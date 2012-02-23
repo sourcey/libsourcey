@@ -1,7 +1,6 @@
 ############################### wxWidgets ################################
 
-#${LIBSOURCEY_SOURCE_DIR}/3rdparty/wxWidgets
-set(WXWIDGETS_SOURCE_PATH "D:/dev/lib/wxWidgets-2.9.2" CACHE PATH "wxWidgets Install Location")
+set(WXWIDGETS_SOURCE_PATH "${LIBSOURCEY_SOURCE_DIR}/3rdparty/wxWidgets" CACHE PATH "wxWidgets Install Location")
 set(WXWIDGETS_INCLUDE_PATH "${WXWIDGETS_SOURCE_PATH}/include")
 set(WXWIDGETS_LIBRARY_DIR "${WXWIDGETS_SOURCE_PATH}/lib")
 
@@ -16,20 +15,20 @@ endif()
 set(WXWIDGETS_LIBRARY_DIR ${WXWIDGETS_LIBRARY_DIR} CACHE PATH "wxWidgets Library Location")
 
 set(WXWIDGETS_DEBUG_LIBS "wxbase29ud" 
-                          "wxbase29ud_net" 
-                          "wxbase29ud_xml" 
-                          "wxmsw29ud_core" 
-                          "wxmsw29ud_adv" 
-                          "wxmsw29ud_core" 
-                          "wxmsw29ud_core")
+                         "wxbase29ud_net" 
+                         "wxbase29ud_xml" 
+                         "wxmsw29ud_core" 
+                         "wxmsw29ud_adv" 
+                         "wxmsw29ud_core" 
+                         "wxmsw29ud_core")
 
 set(WXWIDGETS_RELEASE_LIBS "wxbase29u" 
-                            "wxbase29u_net" 
-                            "wxbase29u_xml" 
-                            "wxmsw29u_core" 
-                            "wxmsw29u_adv" 
-                            "wxmsw29u_core" 
-                            "wxmsw29u_core")
+                           "wxbase29u_net" 
+                           "wxbase29u_xml" 
+                           "wxmsw29u_core" 
+                           "wxmsw29u_adv" 
+                           "wxmsw29u_core" 
+                           "wxmsw29u_core")
       
 include_directories(${WXWIDGETS_INCLUDE_PATH})  
 link_directories(${WXWIDGETS_LIBRARY_DIR})
