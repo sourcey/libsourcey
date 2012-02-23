@@ -1,0 +1,17 @@
+############################### RtAudio ################################
+
+set(RTAUDIO_SOURCE_DIR "${LIBSOURCEY_SOURCE_DIR}/3rdparty/RtAudio" CACHE PATH "RtAudio Source Location")
+set(RTAUDIO_LIBRARY_DIR "${LIBSOURCEY_INSTALL_PREFIX}/share/LibSourcey/3rdparty/lib" CACHE PATH "RtAudio Library Location")
+
+set(RTAUDIO_DEBUG_LIBS "RtAudiod")  
+set(RTAUDIO_RELEASE_LIBS "RtAudio")
+
+#set(RTAUDIO_FOUND 1)
+      
+include_directories(${RTAUDIO_SOURCE_DIR})  
+link_directories(${RTAUDIO_LIBRARY_DIR})
+                        
+set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} ${RTAUDIO_SOURCE_DIR})
+set(LIBSOURCEY_LIBRARY_DIRS ${LIBSOURCEY_LIBRARY_DIRS} ${RTAUDIO_LIBRARY_DIR})
+set(LIBSOURCEY_DEBUG_LIBS   ${LIBSOURCEY_DEBUG_LIBS}   ${RTAUDIO_DEBUG_LIBS})    
+set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} ${RTAUDIO_RELEASE_LIBS})
