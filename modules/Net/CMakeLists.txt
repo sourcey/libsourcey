@@ -1,0 +1,1 @@
+define_libsourcey_module(Net Base) # opencv_core opencv_imgproc opencv_highgui opencv_features2d opencv_flann

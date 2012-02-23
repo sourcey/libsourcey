@@ -1,0 +1,1 @@
+define_libsourcey_sample(WaveformOutput Anionu Base Media)
