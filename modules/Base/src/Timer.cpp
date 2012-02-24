@@ -1,6 +1,6 @@
 //
 // This software is copyright by Sourcey <mail@sourcey.com> and is distributed under a dual license:
-// Copyright (C) 2002 Sourcey
+// Copyright (C) 2005 Sourcey
 //
 // Non-Commercial Use:
 // This program is free software: you can redistribute it and/or modify
@@ -178,7 +178,7 @@ void Timer::run()
 			}
 		}
 		catch (Exception& exc) {
-			Log("error") "[Timer:" << this << "] Swallowing Exception: " << exc.displayText() << endl;
+			Log("error") << "[Timer:" << this << "] Swallowing Exception: " << exc.displayText() << endl;
 		}
 	}
 

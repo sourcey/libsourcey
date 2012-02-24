@@ -1,86 +1,23 @@
-# ----------------------------------------------------------------------------
-#  Root CMake file for LibSourcey
-#
-#    From the off-tree build directory, invoke:
-#      $ cmake <PATH_TO_LIBSOURCEY_ROOT>
-#
-# ----------------------------------------------------------------------------
+# ============================================================================
+# Root CMake file for LibSourcey
+# ============================================================================
 
-set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
+cmake_minimum_required(VERSION 2.8)
 
-# Add these standard paths to the search paths for FIND_LIBRARY
-# to find libraries from these locations first
-if(UNIX)
-    set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /lib /usr/lib)
-endif()
-
-# This _must_ go before PROJECT(LibSourcey) in order to work
+# This _must_ go before project(LibSourcey) in order to work
 if(WIN32)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Installation Directory")
 else()
     set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Installation Directory")
 endif()
 
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configs" FORCE)
-set(CMAKE_C_FLAGS_MINSIZEREL "" CACHE INTERNAL "" FORCE)
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "" FORCE)
-set(CMAKE_CXX_FLAGS_MINSIZEREL "" CACHE INTERNAL "" FORCE)
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "" FORCE)
-set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "" CACHE INTERNAL "" FORCE)
-set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "" FORCE)
-set(CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL "" CACHE INTERNAL "" FORCE)
-set(CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "" FORCE)
-set(CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL "" CACHE INTERNAL "" FORCE)
-set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "" FORCE)
-set(CMAKE_VERBOSE OFF CACHE BOOL "Verbose mode")
-
-if(WIN32)
-    if(${CMAKE_GENERATOR} MATCHES "(MinGW)|(MSYS)")
-        set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG" CACHE STRING "")
-    endif()
-endif()
-
-if(CMAKE_VERBOSE)
-    set(CMAKE_VERBOSE_MAKEFILE 1)
-endif()
-
 project(LibSourcey)
-
-cmake_minimum_required(VERSION 2.8)
-
-if(MSVC)
-    set(CMAKE_USE_RELATIVE_PATHS ON CACHE INTERNAL "" FORCE)
-endif()
 
 add_definitions(-DUNICODE -D_UNICODE)
 
 
-# --------------------------------------------------------------
-# Indicate CMake 2.7 and above that we don't want to mix relative
-#  and absolute paths in linker lib lists.
-# Run "cmake --help-policy CMP0003" for more information.
-# --------------------------------------------------------------
-if(COMMAND cmake_policy)
-    cmake_policy(SET CMP0003 NEW)
-endif()
-
 # ----------------------------------------------------------------------------
-# Build static or dynamic libs?
-# Default: dynamic libraries
-# ----------------------------------------------------------------------------
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)")
-
-# ----------------------------------------------------------------------------
-# Include debug info into debug libs?
-# Default: yes
-# ----------------------------------------------------------------------------
-set(BUILD_WITH_DEBUG_INFO ON CACHE BOOL "Include debug info into debug libs")
-
-# ----------------------------------------------------------------------------
-#  Current version number:
+# Current version number:
 # ----------------------------------------------------------------------------
 set(LIBSOURCEY_VERSION "0.8.0")
 
@@ -101,6 +38,21 @@ else()
     set(LIBSOURCEY_DLLVERSION "")
     set(LIBSOURCEY_DEBUG_POSTFIX)
 endif()
+
+
+# ----------------------------------------------------------------------------
+# Build static or dynamic libs?
+# Default: static libraries
+# ----------------------------------------------------------------------------
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)")
+
+
+# ----------------------------------------------------------------------------
+# Include debug info into debug libs?
+# Default: yes
+# ----------------------------------------------------------------------------
+set(BUILD_WITH_DEBUG_INFO ON CACHE BOOL "Include debug info into debug libs")
+
 
 # ----------------------------------------------------------------------------
 # Use statically or dynamically linked CRT?
@@ -171,467 +123,219 @@ if(MSVC)
 endif(MSVC)
 
 
+# ============================================================================
+# Build paths
+# ============================================================================
+set(LIBSOURCEY_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+set(LIBSOURCEY_BUILD_DIR ${CMAKE_BINARY_DIR})
+set(LIBSOURCEY_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(LIBSOURCEY_3RDPARTY_SOURCE_DIR "${LIBSOURCEY_SOURCE_DIR}/3rdparty")
+set(LIBSOURCEY_3RDPARTY_BUILD_DIR "${LIBSOURCEY_INSTALL_PREFIX}/3rdparty")
+set(LIBSOURCEY_INCLUDE_DIRS "") # Variable for all include dirs
+set(LIBSOURCEY_LIBRARY_DIRS "") # Variable for all library dirs
+set(LIBSOURCEY_DEBUG_LIBS "")   # Variable for all debug libraries
+set(LIBSOURCEY_RELEASE_LIBS "") # Variable for all release libraries
+
+
 # ----------------------------------------------------------------------------
-#  Variables for config.h.cmake
+# Build 3rdparty libraries
 # ----------------------------------------------------------------------------
+if(WIN32)
+    set(BUILD_3RDPARTY_LIBS TRUE CACHE BOOL "Build 3rd party libraries")
+else()
+    set(BUILD_3RDPARTY_LIBS FALSE CACHE BOOL "Build 3rd party libraries")
+endif()
+if(BUILD_3RDPARTY_LIBS)
+  # TODO: Search for library and conditional build
+  # depending on XXX_FOUND or HAVE_XXX variable  
+  set(WITH_PUGIXML ON CACHE BOOL "Build with PugiXML")
+  set(WITH_RTAUDIO ON CACHE BOOL "Build with RtAudio")
+  set(WITH_LIBSTROPHE ON CACHE BOOL "Build with LibStrophe")
+  set(WITH_JSONCPP ON CACHE BOOL "Build with JsonCpp")
+  set(WITH_OPENSSL ON CACHE BOOL "Build with OpenSSL")
+  #set(WITH_POCO ON CACHE BOOL "Build with Poco")
+  #set(WITH_FFMPEG ON CACHE BOOL "Build with FFmpeg")
+  #set(WITH_OPENCV ON CACHE BOOL "Build with OpenCV")
+  #set(WITH_WXWIDGETS ON CACHE BOOL "Build with wxWidgets")
+  #set(WITH_LIBUV ON CACHE BOOL "Build with Libuv")
+  #set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} "${LIBSOURCEY_SOURCE_DIR}/3rdparty/MemLeakDetect")
+  add_subdirectory(${LIBSOURCEY_3RDPARTY_SOURCE_DIR})
+else()
+  unset(WITH_PUGIXML CACHE)
+  unset(WITH_RTAUDIO CACHE)
+  unset(WITH_LIBSTROPHE CACHE)
+  unset(WITH_JSONCPP CACHE)
+  unset(WITH_OPENSSL CACHE)
+endif()
+
+
+# ============================================================================
+# Macro for looping sub directories
+#
+# Example:
+#  SUBDIRLIST(SUBDIRS ${MY_CURRENT_DIR})
+# ============================================================================
+MACRO(SUBDIRLIST result curdir)
+  FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
+  SET(dirlist "")
+  FOREACH(child ${children})
+    IF(IS_DIRECTORY ${curdir}/${child})
+        SET(dirlist ${dirlist} ${child})
+    ENDIF()
+  ENDFOREACH()
+  SET(${result} ${dirlist})
+ENDMACRO()
+
+
+# ============================================================================
+# Include libraries, modules and projects
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Additional Libraries
+# ----------------------------------------------------------------------------
+if(WIN32)
+  set(LIBSOURCEY_DEBUG_LIBS ${LIBSOURCEY_DEBUG_LIBS} ws2_32)  
+  set(LIBSOURCEY_DEBUG_LIBS ${LIBSOURCEY_DEBUG_LIBS} dsound)  
+  set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} ws2_32)  
+  set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} dsound) 
+endif()
+
+
+# ----------------------------------------------------------------------------
+# Include third party libraries
+# ----------------------------------------------------------------------------
+
+# Include our third party source directory
+#set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} "${LIBSOURCEY_INCLUDE_DIRS}/3rdparty")
+# Include our third party install directory
+#set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} "${LIBSOURCEY_INSTALL_PREFIX}/3rdparty")
+#include_directories("${LIBSOURCEY_INCLUDE_DIRS}")
+
+# Include our third party library install directory
+link_directories("${LIBSOURCEY_INSTALL_PREFIX}/lib")
+
+
+# ----------------------------------------------------------------------------
+# Module includes
+# ----------------------------------------------------------------------------
+include(LibSourceyModule.cmake REQUIRED)
+
+#set(USING_POCO OFF)
+#message("INIT: ${USING_POCO}")
+  
+  
+# ----------------------------------------------------------------------------
+# LibSourcey modules
+# ----------------------------------------------------------------------------
+set(BUILD_MODULES ON CACHE BOOL "Build core modules")
+SUBDIRLIST(MODULES "${CMAKE_SOURCE_DIR}/modules")
+if(BUILD_MODULES)
+
+  
+  # Build modules sample apps:
+  # ---------------------------------------------------
+  set(BUILD_MODULE_SAMPLES OFF CACHE BOOL "Build all samples")
+  if(BUILD_MODULE_SAMPLES)
+    include(LibSourceySample.cmake REQUIRED)
+  endif()
+  
+
+  # Build modules tests:
+  # ---------------------------------------------------
+  set(BUILD_MODULE_TESTS OFF CACHE BOOL "Build tests")
+  if(BUILD_MODULE_TESTS)
+    include(LibSourceyTest.cmake REQUIRED)
+  endif()  
+  
+
+  # Build modules:
+  # ---------------------------------------------------
+  FOREACH(module ${MODULES})
+    message(STATUS "Including Module: ${module}")
+    if (EXISTS "${CMAKE_SOURCE_DIR}/modules/${module}/CMakeLists.txt")
+      set(BUILD_MODULE_${module} ON CACHE BOOL "Build Module: ${module}")
+      mark_as_advanced(FORCE BUILD_MODULE_${module})
+      if(BUILD_MODULE_${module})      
+        ADD_SUBDIRECTORY("${CMAKE_SOURCE_DIR}/modules/${module}")
+      endif()  
+    endif()
+  ENDFOREACH()  
+  
+else()
+  
+  message(STATUS "Not building modules")
+
+  # Hide module definitions:
+  # ---------------------------------------------------
+  unset(BUILD_MODULE_SAMPLES CACHE)
+  unset(BUILD_MODULE_TESTS CACHE)  
+  FOREACH(module ${MODULES})
+    unset(BUILD_MODULE_${module} CACHE)
+  ENDFOREACH()  
+  
+endif()
+
+
+# ----------------------------------------------------------------------------
+# LibSourcey projects
+# ----------------------------------------------------------------------------
+set(BUILD_PROJECTS ON CACHE BOOL "Build projects")
+SUBDIRLIST(PROJECTS "${CMAKE_SOURCE_DIR}/projects")
+if(BUILD_PROJECTS)
+
+  # Include project folders:
+  # ---------------------------------------------------
+  FOREACH(project ${PROJECTS})
+    message(STATUS "Including Project: ${project}")
+    if (EXISTS "${CMAKE_SOURCE_DIR}/projects/${project}/CMakeLists.txt")      
+      set(BUILD_PROJECT_${project} ON CACHE BOOL "Build Project: ${project}")
+      mark_as_advanced(FORCE BUILD_PROJECT_${project})
+      if(BUILD_PROJECT_${project})      
+        ADD_SUBDIRECTORY("${CMAKE_SOURCE_DIR}/projects/${project}")
+      endif()  
+    endif()
+  ENDFOREACH()  
+  
+else()
+
+  # Hide project definitions:
+  # ---------------------------------------------------
+  FOREACH(project ${PROJECTS})
+    unset(BUILD_PROJECT_${project} CACHE)
+  ENDFOREACH()  
+  
+endif()
+
+
+# ----------------------------------------------------------------------------
+# Build config file
+#
+# A directory will be created for each platform so the "Config.h" file is
+# not overwritten if cmake generates code in the same path.
+# ----------------------------------------------------------------------------
+add_definitions(-DHAVE_CONFIG_H)
+
+# Variables for Config.h.cmake
 set(PACKAGE "LibSourcey")
-#set(PACKAGE_BUGREPORT "libsourceylibrary-devel@lists.sourceforge.net")
+set(PACKAGE_BUGREPORT "https://github.com/sourcey/LibSourcey/issues")
 set(PACKAGE_NAME "LibSourcey")
 set(PACKAGE_STRING "${PACKAGE} ${LIBSOURCEY_VERSION}")
 set(PACKAGE_TARNAME "${PACKAGE}")
 set(PACKAGE_VERSION "${LIBSOURCEY_VERSION}")
 
+set(LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant Config.h")
 
-# ----------------------------------------------------------------------------
-# Detect Microsoft compiler:
-# ----------------------------------------------------------------------------
-if(CMAKE_CL_64)
-    set(MSVC64 1)
-endif()
-
-
-# ----------------------------------------------------------------------------
-# Detect GNU version:
-# ----------------------------------------------------------------------------
-if(CMAKE_COMPILER_IS_GNUCXX)
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version
-                  OUTPUT_VARIABLE CMAKE_LIBSOURCEY_GCC_VERSION_FULL
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -v
-                  ERROR_VARIABLE CMAKE_LIBSOURCEY_GCC_INFO_FULL
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    # Typical output in CMAKE_LIBSOURCEY_GCC_VERSION_FULL: "c+//0 (whatever) 4.2.3 (...)"
-    #  Look for the version number
-    string(REGEX MATCH "[0-9].[0-9].[0-9]" CMAKE_GCC_REGEX_VERSION "${CMAKE_LIBSOURCEY_GCC_VERSION_FULL}")
-
-    # Split the three parts:
-    string(REGEX MATCHALL "[0-9]" CMAKE_LIBSOURCEY_GCC_VERSIONS "${CMAKE_GCC_REGEX_VERSION}")
-
-    list(GET CMAKE_LIBSOURCEY_GCC_VERSIONS 0 CMAKE_LIBSOURCEY_GCC_VERSION_MAJOR)
-    list(GET CMAKE_LIBSOURCEY_GCC_VERSIONS 1 CMAKE_LIBSOURCEY_GCC_VERSION_MINOR)
-
-    set(CMAKE_LIBSOURCEY_GCC_VERSION ${CMAKE_LIBSOURCEY_GCC_VERSION_MAJOR}${CMAKE_LIBSOURCEY_GCC_VERSION_MINOR})
-    math(EXPR CMAKE_LIBSOURCEY_GCC_VERSION_NUM "${CMAKE_LIBSOURCEY_GCC_VERSION_MAJOR}*100 + ${CMAKE_LIBSOURCEY_GCC_VERSION_MINOR}")
-    message(STATUS "Detected version of GNU GCC: ${CMAKE_LIBSOURCEY_GCC_VERSION} (${CMAKE_LIBSOURCEY_GCC_VERSION_NUM})")
-
-    if(WIN32)
-        execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpmachine
-                  OUTPUT_VARIABLE CMAKE_LIBSOURCEY_GCC_TARGET_MACHINE
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
-        if(CMAKE_LIBSOURCEY_GCC_TARGET_MACHINE MATCHES "64")
-            set(MINGW64 1)
-        endif()
-    endif()
-
-endif()
-
-
-# ----------------------------------------------------------------------------
-#       CHECK FOR SYSTEM LIBRARIES, OPTIONS, ETC..
-# ----------------------------------------------------------------------------
-
-# Build/install (or not) some apps:
-# ===================================================
-set(BUILD_SAMPLES OFF CACHE BOOL "Build all samples")
-if(BUILD_SAMPLES)
-  include(LibSourceySample.cmake REQUIRED)
-endif()
-
-
-# Build tests:
-# ===================================================
-set(BUILD_TESTS ON CACHE BOOL "Build tests")
-if(BUILD_TESTS)
-  include(LibSourceyTest.cmake REQUIRED)
-endif()
-
-# Build 3rdparty libraries under unix
-# ===================================================
-if(WIN32)
-    set(LIBSOURCEY_BUILD_3RDPARTY_LIBS TRUE  CACHE BOOL "Build 3rd party libraries")
-else()
-    set(LIBSOURCEY_BUILD_3RDPARTY_LIBS FALSE CACHE BOOL "Build 3rd party libraries")
-endif()
-
-include(LibSourceyModule.cmake REQUIRED)
-
-if(UNIX)
-    include(LibSourceyFindPkgConfig.cmake OPTIONAL)
-    include(CheckFunctionExists)
-    include(CheckIncludeFile)
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX)
-    set(ENABLE_PROFILING OFF CACHE BOOL "Enable profiling in the GCC compiler (Add flags: -g -pg)")
-    set(USE_OMIT_FRAME_POINTER ON CACHE BOOL "Enable -fomit-frame-pointer for GCC")
-
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES amd64*|x86_64*)
-        set(X86_64 1)
-    endif()
-
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES i686*|i386*|x86*)
-        set(X86 1)
-    endif()
-
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES powerpc*)
-        set(ENABLE_POWERPC ON CACHE BOOL "Enable PowerPC for GCC")
-    endif()
-
-    if(X86 OR X86_64)
-        # enable everything, since the available set of instructions is checked at runtime
-        set(USE_FAST_MATH ON CACHE BOOL "Enable -ffast-math")
-        set(ENABLE_SSE ON CACHE BOOL "Enable SSE instructions")
-        set(ENABLE_SSE2 ON CACHE BOOL "Enable SSE2 instructions")
-        set(ENABLE_SSE3 OFF CACHE BOOL "Enable SSE3 instructions")
-        set(ENABLE_SSSE3 OFF CACHE BOOL "Enable SSSE3 instructions")
-        set(ENABLE_SSE41 OFF CACHE BOOL "Enable SSE4.1 instructions")
-        set(ENABLE_SSE42 OFF CACHE BOOL "Enable SSE4.2 instructions")
-    endif()
-endif()
-
-if(MSVC)
-    set(ENABLE_SSE ON CACHE BOOL "Enable SSE instructions for MSVC")
-    set(ENABLE_SSE2 ON CACHE BOOL "Enable SSE2 instructions for MSVC")
-    if(CMAKE_C_COMPILER MATCHES "icc")
-        set(ENABLE_SSE3 OFF CACHE BOOL "Enable SSE3 instructions for ICC")
-        set(ENABLE_SSE4_1 OFF CACHE BOOL "Enable SSE4.1 instructions for ICC")
-    endif()
-endif()
-
-
-# ---------------------------------------------------------------------------
-# Include third party libraries:
-# ---------------------------------------------------------------------------
-set(LIBSOURCEY_SOURCE_DIR ${CMAKE_SOURCE_DIR})
-set(LIBSOURCEY_BUILD_DIR ${CMAKE_BINARY_DIR})
-set(LIBSOURCEY_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-
-# Include our third party source directory
-set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} "${LIBSOURCEY_INCLUDE_DIRS}/3rdparty")
-
-# Include our third party install directory
-set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} "${LIBSOURCEY_INSTALL_PREFIX}/3rdparty")
-
-# Include our third party library install directory
-link_directories("${LIBSOURCEY_INSTALL_PREFIX}/lib")
-
-set(WITH_POCO ON CACHE BOOL "Build with Poco")
-if(WITH_POCO)
-    include(LibSourceyFindPoco.cmake)   
-endif()
-
-set(WITH_FFMPEG ON CACHE BOOL "Build with FFmpeg")
-if(WITH_FFMPEG)
-    include(LibSourceyFindFFmpeg.cmake)
-endif()
-
-set(WITH_OPENCV ON CACHE BOOL "Build with OpenCV")
-if(WITH_OPENCV)
-    include(LibSourceyFindOpenCV.cmake)
-endif()
-
-set(WITH_OPENSSL ON CACHE BOOL "Build with OpenSSL")
-if(WITH_OPENSSL)
-    include(LibSourceyFindOpenSSL.cmake)
-endif()
-
-set(WITH_PUGIXML ON CACHE BOOL "Build with PugiXML")
-if(WITH_PUGIXML)
-    include(LibSourceyFindPugiXML.cmake)
-endif()
-
-set(WITH_RTAUDIO ON CACHE BOOL "Build with RtAudio")
-if(WITH_RTAUDIO)
-    include(LibSourceyFindRtAudio.cmake)
-endif()
-
-set(WITH_LIBSTROPHE ON CACHE BOOL "Build with LibStrophe")
-if(WITH_LIBSTROPHE)
-    include(LibSourceyFindLibStrophe.cmake)
-endif()
-
-set(WITH_JSONCPP ON CACHE BOOL "Build with JsonCpp")
-if(WITH_JSONCPP)
-    include(LibSourceyFindJsonCpp.cmake)
-endif()
-
-set(WITH_WXWIDGETS ON CACHE BOOL "Build with wxWidgets")
-if(WITH_WXWIDGETS)
-    include(${LIBSOURCEY_SOURCE_DIR}/LibSourceyFindWxWidgets.cmake)
-endif()
-
-set(WITH_LIBUV ON CACHE BOOL "Build with Libuv")
-if(WITH_LIBUV)
-    include(${LIBSOURCEY_SOURCE_DIR}/LibSourceyFindLibuv.cmake)
-endif()
-
-set(WITH_MEMLEAKDETECT ON CACHE BOOL "Build with MemLeakDetect")
-if(WITH_MEMLEAKDETECT)
-  set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} "${LIBSOURCEY_SOURCE_DIR}/3rdparty/MemLeakDetect")
-endif()
-
-include_directories("${LIBSOURCEY_INCLUDE_DIRS}")
-
-
-# ---------------------------------------------------------------------------
-# Additional Libraries:
-# ---------------------------------------------------------------------------
-if(WIN32)
-    set(LIBSOURCEY_DEBUG_LIBS ${LIBSOURCEY_DEBUG_LIBS} ws2_32)  
-    set(LIBSOURCEY_DEBUG_LIBS ${LIBSOURCEY_DEBUG_LIBS} dsound)  
-    set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} ws2_32)  
-    set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} dsound) 
-endif()
-
-
-# ----------------------------------------------------------------------------
-#                   UPDATE CONFIG FILES & SCRIPTS:
-#
-#  CONFIGURE_FILE(InputFile OutputFile [COPYONLY] [ESCAPE_QUOTES] [@ONLY])
-# If @ONLY is specified, only variables of the form @VAR@ will be
-#  replaces and ${VAR} will be ignored.
-#
-#  A directory will be created for each platform so the "config.h" file is
-#   not overwritten if cmake generates code in the same path.
-# ----------------------------------------------------------------------------
-add_definitions(-DHAVE_CONFIG_H)
-
-set(LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant config.h")
-
-message(STATUS "Parsing 'config.h.cmake'")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake" "${LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR}/config.h")
+message(STATUS "Parsing 'Config.h.cmake'")
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/Config.h.cmake" 
+  "${LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR}/Config.h")
+  
 include_directories("${LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR}")
 
 
 # ----------------------------------------------------------------------------
-#           Set the maximum level of warnings:
-# ----------------------------------------------------------------------------
-# Should be set to true for development
-set(LIBSOURCEY_WARNINGS_ARE_ERRORS OFF CACHE BOOL "Treat warnings as errors")
-
-set(EXTRA_C_FLAGS "")
-set(EXTRA_C_FLAGS_RELEASE "")
-set(EXTRA_C_FLAGS_DEBUG "")
-set(EXTRA_EXE_LINKER_FLAGS "")
-set(EXTRA_EXE_LINKER_FLAGS_RELEASE "")
-set(EXTRA_EXE_LINKER_FLAGS_DEBUG "")
-
-if(MSVC)
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D _SCL_SECURE_NO_WARNINGS")
-    # 64-bit portability warnings, in MSVC8
-    if(MSVC80)
-        set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} /Wp64")
-
-    endif()
-    #if(MSVC90)
-    #    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} /D _BIND_TO_CURRENT_CRT_VERSION=1 /D _BIND_TO_CURRENT_VCLIBS_VERSION=1")
-    #endif()
-
-    if(BUILD_WITH_DEBUG_INFO)
-        set(EXTRA_EXE_LINKER_FLAGS_RELEASE "${EXTRA_EXE_LINKER_FLAGS_RELEASE} /debug")
-    endif()
-
-    # Remove unreferenced functions: function level linking
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} /Gy")
-    if(BUILD_WITH_DEBUG_INFO)
-       set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} /Zi")
-    endif()
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX)
-
-    # High level of warnings.
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wall")
-
-    if(BUILD_WITH_STATIC_CRT)
-        set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -static-libstdc++")
-    endif()
-
-    # The -Wno-long-long is required in 64bit systems when including sytem headers.
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES x86_64*)
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wno-long-long")
-    endif()
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES amd64*)
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wno-long-long")
-    endif()
-
-    # We need pthread's
-    if(UNIX)
-      if(NOT ANDROID)
-        set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -pthread")
-      endif()
-    endif()
-
-    if(LIBSOURCEY_WARNINGS_ARE_ERRORS)
-        set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Werror")
-    endif()
-
-    if(X86)
-        if(NOT MINGW64)
-            if(NOT X86_64)
-                if(NOT APPLE)
-                    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -march=i686")
-                endif()
-            endif()
-        endif()
-    endif()
-
-    # Other optimizations
-    if(USE_OMIT_FRAME_POINTER)
-        set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -fomit-frame-pointer")
-    endif()
-    if(USE_FAST_MATH)
-        set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -ffast-math")
-    endif()
-    if(ENABLE_POWERPC)
-        set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -mcpu=G3 -mtune=G5")
-    endif()
-    if(ENABLE_SSE)
-        set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -msse")
-    endif()
-    if(ENABLE_SSE2)
-        set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -msse2")
-    endif()
-    # SSE3 and further should be disabled under MingW because it generates compiler errors
-    if(NOT MINGW)
-        if(ENABLE_SSE3)
-            set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -msse3")
-        endif()
-
-        if(${CMAKE_LIBSOURCEY_GCC_VERSION_NUM} GREATER 402)
-            set(HAVE_GCC43_OR_NEWER 1)
-        endif()
-        if(${CMAKE_LIBSOURCEY_GCC_VERSION_NUM} GREATER 401)
-            set(HAVE_GCC42_OR_NEWER 1)
-        endif()
-
-        if(HAVE_GCC43_OR_NEWER OR APPLE)
-            if(ENABLE_SSSE3)
-                set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -mssse3")
-            endif()
-            if(HAVE_GCC42_OR_NEWER)
-                if(ENABLE_SSE41)
-                    set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -msse4.1")
-                endif()
-                if(ENABLE_SSE42)
-                    set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -msse4.2")
-                endif()
-            endif()
-        endif()
-    endif()
-
-    if(X86 OR X86_64)
-        if(NOT APPLE)
-            if(${CMAKE_SIZEOF_VOID_P} EQUAL 4)
-                set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -mfpmath=387")
-            endif()
-        endif()
-    endif()
-
-    # Profiling?
-    if(ENABLE_PROFILING)
-        set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -pg -g")
-    else()
-        # Remove unreferenced functions: function level linking
-        if(NOT APPLE)
-            set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -ffunction-sections")
-        endif()
-    endif()
-
-    set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -DNDEBUG")
-    set(EXTRA_C_FLAGS_DEBUG "${EXTRA_C_FLAGS_DEBUG} -O0 -DDEBUG -D_DEBUG")
-
-    if(BUILD_WITH_DEBUG_INFO)
-       set(EXTRA_C_FLAGS_DEBUG "${EXTRA_C_FLAGS_DEBUG} -ggdb3")
-    endif()
-endif()
-
-if(MSVC)
-    # 64-bit MSVC compiler uses SSE/SSE2 by default
-    if(NOT MSVC64)
-       if(ENABLE_SSE)
-          set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} /arch:SSE")
-       endif()
-       if(ENABLE_SSE2)
-          set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} /arch:SSE2")
-       endif()
-    endif()
-    if(ENABLE_SSE3)
-       set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} /arch:SSE3")
-    endif()
-    if(ENABLE_SSE4_1)
-       set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} /arch:SSE4.1")
-    endif()
-    if(ENABLE_SSE OR ENABLE_SSE2 OR ENABLE_SSE3 OR ENABLE_SSE4_1)
-       set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} /Oi")
-    endif()
-endif()
-
-# Extra link libs if the user selects building static libs:
-if(NOT BUILD_SHARED_LIBS)
-    if(CMAKE_COMPILER_IS_GNUCXX)
-        set(LIBSOURCEY_DEBUG_LIBS ${LIBSOURCEY_DEBUG_LIBS} stdc++)
-        set(LIBSOURCEY_EXTRA_C_FLAGS "${LIBSOURCEY_EXTRA_C_FLAGS} -fPIC")
-    endif()
-endif()
-
-
-# Add user supplied extra options (optimization, etc...)
-# ==========================================================
-set(LIBSOURCEY_EXTRA_C_FLAGS "" CACHE STRING "Extra compiler options")
-set(LIBSOURCEY_EXTRA_C_FLAGS_RELEASE "" CACHE STRING "Extra compiler options for Release build")
-set(LIBSOURCEY_EXTRA_C_FLAGS_DEBUG "" CACHE STRING "Extra compiler options for Debug build")
-set(LIBSOURCEY_EXTRA_EXE_LINKER_FLAGS "" CACHE STRING "Extra linker flags" FORCE)
-set(LIBSOURCEY_EXTRA_EXE_LINKER_FLAGS_RELEASE "" CACHE STRING "Extra linker flags for Release build" FORCE)
-set(LIBSOURCEY_EXTRA_EXE_LINKER_FLAGS_DEBUG "" CACHE STRING "Extra linker flags for Debug build" FORCE)
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_C_FLAGS} ${LIBSOURCEY_EXTRA_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_C_FLAGS} ${LIBSOURCEY_EXTRA_C_FLAGS}")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${EXTRA_C_FLAGS_RELEASE} ${LIBSOURCEY_EXTRA_C_FLAGS_RELEASE}")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${EXTRA_C_FLAGS_RELEASE} ${LIBSOURCEY_EXTRA_C_FLAGS_RELEASE}")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${EXTRA_C_FLAGS_DEBUG} ${LIBSOURCEY_EXTRA_C_FLAGS_DEBUG}")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${EXTRA_C_FLAGS_DEBUG} ${LIBSOURCEY_EXTRA_C_FLAGS_DEBUG}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EXTRA_EXE_LINKER_FLAGS} ${LIBSOURCEY_EXTRA_EXE_LINKER_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${EXTRA_EXE_LINKER_FLAGS_RELEASE} ${LIBSOURCEY_EXTRA_EXE_LINKER_FLAGS_RELEASE}")
-set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${EXTRA_EXE_LINKER_FLAGS_DEBUG} ${LIBSOURCEY_EXTRA_EXE_LINKER_FLAGS_DEBUG}")
-
-# In case of Makefiles if the user does not setup CMAKE_BUILD_TYPE, assume it's Release:
-if(${CMAKE_GENERATOR} MATCHES ".*Makefiles")
-    if("${CMAKE_BUILD_TYPE}" STREQUAL "")
-        set(CMAKE_BUILD_TYPE Release)
-    endif()
-endif()
-
-if(WIN32 AND MSVC)
-    # avoid warnings from MSVC about overriding the /W* option
-    # we replace /W3 with /W4 only for C++ files,
-    # since all the 3rd-party libraries LibSourcey uses are in C,
-    # and we do not care about their warnings.
-    string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-    string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
-
-    # allow extern "C" functions throw exceptions
-    string(REPLACE "/EHsc" "/EHsc-" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    string(REPLACE "/EHsc" "/EHsc-" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
-    string(REPLACE "/EHsc" "/EHsc-" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
-    string(REPLACE "/EHsc" "/EHsc-" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    string(REPLACE "/EHsc" "/EHsc-" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-    string(REPLACE "/EHsc" "/EHsc-" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
-
-    string(REPLACE "/Zm1000" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    string(REPLACE "/Zm1000" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-endif()
-
-if("${CMAKE_CONFIGURE_LDFLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_CONFIGURE_LDFLAGS}")
-endif("${CMAKE_CONFIGURE_LDFLAGS}")
-
-
-# ----------------------------------------------------------------------------
-#   Uninstall target, for "make uninstall"
+#  Uninstall target, for "make uninstall"
 # ----------------------------------------------------------------------------
 if(UNIX)
   CONFIGURE_FILE(
@@ -644,92 +348,9 @@ if(UNIX)
 endif()
 
 
-#-----------------------------------
-# Subdirectories:
-#-----------------------------------
-if(LIBSOURCEY_BUILD_3RDPARTY_LIBS)
-    add_subdirectory(3rdparty)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/Anionu)
-    add_subdirectory(Anionu)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/Base)
-    add_subdirectory(Base)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/HTTP)
-    add_subdirectory(HTTP)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/Net)
-    add_subdirectory(Net)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/Pacman)
-    add_subdirectory(Pacman)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/Media)
-    add_subdirectory(Media)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/XML)
-    add_subdirectory(XML)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/XMPP)
-    add_subdirectory(XMPP)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/RTP)
-    add_subdirectory(RTP)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/STUN)
-    add_subdirectory(STUN)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/TURN)
-    add_subdirectory(TURN)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/SDP)
-    add_subdirectory(SDP)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/ICE)
-    add_subdirectory(ICE)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/JSON)
-    add_subdirectory(JSON)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/SocketIO)
-    add_subdirectory(SocketIO)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/Symple)
-    add_subdirectory(Symple)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/UV)
-    add_subdirectory(UV)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/ISpot)
-    add_subdirectory(ISpot)
-endif()
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/SpotImpl)
-    add_subdirectory(SpotImpl)
-endif()
-
 
 # ----------------------------------------------------------------------------
-#   Summary:
+#  Summary:
 # ----------------------------------------------------------------------------
 message(STATUS "")
 message(STATUS "General configuration for LibSourcey ${LIBSOURCEY_VERSION} =====================================")
@@ -749,7 +370,7 @@ endif()
 message(STATUS "")
 message(STATUS "    Install path:               ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "")
-message(STATUS "    config.h is in:             ${LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR}")
+message(STATUS "    Config.h is in:             ${LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR}")
 message(STATUS "-----------------------------------------------------------------")
 message(STATUS "")
 
@@ -760,6 +381,6 @@ endif()
 
 
 #----------------------------------------------------------------------------
-#   Generate the LibSourceyConfig.cmake file for unix
-#      installation in CMAKE_INSTALL_PREFIX
+#  Generate the LibSourceyConfig.cmake file for unix
+#     installation in CMAKE_INSTALL_PREFIX
 #----------------------------------------------------------------------------

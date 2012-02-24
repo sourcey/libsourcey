@@ -1,6 +1,6 @@
 //
 // This software is copyright by Sourcey <mail@sourcey.com> and is distributed under a dual license:
-// Copyright (C) 2002 Sourcey
+// Copyright (C) 2005 Sourcey
 //
 // Non-Commercial Use:
 // This program is free software: you can redistribute it and/or modify
@@ -601,7 +601,7 @@ void Server::sendError(const Request& request, int errorCode, const char* errorD
 
 	// NONCE
 	STUN::Nonce* nonceAttr = new STUN::Nonce;
-	string noonce = generateNonce();
+	string noonce = CryptoProvider::generateRandomKey(32);
 	nonceAttr->copyBytes(noonce.c_str(), noonce.size());
 	errorMsg.add(nonceAttr);
 

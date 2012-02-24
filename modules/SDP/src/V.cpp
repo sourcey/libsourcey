@@ -1,6 +1,6 @@
 //
 // This software is copyright by Sourcey <mail@sourcey.com> and is distributed under a dual license:
-// Copyright (C) 2002 Sourcey
+// Copyright (C) 2005 Sourcey
 //
 // Non-Commercial Use:
 // This program is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@
 //
 
 
+#include "Sourcey/Logger.h"
 #include "Sourcey/SDP/V.h"
 
 

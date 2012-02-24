@@ -1,6 +1,6 @@
 //
 // This software is copyright by Sourcey <mail@sourcey.com> and is distributed under a dual license:
-// Copyright (C) 2002 Sourcey
+// Copyright (C) 2005 Sourcey
 //
 // Non-Commercial Use:
 // This program is free software: you can redistribute it and/or modify
@@ -32,6 +32,7 @@
 
 
 using namespace std;
+using namespace Poco;
 
 
 namespace Sourcey {
@@ -41,13 +42,13 @@ namespace TURN {
 IAllocation::IAllocation(const FiveTuple& tuple, 
 						 const std::string& username, 
 						 UInt32 lifetime) : 
-	_tuple(tuple), 
+	_createdAt(static_cast<UInt32>(time(0))), 
+	_updatedAt(static_cast<UInt32>(time(0))), 
 	_username(username), 
 	_lifetime(lifetime), 
-	_createdAt(time(0)), 
-	_updatedAt(time(0)),
 	_bandwidthLimit(0),
-	_bandwidthUsed(0)
+	_bandwidthUsed(0),
+	_tuple(tuple)
 {	
 }
 
@@ -62,7 +63,7 @@ IAllocation::~IAllocation()
 void IAllocation::updateUsage(UInt32 numBytes)
 {
 	FastMutex::ScopedLock lock(_mutex);
-	_updatedAt = time(0);
+	_updatedAt = static_cast<UInt32>(time(0));
 	_bandwidthUsed += numBytes;
 }
 
@@ -92,7 +93,7 @@ void IAllocation::setLifetime(UInt32 lifetime)
 {
 	FastMutex::ScopedLock lock(_mutex);
 	_lifetime = lifetime;
-	_updatedAt = time(0);
+	_updatedAt = static_cast<UInt32>(time(0));
 	Log("debug") << "[Allocation:" << this << "] Updating Lifetime: " << _lifetime << endl;
 }
 

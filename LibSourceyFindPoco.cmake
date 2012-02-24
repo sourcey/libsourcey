@@ -13,7 +13,7 @@ set(POCO_INCLUDE_DIRS "${POCO_SOURCE_DIR}/Foundation/include"
    
 if(WIN32 AND MSVC)
   if(BUILD_WITH_STATIC_CRT)
-    set(POCO_LIB_SUFFIX'mt')
+    set(POCO_LIB_SUFFIX "mt")
   endif()  
 endif()
 
@@ -34,7 +34,7 @@ set(POCO_RELEASE_LIBS "PocoFoundation${POCO_LIB_POSTFIX}"
       
 include_directories(${POCO_INCLUDE_DIRS})  
 link_directories(${POCO_LIBRARY_DIR})
-                      
+ 
 set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS})
 set(LIBSOURCEY_LIBRARY_DIRS ${LIBSOURCEY_LIBRARY_DIRS} ${POCO_LIBRARY_DIR})
 set(LIBSOURCEY_DEBUG_LIBS   ${LIBSOURCEY_DEBUG_LIBS}   ${POCO_DEBUG_LIBS})   

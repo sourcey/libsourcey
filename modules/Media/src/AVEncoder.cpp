@@ -1,6 +1,6 @@
 //
 // This software is copyright by Sourcey <mail@sourcey.com> and is distributed under a dual license:
-// Copyright (C) 2002 Sourcey
+// Copyright (C) 2005 Sourcey
 //
 // Non-Commercial Use:
 // This program is free software: you can redistribute it and/or modify
@@ -468,9 +468,8 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 	}
 
 	Log("trace") << "[AVEncoder" << this << "] Frame Information:\n" 
-		<< "\n\tFPS Difference: " << fpsDiff
 		<< "\n\tCalculated PTS: " << _video->oframe->pts
-		<< "\n\tFFmpeg PTS: " << packet.pts
+		<< "\n\tFFmpeg PTS: " << opacket.pts
 		<< "\n\tCurrent FPS: " << _fpsCounter.fps
 		<< "\n\tPacket Size: " << opacket.size
 		<< endl;
@@ -485,13 +484,6 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 			return false;
 		}
 	}
-
-		int res = av_interleaved_write_frame(_formatCtx, &packet);
-		if (res < 0) {
-			Log("error") << "[AVEncoder" << this << "] Failed to write video frame" << endl;
-			//throw Exception("Failed to write video frame");
-			return false;
-		}
 
 	return true;
 }

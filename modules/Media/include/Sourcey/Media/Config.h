@@ -1,6 +1,6 @@
 //
 // This software is copyright by Sourcey <mail@sourcey.com> and is distributed under a dual license:
-// Copyright (C) 2002 Sourcey
+// Copyright (C) 2005 Sourcey
 //
 // Non-Commercial Use:
 // This program is free software: you can redistribute it and/or modify
@@ -21,25 +21,27 @@
 //
 
 
-#ifndef SOURCEY_Pacman_Config_H
-#define SOURCEY_Pacman_Config_H
+#ifndef SOURCEY_MEDIA_Config_H
+#define SOURCEY_MEDIA_Config_H
 
 
-namespace Sourcey { 
-namespace Pacman {
+#define MAX_VIDEO_PACKET_SIZE		(3 * 1024 * 1024) 
+#define MAX_AUDIO_PACKET_SIZE		(128 * 1500)			// 1 second of 48khz 32bit audio
 
-	
-#define DEFAULT_API_ENDPOINT "http://localhost:3000"
-#define DEFAULT_API_INDEX_URI "/packages.json"
-//#define DEFAULT_API_UPDATE_URI "/packages/list.json"
-#define DEFAULT_PACKAGE_CACHE_DIR "packages/cache"
-//#define DEFAULT_PACKAGE_MANIFEST_DIR "packages/manifest"
-#define DEFAULT_PACKAGE_INTERMEDIATE_DIR "packages/data"
-#define DEFAULT_PACKAGE_INSTALL_DIR ""
-#define DEFAULT_PLATFORM "Win32"
+#define DEFAULT_VIDEO_SAMPLE_RATE	(384000)				// 128 – 384 kbit/s – business-oriented videoconferencing quality using video compression
+#define DEFAULT_VIDEO_BIT_RATE		(9000)					// Default value for RTP	
 
+#define DEFAULT_AUDIO_SAMPLE_RATE	(44100)
+#define DEFAULT_AUDIO_CHANNELS		(2)
+#define DEFAULT_AUDIO_BIT_RATE		(64000)
 
-} } // namespace Sourcey::Pacman
+#define MAX_ENCODE_DURATION			(3 * 60 * 60 * 1000)	// 3 hours
 
+/* Defined in stdint.h
+#ifndef INT64_C
+#define INT64_C(c) (c ## LL)
+#define UINT64_C(c) (c ## ULL)
+#endif
+*/
 
-#endif // SOURCEY_Pacman_Config_H
+#endif // SOURCEY_MEDIA_Config_H

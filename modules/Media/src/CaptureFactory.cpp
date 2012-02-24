@@ -1,6 +1,6 @@
 //
 // This software is copyright by Sourcey <mail@sourcey.com> and is distributed under a dual license:
-// Copyright (C) 2002 Sourcey
+// Copyright (C) 2005 Sourcey
 //
 // Non-Commercial Use:
 // This program is free software: you can redistribute it and/or modify
@@ -76,7 +76,7 @@ CaptureFactory::CaptureFactory() :
 	audio(this)
 {	
 	//Log("debug") << "CaptureFactory::CaptureFactory" << endl;	
-	_devices->initialize();
+	_devices.initialize();
 }
 
 
@@ -148,7 +148,7 @@ void CaptureFactory::Video::load()
 	// The video capture object will begin capturing frames when it's
 	// reference count becomes positive.
 	std::vector<Device> devs;
-	_factory->devices()->getVideoInputDevices(devs);
+	_factory->devices().getVideoInputDevices(devs);
 	for (size_t i = 0; i < devs.size(); ++i) {
 		try 
 		{
@@ -279,7 +279,7 @@ AudioCapture* CaptureFactory::Audio::getCapture(int deviceId, int channels, int 
 	// reference count becomes positive.
 	std::vector<Device> devs;
 	_factory->devices();	
-	_factory->devices()->getAudioInputDevices(&devs);		
+	_factory->devices().getAudioInputDevices(&devs);		
 	for (size_t i = 0; i < devs.size(); ++i) {	
 		_map[devs[0].id] = new AudioCapture(devs[0].id, 2, 44100);
 		// TODO: Receive callback on capture error or closure.

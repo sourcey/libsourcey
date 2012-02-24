@@ -1,6 +1,6 @@
 //
 // This software is copyright by Sourcey <mail@sourcey.com> and is distributed under a dual license:
-// Copyright (C) 2002 Sourcey
+// Copyright (C) 2005 Sourcey
 //
 // Non-Commercial Use:
 // This program is free software: you can redistribute it and/or modify
@@ -24,33 +24,15 @@
 #ifndef SOURCEY_MEDIA_Types_H
 #define SOURCEY_MEDIA_Types_H
 
-#include <time.h>
+//#include <time.h>
+//#include <sstream>
 #include <stdint.h>
-#include <sstream>
 
-//#include "Sourcey/Callback.h"
+#include "Sourcey/Media/Config.h"
 #include "Sourcey/IPacket.h"
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
-
-
-#ifndef INT64_C
-#define INT64_C(c) (c ## LL)
-#define UINT64_C(c) (c ## ULL)
-#endif
-
-#define MAX_VIDEO_PACKET_SIZE		(3 * 1024 * 1024) 
-#define MAX_AUDIO_PACKET_SIZE		(128 * 1500)			// 1 second of 48khz 32bit audio
-
-#define DEFAULT_VIDEO_SAMPLE_RATE	(384000)				// 128 – 384 kbit/s – business-oriented videoconferencing quality using video compression
-#define DEFAULT_VIDEO_BIT_RATE		(9000)					// Default value for RTP	
-
-#define DEFAULT_AUDIO_SAMPLE_RATE	(44100)
-#define DEFAULT_AUDIO_CHANNELS		(2)
-#define DEFAULT_AUDIO_BIT_RATE		(64000)
-
-#define MAX_ENCODE_DURATION			(3 * 60 * 60 * 1000)	// 3 hours
 
 
 namespace Sourcey {

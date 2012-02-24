@@ -1,6 +1,6 @@
 //
 // This software is copyright by Sourcey <mail@sourcey.com> and is distributed under a dual license:
-// Copyright (C) 2002 Sourcey
+// Copyright (C) 2005 Sourcey
 //
 // Non-Commercial Use:
 // This program is free software: you can redistribute it and/or modify
@@ -70,7 +70,7 @@ void TCPPacketStreamConnection::run()
 		assert(_stream == NULL);
 	}
 	catch (Exception& exc) {
-		Log("error", this) "[TCPPacketStreamConnection:" << this << "] Error: " << exc.displayText() << endl;
+		Log("error", this) << "[TCPPacketStreamConnection:" << this << "] Error: " << exc.displayText() << endl;
 	}
 
 	Log("debug") << "[TCPPacketStreamConnection:" << this << "] TCP Packet Connection Exiting: " << this << endl;
@@ -90,7 +90,7 @@ void TCPPacketStreamConnection::stop()
 }
 
 
-virtual int TCPPacketStreamConnection::send(const char* data, size_t size)
+int TCPPacketStreamConnection::send(const char* data, size_t size)
 {						
 	// Drop empty packets.
 	if (!size) {			
@@ -101,7 +101,7 @@ virtual int TCPPacketStreamConnection::send(const char* data, size_t size)
 	// Drop oversize packets.
 	else if (size > MAX_TCP_PACKET_SIZE) {
 		Log("warn") << "[TCPPacketStreamConnection:" << this << "] Dropping Oversize Data Packet: " 
-			<< "\n\tSize: " << p->size()
+			<< "\n\tSize: " << size
 			<< "\n\tMax Size: " << MAX_TCP_PACKET_SIZE
 			<< endl;
 		return 0;
@@ -121,16 +121,16 @@ void TCPPacketStreamConnection::onStreamPacket(void*, IPacket& packet)
 		// the data pointer directly.
 		DataPacket* p = packet.as<DataPacket>();
 		if (p) {
-			send((const void*)p->data(), p->size());
+			send((const char*)p->data(), p->size());
 		}
 		
 		// Otherwise copy the packet onto an output buffer
 		// before sending it out over the network.
 		else {
-			size = packet.size();
+			size_t size = packet.size();
 			Buffer buf(size ? size : 1500);
 			packet.write(buf);
-			send((const void*)buf.data(), buf.size());
+			send((const char*)buf.data(), buf.size());
 		}
 	}
 	catch (Exception& exc) {

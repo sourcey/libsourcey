@@ -1,1 +1,4 @@
-define_libsourcey_module(Net Base) # opencv_core opencv_imgproc opencv_highgui opencv_features2d opencv_flann
+include("${CMAKE_SOURCE_DIR}/FindPoco.cmake")
+include("${CMAKE_SOURCE_DIR}/FindOpenSSL.cmake")
+
+define_libsourcey_module(Net Base)
