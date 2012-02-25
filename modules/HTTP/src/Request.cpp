@@ -83,7 +83,7 @@ void Request::prepare()
 			form->prepareSubmit(*this);	
 			form->write(body);
 			streambuf* pbuf = body.rdbuf(); 
-			long contentLength = pbuf->pubseekoff(0, ios_base::end);
+			long contentLength = (long)pbuf->pubseekoff(0, ios_base::end);
 			assert(contentLength > 0);
 			setContentLength(contentLength);
 			setChunkedTransferEncoding(false);

@@ -2,10 +2,10 @@
 # - Try to find the required ffmpeg components(default: AVFORMAT, AVUTIL, AVCODEC)
 #
 # Once done this will define
-#  FFMPEG_FOUND         - System has the all required components.
-#  FFMPEG_INCLUDE_DIRS  - Include directory necessary for using the required components headers.
-#  FFMPEG_LIBRARIES     - Link these to use the required ffmpeg components.
-#  FFMPEG_DEFINITIONS   - Compiler switches required for using the required ffmpeg components.
+#  FFmpeg_FOUND         - System has the all required components.
+#  FFmpeg_INCLUDE_DIRS  - Include directory necessary for using the required components headers.
+#  FFmpeg_LIBRARIES     - Link these to use the required ffmpeg components.
+#  FFmpeg_DEFINITIONS   - Compiler switches required for using the required ffmpeg components.
 #
 # For each of the components it will additionaly set.
 #   - AVCODEC
@@ -14,6 +14,7 @@
 #   - AVUTIL
 #   - POSTPROCESS
 #   - SWSCALE
+#
 # the following variables will be defined
 #  <component>_FOUND        - System has <component>
 #  <component>_INCLUDE_DIRS - Include directory necessary for using the <component> headers
@@ -30,7 +31,7 @@
 
 include(FindPackageHandleStandardArgs)
 
-# The default components were taken from a survey over other FindFFMPEG.cmake files
+# The default components were taken from a survey over other FindFFmpeg.cmake files
 if (NOT FFmpeg_FIND_COMPONENTS)
   set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL)
 endif ()
@@ -42,10 +43,10 @@ endif ()
 #
 macro(set_component_found _component )
   if (${_component}_LIBRARIES AND ${_component}_INCLUDE_DIRS)
-    # message(STATUS "  - ${_component} found.")
+     # message(STATUS "  - ${_component} found.")
     set(${_component}_FOUND TRUE)
   else ()
-    # message(STATUS "  - ${_component} not found.")
+     # message(STATUS "  - ${_component} not found.")
   endif ()
 endmacro()
 
@@ -95,7 +96,7 @@ endmacro()
 
 
 # Check for cached results. If there are skip the costly part.
-if (NOT FFMPEG_LIBRARIES)
+if (NOT FFmpeg_FOUND) #FFmpeg_LIBRARIES)
 
   # Check for all possible component.
   find_component(AVCODEC  libavcodec  avcodec  libavcodec/avcodec.h)
@@ -104,32 +105,36 @@ if (NOT FFMPEG_LIBRARIES)
   find_component(AVUTIL   libavutil   avutil   libavutil/avutil.h)
   find_component(SWSCALE  libswscale  swscale  libswscale/swscale.h)
   find_component(POSTPROC libpostproc postproc libpostproc/postprocess.h)
+  
+  # Set FFmpeg as found. Any missing components will set this to false.
+  set(FFmpeg_FOUND 1)
 
-  # Check if the required components were found and add their stuff to the FFMPEG_* vars.
+  # Check if the required components were found and add their stuff to the FFmpeg_* vars.
   foreach (_component ${FFmpeg_FIND_COMPONENTS})
     if (${_component}_FOUND)
       # message(STATUS "Required component ${_component} present.")
-      set(FFMPEG_LIBRARIES   ${FFMPEG_LIBRARIES}   ${${_component}_LIBRARIES})
-      set(FFMPEG_DEFINITIONS ${FFMPEG_DEFINITIONS} ${${_component}_DEFINITIONS})
-      list(APPEND FFMPEG_INCLUDE_DIRS ${${_component}_INCLUDE_DIRS})
+      set(FFmpeg_LIBRARIES   ${FFmpeg_LIBRARIES}   ${${_component}_LIBRARIES})
+      set(FFmpeg_DEFINITIONS ${FFmpeg_DEFINITIONS} ${${_component}_DEFINITIONS})
+      list(APPEND FFmpeg_INCLUDE_DIRS ${${_component}_INCLUDE_DIRS})
     else ()
       # message(STATUS "Required component ${_component} missing.")
+      set(FFmpeg_FOUND 0)
     endif ()
   endforeach ()
 
   # Build the include path with duplicates removed.
-  if (FFMPEG_INCLUDE_DIRS)
-    list(REMOVE_DUPLICATES FFMPEG_INCLUDE_DIRS)
+  if (FFmpeg_INCLUDE_DIRS)
+    list(REMOVE_DUPLICATES FFmpeg_INCLUDE_DIRS)
   endif ()
 
   # cache the vars.
-  set(FFMPEG_INCLUDE_DIRS ${FFMPEG_INCLUDE_DIRS} CACHE STRING "The FFmpeg include directories." FORCE)
-  set(FFMPEG_LIBRARIES    ${FFMPEG_LIBRARIES}    CACHE STRING "The FFmpeg libraries." FORCE)
-  set(FFMPEG_DEFINITIONS  ${FFMPEG_DEFINITIONS}  CACHE STRING "The FFmpeg cflags." FORCE)
+  set(FFmpeg_INCLUDE_DIRS ${FFmpeg_INCLUDE_DIRS} CACHE STRING "The FFmpeg include directories." FORCE)
+  set(FFmpeg_LIBRARIES    ${FFmpeg_LIBRARIES}    CACHE STRING "The FFmpeg libraries." FORCE)
+  set(FFmpeg_DEFINITIONS  ${FFmpeg_DEFINITIONS}  CACHE STRING "The FFmpeg cflags." FORCE)
 
-  mark_as_advanced(FFMPEG_INCLUDE_DIRS
-                   FFMPEG_LIBRARIES
-                   FFMPEG_DEFINITIONS)
+  mark_as_advanced(FFmpeg_INCLUDE_DIRS
+                   FFmpeg_LIBRARIES
+                   FFmpeg_DEFINITIONS)
 
 endif ()
 
@@ -139,10 +144,44 @@ foreach (_component AVCODEC AVDEVICE AVFORMAT AVUTIL POSTPROCESS SWSCALE)
 endforeach ()
 
 # Compile the list of required vars
-set(_FFmpeg_REQUIRED_VARS FFMPEG_LIBRARIES FFMPEG_INCLUDE_DIRS)
+set(_FFmpeg_REQUIRED_VARS FFmpeg_LIBRARIES FFmpeg_INCLUDE_DIRS)
 foreach (_component ${FFmpeg_FIND_COMPONENTS})
   list(APPEND _FFmpeg_REQUIRED_VARS ${_component}_LIBRARIES ${_component}_INCLUDE_DIRS)
 endforeach ()
 
 # Give a nice error message if some of the required vars are missing.
 find_package_handle_standard_args(FFmpeg DEFAULT_MSG ${_FFmpeg_REQUIRED_VARS})
+
+
+# ----------------------------------------------------------------------
+# Display status
+# ----------------------------------------------------------------------
+if(FFmpeg_FOUND)
+   if (NOT FFmpeg_FIND_QUIETLY)
+      message(STATUS "Found FFmpeg: \n\tINC DIR: ${FFmpeg_INCLUDE_DIRS} \n\tLIBS: ${FFmpeg_LIBRARIES}")
+   endif()
+else()
+   if(FFmpeg_FIND_REQUIRED)
+      message(FATAL_ERROR "FFmpeg was not found.")
+   endif()
+endif()
+
+
+#message(STATUS "FFmpeg_FOUND: ${FFmpeg_FOUND}")
+#message(STATUS "FFmpeg_INCLUDE_DIRS: ${FFmpeg_INCLUDE_DIRS}")
+#message(STATUS "FFmpeg_LIBRARIES: ${FFmpeg_LIBRARIES}")
+#message(STATUS "FFmpeg_DEFINITIONS: ${FFmpeg_DEFINITIONS}")
+
+
+# ----------------------------------------------------------------------
+# Include and expose to LibSourcey
+# ----------------------------------------------------------------------
+if(FFmpeg_FOUND)
+  include_directories(${FFmpeg_INCLUDE_DIRS})  
+  link_directories(${FFmpeg_LIBRARY_DIR})
+                        
+  set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} ${FFmpeg_INCLUDE_DIRS})
+  #set(LIBSOURCEY_LIBRARY_DIRS ${LIBSOURCEY_LIBRARY_DIRS} ${FFmpeg_LIBRARY_DIR})
+  set(LIBSOURCEY_DEBUG_LIBS   ${LIBSOURCEY_DEBUG_LIBS}   ${FFmpeg_LIBRARIES})    
+  set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} ${FFmpeg_LIBRARIES})
+endif()

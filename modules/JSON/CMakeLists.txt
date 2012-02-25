@@ -1,4 +1,4 @@
-include("${CMAKE_SOURCE_DIR}/FindPoco.cmake")
-include("${CMAKE_SOURCE_DIR}/LibSourceyFindJsonCpp.cmake")
+find_package(Poco REQUIRED)
+find_package(JsonCpp REQUIRED)
 
 define_libsourcey_module(JSON Base)

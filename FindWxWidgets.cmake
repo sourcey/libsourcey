@@ -228,7 +228,7 @@
              IF( WXWINDOWS_SHARED_LIBRARY )
                  OPTION(WXWINDOWS_USE_SHARED_LIBS
                         "Use shared versions of wxWindows libraries" ON)
-                 MARK_AS_ADVANCED(WXWINDOWS_USE_SHARED_LIBS)
+                 mark_as_advanced(WXWINDOWS_USE_SHARED_LIBS)
              ENDIF( WXWINDOWS_SHARED_LIBRARY )
  
              SET(CMAKE_WX_LIBRARIES ${CMAKE_WX_LIBRARIES} comctl32 wsock32 rpcrt4)
@@ -241,7 +241,7 @@
                  SET(WXWINDOWS_LIBRARIES ${WXWINDOWS_STATIC_LIBRARY} regexd.lib pngd.lib zlibd.lib jpegd.lib tiffd.lib ${CMAKE_WX_LIBRARIES})
              ENDIF( WXWINDOWS_USE_SHARED_LIBS )
  
-             MARK_AS_ADVANCED(
+             mark_as_advanced(
          #       WXWINDOWS_STATIC_LIBRARY
                  WXWINDOWS_SHARED_LIBRARY
                  WXWINDOWS_INCLUDE_PATH
@@ -341,7 +341,7 @@
      # not used here
      SET( CMAKE_WX_CXX_FLAGS "" )
  
-     MARK_AS_ADVANCED(
+     mark_as_advanced(
          WXWINDOWS_INCLUDE_PATH
          WXWINDOWS_INSTALL_PATH
      )
@@ -401,7 +401,7 @@
  
  ENDIF( WIN32 )
  
- MARK_AS_ADVANCED(
+ mark_as_advanced(
      CMAKE_WX_CXX_FLAGS
  )
  

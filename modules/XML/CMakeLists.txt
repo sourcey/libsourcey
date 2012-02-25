@@ -1,5 +1,5 @@
-include("${CMAKE_SOURCE_DIR}/FindPoco.cmake")
-include("${CMAKE_SOURCE_DIR}/FindOpenSSL.cmake")
-include("${CMAKE_SOURCE_DIR}/LibSourceyFindPugiXML.cmake")
+find_package(Poco REQUIRED)
+find_package(OpenSSL REQUIRED)
+find_package(PugiXML REQUIRED)
 
 define_libsourcey_module(XML Base)

@@ -37,11 +37,13 @@
 
 #define MAX_ENCODE_DURATION			(3 * 60 * 60 * 1000)	// 3 hours
 
-/* Defined in stdint.h
+
 #ifndef INT64_C
+#include "inttypes.h"
+/* Defined in stdint.h
 #define INT64_C(c) (c ## LL)
 #define UINT64_C(c) (c ## ULL)
-#endif
 */
+#endif
 
 #endif // SOURCEY_MEDIA_Config_H

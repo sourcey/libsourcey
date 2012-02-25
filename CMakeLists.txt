@@ -11,6 +11,8 @@ else()
     set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Installation Directory")
 endif()
 
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configs" FORCE)
+
 project(LibSourcey)
 
 add_definitions(-DUNICODE -D_UNICODE)
@@ -131,10 +133,44 @@ set(LIBSOURCEY_BUILD_DIR ${CMAKE_BINARY_DIR})
 set(LIBSOURCEY_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(LIBSOURCEY_3RDPARTY_SOURCE_DIR "${LIBSOURCEY_SOURCE_DIR}/3rdparty")
 set(LIBSOURCEY_3RDPARTY_BUILD_DIR "${LIBSOURCEY_INSTALL_PREFIX}/3rdparty")
+set(LIBSOURCEY_3RDPARTY_INSTALL_DIR "${LIBSOURCEY_INSTALL_PREFIX}/share/LibSourcey/3rdparty")
 set(LIBSOURCEY_INCLUDE_DIRS "") # Variable for all include dirs
 set(LIBSOURCEY_LIBRARY_DIRS "") # Variable for all library dirs
 set(LIBSOURCEY_DEBUG_LIBS "")   # Variable for all debug libraries
 set(LIBSOURCEY_RELEASE_LIBS "") # Variable for all release libraries
+
+# Set this for find_package to use our FindXXX.cmake files
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
+
+# Append some common search paths for find_library
+# to find libraries from these locations first
+if(WIN32)
+  set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
+      ${LIBSOURCEY_3RDPARTY_SOURCE_DIR}
+      D:/dev/lib/OpenSSL-Win32/lib/VC/
+      D:/dev/lib/OpenCV2.3/build
+      D:/dev/lib/poco-1.4.1p1-all)
+else()
+    set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
+      /lib 
+      /usr/lib)
+endif()
+
+# Append some common search paths for find_path
+# to search these locations first
+if(WIN32)
+  set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
+      ${LIBSOURCEY_3RDPARTY_SOURCE_DIR}
+      D:/dev/lib/OpenSSL-Win32/include
+      D:/dev/lib/OpenCV2.3/build/include)
+endif()
+
+set(LIBSOURCEY_ARCHITECTURE i386)
+set(LIBSOURCEY_BITNESS 32)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(LIBSOURCEY_BITNESS 64)
+  set(LIBSOURCEY_ARCHITECTURE amd64)
+endif()
 
 
 # ----------------------------------------------------------------------------
@@ -158,7 +194,7 @@ if(BUILD_3RDPARTY_LIBS)
   #set(WITH_OPENCV ON CACHE BOOL "Build with OpenCV")
   #set(WITH_WXWIDGETS ON CACHE BOOL "Build with wxWidgets")
   #set(WITH_LIBUV ON CACHE BOOL "Build with Libuv")
-  #set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} "${LIBSOURCEY_SOURCE_DIR}/3rdparty/MemLeakDetect")
+  #set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} "${LIBSOURCEY_3RDPARTY_SOURCE_DIR}/MemLeakDetect")
   add_subdirectory(${LIBSOURCEY_3RDPARTY_SOURCE_DIR})
 else()
   unset(WITH_PUGIXML CACHE)
@@ -207,12 +243,9 @@ endif()
 # ----------------------------------------------------------------------------
 
 # Include our third party source directory
-#set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} "${LIBSOURCEY_INCLUDE_DIRS}/3rdparty")
-# Include our third party install directory
-#set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} "${LIBSOURCEY_INSTALL_PREFIX}/3rdparty")
-#include_directories("${LIBSOURCEY_INCLUDE_DIRS}")
-
-# Include our third party library install directory
+set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} 
+  ${LIBSOURCEY_3RDPARTY_SOURCE_DIR} ${LIBSOURCEY_3RDPARTY_SOURCE_DIR}/msvc)
+include_directories("${LIBSOURCEY_INCLUDE_DIRS}")
 link_directories("${LIBSOURCEY_INSTALL_PREFIX}/lib")
 
 
@@ -335,7 +368,7 @@ include_directories("${LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR}")
 
 
 # ----------------------------------------------------------------------------
-#  Uninstall target, for "make uninstall"
+#  Uninstall target for "make uninstall"
 # ----------------------------------------------------------------------------
 if(UNIX)
   CONFIGURE_FILE(
@@ -378,9 +411,3 @@ message(STATUS "")
 if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
     message(WARNING "The source directory is the same as binary directory. \"make clean\" may damage the source tree")
 endif()
-
-
-#----------------------------------------------------------------------------
-#  Generate the LibSourceyConfig.cmake file for unix
-#     installation in CMAKE_INSTALL_PREFIX
-#----------------------------------------------------------------------------

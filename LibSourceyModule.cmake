@@ -1,6 +1,6 @@
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------
 # This macro defines a generic LibSourcey module 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------
 macro(define_libsourcey_module name)
             
   project(${name})
@@ -14,6 +14,8 @@ macro(define_libsourcey_module name)
   source_group("Include" FILES ${lib_hdrs}  ${lib_int_hdrs})
   
   include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+  include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/Sourcey/${name}")
+  
   foreach(module ${ARGN})
     if (IS_DIRECTORY "${CMAKE_SOURCE_DIR}/modules/${module}/include")
       include_directories("${CMAKE_SOURCE_DIR}/modules/${module}/include")
@@ -57,16 +59,16 @@ macro(define_libsourcey_module name)
     LIBRARY DESTINATION lib COMPONENT main
     ARCHIVE DESTINATION lib COMPONENT main)        
   
-  # ----------------------------------------------------------------------------
+  # ----------------------------------------------------------------------
   #   Build Samples
-  # ----------------------------------------------------------------------------
+  # ----------------------------------------------------------------------
   if(BUILD_MODULE_SAMPLES AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/samples)
     add_subdirectory(samples)
   endif() 
   
-  # ----------------------------------------------------------------------------
+  # ----------------------------------------------------------------------
   #   Build Tests
-  # ----------------------------------------------------------------------------
+  # ----------------------------------------------------------------------
   if(BUILD_MODULE_TESTS AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_subdirectory(tests)
   endif()    

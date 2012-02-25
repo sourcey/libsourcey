@@ -108,9 +108,8 @@ int TCPPacketStreamConnection::send(const char* data, size_t size)
 	}
 
 	//Log("trace") << "[TCPPacketStreamConnection:" << this << "] Sending Packet: " 
-	//	<< packet.className() << ": " << size << endl;
-	
-	socket().sendBytes(data, size);
+	//	<< packet.className() << ": " << size << endl;	
+	return socket().sendBytes(data, size);
 }
 
 
