@@ -66,11 +66,7 @@ public:
     virtual AVCodecContext* getEncoderContext() const { return _encoderContext; }
 	
     virtual EncoderParams& params() { return _params; }	
-    virtual double getNow() const { return _now; }	
-	
-protected:
-	virtual void initEncodeContext(); //const AudioCodec& oCodec
-    virtual void resetEncodeContext();
+    virtual double getNow() const { return _now; }
 
 private:
 	static Poco::FastMutex _mutex;	// Mutex locker to protect avcodec_open/close().

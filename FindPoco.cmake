@@ -76,18 +76,32 @@ if(WIN32)
   )
 endif()
 
-set(Poco_LIBRARY_DIR_SUFFIXES
- lib
-)
-
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(Poco_LIBRARY_DIR_SUFFIXES "lib64")
+set(Poco_LIBRARY_DIR_SUFFIXES lib)
+if(WIN32 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+  list(APPEND Poco_LIBRARY_DIR_SUFFIXES "lib64")
 endif()
 
 # Set the library suffix for our build type
+set(Poco_LINK_SHARED_LIBS TRUE CACHE BOOL "Link with shared Poco libraries (.dll/.so) instead of static ones (.lib/.a)")    
 set(Poco_LIB_SUFFIX "")
-if(WIN32 AND MSVC AND BUILD_WITH_STATIC_CRT)
-   set(Poco_LIB_SUFFIX "mt")
+#set(Poco_LIB_EXT "")
+if(WIN32 AND MSVC)
+  if(Poco_LINK_SHARED_LIBS)
+    add_definitions(-DPOCO_DLL)
+  else()
+    add_definitions(-DPOCO_STATIC)
+    if(BUILD_WITH_STATIC_CRT)
+      set(Poco_LIB_SUFFIX "mt")
+    else()
+      set(Poco_LIB_SUFFIX "md")
+    endif()    
+  endif()
+#else()
+#  if(Poco_LINK_SHARED_LIBS)
+#    set(Poco_LIB_EXT ".so")
+#  else()
+#    set(Poco_LIB_EXT ".a")
+#  endif()
 endif()
 
 
@@ -161,26 +175,33 @@ if(Poco_DIR)
     if(Poco_LIB_Foundation)
       #set(Poco_COMPONENTS "Foundation${DBG}")
       foreach(component ${Poco_FIND_COMPONENTS})
-        
+      
+        #if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+        #  set(OPENSSL_LIBRARIES
+        #    optimized ${SSL_EAY_RELEASE} debug ${SSL_EAY_DEBUG}
+        #    optimized ${LIB_EAY_RELEASE} debug ${LIB_EAY_DEBUG}
+        #    )
+        #    
+        #else()
+        #  set( OPENSSL_LIBRARIES ${SSL_EAY_RELEASE} ${LIB_EAY_RELEASE} )
+        #endif()
 
         # Create a Debug and a Release list for windows        
-        if (WIN32)
+        if (MSVC)
           find_library(Poco_RLS_${component} "Poco${component}${Poco_LIB_SUFFIX}" Poco_LIBRARY_DIR)
-          if (Poco_RLS_LIB_${component})
-            get_filename_component(lib_dir Poco_DBG_LIB_${component} PATH)
-            list(APPEND Poco_LIBRARY_DIRS ${lib_dir})
-            list(APPEND Poco_RELEASE_LIBRARIES "Poco${component}${Poco_LIB_SUFFIX}")
+          find_library(Poco_DBG_${component} "Poco${component}${Poco_LIB_SUFFIX}d" Poco_LIBRARY_DIR)
+          if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)            
+            if (Poco_RLS_${component}) 
+              list(APPEND Poco_LIBRARIES "optimized" ${Poco_RLS_${component}})
+            endif()
+            if (Poco_DBG_${component})
+              list(APPEND Poco_LIBRARIES "debug" ${Poco_DBG_${component}})
+            endif()
+          else()    
+            if (Poco_RLS_${component}) 
+              list(APPEND Poco_LIBRARIES ${Poco_RLS_${component}})
+            endif()
           endif()
-          find_library(Poco_DBG_LIB_${component} "Poco${component}${Poco_LIB_SUFFIX}d" Poco_LIBRARY_DIR)
-          if (Poco_DBG_LIB_${component})
-            get_filename_component(lib_dir ${Poco_DBG_LIB_${component}} PATH)
-            list(APPEND Poco_LIBRARY_DIRS ${lib_dir})
-message(STATUS "Poco_DBG_LIB_=${Poco_DBG_LIB_${component}}")
-message(STATUS "lib_dir=${lib_dir}")
-message(STATUS "Poco_LIBRARY_DIRS=${Poco_LIBRARY_DIRS}")
-            list(APPEND Poco_DEBUG_LIBRARIES "Poco${component}${Poco_LIB_SUFFIX}d")
-          endif()
-          set(Poco_LIBRARIES ${Poco_LIBRARIES} ${Poco_DEBUG_LIBRARIES} ${Poco_RELEASE_LIBRARIES})
         else()
           find_library(Poco_LIB_${component} "Poco${component}${Poco_LIB_SUFFIX}" Poco_LIBRARY_DIR)
           if (Poco_LIB_${component})
@@ -188,39 +209,15 @@ message(STATUS "Poco_LIBRARY_DIRS=${Poco_LIBRARY_DIRS}")
           endif()
         endif()
       endforeach()
-      list(REMOVE_DUPLICATES Poco_LIBRARIES)
+      
+      #list(REMOVE_DUPLICATES Poco_LIBRARIES)
+      
     endif(Poco_LIB_Foundation)
   endif(NOT Poco_LIBRARY_DIR)
 endif(Poco_DIR)
 
 
-message(STATUS "Poco_LIBRARY_DIRS=${Poco_LIBRARY_DIRS}")
+#message(STATUS "Poco_LIBRARIES=${Poco_LIBRARIES}")
+#message(STATUS "Poco_LIBRARY_DIRS=${Poco_LIBRARY_DIRS}")
 #message(STATUS "Poco_POSSIBLE_ROOT_DIRS=${Poco_POSSIBLE_ROOT_DIRS}")
 #message(STATUS "Poco_DIR=${Poco_DIR}")
-
-# ----------------------------------------------------------------------
-# Display status
-# ----------------------------------------------------------------------
-if (Poco_FOUND)
-   if (NOT Poco_FIND_QUIETLY)
-      message(STATUS "Found Poco: \n\tDir: ${Poco_DIR} \n\tLib Dir: ${Poco_LIBRARY_DIRS} \n\tLIBS: ${Poco_LIBRARIES}")
-   endif (NOT Poco_FIND_QUIETLY)
-else ()
-   if (Poco_FIND_REQUIRED)
-      message(FATAL_ERROR "Poco was not found.")
-   endif (Poco_FIND_REQUIRED)
-endif()
-
-
-# ----------------------------------------------------------------------
-# Expose to LibSourcey
-# ----------------------------------------------------------------------
-if(Poco_FOUND)  
-  include_directories(${Poco_INCLUDE_DIRS})  
-  link_directories(${Poco_LIBRARY_DIRS})
-                        
-  set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} ${Poco_INCLUDE_DIRS})
-  set(LIBSOURCEY_LIBRARY_DIRS ${LIBSOURCEY_LIBRARY_DIRS} ${Poco_LIBRARY_DIRS})
-  set(LIBSOURCEY_DEBUG_LIBS   ${LIBSOURCEY_DEBUG_LIBS}   ${Poco_DEBUG_LIBRARIES})    
-  set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} ${Poco_RELEASE_LIBRARIES})
-endif()

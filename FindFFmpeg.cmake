@@ -33,7 +33,7 @@ include(FindPackageHandleStandardArgs)
 
 # The default components were taken from a survey over other FindFFmpeg.cmake files
 if (NOT FFmpeg_FIND_COMPONENTS)
-  set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL)
+  set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
 endif ()
 
 #
@@ -151,37 +151,3 @@ endforeach ()
 
 # Give a nice error message if some of the required vars are missing.
 find_package_handle_standard_args(FFmpeg DEFAULT_MSG ${_FFmpeg_REQUIRED_VARS})
-
-
-# ----------------------------------------------------------------------
-# Display status
-# ----------------------------------------------------------------------
-if(FFmpeg_FOUND)
-   if (NOT FFmpeg_FIND_QUIETLY)
-      message(STATUS "Found FFmpeg: \n\tINC DIR: ${FFmpeg_INCLUDE_DIRS} \n\tLIBS: ${FFmpeg_LIBRARIES}")
-   endif()
-else()
-   if(FFmpeg_FIND_REQUIRED)
-      message(FATAL_ERROR "FFmpeg was not found.")
-   endif()
-endif()
-
-
-#message(STATUS "FFmpeg_FOUND: ${FFmpeg_FOUND}")
-#message(STATUS "FFmpeg_INCLUDE_DIRS: ${FFmpeg_INCLUDE_DIRS}")
-#message(STATUS "FFmpeg_LIBRARIES: ${FFmpeg_LIBRARIES}")
-#message(STATUS "FFmpeg_DEFINITIONS: ${FFmpeg_DEFINITIONS}")
-
-
-# ----------------------------------------------------------------------
-# Include and expose to LibSourcey
-# ----------------------------------------------------------------------
-if(FFmpeg_FOUND)
-  include_directories(${FFmpeg_INCLUDE_DIRS})  
-  link_directories(${FFmpeg_LIBRARY_DIR})
-                        
-  set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} ${FFmpeg_INCLUDE_DIRS})
-  #set(LIBSOURCEY_LIBRARY_DIRS ${LIBSOURCEY_LIBRARY_DIRS} ${FFmpeg_LIBRARY_DIR})
-  set(LIBSOURCEY_DEBUG_LIBS   ${LIBSOURCEY_DEBUG_LIBS}   ${FFmpeg_LIBRARIES})    
-  set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} ${FFmpeg_LIBRARIES})
-endif()

@@ -86,7 +86,7 @@ bool AnionuAuthenticator::validateRequest(UserManager* authenticator, const stri
 	string date = Util::parseHeader(request, "Date");
 
 	/*
-	Log("debug") << "Anionu Authenticator:"
+	Log("debug") << "Anionu Validating Request:"
 		<< "\n\tHTTP Method: " << httpMethod
 		<< "\n\tURI: " << requestUri
 		<< "\n\tAuthorization: " << authorization
@@ -127,6 +127,7 @@ string AnionuAuthenticator::generateSignature(const string& password, const stri
 											  const string& requestUri, const string& contentType, 
 											  const string& date)
 {
+
 	ostringstream ostr;
 	Base64Encoder encoder(ostr);
 	encoder << CryptoProvider::hash("sha1", 
@@ -137,6 +138,16 @@ string AnionuAuthenticator::generateSignature(const string& password, const stri
 		date
 	);
 	encoder.close();
+	
+	/*
+	Log("debug") << "Anionu Generating Signature:"
+		<< "\n\tPassword: " << password
+		<< "\n\tMethod: " << httpMethod
+		<< "\n\tURI: " << requestUri
+		<< "\n\tContent-Type: " << contentType
+		<< "\n\tDate: " << date
+		<< endl;
+		*/
 	return ostr.str();
 }
 

@@ -13,7 +13,7 @@
 # Find PugiXML include path
 # ----------------------------------------------------------------------
 find_path(PugiXML_INCLUDE_DIR pugixml.hpp
-  ${LIBSOURCEY_3RDPARTY_SOURCE_DIR}/pugixml/src
+  ${LibSourcey_3RDPARTY_SOURCE_DIR}/pugixml/src
   /usr/local/include
   /usr/include
 )
@@ -26,7 +26,7 @@ FIND_LIBRARY(PugiXML_LIBRARY
   NAMES 
     pugixml.lib pugixmld.lib
   PATHS 
-    ${LIBSOURCEY_3RDPARTY_INSTALL_DIR}/lib
+    ${LibSourcey_3RDPARTY_INSTALL_DIR}/lib
     /usr/lib 
     /usr/local/lib
   )
@@ -54,8 +54,8 @@ else()
    endif()
 endif()
 
-#message(STATUS "LIBSOURCEY_3RDPARTY_BUILD_DIR: ${LIBSOURCEY_3RDPARTY_BUILD_DIR}")
-#message(STATUS "LIBSOURCEY_3RDPARTY_SOURCE_DIR: ${LIBSOURCEY_3RDPARTY_SOURCE_DIR}")
+#message(STATUS "LibSourcey_3RDPARTY_BUILD_DIR: ${LibSourcey_3RDPARTY_BUILD_DIR}")
+#message(STATUS "LibSourcey_3RDPARTY_SOURCE_DIR: ${LibSourcey_3RDPARTY_SOURCE_DIR}")
 #message(STATUS "PugiXML_INCLUDE_DIRS: ${PugiXML_INCLUDE_DIRS}")
 #message(STATUS "PugiXML_LIBRARY: ${PugiXML_LIBRARY}")
  
@@ -67,8 +67,8 @@ if(PugiXML_FOUND)
   include_directories(${PugiXML_INCLUDE_DIR})  
   #link_directories(${PugiXML_LIBRARY_DIR})
                         
-  set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} ${PugiXML_INCLUDE_DIR})
-  #set(LIBSOURCEY_LIBRARY_DIRS ${LIBSOURCEY_LIBRARY_DIRS} ${PugiXML_LIBRARY_DIR})
-  set(LIBSOURCEY_DEBUG_LIBS   ${LIBSOURCEY_DEBUG_LIBS}   ${PugiXML_LIBRARY})    
-  set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} ${PugiXML_LIBRARY})
+  set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} ${PugiXML_INCLUDE_DIR})
+  #set(LibSourcey_LIBRARY_DIRS ${LibSourcey_LIBRARY_DIRS} ${PugiXML_LIBRARY_DIR})
+  set(LibSourcey_DEBUG_LIBS   ${LibSourcey_DEBUG_LIBS}   ${PugiXML_LIBRARY})    
+  set(LibSourcey_RELEASE_LIBS ${LibSourcey_RELEASE_LIBS} ${PugiXML_LIBRARY})
 endif()

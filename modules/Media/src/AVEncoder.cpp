@@ -537,10 +537,11 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 		return false;
 	}
 
-	
-	Log("trace") << "[AVEncoder" << this << "] Audio Packet: " << size << endl;
+	return true;
 
 	/*
+	
+	Log("trace") << "[AVEncoder" << this << "] Audio Packet: " << size << endl;
 
 
 	av_fifo_generic_write(_audio->Fifo, (UInt8 *)buffer, bufferSize, NULL);

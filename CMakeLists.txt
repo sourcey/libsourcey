@@ -21,24 +21,24 @@ add_definitions(-DUNICODE -D_UNICODE)
 # ----------------------------------------------------------------------------
 # Current version number:
 # ----------------------------------------------------------------------------
-set(LIBSOURCEY_VERSION "0.8.0")
+set(LibSourcey_VERSION "0.8.0")
 
-string(REGEX MATCHALL "[0-9]" LIBSOURCEY_VERSION_PARTS "${LIBSOURCEY_VERSION}")
+string(REGEX MATCHALL "[0-9]" LibSourcey_VERSION_PARTS "${LibSourcey_VERSION}")
 
-list(GET LIBSOURCEY_VERSION_PARTS 0 LIBSOURCEY_VERSION_MAJOR)
-list(GET LIBSOURCEY_VERSION_PARTS 1 LIBSOURCEY_VERSION_MINOR)
-list(GET LIBSOURCEY_VERSION_PARTS 2 LIBSOURCEY_VERSION_PATCH)
+list(GET LibSourcey_VERSION_PARTS 0 LibSourcey_VERSION_MAJOR)
+list(GET LibSourcey_VERSION_PARTS 1 LibSourcey_VERSION_MINOR)
+list(GET LibSourcey_VERSION_PARTS 2 LibSourcey_VERSION_PATCH)
 
-set(LIBSOURCEY_SOVERSION "${LIBSOURCEY_VERSION_MAJOR}.${LIBSOURCEY_VERSION_MINOR}")
+set(LibSourcey_SOVERSION "${LibSourcey_VERSION_MAJOR}.${LibSourcey_VERSION_MINOR}")
 
 if(WIN32)
     # Postfix of DLLs:
-    set(LIBSOURCEY_DLLVERSION "${LIBSOURCEY_VERSION_MAJOR}${LIBSOURCEY_VERSION_MINOR}${LIBSOURCEY_VERSION_PATCH}")
-    set(LIBSOURCEY_DEBUG_POSTFIX d)
+    set(LibSourcey_DLLVERSION "${LibSourcey_VERSION_MAJOR}${LibSourcey_VERSION_MINOR}${LibSourcey_VERSION_PATCH}")
+    set(LibSourcey_DEBUG_POSTFIX d)
 else()
     # Postfix of so's:
-    set(LIBSOURCEY_DLLVERSION "")
-    set(LIBSOURCEY_DEBUG_POSTFIX)
+    set(LibSourcey_DLLVERSION "")
+    set(LibSourcey_DEBUG_POSTFIX)
 endif()
 
 
@@ -84,7 +84,6 @@ if(MSVC)
 
         set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:libcmt.lib")
         set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:libcmtd.lib")
-
     else(BUILD_WITH_STATIC_CRT)
         foreach(flag_var
                 CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
@@ -128,28 +127,29 @@ endif(MSVC)
 # ============================================================================
 # Build paths
 # ============================================================================
-set(LIBSOURCEY_SOURCE_DIR ${CMAKE_SOURCE_DIR})
-set(LIBSOURCEY_BUILD_DIR ${CMAKE_BINARY_DIR})
-set(LIBSOURCEY_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-set(LIBSOURCEY_3RDPARTY_SOURCE_DIR "${LIBSOURCEY_SOURCE_DIR}/3rdparty")
-set(LIBSOURCEY_3RDPARTY_BUILD_DIR "${LIBSOURCEY_INSTALL_PREFIX}/3rdparty")
-set(LIBSOURCEY_3RDPARTY_INSTALL_DIR "${LIBSOURCEY_INSTALL_PREFIX}/share/LibSourcey/3rdparty")
-set(LIBSOURCEY_INCLUDE_DIRS "") # Variable for all include dirs
-set(LIBSOURCEY_LIBRARY_DIRS "") # Variable for all library dirs
-set(LIBSOURCEY_DEBUG_LIBS "")   # Variable for all debug libraries
-set(LIBSOURCEY_RELEASE_LIBS "") # Variable for all release libraries
+set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
+set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
+set(LibSourcey_3RDPARTY_SOURCE_DIR "${LibSourcey_SOURCE_DIR}/3rdparty")
+set(LibSourcey_3RDPARTY_BUILD_DIR "${LibSourcey_INSTALL_DIR}/3rdparty")
+set(LibSourcey_3RDPARTY_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/LibSourcey/3rdparty")
+#set(LibSourcey_INCLUDE_DIRS "") # Variable for all include dirs
+#set(LibSourcey_LIBRARY_DIRS "") # Variable for all library dirs
+#set(LibSourcey_DEBUG_LIBS "")   # Variable for all debug libraries
+#set(LibSourcey_RELEASE_LIBS "") # Variable for all release libraries
 
 # Set this for find_package to use our FindXXX.cmake files
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
 
 # Append some common search paths for find_library
 # to find libraries from these locations first
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-      ${LIBSOURCEY_3RDPARTY_SOURCE_DIR}
+      ${LibSourcey_3RDPARTY_SOURCE_DIR}
       D:/dev/lib/OpenSSL-Win32/lib/VC/
       D:/dev/lib/OpenCV2.3/build
-      D:/dev/lib/poco-1.4.1p1-all)
+      D:/dev/lib/poco-1.4.1p1-all
+      D:/dev/lib/wxWidgets-2.9.2/lib/vc_lib)
 else()
     set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
       /lib 
@@ -160,17 +160,21 @@ endif()
 # to search these locations first
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-      ${LIBSOURCEY_3RDPARTY_SOURCE_DIR}
+      ${LibSourcey_3RDPARTY_SOURCE_DIR}
       D:/dev/lib/OpenSSL-Win32/include
-      D:/dev/lib/OpenCV2.3/build/include)
+      D:/dev/lib/OpenCV2.3/build/include
+      D:/dev/lib/wxWidgets-2.9.2)
 endif()
 
-set(LIBSOURCEY_ARCHITECTURE i386)
-set(LIBSOURCEY_BITNESS 32)
+set(LibSourcey_ARCHITECTURE i386)
+set(LibSourcey_BITNESS 32)
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(LIBSOURCEY_BITNESS 64)
-  set(LIBSOURCEY_ARCHITECTURE amd64)
+  set(LibSourcey_BITNESS 64)
+  set(LibSourcey_ARCHITECTURE amd64)
 endif()
+
+include(LibSourceyIncludeDependency.cmake OPTIONAL)
+include(LibSourceyIncludeModule.cmake OPTIONAL)
 
 
 # ----------------------------------------------------------------------------
@@ -194,8 +198,8 @@ if(BUILD_3RDPARTY_LIBS)
   #set(WITH_OPENCV ON CACHE BOOL "Build with OpenCV")
   #set(WITH_WXWIDGETS ON CACHE BOOL "Build with wxWidgets")
   #set(WITH_LIBUV ON CACHE BOOL "Build with Libuv")
-  #set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} "${LIBSOURCEY_3RDPARTY_SOURCE_DIR}/MemLeakDetect")
-  add_subdirectory(${LIBSOURCEY_3RDPARTY_SOURCE_DIR})
+  #set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} "${LibSourcey_3RDPARTY_SOURCE_DIR}/MemLeakDetect")
+  add_subdirectory(${LibSourcey_3RDPARTY_SOURCE_DIR})
 else()
   unset(WITH_PUGIXML CACHE)
   unset(WITH_RTAUDIO CACHE)
@@ -204,7 +208,25 @@ else()
   unset(WITH_OPENSSL CACHE)
 endif()
 
+  
+# ----------------------------------------------------------------------------
+# Build sample apps
+# ----------------------------------------------------------------------------
+set(BUILD_MODULE_SAMPLES OFF CACHE BOOL "Build all samples")
+if(BUILD_MODULE_SAMPLES)
+  include(LibSourceySample.cmake REQUIRED)
+endif()
 
+
+# ----------------------------------------------------------------------------
+# Build tests
+# ----------------------------------------------------------------------------
+set(BUILD_MODULE_TESTS OFF CACHE BOOL "Build tests")
+if(BUILD_MODULE_TESTS)
+  include(LibSourceyTest.cmake REQUIRED)
+endif()  
+  
+  
 # ============================================================================
 # Macro for looping sub directories
 #
@@ -228,14 +250,9 @@ ENDMACRO()
 # ============================================================================
 
 # ----------------------------------------------------------------------------
-# Additional Libraries
+# Include standard Libraries
 # ----------------------------------------------------------------------------
-if(WIN32)
-  set(LIBSOURCEY_DEBUG_LIBS ${LIBSOURCEY_DEBUG_LIBS} ws2_32)  
-  set(LIBSOURCEY_DEBUG_LIBS ${LIBSOURCEY_DEBUG_LIBS} dsound)  
-  set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} ws2_32)  
-  set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} dsound) 
-endif()
+set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} ws2_32.lib dsound.lib winmm.lib strmiids.lib)
 
 
 # ----------------------------------------------------------------------------
@@ -243,10 +260,10 @@ endif()
 # ----------------------------------------------------------------------------
 
 # Include our third party source directory
-set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} 
-  ${LIBSOURCEY_3RDPARTY_SOURCE_DIR} ${LIBSOURCEY_3RDPARTY_SOURCE_DIR}/msvc)
-include_directories("${LIBSOURCEY_INCLUDE_DIRS}")
-link_directories("${LIBSOURCEY_INSTALL_PREFIX}/lib")
+set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} 
+  ${LibSourcey_3RDPARTY_SOURCE_DIR} ${LibSourcey_3RDPARTY_SOURCE_DIR}/msvc)
+include_directories("${LibSourcey_INCLUDE_DIRS}")
+link_directories("${LibSourcey_INSTALL_DIR}/lib")
 
 
 # ----------------------------------------------------------------------------
@@ -257,29 +274,12 @@ include(LibSourceyModule.cmake REQUIRED)
 #set(USING_POCO OFF)
 #message("INIT: ${USING_POCO}")
   
-  
 # ----------------------------------------------------------------------------
 # LibSourcey modules
 # ----------------------------------------------------------------------------
 set(BUILD_MODULES ON CACHE BOOL "Build core modules")
 SUBDIRLIST(MODULES "${CMAKE_SOURCE_DIR}/modules")
 if(BUILD_MODULES)
-
-  
-  # Build modules sample apps:
-  # ---------------------------------------------------
-  set(BUILD_MODULE_SAMPLES OFF CACHE BOOL "Build all samples")
-  if(BUILD_MODULE_SAMPLES)
-    include(LibSourceySample.cmake REQUIRED)
-  endif()
-  
-
-  # Build modules tests:
-  # ---------------------------------------------------
-  set(BUILD_MODULE_TESTS OFF CACHE BOOL "Build tests")
-  if(BUILD_MODULE_TESTS)
-    include(LibSourceyTest.cmake REQUIRED)
-  endif()  
   
 
   # Build modules:
@@ -301,8 +301,6 @@ else()
 
   # Hide module definitions:
   # ---------------------------------------------------
-  unset(BUILD_MODULE_SAMPLES CACHE)
-  unset(BUILD_MODULE_TESTS CACHE)  
   FOREACH(module ${MODULES})
     unset(BUILD_MODULE_${module} CACHE)
   ENDFOREACH()  
@@ -353,18 +351,18 @@ add_definitions(-DHAVE_CONFIG_H)
 set(PACKAGE "LibSourcey")
 set(PACKAGE_BUGREPORT "https://github.com/sourcey/LibSourcey/issues")
 set(PACKAGE_NAME "LibSourcey")
-set(PACKAGE_STRING "${PACKAGE} ${LIBSOURCEY_VERSION}")
+set(PACKAGE_STRING "${PACKAGE} ${LibSourcey_VERSION}")
 set(PACKAGE_TARNAME "${PACKAGE}")
-set(PACKAGE_VERSION "${LIBSOURCEY_VERSION}")
+set(PACKAGE_VERSION "${LibSourcey_VERSION}")
 
-set(LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant Config.h")
+set(LibSourcey_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant Config.h")
 
 message(STATUS "Parsing 'Config.h.cmake'")
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/Config.h.cmake" 
-  "${LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR}/Config.h")
+  "${LibSourcey_CONFIG_FILE_INCLUDE_DIR}/Config.h")
   
-include_directories("${LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR}")
+include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 
 
 # ----------------------------------------------------------------------------
@@ -386,7 +384,7 @@ endif()
 #  Summary:
 # ----------------------------------------------------------------------------
 message(STATUS "")
-message(STATUS "General configuration for LibSourcey ${LIBSOURCEY_VERSION} =====================================")
+message(STATUS "General configuration for LibSourcey ${LibSourcey_VERSION} =====================================")
 message(STATUS "")
 message(STATUS "    Built as dynamic libs?:     ${BUILD_SHARED_LIBS}")
 message(STATUS "    Compiler:                   ${CMAKE_COMPILER}")
@@ -403,7 +401,7 @@ endif()
 message(STATUS "")
 message(STATUS "    Install path:               ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "")
-message(STATUS "    Config.h is in:             ${LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR}")
+message(STATUS "    Config.h is in:             ${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 message(STATUS "-----------------------------------------------------------------")
 message(STATUS "")
 

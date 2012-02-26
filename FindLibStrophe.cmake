@@ -13,7 +13,7 @@
 # Find LibStrophe include path
 # ----------------------------------------------------------------------
 find_path(LibStrophe_INCLUDE_DIR strophe.h
-  ${LIBSOURCEY_3RDPARTY_SOURCE_DIR}/libstrophe
+  ${LibSourcey_3RDPARTY_SOURCE_DIR}/libstrophe
   /usr/local/include
   /usr/include
 )
@@ -30,7 +30,7 @@ FIND_LIBRARY(LibStrophe_LIBRARY
   NAMES 
     libstrophe.lib libstrophed.lib
   PATHS 
-    ${LIBSOURCEY_3RDPARTY_INSTALL_DIR}/lib
+    ${LibSourcey_3RDPARTY_INSTALL_DIR}/lib
     /usr/lib 
     /usr/local/lib
   )
@@ -58,8 +58,8 @@ else()
    endif()
 endif()
 
-#message(STATUS "LIBSOURCEY_3RDPARTY_BUILD_DIR: ${LIBSOURCEY_3RDPARTY_BUILD_DIR}")
-#message(STATUS "LIBSOURCEY_3RDPARTY_SOURCE_DIR: ${LIBSOURCEY_3RDPARTY_SOURCE_DIR}")
+#message(STATUS "LibSourcey_3RDPARTY_BUILD_DIR: ${LibSourcey_3RDPARTY_BUILD_DIR}")
+#message(STATUS "LibSourcey_3RDPARTY_SOURCE_DIR: ${LibSourcey_3RDPARTY_SOURCE_DIR}")
 #message(STATUS "LibStrophe_INCLUDE_DIRS: ${LibStrophe_INCLUDE_DIRS}")
 #message(STATUS "LibStrophe_LIBRARY: ${LibStrophe_LIBRARY}")
  
@@ -71,8 +71,8 @@ if(LibStrophe_FOUND)
   include_directories(${LibStrophe_INCLUDE_DIRS})  
   link_directories(${LibStrophe_LIBRARY_DIR})
                         
-  set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} ${LibStrophe_INCLUDE_DIRS})
-  set(LIBSOURCEY_LIBRARY_DIRS ${LIBSOURCEY_LIBRARY_DIRS} ${LibStrophe_LIBRARY_DIR})
-  set(LIBSOURCEY_DEBUG_LIBS   ${LIBSOURCEY_DEBUG_LIBS}   ${LibStrophe_LIBRARY})    
-  set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} ${LibStrophe_LIBRARY})
+  set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} ${LibStrophe_INCLUDE_DIRS})
+  set(LibSourcey_LIBRARY_DIRS ${LibSourcey_LIBRARY_DIRS} ${LibStrophe_LIBRARY_DIR})
+  set(LibSourcey_DEBUG_LIBS   ${LibSourcey_DEBUG_LIBS}   ${LibStrophe_LIBRARY})    
+  set(LibSourcey_RELEASE_LIBS ${LibSourcey_RELEASE_LIBS} ${LibStrophe_LIBRARY})
 endif()

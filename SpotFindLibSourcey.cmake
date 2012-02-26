@@ -1,48 +1,48 @@
 ############################### LibSourcey ################################
 
-set(LIBSOURCEY_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../LibSourcey" CACHE PATH "LibSourcey Source Location")
+set(LibSourcey_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../LibSourcey" CACHE PATH "LibSourcey Source Location")
 
 if(WIN32)
-    set(LIBSOURCEY_INSTALL_PREFIX "${LIBSOURCEY_SOURCE_DIR}/build/install" CACHE PATH "LibSourcey Install Location")
+    set(LibSourcey_INSTALL_PREFIX "${LibSourcey_SOURCE_DIR}/build/install" CACHE PATH "LibSourcey Install Location")
 else()
-    set(LIBSOURCEY_INSTALL_PREFIX "/usr/local" CACHE PATH "LibSourcey Install Location")
+    set(LibSourcey_INSTALL_PREFIX "/usr/local" CACHE PATH "LibSourcey Install Location")
 endif()
 
-set(LIBSOURCEY_VERSION "0.8.0" CACHE PATH "LibSourcey Version")                           
+set(LibSourcey_VERSION "0.8.0" CACHE PATH "LibSourcey Version")                           
 
-string(REGEX MATCHALL "[0-9]" LIBSOURCEY_VERSION_PARTS "${LIBSOURCEY_VERSION}")
+string(REGEX MATCHALL "[0-9]" LibSourcey_VERSION_PARTS "${LibSourcey_VERSION}")
 
-list(GET LIBSOURCEY_VERSION_PARTS 0 LIBSOURCEY_VERSION_MAJOR)
-list(GET LIBSOURCEY_VERSION_PARTS 1 LIBSOURCEY_VERSION_MINOR)
-list(GET LIBSOURCEY_VERSION_PARTS 2 LIBSOURCEY_VERSION_PATCH)
+list(GET LibSourcey_VERSION_PARTS 0 LibSourcey_VERSION_MAJOR)
+list(GET LibSourcey_VERSION_PARTS 1 LibSourcey_VERSION_MINOR)
+list(GET LibSourcey_VERSION_PARTS 2 LibSourcey_VERSION_PATCH)
 
-#set(LIBSOURCEY_SOVERSION "${LIBSOURCEY_VERSION_MAJOR}.${LIBSOURCEY_VERSION_MINOR}")
+#set(LibSourcey_SOVERSION "${LibSourcey_VERSION_MAJOR}.${LibSourcey_VERSION_MINOR}")
 #
 #if(WIN32)
 #    # Postfix of DLLs:
-#    set(LIBSOURCEY_VERSION_SUFFIX "${LIBSOURCEY_VERSION_MAJOR}${LIBSOURCEY_VERSION_MINOR}${LIBSOURCEY_VERSION_PATCH}")
-#    set(LIBSOURCEY_DEBUG_POSTFIX d)
+#    set(LibSourcey_VERSION_SUFFIX "${LibSourcey_VERSION_MAJOR}${LibSourcey_VERSION_MINOR}${LibSourcey_VERSION_PATCH}")
+#    set(LibSourcey_DEBUG_POSTFIX d)
 #else()
 #    # Postfix of so's:
-#    set(LIBSOURCEY_VERSION_SUFFIX "")
-#    set(LIBSOURCEY_DEBUG_POSTFIX)
+#    set(LibSourcey_VERSION_SUFFIX "")
+#    set(LibSourcey_DEBUG_POSTFIX)
 #endif()
 
-set(LIBSOURCEY_VERSION_SUFFIX "${LIBSOURCEY_VERSION_MAJOR}${LIBSOURCEY_VERSION_MINOR}${LIBSOURCEY_VERSION_PATCH}")  
+set(LibSourcey_VERSION_SUFFIX "${LibSourcey_VERSION_MAJOR}${LibSourcey_VERSION_MINOR}${LibSourcey_VERSION_PATCH}")  
                          
-set(LIBSOURCEY_LIBRARY_DIRS "${LIBSOURCEY_INSTALL_PREFIX}/lib" 
-                            "${LIBSOURCEY_INSTALL_PREFIX}/share/LibSourcey/3rdparty/lib") 
+set(LibSourcey_LIBRARY_DIRS "${LibSourcey_INSTALL_PREFIX}/lib" 
+                            "${LibSourcey_INSTALL_PREFIX}/share/LibSourcey/3rdparty/lib") 
                             
 foreach(m Anionu Base ICE ISpot Media Net HTTP RTP SDP SpotImpl STUN TURN XML XMPP Pacman JSON SocketIO Symple)
-  set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} "${LIBSOURCEY_SOURCE_DIR}/${m}/include")
-  set(LIBSOURCEY_DEBUG_LIBS ${LIBSOURCEY_DEBUG_LIBS} "Sourcey${m}${LIBSOURCEY_VERSION_SUFFIX}d")
-  set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} "Sourcey${m}${LIBSOURCEY_VERSION_SUFFIX}")
+  set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} "${LibSourcey_SOURCE_DIR}/${m}/include")
+  set(LibSourcey_DEBUG_LIBS ${LibSourcey_DEBUG_LIBS} "Sourcey${m}${LibSourcey_VERSION_SUFFIX}d")
+  set(LibSourcey_RELEASE_LIBS ${LibSourcey_RELEASE_LIBS} "Sourcey${m}${LibSourcey_VERSION_SUFFIX}")
 endforeach()
       
-include_directories(${LIBSOURCEY_INCLUDE_DIRS})  
-link_directories(${LIBSOURCEY_LIBRARY_DIRS})
+include_directories(${LibSourcey_INCLUDE_DIRS})  
+link_directories(${LibSourcey_LIBRARY_DIRS})
                       
-set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} ${LIBSOURCEY_INCLUDE_DIRS})
-set(LIBSOURCEY_LIBRARY_DIRS ${LIBSOURCEY_LIBRARY_DIRS} ${LIBSOURCEY_LIBRARY_DIR})
-set(LIBSOURCEY_DEBUG_LIBS   ${LIBSOURCEY_DEBUG_LIBS}   ${LIBSOURCEY_DEBUG_LIBS})   
-set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} ${LIBSOURCEY_RELEASE_LIBS}) 
+set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} ${LibSourcey_INCLUDE_DIRS})
+set(LibSourcey_LIBRARY_DIRS ${LibSourcey_LIBRARY_DIRS} ${LibSourcey_LIBRARY_DIR})
+set(LibSourcey_DEBUG_LIBS   ${LibSourcey_DEBUG_LIBS}   ${LibSourcey_DEBUG_LIBS})   
+set(LibSourcey_RELEASE_LIBS ${LibSourcey_RELEASE_LIBS} ${LibSourcey_RELEASE_LIBS}) 

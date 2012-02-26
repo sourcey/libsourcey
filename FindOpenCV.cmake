@@ -25,9 +25,6 @@
 # --------------------------------
 
 
-set(OpenCV_FOUND 0)
-
-
 # ----------------------------------------------------------------------
 # Default OpenCV components to include if COMPONENTS is undefined
 # ----------------------------------------------------------------------
@@ -94,20 +91,14 @@ if (NOT OpenCV_INCLUDE_DIR)
       break()
     endif()
   endforeach()
-    
-  if (NOT OpenCV_INCLUDE_DIR)
-    message(FATAL_ERROR
-      "Failed to locate OpenCV header include path; please specify it manually. Version >= 2.3 is supported.")
-      
-    return() # Prevent further processing untill we have an include dir
-  endif()
 endif()
-
 
 
 # ----------------------------------------------------------------------
 # Find component libraries
 # ----------------------------------------------------------------------
+
+set(OpenCV_LINK_SHARED_LIBS TRUE CACHE BOOL "Link with shared OpenCV libraries (.dll/.so) instead of static ones (.lib/.a)")    
 
 # Library link dir suffixes appended to OpenCV_DIR 
 set(OpenCV_LIBDIR_SUFFIXES
@@ -133,26 +124,32 @@ if (WIN32)
     set(OpenCV_WIN_LIBDIR_SUFFIX "${OpenCV_WIN_LIBDIR_SUFFIX}/vc10")
   endif()
   
-  #if(NOT BUILD_SHARED_LIBS) 
-  #  set(OpenCV_WIN_LIBDIR_SUFFIX "${OpenCV_WIN_LIBDIR_SUFFIX}/staticlib")
-  #else()
+  if(NOT OpenCV_LINK_SHARED_LIBS)
+    set(OpenCV_WIN_LIBDIR_SUFFIX "${OpenCV_WIN_LIBDIR_SUFFIX}/staticlib")
+  else()
     set(OpenCV_WIN_LIBDIR_SUFFIX "${OpenCV_WIN_LIBDIR_SUFFIX}/lib")
-  #endif()
+  endif()
       
   set(OpenCV_LIBDIR_SUFFIXES ${OpenCV_WIN_LIBDIR_SUFFIX} ${OpenCV_LIBDIR_SUFFIXES})
-
 endif()
 
-if (NOT OpenCV_LIBRARY_DIR)
+
+# The reason for including via iteration rather than find_library
+# is so we can remain version agnostic.
+# TODO: Include only specified modules
+# TODO: Check for specified version
+# TODO: Optimize the following, it will probably break on some systems
+if (OpenCV_INCLUDE_DIR AND NOT OpenCV_LIBRARY_DIR)
+  set(OpenCV_FOUND 0)
 
   # Loop through OpenCV_LIBDIR_SUFFIXES to find the best one
   foreach(directory ${OpenCV_LIBDIR_SUFFIXES})
     set(directory "${OpenCV_DIR}/${directory}")
     if (IS_DIRECTORY ${directory})
     
-      #message(STATUS "Found OpenCV library directory: ${directory}")
+      # message(STATUS "Found OpenCV library directory: ${directory}")
       
-      # Set OpenCV_LIBRARY_DIR
+      set(OpenCV_FOUND 1)
       set(OpenCV_LIBRARY_DIR ${directory})
       
       # Glob library files (wish CMake supported "*.{lib|so|a}" syntax :P)
@@ -162,14 +159,18 @@ if (NOT OpenCV_LIBRARY_DIR)
         file(GLOB_RECURSE libraries "${directory}/*.a")
       endif()
       
+      set(OpenCV_LIBRARIES)
       foreach(lib ${libraries})
-        #get_filename_component(filename ${lib} NAME_WE)
-        list(APPEND OpenCV_LIBRARIES ${lib})          
-        if (${lib} MATCHES "[0-9][d].*$")
-          list(APPEND OpenCV_DEBUG_LIBRARIES ${lib})       
-        else()
-          list(APPEND OpenCV_RELEASE_LIBRARIES ${lib})     
-        endif()
+        #get_filename_component(filename ${lib} NAME_WE)        
+        if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)  
+          if (${lib} MATCHES "d.lib$")
+            list(APPEND OpenCV_LIBRARIES "debug" ${lib})
+          else()
+            list(APPEND OpenCV_LIBRARIES "optimized" ${lib})
+          endif()          
+        else()  
+          list(APPEND OpenCV_LIBRARIES ${lib})          
+        endif()  
       endforeach()  
       
       # Our work here is done
@@ -177,43 +178,14 @@ if (NOT OpenCV_LIBRARY_DIR)
          
     endif()
   endforeach()
-
-  if (NOT OpenCV_LIBRARY_DIR)
-    set(OpenCV_LIBRARY_DIR "" CACHE PATH "OpenCV Library Directory")
-    message(FATAL_ERROR
-      "Failed to locate OpenCV libraries; please specify the path manually. Version >= 2.3 is supported.")
-      
-    return() # Prevent further processing untill we have libraries
-  endif()
 endif()
-  
-  
-set(OpenCV_FOUND 1)
+ 
 
 
-# ----------------------------------------------------------------------
-# Display status
-# ----------------------------------------------------------------------
-if (OpenCV_FOUND)
-   if (NOT OpenCV_FIND_QUIETLY)
-      message(STATUS "Found OpenCV: \n\tDir: ${OpenCV_DIR}\n\tDebug: ${OpenCV_DEBUG_LIBRARIES}\n\tRelease: ${OpenCV_RELEASE_LIBRARIES}")
-   endif (NOT OpenCV_FIND_QUIETLY)
-else ()
+if(NOT OpenCV_FOUND)
    if (OpenCV_FIND_REQUIRED)
-      message(FATAL_ERROR "OpenCV was not found.")
-   endif (OpenCV_FIND_REQUIRED)
+      message(FATAL_ERROR 
+        "OpenCV was not found; please specify the path manually. Version >= 2.3 is supported.")
+   endif()
 endif()
 
-
-# ----------------------------------------------------------------------
-# Include and expose to LibSourcey
-# ----------------------------------------------------------------------
-if(OpenCV_FOUND)
-  include_directories(${OpenCV_INCLUDE_DIR})  
-  link_directories(${OpenCV_LIBRARY_DIR})
-                        
-  set(LIBSOURCEY_INCLUDE_DIRS ${LIBSOURCEY_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIR})
-  set(LIBSOURCEY_LIBRARY_DIRS ${LIBSOURCEY_LIBRARY_DIRS} ${OpenCV_LIBRARY_DIR})
-  set(LIBSOURCEY_DEBUG_LIBS   ${LIBSOURCEY_DEBUG_LIBS}   ${OpenCV_DEBUG_LIBRARIES})    
-  set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} ${OpenCV_RELEASE_LIBRARIES})
-endif()

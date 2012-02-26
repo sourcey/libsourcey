@@ -2,7 +2,7 @@
 #  Root CMake file for LibSourcey
 #
 #    From the off-tree build directory, invoke:
-#      $ cmake <PATH_TO_LIBSOURCEY_ROOT>
+#      $ cmake <PATH_TO_LibSourcey_ROOT>
 #
 # ----------------------------------------------------------------------
 
@@ -84,24 +84,24 @@ set(BUILD_WITH_DEBUG_INFO ON CACHE BOOL "Include debug info into debug libs")
 # ----------------------------------------------------------------------
 #  Current version number:
 # ----------------------------------------------------------------------
-set(LIBSOURCEY_VERSION "0.8.0")
+set(LibSourcey_VERSION "0.8.0")
 
-string(REGEX MATCHALL "[0-9]" LIBSOURCEY_VERSION_PARTS "${LIBSOURCEY_VERSION}")
+string(REGEX MATCHALL "[0-9]" LibSourcey_VERSION_PARTS "${LibSourcey_VERSION}")
 
-list(GET LIBSOURCEY_VERSION_PARTS 0 LIBSOURCEY_VERSION_MAJOR)
-list(GET LIBSOURCEY_VERSION_PARTS 1 LIBSOURCEY_VERSION_MINOR)
-list(GET LIBSOURCEY_VERSION_PARTS 2 LIBSOURCEY_VERSION_PATCH)
+list(GET LibSourcey_VERSION_PARTS 0 LibSourcey_VERSION_MAJOR)
+list(GET LibSourcey_VERSION_PARTS 1 LibSourcey_VERSION_MINOR)
+list(GET LibSourcey_VERSION_PARTS 2 LibSourcey_VERSION_PATCH)
 
-set(LIBSOURCEY_SOVERSION "${LIBSOURCEY_VERSION_MAJOR}.${LIBSOURCEY_VERSION_MINOR}")
+set(LibSourcey_SOVERSION "${LibSourcey_VERSION_MAJOR}.${LibSourcey_VERSION_MINOR}")
 
 if(WIN32)
     # Postfix of DLLs:
-    set(LIBSOURCEY_DLLVERSION "${LIBSOURCEY_VERSION_MAJOR}${LIBSOURCEY_VERSION_MINOR}${LIBSOURCEY_VERSION_PATCH}")
-    set(LIBSOURCEY_DEBUG_POSTFIX d)
+    set(LibSourcey_DLLVERSION "${LibSourcey_VERSION_MAJOR}${LibSourcey_VERSION_MINOR}${LibSourcey_VERSION_PATCH}")
+    set(LibSourcey_DEBUG_POSTFIX d)
 else()
     # Postfix of so's:
-    set(LIBSOURCEY_DLLVERSION "")
-    set(LIBSOURCEY_DEBUG_POSTFIX)
+    set(LibSourcey_DLLVERSION "")
+    set(LibSourcey_DEBUG_POSTFIX)
 endif()
 
 # ----------------------------------------------------------------------
@@ -179,9 +179,9 @@ endif(MSVC)
 set(PACKAGE "LibSourcey")
 #set(PACKAGE_BUGREPORT "libsourceylibrary-devel@lists.sourceforge.net")
 set(PACKAGE_NAME "LibSourcey")
-set(PACKAGE_STRING "${PACKAGE} ${LIBSOURCEY_VERSION}")
+set(PACKAGE_STRING "${PACKAGE} ${LibSourcey_VERSION}")
 set(PACKAGE_TARNAME "${PACKAGE}")
-set(PACKAGE_VERSION "${LIBSOURCEY_VERSION}")
+set(PACKAGE_VERSION "${LibSourcey_VERSION}")
 
 
 # ----------------------------------------------------------------------
@@ -197,32 +197,32 @@ endif()
 # ----------------------------------------------------------------------
 if(CMAKE_COMPILER_IS_GNUCXX)
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version
-                  OUTPUT_VARIABLE CMAKE_LIBSOURCEY_GCC_VERSION_FULL
+                  OUTPUT_VARIABLE CMAKE_LibSourcey_GCC_VERSION_FULL
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} -v
-                  ERROR_VARIABLE CMAKE_LIBSOURCEY_GCC_INFO_FULL
+                  ERROR_VARIABLE CMAKE_LibSourcey_GCC_INFO_FULL
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-    # Typical output in CMAKE_LIBSOURCEY_GCC_VERSION_FULL: "c+//0 (whatever) 4.2.3 (...)"
+    # Typical output in CMAKE_LibSourcey_GCC_VERSION_FULL: "c+//0 (whatever) 4.2.3 (...)"
     #  Look for the version number
-    string(REGEX MATCH "[0-9].[0-9].[0-9]" CMAKE_GCC_REGEX_VERSION "${CMAKE_LIBSOURCEY_GCC_VERSION_FULL}")
+    string(REGEX MATCH "[0-9].[0-9].[0-9]" CMAKE_GCC_REGEX_VERSION "${CMAKE_LibSourcey_GCC_VERSION_FULL}")
 
     # Split the three parts:
-    string(REGEX MATCHALL "[0-9]" CMAKE_LIBSOURCEY_GCC_VERSIONS "${CMAKE_GCC_REGEX_VERSION}")
+    string(REGEX MATCHALL "[0-9]" CMAKE_LibSourcey_GCC_VERSIONS "${CMAKE_GCC_REGEX_VERSION}")
 
-    list(GET CMAKE_LIBSOURCEY_GCC_VERSIONS 0 CMAKE_LIBSOURCEY_GCC_VERSION_MAJOR)
-    list(GET CMAKE_LIBSOURCEY_GCC_VERSIONS 1 CMAKE_LIBSOURCEY_GCC_VERSION_MINOR)
+    list(GET CMAKE_LibSourcey_GCC_VERSIONS 0 CMAKE_LibSourcey_GCC_VERSION_MAJOR)
+    list(GET CMAKE_LibSourcey_GCC_VERSIONS 1 CMAKE_LibSourcey_GCC_VERSION_MINOR)
 
-    set(CMAKE_LIBSOURCEY_GCC_VERSION ${CMAKE_LIBSOURCEY_GCC_VERSION_MAJOR}${CMAKE_LIBSOURCEY_GCC_VERSION_MINOR})
-    math(EXPR CMAKE_LIBSOURCEY_GCC_VERSION_NUM "${CMAKE_LIBSOURCEY_GCC_VERSION_MAJOR}*100 + ${CMAKE_LIBSOURCEY_GCC_VERSION_MINOR}")
-    message(STATUS "Detected version of GNU GCC: ${CMAKE_LIBSOURCEY_GCC_VERSION} (${CMAKE_LIBSOURCEY_GCC_VERSION_NUM})")
+    set(CMAKE_LibSourcey_GCC_VERSION ${CMAKE_LibSourcey_GCC_VERSION_MAJOR}${CMAKE_LibSourcey_GCC_VERSION_MINOR})
+    math(EXPR CMAKE_LibSourcey_GCC_VERSION_NUM "${CMAKE_LibSourcey_GCC_VERSION_MAJOR}*100 + ${CMAKE_LibSourcey_GCC_VERSION_MINOR}")
+    message(STATUS "Detected version of GNU GCC: ${CMAKE_LibSourcey_GCC_VERSION} (${CMAKE_LibSourcey_GCC_VERSION_NUM})")
 
     if(WIN32)
         execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpmachine
-                  OUTPUT_VARIABLE CMAKE_LIBSOURCEY_GCC_TARGET_MACHINE
+                  OUTPUT_VARIABLE CMAKE_LibSourcey_GCC_TARGET_MACHINE
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
-        if(CMAKE_LIBSOURCEY_GCC_TARGET_MACHINE MATCHES "64")
+        if(CMAKE_LibSourcey_GCC_TARGET_MACHINE MATCHES "64")
             set(MINGW64 1)
         endif()
     endif()
@@ -245,9 +245,9 @@ set(BUILD_TESTS ON CACHE BOOL "Build tests")
 # Build 3rdparty libraries under unix
 # ===================================================
 if(WIN32)
-    set(LIBSOURCEY_BUILD_3RDPARTY_LIBS TRUE  CACHE BOOL "Build 3rd party libraries")
+    set(LibSourcey_BUILD_3RDPARTY_LIBS TRUE  CACHE BOOL "Build 3rd party libraries")
 else()
-    set(LIBSOURCEY_BUILD_3RDPARTY_LIBS FALSE CACHE BOOL "Build 3rd party libraries")
+    set(LibSourcey_BUILD_3RDPARTY_LIBS FALSE CACHE BOOL "Build 3rd party libraries")
 endif()
 
 include(LibSourceyModule.cmake REQUIRED)
@@ -299,8 +299,8 @@ endif()
 # ---------------------------------------------------------------------------
 # Include third party libraries:
 # ---------------------------------------------------------------------------
-set(LIBSOURCEY_SOURCE_DIR ${CMAKE_SOURCE_DIR})
-set(LIBSOURCEY_BUILD_DIR ${CMAKE_BINARY_DIR})
+set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
 
 set(WITH_POCO ON CACHE BOOL "Build with Poco")
 if(WITH_POCO)
@@ -342,10 +342,10 @@ endif()
 # Additional Libraries:
 # ---------------------------------------------------------------------------
 if(WIN32)
-    set(LIBSOURCEY_DEBUG_LIBS ${LIBSOURCEY_DEBUG_LIBS} ws2_32)  
-    set(LIBSOURCEY_DEBUG_LIBS ${LIBSOURCEY_DEBUG_LIBS} dsound)  
-    set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} ws2_32)  
-    set(LIBSOURCEY_RELEASE_LIBS ${LIBSOURCEY_RELEASE_LIBS} dsound) 
+    set(LibSourcey_DEBUG_LIBS ${LibSourcey_DEBUG_LIBS} ws2_32)  
+    set(LibSourcey_DEBUG_LIBS ${LibSourcey_DEBUG_LIBS} dsound)  
+    set(LibSourcey_RELEASE_LIBS ${LibSourcey_RELEASE_LIBS} ws2_32)  
+    set(LibSourcey_RELEASE_LIBS ${LibSourcey_RELEASE_LIBS} dsound) 
 endif()
 
 
@@ -361,18 +361,18 @@ endif()
 # ----------------------------------------------------------------------
 add_definitions(-DHAVE_CONFIG_H)
 
-set(LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant config.h")
+set(LibSourcey_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant config.h")
 
 message(STATUS "Parsing 'config.h.cmake'")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake" "${LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR}/config.h")
-include_directories("${LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR}")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake" "${LibSourcey_CONFIG_FILE_INCLUDE_DIR}/config.h")
+include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 
 
 # ----------------------------------------------------------------------
 #           Set the maximum level of warnings:
 # ----------------------------------------------------------------------
 # Should be set to true for development
-set(LIBSOURCEY_WARNINGS_ARE_ERRORS OFF CACHE BOOL "Treat warnings as errors")
+set(LibSourcey_WARNINGS_ARE_ERRORS OFF CACHE BOOL "Treat warnings as errors")
 
 set(EXTRA_C_FLAGS "")
 set(EXTRA_C_FLAGS_RELEASE "")
@@ -427,7 +427,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
       endif()
     endif()
 
-    if(LIBSOURCEY_WARNINGS_ARE_ERRORS)
+    if(LibSourcey_WARNINGS_ARE_ERRORS)
         set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Werror")
     endif()
 
@@ -463,10 +463,10 @@ if(CMAKE_COMPILER_IS_GNUCXX)
             set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -msse3")
         endif()
 
-        if(${CMAKE_LIBSOURCEY_GCC_VERSION_NUM} GREATER 402)
+        if(${CMAKE_LibSourcey_GCC_VERSION_NUM} GREATER 402)
             set(HAVE_GCC43_OR_NEWER 1)
         endif()
-        if(${CMAKE_LIBSOURCEY_GCC_VERSION_NUM} GREATER 401)
+        if(${CMAKE_LibSourcey_GCC_VERSION_NUM} GREATER 401)
             set(HAVE_GCC42_OR_NEWER 1)
         endif()
 
@@ -535,30 +535,30 @@ endif()
 # Extra link libs if the user selects building static libs:
 if(NOT BUILD_SHARED_LIBS)
     if(CMAKE_COMPILER_IS_GNUCXX)
-        set(LIBSOURCEY_DEBUG_LIBS ${LIBSOURCEY_DEBUG_LIBS} stdc++)
-        set(LIBSOURCEY_EXTRA_C_FLAGS "${LIBSOURCEY_EXTRA_C_FLAGS} -fPIC")
+        set(LibSourcey_DEBUG_LIBS ${LibSourcey_DEBUG_LIBS} stdc++)
+        set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -fPIC")
     endif()
 endif()
 
 
 # Add user supplied extra options (optimization, etc...)
 # ==========================================================
-set(LIBSOURCEY_EXTRA_C_FLAGS "" CACHE STRING "Extra compiler options")
-set(LIBSOURCEY_EXTRA_C_FLAGS_RELEASE "" CACHE STRING "Extra compiler options for Release build")
-set(LIBSOURCEY_EXTRA_C_FLAGS_DEBUG "" CACHE STRING "Extra compiler options for Debug build")
-set(LIBSOURCEY_EXTRA_EXE_LINKER_FLAGS "" CACHE STRING "Extra linker flags" FORCE)
-set(LIBSOURCEY_EXTRA_EXE_LINKER_FLAGS_RELEASE "" CACHE STRING "Extra linker flags for Release build" FORCE)
-set(LIBSOURCEY_EXTRA_EXE_LINKER_FLAGS_DEBUG "" CACHE STRING "Extra linker flags for Debug build" FORCE)
+set(LibSourcey_EXTRA_C_FLAGS "" CACHE STRING "Extra compiler options")
+set(LibSourcey_EXTRA_C_FLAGS_RELEASE "" CACHE STRING "Extra compiler options for Release build")
+set(LibSourcey_EXTRA_C_FLAGS_DEBUG "" CACHE STRING "Extra compiler options for Debug build")
+set(LibSourcey_EXTRA_EXE_LINKER_FLAGS "" CACHE STRING "Extra linker flags" FORCE)
+set(LibSourcey_EXTRA_EXE_LINKER_FLAGS_RELEASE "" CACHE STRING "Extra linker flags for Release build" FORCE)
+set(LibSourcey_EXTRA_EXE_LINKER_FLAGS_DEBUG "" CACHE STRING "Extra linker flags for Debug build" FORCE)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_C_FLAGS} ${LIBSOURCEY_EXTRA_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_C_FLAGS} ${LIBSOURCEY_EXTRA_C_FLAGS}")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${EXTRA_C_FLAGS_RELEASE} ${LIBSOURCEY_EXTRA_C_FLAGS_RELEASE}")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${EXTRA_C_FLAGS_RELEASE} ${LIBSOURCEY_EXTRA_C_FLAGS_RELEASE}")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${EXTRA_C_FLAGS_DEBUG} ${LIBSOURCEY_EXTRA_C_FLAGS_DEBUG}")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${EXTRA_C_FLAGS_DEBUG} ${LIBSOURCEY_EXTRA_C_FLAGS_DEBUG}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EXTRA_EXE_LINKER_FLAGS} ${LIBSOURCEY_EXTRA_EXE_LINKER_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${EXTRA_EXE_LINKER_FLAGS_RELEASE} ${LIBSOURCEY_EXTRA_EXE_LINKER_FLAGS_RELEASE}")
-set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${EXTRA_EXE_LINKER_FLAGS_DEBUG} ${LIBSOURCEY_EXTRA_EXE_LINKER_FLAGS_DEBUG}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_C_FLAGS} ${LibSourcey_EXTRA_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_C_FLAGS} ${LibSourcey_EXTRA_C_FLAGS}")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${EXTRA_C_FLAGS_RELEASE} ${LibSourcey_EXTRA_C_FLAGS_RELEASE}")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${EXTRA_C_FLAGS_RELEASE} ${LibSourcey_EXTRA_C_FLAGS_RELEASE}")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${EXTRA_C_FLAGS_DEBUG} ${LibSourcey_EXTRA_C_FLAGS_DEBUG}")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${EXTRA_C_FLAGS_DEBUG} ${LibSourcey_EXTRA_C_FLAGS_DEBUG}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EXTRA_EXE_LINKER_FLAGS} ${LibSourcey_EXTRA_EXE_LINKER_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${EXTRA_EXE_LINKER_FLAGS_RELEASE} ${LibSourcey_EXTRA_EXE_LINKER_FLAGS_RELEASE}")
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${EXTRA_EXE_LINKER_FLAGS_DEBUG} ${LibSourcey_EXTRA_EXE_LINKER_FLAGS_DEBUG}")
 
 # In case of Makefiles if the user does not setup CMAKE_BUILD_TYPE, assume it's Release:
 if(${CMAKE_GENERATOR} MATCHES ".*Makefiles")
@@ -610,7 +610,7 @@ endif()
 #-----------------------------------
 # Subdirectories:
 #-----------------------------------
-if(LIBSOURCEY_BUILD_3RDPARTY_LIBS)
+if(LibSourcey_BUILD_3RDPARTY_LIBS)
     add_subdirectory(3rdparty)
 endif()
 
@@ -667,7 +667,7 @@ endif()
 #   Summary:
 # ----------------------------------------------------------------------
 message(STATUS "")
-message(STATUS "General configuration for LibSourcey ${LIBSOURCEY_VERSION} =====================================")
+message(STATUS "General configuration for LibSourcey ${LibSourcey_VERSION} =====================================")
 message(STATUS "")
 message(STATUS "    Built as dynamic libs?:     ${BUILD_SHARED_LIBS}")
 message(STATUS "    Compiler:                   ${CMAKE_COMPILER}")
@@ -684,7 +684,7 @@ endif()
 message(STATUS "")
 message(STATUS "    Install path:               ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "")
-message(STATUS "    config.h is in:             ${LIBSOURCEY_CONFIG_FILE_INCLUDE_DIR}")
+message(STATUS "    config.h is in:             ${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 message(STATUS "-----------------------------------------------------------------")
 message(STATUS "")
 
