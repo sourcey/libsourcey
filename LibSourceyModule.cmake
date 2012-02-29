@@ -12,13 +12,24 @@ macro(define_libsourcey_module name)
   
   source_group("Src" FILES ${lib_srcs})
   source_group("Include" FILES ${lib_hdrs}  ${lib_int_hdrs})
-  
-  include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
-  include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/Sourcey/${name}")    
-  
-  include_libsourcey_modules(${ARGN})  
 
-  add_library(${name} ${lib_srcs} ${lib_hdrs} ${lib_int_hdrs})
+  add_library(${name} ${lib_srcs} ${lib_hdrs} ${lib_int_hdrs})     
+  
+  # Include modules first for the benefit of compilers which
+  # require ordered link libraries.
+  foreach(module ${ARGN})
+    include_libsourcey_modules(${module})  
+    add_dependencies(${name} ${module})
+  endforeach()  
+
+  # Add external dependencies and required libraries for linking.
+  target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
+  add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES})   
+  
+  include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
+  message(STATUS "LibSourcey_INCLUDE_DIRS: ${LibSourcey_INCLUDE_DIRS}")
+  include_directories(${LibSourcey_INCLUDE_DIRS})
+  link_directories(${LibSourcey_LIBRARY_DIRS})
 
   if(NOT ANDROID)
     # Android SDK build scripts can include only .so files into final .apk
@@ -36,11 +47,7 @@ macro(define_libsourcey_module name)
     #RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
     INSTALL_NAME_DIR lib
     LINKER_LANGUAGE CXX)
-
-  # Add dependencies and required libraries for linking
-  target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
-  #add_dependencies(${name} ${LibSourcey_DEBUG_LIBS} ${LibSourcey_RELEASE_LIBS} ${ARGN})
-
+    
   install(TARGETS ${name}
     RUNTIME DESTINATION bin COMPONENT main
     LIBRARY DESTINATION lib COMPONENT main

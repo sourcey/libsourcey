@@ -242,12 +242,12 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "Build all examples")
 # ===================================================
 set(BUILD_TESTS ON CACHE BOOL "Build tests")
 
-# Build 3rdparty libraries under unix
+# Build dependencies under unix
 # ===================================================
 if(WIN32)
-    set(LibSourcey_BUILD_3RDPARTY_LIBS TRUE  CACHE BOOL "Build 3rd party libraries")
+    set(LibSourcey_BUILD_DEPENDENCIES_LIBS TRUE  CACHE BOOL "Build 3rd party libraries")
 else()
-    set(LibSourcey_BUILD_3RDPARTY_LIBS FALSE CACHE BOOL "Build 3rd party libraries")
+    set(LibSourcey_BUILD_DEPENDENCIES_LIBS FALSE CACHE BOOL "Build 3rd party libraries")
 endif()
 
 include(LibSourceyModule.cmake REQUIRED)
@@ -610,8 +610,8 @@ endif()
 #-----------------------------------
 # Subdirectories:
 #-----------------------------------
-if(LibSourcey_BUILD_3RDPARTY_LIBS)
-    add_subdirectory(3rdparty)
+if(LibSourcey_BUILD_DEPENDENCIES_LIBS)
+    add_subdirectory(deps)
 endif()
 
 if(EXISTS ${CMAKE_SOURCE_DIR}/Base)

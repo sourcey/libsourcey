@@ -3,7 +3,7 @@
 #
 # The following variabled will be defined:
 #
-#  PugiXML
+#  PugiXML_FOUND
 #  PugiXML_INCLUDE_DIR
 #  PugiXML_LIBRARY
 #
@@ -13,7 +13,7 @@
 # Find PugiXML include path
 # ----------------------------------------------------------------------
 find_path(PugiXML_INCLUDE_DIR pugixml.hpp
-  ${LibSourcey_3RDPARTY_SOURCE_DIR}/pugixml/src
+  ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/pugixml/src
   /usr/local/include
   /usr/include
 )
@@ -22,53 +22,73 @@ find_path(PugiXML_INCLUDE_DIR pugixml.hpp
 # ----------------------------------------------------------------------
 # Find PugiXML library
 # ----------------------------------------------------------------------
-FIND_LIBRARY(PugiXML_LIBRARY 
-  NAMES 
-    pugixml.lib pugixmld.lib
-  PATHS 
-    ${LibSourcey_3RDPARTY_INSTALL_DIR}/lib
-    /usr/lib 
-    /usr/local/lib
-  )
+if(WIN32 AND MSVC)
+  
+  find_library(PugiXML_DEBUG_LIBRARY 
+    NAMES 
+      pugixmld
+    PATHS 
+      ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
+      /usr/lib 
+      /usr/local/lib
+    )
+    
+  find_library(PugiXML_RELEASE_LIBRARY 
+    NAMES 
+      pugixml
+    PATHS 
+      ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
+      /usr/lib 
+      /usr/local/lib
+    )
+    
+  if(PugiXML_DEBUG_LIBRARY OR PugiXML_RELEASE_LIBRARY)  
+    if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)            
+      if (PugiXML_RELEASE_LIBRARY) 
+        list(APPEND PugiXML_LIBRARY "optimized" ${PugiXML_RELEASE_LIBRARY})
+      endif()
+      if (PugiXML_DEBUG_LIBRARY)
+        list(APPEND PugiXML_LIBRARY "debug" ${PugiXML_DEBUG_LIBRARY})
+      endif()
+    else()    
+      if (PugiXML_RELEASE_LIBRARY) 
+        list(APPEND PugiXML_LIBRARY ${PugiXML_RELEASE_LIBRARY})
+      elseif (PugiXML_DEBUG_LIBRARY) 
+        list(APPEND PugiXML_LIBRARY ${PugiXML_DEBUG_LIBRARY})
+      endif()
+    endif()
+    mark_as_advanced(PugiXML_DEBUG_LIBRARY PugiXML_RELEASE_LIBRARY)
+  endif()
+
+else()
+
+  # TODO: PugiXML lib names for various systems
+  set(PugiXML_LIB_NAMES "pugixml")
+  
+  find_library(PugiXML_LIBRARY 
+    NAMES 
+      ${PugiXML_LIB_NAMES}
+    PATHS 
+      ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
+      /usr/lib 
+      /usr/local/lib
+    )
+
+endif()
 
 if(PugiXML_LIBRARY AND PugiXML_INCLUDE_DIR)
   set(PugiXML_FOUND 1)
+  mark_as_advanced(PugiXML_LIBRARY PugiXML_INCLUDE_DIR)
 else()
   set(PugiXML_FOUND 0)
 endif()
-
-#get_filename_component(PugiXML_LIBRARY_DIR ${PugiXML_LIBRARY} PATH)
-#get_filename_component(PugiXML_LIBRARY ${PugiXML_LIBRARY} NAME)
   
       
 # ----------------------------------------------------------------------
 # Display status
 # ----------------------------------------------------------------------
-if(PugiXML_FOUND)
-   if(NOT PugiXML_FIND_QUIETLY)
-      message(STATUS "Found PugiXML: \n\tINC DIR: ${PugiXML_INCLUDE_DIR} \n\tLIB DIR: ${PugiXML_LIBRARY_DIR} \n\tLIBS: ${PugiXML_LIBRARY}")
-   endif()
-else()
+if(NOT PugiXML_FOUND)
    if(PugiXML_FIND_REQUIRED)
-      message(FATAL_ERROR "PugiXML was not found.")
+      message(FATAL_ERROR "PugiXML was not found. Please build dependencies first, or specify the path manually.")
    endif()
-endif()
-
-#message(STATUS "LibSourcey_3RDPARTY_BUILD_DIR: ${LibSourcey_3RDPARTY_BUILD_DIR}")
-#message(STATUS "LibSourcey_3RDPARTY_SOURCE_DIR: ${LibSourcey_3RDPARTY_SOURCE_DIR}")
-#message(STATUS "PugiXML_INCLUDE_DIRS: ${PugiXML_INCLUDE_DIRS}")
-#message(STATUS "PugiXML_LIBRARY: ${PugiXML_LIBRARY}")
- 
-
-# ----------------------------------------------------------------------
-# Include and expose to LibSourcey
-# ----------------------------------------------------------------------
-if(PugiXML_FOUND)
-  include_directories(${PugiXML_INCLUDE_DIR})  
-  #link_directories(${PugiXML_LIBRARY_DIR})
-                        
-  set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} ${PugiXML_INCLUDE_DIR})
-  #set(LibSourcey_LIBRARY_DIRS ${LibSourcey_LIBRARY_DIRS} ${PugiXML_LIBRARY_DIR})
-  set(LibSourcey_DEBUG_LIBS   ${LibSourcey_DEBUG_LIBS}   ${PugiXML_LIBRARY})    
-  set(LibSourcey_RELEASE_LIBS ${LibSourcey_RELEASE_LIBS} ${PugiXML_LIBRARY})
 endif()
