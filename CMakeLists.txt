@@ -320,13 +320,7 @@ if(BUILD_MODULES OR BUILD_APPLICATIONS)
 
   foreach(module ${subdirs})
     message(STATUS "Including Module: ${module}")
-    if (EXISTS "${CMAKE_SOURCE_DIR}/srcs/${module}/CMakeLists.txt")
-    
-      #mark_as_advanced(FORCE BUILD_MODULE_${module})  
-      #set(BUILD_MODULE_${module} ON CACHE BOOL "Build Module: ${module}")
-      #if(BUILD_MODULE_${module}) 
-      #endif()
-      
+    if (EXISTS "${CMAKE_SOURCE_DIR}/srcs/${module}/CMakeLists.txt")      
       add_subdirectory("${CMAKE_SOURCE_DIR}/srcs/${module}")
     endif()
   endforeach() 

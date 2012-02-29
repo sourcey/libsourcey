@@ -3,14 +3,24 @@ Please see http://sourcey.com/projects/libsourcey
 
 EXTERNAL DEPENDENCIES
 =================================================
+
 OpennSSL >= 0.98
+-------------------------------------------------
+
+
 Poco >= 1.4
+-------------------------------------------------
 
-  $ ./configure --no-tests --no-samples --omit=Data,Data/SQLite,Data/MySQL,Data/ODBC,PageCompiler,PageCompiler/File2Page
+./configure --no-tests --no-samples --omit=Data,Data/SQLite,Data/MySQL,Data/ODBC,PageCompiler,PageCompiler/File2Page
 
-Some modules:
-OpennCV >= 2.3
+
+OpenCV >= 2.3
+-------------------------------------------------
+
+
+
 FFmpeg >= 6
+-------------------------------------------------
 
 
 INTERNAL DEPENDENCIES
@@ -23,8 +33,17 @@ RtAudio
 libstrophe
 
 
+OBTAINING SOURCES
+=================================================
+git clone https://bitbucket.org/sourcey/libsourcey.git
+
+
+
 BUILDING
 =================================================
+
+Install CMake
+
 
 Open CMake
 
@@ -45,8 +64,3 @@ make install
 3) Build Projects
 
 make install
-
-
-TODO
-=================================================
-  - FFMpeg's ByteIOContext and related function are depreciated. Update media code.
