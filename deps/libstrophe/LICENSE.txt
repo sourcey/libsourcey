@@ -1,0 +1,5 @@
+libstrophe XMPP client library
+Copyright (C) 2005-2009 Collecta, Inc.
+
+This program is dual licensed under the MIT and GPLv3 licenses.
+Please the files MIT-LICENSE.txt and GPL-LICENSE.txt for details.

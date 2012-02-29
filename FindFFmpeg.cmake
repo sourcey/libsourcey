@@ -29,70 +29,13 @@
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
+include(LibSourceyMacros)
 include(FindPackageHandleStandardArgs)
 
 # The default components were taken from a survey over other FindFFmpeg.cmake files
 if (NOT FFmpeg_FIND_COMPONENTS)
   set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
-endif ()
-
-#
-### Macro: set_component_found
-#
-# Marks the given component as found if both *_LIBRARIES AND *_INCLUDE_DIRS is present.
-#
-macro(set_component_found _component )
-  if (${_component}_LIBRARIES AND ${_component}_INCLUDE_DIRS)
-     # message(STATUS "  - ${_component} found.")
-    set(${_component}_FOUND TRUE)
-  else ()
-     # message(STATUS "  - ${_component} not found.")
-  endif ()
-endmacro()
-
-#
-### Macro: find_component
-#
-# Checks for the given component by invoking pkgconfig and then looking up the libraries and
-# include directories.
-#
-macro(find_component _component _pkgconfig _library _header)
-
-  if (NOT WIN32)
-     # use pkg-config to get the directories and then use these values
-     # in the FIND_PATH() and FIND_LIBRARY() calls
-     find_package(PkgConfig)
-     if (PKG_CONFIG_FOUND)
-       pkg_check_modules(PC_${_component} ${_pkgconfig})
-     endif ()
-  endif (NOT WIN32)
-
-  find_path(${_component}_INCLUDE_DIRS ${_header}
-    HINTS
-      ${PC_LIB${_component}_INCLUDEDIR}
-      ${PC_LIB${_component}_INCLUDE_DIRS}
-    PATH_SUFFIXES
-      ffmpeg
-  )
-
-  find_library(${_component}_LIBRARIES NAMES ${_library}
-      HINTS
-      ${PC_LIB${_component}_LIBDIR}
-      ${PC_LIB${_component}_LIBRARY_DIRS}
-  )
-
-  set(${_component}_DEFINITIONS  ${PC_${_component}_CFLAGS_OTHER} CACHE STRING "The ${_component} CFLAGS.")
-  set(${_component}_VERSION      ${PC_${_component}_VERSION}      CACHE STRING "The ${_component} version number.")
-
-  set_component_found(${_component})
-
-  mark_as_advanced(
-    ${_component}_INCLUDE_DIRS
-    ${_component}_LIBRARIES
-    ${_component}_DEFINITIONS
-    ${_component}_VERSION)
-
-endmacro()
+endif()
 
 
 # Check for cached results. If there are skip the costly part.

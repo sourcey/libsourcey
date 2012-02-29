@@ -1,0 +1,33 @@
+﻿Build started 10/15/2011 12:24:17 AM.
+     1>Project "D:\dev\lib\libstrophe\expat\lib\expat_static.vcxproj" on node 2 (build target(s)).
+     1>PrepareForBuild:
+         Creating directory ".\..\win32\bin\Debug\".
+       InitializeBuildStatus:
+         Creating ".\..\win32\tmp\Debug_static\expat_static.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         D:\Program Files\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D COMPILED_FROM_DSP /D _LIB /D _VC80_UPGRADE=0x0600 /D _MBCS /Gm- /EHsc /RTC1 /MTd /GS /Gy- /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\..\win32\tmp\Debug_static\\" /Fd".\..\win32\tmp\Debug_static\vc100.pdb" /FR".\..\win32\tmp\Debug_static\\" /Gd /TC /analyze- /errorReport:prompt xmlparse.c xmlrole.c xmltok.c xmltok_impl.c xmltok_ns.c
+         xmlparse.c
+         xmlrole.c
+         xmltok.c
+         xmltok_impl.c
+         xmltok_ns.c
+         Generating Code...
+     1>D:\Program Files\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppBuild.targets(1151,5): warning MSB8012: TargetPath(D:\dev\lib\libstrophe\expat\lib\.\..\win32\bin\Debug\expat_static.lib) does not match the Library's OutputFile property value (D:\dev\lib\libstrophe\expat\win32\bin\Debug\libexpatMT.lib). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Lib.OutputFile).
+     1>D:\Program Files\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppBuild.targets(1153,5): warning MSB8012: TargetName(expat_static) does not match the Library's OutputFile property value (libexpatMT). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Lib.OutputFile).
+       Lib:
+         D:\Program Files\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"..\win32\bin\Debug\libexpatMT.lib" /NOLOGO .\..\win32\tmp\Debug_static\xmlparse.obj
+         .\..\win32\tmp\Debug_static\xmlrole.obj
+         .\..\win32\tmp\Debug_static\xmltok.obj
+         .\..\win32\tmp\Debug_static\xmltok_impl.obj
+         .\..\win32\tmp\Debug_static\xmltok_ns.obj
+         expat_static.vcxproj -> D:\dev\lib\libstrophe\expat\lib\.\..\win32\bin\Debug\expat_static.lib
+       BscMake:
+         D:\Program Files\Microsoft Visual Studio 10.0\VC\bin\bscmake.exe /nologo /o".\..\win32\bin\Debug\expat_static.bsc" .\..\win32\tmp\Debug_static\xmlparse.sbr .\..\win32\tmp\Debug_static\xmlrole.sbr .\..\win32\tmp\Debug_static\xmltok.sbr .\..\win32\tmp\Debug_static\xmltok_impl.sbr .\..\win32\tmp\Debug_static\xmltok_ns.sbr
+       FinalizeBuildStatus:
+         Deleting file ".\..\win32\tmp\Debug_static\expat_static.unsuccessfulbuild".
+         Touching ".\..\win32\tmp\Debug_static\expat_static.lastbuildstate".
+     1>Done Building Project "D:\dev\lib\libstrophe\expat\lib\expat_static.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:01.76
