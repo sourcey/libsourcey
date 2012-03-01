@@ -40,6 +40,7 @@ if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/expat")
   elseif(APPLE)
       add_definitions(-DMACOS_CLASSIC)  
   endif()
+  add_definitions(-DHAVE_MEMMOVE)  
 endif()  
   
 # Include OpenSSL

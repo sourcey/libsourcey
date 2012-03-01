@@ -63,11 +63,11 @@ if(WIN32 AND MSVC)
 else()
 
   # TODO: RtAudio lib names for various systems
-  set(RtAudio_LIB_NAMES "RtAudio")
+  #set(RtAudio_LIB_NAMES "RtAudio rtaudio")
 
   find_library(RtAudio_LIBRARY 
     NAMES 
-      ${RtAudio_LIB_NAMES}
+      rtaudio #${RtAudio_LIB_NAMES}
     PATHS 
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
       /usr/lib 
