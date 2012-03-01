@@ -26,6 +26,10 @@
 #include "Poco/Path.h"
 #include <assert.h>
 
+//#ifdef _WIN32
+#include "windows.h"
+//#endif
+
 
 using namespace Poco;
 using namespace std;
@@ -118,7 +122,7 @@ void FileChannel::write(const string& message, LogLevel level, const ILoggable* 
 	std::copy(s.begin(), s.end(), temp.begin());
 	OutputDebugString(temp.data());
 #endif
-
+	
 	/*
 	// Output the prefix and message to the log file
 	*_stream << "[" << getStringFromLogLevel(level) << "] ";

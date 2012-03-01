@@ -1,1 +1,1 @@
-define_libsourcey_sample(SocketIOClient Base Net SocketIO JSON)
+define_sourcey_module_sample(SocketIOClient Base Net SocketIO JSON)

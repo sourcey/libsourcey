@@ -21,7 +21,7 @@
 //
 
 
-#include "Sourcey/XMPP/Client/Client.h"
+#include "Sourcey/XMPP/client/Client.h"
 #include "Sourcey/XMPP/Router.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Base.h"
@@ -29,7 +29,7 @@
 #include "Poco/String.h"
 #include "Poco/Mutex.h"
 
-#include "src/common.h" // libstrophe
+#include "src/common.h"
 
 #include <assert.h>
 #include <iostream>

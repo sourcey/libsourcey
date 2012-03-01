@@ -1,4 +1,7 @@
-include_dependency(Poco REQUIRED)
-include_dependency(JsonCpp REQUIRED)
+ask_build_sourcey_module(JSON)
+if(BUILD_MODULE_JSON) 
+  include_dependency(Poco REQUIRED)
+  include_dependency(JsonCpp REQUIRED)
 
-define_libsourcey_module(JSON Base)
+  define_sourcey_module(JSON Base)
+endif()

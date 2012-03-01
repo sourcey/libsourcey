@@ -51,8 +51,6 @@
 #include <unistd.h>
 #endif
 #endif // NO_DEVICE_MANAGER
-#include <stdlib.h>
-//#include <string.h>
 
 
 using namespace std;
@@ -267,7 +265,7 @@ bool DeviceManager::getDefaultVideoInputDevice(Device& device)
 	if (ret) {
 		device = devices[0];
 		for (size_t i = 0; i < devices.size(); ++i) {
-			if (strncasecmp(devices[i].name.data(), kUsbDevicePathPrefix,
+			if (strnicmp(devices[i].name.data(), kUsbDevicePathPrefix,
 				ARRAY_SIZE(kUsbDevicePathPrefix) - 1) == 0) {
 					device = devices[i];
 					break;
@@ -981,7 +979,7 @@ static bool ShouldDeviceBeIgnored(const string& deviceName) {
 	};
 
 	for (int i = 0; i < ARRAY_SIZE(kFilteredDevices); ++i) {
-		if (strncasecmp(deviceName.c_str(), kFilteredDevices[i],
+		if (strnicmp(deviceName.c_str(), kFilteredDevices[i],
 			strlen(kFilteredDevices[i])) == 0) {
 				//Log("error") << "Ignoring device " << deviceName << endl;
 				return true;

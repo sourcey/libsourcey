@@ -106,7 +106,7 @@ public:
 	size_t readToNext(std::string& val, char c);
 
 	void operator++(int) { _pos++; }			// increment position by 1
-	void operator--(int) { _pos--; }			// deincrement position by 1
+	void operator--(int) { _pos--; }				// deincrement position by 1
 	
 	void operator+=(int val) { _pos += val; }	// increment position by x
 	void operator-=(int val) { _pos -= val; }	// deincrement position by x

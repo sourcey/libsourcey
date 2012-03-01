@@ -1,4 +1,7 @@
-include_dependency(Poco REQUIRED)
-include_dependency(OpenSSL REQUIRED)
+ask_build_sourcey_module(Net)
+if(BUILD_MODULE_Net) 
+  include_dependency(Poco REQUIRED)
+  include_dependency(OpenSSL REQUIRED)
 
-define_libsourcey_module(Net Base)
+  define_sourcey_module(Net Base)
+endif()

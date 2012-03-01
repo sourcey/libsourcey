@@ -1,1 +1,1 @@
-define_libsourcey_sample(VideoSocket Anionu Base Net XML HTTP)
+define_sourcey_module_sample(VideoSocket Anionu Base Net XML HTTP)
