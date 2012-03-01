@@ -133,45 +133,44 @@ set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_SOURCE_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_INSTALL_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/LibSourcey/deps")
-#set(LibSourcey_INCLUDE_DIRS "") # Variable for all include dirs
-#set(LibSourcey_LIBRARY_DIRS "") # Variable for all library dirs
-#set(LibSourcey_DEBUG_LIBS "")   # Variable for all debug libraries
-#set(LibSourcey_RELEASE_LIBS "") # Variable for all release libraries
+set(LibSourcey_INCLUDE_DIRS "") # Contains all include dirs
+set(LibSourcey_LIBRARY_DIRS "") # Contains all include library dirs
+set(LibSourcey_INCLUDE_LIBRARIES "") # Contains all include libraries
 
-# Set this for find_package to use our FindXXX.cmake files
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
+# Tell CMake where to locate our .cmake files
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
 # Append some common search paths for find_library
 # to find libraries from these locations first
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-      ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
-      D:/dev/apps/MinGW/msys/1.0/local
-      D:/dev/lib/OpenCV2.3/build
-      D:/dev/lib/wxWidgets-2.9.2/lib/vc_lib
-      D:/dev/lib/ffmpeg/lib
-      )
+    ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
+    D:/dev/apps/MinGW/msys/1.0/local
+    D:/dev/lib/OpenCV2.3/build
+    D:/dev/lib/wxWidgets-2.9.2/lib/vc_lib
+    D:/dev/lib/ffmpeg/lib
+    D:/dev/lib/OpenSSL-Win32/lib/VC
+    D:/dev/lib/poco-1.4.1p1-all/lib 
+    )
 else()
-    set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
-      /lib 
-      /usr/lib)
+  set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
+    /lib 
+    /usr/lib)
 endif()
-      #D:/dev/lib/OpenSSL-Win32/lib/VC/
-      #D:/dev/lib/poco-1.4.1p1-all #/lib
 
 # Append some common search paths for find_path
 # to search these locations first
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-      ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
-      D:/dev/apps/MinGW/msys/1.0/local
-      D:/dev/lib/OpenCV2.3/build/include
-      D:/dev/lib/wxWidgets-2.9.2
-      D:/dev/lib/ffmpeg)
+    ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
+    D:/dev/apps/MinGW/msys/1.0/local
+    D:/dev/lib/OpenCV2.3/build/include
+    D:/dev/lib/wxWidgets-2.9.2
+    D:/dev/lib/ffmpeg
+    D:/dev/lib/OpenSSL-Win32/include
+    D:/dev/lib/poco-1.4.1p1-all)
 endif()
-
-      #D:/dev/lib/OpenSSL-Win32/include
-      #D:/dev/lib/poco-1.4.1p1-all
       
 set(LibSourcey_ARCHITECTURE i386)
 set(LibSourcey_BITNESS 32)
@@ -180,8 +179,9 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(LibSourcey_ARCHITECTURE amd64)
 endif()
 
-include(LibSourceyIncludeDependency.cmake OPTIONAL)
-include(LibSourceyIncludeModule.cmake OPTIONAL)
+include(LibSourceyMacros REQUIRED)
+include(LibSourceyIncludeDependency OPTIONAL)
+include(LibSourceyIncludeModule OPTIONAL)
 
 
 # ----------------------------------------------------------------------------
@@ -190,18 +190,18 @@ include(LibSourceyIncludeModule.cmake OPTIONAL)
 # TODO: Move to /deps cmakelists.txt
 # ----------------------------------------------------------------------------
 #if(WIN32)
-    set(BUILD_DEPENDENCIES_LIBS TRUE CACHE BOOL "Build 3rd party libraries")
+    set(BUILD_DEPENDENCIES TRUE CACHE BOOL "Build 3rd party libraries")
 #else()
-#    set(BUILD_DEPENDENCIES_LIBS FALSE CACHE BOOL "Build 3rd party libraries")
+#    set(BUILD_DEPENDENCIES FALSE CACHE BOOL "Build 3rd party libraries")
 #endif()
-if(BUILD_DEPENDENCIES_LIBS)
+if(BUILD_DEPENDENCIES)
   # TODO: Search for library and conditional build
   # depending on XXX_FOUND or HAVE_XXX variable  
   set(WITH_PUGIXML ON CACHE BOOL "Build with PugiXML")
   set(WITH_RTAUDIO ON CACHE BOOL "Build with RtAudio")
   set(WITH_LIBSTROPHE ON CACHE BOOL "Build with LibStrophe")
   set(WITH_JSONCPP ON CACHE BOOL "Build with JsonCpp")
-  set(WITH_OPENSSL ON CACHE BOOL "Build with OpenSSL")
+  #set(WITH_OPENSSL ON CACHE BOOL "Build with OpenSSL")
   #set(WITH_POCO ON CACHE BOOL "Build with Poco")
   #set(WITH_FFMPEG ON CACHE BOOL "Build with FFmpeg")
   #set(WITH_OPENCV ON CACHE BOOL "Build with OpenCV")
@@ -214,25 +214,7 @@ else()
   unset(WITH_RTAUDIO CACHE)
   unset(WITH_LIBSTROPHE CACHE)
   unset(WITH_JSONCPP CACHE)
-  unset(WITH_OPENSSL CACHE)
 endif()
-  
-# ============================================================================
-# macro for looping sub directories
-#
-# Example:
-#  subdirlist(SUBDIRS ${MY_CURRENT_DIR})
-# ============================================================================
-macro(subdirlist result curdir)
-  file(GLOB children RELATIVE ${curdir} ${curdir}/*)
-  set(dirlist "")
-  foreach(child ${children})
-    if(IS_DIRECTORY ${curdir}/${child})
-        set(dirlist ${dirlist} ${child})
-    endif()
-  endforeach()
-  set(${result} ${dirlist})
-endmacro()
 
 
 # ============================================================================
@@ -253,7 +235,7 @@ endif()
 
 
 # ----------------------------------------------------------------------------
-# Include third party libraries
+# Include third party dependencies
 # ----------------------------------------------------------------------------
 
 # Include our third party source directory
@@ -290,23 +272,8 @@ link_directories("${LibSourcey_INSTALL_DIR}/lib")
 #
 # ----------------------------------------------------------------------------
 set(BUILD_MODULES OFF CACHE BOOL "Build LibSourcey Modules")
-if(BUILD_MODULES)  
-
-  # Build sample apps
-  # ---------------------------------------------------
-  set(BUILD_MODULE_SAMPLES OFF CACHE BOOL "Build all samples")
-  if(BUILD_MODULE_SAMPLES)
-    include(LibSourceySample.cmake REQUIRED)
-  endif()
-
-
-  # Build tests
-  # ---------------------------------------------------
-  set(BUILD_MODULE_TESTS OFF CACHE BOOL "Build tests")
-  if(BUILD_MODULE_TESTS)
-    include(LibSourceyTest.cmake REQUIRED)
-  endif()
-  
+if(BUILD_MODULES) 
+  include(LibSourceyModule REQUIRED)
 endif()  
 
   
@@ -316,79 +283,15 @@ set(BUILD_APPLICATIONS OFF CACHE BOOL "Build LibSourcey Applications")
 # ----------------------------------------------------------------------------
 # Include the LibSourcey source tree
 # ----------------------------------------------------------------------------
-if(BUILD_MODULES OR BUILD_APPLICATIONS)  
-  
-  include(LibSourceyModule.cmake REQUIRED)
+if(BUILD_MODULES OR BUILD_APPLICATIONS)    
   subdirlist(subdirs "${CMAKE_SOURCE_DIR}/libs")
-
   foreach(module ${subdirs})
-    message(STATUS "Including Module: ${module}")
+    # message(STATUS "Including Module: ${module}")
     if (EXISTS "${CMAKE_SOURCE_DIR}/libs/${module}/CMakeLists.txt")      
       add_subdirectory("${CMAKE_SOURCE_DIR}/libs/${module}")
     endif()
   endforeach() 
 endif()
-
-
-
-#subdirlist(project_subdirs "${CMAKE_SOURCE_DIR}/projects")
-
-
-#set(module_dirs ${MODULES} ${PROJECTS})  
-#if(BUILD_MODULES)  
-#
-#  # Build modules:
-#  # ---------------------------------------------------
-#  foreach(module ${MODULES})
-#    message(STATUS "Including Module: ${module}")
-#    if (EXISTS "${CMAKE_SOURCE_DIR}/modules/${module}/CMakeLists.txt")
-#      set(BUILD_MODULE_${module} ON CACHE BOOL "Build Module: ${module}")
-#      mark_as_advanced(FORCE BUILD_MODULE_${module})
-#      if(BUILD_MODULE_${module})      
-#        add_subdirectory("${CMAKE_SOURCE_DIR}/modules/${module}")
-#      endif()  
-#    endif()
-#  endforeach()  
-#  
-#else()
-#
-#  # Unset core module definitions:
-#  # ---------------------------------------------------
-#  foreach(module ${MODULES})
-#    unset(BUILD_MODULE_${module} CACHE)
-#  endforeach()  
-#  
-#endif()
-
-
-# ----------------------------------------------------------------------------
-# LibSourcey project applications
-# ----------------------------------------------------------------------------
-#set(BUILD_APPLICATIONS OFF CACHE BOOL "Build project applications")
-#if(BUILD_APPLICATIONS)
-
-#  # Include project folders:
-#  # ---------------------------------------------------
-#  foreach(project ${PROJECTS})
-#    message(STATUS "Including Project: ${project}")
-#    if (EXISTS "${CMAKE_SOURCE_DIR}/projects/${project}/CMakeLists.txt")      
-#      set(BUILD_PROJECT_${project} ON CACHE BOOL "Build Project: ${project}")
-#      mark_as_advanced(FORCE BUILD_PROJECT_${project})
-#      if(BUILD_PROJECT_${project})      
-#        add_subdirectory("${CMAKE_SOURCE_DIR}/projects/${project}")
-#      endif()  
-#    endif()
-#  endforeach()  
-#  
-#else()
-
-  # Hide project definitions:
-  # ---------------------------------------------------
-#  foreach(project ${PROJECTS})
-#    unset(BUILD_PROJECT_${project} CACHE)
-#  endforeach()  
-#  
-#endif()
 
 
 # ----------------------------------------------------------------------------
@@ -411,7 +314,7 @@ set(LibSourcey_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where 
 
 message(STATUS "Parsing 'Config.h.cmake'")
 configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/Config.h.cmake" 
+  "${CMAKE_SOURCE_DIR}/cmake/Config.h.cmake" 
   "${LibSourcey_CONFIG_FILE_INCLUDE_DIR}/Config.h")
   
 include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")

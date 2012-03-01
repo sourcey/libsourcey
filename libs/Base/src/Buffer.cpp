@@ -469,7 +469,7 @@ const char Buffer::peekChar()
 	if (_end > _pos)
 		return (const char)_bytes[_pos];
 	Log("error") << "Peeking next character is NULL" << endl;
-	return 0;
+	return NULL;
 }
 
 
@@ -482,7 +482,7 @@ const UInt8 Buffer::peekUInt8()
 	}
 	
 	Log("warn") << "Peeking UInt8: NULL" << endl;
-	return 0;
+	return NULL;
 }
 
 
@@ -495,7 +495,7 @@ const UInt16 Buffer::peekUInt16()
 	}
 	
 	Log("warn") << "Peeking UInt16: NULL" << endl;
-	return 0;
+	return NULL;
 }
 
 
@@ -508,7 +508,7 @@ const UInt32 Buffer::peekUInt24()
 	}
 	
 	Log("warn") << "Peeking UInt24: NULL" << endl;
-	return 0;
+	return NULL;
 }
 
 
@@ -521,7 +521,7 @@ const UInt32 Buffer::peekUInt32()
 	}
 	
 	Log("warn") << "Peeking UInt32: NULL" << endl;
-	return 0;
+	return NULL;
 }
 
 
@@ -534,7 +534,7 @@ const UInt64 Buffer::peekUInt64()
 	}
 	
 	Log("warn") << "Peeking UInt64: NULL" << endl;
-	return 0;
+	return NULL;
 }
 
 

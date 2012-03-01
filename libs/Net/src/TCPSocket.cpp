@@ -35,6 +35,7 @@ using Poco::FastMutex;
 using Poco::ScopedLock;
 
 
+
 namespace Sourcey {
 namespace Net {
 
@@ -116,7 +117,7 @@ void TCPSocket::close()
 		unbindEvents();
 		try	{
 			// If the socket is already closed for whatever
-			// reason an /*InvalidSocketException*/NetException will be thrown. 
+			// reason an InvalidSocketException will be thrown. 
 			// Just swallow it.
 			StreamSocket::close();
 			onClose();
@@ -417,7 +418,7 @@ int TCPSocket::errorno() const
 	try	{
 		return impl()->socketError();
 	}
-	catch (Poco::Net::/*InvalidSocketException*/NetException& exc) {
+	catch (Poco::Net::InvalidSocketException& exc) {
 		// swallow it
 	}
 	return -1; // invalid socket
@@ -429,7 +430,7 @@ Address TCPSocket::address() const
 	try	{
 		return StreamSocket::address();
 	}
-	catch (Poco::Net::/*InvalidSocketException*/NetException& exc) {
+	catch (Poco::Net::InvalidSocketException& exc) {
 		// swallow it
 	}
 	return Address();
@@ -441,7 +442,7 @@ Address TCPSocket::peerAddress() const
 	try	{
 		return StreamSocket::peerAddress();
 	}
-	catch (Poco::Net::/*InvalidSocketException*/NetException& exc) {
+	catch (Poco::Net::InvalidSocketException& exc) {
 		// swallow it
 	}
 	return Address();

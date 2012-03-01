@@ -127,7 +127,7 @@ void AVEncoder::initialize()
 			throw Exception("Unable to allocate format context");
 
 		if (!_params.ofile.empty())
-			snprintf(_formatCtx->filename, sizeof(_formatCtx->filename), "%s", _params.ofile.data());
+			_snprintf(_formatCtx->filename, sizeof(_formatCtx->filename), "%s", _params.ofile.data());
 		
 		// Set the container codec
 		//string 

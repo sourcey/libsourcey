@@ -25,9 +25,7 @@
 #define SOURCEY_STUN_ATTRIBUTES_H
 
 
-#ifdef _WIN32
 #include <winsock2.h>
-#endif
 #include <string>
 #include <cstring>
 #include <iostream>

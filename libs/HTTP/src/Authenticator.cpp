@@ -239,7 +239,7 @@ DigestAuthenticator::~DigestAuthenticator()
 string DigestAuthenticator::parseHeaderSegment(const string& key) 
 {
 	string value = "";
-	string::size_type start, end = 0;
+	string::size_type start, end = NULL;
 	start = _lastRequest.find(" "+key+" = ",0);
 	if (start != string::npos) {
 		start += key.length()+2;
