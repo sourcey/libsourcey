@@ -1,0 +1,22 @@
+This guide is designed to quicken the process of compiling LibSourcey in a linux environment. The steps below were written for Ubuntu 11.04 - Natty Narwhal - but should be easy to port to other systems.
+
+
+1) Build and Install LibSourcey
+
+2) Download and compile the Anionu module
+
+1. You can download the Anionu module directly from: https://bitbucket.org/sourcey/anionu
+Better yet you can clone the repository: git clone https://bitbucket.org/sourcey/anionu.git
+The Anionu folder should end up in the librourcey/libs folder alongside all other LibSourcey modules and applications.
+
+3) Compile the Anionu module
+
+1. Open up Cmake. The source directory should point to ".../librourcey", and the binary directory to ".../librourcey/build" the same as when compiling LibSourcey.
+
+2. Ensure BUILD_MODULES is checked and generate the project makefiles. Remember that individual modules may be enabled/disabled via advanced options.
+
+3. Open up ".../librourcey/build" in a terminal window and:
+
+make
+sudo make install
+

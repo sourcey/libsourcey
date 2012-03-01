@@ -247,7 +247,10 @@ if(MSVC)
   
 elseif(MSYS)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lws2_32 -liphlpapi")
+elseif(LINUX)
+  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -llibc -lglibc")
 endif()
+
 
 # ----------------------------------------------------------------------------
 # Include third party libraries
@@ -316,12 +319,12 @@ set(BUILD_APPLICATIONS OFF CACHE BOOL "Build LibSourcey Applications")
 if(BUILD_MODULES OR BUILD_APPLICATIONS)  
   
   include(LibSourceyModule.cmake REQUIRED)
-  subdirlist(subdirs "${CMAKE_SOURCE_DIR}/srcs")
+  subdirlist(subdirs "${CMAKE_SOURCE_DIR}/libs")
 
   foreach(module ${subdirs})
     message(STATUS "Including Module: ${module}")
-    if (EXISTS "${CMAKE_SOURCE_DIR}/srcs/${module}/CMakeLists.txt")      
-      add_subdirectory("${CMAKE_SOURCE_DIR}/srcs/${module}")
+    if (EXISTS "${CMAKE_SOURCE_DIR}/libs/${module}/CMakeLists.txt")      
+      add_subdirectory("${CMAKE_SOURCE_DIR}/libs/${module}")
     endif()
   endforeach() 
 endif()

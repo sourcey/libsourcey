@@ -1,0 +1,111 @@
+BODY {
+	LINE-HEIGHT: 130%; BACKGROUND-COLOR: #ffffff; FONT-FAMILY: Verdana, Arial, Helvetica, Geneva, sans-serif; COLOR: #000000; MARGIN-LEFT: 7%; FONT-SIZE: small; MARGIN-RIGHT: 7%
+}
+#left {
+	BORDER-BOTTOM: #aaaaaa 0px solid; BORDER-LEFT: #aaaaaa 0px solid; PADDING-BOTTOM: 10px; MARGIN: 0% 0% 5%; PADDING-LEFT: 2%; WIDTH: 12%; PADDING-RIGHT: 2%; FLOAT: left; BORDER-TOP: #aaaaaa 0px solid; BORDER-RIGHT: 1px solid; PADDING-TOP: 4px
+}
+#main {
+	BORDER-BOTTOM: 0px; BORDER-LEFT: 0px; PADDING-BOTTOM: 10px; MARGIN: 0% 0% 5% 17%; PADDING-LEFT: 2%; PADDING-RIGHT: 2%; COLOR: #000000; BORDER-TOP: 0px; FONT-WEIGHT: normal; BORDER-RIGHT: 0px; TEXT-DECORATION: none; PADDING-TOP: 4px
+}
+#foot {
+	TEXT-ALIGN: center; COLOR: #666666; CLEAR: both; FONT-SIZE: x-small; BORDER-TOP: 0px solid; FONT-WEIGHT: normal; TEXT-DECORATION: none
+}
+A:link {
+	COLOR: #336699
+}
+A.standardsButton {
+	BORDER-BOTTOM: #3f1a01 1px solid; BORDER-LEFT: #ff9a57 1px solid; PADDING-BOTTOM: 0px; BACKGROUND-COLOR: #ff6600; MARGIN: 0px; PADDING-LEFT: 3px; PADDING-RIGHT: 3px; COLOR: #ffffff; BORDER-TOP: #ffc8a4 1px solid; BORDER-RIGHT: #7d3302 1px solid; TEXT-DECORATION: none; PADDING-TOP: 0px
+}
+A:visited {
+	COLOR: #663399
+}
+H1 {
+	LINE-HEIGHT: 0.8; COLOR: #336699
+}
+H2 {
+	LINE-HEIGHT: 0.8; COLOR: #336699
+}
+H3 {
+	LINE-HEIGHT: 0.8; COLOR: #336699
+}
+H4 {
+	LINE-HEIGHT: 0.8; COLOR: #336699
+}
+H5 {
+	LINE-HEIGHT: 0.8; COLOR: #336699
+}
+H6 {
+	LINE-HEIGHT: 0.8; COLOR: #336699
+}
+PRE {
+	FONT-FAMILY: Courier, monospace
+}
+UL {
+	LIST-STYLE-POSITION: outside; LIST-STYLE-TYPE: disc
+}
+.body {
+	FONT-FAMILY: Verdana, Arial, Helvetica, Geneva, sans-serif; FONT-SIZE: small
+}
+.bold {
+	FONT-WEIGHT: bold
+}
+.box {
+	BORDER-BOTTOM: thin dotted; BORDER-LEFT: thin dotted; PADDING-BOTTOM: 1em; PADDING-LEFT: 2em; PADDING-RIGHT: 2em; BORDER-TOP: thin dotted; BORDER-RIGHT: thin dotted; PADDING-TOP: 1em
+}
+.caption {
+	FONT-WEIGHT: bold
+}
+.code {
+	FONT-FAMILY: "Courier New", Courier, monospace; WHITE-SPACE: pre
+}
+.def {
+	PADDING-BOTTOM: 1em; TEXT-INDENT: -6.3em; PADDING-LEFT: 6.5em; PADDING-RIGHT: 10em; PADDING-TOP: 1em
+}
+.em {
+	FONT-STYLE: italic
+}
+.example {
+	BACKGROUND-COLOR: yellow; MARGIN-LEFT: 5%; MARGIN-RIGHT: 25%
+}
+.indent {
+	PADDING-LEFT: 5%; PADDING-RIGHT: 5%
+}
+.head {
+	COLOR: #336699; FONT-WEIGHT: bold
+}
+.highlight {
+	COLOR: #336699
+}
+.nav {
+	LINE-HEIGHT: 45%; WHITE-SPACE: nowrap; FONT-SIZE: small; TEXT-DECORATION: none
+}
+.navhead {
+	LINE-HEIGHT: 90%; PADDING-LEFT: 0px; COLOR: #336699; FONT-SIZE: medium; TEXT-DECORATION: none
+}
+.pagehead {
+	COLOR: #336699; TEXT-DECORATION: none
+}
+A.pagehead:visited {
+	COLOR: #336699; TEXT-DECORATION: none
+}
+.ref {
+	FONT-WEIGHT: bold
+}
+.strong {
+	FONT-WEIGHT: bold
+}
+.subhead {
+	FONT-STYLE: italic
+}
+.sub {
+	FONT-SIZE: xx-small; VERTICAL-ALIGN: sub
+}
+.super {
+	FONT-SIZE: xx-small; VERTICAL-ALIGN: super
+}
+.tablebody {
+	FONT-FAMILY: Verdana, Arial, Helvetica, Geneva, sans-serif; WHITE-SPACE: nowrap; FONT-SIZE: small
+}
+.event {
+	COLOR: #336699
+}

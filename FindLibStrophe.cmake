@@ -63,11 +63,11 @@ if(WIN32 AND MSVC)
 else()
 
   # TODO: LibStrophe lib names for various systems
-  set(LibStrophe_LIB_NAMES "libstrophe")
+  #set(LibStrophe_LIB_NAMES "libstrophe")
   
   find_library(LibStrophe_LIBRARY 
     NAMES 
-      ${LibStrophe_LIB_NAMES}
+      strophe #${LibStrophe_LIB_NAMES}
     PATHS 
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
       /usr/lib 

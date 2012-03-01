@@ -1,0 +1,2 @@
+Jingle::Content::Description neesd to parse payloads
+Jingle::Content::Transport neesd to parse transports

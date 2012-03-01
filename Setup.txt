@@ -1,0 +1,136 @@
+This guide is designed to quicken the process of compiling LibSourcey in a linux environment. The steps below were written for Ubuntu 11.04 - Natty Narwhal - but should be easy to port to other systems.
+
+
+1) Install Cmake
+
+sudo apt-get install cmake cmake-qt-gui
+
+
+1) Install Poco
+
+sudo apt-get install libpoco-dev
+
+
+1) Install LibSSL
+
+sudo apt-get install libssl-dev
+
+
+3) Install OpenCV & FFmpeg 
+http://www.ozbotz.org/opencv-installation/
+
+
+1. Remove any installed versions of ffmpeg and x264
+
+sudo apt-get remove ffmpeg x264 libx264-dev
+
+
+2. Get all the dependencies for x264 and ffmpeg by entering the following commands:
+
+sudo apt-get update
+sudo apt-get install build-essential checkinstall git cmake libfaac-dev libjack-jackd2-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libsdl1.2-dev libtheora-dev libva-dev libvdpau-dev libvorbis-dev libx11-dev libxfixes-dev libxvidcore-dev texi2html yasm zlib1g-dev
+
+3. Download and install gstreamer by entering the following command:
+
+sudo apt-get install libgstreamer0.10-0 libgstreamer0.10-dev gstreamer0.10-tools gstreamer0.10-plugins-base libgstreamer-plugins-base0.10-dev gstreamer0.10-plugins-good gstreamer0.10-plugins-ugly gstreamer0.10-plugins-bad gstreamer0.10-ffmpeg
+
+4. Download and install install x264.
+
+- Download a recent stable snapshot of x264 from ftp://ftp.videolan.org/pub/videolan/x264/snapshots/. The exact version does not seem to matter. To write this guide, I used version x264-snapshot-20110808-2245-stable.tar.bz2, but I have used previous versions too.
+- Configure and build the x264 libraries by entering the following commands:
+
+./configure --enable-static
+make
+sudo make install
+
+
+5. Download and install install ffmpeg.
+
+- Download ffmpeg version 0.8.x from http://ffmpeg.org/download.html. Note: Versions of OpenCV prior to 2.3.1 require ffmpeg 0.7.x.
+- Configure and build ffmpeg by entering the following commands in a terminal:
+
+./configure --enable-gpl --enable-libfaac --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-nonfree --enable-postproc --enable-version3 --enable-x11grab
+make
+sudo make install
+
+
+6. Download and install gtk by entering the following command:
+
+sudo apt-get install libgtk2.0-0 libgtk2.0-dev
+
+
+7. Download and install libjpeg by entering the following command:
+
+sudo apt-get install libjpeg62 libjpeg62-dev
+
+
+8. Download and install install v4l (video for linux).
+
+- Download v4l-utils-0.8.5.tar.bz2 from http://www.linuxtv.org/downloads/v4l-utils/
+- Build v4l by entering the following commands in a terminal:
+
+make
+sudo make install
+
+
+9. Download and install install OpenCV.
+
+- Download OpenCV version 2.3.1 from http://sourceforge.net/projects/opencvlibrary/files/
+- Use the following command to untar the source files
+
+wget http://downloads.sourceforge.net/project/opencvlibrary/opencv-unix/2.3.1/OpenCV-2.3.1a.tar.bz2
+tar xvf OpenCV-2.3.1.tar.bz2
+cd OpenCV-2.3.1/
+mkdir build
+cd build
+cmake ..
+
+- Check that the output of cmake includes the following text:
+found gstreamer-base-0.10
+GTK+ 2.x: YES
+FFMPEG: YES
+GStreamer: YES
+V4L/V4L2: Using libv4l
+
+Note: In versions of OpenCV prior to 2.3.1, the binary digit 1 was used instead of the word YES, like this: FFMPEG: 1.
+
+- Run make
+- Run sudo make install
+
+10. Configure Linux.
+
+- Tell linux where the shared libraries for OpenCV are located by entering the following shell command:
+
+export LD_LIBRARY_PATH=/usr/local/lib
+
+
+Add the command to your .bashrc file so that you don’t have to enter every time your start a new terminal.
+
+Alternatively, you can configure the system wide library search path. Using your favorite editor, add a single line containing the text /usr/local/lib to the end of a file named /etc/ld.so.conf.d/opencv.conf. Using vi, for example, enter the following commands:
+
+sudo vi /etc/ld.so.conf.d/opencv.conf
+G
+o
+/usr/local/lib
+<Esc>
+:wq!
+
+- Using your favorite editor, add the following two lines to the end of /etc/bash.bashrc:
+
+PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
+export PKG_CONFIG_PATH
+
+- Reboot.
+
+
+11) Build LibSourcey
+
+1. First of all select BUILD_DEPENDENCIES
+
+
+----------------
+After completing the previous steps, your system should be ready to compile code that uses the OpenCV libraries. The following example shows one way to compile code for OpenCV:
+
+g++ `pkg-config opencv --cflags` `pkg-config opencv --libs` my_code.cpp  -o my_code
+----------------
+
