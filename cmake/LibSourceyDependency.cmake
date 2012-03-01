@@ -11,7 +11,7 @@ macro(include_dependency name)
   # Determine the variable scope
   set(var_root ${name})  
   set(lib_found 0)
-  STRING(TOUPPER ${var_root} var_root_upper)
+  string(TOUPPER ${var_root} var_root_upper)
   if(${var_root}_FOUND)
     set(lib_found 1)
   else()
@@ -28,8 +28,8 @@ macro(include_dependency name)
     return()
   endif()
   
-  # Set a HAVE_XXX variable for our config.h
-  set(HAVE_${var_root_upper})  
+  # Set a HAVE_XXX variable at parent scope for our Config.h
+  set(HAVE_${var_root_upper} 1 PARENT_SCOPE)  
   
   # Expose to LibSourcey
   if(${var_root}_INCLUDE_DIR)
