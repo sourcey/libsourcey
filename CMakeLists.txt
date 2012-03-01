@@ -180,20 +180,31 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 endif()
 
 include(LibSourceyMacros REQUIRED)
-include(LibSourceyIncludeDependency OPTIONAL)
-include(LibSourceyIncludeModule OPTIONAL)
+include(LibSourceyDependency OPTIONAL)
 
 
 # ----------------------------------------------------------------------------
-# Build deps libraries
-#
-# TODO: Move to /deps cmakelists.txt
+# Include and build third party dependencies
 # ----------------------------------------------------------------------------
 #if(WIN32)
     set(BUILD_DEPENDENCIES TRUE CACHE BOOL "Build 3rd party libraries")
 #else()
 #    set(BUILD_DEPENDENCIES FALSE CACHE BOOL "Build 3rd party libraries")
 #endif()
+
+# Define known dependencies for our Config.h
+# These variables will be modified by include_dependency()
+set(HAVE_PUGIXML 0)
+set(HAVE_RTAUDIO 0)
+set(HAVE_LIBSTROPHE 0)
+set(HAVE_JSONCPP 0)
+set(HAVE_OPENSSL 0)
+set(HAVE_POCO 0)
+set(HAVE_FFMPEG 0)
+set(HAVE_OPENCV 0)
+set(HAVE_WXWIDGETS 0)
+set(HAVE_LIBUV 0)
+  
 if(BUILD_DEPENDENCIES)
   # TODO: Search for library and conditional build
   # depending on XXX_FOUND or HAVE_XXX variable  
@@ -201,12 +212,6 @@ if(BUILD_DEPENDENCIES)
   set(WITH_RTAUDIO ON CACHE BOOL "Build with RtAudio")
   set(WITH_LIBSTROPHE ON CACHE BOOL "Build with LibStrophe")
   set(WITH_JSONCPP ON CACHE BOOL "Build with JsonCpp")
-  #set(WITH_OPENSSL ON CACHE BOOL "Build with OpenSSL")
-  #set(WITH_POCO ON CACHE BOOL "Build with Poco")
-  #set(WITH_FFMPEG ON CACHE BOOL "Build with FFmpeg")
-  #set(WITH_OPENCV ON CACHE BOOL "Build with OpenCV")
-  #set(WITH_WXWIDGETS ON CACHE BOOL "Build with wxWidgets")
-  #set(WITH_LIBUV ON CACHE BOOL "Build with Libuv")
   #set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} "${LibSourcey_DEPENDENCIES_SOURCE_DIR}/MemLeakDetect")
   add_subdirectory(${LibSourcey_DEPENDENCIES_SOURCE_DIR})
 else()
@@ -271,13 +276,13 @@ link_directories("${LibSourcey_INSTALL_DIR}/lib")
 #     Modules have been built and installed.
 #
 # ----------------------------------------------------------------------------
-set(BUILD_MODULES OFF CACHE BOOL "Build LibSourcey Modules")
+set(BUILD_MODULES OFF CACHE BOOL "Build LibSourcey modules")
 if(BUILD_MODULES) 
   include(LibSourceyModule REQUIRED)
 endif()  
 
   
-set(BUILD_APPLICATIONS OFF CACHE BOOL "Build LibSourcey Applications")
+set(BUILD_APPLICATIONS OFF CACHE BOOL "Build LibSourcey applications")
   
 
 # ----------------------------------------------------------------------------
@@ -285,17 +290,20 @@ set(BUILD_APPLICATIONS OFF CACHE BOOL "Build LibSourcey Applications")
 # ----------------------------------------------------------------------------
 if(BUILD_MODULES OR BUILD_APPLICATIONS)    
   subdirlist(subdirs "${CMAKE_SOURCE_DIR}/libs")
-  foreach(module ${subdirs})
-    # message(STATUS "Including Module: ${module}")
-    if (EXISTS "${CMAKE_SOURCE_DIR}/libs/${module}/CMakeLists.txt")      
-      add_subdirectory("${CMAKE_SOURCE_DIR}/libs/${module}")
+  foreach(name ${subdirs})
+    # This variable is so modules can set HAVE_LIBSOURCEY_XXX for our
+    # Config.h inside the child scope. See include_sourcey_modules
+    set(HAVE_LIBSOURCEY_${name} 0)
+    set(dir "${CMAKE_SOURCE_DIR}/libs/${name}")
+    if (EXISTS "${dir}/CMakeLists.txt")
+      add_subdirectory(${dir})
     endif()
   endforeach() 
 endif()
 
 
 # ----------------------------------------------------------------------------
-# Build config file
+# Build our Config.h file
 #
 # A directory will be created for each platform so the "Config.h" file is
 # not overwritten if cmake generates code in the same path.
