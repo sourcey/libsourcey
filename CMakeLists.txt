@@ -121,7 +121,14 @@ if(MSVC)
         string(REPLACE "/Zi" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
     endif()
 
-endif(MSVC)
+endif()
+
+
+# ----------------------------------------------------------------------------
+# Set the location of our platform-dependant Config.h
+# ----------------------------------------------------------------------------
+set(LibSourcey_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant Config.h")
+include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 
 
 # ============================================================================
@@ -180,17 +187,14 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 endif()
 
 include(LibSourceyMacros REQUIRED)
+include(LibSourceyModule REQUIRED)
 include(LibSourceyDependency OPTIONAL)
 
 
 # ----------------------------------------------------------------------------
 # Include and build third party dependencies
 # ----------------------------------------------------------------------------
-#if(WIN32)
-    set(BUILD_DEPENDENCIES TRUE CACHE BOOL "Build 3rd party libraries")
-#else()
-#    set(BUILD_DEPENDENCIES FALSE CACHE BOOL "Build 3rd party libraries")
-#endif()
+set(BUILD_DEPENDENCIES TRUE CACHE BOOL "Build third party dependencies")
 
 # Define known dependencies for our Config.h
 # These variables will be modified by include_dependency()
@@ -276,12 +280,7 @@ link_directories("${LibSourcey_INSTALL_DIR}/lib")
 #     Modules have been built and installed.
 #
 # ----------------------------------------------------------------------------
-set(BUILD_MODULES OFF CACHE BOOL "Build LibSourcey modules")
-if(BUILD_MODULES) 
-  include(LibSourceyModule REQUIRED)
-endif()  
-
-  
+set(BUILD_MODULES OFF CACHE BOOL "Build LibSourcey modules")  
 set(BUILD_APPLICATIONS OFF CACHE BOOL "Build LibSourcey applications")
   
 
@@ -292,7 +291,7 @@ if(BUILD_MODULES OR BUILD_APPLICATIONS)
   subdirlist(subdirs "${CMAKE_SOURCE_DIR}/libs")
   foreach(name ${subdirs})
     # This variable is so modules can set HAVE_LIBSOURCEY_XXX for our
-    # Config.h inside the child scope. See include_sourcey_modules
+    # Config.h inside the child scope. See include_sourcey_modules()
     set(HAVE_LIBSOURCEY_${name} 0)
     set(dir "${CMAKE_SOURCE_DIR}/libs/${name}")
     if (EXISTS "${dir}/CMakeLists.txt")
@@ -318,14 +317,11 @@ set(PACKAGE_STRING "${PACKAGE} ${LibSourcey_VERSION}")
 set(PACKAGE_TARNAME "${PACKAGE}")
 set(PACKAGE_VERSION "${LibSourcey_VERSION}")
 
-set(LibSourcey_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant Config.h")
-
 message(STATUS "Parsing 'Config.h.cmake'")
 configure_file(
   "${CMAKE_SOURCE_DIR}/cmake/Config.h.cmake" 
   "${LibSourcey_CONFIG_FILE_INCLUDE_DIR}/Config.h")
   
-include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 
 
 # ----------------------------------------------------------------------------
@@ -333,14 +329,13 @@ include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 # ----------------------------------------------------------------------------
 if(UNIX)
   CONFIGURE_FILE(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
     IMMEDIATE @ONLY)
 
   ADD_CUSTOM_TARGET(uninstall
     "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 endif()
-
 
 
 # ----------------------------------------------------------------------------

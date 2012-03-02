@@ -21,7 +21,7 @@
 //
 
 
-#include "Sourcey/XMPP/client/Client.h"
+#include "Sourcey/XMPP/Client/Client.h"
 #include "Sourcey/XMPP/Router.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Base.h"

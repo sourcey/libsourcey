@@ -26,10 +26,6 @@
 #include "Poco/Path.h"
 #include <assert.h>
 
-//#ifdef _WIN32
-#include "windows.h"
-//#endif
-
 
 using namespace Poco;
 using namespace std;

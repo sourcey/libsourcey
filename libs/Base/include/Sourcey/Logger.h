@@ -34,6 +34,8 @@
 #include <sstream>
 #include <map>
 
+#include <string.h>
+
 
 namespace Sourcey {
 
