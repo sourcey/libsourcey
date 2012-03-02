@@ -42,7 +42,7 @@ FastMutex AudioEncoder::_mutex;
 AudioEncoder::AudioEncoder(const EncoderParams& params) : 
 	_params(params),
 	_encoderContext(NULL),
-	_now(NULL)
+	_now(0)
 {	
 	Log("trace") << "[AudioEncoder" << this << "] Creating" << endl;
 }

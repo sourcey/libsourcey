@@ -120,7 +120,7 @@ void UDPSocket::close()
 	if (!_closed) {
 		try	{
 			// If the socket is already closed for whatever
-			// reason an InvalidSocketException will be thrown. 
+			// reason an /*InvalidSocketException*/NetException will be thrown. 
 			// Just swallow it.
 			DatagramSocket::close();
 		}
@@ -321,7 +321,7 @@ Address UDPSocket::address() const
 	try	{
 		return DatagramSocket::address();
 	}
-	catch (Poco::Net::InvalidSocketException& exc) {
+	catch (Poco::Net::/*InvalidSocketException*/NetException& exc) {
 		// swallow it
 	}
 	return Address();
@@ -333,7 +333,7 @@ Address UDPSocket::peerAddress() const
 	try	{
 		return DatagramSocket::peerAddress();
 	}
-	catch (Poco::Net::InvalidSocketException& exc) {
+	catch (Poco::Net::/*InvalidSocketException*/NetException& exc) {
 		// swallow it
 	}
 	return Address();
@@ -345,7 +345,7 @@ int UDPSocket::errorno() const
 	try	{
 		return impl()->socketError();
 	}
-	catch (Poco::Net::InvalidSocketException& exc) {
+	catch (Poco::Net::/*InvalidSocketException*/NetException& exc) {
 		// swallow it
 	}
 	return -1; // invalid socket

@@ -27,12 +27,11 @@
 
 #include "Sourcey/Base.h"
 
-#ifdef POSIX
-#include <arpa/inet.h>
-#endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
+#else
+#include <arpa/inet.h>
 #endif
 
 #include <math.h>
