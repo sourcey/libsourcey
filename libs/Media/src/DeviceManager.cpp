@@ -42,6 +42,7 @@
 #include <mmsystem.h>
 #include <functiondiscoverykeys_devpkey.h>
 #include <uuids.h>
+#define strncasecmp strnicmp
 //#include "Sourcey/Win32.h"
 //#include "Sourcey/Win32Window.h"
 #elif OSX

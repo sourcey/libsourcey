@@ -44,20 +44,55 @@ endif()
 # Check for cached results. If there are skip the costly part.
 if (NOT Poco_FOUND) # Poco_LIBRARIES
 
+  # Set the library suffix for our build type
+  set(Poco_LINK_SHARED_LIBS TRUE CACHE BOOL "Link with shared Poco libraries (.dll/.so) instead of static ones (.lib/.a)")    
+  set(Poco_LIB_SUFFIX "")
+  #set(Poco_LIB_EXT "")
+  if(WIN32) #  AND MSVC    
+    add_definitions(-DPOCO_NO_AUTOMATIC_LIBS)
+    if(Poco_LINK_SHARED_LIBS)
+      add_definitions(-DPOCO_DLL)
+    else()
+      add_definitions(-DPOCO_STATIC)
+      if(BUILD_WITH_STATIC_CRT)
+        set(Poco_LIB_SUFFIX "mt")
+      else()
+        set(Poco_LIB_SUFFIX "md")
+      endif()    
+    endif()
+  endif()
+
+  # Set search path suffixes for windows
+  if(WIN32)
+    set(Poco_PATH_SUFFIXES
+      /CppUnit/include
+      /Data/include
+      /Foundation/include
+      /Crypto/include
+      /Net/include
+      /NetSSL_OpenSSL/include
+      /PageCompiler/include
+      /Util/include
+      /XML/include
+      /Zip/include)
+  endif()
+      
   # Check for all possible components.      
-  find_component(Foundation   Foundation  PocoFoundation  Poco/Foundation.h)
-  find_component(CppUnit      CppUnit     PocoCppUnit     Poco/CppUnit/CppUnit.h)
-  find_component(Net          Net         PocoNet         Poco/Net/Net.h)
-  find_component(NetSSL       NetSSL      PocoNetSSL      Poco/Net/NetSSL.h)
-  find_component(Crypto       Crypto      PocoCrypto      Poco/Crypto/Crypto.h)
-  find_component(Util         Util        PocoUtil        Poco/Util/Util.h)
-  find_component(XML          XML         PocoXML         Poco/XML/XML.h)
-  find_component(Zip          Zip         PocoZip         Poco/Zip/Zip.h)
-  find_component(Data         Data        PocoData        Poco/Data/Data.h)
-  find_component(PageCompiler PageCompiler PocoPageCompiler Poco/PageCompiler/PageCompiler.h)
+  find_multi_component(Poco Foundation   Foundation  PocoFoundation${Poco_LIB_SUFFIX}  Poco/Foundation.h)
+  find_multi_component(Poco CppUnit      CppUnit     PocoCppUnit${Poco_LIB_SUFFIX}     Poco/CppUnit/CppUnit.h)
+  find_multi_component(Poco Net          Net         PocoNet${Poco_LIB_SUFFIX}         Poco/Net/Net.h)
+  find_multi_component(Poco NetSSL       NetSSL      PocoNetSSL${Poco_LIB_SUFFIX}      Poco/Net/NetSSL.h)
+  find_multi_component(Poco Crypto       Crypto      PocoCrypto${Poco_LIB_SUFFIX}      Poco/Crypto/Crypto.h)
+  find_multi_component(Poco Util         Util        PocoUtil${Poco_LIB_SUFFIX}        Poco/Util/Util.h)
+  find_multi_component(Poco XML          XML         PocoXML${Poco_LIB_SUFFIX}         Poco/XML/XML.h)
+  find_multi_component(Poco Zip          Zip         PocoZip${Poco_LIB_SUFFIX}         Poco/Zip/Zip.h)
+  find_multi_component(Poco Data         Data        PocoData${Poco_LIB_SUFFIX}        Poco/Data/Data.h)
+  find_multi_component(Poco PageCompiler PageCompiler PocoPageCompiler Poco/PageCompiler/PageCompiler.h)  
   
-  # Set Poco as found. Any missing components will set this to false.
+  # Set Poco as found. Any missing required components will set this to false.
   set(Poco_FOUND 1)
+  set(Poco_INCLUDE_DIRS "")
+  set(Poco_LIBRARIES "")
 
   # Check if the required components were found and add their stuff to the Poco_* vars.
   foreach (_component ${Poco_FIND_COMPONENTS})
@@ -69,16 +104,31 @@ if (NOT Poco_FOUND) # Poco_LIBRARIES
     else ()
       # message(ERROR "Required component ${_component} missing.")
       set(Poco_FOUND 0)
-    endif ()
-  endforeach ()
+    endif()
+  endforeach()
+  
+  # If we are on windows find_component will not be able to resolve the include paths
+  # so we need to add them manually
+  
+  
+#  find_path(Poco_DIR 
+#    NAMES 
+#      Foundation/include/Poco/Foundation.h 
+#    PATH_SUFFIXES 
+#      ${Poco_DIR_SUFFIXES} 
+#    PATHS
+#      ${Poco_POSSIBLE_ROOT_DIRS}
+#    DOC 
+#      "The ${Poco_INCLUDE_PATH_DESCRIPTION}"
+#  )
 
   # Build the include path with duplicates removed.
-  if (Poco_INCLUDE_DIRS)
-    list(REMOVE_DUPLICATES Poco_INCLUDE_DIRS)
-  endif ()
-  if (Poco_LIBRARIES)
-    list(REMOVE_DUPLICATES Poco_LIBRARIES)
-  endif ()
+  #if (Poco_INCLUDE_DIRS)
+  #  list(REMOVE_DUPLICATES Poco_INCLUDE_DIRS)
+  #endif ()
+  #if (Poco_LIBRARIES)
+  #  list(REMOVE_DUPLICATES Poco_LIBRARIES)
+  #endif ()
   
   # Stop Poco for undefining windows stuff
   add_definitions(-DPOCO_NO_UNWINDOWS)

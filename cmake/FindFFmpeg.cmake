@@ -42,12 +42,12 @@ endif()
 if (NOT FFmpeg_FOUND) #FFmpeg_LIBRARIES)
 
   # Check for all possible component.
-  find_component(AVCODEC  libavcodec  avcodec  libavcodec/avcodec.h)
-  find_component(AVFORMAT libavformat avformat libavformat/avformat.h)
-  find_component(AVDEVICE libavdevice avdevice libavdevice/avdevice.h)
-  find_component(AVUTIL   libavutil   avutil   libavutil/avutil.h)
-  find_component(SWSCALE  libswscale  swscale  libswscale/swscale.h)
-  find_component(POSTPROC libpostproc postproc libpostproc/postprocess.h)
+  find_component(FFmpeg AVCODEC  libavcodec  avcodec  libavcodec/avcodec.h)
+  find_component(FFmpeg AVFORMAT libavformat avformat libavformat/avformat.h)
+  find_component(FFmpeg AVDEVICE libavdevice avdevice libavdevice/avdevice.h)
+  find_component(FFmpeg AVUTIL   libavutil   avutil   libavutil/avutil.h)
+  find_component(FFmpeg SWSCALE  libswscale  swscale  libswscale/swscale.h)
+  find_component(FFmpeg POSTPROC libpostproc postproc libpostproc/postprocess.h)
   
   # Set FFmpeg as found. Any missing components will set this to false.
   set(FFmpeg_FOUND 1)
