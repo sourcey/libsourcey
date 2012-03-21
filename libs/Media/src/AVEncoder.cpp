@@ -26,6 +26,10 @@
 
 #include "assert.h"
 
+#if WIN32
+#define snprintf _snprintf
+#endif
+
 
 using namespace std;
 using namespace Poco;
