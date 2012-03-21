@@ -303,7 +303,7 @@ int main(int argc, char** argv)
 
 
 	srv.stop();
-	api.setCredentials("admin", "inusuvup");
+	api.setCredentials(Anionu_API_USERNAME, Anionu_API_PASSWORD);
 	//api.loadServices();
 
 	string service("GetAccount");

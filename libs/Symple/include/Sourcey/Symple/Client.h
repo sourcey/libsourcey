@@ -1,6 +1,10 @@
 //
-// This software is copyright by Sourcey <mail@sourcey.com> and is distributed under a dual license:
-// Copyright (C) 2005 Sourcey
+// LibSourcey
+// Copyright (C) 2005, Sourcey <http://sourcey.com>
+//
+// LibSourcey is is distributed under a dual license that allows free, 
+// open source use and closed source use under a standard commercial
+// license.
 //
 // Non-Commercial Use:
 // This program is free software: you can redistribute it and/or modify
@@ -62,7 +66,7 @@ public:
 			group		= "global";
 			name		= "";
 			type		= "peer";
-			serverAddr	= Net::Address("127.0.0.1", 1337);
+			serverAddr	= Net::Address("127.0.0.1", 4000);
 		}
 	};
 

@@ -42,8 +42,8 @@ int main(int argc, char** argv)
 	Sourcey::Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
 	
 	PackageManager::Options options;
-	options.httpUsername = "admin";
-	options.httpPassword = "inusuvup";
+	options.httpUsername = Anionu_API_USERNAME;
+	options.httpPassword = Anionu_API_PASSWORD;
 	PackageManagerConsole app(options);	
 	app.initialize();
 	

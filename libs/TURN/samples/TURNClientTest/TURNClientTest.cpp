@@ -277,7 +277,7 @@ int main(int argc, char** argv)
 	co.timeout = 10 * 1000;
 	co.timerInterval = 3 * 1000;
 	co.username = "user";
-	co.password = "inusuvup";
+	co.password = Anionu_API_PASSWORD;
 	
 		{
 			TURN::ClientTestRunner test;
