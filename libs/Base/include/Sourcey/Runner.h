@@ -61,7 +61,7 @@ public:
 	virtual void run();
 		// Called by the thread to run internal tasks.
 
-	static Runner& getDefault();
+	//static Runner& getDefault();
 		// Returns the default Runner singleton, although
 		// Runner instances may be initialized individually. 
 	

@@ -52,7 +52,7 @@ ITask::ITask(Runner& runner, bool autoStart, bool runOnce, const std::string& na
 
 ITask::~ITask()
 {
-	Log("trace") << "[ITask: " << this << "] Drestroying" << endl;
+	Log("trace") << "[ITask: " << this << "] Destroying" << endl;
 	assert(_runOnce || !_running);
 }
 

@@ -102,16 +102,11 @@ class Reactor: public Poco::Runnable
 	/// the book "Pattern Languages of Program Design" by Jim
 	/// Coplien and Douglas C. Schmidt (Addison Wesley, 1995).
 	///
-	/// Poco's SocketReactor was found to be inefficient in high
-	/// traffic situations. This implementation significantly
-	/// improves performance and scalability by employing separate
-	/// notification thread.
-	///
 	/// TODO: Poco's poll method using epoll on linux reinitializes
 	/// the epoll context on each call. Implement poll() locally.
 {
 public:
-	Reactor(Runner& runner = Runner::getDefault(), int timeout = 5000000);
+	Reactor(int timeout = 5000000);
 	virtual ~Reactor();
 	
 	void run();
@@ -133,11 +128,11 @@ public:
 	virtual void detach(const Poco::Net::Socket& socket);
 		/// Detaches all delegates from the given socket.
 	
-	static Reactor& getDefault();
+	//static Reactor& getDefault();
 		/// Returns the default Reactor singleton, although
 		/// Reactor instances may be initialized individually.
 	
-	Runner& runner();
+	//Runner& runner();
 	
 	NullSignal Shutdown;
 	
@@ -156,7 +151,7 @@ protected:
 	typedef std::vector<ReactorDelegate*> DelegateList;
 
 	DelegateList	_delegates;
-	Runner&			_runner;
+	//Runner&			_runner;
 	bool            _stop;
 	Poco::Thread	_thread;
 	Poco::Event		_wakeUp;

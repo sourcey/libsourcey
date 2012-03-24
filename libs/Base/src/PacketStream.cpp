@@ -27,7 +27,7 @@
 
 #include "Sourcey/PacketStream.h"
 #include "Sourcey/PacketStream.h"
-#include "Sourcey/IRunnable.h"
+#include "Sourcey/IStartable.h"
 
 #include "Poco/Exception.h"
 #include "Poco/NumberParser.h"
@@ -100,7 +100,7 @@ void PacketStream::start()
 			PacketDispatcher* source = (*sit).ptr;
 			source->attach(packetDelegate(this, &PacketStream::onSourcePacket));
 			if ((*sit).syncState) {
-				IRunnable* runnable = dynamic_cast<IRunnable*>((*sit).ptr);
+				IStartable* runnable = dynamic_cast<IStartable*>((*sit).ptr);
 				if (runnable) {
 					Log("trace") << "[PacketStream:" << this << "] Starting Runnable Source: " << source << endl;
 					runnable->start();
@@ -132,7 +132,7 @@ void PacketStream::stop() //bool stopSources
 			PacketDispatcher* source = (*sit).ptr;
 			source->attach(packetDelegate(this, &PacketStream::onSourcePacket));
 			if ((*sit).syncState) {
-				IRunnable* runnable = dynamic_cast<IRunnable*>((*sit).ptr);
+				IStartable* runnable = dynamic_cast<IStartable*>((*sit).ptr);
 				if (runnable) {
 					Log("trace") << "[PacketStream:" << this << "] Stopping Runnable Source: " << source << endl;
 					runnable->stop();

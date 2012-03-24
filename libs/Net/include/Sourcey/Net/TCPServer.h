@@ -47,7 +47,7 @@ template <class SocketT>
 class TCPServer: public TCPSocketAcceptor
 {
 public:
-	TCPServer(Reactor& reactor = Reactor::getDefault()) : TCPSocketAcceptor(reactor) {};
+	TCPServer(Reactor& reactor/* = Reactor::getDefault()*/) : TCPSocketAcceptor(reactor) {};
 	virtual ~TCPServer() {};
 
 	Signal<SocketT*> SocketCreated;

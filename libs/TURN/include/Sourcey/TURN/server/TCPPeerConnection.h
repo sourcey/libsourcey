@@ -50,8 +50,8 @@ class TCPClientConnection;
 class TCPPeerConnection: public Net::TCPSocket
 {
 public:
-	TCPPeerConnection(TCPAllocation& allocation, Net::Reactor& reactor = Net::Reactor::getDefault());
-	TCPPeerConnection(TCPAllocation& allocation, const Poco::Net::StreamSocket& socket, Net::Reactor& reactor = Net::Reactor::getDefault());
+	TCPPeerConnection(TCPAllocation& allocation, Net::Reactor& reactor/* = Net::Reactor::getDefault()*/);
+	TCPPeerConnection(TCPAllocation& allocation, const Poco::Net::StreamSocket& socket, Net::Reactor& reactor/* = Net::Reactor::getDefault()*/);
 	virtual ~TCPPeerConnection();
 	
 	void bindWith(TCPClientConnection* client);

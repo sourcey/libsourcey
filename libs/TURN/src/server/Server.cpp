@@ -39,13 +39,13 @@ namespace Sourcey {
 namespace TURN {
 
 
-Server::Server(IServerObserver& observer, const Options& options, Net::Reactor& reactor) : //, Runner& runner) : //
-	_socketUDP(reactor), //, runner
+Server::Server(IServerObserver& observer, Net::Reactor& reactor, Runner& runner, const Options& options) : 
+	_socketUDP(reactor, runner),
 	_socketTCP(reactor),
 	_observer(observer),
 	_options(options),
-	_reactor(reactor)//,
-	//_runner(runner)
+	_reactor(reactor),
+	_runner(runner)
 {
 	Log("debug") << "TURN::Server Initializing" << endl;
 }
@@ -55,7 +55,7 @@ Server::~Server()
 {
 	////Timer::getDefault().stop(TimerCallback<Server>(this, &ServerAllocation::onTimer));
 	//_socketUDP.detach(packetDelegate<Server, STUN::Message>(this, &Server::onPacketReceived, 1));
-	Log("trace") << "Destroying" << endl;	
+	Log("trace") << "TURN::Server Destroying" << endl;	
 	stop();
 }
 

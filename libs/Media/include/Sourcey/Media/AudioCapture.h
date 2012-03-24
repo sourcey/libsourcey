@@ -25,8 +25,8 @@
 //
 
 
-#ifndef AUDIO_CAPTURE_H
-#define AUDIO_CAPTURE_H
+#ifndef SOURCEY_MEDIA_AudioCapture_H
+#define SOURCEY_MEDIA_AudioCapture_H
 
 
 #include "Sourcey/Media/Types.h"

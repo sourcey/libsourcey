@@ -79,9 +79,9 @@ public:
 
 public:
 	Server(IServerObserver& observer, 
-		   const Options& options, 
-		   //Runner& runner = Runner::getDefault(), 
-		   Net::Reactor& reactor = Net::Reactor::getDefault());
+		   Net::Reactor& reactor, 
+		   Runner& runner,
+		   const Options& options);
 	~Server();
 
 	virtual void start();
@@ -105,7 +105,7 @@ public:
 	Net::UDPSocket& socketUDP();
 	IServerObserver& observer();
 	Net::Reactor& reactor();
-	//Runner& runner();
+	Runner& runner();
 	Options& options();
 	
 	void onTCPConnectionCreated(void* sender, Net::TCPSocket* sock);
@@ -115,9 +115,9 @@ public:
 	virtual const char* className() const { return "TURNServer"; };
 
 private:	
-	//Runner&				_runner;
+	Runner&					_runner;
 	Net::Reactor&			_reactor;
-	Net::UDPSocket	_socketUDP;
+	Net::UDPSocket			_socketUDP;
 	Net::TCPPacketServer	_socketTCP;
 	IServerObserver&		_observer;
 	Options					_options;

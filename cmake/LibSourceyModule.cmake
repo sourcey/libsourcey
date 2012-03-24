@@ -42,10 +42,6 @@ macro(include_sourcey_modules)
       endforeach()       
     endif()
     
-    # Set HAVE_LIBSOURCEY_XXX at parent scope for inclusion
-    # into our Config.h
-    set(HAVE_LIBSOURCEY_${name} ${HAVE_LIBSOURCEY_${name}} PARENT_SCOPE)
-    
     if (NOT HAVE_LIBSOURCEY_${name})
        message(FATAL_ERROR "Unable to include dependent LibSourcey module: ${name}")
     endif()
@@ -105,7 +101,11 @@ macro(define_sourcey_module name)
   source_group("Include" FILES ${lib_hdrs}  ${lib_int_hdrs})
 
   add_library(${name} ${lib_srcs} ${lib_hdrs} ${lib_int_hdrs})     
-  
+      
+  # Set HAVE_LIBSOURCEY_XXX at parent scope for inclusion
+  # into our Config.h
+  set(HAVE_LIBSOURCEY_${name} ON PARENT_SCOPE)
+    
   # Include dependent modules
   foreach(module ${ARGN})
     include_sourcey_modules(${module})  
@@ -114,7 +114,7 @@ macro(define_sourcey_module name)
 
   # Include external dependencies
   target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
-  add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES})   
+  add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES}) # requires complete recompile on some systems
   
   # Include library and header directories
   include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  

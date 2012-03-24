@@ -42,8 +42,8 @@ class Socket;
 
 struct Transaction: public ITransaction<SocketIO::Packet>
 {
-	Transaction(SocketIO::Socket& socket, int maxAttempts = 1, long timeout = 10000);
-	Transaction(SocketIO::Socket& socket, const SocketIO::Packet& request, int maxAttempts = 1, long timeout = 10000);
+	Transaction(Runner& runner, SocketIO::Socket& socket, int maxAttempts = 1, long timeout = 10000);
+	Transaction(Runner& runner, SocketIO::Socket& socket, const SocketIO::Packet& request, int maxAttempts = 1, long timeout = 10000);
 	virtual ~Transaction();
 	
 	virtual bool send();

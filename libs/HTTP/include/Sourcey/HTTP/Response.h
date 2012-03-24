@@ -41,11 +41,29 @@ class Response: public Poco::Net::HTTPResponse
 {	
 public:
 	Response();
+		/// Creates the Response with OK status.
+		
+	Response(HTTPStatus status, const std::string& reason);
+		/// Creates the Response with the given status
+		/// and reason phrase.
+
+	Response(const std::string& version, HTTPStatus status, const std::string& reason);
+		/// Creates the Response with the given version, status
+		/// and reason phrase.
+		
+	Response(HTTPStatus status);
+		/// Creates the Response with the given status
+		/// an an appropriate reason phrase.
+
+	Response(const std::string& version, HTTPStatus status);
+		/// Creates the Response with the given version, status
+		/// an an appropriate reason phrase.
+
 	virtual ~Response();
 		/// Destroys the Request.	
 	
 	std::stringstream body;
-		/// Contains the respose body data.
+		/// Contains the response body data.
 
 	std::string error;
 		/// Contains an error message if the response failed.

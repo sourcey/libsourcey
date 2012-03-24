@@ -41,9 +41,8 @@ namespace Sourcey {
 namespace Net {
 
 
-Reactor::Reactor(Runner& runner, int timeout) :
-	_thread("Runner"),
-	_runner(runner),
+Reactor::Reactor(int timeout) : //Runner& runner, 
+	_thread("Reactor"),
 	_timeout(timeout),
 	_stop(false)	
 {
@@ -54,9 +53,9 @@ Reactor::Reactor(Runner& runner, int timeout) :
 
 Reactor::~Reactor()
 {
-	cout << "[Reactor:" << this << "] Drestroying" << endl;
-
+	cout << "[Reactor:" << this << "] Destroying" << endl;
 	stop();
+	cout << "[Reactor:" << this << "] Destroying: OK" << endl;
 }
 
 
@@ -75,7 +74,7 @@ void Reactor::run()
 			error.clear();
 
 			if (_delegates.empty()) {				
-				Log("trace") << "[Reactor:" << this << "] Skeeping" << endl;
+				Log("trace") << "[Reactor:" << this << "] Sleeping" << endl;
 				_wakeUp.wait();		
 				Log("trace") << "[Reactor:" << this << "] Waking up" << endl;
 			}
@@ -126,8 +125,10 @@ void Reactor::run()
 			//throw;
 		}
 	}
-
+	
+	Log("trace") << "[Reactor:" << this << "] Shutdown" << endl;
 	Shutdown.dispatch(this);
+	Log("trace") << "[Reactor:" << this << "] Exiting" << endl;
 }
 
 
@@ -227,16 +228,16 @@ void Reactor::dispatch(const Socket& socket, SocketEvent event)
 }
 
 
+} } // namespace Sourcey::Net
+
+/*
+
+
 Reactor& Reactor::getDefault() 
 {
 	static Poco::SingletonHolder<Reactor> sh;
 	return *sh.get();
 }
-
-
-} } // namespace Sourcey::Net
-
-/*
 // ---------------------------------------------------------------------
 //
 ReactorNotifier::ReactorNotifier(Reactor& reactor, Runner& runner, int queueSize, int dispatchTimeout) : 

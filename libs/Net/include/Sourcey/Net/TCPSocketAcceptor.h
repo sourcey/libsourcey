@@ -45,7 +45,7 @@ namespace Net {
 class TCPSocketAcceptor: public Poco::Net::ServerSocket
 {
 public:
-	TCPSocketAcceptor(Reactor& reactor = Reactor::getDefault());
+	TCPSocketAcceptor(Reactor& reactor/* = Reactor::getDefault()*/);
 	virtual ~TCPSocketAcceptor();
 	
 	virtual void bind(UInt16 localPort);		

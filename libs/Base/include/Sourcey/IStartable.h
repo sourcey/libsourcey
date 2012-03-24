@@ -24,21 +24,24 @@
 // Please contact mail@sourcey.com
 //
 
-
-#ifndef SOURCEY_H
-#define SOURCEY_H
-
-
-//
-// Cross platform configuration
-//
-#include "Config.h"
-
-//
-// Pull in basic definitions
-//
-#include "Poco/Foundation.h"
-#include "Sourcey/Types.h"
+#ifndef SOURCEY_IStartable_H
+#define SOURCEY_IStartable_H
 
 
-#endif // SOURCEY_H
+namespace Sourcey {
+
+		
+class IStartable
+	/// Defines a generic interface for a
+	/// class that can be started and stopped.
+{
+public:
+	virtual void start() = 0;
+	virtual void stop() = 0;
+};
+
+
+} // namespace Sourcey
+
+
+#endif // SOURCEY_IStartable_H

@@ -28,6 +28,8 @@
 #ifndef SOURCEY_XMPP_JINGLE_SessionICEUDP_H
 #define SOURCEY_XMPP_JINGLE_SessionICEUDP_H
 
+#ifdef HAVE_LIBSOURCEY_ICE
+
 
 #include "Sourcey/XML/XML.h"
 #include "Sourcey/XMPP/Jingle/ISession.h"
@@ -166,5 +168,7 @@ private:
 } // namespace XMPP 
 } // namespace Sourcey 
 
+
+#endif // HAVE_LIBSOURCEY_ICE
 
 #endif // SOURCEY_XMPP_JINGLE_SessionICEUDP_H

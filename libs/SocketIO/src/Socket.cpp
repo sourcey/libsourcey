@@ -44,12 +44,14 @@ namespace Sourcey {
 namespace SocketIO {
 	
 
-Socket::Socket()
+Socket::Socket(Net::Reactor& reactor) :
+	WebSocket(reactor)
 {
 }
 
 
-Socket::Socket(const Net::Address& srvAddr) : 
+Socket::Socket(Net::Reactor& reactor, const Net::Address& srvAddr) :
+	WebSocket(reactor),
 	_srvAddr(srvAddr)
 {
 }
@@ -173,12 +175,20 @@ bool Socket::sendInitialRequest()
 
 void Socket::close()
 {			
-	Log("debug") << "[SocketIO::Socket] Closing" << endl;	
+	Log("trace") << "[SocketIO::Socket] Closing" << endl;	
 
-	if (!isError())
+	if (!isError()) {
+		//Log("trace") << "[SocketIO::Socket] Closing: 1" << endl;
+		//Timer::getDefault();
+		//Log("trace") << "[SocketIO::Socket] Closing: 11" << endl;
 		Timer::getDefault().stop(TimerCallback<Socket>(this, &Socket::onHeartBeatTimer));	
+	}
 	
+	Log("trace") << "[SocketIO::Socket] Closing: 2" << endl;	
+
 	WebSocket::close();
+
+	Log("trace") << "[SocketIO::Socket] Closing: OK" << endl;	
 }
 
 

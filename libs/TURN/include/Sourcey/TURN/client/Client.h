@@ -116,10 +116,9 @@ public:
 
 public:
 	Client(IClientObserver& observer,
-		   const Options& options = Options(), 
-		   Net::Reactor& reactor = Net::Reactor::getDefault()//, 
-		   //Runner& runner = Runner::getDefault()
-		   );
+		   Net::Reactor& reactor,
+		   Runner& runner,
+		   const Options& options = Options());
 	virtual ~Client();
 
 	virtual void initiate();
@@ -167,6 +166,7 @@ public:
 	
 	IClientObserver& observer();
 	Net::ISocket& socket();
+	Runner& runner();
 	Net::Reactor& reactor();
 	Options& options();	
 	
@@ -179,7 +179,7 @@ public:
 
 protected:
 	IClientObserver&	_observer;
-	//Runner&				_runner;
+	Runner&				_runner;
 	Net::Reactor&		_reactor;
 	Options				_options;
 	Net::ISocket*		_socket;

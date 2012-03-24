@@ -39,17 +39,18 @@ namespace Net {
 
 template <class PacketT>
 class Transaction: public ITransaction<PacketT>
-	/// This class rovides request/response functionality for IPacket
+	/// This class provides request/response functionality for IPacket
 	/// types emitted from an ISocket.
 	/// This class is designed to be derived on a per protocol basis.
 {
 public:
-	Transaction(ISocket* socket, 
+	Transaction(Runner& runner, 
+				ISocket* socket, 
 				const Address& localAddress, 
 				const Address& peerAddress, 
 				int maxAttempts = 1, 
 				int timeout = 10000) : 
-		ITransaction<PacketT>(maxAttempts, timeout), 
+		ITransaction<PacketT>(runner, maxAttempts, timeout), 
 		_socket(socket), _localAddress(localAddress), _peerAddress(peerAddress)
 	{
 		Log("debug") << "[Transaction:" << this << "] Creating" << std::endl;

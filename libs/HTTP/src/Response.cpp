@@ -37,7 +37,32 @@ namespace Sourcey {
 namespace HTTP {
 	
 
-Response::Response() 
+Response::Response()
+{
+}
+
+	
+Response::Response(HTTPStatus status, const std::string& reason) :
+	HTTPResponse(status, reason)
+{
+}
+
+
+	
+Response::Response(const std::string& version, HTTPStatus status, const std::string& reason) :
+	HTTPResponse(version, status, reason)
+{
+}
+
+	
+Response::Response(HTTPStatus status) :
+	HTTPResponse(status)
+{
+}
+
+
+Response::Response(const std::string& version, HTTPStatus status) :
+	HTTPResponse(version, status)
 {
 }
 

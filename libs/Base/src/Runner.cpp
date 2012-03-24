@@ -51,7 +51,7 @@ Runner::Runner() :
 
 Runner::~Runner()
 {		
-	cout << "[Runner:" << this << "] Drestroying" << endl;
+	cout << "[Runner:" << this << "] Destroying" << endl;
 	{
 		Mutex::ScopedLock lock(_mutex);	
 		_stop = true;
@@ -61,6 +61,8 @@ Runner::~Runner()
 	// The Runner should never be destroyed inside a Task
 	// callback, otherwise we will result in deadlock.
 	_thread.join();
+
+	cout << "[Runner:" << this << "] Destroying: OK" << endl;
 }
 	
 
@@ -196,14 +198,18 @@ void Runner::run()
 	}
 		
 	Shutdown.dispatch(this);
+
+	Log("debug") << "[Runner:" << this << "] Exiting" << endl;
 }
 
 
+/*
 Runner& Runner::getDefault() 
 {
 	static Poco::SingletonHolder<Runner> sh;
 	return *sh.get();
 }
+*/
 
 
 } // namespace Sourcey

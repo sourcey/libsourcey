@@ -47,7 +47,8 @@ TimerTask::TimerTask(Runner& runner, long timeout, long interval) :
 	Log("trace") << "[TimerTask: " << this << "] Creating" << endl;
 }
 
-	
+
+/*
 TimerTask::TimerTask(long timeout, long interval) : 
 	ITask(Runner::getDefault(), false, false), 
 	_timeout(timeout), 
@@ -56,11 +57,12 @@ TimerTask::TimerTask(long timeout, long interval) :
 {
 	Log("trace") << "[TimerTask: " << this << "] Creating" << endl;
 }
+*/
 
 
 TimerTask::~TimerTask()
 {
-	Log("trace") << "[TimerTask: " << this << "] Drestroying" << endl;
+	Log("trace") << "[TimerTask: " << this << "] Destroying" << endl;
 }
 
 
@@ -89,12 +91,12 @@ bool TimerTask::stop()
 
 void TimerTask::run()
 { 
-	bool doInvoke = false;
+	bool doTimeout = false;
 	bool doDestroy = false;
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);	
 		if (_scheduleAt.expired()) {
-			doInvoke = true;
+			doTimeout = true;
 			if (_interval > 0) {
 				_scheduleAt.setDelay(_interval);
 				_scheduleAt.reset();
@@ -102,7 +104,7 @@ void TimerTask::run()
 			else doDestroy = true;
 		}
 	}
-	if (doInvoke)
+	if (doTimeout)
 		onTimeout();
 	if (doDestroy)
 		destroy();
@@ -125,7 +127,7 @@ void TimerTask::setInterval(long interval)
 
 void TimerTask::onTimeout()
 { 
-	Invoke.dispatch(this);
+	Timeout.dispatch(this);
 }
 
 

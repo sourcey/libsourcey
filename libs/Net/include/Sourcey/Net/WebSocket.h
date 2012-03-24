@@ -41,8 +41,8 @@ namespace Net {
 class WebSocket: public TCPClientSocket
 {
 public:
-	WebSocket();
-	WebSocket(const Poco::URI& uri);
+	WebSocket(Reactor& reactor);
+	WebSocket(Reactor& reactor, const Poco::URI& uri);
 	virtual ~WebSocket();
 	
 	void connect(const Poco::URI& uri);

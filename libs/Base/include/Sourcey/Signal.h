@@ -31,7 +31,7 @@
 
 #include "Sourcey/Base.h"
 #include "Sourcey/Delegate.h"
-#include "Sourcey/Logger.h"
+//#include "Sourcey/Logger.h"
 #include "Sourcey/Util.h"
 #include "Poco/Mutex.h"
 #include <vector>

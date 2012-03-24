@@ -28,6 +28,7 @@
 #include "Sourcey/Logger.h"
 #include "Poco/Format.h"
 #include "Poco/Path.h"
+#include "Poco/File.h"
 #include <assert.h>
 
 
@@ -71,6 +72,81 @@ void ILoggable::printLog(std::ostream& ost) const
 
 // ---------------------------------------------------------------------
 //
+// Log Channel
+//
+// ---------------------------------------------------------------------
+LogChannel::LogChannel(const string& name, LogLevel level, const char* dateFormat) : 
+	_name(name), 
+	_level(level), 
+	_dateFormat(dateFormat)
+{
+}
+
+
+void LogChannel::write(const std::string& message, LogLevel level, const ILoggable* klass)
+{
+	(void)message;
+	(void)level;
+	(void)klass;
+}
+
+
+void LogChannel::format(std::ostream& out, const std::string& message, LogLevel level, const ILoggable* klass) 
+{ 
+	if (_dateFormat)
+		out << Poco::DateTimeFormatter::format(Poco::Timestamp(), _dateFormat);
+	out << " [" << getStringFromLogLevel(level) << "]";
+	if (klass)
+		klass->printLog(out);
+	out << " ";
+	out << message;
+	out.flush();
+}
+
+
+// ---------------------------------------------------------------------
+//
+// Console Channel
+//
+// ---------------------------------------------------------------------
+ConsoleChannel::ConsoleChannel(const string& name, LogLevel level, const char* dateFormat) : 
+	LogChannel(name, level, dateFormat) 
+{
+}
+
+
+void ConsoleChannel::write(const string& message, LogLevel level, const ILoggable* klass) 
+{ 
+#if defined(_DEBUG) || defined(_CONSOLE)
+	
+	if (this->level() > level)
+		return;
+	
+	ostringstream ss;
+	format(ss, message, level, klass);
+	cout << ss.str();
+#if defined(_MSC_VER) && defined(_DEBUG)
+	std::string s(ss.str());
+	std::wstring temp(s.length(), L' ');
+	std::copy(s.begin(), s.end(), temp.begin());
+	OutputDebugString(temp.data());
+#endif
+	/*
+		ostringstream ss;
+		ss << "[" << getStringFromLogLevel(level) << "] ";
+		if (klass)
+			klass->printLog(ss);
+		ss << message;
+//#if defined(_CONSOLE)
+		cout << ss.str();
+//#endif
+	*/
+#endif
+};
+
+
+// ---------------------------------------------------------------------
+//
 // File Channel
 //
 // ---------------------------------------------------------------------
@@ -78,17 +154,16 @@ FileChannel::FileChannel(const string& name,
 						 const string& dir, 
 						 LogLevel level, 
 						 const string& extension, 
-						 const char* dateFormat, 
-						 int rotationInterval) : 
-	LogChannel(name, level),
+						 int rotationInterval, 
+						 const char* dateFormat) : 
+	LogChannel(name, level, dateFormat),
 	_stream(NULL),
 	_dir(dir),
 	_extension(extension),
-	_dateFormat(dateFormat),
 	_rotationInterval(rotationInterval),
 	_rotatedAt(0)
 {
-	// The initial log file will be opened on the first call to setup()
+	// The initial log file will be opened on the first call to rotate()
 }
 	
 
@@ -110,9 +185,10 @@ void FileChannel::write(const string& message, LogLevel level, const ILoggable* 
 		rotate();
 	
 	ostringstream ss;
-	writeLogFormat(ss, message, level, klass);
+	format(ss, message, level, klass);
 	*_stream << ss.str();
 	_stream->flush();
+
 #if defined(_DEBUG) //&& defined(_CONSOLE)
 	cout << ss.str();
 #endif
@@ -122,23 +198,6 @@ void FileChannel::write(const string& message, LogLevel level, const ILoggable* 
 	std::copy(s.begin(), s.end(), temp.begin());
 	OutputDebugString(temp.data());
 #endif
-	
-	/*
-	// Output the prefix and message to the log file
-	*_stream << "[" << getStringFromLogLevel(level) << "] ";
-	*_stream << DateTimeFormatter::format(Timestamp(), _dateFormat);
-	if (klass)
-		klass->printLog(*_stream);
-	*_stream << message;
-	_stream->flush();
-	writeLogFormat(*_stream, message, level, klass, _dateFormat);
-	*/
-	
-	/*
-	LogMessage msg(message, getStringFromLogLevel(level), _dateFormat);
-	msg.dump(*_stream);
-	//OnLogMessage.dispatch(this, msg);
-	*/
 }
 
 	
@@ -146,59 +205,50 @@ void FileChannel::rotate()
 {
 	if (_stream) {
 		_stream->close();
-		delete _stream;	
-		_stream = NULL;	
+		delete _stream;
 	}
 
 	// Initialize and open the next log file
-	_filename = format("%s_%ld.%s", _name, static_cast<long>(Timestamp().epochTime()), _extension);
-	Path path(_dir);
+	_filename = Poco::format("%s_%ld.%s", _name, static_cast<long>(Timestamp().epochTime()), _extension);
+	Path path(_dir);	
+	File(path).createDirectories();
 	path.setFileName(_filename);
 	_stream = new ofstream(path.toString().data());	
 	_rotatedAt = time(0);
 }
 
 
+/*
 // ---------------------------------------------------------------------
 //
-// Console Channel
+// Evented File Channel
 //
 // ---------------------------------------------------------------------
-ConsoleChannel::ConsoleChannel(const string& name, LogLevel level) : 
-	LogChannel(name, level) 
+EventedFileChannel::EventedFileChannel(const string& name,
+						 const string& dir, 
+						 LogLevel level, 
+						 const string& extension, 
+						 int rotationInterval, 
+						 const char* dateFormat) : 
+	FileChannel(name, dir, level, extension, rotationInterval, dateFormat)
 {
 }
 
 
-void ConsoleChannel::write(const string& message, LogLevel level, const ILoggable* klass) 
-{ 
-#if defined(_DEBUG) || defined(_CONSOLE)
-	
+EventedFileChannel::~EventedFileChannel() 
+{
+}
+
+
+void EventedFileChannel::write(const string& message, LogLevel level, const ILoggable* klass) 
+{	
 	if (this->level() > level)
 		return;
-	
-	ostringstream ss;
-	writeLogFormat(ss, message, level, klass);
-	cout << ss.str();
-#if defined(_MSC_VER) && defined(_DEBUG)
-	std::string s(ss.str());
-	std::wstring temp(s.length(), L' ');
-	std::copy(s.begin(), s.end(), temp.begin());
-	OutputDebugString(temp.data());
-#endif
-	/*
-		ostringstream ss;
-		ss << "[" << getStringFromLogLevel(level) << "] ";
-		if (klass)
-			klass->printLog(ss);
-		ss << message;
-//#if defined(_CONSOLE)
-		cout << ss.str();
-//#endif
-	*/
-#endif
-};
-//OutputDebugString 
+
+	FileChannel::write(message, level, klass);	
+	OnLogMessage.dispatch(this, message, level, klass);
+}
+*/
 
 
 // ---------------------------------------------------------------------
@@ -241,13 +291,16 @@ Logger::Logger() :
 	_nullChannel(new LogChannel("null")),
 	_defaultChannel(NULL)
 {
+	cout << "[Logger:" << this << "] Creating" << endl;
 }
 
 
 Logger::~Logger()
 {	
+	cout << "[Logger:" << this << "] Destroying" << endl;
 	Util::ClearMap(_map);
 	delete _nullChannel;
+	cout << "[Logger:" << this << "] Destroying: OK" << endl;
 }
 
 
@@ -342,3 +395,23 @@ void Logger::write(const string& message, LogLevel level, const ILoggable* klass
 
 
 } // namespace Sourcey
+
+
+
+	
+	/*
+	// Output the prefix and message to the log file
+	*_stream << "[" << getStringFromLogLevel(level) << "] ";
+	*_stream << DateTimeFormatter::format(Timestamp(), _dateFormat);
+	if (klass)
+		klass->printLog(*_stream);
+	*_stream << message;
+	_stream->flush();
+	format(*_stream, message, level, klass, _dateFormat);
+	*/
+	
+	/*
+	LogMessage msg(message, getStringFromLogLevel(level), _dateFormat);
+	msg.dump(*_stream);
+	//OnLogMessage.dispatch(this, msg);
+	*/

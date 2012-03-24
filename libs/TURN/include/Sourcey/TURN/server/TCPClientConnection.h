@@ -47,7 +47,7 @@ class TCPPeerConnection;
 class TCPClientConnection: public Net::TCPSocket
 {
 public:
-	TCPClientConnection(TCPAllocation& allocation, const Poco::Net::StreamSocket& socket, TCPPeerConnection* peer, Net::Reactor& reactor = Net::Reactor::getDefault());
+	TCPClientConnection(TCPAllocation& allocation, const Poco::Net::StreamSocket& socket, TCPPeerConnection* peer, Net::Reactor& reactor/* = Net::Reactor::getDefault()*/);
 	virtual ~TCPClientConnection();
 	
 	void bindWith(TCPPeerConnection* peer);

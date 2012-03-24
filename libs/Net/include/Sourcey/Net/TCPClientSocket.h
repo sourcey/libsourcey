@@ -68,7 +68,7 @@ struct ClientState: public StateT
 class TCPClientSocket: public TCPSocket, public StatefulSignal<ClientState>
 {
 public:
-	TCPClientSocket(Reactor& reactor = Reactor::getDefault());
+	TCPClientSocket(Reactor& reactor/* = Reactor::getDefault()*/);
 	TCPClientSocket(const TCPClientSocket& r);
 	virtual ~TCPClientSocket();
 	

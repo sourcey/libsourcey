@@ -164,7 +164,7 @@ void Configuration::setRaw(const string& key, const string& value)
 	}
 
 	// The base class triggers the ConfigurationChanged callback.
-	IConfiguration::setRaw(key, value);
+	//IConfiguration::setRaw(key, value);
 }
 
 
