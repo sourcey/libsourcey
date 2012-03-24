@@ -65,13 +65,10 @@ class TCPClient: public Client
 {
 public:
 	TCPClient(ITCPClientObserver& observer,
-			  const Client::Options& options = Client::Options(), 
-			  Net::Reactor& reactor = Net::Reactor::getDefault()//, 
-			  // Runner& runner = Runner::getDefault()
-			  );
+			  Net::Reactor& reactor,
+			  Runner& runner,
+			  const Client::Options& options = Client::Options());
 	virtual ~TCPClient();
-
-	//virtual void onTimer(TimerCallback<Client>& timer);
 
 	virtual void initiate();
 	virtual void terminate();

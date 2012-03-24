@@ -43,8 +43,9 @@
 #cmakedefine HAVE_LIBSOURCEY_ISpot
 #cmakedefine HAVE_LIBSOURCEY_Anionu
 
-#cmakedefine Anionu_API_USERNAME
-#cmakedefine Anionu_API_PASSWORD
+/* Anionu API Credentials */
+#define Anionu_API_USERNAME "${Anionu_API_USERNAME}"
+#define Anionu_API_PASSWORD "${Anionu_API_PASSWORD}"
 
 /* Poco C++ library */
 #cmakedefine HAVE_POCO

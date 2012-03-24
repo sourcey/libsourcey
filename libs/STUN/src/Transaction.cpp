@@ -42,12 +42,13 @@ namespace Sourcey {
 namespace STUN {
 
 
-Transaction::Transaction(ISocket* socket, 
+Transaction::Transaction(Runner& runner, 
+						 ISocket* socket, 
 						 const Address& localAddress, 
 						 const Address& peerAddress, 
 						 int maxAttempts,
 						 long timeout) : 
-	Net::Transaction<Message>(socket, localAddress, peerAddress, maxAttempts, timeout)
+	Net::Transaction<Message>(runner, socket, localAddress, peerAddress, maxAttempts, timeout)
 {
 	Log("debug") << "[STUNTransaction::" << this << "] Initializing" << std::endl;
 }

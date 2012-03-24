@@ -55,6 +55,7 @@ namespace HTTP {
 Transaction::Transaction(Request* request) : 
 	_request(request),
 	_session(NULL),
+	_response(HTTPResponse::HTTP_NOT_FOUND),
 	_clientData(NULL)
 {
 	Log("trace") << "[HTTPTransaction] Creating" << endl;
@@ -89,6 +90,7 @@ bool Transaction::send()
 			<< "\n\tMethod: " << _request->getMethod()
 			<< "\n\tHas Credentials: " << _request->hasCredentials()
 			<< "\n\tURI: " << _request->getURI()
+			<< "\n\tStatus: " << _response.getStatus()
 			//<< "\n\tOutput Path: " << _outputPath
 			<< endl;
 		

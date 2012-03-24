@@ -24,11 +24,12 @@
 // Please contact mail@sourcey.com
 //
 
-#ifndef SOURCEY_LOGGER_H
-#define SOURCEY_LOGGER_H
+#ifndef SOURCEY_Logger_H
+#define SOURCEY_Logger_H
 
 
 #include "Sourcey/Util.h"
+#include "Sourcey/Signal.h"
 #include "Poco/DateTimeFormatter.h"
 #include "Poco/DateTimeFormat.h"
 #include "Poco/Thread.h"
@@ -101,49 +102,32 @@ struct ILoggable
 };
 
 
-inline void writeLogFormat(std::ostream& out, 
-						   const std::string& message, 
-						   LogLevel level = DebugLevel, 
-						   const ILoggable* klass = NULL, 
-						   const char* dateFormat = "%H:%M:%S") 
-{ 
-	out << "[" << getStringFromLogLevel(level) << "] ";
-	if (dateFormat)
-		out << Poco::DateTimeFormatter::format(Poco::Timestamp(), dateFormat);
-	if (klass)
-		klass->printLog(out);
-	out << " ";
-	out << message;
-	out.flush();
-};
-
-
 class LogChannel
 {
 public:	
-	LogChannel(const std::string& name, LogLevel level = DebugLevel) :
-		_name(name), _level(level) {}
+	LogChannel(const std::string& name, LogLevel level = DebugLevel, const char* dateFormat = "%H:%M:%S");
 
-	virtual void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL)
-	{
-		(void)message;
-		(void)level;
-		(void)klass;
-	}
+	virtual void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
+	virtual void format(std::ostream& out, const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
 
 	std::string	name() const { return _name; };
 	LogLevel level() const { return _level; };
+	const char* dateFormat() const { return _dateFormat; };
+	
+	void setLevel(LogLevel level) { _level = level; };
+	void setDateFormat(const char* format) { _dateFormat = format; };
 
 protected:
 	std::string _name;
 	LogLevel	_level;
+	const char*	_dateFormat;
 };
 
 
 class ConsoleChannel: public LogChannel
 {		
 public:
-	ConsoleChannel(const std::string& name, LogLevel level = DebugLevel);
+	ConsoleChannel(const std::string& name, LogLevel level = DebugLevel, const char* dateFormat = "%H:%M:%S");
 		
 	virtual void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
 };
@@ -157,8 +141,8 @@ public:
 		const std::string& dir,
 		LogLevel level = DebugLevel, 
 		const std::string& extension = "log", 
-		const char* dateFormat = "%H:%M:%S", 
-		int rotationInterval = 12 * 3600);
+		int rotationInterval = 12 * 3600, 
+		const char* dateFormat = "%H:%M:%S");
 	virtual ~FileChannel();
 
 	virtual void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
@@ -166,21 +150,40 @@ public:
 
 	std::string	dir() const { return _dir; };
 	std::string	filename() const { return _filename; };
+	int	rotationInterval() const { return _rotationInterval; };
 	
 	void setDir(const std::string& dir) { _dir = dir; };
 	void setExtension(const std::string& ext) { _extension = ext; };
-
-	//Signal<LogMessage&> OnLogMessage;
+	void setRotationInterval(int interval) { _rotationInterval = interval; };
 
 private:
 	std::ofstream*	_stream;
 	std::string		_dir;
 	std::string		_filename;
 	std::string		_extension;
-	const char*		_dateFormat;
 	time_t			_rotatedAt;			// The time the log was last rotated
 	int				_rotationInterval;	// The log rotation interval in seconds
 };
+
+
+/*
+class EventedFileChannel: public FileChannel
+{	
+public:
+	EventedFileChannel(
+		const std::string& name,
+		const std::string& dir,
+		LogLevel level = DebugLevel, 
+		const std::string& extension = "log", 
+		int rotationInterval = 12 * 3600, 
+		const char* dateFormat = "%H:%M:%S");
+	virtual ~EventedFileChannel();
+	
+	virtual void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
+
+	Signal3<const std::string&, LogLevel&, const ILoggable*&> OnLogMessage;
+};
+*/
 
 
 typedef std::map<std::string, LogChannel*> LogMap;

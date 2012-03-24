@@ -558,33 +558,23 @@ PackagePair PackageManager::getPackagePair(const std::string& name) const
 PackagePair PackageManager::getOrCreatePackagePair(const std::string& name)
 {	
 	Mutex::ScopedLock lock(_mutex);
-	
-	Log("trace") << "[PackageManager] " << "Creating Package Pair: " << name << endl;
 
 	RemotePackage* remote = _remotePackages.get(name, true);
-	Log("trace") << "[PackageManager] " << "Creating Package Pair 1: " << name << endl;
 	if (!remote->latestAsset().valid())
 		throw Exception("The remote package has no file assets");
-	
-	Log("trace") << "[PackageManager] " << "Creating Package Pair 2: " << name << endl;
 
 	if (!remote->valid())
 		throw Exception("The remote package is invalid");
-	Log("trace") << "[PackageManager] " << "Creating Package Pair 3: " << name << endl;
 
 	// Get or create the local package description.
 	LocalPackage* local = _localPackages.get(name, false);
-	Log("trace") << "[PackageManager] " << "Creating Package Pair 4: " << name << endl;
 	if (!local) {
 		local = new LocalPackage(*remote);
-	Log("trace") << "[PackageManager] " << "Creating Package Pair 5: " << name << endl;
 		_localPackages.add(name, local);
 	}
 	
-	Log("trace") << "[PackageManager] " << "Creating Package Pair 6: " << name << endl;
 	if (!local->valid())
 		throw Exception("The local package is invalid");
-	Log("trace") << "[PackageManager] " << "Creating Package Pair 7: " << name << endl;
 	
 	return PackagePair(*local, *remote);
 }

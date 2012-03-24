@@ -39,15 +39,15 @@ namespace Sourcey {
 namespace SocketIO {
 
 
-Transaction::Transaction(Socket& socket, int maxAttempts, long timeout) : 
-	ITransaction<Packet>(maxAttempts, timeout), socket(socket)
+Transaction::Transaction(Runner& runner, Socket& socket, int maxAttempts, long timeout) : 
+	ITransaction<Packet>(runner, maxAttempts, timeout), socket(socket)
 {
 	Log("debug") << "[SocketIOTransaction::" << this << "] Initializing" << endl;
 }
 
 
-Transaction::Transaction(Socket& socket, const Packet& request, int maxAttempts, long timeout) : 
-	ITransaction<Packet>(request, maxAttempts, timeout), socket(socket)
+Transaction::Transaction(Runner& runner, Socket& socket, const Packet& request, int maxAttempts, long timeout) : 
+	ITransaction<Packet>(runner, request, maxAttempts, timeout), socket(socket)
 {
 	Log("debug") << "[SocketIOTransaction::" << this << "] Initializing" << endl;
 }

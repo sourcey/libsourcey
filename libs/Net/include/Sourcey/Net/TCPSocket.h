@@ -48,8 +48,8 @@ class TCPSocket: public ISocket, public Poco::Net::StreamSocket
 	/// over the top of Poco's StreamSocket.
 {
 public:
-	TCPSocket(Reactor& reactor = Reactor::getDefault(), bool deleteOnClose = false);
-	TCPSocket(const Poco::Net::StreamSocket& socket, Reactor& reactor = Reactor::getDefault(), bool deleteOnClose = false);
+	TCPSocket(Reactor& reactor/* = Reactor::getDefault()*/, bool deleteOnClose = false);
+	TCPSocket(const Poco::Net::StreamSocket& socket, Reactor& reactor/* = Reactor::getDefault()*/, bool deleteOnClose = false);
 	TCPSocket(const TCPSocket& r);
 	
 	virtual ~TCPSocket();

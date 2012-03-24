@@ -37,12 +37,14 @@ namespace Sourcey {
 namespace Net {
 
 
-WebSocket::WebSocket()
+WebSocket::WebSocket(Reactor& reactor) :
+	TCPClientSocket(reactor)
 {  
 }
 
 
-WebSocket::WebSocket(const URI& uri) :
+WebSocket::WebSocket(Reactor& reactor, const URI& uri) :
+	TCPClientSocket(reactor),
 	_headerState(0),
 	_uri(uri)
 {

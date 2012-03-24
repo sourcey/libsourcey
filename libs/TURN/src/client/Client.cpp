@@ -43,11 +43,11 @@ namespace Sourcey {
 namespace TURN {
 
 
-Client::Client(IClientObserver& observer, const Options& options, Net::Reactor& reactor) : //, Runner& runner
+Client::Client(IClientObserver& observer, Net::Reactor& reactor, Runner& runner, const Options& options) : 
 	_observer(observer),
 	_options(options),
 	_reactor(reactor),
-	//_runner(runner),
+	_runner(runner),
 	_socket(NULL)
 {
 }
@@ -298,7 +298,7 @@ STUN::Transaction* Client::createTransaction(Net::ISocket* socket)
 	
 	socket = socket ? socket : _socket;
 	assert(socket);
-	STUN::Transaction* transaction = new STUN::Transaction(socket, socket->address(), _options.serverAddr, 1, _options.timeout);
+	STUN::Transaction* transaction = new STUN::Transaction(_runner, socket, socket->address(), _options.serverAddr, 1, _options.timeout);
 	transaction->StateChange += delegate(this, &Client::onTransactionStateChange);	
 	_transactions.push_back(transaction);
 	return transaction;
@@ -977,8 +977,6 @@ void Client::onTimer(TimerCallback<Client>&)
 		sendRefresh();
 }
 
-
-
 	
 void Client::onStateChange(ClientState& state, const ClientState& oldState) 
 {
@@ -988,7 +986,7 @@ void Client::onStateChange(ClientState& state, const ClientState& oldState)
 
 Net::ISocket* Client::createSocket()
 {
-	return new Net::UDPSocket(_reactor);
+	return new Net::UDPSocket(_reactor, _runner);
 }
 
 
@@ -1025,13 +1023,11 @@ Net::Reactor& Client::reactor()
 }
 
 
-/*
 Runner& Client::runner()
 {
 	FastMutex::ScopedLock lock(_mutex);
 	return _runner;
 }
-*/
 
 
 Net::Address Client::mappedAddress() const 

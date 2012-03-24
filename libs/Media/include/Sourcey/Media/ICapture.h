@@ -30,7 +30,7 @@
 
 
 #include "Sourcey/PacketDispatcher.h"
-#include "Sourcey/IRunnable.h"
+#include "Sourcey/IStartable.h"
 
 #include <list>
 
@@ -39,7 +39,7 @@ namespace Sourcey {
 namespace Media {
 
 
-class ICapture: public PacketDispatcher, public IRunnable
+class ICapture: public PacketDispatcher, public IStartable
 {
 public:
 	ICapture() {};

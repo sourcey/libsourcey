@@ -34,7 +34,7 @@
 #include "Sourcey/Media/IEncoder.h"
 #include "Sourcey/Media/AudioEncoder.h"
 #include "Sourcey/Media/VideoEncoder.h"
-#include "Sourcey/IRunnable.h"
+#include "Sourcey/IStartable.h"
 #include "Sourcey/Logger.h"
 
 #include "Poco/DateTimeFormatter.h"
@@ -46,7 +46,7 @@ namespace Media {
 
 
 template <class EncoderT>
-class CaptureEncoder: public IRunnable, public EncoderT
+class CaptureEncoder: public IStartable, public EncoderT
 	/// This class extends a Encoder object for encoding the output
 	/// of an ICapture object.
 	///

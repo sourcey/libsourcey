@@ -40,7 +40,8 @@ namespace TURN {
 
 
 TCPAllocation::TCPAllocation(Server& server, Net::TCPSocket& controlConn, const FiveTuple& tuple, const string& username, const UInt32& lifetime) : 
-	ServerAllocation(server, tuple, username, lifetime), 
+	ServerAllocation(server, tuple, username, lifetime),
+	_acceptor(server.reactor()),
 	_control(controlConn)
 {
 	// Handle data from the relay socket directly from the

@@ -208,6 +208,6 @@ struct PackagePair
 
 	//virtual void setComplete(bool flag);
 		/// This method is called when package installation
-		/// completes in a successfull or failed capacity. 
+		/// completes in a successful or failed capacity. 
 		/// The package version will be set from the asset,
 		/// and the installed attribute will be updated.

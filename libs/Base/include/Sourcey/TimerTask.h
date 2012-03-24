@@ -50,13 +50,13 @@ class TimerTask: public ITask
 {
 public:	
 	TimerTask(Runner& runner, long timeout = 0, long interval = 0);
-	TimerTask(long timeout = 0, long interval = 0);
+	//TimerTask(long timeout = 0, long interval = 0);
 
 	virtual bool start(); 
 	virtual bool stop();
 	
 	virtual void onTimeout();
-		/// Preforms task processing when the timer fires.
+		/// Performs task processing when the timer fires.
 	
 	//virtual bool again();
 		/// Start the timer, and if it is repeating restart
@@ -73,7 +73,8 @@ public:
 	virtual long interval() const;
 		/// Returns the timer interval value.
 	
-	NullSignal Invoke;
+	NullSignal Timeout;
+		/// Signals on timeout and interval.
 
 protected:
 	TimerTask& operator=(TimerTask const&) {}
@@ -82,14 +83,14 @@ protected:
 	
 	long _timeout;
 	long _interval;
-	Timeout _scheduleAt;
+	Sourcey::Timeout _scheduleAt;
 
 	///Timeout _timeout;
 
 	friend class Runner;
 };
 
-			/// = Runner::getDefault()
+			////* = Runner::getDefault()*/
 		  //bool autoStart = false, 
 		  //bool runOnce = false, 
 		  //const std::string& name = ""

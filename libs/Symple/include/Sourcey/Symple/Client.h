@@ -30,6 +30,7 @@
 
 
 #include "Sourcey/TimedManager.h"
+#include "Sourcey/Net/Reactor.h"
 #include "Sourcey/Net/WebSocket.h"
 #include "Sourcey/SocketIO/Socket.h"
 #include "Sourcey/Symple/Message.h"
@@ -71,7 +72,7 @@ public:
 	};
 
 public:
-	Client(const Options& options = Options()); 
+	Client(Net::Reactor& reactor, Runner& runner, const Options& options = Options()); 
 	virtual ~Client();
 	
 	virtual void connect();
@@ -90,6 +91,7 @@ public:
 	
 	Options& options();
 	Roster& roster();
+	Runner& runner();
 	PersistenceT& persistence();
 	ID ourID() const;
 
@@ -107,6 +109,7 @@ protected:
 	
 	Options _options;
 	Roster _roster;
+	Runner& _runner;
 	ID _ourID;
 	PersistenceT _persistence;
 	mutable Poco::FastMutex	_mutex;

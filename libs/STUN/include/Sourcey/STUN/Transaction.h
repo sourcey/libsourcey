@@ -39,7 +39,8 @@ namespace STUN {
 
 struct Transaction: public Net::Transaction<Message>
 {
-	Transaction(Net::ISocket* socket, 
+	Transaction(Runner& runner, 
+				Net::ISocket* socket, 
 				const Net::Address& localAddress, 
 				const Net::Address& peerAddress, 
 				int maxAttempts = 1, 

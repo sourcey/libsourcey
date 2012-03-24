@@ -293,7 +293,7 @@ size_t Packet::size() const
 	ostringstream ss;
 	print(ss);
 	assert(ss.tellp());
-	return ss.tellp();
+	return static_cast<size_t>(ss.tellp());
 }
 
 

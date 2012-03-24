@@ -31,7 +31,7 @@
 
 #include "Sourcey/Logger.h"
 #include "Sourcey/Stateful.h"
-#include "Sourcey/IRunnable.h"
+#include "Sourcey/IStartable.h"
 #include "Sourcey/PacketDispatcher.h"
 #include "Sourcey/IPacketProcessor.h"
 
@@ -95,7 +95,7 @@ struct PacketStreamState: public StateT
 };
 
 
-class PacketStream: public PacketDispatcher, public StatefulSignal<PacketStreamState>, public IRunnable
+class PacketStream: public PacketDispatcher, public StatefulSignal<PacketStreamState>, public IStartable
 	/// This class provides an interface for processing packets.
 	/// A packet stream consists of a single PacketDispatcher,
 	/// one or many IPacketProcessor instances, and one or many 

@@ -53,8 +53,8 @@ class UDPSocket: public ISocket, public Poco::Net::DatagramSocket
 	/// loss. The message queue runs inside the Runner thread. 
 {
 public:
-	UDPSocket(Reactor& reactor = Reactor::getDefault(), 
-		      Runner& runner = Runner::getDefault());
+	UDPSocket(Reactor& reactor/* = Reactor::getDefault()*/, 
+		      Runner& runner/* = Runner::getDefault()*/);
 	UDPSocket(const UDPSocket& r);
 	virtual ~UDPSocket();
 

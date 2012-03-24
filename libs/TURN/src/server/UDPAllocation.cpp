@@ -51,7 +51,7 @@ UDPAllocation::UDPAllocation(Server& server,
 							 const std::string& username, 
 							 const UInt32& lifetime) : 
 	ServerAllocation(server, tuple, username, lifetime),
-	_relaySocket(server.reactor()) //, server.runner()
+	_relaySocket(server.reactor(), server.runner())
 {
 	// Handle data from the relay socket directly from the allocation.
 	// This will remove the need for allocation lookups when receiving

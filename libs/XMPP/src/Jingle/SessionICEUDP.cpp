@@ -25,6 +25,9 @@
 //
 
 
+#ifdef HAVE_LIBSOURCEY_ICE
+
+
 #include "Sourcey/XMPP/Jingle/SessionICEUDP.h"
 #include "Sourcey/XMPP/Jingle/SessionManager.h"
 #include "Sourcey/XMPP/Stanza.h"
@@ -710,3 +713,6 @@ SessionICEUDP::JingleICEUDP::JingleICEUDP(
 } // namespace Jingle
 } // namespace XMPP 
 } // namespace Sourcey 
+
+
+#endif // HAVE_LIBSOURCEY_ICE

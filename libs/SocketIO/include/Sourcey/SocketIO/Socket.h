@@ -45,8 +45,8 @@ namespace SocketIO {
 class Socket: public Net::WebSocket
 {
 public:
-	Socket();
-	Socket(const Net::Address& srvAddr);
+	Socket(Net::Reactor& reactor);
+	Socket(Net::Reactor& reactor, const Net::Address& srvAddr);
 	virtual ~Socket();
 	
 	void connect(const Net::Address& srvAddr);	

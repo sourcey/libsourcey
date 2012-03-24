@@ -40,15 +40,20 @@ namespace Sourcey {
 namespace Symple {
 
 
-Client::Client(const Options& options) : 
+Client::Client(Net::Reactor& reactor, Runner& runner, const Options& options) : 
+	SocketIO::Socket(reactor),
+	_runner(runner),
 	_options(options)
 {
+	Log("trace") << "[Symple::Client] Creating" << endl;
 }
 
 
 Client::~Client() 
 {
+	Log("trace") << "[Symple::Client] Destroying" << endl;
 	close();
+	Log("trace") << "[Symple::Client] Destroying: OK" << endl;
 }
 
 
@@ -126,7 +131,7 @@ int Client::announce()
 		data["type"]	= _options.type;
 	}	
 	SocketIO::Packet p("announce", data, true);
-	SocketIO::Transaction* txn = new SocketIO::Transaction(*this, p, 1, 5000);
+	SocketIO::Transaction* txn = new SocketIO::Transaction(_runner, *this, p, 1, 5000);
 	txn->StateChange += delegate(this, &Client::onAnnounce);
 	return txn->send();
 }

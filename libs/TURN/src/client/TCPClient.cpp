@@ -43,8 +43,8 @@ namespace Sourcey {
 namespace TURN {
 
 
-TCPClient::TCPClient(ITCPClientObserver& observer, const Client::Options& options, Net::Reactor& reactor) : 
-	Client(observer, options, reactor), 
+TCPClient::TCPClient(ITCPClientObserver& observer, Net::Reactor& reactor, Runner& runner, const Client::Options& options) : 
+	Client(observer, reactor, runner, options), 
 	_observer(observer)
 {
 	Log("debug") << "[TURN::TCPClient:" << this << "] Creating" << endl;

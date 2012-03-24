@@ -48,11 +48,12 @@ Timer::Timer() :
 
 Timer::~Timer() 
 {	
-	cout << "[Timer: " << this << "] Drestroying" << endl;
+	cout << "[Timer: " << this << "] Destroying" << endl;
 	_stop = true;
 	_wakeUp.set();
 	_thread.join();
 	Util::ClearVector(_callbacks);	
+	cout << "[Timer: " << this << "] Destroying: OK" << endl;
 }
 
 
@@ -74,7 +75,11 @@ void Timer::start(const ITimerCallback& callback)
 
 void Timer::stop(const ITimerCallback& callback) 
 {
+	Log("trace") << "[Timer:" << this << "] Stopping" << endl;
+	Log("trace") << "[Timer:" << this << "] Stopping: " << callback.object() << endl;
+
 	Mutex::ScopedLock lock(_mutex);
+	Log("trace") << "[Timer:" << this << "] Stopping 1: " << callback.object() << endl;
 	bool success = false;
 	for (TimerCallbackList::const_iterator it = _callbacks.begin(); it != _callbacks.end(); ++it) {
 		if (**it == callback) {
@@ -128,12 +133,12 @@ void Timer::run()
 
 	while (!_stop) {	
 		try {
-			//Log("trace") << "[Timer:" << this << "] Waiting for " << _scheduleAt.remaining() << endl;
+			Log("trace") << "[Timer:" << this << "] Waiting for " << _scheduleAt.remaining() << endl;
 
 			_wakeUp.tryWait(_scheduleAt.remaining());
 			if (_scheduleAt.expired()) {
 
-				//Log("trace") << "[Timer:" << this << "] Timeout" << endl;
+				Log("trace") << "[Timer:" << this << "] Timeout" << endl;
 				ScopedLockWithUnlock<Mutex> lock(_mutex);
 				TimerCallbackList toNotify(_callbacks);
 				lock.unlock();
@@ -185,7 +190,7 @@ void Timer::run()
 			Log("error") << "[Timer:" << this << "] Swallowing Exception: " << exc.displayText() << endl;
 		}
 	}
-
+	
 	Log("trace") << "[Timer:" << this << "] Exiting" << endl;
 }
 

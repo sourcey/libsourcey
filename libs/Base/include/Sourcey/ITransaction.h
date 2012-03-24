@@ -71,8 +71,8 @@ class ITransaction: protected TimerTask, public ISendable, public StatefulSignal
 	/// the Runner instance, and is destroyed when complete.
 {
 public:
-	ITransaction(int maxAttempts = 1, long timeout = 10000) : 
-		TimerTask(timeout, timeout),
+	ITransaction(Runner& runner, int maxAttempts = 1, long timeout = 10000) : 
+		TimerTask(runner, timeout, timeout),
 		_maxAttempts(maxAttempts), 
 		_attempts(0), 
 		_cancelled(false)
@@ -80,8 +80,8 @@ public:
 		Log("debug") << "[ITransaction:" << this << "] Creating" << std::endl;
 	}
 
-	ITransaction(const PacketT& request, int maxAttempts = 1, long timeout = 10000) : 
-		TimerTask(timeout, timeout),
+	ITransaction(Runner& runner, const PacketT& request, int maxAttempts = 1, long timeout = 10000) : 
+		TimerTask(runner, timeout, timeout),
 		_request(request), 
 		_maxAttempts(maxAttempts), 
 		_attempts(0), 
@@ -187,7 +187,7 @@ protected:
 
 	virtual bool match(const PacketT& packet) = 0;
 		/// Matches against a potential response.
-		/// Returns true on successfull match.
+		/// Returns true on successful match.
 
 	virtual void onResponse() 
 		/// Call when a successful response is received.

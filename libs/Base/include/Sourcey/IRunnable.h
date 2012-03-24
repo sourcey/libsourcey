@@ -24,20 +24,24 @@
 // Please contact mail@sourcey.com
 //
 
+
 #ifndef SOURCEY_IRunnable_H
 #define SOURCEY_IRunnable_H
+
+
+#include "Poco/Thread.h"
 
 
 namespace Sourcey {
 
 		
-class IRunnable
-	/// Defines a generic interface for a runnable, generally
-	/// threaded, class that can be started and stopped.
+class IRunnable: public Poco::Runnable
+	/// Defines a generic interface for class
+	/// that can be run and cancelled.
 {
 public:
-	virtual void start() = 0;
-	virtual void stop() = 0;
+	virtual void run() = 0;
+	virtual void cancel() = 0;
 };
 
 

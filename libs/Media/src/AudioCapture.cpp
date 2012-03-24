@@ -187,7 +187,7 @@ bool AudioCapture::isInitialized() const
 bool AudioCapture::isRunning() const
 {
 	FastMutex::ScopedLock lock(_mutex);
-	return _audio.isStreamRunning();
+	return _audio.isStreamOpen();
 }
 
 

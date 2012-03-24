@@ -43,11 +43,13 @@ namespace Media {
 
 FormatRegistry::FormatRegistry()
 {
+	cout << "[FormatRegistry:" << this << "] Creating" << endl;
 }
 
 
 FormatRegistry::~FormatRegistry()
 {
+	cout << "[FormatRegistry:" << this << "] Destroying" << endl;
 }
 
 
