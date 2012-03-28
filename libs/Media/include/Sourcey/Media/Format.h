@@ -42,7 +42,7 @@ namespace Media {
 
 struct Format 
 	/// Defines a media container format which is available through the
-	/// Format Registry for encoding/decoding. A format specifies proffered
+	/// Format Registry for encoding/decoding. A format specifies preferred
 	/// default values for each codec.
 {	
 	enum Type 

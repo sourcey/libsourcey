@@ -159,6 +159,7 @@ struct LocalPackage: public Package
 	virtual bool isInstalled();
 		/// Returns true or false depending on weather or
 		/// not the package is installed successfully.
+		/// False if package is in Failed state.
 
 	virtual bool isFailed();
 

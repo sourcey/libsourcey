@@ -128,6 +128,13 @@ bool FormatRegistry::exists(const string& label)
 }
 
 
+void FormatRegistry::clear()
+{
+	FastMutex::ScopedLock lock(_mutex);
+	_formats.clear();
+}
+
+
 FormatList FormatRegistry::formats() const
 { 
 	FastMutex::ScopedLock lock(_mutex);
@@ -137,12 +144,13 @@ FormatList FormatRegistry::formats() const
 
 void FormatRegistry::registerFormat(const Format& format)	
 { 
+	unregisterFormat(format.label);
 	FastMutex::ScopedLock lock(_mutex);
     _formats.push_back(format);
 }
 
 
-void FormatRegistry::unregisterFormat(const string& label)	
+bool FormatRegistry::unregisterFormat(const string& label)	
 { 
 	FastMutex::ScopedLock lock(_mutex);
 	for (FormatList::iterator it = _formats.begin(); it != _formats.end(); ++it) {
@@ -150,9 +158,10 @@ void FormatRegistry::unregisterFormat(const string& label)
 			_formats.erase(it);
 			if (_default == label)
 				_default = "";
-			return;
+			return true;
 		}
 	}
+	return false;
 }
 
 

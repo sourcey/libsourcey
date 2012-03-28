@@ -90,7 +90,6 @@ bool Transaction::send()
 			<< "\n\tMethod: " << _request->getMethod()
 			<< "\n\tHas Credentials: " << _request->hasCredentials()
 			<< "\n\tURI: " << _request->getURI()
-			<< "\n\tStatus: " << _response.getStatus()
 			//<< "\n\tOutput Path: " << _outputPath
 			<< endl;
 		

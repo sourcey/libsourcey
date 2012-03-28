@@ -25,7 +25,7 @@
 //
 
 
-#include "Sourcey/Media/CaptureFactory.h"
+#include "Sourcey/Media/MediaFactory.h"
 #include "Sourcey/Logger.h"
 
 
@@ -40,33 +40,33 @@ namespace Media {
 
 // ---------------------------------------------------------------------
 //
-// Capture Factory
+// Media Factory
 //
 // ---------------------------------------------------------------------
-CaptureFactory*	CaptureFactory::_instance;
-FastMutex		CaptureFactory::_mutex;
+MediaFactory*	MediaFactory::_instance;
+FastMutex		MediaFactory::_mutex;
 
 
-CaptureFactory* CaptureFactory::instance() 
+MediaFactory* MediaFactory::instance() 
 {
 	if (_instance == NULL) 
 	{
 		FastMutex::ScopedLock lock(_mutex);
 		if (_instance == NULL) {
-			_instance = new CaptureFactory;
+			_instance = new MediaFactory;
 		}
 	}
 	return _instance;
 }
 
 
-void CaptureFactory::initialize() 
+void MediaFactory::initialize() 
 {
 	instance();
 }
 
 
-void CaptureFactory::uninitialize() 
+void MediaFactory::uninitialize() 
 {
 	if (_instance) {
 		delete _instance;
@@ -75,49 +75,50 @@ void CaptureFactory::uninitialize()
 }
 
 
-CaptureFactory::CaptureFactory() :
+MediaFactory::MediaFactory() :
 	video(this),
 	audio(this)
 {	
-	//Log("debug") << "CaptureFactory::CaptureFactory" << endl;	
-	_devices.initialize();
+	cout << "MediaFactory::MediaFactory" << endl;	
+	_devices = DeviceManagerFactory::create();
+	_devices->initialize();
 }
 
 
-CaptureFactory::~CaptureFactory()
+MediaFactory::~MediaFactory()
 {	
-	//Log("debug") << "CaptureFactory::~CaptureFactory" << endl;
+	cout << "MediaFactory::~MediaFactory" << endl;
 }
 
 
-void CaptureFactory::loadVideo() 
+void MediaFactory::loadVideo() 
 {
 	video.load();
 }
 
 
-void CaptureFactory::loadAudio() 
+void MediaFactory::loadAudio() 
 {
 	audio.load();
 }
 
 
-void CaptureFactory::unloadVideo()
+void MediaFactory::unloadVideo()
 {
 	video.unload();
 }
 
 
-void CaptureFactory::unloadAudio()
+void MediaFactory::unloadAudio()
 {
 	audio.unload();
 }
 
 
-DeviceManager& CaptureFactory::devices() 
+IDeviceManager& MediaFactory::devices() 
 { 
 	FastMutex::ScopedLock lock(_mutex);
-	return _devices; 
+	return *_devices; 
 }
 
 
@@ -126,19 +127,19 @@ DeviceManager& CaptureFactory::devices()
 // Media Factory Video
 //
 // ---------------------------------------------------------------------
-CaptureFactory::Video::Video(CaptureFactory* factory) :
+MediaFactory::Video::Video(MediaFactory* factory) :
 	_factory(factory)
 {
 }
 
 
-CaptureFactory::Video::~Video()
+MediaFactory::Video::~Video()
 {	
 	unload();
 }
 
 
-void CaptureFactory::Video::unload()
+void MediaFactory::Video::unload()
 {
 	for (VideoCaptureMap::iterator it = _map.begin(); it != _map.end(); ++it) 
 		delete it->second;
@@ -146,13 +147,13 @@ void CaptureFactory::Video::unload()
 }
 
 
-void CaptureFactory::Video::load()
+void MediaFactory::Video::load()
 {
 	// Initialize an idle VideoCapture object for each available device.
 	// The video capture object will begin capturing frames when it's
 	// reference count becomes positive.
 	std::vector<Device> devs;
-	_factory->devices().getVideoInputDevices(devs);
+	_factory->devices().getVideoCaptureDevices(devs);
 	for (size_t i = 0; i < devs.size(); ++i) {
 		try 
 		{
@@ -172,7 +173,7 @@ void CaptureFactory::Video::load()
 // NOTE: Video devices _must_ be initialized from the main thread or they 
 // will not be available from other threads. Due to the fact that we are 
 // storing initialized devices correct initialization is very important.
-VideoCapture* CaptureFactory::Video::getCapture(int deviceId) 
+VideoCapture* MediaFactory::Video::getCapture(int deviceId) 
 {
 	FastMutex::ScopedLock lock(_mutex);
 	VideoCaptureMap::iterator it = _map.find(deviceId);
@@ -187,13 +188,13 @@ VideoCapture* CaptureFactory::Video::getCapture(int deviceId)
 // WARNING: File video captures are started with destroyOnStop set
 // to true, meaning that the capture will be destroyed as soon as
 // it's reference count reaches 0.
-VideoCapture* CaptureFactory::Video::getCapture(const std::string& file) 
+VideoCapture* MediaFactory::Video::getCapture(const std::string& file) 
 {
 	return new VideoCapture(file, true, true);
 }
 
 
-bool CaptureFactory::Video::closeCapture(int deviceId)
+bool MediaFactory::Video::closeCapture(int deviceId)
 {
 	FastMutex::ScopedLock lock(_mutex);
 
@@ -208,7 +209,7 @@ bool CaptureFactory::Video::closeCapture(int deviceId)
 
 
 /*
-void CaptureFactory::Video::onRefCountChange(const void* pSender, int& refCount) {	
+void MediaFactory::Video::onRefCountChange(const void* pSender, int& refCount) {	
 	VideoCapture* capture = const_cast<VideoCapture*>(reinterpret_cast<const VideoCapture*>(pSender));
 
 	// We do not want vagabond file captures hanging around
@@ -224,33 +225,33 @@ void CaptureFactory::Video::onRefCountChange(const void* pSender, int& refCount)
 // Media Factory Audio
 //
 // ---------------------------------------------------------------------
-CaptureFactory::Audio::Audio(CaptureFactory* factory) :
+MediaFactory::Audio::Audio(MediaFactory* factory) :
 	_factory(factory)
 {
 }
 
 
-CaptureFactory::Audio::~Audio()
+MediaFactory::Audio::~Audio()
 {	
 	unload();
 }
 
 
-void CaptureFactory::Audio::unload()
+void MediaFactory::Audio::unload()
 {
 	// Nothing to do... AudioCapture instances are not managed like 
 	// VideoCapture instances.
 }
 
 
-void CaptureFactory::Audio::load()
+void MediaFactory::Audio::load()
 {
 	// Nothing to do... AudioCapture instances are not managed like 
 	// VideoCapture instances.
 }
 
 
-AudioCapture* CaptureFactory::Audio::getCapture(int deviceId, int channels, int sampleRate)
+AudioCapture* MediaFactory::Audio::getCapture(int deviceId, int channels, int sampleRate)
 {
 	return new AudioCapture(deviceId, channels, sampleRate);
 }
@@ -266,7 +267,7 @@ AudioCapture* CaptureFactory::Audio::getCapture(int deviceId, int channels, int 
 		return it->second;
 	} 
 	else {
-		Log("debug") << "CaptureFactory: Attempting to start capture on unregistered audio device." << endl;
+		Log("debug") << "MediaFactory: Attempting to start capture on unregistered audio device." << endl;
 		_map[deviceId] = new AudioCapture(deviceId, 2, 44100);
 		return _map[deviceId];
 	}

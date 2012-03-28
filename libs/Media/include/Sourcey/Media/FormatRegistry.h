@@ -57,9 +57,18 @@ public:
 		/// priority will take precedence.
 	
     virtual void registerFormat(const Format& format);
-    virtual void unregisterFormat(const std::string& label);
+		/// Registers the given media format overriding 
+		/// existing media formats of the same label.
+
+    virtual bool unregisterFormat(const std::string& label);
+		/// Unregisters the media format matching the
+		/// given label. 
+
     virtual void setDefault(const std::string& label);
+		/// Sets the default fallback media format.
+
     virtual bool exists(const std::string& label);
+    virtual void clear();
 
     virtual FormatList formats() const;
 

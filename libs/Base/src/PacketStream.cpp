@@ -352,12 +352,20 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 			PacketAdapterList::iterator it = _processors.begin();
 			if (it != _processors.end()) {
 
-				// We don't want any new adapters
-				// or stream destruction while we
-				// are processing.
+				// We don't want any new adapters or stream destruction
+				// while we are processing.
 				_ready.reset();
 
 				firstProc = reinterpret_cast<IPacketProcessor*>((*it).ptr);
+
+				// If the first processor rejects the packet then the 
+				// packet will be dropped.
+				if (!firstProc->accepts(packet)) {
+					Log("trace") << "[PacketStream:" << this << "] Start Process Chain: " 
+						<< &packet << ": " << firstProc << ": Packet rejected." << endl;
+					//firstProc = NULL;
+					return;
+				}
 			}
 		}
 
@@ -367,8 +375,7 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 			firstProc->process(packet);
 		}
 
-		// If there are no processors
-		// we just proxy the packet.
+		// If there are no processors we just proxy the packet.
 		else {
 			//Log("trace") << "[PacketStream:" << this << "] Proxying: " 
 			//	<< &packet << ": " << packet.className() << endl;
