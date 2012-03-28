@@ -46,13 +46,13 @@ namespace JSON {
 // ---------------------------------------------------------------------
 Configuration::Configuration()
 {	
-	Log("trace") << "[Configuration] Creating" << endl;
+	Log("trace") << "[JSONConfiguration] Creating" << endl;
 }
 
 
 Configuration::~Configuration()
 {
-	Log("trace") << "[Configuration] Destroying" << endl;
+	Log("trace") << "[JSONConfiguration] Destroying" << endl;
 }
 
 
@@ -70,7 +70,7 @@ void Configuration::load(bool create)
 	if (_path.empty())
 		throw Exception("Configuration file path must be set.");
 
-	Log("debug") << "[Configuration] Loading: " << _path << endl;
+	Log("debug") << "[JSONConfiguration] Loading: " << _path << endl;
 	
 	if (create && !File(_path).exists())
 		File(_path).createFile();
@@ -94,7 +94,7 @@ void Configuration::save()
 	if (_path.empty())
 		throw Exception("Configuration file path must be set.");
 
-	Log("debug") << "[Configuration] Saving: " << _path << endl;
+	Log("debug") << "[JSONConfiguration] Saving: " << _path << endl;
 	
 	// Will throw on error
 	JSON::saveFile(*this, _path);

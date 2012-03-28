@@ -25,17 +25,16 @@
 //
 
 
-#ifndef SOURCEY_CaptureFactory_H
-#define SOURCEY_CaptureFactory_H
+#ifndef SOURCEY_MediaFactory_H
+#define SOURCEY_MediaFactory_H
 
 
+#include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/VideoCapture.h"
 #include "Sourcey/Media/AudioCapture.h"
-#include "Sourcey/Media/DeviceManager.h"
-#include "Sourcey/Media/Types.h"
 
 #include "Poco/Foundation.h"
-#include "Poco/Thread.h"
+#include "Poco/Mutex.h"
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
@@ -43,22 +42,33 @@
 #include <iostream>
 #include <map>
 
+#include "Sourcey/Media/DeviceManager.h"
+#if !defined(USING_FAKE_DeviceManager) && WIN32
+#include "Sourcey/Media/DeviceManager_WIN32.h"
+#elif !defined(USING_FAKE_DeviceManager) && OSX
+#include "Sourcey/Media/DeviceManager_MAC.h"
+#elif !defined(USING_FAKE_DeviceManager) && LINUX
+#include "Sourcey/Media/DeviceManager_LINUX.h"
+#else
+#include "Sourcey/Media/DeviceManager_FAKE.h"
+#endif
+
 
 namespace Sourcey {
 namespace Media {
 
 
-class CaptureFactory
-	/// The CaptureFactory class is a singleton for instantiating
+class MediaFactory
+	/// The MediaFactory class is a singleton for instantiating
 	/// and managing audio and video captures. 
 	///
 	/// Video:
-	/// The CaptureFactory ensures that only a single VideoCapture
+	/// The MediaFactory ensures that only a single VideoCapture
 	/// instance exists for each device at any given time. This is
 	/// a limitation imposed by the underlying architecture.
 	///
 	/// Audio:
-	/// The CaptureFactory just provides a convenient interface for
+	/// The MediaFactory just provides a convenient interface for
 	/// instantiating AudioCaptures. Since no such limitation like
 	/// for video applies nothing else is required.
 	///
@@ -66,7 +76,7 @@ class CaptureFactory
 	/// @see DeviceManager
 {
 public:
-	static CaptureFactory* instance();
+	static MediaFactory* instance();
 	static void initialize();	
 	static void uninitialize();
 
@@ -75,13 +85,13 @@ public:
 	void unloadVideo();
 	void unloadAudio();
 
-	DeviceManager& devices();
+	IDeviceManager& devices();
 
 	class Video
-		/// This class manages Video for the CaptureFactory.
+		/// This class manages Video for the MediaFactory.
 	{
 	public:
-		Video(CaptureFactory* factory);	
+		Video(MediaFactory* factory);	
 		~Video();
 
 		void load();
@@ -101,16 +111,16 @@ public:
 			/// Closes the VideoCapture for the given device ID.
 
 	protected:
-		CaptureFactory*	_factory;
+		MediaFactory*	_factory;
 		VideoCaptureMap	_map;
 
 	} video;
 
 	class Audio
-		/// This class manages Audio for the CaptureFactory.
+		/// This class manages Audio for the MediaFactory.
 	{
 	public:
-		Audio(CaptureFactory* factory);	
+		Audio(MediaFactory* factory);	
 		~Audio();	
 
 		void load();
@@ -120,20 +130,20 @@ public:
 			///
 
 	protected:
-		CaptureFactory*	_factory;
+		MediaFactory*	_factory;
 		//AudioCaptureMap	_map;
 
 	} audio;
 
 protected:
-	CaptureFactory();									// Private so that it can not be called
-	//CaptureFactory(CaptureFactory const&){};			// Copy constructor is private
-	CaptureFactory& operator=(CaptureFactory const&){};	// Assignment operator is private
-	~CaptureFactory();
+	MediaFactory();									// Private so that it can not be called
+	//MediaFactory(MediaFactory const&){};			// Copy constructor is private
+	MediaFactory& operator=(MediaFactory const&){};	// Assignment operator is private
+	~MediaFactory();
 
-	static CaptureFactory*	_instance;
+	static MediaFactory*	_instance;
 	static Poco::FastMutex	_mutex;
-	DeviceManager			_devices;
+	IDeviceManager*			_devices;
 };
 
 

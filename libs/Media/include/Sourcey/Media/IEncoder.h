@@ -135,7 +135,7 @@ class IPacketEncoder: public IEncoder, public IPacketProcessor
 {
 public:
 	virtual void process(IPacket& packet) = 0;
-		// Encodes the packet, and pushes it downstream.
+		// Encodes the packet, and pushes it on downstream.
 };
 
 

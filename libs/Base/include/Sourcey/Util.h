@@ -41,6 +41,8 @@
 #define MINVALUE(X,Y) ((X)<(Y)) ? (X) : (Y)
 #define MAXVALUE(X,Y) ((X)>(Y)) ? (X) : (Y)
 
+#define ARRAY_SIZE(x) (static_cast<int>((sizeof(x)/sizeof(x[0]))))
+
 
 namespace Sourcey {
 namespace Util {
@@ -52,6 +54,21 @@ std::string itoa(unsigned i);
 unsigned atoi(const std::string& str);
 std::string dtoa(double d);
 double atod(const std::string& str);
+
+template<typename T>
+std::string toString(const T &t) {
+    std::ostringstream oss;
+    oss << t;
+    return oss.str();
+}
+
+template<typename T>
+T fromString(const std::string& s) {
+    std::istringstream iss(s);
+    T t;
+    iss >> t;
+    return t;
+}
 
 bool isNumber(const std::string& str);
 

@@ -64,7 +64,7 @@ CaptureRecorder::~CaptureRecorder()
 void CaptureRecorder::initialize()
 {
 	if (!_video && !_audio)
-		throw Exception("No AV available devices for encoding.");
+		throw Exception("Must have AV devices to record.");
 
 	// Disable AV codecs depending on capture availability
 	if (!_video) {

@@ -44,6 +44,7 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate) :
 	_isInitialized(false)
 {
 	Log("debug") << "[AudioCapture" << this << "] Creating" << endl;
+
 	_iParams.deviceId = _deviceId;
 	_iParams.nChannels = _channels;
 	_iParams.firstChannel = 0;
@@ -73,6 +74,8 @@ AudioCapture::~AudioCapture()
 
 void AudioCapture::open(int channels, int sampleRate)
 {
+	Log("debug") << "[AudioCapture" << this << "] Opening: " << channels << ": " << sampleRate << endl;
+
 	FastMutex::ScopedLock lock(_mutex);
 	
 	_channels = channels;

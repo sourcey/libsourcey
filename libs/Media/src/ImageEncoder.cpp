@@ -94,7 +94,7 @@ void ImageEncoder::process(IPacket& packet)
     vector<unsigned char> buffer;
 
 	// FIXME: If the video capture is stopped before
-	// this callback completes our Mat is currupted.
+	// this callback completes our Mat is corrupted.
 	cv::Mat& source = *vpacket->mat;
 	if (source.cols != _params.oformat.video.width &&
 		source.rows != _params.oformat.video.height) {
@@ -109,6 +109,7 @@ void ImageEncoder::process(IPacket& packet)
 	vpacket->setSize(buffer.size());
 	
 	//Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << vpacket << endl;
+	//_fps.tick();
 	dispatch(this, *vpacket);
 	//Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: OK: " << vpacket << endl;
 }

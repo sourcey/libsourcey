@@ -74,7 +74,7 @@ double atod(const string& str)
 	istringstream i(str);
 	double x;
 	if (!(i >> x))
-	 return 0;
+		return 0;
 	return x;
 } 
 
@@ -85,7 +85,6 @@ bool isNumber(const string& str)
        if (!isdigit(str[i]))
            return false;
    }
-
    return true;
 }
 
@@ -101,7 +100,7 @@ unsigned atoi(const string& str)
 
 string itoa(unsigned i)
 {
-	stringstream out;
+	ostringstream out;
 	out << i;
 	return out.str();
 }

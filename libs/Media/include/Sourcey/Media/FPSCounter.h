@@ -25,11 +25,13 @@
 //
 
 
-#ifndef FPS_COUNTER_H
-#define FPS_COUNTER_H
+#ifndef SOURCEY_MEDIA_FPSCounter_H
+#define SOURCEY_MEDIA_FPSCounter_H
 
 
 #include <time.h>
+
+#include "Sourcey/IPacketProcessor.h"
 
 
 namespace Sourcey {
@@ -44,18 +46,20 @@ struct FPSCounter
 	double fps;
 	double frames;
 
-	FPSCounter() {
+	FPSCounter()
+	{
 		reset();
 	}
 
-	void tick() {	
-		if (started()) {
+	void tick() 
+	{	
+		if (started())
 			endFrame();
-		}		
 		startFrame();
 	}
 
-	void reset() {
+	void reset() 
+	{
 		start = 0;
 		end = 0;
 		duration = 0;
@@ -63,15 +67,18 @@ struct FPSCounter
 		frames = 0;
 	}
 
-	bool started() {
+	bool started() 
+	{
 		return start != 0;
 	}
 
-	void startFrame() {
+	void startFrame() 
+	{
 		start = clock();
 	}
 
-	double endFrame() {
+	double endFrame() 
+	{
 		end = clock();
 		duration += (double)(end - start) / CLOCKS_PER_SEC;
 		frames++;
@@ -81,7 +88,51 @@ struct FPSCounter
 };
 
 
+class FPSLimiter: public IPacketProcessor
+	/// This class limits the throughput rate of IPackets.
+{
+public:
+	FPSLimiter(int max) : _max(max)
+	{
+	}
+
+	virtual bool accepts(IPacket&)
+		/// Reject the packet if we have exceeded the maximum FPS.
+	{ 
+		Log("trace") << "[FPSLimiter:" << this <<"] Accepting: \n" 
+			<< "\n\tFPS Limit: " << _max
+			<< "\n\tCurrent FPS: " << _counter.fps
+			<< "\n\tAcceptable: " << (static_cast<int>(_counter.fps) <= _max)
+			<< std::endl;
+		
+		if (_counter.started()) {
+			_counter.endFrame();
+			if (_counter.fps > _max)
+				return false;
+		}
+		_counter.startFrame();
+		return true; 
+	};
+
+	virtual void process(IPacket& packet) 
+	{
+		Log("trace") << "[FPSLimiter:" << this <<"] Processing" << std::endl;
+		_counter.tick();
+		dispatch(this, packet);
+	};
+	
+	virtual FPSCounter& counter()
+	{
+		return _counter;
+	};
+
+protected:	
+	int _max;
+	FPSCounter _counter;
+};
+
+
 } } // namespace Sourcey::Media
 
 
-#endif // FPS_COUNTER_H
+#endif // SOURCEY_MEDIA_FPSCounter_H

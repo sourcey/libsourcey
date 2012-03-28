@@ -94,13 +94,40 @@ macro(define_sourcey_module name)
 
   # Add library source files
   file(GLOB_RECURSE lib_srcs "src/*.c*")
-  file(GLOB_RECURSE lib_hdrs "src/*.h*")
-  file(GLOB_RECURSE lib_int_hdrs "include/*.h*")
+  file(GLOB_RECURSE lib_hdrs "include/*.h*")
+  
+  # Exclude platform dependent implementations
+  set(lib_srcs_exclude "")
+  set(lib_hdrs_exclude "")
+  if(NOT WIN32)
+    set(lib_srcs_exclude ${lib_srcs_exclude} " *_WIN32.cpp")  
+    set(lib_hdrs_exclude ${lib_hdrs_exclude} " *_WIN32.h")  
+  endif()  
+  if(NOT LINUX)
+    set(lib_srcs_exclude ${lib_srcs_exclude} " *_LINUX.cpp")  
+    set(lib_hdrs_exclude ${lib_hdrs_exclude} " *_LINUX.h")  
+  endif()  
+  if(NOT APPLE)
+    set(lib_srcs_exclude ${lib_srcs_exclude} " *_MAC.cpp")  
+    set(lib_hdrs_exclude ${lib_hdrs_exclude} " *_MAC.h")  
+  endif()
+  JOIN("${lib_srcs_exclude}" "|" lib_srcs_exclude)
+  JOIN("${lib_hdrs_exclude}" "|" lib_hdrs_exclude)
+  
+  #STRING(CHOP ${lib_srcs_exclude} 1 lib_srcs_exclude) 
+  #STRING(CHOP ${lib_hdrs_exclude} 1 lib_hdrs_exclude) 
+  
+  #string(REGEX REPLACE " *_WIN32.cpp| *_LINUX.cpp| *_UNIX.cpp| *_MAC.cpp| *_NULL.cpp" "" lib_srcs "${lib_srcs}")
+  #string(REGEX REPLACE " *_WIN32.h| *_LINUX.h| *_UNIX.h| *_MAC.h| *_FAKE.h" "" lib_hdrs "${lib_hdrs}")
+  #message(${lib_srcs_exclude} )
+  #message(${lib_hdrs_exclude} )
+  string(REGEX REPLACE ${lib_srcs_exclude} "" lib_srcs "${lib_srcs}")
+  string(REGEX REPLACE ${lib_hdrs_exclude} "" lib_hdrs "${lib_hdrs}")
   
   source_group("Src" FILES ${lib_srcs})
-  source_group("Include" FILES ${lib_hdrs}  ${lib_int_hdrs})
+  source_group("Include" FILES ${lib_hdrs})
 
-  add_library(${name} ${lib_srcs} ${lib_hdrs} ${lib_int_hdrs})     
+  add_library(${name} ${lib_srcs} ${lib_hdrs})     
       
   # Set HAVE_LIBSOURCEY_XXX at parent scope for inclusion
   # into our Config.h
