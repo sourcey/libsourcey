@@ -64,8 +64,8 @@ VideoCapture::VideoCapture(int deviceId, bool checkDevice, bool destroyOnStop) :
 	_stop(false)
 {
 	Log("trace") << "[VideoCapture:" << this << "] Initializing: " << deviceId << endl;
-	if (checkDevice)
-		this->checkDevice();
+	//if (checkDevice)
+	//	this->checkDevice();
 
 	start();
 }
@@ -84,8 +84,8 @@ VideoCapture::VideoCapture(const std::string& filename, bool checkDevice, bool d
 	_stop(false) 
 {
 	Log("trace") << "[VideoCapture:" << this << "] Initializing: " << filename << endl;
-	if (checkDevice)
-		this->checkDevice();
+	//if (checkDevice)
+	//	this->checkDevice();
 
 	start();
 }
@@ -113,12 +113,18 @@ VideoCapture::~VideoCapture()
 bool VideoCapture::checkDevice()
 {
 	FastMutex::ScopedLock lock(_mutex);
+	
+	Log("trace") << "[VideoCapture:" << this << "] Checking Device" << endl;
+	Log("trace") << "[VideoCapture:" << this << "] Checking Device: Is Opened: " << _capture.isOpened() << endl;
 
 	// Attempt to capture one frame and read some information
 	bool isOpen = _capture.isOpened() ? true : 
 		_filename.empty() ? 
 			_capture.open(_deviceId) : 
 			_capture.open(_filename);		
+	
+	Log("trace") << "[VideoCapture:" << this << "] Checking Device: " << isOpen << endl;
+
 	if (isOpen) {
 		_capture >> _frame;
 		_width = _frame.cols;
@@ -132,7 +138,7 @@ bool VideoCapture::checkDevice()
 		
 	if (!isOpen || !_width || !_height) {
 		stringstream ss;
-		ss << "Please chack your video device: "; 
+		ss << "Please check your video device: "; 
 		_filename.empty() ? (ss << _deviceId) : (ss << _filename);
 		throw Exception(ss.str());
 	}

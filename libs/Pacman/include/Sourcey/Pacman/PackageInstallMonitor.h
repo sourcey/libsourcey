@@ -53,11 +53,18 @@ public:
 	virtual LocalPackageList packages() const;
 		/// Returns the list of monitored packages.
 
-	bool isComplete() const;
+	virtual void cancelAll();
+		/// Cancels all monitored installation tasks.
+
+	virtual bool isComplete() const;
+		/// Returns true if all install tasks have completed,
+		/// either successfully or unsuccessfully.		
 		
+	Signal3<PackageInstallTask&, PackageInstallState&, const PackageInstallState&> PackageInstallStateChange;
 	Signal<LocalPackage&> PackageInstallComplete;
 	
 protected:
+	virtual void onPackageInstallStateChange(void* sender, PackageInstallState& state, const PackageInstallState& oldState);
 	virtual void onPackageInstallComplete(void* sender);
 		/// Called when a monitored install task completes.
 

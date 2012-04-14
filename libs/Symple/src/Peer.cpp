@@ -26,14 +26,11 @@
 
 
 #include "Sourcey/Symple/Peer.h"
-#include "Sourcey/Util.h"
-#include "Sourcey/CryptoProvider.h"
-#include "Poco/Format.h"
+#include "Sourcey/Logger.h"
 #include "assert.h"
 
 
 using namespace std;
-//using namespace Sourcey::XML;
 using namespace Poco;
 
 
@@ -76,14 +73,31 @@ void Peer::print(std::ostream& os) const
 bool Peer::valid() 
 {
 	return isMember("id") 
-		&& isMember("name")
+		&& isMember("user")
 		&& isMember("type");
 }
 
 
-ID Peer::id() const 
+Address Peer::address() const 
 {
-	return ID(get("id", "").asString());
+	Address a;
+	a.setID(id());
+	a.setUser(user());
+	a.setName(name());
+	a.setGroup(group());
+	return a;
+}
+
+
+string Peer::id() const 
+{
+	return get("id", "").asString();
+}
+
+
+string Peer::user() const 
+{
+	return get("user", "").asString();
 }
 
 
@@ -93,19 +107,21 @@ string Peer::name() const
 }
 
 
+string Peer::group() const 
+{
+	return get("group", "").asString();
+}
+
+
 string Peer::type() const 
 {
 	return get("type", "").asString();
 }
 
-string Peer::user() const 
-{
-	return get("user", "").asString();
-}
 
-string Peer::address() const 
+string Peer::host() const 
 {
-	return get("address", "").asString();
+	return get("host", "").asString();
 }
 
 
@@ -115,9 +131,9 @@ void Peer::setID(const std::string& id)
 }
 
 
-void Peer::setType(const std::string& type) 
+void Peer::setUser(const std::string& user) 
 {
-	(*this)["type"] = type;
+	(*this)["user"] = user;
 }
 
 
@@ -126,16 +142,20 @@ void Peer::setName(const std::string& name)
 	(*this)["name"] = name;
 }
 
-
-void Peer::setUser(const std::string& user) 
+void Peer::setGroup(const std::string& group) 
 {
-	(*this)["user"] = user;
+	(*this)["group"] = group;
+}
+
+void Peer::setType(const std::string& type) 
+{
+	(*this)["type"] = type;
 }
 
 
-void Peer::setAddress(const std::string& addr) 
+void Peer::setHost(const std::string& host) 
 {
-	(*this)["addr"] = addr;
+	(*this)["host"] = host;
 }
 
 

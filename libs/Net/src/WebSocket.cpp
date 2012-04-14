@@ -210,7 +210,7 @@ void WebSocket::recv(Buffer& buffer)
 				_headerState = 1;
 			}
 			else {
-				setError("Unable to parse response header");
+				setError("Invalid response header");
 				return;
 			}
 		}

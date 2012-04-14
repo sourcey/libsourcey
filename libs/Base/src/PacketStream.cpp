@@ -194,12 +194,12 @@ void PacketStream::close()
 void PacketStream::onStateChange(PacketStreamState& state, const PacketStreamState& oldState)
 {
 	Log("trace") << "[PacketStream:" << this << "] State changed from " << oldState << " to " << state << endl;
-		if (state.id() != PacketStreamState::Closed &&
-			state.id() != PacketStreamState::None) {
-			PacketAdapterList adapters = this->adapters();
-			for (PacketAdapterList::iterator it = adapters.begin(); it != adapters.end(); ++it)
-				(*it).ptr->onStreamStateChange(state);
-		}
+	if (state.id() != PacketStreamState::Closed &&
+		state.id() != PacketStreamState::None) {
+		PacketAdapterList adapters = this->adapters();
+		for (PacketAdapterList::iterator it = adapters.begin(); it != adapters.end(); ++it)
+			(*it).ptr->onStreamStateChange(state);
+	}
 	StatefulSignal<PacketStreamState>::onStateChange(state, oldState); // send events
 }
 
@@ -361,8 +361,8 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 				// If the first processor rejects the packet then the 
 				// packet will be dropped.
 				if (!firstProc->accepts(packet)) {
-					Log("trace") << "[PacketStream:" << this << "] Start Process Chain: " 
-						<< &packet << ": " << firstProc << ": Packet rejected." << endl;
+					//Log("trace") << "[PacketStream:" << this << "] Start Process Chain: " 
+					//	<< &packet << ": " << firstProc << ": Packet rejected." << endl;
 					//firstProc = NULL;
 					return;
 				}

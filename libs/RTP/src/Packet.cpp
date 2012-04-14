@@ -153,7 +153,7 @@ bool Packet::read(Buffer& buf)
 	}
 
 	if (!_header.read(buf)) {
-		Log("error") << "RTP: Unable to parse RTP header." << endl;
+		Log("error") << "RTP: Invalid RTP header." << endl;
 		return false;
 	}
 	

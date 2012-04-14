@@ -8,6 +8,7 @@
 #
 # The following are set after configuration is done: 
 #  OpenCV_FOUND
+#  OpenCV_DIR
 #  OpenCV_INCLUDE_DIR
 #  OpenCV_LIBRARIES
 #  OpenCV_LIBRARY_DIR
@@ -51,12 +52,10 @@ set (OpenCV_POSSIBLE_ROOT_DIRS
 # Find the OpenCV root dir
 # On windows this must be the OpenCV "build" dir
 # ----------------------------------------------------------------------
-if (NOT OpenCV_INCLUDE_DIR)
+if (NOT OpenCV_DIR)
   find_path(OpenCV_DIR 
     NAMES 
       include/opencv2/core/core.hpp
-      #build/include/opencv2/core/core.hpp
-      #../build/opencv2/core/core.hpp
     PATHS
       ${OpenCV_POSSIBLE_ROOT_DIRS} 
     DOC 
@@ -140,7 +139,7 @@ endif()
 # TODO: Include only specified modules
 # TODO: Check for specified version
 # TODO: Optimize the following, it will probably break on some systems
-if (OpenCV_INCLUDE_DIR AND NOT OpenCV_LIBRARY_DIR)
+if (NOT OpenCV_FOUND) #OpenCV_INCLUDE_DIR AND NOT OpenCV_LIBRARY_DIR)
   set(OpenCV_FOUND 0)
 
   # Loop through OpenCV_LIBDIR_SUFFIXES to find the best one
@@ -148,7 +147,7 @@ if (OpenCV_INCLUDE_DIR AND NOT OpenCV_LIBRARY_DIR)
     set(directory "${OpenCV_DIR}/${directory}")
     if (IS_DIRECTORY ${directory})
     
-      # message(STATUS "Found OpenCV library directory: ${directory}")
+      #message(STATUS "Found OpenCV library directory: ${directory}")
       
       set(OpenCV_FOUND 1)
       set(OpenCV_LIBRARY_DIR ${directory})
@@ -160,31 +159,43 @@ if (OpenCV_INCLUDE_DIR AND NOT OpenCV_LIBRARY_DIR)
         file(GLOB_RECURSE libraries "${directory}/*.a")
       endif()
       
-      set(OpenCV_LIBRARIES)
+      #set(OpenCV_LIBRARIES "")
       foreach(lib ${libraries})
-        #get_filename_component(filename ${lib} NAME_WE)        
+        get_filename_component(filename ${lib} NAME)        
         if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)  
-          if (${lib} MATCHES "d.lib$")
-            list(APPEND OpenCV_LIBRARIES "debug" ${lib})
+          if (${filename} MATCHES "d.lib$")
+            list(APPEND OpenCV_LIBRARIES "debug" ${filename})
           else()
-            list(APPEND OpenCV_LIBRARIES "optimized" ${lib})
+            list(APPEND OpenCV_LIBRARIES "optimized" ${filename})
           endif()          
         else()  
-          list(APPEND OpenCV_LIBRARIES ${lib})          
+          list(APPEND OpenCV_LIBRARIES ${filename})          
         endif()  
       endforeach()  
       
+      #message(STATUS "Found OpenCV libraries: ${OpenCV_LIBRARIES}")
+                   
       # Our work here is done
       break()
          
     endif()
   endforeach()
-endif()
- 
+       
+  # Cache the vars.
+  set(OpenCV_INCLUDE_DIR  ${OpenCV_INCLUDE_DIR}  CACHE STRING   "The OpenCV include directory." FORCE)
+  set(OpenCV_LIBRARY_DIR  ${OpenCV_LIBRARY_DIR}  CACHE STRING   "The OpenCV library directory." FORCE)
+  set(OpenCV_LIBRARIES    ${OpenCV_LIBRARIES}    CACHE STRING   "The OpenCV libraries." FORCE)
+  set(OpenCV_FOUND        ${OpenCV_FOUND}        CACHE BOOLEAN  "The OpenCV found status." FORCE)
+      
+  mark_as_advanced(OpenCV_INCLUDE_DIR
+                   OpenCV_LIBRARY_DIR
+                   OpenCV_LIBRARIES
+                   OpenCV_FOUND)
 
-if(NOT OpenCV_FOUND)
-   if (OpenCV_FIND_REQUIRED)
-      message(FATAL_ERROR 
-        "OpenCV was not found; please specify the path manually. Version >= 2.3 is supported.")
-   endif()
+  if(NOT OpenCV_FOUND)
+     if (OpenCV_FIND_REQUIRED)
+        message(FATAL_ERROR 
+          "OpenCV was not found; please specify the path manually. Version >= 2.3 is supported.")
+     endif()
+  endif()
 endif()

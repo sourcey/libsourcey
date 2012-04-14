@@ -70,6 +70,8 @@ struct Package: public JSON::Value
 	virtual std::string name() const;
 	virtual std::string type() const;
 	virtual std::string title() const;
+	virtual std::string author() const;
+	virtual std::string description() const;
 
 	virtual JSON::Value& assets();
 	

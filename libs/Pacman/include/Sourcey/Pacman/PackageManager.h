@@ -34,7 +34,7 @@
 #include "Sourcey/Pacman/Package.h"
 #include "Sourcey/Pacman/PackageInstallTask.h"
 #include "Sourcey/Pacman/PackageInstallMonitor.h"
-#include "Sourcey/BasicManager.h"
+#include "Sourcey/EventfulManager.h"
 #include "Sourcey/Stateful.h"
 #include "Sourcey/Runner.h"
 #include "Sourcey/HTTP/Transaction.h"
@@ -54,10 +54,10 @@ namespace Sourcey {
 namespace Pacman {
 
 
-typedef BasicManager<std::string, LocalPackage>		LocalPackageMap;
-typedef LocalPackageMap::Map						LocalPackageMapT;
-typedef BasicManager<std::string, RemotePackage>	RemotePackageMap;
-typedef RemotePackageMap::Map						RemotePackageMapT;
+typedef EventfulManager<std::string, LocalPackage>	LocalPackageStore;
+typedef LocalPackageStore::Map						LocalPackageMap;
+typedef EventfulManager<std::string, RemotePackage>	RemotePackageStore;
+typedef RemotePackageStore::Map						RemotePackageMap;
 
 
 class PackageManager
@@ -197,8 +197,7 @@ public:
 		/// Checks the veracity of the install manifest for the given
 		/// package and and ensures all package files exist on the
 		/// file system.
-
-	
+		
 	//
 	/// File Helper Methods
 	//
@@ -228,13 +227,19 @@ public:
 	virtual Poco::Path getIntermediatePackageDir(const std::string& packageName);
 		/// Returns the full path of the intermediate file if it exists,
 		/// or an empty path if the file doesn't exist.
-
+	
 	/// 
 	/// Accessors
-	//	
+	///
 	virtual Options& options() { return _options; }
-	virtual RemotePackageMap& remotePackages() { return _remotePackages; }
-	virtual LocalPackageMap& localPackages() { return _localPackages; }
+	virtual RemotePackageStore& remotePackages() { return _remotePackages; }
+	virtual LocalPackageStore& localPackages() { return _localPackages; }
+		
+	/// 
+	/// Events
+	///
+	Signal<LocalPackage&> PackageInstalled;
+	Signal<LocalPackage&> PackageUninstalled;
 
 protected:
 
@@ -245,8 +250,8 @@ protected:
 	
 protected:
 	Options				_options;
-	LocalPackageMap		_localPackages;
-	RemotePackageMap	_remotePackages;
+	LocalPackageStore		_localPackages;
+	RemotePackageStore	_remotePackages;
 	PackageInstallTaskList _tasks;
 	
 	mutable Poco::Mutex	_mutex;

@@ -39,8 +39,8 @@ endif()
 
 
 # Check for cached results. If there are skip the costly part.
-if (NOT FFmpeg_FOUND) #FFmpeg_LIBRARIES)
-
+if (NOT FFmpeg_FOUND) #FFmpeg_LIBRARIES
+      
   # Check for all possible component.
   find_component(FFmpeg AVCODEC  libavcodec  avcodec  libavcodec/avcodec.h)
   find_component(FFmpeg AVFORMAT libavformat avformat libavformat/avformat.h)
@@ -60,7 +60,7 @@ if (NOT FFmpeg_FOUND) #FFmpeg_LIBRARIES)
       set(FFmpeg_DEFINITIONS ${FFmpeg_DEFINITIONS} ${${_component}_DEFINITIONS})
       list(APPEND FFmpeg_INCLUDE_DIRS ${${_component}_INCLUDE_DIRS})
     else ()
-      # message(STATUS "Required component ${_component} missing.")
+      message(STATUS "Required component ${_component} missing.")
       set(FFmpeg_FOUND 0)
     endif ()
   endforeach ()
@@ -70,14 +70,16 @@ if (NOT FFmpeg_FOUND) #FFmpeg_LIBRARIES)
     list(REMOVE_DUPLICATES FFmpeg_INCLUDE_DIRS)
   endif ()
 
-  # cache the vars.
-  set(FFmpeg_INCLUDE_DIRS ${FFmpeg_INCLUDE_DIRS} CACHE STRING "The FFmpeg include directories." FORCE)
-  set(FFmpeg_LIBRARIES    ${FFmpeg_LIBRARIES}    CACHE STRING "The FFmpeg libraries." FORCE)
-  set(FFmpeg_DEFINITIONS  ${FFmpeg_DEFINITIONS}  CACHE STRING "The FFmpeg cflags." FORCE)
+  # Cache the vars.
+  set(FFmpeg_INCLUDE_DIRS ${FFmpeg_INCLUDE_DIRS} CACHE STRING   "The FFmpeg include directories." FORCE)
+  set(FFmpeg_LIBRARIES    ${FFmpeg_LIBRARIES}    CACHE STRING   "The FFmpeg libraries." FORCE)
+  set(FFmpeg_DEFINITIONS  ${FFmpeg_DEFINITIONS}  CACHE STRING   "The FFmpeg cflags." FORCE)
+  set(FFmpeg_FOUND        ${FFmpeg_FOUND}        CACHE BOOLEAN  "The FFmpeg found status." FORCE)
 
   mark_as_advanced(FFmpeg_INCLUDE_DIRS
                    FFmpeg_LIBRARIES
-                   FFmpeg_DEFINITIONS)
+                   FFmpeg_DEFINITIONS
+                   FFmpeg_FOUND)
 
 endif ()
 

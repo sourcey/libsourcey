@@ -99,11 +99,13 @@ public:
 	virtual bool accepts(IPacket&)
 		/// Reject the packet if we have exceeded the maximum FPS.
 	{ 
+		/*
 		Log("trace") << "[FPSLimiter:" << this <<"] Accepting: \n" 
 			<< "\n\tFPS Limit: " << _max
 			<< "\n\tCurrent FPS: " << _counter.fps
 			<< "\n\tAcceptable: " << (static_cast<int>(_counter.fps) <= _max)
 			<< std::endl;
+			*/
 		
 		if (_counter.started()) {
 			_counter.endFrame();
@@ -116,7 +118,7 @@ public:
 
 	virtual void process(IPacket& packet) 
 	{
-		Log("trace") << "[FPSLimiter:" << this <<"] Processing" << std::endl;
+		//Log("trace") << "[FPSLimiter:" << this <<"] Processing" << std::endl;
 		_counter.tick();
 		dispatch(this, packet);
 	};

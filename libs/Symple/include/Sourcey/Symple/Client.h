@@ -80,7 +80,9 @@ public:
 	
 	virtual int send(const std::string data);
 	virtual int send(Message& message, bool ack = false);
-	virtual int sendPresence(const std::string& to = "", bool probe = false);
+	virtual int sendPresence(bool probe = false);
+	virtual int sendPresence(const Address& to, bool probe = false);
+	virtual void createPresence(Presence& presence);
 
 	virtual int respond(Message& message);
 		/// Responds to an incoming message and sends it.
@@ -88,31 +90,54 @@ public:
 	
 	Client& operator >> (Message& message);
 		/// Stream operator alias for send()
+
+    virtual Peer& ourPeer();
+		/// Returns the peer object that controls the
+		/// current session or throws an exception.
 	
 	Options& options();
 	Roster& roster();
 	Runner& runner();
 	PersistenceT& persistence();
-	ID ourID() const;
+	std::string ourID() const;
+	int announceStatus() const;
+
+	Signal<int&> Announce;
+		/// Notifies the outside application about the 
+		/// response status code of our announce() call.
+		/// Possible status codes are:
+		///		- 200: Authentication success
+		///		- 401: Authentication failed
+		///		- 404: Bad request data
+		///		- 500: Server not found
 
 	Signal<Peer&> UpdatePresenceData;
-		/// Called by sendPresence() so outside classes
-		/// can modify the outgoing presence object.
+		/// Called by createPresence() so outside classes
+		/// can modify the outgoing Peer object.
 
-protected:
+protected:	
+	virtual int announce();
+		/// Called when a new connection is established
+		/// to announce and authenticate the peer on the
+		/// server.
+
+	virtual void cleanup();
+		/// Resets variables and data at the beginning  
+		/// and end of each session.
+
 	virtual void onOnline();
 	virtual void onClose();
-
-	virtual int announce();		
 	virtual bool onPacketCreated(IPacket* packet);
 	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&);
 	
+	mutable Poco::FastMutex	_mutex;
+
 	Options _options;
 	Roster _roster;
 	Runner& _runner;
-	ID _ourID;
+	std::string _ourID;
 	PersistenceT _persistence;
-	mutable Poco::FastMutex	_mutex;
+	int _announceStatus;
 };
 
 

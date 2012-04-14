@@ -28,6 +28,7 @@
 #include "Sourcey/Symple/Message.h"
 #include "Sourcey/Util.h"
 #include "Sourcey/CryptoProvider.h"
+#include "Sourcey/Logger.h"
 #include "Poco/Format.h"
 #include "assert.h"
 
@@ -40,7 +41,8 @@ namespace Sourcey {
 namespace Symple {
 
 
-Message::Message() 
+Message::Message() :
+	JSON::Value(Json::objectValue)
 {
 	(*this)["id"] = CryptoProvider::generateRandomKey(32);
 	(*this)["type"] = "message";
@@ -144,15 +146,16 @@ string Message::id() const
 }
 
 
-string Message::to() const 
+Address Message::to() const 
 {
-	return get("to", "").asString();
+	//return Address(get("to", ""));
+	return Address((*this)["to"]); //get("from", ""));
 }
 
 
-string Message::from() const 
+Address Message::from() const 
 {
-	return get("from", "").asString();
+	return Address((*this)["from"]); //get("from", ""));
 }
 
 
@@ -192,28 +195,32 @@ void Message::setType(const string& type)
 }
 
 	
-void Message::setTo(const ID& to) 
+void Message::setTo(const Address& to) 
 {
-	(*this)["to"] = to.toString();
+	(*this)["to"] = to; //.toString();
 }
 	
 
+/*
 void Message::setTo(const string& to) 
 {
 	(*this)["to"] = to;
 }
+*/
 
 
-void Message::setFrom(const ID& from) 
+void Message::setFrom(const Address& from) 
 {
-	(*this)["from"] = from.toString();
+	(*this)["from"] = from; //.toString();
 }
 
 
+/*
 void Message::setFrom(const string& from) 
 {
 	(*this)["from"] = from;
 }
+*/
 
 
 void Message::setStatus(int code) 

@@ -81,7 +81,7 @@ public:
 	FormField getField(const std::string& id, bool partial = false);
 	bool getField(const std::string& id, FormField& field, bool partial = false);
 	bool hasField(const std::string& id, bool partial = false);
-		/// Returns true if the given ID matches any of the
+		/// Returns true if the given Address matches any of the
 		/// internal form element IDs.
 		/// If the partial flag is set then substring matches
 		/// will be counted.
@@ -97,7 +97,7 @@ public:
 protected:
 	JSON::Value* _root;
 		/// The root pointer is just a reference
-		/// to an enternaly managed JSON value.
+		/// to an externally managed JSON value..
 };
 
 
