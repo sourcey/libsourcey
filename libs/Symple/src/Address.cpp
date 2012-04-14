@@ -25,7 +25,7 @@
 //
 
 
-#include "Sourcey/Symple/ID.h"
+#include "Sourcey/Symple/Address.h"
 #include "Sourcey/Util.h"
 #include "sstream"
 #include "assert.h"
@@ -38,18 +38,37 @@ namespace Sourcey {
 namespace Symple {
 
 
-ID::ID() 
+Address::Address() :
+	JSON::Value(Json::objectValue)
 {
 }
 
 
-ID::ID(const string& id)
+Address::Address(const Address& r) :
+	JSON::Value(r)
+{
+}
+
+
+Address::Address(const JSON::Value& r) :
+	JSON::Value(r)
+{
+}
+
+
+Address::~Address()
+{
+}
+
+
+/*
+Address::Address(const string& id)
 {
 	parse(id);
 }
 	
 
-bool ID::parse(const string& id)
+bool Address::parse(const string& id)
 {
 	StringList elems;
 	Util::split(id, ':', elems);
@@ -58,49 +77,104 @@ bool ID::parse(const string& id)
 	if (elems.size() >= 2)
 		user = elems[1];
 	if (elems.size() >= 3)
-		node = elems[2];
+		id = elems[2];
 	return valid();
 }
+*/
 
 
-bool ID::valid() const
+string Address::id() const 
 {
-	return !group.empty()
-		&& !user.empty()
-		&& !node.empty();
+	return get("id", "").asString();
 }
 
 
-void ID::print(ostream& os) const
+string Address::user() const 
 {
-	os << group;
-	os << ":";
-	os << user;
-	os << ":";
-	os << node;
+	return get("user", "").asString();
 }
 
 
-string ID::toString() const
+string Address::name() const 
+{
+	return get("name", "").asString();
+}
+
+
+string Address::group() const 
+{
+	return get("group", "").asString();
+}
+
+
+void Address::setID(const std::string& id) 
+{
+	(*this)["id"] = id;
+}
+
+
+void Address::setUser(const std::string& user) 
+{
+	(*this)["user"] = user;
+}
+
+
+void Address::setName(const std::string& name) 
+{
+	(*this)["name"] = name;
+}
+
+
+void Address::setGroup(const std::string& group) 
+{
+	(*this)["group"] = group;
+}
+
+
+bool Address::valid() const
+{
+	return !id().empty()
+		&& !user().empty();
+}
+
+
+void Address::print(ostream& os) const
+{
+	os << group();
+	os << ":";
+	os << user();
+	os << "(";
+	os << name();
+	os << ")";
+	os << ":";
+	os << id();
+}
+
+
+/*
+string Address::toString() const
 {
 	ostringstream os;
 	print(os);
 	return os.str(); 
 }
+*/
 
 
-bool ID::operator == (ID& r)
+bool Address::operator == (Address& r)
 {
-	return group == r.group
-		&& user == r.user
-		&& node == r.node;
+	return group() == r.group()
+		&& user() == r.user()
+		&& id() == r.id();
 }
 
 
-bool ID::operator == (string& r)
+/*
+bool Address::operator == (string& r)
 {
 	return toString() == r;
 }
+*/
 
 
 } // namespace Symple 

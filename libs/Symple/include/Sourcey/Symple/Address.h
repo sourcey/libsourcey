@@ -25,57 +25,69 @@
 //
 
 
-#ifndef SOURCEY_Symple_Peer_H
-#define SOURCEY_Symple_Peer_H
+#ifndef SOURCEY_Symple_Address_H
+#define SOURCEY_Symple_Address_H
 
 
 #include "Sourcey/JSON/JSON.h"
-#include "Sourcey/Symple/Address.h"
 
 
 namespace Sourcey {
 namespace Symple {
 
 
-class Peer: public JSON::Value
-	/// This class represents a peer on the network.
-	/// A Peer object may also contain arbitrary data set by
-	/// the client to share with other peers on the network.
-	/// @see Address for further methods and basic accessors.
+class Address: public JSON::Value
+	/// The Address structure contains identity information about
+	/// an entity on the network.
 {
-public:		
-	Peer();
-	Peer(const Peer& r);
-	Peer(const JSON::Value& r);
-	virtual ~Peer();
-
-	Address address() const;
+public:
+	Address();
+	Address(const Address& r);
+	Address(const JSON::Value& root);
+		/// The provided JSON value should be an object containing
+		/// the group, user, name and id string properties.
+	virtual ~Address();
 	
 	std::string id() const;
 	std::string user() const;
 	std::string name() const;
 	std::string group() const;
-	std::string type() const;
-	std::string host() const;
 	
 	void setID(const std::string& id);	
 	void setUser(const std::string& user);
 	void setName(const std::string& name);
 	void setGroup(const std::string& group);
-	void setType(const std::string& type);
-	void setHost(const std::string& host);
-
-	virtual bool valid();	
 	
+	bool valid() const;
 	void print(std::ostream& os) const;
 	
-    friend std::ostream& operator << (std::ostream& os, const Peer& peer)
+	bool operator == (Address& r);
+	
+    friend std::ostream& operator << (std::ostream& os, const Address& addr)
 	{
-		peer.print(os);
+		addr.print(os);
 		return os;
 	}
 	
-	virtual const char* className() const { return "Symple::Peer"; }
+	/*
+
+	//std::string group;const std::string& id
+	//std::string user;
+	//std::string name;
+	//std::string id;
+
+	bool parse(const JSON::Value& root);
+		id.print(os);
+	std::string toString() const;
+	bool operator == (std::string& r);
+
+protected:
+	JSON::Value* _root;
+		/// The root pointer is just a reference
+		/// to an externally managed JSON value,
+		/// generally a Message instance.
+	*/
+
 };
 
 
@@ -83,4 +95,4 @@ public:
 } // namespace Sourcey
 
 
-#endif // SOURCEY_Symple_Peer_H
+#endif // SOURCEY_Symple_Address_H

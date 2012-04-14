@@ -43,7 +43,8 @@ namespace Symple {
 Client::Client(Net::Reactor& reactor, Runner& runner, const Options& options) : 
 	SocketIO::Socket(reactor),
 	_runner(runner),
-	_options(options)
+	_options(options),
+	_announceStatus(500)
 {
 	Log("trace") << "[Symple::Client] Creating" << endl;
 }
@@ -59,14 +60,19 @@ Client::~Client()
 
 void Client::connect()
 {
+	Log("debug") << "[Symple::Client] Connecting" << endl;
+
 	assert(!_options.user.empty());
 	assert(!_options.token.empty());
+	cleanup();
 	SocketIO::Socket::connect(_options.serverAddr);
 }
 
 
 void Client::close()
 {
+	Log("debug") << "[Symple::Client] Closing" << endl;
+
 	SocketIO::Socket::close();
 }
 
@@ -81,9 +87,9 @@ int Client::send(const std::string data)
 int Client::send(Message& message, bool ack)
 {	
 	assert(isOnline());
-	message.setFrom(ourID());
+	message.setFrom(ourPeer().address());
 	assert(message.valid());
-	assert(message.to() != message.from());
+	assert(message.to().id() != message.from().id());
 	Log("debug") << "[Symple::Client] Sending Message: " 
 		<< message.id() << ":\n" 
 		<< JSON::stringify(message, true) << endl;
@@ -91,24 +97,36 @@ int Client::send(Message& message, bool ack)
 }
 
 
-int Client::sendPresence(const std::string& to, bool probe)
+void Client::createPresence(Presence& p)
+{
+	Log("debug") << "[Symple::Client] Creating Presence" << endl;
+
+	Peer& peer = /*_roster.*/ourPeer();
+	UpdatePresenceData.dispatch(this, peer);
+	//p.setFrom(peer.address()); //ourPeer());
+	p["data"] = peer;
+}
+
+
+int Client::sendPresence(bool probe)
 {
 	Log("debug") << "[Symple::Client] Broadcasting Presence" << endl;
 
 	Presence p;
-	{
-		FastMutex::ScopedLock lock(_mutex);
+	createPresence(p);
+	p.setProbe(probe);
+	return send(p);
+}
 
-		Peer& peer = *_roster.ourPeer();
-		UpdatePresenceData.dispatch(this, peer);
 
-		p.setFrom(_ourID);
-		p.setProbe(probe);
-		if (!to.empty())
-			p.setTo(to);
-		p["data"] = peer;
-	}
-
+int Client::sendPresence(const Address& to, bool probe)
+{
+	Log("debug") << "[Symple::Client] Sending Presence" << endl;
+	
+	Presence p;
+	createPresence(p);
+	p.setProbe(probe);
+	p.setTo(to); //*roster().get(to.id(), true));
 	return send(p);
 }
 
@@ -143,44 +161,59 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 	
 	SocketIO::Transaction* transaction = reinterpret_cast<SocketIO::Transaction*>(sender);
 	switch (state.id()) {	
-	case TransactionState::Success:		
+	case TransactionState::Success:
 		try 
 		{
 			JSON::Value data = transaction->response().json()[(size_t)0];
-			if (data["status"].asInt() != 200)
-				throw Exception("Authorization Error: " + data["message"].asString());
+			_announceStatus = data["status"].asInt();
 
-			_ourID = ID(data["data"]["id"].asString());
-			if (!_ourID.valid())
-				throw Exception("Invalid Authentication Response");
+			// Notify the outside application of the response 
+			// status before we transition the client state.
+			Announce.dispatch(this, _announceStatus);
 
-			// Set our local peer from the response or fail.
-			_roster.setOurID(_ourID);
+			if (_announceStatus != 200)
+				throw Exception(data["message"].asString()); //"Announce Error: " + 
+
+			_ourID = data["data"]["id"].asString(); //Address();
+			if (_ourID.empty())
+				throw Exception("Invalid server response.");
+
+			// Set our local peer data from the response or fail.
 			_roster.update(data["data"], true);
 
-			// Now we can transition our state on Online.
+			// Transition our state on Online.
 			SocketIO::Socket::onOnline();
 
-			// Broadcast our presence probe to the group.
-			sendPresence("", true);
+			// Broadcast a presence probe to our network.
+			sendPresence(true);
 		}
 		catch (Exception& exc)
 		{
-			setError(exc.displayText());
+			// Set the error message and close the connection.
+			setError(exc.message());
 		}
 		break;		
 
 	case TransactionState::Failed:
+		Announce.dispatch(this, _announceStatus);
 		setError(state.message());
 		break;
 	}
 }
 
 
+void Client::cleanup()
+{
+	_roster.clear();
+	_announceStatus = 500;
+	_ourID = "";
+}
+
+
 void Client::onClose()
 {
 	SocketIO::Socket::onClose();
-	_roster.clear();
+	cleanup();
 }
 
 
@@ -196,7 +229,7 @@ void Client::onOnline()
 bool Client::onPacketCreated(IPacket* packet) 
 {
 	Log("trace") << "[Symple::Client] Packet Created: " << packet->className() << endl;
-	packet->print(cout);
+	//packet->print(cout);
 
 	// Catch incoming messages here so we can parse
 	// messages and handle presence updates.
@@ -259,10 +292,27 @@ Client::Options& Client::options()
 }
 
 
-ID Client::ourID() const
+string Client::ourID() const
 {
 	FastMutex::ScopedLock lock(_mutex);
 	return _ourID;
+}
+
+
+int Client::announceStatus() const
+{
+	FastMutex::ScopedLock lock(_mutex);
+	return _announceStatus;
+}
+
+
+Peer& Client::ourPeer() //bool whiny
+{	
+	FastMutex::ScopedLock lock(_mutex);
+	Log("debug") << "[Client::" << this << "] Getting Our Peer: " << _ourID << endl;
+	if (_ourID.empty())
+		throw Exception("No active peer session is available.");
+	return *_roster.get(_ourID, true);
 }
 
 

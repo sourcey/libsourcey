@@ -49,18 +49,19 @@ Roster::~Roster()
 }
 
 
-void Roster::setOurID(const ID& id)
+/*
+void Roster::setOurID(const Address& id)
 {
 	FastMutex::ScopedLock lock(_mutex);
 	assert(id.valid());
-	_ourID = id;
+	_ourAddress = id;
 }
 
 
-ID Roster::ourID() const
+Address Roster::ourAddress() const
 {
 	FastMutex::ScopedLock lock(_mutex);
-	return _ourID;
+	return _ourAddress;
 }
 
 
@@ -69,17 +70,18 @@ Peer* Roster::ourPeer(bool whiny)
 	string id;
 	{
 		FastMutex::ScopedLock lock(_mutex);
-		Log("debug") << "[Roster::" << this << "] Getting Our Peer: " << _ourID.toString() << endl;
-		if (!_ourID.valid()) {
+		Log("debug") << "[Roster::" << this << "] Getting Our Peer: " << _ourAddress.toString() << endl;
+		if (!_ourAddress.valid()) {
 			if (whiny)
 				throw Exception("No active peer is available");
 			else return NULL;
 		}
-		id = _ourID.toString();
-		Log("debug") << "[Roster::" << this << "] Getting Our Peer: 1: " << _ourID.toString() << endl;
+		id = _ourAddress.toString();
+		Log("debug") << "[Roster::" << this << "] Getting Our Peer: 1: " << _ourAddress.toString() << endl;
 	}
 	return Roster::Manager::get(id, whiny);
 }
+*/
 
 
 void Roster::update(const JSON::Value& data, bool whiny)

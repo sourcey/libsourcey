@@ -32,7 +32,7 @@
 #include "Sourcey/Base.h"
 #include "Sourcey/IPacket.h"
 #include "Sourcey/JSON/JSON.h"
-#include "Sourcey/Symple/ID.h"
+#include "Sourcey/Symple/Address.h"
 
 
 namespace Sourcey {
@@ -56,15 +56,15 @@ public:
 	
 	std::string type() const;	
 	std::string id() const;	
-	std::string to() const;
-	std::string from() const;
+	Address to() const;
+	Address from() const;
 	int status() const;	
 	
 	void setType(const std::string& type);
-	void setTo(const ID& to);	
-	void setTo(const std::string& to);	
-	void setFrom(const ID& from);
-	void setFrom(const std::string& from);
+	void setTo(const Address& to);	
+	//void setTo(const std::string& to);	
+	void setFrom(const Address& from);
+	//void setFrom(const std::string& from);
 
 	void setStatus(int code);
 		/// HTTP status codes are used to describe the message response.

@@ -102,13 +102,32 @@ int TCPPacketStreamConnection::send(const char* data, size_t size)
 		return 0;
 	}
 
-	// Drop oversize packets.
+	// Split oversize packets.
 	else if (size > MAX_TCP_PACKET_SIZE) {
-		Log("warn") << "[TCPPacketStreamConnection:" << this << "] Dropping Oversize Data Packet: " 
+		
+		/*
+		Log("trace") << "[TCPPacketStreamConnection:" << this << "] Splitting Oversize Data Packet: " 
 			<< "\n\tSize: " << size
 			<< "\n\tMax Size: " << MAX_TCP_PACKET_SIZE
 			<< endl;
-		return 0;
+			*/
+		
+		int index = 0;
+		int read = 0;
+		while (index < size) {		
+			read = min(size - read, MAX_TCP_PACKET_SIZE);
+			/*
+			Log("trace") << "[TCPPacketStreamConnection:" << this << "] Splitting Oversize Data Packet: " 
+				<< "\n\tCurrent Index: " << index
+				<< "\n\tRead Bytes: " << read
+				<< "\n\tRemaining: " << (size - read)
+				<< endl;
+				*/
+			socket().sendBytes(data + index, read);
+			index += read;
+		}
+		
+		return size;
 	}
 
 	//Log("trace") << "[TCPPacketStreamConnection:" << this << "] Sending Packet: " 

@@ -31,7 +31,7 @@
 
 #include "Sourcey/EventfulManager.h"
 #include "Sourcey/Symple/Peer.h"
-#include "Sourcey/Symple/ID.h"
+#include "Sourcey/Symple/Address.h"
 
 
 namespace Sourcey {
@@ -39,6 +39,8 @@ namespace Symple {
 
 
 class Roster: public EventfulManager<std::string, Peer>
+	/// The Roster provided a registry for active network peers
+	/// indexed by their current session ID.
 {
 public:
 	typedef EventfulManager<std::string, Peer>	Manager;
@@ -51,10 +53,10 @@ public:
 	virtual void update(const JSON::Value& data, bool whiny = false);
 		/// Updates the roster from the given client object.
 	
-	virtual void setOurID(const ID& id);
+	//virtual void setOurID(const Address& id);
 
-    virtual ID ourID() const;
-    virtual Peer* ourPeer(bool whiny = true);
+    //virtual Address ourAddress() const;
+    //virtual Peer* ourPeer(bool whiny = true);
 		/// Returns the peer object that
 		/// controls the current session.
 	
@@ -66,7 +68,7 @@ public:
 
 protected:
 
-	ID _ourID;
+	//Address _ourAddress;
 };
 	
 

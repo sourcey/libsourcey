@@ -47,6 +47,16 @@ PackageInstallMonitor::~PackageInstallMonitor()
 }
 
 
+void PackageInstallMonitor::onPackageInstallStateChange(void* sender, PackageInstallState& state, const PackageInstallState& oldState)
+{
+	PackageInstallTask* task = reinterpret_cast<PackageInstallTask*>(sender);
+
+	Log("debug") << "[PackageInstallMonitor] onPackageInstallStateChange: " << task << ": " << state.toString() << endl;
+
+	PackageInstallStateChange.dispatch(this, *task, state, oldState);
+}
+
+
 void PackageInstallMonitor::onPackageInstallComplete(void* sender) 
 {
 	PackageInstallTask* task = reinterpret_cast<PackageInstallTask*>(sender);
@@ -59,6 +69,7 @@ void PackageInstallMonitor::onPackageInstallComplete(void* sender)
 	// Remove the package task reference.
 	for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end();) {
 		if (task == *it) {
+			task->StateChange -= delegate(this, &PackageInstallMonitor::onPackageInstallStateChange);
 			task->TaskComplete -= delegate(this, &PackageInstallMonitor::onPackageInstallComplete);
 			_tasks.erase(it);
 			break;
@@ -76,7 +87,16 @@ void PackageInstallMonitor::addTask(PackageInstallTask* task)
 		throw Exception("Invalid package task");
 	_tasks.push_back(task);
 	_packages.push_back(task->_local);
+	task->StateChange += delegate(this, &PackageInstallMonitor::onPackageInstallStateChange);
 	task->TaskComplete += delegate(this, &PackageInstallMonitor::onPackageInstallComplete);
+}
+
+
+void PackageInstallMonitor::cancelAll()
+{	
+	for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end();) {
+		(*it)->cancel();
+	}
 }
 
 

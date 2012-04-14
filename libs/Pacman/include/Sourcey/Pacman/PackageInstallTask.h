@@ -75,9 +75,11 @@ struct PackageInstallState: public StateT
 };
 
 
-class PackageInstallTask: public Poco::Runnable, public Stateful<PackageInstallState>, public ILoggable
+class PackageInstallTask: public Poco::Runnable, public StatefulSignal<PackageInstallState>, public ILoggable
 	/// This class is responsible for the installation process
 	/// of a single package.
+	///
+	/// TODO: Revise mutex usage for better thread safety.
 {
 public:
 	PackageInstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote);
@@ -106,22 +108,27 @@ public:
 		/// Called when the task completes either
 		/// successfully or in error.
 
+	virtual LocalPackage* local() const;
+	virtual RemotePackage* remote() const;
+	
+	virtual bool cancelled() const;
+	virtual bool failed() const;
+	virtual bool success() const;
 	virtual bool valid() const;
 
 	virtual void onStateChange(PackageInstallState& state, const PackageInstallState& oldState);
 
-	//virtual void onTransactionComplete(void* sender, HTTP::Response& response);
-		/// Download progress callbacks.
-
 	virtual void onDecompressionError(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const std::string>& info);
 	virtual void onDecompressionOk(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info);
 
-	virtual void printLog(std::ostream& ost) const;	
+	//virtual void printLog(std::ostream& ost) const;	
 	virtual const char* className() const { return "PackageInstallTask"; }
 	
 	NullSignal TaskComplete;
 
 protected:
+	mutable Poco::FastMutex	_mutex;
+
 	Poco::Thread	_thread;
 	PackageManager& _manager;
 	LocalPackage*	_local;

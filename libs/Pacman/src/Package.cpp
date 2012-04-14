@@ -71,23 +71,35 @@ bool Package::valid() const
 
 int Package::id() const
 {
-	return (*this)/*["package"]*/["id"].asInt();
+	return (*this)["id"].asInt();
 }
 
 string Package::name() const
 {
-	return (*this)/*["package"]*/["name"].asString();
+	return (*this)["name"].asString();
 }
 
 
 string Package::type() const
 {
-	return (*this)/*["package"]*/["type"].asString();
+	return (*this)["type"].asString();
 }
 
 string Package::title() const
 {
-	return (*this)/*["package"]*/["title"].asString();
+	return (*this)["title"].asString();
+}
+
+
+string Package::author() const
+{
+	return (*this)["author"].asString();
+}
+
+
+string Package::description() const
+{
+	return (*this)["description"].asString();
 }
 
 

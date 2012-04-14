@@ -49,7 +49,6 @@ namespace Pacman {
 
 
 PackageInstallTask::PackageInstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote) :
-	//ITask(manager.runner(), false, false, local->name()),
 	_manager(manager),
 	_local(local),
 	_remote(remote),
@@ -66,14 +65,16 @@ PackageInstallTask::~PackageInstallTask()
 
 void PackageInstallTask::start()
 {
-	Log("debug") << "[PackageInstallTask] Starting" << endl;
+	Log("debug", this) << "Starting" << endl;
+
 	_thread.start(*this);
 }
 
 
 void PackageInstallTask::cancel()
 {
-	Log("debug") << "[PackageInstallTask] Cancelling" << endl;
+	Log("debug", this) << "Cancelling" << endl;
+
 	_cancelled = true;
 	_transaction.cancel();
 	_thread.join();
@@ -83,19 +84,21 @@ void PackageInstallTask::cancel()
 void PackageInstallTask::run()
 {
 	try {
-		// If the package failed previously we
-		// might need to clear the file cache.
-		if (_local->isFailed() && 
-			_manager.options().clearFailedCache)
-			_manager.clearPackageCache(*_local);
+		// If the package failed previously we might need
+		// to clear the file cache.
+		if (_manager.options().clearFailedCache)
+			_manager.clearPackageCache(*_local);		
 
-		// Kick off the state machine
-		_local->setState("Installing");
-		setState(PackageInstallState::Downloading);		
+		// Kick off the state machine. If any errors are
+		// encountered an exception will be thrown and the
+		// task will fail.
+		doDownload();
+		doUnpack();
+		doFinalize();
 	}
 	catch (Exception& exc) {		
-		Log("error", this) << "Install Failed: " << exc.displayText() << endl; 
-		setState(PackageInstallState::Failed, exc.displayText());
+		Log("error", this) << "Install Failed: " << exc.message() << endl; 
+		setState(this, PackageInstallState::Failed, exc.message());
 	}
 
 	setComplete();
@@ -105,24 +108,19 @@ void PackageInstallTask::run()
 
 void PackageInstallTask::onStateChange(PackageInstallState& state, const PackageInstallState& oldState)
 {
-	if (_cancelled)
-		return;
+	Log("debug", this) << state.toString() << endl; 
 
+	// Check for cancellation each time the state is transitioned
+	// and throw an exception to break out of the current scope.
+	if (_cancelled)
+		throw Exception("The installation task was cancelled by the user.");
+
+	// Set the package install task so we know from which state to
+	// resume installation.
+	// TODO: Should this be reset by the clearFailedCache option?
 	_local->setInstallState(state.toString());
 
 	switch (state.id()) {
-	case PackageInstallState::Downloading:
-		doDownload();
-		break;
-
-	case PackageInstallState::Unpacking:
-		doUnpack();
-		break;
-
-	case PackageInstallState::Finalizing:
-		doFinalize();
-		break;
-
 	case PackageInstallState::Installed:
 		_local->setState("Installed");
 		_local->clearErrors();
@@ -135,34 +133,17 @@ void PackageInstallTask::onStateChange(PackageInstallState& state, const Package
 			_local->addError(state.message());
 		break;
 
-	default: assert(false);
+	default: 
+		_local->setState("Installing");	
 	}
-}
 
-
-void PackageInstallTask::setComplete()
-{
-	Log("info", this) << "Package Install Complete:" 
-		<< "\n\tName: " << _local->name()
-		<< "\n\tVersion: " << _local->version()
-		<< "\n\tPackage State: " << _local->state()
-		<< "\n\tPackage Install State: " << _local->installState()
-		<< endl;
-#ifdef _DEBUG
-	_local->print(cout);	
-#endif
-	
-	// The task will be destroyed
-	// as a result of this signal.
-	TaskComplete.dispatch(this);
+	StatefulSignal<PackageInstallState>::onStateChange(state, oldState);
 }
 
 
 void PackageInstallTask::doDownload()
 {
-	Log("debug", this) << "Initializing Download" << endl; 
-
-	setState(PackageInstallState::Downloading);
+	setState(this, PackageInstallState::Downloading);
 
 	//if (_local->isLatestVersion(_remote->latestAsset()))
 	//	throw Exception("This local package is already up to date");
@@ -181,7 +162,7 @@ void PackageInstallTask::doDownload()
 	if (_manager.hasCachedFile(localAsset.fileName()) && 
 		localAsset == remoteAsset) {
 		Log("debug", this) << "File exists, skipping download" << endl;		
-		setState(PackageInstallState::Unpacking);
+		setState(this, PackageInstallState::Unpacking);
 		return;
 	}
 	
@@ -198,25 +179,26 @@ void PackageInstallTask::doDownload()
 		cred.authenticate(*request); 
 	}
 	
-	Log("debug", this) << "Initializing Download: Ready" << endl; 
+	Log("debug", this) << "Initializing Download: Ready" << endl;
+
 	_transaction.setRequest(request);
 	_transaction.setOutputPath(_manager.getCacheFilePath(localAsset.fileName()).toString());
 	if (!_transaction.send())
-		throw Exception("Package download failed: " + _transaction.response().getReason());	
+		throw Exception(format("Failed to download package files: HTTP Error: %d %s", 
+			static_cast<int>(_transaction.response().getStatus()), 
+			_transaction.response().getReason()));	
 	
 	Log("debug", this) << "Initializing Download: OK" << endl; 
 	
-	// Transition the internal state if the HTTP
+	// Transition the internal state since the HTTP
 	// transaction was a success.
-	setState(PackageInstallState::Unpacking);
+	setState(this, PackageInstallState::Unpacking);
 }
 
 
 void PackageInstallTask::doUnpack()
 {
-	Log("debug", this) << "Initializing Unpacking" << endl; 
-
-	setState(PackageInstallState::Unpacking);
+	setState(this, PackageInstallState::Unpacking);
 		
 	Package::Asset localAsset = _local->latestAsset();
 	if (!localAsset.valid())
@@ -251,7 +233,7 @@ void PackageInstallTask::doUnpack()
 	c.EOk -=Poco::Delegate<PackageInstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path> >(this, &PackageInstallTask::onDecompressionOk);
 	
 	// Transition the internal state on success
-	setState(PackageInstallState::Finalizing);
+	setState(this, PackageInstallState::Finalizing);
 }
 
 
@@ -259,7 +241,7 @@ void PackageInstallTask::onDecompressionError(const void*, pair<const Poco::Zip:
 {
 	Log("error", this) << "Decompression Error: " << info.second << endl;
 
-	// Exctraction failed, throw an exception
+	// Extraction failed, throw an exception
 	throw Exception("Archive Error: Extraction failed: " + info.second);
 }
 
@@ -276,9 +258,7 @@ void PackageInstallTask::onDecompressionOk(const void*, pair<const Poco::Zip::Zi
 
 void PackageInstallTask::doFinalize() 
 {
-	Log("debug", this) << "Finalizing Installation" << endl;
-	
-	setState(PackageInstallState::Finalizing);
+	setState(this, PackageInstallState::Finalizing);
 
 	bool errors = false;
 	Path outputDir(_manager.getIntermediatePackageDir(_local->name()));
@@ -300,8 +280,8 @@ void PackageInstallTask::doFinalize()
 			// must be called from an external process before the
 			// installation can be completed.
 			errors = true;
-			Log("error", this) << "Error: " << exc.displayText() << endl;
-			_local->addError(exc.displayText());
+			Log("error", this) << "Error: " << exc.message() << endl;
+			_local->addError(exc.message());
 		}
 		
 		++fIt;
@@ -328,32 +308,76 @@ void PackageInstallTask::doFinalize()
 		// While testing on a windows system this fails regularly
 		// with a file sharing error, but since the package is already
 		// installed we can just swallow it.
-		Log("warn", this) << "Unable to remove temp directory: " << exc.displayText() << endl;
+		Log("warn", this) << "Unable to remove temp directory: " << exc.message() << endl;
 	}
 	
 	// Transition the internal state if finalization was a success.
-	// This will complete the installation proccess.
-	setState(PackageInstallState::Installed);
+	// This will complete the installation process.
+	setState(this, PackageInstallState::Installed);
+}
+
+
+void PackageInstallTask::setComplete()
+{
+	{
+		FastMutex::ScopedLock lock(_mutex);
+
+		Log("info", this) << "Package Install Complete:" 
+			<< "\n\tName: " << _local->name()
+			<< "\n\tVersion: " << _local->version()
+			<< "\n\tPackage State: " << _local->state()
+			<< "\n\tPackage Install State: " << _local->installState()
+			<< endl;
+#ifdef _DEBUG
+		_local->print(cout);	
+#endif
+	}
+	
+	// The task will be destroyed
+	// as a result of this signal.
+	TaskComplete.dispatch(this);
 }
 
 
 bool PackageInstallTask::valid() const
 {
+	FastMutex::ScopedLock lock(_mutex);
 	return !stateEquals(PackageInstallState::Failed) 
 		&& _local->valid() 
 		&& (!_remote || _remote->valid());
 }
 
 
-void PackageInstallTask::printLog(std::ostream& ost) const
+bool PackageInstallTask::cancelled() const
 {
-	ost << "["
-		<< className()
-		<< ":"
-		<< _local->name()
-		<< ":"
-		<< state()
-		<< "] ";
+	FastMutex::ScopedLock lock(_mutex);
+	return _cancelled;
+}
+
+
+bool PackageInstallTask::failed() const
+{
+	return stateEquals(PackageInstallState::Failed);
+}
+
+
+bool PackageInstallTask::success() const
+{
+	return stateEquals(PackageInstallState::Installed);
+}
+
+
+LocalPackage* PackageInstallTask::local() const
+{
+	FastMutex::ScopedLock lock(_mutex);
+	return _local;
+}
+
+
+RemotePackage* PackageInstallTask::remote() const
+{
+	FastMutex::ScopedLock lock(_mutex);
+	return _remote;
 }
 
 
@@ -361,6 +385,43 @@ void PackageInstallTask::printLog(std::ostream& ost) const
 
 
 
+	/*
+	case PackageInstallState::Downloading:
+		doDownload();
+		break;
+
+	case PackageInstallState::Unpacking:
+		doUnpack();
+		break;
+
+	case PackageInstallState::Finalizing:
+		doFinalize();
+		break;
+	*/
+
+
+		/*
+void PackageInstallTask::printLog(std::ostream& ost) const
+{
+	ost << "["
+		<< className()
+		<< ":"
+		<< local()->name()
+		<< ":"
+		<< state()
+		<< "] ";
+}
+
+
+		_local->setState("Installed");
+		_local->clearErrors();
+		_local->setVersion(_local->latestAsset().version());
+
+		_local->setState("Failed");
+		if (!state.message().empty())
+			_local->addError(state.message());
+	//ITask(manager.runner(), false, false, local->name()),
+			*/
 
 /*
 	//transaction->TransactionComplete += delegate(this, &PackageInstallTask::onTransactionComplete);
@@ -369,9 +430,9 @@ void PackageInstallTask::onTransactionComplete(void* sender, HTTP::Response& res
 	Log("debug", this) << "Download Complete: " << response.success() << endl;
 	
 	if (response.success())		
-		setState(PackageInstallState::Unpacking);
+		setState(this, PackageInstallState::Unpacking);
 	else
-		setState(PackageInstallState::Failed, response.error);
+		setState(this, PackageInstallState::Failed, response.error);
 }
 */
 
@@ -418,7 +479,7 @@ void PackageInstallTask::setFailed(const string& message)
 		_local->setState("Failed");
 		_local->setInstallState("Failed");		
 		_manager.saveLocalPackage(*local);
-		setState(PackageInstallState::Installed, message);
+		setState(this, PackageInstallState::Installed, message);
 	}
 };
 
@@ -431,7 +492,7 @@ void PackageInstallTask::setComplete(const string& message)
 		_local->setInstallState("Installed");
 		_local->setVersion(_local->latestAsset().version());
 		_manager.saveLocalPackage(*local);
-		setState(PackageInstallState::Installed, message);		
+		setState(this, PackageInstallState::Installed, message);		
 
 		Log("info", this) << "Package Installed:" 
 			<< "\n\tName: " << _local->name()
@@ -451,7 +512,7 @@ void PackageInstallTask::setIncomplete(const string& message)
 		_local->setInstallState("Incomplete");
 		//_local->setVersion(_local->latestAsset().version());
 		_manager.saveLocalPackage(*local);
-		setState(PackageInstallState::Incomplete, message);		
+		setState(this, PackageInstallState::Incomplete, message);		
 
 		Log("info", this) << "Package Incomplete:" 
 			<< "\n\tName: " << _local->name()
@@ -501,7 +562,7 @@ void PackageInstallTask::transitionState()
 		}
 	}
 	catch (Exception& exc) {
-		setFailed(exc.displayText());
+		setFailed(exc.message());
 	}
 }
 */
@@ -535,7 +596,7 @@ bool PackageInstallTask::setState(unsigned int id, const string& message)
 			}
 		}
 		catch (Exception& exc) {
-			setFailed(exc.displayText());
+			setFailed(exc.message());
 		}
 
 		return true;
@@ -560,7 +621,7 @@ void PackageInstallTask::parsePackageResponse(JSON::Document& response)
 		ostringstream ss;
 		updatedPackage.print(ss);
 		manifest.load(ss.str().data());
-		setState(PackageInstallState::QueryingPackageListInstalled);
+		setState(this, PackageInstallState::QueryingPackageListInstalled);
 	}
 }
 */

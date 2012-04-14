@@ -102,6 +102,8 @@ macro(find_component _module _component _pkgconfig _library _header)
 
   mark_as_advanced(
     ${_component}_INCLUDE_DIRS
+    ${_component}_DEBUG_LIBRARIES
+    ${_component}_RELEASE_LIBRARIES
     ${_component}_LIBRARIES
     ${_component}_DEFINITIONS
     ${_component}_VERSION)
@@ -138,9 +140,9 @@ macro(find_multi_component _module _component _pkgconfig _library _header)
 
   # Create a Debug and a Release list for multi configuration builds        
   if (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-    set(${_component}_RELEASE_LIBRARIES ${_component}_RELEASE_LIBRARIES-NOTFOUND)
-    set(${_component}_DEBUG_LIBRARIES ${_component}_DEBUG_LIBRARIES-NOTFOUND)
-    set(${_component}_LIBRARIES)
+    #set(${_component}_RELEASE_LIBRARIES ${_component}_RELEASE_LIBRARIES-NOTFOUND)
+    #set(${_component}_DEBUG_LIBRARIES ${_component}_DEBUG_LIBRARIES-NOTFOUND)
+    #set(${_component}_LIBRARIES)
     find_library(${_component}_RELEASE_LIBRARIES 
       NAMES
         lib${_library}.a 
@@ -175,7 +177,7 @@ macro(find_multi_component _module _component _pkgconfig _library _header)
     #message("R-----${_component}=${${_component}_LIBRARIES}")
     #message("D-----${_component}=${${_component}_LIBRARIES}")
   else()
-    set(${_component}_LIBRARIES)
+    #set(${_component}_LIBRARIES)
     find_library(${_component}_LIBRARIES 
       NAMES # setting in order might help overcome find_library bugs :/
         lib${_library}.a 
@@ -212,6 +214,8 @@ macro(find_multi_component _module _component _pkgconfig _library _header)
   mark_as_advanced(
     ${_component}_INCLUDE_DIRS
     ${_component}_LIBRARIES
+    ${_component}_DEBUG_LIBRARIES
+    ${_component}_RELEASE_LIBRARIES
     ${_component}_DEFINITIONS
     ${_component}_VERSION)
 
