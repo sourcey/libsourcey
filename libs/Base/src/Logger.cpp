@@ -66,7 +66,7 @@ void ILoggable::printLog(std::ostream& ost) const
 		<< className()
 		<< ":"
 		<< this // override to reflect derived pid
-		<< "] ";
+		<< "]";
 }
 
 
@@ -95,7 +95,7 @@ void LogChannel::format(std::ostream& out, const std::string& message, LogLevel 
 { 
 	if (_dateFormat)
 		out << Poco::DateTimeFormatter::format(Poco::Timestamp(), _dateFormat);
-	out << " [" << getStringFromLogLevel(level) << "]";
+	out << " [" << getStringFromLogLevel(level) << "] ";
 	if (klass)
 		klass->printLog(out);
 	out << " ";

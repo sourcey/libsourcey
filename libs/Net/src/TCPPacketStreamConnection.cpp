@@ -74,10 +74,10 @@ void TCPPacketStreamConnection::run()
 		assert(_stream == NULL);
 	}
 	catch (Exception& exc) {
-		Log("error", this) << "[TCPPacketStreamConnection:" << this << "] Error: " << exc.displayText() << endl;
+		Log("error", this) << "Error: " << exc.displayText() << endl;
 	}
 
-	Log("debug") << "[TCPPacketStreamConnection:" << this << "] TCP Packet Connection Exiting: " << this << endl;
+	Log("debug", this) << "TCP Packet Connection Exiting: " << this << endl;
 }
 
 

@@ -42,26 +42,26 @@ namespace SocketIO {
 Transaction::Transaction(Runner& runner, Socket& socket, int maxAttempts, long timeout) : 
 	ITransaction<Packet>(runner, maxAttempts, timeout), socket(socket)
 {
-	Log("debug") << "[SocketIOTransaction::" << this << "] Initializing" << endl;
+	Log("debug") << "[SocketIOTransaction:" << this << "] Initializing" << endl;
 }
 
 
 Transaction::Transaction(Runner& runner, Socket& socket, const Packet& request, int maxAttempts, long timeout) : 
 	ITransaction<Packet>(runner, request, maxAttempts, timeout), socket(socket)
 {
-	Log("debug") << "[SocketIOTransaction::" << this << "] Initializing" << endl;
+	Log("debug") << "[SocketIOTransaction:" << this << "] Initializing" << endl;
 }
 
 
 Transaction::~Transaction() 
 {
-	Log("debug") << "[SocketIOTransaction::" << this << "] Destroying" << endl;	
+	Log("debug") << "[SocketIOTransaction:" << this << "] Destroying" << endl;	
 }
 
 
 bool Transaction::send()
 {
-	Log("debug") << "[SocketIOTransaction::" << this << "] Sending" << endl;	
+	Log("debug") << "[SocketIOTransaction:" << this << "] Sending" << endl;	
 	_request.setAck(true);	
 	socket += packetDelegate(this, &Transaction::onPotentialResponse, 100);
 	if (socket.send(_request), true)
@@ -72,7 +72,7 @@ bool Transaction::send()
 	
 void Transaction::onPotentialResponse(void*, Packet& packet)
 {
-	//Log("debug") << "[SocketIOTransaction::" << this << "] Potential Response: " 
+	//Log("debug") << "[SocketIOTransaction:" << this << "] Potential Response: " 
 	//	<< packet.className() << endl;	
 	if (process(packet))
 		throw StopPropagation();
@@ -81,7 +81,7 @@ void Transaction::onPotentialResponse(void*, Packet& packet)
 
 bool Transaction::match(const Packet& packet) 
 {
-	Log("debug") << "[SocketIOTransaction::" << this << "] Match: "
+	Log("debug") << "[SocketIOTransaction:" << this << "] Match: "
 		<< "\n\tRequest: " << _request.id()
 		<< "\n\tResponse: " << packet.id()
 		<< endl;	
@@ -92,7 +92,7 @@ bool Transaction::match(const Packet& packet)
 
 void Transaction::onComplete()
 {
-	Log("debug") << "[SocketIOTransaction::" << this << "] Closing" << endl;
+	Log("debug") << "[SocketIOTransaction:" << this << "] Closing" << endl;
 
 	socket -= packetDelegate(this, &Transaction::onPotentialResponse);
 	

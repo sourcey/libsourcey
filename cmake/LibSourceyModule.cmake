@@ -202,21 +202,36 @@ macro(define_sourcey_module_sample name)
     
     source_group("Src" FILES ${lib_srcs})
     source_group("Include" FILES ${lib_hdrs})
-
+  
     add_executable(${name} ${lib_srcs} ${lib_hdrs})
+
+    # Include dependent modules
+    foreach(module ${ARGN})
+      include_sourcey_modules(${module})  
+      #add_dependencies(${name} ${module})
+    endforeach()  
+
+    # Include external dependencies
+    target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
+    add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES}) # requires complete recompile on some systems
+
+    # Include library and header directories
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
+    include_directories(${LibSourcey_INCLUDE_DIRS})
+    link_directories(${LibSourcey_LIBRARY_DIRS})  
      
     set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
         
-    foreach(lib ${ARGN})
-        target_link_libraries(${name} debug "Sourcey${lib}${LibSourcey_DLLVERSION}d")
-        target_link_libraries(${name} optimized "Sourcey${lib}${LibSourcey_DLLVERSION}")
-    endforeach()
-    foreach(lib IN LISTS LibSourcey_DEBUG_LIBS)
-        target_link_libraries(${name} debug ${lib})
-    endforeach()
-    foreach(lib IN LISTS LibSourcey_RELEASE_LIBS)
-        target_link_libraries(${name} optimized ${lib})
-    endforeach()
+    #foreach(lib ${ARGN})
+    #    target_link_libraries(${name} debug "Sourcey${lib}${LibSourcey_DLLVERSION}d")
+    #    target_link_libraries(${name} optimized "Sourcey${lib}${LibSourcey_DLLVERSION}")
+    #endforeach()
+    #foreach(lib IN LISTS LibSourcey_DEBUG_LIBS)
+    #    target_link_libraries(${name} debug ${lib})
+    #endforeach()
+    #foreach(lib IN LISTS LibSourcey_RELEASE_LIBS)
+    #    target_link_libraries(${name} optimized ${lib})
+    #endforeach()
 
     install(TARGETS ${name} RUNTIME DESTINATION "samples/${name}" COMPONENT main) 
         
@@ -228,34 +243,66 @@ endmacro()
 # Defines a generic LibSourcey test application.
 #
 macro(define_libsourcey_test name)
-            
+                    
     project(${name})    
 
-    # Add example source files
+    # Add source files
     file(GLOB lib_hdrs "*.h*")
     file(GLOB lib_srcs "*.cpp")
     
     source_group("Src" FILES ${lib_srcs})
     source_group("Include" FILES ${lib_hdrs})
-
+  
     add_executable(${name} ${lib_srcs} ${lib_hdrs})
+
+    # Include dependent modules
+    foreach(module ${ARGN})
+      include_sourcey_modules(${module})  
+      #add_dependencies(${name} ${module})
+    endforeach()  
+
+    # Include external dependencies
+    target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
+    add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES}) # requires complete recompile on some systems
+
+    # Include library and header directories
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
+    include_directories(${LibSourcey_INCLUDE_DIRS})
+    link_directories(${LibSourcey_LIBRARY_DIRS})  
      
     set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
-        
-    foreach(lib ${ARGN})
-        target_link_libraries(${name} debug "Sourcey${lib}${LibSourcey_DLLVERSION}d")
-        target_link_libraries(${name} optimized "Sourcey${lib}${LibSourcey_DLLVERSION}")
-    endforeach()
-    foreach(lib IN LISTS LibSourcey_DEBUG_LIBS)
-        target_link_libraries(${name} debug ${lib})
-    endforeach()
-    foreach(lib IN LISTS LibSourcey_RELEASE_LIBS)
-        target_link_libraries(${name} optimized ${lib})
-    endforeach()
 
     install(TARGETS ${name} RUNTIME DESTINATION "tests/${name}" COMPONENT main) 
-        
+    
 endmacro()
+
+
+            
+    #project(${name})    
+
+    # Add example source files
+    #file(GLOB lib_hdrs "*.h*")
+    #file(GLOB lib_srcs "*.cpp")
+    
+    #source_group("Src" FILES ${lib_srcs})
+    #source_group("Include" FILES ${lib_hdrs})
+
+    #add_executable(${name} ${lib_srcs} ${lib_hdrs})
+     
+    #set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
+        
+    #foreach(lib ${ARGN})
+    #    target_link_libraries(${name} debug "Sourcey${lib}${LibSourcey_DLLVERSION}d")
+    #    target_link_libraries(${name} optimized "Sourcey${lib}${LibSourcey_DLLVERSION}")
+    #endforeach()
+    #foreach(lib IN LISTS LibSourcey_DEBUG_LIBS)
+    #    target_link_libraries(${name} debug ${lib})
+    #endforeach()
+    #foreach(lib IN LISTS LibSourcey_RELEASE_LIBS)
+    #    target_link_libraries(${name} optimized ${lib})
+    #endforeach()
+
+    #install(TARGETS ${name} RUNTIME DESTINATION "tests/${name}" COMPONENT main) 
 
 
 

@@ -50,6 +50,20 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries (.dll/.so) instead 
 
 
 # ----------------------------------------------------------------------------
+# Build sample applications
+# Default: off
+# ----------------------------------------------------------------------------
+set(BUILD_MODULE_SAMPLES OFF CACHE BOOL "Build module sample applications?")
+
+
+# ----------------------------------------------------------------------------
+# Build test applications
+# Default: off
+# ----------------------------------------------------------------------------
+set(BUILD_MODULE_TESTS OFF CACHE BOOL "Build module test applications?")
+
+
+# ----------------------------------------------------------------------------
 # Include debug info into debug libs?
 # Default: yes
 # ----------------------------------------------------------------------------
@@ -152,10 +166,11 @@ set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 # to find libraries from these locations first
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
+    ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
     D:/dev/lib/OpenCV2.3/build
     D:/dev/lib/wxWidgets-2.9.2/lib/vc_lib
-    D:/dev/lib/ffmpeg/lib
+    #D:/dev/lib/ffmpeg/lib
+    D:/dev/lib/ffmpeg-2012-04-16/lib
     D:/dev/lib/OpenSSL-Win32/lib/VC
     D:/dev/lib/poco-1.4.1p1-all/lib 
     #D:/dev/apps/MinGW/msys/1.0/local
@@ -173,12 +188,14 @@ if(WIN32)
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
     D:/dev/lib/OpenCV2.3/build/include
     D:/dev/lib/wxWidgets-2.9.2
-    D:/dev/lib/ffmpeg
+    #D:/dev/lib/ffmpeg
+    D:/dev/lib/ffmpeg-2012-04-16/include
     D:/dev/lib/OpenSSL-Win32/include
     D:/dev/lib/poco-1.4.1p1-all
     #D:/dev/apps/MinGW/msys/1.0/local
     )
 endif()
+  #set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} "${LibSourcey_DEPENDENCIES_SOURCE_DIR}/MemLeakDetect")
       
 set(LibSourcey_ARCHITECTURE i386)
 set(LibSourcey_BITNESS 32)

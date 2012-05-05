@@ -38,6 +38,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/fifo.h>
+#include <libavutil/opt.h>
 #include <libswscale/swscale.h>
 }
 
@@ -55,25 +56,23 @@ struct VideoContext
 	virtual void close();
 	virtual void reset();
 	
-	//virtual int populateMatrix(cv::Mat& mat);
 	static AVFrame* createVideoFrame(::PixelFormat pixfmt, int width, int height);
 
-    //int					streamID;
-	AVStream*			stream;
-	AVCodecContext*		codec;
-	//AVCodec*			codec;
-	//AVPacket*			packet;
-	AVFrame*			iframe;
-	AVFrame*			oframe;
-	struct SwsContext*	convertCtx;
+	AVStream* stream;
+	AVCodecContext* codec;
+	AVFrame* iframe;
+	AVFrame* oframe;
+	struct SwsContext*	convCtx;
 
-    int					bufferSize;
-	uint8_t*			buffer;
+    int bufferSize;
+	UInt8* buffer;
+	UInt64 frameNum;
 
     double pts;
 	
     std::string error;
 };
+
 
 // ---------------------------------------------------------------------
 //
@@ -86,12 +85,14 @@ struct VideoEncoderContext: public VideoContext
 	virtual void close();
 	virtual void reset();	
 	
-	virtual int encode(unsigned char* buffer, int bufferSize, AVPacket& opacket);
+	virtual int encode(unsigned char* buffer, int bufferSize, AVPacket& opacket/*, unsigned pts = AV_NOPTS_VALUE*/);
+		/// Encodes a video frame from given data buffer and
+		/// stores it in the opacket.
+		/// If a pts value is given it will be applied to the
+		/// encoded video packet.
 		
-    // int			frameSize;
 	VideoCodec	iparams;
 	VideoCodec	oparams;
-	//AVPacket*	opacket;
 };
 
 

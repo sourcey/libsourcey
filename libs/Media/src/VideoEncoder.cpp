@@ -54,7 +54,7 @@ VideoEncoder::~VideoEncoder()
 {
 	Log("debug") << "[VideoEncoder" << this << "] Destroying" << endl;
 
-	setState(this, EncoderState::Closing);
+	setState(this, EncoderState::Stopped);
     cleanup();
 }
 
@@ -79,8 +79,8 @@ void VideoEncoder::initialize()
 		// Lock our mutex during avcodec_init
 		{
 			FastMutex::ScopedLock lock(_mutex);
-			avcodec_init();
-			avcodec_register_all();
+			//avcodec_init();
+			//avcodec_register_all();
 		}
 
 		initEncodeContext();

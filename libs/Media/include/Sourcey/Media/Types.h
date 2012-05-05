@@ -49,7 +49,7 @@ struct MediaPacket: public DataPacket
 
 	MediaPacket(unsigned char* data = NULL,
 				int size = 0,
-				double time = ::time(0)) :
+				double time = 0) :
 		DataPacket(data, size),
 		time(time) {};
 
@@ -79,14 +79,14 @@ struct VideoPacket: public MediaPacket
 				int size = 0,
 				int width = 0,
 				int height = 0,
-				double time = (double)clock() / CLOCKS_PER_SEC) :
+				double time = 0) : //(double)clock() / CLOCKS_PER_SEC
 		MediaPacket(data, size, time),
 		width(width),
 		height(height),
 		mat(NULL) {};
 
 	VideoPacket(cv::Mat* mat, 
-			    double time = (double)clock() / CLOCKS_PER_SEC) :
+			    double time = 0) : //(double)clock() / CLOCKS_PER_SEC
 		MediaPacket((unsigned char*)mat->data, mat->total(), time),
 		width(mat->cols),
 		height(mat->rows),
@@ -114,7 +114,7 @@ struct AudioPacket: public MediaPacket
 {
 	AudioPacket(unsigned char* data = NULL,
 				int size = 0,
-				double time = (double)clock() / CLOCKS_PER_SEC) :
+				double time = 0) : //(double)clock() / CLOCKS_PER_SEC
 		MediaPacket(data, size, time) {};
 
 	AudioPacket(const AudioPacket& r) : 

@@ -64,7 +64,7 @@ struct AudioContext
     //AVPacket*			packet;
 	
     int					bufferSize;
-    uint8_t*			buffer;
+    UInt8*			buffer;
     //int				offset;
 
 	// Exposed properties
@@ -74,6 +74,7 @@ struct AudioContext
     int bitsPerSample;
     int channels;
 	*/
+	UInt64 frameNum;
     double				pts;
 	
     std::string			error;

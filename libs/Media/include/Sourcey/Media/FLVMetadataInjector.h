@@ -31,7 +31,9 @@
 
 #include "Sourcey/IPacketizer.h"
 #include "Sourcey/Signal.h"
+#include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/FPSCounter.h"
+#include "Sourcey/Media/Format.h"
 #include "Poco/Net/HTTPResponse.h"
 #include "Poco/Format.h"
 #include <sstream>
@@ -130,7 +132,8 @@ public:
 				if (_waitingForKeyframe) {
 
 					// Drop all frames until we receive the first keyframe.
-					if (!fastIsFLVHeader(reinterpret_cast<char*>(mpacket->data()))) {
+					//fastIsFLVHeader(reinterpret_cast<char*>(mpacket->data())
+					if (!fastIsFLVKeyFrame(reinterpret_cast<char*>(mpacket->data()))) {
 						Log("debug") << "[FLVMetadataInjector:" << this << "] Waiting for Keyframe" << std::endl;
 						return;
 					}
@@ -223,16 +226,22 @@ public:
 			
 		int offset = buf.position();
 
-		UInt8 tagType; 
-		buf.readUInt8(tagType);
-		if (tagType != FLV_TAG_TYPE_VIDEO)
-			return false;
+		//UInt8 tagType; 
+		//buf.readUInt8(tagType);
+		//if (tagType != FLV_TAG_TYPE_VIDEO)
+		//	return false;
 						
 		UInt8 flags;				
 		buf.setPosition(11);
 		buf.readUInt8(flags);	
 					
 		buf.setPosition(offset);
+		return (flags & FLV_FRAME_KEY) == FLV_FRAME_KEY;
+	}
+
+	virtual bool fastIsFLVKeyFrame(char* buf)
+	{		
+		UInt8 flags = buf[11];
 		return (flags & FLV_FRAME_KEY) == FLV_FRAME_KEY;
 	}
 
@@ -321,17 +330,15 @@ public:
 		// Write tag size
 		buf.writeUInt32(dataSize + 11);
 			
-		/*
-		Log("debug") << "FLV Header:" 
-			<< "\n\tType: " << (int)tagType
-			<< "\n\tData Size: " << dataSize
-			<< "\n\tTimestamp: " << timestamp
-			<< "\n\tStream ID: " << streamId
-			<< std::endl;
-		*/
+		//Log("debug") << "FLV Header:" 
+		//	<< "\n\tType: " << (int)tagType
+		//	<< "\n\tData Size: " << dataSize
+		//	<< "\n\tTimestamp: " << timestamp
+		//	<< "\n\tStream ID: " << streamId
+		//	<< std::endl;
 	}	
 
-	virtual bool dumpFLVTags(Buffer& buf)
+	static bool dumpFLVTags(Buffer& buf)
 	{	
 		bool result = false; 
 

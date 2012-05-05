@@ -4908,7 +4908,13 @@ void RtApiDs :: callbackEvent()
       }
     }
     else { // mode == INPUT
-      while ( safeReadPointer < endRead ) {
+	  // CHANGE: Sometimes when the stream is closing we
+	  // end up with infinite recursion here, so let's
+	  // add a check to stream_.callbackInfo.isRunning.
+		
+      //while ( safeReadPointer < endRead ) {
+      while ( safeReadPointer < endRead && 
+		  stream_.callbackInfo.isRunning) {
         // See comments for playback.
         double millis = (endRead - safeReadPointer) * 1000.0;
         millis /= ( formatBytes(stream_.deviceFormat[1]) * stream_.nDeviceChannels[1] * stream_.sampleRate);

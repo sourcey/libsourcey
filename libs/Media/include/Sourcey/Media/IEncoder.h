@@ -46,8 +46,8 @@ struct EncoderState: public StateT
 		None = 0,
 		Ready,
 		Encoding,
-		Failed,
-		Closing
+		Stopped,
+		Failed
 	};
 
 	std::string str(unsigned int id) const 
@@ -56,8 +56,8 @@ struct EncoderState: public StateT
 		case None:			return "None";
 		case Ready:			return "Ready";
 		case Encoding:		return "Encoding";
+		case Stopped:		return "Stopped";
 		case Failed:		return "Failed";
-		case Closing:		return "Closing";
 		}
 		return "undefined"; 
 	};
