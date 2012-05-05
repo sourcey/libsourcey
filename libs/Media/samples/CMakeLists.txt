@@ -4,3 +4,4 @@
 # ----------------------------------------------------------------------------
 
 add_subdirectory(VideoSocket)
+add_subdirectory(WaveformOutput)

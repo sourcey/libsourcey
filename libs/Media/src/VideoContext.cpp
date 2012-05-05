@@ -56,6 +56,8 @@ void VideoContext::open()
 
 void VideoContext::close()
 {
+	Log("trace") << "[VideoContext" << this << "] Closing" << endl;
+
 	if (iframe)
 		av_free(iframe);
 	
@@ -65,14 +67,20 @@ void VideoContext::close()
   	//if (packet)
   	//	av_free_packet(packet);
   	
-  	if (convertCtx)
-		sws_freeContext(convertCtx);
+  	if (convCtx)
+		sws_freeContext(convCtx);
 
 	if (codec)
+		//av_freep(codec);
 		avcodec_close(codec);
+	
+	if (stream)	
+		av_freep(stream);
 
     if (buffer)
         av_free(buffer);
+	
+	Log("trace") << "[VideoContext" << this << "] Closing: OK" << endl;
 }
 
 
@@ -81,12 +89,14 @@ void VideoContext::reset()
 	stream = NULL;
 	codec = NULL;
 	//packet = NULL;
-	convertCtx = NULL;
+	convCtx = NULL;
 	iframe = NULL;
 	oframe = NULL;
 		
 	bufferSize = 0;
 	buffer = NULL;
+
+	frameNum = 0;
 
 	pts = 0.0;
 
@@ -96,25 +106,22 @@ void VideoContext::reset()
 		
 AVFrame* VideoContext::createVideoFrame(::PixelFormat pixfmt, int width, int height)
 {
-    AVFrame* picture;
-    UInt8* buffer;
-    int size;
-    
-    picture = avcodec_alloc_frame();
+    AVFrame* picture = avcodec_alloc_frame();
     if (!picture)
-        return 0;
+        return NULL;
 	
-    size = avpicture_get_size(pixfmt, width, height);
-    buffer = (UInt8*)av_malloc(size);
+    int size = avpicture_get_size(pixfmt, width, height);
+    UInt8* buffer = (UInt8*)av_malloc(size);
     if (!buffer) {
         av_free(picture);
-        return 0;
+        return NULL;
 	}
 		
-	avpicture_fill((AVPicture *)picture, buffer, pixfmt, width, height);
+	avpicture_fill(reinterpret_cast<AVPicture*>(picture), buffer, pixfmt, width, height);
 
     return picture;
 }
+
 
 /*
 void VideoContext::populate()
@@ -163,42 +170,55 @@ VideoEncoderContext::~VideoEncoderContext()
 
 void VideoEncoderContext::open(AVFormatContext *oc) //, const VideoCodec& params
 {
-	Log("debug") << "[VideoEncoderContext" << this << "] Opening Video" << endl;
+	Log("debug") << "[VideoEncoderContext:" << this << "] Opening Video" << endl;
 
 	VideoContext::open();
 
-	assert(oparams.enabled);
+	assert(oparams.enabled);	
 
+	// Find the video encoder
+	AVCodec* c = avcodec_find_encoder(oc->oformat->video_codec);
+	if (!c)
+   		throw Exception("Video codec encoder not found.");
+	
 	// Add a video stream that uses the format's default video 
 	// codec to the format context's streams[] array.
-	stream = av_new_stream(oc, 0);
+	stream = avformat_new_stream(oc, c);
 	if (!stream)
-		throw Exception("Unable to initialize the video stream");	
-
-	//codec->codec_id = av_guess_codec(oc->oformat, NULL, oc->filename, NULL, CODEC_TYPE_VIDEO);
+		throw Exception("Failed to initialize the video stream.");	
+	
 	codec = stream->codec;
+	avcodec_get_context_defaults3(codec, c);
 	codec->codec_id = oc->oformat->video_codec;	
 	codec->codec_type = AVMEDIA_TYPE_VIDEO;
-
-	// Put sample parameters
-	codec->bit_rate = oparams.bitRate; 
-	codec->bit_rate_tolerance = oparams.bitRate * 100;
-	//mpa_vidctx->bit_rate = usebitrate;
-   // mpa_vidctx->bit_rate_tolerance = usebitrate * 100;
-	//codec->bit_rate         = 400000;      // TODO: BITRATE SETTINGS!
-	//codec->bit_rate = 1000 * bitrateScale;
-	//codec->bit_rate = oparams.width * oparams.height * bitrateScale; 
-
+	
 	// Resolution must be a multiple of two
 	codec->width = oparams.width;
 	codec->height = oparams.height;
 
-	// time base: this is the fundamental unit of time (in seconds) in terms
+	// Define encoding parameters
+	codec->bit_rate = oparams.bitRate; 
+	codec->bit_rate_tolerance = oparams.bitRate * 100;
+
+	// Time base: this is the fundamental unit of time (in seconds) in terms
 	// of which frame timestamps are represented. for fixed-fps content,
 	// timebase should be 1/framerate and timestamp increments should be
 	// identically 1.
+	codec->time_base.den = oparams.fps; //1000; //
+	codec->time_base.num = 1; //1000; //
+	/*
+	// Variable frame rate
+	//      encoder.createFile(filename,width,height,bitrate,gop,fps);			// Fixed frame rate
+   //else
+   //   encoder.createFile(filename,width,height,bitrate*1000/fps,gop,1000);	// For variable frame rates: set the time base to e.g. 1ms (1000fps),
+																				// and correct the bitrate according to the expected average frame 
+	codec->bit_rate = oparams.bitRate * 1000 / oparams.fps; 
+	codec->bit_rate_tolerance = oparams.bitRate * 100;
+	
+	codec->time_base.den = 1000;
 	codec->time_base.num = 1;
-	codec->time_base.den = oparams.fps;
+	*/
+
 
 	// Emit one intra frame every twelve frames at most
 	//codec->gop_size = 12; 
@@ -210,7 +230,7 @@ void VideoEncoderContext::open(AVFormatContext *oc) //, const VideoCodec& params
 
 	if (codec->codec_id == CODEC_ID_MPEG1VIDEO || 
 		codec->codec_id == CODEC_ID_MSMPEG4V3) {
-		// Needed to avoid using macroblocks in which some coecs overflow
+		// Needed to avoid using macroblocks in which some codecs overflow
  		// this doesn't happen with normal video, it just happens here as the
  		// motion of the chroma plane doesn't match the luma plane 
  		// avoid Ffmpeg warning 'clipping 1 dct coefficients...'
@@ -238,8 +258,25 @@ void VideoEncoderContext::open(AVFormatContext *oc) //, const VideoCodec& params
 		codec->pix_fmt = PIX_FMT_YUV420P;
 		break;
 	}
+	
+    if (codec->codec_id == CODEC_ID_H264)
+        av_opt_set(codec->priv_data, "preset", "baseline", 0); // slow
 
 	/*
+	
+	// H264 defaults
+	if (codec->codec_id == CODEC_ID_H264) {
+		codec->me_range = 5;
+		codec->max_qdiff = 5;
+		codec->qmin = 20;
+		codec->qmax = 30;
+		codec->qcompress = 0.6f;
+		codec->qblur = 0.1f;
+		codec->gop_size = 3;
+		codec->max_b_frames = 1;
+		codec->flags = CODEC_FLAG_LOW_DELAY;
+	}
+
 	// libx264-medium.ffpreset preset
 	codec->coder_type = 1;  // coder = 1
 	codec->flags|=CODEC_FLAG_LOOP_FILTER;   // flags=+loop
@@ -267,7 +304,6 @@ void VideoEncoderContext::open(AVFormatContext *oc) //, const VideoCodec& params
 	// libx264-main.ffpreset preset
 	codec->flags2|=CODEC_FLAG2_8X8DCT;
 	//codec->flags2^=CODEC_FLAG2_8X8DCT;    // flags2=-dct8x8
-	*/
 
 	// H264 defaults
 	if (codec->codec_id == CODEC_ID_H264) {
@@ -281,90 +317,48 @@ void VideoEncoderContext::open(AVFormatContext *oc) //, const VideoCodec& params
 		codec->max_b_frames = 1;
 		codec->flags = CODEC_FLAG_LOW_DELAY;
 	}
+	*/
 
 	// Some formats want stream headers to be separate
 	if (oc->oformat->flags & AVFMT_GLOBALHEADER)
 		codec->flags |= CODEC_FLAG_GLOBAL_HEADER;
-	
-	AVCodec* c = avcodec_find_encoder(codec->codec_id);
-	if (!c)
-   		throw Exception("Video codec not found");
 
 	// Open the video codec
-	if (avcodec_open(codec, c) < 0)
-   		throw Exception("Unable to open the video codec");
+	if (avcodec_open2(codec, c, NULL) < 0)
+   		throw Exception("Unable to open the video codec.");
 
 	// Allocate the input frame
-	//iframe = createVideoFrame(static_cast<::PixelFormat>(iparams.pixfmt), 
 	iframe = createVideoFrame((::PixelFormat)iparams.pixfmt, iparams.width, iparams.height);
 	if (!iframe)
-		throw Exception("Unable to allocate input frame");
+		throw Exception("Unable to allocate input frame.");
 
 	// Allocate the output frame
 	oframe = createVideoFrame(codec->pix_fmt, codec->width, codec->height);
 	if (!oframe)
-		throw Exception("Unable to allocate output frame");	
-		
-	// Initialize the video buffer
-	//_videoBufferSize = codec->width * codec->height * 3;
-	//_videoBuffer = new unsigned char[_videoBufferSize];
+		throw Exception("Unable to allocate output frame.");
 
-    this->bufferSize = codec->width * codec->height * 3; //MAX_AUDIO_PACKET_SIZE;
-    this->buffer = (UInt8*)av_malloc(this->bufferSize);		
-    //this->opacket = (AVPacket*)av_mallocz(sizeof(AVPacket));
-   // av_init_packet(this->opacket);
+    this->bufferSize = codec->width * 3 * codec->height;
+    this->buffer = (UInt8*)av_malloc(this->bufferSize);
 }
 
 
 void VideoEncoderContext::close()
 {
-	Log("debug") << "[VideoEncoderContext" << this << "] Closing Video" << endl;
+	Log("debug") << "[VideoEncoderContext:" << this << "] Closing Video" << endl;
 
-	VideoContext::close();	
-	
-	/*
-  	if (opacket)
-  		av_free_packet(opacket);
-
-	if (stream) {
-		avcodec_close(codec);
-		stream = NULL;
-	}
-    if (iframe) {
-		//if (iframe->data)
-		//	av_free(iframe->data[0]);
-		av_free(iframe);
-		iframe = NULL;
-	}
-    if (oframe) {
-		if (oframe->data)
-			av_free(oframe->data[0]);
-        av_free(oframe);
-		oframe = NULL;
-    }
-	if (_videoBuffer) {
-		delete _videoBuffer;
-		_videoBuffer = NULL;
-	}
-	if (convCtx) {
-		sws_freeContext(convCtx);
-		convCtx = NULL;
-	}
-	*/
+	VideoContext::close();
 }
 
 	
 void VideoEncoderContext::reset() 
 {
 	VideoContext::reset();
-
-	//opacket = NULL;
 }
 
 
-int VideoEncoderContext::encode(unsigned char* buffer, int bufferSize, AVPacket& opacket)
+int VideoEncoderContext::encode(unsigned char* buffer, int bufferSize, AVPacket& opacket/*, unsigned pts*/)
 {	
-	Log("trace") << "[AVEncoder" << this << "] Encoding Video Packet" << endl;
+	//Log("trace") << "[VideoEncoderContext:" << this << "] Encoding Video Packet" << endl;
 
 	assert(iframe);
 	assert(oframe);
@@ -386,13 +380,13 @@ int VideoEncoderContext::encode(unsigned char* buffer, int bufferSize, AVPacket&
 	
 	// Initialize scale conversion context if uninitialized or if the
 	// video input size has changed.
-	if (convertCtx == NULL) {
-		convertCtx = sws_getContext(
+	if (convCtx == NULL) {
+		convCtx = sws_getContext(
 			iparams.width, iparams.height, (::PixelFormat)iparams.pixfmt, 
 			codec->width, codec->height, codec->pix_fmt,
 			SWS_BICUBIC, NULL, NULL, NULL);
 
-		Log("trace") << "[VideoEncoderContext" << this << "] Video Conversion Context:\n" 
+		Log("trace") << "[VideoEncoderContext:" << this << "] Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << iparams.width
 			<< "\n\tInput Height: " << iparams.height
 			<< "\n\tInput Pixel Format: " << iparams.pixfmt
@@ -401,19 +395,38 @@ int VideoEncoderContext::encode(unsigned char* buffer, int bufferSize, AVPacket&
 			<< "\n\tOutput Pixel Format: " << codec->pix_fmt
 			<< endl;
 	}
-	if (sws_scale(convertCtx,
+	if (sws_scale(convCtx,
 		iframe->data, iframe->linesize, 0, iparams.height,
 		oframe->data, oframe->linesize) < 0)
-		throw Exception("Pixel format conversion not supported");
+		throw Exception("Pixel format conversion not supported.");
+	
+	/*
+	if (frameNum == 0)
+		pts = 0;
+	else
+		pts += sqrt((double)frameNum);
+
+	//if (pts != AV_NOPTS_VALUE)				// Use custom pts if provided
+		oframe->pts = pts;					// Set the custom time stamp
+		codec->coded_frame->pts = pts;		// Set the custom time stamp
+		*/
 
 	int len = avcodec_encode_video(codec, this->buffer, this->bufferSize, oframe);
-    if (len > 0) {
+    if (len > 0) {		
 
+		/*
+		//if (pts != AV_NOPTS_VALUE)          // Set custom pts again for subsequent processing
+			codec->coded_frame->pts = pts;  // Set the custom time stamp
+			*/
+		
 		av_init_packet(&opacket);
-	
-		if (codec->coded_frame &&
-			codec->coded_frame->pts != AV_NOPTS_VALUE)
-			opacket.pts = av_rescale_q(codec->coded_frame->pts, codec->time_base, stream->time_base);
+
+		//if (pts != AV_NOPTS_VALUE)
+		//	opacket.pts = pts;
+		//else
+		if (codec->coded_frame->pts != AV_NOPTS_VALUE)
+			opacket.pts = av_rescale_q(codec->coded_frame->pts, codec->time_base, stream->time_base);		
+		//opacket.pts = pts;
 
 		if (codec->coded_frame->key_frame)
 			opacket.flags |= AV_PKT_FLAG_KEY;
@@ -421,6 +434,22 @@ int VideoEncoderContext::encode(unsigned char* buffer, int bufferSize, AVPacket&
 		opacket.stream_index = stream->index;
 		opacket.data = this->buffer;
 		opacket.size = len;	
+			
+		//frameNum++;
+		
+		/*
+		Log("trace") << "[VideoEncoderContext:" << this << "] Encoding Video Packet:\n"
+			//<< "\n\AV_NOPTS_VALUE: " << (codec->coded_frame->pts != AV_NOPTS_VALUE)
+			//<< "\n\codec->coded_frame: " << codec->coded_frame
+			//<< "\n\codec->coded_frame->pts: " << codec->coded_frame->pts
+			<< "\n\codec->time_base: " << codec->time_base.den
+			<< "\n\codec->time_base num: " << codec->time_base.num
+			<< "\n\stream->time_base: " << stream->time_base.den
+			<< "\n\stream->time_base num: " << stream->time_base.num
+			//<< "\n\opacket.pts: " << opacket.pts
+			//<< "\n\pts: " << pts
+			<< endl;
+			*/
     }
 	else 
 		Log("warn") << "[VideoEncoderContext:" << this << "] Encoded frame is NULL" << endl;
@@ -507,6 +536,7 @@ int VideoEncoderContext::encode(unsigned char* buffer, int bufferSize, AVPacket&
 	*/
 }
 
+
 // ---------------------------------------------------------------------
 //
 // Video Decoder Context
@@ -525,7 +555,7 @@ void VideoDecoderContext::open(AVFormatContext *ic, int streamID)
 {
 	VideoContext::open();
 	
-	Log("info") << "[AVFileReader:" << this << "] Opening Video: " << streamID << endl;
+	Log("info") << "[VideoDecoderContext:" << this << "] Opening Video: " << streamID << endl;
 
 	assert(ic);
 	assert(streamID >= 0);
@@ -547,17 +577,12 @@ void VideoDecoderContext::open(AVFormatContext *ic, int streamID)
 	//if (this->oframe == NULL)
 	//	throw Exception("Could not allocate the output frame");
 	
-	this->bufferSize = avpicture_get_size(PIX_FMT_BGR24, this->codec->width, this->codec->height);
-	this->buffer = (uint8_t*)av_malloc(this->bufferSize * sizeof(uint8_t));	
-	avpicture_fill((AVPicture*)this->oframe, this->buffer, PIX_FMT_BGR24, this->codec->width, this->codec->height);
+	//this->bufferSize = avpicture_get_size(PIX_FMT_BGR24, this->codec->width, this->codec->height);
+	//this->buffer = (UInt8*)av_malloc(this->bufferSize * sizeof(UInt8));	
+	//avpicture_fill((AVPicture*)this->oframe, this->buffer, PIX_FMT_BGR24, this->codec->width, this->codec->height);
 	
     //this->packet = (AVPacket*)av_mallocz(sizeof(AVPacket));
     //av_init_packet(this->packet);
-
-    //av_init_packet(&this->packet);
-
-	// Allocate the OpenCV video matrix
-	//_cvMatrix.create(this->codec->height, this->codec->width, CV_8UC(3));
 
 	/*
 	assert(ic);
@@ -595,7 +620,7 @@ void VideoDecoderContext::open(AVFormatContext *ic, int streamID)
     }
 
     bufferSize = MAX_AUDIO_PACKET_SIZE;
-    buffer = (uint8_t*)av_malloc(bufferSize);
+    buffer = (UInt8*)av_malloc(bufferSize);
     //packet = (AVPacket*)av_mallocz(sizeof(AVPacket));
     //av_init_packet(packet);
     //offset = 0;
@@ -629,20 +654,26 @@ int VideoDecoderContext::decode(AVPacket& packet)
 	int len = avcodec_decode_video2(codec, iframe, &frameDecoded, &packet);
 	if (len < 0) {
 		error = "Decoder error";
-		Log("error") << "[AVFileReader:" << this << "] Decoding Video: Error: " << error << endl;
+		Log("error") << "[VideoDecoderContext:" << this << "] Decoding Video: Error: " << error << endl;
 		return -1;
     }
 		
 	// If frameDecoded == 0, then no frame was produced.
 	if (frameDecoded == 0) {
-		Log("warn") << "[AVFileReader:" << this << "] Decoding Video: No frame was encoded." << endl;
+		Log("warn") << "[VideoDecoderContext:" << this << "] Decoding Video: No frame was encoded." << endl;
 		return 0;
 	}
+		
+	//Log("trace") << "[VideoDecoderContext:" << this << "] Decoder DTS: " << packet.dts << endl;
+	//Log("trace") << "[VideoDecoderContext:" << this << "] Decoder Time Base: " << stream->time_base.den << endl;
 		
 	if (packet.dts != AV_NOPTS_VALUE) {
 		pts = packet.dts;
 		pts *= av_q2d(stream->time_base);
 	}
+	
+	Log("trace") << "[VideoDecoderContext:" << this << "] Decoder PTS: " << packet.pts << endl;
+	Log("trace") << "[VideoDecoderContext:" << this << "] Decoder PTS 1: " << pts << endl;
 
 	/*
 	// Initialize scale conversion context if uninitialized or if the
@@ -669,17 +700,17 @@ int VideoDecoderContext::decode(AVPacket& packet)
 		throw Exception("Pixel format conversion not supported");
 
 	// Convert the image from its native format to BGR.
-	if (convertCtx == NULL)
-		convertCtx = sws_getContext(
+	if (convCtx == NULL)
+		convCtx = sws_getContext(
 			codec->width, codec->height, codec->pix_fmt, 
 			codec->width, codec->height, PIX_FMT_BGR24, 
 			SWS_BICUBIC, NULL, NULL, NULL);
-	if (convertCtx == NULL)
+	if (convCtx == NULL)
 		throw Exception("Cannot initialize the video conversion context");	
 			
 	// Scales the data in src according to our settings in our SwsContext.
 	sws_scale(
-		convertCtx, iframe->data, iframe->linesize, 
+		convCtx, iframe->data, iframe->linesize, 
 		0, codec->height, oframe->data, oframe->linesize);
 		*/
 

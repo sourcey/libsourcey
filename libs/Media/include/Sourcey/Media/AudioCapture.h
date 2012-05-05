@@ -77,6 +77,8 @@ public:
 	virtual ~AudioCapture();
 	
   	virtual void open(int channels, int sampleRate);
+  	virtual void close();
+
   	virtual void start();
   	virtual void stop();
 	
@@ -87,20 +89,24 @@ public:
 	virtual int sampleRate() const;
 	virtual int numChannels() const;
 	virtual bool isRunning() const;
-	virtual bool isInitialized() const;
+	virtual bool isOpen() const;
 
 protected:
+	virtual void setError(const std::string& message);
+		/// Sets the error message and throws and exception.
+
 	static int callback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 					    double streamTime, RtAudioStreamStatus status, void *data);
 
 private:
+	mutable Poco::FastMutex		_mutex;
+	RtAudio::StreamParameters	_iParams;
 	RtAudio		_audio;
 	int			_deviceId; 
 	int			_channels;
 	int			_sampleRate;
-	bool		_isInitialized;
-	RtAudio::StreamParameters	_iParams;
-	mutable Poco::FastMutex		_mutex;
+	bool		_isOpen;
+	std::string _error;
 };
 
 

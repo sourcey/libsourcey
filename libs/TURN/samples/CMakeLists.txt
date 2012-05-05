@@ -1,1 +1,1 @@
-add_subdirectory(TURNClientTest)
+#add_subdirectory(TURNClientTest)

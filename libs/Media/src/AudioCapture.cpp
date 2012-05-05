@@ -41,16 +41,16 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate) :
 	_deviceId(deviceId),
 	_channels(channels),
 	_sampleRate(sampleRate),
-	_isInitialized(false)
+	_isOpen(false)
 {
-	Log("debug") << "[AudioCapture" << this << "] Creating" << endl;
+	Log("trace") << "[AudioCapture:" << this << "] Creating" << endl;
 
 	_iParams.deviceId = _deviceId;
 	_iParams.nChannels = _channels;
 	_iParams.firstChannel = 0;
 
 	if (_audio.getDeviceCount() < 1) {
-		Log("error") << "[AudioCapture" << this << "] No audio devices found!" << endl;
+		Log("warn") << "[AudioCapture:" << this << "] No audio devices found!" << endl;
 		return;
 	}
 
@@ -59,22 +59,20 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate) :
 		
 	// Open the audio stream or throw an exception.
 	open(channels, sampleRate);
-
-	_isInitialized = true;
 }
 
 
 AudioCapture::~AudioCapture()
 {
-	Log("debug") << "[AudioCapture" << this << "] Destroying" << endl;
-	if (_audio.isStreamOpen()) 
-		_audio.closeStream();
+	Log("trace") << "[AudioCapture:" << this << "] Destroying" << endl;
 }
 
 
 void AudioCapture::open(int channels, int sampleRate)
 {
-	Log("debug") << "[AudioCapture" << this << "] Opening: " << channels << ": " << sampleRate << endl;
+	Log("trace") << "[AudioCapture:" << this << "] Opening: " << channels << ": " << sampleRate << endl;
+
+	close();
 
 	FastMutex::ScopedLock lock(_mutex);
 	
@@ -84,30 +82,55 @@ void AudioCapture::open(int channels, int sampleRate)
 	unsigned int nBufferFrames = 256; //512;
 
 	try {
-		//if (_audio.isStreamOpen()) 
-		//	_audio.closeStream();	
-
 		_audio.openStream(NULL, &_iParams, AUDIO_FORMAT, _sampleRate, &nBufferFrames, &AudioCapture::callback, (void*)this);
+		_error = "";
+		_isOpen = true;
+		Log("trace") << "[AudioCapture:" << this << "] Opening: OK" << endl;
 	}
 	catch (RtError& e) {
-		Log("error") << e.getMessage() << endl;
-		throw Exception(e.getMessage());
+		setError("Failed to open audio capture: " + e.getMessage());
+	}
+	catch (...) {
+		setError("Failed to open audio capture.");
+	}
+}
+
+
+void AudioCapture::close()
+{	
+	Log("trace") << "[AudioCapture:" << this << "] Closing" << endl;
+	try {
+		FastMutex::ScopedLock lock(_mutex);
+		_isOpen = false;
+		if (_audio.isStreamOpen())
+			_audio.closeStream();
+		Log("trace") << "[AudioCapture:" << this << "] Closing: OK" << endl;
+	}
+	catch (RtError& e) {
+		setError("Failed to close audio capture: " + e.getMessage());
+	}
+	catch (...) {
+		setError("Failed to close audio capture.");
 	}
 }
 
 
 void AudioCapture::start()
 {	
-	Log("debug") << "[AudioCapture" << this << "] Starting" << endl;
+	Log("trace") << "[AudioCapture:" << this << "] Starting" << endl;
 
 	if (!isRunning()) {
 		try {
 			FastMutex::ScopedLock lock(_mutex);
-			Log("debug") << "[AudioCapture" << this << "] Starting Stream" << endl;
 			_audio.startStream();
+			_error = "";
+			Log("trace") << "[AudioCapture:" << this << "] Starting: OK" << endl;
 		}
 		catch (RtError& e) {
-			Log("debug") << e.getMessage() << endl;
+			setError("Failed to start audio capture: " + e.getMessage());
+		}
+		catch (...) {
+			setError("Failed to start audio capture.");
 		}
 	}
 }
@@ -115,17 +138,22 @@ void AudioCapture::start()
 
 void AudioCapture::stop()
 {	
-	Log("debug") << "[AudioCapture" << this << "] Stopping" << endl;
+	Log("trace") << "[AudioCapture:" << this << "] Stopping" << endl;
 
 	if (isRunning()) {
 		try {
 			FastMutex::ScopedLock lock(_mutex);
 			_audio.stopStream();
+			Log("trace") << "[AudioCapture:" << this << "] Stopping: OK" << endl;
 		}
 		catch (RtError& e) {
-			Log("debug") << e.getMessage() << endl;
+			setError("Failed to stop audio capture: " + e.getMessage());
+		}
+		catch (...) {
+			setError("Failed to stop audio capture.");
 		}
 	}
+
 }
 
 
@@ -144,53 +172,67 @@ void AudioCapture::detach(const PacketDelegateBase& delegate)
 	Log("debug") << "[AudioCapture:" << this << "] Removed Delegate: " << refCount() << endl;
 	if (refCount() == 0)
 		stop();
+
+	Log("debug") << "[AudioCapture:" << this << "] Removed Delegate: OK" << endl;
+}
+
+
+void AudioCapture::setError(const string& message)
+{
+	_error = message;
+	Log("error") << "[AudioCapture::" << this << "] Error: " << message << endl;
+	throw Exception(message);
 }
 
 
 int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
-	double streamTime, RtAudioStreamStatus status, void *data)
+	double streamTime, RtAudioStreamStatus status, void* data)
 {
 	AudioCapture* klass = (AudioCapture*)data;
 
-	Log("error") << "[AudioCapture" << klass << "] callback" << endl;
-
+	//Log("trace") << "[AudioCapture::" << klass << "] Callback" << endl;
+	
 	if (status) 
-		Log("error") << "[AudioCapture" << klass << "] Stream over/underflow detected" << endl;
+		Log("error") << "[AudioCapture::" << klass << "] Stream over/underflow detected" << endl;
+
+	assert(inputBuffer != NULL);
+
+	//if (!klass->isOpen())
+	//	return 2;
 
 	//if (inputBuffer == NULL) {
-	//	Log("error") << "[AudioCapture" << klass << "] Input buffer is NULL." << endl;
+	//	Log("error") << "[AudioCapture::" << klass << "] Input buffer is NULL." << endl;
 	//	return 2;
-	//}
+	//} 
 
 	AudioPacket packet(
 		(unsigned char*)inputBuffer, 
 		nBufferFrames * klass->numChannels() * sizeof(AUDIO_DATA),
 		(double)streamTime);
 
-	/*
-	Log("trace") << "[AudioCapture] AudioPacket: " 
-		<< "\n\tPacket Ptr: " << inputBuffer << "\n"
-		<< "\n\tPacket Size: " << packet.size << "\n"
-		<< "\n\tStream Time: " << packet.time << "\n"
-		<< endl;
-		*/
+	//Log("trace") << "[AudioCapture] AudioPacket: " 
+	//	<< "\n\tPacket Ptr: " << inputBuffer << "\n"
+	//	<< "\n\tPacket Size: " << packet.size << "\n"
+	//	<< "\n\tStream Time: " << packet.time << "\n"
+	//	<< endl;
 
 	klass->dispatch(klass, packet);
+	//Log("trace") << "[AudioCapture::" << klass << "] Callback: OK" << endl;
 	return 0;
 }
 
 
-bool AudioCapture::isInitialized() const
+bool AudioCapture::isOpen() const
 { 
 	FastMutex::ScopedLock lock(_mutex);
-	return _isInitialized;
+	return _isOpen;
 }
 
 
 bool AudioCapture::isRunning() const
 {
 	FastMutex::ScopedLock lock(_mutex);
-	return _audio.isStreamOpen();
+	return _audio.isStreamRunning();
 }
 
 

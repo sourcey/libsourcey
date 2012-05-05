@@ -71,6 +71,8 @@ public:
 
 	void setParams(const RecorderParams& params) { _params = params; };
 	RecorderParams& params() { return _params; };
+	
+	std::ofstream _file;
 
 protected:			
 	virtual void onStreamStateChange(const PacketStreamState& state);
@@ -81,7 +83,8 @@ protected:
 	RecorderParams	_params;	
 	FPSCounter		_fpsCounter;
 	AVFormatContext* _formatCtx;
-	ByteIOContext*	_outIO;
+	clock_t			_startTime;
+	AVIOContext*	_outIO;
 	unsigned char*  _outIOBuffer; 
 	int				_outIOBufferSize; 
 
@@ -92,15 +95,19 @@ protected:
 
  	// The following variables allow for dynamically
 	// calculated video presentation timestamps (PTS).
-	double			_videoPTS;
+	Int64			_videoPTS;
 	Int64			_videoLastPTS;
 	clock_t			_videoTime;
+	clock_t			_videoLastTime;
 
 	//
  	// Audio
 	//
 	AudioEncoderContext* _audio;
 	clock_t			_audioTime;	
+	AVFifoBuffer*	_audioFifo;		
+	UInt8*			_audioFifoOutBuffer;
+	int				_audioOutSize;
 };
 
 

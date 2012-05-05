@@ -262,6 +262,12 @@ void Message::setData(const string& name, const string& data)
 }
 
 
+void Message::setData(const string& name, const JSON::Value& data) 
+{
+	(*this)["data"][name] = data;
+}
+
+
 void Message::setData(const string& name, int data) 
 {
 	(*this)["data"][name] = data;

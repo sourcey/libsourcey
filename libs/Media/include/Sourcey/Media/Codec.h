@@ -70,9 +70,9 @@ struct Codec
 		AAC			= 86018,
 		AC3			= 86019,
 		Vorbis		= 86021,
-		FLAC		= 86030,
-		NellyMoser	= 86052,
-		Speex		= 86054
+		FLAC		= 86028,
+		NellyMoser	= 86050,
+		Speex		= 86052
 	};
 
 	//

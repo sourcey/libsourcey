@@ -138,6 +138,11 @@ public:
 
 	PacketAdapterList adapters() const;
 	
+	virtual void setClientData(void* data);
+	virtual void* clientData() const;
+		/// Provides the ability to associate a non managed
+		/// arbitrary client data pointer with the stream.
+	
 	template <class AdapterT>
 	AdapterT* getSource(int index = 0)
 	{
@@ -177,12 +182,14 @@ protected:
 	virtual void onDispatchPacket(void* sender, IPacket& packet);
 	virtual void onStateChange(PacketStreamState& state, const PacketStreamState& oldState);
 
+protected:
+	mutable Poco::FastMutex	_mutex;
+
 	std::string _name;
+	//Poco::Event _ready;
 	PacketAdapterList _sources;
 	PacketAdapterList _processors;
-	Poco::Event _ready;
-
-	mutable Poco::FastMutex	_mutex;
+	void* _clientData;
 };
 
 

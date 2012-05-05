@@ -3,4 +3,4 @@
 #
 # ----------------------------------------------------------------------------
 
-add_subdirectory(PackageManagerConsole)
+#add_subdirectory(PackageManagerConsole)

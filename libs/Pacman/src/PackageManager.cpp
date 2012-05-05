@@ -162,7 +162,9 @@ void PackageManager::queryRemotePackages()
 		JSON::Reader reader;
 		bool res = reader.parse(data, root);
 		if (!res)
-			throw Exception(reader.getFormatedErrorMessages());
+			throw Exception("Invalid Server Response: " + reader.getFormatedErrorMessages());
+
+		_remotePackages.clear();
 		
 		for (JSON::ValueIterator it = root.begin(); it != root.end(); it++) {		
 			RemotePackage* package = new RemotePackage(*it);
@@ -176,6 +178,7 @@ void PackageManager::queryRemotePackages()
 	}
 	catch (Exception& exc) {
 		Log("error") << "[PackageManager] Package Query Error: " << exc.message() << endl;
+		exc.rethrow();
 	}
 }
 

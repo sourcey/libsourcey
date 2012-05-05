@@ -44,10 +44,11 @@ namespace Sourcey {
 
 PacketStream::PacketStream(const string& name) : 
 	_name(name),
-	_ready(false)
+	//_ready(false),
+	_clientData(NULL)
 {
 	Log("trace") << "[PacketStream:" << this << "] Creating" << endl;
-	_ready.set();
+	//_ready.set();
 }
 
 
@@ -102,7 +103,7 @@ void PacketStream::start()
 			if ((*sit).syncState) {
 				IStartable* runnable = dynamic_cast<IStartable*>((*sit).ptr);
 				if (runnable) {
-					Log("trace") << "[PacketStream:" << this << "] Starting Runnable Source: " << source << endl;
+					Log("trace") << "[PacketStream:" << this << "] Starting Startable Source: " << source << endl;
 					runnable->start();
 				}
 			}
@@ -130,7 +131,7 @@ void PacketStream::stop() //bool stopSources
 		// Stop runnable sources
 		for (PacketAdapterList::iterator sit = _sources.begin(); sit != _sources.end(); ++sit) {
 			PacketDispatcher* source = (*sit).ptr;
-			source->attach(packetDelegate(this, &PacketStream::onSourcePacket));
+			source->detach(packetDelegate(this, &PacketStream::onSourcePacket));
 			if ((*sit).syncState) {
 				IStartable* runnable = dynamic_cast<IStartable*>((*sit).ptr);
 				if (runnable) {
@@ -207,11 +208,11 @@ void PacketStream::onStateChange(PacketStreamState& state, const PacketStreamSta
 void PacketStream::attach(PacketDispatcher* source, bool freePointer, bool syncState) 
 {
 	Log("trace") << "[PacketStream:" << this << "] Attaching Source " << source << endl;
-	_ready.wait(
+	//_ready.wait(
 #ifdef _DEBUG
-		1000
+		//1000
 #endif
-	);
+	//);
 	FastMutex::ScopedLock lock(_mutex);
 	_sources.push_back(PacketAdapterReference(source, 0, freePointer, syncState));
 	sort(_sources.begin(), _sources.end(), PacketAdapterReference::CompareOrder);
@@ -224,11 +225,11 @@ void PacketStream::attach(PacketDispatcher* source, bool freePointer, bool syncS
 void PacketStream::attach(IPacketProcessor* proc, int order, bool freePointer) 
 {
 	Log("trace") << "[PacketStream:" << this << "] Attaching Processor " << proc << endl;
-	_ready.wait(
+	//_ready.wait(
 #ifdef _DEBUG
-		1000
+		//1000
 #endif
-	);
+	//);
 	FastMutex::ScopedLock lock(_mutex);
 	_processors.push_back(PacketAdapterReference(proc, order == 0 ? _processors.size() : order, freePointer));
 	sort(_processors.begin(), _processors.end(), PacketAdapterReference::CompareOrder);
@@ -241,11 +242,11 @@ void PacketStream::attach(IPacketProcessor* proc, int order, bool freePointer)
 void PacketStream::detach(PacketDispatcher* source) 
 {
 	Log("trace") << "[PacketStream:" << this << "] Detaching Source: " << source << endl;
-	_ready.wait(
+	//_ready.wait(
 #ifdef _DEBUG
-		1000
+		//1000
 #endif
-	);
+	//);
 	FastMutex::ScopedLock lock(_mutex);
 	for (PacketAdapterList::iterator it = _sources.begin(); it != _sources.end(); ++it) {
 		if ((*it).ptr == source) {
@@ -264,11 +265,11 @@ void PacketStream::detach(PacketDispatcher* source)
 void PacketStream::detach(IPacketProcessor* proc) 
 {
 	Log("trace") << "[PacketStream:" << this << "] Detaching Processor: " << proc << endl;
-	_ready.wait(
+	//_ready.wait(
 #ifdef _DEBUG
-		1000
+		//1000
 #endif
-	);
+	//);
 	FastMutex::ScopedLock lock(_mutex);
 	for (PacketAdapterList::iterator it = _processors.begin(); it != _processors.end(); ++it) {
 		if ((*it).ptr == proc) {
@@ -299,29 +300,35 @@ void PacketStream::detachAll()
 {
 	Log("trace") << "[PacketStream:" << this << "] Detaching All" << endl;
 		
-	_ready.wait(
+	//_ready.wait(
 #ifdef _DEBUG
-		1000
+		//1000
 #endif
-	);
+	//);
+
+	Log("trace") << "[PacketStream:" << this << "] Detaching All: Sources" << endl;
 		
+	FastMutex::ScopedLock lock(_mutex);
 	PacketAdapterList::iterator sit = _sources.begin();
 	while (sit != _sources.end()) {
 		Log("trace") << "[PacketStream:" << this << "] Detaching Source: " << (*sit).ptr << endl;
 		(*sit).ptr->detach(packetDelegate(this, &PacketStream::onSourcePacket));
 		if ((*sit).freePointer)
 			delete (*sit).ptr;
+		Log("trace") << "[PacketStream:" << this << "] Detaching Source: " << (*sit).ptr << ": OK" << endl;
 		//	toDelete.push_back(*sit);
 		sit = _sources.erase(sit);
 	}	
+	
+	Log("trace") << "[PacketStream:" << this << "] Detaching All: Processors" << endl;
 
-	FastMutex::ScopedLock lock(_mutex);
 	PacketAdapterList::iterator pit = _processors.begin();
 	while (pit != _processors.end()) {
 		Log("trace") << "[PacketStream:" << this << "] Detaching Processor: " << (*pit).ptr << endl;
 		//(*pit).ptr->detach(packetDelegate(this, &PacketStream::onNextPacket));
 		if ((*pit).freePointer)
 			delete (*pit).ptr;
+		Log("trace") << "[PacketStream:" << this << "] Detaching Processor: " << (*pit).ptr << ": OK" << endl;
 		//	toDelete.push_back(*pit);
 		pit = _processors.erase(pit);
 	}	
@@ -338,9 +345,9 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 	//	<< &packet << ": " << packet.className() << endl;
 
 	if (!isRunning()) {
-		//Log("trace") << "[PacketStream:" << this << "] Dropping Source Packet: " 
-		//	<< &packet << ": " << state() << endl;	
-		_ready.set();
+		Log("trace") << "[PacketStream:" << this << "] Dropping Source Packet: " 
+			<< &packet << ": " << state() << endl;	
+		//_ready.set(); 
 		return;
 	}
 
@@ -354,15 +361,16 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 
 				// We don't want any new adapters or stream destruction
 				// while we are processing.
-				_ready.reset();
+				//_ready.reset();
 
 				firstProc = reinterpret_cast<IPacketProcessor*>((*it).ptr);
 
 				// If the first processor rejects the packet then the 
 				// packet will be dropped.
+				// API CHANGE: Loop processors until packet is accepted?
 				if (!firstProc->accepts(packet)) {
-					//Log("trace") << "[PacketStream:" << this << "] Start Process Chain: " 
-					//	<< &packet << ": " << firstProc << ": Packet rejected." << endl;
+					Log("warn") << "[PacketStream:" << this << "] Source Packet Rejected: " 
+						<< firstProc << ": " << packet.className() << endl;
 					//firstProc = NULL;
 					return;
 				}
@@ -383,7 +391,7 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 		}
 	}
 	catch (Exception& exc) {
-		Log("error") << "[PacketStream:" << this << "] Error: " << exc.displayText() << endl;
+		Log("error") << "[PacketStream:" << this << "] Processor Error: " << exc.displayText() << endl;
 		setState(this, PacketStreamState::Failed, exc.displayText());
 	}	
 	
@@ -391,7 +399,7 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 	//	<< &packet << ": " << packet.className() << endl;
 
 	// Reset the ready event once processing is complete.
-	_ready.set();
+	//_ready.set();
 	return;
 }
 
@@ -451,7 +459,20 @@ PacketAdapterList PacketStream::adapters() const
 	FastMutex::ScopedLock lock(_mutex);
 	return _processors;
 }
+	
 
+void PacketStream::setClientData(void* data)
+{
+	FastMutex::ScopedLock lock(_mutex);
+	_clientData = data;
+}
+
+
+void* PacketStream::clientData() const
+{
+	FastMutex::ScopedLock lock(_mutex);
+	return _clientData;
+}
 
 
 } // namespace Sourcey

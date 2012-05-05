@@ -309,7 +309,7 @@ int Client::announceStatus() const
 Peer& Client::ourPeer() //bool whiny
 {	
 	FastMutex::ScopedLock lock(_mutex);
-	Log("debug") << "[Client::" << this << "] Getting Our Peer: " << _ourID << endl;
+	Log("debug") << "[Client:" << this << "] Getting Our Peer: " << _ourID << endl;
 	if (_ourID.empty())
 		throw Exception("No active peer session is available.");
 	return *_roster.get(_ourID, true);

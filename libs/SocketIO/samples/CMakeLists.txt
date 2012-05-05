@@ -1,1 +1,1 @@
-add_subdirectory(SocketIOClient)
+#add_subdirectory(SocketIOClient)

@@ -39,13 +39,13 @@ namespace Symple {
 
 Roster::Roster()
 {	
-	//Log("debug") << "[Roster::" << this << "] Creating" << endl;
+	//Log("debug") << "[Roster:" << this << "] Creating" << endl;
 }
 	
 
 Roster::~Roster() 
 {
-	//Log("debug") << "[Roster::" << this << "] Destroying" << endl;
+	//Log("debug") << "[Roster:" << this << "] Destroying" << endl;
 }
 
 
@@ -70,14 +70,14 @@ Peer* Roster::ourPeer(bool whiny)
 	string id;
 	{
 		FastMutex::ScopedLock lock(_mutex);
-		Log("debug") << "[Roster::" << this << "] Getting Our Peer: " << _ourAddress.toString() << endl;
+		Log("debug") << "[Roster:" << this << "] Getting Our Peer: " << _ourAddress.toString() << endl;
 		if (!_ourAddress.valid()) {
 			if (whiny)
 				throw Exception("No active peer is available");
 			else return NULL;
 		}
 		id = _ourAddress.toString();
-		Log("debug") << "[Roster::" << this << "] Getting Our Peer: 1: " << _ourAddress.toString() << endl;
+		Log("debug") << "[Roster:" << this << "] Getting Our Peer: 1: " << _ourAddress.toString() << endl;
 	}
 	return Roster::Manager::get(id, whiny);
 }
@@ -91,7 +91,7 @@ void Roster::update(const JSON::Value& data, bool whiny)
 		data.isMember("user") && 
 		data.isMember("name") && 
 		data.isMember("type")) {
-		Log("debug") << "[Roster::" << this << "] Updating: " << JSON::stringify(data, true) << endl;
+		Log("debug") << "[Roster:" << this << "] Updating: " << JSON::stringify(data, true) << endl;
 		string id = data["id"].asString();
 		Peer* peer = get(id, false);
 		if (!peer) {
@@ -107,7 +107,7 @@ void Roster::update(const JSON::Value& data, bool whiny)
 	}
 	else {
 		string error("Bad roster item data: " + JSON::stringify(data));
-		Log("error") << "[Roster::" << this << "] " << error << endl;	
+		Log("error") << "[Roster:" << this << "] " << error << endl;	
 		if (whiny)
 			throw Exception(error);
 	}
@@ -117,22 +117,22 @@ void Roster::update(const JSON::Value& data, bool whiny)
 /*
 Roster::~Roster() 
 {
-	//Log("debug") << "[Roster::" << this << "] Destroying" << endl;
+	//Log("debug") << "[Roster:" << this << "] Destroying" << endl;
 	closeAll();
-	Log("debug") << "[Roster::" << this << "] Destroying: OK" << endl;
+	Log("debug") << "[Roster:" << this << "] Destroying: OK" << endl;
 }
 
 
 void Roster::closeAll()
 {
 	FastMutex::ScopedLock lock(_mutex);
-	Log("debug") << "[Roster::" << this << "] Closing All Peers: " << _items.size() << endl;
+	Log("debug") << "[Roster:" << this << "] Closing All Peers: " << _items.size() << endl;
 	
 	PeerMap::iterator it = _items.begin();
 	PeerMap::iterator it2;
 	while (it != _items.end()) {
 		it2 = it++;
-		Log("debug") << "[Roster::" << this << "] Closing: " << it->second->name() << endl;
+		Log("debug") << "[Roster:" << this << "] Closing: " << it->second->name() << endl;
 		(*it2).second->StateChange -= delegate(this, &Roster::onPeerStateChange);
 		(*it2).second->close();
 		if (_freeClosedPeers)
@@ -148,7 +148,7 @@ bool Roster::addPeer(Peer* stream, bool whiny)
 	assert(stream);
 	assert(!stream->name().empty());
 	
-	Log("debug") << "[Roster::" << this << "] Adding Peer: " << stream->name() << endl;
+	Log("debug") << "[Roster:" << this << "] Adding Peer: " << stream->name() << endl;
 
 	if (Roster::Manager::add(stream->name(), stream, false)) {
 
@@ -167,7 +167,7 @@ bool Roster::removePeer(const string& name)
 {
 	assert(!name.empty());
 
-	Log("debug") << "[Roster::" << this << "] Removing Peer: " << name << endl;		
+	Log("debug") << "[Roster:" << this << "] Removing Peer: " << name << endl;		
 	return Roster::Manager::remove(name) != 0;
 }
 
@@ -176,7 +176,7 @@ bool Roster::closePeer(const string& name, bool whiny)
 {
 	assert(!name.empty());
 
-	Log("debug") << "[Roster::" << this << "] Closing Peer: " << name << endl;
+	Log("debug") << "[Roster:" << this << "] Closing Peer: " << name << endl;
 	Peer* stream = get(name, whiny);
 	if (stream) {
 		stream->close();
@@ -195,16 +195,16 @@ Peer* Roster::getPeer(const string& name, bool whiny)
 /*
 void Roster::onPeerStateChange(void* sender, PeerState& state, const PeerState&)
 {
-	Log("debug") << "[Roster::" << this << "] Peer State Changed: " << state.toString() << endl;
+	Log("debug") << "[Roster:" << this << "] Peer State Changed: " << state.toString() << endl;
 	
 	if (state.id() == PeerState::Closed) {
 		Peer* stream = reinterpret_cast<Peer*>(sender);
 		stream->StateChange -= delegate(this, &Roster::onPeerStateChange);
 		if (_freeClosedPeers) {
-			Log("debug") << "[Roster::" << this << "] Peer State Changed: Freeing: " << stream->name() << endl;
+			Log("debug") << "[Roster:" << this << "] Peer State Changed: Freeing: " << stream->name() << endl;
 			Roster::Manager::free(stream->name());
 		} else {
-			Log("debug") << "[Roster::" << this << "] Peer State Changed: Removing: " << stream->name() << endl;
+			Log("debug") << "[Roster:" << this << "] Peer State Changed: Removing: " << stream->name() << endl;
 			Roster::Manager::remove(stream->name());
 		}
 	}

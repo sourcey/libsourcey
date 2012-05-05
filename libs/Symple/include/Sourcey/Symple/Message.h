@@ -79,6 +79,7 @@ public:
 	JSON::Value& data(const std::string& name);
 	JSON::Value& setData(const std::string& name);
 	void setData(const std::string& name, const std::string& data);
+	void setData(const std::string& name, const JSON::Value& data);
 	void setData(const std::string& name, int data);
 	void removeData(const std::string& name);
 	
