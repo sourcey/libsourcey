@@ -41,6 +41,36 @@ public:
 };
 
 
+template <class TStartable>
+class AsyncStartable: public TStartable, public Poco::Runnable
+{
+public:
+	AsyncStartable() {};
+	virtual ~AsyncStartable() {};
+
+	virtual bool start() 
+	{
+		_thread.start(*this);
+		return true;
+	}
+	
+	virtual void stop()
+	{
+		TStartable::stop();
+		_thread.join();
+	}
+	
+protected:
+	virtual void run()
+	{	
+		TStartable::start(); // must block
+		delete this;
+	}
+
+protected:
+	Poco::Thread _thread;
+};
+
 } // namespace Sourcey
 
 

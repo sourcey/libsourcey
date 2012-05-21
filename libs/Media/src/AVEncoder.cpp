@@ -147,18 +147,18 @@ void AVEncoder::initialize()
 		// Allocate the output media context
 		_formatCtx = avformat_alloc_context();
 		if (!_formatCtx) 
-			throw Exception("Unable to allocate format context.");
+			throw Exception("Cannot allocate format context.");
 
 		if (!_params.ofile.empty())
 			snprintf(_formatCtx->filename, sizeof(_formatCtx->filename), "%s", _params.ofile.data());
 		
 		// Set the container codec
-		string ofmt = _params.ofile.empty() ? 
-			_params.oformat./*name*/extension() : 
+		string ofmt = _params.ofile.empty() ? "." + 
+			_params.oformat.extension() : 
 			_params.ofile;
 		_formatCtx->oformat = av_guess_format(NULL, ofmt.data(), NULL);	
 		if (!_formatCtx->oformat)
-			throw Exception("Unable to find suitable output format for " + ofmt);
+			throw Exception("Cannot find suitable output format for " + ofmt);
 
 		// Set the encoder codec
 		if (_params.oformat.video.enabled)

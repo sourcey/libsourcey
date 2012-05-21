@@ -160,9 +160,9 @@ string Package::Asset::version() const
 }
 
 
-std::string Package::Asset::url() const
+std::string Package::Asset::url(int index) const
 {
-	return root["mirrors"][(size_t)0].asString();
+	return root["mirrors"][(size_t)index]["url"].asString();
 }
 
 
@@ -170,7 +170,6 @@ bool Package::Asset::valid() const
 {
 	return !root["file-name"].empty() 
 		&& !root["version"].empty();
-
 }
 
 

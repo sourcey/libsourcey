@@ -1,0 +1,40 @@
+lame 3.98.2 http://lame.sourceforge.net/
+
+tar zxfv lame-398-2.tar.gz
+cd lame-398-2
+patch -p0 < ../lame-398-2.diff
+./configure --prefix=/mingw --disable-shared --enable-static --disable-frontend --enable-nasm
+make
+make install
+
+libogg 1.1.3 http://www.xiph.org/
+
+tar zxfv libogg-1.1.3.tar.gz
+cd libogg-1.1.3
+./configure --prefix=/mingw --enable-static --disable-shared
+make
+make install
+
+libvorbis 1.2.0 http://www.xiph.org/
+
+tar zxfv libvorbis-1.2.0.tar.gz
+cd libvorbis-1.2.0
+./configure --prefix=/mingw --enable-static --disable-shared
+make
+make install
+
+libtheora 1.0 http://www.xiph.org/
+
+tar xfvj libtheora-1.0.tar.bz2
+cd libtheora-1.0
+./configure --prefix=/mingw --enable-static --disable-shared
+make
+make install
+
+speex-1.2rc1.tar.gz http://www.xiph.org/
+
+tar zxfv speex-1.2rc1.tar.gz
+cd speex-1.2rc1
+./configure --enable-static --disable-shared
+make
+make install

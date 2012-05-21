@@ -109,14 +109,14 @@ struct VideoDecoderContext: public VideoContext
 
 	virtual int decode(AVPacket& packet);
 		// Decodes a single frame from the provided packet.
+		// TODO: We may need to return the generated frame size to match
+		// the audio API, not the encoded length.
 		// IMPORTANT: In order to ensure all data is decoded from the
 		// input packet, this method should be looped until the input
 		// packet size is 0.
 		// Example:
 		//	while (packet.size > 0) {
 		//		len = decode(packet);
-		//		packet.data += len;
-		//		packet.size -= len;
 		//	}
 
     double duration;

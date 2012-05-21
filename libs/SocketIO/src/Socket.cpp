@@ -31,6 +31,7 @@
 
 #include "Poco/Format.h"
 #include "Poco/StreamCopier.h"
+#include "Poco/Net/HTTPClientSession.h"
 #include "Poco/Net/HTTPRequest.h"
 #include "Poco/Net/HTTPResponse.h"
 
@@ -83,7 +84,7 @@ void Socket::connect()
 		throw Exception("The SocketIO Socket is already active.");
 
 	_uri = "ws://" + _srvAddr.toString() + "/socket.io/1/";	
-	Log("debug") << "[SocketIO::Socket] Initializing on " << _uri.toString() << endl;
+	Log("debug") << "[SocketIO::Socket]	Connecting to " << _uri.toString() << endl;
 
 	if (sendInitialRequest()) {
 				
@@ -103,14 +104,29 @@ void Socket::connect()
 
 
 bool Socket::sendInitialRequest()
-{	
+{		 
+	HTTPClientSession s(_srvAddr);
+	HTTPRequest request(HTTPRequest::HTTP_POST, "/socket.io/1/");	
+	s.sendRequest(request);
+	HTTPResponse response;
+	std::istream& rs = s.receiveResponse(response);
+	std::ostringstream body;
+	StreamCopier::copyStream(rs, body);
+	int status = response.getStatus();
+
+	Log("debug") << "[SocketIO::Socket] Handshake:" 
+		<< "\n\tStatus: " << status
+		<< "\n\tResponse: " << body.str()
+		<< endl;
+
+	/*
 	// Seems to be a strange bug where data copying from receiveBytes
 	// into a std::iostream is invalid. This is causing Poco to throw
 	// a NoMesageException when using the HTTPRequest object because 
 	// the first byte == eof.
 	// Copying into a std::string yields no such problem, so using 
 	// std::string for now.
-		
+
 	StreamSocket socket;	
 	socket.connect(_srvAddr);
 	SocketStream ss(socket);
@@ -119,12 +135,13 @@ bool Socket::sendInitialRequest()
 	HTTPRequest request("POST", "/socket.io/1/");	
 	for (NameValueCollection::ConstIterator it = _httpHeaders.begin(); it != _httpHeaders.end(); it++)
 		request.set((*it).first, (*it).second);
+	//request.setContentLength(0);
 	request.write(ss);
 	ss.flush();
 	assert(ss.good());	
 	
 	// Response
-	char buffer[512];
+	char buffer[1024];
 	int size = socket.receiveBytes(buffer, sizeof(buffer));	
 	string response(buffer, size);
 	size_t pos = response.find(" "); pos++;
@@ -133,23 +150,29 @@ bool Socket::sendInitialRequest()
 	string body(response.substr(pos, response.length()));
 	socket.shutdownSend();
 
-	Log("debug") << "[SocketIO::Socket] Handshake Response:" 
+	Log("debug") << "[SocketIO::Socket] Handshake:" 
+		//<< "\n\tRequest: " << ss.str()
 		<< "\n\tStatus: " << status
 		<< "\n\tResponse: " << response
+		<< "\n\tResponse Len: " << response.size()
 		<< "\n\tBody: " << body
 		<< endl;
+		*/
 
 	// The server can respond in three different ways:
-    // 401 Unauthorized: If the server refuses to authorize the client to connect, based on the supplied information (eg: Cookie header or custom query components).
+    // 401 Unauthorized: If the server refuses to authorize the client to connect, 
+	//		based on the supplied information (eg: Cookie header or custom query components).
     // 503 Service Unavailable: If the server refuses the connection for any reason (eg: overload).
 	// 200 OK: The handshake was successful.
 	if (status != 200)
 		throw Exception(format("SocketIO handshake failed with %d", status));
 					
 	// Parse the response response
-	StringList respData = Util::split(body, ':', 4);
+	StringList respData = Util::split(body.str(), ':', 4);
 	if (respData.size() < 4)
-		throw Exception(format("Invalid response: %s", body));
+		throw Exception(body.str().empty() ? 
+			"Invalid SocketIO handshake response." : format(
+			"Invalid SocketIO handshake response: %s", body.str()));
 	
 	_sessionID = respData[0];
 	_heartBeatTimeout = Util::atoi(respData[1]);
@@ -184,8 +207,6 @@ void Socket::close()
 		Timer::getDefault().stop(TimerCallback<Socket>(this, &Socket::onHeartBeatTimer));	
 	}
 	
-	Log("trace") << "[SocketIO::Socket] Closing: 2" << endl;	
-
 	WebSocket::close();
 
 	Log("trace") << "[SocketIO::Socket] Closing: OK" << endl;	

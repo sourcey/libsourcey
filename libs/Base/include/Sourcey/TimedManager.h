@@ -54,6 +54,8 @@ public:
 		/// The item pointer MUST be destroyed by the manager or the 
 		/// application will crash.
 	{
+		Log("trace") << "[TimedManager] Adding: " << item << ": " << timeout << std::endl;
+
 		// Remove existing items for the
 		// given key and store the item.
 		Base::free(name);
@@ -82,9 +84,11 @@ public:
 			Timer::getDefault().stop(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, 0, 0, item));
 	}
 
-	virtual void onRemove(const TKey&, TValue* item) 
+	virtual void onRemove(const TKey& key, TValue* item) 
 	{ 
+		Log("trace") << "[TimedManager] Removing: " << item << std::endl;
 		Timer::getDefault().stop(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, 0, 0, item));
+		Base::onRemove(key, item);
 	}
 
 	virtual void clear()
@@ -95,8 +99,8 @@ public:
 
 	virtual void onItemTimeout(TimerCallback<TimedManager>& timer)
 	{
-		//Log("debug") << "[TimedManager] Item Timeout" << std::endl;
 		TValue* item = reinterpret_cast<TValue*>(timer.opaque());
+		Log("trace") << "[TimedManager] Item Timeout: " << item << std::endl;
 		if (Base::remove(item))
 			delete item;
 	}

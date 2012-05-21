@@ -180,13 +180,16 @@ void AudioEncoderContext::open(AVFormatContext *oc) //, const AudioCodec& params
 	
 	// Open the codec
 	if (avcodec_open2(codec, c, NULL) < 0)
-		throw Exception("Unable to open the audio codec.");
+		throw Exception("Cannot open the audio codec.");
 		
 	// NOTE: buffer must be >= AVCODEC_MAX_AUDIO_FRAME_SIZE
 	// or some codecs will fail.
     bufferSize = AVCODEC_MAX_AUDIO_FRAME_SIZE; //MAX_AUDIO_PACKET_SIZE;
     buffer = (UInt8*)av_malloc(this->bufferSize);	
-	
+		
+	// Set the output frame size.
+	frameSize = codec->frame_size * 2 * codec->channels;
+
 	/*
 	if (codec->channels == 6)
 		codec->channel_layout = AV_CH_LAYOUT_5POINT1;
@@ -231,7 +234,7 @@ void AudioEncoderContext::open(AVFormatContext *oc) //, const AudioCodec& params
 
 	// Allocate a buffer to read OUT of the FIFO into. The FIFO maintains its own buffer internally.
 	if ((_audioFifoOutBuffer = (UInt8*)av_malloc(MAX_AUDIO_PACKET_SIZE * 2)) == 0)
-		throw Exception("Can't allocate audio FIFO buffer.");
+		throw Exception("Cannot allocate audio FIFO buffer.");
 		*/	
 }
 
@@ -361,7 +364,7 @@ int AudioEncoderContext::encode(unsigned char* buffer, int bufferSize, AVPacket&
 	}
 
 	if (!buffer || !bufferSize) 
-		throw Exception("Unable to encode audio frame.");
+		throw Exception("Cannot encode audio frame.");
 
 	if (bufferSize > this->bufferSize) 
 		throw Exception("Audio frame too big.");
@@ -494,6 +497,7 @@ void AudioDecoderContext::open(AVFormatContext *ic, int streamID)
 	// or some codecs will fail.
     bufferSize = AVCODEC_MAX_AUDIO_FRAME_SIZE; //MAX_AUDIO_PACKET_SIZE;
     buffer = (UInt8*)av_malloc(bufferSize);
+
     //packet = (AVPacket*)av_mallocz(sizeof(AVPacket));
     //av_init_packet(packet);
     //offset = 0;
@@ -543,8 +547,8 @@ int AudioDecoderContext::decode(AVPacket& packet)
 			pts *= av_q2d(stream->time_base);
 		}
 
-		Log("trace") << "[AudioDecoderContext:" << this << "] Decoder PTS: " << packet.pts << endl;
-		Log("trace") << "[AudioDecoderContext:" << this << "] Decoder PTS 1: " << pts << endl;
+		//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder PTS: " << packet.pts << endl;
+		//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder PTS 1: " << pts << endl;
 	
 		return outSize;
 	} 

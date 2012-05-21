@@ -116,21 +116,14 @@ ConsoleChannel::ConsoleChannel(const string& name, LogLevel level, const char* d
 
 
 void ConsoleChannel::write(const string& message, LogLevel level, const ILoggable* klass) 
-{ 
-#if defined(_DEBUG) || defined(_CONSOLE)
-	
+{ 	
 	if (this->level() > level)
 		return;
 	
 	ostringstream ss;
-	format(ss, message, level, klass);
+	format(ss, message, level, klass); 
+#if defined(_CONSOLE) // || defined(_DEBUG)
 	cout << ss.str();
-#if defined(_MSC_VER) && defined(_DEBUG)
-	std::string s(ss.str());
-	std::wstring temp(s.length(), L' ');
-	std::copy(s.begin(), s.end(), temp.begin());
-	OutputDebugString(temp.data());
-#endif
 	/*
 		ostringstream ss;
 		ss << "[" << getStringFromLogLevel(level) << "] ";
@@ -141,6 +134,12 @@ void ConsoleChannel::write(const string& message, LogLevel level, const ILoggabl
 		cout << ss.str();
 //#endif
 	*/
+#endif
+#if defined(_MSC_VER) //&& defined(_DEBUG)
+	std::string s(ss.str());
+	std::wstring temp(s.length(), L' ');
+	std::copy(s.begin(), s.end(), temp.begin());
+	OutputDebugString(temp.data());
 #endif
 };
 
@@ -280,10 +279,19 @@ void Logger::initialize()
 
 void Logger::uninitialize() 
 {
+	FastMutex::ScopedLock lock(_mutex);
 	if (_instance) {
 		delete _instance;
 		_instance = NULL;
 	}
+}
+
+
+void Logger::setInstance(Logger* logger)
+{
+	uninitialize();
+	FastMutex::ScopedLock lock(_mutex);
+	_instance = logger;
 }
 
 

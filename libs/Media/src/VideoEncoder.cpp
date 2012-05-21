@@ -111,7 +111,7 @@ void VideoEncoder::initEncodeContext()
 
     AVCodecContext *oContext = avcodec_alloc_context();
     if (!oContext)
-        throw Exception("Unable to allocate encoder context.");
+        throw Exception("Cannot allocate encoder context.");
 
     oContext->codec_type = AVMEDIA_TYPE_VIDEO;
     oContext->width = _params.oformat.video.width;
@@ -156,7 +156,7 @@ void VideoEncoder::initEncodeContext()
 		// Lock our mutex during avcodec_open
 		FastMutex::ScopedLock lock(_mutex);
 		if (avcodec_open(oContext, oCodec) < 0)
-			throw Exception("Unable to open output codec.");
+			throw Exception("Cannot open output codec.");
 	}
 
     _encoderContext = oContext;	

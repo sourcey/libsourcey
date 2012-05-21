@@ -111,7 +111,7 @@ bool Transaction::send()
 			processResponse(ist);
 		} 
 		else
-			throw Exception("Unable to create HTTP session for scheme: " + _uri.getScheme());
+			throw Exception("Cannot create HTTP session for scheme: " + _uri.getScheme());
 
 		if (!cancelled())
 			setState(this, _response.success() ? 

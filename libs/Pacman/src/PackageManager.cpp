@@ -90,7 +90,7 @@ void PackageManager::initialize()
 
 bool PackageManager::initialized() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 	return !_remotePackages.empty()
 		|| !_localPackages.empty();
 }
@@ -100,7 +100,7 @@ void PackageManager::uninitialize()
 {	
 	abortAllTasks();
 	
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 	_remotePackages.clear();
 	_localPackages.clear();
 }
@@ -108,7 +108,7 @@ void PackageManager::uninitialize()
 
 void PackageManager::abortAllTasks()
 {
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 	PackageInstallTaskList::iterator it = _tasks.begin();
 	while (it != _tasks.end()) {
 		(*it)->cancel();
@@ -119,6 +119,7 @@ void PackageManager::abortAllTasks()
 
 void PackageManager::createDirectories()
 {
+	FastMutex::ScopedLock lock(_mutex);
 	File(_options.cacheDir).createDirectories();
 	File(_options.interDir).createDirectories();
 	File(_options.installDir).createDirectories();
@@ -127,16 +128,16 @@ void PackageManager::createDirectories()
 
 void PackageManager::queryRemotePackages()
 {	
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 	
-	Log("debug") << "[PackageManager] Querying Packages: " << _options.endpoint << endl;
+	Log("debug") << "[PackageManager] Querying Packages: " << _options.endpoint << _options.indexURI << endl;
 
 	if (!_tasks.empty())
 		throw Exception("Please cancel all package tasks before re-loading packages");	
 
 	try {
 
-		// Make the API call to retreive the remote manifest
+		// Make the API call to retrieve the remote manifest
 		URI uri(_options.endpoint);
 		HTTPClientSession session(uri.getHost(), uri.getPort());
 		HTTPRequest request("GET", _options.indexURI, HTTPMessage::HTTP_1_1);
@@ -187,7 +188,7 @@ void PackageManager::loadLocalPackages()
 {
 	string dir;
 	{
-		Mutex::ScopedLock lock(_mutex);
+		FastMutex::ScopedLock lock(_mutex);
 
 		if (!_tasks.empty())
 			throw Exception("Please cancel all package tasks before re-loading packages");	
@@ -202,7 +203,7 @@ void PackageManager::loadLocalPackages()
 void PackageManager::loadLocalPackages(const string& dir)
 {
 	Log("debug") << "[PackageManager] Loading manifests: " << dir << endl;		
-	Mutex::ScopedLock lock(_mutex);
+	//FastMutex::ScopedLock lock(_mutex);
 
 	DirectoryIterator fIt(dir);
 	DirectoryIterator fEnd;
@@ -221,7 +222,7 @@ void PackageManager::loadLocalPackages(const string& dir)
 					throw Exception("The local package is invalid");
 				}
 
-				_localPackages.add(package->name(), package);
+				localPackages().add(package->name(), package);
 			}
 			catch (Exception& exc) {
 				Log("error") << "[PackageManager] Load Error: " << exc.message() << endl;
@@ -237,16 +238,21 @@ void PackageManager::loadLocalPackages(const string& dir)
 
 bool PackageManager::saveLocalPackages(bool whiny)
 {
+	Log("trace") << "[PackageManager] Saving Local Packages" << endl;
+
 	bool res = true;
 	
-	ScopedLockWithUnlock<Mutex> lock(_mutex);
-	LocalPackageMap toSave(_localPackages.items());
-	lock.unlock();
+	//ScopedLockWithUnlock<Mutex> lock(_mutex);
+	//LocalPackageMap toSave(_localPackages.items());
+	//lock.unlock();
 
+	LocalPackageMap toSave = localPackages().copy();
 	for (LocalPackageMap::const_iterator it = toSave.begin(); it != toSave.end(); ++it) {
 		if (!saveLocalPackage(static_cast<LocalPackage&>(*it->second), whiny))
 			res = false;
 	}
+
+	Log("trace") << "[PackageManager] Saving Local Packages: OK" << endl;
 
 	return res;
 }
@@ -254,12 +260,14 @@ bool PackageManager::saveLocalPackages(bool whiny)
 
 bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 {
-	Mutex::ScopedLock lock(_mutex);
+	Log("trace") << "[PackageManager] Saving Local Package: " << package.name() << endl;
+
+	//FastMutex::ScopedLock lock(_mutex);
 	bool res = false;
 
 	try {
-		string path(format("%s/manifest_%s.json", _options.interDir, package.name()));
-		Log("debug") << "[PackageManager] Saving Package:" << path << endl;
+		string path(format("%s/manifest_%s.json", options().interDir, package.name()));
+		Log("debug") << "[PackageManager] Saving Package: " << path << endl;
 		JSON::saveFile(package, path);
 		res = true;
 	}
@@ -267,7 +275,10 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 		Log("error") << "[PackageManager] Save Error: " << exc.message() << endl;
 		if (whiny)
 			exc.rethrow();
-	}
+	}	
+
+	Log("trace") << "[PackageManager] Saving Local Package: OK: " << package.name() << endl;
+
 	return res;
 }
 
@@ -288,7 +299,7 @@ bool PackageManager::installPackage(const string& name, PackageInstallMonitor* m
 		// it's unpopulated.
 		// TODO: Store to cache file and unload when all tasks
 		// complete.
-		if (_remotePackages.empty())
+		if (remotePackages().empty())
 			queryRemotePackages();
 
 		PackagePair pair = getOrCreatePackagePair(name);
@@ -350,8 +361,7 @@ bool PackageManager::updatePackage(const string& name, PackageInstallMonitor* mo
 	// action, except we will make sure local package exists 
 	// before we continue.
 	{
-		Mutex::ScopedLock lock(_mutex);
-		if (!_localPackages.exists(name)) {
+		if (!localPackages().exists(name)) {
 			string error("Update Failed: " + name + " is not installed");
 			Log("error") << "[PackageManager] " << error << endl;	
 			if (whiny)
@@ -380,11 +390,12 @@ bool PackageManager::updateAllPackages(PackageInstallMonitor* monitor, bool whin
 {
 	bool res = true;
 	
-	ScopedLockWithUnlock<Mutex> lock(_mutex);
-	LocalPackageMap toUpdate(_localPackages.items());
-	lock.unlock();
-
-	for (LocalPackageMap::const_iterator it = toUpdate.begin(); it != toUpdate.end(); ++it) {	
+	//ScopedLockWithUnlock<Mutex> lock(_mutex);
+	//LocalPackageMap toUpdate(_localPackages.items());
+	//lock.unlock();
+	
+	LocalPackageMap& packages = localPackages().items();
+	for (LocalPackageMap::const_iterator it = packages.begin(); it != packages.end(); ++it) {	
 		if (!updatePackage(it->second->name(), monitor, whiny))
 			res = false;
 	}
@@ -396,11 +407,11 @@ bool PackageManager::updateAllPackages(PackageInstallMonitor* monitor, bool whin
 bool PackageManager::uninstallPackage(const string& name, bool whiny)
 {
 	Log("debug") << "[PackageManager] Uninstalling Package: " << name << endl;	
-	Mutex::ScopedLock lock(_mutex);
+	//FastMutex::ScopedLock lock(_mutex);
 	
 	try 
 	{
-		LocalPackage* package = _localPackages.get(name, true);
+		LocalPackage* package = localPackages().get(name, true);
 		LocalPackage::Manifest manifest = package->manifest();
 		if (manifest.empty())
 			throw Exception("Uninstall Error: The local package manifests is empty");
@@ -426,14 +437,14 @@ bool PackageManager::uninstallPackage(const string& name, bool whiny)
 		}
 	
 		// Delete package manifest file
-		File file(format("%s/manifest_%s.json", _options.interDir, package->name()));
+		File file(format("%s/manifest_%s.json", options().interDir, package->name()));
 		file.remove();	
 
 		// Notify the outside application
 		PackageUninstalled.dispatch(this, *package);
 		
 		// Free package reference from memory
-		_localPackages.remove(package);
+		localPackages().remove(package);
 		delete package;
 	}
 	catch (Exception& exc) 
@@ -462,11 +473,11 @@ bool PackageManager::uninstallPackages(const StringList& names, bool whiny)
 
 PackageInstallTask* PackageManager::createPackageInstallTask(PackagePair& pair) //const std::string& name, PackageInstallMonitor* monitor)
 {	
-	Mutex::ScopedLock lock(_mutex);
-
 	PackageInstallTask* task = new PackageInstallTask(*this, &pair.local, &pair.remote);
 	task->TaskComplete += delegate(this, &PackageManager::onPackageInstallComplete, -1);
-	task->start();		
+	task->start();
+
+	FastMutex::ScopedLock lock(_mutex);
 	_tasks.push_back(task);
 
 	return task;
@@ -475,13 +486,14 @@ PackageInstallTask* PackageManager::createPackageInstallTask(PackagePair& pair) 
 
 bool PackageManager::hasUnfinalizedPackages()
 {	
-	Mutex::ScopedLock lock(_mutex);
+	//FastMutex::ScopedLock lock(_mutex);
 
 	Log("debug") << "[PackageManager] Checking if Finalization Required" << endl;
 	
 	bool res = false;	
-	LocalPackageMap toCheck(_localPackages.items());
-	for (LocalPackageMap::const_iterator it = toCheck.begin(); it != toCheck.end(); ++it) {
+	//LocalPackageMap toCheck(_localPackages.items());
+	LocalPackageMap& packages = localPackages().items();
+	for (LocalPackageMap::const_iterator it = packages.begin(); it != packages.end(); ++it) {
 		if (it->second->state() == "Installing" && 
 			it->second->installState() == "Finalizing") {
 			Log("debug") << "[PackageManager] Finalization required: " << it->second->name() << endl;
@@ -497,7 +509,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 {
 	Log("debug") << "[PackageManager] Finalizing Installations" << endl;
 	
-	//Mutex::ScopedLock lock(_mutex);
+	//FastMutex::ScopedLock lock(_mutex);
 	
 	bool res = true;
 	
@@ -549,8 +561,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 // ---------------------------------------------------------------------
 PackagePair PackageManager::getPackagePair(const std::string& name) const
 {		
-	Mutex::ScopedLock lock(_mutex);
-
+	FastMutex::ScopedLock lock(_mutex);
 	LocalPackage* local = _localPackages.get(name, true);
 	RemotePackage* remote = _remotePackages.get(name, true);
 
@@ -566,9 +577,7 @@ PackagePair PackageManager::getPackagePair(const std::string& name) const
 
 PackagePair PackageManager::getOrCreatePackagePair(const std::string& name)
 {	
-	Mutex::ScopedLock lock(_mutex);
-
-	RemotePackage* remote = _remotePackages.get(name, true);
+	RemotePackage* remote = remotePackages().get(name, true);
 	if (!remote->latestAsset().valid())
 		throw Exception("The remote package has no file assets.");
 
@@ -576,10 +585,10 @@ PackagePair PackageManager::getOrCreatePackagePair(const std::string& name)
 		throw Exception("The remote package is invalid.");
 
 	// Get or create the local package description.
-	LocalPackage* local = _localPackages.get(name, false);
+	LocalPackage* local = localPackages().get(name, false);
 	if (!local) {
 		local = new LocalPackage(*remote);
-		_localPackages.add(name, local);
+		localPackages().add(name, local);
 	}
 	
 	if (!local->valid())
@@ -625,7 +634,7 @@ bool PackageManager::checkInstallManifest(LocalPackage& package)
 // ---------------------------------------------------------------------
 void PackageManager::clearCache()
 {
-	Path path(_options.cacheDir);
+	Path path(options().cacheDir);
 	path.makeDirectory();
 	return File(path).remove();
 }
@@ -647,8 +656,7 @@ bool PackageManager::clearPackageCache(LocalPackage& package)
 bool PackageManager::clearCacheFile(const std::string& fileName, bool whiny)
 {
 	try {
-		Mutex::ScopedLock lock(_mutex);	
-		Path path(_options.cacheDir);
+		Path path(options().cacheDir);
 		path.makeDirectory();
 		path.setFileName(fileName);
 		File(path).remove();
@@ -667,9 +675,7 @@ bool PackageManager::clearCacheFile(const std::string& fileName, bool whiny)
 
 bool PackageManager::hasCachedFile(const std::string& fileName)
 {
-	Mutex::ScopedLock lock(_mutex);
-
-	Path path(_options.cacheDir);
+	Path path(options().cacheDir);
 	path.makeDirectory();
 	path.setFileName(fileName);
 	return File(path).exists();
@@ -685,9 +691,9 @@ bool PackageManager::isSupportedFileType(const std::string& fileName)
 
 Path PackageManager::getCacheFilePath(const std::string& fileName)
 {
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 
-	Path path(_options.cacheDir);
+	Path path(options().cacheDir);
 	path.makeDirectory();
 	path.setFileName(fileName);
 	return path;
@@ -696,9 +702,7 @@ Path PackageManager::getCacheFilePath(const std::string& fileName)
 
 Path PackageManager::getInstallFilePath(const std::string& fileName)
 {
-	Mutex::ScopedLock lock(_mutex);
-
-	Path path(_options.installDir);
+	Path path(options().installDir);
 	path.makeDirectory();
 	path.setFileName(fileName);
 	return path;
@@ -707,13 +711,34 @@ Path PackageManager::getInstallFilePath(const std::string& fileName)
 	
 Path PackageManager::getIntermediatePackageDir(const std::string& packageName)
 {
-	Mutex::ScopedLock lock(_mutex);
-
-	Path dir(_options.interDir);
+	Log("debug") << "[PackageManager] getIntermediatePackageDir 0" << endl;
+		
+	Path dir(options().interDir);
 	dir.makeDirectory();
 	dir.pushDirectory(packageName);
 	File(dir).createDirectories();
 	return dir;
+}
+
+
+PackageManager::Options& PackageManager::options() 
+{ 
+	FastMutex::ScopedLock lock(_mutex);
+	return _options;
+}
+
+
+RemotePackageStore& PackageManager::remotePackages() 
+{ 
+	FastMutex::ScopedLock lock(_mutex);
+	return _remotePackages; 
+}
+
+
+LocalPackageStore& PackageManager::localPackages()
+{ 
+	FastMutex::ScopedLock lock(_mutex);
+	return _localPackages; 
 }
 
 
@@ -724,11 +749,17 @@ Path PackageManager::getIntermediatePackageDir(const std::string& packageName)
 // ---------------------------------------------------------------------
 void PackageManager::onPackageInstallComplete(void* sender)
 {
+	Log("trace") << "[PackageManager] onPackageInstallComplete" << endl;
+
 	PackageInstallTask* task = reinterpret_cast<PackageInstallTask*>(sender);
 	PackageInstalled.dispatch(this, *task->local());
-	saveLocalPackage(*task->_local);
-	Mutex::ScopedLock lock(_mutex);
-	for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end();) {
+
+	// Save the local package
+	saveLocalPackage(*task->local());
+
+	// Remove the task reference
+	FastMutex::ScopedLock lock(_mutex);
+	for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++) {
 		if (*it == task) {
 			_tasks.erase(it);
 			return;
@@ -818,7 +849,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 	if (_remotePackages.empty())
 		throw Exception("No remote package manifests have been loaded");
 
-	// Retreive the remote package manifest or fail.
+	// retrieve the remote package manifest or fail.
 	RemotePackage* remote = _remotePackages.get(name, true);
 		
 	// Get or create the local package description.
@@ -895,7 +926,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 				Log("error") << "[PackageManager] Finalizing: Delete Error: " << fIt.path().toString() << endl;
 				*/
 	/* 
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 	//const string& name
 	//if (Util::compareVersion(remote->latestAsset().version(), local->version()))
 	//	return false;
@@ -917,7 +948,7 @@ PackagePair PackageManager::getPackagePair(const std::string& name, bool whiny)
 
 bool PackageManager::isLatestVersion(const string& name)
 {	
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 	
 	LocalPackage* local = _localPackages.get(name, true);
 	RemotePackage* remote = _remotePackages.get(name, true);

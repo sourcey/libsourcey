@@ -258,10 +258,15 @@ void PackageInstallTask::onDecompressionOk(const void*, pair<const Poco::Zip::Zi
 
 void PackageInstallTask::doFinalize() 
 {
+		Log("debug", this) << "doFinalize" << endl;
 	setState(this, PackageInstallState::Finalizing);
+		Log("debug", this) << "doFinalize 1" << endl;
+		Log("debug", this) << "doFinalize 11: " << _local->name() << endl;
 
 	bool errors = false;
 	Path outputDir(_manager.getIntermediatePackageDir(_local->name()));
+	
+		Log("debug", this) << "doFinalize 2" << endl;
 
 	// Move all extracted files to the installation path
 	DirectoryIterator fIt(outputDir);
@@ -287,12 +292,16 @@ void PackageInstallTask::doFinalize()
 		++fIt;
 	}
 
+		Log("debug", this) << "doFinalize 3" << endl;
+
 	// The package requires finalizing at a later date. 
 	// The current task will be terminated.
 	if (errors) {
+		Log("debug", this) << "Finalization failed" << endl;
 		_cancelled = true;
 		return;
 	}
+		Log("debug", this) << "doFinalize 4" << endl;
 	
 	// Remove the temporary output folder if the installation
 	// was successfully finalized.
@@ -308,8 +317,10 @@ void PackageInstallTask::doFinalize()
 		// While testing on a windows system this fails regularly
 		// with a file sharing error, but since the package is already
 		// installed we can just swallow it.
-		Log("warn", this) << "Unable to remove temp directory: " << exc.message() << endl;
+		Log("warn", this) << "Cannot remove temp directory: " << exc.message() << endl;
 	}
+
+	Log("debug", this) << "Finalization Complete" << endl;
 	
 	// Transition the internal state if finalization was a success.
 	// This will complete the installation process.
