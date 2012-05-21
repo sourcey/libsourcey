@@ -75,11 +75,9 @@ void Timer::start(const ITimerCallback& callback)
 
 void Timer::stop(const ITimerCallback& callback) 
 {
-	Log("trace") << "[Timer:" << this << "] Stopping" << endl;
 	Log("trace") << "[Timer:" << this << "] Stopping: " << callback.object() << endl;
 
 	Mutex::ScopedLock lock(_mutex);
-	Log("trace") << "[Timer:" << this << "] Stopping 1: " << callback.object() << endl;
 	bool success = false;
 	for (TimerCallbackList::const_iterator it = _callbacks.begin(); it != _callbacks.end(); ++it) {
 		if (**it == callback) {
@@ -132,7 +130,7 @@ void Timer::run()
 	Log("trace") << "[Timer:" << this << "] Running" << endl;
 
 	while (!_stop) {	
-		try {
+		//try {
 			Log("trace") << "[Timer:" << this << "] Waiting for " << _scheduleAt.remaining() << endl;
 
 			_wakeUp.tryWait(_scheduleAt.remaining());
@@ -185,10 +183,10 @@ void Timer::run()
 					sort(_callbacks.begin(), _callbacks.end(), CompareTimeout);
 				}	
 			}
-		}
-		catch (Exception& exc) {
-			Log("error") << "[Timer:" << this << "] Swallowing Exception: " << exc.displayText() << endl;
-		}
+		//}
+		//catch (Exception& exc) {
+		//	Log("error") << "[Timer:" << this << "] Swallowing Exception: " << exc.displayText() << endl;
+		//}
 	}
 	
 	Log("trace") << "[Timer:" << this << "] Exiting" << endl;

@@ -69,13 +69,18 @@ void VideoContext::close()
   	
   	if (convCtx)
 		sws_freeContext(convCtx);
+	
+	Log("trace") << "[VideoContext" << this << "] Closing 1" << endl;
 
 	if (codec)
 		//av_freep(codec);
 		avcodec_close(codec);
-	
+
 	if (stream)	
-		av_freep(stream);
+		stream = NULL;
+		//av_freep(stream);
+	
+	Log("trace") << "[VideoContext" << this << "] Closing 2" << endl;
 
     if (buffer)
         av_free(buffer);
@@ -325,17 +330,17 @@ void VideoEncoderContext::open(AVFormatContext *oc) //, const VideoCodec& params
 
 	// Open the video codec
 	if (avcodec_open2(codec, c, NULL) < 0)
-   		throw Exception("Unable to open the video codec.");
+   		throw Exception("Cannot open the video codec.");
 
 	// Allocate the input frame
 	iframe = createVideoFrame((::PixelFormat)iparams.pixfmt, iparams.width, iparams.height);
 	if (!iframe)
-		throw Exception("Unable to allocate input frame.");
+		throw Exception("Cannot allocate input frame.");
 
 	// Allocate the output frame
 	oframe = createVideoFrame(codec->pix_fmt, codec->width, codec->height);
 	if (!oframe)
-		throw Exception("Unable to allocate output frame.");
+		throw Exception("Cannot allocate output frame.");
 
     this->bufferSize = codec->width * 3 * codec->height;
     this->buffer = (UInt8*)av_malloc(this->bufferSize);
@@ -660,10 +665,14 @@ int VideoDecoderContext::decode(AVPacket& packet)
 		
 	// If frameDecoded == 0, then no frame was produced.
 	if (frameDecoded == 0) {
-		Log("warn") << "[VideoDecoderContext:" << this << "] Decoding Video: No frame was encoded." << endl;
+		Log("warn") << "[VideoDecoderContext:" << this << "] Decoding Video: No frame was decoded." << endl;
 		return 0;
 	}
+
+	packet.size -= len;
+    packet.data += len;		
 		
+	//Log("trace") << "[VideoDecoderContext:" << this << "] Decoder Size: " << frameDecoded << endl;
 	//Log("trace") << "[VideoDecoderContext:" << this << "] Decoder DTS: " << packet.dts << endl;
 	//Log("trace") << "[VideoDecoderContext:" << this << "] Decoder Time Base: " << stream->time_base.den << endl;
 		
@@ -672,8 +681,8 @@ int VideoDecoderContext::decode(AVPacket& packet)
 		pts *= av_q2d(stream->time_base);
 	}
 	
-	Log("trace") << "[VideoDecoderContext:" << this << "] Decoder PTS: " << packet.pts << endl;
-	Log("trace") << "[VideoDecoderContext:" << this << "] Decoder PTS 1: " << pts << endl;
+	//Log("trace") << "[VideoDecoderContext:" << this << "] Decoder PTS: " << packet.pts << endl;
+	//Log("trace") << "[VideoDecoderContext:" << this << "] Decoder PTS 1: " << pts << endl;
 
 	/*
 	// Initialize scale conversion context if uninitialized or if the

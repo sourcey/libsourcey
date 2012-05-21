@@ -195,6 +195,9 @@ public:
 	static Logger& instance();
 	static void initialize();	
 	static void uninitialize();
+	
+	static void setInstance(Logger* logger);
+		// Sets the logger instance and deletes the current instance.
 
 	void add(LogChannel* channel);
 	void remove(const std::string& name, bool deletePointer = true);

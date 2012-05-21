@@ -467,7 +467,7 @@ void XMPPTask::onRecvStanza(xmpp_stanza_t* const stanza)
 			delete s;
 		}
 		else
-			Log("error", this) << "Unable to create stanza." << endl;
+			Log("error", this) << "Cannot create stanza." << endl;
 		delete buf;
 	}
 }

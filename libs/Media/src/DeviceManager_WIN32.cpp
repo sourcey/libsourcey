@@ -331,7 +331,7 @@ bool getCoreAudioDevices(bool input, vector<Device>& devs)
 					if (SUCCEEDED(hr)) {
 						devs.push_back(dev);
 					} else {
-						Log("warn") << "Unable to query IMM Device, skipping.  HR=" << hr << endl;
+						Log("warn") << "Cannot query IMM Device, skipping.  HR=" << hr << endl;
 						hr = S_FALSE;
 					}
 				}

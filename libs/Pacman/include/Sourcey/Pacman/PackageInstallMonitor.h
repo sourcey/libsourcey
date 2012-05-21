@@ -62,11 +62,15 @@ public:
 		
 	Signal3<PackageInstallTask&, PackageInstallState&, const PackageInstallState&> PackageInstallStateChange;
 	Signal<LocalPackage&> PackageInstallComplete;
+	Signal<LocalPackageList&> PackageInstallationsComplete;
 	
 protected:
 	virtual void onPackageInstallStateChange(void* sender, PackageInstallState& state, const PackageInstallState& oldState);
 	virtual void onPackageInstallComplete(void* sender);
 		/// Called when a monitored install task completes.
+	
+protected:
+	mutable Poco::FastMutex	_mutex;
 
 	PackageInstallTaskList _tasks;
 	LocalPackageList _packages;

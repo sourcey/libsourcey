@@ -83,11 +83,11 @@ bool endsWith(const std::string& str, const std::string& suffix);
 
 std::string getPID(void* ptr);
 
-StringList &split(const std::string &s, const std::string &delim, StringList &elems, int limit = -1);
-StringList split(const std::string &s, const std::string &delim, int limit = -1);
+StringList &split(const std::string& s, const std::string& delim, StringList &elems, int limit = -1);
+StringList split(const std::string& s, const std::string& delim, int limit = -1);
 
-StringList &split(const std::string &s, char delim, StringList &elems, int limit = -1);
-StringList split(const std::string &s, char delim, int limit = -1);
+StringList &split(const std::string& s, char delim, StringList &elems, int limit = -1);
+StringList split(const std::string& s, char delim, int limit = -1);
 
 std::string trim(const std::string& str);
 	///

@@ -50,7 +50,7 @@ inline void loadFile(JSON::Value& root, const std::string& path)
 	std::ifstream infile;
 	infile.open(path.data(), std::ifstream::in);
 	if (!infile.is_open())		
-		throw Poco::OpenFileException("Unable to open input file: " + path);
+		throw Poco::OpenFileException("Cannot open input file: " + path);
 
 	JSON::Reader reader;
 	bool res = reader.parse(infile, root);
@@ -66,7 +66,7 @@ inline void saveFile(const JSON::Value& root, const std::string& path)
 	std::ofstream outfile;
 	outfile.open(path.data());
 	if (!outfile.is_open())
-		throw Poco::FileException("Unable to open output file: " + path);
+		throw Poco::FileException("Cannot open output file: " + path);
 
 	outfile << writer.write(root);
 	outfile.close();

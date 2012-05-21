@@ -107,11 +107,11 @@ public:
 public:	
 	virtual bool accepts(IPacket& packet) { return dynamic_cast<const Media::VideoPacket*>(&packet) != 0; };
 	virtual void process(IPacket& packet);
-
-	virtual void onStreamStateChange();
 	
 	virtual bool isRunning() const;
 	virtual bool isProcessing() const;
+
+	virtual void onStreamStateChange(const PacketStreamState&);
 	
 	virtual time_t segmentEndingAt() const { return _motionSegmentEndingAt; };	
 	virtual int motionLevel() const { return _motionLevel; };	

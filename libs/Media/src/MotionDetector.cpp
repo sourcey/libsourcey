@@ -65,7 +65,7 @@ MotionDetector::~MotionDetector()
 }
 
 
-void MotionDetector::onStreamStateChange()
+void MotionDetector::onStreamStateChange(const PacketStreamState&)
 {
 	Log("debug") << "[MotionDetector:" << this <<"] Reset Stream State" << endl;
 

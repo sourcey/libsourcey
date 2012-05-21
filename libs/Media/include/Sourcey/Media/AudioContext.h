@@ -64,7 +64,11 @@ struct AudioContext
     //AVPacket*			packet;
 	
     int					bufferSize;
-    UInt8*			buffer;
+    UInt8*				buffer;
+
+	// The output frame size for encoding and decoding.
+    int					frameSize;
+
     //int				offset;
 
 	// Exposed properties
@@ -112,14 +116,13 @@ struct AudioDecoderContext: public AudioContext
 
 	virtual int decode(AVPacket& packet);
 		// Decodes a single frame from the provided packet.
+		// Returns the size of the decoded frame. 
 		// IMPORTANT: In order to ensure all data is decoded from the
 		// input packet, this method should be looped until the input
 		// packet size is 0.
 		// Example:
 		//	while (packet.size > 0) {
-		//		len = decode(packet);
-		//		packet.data += len;
-		//		packet.size -= len;
+		//		decode(packet);
 		//	}
 
     double duration;

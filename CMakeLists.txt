@@ -167,10 +167,11 @@ set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
+    "${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg/bin"
     D:/dev/lib/OpenCV2.3/build
     D:/dev/lib/wxWidgets-2.9.2/lib/vc_lib
     #D:/dev/lib/ffmpeg/lib
-    D:/dev/lib/ffmpeg-2012-04-16/lib
+    #D:/dev/lib/ffmpeg-2012-04-16/lib
     D:/dev/lib/OpenSSL-Win32/lib/VC
     D:/dev/lib/poco-1.4.1p1-all/lib 
     #D:/dev/apps/MinGW/msys/1.0/local
@@ -188,8 +189,9 @@ if(WIN32)
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
     D:/dev/lib/OpenCV2.3/build/include
     D:/dev/lib/wxWidgets-2.9.2
+    "${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg"
     #D:/dev/lib/ffmpeg
-    D:/dev/lib/ffmpeg-2012-04-16/include
+    #D:/dev/lib/ffmpeg-2012-04-16/include
     D:/dev/lib/OpenSSL-Win32/include
     D:/dev/lib/poco-1.4.1p1-all
     #D:/dev/apps/MinGW/msys/1.0/local

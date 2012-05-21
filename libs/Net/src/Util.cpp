@@ -174,7 +174,7 @@ string getPublicIPAddress(bool whiny)
 	}
 
 	if (whiny)
-		throw Exception("Unable to determine the public IP address of this computer.");
+		throw Exception("Cannot determine the public IP address of this computer.");
 	else 
 		return "";
 

@@ -34,6 +34,8 @@ void AVFileReader::open(const string& ifile)
 	Log("trace") << "[AVFileReader:" << this << "] Opening: " << ifile << endl;
 
 	av_register_all();
+
+	_ifile = ifile;
 		
 	if (avformat_open_input(&_formatCtx, ifile.data(), NULL, NULL) != 0)
 		throw Exception("Could not open the source media file.");
@@ -127,7 +129,6 @@ void AVFileReader::run()
 		int len;
 		int res;
 		while (!_stop) {
-			Log("trace") << "[AVFileReader:" << this << "] Looping: " << _ifile << endl;
 
 			AVPacket packet;
 			av_init_packet(&packet);
@@ -138,12 +139,12 @@ void AVFileReader::run()
 						if ((len = _video->decode(packet)) <= 0)
 							break;
 
-						packet.data += len;
-						packet.size -= len;
+						//packet.data += len;
+						//packet.size -= len;
 						
 						//Log("trace") << "[AVFileReader:" << this << "] Broadcasting Video: " << _video->pts << endl;
 						VideoPacket video(_video->buffer, len, _video->codec->width, _video->codec->height, _video->pts);
-						video.opaque = _video;
+						video.opaque = &packet; //_video;
 						dispatch(this, video);
 					}
 					break;
@@ -153,12 +154,12 @@ void AVFileReader::run()
 						if ((len = _audio->decode(packet)) <= 0)
 							break;
 
-						packet.data += len;
-						packet.size -= len;
+						//packet.data += len;
+						//packet.size -= len;
 						
 						//Log("trace") << "[AVFileReader:" << this << "] Broadcasting Audio: " << _video->pts << endl;
 						AudioPacket audio(_audio->buffer, len, _audio->pts);
-						audio.opaque = _audio;
+						audio.opaque = &packet; //_audio;
 						dispatch(this, audio);
 					}
 					break;
@@ -195,6 +196,27 @@ void AVFileReader::run()
 
 	Log("trace") << "[AVFileReader:" << this << "] Exiting" << endl;
 	ReadComplete.dispatch(this);
+}
+	
+
+AVFormatContext* AVFileReader::formatCtx() const
+{
+	FastMutex::ScopedLock lock(_mutex);	
+	return _formatCtx;
+}
+	
+
+VideoDecoderContext* AVFileReader::video() const
+{
+	FastMutex::ScopedLock lock(_mutex);	
+	return _video;
+}
+	
+
+AudioDecoderContext* AVFileReader::audio() const
+{
+	FastMutex::ScopedLock lock(_mutex);	
+	return _audio;
 }
 
 

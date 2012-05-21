@@ -782,7 +782,7 @@ void Client::handleCreatePermissionErrorResponse(const STUN::Message& response)
 
 	removeAllPermissions();
 	
-	setState(ClientState::Failed, "Unable to create peer permissions on server.");
+	setState(ClientState::Failed, "Cannot create peer permissions on server.");
 }
 
 

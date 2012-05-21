@@ -11,6 +11,7 @@
 #   - AVCODEC
 #   - AVDEVICE
 #   - AVFORMAT
+#   - AVFILTER
 #   - AVUTIL
 #   - POSTPROCESS
 #   - SWSCALE
@@ -34,7 +35,7 @@ include(FindPackageHandleStandardArgs)
 
 # The default components were taken from a survey over other FindFFmpeg.cmake files
 if (NOT FFmpeg_FIND_COMPONENTS)
-  set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
+  set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE) #AVFILTER
 endif()
 
 
@@ -44,6 +45,7 @@ if (NOT FFmpeg_FOUND) #FFmpeg_LIBRARIES
   # Check for all possible component.
   find_component(FFmpeg AVCODEC  libavcodec  avcodec  libavcodec/avcodec.h)
   find_component(FFmpeg AVFORMAT libavformat avformat libavformat/avformat.h)
+  find_component(FFmpeg AVFILTER libavfilter avfilter libavfilter/avfilter.h)
   find_component(FFmpeg AVDEVICE libavdevice avdevice libavdevice/avdevice.h)
   find_component(FFmpeg AVUTIL   libavutil   avutil   libavutil/avutil.h)
   find_component(FFmpeg SWSCALE  libswscale  swscale  libswscale/swscale.h)
@@ -55,7 +57,7 @@ if (NOT FFmpeg_FOUND) #FFmpeg_LIBRARIES
   # Check if the required components were found and add their stuff to the FFmpeg_* vars.
   foreach (_component ${FFmpeg_FIND_COMPONENTS})
     if (${_component}_FOUND)
-      # message(STATUS "Required component ${_component} present.")
+      message(STATUS "Required component ${_component} present.")
       set(FFmpeg_LIBRARIES   ${FFmpeg_LIBRARIES}   ${${_component}_LIBRARIES})
       set(FFmpeg_DEFINITIONS ${FFmpeg_DEFINITIONS} ${${_component}_DEFINITIONS})
       list(APPEND FFmpeg_INCLUDE_DIRS ${${_component}_INCLUDE_DIRS})
@@ -84,7 +86,7 @@ if (NOT FFmpeg_FOUND) #FFmpeg_LIBRARIES
 endif ()
 
 # Now set the noncached _FOUND vars for the components.
-foreach (_component AVCODEC AVDEVICE AVFORMAT AVUTIL POSTPROCESS SWSCALE)
+foreach (_component AVCODEC AVDEVICE AVFORMAT AVUTIL POSTPROCESS SWSCALE) #AVFILTER
   set_component_found(${_component})
 endforeach ()
 

@@ -231,9 +231,9 @@ public:
 	/// 
 	/// Accessors
 	///
-	virtual Options& options() { return _options; }
-	virtual RemotePackageStore& remotePackages() { return _remotePackages; }
-	virtual LocalPackageStore& localPackages() { return _localPackages; }
+	virtual Options& options();
+	virtual RemotePackageStore& remotePackages();
+	virtual LocalPackageStore& localPackages();
 		
 	/// 
 	/// Events
@@ -248,13 +248,12 @@ protected:
 	//
 	virtual void onPackageInstallComplete(void* sender);
 	
-protected:
+protected:	
+	mutable Poco::FastMutex _mutex;
 	Options				_options;
-	LocalPackageStore		_localPackages;
+	LocalPackageStore	_localPackages;
 	RemotePackageStore	_remotePackages;
 	PackageInstallTaskList _tasks;
-	
-	mutable Poco::Mutex	_mutex;
 };
 
 

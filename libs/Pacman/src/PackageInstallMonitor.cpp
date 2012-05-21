@@ -31,6 +31,7 @@
 
 
 using namespace std;
+using namespace Poco;
 
 
 namespace Sourcey { 
@@ -66,23 +67,31 @@ void PackageInstallMonitor::onPackageInstallComplete(void* sender)
 	// Notify listeners when each package completes.
 	PackageInstallComplete.dispatch(this, *task->_local);
 		
-	// Remove the package task reference.
-	for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end();) {
-		if (task == *it) {
-			task->StateChange -= delegate(this, &PackageInstallMonitor::onPackageInstallStateChange);
-			task->TaskComplete -= delegate(this, &PackageInstallMonitor::onPackageInstallComplete);
-			_tasks.erase(it);
-			break;
+	{
+		FastMutex::ScopedLock lock(_mutex);
+
+		// Remove the package task reference.
+		for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++) {
+			if (task == *it) {
+				task->StateChange -= delegate(this, &PackageInstallMonitor::onPackageInstallStateChange); 
+				task->TaskComplete -= delegate(this, &PackageInstallMonitor::onPackageInstallComplete);
+				_tasks.erase(it);
+				break;
+			}
 		}
+
+		Log("info") << "[PackageInstallMonitor] Waiting on " 
+			<< _tasks.size() << " packages to complete" << endl;
 	}
 
-	Log("info") << "[PackageInstallMonitor] Waiting on " 
-		<< _tasks.size() << " packages to complete" << endl;
+	if (isComplete())
+		PackageInstallationsComplete.dispatch(this, _packages);
 }
 
 
 void PackageInstallMonitor::addTask(PackageInstallTask* task)
 {
+	FastMutex::ScopedLock lock(_mutex);
 	if (!task->valid())
 		throw Exception("Invalid package task");
 	_tasks.push_back(task);
@@ -94,7 +103,8 @@ void PackageInstallMonitor::addTask(PackageInstallTask* task)
 
 void PackageInstallMonitor::cancelAll()
 {	
-	for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end();) {
+	FastMutex::ScopedLock lock(_mutex);
+	for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++) {
 		(*it)->cancel();
 	}
 }
@@ -102,18 +112,21 @@ void PackageInstallMonitor::cancelAll()
 
 PackageInstallTaskList PackageInstallMonitor::tasks() const 
 { 
+	FastMutex::ScopedLock lock(_mutex);
 	return _tasks; 
 }
 
 
 LocalPackageList PackageInstallMonitor::packages() const 
 { 
+	FastMutex::ScopedLock lock(_mutex);
 	return _packages; 
 }
 
 
 bool PackageInstallMonitor::isComplete() const 
 { 
+	FastMutex::ScopedLock lock(_mutex);
 	return _tasks.empty(); 
 }
 

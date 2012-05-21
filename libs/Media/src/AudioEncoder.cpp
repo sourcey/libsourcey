@@ -85,7 +85,7 @@ void AudioEncoder::initialize()
 
 		AVCodecContext *ocontext = avcodec_alloc_context();
 		if (!ocontext)
-			throw Exception("Unable to allocate encoder context.");	
+			throw Exception("Cannot allocate encoder context.");	
 
 		// Now we'll setup the parameters of AVCodecContext
 		avcodec_get_context_defaults2(ocontext, AVMEDIA_TYPE_AUDIO);
@@ -102,7 +102,7 @@ void AudioEncoder::initialize()
 
 		AVCodec *oCodec = avcodec_find_encoder(static_cast<CodecID>(_params.oformat.audio.id));
 		if (avcodec_open(ocontext, oCodec) < 0)
-			throw Exception("Unable to open output audio codec.");
+			throw Exception("Cannot open output audio codec.");
 
 		// Set the frame size
 		if (ocontext->frame_size <= 1) {

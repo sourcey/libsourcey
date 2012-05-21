@@ -125,6 +125,7 @@ public:
 	virtual bool isNone() const		{ return stateEquals(EncoderState::None); };
 	virtual bool isReady() const	{ return stateBetween(EncoderState::Ready, EncoderState::Encoding); };
 	virtual bool isEncoding() const	{ return stateEquals(EncoderState::Encoding); };
+	virtual bool isStopped() const	{ return stateEquals(EncoderState::Stopped); };
 	virtual bool isFailed() const	{ return stateEquals(EncoderState::Failed); };
 };
 

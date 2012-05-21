@@ -50,7 +50,7 @@ struct Package: public JSON::Value
 		
 		virtual std::string fileName() const;
 		virtual std::string version() const;
-		virtual std::string url() const;
+		virtual std::string url(int index = 0) const;
 
 		virtual bool valid() const;
 

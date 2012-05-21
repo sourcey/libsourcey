@@ -132,7 +132,7 @@ string Format::name() const
 
 string Format::extension() const
 {
-	string extension = "." + Format::idString(id);
+	string extension = Format::idString(id);
 	std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 	return extension;
 }

@@ -131,7 +131,7 @@ string trim(const string& str)
 }
 
 
-StringList &split(const string &s, const string &delim, StringList &elems, int limit) 
+StringList &split(const string& s, const string& delim, StringList &elems, int limit) 
 {
 	bool final = false;
 	std::string::size_type prev = 0, pos = 0;
@@ -148,7 +148,7 @@ StringList &split(const string &s, const string &delim, StringList &elems, int l
 }
 
 
-StringList split(const string &s, const string &delim, int limit) 
+StringList split(const string& s, const string& delim, int limit) 
 {
     StringList elems;
     return split(s, delim, elems, limit);
@@ -156,7 +156,7 @@ StringList split(const string &s, const string &delim, int limit)
 
 
 
-StringList &split(const string &s, char delim, StringList &elems, int limit) 
+StringList &split(const string& s, char delim, StringList &elems, int limit) 
 {
     stringstream ss(s);
     string item;
@@ -171,7 +171,7 @@ StringList &split(const string &s, char delim, StringList &elems, int limit)
 }
 
 
-StringList split(const string &s, char delim, int limit) 
+StringList split(const string& s, char delim, int limit) 
 {
     StringList elems;
     return split(s, (char)delim, elems, limit);

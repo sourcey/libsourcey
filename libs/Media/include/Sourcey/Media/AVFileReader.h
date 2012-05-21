@@ -25,7 +25,7 @@ namespace Media {
 
 
 class AVFileReader: public PacketDispatcher, public IStartable, public Poco::Runnable
-	/// Video decoder class with reusable code that
+	/// Video file decoder class with reusable code that
 	/// depends on ffmpeg libavcodec/libavformat.
 {
 public:		
@@ -37,8 +37,12 @@ public:
 	
 	virtual void start();
 	virtual void stop();
-
+	
 	virtual std::string error() const;
+	
+	virtual AVFormatContext* formatCtx() const;
+	virtual VideoDecoderContext* video() const;
+	virtual AudioDecoderContext* audio() const;
 
 	NullSignal ReadComplete;
 
