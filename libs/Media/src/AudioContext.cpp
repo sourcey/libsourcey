@@ -124,16 +124,22 @@ void AudioEncoderContext::open(AVFormatContext *oc) //, const AudioCodec& params
 {
 	AudioContext::open();
 	
-	// Find the video encoder
-	AVCodec* c = avcodec_find_encoder(oc->oformat->audio_codec); //codec->codec_id
+	// Find the video encoder.
+	// Some audio encoders have separate floating and fixed
+	// point encoders so we need to manually specify the fixed
+	// point encoder until we can control the sample_fmt via
+	// configuration.
+	AVCodec* c = NULL;
+	if (oc->oformat->audio_codec == CODEC_ID_AC3)
+		c = avcodec_find_encoder_by_name("ac3_fixed");
+	else
+		c = avcodec_find_encoder(oc->oformat->audio_codec);
 	if (!c)
-   		throw Exception("Audio codec encoder not found.");
+   		throw Exception("Audio encoder not found.");
 	
 	stream = avformat_new_stream(oc, c);
 	if (!stream)
-		throw Exception("Failed to initialize the audio stream.");	
-
-    //st->id = 1;
+		throw Exception("Failed to initialize the audio stream.");
 	
 	/*
     c = st->codec;

@@ -82,6 +82,7 @@ public:
 	void setData(const std::string& name, const JSON::Value& data);
 	void setData(const std::string& name, int data);
 	void removeData(const std::string& name);
+	bool hasData(const std::string& name);
 	
 	virtual bool read(Buffer& buf);
 	virtual void write(Buffer& buf) const;

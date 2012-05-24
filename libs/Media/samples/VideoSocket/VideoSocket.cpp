@@ -103,6 +103,10 @@ Format H264AAC = Format("H264AAC", Format::FLV,
 Format MJPEG = Format("MJPEG", Format::MJPEG, 
 	VideoCodec(Codec::MJPEG, "MJPEG", 640, 480, 25));
 
+Format MP4 = Format("MP4", Format::MP4,
+	VideoCodec(Codec::MPEG4, "MPEG4", 320, 240, 25),
+	AudioCodec(Codec::AC3, "AC3", 2, 44100));
+
 
 namespace Sourcey { 
 namespace Media {	
@@ -341,14 +345,13 @@ public:
 	{
 		try
 		{
-			Log("trace") << "[StreamTest] Running" << endl;
-			
+			Log("trace") << "[StreamTest] Running" << endl;			
 
 			Media::RecorderParams params;
-			params.ofile = "enctest.flv";
+			params.ofile = "enctest.mp4";
 			//params.stopAt = time(0) + 3;
 			//AllocateOpenCVInputFormat(videoCapture, params.iformat);	
-			params.oformat = FLVSpeex16000; //MP344100; //FLVMP3; //
+			params.oformat = MP4; //FLVSpeex16000; //MP344100; //FLVMP3; //
 
 			/*
 			params.oformat = Format("FLV", Format::FLV, 
@@ -561,23 +564,31 @@ int main(int argc, char** argv)
 	{
 		Log("trace") << "Media Tests: FAILED: " << exc.displayText() << endl;
 	}	
-
-	
+		Log("trace") << "Media Tests: Speex: " << CODEC_ID_SPEEX << endl;
+		Log("trace") << "Media Tests: Speex: " << Codec::Speex << endl;
+		
+		Log("trace") << "Media Tests: AAC: " << CODEC_ID_AAC << endl;
+		Log("trace") << "Media Tests: AAC: " << Codec::AAC << endl;
+		
+		Log("trace") << "Media Tests: AC3: " << CODEC_ID_AC3 << endl;
+		Log("trace") << "Media Tests: AC3: " << Codec::AC3 << endl;
+		
 	*/
+
 	Media::MediaFactory::initialize();
 	Media::MediaFactory::instance()->loadVideo();
 	Media::MediaFactory::instance()->loadAudio();
-	
 	
 	MediaServer srv(328);
 	srv.start();
 	system("pause");
 
 	/*
+	
+	
 	StreamTest test;
 	test.run();
 	system("pause");
-	
 	{
 		StreamTest test;
 		test.run();

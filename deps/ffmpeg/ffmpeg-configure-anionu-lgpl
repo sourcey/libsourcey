@@ -27,18 +27,20 @@
   --enable-encoder=flv \
   --enable-encoder=mjpeg \
   --enable-encoder=mp3 \
-	--enable-encoder=ac3 \
-	--enable-encoder=aac \
+	--enable-encoder=ac3_fixed \
   --enable-encoder=libspeex \
   --enable-muxer=h263 \
-  --enable-muxer=mpeg4 \
+  --enable-muxer=mp4 \
   --enable-muxer=flv \
   --enable-muxer=mjpeg \
   --enable-muxer=mp3 \
-	--enable-muxer=ac3 \
-	--enable-muxer=aac \
-	--enable-muxer=libspeex   
-	
+	--enable-muxer=ac3
+
+
+#	--enable-muxer=libspeex   
+#	--enable-encoder=ac3 \
+#	--enable-encoder=aac \
+#	--enable-muxer=aac \
 #  --disable-ffprobe \
 #	--enable-muxer=nellymoser
 #	--enable-encoder=nellymoser \

@@ -82,7 +82,22 @@ class PackageInstallTask: public Poco::Runnable, public StatefulSignal<PackageIn
 	/// TODO: Revise mutex usage for better thread safety.
 {
 public:
-	PackageInstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote);
+	struct Options 
+		/// Package installation options.
+	{
+		std::string version;		// If set then the specified package version will
+									// be installed.
+		std::string projectVersion; // If set only package versions with the specified
+									// parent project version will be installed.
+
+		Options() {
+			version = "";
+			projectVersion = "";
+		}
+	};
+
+public:
+	PackageInstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote, const Options& options = Options());
 	virtual ~PackageInstallTask();	
 
 	virtual void start();
@@ -128,11 +143,12 @@ public:
 
 protected:
 	mutable Poco::FastMutex	_mutex;
-
+	
 	Poco::Thread	_thread;
 	PackageManager& _manager;
 	LocalPackage*	_local;
 	RemotePackage*	_remote;
+	Options			_options;
 	bool			_cancelled;
 	HTTP::Transaction _transaction;
 	

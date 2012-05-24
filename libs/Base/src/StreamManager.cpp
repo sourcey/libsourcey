@@ -63,7 +63,7 @@ void StreamManager::closeAll()
 		(*it2).second->close();
 		if (_freeClosedStreams)
 			delete (*it2).second;
-		_items.erase(it);
+		_items.erase(it2);
 	}
 }
 

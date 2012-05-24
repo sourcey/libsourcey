@@ -89,7 +89,7 @@ public:
 		} 
 		catch (Exception& exc) {
 			Log("error") << "Encoder Error: " << exc.displayText() << std::endl;
-			EncoderT::setState(this, EncoderState::Failed);
+			EncoderT::setState(this, EncoderState::Error);
 			stop();
 			exc.rethrow();
 		}
@@ -109,7 +109,7 @@ public:
 		} 
 		catch (Exception& exc) {
 			Log("error") << "Encoder Error: " << exc.displayText() << std::endl;
-			EncoderT::setState(this, EncoderState::Failed);
+			EncoderT::setState(this, EncoderState::Error);
 		}
 
 		if (_destroyOnStop)
@@ -126,7 +126,7 @@ public:
 		} 
 		catch (Exception& exc) {
 			Log("error") << "Encoder Error: " << exc.displayText() << std::endl;
-			EncoderT::setState(this, EncoderState::Failed);
+			EncoderT::setState(this, EncoderState::Error);
 			stop();
 		}
 	}
@@ -180,7 +180,7 @@ public:
 		} 
 		catch (Exception& exc) {
 			Log("error") << "Encoder Error: " << exc.displayText() << std::endl;
-			EncoderT::setState(this, EncoderState::Failed);
+			EncoderT::setState(this, EncoderState::Error);
 			stop();
 			exc.rethrow();
 		}
@@ -199,7 +199,7 @@ public:
 		} 
 		catch (Exception& exc) {
 			Log("error") << "Encoder Error: " << exc.displayText() << std::endl;
-			EncoderT::setState(this, EncoderState::Failed);
+			EncoderT::setState(this, EncoderState::Error);
 		}
 
 		if (_destroyOnStop)

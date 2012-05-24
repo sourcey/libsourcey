@@ -280,5 +280,11 @@ void Message::removeData(const string& name)
 }
 
 
+bool Message::hasData(const string& name)
+{
+	return (*this)["data"].isMember(name);
+}
+
+
 } // namespace Symple 
 } // namespace Sourcey

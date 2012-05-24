@@ -48,10 +48,11 @@ namespace Sourcey {
 namespace Pacman {
 
 
-PackageInstallTask::PackageInstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote) :
+PackageInstallTask::PackageInstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote, const Options& options) :
 	_manager(manager),
 	_local(local),
 	_remote(remote),
+	_options(options),
 	_cancelled(false)
 {
 	assert(valid());
@@ -149,12 +150,16 @@ void PackageInstallTask::doDownload()
 	//	throw Exception("This local package is already up to date");
 	
 	Package::Asset localAsset = _local->latestAsset();
-	Package::Asset remoteAsset = _remote->latestAsset();
+	Package::Asset remoteAsset = !_options.version.empty() ? 
+		_remote->assetVersion(_options.version) : 
+			!_options.projectVersion.empty() ?
+				_remote->latestProjectAsset(_options.projectVersion) :
+					_remote->latestAsset();
 
 	string uri = remoteAsset.url();
 	string filename = remoteAsset.fileName();
 	if (uri.empty() || filename.empty())
-		throw Exception("Package download failed: No mirrors");
+		throw Exception("Package download failed: No suitable remote asset.");
 	
 	// If the local package manifest already has a listing of
 	// the latest remote asset, and the file already exists in

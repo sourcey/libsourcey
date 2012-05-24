@@ -125,6 +125,37 @@ Package::Asset Package::latestAsset()
 }
 
 
+Package::Asset Package::assetVersion(const string& version)
+{
+	JSON::Value& assets = this->assets();
+	JSON::Value& asset = JSON::Value(); //assets[(size_t)0];
+	for (unsigned i = 0; i < assets.size(); i++) {
+		if (assets[i]["version"].asString() == version) {
+			asset = assets[i];
+			break;
+		}
+	}
+	
+	return Asset(asset);
+}
+
+
+Package::Asset Package::latestProjectAsset(const string& version)
+{
+	JSON::Value& assets = this->assets();
+	JSON::Value& asset = assets[(size_t)0];
+	for (unsigned i = 0; i < assets.size(); i++) {
+		if (assets[i]["project-version"].asString() == version &&
+			Util::compareVersion(assets[i]["version"].asString(), asset["version"].asString())) {
+			asset = assets[i];
+		}
+	}
+	
+	return Asset(asset["project-version"].asString() == version ? asset : JSON::Value());
+}
+
+
+
 void Package::print(std::ostream& ost) const
 {
 	JSON::StyledWriter writer;

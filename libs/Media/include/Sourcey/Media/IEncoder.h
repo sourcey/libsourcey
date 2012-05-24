@@ -47,7 +47,7 @@ struct EncoderState: public StateT
 		Ready,
 		Encoding,
 		Stopped,
-		Failed
+		Error
 	};
 
 	std::string str(unsigned int id) const 
@@ -57,7 +57,7 @@ struct EncoderState: public StateT
 		case Ready:			return "Ready";
 		case Encoding:		return "Encoding";
 		case Stopped:		return "Stopped";
-		case Failed:		return "Failed";
+		case Error:			return "Error";
 		}
 		return "undefined"; 
 	};
@@ -126,7 +126,7 @@ public:
 	virtual bool isReady() const	{ return stateBetween(EncoderState::Ready, EncoderState::Encoding); };
 	virtual bool isEncoding() const	{ return stateEquals(EncoderState::Encoding); };
 	virtual bool isStopped() const	{ return stateEquals(EncoderState::Stopped); };
-	virtual bool isFailed() const	{ return stateEquals(EncoderState::Failed); };
+	virtual bool isError() const	{ return stateEquals(EncoderState::Error); };
 };
 
 
