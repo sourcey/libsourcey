@@ -66,6 +66,7 @@ class PackageManager
 {
 public:
 	struct Options 
+		/// Package manager initialization options.
 	{
 		// Server Options
 		std::string endpoint;
@@ -133,17 +134,21 @@ public:
 	//
 	/// Package Installation Methods
 	//
-	virtual bool installPackages(const StringList& names, PackageInstallMonitor* monitor = NULL, bool whiny = false);
+	virtual bool installPackages(const StringList& names, PackageInstallMonitor* monitor = NULL, 
+		const PackageInstallTask::Options& options = PackageInstallTask::Options(), bool whiny = false);
 		/// Installs multiple packages.
 
-	virtual bool installPackage(const std::string& name, PackageInstallMonitor* monitor = NULL, bool whiny = false);
+	virtual bool installPackage(const std::string& name, PackageInstallMonitor* monitor = NULL, 
+		const PackageInstallTask::Options& options = PackageInstallTask::Options(), bool whiny = false);
 		/// Installs a single package.
 
-	virtual bool updatePackages(const StringList& names, PackageInstallMonitor* monitor = NULL, bool whiny = false);
+	virtual bool updatePackages(const StringList& names, PackageInstallMonitor* monitor = NULL, 
+		const PackageInstallTask::Options& options = PackageInstallTask::Options(), bool whiny = false);
 		/// Updates multiple packages.
 		/// The package will be installed if it does not exist.
 
-	virtual bool updatePackage(const std::string& name, PackageInstallMonitor* monitor = NULL, bool whiny = false);
+	virtual bool updatePackage(const std::string& name, PackageInstallMonitor* monitor = NULL, 
+		const PackageInstallTask::Options& options = PackageInstallTask::Options(), bool whiny = false);
 		/// Updates a single package.
 		/// The package will be installed if it does not exist.
 
@@ -186,7 +191,8 @@ public:
 		/// If the remote package doesn't exist a NotFoundException 
 		/// will be thrown.	
 	
-	virtual PackageInstallTask* createPackageInstallTask(PackagePair& pair);
+	virtual PackageInstallTask* createPackageInstallTask(PackagePair& pair, 
+		const PackageInstallTask::Options& options = PackageInstallTask::Options());
 		/// Creates a package installation task for the given pair.
 	
 	virtual bool isLatestVersion(PackagePair& pair);

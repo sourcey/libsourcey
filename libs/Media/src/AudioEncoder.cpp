@@ -146,7 +146,7 @@ void AudioEncoder::initialize()
 
 		cleanup();
 		setStateMessage(exc.displayText());
-		setState(this, EncoderState::Failed);	
+		setState(this, EncoderState::Error);	
 		exc.rethrow();
     }
 }

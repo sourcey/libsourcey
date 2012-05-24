@@ -73,15 +73,27 @@ struct Package: public JSON::Value
 	virtual std::string author() const;
 	virtual std::string description() const;
 
-	virtual JSON::Value& assets();
-	
+	virtual JSON::Value& assets();	
+
 	virtual Asset latestAsset();
-		/// The file asset with the greatest version
+		/// Returns the file asset with the greatest version.
 		/// number belonging to this package.
 		/// For local packages this is the currently
 		/// installed version.
 		/// For remote packages this is the latest 
 		/// available version.
+
+	virtual Asset assetVersion(const std::string& version);
+		/// Returns an asset matching the specified version,
+		/// or a blank asset.
+	
+	virtual Asset latestProjectAsset(const std::string& version);
+		/// Returns the latest asset for the specified project 	
+		/// version, or a blank asset.
+		/// This method is for safely installing plug-ins which
+		/// require a specific parent project version.
+		/// The package JSON must have a "project-version"
+		/// member for this function to work.
 
 	virtual bool valid() const;
 

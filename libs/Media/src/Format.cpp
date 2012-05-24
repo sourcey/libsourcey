@@ -71,8 +71,36 @@ Format::Format(const Format& r) :
 {
 }
 
-	
-Format::ID Format::toID(const string& name) 
+
+string Format::name() const
+{
+	return idToName(id);
+}
+
+
+string Format::extension() const
+{
+	string extension(idToName(id));
+	std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+	return extension;
+}
+
+
+string Format::encoderName() const
+{
+	return idToEncoderName(id);
+}
+
+
+string Format::toString() const 
+{
+	ostringstream os;
+	os << "Format[" << label << ":"  << id << ":" << name() << "]";
+	return os.str();
+}
+
+
+Format::ID Format::nameToID(const std::string& name) 
 {
 	if (name == "Raw")
 		return Format::Raw;
@@ -101,48 +129,49 @@ Format::ID Format::toID(const string& name)
 }
 
 
-string Format::idString(UInt32 id) 
+std::string Format::idToName(UInt32 id) 
 {
 	switch(id)
 	{
-		case Unknown:	return "Unknown";
-		case Raw:		return "Raw";
+		case Format::Unknown:	return "Unknown";
+		case Format::Raw:		return "Raw";
 			  
 		// Video Formats
-		case MP4:		return "MP4";
-		case FLV:		return "FLV";
-		case OGG:		return "OGG";
-		case AVI:		return "AVI";
-		case MJPEG:		return "MJPEG";
-		case MPNG:		return "MPNG";
+		case Format::MP4:		return "MP4";
+		case Format::FLV:		return "FLV";
+		case Format::OGG:		return "OGG";
+		case Format::AVI:		return "AVI";
+		case Format::MJPEG:		return "MJPEG";
+		case Format::MPNG:		return "MPNG";
 
 		// Audio Formats
-		case M4A:		return "M4A";
-		case MP3:		return "MP3";
+		case Format::M4A:		return "M4A";
+		case Format::MP3:		return "MP3";
 	}
 	return "Unknown";
 }
 
 
-string Format::name() const
+std::string Format::idToEncoderName(UInt32 id) 
 {
-	return Format::idString(id);
-}
+	switch(id)
+	{
+		case Format::Unknown:	return "";
+		case Format::Raw:		return "";
+			  
+		// Video Formats
+		case Format::MP4:		return "mp4";
+		case Format::FLV:		return "flv";
+		case Format::OGG:		return "ogg";
+		case Format::AVI:		return "avi";
+		case Format::MJPEG:		return "mjpeg";
+		case Format::MPNG:		return "mpng";
 
-
-string Format::extension() const
-{
-	string extension = Format::idString(id);
-	std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
-	return extension;
-}
-
-
-string Format::toString() const 
-{
-	ostringstream os;
-	os << "Format[" << label << ":"  << id << ":" << name() << "]";
-	return os.str();
+		// Audio Formats
+		case Format::M4A:		return "m4a";
+		case Format::MP3:		return "mp3";
+	}
+	return "";
 }
 
 

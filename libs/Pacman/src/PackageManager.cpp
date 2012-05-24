@@ -288,8 +288,7 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 //	Package Installation Methods
 //
 // ---------------------------------------------------------------------
-
-bool PackageManager::installPackage(const string& name, PackageInstallMonitor* monitor, bool whiny)
+bool PackageManager::installPackage(const string& name, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
 {	
 	Log("debug") << "[PackageManager] Installing Package: " << name << endl;	
 
@@ -327,7 +326,7 @@ bool PackageManager::installPackage(const string& name, PackageInstallMonitor* m
 			<< pair.local.version() << " <= " 
 			<< pair.remote.latestAsset().version() << endl;
 
-		PackageInstallTask* task = createPackageInstallTask(pair);	
+		PackageInstallTask* task = createPackageInstallTask(pair, options);	
 		if (monitor)
 			monitor->addTask(task);
 	}
@@ -344,18 +343,18 @@ bool PackageManager::installPackage(const string& name, PackageInstallMonitor* m
 }
 
 
-bool PackageManager::installPackages(const StringList& names, PackageInstallMonitor* monitor, bool whiny)
+bool PackageManager::installPackages(const StringList& names, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
 {	
 	bool res = true;
 	for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
-		if (!installPackage(*it, monitor, whiny))
+		if (!installPackage(*it, monitor, options, whiny))
 			res = false;
 	}
 	return res;
 }
 
 
-bool PackageManager::updatePackage(const string& name, PackageInstallMonitor* monitor, bool whiny)
+bool PackageManager::updatePackage(const string& name, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
 {	
 	// An update action is essentially the same as an install
 	// action, except we will make sure local package exists 
@@ -371,15 +370,15 @@ bool PackageManager::updatePackage(const string& name, PackageInstallMonitor* mo
 		}
 	}
 
-	return installPackage(name, monitor, whiny);
+	return installPackage(name, monitor, options, whiny);
 }
 
 
-bool PackageManager::updatePackages(const StringList& names, PackageInstallMonitor* monitor, bool whiny)
+bool PackageManager::updatePackages(const StringList& names, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
 {
 	bool res = true;
 	for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
-		if (!updatePackage(*it, monitor, whiny))		
+		if (!updatePackage(*it, monitor, options, whiny))		
 			res = false;
 	}	
 	return res;
@@ -396,7 +395,7 @@ bool PackageManager::updateAllPackages(PackageInstallMonitor* monitor, bool whin
 	
 	LocalPackageMap& packages = localPackages().items();
 	for (LocalPackageMap::const_iterator it = packages.begin(); it != packages.end(); ++it) {	
-		if (!updatePackage(it->second->name(), monitor, whiny))
+		if (!updatePackage(it->second->name(), monitor, PackageInstallTask::Options(), whiny))
 			res = false;
 	}
 	
@@ -471,9 +470,9 @@ bool PackageManager::uninstallPackages(const StringList& names, bool whiny)
 }
 
 
-PackageInstallTask* PackageManager::createPackageInstallTask(PackagePair& pair) //const std::string& name, PackageInstallMonitor* monitor)
+PackageInstallTask* PackageManager::createPackageInstallTask(PackagePair& pair, const PackageInstallTask::Options& options) //const std::string& name, PackageInstallMonitor* monitor)
 {	
-	PackageInstallTask* task = new PackageInstallTask(*this, &pair.local, &pair.remote);
+	PackageInstallTask* task = new PackageInstallTask(*this, &pair.local, &pair.remote, options);
 	task->TaskComplete += delegate(this, &PackageManager::onPackageInstallComplete, -1);
 	task->start();
 

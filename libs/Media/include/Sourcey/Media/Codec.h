@@ -52,7 +52,7 @@ struct Codec
 	{		
 		Unknown		= 0,
 		
-		// video
+		// Video
 		Raw			= 14,
 		H263		= 5,
 		H263p		= 20,
@@ -63,7 +63,7 @@ struct Codec
 		MJPEG		= 8,
 		FLV			= 22,
 		
-		// audio
+		// Audio
 		PCM			= 65536,
 		MP2			= 86016,
 		MP3			= 86017,
@@ -72,7 +72,7 @@ struct Codec
 		Vorbis		= 86021,
 		FLAC		= 86028,
 		NellyMoser	= 86050,
-		Speex		= 86052
+		Speex		= 86054
 	};
 
 	//

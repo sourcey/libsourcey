@@ -136,7 +136,8 @@ void AVEncoder::initialize()
 		// Lock our mutex during initialization
 		FastMutex::ScopedLock lock(_mutex);
 
-		if (!_params.oformat.video.enabled && !_params.oformat.audio.enabled)
+		if (!_params.oformat.video.enabled && 
+			!_params.oformat.audio.enabled)
 			throw Exception("Either video or audio parameters must be specified.");
 
 		if (!_params.oformat.id)
@@ -155,10 +156,10 @@ void AVEncoder::initialize()
 		// Set the container codec
 		string ofmt = _params.ofile.empty() ? "." + 
 			_params.oformat.extension() : 
-			_params.ofile;
-		_formatCtx->oformat = av_guess_format(NULL, ofmt.data(), NULL);	
+			_params.ofile;		
+		_formatCtx->oformat = av_guess_format(/*_params.oformat.encoderName().data()*/NULL, ofmt.data(), NULL);	
 		if (!_formatCtx->oformat)
-			throw Exception("Cannot find suitable output format for " + ofmt);
+			throw Exception("Cannot find suitable output format for " + _params.oformat.encoderName());
 
 		// Set the encoder codec
 		if (_params.oformat.video.enabled)
@@ -248,7 +249,7 @@ void AVEncoder::initialize()
 		Log("error") << "[AVEncoder:" << this << "] Error: " << exc.displayText() << endl;
 		
 		cleanup();
-		setState(this, EncoderState::Failed, exc.displayText());
+		setState(this, EncoderState::Error, exc.displayText());
 		exc.rethrow();
 	}
 }
