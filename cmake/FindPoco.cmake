@@ -53,6 +53,13 @@ if (NOT Poco_FOUND) # Poco_LIBRARIES
     if(Poco_LINK_SHARED_LIBS)
       add_definitions(-DPOCO_DLL)
     else()
+      #message("Linking Poco Static Libs")
+      # Now set the noncached _FOUND vars for the components.
+      #Zip Net NetSSL Crypto Util XML Foundation
+      foreach (_component Net NetSSL Crypto Util XML Foundation Zip Data CppUnit PageCompiler)
+        set_component_notfound(${_component})
+      endforeach ()
+
       add_definitions(-DPOCO_STATIC)
       if(BUILD_WITH_STATIC_CRT)
         set(Poco_LIB_SUFFIX "mt")

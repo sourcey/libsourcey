@@ -120,7 +120,7 @@ AudioEncoderContext::~AudioEncoderContext()
 }
 
 
-void AudioEncoderContext::open(AVFormatContext *oc) //, const AudioCodec& params
+void AudioEncoderContext::open(AVFormatContext* oc) //, const AudioCodec& params
 {
 	AudioContext::open();
 	
@@ -528,35 +528,90 @@ void AudioDecoderContext::reset()
 }
 
 
-int AudioDecoderContext::decode(AVPacket& packet)
+bool AudioDecoderContext::decode(UInt8* data, int size, AVPacket& opacket)
 {
+    AVPacket ipacket;
+    av_init_packet(&ipacket);
+    ipacket.stream_index = stream->index;
+    ipacket.data = data;
+    ipacket.size = size;
+	return decode(ipacket, opacket);
+}
+
+
+bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
+{
+	assert(ipacket.stream_index == stream->index);
+	
+	int outSize = -1;
+	int bytesRemaining = ipacket.size;
+	int bytesDecoded = 0;
+	
+	opacket.data = NULL;
+	opacket.size = 0;
+
+	while (bytesRemaining > 0 && !outSize)
+	{
+		bytesDecoded = avcodec_decode_audio3(codec, (int16_t*)buffer, &outSize, &ipacket);
+		if (bytesDecoded < 0) {
+			Log("error") << "[AudioDecoderContext:" << this << "] Decoder Error" << endl;
+			error = "Decoder error";
+			throw Exception(error);
+			//return -1;
+		}
+
+		bytesRemaining -= bytesDecoded;
+	}
+
+	if (outSize) {
+		opacket.data = buffer;	
+		opacket.size = outSize;
+		
+		if (ipacket.pts != AV_NOPTS_VALUE) {
+			opacket.pts = ipacket.pts;
+			opacket.pts *= av_q2d(stream->time_base);
+		}	
+		if (ipacket.dts != AV_NOPTS_VALUE) {
+			opacket.dts = ipacket.dts;
+			opacket.dts *= av_q2d(stream->time_base);
+		}
+
+		return true;
+	}
+
+	return false;
+
+	/*
+	int outSize = bufferSize;
+	int len = avcodec_decode_audio3(codec, (int16_t*)buffer, &outSize, &ipacket);
+	if (len < 0) {
+		error = "Decoder error";
+		Log("error") << "[VideoDecoderContext:" << this << "] Decoding Video: Error: " << error << endl;
+		return -1;
+	}
+	//if (len < 0)
+	//	throw Exception("Audio decoder error");
+
+	ipacket.size -= len;
+    ipacket.data += len;
+		
+	//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder DTS: " << ipacket.dts << endl;
+	//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder Time Base: " << stream->time_base.den << endl;
+
+	if (ipacket.pts != AV_NOPTS_VALUE) {
+		pts = ipacket.pts;
+		pts *= av_q2d(stream->time_base);
+	}
+
+	//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder PTS: " << ipacket.pts << endl;
+	//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder PTS 1: " << pts << endl;
+	
+	return outSize;
+	*/
+
+	/*
 	try 
 	{
-		if (packet.stream_index != stream->index) {
-			Log("error") << "[AudioDecoderContext:" << this << "] Decoding Audio: Error: Wrong stream" << endl;
-			return -1;
-		}
-	
-		int outSize = bufferSize;
-		int len = avcodec_decode_audio3(codec, (int16_t*)buffer, &outSize, &packet);
-		if (len < 0)
-			throw Exception("Audio decoder error");
-
-		packet.size -= len;
-        packet.data += len;
-		
-		//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder DTS: " << packet.dts << endl;
-		//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder Time Base: " << stream->time_base.den << endl;
-
-		if (packet.dts != AV_NOPTS_VALUE) {
-			pts = packet.dts;
-			pts *= av_q2d(stream->time_base);
-		}
-
-		//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder PTS: " << packet.pts << endl;
-		//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder PTS 1: " << pts << endl;
-	
-		return outSize;
 	} 
 	catch (Exception& exc) 
 	{
@@ -564,8 +619,8 @@ int AudioDecoderContext::decode(AVPacket& packet)
 		Log("error") << "[AudioDecoderContext:" << this << "] Decoder Error: " << error << endl;
 		exc.rethrow();
 	}
-
 	return -1;
+	*/
 }
 
 	

@@ -46,19 +46,23 @@ public:
 	virtual ~PackageInstallMonitor();
 	
 	virtual void addTask(PackageInstallTask* task);
+		/// Adds a task to monitor.
+
+	virtual void startAll();
+		/// Starts all monitored tasks.
+
+	virtual void cancelAll();
+		/// Cancels all monitored tasks.
+
+	virtual bool isComplete() const;
+		/// Returns true if all install tasks have completed,
+		/// either successfully or unsuccessfully.
 
 	virtual PackageInstallTaskList tasks() const;
 		/// Returns the list of monitored package tasks.
 	
 	virtual LocalPackageList packages() const;
 		/// Returns the list of monitored packages.
-
-	virtual void cancelAll();
-		/// Cancels all monitored installation tasks.
-
-	virtual bool isComplete() const;
-		/// Returns true if all install tasks have completed,
-		/// either successfully or unsuccessfully.		
 		
 	Signal3<PackageInstallTask&, PackageInstallState&, const PackageInstallState&> PackageInstallStateChange;
 	Signal<LocalPackage&> PackageInstallComplete;

@@ -104,7 +104,7 @@ public:
 	virtual void cancel();
 
 	virtual void run();
-		/// Called asynchronously by the Runner to
+		/// Called asynchronously by the thread to
 		/// kick off the state machine.
 
 	virtual void doDownload();
@@ -129,6 +129,7 @@ public:
 	virtual bool cancelled() const;
 	virtual bool failed() const;
 	virtual bool success() const;
+	virtual bool complete() const;
 	virtual bool valid() const;
 
 	virtual void onStateChange(PackageInstallState& state, const PackageInstallState& oldState);

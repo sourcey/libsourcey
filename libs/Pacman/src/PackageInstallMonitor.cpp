@@ -101,12 +101,19 @@ void PackageInstallMonitor::addTask(PackageInstallTask* task)
 }
 
 
+void PackageInstallMonitor::startAll()
+{	
+	FastMutex::ScopedLock lock(_mutex);
+	for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++)
+		(*it)->start();
+}
+
+
 void PackageInstallMonitor::cancelAll()
 {	
 	FastMutex::ScopedLock lock(_mutex);
-	for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++) {
+	for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++)
 		(*it)->cancel();
-	}
 }
 
 

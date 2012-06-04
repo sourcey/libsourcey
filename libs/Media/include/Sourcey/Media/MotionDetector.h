@@ -74,6 +74,7 @@ struct MotionDetectorState: public StateT
 
 class MotionDetector: public StatefulSignal<MotionDetectorState>, public IPacketProcessor
 {
+public:
 	struct Options 
 	{	
 		double motionThreshold;
@@ -107,16 +108,14 @@ public:
 public:	
 	virtual bool accepts(IPacket& packet) { return dynamic_cast<const Media::VideoPacket*>(&packet) != 0; };
 	virtual void process(IPacket& packet);
-	
-	virtual bool isRunning() const;
-	virtual bool isProcessing() const;
 
 	virtual void onStreamStateChange(const PacketStreamState&);
 	
-	virtual time_t segmentEndingAt() const { return _motionSegmentEndingAt; };	
-	virtual int motionLevel() const { return _motionLevel; };	
-	virtual Options& options() { return _options; };	
-	virtual void setOptions(const MotionDetector::Options& options);
+	virtual int motionLevel() const;
+	virtual Options& options();	
+	
+	virtual bool isRunning() const;
+	virtual bool isProcessing() const;
 	
 	const char* className() const { return "MotionDetector"; }
 
@@ -125,6 +124,8 @@ protected:
 	void computeMotionState();	
 
 private:
+	mutable Poco::FastMutex _mutex;
+
 	Options _options;
 	Poco::Stopwatch _stopwatch;	
 	bool	_processing;	
@@ -139,8 +140,6 @@ private:
 	cv::Mat _last;			// Last image for comparison
 	cv::Mat _mhi;			// Motion history image
 	cv::Mat _silhouette;	// The threshold image
-
-	mutable Poco::FastMutex _mutex;
 };
 
 

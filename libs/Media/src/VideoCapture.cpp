@@ -97,7 +97,7 @@ VideoCapture::~VideoCapture()
 
 	if (_thread.isRunning()) {
 		_stop = true;		
-		_wakeUp.set();
+		//_wakeUp.set();
 
 		// Because we are calling join on the thread
 		// this destructor must never be called from
@@ -113,9 +113,6 @@ VideoCapture::~VideoCapture()
 bool VideoCapture::checkDevice()
 {
 	FastMutex::ScopedLock lock(_mutex);
-	
-	Log("trace") << "[VideoCapture:" << this << "] Checking Device" << endl;
-	Log("trace") << "[VideoCapture:" << this << "] Checking Device: Is Opened: " << _capture.isOpened() << endl;
 
 	// Attempt to capture one frame and read some information
 	bool isOpen = _capture.isOpened() ? true : 
@@ -185,7 +182,7 @@ void VideoCapture::start()
 		_counter.reset();	
 		_thread.start(*this);
 	}
-	_wakeUp.set();
+	//_wakeUp.set();
 	Log("trace") << "[VideoCapture:" << this << "] Starting: OK" << endl;
 }
 
@@ -234,89 +231,103 @@ void VideoCapture::run()
 		<< "\n\tHeight: " << _height
 		<< endl;
 
-	while (!_stop) 
-	{
-		try 
-		{	
-			VideoPacket packet;
+	while (!_stop) {
+		if (refCount() > 0) {
+			try 
 			{	
-				FastMutex::ScopedLock lock(_mutex);		
+				VideoPacket packet;
+				{	
+					FastMutex::ScopedLock lock(_mutex);		
 
-				// Sometimes stop will be true after we enter this scope.
-				if (_stop)
-					break;
+					// Stop may be true after we enter this scope.
+					if (_stop)
+						break;
 					
-				// Attempt to re-open the capture device if its closed.
-				_isOpened = _capture.isOpened();
-				if (_deviceId >= 0 && !_isOpened) {
-					_isOpened = _capture.open(_deviceId);
-				}
+					// Attempt to re-open the capture device if closed.
+					_isOpened = _capture.isOpened();
+					if (_deviceId >= 0 && !_isOpened) {
+						_isOpened = _capture.open(_deviceId);
+					}
 
-				// Break the loop if the capture can't open. 
-				// Perhaps another application is using the device,
-				// or it has been unplugged.
-				if (!_isOpened) {				
-					Log("error") << "[VideoCapture:" << this << "] Please check your video camera: " << _deviceId << endl;	
-					_stop = true;
-					break;
-				}
+					// Break the loop if the capture failed. 
+					// Perhaps another application is using the device
+					// or it has been unplugged?
+					if (!_isOpened) {				
+						Log("error") << "[VideoCapture:" << this << "] Please check your video camera: " << _deviceId << endl;	
+						_stop = true;
+						break;
+					}
 
-				// Grab a frame from the video source.
-				_capture >> _frame;
-				_width = _frame.cols;
-				_height = _frame.rows;
-
-				// If we are using a file input and we read to the
-				// end of the file subsequent frames will be empty.
-				// Just keep looping the video.
-				if (!_filename.empty() && (!_frame.cols || !_frame.rows)) {
-					_capture.open(_filename);
+					// Grab a frame from the capture source.
 					_capture >> _frame;
+					_width = _frame.cols;
+					_height = _frame.rows;
+
+					// If we are using a file input and we read to the
+					// end of the file subsequent frames will be empty.
+					// Just keep looping the input video.
+					if (!_filename.empty() && (!_frame.cols || !_frame.rows)) {
+						_capture.open(_filename);
+						_capture >> _frame;
+					}
+
+					// Update our FPS counter.
+					_counter.tick();
+
+					packet = VideoPacket(&_frame);
 				}
-
-				// Update our FPS counter
-				_counter.tick();
-
-				packet = VideoPacket(&_frame);
-			}
 		
-			//Log("trace") << "[VideoCapture:" << this << "] Broadcasting: " << _stop << endl;	
-			if (!_stop && packet.width && packet.height) {
-				/*
-				Log("trace") << "[VideoCapture:" << this << "] Broadcasting: " 
-					<< "\n\tFPS: " << _counter.fps
-					<< "\n\tWidth: " << packet.width
-					<< "\n\tHeight: " << packet.height
-					<< "\n\tSize: " << packet.size()
-					<< endl;
-					*/
+				if (!_stop && packet.width && packet.height) {
+					/*
+					Log("trace") << "[VideoCapture:" << this << "] Broadcasting: " 
+						<< "\n\tFPS: " << _counter.fps
+						<< "\n\tWidth: " << packet.width
+						<< "\n\tHeight: " << packet.height
+						<< "\n\tSize: " << packet.size()
+						<< endl;
+						*/
 
-				dispatch(this, packet);
-				//Log("trace") << "[VideoCapture:" << this << "] Broadcasting: OK" << endl;
+					dispatch(this, packet);
+					//Log("trace") << "[VideoCapture:" << this << "] Broadcasting: OK" << endl;
+				}
+			} 
+			catch (cv::Exception& exc) 
+			{
+				Log("error") << "[VideoCapture:" << this << "] Error: " << exc.err << endl;
+
+				// TODO: Stop the capture?
 			}
-		} 
-		catch (cv::Exception& exc) 
-		{
-			Log("error") << "[VideoCapture:" << this << "] Error: " << exc.err << endl;
 		}
-			
-		cv::waitKey(10);
-
+		
+		// NOTE: Failing to call waitKey inside the capture loop
+		// causes strange issues and slowdowns with windows system
+		// calls such as ShellExecuteEx and friends.
+		cv::waitKey(5);
+				
+		// Release the CPU.
+		Thread::sleep(5);
+		
+		/*
 		// If the capture is disabled keep on looping so we can keep
 		// the cv capture alive.
 		if (refCount() == 0) {
 			Log("trace") << "[VideoCapture:" << this << "] Sleeping" << endl;
 			_wakeUp.wait();
 			Log("trace") << "[VideoCapture:" << this << "] Waking Up" << endl;
-		}		
+		}	
+		*/
 	}
 
 	Log("trace") << "[VideoCapture:" << this << "] Exiting" << endl;
-
-	if (_capture.isOpened()) {
-		_capture.release();
+	
+	// Attempt to free the capture.
+	{	
+		FastMutex::ScopedLock lock(_mutex);		
+		if (_capture.isOpened()) {
+			_capture.release();
+		}
+		_isOpened = false;
 	}
-	_isOpened = false;
 
 	Log("trace") << "[VideoCapture:" << this << "] Exiting: OK" << endl;
 }

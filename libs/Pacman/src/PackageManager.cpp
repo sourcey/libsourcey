@@ -288,6 +288,163 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 //	Package Installation Methods
 //
 // ---------------------------------------------------------------------
+PackageInstallTask* PackageManager::installPackage(const string& name, const PackageInstallTask::Options& options, bool whiny)
+{	
+	Log("debug") << "[PackageManager] Installing Package: " << name << endl;	
+
+	try 
+	{
+		// Try to update our remote package list if none exist.
+		// TODO: Consider storing a remote package cache file.
+		if (remotePackages().empty())
+			queryRemotePackages();
+
+		PackagePair pair = getOrCreatePackagePair(name);
+
+		// Check against provided options to make sure that
+		// we can proceed with task creation.
+		if (!options.version.empty())
+			pair.remote.assetVersion(options.version); // throw if none
+		if (!options.projectVersion.empty())
+			pair.remote.latestProjectAsset(options.projectVersion); // throw if none
+
+		// Check the existing package veracity if one exists.
+		// If the package is up to date we have nothing to do 
+		// so just return a NULL pointer but do not throw.
+		if (pair.local.isInstalled()) {
+			if (checkInstallManifest(pair.local)) {
+				Log("debug") 
+					<< pair.local.name() << " manifest is complete" << endl;			
+				if (isLatestVersion(pair)) {
+					Log("info") 
+						<< pair.local.name() << " is already up to date: " 
+						<< pair.local.version() << " >= " 
+						<< pair.remote.latestAsset().version() << endl;
+					return NULL;
+				}
+			}
+		}
+	
+		Log("info") 
+			<< pair.local.name() << " is updating: " 
+			<< pair.local.version() << " <= " 
+			<< pair.remote.latestAsset().version() << endl;
+
+		//PackageInstallTask* task = createPackageInstallTask(pair, options);	
+		//if (monitor)
+		//	monitor->addTask(task);
+	
+		return createPackageInstallTask(pair, options);
+	}
+	catch (Exception& exc) 
+	{
+		Log("error") << "[PackageManager] Error: " << exc.message() << endl;
+		if (whiny)
+			exc.rethrow();
+	}
+	
+	return NULL;
+}
+
+
+PackageInstallMonitor* PackageManager::installPackages(const StringList& names, const PackageInstallTask::Options& options, bool whiny)
+{	
+	PackageInstallMonitor* monitor = new PackageInstallMonitor();
+	try 
+	{
+		for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
+			PackageInstallTask* task = installPackage(*it, options, whiny);
+			if (task)
+				monitor->addTask(task);
+		}
+
+		// Delete the monitor and return NULL
+		// if no tasks were created.
+		if (monitor->tasks().empty()) {
+			delete monitor;
+			return NULL;
+		}
+	}
+	catch (Exception& exc) 
+	{
+		delete monitor;
+		assert(whiny);
+		exc.rethrow();
+	}
+
+	return monitor;
+}
+
+
+PackageInstallTask* PackageManager::updatePackage(const string& name, const PackageInstallTask::Options& options, bool whiny)
+{	
+	// An update action is essentially the same as an install
+	// action, except we will make sure local package exists 
+	// before we continue.
+	{
+		if (!localPackages().exists(name)) {
+			string error("Update Failed: " + name + " is not installed.");
+			Log("error") << "[PackageManager] " << error << endl;	
+			if (whiny)
+				throw Exception(error);
+			else
+				return NULL;
+		}
+	}
+
+	return installPackage(name, options, whiny);
+}
+
+
+PackageInstallMonitor* PackageManager::updatePackages(const StringList& names, const PackageInstallTask::Options& options, bool whiny)
+{	
+	// An update action is essentially the same as an install
+	// action, except we will make sure local package exists 
+	// before we continue.
+	{
+		for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
+			if (!localPackages().exists(*it)) {
+				string error("Update Failed: " + *it + " is not installed.");
+				Log("error") << "[PackageManager] " << error << endl;	
+				if (whiny)
+					throw Exception(error);
+				else
+					return NULL;
+			}
+		}
+	}
+	
+	return installPackages(names, options, whiny);
+
+	/*
+	PackageInstallMonitor* monitor = new PackageInstallMonitor();
+	try 
+	{
+		bool res = true;
+		for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
+			PackageInstallTask* task = updatePackage(*it, options, whiny);
+			if (!task)
+				res = false;
+			monitor->addTask(task);
+			//else if (monitor)
+			//if (!updatePackage(*it, monitor, options, whiny))		
+			//	res = false;
+		}	
+	}
+	catch (Exception& exc) 
+	{
+		delete monitor;
+		monitor = NULL;
+		if (whiny)
+			exc.rethrow();
+	}
+
+	return monitor;
+	*/
+}
+
+
+/*
 bool PackageManager::installPackage(const string& name, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
 {	
 	Log("debug") << "[PackageManager] Installing Package: " << name << endl;	
@@ -300,6 +457,10 @@ bool PackageManager::installPackage(const string& name, PackageInstallMonitor* m
 		// complete.
 		if (remotePackages().empty())
 			queryRemotePackages();
+
+		// Check the remote package against provided options
+		// to make sure we can proceed.
+		assert(0);
 
 		PackagePair pair = getOrCreatePackagePair(name);
 
@@ -316,7 +477,7 @@ bool PackageManager::installPackage(const string& name, PackageInstallMonitor* m
 						<< pair.local.name() << " is already up to date: " 
 						<< pair.local.version() << " >= " 
 						<< pair.remote.latestAsset().version() << endl;
-					return true;
+					//return true;
 				}
 			}
 		}
@@ -383,9 +544,10 @@ bool PackageManager::updatePackages(const StringList& names, PackageInstallMonit
 	}	
 	return res;
 }
+*/
 
 
-bool PackageManager::updateAllPackages(PackageInstallMonitor* monitor, bool whiny)
+bool PackageManager::updateAllPackages(bool whiny) //PackageInstallMonitor* monitor, 
 {
 	bool res = true;
 	
@@ -395,8 +557,14 @@ bool PackageManager::updateAllPackages(PackageInstallMonitor* monitor, bool whin
 	
 	LocalPackageMap& packages = localPackages().items();
 	for (LocalPackageMap::const_iterator it = packages.begin(); it != packages.end(); ++it) {	
-		if (!updatePackage(it->second->name(), monitor, PackageInstallTask::Options(), whiny))
+		//if (!updatePackage(it->second->name(), monitor, PackageInstallTask::Options(), whiny))
+		//	res = false;	
+		PackageInstallTask::Options options;
+		PackageInstallTask* task = updatePackage(it->second->name(), options, whiny);
+		if (!task)
 			res = false;
+		//else if (monitor)
+		//	monitor->addTask(task);
 	}
 	
 	return res;
@@ -473,8 +641,8 @@ bool PackageManager::uninstallPackages(const StringList& names, bool whiny)
 PackageInstallTask* PackageManager::createPackageInstallTask(PackagePair& pair, const PackageInstallTask::Options& options) //const std::string& name, PackageInstallMonitor* monitor)
 {	
 	PackageInstallTask* task = new PackageInstallTask(*this, &pair.local, &pair.remote, options);
-	task->TaskComplete += delegate(this, &PackageManager::onPackageInstallComplete, -1);
-	task->start();
+	task->TaskComplete += delegate(this, &PackageManager::onPackageInstallComplete, -1); // lowest priority to remove task
+	//task->start();
 
 	FastMutex::ScopedLock lock(_mutex);
 	_tasks.push_back(task);
@@ -603,6 +771,20 @@ bool PackageManager::isLatestVersion(PackagePair& pair)
 	if (!pair.local.isLatestVersion(pair.remote.latestAsset()))
 		return false;
 	return true;
+}
+
+
+string PackageManager::installedPackageVersion(const string& name) const
+{
+	FastMutex::ScopedLock lock(_mutex);
+	LocalPackage* local = _localPackages.get(name, true);
+	
+	if (!local->valid())
+		throw Exception("The local package is invalid.");
+	if (!local->isInstalled())
+		throw Exception("The local package is not installed.");
+
+	return local->version();
 }
 
 
@@ -748,9 +930,10 @@ LocalPackageStore& PackageManager::localPackages()
 // ---------------------------------------------------------------------
 void PackageManager::onPackageInstallComplete(void* sender)
 {
-	Log("trace") << "[PackageManager] onPackageInstallComplete" << endl;
-
 	PackageInstallTask* task = reinterpret_cast<PackageInstallTask*>(sender);
+	
+	Log("trace") << "[PackageManager] Package Install Complete: " << task->state().toString() << endl;
+
 	PackageInstalled.dispatch(this, *task->local());
 
 	// Save the local package

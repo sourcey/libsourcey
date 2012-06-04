@@ -1,22 +1,25 @@
+#include "Sourcey/Logger.h"
 #include "Sourcey/Runner.h"
 #include "Sourcey/PacketStream.h"
 #include "Sourcey/Util.h"
-#include "Sourcey/Net/TCPService.h"
 #include "Sourcey/Media/MediaFactory.h"
-#include "Sourcey/Media/AudioCapture.h"
+#include "Sourcey/Media/MotionDetector.h"
 #include "Sourcey/Media/AVEncoder.h"
 #include "Sourcey/Media/FLVMetadataInjector.h"
-
-//#include "Sourcey/HTTP/MultipartPacketizer.h"
+#include "Sourcey/Net/TCPService.h"
+#include "Sourcey/HTTP/MultipartPacketizer.h"
 
 
 /*
+#include "Sourcey/Media/AudioCapture.h"
 #include "Sourcey/Net/Util.h"
 #include "Sourcey/HTTP/Util.h"
 #include "Sourcey/HTTP/MultipartPacketizer.h"
-*/
-#include "Sourcey/Logger.h"
 #include "Sourcey/Media/ImageEncoder.h"
+//using namespace Sourcey::HTTP;
+//VideoCapture* videoCapture;
+//AudioCapture* audioCapture;
+//bool stop = false;
 
 #include "Poco/Net/HTTPRequest.h"
 #include "Poco/Net/TCPServer.h"
@@ -26,10 +29,12 @@
 #include "Poco/Net/StreamSocket.h"
 #include "Poco/Net/ServerSocket.h"
 #include "Poco/format.h"
-
 #include <string>
 #include <vector>
 #include <assert.h>
+*/
+
+
 #include <conio.h>
 
 
@@ -40,7 +45,6 @@ using namespace Sourcey;
 using namespace Sourcey::Net;
 using namespace Sourcey::Media;
 using namespace Sourcey::Util;
-//using namespace Sourcey::HTTP;
 
 
 // Detect Memory Leaks
@@ -51,11 +55,16 @@ CMemLeakDetect memLeakDetect;
 #endif<DataPacket>
 */
 
-//VideoCapture* videoCapture;
-//AudioCapture* audioCapture;
-//bool stop = false;
 
-			
+namespace Sourcey { 
+namespace Media {	
+
+		
+// ----------------------------------------------------------------------------
+//
+// Media Formats
+//
+// ----------------------------------------------------------------------------		
 Format MP344100 = Format("MP3", Format::MP3, 
 	VideoCodec(),
 	AudioCodec(Codec::MP3, "MP3", 2, 44100));	
@@ -69,7 +78,10 @@ Format FLVNellyMoser11025NoVideo = Format("FLV", Format::FLV,
 	AudioCodec(Codec::NellyMoser, "NellyMoser", 1, 11025));	
 			
 Format FLVNoAudio = Format("FLV", Format::FLV, 
-	VideoCodec(Codec::FLV, "FLV", 320, 240, 20));	
+	VideoCodec(Codec::FLV, "FLV", 320, 240, 30));	
+			
+Format FLVH264NoAudio = Format("FLVH264", Format::FLV, 
+	VideoCodec(Codec::H264, "H264", 320, 240, 30));	
 			
 Format FLVSpeex16000NoVideo = Format("FLV", Format::FLV, 
 	VideoCodec(),
@@ -108,10 +120,6 @@ Format MP4 = Format("MP4", Format::MP4,
 	AudioCodec(Codec::AC3, "AC3", 2, 44100));
 
 
-namespace Sourcey { 
-namespace Media {	
-
-
 // ----------------------------------------------------------------------------
 //
 // Media Connection
@@ -137,37 +145,32 @@ public:
 	{
 		try
 		{
-			Log("trace") << "[MediaConnection] Running" << endl;				
-
-			//params.iformat.video.pixfmt = (Sourcey::Media::PixelFormat::ID)PIX_FMT_GRAY8; //PIX_FMT_BGR8; //PIX_FMT_BGR32 // PIX_FMT_BGR32
-			//MotionDetector* detector = new MotionDetector();
-			//detector->setVideoCapture(videoCapture);
-			//stream.attach(detector, true);		
-			//stream.attach(new SurveillanceMJPEGPacketizer(*detector), 20, true);	
-			
-			//videoCapture = new VideoCapture(0, true);
-			//audioCapture = new AudioCapture(0, 2, 44100);
-			//audioCapture = new AudioCapture(0, 1, 16000);	
-			//audioCapture = new AudioCapture(0, 1, 11025);	
-			
+			Log("trace") << "[MediaConnection] Running" << endl;
+						
 			//params.oformat.video.enabled = false;
 			if (params.oformat.video.enabled && videoCapture)
 				stream.attach(videoCapture, false);
 			//params.oformat.audio.enabled = false;
 			if (params.oformat.audio.enabled && audioCapture)
-				stream.attach(audioCapture, true);
+				stream.attach(audioCapture, true);			
+
+			//params.iformat.video.pixfmt = (Sourcey::Media::PixelFormat::ID)PIX_FMT_GRAY8; 
+			//MotionDetector* detector = new MotionDetector();
+			//stream.attach(detector, 3, true);			
 		
+			//params.oformat.video.bitRate = 10000000;
+
 			// init encoder				
 			encoder = new AVEncoder();
 			encoder->setParams(params);
 			encoder->initialize();
 			stream.attach(encoder, 5, true);				
-
-			/*
+			
 			if (params.oformat.label == "MJPEG") {
 				HTTP::MultipartPacketizer* packetizer = new HTTP::MultipartPacketizer("image/jpeg");
-				stream.attach(packetizer, 10);
+				stream.attach(packetizer, 10, true);
 			}
+			/*
 			else if (params.oformat.label == "FLV") {
 				FLVMetadataInjector* injector = new FLVMetadataInjector(params.oformat);
 				stream.attach(injector, 10);
@@ -179,10 +182,6 @@ public:
 			stream.start();
 			
 			_stop.wait();
-			//while (!stop)
-			//{
-			//	Thread::sleep(50);
-			//}
 			Log("trace") << "[MediaConnection] #### Stopped" << endl;
 			
 			stream -= packetDelegate(this, &MediaConnection::onVideoEncoded);
@@ -269,7 +268,7 @@ public:
 				params.oformat = MJPEG;
 			
 			else if ((request.find("flv") != string::npos))
-				params.oformat = FLVSpeex16000NoVideo; //FLVNoAudio; //FLVSpeex16000NoVideo; //FLVH264AAC; //FLVNellyMoser11025; //FLVAAC; //FLVSpeex16000; //FLVMP3; //NoVideo; //FLVNellyMoser11025; //NoVideo; //FLVMP3; //FLVSpeex16000NoVideo; //FLVSpeex16000; //FLVNoAudio; //
+				params.oformat = FLVNoAudio; //FLVH264NoAudio; //FLVSpeex16000NoVideo; //FLVNoAudio; //FLVSpeex16000NoVideo; //FLVH264AAC; //FLVNellyMoser11025; //FLVAAC; //FLVSpeex16000; //FLVMP3; //NoVideo; //FLVNellyMoser11025; //NoVideo; //FLVMP3; //FLVSpeex16000NoVideo; //FLVSpeex16000; //FLVNoAudio; //
 			
 			else 
 				throw Exception("No format specified");
@@ -316,7 +315,6 @@ public:
 	{
 	}
 };
-
 
 
 
@@ -502,77 +500,56 @@ int main(int argc, char** argv)
 	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
 	
 	/*
-			Log("trace") << "HTTP Connection:\n"
-				<< "\n\CODEC_ID_MP2: " << CODEC_ID_MP2
-				<< "\n\CODEC_ID_MP3: " << CODEC_ID_MP3
-				<< "\n\CODEC_ID_AAC: " << CODEC_ID_AAC
-				<< "\n\CODEC_ID_AC3: " << CODEC_ID_AC3
-				<< "\n\CODEC_ID_FLAC: " << CODEC_ID_FLAC
-				<< "\n\CODEC_ID_VORBIS: " << CODEC_ID_VORBIS
-				<< "\n\CODEC_ID_NELLYMOSER: " << CODEC_ID_NELLYMOSER
-				<< "\n\CODEC_ID_SPEEX: " << CODEC_ID_SPEEX
-				<< "\n\CODEC_ID_H263: " << CODEC_ID_H263
-				<< "\n\CODEC_ID_H263P: " << CODEC_ID_H263P
-				<< "\n\CODEC_ID_H264: " << CODEC_ID_H264
-				//<< "\n\CODEC_ID_MPEG: " << CODEC_ID_MPEG
-				//<< "\n\CODEC_ID_MPEG2: " << CODEC_ID_MPEG2
-				<< "\n\CODEC_ID_MPEG4: " << CODEC_ID_MPEG4
-				<< "\n\CODEC_ID_MJPEG: " << CODEC_ID_MJPEG
-				<< "\n\CODEC_ID_FLV1: " << CODEC_ID_FLV1
-				<< endl;
+	Log("trace") << "HTTP Connection:\n"
+		<< "\n\CODEC_ID_MP2: " << CODEC_ID_MP2
+		<< "\n\CODEC_ID_MP3: " << CODEC_ID_MP3
+		<< "\n\CODEC_ID_AAC: " << CODEC_ID_AAC
+		<< "\n\CODEC_ID_AC3: " << CODEC_ID_AC3
+		<< "\n\CODEC_ID_FLAC: " << CODEC_ID_FLAC
+		<< "\n\CODEC_ID_VORBIS: " << CODEC_ID_VORBIS
+		<< "\n\CODEC_ID_NELLYMOSER: " << CODEC_ID_NELLYMOSER
+		<< "\n\CODEC_ID_SPEEX: " << CODEC_ID_SPEEX
+		<< "\n\CODEC_ID_H263: " << CODEC_ID_H263
+		<< "\n\CODEC_ID_H263P: " << CODEC_ID_H263P
+		<< "\n\CODEC_ID_H264: " << CODEC_ID_H264
+		//<< "\n\CODEC_ID_MPEG: " << CODEC_ID_MPEG
+		//<< "\n\CODEC_ID_MPEG2: " << CODEC_ID_MPEG2
+		<< "\n\CODEC_ID_MPEG4: " << CODEC_ID_MPEG4
+		<< "\n\CODEC_ID_MJPEG: " << CODEC_ID_MJPEG
+		<< "\n\CODEC_ID_FLV1: " << CODEC_ID_FLV1
+		<< endl;
 
 	
-		MP2			= 86016,
-		MP3			= 86017,
-		AAC			= 86018,
-		AC3			= 86019,
-		Vorbis		= 86021,
-		FLAC		= 86030,
+	MP2			= 86016,
+	MP3			= 86017,
+	AAC			= 86018,
+	AC3			= 86019,
+	Vorbis		= 86021,
+	FLAC		= 86030,
 
-		Raw			= 14,
-		H263		= 5,
-		H263p		= 20,
-		H264		= 28,
-		MPEG1		= 1,
-		MPEG2		= 2,
-		MPEG4		= 13,
-		MJPEG		= 8,
-		FLV			= 22,
+	Raw			= 14,
+	H263		= 5,
+	H263p		= 20,
+	H264		= 28,
+	MPEG1		= 1,
+	MPEG2		= 2,
+	MPEG4		= 13,
+	MJPEG		= 8,
+	FLV			= 22,
 		
-		// audio
-		PCM			= 65536,
-		MP2			= 86016,
-		MP3			= 86017,
-		AAC			= 86018,
-		AC3			= 86019,
-		Vorbis		= 86021,
-		FLAC		= 86030,
-		NellyMoser	= 86052,
-		Speex		= 86054
+	// audio
+	PCM			= 65536,
+	MP2			= 86016,
+	MP3			= 86017,
+	AAC			= 86018,
+	AC3			= 86019,
+	Vorbis		= 86021,
+	FLAC		= 86030,
+	NellyMoser	= 86052,
+	Speex		= 86054
 
 	videoCapture = NULL;
-	audioCapture = NULL;
-
-	try
-	{
-		videoCapture = new VideoCapture(0, true);
-		//audioCapture = new AudioCapture(0, 2, 44100);
-		//audioCapture = new AudioCapture(0, 1, 16000);	
-		audioCapture = new AudioCapture(0, 1, 11025);			
-	}
-	catch (Poco::Exception& exc)
-	{
-		Log("trace") << "Media Tests: FAILED: " << exc.displayText() << endl;
-	}	
-		Log("trace") << "Media Tests: Speex: " << CODEC_ID_SPEEX << endl;
-		Log("trace") << "Media Tests: Speex: " << Codec::Speex << endl;
-		
-		Log("trace") << "Media Tests: AAC: " << CODEC_ID_AAC << endl;
-		Log("trace") << "Media Tests: AAC: " << Codec::AAC << endl;
-		
-		Log("trace") << "Media Tests: AC3: " << CODEC_ID_AC3 << endl;
-		Log("trace") << "Media Tests: AC3: " << Codec::AC3 << endl;
-		
+	audioCapture = NULL;		
 	*/
 
 	Media::MediaFactory::initialize();
@@ -583,9 +560,7 @@ int main(int argc, char** argv)
 	srv.start();
 	system("pause");
 
-	/*
-	
-	
+	/*	
 	StreamTest test;
 	test.run();
 	system("pause");

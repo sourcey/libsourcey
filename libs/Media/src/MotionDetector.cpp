@@ -68,10 +68,10 @@ MotionDetector::~MotionDetector()
 void MotionDetector::onStreamStateChange(const PacketStreamState&)
 {
 	Log("debug") << "[MotionDetector:" << this <<"] Reset Stream State" << endl;
-
-	FastMutex::ScopedLock lock(_mutex); 
 	
 	setState(this, MotionDetectorState::Idle);
+
+	FastMutex::ScopedLock lock(_mutex); 
 	_motionLevel = 0;
 	_motionFrameCount = 0;
 	_motionCanStartAt = 0; 
@@ -93,29 +93,32 @@ void MotionDetector::process(IPacket& packet)
 	if (vpacket->mat == NULL)
 		throw Exception("Video packets must contain an OpenCV image.");
 
-	FastMutex::ScopedLock lock(_mutex); 
+	VideoPacket opacket;
+	cv::Mat& source = *vpacket->mat;
+	cv::Mat mask(source.size(), CV_8UC1);
+	{
+		FastMutex::ScopedLock lock(_mutex); 
 	
-	_processing = true;
-	_timestamp = vpacket->time; //(double)clock() / CLOCKS_PER_SEC;
-	updateMHI(*vpacket->mat);
-	computeMotionState();	
+		_processing = true;
+		_timestamp = (double)clock() / CLOCKS_PER_SEC; // vpacket->time;
+		updateMHI(source);
+		computeMotionState();	
 
-	// Broadcast the MHI if we have receivers connected.
-	//if (refCount() > 0) 
-	//{
-	cv::Mat mask(_mhi.size(), CV_8UC1);
+		// Create the single channel mask.
+		_mhi.convertTo(mask, CV_8UC1, 255.0 / _options.stableMotionLifetime, 
+			(_options.stableMotionLifetime - _timestamp) * (255.0 / _options.stableMotionLifetime));
 
-	_mhi.convertTo(mask, CV_8UC1, 255.0 / _options.stableMotionLifetime, 
-		(_options.stableMotionLifetime - vpacket->time) * (255.0 / _options.stableMotionLifetime));
+		opacket = VideoPacket(&mask);
+		_processing = false;	
 
-	// IMPORTANT: Broadcast images are single channel,
-	// so encoders will need to set the input pixel 
-	// format to GRAY8.
-	vpacket->mat = &mask;
-	dispatch(this, *vpacket);
-	//}
-		
-	_processing = false;
+		//cv::imshow("Motion Image", mask);
+		//cv::imshow("Mask Image", _mhi);
+		//cv::waitKey(10);
+	}
+
+	// NOTE: Dispatched images are GRAY8 so encoders will
+	// need to adjust the input pixel format accordingly.
+	dispatch(this, opacket);
 	
 	Log("trace") << "[MotionDetector:" << this <<"] Processing: OK" << endl;
 }
@@ -125,7 +128,7 @@ void MotionDetector::updateMHI(cv::Mat& source)
 {
 	//FastMutex::ScopedLock lock(_mutex); 
 
-	cv::Mat grey;
+	cv::Mat grey; //(source.size(), CV_8UC1);
 	cv::cvtColor(source, grey, CV_RGB2GRAY);
 
 	if (_last.type() != CV_8UC1 ||
@@ -150,7 +153,8 @@ void MotionDetector::updateMHI(cv::Mat& source)
 
 void MotionDetector::computeMotionState() 
 { 
-	Log("debug") << "[MotionDetector:" << this <<"] Update Motion State: " << _motionLevel << ":" << _options.motionThreshold << endl;
+	Log("debug") << "[MotionDetector:" << this <<"] Update Motion State: " << state().toString() 
+		<< ": " << _motionLevel << ":" << _options.motionThreshold << endl;
 	
 	//FastMutex::ScopedLock lock(_mutex); 
 
@@ -187,8 +191,7 @@ void MotionDetector::computeMotionState()
 				// consider motion stable and trigger the alarm.				
 		
 				// Our current motion count will be valid for 
-				// 'stable motion duration' 
-				// of nanoseconds.
+				// 'stable motion duration' of nanoseconds.
 				if (_motionFrameCount == 0) _stopwatch.start();
 				if (_stopwatch.elapsed() < _options.stableMotionLifetime * 1000000) {
 					_motionFrameCount++;
@@ -227,8 +230,8 @@ void MotionDetector::computeMotionState()
 				Log("debug") << "[MotionDetector:" << this <<"] UpdateMotionState: Set to Waiting" << endl;
 			}
 
-			// If motion threshold is exceeded then extend our 
-			// timer...
+			// If motion threshold is exceeded while triggered
+			// then extend the timer...
 			else if (_motionLevel > _options.motionThreshold) {
 				_motionSegmentEndingAt = min<time_t>(
 					currentTime + _options.minTriggeredDuration, 				
@@ -241,10 +244,17 @@ void MotionDetector::computeMotionState()
 }
 
 
-void MotionDetector::setOptions(const MotionDetector::Options& options)
+int MotionDetector::motionLevel() const
 {
 	FastMutex::ScopedLock lock(_mutex); 
-	_options = options;
+	return _motionLevel;
+}
+
+
+MotionDetector::Options& MotionDetector::options()
+{
+	FastMutex::ScopedLock lock(_mutex); 
+	return _options;
 }
 
 

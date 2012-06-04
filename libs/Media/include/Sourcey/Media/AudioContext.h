@@ -92,7 +92,7 @@ struct AudioEncoderContext: public AudioContext
 	AudioEncoderContext();
 	virtual ~AudioEncoderContext();	
 	
-	virtual void open(AVFormatContext *oc);
+	virtual void open(AVFormatContext* oc);
 	virtual void close();
 	virtual void reset();	
 	
@@ -113,8 +113,9 @@ struct AudioDecoderContext: public AudioContext
 	virtual void open(AVFormatContext *ic, int streamID);
 	virtual void close();
 	virtual void reset();	
-
-	virtual int decode(AVPacket& packet);
+	
+	virtual bool decode(UInt8* data, int size, AVPacket& opacket);
+	virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
 		// Decodes a single frame from the provided packet.
 		// Returns the size of the decoded frame. 
 		// IMPORTANT: In order to ensure all data is decoded from the

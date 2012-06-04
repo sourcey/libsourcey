@@ -82,10 +82,12 @@ struct Package: public JSON::Value
 		/// installed version.
 		/// For remote packages this is the latest 
 		/// available version.
+		/// Throws an exception if no assets are available.
 
 	virtual Asset assetVersion(const std::string& version);
 		/// Returns an asset matching the specified version,
 		/// or a blank asset.
+		/// Throws an exception if no asset exists.
 	
 	virtual Asset latestProjectAsset(const std::string& version);
 		/// Returns the latest asset for the specified project 	
@@ -94,6 +96,7 @@ struct Package: public JSON::Value
 		/// require a specific parent project version.
 		/// The package JSON must have a "project-version"
 		/// member for this function to work.
+		/// Throws an exception if no asset exists.
 
 	virtual bool valid() const;
 

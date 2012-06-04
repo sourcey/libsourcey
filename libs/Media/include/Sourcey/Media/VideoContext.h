@@ -47,6 +47,9 @@ namespace Sourcey {
 namespace Media {
 
 
+struct VideoConversionContext;
+
+
 struct VideoContext
 {
 	VideoContext();
@@ -60,13 +63,11 @@ struct VideoContext
 
 	AVStream* stream;
 	AVCodecContext* codec;
-	AVFrame* iframe;
-	AVFrame* oframe;
-	struct SwsContext*	convCtx;
+	AVFrame* frame;
 
-    int bufferSize;
-	UInt8* buffer;
-	UInt64 frameNum;
+    //int bufferSize;
+	//UInt8* buffer;
+	//UInt64 frameNum;
 
     double pts;
 	
@@ -81,9 +82,11 @@ struct VideoEncoderContext: public VideoContext
 	VideoEncoderContext();
 	virtual ~VideoEncoderContext();	
 	
-	virtual void open(AVFormatContext *oc); //, const VideoCodec& params
+	virtual void open(AVFormatContext* oc); //, const VideoCodec& params
 	virtual void close();
 	virtual void reset();	
+	
+	virtual AVRational getCodecTimeBase(AVCodec* c, double fps);
 	
 	virtual int encode(unsigned char* buffer, int bufferSize, AVPacket& opacket/*, unsigned pts = AV_NOPTS_VALUE*/);
 		/// Encodes a video frame from given data buffer and
@@ -91,6 +94,7 @@ struct VideoEncoderContext: public VideoContext
 		/// If a pts value is given it will be applied to the
 		/// encoded video packet.
 		
+	VideoConversionContext* convCtx;
 	VideoCodec	iparams;
 	VideoCodec	oparams;
 };
@@ -106,8 +110,9 @@ struct VideoDecoderContext: public VideoContext
 	virtual void open(AVFormatContext *ic, int streamID);
 	virtual void close();
 	virtual void reset();	
-
-	virtual int decode(AVPacket& packet);
+	
+	virtual bool decode(UInt8* data, int size, AVPacket& opacket);
+	virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
 		// Decodes a single frame from the provided packet.
 		// TODO: We may need to return the generated frame size to match
 		// the audio API, not the encoded length.
@@ -122,6 +127,25 @@ struct VideoDecoderContext: public VideoContext
     double duration;
     int width;	// Number of bits used to store a sample
     bool fp;	// Floating-point sample representation
+};
+
+
+// ---------------------------------------------------------------------
+//
+struct VideoConversionContext
+{
+	VideoConversionContext();
+	virtual ~VideoConversionContext();	
+	
+	virtual void create(const VideoCodec& iparams, const VideoCodec& oparams);
+	virtual void free();
+
+	virtual AVFrame* convert(AVFrame* iframe);
+
+	AVFrame* oframe;
+	struct SwsContext* ctx;
+	VideoCodec iparams;
+	VideoCodec oparams;
 };
 
 
