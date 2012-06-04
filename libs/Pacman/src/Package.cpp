@@ -111,6 +111,9 @@ JSON::Value& Package::assets()
 
 Package::Asset Package::latestAsset()
 {
+	if (this->assets().empty())
+		throw Exception("Package has no assets");
+
 	// The latest asset may not be in order, so make
 	// sure we return the latest one.
 	JSON::Value& assets = this->assets();
@@ -127,14 +130,20 @@ Package::Asset Package::latestAsset()
 
 Package::Asset Package::assetVersion(const string& version)
 {
+	if (this->assets().empty())
+		throw Exception("Package has no assets");
+
 	JSON::Value& assets = this->assets();
-	JSON::Value& asset = JSON::Value(); //assets[(size_t)0];
+	JSON::Value& asset = assets[(size_t)0];
 	for (unsigned i = 0; i < assets.size(); i++) {
 		if (assets[i]["version"].asString() == version) {
 			asset = assets[i];
 			break;
 		}
 	}
+
+	if (asset["version"].asString() != version)
+		throw Exception("No asset with version " + version);
 	
 	return Asset(asset);
 }
@@ -142,6 +151,9 @@ Package::Asset Package::assetVersion(const string& version)
 
 Package::Asset Package::latestProjectAsset(const string& version)
 {
+	if (this->assets().empty())
+		throw Exception("Package has no assets");
+
 	JSON::Value& assets = this->assets();
 	JSON::Value& asset = assets[(size_t)0];
 	for (unsigned i = 0; i < assets.size(); i++) {
@@ -150,8 +162,11 @@ Package::Asset Package::latestProjectAsset(const string& version)
 			asset = assets[i];
 		}
 	}
-	
-	return Asset(asset["project-version"].asString() == version ? asset : JSON::Value());
+
+	if (asset["project-version"].asString() != version)
+		throw Exception("No asset with project version " + version);
+
+	return Asset(asset);
 }
 
 
@@ -199,8 +214,9 @@ std::string Package::Asset::url(int index) const
 
 bool Package::Asset::valid() const
 {
-	return !root["file-name"].empty() 
-		&& !root["version"].empty();
+	return root.isMember("file-name")
+		&& root.isMember("version")
+		&& root.isMember("mirrors");
 }
 
 
@@ -303,7 +319,7 @@ void LocalPackage::setInstallState(const string& state)
 void LocalPackage::setVersion(const string& version)
 {
 	if (state() != "Installed")
-		throw Exception("The package must be installed before a version can be set");
+		throw Exception("Package must be installed before the version is set");
 	
 	(*this)["version"] = version;
 }

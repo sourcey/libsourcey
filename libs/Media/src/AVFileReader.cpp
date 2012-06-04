@@ -129,49 +129,69 @@ void AVFileReader::run()
 		int len;
 		int res;
 		while (!_stop) {
+			
+			AVPacket ipacket;
+			AVPacket opacket;
+			av_init_packet(&ipacket);
+			av_init_packet(&opacket);
 
-			AVPacket packet;
-			av_init_packet(&packet);
+			while ((res = av_read_frame(_formatCtx, &ipacket)) >= 0) {
+				if (_video && ipacket.stream_index == _video->stream->index) {	
+					if (_video->decode(ipacket, opacket)) {
+						//if (opacket.size) {
+						VideoPacket video(opacket.data, opacket.size, _video->codec->width, _video->codec->height, opacket.pts);
+						video.opaque = &ipacket; //_video;
+						dispatch(this, video);
+						//}
+					}
 
-			while ((res = av_read_frame(_formatCtx, &packet)) >= 0) {
-				if (_video && packet.stream_index == _video->stream->index) {					
-					while (packet.size > 0) {
-						if ((len = _video->decode(packet)) <= 0)
+					/*
+					while (ipacket.size > 0) {
+						if ((len = _video->decode(ipacket, opacket)) <= 0)
 							break;
 
-						//packet.data += len;
-						//packet.size -= len;
-						
+						//ipacket.data += len;
+						//ipacket.size -= len;
+
 						//Log("trace") << "[AVFileReader:" << this << "] Broadcasting Video: " << _video->pts << endl;
-						VideoPacket video(_video->buffer, len, _video->codec->width, _video->codec->height, _video->pts);
-						video.opaque = &packet; //_video;
-						dispatch(this, video);
+						//_video->codec->coded_frame->data[0] _video->buffer
 					}
+					*/
 					break;
 				}
-				else if (_audio && packet.stream_index == _audio->stream->index) {		
-					while (packet.size > 0) {
-						if ((len = _audio->decode(packet)) <= 0)
+				else if (_audio && ipacket.stream_index == _audio->stream->index) {	
+					if (_audio->decode(ipacket, opacket)) {
+						//if (opacket.size) {						
+						//Log("trace") << "[AVFileReader:" << this << "] Broadcasting Audio: " << _video->pts << endl;
+						AudioPacket audio(opacket.data, opacket.size, opacket.pts);
+						audio.opaque = &ipacket; //_audio;
+						dispatch(this, audio);
+						//}
+					}	
+					/*
+					while (ipacket.size > 0) {
+						if ((len = _audio->decode(ipacket)) <= 0)
 							break;
 
-						//packet.data += len;
-						//packet.size -= len;
+						//ipacket.data += len;
+						//ipacket.size -= len;
 						
 						//Log("trace") << "[AVFileReader:" << this << "] Broadcasting Audio: " << _video->pts << endl;
 						AudioPacket audio(_audio->buffer, len, _audio->pts);
-						audio.opaque = &packet; //_audio;
+						audio.opaque = &ipacket; //_audio;
 						dispatch(this, audio);
 					}
+					*/
 					break;
 				} 
 
 				Log("warn") << "[AVFileReader:" << this << "] Dropping frame from unknown stream:"		
-					<< "\n\tStream ID: " << packet.stream_index
+					<< "\n\tStream ID: " << ipacket.stream_index
 					<< "\n\tVideo ID: " << _video->stream->index
 					<< "\n\tAudio ID: " << _audio->stream->index
 					<< endl;
 
-				av_free_packet(&packet);
+				av_free_packet(&ipacket);
 			}
 
 			if (res < 0) {

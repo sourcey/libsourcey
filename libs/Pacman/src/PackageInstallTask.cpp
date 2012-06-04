@@ -149,30 +149,40 @@ void PackageInstallTask::doDownload()
 	//if (_local->isLatestVersion(_remote->latestAsset()))
 	//	throw Exception("This local package is already up to date");
 	
-	Package::Asset localAsset = _local->latestAsset();
+	//Package::Asset localAsset = _local->latestAsset();
 	Package::Asset remoteAsset = !_options.version.empty() ? 
 		_remote->assetVersion(_options.version) : 
 			!_options.projectVersion.empty() ?
 				_remote->latestProjectAsset(_options.projectVersion) :
 					_remote->latestAsset();
 
+	if (!remoteAsset.valid())
+		throw Exception("Package download failed: The remote asset is invalid.");
+
 	string uri = remoteAsset.url();
 	string filename = remoteAsset.fileName();
-	if (uri.empty() || filename.empty())
-		throw Exception("Package download failed: No suitable remote asset.");
-	
+
 	// If the local package manifest already has a listing of
 	// the latest remote asset, and the file already exists in
 	// the cache we can skip the download.
-	if (_manager.hasCachedFile(localAsset.fileName()) && 
-		localAsset == remoteAsset) {
+	if (!_local->assets().empty() &&
+		_manager.hasCachedFile(_local->latestAsset().fileName()) && 
+		_local->latestAsset() == remoteAsset) {
 		Log("debug", this) << "File exists, skipping download" << endl;		
 		setState(this, PackageInstallState::Unpacking);
 		return;
 	}
 	
 	// Copy the new remote asset to our local manifest.
-	localAsset = _local->copyAsset(remoteAsset);
+	// TODO: Remove current listing if any - we end up
+	// with multiple entries.
+	Package::Asset localAsset = _local->copyAsset(remoteAsset);
+	
+	Log("debug", this) << "Initializing Download:" 
+		<< "\n\tURI: " << uri
+		<< "\n\tRemote Filename: " << filename
+		<< "\n\tLocal Filename: " << localAsset.fileName()
+		<< endl;
 
 	// Initialize a HTTP transaction to download the file.
 	// If the transaction fails an exception will be thrown.
@@ -183,8 +193,6 @@ void PackageInstallTask::doDownload()
 			_manager.options().httpPassword);
 		cred.authenticate(*request); 
 	}
-	
-	Log("debug", this) << "Initializing Download: Ready" << endl;
 
 	_transaction.setRequest(request);
 	_transaction.setOutputPath(_manager.getCacheFilePath(localAsset.fileName()).toString());
@@ -193,12 +201,30 @@ void PackageInstallTask::doDownload()
 			static_cast<int>(_transaction.response().getStatus()), 
 			_transaction.response().getReason()));	
 	
-	Log("debug", this) << "Initializing Download: OK" << endl; 
+	Log("debug", this) << "Download Success" << endl; 
 	
 	// Transition the internal state since the HTTP
 	// transaction was a success.
 	setState(this, PackageInstallState::Unpacking);
 }
+
+			
+	//Log("debug", this) << "Initializing Download: Version: " << _options.version << endl;
+	//Log("debug", this) << "Initializing Download: Project Version: " << _options.projectVersion << endl;
+	//JSON::StyledWriter writer;
+	//ostringstream ost;
+	//ost << writer.write((Json::Value&)localAsset.root);
+	
+	//Log("debug", this) << "Initializing Download: localAsset 1: " << ost.str() << endl;
+	//ost.str("");
+	//ost << writer.write((Json::Value&)remoteAsset.root);
+	
+	//Log("debug", this) << "Initializing Download: remoteAsset 1: " << ost.str() << endl;
+
+	//if (!localAsset.valid())
+	//	throw Exception("Package download failed: The local asset is invalid.");
+	//if (uri.empty() || filename.empty())
+	//	throw Exception("Package download failed: No suitable remote asset.");
 
 
 void PackageInstallTask::doUnpack()
@@ -257,21 +283,16 @@ void PackageInstallTask::onDecompressionOk(const void*, pair<const Poco::Zip::Zi
 		<< info.second.toString() << endl; 
 	
 	// Add the extracted file to out package manifest
-	_local->manifest().addFile(info.second.toString());
+	_local->manifest().addFile(info.second.toString()); 
 }
 
 
 void PackageInstallTask::doFinalize() 
 {
-		Log("debug", this) << "doFinalize" << endl;
 	setState(this, PackageInstallState::Finalizing);
-		Log("debug", this) << "doFinalize 1" << endl;
-		Log("debug", this) << "doFinalize 11: " << _local->name() << endl;
 
 	bool errors = false;
 	Path outputDir(_manager.getIntermediatePackageDir(_local->name()));
-	
-		Log("debug", this) << "doFinalize 2" << endl;
 
 	// Move all extracted files to the installation path
 	DirectoryIterator fIt(outputDir);
@@ -297,8 +318,6 @@ void PackageInstallTask::doFinalize()
 		++fIt;
 	}
 
-		Log("debug", this) << "doFinalize 3" << endl;
-
 	// The package requires finalizing at a later date. 
 	// The current task will be terminated.
 	if (errors) {
@@ -306,7 +325,6 @@ void PackageInstallTask::doFinalize()
 		_cancelled = true;
 		return;
 	}
-		Log("debug", this) << "doFinalize 4" << endl;
 	
 	// Remove the temporary output folder if the installation
 	// was successfully finalized.
@@ -380,6 +398,13 @@ bool PackageInstallTask::failed() const
 bool PackageInstallTask::success() const
 {
 	return stateEquals(PackageInstallState::Installed);
+}
+
+
+bool PackageInstallTask::complete() const
+{
+	return stateEquals(PackageInstallState::Installed) 
+		|| stateEquals(PackageInstallState::Failed);
 }
 
 

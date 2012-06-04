@@ -223,7 +223,7 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 		
 	// Scales the source data according to our SwsContext settings.
 	if (sws_scale(_videoConvCtx,
-		video->iframe->data, video->iframe->linesize, 0, video->codec->height,
+		video->frame->data, video->frame->linesize, 0, video->codec->height,
 		_videoGrayFrame->data, _videoGrayFrame->linesize) < 0)
 		throw Exception("Video Analyzer: Pixel format conversion not supported.");
 

@@ -88,6 +88,11 @@ MediaFactory::MediaFactory() :
 MediaFactory::~MediaFactory()
 {	
 	cout << "MediaFactory::~MediaFactory" << endl;
+
+	if (_devices) {
+		_devices->uninitialize();
+		delete _devices;
+	}
 }
 
 

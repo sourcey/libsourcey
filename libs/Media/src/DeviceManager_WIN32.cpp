@@ -108,12 +108,14 @@ static bool getWaveDevices(bool input, vector<Device>& devs);
 Win32DeviceManager::Win32DeviceManager() : 
 	_need_couninitialize(false) 
 {
+	Log("trace") << "[DeviceManager] Creating" << endl;
 	//setWatcher(new Win32DeviceWatcher(this));
 }
 
 
 Win32DeviceManager::~Win32DeviceManager() 
 {
+	Log("trace") << "[DeviceManager] Destroying" << endl;
 	if (initialized()) {
 		uninitialize();
 	}
@@ -122,14 +124,18 @@ Win32DeviceManager::~Win32DeviceManager()
 
 bool Win32DeviceManager::initialize() 
 {
+	Log("trace") << "[DeviceManager] Initializing" << endl;
 	if (!initialized()) {
 		HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+		//HRESULT hr = CoInitialize(NULL);
 		_need_couninitialize = SUCCEEDED(hr);
 		if (FAILED(hr)) {
-			Log("error") << "CoInitialize failed, hr=" << hr << endl;
 			if (hr != RPC_E_CHANGED_MODE) {
+				Log("error") << "[DeviceManager] CoInitialize failed, hr=" << hr << endl;
 				return false;
 			}
+			else
+				Log("warn") << "[DeviceManager] CoInitialize Changed Mode" << endl;
 		}
 		if (watcher() && !watcher()->start()) {
 			return false;
@@ -142,6 +148,8 @@ bool Win32DeviceManager::initialize()
 
 void Win32DeviceManager::uninitialize() 
 {
+	Log("trace") << "[DeviceManager] Uninitializing" << endl;
+
 	if (initialized()) {
 		if (watcher())
 			watcher()->stop();
@@ -213,7 +221,7 @@ bool getDevices(const CLSID& catid, vector<Device>& devices)
 	CComPtr<IEnumMoniker> cam_enum;
 	if (FAILED(hr = sys_dev_enum.CoCreateInstance(CLSID_SystemDeviceEnum)) ||
 		FAILED(hr = sys_dev_enum->CreateClassEnumerator(catid, &cam_enum, 0))) {
-			Log("error") << "Failed to create device enumerator, hr="  << hr << endl;
+			Log("error") << "[DeviceManager] Failed to create device enumerator, hr="  << hr << endl;
 			return false;
 	}
 
@@ -331,7 +339,7 @@ bool getCoreAudioDevices(bool input, vector<Device>& devs)
 					if (SUCCEEDED(hr)) {
 						devs.push_back(dev);
 					} else {
-						Log("warn") << "Cannot query IMM Device, skipping.  HR=" << hr << endl;
+						Log("warn") << "[DeviceManager] Cannot query IMM Device, skipping.  HR=" << hr << endl;
 						hr = S_FALSE;
 					}
 				}
@@ -340,7 +348,7 @@ bool getCoreAudioDevices(bool input, vector<Device>& devs)
 	}
 
 	if (FAILED(hr)) {
-		Log("warn") << "getCoreAudioDevices failed with hr " << hr << endl;
+		Log("warn") << "[DeviceManager] getCoreAudioDevices failed with hr " << hr << endl;
 		return false;
 	}
 	return true;

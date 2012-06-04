@@ -130,14 +130,38 @@ public:
 	virtual bool saveLocalPackages(bool whiny = false);
 	virtual bool saveLocalPackage(LocalPackage& package, bool whiny = false);
 		/// Saves the local package manifest to the file system.
-
+	
 	//
 	/// Package Installation Methods
 	//
-	virtual bool installPackages(const StringList& names, PackageInstallMonitor* monitor = NULL, 
+	virtual PackageInstallTask* installPackage(const std::string& name, //PackageInstallMonitor* monitor = NULL, 
+		const PackageInstallTask::Options& options = PackageInstallTask::Options(), bool whiny = false);
+		/// Installs a single package.
+		/// The returned PackageInstallTask must be started.
+
+	virtual PackageInstallMonitor* installPackages(const StringList& names,// PackageInstallMonitor* monitor = NULL, 
 		const PackageInstallTask::Options& options = PackageInstallTask::Options(), bool whiny = false);
 		/// Installs multiple packages.
+		/// The same options will be passed to each task.
+		/// The returned PackageInstallTask(s) must be started.	
+		/// The returned PackageInstallMonitor will be NULL no tasks were created.	
+		/// The returned PackageInstallMonitor must be freed by the outside application.	
 
+	virtual PackageInstallTask* updatePackage(const std::string& name, //PackageInstallMonitor* monitor = NULL, 
+		const PackageInstallTask::Options& options = PackageInstallTask::Options(), bool whiny = false);
+		/// Updates a single package.
+		/// Throws an exception if the package does exist.
+		/// The returned PackageInstallTask must be started.
+
+	virtual PackageInstallMonitor* updatePackages(const StringList& names,// PackageInstallMonitor* monitor = NULL, 
+		const PackageInstallTask::Options& options = PackageInstallTask::Options(), bool whiny = false);
+		/// Updates multiple packages.
+		/// Throws an exception if the package does exist.
+		/// The returned PackageInstallTask(s) must be started.	
+		/// The returned PackageInstallMonitor will be NULL no tasks were created.	
+		/// The returned PackageInstallMonitor must be freed by the outside application.	
+
+	/*
 	virtual bool installPackage(const std::string& name, PackageInstallMonitor* monitor = NULL, 
 		const PackageInstallTask::Options& options = PackageInstallTask::Options(), bool whiny = false);
 		/// Installs a single package.
@@ -151,8 +175,9 @@ public:
 		const PackageInstallTask::Options& options = PackageInstallTask::Options(), bool whiny = false);
 		/// Updates a single package.
 		/// The package will be installed if it does not exist.
+		*/
 
-	virtual bool updateAllPackages(PackageInstallMonitor* monitor = NULL, bool whiny = false);
+	virtual bool updateAllPackages(bool whiny = false); //PackageInstallMonitor* monitor = NULL, 
 		/// Updates all installed packages.
 
 	virtual bool uninstallPackages(const StringList& names, bool whiny = false);
@@ -198,6 +223,11 @@ public:
 	virtual bool isLatestVersion(PackagePair& pair);
 		/// Checks if a newer version is available for the given
 		/// package pair.
+	
+	virtual std::string installedPackageVersion(const std::string& name) const;
+		/// Returns the version number of an installed package.
+		/// Exceptions will be thrown if the package does not exist,
+		/// or is not fully installed.
 	
 	virtual bool checkInstallManifest(LocalPackage& package);
 		/// Checks the veracity of the install manifest for the given

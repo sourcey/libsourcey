@@ -45,6 +45,28 @@ macro(set_component_found _component )
   endif ()
 endmacro()
 
+
+#
+### Macro: set_component_notfound
+#
+# Marks the given component as not found, and resets the cache for find_path and find_library results.
+#
+macro(set_component_notfound _component)
+
+  # message(STATUS "  - ${_component} setting notfound.")
+  set(${_component}_FOUND FALSE)
+  
+  if (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)  
+    set(${_component}_RELEASE_LIBRARIES ${_component}_RELEASE_LIBRARIES-NOTFOUND)
+    set(${_component}_DEBUG_LIBRARIES ${_component}_DEBUG_LIBRARIES-NOTFOUND)
+    set(${_component}_LIBRARIES "") #${_component}_LIBRARIES-NOTFOUND)
+  else()
+    set(${_component}_LIBRARIES ${_component}_LIBRARIES-NOTFOUND)
+  endif()  
+    
+endmacro()
+
+
 #
 ### Macro: find_component
 #

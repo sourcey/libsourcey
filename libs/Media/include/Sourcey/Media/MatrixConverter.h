@@ -75,7 +75,7 @@ public:
 			
 		// Scales the source data according to our SwsContext settings.
 		if (sws_scale(_convCtx,
-			video->iframe->data, video->iframe->linesize, 0, video->codec->height,
+			video->frame->data, video->frame->linesize, 0, video->codec->height,
 			_oframe->data, _oframe->linesize) < 0)
 			throw Exception("Matrix Converter: Pixel format conversion not supported.");
 
