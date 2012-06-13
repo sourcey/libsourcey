@@ -64,43 +64,44 @@ struct EncoderState: public StateT
 };
 
 
-struct EncoderParams
+struct EncoderOptions
 {
 	Format iformat;		// The input media format.
 	Format oformat;		// The output media format.
-	EncoderParams(const Format& iformat = Format(), 
-				  const Format& oformat = Format()) :
+	EncoderOptions(const Format& iformat = Format(), 
+				   const Format& oformat = Format()) :
 		iformat(iformat),
 		oformat(oformat) {}
-	EncoderParams(const EncoderParams& r) : 
+	EncoderOptions(const EncoderOptions& r) : 
 		iformat(r.iformat),
 		oformat(r.oformat) {}
-	virtual ~EncoderParams() {};
+	virtual ~EncoderOptions() {};
 };
 	
 
-struct RecorderParams: public EncoderParams
+struct RecorderOptions: public EncoderOptions
 {
 	std::string ifile;	// The input file path.
 	std::string ofile;	// The output file path.
-	time_t stopAt;		// Stop at a certain time.
-	RecorderParams(const Format& iformat = Format(),
-					  const Format& oformat = Format(),
-					  const std::string& ifile = "",
-					  const std::string& ofile = "",
-					  time_t stopAt = 0) :
-		EncoderParams(iformat, oformat),
+	long duration;		// The millisecond duration 
+						// of time to record.
+	RecorderOptions(const Format& iformat = Format(),
+					const Format& oformat = Format(),
+					const std::string& ifile = "",
+					const std::string& ofile = "",
+					long duration = 0) :
+		EncoderOptions(iformat, oformat),
 		ifile(ifile),
 		ofile(ofile),
-		stopAt(stopAt) {}
-	RecorderParams(const EncoderParams& r) :
-		EncoderParams(r.iformat, r.oformat) {}
-	RecorderParams(const RecorderParams& r) : 
-		EncoderParams(r.iformat, r.oformat),
+		duration(duration) {}
+	RecorderOptions(const EncoderOptions& r) :
+		EncoderOptions(r.iformat, r.oformat) {}
+	RecorderOptions(const RecorderOptions& r) : 
+		EncoderOptions(r.iformat, r.oformat),
 		ifile(r.ifile),
 		ofile(r.ofile),
-		stopAt(r.stopAt) {}
-	virtual ~RecorderParams() {};
+		duration(r.duration) {}
+	virtual ~RecorderOptions() {};
 };
 
 
@@ -120,23 +121,24 @@ public:
 	virtual void initialize() = 0;
 	virtual void uninitialize() = 0;	
 	
-	virtual EncoderParams& params() = 0;
+	virtual EncoderOptions& options() = 0;
 
 	virtual bool isNone() const		{ return stateEquals(EncoderState::None); };
-	virtual bool isReady() const	{ return stateBetween(EncoderState::Ready, EncoderState::Encoding); };
+	virtual bool isReady() const	{ return stateEquals(EncoderState::Ready); };
 	virtual bool isEncoding() const	{ return stateEquals(EncoderState::Encoding); };
+	virtual bool isActive() const	{ return stateBetween(EncoderState::Ready, EncoderState::Encoding); };
 	virtual bool isStopped() const	{ return stateEquals(EncoderState::Stopped); };
 	virtual bool isError() const	{ return stateEquals(EncoderState::Error); };
 };
 
 
 class IPacketEncoder: public IEncoder, public IPacketProcessor
-	/// This is the abstract class for all instantiations
-	/// of the IPacketEncoder template.
+	/// This class extends the IEncoder interface to add
+	/// PacketStream compatibility.
 {
 public:
 	virtual void process(IPacket& packet) = 0;
-		// Encodes the packet, and pushes it on downstream.
+		// Encodes the packet, and pushes it downstream.
 };
 
 

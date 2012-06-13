@@ -242,6 +242,7 @@ void VideoEncoderContext::open(AVFormatContext* oc) //, const VideoCodec& params
 	// Allocate the conversion context
 	// TODO: Check if conversion is necessary.
 	convCtx = new VideoConversionContext();
+	//oparams.pixfmt = (PixelFormat::ID)codec->pix_fmt;
 	convCtx->create(iparams, oparams);
 
 	// Allocate the input frame
@@ -546,21 +547,7 @@ VideoConversionContext::~VideoConversionContext()
 
 void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec& oparams)
 {
-	Log("trace") << "[VideoConversionContext" << this << "] Opening" << endl;
-
-    if (ctx)
-        throw Exception("Conversion context already initialized.");
-
-    avpicture_alloc(reinterpret_cast<AVPicture*>(oframe), 
-		(::PixelFormat)oparams.pixfmt, oparams.width, oparams.height);
-	ctx = sws_getContext(
-		iparams.width, iparams.height, (::PixelFormat)iparams.pixfmt,
-        oparams.width, oparams.height, (::PixelFormat)oparams.pixfmt, 
-		/* SWS_FAST_BILINEAR */SWS_BICUBIC, NULL, NULL, NULL);
-    if (!ctx) 
-        throw Exception("Invalid conversion context.");
-
-	Log("trace") << "[VideoConversionContext:" << this << "] Video Conversion Context:\n" 
+	Log("trace") << "[VideoConversionContext:" << this << "] Creating:" 
 		<< "\n\tInput Width: " << iparams.width
 		<< "\n\tInput Height: " << iparams.height
 		<< "\n\tInput Pixel Format: " << iparams.pixfmt
@@ -568,9 +555,28 @@ void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec&
 		<< "\n\tOutput Height: " << oparams.height
 		<< "\n\tOutput Pixel Format: " << oparams.pixfmt
 		<< endl;
+
+    if (ctx)
+        throw Exception("Conversion context already initialized.");
+
+	oframe = avcodec_alloc_frame();
+    avpicture_alloc(reinterpret_cast<AVPicture*>(oframe), 
+		(::PixelFormat)oparams.pixfmt, oparams.width, oparams.height);
+	Log("trace") << "[VideoConversionContext" << this << "] Opening 2" << endl;
+	ctx = sws_getContext(
+		iparams.width, iparams.height, (::PixelFormat)iparams.pixfmt,
+        oparams.width, oparams.height, (::PixelFormat)oparams.pixfmt, 
+		/* SWS_FAST_BILINEAR */SWS_BICUBIC, NULL, NULL, NULL);
+	Log("trace") << "[VideoConversionContext" << this << "] Opening 3" << endl;
+    if (!ctx) 
+        throw Exception("Invalid conversion context.");
 	
+	Log("trace") << "[VideoConversionContext" << this << "] Opening 4" << endl;
+
 	this->iparams = iparams;
 	this->oparams = oparams;
+	
+	Log("trace") << "[VideoConversionContext" << this << "] Creating: OK" << endl;
 }
 	
 

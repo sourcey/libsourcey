@@ -141,15 +141,19 @@ void AudioCapture::stop()
 	Log("trace") << "[AudioCapture:" << this << "] Stopping" << endl;
 
 	if (isRunning()) {
+		Log("trace") << "[AudioCapture:" << this << "] Stopping 0" << endl;
 		try {
 			FastMutex::ScopedLock lock(_mutex);
+		Log("trace") << "[AudioCapture:" << this << "] Stopping 1" << endl;
 			_audio.stopStream();
 			Log("trace") << "[AudioCapture:" << this << "] Stopping: OK" << endl;
 		}
 		catch (RtError& e) {
+		Log("trace") << "[AudioCapture:" << this << "] Stopping 2" << endl;
 			setError("Failed to stop audio capture: " + e.getMessage());
 		}
 		catch (...) {
+		Log("trace") << "[AudioCapture:" << this << "] Stopping 3" << endl;
 			setError("Failed to stop audio capture.");
 		}
 	}

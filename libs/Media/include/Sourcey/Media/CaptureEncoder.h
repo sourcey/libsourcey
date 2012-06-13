@@ -55,7 +55,7 @@ class CaptureEncoder: public IStartable, public EncoderT
 	/// NOTE: This class is depreciated.
 {
 public:
-	CaptureEncoder(ICapture* capture, const EncoderParams& params, bool destroyOnStop = false) : 
+	CaptureEncoder(ICapture* capture, const EncoderOptions& options, bool destroyOnStop = false) : 
 		EncoderT(params),
 		_capture(capture),
 		_destroyOnStop(destroyOnStop)

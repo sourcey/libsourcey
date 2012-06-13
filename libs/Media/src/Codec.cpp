@@ -251,13 +251,13 @@ void AudioCodec::print(std::ostream& ost)
 //
 VideoCodec::VideoCodec() : 
 	Codec(id, name, DEFAULT_VIDEO_SAMPLE_RATE, DEFAULT_VIDEO_BIT_RATE, false), 
-	width(0), height(0), fps(0) 
+	width(0), height(0), fps(0), pixfmt(PixelFormat::YUV420P) 
 {
 }
 
 
-VideoCodec::VideoCodec(UInt32 id, const string& name, int width, int height, double fps, int sampleRate, int bitRate) : 
-	Codec(id, name, sampleRate, bitRate, true), width(width), height(height), fps(fps) 
+VideoCodec::VideoCodec(UInt32 id, const string& name, int width, int height, double fps, int sampleRate, int bitRate, PixelFormat::ID pixfmt) : 
+	Codec(id, name, sampleRate, bitRate, true), width(width), height(height), fps(fps), pixfmt(pixfmt) 
 {
 }
 

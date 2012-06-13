@@ -179,8 +179,19 @@ void Timer::run()
 
 				// Re-sort callbacks and update our next callback event.
 				if (!_callbacks.empty()) {
-					_scheduleAt = _callbacks.front()->scheduleAt();
 					sort(_callbacks.begin(), _callbacks.end(), CompareTimeout);
+					_scheduleAt = _callbacks.front()->scheduleAt();
+					
+					/*
+					Log("trace") << "[Timer:" << this << "] Printing Sorted Callbacks" << endl;
+					TimerCallbackList::iterator it = _callbacks.begin();
+					while (it != _callbacks.end()) {
+						Log("trace") << "[Timer:" << this << "] Callback: " 
+							<< (*it)->object() << ": " 
+							<< (*it)->scheduleAt().remaining() << endl;
+						++it;
+					}
+					*/
 				}	
 			}
 		//}

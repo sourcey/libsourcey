@@ -44,7 +44,7 @@ class TCPPacketStreamConnection: public Poco::Net::TCPServerConnection, public I
 public:
 	TCPPacketStreamConnection(PacketStream* stream, 
 							  const Poco::Net::StreamSocket& socket, 
-							  bool closeDisconnect = true, 
+							  //bool closeDisconnect = true, 
 							  bool resetOnConnect = true);
 	virtual ~TCPPacketStreamConnection();
 
@@ -64,7 +64,7 @@ protected:
 	PacketStream*	_stream;
 	Poco::Event		_stop;
 	bool			_resetOnConnect;
-	bool			_closeDisconnect;
+	//bool			_closeOnDisconnect;
 	mutable Poco::FastMutex _mutex;
 };
 

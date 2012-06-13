@@ -52,7 +52,7 @@ class ImageEncoder: public IPacketEncoder
 	//
 {
 public:		
-	ImageEncoder(EncoderParams& params, std::vector<int> cvParams = std::vector<int>());
+	ImageEncoder(EncoderOptions& options, std::vector<int> cvParams = std::vector<int>());
 	virtual ~ImageEncoder();
 	
 	virtual void initialize();
@@ -61,12 +61,12 @@ public:
 	virtual bool accepts(IPacket& packet);
 	virtual void process(IPacket& packet);
 	
-	virtual EncoderParams& params();
+	virtual EncoderOptions& options();
 
 private:
 	std::string _extension;
-    EncoderParams _params;
-    std::vector<int> _cvParams;
+    EncoderOptions _options;
+    std::vector<int> _params;
 };
 
 

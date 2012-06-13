@@ -56,7 +56,7 @@ class AVEncoder: public IPacketEncoder
 	/// which  depends on libavcodec/libavformat.
 {
 public:
-	AVEncoder(const RecorderParams& params);
+	AVEncoder(const RecorderOptions& options);
 	AVEncoder();
 	virtual ~AVEncoder();
 
@@ -68,11 +68,7 @@ public:
 
 	virtual bool encodeAudio(unsigned char* buffer, int bufferSize);
 	virtual bool encodeVideo(unsigned char* buffer, int bufferSize, int width, int height);
-
-	void setParams(const RecorderParams& params) { _params = params; };
-	RecorderParams& params() { return _params; };
-	
-	std::ofstream _file;
+	RecorderOptions& options(); // { return _options; };
 
 protected:			
 	virtual void onStreamStateChange(const PacketStreamState& state);
@@ -80,7 +76,7 @@ protected:
 protected:
 	static Poco::FastMutex _mutex; // Protects avcodec_open/close()
 
-	RecorderParams	_params;	
+	RecorderOptions	_options;	
 	FPSCounter		_fpsCounter;
 	AVFormatContext* _formatCtx;
 	clock_t			_startTime;

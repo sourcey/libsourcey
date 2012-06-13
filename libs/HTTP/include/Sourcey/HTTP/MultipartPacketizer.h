@@ -50,6 +50,12 @@ public:
 		_base64(base64),
 		_initial(true)
 	{
+		Log("trace") << "[MultipartPacketizer:" << this << "] Creating" << std::endl;
+	}
+	
+	virtual ~MultipartPacketizer() 
+	{
+		Log("trace") << "[MultipartPacketizer:" << this << "] Destroying" << std::endl;
 	}
 	
 	virtual void writeInitialHTTPHeaders(std::ostringstream& ost)
@@ -77,6 +83,8 @@ public:
 
 	virtual void process(IPacket& packet)
 	{		
+		Log("trace") << "[MultipartPacketizer:" << this << "] Processing" << std::endl;
+
 		std::ostringstream header;
 
 		// Write the initial HTTP response header		
@@ -92,13 +100,15 @@ public:
 		
 		if (!_dontFragment) {
 
-			// Broadcast the HTTP header as a seperate packet
+			// Broadcast the HTTP header as a separate packet
 			// so we don't need to copy packet data.
 			std::string httpData(header.str());
 			DataPacket httpHeader((unsigned char*)httpData.data(), httpData.size());
+			Log("trace") << "[MultipartPacketizer:" << this << "] Dispatching" << std::endl;
 			dispatch(this, httpHeader);
 
 			// Proxy the input packet.
+			Log("trace") << "[MultipartPacketizer:" << this << "] Dispatching 1" << std::endl;
 			dispatch(this, packet);
 		}
 		else {
@@ -115,6 +125,8 @@ public:
 			opacket.read(obuf);
 			dispatch(this, opacket);
 		}
+
+		Log("trace") << "[MultipartPacketizer:" << this << "] Processing: OK" << std::endl;
 	}
 
 protected:
