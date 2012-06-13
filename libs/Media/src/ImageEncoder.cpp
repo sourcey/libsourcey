@@ -40,15 +40,15 @@ namespace Sourcey {
 namespace Media {
 
 
-ImageEncoder::ImageEncoder(EncoderParams& params, vector<int> cvParams) : 
-	_params(params),
-	_cvParams(cvParams)
+ImageEncoder::ImageEncoder(EncoderOptions& options, vector<int> cvParams) : 
+	_options(options),
+	_params(cvParams)
 {	
 	Log("debug") << "[ImageEncoder" << this << "] Creating" << endl;
 
-	if (_params.oformat.id == Format::MJPEG)
+	if (_options.oformat.id == Format::MJPEG)
 		_extension = ".jpg";
-	else if (_params.oformat.id == Format::MPNG)
+	else if (_options.oformat.id == Format::MPNG)
 		_extension = ".png";
 	else 
 		// TODO: support more!
@@ -82,11 +82,11 @@ void ImageEncoder::process(IPacket& packet)
 { 
 	//Log("trace") << "[ImageEncoder:" << this <<"] Processing" << endl;
 
-	Media::VideoPacket* vpacket = dynamic_cast<Media::VideoPacket*>(&packet);
-	if (!vpacket) {
-		dispatch(this, packet);
-		return;
-	}
+	Media::VideoPacket* vpacket = reinterpret_cast<Media::VideoPacket*>(&packet);
+	//if (!vpacket) {
+	//	dispatch(this, packet);
+	//	return;
+	//}
 	
 	if (!vpacket->mat)
 		throw Exception("Video packets must contain an OpenCV image.");
@@ -96,28 +96,27 @@ void ImageEncoder::process(IPacket& packet)
 	// FIXME: If the video capture is stopped before
 	// this callback completes our Mat is corrupted.
 	cv::Mat& source = *vpacket->mat;
-	if (source.cols != _params.oformat.video.width &&
-		source.rows != _params.oformat.video.height) {
+	if (source.cols != _options.oformat.video.width &&
+		source.rows != _options.oformat.video.height) {
 		cv::Mat resized;
-		cv::resize(source, resized, cv::Size(_params.oformat.video.width, _params.oformat.video.height));
-		cv::imencode(_extension, resized, buffer, _cvParams);
+		cv::resize(source, resized, cv::Size(_options.oformat.video.width, _options.oformat.video.height));
+		cv::imencode(_extension, resized, buffer, _params);
 	}
 	else		
-		cv::imencode(_extension, source, buffer, _cvParams);
+		cv::imencode(_extension, source, buffer, _params);
 	
 	vpacket->setData(&buffer[0]);
 	vpacket->setSize(buffer.size());
 	
 	//Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << vpacket << endl;
-	//_fps.tick();
 	dispatch(this, *vpacket);
 	//Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: OK: " << vpacket << endl;
 }
 
 	
-EncoderParams& ImageEncoder::params()
+EncoderOptions& ImageEncoder::options()
 {
-	return _params;
+	return _options;
 }
 
 

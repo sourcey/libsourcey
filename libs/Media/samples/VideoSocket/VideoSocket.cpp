@@ -128,9 +128,9 @@ Format MP4 = Format("MP4", Format::MP4,
 class MediaConnection: public TCPServerConnection
 {
 public:
-	MediaConnection(const StreamSocket& sock, const Media::RecorderParams& params, 
+	MediaConnection(const StreamSocket& sock, const RecorderOptions& options, 
 		VideoCapture* videoCapture = NULL, AudioCapture* audioCapture = NULL) : 
-		TCPServerConnection(sock), params(params), encoder(NULL), 
+		TCPServerConnection(sock), options(options), encoder(NULL), 
 		videoCapture(videoCapture), audioCapture(audioCapture)
 	{		
 		Log("trace") << "[MediaConnection] Creating" << endl;
@@ -147,32 +147,31 @@ public:
 		{
 			Log("trace") << "[MediaConnection] Running" << endl;
 						
-			//params.oformat.video.enabled = false;
-			if (params.oformat.video.enabled && videoCapture)
+			//options.oformat.video.enabled = false;
+			if (options.oformat.video.enabled && videoCapture)
 				stream.attach(videoCapture, false);
-			//params.oformat.audio.enabled = false;
-			if (params.oformat.audio.enabled && audioCapture)
+			//options.oformat.audio.enabled = false;
+			if (options.oformat.audio.enabled && audioCapture)
 				stream.attach(audioCapture, true);			
 
-			//params.iformat.video.pixfmt = (Sourcey::Media::PixelFormat::ID)PIX_FMT_GRAY8; 
+			//options.iformat.video.pixfmt = (Sourcey::PixelFormat::ID)PIX_FMT_GRAY8; 
 			//MotionDetector* detector = new MotionDetector();
 			//stream.attach(detector, 3, true);			
 		
-			//params.oformat.video.bitRate = 10000000;
+			//options.oformat.video.bitRate = 10000000;
 
 			// init encoder				
-			encoder = new AVEncoder();
-			encoder->setParams(params);
+			encoder = new AVEncoder(options);
 			encoder->initialize();
 			stream.attach(encoder, 5, true);				
 			
-			if (params.oformat.label == "MJPEG") {
-				HTTP::MultipartPacketizer* packetizer = new HTTP::MultipartPacketizer("image/jpeg");
+			if (options.oformat.label == "MJPEG") {
+				HTTP::MultipartPacketizer* packetizer = new HTTP::MultipartPacketizer("image/jpeg", false);
 				stream.attach(packetizer, 10, true);
 			}
 			/*
-			else if (params.oformat.label == "FLV") {
-				FLVMetadataInjector* injector = new FLVMetadataInjector(params.oformat);
+			else if (options.oformat.label == "FLV") {
+				FLVMetadataInjector* injector = new FLVMetadataInjector(options.oformat);
 				stream.attach(injector, 10);
 			}
 			*/
@@ -213,7 +212,7 @@ public:
 		}
 	}
 	
-	Media::RecorderParams params;
+	RecorderOptions options;
 	VideoCapture* videoCapture;
 	AudioCapture* audioCapture;
 	Poco::Event _stop;
@@ -260,32 +259,31 @@ public:
 				return new FlashPolicyRequestHandler(sock);
 			}
 			
-			Media::RecorderParams params;
-			//params.ofile = "test1.flv";
-			//params.stopAt = time(0) + 3;
+			RecorderOptions options;
+			//options.ofile = "test1.flv";
+			//options.stopAt = time(0) + 3;
 
 			if ((request.find("mjpeg") != string::npos))
-				params.oformat = MJPEG;
+				options.oformat = MJPEG;
 			
 			else if ((request.find("flv") != string::npos))
-				params.oformat = FLVNoAudio; //FLVH264NoAudio; //FLVSpeex16000NoVideo; //FLVNoAudio; //FLVSpeex16000NoVideo; //FLVH264AAC; //FLVNellyMoser11025; //FLVAAC; //FLVSpeex16000; //FLVMP3; //NoVideo; //FLVNellyMoser11025; //NoVideo; //FLVMP3; //FLVSpeex16000NoVideo; //FLVSpeex16000; //FLVNoAudio; //
+				options.oformat = FLVNoAudio; //FLVH264NoAudio; //FLVSpeex16000NoVideo; //FLVNoAudio; //FLVSpeex16000NoVideo; //FLVH264AAC; //FLVNellyMoser11025; //FLVAAC; //FLVSpeex16000; //FLVMP3; //NoVideo; //FLVNellyMoser11025; //NoVideo; //FLVMP3; //FLVSpeex16000NoVideo; //FLVSpeex16000; //FLVNoAudio; //
 			
 			else 
 				throw Exception("No format specified");
 			
 			VideoCapture* videoCapture = NULL;
 			AudioCapture* audioCapture = NULL;
-			if (params.oformat.video.enabled) {
+			if (options.oformat.video.enabled) {
 				videoCapture = MediaFactory::instance()->video.getCapture(0);
-				AllocateOpenCVInputFormat(videoCapture, params.iformat);	
+				AllocateOpenCVInputFormat(videoCapture, options.iformat);	
 			}
-			if (params.oformat.audio.enabled)
+			if (options.oformat.audio.enabled)
 				audioCapture = MediaFactory::instance()->audio.getCapture(0, 
-					params.oformat.audio.channels, 
-					params.oformat.audio.sampleRate);
+					options.oformat.audio.channels, 
+					options.oformat.audio.sampleRate);
 
-			return new MediaConnection(socket, params, videoCapture, audioCapture);
-			
+			return new MediaConnection(socket, options, videoCapture, audioCapture);			
 		}
 		catch (Exception& exc)
 		{
@@ -335,7 +333,7 @@ public:
 	~StreamTest() 
 	{
 		Log("trace") << "[StreamTest] Destroying" << endl;
-		stream.stop();
+		//stream.stop();
 		//delete encoder;
 	}
 			
@@ -345,14 +343,14 @@ public:
 		{
 			Log("trace") << "[StreamTest] Running" << endl;			
 
-			Media::RecorderParams params;
-			params.ofile = "enctest.mp4";
-			//params.stopAt = time(0) + 3;
-			//AllocateOpenCVInputFormat(videoCapture, params.iformat);	
-			params.oformat = MP4; //FLVSpeex16000; //MP344100; //FLVMP3; //
+			RecorderOptions options;
+			//options.ofile = "enctest.mp4";
+			//options.stopAt = time(0) + 3;
+			//AllocateOpenCVInputFormat(videoCapture, options.iformat);	
+			options.oformat = MP4; //FLVSpeex16000; //MP344100; //FLVMP3; //
 
 			/*
-			params.oformat = Format("FLV", Format::FLV, 
+			options.oformat = Format("FLV", Format::FLV, 
 				VideoCodec(Codec::FLV, "FLV", 320, 240, 20),
 				//AudioCodec(Codec::NellyMoser, "NellyMoser", 1, 11025)
 				//AudioCodec(Codec::Speex, "Speex", 1, 16000)//,
@@ -362,21 +360,22 @@ public:
 			
 			VideoCapture* videoCapture = NULL;
 			AudioCapture* audioCapture = NULL;
-			if (params.oformat.video.enabled) {
+			if (options.oformat.video.enabled) {
 				videoCapture = MediaFactory::instance()->video.getCapture(0);
-				AllocateOpenCVInputFormat(videoCapture, params.iformat);	
-				assert(params.iformat.video.width);
+				AllocateOpenCVInputFormat(videoCapture, options.iformat);	
+				assert(options.iformat.video.width);
 				stream.attach(videoCapture, false);
 			}
-			if (params.oformat.audio.enabled) {
+			options.oformat.audio.enabled = false;
+			if (options.oformat.audio.enabled) {
 				audioCapture = MediaFactory::instance()->audio.getCapture(0, 
-					params.oformat.audio.channels, 
-					params.oformat.audio.sampleRate);
+					options.oformat.audio.channels, 
+					options.oformat.audio.sampleRate);
 				stream.attach(audioCapture, true);
 			}
 
 			/*
-			params.oformat = Format("FLV", Format::FLV,
+			options.oformat = Format("FLV", Format::FLV,
 				//VideoCodec(Codec::MPEG4, "MPEG4", 640, 480, 25), 
 				//VideoCodec(Codec::H264, "H264", 640, 480, 25), 
 				VideoCodec(Codec::FLV, "FLV", 640, 480, 25), 
@@ -386,28 +385,28 @@ public:
 				//AudioCodec(Codec::AAC, "AAC", 2, 44100)
 				AudioCodec(Codec::AAC, "AAC", 1, 11025)
 			);
-			params.oformat = Format("MJPEG", Format::MJPEG, VideoCodec(Codec::MJPEG, "MJPEG", 640, 480, 25));
-			//params.oformat = Format("FLV", Format::FLV, VideoCodec(Codec::H264, "H264", 400, 300, 25));	
-			//params.oformat = Format("FLV", Format::FLV, VideoCodec(Codec::FLV, "FLV", 640, 480, 100));	
-			//params.oformat = Format("FLV", Format::FLV, VideoCodec(Codec::FLV, "FLV", 320, 240, 15));	
-			//params.oformat = Format("FLV", Format::FLV, VideoCodec(Codec::H264, "H264", 400, 300, 25));	
-			//params.oformat = Format("MP4", Format::MP4, VideoCodec(Codec::H264, "H264", 400, 300, 25));
+			options.oformat = Format("MJPEG", Format::MJPEG, VideoCodec(Codec::MJPEG, "MJPEG", 640, 480, 25));
+			//options.oformat = Format("FLV", Format::FLV, VideoCodec(Codec::H264, "H264", 400, 300, 25));	
+			//options.oformat = Format("FLV", Format::FLV, VideoCodec(Codec::FLV, "FLV", 640, 480, 100));	
+			//options.oformat = Format("FLV", Format::FLV, VideoCodec(Codec::FLV, "FLV", 320, 240, 15));	
+			//options.oformat = Format("FLV", Format::FLV, VideoCodec(Codec::H264, "H264", 400, 300, 25));	
+			//options.oformat = Format("MP4", Format::MP4, VideoCodec(Codec::H264, "H264", 400, 300, 25));
 			*/
 			
 			//videoCapture += videoDelegate(this, &StreamTest::onVideoEncoded);
 
-			//params.iformat.video.pixfmt = (Sourcey::Media::PixelFormat::ID)PIX_FMT_GRAY8; //PIX_FMT_BGR8; //PIX_FMT_BGR32 // PIX_FMT_BGR32
+			//options.iformat.video.pixfmt = (Sourcey::PixelFormat::ID)PIX_FMT_GRAY8; //PIX_FMT_BGR8; //PIX_FMT_BGR32 // PIX_FMT_BGR32
 			//MotionDetector* detector = new MotionDetector();
 			//detector->setVideoCapture(videoCapture);
 			//stream.attach(detector, true);		
 			
 				
-			//vector<int> cvparams = vector<int>(2);
-			//cvparams[0] = CV_IMWRITE_JPEG_QUALITY;
-			//cvparams[1] = 95;	// default 95 [0-100]
-			//encoder = new ImageEncoder(session->params(), params);
+			//vector<int> cvoptions = vector<int>(2);
+			//cvoptions[0] = CV_IMWRITE_JPEG_QUALITY;
+			//cvoptions[1] = 95;	// default 95 [0-100]
+			//encoder = new ImageEncoder(session->options(), options);
 
-			//stream.attach(new ImageEncoder(params, cvparams), 20, true);	
+			//stream.attach(new ImageEncoder(options, cvoptions), 20, true);	
 			//stream.attach(videoCapture, false);
 			
 			//stream += packetDelegate(this, &StreamTest::onVideoPacket);
@@ -416,15 +415,14 @@ public:
 			//stream -= videoDelegate(this, &StreamTest::onVideoPacket);
 		
 			// init encoder				
-			encoder = new AVEncoder();
-			encoder->setParams(params);
+			encoder = new AVEncoder(options);
 			encoder->initialize();
 			stream.attach(encoder, 5, true);				
 				
 			//HTTP::MultipartPacketizer* packetizer = new HTTP::MultipartPacketizer("image/jpeg");
 			//stream.attach(packetizer, 10);
 
-			//FLVMetadataInjector* injector = new FLVMetadataInjector(params.oformat);
+			//FLVMetadataInjector* injector = new FLVMetadataInjector(options.oformat);
 			//stream.attach(injector);
 			
 			// attach delegates
@@ -433,6 +431,7 @@ public:
 			// start the stream
 			stream.start();
 				
+			system("pause");
 			//while (!stop)
 			//{
 			//	Thread::sleep(50);
@@ -454,7 +453,8 @@ public:
 		Log("trace") << "[MediaConnection] Video Encoded" << endl;
 
 		fpsCounter.tick();
-
+		
+		/*
 		//Log("trace") << "[MediaConnection] Sending Packet: " << packet.size << ": " << fpsCounter.fps << endl;
 		//Log("trace") << "[MediaConnection] Sending Packet: " << string((const char*)packet.data, 50) << endl;
 		
@@ -467,7 +467,6 @@ public:
 			//encoder->uninitialize();
 		}
 		
-		/*
 		StreamSocket& ss = socket();
 		try
 		{		
@@ -552,17 +551,21 @@ int main(int argc, char** argv)
 	audioCapture = NULL;		
 	*/
 
-	Media::MediaFactory::initialize();
-	Media::MediaFactory::instance()->loadVideo();
-	Media::MediaFactory::instance()->loadAudio();
+	MediaFactory::initialize();
+	MediaFactory::instance()->loadVideo();
+	MediaFactory::instance()->loadAudio();
 	
-	MediaServer srv(328);
-	srv.start();
-	system("pause");
+	{
+		StreamTest test;
+		test.run();
+		system("pause");
+	}
+
+	MediaFactory::uninitialize();
 
 	/*	
-	StreamTest test;
-	test.run();
+	MediaServer srv(328);
+	srv.start();
 	system("pause");
 	{
 		StreamTest test;

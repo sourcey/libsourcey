@@ -186,7 +186,7 @@ protected:
 	mutable Poco::FastMutex	_mutex;
 
 	std::string _name;
-	//Poco::Event _ready;
+	Poco::Event _processing;
 	PacketAdapterList _sources;
 	PacketAdapterList _processors;
 	void* _clientData;

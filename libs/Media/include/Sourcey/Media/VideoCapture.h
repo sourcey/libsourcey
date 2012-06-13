@@ -94,19 +94,23 @@ public:
 	virtual void attach(const PacketDelegateBase& delegate);
 	virtual void detach(const PacketDelegateBase& delegate);
 	
-	virtual cv::Mat getFrame(int width = 0, int height = 0);
+	virtual void getFrame(cv::Mat& frame, int width = 0, int height = 0);
 	
 	virtual bool isOpened() const;
 	virtual bool isRunning() const;
 
 	virtual int deviceId() const;
 	virtual std::string	filename() const;
+	virtual std::string	name() const;
 	virtual int width() const;
 	virtual int height() const;
 	virtual double fps() const;
 
 protected:	
-	virtual bool checkDevice();
+	virtual bool open();
+	virtual void release();
+	virtual void grab();
+	virtual bool check();	
 	virtual void run();
 
 private:   

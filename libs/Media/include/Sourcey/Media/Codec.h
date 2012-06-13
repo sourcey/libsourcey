@@ -170,7 +170,8 @@ struct VideoCodec: public Codec
 	VideoCodec(UInt32 id, const std::string& name, 
 		int width = 0, int height = 0, double fps = 20, 
 		int bitRate = DEFAULT_VIDEO_BIT_RATE, 
-		int sampleRate = DEFAULT_VIDEO_SAMPLE_RATE);		
+		int sampleRate = DEFAULT_VIDEO_SAMPLE_RATE, 
+		PixelFormat::ID pixfmt = PixelFormat::YUV420P);		
 	VideoCodec(const VideoCodec& r);
 
 	virtual std::string toString() const;

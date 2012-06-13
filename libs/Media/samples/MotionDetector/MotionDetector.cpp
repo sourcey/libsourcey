@@ -33,8 +33,13 @@ class MotionDetectorStream: public PacketStream
 public:
 	MotionDetectorStream()
 	{	
-		VideoCapture* videoCapture = MediaFactory::instance()->video.getCapture(0);		//new VideoCapture(0); //
-		attach(videoCapture, false);
+
+		VideoCapture* video = MediaFactory::instance()->video.getCapture(0);		//new VideoCapture(0); //
+		attach(video, false);
+
+		Format format;
+		AllocateOpenCVInputFormat(video, format);
+		assert(format.video.width && format.video.height);
 		
 		MotionDetector::Options options;
 		MotionDetector* detector = new MotionDetector(options);
@@ -70,13 +75,11 @@ int main(int argc, char** argv)
 
 	MotionDetectorStream test;
 	test.start();
-	MotionDetectorStream test1;
-	test1.start();
 	/*
-	
+	MotionDetectorStream test1;
+	test1.start();	
 	MotionDetectorStream test2;
 	test2.start();
-
 	*/
 	system("pause");
 
