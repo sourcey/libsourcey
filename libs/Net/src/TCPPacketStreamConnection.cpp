@@ -115,7 +115,7 @@ int TCPPacketStreamConnection::send(const char* data, size_t size)
 		int index = 0;
 		int read = 0;
 		while (index < size) {		
-			read = min(size - read, MAX_TCP_PACKET_SIZE);
+			read = min<int>(size - read, MAX_TCP_PACKET_SIZE);
 			/*
 			Log("trace") << "Splitting Oversize Data Packet: " 
 				<< "\n\tCurrent Index: " << index

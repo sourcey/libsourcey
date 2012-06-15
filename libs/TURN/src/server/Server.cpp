@@ -654,12 +654,12 @@ Net::Reactor& Server::reactor()
 }
 
 
-/*
 Runner& Server::runner()
 {
 	FastMutex::ScopedLock lock(_mutex);
 	return _runner;
 }
+/*
 */
 
 

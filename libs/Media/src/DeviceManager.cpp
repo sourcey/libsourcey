@@ -350,7 +350,7 @@ bool DeviceManager::shouldDeviceBeIgnored(const string& deviceName, const char* 
 
 	int i = 0;
 	while (exclusionList[i]) {
-		if (strnicmp(deviceName.c_str(), exclusionList[i],
+		if (strncasecmp(deviceName.c_str(), exclusionList[i],
 			strlen(exclusionList[i])) == 0) {
 				Log("info") << "Ignoring device " << deviceName << endl;
 				return true;

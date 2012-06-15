@@ -80,14 +80,43 @@ macro(find_component _module _component _pkgconfig _library _header)
      # in the FIND_PATH() and FIND_LIBRARY() calls
      find_package(PkgConfig)
      if (PKG_CONFIG_FOUND)
-       pkg_check_modules(PC_${_component} ${_pkgconfig})
+        set(ALIAS               ALIASOF_${_pkgconfig})
+        set(ALIAS_FOUND                 ${ALIAS}_FOUND)
+        set(ALIAS_INCLUDE_DIRS   ${ALIAS}_INCLUDE_DIRS)
+        set(ALIAS_LIBRARY_DIRS   ${ALIAS}_LIBRARY_DIRS)
+        set(ALIAS_LIBRARIES         ${ALIAS}_LIBRARIES)
+
+        #pkg_check_modules(PC_${_component} ${_pkgconfig})
+        PKG_CHECK_MODULES(${ALIAS} ${_pkgconfig})
+
+        if(${ALIAS_FOUND})
+          #set(${define} 1)
+          foreach(P "${ALIAS_INCLUDE_DIRS}")
+            if(${P})
+              list(APPEND LibSourcey_INCLUDE_DIRS ${${P}})
+              #message("ALIAS_INCLUDE_DIRS=${${P}}")
+            endif()
+          endforeach()
+
+          foreach(P "${ALIAS_LIBRARY_DIRS}")
+            if(${P})
+              list(APPEND LibSourcey_LIBRARY_DIRS${${P}})
+            endif()
+          endforeach()
+
+          list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${ALIAS_LIBRARIES}})             
+	   #message("ALIAS_LIBRARIES=${${ALIAS_LIBRARIES}}")
+        endif()
      endif()
   endif()
+  
+  message("ALIAS_LIBRARY_DIRS=${${ALIAS_INCLUDE_DIRS}}")
 
   find_path(${_component}_INCLUDE_DIRS ${_header}
     HINTS
-      ${PC_LIB${_component}_INCLUDEDIR}
-      ${PC_LIB${_component}_INCLUDE_DIRS}
+      ${ALIAS_INCLUDE_DIRS}
+	#${PC_LIB${_component}_INCLUDEDIR}
+       #${PC_LIB${_component}_INCLUDE_DIRS}
     #PATH_SUFFIXES
     #  ${{_module}_PATH_SUFFIXES}
     #  ffmpeg
@@ -99,8 +128,9 @@ macro(find_component _module _component _pkgconfig _library _header)
       ${_library}.lib
       ${_library}
     HINTS
-      ${PC_LIB${_component}_LIBDIR}
-      ${PC_LIB${_component}_LIBRARY_DIRS}
+      ${ALIAS_INCLUDE_DIRS}
+      #${PC_LIB${_component}_LIBDIR}
+      #${PC_LIB${_component}_LIBRARY_DIRS}
     PATH_SUFFIXES 
       lib
       bin
@@ -110,7 +140,9 @@ macro(find_component _module _component _pkgconfig _library _header)
   #message("find_component_INCLUDE_DIRS=${${_component}_INCLUDE_DIRS}")
   #message("find_component=lib${_library}.a")
   #message("find_component=${${_component}_INCLUDE_DIRS}")
-  #message("find_component_LIBRARIES=${${_component}_LIBRARIES}")
+  #message("find_component_LIBRARIES=${${_component}_LIBRARIES}")  
+  #message("find_component_PC=${PC_${_component}}")  
+  #message("find_component_PCg=${_pkgconfig}")
   #message("${${_component}_INCLUDE_DIRS}/lib")
   #message("${PC_LIB${_component}_LIBDIR}")
   #message("${PC_LIB${_component}_LIBRARY_DIRS}")

@@ -74,13 +74,13 @@ Format::Format(const Format& r) :
 
 string Format::name() const
 {
-	return idToName(id);
+	return Format::idToName(id);
 }
 
 
 string Format::extension() const
 {
-	string extension(idToName(id));
+	string extension(Format::idToName(id));
 	std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 	return extension;
 }
@@ -88,7 +88,7 @@ string Format::extension() const
 
 string Format::encoderName() const
 {
-	return idToEncoderName(id);
+	return Format::idToEncoderName(id);
 }
 
 

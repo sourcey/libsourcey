@@ -161,7 +161,7 @@ string Address::toString() const
 */
 
 
-bool Address::operator == (Address& r)
+bool Address::operator == (const Address& r)
 {
 	return group() == r.group()
 		&& user() == r.user()

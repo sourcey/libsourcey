@@ -35,6 +35,14 @@
 #include "Config.h"
 
 //
+// Cross platform normalization
+//
+#ifdef WIN32
+#define strncasecmp strnicmp
+#define strcasecmp stricmp
+#endif 
+
+//
 // Pull in basic definitions
 //
 #include "Poco/Foundation.h"

@@ -61,7 +61,7 @@ public:
 	bool valid() const;
 	void print(std::ostream& os) const;
 	
-	bool operator == (Address& r);
+	bool operator == (const Address& r);
 	
     friend std::ostream& operator << (std::ostream& os, const Address& addr)
 	{
