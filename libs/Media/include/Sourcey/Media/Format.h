@@ -124,12 +124,12 @@ struct Format
 	virtual std::string toString() const;
 	virtual void print(std::ostream& ost);
 
-	//static Format::ID toID(const std::string& name);	
+	//static ID toID(const std::string& name);	
 	//static std::string idString(UInt32 id);
 	//static std::string encoderName(UInt32 id);
-	static Format::ID Format::nameToID(const std::string& name);
-	static std::string Format::idToName(UInt32 id);
-	static std::string Format::idToEncoderName(UInt32 id);
+	static ID nameToID(const std::string& name);
+	static std::string idToName(UInt32 id);
+	static std::string idToEncoderName(UInt32 id);
 
 	static bool preferable(const Format& first, const Format& second) {
 		return first.priority > second.priority;

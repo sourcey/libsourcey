@@ -29,7 +29,9 @@
 #define SOURCEY_TimedManager_H
 
 
+#include "Sourcey/Base.h"
 #include "Sourcey/BasicManager.h"
+#include "Sourcey/Logger.h"
 #include "Sourcey/Timer.h"
 
 
@@ -54,7 +56,7 @@ public:
 		/// The item pointer MUST be destroyed by the manager or the 
 		/// application will crash.
 	{
-		Log("trace") << "[TimedManager] Adding: " << item << ": " << timeout << std::endl;
+		//Log("trace") << "[TimedManager] Adding: " << item << ": " << timeout << std::endl;
 
 		// Remove existing items for the
 		// given key and store the item.
@@ -86,7 +88,7 @@ public:
 
 	virtual void onRemove(const TKey& key, TValue* item) 
 	{ 
-		Log("trace") << "[TimedManager] Removing: " << item << std::endl;
+		//Log("trace") << "[TimedManager] Removing: " << item << std::endl;
 		Timer::getDefault().stop(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, 0, 0, item));
 		Base::onRemove(key, item);
 	}
@@ -100,7 +102,7 @@ public:
 	virtual void onItemTimeout(TimerCallback<TimedManager>& timer)
 	{
 		TValue* item = reinterpret_cast<TValue*>(timer.opaque());
-		Log("trace") << "[TimedManager] Item Timeout: " << item << std::endl;
+		//Log("trace") << "[TimedManager] Item Timeout: " << item << std::endl;
 		if (Base::remove(item))
 			delete item;
 	}

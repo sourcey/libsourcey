@@ -71,12 +71,12 @@ public:
 	}
 
 	virtual bool getAudioInputDevices(std::vector<Device>& devs) {
-		*devs = input_devices_;
+		devs = input_devices_;
 		return true;
 	}
 
 	virtual bool getAudioOutputDevices(std::vector<Device>& devs) {
-		*devs = output_devices_;
+		devs = output_devices_;
 		return true;
 	}
 
@@ -92,7 +92,7 @@ public:
 
 	virtual bool getVideoCaptureDevices(std::vector<Device>& devs) 
 	{
-		*devs = vidcap_devices_;
+		devs = vidcap_devices_;
 		return true;
 	}
 
@@ -101,7 +101,7 @@ public:
 		if (vidcap_devices_.empty()) {
 			return false;
 		}
-		*device = vidcap_devices_[0];
+		device = vidcap_devices_[0];
 		return true;
 	}
 
@@ -114,32 +114,36 @@ public:
 	}
 #endif
 
-	void setAudioInputDevices(const std::vector<std::string>& devices) 
+	void setAudioInputDevices(const std::vector<Device>& devices) 
 	{
-		input_devices_.clear();
-		for (size_t i = 0; i < devices.size(); ++i) {
-			input_devices_.push_back(Device(devices[i], i));
-		}
-		SignalDevicesChange();
+		//input_devices_.clear();
+		//for (size_t i = 0; i < devices.size(); ++i) {
+		//	input_devices_.push_back(Device(devices[i], i));
+		//}
+		input_devices_ = devices;
+		//SignalDevicesChange();
 	}
 
-	void setAudioOutputDevices(const std::vector<std::string>& devices) 
+	void setAudioOutputDevices(const std::vector<Device>& devices) 
 	{
-		output_devices_.clear();
-		for (size_t i = 0; i < devices.size(); ++i) {
-			output_devices_.push_back(Device(devices[i], i));
-		}
-		SignalDevicesChange();
+		//output_devices_.clear();
+		//for (size_t i = 0; i < devices.size(); ++i) {
+		//	output_devices_.push_back(Device(devices[i], i));
+		//}		
+		output_devices_ = devices;
+		//SignalDevicesChange();
 	}
 
-	void setVideoCaptureDevices(const std::vector<std::string>& devices)
+	void setVideoCaptureDevices(const std::vector<Device>& devices) 
 	{
-		vidcap_devices_.clear();
-		for (size_t i = 0; i < devices.size(); ++i) {
-			vidcap_devices_.push_back(Device(devices[i], i));
-		}
-		SignalDevicesChange();
+		//vidcap_devices_.clear();
+		//for (size_t i = 0; i < devices.size(); ++i) {
+		//	vidcap_devices_.push_back(Device(devices[i], i));
+		//}		
+		vidcap_devices_ = devices;
+		//SignalDevicesChange();
 	}
+
 
 	virtual bool getVideoCaptureDevice(const std::string& name, Device& out) 
 	{
@@ -148,7 +152,7 @@ public:
 
 			// If the name is empty, return the default device.
 			if (name.empty() || name == kDefaultDeviceName) {
-				*out = vidcap_devices_[0];
+				out = vidcap_devices_[0];
 				return true;
 			}
 
@@ -158,10 +162,10 @@ public:
 	bool getAudioDevice(bool input, const std::string& name, Device& out) 
 	{
 			// If the name is empty, return the default device.
-			if (name.empty() || name == kDefaultDeviceName) {
-				*out = Device(name, -1);
-				return true;
-			}
+			//if (name.empty() || name == kDefaultDeviceName) {
+			//	out = Device(name, -1);
+			//	return true;
+			//}
 
 			return findDeviceByName((input ? input_devices_ : output_devices_),
 				name, out);
@@ -172,7 +176,7 @@ public:
 			for (std::vector<Device>::const_iterator it = devices.begin();
 				it != devices.end(); ++it) {
 					if (name == it->name) {
-						*out = *it;
+						out = *it;
 						return true;
 					}
 			}
@@ -185,7 +189,7 @@ private:
 };
 
 
-}  // namespace cricket
+} } // namespace Sourcey::Media
 
 
 #endif  // SOURCEY_MEDIA_DeviceManager_FAKE_H
