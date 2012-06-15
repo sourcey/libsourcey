@@ -2,7 +2,6 @@
 # See http://sourceforge.net/projects/opencvlibrary/
 #
 # The following variables are optionally searched for defaults
-#  OpenCV_DIR:            Base directory of OpenCv tree to use.
 #  OpenCV_FIND_COMPONENTS : find_package(OpenCV COMPONENTS ..) 
 #    compatible interface. typically  CV CXCORE CVAUX HIGHGUI CVCAM .. etc.
 #
@@ -23,65 +22,8 @@ endif()
 
 
 # ----------------------------------------------------------------------
-# Standard OpenCV installation paths
-# ----------------------------------------------------------------------
-#set (OpenCV_POSSIBLE_ROOT_DIRS
-#  "${OpenCV_DIR}"
-#  "$ENV{OpenCV_ROOT}"
-#  "$ENV{OpenCV_HOME}"
-#  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Intel(R) Open Source Computer Vision Library_is1;Inno Setup: App Path]"
-#  "$ENV{ProgramFiles}/OpenCV/build"
-#  /usr/local
-#  /usr
-#  )
-
-
-# ----------------------------------------------------------------------
-# Find the OpenCV root dir
-# On windows this must be the OpenCV "build" dir
-# ----------------------------------------------------------------------
-#if (NOT OpenCV_DIR)
-#  find_path(OpenCV_DIR 
-#    NAMES 
-#      include/opencv2/core/core.hpp
-#    PATHS
-#      ${OpenCV_POSSIBLE_ROOT_DIRS} 
-#    DOC 
-#      "OpenCV Install Location"
-#    )
-#    
-#  if (NOT OpenCV_DIR)
-#    message(FATAL_ERROR
-#      "Failed to locate OpenCV install path; please specify it manually. Version >= 2.3 is supported.")
-#
-#    return() # Prevent further processing untill we have a root dir
-#  endif()
-#  mark_as_advanced(FORCE OpenCV_DIR)  
-#endif()
-
-
-# ----------------------------------------------------------------------
 # Find OpenCV include directory
 # ----------------------------------------------------------------------
-
-# Header include dir suffixes appended to OpenCV_DIR
-#set(OpenCV_INCDIR_SUFFIXES
-#  include
-#  build/include
-#  ../build/include
-#  )      
-#include/opencv2/core/core.hpp   
- #PATHS
-#  ${OpenCV_POSSIBLE_ROOT_DIRS} 
-  #foreach(directory ${OpenCV_INCDIR_SUFFIXES})
-  #  set(directory "${OpenCV_DIR}/${directory}")
-  #  if (IS_DIRECTORY ${directory})
-  #    set(OpenCV_INCLUDE_DIR ${directory})
-  #    break()
-  #  endif()
-  #endforeach()
-
-
 if (NOT OpenCV_INCLUDE_DIR)
   find_path(OpenCV_INCLUDE_DIR 
     NAMES 
@@ -100,11 +42,6 @@ endif()
 # ----------------------------------------------------------------------
 
 set(OpenCV_LINK_SHARED_LIBS TRUE CACHE BOOL "Link with shared OpenCV libraries (.dll/.so) instead of static ones (.lib/.a)")    
-   
-# Library link dir suffixes appended to OpenCV_DIR 
-#set(OpenCV_LIBDIR_SUFFIXES
-#  lib
-#  )
 
 # OpenCV 2.3 windows installations keep precompiled binaries
 # in a sibling "build" folder adjacent to OpenCV_DIR
@@ -148,9 +85,6 @@ list(GET OpenCV_LIBRARY_VERSION_PARTS 2 OpenCV_VERSION_PATCH)
 # TODO: Optimize the following, it will probably break on some systems
 if (NOT OpenCV_FOUND) #OpenCV_INCLUDE_DIR AND NOT OpenCV_LIBRARY_DIR)
   set(OpenCV_FOUND 0)
-
-  #if(NOT OpenCV_FOUND)
-  #set(OpenCV_LIB_NAMES )
   
   find_path(OpenCV_LIBRARY_DIR 
     NAMES       
@@ -164,22 +98,7 @@ if (NOT OpenCV_FOUND) #OpenCV_INCLUDE_DIR AND NOT OpenCV_LIBRARY_DIR)
     PATHS 
       /usr/lib 
       /usr/local/lib
-    )    
-  
-
-  message(STATUS "############################################## ${OpenCV_INCLUDE_DIR}")  
-  message(STATUS "############################################## ${OpenCV_LIBRARY_DIR}")
-  #message(STATUS "Searching for OpenCV ${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}")
-  #message(STATUS "Found OpenCV library directory: ${OpenCV_LIBRARY_DIR}")
-  # Loop through OpenCV_LIBDIR_SUFFIXES to find the best one
-  #foreach(directory ${OpenCV_LIBDIR_SUFFIXES})
-  #  set(directory "${OpenCV_DIR}/${directory}")
-  #  if (IS_DIRECTORY ${directory})
-                   
-      # Our work here is done
-      #break()
-  #endforeach()
-  
+    )  
   
   if(OpenCV_LIBRARY_DIR)
     set(OpenCV_FOUND 1)    
@@ -193,15 +112,17 @@ if (NOT OpenCV_FOUND) #OpenCV_INCLUDE_DIR AND NOT OpenCV_LIBRARY_DIR)
     
     set(OpenCV_LIBRARIES "")
     foreach(lib ${libraries})
-      get_filename_component(filename ${lib} NAME)        
-      if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)  
-        if (${filename} MATCHES "d.lib$")
-          list(APPEND OpenCV_LIBRARIES "debug" ${filename})
-        else()
-          list(APPEND OpenCV_LIBRARIES "optimized" ${filename})
-        endif()          
-      else()  
-        list(APPEND OpenCV_LIBRARIES ${filename})          
+      get_filename_component(filename ${lib} NAME) 
+      if(${filename} MATCHES "opencv") 
+        if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)  
+          if (${filename} MATCHES "d.lib$")
+            list(APPEND OpenCV_LIBRARIES "debug" ${filename})
+          else()
+            list(APPEND OpenCV_LIBRARIES "optimized" ${filename})
+          endif()          
+        else()  
+          list(APPEND OpenCV_LIBRARIES ${filename})          
+        endif()  
       endif()  
     endforeach()  
     

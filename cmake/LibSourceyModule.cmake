@@ -43,7 +43,7 @@ macro(include_sourcey_modules)
     endif()
     
     if (NOT HAVE_LIBSOURCEY_${name})
-       message(FATAL_ERROR "Unable to include dependent LibSourcey module: ${name}")
+       message(ERROR "Unable to include dependent LibSourcey module: ${name}. The build may fail.")
     endif()
         
     set(lib_name "Sourcey${name}${LibSourcey_DLLVERSION}")
