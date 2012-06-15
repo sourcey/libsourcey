@@ -65,22 +65,14 @@ endif()
 # ----------------------------------------------------------------------
 
 # Header include dir suffixes appended to OpenCV_DIR
-set(OpenCV_INCDIR_SUFFIXES
-  include
-  build/include
-  ../build/include
-  )
-
-if (NOT OpenCV_INCLUDE_DIR)
-  find_path(OpenCV_INCLUDE_DIR 
-    NAMES 
-      #include/opencv2/core/core.hpp
-      opencv2/core/core.hpp
-    #PATHS
-    #  ${OpenCV_POSSIBLE_ROOT_DIRS} 
-    DOC 
-      "OpenCV Include Directory"
-    )
+#set(OpenCV_INCDIR_SUFFIXES
+#  include
+#  build/include
+#  ../build/include
+#  )      
+#include/opencv2/core/core.hpp   
+ #PATHS
+#  ${OpenCV_POSSIBLE_ROOT_DIRS} 
   #foreach(directory ${OpenCV_INCDIR_SUFFIXES})
   #  set(directory "${OpenCV_DIR}/${directory}")
   #  if (IS_DIRECTORY ${directory})
@@ -88,6 +80,18 @@ if (NOT OpenCV_INCLUDE_DIR)
   #    break()
   #  endif()
   #endforeach()
+
+
+if (NOT OpenCV_INCLUDE_DIR)
+  find_path(OpenCV_INCLUDE_DIR 
+    NAMES 
+      opencv2/core/core.hpp
+    DOC 
+      "OpenCV Include Directory"
+    PATHS
+  	/usr/local/include
+  	/usr/include
+    )	
 endif()
 
 
@@ -96,7 +100,7 @@ endif()
 # ----------------------------------------------------------------------
 
 set(OpenCV_LINK_SHARED_LIBS TRUE CACHE BOOL "Link with shared OpenCV libraries (.dll/.so) instead of static ones (.lib/.a)")    
-
+   
 # Library link dir suffixes appended to OpenCV_DIR 
 #set(OpenCV_LIBDIR_SUFFIXES
 #  lib
@@ -130,14 +134,13 @@ set(OpenCV_LINK_SHARED_LIBS TRUE CACHE BOOL "Link with shared OpenCV libraries (
 #  set(OpenCV_LIBDIR_SUFFIXES ${OpenCV_WIN_LIBDIR_SUFFIX} ${OpenCV_LIBDIR_SUFFIXES})
 #endif()
 
-set(OpenCV_LIBRARY_VERSION "2.4.0" CACHE STRING "OpenCV library version.")    
+set(OpenCV_LIBRARY_VERSION "2.4.1" CACHE STRING "OpenCV library version.")    
 string(REGEX MATCHALL "[0-9]" OpenCV_LIBRARY_VERSION_PARTS "${OpenCV_LIBRARY_VERSION}")
 
 list(GET OpenCV_LIBRARY_VERSION_PARTS 0 OpenCV_VERSION_MAJOR)
 list(GET OpenCV_LIBRARY_VERSION_PARTS 1 OpenCV_VERSION_MINOR)
 list(GET OpenCV_LIBRARY_VERSION_PARTS 2 OpenCV_VERSION_PATCH)
-
-    
+ 
 # The reason for including via iteration rather than find_library
 # is so we can remain version agnostic.
 # TODO: Include only specified modules
@@ -145,16 +148,27 @@ list(GET OpenCV_LIBRARY_VERSION_PARTS 2 OpenCV_VERSION_PATCH)
 # TODO: Optimize the following, it will probably break on some systems
 if (NOT OpenCV_FOUND) #OpenCV_INCLUDE_DIR AND NOT OpenCV_LIBRARY_DIR)
   set(OpenCV_FOUND 0)
+
+  #if(NOT OpenCV_FOUND)
+  #set(OpenCV_LIB_NAMES )
   
   find_path(OpenCV_LIBRARY_DIR 
-    NAMES 
-      opencv_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}.a
+    NAMES       
+      opencv_core
+      libopencv_core.a.${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}      
+      libopencv_core.so.${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}
       opencv_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}.lib
       opencv_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}d.lib
     DOC 
-      "OpenCV Library Directory"
+      "OpenCV Library Directory"    
+    PATHS 
+      /usr/lib 
+      /usr/local/lib
     )    
   
+
+  message(STATUS "############################################## ${OpenCV_INCLUDE_DIR}")  
+  message(STATUS "############################################## ${OpenCV_LIBRARY_DIR}")
   #message(STATUS "Searching for OpenCV ${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}")
   #message(STATUS "Found OpenCV library directory: ${OpenCV_LIBRARY_DIR}")
   # Loop through OpenCV_LIBDIR_SUFFIXES to find the best one
