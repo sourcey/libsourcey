@@ -46,5 +46,5 @@ set_target_properties(${the_target} PROPERTIES
     
 #if(NOT BUILD_SHARED_LIBS)
   install(TARGETS ${the_target}
-    ARCHIVE DESTINATION share/LibSourcey/deps/lib COMPONENT main)
+    ARCHIVE DESTINATION ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib COMPONENT main)
 #endif()

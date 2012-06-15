@@ -8,16 +8,17 @@
 #  JsonCpp_LIBRARY
 #
 
-
 # ----------------------------------------------------------------------
 # Find JsonCpp include path
 # ----------------------------------------------------------------------
-FIND_PATH(JsonCpp_INCLUDE_DIR json/json.h
-  ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/jsoncpp/include
-  /usr/local/include
-  /usr/include
+FIND_PATH(JsonCpp_INCLUDE_DIR     
+  NAMES 
+  	json/json.h   
+  PATHS
+  	${LibSourcey_DEPENDENCIES_SOURCE_DIR}/jsoncpp/include
+  	/usr/local/include
+  	/usr/include
 )
-
 
 # ----------------------------------------------------------------------
 # Find JsonCpp library
@@ -63,25 +64,26 @@ if(WIN32 AND MSVC)
 else()
 
   # TODO: jsoncpp lib names for various systems
-  set(JsonCpp_LIB_NAMES "jsoncpp")
+  #set(JsonCpp_LIB_NAMES "jsoncpp")
 
-  if(CMAKE_COMPILER_IS_GNUCXX)
-    # Get the GCC compiler version
-    exec_program(${CMAKE_CXX_COMPILER}
-                 ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
-                 OUTPUT_VARIABLE _gcc_COMPILER_VERSION
-                 OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    set(JsonCpp_LIB_NAMES ${JsonCpp_LIB_NAMES} libjson_linux-gcc-${_gcc_COMPILER_VERSION}_libmt.so)
-  endif()
+  #if(CMAKE_COMPILER_IS_GNUCXX)
+  #  # Get the GCC compiler version
+  #  exec_program(${CMAKE_CXX_COMPILER}
+  #               ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+  #               OUTPUT_VARIABLE _gcc_COMPILER_VERSION
+  #               OUTPUT_STRIP_TRAILING_WHITESPACE)
+  #
+  #  set(JsonCpp_LIB_NAMES ${JsonCpp_LIB_NAMES} libjson_linux-gcc-${_gcc_COMPILER_VERSION}_libmt.so)
+  #endif()
 
   find_library(JsonCpp_LIBRARY 
     NAMES 
-      ${JsonCpp_LIB_NAMES}
+	jsoncpp
+	libjsoncpp
     PATHS 
-      ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
-      /usr/lib 
-      /usr/local/lib
+       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
+       /usr/lib 
+       /usr/local/lib
     )
 
 endif()
@@ -95,8 +97,7 @@ endif()
 
 #get_filename_component(JsonCpp_LIBRARY_DIR "${JsonCpp_LIBRARY}" PATH)
 #get_filename_component(JsonCpp_LIBRARY "${JsonCpp_LIBRARY}" NAME)
-  
-  
+    
 # ----------------------------------------------------------------------
 # Display status
 # ----------------------------------------------------------------------
