@@ -134,8 +134,6 @@ public:
 	virtual void stop();
 		
 	virtual Options& options();
-	//virtual std::string ifile() const;
-	//virtual std::string ofile() const;
 	virtual std::string error() const;
 
 	NullSignal Complete;
@@ -155,15 +153,11 @@ protected:
 	
 	Options _options;
 	std::string	_error;
-	//std::string	_ifile;
-	//std::string	_ofile;
 	std::ofstream _file;
 	AVFileReader _reader;
 	VideoAnalyzer::Stream* _video;
-	VideoAnalyzer::Stream* _audio;
-	
-	AVFrame* _videoGrayFrame;
-	struct SwsContext* _videoConvCtx;
+	VideoAnalyzer::Stream* _audio;	
+	VideoConversionContext* _videoConv;
 };
 
 

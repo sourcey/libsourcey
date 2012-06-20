@@ -32,6 +32,9 @@
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/IEncoder.h"
 
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+
 
 namespace Sourcey {
 namespace Media {

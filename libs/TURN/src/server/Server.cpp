@@ -47,7 +47,7 @@ Server::Server(IServerObserver& observer, Net::Reactor& reactor, Runner& runner,
 	_reactor(reactor),
 	_runner(runner)
 {
-	Log("debug") << "TURN::Server Initializing" << endl;
+	Log("trace") << "TURN Server: Creating" << endl;
 }
 
 
@@ -55,23 +55,22 @@ Server::~Server()
 {
 	////Timer::getDefault().stop(TimerCallback<Server>(this, &ServerAllocation::onTimer));
 	//_socketUDP.detach(packetDelegate<Server, STUN::Message>(this, &Server::onPacketReceived, 1));
-	Log("trace") << "TURN::Server Destroying" << endl;	
+	Log("trace") << "TURN Server: Destroying" << endl;	
 	stop();
 }
 
 
 void Server::start()
 {
-	Log("trace") << "Starting" << endl;	
+	Log("trace") << "TURN Server: Binding" << endl;	
 
 	// Initialize UDP
 	_socketUDP.registerPacketType<STUN::Message>(1);
 	_socketUDP.attach(packetDelegate<Server, STUN::Message>(this, &Server::onPacketReceived, 1));
 	_socketUDP.bind(_options.listenAddr);
 
-	Log("debug") << "TURN::Server Listening on " 
-		<< _socketUDP.address().toString() 
-		<< endl;
+	Log("info") << "TURN Server: Listening on " 
+		<< _socketUDP.address().toString() << endl;
 	
 	// Initialize TCP
 	if (_options.enableTCP) {
@@ -80,20 +79,19 @@ void Server::start()
 	}
 
 	Timer::getDefault().start(TimerCallback<Server>(this, &Server::onTimer, 5000, 5000));
-
 }
 
 
 void Server::stop()
 {
-	Log("trace") << "Stopping" << endl;	
+	Log("trace") << "TURN Server: Stopping" << endl;	
 	Timer::getDefault().stop(TimerCallback<Server>(this, &Server::onTimer));
 }
 
 
 void Server::onTimer(TimerCallback<Server>& timer) 
 {
-	Log("trace") << "On Timer" << endl;	
+	Log("trace") << "TURN Server: On Timer" << endl;	
 
 	ServerAllocationMap allocations = this->allocations();
 	for (ServerAllocationMap::iterator it = allocations.begin(); it != allocations.end(); ++it) {
@@ -105,7 +103,7 @@ void Server::onTimer(TimerCallback<Server>& timer)
 
 void Server::onTCPConnectionCreated(void* sender, Net::TCPSocket* socket)
 {
-	Log("debug") << "TCP Connection Accepted: " << socket->peerAddress() << endl;	
+	Log("debug") << "TURN Server: TCP Connection Accepted: " << socket->peerAddress() << endl;	
 	
 	socket->registerPacketType<STUN::Message>(1);
 	socket->attach(packetDelegate<TURN::Server, STUN::Message>(this, &TURN::Server::onPacketReceived));
@@ -114,7 +112,7 @@ void Server::onTCPConnectionCreated(void* sender, Net::TCPSocket* socket)
 
 void Server::onPacketReceived(void* sender, STUN::Message& message) 
 {
-	Log("debug") << "STUN Packet Received: " << message.toString() << endl;	
+	Log("trace") << "TURN Server: STUN Packet Received: " << message.toString() << endl;	
 
 	assert(message.state() == STUN::Message::Request);
 	
@@ -164,7 +162,7 @@ void Server::onPacketReceived(void* sender, STUN::Message& message)
 
 void Server::handleRequest(const Request& request, AuthenticationState state)
 {	
-	Log("debug") << "STUN Request Received:\n" 
+	Log("debug") << "TURN Server: STUN Request Received:\n" 
 		<< "\tFrom: " << request.remoteAddr.toString() << "\n"
 		<< "\tData: " << request.toString()
 		<< endl;

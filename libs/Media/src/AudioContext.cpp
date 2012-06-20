@@ -58,11 +58,12 @@ void AudioContext::reset()
 {
 	stream = NULL;
 	codec = NULL;
+	frame = NULL;
 		
+	/*
 	bufferSize = 0;
 	buffer = NULL;
 		
-	/*
 	bitRate = -1;
 	sampleRate = -1;
 	bitsPerSample = -1;
@@ -78,11 +79,14 @@ void AudioContext::reset()
 
 void AudioContext::close()
 {
+	if (frame)
+		av_free(frame);
+
 	if (codec)
 		avcodec_close(codec);
 
-    if (buffer)
-        av_free(buffer);
+    //if (buffer)
+    //    av_free(buffer);
 }
 
 
@@ -170,7 +174,7 @@ void AudioEncoderContext::open(AVFormatContext* oc) //, const AudioCodec& params
 	codec->codec_type = AVMEDIA_TYPE_AUDIO;
 	codec->bit_rate = oparams.bitRate;			// 64000	
 	codec->sample_rate = oparams.sampleRate;		// 44100
-	codec->sample_fmt = AV_SAMPLE_FMT_S16;
+	codec->sample_fmt = AV_SAMPLE_FMT_S16;		// NOTE: Add support for floating point format
 	codec->channels = oparams.channels;	 		// 2
 	codec->time_base.num = 1;
 	codec->time_base.den = oparams.sampleRate; //25; //20; //25; //25; //
@@ -178,7 +182,6 @@ void AudioEncoderContext::open(AVFormatContext* oc) //, const AudioCodec& params
 	//codec->bit_rate = 32000; //oparams.bitRate * 1000 / 25; 
 	//codec->bit_rate = oparams.bitRate * 1000 / 25; 
 	//codec->time_base.den = 1000;
-
 
     // Some formats want stream headers to be separate
     if (oc->oformat->flags & AVFMT_GLOBALHEADER)
@@ -190,11 +193,16 @@ void AudioEncoderContext::open(AVFormatContext* oc) //, const AudioCodec& params
 		
 	// NOTE: buffer must be >= AVCODEC_MAX_AUDIO_FRAME_SIZE
 	// or some codecs will fail.
-    bufferSize = AVCODEC_MAX_AUDIO_FRAME_SIZE; //MAX_AUDIO_PACKET_SIZE;
-    buffer = (UInt8*)av_malloc(this->bufferSize);	
+    //bufferSize = AVCODEC_MAX_AUDIO_FRAME_SIZE; //MAX_AUDIO_PACKET_SIZE;
+    //buffer = (UInt8*)av_malloc(this->bufferSize);	
 		
 	// Set the output frame size.
-	frameSize = codec->frame_size * 2 * codec->channels;
+	//frameSize = codec->frame_size * 2 * codec->channels;
+	
+	frame = avcodec_alloc_frame();
+	//av_samples_get_buffer_size(NULL, codec->channels,decoded_frame->nb_samples,c->sample_fmt, 1);
+	
+	//
 
 	/*
 	if (codec->channels == 6)
@@ -230,7 +238,7 @@ void AudioEncoderContext::open(AVFormatContext* oc) //, const AudioCodec& params
 	}
 
 	// Set the encoded output frame size
-	//int outSize = av_get_bits_per_sample_format(codec->sample_fmt)/8;
+	//int frameDecoded = av_get_bits_per_sample_format(codec->sample_fmt)/8;
 	_audioOutSize = codec->frame_size * 2 * codec->channels;
 
 	// The encoder may require a minimum number of raw audio samples for each encoding but we can't
@@ -286,29 +294,273 @@ void AudioEncoderContext::reset()
 }
 
 
-int AudioEncoderContext::encode(unsigned char* buffer, int bufferSize, AVPacket& opacket)
-{	
-	/*
-	Log("trace") << "[AudioEncoderContext:" << this << "] Encoding Audio Packet" << endl;
-	
-			Log("trace") << "Encoding Audio Packet:\n"
-				<< "\n\CODEC_ID_MP2: " << CODEC_ID_MP2
-				<< "\n\CODEC_ID_MP3: " << CODEC_ID_MP3
-				<< "\n\CODEC_ID_AAC: " << CODEC_ID_AAC
-				<< "\n\CODEC_ID_AC3: " << CODEC_ID_AC3
-				<< endl;
-				*/
+bool AudioEncoderContext::encode(UInt8* data, int size, AVPacket& opacket)
+{
+	assert(data);
+	assert(size);
+    AVPacket ipacket;
+    av_init_packet(&ipacket);
+    ipacket.stream_index = stream->index;
+    ipacket.data = data;
+    ipacket.size = size;
+	return encode(ipacket, opacket);
+}
 
-	int len = avcodec_encode_audio(codec, this->buffer, this->bufferSize, (short*)buffer);
+
+bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
+{
+	// Log("trace") << "[AudioEncoderContext:" << this << "] Encoding Audio Packet" << endl;
+
+	assert(ipacket.stream_index == stream->index);
+
+	int frameEncoded = 0;
+	
+	frame->data[0] = ipacket.data;
+
+	int len = avcodec_encode_audio2(codec, &opacket, frame, &frameEncoded);
     if (len < 0) {
 		error = "Encoder error";
 		Log("error") << "[AudioEncoderContext:" << this << "] Encoding Audio: Error: " << error << endl;
 		return -1;
     }
 
-	av_init_packet(&opacket);
+	return frameEncoded;
+}
+
+
+// ---------------------------------------------------------------------
+//
+// Audio Decoder Context
+//
+// ---------------------------------------------------------------------
+AudioDecoderContext::AudioDecoderContext()
+{
+}
+	
+
+AudioDecoderContext::~AudioDecoderContext()
+{
+}
+
+
+void AudioDecoderContext::open(AVFormatContext *ic, int streamID)
+{
+	AudioContext::open();
+	
+	Log("debug") << "[AudioDecoderContext:" << this << "] Opening Audio: " << streamID << endl;
+
+	assert(ic);
+	assert(streamID >= 0);
+	
+    stream = ic->streams[streamID];
+    codec = stream->codec;
+
+    AVCodec* c = avcodec_find_decoder(codec->codec_id);
+    if (c == NULL)
+		throw Exception("The audio codec is missing or unsupported.");
+
+    if (avcodec_open(codec, c) < 0)
+		throw Exception("Could not open the video codec.");
+
+    switch (codec->sample_fmt) {
+    case AV_SAMPLE_FMT_S16:
+        width = 16;
+        fp = false;
+        break;
+    case AV_SAMPLE_FMT_S32:
+        width = 32;
+        fp = false;
+        break;
+    case AV_SAMPLE_FMT_FLT:
+        width = 32;
+        fp = true;
+        break;
+    case AV_SAMPLE_FMT_DBL:
+        width = 64;
+        fp = true;
+        break;
+    default:
+		throw Exception("Unsupported audio sample format.");
+    }
+	
+	frame = avcodec_alloc_frame();
+}
+
+
+void AudioDecoderContext::close()
+{
+	AudioContext::close();
+}
+
+
+	
+void AudioDecoderContext::reset() 
+{
+	AudioContext::reset();
+	
+	duration = 0.0;	
+	width = -1;
+	fp = false;
+}
+
+
+bool AudioDecoderContext::decode(UInt8* data, int size, AVPacket& opacket)
+{
+    AVPacket ipacket;
+    av_init_packet(&ipacket);
+    ipacket.stream_index = stream->index;
+    ipacket.data = data;
+    ipacket.size = size;
+	return decode(ipacket, opacket);
+}
+
+
+bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
+{
+	assert(ipacket.stream_index == stream->index);
+	assert(frame);
+	
+	int frameDecoded = 0;
+	int bytesDecoded = 0;
+	int bytesRemaining = ipacket.size;
+	
+	opacket.data = NULL;
+	opacket.size = 0;
+
+	while (bytesRemaining && !frameDecoded)
+	{
+		avcodec_get_frame_defaults(frame);
+		bytesDecoded = avcodec_decode_audio4(codec, frame, &frameDecoded, &ipacket);		
+		if (bytesDecoded < 0) {
+			Log("error") << "[AudioDecoderContext:" << this << "] Decoder Error" << endl;
+			error = "Decoder error";
+			throw Exception(error);
+		}
+
+		bytesRemaining -= bytesDecoded;
+	}
+
+	if (frameDecoded) {
+		opacket.data = frame->data[0]; //buffer;	
+		opacket.size = av_samples_get_buffer_size(NULL, codec->channels, frame->nb_samples, codec->sample_fmt, 1);		
+		
+		// NOTE: avcodec_decode_audio4 does not seem to set the PTS
+		// for output frame so we just use the input frame PTS value.
+		frame->pts = ipacket.pts;
+		if (frame->pts != AV_NOPTS_VALUE) {
+			opacket.pts = frame->pts;
+			pts = frame->pts;
+			pts *= av_q2d(stream->time_base);
+		}
+
+		/*
+		Log("trace") << "[AudioDecoderContext:" << this << "] Decoded Frame:" 
+			<< "\n\tFrame Size: " << opacket.size
+			<< "\n\tFrame PTS: " << opacket.pts
+			<< "\n\tInput Frame PTS: " << ipacket.pts
+			<< "\n\tNo Frame PTS: " << (frame->pts != AV_NOPTS_VALUE)
+			<< "\n\tDecoder PTS: " << pts
+			<< endl;
+			*/
+
+		return true;
+	}
+
+	return false;
+}
+
+	
+} } // namespace Sourcey::Media
+
+
+		/*	
+		Log("trace") << "[AudioDecoderContext:" << this << "] check frame_size: " << codec->frame_size << endl;
+		Log("trace") << "[AudioDecoderContext:" << this << "] check channels: " << codec->channels << endl;
+		Log("trace") << "[AudioDecoderContext:" << this << "] check size: " << (codec->frame_size * 2 * codec->channels) << endl;
+		Log("trace") << "[AudioDecoderContext:" << this << "] frame->nb_samples: " << frame->nb_samples << endl;		
+		Log("trace") << "[AudioDecoderContext:" << this << "] opacket.size: " << opacket.size << endl;
+	
+		Log("trace") << "[AudioDecoderContext:" << this << "] bytesTotal: " << ipacket.size << endl;
+		Log("trace") << "[AudioDecoderContext:" << this << "] frameDecoded: " << opacket.size << endl;
+		Log("trace") << "[AudioDecoderContext:" << this << "] bytesRemaining: " << bytesRemaining << endl;
+		Log("trace") << "[AudioDecoderContext:" << this << "] bytesDecoded: " << bytesDecoded << endl;
+		Log("trace") << "[AudioDecoderContext:" << this << "] frameDecoded: " << frameDecoded << endl;
+
+		if (ipacket.pts != AV_NOPTS_VALUE) {
+			opacket.pts = ipacket.pts;
+			opacket.pts *= av_q2d(stream->time_base);
+		}	
+		if (ipacket.dts != AV_NOPTS_VALUE) {
+			opacket.dts = ipacket.dts;
+			opacket.dts *= av_q2d(stream->time_base);
+		}
+		*/
+
+	/*
+	int frameDecoded = bufferSize;
+	int len = avcodec_decode_audio3(codec, (int16_t*)buffer, &frameDecoded, &ipacket);
+	if (len < 0) {
+		error = "Decoder error";
+		Log("error") << "[VideoDecoderContext:" << this << "] Decoding Video: Error: " << error << endl;
+		return -1;
+	}
+	//if (len < 0)
+	//	throw Exception("Audio decoder error");
+
+	ipacket.size -= len;
+    ipacket.data += len;
+		
+	//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder DTS: " << ipacket.dts << endl;
+	//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder Time Base: " << stream->time_base.den << endl;
+
+	if (ipacket.pts != AV_NOPTS_VALUE) {
+		pts = ipacket.pts;
+		pts *= av_q2d(stream->time_base);
+	}
+
+	//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder PTS: " << ipacket.pts << endl;
+	//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder PTS 1: " << pts << endl;
+	
+	return frameDecoded;
+	*/
+
+	/*
+	try 
+	{
+	} 
+	catch (Exception& exc) 
+	{
+		error = exc.displayText();
+		Log("error") << "[AudioDecoderContext:" << this << "] Decoder Error: " << error << endl;
+		exc.rethrow();
+	}
+	return -1;
+	*/
+
+
+
 	
 	/*
+
+	//av_init_packet(&opacket);
+	//opacket.data = NULL;
+	//opacket.size = 0;
+
+	if (frameEncoded) {
+		//opacket.data = frame->data[0];	
+		/opacket.size = av_samples_get_buffer_size(NULL, codec->channels, frame->nb_samples, codec->sample_fmt, 1);
+		
+		if (ipacket.pts != AV_NOPTS_VALUE) {
+			opacket.pts = ipacket.pts;
+			opacket.pts *= av_q2d(stream->time_base);
+		}	
+		if (ipacket.dts != AV_NOPTS_VALUE) {
+			opacket.dts = ipacket.dts;
+			opacket.dts *= av_q2d(stream->time_base);
+		}
+
+		return true;
+	}
 	if (frameNum == 0)
 		pts = 0;
 	else
@@ -328,7 +580,6 @@ int AudioEncoderContext::encode(unsigned char* buffer, int bufferSize, AVPacket&
 			<< "\n\stream->time_base num: " << stream->time_base.num
 			//<< "\n\opacket.pts: " << opacket.pts
 			<< endl;
-			*/
 
 	if (codec->coded_frame->key_frame) 
         opacket.flags |= AV_PKT_FLAG_KEY;
@@ -338,6 +589,7 @@ int AudioEncoderContext::encode(unsigned char* buffer, int bufferSize, AVPacket&
 	opacket.size = len;
 	
 	return len;
+			*/
 
 	/*, 
 	//AVPacket packet;
@@ -442,186 +694,3 @@ int AudioEncoderContext::encode(unsigned char* buffer, int bufferSize, AVPacket&
 
 	return true;
 	*/
-}
-
-
-// ---------------------------------------------------------------------
-//
-// Audio Decoder Context
-//
-// ---------------------------------------------------------------------
-AudioDecoderContext::AudioDecoderContext()
-{
-}
-	
-
-AudioDecoderContext::~AudioDecoderContext()
-{
-}
-
-void AudioDecoderContext::open(AVFormatContext *ic, int streamID)
-{
-	AudioContext::open();
-	
-	Log("info") << "[AudioDecoderContext:" << this << "] Opening Audio: " << streamID << endl;
-
-	assert(ic);
-	assert(streamID >= 0);
-	
-    stream = ic->streams[streamID];
-    codec = stream->codec;
-
-    AVCodec* c = avcodec_find_decoder(codec->codec_id);
-    if (c == NULL)
-		throw Exception("The audio codec is missing or unsupported.");
-
-    if (avcodec_open(codec, c) < 0)
-		throw Exception("Could not open the video codec.");
-
-    switch (codec->sample_fmt) {
-    case AV_SAMPLE_FMT_S16:
-        width = 16;
-        fp = false;
-        break;
-    case AV_SAMPLE_FMT_S32:
-        width = 32;
-        fp = false;
-        break;
-    case AV_SAMPLE_FMT_FLT:
-        width = 32;
-        fp = true;
-        break;
-    case AV_SAMPLE_FMT_DBL:
-        width = 64;
-        fp = true;
-        break;
-    default:
-		throw Exception("Unsupported audio sample format.");
-    }
-	
-	// NOTE: buffer must be >= AVCODEC_MAX_AUDIO_FRAME_SIZE
-	// or some codecs will fail.
-    bufferSize = AVCODEC_MAX_AUDIO_FRAME_SIZE; //MAX_AUDIO_PACKET_SIZE;
-    buffer = (UInt8*)av_malloc(bufferSize);
-
-    //packet = (AVPacket*)av_mallocz(sizeof(AVPacket));
-    //av_init_packet(packet);
-    //offset = 0;
-    //return codec;
-}
-
-
-void AudioDecoderContext::close()
-{
-	AudioContext::close();
-}
-
-
-	
-void AudioDecoderContext::reset() 
-{
-	AudioContext::reset();
-	
-	duration = 0.0;	
-	width = -1;
-	fp = false;
-}
-
-
-bool AudioDecoderContext::decode(UInt8* data, int size, AVPacket& opacket)
-{
-    AVPacket ipacket;
-    av_init_packet(&ipacket);
-    ipacket.stream_index = stream->index;
-    ipacket.data = data;
-    ipacket.size = size;
-	return decode(ipacket, opacket);
-}
-
-
-bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
-{
-	assert(ipacket.stream_index == stream->index);
-	
-	int outSize = -1;
-	int bytesRemaining = ipacket.size;
-	int bytesDecoded = 0;
-	
-	opacket.data = NULL;
-	opacket.size = 0;
-
-	while (bytesRemaining > 0 && !outSize)
-	{
-		bytesDecoded = avcodec_decode_audio3(codec, (int16_t*)buffer, &outSize, &ipacket);
-		if (bytesDecoded < 0) {
-			Log("error") << "[AudioDecoderContext:" << this << "] Decoder Error" << endl;
-			error = "Decoder error";
-			throw Exception(error);
-			//return -1;
-		}
-
-		bytesRemaining -= bytesDecoded;
-	}
-
-	if (outSize) {
-		opacket.data = buffer;	
-		opacket.size = outSize;
-		
-		if (ipacket.pts != AV_NOPTS_VALUE) {
-			opacket.pts = ipacket.pts;
-			opacket.pts *= av_q2d(stream->time_base);
-		}	
-		if (ipacket.dts != AV_NOPTS_VALUE) {
-			opacket.dts = ipacket.dts;
-			opacket.dts *= av_q2d(stream->time_base);
-		}
-
-		return true;
-	}
-
-	return false;
-
-	/*
-	int outSize = bufferSize;
-	int len = avcodec_decode_audio3(codec, (int16_t*)buffer, &outSize, &ipacket);
-	if (len < 0) {
-		error = "Decoder error";
-		Log("error") << "[VideoDecoderContext:" << this << "] Decoding Video: Error: " << error << endl;
-		return -1;
-	}
-	//if (len < 0)
-	//	throw Exception("Audio decoder error");
-
-	ipacket.size -= len;
-    ipacket.data += len;
-		
-	//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder DTS: " << ipacket.dts << endl;
-	//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder Time Base: " << stream->time_base.den << endl;
-
-	if (ipacket.pts != AV_NOPTS_VALUE) {
-		pts = ipacket.pts;
-		pts *= av_q2d(stream->time_base);
-	}
-
-	//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder PTS: " << ipacket.pts << endl;
-	//Log("trace") << "[AudioDecoderContext:" << this << "] Decoder PTS 1: " << pts << endl;
-	
-	return outSize;
-	*/
-
-	/*
-	try 
-	{
-	} 
-	catch (Exception& exc) 
-	{
-		error = exc.displayText();
-		Log("error") << "[AudioDecoderContext:" << this << "] Decoder Error: " << error << endl;
-		exc.rethrow();
-	}
-	return -1;
-	*/
-}
-
-	
-} } // namespace Sourcey::Media

@@ -28,15 +28,12 @@
 #ifndef SOURCEY_MEDIA_Types_H
 #define SOURCEY_MEDIA_Types_H
 
-//#include <time.h>
-//#include <sstream>
-//#include <stdint.h>
 
 #include "Sourcey/Media/Config.h"
 #include "Sourcey/IPacket.h"
 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+//#include <opencv/cv.h>
+//#include <opencv/highgui.h>
 
 
 namespace Sourcey {
@@ -73,7 +70,6 @@ struct VideoPacket: public MediaPacket
 {
 	int width;
 	int height;
-	cv::Mat* mat;	// For OpenCV generated packets.
 
 	VideoPacket(unsigned char* data = NULL,
 				int size = 0,
@@ -82,21 +78,12 @@ struct VideoPacket: public MediaPacket
 				double time = 0) : //(double)clock() / CLOCKS_PER_SEC
 		MediaPacket(data, size, time),
 		width(width),
-		height(height),
-		mat(NULL) {};
-
-	VideoPacket(cv::Mat* mat, 
-			    double time = 0) : //(double)clock() / CLOCKS_PER_SEC
-		MediaPacket((unsigned char*)mat->data, mat->total(), time),
-		width(mat->cols),
-		height(mat->rows),
-		mat(mat) {};
+		height(height) {};
 
 	VideoPacket(const VideoPacket& r) : 
 		MediaPacket(r), 
 		width(r.width), 
-		height(r.height), 
-		mat(r.mat) 
+		height(r.height)
 	{
 	}
 

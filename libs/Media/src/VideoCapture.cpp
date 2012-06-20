@@ -268,7 +268,7 @@ void VideoCapture::run()
 			try 
 			{	
 				grab();
-				VideoPacket packet(&_frame);		
+				MatPacket packet(&_frame);		
 				if (!_stop && packet.width && packet.height) {
 					/*
 					Log("trace") << "[VideoCapture:" << this << "] Dispatch: " 
@@ -285,9 +285,18 @@ void VideoCapture::run()
 			} 
 			catch (cv::Exception& exc) 
 			{
-				Log("error") << "[VideoCapture:" << this << "] Error: " << exc.err << endl;
-
+				Log("error") << "[VideoCapture:" << this << "] OpenCV Error: " << exc.err << endl;
 				// TODO: Stop the capture?
+			}
+			catch (Poco::Exception& exc) 
+			{
+				Log("error") << "[VideoCapture:" << this << "] Error: " << exc.displayText() << endl;
+				exc.rethrow();
+			}
+			catch (...) 
+			{
+				Log("error") << "[VideoCapture:" << this << "] Caught Unknown Exception" << endl;
+				throw;
 			}
 		//}
 		

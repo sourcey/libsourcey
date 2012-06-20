@@ -26,6 +26,7 @@
 
 
 #include "Sourcey/Media/ImageEncoder.h"
+#include "Sourcey/Media/VideoCapture.h"
 #include "Sourcey/Logger.h"
 
 #include "assert.h"
@@ -82,20 +83,15 @@ void ImageEncoder::process(IPacket& packet)
 { 
 	//Log("trace") << "[ImageEncoder:" << this <<"] Processing" << endl;
 
-	Media::VideoPacket* vpacket = reinterpret_cast<Media::VideoPacket*>(&packet);
-	//if (!vpacket) {
-	//	dispatch(this, packet);
-	//	return;
-	//}
-	
-	if (!vpacket->mat)
+	MatPacket* mpacket = reinterpret_cast<MatPacket*>(&packet);	
+	if (!mpacket->mat)
 		throw Exception("Video packets must contain an OpenCV image.");
 	
     vector<unsigned char> buffer;
 
 	// FIXME: If the video capture is stopped before
 	// this callback completes our Mat is corrupted.
-	cv::Mat& source = *vpacket->mat;
+	cv::Mat& source = *mpacket->mat;
 	if (source.cols != _options.oformat.video.width &&
 		source.rows != _options.oformat.video.height) {
 		cv::Mat resized;
@@ -105,12 +101,12 @@ void ImageEncoder::process(IPacket& packet)
 	else		
 		cv::imencode(_extension, source, buffer, _params);
 	
-	vpacket->setData(&buffer[0]);
-	vpacket->setSize(buffer.size());
+	mpacket->setData(&buffer[0]);
+	mpacket->setSize(buffer.size());
 	
-	//Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << vpacket << endl;
-	dispatch(this, *vpacket);
-	//Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: OK: " << vpacket << endl;
+	//Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket << endl;
+	dispatch(this, *mpacket);
+	//Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: OK: " << mpacket << endl;
 }
 
 	

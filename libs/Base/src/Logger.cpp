@@ -96,9 +96,10 @@ void LogChannel::format(std::ostream& out, const std::string& message, LogLevel 
 	if (_dateFormat)
 		out << Poco::DateTimeFormatter::format(Poco::Timestamp(), _dateFormat);
 	out << " [" << getStringFromLogLevel(level) << "] ";
-	if (klass)
+	if (klass) {
 		klass->printLog(out);
-	out << " ";
+		out << " ";
+	}
 	out << message;
 	out.flush();
 }
@@ -150,11 +151,85 @@ void ConsoleChannel::write(const string& message, LogLevel level, const ILoggabl
 //
 // ---------------------------------------------------------------------
 FileChannel::FileChannel(const string& name,
-						 const string& dir, 
+						 const string& path, 
 						 LogLevel level, 
-						 const string& extension, 
-						 int rotationInterval, 
 						 const char* dateFormat) : 
+	LogChannel(name, level, dateFormat),
+	_path(path)
+{
+}
+	
+
+FileChannel::~FileChannel() 
+{
+	close();
+}
+
+
+void FileChannel::open() 
+{
+	assert(!_path.empty() && "path must be set");
+	_stream.close();
+	_stream.open(_path.data(), ios::out | ios::app);	
+}
+
+
+void FileChannel::close() 
+{ 
+	_stream.close();
+}
+
+
+void FileChannel::write(const string& message, LogLevel level, const ILoggable* klass) 
+{	
+	if (this->level() > level)
+		return;
+	
+	if (!_stream.is_open())	
+		open();
+	//	_stream = new ofstream(_path.data());
+	
+	ostringstream ss;
+	format(ss, message, level, klass);
+	_stream << ss.str();
+	_stream.flush();
+
+#if defined(_DEBUG) //&& defined(_CONSOLE)
+	cout << ss.str();
+#endif
+#if defined(_DEBUG) && defined(_MSC_VER)
+	std::string s(ss.str());
+	std::wstring temp(s.length(), L' ');
+	std::copy(s.begin(), s.end(), temp.begin());
+	OutputDebugString(temp.data());
+#endif
+}
+
+
+void FileChannel::setPath(const string& path) 
+{ 
+	_path = path; 
+	open();
+}
+
+
+string FileChannel::path() const 
+{ 
+	return _path;
+}
+
+
+// ---------------------------------------------------------------------
+//
+// Rotating File Channel
+//
+// ---------------------------------------------------------------------
+RotatingFileChannel::RotatingFileChannel(const string& name,
+	                                     const string& dir, 
+										 LogLevel level, 
+										 const string& extension, 
+										 int rotationInterval, 
+										 const char* dateFormat) : 
 	LogChannel(name, level, dateFormat),
 	_stream(NULL),
 	_dir(dir),
@@ -166,7 +241,7 @@ FileChannel::FileChannel(const string& name,
 }
 	
 
-FileChannel::~FileChannel() 
+RotatingFileChannel::~RotatingFileChannel() 
 {
 	if (_stream) {
 		_stream->close();
@@ -175,7 +250,7 @@ FileChannel::~FileChannel()
 }
 
 
-void FileChannel::write(const string& message, LogLevel level, const ILoggable* klass) 
+void RotatingFileChannel::write(const string& message, LogLevel level, const ILoggable* klass) 
 {	
 	if (this->level() > level)
 		return;
@@ -200,14 +275,14 @@ void FileChannel::write(const string& message, LogLevel level, const ILoggable* 
 }
 
 	
-void FileChannel::rotate() 
+void RotatingFileChannel::rotate() 
 {
 	if (_stream) {
 		_stream->close();
 		delete _stream;
 	}
 
-	// Initialize and open the next log file
+	// Open the next log file
 	_filename = Poco::format("%s_%ld.%s", _name, static_cast<long>(Timestamp().epochTime()), _extension);
 	Path path(_dir);	
 	File(path).createDirectories();

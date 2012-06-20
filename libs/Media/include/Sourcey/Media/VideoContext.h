@@ -88,7 +88,10 @@ struct VideoEncoderContext: public VideoContext
 	
 	virtual AVRational getCodecTimeBase(AVCodec* c, double fps);
 	
-	virtual int encode(unsigned char* buffer, int bufferSize, AVPacket& opacket/*, unsigned pts = AV_NOPTS_VALUE*/);
+	virtual bool encode(unsigned char* data, int size, AVPacket& opacket);
+	virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
+
+	//virtual int encode(unsigned char* buffer, int bufferSize, AVPacket& opacket/*, unsigned pts = AV_NOPTS_VALUE*/);
 		/// Encodes a video frame from given data buffer and
 		/// stores it in the opacket.
 		/// If a pts value is given it will be applied to the
@@ -113,20 +116,8 @@ struct VideoDecoderContext: public VideoContext
 	
 	virtual bool decode(UInt8* data, int size, AVPacket& opacket);
 	virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
-		// Decodes a single frame from the provided packet.
-		// TODO: We may need to return the generated frame size to match
-		// the audio API, not the encoded length.
-		// IMPORTANT: In order to ensure all data is decoded from the
-		// input packet, this method should be looped until the input
-		// packet size is 0.
-		// Example:
-		//	while (packet.size > 0) {
-		//		len = decode(packet);
-		//	}
-
-    double duration;
-    int width;	// Number of bits used to store a sample
-    bool fp;	// Floating-point sample representation
+		/// Decodes a frame from the given packet into the output packet.
+		/// Returns true if a frame was decoded, false otherwise.
 };
 
 

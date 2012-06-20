@@ -92,6 +92,8 @@ inline const char* getStringFromLogLevel(LogLevel level)
 class LogStream;
 
 
+// ---------------------------------------------------------------------
+//
 struct ILoggable 
 { 
 	ILoggable();
@@ -102,6 +104,8 @@ struct ILoggable
 };
 
 
+// ---------------------------------------------------------------------
+//
 class LogChannel
 {
 public:	
@@ -124,6 +128,8 @@ protected:
 };
 
 
+// ---------------------------------------------------------------------
+//
 class ConsoleChannel: public LogChannel
 {		
 public:
@@ -133,17 +139,46 @@ public:
 };
 
 
+// ---------------------------------------------------------------------
+//
 class FileChannel: public LogChannel
 {	
 public:
 	FileChannel(
+		const std::string& name,
+		const std::string& path,
+		LogLevel level = DebugLevel, 
+		const char* dateFormat = "%H:%M:%S");
+	virtual ~FileChannel();
+
+	virtual void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
+	
+	void setPath(const std::string& path);
+	std::string	path() const;
+
+protected:
+	virtual void open();
+	virtual void close();
+
+protected:
+	std::ofstream	_stream;
+	std::string		_path;
+};
+
+
+// ---------------------------------------------------------------------
+//
+class RotatingFileChannel: public LogChannel
+{	
+public:
+	RotatingFileChannel(
 		const std::string& name,
 		const std::string& dir,
 		LogLevel level = DebugLevel, 
 		const std::string& extension = "log", 
 		int rotationInterval = 12 * 3600, 
 		const char* dateFormat = "%H:%M:%S");
-	virtual ~FileChannel();
+	virtual ~RotatingFileChannel();
 
 	virtual void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
 	virtual void rotate();
@@ -156,7 +191,7 @@ public:
 	void setExtension(const std::string& ext) { _extension = ext; };
 	void setRotationInterval(int interval) { _rotationInterval = interval; };
 
-private:
+protected:
 	std::ofstream*	_stream;
 	std::string		_dir;
 	std::string		_filename;
@@ -189,6 +224,8 @@ public:
 typedef std::map<std::string, LogChannel*> LogMap;
 
 
+// ---------------------------------------------------------------------
+//
 class Logger 
 {
 public:
@@ -232,8 +269,8 @@ public:
 
 protected:
 	Logger();								// Private so that it can not be called
-	Logger(Logger const&) {};				// Copy constructor is private
-	Logger& operator=(Logger const&) {};	// Assignment operator is private
+	Logger(Logger const&) {};				// Copy constructor is protected
+	Logger& operator=(Logger const&) {};	// Assignment operator is protected
 	~Logger();
 	
 	LogChannel*				_nullChannel;
@@ -296,7 +333,7 @@ public:
 		return *this;
 	}
 
-private:
+protected:
 	LogLevel			_level;
 	std::string			_name;
 	LogChannel*			_channel;

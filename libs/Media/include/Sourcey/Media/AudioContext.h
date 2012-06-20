@@ -60,14 +60,15 @@ struct AudioContext
     // Internal data 
     AVStream*			stream;
     AVCodecContext*		codec;
+	AVFrame*            frame;
     //AVCodec*			codec;
     //AVPacket*			packet;
 	
-    int					bufferSize;
-    UInt8*				buffer;
+    //int					bufferSize;
+    //UInt8*				buffer;
 
 	// The output frame size for encoding and decoding.
-    int					frameSize;
+    //int					frameSize;
 
     //int				offset;
 
@@ -96,7 +97,8 @@ struct AudioEncoderContext: public AudioContext
 	virtual void close();
 	virtual void reset();	
 	
-	virtual int encode(unsigned char* buffer, int bufferSize, AVPacket& opacket);
+	virtual bool encode(unsigned char* data, int size, AVPacket& opacket);
+	virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
 
 	AudioCodec		iparams;
 	AudioCodec		oparams;

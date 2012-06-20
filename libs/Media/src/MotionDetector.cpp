@@ -80,27 +80,33 @@ void MotionDetector::onStreamStateChange(const PacketStreamState&)
 }
 
 
+bool MotionDetector::accepts(IPacket& packet) 
+{ 
+	return dynamic_cast<const MatPacket*>(&packet) != 0;
+};
+
+
 void MotionDetector::process(IPacket& packet)
 {
 	Log("trace") << "[MotionDetector:" << this <<"] Processing" << endl;
 
-	Media::VideoPacket* vpacket = dynamic_cast<Media::VideoPacket*>(&packet);		
-	if (!vpacket) {
+	MatPacket* mpacket = dynamic_cast<MatPacket*>(&packet);		
+	if (!mpacket) {
 		dispatch(this, packet);
 		return;
 	}
 	
-	if (vpacket->mat == NULL)
+	if (mpacket->mat == NULL)
 		throw Exception("Video packets must contain an OpenCV image.");
 
 	VideoPacket opacket;
-	cv::Mat& source = *vpacket->mat;
+	cv::Mat& source = *mpacket->mat;
 	cv::Mat mask(source.size(), CV_8UC1);
 	{
 		FastMutex::ScopedLock lock(_mutex); 
 	
 		_processing = true;
-		_timestamp = (double)clock() / CLOCKS_PER_SEC; // vpacket->time;
+		_timestamp = (double)clock() / CLOCKS_PER_SEC; // mpacket->time;
 		updateMHI(source);
 		computeMotionState();	
 
@@ -108,7 +114,7 @@ void MotionDetector::process(IPacket& packet)
 		_mhi.convertTo(mask, CV_8UC1, 255.0 / _options.stableMotionLifetime, 
 			(_options.stableMotionLifetime - _timestamp) * (255.0 / _options.stableMotionLifetime));
 
-		opacket = VideoPacket(&mask);
+		opacket = MatPacket(&mask);
 		_processing = false;	
 
 		//cv::imshow("Motion Image", mask);
