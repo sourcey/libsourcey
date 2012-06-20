@@ -22,6 +22,12 @@ endif()
 
 
 # ----------------------------------------------------------------------
+# Options
+# ----------------------------------------------------------------------
+set(OpenCV_LINK_SHARED_LIBS TRUE CACHE BOOL "Link with shared OpenCV libraries (.dll/.so) instead of static ones (.lib/.a)")    
+
+
+# ----------------------------------------------------------------------
 # Find OpenCV include directory
 # ----------------------------------------------------------------------
 if (NOT OpenCV_INCLUDE_DIR)
@@ -30,76 +36,65 @@ if (NOT OpenCV_INCLUDE_DIR)
       opencv2/core/core.hpp
     DOC 
       "OpenCV Include Directory"
-    PATHS
-  	/usr/local/include
-  	/usr/include
+    #PATHS
+  	#  /usr/local/include
+  	#  /usr/include
     )	
 endif()
 
 
 # ----------------------------------------------------------------------
-# Find component libraries
+# Determine OpenCV version
 # ----------------------------------------------------------------------
+# Set the version of the OpenCV library we are linking against.
+# This is important for windows as the opencv libraries names include the vesion.
 
-set(OpenCV_LINK_SHARED_LIBS TRUE CACHE BOOL "Link with shared OpenCV libraries (.dll/.so) instead of static ones (.lib/.a)")    
+if(OpenCV_INCLUDE_DIR AND NOT OpenCV_VERSION_FILE)
+  set(OpenCV_VERSION_FILE "${OpenCV_INCLUDE_DIR}/opencv2/core/version.hpp")
+  if(EXISTS "${OpenCV_VERSION_FILE}")
 
-# OpenCV 2.3 windows installations keep precompiled binaries
-# in a sibling "build" folder adjacent to OpenCV_DIR
-#if (WIN32)
-#  set(OpenCV_WIN_LIBDIR_SUFFIX "")
-#  
-#  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-#    set(OpenCV_WIN_LIBDIR_SUFFIX "${OpenCV_WIN_LIBDIR_SUFFIX}/x64")
-#  else()
-#    set(OpenCV_WIN_LIBDIR_SUFFIX "${OpenCV_WIN_LIBDIR_SUFFIX}/x86")
-#  endif()
-#
-#  if(MINGW)
-#    set(OpenCV_WIN_LIBDIR_SUFFIX "${OpenCV_WIN_LIBDIR_SUFFIX}/mingw")
-#  elseif(MSVC90)
-#    set(OpenCV_WIN_LIBDIR_SUFFIX "${OpenCV_WIN_LIBDIR_SUFFIX}/vc9")
-#  elseif(MSVC10)
-#    set(OpenCV_WIN_LIBDIR_SUFFIX "${OpenCV_WIN_LIBDIR_SUFFIX}/vc10")
-#  endif()
-#  
-#  if(NOT OpenCV_LINK_SHARED_LIBS)
-#    set(OpenCV_WIN_LIBDIR_SUFFIX "${OpenCV_WIN_LIBDIR_SUFFIX}/staticlib")
-#  else()
-#    set(OpenCV_WIN_LIBDIR_SUFFIX "${OpenCV_WIN_LIBDIR_SUFFIX}/lib")
-#  endif()
-#      
-#  set(OpenCV_LIBDIR_SUFFIXES ${OpenCV_WIN_LIBDIR_SUFFIX} ${OpenCV_LIBDIR_SUFFIXES})
-#endif()
+    FILE(STRINGS "${OpenCV_VERSION_FILE}" OpenCV_VERSION_PARTS REGEX "#define CV_.+OR_VERSION[ ]+[0-9]+" )
 
-set(OpenCV_LIBRARY_VERSION "2.4.1" CACHE STRING "OpenCV library version.")    
-string(REGEX MATCHALL "[0-9]" OpenCV_LIBRARY_VERSION_PARTS "${OpenCV_LIBRARY_VERSION}")
+    string(REGEX REPLACE ".+CV_MAJOR_VERSION[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_MAJOR "${OpenCV_VERSION_PARTS}")
+    string(REGEX REPLACE ".+CV_MINOR_VERSION[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_MINOR "${OpenCV_VERSION_PARTS}")
+    string(REGEX REPLACE ".+CV_SUBMINOR_VERSION[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_PATCH "${OpenCV_VERSION_PARTS}")
 
-list(GET OpenCV_LIBRARY_VERSION_PARTS 0 OpenCV_VERSION_MAJOR)
-list(GET OpenCV_LIBRARY_VERSION_PARTS 1 OpenCV_VERSION_MINOR)
-list(GET OpenCV_LIBRARY_VERSION_PARTS 2 OpenCV_VERSION_PATCH)
- 
+    set(OpenCV_VERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}")
+    set(OpenCV_SOVERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}")
+    
+  else()
+    set(OpenCV_LIBRARY_VERSION "2.4.1" CACHE STRING "OpenCV library version.")    
+  endif()
+endif()
+
+
+# ----------------------------------------------------------------------
+# Find component libraries
+# ---------------------------------------------------------------------- 
 # The reason for including via iteration rather than find_library
 # is so we can remain version agnostic.
-# TODO: Include only specified modules
-# TODO: Check for specified version
-# TODO: Optimize the following, it will probably break on some systems
-if (NOT OpenCV_FOUND) #OpenCV_INCLUDE_DIR AND NOT OpenCV_LIBRARY_DIR)
+# TODO: Include only OpenCV_FIND_COMPONENTS
+if (NOT OpenCV_FOUND)
   set(OpenCV_FOUND 0)
   
   find_path(OpenCV_LIBRARY_DIR 
     NAMES       
-      opencv_core
-      libopencv_core.a.${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}      
-      libopencv_core.so.${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}
-      opencv_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}.lib
-      opencv_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}d.lib
+      OpenCV_core
+      libOpenCV_core.a.${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}      
+      libOpenCV_core.so.${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}
+      OpenCV_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}.lib
+      OpenCV_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}d.lib
     DOC 
       "OpenCV Library Directory"    
-    PATHS 
-      /usr/lib 
-      /usr/local/lib
-    )  
-  
+    PATH_SUFFIXES 
+      Debug
+      Release
+    #PATHS 
+    #  D:/dev/lib/OpenCV2.4/build/lib/Debug
+    #  /usr/lib 
+    #  /usr/local/lib
+    )
+    
   if(OpenCV_LIBRARY_DIR)
     set(OpenCV_FOUND 1)    
     
@@ -127,19 +122,18 @@ if (NOT OpenCV_FOUND) #OpenCV_INCLUDE_DIR AND NOT OpenCV_LIBRARY_DIR)
     endforeach()  
     
     message(STATUS "Found OpenCV libraries: ${OpenCV_LIBRARIES}")
-       
-  endif()
      
-  # Cache the vars.
-  set(OpenCV_INCLUDE_DIR  ${OpenCV_INCLUDE_DIR}  CACHE STRING   "The OpenCV include directory." FORCE)
-  set(OpenCV_LIBRARY_DIR  ${OpenCV_LIBRARY_DIR}  CACHE STRING   "The OpenCV library directory." FORCE)
-  set(OpenCV_LIBRARIES    ${OpenCV_LIBRARIES}    CACHE STRING   "The OpenCV libraries." FORCE)
-  set(OpenCV_FOUND        ${OpenCV_FOUND}        CACHE BOOLEAN  "The OpenCV found status." FORCE)
-      
-  mark_as_advanced(OpenCV_INCLUDE_DIR
-                   OpenCV_LIBRARY_DIR
-                   OpenCV_LIBRARIES
-                   OpenCV_FOUND)
+    # Cache the vars.
+    set(OpenCV_INCLUDE_DIR  ${OpenCV_INCLUDE_DIR}  CACHE STRING   "The OpenCV include directory." FORCE)
+    set(OpenCV_LIBRARY_DIR  ${OpenCV_LIBRARY_DIR}  CACHE STRING   "The OpenCV library directory." FORCE)
+    set(OpenCV_LIBRARIES    ${OpenCV_LIBRARIES}    CACHE STRING   "The OpenCV libraries." FORCE)
+    set(OpenCV_FOUND        ${OpenCV_FOUND}        CACHE BOOLEAN  "The OpenCV found status." FORCE)
+        
+    mark_as_advanced(OpenCV_INCLUDE_DIR
+                     OpenCV_LIBRARY_DIR
+                     OpenCV_LIBRARIES
+                     OpenCV_FOUND)       
+  endif()
 
   if(NOT OpenCV_FOUND)
      if (OpenCV_FIND_REQUIRED)

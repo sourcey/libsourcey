@@ -531,8 +531,8 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 	if (!buffer || !bufferSize) 
 		throw Exception("Invalid audio input");
 
-	if (bufferSize > _audio->bufferSize) 
-		throw Exception("Audio frame too big"); 
+	//if (bufferSize > _audio->bufferSize) 
+	//	throw Exception("Audio frame too big"); 
 	
 	av_fifo_generic_write(_audioFifo, (UInt8 *)buffer, bufferSize, NULL);
 	while (av_fifo_size(_audioFifo) >= _audioOutSize) {

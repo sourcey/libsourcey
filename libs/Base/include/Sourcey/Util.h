@@ -57,14 +57,14 @@ std::string dtoa(double d);
 double atod(const std::string& str);
 
 template<typename T>
-std::string toString(const T &t) {
+std::string tostr(const T &t) {
     std::ostringstream oss;
     oss << t;
     return oss.str();
 }
 
 template<typename T>
-T fromString(const std::string& s) {
+T strto(const std::string& s) {
     std::istringstream iss(s);
     T t;
     iss >> t;

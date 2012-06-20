@@ -148,6 +148,31 @@ inline void AllocateOpenCVInputFormat(const VideoCapture* capture, Format& forma
 typedef std::map<int, VideoCapture*> VideoCaptureMap;
 
 
+struct MatPacket: public VideoPacket 
+{
+	cv::Mat* mat;	// For OpenCV generated packets.
+
+	MatPacket(unsigned char* data = NULL,
+				int size = 0,
+				int width = 0,
+				int height = 0,
+				double time = 0) :
+		VideoPacket(data, size, width, height, time),
+		mat(NULL) {};
+
+	MatPacket(cv::Mat* mat, double time = 0) :
+		VideoPacket((unsigned char*)mat->data, mat->total(), mat->cols, mat->rows, time),
+		mat(mat) {};
+
+	virtual IPacket* clone() const {
+		return new MatPacket(*this);
+	}	
+
+	virtual const char* className() const { return "MatPacket"; }
+}; 
+
+
+
 } // namespace Media
 } // namespace Sourcey
 

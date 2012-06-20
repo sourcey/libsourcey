@@ -106,7 +106,7 @@ public:
 	virtual ~MotionDetector();
 	
 public:	
-	virtual bool accepts(IPacket& packet) { return dynamic_cast<const Media::VideoPacket*>(&packet) != 0; };
+	virtual bool accepts(IPacket& packet);
 	virtual void process(IPacket& packet);
 
 	virtual void onStreamStateChange(const PacketStreamState&);

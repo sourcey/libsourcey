@@ -345,7 +345,7 @@ void FormField::setValue(const string& value)
 
 void FormField::setValue(int value)
 {
-	setValue(Util::toString<int>(value));
+	setValue(Util::tostr<int>(value));
 }
 
 
@@ -369,7 +369,7 @@ void FormField::addValue(const string& value)
 
 void FormField::addValue(int value)
 {
-	addValue(Util::toString<int>(value));
+	addValue(Util::tostr<int>(value));
 }
 
 

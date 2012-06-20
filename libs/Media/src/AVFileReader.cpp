@@ -138,11 +138,9 @@ void AVFileReader::run()
 			while ((res = av_read_frame(_formatCtx, &ipacket)) >= 0) {
 				if (_video && ipacket.stream_index == _video->stream->index) {	
 					if (_video->decode(ipacket, opacket)) {
-						//if (opacket.size) {
-						VideoPacket video(opacket.data, opacket.size, _video->codec->width, _video->codec->height, opacket.pts);
-						video.opaque = &ipacket; //_video;
+						VideoPacket video(opacket.data, opacket.size, _video->codec->width, _video->codec->height, _video->pts); //opacket.pts
+						video.opaque = &ipacket;
 						dispatch(this, video);
-						//}
 					}
 
 					/*
@@ -160,13 +158,11 @@ void AVFileReader::run()
 					break;
 				}
 				else if (_audio && ipacket.stream_index == _audio->stream->index) {	
-					if (_audio->decode(ipacket, opacket)) {
-						//if (opacket.size) {						
+					if (_audio->decode(ipacket, opacket)) {			
 						//Log("trace") << "[AVFileReader:" << this << "] Broadcasting Audio: " << _video->pts << endl;
-						AudioPacket audio(opacket.data, opacket.size, opacket.pts);
-						audio.opaque = &ipacket; //_audio;
+						AudioPacket audio(opacket.data, opacket.size, _audio->pts); //opacket.pts
+						audio.opaque = &ipacket;
 						dispatch(this, audio);
-						//}
 					}	
 					/*
 					while (ipacket.size > 0) {
@@ -206,7 +202,7 @@ void AVFileReader::run()
 	catch (Exception& exc) 
 	{
 		_error = exc.message();
-		Log("error") << "[AVFileReader:" << this << "] Decoder Error: " << exc.message() << endl;
+		Log("error") << "[AVFileReader:" << this << "] Decoder Error: " << _error << endl;
 	}
 	catch (...) 
 	{

@@ -28,7 +28,6 @@
 #include "Sourcey/Media/VideoAnalyzer.h"
 
 
-using namespace cv;
 using namespace std;
 using namespace Poco;
 
@@ -40,7 +39,8 @@ namespace Media {
 VideoAnalyzer::VideoAnalyzer(const Options& options) : 
 	_options(options),
 	_video(NULL),
-	_audio(NULL)
+	_audio(NULL),
+	_videoConv(NULL)
 {
 	Log("trace") << "[VideoAnalyzer:" << this <<"] Creating" << endl;
 }
@@ -49,9 +49,11 @@ VideoAnalyzer::VideoAnalyzer(const Options& options) :
 VideoAnalyzer::~VideoAnalyzer() 
 {
 	Log("trace") << "[VideoAnalyzer:" << this <<"] Destroying" << endl;
-
+	
 	if (_video)
 		delete _video;
+	if (_videoConv)
+		delete _videoConv;
 	if (_audio)
 		delete _audio;
 }
@@ -85,15 +87,16 @@ void VideoAnalyzer::start()
 			_video->initialize(_options.numFFTBits, sizeof(*_video->rdftData) *
 				(_reader.video()->codec->width * 
 				 _reader.video()->codec->height));
-			_videoConvCtx = NULL;
-			_videoGrayFrame = NULL;
+			_videoConv = NULL;
 		}
 
 		if (_reader.audio()) {
 			_audio = new VideoAnalyzer::Stream("Audio");
-			_audio->initialize(_options.numFFTBits, sizeof(*_audio->rdftData) *
-				(_reader.audio()->stream->codec->frame_size * 2 * 
-				 _reader.audio()->stream->codec->channels));
+			_audio->initialize(_options.numFFTBits, AVCODEC_MAX_AUDIO_FRAME_SIZE
+				//sizeof(*_audio->rdftData) *
+				//(_reader.audio()->stream->codec->frame_size * 2 * 
+				// _reader.audio()->stream->codec->channels)
+				 );
 		}
 	
 		_reader += packetDelegate(this, &VideoAnalyzer::onVideo);
@@ -196,36 +199,56 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 	// Skip frames if we exceed the maximum processing framerate.
 	double fps = _video->frames / packet.time;
 	if (_options.maxFramerate > 0 && fps > _options.maxFramerate) {
-		//Log("trace") << "[VideoAnalyzer:" << this << "] Skipping frame at fps: " << fps << endl;
+		Log("trace") << "[VideoAnalyzer:" << this << "] Skipping video frame at fps: " << fps << endl;
 		return;
 	}
 	_video->frames++;	
 		
+	/*
 	// Create and allocate the conversion frame.
-	if (_videoGrayFrame == NULL) {
-		_videoGrayFrame = avcodec_alloc_frame();	
-		if (_videoGrayFrame == NULL)
+	if (oframe == NULL) {
+		oframe = avcodec_alloc_frame();	
+		if (oframe == NULL)
 			throw Exception("Video Analyzer: Unable to allocate the output video frame.");
 
-		avpicture_alloc(reinterpret_cast<AVPicture*>(_videoGrayFrame), 
+		avpicture_alloc(reinterpret_cast<AVPicture*>(oframe), 
 			PIX_FMT_GRAY8, video->codec->width, video->codec->height);
 	}
 	
 	// Convert the image from its native format to GREY8.
-	if (_videoConvCtx == NULL) {
-		_videoConvCtx = sws_getContext(
+	if (_videoConv == NULL) {
+		_videoConv = sws_getContext(
 			video->codec->width, video->codec->height, video->codec->pix_fmt, 
 			video->codec->width, video->codec->height, PIX_FMT_GRAY8, 
 			SWS_BICUBIC, NULL, NULL, NULL);
 	}
-	if (_videoConvCtx == NULL)
+	*/
+	if (_videoConv == NULL) {
+		
+		VideoCodec iparams;
+		iparams.width = video->codec->width;
+		iparams.height = video->codec->height;
+		iparams.pixfmt = (PixelFormat::ID)video->codec->pix_fmt;
+		VideoCodec oparams;
+		oparams.width = video->codec->width;
+		oparams.height = video->codec->height;
+		oparams.pixfmt = (PixelFormat::ID)PIX_FMT_GRAY8;
+		
+		_videoConv = new VideoConversionContext();
+		_videoConv->create(iparams, oparams);
+	}
+	if (_videoConv == NULL)
 		throw Exception("Video Analyzer: Unable to initialize the video conversion context.");	
 		
-	// Scales the source data according to our SwsContext settings.
-	if (sws_scale(_videoConvCtx,
+	// Convert the source image to grayscale.
+	AVFrame* oframe = _videoConv->convert(video->frame);
+
+	/*
+	if (sws_scale(_videoConv,
 		video->frame->data, video->frame->linesize, 0, video->codec->height,
-		_videoGrayFrame->data, _videoGrayFrame->linesize) < 0)
+		oframe->data, oframe->linesize) < 0)
 		throw Exception("Video Analyzer: Pixel format conversion not supported.");
+		*/
 
 	// Populate the FFT input data.
 	// Examples:
@@ -236,7 +259,7 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 	for (int y = 0; y < video->codec->height; y++) {
 		for (int x = 0; x < video->codec->width; x++) {
 			_video->filled = y * video->codec->width + x; // * 3;
-			_video->rdftData[_video->filled] = (float)_videoGrayFrame->data[0][_video->filled] * pow(-1.0, y + x);
+			_video->rdftData[_video->filled] = (float)oframe->data[0][_video->filled] * pow(-1.0, y + x);
 		}
 	}
 
@@ -253,13 +276,13 @@ void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 	// Skip frames if we exceed the maximum processing framerate.
 	double fps = _audio->frames / packet.time;
 	if (_options.maxFramerate > 0 && fps > _options.maxFramerate) {
-		//Log("trace") << "[VideoAnalyzer:" << this << "] Skipping frame at fps: " << fps << endl;
+		Log("trace") << "[VideoAnalyzer:" << this << "] Skipping audio frame at fps: " << fps << endl;
 		return;
 	}
 	_audio->frames++;
 	
 	short const* data = reinterpret_cast<short*>(packet.data());	
-	int size = FFMIN(_reader.audio()->frameSize, packet.size());
+	int size = packet.size(); //FFMIN(_reader.audio()->frameSize, packet.size());
 	int channels = _reader.audio()->stream->codec->channels;
 	int filled = 0;
 	
@@ -279,6 +302,8 @@ void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
     }
 
 	processSpectrum(*_audio, packet.time);
+	/*
+	*/
 }
 
 
@@ -327,6 +352,8 @@ VideoAnalyzer::Stream::~Stream()
 	
 void VideoAnalyzer::Stream::initialize(int rdftBits, int rdftSize)
 {
+	Log("trace") << "[VideoAnalyzerStream:" << this << ":" << name << "] Initializing" << endl;	
+
 	lastPTS		= 0;
 	frames		= 0;
 	filled		= 0;
@@ -337,6 +364,8 @@ void VideoAnalyzer::Stream::initialize(int rdftBits, int rdftSize)
 	
 void VideoAnalyzer::Stream::uninitialize()
 {
+	Log("trace") << "[VideoAnalyzerStream:" << this << ":" << name << "] Uninitializing" << endl;	
+	
 	if (rdft)
 		av_rdft_end(rdft);
 	if (rdftData)

@@ -325,7 +325,7 @@ Address UDPSocket::address() const
 	try	{
 		return DatagramSocket::address();
 	}
-	catch (Poco::Net::/*InvalidSocketException*/NetException& exc) {
+	catch (Poco::Net::/*InvalidSocketException*/NetException&) {
 		// swallow it
 	}
 	return Address();
@@ -337,7 +337,7 @@ Address UDPSocket::peerAddress() const
 	try	{
 		return DatagramSocket::peerAddress();
 	}
-	catch (Poco::Net::/*InvalidSocketException*/NetException& exc) {
+	catch (Poco::Net::/*InvalidSocketException*/NetException&) {
 		// swallow it
 	}
 	return Address();
@@ -349,7 +349,7 @@ int UDPSocket::errorno() const
 	try	{
 		return impl()->socketError();
 	}
-	catch (Poco::Net::/*InvalidSocketException*/NetException& exc) {
+	catch (Poco::Net::/*InvalidSocketException*/NetException&) {
 		// swallow it
 	}
 	return -1; // invalid socket
