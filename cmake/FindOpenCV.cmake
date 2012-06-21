@@ -37,8 +37,8 @@ if (NOT OpenCV_INCLUDE_DIR)
     DOC 
       "OpenCV Include Directory"
     #PATHS
-  	#  /usr/local/include
-  	#  /usr/include
+    #	/usr/local/include
+    #	/usr/include
     )	
 endif()
 
@@ -63,10 +63,14 @@ if(OpenCV_INCLUDE_DIR AND NOT OpenCV_VERSION_FILE)
     set(OpenCV_SOVERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}")
     
   else()
-    set(OpenCV_LIBRARY_VERSION "2.4.1" CACHE STRING "OpenCV library version.")    
+    set(OpenCV_VERSION "2.4.1" CACHE STRING "OpenCV library version.")    
   endif()
 endif()
 
+
+#message("OpenCV_INCLUDE_DIR=${OpenCV_INCLUDE_DIR}")
+#message("OpenCV_VERSION_FILE=${OpenCV_VERSION_FILE}")
+#message("OpenCV_VERSION=${OpenCV_VERSION}")
 
 # ----------------------------------------------------------------------
 # Find component libraries
@@ -74,26 +78,28 @@ endif()
 # The reason for including via iteration rather than find_library
 # is so we can remain version agnostic.
 # TODO: Include only OpenCV_FIND_COMPONENTS
+#set(OpenCV_FOUND 0)
 if (NOT OpenCV_FOUND)
   set(OpenCV_FOUND 0)
   
   find_path(OpenCV_LIBRARY_DIR 
     NAMES       
-      OpenCV_core
-      libOpenCV_core.a.${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}      
-      libOpenCV_core.so.${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}
-      OpenCV_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}.lib
-      OpenCV_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}d.lib
+      libopencv_core.a.${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}      
+      libopencv_core.so.${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}
+      opencv_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}.lib
+      opencv_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}d.lib
     DOC 
       "OpenCV Library Directory"    
     PATH_SUFFIXES 
       Debug
       Release
-    #PATHS 
-    #  D:/dev/lib/OpenCV2.4/build/lib/Debug
-    #  /usr/lib 
-    #  /usr/local/lib
+    PATHS
+      /usr/lib 
+      /usr/local/lib
     )
+
+  #message("OpenCV_LIBRARY_NAME=${OpenCV_LIBRARY_DIR}")  
+  #message("OpenCV_LIBRARY_DIR=libopencv_core.so.${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}")
     
   if(OpenCV_LIBRARY_DIR)
     set(OpenCV_FOUND 1)    

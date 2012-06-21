@@ -125,21 +125,11 @@ void ConsoleChannel::write(const string& message, LogLevel level, const ILoggabl
 	format(ss, message, level, klass); 
 #if defined(_CONSOLE) // || defined(_DEBUG)
 	cout << ss.str();
-	/*
-		ostringstream ss;
-		ss << "[" << getStringFromLogLevel(level) << "] ";
-		if (klass)
-			klass->printLog(ss);
-		ss << message;
-//#if defined(_CONSOLE)
-		cout << ss.str();
-//#endif
-	*/
 #endif
 #if defined(_MSC_VER) //&& defined(_DEBUG)
-	std::string s(ss.str());
-	std::wstring temp(s.length(), L' ');
-	std::copy(s.begin(), s.end(), temp.begin());
+	string s(ss.str());
+	wstring temp(s.length(), L' ');
+	copy(s.begin(), s.end(), temp.begin());
 	OutputDebugString(temp.data());
 #endif
 };
