@@ -4,7 +4,7 @@
 # Generic inclusion of 3rd party dependency into a LibSourcey project.
 #
 macro(include_dependency name)
-  # message("Including dependency: ${name}")
+  #message("Including dependency: ${name}")
   
   find_package(${name} ${ARGN})  
     

@@ -34,6 +34,32 @@
 //
 #include "Config.h"
 
+#ifdef _WIN32
+    // Windows (x64 and x86)
+    #define WIN32
+#endif
+#if __unix__ // all unices
+    // Unix    
+    #define UNIX
+#endif
+#if __posix__
+    // POSIX    
+    #define POSIX
+#endif
+#if __linux__
+    // linux    
+    #define LINUX
+#endif
+#if __GNUC__
+    // GCC specific
+    #define GNUC
+#endif
+#if __APPLE__
+    // Mac OS
+    #define APPLE
+#endif
+
+
 //
 // Cross platform normalization
 //
