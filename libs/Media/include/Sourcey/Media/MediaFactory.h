@@ -43,11 +43,11 @@
 #include <map>
 
 #include "Sourcey/Media/DeviceManager.h"
-#if !defined(USING_FAKE_DeviceManager) && WIN32
+#if !defined(USING_FAKE_DeviceManager) && defined(WIN32)
 #include "Sourcey/Media/DeviceManager_WIN32.h"
-#elif !defined(USING_FAKE_DeviceManager) && OSX
+#elif !defined(USING_FAKE_DeviceManager) && defined(MACOS)
 #include "Sourcey/Media/DeviceManager_MAC.h"
-#elif !defined(USING_FAKE_DeviceManager) && LINUX
+#elif !defined(USING_FAKE_DeviceManager) && defined(LINUX)
 #include "Sourcey/Media/DeviceManager_LINUX.h"
 #else
 #include "Sourcey/Media/DeviceManager_FAKE.h"
