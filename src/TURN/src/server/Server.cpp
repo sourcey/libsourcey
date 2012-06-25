@@ -57,9 +57,9 @@ Server::~Server()
 	////Timer::getDefault().stop(TimerCallback<Server>(this, &ServerAllocation::onTimer));
 	//_socketUDP.detach(packetDelegate<Server, STUN::Message>(this, &Server::onPacketReceived, 1));
 	Log("trace", this) << "Destroying" << endl;	
-	stop();
-	
-	_timer->destroy();
+	stop();	
+	_timer->destroy();	
+	Log("trace", this) << "Destroying: OK" << endl;
 }
 
 
@@ -72,8 +72,7 @@ void Server::start()
 	_socketUDP.attach(packetDelegate<Server, STUN::Message>(this, &Server::onPacketReceived, 1));
 	_socketUDP.bind(_options.listenAddr);
 
-	Log("info", this) << "Listening on " 
-		<< _socketUDP.address().toString() << endl;
+	Log("info", this) << "Listening on " << _socketUDP.address().toString() << endl;
 	
 	// Initialize TCP
 	if (_options.enableTCP) {
@@ -93,12 +92,17 @@ void Server::stop()
 	Log("trace", this) << "Stopping" << endl;	
 	//Timer::getDefault().stop(TimerCallback<Server>(this, &Server::onTimer));	
 	_timer->stop();
+
+	if (_options.enableTCP) {
+		_socketTCP.close();
+	}
+	_socketUDP.close();
 }
 
 
 void Server::onTimer(void*) //TimerCallback<Server>& timer
 {
-	Log("trace", this) << "On Timer" << endl;	
+	//Log("trace", this) << "On Timer" << endl;	
 
 	ServerAllocationMap allocations = this->allocations();
 	for (ServerAllocationMap::iterator it = allocations.begin(); it != allocations.end(); ++it) {
@@ -394,7 +398,7 @@ void Server::handleAllocateRequest(const Request& request)
 	//     attribute follow the specification in [RFC5389].
 
 	// Compute the appropriate LIFETIME for this allocation.
-	UInt32 lifetime = min(_options.allocationMaxLifetime / 1000, _options.allocationDefaultLifetime / 1000);
+	UInt32 lifetime = min(options().allocationMaxLifetime / 1000, options().allocationDefaultLifetime / 1000);
 	const STUN::Lifetime* lifetimeAttr = request.get<STUN::Lifetime>();
 	if (lifetimeAttr)
 		lifetime = min(lifetime, lifetimeAttr->value());
@@ -536,7 +540,8 @@ void Server::handleAllocateRequest(const Request& request)
 	//    address.
 	STUN::XorRelayedAddress* relayAddrAttr = new STUN::XorRelayedAddress;
 	relayAddrAttr->setFamily(1);
-	relayAddrAttr->setIP(allocation->relayedAddress().host().toString());
+	relayAddrAttr->setIP(options().listenAddr.host().toString());
+	//relayAddrAttr->setIP(allocation->relayedAddress().host().toString());
 	relayAddrAttr->setPort(allocation->relayedAddress().port());
 	response.add(relayAddrAttr);
 

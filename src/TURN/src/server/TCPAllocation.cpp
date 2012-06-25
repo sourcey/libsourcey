@@ -47,7 +47,7 @@ TCPAllocation::TCPAllocation(Server& server, Net::TCPSocket* control, const Five
 	// Handle data from the relay socket directly from the
 	// allocation. This will remove the need for allocation
 	// lookups when receiving data from peers.
-	_acceptor.bind(Net::Address("127.0.0.1", 0));
+	_acceptor.bind(Net::Address(server.options().listenAddr.host(), 0));
 	_acceptor.SocketAccepted += delegate(this, &TCPAllocation::onPeerAccepted);
 	
 	// The allocation will be closed if the control connection is lost.
