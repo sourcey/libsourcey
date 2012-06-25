@@ -25,16 +25,16 @@ macro(include_sourcey_modules)
     # message(STATUS "Including module: ${name}")
     
     # Include the module headers. 
-    # These may be located in the "libs/" root directory,
+    # These may be located in the "src/" root directory,
     # or in a sub directory.
     set(HAVE_LIBSOURCEY_${name} 0)
-    if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/libs/${name}/include")
-      include_directories("${CMAKE_SOURCE_DIR}/libs/${name}/include")   
+    if(IS_DIRECTORY "${LibSourcey_SOURCE_DIR}/${name}/include")
+      include_directories("${LibSourcey_SOURCE_DIR}/${name}/include")   
       set(HAVE_LIBSOURCEY_${name} 1)
     else()       
-      subdirlist(subdirs "${CMAKE_SOURCE_DIR}/libs")
+      subdirlist(subdirs "${LibSourcey_SOURCE_DIR}")
       foreach(dir ${subdirs})
-        set(dir "${CMAKE_SOURCE_DIR}/libs/${dir}/${name}/include")
+        set(dir "${LibSourcey_SOURCE_DIR}/${dir}/${name}/include")
         if(IS_DIRECTORY ${dir})
           include_directories(${dir})
           set(HAVE_LIBSOURCEY_${name} 1)
@@ -320,10 +320,10 @@ endmacro()
 
         
     
-      #if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/libs/Anionu/${name}/include")        
+      #if(IS_DIRECTORY "${LibSourcey_SOURCE_DIR}/Anionu/${name}/include")        
       #message(STATUS "Including Module: ${module}")
-      #if (EXISTS "${CMAKE_SOURCE_DIR}/libs/${module}/CMakeLists.txt")      
-      #  add_subdirectory("${CMAKE_SOURCE_DIR}/libs/${module}")
+      #if (EXISTS "${LibSourcey_SOURCE_DIR}/${module}/CMakeLists.txt")      
+      #  add_subdirectory("${LibSourcey_SOURCE_DIR}/${module}")
       #endif()
     #list(APPEND LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_${name}})
     #if(MSVC) 

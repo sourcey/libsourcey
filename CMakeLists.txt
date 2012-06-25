@@ -32,10 +32,11 @@ endif()
 # ----------------------------------------------------------------------------
 # Build paths
 # ----------------------------------------------------------------------------
-set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+set(LibSourcey_DIR ${CMAKE_SOURCE_DIR})
+set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
 set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
-set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_SOURCE_DIR}/deps")
+set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_INSTALL_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/LibSourcey/deps")
 set(LibSourcey_INCLUDE_DIRS "") # Contains all include dirs
@@ -65,7 +66,7 @@ if(WIN32)
     #D:/dev/lib/OpenCV2.4/build/lib/Debug
     #D:/dev/lib/ffmpeg/lib
     #D:/dev/apps/MinGW/msys/1.0/local
-    #D:/dev/projects/Sourcey/LibSourcey/libs/anionu/deps/ffmpeg/bin
+    #D:/dev/projects/Sourcey/LibSourcey/src/anionu/deps/ffmpeg/bin
     )
 else()
   set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
@@ -87,7 +88,7 @@ if(WIN32)
     #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg
     #D:/dev/lib/ffmpeg
     #D:/dev/apps/MinGW/msys/1.0/local
-    #D:/dev/projects/Sourcey/LibSourcey/libs/anionu/deps/ffmpeg/include
+    #D:/dev/projects/Sourcey/LibSourcey/src/anionu/deps/ffmpeg/include
     )
 endif()
 
@@ -95,7 +96,7 @@ endif()
 # ----------------------------------------------------------------------------
 # Current version number
 # ----------------------------------------------------------------------------
-set(LibSourcey_VERSION_FILE "${LibSourcey_SOURCE_DIR}/libs/Base/include/Sourcey/Base.h")
+set(LibSourcey_VERSION_FILE "${LibSourcey_DIR}/src/Base/include/Sourcey/Base.h")
 if(NOT EXISTS "${LibSourcey_VERSION_FILE}")
   message(FATAL_ERROR "Cannot find base module headers.")
 endif()
@@ -226,7 +227,7 @@ endif()
 # ============================================================================
 # Include libraries, modules and projects
 #
-# LibSourcey automatically includes all directories inside the ./libs folder. 
+# LibSourcey automatically includes all directories inside the ./src folder. 
 # Libraries in the LibSourcey source tree are broken up into three types:
 #
 # Dependency:
@@ -315,12 +316,12 @@ set(BUILD_APPLICATIONS OFF CACHE BOOL "Build LibSourcey applications")
 # Include the LibSourcey source tree
 # ----------------------------------------------------------------------------
 if(BUILD_MODULES OR BUILD_APPLICATIONS)    
-  subdirlist(subdirs "${CMAKE_SOURCE_DIR}/libs")
+  subdirlist(subdirs "${CMAKE_SOURCE_DIR}/src")
   foreach(name ${subdirs})
     # This variable is so modules can set HAVE_LIBSOURCEY_XXX for our
     # Config.h inside the child scope. See include_sourcey_modules()
     set(HAVE_LIBSOURCEY_${name} 0)
-    set(dir "${CMAKE_SOURCE_DIR}/libs/${name}")
+    set(dir "${CMAKE_SOURCE_DIR}/src/${name}")
     if (EXISTS "${dir}/CMakeLists.txt")
       add_subdirectory(${dir})
     endif()
