@@ -47,19 +47,19 @@ namespace TURN {
 
 
 UDPAllocation::UDPAllocation(Server& server,
-							 const FiveTuple& tuple, 
-							 const std::string& username, 
-							 const UInt32& lifetime) : 
+                             const FiveTuple& tuple, 
+                             const string& username, 
+                             const UInt32& lifetime) : 
 	ServerAllocation(server, tuple, username, lifetime),
 	_relaySocket(server.reactor(), server.runner())
 {
 	// Handle data from the relay socket directly from the allocation.
 	// This will remove the need for allocation lookups when receiving
 	// data from peers.
-	_relaySocket.bind(Net::Address("127.0.0.1", 0));
+	_relaySocket.bind(Net::Address(server.options().listenAddr.host(), 0));
 	_relaySocket.attach(packetDelegate(this, &UDPAllocation::onPacketReceived,1));
 
-	Log("trace", this) << " Initializing on address: " << _relaySocket.address().toString() << std::endl;
+	Log("trace", this) << " Initializing on address: " << _relaySocket.address() << endl;
 }
 
 

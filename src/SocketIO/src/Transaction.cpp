@@ -65,7 +65,7 @@ bool Transaction::send()
 	_request.setAck(true);	
 	socket += packetDelegate(this, &Transaction::onPotentialResponse, 100);
 	if (socket.send(_request), true)
-		return ITransaction::send();
+		return ITransaction<Packet>::send();
 	return false;
 }
 
@@ -96,7 +96,7 @@ void Transaction::onComplete()
 
 	socket -= packetDelegate(this, &Transaction::onPotentialResponse);
 	
-	ITransaction::onComplete();
+	ITransaction<Packet>::onComplete();
 }
 
 
