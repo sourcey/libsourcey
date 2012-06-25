@@ -32,10 +32,10 @@
 #include <string>
 #include <vector>
 #include <assert.h>
-*/
-
 
 #include <conio.h>
+*/
+
 
 
 using namespace std;
@@ -229,7 +229,7 @@ public:
 class MediaConnectionFactory: public Poco::Net::TCPServerConnectionFactory
 {
 public:
-	TCPServerConnection* MediaConnectionFactory::createConnection(const StreamSocket& socket) 
+	TCPServerConnection* createConnection(const StreamSocket& socket) 
 	{  
 		Log("trace") << "[MediaConnectionFactory] Creating Connection" << endl;
 	
@@ -303,12 +303,12 @@ public:
 class MediaServer: public TCPService
 {
 public:
-	MediaServer::MediaServer(unsigned short port) :
+	MediaServer(unsigned short port) :
 		TCPService(new MediaConnectionFactory(), port)
 	{
 	}
 
-	MediaServer::~MediaServer()
+	~MediaServer()
 	{
 	}
 };
