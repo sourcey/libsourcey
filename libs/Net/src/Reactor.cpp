@@ -46,16 +46,17 @@ Reactor::Reactor(int timeout) : //Runner& runner,
 	_timeout(timeout),
 	_stop(false)	
 {
-	cout << "[Reactor:" << this << "] Creating" << endl;
+	cout << "Creating" << endl;
 	_thread.start(*this);
 }
 
 
 Reactor::~Reactor()
 {
-	cout << "[Reactor:" << this << "] Destroying" << endl;
+	cout << "Destroying" << endl;
 	stop();
-	cout << "[Reactor:" << this << "] Destroying: OK" << endl;
+	//Util::ClearVector(_delegates);
+	cout << "Destroying: OK" << endl;
 }
 
 
@@ -74,9 +75,9 @@ void Reactor::run()
 			error.clear();
 
 			if (_delegates.empty()) {				
-				Log("trace") << "[Reactor:" << this << "] Sleeping" << endl;
+				Log("trace", this) << "Sleeping" << endl;
 				_wakeUp.wait();		
-				Log("trace") << "[Reactor:" << this << "] Waking up" << endl;
+				Log("trace", this) << "Waking up" << endl;
 			}
 			{
 				FastMutex::ScopedLock lock(_mutex);
@@ -121,20 +122,20 @@ void Reactor::run()
 		}
 		catch (...)
 		{
-			Log("error") << "[Reactor:" << this << "] Unknown Error" << endl;
+			Log("error", this) << "Unknown Error" << endl;
 			//throw;
 		}
 	}
 	
-	Log("trace") << "[Reactor:" << this << "] Shutdown" << endl;
+	Log("trace", this) << "Shutdown" << endl;
 	Shutdown.dispatch(this);
-	Log("trace") << "[Reactor:" << this << "] Exiting" << endl;
+	Log("trace", this) << "Exiting" << endl;
 }
 
 
 void Reactor::handleException(const Exception& exc)
 {
-	Log("error") << "[Reactor:" << this << "] Error " << exc.displayText() << endl;
+	Log("error", this) << "Error " << exc.displayText() << endl;
 
 #ifdef _DEBUG	
 	exc.rethrow();
@@ -144,7 +145,7 @@ void Reactor::handleException(const Exception& exc)
 
 void Reactor::handleException(const std::exception& exc)
 {
-	Log("error") << "[Reactor:" << this << "] Error " << exc.what() << endl;
+	Log("error", this) << "Error " << exc.what() << endl;
 
 #ifdef _DEBUG	
 	throw exc;
@@ -154,7 +155,7 @@ void Reactor::handleException(const std::exception& exc)
 	
 void Reactor::stop()
 {
-	Log("trace") << "[Reactor:" << this << "] Stopping" << endl;
+	Log("trace", this) << "Stopping" << endl;
 
 	_stop = true;
 	_wakeUp.set();
@@ -164,7 +165,7 @@ void Reactor::stop()
 
 void Reactor::attach(const Poco::Net::Socket& socket, const ReactorDelegate& delegate)
 {
-	//Log("trace") << "[Reactor:" << this << "] Attach: " << socket.impl() << ": " << delegate.event << endl;
+	//Log("trace", this) << "Attach: " << socket.impl(, this) << ": " << delegate.event << endl;
 
 	detach(socket, delegate);
 
@@ -180,7 +181,7 @@ void Reactor::attach(const Poco::Net::Socket& socket, const ReactorDelegate& del
 
 void Reactor::detach(const Poco::Net::Socket& socket, const ReactorDelegate& delegate) 
 {	
-	//Log("trace") << "[Reactor:" << this << "] Detach: " << socket.impl() << ": " << delegate.event << endl;
+	//Log("trace", this) << "Detach: " << socket.impl(, this) << ": " << delegate.event << endl;
 
 	FastMutex::ScopedLock lock(_mutex);
 	
@@ -191,12 +192,14 @@ void Reactor::detach(const Poco::Net::Socket& socket, const ReactorDelegate& del
 			break;
 		}
 	}
+
+	//Log("trace", this) << "Detach: OK: " << socket.impl(, this) << ": " << delegate.event << endl;
 }
 
 
 void Reactor::detach(const Poco::Net::Socket& socket)
 {
-	//Log("trace") << "[Reactor:" << this << "] Detach: " << socket.impl() << endl;
+	//Log("trace", this) << "Detach: " << socket.impl() << endl;
 
 	FastMutex::ScopedLock lock(_mutex);
 
@@ -255,11 +258,11 @@ void ReactorNotifier::run()
 
 void ReactorNotifier::dispatch(ReactorEvent& event)
 {
-	Log("trace") << "[ReactorNotifier:" << this << "] Broadcast: " << event.delegate.socket.impl() << ": " << event.type << endl;
+	Log("trace", this) << "[ReactorNotifier:" << this << "] Broadcast: " << event.delegate.socket.impl(, this) << ": " << event.type << endl;
 	assert(event.delegate.locked);
 	
 	event.delegate.dispatch(&event.reactor, event, 0, 0, 0);
-	Log("trace") << "[ReactorNotifier:" << this << "] Broadcast Unlock " << event.delegate.socket.impl() << ": " << event.type << endl;
+	Log("trace", this) << "[ReactorNotifier:" << this << "] Broadcast Unlock " << event.delegate.socket.impl(, this) << ": " << event.type << endl;
 	assert(event.delegate.locked);
 	event.delegate.locked = false;
 }
@@ -267,13 +270,13 @@ void ReactorNotifier::dispatch(ReactorEvent& event)
 
 void ReactorNotifier::removeNotifications(const ReactorDelegate& delegate)
 {
-	Log("trace") << "[ReactorNotifier:" << this << "] Removing: " << &delegate << endl;
+	Log("trace", this) << "[ReactorNotifier:" << this << "] Removing: " << &delegate << endl;
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 
 	DispatchQueue<ReactorEvent>::Queue::iterator it = _queue.begin();
 	while (it != _queue.end()) {
 		if ((*it)->delegate == delegate) {
-			Log("trace") << "[ReactorNotifier:" << this << "] Deleting Redundant Notification: " << (*it) << endl;
+			Log("trace", this) << "[ReactorNotifier:" << this << "] Deleting Redundant Notification: " << (*it) << endl;
 			delete *it;
 			it = _queue.erase(it);
 		}

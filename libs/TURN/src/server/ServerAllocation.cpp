@@ -47,7 +47,7 @@ ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple, const
 {
 	_server.addAllocation(this);
 	
-	Log("debug") << "[ServerAllocation:" << this << "] Created: " 
+	Log("trace", this) << "Created: " 
 		<< "\r\tLifetime: " << _lifetime
 		<< "\r\tMaximum Lifetime: " << _maxLifetime
 		<< "\r\tUsername: " << username
@@ -57,7 +57,7 @@ ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple, const
 
 ServerAllocation::~ServerAllocation() 
 {
-	Log("debug") << "[ServerAllocation:" << this << "] Destroying:" 
+	Log("trace", this) << "Destroying:" 
 		<< "\n\tBandwidth Limit: " << bandwidthLimit()
 		<< "\n\tBandwidth Used: " << bandwidthUsed()
 		<< "\n\tBandwidth Remaining: " << bandwidthRemaining()
@@ -70,7 +70,7 @@ ServerAllocation::~ServerAllocation()
 
 bool ServerAllocation::handleRequest(const Request& request) 
 {	
-	Log("debug") << "[ServerAllocation:" << this << "] Handle Request" << endl;	
+	Log("trace", this) << "Handle Request" << endl;	
 	
 	// FIXME: Adding this check as we seem to be receiving requests
 	// after the allocation is received under heavy traffic.
@@ -89,7 +89,7 @@ bool ServerAllocation::handleRequest(const Request& request)
 
 void ServerAllocation::handleRefreshRequest(const Request& request) 
 {
-	Log("debug") << "[ServerAllocation:" << this << "] Handle Refresh Request" << endl;
+	Log("trace", this) << "Handle Refresh Request" << endl;
 	assert(request.type() == STUN::Message::Refresh);
 	assert(request.state() == STUN::Message::Request);
 
@@ -157,9 +157,10 @@ void ServerAllocation::handleRefreshRequest(const Request& request)
 	request.socket.send(response, request.remoteAddr);
 }
 
+
 void ServerAllocation::handleCreatePermission(const Request& request) 
 {	
-	Log("debug") << "[ServerAllocation:" << this << "] Handle Create Permission" << endl;
+	Log("trace", this) << "Handle Create Permission" << endl;
 
 	// 9.2. Receiving a CreatePermission Request
 	// 
@@ -225,7 +226,7 @@ UInt32 ServerAllocation::timeRemaining()
 		)
 	);
 	
-	//Log("debug") << "[ServerAllocation:" << this << "] Seconds Remaining: " 
+	//Log("trace", this) << "Seconds Remaining: " 
 	//	<< "\r\tLifetime: " << (_lifetime - (currentTime - _updatedAt)) 
 	//	<< "\r\tMaximum: " << (_maxLifetime - (currentTime - _updatedAt)) 
 	//	<< endl;

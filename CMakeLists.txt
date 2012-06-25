@@ -19,16 +19,94 @@ add_definitions(-DUNICODE -D_UNICODE)
 
 
 # ----------------------------------------------------------------------------
-# Current version number:
+# Set bitness
+# ----------------------------------------------------------------------------  
+set(LibSourcey_ARCHITECTURE i386)
+set(LibSourcey_BITNESS 32)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(LibSourcey_BITNESS 64)
+  set(LibSourcey_ARCHITECTURE amd64)
+endif()
+
+
 # ----------------------------------------------------------------------------
-set(LibSourcey_VERSION "0.8.0")
+# Build paths
+# ----------------------------------------------------------------------------
+set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
+set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
+set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_SOURCE_DIR}/deps")
+set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_INSTALL_DIR}/deps")
+set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/LibSourcey/deps")
+set(LibSourcey_INCLUDE_DIRS "") # Contains all include dirs
+set(LibSourcey_LIBRARY_DIRS "") # Contains all include library dirs
+set(LibSourcey_INCLUDE_LIBRARIES "") # Contains all include libraries
 
-string(REGEX MATCHALL "[0-9]" LibSourcey_VERSION_PARTS "${LibSourcey_VERSION}")
+# Tell CMake where to locate our .cmake files
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
-list(GET LibSourcey_VERSION_PARTS 0 LibSourcey_VERSION_MAJOR)
-list(GET LibSourcey_VERSION_PARTS 1 LibSourcey_VERSION_MINOR)
-list(GET LibSourcey_VERSION_PARTS 2 LibSourcey_VERSION_PATCH)
+include(LibSourceyMacros REQUIRED)
+include(LibSourceyModule REQUIRED)
+include(LibSourceyDependency OPTIONAL)
 
+# Append some common search paths for find_library
+# to find libraries from these locations first
+if(WIN32)
+  set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
+    ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
+    D:/dev/lib/OpenCV2.4/build/lib
+    D:/dev/lib/wxWidgets-2.9.2/lib/vc_lib
+    D:/dev/lib/ffmpeg-2012-04-16/lib
+    D:/dev/lib/OpenSSL-Win32/lib/VC
+    D:/dev/lib/poco-1.4.1p1-all/lib 
+    #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg/bin
+    #D:/dev/lib/OpenCV2.3/build
+    #D:/dev/lib/OpenCV2.4/build/lib/Debug
+    #D:/dev/lib/ffmpeg/lib
+    #D:/dev/apps/MinGW/msys/1.0/local
+    #D:/dev/projects/Sourcey/LibSourcey/libs/anionu/deps/ffmpeg/bin
+    )
+else()
+  set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
+    /lib 
+    /usr/lib)
+endif()
+
+# Append some common search paths for find_path
+# to search these locations first
+if(WIN32)
+  set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
+    ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
+    D:/dev/lib/OpenCV2.4/build/include
+    D:/dev/lib/wxWidgets-2.9.2
+    D:/dev/lib/ffmpeg-2012-04-16/include
+    D:/dev/lib/OpenSSL-Win32/include
+    D:/dev/lib/poco-1.4.1p1-all
+    #D:/dev/lib/OpenCV2.3/build/include
+    #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg
+    #D:/dev/lib/ffmpeg
+    #D:/dev/apps/MinGW/msys/1.0/local
+    #D:/dev/projects/Sourcey/LibSourcey/libs/anionu/deps/ffmpeg/include
+    )
+endif()
+
+
+# ----------------------------------------------------------------------------
+# Current version number
+# ----------------------------------------------------------------------------
+set(LibSourcey_VERSION_FILE "${LibSourcey_SOURCE_DIR}/libs/Base/include/Sourcey/Base.h")
+if(NOT EXISTS "${LibSourcey_VERSION_FILE}")
+  message(FATAL_ERROR "Cannot find base module headers.")
+endif()
+
+FILE(STRINGS "${LibSourcey_VERSION_FILE}" LibSourcey_VERSION_PARTS REGEX "#define SOURCEY_.+_VERSION[ ]+[0-9]+" )
+
+string(REGEX REPLACE ".+SOURCEY_MAJOR_VERSION[ ]+([0-9]+).*" "\\1" LibSourcey_VERSION_MAJOR "${LibSourcey_VERSION_PARTS}")
+string(REGEX REPLACE ".+SOURCEY_MINOR_VERSION[ ]+([0-9]+).*" "\\1" LibSourcey_VERSION_MINOR "${LibSourcey_VERSION_PARTS}")
+string(REGEX REPLACE ".+SOURCEY_PATCH_VERSION[ ]+([0-9]+).*" "\\1" LibSourcey_VERSION_PATCH "${LibSourcey_VERSION_PARTS}")
+
+set(LibSourcey_VERSION "${LibSourcey_VERSION_MAJOR}.${LibSourcey_VERSION_MINOR}.${LibSourcey_VERSION_PATCH}")
 set(LibSourcey_SOVERSION "${LibSourcey_VERSION_MAJOR}.${LibSourcey_VERSION_MINOR}")
 
 if(WIN32)
@@ -68,6 +146,13 @@ set(BUILD_MODULE_TESTS OFF CACHE BOOL "Build module test applications?")
 # Default: yes
 # ----------------------------------------------------------------------------
 set(BUILD_WITH_DEBUG_INFO ON CACHE BOOL "Include debug info into debug libs")
+
+
+# ----------------------------------------------------------------------------
+# Set the location of our platform-dependant Config.h
+# ----------------------------------------------------------------------------
+set(LibSourcey_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant Config.h")
+include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 
 
 # ----------------------------------------------------------------------------
@@ -138,86 +223,46 @@ if(MSVC)
 endif()
 
 
-# ----------------------------------------------------------------------------
-# Set the location of our platform-dependant Config.h
-# ----------------------------------------------------------------------------
-set(LibSourcey_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant Config.h")
-include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
-
-
 # ============================================================================
-# Build paths
+# Include libraries, modules and projects
+#
+# LibSourcey automatically includes all directories inside the ./libs folder. 
+# Libraries in the LibSourcey source tree are broken up into three types:
+#
+# Dependency:
+#     A third party library required by a LibSourcey Modue or Application.  
+#     Dependencies may be external or internal. External dependencies reside
+#     outside on the source tree, while internal dependencies generally reside
+#     in the deps folder. All dependencies must be built, installed, found
+#     and included by the build system before Modules and Application can be
+#     built. 
+#
+# Module: 
+#     A static or dynamic library which extends the LibSourcey core, and is
+#     included by Applications based on LibSourcey architecture. Modules must
+#     be built and installed before Applications.
+#
+# Application: 
+#     A standalone application. These must be built once all Dependencies and
+#     Modules have been built and installed.
+#
 # ============================================================================
-set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR})
-set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
-set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
-set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_SOURCE_DIR}/deps")
-set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_INSTALL_DIR}/deps")
-set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/LibSourcey/deps")
-set(LibSourcey_INCLUDE_DIRS "") # Contains all include dirs
-set(LibSourcey_LIBRARY_DIRS "") # Contains all include library dirs
-set(LibSourcey_INCLUDE_LIBRARIES "") # Contains all include libraries
 
-# Tell CMake where to locate our .cmake files
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
-set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
-
-# Append some common search paths for find_library
-# to find libraries from these locations first
-if(WIN32)
-  set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
-    #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg/bin
-    #D:/dev/lib/OpenCV2.3/build
-    D:/dev/lib/OpenCV2.4/build/lib
-    #D:/dev/lib/OpenCV2.4/build/lib/Debug
-    D:/dev/lib/wxWidgets-2.9.2/lib/vc_lib
-    #D:/dev/lib/ffmpeg/lib
-    D:/dev/lib/ffmpeg-2012-04-16/lib
-    D:/dev/lib/OpenSSL-Win32/lib/VC
-    D:/dev/lib/poco-1.4.1p1-all/lib 
-    #D:/dev/apps/MinGW/msys/1.0/local
-    #D:/dev/projects/Sourcey/LibSourcey/libs/anionu/deps/ffmpeg/bin
-    )
-else()
-  set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
-    /lib 
-    /usr/lib)
+# ----------------------------------------------------------------------------
+# Include standard Libraries
+# ----------------------------------------------------------------------------
+if(MSVC)
+  set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} ws2_32.lib dsound.lib winmm.lib strmiids.lib)
+  
+elseif(MSYS)
+  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lws2_32 -liphlpapi")
+elseif(LINUX)
+  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -llibc -lglibc")
 endif()
-
-# Append some common search paths for find_path
-# to search these locations first
-if(WIN32)
-  set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
-    #D:/dev/lib/OpenCV2.3/build/include
-    D:/dev/lib/OpenCV2.4/build/include
-    D:/dev/lib/wxWidgets-2.9.2
-    #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg
-    #D:/dev/lib/ffmpeg
-    D:/dev/lib/ffmpeg-2012-04-16/include
-    D:/dev/lib/OpenSSL-Win32/include
-    D:/dev/lib/poco-1.4.1p1-all
-    #D:/dev/apps/MinGW/msys/1.0/local
-    #D:/dev/projects/Sourcey/LibSourcey/libs/anionu/deps/ffmpeg/include
-    )
-endif()
-  #set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} "${LibSourcey_DEPENDENCIES_SOURCE_DIR}/MemLeakDetect")
-      
-set(LibSourcey_ARCHITECTURE i386)
-set(LibSourcey_BITNESS 32)
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(LibSourcey_BITNESS 64)
-  set(LibSourcey_ARCHITECTURE amd64)
-endif()
-
-include(LibSourceyMacros REQUIRED)
-include(LibSourceyModule REQUIRED)
-include(LibSourceyDependency OPTIONAL)
 
 
 # ----------------------------------------------------------------------------
-# Include and build third party dependencies
+# Include and third party dependencies
 # ----------------------------------------------------------------------------
 set(BUILD_DEPENDENCIES TRUE CACHE BOOL "Build third party dependencies")
 
@@ -241,7 +286,7 @@ if(BUILD_DEPENDENCIES)
   set(WITH_RTAUDIO ON CACHE BOOL "Build with RtAudio")
   set(WITH_LIBSTROPHE ON CACHE BOOL "Build with LibStrophe")
   set(WITH_JSONCPP ON CACHE BOOL "Build with JsonCpp")
-  #set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} "${LibSourcey_DEPENDENCIES_SOURCE_DIR}/MemLeakDetect")
+  set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} "${LibSourcey_DEPENDENCIES_SOURCE_DIR}/MemLeakDetect")
   add_subdirectory(${LibSourcey_DEPENDENCIES_SOURCE_DIR})
 else()
   unset(WITH_PUGIXML CACHE)
@@ -249,28 +294,6 @@ else()
   unset(WITH_LIBSTROPHE CACHE)
   unset(WITH_JSONCPP CACHE)
 endif()
-
-
-# ============================================================================
-# Include libraries, modules and projects
-# ============================================================================
-
-# ----------------------------------------------------------------------------
-# Include standard Libraries
-# ----------------------------------------------------------------------------
-if(MSVC)
-  set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} ws2_32.lib dsound.lib winmm.lib strmiids.lib)
-  
-elseif(MSYS)
-  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lws2_32 -liphlpapi")
-elseif(LINUX)
-  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -llibc -lglibc")
-endif()
-
-
-# ----------------------------------------------------------------------------
-# Include third party dependencies
-# ----------------------------------------------------------------------------
 
 # Include our third party source directory
 list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}) 
@@ -280,30 +303,9 @@ endif()
 include_directories("${LibSourcey_INCLUDE_DIRS}")
 link_directories("${LibSourcey_INSTALL_DIR}/lib")
 
- 
+
 # ----------------------------------------------------------------------------
-# Include LibSourcey modules and projects
-#
-# LibSourcey automatically includes all directories inside core and projects. 
-# Libraries in the LibSourcey source tree are broken up into two types:
-#
-#   Dependency:
-#     A third party library required by a LibSourcey Modue or Application.  
-#     Dependencies may be external or internal. External dependencies reside
-#     outside on the source tree, while internal dependencies generally reside
-#     in the deps folder. All dependencies must be built, installed, found
-#     and included by the build system before Modules and Application can be
-#     built. 
-#
-#   Module: 
-#     A static or dynamic library which extends the LibSourcey core, and is
-#     included by Applications based on LibSourcey architecture. Modules must
-#     be built and installed before Applications.
-#
-#   Application: 
-#     A standalone application. These must be built once all Dependencies and
-#     Modules have been built and installed.
-#
+# Include LibSourcey modules and applications
 # ----------------------------------------------------------------------------
 set(BUILD_MODULES OFF CACHE BOOL "Build LibSourcey modules")  
 set(BUILD_APPLICATIONS OFF CACHE BOOL "Build LibSourcey applications")
@@ -348,7 +350,6 @@ configure_file(
   "${LibSourcey_CONFIG_FILE_INCLUDE_DIR}/Config.h")
   
 
-
 # ----------------------------------------------------------------------------
 #  Uninstall target for "make uninstall"
 # ----------------------------------------------------------------------------
@@ -367,7 +368,7 @@ endif()
 #  Summary:
 # ----------------------------------------------------------------------------
 message(STATUS "")
-message(STATUS "General configuration for LibSourcey ${LibSourcey_VERSION} =====================================")
+message(STATUS "General configuration for LibSourcey ${LibSourcey_VERSION} ===============================")
 message(STATUS "")
 message(STATUS "    Built as dynamic libs?:     ${BUILD_SHARED_LIBS}")
 message(STATUS "    Compiler:                   ${CMAKE_COMPILER}")

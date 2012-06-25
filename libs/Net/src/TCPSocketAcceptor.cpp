@@ -74,7 +74,6 @@ void TCPSocketAcceptor::close()
 	Log("trace") << "[TCPSocketAcceptor: " << this << "] Closing" << endl;
 	
 	_reactor.detach(*this, reactorDelegate(this, &TCPSocketAcceptor::onAccept, SocketReadable));
-	Log("trace") << "[TCPSocketAcceptor: " << this << "] Closing 1" << endl;
 	try	{
 		// If the socket is already closed an exception
 		// will be thrown. Just swallow it.
@@ -93,8 +92,6 @@ void TCPSocketAcceptor::onAccept()
 	Log("trace") << "[TCPSocketAcceptor: " << this << "] On Accept" << endl;
 	try	{
 		StreamSocket sock = acceptConnection();
-
-		// If nobody accepts the socket it will be destroyed.
 		SocketAccepted.dispatch(this, sock, _reactor);
 	}
 	catch (Poco::IOException& exc) {

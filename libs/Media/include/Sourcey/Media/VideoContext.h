@@ -49,6 +49,10 @@ namespace Media {
 
 struct VideoConversionContext;
 
+	
+inline AVFrame* CreateVideoFrame(::PixelFormat pixfmt, int width, int height);
+inline AVRational GetCodecTimeBase(AVCodec* c, double fps);
+
 
 struct VideoContext
 {
@@ -56,21 +60,12 @@ struct VideoContext
 	virtual ~VideoContext();
 		
 	virtual void open();
-	virtual void close();
-	virtual void reset();
-	
-	static AVFrame* createVideoFrame(::PixelFormat pixfmt, int width, int height);
+	virtual void close();	
 
 	AVStream* stream;
 	AVCodecContext* codec;
 	AVFrame* frame;
-
-    //int bufferSize;
-	//UInt8* buffer;
-	//UInt64 frameNum;
-
-    double pts;
-	
+    double pts;	
     std::string error;
 };
 
@@ -84,20 +79,16 @@ struct VideoEncoderContext: public VideoContext
 	
 	virtual void open(AVFormatContext* oc); //, const VideoCodec& params
 	virtual void close();
-	virtual void reset();	
-	
-	virtual AVRational getCodecTimeBase(AVCodec* c, double fps);
+
 	
 	virtual bool encode(unsigned char* data, int size, AVPacket& opacket);
 	virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
-
-	//virtual int encode(unsigned char* buffer, int bufferSize, AVPacket& opacket/*, unsigned pts = AV_NOPTS_VALUE*/);
-		/// Encodes a video frame from given data buffer and
-		/// stores it in the opacket.
-		/// If a pts value is given it will be applied to the
-		/// encoded video packet.
 		
-	VideoConversionContext* convCtx;
+	VideoConversionContext* conv;
+
+    UInt8*			buffer;
+    int				bufferSize;
+
 	VideoCodec	iparams;
 	VideoCodec	oparams;
 };
@@ -112,7 +103,8 @@ struct VideoDecoderContext: public VideoContext
 	
 	virtual void open(AVFormatContext *ic, int streamID);
 	virtual void close();
-	virtual void reset();	
+	
+	
 	
 	virtual bool decode(UInt8* data, int size, AVPacket& opacket);
 	virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
@@ -145,3 +137,24 @@ struct VideoConversionContext
 
 #endif	// SOURCEY_MEDIA_VideoContext_H
 
+
+	//virtual void reset();
+	//virtual void reset();	
+	
+	//AVFrame* oframe;
+	//struct SwsContext* convCtx;
+/*
+void VideoDecoderContext::reset() 
+{
+	VideoContext::reset();
+}
+*/
+	//virtual void reset();	
+
+
+
+	//virtual int encode(unsigned char* buffer, int bufferSize, AVPacket& opacket/*, unsigned pts = AV_NOPTS_VALUE*/);
+		/// Encodes a video frame from given data buffer and
+		/// stores it in the opacket.
+		/// If a pts value is given it will be applied to the
+		/// encoded video packet.

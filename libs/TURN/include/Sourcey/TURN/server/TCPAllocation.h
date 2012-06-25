@@ -48,7 +48,7 @@ class TCPAllocation: public ServerAllocation
 {
 public:
 	TCPAllocation(Server& server, 
-				  Net::TCPSocket& controlConn, 
+				  Net::TCPSocket* control, 
 				  const FiveTuple& tuple, 
 				  const std::string& username, 
 				  const UInt32& lifetime);
@@ -57,23 +57,28 @@ public:
 	bool handleRequest(const Request& request);	
 	void handleConnectRequest(const Request& request);
 	void handleConnectionBindRequest(const Request& request);
+		
+	bool isOK();
+
+	void sendToControl(STUN::Message& message);
+
+	Net::TCPSocket* control();
+	Net::Address relayedAddress() const;
+	ClientConnectionManager& clients();
+	PeerConnectionManager& peers();
 	
+	bool onTimer();
+	void onControlDisconnect(void* sender);
 	void onPeerAccepted(void* sender, Poco::Net::StreamSocket& sock, Net::Reactor& reactor);
 	void onPeerConnectSuccess(void* sender); 
 	void onPeerConnectError(void* sender, const std::string& error, int& errnum);
 	void onPeerDisconnected(void* sender);
 	void onClientDisconnect(void* sender);
-	
-	bool isOK();
-	bool onTimer();
-	
-	Net::Address relayedAddress() const;
-	Net::TCPSocket& control();
-	ClientConnectionManager& clients();
-	PeerConnectionManager& peers();
+
+	virtual const char* className() const { return "TCPAllocation"; };
 
 protected:
-	Net::TCPSocket&	_control;
+	Net::TCPSocket*	_control;
 	ClientConnectionManager	_clients;
 	PeerConnectionManager	_peers;
 	Net::TCPSocketAcceptor	_acceptor;

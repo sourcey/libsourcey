@@ -123,9 +123,9 @@ void ConsoleChannel::write(const string& message, LogLevel level, const ILoggabl
 	
 	ostringstream ss;
 	format(ss, message, level, klass); 
-#if defined(_CONSOLE) // || defined(_DEBUG)
+//#if defined(_CONSOLE) || defined(_DEBUG)
 	cout << ss.str();
-#endif
+//#endif
 #if defined(_MSC_VER) //&& defined(_DEBUG)
 	string s(ss.str());
 	wstring temp(s.length(), L' ');
@@ -148,7 +148,7 @@ FileChannel::FileChannel(const string& name,
 	_path(path)
 {
 }
-	
+
 
 FileChannel::~FileChannel() 
 {
@@ -177,16 +177,15 @@ void FileChannel::write(const string& message, LogLevel level, const ILoggable* 
 	
 	if (!_stream.is_open())	
 		open();
-	//	_stream = new ofstream(_path.data());
 	
 	ostringstream ss;
 	format(ss, message, level, klass);
 	_stream << ss.str();
 	_stream.flush();
 
-#if defined(_DEBUG) //&& defined(_CONSOLE)
+//#if defined(_DEBUG) && defined(_CONSOLE)
 	cout << ss.str();
-#endif
+//#endif
 #if defined(_DEBUG) && defined(_MSC_VER)
 	std::string s(ss.str());
 	std::wstring temp(s.length(), L' ');
@@ -468,23 +467,3 @@ void Logger::write(const string& message, LogLevel level, const ILoggable* klass
 
 
 } // namespace Sourcey
-
-
-
-	
-	/*
-	// Output the prefix and message to the log file
-	*_stream << "[" << getStringFromLogLevel(level) << "] ";
-	*_stream << DateTimeFormatter::format(Timestamp(), _dateFormat);
-	if (klass)
-		klass->printLog(*_stream);
-	*_stream << message;
-	_stream->flush();
-	format(*_stream, message, level, klass, _dateFormat);
-	*/
-	
-	/*
-	LogMessage msg(message, getStringFromLogLevel(level), _dateFormat);
-	msg.dump(*_stream);
-	//OnLogMessage.dispatch(this, msg);
-	*/

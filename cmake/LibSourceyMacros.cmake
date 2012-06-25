@@ -38,63 +38,35 @@ endfunction()
 # LIST_LENGTH(length ${MYLIST})
 # MESSAGE("length: ${length}")
 #
-MACRO(LIST_LENGTH var)
-  SET(entries)
-  FOREACH(e ${ARGN})
-    SET(entries "${entries}.")
-  ENDFOREACH(e)
-  STRING(LENGTH ${entries} ${var})
-ENDMACRO(LIST_LENGTH)
+macro(LIST_LENGTH var)
+  set(entries)
+  foreach(e ${ARGN})
+    set(entries "${entries}.")
+  endforeach(e)
+  string(LENGTH ${entries} ${var})
+endmacro()
 
 
 #
-### Macro: list_append_new
+### Macro: append_unique_list
 #
 # Appends items from the source list to the given target list
 # if they are not already contained within the target list
-# in string form.
+# in flattened string form.
 #
-function(list_append_new target source)  
-  
+function(append_unique_list target source)    
   if (NOT ${source}) 
-    #message("alist_append_unique: no source array ${source}: ${${source}}")    
     return()
   endif()
-
-  #message("list_append_unique:BEFORE=${target}=${${target}}")  
-  #message("======= alist_append_unique:target=${target}a")    
-  #message("alist_append_unique:source=${source}a") 
-  #message("alist_append_unique:target1=${${target}}a")    
-  #message("alist_append_unique:source1=${${source}}a")  
-
   if (NOT ${target})       
     set(${target} ${${source}} PARENT_SCOPE)
-    #message("alist_append_unique: target array is empty, setting from source")  
-  else()    
-
+  else()
     join("${${target}}" ":" target_str)  
     join("${${source}}" ":" source_str)
     if (NOT ${target_str} MATCHES ${source_str}) 
-      #  #list(APPEND target ${source})      
-      #message("alist_append_unique: apending ${source_str} to ${target_str}")  
       set(${target} ${${target}} ${${source}} PARENT_SCOPE)
-    else()     	
-      #message("alist_append_unique: skipping because of match: ${target_str} contains ${source_str}")  
     endif() 
   endif() 
-
-  #message("list_append_unique:RESULT=${target}=${${target}}")  
-
-  #message("list_append_unique:target_str=${target_str}")    
-  #message("list_append_unique:source_str=${source_str}")  
-  #set(${target} ${${target}} ${${source}})
-  #set(${target} ${${source}})
-
-  #if (NOT target_str)       
-  #  set(target ${${target}} ${${source}} PARENT_SCOPE)
-  #  return()  
-  #endif() 
-
 endfunction()
 
 
@@ -121,52 +93,39 @@ endmacro()
 #
 # Marks the given module as found all component are present.
 #
-macro(set_module_found module)  
-
-  include(FindPackageHandleStandardArgs)
+macro(set_module_found module) 
   
+  set(${module}_FOUND FALSE)
   set(${module}_FOUND FALSE PARENT_SCOPE)
-
-  #if (NOT ${module}_LIBRARIES OR NOT ${module}_INCLUDE_DIRS)  
-  #  return()
-  #endif()
- 
-  # Check that the required components were found.   
-  #if (${module}_FIND_COMPONENTS)
-  #  foreach (component ${${module}_FIND_COMPONENTS})
-  #    if (${module}_${component}_FOUND)
-  #      message(STATUS "Required ${module} component ${component} present.")
-  #    else ()
-  #      message(STATUS "Required ${module} component ${component} missing.")
-  #      return()
-  #    endif ()
-  #  endforeach ()
-  #endif()  
-
-  # TODO: Honour this setting
-  #if (${module}_FIND_REQUIRED)
 
   # Compile the list of required vars
   set(_${module}_REQUIRED_VARS ${module}_LIBRARIES ${module}_INCLUDE_DIRS)
-  foreach (_component ${${module}_FIND_COMPONENTS})
-    list(APPEND _${module}_REQUIRED_VARS ${module}_${_component}_LIBRARIES ${module}_${_component}_INCLUDE_DIRS)
+  foreach (component ${${module}_FIND_COMPONENTS})
+    list(APPEND _${module}_REQUIRED_VARS ${module}_${component}_LIBRARIES ${module}_${component}_INCLUDE_DIRS)
+    #if (${module}_${component}_FOUND)
+    #  #message(STATUS "Required ${module} component ${component} present.")
+    #else ()
+    #  #message(STATUS "Required ${module} component ${component} missing.")
+    #endif ()
   endforeach ()
 
-  # Give a nice error message if some of the required vars are missing.
-  find_package_handle_standard_args(${module} DEFAULT_MSG ${_${module}_REQUIRED_VARS})
-
-  #endif() 
-
   # Cache the vars.
-  #set(${module}_INCLUDE_DIRS ${${module}_INCLUDE_DIRS} CACHE STRING   "The ${module} include directories." FORCE)
-  #set(${module}_LIBRARY_DIRS ${${module}_LIBRARY_DIRS} CACHE STRING   "The ${module} library directories." FORCE)
-  #set(${module}_LIBRARIES    ${${module}_LIBRARIES}    CACHE STRING   "The ${module} libraries." FORCE)
-  #set(${module}_FOUND        ${${module}_FOUND}        CACHE BOOLEAN  "The ${module} found status." FORCE)  
-
+  set(${module}_INCLUDE_DIRS ${${module}_INCLUDE_DIRS} CACHE STRING   "The ${module} include directories." FORCE)
+  set(${module}_LIBRARY_DIRS ${${module}_LIBRARY_DIRS} CACHE STRING   "The ${module} library directories." FORCE)
+  set(${module}_LIBRARIES    ${${module}_LIBRARIES}    CACHE STRING   "The ${module} libraries." FORCE)
+  set(${module}_FOUND        ${${module}_FOUND}        CACHE BOOLEAN  "The ${module} found status." FORCE)  
   set(${module}_INCLUDE_DIRS ${${module}_INCLUDE_DIRS} PARENT_SCOPE)
   set(${module}_LIBRARY_DIRS ${${module}_LIBRARY_DIRS} PARENT_SCOPE)
   set(${module}_LIBRARIES    ${${module}_LIBRARIES}    PARENT_SCOPE)
   set(${module}_FOUND        ${${module}_FOUND}        PARENT_SCOPE)
+
+  if (${module}_FIND_REQUIRED)
+    # Give a nice error message if some of the required vars are missing.
+    include(FindPackageHandleStandardArgs)
+    find_package_handle_standard_args(${module} DEFAULT_MSG ${_${module}_REQUIRED_VARS})
+  else() 
+    message("Failed to locate ${module}. Please specify paths manually.")  
+  endif() 
 
   mark_as_advanced(${module}_INCLUDE_DIRS
                    ${module}_LIBRARY_DIRS
@@ -174,8 +133,9 @@ macro(set_module_found module)
                    ${module}_DEFINITIONS
                    ${module}_FOUND)
 
+  set(${module}_FOUND TRUE)
   set(${module}_FOUND TRUE PARENT_SCOPE)
-
+  
   #message("Module Found=${module}")    
 
 endmacro()
@@ -191,54 +151,34 @@ macro(set_component_found module component)
   set_component_alias(${module} ${component})
 
   if (${module}_${component}_LIBRARIES AND ${module}_${component}_INCLUDE_DIRS)
-    message(STATUS "  - ${module} ${component} found.")
+    # message(STATUS "  - ${module} ${component} found.")
     set(${ALIAS_FOUND} TRUE PARENT_SCOPE)
   
     # Add component vars to the perant module lists
-    list_append_new(${module}_INCLUDE_DIRS ${ALIAS_INCLUDE_DIRS})    
-    list_append_new(${module}_LIBRARY_DIRS ${ALIAS_LIBRARY_DIRS})   
-    list_append_new(${module}_LIBRARIES    ${ALIAS_LIBRARIES})    
-    list_append_new(${module}_DEFINITIONS  ${ALIAS_DEFINITIONS})
+    append_unique_list(${module}_INCLUDE_DIRS ${ALIAS_INCLUDE_DIRS})    
+    append_unique_list(${module}_LIBRARY_DIRS ${ALIAS_LIBRARY_DIRS})   
+    append_unique_list(${module}_LIBRARIES    ${ALIAS_LIBRARIES})    
+    append_unique_list(${module}_DEFINITIONS  ${ALIAS_DEFINITIONS})
 
-    #if (${${module}_INCLUDE_DIRS} NOT MATCHES ${${ALIAS_INCLUDE_DIRS}}) 
-    #	list(APPEND ${module}_INCLUDE_DIRS ${${ALIAS_INCLUDE_DIRS}})    
-    #endif ()             
-    #if (${${module}_LIBRARY_DIRS} NOT MATCHES ${${ALIAS_LIBRARY_DIRS}}) 
-    #	list(APPEND ${module}_LIBRARY_DIRS ${${ALIAS_LIBRARY_DIRS}})   
-    #endif ()           
-    #if (${${module}_LIBRARIES} NOT MATCHES ${${ALIAS_LIBRARIES}}) 
-    #  list(APPEND ${module}_LIBRARIES    ${${ALIAS_LIBRARIES}})  
-    #endif ()            
-    #if (${${module}_DEFINITIONS} NOT MATCHES ${${ALIAS_DEFINITIONS}})    
-    #  list(APPEND ${module}_DEFINITIONS  ${${ALIAS_DEFINITIONS}}) 
-    #endif ()   
-    #set(${module}_INCLUDE_DIRS ${${module}_INCLUDE_DIRS} ${${ALIAS_INCLUDE_DIRS}} PARENT_SCOPE)      
-    #set(${module}_LIBRARY_DIRS ${${module}_LIBRARY_DIRS} ${${ALIAS_LIBRARY_DIRS}} PARENT_SCOPE)  
-    #set(${module}_LIBRARIES    ${${module}_LIBRARIES}    ${${ALIAS_LIBRARIES}} PARENT_SCOPE)        
-    #set(${module}_LIBRARIES    ${${module}_LIBRARIES}    ${${ALIAS_LIBRARIES}})      
-    #set(${module}_DEFINITIONS  ${${module}_DEFINITIONS} ${${ALIAS_DEFINITIONS}} PARENT_SCOPE)   
-
+    set(${module}_INCLUDE_DIRS ${${module}_INCLUDE_DIRS} PARENT_SCOPE)      
+    set(${module}_LIBRARY_DIRS ${${module}_LIBRARY_DIRS} PARENT_SCOPE)  
+    set(${module}_LIBRARIES    ${${module}_LIBRARIES}    PARENT_SCOPE)           
+    set(${module}_DEFINITIONS  ${${module}_DEFINITIONS}  PARENT_SCOPE)   
+    
     #message("Find Component Paths=${module}:${component}:${library}:${header}")
     #message("${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")  
     #message("${ALIAS_RELEASE_LIBRARIES}=${${ALIAS_RELEASE_LIBRARIES}}")  
     #message("${ALIAS_DEBUG_LIBRARIES}=${${ALIAS_DEBUG_LIBRARIES}}")  
     #message("${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")
     #message("${module}_INCLUDE_DIRS=${${module}_INCLUDE_DIRS}") 
-
-
-
-    #message("${module}_LIBRARIES=${${module}_LIBRARIES}")         
-    #message("${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")  
-    #message("${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")      
-    #message("${module}_INCLUDE_DIRS=${${module}_INCLUDE_DIRS}")  
-
+    #message("${module}_LIBRARIES=${${module}_LIBRARIES}")     
 
     mark_as_advanced(
       ${ALIAS_INCLUDE_DIRS}
       ${ALIAS_LIBRARY_DIRS})
 
   else ()
-     message(STATUS "  - ${module} ${component} not found.")
+     #message(STATUS "  - ${module} ${component} not found.")
   endif ()
 
   mark_as_advanced(
@@ -258,14 +198,19 @@ endmacro()
 #
 macro(set_module_notfound module)
 
-  # message(STATUS "  - ${module} ${component} setting notfound.")
+  # message(STATUS "  - ${module} ${component} setting not found.")
+  set(${module}_FOUND FALSE)
   set(${module}_FOUND FALSE PARENT_SCOPE)
   
   if (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)  
-    #set(${module}_RELEASE_LIBRARIES "" PARENT_SCOPE)
-    #set(${module}_DEBUG_LIBRARIES "" PARENT_SCOPE)
-    #set(${module}_LIBRARIES "" PARENT_SCOPE)
+    set(${module}_RELEASE_LIBRARIES "")
+    set(${module}_DEBUG_LIBRARIES "")
+    set(${module}_LIBRARIES "")
+    set(${module}_RELEASE_LIBRARIES "" PARENT_SCOPE)
+    set(${module}_DEBUG_LIBRARIES "" PARENT_SCOPE)
+    set(${module}_LIBRARIES "" PARENT_SCOPE)
   else()    
+    set(${module}_LIBRARIES ${ALIAS_LIBRARIES}-NOTFOUND)
     #set(${module}_LIBRARIES ${ALIAS_LIBRARIES}-NOTFOUND PARENT_SCOPE)
   endif()  
     
@@ -281,14 +226,19 @@ macro(set_component_notfound module component)
 
   set_component_alias(${module} ${component})
 
-  # message(STATUS "  - ${module} ${component} setting notfound.")
+  # message(STATUS "  - ${module} ${component} setting not found.")
+  set(${ALIAS_FOUND} FALSE)
   set(${ALIAS_FOUND} FALSE PARENT_SCOPE)
   
-  if (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)  
+  if (${module}_MULTI_CONFIGURATION AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
+    set(${ALIAS_RELEASE_LIBRARIES} ${ALIAS_RELEASE_LIBRARIES}-NOTFOUND)
+    set(${ALIAS_DEBUG_LIBRARIES} ${ALIAS_DEBUG_LIBRARIES}-NOTFOUND)
+    set(${ALIAS_LIBRARIES} "") #${module}_${component}_LIBRARIES-NOTFOUND)
     #set(${ALIAS_RELEASE_LIBRARIES} ${ALIAS_RELEASE_LIBRARIES}-NOTFOUND PARENT_SCOPE)
     #set(${ALIAS_DEBUG_LIBRARIES} ${ALIAS_DEBUG_LIBRARIES}-NOTFOUND PARENT_SCOPE)
     #set(${ALIAS_LIBRARIES} "") #${module}_${component}_LIBRARIES-NOTFOUND PARENT_SCOPE)
   else()
+    set(${ALIAS_LIBRARIES} ${ALIAS_LIBRARIES}-NOTFOUND)
     #set(${ALIAS_LIBRARIES} ${ALIAS_LIBRARIES}-NOTFOUND PARENT_SCOPE)
   endif()  
     
@@ -303,7 +253,7 @@ endmacro()
 macro(find_component_paths module component library header)
 
   set_component_alias(${module} ${component})  
-  #set_component_notfound(${module} ${component})
+  set_component_notfound(${module} ${component})
 
   find_path(${ALIAS_INCLUDE_DIRS} ${header}
     #HINTS
@@ -312,12 +262,13 @@ macro(find_component_paths module component library header)
       ${${module}_PATH_SUFFIXES}
   )
 
-  # Create a Debug and a Release list for multi configuration builds        
-  if (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+  # Create a Debug and a Release list for multi configuration builds.
+  # NOTE: <module>_CONFIGURATION_TYPES must be set to use this.
+  if (${module}_MULTI_CONFIGURATION AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
     find_library(${ALIAS_RELEASE_LIBRARIES} 
       NAMES
         lib${library}.a         
-        lib${library}.socd ..
+        lib${library}.so
         ${library}.lib
         ${library}
       #HINTS
@@ -337,7 +288,7 @@ macro(find_component_paths module component library header)
     endif()
     if (${ALIAS_DEBUG_LIBRARIES})
       list(APPEND ${ALIAS_LIBRARIES} "debug" ${${ALIAS_DEBUG_LIBRARIES}})
-    endif()    
+    endif()
   else()
     find_library(${ALIAS_LIBRARIES}
       NAMES # setting in order might help overcome find_library bugs :/
@@ -353,6 +304,7 @@ macro(find_component_paths module component library header)
   set_component_found(${module} ${component})
 
 endmacro()
+
 
 #
 ### Macro: find_component

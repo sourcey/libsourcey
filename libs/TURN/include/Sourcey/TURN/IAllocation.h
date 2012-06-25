@@ -34,6 +34,7 @@
 #include "Sourcey/TURN/Types.h"
 #include "Sourcey/Timeout.h"
 #include "Sourcey/Timer.h"
+#include "Sourcey/Logger.h"
 #include "Sourcey/Net/Address.h"
 #include "Poco/Mutex.h"
 
@@ -42,7 +43,7 @@ namespace Sourcey {
 namespace TURN {
 
 
-class IAllocation 
+class IAllocation: public ILoggable
 	//  All TURN operations revolve around allocations, and all TURN messages
 	//  are associated with an allocation.  An allocation conceptually
 	//  consists of the following state data:
@@ -87,7 +88,7 @@ class IAllocation
 	//  then ticks down towards 0.  By default, each Allocate or Refresh
 	//  transaction resets this timer to the default lifetime value of 600
 	//  seconds (10 minutes), but the client can request a different value in
-	//  the Allocate and Refresh request.  IAllocations can only be refreshed
+	//  the Allocate and Refresh request. Allocations can only be refreshed
 	//  using the Refresh request; sending data to a peer does not refresh an
 	//  allocation. When an allocation expires, the state data associated
 	//  with the allocation can be freed.
@@ -104,8 +105,8 @@ public:
 		// usage each time the allocation is used.
 
 	virtual bool isOK();
-		// Returns false if the allocation is timed out or the bandwidth
-		// limit has been reached.
+		// Returns false if the allocation is timed out or the 
+		// bandwidth limit has been reached.
 
 	virtual bool expired();
 		// Returns true if the allocation is timed out.
@@ -136,6 +137,8 @@ public:
 	//virtual void refreshAllPermissions();
 	virtual bool hasPermission(const Net::IP& peerIP);
 
+	virtual const char* className() const { return "IAllocation"; };
+
 protected:
 	FiveTuple		_tuple;
 	std::string		_username;
@@ -143,9 +146,8 @@ protected:
 	UInt32			_createdAt;
 	UInt32			_updatedAt;
 	PermissionList	_permissions;
-	//Timeout			_timeout;
-	UInt32	_bandwidthLimit;
-	UInt32	_bandwidthUsed;
+	UInt32			_bandwidthLimit;
+	UInt32			_bandwidthUsed;
 	mutable Poco::FastMutex _mutex;
 };
 

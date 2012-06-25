@@ -120,8 +120,7 @@ void UDPSocket::close()
 	Log("debug") << "[UDPSocket:" << this << "] Closing" << endl;
 
 	unbindEvents();
-	FastMutex::ScopedLock lock(_mutex); 
-	if (!_closed) {
+	if (isConnected()) {
 		try	{
 			// If the socket is already closed for whatever
 			// reason an /*InvalidSocketException*/NetException will be thrown. 
@@ -130,9 +129,12 @@ void UDPSocket::close()
 		}
 		catch (Poco::Net::NetException& exc) {
 			Log("debug") << "[TCPSocket:" << this << "] Closing: " << exc.displayText() << endl;
+		}		
+		{
+			FastMutex::ScopedLock lock(_mutex); 
+			_queue->stop();
+			_closed = true;	
 		}
-		_queue->stop();
-		_closed = true;	
 		Closed.dispatch(this);
 	}
 }

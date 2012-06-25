@@ -97,7 +97,7 @@ typedef ReactorDelegateBase ReactorDelegate;
 
 // ---------------------------------------------------------------------
 //
-class Reactor: public Poco::Runnable
+class Reactor: public Poco::Runnable, public ILoggable
 	/// This class implements the Reactor pattern described in
 	/// the book "Pattern Languages of Program Design" by Jim
 	/// Coplien and Douglas C. Schmidt (Addison Wesley, 1995).
@@ -135,6 +135,8 @@ public:
 	//Runner& runner();
 	
 	NullSignal Shutdown;
+
+	virtual const char* className() const { return "Reactor"; };
 	
 protected:	
 	void dispatch(const Poco::Net::Socket& socket, SocketEvent event);

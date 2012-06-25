@@ -3,4 +3,4 @@
 #
 # ----------------------------------------------------------------------------
 
-add_subdirectory(TURNServer)
+add_subdirectory(EchoServer)

@@ -120,7 +120,7 @@ public:
 protected:
 	virtual ~DispatchQueue() 
 	{
-		Log("debug") << "[PacketQueue:" << this << "] Destroying" << std::endl;
+		Log("trace") << "[DispatchQueue:" << this << "] Destroying" << std::endl;
 		clear();
 	};
 	

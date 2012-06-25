@@ -108,12 +108,12 @@ protected:
 	virtual void resetBuffer();
 	
 protected:
+	mutable Poco::FastMutex _mutex;
 	Buffer					_buffer;
 	Reactor&				_reactor;
 	std::string				_error;
 	bool					_connected;
 	bool					_deleteOnClose;
-	mutable Poco::FastMutex _mutex;
 };
 
 

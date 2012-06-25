@@ -55,33 +55,12 @@ struct AudioContext
 	
 	virtual void open();
 	virtual void close();		
-	virtual void reset();	
+	//virtual void reset();	
 	
-    // Internal data 
     AVStream*			stream;
     AVCodecContext*		codec;
 	AVFrame*            frame;
-    //AVCodec*			codec;
-    //AVPacket*			packet;
-	
-    //int					bufferSize;
-    //UInt8*				buffer;
-
-	// The output frame size for encoding and decoding.
-    //int					frameSize;
-
-    //int				offset;
-
-	// Exposed properties
-	/*
-    int bitRate;
-    int sampleRate;
-    int bitsPerSample;
-    int channels;
-	*/
-	UInt64 frameNum;
-    double				pts;
-	
+    double				pts;	
     std::string			error;
 };
 
@@ -95,10 +74,13 @@ struct AudioEncoderContext: public AudioContext
 	
 	virtual void open(AVFormatContext* oc);
 	virtual void close();
-	virtual void reset();	
+	//virtual void reset();	
 	
 	virtual bool encode(unsigned char* data, int size, AVPacket& opacket);
-	virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
+	virtual bool encode(AVPacket& ipacket, AVPacket& opacket);	
+	
+    UInt8*			buffer;
+    int				bufferSize;
 
 	AudioCodec		iparams;
 	AudioCodec		oparams;
@@ -114,7 +96,7 @@ struct AudioDecoderContext: public AudioContext
 	
 	virtual void open(AVFormatContext *ic, int streamID);
 	virtual void close();
-	virtual void reset();	
+	//virtual void reset();	
 	
 	virtual bool decode(UInt8* data, int size, AVPacket& opacket);
 	virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
@@ -139,3 +121,21 @@ struct AudioDecoderContext: public AudioContext
 
 #endif	// SOURCEY_MEDIA_AudioContext_H
 
+
+
+    // Internal data 
+    //AVCodec*			codec;
+    //AVPacket*			packet;
+
+	// The output frame size for encoding and decoding.
+    //int					frameSize;
+
+    //int				offset;
+
+	// Exposed properties
+	/*
+    int bitRate;
+    int sampleRate;
+    int bitsPerSample;
+    int channels;
+	*/

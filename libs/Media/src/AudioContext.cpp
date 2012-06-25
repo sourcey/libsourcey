@@ -42,9 +42,12 @@ namespace Media {
 // Base Audio Context
 //
 // ---------------------------------------------------------------------
-AudioContext::AudioContext()
+AudioContext::AudioContext() :
+	stream(NULL),
+	codec(NULL),
+	frame(NULL),
+	pts(0.0)
 {
-	reset();
 }
 	
 
@@ -52,41 +55,28 @@ AudioContext::~AudioContext()
 {	
 	close();
 }
-
-
-void AudioContext::reset()
-{
-	stream = NULL;
-	codec = NULL;
-	frame = NULL;
-		
-	/*
-	bufferSize = 0;
-	buffer = NULL;
-		
-	bitRate = -1;
-	sampleRate = -1;
-	bitsPerSample = -1;
-	channels = -1;
-	*/
-	frameNum = 0;
-
-	pts = 0.0;	
-
-	error = "";
-}
 	
 
 void AudioContext::close()
 {
-	if (frame)
+	if (frame) {
 		av_free(frame);
+		frame = NULL;
+	}
 
-	if (codec)
+	if (codec) {
 		avcodec_close(codec);
+		codec = NULL;
+	}
 
-    //if (buffer)
-    //    av_free(buffer);
+	if (stream)	{
+		stream = NULL;
+		// NOTE: The stream is managed by the AVFormatContext
+		//av_freep(stream);
+	}
+	
+	pts = 0.0;
+	error = "";
 }
 
 
@@ -114,13 +104,16 @@ double AudioContext::pts()
 // Audio Encoder Context
 //
 // ---------------------------------------------------------------------
-AudioEncoderContext::AudioEncoderContext()
+AudioEncoderContext::AudioEncoderContext() :
+	buffer(NULL),
+	bufferSize(0)
 {
 }
 	
 
 AudioEncoderContext::~AudioEncoderContext()
 {
+	close();
 }
 
 
@@ -144,28 +137,6 @@ void AudioEncoderContext::open(AVFormatContext* oc) //, const AudioCodec& params
 	stream = avformat_new_stream(oc, c);
 	if (!stream)
 		throw Exception("Failed to initialize the audio stream.");
-	
-	/*
-    c = st->codec;
-	
-    c->sample_fmt = AV_SAMPLE_FMT_S16;
-    c->bit_rate = 64000;
-    c->sample_rate = 44100;
-    c->channels = 2;
-
-    // some formats want stream headers to be separate
-    if (oc->oformat->flags & AVFMT_GLOBALHEADER)
-        c->flags |= CODEC_FLAG_GLOBAL_HEADER;
-
-	// Initializes the audio buffers
-	//this->buffer = new unsigned char[MAX_AUDIO_PACKET_SIZE];
-
-	// Add an audio stream that uses the format's default video codec 
-	// to the format context's streams[] array.
-	stream = av_new_stream(oc, 0);
-	if (!stream)
-		throw Exception("Could not allocate audio stream");
-	*/
 
 	// Now we'll setup the parameters of AVCodecContext
 	codec = stream->codec;
@@ -174,10 +145,10 @@ void AudioEncoderContext::open(AVFormatContext* oc) //, const AudioCodec& params
 	codec->codec_type = AVMEDIA_TYPE_AUDIO;
 	codec->bit_rate = oparams.bitRate;			// 64000	
 	codec->sample_rate = oparams.sampleRate;		// 44100
-	codec->sample_fmt = AV_SAMPLE_FMT_S16;		// NOTE: Add support for floating point format
+	codec->sample_fmt = AV_SAMPLE_FMT_S16;		// TODO: Add support for floating point format
 	codec->channels = oparams.channels;	 		// 2
 	codec->time_base.num = 1;
-	codec->time_base.den = oparams.sampleRate; //25; //20; //25; //25; //
+	codec->time_base.den = oparams.sampleRate;
 	
 	//codec->bit_rate = 32000; //oparams.bitRate * 1000 / 25; 
 	//codec->bit_rate = oparams.bitRate * 1000 / 25; 
@@ -193,63 +164,11 @@ void AudioEncoderContext::open(AVFormatContext* oc) //, const AudioCodec& params
 		
 	// NOTE: buffer must be >= AVCODEC_MAX_AUDIO_FRAME_SIZE
 	// or some codecs will fail.
-    //bufferSize = AVCODEC_MAX_AUDIO_FRAME_SIZE; //MAX_AUDIO_PACKET_SIZE;
-    //buffer = (UInt8*)av_malloc(this->bufferSize);	
-		
-	// Set the output frame size.
-	//frameSize = codec->frame_size * 2 * codec->channels;
+    bufferSize = AVCODEC_MAX_AUDIO_FRAME_SIZE; //MAX_AUDIO_PACKET_SIZE;
+    buffer = (UInt8*)av_malloc(bufferSize);	
 	
 	frame = avcodec_alloc_frame();
-	//av_samples_get_buffer_size(NULL, codec->channels,decoded_frame->nb_samples,c->sample_fmt, 1);
-	
-	//
-
-	/*
-	if (codec->channels == 6)
-		codec->channel_layout = AV_CH_LAYOUT_5POINT1;
-
-	if (codec->codec_id == CODEC_ID_AAC) {		
-		codec->profile = FF_PROFILE_AAC_LOW;		
-	}
-	else if (codec->codec_id == CODEC_ID_AMR_NB) {
-		codec->sample_rate = 8000;
-		codec->channels = 1;
-	}
-
-	// Find the encoder
-	//avcodec_find_encoder_by_name
-	AVCodec* c = avcodec_find_encoder(codec->codec_id);
-	if (!c)
-		throw Exception("Audio codec not found.");	
-	
-	// Set the frame size
-	if (codec->frame_size <= 1) {
-		codec->frame_size = MAX_AUDIO_PACKET_SIZE / codec->channels;
-		switch (codec->codec_id) {
-		case CODEC_ID_PCM_S16LE:
-		case CODEC_ID_PCM_S16BE:
-		case CODEC_ID_PCM_U16LE:
-		case CODEC_ID_PCM_U16BE:
-			codec->frame_size >>= 1;
-			break;
-		default:
-			break;
-		}
-	}
-
-	// Set the encoded output frame size
-	//int frameDecoded = av_get_bits_per_sample_format(codec->sample_fmt)/8;
-	_audioOutSize = codec->frame_size * 2 * codec->channels;
-
-	// The encoder may require a minimum number of raw audio samples for each encoding but we can't
-	// guarantee we'll get this minimum each time an audio frame is decoded from the in file so 
-	// we use a FIFO to store up incoming raw samples until we have enough for one call to the codec.
-	_audioFifo = av_fifo_alloc(MAX_AUDIO_PACKET_SIZE * 2);
-
-	// Allocate a buffer to read OUT of the FIFO into. The FIFO maintains its own buffer internally.
-	if ((_audioFifoOutBuffer = (UInt8*)av_malloc(MAX_AUDIO_PACKET_SIZE * 2)) == 0)
-		throw Exception("Cannot allocate audio FIFO buffer.");
-		*/	
+	//av_samples_get_buffer_size(NULL, codec->channels, decoded_frame->nb_samples, c->sample_fmt, 1);
 }
 
 
@@ -259,38 +178,10 @@ void AudioEncoderContext::close()
 
 	AudioContext::close();	
 	
-  	//if (packet)
-  	//	av_free_packet(packet);
-
-	/*
-	if (codec) {
-		avcodec_close(codec);
-		codec = NULL;
+	if (buffer) {
+		av_free(buffer);
+		buffer = NULL;
 	}
-
-	if (this->buffer) {
-		delete this->buffer;
-		this->buffer = NULL;
-	}
-   // if (params.enabled)			delete _audioParams;
-	if (_audioFifoOutBuffer) {
-		av_free(_audioFifoOutBuffer);
-		_audioFifoOutBuffer = NULL;
-	}
-	if (_audioFifo) {	
-		av_fifo_free(_audioFifo);
-		_audioFifo = NULL;
-	}
-	*/
-}
-
-	
-void AudioEncoderContext::reset() 
-{
-	AudioContext::reset();
-
-	//packet = NULL;
-	//frameSize = 0;
 }
 
 
@@ -312,11 +203,13 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 	// Log("trace") << "[AudioEncoderContext:" << this << "] Encoding Audio Packet" << endl;
 
 	assert(ipacket.stream_index == stream->index);
-
-	int frameEncoded = 0;
 	
 	frame->data[0] = ipacket.data;
-
+		
+    opacket.data = this->buffer;
+    opacket.size = this->bufferSize;
+	
+	int frameEncoded = 0;
 	int len = avcodec_encode_audio2(codec, &opacket, frame, &frameEncoded);
     if (len < 0) {
 		error = "Encoder error";
@@ -333,13 +226,17 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 // Audio Decoder Context
 //
 // ---------------------------------------------------------------------
-AudioDecoderContext::AudioDecoderContext()
+AudioDecoderContext::AudioDecoderContext() :
+	duration(0.0),
+	width(-1),
+	fp(false)
 {
 }
 	
 
 AudioDecoderContext::~AudioDecoderContext()
 {
+	close();
 }
 
 
@@ -390,14 +287,7 @@ void AudioDecoderContext::open(AVFormatContext *ic, int streamID)
 void AudioDecoderContext::close()
 {
 	AudioContext::close();
-}
 
-
-	
-void AudioDecoderContext::reset() 
-{
-	AudioContext::reset();
-	
 	duration = 0.0;	
 	width = -1;
 	fp = false;
@@ -473,6 +363,77 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 } } // namespace Sourcey::Media
 
 
+	
+	
+		
+	// Set the output frame size.
+	//frameSize = codec->frame_size * 2 * codec->channels;
+	//
+
+	/*
+	if (codec->channels == 6)
+		codec->channel_layout = AV_CH_LAYOUT_5POINT1;
+
+	if (codec->codec_id == CODEC_ID_AAC) {		
+		codec->profile = FF_PROFILE_AAC_LOW;		
+	}
+	else if (codec->codec_id == CODEC_ID_AMR_NB) {
+		codec->sample_rate = 8000;
+		codec->channels = 1;
+	}
+
+	// Find the encoder
+	//avcodec_find_encoder_by_name
+	AVCodec* c = avcodec_find_encoder(codec->codec_id);
+	if (!c)
+		throw Exception("Audio codec not found.");	
+	
+	// Set the frame size
+	if (codec->frame_size <= 1) {
+		codec->frame_size = MAX_AUDIO_PACKET_SIZE / codec->channels;
+		switch (codec->codec_id) {
+		case CODEC_ID_PCM_S16LE:
+		case CODEC_ID_PCM_S16BE:
+		case CODEC_ID_PCM_U16LE:
+		case CODEC_ID_PCM_U16BE:
+			codec->frame_size >>= 1;
+			break;
+		default:
+			break;
+		}
+	}
+
+	// Set the encoded output frame size
+	//int frameDecoded = av_get_bits_per_sample_format(codec->sample_fmt)/8;
+	_audioOutSize = codec->frame_size * 2 * codec->channels;
+
+	// The encoder may require a minimum number of raw audio samples for each encoding but we can't
+	// guarantee we'll get this minimum each time an audio frame is decoded from the in file so 
+	// we use a FIFO to store up incoming raw samples until we have enough for one call to the codec.
+	_audioFifo = av_fifo_alloc(MAX_AUDIO_PACKET_SIZE * 2);
+
+	// Allocate a buffer to read OUT of the FIFO into. The FIFO maintains its own buffer internally.
+	if ((_audioFifoOutBuffer = (UInt8*)av_malloc(MAX_AUDIO_PACKET_SIZE * 2)) == 0)
+		throw Exception("Cannot allocate audio FIFO buffer.");
+		*/	
+  	//if (packet)
+  	//	av_free_packet(packet);
+
+	/*
+	if (codec) {
+		avcodec_close(codec);
+		codec = NULL;
+	}
+   // if (params.enabled)			delete _audioParams;
+	if (_audioFifoOutBuffer) {
+		av_free(_audioFifoOutBuffer);
+		_audioFifoOutBuffer = NULL;
+	}
+	if (_audioFifo) {	
+		av_fifo_free(_audioFifo);
+		_audioFifo = NULL;
+	}
+	*/
 		/*	
 		Log("trace") << "[AudioDecoderContext:" << this << "] check frame_size: " << codec->frame_size << endl;
 		Log("trace") << "[AudioDecoderContext:" << this << "] check channels: " << codec->channels << endl;
@@ -591,6 +552,28 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 	return len;
 			*/
 
+	
+	/*
+    c = st->codec;
+	
+    c->sample_fmt = AV_SAMPLE_FMT_S16;
+    c->bit_rate = 64000;
+    c->sample_rate = 44100;
+    c->channels = 2;
+
+    // some formats want stream headers to be separate
+    if (oc->oformat->flags & AVFMT_GLOBALHEADER)
+        c->flags |= CODEC_FLAG_GLOBAL_HEADER;
+
+	// Initializes the audio buffers
+	//this->buffer = new unsigned char[MAX_AUDIO_PACKET_SIZE];
+
+	// Add an audio stream that uses the format's default video codec 
+	// to the format context's streams[] array.
+	stream = av_new_stream(oc, 0);
+	if (!stream)
+		throw Exception("Could not allocate audio stream");
+	*/
 	/*, 
 	//AVPacket packet;
 	av_init_packet(&packet);

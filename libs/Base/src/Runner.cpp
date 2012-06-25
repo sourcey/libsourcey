@@ -74,7 +74,7 @@ bool Runner::start(ITask* task)
 	Mutex::ScopedLock lock(_mutex);	
 	task->_running = true;
 	_tasks.push_back(task);
-	Log("debug") << "[Runner:" << this << "] Started Task: " << task << endl;
+	Log("trace") << "[Runner:" << this << "] Started Task: " << task << endl;
 	_wakeUp.set();
 	return true;
 }
@@ -86,7 +86,7 @@ bool Runner::stop(ITask* task)
 		return false;
 
 	Mutex::ScopedLock lock(_mutex);
-	Log("debug") << "[Runner:" << this << "] Stopped Task: " 
+	Log("trace") << "[Runner:" << this << "] Stopped Task: " 
 		<< task << ": " << _tasks.size() << " tasks in queue." << endl;	
 	task->_running = false;
 	return true;
@@ -95,25 +95,28 @@ bool Runner::stop(ITask* task)
 
 void Runner::abort(ITask* task)
 {
-	Log("debug") << "[Runner:" << this << "] Aborting Task: " 
+	Log("trace") << "[Runner:" << this << "] Aborting Task: " 
 		<< task << endl;
 
+	Mutex::ScopedLock lock(_mutex);
+
 	if (running(task)) {
-		Mutex::ScopedLock lock(_mutex);
-		Log("debug") << "[Runner:" << this << "] Aborting Running Task: " << task << endl;
+		Log("trace") << "[Runner:" << this << "] Aborting Running Task: " << task << endl;
 		task->_destroyed = true;
-		task->_running = false;	
+		task->_running = false;
 	}
 	else {
-		Log("debug") << "[Runner:" << this << "] Aborting Stopped Task: " << task << endl;
+		Log("trace") << "[Runner:" << this << "] Aborting Stopped Task: " << task << endl;
 		delete task;
 	}
+	/*
+	*/
 }
 
 
 bool Runner::running(ITask* task) const
 {	
-	Log("debug") << "[Runner:" << this << "] Check Running: " 
+	Log("trace") << "[Runner:" << this << "] Check Running: " 
 		<< task << endl;
 
 	Mutex::ScopedLock lock(_mutex);
@@ -139,7 +142,7 @@ void Runner::run()
 			if (_stop)
 				break;
 
-			//Log("debug") << "[Runner:" << this << "] Looping: " << _tasks.size() << endl;
+			//Log("trace") << "[Runner:" << this << "] Looping: " << _tasks.size() << endl;
 			if (!_tasks.empty()) {
 				task = _tasks.front();
 				_tasks.pop_front();				
@@ -148,7 +151,7 @@ void Runner::run()
 				destroy = task->_destroyed || task->_runOnce;
 				
 				/*
-				Log("debug") << "[Runner:" << this << "] Obtained: " 
+				Log("trace") << "[Runner:" << this << "] Obtained: " 
 					<< task
 					//<< ": Aborted: " << task->destroyed() 
 					//<< ": Running: " << task->running() 
@@ -163,20 +166,20 @@ void Runner::run()
 		}
 
 		if (!task) {
-			Log("debug") << "[Runner:" << this << "] No more tasks to run" << endl;
+			Log("trace") << "[Runner:" << this << "] No more tasks to run" << endl;
 			_wakeUp.wait();
-			Log("debug") << "[Runner:" << this << "] Waking up" << endl;
+			Log("trace") << "[Runner:" << this << "] Waking up" << endl;
 			continue;
 		}
 
 		else if (running) {	
-			//Log("debug") << "[Runner:" << this << "] Running: " << task << endl;
+			//Log("trace") << "[Runner:" << this << "] Running: " << task << endl;
 			task->run();	
-			//Log("debug") << "[Runner:" << this << "] Running: OK: " << task << endl;
+			//Log("trace") << "[Runner:" << this << "] Running: OK: " << task << endl;
 		} 
 
 		if (destroy) { // || runOnce
-			Log("debug") << "[Runner:" << this << "] Destroying Task: " << task << endl;	
+			Log("trace") << "[Runner:" << this << "] Destroying Task: " << task << endl;	
 			delete task;
 		}
 
@@ -185,13 +188,13 @@ void Runner::run()
 		Idle.dispatch(this);
 	}	
 			
-	Log("debug") << "[Runner:" << this << "] Shutdown" << endl;
+	Log("trace") << "[Runner:" << this << "] Shutdown" << endl;
 	
 	// Ensure all tasks are destroyed.
 	{
 		//Mutex::ScopedLock lock(_mutex);
 		for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {	
-			Log("debug") << "[Runner:" << this << "] Shutdown: Destroying Task: " << *it << endl;
+			Log("trace") << "[Runner:" << this << "] Shutdown: Destroying Task: " << *it << endl;
 			(*it)->_running = false;
 			delete *it;
 		}
@@ -199,7 +202,7 @@ void Runner::run()
 		
 	Shutdown.dispatch(this);
 
-	Log("debug") << "[Runner:" << this << "] Exiting" << endl;
+	Log("trace") << "[Runner:" << this << "] Exiting" << endl;
 }
 
 

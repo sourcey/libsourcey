@@ -46,9 +46,11 @@ namespace Net {
 TCPSocket::TCPSocket(Reactor& reactor, bool deleteOnClose) : 
 	_reactor(reactor),
 	_connected(false),
+	//_reading(false),
 	_deleteOnClose(deleteOnClose)
 {
-	Log("debug") << "[TCPSocket:" << this << "] Creating" << endl;
+	Log("trace") << "[TCPSocket:" << this << "] Creating" << endl;	
+	//_reading.set();
 }
 
 
@@ -56,9 +58,11 @@ TCPSocket::TCPSocket(const Poco::Net::StreamSocket& socket, Reactor& reactor, bo
 	Poco::Net::StreamSocket(socket),
 	_reactor(reactor),
 	_connected(false),
+	//_reading(false),
 	_deleteOnClose(deleteOnClose)
 {
-	Log("debug") << "[TCPSocket:" << this << "] Creating from " << socket.address().toString() << endl;
+	Log("trace") << "[TCPSocket:" << this << "] Creating from " << socket.address().toString() << endl;
+	//_reading.set();
 	bindEvents();
 }
 
@@ -67,18 +71,21 @@ TCPSocket::TCPSocket(const TCPSocket& r) :
 	StreamSocket(r),
 	_reactor(r._reactor),
 	_connected(r._connected),
+	//_reading(false),
 	_deleteOnClose(r._deleteOnClose)
 {
-	Log("debug") << "[TCPSocket:" << this << "] Creating from " << r.address() << endl;	
+	Log("trace") << "[TCPSocket:" << this << "] Creating from " << r.address() << endl;	
+	//_reading.set();
 	bindEvents();
 }
 
 
 TCPSocket::~TCPSocket() 
 {	
-	Log("debug") << "[TCPSocket:" << this << "] Destroying: " << impl() << endl;
+	Log("trace") << "[TCPSocket:" << this << "] Destroying: " << impl() << endl;
 	unbindEvents();
-	Log("debug") << "[TCPSocket:" << this << "] Destroying: OK: " << impl() << endl;
+	//_reading.wait();
+	Log("trace") << "[TCPSocket:" << this << "] Destroying: OK: " << impl() << endl;
 }
 
 
@@ -90,7 +97,7 @@ void TCPSocket::connect(const Address& peerAddress)
 
 void TCPSocket::connect(const Address& peerAddress, int timeout) 
 {
-	Log("debug") << "[TCPSocket:" << this << "] Connecting to " << peerAddress.toString() << endl;	
+	Log("trace") << "[TCPSocket:" << this << "] Connecting to " << peerAddress.toString() << endl;	
 
 	if (isConnected())
 		throw Exception("Socket already connected");
@@ -105,7 +112,7 @@ void TCPSocket::connect(const Address& peerAddress, int timeout)
 		resetBuffer();
 	} 
 	catch (Poco::Exception& exc) {
-		Log("debug") << "[TCPSocket:" << this << "] Connection failed: " << exc.displayText() << endl;	
+		Log("trace") << "[TCPSocket:" << this << "] Connection failed: " << exc.displayText() << endl;	
 		setError(exc.displayText());
 		exc.rethrow();
 	}
@@ -114,7 +121,7 @@ void TCPSocket::connect(const Address& peerAddress, int timeout)
 
 void TCPSocket::close()
 {
-	Log("debug") << "[TCPSocket:" << this << "] Closing" << endl;	
+	Log("trace") << "[TCPSocket:" << this << "] Closing" << endl;	
 
 	if (isConnected()) {
 		unbindEvents();
@@ -126,66 +133,60 @@ void TCPSocket::close()
 			onClose();
 		}
 		catch (Poco::IOException& exc) {
-			Log("debug") << "[TCPSocket:" << this << "] Closing: " << exc.displayText() << endl;
+			Log("trace") << "[TCPSocket:" << this << "] Closing: " << exc.displayText() << endl;
 		}
-		Log("debug") << "[TCPSocket:" << this << "] Closing: 1" << endl;	
 	}
-	Log("debug") << "[TCPSocket:" << this << "] Closing: OK" << endl;	
+	Log("trace") << "[TCPSocket:" << this << "] Closing: OK" << endl;	
 }
 
 
 void TCPSocket::onReadable() 
 {
-	Log("debug") << "[TCPSocket:" << this << "] On Readable: " << impl() << endl;
+	Log("trace") << "[TCPSocket:" << this << "] On Readable: " << impl() << endl;
 
 	try	{
-		//int size = 0;
-		//Buffer* buffer = NULL;;
-		//{
-			//FastMutex::ScopedLock lock(_mutex); 
-			
-			// No locking required here because we always read
-			// from the reactor thread.
+		int size = 0;
+		Buffer* buffer = NULL;;
+		{
+			FastMutex::ScopedLock lock(_mutex); 			
 
 			// Resize our buffer as required.
 			// This is preferable to allocating a huge buffer on startup.
-			int size = min(StreamSocket::available(), MAX_TCP_PACKET_SIZE);
+			size = min(StreamSocket::available(), MAX_TCP_PACKET_SIZE);
 			if (_buffer.capacity() < size) {
-				Log("debug") << "[TCPSocket:" << this << "] Resizing buffer: " << size << endl;
+				Log("trace") << "[TCPSocket:" << this << "] Resizing buffer: " << size << endl;
 				_buffer.reserve(size);
 			}
 			size = StreamSocket::receiveBytes(_buffer.bytes(), size);
 			Log("trace") << "[TCPSocket:" << this << "] RECV: " << size << ": "
 				<< StreamSocket::address().toString() << "<--" 
 				<< StreamSocket::peerAddress().toString() << endl;
-			//buffer = &_buffer;
 			_buffer.setPosition(0);
 			_buffer.setSize(size);
-		//}
-		
-		if (size) {	
-			recv(_buffer);
+			buffer = &_buffer;
+		}
+
+		if (size) {
+			//_reading.set();
+			recv(*buffer);
 		}
 		else {
-			Log("debug") << "[TCPSocket:" << this << "] Received EOF" << endl;
-			//_error = "Peer closed connection";
-			//close();
+			Log("trace") << "[TCPSocket:" << this << "] Received EOF" << endl;
 			throw Poco::IOException("Peer closed connection");
 		}
 	}
 	// ConnectionAbortedException
 	// ConnectionResetException
 	catch (Poco::IOException& exc) {
-		Log("debug") << "[TCPSocket:" << this << "] RECV: " << exc.displayText() << endl;	
-		setError(exc.displayText());
+		Log("error") << "[TCPSocket:" << this << "] RECV: " << exc.displayText() << endl;
+		//_reading.set();
+		setError(exc.displayText()); // will probably result in deletion
 	}
 }
 
 
 int TCPSocket::send(const char* data, int size) 
 {
-	Log("error") << "[TCPSocket:" << this << "] BEFORE SEND: " << size << endl;
-
 	assert(size <= MAX_TCP_PACKET_SIZE);
 	try	{
 		Log("trace") << "[TCPSocket:" << this << "] SEND: " << size << ": " 
@@ -285,21 +286,23 @@ void TCPSocket::packetize(Buffer& buffer)
 
 void TCPSocket::onConnect() 
 {
-	Log("debug") << "[TCPSocket:" << this << "] On Connect: " << impl() << endl;
+	Log("trace") << "[TCPSocket:" << this << "] On Connect: " << impl() << endl;	
+	{
+		FastMutex::ScopedLock lock(_mutex); 
 
-	// This event tells us that we are connected ie. the 
-	// connection is writable. There is no more need for
-	// this event so we can remove the delegate.
-	_reactor.detach(*this, reactorDelegate(this, &TCPSocket::onConnect, SocketWritable));	
-	_connected = true;
-
+		// This event tells us that we are connected ie. the 
+		// connection is writable. There is no more need for
+		// this event so we can remove the delegate.
+		_reactor.detach(*this, reactorDelegate(this, &TCPSocket::onConnect, SocketWritable));	
+		_connected = true;
+	}
 	Connected.dispatch(this);
 }
 
 
 void TCPSocket::onClose()
 {
-	Log("debug") << "[TCPSocket:" << this << "] On Close: " << impl() << endl;
+	Log("trace") << "[TCPSocket:" << this << "] On Close: " << impl() << endl;
 	
 	// This method must be called from close()
 
@@ -316,11 +319,11 @@ void TCPSocket::onClose()
 	Closed.dispatch(this);
 
 	if (destroy) {
-		Log("debug") << "[TCPSocket:" << this << "] Delete on close" << endl;	
+		Log("trace") << "[TCPSocket:" << this << "] Delete on close" << endl;	
 		delete this;
 	}
 
-	Log("debug") << "[TCPSocket:" << this << "] On Close: OK" << endl;
+	Log("trace") << "[TCPSocket:" << this << "] On Close: OK" << endl;
 }
 
 
@@ -354,7 +357,7 @@ void TCPSocket::resetBuffer()
 	// accordingly.
 	int recvSize = StreamSocket::getReceiveBufferSize();
 	if (recvSize != _buffer.capacity()) {
-		Log("debug") << "[TCPSocket:" << this << "] Buffer Size: " << recvSize << endl;
+		Log("trace") << "[TCPSocket:" << this << "] Buffer Size: " << recvSize << endl;
 		_buffer.reserve(recvSize);
 	}	
 	_buffer.clear();
@@ -476,14 +479,14 @@ TransportProtocol TCPSocket::transport() const
 	//if (!stateEquals(ClientState::Disconnected)) 		
 		//_error = e.displayText();
 		//setState(this, ClientState::Disconnected, e.displayText());
-	//Log("debug") << "[TCPSocket:" << this << "] Closing 1" << endl;	
+	//Log("trace") << "[TCPSocket:" << this << "] Closing 1" << endl;	
 		//destroy = _deleteOnClose;
 
 	//if (destroy) {
-	//	Log("debug") << "[TCPSocket:" << this << "] Destroying On Closing" << endl;	
+	//	Log("trace") << "[TCPSocket:" << this << "] Destroying On Closing" << endl;	
 	//	delete this;
 	//}
-	//Log("debug") << "[TCPSocket:" << this << "] Closing: OK" << endl;	
+	//Log("trace") << "[TCPSocket:" << this << "] Closing: OK" << endl;	
 	
 	
 	//Poco::Observer<TCPSocket, WritableNotification>(*this, &TCPSocket::onConnect));
@@ -542,7 +545,7 @@ void TCPSocket::recv(const char* data, int size, const Address& peerAddress)
 		delete packet;
 	}	
 	catch (StopPropagation&) {
-		//Log("debug") << "[TCPSocket:" << this << "] Stopping Event Propagation" << endl;
+		//Log("trace") << "[TCPSocket:" << this << "] Stopping Event Propagation" << endl;
 	}
 }
 */

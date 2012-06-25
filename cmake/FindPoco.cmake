@@ -4,8 +4,9 @@
 # Once done this will define
 #  Poco_FOUND         - System has the all required components.
 #  Poco_INCLUDE_DIRS  - Include directory necessary for using the required components headers.
-#  Poco_LIBRARIES     - Link these to use the required ffmpeg components.
-#  Poco_DEFINITIONS   - Compiler switches required for using the required ffmpeg components.
+#  Poco_LIBRARY_DIRS  - Library directories necessary for using the required components.
+#  Poco_LIBRARIES     - Link these to use the required components.
+#  Poco_DEFINITIONS   - Compiler switches required for using the required components.
 #
 # For each of the components it will additionaly set.
 #   - Foundation
@@ -20,46 +21,36 @@
 #   - PageCompiler
 #
 # the following variables will be defined
-#  <component>_FOUND        - System has <component>
-#  <component>_INCLUDE_DIRS - Include directory necessary for using the <component> headers
-#  <component>_LIBRARIES    - Link these to use <component>
-#  <component>_DEFINITIONS  - Compiler switches required for using <component>
-#  <component>_VERSION      - The components version
-#
-# Copyright (c) 2006, Matthias Kretz, <kretz@kde.org>
-# Copyright (c) 2008, Alexander Neundorf, <neundorf@kde.org>
-# Copyright (c) 2011, Michael Jansen, <kde@michael-jansen.biz>
-#
-# Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+#  Poco_<component>_FOUND        - System has <component>
+#  Poco_<component>_INCLUDE_DIRS - Include directories necessary for using the <component> headers
+#  Poco_<component>_LIBRARY_DIRS - Library directories necessary for using the <component>
+#  Poco_<component>_LIBRARIES    - Link these to use <component>
+#  Poco_<component>_DEFINITIONS  - Compiler switches required for using <component>
+#  Poco_<component>_VERSION      - The components version
   
 include(LibSourceyMacros)
 
-# The default components to find.
+# The default components to find
 if (NOT Poco_FIND_COMPONENTS)
   set(Poco_FIND_COMPONENTS Zip Net NetSSL Crypto Util XML Foundation)
 endif()
 
+# Link library type
+set(Poco_LINK_SHARED_LIBS TRUE CACHE BOOL "Link with shared Poco libraries (.dll/.so) instead of static ones (.lib/.a)")    
+  
 # Check for cached results. If there are then skip the costly part.
-#set_module_notfound(Poco)
+set_module_notfound(Poco)
 if (NOT Poco_FOUND)
 
   # Set the library suffix for our build type
-  set(Poco_LINK_SHARED_LIBS TRUE CACHE BOOL "Link with shared Poco libraries (.dll/.so) instead of static ones (.lib/.a)")    
   set(Poco_LIB_SUFFIX "")
-  #set(Poco_LIB_EXT "")
-  if(WIN32) #  AND MSVC    
+  if(WIN32 AND MSVC)
+    set(Poco_MULTI_CONFIGURATION TRUE)
     add_definitions(-DPOCO_NO_AUTOMATIC_LIBS)
+    add_definitions(-DPOCO_NO_UNWINDOWS)
     if(Poco_LINK_SHARED_LIBS)
       add_definitions(-DPOCO_DLL)
     else()
-      #message("Linking Poco Static Libs")
-      # Now set the noncached _FOUND vars for the components.
-      #Zip Net NetSSL Crypto Util XML Foundation
-      foreach (component Net NetSSL Crypto Util XML Foundation Zip Data CppUnit PageCompiler)
-        setcomponent_notfound(${component})
-      endforeach ()
-
       add_definitions(-DPOCO_STATIC)
       if(BUILD_WITH_STATIC_CRT)
         set(Poco_LIB_SUFFIX "mt")
@@ -81,10 +72,10 @@ if (NOT Poco_FOUND)
       /PageCompiler/include
       /Util/include
       /XML/include
-      /Zip/include)
+      /Zip/include)    
   endif()
       
-  # Check for all possible components.      
+  # Check for all possible components 
   find_component_paths(Poco Foundation   PocoFoundation${Poco_LIB_SUFFIX} Poco/Foundation.h)
   find_component_paths(Poco CppUnit      PocoCppUnit${Poco_LIB_SUFFIX}    Poco/CppUnit/CppUnit.h)
   find_component_paths(Poco Net          PocoNet${Poco_LIB_SUFFIX}        Poco/Net/Net.h)
@@ -96,25 +87,28 @@ if (NOT Poco_FOUND)
   find_component_paths(Poco Data         PocoData${Poco_LIB_SUFFIX}       Poco/Data/Data.h)
   find_component_paths(Poco PageCompiler PocoPageCompiler                 Poco/PageCompiler/PageCompiler.h)  
    
-  # Stop Poco for undefining windows stuff
-  add_definitions(-DPOCO_NO_UNWINDOWS)
-
-  # Set Poco as found or not.
+  # Set Poco as found or not
   set_module_found(Poco)
+endif ()
+
+
+
+      # Now set the noncached _FOUND vars for the components.
+      #Zip Net NetSSL Crypto Util XML Foundation
+      #foreach (component Net NetSSL Crypto Util XML Foundation Zip Data CppUnit PageCompiler)
+      #  set_component_notfound(Poco ${component})
+      #endforeach ()
+
+
+
+
+
 
   # Cache the vars.
   #set(Poco_INCLUDE_DIRS ${Poco_INCLUDE_DIRS} CACHE STRING  "The Poco include directories." FORCE)
   #set(Poco_LIBRARIES    ${Poco_LIBRARIES}    CACHE STRING  "The Poco libraries." FORCE)
   #set(Poco_DEFINITIONS  ${Poco_DEFINITIONS}  CACHE STRING  "The Poco cflags." FORCE)  
   #set(Poco_FOUND        ${Poco_FOUND}        CACHE BOOLEAN "The Poco found status." FORCE)
-endif ()
-
-
-
-
-
-
-
 
 
 

@@ -56,7 +56,7 @@ public:
 };
 
 
-typedef std::vector<PacketDispatcher*> PacketBroadcasterList;
+typedef std::vector<PacketDispatcher*> PacketDispatcherList;
 
 
 } // namespace Sourcey

@@ -110,6 +110,7 @@ class LogChannel
 {
 public:	
 	LogChannel(const std::string& name, LogLevel level = DebugLevel, const char* dateFormat = "%H:%M:%S");
+	virtual ~LogChannel() {}; 
 
 	virtual void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
 	virtual void format(std::ostream& out, const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
@@ -134,6 +135,7 @@ class ConsoleChannel: public LogChannel
 {		
 public:
 	ConsoleChannel(const std::string& name, LogLevel level = DebugLevel, const char* dateFormat = "%H:%M:%S");
+	virtual ~ConsoleChannel() {}; 
 		
 	virtual void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
 };
