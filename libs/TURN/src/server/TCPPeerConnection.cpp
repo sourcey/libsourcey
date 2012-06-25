@@ -60,7 +60,7 @@ TCPPeerConnection::TCPPeerConnection(TCPAllocation& allocation, const Poco::Net:
 	_connectionID(CryptoProvider::generateRandomNumber(8)),
 	_client(NULL)
 {
-	Log("debug") << "[TCPPeerConnection:" << this << "] Creating" << endl;
+	Log("trace") << "[TCPPeerConnection:" << this << "] Creating" << endl;
 	while (_allocation.peers().exists(_connectionID))
 		_connectionID = CryptoProvider::generateRandomNumber(8);
 	_allocation.peers().add(_connectionID, this);
@@ -69,7 +69,7 @@ TCPPeerConnection::TCPPeerConnection(TCPAllocation& allocation, const Poco::Net:
 	
 TCPPeerConnection::~TCPPeerConnection()
 {
-	Log("debug") << "[TCPPeerConnection:" << this << "] Destroying" << endl;
+	Log("trace") << "[TCPPeerConnection:" << this << "] Destroying" << endl;
 	assert(!isConnected());
 	_allocation.peers().remove(this);
 }
@@ -104,7 +104,7 @@ void TCPPeerConnection::bindWith(TCPClientConnection* client)
 		assert(!client || _connectionID == client->connectionID());
 		_client = client;
 		if (_client != NULL) {	
-			Log("debug") << "[TCPPeerConnection:" << this << "] Binding With Client: " << client->address() << endl;
+			Log("trace") << "[TCPPeerConnection:" << this << "] Binding With Client: " << client->address() << endl;
 			_timeout.stop();
 		}
 	}

@@ -59,7 +59,7 @@ IAllocation::IAllocation(const FiveTuple& tuple,
 
 IAllocation::~IAllocation() 
 {
-	Log("debug") << "[Allocation:" << this << "] Destroying" << endl;	
+	Log("trace", this) << "Destroying" << endl;	
 	_permissions.clear();
 }
 
@@ -98,7 +98,7 @@ void IAllocation::setLifetime(UInt32 lifetime)
 	FastMutex::ScopedLock lock(_mutex);
 	_lifetime = lifetime;
 	_updatedAt = static_cast<UInt32>(time(0));
-	Log("debug") << "[Allocation:" << this << "] Updating Lifetime: " << _lifetime << endl;
+	Log("trace", this) << "Updating Lifetime: " << _lifetime << endl;
 }
 
 
@@ -167,14 +167,14 @@ void IAllocation::addPermission(const Net::IP& ip)
 	// If the permission is already in the list then refresh it.
 	for (PermissionList::iterator it = _permissions.begin(); it != _permissions.end(); ++it) {
 		if ((*it).ip == ip) {		
-			Log("debug") << "[Allocation:" << this << "] Refreshing permission: " << ip.toString() << endl;
+			Log("trace", this) << "Refreshing permission: " << ip.toString() << endl;
 			(*it).refresh();
 			return;
 		}
 	}
 
 	// Otherwise create it...
-	Log("debug") << "[Allocation:" << this << "] Creating permission: " << ip.toString() << endl;
+	Log("trace", this) << "Creating permission: " << ip.toString() << endl;
 	_permissions.push_back(Permission(ip));
 }
 
@@ -213,7 +213,7 @@ void IAllocation::removeExpiredPermissions()
 	FastMutex::ScopedLock lock(_mutex);
 	for (PermissionList::iterator it = _permissions.begin(); it != _permissions.end();) {
 		if ((*it).timeout.expired()) {
-			Log("info") << "[Allocation:" << this << "] Removing Expired Permission: " << (*it).ip.toString() << endl;
+			Log("info", this) << "Removing Expired Permission: " << (*it).ip.toString() << endl;
 			it = _permissions.erase(it);
 		} else 
 			++it;
@@ -225,11 +225,11 @@ bool IAllocation::hasPermission(const Net::IP& peerIP)
 {
 	for (PermissionList::iterator it = _permissions.begin(); it != _permissions.end(); ++it) {
 		if (*it == peerIP) {		
-			Log("debug") << "[Allocation:" << this << "] Has permission for: " << peerIP.toString() << endl;
+			Log("trace", this) << "Has permission for: " << peerIP.toString() << endl;
 			return true;
 		}
 	}
-	Log("debug") << "[Allocation:" << this << "] No permission for: " << peerIP.toString() << endl;
+	Log("trace", this) << "No permission for: " << peerIP.toString() << endl;
 	return false;
 }
 

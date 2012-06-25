@@ -48,12 +48,11 @@ using namespace Sourcey::Util;
 
 
 // Detect Memory Leaks
-/*
 #ifdef _DEBUG
 #include "MemLeakDetect/MemLeakDetect.h"
+#include "MemLeakDetect/MemLeakDetect.cpp"
 CMemLeakDetect memLeakDetect;
-#endif<DataPacket>
-*/
+#endif
 
 
 namespace Sourcey { 

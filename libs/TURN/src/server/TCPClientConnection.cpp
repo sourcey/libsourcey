@@ -78,7 +78,7 @@ void TCPClientConnection::recv(Buffer& buffer)
 			Log("trace") << "[TCPClientConnection:" << this << "] Dropped early data" << endl;
 	}
 	catch (Exception& exc) {
-		Log("debug") << "[TCPClientConnection:" << this << "] Send Error: " << exc.displayText() << endl;
+		Log("trace") << "[TCPClientConnection:" << this << "] Send Error: " << exc.displayText() << endl;
 		setError(exc.displayText());
 	}
 }

@@ -47,7 +47,10 @@ public:
 					 const FiveTuple& tuple, 
 					 const std::string& username, 
 					 UInt32 lifetime);
-	virtual ~ServerAllocation();	
+	virtual ~ServerAllocation();
+		/// IMPORTANT: The destructor should never be called directly.
+		/// The allocation is always deleted via the timer callback
+		/// @see onTimer()
 	
 	virtual UInt32 timeRemaining(); 
 	
@@ -55,7 +58,12 @@ public:
 	virtual void handleRefreshRequest(const Request& request);	
 	virtual void handleCreatePermission(const Request& request);
 	
-	virtual bool onTimer(); 
+	virtual bool onTimer();
+		/// Asynchronous timer callback for updating the allocation
+		/// permissions and state etc.
+		/// If this call returns false the allocation will be deleted.
+
+	virtual const char* className() const { return "ServerAllocation"; };
 
 protected:
 	Server&	_server;

@@ -159,7 +159,7 @@ void PackageManager::queryRemotePackages()
 			<< "\n\tResponse: " << data
 			<< endl;
 		
-		JSON::Value root;		
+		JSON::Value root;
 		JSON::Reader reader;
 		bool res = reader.parse(data, root);
 		if (!res)

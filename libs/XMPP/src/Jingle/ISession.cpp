@@ -111,7 +111,7 @@ void ISession::print(std::ostream& ost)
 /*
 PacketDispatcher* ISession::getMediaSource(const std::string& name) 
 {
-	for (PacketBroadcasterList::const_iterator it = _sources.begin(); it != _sources.end(); ++it) {
+	for (PacketDispatcherList::const_iterator it = _sources.begin(); it != _sources.end(); ++it) {
 		if ((*it)->name() == name) {
 			return *it;
 		}

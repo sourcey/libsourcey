@@ -38,7 +38,7 @@ using namespace std;
 namespace Sourcey {
 
 	
-ITask::ITask(Runner& runner, bool autoStart, bool runOnce, const std::string& name) :   
+ITask::ITask(Runner& runner, bool autoStart, bool runOnce, const string& name) :   
 	_runner(runner),
 	_runOnce(runOnce),
 	_running(false),
@@ -52,7 +52,7 @@ ITask::ITask(Runner& runner, bool autoStart, bool runOnce, const std::string& na
 
 ITask::~ITask()
 {
-	Log("trace") << "[ITask: " << this << "] Destroying" << endl;
+	Log("trace") << "[ITask:" << this << "] Destroying" << endl;
 	assert(_runOnce || !_running);
 }
 
@@ -74,7 +74,10 @@ bool ITask::stop()
 
 void ITask::destroy()			
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	assert(!destroyed());
+
+	// NOTE: Can't lock mutex here as this call will 
+	// result in task pointer deletion if not running.
 	_runner.abort(this); 
 }
 
@@ -100,14 +103,14 @@ bool ITask::destroyed() const
 }
 
 	
-std::string ITask::name() const
+string ITask::name() const
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	return _name;
 }
 
 
-void ITask::setName(const std::string& name) 
+void ITask::setName(const string& name) 
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	_name = name;

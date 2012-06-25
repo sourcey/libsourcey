@@ -60,6 +60,8 @@ public:
 	
 	Net::Address relayedAddress() const;
 
+	virtual const char* className() const { return "UDPAllocation"; };
+
 private:
 	Net::UDPSocket _relaySocket;
 };

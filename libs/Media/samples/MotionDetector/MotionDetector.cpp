@@ -52,7 +52,7 @@ public:
 	{
 	}
 
-	void onVideoEncoded(void* sender, VideoPacket& packet)
+	void onVideoEncoded(void* sender, MatPacket& packet)
 	{
 		Log("trace") << "[MotionDetectorApp] Video Encoded" << endl;
 

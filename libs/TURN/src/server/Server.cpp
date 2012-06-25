@@ -32,7 +32,7 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Poco::Net;
+using namespace Sourcey::Net;
 
 
 namespace Sourcey {
@@ -45,9 +45,10 @@ Server::Server(IServerObserver& observer, Net::Reactor& reactor, Runner& runner,
 	_observer(observer),
 	_options(options),
 	_reactor(reactor),
-	_runner(runner)
+	_runner(runner),
+	_timer(new TimerTask(runner, 5000, 5000))
 {
-	Log("trace") << "TURN Server: Creating" << endl;
+	Log("trace", this) << "Creating" << endl;
 }
 
 
@@ -55,43 +56,49 @@ Server::~Server()
 {
 	////Timer::getDefault().stop(TimerCallback<Server>(this, &ServerAllocation::onTimer));
 	//_socketUDP.detach(packetDelegate<Server, STUN::Message>(this, &Server::onPacketReceived, 1));
-	Log("trace") << "TURN Server: Destroying" << endl;	
+	Log("trace", this) << "Destroying" << endl;	
 	stop();
+	
+	_timer->destroy();
 }
 
 
 void Server::start()
 {
-	Log("trace") << "TURN Server: Binding" << endl;	
+	Log("trace", this) << "Binding" << endl;	
 
 	// Initialize UDP
 	_socketUDP.registerPacketType<STUN::Message>(1);
 	_socketUDP.attach(packetDelegate<Server, STUN::Message>(this, &Server::onPacketReceived, 1));
 	_socketUDP.bind(_options.listenAddr);
 
-	Log("info") << "TURN Server: Listening on " 
+	Log("info", this) << "Listening on " 
 		<< _socketUDP.address().toString() << endl;
 	
 	// Initialize TCP
 	if (_options.enableTCP) {
 		_socketTCP.bind(_options.listenAddr);
 		_socketTCP.SocketCreated += delegate(this, &Server::onTCPConnectionCreated);
-	}
-
-	Timer::getDefault().start(TimerCallback<Server>(this, &Server::onTimer, 5000, 5000));
+	}	
+	
+	//Timer::getDefault().start(TimerCallback<Server>(this, &Server::onTimer, 5000, 5000));
+	//TimerTask* timer = new TimerTask(_runner, 5000, 5000);
+	_timer->Timeout += delegate(this, &Server::onTimer);
+	_timer->start();
 }
 
 
 void Server::stop()
 {
-	Log("trace") << "TURN Server: Stopping" << endl;	
-	Timer::getDefault().stop(TimerCallback<Server>(this, &Server::onTimer));
+	Log("trace", this) << "Stopping" << endl;	
+	//Timer::getDefault().stop(TimerCallback<Server>(this, &Server::onTimer));	
+	_timer->stop();
 }
 
 
-void Server::onTimer(TimerCallback<Server>& timer) 
+void Server::onTimer(void*) //TimerCallback<Server>& timer
 {
-	Log("trace") << "TURN Server: On Timer" << endl;	
+	Log("trace", this) << "On Timer" << endl;	
 
 	ServerAllocationMap allocations = this->allocations();
 	for (ServerAllocationMap::iterator it = allocations.begin(); it != allocations.end(); ++it) {
@@ -101,18 +108,36 @@ void Server::onTimer(TimerCallback<Server>& timer)
 }
 
 
-void Server::onTCPConnectionCreated(void* sender, Net::TCPSocket* socket)
+void Server::onTCPConnectionCreated(void* sender, Net::TCPSocket& sock)
 {
-	Log("debug") << "TURN Server: TCP Connection Accepted: " << socket->peerAddress() << endl;	
+	Log("trace", this) << "TCP Connection Accepted: " << sock.peerAddress() << endl;	
 	
+	TCPSocket* socket = new TCPSocket(sock); //, reactor()
 	socket->registerPacketType<STUN::Message>(1);
-	socket->attach(packetDelegate<TURN::Server, STUN::Message>(this, &TURN::Server::onPacketReceived));
+	socket->attach(packetDelegate(this, &Server::onPacketReceived));
+	socket->Closed += delegate(this, &Server::onTCPConnectionClosed, -1); // lowest priority
+}
+
+
+void Server::onTCPConnectionClosed(void* sender)
+{
+	TCPSocket* socket = reinterpret_cast<TCPSocket*>(sender);
+
+	Log("trace", this) << "TCP Connection Closed: " << socket->peerAddress() << endl;	
+	
+	// NOTE: Terminate associated allocation
+	//FiveTuple tuple(socket->peerAddress(), socket->localAddress(), socket->transport());
+	//ServerAllocation* allocation = getAllocation(tuple);
+	//if (allocation) {
+	//}	
+
+	delete socket;
 }
 
 
 void Server::onPacketReceived(void* sender, STUN::Message& message) 
 {
-	Log("trace") << "TURN Server: STUN Packet Received: " << message.toString() << endl;	
+	Log("trace", this) << "STUN Packet Received: " << message.toString() << endl;	
 
 	assert(message.state() == STUN::Message::Request);
 	
@@ -134,16 +159,16 @@ void Server::onPacketReceived(void* sender, STUN::Message& message)
 	AuthenticationState result = _observer.authenticateRequest(this, request);
 	switch (result) {
 		case Authenticating: 
-			Log("debug") << "STUN Request Authenticating" << endl;
+			Log("trace", this) << "STUN Request Authenticating" << endl;
 			break;
 
 		case Authorized: 
-			Log("debug") << "STUN Request Authorized" << endl;
+			Log("trace", this) << "STUN Request Authorized" << endl;
 			handleAuthorizedRequest(request);
 			break;
 
 		case Unauthorized: 
-			Log("debug") << "Unauthorized STUN Request" << endl;
+			Log("trace", this) << "Unauthorized STUN Request" << endl;
 			sendError(request, 401, "Unauthorized");
 			break;
 	}
@@ -152,7 +177,7 @@ void Server::onPacketReceived(void* sender, STUN::Message& message)
 		return;
 	}
 	else {
-		Log("debug") << "Unauthorized STUN Request" << endl;
+		Log("trace", this) << "Unauthorized STUN Request" << endl;
 		sendError(request, 401, "Unauthorized");
 		return;
 	}
@@ -162,7 +187,7 @@ void Server::onPacketReceived(void* sender, STUN::Message& message)
 
 void Server::handleRequest(const Request& request, AuthenticationState state)
 {	
-	Log("debug") << "TURN Server: STUN Request Received:\n" 
+	Log("trace", this) << "STUN Request Received:\n" 
 		<< "\tFrom: " << request.remoteAddr.toString() << "\n"
 		<< "\tData: " << request.toString()
 		<< endl;
@@ -227,10 +252,9 @@ void Server::handleAuthorizedRequest(const Request& request) //, AuthenticationS
 			if (!allocation)  {
 				sendError(request, 437, "Allocation Mismatch");
 				return;
-			}
-			
+			}			
 
-			Log("debug") << "Obtained allocation: " 
+			Log("trace", this) << "Obtained allocation: " 
 				<< allocation->tuple().toString() << endl;
 					
 			if (!allocation->handleRequest(request))
@@ -259,7 +283,7 @@ void Server::handleConnectionBindRequest(const Request& request)
 
 void Server::handleBindingRequest(const Request& request) 
 {
-	Log("debug") << "Handle Binding Request" << endl;
+	Log("trace", this) << "Handle Binding Request" << endl;
 
 	assert(request.type() == STUN::Message::Binding);
 	assert(request.state() == STUN::Message::Request);
@@ -281,7 +305,7 @@ void Server::handleBindingRequest(const Request& request)
 
 void Server::handleAllocateRequest(const Request& request) 
 {
-	Log("debug") << "Handle Allocate Request" << endl;
+	Log("trace", this) << "Handle Allocate Request" << endl;
 
 	assert(request.type() == STUN::Message::Allocate);
 	assert(request.state() == STUN::Message::Request);
@@ -297,7 +321,7 @@ void Server::handleAllocateRequest(const Request& request)
 	// 
 	const STUN::Username* usernameAttr = request.get<STUN::Username>();
 	if (!usernameAttr) {
-		Log("debug") << "Unauthorized STUN Request" << endl;
+		Log("trace", this) << "Unauthorized STUN Request" << endl;
 		sendError(request, 401, "Unauthorized");
 		return;
 	}
@@ -497,8 +521,8 @@ void Server::handleAllocateRequest(const Request& request)
 		// connections on the relayed transport address.  Refer to Section 5.3
 		// for details.
 
-		Net::TCPSocket& socket = static_cast<Net::TCPSocket&>(request.socket);
-		allocation = new TCPAllocation(*this, socket, tuple, username, lifetime);
+		//Net::TCPSocket& socket = static_cast<Net::TCPSocket&>(request.socket);
+		allocation = new TCPAllocation(*this, static_cast<Net::TCPSocket*>(&request.socket), tuple, username, lifetime);
 	} 
 
 	// Once the allocation is created, the server replies with a success
@@ -577,13 +601,13 @@ void Server::handleAllocateRequest(const Request& request)
 	//    The server may use a smaller maximum lifetime value to minimize
 	//    the lifetime of allocations "orphaned" in this manner.
 
-	Log("debug") << "Handle Allocation Request: OK" << endl;
+	Log("trace", this) << "Handle Allocation Request: OK" << endl;
 }
 
 				   
 void Server::sendError(const Request& request, int errorCode, const char* errorDesc) 
 {
-	Log("debug") << "Sending STUN error: " << errorCode << ":" << errorDesc << endl;
+	Log("trace", this) << "Sending STUN error: " << errorCode << ":" << errorDesc << endl;
 	
 	FastMutex::ScopedLock lock(_mutex);
 
@@ -669,7 +693,7 @@ void Server::addAllocation(ServerAllocation* alloc)
 		assert(_allocations.find(alloc->tuple()) == _allocations.end());
 		_allocations[alloc->tuple()] = alloc;
 
-		Log("info") << "Added an allocation: " 
+		Log("info", this) << "Added an allocation: " 
 			<< alloc->tuple().toString() << ": " 
 			<< _allocations.size() << " total" << endl;
 	}
@@ -687,7 +711,7 @@ void Server::removeAllocation(ServerAllocation* alloc)
 		assert(it != _allocations.end());
 		_allocations.erase(it);
 
-		Log("info") << "Removed an allocation: " 
+		Log("info", this) << "Removed an allocation: " 
 			<< alloc->tuple().toString() << ": " 
 			<< _allocations.size() << " remaining" << endl;
 	}

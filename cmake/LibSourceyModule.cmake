@@ -18,7 +18,7 @@ endmacro()
 #
 ### Macro: include_sourcey_modules
 #
-# Generic inclusion of LibSourcey module(s) into a project.
+# Inclusion of LibSourcey module(s) into a project.
 #
 macro(include_sourcey_modules)
   foreach(name ${ARGN})
@@ -43,11 +43,11 @@ macro(include_sourcey_modules)
     endif()
     
     if (NOT HAVE_LIBSOURCEY_${name})
-       message(ERROR "Unable to include dependent LibSourcey module: ${name}. The build may fail.")
+       message(ERROR "Unable to include dependent LibSourcey module ${name}. The build may fail.")
     endif()
         
     set(lib_name "Sourcey${name}${LibSourcey_DLLVERSION}")
-        
+    
     # Create a Debug and a Release list for MSVC        
     if (MSVC)
       find_library(LibSourcey_${name}_RELEASE "${lib_name}" LibSourcey_LIBRARY_DIR)
@@ -88,7 +88,7 @@ endmacro()
 #
 # Defines a generic LibSourcey module.
 #
-macro(define_sourcey_module name)       
+macro(define_sourcey_module name) 
     
   project(${name})
 
@@ -147,10 +147,11 @@ macro(define_sourcey_module name)
   include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
   include_directories(${LibSourcey_INCLUDE_DIRS})
   link_directories(${LibSourcey_LIBRARY_DIRS})
-  
-  #message(STATUS "LibSourcey_INCLUDE_DIRS: ${LibSourcey_INCLUDE_DIRS}")
-  #message(STATUS "LibSourcey_LIBRARY_DIRS: ${LibSourcey_LIBRARY_DIRS}")
-  #message(STATUS "LibSourcey_INCLUDE_LIBRARIES: ${LibSourcey_INCLUDE_LIBRARIES}")
+          
+  #message(STATUS "Defining module ${name}:")  
+  #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")  
+  #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")  
+  #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
 
   if(NOT ANDROID)
     # Android SDK build scripts can include only .so files into final .apk
@@ -214,7 +215,12 @@ macro(define_sourcey_module_sample name)
     # Include external dependencies
     target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
     add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES}) # requires complete recompile on some systems
-
+          
+    message(STATUS "Defining module sample ${name}:")  
+    message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")  
+    #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")  
+    #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
+  
     # Include library and header directories
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
     include_directories(${LibSourcey_INCLUDE_DIRS})
@@ -264,7 +270,12 @@ macro(define_libsourcey_test name)
     # Include external dependencies
     target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
     add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES}) # requires complete recompile on some systems
-
+          
+    message(STATUS "Defining module test ${name}:")  
+    message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")  
+    #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")  
+    #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
+    
     # Include library and header directories
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
     include_directories(${LibSourcey_INCLUDE_DIRS})

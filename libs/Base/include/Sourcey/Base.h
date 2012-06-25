@@ -30,13 +30,25 @@
 
 
 //
+// Version number  
+//
+#define SOURCEY_MAJOR_VERSION    0
+#define SOURCEY_MINOR_VERSION    8
+#define SOURCEY_PATCH_VERSION    1
+
+#define SOURCEY_AUX_STR_EXP(__A) #__A
+#define SOURCEY_AUX_STR(__A)     SOURCEY_AUX_STR_EXP(__A)
+#define SOURCEY_VERSION          SOURCEY_AUX_STR(SOURCEY_MAJOR_VERSION) "." SOURCEY_AUX_STR(SOURCEY_MINOR_VERSION) "." SOURCEY_AUX_STR(SOURCEY_PATCH_VERSION)
+
+
+//
 // Cross platform configuration
 //
 #include "Config.h"
 
 #ifdef _WIN32
     // Windows (x64 and x86)
-    #define WIN32
+    #define WIN32 1
 #endif
 #if __unix__ // all unices
     // Unix    
@@ -67,6 +79,7 @@
 #define strncasecmp strnicmp
 #define strcasecmp stricmp
 #endif 
+
 
 //
 // Pull in basic definitions

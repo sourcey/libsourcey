@@ -1,6 +1,0 @@
-TODO
-=================================================
-
-	- Update media code; ffmpeg's ByteIOContext and related function are depreciated. 
-	- CMake for linux.
-	- CMake config file.

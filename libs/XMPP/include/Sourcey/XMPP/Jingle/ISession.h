@@ -136,7 +136,7 @@ public:
 	virtual std::string initiator() const { return _initiator; };
 	virtual std::string responder() const { return _responder; };
 	virtual SessionManager& manager() const { return _manager; };
-	virtual PacketBroadcasterList sources() const { return _sources; };
+	virtual PacketDispatcherList sources() const { return _sources; };
 	
 	virtual void addMediaSource(PacketDispatcher* source);
 	virtual void removeMediaSources();
@@ -150,7 +150,7 @@ protected:
 	std::string _sid;
     std::string _initiator;
     std::string _responder;
-	PacketBroadcasterList _sources;
+	PacketDispatcherList _sources;
 	bool _destroySources;
 
 	friend class SessionManager;

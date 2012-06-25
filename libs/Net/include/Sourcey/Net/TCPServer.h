@@ -31,6 +31,7 @@
 
 #include "Sourcey/Base.h"
 #include "Sourcey/Stateful.h"
+#include "Sourcey/Net/TCPSocket.h"
 #include "Sourcey/Net/TCPSocketAcceptor.h"
 #include "Sourcey/Net/ISocket.h"
 #include "Sourcey/Net/Reactor.h"
@@ -50,23 +51,18 @@ public:
 	TCPServer(Reactor& reactor/* = Reactor::getDefault()*/) : TCPSocketAcceptor(reactor) {};
 	virtual ~TCPServer() {};
 
-	Signal<SocketT*> SocketCreated;
+	Signal<SocketT&> SocketCreated;
+		/// Dispatches created sockets.
 	
 protected:
 	virtual void onAccept()
 	{
 		Poco::Net::StreamSocket ss = acceptConnection();
 		
-		Log("debug") << "[TCPServer: " << this << "] Accept: " << ss.peerAddress().toString() << std::endl;
+		Log("trace") << "[TCPServer:" << this << "] Accept: " << ss.peerAddress().toString() << std::endl;
 
-		SocketT* socket = createSocket(ss);		
-		//socket->deleteOnClose(true); // destroy on close by default
+		SocketT socket = SocketT(ss, _reactor);
 		SocketCreated.dispatch(this, socket);
-	}
-
-	virtual SocketT* createSocket(Poco::Net::StreamSocket& socket)
-	{
-		return new SocketT(socket, _reactor);
 	}
 };
 
@@ -78,3 +74,24 @@ typedef TCPServer<TCPSocket> TCPPacketServer;
 
 
 #endif // SOURCEY_NET_TCPServer_H
+
+
+
+	
+		/// NOTE: The Socket pointer must be freed by the outside application.
+		//if (SocketCreated.refCount()) {
+		//}
+			// TODO: Create the socket on the stack so we don't
+			// need to listen for close to free socket pointer.
+	//socket->Closed += delegate(this, &TCPServer::onSocketClosed, -1);	
+	//void onSocketClosed(void* sender) 
+	//{
+	//	SocketT* socket = reinterpret_cast<SocketT*>(sender);	
+	//	Log("trace") << "[TCPServer:" << this << "] Freeing Socket: " << socket->peerAddress().toString() << std::endl;
+	//	delete socket;
+	//}
+
+	//virtual SocketT* createSocket(Poco::Net::StreamSocket& socket)
+	//{
+	//	return new SocketT(socket, _reactor);
+	//}

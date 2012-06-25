@@ -29,6 +29,9 @@
 #define SOURCEY_TURN_Server_H
 
 
+#include "Sourcey/TimerTask.h"
+#include "Sourcey/Net/TCPServer.h"
+#include "Sourcey/Net/UDPSocket.h"
 #include "Sourcey/STUN/Message.h"
 #include "Sourcey/TURN/server/IServerObserver.h"
 #include "Sourcey/TURN/server/ServerAllocation.h"
@@ -36,8 +39,6 @@
 #include "Sourcey/TURN/server/TCPAllocation.h"
 #include "Sourcey/TURN/Util.h"
 
-#include "Sourcey/Net/TCPServer.h"
-#include "Sourcey/Net/UDPSocket.h"
 
 #include <assert.h>
 #include <string>
@@ -108,9 +109,10 @@ public:
 	Runner& runner();
 	Options& options();
 	
-	void onTCPConnectionCreated(void* sender, Net::TCPSocket* sock);
+	void onTCPConnectionCreated(void* sender, Net::TCPSocket& sock);
+	void onTCPConnectionClosed(void* sender);
 	void onPacketReceived(void* sender, STUN::Message& message);
-	void onTimer(TimerCallback<Server>& timer);
+	void onTimer(void*); //TimerCallback<Server>& timer
 
 	virtual const char* className() const { return "TURNServer"; };
 
@@ -122,6 +124,7 @@ private:
 	IServerObserver&		_observer;
 	Options					_options;
 	ServerAllocationMap		_allocations;
+	TimerTask*              _timer;
 	mutable Poco::FastMutex	_mutex;
 };
 

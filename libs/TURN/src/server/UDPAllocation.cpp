@@ -59,13 +59,13 @@ UDPAllocation::UDPAllocation(Server& server,
 	_relaySocket.bind(Net::Address("127.0.0.1", 0));
 	_relaySocket.attach(packetDelegate(this, &UDPAllocation::onPacketReceived,1));
 
-	Log("debug") << "[UDPAllocation:" << this << "]  " << this << ": Initializing on address: " << _relaySocket.address().toString() << std::endl;
+	Log("trace", this) << " Initializing on address: " << _relaySocket.address().toString() << std::endl;
 }
 
 
 UDPAllocation::~UDPAllocation() 
 {
-	Log("debug") << "[UDPAllocation:" << this << "] Destroying" << endl;	
+	Log("trace", this) << "Destroying" << endl;	
 	_relaySocket.detach(packetDelegate(this, &UDPAllocation::onPacketReceived));
 	_relaySocket.close();
 }
@@ -73,7 +73,7 @@ UDPAllocation::~UDPAllocation()
 
 bool UDPAllocation::handleRequest(const Request& request) 
 {	
-	Log("debug") << "[UDPAllocation:" << this << "] Handle Request" << endl;	
+	Log("trace", this) << "Handle Request" << endl;	
 
 	if (!ServerAllocation::handleRequest(request)) {
 		if (request.type() == STUN::Message::SendIndication)
@@ -88,7 +88,7 @@ bool UDPAllocation::handleRequest(const Request& request)
 
 void UDPAllocation::handleSendIndication(const Request& request) 
 {	
-	Log("debug") << "[UDPAllocation:" << this << "] Handle Send Indication" << endl;
+	Log("trace", this) << "Handle Send Indication" << endl;
 
 	// The message is first checked for validity.  The Send indication MUST
 	// contain both an XOR-PEER-ADDRESS attribute and a DATA attribute.  If
@@ -98,14 +98,14 @@ void UDPAllocation::handleSendIndication(const Request& request)
 
 	const STUN::XorPeerAddress* peerAttr = request.get<STUN::XorPeerAddress>();
 	if (!peerAttr || peerAttr && peerAttr->family() != 1) {
-		Log("error") << "[UDPAllocation:" << this << "] Send Indication Error: No Peer Address" << endl;
+		Log("error", this) << "Send Indication Error: No Peer Address" << endl;
 		// silently disgarded...
 		return;
 	}
 
 	const STUN::Data* dataAttr = request.get<STUN::Data>();
 	if (!dataAttr) {
-		Log("error") << "[UDPAllocation:" << this << "] Send Indication Error: No Data Attribute" << endl;
+		Log("error", this) << "Send Indication Error: No Data Attribute" << endl;
 		// silently disgarded...
 		return;
 	}
@@ -127,7 +127,7 @@ void UDPAllocation::handleSendIndication(const Request& request)
 	
 	Net::Address peerAddress = peerAttr->address();
 	if (!hasPermission(peerAddress.host())) {
-		Log("error") << "[UDPAllocation:" << this << "] Send Indication Error: No permission: " << peerAddress.host().toString() << endl;
+		Log("error", this) << "Send Indication Error: No permission: " << peerAddress.host().toString() << endl;
 		// silently disgarded...
 		return;
 	}
@@ -149,7 +149,7 @@ void UDPAllocation::handleSendIndication(const Request& request)
 
 	// The resulting UDP datagram is then sent to the peer.
 	
-	Log("debug") << "[UDPAllocation:" << this << "] Relaying Send Indication: " 
+	Log("trace", this) << "Relaying Send Indication: " 
 		<< "\r\tFrom: " << request.remoteAddr.toString()
 		<< "\r\tTo: " << peerAttr->address().toString()
 		<< endl;	
@@ -174,10 +174,10 @@ void UDPAllocation::onPacketReceived(void* sender, DataPacket& packet)
 	if (!isOK())
 		return;
 
-	Log("debug") << "[UDPAllocation:" << this << "] Received UDP Datagram from " << source->peerAddress.toString() << endl;	
+	Log("trace", this) << "Received UDP Datagram from " << source->peerAddress.toString() << endl;	
 	
 	if (!hasPermission(source->peerAddress.host())) {
-		Log("debug") << "[UDPAllocation:" << this << "] No Permission: " << source->peerAddress.host().toString() << endl;	
+		Log("trace", this) << "No Permission: " << source->peerAddress.host().toString() << endl;	
 		return;
 	}
 
@@ -196,7 +196,7 @@ void UDPAllocation::onPacketReceived(void* sender, DataPacket& packet)
 	
 	FastMutex::ScopedLock lock(_mutex);
 
-	Log("debug") << "[UDPAllocation:" << this << "] Sending Data Indication:" 
+	Log("trace", this) << "Sending Data Indication:" 
 		<< "\n\tFrom: " << source->peerAddress.toString()
 		<< "\n\tTo: " << _tuple.remote().toString()
 		//<< "\tData: " << string(packet.data, packet.size)

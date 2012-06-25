@@ -279,12 +279,14 @@ void AVEncoder::cleanup()
 
     // Close each codec 
 	if (_video) {
+		//_video->close();
 		delete _video;
 		_video = NULL;
 	}
-	if (_video) {
-		delete _video;
-		_video = NULL;
+	if (_audio) {
+		//_audio->close();
+		delete _audio;
+		_audio = NULL;
 	}
 	
     // Close the format
@@ -470,9 +472,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 		//}
 		
  		// Encode the frame 
-		//int size = _video->encode(buffer, bufferSize, opacket);	//, pts
-		//if (size < 0) {
-		if (_video->encode(buffer, bufferSize, opacket)) {
+		if (!_video->encode(buffer, bufferSize, opacket)) {
 			Log("warn") << "[AVEncoder:" << this << "] Failed to encode video frame" << endl;
 			return false;
 		}
