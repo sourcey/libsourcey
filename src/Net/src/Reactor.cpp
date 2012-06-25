@@ -99,9 +99,11 @@ void Reactor::run()
 					}
 				}
 			}
-
+				
+			//Log("trace", this) << "Select In: " << readable.size() << ":" << readable.size() << ":" << error.size() << endl;
 			if (Socket::select(readable, writable, error, _timeout)) 
 			{
+				//Log("trace", this) << "Select Out: " << readable.size() << ":" << readable.size() << ":" << error.size() << endl;
 				for (Socket::SocketList::iterator it = readable.begin(); it != readable.end(); ++it)
 					dispatch(*it, SocketReadable);
 				for (Socket::SocketList::iterator it = writable.begin(); it != writable.end(); ++it)
@@ -143,7 +145,7 @@ void Reactor::handleException(const Exception& exc)
 }
 
 
-void Reactor::handleException(const std::exception& exc)
+void Reactor::handleException(const exception& exc)
 {
 	Log("error", this) << "Error " << exc.what() << endl;
 
@@ -165,7 +167,7 @@ void Reactor::stop()
 
 void Reactor::attach(const Poco::Net::Socket& socket, const ReactorDelegate& delegate)
 {
-	//Log("trace", this) << "Attach: " << socket.impl(, this) << ": " << delegate.event << endl;
+	//Log("trace", this) << "Attach: " << socket.impl() << ": " << delegate.event << endl;
 
 	detach(socket, delegate);
 
@@ -175,13 +177,15 @@ void Reactor::attach(const Poco::Net::Socket& socket, const ReactorDelegate& del
 	d->socket = Poco::Net::Socket(socket);
 	_delegates.push_back(d);
 	
-	_wakeUp.set();
+	_wakeUp.set();	
+
+	//Log("trace", this) << "Attach: OK: " << socket.impl() << ": " << delegate.event << endl;
 }
 
 
 void Reactor::detach(const Poco::Net::Socket& socket, const ReactorDelegate& delegate) 
 {	
-	//Log("trace", this) << "Detach: " << socket.impl(, this) << ": " << delegate.event << endl;
+	//Log("trace", this) << "Detach: " << socket.impl() << ": " << delegate.event << endl;
 
 	FastMutex::ScopedLock lock(_mutex);
 	
@@ -193,7 +197,7 @@ void Reactor::detach(const Poco::Net::Socket& socket, const ReactorDelegate& del
 		}
 	}
 
-	//Log("trace", this) << "Detach: OK: " << socket.impl(, this) << ": " << delegate.event << endl;
+	//Log("trace", this) << "Detach: OK: " << socket.impl() << ": " << delegate.event << endl;
 }
 
 
@@ -233,6 +237,7 @@ void Reactor::dispatch(const Socket& socket, SocketEvent event)
 
 } } // namespace Sourcey::Net
 
+
 /*
 
 
@@ -258,11 +263,11 @@ void ReactorNotifier::run()
 
 void ReactorNotifier::dispatch(ReactorEvent& event)
 {
-	Log("trace", this) << "[ReactorNotifier:" << this << "] Broadcast: " << event.delegate.socket.impl(, this) << ": " << event.type << endl;
+	Log("trace", this) << "[ReactorNotifier:" << this << "] Broadcast: " << event.delegate.socket.impl() << ": " << event.type << endl;
 	assert(event.delegate.locked);
 	
 	event.delegate.dispatch(&event.reactor, event, 0, 0, 0);
-	Log("trace", this) << "[ReactorNotifier:" << this << "] Broadcast Unlock " << event.delegate.socket.impl(, this) << ": " << event.type << endl;
+	Log("trace", this) << "[ReactorNotifier:" << this << "] Broadcast Unlock " << event.delegate.socket.impl() << ": " << event.type << endl;
 	assert(event.delegate.locked);
 	event.delegate.locked = false;
 }

@@ -97,12 +97,11 @@ void UDPSocket::bind(const Address& address, bool reuseAddress)
 	if (isConnected())
 		throw Exception("Socket already bound/connected");
 
-	try {
-		FastMutex::ScopedLock lock(_mutex); 	
-
-		_error = "";
+	try {		
 		DatagramSocket::bind(address, reuseAddress);
-		bindEvents();
+		bindEvents();			
+		FastMutex::ScopedLock lock(_mutex); 		
+		_error = "";
 		_queue->start();
 		_closed = false;
 	} 
@@ -111,7 +110,7 @@ void UDPSocket::bind(const Address& address, bool reuseAddress)
 		_error = e.displayText();
 		Log("error") << "[UDPSocket:" << this << "] Connection failed: " << _error << endl;
 		e.rethrow();
-	}
+	}	
 }
 	
 

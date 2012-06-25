@@ -60,7 +60,7 @@ void TCPSocketAcceptor::bind(UInt16 localPort)
 
 void TCPSocketAcceptor::bind(const Address& address) 
 {
-	Log("trace") << "[TCPSocketAcceptor: " << this << "] Binding on " << address.toString() << endl;
+	Log("debug") << "[TCPSocketAcceptor:" << this << "] Binding on " << address << endl;
 	
 	_reactor.attach(*this, reactorDelegate(this, &TCPSocketAcceptor::onAccept, SocketReadable));
 
@@ -71,7 +71,7 @@ void TCPSocketAcceptor::bind(const Address& address)
 
 void TCPSocketAcceptor::close()
 {
-	Log("trace") << "[TCPSocketAcceptor: " << this << "] Closing" << endl;
+	Log("trace") << "[TCPSocketAcceptor:" << this << "] Closing" << endl;
 	
 	_reactor.detach(*this, reactorDelegate(this, &TCPSocketAcceptor::onAccept, SocketReadable));
 	try	{
@@ -83,13 +83,13 @@ void TCPSocketAcceptor::close()
 		Log("error") << "[TCPSocketAcceptor:" << this << "] " << exc.displayText() << endl;
 	}
 
-	Log("trace") << "[TCPSocketAcceptor: " << this << "] Closing: OK" << endl;
+	Log("trace") << "[TCPSocketAcceptor:" << this << "] Closing: OK" << endl;
 }
 
 
 void TCPSocketAcceptor::onAccept() 
 {
-	Log("trace") << "[TCPSocketAcceptor: " << this << "] On Accept" << endl;
+	Log("trace") << "[TCPSocketAcceptor:" << this << "] On Accept" << endl;
 	try	{
 		StreamSocket sock = acceptConnection();
 		SocketAccepted.dispatch(this, sock, _reactor);
