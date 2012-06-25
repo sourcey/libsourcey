@@ -1,0 +1,9 @@
+7.2.1.1. Detecting and Repairing Role Conflicts
+9.1.1.1.  ICE Restarts
+18.5.2. STUN Amplification Attacks
+Timeout and repeat for STUN::Request
+limit the total number of connectivity
+checks the agent performs across all check lists to a specific value,
+and this value MUST be configurable.  A default of 100 is
+RECOMMENDED.
+
