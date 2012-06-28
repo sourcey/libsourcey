@@ -78,7 +78,7 @@ endif()
 # The reason for including via iteration rather than find_library
 # is so we can remain version agnostic.
 # TODO: Include only OpenCV_FIND_COMPONENTS
-#set(OpenCV_FOUND 0)
+#set_module_notfound(OpenCV)
 if (NOT OpenCV_FOUND)
   set(OpenCV_FOUND 0)
   
@@ -127,7 +127,7 @@ if (NOT OpenCV_FOUND)
       endif()  
     endforeach()  
     
-    message(STATUS "Found OpenCV libraries: ${OpenCV_LIBRARIES}")
+    #message(STATUS "Found OpenCV libraries: ${OpenCV_LIBRARIES}")
      
     # Cache the vars.
     set(OpenCV_INCLUDE_DIR  ${OpenCV_INCLUDE_DIR}  CACHE STRING   "The OpenCV include directory." FORCE)

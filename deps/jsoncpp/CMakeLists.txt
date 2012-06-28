@@ -8,8 +8,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 # The source files:
 file(GLOB lib_srcs src/lib_json/*.cpp)
 file(GLOB lib_hdrs include/json/*.h)
-
-
+  
 # ----------------------------------------------------------------------------------
 # Define the library target
 # ----------------------------------------------------------------------------------

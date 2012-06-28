@@ -1,5 +1,5 @@
 ask_build_sourcey_module(TURN)
-if(BUILD_MODULE_TURN) 
+if(BUILD_MODULES AND BUILD_MODULE_TURN) 
   include_dependency(Poco REQUIRED)
   include_dependency(OpenSSL REQUIRED)
 
