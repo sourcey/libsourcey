@@ -126,7 +126,6 @@ void AVFileReader::run()
 	
 	try 
 	{
-		int len;
 		int res;
 		while (!_stop) {
 			

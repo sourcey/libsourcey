@@ -1,5 +1,5 @@
 # vim: ts=2 sw=2
-# - Try to find the required ffmpeg components(default: Zip Net NetSSL Crypto Util XML Foundation)
+# - Try to find the required ffmpeg Poco (default: Zip Net NetSSL Crypto Util XML Foundation)
 #
 # Once done this will define
 #  Poco_FOUND         - System has the all required components.
@@ -27,8 +27,6 @@
 #  Poco_<component>_LIBRARIES    - Link these to use <component>
 #  Poco_<component>_DEFINITIONS  - Compiler switches required for using <component>
 #  Poco_<component>_VERSION      - The components version
-  
-include(LibSourceyMacros)
 
 # The default components to find
 if (NOT Poco_FIND_COMPONENTS)
@@ -36,7 +34,7 @@ if (NOT Poco_FIND_COMPONENTS)
 endif()
 
 # Link library type
-set(Poco_LINK_SHARED_LIBS TRUE CACHE BOOL "Link with shared Poco libraries (.dll/.so) instead of static ones (.lib/.a)")    
+set(Poco_LINK_SHARED_LIBS FALSE CACHE BOOL "Link with shared Poco libraries (.dll/.so) instead of static ones (.lib/.a)")    
   
 # Check for cached results. If there are then skip the costly part.
 set_module_notfound(Poco)

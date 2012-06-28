@@ -1,5 +1,5 @@
 ask_build_sourcey_module(SDP)
-if(BUILD_MODULE_SDP) 
+if(BUILD_MODULES AND BUILD_MODULE_SDP) 
   include_dependency(Poco REQUIRED)
   include_dependency(OpenSSL REQUIRED)
 

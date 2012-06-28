@@ -1,73 +1,135 @@
 #
-### Macro: subdirlist
+### Macro: include_dependency
 #
-# Returns a list of subdirectories.
+# Inclusion of 3rd party dependency into a LibSourcey project.
 #
-macro(subdirlist result curdir)
-  file(GLOB children RELATIVE ${curdir} ${curdir}/*)
-  set(dirlist "")
-  foreach(child ${children})
-    if(IS_DIRECTORY ${curdir}/${child})
-        set(dirlist ${dirlist} ${child})
+macro(include_dependency name)
+  #message(STATUS "Including dependency: ${name}")
+  
+  find_package(${name} ${ARGN})  
+    
+  # Determine the variable scope
+  set(var_root ${name})  
+  set(lib_found 0)
+  string(TOUPPER ${var_root} var_root_upper)
+  if(${var_root}_FOUND)
+    set(lib_found 1)
+  else()
+    # Try to use old style uppercase variable accessor
+    if(${var_root_upper}_FOUND)
+      set(var_root ${var_root_upper})  
+      set(lib_found 1)
     endif()
-  endforeach()
-  set(${result} ${dirlist})
-endmacro()
-
-
-#
-### Macro: join
-#
-# Joins a string array.
-# Example:
-#   SET( letters "" "\;a" b c "d\;d" )
-#   JOIN("${letters}" ":" output)
-#   MESSAGE("${output}") # :;a:b:c:d;d
-#
-function(JOIN VALUES GLUE OUTPUT)
-  string (REPLACE ";" "${GLUE}" _TMP_STR "${VALUES}")
-  set (${OUTPUT} "${_TMP_STR}" PARENT_SCOPE)
-endfunction()
-
-
-#
-### Macro: list_length
-#
-# Example:
-# SET(MYLIST hello world foo bar)
-# LIST_LENGTH(length ${MYLIST})
-# MESSAGE("length: ${length}")
-#
-macro(LIST_LENGTH var)
-  set(entries)
-  foreach(e ${ARGN})
-    set(entries "${entries}.")
-  endforeach(e)
-  string(LENGTH ${entries} ${var})
-endmacro()
-
-
-#
-### Macro: append_unique_list
-#
-# Appends items from the source list to the given target list
-# if they are not already contained within the target list
-# in flattened string form.
-#
-function(append_unique_list target source)    
-  if (NOT ${source}) 
+  endif()  
+  
+  # Exit message on failure
+  if (NOT ${var_root}_FOUND)
+    message("Failed to include dependency: ${name}") 
     return()
   endif()
-  if (NOT ${target})       
-    set(${target} ${${source}} PARENT_SCOPE)
-  else()
-    join("${${target}}" ":" target_str)  
-    join("${${source}}" ":" source_str)
-    if (NOT ${target_str} MATCHES ${source_str}) 
-      set(${target} ${${target}} ${${source}} PARENT_SCOPE)
-    endif() 
-  endif() 
-endfunction()
+  
+  # Set a HAVE_XXX variable at parent scope for our Config.h
+  set(HAVE_${var_root_upper} TRUE PARENT_SCOPE)      
+  # Expose to LibSourcey
+  if(${var_root}_INCLUDE_DIR)
+    #message(STATUS "- Found ${name} Inc Dir: ${${var_root}_INCLUDE_DIR}")
+    #include_directories(${${var_root}_INCLUDE_DIR})
+    list(APPEND LibSourcey_INCLUDE_DIRS ${${var_root}_INCLUDE_DIR})
+  endif()
+  if(${var_root}_INCLUDE_DIRS)
+    #message(STATUS "- Found ${name} Inc Dirs: ${${var_root}_INCLUDE_DIRS}")
+    #include_directories(${${var_root}_INCLUDE_DIRS})
+    list(APPEND LibSourcey_INCLUDE_DIRS ${${var_root}_INCLUDE_DIRS})    
+  endif()
+  if(${var_root}_LIBRARY_DIR)
+    #message(STATUS "- Found ${name} Lib Dir: ${${var_root}_LIBRARY_DIR}")
+    #link_directories(${${var_root}_LIBRARY_DIR})
+    list(APPEND LibSourcey_LIBRARY_DIRS ${${var_root}_LIBRARY_DIR})
+    #list(REMOVE_DUPLICATES LibSourcey_LIBRARY_DIRS)
+  endif()
+  if(${var_root}_LIBRARY_DIRS)
+    #message(STATUS "- Found ${name} Lib Dirs: ${${var_root}_LIBRARY_DIRS}")
+    #link_directories(${${var_root}_LIBRARY_DIRS})
+    list(APPEND LibSourcey_LIBRARY_DIRS ${${var_root}_LIBRARY_DIRS})
+    #list(REMOVE_DUPLICATES LibSourcey_LIBRARY_DIRS)
+  endif()
+  if(${var_root}_LIBRARY)
+    #message(STATUS "- Found ${name} Lib: ${${var_root}_LIBRARY}")
+    list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${var_root}_LIBRARY})
+  endif()
+  if(${var_root}_LIBRARIES)
+    #message(STATUS "- Found ${name} Libs: ${${var_root}_LIBRARIES}")
+    list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${var_root}_LIBRARIES})
+  endif()
+endmacro()
+
+
+#
+### Macro: include_sourcey_modules
+#
+# Inclusion of LibSourcey module(s) into a project.
+#
+macro(include_sourcey_modules)
+  foreach(name ${ARGN})
+    # message(STATUS "Including module: ${name}")
+    
+    # Include the module headers. 
+    # These may be located in the "src/" root directory,
+    # or in a sub directory.
+    set(HAVE_LIBSOURCEY_${name} 0)
+    if(IS_DIRECTORY "${LibSourcey_SOURCE_DIR}/${name}/include")
+      include_directories("${LibSourcey_SOURCE_DIR}/${name}/include")   
+      set(HAVE_LIBSOURCEY_${name} 1)
+    else()       
+      subdirlist(subdirs "${LibSourcey_SOURCE_DIR}")
+      foreach(dir ${subdirs})
+        set(dir "${LibSourcey_SOURCE_DIR}/${dir}/${name}/include")
+        if(IS_DIRECTORY ${dir})
+          include_directories(${dir})
+          set(HAVE_LIBSOURCEY_${name} 1)
+        endif()
+      endforeach()       
+    endif()
+    
+    if (NOT HAVE_LIBSOURCEY_${name})
+       message(ERROR "Unable to include dependent LibSourcey module ${name}. The build may fail.")
+    endif()
+        
+    set(lib_name "Sourcey${name}${LibSourcey_DLLVERSION}")
+    
+    # Create a Debug and a Release list for MSVC        
+    if (MSVC)
+      find_library(LibSourcey_${name}_RELEASE "${lib_name}" LibSourcey_LIBRARY_DIR)
+      find_library(LibSourcey_${name}_DEBUG "${lib_name}d" LibSourcey_LIBRARY_DIR)
+      if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)            
+        if (LibSourcey_${name}_RELEASE) 
+          list(APPEND LibSourcey_INCLUDE_LIBRARIES "optimized" ${LibSourcey_${name}_RELEASE})
+          mark_as_advanced(LibSourcey_${name}_RELEASE)
+        endif()
+        if (LibSourcey_${name}_DEBUG)
+          list(APPEND LibSourcey_INCLUDE_LIBRARIES "debug" ${LibSourcey_${name}_DEBUG})
+          mark_as_advanced(LibSourcey_${name}_DEBUG)
+        endif()
+      else()    
+        if (LibSourcey_${name}_RELEASE) 
+          list(APPEND LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_${name}_RELEASE})
+          mark_as_advanced(LibSourcey_${name}_RELEASE)
+        endif()
+        if (LibSourcey_${name}_DEBUG)
+          mark_as_advanced(LibSourcey_${name}_DEBUG)
+        endif()
+      endif()      
+    else()
+      find_library(LibSourcey_${name} "${lib_name}" LibSourcey_LIBRARY_DIR)
+      if (LibSourcey_${name})
+        # Prepend module libraries otherwise linking will fail
+        # on compilers that require ordering of link libraries.
+        set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_${name}} ${LibSourcey_INCLUDE_LIBRARIES})
+        mark_as_advanced(LibSourcey_${name})
+      endif()
+    endif()
+  endforeach()
+endmacro()
 
 
 #
@@ -127,14 +189,14 @@ macro(set_module_found module)
     message("Failed to locate ${module}. Please specify paths manually.")  
   endif() 
 
+  set(${module}_FOUND TRUE)
+  set(${module}_FOUND TRUE PARENT_SCOPE)
+
   mark_as_advanced(${module}_INCLUDE_DIRS
                    ${module}_LIBRARY_DIRS
                    ${module}_LIBRARIES
                    ${module}_DEFINITIONS
                    ${module}_FOUND)
-
-  set(${module}_FOUND TRUE)
-  set(${module}_FOUND TRUE PARENT_SCOPE)
   
   #message("Module Found=${module}")    
 
@@ -575,4 +637,4 @@ endmacro()
 #        bin
 #    )  
 #  endif()  
-  
+ 

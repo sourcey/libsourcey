@@ -1,89 +1,4 @@
 #
-### Macro: ask_build_sourcey_module
-#
-# Optionally build a LibSourcey module.
-# This should be called before include_dependency and
-# define_sourcey_module for each module.
-#
-macro(ask_build_sourcey_module name)
-  if(BUILD_MODULES)
-    set(BUILD_MODULE_${name} ON CACHE BOOL "Build LibSourcey module: ${name}")
-    if(BUILD_MODULE_${name}) 
-      mark_as_advanced(FORCE BUILD_MODULE_${name})  
-    endif()  
-  endif()  
-endmacro()
-
-
-#
-### Macro: include_sourcey_modules
-#
-# Inclusion of LibSourcey module(s) into a project.
-#
-macro(include_sourcey_modules)
-  foreach(name ${ARGN})
-    # message(STATUS "Including module: ${name}")
-    
-    # Include the module headers. 
-    # These may be located in the "src/" root directory,
-    # or in a sub directory.
-    set(HAVE_LIBSOURCEY_${name} 0)
-    if(IS_DIRECTORY "${LibSourcey_SOURCE_DIR}/${name}/include")
-      include_directories("${LibSourcey_SOURCE_DIR}/${name}/include")   
-      set(HAVE_LIBSOURCEY_${name} 1)
-    else()       
-      subdirlist(subdirs "${LibSourcey_SOURCE_DIR}")
-      foreach(dir ${subdirs})
-        set(dir "${LibSourcey_SOURCE_DIR}/${dir}/${name}/include")
-        if(IS_DIRECTORY ${dir})
-          include_directories(${dir})
-          set(HAVE_LIBSOURCEY_${name} 1)
-        endif()
-      endforeach()       
-    endif()
-    
-    if (NOT HAVE_LIBSOURCEY_${name})
-       message(ERROR "Unable to include dependent LibSourcey module ${name}. The build may fail.")
-    endif()
-        
-    set(lib_name "Sourcey${name}${LibSourcey_DLLVERSION}")
-    
-    # Create a Debug and a Release list for MSVC        
-    if (MSVC)
-      find_library(LibSourcey_${name}_RELEASE "${lib_name}" LibSourcey_LIBRARY_DIR)
-      find_library(LibSourcey_${name}_DEBUG "${lib_name}d" LibSourcey_LIBRARY_DIR)
-      if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)            
-        if (LibSourcey_${name}_RELEASE) 
-          list(APPEND LibSourcey_INCLUDE_LIBRARIES "optimized" ${LibSourcey_${name}_RELEASE})
-          mark_as_advanced(LibSourcey_${name}_RELEASE)
-        endif()
-        if (LibSourcey_${name}_DEBUG)
-          list(APPEND LibSourcey_INCLUDE_LIBRARIES "debug" ${LibSourcey_${name}_DEBUG})
-          mark_as_advanced(LibSourcey_${name}_DEBUG)
-        endif()
-      else()    
-        if (LibSourcey_${name}_RELEASE) 
-          list(APPEND LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_${name}_RELEASE})
-          mark_as_advanced(LibSourcey_${name}_RELEASE)
-        endif()
-        if (LibSourcey_${name}_DEBUG)
-          mark_as_advanced(LibSourcey_${name}_DEBUG)
-        endif()
-      endif()      
-    else()
-      find_library(LibSourcey_${name} "${lib_name}" LibSourcey_LIBRARY_DIR)
-      if (LibSourcey_${name})
-        # Prepend module libraries otherwise linking will fail
-        # on compilers that require ordering of link libraries.
-        set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_${name}} ${LibSourcey_INCLUDE_LIBRARIES})
-        mark_as_advanced(LibSourcey_${name})
-      endif()
-    endif()
-  endforeach()
-endmacro()
-
-
-#
 ### Macro: define_sourcey_module
 #
 # Defines a generic LibSourcey module.
@@ -127,7 +42,7 @@ macro(define_sourcey_module name)
   source_group("Src" FILES ${lib_srcs})
   source_group("Include" FILES ${lib_hdrs})
 
-  add_library(${name} ${lib_srcs} ${lib_hdrs})     
+  add_library(${name} ${lib_srcs} ${lib_hdrs})
       
   # Set HAVE_LIBSOURCEY_XXX at parent scope for inclusion
   # into our Config.h

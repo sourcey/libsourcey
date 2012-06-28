@@ -12,22 +12,49 @@ else()
 endif()
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configs" FORCE)
+if(DEFINED CMAKE_BUILD_TYPE AND CMAKE_VERSION VERSION_GREATER "2.8")
+  set_property(7 CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${CMAKE_CONFIGURATION_TYPES}7 )
+endif()
 
 project(LibSourcey)
 
 add_definitions(-DUNICODE -D_UNICODE)
 
+# Tell CMake where to locate our .cmake files
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+
+include(LibSourceyUtilities REQUIRED)
+include(LibSourceyDependencies REQUIRED)
+include(LibSourceyApplication REQUIRED)
+include(LibSourceyModule REQUIRED)
+include(LibSourceyDetectCXXCompiler REQUIRED)
+include(LibSourceyVersion REQUIRED)
 
 # ----------------------------------------------------------------------------
-# Set bitness
-# ----------------------------------------------------------------------------  
-set(LibSourcey_ARCHITECTURE i386)
-set(LibSourcey_BITNESS 32)
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(LibSourcey_BITNESS 64)
-  set(LibSourcey_ARCHITECTURE amd64)
-endif()
+# LibSourcey build components
+# ----------------------------------------------------------------------------
+set_option(BUILD_SHARED_LIBS          "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" NOT (ANDROID OR IOS))
+set_option(BUILD_MODULE_SAMPLES       "Build module sample applications?"                        OFF)
+set_option(BUILD_MODULE_TESTS         "Build module test applications?"                          OFF)
+set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs"                       ON)
 
+# ----------------------------------------------------------------------------
+# OpenCV build options
+# ----------------------------------------------------------------------------
+set_option(ENABLE_SOLUTION_FOLDERS    "Solution folder in Visual Studio or in other IDEs"        MSVC_IDE IF (CMAKE_VERSION VERSION_GREATER "2.8.0") )
+set_option(ENABLE_PROFILING           "Enable profiling in the GCC compiler (Add flags: -g -pg)" OFF  IF CMAKE_COMPILER_IS_GNUCXX )
+set_option(ENABLE_OMIT_FRAME_POINTER  "Enable -fomit-frame-pointer for GCC"                      ON   IF CMAKE_COMPILER_IS_GNUCXX )
+set_option(ENABLE_POWERPC             "Enable PowerPC for GCC"                                   ON   IF (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_SYSTEM_PROCESSOR MATCHES powerpc.*) )
+set_option(ENABLE_FAST_MATH           "Enable -ffast-math (not recommended for GCC 4.6.x)"       OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64)) )
+set_option(ENABLE_SSE                 "Enable SSE instructions"                                  ON   IF (MSVC OR CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64)) )
+set_option(ENABLE_SSE2                "Enable SSE2 instructions"                                 ON   IF (MSVC OR CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64)) )
+set_option(ENABLE_SSE3                "Enable SSE3 instructions"                                 OFF  IF (CV_ICC OR CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64)) )
+set_option(ENABLE_SSSE3               "Enable SSSE3 instructions"                                OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64)) )
+set_option(ENABLE_SSE41               "Enable SSE4.1 instructions"                               OFF  IF (CV_ICC OR CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64)) )
+set_option(ENABLE_SSE42               "Enable SSE4.2 instructions"                               OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64)) )
+set_option(ENABLE_NOISY_WARNINGS      "Show all warnings even if they are too noisy"             OFF )
+set_option(LibSourcey_WARNINGS_ARE_ERRORS "Treat warnings as errors"                                 OFF )
 
 # ----------------------------------------------------------------------------
 # Build paths
@@ -42,23 +69,18 @@ set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/LibSour
 set(LibSourcey_INCLUDE_DIRS "") # Contains all include dirs
 set(LibSourcey_LIBRARY_DIRS "") # Contains all include library dirs
 set(LibSourcey_INCLUDE_LIBRARIES "") # Contains all include libraries
-
-# Tell CMake where to locate our .cmake files
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
-set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
-
-include(LibSourceyMacros REQUIRED)
-include(LibSourceyModule REQUIRED)
-include(LibSourceyDependency OPTIONAL)
+set(LibSourcey_BUILD_DEPENDENCIES "") # List of all dependencies to build
+set(LibSourcey_BUILD_MODULES "") # List of all modules to build
+set(LibSourcey_BUILD_APPLICATIONS "") # List of all apps to build
 
 # Append some common search paths for find_library
 # to find libraries from these locations first
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
-    D:/dev/lib/OpenCV2.4/build/lib
+    D:/dev/lib/OpenCV2.4/build/install/lib
     D:/dev/lib/wxWidgets-2.9.2/lib/vc_lib
-    D:/dev/lib/ffmpeg-2012-04-16/lib
+    #D:/dev/lib/ffmpeg-2012-04-16/lib
     D:/dev/lib/OpenSSL-Win32/lib/VC
     D:/dev/lib/poco-1.4.1p1-all/lib 
     #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg/bin
@@ -66,7 +88,7 @@ if(WIN32)
     #D:/dev/lib/OpenCV2.4/build/lib/Debug
     #D:/dev/lib/ffmpeg/lib
     #D:/dev/apps/MinGW/msys/1.0/local
-    #D:/dev/projects/Sourcey/LibSourcey/src/anionu/deps/ffmpeg/bin
+    D:/dev/projects/Sourcey/LibSourcey/src/anionu/deps/ffmpeg/bin
     )
 else()
   set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
@@ -79,149 +101,37 @@ endif()
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
-    D:/dev/lib/OpenCV2.4/build/include
+    D:/dev/lib/OpenCV2.4/build/install/include
     D:/dev/lib/wxWidgets-2.9.2
-    D:/dev/lib/ffmpeg-2012-04-16/include
+    #D:/dev/lib/ffmpeg-2012-04-16/include
     D:/dev/lib/OpenSSL-Win32/include
     D:/dev/lib/poco-1.4.1p1-all
     #D:/dev/lib/OpenCV2.3/build/include
     #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg
     #D:/dev/lib/ffmpeg
     #D:/dev/apps/MinGW/msys/1.0/local
-    #D:/dev/projects/Sourcey/LibSourcey/src/anionu/deps/ffmpeg/include
+    D:/dev/projects/Sourcey/LibSourcey/src/anionu/deps/ffmpeg/include
     )
 endif()
 
-
 # ----------------------------------------------------------------------------
-# Current version number
+# Solution folders:
 # ----------------------------------------------------------------------------
-set(LibSourcey_VERSION_FILE "${LibSourcey_DIR}/src/Base/include/Sourcey/Base.h")
-if(NOT EXISTS "${LibSourcey_VERSION_FILE}")
-  message(FATAL_ERROR "Cannot find base module headers.")
+if(ENABLE_SOLUTION_FOLDERS)
+  set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+  set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMakeTargets")
 endif()
 
-FILE(STRINGS "${LibSourcey_VERSION_FILE}" LibSourcey_VERSION_PARTS REGEX "#define SOURCEY_.+_VERSION[ ]+[0-9]+" )
-
-string(REGEX REPLACE ".+SOURCEY_MAJOR_VERSION[ ]+([0-9]+).*" "\\1" LibSourcey_VERSION_MAJOR "${LibSourcey_VERSION_PARTS}")
-string(REGEX REPLACE ".+SOURCEY_MINOR_VERSION[ ]+([0-9]+).*" "\\1" LibSourcey_VERSION_MINOR "${LibSourcey_VERSION_PARTS}")
-string(REGEX REPLACE ".+SOURCEY_PATCH_VERSION[ ]+([0-9]+).*" "\\1" LibSourcey_VERSION_PATCH "${LibSourcey_VERSION_PARTS}")
-
-set(LibSourcey_VERSION "${LibSourcey_VERSION_MAJOR}.${LibSourcey_VERSION_MINOR}.${LibSourcey_VERSION_PATCH}")
-set(LibSourcey_SOVERSION "${LibSourcey_VERSION_MAJOR}.${LibSourcey_VERSION_MINOR}")
-
-if(WIN32)
-    # Postfix of DLLs:
-    set(LibSourcey_DLLVERSION "${LibSourcey_VERSION_MAJOR}${LibSourcey_VERSION_MINOR}${LibSourcey_VERSION_PATCH}")
-    set(LibSourcey_DEBUG_POSTFIX "d")
-else()
-    # Postfix of so's:
-    set(LibSourcey_DLLVERSION "")
-    set(LibSourcey_DEBUG_POSTFIX)
-endif()
-
-
 # ----------------------------------------------------------------------------
-# Build static or dynamic libs?
-# Default: static libraries
+# LibSourcey compiler and linker options
 # ----------------------------------------------------------------------------
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)")
-
-
-# ----------------------------------------------------------------------------
-# Build sample applications
-# Default: off
-# ----------------------------------------------------------------------------
-set(BUILD_MODULE_SAMPLES OFF CACHE BOOL "Build module sample applications?")
-
-
-# ----------------------------------------------------------------------------
-# Build test applications
-# Default: off
-# ----------------------------------------------------------------------------
-set(BUILD_MODULE_TESTS OFF CACHE BOOL "Build module test applications?")
-
-
-# ----------------------------------------------------------------------------
-# Include debug info into debug libs?
-# Default: yes
-# ----------------------------------------------------------------------------
-set(BUILD_WITH_DEBUG_INFO ON CACHE BOOL "Include debug info into debug libs")
-
+include(LibSourceyCompilerOptions REQUIRED)
 
 # ----------------------------------------------------------------------------
 # Set the location of our platform-dependant Config.h
 # ----------------------------------------------------------------------------
 set(LibSourcey_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant Config.h")
 include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
-
-
-# ----------------------------------------------------------------------------
-# Use statically or dynamically linked CRT?
-# Default: dynamic
-# ----------------------------------------------------------------------------
-if(WIN32 AND NOT BUILD_SHARED_LIBS)
-  option (BUILD_WITH_STATIC_CRT "Enables use of staticaly linked CRT" OFF)
-endif()
-    
-if(MSVC)
-    if(BUILD_WITH_STATIC_CRT)
-        foreach(flag_var
-                CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
-                CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
-                CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-                CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-           if(${flag_var} MATCHES "/MD")
-              string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
-           endif(${flag_var} MATCHES "/MD")
-
-           if(${flag_var} MATCHES "/MDd")
-              string(REGEX REPLACE "/MDd" "/MTd" ${flag_var} "${${flag_var}}")
-           endif(${flag_var} MATCHES "/MDd")
-        endforeach(flag_var)
-
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:atlthunk.lib /NODEFAULTLIB:msvcrt.lib /NODEFAULTLIB:msvcrtd.lib")
-
-        set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:libcmt.lib")
-        set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:libcmtd.lib")
-    else(BUILD_WITH_STATIC_CRT)
-        foreach(flag_var
-                CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
-                CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
-                CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-                CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-           if(${flag_var} MATCHES "/MT")
-              string(REGEX REPLACE "/MT" "/MD" ${flag_var} "${${flag_var}}")
-           endif(${flag_var} MATCHES "/MT")
-
-           if(${flag_var} MATCHES "/MTd")
-              string(REGEX REPLACE "/MTd" "/MDd" ${flag_var} "${${flag_var}}")
-           endif(${flag_var} MATCHES "/MTd")
-        endforeach(flag_var)
-
-    endif(BUILD_WITH_STATIC_CRT)
-
-    if(NOT BUILD_WITH_DEBUG_INFO)
-        string(REPLACE "/debug" "" CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-        string(REPLACE "/DEBUG" "" CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-        string(REPLACE "/INCREMENTAL:YES" "/INCREMENTAL:NO" CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-        string(REPLACE "/INCREMENTAL " "/INCREMENTAL:NO" CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-
-        string(REPLACE "/debug" "" CMAKE_MODULE_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG}")
-        string(REPLACE "/DEBUG" "" CMAKE_MODULE_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG}")
-        string(REPLACE "/INCREMENTAL:YES" "/INCREMENTAL:NO" CMAKE_MODULE_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG}")
-        string(REPLACE "/INCREMENTAL " "/INCREMENTAL:NO" CMAKE_MODULE_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG}")
-
-        string(REPLACE "/debug" "" CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}")
-        string(REPLACE "/DEBUG" "" CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}")
-        string(REPLACE "/INCREMENTAL:YES" "/INCREMENTAL:NO" CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}")
-        string(REPLACE "/INCREMENTAL " "/INCREMENTAL:NO" CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}")
-
-        string(REPLACE "/Zi" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
-        string(REPLACE "/Zi" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
-    endif()
-
-endif()
 
 
 # ============================================================================
@@ -345,7 +255,7 @@ set(PACKAGE_STRING "${PACKAGE} ${LibSourcey_VERSION}")
 set(PACKAGE_TARNAME "${PACKAGE}")
 set(PACKAGE_VERSION "${LibSourcey_VERSION}")
 
-message(STATUS "Parsing 'Config.h.cmake'")
+status("Parsing 'Config.h.cmake'")
 configure_file(
   "${CMAKE_SOURCE_DIR}/cmake/Config.h.cmake" 
   "${LibSourcey_CONFIG_FILE_INCLUDE_DIR}/Config.h")
@@ -368,29 +278,103 @@ endif()
 # ----------------------------------------------------------------------------
 #  Summary:
 # ----------------------------------------------------------------------------
-message(STATUS "")
-message(STATUS "General configuration for LibSourcey ${LibSourcey_VERSION} ===============================")
-message(STATUS "")
-message(STATUS "    Built as dynamic libs?:     ${BUILD_SHARED_LIBS}")
-message(STATUS "    Compiler:                   ${CMAKE_COMPILER}")
-message(STATUS "    C++ flags (Release):        ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
-message(STATUS "    C++ flags (Debug):          ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
-if(WIN32)
-message(STATUS "    Linker flags (Release):     ${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
-message(STATUS "    Linker flags (Debug):       ${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-else()
-message(STATUS "    Linker flags (Release):     ${CMAKE_SHARED_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS_RELEASE}")
-message(STATUS "    Linker flags (Debug):       ${CMAKE_SHARED_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS_DEBUG}")
+
+# Build platform
+status("")
+status("  Platform:")
+status("    Host:"             ${CMAKE_HOST_SYSTEM_NAME} ${CMAKE_HOST_SYSTEM_VERSION} ${CMAKE_HOST_SYSTEM_PROCESSOR})
+if(CMAKE_CROSSCOMPILING)
+  status("    Target:"           ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_PROCESSOR})
+endif()
+status("    CMake:"            ${CMAKE_VERSION})
+status("    CMake generator:"  ${CMAKE_GENERATOR})
+status("    CMake build tool:" ${CMAKE_BUILD_TOOL})
+if(MSVC)
+  status("    MSVC:"           ${MSVC_VERSION})
+endif()
+if(CMAKE_GENERATOR MATCHES Xcode)
+  status("    Xcode:"          ${XCODE_VERSION})
+endif()
+if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
+  status("    Configuration:"  ${CMAKE_BUILD_TYPE})
 endif()
 
-message(STATUS "")
-message(STATUS "    Install path:               ${CMAKE_INSTALL_PREFIX}")
-message(STATUS "")
-message(STATUS "    Config.h is in:             ${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
-message(STATUS "-----------------------------------------------------------------")
-message(STATUS "")
+# C/C++ options
+status("")
+status("  C/C++:")
+status("    Built as dynamic libs?:" BUILD_SHARED_LIBS THEN YES ELSE NO)
+status("    C++ Compiler:"           CMAKE_COMPILER_IS_GNUCXX THEN "${CMAKE_CXX_COMPILER} (ver ${CMAKE_GCC_REGEX_VERSION})" ELSE "${CMAKE_CXX_COMPILER}" )
+status("    C++ flags (Release):"    ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE})
+status("    C++ flags (Debug):"      ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG})
+status("    C Compiler:"             ${CMAKE_C_COMPILER})
+status("    C flags (Release):"      ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE})
+status("    C flags (Debug):"        ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG})
+if(WIN32)
+  status("    Linker flags (Release):" ${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS_RELEASE})
+  status("    Linker flags (Debug):"   ${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS_DEBUG})
+else()
+  status("    Linker flags (Release):" ${CMAKE_SHARED_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS_RELEASE})
+  status("    Linker flags (Debug):"   ${CMAKE_SHARED_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS_DEBUG})
+endif()
+
+# Modules
+status("")
+status("  Build Components:")
+status("")
+status("    Dependencies:               ${LibSourcey_BUILD_DEPENDENCIES}")
+status("    Modules:                    ${LibSourcey_BUILD_MODULES}")
+status("    Applications:               ${LibSourcey_BUILD_APPLICATIONS}")
+  
+# Auxiliary
+status("")
+status("    Install path:               ${CMAKE_INSTALL_PREFIX}")
+status("")
+status("    Config.h is in:             ${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
+status("-----------------------------------------------------------------")
+status("")
 
 # Warn in the case of in-source build
 if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
     message(WARNING "The source directory is the same as binary directory. \"make clean\" may damage the source tree")
 endif()
+
+
+#foreach(m ${LibSourcey_BUILD_MODULES})
+  
+#endforeach()
+  #set(__mdeps "")
+  #foreach(d ${LibSourcey_MODULE_${m}_DEPS})
+  #  if(d MATCHES "^opencv_" AND NOT HAVE_${d})
+  #    list(APPEND __mdeps ${d})
+  #  endif()
+  #endforeach()
+  #list(APPEND LibSourcey_MODULES_DISABLED_AUTO_ST "${m}(deps: ${__mdeps})")
+
+
+#string(REPLACE "opencv_" "" LibSourcey_MODULES_BUILD_ST          "${LibSourcey_MODULES_BUILD}")
+#string(REPLACE "opencv_" "" LibSourcey_MODULES_DISABLED_USER_ST  "${LibSourcey_MODULES_DISABLED_USER}")
+#string(REPLACE "opencv_" "" LibSourcey_MODULES_DISABLED_FORCE_ST "${LibSourcey_MODULES_DISABLED_FORCE}")
+#set(LibSourcey_MODULES_DISABLED_AUTO_ST "")
+
+
+
+
+# ----------------------------------------------------------------------------
+# Use statically or dynamically linked CRT?
+# Default: dynamic
+# ----------------------------------------------------------------------------
+#if(WIN32 AND NOT BUILD_SHARED_LIBS)
+#  option (BUILD_WITH_STATIC_CRT "Enables use of staticaly linked CRT" OFF)
+#endif()
+    
+
+
+# ----------------------------------------------------------------------------
+# Set bitness
+# ----------------------------------------------------------------------------  
+#set(LibSourcey_ARCHITECTURE i386)
+#set(LibSourcey_BITNESS 32)
+#if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+#  set(LibSourcey_BITNESS 64)
+#  set(LibSourcey_ARCHITECTURE amd64)
+#endif()

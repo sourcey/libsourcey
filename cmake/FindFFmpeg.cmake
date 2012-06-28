@@ -22,15 +22,13 @@
 #  <component>_DEFINITIONS  - Compiler switches required for using <component>
 #  <component>_VERSION      - The components version
 
-include(LibSourceyMacros)
-
 # The default components were taken from a survey over other FindFFmpeg.cmake files
 if (NOT FFmpeg_FIND_COMPONENTS)
   set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE) #AVFILTER
 endif()
 
 # Check for cached results. If there are skip the costly part.
-set_module_notfound(FFmpeg)
+#set_module_notfound(FFmpeg)
 if (NOT FFmpeg_FOUND)
       
   # Check for all components
@@ -45,6 +43,9 @@ if (NOT FFmpeg_FOUND)
   # Set FFmpeg as found or not
   set_module_found(FFmpeg)
 endif ()
+
+
+
 
 
 
