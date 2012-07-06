@@ -24,8 +24,10 @@ add_definitions(-DUNICODE -D_UNICODE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
+# Include required cmake files
 include(LibSourceyUtilities REQUIRED)
-include(LibSourceyDependencies REQUIRED)
+include(LibSourceyIncludes REQUIRED)
+include(LibSourceyDependency REQUIRED)
 include(LibSourceyApplication REQUIRED)
 include(LibSourceyModule REQUIRED)
 include(LibSourceyDetectCXXCompiler REQUIRED)
@@ -34,10 +36,15 @@ include(LibSourceyVersion REQUIRED)
 # ----------------------------------------------------------------------------
 # LibSourcey build components
 # ----------------------------------------------------------------------------
-set_option(BUILD_SHARED_LIBS          "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" NOT (ANDROID OR IOS))
+set_option(BUILD_SHARED_LIBS          "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" NOT (WIN32 OR ANDROID OR IOS))
+set_option(BUILD_DEPENDENCIES         "Build third party dependencies"                           ON)
+set_option(BUILD_MODULES              "Build LibSourcey modules"                                 ON)
+set_option(BUILD_APPLICATIONS         "Build LibSourcey applications"                            ON)
 set_option(BUILD_MODULE_SAMPLES       "Build module sample applications?"                        OFF)
 set_option(BUILD_MODULE_TESTS         "Build module test applications?"                          OFF)
 set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs"                       ON)
+set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs (not MSCV only)"       ON )
+set_option(BUILD_WITH_STATIC_CRT      "Enables staticaly linked CRT for staticaly linked libraries" OFF)
 
 # ----------------------------------------------------------------------------
 # OpenCV build options
@@ -54,7 +61,7 @@ set_option(ENABLE_SSSE3               "Enable SSSE3 instructions"               
 set_option(ENABLE_SSE41               "Enable SSE4.1 instructions"                               OFF  IF (CV_ICC OR CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64)) )
 set_option(ENABLE_SSE42               "Enable SSE4.2 instructions"                               OFF  IF (CMAKE_COMPILER_IS_GNUCXX AND (X86 OR X86_64)) )
 set_option(ENABLE_NOISY_WARNINGS      "Show all warnings even if they are too noisy"             OFF )
-set_option(LibSourcey_WARNINGS_ARE_ERRORS "Treat warnings as errors"                                 OFF )
+set_option(LibSourcey_WARNINGS_ARE_ERRORS "Treat warnings as errors"                             OFF )
 
 # ----------------------------------------------------------------------------
 # Build paths
@@ -66,26 +73,28 @@ set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_INSTALL_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/LibSourcey/deps")
-set(LibSourcey_INCLUDE_DIRS "") # Contains all include dirs
-set(LibSourcey_LIBRARY_DIRS "") # Contains all include library dirs
-set(LibSourcey_INCLUDE_LIBRARIES "") # Contains all include libraries
-set(LibSourcey_BUILD_DEPENDENCIES "") # List of all dependencies to build
-set(LibSourcey_BUILD_MODULES "") # List of all modules to build
-set(LibSourcey_BUILD_APPLICATIONS "") # List of all apps to build
+set(LibSourcey_INCLUDE_DIRS "")         # Contains all include dirs
+set(LibSourcey_LIBRARY_DIRS "")         # Contains all include library dirs
+set(LibSourcey_INCLUDE_LIBRARIES "")    # Contains all include libraries
+set(LibSourcey_BUILD_DEPENDENCIES "")   # List of all dependencies to build
+set(LibSourcey_BUILD_MODULES "")        # List of all modules to build
+set(LibSourcey_BUILD_APPLICATIONS "")   # List of all apps to build
 
 # Append some common search paths for find_library
 # to find libraries from these locations first
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
-    D:/dev/lib/OpenCV2.4/build/install/lib
+    #D:/dev/lib/OpenCV2.3/build/x86/vc10/lib
+    #D:/dev/lib/OpenCV2.4/build/lib/Debug
+    #D:/dev/lib/OpenCV2.4/build/install/lib
+    #D:/dev/lib/OpenCV2.4.1/build/x86/vc10/lib
+    D:/dev/lib/OpenCV2.4.1/build/install/lib
     D:/dev/lib/wxWidgets-2.9.2/lib/vc_lib
     #D:/dev/lib/ffmpeg-2012-04-16/lib
     D:/dev/lib/OpenSSL-Win32/lib/VC
     D:/dev/lib/poco-1.4.1p1-all/lib 
     #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg/bin
-    #D:/dev/lib/OpenCV2.3/build
-    #D:/dev/lib/OpenCV2.4/build/lib/Debug
     #D:/dev/lib/ffmpeg/lib
     #D:/dev/apps/MinGW/msys/1.0/local
     D:/dev/projects/Sourcey/LibSourcey/src/anionu/deps/ffmpeg/bin
@@ -101,12 +110,13 @@ endif()
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
-    D:/dev/lib/OpenCV2.4/build/install/include
+    #D:/dev/lib/OpenCV2.3/build/include
+    #D:/dev/lib/OpenCV2.4/build/install/include
+    D:/dev/lib/OpenCV2.4.1/build/include
     D:/dev/lib/wxWidgets-2.9.2
     #D:/dev/lib/ffmpeg-2012-04-16/include
     D:/dev/lib/OpenSSL-Win32/include
     D:/dev/lib/poco-1.4.1p1-all
-    #D:/dev/lib/OpenCV2.3/build/include
     #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg
     #D:/dev/lib/ffmpeg
     #D:/dev/apps/MinGW/msys/1.0/local
@@ -123,6 +133,14 @@ if(ENABLE_SOLUTION_FOLDERS)
 endif()
 
 # ----------------------------------------------------------------------------
+# Use statically or dynamically linked CRT?
+# Default: dynamic
+# ----------------------------------------------------------------------------
+if(MSVC)
+  include(LibSourceyCRTLinkage REQUIRED)
+endif()
+
+# ----------------------------------------------------------------------------
 # LibSourcey compiler and linker options
 # ----------------------------------------------------------------------------
 include(LibSourceyCompilerOptions REQUIRED)
@@ -135,7 +153,7 @@ include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 
 
 # ============================================================================
-# Include libraries, modules and projects
+# Include Dependencies, Modules and Applications
 #
 # LibSourcey automatically includes all directories inside the ./src folder. 
 # Libraries in the LibSourcey source tree are broken up into three types:
@@ -144,7 +162,7 @@ include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 #     A third party library required by a LibSourcey Modue or Application.  
 #     Dependencies may be external or internal. External dependencies reside
 #     outside on the source tree, while internal dependencies generally reside
-#     in the deps folder. All dependencies must be built, installed, found
+#     in the ./deps folder. All dependencies must be built, installed, found
 #     and included by the build system before Modules and Application can be
 #     built. 
 #
@@ -154,7 +172,7 @@ include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 #     be built and installed before Applications.
 #
 # Application: 
-#     A standalone application. These must be built once all Dependencies and
+#     A standalone application. These can be built once all Dependencies and
 #     Modules have been built and installed.
 #
 # ============================================================================
@@ -163,19 +181,16 @@ include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 # Include standard Libraries
 # ----------------------------------------------------------------------------
 if(MSVC)
-  set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} ws2_32.lib dsound.lib winmm.lib strmiids.lib)
-  
+  set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} ws2_32.lib dsound.lib winmm.lib strmiids.lib)  
 elseif(MSYS)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lws2_32 -liphlpapi")
 elseif(LINUX)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -llibc -lglibc")
 endif()
 
-
 # ----------------------------------------------------------------------------
 # Include and third party dependencies
 # ----------------------------------------------------------------------------
-set(BUILD_DEPENDENCIES TRUE CACHE BOOL "Build third party dependencies")
 
 # Define known dependencies for our Config.h
 # These variables will be modified by include_dependency()
@@ -206,38 +221,29 @@ else()
   unset(WITH_JSONCPP CACHE)
 endif()
 
-# Include our third party source directory
+# Include our dependencies source directory
 list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}) 
 if (MSVC)
   list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/msvc) 
 endif()
 include_directories("${LibSourcey_INCLUDE_DIRS}")
 link_directories("${LibSourcey_INSTALL_DIR}/lib")
-
-
-# ----------------------------------------------------------------------------
-# Include LibSourcey modules and applications
-# ----------------------------------------------------------------------------
-set(BUILD_MODULES OFF CACHE BOOL "Build LibSourcey modules")  
-set(BUILD_APPLICATIONS OFF CACHE BOOL "Build LibSourcey applications")
   
-
 # ----------------------------------------------------------------------------
 # Include the LibSourcey source tree
 # ----------------------------------------------------------------------------
 if(BUILD_MODULES OR BUILD_APPLICATIONS)    
   subdirlist(subdirs "${CMAKE_SOURCE_DIR}/src")
   foreach(name ${subdirs})
-    # This variable is so modules can set HAVE_LIBSOURCEY_XXX for our
+    # This variable is so modules can set HAVE_LibSourcey_XXX for our
     # Config.h inside the child scope. See include_sourcey_modules()
-    set(HAVE_LIBSOURCEY_${name} 0)
+    set(HAVE_LibSourcey_${name} 0)
     set(dir "${CMAKE_SOURCE_DIR}/src/${name}")
     if (EXISTS "${dir}/CMakeLists.txt")
       add_subdirectory(${dir})
     endif()
   endforeach() 
 endif()
-
 
 # ----------------------------------------------------------------------------
 # Build our Config.h file
@@ -260,7 +266,6 @@ configure_file(
   "${CMAKE_SOURCE_DIR}/cmake/Config.h.cmake" 
   "${LibSourcey_CONFIG_FILE_INCLUDE_DIR}/Config.h")
   
-
 # ----------------------------------------------------------------------------
 #  Uninstall target for "make uninstall"
 # ----------------------------------------------------------------------------
@@ -273,7 +278,6 @@ if(UNIX)
   ADD_CUSTOM_TARGET(uninstall
     "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 endif()
-
 
 # ----------------------------------------------------------------------------
 #  Summary:
@@ -337,6 +341,15 @@ status("")
 if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
     message(WARNING "The source directory is the same as binary directory. \"make clean\" may damage the source tree")
 endif()
+
+
+
+
+
+
+
+
+
 
 
 #foreach(m ${LibSourcey_BUILD_MODULES})

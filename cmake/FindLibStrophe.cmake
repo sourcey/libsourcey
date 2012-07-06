@@ -28,6 +28,7 @@ if(WIN32 AND MSVC)
     NAMES 
       libstrophed
     PATHS 
+      ${LibSourcey_DEPENDENCIES_BUILD_DIR}/libstrophe
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
       /usr/lib 
       /usr/local/lib
@@ -37,6 +38,7 @@ if(WIN32 AND MSVC)
     NAMES 
       libstrophe
     PATHS 
+      ${LibSourcey_DEPENDENCIES_BUILD_DIR}/libstrophe
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
       /usr/lib 
       /usr/local/lib
@@ -69,6 +71,7 @@ else()
     NAMES 
       strophe #${LibStrophe_LIB_NAMES}
     PATHS 
+      ${LibSourcey_DEPENDENCIES_BUILD_DIR}/libstrophe
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
       /usr/lib 
       /usr/local/lib

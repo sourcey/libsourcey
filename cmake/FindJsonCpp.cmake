@@ -29,6 +29,7 @@ if(WIN32 AND MSVC)
     NAMES 
       jsoncppd
     PATHS 
+      ${LibSourcey_DEPENDENCIES_BUILD_DIR}/jsoncpp
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
       /usr/lib 
       /usr/local/lib
@@ -38,6 +39,7 @@ if(WIN32 AND MSVC)
     NAMES 
       jsoncpp
     PATHS 
+      ${LibSourcey_DEPENDENCIES_BUILD_DIR}/jsoncpp
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
       /usr/lib 
       /usr/local/lib
@@ -78,9 +80,10 @@ else()
 
   find_library(JsonCpp_LIBRARY 
     NAMES 
-	jsoncpp
-	libjsoncpp
+      jsoncpp
+      libjsoncpp
     PATHS 
+       ${LibSourcey_DEPENDENCIES_BUILD_DIR}/jsoncpp
        ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
        /usr/lib 
        /usr/local/lib

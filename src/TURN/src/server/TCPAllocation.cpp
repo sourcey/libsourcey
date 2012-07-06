@@ -280,7 +280,7 @@ void TCPAllocation::onPeerConnectSuccess(void* sender)
 }
 
 
-void TCPAllocation::onPeerConnectError(void* sender, const string& error, int& errnum)
+void TCPAllocation::onPeerConnectError(void* sender, int& errnum, const string& error)
 {
 	Log("trace", this) << "[TURNClient:" << this << "] Peer Connect Error" << endl;
 

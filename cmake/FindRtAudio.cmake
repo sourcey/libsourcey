@@ -28,6 +28,7 @@ if(WIN32 AND MSVC)
     NAMES 
       RtAudiod
     PATHS 
+      ${LibSourcey_DEPENDENCIES_BUILD_DIR}/RtAudio
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
       /usr/lib 
       /usr/local/lib
@@ -37,6 +38,7 @@ if(WIN32 AND MSVC)
     NAMES 
       RtAudio
     PATHS 
+      ${LibSourcey_DEPENDENCIES_BUILD_DIR}/RtAudio
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
       /usr/lib 
       /usr/local/lib
@@ -69,6 +71,7 @@ else()
     NAMES 
       rtaudio #${RtAudio_LIB_NAMES}
     PATHS 
+      ${LibSourcey_DEPENDENCIES_BUILD_DIR}/RtAudio
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
       /usr/lib 
       /usr/local/lib

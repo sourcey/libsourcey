@@ -25,43 +25,46 @@
 //
 
 
-#include "Sourcey/Net/TCPClientSocket.h"
+/*
+#include "Sourcey/Net/StatefulSocket.h"
 
 
 using namespace std;
 using namespace Poco;
 using namespace Poco::Net;
+*/
 
 
 namespace Sourcey {
 namespace Net {
 	
 
-TCPClientSocket::TCPClientSocket(Reactor& reactor) : 
+	/*
+TCPStatefulSocket::TCPStatefulSocket(Reactor& reactor) : 
 	TCPSocket(reactor)
 {
 }
 
 
-TCPClientSocket::TCPClientSocket(const TCPClientSocket& r) : 
+TCPStatefulSocket::TCPStatefulSocket(const TCPStatefulSocket& r) : 
 	TCPSocket(r)
 {
 }
 	
 	
-TCPClientSocket::~TCPClientSocket()
+TCPStatefulSocket::~TCPStatefulSocket()
 {
 }
 
 
-void TCPClientSocket::connect(const Address& peerAddress, int timeout) 
+void TCPStatefulSocket::connect(const Address& peerAddress, int timeout) 
 {
 	setState(this, ClientState::Connecting);
 	TCPSocket::connect(peerAddress, timeout);
 }
 
 
-void TCPClientSocket::onConnect()
+void TCPStatefulSocket::onConnect()
 {
 	assert(stateEquals(ClientState::Connecting));
 	setState(this, ClientState::Connected);
@@ -69,14 +72,14 @@ void TCPClientSocket::onConnect()
 }
 
 
-void TCPClientSocket::onHandshake()
+void TCPStatefulSocket::onHandshake()
 {
 	assert(stateEquals(ClientState::Connected));
 	setState(this, ClientState::Handshaking);
 }
 
 
-void TCPClientSocket::onOnline()
+void TCPStatefulSocket::onOnline()
 {
 	assert(stateEquals(ClientState::Handshaking)
 		|| stateEquals(ClientState::Connected));
@@ -84,15 +87,15 @@ void TCPClientSocket::onOnline()
 }
 
 
-void TCPClientSocket::onClose()
+void TCPStatefulSocket::onClose()
 {
-	Log("trace") << "[TCPClientSocket:" << this << "] On Close: " << impl() << ": " << state() << endl;
+	Log("trace") << "[TCPStatefulSocket:" << this << "] On Close" << endl;
 	setState(this, ClientState::Disconnected, _error);
 	TCPSocket::onClose();
 }
 
 
-bool TCPClientSocket::isActive()
+bool TCPStatefulSocket::isActive()
 {
 	return stateEquals(ClientState::Connecting)
 		|| stateEquals(ClientState::Handshaking)
@@ -101,10 +104,11 @@ bool TCPClientSocket::isActive()
 }
 
 
-bool TCPClientSocket::isOnline()
+bool TCPStatefulSocket::isOnline()
 {
 	return stateEquals(ClientState::Online);
 }
+*/
 
 
 } } // namespace Sourcey::Net

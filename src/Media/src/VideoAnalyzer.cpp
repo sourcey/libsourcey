@@ -284,7 +284,7 @@ void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 	short const* data = reinterpret_cast<short*>(packet.data());	
 	int size = packet.size(); //FFMIN(_reader.audio()->frameSize, packet.size());
 	int channels = _reader.audio()->stream->codec->channels;
-	int filled = 0;
+	//int filled = 0;
 	
 	// Packet size / 2 = 2 bytes per sample (short)
 	// Example at http://blackhole.ubitux.fr/bench-fftw-ffmpeg-fft/fft.c

@@ -25,9 +25,8 @@
 //
 
 
-#include "Sourcey/Net/TCPSocket.h"
-
 /*
+#include "Sourcey/Net/SocketBase.h"
 #include "Sourcey/Net/Types.h"
 #include "Sourcey/Logger.h"
 #include "Poco/Net/NetException.h"
@@ -46,61 +45,55 @@ namespace Sourcey {
 namespace Net {
 
 
-//TCPSocket::TCPSocket(Reactor& reactor, bool deleteOnClose) : 
+//SocketImpl::SocketImpl(Reactor& reactor) : 
 //	_reactor(reactor),
 //	_connected(false),
 //	//_reading(false),
-//	_deleteOnClose(deleteOnClose)
+//	_deleteOnClose(false)
 //{
-//	Log("trace") << "[TCPSocket:" << this << "] Creating" << endl;	
-//	//_reading.set();
+//	Log("trace") << "[SocketImpl:" << this << "] Creating" << endl;	
 //}
 //
 //
-//TCPSocket::TCPSocket(const Poco::Net::StreamSocket& socket, Reactor& reactor, bool deleteOnClose) :
+//SocketImpl::SocketImpl(const Poco::Net::StreamSocket& socket, Reactor& reactor) :
 //	Poco::Net::StreamSocket(socket),
 //	_reactor(reactor),
 //	_connected(false),
-//	//_reading(false),
-//	_deleteOnClose(deleteOnClose)
+//	_deleteOnClose(false)
 //{
-//	Log("trace") << "[TCPSocket:" << this << "] Creating from " << socket.address().toString() << endl;
-//	//_reading.set();
+//	Log("trace") << "[SocketImpl:" << this << "] Creating from " << socket.address().toString() << endl;
 //	bindEvents();
 //}
 //
 //
-//TCPSocket::TCPSocket(const TCPSocket& r) : 
+//SocketImpl::SocketImpl(const SocketImpl& r) : 
 //	StreamSocket(r),
 //	_reactor(r._reactor),
 //	_connected(r._connected),
-//	//_reading(false),
 //	_deleteOnClose(r._deleteOnClose)
 //{
-//	Log("trace") << "[TCPSocket:" << this << "] Creating from " << r.address() << endl;	
-//	//_reading.set();
+//	Log("trace") << "[SocketImpl:" << this << "] Creating from " << r.address() << endl;
 //	bindEvents();
 //}
 //
 //
-//TCPSocket::~TCPSocket() 
+//SocketImpl::~SocketImpl() 
 //{	
-//	Log("trace") << "[TCPSocket:" << this << "] Destroying: " << impl() << endl;
+//	Log("trace") << "[SocketImpl:" << this << "] Destroying: " << impl() << endl;
 //	unbindEvents();
-//	//_reading.wait();
-//	Log("trace") << "[TCPSocket:" << this << "] Destroying: OK: " << impl() << endl;
+//	Log("trace") << "[SocketImpl:" << this << "] Destroying: OK: " << impl() << endl;
 //}
 //
 //
-//void TCPSocket::connect(const Address& peerAddress) 
+//void SocketImpl::connect(const Address& peerAddress) 
 //{
 //	connect(peerAddress, 0);
 //}
 //
 //
-//void TCPSocket::connect(const Address& peerAddress, int timeout) 
+//void SocketImpl::connect(const Address& peerAddress, int timeout) 
 //{
-//	Log("trace") << "[TCPSocket:" << this << "] Connecting to " << peerAddress.toString() << endl;	
+//	Log("trace") << "[SocketImpl:" << this << "] Connecting to " << peerAddress.toString() << endl;	
 //
 //	if (isConnected())
 //		throw Exception("Socket already connected");
@@ -115,16 +108,16 @@ namespace Net {
 //		resetBuffer();
 //	} 
 //	catch (Poco::Exception& exc) {
-//		Log("trace") << "[TCPSocket:" << this << "] Connection failed: " << exc.displayText() << endl;	
+//		Log("error") << "[SocketImpl:" << this << "] Connection failed: " << exc.displayText() << endl;	
 //		setError(exc.displayText());
 //		exc.rethrow();
 //	}
 //}
 //
 //
-//void TCPSocket::close()
+//void SocketImpl::close()
 //{
-//	Log("trace") << "[TCPSocket:" << this << "] Closing" << endl;	
+//	Log("trace") << "[SocketImpl:" << this << "] Closing" << endl;	
 //
 //	if (isConnected()) {
 //		unbindEvents();
@@ -136,16 +129,16 @@ namespace Net {
 //			onClose();
 //		}
 //		catch (Poco::IOException& exc) {
-//			Log("trace") << "[TCPSocket:" << this << "] Closing: " << exc.displayText() << endl;
+//			Log("warn") << "[SocketImpl:" << this << "] Closing Error: " << exc.displayText() << endl;
 //		}
 //	}
-//	Log("trace") << "[TCPSocket:" << this << "] Closing: OK" << endl;	
+//	Log("trace") << "[SocketImpl:" << this << "] Closing: OK" << endl;	
 //}
 //
 //
-//void TCPSocket::onReadable() 
+//void SocketImpl::onReadable() 
 //{
-//	Log("trace") << "[TCPSocket:" << this << "] On Readable: " << impl() << endl;
+//	Log("trace") << "[SocketImpl:" << this << "] On Readable: " << impl() << endl;
 //
 //	try	{
 //		int size = 0;
@@ -157,11 +150,11 @@ namespace Net {
 //			// This is preferable to allocating a huge buffer on startup.
 //			size = min(impl()->available(), MAX_TCP_PACKET_SIZE);
 //			if (_buffer.capacity() < size) {
-//				Log("trace") << "[TCPSocket:" << this << "] Resizing buffer: " << size << endl;
+//				Log("trace") << "[SocketImpl:" << this << "] Resizing buffer: " << size << endl;
 //				_buffer.reserve(size);
 //			}
 //			size = impl()->receiveBytes(_buffer.bytes(), size);
-//			Log("trace") << "[TCPSocket:" << this << "] RECV: " << size << ": "
+//			Log("trace") << "[SocketImpl:" << this << "] RECV: " << size << ": "
 //				<< impl()->address().toString() << "<--" 
 //				<< impl()->peerAddress().toString() << endl;
 //			_buffer.setPosition(0);
@@ -170,29 +163,27 @@ namespace Net {
 //		}
 //
 //		if (size) {
-//			//_reading.set();
 //			recv(*buffer);
 //		}
 //		else {
-//			Log("trace") << "[TCPSocket:" << this << "] Received EOF" << endl;
+//			Log("trace") << "[SocketImpl:" << this << "] Received EOF" << endl;
 //			throw Poco::IOException("Peer closed connection");
 //		}
 //	}
 //	// ConnectionAbortedException
 //	// ConnectionResetException
 //	catch (Poco::IOException& exc) {
-//		Log("error") << "[TCPSocket:" << this << "] RECV: " << exc.displayText() << endl;
-//		//_reading.set();
+//		Log("error") << "[SocketImpl:" << this << "] RECV: " << exc.displayText() << endl;
 //		setError(exc.displayText()); // will probably result in deletion
 //	}
 //}
 //
 //
-//int TCPSocket::send(const char* data, int size) 
+//int SocketImpl::send(const char* data, int size) 
 //{
 //	assert(size <= MAX_TCP_PACKET_SIZE);
 //	try	{
-//		Log("trace") << "[TCPSocket:" << this << "] SEND: " << size << ": " 
+//		Log("trace") << "[SocketImpl:" << this << "] SEND: " << size << ": " 
 //			<< address().toString() << "-->" 
 //			<< peerAddress().toString() << endl;
 //		return impl()->sendBytes(data, size);
@@ -200,20 +191,20 @@ namespace Net {
 //	catch (Poco::IOException& exc) {
 //		// Don't set the error here, the error
 //		// will always come though the reactor.
-//		Log("error") << "[TCPSocket:" << this << "] SEND: " << exc.displayText() << endl;
+//		Log("error") << "[SocketImpl:" << this << "] SEND: " << exc.displayText() << endl;
 //	}
 //	return -1; // error
 //}
 //
 //
-//int TCPSocket::send(const char* data, int size, const Address& peerAddress)
+//int SocketImpl::send(const char* data, int size, const Address& peerAddress)
 //{
 //	assert(peerAddress == this->peerAddress());
 //	return send(data, size);
 //}
 //
 //
-//int TCPSocket::send(const DataPacket& packet) 
+//int SocketImpl::send(const DataPacket& packet) 
 //{
 //	// Most large packets, ie. MediaPackets derive from
 //	// DataPacket, so we can avoid memcpy altogether.
@@ -221,14 +212,14 @@ namespace Net {
 //}
 //
 //
-//int TCPSocket::send(const DataPacket& packet, const Address& peerAddress)
+//int SocketImpl::send(const DataPacket& packet, const Address& peerAddress)
 //{
 //	assert(peerAddress == this->peerAddress());
 //	return send(packet);
 //}
 //
 //
-//int TCPSocket::send(const IPacket& packet) 
+//int SocketImpl::send(const IPacket& packet) 
 //{
 //	// Currently a nocopy solution for sending IPackets is
 //	// impossible unless a generic data member exists such
@@ -244,14 +235,14 @@ namespace Net {
 //}
 //
 //
-//int TCPSocket::send(const IPacket& packet, const Address& peerAddress)
+//int SocketImpl::send(const IPacket& packet, const Address& peerAddress)
 //{
 //	assert(peerAddress == this->peerAddress());
 //	return send(packet);
 //}
 //
 //
-//void TCPSocket::send(IPacket& packet)
+//void SocketImpl::send(IPacket& packet)
 //{
 //	// Always try to cast packets as DataPacket types so
 //	// we can avoid copying data.
@@ -263,49 +254,49 @@ namespace Net {
 //}
 //
 //
-//void TCPSocket::recv(Buffer& buffer)
+//void SocketImpl::recv(Buffer& buffer)
 //{
 //	// May be overridden for custom handling...
 //	packetize(buffer);
 //}
 //
 //
-//void TCPSocket::packetize(Buffer& buffer)
+//void SocketImpl::packetize(Buffer& buffer)
 //{	
 //	// Create the outgoing packet from the available creation
 //	// strategies. For best performance the most used strategies
 //	// should have the highest priority.
 //	IPacket* packet = createPacket(buffer);
 //	if (!packet) {
-//		Log("warn") << "[TCPSocket:" << this << "] Unable to create data packet." << endl;	
+//		Log("warn") << "[SocketImpl:" << this << "] Unable to create data packet." << endl;	
 //		return;
 //	}
 //
-//	packet->info = new PacketInfo(*this, TCPSocket::peerAddress());
+//	packet->info = new PacketInfo(*this, SocketImpl::peerAddress());
 //	dispatch(this, *packet);	
 //	delete packet;
 //}
 //
 //
-//void TCPSocket::onConnect() 
+//void SocketImpl::onConnect() 
 //{
-//	Log("trace") << "[TCPSocket:" << this << "] On Connect: " << impl() << endl;	
+//	Log("trace") << "[SocketImpl:" << this << "] On Connect: " << impl() << endl;	
 //	{
 //		FastMutex::ScopedLock lock(_mutex); 
 //
 //		// This event tells us that we are connected ie. the 
 //		// connection is writable. There is no more need for
 //		// this event so we can remove the delegate.
-//		_reactor.detach(*this, reactorDelegate(this, &TCPSocket::onConnect, SocketWritable));	
+//		_reactor.detach(*this, reactorDelegate(this, &SocketImpl::onConnect, SocketWritable));	
 //		_connected = true;
 //	}
 //	Connected.dispatch(this);
 //}
 //
 //
-//void TCPSocket::onClose()
+//void SocketImpl::onClose()
 //{
-//	Log("trace") << "[TCPSocket:" << this << "] On Close: " << impl() << endl;
+//	Log("trace") << "[SocketImpl:" << this << "] On Close: " << impl() << endl;
 //	
 //	// This method must be called from close()
 //
@@ -322,17 +313,17 @@ namespace Net {
 //	Closed.dispatch(this);
 //
 //	if (destroy) {
-//		Log("trace") << "[TCPSocket:" << this << "] Delete on close" << endl;	
+//		Log("trace") << "[SocketImpl:" << this << "] Delete on close" << endl;	
 //		delete this;
 //	}
 //
-//	Log("trace") << "[TCPSocket:" << this << "] On Close: OK" << endl;
+//	Log("trace") << "[SocketImpl:" << this << "] On Close: OK" << endl;
 //}
 //
 //
-//void TCPSocket::onError() 
+//void SocketImpl::onError() 
 //{
-//	Log("warn") << "[TCPSocket:" << this << "] On Error" << endl;
+//	Log("warn") << "[SocketImpl:" << this << "] On Error" << endl;
 //
 //	// We received an error notification from the reactor.
 //	// Close the socket.
@@ -340,18 +331,18 @@ namespace Net {
 //}
 //
 //
-//void TCPSocket::setError(const std::string& err)
+//void SocketImpl::setError(const std::string& err)
 //{
-//	Log("error") << "[TCPSocket:" << this << "] Error: " << err << endl;
+//	Log("error") << "[SocketImpl:" << this << "] Error: " << err << endl;
 //	_error = err;
 //	int n = errorno();
 //	Error.dispatch(this, _error, n);
 //	close();
-//	Log("error") << "[TCPSocket:" << this << "] Error: OK" << endl;
+//	Log("error") << "[SocketImpl:" << this << "] Error: OK" << endl;
 //}
 //
 //
-//void TCPSocket::resetBuffer() 
+//void SocketImpl::resetBuffer() 
 //{	
 //	FastMutex::ScopedLock lock(_mutex); 
 //
@@ -360,69 +351,69 @@ namespace Net {
 //	// accordingly.
 //	int recvSize = impl()->getReceiveBufferSize();
 //	if (recvSize != _buffer.capacity()) {
-//		Log("trace") << "[TCPSocket:" << this << "] Buffer Size: " << recvSize << endl;
+//		Log("trace") << "[SocketImpl:" << this << "] Buffer Size: " << recvSize << endl;
 //		_buffer.reserve(recvSize);
 //	}	
 //	_buffer.clear();
 //}
 //
 //
-//void TCPSocket::bindEvents()
+//void SocketImpl::bindEvents()
 //{		
 //	FastMutex::ScopedLock lock(_mutex); 
 //
-//	_reactor.attach(*this, reactorDelegate(this, &TCPSocket::onReadable, SocketReadable));
-//	_reactor.attach(*this, reactorDelegate(this, &TCPSocket::onConnect, SocketWritable));
-//	_reactor.attach(*this, reactorDelegate(this, &TCPSocket::onError, SocketError));
+//	_reactor.attach(*this, reactorDelegate(this, &SocketImpl::onReadable, SocketReadable));
+//	_reactor.attach(*this, reactorDelegate(this, &SocketImpl::onConnect, SocketWritable));
+//	_reactor.attach(*this, reactorDelegate(this, &SocketImpl::onError, SocketError));
 //}
 //
 //
-//void TCPSocket::unbindEvents()
+//void SocketImpl::unbindEvents()
 //{	
 //	FastMutex::ScopedLock lock(_mutex); 
 //
-//	_reactor.detach(*this, reactorDelegate(this, &TCPSocket::onReadable, SocketReadable));
-//	_reactor.detach(*this, reactorDelegate(this, &TCPSocket::onConnect, SocketWritable));
-//	_reactor.detach(*this, reactorDelegate(this, &TCPSocket::onError, SocketError));
+//	_reactor.detach(*this, reactorDelegate(this, &SocketImpl::onReadable, SocketReadable));
+//	_reactor.detach(*this, reactorDelegate(this, &SocketImpl::onConnect, SocketWritable));
+//	_reactor.detach(*this, reactorDelegate(this, &SocketImpl::onError, SocketError));
 //}
 //
 //
-//Reactor& TCPSocket::reactor()
+//Reactor& SocketImpl::reactor()
 //{
 //	FastMutex::ScopedLock lock(_mutex); 
 //	return _reactor;
 //}
 //
 //
-//bool TCPSocket::isConnected()
+//bool SocketImpl::isConnected()
 //{
 //	FastMutex::ScopedLock lock(_mutex); 
 //	return _connected;
 //}
 //
 //
-//bool TCPSocket::isError()
+//bool SocketImpl::isError()
 //{
 //	FastMutex::ScopedLock lock(_mutex);
 //	return !_error.empty();
 //}
 //
 //
-//void TCPSocket::deleteOnClose(bool flag)
+//void SocketImpl::deleteOnClose(bool flag)
 //{
 //	FastMutex::ScopedLock lock(_mutex);
 //	_deleteOnClose = flag;
 //}
 //
 //
-//std::string TCPSocket::error() const
+//std::string SocketImpl::error() const
 //{
 //	FastMutex::ScopedLock lock(_mutex); 
 //	return _error;
 //}
 //
 //
-//int TCPSocket::errorno() const 
+//int SocketImpl::errorno() const 
 //{
 //	try	{
 //		return impl()->socketError();
@@ -434,7 +425,7 @@ namespace Net {
 //}
 //
 //
-//Address TCPSocket::address() const 
+//Address SocketImpl::address() const 
 //{
 //	try	{
 //		return impl()->address();
@@ -446,7 +437,7 @@ namespace Net {
 //}
 //
 //
-//Address TCPSocket::peerAddress() const 
+//Address SocketImpl::peerAddress() const 
 //{
 //	try	{
 //		return impl()->peerAddress();
@@ -458,7 +449,7 @@ namespace Net {
 //}
 //
 //
-//TransportProtocol TCPSocket::transport() const 
+//TransportProtocol SocketImpl::transport() const 
 //{ 
 //	return Net::TCP; 
 //}
@@ -482,22 +473,22 @@ namespace Net {
 	//if (!stateEquals(ClientState::Disconnected)) 		
 		//_error = e.displayText();
 		//setState(this, ClientState::Disconnected, e.displayText());
-	//Log("trace") << "[TCPSocket:" << this << "] Closing 1" << endl;	
+	//Log("trace") << "[SocketImpl:" << this << "] Closing 1" << endl;	
 		//destroy = _deleteOnClose;
 
 	//if (destroy) {
-	//	Log("trace") << "[TCPSocket:" << this << "] Destroying On Closing" << endl;	
+	//	Log("trace") << "[SocketImpl:" << this << "] Destroying On Closing" << endl;	
 	//	delete this;
 	//}
-	//Log("trace") << "[TCPSocket:" << this << "] Closing: OK" << endl;	
+	//Log("trace") << "[SocketImpl:" << this << "] Closing: OK" << endl;	
 	
 	
-	//Poco::Observer<TCPSocket, WritableNotification>(*this, &TCPSocket::onConnect));
+	//Poco::Observer<SocketImpl, WritableNotification>(*this, &SocketImpl::onConnect));
 	//assert(0);
 	/*
 
 
-int TCPSocket::bytesAvailable()
+int SocketImpl::bytesAvailable()
 {
 	return StreamSocket::available();
 }
@@ -519,7 +510,7 @@ int TCPSocket::bytesAvailable()
 */
 
 /*
-StreamSocket& TCPSocket::impl()
+StreamSocket& SocketImpl::impl()
 {
 	FastMutex::ScopedLock lock(_mutex); 
 	return *this;
@@ -527,10 +518,10 @@ StreamSocket& TCPSocket::impl()
 */
 
 /*
-void TCPSocket::recv(const char* data, int size, const Address& peerAddress)
+void SocketImpl::recv(const char* data, int size, const Address& peerAddress)
 {
 	try	{
-		Log("trace") << "[TCPSocket:" << this << "] RECV: " << size << ": " << address().toString() << "<--" << peerAddress.toString() << endl;
+		Log("trace") << "[SocketImpl:" << this << "] RECV: " << size << ": " << address().toString() << "<--" << peerAddress.toString() << endl;
 		
 		/// Create the outgoing packet from the available handler protocols.
 		/// TODO: To attain best performance, the most used socket packet
@@ -538,7 +529,7 @@ void TCPSocket::recv(const char* data, int size, const Address& peerAddress)
 		Buffer buffer(data, size);
 		IPacket* packet = createPacket(buffer);
 		if (!packet) {
-			Log("warn") << "[TCPSocket:" << this << "] Unable to create data packet." << endl;	
+			Log("warn") << "[SocketImpl:" << this << "] Unable to create data packet." << endl;	
 			return;
 		}
 
@@ -548,14 +539,14 @@ void TCPSocket::recv(const char* data, int size, const Address& peerAddress)
 		delete packet;
 	}	
 	catch (StopPropagation&) {
-		//Log("trace") << "[TCPSocket:" << this << "] Stopping Event Propagation" << endl;
+		//Log("trace") << "[SocketImpl:" << this << "] Stopping Event Propagation" << endl;
 	}
 }
 */
 
 
 /*
-void TCPSocket::transferTo(TCPSocket* r)
+void SocketImpl::transferTo(SocketImpl* r)
 {
 	reinterpret_cast<StreamSocket&>(*r) 
 		= reinterpret_cast<const StreamSocket&>(*this);

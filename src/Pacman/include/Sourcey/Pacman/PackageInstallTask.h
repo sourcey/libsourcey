@@ -103,10 +103,6 @@ public:
 	virtual void start();
 	virtual void cancel();
 
-	virtual void run();
-		/// Called asynchronously by the thread to
-		/// kick off the state machine.
-
 	virtual void doDownload();
 		/// Downloads the package archive from the
 		/// server.
@@ -133,14 +129,26 @@ public:
 	virtual bool valid() const;
 
 	virtual void onStateChange(PackageInstallState& state, const PackageInstallState& oldState);
-
+	virtual void onResponseProgress(void* sender, HTTP::TransferState& state);
 	virtual void onDecompressionError(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const std::string>& info);
 	virtual void onDecompressionOk(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info);
 
 	//virtual void printLog(std::ostream& ost) const;	
 	virtual const char* className() const { return "PackageInstallTask"; }
 	
-	NullSignal TaskComplete;
+	Signal<int&> Progress;
+		/// Signals on progress update [0-100].
+	
+	NullSignal Complete;
+		/// Signals on task completion for both
+		/// success and failure cases.
+	
+protected:
+	virtual void run();
+		/// Called asynchronously by the thread to
+		/// do the work.
+
+	virtual void setProgress(int value);
 
 protected:
 	mutable Poco::FastMutex	_mutex;
@@ -150,6 +158,7 @@ protected:
 	LocalPackage*	_local;
 	RemotePackage*	_remote;
 	Options			_options;
+	int             _progress;
 	bool			_cancelled;
 	HTTP::Transaction _transaction;
 	

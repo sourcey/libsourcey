@@ -126,7 +126,7 @@ void ConsoleChannel::write(const string& message, LogLevel level, const ILoggabl
 //#if defined(_CONSOLE) || defined(_DEBUG)
 	cout << ss.str();
 //#endif
-#if defined(_MSC_VER) //&& defined(_DEBUG)
+#if defined(_MSC_VER) && defined(_DEBUG)
 	string s(ss.str());
 	wstring temp(s.length(), L' ');
 	copy(s.begin(), s.end(), temp.begin());
@@ -158,9 +158,22 @@ FileChannel::~FileChannel()
 
 void FileChannel::open() 
 {
-	assert(!_path.empty() && "path must be set");
+	// Ensure a path was set
+	if (_path.empty())
+		throw Exception("Log file path must be set.");
+	
+	// Create directories if needed
+	Path dir(_path);
+	dir.setFileName("");
+	File(dir).createDirectories();
+	
+	// Open the file stream
 	_stream.close();
 	_stream.open(_path.data(), ios::out | ios::app);	
+
+	// Throw on failure
+	if (!_stream.is_open())
+		throw Exception("Failed to open log file: " + _path);
 }
 
 
@@ -252,9 +265,9 @@ void RotatingFileChannel::write(const string& message, LogLevel level, const ILo
 	*_stream << ss.str();
 	_stream->flush();
 
-#if defined(_DEBUG) //&& defined(_CONSOLE)
+//#if defined(_DEBUG) && defined(_CONSOLE)
 	cout << ss.str();
-#endif
+//#endif
 #if defined(_DEBUG) && defined(_MSC_VER)
 	std::string s(ss.str());
 	std::wstring temp(s.length(), L' ');

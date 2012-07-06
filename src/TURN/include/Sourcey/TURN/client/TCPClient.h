@@ -31,7 +31,8 @@
 
 #include "Sourcey/TURN/client/Client.h"
 #include "Sourcey/BasicManager.h"
-#include "Sourcey/Net/TCPClientSocket.h"
+#include "Sourcey/Net/TCPSocket.h"
+#include "Sourcey/Net/StatefulSocket.h"
 
 #include <string>
 #include <deque>
@@ -41,7 +42,7 @@ namespace Sourcey {
 namespace TURN {
 	
 
-typedef BasicManager<Net::Address, Net::TCPClientSocket>	ConnectionManager;
+typedef BasicManager<Net::Address, Net::TCPStatefulSocket>	ConnectionManager;
 typedef ConnectionManager::Map								ConnectionManagerMap;
 
 
@@ -50,9 +51,9 @@ class TCPClient;
 
 struct ITCPClientObserver: public IClientObserver 
 {
-	virtual void onClientConnectionCreated(TCPClient& client, Net::TCPClientSocket* socket, const Net::Address& peerAddress) {};
-	virtual void onClientConnectionClosed(TCPClient& client, Net::TCPClientSocket* socket, const Net::Address& peerAddress) {};
-	virtual void onClientConnectionState(TCPClient& client, Net::TCPClientSocket* socket,
+	virtual void onClientConnectionCreated(TCPClient& client, Net::TCPStatefulSocket* socket, const Net::Address& peerAddress) {};
+	virtual void onClientConnectionClosed(TCPClient& client, Net::TCPStatefulSocket* socket, const Net::Address& peerAddress) {};
+	virtual void onClientConnectionState(TCPClient& client, Net::TCPStatefulSocket* socket,
 		Net::ClientState& state, const Net::ClientState& oldState) {};
 
 	virtual void onClientConnectionBindingFailed(TCPClient& client, const Net::Address& peerAddress) {};
@@ -90,7 +91,7 @@ public:
 	virtual Net::ISocket* createSocket();
 	virtual int transportProtocol();
 	
-	bool getPeerAddress(Net::TCPClientSocket* conn, Net::Address& peerAddress);
+	bool getPeerAddress(Net::TCPStatefulSocket* conn, Net::Address& peerAddress);
 	ConnectionManager& connections();
 	
 protected:	

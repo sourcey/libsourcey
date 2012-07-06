@@ -26,106 +26,322 @@
 
 
 #include "Sourcey/SocketIO/Socket.h"
+
+/*
 #include "Sourcey/SocketIO/Packet.h"
-#include "Sourcey/Logger.h"
+#include "Sourcey/HTTP/Transaction.h"
 
 #include "Poco/Format.h"
-#include "Poco/StreamCopier.h"
-#include "Poco/Net/HTTPClientSession.h"
-#include "Poco/Net/HTTPRequest.h"
-#include "Poco/Net/HTTPResponse.h"
 
 
 using namespace std;
 using namespace Poco;
 using namespace Poco::Net;
+*/
 
 
 namespace Sourcey {
 namespace SocketIO {
 	
 
-Socket::Socket(Net::Reactor& reactor) :
-	WebSocket(reactor)
-{
-}
+//SocketBase::SocketBase(Net::Reactor& reactor) :
+//	WebSocket(reactor),
+//	_secure(false)
+//{
+//}
+//
+//
+//SocketBase::SocketBase(Net::Reactor& reactor, const Net::Address& srvAddr) :
+//	WebSocket(reactor),
+//	_srvAddr(srvAddr),
+//	_secure(false)
+//{
+//}
+//
+//
+//SocketBase::~SocketBase() 
+//{
+//	close();
+//}
+//
+//
+//void SocketBase::connect(const Net::Address& srvAddr)
+//{	
+//	{
+//		FastMutex::ScopedLock lock(_mutex);
+//		_srvAddr = srvAddr;
+//	}
+//	connect();
+//}
+//
+//
+//void SocketBase::connect()
+//{
+//	FastMutex::ScopedLock lock(_mutex);
+//
+//	assert(_srvAddr.valid());
+//
+//	if (isActive())
+//		throw Exception("The SocketIO Socket is already active.");
+//
+//	_uri = "ws://" + _srvAddr.toString() + "/socket.io/1/";	
+//	if (_secure)
+//		_uri.setScheme("wss");
+//
+//	Log("debug") << "[SocketIO::Socket]	Connecting to " << _uri.toString() << endl;
+//
+//	if (sendHandshakeRequest()) {
+//				
+//		Timer::getDefault().start(TimerCallback<Socket>(this, &SocketBase::onHeartBeatTimer, 
+//			(_heartBeatTimeout * .75) * 1000, 
+//			(_heartBeatTimeout * .75) * 1000));
+//	
+//		// Receive SocketIO packets
+//		registerPacketType<SocketIO::Packet>(10);
+//		
+//		// Initialize the websocket
+//		_uri.setPath("/socket.io/1/websocket/" + _sessionID);
+//		WebSocketBase::connect(_uri);
+//	}
+//}
+//
+//
+//bool SocketBase::sendHandshakeRequest()
+//{
+//	// NOTE: No need for mutex lock because this method is called from connect()
+//	
+//	Log("trace") << "[SocketIO::Socket] Sending Handshake" << endl;
+//	
+//	
+//	URI uri("http://" + _srvAddr.toString() + "/socket.io/1/");	
+//	if (_secure)
+//		uri.setScheme("https");
+//
+//	HTTP::Request* request = new HTTP::Request("POST", uri.toString());	
+//	HTTP::Transaction transaction(request);
+//	HTTP::Response& response = transaction.response();
+//
+//	// The server can respond in three different ways:
+//    // 401 Unauthorized: If the server refuses to authorize the client to connect, 
+//	//		based on the supplied information (eg: Cookie header or custom query components).
+//    // 503 Service Unavailable: If the server refuses the connection for any reason (eg: overload).
+//	// 200 OK: The handshake was successful.
+//	if (!transaction.send())
+//		throw Exception(format("SocketIO handshake failed: HTTP Error: %d %s", 
+//			static_cast<int>(response.getStatus()), response.getReason()));		
+//
+//	Log("trace") << "[SocketIO::Socket] Handshake Response:" 
+//		<< "\n\tStatus: " << response.getStatus()
+//		<< "\n\tReason: " << response.getReason()
+//		<< "\n\tResponse: " << response.body.str()
+//		<< endl;
+//
+//	//if (status != 200)
+//	//	throw Exception(format("SocketIO handshake failed with %d", status));	
+//
+//	// Parse the response response
+//	StringList respData = Util::split(response.body.str(), ':', 4);
+//	if (respData.size() < 4)
+//		throw Exception(response.empty() ? 
+//			"Invalid SocketIO handshake response." : format(
+//			"Invalid SocketIO handshake response: %s", response.body.str()));
+//	
+//	_sessionID = respData[0];
+//	_heartBeatTimeout = Util::atoi(respData[1]);
+//	_connectionClosingTimeout = Util::atoi(respData[2]);
+//	_protocols = Util::split(respData[3], ',');
+//
+//	// Check websockets are supported
+//	bool wsSupported = false;
+//	for (int i = 0; i < _protocols.size(); i++) {
+//		Log("debug") << "[SocketIO::Socket] Supports Protocol: " << _protocols[i] << endl;	
+//		if (_protocols[i] == "websocket") {
+//			wsSupported = true;
+//			break;
+//		}
+//	}
+//
+//	if (!wsSupported)
+//		throw Exception("The SocketIO server does not support WebSockets");
+//
+//	return true;
+//}
+//
+//
+//void SocketBase::close()
+//{			
+//	Log("trace") << "[SocketIO::Socket] Closing" << endl;	
+//
+//	if (!isError())
+//		Timer::getDefault().stop(TimerCallback<Socket>(this, &SocketBase::onHeartBeatTimer));
+//	
+//	WebSocketBase::close();
+//
+//	Log("trace") << "[SocketIO::Socket] Closing: OK" << endl;	
+//}
+//
+//
+//int SocketBase::sendConnect(const string& endpoint, const string& query)
+//{
+//	FastMutex::ScopedLock lock(_mutex);
+//	// (1) Connect
+//	// Only used for multiple sockets. Signals a connection to the endpoint. Once the server receives it, it's echoed back to the client.
+//	// 
+//	// Example, if the client is trying to connect to the endpoint /test, a message like this will be delivered:
+//	// 
+//	// '1::' [path] [query]
+//	// Example:
+//	// 
+//	// 1::/test?my=param
+//	string out = "1::";
+//	if (!endpoint.empty())
+//		out += "/" + endpoint;
+//	if (!query.empty())
+//		out += "?" + query;
+//	return WebSocketBase::send(out.data(), out.size());
+//}
+//
+//
+//int SocketBase::send(SocketIO::Packet::Type type, const string& data, bool ack)
+//{
+//	Packet packet(type, data, ack);
+//	return send(packet);
+//}
+//
+//
+//int SocketBase::send(const string& data, bool ack)
+//{
+//	Packet packet(data, ack);
+//	return send(packet);
+//}
+//
+//
+//int SocketBase::send(const JSON::Value& data, bool ack)
+//{
+//	Packet packet(data, ack);
+//	return send(packet);
+//}
+//
+//
+//int SocketBase::send(const SocketIO::Packet& packet)
+//{
+//	return WebSocketBase::send(packet);
+//}
+//
+//
+//int SocketBase::emit(const string& event, const JSON::Value& args, bool ack)
+//{
+//	Packet packet(event, args, ack);
+//	return send(packet);
+//}
+//
+//
+//void SocketBase::onHeartBeatTimer(TimerCallback<Socket>&) 
+//{
+//	Log("trace") << "[SocketIO::Socket] Heart Beat Timer" << endl;
+//	
+//	if (isConnected())
+//		sendHeartbeat();
+//
+//	// Try to reconnect if the connection was closed in error
+//	else if (isError()) {	
+//		Log("trace") << "[SocketIO::Socket] Attempting to reconnect" << endl;	
+//		try {
+//			connect();
+//		} 
+//		catch (Poco::Exception& exc) {			
+//			Log("error") << "[SocketIO::Socket] Reconnection attempt failed: " << exc.displayText() << endl;
+//		}	
+//	}
+//}
+//
+//
+//int SocketBase::sendHeartbeat()
+//{
+//	Log("trace") << "[SocketIO::Socket] Heart Beat" << endl;
+//	return WebSocketBase::send("2::", 3);
+//}
+//
+//
+//void SocketBase::setSecure(bool flag)
+//{
+//	FastMutex::ScopedLock lock(_mutex);
+//	_secure = flag;
+//}
+//
+//
+//Net::IWebSocket* SocketBase::socket()
+//{
+//	FastMutex::ScopedLock lock(_mutex);
+//	return _socket;
+//}
+//
+//
+//Poco::Net::NameValueCollection& SocketBase::httpHeaders()
+//{
+//	FastMutex::ScopedLock lock(_mutex);
+//	return _httpHeaders;
+//}
+//
+//
+//string SocketBase::sessionID() const 
+//{
+//	FastMutex::ScopedLock lock(_mutex);
+//	return _sessionID;
+//}
 
 
-Socket::Socket(Net::Reactor& reactor, const Net::Address& srvAddr) :
-	WebSocket(reactor),
-	_srvAddr(srvAddr)
-{
-}
+} } // namespace Sourcey::SocketIO
 
-
-Socket::~Socket() 
-{
-	close();
-}
-
-
-void Socket::connect(const Net::Address& srvAddr)
-{	
-	{
-		FastMutex::ScopedLock lock(_mutex);
-		_srvAddr = srvAddr;
-	}
-	connect();
-}
-
-
-void Socket::connect()
-{
-	FastMutex::ScopedLock lock(_mutex);
-
-	assert(_srvAddr.valid());
-
-	if (isActive())
-		throw Exception("The SocketIO Socket is already active.");
-
-	_uri = "ws://" + _srvAddr.toString() + "/socket.io/1/";	
-	Log("debug") << "[SocketIO::Socket]	Connecting to " << _uri.toString() << endl;
-
-	if (sendInitialRequest()) {
-				
-		Timer::getDefault().start(TimerCallback<Socket>(this, &Socket::onHeartBeatTimer, 
-			(_heartBeatTimeout * .75) * 1000, 
-			(_heartBeatTimeout * .75) * 1000));
 	
-		// Receive SocketIO packets
-		registerPacketType<SocketIO::Packet>(10);
-		
-		// Initialize the websocket
-		_uri.setPath("/socket.io/1/websocket/" + _sessionID);
-		WebSocket::connect(_uri);
-
+	/*
+	int status = 503;
+	string response;
+	
+	// HTTPS
+	if (_secure) {
+		HTTPSClientSession s(_srvAddr.host().toString(), _srvAddr.port());
+		HTTPRequest req(HTTPRequest::HTTP_POST, "/socket.io/1/");	
+		s.sendRequest(req);
+		HTTPResponse res;
+		istream& rstr = s.receiveResponse(res);
+		ostringstream rdata;
+		StreamCopier::copyStream(rstr, rdata);
+		status = res.getStatus();
+		response = rdata.str();
 	}
-}
+
+	// HTTP
+	else {
+		HTTPClientSession s(_srvAddr.host().toString(), _srvAddr.port());
+		HTTPRequest req(HTTPRequest::HTTP_POST, "/socket.io/1/");	
+		s.sendRequest(req);
+		HTTPResponse res;
+		istream& rstr = s.receiveResponse(res);
+		ostringstream rdata;
+		StreamCopier::copyStream(rstr, rdata);
+		status = res.getStatus();
+		response = rdata.str();
+	}
+	*/
 
 
-bool Socket::sendInitialRequest()
-{		 
+	/*
+
 	HTTPClientSession s(_srvAddr);
 	HTTPRequest request(HTTPRequest::HTTP_POST, "/socket.io/1/");	
 	s.sendRequest(request);
 	HTTPResponse response;
-	std::istream& rs = s.receiveResponse(response);
-	std::ostringstream body;
+	istream& rs = s.receiveResponse(response);
 	StreamCopier::copyStream(rs, body);
 	int status = response.getStatus();
-
-	Log("debug") << "[SocketIO::Socket] Handshake:" 
-		<< "\n\tStatus: " << status
-		<< "\n\tResponse: " << body.str()
-		<< endl;
-
-	/*
+	
 	// Seems to be a strange bug where data copying from receiveBytes
-	// into a std::iostream is invalid. This is causing Poco to throw
+	// into a iostream is invalid. This is causing Poco to throw
 	// a NoMesageException when using the HTTPRequest object because 
 	// the first byte == eof.
-	// Copying into a std::string yields no such problem, so using 
-	// std::string for now.
+	// Copying into a string yields no such problem, so using 
+	// string for now.
 
 	StreamSocket socket;	
 	socket.connect(_srvAddr);
@@ -157,157 +373,6 @@ bool Socket::sendInitialRequest()
 		<< "\n\tResponse Len: " << response.size()
 		<< "\n\tBody: " << body
 		<< endl;
+
+	string response = transaction.response().body.str();
 		*/
-
-	// The server can respond in three different ways:
-    // 401 Unauthorized: If the server refuses to authorize the client to connect, 
-	//		based on the supplied information (eg: Cookie header or custom query components).
-    // 503 Service Unavailable: If the server refuses the connection for any reason (eg: overload).
-	// 200 OK: The handshake was successful.
-	if (status != 200)
-		throw Exception(format("SocketIO handshake failed with %d", status));
-					
-	// Parse the response response
-	StringList respData = Util::split(body.str(), ':', 4);
-	if (respData.size() < 4)
-		throw Exception(body.str().empty() ? 
-			"Invalid SocketIO handshake response." : format(
-			"Invalid SocketIO handshake response: %s", body.str()));
-	
-	_sessionID = respData[0];
-	_heartBeatTimeout = Util::atoi(respData[1]);
-	_connectionClosingTimeout = Util::atoi(respData[2]);
-	_protocols = Util::split(respData[3], ',');
-
-	// Check websockets are supported
-	bool wsSupported = false;
-	for (int i = 0; i < _protocols.size(); i++) {
-		Log("debug") << "[SocketIO::Socket] Supports Protocol: " << _protocols[i] << endl;	
-		if (_protocols[i] == "websocket") {
-			wsSupported = true;
-			break;
-		}
-	}
-
-	if (!wsSupported)
-		throw Exception("The SocketIO server does not support WebSockets");
-
-	return true;
-}
-
-
-void Socket::close()
-{			
-	Log("trace") << "[SocketIO::Socket] Closing" << endl;	
-
-	if (!isError()) {
-		//Log("trace") << "[SocketIO::Socket] Closing: 1" << endl;
-		//Timer::getDefault();
-		//Log("trace") << "[SocketIO::Socket] Closing: 11" << endl;
-		Timer::getDefault().stop(TimerCallback<Socket>(this, &Socket::onHeartBeatTimer));	
-	}
-	
-	WebSocket::close();
-
-	Log("trace") << "[SocketIO::Socket] Closing: OK" << endl;	
-}
-
-
-int Socket::sendConnect(const string& endpoint, const string& query)
-{
-	FastMutex::ScopedLock lock(_mutex);
-	// (1) Connect
-	// Only used for multiple sockets. Signals a connection to the endpoint. Once the server receives it, it's echoed back to the client.
-	// 
-	// Example, if the client is trying to connect to the endpoint /test, a message like this will be delivered:
-	// 
-	// '1::' [path] [query]
-	// Example:
-	// 
-	// 1::/test?my=param
-	string out = "1::";
-	if (!endpoint.empty())
-		out += "/" + endpoint;
-	if (!query.empty())
-		out += "?" + query;
-	return WebSocket::send(out.data(), out.size());
-}
-
-
-int Socket::send(SocketIO::Packet::Type type, const string& data, bool ack)
-{
-	Packet packet(type, data, ack);
-	return send(packet);
-}
-
-
-int Socket::send(const std::string& data, bool ack)
-{
-	Packet packet(data, ack);
-	return send(packet);
-}
-
-
-int Socket::send(const JSON::Value& data, bool ack)
-{
-	Packet packet(data, ack);
-	return send(packet);
-}
-
-
-int Socket::send(const SocketIO::Packet& packet)
-{
-	return WebSocket::send(packet);
-}
-
-
-int Socket::emit(const string& event, const JSON::Value& args, bool ack)
-{
-	Packet packet(event, args, ack);
-	return send(packet);
-}
-
-
-void Socket::onHeartBeatTimer(TimerCallback<Socket>&) 
-{
-	Log("trace") << "[SocketIO::Socket] Heart Beat Timer" << endl;
-	
-	if (isConnected())
-		sendHeartbeat();
-
-	// Try to reconnect if the connection was closed in error
-	else if (isError()) {	
-		Log("trace") << "[SocketIO::Socket] Attempting to reconnect" << endl;	
-		try {
-			connect();
-		} 
-		catch (Poco::Exception& e) 
-		{			
-			Log("error") << "[SocketIO::Socket] Reconnection attempt failed: " << e.displayText() << endl;
-		}	
-	}
-}
-
-
-int Socket::sendHeartbeat()
-{
-	Log("trace") << "[SocketIO::Socket] Heart Beat" << endl;
-	return WebSocket::send("2::", 3);
-}
-
-
-Poco::Net::NameValueCollection& Socket::httpHeaders()
-{
-	FastMutex::ScopedLock lock(_mutex);
-	return _httpHeaders;
-}
-
-
-std::string Socket::sessionID() const 
-{
-	FastMutex::ScopedLock lock(_mutex);
-	return _sessionID;
-}
-
-
-} } // namespace Sourcey::SocketIO

@@ -82,10 +82,16 @@ DefinePolymorphicDelegateWithArg(videoDelegate, IPacket, VideoDelegate, double, 
 // ---------------------------------------------------------------------
 //
 class VideoCapture: public ICapture, public Poco::Runnable 
+	/// Class for video capturing from video files or cameras.
+	/// Requires OpenCV.
+	/// 
+	/// WINDOWS USERS:
+	/// OpenCV HighGUI DirectShow must be compiled with VI_COM_MULTI_THREADED
+	/// defined otherwise capture will fail.
 {
 public:
-	VideoCapture(int deviceId, bool checkDevice = true, bool destroyOnStop = false);
-	VideoCapture(const std::string& filename, bool checkDevice = true, bool destroyOnStop = false);
+	VideoCapture(int deviceId);
+	VideoCapture(const std::string& filename);
 	virtual ~VideoCapture();
 	
 	virtual void start();
@@ -99,12 +105,15 @@ public:
 	virtual bool isOpened() const;
 	virtual bool isRunning() const;
 
+	virtual void setDestroyOnStop(bool flag);
+
 	virtual int deviceId() const;
 	virtual std::string	filename() const;
 	virtual std::string	name() const;
 	virtual int width() const;
 	virtual int height() const;
 	virtual double fps() const;
+	virtual cv::VideoCapture& capture();
 
 protected:	
 	virtual bool open();
@@ -114,10 +123,11 @@ protected:
 	virtual void run();
 
 private:   
+	mutable Poco::FastMutex _mutex;
+
 	Poco::Thread		_thread;
 	cv::VideoCapture	_capture;
 	cv::Mat				_frame;	
-	FPSCounter			_counter;
 	int					_deviceId;	// For video devices
 	std::string			_filename;	// For video files
 	int					_width;		// The default capture width
@@ -125,8 +135,8 @@ private:
 	bool				_stop;
 	bool				_isOpened;	// Reliable replacement for OpenCV
 	bool				_destroyOnStop;
+	FPSCounter			_counter;
 	Poco::Event			_wakeUp;
-	static Poco::FastMutex	_mutex;
 };
 
 

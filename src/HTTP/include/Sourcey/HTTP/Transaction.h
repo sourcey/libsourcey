@@ -48,7 +48,7 @@ struct TransferState
 {
 	enum Type
 	{
-		None		= 0,
+		None,
 		Running,
 		Complete,
 		Cancelled,	/// cancelled as result of user intervention
@@ -56,23 +56,24 @@ struct TransferState
 	};
 	
 	Type state;
-	UInt32 current;
-	UInt32 total;
+	std::streamsize current;
+	std::streamsize total;
 
 	TransferState() :	
 		current(0), total(0), state(None) {}
+
+	std::streamsize progress() {
+		return (current / (total * 1.0)) * 100;
+	}
 };
 
 
 // ---------------------------------------------------------------------
 //
-class Transaction: public StatefulSignal<TransactionState>, public ISendable 
-	///
+class Transaction: public StatefulSignal<TransactionState>, public ISendable, public ILoggable
 	/// Implements a HTTP transaction.
 	///
-	/// TODO: 
-	///	- Use ITransaction semantics
-	///	- Single TransferState depending on HTTP method
+	/// TODO: Use ITransaction semantics
 	///
 {
 public:
@@ -84,8 +85,8 @@ public:
 	
 	virtual Request& request();
 	virtual Response& response();
-	virtual TransferState& uploadState();
-	virtual TransferState& downloadState();
+	virtual TransferState& requestState();
+	virtual TransferState& responseState();
 	virtual bool cancelled();
 
 	virtual void setRequest(Request* request);
@@ -103,24 +104,26 @@ public:
 		/// Sets an arbitrary pointer to associate with
 		/// this transaction.
 	
-	Signal<TransferState&> UploadProgress;
-	Signal<TransferState&> DownloadProgress;
-	Signal<Response&> TransactionComplete;
+	Signal<TransferState&> RequestProgress;
+	Signal<TransferState&> ResponseProgress;
+	Signal<Response&> Complete;
+	
+	virtual const char* className() const { return "HTTPTransaction"; }
 	
 protected:
 	virtual void processRequest(std::ostream &ost);
 	virtual void processResponse(std::istream &ist);
 	virtual void dispatchCallbacks();
 	
-	virtual void updateUploadState(TransferState::Type state, UInt32 current);
-	virtual void updateDownloadState(TransferState::Type state, UInt32 current);
+	virtual void setRequestState(TransferState::Type state);
+	virtual void setResponseState(TransferState::Type state);
 
 protected:
 	Request*		_request;
 	Response		_response;
 	Poco::URI		_uri;
-	TransferState	_uploadState;
-	TransferState	_downloadState;
+	TransferState	_requestState;
+	TransferState	_responseState;
 	std::string		_outputPath;
 	void*			_clientData;
 	Poco::Net::HTTPSession*	_session;

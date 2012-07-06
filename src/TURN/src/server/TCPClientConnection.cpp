@@ -40,7 +40,7 @@ namespace TURN {
 
 
 TCPClientConnection::TCPClientConnection(TCPAllocation& allocation, const Poco::Net::StreamSocket& socket, TCPPeerConnection* peer, Net::Reactor& reactor) : 
-	Net::TCPSocket(socket, reactor, true),
+	Net::TCPSocket(socket, reactor), //, true
 	_allocation(allocation),
 	_connectionID(peer->connectionID()),
 	_peer(peer)
@@ -48,6 +48,8 @@ TCPClientConnection::TCPClientConnection(TCPAllocation& allocation, const Poco::
 	Log("trace") << "[TCPClientConnection:" << this << "] Creating" << endl;
 	_peer->bindWith(this);
 	_allocation.clients().add(_connectionID, this);
+
+	setDeleteOnClose(true);
 }
 
 	

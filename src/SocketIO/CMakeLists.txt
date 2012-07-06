@@ -4,5 +4,5 @@ if(BUILD_MODULES AND BUILD_MODULE_SocketIO)
   include_dependency(OpenSSL REQUIRED)
   include_dependency(JsonCpp REQUIRED)
 
-  define_sourcey_module(SocketIO Base Net JSON)
+  define_sourcey_module(SocketIO Base Net HTTP JSON)
 endif()

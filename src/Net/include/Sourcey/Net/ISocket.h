@@ -36,6 +36,15 @@
 #include "Sourcey/Net/Types.h"
 #include "Sourcey/Net/Address.h"
 
+#include "Poco/Net/SecureStreamSocket.h"
+#include "Poco/Net/StreamSocket.h"
+#include "Poco/Net/SocketStream.h"
+
+
+#define TCPContext Poco::Net::StreamSocket, Sourcey::Net::TCP
+#define SSLContext Poco::Net::SecureStreamSocket, Sourcey::Net::SSLTCP
+#define UDPContext Poco::Net::DatagramSocket, Sourcey::Net::UDP
+
 
 namespace Sourcey {
 namespace Net {
@@ -72,7 +81,7 @@ public:
 	
 	NullSignal Connected;
 	NullSignal Closed;
-	Signal2<const std::string&, int&> Error;
+	Signal2<int&, const std::string&> Error;
 };
 
 

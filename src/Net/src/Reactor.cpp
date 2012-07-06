@@ -32,9 +32,18 @@
 #include "Poco/SingletonHolder.h"
 
 
+/*
+#include "Poco/Net/HTTPRequest.h"
+#include "Poco/Net/StreamSocket.h"
+#include "Poco/Net/SecureStreamSocket.h"
+
+//#include "Sourcey/HTTP/Request.h"
+*/
+
+
 using namespace std;
 using namespace Poco;
-using namespace Poco::Net;
+//using namespace Poco::Net;
 
 
 namespace Sourcey {
@@ -55,16 +64,15 @@ Reactor::~Reactor()
 {
 	cout << "Destroying" << endl;
 	stop();
-	//Util::ClearVector(_delegates);
 	cout << "Destroying: OK" << endl;
 }
 
 
 void Reactor::run()
 {	
-	Socket::SocketList readable;
-	Socket::SocketList writable;
-	Socket::SocketList error;
+	Poco::Net::Socket::SocketList readable;
+	Poco::Net::Socket::SocketList writable;
+	Poco::Net::Socket::SocketList error;
 	
 	while (!_stop)
 	{		
@@ -98,17 +106,61 @@ void Reactor::run()
 						break;
 					}
 				}
+				/*
+				readable = _readable;
+				writable = _writable;
+				error = _error;
+				*/
 			}
 				
-			//Log("trace", this) << "Select In: " << readable.size() << ":" << readable.size() << ":" << error.size() << endl;
-			if (Socket::select(readable, writable, error, _timeout)) 
+			//Log("trace", this) << "Select In: " << readable.size() << ":" << writable.size() << ":" << error.size() << endl;
+			if (Poco::Net::Socket::select(readable, writable, error, _timeout)) 
 			{
-				//Log("trace", this) << "Select Out: " << readable.size() << ":" << readable.size() << ":" << error.size() << endl;
-				for (Socket::SocketList::iterator it = readable.begin(); it != readable.end(); ++it)
+				//Log("trace", this) << "Select Out: " << readable.size() << ":" << writable.size() << ":" << error.size() << endl;
+				for (Poco::Net::Socket::SocketList::iterator it = readable.begin(); it != readable.end(); ++it) {
 					dispatch(*it, SocketReadable);
-				for (Socket::SocketList::iterator it = writable.begin(); it != writable.end(); ++it)
+					
+					/*
+					for (DelegateList::iterator ait = _delegates.begin(); ait != _delegates.end(); ++ait) {
+						if (*(*ait)->socket == *it && (*ait)->event == SocketReadable) {
+
+							Log("trace") << "RREACTOE ################################# RECV" << endl;
+					
+							char buffer[32];
+
+							Poco::Net::SecureStreamSocket sock(*(*ait)->socket);
+							int n = sock.receiveBytes(buffer, sizeof(buffer));
+
+							//int n = ((Poco::Net::SecureStreamSocket&)(*it)).receiveBytes(buffer, sizeof(buffer));
+			
+							std::string response(buffer, n);
+							Log("trace") << "RREACTOE ################################# response: " << response << endl;
+						}
+					}
+					*/
+				}
+				for (Poco::Net::Socket::SocketList::iterator it = writable.begin(); it != writable.end(); ++it) {
 					dispatch(*it, SocketWritable);
-				for (Socket::SocketList::iterator it = error.begin(); it != error.end(); ++it)
+					
+					/*
+					for (DelegateList::iterator ait = _delegates.begin(); ait != _delegates.end(); ++ait) {
+						if (*(*ait)->socket == *it && (*ait)->event == SocketWritable) {
+	
+							Poco::Net::HTTPRequest request("GET", "/");
+							stringstream ss;
+							request.write(ss);	
+							Log("trace") << "RREACTOE  equest Headers: " << ss.str() << endl;
+							Poco::Net::SecureStreamSocket sock(*(*ait)->socket);
+							//int n = sock.receiveBytes(buffer, sizeof(buffer));
+							//Poco::Net::SecureStreamSocket sock(*it);
+							int n = sock.sendBytes(ss.str().data(), ss.str().length());
+							//((Poco::Net::SecureStreamSocket&)(*it)).sendBytes(ss.str().data(), ss.str().length());
+							Log("trace") << "RREACTOE  equest Headers: OK" << endl;
+						}
+					}
+					*/
+				}
+				for (Poco::Net::Socket::SocketList::iterator it = error.begin(); it != error.end(); ++it)
 					dispatch(*it, SocketError);
 			} 
 
@@ -167,7 +219,7 @@ void Reactor::stop()
 
 void Reactor::attach(const Poco::Net::Socket& socket, const ReactorDelegate& delegate)
 {
-	//Log("trace", this) << "Attach: " << socket.impl() << ": " << delegate.event << endl;
+	Log("trace", this) << "Attach: " << socket.impl() << ": " << delegate.event << endl;
 
 	detach(socket, delegate);
 
@@ -175,9 +227,27 @@ void Reactor::attach(const Poco::Net::Socket& socket, const ReactorDelegate& del
 	
 	ReactorDelegate* d = delegate.clone();
 	d->socket = Poco::Net::Socket(socket);
+	//d->socket = &socket;
 	_delegates.push_back(d);
 	
 	_wakeUp.set();	
+	
+	/*
+	switch (delegate.event) {
+	case SocketReadable:
+		_readable.push_back(socket);
+		break;		
+	case SocketWritable:
+		_writable.push_back(socket);
+		break;
+	case SocketError:
+		_error.push_back(socket);
+		break;
+	default:
+		assert(false);
+		break;
+	}
+	*/
 
 	//Log("trace", this) << "Attach: OK: " << socket.impl() << ": " << delegate.event << endl;
 }
@@ -217,8 +287,10 @@ void Reactor::detach(const Poco::Net::Socket& socket)
 }
 
 
-void Reactor::dispatch(const Socket& socket, SocketEvent event)
+void Reactor::dispatch(const Poco::Net::Socket& socket, SocketEvent event)
 {
+	//Log("trace", this) << "Dispatch: " << socket.impl() << endl;
+
 	ReactorDelegate* delegate = NULL;
 	{
 		FastMutex::ScopedLock lock(_mutex);	

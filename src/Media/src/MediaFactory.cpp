@@ -79,7 +79,7 @@ MediaFactory::MediaFactory() :
 	video(this),
 	audio(this)
 {	
-	cout << "MediaFactory::MediaFactory" << endl;	
+	//cout << "MediaFactory::MediaFactory" << endl;	
 	_devices = DeviceManagerFactory::create();
 	_devices->initialize();
 }
@@ -87,7 +87,7 @@ MediaFactory::MediaFactory() :
 
 MediaFactory::~MediaFactory()
 {	
-	cout << "MediaFactory::~MediaFactory" << endl;
+	//cout << "MediaFactory::~MediaFactory" << endl;
 
 	if (_devices) {
 		_devices->uninitialize();
@@ -154,22 +154,28 @@ void MediaFactory::Video::unload()
 
 void MediaFactory::Video::load()
 {
+	Log("debug") << "[MediaFactory] Loading Video" << endl;
+	
+	FastMutex::ScopedLock lock(_mutex);
+
 	// Initialize an idle VideoCapture object for each available device.
 	// The video capture object will begin capturing frames when it's
 	// reference count becomes positive.
-	std::vector<Device> devs;
+	vector<Device> devs;
 	_factory->devices().getVideoCaptureDevices(devs);
 	for (size_t i = 0; i < devs.size(); ++i) {
 		try 
 		{
+			Log("trace") << "[MediaFactory] Loading Video: " << devs[0].id << endl;
+
 			// TODO: Receive callback on capture error or closure.
 			VideoCapture* capture = new VideoCapture(devs[0].id);
 			_map[devs[0].id] = capture;
 		} 
 		catch (...) 
 		{
-			//Log("error") << exc.displayText() << endl;
-			_map[devs[0].id] = 0;
+			Log("error") << "[MediaFactory] Failed to load video capture." << endl;
+			_map[devs[0].id] = NULL;
 		}
 	}
 }
@@ -193,9 +199,11 @@ VideoCapture* MediaFactory::Video::getCapture(int deviceId)
 // WARNING: File video captures are started with destroyOnStop set
 // to true, meaning that the capture will be destroyed as soon as
 // it's reference count reaches 0.
-VideoCapture* MediaFactory::Video::getCapture(const std::string& file) 
+VideoCapture* MediaFactory::Video::getCapture(const string& file) 
 {
-	return new VideoCapture(file, true, true);
+	VideoCapture* capture = new VideoCapture(file);
+	capture->setDestroyOnStop(true);
+	return capture;
 }
 
 
@@ -287,7 +295,7 @@ AudioCapture* MediaFactory::Audio::getCapture(int deviceId, int channels, int sa
 	// Initialize an idle AudioCapture object for each available device.
 	// The audio capture object will begin capturing frames when it's
 	// reference count becomes positive.
-	std::vector<Device> devs;
+	vector<Device> devs;
 	_factory->devices();	
 	_factory->devices().getAudioInputDevices(&devs);		
 	for (size_t i = 0; i < devs.size(); ++i) {	
