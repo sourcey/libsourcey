@@ -9,9 +9,8 @@
 #  OpenCV_FOUND
 #  OpenCV_INCLUDE_DIR
 #  OpenCV_LIBRARIES
-#  OpenCV_LIBRARY_DIR
+#  OpenCV_LIBRARY_DIRS
 # --------------------------------
-
 
 # ----------------------------------------------------------------------
 # Default OpenCV components to include if COMPONENTS is undefined
@@ -20,16 +19,15 @@ if(NOT OpenCV_FIND_COMPONENTS)
   set(OpenCV_FIND_COMPONENTS callib3d contrib core features2d flann gpu harrtraining_engine highgui imgproc legacy ml objdetect video)
 endif()
 
-
 # ----------------------------------------------------------------------
 # Options
 # ----------------------------------------------------------------------
 set(OpenCV_LINK_SHARED_LIBS TRUE CACHE BOOL "Link with shared OpenCV libraries (.dll/.so) instead of static ones (.lib/.a)")    
 
-
 # ----------------------------------------------------------------------
 # Find OpenCV include directory
 # ----------------------------------------------------------------------
+#set(OpenCV_INCLUDE_DIR OpenCV_INCLUDE_DIR-NOTFOUND)
 if (NOT OpenCV_INCLUDE_DIR)
   find_path(OpenCV_INCLUDE_DIR 
     NAMES 
@@ -41,7 +39,6 @@ if (NOT OpenCV_INCLUDE_DIR)
     #	/usr/include
     )	
 endif()
-
 
 # ----------------------------------------------------------------------
 # Determine OpenCV version
@@ -77,12 +74,13 @@ endif()
 # ---------------------------------------------------------------------- 
 # The reason for including via iteration rather than find_library
 # is so we can remain version agnostic.
-# TODO: Include only OpenCV_FIND_COMPONENTS
 #set_module_notfound(OpenCV)
+set(OpenCV_FOUND 0)
 if (NOT OpenCV_FOUND)
   set(OpenCV_FOUND 0)
   
-  find_path(OpenCV_LIBRARY_DIR 
+  set(OpenCV_LIBRARY_DIRS OpenCV_LIBRARY_DIRS-NOTFOUND)
+  find_path(OpenCV_LIBRARY_DIRS 
     NAMES       
       libopencv_core.a.${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}      
       libopencv_core.so.${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}
@@ -98,19 +96,20 @@ if (NOT OpenCV_FOUND)
       /usr/local/lib
     )
 
-  #message("OpenCV_LIBRARY_NAME=${OpenCV_LIBRARY_DIR}")  
-  #message("OpenCV_LIBRARY_DIR=libopencv_core.so.${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}")
+  #message("OpenCV_LIBRARY_NAME=${OpenCV_LIBRARY_DIRS}")  
+  #message("OpenCV_LIBRARY_DIRS=libopencv_core.so.${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}")
     
-  if(OpenCV_LIBRARY_DIR)
+  if(OpenCV_LIBRARY_DIRS)
     set(OpenCV_FOUND 1)    
     
     # Glob library files (wish CMake supported "*.{lib|so|a}" syntax :P)
     if (WIN32)
-      file(GLOB_RECURSE libraries "${OpenCV_LIBRARY_DIR}/*.lib") 
+      file(GLOB_RECURSE libraries "${OpenCV_LIBRARY_DIRS}/*.lib") 
     else()
-      file(GLOB_RECURSE libraries "${OpenCV_LIBRARY_DIR}/*.a")
-    endif()
+      file(GLOB_RECURSE libraries "${OpenCV_LIBRARY_DIRS}/*.a")
+    endif()    
     
+    # TODO: Include only OpenCV_FIND_COMPONENTS
     set(OpenCV_LIBRARIES "")
     foreach(lib ${libraries})
       get_filename_component(filename ${lib} NAME) 
@@ -125,18 +124,46 @@ if (NOT OpenCV_FOUND)
           list(APPEND OpenCV_LIBRARIES ${filename})          
         endif()  
       endif()  
-    endforeach()  
-    
+    endforeach()    
+  
+    if(WIN32)
+      # Include OpenCV shared libraries      
+      if(NOT OpenCV_LINK_SHARED_LIBS)
+        set(OpenCV_SHARED_LIBRARY_DIR "")
+        if(IS_DIRECTORY "${OpenCV_INCLUDE_DIR}/../share/OpenCV/3rdparty/lib")
+          set(OpenCV_SHARED_LIBRARY_DIR "${OpenCV_INCLUDE_DIR}/../share/OpenCV/3rdparty/lib")
+        elseif(IS_DIRECTORY "${OpenCV_INCLUDE_DIR}/../3rdparty/lib")
+          set(OpenCV_SHARED_LIBRARY_DIR "${OpenCV_INCLUDE_DIR}/../3rdparty/lib")
+        endif()  
+        if(OpenCV_SHARED_LIBRARY_DIR)       
+          list(APPEND OpenCV_LIBRARY_DIRS ${OpenCV_SHARED_LIBRARY_DIR})       
+          if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)  
+            list(APPEND OpenCV_LIBRARIES debug zlibd.lib)
+            list(APPEND OpenCV_LIBRARIES optimized zlib.lib)      
+          else()  
+            list(APPEND OpenCV_LIBRARIES zlib.lib)          
+          endif()          
+        endif() 
+        list(APPEND OpenCV_LIBRARIES Vfw32.lib)   
+      endif() 
+      
+      # LibSourcey requires HighGUI DirectShow to use multithreaded COM.
+      # Just provide a warning for now, but we really should check the source file itself.
+      status("IMPORTANT: OpenCV HighGUI DirectShow must be compiled with VI_COM_MULTI_THREADED defined.")
+    endif()
+  
     #message(STATUS "Found OpenCV libraries: ${OpenCV_LIBRARIES}")
+    
+    #set_module_found(OpenCV)
      
     # Cache the vars.
     set(OpenCV_INCLUDE_DIR  ${OpenCV_INCLUDE_DIR}  CACHE STRING   "The OpenCV include directory." FORCE)
-    set(OpenCV_LIBRARY_DIR  ${OpenCV_LIBRARY_DIR}  CACHE STRING   "The OpenCV library directory." FORCE)
+    set(OpenCV_LIBRARY_DIRS ${OpenCV_LIBRARY_DIRS} CACHE STRING   "The OpenCV library directories." FORCE)
     set(OpenCV_LIBRARIES    ${OpenCV_LIBRARIES}    CACHE STRING   "The OpenCV libraries." FORCE)
     set(OpenCV_FOUND        ${OpenCV_FOUND}        CACHE BOOLEAN  "The OpenCV found status." FORCE)
         
     mark_as_advanced(OpenCV_INCLUDE_DIR
-                     OpenCV_LIBRARY_DIR
+                     OpenCV_LIBRARY_DIRS
                      OpenCV_LIBRARIES
                      OpenCV_FOUND)       
   endif()

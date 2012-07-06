@@ -37,13 +37,13 @@ namespace Sourcey {
 namespace SocketIO {
 
 
-class Socket;
+class ISocket;
 
 
 struct Transaction: public ITransaction<SocketIO::Packet>
 {
-	Transaction(Runner& runner, SocketIO::Socket& socket, int maxAttempts = 1, long timeout = 10000);
-	Transaction(Runner& runner, SocketIO::Socket& socket, const SocketIO::Packet& request, int maxAttempts = 1, long timeout = 10000);
+	Transaction(Runner& runner, SocketIO::ISocket& socket, int maxAttempts = 1, long timeout = 10000);
+	Transaction(Runner& runner, SocketIO::ISocket& socket, const SocketIO::Packet& request, int maxAttempts = 1, long timeout = 10000);
 	virtual ~Transaction();
 	
 	virtual bool send();
@@ -52,7 +52,7 @@ struct Transaction: public ITransaction<SocketIO::Packet>
 	virtual void onPotentialResponse(void*, Packet& packet);
 	virtual void onComplete();
 
-	SocketIO::Socket& socket;
+	SocketIO::ISocket& socket;
 };
 
 

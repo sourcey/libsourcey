@@ -36,12 +36,14 @@
 #include "Poco/DirectoryIterator.h"
 
 #include "Poco/Net/HTTPBasicCredentials.h"
+/*
 #include "Poco/Net/HTTPStreamFactory.h"
 #include "Poco/Net/HTTPClientSession.h"
 #include "Poco/Net/HTTPRequest.h"
 #include "Poco/Net/HTTPResponse.h"
 #include "Poco/Net/FilePartSource.h"
 #include "Poco/Net/NetException.h"
+*/
 
 
 using namespace std;
@@ -138,30 +140,27 @@ void PackageManager::queryRemotePackages()
 	try {
 
 		// Make the API call to retrieve the remote manifest
-		URI uri(_options.endpoint);
-		HTTPClientSession session(uri.getHost(), uri.getPort());
-		HTTPRequest request("GET", _options.indexURI, HTTPMessage::HTTP_1_1);
+		HTTP::Request* request = new HTTP::Request("GET", _options.endpoint + _options.indexURI);	
 		if (!_options.httpUsername.empty()) {
-			HTTPBasicCredentials cred(_options.httpUsername, _options.httpPassword);
-			cred.authenticate(request);
+			Poco::Net::HTTPBasicCredentials cred(_options.httpUsername, _options.httpPassword);
+			cred.authenticate(*request); 
 		}
-		request.write(cout);
-		session.setTimeout(Timespan(10,0));
-		session.sendRequest(request);
-		HTTPResponse response;
-		istream& rs = session.receiveResponse(response);
-		string data;
-		StreamCopier::copyToString(rs, data);
+
+		HTTP::Transaction transaction(request);
+		HTTP::Response& response = transaction.response();
+		if (!transaction.send())
+			throw Exception(format("Failed to query packages from server: HTTP Error: %d %s", 
+				static_cast<int>(response.getStatus()), response.getReason()));			
 
 		Log("debug") << "[PackageManager] Package Query Response:" 
 			<< "\n\tStatus: " << response.getStatus()
 			<< "\n\tReason: " << response.getReason()
-			<< "\n\tResponse: " << data
+			<< "\n\tResponse: " << response.body.str()
 			<< endl;
 		
 		JSON::Value root;
 		JSON::Reader reader;
-		bool res = reader.parse(data, root);
+		bool res = reader.parse(response.body.str(), root);
 		if (!res)
 			throw Exception("Invalid Server Response: " + reader.getFormatedErrorMessages());
 
@@ -176,6 +175,8 @@ void PackageManager::queryRemotePackages()
 			}
 			_remotePackages.add(package->name(), package);
 		}
+
+		Log("debug") << "[PackageManager] Querying Packages: Success" << endl;
 	}
 	catch (Exception& exc) {
 		Log("error") << "[PackageManager] Package Query Error: " << exc.message() << endl;
@@ -241,11 +242,6 @@ bool PackageManager::saveLocalPackages(bool whiny)
 	Log("trace") << "[PackageManager] Saving Local Packages" << endl;
 
 	bool res = true;
-	
-	//ScopedLockWithUnlock<Mutex> lock(_mutex);
-	//LocalPackageMap toSave(_localPackages.items());
-	//lock.unlock();
-
 	LocalPackageMap toSave = localPackages().copy();
 	for (LocalPackageMap::const_iterator it = toSave.begin(); it != toSave.end(); ++it) {
 		if (!saveLocalPackage(static_cast<LocalPackage&>(*it->second), whiny))
@@ -415,145 +411,12 @@ PackageInstallMonitor* PackageManager::updatePackages(const StringList& names, c
 	}
 	
 	return installPackages(names, options, whiny);
-
-	/*
-	PackageInstallMonitor* monitor = new PackageInstallMonitor();
-	try 
-	{
-		bool res = true;
-		for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
-			PackageInstallTask* task = updatePackage(*it, options, whiny);
-			if (!task)
-				res = false;
-			monitor->addTask(task);
-			//else if (monitor)
-			//if (!updatePackage(*it, monitor, options, whiny))		
-			//	res = false;
-		}	
-	}
-	catch (Exception& exc) 
-	{
-		delete monitor;
-		monitor = NULL;
-		if (whiny)
-			exc.rethrow();
-	}
-
-	return monitor;
-	*/
 }
-
-
-/*
-bool PackageManager::installPackage(const string& name, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
-{	
-	Log("debug") << "[PackageManager] Installing Package: " << name << endl;	
-
-	try 
-	{
-		// Always try to update our remote package list if
-		// it's unpopulated.
-		// TODO: Store to cache file and unload when all tasks
-		// complete.
-		if (remotePackages().empty())
-			queryRemotePackages();
-
-		// Check the remote package against provided options
-		// to make sure we can proceed.
-		assert(0);
-
-		PackagePair pair = getOrCreatePackagePair(name);
-
-		// Check the veracity of existing packages.
-		// If the package is installed, the manifest is complete
-		// and the package is up to date we have nothing to do, 
-		// just return as success.
-		if (pair.local.isInstalled()) {
-			if (checkInstallManifest(pair.local)) {
-				Log("debug") 
-					<< pair.local.name() << " manifest is complete" << endl;			
-				if (isLatestVersion(pair)) {
-					Log("info") 
-						<< pair.local.name() << " is already up to date: " 
-						<< pair.local.version() << " >= " 
-						<< pair.remote.latestAsset().version() << endl;
-					//return true;
-				}
-			}
-		}
-	
-		Log("info") 
-			<< pair.local.name() << " is updating: " 
-			<< pair.local.version() << " <= " 
-			<< pair.remote.latestAsset().version() << endl;
-
-		PackageInstallTask* task = createPackageInstallTask(pair, options);	
-		if (monitor)
-			monitor->addTask(task);
-	}
-	catch (Exception& exc) 
-	{
-		Log("error") << "[PackageManager] Error: " << exc.message() << endl;
-		if (whiny)
-			exc.rethrow();
-		else 
-			return false;
-	}
-	
-	return true;
-}
-
-
-bool PackageManager::installPackages(const StringList& names, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
-{	
-	bool res = true;
-	for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
-		if (!installPackage(*it, monitor, options, whiny))
-			res = false;
-	}
-	return res;
-}
-
-
-bool PackageManager::updatePackage(const string& name, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
-{	
-	// An update action is essentially the same as an install
-	// action, except we will make sure local package exists 
-	// before we continue.
-	{
-		if (!localPackages().exists(name)) {
-			string error("Update Failed: " + name + " is not installed");
-			Log("error") << "[PackageManager] " << error << endl;	
-			if (whiny)
-				throw Exception(error);
-			else
-				return false;
-		}
-	}
-
-	return installPackage(name, monitor, options, whiny);
-}
-
-
-bool PackageManager::updatePackages(const StringList& names, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
-{
-	bool res = true;
-	for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
-		if (!updatePackage(*it, monitor, options, whiny))		
-			res = false;
-	}	
-	return res;
-}
-*/
 
 
 bool PackageManager::updateAllPackages(bool whiny) //PackageInstallMonitor* monitor, 
 {
 	bool res = true;
-	
-	//ScopedLockWithUnlock<Mutex> lock(_mutex);
-	//LocalPackageMap toUpdate(_localPackages.items());
-	//lock.unlock();
 	
 	LocalPackageMap& packages = localPackages().items();
 	for (LocalPackageMap::const_iterator it = packages.begin(); it != packages.end(); ++it) {	
@@ -581,10 +444,10 @@ bool PackageManager::uninstallPackage(const string& name, bool whiny)
 		LocalPackage* package = localPackages().get(name, true);
 		LocalPackage::Manifest manifest = package->manifest();
 		if (manifest.empty())
-			throw Exception("Uninstall Error: The local package manifests is empty");
+			throw Exception("The local package manifests is empty.");
 	
 		// Delete package files
-		// NOTE: If some files fail to delete we will still
+		// NOTE: If some files fail to delete we still
 		// consider the uninstall a success.
 		try 
 		{			
@@ -616,7 +479,7 @@ bool PackageManager::uninstallPackage(const string& name, bool whiny)
 	}
 	catch (Exception& exc) 
 	{
-		Log("error") << "[PackageManager] Error: " << exc.message() << endl;
+		Log("error") << "[PackageManager] Uninstall Error: " << exc.message() << endl;
 		if (whiny)
 			exc.rethrow();
 		else 
@@ -641,7 +504,7 @@ bool PackageManager::uninstallPackages(const StringList& names, bool whiny)
 PackageInstallTask* PackageManager::createPackageInstallTask(PackagePair& pair, const PackageInstallTask::Options& options) //const std::string& name, PackageInstallMonitor* monitor)
 {	
 	PackageInstallTask* task = new PackageInstallTask(*this, &pair.local, &pair.remote, options);
-	task->TaskComplete += delegate(this, &PackageManager::onPackageInstallComplete, -1); // lowest priority to remove task
+	task->Complete += delegate(this, &PackageManager::onPackageInstallComplete, -1); // lowest priority to remove task
 	//task->start();
 
 	FastMutex::ScopedLock lock(_mutex);
@@ -707,7 +570,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 			}
 		}
 		catch (Exception& exc) {
-			Log("error") << "[PackageManager] Finalizing Error: " << exc.message() << endl;
+			Log("error") << "[PackageManager] Finalize Error: " << exc.message() << endl;
 			res = false;
 			if (whiny)
 				exc.rethrow();
@@ -956,10 +819,155 @@ void PackageManager::onPackageInstallComplete(void* sender)
 
 
 
+	/*
+	PackageInstallMonitor* monitor = new PackageInstallMonitor();
+	try 
+	{
+		bool res = true;
+		for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
+			PackageInstallTask* task = updatePackage(*it, options, whiny);
+			if (!task)
+				res = false;
+			monitor->addTask(task);
+			//else if (monitor)
+			//if (!updatePackage(*it, monitor, options, whiny))		
+			//	res = false;
+		}	
+	}
+	catch (Exception& exc) 
+	{
+		delete monitor;
+		monitor = NULL;
+		if (whiny)
+			exc.rethrow();
+	}
+
+	return monitor;
+	*/
 
 
 
 
+/*
+bool PackageManager::installPackage(const string& name, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
+{	
+	Log("debug") << "[PackageManager] Installing Package: " << name << endl;	
+
+	try 
+	{
+		// Always try to update our remote package list if
+		// it's unpopulated.
+		// TODO: Store to cache file and unload when all tasks
+		// complete.
+		if (remotePackages().empty())
+			queryRemotePackages();
+
+		// Check the remote package against provided options
+		// to make sure we can proceed.
+		assert(0);
+
+		PackagePair pair = getOrCreatePackagePair(name);
+
+		// Check the veracity of existing packages.
+		// If the package is installed, the manifest is complete
+		// and the package is up to date we have nothing to do, 
+		// just return as success.
+		if (pair.local.isInstalled()) {
+			if (checkInstallManifest(pair.local)) {
+				Log("debug") 
+					<< pair.local.name() << " manifest is complete" << endl;			
+				if (isLatestVersion(pair)) {
+					Log("info") 
+						<< pair.local.name() << " is already up to date: " 
+						<< pair.local.version() << " >= " 
+						<< pair.remote.latestAsset().version() << endl;
+					//return true;
+				}
+			}
+		}
+	
+		Log("info") 
+			<< pair.local.name() << " is updating: " 
+			<< pair.local.version() << " <= " 
+			<< pair.remote.latestAsset().version() << endl;
+
+		PackageInstallTask* task = createPackageInstallTask(pair, options);	
+		if (monitor)
+			monitor->addTask(task);
+	}
+	catch (Exception& exc) 
+	{
+		Log("error") << "[PackageManager] Error: " << exc.message() << endl;
+		if (whiny)
+			exc.rethrow();
+		else 
+			return false;
+	}
+	
+	return true;
+}
+
+
+bool PackageManager::installPackages(const StringList& names, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
+{	
+	bool res = true;
+	for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
+		if (!installPackage(*it, monitor, options, whiny))
+			res = false;
+	}
+	return res;
+}
+
+
+bool PackageManager::updatePackage(const string& name, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
+{	
+	// An update action is essentially the same as an install
+	// action, except we will make sure local package exists 
+	// before we continue.
+	{
+		if (!localPackages().exists(name)) {
+			string error("Update Failed: " + name + " is not installed");
+			Log("error") << "[PackageManager] " << error << endl;	
+			if (whiny)
+				throw Exception(error);
+			else
+				return false;
+		}
+	}
+
+	return installPackage(name, monitor, options, whiny);
+}
+
+
+bool PackageManager::updatePackages(const StringList& names, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
+{
+	bool res = true;
+	for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
+		if (!updatePackage(*it, monitor, options, whiny))		
+			res = false;
+	}	
+	return res;
+}
+*/
+
+
+
+		/*
+		URI uri(_options.endpoint);
+		HTTPClientSession session(uri.getHost(), uri.getPort());
+		HTTPRequest request("GET", _options.indexURI, HTTPMessage::HTTP_1_1);
+		if (!_options.httpUsername.empty()) {
+			HTTPBasicCredentials cred(_options.httpUsername, _options.httpPassword);
+			cred.authenticate(request);
+		}
+		request.write(cout);
+		session.setTimeout(Timespan(10,0));
+		session.sendRequest(request);
+		HTTPResponse response;
+		istream& rs = session.receiveResponse(response);
+		string data;
+		StreamCopier::copyToString(rs, data);
+		*/
 		/*
 
 	package.print(cout);

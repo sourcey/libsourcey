@@ -28,7 +28,6 @@
 #ifndef SOURCEY_NET_UDPSocket_H
 #define SOURCEY_NET_UDPSocket_H
 
-
 #include "Sourcey/Base.h"
 #include "Sourcey/PacketQueue.h"
 #include "Sourcey/Net/Types.h"

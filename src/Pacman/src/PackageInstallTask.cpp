@@ -53,6 +53,7 @@ PackageInstallTask::PackageInstallTask(PackageManager& manager, LocalPackage* lo
 	_local(local),
 	_remote(remote),
 	_options(options),
+	_progress(0),
 	_cancelled(false)
 {
 	assert(valid());
@@ -61,21 +62,22 @@ PackageInstallTask::PackageInstallTask(PackageManager& manager, LocalPackage* lo
 
 PackageInstallTask::~PackageInstallTask()
 {
+	// :)
 }
 
 
 void PackageInstallTask::start()
 {
-	Log("debug", this) << "Starting" << endl;
-
+	Log("trace", this) << "Starting" << endl;	
+	FastMutex::ScopedLock lock(_mutex);
 	_thread.start(*this);
 }
 
 
 void PackageInstallTask::cancel()
 {
-	Log("debug", this) << "Cancelling" << endl;
-
+	Log("trace", this) << "Cancelling" << endl;	
+	FastMutex::ScopedLock lock(_mutex);
 	_cancelled = true;
 	_transaction.cancel();
 	_thread.join();
@@ -89,19 +91,23 @@ void PackageInstallTask::run()
 		// to clear the file cache.
 		if (_manager.options().clearFailedCache)
 			_manager.clearPackageCache(*_local);		
-
+		
 		// Kick off the state machine. If any errors are
 		// encountered an exception will be thrown and the
 		// task will fail.
+		setProgress(0);
 		doDownload();
+		setProgress(75);
 		doUnpack();
+		setProgress(90);
 		doFinalize();
 	}
 	catch (Exception& exc) {		
 		Log("error", this) << "Install Failed: " << exc.message() << endl; 
 		setState(this, PackageInstallState::Failed, exc.message());
 	}
-
+	
+	setProgress(100);
 	setComplete();
 	delete this;
 }
@@ -109,33 +115,40 @@ void PackageInstallTask::run()
 
 void PackageInstallTask::onStateChange(PackageInstallState& state, const PackageInstallState& oldState)
 {
-	Log("debug", this) << state.toString() << endl; 
+	Log("debug", this) << "State Changed to " << state.toString() << endl; 	
+	{
+		FastMutex::ScopedLock lock(_mutex);
 
-	// Check for cancellation each time the state is transitioned
-	// and throw an exception to break out of the current scope.
-	if (_cancelled)
-		throw Exception("The installation task was cancelled by the user.");
+		// Check for cancellation each time the state is transitioned
+		// and throw an exception to break out of the current scope.
+		if (_cancelled && state.id() != PackageInstallState::Failed)
+			throw Exception("The installation task was cancelled by the user.");
 
-	// Set the package install task so we know from which state to
-	// resume installation.
-	// TODO: Should this be reset by the clearFailedCache option?
-	_local->setInstallState(state.toString());
+		// Set the package install task so we know from which state to
+		// resume installation.
+		// TODO: Should this be reset by the clearFailedCache option?
+		_local->setInstallState(state.toString());
 
-	switch (state.id()) {
-	case PackageInstallState::Installed:
-		_local->setState("Installed");
-		_local->clearErrors();
-		_local->setVersion(_local->latestAsset().version());
-		break;
-
-	case PackageInstallState::Failed:
-		_local->setState("Failed");
-		if (!state.message().empty())
-			_local->addError(state.message());
-		break;
-
-	default: 
-		_local->setState("Installing");	
+		switch (state.id()) {			
+		case PackageInstallState::Downloading:
+			break;
+		case PackageInstallState::Unpacking:
+			break;
+		case PackageInstallState::Finalizing:
+			break;
+		case PackageInstallState::Installed:
+			_local->setState("Installed");
+			_local->clearErrors();
+			_local->setVersion(_local->latestAsset().version());
+			break;
+		case PackageInstallState::Failed:
+			_local->setState("Failed");
+			if (!state.message().empty())
+				_local->addError(state.message());
+			break;
+		default: 
+			_local->setState("Installing");	
+		}
 	}
 
 	StatefulSignal<PackageInstallState>::onStateChange(state, oldState);
@@ -196,6 +209,7 @@ void PackageInstallTask::doDownload()
 
 	_transaction.setRequest(request);
 	_transaction.setOutputPath(_manager.getCacheFilePath(localAsset.fileName()).toString());
+	_transaction.ResponseProgress += delegate(this, &PackageInstallTask::onResponseProgress);
 	if (!_transaction.send())
 		throw Exception(format("Failed to download package files: HTTP Error: %d %s", 
 			static_cast<int>(_transaction.response().getStatus()), 
@@ -208,23 +222,14 @@ void PackageInstallTask::doDownload()
 	setState(this, PackageInstallState::Unpacking);
 }
 
-			
-	//Log("debug", this) << "Initializing Download: Version: " << _options.version << endl;
-	//Log("debug", this) << "Initializing Download: Project Version: " << _options.projectVersion << endl;
-	//JSON::StyledWriter writer;
-	//ostringstream ost;
-	//ost << writer.write((Json::Value&)localAsset.root);
-	
-	//Log("debug", this) << "Initializing Download: localAsset 1: " << ost.str() << endl;
-	//ost.str("");
-	//ost << writer.write((Json::Value&)remoteAsset.root);
-	
-	//Log("debug", this) << "Initializing Download: remoteAsset 1: " << ost.str() << endl;
 
-	//if (!localAsset.valid())
-	//	throw Exception("Package download failed: The local asset is invalid.");
-	//if (uri.empty() || filename.empty())
-	//	throw Exception("Package download failed: No suitable remote asset.");
+void PackageInstallTask::onResponseProgress(void* sender, HTTP::TransferState& state)
+{
+	Log("debug", this) << "Download Progress: " << state.progress() << endl;
+
+	// Progress 0 - 75 covers download
+	setProgress(state.progress() * 0.75);
+}
 
 
 void PackageInstallTask::doUnpack()
@@ -369,7 +374,17 @@ void PackageInstallTask::setComplete()
 	
 	// The task will be destroyed
 	// as a result of this signal.
-	TaskComplete.dispatch(this);
+	Complete.dispatch(this);
+}
+
+
+void PackageInstallTask::setProgress(int value) 
+{
+	{
+		FastMutex::ScopedLock lock(_mutex);	
+		_progress = value;
+	}
+	Progress.dispatch(this, value);
 }
 
 
@@ -426,20 +441,6 @@ RemotePackage* PackageInstallTask::remote() const
 
 
 
-	/*
-	case PackageInstallState::Downloading:
-		doDownload();
-		break;
-
-	case PackageInstallState::Unpacking:
-		doUnpack();
-		break;
-
-	case PackageInstallState::Finalizing:
-		doFinalize();
-		break;
-	*/
-
 
 		/*
 void PackageInstallTask::printLog(std::ostream& ost) const
@@ -465,7 +466,7 @@ void PackageInstallTask::printLog(std::ostream& ost) const
 			*/
 
 /*
-	//transaction->TransactionComplete += delegate(this, &PackageInstallTask::onTransactionComplete);
+	//transaction->Complete += delegate(this, &PackageInstallTask::onTransactionComplete);
 void PackageInstallTask::onTransactionComplete(void* sender, HTTP::Response& response)
 {
 	Log("debug", this) << "Download Complete: " << response.success() << endl;

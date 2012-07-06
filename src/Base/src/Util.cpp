@@ -204,6 +204,14 @@ bool endsWith(const string& str, const string& suffix)
 }
 
 
+void pause()
+{
+	//cin.ignore(1024, '\n');
+	cout << "Press enter to continue...";
+	cin.get();
+}
+
+
 bool compareVersion(const string& l, const string& r) 
 {
 	if (l.empty())

@@ -110,6 +110,8 @@ bool compareVersion(const std::string& l, const std::string& r);
 bool matchNodes(const std::string& node, const std::string& xnode, const std::string& delim = "\r\n");
 bool matchNodes(const StringList& params, const StringList& xparams);
 
+void pause();
+	/// Pause the current thread until a key is pressed...
 
 template<typename T>
 inline void ClearList(std::list<T*>& L)

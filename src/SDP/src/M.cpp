@@ -110,7 +110,7 @@ M::M(const string& media,
 {
 	_mediaType = media;
 	_port = port;
-	_nPorts = _nPorts;
+	_nPorts = nPorts;
 	_transport = transport;
 }
 

@@ -28,6 +28,7 @@ if(WIN32 AND MSVC)
     NAMES 
       pugixmld
     PATHS 
+      ${LibSourcey_DEPENDENCIES_BUILD_DIR}/pugixml
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
       /usr/lib 
       /usr/local/lib
@@ -37,6 +38,7 @@ if(WIN32 AND MSVC)
     NAMES 
       pugixml
     PATHS 
+      ${LibSourcey_DEPENDENCIES_BUILD_DIR}/pugixml
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
       /usr/lib 
       /usr/local/lib
@@ -69,6 +71,7 @@ else()
     NAMES 
       ${PugiXML_LIB_NAMES}
     PATHS 
+      ${LibSourcey_DEPENDENCIES_BUILD_DIR}/pugixml
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
       /usr/lib 
       /usr/local/lib

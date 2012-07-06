@@ -76,7 +76,10 @@ macro(define_sourcey_module name)
       SOVERSION ${LibSourcey_SOVERSION})
   endif()
 
-  # Additional target properties
+  # Additional target properties   
+  if(ENABLE_SOLUTION_FOLDERS)
+    set_target_properties(${name} PROPERTIES FOLDER "modules")
+  endif()
   set_target_properties(${name} PROPERTIES
     OUTPUT_NAME "Sourcey${name}${LibSourcey_DLLVERSION}" 
     DEBUG_POSTFIX "${LibSourcey_DEBUG_POSTFIX}"
@@ -110,51 +113,54 @@ endmacro()
 #
 macro(define_sourcey_module_sample name)
             
-    project(${name})    
+  project(${name})    
 
-    # Add example source files
-    file(GLOB lib_hdrs "*.h*")
-    file(GLOB lib_srcs "*.cpp")
-    
-    source_group("Src" FILES ${lib_srcs})
-    source_group("Include" FILES ${lib_hdrs})
+  # Add example source files
+  file(GLOB lib_hdrs "*.h*")
+  file(GLOB lib_srcs "*.cpp")
   
-    add_executable(${name} ${lib_srcs} ${lib_hdrs})
+  source_group("Src" FILES ${lib_srcs})
+  source_group("Include" FILES ${lib_hdrs})
 
-    # Include dependent modules
-    foreach(module ${ARGN})
-      include_sourcey_modules(${module})  
-      #add_dependencies(${name} ${module})
-    endforeach()  
+  add_executable(${name} ${lib_srcs} ${lib_hdrs})
 
-    # Include external dependencies
-    target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
-    add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES}) # requires complete recompile on some systems
-          
-    message(STATUS "Defining module sample ${name}:")  
-    message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")  
-    #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")  
-    #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
-  
-    # Include library and header directories
-    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
-    include_directories(${LibSourcey_INCLUDE_DIRS})
-    link_directories(${LibSourcey_LIBRARY_DIRS})  
-     
-    set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
+  # Include dependent modules
+  foreach(module ${ARGN})
+    include_sourcey_modules(${module})  
+    #add_dependencies(${name} ${module})
+  endforeach()  
+
+  # Include external dependencies
+  target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
+  add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES}) # requires complete recompile on some systems
         
-    #foreach(lib ${ARGN})
-    #    target_link_libraries(${name} debug "Sourcey${lib}${LibSourcey_DLLVERSION}d")
-    #    target_link_libraries(${name} optimized "Sourcey${lib}${LibSourcey_DLLVERSION}")
-    #endforeach()
-    #foreach(lib IN LISTS LibSourcey_DEBUG_LIBS)
-    #    target_link_libraries(${name} debug ${lib})
-    #endforeach()
-    #foreach(lib IN LISTS LibSourcey_RELEASE_LIBS)
-    #    target_link_libraries(${name} optimized ${lib})
-    #endforeach()
+  message(STATUS "Defining module sample ${name}:")  
+  message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")  
+  #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")  
+  #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
 
-    install(TARGETS ${name} RUNTIME DESTINATION "samples/${name}" COMPONENT main) 
+  # Include library and header directories
+  include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
+  include_directories(${LibSourcey_INCLUDE_DIRS})
+  link_directories(${LibSourcey_LIBRARY_DIRS})  
+   
+  if(ENABLE_SOLUTION_FOLDERS)
+    set_target_properties(${name} PROPERTIES FOLDER "samples")
+  endif()
+  set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
+      
+  #foreach(lib ${ARGN})
+  #    target_link_libraries(${name} debug "Sourcey${lib}${LibSourcey_DLLVERSION}d")
+  #    target_link_libraries(${name} optimized "Sourcey${lib}${LibSourcey_DLLVERSION}")
+  #endforeach()
+  #foreach(lib IN LISTS LibSourcey_DEBUG_LIBS)
+  #    target_link_libraries(${name} debug ${lib})
+  #endforeach()
+  #foreach(lib IN LISTS LibSourcey_RELEASE_LIBS)
+  #    target_link_libraries(${name} optimized ${lib})
+  #endforeach()
+
+  install(TARGETS ${name} RUNTIME DESTINATION "samples/${name}" COMPONENT main) 
         
 endmacro()
 
@@ -164,41 +170,44 @@ endmacro()
 # Defines a generic LibSourcey test application.
 #
 macro(define_libsourcey_test name)
-                    
-    project(${name})    
+                  
+  project(${name})    
 
-    # Add source files
-    file(GLOB lib_hdrs "*.h*")
-    file(GLOB lib_srcs "*.cpp")
-    
-    source_group("Src" FILES ${lib_srcs})
-    source_group("Include" FILES ${lib_hdrs})
+  # Add source files
+  file(GLOB lib_hdrs "*.h*")
+  file(GLOB lib_srcs "*.cpp")
   
-    add_executable(${name} ${lib_srcs} ${lib_hdrs})
+  source_group("Src" FILES ${lib_srcs})
+  source_group("Include" FILES ${lib_hdrs})
 
-    # Include dependent modules
-    foreach(module ${ARGN})
-      include_sourcey_modules(${module})  
-      #add_dependencies(${name} ${module})
-    endforeach()  
+  add_executable(${name} ${lib_srcs} ${lib_hdrs})
 
-    # Include external dependencies
-    target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
-    add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES}) # requires complete recompile on some systems
-          
-    message(STATUS "Defining module test ${name}:")  
-    message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")  
-    #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")  
-    #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
-    
-    # Include library and header directories
-    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
-    include_directories(${LibSourcey_INCLUDE_DIRS})
-    link_directories(${LibSourcey_LIBRARY_DIRS})  
-     
-    set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
+  # Include dependent modules
+  foreach(module ${ARGN})
+    include_sourcey_modules(${module})  
+    #add_dependencies(${name} ${module})
+  endforeach()  
 
-    install(TARGETS ${name} RUNTIME DESTINATION "tests/${name}" COMPONENT main) 
+  # Include external dependencies
+  target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
+  add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES}) # requires complete recompile on some systems
+        
+  message(STATUS "Defining module test ${name}:")  
+  message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")  
+  #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")  
+  #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
+  
+  # Include library and header directories
+  include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
+  include_directories(${LibSourcey_INCLUDE_DIRS})
+  link_directories(${LibSourcey_LIBRARY_DIRS})  
+      
+  if(ENABLE_SOLUTION_FOLDERS)
+    set_target_properties(${name} PROPERTIES FOLDER "tests")
+  endif()
+  set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
+
+  install(TARGETS ${name} RUNTIME DESTINATION "tests/${name}" COMPONENT main) 
     
 endmacro()
 

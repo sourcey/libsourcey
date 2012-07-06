@@ -92,7 +92,7 @@ static const char* kFilteredAudioDevicesName[] = {
 	NULL,
 };
 static const char* const kFilteredVideoDevicesName[] =  {
-	"Google Camera Adapter",   // Our own magiccams
+	"Google Camera Adapter",   // Google magiccams
 	"Asus virtual Camera",     // Bad Asus desktop virtual cam
 	"Bluetooth Video",         // Bad Sony viao bluetooth sharing driver
 	NULL,
@@ -138,10 +138,12 @@ bool Win32DeviceManager::initialize()
 				Log("warn") << "[DeviceManager] CoInitialize Changed Mode" << endl;
 		}
 		if (watcher() && !watcher()->start()) {
+			Log("error") << "[DeviceManager] Failed to start watcher" << endl;
 			return false;
 		}
 		setInitialized(true);
 	}
+	Log("trace") << "[DeviceManager] Initializing: OK" << endl;
 	return true;
 }
 
@@ -159,6 +161,7 @@ void Win32DeviceManager::uninitialize()
 		}
 		setInitialized(false);
 	}
+	Log("trace") << "[DeviceManager] Uninitializing: OK" << endl;
 }
 
 

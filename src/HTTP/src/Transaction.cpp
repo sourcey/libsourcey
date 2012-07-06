@@ -33,7 +33,6 @@
 #include "Poco/Net/SSLManager.h"
 #include "Poco/Net/KeyConsoleHandler.h"
 #include "Poco/Net/ConsoleCertificateHandler.h"
-#include "Poco/URIStreamOpener.h"
 #include "Poco/FileStream.h"
 #include "Poco/StreamCopier.h"
 #include "Poco/Path.h"
@@ -55,19 +54,20 @@ namespace HTTP {
 Transaction::Transaction(Request* request) : 
 	_request(request),
 	_session(NULL),
-	_response(HTTPResponse::HTTP_NOT_FOUND),
+	_response(HTTPResponse::HTTP_SERVICE_UNAVAILABLE),
 	_clientData(NULL)
 {
-	Log("trace") << "[HTTPTransaction] Creating" << endl;
+	Log("trace", this) << "Creating" << endl;
 }
 
 
 Transaction::~Transaction()
 {
-	Log("trace") << "[HTTPTransaction] Destroying" << endl;
+	Log("trace", this) << "Destroying" << endl;
+	// Free HTTP client session like so as base is protected
 	if (_session) {
 		if (_uri.getScheme() == "http")
-			delete static_cast<HTTPClientSession*>(_session); // base is protected
+			delete static_cast<HTTPClientSession*>(_session);
 
 		else if (_uri.getScheme() == "https")
 			delete static_cast<HTTPSClientSession*>(_session);
@@ -83,29 +83,32 @@ bool Transaction::send()
 	try 
 	{
 		setState(this, TransactionState::Running);
-
-		_request->prepare();
 		
-		Log("trace") << "[HTTPTransaction] Running:" 
+		_uri = URI(_request->getURI());		
+		_request->prepare();
+		_request->setURI(_uri.getPathAndQuery());
+
+		Log("trace", this) << "Running:" 
 			<< "\n\tMethod: " << _request->getMethod()
 			<< "\n\tHas Credentials: " << _request->hasCredentials()
-			<< "\n\tURI: " << _request->getURI()
+			<< "\n\tURI: " << _uri.toString()
+			<< "\n\tHost: " << _uri.getHost()
+			<< "\n\tPort: " << _uri.getPort()
 			//<< "\n\tOutput Path: " << _outputPath
 			<< endl;
 		
-		_uri = URI(_request->getURI());
 		if (_uri.getScheme() == "http") {
 			HTTPClientSession session(_uri.getHost(), _uri.getPort());
-			session.setTimeout(Timespan(6, 0));
-			ostream &ost = session.sendRequest(*_request);
+			session.setTimeout(Timespan(10, 0));
+			ostream& ost = session.sendRequest(*_request);
 			processRequest(ost);
 			istream& ist = session.receiveResponse(_response);
 			processResponse(ist);
 		} 
 		else if (_uri.getScheme() == "https") {
 			HTTPSClientSession session(_uri.getHost(), _uri.getPort());
-			session.setTimeout(Timespan(6, 0));
-			ostream &ost = session.sendRequest(*_request);
+			session.setTimeout(Timespan(10, 0));
+			ostream& ost = session.sendRequest(*_request);
 			processRequest(ost);
 			istream& ist = session.receiveResponse(_response);
 			processResponse(ist);
@@ -119,20 +122,19 @@ bool Transaction::send()
 				_response.getReason());
 	}
 	catch (StopPropagation&) {
-		Log("trace") << "[HTTPTransaction] Cancelled" << endl;
+		Log("trace", this) << "Cancelled" << endl;
 		return false;
 	}
 	catch (Exception& exc) {
-		Log("error") << "[HTTPTransaction] Failed: " << exc.displayText() << endl;
+		Log("error", this) << "Failed: " << exc.displayText() << endl;
 		_response.error = exc.displayText();
 		setState(this, TransactionState::Failed, _response.error);
 		//exc.rethrow();
 	}
 
-	Log("trace") << "[HTTPTransaction] Response:" 
-		<< "\n\tStatus: " << _response.getStatus()
-		<< "\n\tReason: " << _response.getReason()
-		<< endl;
+	Log("trace", this) << "Response: " 
+		<< _response.getStatus() << ": " 
+		<< _response.getReason() << endl;
 
 	dispatchCallbacks();
 	return _response.success();
@@ -141,108 +143,130 @@ bool Transaction::send()
 
 void Transaction::cancel()
 {
-	Log("trace") << "[HTTPTransaction] Cancelling" << endl;
+	Log("trace", this) << "Cancelling" << endl;
 	FastMutex::ScopedLock lock(_mutex);
 	setState(this, TransactionState::Cancelled);
 }
 
-	
-void Transaction::updateUploadState(TransferState::Type state, UInt32 current)
+
+void Transaction::processRequest(ostream& ostr)
 {
-	_uploadState.state = state;
-	_uploadState.current = current;
-	UploadProgress.dispatch(this, _uploadState);
-}
+	stringstream ss;
+	_request->write(ss);	
+	Log("trace", this) << "Request Headers: " << ss.str() << endl;
 
-
-void Transaction::updateDownloadState(TransferState::Type state, UInt32 current)
-{
-	_downloadState.state = state;
-	_downloadState.current = current;
-	DownloadProgress.dispatch(this, _downloadState);
-}
-
-
-void Transaction::processRequest(ostream &ost)
-{
 	try 
 	{
-		if (_request->form) {
-			//UInt32 bytesTotal = _request->getContentLength();
-			UInt32 bytesUploaded = 0;
+		_requestState.total = _request->getContentLength();
+		setRequestState(TransferState::Running);
+		if (_request->form) 
+		{
 			streambuf* pbuf = _request->body.rdbuf(); 
 			while (pbuf->sgetc() != EOF) {
-				char ch = pbuf->sbumpc();
-				ost << ch;
-				bytesUploaded++;
-				if (bytesUploaded % 32768 == 0) {					
+				ostr << pbuf->sbumpc();
+				_requestState.current++;
+				if (_requestState.current % 32768 == 0) {					
 					if (cancelled()) {
-						updateUploadState(TransferState::Cancelled, bytesUploaded);
+						setRequestState(TransferState::Cancelled);
 						throw StopPropagation();
 					}
+					
+					Log("trace", this) << "Upload progress: " << 
+						_requestState.current << " of " << 
+						_requestState.total << endl;
 
-					//Log("trace") << "Upload progress: " << bytesUploaded << " of " << bytesTotal << endl;
-					updateUploadState(TransferState::Running, bytesUploaded);
+					setRequestState(TransferState::Running);
 				}
-			}
-		
-			updateUploadState(TransferState::Complete, bytesUploaded);
+			}		
 		}
+		setRequestState(TransferState::Complete);
 	}
 	catch (Exception& exc) 
 	{
-		Log("trace") << "[HTTPTransaction] Request Error: " << exc.displayText() << endl;
-		updateUploadState(TransferState::Failed, 0);
+		Log("error", this) << "Request Error: " << exc.displayText() << endl;
+		setRequestState(TransferState::Failed);
 		exc.rethrow();
-	}		
+	}	
 }
 
 
-void Transaction::processResponse(istream &ist)
-{		
-	try 
-	{
-		// TODO: Upload progress
+void Transaction::setRequestState(TransferState::Type state)
+{
+	_requestState.state = state;
+	RequestProgress.dispatch(this, _requestState);
+}
 
-		// If no output path is set copy the response data to 
-		// our response object.
-		if (_outputPath.empty()) {
-			StreamCopier::copyStream(ist, _response.body);
-			//StreamCopier::copyStreamUnbuffered(rs, _response.data);
+
+void Transaction::processResponse(istream& istr)
+{	
+	//stringstream ss;
+	//_response.write(ss);	
+	//Log("trace", this) << "Response Headers: " << ss.str() << endl;
+
+	try 
+	{	
+		char c;
+		ostream& ostr =_response.body;
+		_responseState.total = _response.getContentLength();
+		setResponseState(TransferState::Running);		
+
+		istr.get(c);
+		while (istr && ostr)
+		{
+			_responseState.current++;
+			ostr.put(c);
+			istr.get(c);
+			if (_responseState.current % 32768 == 0) {					
+				if (cancelled()) {
+					setResponseState(TransferState::Cancelled);
+					throw StopPropagation();
+				}
+				
+				Log("trace", this) << "Download progress: " 
+					<< _responseState.current << " of " 
+					<< _responseState.total << endl;
+	
+				setResponseState(TransferState::Running);
+			}
 		}
-		
-		// Otherwise save the response to the output file.
-		else {
-			Log("trace") << "[HTTPTransaction] Saving output file: " << _outputPath << endl;
+					
+		// Save to output file if required
+		if (!_outputPath.empty()) {
+			Log("trace", this) << "Saving to output file: " << _outputPath << endl;
 			Path dir(_outputPath);
 			dir.setFileName("");
-			File(dir).createDirectories();	
-			FileOutputStream fost(_outputPath);
-			StreamCopier::copyStream(ist, fost);
-			//StreamCopier::copyStreamUnbuffered(ist, fost);
+			File(dir).createDirectories();
+			FileOutputStream fstr(_outputPath);
+			istr.seekg(0, ios::beg);
+			StreamCopier::copyStream(istr, fstr);
 		}
-
-		updateDownloadState(TransferState::Complete, 0);
+		
+		setResponseState(TransferState::Complete);
 	}
 	catch (Exception& exc) 
 	{
-		Log("trace") << "[HTTPTransaction] Response Error: " << exc.displayText() << endl;
-		updateDownloadState(TransferState::Failed, 0);
+		Log("error", this) << "Response Error: " << exc.displayText() << endl;
+		setResponseState(TransferState::Failed);
 		exc.rethrow();
 	}
+}
+
+void Transaction::setResponseState(TransferState::Type state)
+{
+	_responseState.state = state;
+	ResponseProgress.dispatch(this, _responseState);
 }
 
 
 void Transaction::dispatchCallbacks()
 {	
 	if (!cancelled())
-		TransactionComplete.dispatch(this, _response);
+		Complete.dispatch(this, _response);
 }
 
 
 bool Transaction::cancelled()
 {
-	FastMutex::ScopedLock lock(_mutex);	
 	return stateEquals(TransactionState::Cancelled);
 }
 
@@ -261,17 +285,17 @@ Response& Transaction::response()
 }
 
 
-TransferState& Transaction::uploadState() 
+TransferState& Transaction::requestState() 
 {
 	FastMutex::ScopedLock lock(_mutex);
-	return _uploadState; 
+	return _requestState; 
 }
 
 
-TransferState& Transaction::downloadState() 
+TransferState& Transaction::responseState() 
 { 
 	FastMutex::ScopedLock lock(_mutex);
-	return _uploadState; 
+	return _requestState; 
 }	
 
 
@@ -311,3 +335,81 @@ void* Transaction::clientData() const
 
 
 } } // namespace Sourcey::HTTP
+
+
+	
+	
+				//ch = pbuf->sbumpc();
+				//ostr << ch;
+			//std::streamsize _requestState.current = 0;
+
+	/*
+	char c;
+	std::streamsize _requestState.current = 0;
+	std::streamsize total = _request->getContentLength();
+	ostream& istr =_request->body;
+	ostr.get(c);
+	while (ostr && istr)
+	{
+		++_requestState.current;
+		istr.put(c);
+		ostr.get(c);
+		if (_requestState.current % 32768 == 0) {					
+			if (cancelled()) {
+				setResponseState(TransferState::Cancelled, _requestState.current);
+				throw StopPropagation();
+			}
+				
+			Log("trace", this) << "Upload progress: " << _requestState.current << " of " << total << endl;
+			//Log("trace", this) << "Upload progress: " << _requestState.current << endl;
+			setResponseState(TransferState::Running, _requestState.current);
+		}
+	}
+
+	
+	*/
+			
+	//char c;
+
+	
+
+	/*
+	ofstream* ofstr = NULL;	
+	if (!_outputPath.empty()) {
+		ofstr = new ofstream(_outputPath.data());
+		if (!ofstr->is_open())
+			throw Exception("Cannot open output file: " + _outputPath);
+	}
+	ostream& ostr = ofstr ? reinterpret_cast<ostream&>(*ofstr) : _response.body;
+	*/
+			
+	/*
+	try 
+	{
+		// If no output path is set copy the response data to 
+		// our response object.
+		if (_outputPath.empty()) {
+			StreamCopier::copyStream(ist, _response.body);
+			//StreamCopier::copyStreamUnbuffered(rs, _response.data);
+		}
+		
+		// Otherwise save the response to the output file.
+		else {
+			Log("trace", this) << "Saving output file: " << _outputPath << endl;
+			Path dir(_outputPath);
+			dir.setFileName("");
+			File(dir).createDirectories();	
+			FileOutputStream ofstr(_outputPath);
+			StreamCopier::copyStream(ist, ofstr);
+			//StreamCopier::copyStreamUnbuffered(ist, ofstr);
+		}
+
+		setResponseState(TransferState::Complete, 0);
+	}
+	catch (Exception& exc) 
+	{
+		Log("trace", this) << "Response Error: " << exc.displayText() << endl;
+		setResponseState(TransferState::Failed, 0);
+		exc.rethrow();
+	}
+	*/

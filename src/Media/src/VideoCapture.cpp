@@ -38,53 +38,35 @@ namespace Sourcey {
 namespace Media {
 
 
-FastMutex VideoCapture::_mutex;
-
-//
-// Windows OpenCV Notes
-//
-// OpenCV's cv::VideoCapture class does not work well accross thread
-// boundaries. For instance, if we initialize a cv::VideoCapture in
-// the main thread of of two applications and read from a child thread,
-// the read thread of the second application to result in a deadlock.
-// However, if both application initialize the capture and read from
-// the same thread the second application's capture will output green
-// frames until the first application releases the capture.
-//	
-
-VideoCapture::VideoCapture(int deviceId, bool checkDevice, bool destroyOnStop) : 
+VideoCapture::VideoCapture(int deviceId) : 
 	_thread("VideoCapture"),
 	_capture(cv::VideoCapture(deviceId)),
-	_destroyOnStop(destroyOnStop),
 	_deviceId(deviceId),
 	_width(0),
 	_height(0),
+	_destroyOnStop(false),
 	_isOpened(false),
 	_stop(false)
 {
-	Log("trace") << "[VideoCapture:" << this << "] Initializing: " << deviceId << endl;
-	if (checkDevice)
-		check();
-
+	Log("trace") << "[VideoCapture:" << this << "] Creating: " << deviceId << endl;
+	check();
 	start();
 }
 
 
-VideoCapture::VideoCapture(const std::string& filename, bool checkDevice, bool destroyOnStop) : 
+VideoCapture::VideoCapture(const string& filename) : 
 	_thread("VideoCapture"),
 	_capture(cv::VideoCapture(filename)),
-	_destroyOnStop(destroyOnStop),
 	_filename(filename),
 	_deviceId(-1),
 	_width(0),
 	_height(0),
+	_destroyOnStop(false),
 	_isOpened(false),
 	_stop(false) 
 {
-	Log("trace") << "[VideoCapture:" << this << "] Initializing: " << filename << endl;
-	if (checkDevice)
-		check();
-
+	Log("trace") << "[VideoCapture:" << this << "] Creating: " << filename << endl;
+	check();
 	start();
 }
 
@@ -131,8 +113,9 @@ void VideoCapture::stop()
 	Log("trace") << "[VideoCapture:" << this << "] Stopping" << endl;
 	FastMutex::ScopedLock lock(_mutex);	
 
-	// The Video Capture will be disabled when
-	// when the reference count reaches 0.
+	// The capture is never stopped, but when the
+	// reference count reaches 0 and destroyOnStop
+	// is set we destroy the capture.
 	if (refCount() == 0 && _destroyOnStop) {		
 		Log("trace") << "[VideoCapture:" << this << "] Terminating" << endl;
 		delete this;
@@ -202,6 +185,8 @@ bool VideoCapture::check()
 
 	FastMutex::ScopedLock lock(_mutex);	
 
+	// TODO: Check COM is multithreaded when using dshow highgui.
+
 	// Ensure the captured frame is not empty.
 	if (!_frame.cols ||!_frame.rows ) {
 		stringstream ss;
@@ -217,10 +202,10 @@ bool VideoCapture::check()
 void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 {
 	Log("trace") << "[VideoCapture:" << this << "] Get Frame: " << width << "x" << height << endl;
-	
-	// Don't actually grab a frame here, just copy the current frame.
 
 	FastMutex::ScopedLock lock(_mutex);	
+	
+	// Don't actually grab a frame here, just copy the current frame.
 	
 	if (_isOpened) {
 		if ((width && _frame.cols != width) || 
@@ -318,6 +303,13 @@ void VideoCapture::run()
 }
 
 
+void VideoCapture::setDestroyOnStop(bool flag)
+{
+	FastMutex::ScopedLock lock(_mutex);
+	_destroyOnStop = flag;
+}
+
+
 bool VideoCapture::isOpened() const
 {
 	FastMutex::ScopedLock lock(_mutex);
@@ -339,14 +331,14 @@ int VideoCapture::deviceId() const
 }
 
 
-std::string	VideoCapture::filename() const 
+string	VideoCapture::filename() const 
 {
 	FastMutex::ScopedLock lock(_mutex);
 	return _filename; 
 }
 
 
-std::string	VideoCapture::name() const 
+string	VideoCapture::name() const 
 {
 	FastMutex::ScopedLock lock(_mutex);
 	stringstream ss;
@@ -373,6 +365,13 @@ double VideoCapture::fps() const
 {
 	FastMutex::ScopedLock lock(_mutex);
 	return _counter.fps; 
+}
+
+
+cv::VideoCapture& VideoCapture::capture()
+{
+	FastMutex::ScopedLock lock(_mutex);
+	return _capture; 
 }
 
 

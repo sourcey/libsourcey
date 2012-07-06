@@ -48,44 +48,50 @@ PackageInstallMonitor::~PackageInstallMonitor()
 }
 
 
-void PackageInstallMonitor::onPackageInstallStateChange(void* sender, PackageInstallState& state, const PackageInstallState& oldState)
+void PackageInstallMonitor::onInstallStateChange(void* sender, PackageInstallState& state, const PackageInstallState& oldState)
 {
 	PackageInstallTask* task = reinterpret_cast<PackageInstallTask*>(sender);
 
-	Log("debug") << "[PackageInstallMonitor] onPackageInstallStateChange: " << task << ": " << state.toString() << endl;
+	Log("debug") << "[PackageInstallMonitor] onInstallStateChange: " << task << ": " << state.toString() << endl;
 
-	PackageInstallStateChange.dispatch(this, *task, state, oldState);
+	InstallStateChange.dispatch(this, *task, state, oldState);
 }
 
 
-void PackageInstallMonitor::onPackageInstallComplete(void* sender) 
+void PackageInstallMonitor::onInstallComplete(void* sender) 
 {
 	PackageInstallTask* task = reinterpret_cast<PackageInstallTask*>(sender);
 
 	Log("debug") << "[PackageInstallMonitor] Package Install Complete: " << task->state().toString() << endl;
 
 	// Notify listeners when each package completes.
-	PackageInstallComplete.dispatch(this, *task->_local);
-		
+	InstallComplete.dispatch(this, *task->local());
+	
+	int progress = 0;
 	{
 		FastMutex::ScopedLock lock(_mutex);
 
 		// Remove the package task reference.
 		for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++) {
 			if (task == *it) {
-				task->StateChange -= delegate(this, &PackageInstallMonitor::onPackageInstallStateChange); 
-				task->TaskComplete -= delegate(this, &PackageInstallMonitor::onPackageInstallComplete);
+				task->StateChange -= delegate(this, &PackageInstallMonitor::onInstallStateChange); 
+				task->Complete -= delegate(this, &PackageInstallMonitor::onInstallComplete);
 				_tasks.erase(it);
 				break;
 			}
 		}
 
+		progress = (_packages.size() - _tasks.size()) / _packages.size();
+
 		Log("info") << "[PackageInstallMonitor] Waiting on " 
 			<< _tasks.size() << " packages to complete" << endl;
 	}
 
+	// Set progress
+	setProgress(progress);
+
 	if (isComplete())
-		PackageInstallationsComplete.dispatch(this, _packages);
+		Complete.dispatch(this, _packages);
 }
 
 
@@ -96,8 +102,8 @@ void PackageInstallMonitor::addTask(PackageInstallTask* task)
 		throw Exception("Invalid package task");
 	_tasks.push_back(task);
 	_packages.push_back(task->_local);
-	task->StateChange += delegate(this, &PackageInstallMonitor::onPackageInstallStateChange);
-	task->TaskComplete += delegate(this, &PackageInstallMonitor::onPackageInstallComplete);
+	task->StateChange += delegate(this, &PackageInstallMonitor::onInstallStateChange);
+	task->Complete += delegate(this, &PackageInstallMonitor::onInstallComplete);
 }
 
 
@@ -114,6 +120,16 @@ void PackageInstallMonitor::cancelAll()
 	FastMutex::ScopedLock lock(_mutex);
 	for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++)
 		(*it)->cancel();
+}
+
+
+void PackageInstallMonitor::setProgress(int value)
+{
+	{
+		Poco::FastMutex::ScopedLock lock(_mutex);	
+		_progress = value;
+	}
+	Progress.dispatch(this, value);
 }
 
 
@@ -142,7 +158,7 @@ bool PackageInstallMonitor::isComplete() const
 
 
 
-	//task->StateChange += delegate(this, &PackageInstallMonitor::onPackageInstallComplete);
+	//task->StateChange += delegate(this, &PackageInstallMonitor::onInstallComplete);
 	// When all packages complete update our state to
 	// notify listeners.
 	//if (_tasks.empty())
@@ -160,7 +176,7 @@ bool PackageInstallMonitor::isComplete() const
 
 	//}
 	/*
-			task->StateChange -= delegate(this, &PackageInstallMonitor::onPackageInstallComplete);
+			task->StateChange -= delegate(this, &PackageInstallMonitor::onInstallComplete);
 	// Set the state to running on the first callback we get.
 	//if (stateEquals(PackageInstallMonitorState::None))
 	//	setState(this, PackageInstallMonitorState::Running);
@@ -179,12 +195,12 @@ bool PackageInstallMonitor::isComplete() const
 				<< _tasks.size() << " packages to complete" << endl;
 
 		// Notify listeners when each package completes.
-		PackageInstallComplete.dispatch(this, *task->local);
+		InstallComplete.dispatch(this, *task->local);
 		
 		// Remove the package reference.
 		for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end();) {
 			if (task == *it) {
-				task->StateChange -= delegate(this, &PackageInstallMonitor::onPackageInstallComplete);
+				task->StateChange -= delegate(this, &PackageInstallMonitor::onInstallComplete);
 				_tasks.erase(it);
 				break;
 			}

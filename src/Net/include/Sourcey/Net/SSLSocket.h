@@ -25,8 +25,8 @@
 //
 
 
-#ifndef SOURCEY_NET_TCPSocket_H
-#define SOURCEY_NET_TCPSocket_H
+#ifndef SOURCEY_NET_SSLSocket_H
+#define SOURCEY_NET_SSLSocket_H
 
 
 #include "Sourcey/Base.h"
@@ -36,31 +36,28 @@
 //#include "Sourcey/Net/StatefulSocket.h"
 //#include "Sourcey/Net/WebSocket.h"
 
-#include "Poco/Net/StreamSocket.h"
-
 
 namespace Sourcey {
 namespace Net {
-	
-
-typedef SocketBase<TCPContext>  TCPSocket;
 
 
-
-//typedef TCPSocket SocketBase<Poco::Net::StreamSocket>;
-//typedef SSLTCPSocket1 SocketBase<Poco::Net::SecureStreamSocket>;
+typedef SocketBase<SSLContext>                 SSLSocket;
 
 
-//class TCPSocket: public ISocket, public Poco::Net::StreamSocket
+	/*
+*/
+
+
+//class SSLSocket: public ISocket, public Poco::Net::StreamSocket
 //	/// This class implements a generic TCP socket interface
 //	/// over the top of Poco's StreamSocket.
 //{
 //public:
-//	TCPSocket(Reactor& reactor/* = Reactor::getDefault()*/, bool deleteOnClose = false);
-//	TCPSocket(const Poco::Net::StreamSocket& socket, Reactor& reactor/* = Reactor::getDefault()*/, bool deleteOnClose = false);
-//	TCPSocket(const TCPSocket& r);
+//	SSLSocket(Reactor& reactor/* = Reactor::getDefault()*/, bool deleteOnClose = false);
+//	SSLSocket(const Poco::Net::StreamSocket& socket, Reactor& reactor/* = Reactor::getDefault()*/, bool deleteOnClose = false);
+//	SSLSocket(const SSLSocket& r);
 //	
-//	virtual ~TCPSocket();
+//	virtual ~SSLSocket();
 //	
 //	virtual void connect(const Address& peerAddress);
 //	virtual void connect(const Address& peerAddress, int timeout);
@@ -128,4 +125,4 @@ typedef SocketBase<TCPContext>  TCPSocket;
 } } // namespace Sourcey::Net
 
 
-#endif // SOURCEY_NET_TCPSocket_H
+#endif // SOURCEY_NET_SSLSocket_H

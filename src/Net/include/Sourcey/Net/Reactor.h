@@ -106,7 +106,7 @@ class Reactor: public Poco::Runnable, public ILoggable
 	/// the epoll context on each call. Implement poll() locally.
 {
 public:
-	Reactor(int timeout = 5000000);
+	Reactor(int timeout = 250000);
 	virtual ~Reactor();
 	
 	void run();
@@ -151,15 +151,23 @@ protected:
 
 protected:
 	typedef std::vector<ReactorDelegate*> DelegateList;
-
+	
+	mutable Poco::FastMutex _mutex;
+	
 	DelegateList	_delegates;
-	//Runner&			_runner;
-	bool            _stop;
 	Poco::Thread	_thread;
 	Poco::Event		_wakeUp;
+	bool            _stop;
 	Poco::Timespan  _timeout;
-	mutable Poco::FastMutex _mutex;
 };
+
+
+	/*
+	//Runner&			_runner;
+	Poco::Net::Socket::SocketList _readable;
+	Poco::Net::Socket::SocketList _writable;
+	Poco::Net::Socket::SocketList _error;
+	*/
 
 
 // ---------------------------------------------------------------------

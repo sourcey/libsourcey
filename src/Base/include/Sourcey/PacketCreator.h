@@ -130,6 +130,16 @@ struct PacketRegistry
 		}
 	}
 
+	PacketCreationStrategyList& types() {
+		Poco::FastMutex::ScopedLock lock(_mutex);		
+		return _types;
+	}
+
+	PacketCreationStrategyList types() const {
+		Poco::FastMutex::ScopedLock lock(_mutex);		
+		return _types;
+	}
+
 protected:
 	PacketCreationStrategyList _types;
 	mutable Poco::FastMutex	_mutex;

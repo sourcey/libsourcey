@@ -41,7 +41,7 @@ namespace TURN {
 
 
 TCPPeerConnection::TCPPeerConnection(TCPAllocation& allocation, Net::Reactor& reactor) : 
-	Net::TCPSocket(reactor, true),
+	Net::TCPSocket(reactor), //, true
 	_allocation(allocation),
 	_timeout(PEER_CONNECTION_TIMEOUT * 1000),
 	_connectionID(CryptoProvider::generateRandomNumber(8)),
@@ -50,11 +50,13 @@ TCPPeerConnection::TCPPeerConnection(TCPAllocation& allocation, Net::Reactor& re
 	while (_allocation.peers().exists(_connectionID))
 		_connectionID = CryptoProvider::generateRandomNumber(8);
 	_allocation.peers().add(_connectionID, this);
+
+	setDeleteOnClose(true);
 }
 
 
 TCPPeerConnection::TCPPeerConnection(TCPAllocation& allocation, const Poco::Net::StreamSocket& socket, Net::Reactor& reactor) :
-	Net::TCPSocket(socket, reactor, true),
+	Net::TCPSocket(socket, reactor), //, true
 	_allocation(allocation),
 	_timeout(PEER_CONNECTION_TIMEOUT * 1000),
 	_connectionID(CryptoProvider::generateRandomNumber(8)),
@@ -64,6 +66,8 @@ TCPPeerConnection::TCPPeerConnection(TCPAllocation& allocation, const Poco::Net:
 	while (_allocation.peers().exists(_connectionID))
 		_connectionID = CryptoProvider::generateRandomNumber(8);
 	_allocation.peers().add(_connectionID, this);
+
+	setDeleteOnClose(true);
 }
 
 	

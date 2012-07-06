@@ -37,14 +37,15 @@ namespace Sourcey {
 namespace Net {
 
 
+	/*
 WebSocket::WebSocket(Reactor& reactor) :
-	TCPClientSocket(reactor)
+	TCPStatefulSocket(reactor)
 {  
 }
 
 
 WebSocket::WebSocket(Reactor& reactor, const URI& uri) :
-	TCPClientSocket(reactor),
+	TCPStatefulSocket(reactor),
 	_headerState(0),
 	_uri(uri)
 {
@@ -70,7 +71,7 @@ void WebSocket::connect()
 	Log("debug") << "[WebSocket: " << this << "] Connecting to " << _uri.toString() << endl;	
 
 	// Will throw on error
-	TCPClientSocket::connect(Address(_uri.getHost(), _uri.getPort()));
+	TCPStatefulSocket::connect(Address(_uri.getHost(), _uri.getPort()));
 }
 
 
@@ -86,14 +87,14 @@ void WebSocket::close()
 		ss.flush();
 	}
 
-	TCPClientSocket::close();
+	TCPStatefulSocket::close();
 }
 
 
 void WebSocket::onConnect()
 {
 	Log("debug") << "[WebSocket] Connected" << endl;
-	TCPClientSocket::onConnect();
+	TCPStatefulSocket::onConnect();
 	sendHandshake();
 }
 
@@ -125,7 +126,7 @@ void WebSocket::sendHandshake()
 	ss << WS_KEY_THREE;
 	ss.flush();
 
-	TCPClientSocket::onHandshake();
+	TCPStatefulSocket::onHandshake();
 }
 
 	
@@ -231,6 +232,11 @@ void WebSocket::recv(Buffer& buffer)
 	}
 }
 
+*/
+
+} } // namespace Sourcey::Net
+
+
 
 
 
@@ -239,13 +245,13 @@ void WebSocket::onConnect()
 {
 	//setState(this, ClientState::Handshaking);
 	//	TCPSocket::onConnect();
-	//TCPClientSocket::onConnected(status);
+	//StatefulSocketBase::onConnected(status);
 }
 */
 /*
 void WebSocket::onError(SocketEvent& event) 
 {
-	Log("warn") << "[TCPClientSocket: " << this << "] On Error" << endl;
+	Log("warn") << "[TCPStatefulSocket: " << this << "] On Error" << endl;
 	//nf->release();
 	setState(this, ClientState::Disconnected, "Connection error");
 }
@@ -268,9 +274,7 @@ bool WebSocket::setState(this, unsigned int id, const std::string& message)
 		break;
 	}
 
-	return StatefulSignal<ClientState>::setState(this, id, message); //TCPClientSocket
+	return StatefulSignal<ClientState>::setState(this, id, message); //StatefulSocketBase
 }
 */
 
-
-} } // namespace Sourcey::Net

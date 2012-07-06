@@ -132,6 +132,7 @@ void TCPClient::sendConnectRequest(const Net::Address& peerAddress)
 	sendAuthenticatedTransaction(transaction);
 }
 
+
 void TCPClient::sendData(const char* data, int size, const Net::Address& peerAddress) 
 {
 	Log("trace") << "[TURN::TCPClient:" << this << "] Sending Data to peer: " 
@@ -283,7 +284,7 @@ void TCPClient::handleConnectionBindResponse(const STUN::Message& response)
 	Log("trace") << "[TURN::TCPClient:" << this << "] Connection Bind Success Response" << endl;	
 
 	STUN::Transaction* transaction = reinterpret_cast<STUN::Transaction*>(response.opaque);
-	Net::TCPClientSocket* conn = static_cast<Net::TCPClientSocket*>(transaction->socket());
+	Net::TCPStatefulSocket* conn = static_cast<Net::TCPStatefulSocket*>(transaction->socket());
 
 	Net::Address peerAddress;
 	if (!getPeerAddress(conn, peerAddress)) {
@@ -314,7 +315,7 @@ void TCPClient::handleConnectionBindErrorResponse(const STUN::Message& response)
 	}
 	
 	STUN::Transaction* transaction = reinterpret_cast<STUN::Transaction*>(response.opaque);
-	Net::TCPClientSocket* conn = static_cast<Net::TCPClientSocket*>(transaction->socket());
+	Net::TCPStatefulSocket* conn = static_cast<Net::TCPStatefulSocket*>(transaction->socket());
 	conn->StateChange -= delegate(this, &TCPClient::onClientConnectionStateChange);	
 	FastMutex::ScopedLock lock(_mutex);	
 	if (!isTerminated()) {
@@ -331,12 +332,12 @@ bool TCPClient::createAndBindConnection(UInt32 connectionID, const Net::Address&
 	if (isTerminated())
 		return false;
 
-	Net::TCPClientSocket* conn = new Net::TCPClientSocket(_reactor); //, false
+	Net::TCPStatefulSocket* conn = new Net::TCPStatefulSocket(_reactor); //, false
 	Log("trace") << "[TURN::TCPClient:" << this << "] @@@@@@@@@@@createAndBindConnection: conn: " << conn << endl;	
 	try {
 		// Temporarily accept STUN packets so we can 
 		// verify the ConnectionBind response.
-		conn->deleteOnClose(true);
+		conn->setDeleteOnClose(true);
 		conn->registerPacketType<STUN::Message>(1);
 		conn->StateChange += delegate(this, &TCPClient::onClientConnectionStateChange);	
 		conn->connect(_options.serverAddr); // will throw on error
@@ -366,7 +367,7 @@ bool TCPClient::createAndBindConnection(UInt32 connectionID, const Net::Address&
 
 void TCPClient::onClientConnectionStateChange(void* sender, Net::ClientState& state, const Net::ClientState& oldState)
 {	
-	Net::TCPClientSocket* conn = reinterpret_cast<Net::TCPClientSocket*>(sender);	
+	Net::TCPStatefulSocket* conn = reinterpret_cast<Net::TCPStatefulSocket*>(sender);	
 	Log("trace") << "[TURN::TCPClient:" << this << "] Client Connection State Changed: " << state.toString() << endl;
 	{
 		FastMutex::ScopedLock lock(_mutex);
@@ -389,7 +390,7 @@ void TCPClient::onClientConnectionStateChange(void* sender, Net::ClientState& st
 
 void TCPClient::onDataPacketReceived(void* sender, DataPacket& packet)
 {
-	Net::TCPClientSocket* conn = static_cast<Net::TCPClientSocket*>(sender);	
+	Net::TCPStatefulSocket* conn = static_cast<Net::TCPStatefulSocket*>(sender);	
 	Net::Address peerAddress;
 	if (!isTerminated() && getPeerAddress(conn, peerAddress))
 		_observer.onRelayedData(*this, (const char *)packet.data(), packet.size(), peerAddress);
@@ -398,7 +399,7 @@ void TCPClient::onDataPacketReceived(void* sender, DataPacket& packet)
 }
 
 
-bool TCPClient::getPeerAddress(Net::TCPClientSocket* conn, Net::Address& peerAddress)
+bool TCPClient::getPeerAddress(Net::TCPStatefulSocket* conn, Net::Address& peerAddress)
 {
 	ConnectionManagerMap conns = connections().items();
 	for (ConnectionManagerMap::const_iterator it = conns.begin(); it != conns.end(); ++it) {
@@ -414,7 +415,7 @@ bool TCPClient::getPeerAddress(Net::TCPClientSocket* conn, Net::Address& peerAdd
 Net::ISocket* TCPClient::createSocket()
 {
 	FastMutex::ScopedLock lock(_mutex);
-	return new Net::TCPClientSocket(_reactor);
+	return new Net::TCPStatefulSocket(_reactor);
 }
 
 

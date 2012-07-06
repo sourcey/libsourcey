@@ -64,20 +64,31 @@ public:
 	virtual LocalPackageList packages() const;
 		/// Returns the list of monitored packages.
 		
-	Signal3<PackageInstallTask&, PackageInstallState&, const PackageInstallState&> PackageInstallStateChange;
-	Signal<LocalPackage&> PackageInstallComplete;
-	Signal<LocalPackageList&> PackageInstallationsComplete;
+	Signal3<PackageInstallTask&, PackageInstallState&, const PackageInstallState&> InstallStateChange;
+		/// Proxies state change events from managed packages
+
+	Signal<LocalPackage&> InstallComplete;
+		/// Signals when a managed install task completes.
+	
+	Signal<int&> Progress;
+		/// Signals on overall progress update [0-100].
+
+	Signal<LocalPackageList&> Complete;
+		/// Signals on all tasks complete.
 	
 protected:
-	virtual void onPackageInstallStateChange(void* sender, PackageInstallState& state, const PackageInstallState& oldState);
-	virtual void onPackageInstallComplete(void* sender);
+	virtual void onInstallStateChange(void* sender, PackageInstallState& state, const PackageInstallState& oldState);
+	virtual void onInstallComplete(void* sender);
 		/// Called when a monitored install task completes.
 	
+	virtual void setProgress(int value);
+
 protected:
 	mutable Poco::FastMutex	_mutex;
 
 	PackageInstallTaskList _tasks;
 	LocalPackageList _packages;
+	int _progress;
 };
 
 
