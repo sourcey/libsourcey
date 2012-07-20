@@ -33,7 +33,7 @@
 #include "Sourcey/TURN/server/TCPClientConnection.h"
 #include "Sourcey/TURN/server/TCPPeerConnection.h"
 #include "Sourcey/Net/TCPSocket.h"
-#include "Sourcey/Net/TCPSocketAcceptor.h"
+#include "Sourcey/Net/SocketAcceptor.h"
 
 
 namespace Sourcey {
@@ -48,7 +48,7 @@ class TCPAllocation: public ServerAllocation
 {
 public:
 	TCPAllocation(Server& server, 
-				  Net::TCPSocket* control, 
+				  Net::TCPPacketSocket* control, 
 				  const FiveTuple& tuple, 
 				  const std::string& username, 
 				  const UInt32& lifetime);
@@ -62,7 +62,7 @@ public:
 
 	void sendToControl(STUN::Message& message);
 
-	Net::TCPSocket* control();
+	Net::TCPPacketSocket* control();
 	Net::Address relayedAddress() const;
 	ClientConnectionManager& clients();
 	PeerConnectionManager& peers();
@@ -78,7 +78,7 @@ public:
 	virtual const char* className() const { return "TCPAllocation"; };
 
 protected:
-	Net::TCPSocket*	_control;
+	Net::TCPPacketSocket*	_control;
 	ClientConnectionManager	_clients;
 	PeerConnectionManager	_peers;
 	Net::TCPSocketAcceptor	_acceptor;

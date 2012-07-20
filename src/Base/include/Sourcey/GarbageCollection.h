@@ -30,7 +30,7 @@
 
 
 #include "Sourcey/Base.h"
-#include "Sourcey/ITask.h"
+#include "Sourcey/Task.h"
 
 
 namespace Sourcey {
@@ -40,16 +40,18 @@ class Runner;
 
 
 template <class DeletableT>
-class GarbageCollectionTask: public ITask
+class GarbageCollectionTask: public Task
 {
 public:
 	GarbageCollectionTask(Runner& runner, void* ptr) : 
-	  ITask(runner, true, true), _ptr(ptr) {
+	  Task(runner, false, true), _ptr(ptr) {
+		  /*
 #ifdef _DEBUG
 		  ostringstream ss;
 		  ss << "GarbageCollection[" << _ptr << "]";
 		  _name = ss.str();
 #endif
+		  */
 	}
 
 	~GarbageCollectionTask() {
@@ -77,19 +79,21 @@ private:
 // ---------------------------------------------------------------------
 //
 template <class DeletableT>
-class TimedGarbageCollectionTask: public ITask
+class DelayedGarbageCollectionTask: public Task
 {
 public:
-	TimedGarbageCollectionTask(Runner& runner, void* ptr, UInt32 delay = 100) :
-	  ITask(runner, true, false), _ptr(ptr), _timeout(delay, true) {
+	DelayedGarbageCollectionTask(Runner& runner, void* ptr, UInt32 delay = 100) :
+	  Task(runner, true, true), _ptr(ptr), _timeout(delay, true) {
+		  /*
 #ifdef _DEBUG
 		  ostringstream ss;
 		  ss << "TimedGarbageCollection[" << _ptr << "]";
 		  _name = ss.str();
 #endif
+		  */
 	}
 
-	~TimedGarbageCollectionTask() {
+	~DelayedGarbageCollectionTask() {
 		if (_ptr)
 			free();
 	}

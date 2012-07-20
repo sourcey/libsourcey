@@ -40,35 +40,39 @@ namespace Sourcey {
 
 
 template<class T>
-class DispatchQueue: public ITask
+class DispatchQueue: public Task
 {
 public:
 	DispatchQueue(Runner& runner, int queueSize = 1024, int dispatchTimeout = DEFAULT_TIMEOUT) :
-		ITask(runner, false, false),
+		//Task(runner, false, false),
 		_queueSize(queueSize),
 		_timeout(dispatchTimeout)
 	{
 		Log("trace") << "[DispatchQueue:" << this << "] Creating" << std::endl;
 	}
 	
+
 	virtual bool start()
 	{
 		Log("trace") << "[DispatchQueue:" << this << "] Starting" << std::endl;
-		return ITask::start();
+		return Task::start();
 	}
+
 
 	virtual bool stop()
 	{
 		Log("trace") << "[DispatchQueue:" << this << "] Stopping" << std::endl;
 		clear();
-		return ITask::stop();
+		return Task::stop();
 	}
 
+
 	virtual void dispatch(T& item) = 0;
-		// Called inside the Runner thread to broadcast an item.
+		// Called inside the Runner thread to dispatch an item.
 		//
 		// Overriding classes implement broadcasting logic here.
 	
+
 	virtual void push(T* item)
 		// Pushes an item onto the queue.
 		// Item pointers are now managed by the DispatchQueue.		
@@ -86,12 +90,14 @@ public:
 		_queue.push_back(item);
 	}
 
+
 	virtual void clear()
 		// Clears all queued items.
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);	
 		Util::ClearDeque(_queue);
 	}
+
 
 	virtual void run()
 		// Called asynchronously by the Runner to broadcast
@@ -103,7 +109,7 @@ public:
 		{
 			{
 				Poco::FastMutex::ScopedLock lock(_mutex);
-				if (!_running || _queue.empty() || _stopwatch.elapsed() > _timeout)			
+				if (_queue.empty() || _stopwatch.elapsed() > _timeout) // !_running || 
 					break;
 
 				item = _queue.front();
@@ -117,13 +123,14 @@ public:
 		_stopwatch.reset();
 	}
 
+
 protected:
 	virtual ~DispatchQueue() 
 	{
 		Log("trace") << "[DispatchQueue:" << this << "] Destroying" << std::endl;
 		clear();
 	};
-	
+		
 	typedef std::deque<T*> Queue;
 
 	enum

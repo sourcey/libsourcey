@@ -71,45 +71,45 @@ Codec::Codec(const Codec& r) :
 Codec::ID Codec::toID(const string& type) 
 {
 	// video
-	if (type =="Raw")
+	if (type == "Raw")
 		return Codec::Raw;
-	if (type =="H263")
+	if (type == "H263")
 		return Codec::H263;
-	if (type =="H263p")
+	if (type == "H263p")
 		return Codec::H263p;
-	if (type =="H264")
+	if (type == "H264")
 		return Codec::H264;
-	if (type =="MPEG1")
+	if (type == "MPEG1")
 		return Codec::MPEG1;
-	if (type =="MPEG2")
+	if (type == "MPEG2")
 		return Codec::MPEG2;
-	if (type =="MPEG4")
+	if (type == "MPEG4")
 		return Codec::MPEG4;
-	if (type =="MJPEG")
+	if (type == "MJPEG")
 		return Codec::MJPEG;
-	if (type =="JPEG")
+	if (type == "JPEG")
 		return Codec::MJPEG;
-	if (type =="FLV")
+	if (type == "FLV")
 		return Codec::FLV;
 
 	// audio
-	if (type =="PCM")
+	if (type == "PCM")
 		return Codec::PCM;
-	if (type =="MP2")
+	if (type == "MP2")
 		return Codec::MP2;
-	if (type =="MP3")
+	if (type == "MP3")
 		return Codec::MP3;
-	if (type =="AAC")
+	if (type == "AAC")
 		return Codec::AAC;
-	if (type =="AC3")
+	if (type == "AC3")
 		return Codec::AC3;
-	if (type =="Vorbis")
+	if (type == "Vorbis")
 		return Codec::Vorbis;
-	if (type =="FLAC")
+	if (type == "FLAC")
 		return Codec::FLAC;
-	if (type =="NellyMoser")
+	if (type == "NellyMoser")
 		return Codec::NellyMoser;
-	if (type =="Speex")
+	if (type == "Speex")
 		return Codec::Speex;	
 
 	return Codec::Unknown;

@@ -40,7 +40,7 @@ namespace TURN {
 
 
 TCPClientConnection::TCPClientConnection(TCPAllocation& allocation, const Poco::Net::StreamSocket& socket, TCPPeerConnection* peer, Net::Reactor& reactor) : 
-	Net::TCPSocket(socket, reactor), //, true
+	Net::TCPPacketSocket(socket, reactor), //, true
 	_allocation(allocation),
 	_connectionID(peer->connectionID()),
 	_peer(peer)

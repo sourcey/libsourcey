@@ -39,25 +39,21 @@
 #include "Poco/Mutex.h"
 
 
-
-#include "Poco/Net/HTTPRequest.h"
-
-
-
 namespace Sourcey {
 namespace Net {
 
 	
-template <class SocketImplT, TransportProtocol TransportT, class ISocketT = ISocket>
-class SocketBase: public SocketImplT, public ISocketT, public ILoggable
+template <class StreamSocketT, TransportProtocol TransportT, class ISocketT = ISocket>
+class SocketBase: public StreamSocketT, public ISocketT, public ILoggable
 	/// This class implements a reactor based socket.
+	/// This class is designed to used with TCP and SSL
+	/// socket types. 
 {
 public:	
-	//typedef TransportProtocol TransportT   Transport;
-	typedef typename ISocketT     Interface;
+	typedef typename ISocketT InterfaceT;
 
-	SocketBase(Reactor& reactor) : //Poco::Net::Socket& socket, 
-		//_socket(socket),
+
+	SocketBase(Reactor& reactor) : 
 		_reactor(reactor),
 		_connected(false),
 		_deleteOnClose(false)
@@ -66,9 +62,8 @@ public:
 	}
 
 
-	SocketBase(const SocketImplT& socket, Reactor& reactor) : //SocketImplT& socket, 
-		SocketImplT(socket),
-		//_socket(socket),
+	SocketBase(const StreamSocketT& socket, Reactor& reactor) : 
+		StreamSocketT(socket),
 		_reactor(reactor),
 		_connected(false),
 		_deleteOnClose(false)
@@ -79,7 +74,7 @@ public:
 
 
 	SocketBase(const SocketBase& r) : 
-		SocketImplT(r),
+		StreamSocketT(r),
 		_reactor(r._reactor),
 		_connected(r._connected),
 		_deleteOnClose(r._deleteOnClose)
@@ -113,17 +108,12 @@ public:
 		try {
 			_error = "";
 			if (timeout)
-				SocketImplT::connect(peerAddress, Poco::Timespan(timeout, 0));
+				StreamSocketT::connect(peerAddress, Poco::Timespan(timeout, 0));
 			else
-				SocketImplT::connect(peerAddress);
-				//SocketImplT::connectNB(peerAddress);
+				StreamSocketT::connect(peerAddress);
+				//StreamSocketT::connectNB(peerAddress);
 			bindEvents();
 			resetBuffer();
-
-			// Register a DataPacket creator types if no
-			// packet types have been registered yet.
-			if (types().empty())
-				registerPacketType<DataPacket>(1);
 		} 
 		catch (Poco::Exception& exc) {
 			Log("trace", this) << "Connection failed: " << exc.displayText() << std::endl;	
@@ -138,16 +128,21 @@ public:
 		Log("trace", this) << "Closing" << std::endl;
 
 		if (isConnected()) {
+			Log("trace", this) << "Closing 1" << std::endl;
 			unbindEvents();
+			Log("trace", this) << "Closing 2" << std::endl;
 			try	{
 				// If the socket is already closed an
 				// InvalidSocketException will be thrown. 
 				// Just swallow it.
-				SocketImplT::close();
+				Log("trace", this) << "Closing 3" << std::endl;
+				StreamSocketT::close();
+				Log("trace", this) << "Closing 4" << std::endl;
 			}
 			catch (Poco::IOException& exc) {
 				Log("warn", this) << "Closing Error: " << exc.displayText() << std::endl;
 			}
+			Log("trace", this) << "Closing 5" << std::endl;
 			onClose(); // will probably result in destruction
 		}
 	}
@@ -160,12 +155,12 @@ public:
 			Log("trace", this) << "SEND: " << size << ": " 
 				<< address().toString() << "-->" 
 				<< peerAddress().toString() << std::endl;
-			return SocketImplT::sendBytes(data, size);
+			return StreamSocketT::sendBytes(data, size);
 		}	
 		catch (Poco::IOException& exc) {
 			// Don't set the error here, the error
 			// always comes back though the reactor.
-			Log("error", this) << "SEND: " << exc.displayText() << std::endl;
+			Log("error", this) << "Send Error: " << exc.displayText() << std::endl;
 		}
 		return -1; // error
 	}
@@ -228,12 +223,6 @@ public:
 			send(reinterpret_cast<const IPacket&>(packet));
 	}
 
-	
-	virtual void attach(const PacketDelegateBase& delegate) 
-	{
-		PacketDispatcher::attach(delegate);
-	}
-
 
 	virtual void setDeleteOnClose(bool flag)
 	{
@@ -259,7 +248,7 @@ public:
 	virtual int errorno() const 
 	{
 		try	{
-			return SocketImplT::impl()->socketError();
+			return StreamSocketT::impl()->socketError();
 		}
 		catch (Poco::Net::InvalidSocketException&) {
 			// swallow it
@@ -271,7 +260,7 @@ public:
 	virtual Address address() const 
 	{
 		try	{
-			return SocketImplT::address();
+			return StreamSocketT::address();
 		}
 		catch (Poco::Net::InvalidSocketException&) {
 			// swallow it
@@ -283,7 +272,7 @@ public:
 	virtual Address peerAddress() const 
 	{
 		try	{
-			return SocketImplT::peerAddress();
+			return StreamSocketT::peerAddress();
 		}
 		catch (Poco::Net::InvalidSocketException&) {
 			// swallow it
@@ -292,15 +281,14 @@ public:
 	}
 
 
-	virtual bool isConnected()
+	virtual bool isConnected() const
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex); 
-		Log("trace") << "[StatefulBase:" << this << "] isConnected: " << _connected << std::endl;
 		return _connected;
 	}
 
 
-	virtual bool isError()
+	virtual bool isError() const
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		return !_error.empty();
@@ -330,7 +318,7 @@ protected:
 				// Get the readable size.
 				// NOTE: This is not available for SecureStreamSocket in
 				// which case we use buffer capacity to determine read size.
-				size = min(SocketImplT::available(), MAX_TCP_PACKET_SIZE);
+				size = min(StreamSocketT::available(), MAX_TCP_PACKET_SIZE);
 				size = size ? size : _buffer.capacity();
 
 				// Resize our buffer as required.
@@ -341,10 +329,10 @@ protected:
 				}
 
 				// Read bytes from the socket into the output buffer.
-				size = SocketImplT::receiveBytes(_buffer.bytes(), size);
+				size = StreamSocketT::receiveBytes(_buffer.bytes(), size);
 				Log("trace", this) << "RECV: " << size << ": "
-					<< SocketImplT::address().toString() << "<--" 
-					<< SocketImplT::peerAddress().toString() << std::endl;
+					<< StreamSocketT::address().toString() << "<--" 
+					<< StreamSocketT::peerAddress().toString() << std::endl;
 				_buffer.setPosition(0);
 				_buffer.setSize(size);
 				buffer = &_buffer;
@@ -367,26 +355,18 @@ protected:
 
 
 	virtual void recv(Buffer& buffer)
+		/// Receives data from the socket.
 	{
 		// May be overridden for custom handling...
 		packetize(buffer);
 	}
-
+	
 
 	virtual void packetize(Buffer& buffer)
-		// Create the outgoing packet from the available creation
-		// strategies. For best performance the most used strategies
-		// should have the highest priority.
-	{	
-		IPacket* packet = createPacket(buffer);
-		if (!packet) {
-			Log("warn", this) << "Unable to create data packet." << std::endl;	
-			return;
-		}
-
-		packet->info = new PacketInfo(*this, peerAddress());
-		dispatch(static_cast<ISocketT*>(this), *packet);	
-		delete packet;
+		/// Creates and dispatches a packet from received data.
+	{		
+		// May be overridden for custom handling...	
+		Data.dispatch(this, buffer, peerAddress());	
 	}
 
 
@@ -394,7 +374,7 @@ protected:
 	{
 		Log("trace", this) << "On Connect" << std::endl;	
 
-		//SocketImplT::setBlocking(true);
+		//StreamSocketT::setBlocking(true);
 		{
 			Poco::FastMutex::ScopedLock lock(_mutex); 
 
@@ -404,15 +384,13 @@ protected:
 			_reactor.detach(*this, reactorDelegate(this, &SocketBase::onConnect, SocketWritable));	
 			_connected = true;
 		}
-		//Connected.dispatch(this);
 		Connected.dispatch(static_cast<ISocketT*>(this));
 	}
 
 
 	virtual void onClose()
 	{
-		Log("trace") << "[StatefulBase:" << this << "] On Close" << std::endl;
-		//Log("trace", this) << "On Close" << std::endl;
+		Log("trace", this) << "On Close" << std::endl;
 	
 		// This method must be called from close()
 
@@ -432,8 +410,6 @@ protected:
 			Log("trace", this) << "Delete on close" << std::endl;	
 			delete this;
 		}
-
-		//Log("trace", this) << "On Close: OK" << std::endl;
 	}
 
 
@@ -450,7 +426,10 @@ protected:
 	virtual void setError(const std::string& err)
 	{
 		Log("error", this) << "Error: " << err << std::endl;
-		_error = err;
+		{
+			Poco::FastMutex::ScopedLock lock(_mutex); 
+			_error = err;
+		}
 		int n = errorno();
 		Error.dispatch(static_cast<ISocketT*>(this), n, _error);
 		close();
@@ -464,7 +443,7 @@ protected:
 		// Set the initial buffer size to the getReceiveBufferSize value.
 		// If read sizes surpass this value the buffer size will be adjusted
 		// accordingly.
-		int recvSize = SocketImplT::getReceiveBufferSize();
+		int recvSize = StreamSocketT::getReceiveBufferSize();
 		if (recvSize != static_cast<int>(_buffer.capacity())) {
 			Log("trace", this) << "Buffer Size: " << recvSize << std::endl;
 			_buffer.reserve(recvSize);
@@ -495,7 +474,6 @@ protected:
 	
 protected:
 	mutable Poco::FastMutex _mutex;
-	//Poco::Net::Socket&		_socket;
 	Buffer					_buffer;
 	Reactor&				_reactor;
 	std::string				_error;
@@ -513,8 +491,29 @@ protected:
 
 
 	/*
+		//
+
+	virtual void packetize(Buffer& buffer)
+		// Create the outgoing packet from the available creation
+		// strategies. For best performance the most used strategies
+		// should have the highest priority.
+	{	
+		IPacket* packet = createPacket(buffer);
+		if (!packet) {
+			Log("warn", this) << "Unable to create data packet." << std::endl;	
+			return;
+		}
+
+		packet->info = new PacketInfo(*this, peerAddress());
+		dispatch(static_cast<ISocketT*>(this), *packet);	
+		delete packet;
+	}
+	*/
+
+
+	/*
 	Socket(Reactor& reactor = Reactor::getDefault(), bool deleteOnClose = false);
-	Socket(const SocketImplT& socket, Reactor& reactor = Reactor::getDefault(), bool deleteOnClose = false);
+	Socket(const StreamSocketT& socket, Reactor& reactor = Reactor::getDefault(), bool deleteOnClose = false);
 	Socket(const Socket& r);
 	
 	virtual ~Socket();

@@ -1,6 +1,7 @@
 #include "EchoServer.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Util.h"
+#include "Sourcey/Net/TCPSocket.h"
 
 #include "Poco/String.h"
 #include "Poco/Format.h"
@@ -124,12 +125,12 @@ int EchoServer::main(const vector<string>& args)
 			Log("debug", this) << "Creating: " << _port << endl;
 			_reactor = new Reactor();
 
-			_server = new TCPPacketServer(*_reactor);
+			_server = new TCPSocketAcceptor(*_reactor);
 			_server->bind(Address("127.0.0.1", _port));
-			_server->SocketCreated += delegate(this, &EchoServer::onSocketCreated);
+			_server->SocketAccepted += delegate(this, &EchoServer::onSocketCreated);
 
 			// Wait for kill			
-			//system("pause");
+			//Util::pause();
 			waitForTerminationRequest();
 		}
 	}
@@ -141,20 +142,21 @@ int EchoServer::main(const vector<string>& args)
 }
 
 	
-void EchoServer::onSocketCreated(void* sender, TCPSocket& socket)
+void EchoServer::onSocketCreated(void* sender, Poco::Net::StreamSocket& socket, Net::Reactor& reactor)
 {
-	Log("debug", this) << "TCP Socket Created: " << socket.peerAddress() << endl;
+	Log("debug", this) << "TCP Socket Created: " << socket.peerAddress().toString() << endl;
 	
-	TCPSocket* sock = new TCPSocket(socket, *_reactor);
+	TCPPacketSocket* sock = new TCPPacketSocket(socket, reactor);
+	sock->setDeleteOnClose(true);
 	sock->registerPacketType<DataPacket>(1);
 	sock->attach(packetDelegate(this, &EchoServer::onRequestReceived));
-	sock->Closed += delegate(this, &EchoServer::onSocketClosed, -1);	
+	//sock->Closed += delegate(this, &EchoServer::onSocketClosed, -1);	
 }
 
 
 void EchoServer::onRequestReceived(void* sender, DataPacket& packet) 
 {
-	TCPSocket* socket = reinterpret_cast<TCPSocket*>(sender);	
+	TCPPacketSocket* socket = reinterpret_cast<TCPPacketSocket*>(sender);	
 
 	Log("debug", this) << "Packet Received: " << packet.size() << ": " << socket->peerAddress() << endl;	
 
@@ -163,12 +165,14 @@ void EchoServer::onRequestReceived(void* sender, DataPacket& packet)
 }
 
 
+/*
 void EchoServer::onSocketClosed(void* sender) 
 {
-	TCPSocket* socket = reinterpret_cast<TCPSocket*>(sender);	
+	TCPPacketSocket* socket = reinterpret_cast<TCPPacketSocket*>(sender);	
 	Log("trace", this) << "[TCPServer:" << this << "] Freeing Socket: " << socket->peerAddress().toString() << std::endl;
 	delete socket;
 }
+*/
 
 
 } } // namespace Sourcey::Net

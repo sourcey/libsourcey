@@ -291,17 +291,19 @@ static xmpp_log_t XMPPLogger = { HandleXMPPLogger, NULL };
 // ---------------------------------------------------------------------
 //
 XMPPTask::XMPPTask(Client& client, Runner& runner) :
-	ITask(runner),
+	Task(runner, true),
 	_client(client),
 	_context(NULL),
     _connection(NULL),
     _log(NULL)
-{	
+{
+	/*
 #ifdef _DEBUG
 	ostringstream ss;
 	ss << "XMPPTask[" << &_client << "]";
 	_name = ss.str();
 #endif
+	*/
 }
 	
 
@@ -350,7 +352,7 @@ bool XMPPTask::start()
 	
 	Log("debug", this) << "Starting XMPP: OK" << endl;		
 
-	return ITask::start();
+	return Task::start();
 }
 
 

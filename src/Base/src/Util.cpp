@@ -40,6 +40,7 @@
 #endif
 
 #include <string>
+#include <iostream>
 #include <sstream>
 #include <algorithm>
 #include <cctype>
@@ -52,21 +53,6 @@ using namespace Poco;
 
 namespace Sourcey {
 namespace Util {
-
-
-#ifdef _WIN32
-UInt32 getTime() {
-	return ::GetTickCount();
-}
-#else
-static int ClocksPerSec = sysconf(_SC_CLK_TCK);
-
-UInt32 getTime() {
-	tms t;
-	clock_t result = times(&t);
-	return result & 0xFFFFFFFF;
-}
-#endif
 
 
 double atod(const string& str)
@@ -296,6 +282,20 @@ bool matchNodes(const StringList& params, const StringList& xparams)
 
 	return true;
 }
+
+
+#if WIN32
+UInt32 getTime() {
+	return ::GetTickCount();
+}
+#else
+static int ClocksPerSec = sysconf(_SC_CLK_TCK);
+UInt32 getTime() {
+	tms t;
+	clock_t result = times(&t);
+	return result & 0xFFFFFFFF;
+}
+#endif
 
 
 #if WIN32

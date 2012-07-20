@@ -25,12 +25,12 @@
 //
 
 
-#ifndef SOURCEY_NET_ITransaction_H
-#define SOURCEY_NET_ITransaction_H
+#ifndef SOURCEY_NET_PacketTransaction_H
+#define SOURCEY_NET_PacketTransaction_H
 
 
-#include "Sourcey/ITransaction.h"
-#include "Sourcey/Net/ISocket.h"
+#include "Sourcey/PacketTransaction.h"
+#include "Sourcey/Net/IPacketSocket.h"
 
 
 namespace Sourcey {
@@ -38,45 +38,45 @@ namespace Net {
 
 
 template <class PacketT>
-class Transaction: public ITransaction<PacketT>
+class Transaction: public PacketTransaction<PacketT>
 	/// This class provides request/response functionality for IPacket
-	/// types emitted from an ISocket.
+	/// types emitted from an IPacketSocket.
 	/// This class is designed to be derived on a per protocol basis.
 {
 public:
 	Transaction(Runner& runner, 
-				ISocket* socket, 
+				IPacketSocket* socket, 
 				const Address& localAddress, 
 				const Address& peerAddress, 
-				int maxAttempts = 1, 
+				int retries = 1, 
 				int timeout = 10000) : 
-		ITransaction<PacketT>(runner, maxAttempts, timeout), 
+		PacketTransaction<PacketT>(runner, retries, timeout), 
 		_socket(socket), _localAddress(localAddress), _peerAddress(peerAddress)
 	{
-		Log("debug") << "[Transaction:" << this << "] Creating" << std::endl;
+		Log("debug") << "[NetTransaction:" << this << "] Creating" << std::endl;
 	}
 
 	virtual bool send()
 	{
 		if (_socket)
 			_socket->attach(packetDelegate(this, &Transaction::onPotentialResponse, 100));
-		if (!_socket || _socket->send(ITransaction<PacketT>::_request, _peerAddress))
-			return ITransaction<PacketT>::send();
+		if (!_socket || _socket->send(PacketTransaction<PacketT>::_request, _peerAddress))
+			return PacketTransaction<PacketT>::send();
 		setState(this, TransactionState::Failed);
 		return false;
 	}
 	
 	virtual void cancel()
 	{
-		Log("debug") << "[NetTransaction:" << this << "] Closing" << std::endl;
+		Log("debug") << "[NetTransaction:" << this << "] Canceling" << std::endl;
 		{
-			Poco::FastMutex::ScopedLock lock(ITransaction<PacketT>::_mutex);
+			Poco::FastMutex::ScopedLock lock(PacketTransaction<PacketT>::_mutex);
 			if (_socket) {
 				_socket->detach(packetDelegate(this, &Transaction::onPotentialResponse));
 				_socket = NULL;
 			}
 		}
-		ITransaction<PacketT>::cancel();
+		PacketTransaction<PacketT>::cancel();
 	}
 	
 	virtual void onPotentialResponse(void*, PacketT& packet)
@@ -87,15 +87,15 @@ public:
 
 	virtual void onComplete()
 	{
-		Log("debug") << "[NetTransaction:" << this << "] Closing" << std::endl;
+		Log("debug") << "[NetTransaction:" << this << "] Complete" << std::endl;
 		{
-			Poco::FastMutex::ScopedLock lock(ITransaction<PacketT>::_mutex);
+			Poco::FastMutex::ScopedLock lock(PacketTransaction<PacketT>::_mutex);
 			if (_socket) {
 				_socket->detach(packetDelegate(this, &Transaction::onPotentialResponse));
 				_socket = NULL;
 			}
 		}
-		ITransaction<PacketT>::onComplete();
+		PacketTransaction<PacketT>::onComplete();
 	}
 	
 	Address& localAddress() 
@@ -118,7 +118,7 @@ public:
 		return _peerAddress;
 	}
 	
-	ISocket* socket() 
+	IPacketSocket* socket() 
 	{
 		return _socket;
 	}
@@ -140,7 +140,7 @@ protected:
 			&& _peerAddress == info->peerAddress;
 	};
 	
-	ISocket* _socket;
+	IPacketSocket* _socket;
 	Address _localAddress;
 	Address _peerAddress;
 };
@@ -149,4 +149,4 @@ protected:
 } } // namespace Sourcey::Net
 
 
-#endif // SOURCEY_NET_ITransaction_H
+#endif // SOURCEY_NET_PacketTransaction_H

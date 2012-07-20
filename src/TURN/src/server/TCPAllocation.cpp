@@ -39,7 +39,7 @@ namespace Sourcey {
 namespace TURN {
 
 
-TCPAllocation::TCPAllocation(Server& server, Net::TCPSocket* control, const FiveTuple& tuple, const string& username, const UInt32& lifetime) : 
+TCPAllocation::TCPAllocation(Server& server, Net::TCPPacketSocket* control, const FiveTuple& tuple, const string& username, const UInt32& lifetime) : 
 	ServerAllocation(server, tuple, username, lifetime),
 	_acceptor(server.reactor()),
 	_control(control)
@@ -352,7 +352,7 @@ void TCPAllocation::handleConnectionBindRequest(const Request& request)
 				
 		// Reassign the underlying socket to the client connection and
 		// delete the old socket pointer.
-		Net::TCPSocket* socket = static_cast<Net::TCPSocket*>(&request.socket);
+		Net::TCPPacketSocket* socket = static_cast<Net::TCPPacketSocket*>(&request.socket);
 		TCPClientConnection* client = new TCPClientConnection(*this, *socket, peer, _server.reactor());
 		client->Closed += delegate(this, &TCPAllocation::onClientDisconnect);
 		delete socket;
@@ -416,7 +416,7 @@ void TCPAllocation::onClientDisconnect(void* sender)
 }
 
 
-Net::TCPSocket* TCPAllocation::control()
+Net::TCPPacketSocket* TCPAllocation::control()
 {
 	FastMutex::ScopedLock lock(_mutex);
 	return _control;

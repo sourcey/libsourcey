@@ -30,7 +30,8 @@
 
 
 #include "Sourcey/TimerTask.h"
-#include "Sourcey/Net/TCPServer.h"
+#include "Sourcey/Net/SocketAcceptor.h"
+#include "Sourcey/Net/TCPSocket.h"
 #include "Sourcey/Net/UDPSocket.h"
 #include "Sourcey/STUN/Message.h"
 #include "Sourcey/TURN/server/IServerObserver.h"
@@ -103,14 +104,14 @@ public:
 	ServerAllocation* getAllocation(const FiveTuple& tuple);
 	TCPAllocation* getTCPAllocation(const UInt32& connectionID);
 	
-	Net::UDPSocket& socketUDP();
+	Net::UDPPacketSocket& socketUDP();
 	IServerObserver& observer();
 	Net::Reactor& reactor();
 	Runner& runner();
 	Options& options();
 	
-	void onTCPConnectionCreated(void* sender, Net::TCPSocket& sock);
-	void onTCPConnectionClosed(void* sender);
+	void onTCPConnectionAccepted(void* sender, Poco::Net::StreamSocket& socket, Net::Reactor& reactor);
+	//void onTCPConnectionClosed(void* sender);
 	void onPacketReceived(void* sender, STUN::Message& message);
 	void onTimer(void*); //TimerCallback<Server>& timer
 
@@ -119,8 +120,8 @@ public:
 private:	
 	Runner&					_runner;
 	Net::Reactor&			_reactor;
-	Net::UDPSocket			_socketUDP;
-	Net::TCPPacketServer	_socketTCP;
+	Net::UDPPacketSocket	_socketUDP;
+	Net::TCPSocketAcceptor	_socketTCP;
 	IServerObserver&		_observer;
 	Options					_options;
 	ServerAllocationMap		_allocations;

@@ -149,7 +149,7 @@ protected:
 
 // ---------------------------------------------------------------------
 //
-class XMPPTask: public ITask, public ILoggable
+class XMPPTask: public Task, public ILoggable
 {
 public:
 	XMPPTask(Client& client, Runner& runner);

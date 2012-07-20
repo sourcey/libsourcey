@@ -103,8 +103,8 @@ void PackageInstallTask::run()
 		doFinalize();
 	}
 	catch (Exception& exc) {		
-		Log("error", this) << "Install Failed: " << exc.message() << endl; 
-		setState(this, PackageInstallState::Failed, exc.message());
+		Log("error", this) << "Install Failed: " << exc.displayText() << endl; 
+		setState(this, PackageInstallState::Failed, exc.displayText());
 	}
 	
 	setProgress(100);
@@ -316,8 +316,8 @@ void PackageInstallTask::doFinalize()
 			// must be called from an external process before the
 			// installation can be completed.
 			errors = true;
-			Log("error", this) << "Error: " << exc.message() << endl;
-			_local->addError(exc.message());
+			Log("error", this) << "Error: " << exc.displayText() << endl;
+			_local->addError(exc.displayText());
 		}
 		
 		++fIt;
@@ -345,7 +345,7 @@ void PackageInstallTask::doFinalize()
 		// While testing on a windows system this fails regularly
 		// with a file sharing error, but since the package is already
 		// installed we can just swallow it.
-		Log("warn", this) << "Cannot remove temp directory: " << exc.message() << endl;
+		Log("warn", this) << "Cannot remove temp directory: " << exc.displayText() << endl;
 	}
 
 	Log("debug", this) << "Finalization Complete" << endl;
@@ -462,7 +462,7 @@ void PackageInstallTask::printLog(std::ostream& ost) const
 		_local->setState("Failed");
 		if (!state.message().empty())
 			_local->addError(state.message());
-	//ITask(manager.runner(), false, false, local->name()),
+	//Task(manager.runner(), false, false, local->name()),
 			*/
 
 /*
@@ -604,7 +604,7 @@ void PackageInstallTask::transitionState()
 		}
 	}
 	catch (Exception& exc) {
-		setFailed(exc.message());
+		setFailed(exc.displayText());
 	}
 }
 */
@@ -638,7 +638,7 @@ bool PackageInstallTask::setState(unsigned int id, const string& message)
 			}
 		}
 		catch (Exception& exc) {
-			setFailed(exc.message());
+			setFailed(exc.displayText());
 		}
 
 		return true;

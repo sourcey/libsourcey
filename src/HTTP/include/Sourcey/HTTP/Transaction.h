@@ -31,7 +31,7 @@
 
 #include "Sourcey/Signal.h"
 #include "Sourcey/ISendable.h"
-#include "Sourcey/ITransaction.h"
+#include "Sourcey/PacketTransaction.h"
 #include "Sourcey/HTTP/Request.h"
 #include "Sourcey/HTTP/Response.h"
 
@@ -62,7 +62,7 @@ struct TransferState
 	TransferState() :	
 		current(0), total(0), state(None) {}
 
-	std::streamsize progress() {
+	double progress() {
 		return (current / (total * 1.0)) * 100;
 	}
 };
@@ -73,7 +73,7 @@ struct TransferState
 class Transaction: public StatefulSignal<TransactionState>, public ISendable, public ILoggable
 	/// Implements a HTTP transaction.
 	///
-	/// TODO: Use ITransaction semantics
+	/// TODO: Use PacketTransaction semantics
 	///
 {
 public:

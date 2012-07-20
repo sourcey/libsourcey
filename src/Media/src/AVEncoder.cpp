@@ -551,7 +551,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 			}
 		} 
 		else {
-			Log("warn") << "[AVEncoder:" << this << "] Encoded video frame size is NULL; it may have been buffered" << endl;
+			// Encoded video frame is empty, it may have been buffered.
 			return false;
 		}
 	}

@@ -45,42 +45,11 @@ namespace HTTP {
 class Authenticator
 {
 public:
-	Authenticator();
-	virtual ~Authenticator();
+	virtual ~Authenticator() {};
 
 public:
 	virtual bool validateRequest(UserManager* authenticator, const std::string& request) = 0;
 	virtual std::string prepare401Header(const std::string& extra = "") = 0;
-};
-
-
-// ---------------------------------------------------------------------
-//
-// Anionu Authenticator
-//
-// ---------------------------------------------------------------------
-class AnionuAuthenticator: public Authenticator
-{
-public:
-	AnionuAuthenticator(const std::string& realm = "Spot", const std::string& version = "HTTP/1.1");
-	virtual ~AnionuAuthenticator();
-
-public:
-	std::string prepare401Header(const std::string& extra = "");
-	bool validateRequest(UserManager* authenticator, const std::string& request);	
-	static std::string generateSignature(const std::string& password,  const std::string& requestUri, 
-									     const std::string& httpMethod, const std::string& contentType, 
-										 const std::string& date);
-	static std::string generateAuthHeader(const std::string& username, const std::string& password, 
-										  const std::string& requestUri, const std::string& httpMethod, 
-										  const std::string& contentType, const std::string& date);
-
-protected:
-	std::string _protocol;
-	std::string _version;
-	std::string _realm;
-	std::string _noonce;
-	std::string _opaque;
 };
 
 

@@ -31,37 +31,19 @@
 
 #include "Sourcey/Base.h"
 #include "Sourcey/IPacket.h"
-#include "Sourcey/PacketCreator.h"
-#include "Sourcey/PacketDispatcher.h"
 #include "Sourcey/Net/Types.h"
 #include "Sourcey/Net/Address.h"
-
-#include "Poco/Net/SecureStreamSocket.h"
-#include "Poco/Net/StreamSocket.h"
-#include "Poco/Net/SocketStream.h"
-
-
-#define TCPContext Poco::Net::StreamSocket, Sourcey::Net::TCP
-#define SSLContext Poco::Net::SecureStreamSocket, Sourcey::Net::SSLTCP
-#define UDPContext Poco::Net::DatagramSocket, Sourcey::Net::UDP
 
 
 namespace Sourcey {
 namespace Net {
+	
 
-
-class ISocket: public PacketCreator, public PacketDispatcher
-	/// LibSourcey's ISocket interface is designed to act as
-	/// a pluggable PacketStream adapter which may be a source or
-	/// destination for IPackets.
-	///
-	/// Packets may received by delegating listeners using the 
-	/// PacketDispatcher signal methods.
+class ISocket
+	/// This class defines the generic socket interface   
+	/// from which all sockets classes derive.
 {
 public:
-	ISocket() {};
-	ISocket(const ISocket& r) :
-		PacketCreator(r) {}; // delegates are not copied
 	virtual ~ISocket() {};
 
 	virtual void connect(const Address& address) = 0;
@@ -71,62 +53,53 @@ public:
 	virtual int send(const char* data, int size, const Address& peerAddress) = 0;
 	virtual int send(const IPacket& packet) = 0;
 	virtual int send(const IPacket& packet, const Address& peerAddress) = 0;
-	virtual void send(IPacket& packet) = 0; // delegate compatibility
 	
 	virtual Address address() const = 0;
+		/// The locally bound address.
+
 	virtual Address peerAddress() const = 0;
+		/// The connected peer address.
+
 	virtual TransportProtocol transport() const = 0;
+		/// The transport protocol: TCP, UDP or SSLTCP.
+		/// See TransportProtocol definition.
+
 	virtual std::string error() const = 0;
 	virtual int errorno() const = 0;
 	
+	virtual bool isConnected() const = 0;
+	virtual bool isError() const = 0;
+
 	NullSignal Connected;
+		/// Signals that the socket is connected.
+
 	NullSignal Closed;
+		/// Signals that the socket is closed.
+
 	Signal2<int&, const std::string&> Error;
+		/// Signals that the socket is closed in error.
+		/// This signal will be sent just before the 
+		/// Closed signal.
+
+	Signal2<Buffer&, const Address&> Data;
+		/// Signals data received by the socket.
+		/// The address argument is for UDP compatibility.
+		/// For TCP it will always return the peerAddress.
 };
 
 
 typedef std::vector<ISocket*> ISocketList;
 
 
-struct PacketInfo: public IPacketInfo
-	/// An abstract interface for packet sources to
-	/// provide extra information about packets.
-{ 
-	ISocket& socket;
-	Address localAddress;
-	Address peerAddress;
-
-	PacketInfo(ISocket& socket, const Address& peerAddress) :
-		socket(socket), 
-		localAddress(socket.address()), 
-		peerAddress(peerAddress) {}		
-
-	PacketInfo(const PacketInfo& r) : 
-		socket(r.socket), 
-		localAddress(r.localAddress), 
-		peerAddress(r.peerAddress) {}
-		
-	/*
-	PacketInfo& operator = (const PacketInfo& r) {
-		socket = r.socket;
-		localAddress = r.localAddress;
-		peerAddress = r.peerAddress;
-		return *this;
-	}
-	*/
-
-	virtual ~PacketInfo() {}; 
-	
-	virtual IPacketInfo* clone() const {
-		return new PacketInfo(*this);
-	}
-
-private:
-	PacketInfo& operator = (const PacketInfo&) {}; // can't assign mutex
-};
-
-
 } } // namespace Sourcey::Net
 
 
 #endif // SOURCEY_NET_ISocket_H
+
+
+//#include "Sourcey/PacketFactory.h"
+//#include "Sourcey/PacketDispatcher.h"
+	//ISocket() {};
+	//ISocket(const ISocket& r) :
+	//	PacketFactory(r) {}; // delegates are not copied
+	//: public PacketFactory, public PacketDispatcher

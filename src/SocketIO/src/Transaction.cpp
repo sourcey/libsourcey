@@ -26,7 +26,7 @@
 
 
 #include "Sourcey/SocketIO/Transaction.h"
-#include "Sourcey/SocketIO/Socket.h"
+#include "Sourcey/SocketIO/Client.h"
 #include "Sourcey/Logger.h"
 #include <iostream>
 
@@ -39,17 +39,31 @@ namespace Sourcey {
 namespace SocketIO {
 
 
-Transaction::Transaction(Runner& runner, ISocket& socket, int maxAttempts, long timeout) : 
-	ITransaction<Packet>(runner, maxAttempts, timeout), socket(socket)
+Transaction::Transaction(Runner& runner, Client& client, int retries, long timeout) : 
+	PacketTransaction<Packet>(runner, retries, timeout), client(client)
 {
-	Log("debug") << "[SocketIOTransaction:" << this << "] Initializing" << endl;
+	Log("debug") << "[SocketIOTransaction:" << this << "] Creating" << endl;
 }
 
 
-Transaction::Transaction(Runner& runner, ISocket& socket, const Packet& request, int maxAttempts, long timeout) : 
-	ITransaction<Packet>(runner, request, maxAttempts, timeout), socket(socket)
+Transaction::Transaction(Runner& runner, Client& client, const Packet& request, int retries, long timeout) : 
+	PacketTransaction<Packet>(runner, request, retries, timeout), client(client)
 {
-	Log("debug") << "[SocketIOTransaction:" << this << "] Initializing" << endl;
+	Log("debug") << "[SocketIOTransaction:" << this << "] Creating" << endl;
+}
+
+
+Transaction::Transaction(Client& client, int retries, long timeout) : 
+	PacketTransaction<Packet>(retries, timeout), client(client)
+{
+	Log("debug") << "[SocketIOTransaction:" << this << "] Creating" << endl;
+}
+
+
+Transaction::Transaction(Client& client, const Packet& request, int retries, long timeout) : 
+	PacketTransaction<Packet>(request, retries, timeout), client(client)
+{
+	Log("debug") << "[SocketIOTransaction:" << this << "] Creating" << endl;
 }
 
 
@@ -63,9 +77,9 @@ bool Transaction::send()
 {
 	Log("debug") << "[SocketIOTransaction:" << this << "] Sending" << endl;	
 	_request.setAck(true);	
-	socket += packetDelegate(this, &Transaction::onPotentialResponse, 100);
-	if (socket.send(_request), true)
-		return ITransaction<Packet>::send();
+	client += packetDelegate(this, &Transaction::onPotentialResponse, 100);
+	if (client.send(_request), true)
+		return PacketTransaction<Packet>::send();
 	return false;
 }
 
@@ -94,9 +108,9 @@ void Transaction::onComplete()
 {
 	Log("debug") << "[SocketIOTransaction:" << this << "] Closing" << endl;
 
-	socket -= packetDelegate(this, &Transaction::onPotentialResponse);
+	client -= packetDelegate(this, &Transaction::onPotentialResponse);
 	
-	ITransaction<Packet>::onComplete();
+	PacketTransaction<Packet>::onComplete();
 }
 
 

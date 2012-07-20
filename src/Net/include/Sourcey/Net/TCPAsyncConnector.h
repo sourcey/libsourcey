@@ -40,18 +40,18 @@ namespace Net {
 
 
 template <class TSocket>
-class TCPAsyncConnector: public Poco::Runnable //ITask
+class TCPAsyncConnector: public Poco::Runnable //Task
 	/// This class implements an asynchronous socket connector
 	/// which runs in a separate thread.
 	/// This is useful for high performance applications where
 	/// the processing thread can't be blocked while potentially
 	/// time consuming outgoing connections are made.
-	/// This class is not implemented as an ITask because it may
+	/// This class is not implemented as an Task because it may
 	/// block for too long.
 {
 public:
 	TCPAsyncConnector(/*Runner& runner, */TSocket& socket, const Address& peerAddress, int timeout = 0) : 
-		//ITask(runner, false, true),
+		//Task(runner, false, true),
 		_socket(socket),
 		_peerAddress(peerAddress),
 		_timeout(timeout)

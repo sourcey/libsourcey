@@ -34,7 +34,7 @@ using namespace std;
 using namespace Poco;
 
 using Sourcey::Net::Transaction;
-using Sourcey::Net::ISocket;
+using Sourcey::Net::IPacketSocket;
 using Sourcey::Net::Address;
 
 
@@ -43,12 +43,12 @@ namespace STUN {
 
 
 Transaction::Transaction(Runner& runner, 
-						 ISocket* socket, 
+						 IPacketSocket* socket, 
 						 const Address& localAddress, 
 						 const Address& peerAddress, 
-						 int maxAttempts,
+						 int retries,
 						 long timeout) : 
-	Net::Transaction<Message>(runner, socket, localAddress, peerAddress, maxAttempts, timeout)
+	Net::Transaction<Message>(runner, socket, localAddress, peerAddress, retries, timeout)
 {
 	Log("debug") << "[STUNTransaction:" << this << "] Initializing" << std::endl;
 }
@@ -103,7 +103,7 @@ bool Transaction::match(const Message& message, const Net::Address& localAddress
 
 /*
 	response = response;
-void Transaction::onPacketReceived(void* sender, Message& message) //, Net::ISocket& socket, const Net::Address& localAddress, const Net::Address& peerAddress
+void Transaction::onPacketReceived(void* sender, Message& message) //, Net::IPacketSocket& socket, const Net::Address& localAddress, const Net::Address& peerAddress
 {
 	Net::PacketInfo* source = reinterpret_cast<Net::PacketInfo*>(message.info);
 	assert(source);
