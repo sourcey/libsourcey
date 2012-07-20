@@ -40,10 +40,10 @@ namespace STUN {
 struct Transaction: public Net::Transaction<Message>
 {
 	Transaction(Runner& runner, 
-				Net::ISocket* socket, 
+				Net::IPacketSocket* socket, 
 				const Net::Address& localAddress, 
 				const Net::Address& peerAddress, 
-				int maxAttempts = 1, 
+				int retries = 1, 
 				long timeout = 10000);
 	
 	virtual bool match(const Message& message);

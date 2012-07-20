@@ -25,8 +25,8 @@
 //
 
 
-#ifndef SOURCEY_TCP_SERVICE_H
-#define SOURCEY_TCP_SERVICE_H
+#ifndef SOURCEY_NET_TCPService_H
+#define SOURCEY_NET_TCPService_H
 
 
 #include "Sourcey/Base.h"
@@ -126,4 +126,4 @@ public:
 
 } } // namespace Sourcey::Net
 
-#endif // SOURCEY_TCP_SERVICE_H
+#endif // SOURCEY_NET_TCPService_H

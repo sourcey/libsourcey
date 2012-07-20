@@ -279,16 +279,16 @@ bool VideoEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 	oframe->pts = codec->frame_number++;
 
     av_init_packet(&opacket);	
-	opacket.stream_index = stream->index;	
+	opacket.stream_index = this->stream->index;	
 	opacket.data = this->buffer;
 	opacket.size = this->bufferSize;
 
 	int frameEncoded = 0;
-	int len = avcodec_encode_video2(codec, &opacket, oframe, &frameEncoded);  
-	if (len < 0) {
-		error = "Encoder error";
-		Log("error") << "[VideoEncoderContext:" << this << "] Encoder Error" << endl;
-		return false;
+	if (avcodec_encode_video2(codec, &opacket, oframe, &frameEncoded) < 0) {
+		error = "Fatal Encoder Error";
+		Log("error") << "[VideoEncoderContext:" << this << "] Fatal Encoder Error" << endl;
+		throw Exception(error);
+		//return false;
     }
 	
 	return frameEncoded > 0;

@@ -41,13 +41,15 @@ Router::Router(Runner& runner) :
 	_task(new PacketQueue(*this, runner)),
 	_runner(runner)
 {	
-	_task->start();
+	//_task->start();
+	_runner.start(_task);
 }
 
 
 Router::~Router() 
 {
-	_task->destroy(); // The Runner will free the pointer
+	//_task->destroy();
+	_runner.destroy(_task);  // The Runner will free the task pointer
 }
 
 

@@ -47,7 +47,7 @@ class TCPAllocation;
 class TCPClientConnection;
 
 	
-class TCPPeerConnection: public Net::TCPSocket
+class TCPPeerConnection: public Net::TCPPacketSocket
 {
 public:
 	TCPPeerConnection(TCPAllocation& allocation, Net::Reactor& reactor/* = Net::Reactor::getDefault()*/);

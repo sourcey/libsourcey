@@ -37,27 +37,25 @@ using namespace std;
 
 namespace Sourcey {
 
-	
-TimerTask::TimerTask(Runner& runner, long timeout, long interval) : 
-	ITask(runner, false, false), 
-	_timeout(timeout), 
-	_interval(interval),
-	_scheduleAt(timeout)
-{
-	Log("trace") << "[TimerTask: " << this << "] Creating" << endl;
-}
 
-
-/*
 TimerTask::TimerTask(long timeout, long interval) : 
-	ITask(Runner::getDefault(), false, false), 
+	Task(true),
 	_timeout(timeout), 
 	_interval(interval),
 	_scheduleAt(timeout)
 {
 	Log("trace") << "[TimerTask: " << this << "] Creating" << endl;
 }
-*/
+
+
+TimerTask::TimerTask(Runner& runner, long timeout, long interval) : 
+	Task(runner, true, false), 
+	_timeout(timeout), 
+	_interval(interval),
+	_scheduleAt(timeout)
+{
+	Log("trace") << "[TimerTask: " << this << "] Creating" << endl;
+}
 
 
 TimerTask::~TimerTask()
@@ -74,7 +72,7 @@ bool TimerTask::start()
 		_scheduleAt.setDelay(_timeout);
 		_scheduleAt.reset();
 	}
-	return ITask::start();	
+	return Task::start();	
 }	
 
 
@@ -85,14 +83,21 @@ bool TimerTask::stop()
 		Poco::FastMutex::ScopedLock lock(_mutex);	
 		_scheduleAt.stop();
 	}
-	return ITask::stop();
+	return Task::stop();
 }
 
 
-void TimerTask::run()
+bool TimerTask::destroy()			
+{ 
+	Log("trace") << "[TimerTask: " << this << "] Destroying" << endl;
+	return Task::destroy();
+}
+
+
+bool TimerTask::canRun()
 { 
 	bool doTimeout = false;
-	bool doDestroy = false;
+	bool doStop = false;
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);	
 		if (_scheduleAt.expired()) {
@@ -101,20 +106,43 @@ void TimerTask::run()
 				_scheduleAt.setDelay(_interval);
 				_scheduleAt.reset();
 			}
-			else doDestroy = true;
+			else doStop = true;
 		}
+		
+		Log("trace") << "[TimerTask: " << this << "] Can Run: " 
+			<< doTimeout << ": " 
+			<< doStop << ": " 
+			<< _scheduleAt.remaining() << endl;
 	}
-	if (doTimeout)
-		onTimeout();
-	if (doDestroy)
-		destroy();
+
+
+	if (doStop) {
+		Task::stop();
+		return false;
+	}
+	return doTimeout;
 }
 
-	
-long TimerTask::interval() const
+
+void TimerTask::run()
+{ 
+	Log("trace") << "[TimerTask: " << this << "] Running" << endl;
+	Timeout.dispatch(this);
+	onTimeout();
+}
+
+
+void TimerTask::onTimeout()
+{ 
+	Log("trace") << "[TimerTask: " << this << "] Timeout" << endl;
+	// override me...
+}
+
+
+void TimerTask::setTimeout(long timeout) 
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);	
-	return _interval;
+	_timeout = timeout;
 }
 
 
@@ -123,12 +151,56 @@ void TimerTask::setInterval(long interval)
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	_interval = interval;
 }
+	
 
+long TimerTask::timeout() const
+{
+	Poco::FastMutex::ScopedLock lock(_mutex);	
+	return _timeout;
+}
+	
 
-void TimerTask::onTimeout()
-{ 
-	Timeout.dispatch(this);
+long TimerTask::interval() const
+{
+	Poco::FastMutex::ScopedLock lock(_mutex);	
+	return _interval;
 }
 
 
 } // namespace Sourcey
+
+
+	/*
+	bool doTimeout = false;
+	bool doStop = false;
+	{
+		Poco::FastMutex::ScopedLock lock(_mutex);	
+		if (_scheduleAt.expired()) {
+			doTimeout = true;
+			if (_interval > 0) {
+				_scheduleAt.setDelay(_interval);
+				_scheduleAt.reset();
+			}
+			else doStop = true;
+		}
+	}
+	if (doTimeout)
+		onTimeout();
+	if (doStop)
+		Task::destroy();
+		*/
+
+
+
+ //Runner::getDefault(), 
+	
+/*
+TimerTask::TimerTask(Runner& runner, long timeout, long interval) : 
+	Task(runner, true), 
+	_timeout(timeout), 
+	_interval(interval),
+	_scheduleAt(timeout)
+{
+	Log("trace") << "[TimerTask: " << this << "] Creating" << endl;
+}
+*/

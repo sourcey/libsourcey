@@ -46,145 +46,6 @@ namespace HTTP {
 
 // ---------------------------------------------------------------------
 //
-// Authenticator
-//
-// ---------------------------------------------------------------------
-Authenticator::Authenticator()
-{
-}
-
-
-Authenticator::~Authenticator() 
-{
-}
-
-
-// ---------------------------------------------------------------------
-//
-// Anionu HTTP Authenticator
-//
-// ---------------------------------------------------------------------
-AnionuAuthenticator::AnionuAuthenticator(const string& realm, const string& version)
-{
-	_realm = realm;
-	_opaque = CryptoProvider::hash("md5", _realm);
-	_version = version;
-}
-
-
-AnionuAuthenticator::~AnionuAuthenticator() 
-{
-}
-
-
-// (access-key:Client-Username:http-method:content-type:date))
-bool AnionuAuthenticator::validateRequest(UserManager* authenticator, const string& request) 
-{
-	Log("debug") << "[AnionuAuthenticator] Validating Request: " + request << endl;
-		
-	string httpMethod = request.substr(0, request.find_first_of(' '));
-	string requestUri = Util::parseURI(request);	
-	string authorization = Util::parseHeader(request, "Authorization");
-	string clientUsername = Util::parseHeader(request, "Client-Username");
-	string contentType = Util::parseHeader(request, "Content-Type");
-	string date = Util::parseHeader(request, "Date");
-
-	/*
-	Log("debug") << "Anionu Validating Request:"
-		<< "\n\tHTTP Method: " << httpMethod
-		<< "\n\tURI: " << requestUri
-		<< "\n\tAuthorization: " << authorization
-		<< "\n\tClient-Username: " << clientUsername
-		<< "\n\tContent-Type: " << contentType
-		<< "\n\tDate: " << date
-		<< endl;
-		*/
-
-	if (!httpMethod.size() || !requestUri.size() || !authorization.size())
-		return false;
-	
-	replaceInPlace(authorization, "Anionu ", "");
-	StringList tokens = Util::split(authorization,":");
-	if (tokens.size() != 2)
-		return false;
-
-	string username = tokens[0];
-	string signature = tokens[1];
-	if (!username.size() || !signature.size())
-		return false;
-
-	// Check the user exists on the system and retrieve their Password
-	const IUser* user = authenticator->get(username);
-	if (!user) 
-		return false;
-
-	string ourSignature = generateSignature(user->password(), httpMethod, requestUri, contentType, date);
-
-	// Check equality
-	return ourSignature == signature;
-}
-
-
-// Anionu API authentication header is computed as follows:
-// Authorization: Anionu username:Base64(SHA256(access-key:http-method:request-uri:content-type:date))
-string AnionuAuthenticator::generateSignature(const string& password, const string& httpMethod, 
-											  const string& requestUri, const string& contentType, 
-											  const string& date)
-{
-
-	ostringstream ostr;
-	Base64Encoder encoder(ostr);
-	encoder << CryptoProvider::hash("sha1", 
-		password +
-		httpMethod +
-		requestUri +
-		contentType +
-		date
-	);
-	encoder.close();
-	
-	/*
-	Log("debug") << "Anionu Generating Signature:"
-		<< "\n\tPassword: " << password
-		<< "\n\tMethod: " << httpMethod
-		<< "\n\tURI: " << requestUri
-		<< "\n\tContent-Type: " << contentType
-		<< "\n\tDate: " << date
-		<< endl;
-		*/
-	return ostr.str();
-}
-
-
-// Anionu API authentication header is computed as follows:
-// Anionu username:Base64(SHA256(access-key:Client-Username:http-method:request-uri:content-type:date))
-string AnionuAuthenticator::generateAuthHeader(const std::string& username, const string& password, /*const string& clientUsername,*/ const string& httpMethod, 
-												 const string& requestUri, const string& contentType, const string& date)
-{	
-	return format(
-		"Anionu %s:%s", 
-		username, 
-		generateSignature(password, /*clientUsername,*/ httpMethod, requestUri, contentType, date)
-	);
-}
-
-
-string AnionuAuthenticator::prepare401Header(const string& extra) 
-{
-	return format(
-		"%s 401 Unauthorized\r\n"
-		"%s"
-		"WWW-Authenticate: Anionu realm=\"%s\"\r\n"
-		"\r\n",
-		_version,
-		extra, 
-		_realm
-	);
-}
-
-
-// ---------------------------------------------------------------------
-//
 // Digest Authenticator
 //
 // ---------------------------------------------------------------------
@@ -226,17 +87,13 @@ DigestAuthenticator::DigestAuthenticator(const string& realm, const string& vers
 	_usingRFC2617(usingRFC2617),
 	_opaque(CryptoProvider::hash("md5", realm))
 {
-	Log("debug") << "[DigestAuthenticator] Creating" << endl;
-	//_usingRFC2617 = usingRFC2617;
-	//_version = version;
-	//_realm = Config::getAppId();
-	//_opaque = CryptoProvider::hash("md5", _realm);
+	Log("trace") << "[DigestAuthenticator] Creating" << endl;
 }
 
 
 DigestAuthenticator::~DigestAuthenticator() 
 {
-	Log("debug") << "[DigestAuthenticator] Destroying" << endl;
+	Log("trace") << "[DigestAuthenticator] Destroying" << endl;
 }
 
 
@@ -255,14 +112,14 @@ string DigestAuthenticator::parseHeaderSegment(const string& key)
 		value = _lastRequest.substr(start, end-start);
 		replaceInPlace(value,"\"", "");
 	}
-	//Log("debug") << format("Parse: Key: %s, Value: %s, start: %d, end: %d", key, value, start, end));
+	//Log("trace") << format("Parse: Key: %s, Value: %s, start: %d, end: %d", key, value, start, end));
 	return value;
 }
 
 
 bool DigestAuthenticator::validateRequest(UserManager* authenticator, const string& request) 
 {
-	Log("debug") << "[DigestAuthenticator] Validating Request: " + request << endl;
+	Log("trace") << "[DigestAuthenticator] Validating Request: " + request << endl;
 
 	_lastRequest = request;
 	string hash;
@@ -276,7 +133,7 @@ bool DigestAuthenticator::validateRequest(UserManager* authenticator, const stri
 	string response = parseHeaderSegment("response");
 
 	/*
-	Log("debug") << "Digest Authenticator:"
+	Log("trace") << "Digest Authenticator:"
 		<< "\n\tHTTP Method: " << httpMethod
 		<< "\n\tUsername: " << username
 		<< "\n\tURI: " << uri

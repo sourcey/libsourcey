@@ -29,7 +29,7 @@
 #define SOURCEY_TURN_Types_H
 
 
-#include "Sourcey/Net/ISocket.h"
+#include "Sourcey/Net/IPacketSocket.h"
 #include "Sourcey/Net/Address.h"
 #include "Sourcey/STUN/Message.h"
 
@@ -49,11 +49,11 @@ enum AuthenticationState
 
 struct Request: public STUN::Message
 {
-	Net::ISocket& socket;
+	Net::IPacketSocket& socket;
 	Net::Address localAddress;
 	Net::Address remoteAddr;
 
-	Request(Net::ISocket& socket, 
+	Request(Net::IPacketSocket& socket, 
 			const STUN::Message& message, 
 			const Net::Address& localAddress = Net::Address(), 
 			const Net::Address& remoteAddr = Net::Address()) :
@@ -61,6 +61,12 @@ struct Request: public STUN::Message
 		socket(socket), 
 		localAddress(localAddress), 
 		remoteAddr(remoteAddr) {}
+
+	Request(const Request& r) :
+		STUN::Message(r), 
+		socket(r.socket), 
+		localAddress(r.localAddress), 
+		remoteAddr(r.remoteAddr) {}
 };
 
 

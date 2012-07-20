@@ -198,26 +198,61 @@ bool AudioEncoderContext::encode(UInt8* data, int size, AVPacket& opacket)
 }
 
 
+#define INBUF_SIZE 4096
+#define AUDIO_INBUF_SIZE 320
+#define AUDIO_REFILL_THRESH 4096
+
+
 bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 {
 	// Log("trace") << "[AudioEncoderContext:" << this << "] Encoding Audio Packet" << endl;
 
 	assert(ipacket.stream_index == stream->index);
+	assert(frame);
+	assert(buffer);
+	assert(bufferSize);	
 	
+	int outSize = codec->frame_size * 2 * codec->channels;
+	int size = avcodec_encode_audio(codec, this->buffer, outSize, (short*)ipacket.data);
+	if (size < 0) {		
+		error = "Fatal Encoder Error";
+		Log("error") << "[AudioEncoderContext:" << this << "] " << error << endl;
+		throw Exception(error);
+		//return false;
+	}
+	
+	av_init_packet(&opacket);
+	opacket.data = this->buffer;	
+	opacket.size = size;
+
+	return true;
+	/*
+	*/
+
+	/*
+	//
+	// New API avcodec_encode_audio2 implementation
+	// Receiving "extended_data is not set." error message 
+	// and some codecs failing to encode. Investigate further
+	// before using the following code.
+	//
 	frame->data[0] = ipacket.data;
 		
-    opacket.data = this->buffer;
-    opacket.size = this->bufferSize;
+    av_init_packet(&opacket);
+	opacket.stream_index = stream->index;	
+    opacket.data = buffer;
+    opacket.size = bufferSize;
 	
 	int frameEncoded = 0;
-	int len = avcodec_encode_audio2(codec, &opacket, frame, &frameEncoded);
-    if (len < 0) {
-		error = "Encoder error";
-		Log("error") << "[AudioEncoderContext:" << this << "] Encoding Audio: Error: " << error << endl;
-		return -1;
+    if (avcodec_encode_audio2(codec, &opacket, frame, &frameEncoded) < 0) {
+		error = "Fatal Encoder Error";
+		Log("error") << "[AudioEncoderContext:" << this << "] " << error << endl;
+		throw Exception(error);
+		//return false;
     }
 
-	return frameEncoded;
+	return frameEncoded > 0;
+	*/
 }
 
 
@@ -365,6 +400,24 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 
 	
 	
+
+
+/*
+	//avcodec_get_frame_defaults(frame);
+	
+    //if (avcodec_fill_audio_frame(frame, codec->channels, codec->sample_fmt, ipacket.data, AUDIO_INBUF_SIZE, 1) < 0) { //AUDIO_INBUF_SIZE
+    if (avcodec_fill_audio_frame(frame, codec->channels, codec->sample_fmt, ipacket.data, ipacket.size, 1) < 0) { //AUDIO_INBUF_SIZE
+        //av_log(NULL, AV_LOG_FATAL, "Audio encoding failed\n");
+        //exit(1);
+
+		error = "Unable To Fill Frame";
+		Log("error") << "[AudioEncoderContext:" << this << "] " << error << endl;
+		throw Exception(error);
+    }
+	
+    //frame->nb_samples  = AUDIO_INBUF_SIZE / (codec->channels * av_get_bytes_per_sample(codec->sample_fmt));
+    //frame->nb_samples  = ipacket.size / (codec->channels * av_get_bytes_per_sample(codec->sample_fmt));
+	*/
 		
 	// Set the output frame size.
 	//frameSize = codec->frame_size * 2 * codec->channels;

@@ -48,7 +48,8 @@ Client::Client(IClientObserver& observer, Net::Reactor& reactor, Runner& runner,
 	_options(options),
 	_reactor(reactor),
 	_runner(runner),
-	_socket(NULL)
+	_socket(NULL),
+	_timer(NULL)
 {
 }
 
@@ -74,14 +75,7 @@ void Client::initiate()
 	_socket->attach(packetDelegate<Client, STUN::Message>(this, &Client::onReceiveSTUNMessage, 0));
 	_socket->Connected += delegate(this, &Client::onClientConnect);
 	_socket->Closed += delegate(this, &Client::onClientDisconnect);
-	/*
-	Stateful<Net::ClientState>* stateful = dynamic_cast<Stateful<Net::ClientState>*>(_socket);
-	if (!stateful)
-		throw Exception("The TURN socket must be stateful.");
-	stateful->StateChange += delegate(this, &Client::onConnectStateChange);
-	*/
-
-	_socket->connect(_options.serverAddr);	
+	_socket->connect(_options.serverAddr);
 }
 
 
@@ -89,9 +83,15 @@ void Client::terminate()
 {
 	Log("trace") << "[TURN::Client:" << this << "] Terminating" << endl;	
 
-	Timer::getDefault().stop(TimerCallback<Client>(this, &Client::onTimer));	
+	//Timer::getDefault().stop(TimerCallback<Client>(this, &Client::onTimer));	
 	{
 		FastMutex::ScopedLock lock(_mutex); 
+
+		if (_timer) {
+			_runner.destroy(_timer);
+			_timer = NULL;
+		}
+			//_timer->destroy();	
 	
 		//Util::ClearVector(_transactions);
 		for (vector<STUN::Transaction*>::iterator it = _transactions.begin(); it != _transactions.end(); ++it) {
@@ -106,14 +106,6 @@ void Client::terminate()
 			_socket->detach(packetDelegate<Client, STUN::Message>(this, &Client::onReceiveSTUNMessage, 0));
 			_socket->Connected -= delegate(this, &Client::onClientConnect);
 			_socket->Closed -= delegate(this, &Client::onClientDisconnect);
-		
-			/*
-			Stateful<Net::ClientState>* stateful = dynamic_cast<Stateful<Net::ClientState>*>(_socket);
-			if (!stateful)
-				throw Exception("The TURN socket must be stateful.");
-			stateful->StateChange -= delegate(this, &Client::onConnectStateChange);
-			*/
-
 			_socket->close();
 			delete _socket;
 			_socket = NULL;
@@ -129,7 +121,12 @@ void Client::terminate()
 void Client::onClientConnect(void* sender)
 {
 	Log("trace") << "[TURNClient:" << this << "] Client Connected" << endl;	
-	Timer::getDefault().start(TimerCallback<Client>(this, &Client::onTimer, _options.timerInterval, _options.timerInterval));
+	//Timer::getDefault().start(TimerCallback<Client>(this, &Client::onTimer, _options.timerInterval, _options.timerInterval));
+	assert(!_timer);
+	_timer = new TimerTask(_options.timerInterval, _options.timerInterval);
+	_timer->Timeout += delegate(this, &Client::onTimer);
+	runner().start(_timer);
+	//_timer->start();
 	sendAllocate();
 }
 
@@ -142,18 +139,18 @@ void Client::onClientDisconnect(void* sender)
 
 
 /*
-void Client::onConnectStateChange(void* sender, Net::ClientState& state, const Net::ClientState&)
+void Client::onConnectStateChange(void* sender, Net::SocketState& state, const Net::SocketState&)
 {
 	Log("trace") << "[TURNClient:" << this << "] Connection State Changed: " << state.toString() << endl;	
 	
 	switch (state.id()) {
-	case Net::ClientState::Connected:
+	case Net::SocketState::Connected:
 		Timer::getDefault().start(TimerCallback<Client>(this, &Client::onTimer, _options.timerInterval, _options.timerInterval));
 		sendAllocate();
 		break;
 		
-	case Net::ClientState::Disconnected: 
-	case Net::ClientState::Error:
+	case Net::SocketState::Disconnected: 
+	case Net::SocketState::Error:
 		terminate();
 		break;
 	}
@@ -292,7 +289,7 @@ bool Client::sendAuthenticatedTransaction(STUN::Transaction* transaction)
 }
 
 
-STUN::Transaction* Client::createTransaction(Net::ISocket* socket)
+STUN::Transaction* Client::createTransaction(Net::IPacketSocket* socket)
 {
 	FastMutex::ScopedLock lock(_mutex); 
 	
@@ -965,7 +962,8 @@ void Client::onTransactionStateChange(void* sender, TransactionState& state, con
 };
 
 
-void Client::onTimer(TimerCallback<Client>&) 
+//void Client::onTimer(TimerCallback<Client>&) 
+void Client::onTimer(void*)
 {	
 	FastMutex::ScopedLock lock(_mutex); 
 
@@ -984,9 +982,9 @@ void Client::onStateChange(ClientState& state, const ClientState& oldState)
 }
 		
 
-Net::ISocket* Client::createSocket()
+Net::IPacketSocket* Client::createSocket()
 {
-	return new Net::UDPSocket(_reactor, _runner);
+	return new Net::UDPPacketSocket(_reactor, _runner);
 }
 
 
@@ -1002,7 +1000,7 @@ bool Client::isTerminated() const
 }
 
 	
-Net::ISocket& Client::socket()
+Net::IPacketSocket& Client::socket()
 { 
 	FastMutex::ScopedLock lock(_mutex);
 	return *_socket; 

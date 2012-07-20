@@ -72,7 +72,7 @@ struct Codec
 		Vorbis		= 86021,
 		FLAC		= 86028,
 		NellyMoser	= 86050,
-		Speex		= 86054
+		Speex		= 86052
 	};
 
 	//

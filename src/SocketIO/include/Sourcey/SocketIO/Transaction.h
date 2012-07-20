@@ -29,7 +29,7 @@
 #define SOURCEY_SocketIO_Transaction_H
 
 
-#include "Sourcey/ITransaction.h"
+#include "Sourcey/PacketTransaction.h"
 #include "Sourcey/SocketIO/Packet.h"
 
 
@@ -37,13 +37,15 @@ namespace Sourcey {
 namespace SocketIO {
 
 
-class ISocket;
+class Client;
 
 
-struct Transaction: public ITransaction<SocketIO::Packet>
+struct Transaction: public PacketTransaction<SocketIO::Packet>
 {
-	Transaction(Runner& runner, SocketIO::ISocket& socket, int maxAttempts = 1, long timeout = 10000);
-	Transaction(Runner& runner, SocketIO::ISocket& socket, const SocketIO::Packet& request, int maxAttempts = 1, long timeout = 10000);
+	Transaction(Runner& runner, SocketIO::Client& client, int retries = 1, long timeout = 10000);
+	Transaction(Runner& runner, SocketIO::Client& client, const SocketIO::Packet& request, int retries = 1, long timeout = 10000);
+	Transaction(SocketIO::Client& client, int retries = 1, long timeout = 10000);
+	Transaction(SocketIO::Client& client, const SocketIO::Packet& request, int retries = 1, long timeout = 10000);
 	virtual ~Transaction();
 	
 	virtual bool send();
@@ -52,7 +54,7 @@ struct Transaction: public ITransaction<SocketIO::Packet>
 	virtual void onPotentialResponse(void*, Packet& packet);
 	virtual void onComplete();
 
-	SocketIO::ISocket& socket;
+	SocketIO::Client& client;
 };
 
 

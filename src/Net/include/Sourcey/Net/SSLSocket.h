@@ -32,19 +32,32 @@
 #include "Sourcey/Base.h"
 #include "Sourcey/Net/Types.h"
 #include "Sourcey/Net/Reactor.h"
-#include "Sourcey/Net/SocketBase.h"
-//#include "Sourcey/Net/StatefulSocket.h"
-//#include "Sourcey/Net/WebSocket.h"
+#include "Sourcey/Net/PacketSocketBase.h"
+
+#include "Poco/Net/SecureStreamSocket.h"
 
 
 namespace Sourcey {
 namespace Net {
 
 
-typedef SocketBase<SSLContext>                 SSLSocket;
+typedef SocketBase<Poco::Net::SecureStreamSocket, SSLTCP>        SSLSocket;
+typedef PacketSocketBase<Poco::Net::SecureStreamSocket, SSLTCP>  SSLPacketSocket;
+
+
+} } // namespace Sourcey::Net
+
+
+#endif // SOURCEY_NET_SSLSocket_H
+
+
+
+
 
 
 	/*
+//#include "Sourcey/Net/StatefulSocket.h"
+//#include "Sourcey/Net/WebSocket.h"
 */
 
 
@@ -120,9 +133,3 @@ typedef SocketBase<SSLContext>                 SSLSocket;
 //	bool					_connected;
 //	bool					_deleteOnClose;
 //};
-
-
-} } // namespace Sourcey::Net
-
-
-#endif // SOURCEY_NET_SSLSocket_H

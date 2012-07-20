@@ -29,7 +29,7 @@
 #define SOURCEY_Runner_H
 
 
-#include "Sourcey/ITask.h"
+#include "Sourcey/Task.h"
 #include "Sourcey/Signal.h"
 #include "Poco/Thread.h"
 #include "Poco/Event.h"
@@ -38,6 +38,34 @@
 
 
 namespace Sourcey {
+
+
+	/*
+struct TaskEntry
+{
+	bool repeat;
+	bool running;
+	bool destroy;
+	Task* task;
+
+	TaskEntry(Task* task = NULL, bool repeat = true, bool running = false) : 
+		task(task), repeat(repeat), running(running), destroy(false) {}
+
+	virtual bool canRun() { return running; }
+};
+
+
+struct ScheduledTaskEntry: public TaskEntry
+{
+	Poco::Timestamp scheduleAt;	
+	//Poco::TimeDiff interval;
+
+	ScheduledTaskEntry() {}
+		
+	//: TaskEntry() : task(NULL), repeat(true), running(false) {}
+	//long timeout;
+};
+*/
 
 
 class Runner: public Poco::Runnable
@@ -51,32 +79,51 @@ public:
 	Runner();
 	virtual ~Runner();
 	
-	virtual bool start(ITask* task);
-	virtual bool stop(ITask* task);
-	virtual void abort(ITask* task);
+	virtual bool add(Task* task);
+		/// Adds a task to the runner.
 
-	virtual bool running(ITask* task) const;
-		// Returns weather or not a task is currently active.
+	virtual bool start(Task* task);
+		/// Starts a task, adding it if it doesn't exist.
 
-	virtual void run();
-		// Called by the thread to run internal tasks.
+	virtual bool stop(Task* task);
+		/// Stops a task.
+		/// The task reference will be managed the Runner
+		/// until the task is destroyed.
 
-	//static Runner& getDefault();
-		// Returns the default Runner singleton, although
-		// Runner instances may be initialized individually. 
+	virtual bool destroy(Task* task);
+		/// Queues a task for destruction.
+	
+	virtual bool exists(Task* task) const;
+		/// Returns weather or not a task exists.
+
+	//virtual bool running(Task* task) const;
+		/// Returns weather or not a task is started.
+	
+	//virtual void wakeUp();
+		/// Tells the runner to wake up and loop internal tasks.
+
+	static Runner& getDefault();
+		/// Returns the default Runner singleton, although
+		/// Runner instances may be initialized individually.
+		/// The default runner should be kept for short running
+		/// tasks such as timers in order to maintain performance.
 	
 	template <class T>
 	void deleteLater(void* ptr)
-		// Schedules a pointer for asynchronous deletion.
+		/// Schedules a pointer for asynchronous deletion.
 	{
 		(void)new GarbageCollectionTask<T>(*this, ptr);
 	}
 	
 	NullSignal Idle;
 	NullSignal Shutdown;
+		
+protected:
+	virtual void run();
+		/// Called by the thread to run internal tasks.
 
 protected:
-	typedef std::deque<ITask*> TaskList;
+	typedef std::deque<Task*> TaskList;
 
 	Poco::Thread	_thread;
 	TaskList		_tasks;
@@ -90,3 +137,13 @@ protected:
 
 
 #endif // SOURCEY_Runner_H
+
+
+	
+	 //, bool repeat = true
+	//virtual bool schedule(Task* task, const Poco::DateTime& runAt);
+	//virtual bool scheduleRepeated(Task* task, const Poco::Timespan& interval);
+
+	 //Task*
+	//virtual TaskEntry& get(Task* task) const;
+		/// Returns the TaskEntry for a task.

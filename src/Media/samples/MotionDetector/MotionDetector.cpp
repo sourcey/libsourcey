@@ -81,7 +81,7 @@ int main(int argc, char** argv)
 	MotionDetectorStream test2;
 	test2.start();
 	*/
-	system("pause");
+	Util::pause();
 
 	return 0;
 }

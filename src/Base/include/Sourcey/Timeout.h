@@ -25,8 +25,8 @@
 //
 
 
-#ifndef SOURCEY_TIME_H
-#define SOURCEY_TIME_H
+#ifndef SOURCEY_Timeout_H
+#define SOURCEY_Timeout_H
 
 
 #include "Sourcey/Base.h"

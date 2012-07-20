@@ -32,7 +32,7 @@
 #include "Sourcey/Base.h"
 #include "Sourcey/Net/Types.h"
 #include "Sourcey/Net/Reactor.h"
-#include "Sourcey/Net/SocketBase.h"
+#include "Sourcey/Net/PacketSocketBase.h"
 //#include "Sourcey/Net/StatefulSocket.h"
 //#include "Sourcey/Net/WebSocket.h"
 
@@ -41,9 +41,10 @@
 
 namespace Sourcey {
 namespace Net {
-	
 
-typedef SocketBase<TCPContext>  TCPSocket;
+	
+typedef SocketBase<Poco::Net::StreamSocket, TCP>        TCPSocket;
+typedef PacketSocketBase<Poco::Net::StreamSocket, TCP>  TCPPacketSocket;
 
 
 

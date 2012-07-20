@@ -63,7 +63,7 @@ public:
 	virtual const char* className() const { return "UDPAllocation"; };
 
 private:
-	Net::UDPSocket _relaySocket;
+	Net::UDPPacketSocket _relaySocket;
 };
 
 

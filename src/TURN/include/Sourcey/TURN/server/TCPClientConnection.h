@@ -44,7 +44,7 @@ class TCPAllocation;
 class TCPPeerConnection;
 
 	
-class TCPClientConnection: public Net::TCPSocket
+class TCPClientConnection: public Net::TCPPacketSocket
 {
 public:
 	TCPClientConnection(TCPAllocation& allocation, const Poco::Net::StreamSocket& socket, TCPPeerConnection* peer, Net::Reactor& reactor/* = Net::Reactor::getDefault()*/);

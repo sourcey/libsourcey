@@ -135,7 +135,7 @@ void PackageManager::queryRemotePackages()
 	Log("debug") << "[PackageManager] Querying Packages: " << _options.endpoint << _options.indexURI << endl;
 
 	if (!_tasks.empty())
-		throw Exception("Please cancel all package tasks before re-loading packages");	
+		throw Exception("Please cancel all package tasks before re-loading packages.");
 
 	try {
 
@@ -179,7 +179,7 @@ void PackageManager::queryRemotePackages()
 		Log("debug") << "[PackageManager] Querying Packages: Success" << endl;
 	}
 	catch (Exception& exc) {
-		Log("error") << "[PackageManager] Package Query Error: " << exc.message() << endl;
+		Log("error") << "[PackageManager] Package Query Error: " << exc.displayText() << endl;
 		exc.rethrow();
 	}
 }
@@ -226,7 +226,7 @@ void PackageManager::loadLocalPackages(const string& dir)
 				localPackages().add(package->name(), package);
 			}
 			catch (Exception& exc) {
-				Log("error") << "[PackageManager] Load Error: " << exc.message() << endl;
+				Log("error") << "[PackageManager] Load Error: " << exc.displayText() << endl;
 				//if (whiny)
 				//	exc.rethrow();
 			}
@@ -268,7 +268,7 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 		res = true;
 	}
 	catch (Exception& exc) {
-		Log("error") << "[PackageManager] Save Error: " << exc.message() << endl;
+		Log("error") << "[PackageManager] Save Error: " << exc.displayText() << endl;
 		if (whiny)
 			exc.rethrow();
 	}	
@@ -334,7 +334,7 @@ PackageInstallTask* PackageManager::installPackage(const string& name, const Pac
 	}
 	catch (Exception& exc) 
 	{
-		Log("error") << "[PackageManager] Error: " << exc.message() << endl;
+		Log("error") << "[PackageManager] Error: " << exc.displayText() << endl;
 		if (whiny)
 			exc.rethrow();
 	}
@@ -463,7 +463,7 @@ bool PackageManager::uninstallPackage(const string& name, bool whiny)
 		}
 		catch (Exception& exc) 
 		{
-			Log("error") << "[PackageManager] Uninstall Error: " << exc.message() << endl;
+			Log("error") << "[PackageManager] Uninstall Error: " << exc.displayText() << endl;
 		}
 	
 		// Delete package manifest file
@@ -479,7 +479,7 @@ bool PackageManager::uninstallPackage(const string& name, bool whiny)
 	}
 	catch (Exception& exc) 
 	{
-		Log("error") << "[PackageManager] Uninstall Error: " << exc.message() << endl;
+		Log("error") << "[PackageManager] Uninstall Error: " << exc.displayText() << endl;
 		if (whiny)
 			exc.rethrow();
 		else 
@@ -570,7 +570,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 			}
 		}
 		catch (Exception& exc) {
-			Log("error") << "[PackageManager] Finalize Error: " << exc.message() << endl;
+			Log("error") << "[PackageManager] Finalize Error: " << exc.displayText() << endl;
 			res = false;
 			if (whiny)
 				exc.rethrow();
@@ -708,7 +708,7 @@ bool PackageManager::clearCacheFile(const std::string& fileName, bool whiny)
 	}
 	catch (Exception& exc) {
 		Log("error") << "[PackageManager] Clear Cache Error: " 
-			<< fileName << ": " << exc.message() << endl;
+			<< fileName << ": " << exc.displayText() << endl;
 		if (whiny)
 			exc.rethrow();
 	}
@@ -897,7 +897,7 @@ bool PackageManager::installPackage(const string& name, PackageInstallMonitor* m
 	}
 	catch (Exception& exc) 
 	{
-		Log("error") << "[PackageManager] Error: " << exc.message() << endl;
+		Log("error") << "[PackageManager] Error: " << exc.displayText() << endl;
 		if (whiny)
 			exc.rethrow();
 		else 
@@ -1096,7 +1096,7 @@ bool PackageManager::updatePackages(const StringList& names, PackageInstallMonit
 				// must be called from an external process before the
 				// installation can be completed.
 				errors = true;
-				Log("error") << "[PackageInstallTask] Finalizing Error: " << exc.message() << endl;
+				Log("error") << "[PackageInstallTask] Finalizing Error: " << exc.displayText() << endl;
 			}
 		}
 
@@ -1176,7 +1176,7 @@ bool PackageManager::isLatestVersion(const string& name)
 	}
 	catch (Exception& exc) 
 	{
-		Log("error") << "[PackageManager] Error: " << exc.message() << endl;
+		Log("error") << "[PackageManager] Error: " << exc.displayText() << endl;
 		if (whiny)
 			exc.rethrow();
 		else 

@@ -42,7 +42,7 @@ namespace Sourcey {
 namespace TURN {
 	
 
-typedef BasicManager<Net::Address, Net::TCPStatefulSocket>	ConnectionManager;
+typedef BasicManager<Net::Address, Net::TCPStatefulPacketSocket>	ConnectionManager;
 typedef ConnectionManager::Map								ConnectionManagerMap;
 
 
@@ -51,10 +51,10 @@ class TCPClient;
 
 struct ITCPClientObserver: public IClientObserver 
 {
-	virtual void onClientConnectionCreated(TCPClient& client, Net::TCPStatefulSocket* socket, const Net::Address& peerAddress) {};
-	virtual void onClientConnectionClosed(TCPClient& client, Net::TCPStatefulSocket* socket, const Net::Address& peerAddress) {};
-	virtual void onClientConnectionState(TCPClient& client, Net::TCPStatefulSocket* socket,
-		Net::ClientState& state, const Net::ClientState& oldState) {};
+	virtual void onClientConnectionCreated(TCPClient& client, Net::TCPStatefulPacketSocket* socket, const Net::Address& peerAddress) {};
+	virtual void onClientConnectionClosed(TCPClient& client, Net::TCPStatefulPacketSocket* socket, const Net::Address& peerAddress) {};
+	virtual void onClientConnectionState(TCPClient& client, Net::TCPStatefulPacketSocket* socket,
+		Net::SocketState& state, const Net::SocketState& oldState) {};
 
 	virtual void onClientConnectionBindingFailed(TCPClient& client, const Net::Address& peerAddress) {};
 
@@ -85,13 +85,13 @@ public:
 	virtual void handleConnectionAttemptIndication(const STUN::Message& response);	
 
 	virtual bool createAndBindConnection(UInt32 connectionID, const Net::Address& peerAddress);
-	virtual void onClientConnectionStateChange(void* sender, Net::ClientState& state, const Net::ClientState& oldState);	
+	virtual void onClientConnectionStateChange(void* sender, Net::SocketState& state, const Net::SocketState& oldState);	
 	virtual void onDataPacketReceived(void* sender, DataPacket& packet);
 
-	virtual Net::ISocket* createSocket();
+	virtual Net::IPacketSocket* createSocket();
 	virtual int transportProtocol();
 	
-	bool getPeerAddress(Net::TCPStatefulSocket* conn, Net::Address& peerAddress);
+	bool getPeerAddress(Net::TCPStatefulPacketSocket* conn, Net::Address& peerAddress);
 	ConnectionManager& connections();
 	
 protected:	

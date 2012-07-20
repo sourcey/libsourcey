@@ -200,7 +200,7 @@ void AVFileReader::run()
 	} 
 	catch (Exception& exc) 
 	{
-		_error = exc.message();
+		_error = exc.displayText();
 		Log("error") << "[AVFileReader:" << this << "] Decoder Error: " << _error << endl;
 	}
 	catch (...) 

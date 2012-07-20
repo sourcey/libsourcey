@@ -32,7 +32,11 @@
 #include "Sourcey/Base.h"
 #include "Sourcey/Net/Reactor.h"
 #include "Sourcey/Net/StatefulSocket.h"
+
 #include "Poco/URI.h"
+#include "Poco/Net/SocketStream.h"
+#include "Poco/Net/StreamSocket.h"
+#include "Poco/Net/SecureStreamSocket.h"
 
 
 namespace Sourcey {
@@ -48,13 +52,39 @@ public:
 	virtual void connect() = 0;
 	virtual void close() = 0;
 	
-	virtual int send(const char* data, int size) = 0;
-	virtual int send(const IPacket& packet) = 0;
+	//virtual int send(const char* data, int size) = 0;
+	//virtual int send(const IPacket& packet) = 0;
 	
 	virtual void setProtocol(const std::string& proto) = 0;
 	virtual void setCookie(const std::string& cookie) = 0;
 
 	virtual UInt16 port() = 0;
+
+	NullSignal Online;
+		/// Signals that the socket is validated
+		/// and ready to send data.
+};
+	
+
+// ---------------------------------------------------------------------
+//
+class IPacketWebSocket: public IPacketSocket
+{
+public:
+	virtual ~IPacketWebSocket() {};
+	
+	virtual void connect(const std::string& uri) = 0;
+	virtual void connect() = 0;
+	virtual void close() = 0;
+	
+	virtual void setProtocol(const std::string& proto) = 0;
+	virtual void setCookie(const std::string& cookie) = 0;
+
+	virtual UInt16 port() = 0;
+
+	NullSignal Online;
+		/// Signals that the socket is validated
+		/// and ready to send data.
 };
 
 
@@ -83,14 +113,14 @@ public:
 	}
 
 
-	void connect(const std::string& uri)
+	virtual void connect(const std::string& uri)
 	{
 		_uri = uri;
 		connect();
 	}
 
 
-	void connect()
+	virtual void connect()
 	{
 		_headerState = 0;
 	
@@ -101,10 +131,9 @@ public:
 	}
 
 
-	void close()
+	virtual void close()
 	{
-		Log("trace") << "[WebSocketBase:" << this << "] Closing" << std::endl;
-		Log("debug", this) << "Closing" << endl;
+		Log("debug", this) << "WebSocket Closing" << endl;
 		_headerState = 0;
 	
 		if (isConnected()) {
@@ -145,7 +174,7 @@ public:
 		ss << WS_KEY_THREE;
 		ss.flush();
 		
-		onHandshake();
+		//onHandshake();
 	}
 
 
@@ -159,6 +188,7 @@ public:
 		ss.flush();
 		return size;
 	}
+
 
 	virtual int send(const IPacket& packet)
 	{
@@ -272,6 +302,13 @@ protected:
 		sendHandshake();
 	}
 
+	virtual void onOnline()
+	{
+		Log("debug", this) << "Web Socket Online" << endl;
+
+		Online.dispatch(static_cast<SocketBaseT::InterfaceT*>(this));
+	}
+
 
 protected:	
 	mutable Poco::FastMutex _mutex;
@@ -283,8 +320,10 @@ protected:
 };
 
 
-typedef WebSocketBase< TCPStatefulSocket >  WebSocket;
-typedef WebSocketBase< SSLStatefulSocket >  SSLWebSocket;
+typedef WebSocketBase< Net::SocketBase< ::Poco::Net::StreamSocket, TCP, Net::IWebSocket > >  WebSocket;
+typedef WebSocketBase< Net::SocketBase< ::Poco::Net::SecureStreamSocket, SSLTCP, Net::IWebSocket > >  SSLWebSocket;
+typedef WebSocketBase< Net::PacketSocketBase< ::Poco::Net::StreamSocket, TCP, Net::IPacketWebSocket > >  PacketWebSocket;
+typedef WebSocketBase< Net::PacketSocketBase< ::Poco::Net::SecureStreamSocket, SSLTCP, Net::IPacketWebSocket > >  SSLPacketWebSocket;
 
 
 } } // namespace Sourcey::Net

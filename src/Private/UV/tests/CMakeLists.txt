@@ -1,0 +1,1 @@
+define_sourcey_module_test(UVTests Base Net UV)

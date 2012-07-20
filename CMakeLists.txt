@@ -227,7 +227,7 @@ if (MSVC)
   list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/msvc) 
 endif()
 include_directories("${LibSourcey_INCLUDE_DIRS}")
-link_directories("${LibSourcey_INSTALL_DIR}/lib")
+#link_directories("${LibSourcey_INSTALL_DIR}/lib")
   
 # ----------------------------------------------------------------------------
 # Include the LibSourcey source tree

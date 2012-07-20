@@ -25,25 +25,32 @@
 //
 
 
-#ifndef SOURCEY_NET_UDPSocket_H
-#define SOURCEY_NET_UDPSocket_H
+#ifndef SOURCEY_NET_UDPPacketSocket_H
+#define SOURCEY_NET_UDPPacketSocket_H
+
 
 #include "Sourcey/Base.h"
-#include "Sourcey/PacketQueue.h"
-#include "Sourcey/Net/Types.h"
-#include "Sourcey/Net/ISocket.h"
-#include "Sourcey/Net/Address.h"
-#include "Sourcey/Net/Reactor.h"
+#include "Sourcey/Net/AsyncPacketSocketBase.h"
 
 #include "Poco/Net/DatagramSocket.h"
-#include "Poco/Mutex.h"
 
 
 namespace Sourcey {
 namespace Net {
 
 
-class UDPSocket: public ISocket, public Poco::Net::DatagramSocket
+typedef AsyncPacketSocketBase<Poco::Net::DatagramSocket, UDP> UDPPacketSocket;
+
+
+} } // namespace Sourcey::Net
+
+
+#endif // SOURCEY_NET_UDPPacketSocket_H
+
+
+
+/*
+class UDPPacketSocket: public IPacketSocket, public Poco::Net::DatagramSocket //, public PacketFactory, public PacketDispatcher
 	/// This class provides efficient UDP messaging for
 	/// LibSourcey.
 	///
@@ -52,10 +59,10 @@ class UDPSocket: public ISocket, public Poco::Net::DatagramSocket
 	/// loss. The message queue runs inside the Runner thread. 
 {
 public:
-	UDPSocket(Reactor& reactor/* = Reactor::getDefault()*/, 
-		      Runner& runner/* = Runner::getDefault()*/);
-	UDPSocket(const UDPSocket& r);
-	virtual ~UDPSocket();
+	UDPPacketSocket(Reactor& reactor, 
+		      Runner& runner);
+	UDPPacketSocket(const UDPPacketSocket& r);
+	virtual ~UDPPacketSocket();
 
 	virtual void close();	
 
@@ -84,8 +91,8 @@ public:
 	virtual int send(const IPacket& packet, const Address& peerAddress);
 	virtual void send(IPacket& packet);
 
-	virtual bool isConnected();
-	virtual bool isError();	
+	virtual bool isConnected() const;
+	virtual bool isError() const;	
 	
 	Address address() const;
 	Address peerAddress() const;
@@ -114,9 +121,4 @@ protected:
 	std::string		_error;
 	mutable Poco::FastMutex	_mutex;
 };
-
-
-} } // namespace Sourcey::Net
-
-
-#endif // SOURCEY_NET_UDPSocket_H
+*/

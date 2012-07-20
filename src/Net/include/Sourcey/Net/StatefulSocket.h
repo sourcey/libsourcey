@@ -31,22 +31,25 @@
 
 #include "Sourcey/Base.h"
 #include "Sourcey/Stateful.h"
-#include "Sourcey/Net/SocketBase.h"
+#include "Sourcey/Net/PacketSocketBase.h"
+
+#include "Poco/Net/StreamSocket.h"
+#include "Poco/Net/SecureStreamSocket.h"
 
 
 namespace Sourcey {
 namespace Net {
 
 
-struct ClientState: public StateT 
+struct SocketState: public StateT 
 {
 	enum Type 
 	{
 		None				= 0x00,
 		Connecting			= 0x01,
 		Connected			= 0x04,
-		Handshaking			= 0x08,
-		Online				= 0x10,
+		//Handshaking			= 0x08,
+		//Online				= 0x10,
 		Disconnected		= 0x20
 	};
 
@@ -56,8 +59,8 @@ struct ClientState: public StateT
 		case None:			return "None";
 		case Connecting:	return "Connecting";
 		case Connected:		return "Connected";
-		case Handshaking:	return "Handshaking";
-		case Online:		return "Online";
+		//case Handshaking:	return "Handshaking";
+		//case Online:		return "Online";
 		case Disconnected:	return "Disconnected";
 		}
 		return "undefined"; 
@@ -66,7 +69,7 @@ struct ClientState: public StateT
 
 
 template <class SocketBaseT>
-class StatefulSocketBase: public SocketBaseT, public StatefulSignal<ClientState>
+class StatefulSocketBase: public SocketBaseT, public StatefulSignal<SocketState>
 {
 public:
 	StatefulSocketBase(Reactor& reactor) : 
@@ -88,24 +91,27 @@ public:
 
 	virtual void connect(const Address& peerAddress, int timeout = 0) 
 	{
-		setState(static_cast<SocketBaseT::Interface*>(this), ClientState::Connecting);
+		setState(static_cast<SocketBaseT::InterfaceT*>(this), SocketState::Connecting);
 		SocketBaseT::connect(peerAddress, timeout);
 	}
 
 
 	virtual bool isActive()
 	{
-		return stateEquals(ClientState::Connecting)
-			|| stateEquals(ClientState::Handshaking)
-			|| stateEquals(ClientState::Connected)
-			|| stateEquals(ClientState::Online);
+		return stateEquals(SocketState::Connecting)
+			//|| stateEquals(SocketState::Handshaking)
+			|| stateEquals(SocketState::Connected)
+			//|| stateEquals(SocketState::Online)
+			;
 	}
 
 
+	/*
 	virtual bool isOnline()
 	{
-		return stateEquals(ClientState::Online);
+		return stateEquals(SocketState::Online);
 	}
+	*/
 	
 
 	virtual const char* className() const { return "StatefulSocketBase"; }
@@ -114,38 +120,42 @@ public:
 protected:
 	virtual void onConnect()
 	{
-		assert(stateEquals(ClientState::Connecting));
+		assert(stateEquals(SocketState::Connecting));
 		SocketBaseT::onConnect(); // must call base before setting state
-		setState(static_cast<SocketBaseT::Interface*>(this), ClientState::Connected);
+		setState(static_cast<SocketBaseT::InterfaceT*>(this), SocketState::Connected);
 	}
 
 
+	/*
 	virtual void onHandshake()
 	{
-		assert(stateEquals(ClientState::Connected));
-		setState(static_cast<SocketBaseT::Interface*>(this), ClientState::Handshaking);
+		assert(stateEquals(SocketState::Connected));
+		setState(static_cast<SocketBaseT::InterfaceT*>(this), SocketState::Handshaking);
 	}
 
 
 	virtual void onOnline()
 	{
-		assert(stateEquals(ClientState::Handshaking)
-			|| stateEquals(ClientState::Connected));
-		setState(static_cast<SocketBaseT::Interface*>(this), ClientState::Online);
+		assert(stateEquals(SocketState::Handshaking)
+			|| stateEquals(SocketState::Connected));
+		setState(static_cast<SocketBaseT::InterfaceT*>(this), SocketState::Online);
 	}
+	*/
 
 
 	virtual void onClose()
 	{
 		Log("trace") << "[StatefulSocketBase:" << this << "] On Close" << std::endl;
-		setState(static_cast<SocketBaseT::Interface*>(this), ClientState::Disconnected, _error);
+		setState(static_cast<SocketBaseT::InterfaceT*>(this), SocketState::Disconnected, _error);
 		SocketBaseT::onClose(); // may result in destructon
 	}
 };
 
 
-typedef StatefulSocketBase< SocketBase<TCPContext> > TCPStatefulSocket;
-typedef StatefulSocketBase< SocketBase<SSLContext> > SSLStatefulSocket;
+typedef StatefulSocketBase< SocketBase<Poco::Net::StreamSocket, TCP> > TCPStatefulSocket;
+typedef StatefulSocketBase< SocketBase<Poco::Net::SecureStreamSocket, SSLTCP> > SSLStatefulSocket;
+typedef StatefulSocketBase< PacketSocketBase<Poco::Net::StreamSocket, TCP> > TCPStatefulPacketSocket;
+typedef StatefulSocketBase< PacketSocketBase<Poco::Net::SecureStreamSocket, SSLTCP> > SSLStatefulPacketSocket;
 
 
 } } // namespace Sourcey::Net

@@ -45,24 +45,24 @@ namespace HTTP {
 
 
 Request::Request() : 
-	Poco::Net::HTTPRequest("GET", HTTPMessage::HTTP_1_1), form(NULL)
+	Poco::Net::HTTPRequest(HTTPMessage::HTTP_1_1), form(NULL)
 {
 }
 
 
-Request::Request(const std::string& version) : 
-	Poco::Net::HTTPRequest("GET", version), form(NULL)
+Request::Request(const string& version) : 
+	Poco::Net::HTTPRequest(version), form(NULL)
 {
 }
 
 
-Request::Request(const std::string& method, const std::string& uri) : 
+Request::Request(const string& method, const string& uri) : 
 	Poco::Net::HTTPRequest(method, uri, HTTPMessage::HTTP_1_1), form(NULL)
 {
 }
 
 
-Request::Request(const std::string& method, const std::string& uri, const std::string& version) : 
+Request::Request(const string& method, const string& uri, const string& version) : 
 	Poco::Net::HTTPRequest(method, uri, version), form(NULL)
 {
 }
@@ -99,7 +99,7 @@ void Request::prepare()
 }
 
 
-void Request::read(std::istream& istr)
+void Request::read(istream& istr)
 {
 	Poco::Net::HTTPRequest::read(istr);
 	Util::parseURIQuery(getURI(), _params);
@@ -112,7 +112,7 @@ const NameValueCollection& Request::params() const
 }
 
 
-bool Request::matches(const std::string& expression) const
+bool Request::matches(const string& expression) const
 {
 	return Util::matchURI(getURI(), expression);
 }

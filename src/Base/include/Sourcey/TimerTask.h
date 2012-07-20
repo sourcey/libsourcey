@@ -30,7 +30,7 @@
 
 
 #include "Sourcey/Base.h"
-#include "Sourcey/ITask.h"
+#include "Sourcey/Task.h"
 #include "Sourcey/Signal.h"
 #include "Sourcey/Timeout.h"
 #include "Poco/Mutex.h"
@@ -44,56 +44,83 @@ namespace Sourcey {
 class Runner;
 	
 
-class TimerTask: public ITask
-	/// This class defines an asynchronous Task whose run() 
-	/// method will be called frequently by the Runner.
+class TimerTask: public Task
+	/// This class defines a TimerTask which is responsible
+	/// for sending callbacks at specified time intervals.
+	///
+	/// TimerTasks with only a timeout value and no repeat
+	/// interval will be stopped after the initial timeout.
+	/// Calling start() again will restart the timer.
+	///
+	/// TimerTasks must be explicitly destroyed using the 
+	/// destroy() method.
 {
 public:	
+	TimerTask(long timeout = 0, long interval = 0);
 	TimerTask(Runner& runner, long timeout = 0, long interval = 0);
-	//TimerTask(long timeout = 0, long interval = 0);
-
-	virtual bool start(); 
+	
+	virtual bool start();
 	virtual bool stop();
-	
-	virtual void onTimeout();
-		/// Performs task processing when the timer fires.
-	
-	//virtual bool again();
-		/// Start the timer, and if it is repeating restart
-		/// it using the repeat value as the timeout.
+	virtual bool destroy();
+
+	virtual void setTimeout(long timeout);
+		/// Sets the initial timeout value. Note that if the
+		/// timer has already been started then setting this
+		/// value will have no effect.
 
 	virtual void setInterval(long interval);
-		/// Set the repeat value. Note that if the repeat
+		/// Sets the repeat value. Note that if the repeat
 		/// value is set from a timer callback it does not
 		/// immediately take effect. If the timer was
 		/// non-repeating before, it will have been stopped.
 		/// If it was repeating, then the old repeat value
 		/// will have been used to schedule the next timeout.
+	
+	virtual long timeout() const;
+		/// Returns the timer timeout value.
 
 	virtual long interval() const;
 		/// Returns the timer interval value.
+	
+	virtual void onTimeout();
+		/// Derived classes can extend this method to 
+		/// implement processing logic when the timer fires.
 	
 	NullSignal Timeout;
 		/// Signals on timeout and interval.
 
 protected:
 	TimerTask& operator=(TimerTask const&) {}
-	virtual ~TimerTask();
+	virtual ~TimerTask();	
+
+	virtual bool canRun();
 	virtual void run();
 	
 	long _timeout;
 	long _interval;
 	Sourcey::Timeout _scheduleAt;
 
-	///Timeout _timeout;
-
 	friend class Runner;
 };
 
-			////* = Runner::getDefault()*/
-		  //bool autoStart = false, 
-		  //bool runOnce = false, 
-		  //const std::string& name = ""
+
+} // namespace Sourcey
+
+
+#endif // SOURCEY_TimerTask_H
+
+
+
+	
+	//virtual bool again();
+		/// Start the timer, and if it is repeating restart
+		/// it using the repeat value as the timeout.
+
+	///Timeout _timeout;
+	////* = Runner::getDefault()*/
+	//bool autoStart = false, 
+	//bool runOnce = false, 
+	//const std::string& name = ""
 		  
 	/*
 	Runner& _runner;	
@@ -124,9 +151,3 @@ protected:
 	///TimerTask(const TimerTask&) {}
 	///virtual ~Task() {}
 	*/
-
-
-} // namespace Sourcey
-
-
-#endif // SOURCEY_TimerTask_H

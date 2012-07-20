@@ -1,7 +1,5 @@
 build/
 bak/
-tests/
-bak/
 depreciated/
 
 libs/*

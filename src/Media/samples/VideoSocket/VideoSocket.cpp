@@ -22,7 +22,7 @@
 //bool stop = false;
 
 #include "Poco/Net/HTTPRequest.h"
-#include "Poco/Net/TCPServer.h"
+#include "Poco/Net/SocketAcceptor.h"
 #include "Poco/Net/TCPServerConnection.h"
 #include "Poco/Net/TCPServerConnectionFactory.h"
 #include "Poco/Net/TCPServerParams.h"
@@ -47,12 +47,14 @@ using namespace Sourcey::Media;
 using namespace Sourcey::Util;
 
 
+/*
 // Detect Memory Leaks
 #ifdef _DEBUG
 #include "MemLeakDetect/MemLeakDetect.h"
 #include "MemLeakDetect/MemLeakDetect.cpp"
 CMemLeakDetect memLeakDetect;
 #endif
+*/
 
 
 namespace Sourcey { 
@@ -254,7 +256,7 @@ public:
 			//
 			if ((request.find("policy-file-request") != string::npos) ||
 				(request.find("crossdomain") != string::npos)) {
-				Log("trace") << "[MediaConnectionFactory] Sending Flash Policy File Request" << endl;
+				Log("trace") << "[MediaConnectionFactory] Sending Flash Crossdomain Policy" << endl;
 				return new FlashPolicyRequestHandler(sock);
 			}
 			
@@ -266,7 +268,10 @@ public:
 				options.oformat = MJPEG;
 			
 			else if ((request.find("flv") != string::npos))
-				options.oformat = FLVNoAudio; //FLVH264NoAudio; //FLVSpeex16000NoVideo; //FLVNoAudio; //FLVSpeex16000NoVideo; //FLVH264AAC; //FLVNellyMoser11025; //FLVAAC; //FLVSpeex16000; //FLVMP3; //NoVideo; //FLVNellyMoser11025; //NoVideo; //FLVMP3; //FLVSpeex16000NoVideo; //FLVSpeex16000; //FLVNoAudio; //
+				options.oformat = FLVSpeex16000NoVideo; //FLVNoAudio; //FLVH264NoAudio; //FLVSpeex16000NoVideo; //FLVNoAudio; //FLVSpeex16000NoVideo; //FLVH264AAC; //FLVNellyMoser11025; //FLVAAC; //FLVSpeex16000; //FLVMP3; //NoVideo; //FLVNellyMoser11025; //NoVideo; //FLVMP3; //FLVSpeex16000NoVideo; //FLVSpeex16000; //FLVNoAudio; //
+			
+			else if ((request.find("mp3") != string::npos))
+				options.oformat = MP344100;			
 			
 			else 
 				throw Exception("No format specified");
@@ -346,7 +351,7 @@ public:
 			//options.ofile = "enctest.mp4";
 			//options.stopAt = time(0) + 3;
 			//AllocateOpenCVInputFormat(videoCapture, options.iformat);	
-			options.oformat = MP4; //FLVSpeex16000; //MP344100; //FLVMP3; //
+			options.oformat = FLVSpeex16000NoVideo; //MP4; //FLVSpeex16000; //MP344100; //FLVMP3; //
 
 			/*
 			options.oformat = Format("FLV", Format::FLV, 
@@ -360,13 +365,18 @@ public:
 			VideoCapture* videoCapture = NULL;
 			AudioCapture* audioCapture = NULL;
 			if (options.oformat.video.enabled) {
+				
+				Log("trace") << "[StreamTest] Opening Video Capture" << endl;	
+
 				videoCapture = MediaFactory::instance()->video.getCapture(0);
 				AllocateOpenCVInputFormat(videoCapture, options.iformat);	
 				assert(options.iformat.video.width);
 				stream.attach(videoCapture, false);
 			}
-			options.oformat.audio.enabled = false;
+			//options.oformat.audio.enabled = false;
 			if (options.oformat.audio.enabled) {
+				Log("trace") << "[StreamTest] Opening Video Capture" << endl;	
+
 				audioCapture = MediaFactory::instance()->audio.getCapture(0, 
 					options.oformat.audio.channels, 
 					options.oformat.audio.sampleRate);
@@ -430,7 +440,7 @@ public:
 			// start the stream
 			stream.start();
 				
-			system("pause");
+			Util::pause();
 			//while (!stop)
 			//{
 			//	Thread::sleep(50);
@@ -497,7 +507,6 @@ int main(int argc, char** argv)
 {
 	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
 	
-	/*
 	Log("trace") << "HTTP Connection:\n"
 		<< "\n\CODEC_ID_MP2: " << CODEC_ID_MP2
 		<< "\n\CODEC_ID_MP3: " << CODEC_ID_MP3
@@ -516,7 +525,8 @@ int main(int argc, char** argv)
 		<< "\n\CODEC_ID_MJPEG: " << CODEC_ID_MJPEG
 		<< "\n\CODEC_ID_FLV1: " << CODEC_ID_FLV1
 		<< endl;
-
+	
+	/*
 	
 	MP2			= 86016,
 	MP3			= 86017,
@@ -554,10 +564,18 @@ int main(int argc, char** argv)
 	MediaFactory::instance()->loadVideo();
 	MediaFactory::instance()->loadAudio();
 	
+	/*
 	{
 		StreamTest test;
 		test.run();
-		system("pause");
+		Util::pause();
+	}
+	*/
+	
+	{
+		MediaServer srv(328);
+		srv.start();
+		Util::pause();
 	}
 
 	MediaFactory::uninitialize();
@@ -565,30 +583,30 @@ int main(int argc, char** argv)
 	/*	
 	MediaServer srv(328);
 	srv.start();
-	system("pause");
+	Util::pause();
 	{
 		StreamTest test;
 		test.run();
-		system("pause");
+		Util::pause();
 	}
 	{
 		StreamTest test1;
 		test1.run();
-		system("pause");
+		Util::pause();
 	}
 	{
 		StreamTest test2;
 		test2.run();
-		system("pause");
+		Util::pause();
 	}
 
 
 	ServerSocket svs(328);
 	TCPServer srv(new TCPServerConnectionFactoryImpl<MediaConnection>(), svs);
 	srv.start();
-	system("pause");
+	Util::pause();
 	stop = true;
-	system("pause");
+	Util::pause();
 
 
 	srv.stop();
@@ -655,7 +673,7 @@ int main(int argc, char** argv)
 	}
 	*/
 
-	system("pause");
+	Util::pause();
 
 	return 0;
 }

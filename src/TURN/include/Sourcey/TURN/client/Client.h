@@ -154,8 +154,8 @@ public:
 	virtual void handleDataIndication(const STUN::Message& response);
 	
 	virtual int transportProtocol();
-	virtual Net::ISocket* createSocket();
-	virtual STUN::Transaction* createTransaction(Net::ISocket* socket = NULL);
+	virtual Net::IPacketSocket* createSocket();
+	virtual STUN::Transaction* createTransaction(Net::IPacketSocket* socket = NULL);
 	virtual void authenticateRequest(STUN::Message& request);
 	virtual bool sendAuthenticatedTransaction(STUN::Transaction* transaction);
 	virtual bool removeTransaction(STUN::Transaction* transaction);
@@ -165,7 +165,7 @@ public:
 	bool isTerminated() const;	
 	
 	IClientObserver& observer();
-	Net::ISocket& socket();
+	Net::IPacketSocket& socket();
 	Runner& runner();
 	Net::Reactor& reactor();
 	Options& options();	
@@ -175,14 +175,16 @@ public:
 	virtual void onClientDisconnect(void* sender);
 	virtual void onStateChange(ClientState& state, const ClientState& oldState);
 	virtual void onTransactionStateChange(void* sender, TransactionState& state, const TransactionState&);	
-	virtual void onTimer(TimerCallback<Client>& timer);
+	virtual void onTimer(void*);
+	//virtual void onTimer(TimerCallback<Client>& timer);
 
 protected:
 	IClientObserver&	_observer;
 	Runner&				_runner;
 	Net::Reactor&		_reactor;
 	Options				_options;
-	Net::ISocket*		_socket;
+	Net::IPacketSocket*	_socket;
+	TimerTask*          _timer;
 
 	Net::Address		_mappedAddress;
 	Net::Address		_relayedAddress;
@@ -195,6 +197,7 @@ protected:
 
 	std::vector<STUN::Transaction*> _transactions;
 		// A list containing currently active transactions
+
 
 	mutable Poco::FastMutex _mutex;
 };

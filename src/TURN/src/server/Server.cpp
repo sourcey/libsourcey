@@ -77,7 +77,7 @@ void Server::start()
 	// Initialize TCP
 	if (_options.enableTCP) {
 		_socketTCP.bind(_options.listenAddr);
-		_socketTCP.SocketCreated += delegate(this, &Server::onTCPConnectionCreated);
+		_socketTCP.SocketAccepted += delegate(this, &Server::onTCPConnectionAccepted);
 	}	
 	
 	//Timer::getDefault().start(TimerCallback<Server>(this, &Server::onTimer, 5000, 5000));
@@ -112,20 +112,22 @@ void Server::onTimer(void*) //TimerCallback<Server>& timer
 }
 
 
-void Server::onTCPConnectionCreated(void* sender, Net::TCPSocket& sock)
+void Server::onTCPConnectionAccepted(void* sender, Poco::Net::StreamSocket& sock, Net::Reactor& reactor)
 {
-	Log("trace", this) << "TCP Connection Accepted: " << sock.peerAddress() << endl;	
+	Log("trace", this) << "TCP Connection Accepted: " << sock.peerAddress().toString() << endl;	
 	
-	TCPSocket* socket = new TCPSocket(sock); //, reactor()
+	TCPPacketSocket* socket = new TCPPacketSocket(sock, reactor); //, reactor()
+	socket->setDeleteOnClose(true);
 	socket->registerPacketType<STUN::Message>(1);
 	socket->attach(packetDelegate(this, &Server::onPacketReceived));
-	socket->Closed += delegate(this, &Server::onTCPConnectionClosed, -1); // lowest priority
+	//socket->Closed += delegate(this, &Server::onTCPConnectionClosed, -1); // lowest priority
 }
 
 
+/*
 void Server::onTCPConnectionClosed(void* sender)
 {
-	TCPSocket* socket = reinterpret_cast<TCPSocket*>(sender);
+	TCPPacketSocket* socket = reinterpret_cast<TCPPacketSocket*>(sender);
 
 	Log("trace", this) << "TCP Connection Closed: " << socket->peerAddress() << endl;	
 	
@@ -137,6 +139,7 @@ void Server::onTCPConnectionClosed(void* sender)
 
 	delete socket;
 }
+*/
 
 
 void Server::onPacketReceived(void* sender, STUN::Message& message) 
@@ -525,8 +528,8 @@ void Server::handleAllocateRequest(const Request& request)
 		// connections on the relayed transport address.  Refer to Section 5.3
 		// for details.
 
-		//Net::TCPSocket& socket = static_cast<Net::TCPSocket&>(request.socket);
-		allocation = new TCPAllocation(*this, static_cast<Net::TCPSocket*>(&request.socket), tuple, username, lifetime);
+		//Net::TCPPacketSocket& socket = static_cast<Net::TCPPacketSocket&>(request.socket);
+		allocation = new TCPAllocation(*this, static_cast<Net::TCPPacketSocket*>(&request.socket), tuple, username, lifetime);
 	} 
 
 	// Once the allocation is created, the server replies with a success
@@ -646,7 +649,7 @@ void Server::sendError(const Request& request, int errorCode, const char* errorD
 }
 
 	
-Net::UDPSocket& Server::socketUDP()
+Net::UDPPacketSocket& Server::socketUDP()
 { 
 	FastMutex::ScopedLock lock(_mutex);
 	return _socketUDP; 

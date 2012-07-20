@@ -32,17 +32,322 @@
 #include "Sourcey/Logger.h"
 
 
-using namespace std;
 using namespace Poco;
 using namespace Poco::Net;
 using namespace Sourcey::Net;
 */
+using namespace std;
 
 
 namespace Sourcey {
 namespace Symple {
 
 
+Client::Client(Net::IWebSocket& socket, const Client::Options& options) :
+	SocketIO::Client(socket),
+	_options(options),
+	_announceStatus(500)
+{
+	Log("trace", this) << "Creating" << std::endl;
+}
+
+
+Client::~Client() 
+{
+	Log("trace", this) << "Destroying" << std::endl;
+	close();
+	Log("trace", this) << "Destroying: OK" << std::endl;
+}
+
+
+void Client::connect()
+{
+	Log("trace", this) << "Connecting" << std::endl;		
+	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
+		assert(!_options.user.empty());
+		//assert(!_options.token.empty());
+		_serverAddr = _options.serverAddr;
+	}
+	reset();
+	SocketIO::Client::connect();
+}
+
+
+void Client::close()
+{
+	Log("trace", this) << "Closing" << std::endl;
+
+	SocketIO::Client::close();
+}
+
+
+int Client::send(const std::string data)
+{
+	assert(isOnline());
+	return SocketIO::Client::send(SocketIO::Packet::Message, data, false);
+}
+
+
+int Client::send(Message& message, bool ack)
+{	
+	assert(isOnline());
+	message.setFrom(ourPeer().address());
+	assert(message.valid());
+	assert(message.to().id() != message.from().id());
+	Log("trace", this) << "Sending Message: " 
+		<< message.id() << ":\n" 
+		<< JSON::stringify(message, true) << std::endl;
+	return SocketIO::Client::send(message, false);
+}
+
+
+void Client::createPresence(Presence& p)
+{
+	Log("trace", this) << "Creating Presence" << std::endl;
+
+	Peer& peer = ourPeer();
+	UpdatePresenceData.dispatch(this, peer);
+	p["data"] = peer;
+}
+
+
+int Client::sendPresence(bool probe)
+{
+	Log("trace", this) << "Broadcasting Presence" << std::endl;
+
+	Presence p;
+	createPresence(p);
+	p.setProbe(probe);
+	return send(p);
+}
+
+
+int Client::sendPresence(const Address& to, bool probe)
+{
+	Log("trace", this) << "Sending Presence" << std::endl;
+	
+	Presence p;
+	createPresence(p);
+	p.setProbe(probe);
+	p.setTo(to);
+	return send(p);
+}
+
+
+int Client::respond(Message& message)
+{
+	message.setTo(message.from());
+	return send(message);
+}
+
+
+Roster& Client::roster() 
+{ 
+	Poco::FastMutex::ScopedLock lock(_mutex);
+	return _roster; 
+}
+
+
+/*
+Runner& runner() 
+{ 
+	Poco::FastMutex::ScopedLock lock(_mutex);
+	return _runner; 
+}
+
+
+int Client::announceStatus() const
+{
+	Poco::FastMutex::ScopedLock lock(_mutex);
+	return _announceStatus;
+}
+*/
+
+
+PersistenceT& Client::persistence() 
+{ 
+	Poco::FastMutex::ScopedLock lock(_mutex);
+	return _persistence; 
+}
+
+
+Client::Options& Client::options() 
+{ 
+	Poco::FastMutex::ScopedLock lock(_mutex);
+	return _options; 
+}
+
+
+std::string Client::ourID() const
+{
+	Poco::FastMutex::ScopedLock lock(_mutex);
+	return _ourID;
+}
+
+
+Peer& Client::ourPeer()
+{	
+	Poco::FastMutex::ScopedLock lock(_mutex);
+	Log("trace", this) << "Getting Our Peer: " << _ourID << std::endl;
+	if (_ourID.empty())
+		throw Exception("No active peer session is available.");
+	return *_roster.get(_ourID, true);
+}
+
+
+Client& Client::operator >> (Message& message)
+{
+	send(message);
+	return *this;
+}
+
+	
+int Client::announce()
+{
+	JSON::Value data;
+	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
+		data["token"]	= _options.token;
+		data["group"]	= _options.group;
+		data["user"]	= _options.user;
+		data["name"]	= _options.name;
+		data["type"]	= _options.type;
+	}	
+	SocketIO::Packet p("announce", data, true);
+	SocketIO::Transaction* txn = new SocketIO::Transaction(*this, p, 1, 5000);
+	txn->StateChange += delegate(this, &Client::onAnnounce);
+	return txn->send();
+}
+
+
+void Client::onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
+{
+	Log("trace", this) << "Announce Response: " << state.toString() << std::endl;
+	
+	SocketIO::Transaction* transaction = reinterpret_cast<SocketIO::Transaction*>(sender);
+	switch (state.id()) {	
+	case TransactionState::Success:
+		try 
+		{
+			JSON::Value data = transaction->response().json()[(size_t)0];
+			_announceStatus = data["status"].asInt();
+
+			// Notify the outside application of the response 
+			// status before we transition the client state.
+			Announce.dispatch(this, _announceStatus);
+
+			if (_announceStatus != 200)
+				throw Exception(data["message"].asString()); //"Announce Error: " + 
+
+			_ourID = data["data"]["id"].asString(); //Address();
+			if (_ourID.empty())
+				throw Exception("Invalid server response.");
+
+			// Set our local peer data from the response or fail.
+			_roster.update(data["data"], true);
+
+			// Transition our state to Online.
+			SocketIO::Client::onOnline();
+
+			// Broadcast a presence probe to our network.
+			sendPresence(true);
+		}
+		catch (Exception& exc)
+		{
+			// Set the error message and close the connection.
+			setError(exc.displayText());
+		}
+		break;		
+
+	case TransactionState::Failed:
+		Announce.dispatch(this, _announceStatus);
+		setError(state.message());
+		break;
+	}
+}
+
+
+void Client::onOnline()
+{
+	Log("trace", this) << "On Online" << std::endl;
+
+	// Override this method because we are not quite
+	// ready to transition to Online yet - we still
+	// need to announce our presence on the server.
+	announce();
+}
+
+
+void Client::onPacket(SocketIO::Packet& packet) 
+{
+	Log("trace", this) << "On Packet: " << packet.className() << std::endl;
+
+	if (packet.type() == SocketIO::Packet::Message || 
+		packet.type() == SocketIO::Packet::JSON) {
+
+		JSON::Value data = packet.json();
+		string type(data["type"].asString());
+		Log("trace", this) << "Packet Created: Symple Type: " << type << std::endl;
+		if (type == "message") {
+			Message m(data);
+			PacketDispatcher::dispatch(this, m);
+		}
+		else if (type == "command") {
+			Command c(data);
+			PacketDispatcher::dispatch(this, c);
+		}
+		else if (type == "presence") {
+			Presence p(data);
+			if (p.isMember("data"))
+				_roster.update(p["data"], false);
+			PacketDispatcher::dispatch(this, p);
+			if (p.isProbe())
+				sendPresence(p.from());
+		}
+	}
+	else
+		PacketDispatcher::dispatch(this, packet);
+}
+
+
+void Client::onClose()
+{
+	Log("trace", this) << "Symple Closing" << std::endl;
+	SocketIO::Client::onClose();
+	reset();
+}
+
+
+void Client::reset()
+{
+	_roster.clear();
+	_announceStatus = 500;
+	_ourID = "";
+}
+
+
+
+
+
+/*
+void Client::onError()
+{
+	SocketIO::Client::onError();
+	reset();
+}
+*/
+
+			
+		//SocketIO::Packet* p = dynamic_cast<SocketIO::Packet*>(packet);
+		//JSON::Value data = packet.json();
+		//if (!data.isObject() || data.isNull()) {
+		//	Log("warning", this) << "Packet is not a JSON object" << std::endl;
+		//	return true; // continue propagation
+		//}
+			//return false; // stop propagation
+			//return false; // stop propagation
+			//return false; // stop propagation
 //Client::Client(Net::Reactor& reactor, Runner& runner, const Options& options) : 
 //	SocketIO::Socket(reactor),
 //	_runner(runner),
@@ -195,7 +500,7 @@ namespace Symple {
 //		catch (Exception& exc)
 //		{
 //			// Set the error message and close the connection.
-//			setError(exc.message());
+//			setError(exc.displayText());
 //		}
 //		break;		
 //

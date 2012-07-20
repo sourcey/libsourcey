@@ -83,20 +83,22 @@ bool Transaction::send()
 	try 
 	{
 		setState(this, TransactionState::Running);
-		
-		_uri = URI(_request->getURI());		
+	
 		_request->prepare();
-		_request->setURI(_uri.getPathAndQuery());
+		_uri = URI(_request->getURI());
+		_request->setURI(_uri.getPathAndQuery()); // ensure URI only in request
 
 		Log("trace", this) << "Running:" 
 			<< "\n\tMethod: " << _request->getMethod()
 			<< "\n\tHas Credentials: " << _request->hasCredentials()
-			<< "\n\tURI: " << _uri.toString()
+			<< "\n\tURL: " << _uri.toString()
+			<< "\n\tURI: " << _request->getURI()
 			<< "\n\tHost: " << _uri.getHost()
 			<< "\n\tPort: " << _uri.getPort()
-			//<< "\n\tOutput Path: " << _outputPath
+			<< "\n\tOutput Path: " << _outputPath
 			<< endl;
 		
+		assert(!_uri.getScheme().empty());
 		if (_uri.getScheme() == "http") {
 			HTTPClientSession session(_uri.getHost(), _uri.getPort());
 			session.setTimeout(Timespan(10, 0));
@@ -151,29 +153,34 @@ void Transaction::cancel()
 
 void Transaction::processRequest(ostream& ostr)
 {
-	stringstream ss;
-	_request->write(ss);	
-	Log("trace", this) << "Request Headers: " << ss.str() << endl;
+	//stringstream ss;
+	//_request->write(ss);	
+	//Log("trace", this) << "Request Headers: " << ss.str() << endl;
 
 	try 
 	{
-		_requestState.total = _request->getContentLength();
+		TransferState& st = _requestState;
+		st.total = _request->getContentLength();
 		setRequestState(TransferState::Running);
 		if (_request->form) 
 		{
+			//Log("trace", this) << "Request Body: " << string(ss.str().data(), 100) << endl;
+			
+			char c;
 			streambuf* pbuf = _request->body.rdbuf(); 
-			while (pbuf->sgetc() != EOF) {
-				ostr << pbuf->sbumpc();
-				_requestState.current++;
-				if (_requestState.current % 32768 == 0) {					
+			while (pbuf->sgetc() != EOF) {				
+				c = pbuf->sbumpc();
+				ostr << c;
+				st.current++;
+				if (st.current % 32768 == 0) {					
 					if (cancelled()) {
 						setRequestState(TransferState::Cancelled);
 						throw StopPropagation();
 					}
 					
 					Log("trace", this) << "Upload progress: " << 
-						_requestState.current << " of " << 
-						_requestState.total << endl;
+						st.current << " of " << 
+						st.total << endl;
 
 					setRequestState(TransferState::Running);
 				}
@@ -207,24 +214,24 @@ void Transaction::processResponse(istream& istr)
 	{	
 		char c;
 		ostream& ostr =_response.body;
-		_responseState.total = _response.getContentLength();
-		setResponseState(TransferState::Running);		
-
+		TransferState& st = _responseState;
+		st.total = _response.getContentLength();
+		setResponseState(TransferState::Running);
 		istr.get(c);
 		while (istr && ostr)
 		{
-			_responseState.current++;
+			st.current++;
 			ostr.put(c);
 			istr.get(c);
-			if (_responseState.current % 32768 == 0) {					
+			if (st.current % 32768 == 0) {					
 				if (cancelled()) {
 					setResponseState(TransferState::Cancelled);
 					throw StopPropagation();
 				}
 				
 				Log("trace", this) << "Download progress: " 
-					<< _responseState.current << " of " 
-					<< _responseState.total << endl;
+					<< st.current << " of " 
+					<< st.total << endl;
 	
 				setResponseState(TransferState::Running);
 			}
@@ -344,6 +351,9 @@ void* Transaction::clientData() const
 			//std::streamsize _requestState.current = 0;
 
 	/*
+	char c;
+				//ch = pbuf->sbumpc();
+				//ostr << ch;
 	char c;
 	std::streamsize _requestState.current = 0;
 	std::streamsize total = _request->getContentLength();
