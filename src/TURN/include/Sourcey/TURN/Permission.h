@@ -31,7 +31,6 @@
 
 #include "Sourcey/TURN/FiveTuple.h"
 #include "Sourcey/Timeout.h"
-#include "Sourcey/Timer.h"
 #include "Sourcey/Net/Address.h"
 
 #include <string>

@@ -39,29 +39,15 @@ namespace Sourcey {
 namespace SocketIO {
 
 
-Transaction::Transaction(Runner& runner, Client& client, int retries, long timeout) : 
-	PacketTransaction<Packet>(runner, retries, timeout), client(client)
+Transaction::Transaction(Client& client, long timeout) : 
+	PacketTransaction<Packet>(client.runner(), timeout, 0), client(client)
 {
 	Log("debug") << "[SocketIOTransaction:" << this << "] Creating" << endl;
 }
 
 
-Transaction::Transaction(Runner& runner, Client& client, const Packet& request, int retries, long timeout) : 
-	PacketTransaction<Packet>(runner, request, retries, timeout), client(client)
-{
-	Log("debug") << "[SocketIOTransaction:" << this << "] Creating" << endl;
-}
-
-
-Transaction::Transaction(Client& client, int retries, long timeout) : 
-	PacketTransaction<Packet>(retries, timeout), client(client)
-{
-	Log("debug") << "[SocketIOTransaction:" << this << "] Creating" << endl;
-}
-
-
-Transaction::Transaction(Client& client, const Packet& request, int retries, long timeout) : 
-	PacketTransaction<Packet>(request, retries, timeout), client(client)
+Transaction::Transaction(Client& client, const Packet& request, long timeout) : 
+	PacketTransaction<Packet>(client.runner(), request, timeout, 0), client(client)
 {
 	Log("debug") << "[SocketIOTransaction:" << this << "] Creating" << endl;
 }

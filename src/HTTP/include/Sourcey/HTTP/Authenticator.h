@@ -29,7 +29,7 @@
 #define SOURCEY_HTTP_Authenticator_H
 
 
-#include "Sourcey/UserManager.h"
+#include "Sourcey/Util/UserManager.h"
 #include <string>
 
 

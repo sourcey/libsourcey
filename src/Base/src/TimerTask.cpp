@@ -44,7 +44,7 @@ TimerTask::TimerTask(long timeout, long interval) :
 	_interval(interval),
 	_scheduleAt(timeout)
 {
-	Log("trace") << "[TimerTask: " << this << "] Creating" << endl;
+	Log("trace") << "[TimerTask:" << this << "] Creating" << endl;
 }
 
 
@@ -54,79 +54,80 @@ TimerTask::TimerTask(Runner& runner, long timeout, long interval) :
 	_interval(interval),
 	_scheduleAt(timeout)
 {
-	Log("trace") << "[TimerTask: " << this << "] Creating" << endl;
+	Log("trace") << "[TimerTask:" << this << "] Creating" << endl;
 }
 
 
 TimerTask::~TimerTask()
 {
-	Log("trace") << "[TimerTask: " << this << "] Destroying" << endl;
+	Log("trace") << "[TimerTask:" << this << "] Destroying" << endl;
 }
 
 
-bool TimerTask::start()
+void TimerTask::start()
 {
-	Log("trace") << "[TimerTask: " << this << "] Start" << endl;
+	Log("trace") << "[TimerTask:" << this << "] Start" << endl;
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);	
 		_scheduleAt.setDelay(_timeout);
 		_scheduleAt.reset();
 	}
-	return Task::start();	
+	Task::start();	
 }	
 
 
-bool TimerTask::stop()			
+void TimerTask::cancel()			
 { 
-	Log("trace") << "[TimerTask: " << this << "] Stop" << endl;
+	Log("trace") << "[TimerTask:" << this << "] Stop" << endl;
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);	
 		_scheduleAt.stop();
 	}
-	return Task::stop();
+	Task::cancel();
 }
 
 
-bool TimerTask::destroy()			
+void TimerTask::destroy()			
 { 
-	Log("trace") << "[TimerTask: " << this << "] Destroying" << endl;
-	return Task::destroy();
+	Log("trace") << "[TimerTask:" << this << "] Destroying" << endl;
+	Task::destroy();
 }
 
 
-bool TimerTask::canRun()
+bool TimerTask::beforeRun()
 { 
-	bool doTimeout = false;
-	bool doStop = false;
+	bool timeout = false;
+	bool cancel = false;
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);	
 		if (_scheduleAt.expired()) {
-			doTimeout = true;
+			timeout = true;
 			if (_interval > 0) {
 				_scheduleAt.setDelay(_interval);
 				_scheduleAt.reset();
 			}
-			else doStop = true;
+			else cancel = true;
 		}
 		
-		Log("trace") << "[TimerTask: " << this << "] Can Run: " 
-			<< doTimeout << ": " 
-			<< doStop << ": " 
+		/*
+		Log("trace") << "[TimerTask:" << this << "] Can Run: " 
+			<< timeout << ": " 
+			<< cancel << ": " 
 			<< _scheduleAt.remaining() << endl;
+			*/
 	}
 
-
-	if (doStop) {
-		Task::stop();
+	if (cancel) {
+		Task::cancel();
 		return false;
 	}
-	return doTimeout;
+	return timeout;
 }
 
 
 void TimerTask::run()
 { 
-	Log("trace") << "[TimerTask: " << this << "] Running" << endl;
+	Log("trace") << "[TimerTask:" << this << "] Running" << endl;
 	Timeout.dispatch(this);
 	onTimeout();
 }
@@ -134,7 +135,7 @@ void TimerTask::run()
 
 void TimerTask::onTimeout()
 { 
-	Log("trace") << "[TimerTask: " << this << "] Timeout" << endl;
+	Log("trace") << "[TimerTask:" << this << "] Timeout" << endl;
 	// override me...
 }
 
@@ -158,35 +159,51 @@ long TimerTask::timeout() const
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	return _timeout;
 }
-	
+
 
 long TimerTask::interval() const
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	return _interval;
 }
+	
+
+Sourcey::Timeout& TimerTask::scheduleAt()
+{
+	Poco::FastMutex::ScopedLock lock(_mutex);	
+	return _scheduleAt;
+}
+	
+
+Sourcey::Timeout TimerTask::scheduleAt() const
+{
+	Poco::FastMutex::ScopedLock lock(_mutex);	
+	return _scheduleAt;
+}
 
 
 } // namespace Sourcey
 
 
+
+
 	/*
-	bool doTimeout = false;
-	bool doStop = false;
+	bool timeout = false;
+	bool cancel = false;
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);	
 		if (_scheduleAt.expired()) {
-			doTimeout = true;
+			timeout = true;
 			if (_interval > 0) {
 				_scheduleAt.setDelay(_interval);
 				_scheduleAt.reset();
 			}
-			else doStop = true;
+			else cancel = true;
 		}
 	}
-	if (doTimeout)
+	if (timeout)
 		onTimeout();
-	if (doStop)
+	if (cancel)
 		Task::destroy();
 		*/
 
@@ -201,6 +218,6 @@ TimerTask::TimerTask(Runner& runner, long timeout, long interval) :
 	_interval(interval),
 	_scheduleAt(timeout)
 {
-	Log("trace") << "[TimerTask: " << this << "] Creating" << endl;
+	Log("trace") << "[TimerTask:" << this << "] Creating" << endl;
 }
 */

@@ -35,9 +35,9 @@
 namespace Sourcey {
 
 
-struct FlagT 
+struct Flags 
 {
-	FlagT(unsigned flags = 0) : _data(flags) {}
+	Flags(unsigned flags = 0) : _data(flags) {}
 	virtual void reset() { _data = 0; };
 	virtual void set(unsigned flag) { if (!has(flag)) _data |= flag; };
 	virtual void add(unsigned flag) { _data |= flag; };
@@ -56,7 +56,7 @@ class Flaggable
 public:
 	Flaggable(unsigned flags = 0) : _flags(flags) {}
 	Flaggable(const Flaggable& r) : _flags(r._flags) {}
-	Flaggable(const FlagT& r) : _flags(r) {}
+	Flaggable(const Flags& r) : _flags(r) {}
 
 	virtual void setFlag(unsigned flag) { 
 		_flags.set(flag); 
@@ -73,13 +73,13 @@ public:
 	virtual bool hasFlag(unsigned flag) const { 
 		return _flags.has(flag); 
 	};
-	virtual void setFlags(FlagT flags) { 
+	virtual void setFlags(Flags flags) { 
 		_flags = flags; 
 	};
-	virtual FlagT flags() const { return _flags; };
+	virtual Flags flags() const { return _flags; };
 
 protected:
-	FlagT _flags;
+	Flags _flags;
 };
 
 

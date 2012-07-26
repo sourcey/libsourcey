@@ -32,7 +32,7 @@
 #include "Sourcey/XMPP/Jingle/Jingle.h"
 #include "Sourcey/PacketDispatcher.h"
 #include "Sourcey/Stateful.h"
-#include "Sourcey/UserManager.h"
+#include "Sourcey/Util/UserManager.h"
 #include "Sourcey/RTP/Codec.h"
 
 #include <assert.h>

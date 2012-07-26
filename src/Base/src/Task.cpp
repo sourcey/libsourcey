@@ -28,6 +28,7 @@
 #include "Sourcey/Task.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Runner.h"
+#include "Sourcey/CryptoProvider.h"
 
 #include <assert.h>
 
@@ -39,18 +40,20 @@ namespace Sourcey {
 
 	
 Task::Task(bool repeating) : 
+	_id(CryptoProvider::generateRandomNumber(8)),
 	_repeating(repeating),
 	_destroyed(false),
-	_running(false),
+	_cancelled(true),
 	_runner(NULL)
 { 
 }
 
 	
 Task::Task(Runner& runner, bool repeating, bool autoStart) : 
+	_id(CryptoProvider::generateRandomNumber(8)),
 	_repeating(repeating),
 	_destroyed(false),
-	_running(false),
+	_cancelled(true),
 	_runner(&runner)
 { 	
 	if (autoStart)
@@ -61,47 +64,58 @@ Task::Task(Runner& runner, bool repeating, bool autoStart) :
 Task::~Task()
 {
 	Log("trace") << "[Task:" << this << "] Destroying" << endl;
-	assert(destroyed());
+	//assert(destroyed());
 }
 
 
-bool Task::start()
+void Task::start()
 { 
 	Log("trace") << "[Task:" << this << "] Starting" << endl;
-	if (!running())
-		return runner().start(this);
-	return true;
+	if (cancelled())
+		runner().start(this);
 }
 
 
-bool Task::stop()			
+void Task::cancel()			
 {
 	Log("trace") << "[Task:" << this << "] Stopping" << endl;
-	if (running())
-		return runner().stop(this);
-	return true;
+	if (!cancelled())
+		runner().cancel(this);
 }
 
 
-bool Task::destroy()			
+void Task::destroy()			
 {
 	Log("trace") << "[Task:" << this << "] Destroying" << endl;
 	if (!destroyed())
-		return runner().destroy(this);
-	return true;
+		runner().destroy(this);
 }
 
 
-bool Task::canRun()			
+bool Task::beforeRun()			
 {
-	return true;
+	Poco::FastMutex::ScopedLock lock(_mutex);	
+	return !_destroyed && !_cancelled;
 }
 
 
-bool Task::running() const						 
+UInt32 Task::id() const
+{
+	Poco::FastMutex::ScopedLock lock(_mutex);	
+	return _id;
+}
+
+
+bool Task::cancelled() const						 
 { 
 	Poco::FastMutex::ScopedLock lock(_mutex);	
-	return _running;
+	return _cancelled;
+}
+
+
+bool Task::afterRun()			
+{
+	return repeating();
 }
 
 
@@ -138,17 +152,17 @@ Runner& Task::runner()
 
 
 	//	Poco::FastMutex::ScopedLock lock(_mutex);
-	//	_running = true;
+	//	_!cancelled = true;
 	//else
 
-	//assert(!_running);
+	//assert(!_!cancelled);
 	//
-	//	throw Exception("The tasks is already running.");
+	//	throw Exception("The tasks is already !cancelled.");
 
 	//Poco::FastMutex::ScopedLock lock(_mutex);
-	//assert(_running);	
-	//if (running())
-	//	throw Exception("The tasks is not running.");
+	//assert(_!cancelled);	
+	//if (!cancelled())
+	//	throw Exception("The tasks is not !cancelled.");
 	//Poco::FastMutex::ScopedLock lock(_mutex);
 	//assert(!_destroyed);
 	//const string& name, //const string& name, //,
@@ -171,9 +185,9 @@ void Task::setName(const string& name)
 }
 */
 
-	//_running = true;
+	//_!cancelled = true;
 	//runner().wakeUp();
-	//_running = false;
+	//_!cancelled = false;
 	//runner().wakeUp();
 	//_destroyed = true;
 	//runner().wakeUp();
@@ -182,16 +196,16 @@ void Task::setName(const string& name)
 void Task::start()
 { 
 	Poco::FastMutex::ScopedLock lock(_mutex);
-	assert(!_running);
-	_running = true;
+	assert(!_!cancelled);
+	_!cancelled = true;
 }	
 
 
 void Task::stop()			
 { 
 	Poco::FastMutex::ScopedLock lock(_mutex);
-	//assert(!_running);
-	_running = false;
+	//assert(!_!cancelled);
+	_!cancelled = false;
 }
 */
 
@@ -200,7 +214,7 @@ void Task::stop()
 	//_runner(runner),
 
 	// NOTE: Can't lock mutex here as this call will 
-	// result in task pointer deletion if not running.
+	// result in task pointer deletion if not !cancelled.
 	//_runner.abort(this); 
 
 /*

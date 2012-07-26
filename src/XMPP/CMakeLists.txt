@@ -8,5 +8,5 @@ if(BUILD_MODULES AND BUILD_MODULE_XMPP)
   include_dependency(OpenCV REQUIRED)   
   include_dependency(RtAudio REQUIRED)
 
-  define_sourcey_module(XMPP Base Net XML Media RTP STUN TURN ICE SDP)
+  define_sourcey_module(XMPP Base Net XML Media RTP STUN TURN ICE SDP Util)
 endif()

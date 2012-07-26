@@ -330,7 +330,7 @@ int main(int argc, char** argv)
 
 
 
-#include "Sourcey/Timer.h"
+#include "Sourcey/Util/Timer.h"
 
 #include "Poco/Stopwatch.h"
 #include "Poco/Net/NetException.h"
@@ -360,11 +360,11 @@ int main(int argc, char** argv)
 #include "Sourcey/Net/Address.h"
 
 
-#include "Sourcey/Timer.h"
+#include "Sourcey/Util/Timer.h"
 #include "IOStream.h"
 #include "AsyncLoop.h"
 #include "uv.h"
-#include "Sourcey/Timer.h"
+#include "Sourcey/Util/Timer.h"
 
 #include "Sourcey/Net/UDPPacketSocket.h"
 #include "Sourcey/Net/TCPPacketSocket.h"

@@ -42,10 +42,8 @@ class Client;
 
 struct Transaction: public PacketTransaction<SocketIO::Packet>
 {
-	Transaction(Runner& runner, SocketIO::Client& client, int retries = 1, long timeout = 10000);
-	Transaction(Runner& runner, SocketIO::Client& client, const SocketIO::Packet& request, int retries = 1, long timeout = 10000);
-	Transaction(SocketIO::Client& client, int retries = 1, long timeout = 10000);
-	Transaction(SocketIO::Client& client, const SocketIO::Packet& request, int retries = 1, long timeout = 10000);
+	Transaction(SocketIO::Client& client, long timeout = 10000);
+	Transaction(SocketIO::Client& client, const SocketIO::Packet& request, long timeout = 10000);
 	virtual ~Transaction();
 	
 	virtual bool send();

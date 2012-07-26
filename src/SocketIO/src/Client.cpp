@@ -44,24 +44,28 @@ namespace Sourcey {
 namespace SocketIO {
 
 
-Client::Client(Net::IWebSocket& socket) :
+Client::Client(Net::IWebSocket& socket, Runner& runner) :
+	_timer(new TimerTask(runner)),
 	_socket(socket),
-	_timer(NULL)
+	_runner(runner)
 {
 }
 
 
-Client::Client(Net::IWebSocket& socket, const Net::Address& serverAddr) :
+Client::Client(Net::IWebSocket& socket, Runner& runner, const Net::Address& serverAddr) :
+	_timer(new TimerTask(runner)),
 	_serverAddr(serverAddr),
 	_socket(socket),
-	_timer(NULL)
+	_runner(runner)
 {
+	connect();
 }
 
 
 Client::~Client() 
 {
 	close();
+	_timer->destroy();
 }
 
 
@@ -114,12 +118,9 @@ void Client::close()
 	Log("trace", this) << "Closing" << endl;
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
-
-		if (_timer) {
-			_timer->Timeout -= delegate(this, &Client::onHeartBeatTimer);
-			_timer->destroy();	
-			_timer = NULL;
-		}
+		
+		_timer->Timeout -= delegate(this, &Client::onHeartBeatTimer);
+		_timer->cancel();	
 
 		_socket.Connected -= delegate(this, &Client::onSocketConnect);
 		_socket.Online -= delegate(this, &Client::onSocketOnline);
@@ -246,10 +247,23 @@ int Client::emit(const string& event, const JSON::Value& args, bool ack)
 }
 
 
+Transaction* Client::createTransaction(const SocketIO::Packet& request, long timeout)
+{
+	return new Transaction(*this, request, timeout);
+}
+
+
 int Client::sendHeartbeat()
 {
 	Log("trace", this) << "Heart Beat" << endl;
 	return socket().send("2::", 3);
+}
+
+
+Runner& Client::runner() const
+{
+	Poco::FastMutex::ScopedLock lock(_mutex);
+	return _runner;
 }
 
 
@@ -320,14 +334,12 @@ void Client::onConnect()
 	// Start the heartbeat timer
 	Poco::FastMutex::ScopedLock lock(_mutex);
 	assert(_heartBeatTimeout);
-	if (!_timer) {
-		_timer = new TimerTask(
-			(_heartBeatTimeout * .75) * 1000, 
-			(_heartBeatTimeout * .75) * 1000);
-		_timer->Timeout += delegate(this, &Client::onHeartBeatTimer);
-	}
-	if (!_timer->running())
-		_timer->start();
+	assert(_timer->cancelled());
+	
+	_timer->setTimeout((_heartBeatTimeout * .75) * 1000);
+	_timer->setInterval((_heartBeatTimeout * .75) * 1000);
+	_timer->Timeout += delegate(this, &Client::onHeartBeatTimer);
+	_timer->start();
 }
 
 
@@ -411,7 +423,31 @@ void Client::onSocketData(void*, Buffer& data, const Net::Address&)
 
 
 
+
+		/*
+		Timer::getDefault().stop(TimerCallback<Client>(this, &Client::onHeartBeatTimer));
+		if (_timer) {
+			_timer->Timeout -= delegate(this, &Client::onHeartBeatTimer);
+			_timer->destroy();	
+			_timer = NULL;
+		}
+		*/
 	
+	
+	
+	/*
+void Client::onHeartBeatTimer(TimerCallback<Socket>&) 
+	Timer::getDefault().start(TimerCallback<Client>(this, &Client::onHeartBeatTimer, 
+		(_heartBeatTimeout * .75) * 1000, 
+		(_heartBeatTimeout * .75) * 1000));
+
+	_timer = new TimerTask(
+		(_heartBeatTimeout * .75) * 1000, 
+		(_heartBeatTimeout * .75) * 1000);
+	//if (!_timer) {
+	//}
+	//if (_timer->cancelled())
+		*/
 /*
 
 

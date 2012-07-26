@@ -98,6 +98,14 @@ inline std::string stringify(const JSON::Value& root, bool pretty = false)
 	return output;
 }
 
+
+inline void assertMember(const JSON::Value& root,  const std::string& name) 
+{
+	if (!root.isMember(name))
+		throw Exception("A '" + name + "' member is required.");
+}
+
+
 inline void countNestedKeys(JSON::Value& root, const std::string& key, int& count, int depth = 0) 
 {
 	depth++;

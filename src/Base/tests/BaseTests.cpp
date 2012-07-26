@@ -3,8 +3,7 @@
 #include "Sourcey/Runner.h"
 #include "Sourcey/Signal.h"
 #include "Sourcey/PacketStream.h"
-#include "Sourcey/ScheduledTask.h"
-#include "Sourcey/Timer.h"
+#include "Sourcey/TimerTask.h"
 #include "Sourcey/Util.h"
 
 #include "Poco/NamedEvent.h"
@@ -47,7 +46,7 @@ public:
 	Tests()
 	{	
 		//runTimerTaskTest();
-		runScheduledTaskTest();
+		//runScheduler::TaskTest();
 		//runTimerTest();
 		//runPacketStreamTests();
 		//runPacketSignalTest();
@@ -83,30 +82,31 @@ public:
 	}
 	
 
+	/*
 	// ---------------------------------------------------------------------
 	//
 	// Scheduled Task Tests
 	//
 	// ---------------------------------------------------------------------	
-	struct TestScheduledTask: public ScheduledTask
+	struct TestScheduler::Task: public Scheduler::Task
 	{
-		TestScheduledTask(Runner& runner) : 
-			ScheduledTask(runner) {}
+		TestScheduler::Task(Runner& runner) : 
+			Scheduler::Task(runner) {}
 
 		void run() 
 		{
-			Log("debug") << "TestScheduledTask: Running" << endl;
+			Log("debug") << "TestScheduler::Task: Running" << endl;
 			ready.set();	
 		}
 	};
 
-	void runScheduledTaskTest() 
+	void runScheduler::TaskTest() 
 	{
 		Log("trace") << "Running Scheduled Task Test" << endl;
 
 		// Schedule to fire 1 second from now.
 		{
-			TestScheduledTask* task = new TestScheduledTask(runner);
+			TestScheduler::Task* task = new TestScheduler::Task(runner);
 			Poco::DateTime dt;
 			Poco::Timespan ts(1, 0);
 			dt += ts;
@@ -117,7 +117,7 @@ public:
 		
 		// Schedule to fire once now, and twice at 1 second intervals.
 		{
-			TestScheduledTask* task = new TestScheduledTask(runner);
+			TestScheduler::Task* task = new TestScheduler::Task(runner);
 			Poco::DateTime dt;
 			Poco::Timespan ts(1, 0);
 			task->scheduleRepeated(dt, ts);
@@ -131,6 +131,7 @@ public:
 		Log("trace") << "Running Scheduled Task Test: END" << endl;
 		Util::pause();
 	}
+	*/
 
 
 	// ---------------------------------------------------------------------
@@ -222,89 +223,6 @@ public:
 		Log("trace") << "Running Garbage Collector Test: END" << endl;
 	}
 	*/
-	
-	
-	// ---------------------------------------------------------------------
-	//
-	// Timer Tests
-	//
-	// ---------------------------------------------------------------------
-
-	/*
-	struct TimerThread: public Poco::Runnable 
-	{				
-		TimerThread(const string& name) : _name(name) {
-			_thread.start(*this);
-		}
-	
-		void run() 	{
-			for (unsigned i = 0; i < 100; i++) {
-				Log("debug") << "TimerThread: " << _name << endl;
-				new TimerTest;
-			}
-		}
-	
-		Poco::Thread		_thread;
-		string			_name;
-	};
-	*/
-	struct TimerTest
-	{
-		string name;
-		int iteration;
-		int iterations;
-		time_t startAt;
-		//Timeout validator;
-		//int timeout;
-		//int interval;
-
-		TimerTest(const string& name, int timeout = 1000/*, int interval = 1000*/, int iterations = 5) : 
-			name(name), startAt(Util::getTime()), iteration(0), iterations(iterations)//, timeout(timeout), interval(interval)
-		{
-			Log("debug") << "[TimerTest:" << name << "] Creating" << endl;	
-			Timer::getDefault().start(TimerCallback<TimerTest>(this, &TimerTest::onTimer, timeout, timeout));
-			//validator.start(timeout * iterations);
-		}
-
-		~TimerTest()
-		{
-			Log("debug") << "[TimerTest:" << name << "] Destroying" << endl;	
-			Timer::getDefault().stop(TimerCallback<TimerTest>(this, &TimerTest::onTimer));
-		}
-
-		void onTimer(TimerCallback<TimerTest>& timer)
-		{
-			iteration++;
-			if (iteration < iterations) {
-				Log("debug") << "[TimerTest:" << name << "] Callback"
-					<< "\n\tElapsed: " << Util::getTime() - startAt
-					<< "\n\tInterval: " << timer.periodicInterval()
-					<< "\n\tIteration: " << iteration
-					<< endl;
-			}
-			else {
-				Log("debug") << "[TimerTest:" << name << "] Complete #####################################"
-					<< "\n\tTotal Time: " << Util::getTime() - startAt
-					<< "\n\tCorrect Time: " << timer.periodicInterval() * iterations
-					<< "\n\tIterations: " << iterations
-					<< endl;			
-				delete this;
-			}
-		}
-	};
-	 
-	void runTimerTest() {
-		Log("trace") << "Running Timer Test" << endl;
-		new TimerTest("Periodic", 1000, 3);
-		new TimerTest("Single", 3000, 1);
-		new TimerTest("Single 1", 5000, 1);
-		new TimerTest("Periodic 1", 1000, 5);
-		new TimerTest("Single 2", 5000, 1);
-		new TimerTest("Periodic 2", 1000, 5);
-		Util::pause();
-		Log("trace") << "Running Timer Test: END" << endl;
-	}
-
 	
 
 	

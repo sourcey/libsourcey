@@ -53,7 +53,7 @@ Runner::~Runner()
 {		
 	cout << "[Runner:" << this << "] Destroying" << endl;
 	{
-		Mutex::ScopedLock lock(_mutex);	
+		FastMutex::ScopedLock lock(_mutex);	
 		_stop = true;
 		_wakeUp.set();
 	}
@@ -61,7 +61,7 @@ Runner::~Runner()
 	// The Runner should never be destroyed inside a Task
 	// callback, otherwise we will result in deadlock.
 	_thread.join();
-
+	clear();
 	cout << "[Runner:" << this << "] Destroying: OK" << endl;
 }
 
@@ -73,10 +73,10 @@ bool Runner::start(Task* task)
 		throw Exception("Runner instance mismatch.");
 	
 	add(task);
-	if (!task->_running) {
-		task->_running = true;
+	if (task->_cancelled) {
+		task->_cancelled = false;
 		task->start();
-		Log("trace") << "[Runner:" << this << "] Started Task: " << task << endl;
+		Log("trace", this) << "Started Task: " << task << endl;
 		_wakeUp.set();
 		return true;
 	}
@@ -84,15 +84,15 @@ bool Runner::start(Task* task)
 }
 
 
-bool Runner::stop(Task* task)
+bool Runner::cancel(Task* task)
 {		
 	if (task->_runner != this)
 		throw Exception("Runner instance mismatch.");
 
-	if (task->_running) {
-		task->_running = false;
-		task->stop();
-		Log("trace") << "[Runner:" << this << "] Stopped Task: " << task << endl;
+	if (!task->_cancelled) {
+		task->_cancelled = true;
+		task->cancel();
+		Log("trace", this) << "Stopped Task: " << task << endl;
 		_wakeUp.set();
 		return true;
 	}
@@ -103,22 +103,23 @@ bool Runner::stop(Task* task)
 
 bool Runner::destroy(Task* task)
 {
-	Log("trace") << "[Runner:" << this << "] Aborting Task: " << task << endl;
+	Log("trace", this) << "Aborting Task: " << task << endl;
 
 	if (task->_runner != this)
 		throw Exception("Runner instance mismatch.");
 	
 	// If the task exists then set the destroyed flag.
 	if (exists(task)) {
-		Log("trace") << "[Runner:" << this << "] Aborting Managed Task: " << task << endl;
+		Log("trace", this) << "Aborting Managed Task: " << task << endl;
 		task->_destroyed = true;
 	}
 		
 	// Otherwise destroy the pointer.
 	else {
-		Log("trace") << "[Runner:" << this << "] Aborting Unmanaged Task: " << task << endl;
+		Log("trace", this) << "Aborting Unmanaged Task: " << task << endl;
 		delete task;
 	}
+
 	_wakeUp.set();
 	return true; // hmmm
 }
@@ -126,12 +127,29 @@ bool Runner::destroy(Task* task)
 
 bool Runner::add(Task* task)
 {
+	Log("trace", this) << "Adding Task: " << task << endl;
 	if (!exists(task)) {
-		Log("trace") << "[Runner:" << this << "] Added Task: " << task << endl;
-		Mutex::ScopedLock lock(_mutex);	
+		FastMutex::ScopedLock lock(_mutex);	
 		_tasks.push_back(task);
 		task->_runner = this;
+		Log("trace", this) << "Added Task: " << task << endl;
 		return true;
+	}
+	return false;
+}
+
+
+bool Runner::remove(Task* task)
+{	
+	Log("trace", this) << "Removing Task: " << task << endl;
+
+	FastMutex::ScopedLock lock(_mutex);
+	for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
+		if (*it == task) {					
+			_tasks.erase(it);
+			Log("trace", this) << "Removed Task: " << task << endl;
+			return true;
+		}
 	}
 	return false;
 }
@@ -139,9 +157,9 @@ bool Runner::add(Task* task)
 
 bool Runner::exists(Task* task) const
 {	
-	Log("trace") << "[Runner:" << this << "] Check Exists: " << task << endl;
+	Log("trace", this) << "Check Exists: " << task << endl;
 
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (*it == task)
 			return true;
@@ -150,90 +168,83 @@ bool Runner::exists(Task* task) const
 }
 
 
+Task* Runner::get(UInt32 id) const
+{
+	FastMutex::ScopedLock lock(_mutex);
+	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
+		if ((*it)->id() == id)
+			return *it;
+	}			
+	return NULL;
+}
+
+
+Task* Runner::next() const
+{
+	FastMutex::ScopedLock lock(_mutex);
+	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
+		if (!(*it)->cancelled())
+			return *it;
+	}			
+	return NULL;
+
+	//FastMutex::ScopedLock lock(_mutex);	
+	//return _tasks.empty() ? NULL : _tasks.front();
+}
+
+
+void Runner::clear()
+{
+	FastMutex::ScopedLock lock(_mutex);
+	for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {	
+		Log("trace", this) << "Shutdown: Destroying Task: " << *it << endl;
+		delete *it;
+	}
+}
+
+
 void Runner::run()
 {
 	while (!_stop) 
 	{
-		Task* task = NULL;
-		bool running = false;
-		bool destroy = false;
-		{
-			Mutex::ScopedLock lock(_mutex);
-				
-			// Sometimes stop will be true after we
-			// unlock the mutex so check again.
-			if (_stop)
-				break;
-
-			//Log("trace") << "[Runner:" << this << "] Looping: " << _tasks.size() << endl;
-			if (!_tasks.empty()) {
-				task = _tasks.front();
-				_tasks.pop_front();
-				
-				running = task->_running;
-				destroy = task->_destroyed || !task->_repeating;
-				
-				/*
-				Log("trace") << "[Runner:" << this << "] Obtained: " 
-					<< task
-					<< ": Aborted: " << task->destroyed() 
-					<< ": Running: " << task->running() 
-					<< ": Repeating: " << task->repeating() 
-					<< endl;
-					*/
-
-				// Push the task back onto the end of the queue
-				// if the task is not pending destruction.
-				if (!destroy)
-					_tasks.push_back(task);
-			}
-		}
-
-		// Pause processing if there are no tasks so
-		// we can save CPU.
-		// TODO: Check if we have any running tasks.
-		if (!task) {
-			Log("trace") << "[Runner:" << this << "] No more tasks to run" << endl;
-			_wakeUp.wait();
-			Log("trace") << "[Runner:" << this << "] Waking up" << endl;
-			continue;
-		}
-
-		// Run the task...
-		else if (running) {	
-			//Log("trace") << "[Runner:" << this << "] Running: " << task << endl;
-			if (task->canRun())
+		Task* task = next();
+		
+		// Run the task
+		if (task) {
+			if (task->beforeRun()) {
 				task->run();	
-			//Log("trace") << "[Runner:" << this << "] Running: OK: " << task << endl;
+				if (!task->afterRun())
+					task->_destroyed = true; //destroy();
+			}
+						
+			// Destroy the task if required
+			if (task->destroyed()) {
+				Log("trace", this) << "Destroying Task: " << task << endl;
+				remove(task);
+				delete task;
+			}	
 		}
-
-		// Destroy the task if the destroy flag is set,
-		// or if the task is not repeatable.
-		if (destroy) {
-			Log("trace") << "[Runner:" << this << "] Destroying Task: " << task << endl;	
-			delete task;
+		
+		// Go to sleep if we have no tasks
+		else {			
+			Log("trace", this) << "Sleeping" << endl;
+			_wakeUp.wait();
+			Log("trace", this) << "Waking up" << endl;
 		}
 
 		// Gulp
 		Thread::sleep(5);		
 
+		// Dispatch the Idle signal
+		// TODO: Idle on each complete iteration of all tasks
 		Idle.dispatch(this);
 	}	
 			
-	Log("trace") << "[Runner:" << this << "] Shutdown" << endl;
-	
-	// Ensure all tasks are destroyed.
-	{
-		Mutex::ScopedLock lock(_mutex);
-		for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {	
-			Log("trace") << "[Runner:" << this << "] Shutdown: Destroying Task: " << *it << endl;
-			delete *it;
-		}
-	}
+	Log("trace", this) << "Shutdown" << endl;
 		
 	Shutdown.dispatch(this);
 
-	Log("trace") << "[Runner:" << this << "] Exiting" << endl;
+	Log("trace", this) << "Exiting" << endl;
 }
 
 
@@ -248,15 +259,239 @@ Runner& Runner::getDefault()
 
 
 
+			//Log("trace", this) << "Running: " << task << endl;
+			//Log("trace", this) << "Running: OK: " << task << endl;
 
 
+
+				//continue;
+			
+			// Push the task back onto the end of the queue
+			//else {
+			//	FastMutex::ScopedLock lock(_mutex);
+			//	_tasks.push_back(task);
+			//}
+
+		/*
+		TaskList::iterator it;
+		{
+			FastMutex::ScopedLock lock(_mutex);
+			for (it = _tasks.begin(); it != _tasks.end(); ++it) {
+				if (!(*it)->cancelled()) {
+					task = *it;
+					break;
+				}
+			}
+		}
+		*/
+
+				/*
+				{
+					FastMutex::ScopedLock lock(_mutex);
+					_tasks.erase(it);
+				}
+				*/
+
+/*
+Task* Runner::pop()
+{
+	FastMutex::ScopedLock lock(_mutex);
+	Task* task = NULL;
+	if (!_tasks.empty())
+		task = _tasks.front();
+	_tasks.pop_front();				
+	return task;
+}
+
+
+Task* Runner::popNonCancelled()
+{
+	FastMutex::ScopedLock lock(_mutex);
+	for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
+		Task* task = *it;
+		if (!task->cancelled()) {			
+			_tasks.erase(it);
+			return task;
+		}
+	}			
+	return NULL;
+}
+
+
+void Runner::push(Task* task)
+{
+	FastMutex::ScopedLock lock(_mutex);
+	_tasks.push_back(task);
+}
+*/
+
+
+			//else { //if (!task->cancelled()) {	
+			//}
+
+	//Task* task = NULL;
+	//bool cancel = false;
+	//bool destroy = false;
+
+/*
+void Runner::run()
+{
+	Task* task = NULL;
+	bool cancel = false;
+	bool destroy = false;
+	while (!_stop) 
+	{
+		{
+			FastMutex::ScopedLock lock(_mutex);
+				
+			// Sometimes stop will be true after we
+			// unlock the mutex so check again.
+			if (_stop)
+				break;
+
+			//Log("trace", this) << "Looping: " << _tasks.size() << endl;
+			if (!_tasks.empty()) {
+				task = _tasks.front();
+				//if (task->_cancelled)
+				//	continue;
+
+				_tasks.pop_front();
+				
+				cancel = task->_cancelled;
+				destroy = task->_destroyed || !task->_repeating;
+
+				// Push the task back onto the end of the queue
+				// if the task is not pending destruction.
+				//if (!destroy)
+				//	_tasks.push_back(task);
+			}
+		}
+
+		// Pause processing if there are no tasks so
+		// we can save CPU.
+		// TODO: Check if we have any cancel tasks.
+		if (!task) {
+			Log("trace", this) << "No more tasks to run" << endl;
+			_wakeUp.wait();
+			Log("trace", this) << "Waking up" << endl;
+			continue;
+		}
+
+		// Run the task...
+		else if (!cancel) {	
+			//Log("trace", this) << "Running: " << task << endl;
+			if (task->beforeRun())
+				task->run();	
+			//Log("trace", this) << "Running: OK: " << task << endl;
+		}
+
+		// Destroy the task if the destroy flag is set,
+		// or if the task is not repeatable.
+		if (destroy) {
+			Log("trace", this) << "Destroying Task: " << task << endl;	
+			delete task;
+		}
+
+		else 
+
+		// Gulp
+		Thread::sleep(5);		
+
+		Idle.dispatch(this);
+	}	
+			
+	Log("trace", this) << "Shutdown" << endl;
+	
+	// Ensure all tasks are destroyed.
+	{
+		FastMutex::ScopedLock lock(_mutex);
+		for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {	
+			Log("trace", this) << "Shutdown: Destroying Task: " << *it << endl;
+			delete *it;
+		}
+	}
+		
+	Shutdown.dispatch(this);
+
+	Log("trace", this) << "Exiting" << endl;
+}
+*/
+
+
+
+
+
+		/*
+		{
+			FastMutex::ScopedLock lock(_mutex);
+				
+			// Sometimes stop will be true after we
+			// unlock the mutex so check again.
+			if (_stop)
+				break;
+
+			//Log("trace", this) << "Looping: " << _tasks.size() << endl;
+			if (!_tasks.empty()) {
+				task = _tasks.front();
+				//if (task->_cancelled)
+				//	continue;
+
+				_tasks.pop_front();
+				
+				cancel = task->_cancelled;
+				destroy = task->_destroyed || !task->_repeating;
+
+				// Push the task back onto the end of the queue
+				// if the task is not pending destruction.
+				//if (!destroy)
+				//	_tasks.push_back(task);
+			}
+		}
+
+		*/
+				
+		/*
+		Log("trace", this) << "Obtained: " 
+			<< task
+			<< ": Aborted: " << task->destroyed() 
+			<< ": Running: " << !task->cancel() 
+			<< ": Repeating: " << task->repeating() 
+			<< endl;
+
+		// Pause processing if there are no tasks so
+		// we can save CPU.
+		// TODO: Check if we have any cancel tasks.
+		if (!task) {
+			Log("trace", this) << "No more tasks to run" << endl;
+			_wakeUp.wait();
+			Log("trace", this) << "Waking up" << endl;
+			continue;
+		}
+
+		// Run the task...
+		else if (!cancel) {	
+			//Log("trace", this) << "Running: " << task << endl;
+			if (task->beforeRun())
+				task->run();	
+			//Log("trace", this) << "Running: OK: " << task << endl;
+		}
+
+		// Destroy the task if the destroy flag is set,
+		// or if the task is not repeatable.
+		if (destroy) {
+			Log("trace", this) << "Destroying Task: " << task << endl;	
+			delete task;
+		}
+
+		else 
+		*/
 
 /*
 bool Runner::running(Task* task) const
 {	
-	Log("trace") << "[Runner:" << this << "] Check Running: " << task << endl;
+	Log("trace", this) << "Check Running: " << task << endl;
 
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (*it == task)
 			return (*it)->running();
@@ -273,7 +508,7 @@ void Runner::wakeUp()
 
 
 
-	//Mutex::ScopedLock lock(_mutex);	
+	//FastMutex::ScopedLock lock(_mutex);	
 
 	/* //, repeat, true)
 	// If the task exists then start it.
@@ -296,7 +531,7 @@ void Runner::wakeUp()
 
 
 	/*
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (*it == task) {
 			(*it)->_running = false;
@@ -310,11 +545,11 @@ void Runner::wakeUp()
 
 
 	/*
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 	
 	bool exists = false;
 	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
-		Log("trace") << "[Runner:" << this << "] Aborting Managed Task: " << task << endl;
+		Log("trace", this) << "Aborting Managed Task: " << task << endl;
 		if (*it == task) {
 			(*it)->_running = false;
 			(*it)->_destroyed = true;
@@ -324,7 +559,7 @@ void Runner::wakeUp()
 	
 	// Otherwise destroy the pointer.
 	if (!exists) {
-		Log("trace") << "[Runner:" << this << "] Aborting Unmanaged Task: " << task << endl;
+		Log("trace", this) << "Aborting Unmanaged Task: " << task << endl;
 		delete task;
 	}
 	*/
@@ -347,7 +582,7 @@ void Runner::wakeUp()
 	
 	/*
 	return false;
-	task->_running = true;
+	!task->_cancelled = true;
 	_tasks.push_back(task);
 	*/
 
@@ -355,21 +590,21 @@ void Runner::wakeUp()
 	if (!running(task))
 		return false;
 
-	Mutex::ScopedLock lock(_mutex);
-	Log("trace") << "[Runner:" << this << "] Stopped Task: " 
+	FastMutex::ScopedLock lock(_mutex);
+	Log("trace", this) << "Stopped Task: " 
 		<< task << ": " << _tasks.size() << " tasks in queue." << endl;	
-	task->_running = false;
+	!task->_cancelled = false;
 	return true;
 	*/
 
 	/*
 	if (running(task)) {
-		Log("trace") << "[Runner:" << this << "] Aborting Running Task: " << task << endl;
+		Log("trace", this) << "Aborting Running Task: " << task << endl;
 		task->_destroy = true;
-		task->_running = false;
+		!task->_cancelled = false;
 	}
 	else {
-		Log("trace") << "[Runner:" << this << "] Aborting Stopped Task: " << task << endl;
+		Log("trace", this) << "Aborting Stopped Task: " << task << endl;
 		delete task;
 	}
 	*/
@@ -381,7 +616,7 @@ void Runner::wakeUp()
 				//if (!entry->repeat)
 				//	entry->destroy = true;
 
-				//running = task->_running;
+				//running = !task->_cancelled;
 				//destroy = task->_destroy || task->_runOnce;
 				//!runOnce && 		
 				//assert(entry->task);	

@@ -43,8 +43,8 @@ namespace Sourcey {
 namespace Symple {
 
 
-Client::Client(Net::IWebSocket& socket, const Client::Options& options) :
-	SocketIO::Client(socket),
+Client::Client(Net::IWebSocket& socket, Runner& runner, const Client::Options& options) :
+	SocketIO::Client(socket, runner),
 	_options(options),
 	_announceStatus(500)
 {
@@ -215,7 +215,7 @@ int Client::announce()
 		data["type"]	= _options.type;
 	}	
 	SocketIO::Packet p("announce", data, true);
-	SocketIO::Transaction* txn = new SocketIO::Transaction(*this, p, 1, 5000);
+	SocketIO::Transaction* txn = createTransaction(p);
 	txn->StateChange += delegate(this, &Client::onAnnounce);
 	return txn->send();
 }

@@ -71,8 +71,8 @@ class PacketTransaction: protected TimerTask, public ISendable, public StatefulS
 	/// the Runner instance, and is destroyed when complete.
 {
 public:
-	PacketTransaction(int retries = 1, long timeout = 10000) : 
-		TimerTask(timeout, timeout),
+	PacketTransaction(long timeout = 10000, int retries = 0) : 
+		TimerTask(timeout, 0),
 		_retries(retries), 
 		_cancelled(false), 
 		_attempts(0)
@@ -81,8 +81,8 @@ public:
 	}
 
 
-	PacketTransaction(const PacketT& request, int retries = 1, long timeout = 10000) : 
-		TimerTask(timeout, timeout),
+	PacketTransaction(const PacketT& request, long timeout = 10000, int retries = 0) : 
+		TimerTask(timeout, 0),
 		_request(request), 
 		_retries(retries), 
 		_cancelled(false), 
@@ -92,8 +92,8 @@ public:
 	}
 
 
-	PacketTransaction(Runner& runner, int retries = 1, long timeout = 10000) :
-		TimerTask(timeout, timeout),
+	PacketTransaction(Runner& runner, long timeout = 10000, int retries = 0) :
+		TimerTask(timeout, 0),
 		_retries(retries), 
 		_cancelled(false), 
 		_attempts(0)
@@ -101,8 +101,9 @@ public:
 		Log("trace") << "[PacketTransaction:" << this << "] Creating" << std::endl;
 	}
 		
-	PacketTransaction(Runner& runner, const PacketT& request, int retries = 1, long timeout = 10000) : 
-		TimerTask(runner, timeout, timeout), 
+
+	PacketTransaction(Runner& runner, const PacketT& request, long timeout = 10000, int retries = 0) : 
+		TimerTask(runner, timeout, 0), 
 		_request(request), 
 		_retries(retries), 
 		_cancelled(false), 
@@ -117,56 +118,60 @@ public:
 		/// Overriding classes implement sending here.
 		/// This method must be called by derived classes.
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		if (!canSend())
+			return false;
+			//throw Exception("The transaction cannot be sent.");
 
-		Log("trace") << "[PacketTransaction:" << this << "] Sending: " 
-			<< _timeout << ": " << _request.toString() << std::endl;
-		_attempts++;
-		setState(this, TransactionState::Running);
-		if (TimerTask::running())
-			TimerTask::stop();
-		return TimerTask::start();
-	}
+		{
+			Poco::FastMutex::ScopedLock lock(_mutex);
 
-	
-	virtual bool process(const PacketT& packet)
-		/// Processes a potential response and updates state on match.
-	{	
-		if (stateEquals(TransactionState::Running) && match(packet)) {
-			{
-				Poco::FastMutex::ScopedLock lock(_mutex);
-				_response = packet;
-				Log("trace") << "[PacketTransaction:" << this << "] Transaction Response Received: " 
-					<< _response.toString() << std::endl;
-			}
-			onResponse();
-			setState(this, cancelled() ? TransactionState::Cancelled : TransactionState::Success);		
-			onComplete();
-			return true;
+			Log("trace") << "[PacketTransaction:" << this << "] Sending: " 
+				<< _timeout << ": " << _request.toString() << std::endl;
+			_attempts++;
 		}
-		return false;
+		setState(this, TransactionState::Running);
+		TimerTask::cancel();
+		TimerTask::start();
+		return true;
 	}
+	
 
-
-	virtual void cancel()
-		/// Cancellation means that the agent will not retransmit the
-        /// request, will not treat the lack of response to be a failure,
-        /// but will wait the duration of the transaction timeout for 
-		/// a response.
+	void cancel()
+		/// Cancellation means that the agent will not retransmit 
+        /// the request, will not treat the lack of response to be
+        /// a failure, but will wait the duration of the transaction
+		/// timeout for a response.
+		///
+		/// This method is not virtual as the TimerTask cancelled() 
+		/// method is redundant at the transaction scope.
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		_cancelled = true;
+
+		// Do not set the underlying TimerTask to cancelled as we
+		// still need to receive the need timeout event.
 	}
 	
 
-	bool cancelled()
+	bool cancelled() const
+		/// Returns the transaction cancelled status.
+		///
+		/// This method is not virtual as the TimerTask cancelled() 
+		/// method is redundant at the transaction scope.
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		return _cancelled;
 	}
+
+
+	virtual bool canSend()
+	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
+		return !_cancelled && _attempts <= _retries;
+	}
 	
 
-	int attempts()
+	virtual int attempts() const
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		return _attempts;
@@ -201,18 +206,30 @@ public:
 	}
 
 
-	bool canRetry()
-	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
-		return _attempts < _retries;
-	}
-
-
 protected:
 	virtual ~PacketTransaction()
 	{
 		Log("trace") << "[PacketTransaction:" << this << "] Destroying" << std::endl;
 		assert(!stateEquals(TransactionState::Running));
+	}
+
+	
+	virtual bool process(const PacketT& packet)
+		/// Processes a potential response and updates state on match.
+	{	
+		if (stateEquals(TransactionState::Running) && match(packet)) {
+			{
+				Poco::FastMutex::ScopedLock lock(_mutex);
+				_response = packet;
+				Log("trace") << "[PacketTransaction:" << this << "] Transaction Response Received: " 
+					<< _response.toString() << std::endl;
+			}
+			onResponse();
+			setState(this, cancelled() ? TransactionState::Cancelled : TransactionState::Success);		
+			onComplete();
+			return true;
+		}
+		return false;
 	}
 
 
@@ -242,7 +259,7 @@ protected:
 				setState(this, TransactionState::Cancelled);
 				onComplete();
 			} 
-			else if (!canRetry()) {
+			else if (!canSend()) {
 				setState(this, TransactionState::Failed, "Transaction timeout");
 				onComplete();
 			} 
@@ -253,13 +270,12 @@ protected:
 
 protected:
 	mutable Poco::FastMutex	_mutex;
-
-	int _retries;		// The maximum number of attempts before the transaction is considered failed.
-	int _attempts;		// The number of times the transaction has been sent.
-	bool _autoDelete;	// Optionally delete the instance on completion.
-	bool _cancelled;
+	
 	PacketT _request;
 	PacketT _response;
+	bool _cancelled;
+	int _retries;		// The maximum number of attempts before the transaction is considered failed.
+	int _attempts;		// The number of times the transaction has been sent.	
 };
 
 
@@ -269,6 +285,7 @@ protected:
 #endif // SOURCEY_PacketTransaction_H
 
 
+	//bool _autoDelete;	// Optionally delete the instance on completion.
 
 	//Signal<TransactionState&> TransactionComplete;
 		/// Fired when the transaction is completed.

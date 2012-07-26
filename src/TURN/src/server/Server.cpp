@@ -91,7 +91,7 @@ void Server::stop()
 {
 	Log("trace", this) << "Stopping" << endl;	
 	//Timer::getDefault().stop(TimerCallback<Server>(this, &Server::onTimer));	
-	_timer->stop();
+	_timer->cancel();
 
 	if (_options.enableTCP) {
 		_socketTCP.close();

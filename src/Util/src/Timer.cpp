@@ -25,9 +25,11 @@
 //
 
 
-#include "Sourcey/Timer.h"
+#include "Sourcey/Util/Timer.h"
 #include "Sourcey/Logger.h"
 #include "Poco/SingletonHolder.h"
+
+#include <algorithm>
 #include "assert.h"
 
 
@@ -48,12 +50,12 @@ Timer::Timer() :
 
 Timer::~Timer() 
 {	
-	cout << "[Timer: " << this << "] Destroying" << endl;
+	cout << "[Timer:" << this << "] Destroying" << endl;
 	_stop = true;
 	_wakeUp.set();
 	_thread.join();
 	Util::ClearVector(_callbacks);	
-	cout << "[Timer: " << this << "] Destroying: OK" << endl;
+	cout << "[Timer:" << this << "] Destroying: OK" << endl;
 }
 
 
@@ -62,11 +64,11 @@ void Timer::start(const ITimerCallback& callback)
 	// Attempt to stop any matching callbacks
 	stop(callback);
 
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 	_callbacks.push_back(callback.clone());	
 	sort(_callbacks.begin(), _callbacks.end(), CompareTimeout);
 	
-	Log("trace") << "[Timer:" << this << "] Started: " << callback.object() << endl;
+	Log("trace", this) << "Started: " << callback.object() << endl;
 
 	_scheduleAt = _callbacks.front()->scheduleAt();
 	_wakeUp.set();
@@ -75,13 +77,13 @@ void Timer::start(const ITimerCallback& callback)
 
 void Timer::stop(const ITimerCallback& callback) 
 {
-	Log("trace") << "[Timer:" << this << "] Stopping: " << callback.object() << endl;
+	Log("trace", this) << "Stopping: " << callback.object() << endl;
 
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 	bool success = false;
 	for (TimerCallbackList::const_iterator it = _callbacks.begin(); it != _callbacks.end(); ++it) {
 		if (**it == callback) {
-			Log("trace") << "[Timer:" << this << "] Stopped: " << (*it)->object() << endl;
+			Log("trace", this) << "Stopped: " << (*it)->object() << endl;
 			(*it)->cancel();
 			success = true;
 			break;
@@ -96,10 +98,10 @@ void Timer::stop(const ITimerCallback& callback)
 
 void Timer::stopAll(const void* klass)
 {
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 	for (TimerCallbackList::const_iterator it = _callbacks.begin(); it != _callbacks.end(); ++it) {
 		if ((*it)->object() == klass) {
-			Log("trace") << "[Timer:" << this << "] Stopped: " << (*it)->object() << endl;
+			Log("trace", this) << "Stopped: " << (*it)->object() << endl;
 			(*it)->cancel();
 		}
 	}
@@ -108,11 +110,11 @@ void Timer::stopAll(const void* klass)
 
 void Timer::reset(const ITimerCallback& callback) 
 {
-	Mutex::ScopedLock lock(_mutex);
+	FastMutex::ScopedLock lock(_mutex);
 	bool success = false;
 	for (TimerCallbackList::const_iterator it = _callbacks.begin(); it != _callbacks.end(); ++it) {
 		if (**it == callback) {
-			Log("trace") << "[Timer:" << this << "] Reset: " << (*it)->object() << endl;
+			Log("trace", this) << "Reset: " << (*it)->object() << endl;
 			(*it)->scheduleAt().reset();
 			success = true;
 			break;
@@ -127,48 +129,49 @@ void Timer::reset(const ITimerCallback& callback)
 
 void Timer::run() 
 {
-	Log("trace") << "[Timer:" << this << "] Running" << endl;
+	Log("trace", this) << "Running" << endl;
 
 	while (!_stop) {	
 		//try {
-			Log("trace") << "[Timer:" << this << "] Waiting for " << _scheduleAt.remaining() << endl;
+			Log("trace", this) << "Waiting for " << _scheduleAt.remaining() << endl;
 
 			_wakeUp.tryWait(_scheduleAt.remaining());
 			if (_scheduleAt.expired()) {
 
-				Log("trace") << "[Timer:" << this << "] Timeout" << endl;
-				ScopedLockWithUnlock<Mutex> lock(_mutex);
-				TimerCallbackList toNotify(_callbacks);
-				lock.unlock();
+				Log("trace", this) << "Timeout" << endl;
+				//ScopedLockWithUnlock<Mutex> lock(_mutex);
+				//TimerCallbackList callbacks(_callbacks);
+				//lock.unlock();
+				TimerCallbackList callbacks(this->callbacks());
 
 				// If callbacks are empty and we made it here the last 
 				// of our previous callbacks has been cleared. We can
 				// restart the timer.
-				if (toNotify.empty()) {
+				if (callbacks.empty()) {
 					_scheduleAt.reset();
 					_scheduleAt.setDelay(60 * 1000);
 					continue;
 				}
 
 				bool hasRedundant = false;
-				for (TimerCallbackList::const_iterator it = toNotify.begin(); it != toNotify.end(); ++it) {
+				for (TimerCallbackList::const_iterator it = callbacks.begin(); it != callbacks.end(); ++it) {
 					if ((*it)->cancelled()) {
 						hasRedundant = true;
 					}
 					else if ((*it)->ready()) {
-						Log("trace") << "[Timer:" << this << "] Invoking: " << *it << endl;
+						Log("trace", this) << "Invoking: " << *it << endl;
 						(*it)->invoke();
 					}	
 				}
 
 				// Post processing...
-				Mutex::ScopedLock alock(_mutex);				
+				FastMutex::ScopedLock alock(_mutex);				
 				if (hasRedundant) {
-					//Log("trace") << "[Timer:" << this << "] Clearing Redundant Callbacks" << endl;
+					//Log("trace", this) << "Clearing Redundant Callbacks" << endl;
 					TimerCallbackList::iterator it = _callbacks.begin();
 					while (it != _callbacks.end()) {
 						if ((*it)->cancelled()) {
-							Log("trace") << "[Timer:" << this << "] Clearing Cancelled: " << (*it)->object() << endl;
+							Log("trace", this) << "Clearing Cancelled: " << (*it)->object() << endl;
 							delete *it;
 							it = _callbacks.erase(it);
 						}
@@ -183,10 +186,10 @@ void Timer::run()
 					_scheduleAt = _callbacks.front()->scheduleAt();
 					
 					/*
-					Log("trace") << "[Timer:" << this << "] Printing Sorted Callbacks" << endl;
+					Log("trace", this) << "Printing Sorted Callbacks" << endl;
 					TimerCallbackList::iterator it = _callbacks.begin();
 					while (it != _callbacks.end()) {
-						Log("trace") << "[Timer:" << this << "] Callback: " 
+						Log("trace", this) << "Callback: " 
 							<< (*it)->object() << ": " 
 							<< (*it)->scheduleAt().remaining() << endl;
 						++it;
@@ -196,11 +199,18 @@ void Timer::run()
 			}
 		//}
 		//catch (Exception& exc) {
-		//	Log("error") << "[Timer:" << this << "] Swallowing Exception: " << exc.displayText() << endl;
+		//	Log("error", this) << "Swallowing Exception: " << exc.displayText() << endl;
 		//}
 	}
 	
-	Log("trace") << "[Timer:" << this << "] Exiting" << endl;
+	Log("trace", this) << "Exiting" << endl;
+}
+
+
+TimerCallbackList Timer::callbacks() const
+{
+	FastMutex::ScopedLock lock(_mutex);
+	return _callbacks;
 }
 
 

@@ -45,7 +45,9 @@ macro(define_sourcey_application name)
   endforeach()
   
   # KLUDGE: Adding all thrid party dependencies for now.
-  add_dependencies(${name} ${LibSourcey_BUILD_DEPENDENCIES})
+  if (LibSourcey_BUILD_DEPENDENCIES)
+    add_dependencies(${name} ${LibSourcey_BUILD_DEPENDENCIES})
+  endif()
   
   #status("  Linking application ${name}")    
   #status("    Libraries:               ${LibSourcey_INCLUDE_LIBRARIES}")    
