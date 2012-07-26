@@ -38,26 +38,27 @@ namespace Sourcey {
 	
 
 class Runner;
-	
+
 
 class Task
 	/// This class defines an asynchronous Task which is managed
 	/// by a Runner.
 {
 public:	
-	Task(bool repeating = false);	
-	Task(Runner& runner, bool repeating = false, bool autoStart = false);
+	Task(bool repeat = false);	
+	Task(Runner& runner, bool repeat = false, bool autoStart = false);
 		
-	virtual bool start();
-	virtual bool stop();
-	virtual bool destroy();
-
-	virtual bool running() const;
+	virtual void start();
+	virtual void cancel();
+	virtual void destroy();
+	
+	virtual UInt32 id() const;
+	virtual bool cancelled() const;
 	virtual bool destroyed() const;
 	virtual bool repeating() const;
 
 	virtual Runner& runner();
-		/// Returns a reference to the affiliated Runner or 
+		/// Returns a reference to the associated Runner or 
 		/// throws an exception.
 	
 protected:
@@ -69,20 +70,26 @@ protected:
 		/// destroyed there is a chance that the Runner will call
 		/// run() as a pure virtual method.
 	
-	virtual bool canRun();	
-		/// Called by the Runner to determine weather the task can
-		/// be run or not. It is safe to destroy() the task from
-		/// inside this method.
-		/// This method returns true by default.
+	virtual bool beforeRun();	
+		/// Called by the Runner to perform pre-processing, and
+		/// to determine weather the task can be run or not.
+		/// It is safe to destroy() the task from inside this method.
+		/// This method returns !cancelled() by default.
 
 	virtual void run() = 0;	
 		/// Called by the Runner to run the task.
 		/// Override this method to implement task logic.
 	
+	virtual bool afterRun();	
+		/// Called by the Runner to perform post-processing, and
+		/// to determine weather the task should be destroyed or not.
+		/// This method returns true by default.
+
 protected:	
 	mutable Poco::FastMutex	_mutex;
 	
-	bool _running;
+	UInt32 _id;
+	bool _cancelled;
 	bool _destroyed;
 	bool _repeating;
 
@@ -99,6 +106,61 @@ protected:
 
 
 	
+
+
+/*
+template <class RunnableT>
+class ITask: public RunnableT
+	/// This class defines an asynchronous Task which is
+	/// managed by a Runner.
+{
+public:			
+	virtual bool start() = 0;
+	virtual bool cancel() = 0;
+	virtual bool destroy() = 0;
+
+	virtual bool cancelled() const = 0;
+	virtual bool destroyed() const = 0;
+	virtual bool repeating() const = 0;
+		/// Returns true if the task should be run once only
+
+	virtual Runner& runner();
+		/// Returns a reference to the affiliated Runner or 
+		/// throws an exception.
+	
+protected:
+	Task& operator=(Task const&) = 0; // {}
+	virtual ~Task() = 0;
+		/// CAUTION: The destructor should be private, but we
+		/// left it protected for implementational flexibility. The
+		/// reason being that if the derived task is programmatically
+		/// destroyed there is a chance that the Runner will call
+		/// run() as a pure virtual method.
+	
+	virtual bool beforeRun();	
+		/// Called by the Runner to determine weather the task can
+		/// be run or not. It is safe to destroy() the task from
+		/// inside this method.
+		/// This method returns true by default.
+
+	virtual void run() = 0;	
+		/// Called by the Runner to run the task.
+		/// Override this method to implement task logic.
+	
+protected:	
+	mutable Poco::FastMutex	_mutex;
+	
+	bool _cancelled;
+	bool _destroyed;
+	bool _repeating;
+
+	Runner* _runner;
+	
+	friend class Runner;
+};
+
+class TaskBase: public SocketBase<StreamSocketT, TransportT, ISocketT>
+*/
 
 	//std::string _name;
 

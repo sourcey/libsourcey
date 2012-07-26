@@ -33,8 +33,8 @@
 #include "Sourcey/XMPP/Types.h"
 #include "Sourcey/XMPP/Stanza.h"
 #include "Sourcey/XMPP/Command.h"
+#include "Sourcey/Util/TimedManager.h"
 #include "Sourcey/Router.h"
-#include "Sourcey/TimedManager.h"
 #include "Sourcey/Flaggable.h"
 
 
@@ -120,13 +120,13 @@ enum FilterFlags
 };
 
 
-struct Filter: public FlagT
+struct Filter: public Flags
 {	
 	Filter(const std::string& path, unsigned flags = 0) : 
-		FlagT(flags), path(path) {}
+		Flags(flags), path(path) {}
 	
 	Filter(unsigned flags = 0) : 
-		FlagT(flags) {}
+		Flags(flags) {}
 
 	std::string path;
 };

@@ -44,7 +44,7 @@ class DispatchQueue: public Task
 {
 public:
 	DispatchQueue(Runner& runner, int queueSize = 1024, int dispatchTimeout = DEFAULT_TIMEOUT) :
-		//Task(runner, false, false),
+		Task(runner, false, false),
 		_queueSize(queueSize),
 		_timeout(dispatchTimeout)
 	{
@@ -52,18 +52,18 @@ public:
 	}
 	
 
-	virtual bool start()
+	virtual void start()
 	{
 		Log("trace") << "[DispatchQueue:" << this << "] Starting" << std::endl;
-		return Task::start();
+		Task::start();
 	}
 
 
-	virtual bool stop()
+	virtual void cancel()
 	{
 		Log("trace") << "[DispatchQueue:" << this << "] Stopping" << std::endl;
 		clear();
-		return Task::stop();
+		Task::cancel();
 	}
 
 

@@ -29,12 +29,13 @@
 #define SOURCEY_Timer_H
 
 
+#include "Sourcey/Logger.h"
 #include "Sourcey/Timeout.h"
 
 #include "Poco/Thread.h"
 #include "Poco/Event.h"
-#include "Poco/Timestamp.h"
-#include "Poco/SharedPtr.h"
+#//include "Poco/Timestamp.h"
+//#include "Poco/SharedPtr.h"
 
 #include <vector>
 
@@ -138,7 +139,7 @@ public:
 			   (!c->_opaque || c->_opaque == _opaque);
 	}
 	
-private:
+protected:
 	TimerCallback();
 
 	C*       _object;
@@ -154,7 +155,7 @@ private:
 typedef std::vector<ITimerCallback*> TimerCallbackList;
 
 
-class Timer: public Poco::Runnable 
+class Timer: public Poco::Runnable, public ILoggable
 	/// The Timer is an asynchronous delayed notification sender
 	/// responsible for invoking callbacks of notifications meeting 
 	/// specific criteria.
@@ -165,30 +166,34 @@ public:
 	Timer();
 	virtual ~Timer();
 
-	static Timer& getDefault();
-		/// Returns the default Timer singleton, although Timer
-		/// instances may also be initialized individually.
-
 	void start(const ITimerCallback& callback);
 	void stop(const ITimerCallback& callback);
 	void stopAll(const void* klass);
 	void reset(const ITimerCallback& callback);
 
+	static Timer& getDefault();
+		/// Returns the default Timer singleton, although Timer
+		/// instances may also be initialized individually.
+
+	TimerCallbackList callbacks() const;
+	
+	virtual const char* className() const { return "Timer"; }
+
+protected:
 	void run();
 
-private:
 	static bool CompareTimeout(const ITimerCallback* l, const ITimerCallback* r)
 		/// For stl::sort operations
 	{
 		return l->scheduleAt().remaining() < r->scheduleAt().remaining();
 	}
 
-private:	 	
-	mutable Poco::Mutex	_mutex;
-	Poco::Thread		_thread;
+protected:	 	
+	mutable Poco::FastMutex	_mutex;
 	TimerCallbackList	_callbacks;
-	Timeout				_scheduleAt;
+	Poco::Thread		_thread;
 	Poco::Event			_wakeUp;
+	Timeout				_scheduleAt;
 	bool				_stop;
 };
 

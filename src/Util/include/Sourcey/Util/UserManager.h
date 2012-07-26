@@ -54,7 +54,7 @@ public:
 	std::string username() const { return _username; }
 	std::string password() const { return _password; }
 
-private:
+protected:
 	std::string _username;
 	std::string _password;
 };

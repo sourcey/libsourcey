@@ -154,7 +154,7 @@ class XMPPTask: public Task, public ILoggable
 public:
 	XMPPTask(Client& client, Runner& runner);
 	
-	virtual bool start();
+	virtual void start();
 	//virtual bool stop();
 	
 	virtual void send(const Stanza& stanza);

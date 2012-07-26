@@ -83,7 +83,7 @@ protected:
 	NameValueCollection _params;
 
 private:
-	Request(Request& r) {}
+	Request(const Request&) {}
 		/// The copy constructor is private (Poco limitation). 
 };
 

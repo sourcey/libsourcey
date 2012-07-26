@@ -29,10 +29,10 @@
 #define SOURCEY_Symple_Client_H
 
 
-#include "Sourcey/TimedManager.h"
+#include "Sourcey/SocketIO/Client.h"
 #include "Sourcey/Net/Reactor.h"
 #include "Sourcey/Net/WebSocket.h"
-#include "Sourcey/SocketIO/Client.h"
+#include "Sourcey/Util/TimedManager.h"
 #include "Sourcey/Symple/Message.h"
 #include "Sourcey/Symple/Command.h"
 #include "Sourcey/Symple/Presence.h"
@@ -73,7 +73,7 @@ public:
 	};
 
 public:
-	Client(Net::IWebSocket& socket, const Options& options = Options());
+	Client(Net::IWebSocket& socket, Runner& runner, const Options& options = Options());
 	virtual ~Client();
 
 	void connect();
@@ -164,9 +164,9 @@ template <class WebSocketBaseT>
 class ClientBase: public Client
 {
 public:
-	ClientBase(Net::Reactor& reactor, const Client::Options& options = Client::Options()) :
+	ClientBase(Net::Reactor& reactor, Runner& runner = Runner::getDefault(), const Client::Options& options = Client::Options()) :
 		_socket(reactor),
-		Client(_socket, options)
+		Client(_socket, runner, options)
 	{
 	}
 
@@ -206,13 +206,13 @@ enum FilterFlags
 };
 
 
-struct Filter: public FlagT
+struct Filter: public Flags
 {	
 	Filter(const std::string& path, unsigned flags = 0) : 
-		FlagT(flags), path(path) {}
+		Flags(flags), path(path) {}
 	
 	Filter(unsigned flags = 0) : 
-		FlagT(flags), path("*") {}
+		Flags(flags), path("*") {}
 
 	std::string path;
 };

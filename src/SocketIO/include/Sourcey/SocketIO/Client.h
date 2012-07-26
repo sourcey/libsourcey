@@ -30,17 +30,10 @@
 
 
 #include "Sourcey/Net/Reactor.h"
-/*
-#include "Sourcey/Net/SocketBase.h"
-#include "Sourcey/Net/TCPSocket.h"
-#include "Sourcey/Net/SSLSocket.h"
-#include "Sourcey/Net/StatefulSocket.h"
-*/
 #include "Sourcey/Net/WebSocket.h"
 #include "Sourcey/SocketIO/Packet.h"
 #include "Sourcey/SocketIO/Transaction.h"
 #include "Sourcey/HTTP/Transaction.h"
-#include "Sourcey/Timer.h"
 #include "Sourcey/JSON/JSON.h"
 
 #include "Poco/Format.h"
@@ -85,8 +78,8 @@ struct ClientState: public StateT
 class Client: public StatefulSignal<ClientState>, public PacketDispatcher, public ILoggable
 {
 public:
-	Client(Net::IWebSocket& socket);
-	Client(Net::IWebSocket& socket, const Net::Address& serverAddr);
+	Client(Net::IWebSocket& socket, Runner& runner);
+	Client(Net::IWebSocket& socket, Runner& runner, const Net::Address& serverAddr);
 	virtual ~Client();
 	
 	virtual void connect(const Net::Address& serverAddr);
@@ -111,6 +104,10 @@ public:
 	virtual int sendConnect(const std::string& endpoint = "", const std::string& query = "");
 		// Sends a Connect packet
 	
+	virtual Transaction* createTransaction(const SocketIO::Packet& request, long timeout = 10000);
+		// Creates a packet transaction
+
+	virtual Runner& runner() const;
 	virtual Net::IWebSocket& socket() const;
 	virtual Net::Address serverAddr() const;
 	virtual std::string sessionID() const;	
@@ -132,7 +129,6 @@ protected:
 	virtual void onConnect();
 	virtual void onOnline();
 	virtual void onClose();
-	//virtual void onError();
 	virtual void onPacket(SocketIO::Packet& packet);
 	
 	virtual void onHeartBeatTimer(void*);
@@ -145,6 +141,7 @@ protected:
 	mutable Poco::FastMutex	_mutex;
 	
 	Net::IWebSocket& _socket;
+	Runner&			_runner;
 	Net::Address	_serverAddr;
 	StringList		_protocols;
 	std::string		_sessionID;
@@ -158,18 +155,18 @@ protected:
 // ---------------------------------------------------------------------
 //
 template <class WebSocketBaseT>
-class ClientBase: public Client//, public WebSocketBaseT
+class ClientBase: public Client
 {
 public:
-	ClientBase(Net::Reactor& reactor) :
+	ClientBase(Net::Reactor& reactor, Runner& runner = Runner::getDefault()) :
 		_socket(reactor),
-		Client(_socket)
+		Client(_socket, runner)
 	{
 	}
 
-	ClientBase(Net::Reactor& reactor, const Net::Address& serverAddr) :
+	ClientBase(Net::Reactor& reactor, const Net::Address& serverAddr, Runner& runner = Runner::getDefault()) :
 		_socket(reactor),
-		Client(_socket, serverAddr)
+		Client(_socket, runner, serverAddr)
 	{
 	}
 
@@ -199,6 +196,17 @@ typedef SocketIO::ClientBase<
 	> 
 > SSLClient;
 
+
+} } // namespace Sourcey::SocketIO
+
+
+#endif //  SOURCEY_SOCKETIO_Client_H
+
+
+
+
+
+	//virtual void onError();//void*);
 
 /*
 // ---------------------------------------------------------------------
@@ -520,13 +528,6 @@ typedef SocketIO::ClientBase<
 	> 
 > SSLClient;
 */
-
-
-} } // namespace Sourcey::SocketIO
-
-
-#endif //  SOURCEY_SOCKETIO_Client_H
-
 
 /*
 	//virtual void setSecure(bool flag) = 0;

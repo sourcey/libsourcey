@@ -32,7 +32,7 @@
 #include "Sourcey/Base.h"
 #include "Sourcey/BasicManager.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/Timer.h"
+#include "Sourcey/Util/Timer.h"
 
 
 namespace Sourcey {

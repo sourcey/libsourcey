@@ -65,15 +65,16 @@ Form::~Form()
 
 string Form::action() const 
 {
-	return root().get("action", "create").asString();
+	return root().get("action", "form").asString();
 }
 
 	
 void Form::setAction(const string& action) 
 {
 	assert(
-		action == "create" ||
+		action == "form" ||
 		action == "submit" ||
+		action == "cancel" ||		
 		action == "result"
 	);
 	root()["action"] = action;
@@ -190,15 +191,15 @@ void FormElement::setLive(bool flag)
 }
 
 
-FormElement FormElement::addPage(const string& label) 
+FormElement FormElement::addPage(const string& id, const string& label) 
 {
-	return FormElement(root()["elements"][root()["elements"].size()], "page", "", label);
+	return FormElement(root()["elements"][root()["elements"].size()], "page", id, label);
 }
 
 
-FormElement FormElement::addSection(const string& label) 
+FormElement FormElement::addSection(const string& id, const string& label) 
 {
-	return FormElement(root()["elements"][root()["elements"].size()], "section", "", label);
+	return FormElement(root()["elements"][root()["elements"].size()], "section", id, label);
 }
 
 
@@ -210,7 +211,9 @@ FormField FormElement::addField(const string& type, const string& id, const stri
 		type == "list" ||
 		type == "list-multi" ||
 		type == "boolean" ||
+		type == "integer" ||
 		type == "media" ||
+		type == "horizontal-set" ||
 		type == "custom"
 	);
 
@@ -227,6 +230,12 @@ void FormElement::clear()
 bool FormElement::valid() const
 {
 	return _root != NULL; 
+}
+
+
+int FormElement::numElements()
+{
+	return root()["elements"].size();
 }
 
 	

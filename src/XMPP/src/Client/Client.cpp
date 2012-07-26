@@ -326,7 +326,7 @@ XMPPTask::~XMPPTask()
 }
 
 
-bool XMPPTask::start()
+void XMPPTask::start()
 {
 	FastMutex::ScopedLock lock(_mutex);
 	
@@ -352,7 +352,7 @@ bool XMPPTask::start()
 	
 	Log("debug", this) << "Starting XMPP: OK" << endl;		
 
-	return Task::start();
+	Task::start();
 }
 
 

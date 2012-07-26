@@ -40,35 +40,7 @@
 namespace Sourcey {
 
 
-	/*
-struct TaskEntry
-{
-	bool repeat;
-	bool running;
-	bool destroy;
-	Task* task;
-
-	TaskEntry(Task* task = NULL, bool repeat = true, bool running = false) : 
-		task(task), repeat(repeat), running(running), destroy(false) {}
-
-	virtual bool canRun() { return running; }
-};
-
-
-struct ScheduledTaskEntry: public TaskEntry
-{
-	Poco::Timestamp scheduleAt;	
-	//Poco::TimeDiff interval;
-
-	ScheduledTaskEntry() {}
-		
-	//: TaskEntry() : task(NULL), repeat(true), running(false) {}
-	//long timeout;
-};
-*/
-
-
-class Runner: public Poco::Runnable
+class Runner: public Poco::Runnable, public ILoggable
 	/// The Runner is an asynchronous event loop in charge
 	/// of one or many tasks. 
 	///
@@ -79,28 +51,23 @@ public:
 	Runner();
 	virtual ~Runner();
 	
-	virtual bool add(Task* task);
-		/// Adds a task to the runner.
-
 	virtual bool start(Task* task);
 		/// Starts a task, adding it if it doesn't exist.
 
-	virtual bool stop(Task* task);
-		/// Stops a task.
+	virtual bool cancel(Task* task);
+		/// Cancels a task.
 		/// The task reference will be managed the Runner
 		/// until the task is destroyed.
 
 	virtual bool destroy(Task* task);
 		/// Queues a task for destruction.
-	
+
 	virtual bool exists(Task* task) const;
 		/// Returns weather or not a task exists.
 
-	//virtual bool running(Task* task) const;
-		/// Returns weather or not a task is started.
-	
-	//virtual void wakeUp();
-		/// Tells the runner to wake up and loop internal tasks.
+	virtual Task* get(UInt32 id) const;
+		/// Returns the task pointer matching the given ID, 
+		/// or NULL if no task exists.
 
 	static Runner& getDefault();
 		/// Returns the default Runner singleton, although
@@ -117,19 +84,33 @@ public:
 	
 	NullSignal Idle;
 	NullSignal Shutdown;
+	
+	virtual const char* className() const { return "Runner"; }
 		
 protected:
 	virtual void run();
-		/// Called by the thread to run internal tasks.
+		/// Called by the thread to run managed tasks.
+	
+	virtual bool add(Task* task);
+		/// Adds a task to the runner.
+	
+	virtual bool remove(Task* task);
+		/// Removes a task from the runner.
+
+	virtual Task* next() const;
+		/// Returns the next task to be run.
+	
+	virtual void clear();
+		/// Destroys and clears all manages tasks.
 
 protected:
 	typedef std::deque<Task*> TaskList;
-
-	Poco::Thread	_thread;
+	
+	mutable Poco::FastMutex	_mutex;
 	TaskList		_tasks;
+	Poco::Thread	_thread;
 	Poco::Event		_wakeUp;
 	bool			_stop;
-	mutable Poco::Mutex	_mutex;
 };
 
 
@@ -139,6 +120,49 @@ protected:
 #endif // SOURCEY_Runner_H
 
 
+
+
+
+	/*
+	virtual Task* pop();
+	virtual Task* popNonCancelled();
+		/// Pop a non cancelled task from the front of the queue.
+
+	virtual void push(Task* task);
+		// Push a task onto the back of the queue.
+		*/
+	/*
+struct TaskEntry
+{
+	bool repeat;
+	bool running;
+	bool destroy;
+	Task* task;
+
+	TaskEntry(Task* task = NULL, bool repeat = true, bool running = false) : 
+		task(task), repeat(repeat), running(running), destroy(false) {}
+
+	virtual bool beforeRun() { return running; }
+};
+
+
+struct Scheduler::TaskEntry: public TaskEntry
+{
+	Poco::Timestamp scheduleAt;	
+	//Poco::TimeDiff interval;
+
+	Scheduler::TaskEntry() {}
+		
+	//: TaskEntry() : task(NULL), repeat(true), running(false) {}
+	//long timeout;
+};
+*/
+
+	//virtual bool running(Task* task) const;
+		/// Returns weather or not a task is started.
+	
+	//virtual void wakeUp();
+		/// Tells the runner to wake up and loop internal tasks.
 	
 	 //, bool repeat = true
 	//virtual bool schedule(Task* task, const Poco::DateTime& runAt);

@@ -36,7 +36,7 @@
 #include "Sourcey/XMPP/Jingle/Jingle.h"
 #include "Sourcey/ICE/Agent.h"
 #include "Sourcey/PacketDispatcher.h"
-#include "Sourcey/UserManager.h"
+#include "Sourcey/Util/UserManager.h"
 #include "Sourcey/Signal.h"
 
 #include <assert.h>

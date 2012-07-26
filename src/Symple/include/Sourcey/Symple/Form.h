@@ -74,8 +74,8 @@ public:
 	void setError(const std::string& error);
 		/// Sets and optional validation error message.
 	
-	FormElement addPage(const std::string& label = "");
-	FormElement addSection(const std::string& label = "");
+	FormElement addPage(const std::string& id = "", const std::string& label = "");
+	FormElement addSection(const std::string& id = "", const std::string& label = "");
 	FormField addField(const std::string& type, const std::string& id = "", const std::string& label = "");
 	
 	FormField getField(const std::string& id, bool partial = false);
@@ -86,6 +86,9 @@ public:
 		/// If the partial flag is set then substring matches
 		/// will be counted.
 		
+	int numElements();
+		/// Returns the number of child elements.
+
 	bool hasErrors();
 	bool hasPages();
 	
@@ -113,9 +116,11 @@ public:
 
 	void setAction(const std::string& action);
 		/// Possible "action" values
-		/// form 		The form has been created, and is ready to be displayed by the initiator.
-		/// submit 		The form is being submitted, and is ready to be processed by the responder.
-		/// result 		The form has been processed, and is ready to be handled by the initiator.
+		/// form 		The form-processing entity is asking the form-submitting entity to complete a form.
+		/// submit 		The form-submitting entity is submitting data to the form-processing entity.
+		/// cancel 		The form-submitting entity has cancelled submission of data to the form-processing entity.
+		/// result 		The form-processing entity is returning data to the form-submitting entity.
+
 	
 	bool valid();
 };

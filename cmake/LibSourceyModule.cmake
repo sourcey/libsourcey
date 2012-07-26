@@ -51,7 +51,11 @@ macro(define_sourcey_module name)
   # Include dependent modules
   foreach(module ${ARGN})
     include_sourcey_modules(${module})  
-    add_dependencies(${name} ${module})
+    
+    # Fix inter dependency errors
+    if(NOT ${module} MATCHES "Util") 
+      add_dependencies(${name} ${module})
+    endif()
   endforeach()  
 
   # Include external dependencies

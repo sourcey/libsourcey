@@ -43,8 +43,8 @@ struct Transaction: public Net::Transaction<Message>
 				Net::IPacketSocket* socket, 
 				const Net::Address& localAddress, 
 				const Net::Address& peerAddress, 
-				int retries = 1, 
-				long timeout = 10000);
+				long timeout = 10000, 
+				int retries = 1);
 	
 	virtual bool match(const Message& message);
 	virtual void onResponse();

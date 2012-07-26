@@ -59,9 +59,9 @@ public:
 	TimerTask(long timeout = 0, long interval = 0);
 	TimerTask(Runner& runner, long timeout = 0, long interval = 0);
 	
-	virtual bool start();
-	virtual bool stop();
-	virtual bool destroy();
+	virtual void start();
+	virtual void cancel();
+	virtual void destroy();
 
 	virtual void setTimeout(long timeout);
 		/// Sets the initial timeout value. Note that if the
@@ -82,6 +82,10 @@ public:
 	virtual long interval() const;
 		/// Returns the timer interval value.
 	
+	virtual Sourcey::Timeout& scheduleAt();
+	virtual Sourcey::Timeout scheduleAt() const;
+		/// Returns the next scheduled time value.
+	
 	virtual void onTimeout();
 		/// Derived classes can extend this method to 
 		/// implement processing logic when the timer fires.
@@ -93,14 +97,12 @@ protected:
 	TimerTask& operator=(TimerTask const&) {}
 	virtual ~TimerTask();	
 
-	virtual bool canRun();
+	virtual bool beforeRun();
 	virtual void run();
 	
 	long _timeout;
 	long _interval;
 	Sourcey::Timeout _scheduleAt;
-
-	friend class Runner;
 };
 
 

@@ -45,10 +45,10 @@ namespace STUN {
 Transaction::Transaction(Runner& runner, 
 						 IPacketSocket* socket, 
 						 const Address& localAddress, 
-						 const Address& peerAddress, 
-						 int retries,
-						 long timeout) : 
-	Net::Transaction<Message>(runner, socket, localAddress, peerAddress, retries, timeout)
+						 const Address& peerAddress,
+						 long timeout, 
+						 int retries) : 
+	Net::Transaction<Message>(runner, socket, localAddress, peerAddress, timeout, retries)
 {
 	Log("debug") << "[STUNTransaction:" << this << "] Initializing" << std::endl;
 }
