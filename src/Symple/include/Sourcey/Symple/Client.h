@@ -119,7 +119,7 @@ public:
 		/// Possible status codes are:
 		///		- 200: Authentication success
 		///		- 401: Authentication failed
-		///		- 404: Bad request data
+		///		- 400: Bad request data
 		///		- 500: Server not found
 
 	Signal<Peer&> UpdatePresenceData;
@@ -350,7 +350,7 @@ public:
 		/// Possible status codes are:
 		///		- 200: Authentication success
 		///		- 401: Authentication failed
-		///		- 404: Bad request data
+		///		- 400: Bad request data
 		///		- 500: Server not found
 
 	Signal<Peer&> UpdatePresenceData;
@@ -773,7 +773,7 @@ typedef Symple::Client<
 		/// Possible status codes are:
 		///		- 200: Authentication success
 		///		- 401: Authentication failed
-		///		- 404: Bad request data
+		///		- 400: Bad request data
 		///		- 500: Server not found
 
 	Signal<Peer&> UpdatePresenceData;

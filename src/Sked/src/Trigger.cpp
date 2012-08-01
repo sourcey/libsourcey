@@ -133,7 +133,7 @@ void IntervalTrigger::update()
 
 bool IntervalTrigger::expired()
 { 
-	return timesRun >= maxTimes; 
+	return maxTimes > 0 && timesRun >= maxTimes; 
 }
 
 

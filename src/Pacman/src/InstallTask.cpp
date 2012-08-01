@@ -25,7 +25,7 @@
 //
 
 
-#include "Sourcey/Pacman/PackageInstallTask.h"
+#include "Sourcey/Pacman/InstallTask.h"
 #include "Sourcey/Pacman/PackageManager.h"
 #include "Sourcey/Pacman/Package.h"
 #include "Sourcey/Logger.h"
@@ -48,7 +48,7 @@ namespace Sourcey {
 namespace Pacman {
 
 
-PackageInstallTask::PackageInstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote, const Options& options) :
+InstallTask::InstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote, const Options& options) :
 	_manager(manager),
 	_local(local),
 	_remote(remote),
@@ -60,13 +60,13 @@ PackageInstallTask::PackageInstallTask(PackageManager& manager, LocalPackage* lo
 }
 
 
-PackageInstallTask::~PackageInstallTask()
+InstallTask::~InstallTask()
 {
 	// :)
 }
 
 
-void PackageInstallTask::start()
+void InstallTask::start()
 {
 	Log("trace", this) << "Starting" << endl;	
 	FastMutex::ScopedLock lock(_mutex);
@@ -74,7 +74,7 @@ void PackageInstallTask::start()
 }
 
 
-void PackageInstallTask::cancel()
+void InstallTask::cancel()
 {
 	Log("trace", this) << "Cancelling" << endl;	
 	FastMutex::ScopedLock lock(_mutex);
@@ -84,7 +84,7 @@ void PackageInstallTask::cancel()
 }
 
 
-void PackageInstallTask::run()
+void InstallTask::run()
 {
 	try {
 		// If the package failed previously we might need
@@ -113,7 +113,7 @@ void PackageInstallTask::run()
 }
 
 
-void PackageInstallTask::onStateChange(PackageInstallState& state, const PackageInstallState& oldState)
+void InstallTask::onStateChange(PackageInstallState& state, const PackageInstallState& oldState)
 {
 	Log("debug", this) << "State Changed to " << state.toString() << endl; 	
 	{
@@ -155,7 +155,7 @@ void PackageInstallTask::onStateChange(PackageInstallState& state, const Package
 }
 
 
-void PackageInstallTask::doDownload()
+void InstallTask::doDownload()
 {
 	setState(this, PackageInstallState::Downloading);
 
@@ -209,7 +209,7 @@ void PackageInstallTask::doDownload()
 
 	_transaction.setRequest(request);
 	_transaction.setOutputPath(_manager.getCacheFilePath(localAsset.fileName()).toString());
-	_transaction.ResponseProgress += delegate(this, &PackageInstallTask::onResponseProgress);
+	_transaction.ResponseProgress += delegate(this, &InstallTask::onResponseProgress);
 	if (!_transaction.send())
 		throw Exception(format("Failed to download package files: HTTP Error: %d %s", 
 			static_cast<int>(_transaction.response().getStatus()), 
@@ -223,7 +223,7 @@ void PackageInstallTask::doDownload()
 }
 
 
-void PackageInstallTask::onResponseProgress(void* sender, HTTP::TransferState& state)
+void InstallTask::onResponseProgress(void* sender, HTTP::TransferState& state)
 {
 	Log("debug", this) << "Download Progress: " << state.progress() << endl;
 
@@ -232,7 +232,7 @@ void PackageInstallTask::onResponseProgress(void* sender, HTTP::TransferState& s
 }
 
 
-void PackageInstallTask::doUnpack()
+void InstallTask::doUnpack()
 {
 	setState(this, PackageInstallState::Unpacking);
 		
@@ -261,19 +261,19 @@ void PackageInstallTask::doUnpack()
 	// if any errors are encountered and the task will fail.
 	ifstream in(filePath.toString().c_str(), ios::binary);
 	Poco::Zip::Decompress c(in, outputDir);
-	c.EError += Poco::Delegate<PackageInstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const string> >(this, &PackageInstallTask::onDecompressionError);
-	c.EOk +=Poco::Delegate<PackageInstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path> >(this, &PackageInstallTask::onDecompressionOk);
+	c.EError += Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const string> >(this, &InstallTask::onDecompressionError);
+	c.EOk +=Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path> >(this, &InstallTask::onDecompressionOk);
 
 	c.decompressAllFiles();
-	c.EError -= Poco::Delegate<PackageInstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const string> >(this, &PackageInstallTask::onDecompressionError);
-	c.EOk -=Poco::Delegate<PackageInstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path> >(this, &PackageInstallTask::onDecompressionOk);
+	c.EError -= Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const string> >(this, &InstallTask::onDecompressionError);
+	c.EOk -=Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path> >(this, &InstallTask::onDecompressionOk);
 	
 	// Transition the internal state on success
 	setState(this, PackageInstallState::Finalizing);
 }
 
 
-void PackageInstallTask::onDecompressionError(const void*, pair<const Poco::Zip::ZipLocalFileHeader, const string>& info)
+void InstallTask::onDecompressionError(const void*, pair<const Poco::Zip::ZipLocalFileHeader, const string>& info)
 {
 	Log("error", this) << "Decompression Error: " << info.second << endl;
 
@@ -282,7 +282,7 @@ void PackageInstallTask::onDecompressionError(const void*, pair<const Poco::Zip:
 }
 
 
-void PackageInstallTask::onDecompressionOk(const void*, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info)
+void InstallTask::onDecompressionOk(const void*, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info)
 {
 	Log("debug", this) << "Decompression Success: " 
 		<< info.second.toString() << endl; 
@@ -292,7 +292,7 @@ void PackageInstallTask::onDecompressionOk(const void*, pair<const Poco::Zip::Zi
 }
 
 
-void PackageInstallTask::doFinalize() 
+void InstallTask::doFinalize() 
 {
 	setState(this, PackageInstallState::Finalizing);
 
@@ -356,7 +356,7 @@ void PackageInstallTask::doFinalize()
 }
 
 
-void PackageInstallTask::setComplete()
+void InstallTask::setComplete()
 {
 	{
 		FastMutex::ScopedLock lock(_mutex);
@@ -378,7 +378,7 @@ void PackageInstallTask::setComplete()
 }
 
 
-void PackageInstallTask::setProgress(int value) 
+void InstallTask::setProgress(int value) 
 {
 	{
 		FastMutex::ScopedLock lock(_mutex);	
@@ -388,7 +388,7 @@ void PackageInstallTask::setProgress(int value)
 }
 
 
-bool PackageInstallTask::valid() const
+bool InstallTask::valid() const
 {
 	FastMutex::ScopedLock lock(_mutex);
 	return !stateEquals(PackageInstallState::Failed) 
@@ -397,40 +397,40 @@ bool PackageInstallTask::valid() const
 }
 
 
-bool PackageInstallTask::cancelled() const
+bool InstallTask::cancelled() const
 {
 	FastMutex::ScopedLock lock(_mutex);
 	return _cancelled;
 }
 
 
-bool PackageInstallTask::failed() const
+bool InstallTask::failed() const
 {
 	return stateEquals(PackageInstallState::Failed);
 }
 
 
-bool PackageInstallTask::success() const
+bool InstallTask::success() const
 {
 	return stateEquals(PackageInstallState::Installed);
 }
 
 
-bool PackageInstallTask::complete() const
+bool InstallTask::complete() const
 {
 	return stateEquals(PackageInstallState::Installed) 
 		|| stateEquals(PackageInstallState::Failed);
 }
 
 
-LocalPackage* PackageInstallTask::local() const
+LocalPackage* InstallTask::local() const
 {
 	FastMutex::ScopedLock lock(_mutex);
 	return _local;
 }
 
 
-RemotePackage* PackageInstallTask::remote() const
+RemotePackage* InstallTask::remote() const
 {
 	FastMutex::ScopedLock lock(_mutex);
 	return _remote;
@@ -443,7 +443,7 @@ RemotePackage* PackageInstallTask::remote() const
 
 
 		/*
-void PackageInstallTask::printLog(std::ostream& ost) const
+void InstallTask::printLog(std::ostream& ost) const
 {
 	ost << "["
 		<< className()
@@ -466,8 +466,8 @@ void PackageInstallTask::printLog(std::ostream& ost) const
 			*/
 
 /*
-	//transaction->Complete += delegate(this, &PackageInstallTask::onTransactionComplete);
-void PackageInstallTask::onTransactionComplete(void* sender, HTTP::Response& response)
+	//transaction->Complete += delegate(this, &InstallTask::onTransactionComplete);
+void InstallTask::onTransactionComplete(void* sender, HTTP::Response& response)
 {
 	Log("debug", this) << "Download Complete: " << response.success() << endl;
 	
@@ -512,7 +512,7 @@ void PackageInstallTask::onTransactionComplete(void* sender, HTTP::Response& res
 
 
 
-void PackageInstallTask::setFailed(const string& message) 
+void InstallTask::setFailed(const string& message) 
 { 
 	if (!stateEquals(PackageInstallState::Failed)) {		
 		Log("error", this) << "Package Install Failed: " << message << endl;
@@ -526,7 +526,7 @@ void PackageInstallTask::setFailed(const string& message)
 };
 
 
-void PackageInstallTask::setComplete(const string& message)
+void InstallTask::setComplete(const string& message)
 {	
 	if (!stateEquals(PackageInstallState::Incomplete)) {
 	if (!stateEquals(PackageInstallState::Installed)) {
@@ -547,7 +547,7 @@ void PackageInstallTask::setComplete(const string& message)
 }
 
 
-void PackageInstallTask::setIncomplete(const string& message)
+void InstallTask::setIncomplete(const string& message)
 {	
 	if (!stateEquals(PackageInstallState::Incomplete)) {
 		_local->setState("Incomplete");
@@ -568,7 +568,7 @@ void PackageInstallTask::setIncomplete(const string& message)
 
 
 	virtual void onStateChange(T& state, const T& oldState);
-void PackageInstallTask::transitionState()
+void InstallTask::transitionState()
 {
 	
 		// If any errors are enountered we set the overall
@@ -612,7 +612,7 @@ void PackageInstallTask::transitionState()
 
 
 /*
-bool PackageInstallTask::setState(unsigned int id, const string& message) 
+bool InstallTask::setState(unsigned int id, const string& message) 
 {
 	if (Stateful<PackageInstallState>::setState(id, message)) {
 
@@ -649,7 +649,7 @@ bool PackageInstallTask::setState(unsigned int id, const string& message)
 
 
 /*
-void PackageInstallTask::parsePackageResponse(JSON::Document& response)
+void InstallTask::parsePackageResponse(JSON::Document& response)
 {
 	Log("debug", this) << "Parsing Updated Package" << endl; 
 	

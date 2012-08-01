@@ -102,6 +102,21 @@ protected:
 	
 	virtual void clear();
 		/// Destroys and clears all manages tasks.
+		
+	virtual void onAdd(Task* task);
+		/// Called after a task is added.
+		
+	virtual void onStart(Task* task);
+		/// Called after a task is started.
+		
+	virtual void onCancel(Task* task);
+		/// Called after a task is cancelled.
+	
+	virtual void onRemove(Task* task);
+		/// Called after a task is removed.
+	
+	virtual void onRun(Task* task);
+		/// Called after a task has run.
 
 protected:
 	typedef std::deque<Task*> TaskList;
