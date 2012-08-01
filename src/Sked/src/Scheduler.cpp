@@ -106,7 +106,9 @@ void Scheduler::run()
 			}
 			if (task->beforeRun()) {
 				task->run();	
-				if (!task->afterRun()) {
+				if (task->afterRun())
+					onRun(task);
+				else {
 					Log("trace", this) << "Destroying After Run: " << task << endl;
 					task->_destroyed = true; //destroy();
 				}

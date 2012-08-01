@@ -122,7 +122,7 @@ StringList &split(const string& s, const string& delim, StringList &elems, int l
 	bool final = false;
 	std::string::size_type prev = 0, pos = 0;
     while((pos = s.find(delim, pos)) != std::string::npos) {
-		final = elems.size() + 1 == limit;
+		final = static_cast<int>(elems.size() + 1) == limit;
 		elems.push_back(s.substr(prev, final ? (s.size() - prev) : (pos - prev)));
         prev = ++pos;
 		if (final)
@@ -148,7 +148,7 @@ StringList &split(const string& s, char delim, StringList &elems, int limit)
     string item;
     while (getline(ss, item, delim)) {
         elems.push_back(item);
-		if (elems.size() + 1 == limit)
+		if (static_cast<int>(elems.size() + 1) == limit)
 			break;
     }
 	if (ss.tellg() > 0)

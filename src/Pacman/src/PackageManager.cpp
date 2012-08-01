@@ -36,14 +36,6 @@
 #include "Poco/DirectoryIterator.h"
 
 #include "Poco/Net/HTTPBasicCredentials.h"
-/*
-#include "Poco/Net/HTTPStreamFactory.h"
-#include "Poco/Net/HTTPClientSession.h"
-#include "Poco/Net/HTTPRequest.h"
-#include "Poco/Net/HTTPResponse.h"
-#include "Poco/Net/FilePartSource.h"
-#include "Poco/Net/NetException.h"
-*/
 
 
 using namespace std;
@@ -111,7 +103,7 @@ void PackageManager::uninitialize()
 void PackageManager::abortAllTasks()
 {
 	FastMutex::ScopedLock lock(_mutex);
-	PackageInstallTaskList::iterator it = _tasks.begin();
+	InstallTaskList::iterator it = _tasks.begin();
 	while (it != _tasks.end()) {
 		(*it)->cancel();
 		it = _tasks.erase(it);
@@ -284,7 +276,7 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 //	Package Installation Methods
 //
 // ---------------------------------------------------------------------
-PackageInstallTask* PackageManager::installPackage(const string& name, const PackageInstallTask::Options& options, bool whiny)
+InstallTask* PackageManager::installPackage(const string& name, const InstallTask::Options& options, bool whiny)
 {	
 	Log("debug") << "[PackageManager] Installing Package: " << name << endl;	
 
@@ -312,11 +304,14 @@ PackageInstallTask* PackageManager::installPackage(const string& name, const Pac
 				Log("debug") 
 					<< pair.local.name() << " manifest is complete" << endl;			
 				if (isLatestVersion(pair)) {
-					Log("info") 
-						<< pair.local.name() << " is already up to date: " 
+					ostringstream ost;
+					ost << pair.local.name() << " is already up to date: " 
 						<< pair.local.version() << " >= " 
 						<< pair.remote.latestAsset().version() << endl;
-					return NULL;
+					if (whiny)
+						throw Exception(ost.str());
+					else
+						return NULL;
 				}
 			}
 		}
@@ -326,11 +321,11 @@ PackageInstallTask* PackageManager::installPackage(const string& name, const Pac
 			<< pair.local.version() << " <= " 
 			<< pair.remote.latestAsset().version() << endl;
 
-		//PackageInstallTask* task = createPackageInstallTask(pair, options);	
+		//InstallTask* task = createInstallTask(pair, options);	
 		//if (monitor)
 		//	monitor->addTask(task);
 	
-		return createPackageInstallTask(pair, options);
+		return createInstallTask(pair, options);
 	}
 	catch (Exception& exc) 
 	{
@@ -343,13 +338,13 @@ PackageInstallTask* PackageManager::installPackage(const string& name, const Pac
 }
 
 
-PackageInstallMonitor* PackageManager::installPackages(const StringList& names, const PackageInstallTask::Options& options, bool whiny)
+InstallMonitor* PackageManager::installPackages(const StringList& names, const InstallTask::Options& options, bool whiny)
 {	
-	PackageInstallMonitor* monitor = new PackageInstallMonitor();
+	InstallMonitor* monitor = new InstallMonitor();
 	try 
 	{
 		for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
-			PackageInstallTask* task = installPackage(*it, options, whiny);
+			InstallTask* task = installPackage(*it, options, whiny);
 			if (task)
 				monitor->addTask(task);
 		}
@@ -372,7 +367,7 @@ PackageInstallMonitor* PackageManager::installPackages(const StringList& names, 
 }
 
 
-PackageInstallTask* PackageManager::updatePackage(const string& name, const PackageInstallTask::Options& options, bool whiny)
+InstallTask* PackageManager::updatePackage(const string& name, const InstallTask::Options& options, bool whiny)
 {	
 	// An update action is essentially the same as an install
 	// action, except we will make sure local package exists 
@@ -392,7 +387,7 @@ PackageInstallTask* PackageManager::updatePackage(const string& name, const Pack
 }
 
 
-PackageInstallMonitor* PackageManager::updatePackages(const StringList& names, const PackageInstallTask::Options& options, bool whiny)
+InstallMonitor* PackageManager::updatePackages(const StringList& names, const InstallTask::Options& options, bool whiny)
 {	
 	// An update action is essentially the same as an install
 	// action, except we will make sure local package exists 
@@ -414,16 +409,16 @@ PackageInstallMonitor* PackageManager::updatePackages(const StringList& names, c
 }
 
 
-bool PackageManager::updateAllPackages(bool whiny) //PackageInstallMonitor* monitor, 
+bool PackageManager::updateAllPackages(bool whiny) //InstallMonitor* monitor, 
 {
 	bool res = true;
 	
 	LocalPackageMap& packages = localPackages().items();
 	for (LocalPackageMap::const_iterator it = packages.begin(); it != packages.end(); ++it) {	
-		//if (!updatePackage(it->second->name(), monitor, PackageInstallTask::Options(), whiny))
+		//if (!updatePackage(it->second->name(), monitor, InstallTask::Options(), whiny))
 		//	res = false;	
-		PackageInstallTask::Options options;
-		PackageInstallTask* task = updatePackage(it->second->name(), options, whiny);
+		InstallTask::Options options;
+		InstallTask* task = updatePackage(it->second->name(), options, whiny);
 		if (!task)
 			res = false;
 		//else if (monitor)
@@ -501,9 +496,9 @@ bool PackageManager::uninstallPackages(const StringList& names, bool whiny)
 }
 
 
-PackageInstallTask* PackageManager::createPackageInstallTask(PackagePair& pair, const PackageInstallTask::Options& options) //const std::string& name, PackageInstallMonitor* monitor)
+InstallTask* PackageManager::createInstallTask(PackagePair& pair, const InstallTask::Options& options) //const std::string& name, InstallMonitor* monitor)
 {	
-	PackageInstallTask* task = new PackageInstallTask(*this, &pair.local, &pair.remote, options);
+	InstallTask* task = new InstallTask(*this, &pair.local, &pair.remote, options);
 	task->Complete += delegate(this, &PackageManager::onPackageInstallComplete, -1); // lowest priority to remove task
 	//task->start();
 
@@ -552,7 +547,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 
 				// Create an install task on the stack - we just
 				// have to move some files so no async required.
-				PackageInstallTask task(*this, it->second, NULL);
+				InstallTask task(*this, it->second, NULL);
 				task.doFinalize();
 				
 				assert(it->second->state() == "Installed" 
@@ -793,7 +788,7 @@ LocalPackageStore& PackageManager::localPackages()
 // ---------------------------------------------------------------------
 void PackageManager::onPackageInstallComplete(void* sender)
 {
-	PackageInstallTask* task = reinterpret_cast<PackageInstallTask*>(sender);
+	InstallTask* task = reinterpret_cast<InstallTask*>(sender);
 	
 	Log("trace") << "[PackageManager] Package Install Complete: " << task->state().toString() << endl;
 
@@ -804,7 +799,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 
 	// Remove the task reference
 	FastMutex::ScopedLock lock(_mutex);
-	for (PackageInstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++) {
+	for (InstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++) {
 		if (*it == task) {
 			_tasks.erase(it);
 			return;
@@ -820,12 +815,12 @@ void PackageManager::onPackageInstallComplete(void* sender)
 
 
 	/*
-	PackageInstallMonitor* monitor = new PackageInstallMonitor();
+	InstallMonitor* monitor = new InstallMonitor();
 	try 
 	{
 		bool res = true;
 		for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
-			PackageInstallTask* task = updatePackage(*it, options, whiny);
+			InstallTask* task = updatePackage(*it, options, whiny);
 			if (!task)
 				res = false;
 			monitor->addTask(task);
@@ -849,7 +844,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 
 
 /*
-bool PackageManager::installPackage(const string& name, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
+bool PackageManager::installPackage(const string& name, InstallMonitor* monitor, const InstallTask::Options& options, bool whiny)
 {	
 	Log("debug") << "[PackageManager] Installing Package: " << name << endl;	
 
@@ -891,7 +886,7 @@ bool PackageManager::installPackage(const string& name, PackageInstallMonitor* m
 			<< pair.local.version() << " <= " 
 			<< pair.remote.latestAsset().version() << endl;
 
-		PackageInstallTask* task = createPackageInstallTask(pair, options);	
+		InstallTask* task = createInstallTask(pair, options);	
 		if (monitor)
 			monitor->addTask(task);
 	}
@@ -908,7 +903,7 @@ bool PackageManager::installPackage(const string& name, PackageInstallMonitor* m
 }
 
 
-bool PackageManager::installPackages(const StringList& names, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
+bool PackageManager::installPackages(const StringList& names, InstallMonitor* monitor, const InstallTask::Options& options, bool whiny)
 {	
 	bool res = true;
 	for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
@@ -919,7 +914,7 @@ bool PackageManager::installPackages(const StringList& names, PackageInstallMoni
 }
 
 
-bool PackageManager::updatePackage(const string& name, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
+bool PackageManager::updatePackage(const string& name, InstallMonitor* monitor, const InstallTask::Options& options, bool whiny)
 {	
 	// An update action is essentially the same as an install
 	// action, except we will make sure local package exists 
@@ -939,7 +934,7 @@ bool PackageManager::updatePackage(const string& name, PackageInstallMonitor* mo
 }
 
 
-bool PackageManager::updatePackages(const StringList& names, PackageInstallMonitor* monitor, const PackageInstallTask::Options& options, bool whiny)
+bool PackageManager::updatePackages(const StringList& names, InstallMonitor* monitor, const InstallTask::Options& options, bool whiny)
 {
 	bool res = true;
 	for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
@@ -1078,7 +1073,7 @@ bool PackageManager::updatePackages(const StringList& names, PackageInstallMonit
 	{
 		Log("debug") << "[PackageManager] Finalizing: Found: " << dIt.path().toString() << endl;
 		
-		// PackageInstallTasks are located inside their respective folders.
+		// InstallTasks are located inside their respective folders.
 		DirectoryIterator fIt(dIt.path());
 		DirectoryIterator fEnd;
 		while (fIt != fEnd)
@@ -1096,7 +1091,7 @@ bool PackageManager::updatePackages(const StringList& names, PackageInstallMonit
 				// must be called from an external process before the
 				// installation can be completed.
 				errors = true;
-				Log("error") << "[PackageInstallTask] Finalizing Error: " << exc.displayText() << endl;
+				Log("error") << "[InstallTask] Finalizing Error: " << exc.displayText() << endl;
 			}
 		}
 

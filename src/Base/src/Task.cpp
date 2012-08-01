@@ -40,7 +40,7 @@ namespace Sourcey {
 
 	
 Task::Task(bool repeating) : 
-	_id(CryptoProvider::generateRandomNumber(8)),
+	_id(static_cast<UInt32>(CryptoProvider::generateRandomNumber(8))),
 	_repeating(repeating),
 	_destroyed(false),
 	_cancelled(true),
@@ -50,7 +50,7 @@ Task::Task(bool repeating) :
 
 	
 Task::Task(Runner& runner, bool repeating, bool autoStart) : 
-	_id(CryptoProvider::generateRandomNumber(8)),
+	_id(static_cast<UInt32>(CryptoProvider::generateRandomNumber(8))),
 	_repeating(repeating),
 	_destroyed(false),
 	_cancelled(true),

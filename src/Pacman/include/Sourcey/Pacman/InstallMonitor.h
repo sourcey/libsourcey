@@ -25,11 +25,11 @@
 //
 
 
-#ifndef SOURCEY_Pacman_PackageInstallMonitor_H
-#define SOURCEY_Pacman_PackageInstallMonitor_H
+#ifndef SOURCEY_Pacman_InstallMonitor_H
+#define SOURCEY_Pacman_InstallMonitor_H
 
 
-#include "Sourcey/Pacman/PackageInstallTask.h"
+#include "Sourcey/Pacman/InstallTask.h"
 
 
 namespace Sourcey { 
@@ -39,13 +39,13 @@ namespace Pacman {
 typedef std::vector<LocalPackage*> LocalPackageList;
 
 
-class PackageInstallMonitor
+class InstallMonitor
 {
 public:	
-	PackageInstallMonitor();
-	virtual ~PackageInstallMonitor();
+	InstallMonitor();
+	virtual ~InstallMonitor();
 	
-	virtual void addTask(PackageInstallTask* task);
+	virtual void addTask(InstallTask* task);
 		/// Adds a task to monitor.
 
 	virtual void startAll();
@@ -58,13 +58,13 @@ public:
 		/// Returns true if all install tasks have completed,
 		/// either successfully or unsuccessfully.
 
-	virtual PackageInstallTaskList tasks() const;
+	virtual InstallTaskList tasks() const;
 		/// Returns the list of monitored package tasks.
 	
 	virtual LocalPackageList packages() const;
 		/// Returns the list of monitored packages.
 		
-	Signal3<PackageInstallTask&, PackageInstallState&, const PackageInstallState&> InstallStateChange;
+	Signal3<InstallTask&, PackageInstallState&, const PackageInstallState&> InstallStateChange;
 		/// Proxies state change events from managed packages
 
 	Signal<LocalPackage&> InstallComplete;
@@ -86,13 +86,13 @@ protected:
 protected:
 	mutable Poco::FastMutex	_mutex;
 
-	PackageInstallTaskList _tasks;
+	InstallTaskList _tasks;
 	LocalPackageList _packages;
 	int _progress;
 };
 
 
-inline std::string getPackageInstallTaskNamesString(LocalPackageList& packages) 
+inline std::string getInstallTaskNamesString(LocalPackageList& packages) 
 	/// Returns a comma delimited package name string.
 {
 	std::string names;
@@ -109,4 +109,4 @@ inline std::string getPackageInstallTaskNamesString(LocalPackageList& packages)
 } } // namespace Sourcey::Pacman
 
 
-#endif // SOURCEY_Pacman_PackageInstallMonitor_H
+#endif // SOURCEY_Pacman_InstallMonitor_H

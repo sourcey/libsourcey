@@ -77,6 +77,7 @@ bool Runner::start(Task* task)
 		task->_cancelled = false;
 		task->start();
 		Log("trace", this) << "Started Task: " << task << endl;
+		onStart(task);
 		_wakeUp.set();
 		return true;
 	}
@@ -92,7 +93,8 @@ bool Runner::cancel(Task* task)
 	if (!task->_cancelled) {
 		task->_cancelled = true;
 		task->cancel();
-		Log("trace", this) << "Stopped Task: " << task << endl;
+		Log("trace", this) << "Cancelled Task: " << task << endl;
+		onCancel(task);
 		_wakeUp.set();
 		return true;
 	}
@@ -133,6 +135,7 @@ bool Runner::add(Task* task)
 		_tasks.push_back(task);
 		task->_runner = this;
 		Log("trace", this) << "Added Task: " << task << endl;
+		onAdd(task);
 		return true;
 	}
 	return false;
@@ -148,6 +151,7 @@ bool Runner::remove(Task* task)
 		if (*it == task) {					
 			_tasks.erase(it);
 			Log("trace", this) << "Removed Task: " << task << endl;
+			onRemove(task);
 			return true;
 		}
 	}
@@ -213,8 +217,10 @@ void Runner::run()
 		if (task) {
 			if (task->beforeRun()) {
 				task->run();	
-				if (!task->afterRun())
-					task->_destroyed = true; //destroy();
+				if (task->afterRun())			
+					onRun(task);
+				else
+					task->_destroyed = true; //destroy();	
 			}
 						
 			// Destroy the task if required
@@ -245,6 +251,31 @@ void Runner::run()
 	Shutdown.dispatch(this);
 
 	Log("trace", this) << "Exiting" << endl;
+}
+
+
+void Runner::onAdd(Task*) 
+{
+}
+
+
+void Runner::onStart(Task*) 
+{
+}
+
+
+void Runner::onCancel(Task*) 
+{
+}
+
+
+void Runner::onRemove(Task*) 
+{
+}
+
+
+void Runner::onRun(Task*) 
+{
 }
 
 

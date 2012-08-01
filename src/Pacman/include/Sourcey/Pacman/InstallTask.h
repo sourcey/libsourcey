@@ -25,8 +25,8 @@
 //
 
 
-#ifndef SOURCEY_Pacman_PackageInstallTask_H
-#define SOURCEY_Pacman_PackageInstallTask_H
+#ifndef SOURCEY_Pacman_InstallTask_H
+#define SOURCEY_Pacman_InstallTask_H
 
 
 #include "Sourcey/Pacman/Package.h"
@@ -75,7 +75,7 @@ struct PackageInstallState: public StateT
 };
 
 
-class PackageInstallTask: public Poco::Runnable, public StatefulSignal<PackageInstallState>, public ILoggable
+class InstallTask: public Poco::Runnable, public StatefulSignal<PackageInstallState>, public ILoggable
 	/// This class is responsible for the installation process
 	/// of a single package.
 	///
@@ -97,8 +97,8 @@ public:
 	};
 
 public:
-	PackageInstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote, const Options& options = Options());
-	virtual ~PackageInstallTask();	
+	InstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote, const Options& options = Options());
+	virtual ~InstallTask();	
 
 	virtual void start();
 	virtual void cancel();
@@ -134,7 +134,7 @@ public:
 	virtual void onDecompressionOk(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info);
 
 	//virtual void printLog(std::ostream& ost) const;	
-	virtual const char* className() const { return "PackageInstallTask"; }
+	virtual const char* className() const { return "InstallTask"; }
 	
 	Signal<int&> Progress;
 		/// Signals on progress update [0-100].
@@ -163,14 +163,14 @@ protected:
 	HTTP::Transaction _transaction;
 	
 	friend class PackageManager;
-	friend class PackageInstallMonitor;	
+	friend class InstallMonitor;	
 };
 
 
-typedef std::vector<PackageInstallTask*> PackageInstallTaskList;
+typedef std::vector<InstallTask*> InstallTaskList;
 
 
 } } // namespace Sourcey::Pacman
 
 
-#endif // SOURCEY_Pacman_PackageInstallTask_H
+#endif // SOURCEY_Pacman_InstallTask_H

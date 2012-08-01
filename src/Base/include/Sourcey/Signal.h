@@ -112,7 +112,26 @@ public:
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		return _delegates;
 	}
-	
+
+	virtual void cleanup() 
+		/// Deletes cancelled delegates.
+	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
+		Iterator it = _delegates.begin(); 
+		while (it != _delegates.end()) {
+			DelegateT* delegate = *it;
+			if (delegate->cancelled()) {
+				assert(_hasCancelled);
+				delete delegate;
+				it = _delegates.erase(it);
+			}
+			else
+				++it;
+		}
+
+		_hasCancelled = false;
+	}
+
 	virtual void obtain(DelegateList& active) 
 		/// Obtains a list of active delegates, and deletes
 		/// cancelled delegates.

@@ -116,7 +116,7 @@ bool Transaction::send()
 			processResponse(ist);
 		} 
 		else
-			throw Exception("Cannot create HTTP session for scheme: " + _uri.getScheme());
+			throw Exception("Unknown HTTP scheme: " + _uri.getScheme());
 
 		if (!cancelled())
 			setState(this, _response.success() ? 
@@ -213,7 +213,11 @@ void Transaction::processResponse(istream& istr)
 	try 
 	{	
 		char c;
-		ostream& ostr =_response.body;
+		ofstream* fstr = _outputPath.empty() ? NULL : 
+			new ofstream(_outputPath.data(), ios_base::out | ios_base::binary);
+		ostream& ostr = fstr ? 
+			static_cast<ostream&>(*fstr) : 
+			static_cast<ostream&>(_response.body);
 		TransferState& st = _responseState;
 		st.total = _response.getContentLength();
 		setResponseState(TransferState::Running);
@@ -236,17 +240,9 @@ void Transaction::processResponse(istream& istr)
 				setResponseState(TransferState::Running);
 			}
 		}
-					
-		// Save to output file if required
-		if (!_outputPath.empty()) {
-			Log("trace", this) << "Saving to output file: " << _outputPath << endl;
-			Path dir(_outputPath);
-			dir.setFileName("");
-			File(dir).createDirectories();
-			FileOutputStream fstr(_outputPath);
-			istr.seekg(0, ios::beg);
-			StreamCopier::copyStream(istr, fstr);
-		}
+				
+		if (fstr)
+			fstr->close();
 		
 		setResponseState(TransferState::Complete);
 	}

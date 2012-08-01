@@ -81,6 +81,12 @@ void Form::setAction(const string& action)
 }
 
 
+void Form::setRebuild(bool flag) 
+{
+	root()["rebuild"] = flag;
+}
+
+
 bool Form::valid()
 {
 	return FormElement::valid() 
@@ -213,6 +219,9 @@ FormField FormElement::addField(const string& type, const string& id, const stri
 		type == "boolean" ||
 		type == "integer" ||
 		type == "media" ||
+		type == "date" ||
+		type == "time" ||
+		type == "datetime" ||
 		type == "horizontal-set" ||
 		type == "custom"
 	);
@@ -245,7 +254,50 @@ bool FormElement::hasErrors()
 }
 
 
-bool FormElement::getField(const std::string& id, FormField& field, bool partial)
+
+bool FormElement::clearElements(const string& id, bool partial)
+{	
+	//JSON::Value& root() = section.root()();
+	bool match = false;
+	JSON::Value result;				
+	JSON::Value::Members members = root().getMemberNames();
+	for (unsigned i = 0; i < members.size(); i++) {
+
+		// Filter elements	
+		if (members[i] == "elements") {
+			for (int i = 0; i < root()["elements"].size(); i++) {
+				JSON::Value& element =  root()["elements"][i];
+				string curID = element["id"].asString();
+				if (//element.isObject() && 
+					//element.isMember("id") && 
+					partial ? 
+						curID.find(id) != string::npos : 
+						curID == id) {
+					Log("trace") << "Symple Form: Removing Redundant: " << curID << endl;
+					match = true;
+				}
+				else {
+					Log("trace") << "Symple Form: Keeping: " << curID << endl;
+					result["elements"].append(element);
+				}
+			}
+		}
+
+		// Keep other members
+		else
+			result[members[i]] = root()[members[i]];
+	}
+				
+	Log("trace") << "Symple Form: Removing Redundant Result: " << JSON::stringify(result, true) << endl;
+	Log("trace") << "Symple Form: Removing Redundant Before: " << JSON::stringify(root(), true) << endl;
+	*_root = result;
+	Log("trace") << "Symple Form: Removing Redundant After: " << JSON::stringify(root(), true) << endl;
+
+	return match;
+}
+
+
+bool FormElement::getField(const string& id, FormField& field, bool partial)
 {	
 	return JSON::findNestedObjectWithProperty(root(), field._root, "id", id, partial);
 }
@@ -308,7 +360,7 @@ JSON::Value& FormField::values()
 }
 
 	
-std::string FormField::value() const
+string FormField::value() const
 {
 	return root()["values"][(size_t)0].asString();
 }
