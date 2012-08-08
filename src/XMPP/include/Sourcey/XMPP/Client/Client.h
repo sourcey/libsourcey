@@ -47,7 +47,7 @@ namespace Sourcey {
 namespace XMPP {
 
 
-struct ClientState: public StateT 
+struct ClientState: public State 
 {
 	enum Type 
 	{

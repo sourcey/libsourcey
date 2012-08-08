@@ -136,11 +136,17 @@ public:
 		Log("debug", this) << "WebSocket Closing" << endl;
 		_headerState = 0;
 	
-		if (isConnected()) {
-			Poco::Net::SocketStream ss(*this);
-			ss << 0xff;
-			ss << 0x00;
-			ss.flush();
+		try {
+			if (isConnected()) {
+				Poco::Net::SocketStream ss(*this);
+				ss << 0xff;
+				ss << 0x00;
+				ss.flush();
+			}
+		}
+		catch (Exception& exc) {
+			// Not a fatal error
+			Log("warn", this) << "WebSocket Closing Error: " << exc.displayText() << endl;
 		}
 
 		SocketBaseT::close();

@@ -38,7 +38,7 @@
 namespace Sourcey {
 
 
-struct TransactionState: public StateT 
+struct TransactionState: public State 
 {	
 	enum Type 
 	{

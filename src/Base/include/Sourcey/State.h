@@ -25,20 +25,107 @@
 //
 
 
-#ifndef SOURCEY_Stateful_H
-#define SOURCEY_Stateful_H
+#ifndef SOURCEY_State_H
+#define SOURCEY_State_H
 
 
 #include "Sourcey/Signal.h"
-#include "Sourcey/State.h"
 
-#include <string>
-#include <iostream>
+//#include <string>
+//#include <iostream>
 
 
 namespace Sourcey {
 
 
+struct State 
+{ 
+	typedef unsigned int ID;
+
+	State(ID id = 0);
+
+	virtual ID id() const;
+	virtual void set(ID id);
+	virtual std::string message() const;
+	virtual void setMessage(const std::string& message);
+	
+	virtual std::string str(ID id) const;
+	virtual std::string toString() const;
+
+	virtual bool between(ID lid, ID rid) const
+	{ 	
+		int id = this->id();
+		return id >= lid 
+			&& id <= rid;
+	}
+		
+	virtual bool equals(ID id) const
+	{ 	
+		return this->id() == id;
+	}
+
+	bool operator == (const State& r) 
+	{ 
+		return id() == r.id();
+	}	
+	
+    friend std::ostream& operator << (std::ostream& os, const State& state) 
+	{
+		os << state.toString();
+		return os;
+    }
+
+protected:
+	ID _id;
+	std::string _message;
+};
+
+
+// ---------------------------------------------------------------------
+//
+struct MutexState: public State
+{ 
+	MutexState(ID id = 0);
+	MutexState(const MutexState& r) : State(r) {}
+
+	virtual ID id() const { Poco::FastMutex::ScopedLock lock(_mutex); return _id;	}
+	virtual void set(ID id) { Poco::FastMutex::ScopedLock lock(_mutex); _id = id; }
+	virtual std::string message() const { Poco::FastMutex::ScopedLock lock(_mutex);	return _message; }
+	virtual void setMessage(const std::string& message) { Poco::FastMutex::ScopedLock lock(_mutex);	_message = message; }
+
+protected:
+	mutable Poco::FastMutex	_mutex;
+};
+
+
+// ---------------------------------------------------------------------
+//
+struct StateSignal: public MutexState
+{ 
+	StateSignal(ID id = 0);
+	StateSignal(const StateSignal& r);
+		
+	virtual bool change(ID id);
+	virtual bool canChange(ID id);	
+	virtual void onChange(ID id, ID prev);
+
+	Signal2<const ID&, const ID&> Change;
+		/// Fired when the state changes to signal 
+		/// the new and previous states.
+
+protected:	
+	virtual void set(ID id);
+};
+
+
+
+
+	//virtual ID id() const { Poco::FastMutex::ScopedLock lock(_mutex); return _id;	}
+	//virtual void set(ID id) { Poco::FastMutex::ScopedLock lock(_mutex); _id = id; }
+	//virtual std::string message() const { Poco::FastMutex::ScopedLock lock(_mutex);	return _message; }
+	//virtual void setMessage(const std::string& message) { Poco::FastMutex::ScopedLock lock(_mutex);	_message = message; }
+
+/*
 // ---------------------------------------------------------------------
 //
 template<typename T>
@@ -50,12 +137,12 @@ class Stateful
 	/// Synchronization is left to the implementation.
 {
 public:
-	virtual bool stateEquals(unsigned int id) const
+	virtual bool stateEquals(ID id) const
 	{ 	
 		return _state.id() == id;
 	}
 
-	virtual bool stateBetween(unsigned int lid, unsigned int rid) const
+	virtual bool stateBetween(ID lid, ID rid) const
 	{ 	
 		return _state.id() >= lid 
 			&& _state.id() <= rid;
@@ -65,7 +152,7 @@ public:
 	virtual T state() const { return _state; }
 
 protected:
-	virtual bool canChangeState(unsigned int id) 
+	virtual bool canChangeState(ID id) 
 	{
 		if (state().id() != id) 
 			return true;
@@ -76,7 +163,7 @@ protected:
 	{
 	}
 
-	virtual bool setState(unsigned int id, const std::string& message = "") 
+	virtual bool setState(ID id, const std::string& message = "") 
 	{ 	
 		if (canChangeState(id)) {
 			T& state = this->state();
@@ -107,12 +194,12 @@ class MutexStateful: public Stateful<T>
 	/// Stateful implementation.
 {
 public:
-	virtual bool stateEquals(unsigned int id) const
+	virtual bool stateEquals(ID id) const
 	{ 	
 		return state().id() == id;
 	}
 
-	virtual bool stateBetween(unsigned int lid, unsigned int rid) const
+	virtual bool stateBetween(ID lid, ID rid) const
 	{ 	
 		int id = state().id();
 		return id >= lid 
@@ -149,7 +236,7 @@ public:
 		/// new and old states.
 
 protected:
-	virtual bool setState(void* sender, unsigned int id, const std::string& message = "") 
+	virtual bool setState(void* sender, ID id, const std::string& message = "") 
 		/// This method is used to send the state signal
 		/// after a successful state change.
 	{ 
@@ -161,6 +248,7 @@ protected:
 		return false;
 	}
 };
+*/
 
 
 } // namespace Sourcey

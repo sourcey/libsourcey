@@ -39,7 +39,7 @@ namespace Sourcey {
 namespace Media {
 
 
-struct EncoderState: public StateT 
+struct EncoderState: public State 
 {
 	enum Type 
 	{

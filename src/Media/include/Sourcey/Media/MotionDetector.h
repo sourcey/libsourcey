@@ -49,7 +49,7 @@ namespace Sourcey {
 namespace Media {
 
 
-struct MotionDetectorState: public StateT
+struct MotionDetectorState: public State
 {
 	enum Type
 	{

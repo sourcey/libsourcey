@@ -45,7 +45,7 @@ namespace Sourcey {
 namespace Net {
 
 
-struct TCPServiceState: public StateT 
+struct TCPServiceState: public State 
 {
 	enum Type 
 	{

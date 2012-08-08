@@ -58,7 +58,7 @@ namespace Media {
 
 
 /*
-struct VideoAnalyzerState: public StateT
+struct VideoAnalyzerState: public State
 {
 	enum Type
 	{

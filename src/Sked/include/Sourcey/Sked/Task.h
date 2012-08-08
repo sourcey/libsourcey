@@ -46,8 +46,8 @@ class Task: public Sourcey::Task, public JSON::ISerializable
 	/// scheduling capabilities.
 {
 public:
-	Task(const std::string& name);
-	Task(Scheduler& scheduler, const std::string& name);
+	Task(const std::string& type, const std::string& name = "");
+	Task(Scheduler& scheduler, const std::string& type, const std::string& name = "");
 	
 	virtual void start();
 		
@@ -80,8 +80,9 @@ public:
 		/// An Sked::Trigger must be associated
 		/// or an exception will be thrown.
 	
+	std::string type() const;
 	std::string name() const;
-	//void setName(const std::string& name);
+	void setName(const std::string& name);
 
 	virtual const char* className() const { return "Task"; }
 
@@ -103,6 +104,7 @@ protected:
 	
 	Sked::Scheduler* _scheduler;
 	Sked::Trigger*   _trigger;
+	std::string      _type;
 	std::string      _name;
 
 	friend class Scheduler;
