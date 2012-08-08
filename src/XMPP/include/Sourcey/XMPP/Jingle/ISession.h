@@ -43,7 +43,7 @@ namespace XMPP {
 namespace Jingle {
 
 
-struct SessionState: public StateT 
+struct SessionState: public State 
 {
 	enum Type 
 	{

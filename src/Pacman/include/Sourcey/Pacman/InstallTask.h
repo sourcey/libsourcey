@@ -45,7 +45,7 @@ namespace Pacman {
 class PackageManager;
 
 
-struct PackageInstallState: public StateT 
+struct PackageInstallState: public State 
 {
 	enum Type 
 	{

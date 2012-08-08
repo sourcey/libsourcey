@@ -42,8 +42,9 @@ namespace Sourcey {
 namespace Sked {
 	
 
-Task::Task(const string& name) : 
-	Sourcey::Task(true),
+Task::Task(const string& type, const string& name) : 
+	Sourcey::Task(true),		
+	_type(type),
 	_name(name),
 	_scheduler(NULL),
 	_trigger(NULL)
@@ -52,8 +53,9 @@ Task::Task(const string& name) :
 }
 
 	
-Task::Task(Sked::Scheduler& scheduler, const string& name) : 
+Task::Task(Sked::Scheduler& scheduler, const string& type, const string& name) : 
 	Sourcey::Task(reinterpret_cast<Scheduler&>(scheduler), true, false),
+	_type(type),
 	_name(name),
 	_scheduler(NULL),
 	_trigger(NULL)
@@ -82,6 +84,7 @@ void Task::serialize(JSON::Value& root)
 	Poco::FastMutex::ScopedLock lock(_mutex);
 	
 	root["id"] = _id;
+	root["type"] = _type;
 	root["name"] = _name;
 }
 
@@ -93,9 +96,11 @@ void Task::deserialize(JSON::Value& root)
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	
 	JSON::assertMember(root, "id");
+	JSON::assertMember(root, "type");
 	JSON::assertMember(root, "name");
 	
 	_id = root["id"].asUInt();
+	_type = root["type"].asString();
 	_name = root["name"].asString();
 }
 
@@ -131,6 +136,13 @@ string Task::name() const
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	return _name;
+}
+
+
+string Task::type() const
+{
+	Poco::FastMutex::ScopedLock lock(_mutex);	
+	return _type;
 }
 
 
@@ -181,18 +193,18 @@ void Task::setName(const string& name)
 		throw Exception("A time member is required.");
 	
 	int tzd;
-	DateTime time(DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT, root["time"].asString(), tzd));
+	DateTime time(DateTimeParser::parse(Sked::DateFormat, root["time"].asString(), tzd));
 	schedule(time);
 	*/
 
 		//root["time"] = DateTimeFormatter::format(time(), 
-		//	DateTimeFormat::ISO8601_FORMAT);
+		//	Sked::DateFormat);
 
 		//if (!root.isMember("time"))
 		//	throw Exception("A time member is required.");
 	
 		//int tzd;
-		//DateTime time(DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT, root["time"].asString(), tzd));
+		//DateTime time(DateTimeParser::parse(Sked::DateFormat, root["time"].asString(), tzd));
 		//schedule(time);
 
 
@@ -231,8 +243,8 @@ DateTime Task::time() const
     //DateTime now;
     //Timespan s = now += time;
     //Timespan s = time - now;	
-	//Log("trace") << "[Task:" << this << "] Time Now: " << DateTimeFormatter::format(now, DateTimeFormat::ISO8601_FORMAT) << endl;
-	//Log("trace") << "[Task:" << this << "] Time Trigger: " << DateTimeFormatter::format(time, DateTimeFormat::ISO8601_FORMAT) << endl;
+	//Log("trace") << "[Task:" << this << "] Time Now: " << DateTimeFormatter::format(now, Sked::DateFormat) << endl;
+	//Log("trace") << "[Task:" << this << "] Time Trigger: " << DateTimeFormatter::format(time, Sked::DateFormat) << endl;
 	//Log("trace") << "[Task:" << this << "] Timeout in " << (diff / 1000) << endl;
 	//start();
 
@@ -287,7 +299,7 @@ void Task::serialize(JSON::Value& root)
 	Log("trace") << "Serializing" << endl;	
 	
 	root["time"] = DateTimeFormatter::format(time(), 
-		DateTimeFormat::ISO8601_FORMAT);
+		Sked::DateFormat);
 }
 
 

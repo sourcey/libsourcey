@@ -88,23 +88,24 @@ void Scheduler::run()
 					<< "\n\tMinutes: " << remaining.totalMinutes()
 					<< "\n\tSeconds: " << remaining.totalSeconds()
 					<< "\n\tMilliseconds: " << remaining.totalMilliseconds()
-					<< "\n\tCurrentTime: " << DateTimeFormatter::format(now, DateTimeFormat::ISO8601_FORMAT)
-					<< "\n\tScheduledAt: " << DateTimeFormatter::format(task->trigger().scheduleAt, DateTimeFormat::ISO8601_FORMAT)
+					<< "\n\tCurrentTime: " << DateTimeFormatter::format(now, Sked::DateFormat)
+					<< "\n\tScheduledAt: " << DateTimeFormatter::format(task->trigger().scheduleAt, Sked::DateFormat)
 					<< endl;
 			}
 			
 			// Wait for the scheduled timeout
 			if (!task->trigger().timeout())
-				_wakeUp.tryWait(static_cast<long>(task->trigger().remaining()));								
-			{
-				Poco::DateTime now;
-				Log("trace", this) << "Running: "
-					<< "\n\tPID: " << task
-					<< "\n\tCurrentTime: " << DateTimeFormatter::format(now, DateTimeFormat::ISO8601_FORMAT)
-					<< "\n\tScheduledTime: " << DateTimeFormatter::format(task->trigger().scheduleAt, DateTimeFormat::ISO8601_FORMAT)
-					<< endl;
-			}
-			if (task->beforeRun()) {
+				_wakeUp.tryWait(static_cast<long>(task->trigger().remaining()));	
+
+			if (task->beforeRun()) {							
+				{
+					Poco::DateTime now;
+					Log("trace", this) << "Running: "
+						<< "\n\tPID: " << task
+						<< "\n\tCurrentTime: " << DateTimeFormatter::format(now, Sked::DateFormat)
+						<< "\n\tScheduledTime: " << DateTimeFormatter::format(task->trigger().scheduleAt, Sked::DateFormat)
+						<< endl;
+				}
 				task->run();	
 				if (task->afterRun())
 					onRun(task);
@@ -113,13 +114,17 @@ void Scheduler::run()
 					task->_destroyed = true; //destroy();
 				}
 			}
-
+			else
+				Log("trace", this) << "Skipping Task: " << task << endl;
+			
+			/*
 			// Destroy the task if needed
 			if (task->destroyed()) {
 				Log("trace", this) << "Destroying Task: " << task << endl;	
 				assert(remove(task));
 				delete task;
-			}					
+			}
+			*/
 
 			Log("trace", this) << "Running: OK: " << task << endl;
 		}
@@ -160,6 +165,7 @@ void Scheduler::update()
 		//assert(task);
 		if (task->destroyed()) {
 			Log("trace", this) << "Clearing Destroyed: " << task << endl;
+			onRemove(task);
 			delete task;
 			it = _tasks.erase(it);
 		}

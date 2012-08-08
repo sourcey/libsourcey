@@ -46,6 +46,9 @@ namespace Sourcey {
 namespace Sked {
 
 
+static const char* DateFormat = "%Y-%m-%d %H:%M:%S %Z";
+
+
 class Scheduler: public Runner, public JSON::ISerializable
 	/// The Scheduler manages and runs tasks 
 	/// that need to be executed at specific times.

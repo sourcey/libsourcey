@@ -26,6 +26,7 @@
 
 
 #include "Sourcey/Sked/Trigger.h"
+#include "Sourcey/Sked/Scheduler.h"
 #include "Sourcey/Logger.h"
 
 #include "Poco/DateTimeFormatter.h"
@@ -76,9 +77,9 @@ void Trigger::serialize(JSON::Value& root)
 	Log("trace") << "Serializing" << endl;	
 	
 	root["name"] = name;
-	root["createdAt"] = DateTimeFormatter::format(createdAt, DateTimeFormat::ISO8601_FORMAT);
-	root["scheduleAt"] = DateTimeFormatter::format(scheduleAt, DateTimeFormat::ISO8601_FORMAT);
-	root["lastRunAt"] = DateTimeFormatter::format(lastRunAt, DateTimeFormat::ISO8601_FORMAT);
+	root["createdAt"] = DateTimeFormatter::format(createdAt, Sked::DateFormat);
+	root["scheduleAt"] = DateTimeFormatter::format(scheduleAt, Sked::DateFormat);
+	root["lastRunAt"] = DateTimeFormatter::format(lastRunAt, Sked::DateFormat);
 	root["timesRun"] = timesRun;
 }
 
@@ -95,9 +96,9 @@ void Trigger::deserialize(JSON::Value& root)
 	
 	int tzd;
 	name = root["name"].asString();
-	createdAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT, root["createdAt"].asString(), tzd);
-	scheduleAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT, root["scheduleAt"].asString(), tzd);
-	lastRunAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT, root["lastRunAt"].asString(), tzd);
+	createdAt = DateTimeParser::parse(Sked::DateFormat, root["createdAt"].asString(), tzd);
+	scheduleAt = DateTimeParser::parse(Sked::DateFormat, root["scheduleAt"].asString(), tzd);
+	lastRunAt = DateTimeParser::parse(Sked::DateFormat, root["lastRunAt"].asString(), tzd);
 	timesRun = root["timesRun"].asInt();
 }
 
@@ -188,10 +189,10 @@ void DailyTrigger::update()
 	/*
 	Log("trace") << "[DailyTrigger] Updating: "
 			<< "\n\tDayOfWeek: " << next.dayOfWeek()
-			<< "\n\tNowTime: " << Poco::DateTimeFormatter::format(now, Poco::DateTimeFormat::ISO8601_FORMAT)
-			<< "\n\tPrevTime: " << Poco::DateTimeFormatter::format(prev, Poco::DateTimeFormat::ISO8601_FORMAT)
-			<< "\n\tNextTime: " << Poco::DateTimeFormatter::format(next, Poco::DateTimeFormat::ISO8601_FORMAT)
-			<< "\n\tScheduleTime: " << Poco::DateTimeFormatter::format(scheduleAt, Poco::DateTimeFormat::ISO8601_FORMAT)
+			<< "\n\tNowTime: " << Poco::DateTimeFormatter::format(now, Poco::Sked::DateFormat)
+			<< "\n\tPrevTime: " << Poco::DateTimeFormatter::format(prev, Poco::Sked::DateFormat)
+			<< "\n\tNextTime: " << Poco::DateTimeFormatter::format(next, Poco::Sked::DateFormat)
+			<< "\n\tScheduleTime: " << Poco::DateTimeFormatter::format(scheduleAt, Poco::Sked::DateFormat)
 			<< endl;
 			*/
 }

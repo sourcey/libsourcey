@@ -44,7 +44,7 @@ namespace Sourcey {
 namespace TURN {
 
 
-struct ClientState: public StateT  
+struct ClientState: public State  
 {
 	enum Type 
 	{

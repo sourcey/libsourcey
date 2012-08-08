@@ -45,7 +45,7 @@ namespace Sourcey {
 namespace SocketIO {
 
 
-struct ClientState: public StateT 
+struct ClientState: public State 
 {
 	enum Type 
 	{

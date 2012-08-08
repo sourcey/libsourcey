@@ -191,9 +191,6 @@ Task* Runner::next() const
 			return *it;
 	}			
 	return NULL;
-
-	//FastMutex::ScopedLock lock(_mutex);	
-	//return _tasks.empty() ? NULL : _tasks.front();
 }
 
 
@@ -289,6 +286,9 @@ Runner& Runner::getDefault()
 } // namespace Sourcey
 
 
+
+	//FastMutex::ScopedLock lock(_mutex);	
+	//return _tasks.empty() ? NULL : _tasks.front();
 
 			//Log("trace", this) << "Running: " << task << endl;
 			//Log("trace", this) << "Running: OK: " << task << endl;

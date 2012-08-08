@@ -65,7 +65,7 @@ struct PacketAdapterReference
 typedef std::vector<PacketAdapterReference> PacketAdapterList;
 
 
-struct PacketStreamState: public StateT 
+struct PacketStreamState: public State 
 {
 	enum Type 
 	{
