@@ -57,7 +57,6 @@ public:
 	std::string type() const;
 	std::string id() const;
 	std::string label() const;
-	bool live() const;
 	
 	void setType(const std::string& type);
 		/// Possible "type" values: 
@@ -67,13 +66,9 @@ public:
 	void setId(const std::string& id);
 	void setLabel(const std::string& text);
 	void setHint(const std::string& text);
-	void setLive(bool flag);
-		/// Live fields or elements are used to submit partial
-		/// sections a form, without sending the entire form.
-
 	void setError(const std::string& error);
 		/// Sets and optional validation error message.
-	
+
 	FormElement addPage(const std::string& id = "", const std::string& label = "");
 	FormElement addSection(const std::string& id = "", const std::string& label = "");
 	FormField addField(const std::string& type, const std::string& id = "", const std::string& label = "");
@@ -85,6 +80,15 @@ public:
 		/// internal form element IDs.
 		/// If the partial flag is set then substring matches
 		/// will be counted.
+
+	void setLive(bool flag);
+		/// Live fields or elements are used to submit partial
+		/// sections a form, without sending the entire form.
+
+	bool live() const;
+		/// Returns true if this field is live, meaning the
+		/// form-processing entity should auto-update this
+		/// field's value whenever it changes.		
 
 	bool clearElements(const std::string& id, bool partial = false);
 		/// Clears child elements matching the given ID.
@@ -115,7 +119,10 @@ public:
 	Form(Command& root);
 	virtual ~Form();
 	
+	bool valid();
+
 	std::string action() const;
+	bool partial() const;
 
 	void setAction(const std::string& action);
 		/// Possible "action" values
@@ -126,8 +133,11 @@ public:
 	
 	void setRebuild(bool flag);
 		/// Notifies the form-submitting entity that the form should be rebuilt.
-	
-	bool valid();
+
+	void setPartial(bool flag);
+		/// Notifies the form is a partial section of the form.
+		/// This is used for transmitting and updating live
+		/// fields such as for auto-complete.
 };
 
 
@@ -153,7 +163,7 @@ public:
 	void addValue(double value);
 	void addValue(bool value);
 		/// Appends a value to the value array.		
-	
+
 	JSON::Value& values();
 		/// Returns a JSON array of all values.
 
