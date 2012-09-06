@@ -68,6 +68,18 @@ string Form::action() const
 	return root().get("action", "form").asString();
 }
 
+
+bool Form::partial() const
+{
+	return root()["partial"].asBool();
+}
+
+
+void Form::setPartial(bool flag)
+{	
+	root()["partial"] = flag;
+}
+
 	
 void Form::setAction(const string& action) 
 {
@@ -154,12 +166,6 @@ string FormElement::label() const
 }
 
 
-bool FormElement::live() const
-{
-	return root()["live"].asBool();
-}
-
-
 void FormElement::setType(const string& type)
 {
 	root()["type"] = type;
@@ -187,13 +193,6 @@ void FormElement::setHint(const string& text)
 void FormElement::setError(const string& error)
 {
 	root()["error"] = error;
-}
-
-
-
-void FormElement::setLive(bool flag)
-{	
-	root()["live"] = flag;
 }
 
 
@@ -251,6 +250,18 @@ int FormElement::numElements()
 bool FormElement::hasErrors()
 {
 	return JSON::hasNestedKey(root(), "error");
+}
+
+
+bool FormElement::live() const
+{
+	return root()["live"].asBool();
+}
+
+
+void FormElement::setLive(bool flag)
+{	
+	root()["live"] = flag;
 }
 
 
