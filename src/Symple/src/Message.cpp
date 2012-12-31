@@ -250,9 +250,16 @@ void Message::addNote(const string& type, const string& text)
 	(*this)["notes"].append(note);
 }
 
+
 JSON::Value& Message::setData(const string& name) 
 {
 	return (*this)["data"][name] = name;
+}
+
+
+void Message::setData(const string& name, const char* data) 
+{
+	(*this)["data"][name] = data;
 }
 
 

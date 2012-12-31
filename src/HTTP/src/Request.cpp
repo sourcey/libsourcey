@@ -80,13 +80,14 @@ void Request::prepare()
 	assert(!getURI().empty());
 
 	string date = DateTimeFormatter::format(Timestamp(), DateTimeFormat::RFC822_FORMAT);
-	set("Date", date);
+	set("Date", date);	
+	set("User-Agent", "Sourcey C++ API");
 	if (getMethod() == "POST" || 
 		getMethod() == "PUT") {
 		if (form) {
 			form->prepareSubmit(*this);	
 			form->write(body);
-			streambuf* pbuf = body.rdbuf(); 
+			streambuf* pbuf = body.rdbuf();
 			long contentLength = (long)pbuf->pubseekoff(0, ios_base::end);
 			assert(contentLength > 0);
 			setContentLength(contentLength);

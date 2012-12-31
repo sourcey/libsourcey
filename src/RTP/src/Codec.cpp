@@ -39,14 +39,14 @@ namespace RTP {
 
 // ---------------------------------------------------------------------
 //
-Codec::Codec(UInt32 id, const string& name, int sampleRate, int bitRate) : //const string& name, 
-	Media::Codec(id, name, sampleRate, bitRate, true)
+Codec::Codec(int id, const string& name, int sampleRate, int bitRate) : //const string& name, 
+	Media::Codec(name, sampleRate, bitRate, true), id(id)
 {
 }
 
 	
-Codec::Codec(const Media::Codec& r) :
-	Media::Codec(r.id, r.name, r.sampleRate, r.bitRate, r.enabled)
+Codec::Codec(const Codec& r) :
+	Media::Codec(r.name, r.sampleRate, r.bitRate, r.enabled), id(r.id)
 {
 }
 
@@ -120,7 +120,7 @@ string Codec::toSDP() const
 
 // ---------------------------------------------------------------------
 //
-AudioCodec::AudioCodec(const Media::Codec& r) :
+AudioCodec::AudioCodec(const Codec& r) :
 	Codec(r)
 {
 }
@@ -134,7 +134,7 @@ AudioCodec::AudioCodec(const std::string& sdp) :
 
 // ---------------------------------------------------------------------
 //
-VideoCodec::VideoCodec(const Media::Codec& r) :
+VideoCodec::VideoCodec(const Codec& r) :
 	Codec(r)
 {
 }

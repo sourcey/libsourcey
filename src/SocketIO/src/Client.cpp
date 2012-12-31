@@ -119,6 +119,7 @@ void Client::close()
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		
+		// Cancel the timer if connection manually closed
 		_timer->Timeout -= delegate(this, &Client::onHeartBeatTimer);
 		_timer->cancel();	
 
@@ -331,15 +332,16 @@ void Client::onConnect()
 			
 	setState(this, ClientState::Connected);
 
-	// Start the heartbeat timer
 	Poco::FastMutex::ScopedLock lock(_mutex);
 	assert(_heartBeatTimeout);
-	assert(_timer->cancelled());
-	
-	_timer->setTimeout((_heartBeatTimeout * .75) * 1000);
-	_timer->setInterval((_heartBeatTimeout * .75) * 1000);
-	_timer->Timeout += delegate(this, &Client::onHeartBeatTimer);
-	_timer->start();
+
+	// Start the heartbeat timer if cancelled
+	if (_timer->cancelled()) {	
+		_timer->setTimeout((_heartBeatTimeout * .75) * 1000);
+		_timer->setInterval((_heartBeatTimeout * .75) * 1000);
+		_timer->Timeout += delegate(this, &Client::onHeartBeatTimer);
+		_timer->start();
+	}
 }
 
 

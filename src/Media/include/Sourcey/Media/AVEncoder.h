@@ -107,6 +107,32 @@ protected:
 };
 
 
+/*
+inline std::string GetEncoderFromCodecName(const std::string& name) 
+	/// Attempts to get the FFmpeg encoder from a codec name.
+{	
+	AVCodec* c;
+	string value = name;
+
+	// make lowercase
+	std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+	
+	// try it
+	if (c = avcodec_find_encoder_by_name(value.data())) 
+		goto success;
+
+	// try splitting first word
+	//if (c = avcodec_find_encoder_by_name(value.data())) 
+	//	goto success;
+	
+    return "";
+
+success:
+	 return c->name;
+}
+*/
+
+
 } } // namespace Sourcey::Media
 
 

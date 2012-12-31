@@ -228,11 +228,11 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 		VideoCodec iparams;
 		iparams.width = video->codec->width;
 		iparams.height = video->codec->height;
-		iparams.pixfmt = (PixelFormat::ID)video->codec->pix_fmt;
+		iparams.pixfmt = static_cast<UInt32>(video->codec->pix_fmt);
 		VideoCodec oparams;
 		oparams.width = video->codec->width;
 		oparams.height = video->codec->height;
-		oparams.pixfmt = (PixelFormat::ID)PIX_FMT_GRAY8;
+		oparams.pixfmt = static_cast<UInt32>(PixelFormat::GRAY8);
 		
 		_videoConv = new VideoConversionContext();
 		_videoConv->create(iparams, oparams);

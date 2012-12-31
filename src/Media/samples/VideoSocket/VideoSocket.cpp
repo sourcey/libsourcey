@@ -68,57 +68,92 @@ namespace Media {
 // ----------------------------------------------------------------------------		
 Format MP344100 = Format("MP3", Format::MP3, 
 	VideoCodec(),
-	AudioCodec(Codec::MP3, "MP3", 2, 44100));	
+	AudioCodec("MP3", "libmp3lame", 2, 44100, 128000, (UInt32)SampleFormat::S16P));	
+	// Adobe Flash Player requires that audio files be 16bit and have a sample rate of 44.1khz.
+	// Flash Player can handle MP3 files encoded at 32kbps, 48kbps, 56kbps, 64kbps, 128kbps, 160kbps or 256kbps.
+	// NOTE: 128000 works fine for 44100, but 64000 is broken!
 			
+Format MP38000  = Format("MP3", Format::MP3, 
+	VideoCodec(),
+	AudioCodec("MP3", "libmp3lame", 1, 8000, 64000)); //)
+			
+Format MP311000  = Format("MP3", Format::MP3, 
+	VideoCodec(),
+	AudioCodec("MP3", "libmp3lame", 1, 11000, 16000));
+
+//16 kbps, 11 khz, Mono, MP3
+
+Format MP348000 = Format("MP3", Format::MP3, 
+	VideoCodec(),
+	AudioCodec("MP3", "libmp3lame", 2, 48000, 128000, (UInt32)SampleFormat::S16P));	//, (UInt32)SampleFormat::S16P)
+ 			
+Format FLVSpeex16000NoVideo = Format("FLV", Format::FLV, 
+	VideoCodec(),
+	AudioCodec("Speex", "libspeex", 1, 16000));	//, 16800
+
+/*
 Format FLVNellyMoser11025 = Format("FLV", Format::FLV, 
-	VideoCodec(Codec::FLV, "FLV", 320, 240, 20),
-	AudioCodec(Codec::NellyMoser, "NellyMoser", 1, 11025));	
+	VideoCodec("FLV", "flv", 320, 240, 20),
+	AudioCodec("Nellymoser", "nellymoser", 1, 11025));	
 			
 Format FLVNellyMoser11025NoVideo = Format("FLV", Format::FLV, 
 	VideoCodec(),
-	AudioCodec(Codec::NellyMoser, "NellyMoser", 1, 11025));	
+	AudioCodec("Nellymoser", "nellymoser", 1, 11025, 64000, (UInt32)SampleFormat::FLT));	//
+	// Supports float only
 			
 Format FLVNoAudio = Format("FLV", Format::FLV, 
-	VideoCodec(Codec::FLV, "FLV", 320, 240, 30));	
+	VideoCodec("FLV", "flv", 320, 240));	//, 6, 9000, 64000
 			
 Format FLVH264NoAudio = Format("FLVH264", Format::FLV, 
-	VideoCodec(Codec::H264, "H264", 320, 240, 30));	
+	VideoCodec("H264", "libx264", 320, 240, 30));	
 			
-Format FLVSpeex16000NoVideo = Format("FLV", Format::FLV, 
-	VideoCodec(),
-	AudioCodec(Codec::Speex, "Speex", 1, 16000));	//, 16800
+//Format FLVSpeex8000NoVideo = Format("FLV", Format::FLV, 
+//	VideoCodec(),
+//	AudioCodec("Speex", "libspeex", , 1, 8000));	//, 16800
 			
 Format FLVSpeex16000 = Format("FLV", Format::FLV, 
-	VideoCodec(Codec::FLV, "FLV", 320, 240, 25),
-	AudioCodec(Codec::Speex, "Speex", 1, 16000));	
+	VideoCodec("FLV", "flv", 320, 240, 25),
+	AudioCodec("Speex", "libspeex", , 1, 16000));	
 			
 Format FLVMP3 = Format("FLV", Format::FLV, 
-	VideoCodec(Codec::FLV, "FLV", 320, 240, 20),
-	AudioCodec(Codec::MP3, "MP3", 2, 44100));	
+	VideoCodec("FLV", "flv", 320, 240, 20),
+	AudioCodec("MP3", "libmp3lame", 2, 44100, 64000, (UInt32)SampleFormat::S16P));	
+
+Format AAC44100 = Format("MP4", Format::MP4,
+	//VideoCodec("MPEG4", "mpeg4", 640, 480, 25), 
+	//VideoCodec("H264", "libx264", 320, 240, 25),
+	AudioCodec("AAC", "aac", 2, 44100));
 			
 Format FLVAAC = Format("FLV", Format::FLV, 
-	VideoCodec(Codec::FLV, "FLV", 320, 240, 25),
-	AudioCodec(Codec::AAC, "AAC", 2, 44100));	
+	VideoCodec("FLV", "flv", 320, 240, 25),
+	AudioCodec("AAC", "aac", 2, 44100));	
 
 Format FLVH264AAC = Format("FLV", Format::FLV,
-	//VideoCodec(Codec::MPEG4, "MPEG4", 640, 480, 25), 
-	VideoCodec(Codec::H264, "H264", 320, 240, 25),
-	AudioCodec(Codec::AAC, "AAC", 2, 44100));
+	//VideoCodec("MPEG4", "mpeg4", 640, 480, 25), 
+	VideoCodec("H264", "libx264", 320, 240, 25),
+	AudioCodec("AAC", "aac", 2, 44100));
 
 Format MPEG4AAC = Format("FLV", Format::FLV,
-	VideoCodec(Codec::MPEG4, "MPEG4", 640, 480, 25),
-	AudioCodec(Codec::AAC, "AAC", 2, 44100));
+	VideoCodec("MPEG4", "mpeg4", 640, 480, 25),
+	AudioCodec("AAC", "aac", 2, 44100));
 
 Format H264AAC = Format("H264AAC", Format::FLV,
-	VideoCodec(Codec::H264, "H264", 640, 480, 25),
-	AudioCodec(Codec::AAC, "AAC", 2, 44100));
+	VideoCodec("H264", "libx264", 640, 480, 25),
+	AudioCodec("AAC", "aac", 2, 44100));
 
 Format MJPEG = Format("MJPEG", Format::MJPEG, 
-	VideoCodec(Codec::MJPEG, "MJPEG", 640, 480, 25));
+	VideoCodec("MJPEG", "mjpeg", 640, 480, 25));
 
 Format MP4 = Format("MP4", Format::MP4,
-	VideoCodec(Codec::MPEG4, "MPEG4", 320, 240, 25),
-	AudioCodec(Codec::AC3, "AC3", 2, 44100));
+	VideoCodec("MPEG4", "mpeg4", 320, 240, 25),
+	AudioCodec("AC3", "ac3_fixed", 2, 44100));
+	*/
+
+
+// Global for now
+Format currentFormat = FLVSpeex16000NoVideo; //MJPEG; //H264AAC; //MP38000; //MP38000; //MP38000; //MP344100; //MP344100; //AAC44100; //FLVNoAudio; //FLVNellyMoser11025NoVideo; //FLVSpeex16000NoVideo; //FLVNellyMoser11025NoVideo; //FLVH264NoAudio; //MP344100; //FLVNellyMoser11025NoVideo; //FLVH264NoAudio; //FLVNellyMoser11025NoVideo; //FLVNellyMoser11025NoVideo; //FLVNellyMoser11025NoVideo; FLVNellyMoser11025NoVideo; //MP344100; 
+VideoCapture* videoCapture = NULL;
+AudioCapture* audioCapture = NULL;
 
 
 // ----------------------------------------------------------------------------
@@ -153,9 +188,10 @@ public:
 				stream.attach(videoCapture, false);
 			//options.oformat.audio.enabled = false;
 			if (options.oformat.audio.enabled && audioCapture)
-				stream.attach(audioCapture, true);			
+				stream.attach(audioCapture, false);	
+				//stream.attach(audioCapture, true);			
 
-			//options.iformat.video.pixfmt = (Sourcey::PixelFormat::ID)PIX_FMT_GRAY8; 
+			//options.iformat.video.pixfmt = (Sourcey::::PixelFormat)PIX_FMT_GRAY8; 
 			//MotionDetector* detector = new MotionDetector();
 			//stream.attach(detector, 3, true);			
 		
@@ -166,26 +202,32 @@ public:
 			encoder->initialize();
 			stream.attach(encoder, 5, true);				
 			
+			/*
 			if (options.oformat.label == "MJPEG") {
 				HTTP::MultipartPacketizer* packetizer = new HTTP::MultipartPacketizer("image/jpeg", false);
 				stream.attach(packetizer, 10, true);
 			}
-			/*
 			else if (options.oformat.label == "FLV") {
 				FLVMetadataInjector* injector = new FLVMetadataInjector(options.oformat);
 				stream.attach(injector, 10);
 			}
 			*/
+			
+			_file.open("vidtest.flv", ios::out | ios::binary);	
 
 			// start the stream
 			stream += packetDelegate(this, &MediaConnection::onVideoEncoded);
 			stream.start();
+			
 			
 			_stop.wait();
 			Log("trace") << "[MediaConnection] #### Stopped" << endl;
 			
 			stream -= packetDelegate(this, &MediaConnection::onVideoEncoded);
 			stream.stop();
+
+			
+			_file.close();
 			
 		}
 		catch (Poco::Exception& exc)
@@ -202,7 +244,8 @@ public:
 		fpsCounter.tick();
 
 		try
-		{		
+		{					
+			_file.write((const char*)packet.data(), packet.size());
 			socket().sendBytes(packet.data(), packet.size());
 		}
 		catch (Poco::Exception& exc)
@@ -217,6 +260,7 @@ public:
 	VideoCapture* videoCapture;
 	AudioCapture* audioCapture;
 	Poco::Event _stop;
+	std::ofstream _file;
 	AVEncoder* encoder;
 	PacketStream stream;
 	FPSCounter fpsCounter;
@@ -261,21 +305,33 @@ public:
 			}
 			
 			RecorderOptions options;
+			options.oformat = currentFormat;
 			//options.ofile = "test1.flv";
 			//options.stopAt = time(0) + 3;
 
+			/*
 			if ((request.find("mjpeg") != string::npos))
 				options.oformat = MJPEG;
 			
 			else if ((request.find("flv") != string::npos))
-				options.oformat = FLVSpeex16000NoVideo; //FLVNoAudio; //FLVH264NoAudio; //FLVSpeex16000NoVideo; //FLVNoAudio; //FLVSpeex16000NoVideo; //FLVH264AAC; //FLVNellyMoser11025; //FLVAAC; //FLVSpeex16000; //FLVMP3; //NoVideo; //FLVNellyMoser11025; //NoVideo; //FLVMP3; //FLVSpeex16000NoVideo; //FLVSpeex16000; //FLVNoAudio; //
+				options.oformat = FLVNellyMoser11025NoVideo; //MP344100; //FLVSpeex16000NoVideo; //FLVNoAudio; //FLVNellyMoser11025NoVideo; //FLVSpeex16000NoVideo; //FLVNoAudio; //FLVH264NoAudio; //FLVSpeex16000NoVideo; //FLVNoAudio; //FLVSpeex16000NoVideo; //FLVH264AAC; //FLVNellyMoser11025; //FLVAAC; //FLVSpeex16000; //FLVMP3; //NoVideo; //FLVNellyMoser11025; //NoVideo; //FLVMP3; //FLVSpeex16000NoVideo; //FLVSpeex16000; //FLVNoAudio; //
 			
 			else if ((request.find("mp3") != string::npos))
-				options.oformat = MP344100;			
+				options.oformat = MP344100;		
 			
 			else 
 				throw Exception("No format specified");
+				*/
 			
+			cout << "HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE: " << options.oformat.toString() << endl;
+			
+			if (options.oformat.video.enabled)
+				AllocateOpenCVInputFormat(videoCapture, options.iformat);	
+			
+			if (options.oformat.audio.enabled)
+				AllocateRtAudioInputFormat(audioCapture, options.iformat);
+
+			/*
 			VideoCapture* videoCapture = NULL;
 			AudioCapture* audioCapture = NULL;
 			if (options.oformat.video.enabled) {
@@ -286,6 +342,7 @@ public:
 				audioCapture = MediaFactory::instance()->audio.getCapture(0, 
 					options.oformat.audio.channels, 
 					options.oformat.audio.sampleRate);
+					*/
 
 			return new MediaConnection(socket, options, videoCapture, audioCapture);			
 		}
@@ -348,28 +405,42 @@ public:
 			Log("trace") << "[StreamTest] Running" << endl;			
 
 			RecorderOptions options;
-			//options.ofile = "enctest.mp4";
+			options.oformat = currentFormat;
+			options.ofile = "enctest4.mp4";
 			//options.stopAt = time(0) + 3;
 			//AllocateOpenCVInputFormat(videoCapture, options.iformat);	
-			options.oformat = FLVSpeex16000NoVideo; //MP4; //FLVSpeex16000; //MP344100; //FLVMP3; //
-
-			/*
-			options.oformat = Format("FLV", Format::FLV, 
-				VideoCodec(Codec::FLV, "FLV", 320, 240, 20),
-				//AudioCodec(Codec::NellyMoser, "NellyMoser", 1, 11025)
-				//AudioCodec(Codec::Speex, "Speex", 1, 16000)//,
-				AudioCodec(Codec::MP3, "MP3", 2, 44100)
-				);
-				*/
+			//options.oformat = MP344100; //MP4; //FLVSpeex16000; //MP344100; //FLVMP3; //
 			
+			//_file.open("enctest1.mp3", ios::out | ios::binary);	
+			
+
+			/*			
+
+
+			Log("trace") << "[StreamTest] Running: " << options.oformat.audio.sampleFmt << endl;	
+			Log("trace") << "[StreamTest] Running: " << AV_SAMPLE_FMT_S16P << endl;	
+	
+			assert((AVSampleFormat)options.oformat.audio.sampleFmt == AV_SAMPLE_FMT_S16P);
+
+			options.oformat = Format("FLV", Format::FLV, 
+				VideoCodec("FLV", "flv", 320, 240, 20),
+				//AudioCodec("Nellymoser", "nellymoser", 1, 11025)
+				//AudioCodec("Speex", "libspeex", , 1, 16000)//,
+				AudioCodec("MP3", "libmp3lame", 2, 44100)
+				);
+				audioCapture = MediaFactory::instance()->audio.getCapture(0, 1, 16000);
 			VideoCapture* videoCapture = NULL;
 			AudioCapture* audioCapture = NULL;
+				*/
+			
+
 			if (options.oformat.video.enabled) {
 				
 				Log("trace") << "[StreamTest] Opening Video Capture" << endl;	
 
-				videoCapture = MediaFactory::instance()->video.getCapture(0);
-				AllocateOpenCVInputFormat(videoCapture, options.iformat);	
+				//videoCapture = MediaFactory::instance()->video.getCapture(0);
+				//AllocateOpenCVInputFormat(videoCapture, options.iformat);	
+				AllocateOpenCVInputFormat(videoCapture, options.iformat);
 				assert(options.iformat.video.width);
 				stream.attach(videoCapture, false);
 			}
@@ -377,34 +448,35 @@ public:
 			if (options.oformat.audio.enabled) {
 				Log("trace") << "[StreamTest] Opening Video Capture" << endl;	
 
-				audioCapture = MediaFactory::instance()->audio.getCapture(0, 
-					options.oformat.audio.channels, 
-					options.oformat.audio.sampleRate);
+				//audioCapture = MediaFactory::instance()->audio.getCapture(0, 
+				//	options.oformat.audio.channels, 
+				//	options.oformat.audio.sampleRate);
+				AllocateRtAudioInputFormat(audioCapture, options.iformat);
 				stream.attach(audioCapture, true);
 			}
 
 			/*
 			options.oformat = Format("FLV", Format::FLV,
-				//VideoCodec(Codec::MPEG4, "MPEG4", 640, 480, 25), 
-				//VideoCodec(Codec::H264, "H264", 640, 480, 25), 
-				VideoCodec(Codec::FLV, "FLV", 640, 480, 25), 
-				//AudioCodec(Codec::NellyMoser, "NellyMoser", 1, 11025)
-				//AudioCodec(Codec::Speex, "Speex", 2, 44100)
-				//AudioCodec(Codec::MP3, "MP3", 2, 44100)
-				//AudioCodec(Codec::AAC, "AAC", 2, 44100)
-				AudioCodec(Codec::AAC, "AAC", 1, 11025)
+				//VideoCodec("MPEG4", "mpeg4", 640, 480, 25), 
+				//VideoCodec("H264", "libx264", 640, 480, 25), 
+				VideoCodec("FLV", "flv", 640, 480, 25), 
+				//AudioCodec("Nellymoser", "nellymoser", 1, 11025)
+				//AudioCodec("Speex", "libspeex", , 2, 44100)
+				//AudioCodec("MP3", "libmp3lame", 2, 44100)
+				//AudioCodec("AAC", "aac", 2, 44100)
+				AudioCodec("AAC", "aac", 1, 11025)
 			);
-			options.oformat = Format("MJPEG", Format::MJPEG, VideoCodec(Codec::MJPEG, "MJPEG", 640, 480, 25));
-			//options.oformat = Format("FLV", Format::FLV, VideoCodec(Codec::H264, "H264", 400, 300, 25));	
-			//options.oformat = Format("FLV", Format::FLV, VideoCodec(Codec::FLV, "FLV", 640, 480, 100));	
-			//options.oformat = Format("FLV", Format::FLV, VideoCodec(Codec::FLV, "FLV", 320, 240, 15));	
-			//options.oformat = Format("FLV", Format::FLV, VideoCodec(Codec::H264, "H264", 400, 300, 25));	
-			//options.oformat = Format("MP4", Format::MP4, VideoCodec(Codec::H264, "H264", 400, 300, 25));
+			options.oformat = Format("MJPEG", Format::MJPEG, VideoCodec("MJPEG", "mjpeg", 640, 480, 25));
+			//options.oformat = Format("FLV", Format::FLV, VideoCodec("H264", "libx264", 400, 300, 25));	
+			//options.oformat = Format("FLV", Format::FLV, VideoCodec("FLV", "flv", 640, 480, 100));	
+			//options.oformat = Format("FLV", Format::FLV, VideoCodec("FLV", "flv", 320, 240, 15));	
+			//options.oformat = Format("FLV", Format::FLV, VideoCodec("H264", "libx264", 400, 300, 25));	
+			//options.oformat = Format("MP4", Format::MP4, VideoCodec("H264", "libx264", 400, 300, 25));
 			*/
 			
 			//videoCapture += videoDelegate(this, &StreamTest::onVideoEncoded);
 
-			//options.iformat.video.pixfmt = (Sourcey::PixelFormat::ID)PIX_FMT_GRAY8; //PIX_FMT_BGR8; //PIX_FMT_BGR32 // PIX_FMT_BGR32
+			//options.iformat.video.pixfmt = (Sourcey::::PixelFormat)PIX_FMT_GRAY8; //PIX_FMT_BGR8; //PIX_FMT_BGR32 // PIX_FMT_BGR32
 			//MotionDetector* detector = new MotionDetector();
 			//detector->setVideoCapture(videoCapture);
 			//stream.attach(detector, true);		
@@ -441,6 +513,8 @@ public:
 			stream.start();
 				
 			Util::pause();
+	
+			_file.close();
 			//while (!stop)
 			//{
 			//	Thread::sleep(50);
@@ -463,6 +537,7 @@ public:
 
 		fpsCounter.tick();
 		
+		_file.write((const char*)packet.data(), packet.size());		
 		/*
 		//Log("trace") << "[MediaConnection] Sending Packet: " << packet.size << ": " << fpsCounter.fps << endl;
 		//Log("trace") << "[MediaConnection] Sending Packet: " << string((const char*)packet.data, 50) << endl;
@@ -496,6 +571,7 @@ public:
 	AVEncoder* encoder;
 	PacketStream stream;
 	FPSCounter fpsCounter;
+	std::ofstream _file;	
 };
 
 
@@ -557,21 +633,61 @@ int main(int argc, char** argv)
 	Speex		= 86054
 
 	videoCapture = NULL;
-	audioCapture = NULL;		
-	*/
+	audioCapture = NULL;	
+	
+static const RtAudioFormat RTAUDIO_SINT8 = 0x1;    // 8-bit signed integer.
+static const RtAudioFormat RTAUDIO_SINT16 = 0x2;   // 16-bit signed integer.
+static const RtAudioFormat RTAUDIO_SINT24 = 0x4;   // Lower 3 bytes of 32-bit signed integer.
+static const RtAudioFormat RTAUDIO_SINT32 = 0x8;   // 32-bit signed integer.
+static const RtAudioFormat RTAUDIO_FLOAT32 = 0x10; // Normalized between plus/minus 1.0.
+static const RtAudioFormat RTAUDIO_FLOAT64 = 0x20; // Normalized between plus/minus 1.0.
+
+typedef char AUDIO_DATA;
+#define AUDIO_FORMAT RTAUDIO_SINT8
+
+typedef signed short AUDIO_DATA;
+#define AUDIO_FORMAT RTAUDIO_SINT16
+
+typedef signed long AUDIO_DATA;
+#define AUDIO_FORMAT RTAUDIO_SINT24
+
+typedef signed long AUDIO_DATA;
+#define AUDIO_FORMAT RTAUDIO_SINT32
+
+typedef float AUDIO_DATA;
+#define AUDIO_FORMAT RTAUDIO_FLOAT32
+			Log("trace") << "[MediaConnection] ENDING!!!!!!!!!!!!!" << sizeof(char) << endl;
+			Log("trace") << "[MediaConnection] ENDING!!!!!!!!!!!!!" << sizeof(signed short) << endl;
+			Log("trace") << "[MediaConnection] ENDING!!!!!!!!!!!!!" << sizeof(signed long) << endl;
+			Log("trace") << "[MediaConnection] ENDING!!!!!!!!!!!!!" << sizeof(signed long) << endl;
+			Log("trace") << "[MediaConnection] ENDING!!!!!!!!!!!!!" << sizeof(float) << endl;
+			Log("trace") << "[MediaConnection] ENDING!!!!!!!!!!!!!" << sizeof(double) << endl;
+	
+	assert(sizeof(signed short) > 20);
+	*/			
+	
 
 	MediaFactory::initialize();
 	MediaFactory::instance()->loadVideo();
 	MediaFactory::instance()->loadAudio();
+	
+	videoCapture = MediaFactory::instance()->video.getCapture(0);
+	audioCapture = MediaFactory::instance()->audio.getCapture(0, 
+		currentFormat.audio.channels, 
+		currentFormat.audio.sampleRate); //, RTAUDIO_FLOAT32
+	//audioCapture = MediaFactory::instance()->audio.getCapture(0, 1, 11025, RTAUDIO_FLOAT32);
+	//audioCapture = MediaFactory::instance()->audio.getCapture(0, 2, 44100);
+	//audioCapture = MediaFactory::instance()->audio.getCapture(0, 1, 16000);
+	//audioCapture->start();
+	//, RTAUDIO_FLOAT32, RTAUDIO_FLOAT64
 	
 	/*
 	{
 		StreamTest test;
 		test.run();
 		Util::pause();
-	}
+	}	
 	*/
-	
 	{
 		MediaServer srv(328);
 		srv.start();
@@ -671,10 +787,10 @@ int main(int argc, char** argv)
 			api.loadServices();
 		} 
 	}
-	*/
 
 	Util::pause();
 
+	*/
 	return 0;
 }
 

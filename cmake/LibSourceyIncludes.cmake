@@ -98,9 +98,33 @@ macro(include_sourcey_modules)
     set(lib_name "Sourcey${name}${LibSourcey_DLLVERSION}")
     
     # Create a Debug and a Release list for MSVC        
-    if (MSVC)
-      find_library(LibSourcey_${name}_RELEASE "${lib_name}" LibSourcey_LIBRARY_DIR)
-      find_library(LibSourcey_${name}_DEBUG "${lib_name}d" LibSourcey_LIBRARY_DIR)
+    if (MSVC)    
+      
+      # Find the module giving priority to the build output folder, and install folder second.
+      # This way we don't have to install updated modules before building applications
+      # simplifying the build process. 
+    
+      # Always reset the module folders since.
+      set(LibSourcey_${name}_RELEASE LibSourcey_${name}_RELEASE-NOTFOUND)
+      set(LibSourcey_${name}_RELEASE LibSourcey_${name}_RELEASE-NOTFOUND PARENT_SCOPE)
+      set(LibSourcey_${name}_DEBUG LibSourcey_${name}_DEBUG-NOTFOUND)
+      set(LibSourcey_${name}_DEBUG LibSourcey_${name}_DEBUG-NOTFOUND PARENT_SCOPE)  
+      
+      # Since CMake doesn't give priority to the PATHS parameter, we need to search twice:
+      # once using NO_DEFAULT_PATH, and once using default values.         
+      find_library(LibSourcey_${name}_RELEASE "${lib_name}" 
+        PATHS ${LibSourcey_BUILD_DIR}/src/${name}
+        PATH_SUFFIXES Release
+        NO_DEFAULT_PATH)
+      find_library(LibSourcey_${name}_DEBUG "${lib_name}d" 
+        PATHS ${LibSourcey_BUILD_DIR}/src/${name}
+        PATH_SUFFIXES Debug
+        NO_DEFAULT_PATH)        
+      
+      # Search the module install folder if none was located.
+      find_library(LibSourcey_${name}_RELEASE "${lib_name}")
+      find_library(LibSourcey_${name}_DEBUG "${lib_name}d")
+      
       if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)            
         if (LibSourcey_${name}_RELEASE) 
           list(APPEND LibSourcey_INCLUDE_LIBRARIES "optimized" ${LibSourcey_${name}_RELEASE})
@@ -119,8 +143,12 @@ macro(include_sourcey_modules)
           mark_as_advanced(LibSourcey_${name}_DEBUG)
         endif()
       endif()      
-    else()
-      find_library(LibSourcey_${name} "${lib_name}" LibSourcey_LIBRARY_DIR)
+    else()      
+      # Find the module giving preference to the build output folder.
+      find_library(LibSourcey_${name} "${lib_name}" 
+        PATHS ${LibSourcey_BUILD_DIR}/src/${name}
+        NO_DEFAULT_PATH)
+      find_library(LibSourcey_${name} "${lib_name}")
       if (LibSourcey_${name})
         # Prepend module libraries otherwise linking will fail
         # on compilers that require ordering of link libraries.
@@ -404,16 +432,6 @@ macro(find_component module component pkgconfig library header)
   endif()
 
 endmacro()
-
-
-
-
-
-
-
-
-
-
 
 
 #

@@ -39,37 +39,182 @@ namespace Media {
 // ---------------------------------------------------------------------
 //
 Codec::Codec() : 
-	id(Unknown), name("Unknown"), sampleRate(0), bitRate(0), quality(0), enabled(false) 
+	name("Unknown"), sampleRate(0), bitRate(0), quality(0), enabled(false) 
 {
 }
 
-Codec::Codec(UInt32 id, const string& name, int sampleRate, int bitRate, bool enabled) : //const string& name, 
-	id(id), name(name), sampleRate(sampleRate), bitRate(bitRate), quality(0), enabled(enabled) 
+Codec::Codec(const string& name, int sampleRate, int bitRate, bool enabled) :
+	name(name), sampleRate(sampleRate), bitRate(bitRate), quality(0), enabled(enabled) 
 {
 }
 
 
-Codec::Codec(UInt32 id, int sampleRate, int bitRate, bool enabled) :
-	id(id), sampleRate(sampleRate), bitRate(bitRate), enabled(enabled) 
+Codec::Codec(const string& name, const string& encoder, int sampleRate, int bitRate, bool enabled) :
+	name(name), encoder(encoder), sampleRate(sampleRate), bitRate(bitRate), enabled(enabled) 
 {
-	// set the name if none was set by derived class.
-	if (name.empty()) 
-		name = idString(static_cast<ID>(id));
 }
 
 
 Codec::Codec(const Codec& r) :
-	id(r.id),
 	name(r.name),
+	encoder(r.encoder),
 	sampleRate(r.sampleRate),
 	bitRate(r.bitRate),
 	enabled(r.enabled) 
 {
 }
 
-	
-Codec::ID Codec::toID(const string& type) 
+
+string Codec::toString() const 
 {
+	ostringstream os;
+	os << "Codec[" << name << ":" << encoder << ":" << sampleRate << ":" << enabled << "]";
+	return os.str();
+}
+
+
+void Codec::print(ostream& ost)
+{
+	ost << "Codec["		
+		//<< "\n\tID: " << id
+		<< "\n\tName: " << name
+		<< "\n\tEncoder: " << encoder
+		<< "\n\tSample Rate: " << sampleRate
+		<< "\n\tBit Rate: " << bitRate
+		<< "\n\tQuality: " << quality
+		<< "\n\tEnabled: " << enabled	
+		<< "]";
+}
+
+
+// ---------------------------------------------------------------------
+//
+AudioCodec::AudioCodec() : 
+	Codec("Unknown", DEFAULT_AUDIO_SAMPLE_RATE, DEFAULT_AUDIO_BIT_RATE, false), 
+	channels(DEFAULT_AUDIO_CHANNELS), sampleFmt(DEFAULT_AUDIO_SAMPLE_FMT) 
+{
+}
+
+
+AudioCodec::AudioCodec(const string& name, int channels, int sampleRate, int bitRate, UInt32 sampleFmt) : 
+	Codec(name, encoder, sampleRate, bitRate, true), channels(channels), sampleFmt(sampleFmt) 
+{
+}
+
+
+AudioCodec::AudioCodec(const string& name, const string& encoder, int channels, int sampleRate, int bitRate, UInt32 sampleFmt) : 
+	Codec(name, encoder, sampleRate, bitRate, true), channels(channels), sampleFmt(sampleFmt) 
+{
+}
+
+
+AudioCodec::AudioCodec(const AudioCodec& r) :
+	Codec(r.name, r.encoder, r.sampleRate, r.bitRate, r.enabled),
+	channels(r.channels), sampleFmt(r.sampleFmt) 
+{
+}
+
+
+string AudioCodec::toString() const 
+{
+	ostringstream os;
+	os << "AudioCodec[" << name << ":" << encoder << ":" << sampleRate << ":" << bitRate
+		<< ":" << channels << ":" << sampleFmt << ":" << enabled << "]";
+	return os.str();
+}
+
+
+void AudioCodec::print(ostream& ost)
+{
+	ost << "AudioCodec["
+		<< "\n\tName: " << name
+		<< "\n\tEncoder: " << encoder
+		<< "\n\tSample Rate: " << sampleRate
+		<< "\n\tBit Rate: " << bitRate
+		<< "\n\tChannels: " << channels
+		<< "\n\tSample Fmt: " << sampleFmt
+		<< "\n\tQuality: " << quality
+		<< "\n\tEnabled: " << enabled	
+		<< "]";
+}
+
+
+// ---------------------------------------------------------------------
+//
+VideoCodec::VideoCodec() : 
+	Codec("Unknown", DEFAULT_VIDEO_SAMPLE_RATE, DEFAULT_VIDEO_BIT_RATE, false), 
+	width(0), height(0), fps(0), pixfmt(DEFAULT_VIDEO_PIXEL_FMT) 
+{
+}
+
+
+VideoCodec::VideoCodec(const string& name, int width, int height, double fps, int sampleRate, int bitRate, UInt32 pixfmt) : 
+	Codec(name, sampleRate, bitRate, true), 
+	width(width), height(height), fps(fps), pixfmt(pixfmt) 
+{
+}
+
+
+VideoCodec::VideoCodec(const string& name, const string& encoder, int width, int height, double fps, int sampleRate, int bitRate, UInt32 pixfmt) : 
+	Codec(name, encoder, sampleRate, bitRate, true), 
+	width(width), height(height), fps(fps), pixfmt(pixfmt) 
+{
+}
+
+
+VideoCodec::VideoCodec(const VideoCodec& r) :
+	Codec(r.name, r.encoder, r.sampleRate, r.bitRate, r.enabled),
+	width(r.width), height(r.height), fps(r.fps), pixfmt(r.pixfmt)
+{
+}
+	
+
+string VideoCodec::toString() const 
+{
+	ostringstream os;
+	os << "VideoCodec[" << name << ":" << encoder << ":" << width << ":" << height
+		<< ":" << fps << ":" << pixfmt << ":" << enabled << "]";
+	return os.str();
+}
+
+
+void VideoCodec::print(ostream& ost)
+{
+	ost << "VideoCodec["
+		<< "\n\tName: " << name
+		<< "\n\tEncoder: " << encoder
+		<< "\n\tSample Rate: " << sampleRate
+		<< "\n\tBit Rate: " << bitRate
+		<< "\n\tWidth: " << width
+		<< "\n\tHeight: " << height
+		<< "\n\tFPS: " << fps
+		<< "\n\tPixel Format: " << pixfmt
+		<< "\n\tQuality: " << quality
+		<< "\n\tEnabled: " << enabled	
+		<< "]";
+}
+
+
+} // namespace Media 
+} // namespace Sourcey
+
+
+
+	/*id(Unknown), */
+	
+	
+	
+	// set the name if none was set by derived class.
+	//if (name.empty()) 
+	//	name = idString(id);
+		//name = idString(static_cast<ID>(id));
+	//id(r.id),
+	
+	/*
+UInt32 Codec::toID(const string& type) 
+{
+	// TODO: Use FFmpeg is available?
+
 	// video
 	if (type == "Raw")
 		return Codec::Raw;
@@ -142,8 +287,11 @@ string Codec::idString(UInt32 id)
 		case NellyMoser:return "NellyMoser";
 		case Speex:		return "Speex";
 	}
+
 	return "Unknown";
+	// return avcodec_get_name(id);
 }
+*/
 
 
 /*
@@ -158,144 +306,3 @@ bool Codec::matches(UInt32 id, const string& name) const
 	return this->id == id && this->name == name;
 }
 */
-
-
-string Codec::toString() const 
-{
-	ostringstream os;
-	os << "Codec[" << id << ":" << name << ":" << sampleRate << ":" << enabled << "]";
-	return os.str();
-}
-
-
-void Codec::print(std::ostream& ost)
-{
-	ost << "Codec["		
-		<< "\n\tID: " << id
-		<< "\n\tName: " << name
-		<< "\n\tSample Rate: " << sampleRate
-		<< "\n\tBit Rate: " << bitRate
-		<< "\n\tQuality: " << quality
-		<< "\n\tEnabled: " << enabled	
-		<< "]";
-}
-
-
-/*
-	UInt32 id;
-	std::string name;	// The display name for this codec. May or may not match ID string.
-	int sampleRate;		// The sampling rate or RTP clock rate.
-	int bitRate;		// The bit rate to encode at.
-	int quality;		// Optional quality value, variable range depending on codec.
-	bool enabled;		// Weather or not the codec is available for use.
-
-string Codec::toSDP() const 
-{
-	ostringstream os;
-	os << "a=rtpmap:" 
-		<< id << " " 
-		<< name << "/" 
-		<< sampleRate 
-		<< "\r\n";
-	return os.str();
-}
-*/
-
-
-// ---------------------------------------------------------------------
-//
-
-AudioCodec::AudioCodec() : 
-	Codec(id, name, DEFAULT_AUDIO_SAMPLE_RATE, DEFAULT_AUDIO_BIT_RATE, false), channels(DEFAULT_AUDIO_CHANNELS) 
-{
-}
-
-
-AudioCodec::AudioCodec(UInt32 id, const std::string& name, int channels, int sampleRate, int bitRate) : 
-	Codec(id, name, sampleRate, bitRate, true), channels(channels) 
-{
-}
-
-
-AudioCodec::AudioCodec(const AudioCodec& r) :
-	Codec(r.id, r.name, r.sampleRate, r.bitRate, r.enabled),
-	channels(r.channels)
-{
-}
-
-
-string AudioCodec::toString() const 
-{
-	ostringstream os;
-	os << "AudioCodec[" << id << ":" << name << ":" << sampleRate << ":" << bitRate
-		<< ":" << channels << ":" << enabled << "]";
-	return os.str();
-}
-
-
-void AudioCodec::print(std::ostream& ost)
-{
-	ost << "AudioCodec["		
-		<< "\n\tID: " << id
-		<< "\n\tName: " << name
-		<< "\n\tSample Rate: " << sampleRate
-		<< "\n\tBit Rate: " << bitRate
-		<< "\n\tChannels: " << channels
-		<< "\n\tQuality: " << quality
-		<< "\n\tEnabled: " << enabled	
-		<< "]";
-}
-
-
-// ---------------------------------------------------------------------
-//
-VideoCodec::VideoCodec() : 
-	Codec(id, name, DEFAULT_VIDEO_SAMPLE_RATE, DEFAULT_VIDEO_BIT_RATE, false), 
-	width(0), height(0), fps(0), pixfmt(PixelFormat::YUV420P) 
-{
-}
-
-
-VideoCodec::VideoCodec(UInt32 id, const string& name, int width, int height, double fps, int sampleRate, int bitRate, PixelFormat::ID pixfmt) : 
-	Codec(id, name, sampleRate, bitRate, true), width(width), height(height), fps(fps), pixfmt(pixfmt) 
-{
-}
-
-VideoCodec::VideoCodec(const VideoCodec& r) :
-	Codec(r.id, r.name, r.sampleRate, r.bitRate, r.enabled),
-	width(r.width),
-	height(r.height),
-	fps(r.fps),
-	pixfmt(r.pixfmt)
-{
-}
-	
-
-string VideoCodec::toString() const 
-{
-	ostringstream os;
-	os << "VideoCodec[" << id << ":" << name << ":" << width << ":" << height
-		<< ":" << fps << ":" << enabled << "]";
-	return os.str();
-}
-
-
-void VideoCodec::print(std::ostream& ost)
-{
-	ost << "VideoCodec["		
-		<< "\n\tID: " << id
-		<< "\n\tName: " << name
-		<< "\n\tSample Rate: " << sampleRate
-		<< "\n\tBit Rate: " << bitRate
-		<< "\n\tWidth: " << width
-		<< "\n\tHeight: " << height
-		<< "\n\tFPS: " << fps
-		<< "\n\tPixel Format: " << pixfmt
-		<< "\n\tQuality: " << quality
-		<< "\n\tEnabled: " << enabled	
-		<< "]";
-}
-
-
-} // namespace Media 
-} // namespace Sourcey

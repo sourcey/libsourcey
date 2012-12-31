@@ -117,7 +117,7 @@ public:
 			if (_initial && !_modifyingStream) {
 				Buffer buf;
 				packet.write(buf);
-				_modifyingStream = !isFLVHeader(buf);
+				_modifyingStream = true; //!isFLVHeader(buf);
 				_waitingForKeyframe = _modifyingStream;
 				_timestampOffset = 0;
 				_initial = false;
@@ -168,8 +168,8 @@ public:
 			}
 		}
 
-		// Just proxy the packet if no
-		// modification is required.
+		// Just proxy the packet if no modification is required.
+		//Log("debug") << "[FLVMetadataInjector:" << this << "] Proxy Packet" << std::endl;
 		dispatch(this, packet);
 	}
 	

@@ -126,7 +126,7 @@ public:
 		void load();
 		void unload();
 
-		virtual AudioCapture* getCapture(int deviceId, int channels = DEFAULT_AUDIO_CHANNELS, int sampleRate = DEFAULT_AUDIO_SAMPLE_RATE);
+		virtual AudioCapture* getCapture(int deviceId, int channels = DEFAULT_AUDIO_CHANNELS, int sampleRate = DEFAULT_AUDIO_SAMPLE_RATE, RtAudioFormat format = RTAUDIO_SINT16);
 			///
 
 	protected:

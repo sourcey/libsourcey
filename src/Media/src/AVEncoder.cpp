@@ -157,14 +157,14 @@ void AVEncoder::initialize()
 		_formatCtx->oformat = av_guess_format(/*_options.oformat.encoderName().data()*/NULL, ofmt.data(), NULL);	
 		if (!_formatCtx->oformat)
 			throw Exception("Cannot find suitable output format for " + _options.oformat.encoderName());
-
+		
+		/*
 		// Set the encoder codec
 		if (_options.oformat.video.enabled)
 			_formatCtx->oformat->video_codec = static_cast<CodecID>(_options.oformat.video.id);
 		if (_options.oformat.audio.enabled)
 			_formatCtx->oformat->audio_codec = static_cast<CodecID>(_options.oformat.audio.id);		
 		
-		/*
 		for (int i=0; i< _formatCtx->nb_streams; i++) {
 			if (_formatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO && 
 				_video == NULL) {
@@ -198,7 +198,9 @@ void AVEncoder::initialize()
 			_audio->open(_formatCtx);			
 
 			// Set the output frame size for encoding
-			_audioOutSize = _audio->stream->codec->frame_size * 2 * _audio->stream->codec->channels;
+			_audioOutSize = _audio->stream->codec->frame_size * 
+				av_get_bytes_per_sample(_audio->stream->codec->sample_fmt) * 
+				_audio->stream->codec->channels;
 
 			// The encoder may require a minimum number of raw audio samples for each encoding but we can't
 			// guarantee we'll get this minimum each time an audio frame is decoded from the in file so 
@@ -458,7 +460,8 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 	} 
 	else {
 		
-		//	_video->oframe->pts = _video->pts;
+		/*
+		//_video->oframe->pts = _video->pts;
 
 		// PTS value will increment by 1 for input each frame at defined FPS value.
 		// PTS value will need to be dynamically generated for variable FPS rates.	
@@ -468,8 +471,10 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 		//else {
 			double fpsDiff = (_video->codec->time_base.den / _fpsCounter.fps);
 			_video->pts = _video->pts + fpsDiff;
+			//_video->dts = _video->pts + fpsDiff;
 			//_video->oframe->pts = _video->pts;
 		//}
+		*/
 		
  		// Encode the frame 
 		if (!_video->encode(buffer, bufferSize, opacket)) {
@@ -481,12 +486,24 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 	}
 
 	if (opacket.size > 0) {
+		 
+		/*
+		Log("trace") << "[AVEncoder:" << this << "] Writing Video Packet: " 
+			<< opacket.pts << ": " 
+			<< opacket.dts << ": " 
+			//<< _video->pts << ": "
+			//<< ((1000.0 / _fpsCounter.fps) * _fpsCounter.frames)
+			<< endl;
+		
+		if (opacket.pts == AV_NOPTS_VALUE) 
+			opacket.pts = (1000.0 / _fpsCounter.fps) * _fpsCounter.frames;
+
+		if (opacket.dts == AV_NOPTS_VALUE) 
+			opacket.dts = (1000.0 / _fpsCounter.fps) * _fpsCounter.frames;		
+			*/
 	
 		// Write the encoded frame to the output file / stream.
-		//int res = av_write_frame(_formatCtx, &packet);
-		int res = av_interleaved_write_frame(_formatCtx, &opacket);
-		//int res = av_write_frame(_formatCtx, &opacket);
-		if (res < 0) {
+		if (av_interleaved_write_frame(_formatCtx, &opacket) < 0) {
 			Log("error") << "[AVEncoder:" << this << "] Failed to write video frame" << endl;
 			return false;
 		}
@@ -512,6 +529,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 	// Lock the mutex while encoding
 	//FastMutex::ScopedLock lock(_mutex);	
 
+	/*
 	// If we are encoding a multiplex stream wait for the first
 	// video frame to be encoded before we start encoding audio
 	// otherwise we get errors for some codecs.
@@ -519,9 +537,10 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 		Log("trace") << "[AVEncoder:" << this << "] Encoding Audio Packet: Dropping audio frames until we have video." << endl;
 		return false;
 	}
+	*/
 
 	if (!isActive())
-		throw Exception("The encoder is not initialized.");
+		throw Exception("The encoder is not initialized");
 	
 	assert(buffer);
 	assert(bufferSize);
@@ -530,9 +549,6 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 	
 	if (!buffer || !bufferSize) 
 		throw Exception("Invalid audio input");
-
-	//if (bufferSize > _audio->bufferSize) 
-	//	throw Exception("Audio frame too big"); 
 	
 	av_fifo_generic_write(_audioFifo, (UInt8 *)buffer, bufferSize, NULL);
 	while (av_fifo_size(_audioFifo) >= _audioOutSize) {
@@ -540,12 +556,12 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 
  		// Encode a frame of AudioOutSize bytes
 		AVPacket opacket;	
+
 		//int size = _audio->encode(_audioFifoOutBuffer, _audioOutSize, opacket);
 		if (_audio->encode(_audioFifoOutBuffer, _audioOutSize, opacket)) {
 
 	 		// Write the encoded frame to the output file
-			int result = av_interleaved_write_frame(_formatCtx, &opacket);
-			if (result != 0) {
+			if (av_interleaved_write_frame(_formatCtx, &opacket) != 0) {
 				Log("error") << "[AVEncoder:" << this << "] Failed to write audio frame" << endl;
 				return false;
 			}

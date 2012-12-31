@@ -31,6 +31,7 @@
 
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/ICapture.h"
+#include "Sourcey/Media/Format.h"
 #include "Sourcey/Signal.h"
 
 #include "RtAudio.h"
@@ -43,16 +44,14 @@
 namespace Sourcey {
 namespace Media {
 
-
-/*
-typedef char AUDIO_DATA;
-#define AUDIO_FORMAT RTAUDIO_SINT8
-*/
+	
 
 typedef signed short AUDIO_DATA;
 #define AUDIO_FORMAT RTAUDIO_SINT16
-
 /*
+typedef char AUDIO_DATA;
+#define AUDIO_FORMAT RTAUDIO_SINT8
+
 typedef signed long AUDIO_DATA;
 #define AUDIO_FORMAT RTAUDIO_SINT24
 
@@ -73,10 +72,10 @@ DefinePolymorphicDelegateWithArg(audioDelegate, IPacket, PacketDelegateBase, Voi
 class AudioCapture: public ICapture
 {
 public:	
-	AudioCapture(int deviceId, int channels, int sampleRate);
+	AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format = RTAUDIO_SINT16);
 	virtual ~AudioCapture();
 	
-  	virtual void open(int channels, int sampleRate);
+  	virtual void open(); //int channels, int sampleRate, RtAudioFormat format = RTAUDIO_SINT16)
   	virtual void close();
 
   	virtual void start();
@@ -90,6 +89,7 @@ public:
 	virtual int numChannels() const;
 	virtual bool isRunning() const;
 	virtual bool isOpen() const;
+	virtual RtAudioFormat format() const;
 
 protected:
 	virtual void setError(const std::string& message);
@@ -101,6 +101,7 @@ protected:
 private:
 	mutable Poco::FastMutex		_mutex;
 	RtAudio::StreamParameters	_iParams;
+	RtAudioFormat _format;
 	RtAudio		_audio;
 	int			_deviceId; 
 	int			_channels;
@@ -111,6 +112,18 @@ private:
 
 
 typedef std::map<int, AudioCapture*> AudioCaptureMap;
+
+
+inline void AllocateRtAudioInputFormat(const AudioCapture* capture, Format& format) 
+	/// Allocates an OpenCV compatible input format for
+	/// our encoders.
+{
+	assert(capture);
+	format.audio.sampleFmt = SampleFormat::S16; //RTAUDIO_SINT16; // TODO: Convert from RtAudioFormat to SampleFormat
+	format.audio.channels = capture->numChannels();
+	format.audio.sampleRate = capture->sampleRate();
+	format.audio.enabled = true;
+}
 
 
 } } // namespace Sourcey::Media

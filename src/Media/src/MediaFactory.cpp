@@ -264,9 +264,9 @@ void MediaFactory::Audio::load()
 }
 
 
-AudioCapture* MediaFactory::Audio::getCapture(int deviceId, int channels, int sampleRate)
+AudioCapture* MediaFactory::Audio::getCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format)
 {
-	return new AudioCapture(deviceId, channels, sampleRate);
+	return new AudioCapture(deviceId, channels, sampleRate, format);
 }
 
 
