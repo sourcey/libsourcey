@@ -141,14 +141,14 @@ struct VideoCodec
 	int width;
 	int height;
 	double fps;	
-	PixelFormat::ID pixfmt;		// The input pixel format 
+	PIX_FMT_ID pixfmt;		// The input pixel format 
 	int bitRate;
 	int quality;				// For JPEG creation
 	VideoCodec(Codec::ID codec,
 				int width = 400,
 				int height = 300,
 				double fps = 25,
-				PixelFormat::ID pixfmt = PixelFormat::BGR24,
+				PIX_FMT_ID pixfmt = PIX_FMT_BGR24,
 				int bitRate = 200 * 1024,
 				int quality = 80) : 
 		enabled(true),
@@ -165,7 +165,7 @@ struct VideoCodec
 		width(400),
 		height(300),
 		fps(25),
-		pixfmt(PixelFormat::BGR24),
+		pixfmt(PIX_FMT_BGR24),
 		bitRate(200 * 1024),
 		quality(80) {}
 	VideoCodec(const VideoCodec& r) : 

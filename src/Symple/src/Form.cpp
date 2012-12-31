@@ -216,7 +216,7 @@ FormField FormElement::addField(const string& type, const string& id, const stri
 		type == "list" ||
 		type == "list-multi" ||
 		type == "boolean" ||
-		type == "integer" ||
+		type == "number" ||
 		type == "media" ||
 		type == "date" ||
 		type == "time" ||

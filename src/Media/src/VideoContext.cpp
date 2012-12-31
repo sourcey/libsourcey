@@ -120,9 +120,13 @@ void VideoEncoderContext::open(AVFormatContext* oc) //, const VideoCodec& params
 	assert(oparams.enabled);	
 
 	// Find the video encoder
-	AVCodec* c = avcodec_find_encoder(oc->oformat->video_codec);
+	AVCodec* c = avcodec_find_encoder_by_name(oparams.encoder.data());
 	if (!c)
-   		throw Exception("Video codec encoder not found.");
+   		throw Exception("Video encoder not found.");
+
+	oc->oformat->video_codec = c->id;
+	
+	//_formatCtx->oformat->video_codec = static_cast<CodecID>(_options.oformat.video.id);
 	
 	// Add a video stream that uses the format's default video 
 	// codec to the format context's streams[] array.
@@ -131,8 +135,8 @@ void VideoEncoderContext::open(AVFormatContext* oc) //, const VideoCodec& params
 		throw Exception("Failed to create the video stream.");	
 	
 	codec = stream->codec;
-	//avcodec_get_context_defaults3(codec, c);
-	codec->codec_id = oc->oformat->video_codec;	
+	avcodec_get_context_defaults3(codec, c);
+	codec->codec_id = c->id; //oc->oformat->video_codec;	
 	codec->codec_type = AVMEDIA_TYPE_VIDEO;
 	
 	// Resolution must be a multiple of two
@@ -183,7 +187,7 @@ void VideoEncoderContext::open(AVFormatContext* oc) //, const VideoCodec& params
 	//int bitrateScale = 64;
 	switch (oc->oformat->video_codec) {
 	case CODEC_ID_JPEGLS:
-		// PixelFormat::BGR24 or GRAY8 depending on is_color...
+		// PIX_FMT_BGR24 or GRAY8 depending on is_color...
 		codec->pix_fmt = PIX_FMT_BGR24;
 		break;
 	case CODEC_ID_HUFFYUV:
@@ -275,8 +279,7 @@ bool VideoEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 	// http://thompsonng.blogspot.com.au/2011/09/ffmpeg-avinterleavedwriteframe-return.html
 	// http://stackoverflow.com/questions/6603979/ffmpegavcodec-encode-video-setting-pts-h264
 	// (1 / oparams.fps) * sample rate * frame number
-	//oframe->pts = (1 / oparams.fps) * 90 * codec->frame_number++;
-	oframe->pts = codec->frame_number++;
+	oframe->pts = codec->frame_number;
 
     av_init_packet(&opacket);	
 	opacket.stream_index = this->stream->index;	
@@ -288,7 +291,31 @@ bool VideoEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 		error = "Fatal Encoder Error";
 		Log("error") << "[VideoEncoderContext:" << this << "] Fatal Encoder Error" << endl;
 		throw Exception(error);
-		//return false;
+    }
+	if (frameEncoded) {
+        if (opacket.pts != AV_NOPTS_VALUE)
+            opacket.pts = av_rescale_q(opacket.pts, codec->time_base, stream->time_base);
+        if (opacket.dts != AV_NOPTS_VALUE)
+            opacket.dts = av_rescale_q(opacket.dts, codec->time_base, stream->time_base);
+		
+		if (stream->codec->coded_frame->key_frame) 
+		    opacket.flags |= AV_PKT_FLAG_KEY;
+
+		/*	
+		Log("trace") << "[VideoEncoderContext:" << this << "] Encoded PTS:\n" 
+			//<< "\n\tPTS: " << av_ts2str(opacket.pts)
+			//<< "\n\tDTS: " << av_ts2str(opacket.dts)
+			//<< "\n\tPTS Time: " << av_ts2timestr(opacket.pts, &stream->time_base)
+			//<< "\n\tDTS Time: " << av_ts2timestr(opacket.dts, &stream->time_base)
+			<< "\n\tPTS: " << opacket.pts
+			<< "\n\tDTS: " << opacket.dts
+			<< "\n\tFrame PTS: " << oframe->pts
+			//<< "\n\tCodec Time Den: " << codec->time_base.den
+			//<< "\n\tCodec Time Num: " << codec->time_base.num
+			//<< "\n\tStream Time Den: " << stream->time_base.den
+			//<< "\n\tStream Time Num: " << stream->time_base.num
+			<< endl; 
+		*/
     }
 	
 	return frameEncoded > 0;

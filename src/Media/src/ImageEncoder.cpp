@@ -88,10 +88,15 @@ void ImageEncoder::process(IPacket& packet)
 		throw Exception("Video packets must contain an OpenCV image.");
 	
     vector<unsigned char> buffer;
-
+	
 	// FIXME: If the video capture is stopped before
 	// this callback completes our Mat is corrupted.
 	cv::Mat& source = *mpacket->mat;
+	Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket->mat << endl;
+	Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << source.cols << endl;
+	Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << source.rows << endl;
+	Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << _options.oformat.video.width << endl;
+	Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << _options.oformat.video.height << endl;
 	if (source.cols != _options.oformat.video.width &&
 		source.rows != _options.oformat.video.height) {
 		cv::Mat resized;

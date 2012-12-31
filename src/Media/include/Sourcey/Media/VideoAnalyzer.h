@@ -36,6 +36,7 @@
 #include "Sourcey/IPacketProcessor.h"
 #include "Sourcey/Media/AVFileReader.h"
 #include "Sourcey/Media/FPSCounter.h"
+#include "Sourcey/Media/Format.h"
 
 
 extern "C" {

@@ -8,12 +8,13 @@
 #
 # For each of the components it will additionaly set.
 #   - AVCODEC
-#   - AVDEVICE
 #   - AVFORMAT
 #   - AVFILTER
 #   - AVUTIL
-#   - POSTPROCESS
+#   - AVDEVICE
 #   - SWSCALE
+#   - SWRESAMPLE
+#   - POSTPROC
 #
 # the following variables will be defined
 #  <component>_FOUND        - System has <component>
@@ -23,31 +24,28 @@
 #  <component>_VERSION      - The components version
 
 # The default components were taken from a survey over other FindFFmpeg.cmake files
+# TODO: Implement this...
 if (NOT FFmpeg_FIND_COMPONENTS)
-  set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE) #AVFILTER
+  set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)
 endif()
 
 # Check for cached results. If there are skip the costly part.
-#set_module_notfound(FFmpeg)
+set_module_notfound(FFmpeg)
 if (NOT FFmpeg_FOUND)
       
   # Check for all components
-  find_component(FFmpeg AVCODEC  libavcodec  avcodec  libavcodec/avcodec.h)
-  find_component(FFmpeg AVFORMAT libavformat avformat libavformat/avformat.h)
-  find_component(FFmpeg AVFILTER libavfilter avfilter libavfilter/avfilter.h)
-  find_component(FFmpeg AVDEVICE libavdevice avdevice libavdevice/avdevice.h)
-  find_component(FFmpeg AVUTIL   libavutil   avutil   libavutil/avutil.h)
-  find_component(FFmpeg SWSCALE  libswscale  swscale  libswscale/swscale.h)
-  find_component(FFmpeg POSTPROC libpostproc postproc libpostproc/postprocess.h)
+  find_component(FFmpeg AVCODEC    libavcodec    avcodec    libavcodec/avcodec.h)
+  find_component(FFmpeg AVFORMAT   libavformat   avformat   libavformat/avformat.h)
+  find_component(FFmpeg AVFILTER   libavfilter   avfilter   libavfilter/avfilter.h)
+  find_component(FFmpeg AVUTIL     libavutil     avutil     libavutil/avutil.h)
+  find_component(FFmpeg AVDEVICE   libavdevice   avdevice   libavdevice/avdevice.h)
+  find_component(FFmpeg SWSCALE    libswscale    swscale    libswscale/swscale.h)
+  find_component(FFmpeg SWRESAMPLE libswresample swresample libswresample/swresample.h)
+  find_component(FFmpeg POSTPROC   libpostproc   postproc   libpostproc/postprocess.h)
   
   # Set FFmpeg as found or not
   set_module_found(FFmpeg)
 endif ()
-
-
-
-
-
 
 
 # Cache the vars.
@@ -59,8 +57,6 @@ endif ()
 #message("FFmpeg_LIBRARIES=${FFmpeg_LIBRARIES}")     
 #message("FFmpeg_INCLUDE_DIRS=${FFmpeg_INCLUDE_DIRS}")      
 #message("FFmpeg_INCLUDE_DIRS=${FFmpeg_INCLUDE_DIRS}")  
-
-
 
 # Check that the required components were found.    
 #set(FFmpeg_FOUND 1)
@@ -77,7 +73,6 @@ endif ()
 #if (FFmpeg_INCLUDE_DIRS)
 #  list(REMOVE_DUPLICATES FFmpeg_INCLUDE_DIRS)
 #endif ()
-
 
 #mark_as_advanced(FFmpeg_INCLUDE_DIRS
 #                 FFmpeg_LIBRARIES

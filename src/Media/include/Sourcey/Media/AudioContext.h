@@ -41,6 +41,7 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libavutil/fifo.h>
 #include <libswscale/swscale.h>
+#include <libswresample/swresample.h> //#include "avresample.h"
 }
 
 
@@ -54,8 +55,7 @@ struct AudioContext
 	virtual ~AudioContext();
 	
 	virtual void open();
-	virtual void close();		
-	//virtual void reset();	
+	virtual void close();
 	
     AVStream*			stream;
     AVCodecContext*		codec;
@@ -67,6 +67,7 @@ struct AudioContext
 
 // ---------------------------------------------------------------------
 //
+struct AudioResampler;
 struct AudioEncoderContext: public AudioContext
 {
 	AudioEncoderContext();
@@ -74,13 +75,14 @@ struct AudioEncoderContext: public AudioContext
 	
 	virtual void open(AVFormatContext* oc);
 	virtual void close();
-	//virtual void reset();	
 	
 	virtual bool encode(unsigned char* data, int size, AVPacket& opacket);
 	virtual bool encode(AVPacket& ipacket, AVPacket& opacket);	
 	
-    UInt8*			buffer;
-    int				bufferSize;
+	AudioResampler* resampler;
+	
+    int				samplesPerFrame;
+    int				outputBytes;
 
 	AudioCodec		iparams;
 	AudioCodec		oparams;
@@ -96,23 +98,34 @@ struct AudioDecoderContext: public AudioContext
 	
 	virtual void open(AVFormatContext *ic, int streamID);
 	virtual void close();
-	//virtual void reset();	
 	
 	virtual bool decode(UInt8* data, int size, AVPacket& opacket);
 	virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
-		// Decodes a single frame from the provided packet.
-		// Returns the size of the decoded frame. 
-		// IMPORTANT: In order to ensure all data is decoded from the
-		// input packet, this method should be looped until the input
-		// packet size is 0.
-		// Example:
-		//	while (packet.size > 0) {
-		//		decode(packet);
-		//	}
 
     double duration;
     int width;	// Number of bits used to store a sample
     bool fp;	// Floating-point sample representation
+};
+
+
+// ---------------------------------------------------------------------
+//
+struct AudioResampler
+{
+	AudioResampler();
+	virtual ~AudioResampler();	
+	
+	virtual void create(const AudioCodec& iparams, const AudioCodec& oparams);
+	virtual void free();
+
+	virtual UInt8* resample(UInt8* inSamples, int inNbSamples);
+
+	UInt8* outBuffer;
+	int outNbSamples;
+	struct SwrContext* ctx;
+	AVCodecContext* ocontext;
+	AudioCodec iparams;
+	AudioCodec oparams;
 };
 
 
@@ -122,6 +135,24 @@ struct AudioDecoderContext: public AudioContext
 #endif	// SOURCEY_MEDIA_AudioContext_H
 
 
+	//virtual void reset();	
+		// Decodes a single frame from the provided packet.
+		// Returns the size of the decoded frame. 
+		// IMPORTANT: In order to ensure all data is decoded from the
+		// input packet, this method should be looped until the input
+		// packet size is 0.
+		// Example:
+		//	while (packet.size > 0) {
+		//		decode(packet);
+		//	}
+/* 
+//, AVCodecContext* ocontext, int encFrameSize
+	//AVFrame* iframe
+	//AVFrame* oframe;
+	//struct AVResampleContext* ctx;
+	//int inNbSmaples;
+	//int outFrameSize; // output frame size
+*/
 
     // Internal data 
     //AVCodec*			codec;

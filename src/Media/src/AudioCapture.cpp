@@ -33,14 +33,16 @@ using namespace std;
 using namespace Poco;
 using namespace Sourcey;
 
+
 namespace Sourcey {
 namespace Media {
 
 
-AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate) : 
+AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format) : 
 	_deviceId(deviceId),
 	_channels(channels),
 	_sampleRate(sampleRate),
+	_format(format),
 	_isOpen(false)
 {
 	Log("trace") << "[AudioCapture:" << this << "] Creating" << endl;
@@ -58,7 +60,7 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate) :
 	_audio.showWarnings(true);
 		
 	// Open the audio stream or throw an exception.
-	open(channels, sampleRate);
+	open(); //channels, sampleRate
 }
 
 
@@ -68,21 +70,22 @@ AudioCapture::~AudioCapture()
 }
 
 
-void AudioCapture::open(int channels, int sampleRate)
+void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 {
-	Log("trace") << "[AudioCapture:" << this << "] Opening: " << channels << ": " << sampleRate << endl;
+	Log("trace") << "[AudioCapture:" << this << "] Opening: " << _channels << ": " << _sampleRate << endl;
 
 	close();
 
 	FastMutex::ScopedLock lock(_mutex);
 	
-	_channels = channels;
-	_sampleRate = sampleRate;
-	_iParams.nChannels = _channels;
+	//_channels = channels;
+	//_sampleRate = sampleRate;
+	//_format = format;
+	//_iParams.nChannels = _channels;
 	unsigned int nBufferFrames = 256; //512;
 
 	try {
-		_audio.openStream(NULL, &_iParams, AUDIO_FORMAT, _sampleRate, &nBufferFrames, &AudioCapture::callback, (void*)this);
+		_audio.openStream(NULL, &_iParams, _format, _sampleRate, &nBufferFrames, &AudioCapture::callback, (void*)this);
 		_error = "";
 		_isOpen = true;
 		Log("trace") << "[AudioCapture:" << this << "] Opening: OK" << endl;
@@ -141,19 +144,16 @@ void AudioCapture::stop()
 	Log("trace") << "[AudioCapture:" << this << "] Stopping" << endl;
 
 	if (isRunning()) {
-		Log("trace") << "[AudioCapture:" << this << "] Stopping 0" << endl;
 		try {
 			FastMutex::ScopedLock lock(_mutex);
-		Log("trace") << "[AudioCapture:" << this << "] Stopping 1" << endl;
+			Log("trace") << "[AudioCapture:" << this << "] Stopping: Before" << endl;
 			_audio.stopStream();
 			Log("trace") << "[AudioCapture:" << this << "] Stopping: OK" << endl;
 		}
 		catch (RtError& e) {
-		Log("trace") << "[AudioCapture:" << this << "] Stopping 2" << endl;
 			setError("Failed to stop audio capture: " + e.getMessage());
 		}
 		catch (...) {
-		Log("trace") << "[AudioCapture:" << this << "] Stopping 3" << endl;
 			setError("Failed to stop audio capture.");
 		}
 	}
@@ -176,7 +176,6 @@ void AudioCapture::detach(const PacketDelegateBase& delegate)
 	Log("debug") << "[AudioCapture:" << this << "] Removed Delegate: " << refCount() << endl;
 	if (refCount() == 0)
 		stop();
-
 	Log("debug") << "[AudioCapture:" << this << "] Removed Delegate: OK" << endl;
 }
 
@@ -200,29 +199,57 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 		Log("error") << "[AudioCapture::" << klass << "] Stream over/underflow detected" << endl;
 
 	assert(inputBuffer != NULL);
+	if (inputBuffer == NULL) {
+		Log("error") << "[AudioCapture::" << klass << "] Input buffer is NULL." << endl;
+		return 2;
+	} 
 
 	//if (!klass->isOpen())
 	//	return 2;
 
-	//if (inputBuffer == NULL) {
-	//	Log("error") << "[AudioCapture::" << klass << "] Input buffer is NULL." << endl;
-	//	return 2;
-	//} 
+	int size = 2;
+	RtAudioFormat format = klass->format();
+	// - \e RTAUDIO_SINT8:   8-bit signed integer.
+	if (format == RTAUDIO_SINT8)
+		size = 1;
+    // - \e RTAUDIO_SINT16:  16-bit signed integer.
+	else if (format == RTAUDIO_SINT16)
+		size = 2;
+    // - \e RTAUDIO_SINT24:  Lower 3 bytes of 32-bit signed integer.
+	else if (format == RTAUDIO_SINT24)
+		size = 4;
+    // - \e RTAUDIO_SINT32:  32-bit signed integer.
+	else if (format == RTAUDIO_SINT32)
+		size = 4;
+    // - \e RTAUDIO_FLOAT32: Normalized between plus/minus 1.0.
+	else if (format == RTAUDIO_FLOAT32)
+		size = 4;
+    // - \e RTAUDIO_FLOAT64: Normalized between plus/minus 1.0.
+	else if (format == RTAUDIO_FLOAT64)
+		size = 8;
+	else assert(0 && "unknown audio capture format");
 
 	AudioPacket packet(
 		(unsigned char*)inputBuffer, 
-		nBufferFrames * klass->numChannels() * sizeof(AUDIO_DATA),
+		nBufferFrames * klass->numChannels() * size, //sizeof(AUDIO_DATA),
 		(double)streamTime);
 
 	//Log("trace") << "[AudioCapture] AudioPacket: " 
-	//	<< "\n\tPacket Ptr: " << inputBuffer << "\n"
-	//	<< "\n\tPacket Size: " << packet.size << "\n"
-	//	<< "\n\tStream Time: " << packet.time << "\n"
+	//	<< "\n\tPacket Ptr: " << inputBuffer
+	//	<< "\n\tPacket Size: " << packet.size() 
+	//	<< "\n\tStream Time: " << packet.time
 	//	<< endl;
 
 	klass->dispatch(klass, packet);
 	//Log("trace") << "[AudioCapture::" << klass << "] Callback: OK" << endl;
 	return 0;
+}
+
+
+RtAudioFormat AudioCapture::format() const
+{ 
+	FastMutex::ScopedLock lock(_mutex);
+	return _format;
 }
 
 
