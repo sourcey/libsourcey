@@ -41,7 +41,7 @@ class Tests
 {
 	Poco::Event ready;
 	
-	//Runner runner;
+	Runner runner;
 	Net::Reactor reactor;
 	
 public:
@@ -58,9 +58,9 @@ public:
 		options.serverAddr = Net::Address(SERVER_HOST, SERVER_PORT);
 	
 #if USE_SSL
-		Symple::SSLClient client(reactor, options);
+		Symple::SSLClient client(reactor, runner, options);
 #else
-		Symple::TCPClient client(reactor, options);
+		Symple::TCPClient client(reactor, runner, options);
 #endif
 
 		client.StateChange += delegate(this, &Tests::onConnectionStateChange);

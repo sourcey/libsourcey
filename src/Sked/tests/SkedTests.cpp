@@ -57,8 +57,8 @@ public:
 	// ---------------------------------------------------------------------	
 	struct ScheduledTask: public Sked::Task
 	{
-		ScheduledTask(Scheduler& scheduler) : 
-			Sked::Task(scheduler, "ScheduledTask")
+		ScheduledTask() : //Scheduler& scheduler
+			Sked::Task("ScheduledTask") //scheduler, 
 		{
 			Log("debug") << "[ScheduledTask] Creating ################################" << endl;				
 		}
@@ -155,13 +155,14 @@ public:
 
 		// Schedule an interval task to run 3 times at 1 second intervals
 		{
-			ScheduledTask* task = new ScheduledTask(scheduler);			
+			ScheduledTask* task = new ScheduledTask();			
 			IntervalTrigger* trigger = task->createTrigger<IntervalTrigger>();
 			
 			trigger->interval = Timespan(1, 0);
 			trigger->maxTimes = 3;
 
-			task->start();
+			scheduler.schedule(task);
+			//task->start();
 
 			// Print to cout
 			Log("debug") << "##### Sked Print Output:" << endl;

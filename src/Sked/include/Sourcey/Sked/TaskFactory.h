@@ -72,27 +72,26 @@ public:
 	//
 	typedef std::map<std::string, Sked::Task*(*)(/*Scheduler&*/)> TaskMap;
 
-    Sked::Task* createTask(const std::string& name/*, Scheduler& scheduler*/) 
+    Sked::Task* createTask(const std::string& type/*, Scheduler& scheduler*/) 
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
-        TaskMap::iterator it = _tasks.find(name);
+        TaskMap::iterator it = _tasks.find(type);
         if (it == _tasks.end())
-			throw Exception("Failed to create scheduled task.");
-            //return NULL;
-        return it->second(); //scheduler);
+			throw Exception("Failed to create scheduled task: " + type);
+        return it->second();
     }
 	
 	template<typename T>
-    void registerTask(const std::string& name)	
+    void registerTask(const std::string& type)	
 	{ 
 		Poco::FastMutex::ScopedLock lock(_mutex);
-        _tasks[name] = &instantiateTask<T>;
+        _tasks[type] = &instantiateTask<T>;
     }
 	
-    void unregisterTask(const std::string& name)	
+    void unregisterTask(const std::string& type)	
 	{ 
 		Poco::FastMutex::ScopedLock lock(_mutex);
-        TaskMap::iterator it = _tasks.find(name);
+        TaskMap::iterator it = _tasks.find(type);
         if (it == _tasks.end())
             return;
 		_tasks.erase(it);
@@ -110,27 +109,26 @@ public:
 	//
 	typedef std::map<std::string, Sked::Trigger*(*)()> TriggerMap;
 
-    Sked::Trigger* createTrigger(const std::string& name) //, TriggerSked& scheduler
+    Sked::Trigger* createTrigger(const std::string& type)
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
-        TriggerMap::iterator it = _triggers.find(name);
+        TriggerMap::iterator it = _triggers.find(type);
         if (it == _triggers.end())
-			throw Exception("Failed to create scheduled trigger.");
-            //return NULL;
-        return it->second(); //scheduler
+			throw Exception("Failed to create scheduled trigger: " + type);
+        return it->second();
     }
 	
 	template<typename T>
-    void registerTrigger(const std::string& name)	
+    void registerTrigger(const std::string& type)	
 	{ 
 		Poco::FastMutex::ScopedLock lock(_mutex);
-        _triggers[name] = &instantiateTrigger<T>;
+        _triggers[type] = &instantiateTrigger<T>;
     }
 	
-    void unregisterTrigger(const std::string& name)	
+    void unregisterTrigger(const std::string& type)	
 	{ 
 		Poco::FastMutex::ScopedLock lock(_mutex);
-        TriggerMap::iterator it = _triggers.find(name);
+        TriggerMap::iterator it = _triggers.find(type);
         if (it == _triggers.end())
             return;
 		_triggers.erase(it);

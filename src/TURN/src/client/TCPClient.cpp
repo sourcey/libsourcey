@@ -68,27 +68,22 @@ void TCPClient::initiate()
 void TCPClient::terminate()
 {
 	Log("trace") << "[TURN::TCPClient:" << this << "] Terminating" << endl;	
-
 	Client::terminate();	
-	Log("trace") << "[TURN::TCPClient:" << this << "] Terminating 1" << endl;
 	{
-		FastMutex::ScopedLock lock(_mutex);
-		
+		FastMutex::ScopedLock lock(_mutex);		
 		ConnectionManagerMap& items = _connections.items();
 		ConnectionManagerMap::iterator it = items.begin();
 		ConnectionManagerMap::iterator it2;
-		Log("trace") << "[TURN::TCPClient:" << this << "] Terminating: Active Connections: " << items.size() << endl;	
+		Log("trace") << "[TURN::TCPClient:" << this << "] Terminating: Closing Connections: " << items.size() << endl;	
 		while (it != items.end()) {
-			it2 = it++;		
-			//(*it2).second->StateChange -= delegate(this, &SessionManager::onJingleSessionStateChange);
-			//(*it2).second->terminate();
-			Log("trace") << "[TURN::TCPClient:" << this << "] Terminating: Closing: " << it2->second << endl;	
-			it2->second->detach(packetDelegate<TCPClient, DataPacket>(this, &TCPClient::onDataPacketReceived));
+			it2 = it++;
+			Log("trace") << "[TURN::TCPClient:" << this << "] Terminating: Closing Connection: " << it2->second << endl;	
+			it2->second->detach(packetDelegate(this, &TCPClient::onDataPacketReceived));
 			it2->second->StateChange -= delegate(this, &TCPClient::onClientConnectionStateChange);	
 			it2->second->close();
-			//delete it2->second;
 			items.erase(it2);
 		}
+		assert(items.empty());
 
 		/*
 		ConnectionManagerMap::iterator it = items.begin();
@@ -102,7 +97,6 @@ void TCPClient::terminate()
 			it = items.erase(it);
 		}
 		*/
-		assert(items.empty());
 	}
 	
 	Log("trace") << "[TURN::TCPClient:" << this << "] Terminating: OK" << endl;
@@ -282,13 +276,22 @@ void TCPClient::handleConnectionBindResponse(const STUN::Message& response)
 	Log("trace") << "[TURN::TCPClient:" << this << "] Connection Bind Success Response" << endl;	
 
 	STUN::Transaction* transaction = reinterpret_cast<STUN::Transaction*>(response.opaque);
-	Net::TCPStatefulPacketSocket* conn = static_cast<Net::TCPStatefulPacketSocket*>(transaction->socket());
-
+	Net::IPacketSocket* socket = transaction->socket();
 	Net::Address peerAddress;
-	if (!getPeerAddress(conn, peerAddress)) {
+	if (!getPeerAddress(socket, peerAddress)) {
 		assert(false);
 		return;
 	}
+
+	//Net::TCPStatefulPacketSocket* conn = static_cast<Net::TCPStatefulPacketSocket*>(transaction->socket());
+	//Net::IPacketSocket* socket = reinterpret_cast<Net::IPacketSocket*>(sender);
+	//Net::TCPStatefulPacketSocket* conn1 = static_cast<Net::TCPStatefulPacketSocket*>(sender);	
+	//Net::TCPStatefulPacketSocket* conn = static_cast<Net::TCPStatefulPacketSocket*>(socket);	
+	//Net::TCPStatefulPacketSocket* conn = static_cast<Net::TCPStatefulPacketSocket*>(transaction->socket());
+
+
+	Net::TCPStatefulPacketSocket* conn = connections().get(peerAddress, false);
+	assert(conn);
 
 	// We no longer want to receive STUN packets.
 	// Data will be transferred as-is to and from 
@@ -304,7 +307,7 @@ void TCPClient::handleConnectionBindResponse(const STUN::Message& response)
 
 void TCPClient::handleConnectionBindErrorResponse(const STUN::Message& response)
 {
-	Log("trace") << "[TURN::TCPClient:" << this << "] Connection Bind Error" << endl;
+	Log("trace") << "[TURN::TCPClient:" << this << "] Connection Bind Error Response" << endl;
 
 	STUN::ConnectionID* connAttr = response.get<STUN::ConnectionID>();
 	if (!connAttr) {
@@ -313,7 +316,9 @@ void TCPClient::handleConnectionBindErrorResponse(const STUN::Message& response)
 	}
 	
 	STUN::Transaction* transaction = reinterpret_cast<STUN::Transaction*>(response.opaque);
-	Net::TCPStatefulPacketSocket* conn = static_cast<Net::TCPStatefulPacketSocket*>(transaction->socket());
+	//Net::IPacketSocket* socket = reinterpret_cast<Net::IPacketSocket*>(sender);
+	Net::TCPStatefulPacketSocket* conn = connections().get(transaction->socket()->address());
+	//Net::TCPStatefulPacketSocket* conn = static_cast<Net::TCPStatefulPacketSocket*>(transaction->socket());
 	conn->StateChange -= delegate(this, &TCPClient::onClientConnectionStateChange);	
 	FastMutex::ScopedLock lock(_mutex);	
 	if (!isTerminated()) {
@@ -330,12 +335,12 @@ bool TCPClient::createAndBindConnection(UInt32 connectionID, const Net::Address&
 	if (isTerminated())
 		return false;
 
-	Net::TCPStatefulPacketSocket* conn = new Net::TCPStatefulPacketSocket(_reactor); //, false
-	Log("trace") << "[TURN::TCPClient:" << this << "] @@@@@@@@@@@createAndBindConnection: conn: " << conn << endl;	
+	Net::TCPStatefulPacketSocket* conn = new Net::TCPStatefulPacketSocket(_reactor); 
+	Log("trace") << "[TURN::TCPClient:" << this << "] Create And Bind Connection: " << conn << endl;	
 	try {
 		// Temporarily accept STUN packets so we can 
 		// verify the ConnectionBind response.
-		conn->setDeleteOnClose(true);
+		conn->setDeleteOnClose(true);		
 		conn->registerPacketType<STUN::Message>(1);
 		conn->StateChange += delegate(this, &TCPClient::onClientConnectionStateChange);	
 		conn->connect(_options.serverAddr); // will throw on error
@@ -351,11 +356,10 @@ bool TCPClient::createAndBindConnection(UInt32 connectionID, const Net::Address&
 		sendAuthenticatedTransaction(transaction);
 
 		_connections.add(peerAddress, conn);
-
 		return true;
 	} 
 	catch (Exception& exc) {	
-		// instance deleted via state callback
+		// Socket instance deleted via state callback
 		Log("error") << "[TURN::TCPClient" << this << "] Connection Bind Error: " << exc.displayText() << endl;
 	}
 
@@ -365,43 +369,51 @@ bool TCPClient::createAndBindConnection(UInt32 connectionID, const Net::Address&
 
 void TCPClient::onClientConnectionStateChange(void* sender, Net::SocketState& state, const Net::SocketState& oldState)
 {	
-	Net::TCPStatefulPacketSocket* conn = reinterpret_cast<Net::TCPStatefulPacketSocket*>(sender);	
-	Log("trace") << "[TURN::TCPClient:" << this << "] Client Connection State Changed: " << state.toString() << endl;
+	Log("trace") << "[TURN::TCPClient:" << this << "] Client Connection State Change: " << state << ": " << oldState << endl;	
+
+	if (state.id() == Net::SocketState::None)
+		return;
+
+	Net::IPacketSocket* socket = reinterpret_cast<Net::IPacketSocket*>(sender);
+	//Net::TCPStatefulPacketSocket* conn = connections().get(socket->address(), false);
+	//Log("trace") << "[TURN::TCPClient:" << this << "] Client Connection State Change: " << socket << endl;	
 	{
 		FastMutex::ScopedLock lock(_mutex);
-		if (isTerminated())
+		assert(socket);
+		if (!socket || isTerminated())
 			return;
 	}	
 	
 	if (state.id() == Net::SocketState::Disconnected) {	
 		Net::Address peerAddress;
-		if (getPeerAddress(conn, peerAddress)) {
-			_observer.onClientConnectionClosed(*this, conn, peerAddress);
-			connections().remove(conn);
+		if (getPeerAddress(socket, peerAddress)) {
+			_observer.onClientConnectionClosed(*this, socket, peerAddress);
+			assert(connections().remove(peerAddress));
 		} else
 			assert(false);
 	}
 
-	_observer.onClientConnectionState(*this, conn, state, oldState);
+	_observer.onClientConnectionState(*this, socket, state, oldState);
 }
 
 
 void TCPClient::onDataPacketReceived(void* sender, DataPacket& packet)
 {
-	Net::TCPStatefulPacketSocket* conn = static_cast<Net::TCPStatefulPacketSocket*>(sender);	
+	Net::IPacketSocket* socket = reinterpret_cast<Net::IPacketSocket*>(sender);
+	//Net::TCPStatefulPacketSocket* conn = connections().get(socket->address());
 	Net::Address peerAddress;
-	if (!isTerminated() && getPeerAddress(conn, peerAddress))
+	if (!isTerminated() && getPeerAddress(socket, peerAddress))
 		_observer.onRelayedData(*this, (const char *)packet.data(), packet.size(), peerAddress);
 	else
 		Log("warn") << "[TURN::TCPClient" << this << "] No Peer: Data Packet Dropped" << endl;	
 }
 
 
-bool TCPClient::getPeerAddress(Net::TCPStatefulPacketSocket* conn, Net::Address& peerAddress)
+bool TCPClient::getPeerAddress(Net::IPacketSocket* socket, Net::Address& peerAddress)
 {
 	ConnectionManagerMap conns = connections().items();
 	for (ConnectionManagerMap::const_iterator it = conns.begin(); it != conns.end(); ++it) {
-		if (it->second == conn) {
+		if (it->second == socket) {
 			peerAddress = it->first;
 			return true;
 		}
@@ -431,3 +443,9 @@ int TCPClient::transportProtocol()
 
 
 } } //  namespace Sourcey::TURN
+
+
+
+
+
+//Net::TCPStatefulPacketSocket* getPeerConnection(Net::Address& peerAddress);

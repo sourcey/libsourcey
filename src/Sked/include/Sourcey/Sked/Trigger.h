@@ -75,7 +75,7 @@ enum MonthOfTheYeay
 //
 struct Trigger: public JSON::ISerializable
 {
-	Trigger(const std::string& name = "");
+	Trigger(const std::string& type = "", const std::string& name = "");
 
 	virtual void update() = 0;
 		/// Updates the scheduleAt value to the
@@ -98,8 +98,11 @@ struct Trigger: public JSON::ISerializable
 	virtual void serialize(JSON::Value& root);
 	virtual void deserialize(JSON::Value& root);
 
+	std::string type;
+		/// The type of this trigger class.
+
 	std::string name;
-		/// The name of this trigger class.
+		/// The display name of this trigger class.
 	
 	int timesRun;
 		/// The number of times the task has run
@@ -139,6 +142,9 @@ struct IntervalTrigger: public Trigger
 
 	virtual void update();
 	virtual bool expired();
+	
+	virtual void serialize(JSON::Value& root);
+	virtual void deserialize(JSON::Value& root);
 
 	Poco::Timespan interval;
 		/// This value represents the interval to wait

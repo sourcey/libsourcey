@@ -69,9 +69,10 @@ public:
 		// The TransactionID is used to determine if this connection
 		// is bound with a Connect request, in which case a response
 		// must be sent on connection success/error.
-
+	
 protected:
 	void recv(Buffer& buffer);
+	void onClientDisconnect(void*);
 
 	TCPAllocation&			_allocation;
 	STUN::TransactionID		_transactionID;

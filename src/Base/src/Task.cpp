@@ -78,7 +78,7 @@ void Task::start()
 
 void Task::cancel()			
 {
-	Log("trace") << "[Task:" << this << "] Stopping" << endl;
+	Log("trace") << "[Task:" << this << "] Cancelling" << endl;
 	if (!cancelled())
 		runner().cancel(this);
 }
@@ -137,7 +137,7 @@ Runner& Task::runner()
 { 
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	if (!_runner)
-		throw Exception("Tasks must be started with a Runner instance.");
+		throw Exception("Tasks must have a Runner instance.");
 	return *_runner;
 }
 

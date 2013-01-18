@@ -51,9 +51,9 @@ class TCPClient;
 
 struct ITCPClientObserver: public IClientObserver 
 {
-	virtual void onClientConnectionCreated(TCPClient& client, Net::TCPStatefulPacketSocket* socket, const Net::Address& peerAddress) {};
-	virtual void onClientConnectionClosed(TCPClient& client, Net::TCPStatefulPacketSocket* socket, const Net::Address& peerAddress) {};
-	virtual void onClientConnectionState(TCPClient& client, Net::TCPStatefulPacketSocket* socket,
+	virtual void onClientConnectionCreated(TCPClient& client, Net::IPacketSocket* socket, const Net::Address& peerAddress) {};
+	virtual void onClientConnectionClosed(TCPClient& client, Net::IPacketSocket* socket, const Net::Address& peerAddress) {};
+	virtual void onClientConnectionState(TCPClient& client, Net::IPacketSocket* socket,
 		Net::SocketState& state, const Net::SocketState& oldState) {};
 
 	virtual void onClientConnectionBindingFailed(TCPClient& client, const Net::Address& peerAddress) {};
@@ -90,10 +90,12 @@ public:
 
 	virtual Net::IPacketSocket* createSocket();
 	virtual int transportProtocol();
-	
-	bool getPeerAddress(Net::TCPStatefulPacketSocket* conn, Net::Address& peerAddress);
 	ConnectionManager& connections();
-	
+		
+	bool getPeerAddress(Net::IPacketSocket* conn, Net::Address& peerAddress);
+	//Net::TCPStatefulPacketSocket* getConnection(const Net::Address& peerAddress);
+		/// Obtain the TCPStatefulPacketSocket instance from the IPacketSocket
+
 protected:	
 	ITCPClientObserver& _observer;
 	ConnectionManager _connections;

@@ -72,9 +72,10 @@ protected:
 	
 	virtual bool beforeRun();	
 		/// Called by the Runner to perform pre-processing, and
-		/// to determine weather the task can be run or not.
-		/// It is safe to destroy() the task from inside this method.
-		/// This method returns !cancelled() by default.
+		/// to determine weather the task should be run or not.
+		/// By default this method returns true if the task is not 
+		/// cancelled or destroying.
+		/// It is safe to destroy() the task from this method.
 
 	virtual void run() = 0;	
 		/// Called by the Runner to run the task.
@@ -83,7 +84,8 @@ protected:
 	virtual bool afterRun();	
 		/// Called by the Runner to perform post-processing, and
 		/// to determine weather the task should be destroyed or not.
-		/// This method returns true by default.
+		/// This method returns true by default. Return false here
+		/// to destroy the task.
 
 protected:	
 	mutable Poco::FastMutex	_mutex;

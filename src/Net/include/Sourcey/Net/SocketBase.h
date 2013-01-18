@@ -128,22 +128,17 @@ public:
 		Log("trace", this) << "Closing" << std::endl;
 
 		if (isConnected()) {
-			Log("trace", this) << "Closing 1" << std::endl;
 			unbindEvents();
-			Log("trace", this) << "Closing 2" << std::endl;
 			try	{
 				// If the socket is already closed an
 				// InvalidSocketException will be thrown. 
 				// Just swallow it.
-				Log("trace", this) << "Closing 3" << std::endl;
 				StreamSocketT::close();
-				Log("trace", this) << "Closing 4" << std::endl;
 			}
 			catch (Poco::IOException& exc) {
 				Log("warn", this) << "Closing Error: " << exc.displayText() << std::endl;
 			}
-			Log("trace", this) << "Closing 5" << std::endl;
-			onClose(); // will probably result in destruction
+			onClose(); // May result in destruction
 		}
 	}
 
@@ -403,11 +398,11 @@ protected:
 			_connected = false;
 			destroy = _deleteOnClose;
 		}
-
+		
 		Closed.dispatch(static_cast<ISocketT*>(this));
 
 		if (destroy) {
-			Log("trace", this) << "Delete on close" << std::endl;	
+			Log("trace", this) << "On Close: Deleting" << std::endl;	
 			delete this;
 		}
 	}

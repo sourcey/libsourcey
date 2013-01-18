@@ -21,12 +21,14 @@ using namespace Sourcey::TURN;
 //using namespace Poco;
 
 
+/*
 // Detect Memory Leaks
 #ifdef _DEBUG
 #include "MemLeakDetect/MemLeakDetect.h"
 #include "MemLeakDetect/MemLeakDetect.cpp"
 CMemLeakDetect memLeakDetect;
 #endif
+*/
 
 
 #define USE_TCP
@@ -117,8 +119,8 @@ struct ClientTest
 		// The initiating client...
 		//		
 			
-		//Net::IP peerIP("127.0.0.1");
-		Net::IP peerIP("124.170.91.112");
+		Net::IP peerIP("127.0.0.1");
+		//Net::IP peerIP("124.170.91.112");
 		initiator->AllocationCreated += delegate(this, &ClientTest::onInitiatorAllocationCreated);
 		initiator->initiate(o, peerIP);
 	}
@@ -128,10 +130,20 @@ struct ClientTest
 		Log("debug") << "TURN: TCPInitiator Allocation Created" << endl;
 		responder->start(client.relayedAddress());
 	}
+
+	/*
+	void onRecreateTimer(TimerCallback<ClientTest>& timer)
+	{
+		Log("debug") << "###################################### TURN: Recreating Responder" << endl;
+		delete responder;
+		responder = new TCPResponder(id, reactor, runner);
+		responder->start(initiator->client->relayedAddress());
+	}
+	*/
 	
 	virtual void onTestDone(void* sender, bool success)
 	{
-		Log("debug") << "ClientTestRunner: TestDone" << endl;
+		Log("debug") << "############################# ClientTestRunner: TestDone: " << success << endl;
 		result = success ? Success : Failed;
 		//TestDone.dispatch(this, result);
 	}
@@ -192,7 +204,7 @@ struct ClientTestRunner
 
 	void print(std::ostream& ost) 
 	{	
-		ost << "ClientTestRunner Results:" 
+		ost << "################################## ClientTestRunner Results:" 
 			<< "\n\tTimes: " << nTimes
 			<< "\n\tComplete: " << nComplete
 			<< "\n\tSucceeded: " << nSucceeded
@@ -234,7 +246,8 @@ int main(int argc, char** argv)
 		//
 		// Initialize clients
 		TURN::Client::Options co;
-		co.serverAddr = Net::Address("173.230.150.125", 3478);
+		//co.serverAddr = Net::Address("173.230.150.125", 3478);
+		co.serverAddr = Net::Address("127.0.0.1", 3478);
 		co.lifetime  = 120 * 1000; // 1 minute
 		co.timeout = 10 * 1000;
 		co.timerInterval = 3 * 1000;

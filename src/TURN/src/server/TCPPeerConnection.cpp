@@ -39,7 +39,6 @@ namespace Sourcey {
 namespace TURN {
 	
 
-
 TCPPeerConnection::TCPPeerConnection(TCPAllocation& allocation, Net::Reactor& reactor) : 
 	Net::TCPPacketSocket(reactor), //, true
 	_allocation(allocation),
@@ -75,12 +74,16 @@ TCPPeerConnection::~TCPPeerConnection()
 {
 	Log("trace") << "[TCPPeerConnection:" << this << "] Destroying" << endl;
 	assert(!isConnected());
+	//assert(_client == NULL);
 	_allocation.peers().remove(this);
+	Log("trace") << "[TCPPeerConnection:" << this << "] Destroying: OK" << endl;
 }
 
 
 void TCPPeerConnection::recv(Buffer& buffer)
 {
+	Log("trace") << "[TCPPeerConnection:" << this << "] Received Data: " << buffer.size() << endl;
+
 	try {	
 		FastMutex::ScopedLock lock(_mutex);
 
@@ -91,13 +94,72 @@ void TCPPeerConnection::recv(Buffer& buffer)
 
 			_client->send(buffer.bytes(), buffer.size());
 		}
-		else		
+
+		// TODO: Handle Flash Policy elsewhere?
+		else if (buffer.size() == 23 && (strcmp(buffer.bytes(), "<policy-file-request/>") == 0)) {
+			Log("trace") << "[TCPPeerConnection:" << this << "] Handle Flash Policy" << endl;
+			string policy("<?xml version=\"1.0\"?><cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>");
+			sendBytes(policy.data(), policy.length() + 1);
+			close();
+		}
+		else
 			// TODO: buffering early media
-			Log("warn") << "[TCPPeerConnection:" << this << "] Dropped early data" << endl;
+			Log("warn") << "[TCPPeerConnection:" << this << "] Dropped early data: " << string(buffer.bytes(), buffer.size()) << (strcmp(buffer.bytes(), "<policy-file-request/>") == 0) << endl;
 	}
 	catch (Exception& exc) {
+		Log("error") << "[TCPPeerConnection:" << this << "] RECV Error: " << exc.displayText() << endl;
 		setError(exc.displayText());
 	}
+}
+
+
+/*	
+void TCPPeerConnection::onClose()
+{
+	Log("trace") << "[TCPPeerConnection:" << this << "] On Close" << endl;	
+		
+	Net::TCPPacketSocket::onClose();
+	Log("trace") << "[TCPPeerConnection:" << this << "] On Close: OK" << endl;	
+	
+	// Close the associated client connection.
+	FastMutex::ScopedLock lock(_mutex);	
+	TCPClientConnection* client = _client;
+	if (client) {
+		client->Closed -= delegate(this, &TCPPeerConnection::onClientDisconnect);
+		Log("trace") << "[TCPPeerConnection:" << this << "] On Close 1" << endl;	
+		_client = NULL;
+		client->bindWith(NULL);
+		//client->close();
+	}
+	TCPClientConnection* client = peer->client();
+	if (client) {
+		client->Closed -= delegate(this, &TCPAllocation::onClientDisconnect);
+		_client = NULL;
+		client->bindWith(NULL);
+		//delete client;
+	}
+	Log("trace") << "[TCPPeerConnection:" << this << "] On Close 2" << endl;
+	*/
+	
+	/*
+	TCPClientConnection* client = peer->client();
+	if (client) {
+		client->Closed -= delegate(this, &TCPAllocation::onClientDisconnect);
+		client->close();
+		//delete client;
+	}
+}
+	*/
+
+
+void TCPPeerConnection::onClientDisconnect(void*)
+{
+	Log("trace") << "[TCPPeerConnection:" << this << "] On Client Disconnected" << endl;	
+	{		
+		FastMutex::ScopedLock lock(_mutex);	
+		_client = NULL;
+	}
+	close();
 }
 
 
@@ -106,9 +168,12 @@ void TCPPeerConnection::bindWith(TCPClientConnection* client)
 	{
 		FastMutex::ScopedLock lock(_mutex);
 		assert(!client || _connectionID == client->connectionID());
+		if (_client)
+			_client->Closed -= delegate(this, &TCPPeerConnection::onClientDisconnect);	
 		_client = client;
 		if (_client != NULL) {	
 			Log("trace") << "[TCPPeerConnection:" << this << "] Binding With Client: " << client->address() << endl;
+			_client->Closed += delegate(this, &TCPPeerConnection::onClientDisconnect);
 			_timeout.stop();
 		}
 	}

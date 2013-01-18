@@ -335,9 +335,9 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 				// If the first processor rejects the packet then the 
 				// packet will be dropped.
 				if (!firstProc->accepts(packet)) {
-					Log("warn") << "[PacketStream:" << this << "] Source Packet Rejected: " 
-						<< firstProc << ": " << packet.className() << endl;
-					//firstProc = NULL;
+					//Log("warn") << "[PacketStream:" << this << "] Source Packet Rejected: " 
+					//	<< firstProc << ": " << packet.className() << endl;
+					firstProc = NULL;
 					_processing.set(); 
 					return;
 				}

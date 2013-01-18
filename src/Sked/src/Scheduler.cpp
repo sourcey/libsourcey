@@ -54,12 +54,21 @@ Scheduler::~Scheduler()
 void Scheduler::schedule(Sked::Task* task)
 {
 	Runner::start(task);
+	_wakeUp.set();
 }
 
 
 void Scheduler::cancel(Sked::Task* task) 
 {
 	Runner::cancel(task);
+	_wakeUp.set();
+}
+
+
+void Scheduler::clear() 
+{
+	Runner::clear();
+	_wakeUp.set();
 }
 
 
@@ -74,10 +83,10 @@ void Scheduler::run()
 		update();
 		
 		Sked::Task* task = reinterpret_cast<Sked::Task*>(next());
-
 		
 		// Run the task
 		if (task) {	
+#if _DEBUG
 			{
 				Poco::DateTime now;
 				Poco::Timespan remaining = task->trigger().scheduleAt - now;
@@ -92,12 +101,20 @@ void Scheduler::run()
 					<< "\n\tScheduledAt: " << DateTimeFormatter::format(task->trigger().scheduleAt, Sked::DateFormat)
 					<< endl;
 			}
+#endif
 			
 			// Wait for the scheduled timeout
 			if (!task->trigger().timeout())
-				_wakeUp.tryWait(static_cast<long>(task->trigger().remaining()));	
+				_wakeUp.tryWait(static_cast<long>(task->trigger().remaining()));
 
-			if (task->beforeRun()) {							
+			// The task list may have changed during the timeout
+			// duration, or the current task deleted, so we need
+			// to ensure that the next pending task matches the
+			// current pending task.
+			if (task == next() && 
+				task->trigger().timeout() &&
+				task->beforeRun()) {	
+#if _DEBUG						
 				{
 					Poco::DateTime now;
 					Log("trace", this) << "Running: "
@@ -106,6 +123,9 @@ void Scheduler::run()
 						<< "\n\tScheduledTime: " << DateTimeFormatter::format(task->trigger().scheduleAt, Sked::DateFormat)
 						<< endl;
 				}
+#else
+				Log("trace", this) << "Running: " << task << endl;
+#endif
 				task->run();	
 				if (task->afterRun())
 					onRun(task);
@@ -124,9 +144,9 @@ void Scheduler::run()
 				assert(remove(task));
 				delete task;
 			}
-			*/
 
 			Log("trace", this) << "Running: OK: " << task << endl;
+			*/
 		}
 
 		// Go to sleep if we have no tasks
@@ -137,17 +157,16 @@ void Scheduler::run()
 		}
 
 		// Gulp
-		Thread::sleep(5);		
+		Thread::sleep(10);		
 
 		// Dispatch the Idle signal
-		// TODO: Idle on each complete iteration of all tasks
+		// TODO: Send Idle complete iteration of all tasks, 
+		// rather than after each task.
 		Idle.dispatch(this);
 	}
 			
-	Log("trace", this) << "Shutdown" << endl;
-		
+	Log("trace", this) << "Shutdown" << endl;		
 	Shutdown.dispatch(this);
-
 	Log("trace", this) << "Exiting" << endl;
 }
 
@@ -189,7 +208,7 @@ void Scheduler::serialize(JSON::Value& root)
 		Sked::Task* task = reinterpret_cast<Sked::Task*>(*it);
 		Log("trace", this) << "Serializing: " << task << endl;
 		JSON::Value& entry = root[root.size()];
-		task->serialize(entry); //["task"]
+		task->serialize(entry);
 		task->trigger().serialize(entry["trigger"]);
 	}
 }
@@ -202,15 +221,13 @@ void Scheduler::deserialize(JSON::Value& root)
 	for (JSON::ValueIterator it = root.begin(); it != root.end(); it++) {
 		Sked::Task* task = NULL;
 		Sked::Trigger* trigger = NULL;
-		try {			
-			//JSON::assertMember(*it, "task");
+		try {
 			JSON::assertMember(*it, "trigger");
-			task = factory().createTask((*it)["name"].asString()); //["task"] , *this
-			task->deserialize((*it)); //["task"]
-			trigger = factory().createTrigger((*it)["trigger"]["name"].asString());
+			task = factory().createTask((*it)["type"].asString());
+			task->deserialize((*it));
+			trigger = factory().createTrigger((*it)["trigger"]["type"].asString());
 			trigger->deserialize((*it)["trigger"]);
 			task->setTrigger(trigger);
-			//add(task);
 			schedule(task);
 		}
 		catch (Exception& exc) {

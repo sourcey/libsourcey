@@ -44,7 +44,8 @@ namespace Sourcey {
 namespace Sked {
 
 
-Trigger::Trigger(const string& name) :
+Trigger::Trigger(const string& type, const string& name) :
+	type(type),
 	name(name),
 	timesRun(0)
 {
@@ -76,6 +77,7 @@ void Trigger::serialize(JSON::Value& root)
 {
 	Log("trace") << "Serializing" << endl;	
 	
+	root["type"] = type;
 	root["name"] = name;
 	root["createdAt"] = DateTimeFormatter::format(createdAt, Sked::DateFormat);
 	root["scheduleAt"] = DateTimeFormatter::format(scheduleAt, Sked::DateFormat);
@@ -88,6 +90,7 @@ void Trigger::deserialize(JSON::Value& root)
 {
 	Log("trace") << "Deserializing" << endl;
 	
+	JSON::assertMember(root, "type");
 	JSON::assertMember(root, "name");
 	JSON::assertMember(root, "createdAt");
 	JSON::assertMember(root, "scheduleAt");
@@ -95,6 +98,7 @@ void Trigger::deserialize(JSON::Value& root)
 	JSON::assertMember(root, "timesRun");
 	
 	int tzd;
+	type = root["type"].asString();
 	name = root["name"].asString();
 	createdAt = DateTimeParser::parse(Sked::DateFormat, root["createdAt"].asString(), tzd);
 	scheduleAt = DateTimeParser::parse(Sked::DateFormat, root["scheduleAt"].asString(), tzd);
@@ -106,7 +110,7 @@ void Trigger::deserialize(JSON::Value& root)
 // ---------------------------------------------------------------------
 //
 OnceOnlyTrigger::OnceOnlyTrigger() :
-	Trigger("OnceOnlyTrigger")
+	Trigger("OnceOnlyTrigger", "Once Only")
 {
 }
 
@@ -120,13 +124,13 @@ bool OnceOnlyTrigger::expired()
 // ---------------------------------------------------------------------
 //
 IntervalTrigger::IntervalTrigger() :
-	Trigger("IntervalTrigger"),
+	Trigger("IntervalTrigger", "Interval"),
 	maxTimes(0)
 {
 }
 
 
-void IntervalTrigger::update() 
+void IntervalTrigger::update()
 {
 	scheduleAt += interval;
 }
@@ -138,10 +142,51 @@ bool IntervalTrigger::expired()
 }
 
 
+void IntervalTrigger::serialize(JSON::Value& root)
+{
+	Log("trace") << "Serializing" << endl;	
+
+	Trigger::serialize(root);
+	
+	root["interval"]["days"] = interval.days();
+	root["interval"]["hours"] = interval.hours();
+	root["interval"]["minutes"] = interval.minutes();
+	root["interval"]["seconds"] = interval.seconds();
+}
+
+
+void IntervalTrigger::deserialize(JSON::Value& root)
+{
+	Log("trace") << "[IntervalTrigger] Deserializing" << endl;
+	
+	JSON::assertMember(root, "interval");
+	JSON::assertMember(root["interval"], "days");
+	JSON::assertMember(root["interval"], "hours");
+	JSON::assertMember(root["interval"], "minutes");
+	JSON::assertMember(root["interval"], "seconds");
+
+	Trigger::deserialize(root);
+
+	interval.assign(
+		root["interval"]["days"].asInt(), 
+		root["interval"]["hours"].asInt(), 
+		root["interval"]["minutes"].asInt(), 
+		root["interval"]["seconds"].asInt(), 0);
+	
+	if (!interval.totalSeconds())
+		throw Exception("Interval trigger must have non zero interval.");
+	
+	Poco::DateTime now;	
+	scheduleAt = now;
+	scheduleAt += interval;
+}
+
+
+
 // ---------------------------------------------------------------------
 //
 DailyTrigger::DailyTrigger() :
-	Trigger("DailyTrigger")
+	Trigger("DailyTrigger", "Daily")
 {
 }
 

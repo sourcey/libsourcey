@@ -105,8 +105,7 @@ macro(define_sourcey_module name)
   # Build tests
   if(BUILD_MODULE_TESTS AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_subdirectory(tests)
-  endif()    
-       
+  endif()       
 endmacro()
 
 
@@ -138,8 +137,8 @@ macro(define_sourcey_module_sample name)
   target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
   add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES}) # requires complete recompile on some systems
         
-  message(STATUS "Defining module sample ${name}:")  
-  message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")  
+  #message(STATUS "Defining module sample ${name}:")  
+  #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")  
   #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")  
   #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
 
@@ -164,8 +163,7 @@ macro(define_sourcey_module_sample name)
   #    target_link_libraries(${name} optimized ${lib})
   #endforeach()
 
-  install(TARGETS ${name} RUNTIME DESTINATION "samples/${name}" COMPONENT main) 
-        
+  install(TARGETS ${name} RUNTIME DESTINATION "samples/${name}" COMPONENT main)        
 endmacro()
 
 #
@@ -198,8 +196,8 @@ macro(define_libsourcey_test name)
         
   message(STATUS "Defining module test ${name}:")  
   message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")  
-  #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")  
-  #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
+  message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")  
+  message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
   
   # Include library and header directories
   include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
@@ -211,8 +209,7 @@ macro(define_libsourcey_test name)
   endif()
   set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
 
-  install(TARGETS ${name} RUNTIME DESTINATION "tests/${name}" COMPONENT main) 
-    
+  install(TARGETS ${name} RUNTIME DESTINATION "tests/${name}" COMPONENT main)    
 endmacro()
 
 

@@ -4,3 +4,5 @@
 # ----------------------------------------------------------------------------
 
 add_subdirectory(TURNServer)
+add_subdirectory(TURNMediaProvider)
+

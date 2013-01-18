@@ -54,9 +54,10 @@ public:
 	TCPPeerConnection* peer() const;
 
 	UInt32 connectionID() const;
-
+	
 protected:
 	void recv(Buffer& buffer);
+	void onPeerDisconnect(void*);
 
 	TCPAllocation&			_allocation;
 	UInt32					_connectionID;
