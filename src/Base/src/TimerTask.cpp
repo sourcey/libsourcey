@@ -78,7 +78,7 @@ void TimerTask::start()
 
 void TimerTask::cancel()			
 { 
-	Log("trace") << "[TimerTask:" << this << "] Stop" << endl;
+	Log("trace") << "[TimerTask:" << this << "] Cancel" << endl;
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);	
 		_scheduleAt.stop();
@@ -96,33 +96,56 @@ void TimerTask::destroy()
 
 bool TimerTask::beforeRun()
 { 
-	bool timeout = false;
+	Poco::FastMutex::ScopedLock lock(_mutex);	
+	if (_scheduleAt.expired()) {
+		if (_interval > 0) {
+			_scheduleAt.setDelay(_interval);
+			_scheduleAt.reset();
+		}
+		Log("trace") << "[TimerTask:" << this << "] Before Run: Timeout"  << endl;
+		return true;
+	}
+	return false;
+}
+	//bool cancel = false;
+	//{
+	//cancel = _scheduleAt.expired();		
+	//Log("trace") << "[TimerTask:" << this << "] Before Run: " 
+	//	<< cancel << ": " 
+	//	<< _scheduleAt.remaining() << endl;
+	//}
+
+	//if (cancel)
+	//	Task::cancel();
+
+
+
+bool TimerTask::afterRun()
+{ 
+	// TODO: Destroy the task?
 	bool cancel = false;
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);	
+		cancel = _scheduleAt.expired();
+		Log("trace") << "[TimerTask:" << this << "] After Run: " 
+			<< cancel << ": " 
+			<< _scheduleAt.remaining() << endl;
+	}
+	if (cancel)
+		Task::cancel();
+	return true;
+}
+
+		/*
 		if (_scheduleAt.expired()) {
-			timeout = true;
 			if (_interval > 0) {
 				_scheduleAt.setDelay(_interval);
 				_scheduleAt.reset();
 			}
-			else cancel = true;
+			Log("trace") << "[TimerTask:" << this << "] Can Run: Timeout"  << endl;
+			return true;
 		}
-		
-		/*
-		Log("trace") << "[TimerTask:" << this << "] Can Run: " 
-			<< timeout << ": " 
-			<< cancel << ": " 
-			<< _scheduleAt.remaining() << endl;
-			*/
-	}
-
-	if (cancel) {
-		Task::cancel();
-		return false;
-	}
-	return timeout;
-}
+		*/
 
 
 void TimerTask::run()

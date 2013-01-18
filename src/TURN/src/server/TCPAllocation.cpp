@@ -53,13 +53,14 @@ TCPAllocation::TCPAllocation(Server& server, Net::TCPPacketSocket* control, cons
 	// The allocation will be closed if the control connection is lost.
 	_control->Closed += delegate(this, &TCPAllocation::onControlDisconnect);
 
-	Log("trace", this) << "[TCPAllocation:" << this << "]  " << this << ": Initializing on address: " << _acceptor.address().toString() << endl;
+	Log("trace", this) << "Initializing on address: " 
+		<< _acceptor.address().toString() << endl;
 }
 	
 
 TCPAllocation::~TCPAllocation() 
 {
-	Log("trace", this) << "[TCPAllocation:" << this << "] Destroying" << endl;	
+	Log("trace", this) << "Destroying" << endl;	
 	
 	_acceptor.SocketAccepted -= delegate(this, &TCPAllocation::onPeerAccepted);
 	_acceptor.close();
@@ -71,36 +72,36 @@ TCPAllocation::~TCPAllocation()
 	
 	PeerConnectionMap& peers = _peers.items();	
 	for (PeerConnectionMap::iterator it = peers.begin(); it != peers.end(); ++it) {
-		Log("trace", this) << "[TCPAllocation:" << this << "] Destroying: Peer: " << it->second << endl;	
+		Log("trace", this) << "Destroying: Closing Peer: " << it->second << endl;	
 		//it->second->Connected.detachAll(this);
 		//it->second->Closed.detachAll(this);
-		it->second->Closed -= delegate(this, &TCPAllocation::onPeerDisconnected);	
+		//it->second->Closed -= delegate(this, &TCPAllocation::onPeerDisconnected);	
 		it->second->close();
 		//delete it->second;
 	}
 
 	ClientConnectionMap& clients = _clients.items();	
 	for (ClientConnectionMap::iterator it = clients.begin(); it != clients.end(); ++it) {
-		Log("trace", this) << "[TCPAllocation:" << this << "] Destroying: Client: " << it->second << endl;	
-		it->second->Closed -= delegate(this, &TCPAllocation::onClientDisconnect);	
+		Log("trace", this) << "Destroying: Closing Client: " << it->second << endl;	
+		//it->second->Closed -= delegate(this, &TCPAllocation::onClientDisconnect);	
 		it->second->close();
 		//delete it->second;
 	}
 
-	Log("trace", this) << "[TCPAllocation:" << this << "] Destroying: OK" << endl;	
+	Log("trace", this) << "Destroying: OK" << endl;	
 }
 
 
 void TCPAllocation::onPeerAccepted(void* sender, Poco::Net::StreamSocket& socket, Net::Reactor& reactor)
 {
-	Log("trace", this) << "[TCPAllocation:" << this << "] Socket Accepted: " << socket.peerAddress().toString() << endl;
+	Log("trace", this) << "Socket Accepted: " << socket.peerAddress().toString() << endl;
 	
 	// 5.3. Receiving a TCP Connection on a Relayed Transport Address
 	// 
 	// When a server receives an incoming TCP connection on a relayed
 	// transport address, it processes the request as follows.
 	// 
-	// The server MUST accept the connection.  If it is not successful,
+	// The server MUST accept the connection. If it is not successful,
 	// nothing is sent to the client over the control connection.
 	// 
 	// If the connection is successfully accepted, it is now called a peer
@@ -113,7 +114,7 @@ void TCPAllocation::onPeerAccepted(void* sender, Poco::Net::StreamSocket& socket
 	// immediately after it has been accepted.
 	// 
 	if (!hasPermission(socket.peerAddress().host())) {
-		Log("trace", this) << "[TCPAllocation:" << this << "] No permission for peer: " << socket.peerAddress().toString() << endl;
+		Log("trace", this) << "No permission for peer: " << socket.peerAddress().toString() << endl;
 		return;
 	}
 
@@ -124,7 +125,7 @@ void TCPAllocation::onPeerAccepted(void* sender, Poco::Net::StreamSocket& socket
 	// data connection.
 	// 	
 	TCPPeerConnection* peer = new TCPPeerConnection(*this, socket, reactor);
-	peer->Closed += delegate(this, &TCPAllocation::onPeerDisconnected);
+	//peer->Closed += delegate(this, &TCPAllocation::onPeerDisconnected);
 	
 	STUN::Message response;
 	response.setType(STUN::Message::ConnectionAttempt);
@@ -145,7 +146,7 @@ void TCPAllocation::onPeerAccepted(void* sender, Poco::Net::StreamSocket& socket
 
 bool TCPAllocation::handleRequest(const Request& request) 
 {	
-	Log("trace", this) << "[TCPAllocation:" << this << "] Handle Request" << endl;	
+	Log("trace", this) << "Handle Request" << endl;	
 
 	if (!ServerAllocation::handleRequest(request)) {
 		if (request.type() == STUN::Message::Connect)
@@ -173,19 +174,17 @@ bool TCPAllocation::isOK()
 
 bool TCPAllocation::onTimer() 
 {
-	//Log("trace", this) << "[TCPAllocation:" << this << "] On Timer" << endl;
+	//Log("trace", this) << "On Timer" << endl;
 
-	// Here we clean up expired peer connections, 
-	// nothing else. All other connection types
-	// are self maintaining.		
+	// Here we clean up expired peer connections, nothing else. 
+	// All other connection types are self maintaining.		
 	PeerConnectionMap peers = this->peers().copy();	
 	for (PeerConnectionMap::iterator it = peers.begin(); it != peers.end(); ++it) {
 		if (it->second->expired()) {
 			assert(it->second->client() == NULL);
-			Log("trace", this) << "[TCPAllocation:" << this << "] Destroying: Peer: " << it->second << endl;	
-			it->second->Closed -= delegate(this, &TCPAllocation::onPeerDisconnected);
+			Log("trace", this) << "Closing Expired Peer Connection: " << it->second << endl;	
+			//it->second->Closed -= delegate(this, &TCPAllocation::onPeerDisconnected);
 			it->second->close();
-			//delete it->second;
 		}
 	}
 
@@ -195,7 +194,7 @@ bool TCPAllocation::onTimer()
 
 void TCPAllocation::handleConnectRequest(const Request& request)
 {
-	Log("trace", this) << "[TCPAllocation:" << this << "] Handle Connect Request" << endl;
+	Log("trace", this) << "Handle Connect Request" << endl;
 
 	// 5.2. Receiving a Connect Request
 	// 
@@ -251,11 +250,11 @@ void TCPAllocation::onPeerConnectSuccess(void* sender)
 	TCPPeerConnection* peer = reinterpret_cast<TCPPeerConnection*>(sender);	
 	peer->Connected -= delegate(this, &TCPAllocation::onPeerConnectSuccess);
 	peer->Error -= delegate(this, &TCPAllocation::onPeerConnectError);		
-	peer->Closed += delegate(this, &TCPAllocation::onPeerDisconnected);	
+	//peer->Closed += delegate(this, &TCPAllocation::onPeerDisconnected);	
 	
 	// If the connection is successful, it is now called a peer data
-	// connection.  The server MUST buffer any data received from the
-	// client.  The server adjusts its advertised TCP receive window to
+	// connection. The server MUST buffer any data received from the
+	// client. The server adjusts its advertised TCP receive window to
 	// reflect the amount of empty buffer space.
 	// 
 	// The server MUST include the CONNECTION-ID attribute in the Connect
@@ -305,7 +304,7 @@ void TCPAllocation::onPeerConnectError(void* sender, int& errnum, const string& 
 
 void TCPAllocation::handleConnectionBindRequest(const Request& request) 
 {
-	Log("trace", this) << "[TCPAllocation:" << this << "] Handle ConnectionBind Request" << endl;
+	Log("trace", this) << "Handle ConnectionBind Request" << endl;
 	
 	assert(request.type() == STUN::Message::ConnectionBind);
 
@@ -350,11 +349,11 @@ void TCPAllocation::handleConnectionBindRequest(const Request& request)
 		// Send the response back over the client connection
 		request.socket.send(response);
 				
-		// Reassign the underlying socket to the client connection and
-		// delete the old socket pointer.
+		// Reassign the underlying socket to the client
+		// connection and delete the old socket pointer.
 		Net::TCPPacketSocket* socket = static_cast<Net::TCPPacketSocket*>(&request.socket);
 		TCPClientConnection* client = new TCPClientConnection(*this, *socket, peer, _server.reactor());
-		client->Closed += delegate(this, &TCPAllocation::onClientDisconnect);
+		//client->Closed += delegate(this, &TCPAllocation::onClientDisconnect);
 		delete socket;
 		return;
 
@@ -378,41 +377,10 @@ void TCPAllocation::sendToControl(STUN::Message& message)
 void TCPAllocation::onControlDisconnect(void* sender)
 {
 	FastMutex::ScopedLock lock(_mutex);
-	Log("trace", this) << "Control Socket Disconnected: " << _control->peerAddress() << endl;
-	assert(_control == sender);
+	Log("trace", this) << "Control Socket Disconnected" << endl;
 	_control = NULL;
-}
 
-
-void TCPAllocation::onPeerDisconnected(void* sender)
-{
-	TCPPeerConnection* peer = reinterpret_cast<TCPPeerConnection*>(sender);
-	Log("trace", this) << "Peer Disconnected: " << peer << endl;
-	
-	// Close the associated client connection.
-	TCPClientConnection* client = peer->client();
-	if (client) {
-		client->Closed -= delegate(this, &TCPAllocation::onClientDisconnect);
-		client->close();
-		//delete client;
-	}
-	//delete peer;
-}
-
-
-void TCPAllocation::onClientDisconnect(void* sender)
-{
-	TCPClientConnection* client = reinterpret_cast<TCPClientConnection*>(sender);
-	Log("trace", this) << "Client Disconnected: " << client << endl;	
-
-	// Close the associated peer connection.
-	TCPPeerConnection* peer = client->peer();
-	if (peer) {
-		peer->Closed -= delegate(this, &TCPAllocation::onPeerDisconnected);
-		peer->close();
-		//delete peer;
-	}
-	//delete client;
+	// The allocation will be deleted on the next call to isOK()
 }
 
 
@@ -446,3 +414,41 @@ Net::Address TCPAllocation::relayedAddress() const
 
 
 } } //  namespace Sourcey::TURN
+
+
+
+
+/*
+void TCPAllocation::onPeerDisconnected(TCPPeerConnection* peer)
+{
+	Log("trace", this) << "Peer Disconnected: " << peer << endl;
+	Net::IPacketSocket* sock = reinterpret_cast<Net::IPacketSocket*>(sender);
+	Log("trace", this) << "Peer Disconnected 0: " << sock1 << endl;
+	Log("trace", this) << "Peer Disconnected 01: " << sock1->error() << endl;
+
+	Net::TCPPacketSocket* sock = static_cast<Net::TCPPacketSocket*>(sender);
+	Log("trace", this) << "Peer Disconnected: " << sock << endl;
+	Log("trace", this) << "Peer Disconnected 1: " << sock->error() << endl;
+
+	TCPPeerConnection* peer = static_cast<TCPPeerConnection*>(sender);
+	Log("trace", this) << "#### Peer Disconnected: " << peer->error() << endl;
+	
+	//delete peer;
+}
+
+
+void TCPAllocation::onClientDisconnect(TCPClientConnection* client)
+{
+	//TCPClientConnection* client = reinterpret_cast<TCPClientConnection*>(sender);
+	Log("trace", this) << "Client Disconnected: " << client << endl;	
+
+	// Close the associated peer connection.
+	TCPPeerConnection* peer = client->peer();
+	if (peer) {
+		peer->Closed -= delegate(this, &TCPAllocation::onPeerDisconnected);
+		peer->close();
+		//delete peer;
+	}
+	//delete client;
+}
+	*/

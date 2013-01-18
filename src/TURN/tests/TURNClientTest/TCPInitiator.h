@@ -42,12 +42,10 @@ public:
 		try	{
 			client = new TCPClient(*this, reactor, runner, opts);
 			client->addPermission(peerIP);	
-			client->initiate();
-			
+			client->initiate();			
 		
 			//STUN::SocketTransaction* transaction = client->createTransaction();
 			//delete transaction;
-
 		} 
 		catch (Poco::Exception& exc) {
 			Log("error") << "TCPInitiator: " << id << ": Error: " << exc.displayText() << std::endl;
@@ -57,7 +55,7 @@ public:
 protected:
 	void onRelayStateChange(TURN::Client& client, TURN::ClientState& state, const TURN::ClientState&) 
 	{
-		Log("debug") << "TCPInitiator: " << id << ": State Changed: " << state.toString() << endl;
+		Log("debug") << "####################### TCPInitiator: " << id << ": State Changed: " << state.toString() << endl;
 
 		switch(state.id()) {
 		case ClientState::Waiting:				
@@ -96,9 +94,9 @@ protected:
 			Log("debug") << "TCPInitiator: " << id << ": Socket is dead!" << endl;
 	}
 
-	void onClientConnectionCreated(TCPClient& client, Net::TCPStatefulSocket* sock, const Net::Address& peerAddr) //UInt32 connectionID, 
+	void onClientConnectionCreated(TCPClient& client, Net::IPacketSocket* sock, const Net::Address& peerAddr) //UInt32 connectionID, 
 	{
-		Log("debug") << "TCPInitiator: " << id << ": Connection Created: " << peerAddr << endl;
+		Log("debug") << "######################### TCPInitiator: " << id << ": Connection Created: " << peerAddr << endl;
 				
 		// Send the intial data packet to peer
 		client.sendData("rand@m", 6, peerAddr);
@@ -111,23 +109,23 @@ protected:
 		TestDone.dispatch(this, success);
 	}
 	
-	void onClientConnectionState(TCPClient& client, Net::TCPStatefulSocket*, 
+	void onClientConnectionState(TCPClient& client, Net::IPacketSocket*, 
 		Net::SocketState& state, const Net::SocketState& oldState) 
 	{
-		Log("debug") << "TCPInitiator: " << id << ": Connection State: " << state.toString() << endl;
+		Log("debug") << "######################### TCPInitiator: " << id << ": Connection State: " << state.toString() << endl;
 	}
 
 	void onRelayedData(TURN::Client& client, const char* data, int size, const Net::Address& peerAddr)
 	{
-		Log("debug") << "TCPInitiator: " << id << ": Received Data: " << string(data, size) <<  ": " << peerAddr << endl;
+		Log("debug") << "######################### TCPInitiator: " << id << ": Received Data: " << string(data, size) <<  ": " << peerAddr << endl;
 		
 		// Echo back to peer
-		//client->sendData(data, size, peerAddr);
+		client.sendData(data, size, peerAddr);
 	}
 	
-	void onPermissionsCreated(TURN::Client& client, const TURN::PermissionList& permissions)
+	void onAllocationPermissionsCreated(TURN::Client& client, const TURN::PermissionList& permissions)
 	{
-		Log("debug") << "TCPInitiator: " << id << ": Permissions Created" << endl;
+		Log("debug") << "######################### TCPInitiator: " << id << ": Permissions Created" << endl;
 	}
 };
 

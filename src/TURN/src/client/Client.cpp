@@ -957,7 +957,7 @@ void Client::onTransactionStateChange(void* sender, TransactionState& state, con
 	//Log("trace") << "[TURNClient:" << this << "] Transaction State Changed: " << sender << ": Before Destroy" << endl;
 	//Log("trace") << "[TURNClient:" << this << "] Transaction State Changed: " << transaction->response().toString() << ": Before Destroy" << endl;
 
-	// PROBLEM: If the client was terminated via callback,
+	// BUG: If the client was terminated via callback,
 	// the transaction has been deleted.
 };
 

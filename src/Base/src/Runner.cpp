@@ -198,9 +198,10 @@ void Runner::clear()
 {
 	FastMutex::ScopedLock lock(_mutex);
 	for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {	
-		Log("trace", this) << "Shutdown: Destroying Task: " << *it << endl;
+		Log("trace", this) << "Clear: Destroying Task: " << *it << endl;
 		delete *it;
 	}
+	_tasks.clear();
 }
 
 

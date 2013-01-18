@@ -72,8 +72,8 @@ public:
 	void onPeerAccepted(void* sender, Poco::Net::StreamSocket& sock, Net::Reactor& reactor);
 	void onPeerConnectSuccess(void* sender); 
 	void onPeerConnectError(void* sender, int& errnum, const std::string& error);
-	void onPeerDisconnected(void* sender);
-	void onClientDisconnect(void* sender);
+	//void onPeerDisconnected(void* sender);
+	//void onClientDisconnect(void* sender);
 
 	virtual const char* className() const { return "TCPAllocation"; };
 

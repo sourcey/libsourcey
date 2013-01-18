@@ -100,8 +100,7 @@ int DispatchOutputPacket(void* opaque, UInt8* buffer, int bufferSize)
 	// Callback example at: http://lists.mplayerhq.hu/pipermail/libav-client/2009-May/003034.html
 	AVEncoder* klass = reinterpret_cast<AVEncoder*>(opaque);
 	if (klass) {
-		Log("trace") << "[AVEncoder::" << klass << "] Dispatching Packet: " << bufferSize << endl;
-
+		//Log("trace") << "[AVEncoder::" << klass << "] Dispatching Packet: " << bufferSize << endl;
 		MediaPacket packet(buffer, bufferSize);
 		klass->dispatch(klass, packet);
 	}   
@@ -373,7 +372,7 @@ void AVEncoder::process(IPacket& packet)
 		return;
 	}	
 
-	Log("trace") << "[AVEncoder:" << this << "] Processing Packet: " << &packet << ": " << packet.className() << endl;
+	//Log("trace") << "[AVEncoder:" << this << "] Processing Packet: " << &packet << ": " << packet.className() << endl;
 
 	// We may be receiving either audio or video packets	
 	VideoPacket* videoPacket = dynamic_cast<VideoPacket*>(&packet);

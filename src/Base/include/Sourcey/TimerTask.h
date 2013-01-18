@@ -96,8 +96,9 @@ public:
 protected:
 	TimerTask& operator=(TimerTask const&) {}
 	virtual ~TimerTask();	
-
+	
 	virtual bool beforeRun();
+	virtual bool afterRun();
 	virtual void run();
 	
 	long _timeout;

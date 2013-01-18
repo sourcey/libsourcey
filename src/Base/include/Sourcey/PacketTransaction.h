@@ -93,7 +93,7 @@ public:
 
 
 	PacketTransaction(Runner& runner, long timeout = 10000, int retries = 0) :
-		TimerTask(timeout, 0),
+		TimerTask(runner, timeout, 0),
 		_retries(retries), 
 		_cancelled(false), 
 		_attempts(0)

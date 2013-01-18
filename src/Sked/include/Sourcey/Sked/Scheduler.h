@@ -59,6 +59,7 @@ public:
 
 	virtual void schedule(Sked::Task* task);
 	virtual void cancel(Sked::Task* task);
+	virtual void clear();
 		
 	virtual void serialize(JSON::Value& root);
 	virtual void deserialize(JSON::Value& root);

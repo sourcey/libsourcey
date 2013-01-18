@@ -46,7 +46,7 @@ class Task: public Sourcey::Task, public JSON::ISerializable
 	/// scheduling capabilities.
 {
 public:
-	Task(const std::string& type, const std::string& name = "");
+	Task(const std::string& type = "", const std::string& name = "");
 	Task(Scheduler& scheduler, const std::string& type, const std::string& name = "");
 	
 	virtual void start();

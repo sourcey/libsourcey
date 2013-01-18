@@ -86,10 +86,21 @@ Format MP311000  = Format("MP3", Format::MP3,
 Format MP348000 = Format("MP3", Format::MP3, 
 	VideoCodec(),
 	AudioCodec("MP3", "libmp3lame", 2, 48000, 128000, (UInt32)SampleFormat::S16P));	//, (UInt32)SampleFormat::S16P)
- 			
+ 						
+Format FLVNoAudio = Format("FLV", Format::FLV, 
+	VideoCodec("FLV", "flv", 320, 240));	//, 6, 9000, 64000
+
+Format FLVSpeex16000 = Format("FLV", Format::FLV, 
+	VideoCodec("FLV", "flv", 320, 240),
+	AudioCodec("Speex", "libspeex", 1, 16000));	
+
 Format FLVSpeex16000NoVideo = Format("FLV", Format::FLV, 
 	VideoCodec(),
 	AudioCodec("Speex", "libspeex", 1, 16000));	//, 16800
+
+
+Format MJPEG = Format("MJPEG", Format::MJPEG, 
+	VideoCodec("MJPEG", "mjpeg", 640, 480, 25));
 
 /*
 Format FLVNellyMoser11025 = Format("FLV", Format::FLV, 
@@ -101,19 +112,12 @@ Format FLVNellyMoser11025NoVideo = Format("FLV", Format::FLV,
 	AudioCodec("Nellymoser", "nellymoser", 1, 11025, 64000, (UInt32)SampleFormat::FLT));	//
 	// Supports float only
 			
-Format FLVNoAudio = Format("FLV", Format::FLV, 
-	VideoCodec("FLV", "flv", 320, 240));	//, 6, 9000, 64000
-			
 Format FLVH264NoAudio = Format("FLVH264", Format::FLV, 
 	VideoCodec("H264", "libx264", 320, 240, 30));	
 			
 //Format FLVSpeex8000NoVideo = Format("FLV", Format::FLV, 
 //	VideoCodec(),
-//	AudioCodec("Speex", "libspeex", , 1, 8000));	//, 16800
-			
-Format FLVSpeex16000 = Format("FLV", Format::FLV, 
-	VideoCodec("FLV", "flv", 320, 240, 25),
-	AudioCodec("Speex", "libspeex", , 1, 16000));	
+//	AudioCodec("Speex", "libspeex", 1, 8000));	//, 16800
 			
 Format FLVMP3 = Format("FLV", Format::FLV, 
 	VideoCodec("FLV", "flv", 320, 240, 20),
@@ -141,9 +145,6 @@ Format H264AAC = Format("H264AAC", Format::FLV,
 	VideoCodec("H264", "libx264", 640, 480, 25),
 	AudioCodec("AAC", "aac", 2, 44100));
 
-Format MJPEG = Format("MJPEG", Format::MJPEG, 
-	VideoCodec("MJPEG", "mjpeg", 640, 480, 25));
-
 Format MP4 = Format("MP4", Format::MP4,
 	VideoCodec("MPEG4", "mpeg4", 320, 240, 25),
 	AudioCodec("AC3", "ac3_fixed", 2, 44100));
@@ -151,7 +152,7 @@ Format MP4 = Format("MP4", Format::MP4,
 
 
 // Global for now
-Format currentFormat = FLVSpeex16000NoVideo; //MJPEG; //H264AAC; //MP38000; //MP38000; //MP38000; //MP344100; //MP344100; //AAC44100; //FLVNoAudio; //FLVNellyMoser11025NoVideo; //FLVSpeex16000NoVideo; //FLVNellyMoser11025NoVideo; //FLVH264NoAudio; //MP344100; //FLVNellyMoser11025NoVideo; //FLVH264NoAudio; //FLVNellyMoser11025NoVideo; //FLVNellyMoser11025NoVideo; //FLVNellyMoser11025NoVideo; FLVNellyMoser11025NoVideo; //MP344100; 
+Format currentFormat = MJPEG; //FLVSpeex16000; //FLVSpeex16000NoVideo; //MJPEG; //H264AAC; //MP38000; //MP38000; //MP38000; //MP344100; //MP344100; //AAC44100; //FLVNoAudio; //FLVNellyMoser11025NoVideo; //FLVSpeex16000NoVideo; //FLVNellyMoser11025NoVideo; //FLVH264NoAudio; //MP344100; //FLVNellyMoser11025NoVideo; //FLVH264NoAudio; //FLVNellyMoser11025NoVideo; //FLVNellyMoser11025NoVideo; //FLVNellyMoser11025NoVideo; FLVNellyMoser11025NoVideo; //MP344100; 
 VideoCapture* videoCapture = NULL;
 AudioCapture* audioCapture = NULL;
 
@@ -425,7 +426,7 @@ public:
 			options.oformat = Format("FLV", Format::FLV, 
 				VideoCodec("FLV", "flv", 320, 240, 20),
 				//AudioCodec("Nellymoser", "nellymoser", 1, 11025)
-				//AudioCodec("Speex", "libspeex", , 1, 16000)//,
+				//AudioCodec("Speex", "libspeex", 1, 16000)//,
 				AudioCodec("MP3", "libmp3lame", 2, 44100)
 				);
 				audioCapture = MediaFactory::instance()->audio.getCapture(0, 1, 16000);
@@ -461,7 +462,7 @@ public:
 				//VideoCodec("H264", "libx264", 640, 480, 25), 
 				VideoCodec("FLV", "flv", 640, 480, 25), 
 				//AudioCodec("Nellymoser", "nellymoser", 1, 11025)
-				//AudioCodec("Speex", "libspeex", , 2, 44100)
+				//AudioCodec("Speex", "libspeex", 2, 44100)
 				//AudioCodec("MP3", "libmp3lame", 2, 44100)
 				//AudioCodec("AAC", "aac", 2, 44100)
 				AudioCodec("AAC", "aac", 1, 11025)
