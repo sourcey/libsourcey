@@ -164,9 +164,9 @@ void InstallTask::doDownload()
 	
 	//Package::Asset localAsset = _local->latestAsset();
 	Package::Asset remoteAsset = !_options.version.empty() ? 
-		_remote->assetVersion(_options.version) : 
-			!_options.projectVersion.empty() ?
-				_remote->latestProjectAsset(_options.projectVersion) :
+		_remote->lastestAssetForVersion(_options.version) : 
+			!_options.sdkVersion.empty() ?
+				_remote->latestAssetForSDK(_options.sdkVersion) :
 					_remote->latestAsset();
 
 	if (!remoteAsset.valid())
@@ -248,7 +248,7 @@ void InstallTask::doUnpack()
 		throw Exception("The local package has an unrecognized file extension: " + filePath.getExtension());
 	
 	// Create the output directory
-	Path outputDir(_manager.getIntermediatePackageDir(_local->name()));
+	Path outputDir(_manager.getIntermediatePackageDir(_local->id()));
 	
 	Log("debug", this) << "Unpacking: " 
 		<< filePath.toString() << " to "
@@ -297,7 +297,7 @@ void InstallTask::doFinalize()
 	setState(this, PackageInstallState::Finalizing);
 
 	bool errors = false;
-	Path outputDir(_manager.getIntermediatePackageDir(_local->name()));
+	Path outputDir(_manager.getIntermediatePackageDir(_local->id()));
 
 	// Move all extracted files to the installation path
 	DirectoryIterator fIt(outputDir);

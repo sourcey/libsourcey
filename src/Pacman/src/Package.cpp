@@ -63,20 +63,15 @@ Package::~Package()
 
 bool Package::valid() const
 {
-	return id() > 0
+	return !id().empty()
 		&& !name().empty()
 		&& !type().empty();
 }
 
 
-int Package::id() const
+string Package::id() const
 {
-	return (*this)["id"].asInt();
-}
-
-string Package::name() const
-{
-	return (*this)["name"].asString();
+	return (*this)["id"].asString();
 }
 
 
@@ -85,9 +80,10 @@ string Package::type() const
 	return (*this)["type"].asString();
 }
 
-string Package::title() const
+
+string Package::name() const
 {
-	return (*this)["title"].asString();
+	return (*this)["name"].asString();
 }
 
 
@@ -128,7 +124,7 @@ Package::Asset Package::latestAsset()
 }
 
 
-Package::Asset Package::assetVersion(const string& version)
+Package::Asset Package::lastestAssetForVersion(const string& version)
 {
 	if (this->assets().empty())
 		throw Exception("Package has no assets");
@@ -149,22 +145,23 @@ Package::Asset Package::assetVersion(const string& version)
 }
 
 
-Package::Asset Package::latestProjectAsset(const string& version)
+Package::Asset Package::latestAssetForSDK(const string& version)
 {
 	if (this->assets().empty())
 		throw Exception("Package has no assets");
 
 	JSON::Value& assets = this->assets();
 	JSON::Value& asset = assets[(size_t)0];
-	for (unsigned i = 0; i < assets.size(); i++) {
-		if (assets[i]["project-version"].asString() == version &&
-			Util::compareVersion(assets[i]["version"].asString(), asset["version"].asString())) {
+	for (unsigned i = 0; i < assets.size(); i++) {		
+		if (assets[i]["sdk-version"].asString() == version && (
+			asset["sdk-version"].asString() != version || 
+			Util::compareVersion(assets[i]["version"].asString(), asset["version"].asString()))) {
 			asset = assets[i];
 		}
 	}
 
-	if (asset["project-version"].asString() != version)
-		throw Exception("No asset with project version " + version);
+	if (asset["sdk-version"].asString() != version)
+		throw Exception("No asset with SDK version " + version);
 
 	return Asset(asset);
 }
@@ -203,6 +200,12 @@ string Package::Asset::fileName() const
 string Package::Asset::version() const
 {
 	return root.get("version", "0.0.0").asString();
+}
+
+
+string Package::Asset::sdkVersion() const
+{
+	return root.get("sdk-version", "0.0.0").asString();
 }
 
 

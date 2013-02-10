@@ -131,7 +131,7 @@ int TCPPacketStreamConnection::send(const char* data, size_t size)
 	}
 
 	//Log("trace") << "Sending Packet: " 
-	//	<< packet.className() << ": " << size << endl;	
+	//	<< size << ": " << string(data, min(50, size)) << endl;	
 	return socket().sendBytes(data, size);
 }
 

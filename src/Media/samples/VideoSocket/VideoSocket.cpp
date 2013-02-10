@@ -8,6 +8,8 @@
 #include "Sourcey/Media/FLVMetadataInjector.h"
 #include "Sourcey/Net/TCPService.h"
 #include "Sourcey/HTTP/MultipartPacketizer.h"
+#include "Sourcey/HTTP/StreamingPacketizer.h"
+#include "Sourcey/Util/Base64PacketEncoder.h"
 
 
 /*
@@ -203,11 +205,16 @@ public:
 			encoder->initialize();
 			stream.attach(encoder, 5, true);				
 			
-			/*
 			if (options.oformat.label == "MJPEG") {
-				HTTP::MultipartPacketizer* packetizer = new HTTP::MultipartPacketizer("image/jpeg", false);
+				
+				Base64PacketEncoder* encoder = new Base64PacketEncoder();
+				stream.attach(encoder, 9, true);
+				
+				//HTTP::MultipartPacketizer* packetizer = new HTTP::MultipartPacketizer("image/jpeg", false);
+				HTTP::StreamingPacketizer* packetizer = new HTTP::StreamingPacketizer("image/jpeg");
 				stream.attach(packetizer, 10, true);
 			}
+			/*
 			else if (options.oformat.label == "FLV") {
 				FLVMetadataInjector* injector = new FLVMetadataInjector(options.oformat);
 				stream.attach(injector, 10);
@@ -241,9 +248,11 @@ public:
 
 	void onVideoEncoded(void* sender, DataPacket& packet)
 	{
-		Log("trace") << "[MediaConnection] Sending Packet: " << packet.size() << ": " << fpsCounter.fps << endl;
+		//Log("trace") << "[MediaConnection] Sending Packet: " << packet.size() << ": " << fpsCounter.fps << ": " << string((const char*)packet.data(), min(300, (int)packet.size())) << endl;
 		fpsCounter.tick();
-
+		
+	//Log("trace") << "Sending Packet: " 
+	//	<< size << ": " << string(data, min(50, packet.size())) << endl;	
 		try
 		{					
 			_file.write((const char*)packet.data(), packet.size());
@@ -673,9 +682,9 @@ typedef float AUDIO_DATA;
 	MediaFactory::instance()->loadAudio();
 	
 	videoCapture = MediaFactory::instance()->video.getCapture(0);
-	audioCapture = MediaFactory::instance()->audio.getCapture(0, 
-		currentFormat.audio.channels, 
-		currentFormat.audio.sampleRate); //, RTAUDIO_FLOAT32
+	//audioCapture = MediaFactory::instance()->audio.getCapture(0, 
+	//	currentFormat.audio.channels, 
+	//	currentFormat.audio.sampleRate); //, RTAUDIO_FLOAT32
 	//audioCapture = MediaFactory::instance()->audio.getCapture(0, 1, 11025, RTAUDIO_FLOAT32);
 	//audioCapture = MediaFactory::instance()->audio.getCapture(0, 2, 44100);
 	//audioCapture = MediaFactory::instance()->audio.getCapture(0, 1, 16000);
