@@ -139,7 +139,7 @@ public:
 		/// Installs a single package.
 		/// The returned InstallTask must be started.
 
-	virtual InstallMonitor* installPackages(const StringList& names,// InstallMonitor* monitor = NULL, 
+	virtual InstallMonitor* installPackages(const StringList& ids,// InstallMonitor* monitor = NULL, 
 		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
 		/// Installs multiple packages.
 		/// The same options will be passed to each task.
@@ -153,7 +153,7 @@ public:
 		/// Throws an exception if the package does exist.
 		/// The returned InstallTask must be started.
 
-	virtual InstallMonitor* updatePackages(const StringList& names,// InstallMonitor* monitor = NULL, 
+	virtual InstallMonitor* updatePackages(const StringList& ids,// InstallMonitor* monitor = NULL, 
 		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
 		/// Updates multiple packages.
 		/// Throws an exception if the package does exist.
@@ -166,7 +166,7 @@ public:
 		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
 		/// Installs a single package.
 
-	virtual bool updatePackages(const StringList& names, InstallMonitor* monitor = NULL, 
+	virtual bool updatePackages(const StringList& ids, InstallMonitor* monitor = NULL, 
 		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
 		/// Updates multiple packages.
 		/// The package will be installed if it does not exist.
@@ -180,10 +180,10 @@ public:
 	virtual bool updateAllPackages(bool whiny = false); //InstallMonitor* monitor = NULL, 
 		/// Updates all installed packages.
 
-	virtual bool uninstallPackages(const StringList& names, bool whiny = false);
+	virtual bool uninstallPackages(const StringList& ids, bool whiny = false);
 		/// Uninstalls multiple packages.
 
-	virtual bool uninstallPackage(const std::string& name, bool whiny = false);
+	virtual bool uninstallPackage(const std::string& id, bool whiny = false);
 		/// Uninstalls a single package.
 
 	virtual bool hasUnfinalizedPackages();
@@ -204,12 +204,12 @@ public:
 	//
 	/// Package Helper Methods
 	//	
-	virtual PackagePair getPackagePair(const std::string& name) const;
+	virtual PackagePair getPackagePair(const std::string& id) const;
 		/// Returns a local and remote package pair.
 		/// An exception will be thrown if either the local or
 		/// remote packages aren't available or are invalid.	
 	
-	virtual PackagePair getOrCreatePackagePair(const std::string& name);
+	virtual PackagePair getOrCreatePackagePair(const std::string& id);
 		/// Returns a local and remote package pair.
 		/// If the local package doesn't exist it will be created
 		/// from the remote package.
@@ -224,7 +224,7 @@ public:
 		/// Checks if a newer version is available for the given
 		/// package pair.
 	
-	virtual std::string installedPackageVersion(const std::string& name) const;
+	virtual std::string installedPackageVersion(const std::string& id) const;
 		/// Returns the version number of an installed package.
 		/// Exceptions will be thrown if the package does not exist,
 		/// or is not fully installed.
@@ -253,16 +253,16 @@ public:
 		/// Checks if the file type is a supported package archive.
 	
 	virtual Poco::Path getCacheFilePath(const std::string& fileName);
-		/// Returns the full path of the cached file if it exists, or
-		/// an empty path if the file doesn't exist.
+		/// Returns the full path of the cached file if it exists,
+		/// or an empty path if the file doesn't exist.
 	
 	virtual Poco::Path getInstallFilePath(const std::string& fileName);
 		/// Returns the full path of the installed file if it exists,
 		/// or an empty path if the file doesn't exist.
 	
-	virtual Poco::Path getIntermediatePackageDir(const std::string& packageName);
-		/// Returns the full path of the intermediate file if it exists,
-		/// or an empty path if the file doesn't exist.
+	virtual Poco::Path getIntermediatePackageDir(const std::string& id);
+		/// Returns the the intermediate package directory for the
+		/// given package ID.
 	
 	/// 
 	/// Accessors

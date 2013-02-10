@@ -25,8 +25,8 @@
 //
 
 
-#ifndef SOURCEY_HTTP_MultipartPacketizer_H
-#define SOURCEY_HTTP_MultipartPacketizer_H
+#ifndef SOURCEY_HTTP_StreamingPacketizer_H
+#define SOURCEY_HTTP_StreamingPacketizer_H
 
 
 #include "Sourcey/IPacketizer.h"
@@ -41,21 +41,21 @@ namespace Sourcey {
 namespace HTTP {
 
 
-class MultipartPacketizer: public IPacketizer
+class StreamingPacketizer: public IPacketizer
+	/// Implements HTTP Streaming for modern web browser clients 
+	/// such as WebKit and Firefox (tested on 15.0.1).
 {
 public:
-	MultipartPacketizer(const std::string& contentType, bool dontFragment = true, bool base64 = false) :
+	StreamingPacketizer(const std::string& contentType) :
 		_contentType(contentType),
-		_dontFragment(dontFragment),
-		_base64(base64),
 		_initial(true)
 	{
-		Log("trace") << "[MultipartPacketizer:" << this << "] Creating" << std::endl;
+		Log("trace") << "[StreamingPacketizer:" << this << "] Creating" << std::endl;
 	}
 	
-	virtual ~MultipartPacketizer() 
+	virtual ~StreamingPacketizer() 
 	{
-		Log("trace") << "[MultipartPacketizer:" << this << "] Destroying" << std::endl;
+		Log("trace") << "[StreamingPacketizer:" << this << "] Destroying" << std::endl;
 	}
 	
 	virtual void writeInitialHTTPHeaders(std::ostringstream& ost)
@@ -63,76 +63,37 @@ public:
 		// This method must not include the final carriage return. 
 	{	
 		ost << "HTTP/1.1 200 OK\r\n"
-			<< "Content-Type: multipart/x-mixed-replace; boundary=end\r\n"
+			<< "Content-Type: " << _contentType << "\r\n"
 			<< "Cache-Control: no-store, no-cache, max-age=0, must-revalidate\r\n"
 			<< "Cache-Control: post-check=0, pre-check=0, FALSE\r\n"
 			<< "Access-Control-Allow-Origin: *\r\n"
 			//<< "Transfer-Encoding: chunked\r\n"
 			<< "Pragma: no-cache\r\n"
-			<< "Expires: 0\r\n"
-			;
-	}
-	
-	virtual void writeChunkHTTPHeaders(std::ostringstream& ost)
-		// Sets HTTP headers for the current chunk.
-		// This method must not include the final carriage return. 
-	{	
-		ost << "--end\r\n"
-			<< "Content-Type: " << _contentType << "\r\n";
-		if (_base64)
-			ost << "Content-Transfer-Encoding: base64\r\n";			
+			<< "Expires: 0\r\n";
 	}
 
 	virtual void process(IPacket& packet)
 	{		
-		//Log("trace") << "[MultipartPacketizer:" << this << "] Processing" << std::endl;
-
-		std::ostringstream header;
-
+		//Log("trace") << "[StreamingPacketizer:" << this << "] Processing" << std::endl;
+		
 		// Write the initial HTTP response header		
-		if (_initial) {				
+		if (_initial) {
+			_initial = false;
+			std::ostringstream header;
 			writeInitialHTTPHeaders(header);
 			header << "\r\n";
-			_initial = false;
-		}
-
-		// Write the chunk header
-		writeChunkHTTPHeaders(header);
-		header << "\r\n";
-		
-		if (!_dontFragment) {
-
-			// Broadcast the HTTP header as a separate packet
-			// so we don't need to copy packet data.
 			std::string httpData(header.str());
 			DataPacket httpHeader((unsigned char*)httpData.data(), httpData.size());
 			dispatch(this, httpHeader);
-
-			// Proxy the input packet.
-			dispatch(this, packet);
-		}
-		else {
-			
-			int contentLength = packet.size();
-			Buffer ibuf(contentLength > 0 ? contentLength : 1500);
-			packet.write(ibuf);
-			
-			Buffer obuf;
-			obuf.writeString(header.str());
-			obuf.writeBytes(ibuf.data(), ibuf.size());
-
-			DataPacket opacket;
-			opacket.read(obuf);
-			dispatch(this, opacket);
 		}
 
-		//Log("trace") << "[MultipartPacketizer:" << this << "] Processing: OK" << std::endl;
+		dispatch(this, packet);
+
+		//Log("trace") << "[StreamingPacketizer:" << this << "] Processing: OK" << std::endl;
 	}
 
 protected:
 	std::string _contentType;
-	bool _dontFragment;
-	bool _base64;
 	bool _initial;
 };
 

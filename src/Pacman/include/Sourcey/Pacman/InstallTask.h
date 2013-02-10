@@ -87,12 +87,12 @@ public:
 	{
 		std::string version;		// If set then the specified package version will
 									// be installed.
-		std::string projectVersion; // If set only package versions with the specified
+		std::string sdkVersion; // If set only package versions with the specified
 									// parent project version will be installed.
 
 		Options() {
 			version = "";
-			projectVersion = "";
+			sdkVersion = "";
 		}
 	};
 

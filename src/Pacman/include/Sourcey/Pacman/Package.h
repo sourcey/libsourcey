@@ -50,6 +50,7 @@ struct Package: public JSON::Value
 		
 		virtual std::string fileName() const;
 		virtual std::string version() const;
+		virtual std::string sdkVersion() const;
 		virtual std::string url(int index = 0) const;
 
 		virtual bool valid() const;
@@ -66,36 +67,31 @@ struct Package: public JSON::Value
 	Package(const JSON::Value& src);
 	virtual ~Package();
 
-	virtual int id() const;
+	virtual std::string id() const;
 	virtual std::string name() const;
 	virtual std::string type() const;
-	virtual std::string title() const;
 	virtual std::string author() const;
 	virtual std::string description() const;
 
 	virtual JSON::Value& assets();	
 
 	virtual Asset latestAsset();
-		/// Returns the file asset with the greatest version.
-		/// number belonging to this package.
-		/// For local packages this is the currently
-		/// installed version.
-		/// For remote packages this is the latest 
-		/// available version.
-		/// Throws an exception if no assets are available.
+		/// Returns the latest asset for this package.
+		/// For local packages this is the currently installed version.
+		/// For remote packages this is the latest available version.
+		/// Throws an exception if no asset exists.
 
-	virtual Asset assetVersion(const std::string& version);
-		/// Returns an asset matching the specified version,
-		/// or a blank asset.
+	virtual Asset lastestAssetForVersion(const std::string& version);
+		/// Returns the latest asset for the specified package version.
 		/// Throws an exception if no asset exists.
 	
-	virtual Asset latestProjectAsset(const std::string& version);
-		/// Returns the latest asset for the specified project 	
-		/// version, or a blank asset.
+	virtual Asset latestAssetForSDK(const std::string& version);
+		/// Returns the latest asset for the specified SDK version,
+		/// or a blank asset.
 		/// This method is for safely installing plug-ins which
-		/// require a specific parent project version.
-		/// The package JSON must have a "project-version"
-		/// member for this function to work.
+		/// must be compiled against a specific SDK version.
+		/// The package JSON must have a "sdk-version" member
+		/// for this function to work as intended.
 		/// Throws an exception if no asset exists.
 
 	virtual bool valid() const;

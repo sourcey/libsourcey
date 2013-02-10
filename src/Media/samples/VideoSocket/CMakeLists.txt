@@ -5,4 +5,4 @@ include_dependency(OpenCV REQUIRED)
 include_dependency(RtAudio REQUIRED)
 include_dependency(JsonCpp REQUIRED)
   
-define_sourcey_module_sample(VideoSocket Anionu Base Net XML HTTP Media)
+define_sourcey_module_sample(VideoSocket Anionu Base Net Util HTTP Media)
