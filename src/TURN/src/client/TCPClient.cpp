@@ -279,16 +279,11 @@ void TCPClient::handleConnectionBindResponse(const STUN::Message& response)
 	Net::IPacketSocket* socket = transaction->socket();
 	Net::Address peerAddress;
 	if (!getPeerAddress(socket, peerAddress)) {
+		Log("trace") << "[TURN::TCPClient:" << this << "] No connection for socket: " 
+			<< socket << std::endl;
 		assert(false);
 		return;
 	}
-
-	//Net::TCPStatefulPacketSocket* conn = static_cast<Net::TCPStatefulPacketSocket*>(transaction->socket());
-	//Net::IPacketSocket* socket = reinterpret_cast<Net::IPacketSocket*>(sender);
-	//Net::TCPStatefulPacketSocket* conn1 = static_cast<Net::TCPStatefulPacketSocket*>(sender);	
-	//Net::TCPStatefulPacketSocket* conn = static_cast<Net::TCPStatefulPacketSocket*>(socket);	
-	//Net::TCPStatefulPacketSocket* conn = static_cast<Net::TCPStatefulPacketSocket*>(transaction->socket());
-
 
 	Net::TCPStatefulPacketSocket* conn = connections().get(peerAddress, false);
 	assert(conn);

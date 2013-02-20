@@ -217,10 +217,11 @@ void PackageManager::loadLocalPackages(const string& dir)
 
 				localPackages().add(package->id(), package);
 			}
+			catch (std::exception& exc) {
+				Log("error") << "[PackageManager] Manifest Load Error: " << exc.what() << endl;
+			}
 			catch (Exception& exc) {
 				Log("error") << "[PackageManager] Load Error: " << exc.displayText() << endl;
-				//if (whiny)
-				//	exc.rethrow();
 			}
 		}
 
@@ -288,13 +289,6 @@ InstallTask* PackageManager::installPackage(const string& name, const InstallTas
 			queryRemotePackages();
 
 		PackagePair pair = getOrCreatePackagePair(name);
-
-		// Check against provided options to make sure that
-		// we can proceed with task creation.
-		if (!options.version.empty())
-			pair.remote.lastestAssetForVersion(options.version); // throw if none
-		if (!options.sdkVersion.empty())
-			pair.remote.latestAssetForSDK(options.sdkVersion); // throw if none
 
 		// Check the existing package veracity if one exists.
 		// If the package is up to date we have nothing to do 

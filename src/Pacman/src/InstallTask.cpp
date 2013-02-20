@@ -76,21 +76,30 @@ void InstallTask::start()
 
 void InstallTask::cancel()
 {
-	Log("trace", this) << "Cancelling" << endl;	
-	FastMutex::ScopedLock lock(_mutex);
-	_cancelled = true;
-	_transaction.cancel();
-	_thread.join();
+	{
+		FastMutex::ScopedLock lock(_mutex);
+		_cancelled = true;
+		_transaction.cancel();
+	}
+	//_thread.join(); // Thread deleted on callback
 }
 
 
 void InstallTask::run()
 {
-	try {
+	try {	
+
+		// Check against provided options to make sure that
+		// we can proceed with task creation.
+		if (!_options.version.empty())
+			_remote->lastestAssetForVersion(_options.version); // throw if none
+		if (!_options.sdkVersion.empty())
+			_remote->latestAssetForSDK(_options.sdkVersion); // throw if none
+
 		// If the package failed previously we might need
 		// to clear the file cache.
 		if (_manager.options().clearFailedCache)
-			_manager.clearPackageCache(*_local);		
+			_manager.clearPackageCache(*_local);
 		
 		// Kick off the state machine. If any errors are
 		// encountered an exception will be thrown and the
@@ -122,7 +131,7 @@ void InstallTask::onStateChange(PackageInstallState& state, const PackageInstall
 		// Check for cancellation each time the state is transitioned
 		// and throw an exception to break out of the current scope.
 		if (_cancelled && state.id() != PackageInstallState::Failed)
-			throw Exception("The installation task was cancelled by the user.");
+			throw Exception("Installation cancelled by user intervention.");
 
 		// Set the package install task so we know from which state to
 		// resume installation.
@@ -210,12 +219,13 @@ void InstallTask::doDownload()
 	_transaction.setRequest(request);
 	_transaction.setOutputPath(_manager.getCacheFilePath(localAsset.fileName()).toString());
 	_transaction.ResponseProgress += delegate(this, &InstallTask::onResponseProgress);
-	if (!_transaction.send())
+	if (!_transaction.send() && 
+		!_transaction.cancelled())
 		throw Exception(format("Failed to download package files: HTTP Error: %d %s", 
 			static_cast<int>(_transaction.response().getStatus()), 
-			_transaction.response().getReason()));	
+			_transaction.response().getReason()));
 	
-	Log("debug", this) << "Download Success" << endl; 
+	Log("debug", this) << "Download Complete" << endl; 
 	
 	// Transition the internal state since the HTTP
 	// transaction was a success.
@@ -245,7 +255,7 @@ void InstallTask::doUnpack()
 	if (!File(filePath).exists())
 		throw Exception("The local package file does not exist: " + filePath.toString());	
 	if (!_manager.isSupportedFileType(localAsset.fileName()))
-		throw Exception("The local package has an unrecognized file extension: " + filePath.getExtension());
+		throw Exception("The local package has an unsupported file extension: " + filePath.getExtension());
 	
 	// Create the output directory
 	Path outputDir(_manager.getIntermediatePackageDir(_local->id()));

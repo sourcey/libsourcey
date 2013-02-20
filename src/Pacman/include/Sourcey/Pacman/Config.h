@@ -35,12 +35,10 @@ namespace Pacman {
 	
 #define DEFAULT_API_ENDPOINT "http://localhost:3000"
 #define DEFAULT_API_INDEX_URI "/packages.json"
-//#define DEFAULT_API_UPDATE_URI "/packages/list.json"
 #define DEFAULT_PACKAGE_CACHE_DIR "pacman/cache"
-//#define DEFAULT_PACKAGE_MANIFEST_DIR "pacman/manifest"
 #define DEFAULT_PACKAGE_INTERMEDIATE_DIR "pacman/data"
 #define DEFAULT_PACKAGE_INSTALL_DIR ""
-#define DEFAULT_PLATFORM "Win32"
+#define DEFAULT_PLATFORM "win32"
 
 
 } } // namespace Sourcey::Pacman

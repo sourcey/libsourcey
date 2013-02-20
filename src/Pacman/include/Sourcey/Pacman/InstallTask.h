@@ -85,10 +85,10 @@ public:
 	struct Options 
 		/// Package installation options.
 	{
-		std::string version;		// If set then the specified package version will
+		std::string version;		// If set then the given package version will
 									// be installed.
-		std::string sdkVersion; // If set only package versions with the specified
-									// parent project version will be installed.
+		std::string sdkVersion;		// If set then the latest package version for
+									// given SDK version will be installed.
 
 		Options() {
 			version = "";

@@ -50,6 +50,7 @@ struct Transaction: public PacketTransaction<SocketIO::Packet>
 	virtual bool match(const Packet& packet);
 
 	virtual void onPotentialResponse(void*, Packet& packet);
+	virtual void onResponse();
 	virtual void onComplete();
 
 	SocketIO::Client& client;

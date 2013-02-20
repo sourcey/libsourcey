@@ -48,9 +48,9 @@ public:
 				IPacketSocket* socket, 
 				const Address& localAddress, 
 				const Address& peerAddress, 
-				int retries = 1, 
-				int timeout = 10000) : 
-		PacketTransaction<PacketT>(runner, retries, timeout), 
+				int timeout = 10000, 
+				int retries = 1) : 
+		PacketTransaction<PacketT>(runner, timeout, retries), 
 		_socket(socket), _localAddress(localAddress), _peerAddress(peerAddress)
 	{
 		Log("debug") << "[NetTransaction:" << this << "] Creating" << std::endl;
@@ -85,13 +85,30 @@ public:
 			throw StopPropagation();
 	}	
 
+	virtual void onResponse()
+	{
+		Log("debug") << "[NetTransaction:" << this << "] Response" << std::endl;
+		{
+			// Detach delegates onResponse before state callback.
+			// Remove callbacks, but do not nullify the socket,
+			// because the outside application might need it.
+			Poco::FastMutex::ScopedLock lock(PacketTransaction<PacketT>::_mutex);
+			if (_socket) {
+				_socket->detach(packetDelegate(this, &Transaction::onPotentialResponse));
+				//_socket = NULL;
+			}
+		}
+		PacketTransaction<PacketT>::onResponse();
+	}
+
 	virtual void onComplete()
 	{
 		Log("debug") << "[NetTransaction:" << this << "] Complete" << std::endl;
 		{
+			// Nullify the socket on completion.
 			Poco::FastMutex::ScopedLock lock(PacketTransaction<PacketT>::_mutex);
 			if (_socket) {
-				_socket->detach(packetDelegate(this, &Transaction::onPotentialResponse));
+				//_socket->detach(packetDelegate(this, &Transaction::onPotentialResponse));
 				_socket = NULL;
 			}
 		}
