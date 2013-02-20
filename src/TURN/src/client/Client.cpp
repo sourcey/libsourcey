@@ -295,7 +295,7 @@ STUN::Transaction* Client::createTransaction(Net::IPacketSocket* socket)
 	
 	socket = socket ? socket : _socket;
 	assert(socket);
-	STUN::Transaction* transaction = new STUN::Transaction(_runner, socket, socket->address(), _options.serverAddr, 1, _options.timeout);
+	STUN::Transaction* transaction = new STUN::Transaction(_runner, socket, socket->address(), _options.serverAddr, _options.timeout, 1);
 	transaction->StateChange += delegate(this, &Client::onTransactionStateChange);	
 	_transactions.push_back(transaction);
 	return transaction;
@@ -913,6 +913,9 @@ void Client::onTransactionStateChange(void* sender, TransactionState& state, con
 
 	STUN::Transaction* transaction = reinterpret_cast<STUN::Transaction*>(sender);
 	transaction->response().opaque = transaction;	
+	
+	if (!isTerminated())
+		_observer.onTransactionResponse(*this, *transaction);
 
 	switch (state.id()) {	
 	case TransactionState::Running:
@@ -950,15 +953,6 @@ void Client::onTransactionStateChange(void* sender, TransactionState& state, con
 		}
 		break;
 	}
-
-	if (!isTerminated())
-		_observer.onTransactionResponse(*this, *transaction);
-	
-	//Log("trace") << "[TURNClient:" << this << "] Transaction State Changed: " << sender << ": Before Destroy" << endl;
-	//Log("trace") << "[TURNClient:" << this << "] Transaction State Changed: " << transaction->response().toString() << ": Before Destroy" << endl;
-
-	// BUG: If the client was terminated via callback,
-	// the transaction has been deleted.
 };
 
 

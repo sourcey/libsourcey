@@ -79,6 +79,8 @@ void Transaction::onResponse()
 	else if (_response.type() == Message::SendIndication ||
 		_response.type() == Message::DataIndication)
 		_response.setState(Message::Indication);
+
+	Net::Transaction<Message>::onResponse();
 }
 
 

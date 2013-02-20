@@ -146,7 +146,6 @@ bool Transaction::send()
 void Transaction::cancel()
 {
 	Log("trace", this) << "Cancelling" << endl;
-	FastMutex::ScopedLock lock(_mutex);
 	setState(this, TransactionState::Cancelled);
 }
 

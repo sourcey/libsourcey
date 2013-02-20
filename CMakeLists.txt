@@ -91,7 +91,7 @@ if(WIN32)
     #D:/dev/lib/OpenCV2.4.1/build/x86/vc10/lib
     D:/dev/lib/OpenCV2.4.1/build/install/lib
     #D:/dev/lib/OpenCV2.4.1/build/x86/vc10/lib
-    D:/dev/lib/wxWidgets-2.9.2/lib/vc_lib
+    D:/dev/lib/wxWidgets-2.9.4/lib/vc_lib
     #D:/dev/lib/ffmpeg-2012-04-16/lib
     D:/dev/lib/OpenSSL-Win32/lib/VC
     D:/dev/lib/poco-1.4.1p1-all/lib 
@@ -114,7 +114,7 @@ if(WIN32)
     #D:/dev/lib/OpenCV2.3/build/include
     #D:/dev/lib/OpenCV2.4/build/install/include
     D:/dev/lib/OpenCV2.4.1/build/include
-    D:/dev/lib/wxWidgets-2.9.2
+    D:/dev/lib/wxWidgets-2.9.4
     #D:/dev/lib/ffmpeg-2012-04-16/include
     D:/dev/lib/OpenSSL-Win32/include
     D:/dev/lib/poco-1.4.1p1-all

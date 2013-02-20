@@ -64,7 +64,7 @@ bool Transaction::send()
 	Log("debug") << "[SocketIOTransaction:" << this << "] Sending" << endl;	
 	_request.setAck(true);	
 	client += packetDelegate(this, &Transaction::onPotentialResponse, 100);
-	if (client.send(_request), true)
+	if (client.send(_request)) //, true
 		return PacketTransaction<Packet>::send();
 	return false;
 }
@@ -90,11 +90,21 @@ bool Transaction::match(const Packet& packet)
 }
 
 
-void Transaction::onComplete()
+void Transaction::onResponse()
 {
-	Log("debug") << "[SocketIOTransaction:" << this << "] Closing" << endl;
+	Log("debug") << "[SocketIOTransaction:" << this << "] Response" << endl;
 
 	client -= packetDelegate(this, &Transaction::onPotentialResponse);
+	
+	PacketTransaction<Packet>::onResponse();
+}
+
+
+void Transaction::onComplete()
+{
+	Log("debug") << "[SocketIOTransaction:" << this << "] Complete" << endl;
+
+	//client -= packetDelegate(this, &Transaction::onPotentialResponse);
 	
 	PacketTransaction<Packet>::onComplete();
 }

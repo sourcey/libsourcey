@@ -213,12 +213,27 @@ void Runner::run()
 		
 		// Run the task
 		if (task) {
+			//Log("trace", this) << "Before Run Task: " << task << endl;
 			if (task->beforeRun()) {
+				Log("trace", this) << "Run Task: " << task << endl;
 				task->run();	
+				Log("trace", this) << "After Task: " << task << endl;
 				if (task->afterRun())			
 					onRun(task);
 				else
 					task->_destroyed = true; //destroy();	
+			}
+
+			// Advance the task position
+			else {
+				FastMutex::ScopedLock lock(_mutex);
+				Task* t = _tasks.front();
+				_tasks.pop_front();
+				_tasks.push_back(t);
+				//for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
+					//if (!(*it)->cancelled())
+					//return *it;
+				//}	
 			}
 						
 			// Destroy the task if required
@@ -226,7 +241,7 @@ void Runner::run()
 				Log("trace", this) << "Destroying Task: " << task << endl;
 				remove(task);
 				delete task;
-			}	
+			}
 		}
 		
 		// Go to sleep if we have no tasks
