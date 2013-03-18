@@ -86,8 +86,8 @@ class VideoCapture: public ICapture, public Poco::Runnable
 	/// Requires OpenCV.
 	/// 
 	/// WINDOWS USERS:
-	/// OpenCV HighGUI DirectShow must be compiled with VI_COM_MULTI_THREADED
-	/// defined otherwise capture will fail.
+	/// OpenCV HighGUI DirectShow must be compiled with
+	/// VI_COM_MULTI_THREADED defined otherwise capture will fail.
 {
 public:
 	VideoCapture(int deviceId);
@@ -98,7 +98,7 @@ public:
 	virtual void stop();
 	
 	virtual void attach(const PacketDelegateBase& delegate);
-	virtual void detach(const PacketDelegateBase& delegate);
+	virtual bool detach(const PacketDelegateBase& delegate);
 	
 	virtual void getFrame(cv::Mat& frame, int width = 0, int height = 0);
 	
@@ -113,6 +113,7 @@ public:
 	virtual int width() const;
 	virtual int height() const;
 	virtual double fps() const;
+	virtual bool destroyOnStop() const;
 	virtual cv::VideoCapture& capture();
 
 protected:	
@@ -128,12 +129,13 @@ private:
 	Poco::Thread		_thread;
 	cv::VideoCapture	_capture;
 	cv::Mat				_frame;	
-	int					_deviceId;	// For video devices
-	std::string			_filename;	// For video files
-	int					_width;		// The default capture width
-	int					_height;	// The default capture height
+	int					_deviceId;	// Source device to capture from
+	std::string			_filename;	// Source file to capture from
+	int					_width;		// Capture width
+	int					_height;	// Capture height
+	bool                _isImage;	// Source file is an image or not
+	bool				_isOpened;
 	bool				_stop;
-	bool				_isOpened;	// Reliable replacement for OpenCV
 	bool				_destroyOnStop;
 	FPSCounter			_counter;
 	Poco::Event			_wakeUp;
@@ -145,10 +147,10 @@ inline void AllocateOpenCVInputFormat(const VideoCapture* capture, Format& forma
 	/// our encoders.
 {
 	assert(capture);
-	format.label = "OpenCV";
-	format.id = Format::Raw;
 	format.type = Format::Video;
-	format.video.pixfmt = PixelFormat::BGR24;
+	format.label = "OpenCV";
+	format.id = "rawvideo";
+	format.video.pixelFmt = "bgr24";
 	format.video.width = capture ? capture->width() : 0;
 	format.video.height = capture ? capture->height(): 0;
 	format.video.enabled = true;

@@ -58,11 +58,22 @@ VideoContext::~VideoContext()
 }
 
 
+void VideoContext::create()
+{
+}
+
+
 void VideoContext::open()
 {
-	Log("trace") << "[VideoContext:" << this << "] Opening" << endl;
+	Log("trace") << "[VideoContext:" << this << "] Opening" << endl;	
+	assert(ctx);
+	assert(codec);
+
+	// Open the video codec
+	if (avcodec_open2(ctx, codec, NULL) < 0)
+   		throw Exception("Cannot open the video codec.");
 }
-	
+
 
 void VideoContext::close()
 {
@@ -73,9 +84,9 @@ void VideoContext::close()
 		frame = NULL;
 	}
 
-	if (codec) {
-		avcodec_close(codec);
-		codec = NULL;
+	if (ctx) {
+		avcodec_close(ctx);
+		ctx = NULL;
 	}
 
 	if (stream)	{
@@ -106,134 +117,63 @@ VideoEncoderContext::VideoEncoderContext() :
 
 VideoEncoderContext::~VideoEncoderContext()
 {
-	//assert((!buffer && !conv) && "encoder context must be closed");
 	close();
 }
 
 
-void VideoEncoderContext::open(AVFormatContext* oc) //, const VideoCodec& params
+void VideoEncoderContext::create(AVFormatContext* oc) //, const VideoCodec& params
 {
-	Log("debug") << "[VideoEncoderContext:" << this << "] Opening Video" << endl;
+	Log("debug") << "[VideoEncoderContext:" << this << "] Creating: " 
+		<< "\n\tInput: " << iparams.toString() 
+		<< "\n\tOutput: " << oparams.toString() 
+		<< endl;
 
-	VideoContext::open();
-
-	assert(oparams.enabled);	
-
+	VideoContext::create();
+	
 	// Find the video encoder
-	AVCodec* c = avcodec_find_encoder_by_name(oparams.encoder.data());
-	if (!c)
+	codec = avcodec_find_encoder_by_name(oparams.encoder.data());
+	if (!codec)
    		throw Exception("Video encoder not found.");
 
-	oc->oformat->video_codec = c->id;
-	
-	//_formatCtx->oformat->video_codec = static_cast<CodecID>(_options.oformat.video.id);
+	oc->oformat->video_codec = codec->id;
 	
 	// Add a video stream that uses the format's default video 
 	// codec to the format context's streams[] array.
-	stream = avformat_new_stream(oc, c);
+	stream = avformat_new_stream(oc, codec);
 	if (!stream)
-		throw Exception("Failed to create the video stream.");	
+		throw Exception("Failed to create video stream.");	
 	
-	codec = stream->codec;
-	avcodec_get_context_defaults3(codec, c);
-	codec->codec_id = c->id; //oc->oformat->video_codec;	
-	codec->codec_type = AVMEDIA_TYPE_VIDEO;
-	
-	// Resolution must be a multiple of two
-	codec->width = oparams.width;
-	codec->height = oparams.height;
-	
-	// Define encoding parameters
-	codec->bit_rate = oparams.bitRate; //800000; //700000; //1000000;
-	//codec->bit_rate_tolerance = 1000; //oparams.bitRate * 100;
-	
-	
-	codec->frame_number = 0;
+	ctx = stream->codec;
 
-	/*
-    codec->time_base                  = getCodecTimeBase(c, oparams.fps);
-
-    stream->time_base.den             = 90000;
-    stream->time_base.num             = 1;
-    stream->r_frame_rate.num          = 0;
-    stream->r_frame_rate.den          = 0;
-	*/
-
-	// Time base: this is the fundamental unit of time (in seconds) in terms
-	// of which frame timestamps are represented. for fixed-fps content,
-	// timebase should be 1/framerate and timestamp increments should be
-	// identically 1.
-	codec->time_base.den = oparams.fps;
-	codec->time_base.num = 1;
-
-	// Emit one intra frame every twelve frames at most
-	codec->gop_size = 12; 
-	//codec->gop_size = oparams.fps;
-
-	if (codec->codec_id == CODEC_ID_MPEG2VIDEO) {
-		codec->max_b_frames = 2;
-	}
-
-	if (codec->codec_id == CODEC_ID_MPEG1VIDEO || 
-		codec->codec_id == CODEC_ID_MSMPEG4V3) {
-		// Needed to avoid using macroblocks in which some codecs overflow
- 		// this doesn't happen with normal video, it just happens here as the
- 		// motion of the chroma plane doesn't match the luma plane 
- 		// avoid FFmpeg warning 'clipping 1 dct coefficients...'
-		codec->mb_decision = 2;
-	}
-
-	// Set a few optimal pixel formats for lossless codecs of interest.
-	//int bitrateScale = 64;
-	switch (oc->oformat->video_codec) {
-	case CODEC_ID_JPEGLS:
-		// PIX_FMT_BGR24 or GRAY8 depending on is_color...
-		codec->pix_fmt = PIX_FMT_BGR24;
-		break;
-	case CODEC_ID_HUFFYUV:
-		codec->pix_fmt = PIX_FMT_YUV422P;
-		break;
-	case CODEC_ID_MJPEG:
-	case CODEC_ID_LJPEG:
-	  codec->pix_fmt = PIX_FMT_YUVJ420P;
-	  //bitrateScale = 128;
-	  break;
-	case CODEC_ID_RAWVIDEO:
-	default:
-		// Good for lossy formats, MPEG, etc.
-		codec->pix_fmt = PIX_FMT_YUV420P;
-		break;
-	}
-	
-    if (codec->codec_id == CODEC_ID_H264)
-        av_opt_set(codec->priv_data, "preset", "veryfast", 0); // slow // baseline
+	InitVideoEncoderContext(ctx, codec, oparams);
 
 	// Some formats want stream headers to be separate
 	if (oc->oformat->flags & AVFMT_GLOBALHEADER)
-		codec->flags |= CODEC_FLAG_GLOBAL_HEADER;
-
-	// Open the video codec
-	if (avcodec_open2(codec, c, NULL) < 0)
-   		throw Exception("Cannot open the video codec.");
+		ctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
 		
 	// Allocate the conversion context
-	// TODO: Check if conversion is necessary.
-	conv = new VideoConversionContext();
-	conv->create(iparams, oparams);
+	if (iparams.width != oparams.width ||
+		iparams.height != oparams.height ||
+		iparams.pixelFmt != oparams.pixelFmt) {
+		conv = new VideoConversionContext();
+		conv->create(iparams, oparams);
+	}
 
 	// Allocate the input frame
-	frame = CreateVideoFrame((::PixelFormat)iparams.pixfmt, iparams.width, iparams.height);
+	frame = CreateVideoFrame(ctx->pix_fmt, iparams.width, iparams.height);
 	if (!frame)
 		throw Exception("Cannot allocate input frame.");
 	
-    bufferSize = avpicture_get_size(codec->pix_fmt, codec->width, codec->height);
-    buffer = (UInt8*)av_malloc(bufferSize);
+	// Allocate the encode buffer
+	// XXX: Disabling in favour of encoder maanged buffer
+    //bufferSize = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
+    //buffer = (UInt8*)av_malloc(bufferSize);
 }
 
 
 void VideoEncoderContext::close()
 {
-	Log("debug") << "[VideoEncoderContext:" << this << "] Closing Video" << endl;
+	Log("debug") << "[VideoEncoderContext:" << this << "] Closing" << endl;
 
 	VideoContext::close();
 	
@@ -263,46 +203,57 @@ bool VideoEncoderContext::encode(unsigned char* data, int size, AVPacket& opacke
 
 
 bool VideoEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
-{
-	//Log("trace") << "[VideoEncoderContext:" << this << "] Encoding Video Packet" << endl;
-
-	assert(ipacket.stream_index == stream->index);
+{	
+	assert(ipacket.data);
+	assert(stream);
 	assert(frame);
-	assert(conv);
+	assert(codec);
 
 	frame->data[0] = (UInt8*)ipacket.data;
 
-	// TODO: Check if conversion is necessary.
-	AVFrame* oframe = conv->convert(frame);
-	
 	// TODO: Correctly set the input frame PTS
 	// http://thompsonng.blogspot.com.au/2011/09/ffmpeg-avinterleavedwriteframe-return.html
 	// http://stackoverflow.com/questions/6603979/ffmpegavcodec-encode-video-setting-pts-h264
 	// (1 / oparams.fps) * sample rate * frame number
-	oframe->pts = codec->frame_number;
+	frame->pts = ctx->frame_number;
+
+	return encode(frame, opacket);
+}
+
+
+bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
+{	
+	assert(frame);
+	assert(frame->data[0]);
+	assert(codec);
+
+	AVFrame* oframe = conv ? conv->convert(iframe) : iframe;
+	oframe->pts = iframe->pts;
 
     av_init_packet(&opacket);	
-	opacket.stream_index = this->stream->index;	
-	opacket.data = this->buffer;
-	opacket.size = this->bufferSize;
+	opacket.data = NULL; // use encoder assigned buffer
+	opacket.size = 0;
+	//opacket.data = this->buffer; // use our buffer, not ffmpeg assigned
+	//opacket.size = this->bufferSize;
 
 	int frameEncoded = 0;
-	if (avcodec_encode_video2(codec, &opacket, oframe, &frameEncoded) < 0) {
+	if (avcodec_encode_video2(ctx, &opacket, oframe, &frameEncoded) < 0) {
 		error = "Fatal Encoder Error";
-		Log("error") << "[VideoEncoderContext:" << this << "] Fatal Encoder Error" << endl;
+		Log("error") << "[VideoCodecEncoderContext:" << this << "] Fatal Encoder Error" << endl;
 		throw Exception(error);
     }
-	if (frameEncoded) {
-        if (opacket.pts != AV_NOPTS_VALUE)
-            opacket.pts = av_rescale_q(opacket.pts, codec->time_base, stream->time_base);
-        if (opacket.dts != AV_NOPTS_VALUE)
-            opacket.dts = av_rescale_q(opacket.dts, codec->time_base, stream->time_base);
-		
-		if (stream->codec->coded_frame->key_frame) 
+
+	if (frameEncoded) {		
+		if (ctx->coded_frame->key_frame) 
 		    opacket.flags |= AV_PKT_FLAG_KEY;
 
 		/*	
-		Log("trace") << "[VideoEncoderContext:" << this << "] Encoded PTS:\n" 
+        if (opacket.pts != AV_NOPTS_VALUE)
+            opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
+        if (opacket.dts != AV_NOPTS_VALUE)
+            opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
+
+		Log("trace") << "[VideoCodecEncoderContext:" << this << "] Encoded PTS:\n" 
 			//<< "\n\tPTS: " << av_ts2str(opacket.pts)
 			//<< "\n\tDTS: " << av_ts2str(opacket.dts)
 			//<< "\n\tPTS Time: " << av_ts2timestr(opacket.pts, &stream->time_base)
@@ -310,8 +261,169 @@ bool VideoEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 			<< "\n\tPTS: " << opacket.pts
 			<< "\n\tDTS: " << opacket.dts
 			<< "\n\tFrame PTS: " << oframe->pts
-			//<< "\n\tCodec Time Den: " << codec->time_base.den
-			//<< "\n\tCodec Time Num: " << codec->time_base.num
+			//<< "\n\tCodec Time Den: " << ctx->time_base.den
+			//<< "\n\tCodec Time Num: " << ctx->time_base.num
+			//<< "\n\tStream Time Den: " << stream->time_base.den
+			//<< "\n\tStream Time Num: " << stream->time_base.num
+			<< endl; 
+		*/
+    }
+	
+	return frameEncoded > 0;
+}
+
+
+// ---------------------------------------------------------------------
+//
+// Video Codec Encoder Context
+//
+// ---------------------------------------------------------------------
+VideoCodecEncoderContext::VideoCodecEncoderContext() :
+	conv(NULL),
+	buffer(NULL),
+	bufferSize(0)
+{
+}
+	
+
+VideoCodecEncoderContext::~VideoCodecEncoderContext()
+{
+	close();
+}
+
+
+void VideoCodecEncoderContext::create() //, const VideoCodec& paramsconst VideoCodec& params
+{
+	Log("debug") << "[VideoCodecEncoderContext:" << this << "] Creating: " 
+		<< "\n\tInput: " << iparams.toString() 
+		<< "\n\tOutput: " << oparams.toString() 
+		<< endl;
+
+	VideoContext::create();
+		
+	avcodec_register_all();
+
+	// Find the video encoder
+	codec = avcodec_find_encoder_by_name(oparams.encoder.data());
+	if (!codec)
+   		throw Exception("Video encoder not found.");
+
+    ctx = avcodec_alloc_context();
+    if (!ctx)
+        throw Exception("Cannot allocate encoder context.");	
+
+	InitVideoEncoderContext(ctx, codec, oparams);
+		
+	// Allocate the conversion context
+	if (iparams.width != oparams.width ||
+		iparams.height != oparams.height ||
+		iparams.pixelFmt != oparams.pixelFmt) {
+		conv = new VideoConversionContext();
+		conv->create(iparams, oparams);
+	}
+
+	// Allocate the input frame
+	frame = CreateVideoFrame(ctx->pix_fmt, iparams.width, iparams.height);
+	if (!frame)
+		throw Exception("Cannot allocate input frame.");
+	
+	// Allocate the encode buffer
+	// XXX: Disabling in favour of encoder maanged buffer
+    //bufferSize = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
+    //buffer = (UInt8*)av_malloc(bufferSize);
+}
+
+
+void VideoCodecEncoderContext::close()
+{
+	Log("debug") << "[VideoCodecEncoderContext:" << this << "] Closing" << endl;
+
+	VideoContext::close();
+	
+	if (conv) {
+		delete conv;
+		conv = NULL;
+	}
+
+	if (buffer) {
+		av_free(buffer);
+		buffer = NULL;
+	}
+}
+
+
+bool VideoCodecEncoderContext::encode(unsigned char* data, int size, AVPacket& opacket)
+{
+	assert(data);
+	assert(size);
+    AVPacket ipacket;
+    av_init_packet(&ipacket);
+    ipacket.stream_index = stream->index;
+    ipacket.data = data;
+    ipacket.size = size;
+	return encode(ipacket, opacket);
+}
+
+
+bool VideoCodecEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
+{	
+	assert(stream == NULL);
+	assert(ipacket.data);
+	assert(frame);
+	assert(conv);
+
+	frame->data[0] = (UInt8*)ipacket.data;
+
+	// TODO: Correctly set the input frame PTS
+	// http://thompsonng.blogspot.com.au/2011/09/ffmpeg-avinterleavedwriteframe-return.html
+	// http://stackoverflow.com/questions/6603979/ffmpegavcodec-encode-video-setting-pts-h264
+	// (1 / oparams.fps) * sample rate * frame number
+	frame->pts = ctx->frame_number;
+
+	return encode(frame, opacket);
+}
+
+
+bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
+{	
+	Log("trace") << "[VideoCodecEncoderContext:" << this << "] Encoding Video Packet" << endl;
+
+	AVFrame* oframe = conv ? conv->convert(iframe) : iframe;
+	oframe->pts = iframe->pts;
+
+    av_init_packet(&opacket);	
+	opacket.data = NULL;
+	opacket.size = 0;
+	//opacket.data = this->buffer; // use our buffer, not ffmpeg assigned
+	//opacket.size = this->bufferSize;
+
+	int frameEncoded = 0;
+	if (avcodec_encode_video2(ctx, &opacket, oframe, &frameEncoded) < 0) {
+		error = "Fatal Encoder Error";
+		Log("error") << "[VideoCodecEncoderContext:" << this << "] Fatal Encoder Error" << endl;
+		throw Exception(error);
+    }
+
+	if (frameEncoded) {		
+		if (ctx->coded_frame->key_frame) 
+		    opacket.flags |= AV_PKT_FLAG_KEY;
+
+		/*	
+        if (opacket.pts != AV_NOPTS_VALUE)
+            opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
+        if (opacket.dts != AV_NOPTS_VALUE)
+            opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
+
+		Log("trace") << "[VideoCodecEncoderContext:" << this << "] Encoded PTS:\n" 
+			//<< "\n\tPTS: " << av_ts2str(opacket.pts)
+			//<< "\n\tDTS: " << av_ts2str(opacket.dts)
+			//<< "\n\tPTS Time: " << av_ts2timestr(opacket.pts, &stream->time_base)
+			//<< "\n\tDTS Time: " << av_ts2timestr(opacket.dts, &stream->time_base)
+			<< "\n\tPTS: " << opacket.pts
+			<< "\n\tDTS: " << opacket.dts
+			<< "\n\tFrame PTS: " << oframe->pts
+			//<< "\n\tCodec Time Den: " << ctx->time_base.den
+			//<< "\n\tCodec Time Num: " << ctx->time_base.num
 			//<< "\n\tStream Time Den: " << stream->time_base.den
 			//<< "\n\tStream Time Num: " << stream->time_base.num
 			<< endl; 
@@ -338,27 +450,24 @@ VideoDecoderContext::~VideoDecoderContext()
 }
 
 
-void VideoDecoderContext::open(AVFormatContext *ic, int streamID)
-{
-	VideoContext::open();
-	
-	Log("debug") << "[VideoDecoderContext:" << this << "] Opening Video: " << streamID << endl;
+void VideoDecoderContext::create(AVFormatContext *ic, int streamID)
+{	
+	Log("debug") << "[VideoDecoderContext:" << this << "] Creating: " << streamID << endl;
+	VideoContext::create();
 
 	assert(ic);
 	assert(streamID >= 0);
 	
 	this->stream = ic->streams[streamID];
-	this->codec = this->stream->codec;
-	AVCodec* c = avcodec_find_decoder(this->codec->codec_id);	
-	if (c == NULL)
-		throw Exception("The video codec is missing or unsupported.");
-	
-	if (avcodec_open(this->codec, c) < 0)
-		throw Exception("Could not open the video codec.");
+	this->ctx = this->stream->codec;
+
+	codec = avcodec_find_decoder(this->ctx->codec_id);	
+	if (!codec)
+		throw Exception("Video codec missing or unsupported.");
 	
 	this->frame = avcodec_alloc_frame();
 	if (this->frame == NULL)
-		throw Exception("Could not allocate the input frame.");
+		throw Exception("Could not allocate video input frame.");
 }
 
 
@@ -387,45 +496,75 @@ bool VideoDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 	int bytesDecoded = 0;
 	int bytesRemaining = ipacket.size;
 	
+	av_init_packet(&opacket);
 	opacket.data = NULL;
 	opacket.size = 0;
+	
+	bytesDecoded = avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
+	if (bytesDecoded < 0) {
+		error = "Decoder error";
+		Log("error") << "[VideoDecoderContext:" << this << "] " << error << endl;
+		throw Exception(error);
+	}
 
-	while (bytesRemaining && !frameDecoded)
-	{
-		bytesDecoded = avcodec_decode_video2(codec, frame, &frameDecoded, &ipacket);
-		if (bytesDecoded < 0) {
-			Log("error") << "[VideoDecoderContext:" << this << "] Decoder Error" << endl;
-			error = "Decoder error";
-			throw Exception(error);
-		}
+	// XXX: Asserting here to make sure below looping 
+	// avcodec_decode_video2 is actually redundant.
+	// Otherwise we need to reimplement this pseudo code:
+	// while(packet->size > 0)
+	// {
+	// 	 int ret = avcodec_decode_video2(..., ipacket);
+	// 	 if(ret < -1)
+	//		throw std::exception("error");
+	//
+	//	 ipacket->size -= ret;
+	//	 ipacket->data += ret;
+	// }
+	assert(bytesDecoded == bytesRemaining);
 
+	/*
+	while (bytesRemaining) { // && !frameDecoded
+		//Log("debug") << "#################### [VideoDecoderContext:" << this << "] Decoding: " << ipacket.pts << endl;
 		bytesRemaining -= bytesDecoded;
 	}
+	*/
 
 	if (frameDecoded) {
-		opacket.data = frame->data[0];
-		opacket.size = avpicture_get_size(codec->pix_fmt, codec->width, codec->height);
-
-		assert(opacket.data);
-		assert(opacket.size);
-		
-		if (frame->pts != AV_NOPTS_VALUE) {
-			opacket.pts = frame->pts;
-			pts = frame->pts;
-			pts *= av_q2d(stream->time_base);
-		}
-
-		/*
-		Log("trace") << "[VideoDecoderContext:" << this << "] Decoded Frame:" 
-			<< "\n\tFrame Size: " << opacket.size
-			<< "\n\tFrame PTS: " << opacket.pts
-			<< "\n\tDecoder PTS: " << pts
+		InitDecodedVideoPacket(stream, ctx, frame, &opacket, &pts);			
+		Log("trace") << "[VideoDecoderContext:" << this << "] Decoded Frame:" 		
+			<< "\n\tPTS: " << pts	
+			<< "\n\tPacket Size: " << opacket.size
+			<< "\n\tPacket PTS: " << opacket.pts
+			<< "\n\tPacket DTS: " << opacket.dts
+			<< "\n\tFrame Packet PTS: " << frame->pkt_pts
+			<< "\n\tFrame Packet DTS: " << frame->pkt_dts
 			<< endl;
-			*/
-
+		/*		
+			*/		
+		
 		return true;
 	}
+	return false;
+}
 
+
+bool VideoDecoderContext::flush(AVPacket& opacket)
+{	
+	AVPacket ipacket;
+	av_init_packet(&ipacket);
+	ipacket.data = NULL;
+	ipacket.size = 0;
+
+	av_init_packet(&opacket);
+	opacket.data = NULL;
+	opacket.size = 0;
+	
+	int frameDecoded = 0;
+	avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
+	if (frameDecoded) {
+		InitDecodedVideoPacket(stream, ctx, frame, &opacket, &pts);
+		Log("debug") << "[VideoDecoderContext:" << this << "] Flushed Video Frame: " << opacket.pts << endl;
+		return true;
+	}
 	return false;
 }
 
@@ -453,10 +592,10 @@ void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec&
 	Log("trace") << "[VideoConversionContext:" << this << "] Creating:" 
 		<< "\n\tInput Width: " << iparams.width
 		<< "\n\tInput Height: " << iparams.height
-		<< "\n\tInput Pixel Format: " << iparams.pixfmt
+		<< "\n\tInput Pixel Format: " << iparams.pixelFmt
 		<< "\n\tOutput Width: " << oparams.width
 		<< "\n\tOutput Height: " << oparams.height
-		<< "\n\tOutput Pixel Format: " << oparams.pixfmt
+		<< "\n\tOutput Pixel Format: " << oparams.pixelFmt
 		<< endl;
 
     if (ctx)
@@ -464,10 +603,10 @@ void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec&
 
 	oframe = avcodec_alloc_frame();
     avpicture_alloc(reinterpret_cast<AVPicture*>(oframe), 
-		(::PixelFormat)oparams.pixfmt, oparams.width, oparams.height);
+		av_get_pix_fmt(oparams.pixelFmt), oparams.width, oparams.height);
 	ctx = sws_getContext(
-		iparams.width, iparams.height, (::PixelFormat)iparams.pixfmt,
-        oparams.width, oparams.height, (::PixelFormat)oparams.pixfmt, 
+		iparams.width, iparams.height, av_get_pix_fmt(iparams.pixelFmt),
+        oparams.width, oparams.height, av_get_pix_fmt(oparams.pixelFmt), 
 		/* SWS_FAST_BILINEAR */SWS_BICUBIC, NULL, NULL, NULL);
     if (!ctx) 
         throw Exception("Invalid conversion context.");
@@ -519,22 +658,150 @@ AVFrame* VideoConversionContext::convert(AVFrame* iframe)
 // Inlines & Helpers
 //
 // ---------------------------------------------------------------------		
-AVFrame* CreateVideoFrame(::PixelFormat pixfmt, int width, int height)
+AVFrame* CreateVideoFrame(::PixelFormat pixelFmt, int width, int height)
 {
     AVFrame* picture = avcodec_alloc_frame();
     if (!picture)
         return NULL;
 	
-    int size = avpicture_get_size(pixfmt, width, height);
+    int size = avpicture_get_size(pixelFmt, width, height);
     UInt8* buffer = (UInt8*)av_malloc(size);
     if (!buffer) {
         av_free(picture);
         return NULL;
 	}
 		
-	avpicture_fill(reinterpret_cast<AVPicture*>(picture), buffer, pixfmt, width, height);
+	avpicture_fill(reinterpret_cast<AVPicture*>(picture), buffer, pixelFmt, width, height);
 
     return picture;
+}
+
+
+void InitVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, const VideoCodec& oparams) 
+{
+	assert(oparams.enabled);	
+
+	avcodec_get_context_defaults3(ctx, codec);
+	ctx->codec_id = codec->id;
+	ctx->codec_type = AVMEDIA_TYPE_VIDEO;
+	ctx->pix_fmt = av_get_pix_fmt(oparams.pixelFmt);
+	
+	// Resolution must be a multiple of two
+	ctx->width = oparams.width;
+	ctx->height = oparams.height;
+	
+	// Define encoding parameters
+	ctx->bit_rate = oparams.bitRate;
+	//ctx->bit_rate_tolerance = oparams.bitRate * 100;
+
+	ctx->frame_number = 0;
+
+	// Time base: this is the fundamental unit of time (in seconds) in terms
+	// of which frame timestamps are represented. for fixed-fps content,
+	// timebase should be 1/framerate and timestamp increments should be
+	// identically 1.
+	ctx->time_base.den = oparams.fps;
+	ctx->time_base.num = 1;
+
+	// Emit one intra frame every twelve frames at most
+	ctx->gop_size = 12; 
+	//ctx->gop_size = oparams.fps;
+
+	if (ctx->codec_id == CODEC_ID_MPEG2VIDEO) {
+		ctx->max_b_frames = 2;
+	}
+
+	if (ctx->codec_id == CODEC_ID_MPEG1VIDEO || 
+		ctx->codec_id == CODEC_ID_MSMPEG4V3) {
+		// Needed to avoid using macroblocks in which some codecs overflow
+ 		// this doesn't happen with normal video, it just happens here as the
+ 		// motion of the chroma plane doesn't match the luma plane 
+ 		// avoid FFmpeg warning 'clipping 1 dct coefficients...'
+		ctx->mb_decision = 2;
+	}
+	
+	Log("trace") << "[VideoContext] InitVideoEncoderContext:" 		
+		<< "\n\tctx->pix_fmt	: " << ctx->pix_fmt	
+		<< "\n\toparams.pixelFmt: " << oparams.pixelFmt
+		<< "\n\tCODEC_ID_MJPEG: " << CODEC_ID_MJPEG
+		<< endl;
+
+	// Set a few optimal pixel formats for lossless codecs of interest.
+	// Only do this if the default PIX_FMT_YUV420P is given.
+	if (ctx->pix_fmt == PIX_FMT_YUV420P) {
+		//int bitrateScale = 64;
+		switch (ctx->codec_id) {
+		case CODEC_ID_JPEGLS:
+			// PIX_FMT_BGR24 or GRAY8 depending on is_color...
+			ctx->pix_fmt = PIX_FMT_BGR24;
+			break;
+		case CODEC_ID_HUFFYUV:
+			ctx->pix_fmt = PIX_FMT_YUV422P;
+			break;
+		case CODEC_ID_MJPEG:
+		case CODEC_ID_LJPEG:
+		  ctx->pix_fmt = PIX_FMT_YUVJ420P;
+		  //bitrateScale = 128;
+		  break;
+		case CODEC_ID_RAWVIDEO:
+		default:
+			// Good for lossy formats, MPEG, etc.
+			ctx->pix_fmt = PIX_FMT_YUV420P;
+			break;
+		}
+	}
+	
+	Log("trace") << "[VideoContext] InitVideoEncoderContext 1:" 		
+		<< "\n\tctx->pix_fmt	: " << ctx->pix_fmt	
+		<< "\n\toparams.pixelFmt: " << oparams.pixelFmt
+		<< "\n\tCODEC_ID_MJPEG: " << CODEC_ID_MJPEG
+		<< endl;
+
+    if (ctx->codec_id == CODEC_ID_H264)
+        av_opt_set(ctx->priv_data, "preset", "veryfast", 0); // slow // baseline
+}
+    
+
+void InitDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts)
+{		
+	opacket->data = frame->data[0];
+	opacket->size = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
+	opacket->dts = frame->pkt_dts; // Decoder PTS values can be unordered
+	opacket->pts = frame->pkt_pts;	
+		
+	// Local PTS value represented as decimal seconds
+    if (opacket->dts != AV_NOPTS_VALUE) {
+		*pts = opacket->pts;
+		*pts *= av_q2d(stream->time_base);
+	}
+
+	assert(opacket->data);
+	assert(opacket->size);
+	//assert(opacket->dts >= 0);
+	//assert(opacket->pts >= 0);	
+	
+	Log("trace") << "[VideoContext] Init Decoded Frame PAcket:" 		
+		<< "\n\tFrame DTS: " << frame->pkt_dts		
+		<< "\n\tFrame PTS: " << frame->pkt_pts		
+		<< "\n\tPacket Size: " << opacket->size	
+		<< "\n\tPacket DTS: " << opacket->dts
+		<< "\n\tPacket PTS: " << opacket->pts
+		<< endl;
+
+	/*	
+	// ffplay.c
+	if (decoder_reorder_pts == -1) {
+        *pts = av_frame_get_best_effort_timestamp(frame);
+    } else if (decoder_reorder_pts) {
+        *pts = frame->pkt_pts;
+    } else {
+        *pts = frame->pkt_dts;
+    }
+
+    if (*pts == AV_NOPTS_VALUE) {
+        *pts = 0;
+    }
+	*/
 }
 
 
@@ -567,20 +834,17 @@ AVRational GetCodecTimeBase(AVCodec* codec, double fps)
             }
         }
 
-        if (best && best->num && best->den)
-        {
+        if (best && best->num && best->den) {
             result.den = best->num;
             result.num = best->den;
         }
     }
 
-    if (result.den == 2997)
-    {
+    if (result.den == 2997) {
          result.den = 30000;
          result.num = 1001;
     }
-    else if (result.den == 5994)
-    {
+    else if (result.den == 5994) {
          result.den = 60000;
          result.num = 1001;
     }
@@ -595,9 +859,164 @@ AVRational GetCodecTimeBase(AVCodec* codec, double fps)
 		
 
 	
+	/*
+	// Skip if exceeding maximum FPS
+	if (maxFPS && ipacket.dts != AV_NOPTS_VALUE) {
+		double fps = ctx->frame_number / (ipacket.dts * av_q2d(stream->time_base));
+		if (fps > maxFPS) {
+			Log("trace") << "[VideoDecoderContext:" << this << "] Skipping video frame at fps: " << fps << endl;
+			return false;
+		}
+		Log("trace") << "[VideoDecoderContext:" << this << "] Decoding at fps: " << fps << ": " << ctx->frame_number << endl;
+	}
+	*/
+
+
+	// Allocate the conversion context
+	// TODO: Check if conversion is necessary.
+	//conv = new VideoConversionContext();
+	//conv->create(iparams, oparams);
 	
 	
 
+	/*
+	assert(oparams.enabled);	
+
+	avcodec_get_context_defaults3(ctx, c);
+	ctx->codec_id = c->id; //oc->oformat->video_codec;	
+	ctx->codec_type = AVMEDIA_TYPE_VIDEO;
+	
+	// Resolution must be a multiple of two
+	ctx->width = oparams.width;
+	ctx->height = oparams.height;
+	
+	// Define encoding parameters
+	ctx->bit_rate = oparams.bitRate; //800000; //700000; //1000000;
+	//ctx->bit_rate_tolerance = 1000; //oparams.bitRate * 100;
+		
+	ctx->frame_number = 0;
+
+	// Time base: this is the fundamental unit of time (in seconds) in terms
+	// of which frame timestamps are represented. for fixed-fps content,
+	// timebase should be 1/framerate and timestamp increments should be
+	// identically 1.
+	ctx->time_base.den = oparams.fps;
+	ctx->time_base.num = 1;
+
+	// Emit one intra frame every twelve frames at most
+	ctx->gop_size = 12; 
+	//ctx->gop_size = oparams.fps;
+
+	if (ctx->codec_id == CODEC_ID_MPEG2VIDEO) {
+		ctx->max_b_frames = 2;
+	}
+
+	if (ctx->codec_id == CODEC_ID_MPEG1VIDEO || 
+		ctx->codec_id == CODEC_ID_MSMPEG4V3) {
+		// Needed to avoid using macroblocks in which some codecs overflow
+ 		// this doesn't happen with normal video, it just happens here as the
+ 		// motion of the chroma plane doesn't match the luma plane 
+ 		// avoid FFmpeg warning 'clipping 1 dct coefficients...'
+		ctx->mb_decision = 2;
+	}
+
+	// Set a few optimal pixel formats for lossless codecs of interest.
+	//int bitrateScale = 64;
+	switch (oc->oformat->video_codec) {
+	case CODEC_ID_JPEGLS:
+		// PIX_FMT_BGR24 or GRAY8 depending on is_color...
+		ctx->pix_fmt = PIX_FMT_BGR24;
+		break;
+	case CODEC_ID_HUFFYUV:
+		ctx->pix_fmt = PIX_FMT_YUV422P;
+		break;
+	case CODEC_ID_MJPEG:
+	case CODEC_ID_LJPEG:
+	  ctx->pix_fmt = PIX_FMT_YUVJ420P;
+	  //bitrateScale = 128;
+	  break;
+	case CODEC_ID_RAWVIDEO:
+	default:
+		// Good for lossy formats, MPEG, etc.
+		ctx->pix_fmt = PIX_FMT_YUV420P;
+		break;
+	}
+	
+    if (ctx->codec_id == CODEC_ID_H264)
+        av_opt_set(ctx->priv_data, "preset", "veryfast", 0); // slow // baseline
+
+	// Open the video codec
+	if (avcodec_open2(ctx, codec, NULL) < 0)
+   		throw Exception("Cannot open the video codec.");
+	*/
+	
+
+
+		/*
+		
+		// Use the input packet timestamp if the
+		// frame PTS wasn't set by the decoder.
+		if (frame->pts == AV_NOPTS_VALUE)
+			frame->pts = ipacket.dts;
+		opacket.pts = frame->pts;
+		
+		// Local pts value represented as second decimal.
+		pts = opacket.pts;
+		pts *= av_q2d(stream->time_base);
+		
+		assert(opacket.data);
+		assert(opacket.size);
+				opacket.pts = ipacket.dts;
+		
+		// Local pts value represented as second decimal
+		// http://dranger.com/ffmpeg/ffmpegtutorial_all.html
+		if (ipacket.dts != AV_NOPTS_VALUE) {
+			pts = ipacket.dts;
+			pts *= av_q2d(stream->time_base);
+		}
+		*/
+		
+		//pts = 0;
+		//opacket.pts = ctx->coded_frame->pts != AV_NOPTS_VALUE ? ctx->coded_frame->pts : ipacket.pts;
+		//if(packet->dts == AV_NOPTS_VALUE 
+		//   && pFrame->opaque && *(uint64_t*)pFrame->opaque != AV_NOPTS_VALUE) {
+		//  pts = *(uint64_t *)pFrame->opaque;
+		//} else 
+
+		//if (opacket.pts != AV_NOPTS_VALUE) {
+		//	pts = opacket.pts;
+		//	pts *= av_q2d(stream->time_base);
+		//}
+
+		//if (frame->pts != AV_NOPTS_VALUE) {
+		//	opacket.pts = frame->pts;
+		//	pts = frame->pts;
+		//	pts *= av_q2d(stream->time_base);
+		//}
+
+		//frame->type = FF_BUFFER_TYPE_USER;
+		//frame->pkt_pts = ctx->pkt ? ctx->pkt->pts : AV_NOPTS_VALUE;
+		//frame->width = ctx->width;
+		//frame->height = ctx->height;
+		//frame->format = ctx->pix_fmt;
+		
+			/*
+		Log("trace") << "[VideoDecoderContext:" << this << "] Decoded Frame:" 			
+			<< "\n\tFrame Size: " << opacket.size
+			<< "\n\tFrame PTS: " << opacket.pts
+			<< "\n\tDecoder PTS: " << pts
+			<< "\n\tipacket PTS: " << ipacket.pts
+			<< "\n\tframe->width: " << frame->width
+			<< "\n\tframe->height: " << frame->height
+			<< "\n\tframe->format: " << frame->format
+			<< "\n\tframe->pkt_pts: " << frame->pkt_pts
+			<< "\n\tctx->width: " << ctx->width
+			<< "\n\tctx->height: " << ctx->height
+			<< "\n\tctx->format: " << ctx->pix_fmt
+			<< "\n\tctx->pkt->pts: " << ctx->pkt //->pts
+			<< "\n\tctx->coded_frame->pts: " << ctx->coded_frame->pts
+			<< endl;
+			*/
 	
 /*
 void VideoEncoderContext::reset() 
@@ -623,7 +1042,7 @@ void VideoEncoderContext::reset()
 	//buffer = NULL;
 
 	// Allocate the output frame
-	//oframe = createVideoFrame(codec->pix_fmt, codec->width, codec->height);
+	//oframe = createVideoFrame(ctx->pix_fmt, ctx->width, ctx->height);
 	//if (!oframe)
 	//	throw Exception("Cannot allocate output frame.");
 	
@@ -633,17 +1052,17 @@ void VideoEncoderContext::reset()
 	// video input size has changed.
 	if (convCtx == NULL) {
 		convCtx = sws_getContext(
-			iparams.width, iparams.height, (::PixelFormat)iparams.pixfmt, 
-			codec->width, codec->height, codec->pix_fmt,
+			iparams.width, iparams.height, (::PixelFormat)iparams.pixelFmt, 
+			ctx->width, ctx->height, ctx->pix_fmt,
 			SWS_BICUBIC, NULL, NULL, NULL);
 
 		Log("trace") << "[VideoEncoderContext:" << this << "] Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << iparams.width
 			<< "\n\tInput Height: " << iparams.height
-			<< "\n\tInput Pixel Format: " << iparams.pixfmt
-			<< "\n\tOutput Width: " << codec->width
-			<< "\n\tOutput Height: " << codec->height
-			<< "\n\tOutput Pixel Format: " << codec->pix_fmt
+			<< "\n\tInput Pixel Format: " << iparams.pixelFmt
+			<< "\n\tOutput Width: " << ctx->width
+			<< "\n\tOutput Height: " << ctx->height
+			<< "\n\tOutput Pixel Format: " << ctx->pix_fmt
 			<< endl;
 	}
 	if (sws_scale(convCtx,
@@ -652,17 +1071,17 @@ void VideoEncoderContext::reset()
 		throw Exception("Pixel format conversion not supported.");
 		*/
 	/*
-	int len = avcodec_encode_video(codec, this->buffer, this->bufferSize, oframe);
+	int len = avcodec_encode_video(ctx, this->buffer, this->bufferSize, oframe);
 	if (len < 0) {
 		error = "Encoder error";
 		Log("error") << "[VideoEncoderContext:" << this << "] Encoder Error" << endl;
 		return false;
     }
 				
-	if (codec->coded_frame->pts != AV_NOPTS_VALUE)
-		opacket.pts = av_rescale_q(codec->coded_frame->pts, codec->time_base, stream->time_base);
+	if (ctx->coded_frame->pts != AV_NOPTS_VALUE)
+		opacket.pts = av_rescale_q(ctx->coded_frame->pts, ctx->time_base, stream->time_base);
 
-	if (codec->coded_frame->key_frame)
+	if (ctx->coded_frame->key_frame)
 		opacket.flags |= AV_PKT_FLAG_KEY;
 
 	opacket.data = this->buffer;
@@ -713,16 +1132,16 @@ void VideoContext::reset()
     if (frameEncoded) {	
 		
 		if (opacket.pts != AV_NOPTS_VALUE)
-			opacket.pts = av_rescale_q(opacket.pts, codec->time_base, stream->time_base);
+			opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
 		if (opacket.dts != AV_NOPTS_VALUE)
-			opacket.dts = av_rescale_q(opacket.dts, codec->time_base, stream->time_base);		
+			opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);		
 		
 		Log("trace") << "[VideoEncoderContext:" << this << "] Encoding Video Packet:\n"
-			//<< "\n\AV_NOPTS_VALUE: " << (codec->coded_frame->pts != AV_NOPTS_VALUE)
-			//<< "\n\codec->coded_frame: " << codec->coded_frame
-			//<< "\n\codec->coded_frame->pts: " << codec->coded_frame->pts
-			<< "\n\codec->time_base: " << codec->time_base.den
-			<< "\n\codec->time_base num: " << codec->time_base.num
+			//<< "\n\AV_NOPTS_VALUE: " << (ctx->coded_frame->pts != AV_NOPTS_VALUE)
+			//<< "\n\ctx->coded_frame: " << ctx->coded_frame
+			//<< "\n\ctx->coded_frame->pts: " << ctx->coded_frame->pts
+			<< "\n\ctx->time_base: " << ctx->time_base.den
+			<< "\n\ctx->time_base num: " << ctx->time_base.num
 			<< "\n\stream->time_base: " << stream->time_base.den
 			<< "\n\stream->time_base num: " << stream->time_base.num
 			<< "\n\topacket.pts s: " << av_ts2str(opacket.pts)
@@ -761,17 +1180,17 @@ void VideoContext::reset()
 	// video input size has changed.
 	if (convCtx == NULL) {
 		convCtx = sws_getContext(
-			iparams.width, iparams.height, (::PixelFormat)iparams.pixfmt, 
-			codec->width, codec->height, codec->pix_fmt,
+			iparams.width, iparams.height, (::PixelFormat)iparams.pixelFmt, 
+			ctx->width, ctx->height, ctx->pix_fmt,
 			SWS_BICUBIC, NULL, NULL, NULL);
 
 		Log("trace") << "[VideoEncoderContext:" << this << "] Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << iparams.width
 			<< "\n\tInput Height: " << iparams.height
-			<< "\n\tInput Pixel Format: " << iparams.pixfmt
-			<< "\n\tOutput Width: " << codec->width
-			<< "\n\tOutput Height: " << codec->height
-			<< "\n\tOutput Pixel Format: " << codec->pix_fmt
+			<< "\n\tInput Pixel Format: " << iparams.pixelFmt
+			<< "\n\tOutput Width: " << ctx->width
+			<< "\n\tOutput Height: " << ctx->height
+			<< "\n\tOutput Pixel Format: " << ctx->pix_fmt
 			<< endl;
 	}
 	if (sws_scale(convCtx,
@@ -782,9 +1201,9 @@ void VideoContext::reset()
 	
 	/*
 	// http://stackoverflow.com/questions/9854293/encoding-video-only-flv
-	codec->time_base.num = 1; //oparams.fps; //
-	codec->time_base.den = 1000;
-	//codec->time_base= (AVRational){ 1, 1000 };
+	ctx->time_base.num = 1; //oparams.fps; //
+	ctx->time_base.den = 1000;
+	//ctx->time_base= (AVRational){ 1, 1000 };
 	
 	// Set real frame rate
 	stream->r_frame_rate.num = oparams.fps;
@@ -804,11 +1223,11 @@ void VideoContext::reset()
    //else
    //   encoder.createFile(filename,width,height,bitrate*1000/fps,gop,1000);	// For variable frame rates: set the time base to e.g. 1ms (1000fps),
 																		// and correct the bitrate according to the expected average frame 
-	codec->bit_rate = oparams.bitRate * 1000 / oparams.fps; 
-	codec->bit_rate_tolerance = oparams.bitRate * 100;
+	ctx->bit_rate = oparams.bitRate * 1000 / oparams.fps; 
+	ctx->bit_rate_tolerance = oparams.bitRate * 100;
 	
-	codec->time_base.den = 1000;
-	codec->time_base.num = 1;	
+	ctx->time_base.den = 1000;
+	ctx->time_base.num = 1;	
 
 	
         coderSettings.bitRate = 700000;
@@ -819,7 +1238,7 @@ void VideoContext::reset()
 		//return opacket.size;
 
 		/*
-02027             if (pkt.pts == AV_NOPTS_VALUE && !(enc->codec->capabilities & CODEC_CAP_DELAY))
+02027             if (pkt.pts == AV_NOPTS_VALUE && !(enc->ctx->capabilities & CODEC_CAP_DELAY))
 02028                 pkt.pts = ost->sync_opts;
 02029 
 02030             if (pkt.pts != AV_NOPTS_VALUE)
@@ -847,7 +1266,7 @@ void VideoContext::reset()
 */
 		/*
 		//if (pts != AV_NOPTS_VALUE)          // Set custom pts again for subsequent processing
-			codec->coded_frame->pts = pts;  // Set the custom time stamp
+			ctx->coded_frame->pts = pts;  // Set the custom time stamp
 			*/
 		
 		/*
@@ -855,15 +1274,15 @@ void VideoContext::reset()
 		//if (pts != AV_NOPTS_VALUE)
 		//	opacket.pts = pts;
 		//else
-		//if (codec->coded_frame->pts != AV_NOPTS_VALUE)
-		//	opacket.pts = av_rescale_q(codec->coded_frame->pts, codec->time_base, stream->time_base);		
+		//if (ctx->coded_frame->pts != AV_NOPTS_VALUE)
+		//	opacket.pts = av_rescale_q(ctx->coded_frame->pts, ctx->time_base, stream->time_base);		
 		//opacket.pts = pts;
-		//_videoPTS += codec->time_base.den/(codec->time_base.num/(/durationInMS/50/1000.0));
-		pts += 1000/(1/(/durationInMS/100/1000.0)); //codec->time_base.den/(codec->time_base.num/(/durationInMS/100/1000.0));
+		//_videoPTS += ctx->time_base.den/(ctx->time_base.num/(/durationInMS/50/1000.0));
+		pts += 1000/(1/(/durationInMS/100/1000.0)); //ctx->time_base.den/(ctx->time_base.num/(/durationInMS/100/1000.0));
 		opacket.pts = pts;
 		opacket.dts = pts;
 
-		if (codec->coded_frame->key_frame)
+		if (ctx->coded_frame->key_frame)
 			opacket.flags |= AV_PKT_FLAG_KEY;
 
 		opacket.stream_index = stream->index;
@@ -883,11 +1302,11 @@ void VideoContext::reset()
 
 	//if (pts != AV_NOPTS_VALUE)			// Use custom pts if provided
 		oframe->pts = pts;					// Set the custom time stamp
-		codec->coded_frame->pts = pts;		// Set the custom time stamp
+		ctx->coded_frame->pts = pts;		// Set the custom time stamp
 		*/
 
 	//oframe->pts = pts += 1; //00;
-	//codec->coded_frame->pts = pts;000
+	//ctx->coded_frame->pts = pts;000
 
 /*
 void VideoContext::populate()
@@ -896,12 +1315,12 @@ void VideoContext::populate()
 	if (!codec || !stream)
 		return;
 
-	bitRate = codec->bit_rate;
-	sampleRate = codec->sample_rate;
-	bitsPerSample = codec->bits_per_raw_sample;
+	bitRate = ctx->bit_rate;
+	sampleRate = ctx->sample_rate;
+	bitsPerSample = ctx->bits_per_raw_sample;
 	if (!bitsPerSample)
-		bitsPerSample = codec->bits_per_coded_sample;
-	channels = codec->channels;
+		bitsPerSample = ctx->bits_per_coded_sample;
+	channels = ctx->channels;
 	duration = stream->duration * av_q2d(stream->time_base);
 }
 
@@ -922,17 +1341,17 @@ double VideoContext::pts()
 	// video input size has changed.
 	if (convCtx == NULL) {
 		convCtx = sws_getContext(
-			width, height, (::PixelFormat)iparams.pixfmt, //static_cast<::PixelFormat>()
-			codec->width, codec->height, codec->pix_fmt,
+			width, height, (::PixelFormat)iparams.pixelFmt, //static_cast<::PixelFormat>()
+			ctx->width, ctx->height, ctx->pix_fmt,
 			SWS_BICUBIC, NULL, NULL, NULL);
 
 		Log("trace") << "[AVEncoder" << this << "] Initializing Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << width
 			<< "\n\tInput Height: " << height
-			<< "\n\tInput Pixel Format: " << iparams.pixfmt
-			<< "\n\tOutput Width: " << codec->width
-			<< "\n\tOutput Height: " << codec->height
-			<< "\n\tOutput Pixel Format: " << codec->pix_fmt
+			<< "\n\tInput Pixel Format: " << iparams.pixelFmt
+			<< "\n\tOutput Width: " << ctx->width
+			<< "\n\tOutput Height: " << ctx->height
+			<< "\n\tOutput Pixel Format: " << ctx->pix_fmt
 			<< endl;
 	}
 
@@ -964,7 +1383,7 @@ double VideoContext::pts()
 		if (oframe->pts == AV_NOPTS_VALUE)
 			oframe->pts = 0;
 		else {
-			double fpsDiff = (codec->time_base.den / _fpsCounter.fps);
+			double fpsDiff = (ctx->time_base.den / _fpsCounter.fps);
 			_videoPTS = _videoPTS + fpsDiff;
 			oframe->pts = _videoPTS; //++; // = oframe->pts + fpsDiff;
 		
@@ -974,7 +1393,7 @@ double VideoContext::pts()
 	*/
 
 	/*
-	int len = avcodec_encode_video2(codec, this->buffer, this->bufferSize, (short*)buffer);
+	int len = avcodec_encode_video2(ctx, this->buffer, this->bufferSize, (short*)buffer);
     if (len < 0) {
 		error = "Encoder error";
 		Log("error") << "[VideoEncoderContext:" << this << "] Decoding Video: Error: " << error << endl;
@@ -984,12 +1403,12 @@ double VideoContext::pts()
 	//AVPacket opacket;, AVPacket* output
 	//av_init_opacket(&opacket);
 
-	if (codec->coded_frame && 
-		codec->coded_frame->pts != AV_NOPTS_VALUE) 
-		opacket.pts = av_rescale_q(codec->coded_frame->pts, codec->time_base, stream->time_base);
+	if (ctx->coded_frame && 
+		ctx->coded_frame->pts != AV_NOPTS_VALUE) 
+		opacket.pts = av_rescale_q(ctx->coded_frame->pts, ctx->time_base, stream->time_base);
 			
-	if (codec->coded_frame &&
-		codec->coded_frame->key_frame) 
+	if (ctx->coded_frame &&
+		ctx->coded_frame->key_frame) 
         opacket.flags |= AV_PKT_FLAG_KEY;
 
 	opacket.stream_index = stream->index;
@@ -1010,14 +1429,14 @@ double VideoContext::pts()
     stream = ic->streams[streamID];
     codec = stream->codec;
 
-    AVCodec* c = avcodec_find_decoder (codec->codec_id);
+    AVCodec* c = avcodec_find_decoder (ctx->codec_id);
     if (c == NULL)
 		throw Exception("The video codec is missing or unsupported");
 
-    if (avcodec_open(codec, c) < 0)
+    if (avcodec_open(ctx, c) < 0)
 		throw Exception("Could not open the video codec");
 
-    switch (codec->sample_fmt) {
+    switch (ctx->sample_fmt) {
     case SAMPLE_FMT_S16:
         width = 16;
         fp = false;
@@ -1060,17 +1479,17 @@ double VideoContext::pts()
 	// video input size has changed.
 	if (convCtx == NULL) {
 		convCtx = sws_getContext(
-			width, height, (::PixelFormat)iparams.pixfmt, //static_cast<::PixelFormat>()
-			codec->width, codec->height, codec->pix_fmt,
+			width, height, (::PixelFormat)iparams.pixelFmt, //static_cast<::PixelFormat>()
+			ctx->width, ctx->height, ctx->pix_fmt,
 			SWS_BICUBIC, NULL, NULL, NULL);
 
 		Log("trace") << "[AVEncoder" << this << "] Initializing Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << width
 			<< "\n\tInput Height: " << height
-			<< "\n\tInput Pixel Format: " << iparams.pixfmt
-			<< "\n\tOutput Width: " << codec->width
-			<< "\n\tOutput Height: " << codec->height
-			<< "\n\tOutput Pixel Format: " << codec->pix_fmt
+			<< "\n\tInput Pixel Format: " << iparams.pixelFmt
+			<< "\n\tOutput Width: " << ctx->width
+			<< "\n\tOutput Height: " << ctx->height
+			<< "\n\tOutput Pixel Format: " << ctx->pix_fmt
 			<< endl;
 	}
 
@@ -1082,8 +1501,8 @@ double VideoContext::pts()
 	// Convert the image from its native format to BGR.
 	if (convCtx == NULL)
 		convCtx = sws_getContext(
-			codec->width, codec->height, codec->pix_fmt, 
-			codec->width, codec->height, PIX_FMT_BGR24, 
+			ctx->width, ctx->height, ctx->pix_fmt, 
+			ctx->width, ctx->height, PIX_FMT_BGR24, 
 			SWS_BICUBIC, NULL, NULL, NULL);
 	if (convCtx == NULL)
 		throw Exception("Cannot initialize the video conversion context");	
@@ -1091,63 +1510,63 @@ double VideoContext::pts()
 	// Scales the data in src according to our settings in our SwsContext.
 	sws_scale(
 		convCtx, frame->data, frame->linesize, 
-		0, codec->height, oframe->data, oframe->linesize);
+		0, ctx->height, oframe->data, oframe->linesize);
 		*/
 
 
 	/*
 	
 	// H264 defaults
-	if (codec->codec_id == CODEC_ID_H264) {
-		codec->me_range = 5;
-		codec->max_qdiff = 5;
-		codec->qmin = 20;
-		codec->qmax = 30;
-		codec->qcompress = 0.6f;
-		codec->qblur = 0.1f;
-		codec->gop_size = 3;
-		codec->max_b_frames = 1;
-		codec->flags = CODEC_FLAG_LOW_DELAY;
+	if (ctx->codec_id == CODEC_ID_H264) {
+		ctx->me_range = 5;
+		ctx->max_qdiff = 5;
+		ctx->qmin = 20;
+		ctx->qmax = 30;
+		ctx->qcompress = 0.6f;
+		ctx->qblur = 0.1f;
+		ctx->gop_size = 3;
+		ctx->max_b_frames = 1;
+		ctx->flags = CODEC_FLAG_LOW_DELAY;
 	}
 
 	// libx264-medium.ffpreset preset
-	codec->coder_type = 1;  // coder = 1
-	codec->flags|=CODEC_FLAG_LOOP_FILTER;   // flags=+loop
-	codec->me_cmp|= 1;  // cmp=+chroma, where CHROMA = 1
-	codec->partitions|=X264_PART_I8X8+X264_PART_I4X4+X264_PART_P8X8+X264_PART_B8X8; // partitions=+parti8x8+parti4x4+partp8x8+partb8x8
-	codec->me_method=ME_HEX;    // me_method=hex
-	codec->me_subpel_quality = 7;   // subq=7
-	codec->me_range = 16;   // me_range=16
-	codec->gop_size = 250;  // g=250
-	codec->keyint_min = 25; // keyint_min=25
-	codec->scenechange_threshold = 40;  // sc_threshold=40
-	codec->i_quant_factor = 0.71; // i_qfactor=0.71
-	codec->b_frame_strategy = 1;  // b_strategy=1
-	codec->qcompress = 0.6; // qcomp=0.6
-	codec->qmin = 10;   // qmin=10
-	codec->qmax = 51;   // qmax=51
-	codec->max_qdiff = 4;   // qdiff=4
-	codec->max_b_frames = 3;    // bf=3
-	codec->refs = 3;    // refs=3
-	codec->directpred = 1;  // directpred=1
-	codec->trellis = 1; // trellis=1
-	codec->flags2|=CODEC_FLAG2_BPYRAMID+CODEC_FLAG2_MIXED_REFS+CODEC_FLAG2_WPRED+CODEC_FLAG2_8X8DCT+CODEC_FLAG2_FASTPSKIP;  // flags2=+bpyramid+mixed_refs+wpred+dct8x8+fastpskip
-	codec->weighted_p_pred = 2; // wpredp=2
+	ctx->coder_type = 1;  // coder = 1
+	ctx->flags|=CODEC_FLAG_LOOP_FILTER;   // flags=+loop
+	ctx->me_cmp|= 1;  // cmp=+chroma, where CHROMA = 1
+	ctx->partitions|=X264_PART_I8X8+X264_PART_I4X4+X264_PART_P8X8+X264_PART_B8X8; // partitions=+parti8x8+parti4x4+partp8x8+partb8x8
+	ctx->me_method=ME_HEX;    // me_method=hex
+	ctx->me_subpel_quality = 7;   // subq=7
+	ctx->me_range = 16;   // me_range=16
+	ctx->gop_size = 250;  // g=250
+	ctx->keyint_min = 25; // keyint_min=25
+	ctx->scenechange_threshold = 40;  // sc_threshold=40
+	ctx->i_quant_factor = 0.71; // i_qfactor=0.71
+	ctx->b_frame_strategy = 1;  // b_strategy=1
+	ctx->qcompress = 0.6; // qcomp=0.6
+	ctx->qmin = 10;   // qmin=10
+	ctx->qmax = 51;   // qmax=51
+	ctx->max_qdiff = 4;   // qdiff=4
+	ctx->max_b_frames = 3;    // bf=3
+	ctx->refs = 3;    // refs=3
+	ctx->directpred = 1;  // directpred=1
+	ctx->trellis = 1; // trellis=1
+	ctx->flags2|=CODEC_FLAG2_BPYRAMID+CODEC_FLAG2_MIXED_REFS+CODEC_FLAG2_WPRED+CODEC_FLAG2_8X8DCT+CODEC_FLAG2_FASTPSKIP;  // flags2=+bpyramid+mixed_refs+wpred+dct8x8+fastpskip
+	ctx->weighted_p_pred = 2; // wpredp=2
 
 	// libx264-main.ffpreset preset
-	codec->flags2|=CODEC_FLAG2_8X8DCT;
-	//codec->flags2^=CODEC_FLAG2_8X8DCT;    // flags2=-dct8x8
+	ctx->flags2|=CODEC_FLAG2_8X8DCT;
+	//ctx->flags2^=CODEC_FLAG2_8X8DCT;    // flags2=-dct8x8
 
 	// H264 defaults
-	if (codec->codec_id == CODEC_ID_H264) {
-		codec->me_range = 5;
-		codec->max_qdiff = 5;
-		codec->qmin = 20;
-		codec->qmax = 30;
-		codec->qcompress = 0.6f;
-		codec->qblur = 0.1f;
-		codec->gop_size = 3;
-		codec->max_b_frames = 1;
-		codec->flags = CODEC_FLAG_LOW_DELAY;
+	if (ctx->codec_id == CODEC_ID_H264) {
+		ctx->me_range = 5;
+		ctx->max_qdiff = 5;
+		ctx->qmin = 20;
+		ctx->qmax = 30;
+		ctx->qcompress = 0.6f;
+		ctx->qblur = 0.1f;
+		ctx->gop_size = 3;
+		ctx->max_b_frames = 1;
+		ctx->flags = CODEC_FLAG_LOW_DELAY;
 	}
 	*/

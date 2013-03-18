@@ -170,13 +170,16 @@ void AudioCapture::attach(const PacketDelegateBase& delegate)
 }
 
 
-void AudioCapture::detach(const PacketDelegateBase& delegate) 
+bool AudioCapture::detach(const PacketDelegateBase& delegate) 
 {
-	PacketDispatcher::detach(delegate);
-	Log("debug") << "[AudioCapture:" << this << "] Removed Delegate: " << refCount() << endl;
-	if (refCount() == 0)
-		stop();
-	Log("debug") << "[AudioCapture:" << this << "] Removed Delegate: OK" << endl;
+	if (PacketDispatcher::detach(delegate)) {
+		Log("debug") << "[AudioCapture:" << this << "] Removed Delegate: " << refCount() << endl;
+		if (refCount() == 0)
+			stop();
+		Log("debug") << "[AudioCapture:" << this << "] Removed Delegate: OK" << endl;
+		return true;
+	}
+	return false;
 }
 
 

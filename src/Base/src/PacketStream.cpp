@@ -64,8 +64,12 @@ void PacketStream::start()
 {	
 	Log("trace") << "[PacketStream:" << this << "] Starting" << endl;
 
-	if (stateEquals(PacketStreamState::Running)) 
+	if (stateEquals(PacketStreamState::Running))  {
+		Log("trace") << "[PacketStream:" << this << "] Already Running" << endl;
 		return;
+	}
+	
+	Log("trace") << "[PacketStream:" << this << "] Starting 1" << endl;
 
 	{	
 		FastMutex::ScopedLock lock(_mutex);
@@ -75,31 +79,41 @@ void PacketStream::start()
 		IPacketProcessor* thisProc = NULL;
 		for (PacketAdapterList::iterator pit = _processors.begin(); pit != _processors.end(); ++pit) {
 			thisProc = reinterpret_cast<IPacketProcessor*>((*pit).ptr);
-			if (lastProc)
+			if (lastProc) {
+				Log("trace") << "[PacketStream:" << this << "] Starting 2" << endl;
 				lastProc->attach(packetDelegate(thisProc, &IPacketProcessor::process));
+				Log("trace") << "[PacketStream:" << this << "] Starting 3" << endl;
+			}
 			lastProc = thisProc;
 		}
 
 		// The last processor will call stream dispatch
+				Log("trace") << "[PacketStream:" << this << "] Starting 6" << endl;
 		if (lastProc)
 			lastProc->attach(packetDelegate(this, &PacketStream::onDispatchPacket));
+				Log("trace") << "[PacketStream:" << this << "] Starting 7" << endl;
 
 		// Attach and start synchronized runnables
 		for (PacketAdapterList::iterator sit = _sources.begin(); sit != _sources.end(); ++sit) {
 			PacketDispatcher* source = (*sit).ptr;
+				Log("trace") << "[PacketStream:" << this << "] Starting 4" << endl;
 			source->attach(packetDelegate(this, &PacketStream::onSourcePacket));
+				Log("trace") << "[PacketStream:" << this << "] Starting 5" << endl;
 			if ((*sit).syncState) {
 				IStartable* runnable = dynamic_cast<IStartable*>((*sit).ptr);
 				if (runnable) {
-					Log("trace") << "[PacketStream:" << this << "] Starting Startable Source: " << source << endl;
+					Log("trace") << "[PacketStream:" << this << "] Starting Source: " << source << endl;
 					runnable->start();
 				}
 			}
 		}
+				Log("trace") << "[PacketStream:" << this << "] Starting 8" << endl;
 
 	}
-
+	
+	Log("trace") << "[PacketStream:" << this << "] Starting: OK" << endl;
 	setState(this, PacketStreamState::Running);
+	Log("trace") << "[PacketStream:" << this << "] Starting After: OK" << endl;
 }
 
 
@@ -190,7 +204,9 @@ void PacketStream::onStateChange(PacketStreamState& state, const PacketStreamSta
 		for (PacketAdapterList::iterator it = adapters.begin(); it != adapters.end(); ++it)
 			(*it).ptr->onStreamStateChange(state);
 	}
+	Log("trace") << "[PacketStream:" << this << "] 1: State changed from " << oldState << " to " << state << endl;
 	StatefulSignal<PacketStreamState>::onStateChange(state, oldState); // send events
+	Log("trace") << "[PacketStream:" << this << "] 2: State changed from " << oldState << " to " << state << endl;
 }
 
 
@@ -263,9 +279,9 @@ void PacketStream::attach(const PacketDelegateBase& delegate)
 }
 
 
-void PacketStream::detach(const PacketDelegateBase& delegate)
+bool PacketStream::detach(const PacketDelegateBase& delegate)
 {
-	PacketDispatcher::detach(delegate);
+	return PacketDispatcher::detach(delegate);
 }
 
 

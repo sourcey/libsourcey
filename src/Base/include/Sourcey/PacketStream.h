@@ -124,7 +124,7 @@ public:
 	virtual void detach(IPacketProcessor* proc);
 	
 	virtual void attach(const PacketDelegateBase& delegate);
-	virtual void detach(const PacketDelegateBase& delegate);
+	virtual bool detach(const PacketDelegateBase& delegate);
 	
 	virtual std::string name() const;
 		/// Returns the name of the stream.

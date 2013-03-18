@@ -73,7 +73,7 @@ public:
     virtual double getTimeBase() const { return _params.oformat.video.fps; }
     virtual double getNow() const { return _now; }	
 
-    static AVFrame* MakeBlackFrame(PixelFormat::ID pixfmt, int width, int height);
+    static AVFrame* MakeBlackFrame(PixelFormat::ID pixelFmt, int width, int height);
     static void FreeFrame(AVFrame* f);
 	
 protected:

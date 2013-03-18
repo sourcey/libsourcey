@@ -65,32 +65,36 @@ void VideoAnalyzer::start()
 	if (_options.ifile.empty())
 		throw Poco::FileException("Please specify an input file.");
 
-	if (_options.ofile.empty())
-		throw Poco::FileException("Please specify an output file.");
+	//if (_options.ofile.empty())
+	//	throw Poco::FileException("Please specify an output file.");
 
-	Log("trace") << "[VideoAnalyzer:" << this <<"] Starting: " << _options.ifile << endl;
+	Log("trace") << "[VideoAnalyzer:" << this <<"] Loading: " << _options.ifile << endl;
 
 	_error = "";
 	
 	try 
 	{
 		// Open the output file.
-		_file.open(_options.ofile.data(), ios::out | ios::binary);
-		if (!_file.is_open())		
-			throw Poco::OpenFileException("Cannot open output file: " + _options.ofile);
+		//_ofile.open(_options.ofile.data(), ios::out | ios::binary);
+		//if (!_ofile.is_open())		
+		//	throw Poco::OpenFileException("Cannot open output file: " + _options.ofile);
 
 		// Open the input file decoder.
 		_reader.open(_options.ifile);
 		
 		if (_reader.video()) {
+			//if (_options.maxFPS)
+			//	_reader.video()->maxFPS = _options.maxFPS;
 			_video = new VideoAnalyzer::Stream("Video");
 			_video->initialize(_options.numFFTBits, sizeof(*_video->rdftData) *
-				(_reader.video()->codec->width * 
-				 _reader.video()->codec->height));
+				(_reader.video()->ctx->width * 
+				 _reader.video()->ctx->height));
 			_videoConv = NULL;
 		}
 
 		if (_reader.audio()) {
+			//if (_options.maxFPS)
+			//	_reader.audio()->maxFPS = _options.maxFPS;
 			_audio = new VideoAnalyzer::Stream("Audio");
 			_audio->initialize(_options.numFFTBits, AVCODEC_MAX_AUDIO_FRAME_SIZE
 				//sizeof(*_audio->rdftData) *
@@ -103,7 +107,10 @@ void VideoAnalyzer::start()
 		_reader += packetDelegate(this, &VideoAnalyzer::onAudio);
 
 		_reader.ReadComplete += delegate(this, &VideoAnalyzer::onReadComplete);
-		_reader.start();
+		if (_options.blocking)
+			_reader.run();
+		else
+			_reader.start();
 	} 
 	catch (Exception& exc) 
 	{
@@ -125,7 +132,7 @@ void VideoAnalyzer::stop()
 	_reader -= packetDelegate(this, &VideoAnalyzer::onVideo);
 	_reader -= packetDelegate(this, &VideoAnalyzer::onAudio);
 	_reader.stop();
-	_file.close();
+	//_ofile.close();
 }
 
 
@@ -146,45 +153,52 @@ void VideoAnalyzer::processSpectrum(VideoAnalyzer::Stream& stream, double time)
     av_re = stream.rdftData[1];
     av_im = 0;
 	return;
-	*/
 
 	double val = 0.0;
-	double sum = 0.0;
 	double min = 99999.9;
 	double max = -99999.9;
+	stream.name, 
+	*/
+
+	VideoAnalyzer::Packet packet(time);
+	double sum = 0.0;
 	double avg = 0.0;
 
 	//for (int i = 0; i < _options.fftPoints / 2; ++i) {
 	//for (int i = 1; i < N/2; i += 2) {
 	for (int i = 0; i < stream.filled / 2; i += 2) {
-	    val = GetFrequencyIntensity(stream.rdftData[i], stream.rdftData[i+1]);
-		if (val > max)
-			max = val;
-		if (val < min)
-			min = val;
+	    packet.value = GetFrequencyIntensity(stream.rdftData[i], stream.rdftData[i+1]);
+		if (packet.value > packet.max)
+			packet.max = packet.value;
+		if (packet.value < packet.min)
+			packet.min = packet.value;
 		//printf("re=%10f im=%10f im=%10f\n", stream.rdftData[i], stream.rdftData[i+1]);
 		//Log("trace") << "[VideoAnalyzer:" << this << "] Value: " 
 		//	<< stream.rdftData[i] << ": " << stream.rdftData[i+1] << endl;
-		sum += val; 
+		sum += packet.value; 
 	}
 
 	// TODO: Better way of gathering avg?
 	// Not all FFT values are useful.
 	avg = sum / (stream.filled / 4);
+	packet.value = avg;	
 
-	writeLine(stream.name, time, avg, min, max);
+	PacketOut.dispatch(this, stream, packet);
+	//writeCSV(stream.name, time, avg, min, max);
 }
 
 
-void VideoAnalyzer::writeLine(const string& channel, double time, double value, double min, double max) //, double avg
+/*
+void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 {
 	Log("trace") << "[VideoAnalyzer:" << this << "] Writing:"
-		<< channel << "," << time << "," << value << "," 
-		<< min << "," << max << endl;
+		<< packet.name << "," << packet.time << "," << packet.value << "," 
+		<< packet.min << "," << packet.max << endl;
 
-	_file << channel << "," << time << "," << 
-		value << "," << min << "," << max << "\r\n";
+	_ofile << packet.name << "," << packet.time << "," << 
+		packet.value << "," << packet.min << "," << packet.max << "\r\n";
 }
+*/
 
 
 void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
@@ -196,12 +210,15 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 
 	VideoDecoderContext* video = _reader.video();
 	
+	/*
 	// Skip frames if we exceed the maximum processing framerate.
 	double fps = _video->frames / packet.time;
-	if (_options.maxFramerate > 0 && fps > _options.maxFramerate) {
+	if (_options.maxFPS > 0 && fps > _options.maxFPS) {
 		Log("trace") << "[VideoAnalyzer:" << this << "] Skipping video frame at fps: " << fps << endl;
 		return;
 	}
+	*/
+
 	_video->frames++;	
 		
 	/*
@@ -212,27 +229,27 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 			throw Exception("Video Analyzer: Unable to allocate the output video frame.");
 
 		avpicture_alloc(reinterpret_cast<AVPicture*>(oframe), 
-			PIX_FMT_GRAY8, video->codec->width, video->codec->height);
+			PIX_FMT_GRAY8, video->ctx->width, video->ctx->height);
 	}
 	
 	// Convert the image from its native format to GREY8.
 	if (_videoConv == NULL) {
 		_videoConv = sws_getContext(
-			video->codec->width, video->codec->height, video->codec->pix_fmt, 
-			video->codec->width, video->codec->height, PIX_FMT_GRAY8, 
+			video->ctx->width, video->ctx->height, video->ctx->pix_fmt, 
+			video->ctx->width, video->ctx->height, PIX_FMT_GRAY8, 
 			SWS_BICUBIC, NULL, NULL, NULL);
 	}
 	*/
 	if (_videoConv == NULL) {
 		
 		VideoCodec iparams;
-		iparams.width = video->codec->width;
-		iparams.height = video->codec->height;
-		iparams.pixfmt = static_cast<UInt32>(video->codec->pix_fmt);
+		iparams.width = video->ctx->width;
+		iparams.height = video->ctx->height;
+		iparams.pixelFmt = av_get_pix_fmt_name(video->ctx->pix_fmt);
 		VideoCodec oparams;
-		oparams.width = video->codec->width;
-		oparams.height = video->codec->height;
-		oparams.pixfmt = static_cast<UInt32>(PixelFormat::GRAY8);
+		oparams.width = video->ctx->width;
+		oparams.height = video->ctx->height;
+		oparams.pixelFmt = "gray";
 		
 		_videoConv = new VideoConversionContext();
 		_videoConv->create(iparams, oparams);
@@ -245,7 +262,7 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 
 	/*
 	if (sws_scale(_videoConv,
-		video->frame->data, video->frame->linesize, 0, video->codec->height,
+		video->frame->data, video->frame->linesize, 0, video->ctx->height,
 		oframe->data, oframe->linesize) < 0)
 		throw Exception("Video Analyzer: Pixel format conversion not supported.");
 		*/
@@ -256,9 +273,9 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 	//	http://code.google.com/p/video-processing-application/source/browse/trunk/+video-processing-application/untitled6/Fourier/highpassrgb.cpp
 	//	http://codepaste.ru/9226/
 	_video->filled = 0;
-	for (int y = 0; y < video->codec->height; y++) {
-		for (int x = 0; x < video->codec->width; x++) {
-			_video->filled = y * video->codec->width + x; // * 3;
+	for (int y = 0; y < video->ctx->height; y++) {
+		for (int x = 0; x < video->ctx->width; x++) {
+			_video->filled = y * video->ctx->width + x; // * 3;
 			_video->rdftData[_video->filled] = (float)oframe->data[0][_video->filled] * pow(-1.0, y + x);
 		}
 	}
@@ -269,16 +286,18 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 
 void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 {
-	Log("trace") << "[VideoAnalyzer:" << this << "] On Audio: " << packet.size() << ": " << packet.time << endl;	
+	//Log("trace") << "[VideoAnalyzer:" << this << "] On Audio: " << packet.size() << ": " << packet.time << endl;	
 
 	FastMutex::ScopedLock lock(_mutex); 
 		
+	/*
 	// Skip frames if we exceed the maximum processing framerate.
 	double fps = _audio->frames / packet.time;
-	if (_options.maxFramerate > 0 && fps > _options.maxFramerate) {
+	if (_options.maxFPS > 0 && fps > _options.maxFPS) {
 		Log("trace") << "[VideoAnalyzer:" << this << "] Skipping audio frame at fps: " << fps << endl;
 		return;
 	}
+	*/
 	_audio->frames++;
 	
 	short const* data = reinterpret_cast<short*>(packet.data());	
@@ -302,8 +321,6 @@ void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
     }
 
 	processSpectrum(*_audio, packet.time);
-	/*
-	*/
 }
 
 
@@ -322,6 +339,22 @@ void VideoAnalyzer::onReadComplete(void* sender)
 }
 
 
+AVFileReader& VideoAnalyzer::reader()
+{ 
+	FastMutex::ScopedLock lock(_mutex);
+	return _reader; 
+}
+
+
+/*
+std::ofstream& VideoAnalyzer::ofile()
+{ 
+	FastMutex::ScopedLock lock(_mutex);
+	return _ofile; 
+}
+*/
+
+
 VideoAnalyzer::Options& VideoAnalyzer::options()
 { 
 	FastMutex::ScopedLock lock(_mutex);
@@ -335,6 +368,16 @@ string VideoAnalyzer::error() const
 	return _error;
 }
 
+
+// ---------------------------------------------------------------------
+//
+VideoAnalyzer::Packet::Packet(double time, double value, double min, double max) : //const std::string& name, 
+			time(time), value(value)/*name(name), , min(min), max(max)*/
+{	
+	this->min = min;
+	this->max = max;
+}
+	
 
 // ---------------------------------------------------------------------
 //

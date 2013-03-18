@@ -82,7 +82,7 @@ public:
   	virtual void stop();
 	
 	virtual void attach(const PacketDelegateBase& delegate);
-	virtual void detach(const PacketDelegateBase& delegate);
+	virtual bool detach(const PacketDelegateBase& delegate);
 
 	virtual int deviceId() const;
 	virtual int sampleRate() const;
@@ -119,7 +119,7 @@ inline void AllocateRtAudioInputFormat(const AudioCapture* capture, Format& form
 	/// our encoders.
 {
 	assert(capture);
-	format.audio.sampleFmt = SampleFormat::S16; //RTAUDIO_SINT16; // TODO: Convert from RtAudioFormat to SampleFormat
+	format.audio.sampleFmt = "s16"; //RTAUDIO_SINT16; // TODO: Convert from RtAudioFormat to SampleFormat
 	format.audio.channels = capture->numChannels();
 	format.audio.sampleRate = capture->sampleRate();
 	format.audio.enabled = true;

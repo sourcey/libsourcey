@@ -73,7 +73,7 @@ Format& FormatRegistry::get(const string& label)
 }
 
 
-Format& FormatRegistry::get(UInt32 id) 
+Format& FormatRegistry::getByID(const string& id) 
 {
 	FastMutex::ScopedLock lock(_mutex);
 	for (unsigned int i = 0; i < _formats.size(); i++) {
@@ -82,7 +82,7 @@ Format& FormatRegistry::get(UInt32 id)
 		}
 	}
            
-	throw Poco::NotFoundException(Poco::format("No media format type: %d", (int)id));
+	throw Poco::NotFoundException("No media format type: " + id);
 }
 
 

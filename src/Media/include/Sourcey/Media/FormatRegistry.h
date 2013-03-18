@@ -48,7 +48,7 @@ public:
 	virtual ~FormatRegistry();
 	
     virtual Format& get(const std::string& label);
-    virtual Format& get(UInt32 id);
+    virtual Format& getByID(const std::string& id);
     virtual Format& getOrDefault(const std::string& label);
     virtual Format& getDefault();
 		/// Returns the default media format.

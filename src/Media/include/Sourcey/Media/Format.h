@@ -53,6 +53,7 @@ struct Format
 		Multiplex	= 3		/// both video & audio
 	};
 
+	/*
 	enum ID 
 	{
 		Unknown		= 0,
@@ -70,14 +71,14 @@ struct Format
 		M4A			= 20,
 		MP3			= 21
 	};
+	*/
 
 	//
 	// Base Format Variables
 	//
-	std::string label;		/// The display name of this codec.
-	Type type;				/// The Format::Type of the current object.
-	UInt32 id;				/// The format numeric ID.
-							/// This is not a Format::ID type for extensibility.
+	std::string label;		/// The display name of this format.
+	const char* id;			/// The short name of this format.
+	Type type;				/// The format type.
 	
 	VideoCodec video;		/// The video codec.
 	AudioCodec audio;		/// The audio codec.
@@ -89,47 +90,22 @@ struct Format
 	//
 	Format();
 
-	Format(const std::string& label, UInt32 id, 
+	Format(const std::string& label, const char* id, 
 		const VideoCodec& video, const AudioCodec& audio, int priority = 0);
 		/// Multiplex format constructor
 	
-	Format(const std::string& label, UInt32 id, 
+	Format(const std::string& label, const char* id, 
 		const VideoCodec& video, int priority = 0);
 		/// Video only format constructor
 	
-	Format(const std::string& label, UInt32 id, 
+	Format(const std::string& label, const char* id, 
 		const AudioCodec& audio, int priority = 0);
 		/// Audio only format constructor
 
 	Format(const Format& r);
-
-	//
-	/// Methods
-	//	
-	virtual std::string name() const;
-		/// Returns a string representation of the Codec name.
-		/// The default implementation uses idToName.
-
-	virtual std::string extension() const;
-		/// Returns the file extension for this format.
-		/// The default implementation just transforms the 
-		/// id string to lowercase.
-
-	virtual std::string encoderName() const;
-		/// Returns the encoder name for this format.
-		/// The default implementation uses idToEncoderName.
-		/// This function should return the short name
-		/// for use with av_guess_format.
 	
 	virtual std::string toString() const;
 	virtual void print(std::ostream& ost);
-
-	//static ID toID(const std::string& name);	
-	//static std::string idString(UInt32 id);
-	//static std::string encoderName(UInt32 id);
-	static ID nameToID(const std::string& name);
-	static std::string idToName(UInt32 id);
-	static std::string idToEncoderName(UInt32 id);
 
 	static bool preferable(const Format& first, const Format& second) {
 		return first.priority > second.priority;
@@ -146,3 +122,31 @@ typedef std::vector<Format*> FormatPList;
 
 
 #endif
+
+
+
+	//
+	/// Methods
+	//	
+	//virtual std::string extension() const;
+		/// Returns the file extension for this format.
+		/// The default implementation just transforms the 
+		/// id string to lowercase.
+		/// TODO: Consider removing or making a member variable
+
+	//virtual std::string name() const;
+		/// Returns a string representation of the Codec name.
+		/// The default implementation uses idToName.
+	
+
+	//virtual std::string encoderName() const;
+		/// Returns the encoder name for this format.
+		/// The default implementation uses idToEncoderName.
+		/// This function should return the short name
+		/// for use with av_guess_format.
+	//static ID toID(const std::string& name);	
+	//static std::string idString(const char* id);
+	//static std::string encoderName(const char* id);
+	//static ID nameToID(const std::string& name);
+	//static std::string idToName(const char* id);
+	//static std::string idToEncoderName(const char* id);

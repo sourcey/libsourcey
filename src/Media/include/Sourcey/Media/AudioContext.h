@@ -48,20 +48,30 @@ extern "C" {
 namespace Sourcey {
 namespace Media {
 
+	
+inline void InitDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts);
+
 
 struct AudioContext
 {
 	AudioContext();
 	virtual ~AudioContext();
-	
+			
+	virtual void create();
+		/// Initialize the AVCodecContext with default values
+
 	virtual void open();
-	virtual void close();
-	
-    AVStream*			stream;
-    AVCodecContext*		codec;
-	AVFrame*            frame;
-    double				pts;	
-    std::string			error;
+		/// Open the AVCodecContext
+
+	virtual void close();	
+		/// Close the AVCodecContext
+
+	AVStream* stream;		// The encoder or decoder stream
+	AVCodecContext* ctx;	// The encoder or decoder context
+	AVCodec* codec;			// The encoder or decoder codec
+	AVFrame* frame;			// The encoded or decoded frame
+    double pts;				// PTS in decimal seconds
+    std::string error;		// Error message
 };
 
 
@@ -73,7 +83,8 @@ struct AudioEncoderContext: public AudioContext
 	AudioEncoderContext();
 	virtual ~AudioEncoderContext();	
 	
-	virtual void open(AVFormatContext* oc);
+	virtual void create(AVFormatContext* oc);
+	//virtual void open();
 	virtual void close();
 	
 	virtual bool encode(unsigned char* data, int size, AVPacket& opacket);
@@ -96,11 +107,20 @@ struct AudioDecoderContext: public AudioContext
 	AudioDecoderContext();
 	virtual ~AudioDecoderContext();
 	
-	virtual void open(AVFormatContext *ic, int streamID);
+	virtual void create(AVFormatContext *ic, int streamID);
+	//virtual void open();
 	virtual void close();
 	
 	virtual bool decode(UInt8* data, int size, AVPacket& opacket);
 	virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
+		/// Decodes a the given input packet.
+		/// Returns true an output packet was returned, 
+		/// false otherwise.
+    
+	virtual bool flush(AVPacket& opacket);
+		/// Flushes buffered frames.
+		/// This method should be called after decoding
+		/// until false is returned.
 
     double duration;
     int width;	// Number of bits used to store a sample
@@ -135,6 +155,11 @@ struct AudioResampler
 #endif	// SOURCEY_MEDIA_AudioContext_H
 
 
+    
+	//double maxFPS; 
+		// Maximum decoding FPS. 
+		// FPS is calculated from ipacket PTS. 
+		// Extra frames will be dropped.
 	//virtual void reset();	
 		// Decodes a single frame from the provided packet.
 		// Returns the size of the decoded frame. 

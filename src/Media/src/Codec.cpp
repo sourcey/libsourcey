@@ -96,13 +96,13 @@ AudioCodec::AudioCodec() :
 }
 
 
-AudioCodec::AudioCodec(const string& name, int channels, int sampleRate, int bitRate, UInt32 sampleFmt) : 
+AudioCodec::AudioCodec(const string& name, int channels, int sampleRate, int bitRate, const char* sampleFmt) : 
 	Codec(name, encoder, sampleRate, bitRate, true), channels(channels), sampleFmt(sampleFmt) 
 {
 }
 
 
-AudioCodec::AudioCodec(const string& name, const string& encoder, int channels, int sampleRate, int bitRate, UInt32 sampleFmt) : 
+AudioCodec::AudioCodec(const string& name, const string& encoder, int channels, int sampleRate, int bitRate, const char* sampleFmt) : 
 	Codec(name, encoder, sampleRate, bitRate, true), channels(channels), sampleFmt(sampleFmt) 
 {
 }
@@ -143,28 +143,28 @@ void AudioCodec::print(ostream& ost)
 //
 VideoCodec::VideoCodec() : 
 	Codec("Unknown", DEFAULT_VIDEO_SAMPLE_RATE, DEFAULT_VIDEO_BIT_RATE, false), 
-	width(0), height(0), fps(0), pixfmt(DEFAULT_VIDEO_PIXEL_FMT) 
+	width(0), height(0), fps(0), pixelFmt(DEFAULT_VIDEO_PIXEL_FMT) 
 {
 }
 
 
-VideoCodec::VideoCodec(const string& name, int width, int height, double fps, int sampleRate, int bitRate, UInt32 pixfmt) : 
+VideoCodec::VideoCodec(const string& name, int width, int height, double fps, int sampleRate, int bitRate, const char* pixelFmt) : 
 	Codec(name, sampleRate, bitRate, true), 
-	width(width), height(height), fps(fps), pixfmt(pixfmt) 
+	width(width), height(height), fps(fps), pixelFmt(pixelFmt) 
 {
 }
 
 
-VideoCodec::VideoCodec(const string& name, const string& encoder, int width, int height, double fps, int sampleRate, int bitRate, UInt32 pixfmt) : 
+VideoCodec::VideoCodec(const string& name, const string& encoder, int width, int height, double fps, int sampleRate, int bitRate, const char* pixelFmt) : 
 	Codec(name, encoder, sampleRate, bitRate, true), 
-	width(width), height(height), fps(fps), pixfmt(pixfmt) 
+	width(width), height(height), fps(fps), pixelFmt(pixelFmt) 
 {
 }
 
 
 VideoCodec::VideoCodec(const VideoCodec& r) :
 	Codec(r.name, r.encoder, r.sampleRate, r.bitRate, r.enabled),
-	width(r.width), height(r.height), fps(r.fps), pixfmt(r.pixfmt)
+	width(r.width), height(r.height), fps(r.fps), pixelFmt(r.pixelFmt)
 {
 }
 	
@@ -173,7 +173,7 @@ string VideoCodec::toString() const
 {
 	ostringstream os;
 	os << "VideoCodec[" << name << ":" << encoder << ":" << width << ":" << height
-		<< ":" << fps << ":" << pixfmt << ":" << enabled << "]";
+		<< ":" << fps << ":" << pixelFmt << ":" << enabled << "]";
 	return os.str();
 }
 
@@ -188,7 +188,7 @@ void VideoCodec::print(ostream& ost)
 		<< "\n\tWidth: " << width
 		<< "\n\tHeight: " << height
 		<< "\n\tFPS: " << fps
-		<< "\n\tPixel Format: " << pixfmt
+		<< "\n\tPixel Format: " << pixelFmt
 		<< "\n\tQuality: " << quality
 		<< "\n\tEnabled: " << enabled	
 		<< "]";

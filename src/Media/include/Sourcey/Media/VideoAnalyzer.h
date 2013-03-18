@@ -83,7 +83,7 @@ struct VideoAnalyzerState: public State
 */
 
 
-class VideoAnalyzer//: public StatefulSignal<VideoAnalyzerState>
+class VideoAnalyzer //: public IPacketProcessor //StatefulSignal<VideoAnalyzerState>
 	/// This class provides basic AV spectrum analysis on a 
 	/// video using the Fourier Transform algorithm.
 	/// Data is outputted in CSV format.
@@ -97,16 +97,18 @@ public:
 	struct Options 
 	{	
 		std::string ifile;	// The input video file.
-		std::string ofile;	// The output CSV file.
+		//std::string ofile;	// The output CSV file.
 
 		int numFFTBits;		// Size of the FFT input array: 
 							// (1 << nbits) for DCT-II, DCT-III and DST-I (1 << nbits) + 1 for DCT-I
 
-		int maxFramerate;	// Maximum processing frame rate. 0 for no limit.
+		//int maxFPS;			// Maximum processing frame rate. 0 for no limit.
+		bool blocking;		// Blocking mode (disable async)
 
 		Options() {
 			numFFTBits = 8;
-			maxFramerate = 0;
+			//maxFPS = 0;
+			blocking = false;
 		}
 	};
 
@@ -126,6 +128,16 @@ public:
 		void uninitialize();
 	};
 
+	struct Packet 
+	{
+		//std::string name;
+		double time;
+		double value;
+		double min;
+		double max;
+		Packet(double time = 0.0, double value = 0.0, double min = 99999.9, double max = -99999.9); //const std::string& name, 
+	};
+
 public:
 	VideoAnalyzer(const VideoAnalyzer::Options& options = VideoAnalyzer::Options());
 	virtual ~VideoAnalyzer();
@@ -134,14 +146,17 @@ public:
 	virtual void start();
 	virtual void stop();
 		
+	//virtual std::ofstream& ofile();
+	virtual AVFileReader& reader();
 	virtual Options& options();
 	virtual std::string error() const;
-
+	
+	Signal2<const VideoAnalyzer::Stream&, const VideoAnalyzer::Packet&> PacketOut;
 	NullSignal Complete;
 	
 protected:
 	virtual void processSpectrum(VideoAnalyzer::Stream& name, double time);
-	virtual void writeLine(const std::string& name, double time, double value, double min = 0, double max = 0);
+	//virtual void writeCSV(const VideoAnalyzer::Packet& packet);
 	
 	virtual void onReadComplete(void* sender);
 	virtual void onVideo(void* sender, VideoPacket& packet);
@@ -154,7 +169,7 @@ protected:
 	
 	Options _options;
 	std::string	_error;
-	std::ofstream _file;
+	//std::ofstream _ofile;
 	AVFileReader _reader;
 	VideoAnalyzer::Stream* _video;
 	VideoAnalyzer::Stream* _audio;	

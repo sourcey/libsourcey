@@ -60,8 +60,8 @@ struct Codec
 	// Ctors/Dtors
 	//
 	Codec();
-	Codec(/*UInt32 id, */const std::string& name, int sampleRate = 0, int bitRate = 0, bool enabled = true);
-	Codec(/*UInt32 id, */const std::string& name, const std::string& encoder, int sampleRate = 0, int bitRate = 0, bool enabled = true);
+	Codec(const std::string& name, int sampleRate = 0, int bitRate = 0, bool enabled = true);
+	Codec(const std::string& name, const std::string& encoder, int sampleRate = 0, int bitRate = 0, bool enabled = true);
 	Codec(const Codec& r);
 		
 	//
@@ -72,6 +72,7 @@ struct Codec
 };
 
 
+/*
 // ---------------------------------------------------------------------
 //
 struct SampleFormat 
@@ -97,6 +98,7 @@ struct SampleFormat
 		NB  
 	};
 };
+*/
 
 
 // ---------------------------------------------------------------------
@@ -104,68 +106,31 @@ struct SampleFormat
 #define DEFAULT_AUDIO_SAMPLE_RATE	44100
 #define DEFAULT_AUDIO_BIT_RATE		64000
 #define DEFAULT_AUDIO_CHANNELS		2
-#define DEFAULT_AUDIO_SAMPLE_FMT	SampleFormat::S16
+#define DEFAULT_AUDIO_SAMPLE_FMT	"s16"
 
 
 struct AudioCodec: public Codec 
 {	
 	int channels;
-	UInt32 sampleFmt;
+	const char* sampleFmt; 
+		// u8, s16, s32, flt, dbl, u8p, s16p, s32p, fltp, dblp
 	
 	AudioCodec();
-	AudioCodec(/*UInt32 id, */
-		const std::string& name, 
+	AudioCodec(const std::string& name, 
 		int channels = DEFAULT_AUDIO_CHANNELS, 
 		int sampleRate = DEFAULT_AUDIO_SAMPLE_RATE, 
 		int bitRate = DEFAULT_AUDIO_BIT_RATE,
-		UInt32 sampleFmt = (UInt32)DEFAULT_AUDIO_SAMPLE_FMT);
-	AudioCodec(/*UInt32 id, */
-		const std::string& name, 
+		const char* sampleFmt = DEFAULT_AUDIO_SAMPLE_FMT);
+	AudioCodec(const std::string& name, 
 		const std::string& encoder, 
 		int channels = DEFAULT_AUDIO_CHANNELS, 
 		int sampleRate = DEFAULT_AUDIO_SAMPLE_RATE, 
 		int bitRate = DEFAULT_AUDIO_BIT_RATE,
-		UInt32 sampleFmt = (UInt32)DEFAULT_AUDIO_SAMPLE_FMT);
+		const char* sampleFmt = DEFAULT_AUDIO_SAMPLE_FMT);
 	AudioCodec(const AudioCodec& r);
 
 	virtual std::string toString() const;
 	virtual void print(std::ostream& ost);
-};
-	
-
-// ---------------------------------------------------------------------
-//
-struct PixelFormat 
-	/// Common pixel formats for video encoding/decoding .
-	/// The ID values match their constituent AV_PIX_FMT_XXX
-	/// values in the FFmpeg library.
-{
-	enum ID 
-	{
-		YUV420P		= 0,	///< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
-		YUVJ420P	= 12,	///< planar YUV 4:2:0, 12bpp, full scale (JPEG)
-		YUYV422		= 1,	///< packed YUV 4:2:2, 16bpp, Y0 Cb Y1 Cr
-		RGB24		= 2,    ///< packed RGB 8:8:8, 24bpp, RGBRGB...
-		BGR24		= 3,	///< packed RGB 8:8:8, 24bpp, BGRBGR...
-		GRAY8		= 8,	///<        Y        ,  8bpp
-	};
-
-	inline ID toID(const std::string& type) 
-	{
-		if (type =="YUV420P")
-			return PixelFormat::YUV420P;
-		if (type =="YUVJ420P")
-			return PixelFormat::YUVJ420P;
-		if (type =="YUYV422")
-			return PixelFormat::YUYV422;
-		if (type =="RGB24")
-			return PixelFormat::RGB24;
-		if (type =="BGR24")
-			return PixelFormat::BGR24;
-		if (type =="GRAY8")
-			return PixelFormat::GRAY8;
-		return PixelFormat::YUV420P;
-	}
 };
 
 
@@ -173,7 +138,7 @@ struct PixelFormat
 //
 #define DEFAULT_VIDEO_SAMPLE_RATE	(384000)				// 128 – 384 kbit/s – business-oriented videoconferencing quality using video compression
 #define DEFAULT_VIDEO_BIT_RATE		(9000)					// Default value for RTP	
-#define DEFAULT_VIDEO_PIXEL_FMT		PixelFormat::YUV420P
+#define DEFAULT_VIDEO_PIXEL_FMT		"yuv420p"
 
 
 struct VideoCodec: public Codec 
@@ -181,21 +146,20 @@ struct VideoCodec: public Codec
 	int width;
 	int height;
 	double fps;
-	UInt32 pixfmt;
+	const char* pixelFmt;
 	
 	VideoCodec();
-	VideoCodec(/*UInt32 id, */const std::string& name, 
+	VideoCodec(const std::string& name, 
 		int width = 0, int height = 0, double fps = 20, 
 		int bitRate = DEFAULT_VIDEO_BIT_RATE, 
 		int sampleRate = DEFAULT_VIDEO_SAMPLE_RATE, 
-		UInt32 pixfmt = (UInt32)DEFAULT_VIDEO_PIXEL_FMT);		
-	VideoCodec(/*UInt32 id, */
-		const std::string& name, 
+		const char* pixelFmt = DEFAULT_VIDEO_PIXEL_FMT);		
+	VideoCodec(const std::string& name, 
 		const std::string& encoder, 
 		int width = 0, int height = 0, double fps = 20, 
 		int bitRate = DEFAULT_VIDEO_BIT_RATE, 
 		int sampleRate = DEFAULT_VIDEO_SAMPLE_RATE, 
-		UInt32 pixfmt = (UInt32)DEFAULT_VIDEO_PIXEL_FMT);	
+		const char* pixelFmt = DEFAULT_VIDEO_PIXEL_FMT);	
 	VideoCodec(const VideoCodec& r);
 
 	virtual std::string toString() const;
@@ -245,7 +209,7 @@ typedef std::list<Codec*> CodecPList;
 		Speex		= 86052
 	};
 	*/
-	//bool matches(/*UInt32 id, */const std::string& name) const;
+	//bool matches(const std::string& name) const;
 	//virtual std::string toSDP() const;
 
 	//static UInt32 toID(const std::string& type);	
