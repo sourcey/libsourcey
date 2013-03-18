@@ -38,24 +38,24 @@ namespace Media {
 
 
 Format::Format() : 
-	label("Unknown"), id(Unknown), type(None), priority(0)
+	label("Unknown"), id("rawvideo"), type(None), priority(0)
 {
 }
 
 
-Format::Format(const string& label, UInt32 id, const VideoCodec& video, const AudioCodec& audio, int priority) : 
+Format::Format(const string& label, const char* id, const VideoCodec& video, const AudioCodec& audio, int priority) : 
 	label(label), id(id), type(Multiplex), video(video), audio(audio), priority(priority)
 {
 }
 
 
-Format::Format(const string& label, UInt32 id, const VideoCodec& video, int priority) : 
+Format::Format(const string& label, const char* id, const VideoCodec& video, int priority) : 
 	label(label), id(id), type(Video), video(video), priority(priority)
 {
 }
 
 
-Format::Format(const string& label, UInt32 id, const AudioCodec& audio, int priority) : 
+Format::Format(const string& label, const char* id, const AudioCodec& audio, int priority) : 
 	label(label), id(id), type(Audio), audio(audio), priority(priority)
 {
 }
@@ -72,6 +72,7 @@ Format::Format(const Format& r) :
 }
 
 
+/*
 string Format::name() const
 {
 	return Format::idToName(id);
@@ -80,42 +81,46 @@ string Format::name() const
 
 string Format::extension() const
 {
-	string extension(Format::idToName(id));
+	string extension(this->id);
 	std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 	return extension;
 }
+*/
 
 
+/*
 string Format::encoderName() const
 {
 	return Format::idToEncoderName(id);
 }
+*/
 
 
 string Format::toString() const 
 {
 	ostringstream os;
-	os << "Format[" << label << ":"  << id << ":" << name() << "]";
+	os << "Format[" << label << ":"  << id << "]";
 	return os.str();
 }
 
 
+/*
 Format::ID Format::nameToID(const std::string& name) 
 {
 	if (name == "Raw")
-		return Format::Raw;
+		return "rawvideo";
 
 	// Video Formats
 	if (name == "MP4")
-		return Format::MP4;
+		return "mp4";
 	if (name == "FLV")
-		return Format::FLV;
+		return "flv";
 	if (name == "OGG")
 		return Format::OGG;
 	if (name == "AVI")
 		return Format::AVI;
 	if (name == "MJPEG")
-		return Format::MJPEG;
+		return "mjpeg";
 	if (name == "MPNG")
 		return Format::MPNG;
 
@@ -129,19 +134,19 @@ Format::ID Format::nameToID(const std::string& name)
 }
 
 
-std::string Format::idToName(UInt32 id) 
+std::string Format::idToName(const char* id) 
 {
 	switch(id)
 	{
 		case Format::Unknown:	return "Unknown";
-		case Format::Raw:		return "Raw";
+		case "rawvideo":		return "Raw";
 			  
 		// Video Formats
-		case Format::MP4:		return "MP4";
-		case Format::FLV:		return "FLV";
+		case "mp4":		return "MP4";
+		case "flv":		return "FLV";
 		case Format::OGG:		return "OGG";
 		case Format::AVI:		return "AVI";
-		case Format::MJPEG:		return "MJPEG";
+		case "mjpeg":		return "MJPEG";
 		case Format::MPNG:		return "MPNG";
 
 		// Audio Formats
@@ -152,19 +157,19 @@ std::string Format::idToName(UInt32 id)
 }
 
 
-std::string Format::idToEncoderName(UInt32 id) 
+std::string Format::idToEncoderName(const char* id) 
 {
 	switch(id)
 	{
 		case Format::Unknown:	return "";
-		case Format::Raw:		return "";
+		case "rawvideo":		return "";
 			  
 		// Video Formats
-		case Format::MP4:		return "mp4";
-		case Format::FLV:		return "flv";
+		case "mp4":		return "mp4";
+		case "flv":		return "flv";
 		case Format::OGG:		return "ogg";
 		case Format::AVI:		return "avi";
-		case Format::MJPEG:		return "mjpeg";
+		case "mjpeg":		return "mjpeg";
 		case Format::MPNG:		return "mpng";
 
 		// Audio Formats
@@ -173,6 +178,8 @@ std::string Format::idToEncoderName(UInt32 id)
 	}
 	return "";
 }
+		<< "\n\tName: " << name()
+*/
 
 
 void Format::print(std::ostream& ost)
@@ -180,7 +187,6 @@ void Format::print(std::ostream& ost)
 	ost << "Format["
 		<< "\n\tLabel: " << label
 		<< "\n\tID: " << id
-		<< "\n\tName: " << name()
 		<< "\n\tType: " << type;
 	if (video.enabled) {
 		ost << "\n";

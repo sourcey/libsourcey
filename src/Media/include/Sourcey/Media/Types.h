@@ -141,14 +141,14 @@ struct VideoCodec
 	int width;
 	int height;
 	double fps;	
-	PIX_FMT_ID pixfmt;		// The input pixel format 
+	PIX_FMT_ID pixelFmt;		// The input pixel format 
 	int bitRate;
 	int quality;				// For JPEG creation
 	VideoCodec(Codec::ID codec,
 				int width = 400,
 				int height = 300,
 				double fps = 25,
-				PIX_FMT_ID pixfmt = PIX_FMT_BGR24,
+				PIX_FMT_ID pixelFmt = PIX_FMT_BGR24,
 				int bitRate = 200 * 1024,
 				int quality = 80) : 
 		enabled(true),
@@ -156,7 +156,7 @@ struct VideoCodec
 		width(width),
 		height(height),
 		fps(fps),
-		pixfmt(pixfmt),
+		pixelFmt(pixelFmt),
 		bitRate(bitRate),
 		quality(quality) {}
 	VideoCodec() : 
@@ -165,7 +165,7 @@ struct VideoCodec
 		width(400),
 		height(300),
 		fps(25),
-		pixfmt(PIX_FMT_BGR24),
+		pixelFmt(PIX_FMT_BGR24),
 		bitRate(200 * 1024),
 		quality(80) {}
 	VideoCodec(const VideoCodec& r) : 
@@ -174,7 +174,7 @@ struct VideoCodec
 		width(r.width), 
 		height(r.height), 
 		fps(r.fps),  
-		pixfmt(r.pixfmt), 
+		pixelFmt(r.pixelFmt), 
 		bitRate(r.bitRate),
 		quality(r.quality) {}
 	VideoCodec* clone() { return new VideoCodec(*this); }
@@ -185,7 +185,7 @@ struct VideoCodec
 			width = r.width; 
 			height = r.height; 
 			fps = r.fps;  
-			pixfmt = r.pixfmt; 
+			pixelFmt = r.pixelFmt; 
 			bitRate = r.bitRate;
 			quality = r.quality;
         }
@@ -199,7 +199,7 @@ struct VideoCodec
 			<< " Height:" << height
 			<< " FPS:" << fps
 			<< " Quality:" << quality
-			<< " Pixel Format:" << pixfmt
+			<< " Pixel Format:" << pixelFmt
 			<< " Bit Rate:" << bitRate
 			<< " Enabled:" << enabled
 			<< "]";

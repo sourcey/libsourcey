@@ -156,6 +156,7 @@ void MediaFactory::Video::load()
 {
 	Log("debug") << "[MediaFactory] Loading Video" << endl;
 	
+	/*
 	FastMutex::ScopedLock lock(_mutex);
 
 	// Initialize an idle VideoCapture object for each available device.
@@ -178,6 +179,7 @@ void MediaFactory::Video::load()
 			_map[devs[0].id] = NULL;
 		}
 	}
+	*/
 }
 
 
@@ -186,6 +188,7 @@ void MediaFactory::Video::load()
 // storing initialized devices correct initialization is very important.
 VideoCapture* MediaFactory::Video::getCapture(int deviceId) 
 {
+	/*
 	FastMutex::ScopedLock lock(_mutex);
 	VideoCaptureMap::iterator it = _map.find(deviceId);
 	if (it != _map.end())
@@ -193,6 +196,11 @@ VideoCapture* MediaFactory::Video::getCapture(int deviceId)
 
 	_map[deviceId] = new VideoCapture(deviceId);
 	return _map[deviceId];
+	*/
+	Log("trace") << "[MediaFactory] Get Video Capture: " << deviceId << endl;
+	VideoCapture* capture = new VideoCapture(deviceId);
+	//capture->setDestroyOnStop(true);
+	return capture;
 }
 
 
@@ -201,8 +209,9 @@ VideoCapture* MediaFactory::Video::getCapture(int deviceId)
 // it's reference count reaches 0.
 VideoCapture* MediaFactory::Video::getCapture(const string& file) 
 {
+	Log("trace") << "[MediaFactory] Get Video Capture: " << file << endl;
 	VideoCapture* capture = new VideoCapture(file);
-	capture->setDestroyOnStop(true);
+	//capture->setDestroyOnStop(true);
 	return capture;
 }
 

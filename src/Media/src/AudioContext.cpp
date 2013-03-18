@@ -55,6 +55,23 @@ AudioContext::~AudioContext()
 {	
 	close();
 }
+
+
+void AudioContext::create()
+{
+}
+
+
+void AudioContext::open()
+{	
+	Log("trace") << "[AudioContext:" << this << "] Opening" << endl;	
+	assert(ctx);
+	assert(codec);
+
+	// Open the audio codec
+	if (avcodec_open2(ctx, codec, NULL) < 0)
+   		throw Exception("Cannot open the audio codec.");
+}
 	
 
 void AudioContext::close()
@@ -63,10 +80,10 @@ void AudioContext::close()
 		av_free(frame);
 		frame = NULL;
 	}
-
-	if (codec) {
-		avcodec_close(codec);
-		codec = NULL;
+	
+	if (ctx) {
+		avcodec_close(ctx);
+		ctx = NULL;
 	}
 
 	if (stream)	{
@@ -78,25 +95,6 @@ void AudioContext::close()
 	pts = 0.0;
 	error = "";
 }
-
-
-void AudioContext::open()
-{
-}
-
-
-/*
-double AudioContext::pts()
-{
-
-	if (packet && stream) {
-		double pts = (packet->dts != AV_NOPTS_VALUE) ? packet->dts : 0.0;
-		pts *= av_q2d(stream->time_base);
-		return pts;
-	}
-	return 0.0;
-}
-*/
 
 
 // ---------------------------------------------------------------------
@@ -118,66 +116,83 @@ AudioEncoderContext::~AudioEncoderContext()
 }
 
 
-void AudioEncoderContext::open(AVFormatContext* oc)
+void AudioEncoderContext::create(AVFormatContext* oc)
 {
-	AudioContext::open();
+	AudioContext::create();
 	
-	// Find the video encoder
-	AVCodec* c = avcodec_find_encoder_by_name(oparams.encoder.data());
-	if (!c)
+	// Find the audio encoder
+	//codec = avcodec_find_encoder_by_name(oparams.encoder.data());
+	codec = avcodec_find_encoder(oc->oformat->audio_codec);
+	if (!codec)
    		throw Exception("Audio encoder not found: " + oparams.encoder);
 
-	//oc->oformat->video_codec = c->id;	
-	//AVCodec* c = avcodec_find_encoder(oc->oformat->audio_codec);
-	//if (!c)
-   	//	throw Exception("Audio encoder not found.");
-	
-	oc->oformat->video_codec = c->id;
+	oc->oformat->audio_codec = codec->id;
 
-	stream = avformat_new_stream(oc, c);
+	stream = avformat_new_stream(oc, codec);
 	if (!stream)
 		throw Exception("Failed to initialize the audio stream.");
 
 	// Now we'll setup the parameters of AVCodecContext
-	codec = stream->codec;
-	avcodec_get_context_defaults3(codec, c);
-	codec->codec_id = c->id; //oc->oformat->audio_codec;
-	codec->codec_type = AVMEDIA_TYPE_AUDIO;
-	codec->bit_rate = oparams.bitRate;
-	codec->sample_rate = oparams.sampleRate;
-	codec->channels = oparams.channels;
-	codec->sample_fmt = (AVSampleFormat)oparams.sampleFmt;
-	codec->channel_layout = av_get_default_channel_layout(oparams.channels);
-	codec->time_base.num = 1;
-	codec->time_base.den = oparams.sampleRate;
+	ctx = stream->codec;
+	avcodec_get_context_defaults3(ctx, codec);
+	ctx->codec_id = codec->id;
+	ctx->codec_type = AVMEDIA_TYPE_AUDIO;
+	ctx->bit_rate = oparams.bitRate;
+	ctx->sample_rate = oparams.sampleRate;
+	ctx->channels = oparams.channels;
+	ctx->sample_fmt = av_get_sample_fmt(oparams.sampleFmt);
+	ctx->channel_layout = av_get_default_channel_layout(oparams.channels);
+	ctx->time_base.num = 1;
+	ctx->time_base.den = oparams.sampleRate;
 
     // Some formats want stream headers to be separate
     if (oc->oformat->flags & AVFMT_GLOBALHEADER)
-        codec->flags |= CODEC_FLAG_GLOBAL_HEADER;
+        ctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
 	
 	// Open the codec
-	if (avcodec_open2(codec, c, NULL) < 0)
+	if (avcodec_open2(ctx, codec, NULL) < 0)
 		throw Exception("Cannot open the audio codec.");
 
 	// Set the frame size
-    samplesPerFrame = codec->frame_size;
+    samplesPerFrame = ctx->frame_size;
 		
 	// Set a reasonable maximum output size
-	outputBytes = samplesPerFrame * 
-		av_get_bytes_per_sample(codec->sample_fmt) * 
-		codec->channels;
+	outputBytes = samplesPerFrame
+		 * av_get_bytes_per_sample(ctx->sample_fmt)
+		 * ctx->channels;
 		
     // Create a resampler if required
-    if (codec->sample_fmt != (AVSampleFormat)iparams.sampleFmt) {    
+    if (ctx->sample_fmt != av_get_sample_fmt(iparams.sampleFmt)) {    
 		resampler = new AudioResampler();
 		resampler->create(iparams, oparams);
     }
 }
 
 
+/*
+void AudioEncoderContext::open()
+{
+	Log("debug") << "[AudioEncoderContext:" << this << "] Opening: " << oparams.toString() << endl;
+	
+	assert(codec);
+	assert(frame);
+	AudioContext::open();
+		
+	// Find the audio encoder
+	AVCodec* c = avcodec_find_encoder_by_name(oparams.encoder.data());
+	if (!c)
+   		throw Exception("Audio encoder not found.");
+
+	// Open the audio codec
+	if (avcodec_open2(ctx, codec, NULL) < 0)
+   		throw Exception("Cannot open the audio codec.");
+}
+*/
+
+
 void AudioEncoderContext::close()
 {
-	Log("debug") << "[AudioEncoderContext:" << this << "] Closing Audio" << endl;
+	Log("debug") << "[AudioEncoderContext:" << this << "] Closing" << endl;
 
 	AudioContext::close();	
 	
@@ -242,10 +257,10 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 	avcodec_get_frame_defaults(frame);
 	frame->nb_samples = samplesPerFrame;
 
-	// BUG: Libspeex encoding does not increment codec->frame_number.
+	// BUG: Libspeex encoding does not increment ctx->frame_number.
 	// Might need to create local frame number value for PTS.
-	//frame->pts = codec->frame_number; // Force a PTS value, no AV_NOPTS_VALUE
-    if (avcodec_fill_audio_frame(frame, codec->channels, codec->sample_fmt, samples, outputBytes, 0) < 0) {
+	//frame->pts = ctx->frame_number; // Force a PTS value, no AV_NOPTS_VALUE
+    if (avcodec_fill_audio_frame(frame, ctx->channels, ctx->sample_fmt, samples, outputBytes, 0) < 0) {
 		error = "Error filling audio frame";
 		Log("error") << "[AudioEncoderContext:" << this << "] " << error << endl;
         throw Exception(error);
@@ -257,7 +272,7 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
     opacket.size = 0;
 
 	int frameEncoded = 0;
-    if (avcodec_encode_audio2(codec, &opacket, frame, &frameEncoded) < 0) {
+    if (avcodec_encode_audio2(ctx, &opacket, frame, &frameEncoded) < 0) {
 		error = "Fatal Encoder Error";
 		Log("error") << "[AudioEncoderContext:" << this << "] " << error << endl;
 		throw Exception(error);
@@ -265,11 +280,11 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 		
 	if (frameEncoded) {
 		if (opacket.pts != AV_NOPTS_VALUE)
-			opacket.pts      = av_rescale_q(opacket.pts,      codec->time_base, stream->time_base);
+			opacket.pts      = av_rescale_q(opacket.pts,      ctx->time_base, stream->time_base);
 		if (opacket.dts != AV_NOPTS_VALUE)
-			opacket.dts      = av_rescale_q(opacket.dts,      codec->time_base, stream->time_base);
+			opacket.dts      = av_rescale_q(opacket.dts,      ctx->time_base, stream->time_base);
 		if (opacket.duration > 0)
-			opacket.duration = av_rescale_q(opacket.duration, codec->time_base, stream->time_base);
+			opacket.duration = av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
 
 		Log("trace") << "[AudioEncoderContext:" << this << "] Encoded PTS:\n" 
 			//<< "\n\tPTS: " << av_ts2str(opacket.pts)
@@ -280,8 +295,8 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 			<< "\n\tDTS: " << opacket.dts
 			<< "\n\tFrame PTS: " << frame->pts
 			<< "\n\tDuration: " << opacket.duration
-			//<< "\n\tCodec Time Den: " << codec->time_base.den
-			//<< "\n\tCodec Time Num: " << codec->time_base.num
+			//<< "\n\tCodec Time Den: " << ctx->time_base.den
+			//<< "\n\tCodec Time Num: " << ctx->time_base.num
 			//<< "\n\tStream Time Den: " << stream->time_base.den
 			//<< "\n\tStream Time Num: " << stream->time_base.num
 			<< endl;
@@ -298,7 +313,7 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 	/*
 	// Old API
 	// TODO: Update to use new avcodec_encode_audio2 API
-	int size = avcodec_encode_audio(codec, this->buffer, outputBytes, (short*)samples);
+	int size = avcodec_encode_audio(ctx, this->buffer, outputBytes, (short*)samples);
 	if (size < 0) {		
 		error = "Fatal Encoder Error";
 		Log("error") << "[AudioEncoderContext:" << this << "] " << error << endl;
@@ -309,8 +324,8 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 	opacket.data = this->buffer;	
 	opacket.size = size;
 
-	//if (codec->coded_frame->pts != AV_NOPTS_VALUE)
-	//	opacket.pts = av_rescale_q(codec->coded_frame->pts,      codec->time_base, stream->time_base);
+	//if (ctx->coded_frame->pts != AV_NOPTS_VALUE)
+	//	opacket.pts = av_rescale_q(ctx->coded_frame->pts,      ctx->time_base, stream->time_base);
 
 	return true;
 	*/
@@ -321,10 +336,10 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 	// and some codecs failing to encode. Investigate further
 	// before using the following code.
 	//
-	//int audioInputSampleSize = codec->frame_size * 2 * codec->channels; //codec->frame_size; //ipacket.size; // This is probably incorrect
-    //int size = av_samples_get_buffer_size(NULL, codec->channels,
+	//int audioInputSampleSize = ctx->frame_size * 2 * ctx->channels; //ctx->frame_size; //ipacket.size; // This is probably incorrect
+    //int size = av_samples_get_buffer_size(NULL, ctx->channels,
     //                                          audioInputSampleSize,
-    //                                          codec->sample_fmt, 1);
+    //                                          ctx->sample_fmt, 1);
 
 	//Log("trace") << "[AudioEncoderContext:" << this << "] Encoding Audio Packet: " << audioInputSampleSize << ": " << size << endl;
 
@@ -337,21 +352,21 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 	
 	/*
 	//int 
-	samplesPerFrame  = codec->frame_size;
-	int expectedFrameSize = samplesPerFrame  * av_get_bytes_per_sample(codec->sample_fmt) * codec->channels;
+	samplesPerFrame  = ctx->frame_size;
+	int expectedFrameSize = samplesPerFrame  * av_get_bytes_per_sample(ctx->sample_fmt) * ctx->channels;
 	frame = avcodec_alloc_frame();
 
 	avcodec_get_frame_defaults(frame);
 	 
-    //get_audio_frame((Int16*)ipacket.data, samplesPerFrame , codec->channels);
-    //get_audio_frame(samples, samplesPerFrame , codec->channels);
+    //get_audio_frame((Int16*)ipacket.data, samplesPerFrame , ctx->channels);
+    //get_audio_frame(samples, samplesPerFrame , ctx->channels);
 
-	frame->nb_samples = samplesPerFrame ; //codec->frame_size; // * 2 * codec->channels; // NOTE: Should be input size, nopt output!
-	//frame->pts = codec->frame_number;
+	frame->nb_samples = samplesPerFrame ; //ctx->frame_size; // * 2 * ctx->channels; // NOTE: Should be input size, nopt output!
+	//frame->pts = ctx->frame_number;
 
 	assert(ipacket.size == expectedFrameSize);
-    if (avcodec_fill_audio_frame(frame, codec->channels, codec->sample_fmt, ipacket.data, ipacket.size, 1) < 0) {
-    //if (avcodec_fill_audio_frame(frame, codec->channels, codec->sample_fmt, (uint8_t *)samples, expectedFrameSize, 1) < 0) {
+    if (avcodec_fill_audio_frame(frame, ctx->channels, ctx->sample_fmt, ipacket.data, ipacket.size, 1) < 0) {
+    //if (avcodec_fill_audio_frame(frame, ctx->channels, ctx->sample_fmt, (uint8_t *)samples, expectedFrameSize, 1) < 0) {
 		error = "Error filling audio frame";
 		Log("error") << "[AudioEncoderContext:" << this << "] " << error << endl;
         throw Exception(error);
@@ -363,7 +378,7 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
     opacket.size = 0; //bufferSize;
 	
 	int frameEncoded = 0;
-    if (avcodec_encode_audio2(codec, &opacket, frame, &frameEncoded) < 0) {
+    if (avcodec_encode_audio2(ctx, &opacket, frame, &frameEncoded) < 0) {
 		error = "Fatal Encoder Error";
 		Log("error") << "[AudioEncoderContext:" << this << "] " << error << endl;
 		throw Exception(error);
@@ -371,11 +386,11 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 		
 	if (frameEncoded) {
 		if (opacket.pts != AV_NOPTS_VALUE)
-			opacket.pts      = av_rescale_q(opacket.pts,      codec->time_base, stream->time_base);
+			opacket.pts      = av_rescale_q(opacket.pts,      ctx->time_base, stream->time_base);
 		if (opacket.dts != AV_NOPTS_VALUE)
-			opacket.dts      = av_rescale_q(opacket.dts,      codec->time_base, stream->time_base);
+			opacket.dts      = av_rescale_q(opacket.dts,      ctx->time_base, stream->time_base);
 		if (opacket.duration > 0)
-			opacket.duration = av_rescale_q(opacket.duration, codec->time_base, stream->time_base);
+			opacket.duration = av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
 
 		Log("trace") << "[AudioEncoderContext:" << this << "] Encoded PTS:\n" 
 			//<< "\n\tPTS: " << av_ts2str(opacket.pts)
@@ -385,8 +400,8 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 			<< "\n\tPTS: " << opacket.pts
 			<< "\n\tDTS: " << opacket.dts
 			<< "\n\tFrame PTS: " << frame->pts
-			//<< "\n\tCodec Time Den: " << codec->time_base.den
-			//<< "\n\tCodec Time Num: " << codec->time_base.num
+			//<< "\n\tCodec Time Den: " << ctx->time_base.den
+			//<< "\n\tCodec Time Num: " << ctx->time_base.num
 			//<< "\n\tStream Time Den: " << stream->time_base.den
 			//<< "\n\tStream Time Num: " << stream->time_base.num
 			<< endl; 
@@ -398,6 +413,219 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 
 	return frameEncoded > 0;
 	*/
+}
+
+
+// ---------------------------------------------------------------------
+//
+// Audio Decoder Context
+//
+// ---------------------------------------------------------------------
+AudioDecoderContext::AudioDecoderContext() :
+	duration(0.0),
+	width(-1),
+	fp(false)
+{
+}
+	
+
+AudioDecoderContext::~AudioDecoderContext()
+{
+	close();
+}
+
+
+void AudioDecoderContext::create(AVFormatContext *ic, int streamID)
+{
+	AudioContext::create();
+	
+	Log("debug") << "[AudioDecoderContext:" << this << "] Creating: " << streamID << endl;
+
+	assert(ic);
+	assert(streamID >= 0);
+	
+    stream = ic->streams[streamID];
+    ctx = stream->codec;
+
+    codec = avcodec_find_decoder(ctx->codec_id);
+	if (!codec)
+   		throw Exception("Audio decoder not found.");
+
+    if (avcodec_open(ctx, codec) < 0)
+		throw Exception("Could not open the audio codec.");
+
+    switch (ctx->sample_fmt) {
+    case AV_SAMPLE_FMT_S16:
+        width = 16;
+        fp = false;
+        break;
+    case AV_SAMPLE_FMT_S32:
+        width = 32;
+        fp = false;
+        break;
+    case AV_SAMPLE_FMT_FLT:
+        width = 32;
+        fp = true;
+        break;
+    case AV_SAMPLE_FMT_DBL:
+        width = 64;
+        fp = true;
+        break;
+    default:
+		throw Exception("Unsupported audio sample format.");
+    }
+	
+	frame = avcodec_alloc_frame();
+	if (!frame)
+		throw Exception("Cannot allocate input frame.");
+}
+
+
+/*
+void AudioDecoderContext::open()
+{
+	Log("debug") << "[AudioEncoderContext:" << this << "] Opening" << endl;
+	
+	assert(codec);
+	assert(frame);
+	AudioContext::open();
+		
+	// Find the audio encoder
+    AVCodec* c = avcodec_find_decoder(ctx->codec_id);
+	if (!c)
+   		throw Exception("Audio decoder not found.");
+
+	// Open the audio codec
+	if (avcodec_open2(ctx, codec, NULL) < 0)
+   		throw Exception("Cannot open the audio codec.");
+}
+*/
+
+
+void AudioDecoderContext::close()
+{
+	AudioContext::close();
+
+	duration = 0.0;	
+	width = -1;
+	fp = false;
+}
+
+
+bool AudioDecoderContext::decode(UInt8* data, int size, AVPacket& opacket)
+{
+    AVPacket ipacket;
+    av_init_packet(&ipacket);
+    ipacket.stream_index = stream->index;
+    ipacket.data = data;
+    ipacket.size = size;
+	return decode(ipacket, opacket);
+}
+
+
+bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
+{
+	assert(ipacket.stream_index == stream->index);
+	assert(codec);
+	assert(frame);
+
+	/*
+	// Skip if exceeding maximum FPS
+	if (maxFPS && ipacket.dts != AV_NOPTS_VALUE) {
+		double fps = ctx->frame_number / (ipacket.dts * av_q2d(stream->time_base));
+		if (fps > maxFPS) {
+			Log("trace") << "[AudioDecoderContext:" << this << "] Dropping frame at fps: " << fps << endl;
+			return false;
+		}
+		Log("trace") << "[AudioDecoderContext:" << this << "] Decoding at fps: " << fps << ": " << ctx->frame_number << endl;
+	}
+	*/
+
+	int frameDecoded = 0;
+	int bytesDecoded = 0;
+	int bytesRemaining = ipacket.size;
+	
+	av_init_packet(&opacket);
+	opacket.data = NULL;
+	opacket.size = 0;
+	
+	avcodec_get_frame_defaults(frame);
+	bytesDecoded = avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);		
+	if (bytesDecoded < 0) {
+		error = "Decoder error";
+		Log("error") << "[AudioDecoderContext:" << this << "] " << error << endl;
+		throw Exception(error);
+	}
+
+	// XXX: Asserting here to make sure below looping 
+	// avcodec_decode_video2 is actually redundant.
+	// Otherwise we need to reimplement this pseudo code:
+	// while(packet->size > 0)
+	// {
+	// 	 int ret = avcodec_decode_video2(..., ipacket);
+	// 	 if(ret < -1)
+	//		throw std::exception("error");
+	//
+	//	 ipacket->size -= ret;
+	//	 ipacket->data += ret;
+	// }
+	assert(bytesDecoded == bytesRemaining);
+
+	/*
+	while (bytesRemaining) // && !frameDecoded
+	{
+		avcodec_get_frame_defaults(frame);
+		bytesDecoded = avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);		
+		if (bytesDecoded < 0) {
+			Log("error") << "[AudioDecoderContext:" << this << "] Decoder Error" << endl;
+			error = "Decoder error";
+			throw Exception(error);
+		}
+
+		bytesRemaining -= bytesDecoded;
+	}
+	*/
+
+	if (frameDecoded) {
+		InitDecodedAudioPacket(stream, ctx, frame, &opacket, &pts);
+
+		/*
+		Log("trace") << "[AudioDecoderContext:" << this << "] Decoded Frame:" 
+			<< "\n\tFrame Size: " << opacket.size
+			<< "\n\tFrame PTS: " << opacket.pts
+			<< "\n\tInput Frame PTS: " << ipacket.pts
+			<< "\n\tNo Frame PTS: " << (frame->pts != AV_NOPTS_VALUE)
+			<< "\n\tDecoder PTS: " << pts
+			<< endl;
+			*/
+
+		return true;
+	}
+
+	return false;
+}
+    
+
+bool AudioDecoderContext::flush(AVPacket& opacket)
+{	
+	AVPacket ipacket;
+	av_init_packet(&ipacket);
+	ipacket.data = NULL;
+	ipacket.size = 0;
+
+	av_init_packet(&opacket);
+	opacket.data = NULL;
+	opacket.size = 0;
+	
+	int frameDecoded = 0;
+	avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
+
+	if (frameDecoded) {
+		InitDecodedAudioPacket(stream, ctx, frame, &opacket, &pts);
+		Log("debug") << "[AudioDecoderContext:" << this << "] Flushed Audio Frame: " << opacket.pts << endl;
+		return true;
+	}
+	return false;
 }
 
 
@@ -431,10 +659,10 @@ void AudioResampler::create(const AudioCodec& iparams, const AudioCodec& oparams
         throw Exception("Resample context already initialized");
 
 	Int64 outChLayout = av_get_default_channel_layout(oparams.channels);
-	enum AVSampleFormat outSampleFmt = (AVSampleFormat)oparams.sampleFmt;
+	enum AVSampleFormat outSampleFmt = av_get_sample_fmt(oparams.sampleFmt);
 
     Int64 inChLayout  = av_get_default_channel_layout(iparams.channels);
-    enum AVSampleFormat inSampleFmt  = (AVSampleFormat)iparams.sampleFmt;
+    enum AVSampleFormat inSampleFmt  = av_get_sample_fmt(iparams.sampleFmt);
 
     ctx = swr_alloc_set_opts(ctx,
             outChLayout, outSampleFmt, oparams.sampleRate,
@@ -552,7 +780,7 @@ UInt8* AudioResampler::resample(UInt8* inSamples, int inNbSamples)
 		*/
 	
 	av_samples_alloc(&outBuffer, NULL, oparams.channels, outNbSamples,
-                       (AVSampleFormat)oparams.sampleFmt, 0);
+                       av_get_sample_fmt(oparams.sampleFmt), 0);
 	
     outNbSamples = swr_convert(ctx, &this->outBuffer, outNbSamples,
              (const UInt8**)&inSamples, inNbSamples);
@@ -567,117 +795,80 @@ UInt8* AudioResampler::resample(UInt8* inSamples, int inNbSamples)
 
 // ---------------------------------------------------------------------
 //
-// Audio Decoder Context
+// Inlines & Helpers
 //
-// ---------------------------------------------------------------------
-AudioDecoderContext::AudioDecoderContext() :
-	duration(0.0),
-	width(-1),
-	fp(false)
-{
-}
-	
-
-AudioDecoderContext::~AudioDecoderContext()
-{
-	close();
-}
-
-
-void AudioDecoderContext::open(AVFormatContext *ic, int streamID)
-{
-	AudioContext::open();
-	
-	Log("debug") << "[AudioDecoderContext:" << this << "] Opening Audio: " << streamID << endl;
-
-	assert(ic);
-	assert(streamID >= 0);
-	
-    stream = ic->streams[streamID];
-    codec = stream->codec;
-
-    AVCodec* c = avcodec_find_decoder(codec->codec_id);
-    if (c == NULL)
-		throw Exception("The audio codec is missing or unsupported.");
-
-    if (avcodec_open(codec, c) < 0)
-		throw Exception("Could not open the video codec.");
-
-    switch (codec->sample_fmt) {
-    case AV_SAMPLE_FMT_S16:
-        width = 16;
-        fp = false;
-        break;
-    case AV_SAMPLE_FMT_S32:
-        width = 32;
-        fp = false;
-        break;
-    case AV_SAMPLE_FMT_FLT:
-        width = 32;
-        fp = true;
-        break;
-    case AV_SAMPLE_FMT_DBL:
-        width = 64;
-        fp = true;
-        break;
-    default:
-		throw Exception("Unsupported audio sample format.");
-    }
-	
-	frame = avcodec_alloc_frame();
-}
-
-
-void AudioDecoderContext::close()
-{
-	AudioContext::close();
-
-	duration = 0.0;	
-	width = -1;
-	fp = false;
-}
-
-
-bool AudioDecoderContext::decode(UInt8* data, int size, AVPacket& opacket)
-{
-    AVPacket ipacket;
-    av_init_packet(&ipacket);
-    ipacket.stream_index = stream->index;
-    ipacket.data = data;
-    ipacket.size = size;
-	return decode(ipacket, opacket);
-}
-
-
-bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
-{
-	assert(ipacket.stream_index == stream->index);
-	assert(frame);
-	
-	int frameDecoded = 0;
-	int bytesDecoded = 0;
-	int bytesRemaining = ipacket.size;
-	
-	opacket.data = NULL;
-	opacket.size = 0;
-
-	while (bytesRemaining && !frameDecoded)
-	{
-		avcodec_get_frame_defaults(frame);
-		bytesDecoded = avcodec_decode_audio4(codec, frame, &frameDecoded, &ipacket);		
-		if (bytesDecoded < 0) {
-			Log("error") << "[AudioDecoderContext:" << this << "] Decoder Error" << endl;
-			error = "Decoder error";
-			throw Exception(error);
-		}
-
-		bytesRemaining -= bytesDecoded;
+// ---------------------------------------------------------------------		  
+void InitDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts)
+{		
+	opacket->data = frame->data[0];
+	opacket->size = av_samples_get_buffer_size(NULL, ctx->channels, frame->nb_samples, ctx->sample_fmt, 1);		
+	opacket->dts = frame->pkt_dts; // Decoder PTS values can be unordered
+	opacket->pts = frame->pkt_pts;	
+		
+	// Local PTS value represented as decimal seconds
+    if (opacket->dts != AV_NOPTS_VALUE) {
+		*pts = opacket->pts;
+		*pts *= av_q2d(stream->time_base);
 	}
 
-	if (frameDecoded) {
-		opacket.data = frame->data[0]; //buffer;	
-		opacket.size = av_samples_get_buffer_size(NULL, codec->channels, frame->nb_samples, codec->sample_fmt, 1);		
+	assert(opacket->data);
+	assert(opacket->size);
+	assert(opacket->dts >= 0);
+	assert(opacket->pts >= 0);	
+
+	/*	
+	// ffplay.c
+	if (decoder_reorder_pts == -1) {
+        *pts = av_frame_get_best_effort_timestamp(frame);
+    } else if (decoder_reorder_pts) {
+        *pts = frame->pkt_pts;
+    } else {
+        *pts = frame->pkt_dts;
+    }
+
+    if (*pts == AV_NOPTS_VALUE) {
+        *pts = 0;
+    }
+	*/
+}
+
+	
+} } // namespace Sourcey::Media
+
+
+
 		
+		/*
+		opacket.data = frame->data[0];
+		opacket.size = av_samples_get_buffer_size(NULL, ctx->channels, frame->nb_samples, ctx->sample_fmt, 1);		
+		opacket.dts = frame->pkt_dts; // Decoder PTS values can be unordered
+		opacket.pts = frame->pkt_pts;
+
+		assert(opacket.data);
+		assert(opacket.size);
+		assert(opacket.dts >= 0);
+		assert(opacket.pts >= 0);		
+		
+		// Local PTS value represented as decimal seconds
+        if (opacket.dts != AV_NOPTS_VALUE) {
+			pts = opacket.pts;
+			pts *= av_q2d(stream->time_base);
+		}
+		
+		// Use the input packet timestamp if the
+		// frame PTS wasn't set by the decoder.
+		if (frame->pts == AV_NOPTS_VALUE)
+			frame->pts = ipacket.dts;
+		opacket.pts = frame->pts;
+		
+		// Local pts value represented as second decimal.
+		pts = opacket.pts;
+		pts *= av_q2d(stream->time_base);
+		
+		// http://dranger.com/ffmpeg/ffmpegtutorial_all.html
+		//if (ipacket.dts != AV_NOPTS_VALUE) {
+		//}
+
 		// NOTE: avcodec_decode_audio4 does not seem to set the PTS
 		// for output frame so we just use the input frame PTS value.
 		frame->pts = ipacket.pts;
@@ -686,28 +877,7 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 			pts = frame->pts;
 			pts *= av_q2d(stream->time_base);
 		}
-
-		/*
-		Log("trace") << "[AudioDecoderContext:" << this << "] Decoded Frame:" 
-			<< "\n\tFrame Size: " << opacket.size
-			<< "\n\tFrame PTS: " << opacket.pts
-			<< "\n\tInput Frame PTS: " << ipacket.pts
-			<< "\n\tNo Frame PTS: " << (frame->pts != AV_NOPTS_VALUE)
-			<< "\n\tDecoder PTS: " << pts
-			<< endl;
-			*/
-
-		return true;
-	}
-
-	return false;
-}
-
-
-	
-} } // namespace Sourcey::Media
-
-
+		*/
 	/*
     if (inSampleFmt == AV_SAMPLE_FMT_NONE || 
 		outSampleFmt == AV_SAMPLE_FMT_NONE)
@@ -749,7 +919,7 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 
 	
 	/*
-	// Find the video encoder.
+	// Find the audio encoder.
 	// Some audio encoders have separate floating and fixed
 	// point encoders so we need to manually specify the fixed
 	// point encoder until we can control the sample_fmt via
@@ -761,9 +931,9 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 		c = avcodec_find_encoder(oc->oformat->audio_codec);
 		*/
 		
-	//codec->bit_rate = 32000; //oparams.bitRate * 1000 / 25; 
-	//codec->bit_rate = oparams.bitRate * 1000 / 25; 
-	//codec->time_base.den = 1000;
+	//ctx->bit_rate = 32000; //oparams.bitRate * 1000 / 25; 
+	//ctx->bit_rate = oparams.bitRate * 1000 / 25; 
+	//ctx->time_base.den = 1000;
 	// Allocate the output samples buffer
 	// NOTE: buffer must be >= AVCODEC_MAX_AUDIO_FRAME_SIZE
 	// or some codecs will fail.
@@ -772,6 +942,20 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 	// Allocate the input samples buffer
     //samples = (Int16*)av_malloc(outputBytes);
 	
+
+
+/*
+double AudioContext::pts()
+{
+
+	if (packet && stream) {
+		double pts = (packet->dts != AV_NOPTS_VALUE) ? packet->dts : 0.0;
+		pts *= av_q2d(stream->time_base);
+		return pts;
+	}
+	return 0.0;
+}
+*/
 
 /*
 00619 static void do_audio_out(AVFormatContext *s, OutputStream *ost,
@@ -844,7 +1028,7 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
     }
 }
 	int r;
-    int nb_samples = codec->frame_size; //10;codec->frame_size; //1000; //24; //
+    int nb_samples = ctx->frame_size; //10;ctx->frame_size; //1000; //24; //
 	AVSampleFormat format = AV_SAMPLE_FMT_S16;
 	int sample_rate = 44100;
 
@@ -854,8 +1038,8 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
     int bufsize = av_samples_get_buffer_size(NULL, nb_channels, nb_samples,
                                              format, 1);
 	
-	Log("trace") << "[AudioEncoderContext:" << this << "] Encoding Audio Packet: codec->frame_size: " << codec->frame_size << endl;
-	Log("trace") << "[AudioEncoderContext:" << this << "] Encoding Audio Packet: codec->sample_fmt: " << codec->sample_fmt << endl;
+	Log("trace") << "[AudioEncoderContext:" << this << "] Encoding Audio Packet: ctx->frame_size: " << ctx->frame_size << endl;
+	Log("trace") << "[AudioEncoderContext:" << this << "] Encoding Audio Packet: ctx->sample_fmt: " << ctx->sample_fmt << endl;
 	Log("trace") << "[AudioEncoderContext:" << this << "] Encoding Audio Packet: nb_channels: " << nb_channels << endl;
 	Log("trace") << "[AudioEncoderContext:" << this << "] Encoding Audio Packet: nb_samples: " << nb_samples << endl;
 	Log("trace") << "[AudioEncoderContext:" << this << "] Encoding Audio Packet: bufsize: " << bufsize << endl;
@@ -965,7 +1149,7 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 	int i= 0;
 	int j= 0;
     t = 0;
-    tincr = 2 * M_PI * 440.0 / codec->sample_rate;
+    tincr = 2 * M_PI * 440.0 / ctx->sample_rate;
     for(i=0;i<200;i++) {
         for(j=0;j<samplesPerFrame ;j++) {
             samples[2*j] = (int)(sin(t) * 10000);
@@ -994,7 +1178,7 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 	//this->inNbSmaples = (int)av_rescale_rnd(this->outNbSamples, iparams.sampleRate, oparams.sampleRate, AV_ROUND_UP);
 	
 	// Allocate output buffer
-	// see: http://patches.videolan.org/patch/266/
+	// see: http://patches.audiolan.org/patch/266/
     //this->outBuffer = (UInt8*)av_malloc(this->outNbSamples * this->outFrameSize);	
     //this->outBuffer = (UInt8*)av_malloc(AVCODEC_MAX_AUDIO_FRAME_SIZE);	
 
@@ -1003,7 +1187,7 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 		
 		//(int)av_rescale_rnd(inNbSmaples, oparams.sampleRate, iparams.sampleRate, AV_ROUND_UP);
 
-	//int audioInputSampleSize = codec->frame_size * 2 * codec->channels; 
+	//int audioInputSampleSize = ctx->frame_size * 2 * ctx->channels; 
 	//this->inNbSmaples = inFrameSize = av_get_bytes_per_sample((AVSampleFormat)iparams.sampleFmt) * iparams.channels;
 	//this->outNbSamples = (int)av_rescale_rnd(inNbSmaples, oparams.sampleRate, iparams.sampleRate, AV_ROUND_UP);
 	//int outFrameSize
@@ -1030,8 +1214,8 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 /*
 	//avcodec_get_frame_defaults(frame);
 	
-    //if (avcodec_fill_audio_frame(frame, codec->channels, codec->sample_fmt, ipacket.data, AUDIO_INBUF_SIZE, 1) < 0) { //AUDIO_INBUF_SIZE
-    if (avcodec_fill_audio_frame(frame, codec->channels, codec->sample_fmt, ipacket.data, ipacket.size, 1) < 0) { //AUDIO_INBUF_SIZE
+    //if (avcodec_fill_audio_frame(frame, ctx->channels, ctx->sample_fmt, ipacket.data, AUDIO_INBUF_SIZE, 1) < 0) { //AUDIO_INBUF_SIZE
+    if (avcodec_fill_audio_frame(frame, ctx->channels, ctx->sample_fmt, ipacket.data, ipacket.size, 1) < 0) { //AUDIO_INBUF_SIZE
         //av_log(NULL, AV_LOG_FATAL, "Audio encoding failed\n");
         //exit(1);
 
@@ -1040,41 +1224,41 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 		throw Exception(error);
     }
 	
-    //frame->nb_samples  = AUDIO_INBUF_SIZE / (codec->channels * av_get_bytes_per_sample(codec->sample_fmt));
-    //frame->nb_samples  = ipacket.size / (codec->channels * av_get_bytes_per_sample(codec->sample_fmt));
+    //frame->nb_samples  = AUDIO_INBUF_SIZE / (ctx->channels * av_get_bytes_per_sample(ctx->sample_fmt));
+    //frame->nb_samples  = ipacket.size / (ctx->channels * av_get_bytes_per_sample(ctx->sample_fmt));
 	*/
 		
 	// Set the output frame size.
-	//frameSize = codec->frame_size * 2 * codec->channels;
+	//frameSize = ctx->frame_size * 2 * ctx->channels;
 	//
 
 	/*
-	if (codec->channels == 6)
-		codec->channel_layout = AV_CH_LAYOUT_5POINT1;
+	if (ctx->channels == 6)
+		ctx->channel_layout = AV_CH_LAYOUT_5POINT1;
 
-	if (codec->codec_id == CODEC_ID_AAC) {		
-		codec->profile = FF_PROFILE_AAC_LOW;		
+	if (ctx->codec_id == CODEC_ID_AAC) {		
+		ctx->profile = FF_PROFILE_AAC_LOW;		
 	}
-	else if (codec->codec_id == CODEC_ID_AMR_NB) {
-		codec->sample_rate = 8000;
-		codec->channels = 1;
+	else if (ctx->codec_id == CODEC_ID_AMR_NB) {
+		ctx->sample_rate = 8000;
+		ctx->channels = 1;
 	}
 
 	// Find the encoder
 	//avcodec_find_encoder_by_name
-	AVCodec* c = avcodec_find_encoder(codec->codec_id);
+	AVCodec* c = avcodec_find_encoder(ctx->codec_id);
 	if (!c)
 		throw Exception("Audio codec not found.");	
 	
 	// Set the frame size
-	if (codec->frame_size <= 1) {
-		codec->frame_size = MAX_AUDIO_PACKET_SIZE / codec->channels;
-		switch (codec->codec_id) {
+	if (ctx->frame_size <= 1) {
+		ctx->frame_size = MAX_AUDIO_PACKET_SIZE / ctx->channels;
+		switch (ctx->codec_id) {
 		case CODEC_ID_PCM_S16LE:
 		case CODEC_ID_PCM_S16BE:
 		case CODEC_ID_PCM_U16LE:
 		case CODEC_ID_PCM_U16BE:
-			codec->frame_size >>= 1;
+			ctx->frame_size >>= 1;
 			break;
 		default:
 			break;
@@ -1082,8 +1266,8 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 	}
 
 	// Set the encoded output frame size
-	//int frameDecoded = av_get_bits_per_sample_format(codec->sample_fmt)/8;
-	_audioOutSize = codec->frame_size * 2 * codec->channels;
+	//int frameDecoded = av_get_bits_per_sample_format(ctx->sample_fmt)/8;
+	_audioOutSize = ctx->frame_size * 2 * ctx->channels;
 
 	// The encoder may require a minimum number of raw audio samples for each encoding but we can't
 	// guarantee we'll get this minimum each time an audio frame is decoded from the in file so 
@@ -1113,9 +1297,9 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 	}
 	*/
 		/*	
-		Log("trace") << "[AudioDecoderContext:" << this << "] check frame_size: " << codec->frame_size << endl;
-		Log("trace") << "[AudioDecoderContext:" << this << "] check channels: " << codec->channels << endl;
-		Log("trace") << "[AudioDecoderContext:" << this << "] check size: " << (codec->frame_size * 2 * codec->channels) << endl;
+		Log("trace") << "[AudioDecoderContext:" << this << "] check frame_size: " << ctx->frame_size << endl;
+		Log("trace") << "[AudioDecoderContext:" << this << "] check channels: " << ctx->channels << endl;
+		Log("trace") << "[AudioDecoderContext:" << this << "] check size: " << (ctx->frame_size * 2 * ctx->channels) << endl;
 		Log("trace") << "[AudioDecoderContext:" << this << "] frame->nb_samples: " << frame->nb_samples << endl;		
 		Log("trace") << "[AudioDecoderContext:" << this << "] opacket.size: " << opacket.size << endl;
 	
@@ -1137,7 +1321,7 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 
 	/*
 	int frameDecoded = bufferSize;
-	int len = avcodec_decode_audio3(codec, (int16_t*)buffer, &frameDecoded, &ipacket);
+	int len = avcodec_decode_audio3(ctx, (int16_t*)buffer, &frameDecoded, &ipacket);
 	if (len < 0) {
 		error = "Decoder error";
 		Log("error") << "[AudioDecoderContext:" << this << "] Decoding Audio: Error: " << error << endl;
@@ -1187,7 +1371,7 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 
 	if (frameEncoded) {
 		//opacket.data = frame->data[0];	
-		/opacket.size = av_samples_get_buffer_size(NULL, codec->channels, frame->nb_samples, codec->sample_fmt, 1);
+		/opacket.size = av_samples_get_buffer_size(NULL, ctx->channels, frame->nb_samples, ctx->sample_fmt, 1);
 		
 		if (ipacket.pts != AV_NOPTS_VALUE) {
 			opacket.pts = ipacket.pts;
@@ -1205,22 +1389,22 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 	else
 		pts += sqrt((double)frameNum);
 
-	//if (codec->coded_frame->pts != AV_NOPTS_VALUE) 
-	//	opacket.pts = av_rescale_q(codec->coded_frame->pts, codec->time_base, stream->time_base);
+	//if (ctx->coded_frame->pts != AV_NOPTS_VALUE) 
+	//	opacket.pts = av_rescale_q(ctx->coded_frame->pts, ctx->time_base, stream->time_base);
 	opacket.pts = pts;
 		
 		Log("trace") << "[AudioEncoderContext:" << this << "] Encoding AUDIO Packet:\n"
-			//<< "\n\AV_NOPTS_VALUE: " << (codec->coded_frame->pts != AV_NOPTS_VALUE)
-			//<< "\n\codec->coded_frame: " << codec->coded_frame
-			//<< "\n\codec->coded_frame->pts: " << codec->coded_frame->pts
-			<< "\n\codec->time_base: " << codec->time_base.den
-			<< "\n\codec->time_base num: " << codec->time_base.num
+			//<< "\n\AV_NOPTS_VALUE: " << (ctx->coded_frame->pts != AV_NOPTS_VALUE)
+			//<< "\n\ctx->coded_frame: " << ctx->coded_frame
+			//<< "\n\ctx->coded_frame->pts: " << ctx->coded_frame->pts
+			<< "\n\ctx->time_base: " << ctx->time_base.den
+			<< "\n\ctx->time_base num: " << ctx->time_base.num
 			<< "\n\stream->time_base: " << stream->time_base.den
 			<< "\n\stream->time_base num: " << stream->time_base.num
 			//<< "\n\opacket.pts: " << opacket.pts
 			<< endl;
 
-	if (codec->coded_frame->key_frame) 
+	if (ctx->coded_frame->key_frame) 
         opacket.flags |= AV_PKT_FLAG_KEY;
 
 	opacket.stream_index = stream->index;
@@ -1246,7 +1430,7 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 	// Initializes the audio buffers
 	//this->buffer = new unsigned char[MAX_AUDIO_PACKET_SIZE];
 
-	// Add an audio stream that uses the format's default video codec 
+	// Add an audio stream that uses the format's default audio codec 
 	// to the format context's streams[] array.
 	stream = av_new_stream(oc, 0);
 	if (!stream)
@@ -1256,12 +1440,12 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 	//AVPacket packet;
 	av_init_packet(&packet);
 
-	if (codec->coded_frame && 
-		codec->coded_frame->pts != AV_NOPTS_VALUE) 
-		packet->pts = av_rescale_q(codec->coded_frame->pts, codec->time_base, stream->time_base);
+	if (ctx->coded_frame && 
+		ctx->coded_frame->pts != AV_NOPTS_VALUE) 
+		packet->pts = av_rescale_q(ctx->coded_frame->pts, ctx->time_base, stream->time_base);
 			
-	if (codec->coded_frame &&
-		codec->coded_frame->key_frame) 
+	if (ctx->coded_frame &&
+		ctx->coded_frame->key_frame) 
         packet->flags |= AV_PKT_FLAG_KEY;
 
 	packet->stream_index = stream->index;
@@ -1278,7 +1462,7 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 		}
 	} 
 	else {
-		Log("warn") << "[AudioEncoderContext:" << this << "] Encoded video frame size is NULL; it may have been buffered." << endl;
+		Log("warn") << "[AudioEncoderContext:" << this << "] Encoded audio frame size is NULL; it may have been buffered." << endl;
 		return false;
 	}
 
@@ -1308,7 +1492,7 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 	/*
 	Log("debug") << "[AudioEncoderContext:" << this << "] Encoded audio frame:" 
 		<< "\n\tFrame Size: " << size << "\n"
-		<< "\n\tCoded Frame: " << codec->coded_frame << "\n"
+		<< "\n\tCoded Frame: " << ctx->coded_frame << "\n"
 		<< "\n\tKey Frame: " << (packet->flags & AV_PKT_FLAG_KEY) << "\n"
 		<< endl;
 		*/
@@ -1320,19 +1504,19 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 		av_fifo_generic_read(_audioFifo, _audioFifoOutBuffer, _audioOutSize, NULL);
 
  		// Encode a frame of AudioOutSize bytes
-		int size = avcodec_encode_audio(codec, this->buffer, _audioOutSize, (short*)_audioFifoOutBuffer);
+		int size = avcodec_encode_audio(ctx, this->buffer, _audioOutSize, (short*)_audioFifoOutBuffer);
 		if (size) {
 			AVPacket packet;
 			av_init_packet(&packet);
-			if (codec->coded_frame && 
-				codec->coded_frame->pts != AV_NOPTS_VALUE) 
-				packet->pts = av_rescale_q(codec->coded_frame->pts, codec->time_base, stream->time_base);
+			if (ctx->coded_frame && 
+				ctx->coded_frame->pts != AV_NOPTS_VALUE) 
+				packet->pts = av_rescale_q(ctx->coded_frame->pts, ctx->time_base, stream->time_base);
 			
-			if (codec->coded_frame &&
-				codec->coded_frame->key_frame) 
+			if (ctx->coded_frame &&
+				ctx->coded_frame->key_frame) 
                 packet->flags |= AV_PKT_FLAG_KEY;
 
-            //if (codec->coded_frame->key_frame)
+            //if (ctx->coded_frame->key_frame)
             //    packet->flags |= PKT_FLAG_KEY;
 			//}
 			//packet->flags |= AV_PKT_FLAG_KEY;
@@ -1348,7 +1532,7 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 			}
 		} 
 		else {
-			Log("warn") << "[AudioEncoderContext:" << this << "] Encoded video frame size is NULL; it may have been buffered." << endl;
+			Log("warn") << "[AudioEncoderContext:" << this << "] Encoded audio frame size is NULL; it may have been buffered." << endl;
 			return false;
 		}
 	}

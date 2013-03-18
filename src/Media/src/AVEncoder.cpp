@@ -151,12 +151,12 @@ void AVEncoder::initialize()
 		
 		// Set the container codec
 		string ofmt = _options.ofile.empty() ? "." + 
-			_options.oformat.extension() : 
+			string(_options.oformat.id) : 
 			_options.ofile;		
-		_formatCtx->oformat = av_guess_format(/*_options.oformat.encoderName().data()*/NULL, ofmt.data(), NULL);	
+		_formatCtx->oformat = av_guess_format(_options.oformat.id, ofmt.data(), NULL);	
 		if (!_formatCtx->oformat)
-			throw Exception("Cannot find suitable output format for " + _options.oformat.encoderName());
-		
+			throw Exception("Cannot find suitable encoding format for " + _options.oformat.label);
+
 		/*
 		// Set the encoder codec
 		if (_options.oformat.video.enabled)
@@ -186,7 +186,8 @@ void AVEncoder::initialize()
 			_video = new VideoEncoderContext();
 			_video->iparams = _options.iformat.video;
 			_video->oparams = _options.oformat.video;
-			_video->open(_formatCtx);
+			_video->create(_formatCtx);
+			_video->open();
 		}
 
 		// Initialize the audio encoder (if required)
@@ -194,7 +195,8 @@ void AVEncoder::initialize()
 			_audio = new AudioEncoderContext();
 			_audio->iparams = _options.iformat.audio;
 			_audio->oparams = _options.oformat.audio;
-			_audio->open(_formatCtx);			
+			_audio->create(_formatCtx);
+			_audio->open();			
 
 			// Set the output frame size for encoding
 			_audioOutSize = _audio->stream->codec->frame_size * 
@@ -593,17 +595,17 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 	// video input size has changed.
 	if (_video->ConvCtx == NULL) {
 		_video->ConvCtx = sws_getContext(
-			width, height, (::PixelFormat)_options.iformat.video.pixfmt, //static_cast<::PixelFormat>()
-			codec->width, codec->height, codec->pix_fmt,
+			width, height, (::PixelFormat)_options.iformat.video.pixelFmt, //static_cast<::PixelFormat>()
+			ctx->width, ctx->height, ctx->pix_fmt,
 			SWS_BICUBIC, NULL, NULL, NULL);
 
 		Log("trace") << "[AVEncoder:" << this << "] Initializing Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << width
 			<< "\n\tInput Height: " << height
-			<< "\n\tInput Pixel Format: " << _options.iformat.video.pixfmt
-			<< "\n\tOutput Width: " << codec->width
-			<< "\n\tOutput Height: " << codec->height
-			<< "\n\tOutput Pixel Format: " << codec->pix_fmt
+			<< "\n\tInput Pixel Format: " << _options.iformat.video.pixelFmt
+			<< "\n\tOutput Width: " << ctx->width
+			<< "\n\tOutput Height: " << ctx->height
+			<< "\n\tOutput Pixel Format: " << ctx->pix_fmt
 			<< endl;
 	}
 	

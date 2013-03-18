@@ -47,9 +47,12 @@ ImageEncoder::ImageEncoder(EncoderOptions& options, vector<int> cvParams) :
 {	
 	Log("debug") << "[ImageEncoder" << this << "] Creating" << endl;
 
-	if (_options.oformat.id == Format::MJPEG)
+	if (_options.oformat.id == "jpeg" ||
+		_options.oformat.id == "mjpeg")
 		_extension = ".jpg";
-	else if (_options.oformat.id == Format::MPNG)
+	else if (
+		_options.oformat.id == "png" ||
+		_options.oformat.id == "mpng")
 		_extension = ".png";
 	else 
 		// TODO: support more!

@@ -72,9 +72,9 @@ public:
 		_refCount++;
 	}
 
-	virtual void detach(const DelegateT& delegate) 
+	virtual bool detach(const DelegateT& delegate) 
 		/// Detaches a delegate from the signal.
-		/// If the delegate is not found, the detach will be ignored.
+		/// Returns true if the delegate was detached, false otherwise.
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
@@ -82,9 +82,10 @@ public:
 				(*it)->cancel();
 				_hasCancelled = true;
 				_refCount--;
-				return;
+				return true;
 			}
 		}
+		return false;
 	}
 
 	virtual void detachAll(const Void klass) 

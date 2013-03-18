@@ -265,9 +265,9 @@ void RotatingFileChannel::write(const string& message, LogLevel level, const ILo
 	*_stream << ss.str();
 	_stream->flush();
 
-//#if defined(_DEBUG) && defined(_CONSOLE)
+#if defined(_DEBUG) && defined(_CONSOLE)
 	cout << ss.str();
-//#endif
+#endif
 #if defined(_DEBUG) && defined(_MSC_VER)
 	std::string s(ss.str());
 	std::wstring temp(s.length(), L' ');

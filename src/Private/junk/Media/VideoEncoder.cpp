@@ -117,7 +117,7 @@ void VideoEncoder::initEncodeContext()
     oContext->width = _params.oformat.video.width;
     oContext->height = _params.oformat.video.height;
     oContext->gop_size = _params.oformat.video.fps; //12;
-    //oContext->pix_fmt = static_cast<PixelFormat>(_params.oformat.video.pixfmt);	    	
+    //oContext->pix_fmt = static_cast<PixelFormat>(_params.oformat.video.pixelFmt);	    	
     oContext->time_base.den = _params.oformat.video.fps;
     oContext->time_base.num = 1;
 	//oContext->bit_rate = 400000;	
@@ -141,7 +141,7 @@ void VideoEncoder::initEncodeContext()
 
 	// MJPEG specifics
 	else if (_params.oformat.video.id == Codec::MJPEG) {
-		//oCodec.pixfmt = Media::YUVJ420P;	
+		//oCodec.pixelFmt = Media::YUVJ420P;	
 		oContext->pix_fmt = (::PixelFormat)PixelFormat::YUVJ420P; 
 		oContext->flags |= CODEC_FLAG_QSCALE;
 		oContext->global_quality = 1;
@@ -187,12 +187,12 @@ void VideoEncoder::initScaleContext() //const VideoCodec& iCodec
 	//Log("debug") << "[VideoEncoder" << this << "] Scale Parameters:\n" << _params.iformat.video.toString() << endl;
 
     avpicture_alloc(reinterpret_cast<AVPicture*>(_iFrame), 
-		(::PixelFormat)_params.iformat.video.pixfmt, 
+		(::PixelFormat)_params.iformat.video.pixelFmt, 
 		_params.iformat.video.width, _params.iformat.video.height);
     avpicture_alloc(reinterpret_cast<AVPicture*>(_oFrame), 
 		_encoderContext->pix_fmt, _encoderContext->width, _encoderContext->height);
 	_resizeContext = sws_getContext(_params.iformat.video.width, _params.iformat.video.height, 
-		(::PixelFormat)_params.iformat.video.pixfmt,
+		(::PixelFormat)_params.iformat.video.pixelFmt,
         _encoderContext->width, _encoderContext->height, _encoderContext->pix_fmt, 
 		/* SWS_FAST_BILINEAR */SWS_BICUBIC, NULL, NULL, NULL);
     if (!_resizeContext) 
@@ -304,14 +304,14 @@ int VideoEncoder::encode(unsigned char *input, int inputSize) ///*, unsigned cha
 }
 
 
-AVFrame* VideoEncoder::MakeBlackFrame(PixelFormat::ID pixfmt, int width, int height)
+AVFrame* VideoEncoder::MakeBlackFrame(PixelFormat::ID pixelFmt, int width, int height)
 {
     AVFrame* f = avcodec_alloc_frame();
-    unsigned long size = avpicture_get_size((::PixelFormat)pixfmt, width, height);
+    unsigned long size = avpicture_get_size((::PixelFormat)pixelFmt, width, height);
     UInt8 *buffer = (UInt8*)av_malloc(size*sizeof(UInt8));
 
     memset(buffer, 0, size);
-    avpicture_fill((AVPicture *)f, buffer, (::PixelFormat)pixfmt, width, height);
+    avpicture_fill((AVPicture *)f, buffer, (::PixelFormat)pixelFmt, width, height);
 
     return f;
 }
