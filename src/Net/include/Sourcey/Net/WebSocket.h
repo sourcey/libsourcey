@@ -124,7 +124,7 @@ public:
 	{
 		_headerState = 0;
 	
-		Log("debug", this) << "Web Socket Connecting to " << _uri.toString() << endl;	
+		log("debug") << "Web Socket Connecting to " << _uri.toString() << endl;	
 
 		// Will throw on error
 		SocketBaseT::connect(Address(_uri.getHost(), port()));
@@ -133,7 +133,7 @@ public:
 
 	virtual void close()
 	{
-		Log("debug", this) << "WebSocket Closing" << endl;
+		log("debug") << "WebSocket Closing" << endl;
 		_headerState = 0;
 	
 		try {
@@ -146,7 +146,7 @@ public:
 		}
 		catch (Exception& exc) {
 			// Not a fatal error
-			Log("warn", this) << "WebSocket Closing Error: " << exc.displayText() << endl;
+			log("warn") << "WebSocket Closing Error: " << exc.displayText() << endl;
 		}
 
 		SocketBaseT::close();
@@ -155,7 +155,7 @@ public:
 
 	void sendHandshake()
 	{
-		Log("debug", this) << "Sending Handshake" << endl;
+		log("debug") << "Sending Handshake" << endl;
 
 		Poco::Net::SocketStream ss(*this);
 	
@@ -186,7 +186,7 @@ public:
 
 	virtual int send(const char* data, int size)
 	{
-		//Log("trace", this) << "Send: " << (std::string(data, size)) << endl;	
+		//log("trace") << "Send: " << (std::string(data, size)) << endl;	
 		Poco::Net::SocketStream ss(*this);
 		ss.put(0x00);
 		ss.write(data, size);
@@ -206,18 +206,18 @@ public:
 
 	virtual void recv(Buffer& buffer) 
 	{
-		Log("trace", this) << "On Data: " << buffer.size() << endl;
+		log("trace") << "On Data: " << buffer.size() << endl;
 	
 		if (buffer.size() == 0 || (
 			buffer.size() == 2 && buffer.data()[0] == 0xff && buffer.data()[1] == 0x00)) {
-			Log("debug", this) << "Recv Close" << endl;
+			log("debug") << "Recv Close" << endl;
 			close();
 			return;
 		}
 	
 		// Read Messages
 		else if (_headerState == 2) {
-			Log("trace", this) << "Parsing Messages: " << buffer.size() << endl;
+			log("trace") << "Parsing Messages: " << buffer.size() << endl;
 		
 			while (!buffer.eof()) {
 				std::string message;
@@ -225,7 +225,7 @@ public:
 				buffer.readUInt8(start);
 
 				if (start != 0x00) {
-					Log("warn", this) << "Message contains bad start code" << endl;
+					log("warn") << "Message contains bad start code" << endl;
 					return;
 				}
 
@@ -233,7 +233,7 @@ public:
 					buffer.readString(message, buffer.remaining() - 1);
 				}
 			
-				Log("trace", this) << "Parsed Message: " << message << endl;
+				log("trace") << "Parsed Message: " << message << endl;
 				Buffer msgBuf(message.data(), message.size());
 				packetize(msgBuf);
 				buffer++;
@@ -245,9 +245,9 @@ public:
 		else if (_headerState == 0) { //stateEquals(ClientState::Connected)
 
 			std::string request(buffer.data(), buffer.size());
-			Log("debug", this) << "Parsing Header: " << request << endl;			
+			log("debug") << "Parsing Header: " << request << endl;			
 			if (strncmp(request.data(), "HTTP/1.1 101 ", 13) == 0) {
-				Log("debug", this) << "Received HTTP Response" << endl;	
+				log("debug") << "Received HTTP Response" << endl;	
 				size_t pos = pos = request.find("\r\n\r\n");
 				if (pos != std::string::npos) {
 					buffer.setPosition(pos + 4);
@@ -266,7 +266,7 @@ public:
 		if (_headerState == 1 && buffer.remaining() >= 16) {
 			std::string replyDigest;
 			buffer.readString(replyDigest, 16);
-			Log("debug", this) << "Reply Digest: " << replyDigest << endl;
+			log("debug") << "Reply Digest: " << replyDigest << endl;
 			_headerState = 2;
 
 			// TODO: Validate Digest
@@ -303,14 +303,14 @@ public:
 protected:	
 	virtual void onConnect()
 	{
-		Log("debug", this) << "Web Socket Connected" << endl;
+		log("debug") << "Web Socket Connected" << endl;
 		SocketBaseT::onConnect();
 		sendHandshake();
 	}
 
 	virtual void onOnline()
 	{
-		Log("debug", this) << "Web Socket Online" << endl;
+		log("debug") << "Web Socket Online" << endl;
 
 		Online.dispatch(static_cast<SocketBaseT::InterfaceT*>(this));
 	}

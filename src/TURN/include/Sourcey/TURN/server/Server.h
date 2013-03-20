@@ -51,7 +51,7 @@ namespace Sourcey {
 namespace TURN {
 
 
-class Server: public ILoggable
+class Server: public IPolymorphic
 {
 public:
 	struct Options 

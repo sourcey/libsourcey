@@ -93,7 +93,7 @@ bool TCPService::start(unsigned short port)
 
 	try 
 	{	
-		Log("debug") << "[TCPService] Starting on " << port << endl;	
+		LogDebug() << "[TCPService] Starting on " << port << endl;	
 		_serverSock.bind(port);
 		_serverSock.listen();
 
@@ -109,7 +109,7 @@ bool TCPService::start(unsigned short port)
 	} 
 	catch (Poco::Exception& exc) 
 	{
-		Log("error") << "[TCPService] Failed to initialize: " << exc.displayText() << endl;
+		LogError() << "[TCPService] Failed to initialize: " << exc.displayText() << endl;
 		setState(this, TCPServiceState::Error, exc.displayText());
 	}		
 
@@ -119,7 +119,7 @@ bool TCPService::start(unsigned short port)
 
 void TCPService::stop()
 {	
-	Log("debug") << "[TCPService] Stopping" << endl;
+	LogDebug() << "[TCPService] Stopping" << endl;
 	if (_server)
 		_server->stop();
 
@@ -142,7 +142,7 @@ void FlashPolicyRequestHandler::run()
 {	
 	string policy("<?xml version=\"1.0\"?><cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>");
 	socket().sendBytes(policy.data(), policy.length()+1);
-	Log("debug") << "ProxyServer: Sending policy file response: " << policy << endl;
+	LogDebug() << "ProxyServer: Sending policy file response: " << policy << endl;
 }
 
 
@@ -159,7 +159,7 @@ BadRequestHandler::BadRequestHandler(const StreamSocket& s) :
 
 void BadRequestHandler::run() 
 {
-	Log("debug") << "Bad Request Handler" << endl;	
+	LogDebug() << "Bad Request Handler" << endl;	
 	socket().close();
 }
 

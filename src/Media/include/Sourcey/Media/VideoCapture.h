@@ -29,6 +29,8 @@
 #define SOURCEY_MEDIA_VideoCapture_H
 
 
+#include "Sourcey/Base.h"
+#include "Sourcey/Flaggable.h"
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/Format.h"
 #include "Sourcey/Media/ICapture.h"
@@ -47,8 +49,11 @@
 namespace Sourcey {
 namespace Media {
 
-	
+
+// ---------------------------------------------------------------------
+//
 struct VideoDelegate: public PacketDelegateBase
+	/// Polymorphic packet delegate for the VideoPacket type.
 {
 	typedef double DataT;
 
@@ -63,7 +68,7 @@ struct VideoDelegate: public PacketDelegateBase
 		if (_fps) {
 			_counter.tick();
 			if (_counter.fps > _fps) {
-				Log("debug") << "skipping frame" << std::endl;
+				LogDebug() << "skipping frame" << std::endl;
 				return false;
 			}
 		}		
@@ -79,19 +84,40 @@ protected:
 DefinePolymorphicDelegateWithArg(videoDelegate, IPacket, VideoDelegate, double, 0)
 
 
-// ---------------------------------------------------------------------
-//
 class VideoCapture: public ICapture, public Poco::Runnable 
-	/// Class for video capturing from video files or cameras.
-	/// Requires OpenCV.
+	/// Class for capturing video from files or cameras using OpenCV.
+	///
+	/// Usage:
+	/// VideoCapture instances should be created in the main
+	/// thread to eliminate unexpected behaviour inherent in OpenCV.
+	/// Also avoid creating multiple instances using the same device.
+	/// Instead reuse the same instance, preferrably using the 
+	/// MediaFactory interface.
 	/// 
-	/// WINDOWS USERS:
+	/// Windows:
 	/// OpenCV HighGUI DirectShow must be compiled with
-	/// VI_COM_MULTI_THREADED defined otherwise capture will fail.
+	/// VI_COM_MULTI_THREADED defined otherwise capture 
+	/// there will be CoInitialize conflicts.
 {
 public:
-	VideoCapture(int deviceId);
+	enum Flag 
+	{
+		DestroyOnStop		= 0x01, 
+		SyncWithDelegates	= 0x02,
+		ErrorState			= 0x04//,
+		//		= 0x08,
+		//		= 0x10,
+		//		= 0x20,
+	};
+
+	VideoCapture(int deviceId); 
+		/// Creates and opens the given device ID
+		/// Should be created in the main thread
+
 	VideoCapture(const std::string& filename);
+		/// Creates and opens the given video file
+		/// Can be created in any thread
+
 	virtual ~VideoCapture();
 	
 	virtual void start();
@@ -105,22 +131,19 @@ public:
 	virtual bool isOpened() const;
 	virtual bool isRunning() const;
 
-	virtual void setDestroyOnStop(bool flag);
-
 	virtual int deviceId() const;
 	virtual std::string	filename() const;
 	virtual std::string	name() const;
 	virtual int width() const;
 	virtual int height() const;
 	virtual double fps() const;
-	virtual bool destroyOnStop() const;
+	virtual Flags flags() const;
 	virtual cv::VideoCapture& capture();
 
 protected:	
 	virtual bool open();
 	virtual void release();
-	virtual void grab();
-	virtual bool check();	
+	virtual cv::Mat grab();
 	virtual void run();
 
 private:   
@@ -129,6 +152,7 @@ private:
 	Poco::Thread		_thread;
 	cv::VideoCapture	_capture;
 	cv::Mat				_frame;	
+	Flags				_flags;	
 	int					_deviceId;	// Source device to capture from
 	std::string			_filename;	// Source file to capture from
 	int					_width;		// Capture width
@@ -136,7 +160,6 @@ private:
 	bool                _isImage;	// Source file is an image or not
 	bool				_isOpened;
 	bool				_stop;
-	bool				_destroyOnStop;
 	FPSCounter			_counter;
 	Poco::Event			_wakeUp;
 };
@@ -149,7 +172,8 @@ inline void AllocateOpenCVInputFormat(const VideoCapture* capture, Format& forma
 	assert(capture);
 	format.type = Format::Video;
 	format.label = "OpenCV";
-	format.id = "rawvideo";
+	format.id = "mjpeg";
+	format.video.encoder = "mjpeg";
 	format.video.pixelFmt = "bgr24";
 	format.video.width = capture ? capture->width() : 0;
 	format.video.height = capture ? capture->height(): 0;
@@ -175,6 +199,10 @@ struct MatPacket: public VideoPacket
 	MatPacket(cv::Mat* mat, double time = 0) :
 		VideoPacket((unsigned char*)mat->data, mat->total(), mat->cols, mat->rows, time),
 		mat(mat) {};
+
+	//void init(cv::Mat* mat) const {
+	//	data = 
+	//}	
 
 	virtual IPacket* clone() const {
 		return new MatPacket(*this);
@@ -217,9 +245,9 @@ public:
 		if (_fps) {
 			if (_counter.started()) {
 				_counter.endFrame();
-				//std::Log("debug") << "counter fps: " << _counter.fps << std::endl;
+				//std::LogDebug() << "counter fps: " << _counter.fps << std::endl;
 				if (_counter.fps > _fps) {
-					//std::Log("debug") << "skipping frame" << std::endl;
+					//std::LogDebug() << "skipping frame" << std::endl;
 					return false;
 				}
 			}
@@ -247,7 +275,7 @@ template <class C, typename VideoPacket>
 static Delegate<C, 
 	VideoDelegate,
 	DelegateCallback<C, 8, false, VideoPacket>, IPolymorphic&
-> polymorphicDelegate(C* pObj, void (C::*Method)(VideoPacket&), double fps = 0, int priority = 0) 
+> PolymorphicDelegate(C* pObj, void (C::*Method)(VideoPacket&), double fps = 0, int priority = 0) 
 {
 	return Delegate<C, 
 		VideoDelegate,
@@ -260,7 +288,7 @@ template <class C, typename VideoPacket>
 static Delegate<C, 
 	VideoDelegate,
 	DelegateCallback<C, 8, true, VideoPacket>, IPolymorphic&
-> polymorphicDelegate(C* pObj, void (C::*Method)(Void, VideoPacket&), double fps = 0, int priority = 0) 
+> PolymorphicDelegate(C* pObj, void (C::*Method)(Void, VideoPacket&), double fps = 0, int priority = 0) 
 {
 	return Delegate<C, 
 		VideoDelegate,

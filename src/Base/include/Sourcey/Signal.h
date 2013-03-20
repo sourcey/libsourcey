@@ -214,6 +214,15 @@ protected:
 
 // -------------------------------------------------------------------
 //
+struct StopPropagation: public std::exception
+	// An exception used to break the current callback scope.
+{
+	virtual ~StopPropagation() throw() {};
+};
+
+
+// -------------------------------------------------------------------
+//
 class NullSignal: public SignalBase< 
 	DelegateBase<> 
 > {};

@@ -53,7 +53,7 @@ public:
 		PacketTransaction<PacketT>(runner, timeout, retries), 
 		_socket(socket), _localAddress(localAddress), _peerAddress(peerAddress)
 	{
-		Log("debug") << "[NetTransaction:" << this << "] Creating" << std::endl;
+		LogDebug() << "[NetTransaction:" << this << "] Creating" << std::endl;
 	}
 
 	virtual bool send()
@@ -68,7 +68,7 @@ public:
 	
 	virtual void cancel()
 	{
-		Log("debug") << "[NetTransaction:" << this << "] Canceling" << std::endl;
+		LogDebug() << "[NetTransaction:" << this << "] Canceling" << std::endl;
 		{
 			Poco::FastMutex::ScopedLock lock(PacketTransaction<PacketT>::_mutex);
 			if (_socket) {
@@ -87,7 +87,7 @@ public:
 
 	virtual void onResponse()
 	{
-		Log("debug") << "[NetTransaction:" << this << "] Response" << std::endl;
+		LogDebug() << "[NetTransaction:" << this << "] Response" << std::endl;
 		{
 			// Detach delegates onResponse before state callback.
 			// Remove callbacks, but do not nullify the socket,
@@ -103,7 +103,7 @@ public:
 
 	virtual void onComplete()
 	{
-		Log("debug") << "[NetTransaction:" << this << "] Complete" << std::endl;
+		LogDebug() << "[NetTransaction:" << this << "] Complete" << std::endl;
 		{
 			// Nullify the socket on completion.
 			Poco::FastMutex::ScopedLock lock(PacketTransaction<PacketT>::_mutex);
@@ -143,7 +143,7 @@ public:
 protected:
 	virtual ~Transaction()
 	{
-		Log("debug") << "[Transaction:" << this << "] Destroying" << std::endl;
+		LogDebug() << "[Transaction:" << this << "] Destroying" << std::endl;
 	}
 
 	virtual bool match(const PacketT& packet) 

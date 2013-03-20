@@ -386,21 +386,21 @@ public:
 		_options(options),
 		_announceStatus(500)
 	{
-		Log("trace") << "[Symple::Client:" << this << "] Creating" << std::endl;
+		LogTrace() << "[Symple::Client:" << this << "] Creating" << std::endl;
 	}
 
 
 	virtual ~Client() 
 	{
-		Log("trace") << "[Symple::Client:" << this << "] Destroying" << std::endl;
+		LogTrace() << "[Symple::Client:" << this << "] Destroying" << std::endl;
 		close();
-		Log("trace") << "[Symple::Client:" << this << "] Destroying: OK" << std::endl;
+		LogTrace() << "[Symple::Client:" << this << "] Destroying: OK" << std::endl;
 	}
 
 
 	void connect()
 	{
-		Log("trace") << "[Symple::Client:" << this << "] Connecting" << std::endl;
+		LogTrace() << "[Symple::Client:" << this << "] Connecting" << std::endl;
 		
 		{
 			Poco::FastMutex::ScopedLock lock(_mutex);
@@ -415,7 +415,7 @@ public:
 
 	void close()
 	{
-		Log("trace") << "[Symple::Client:" << this << "] Closing" << std::endl;
+		LogTrace() << "[Symple::Client:" << this << "] Closing" << std::endl;
 
 		SocketIO::Client::close();
 	}
@@ -434,7 +434,7 @@ public:
 		message.setFrom(ourPeer().address());
 		assert(message.valid());
 		assert(message.to().id() != message.from().id());
-		Log("trace") << "[Symple::Client:" << this << "] Sending Message: " 
+		LogTrace() << "[Symple::Client:" << this << "] Sending Message: " 
 			<< message.id() << ":\n" 
 			<< JSON::stringify(message, true) << std::endl;
 		return SocketIO::Client::send(message, false);
@@ -443,7 +443,7 @@ public:
 
 	virtual void createPresence(Presence& p)
 	{
-		Log("trace") << "[Symple::Client:" << this << "] Creating Presence" << std::endl;
+		LogTrace() << "[Symple::Client:" << this << "] Creating Presence" << std::endl;
 
 		Peer& peer = ourPeer();
 		UpdatePresenceData.dispatch(this, peer);
@@ -453,7 +453,7 @@ public:
 
 	virtual int sendPresence(bool probe = false)
 	{
-		Log("trace") << "[Symple::Client:" << this << "] Broadcasting Presence" << std::endl;
+		LogTrace() << "[Symple::Client:" << this << "] Broadcasting Presence" << std::endl;
 
 		Presence p;
 		createPresence(p);
@@ -464,7 +464,7 @@ public:
 
 	virtual int sendPresence(const Address& to, bool probe = false)
 	{
-		Log("trace") << "[Symple::Client:" << this << "] Sending Presence" << std::endl;
+		LogTrace() << "[Symple::Client:" << this << "] Sending Presence" << std::endl;
 	
 		Presence p;
 		createPresence(p);
@@ -526,7 +526,7 @@ public:
 	virtual Peer& ourPeer()
 	{	
 		Poco::FastMutex::ScopedLock lock(_mutex);
-		Log("trace") << "[Symple::Client:" << this << "] Getting Our Peer: " << _ourID << std::endl;
+		LogTrace() << "[Symple::Client:" << this << "] Getting Our Peer: " << _ourID << std::endl;
 		if (_ourID.empty())
 			throw Exception("No active peer session is available.");
 		return *_roster.get(_ourID, true);
@@ -564,7 +564,7 @@ protected:
 
 	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
 	{
-		Log("trace") << "[Symple::Client:" << this << "] Announce Response: " << state.toString() << std::endl;
+		LogTrace() << "[Symple::Client:" << this << "] Announce Response: " << state.toString() << std::endl;
 	
 		SocketIO::Transaction* transaction = reinterpret_cast<SocketIO::Transaction*>(sender);
 		switch (state.id()) {	
@@ -611,7 +611,7 @@ protected:
 
 	virtual void onOnline()
 	{
-		Log("trace") << "[Symple::Client:" << this << "] On Online" << std::endl;
+		LogTrace() << "[Symple::Client:" << this << "] On Online" << std::endl;
 
 		// Override this method because we are not quite
 		// ready to transition to Online yet - we still
@@ -622,7 +622,7 @@ protected:
 
 	virtual bool onPacketCreated(IPacket* packet) 
 	{
-		Log("trace") << "[Symple::Client:" << this << "] Packet Created: " << packet->className() << std::endl;
+		LogTrace() << "[Symple::Client:" << this << "] Packet Created: " << packet->className() << std::endl;
 
 		// Catch incoming messages here so we can parse
 		// messages and handle presence updates.
@@ -639,7 +639,7 @@ protected:
 			}
 		
 			string type(data["type"].asString());
-			Log("trace") << "[Symple::Client:" << this << "] Packet Created: Symple Type: " << type << std::endl;
+			LogTrace() << "[Symple::Client:" << this << "] Packet Created: Symple Type: " << type << std::endl;
 			if (type == "message") {
 				Message m(data);
 				dispatch(this, m);
@@ -666,7 +666,7 @@ protected:
 
 	virtual void onClose()
 	{
-		Log("trace") << "[[Symple::Client:" << this << "] Closing" << std::endl;
+		LogTrace() << "[[Symple::Client:" << this << "] Closing" << std::endl;
 		SocketIO::Client::onClose();
 		reset();
 	}

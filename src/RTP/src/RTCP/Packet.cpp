@@ -96,7 +96,7 @@ bool Packet::read(Buffer& buffer)
 	// TODO: Proper checking...
 
 	if (buffer.remaining() < 4) {
-		Log("error") << "RTCP: Buffer too small to parse RTCP header. " 
+		LogError() << "RTCP: Buffer too small to parse RTCP header. " 
 			<< "Needed 4 but got " << buffer.remaining() << "."
 			<< endl;
 		return false;
@@ -112,7 +112,7 @@ bool Packet::read(Buffer& buffer)
 	buffer.readUInt16(this->length);
 
 	if (buffer.remaining() < this->length - 4) {
-		Log("error") 
+		LogError() 
 			<< "RTCP: Buffer too small to parse RTCP packet: " << (int)this->packetType << ". " 
 			<< "Needed " << (this->length - 4) << " but got " << buffer.remaining() << "."
 			<< endl;

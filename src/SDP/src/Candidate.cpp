@@ -58,7 +58,7 @@ Candidate::Candidate(const string& src) :
 
 	size_t len = src.length();
 	if (src.substr(0, 11) != "a=candidate") {
-		Log("error") << "ERROR: Contact sdp line does not start with <a=candidate>" << std::endl;
+		LogError() << "ERROR: Contact sdp line does not start with <a=candidate>" << std::endl;
 	}
 	size_t i = 12;
 	while (src[i] == ' ' && i < len)

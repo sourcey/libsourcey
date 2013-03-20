@@ -74,7 +74,7 @@ Stanza* Stanza::create(const XML::Document& src)
 		strcmp(src.first_child().name(), "message") == 0)
 		return new Message(src);
 	
-	Log("debug") << "[Stanza] Unable to create XMPP stanza." << endl;
+	LogDebug() << "[Stanza] Unable to create XMPP stanza." << endl;
 	return NULL;
 }
 
@@ -97,14 +97,14 @@ Stanza* Stanza::create(const char* data)
 		return new Message(data);
 	}
 	
-	Log("debug") << "[Stanza] Unable to create XMPP stanza." << endl;
+	LogDebug() << "[Stanza] Unable to create XMPP stanza." << endl;
 	return NULL;
 }
 
 
 Stanza* Stanza::clone() const 
 {
-	Log("debug") << "Cloning Stanza: " << id() << endl;
+	LogDebug() << "Cloning Stanza: " << id() << endl;
 	return new Stanza(*this);
 }
 
@@ -308,7 +308,7 @@ Error Error::setText(const string& text)
 IQ::IQ(const char* data) : 
 	Stanza(data ? data : "<iq/>") 
 {
-	//Log("debug") << "Creating IQ: " << id() << endl;
+	//LogDebug() << "Creating IQ: " << id() << endl;
 
 	if (!data) {
 		setId(CryptoProvider::generateRandomKey(16));
@@ -337,7 +337,7 @@ IQ::IQ(const XML::Document& src) :
 	
 Stanza* IQ::clone() const
 {
-	//Log("debug") << "Cloning IQ: " << id() << endl;
+	//LogDebug() << "Cloning IQ: " << id() << endl;
 	return new IQ(*this);
 }
 
@@ -350,7 +350,7 @@ Stanza* IQ::clone() const
 Message::Message(const char* data) : 
 	Stanza(data ? data : "<message/>") 
 {
-	Log("debug") << "Creating Message: " << id() << endl;
+	LogDebug() << "Creating Message: " << id() << endl;
 	if (!data) {
 		setId(CryptoProvider::generateRandomKey(16));
 	}
@@ -365,7 +365,7 @@ Message::Message(const XML::Document& src) :
 
 Stanza* Message::clone() const
 {
-	//Log("debug") << "Cloning Message: " << id() << endl;
+	//LogDebug() << "Cloning Message: " << id() << endl;
 	return new Message(*this);
 }
 
@@ -398,7 +398,7 @@ void Message::setBody(const string& body)
 Presence::Presence(const char* data) : 
 	Stanza(data ? data : "<presence/>") 
 {
-	//Log("debug") << "Creating Presence: " << id() << endl;
+	//LogDebug() << "Creating Presence: " << id() << endl;
 	if (!data) {
 		setId(CryptoProvider::generateRandomKey(16));
 	}
@@ -413,7 +413,7 @@ Presence::Presence(const XML::Document& src) :
 
 Stanza* Presence::clone() const
 {
-	//Log("debug") << "Cloning Presence: " << id() << endl;
+	//LogDebug() << "Cloning Presence: " << id() << endl;
 	return new Presence(*this);
 }
 

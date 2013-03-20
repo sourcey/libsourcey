@@ -1,5 +1,6 @@
-#include "Sourcey/Media/AVFileReader.h"
+#include "Sourcey/Media/AVInputReader.h"
 #include "Sourcey/Logger.h"
+#include "Poco/Format.h"
 
 
 using namespace std;
@@ -11,41 +12,128 @@ namespace Sourcey {
 namespace Media {
 
 
-AVFileReader::AVFileReader(const Options& options)  : 
-	_thread("AVFileReader"),
+AVInputReader::AVInputReader(const Options& options)  : 
+	_thread("AVInputReader"),
 	_options(options),
 	_formatCtx(NULL),
 	_video(NULL),
 	_audio(NULL),
 	_stop(false)
 {		
-	Log("trace") << "[AVFileReader:" << this << "] Creating" << endl;
+	LogTrace("AVInputReader", this) << "Creating" << endl;
 }
 
 
-AVFileReader::~AVFileReader() 
+AVInputReader::~AVInputReader() 
 {
-	Log("trace") << "[AVFileReader:" << this << "] Destroying" << endl;
+	LogTrace("AVInputReader", this) << "Destroying" << endl;
 
 	close();
 }
 
 
-void AVFileReader::open(const string& ifile)
+void AVInputReader::openFile(const string& file)
 {
-	Log("trace") << "[AVFileReader:" << this << "] Opening: " << ifile << endl;
+	LogTrace("AVInputReader", this) << "Opening: " << file << endl;	
+	openStream(file.data(), NULL, NULL);
+}
+
+
+void AVInputReader::openDevice(int deviceID, int width, int height, double framerate)
+{
+	string device;
+
+#ifdef WIN32
+
+	// Only vfwcap supports index based input, 
+	// dshow requires full device name.
+	// TODO: Determine device name for for given 
+	// index using DeviceManager.
+	if (_options.deviceEngine != "vfwcap")
+		throw "Cannot open index based device";
+		
+	// Video capture on windows only through 
+	// Video For Windows driver
+	device = Poco::format("%d", deviceID);
+#else
+
+	if (_options.deviceEngine == "dv1394") {
+		device = Poco::format("/dev/dv1394/%d", deviceID);
+	} 
+	else {
+		device = Poco::format("/dev/video%d", deviceID);
+	}
+#endif
+
+	openDevice(device, width, height, framerate);
+}
+
+
+void AVInputReader::openDevice(const string& device, int width, int height, double framerate) //int deviceID, 
+{        
+	LogTrace("AVInputReader", this) << "Opening Device: " << device << endl;	
+
+	avdevice_register_all();
+
+	AVInputFormat* iformat;
+	AVDictionary*  iparams = NULL;
+        
+#ifdef WIN32
+
+    iformat = av_find_input_format(_options.deviceEngine.data());
+#else
+
+	if (_options.deviceEngine == "dv1394") {
+        iformat = av_find_input_format("dv1394");
+	} 
+	else {
+		const char* formats[] = {"video4linux2,v4l2", "video4linux2", "video4linux"};
+		int i, formatsCount = sizeof(formats) / sizeof(char*);
+		for (i = 0; i < formatsCount; i++) {
+			iformat = av_find_input_format(formats[i]);
+			if (iformat)
+				break;
+		}
+	}	
+#endif
+	
+    if (!iformat)
+		throw Exception("Couldn't find input format.");
+	
+	// frame rate
+	if (framerate)
+		av_dict_set(&iparams, "framerate", Poco::format("%f", framerate).data(), 0);
+	
+	// video size
+	if (width && height)
+		av_dict_set(&iparams, "video_size", Poco::format("%dx%d", width, height).data(), 0);
+	
+	// video standard
+	if (!_options.deviceStandard.empty())
+		av_dict_set(&iparams, "standard", _options.deviceStandard.data(), 0);
+
+	openStream(device.data(), iformat, &iparams);
+	
+	// for video capture it is important to do non blocking read
+	//_formatCtx->flags |= AVFMT_FLAG_NONBLOCK;
+
+	av_dict_free(&iparams);
+}
+
+
+void AVInputReader::openStream(const char* filename, AVInputFormat* inputFormat, AVDictionary** formatParams)
+{
+	LogTrace("AVInputReader", this) << "Opening Stream: " << *filename << endl;
 
 	av_register_all();
 
-	_ifile = ifile;
-		
-	if (avformat_open_input(&_formatCtx, ifile.data(), NULL, NULL) != 0)
-		throw Exception("Could not open the source media file.");
+	if (avformat_open_input(&_formatCtx, filename, inputFormat, formatParams) != 0)
+		throw Exception("Could not open the media source.");
 
 	if (av_find_stream_info(_formatCtx) < 0)
 		throw Exception("Could not find stream information.");
 	
-  	av_dump_format(_formatCtx, 0, ifile.data(), 0);
+  	av_dump_format(_formatCtx, 0, filename, 0);
 	
 	for (int i = 0; i < _formatCtx->nb_streams; i++) {
 		if (_formatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO && 
@@ -67,9 +155,9 @@ void AVFileReader::open(const string& ifile)
 }
 
 
-void AVFileReader::close()
+void AVInputReader::close()
 {
-	Log("trace") << "[AVFileReader:" << this << "] Closing" << endl;
+	LogTrace("AVInputReader", this) << "Closing" << endl;
 
 	if (_video) {
 		delete _video;
@@ -86,47 +174,47 @@ void AVFileReader::close()
 		_formatCtx = NULL;
   	}
 
-	Log("trace") << "[AVFileReader:" << this << "] Closing: OK" << endl;
+	LogTrace("AVInputReader", this) << "Closing: OK" << endl;
 }
 
 
-void AVFileReader::start() 
+void AVInputReader::start() 
 {
-	Log("trace") << "[AVFileReader:" << this << "] Starting" << endl;
+	LogTrace("AVInputReader", this) << "Starting" << endl;
 
 	FastMutex::ScopedLock lock(_mutex);
 	assert(_video || _audio);
 
 	if (_video || _audio &&
 		!_thread.isRunning()) {
-		Log("trace") << "[AVFileReader:" << this << "] Initializing Thread" << endl;
+		LogTrace("AVInputReader", this) << "Initializing Thread" << endl;
 		_stop = false;
 		_thread.start(*this);
 	}
 
-	Log("trace") << "[AVFileReader:" << this << "] Starting: OK" << endl;
+	LogTrace("AVInputReader", this) << "Starting: OK" << endl;
 }
 
 
-void AVFileReader::stop() 
+void AVInputReader::stop() 
 {
-	Log("trace") << "[AVFileReader:" << this << "] Stopping" << endl;
+	LogTrace("AVInputReader", this) << "Stopping" << endl;
 
 	//FastMutex::ScopedLock lock(_mutex);	
 
 	if (_thread.isRunning()) {
-		Log("trace") << "[AVFileReader:" << this << "] Terminating Thread" << endl;		
+		LogTrace("AVInputReader", this) << "Terminating Thread" << endl;		
 		_stop = true;
 		_thread.join();
 	}
 
-	Log("trace") << "[AVFileReader:" << this << "] Stopping: OK" << endl;
+	LogTrace("AVInputReader", this) << "Stopping: OK" << endl;
 }
 
 
-void AVFileReader::run() 
+void AVInputReader::run() 
 {
-	Log("trace") << "[AVFileReader:" << this << "] Running: " << _ifile << endl;
+	LogTrace("AVInputReader", this) << "Running" << endl;
 	
 	try 
 	{
@@ -145,14 +233,14 @@ void AVFileReader::run()
 						(!_options.processVideoXSecs || !_video->pts || ((ipacket.pts * av_q2d(_video->stream->time_base)) - _video->pts) > _options.processVideoXSecs) &&
 						(!_options.iFramesOnly || (ipacket.flags & AV_PKT_FLAG_KEY))) {
  						if (_video->decode(ipacket, opacket)) {
-							//Log("trace") << "[AVFileReader:" << this << "] Decoded Video: " << _video->pts << endl;
+							//LogTrace("AVInputReader", this) << "Decoded Video: " << _video->pts << endl;
 							VideoPacket video(opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
 							video.opaque = &opacket;
 							dispatch(this, video);
 						}
 					}
 					//else
-					//	Log("trace") << "[AVFileReader:" << this << "] Skipping Video Frame: " << videoFrames << endl;
+					//	LogTrace("AVInputReader", this) << "Skipping Video Frame: " << videoFrames << endl;
 					videoFrames++;
 				}
 				else if (_audio && ipacket.stream_index == _audio->stream->index) {	
@@ -160,14 +248,14 @@ void AVFileReader::run()
 						(!_options.processAudioXSecs || !_audio->pts || ((ipacket.pts * av_q2d(_audio->stream->time_base)) - _audio->pts) > _options.processAudioXSecs) &&
 						(!_options.iFramesOnly || (ipacket.flags & AV_PKT_FLAG_KEY))) {
 						if (_audio->decode(ipacket, opacket)) {			
-							//Log("trace") << "[AVFileReader:" << this << "] Decoded Audio: " << _audio->pts << endl;
+							//LogTrace("AVInputReader", this) << "Decoded Audio: " << _audio->pts << endl;
 							AudioPacket audio(opacket.data, opacket.size, _audio->pts);
 							audio.opaque = &opacket;
 							dispatch(this, audio);
 						}	
 					}
 					//else
-					//	Log("trace") << "[AVFileReader:" << this << "] Skipping Audio Frame: " << audioFrames << endl;
+					//	LogTrace("AVInputReader", this) << "Skipping Audio Frame: " << audioFrames << endl;
 					audioFrames++;
 
 					/*
@@ -178,7 +266,7 @@ void AVFileReader::run()
 						//ipacket.data += len;
 						//ipacket.size -= len;
 						
-						//Log("trace") << "[AVFileReader:" << this << "] Broadcasting Audio: " << _video->pts << endl;
+						//LogTrace("AVInputReader", this) << "Broadcasting Audio: " << _video->pts << endl;
 						AudioPacket audio(_audio->buffer, len, _audio->pts);
 						audio.opaque = &ipacket; //_audio;
 						dispatch(this, audio);
@@ -188,7 +276,7 @@ void AVFileReader::run()
 				} 
 				/*
 				else {
-					Log("warn") << "[AVFileReader:" << this << "] Dropping frame from unknown stream:"		
+					LogWarn() << "[AVInputReader:" << this << "] Dropping frame from unknown stream:"		
 						<< "\n\tStream ID: " << ipacket.stream_index
 						<< "\n\tVideo ID: " << _video->stream->index
 						<< "\n\tAudio ID: " << _audio->stream->index
@@ -231,7 +319,7 @@ void AVFileReader::run()
 				}
 
 				// End of file or error.
-				Log("debug") << "[AVFileReader:" << this << "] Decoding: EOF" << endl;
+				LogDebug() << "[AVInputReader:" << this << "] Decoding: EOF" << endl;
 				break;
 			}
 
@@ -241,48 +329,48 @@ void AVFileReader::run()
 	catch (Exception& exc) 
 	{
 		_error = exc.displayText();
-		Log("error") << "[AVFileReader:" << this << "] Decoder Error: " << _error << endl;
+		LogError() << "[AVInputReader:" << this << "] Decoder Error: " << _error << endl;
 	}
 	catch (...) 
 	{
 		_error = "Unknown Error";
-		Log("error") << "[AVFileReader:" << this << "] Unknown Error" << endl;
+		LogError() << "[AVInputReader:" << this << "] Unknown Error" << endl;
 	}
 
-	Log("trace") << "[AVFileReader:" << this << "] Exiting" << endl;
+	LogTrace("AVInputReader", this) << "Exiting" << endl;
 	ReadComplete.dispatch(this);
 }
 
 
-AVFileReader::Options& AVFileReader::options()
+AVInputReader::Options& AVInputReader::options()
 { 
 	FastMutex::ScopedLock lock(_mutex);
 	return _options; 
 }
 	
 
-AVFormatContext* AVFileReader::formatCtx() const
+AVFormatContext* AVInputReader::formatCtx() const
 {
 	FastMutex::ScopedLock lock(_mutex);	
 	return _formatCtx;
 }
 	
 
-VideoDecoderContext* AVFileReader::video() const
+VideoDecoderContext* AVInputReader::video() const
 {
 	FastMutex::ScopedLock lock(_mutex);	
 	return _video;
 }
 	
 
-AudioDecoderContext* AVFileReader::audio() const
+AudioDecoderContext* AVInputReader::audio() const
 {
 	FastMutex::ScopedLock lock(_mutex);	
 	return _audio;
 }
 
 
-string AVFileReader::error() const
+string AVInputReader::error() const
 {
 	FastMutex::ScopedLock lock(_mutex);	
 	return _error;

@@ -46,7 +46,7 @@ Buffer::Buffer()
 	_max = DEFAULT_SIZE;
 	_bytes = new char[_max];
 
-	// Log("trace") << this << ": Creating Buffer: " << _max << endl;
+	// LogTrace() << this << ": Creating Buffer: " << _max << endl;
 }
 
 
@@ -57,7 +57,7 @@ Buffer::Buffer(size_t len)
 	_max = len;
 	_bytes = new char[_max];
 
-	// Log("trace") << this << ": Creating Buffer: " << _max << endl;
+	// LogTrace() << this << ": Creating Buffer: " << _max << endl;
 }
 
 
@@ -69,7 +69,7 @@ Buffer::Buffer(const char* bytes, size_t len)
 	_bytes = new char[_max];
 	memcpy(_bytes, bytes, _end);
 
-	// Log("trace") << this << ": Creating Buffer: " << _max << endl;
+	// LogTrace() << this << ": Creating Buffer: " << _max << endl;
 }
 
 
@@ -81,7 +81,7 @@ Buffer::Buffer(const char* bytes)
 	_bytes = new char[_max];
 	memcpy(_bytes, bytes, _end);
 
-	// Log("trace") << this << ": Creating Buffer: " << _max << endl;
+	// LogTrace() << this << ": Creating Buffer: " << _max << endl;
 }
 
 
@@ -160,7 +160,7 @@ bool Buffer::readString(string& val, size_t len)
 bool Buffer::readBytes(char* val, size_t len) 
 {
 	if (len > remaining()) {
-		Log("error") << this << ": Buffer: Unable to read passed boundary." << endl;
+		LogError() << this << ": Buffer: Unable to read passed boundary." << endl;
 		return false;
 	} else {
 		memcpy(val, _bytes + _pos, len);
@@ -472,7 +472,7 @@ const char Buffer::peekChar()
 {
 	if (_end > _pos)
 		return (const char)_bytes[_pos];
-	Log("error") << "Peeking next character is NULL" << endl;
+	LogError() << "Peeking next character is NULL" << endl;
 	return 0;
 }
 
@@ -485,7 +485,7 @@ const UInt8 Buffer::peekUInt8()
 		return v;
 	}
 	
-	Log("warn") << "Peeking UInt8: NULL" << endl;
+	LogWarn() << "Peeking UInt8: NULL" << endl;
 	return 0;
 }
 
@@ -498,7 +498,7 @@ const UInt16 Buffer::peekUInt16()
 		return NetworkToHost16(v);
 	}
 	
-	Log("warn") << "Peeking UInt16: NULL" << endl;
+	LogWarn() << "Peeking UInt16: NULL" << endl;
 	return 0;
 }
 
@@ -511,7 +511,7 @@ const UInt32 Buffer::peekUInt24()
 		return NetworkToHost32(v);
 	}
 	
-	Log("warn") << "Peeking UInt24: NULL" << endl;
+	LogWarn() << "Peeking UInt24: NULL" << endl;
 	return 0;
 }
 
@@ -524,7 +524,7 @@ const UInt32 Buffer::peekUInt32()
 		return NetworkToHost32(v);
 	}
 	
-	Log("warn") << "Peeking UInt32: NULL" << endl;
+	LogWarn() << "Peeking UInt32: NULL" << endl;
 	return 0;
 }
 
@@ -537,7 +537,7 @@ const UInt64 Buffer::peekUInt64()
 		return NetworkToHost64(v);
 	}
 	
-	Log("warn") << "Peeking UInt64: NULL" << endl;
+	LogWarn() << "Peeking UInt64: NULL" << endl;
 	return 0;
 }
 

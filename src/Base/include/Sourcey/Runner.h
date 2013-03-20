@@ -31,6 +31,7 @@
 
 #include "Sourcey/Task.h"
 #include "Sourcey/Signal.h"
+#include "Sourcey/IPolymorphic.h"
 #include "Poco/Thread.h"
 #include "Poco/Event.h"
 
@@ -40,7 +41,7 @@
 namespace Sourcey {
 
 
-class Runner: public Poco::Runnable, public ILoggable
+class Runner: public Poco::Runnable, public IPolymorphic
 	/// The Runner is an asynchronous event loop in charge
 	/// of one or many tasks. 
 	///

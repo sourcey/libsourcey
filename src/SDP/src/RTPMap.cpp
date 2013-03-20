@@ -46,7 +46,7 @@ RTPMap::RTPMap(const string& src) :
 
 	size_t len = src.length();
 	if (src.substr(0, 8) != "a=rtpmap") {
-		Log("error") << "ERROR: Contact sdp line does not start with <a=rtpmap>" << std::endl;
+		LogError() << "ERROR: Contact sdp line does not start with <a=rtpmap>" << std::endl;
 	}
 	size_t i = 9;
 

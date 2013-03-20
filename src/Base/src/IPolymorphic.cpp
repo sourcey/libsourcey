@@ -25,55 +25,17 @@
 //
 
 
+#include "Sourcey/IPolymorphic.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/SDP/V.h"
-
-
-using namespace std;
-
 
 
 namespace Sourcey {
-namespace SDP { 
+	
 
-
-V::V(const string& src) :
-	Line(Line::V, 1) 
-{
-	size_t len = src.length();
-	if (src.substr(0, 2) != "v=") {
-		LogError() << "ERROR: SDP line does not start with <v=>" << std::endl;
-	}
-
-	_version = Util::atoi(src.substr(2, src.length()).c_str());
+LogStream IPolymorphic::log(const char* level) const 
+{ 
+	return Log(level, className(), this);
 }
 
-
-V::V(unsigned int ver) :
-	Line(Line::V, 1) 
-{
-	_version = ver;
+	
 }
-
-
-unsigned int V::version() 
-{
-	return _version;
-}
-
-
-void V::setVersion(unsigned int ver) 
-{
-	_version = ver;
-}
-
-
-string V::toString() 
-{
-	return "v=" + Util::itoa(_version);
-}
-
-
-} // namespace SDP 
-} // namespace Sourcey
-

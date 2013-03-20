@@ -60,13 +60,13 @@ public:
 		_capture(capture),
 		_destroyOnStop(destroyOnStop)
 	{
-		Log("debug") << "[CaptureEncoder] Creating" << std::endl;
+		LogDebug() << "[CaptureEncoder] Creating" << std::endl;
 		assert(_capture);	
 	}
 
 	virtual ~CaptureEncoder() 
 	{
-		Log("debug") << "[CaptureEncoder] Destroying" << std::endl;
+		LogDebug() << "[CaptureEncoder] Destroying" << std::endl;
 
 		// A call to stop() is required before destruction.
 		assert(EncoderT::state().id() == EncoderState::None);
@@ -74,7 +74,7 @@ public:
 
 	virtual void start(/*const ParamT& params*/) 
 	{
-		Log("debug") << "[CaptureEncoder] Starting..." << std::endl;
+		LogDebug() << "[CaptureEncoder] Starting..." << std::endl;
 		if (!EncoderT::isReady())
 			EncoderT::initialize();
 
@@ -88,7 +88,7 @@ public:
 			
 		} 
 		catch (Exception& exc) {
-			Log("error") << "Encoder Error: " << exc.displayText() << std::endl;
+			LogError() << "Encoder Error: " << exc.displayText() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
 			exc.rethrow();
@@ -97,7 +97,7 @@ public:
 
 	virtual void stop() 
 	{
-		Log("debug") << "[CaptureEncoder] Stopping..." << std::endl;
+		LogDebug() << "[CaptureEncoder] Stopping..." << std::endl;
 		try {
 			assert(_capture);
 			//assert(EncoderT::isReady());
@@ -108,7 +108,7 @@ public:
 			EncoderT::setState(this, EncoderState::None);
 		} 
 		catch (Exception& exc) {
-			Log("error") << "Encoder Error: " << exc.displayText() << std::endl;
+			LogError() << "Encoder Error: " << exc.displayText() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 		}
 
@@ -125,7 +125,7 @@ public:
 			int size = EncoderT::encode((unsigned char*)packet.data, packet.size);
 		} 
 		catch (Exception& exc) {
-			Log("error") << "Encoder Error: " << exc.displayText() << std::endl;
+			LogError() << "Encoder Error: " << exc.displayText() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
 		}
@@ -153,7 +153,7 @@ public:
 		_capture(capture),
 		_destroyOnStop(destroyOnStop)
 	{
-		Log("debug") << "[RawCaptureEncoder] Creating" << std::endl;
+		LogDebug() << "[RawCaptureEncoder] Creating" << std::endl;
 		assert(_capture);	
 		EncoderT::setState(this, EncoderState::None);
 	}
@@ -161,7 +161,7 @@ public:
 
 	virtual ~RawCaptureEncoder() 
 	{
-		Log("debug") << "[RawCaptureEncoder] Destroying" << std::endl;
+		LogDebug() << "[RawCaptureEncoder] Destroying" << std::endl;
 
 		// A call to stop() is required before destruction.
 		assert(state().id() == EncoderState::None);
@@ -169,7 +169,7 @@ public:
 
 	virtual void start() 
 	{
-		Log("debug") << "[RawCaptureEncoder] Starting..." << std::endl;
+		LogDebug() << "[RawCaptureEncoder] Starting..." << std::endl;
 		try {
 			assert(_capture);
 			//assert(isInitialized());
@@ -179,7 +179,7 @@ public:
 			EncoderT::setState(this, EncoderState::Encoding);
 		} 
 		catch (Exception& exc) {
-			Log("error") << "Encoder Error: " << exc.displayText() << std::endl;
+			LogError() << "Encoder Error: " << exc.displayText() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
 			exc.rethrow();
@@ -188,7 +188,7 @@ public:
 
 	virtual void stop() 
 	{
-		Log("debug") << "[RawCaptureEncoder] Stopping..." << std::endl;
+		LogDebug() << "[RawCaptureEncoder] Stopping..." << std::endl;
 		try {
 			assert(_capture);
 			//assert(isInitialized());
@@ -198,7 +198,7 @@ public:
 			EncoderT::setState(this, EncoderState::None);
 		} 
 		catch (Exception& exc) {
-			Log("error") << "Encoder Error: " << exc.displayText() << std::endl;
+			LogError() << "Encoder Error: " << exc.displayText() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 		}
 

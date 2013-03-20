@@ -151,7 +151,7 @@ struct XMPPDelegate: public PacketDelegateBase
 			return false;
 		}
 
-		//Log("debug") << "[XMPPDelegate] Checking Stanza: " 
+		//LogDebug() << "[XMPPDelegate] Checking Stanza: " 
 		//	<< "\n\tstanzaIsOutbound: " << router->stanzaIsOutbound(*stanza)
 		//	<< "\n\tstanzaIsInbound: " << router->stanzaIsInbound(*stanza)
 		//	<< "\n\tstanzaIsInternal: " << router->stanzaIsInternal(*stanza)
@@ -160,7 +160,7 @@ struct XMPPDelegate: public PacketDelegateBase
 		//	<< "\n\tstanzaIsOutbound: " << router->stanzaIsOutbound(*stanza) 
 		//	<< endl;
 
-		//Log("debug") << "[XMPPDelegate] Checking Flags: " 
+		//LogDebug() << "[XMPPDelegate] Checking Flags: " 
 		//	<< "\n\tAcceptOutbound: " << hasFlag(AcceptOutbound)
 		//	<< "\n\tAcceptInbound: " << hasFlag(AcceptInbound)
 		//	<< "\n\tAcceptInternal: " << hasFlag(AcceptInternal)

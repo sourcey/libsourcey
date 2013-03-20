@@ -73,14 +73,14 @@ size_t Header::size() const
 int Header::read(const UInt8* buffer, int bufferSize)
 {
 	if (bufferSize < kRtpBaseHeaderSize) {
-		Log("error") << "RTP: Header: Buffer size too small: "
+		LogError() << "RTP: Header: Buffer size too small: "
 			<< bufferSize << ": " << kRtpBaseHeaderSize << endl;
 		return -1;
 	}
 
 	int version = ExtractBits(buffer[0], 2, 6);
 	if (version != kRtpVersionNumber) {
-		Log("error") << "RTP: Header: Wrong version number: " 
+		LogError() << "RTP: Header: Wrong version number: " 
 			<< version << ": " << kRtpVersionNumber << endl;
 		return -1;
 	}
@@ -99,7 +99,7 @@ int Header::read(const UInt8* buffer, int bufferSize)
 	assert(this->csrcCount < 16);
 
 	if (bufferSize < this->size()) {
-		Log("error") << "RTP: Header: Buffer size too small for header: "
+		LogError() << "RTP: Header: Buffer size too small for header: "
 			<< bufferSize << ": " << size() << endl;
 		return -1;
 	}

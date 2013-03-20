@@ -54,7 +54,7 @@ Router::~Router()
 void Router::setJID(const string& jid) 
 { 
 	Mutex::ScopedLock lock(_mutex);
-	Log("debug") << "[Router] Setting the local JID to: " << jid << endl;
+	LogDebug() << "[Router] Setting the local JID to: " << jid << endl;
 	_jid = jid; 
 }
 
@@ -168,7 +168,7 @@ Router& Router::operator >> (const char* data)
 		delete s;
 	}
 	else
-		Log("error") << "[Router:" << this << "] Dropped invalid XMPP stanza" << endl;
+		LogError() << "[Router:" << this << "] Dropped invalid XMPP stanza" << endl;
 	return *this;
 }
 

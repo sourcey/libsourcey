@@ -31,11 +31,10 @@
 
 #include "Sourcey/Logger.h"
 #include "Sourcey/Timeout.h"
+#include "Sourcey/IPolymorphic.h"
 
 #include "Poco/Thread.h"
 #include "Poco/Event.h"
-#//include "Poco/Timestamp.h"
-//#include "Poco/SharedPtr.h"
 
 #include <vector>
 
@@ -155,7 +154,7 @@ protected:
 typedef std::vector<ITimerCallback*> TimerCallbackList;
 
 
-class Timer: public Poco::Runnable, public ILoggable
+class Timer: public Poco::Runnable, public IPolymorphic
 	/// The Timer is an asynchronous delayed notification sender
 	/// responsible for invoking callbacks of notifications meeting 
 	/// specific criteria.

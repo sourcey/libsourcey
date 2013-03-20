@@ -45,7 +45,7 @@ TCPClientConnection::TCPClientConnection(TCPAllocation& allocation, const Poco::
 	_connectionID(peer->connectionID()),
 	_peer(NULL)
 {
-	Log("trace") << "[TCPClientConnection:" << this << "] Creating" << endl;
+	LogTrace() << "[TCPClientConnection:" << this << "] Creating" << endl;
 	bindWith(peer);
 	_peer->bindWith(this);
 	_allocation.clients().add(_connectionID, this);
@@ -56,17 +56,17 @@ TCPClientConnection::TCPClientConnection(TCPAllocation& allocation, const Poco::
 	
 TCPClientConnection::~TCPClientConnection()
 {
-	Log("trace") << "[TCPClientConnection:" << this << "] Destroying" << endl;
+	LogTrace() << "[TCPClientConnection:" << this << "] Destroying" << endl;
 	assert(!isConnected());
 	//assert(_peer == NULL);
 	_allocation.clients().remove(this);
-	Log("trace") << "[TCPClientConnection:" << this << "] Destroying: OK" << endl;
+	LogTrace() << "[TCPClientConnection:" << this << "] Destroying: OK" << endl;
 }
 
 
 void TCPClientConnection::recv(Buffer& buffer)
 {
-	Log("trace") << "[TCPClientConnection:" << this << "] Received Data: " << buffer.size() << endl;
+	LogTrace() << "[TCPClientConnection:" << this << "] Received Data: " << buffer.size() << endl;
 
 	try {	
 		FastMutex::ScopedLock lock(_mutex);
@@ -80,10 +80,10 @@ void TCPClientConnection::recv(Buffer& buffer)
 		}
 		else		
 			// TODO: buffering early media
-			Log("trace") << "[TCPClientConnection:" << this << "] Dropped early data" << endl;
+			LogTrace() << "[TCPClientConnection:" << this << "] Dropped early data" << endl;
 	}
 	catch (Exception& exc) {
-		Log("error") << "[TCPClientConnection:" << this << "] RECV Error: " << exc.displayText() << endl;
+		LogError() << "[TCPClientConnection:" << this << "] RECV Error: " << exc.displayText() << endl;
 		setError(exc.displayText());
 	}
 }
@@ -92,7 +92,7 @@ void TCPClientConnection::recv(Buffer& buffer)
 	/*	
 void TCPClientConnection::onClose()
 {
-	Log("trace") << "[TCPClientConnection:" << this << "] On Close" << endl;
+	LogTrace() << "[TCPClientConnection:" << this << "] On Close" << endl;
 	Net::TCPPacketSocket::onClose();	
 	
 	// Close the associated client connection.
@@ -100,7 +100,7 @@ void TCPClientConnection::onClose()
 	TCPPeerConnection* peer = _peer;
 	if (peer) {
 		peer->Closed -= delegate(this, &TCPClientConnection::onPeerDisconnect);
-		Log("trace") << "[TCPClientConnection:" << this << "] On Close 1" << endl;	
+		LogTrace() << "[TCPClientConnection:" << this << "] On Close 1" << endl;	
 		_peer = NULL;
 		peer->bindWith(NULL);
 		//peer->close();
@@ -118,7 +118,7 @@ void TCPClientConnection::onClose()
 
 void TCPClientConnection::onPeerDisconnect(void*)
 {
-	Log("trace") << "[TCPClientConnection:" << this << "] On Peer Disconnected" << endl;
+	LogTrace() << "[TCPClientConnection:" << this << "] On Peer Disconnected" << endl;
 	{		
 		FastMutex::ScopedLock lock(_mutex);	
 		_peer = NULL;
@@ -136,7 +136,7 @@ void TCPClientConnection::bindWith(TCPPeerConnection* peer)
 			_peer->Closed -= delegate(this, &TCPClientConnection::onPeerDisconnect);	
 		_peer = peer;
 		if (_peer != NULL) {
-			Log("trace") << "[TCPClientConnection:" << this << "] Binding With Peer: " << _peer->address() << endl;
+			LogTrace() << "[TCPClientConnection:" << this << "] Binding With Peer: " << _peer->address() << endl;
 			_peer->Closed += delegate(this, &TCPClientConnection::onPeerDisconnect);	
 		}
 	}

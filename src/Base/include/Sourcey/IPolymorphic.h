@@ -25,52 +25,17 @@
 //
 
 
-#ifndef SOURCEY_Types_H
-#define SOURCEY_Types_H
+#ifndef SOURCEY_IPolymorphic_H
+#define SOURCEY_IPolymorphic_H
 
 
-#include "Poco/Types.h"
-#include "Poco/Exception.h"
-
-#include <string>
-#include <vector>
-#include <map>
+#include "Sourcey/Base.h"
 
 
 namespace Sourcey {	
+	
 
-
-//
-// Forward some Poco types to Sourcey namespace
-// to reduce namespace pollution.
-//
-typedef Poco::Int8 Int8;
-typedef Poco::UInt8 UInt8;
-typedef Poco::Int16 Int16;
-typedef Poco::UInt16 UInt16;
-typedef Poco::Int32 Int24;
-typedef Poco::UInt32 UInt24;
-typedef Poco::Int32 Int32;
-typedef Poco::UInt32 UInt32;
-typedef Poco::Int64 Int64;
-typedef Poco::UInt64 UInt64;
-
-
-typedef Poco::Exception Exception;
-
-
-typedef std::vector<std::string>			StringList;
-typedef std::map<std::string, std::string>	StringMap;
-typedef std::pair<std::string, std::string> Metadata;
-
-
-struct StopPropagation: public std::exception
-	// An exception used to break the current scope.
-{
-	virtual ~StopPropagation() throw() {};
-};
-
-
+struct LogStream;
 struct IPolymorphic
 {
 	virtual ~IPolymorphic() {};
@@ -84,9 +49,13 @@ struct IPolymorphic
 	T* as(bool whiny = false) {
 		T* self = dynamic_cast<T*>(this);
 		if (self == NULL && whiny)
-			throw Exception("Polymorphic cast failed");
+			throw Exception("IPolymorphic cast failed");
 		return self;
 	};
+
+	virtual LogStream log(const char* level = "debug") const;
+
+	virtual const char* className() const = 0;
 };
 
 

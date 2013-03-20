@@ -52,7 +52,7 @@ void InstallMonitor::onInstallStateChange(void* sender, PackageInstallState& sta
 {
 	InstallTask* task = reinterpret_cast<InstallTask*>(sender);
 
-	Log("debug") << "[InstallMonitor] onInstallStateChange: " << task << ": " << state.toString() << endl;
+	LogDebug() << "[InstallMonitor] onInstallStateChange: " << task << ": " << state.toString() << endl;
 
 	InstallStateChange.dispatch(this, *task, state, oldState);
 }
@@ -62,7 +62,7 @@ void InstallMonitor::onInstallComplete(void* sender)
 {
 	InstallTask* task = reinterpret_cast<InstallTask*>(sender);
 
-	Log("debug") << "[InstallMonitor] Package Install Complete: " << task->state().toString() << endl;
+	LogDebug() << "[InstallMonitor] Package Install Complete: " << task->state().toString() << endl;
 
 	// Notify listeners when each package completes.
 	InstallComplete.dispatch(this, *task->local());
@@ -83,7 +83,7 @@ void InstallMonitor::onInstallComplete(void* sender)
 
 		progress = (_packages.size() - _tasks.size()) / _packages.size();
 
-		Log("info") << "[InstallMonitor] Waiting on " 
+		LogInfo() << "[InstallMonitor] Waiting on " 
 			<< _tasks.size() << " packages to complete" << endl;
 	}
 
@@ -191,7 +191,7 @@ bool InstallMonitor::isComplete() const
 		if (_tasks.empty())
 			setState(this, InstallMonitorState::Complete);
 		else
-			Log("info") << "[InstallMonitor] Waiting on " 
+			LogInfo() << "[InstallMonitor] Waiting on " 
 				<< _tasks.size() << " packages to complete" << endl;
 
 		// Notify listeners when each package completes.
@@ -237,7 +237,7 @@ InstallTask* InstallMonitor::getTask(const std::string& name) const
 		}
 			*/
 			/*
-			Log("debug") << "[PacketStream:" << this << "] Detaching Processor: " << (*it).ptr << endl;
+			LogDebug() << "[PacketStream:" << this << "] Detaching Processor: " << (*it).ptr << endl;
 			(*it).ptr->detach(polymorphicDelegate(this, &PacketStream::onProcessedPacket));
 			if ((*it).freePointer)
 				delete (*it).ptr;

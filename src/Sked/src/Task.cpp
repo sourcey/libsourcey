@@ -49,7 +49,7 @@ Task::Task(const string& type, const string& name) :
 	_scheduler(NULL),
 	_trigger(NULL)
 {
-	Log("trace") << "Creating" << endl;
+	LogTrace() << "Creating" << endl;
 }
 
 	
@@ -60,13 +60,13 @@ Task::Task(Sked::Scheduler& scheduler, const string& type, const string& name) :
 	_scheduler(NULL),
 	_trigger(NULL)
 {
-	Log("trace") << "Creating" << endl;
+	LogTrace() << "Creating" << endl;
 }
 
 
 Task::~Task()
 {
-	Log("trace") << "Destroying" << endl;
+	LogTrace() << "Destroying" << endl;
 }
 
 
@@ -79,7 +79,7 @@ void Task::start()
 
 void Task::serialize(JSON::Value& root)
 {
-	Log("trace") << "Serializing" << endl;	
+	LogTrace() << "Serializing" << endl;	
 	
 	Poco::FastMutex::ScopedLock lock(_mutex);
 	
@@ -91,7 +91,7 @@ void Task::serialize(JSON::Value& root)
 
 void Task::deserialize(JSON::Value& root)
 {
-	Log("trace") << "Deserializing" << endl;
+	LogTrace() << "Deserializing" << endl;
 	
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	
@@ -243,9 +243,9 @@ DateTime Task::time() const
     //DateTime now;
     //Timespan s = now += time;
     //Timespan s = time - now;	
-	//Log("trace") << "[Task:" << this << "] Time Now: " << DateTimeFormatter::format(now, Sked::DateFormat) << endl;
-	//Log("trace") << "[Task:" << this << "] Time Trigger: " << DateTimeFormatter::format(time, Sked::DateFormat) << endl;
-	//Log("trace") << "[Task:" << this << "] Timeout in " << (diff / 1000) << endl;
+	//LogTrace() << "[Task:" << this << "] Time Now: " << DateTimeFormatter::format(now, Sked::DateFormat) << endl;
+	//LogTrace() << "[Task:" << this << "] Time Trigger: " << DateTimeFormatter::format(time, Sked::DateFormat) << endl;
+	//LogTrace() << "[Task:" << this << "] Timeout in " << (diff / 1000) << endl;
 	//start();
 
     //DateTime now;
@@ -296,7 +296,7 @@ void Task::schedule(const string& time, const string& fmt)
 /*
 void Task::serialize(JSON::Value& root)
 {
-	Log("trace") << "Serializing" << endl;	
+	LogTrace() << "Serializing" << endl;	
 	
 	root["time"] = DateTimeFormatter::format(time(), 
 		Sked::DateFormat);
@@ -305,7 +305,7 @@ void Task::serialize(JSON::Value& root)
 
 void Task::deserialize(JSON::Value& root)
 {
-	Log("trace") << "Deserializing" << endl;
+	LogTrace() << "Deserializing" << endl;
 
 	if (!root.isMember("time"))
 		throw Exception("A time member is required.");

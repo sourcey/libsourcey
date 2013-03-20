@@ -5,6 +5,7 @@
 #include "Sourcey/Runner.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Util.h"
+#include "Sourcey/IPolymorphic.h"
 #include "Sourcey/Net/Reactor.h"
 #include "Sourcey/TURN/server/Server.h"
 
@@ -29,7 +30,7 @@ namespace TURN {
 #define ALLOCATION_MAX_LIFETIME			15 * 60 * 1000	// 15 min
 
 
-class TURNServer: public TURN::IServerObserver, public ILoggable, public Poco::Util::ServerApplication
+class TURNServer: public TURN::IServerObserver, public IPolymorphic, public Poco::Util::ServerApplication
 {
 public:
 	TURNServer();

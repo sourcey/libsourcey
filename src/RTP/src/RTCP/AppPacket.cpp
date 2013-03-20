@@ -64,7 +64,7 @@ bool AppPacket::read(Buffer& buffer)
 	if (RTCP::Packet::read(buffer)) {
 		
 		if (buffer.size() < 4) {
-			Log("error") << "Buffer too short to parse APP packet." << endl;
+			LogError() << "Buffer too short to parse APP packet." << endl;
 			return false;
 		}
 		

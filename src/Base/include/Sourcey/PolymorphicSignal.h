@@ -70,19 +70,19 @@ struct DelegateCallback<C, 8, true, PolymorphicT>
 
 // -------------------------------------------------------------------
 //
-#define DefinePolymorphicDelegate(Name, PolymorphicBaseT, DelegateBaseT)\
+#define DefinePolymorphicDelegate(Name, IPolymorphicBaseT, DelegateBaseT)\
 																		\
 	template <class C, typename PolymorphicT>							\
 	static Delegate<C,													\
 		DelegateBaseT,													\
 		DelegateCallback<C, 8, false, PolymorphicT>,					\
-		PolymorphicBaseT&												\
+		IPolymorphicBaseT&												\
 	> Name(C* pObj, void (C::*Method)(PolymorphicT&), int priority = 0) \
 	{																	\
 		return Delegate<C,												\
 			DelegateBaseT,												\
 			DelegateCallback<C, 8, false, PolymorphicT>,				\
-			PolymorphicBaseT&											\
+			IPolymorphicBaseT&											\
 		>(pObj, Method, priority);										\
 	}																	\
 																		\
@@ -91,33 +91,33 @@ struct DelegateCallback<C, 8, true, PolymorphicT>
 	static Delegate<C,													\
 		DelegateBaseT,													\
 		DelegateCallback<C, 8, true, PolymorphicT>,						\
-		PolymorphicBaseT&												\
+		IPolymorphicBaseT&												\
 	> Name(C* pObj, void (C::*Method)(Void, PolymorphicT&),				\
 		int priority = 0)												\
 	{																	\
 		return Delegate<C,												\
 			DelegateBaseT,												\
 			DelegateCallback<C, 8, true, PolymorphicT>,					\
-			PolymorphicBaseT&											\
+			IPolymorphicBaseT&											\
 		>(pObj, Method, priority);										\
 	}																	\
 
 
-#define DefinePolymorphicDelegateWithArg(Name, PolymorphicBaseT,		\
+#define DefinePolymorphicDelegateWithArg(Name, IPolymorphicBaseT,		\
 	DelegateBaseT, ArgType, ArgDefault)									\
 																		\
 	template <class C, typename PolymorphicT>							\
 	static Delegate<C,													\
 		DelegateBaseT,													\
 		DelegateCallback<C, 8, false, PolymorphicT>,					\
-		PolymorphicBaseT&												\
+		IPolymorphicBaseT&												\
 	> Name(C* pObj, void (C::*Method)(PolymorphicT&),					\
 		ArgType data = ArgDefault, int priority = 0)					\
 	{																	\
 		return Delegate<C,												\
 			DelegateBaseT,												\
 			DelegateCallback<C, 8, false, PolymorphicT>,				\
-			PolymorphicBaseT&											\
+			IPolymorphicBaseT&											\
 		>(pObj, Method, data, priority);								\
 	}																	\
 																		\
@@ -125,19 +125,19 @@ struct DelegateCallback<C, 8, true, PolymorphicT>
 	template <class C, typename PolymorphicT>							\
 	static Delegate<C,													\
 		DelegateBaseT,													\
-		DelegateCallback<C, 8, true, PolymorphicT>, PolymorphicBaseT&	\
+		DelegateCallback<C, 8, true, PolymorphicT>, IPolymorphicBaseT&	\
 	> Name(C* pObj, void (C::*Method)(Void, PolymorphicT&),				\
 		ArgType data = ArgDefault, int priority = 0)					\
 	{																	\
 		return Delegate<C,												\
 			DelegateBaseT,												\
 			DelegateCallback<C, 8, true, PolymorphicT>,					\
-			PolymorphicBaseT&											\
+			IPolymorphicBaseT&											\
 		>(pObj, Method, data, priority);								\
 	}																	\
 
 
-DefinePolymorphicDelegate(polymorphicDelegate, IPolymorphic, PolymorphicDelegateBase)
+DefinePolymorphicDelegate(PolymorphicDelegate, IPolymorphic, PolymorphicDelegateBase)
 
 
 } // namespace Sourcey

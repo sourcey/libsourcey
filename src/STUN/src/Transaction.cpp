@@ -50,19 +50,19 @@ Transaction::Transaction(Runner& runner,
 						 int retries) : 
 	Net::Transaction<Message>(runner, socket, localAddress, peerAddress, timeout, retries)
 {
-	Log("debug") << "[STUNTransaction:" << this << "] Initializing" << std::endl;
+	LogDebug() << "[STUNTransaction:" << this << "] Initializing" << std::endl;
 }
 
 
 Transaction::~Transaction() 
 {
-	Log("debug") << "[STUNTransaction:" << this << "] Destroying" << std::endl;	
+	LogDebug() << "[STUNTransaction:" << this << "] Destroying" << std::endl;	
 }
 
 
 bool Transaction::match(const Message& message) 
 {
-	//Log("debug") << "[STUNTransaction:" << this << "] Match" << std::endl;	
+	//LogDebug() << "[STUNTransaction:" << this << "] Match" << std::endl;	
 
 	return Net::Transaction<Message>::match(message) 
 		&& _request.transactionID() == message.transactionID();
@@ -71,7 +71,7 @@ bool Transaction::match(const Message& message)
 
 void Transaction::onResponse()
 {
-	Log("debug") << "[STUNTransaction:" << this << "] On Response" << std::endl;	
+	LogDebug() << "[STUNTransaction:" << this << "] On Response" << std::endl;	
 	_response.setType(_request.type());
 	_response.setState(Message::SuccessResponse);
 	if (_response.get<STUN::ErrorCode>())
@@ -94,7 +94,7 @@ void Transaction::onResponse()
 /*
 bool Transaction::match(const Message& message, const Net::Address& localAddress, const Net::Address& peerAddress)
 {
-	Log("debug") << "[STUNTransaction:" << this << "] Match" << std::endl;	
+	LogDebug() << "[STUNTransaction:" << this << "] Match" << std::endl;	
 
 	return _request.transactionID() == message.transactionID()
 		&& _localAddress == localAddress
@@ -128,7 +128,7 @@ void Transaction::onPacketReceived(void* sender, Message& message) //, Net::IPac
 /*
 void Transaction::cancel() 
 {
-	Log("debug") << "[STUNTransaction:" << this << "] Cancelling" << std::endl;
+	LogDebug() << "[STUNTransaction:" << this << "] Cancelling" << std::endl;
 	socket.detach(PolymorphicDelegate<Transaction, Message>(this, &Transaction::onPacketReceived, 0));
 	Timer::getDefault().stop(TimerCallback<Transaction>(this, &Transaction::onTransactionTimeout));
 }
@@ -137,7 +137,7 @@ bool Transaction::receive(const Message& message, const Net::Address& localAddre
 {	
 	if (match(message, localAddress, peerAddress)) {	
 		update(message);
-		Log("debug") << "[STUNTransaction:" << this << "] Transaction Response Received: " << response.toString() << std::endl;
+		LogDebug() << "[STUNTransaction:" << this << "] Transaction Response Received: " << response.toString() << std::endl;
 		Timer::getDefault().stop(TimerCallback<Transaction>(this, &Transaction::onTransactionTimeout));
 		setState(this, TransactionState::Success);
 		return true;

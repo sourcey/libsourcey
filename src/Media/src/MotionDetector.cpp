@@ -46,28 +46,28 @@ MotionDetector::MotionDetector(const Options& options) :
 	_motionStartedAt(0), 
 	_motionSegmentEndingAt(0)
 {
-	Log("debug") << "[MotionDetector:" << this <<"] Creating" << endl;
+	LogDebug() << "[MotionDetector:" << this <<"] Creating" << endl;
 }
 
 
 MotionDetector::~MotionDetector() 
 {
-	Log("debug") << "[MotionDetector:" << this <<"] Destroying" << endl;
+	LogDebug() << "[MotionDetector:" << this <<"] Destroying" << endl;
 		
 	// Synchronization issues; wait for computational
 	// tasks to finish before returning.
 	while (isProcessing()) {
-		Log("debug") << "[MotionDetector:" << this <<"] Waiting for computational tasks to finish." << endl;
+		LogDebug() << "[MotionDetector:" << this <<"] Waiting for computational tasks to finish." << endl;
 		Thread::sleep(5);
 	}
 
-	Log("debug") << "[MotionDetector:" << this <<"] Destroying: OK" << endl;
+	LogDebug() << "[MotionDetector:" << this <<"] Destroying: OK" << endl;
 }
 
 
 void MotionDetector::onStreamStateChange(const PacketStreamState&)
 {
-	Log("debug") << "[MotionDetector:" << this <<"] Reset Stream State" << endl;
+	LogDebug() << "[MotionDetector:" << this <<"] Reset Stream State" << endl;
 	
 	setState(this, MotionDetectorState::Idle);
 
@@ -88,7 +88,7 @@ bool MotionDetector::accepts(IPacket& packet)
 
 void MotionDetector::process(IPacket& packet)
 {
-	Log("trace") << "[MotionDetector:" << this <<"] Processing" << endl;
+	LogTrace() << "[MotionDetector:" << this <<"] Processing" << endl;
 
 	MatPacket* mpacket = dynamic_cast<MatPacket*>(&packet);		
 	if (!mpacket) {
@@ -97,7 +97,7 @@ void MotionDetector::process(IPacket& packet)
 	}
 	
 	if (mpacket->mat == NULL)
-		throw Exception("Video packets must contain an OpenCV image.");
+		throw Poco::Exception("Video packets must contain an OpenCV image.");
 
 	VideoPacket opacket;
 	cv::Mat& source = *mpacket->mat;
@@ -126,7 +126,7 @@ void MotionDetector::process(IPacket& packet)
 	// need to adjust the input pixel format accordingly.
 	dispatch(this, opacket);
 	
-	Log("trace") << "[MotionDetector:" << this <<"] Processing: OK" << endl;
+	LogTrace() << "[MotionDetector:" << this <<"] Processing: OK" << endl;
 }
 
 
@@ -159,7 +159,7 @@ void MotionDetector::updateMHI(cv::Mat& source)
 
 void MotionDetector::computeMotionState() 
 { 
-	Log("debug") << "[MotionDetector:" << this <<"] Update Motion State: " << state().toString() 
+	LogDebug() << "[MotionDetector:" << this <<"] Update Motion State: " << state().toString() 
 		<< ": " << _motionLevel << ":" << _options.motionThreshold << endl;
 	
 	//FastMutex::ScopedLock lock(_mutex); 
@@ -169,12 +169,12 @@ void MotionDetector::computeMotionState()
 	switch (state().id()) {
 	case MotionDetectorState::Idle:
 		{
-			// The motion detctor has just started, compute our 
-			// start time and set our state to Waiting...
+			// The motion detector has just started, compute
+			// our start time and set our state to Waiting...
 			_motionCanStartAt = currentTime + _options.preSurveillanceDelay;
 			setState(this, MotionDetectorState::Waiting);
 			
-			Log("debug") << "[MotionDetector:" << this <<"] UpdateMotionState: Set to Waiting" << endl;
+			LogDebug() << "[MotionDetector:" << this <<"] UpdateMotionState: Set to Waiting" << endl;
 		}
 		break;
 	case MotionDetectorState::Waiting: 
@@ -183,7 +183,7 @@ void MotionDetector::computeMotionState()
 			// to Vigilant...
 			if (currentTime > _motionCanStartAt) {				
 				setState(this, MotionDetectorState::Vigilant);			
-				//Log("debug") << "[MotionDetector:" << this <<"] UpdateMotionState: Set to Vigilant" << endl;
+				//LogDebug() << "[MotionDetector:" << this <<"] UpdateMotionState: Set to Vigilant" << endl;
 			}
 		}
 		break;
@@ -201,7 +201,7 @@ void MotionDetector::computeMotionState()
 				if (_motionFrameCount == 0) _stopwatch.start();
 				if (_stopwatch.elapsed() < _options.stableMotionLifetime * 1000000) {
 					_motionFrameCount++;
-					Log("debug") << "Motion Frames Detected: " << _motionFrameCount << endl;
+					LogDebug() << "Motion Frames Detected: " << _motionFrameCount << endl;
 										
 					// Stable motion detected, set our state to Triggered
 					if (_motionFrameCount >= _options.stableMotionNumFrames) {	
@@ -213,16 +213,16 @@ void MotionDetector::computeMotionState()
 							currentTime + _options.minTriggeredDuration, 				
 							_motionStartedAt + _options.maxTriggeredDuration);
 						setState(this, MotionDetectorState::Triggered);
-						//Log("debug") << "[MotionDetector:" << this <<"] UpdateMotionState: Set to Triggered" << endl;
+						//LogDebug() << "[MotionDetector:" << this <<"] UpdateMotionState: Set to Triggered" << endl;
 					}
 				} else {
 					_stopwatch.stop();
 					_stopwatch.reset();
 					_motionSegmentEndingAt = 0;
 					_motionFrameCount = 0;
-					Log("debug") << "Motion Timer Dead" << endl;
+					LogDebug() << "Motion Timer Dead" << endl;
 				}
-				Log("debug") << "Motion Detected" << endl;				
+				LogDebug() << "Motion Detected" << endl;				
 			}
 		}
 		break;
@@ -233,7 +233,7 @@ void MotionDetector::computeMotionState()
 			if (currentTime > _motionSegmentEndingAt) {				
 				_motionCanStartAt = currentTime + _options.postMotionEndedDelay;
 				setState(this, MotionDetectorState::Waiting);
-				Log("debug") << "[MotionDetector:" << this <<"] UpdateMotionState: Set to Waiting" << endl;
+				LogDebug() << "[MotionDetector:" << this <<"] UpdateMotionState: Set to Waiting" << endl;
 			}
 
 			// If motion threshold is exceeded while triggered
@@ -242,7 +242,7 @@ void MotionDetector::computeMotionState()
 				_motionSegmentEndingAt = min<time_t>(
 					currentTime + _options.minTriggeredDuration, 				
 					_motionStartedAt + _options.maxTriggeredDuration);	
-				Log("debug") << "[MotionDetector:" << this <<"] Triggered: Extending to: " << _motionSegmentEndingAt << endl;			
+				LogDebug() << "[MotionDetector:" << this <<"] Triggered: Extending to: " << _motionSegmentEndingAt << endl;			
 			}
 		}
 		break;

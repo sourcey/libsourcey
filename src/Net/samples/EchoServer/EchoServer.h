@@ -15,7 +15,7 @@ namespace Sourcey {
 namespace Net {
 
 
-class EchoServer: public ILoggable, public Poco::Util::ServerApplication
+class EchoServer: public IPolymorphic, public Poco::Util::ServerApplication
 {
 public:
 	EchoServer();

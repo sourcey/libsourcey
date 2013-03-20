@@ -43,7 +43,7 @@ RemoteCandidate::RemoteCandidate(const string& src) :
 	// a=remote-candidates1 192.168.2.101 16052 1 192.168.2.101 16052
 	size_t len = src.length();
 	if (src.substr(0, 19) != "a=remote-candidates") {
-		Log("error") << "ERROR: SDP line does not start with <a=remote-candidates>" << std::endl;
+		LogError() << "ERROR: SDP line does not start with <a=remote-candidates>" << std::endl;
 	}
 	size_t i = 20;
 

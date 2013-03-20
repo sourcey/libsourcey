@@ -41,8 +41,8 @@ class Runner;
 
 
 class Task
-	/// This class defines an asynchronous Task which is managed
-	/// by a Runner.
+	/// This class defines an asynchronous Task
+	/// which is managed by a Runner.
 {
 public:	
 	Task(bool repeat = false);	

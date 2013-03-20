@@ -142,18 +142,18 @@ bool Packet::read(Buffer& buf)
 	//assert(buf.size() < RTP_MAX_PACKET_LEN);
 
 	if (buf.size() == 0) {
-		Log("error") << "RTP: Received empty packet." << endl;
+		LogError() << "RTP: Received empty packet." << endl;
 		return false;
 	}
 
 	if (buf.size() < 12) {
 		// Too small to contain an RTP header 
-		Log("error") << "RTP: Packet too small to contain an RTP header." << endl;
+		LogError() << "RTP: Packet too small to contain an RTP header." << endl;
 		return false;
 	}
 
 	if (!_header.read(buf)) {
-		Log("error") << "RTP: Invalid RTP header." << endl;
+		LogError() << "RTP: Invalid RTP header." << endl;
 		return false;
 	}
 	

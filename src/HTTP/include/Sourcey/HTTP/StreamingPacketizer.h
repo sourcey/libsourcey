@@ -50,12 +50,12 @@ public:
 		_contentType(contentType),
 		_initial(true)
 	{
-		Log("trace") << "[StreamingPacketizer:" << this << "] Creating" << std::endl;
+		LogTrace() << "[StreamingPacketizer:" << this << "] Creating" << std::endl;
 	}
 	
 	virtual ~StreamingPacketizer() 
 	{
-		Log("trace") << "[StreamingPacketizer:" << this << "] Destroying" << std::endl;
+		LogTrace() << "[StreamingPacketizer:" << this << "] Destroying" << std::endl;
 	}
 	
 	virtual void writeInitialHTTPHeaders(std::ostringstream& ost)
@@ -74,7 +74,7 @@ public:
 
 	virtual void process(IPacket& packet)
 	{		
-		//Log("trace") << "[StreamingPacketizer:" << this << "] Processing" << std::endl;
+		//LogTrace() << "[StreamingPacketizer:" << this << "] Processing" << std::endl;
 		
 		// Write the initial HTTP response header		
 		if (_initial) {
@@ -89,7 +89,7 @@ public:
 
 		dispatch(this, packet);
 
-		//Log("trace") << "[StreamingPacketizer:" << this << "] Processing: OK" << std::endl;
+		//LogTrace() << "[StreamingPacketizer:" << this << "] Processing: OK" << std::endl;
 	}
 
 protected:

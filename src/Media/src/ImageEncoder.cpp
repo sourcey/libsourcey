@@ -45,7 +45,7 @@ ImageEncoder::ImageEncoder(EncoderOptions& options, vector<int> cvParams) :
 	_options(options),
 	_params(cvParams)
 {	
-	Log("debug") << "[ImageEncoder" << this << "] Creating" << endl;
+	LogDebug() << "[ImageEncoder" << this << "] Creating" << endl;
 
 	if (_options.oformat.id == "jpeg" ||
 		_options.oformat.id == "mjpeg")
@@ -62,7 +62,7 @@ ImageEncoder::ImageEncoder(EncoderOptions& options, vector<int> cvParams) :
 
 ImageEncoder::~ImageEncoder()
 {
-	Log("debug") << "[ImageEncoder" << this << "] Destroy" << endl;
+	LogDebug() << "[ImageEncoder" << this << "] Destroy" << endl;
 }
 
 	
@@ -84,7 +84,7 @@ bool ImageEncoder::accepts(IPacket& packet)
 
 void ImageEncoder::process(IPacket& packet)
 { 
-	//Log("trace") << "[ImageEncoder:" << this <<"] Processing" << endl;
+	//LogTrace() << "[ImageEncoder:" << this <<"] Processing" << endl;
 
 	MatPacket* mpacket = reinterpret_cast<MatPacket*>(&packet);	
 	if (!mpacket->mat)
@@ -95,11 +95,11 @@ void ImageEncoder::process(IPacket& packet)
 	// FIXME: If the video capture is stopped before
 	// this callback completes our Mat is corrupted.
 	cv::Mat& source = *mpacket->mat;
-	Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket->mat << endl;
-	Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << source.cols << endl;
-	Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << source.rows << endl;
-	Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << _options.oformat.video.width << endl;
-	Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << _options.oformat.video.height << endl;
+	LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket->mat << endl;
+	LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: " << source.cols << endl;
+	LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: " << source.rows << endl;
+	LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: " << _options.oformat.video.width << endl;
+	LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: " << _options.oformat.video.height << endl;
 	if (source.cols != _options.oformat.video.width &&
 		source.rows != _options.oformat.video.height) {
 		cv::Mat resized;
@@ -112,9 +112,9 @@ void ImageEncoder::process(IPacket& packet)
 	mpacket->setData(&buffer[0]);
 	mpacket->setSize(buffer.size());
 	
-	//Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket << endl;
+	//LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket << endl;
 	dispatch(this, *mpacket);
-	//Log("trace") << "[ImageEncoder:" << this <<"] Broadcasting: OK: " << mpacket << endl;
+	//LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: OK: " << mpacket << endl;
 }
 
 	

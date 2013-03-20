@@ -75,9 +75,7 @@ void MediaFactory::uninitialize()
 }
 
 
-MediaFactory::MediaFactory() :
-	video(this),
-	audio(this)
+MediaFactory::MediaFactory()
 {	
 	//cout << "MediaFactory::MediaFactory" << endl;	
 	_devices = DeviceManagerFactory::create();
@@ -94,6 +92,94 @@ MediaFactory::~MediaFactory()
 		delete _devices;
 	}
 }
+
+
+IDeviceManager& MediaFactory::devices() 
+{ 
+	FastMutex::ScopedLock lock(_mutex);
+	return *_devices; 
+}
+
+
+void MediaFactory::loadVideo()
+{
+	LogDebug() << "[MediaFactory] Preloading Video Captures" << endl;
+	
+	// Depreciated code used to preload captures on application load.
+	FastMutex::ScopedLock lock(_mutex);
+
+	// Initialize a VideoCapture object for each available device.
+	// The video capture object will begin capturing frames when it's
+	// reference count becomes positive.
+	vector<Device> devs;
+	_devices->getVideoCaptureDevices(devs);
+	for (size_t i = 0; i < devs.size(); ++i) {
+		try 
+		{
+			LogTrace() << "[MediaFactory] Loading Video: " << devs[0].id << endl;
+
+			// TODO: Receive callback on capture error or closure.
+			VideoCapture* capture = new VideoCapture(devs[0].id);
+			_map[devs[0].id] = capture;
+		} 
+		catch (...) 
+		{
+			LogError() << "[MediaFactory] Failed to load video capture." << endl;
+			_map[devs[0].id] = NULL;
+		}
+	}
+}
+
+
+void MediaFactory::unloadVideo()
+{
+	for (VideoCaptureMap::iterator it = _map.begin(); it != _map.end(); ++it) 
+		delete it->second;
+	_map.clear();
+}
+
+
+VideoCapture* MediaFactory::getVideoCapture(int deviceId) 
+{
+	LogTrace() << "[MediaFactory] Get Video Capture: " << deviceId << endl;
+	FastMutex::ScopedLock lock(_mutex);
+	VideoCaptureMap::iterator it = _map.find(deviceId);
+	if (it != _map.end())
+		return it->second;
+
+	/// Initialize a VideoCapture if none exists.
+	/// This may be error prone if not called from the main
+	/// thread, which is why loadVideo() should be called.
+	_map[deviceId] = new VideoCapture(deviceId);
+	return _map[deviceId];
+}
+
+
+VideoCapture* MediaFactory::createVideoCapture(const string& file, bool destroyOnStop) 
+{
+	LogTrace() << "[MediaFactory] Get Video Capture: " << file << endl;
+	VideoCapture* capture = new VideoCapture(file);
+	capture->flags().set(VideoCapture::DestroyOnStop);
+	return capture;
+}
+
+
+AudioCapture* MediaFactory::createAudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format) //, bool destroyOnStop
+{
+	AudioCapture* capture = new AudioCapture(deviceId, channels, sampleRate, format);
+	//capture->setDestroyOnStop(destroyOnStop);
+	return capture;
+}
+
+
+} } // namespace Sourcey::Media
+
+
+
+
+/*
+
+
 
 
 void MediaFactory::loadVideo() 
@@ -119,14 +205,6 @@ void MediaFactory::unloadAudio()
 	audio.unload();
 }
 
-
-IDeviceManager& MediaFactory::devices() 
-{ 
-	FastMutex::ScopedLock lock(_mutex);
-	return *_devices; 
-}
-
-
 // ---------------------------------------------------------------------
 //
 // Media Factory Video
@@ -143,78 +221,9 @@ MediaFactory::Video::~Video()
 	unload();
 }
 
-
-void MediaFactory::Video::unload()
-{
-	for (VideoCaptureMap::iterator it = _map.begin(); it != _map.end(); ++it) 
-		delete it->second;
-	_map.clear();
-}
-
-
-void MediaFactory::Video::load()
-{
-	Log("debug") << "[MediaFactory] Loading Video" << endl;
-	
-	/*
-	FastMutex::ScopedLock lock(_mutex);
-
-	// Initialize an idle VideoCapture object for each available device.
-	// The video capture object will begin capturing frames when it's
-	// reference count becomes positive.
-	vector<Device> devs;
-	_factory->devices().getVideoCaptureDevices(devs);
-	for (size_t i = 0; i < devs.size(); ++i) {
-		try 
-		{
-			Log("trace") << "[MediaFactory] Loading Video: " << devs[0].id << endl;
-
-			// TODO: Receive callback on capture error or closure.
-			VideoCapture* capture = new VideoCapture(devs[0].id);
-			_map[devs[0].id] = capture;
-		} 
-		catch (...) 
-		{
-			Log("error") << "[MediaFactory] Failed to load video capture." << endl;
-			_map[devs[0].id] = NULL;
-		}
-	}
-	*/
-}
-
-
-// NOTE: Video devices _must_ be initialized from the main thread or they 
-// will not be available from other threads. Due to the fact that we are 
-// storing initialized devices correct initialization is very important.
-VideoCapture* MediaFactory::Video::getCapture(int deviceId) 
-{
-	/*
-	FastMutex::ScopedLock lock(_mutex);
-	VideoCaptureMap::iterator it = _map.find(deviceId);
-	if (it != _map.end())
-		return it->second;
-
-	_map[deviceId] = new VideoCapture(deviceId);
-	return _map[deviceId];
-	*/
-	Log("trace") << "[MediaFactory] Get Video Capture: " << deviceId << endl;
-	VideoCapture* capture = new VideoCapture(deviceId);
-	//capture->setDestroyOnStop(true);
-	return capture;
-}
-
-
 // WARNING: File video captures are started with destroyOnStop set
 // to true, meaning that the capture will be destroyed as soon as
 // it's reference count reaches 0.
-VideoCapture* MediaFactory::Video::getCapture(const string& file) 
-{
-	Log("trace") << "[MediaFactory] Get Video Capture: " << file << endl;
-	VideoCapture* capture = new VideoCapture(file);
-	//capture->setDestroyOnStop(true);
-	return capture;
-}
-
 
 bool MediaFactory::Video::closeCapture(int deviceId)
 {
@@ -229,8 +238,23 @@ bool MediaFactory::Video::closeCapture(int deviceId)
 	return false;
 }
 
+// NOTE: Video devices _must_ be initialized from the main thread or they 
+// will not be available from other threads. Due to the fact that we are 
+// storing initialized devices correct initialization is very important.
+VideoCapture* MediaFactory::Video::createCapture(int deviceId) 
+{
+	LogTrace() << "[MediaFactory] Get Video Capture: " << deviceId << endl;
+#if 0
+	FastMutex::ScopedLock lock(_mutex);
+	VideoCaptureMap::iterator it = _map.find(deviceId);
+	if (it != _map.end())
+		return it->second;
 
-/*
+	_map[deviceId] = new VideoCapture(deviceId);
+	return _map[deviceId];
+#endif
+}
+
 void MediaFactory::Video::onRefCountChange(const void* pSender, int& refCount) {	
 	VideoCapture* capture = const_cast<VideoCapture*>(reinterpret_cast<const VideoCapture*>(pSender));
 
@@ -239,7 +263,6 @@ void MediaFactory::Video::onRefCountChange(const void* pSender, int& refCount) {
 		!capture->filename().empty())
 		delete 
 }
-*/
 
 
 // ---------------------------------------------------------------------
@@ -271,17 +294,7 @@ void MediaFactory::Audio::load()
 	// Nothing to do... AudioCapture instances are not managed like 
 	// VideoCapture instances.
 }
-
-
-AudioCapture* MediaFactory::Audio::getCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format)
-{
-	return new AudioCapture(deviceId, channels, sampleRate, format);
-}
-
-
-} } // namespace Sourcey::Media
-
-
+*/
 	/*
 	FastMutex::ScopedLock lock(_mutex);
 	AudioCaptureMap::iterator it = _map.find(deviceId);
@@ -289,7 +302,7 @@ AudioCapture* MediaFactory::Audio::getCapture(int deviceId, int channels, int sa
 		return it->second;
 	} 
 	else {
-		Log("debug") << "MediaFactory: Attempting to start capture on unregistered audio device." << endl;
+		LogDebug() << "MediaFactory: Attempting to start capture on unregistered audio device." << endl;
 		_map[deviceId] = new AudioCapture(deviceId, 2, 44100);
 		return _map[deviceId];
 	}

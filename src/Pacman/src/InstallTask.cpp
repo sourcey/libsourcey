@@ -68,7 +68,7 @@ InstallTask::~InstallTask()
 
 void InstallTask::start()
 {
-	Log("trace", this) << "Starting" << endl;	
+	log("trace") << "Starting" << endl;	
 	FastMutex::ScopedLock lock(_mutex);
 	_thread.start(*this);
 }
@@ -112,7 +112,7 @@ void InstallTask::run()
 		doFinalize();
 	}
 	catch (Exception& exc) {		
-		Log("error", this) << "Install Failed: " << exc.displayText() << endl; 
+		log("error") << "Install Failed: " << exc.displayText() << endl; 
 		setState(this, PackageInstallState::Failed, exc.displayText());
 	}
 	
@@ -124,7 +124,7 @@ void InstallTask::run()
 
 void InstallTask::onStateChange(PackageInstallState& state, const PackageInstallState& oldState)
 {
-	Log("debug", this) << "State Changed to " << state.toString() << endl; 	
+	log("debug") << "State Changed to " << state.toString() << endl; 	
 	{
 		FastMutex::ScopedLock lock(_mutex);
 
@@ -190,7 +190,7 @@ void InstallTask::doDownload()
 	if (!_local->assets().empty() &&
 		_manager.hasCachedFile(_local->latestAsset().fileName()) && 
 		_local->latestAsset() == remoteAsset) {
-		Log("debug", this) << "File exists, skipping download" << endl;		
+		log("debug") << "File exists, skipping download" << endl;		
 		setState(this, PackageInstallState::Unpacking);
 		return;
 	}
@@ -200,7 +200,7 @@ void InstallTask::doDownload()
 	// with multiple entries.
 	Package::Asset localAsset = _local->copyAsset(remoteAsset);
 	
-	Log("debug", this) << "Initializing Download:" 
+	log("debug") << "Initializing Download:" 
 		<< "\n\tURI: " << uri
 		<< "\n\tRemote Filename: " << filename
 		<< "\n\tLocal Filename: " << localAsset.fileName()
@@ -225,7 +225,7 @@ void InstallTask::doDownload()
 			static_cast<int>(_transaction.response().getStatus()), 
 			_transaction.response().getReason()));
 	
-	Log("debug", this) << "Download Complete" << endl; 
+	log("debug") << "Download Complete" << endl; 
 	
 	// Transition the internal state since the HTTP
 	// transaction was a success.
@@ -235,7 +235,7 @@ void InstallTask::doDownload()
 
 void InstallTask::onResponseProgress(void* sender, HTTP::TransferState& state)
 {
-	Log("debug", this) << "Download Progress: " << state.progress() << endl;
+	log("debug") << "Download Progress: " << state.progress() << endl;
 
 	// Progress 0 - 75 covers download
 	setProgress(state.progress() * 0.75);
@@ -260,7 +260,7 @@ void InstallTask::doUnpack()
 	// Create the output directory
 	Path outputDir(_manager.getIntermediatePackageDir(_local->id()));
 	
-	Log("debug", this) << "Unpacking: " 
+	log("debug") << "Unpacking: " 
 		<< filePath.toString() << " to "
 		<< outputDir.toString() << endl;
 
@@ -285,7 +285,7 @@ void InstallTask::doUnpack()
 
 void InstallTask::onDecompressionError(const void*, pair<const Poco::Zip::ZipLocalFileHeader, const string>& info)
 {
-	Log("error", this) << "Decompression Error: " << info.second << endl;
+	log("error") << "Decompression Error: " << info.second << endl;
 
 	// Extraction failed, throw an exception
 	throw Exception("Archive Error: Extraction failed: " + info.second);
@@ -294,7 +294,7 @@ void InstallTask::onDecompressionError(const void*, pair<const Poco::Zip::ZipLoc
 
 void InstallTask::onDecompressionOk(const void*, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info)
 {
-	Log("debug", this) << "Decompression Success: " 
+	log("debug") << "Decompression Success: " 
 		<< info.second.toString() << endl; 
 	
 	// Add the extracted file to out package manifest
@@ -316,7 +316,7 @@ void InstallTask::doFinalize()
 	{
 		try
 		{
-			Log("debug", this) << "Moving: " << fIt.path().toString() << endl;
+			log("debug") << "Moving: " << fIt.path().toString() << endl;
 			File(fIt.path()).moveTo(_manager.options().installDir);
 		}
 		catch (Exception& exc)
@@ -326,7 +326,7 @@ void InstallTask::doFinalize()
 			// must be called from an external process before the
 			// installation can be completed.
 			errors = true;
-			Log("error", this) << "Error: " << exc.displayText() << endl;
+			log("error") << "Error: " << exc.displayText() << endl;
 			_local->addError(exc.displayText());
 		}
 		
@@ -336,7 +336,7 @@ void InstallTask::doFinalize()
 	// The package requires finalizing at a later date. 
 	// The current task will be terminated.
 	if (errors) {
-		Log("debug", this) << "Finalization failed" << endl;
+		log("debug") << "Finalization failed" << endl;
 		_cancelled = true;
 		return;
 	}
@@ -345,7 +345,7 @@ void InstallTask::doFinalize()
 	// was successfully finalized.
 	try
 	{		
-		Log("debug", this) << "Removing temp directory: " << outputDir.toString() << endl;
+		log("debug") << "Removing temp directory: " << outputDir.toString() << endl;
 
 		// FIXME: How to remove a folder properly?
 		File(outputDir).remove(true);
@@ -355,10 +355,10 @@ void InstallTask::doFinalize()
 		// While testing on a windows system this fails regularly
 		// with a file sharing error, but since the package is already
 		// installed we can just swallow it.
-		Log("warn", this) << "Cannot remove temp directory: " << exc.displayText() << endl;
+		log("warn") << "Cannot remove temp directory: " << exc.displayText() << endl;
 	}
 
-	Log("debug", this) << "Finalization Complete" << endl;
+	log("debug") << "Finalization Complete" << endl;
 	
 	// Transition the internal state if finalization was a success.
 	// This will complete the installation process.
@@ -371,7 +371,7 @@ void InstallTask::setComplete()
 	{
 		FastMutex::ScopedLock lock(_mutex);
 
-		Log("info", this) << "Package Install Complete:" 
+		log("info") << "Package Install Complete:" 
 			<< "\n\tName: " << _local->name()
 			<< "\n\tVersion: " << _local->version()
 			<< "\n\tPackage State: " << _local->state()
@@ -453,7 +453,7 @@ RemotePackage* InstallTask::remote() const
 
 
 		/*
-void InstallTask::printLog(std::ostream& ost) const
+void InstallTask::printlog(std::ostream& ost) const
 {
 	ost << "["
 		<< className()
@@ -479,7 +479,7 @@ void InstallTask::printLog(std::ostream& ost) const
 	//transaction->Complete += delegate(this, &InstallTask::onTransactionComplete);
 void InstallTask::onTransactionComplete(void* sender, HTTP::Response& response)
 {
-	Log("debug", this) << "Download Complete: " << response.success() << endl;
+	log("debug") << "Download Complete: " << response.success() << endl;
 	
 	if (response.success())		
 		setState(this, PackageInstallState::Unpacking);
@@ -492,7 +492,7 @@ void InstallTask::onTransactionComplete(void* sender, HTTP::Response& response)
 		case PackageInstallState::Incomplete:
 			_local->setState("Incomplete");
 
-			Log("info", this) << "Package Incomplete:" 
+			log("info") << "Package Incomplete:" 
 				<< "\n\tName: " << _local->name()
 				<< "\n\tVersion: " << _local->version()
 				<< endl;
@@ -501,7 +501,7 @@ void InstallTask::onTransactionComplete(void* sender, HTTP::Response& response)
 #endif
 			break;
 
-			Log("info", this) << "Package Installed:" 
+			log("info") << "Package Installed:" 
 				<< "\n\tName: " << _local->name()
 				<< "\n\tVersion: " << _local->version()
 				<< endl;
@@ -525,7 +525,7 @@ void InstallTask::onTransactionComplete(void* sender, HTTP::Response& response)
 void InstallTask::setFailed(const string& message) 
 { 
 	if (!stateEquals(PackageInstallState::Failed)) {		
-		Log("error", this) << "Package Install Failed: " << message << endl;
+		log("error") << "Package Install Failed: " << message << endl;
 		if (message.length)
 			_local->addError(message);
 		_local->setState("Failed");
@@ -546,7 +546,7 @@ void InstallTask::setComplete(const string& message)
 		_manager.saveLocalPackage(*local);
 		setState(this, PackageInstallState::Installed, message);		
 
-		Log("info", this) << "Package Installed:" 
+		log("info") << "Package Installed:" 
 			<< "\n\tName: " << _local->name()
 			<< "\n\tVersion: " << _local->version()
 			<< endl;
@@ -566,7 +566,7 @@ void InstallTask::setIncomplete(const string& message)
 		_manager.saveLocalPackage(*local);
 		setState(this, PackageInstallState::Incomplete, message);		
 
-		Log("info", this) << "Package Incomplete:" 
+		log("info") << "Package Incomplete:" 
 			<< "\n\tName: " << _local->name()
 			<< "\n\tVersion: " << _local->version()
 			<< endl;
@@ -661,7 +661,7 @@ bool InstallTask::setState(unsigned int id, const string& message)
 /*
 void InstallTask::parsePackageResponse(JSON::Document& response)
 {
-	Log("debug", this) << "Parsing Updated Package" << endl; 
+	log("debug") << "Parsing Updated Package" << endl; 
 	
 	JSON::Node updatedPackage = response.select_single_node(format("//package[@name='%s']", manifest.name()).data()).node();
 	if (updatedPackage.empty())

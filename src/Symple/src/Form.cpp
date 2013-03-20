@@ -284,11 +284,11 @@ bool FormElement::clearElements(const string& id, bool partial)
 					partial ? 
 						curID.find(id) != string::npos : 
 						curID == id) {
-					Log("trace") << "Symple Form: Removing Redundant: " << curID << endl;
+					LogTrace() << "Symple Form: Removing Redundant: " << curID << endl;
 					match = true;
 				}
 				else {
-					Log("trace") << "Symple Form: Keeping: " << curID << endl;
+					LogTrace() << "Symple Form: Keeping: " << curID << endl;
 					result["elements"].append(element);
 				}
 			}
@@ -299,10 +299,10 @@ bool FormElement::clearElements(const string& id, bool partial)
 			result[members[i]] = root()[members[i]];
 	}
 				
-	Log("trace") << "Symple Form: Removing Redundant Result: " << JSON::stringify(result, true) << endl;
-	Log("trace") << "Symple Form: Removing Redundant Before: " << JSON::stringify(root(), true) << endl;
+	LogTrace() << "Symple Form: Removing Redundant Result: " << JSON::stringify(result, true) << endl;
+	LogTrace() << "Symple Form: Removing Redundant Before: " << JSON::stringify(root(), true) << endl;
 	*_root = result;
-	Log("trace") << "Symple Form: Removing Redundant After: " << JSON::stringify(root(), true) << endl;
+	LogTrace() << "Symple Form: Removing Redundant After: " << JSON::stringify(root(), true) << endl;
 
 	return match;
 }

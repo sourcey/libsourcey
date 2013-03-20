@@ -128,7 +128,7 @@ Format::ID Format::nameToID(const std::string& name)
 	if (name == "M4A")
 		return Format::M4A;
 	if (name == "MP3")
-		return Format::MP3;
+		return "mp3";
 
 	return Format::Unknown;
 }
@@ -151,7 +151,7 @@ std::string Format::idToName(const char* id)
 
 		// Audio Formats
 		case Format::M4A:		return "M4A";
-		case Format::MP3:		return "MP3";
+		case "mp3":		return "MP3";
 	}
 	return "Unknown";
 }
@@ -174,7 +174,7 @@ std::string Format::idToEncoderName(const char* id)
 
 		// Audio Formats
 		case Format::M4A:		return "m4a";
-		case Format::MP3:		return "mp3";
+		case "mp3":		return "mp3";
 	}
 	return "";
 }

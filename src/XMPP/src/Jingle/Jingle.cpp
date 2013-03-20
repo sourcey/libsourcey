@@ -203,7 +203,7 @@ Jingle::Transport Jingle::transport() const
 
 Jingle::PayloadType Jingle::addPayloadType() 
 {
-	//Log("debug") << "Jingle::addPayloadType: " << endl;
+	//LogDebug() << "Jingle::addPayloadType: " << endl;
 	//this->print(cout);
 	//Jingle::PayloadType node = (Jingle::PayloadType&)description().append_child();
 	//node.set_name("payload-type");
@@ -320,7 +320,7 @@ Jingle::PayloadType Jingle::Description::addPayloadType()
 {
 	//Node node = append_child();
 	//node.set_name("payload-type");
-	//Log("debug") << "Jingle::Description::addPayloadType: " << endl;
+	//LogDebug() << "Jingle::Description::addPayloadType: " << endl;
 	//this->print(cout);
 	XML::Node node = append_child();
 	return Jingle::PayloadType(node);
@@ -331,7 +331,7 @@ Jingle::Description Jingle::Description::setMediaType(const string& media)
 { 
 	remove_attribute("media"); 
 	append_attribute("media").set_value(media.data()); 
-	//Log("debug") << "Jingle::Description::setMediaType: " << endl;
+	//LogDebug() << "Jingle::Description::setMediaType: " << endl;
 	//this->print(cout);
 	return *this;
 }
@@ -379,7 +379,7 @@ Jingle::PayloadType Jingle::PayloadType::setId(int id)
 { 
 	remove_attribute("id"); 
 	append_attribute("id").set_value(id); 
-	//Log("debug") << "Jingle::Description::setMediaType: " << endl;
+	//LogDebug() << "Jingle::Description::setMediaType: " << endl;
 	//this->print(cout);
 	return *this;
 }

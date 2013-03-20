@@ -29,7 +29,7 @@
 #define SOURCEY_RTP_Types_H
 
 
-#include "Sourcey/Types.h"
+#include "Sourcey/Base.h"
 
 
 namespace Sourcey { 

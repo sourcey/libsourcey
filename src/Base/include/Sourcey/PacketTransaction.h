@@ -77,7 +77,7 @@ public:
 		_cancelled(false), 
 		_attempts(0)
 	{
-		Log("trace") << "[PacketTransaction:" << this << "] Creating" << std::endl;
+		LogTrace() << "[PacketTransaction:" << this << "] Creating" << std::endl;
 	}
 
 
@@ -88,7 +88,7 @@ public:
 		_cancelled(false), 
 		_attempts(0)
 	{
-		Log("trace") << "[PacketTransaction:" << this << "] Creating" << std::endl;
+		LogTrace() << "[PacketTransaction:" << this << "] Creating" << std::endl;
 	}
 
 
@@ -98,7 +98,7 @@ public:
 		_cancelled(false), 
 		_attempts(0)
 	{
-		Log("trace") << "[PacketTransaction:" << this << "] Creating" << std::endl;
+		LogTrace() << "[PacketTransaction:" << this << "] Creating" << std::endl;
 	}
 		
 
@@ -109,7 +109,7 @@ public:
 		_cancelled(false), 
 		_attempts(0)
 	{
-		Log("trace") << "[PacketTransaction:" << this << "] Creating" << std::endl;
+		LogTrace() << "[PacketTransaction:" << this << "] Creating" << std::endl;
 	}
 
 
@@ -125,7 +125,7 @@ public:
 		{
 			Poco::FastMutex::ScopedLock lock(_mutex);
 
-			Log("trace") << "[PacketTransaction:" << this << "] Sending: " 
+			LogTrace() << "[PacketTransaction:" << this << "] Sending: " 
 				<< _timeout << ": " << _request.toString() << std::endl;
 			_attempts++;
 		}
@@ -209,7 +209,7 @@ public:
 protected:
 	virtual ~PacketTransaction()
 	{
-		Log("trace") << "[PacketTransaction:" << this << "] Destroying" << std::endl;
+		LogTrace() << "[PacketTransaction:" << this << "] Destroying" << std::endl;
 		assert(!stateEquals(TransactionState::Running));
 	}
 
@@ -221,7 +221,7 @@ protected:
 			{
 				Poco::FastMutex::ScopedLock lock(_mutex);
 				_response = packet;
-				Log("trace") << "[PacketTransaction:" << this << "] Transaction Response Received: " 
+				LogTrace() << "[PacketTransaction:" << this << "] Transaction Response Received: " 
 					<< _response.toString() << std::endl;
 			}
 			onResponse();
@@ -246,14 +246,14 @@ protected:
 
 	virtual void onComplete() 
 	{
-		Log("trace") << "[PacketTransaction:" << this << "] Complete" << std::endl;
+		LogTrace() << "[PacketTransaction:" << this << "] Complete" << std::endl;
 		TimerTask::destroy();
 	}
 
 
 	virtual void onTimeout()
 	{	
-		Log("trace") << "[PacketTransaction:" << this << "] Timeout" << std::endl;	
+		LogTrace() << "[PacketTransaction:" << this << "] Timeout" << std::endl;	
 		{		
 			if (cancelled()) {
 				setState(this, TransactionState::Cancelled);

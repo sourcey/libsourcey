@@ -40,37 +40,37 @@ namespace TURN {
 // Media Formats
 //
 // ----------------------------------------------------------------------------		
-Format MP344100 = Format("MP3", Format::MP3, 
+Format MP344100 = Format("MP3", "mp3", 
 	VideoCodec(),
-	AudioCodec("MP3", "libmp3lame", 2, 44100, 128000, (UInt32)SampleFormat::S16P));	
+	AudioCodec("MP3", "libmp3lame", 2, 44100, 128000, "s16p"));	
 	// Adobe Flash Player requires that audio files be 16bit and have a sample rate of 44.1khz.
 	// Flash Player can handle MP3 files encoded at 32kbps, 48kbps, 56kbps, 64kbps, 128kbps, 160kbps or 256kbps.
 	// NOTE: 128000 works fine for 44100, but 64000 is broken!
 			
-Format MP38000  = Format("MP3", Format::MP3, 
+Format MP38000  = Format("MP3", "mp3", 
 	VideoCodec(),
 	AudioCodec("MP3", "libmp3lame", 1, 8000, 64000));
 			
-Format MP311000  = Format("MP3", Format::MP3, 
+Format MP311000  = Format("MP3", "mp3", 
 	VideoCodec(),
 	AudioCodec("MP3", "libmp3lame", 1, 11000, 16000));
 
-Format MP348000 = Format("MP3", Format::MP3, 
+Format MP348000 = Format("MP3", "mp3", 
 	VideoCodec(),
-	AudioCodec("MP3", "libmp3lame", 2, 48000, 128000, (UInt32)SampleFormat::S16P));	//, (UInt32)SampleFormat::S16P)
+	AudioCodec("MP3", "libmp3lame", 2, 48000, 128000, "s16p"));	//, "s16p")
  						
-Format FLVNoAudio = Format("FLV", Format::FLV, 
+Format FLVNoAudio = Format("FLV", "flv", 
 	VideoCodec("FLV", "flv", 320, 240));	//, 6, 9000, 64000
 
-Format FLVSpeex16000 = Format("FLV", Format::FLV, 
+Format FLVSpeex16000 = Format("FLV", "flv", 
 	VideoCodec("FLV", "flv", 320, 240),
 	AudioCodec("Speex", "libspeex", 1, 16000));	
 
-Format FLVSpeex16000NoVideo = Format("FLV", Format::FLV, 
+Format FLVSpeex16000NoVideo = Format("FLV", "flv", 
 	VideoCodec(),
 	AudioCodec("Speex", "libspeex", 1, 16000));	//, 16800
 
-Format MJPEG = Format("MJPEG", Format::MJPEG, 
+Format MJPEG = Format("MJPEG", "mjpeg", 
 	VideoCodec("MJPEG", "mjpeg", 640, 480, 25));
 
 
@@ -358,12 +358,12 @@ int main(int argc, char** argv)
 {
 	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
 
-	MediaFactory::initialize();
-	MediaFactory::instance()->loadVideo();
-	MediaFactory::instance()->loadAudio();
+	//MediaFactory::initialize();
+	//MediaFactory::instance()->loadVideo();
+	//MediaFactory::instance()->loadAudio();
 	
 	// Init input devices
-	ourVideoCapture = MediaFactory::instance()->video.getCapture(0);
+	ourVideoCapture = new VideoCapture(0);
 	//ourAudioCapture = MediaFactory::instance()->audio.getCapture(0, 
 	//	ourMediaFormat.audio.channels, 
 	//	ourMediaFormat.audio.sampleRate);	

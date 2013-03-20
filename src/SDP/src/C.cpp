@@ -42,7 +42,7 @@ C::C(const string& src) :
 {
 	size_t len = src.length();
 	if (src.substr(0, 2) != "c=") {
-		Log("error") << "ERROR: Contact sdp line does not start with <c=>" << std::endl;
+		LogError() << "ERROR: Contact sdp line does not start with <c=>" << std::endl;
 	}
 	size_t i = 2;
 	while (src[i] == ' ' && i < len)

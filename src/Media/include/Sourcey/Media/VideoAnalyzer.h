@@ -34,7 +34,7 @@
 #include "Sourcey/PacketStream.h"
 #include "Sourcey/IStartable.h"
 #include "Sourcey/IPacketProcessor.h"
-#include "Sourcey/Media/AVFileReader.h"
+#include "Sourcey/Media/AVInputReader.h"
 #include "Sourcey/Media/FPSCounter.h"
 #include "Sourcey/Media/Format.h"
 
@@ -147,7 +147,7 @@ public:
 	virtual void stop();
 		
 	//virtual std::ofstream& ofile();
-	virtual AVFileReader& reader();
+	virtual AVInputReader& reader();
 	virtual Options& options();
 	virtual std::string error() const;
 	
@@ -170,7 +170,7 @@ protected:
 	Options _options;
 	std::string	_error;
 	//std::ofstream _ofile;
-	AVFileReader _reader;
+	AVInputReader _reader;
 	VideoAnalyzer::Stream* _video;
 	VideoAnalyzer::Stream* _audio;	
 	VideoConversionContext* _videoConv;

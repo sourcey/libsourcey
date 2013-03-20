@@ -47,7 +47,7 @@ public:
 
 	virtual void process(IPacket& packet)
 	{		
-		Log("trace") << "[Base64PacketEncoder:" << this << "] Processing" << std::endl;
+		LogTrace() << "[Base64PacketEncoder:" << this << "] Processing" << std::endl;
 
 		std::ostringstream ostr;
 		Poco::Base64Encoder encoder(ostr);
@@ -73,7 +73,7 @@ public:
 		DataPacket opacket((unsigned char*)base64.data(), base64.size());
 		dispatch(this, opacket);
 
-		Log("trace") << "[Base64PacketEncoder:" << this << "] Processing: OK" << std::endl;
+		LogTrace() << "[Base64PacketEncoder:" << this << "] Processing: OK" << std::endl;
 	}
 };
 

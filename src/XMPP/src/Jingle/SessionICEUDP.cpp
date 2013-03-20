@@ -55,7 +55,7 @@ SessionICEUDP::SessionICEUDP(SessionManager& manager,
 	ISession(manager, initiator, responder, sid),
 	_ice(NULL) 
 {
-	Log("debug") << "ICEUDP Jingle Session Created:"		
+	LogDebug() << "ICEUDP Jingle Session Created:"		
 		<< "\n\tPID: " << this
 		<< "\n\tInitiator: " << this->_initiator
 		<< "\n\tResponder: " << this->_responder
@@ -68,7 +68,7 @@ SessionICEUDP::SessionICEUDP(SessionManager& manager, const Jingle& j) :
 	ISession(manager, j),
 	_ice(NULL)
 {
-	Log("debug") << "ICEUDP Jingle Session Created:"		
+	LogDebug() << "ICEUDP Jingle Session Created:"		
 		<< "\n\tPID: " << this
 		<< "\n\tInitiator: " << this->_initiator
 		<< "\n\tResponder: " << this->_responder
@@ -79,14 +79,14 @@ SessionICEUDP::SessionICEUDP(SessionManager& manager, const Jingle& j) :
 
 SessionICEUDP::~SessionICEUDP() 
 {
-	Log("debug") << "[SessionICEUDP:" << this << "] Destroying" << endl;
+	LogDebug() << "[SessionICEUDP:" << this << "] Destroying" << endl;
 
 	// NOTE: The session will be removed from the manager
 	// by the base implementation.
 	if (_ice)
 		delete _ice;
 
-	Log("debug") << "[SessionICEUDP:" << this << "] Destroying: OK" << endl;
+	LogDebug() << "[SessionICEUDP:" << this << "] Destroying: OK" << endl;
 }
 
 
@@ -143,13 +143,13 @@ void SessionICEUDP::initiate()
 
 void SessionICEUDP::terminate(const string& reason)
 {
-	Log("debug") << "[SessionICEUDP:" << this << "] Terminating: " << reason << endl;
+	LogDebug() << "[SessionICEUDP:" << this << "] Terminating: " << reason << endl;
 
 	{
 		//FastMutex::ScopedLock lock(_mutex);
 	
 		if (stateEquals(SessionState::Terminating)) {
-			Log("info") << "[SessionICEUDP:" << this << "] The session is already terminating!" << endl;
+			LogInfo() << "[SessionICEUDP:" << this << "] The session is already terminating!" << endl;
 			return;
 		}
 	
@@ -159,7 +159,7 @@ void SessionICEUDP::terminate(const string& reason)
 
 		if (!stateEquals(SessionState::ReceivedTerminate) &&
 			!stateEquals(SessionState::SentTerminate)) {
-			Log("debug") << "[SessionICEUDP:" << this << "] Sending Terminate Stanza" << endl;
+			LogDebug() << "[SessionICEUDP:" << this << "] Sending Terminate Stanza" << endl;
 
 			IQ iq;
 			iq.setType("set");
@@ -191,7 +191,7 @@ bool SessionICEUDP::process(IQ& iq)
 
 	Jingle j = iq.query<Jingle>();
 	assert(!j.action().empty());
-	Log("trace") << "[SessionICEUDP:" << this << "] Processing: " << j.sid() << ": " << j.action() << endl;	
+	LogTrace() << "[SessionICEUDP:" << this << "] Processing: " << j.sid() << ": " << j.action() << endl;	
 
 	if (j.action() == "session-initiate") 
 	{
@@ -253,7 +253,7 @@ bool SessionICEUDP::process(IQ& iq)
 
 void SessionICEUDP::removeMediaSources()
 {			
-	Log("debug") << "[SessionICEUDP:" << this << "] Removing Media Sources" << endl;
+	LogDebug() << "[SessionICEUDP:" << this << "] Removing Media Sources" << endl;
 
 	// Stop all media callbacks.
 	if (!_destroySources && _ice && _ice->options().senders != "recvonly") {
@@ -274,7 +274,7 @@ void SessionICEUDP::removeMediaSources()
 	}
 	
 	ISession::removeMediaSources();
-	Log("debug") << "[SessionICEUDP:" << this << "] Removing Media Sources: OK" << endl;
+	LogDebug() << "[SessionICEUDP:" << this << "] Removing Media Sources: OK" << endl;
 }
 
 
@@ -284,7 +284,7 @@ PacketDispatcher* SessionICEUDP::geStreamMediaSource(const ICE::MediaStream& str
 		return false;
 	}
 
-	Log("debug") << "[SessionICEUDP:" << this << "] Media Stream Source: " << stream.index() << endl;
+	LogDebug() << "[SessionICEUDP:" << this << "] Media Stream Source: " << stream.index() << endl;
 
 	return _sources[stream.index() - 1];
 }
@@ -297,7 +297,7 @@ PacketDispatcher* SessionICEUDP::geStreamMediaSource(const ICE::MediaStream& str
 // ---------------------------------------------------------------------
 bool SessionICEUDP::onMediaStreamCreated(ICE::Agent& agent, ICE::MediaStream& stream) 
 {
-	Log("debug") << "[SessionICEUDP:" << this << "] Media Stream Created" << endl;
+	LogDebug() << "[SessionICEUDP:" << this << "] Media Stream Created" << endl;
 	FastMutex::ScopedLock lock(_mutex);
 
 	// The the agent is controlled and we are sending media then
@@ -310,7 +310,7 @@ bool SessionICEUDP::onMediaStreamCreated(ICE::Agent& agent, ICE::MediaStream& st
 			return false;
 		}
 	}
-	Log("debug") << "[SessionICEUDP:" << this << "] Media Stream Created: OK" << endl;
+	LogDebug() << "[SessionICEUDP:" << this << "] Media Stream Created: OK" << endl;
 	return true;
 }
 
@@ -329,14 +329,14 @@ const IUser* SessionICEUDP::authenticateBindingRequest(ICE::Agent& agent, const 
 		// If it is then we request authentication.
 		AuthenticateICEConnectivityCheck.dispatch(this, username, user);
 	} else
-		Log("error") << "[SessionICEUDP:" << this << "] ICE Binding request not equal to peer: " << username << ": " << peerUsername << endl;
+		LogError() << "[SessionICEUDP:" << this << "] ICE Binding request not equal to peer: " << username << ": " << peerUsername << endl;
 	return user;
 }
 
 
 void SessionICEUDP::onMediaStreamValidPairsChanged(ICE::Agent& agent, ICE::MediaStream& stream, const CandidatePairList& validPairs) 
 {
-	Log("debug") << "[SessionICEUDP:" << this << "] Media Stream Valid Pairs Changed" << endl;
+	LogDebug() << "[SessionICEUDP:" << this << "] Media Stream Valid Pairs Changed" << endl;
 }
 
 
@@ -367,7 +367,7 @@ void SessionICEUDP::onSelectedPairsChanged(Agent& agent, MediaStream& stream, Co
 void SessionICEUDP::onMediaOnData(ICE::Agent& agent, ICE::MediaStream& stream, Component& component, 
 										const DataPacket& packet, const Net::Address& localAddress, const Net::Address& remoteAddr) 
 {
-	Log("trace") << "[SessionICEUDP:" << this << "] Media Data Received: " << packet.size() << endl;
+	LogTrace() << "[SessionICEUDP:" << this << "] Media Data Received: " << packet.size() << endl;
 
 	// Delegates may wish to differentiate RTP from RTCP
 	// packets by creating a callback delegate for each.
@@ -377,7 +377,7 @@ void SessionICEUDP::onMediaOnData(ICE::Agent& agent, ICE::MediaStream& stream, C
 
 void SessionICEUDP::onOutgoingSDP(ICE::Agent& agent, SDP::Message& sdp) 
 {
-	Log("debug") << "[SessionICEUDP:" << this << "] Outgoing SDP: Session State: " << state() << endl;
+	LogDebug() << "[SessionICEUDP:" << this << "] Outgoing SDP: Session State: " << state() << endl;
 	FastMutex::ScopedLock lock(_mutex);
 
 	assert(_ice == &agent);
@@ -398,7 +398,7 @@ void SessionICEUDP::onOutgoingSDP(ICE::Agent& agent, SDP::Message& sdp)
 
 void SessionICEUDP::onICEStateChange(ICE::Agent& agent, ICE::State& state) 
 {
-	Log("debug") << "[SessionICEUDP:" << this << "] ICE State Changed: " << state.toString() << endl;
+	LogDebug() << "[SessionICEUDP:" << this << "] ICE State Changed: " << state.toString() << endl;
 
 	switch(state.id()) {	
 	case ICE::State::GatheringCandidates:
@@ -428,14 +428,14 @@ void SessionICEUDP::onICEStateChange(ICE::Agent& agent, ICE::State& state)
 					
 					ComponentMap components = stream->components();
 					if (components.size() >= 1) {
-						Log("debug") << "[SessionICEUDP:" << this << "] Sending media:"
+						LogDebug() << "[SessionICEUDP:" << this << "] Sending media:"
 							<< "\n\tStream: " << stream->index() << ": " << stream->name() 
 							<< "\n\tComponent: " << components[1]->id()
 							<< endl;
 						source->attach(packetDelegate(components[1], &Component::sendRTPPacket));
 					}
 					if (components.size() >= 2) {						
-						Log("debug") << "[SessionICEUDP:" << this << "] Sending media:"
+						LogDebug() << "[SessionICEUDP:" << this << "] Sending media:"
 							<< "\n\tStream: " << stream->index() << ": " << stream->name() 
 							<< "\n\tComponent: " << components[2]->id()
 							<< endl;
@@ -470,7 +470,7 @@ void SessionICEUDP::onICEStateChange(ICE::Agent& agent, ICE::State& state)
 			Jingle::create(iq, Jingle::Terminate("media-error", _initiator, _responder, _sid));
 			_manager.router() >> iq;
 
-			Log("error") << "Jingle ICE UDP Session failed: " << _sid << endl;
+			LogError() << "Jingle ICE UDP Session failed: " << _sid << endl;
 			*/
 		}
 		break;	
@@ -540,7 +540,7 @@ void SessionICEUDP::onICEStateChange(ICE::Agent& agent, ICE::State& state)
 //
 bool SessionICEUDP::jingleToSDP(SDP::Message& sdp, const Jingle& jingle) 
 {
-	Log("debug") << "[SessionICEUDP:" << this << "] Jingle to SDP: " << jingle.sid() << endl;
+	LogDebug() << "[SessionICEUDP:" << this << "] Jingle to SDP: " << jingle.sid() << endl;
 
 	//jingle.print(cout);
 	FastMutex::ScopedLock lock(_mutex);
@@ -617,7 +617,7 @@ bool SessionICEUDP::sdpToJingle(IQ& iq, const SDP::Message& sdp)
 	assert(!_responder.empty());
 	assert(!_sid.empty());
 		
-	Log("debug") << "[SessionICEUDP:" << this << "] SDP to Jingle:\n" << sdp.toString() << endl;
+	LogDebug() << "[SessionICEUDP:" << this << "] SDP to Jingle:\n" << sdp.toString() << endl;
 	assert(sdp.isICESupported());
 		
 	iq.setType("set");

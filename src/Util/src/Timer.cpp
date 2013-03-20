@@ -68,7 +68,7 @@ void Timer::start(const ITimerCallback& callback)
 	_callbacks.push_back(callback.clone());	
 	sort(_callbacks.begin(), _callbacks.end(), CompareTimeout);
 	
-	Log("trace", this) << "Started: " << callback.object() << endl;
+	log("trace") << "Started: " << callback.object() << endl;
 
 	_scheduleAt = _callbacks.front()->scheduleAt();
 	_wakeUp.set();
@@ -77,13 +77,13 @@ void Timer::start(const ITimerCallback& callback)
 
 void Timer::stop(const ITimerCallback& callback) 
 {
-	Log("trace", this) << "Stopping: " << callback.object() << endl;
+	log("trace") << "Stopping: " << callback.object() << endl;
 
 	FastMutex::ScopedLock lock(_mutex);
 	bool success = false;
 	for (TimerCallbackList::const_iterator it = _callbacks.begin(); it != _callbacks.end(); ++it) {
 		if (**it == callback) {
-			Log("trace", this) << "Stopped: " << (*it)->object() << endl;
+			log("trace") << "Stopped: " << (*it)->object() << endl;
 			(*it)->cancel();
 			success = true;
 			break;
@@ -101,7 +101,7 @@ void Timer::stopAll(const void* klass)
 	FastMutex::ScopedLock lock(_mutex);
 	for (TimerCallbackList::const_iterator it = _callbacks.begin(); it != _callbacks.end(); ++it) {
 		if ((*it)->object() == klass) {
-			Log("trace", this) << "Stopped: " << (*it)->object() << endl;
+			log("trace") << "Stopped: " << (*it)->object() << endl;
 			(*it)->cancel();
 		}
 	}
@@ -114,7 +114,7 @@ void Timer::reset(const ITimerCallback& callback)
 	bool success = false;
 	for (TimerCallbackList::const_iterator it = _callbacks.begin(); it != _callbacks.end(); ++it) {
 		if (**it == callback) {
-			Log("trace", this) << "Reset: " << (*it)->object() << endl;
+			log("trace") << "Reset: " << (*it)->object() << endl;
 			(*it)->scheduleAt().reset();
 			success = true;
 			break;
@@ -129,16 +129,16 @@ void Timer::reset(const ITimerCallback& callback)
 
 void Timer::run() 
 {
-	Log("trace", this) << "Running" << endl;
+	log("trace") << "Running" << endl;
 
 	while (!_stop) {	
 		//try {
-			Log("trace", this) << "Waiting for " << _scheduleAt.remaining() << endl;
+			log("trace") << "Waiting for " << _scheduleAt.remaining() << endl;
 
 			_wakeUp.tryWait(_scheduleAt.remaining());
 			if (_scheduleAt.expired()) {
 
-				Log("trace", this) << "Timeout" << endl;
+				log("trace") << "Timeout" << endl;
 				//ScopedLockWithUnlock<Mutex> lock(_mutex);
 				//TimerCallbackList callbacks(_callbacks);
 				//lock.unlock();
@@ -159,7 +159,7 @@ void Timer::run()
 						hasRedundant = true;
 					}
 					else if ((*it)->ready()) {
-						Log("trace", this) << "Invoking: " << *it << endl;
+						log("trace") << "Invoking: " << *it << endl;
 						(*it)->invoke();
 					}	
 				}
@@ -167,11 +167,11 @@ void Timer::run()
 				// Post processing...
 				FastMutex::ScopedLock alock(_mutex);				
 				if (hasRedundant) {
-					//Log("trace", this) << "Clearing Redundant Callbacks" << endl;
+					//log("trace") << "Clearing Redundant Callbacks" << endl;
 					TimerCallbackList::iterator it = _callbacks.begin();
 					while (it != _callbacks.end()) {
 						if ((*it)->cancelled()) {
-							Log("trace", this) << "Clearing Cancelled: " << (*it)->object() << endl;
+							log("trace") << "Clearing Cancelled: " << (*it)->object() << endl;
 							delete *it;
 							it = _callbacks.erase(it);
 						}
@@ -186,10 +186,10 @@ void Timer::run()
 					_scheduleAt = _callbacks.front()->scheduleAt();
 					
 					/*
-					Log("trace", this) << "Printing Sorted Callbacks" << endl;
+					log("trace") << "Printing Sorted Callbacks" << endl;
 					TimerCallbackList::iterator it = _callbacks.begin();
 					while (it != _callbacks.end()) {
-						Log("trace", this) << "Callback: " 
+						log("trace") << "Callback: " 
 							<< (*it)->object() << ": " 
 							<< (*it)->scheduleAt().remaining() << endl;
 						++it;
@@ -199,11 +199,11 @@ void Timer::run()
 			}
 		//}
 		//catch (Exception& exc) {
-		//	Log("error", this) << "Swallowing Exception: " << exc.displayText() << endl;
+		//	log("error") << "Swallowing Exception: " << exc.displayText() << endl;
 		//}
 	}
 	
-	Log("trace", this) << "Exiting" << endl;
+	log("trace") << "Exiting" << endl;
 }
 
 
