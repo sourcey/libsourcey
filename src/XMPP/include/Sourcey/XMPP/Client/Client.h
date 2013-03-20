@@ -99,7 +99,7 @@ typedef xmpp_stream_error_t StreamError;
 
 // ---------------------------------------------------------------------
 //
-class Client: public StatefulSignal<ClientState>, public ILoggable
+class Client: public StatefulSignal<ClientState>, public IPolymorphic
 {
 public:
 	Client(Router& router);
@@ -149,7 +149,7 @@ protected:
 
 // ---------------------------------------------------------------------
 //
-class XMPPTask: public Task, public ILoggable
+class XMPPTask: public Task, public IPolymorphic
 {
 public:
 	XMPPTask(Client& client, Runner& runner);

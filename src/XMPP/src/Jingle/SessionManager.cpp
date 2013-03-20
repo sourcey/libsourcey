@@ -47,7 +47,7 @@ namespace Jingle {
 SessionManager::SessionManager(Router& router) :
 	_router(router) 
 {
-	Log("debug") << "[JingleSessionManager] Creating" << endl;
+	LogDebug() << "[JingleSessionManager] Creating" << endl;
 	_router.attach(
 		xpathDelegate(this, &SessionManager::onRecvJingle, //XPathDelegate<SessionManager, IQ>
 			Filter("/iq/jingle", AcceptInbound) ///*AcceptRecvStanzas |*/ 
@@ -58,7 +58,7 @@ SessionManager::SessionManager(Router& router) :
 
 SessionManager::~SessionManager() 
 {	
-	Log("debug") << "[JingleSessionManager] Destroying" << endl;
+	LogDebug() << "[JingleSessionManager] Destroying" << endl;
 	//FastMutex::ScopedLock lock(_mutex);
 
 	_router.detachAll(this);	
@@ -95,7 +95,7 @@ void SessionManager::onRecvJingle(void*, IQ& iq)
 		process(iq);
 	}
 	catch (Exception& exc) {
-		Log("error") << "[JingleSessionManager] Jingle Error: " << exc.displayText() << endl;	
+		LogError() << "[JingleSessionManager] Jingle Error: " << exc.displayText() << endl;	
 
 		// We failed to initiate the Jingle session, so send an
 		// XMPP Error as per XEP-0166 #6.3.2
@@ -111,7 +111,7 @@ bool SessionManager::process(IQ& iq)
 {
 	Jingle j = iq.query<Jingle>();
 	
-	Log("debug") << "[JingleSessionManager] Recv Jingle: " << j.sid() << endl;
+	LogDebug() << "[JingleSessionManager] Recv Jingle: " << j.sid() << endl;
 	//FastMutex::ScopedLock lock(_mutex);
 	ISession* s = get(j.sid(), false);
 	if (!s)
@@ -125,7 +125,7 @@ bool SessionManager::process(IQ& iq)
 	
 ISession* SessionManager::createSession(const Jingle& j, bool whiny) 
 {
-	Log("debug") << "[JingleSessionManager] Create: " << j.sid() << endl;
+	LogDebug() << "[JingleSessionManager] Create: " << j.sid() << endl;
 
 	ISession* s = NULL;
 	try	
@@ -143,7 +143,7 @@ ISession* SessionManager::createSession(const Jingle& j, bool whiny)
 		//throw Exception("Jingle session already exists: " + s->sid());
 	}
 	catch (Exception& exc) {
-		Log("error") << "[JingleSessionManager] " << exc.displayText() << endl;
+		LogError() << "[JingleSessionManager] " << exc.displayText() << endl;
 		if (s) {
 			delete s;
 			s = NULL;
@@ -171,11 +171,11 @@ ISession* SessionManager::removeSession(const string& sid)
 
 void SessionManager::onJingleSessionStateChange(void* sender, XMPP::Jingle::SessionState& state, const XMPP::Jingle::SessionState&)
 {
-	Log("debug") << "[JingleSessionManager] Session State Changed: " << state.toString() << endl;
+	LogDebug() << "[JingleSessionManager] Session State Changed: " << state.toString() << endl;
 
 	if (state.id() == XMPP::Jingle::SessionState::Terminating) {
 		ISession* session = reinterpret_cast<ISession*>(sender);
-		Log("debug") << "[JingleSessionManager] Removing Terminating: " << session->sid() << endl;
+		LogDebug() << "[JingleSessionManager] Removing Terminating: " << session->sid() << endl;
 		session->StateChange -= delegate(this, &SessionManager::onJingleSessionStateChange);
 		assert(SessionBase::remove(session)); // delete the pointer
 	}

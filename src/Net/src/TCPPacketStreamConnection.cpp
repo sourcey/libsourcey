@@ -47,20 +47,20 @@ TCPPacketStreamConnection::TCPPacketStreamConnection(PacketStream* stream,
 	//_closeOnDisconnect(closeDisconnect), 
 	_resetOnConnect(resetOnConnect) 
 {
-	Log("debug") << "Creating" << endl;
+	LogDebug() << "Creating" << endl;
 }
 	
 
 TCPPacketStreamConnection::~TCPPacketStreamConnection() 
 { 
-	Log("debug") << "Destroying" << endl;
+	LogDebug() << "Destroying" << endl;
 	stop();
 }
 
 
 void TCPPacketStreamConnection::run() 
 {
-	Log("debug") << "Starting" << endl;
+	LogDebug() << "Starting" << endl;
 	
 	try 
 	{
@@ -74,10 +74,10 @@ void TCPPacketStreamConnection::run()
 		assert(_stream == NULL);
 	}
 	catch (Exception& exc) {
-		Log("error", this) << "Error: " << exc.displayText() << endl;
+		log("error") << "Error: " << exc.displayText() << endl;
 	}
 
-	Log("debug", this) << "Exiting..."<< endl;
+	log("debug") << "Exiting..."<< endl;
 }
 
 
@@ -98,7 +98,7 @@ int TCPPacketStreamConnection::send(const char* data, size_t size)
 {						
 	// Drop empty packets.
 	if (!size) {			
-		Log("warn") << "Dropping Empty Packet" << endl;
+		LogWarn() << "Dropping Empty Packet" << endl;
 		return 0;
 	}
 
@@ -106,7 +106,7 @@ int TCPPacketStreamConnection::send(const char* data, size_t size)
 	else if (size > MAX_TCP_PACKET_SIZE) {
 		
 		/*
-		Log("trace") << "Splitting Oversize Data Packet: " 
+		LogTrace() << "Splitting Oversize Data Packet: " 
 			<< "\n\tSize: " << size
 			<< "\n\tMax Size: " << MAX_TCP_PACKET_SIZE
 			<< endl;
@@ -117,7 +117,7 @@ int TCPPacketStreamConnection::send(const char* data, size_t size)
 		while (index < size) {		
 			read = min<int>(size - read, MAX_TCP_PACKET_SIZE);
 			/*
-			Log("trace") << "Splitting Oversize Data Packet: " 
+			LogTrace() << "Splitting Oversize Data Packet: " 
 				<< "\n\tCurrent Index: " << index
 				<< "\n\tRead Bytes: " << read
 				<< "\n\tRemaining: " << (size - read)
@@ -130,7 +130,7 @@ int TCPPacketStreamConnection::send(const char* data, size_t size)
 		return size;
 	}
 
-	//Log("trace") << "Sending Packet: " 
+	//LogTrace() << "Sending Packet: " 
 	//	<< size << ": " << string(data, min(50, size)) << endl;	
 	return socket().sendBytes(data, size);
 }
@@ -156,7 +156,7 @@ void TCPPacketStreamConnection::onStreamPacket(void*, IPacket& packet)
 		}
 	}
 	catch (Exception& exc) {
-		Log("error", this) << "Error: " << exc.displayText() << endl;		
+		log("error") << "Error: " << exc.displayText() << endl;		
 		//if (_stream && _closeOnDisconnect)
 		//	_stream->close();
 		//else
@@ -171,7 +171,7 @@ void TCPPacketStreamConnection::onStreamPacket(void*, IPacket& packet)
 
 void TCPPacketStreamConnection::onStreamStateChange(void*, PacketStreamState& state, const PacketStreamState&)
 {		
-	Log("debug") << "Session State Changed: " << state << endl;
+	LogDebug() << "Session State Changed: " << state << endl;
 
 	if (state.id() == PacketStreamState::Closing)
 		stop();

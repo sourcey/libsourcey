@@ -50,12 +50,12 @@ public:
 		_base64(base64),
 		_initial(true)
 	{
-		Log("trace") << "[MultipartPacketizer:" << this << "] Creating" << std::endl;
+		LogTrace() << "[MultipartPacketizer:" << this << "] Creating" << std::endl;
 	}
 	
 	virtual ~MultipartPacketizer() 
 	{
-		Log("trace") << "[MultipartPacketizer:" << this << "] Destroying" << std::endl;
+		LogTrace() << "[MultipartPacketizer:" << this << "] Destroying" << std::endl;
 	}
 	
 	virtual void writeInitialHTTPHeaders(std::ostringstream& ost)
@@ -85,7 +85,7 @@ public:
 
 	virtual void process(IPacket& packet)
 	{		
-		//Log("trace") << "[MultipartPacketizer:" << this << "] Processing" << std::endl;
+		//LogTrace() << "[MultipartPacketizer:" << this << "] Processing" << std::endl;
 
 		std::ostringstream header;
 
@@ -126,7 +126,7 @@ public:
 			dispatch(this, opacket);
 		}
 
-		//Log("trace") << "[MultipartPacketizer:" << this << "] Processing: OK" << std::endl;
+		//LogTrace() << "[MultipartPacketizer:" << this << "] Processing: OK" << std::endl;
 	}
 
 protected:

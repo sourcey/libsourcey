@@ -57,13 +57,13 @@ Transaction::Transaction(Request* request) :
 	_response(HTTPResponse::HTTP_SERVICE_UNAVAILABLE),
 	_clientData(NULL)
 {
-	Log("trace", this) << "Creating" << endl;
+	log("trace") << "Creating" << endl;
 }
 
 
 Transaction::~Transaction()
 {
-	Log("trace", this) << "Destroying" << endl;
+	log("trace") << "Destroying" << endl;
 	// Free HTTP client session like so as base is protected
 	if (_session) {
 		if (_uri.getScheme() == "http")
@@ -88,7 +88,7 @@ bool Transaction::send()
 		_uri = URI(_request->getURI());
 		_request->setURI(_uri.getPathAndQuery()); // ensure URI only in request
 
-		Log("trace", this) << "Running:" 
+		log("trace") << "Running:" 
 			<< "\n\tMethod: " << _request->getMethod()
 			<< "\n\tHas Credentials: " << _request->hasCredentials()
 			<< "\n\tURL: " << _uri.toString()
@@ -124,17 +124,17 @@ bool Transaction::send()
 				_response.getReason());
 	}
 	catch (StopPropagation&) {
-		Log("trace", this) << "Cancelled" << endl;
+		log("trace") << "Cancelled" << endl;
 		return false;
 	}
 	catch (Exception& exc) {
-		Log("error", this) << "Failed: " << exc.displayText() << endl;
+		log("error") << "Failed: " << exc.displayText() << endl;
 		_response.error = exc.displayText();
 		setState(this, TransactionState::Failed, _response.error);
 		//exc.rethrow();
 	}
 
-	Log("trace", this) << "Response: " 
+	log("trace") << "Response: " 
 		<< _response.getStatus() << ": " 
 		<< _response.getReason() << endl;
 
@@ -145,7 +145,7 @@ bool Transaction::send()
 
 void Transaction::cancel()
 {
-	Log("trace", this) << "Cancelling" << endl;
+	log("trace") << "Cancelling" << endl;
 	setState(this, TransactionState::Cancelled);
 }
 
@@ -154,7 +154,7 @@ void Transaction::processRequest(ostream& ostr)
 {
 	//stringstream ss;
 	//_request->write(ss);	
-	//Log("trace", this) << "Request Headers: " << ss.str() << endl;
+	//log("trace") << "Request Headers: " << ss.str() << endl;
 
 	try 
 	{
@@ -163,7 +163,7 @@ void Transaction::processRequest(ostream& ostr)
 		setRequestState(TransferState::Running);
 		if (_request->form) 
 		{
-			//Log("trace", this) << "Request Body: " << string(ss.str().data(), 100) << endl;
+			//log("trace") << "Request Body: " << string(ss.str().data(), 100) << endl;
 			
 			char c;
 			streambuf* pbuf = _request->body.rdbuf(); 
@@ -177,7 +177,7 @@ void Transaction::processRequest(ostream& ostr)
 						throw StopPropagation();
 					}
 					
-					Log("trace", this) << "Upload progress: " << 
+					log("trace") << "Upload progress: " << 
 						st.current << " of " << 
 						st.total << endl;
 
@@ -189,7 +189,7 @@ void Transaction::processRequest(ostream& ostr)
 	}
 	catch (Exception& exc) 
 	{
-		Log("error", this) << "Request Error: " << exc.displayText() << endl;
+		log("error") << "Request Error: " << exc.displayText() << endl;
 		setRequestState(TransferState::Failed);
 		exc.rethrow();
 	}	
@@ -207,7 +207,7 @@ void Transaction::processResponse(istream& istr)
 {	
 	//stringstream ss;
 	//_response.write(ss);	
-	//Log("trace", this) << "Response Headers: " << ss.str() << endl;
+	//log("trace") << "Response Headers: " << ss.str() << endl;
 
 	try 
 	{	
@@ -232,7 +232,7 @@ void Transaction::processResponse(istream& istr)
 					throw StopPropagation();
 				}
 				
-				Log("trace", this) << "Download progress: " 
+				log("trace") << "Download progress: " 
 					<< st.current << " of " 
 					<< st.total << endl;
 	
@@ -247,7 +247,7 @@ void Transaction::processResponse(istream& istr)
 	}
 	catch (Exception& exc) 
 	{
-		Log("error", this) << "Response Error: " << exc.displayText() << endl;
+		log("error") << "Response Error: " << exc.displayText() << endl;
 		setResponseState(TransferState::Failed);
 		exc.rethrow();
 	}
@@ -365,8 +365,8 @@ void* Transaction::clientData() const
 				throw StopPropagation();
 			}
 				
-			Log("trace", this) << "Upload progress: " << _requestState.current << " of " << total << endl;
-			//Log("trace", this) << "Upload progress: " << _requestState.current << endl;
+			log("trace") << "Upload progress: " << _requestState.current << " of " << total << endl;
+			//log("trace") << "Upload progress: " << _requestState.current << endl;
 			setResponseState(TransferState::Running, _requestState.current);
 		}
 	}
@@ -400,7 +400,7 @@ void* Transaction::clientData() const
 		
 		// Otherwise save the response to the output file.
 		else {
-			Log("trace", this) << "Saving output file: " << _outputPath << endl;
+			log("trace") << "Saving output file: " << _outputPath << endl;
 			Path dir(_outputPath);
 			dir.setFileName("");
 			File(dir).createDirectories();	
@@ -413,7 +413,7 @@ void* Transaction::clientData() const
 	}
 	catch (Exception& exc) 
 	{
-		Log("trace", this) << "Response Error: " << exc.displayText() << endl;
+		log("trace") << "Response Error: " << exc.displayText() << endl;
 		setResponseState(TransferState::Failed, 0);
 		exc.rethrow();
 	}

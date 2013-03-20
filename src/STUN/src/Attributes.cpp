@@ -251,7 +251,7 @@ Attribute* Attribute::create(UInt16 type, UInt16 size)
 	//	break;
 
 	default:
-		Log("error") << "[STUN] Unable to create attribute for type: " << type << endl;
+		LogError() << "[STUN] Unable to create attribute for type: " << type << endl;
 		break;
 	}
 
@@ -671,19 +671,19 @@ Attribute* MessageIntegrity::clone()
 	
 bool MessageIntegrity::verifyHmac(const string& key) const 
 {
-	//Log("debug") << "Message: Verify HMAC: " << key << endl;
+	//LogDebug() << "Message: Verify HMAC: " << key << endl;
 
 	assert(key.size());
 	assert(!_hmac.empty());
 	assert(!_input.empty());
 
-	//Log("debug") << "Message: Packet integrity input (" << _input << ")" << endl;
-	//Log("debug") << "Message: Packet integrity key (" << key << ")" << endl;
+	//LogDebug() << "Message: Packet integrity input (" << _input << ")" << endl;
+	//LogDebug() << "Message: Packet integrity key (" << key << ")" << endl;
 
 	string hmac = CryptoProvider::computeHMAC(_input, key);
 	assert(hmac.size() == Size);
 
-	//Log("debug") << "Message: Verifying message integrity (" << hmac << ":" << _hmac << ")" << endl;
+	//LogDebug() << "Message: Verifying message integrity (" << hmac << ":" << _hmac << ")" << endl;
 
 	return _hmac == hmac;
 }
@@ -691,13 +691,13 @@ bool MessageIntegrity::verifyHmac(const string& key) const
 
 bool MessageIntegrity::read(Buffer& buf) 
 {
-	//Log("debug") << "Message: Read HMAC" << endl;
+	//LogDebug() << "Message: Read HMAC" << endl;
 
 	// Read the HMAC value.
 	if (!buf.readString(_hmac, Size))
 		return false;
 
-	//Log("debug") << "Message: Parsed message integrity (" << _hmac << ")" << endl;
+	//LogDebug() << "Message: Parsed message integrity (" << _hmac << ")" << endl;
 
 	// Remember the original position ans reset the buffer 
 	// position to 0.	
@@ -723,7 +723,7 @@ bool MessageIntegrity::read(Buffer& buf)
 
 void MessageIntegrity::write(Buffer& buf) const 
 {
-	//Log("debug") << "Message: Write HMAC" << endl;
+	//LogDebug() << "Message: Write HMAC" << endl;
 
 	// If the key (password) is present we will compute the 
 	// HMAC for the current message, otherwise the attribute
@@ -814,7 +814,7 @@ bool ErrorCode::read(Buffer& buf)
 		return false;
 
 	if ((val >> 11) != 0)
-		Log("debug") << "error-code bits not zero";
+		LogDebug() << "error-code bits not zero";
 
 	setErrorCode(val);
 
@@ -939,13 +939,13 @@ bool TransportPrefs::read(Buffer& buf)
 		return false;
 
 	if ((val >> 3) != 0)
-		Log("debug") << "transport-preferences bits not zero";
+		LogDebug() << "transport-preferences bits not zero";
 
 	_preallocate = static_cast<bool>((val >> 2) & 0x1);
 	_prefs = (UInt8)(val & 0x3);
 
 	if (_preallocate && (_prefs == 3))
-		Log("debug") << "transport-preferences imcompatible P and Typ";
+		LogDebug() << "transport-preferences imcompatible P and Typ";
 
 	if (!_preallocate) {
 		if (size() != UInt32Attribute::Size)

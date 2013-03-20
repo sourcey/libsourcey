@@ -89,19 +89,7 @@ inline const char* getStringFromLogLevel(LogLevel level)
 }
 
 
-class LogStream;
-
-
-// ---------------------------------------------------------------------
-//
-struct ILoggable 
-{ 
-	ILoggable();
-	virtual ~ILoggable(); 
-	virtual const char* className() const = 0;
-	virtual LogStream log(const char* level = "debug") const;
-	virtual void printLog(std::ostream& ost) const;
-};
+struct LogStream;
 
 
 // ---------------------------------------------------------------------
@@ -112,8 +100,8 @@ public:
 	LogChannel(const std::string& name, LogLevel level = DebugLevel, const char* dateFormat = "%H:%M:%S");
 	virtual ~LogChannel() {}; 
 
-	virtual void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
-	virtual void format(std::ostream& out, const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
+	virtual void write(const LogStream& stream);
+	virtual void format(const LogStream& stream, std::ostream& ost);
 
 	std::string	name() const { return _name; };
 	LogLevel level() const { return _level; };
@@ -137,7 +125,8 @@ public:
 	ConsoleChannel(const std::string& name, LogLevel level = DebugLevel, const char* dateFormat = "%H:%M:%S");
 	virtual ~ConsoleChannel() {}; 
 		
-	virtual void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
+	//virtual void write(const std::string& message, LogLevel level = DebugLevel, const IPolymorphic* ptr = NULL);
+	virtual void write(const LogStream& stream); //, LogLevel level = DebugLevel, const IPolymorphic* ptr = NULL
 };
 
 
@@ -152,8 +141,9 @@ public:
 		LogLevel level = DebugLevel, 
 		const char* dateFormat = "%H:%M:%S");
 	virtual ~FileChannel();
-
-	virtual void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
+	
+	//virtual void write(const std::string& message, LogLevel level = DebugLevel, const IPolymorphic* ptr = NULL);
+	virtual void write(const LogStream& stream);
 	
 	void setPath(const std::string& path);
 	std::string	path() const;
@@ -163,7 +153,7 @@ protected:
 	virtual void close();
 
 protected:
-	std::ofstream	_stream;
+	std::ofstream	_fstream;
 	std::string		_path;
 };
 
@@ -181,8 +171,9 @@ public:
 		int rotationInterval = 12 * 3600, 
 		const char* dateFormat = "%H:%M:%S");
 	virtual ~RotatingFileChannel();
-
-	virtual void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
+	
+	//virtual void write(const std::string& message, LogLevel level = DebugLevel, const IPolymorphic* ptr = NULL);
+	virtual void write(const LogStream& stream);
 	virtual void rotate();
 
 	std::string	dir() const { return _dir; };
@@ -194,7 +185,7 @@ public:
 	void setRotationInterval(int interval) { _rotationInterval = interval; };
 
 protected:
-	std::ofstream*	_stream;
+	std::ofstream*	_fstream;
 	std::string		_dir;
 	std::string		_filename;
 	std::string		_extension;
@@ -203,7 +194,7 @@ protected:
 };
 
 
-/*
+#if 0
 class EventedFileChannel: public FileChannel
 {	
 public:
@@ -216,11 +207,11 @@ public:
 		const char* dateFormat = "%H:%M:%S");
 	virtual ~EventedFileChannel();
 	
-	virtual void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
+	virtual void write(const std::string& message, LogLevel level = DebugLevel, const IPolymorphic* ptr = NULL);
 
-	Signal3<const std::string&, LogLevel&, const ILoggable*&> OnLogMessage;
+	Signal3<const std::string&, LogLevel&, const IPolymorphic*&> OnLogStream;
 };
-*/
+#endif
 
 
 typedef std::map<std::string, LogChannel*> LogMap;
@@ -251,23 +242,16 @@ public:
 		// Returns the default log channel, or the null channel
 		// if no default channel has been set.
 
-	void write(const std::string& name, const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
-		// Writes the given message to the specified log channel.
-
-	void write(const std::string& message, LogLevel level = DebugLevel, const ILoggable* klass = NULL);
+	void write(const LogStream& stream);
 		// Writes the given message to the default log channel.
 
-	LogStream send(const std::string& name, const char* level = "debug") const;
-		// Creates a LogStream which will write to the specified log channel.
-
-	LogStream send(const char* level = "debug") const;
-		// Creates a LogStream which will write to the default log channel.
-
-	LogStream send(const ILoggable* klass, const std::string& name, const char* level = "debug") const;
-		// Sends to the specified log channel using the loggable class instance.
-
-	LogStream send(const ILoggable* klass, const char* level = "debug") const;
-		// Sends to the default log using the loggable class instance.
+	void write(const char* channel, const LogStream& stream);
+		// Writes the given message to the given log channel.
+	
+	LogStream send(const char* level = "debug", const void* ptr = NULL, 
+		const std::string& realm = "") const;
+		// Sends to the default log using the given class instance.
+		// Recommend using write() to avoid copying LogStream.
 
 protected:
 	Logger();								// Private so that it can not be called
@@ -275,84 +259,73 @@ protected:
 	Logger& operator=(Logger const&) {};	// Assignment operator is protected
 	~Logger();
 	
-	LogChannel*				_nullChannel;
-	LogChannel*				_defaultChannel;
-	LogMap					_map;
+	LogChannel*	_nullChannel;
+	LogChannel*	_defaultChannel;
+	LogMap      _map;
 
-	static Logger*			_instance;
-	//static LogMap			_map;
-	static Poco::FastMutex	_mutex;
+	static Logger*         _instance;
+	static Poco::FastMutex _mutex;
 };
 
 
-
-class LogStream 
+// ---------------------------------------------------------------------
+//
+struct LogStream
 {
-public:
-	LogStream(const std::string& name = "", LogLevel level = DebugLevel, const ILoggable* klass = NULL) : 
-		_channel(NULL), 
-		_name(name),   
-		_level(level),   
-		_klass(klass) {	}
+	LogLevel level;
+	std::ostringstream message;
+	std::string realm;
+	std::string pid;
 
-	LogStream(LogChannel* channel, LogLevel level = DebugLevel, const ILoggable* klass = NULL) : 
-		_channel(channel), 
-		_level(level),   
-		_klass(klass) {	}
-
-	LogStream(const LogStream& r) : 
-		_channel(r._channel), 
-		_name(r._name),  
-		_level(r._level),   
-		_klass(r._klass) { 
-		*this << r._os.rdbuf();
-	}
+	LogStream(LogLevel level = DebugLevel, const std::string& realm = "", const void* ptr = NULL);
+	LogStream(LogLevel level, const std::string& realm = "", const std::string& pid = "");
 
 	template<typename T>
 	LogStream& operator << (const T& data) {
 #ifndef DISABLE_LOGGING
-		_os << data;
+		message << data;
 #endif
 		return *this;
 	}
 
 	LogStream& operator << (std::ostream&(*f)(std::ostream&)) {
-#ifndef DISABLE_LOGGING
-		_os << f;
-
-		// write direct to channel inst
-		if (_channel)
-			_channel->write(_os.str(), _level, _klass);
+#ifndef DISABLE_LOGGING		
+		message << f;
 
 		// send to default channel
-		else if (_name.empty())
-			Logger::instance().write(_os.str(), _level, _klass);
-
-		// send to named channel
-		else
-			Logger::instance().write(_name, _os.str(), _level, _klass);
+		Logger::instance().write(*this);
 #endif
 		return *this;
 	}
-
-protected:
-	LogLevel			_level;
-	std::string			_name;
-	LogChannel*			_channel;
-	const ILoggable*	_klass;
-	std::ostringstream	_os;
 };
 
 
-// Macros for log stream access
-inline LogStream Log(const char* level) 
-	{ return LogStream("", getLogLevelFromString(level)); };
-inline LogStream Log(const char* level, const std::string& name) 
-	{ return LogStream(name, getLogLevelFromString(level)); };
-inline LogStream Log(const char* level, const ILoggable* klass) 
-	{ return LogStream("", getLogLevelFromString(level), klass); };
-inline LogStream Log(const char* level, const std::string& name, const ILoggable* klass) 
-	{ return LogStream(name, getLogLevelFromString(level), klass); };
+//
+// Global log stream accessors
+//
+inline LogStream Log(const char* level = "debug", const char* realm = "", const void* ptr = NULL) 
+	{ return LogStream(getLogLevelFromString(level), realm, ptr); }
+
+inline LogStream Log(const char* level, const void* ptr, const char* realm = "") 
+	{ return LogStream(getLogLevelFromString(level), realm, ptr); }
+
+inline LogStream LogTrace(const char* realm = "", const void* ptr = NULL) 
+	{ return LogStream(TraceLevel, realm, ptr); }
+
+inline LogStream LogDebug(const char* realm = "", const void* ptr = NULL) 
+	{ return LogStream(DebugLevel, realm, ptr); }
+
+inline LogStream LogInfo(const char* realm = "", const void* ptr = NULL) 
+	{ return LogStream(InfoLevel, realm, ptr); }
+
+inline LogStream LogWarn(const char* realm = "", const void* ptr = NULL) 
+	{ return LogStream(WarningLevel, realm, ptr); }
+
+inline LogStream LogError(const char* realm = "", const void* ptr = NULL) 
+	{ return LogStream(ErrorLevel, realm, ptr); }
+
+inline LogStream LogFatal(const char* realm = "", const void* ptr = NULL) 
+	{ return LogStream(FatalLevel, realm, ptr); }
 
 
 } // namespace Sourcey

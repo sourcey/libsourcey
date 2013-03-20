@@ -75,7 +75,7 @@ struct ClientState: public State
 	
 // ---------------------------------------------------------------------
 //
-class Client: public StatefulSignal<ClientState>, public PacketDispatcher, public ILoggable
+class Client: public StatefulSignal<ClientState>, public PacketDispatcher, public IPolymorphic
 {
 public:
 	Client(Net::IWebSocket& socket, Runner& runner);

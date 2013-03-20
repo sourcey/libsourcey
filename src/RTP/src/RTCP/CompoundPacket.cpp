@@ -62,7 +62,7 @@ CompoundPacket::~CompoundPacket()
 bool CompoundPacket::read(Buffer& buffer) 
 {
 	if (buffer.size() < 4) {
-		Log("error") << "RTCP: Received empty packet." << endl;
+		LogError() << "RTCP: Received empty packet." << endl;
 		return false;
 	}
 
@@ -82,7 +82,7 @@ bool CompoundPacket::read(Buffer& buffer)
 		buffer.readUInt16(length);
 		buffer.setPosition(startPos);
 		
-		Log("debug") << "RTCP: Parsing packet with type " 
+		LogDebug() << "RTCP: Parsing packet with type " 
 			<< (int)type << " and length: " << (int)length << ". " 
 			<< "Remaining in buffer " << buffer.remaining() << "."
 			<< endl;
@@ -110,13 +110,13 @@ bool CompoundPacket::read(Buffer& buffer)
 				break;
 
 			default:
-				Log("error") << "RTCP: Parsed unknown packet type " << (int)type << endl;                
+				LogError() << "RTCP: Parsed unknown packet type " << (int)type << endl;                
 				goto error;
 				break;
 		};
 		
 		if (!packet->read(buffer)) {
-			Log("error") << "RTCP: Failed to parse packet with type " << (int)type << endl;            
+			LogError() << "RTCP: Failed to parse packet with type " << (int)type << endl;            
 			goto error;
 		}
 
@@ -135,7 +135,7 @@ bool CompoundPacket::read(Buffer& buffer)
 		buffer.consume(length);
 		errorCount++;
 		if (errorCount > maxErrors) {
-			Log("error") << "RTCP: Parse failed because of too many errors: " << errorCount << endl;
+			LogError() << "RTCP: Parse failed because of too many errors: " << errorCount << endl;
 			return false;
 		}
 	}
@@ -147,7 +147,7 @@ bool CompoundPacket::read(Buffer& buffer)
 void CompoundPacket::write(Buffer& buffer) const 
 {
     for (int i = 0; i < _packets.size(); i++) {		
-		//Log("debug") << "RTCP: Writing packet:" << endl;
+		//LogDebug() << "RTCP: Writing packet:" << endl;
 		//_packets[i]->print(cout);
 		_packets[i]->write(buffer);
 	}

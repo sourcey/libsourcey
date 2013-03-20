@@ -46,8 +46,7 @@ class Stateful
 	/// This class implements a simple state machine.
 	/// T should be a derived State.
 	///
-	/// This class is not inherently thread safe. 
-	/// Synchronization is left to the implementation.
+	/// Use MutexStateful for thread safe implementation. 
 {
 public:
 	virtual bool stateEquals(unsigned int id) const
@@ -141,7 +140,7 @@ protected:
 template<typename T>
 class StatefulSignal: public MutexStateful<T>
 	/// This class adds a StateChange signal
-	/// to the base implementation.
+	/// to the thread safe implementation.
 {
 public:
 	Signal2<T&, const T&> StateChange;

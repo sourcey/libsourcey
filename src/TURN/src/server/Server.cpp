@@ -48,7 +48,7 @@ Server::Server(IServerObserver& observer, Net::Reactor& reactor, Runner& runner,
 	_runner(runner),
 	_timer(new TimerTask(runner, 5000, 5000))
 {
-	Log("trace", this) << "Creating" << endl;
+	log("trace") << "Creating" << endl;
 }
 
 
@@ -56,23 +56,23 @@ Server::~Server()
 {
 	////Timer::getDefault().stop(TimerCallback<Server>(this, &ServerAllocation::onTimer));
 	//_socketUDP.detach(packetDelegate<Server, STUN::Message>(this, &Server::onPacketReceived, 1));
-	Log("trace", this) << "Destroying" << endl;	
+	log("trace") << "Destroying" << endl;	
 	stop();	
 	_timer->destroy();	
-	Log("trace", this) << "Destroying: OK" << endl;
+	log("trace") << "Destroying: OK" << endl;
 }
 
 
 void Server::start()
 {
-	Log("trace", this) << "Binding" << endl;	
+	log("trace") << "Binding" << endl;	
 
 	// Initialize UDP
 	_socketUDP.registerPacketType<STUN::Message>(1);
 	_socketUDP.attach(packetDelegate<Server, STUN::Message>(this, &Server::onPacketReceived, 1));
 	_socketUDP.bind(_options.listenAddr);
 
-	Log("info", this) << "Listening on " << _socketUDP.address().toString() << endl;
+	log("info") << "Listening on " << _socketUDP.address().toString() << endl;
 	
 	// Initialize TCP
 	if (_options.enableTCP) {
@@ -89,7 +89,7 @@ void Server::start()
 
 void Server::stop()
 {
-	Log("trace", this) << "Stopping" << endl;	
+	log("trace") << "Stopping" << endl;	
 	//Timer::getDefault().stop(TimerCallback<Server>(this, &Server::onTimer));	
 	_timer->cancel();
 
@@ -102,7 +102,7 @@ void Server::stop()
 
 void Server::onTimer(void*) //TimerCallback<Server>& timer
 {
-	//Log("trace", this) << "On Timer" << endl;	
+	//log("trace") << "On Timer" << endl;	
 
 	ServerAllocationMap allocations = this->allocations();
 	for (ServerAllocationMap::iterator it = allocations.begin(); it != allocations.end(); ++it) {
@@ -114,7 +114,7 @@ void Server::onTimer(void*) //TimerCallback<Server>& timer
 
 void Server::onTCPConnectionAccepted(void* sender, Poco::Net::StreamSocket& sock, Net::Reactor& reactor)
 {
-	Log("trace", this) << "TCP Connection Accepted: " << sock.peerAddress().toString() << endl;	
+	log("trace") << "TCP Connection Accepted: " << sock.peerAddress().toString() << endl;	
 	
 	TCPPacketSocket* socket = new TCPPacketSocket(sock, reactor); //, reactor()
 	socket->setDeleteOnClose(true);
@@ -129,7 +129,7 @@ void Server::onTCPConnectionClosed(void* sender)
 {
 	TCPPacketSocket* socket = reinterpret_cast<TCPPacketSocket*>(sender);
 
-	Log("trace", this) << "TCP Connection Closed: " << socket->peerAddress() << endl;	
+	log("trace") << "TCP Connection Closed: " << socket->peerAddress() << endl;	
 	
 	// NOTE: Terminate associated allocation
 	//FiveTuple tuple(socket->peerAddress(), socket->localAddress(), socket->transport());
@@ -144,7 +144,7 @@ void Server::onTCPConnectionClosed(void* sender)
 
 void Server::onPacketReceived(void* sender, STUN::Message& message) 
 {
-	Log("trace", this) << "STUN Packet Received: " << message.toString() << endl;	
+	log("trace") << "STUN Packet Received: " << message.toString() << endl;	
 
 	assert(message.state() == STUN::Message::Request);
 	
@@ -166,16 +166,16 @@ void Server::onPacketReceived(void* sender, STUN::Message& message)
 	AuthenticationState result = _observer.authenticateRequest(this, request);
 	switch (result) {
 		case Authenticating: 
-			Log("trace", this) << "STUN Request Authenticating" << endl;
+			log("trace") << "STUN Request Authenticating" << endl;
 			break;
 
 		case Authorized: 
-			Log("trace", this) << "STUN Request Authorized" << endl;
+			log("trace") << "STUN Request Authorized" << endl;
 			handleAuthorizedRequest(request);
 			break;
 
 		case Unauthorized: 
-			Log("trace", this) << "Unauthorized STUN Request" << endl;
+			log("trace") << "Unauthorized STUN Request" << endl;
 			sendError(request, 401, "Unauthorized");
 			break;
 	}
@@ -184,7 +184,7 @@ void Server::onPacketReceived(void* sender, STUN::Message& message)
 		return;
 	}
 	else {
-		Log("trace", this) << "Unauthorized STUN Request" << endl;
+		log("trace") << "Unauthorized STUN Request" << endl;
 		sendError(request, 401, "Unauthorized");
 		return;
 	}
@@ -194,7 +194,7 @@ void Server::onPacketReceived(void* sender, STUN::Message& message)
 
 void Server::handleRequest(const Request& request, AuthenticationState state)
 {	
-	Log("trace", this) << "STUN Request Received:\n" 
+	log("trace") << "STUN Request Received:\n" 
 		<< "\tFrom: " << request.remoteAddr.toString() << "\n"
 		<< "\tData: " << request.toString()
 		<< endl;
@@ -261,7 +261,7 @@ void Server::handleAuthorizedRequest(const Request& request) //, AuthenticationS
 				return;
 			}			
 
-			Log("trace", this) << "Obtained allocation: " 
+			log("trace") << "Obtained allocation: " 
 				<< allocation->tuple().toString() << endl;
 					
 			if (!allocation->handleRequest(request))
@@ -290,7 +290,7 @@ void Server::handleConnectionBindRequest(const Request& request)
 
 void Server::handleBindingRequest(const Request& request) 
 {
-	Log("trace", this) << "Handle Binding Request" << endl;
+	log("trace") << "Handle Binding Request" << endl;
 
 	assert(request.type() == STUN::Message::Binding);
 	assert(request.state() == STUN::Message::Request);
@@ -312,7 +312,7 @@ void Server::handleBindingRequest(const Request& request)
 
 void Server::handleAllocateRequest(const Request& request) 
 {
-	Log("trace", this) << "Handle Allocate Request" << endl;
+	log("trace") << "Handle Allocate Request" << endl;
 
 	assert(request.type() == STUN::Message::Allocate);
 	assert(request.state() == STUN::Message::Request);
@@ -328,7 +328,7 @@ void Server::handleAllocateRequest(const Request& request)
 	// 
 	const STUN::Username* usernameAttr = request.get<STUN::Username>();
 	if (!usernameAttr) {
-		Log("trace", this) << "Unauthorized STUN Request" << endl;
+		log("trace") << "Unauthorized STUN Request" << endl;
 		sendError(request, 401, "Unauthorized");
 		return;
 	}
@@ -348,14 +348,14 @@ void Server::handleAllocateRequest(const Request& request)
 	// 
 	const STUN::RequestedTransport* transportAttr = request.get<STUN::RequestedTransport>();
 	if (!transportAttr) {
-		Log("error") << "No Requested Transport" << endl;
+		LogError() << "No Requested Transport" << endl;
 		sendError(request, 400, "Bad Request");
 		return;
 	}
 		
 	if (transportAttr->value() != 6 &&
 		transportAttr->value() != 17) {
-		Log("error") << "Requested Transport is neither TCP or UDP: " << transportAttr->value() << endl;
+		LogError() << "Requested Transport is neither TCP or UDP: " << transportAttr->value() << endl;
 		sendError(request, 422, "Unsupported Transport Protocol");
 		return;
 	}
@@ -609,13 +609,13 @@ void Server::handleAllocateRequest(const Request& request)
 	//    The server may use a smaller maximum lifetime value to minimize
 	//    the lifetime of allocations "orphaned" in this manner.
 
-	Log("trace", this) << "Handle Allocation Request: OK" << endl;
+	log("trace") << "Handle Allocation Request: OK" << endl;
 }
 
 				   
 void Server::sendError(const Request& request, int errorCode, const char* errorDesc) 
 {
-	Log("trace", this) << "Sending STUN error: " << errorCode << ":" << errorDesc << endl;
+	log("trace") << "Sending STUN error: " << errorCode << ":" << errorDesc << endl;
 	
 	FastMutex::ScopedLock lock(_mutex);
 
@@ -701,7 +701,7 @@ void Server::addAllocation(ServerAllocation* alloc)
 		assert(_allocations.find(alloc->tuple()) == _allocations.end());
 		_allocations[alloc->tuple()] = alloc;
 
-		Log("info", this) << "Added an allocation: " 
+		log("info") << "Added an allocation: " 
 			<< alloc->tuple().toString() << ": " 
 			<< _allocations.size() << " total" << endl;
 	}
@@ -719,7 +719,7 @@ void Server::removeAllocation(ServerAllocation* alloc)
 		assert(it != _allocations.end());
 		_allocations.erase(it);
 
-		Log("info", this) << "Removed an allocation: " 
+		log("info") << "Removed an allocation: " 
 			<< alloc->tuple().toString() << ": " 
 			<< _allocations.size() << " remaining" << endl;
 	}

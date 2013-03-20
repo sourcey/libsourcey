@@ -41,7 +41,7 @@ T::T(const string& src) : Line(Line::T, 5)
 {
 	size_t len = src.length();
 	if (src.substr(0, 2) != "t=") {
-		Log("error") << "ERROR: SDP line does not start with <t=>" << std::endl;
+		LogError() << "ERROR: SDP line does not start with <t=>" << std::endl;
 	}
 	
 	size_t i = 2;

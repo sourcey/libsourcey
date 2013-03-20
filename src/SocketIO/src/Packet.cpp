@@ -142,24 +142,24 @@ bool Packet::read(Buffer& buf)
 	if (buf.size() < 3)
 		return false;
 	
-	//Log("debug") << "[SocketIO::Packet:" << this << "] Reading: " << (string(buf.data(), buf.size())) << endl;
+	//LogDebug() << "[SocketIO::Packet:" << this << "] Reading: " << (string(buf.data(), buf.size())) << endl;
 
 	string data;
 	buf.readString(data, buf.size());
 	StringList content = Util::split(data, ':', 4);
 	if (content.size() < 1) {
-		//Log("debug") << "[SocketIO::Packet:" << this << "] Reading: Invalid Data: " << content.size() << endl;
+		//LogDebug() << "[SocketIO::Packet:" << this << "] Reading: Invalid Data: " << content.size() << endl;
 		return false;
 	}
 		
 	if (!content[0].empty()) {
 		_type = Util::atoi(content[0]);
-		//Log("debug") << "[SocketIO::Packet:" << this << "] Reading: Type: " << typeString() << endl;
+		//LogDebug() << "[SocketIO::Packet:" << this << "] Reading: Type: " << typeString() << endl;
 	}
 
 	if (_type < 0 || 
 		_type > 7) {
-		//Log("debug") << "[SocketIO::Packet:" << this << "] Reading: Invalid Type: " << _type << endl;
+		//LogDebug() << "[SocketIO::Packet:" << this << "] Reading: Invalid Type: " << _type << endl;
 		return false;
 	}
 	if (content.size() >= 2 && !content[1].empty()) {
@@ -188,7 +188,7 @@ bool Packet::read(Buffer& buf)
 	}
 
 	_size = data.length();
-	//Log("debug") << "[SocketIO::Packet:" << this << "] Parse Success: " << toString() << endl;
+	//LogDebug() << "[SocketIO::Packet:" << this << "] Parse Success: " << toString() << endl;
 
 	return true;
 }

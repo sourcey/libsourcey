@@ -38,45 +38,41 @@ namespace Sourcey {
 namespace Media {
 
 
-	VideoCapture::VideoCapture(int deviceId) : 
-_thread("VideoCapture"),
-	_capture(cv::VideoCapture(deviceId)),
+VideoCapture::VideoCapture(int deviceId) : 
+	_thread("VideoCapture"),
 	_deviceId(deviceId),
 	_width(0),
 	_height(0),
-	_destroyOnStop(false),
 	_isOpened(false),
 	_stop(false)
 {
-	Log("trace") << "[VideoCapture:" << this << "] Creating: " << deviceId << endl;
-	check();
+	LogTrace("VideoCapture", this) << "Creating: " << deviceId << endl;
+	open();
 	start();
 }
 
 
 VideoCapture::VideoCapture(const string& filename) : 
-_thread("VideoCapture"),
-	_capture(cv::VideoCapture(filename)),
+	_thread("VideoCapture"),
 	_filename(filename),
 	_deviceId(-1),
 	_width(0),
 	_height(0),
-	_destroyOnStop(false),
 	_isOpened(false),
 	_stop(false) 
 {
-	Log("trace") << "[VideoCapture:" << this << "] Creating: " << filename << endl;
-	check();
+	LogTrace("VideoCapture", this) << "Creating: " << filename << endl;
+	open();
 	start();
 }
 
 
 VideoCapture::~VideoCapture() 
 {	
-	Log("trace") << "[VideoCapture:" << this << "] Destroying" << endl;
+	LogTrace("VideoCapture", this) << "Destroying" << endl;
 
 	if (_thread.isRunning()) {
-		_stop = true;		
+		_stop = true;
 		//_wakeUp.set();
 
 		// Because we are calling join on the thread
@@ -86,56 +82,60 @@ VideoCapture::~VideoCapture()
 		_thread.join();
 	}
 
-	Log("trace") << "[VideoCapture:" << this << "] Destroying: OK" << endl;
+	// Try to release the capture.
+	//try { release(); } catch (...) {}
+
+	LogTrace("VideoCapture", this) << "Destroying: OK" << endl;
 }
 
 
 void VideoCapture::start() 
 {
-	Log("trace") << "[VideoCapture:" << this << "] Starting" << endl;
+	LogTrace("VideoCapture", this) << "Starting" << endl;
 	FastMutex::ScopedLock lock(_mutex);
 
-	//_enabled = true;
-
 	if (!_thread.isRunning()) {
-		Log("trace") << "[VideoCapture:" << this << "] Initializing Thread" << endl;
+		LogTrace("VideoCapture", this) << "Initializing Thread" << endl;
+		if (!_isOpened)
+			throw Exception("The capture must be opened before starting the thread.");
+
 		_stop = false;
 		_counter.reset();	
 		_thread.start(*this);
 	}
-	//_wakeUp.set();
-	Log("trace") << "[VideoCapture:" << this << "] Starting: OK" << endl;
+	LogTrace("VideoCapture", this) << "Starting: OK" << endl;
 }
 
 
 void VideoCapture::stop() 
 {
-	Log("trace") << "[VideoCapture:" << this << "] Stopping" << endl;
-	//FastMutex::ScopedLock lock(_mutex);	
+	LogTrace("VideoCapture", this) << "Stopping" << endl;
 
-	// The capture is never stopped, but when the
-	// reference count reaches 0 and destroyOnStop
-	// is set we destroy the capture.
-	if (refCount() == 0 && destroyOnStop()) {
-		delete this;
+	if (_thread.isRunning()) {
+		LogTrace("VideoCapture", this) << "Terminating Thread" << endl;		
+		_stop = true;
+		_thread.join();
 	}
+
+	if (flags().has(DestroyOnStop))
+		delete this;
 }
 
 
 bool VideoCapture::open()
 {
-	//Log("trace") << "[VideoCapture:" << this << "] Open" << endl;
+	//LogTrace("VideoCapture", this) << "Open" << endl;
 
 	FastMutex::ScopedLock lock(_mutex);
 
 	_isOpened = _capture.isOpened() ? true : 
 		_filename.empty() ? 
-		_capture.open(_deviceId) : 
-	_capture.open(_filename);
+			_capture.open(_deviceId) : 
+			_capture.open(_filename);
 
 	if (!_isOpened) {
 		stringstream ss;
-		ss << "Please check your video device: "; 
+		ss << "Cannot open video capture, please check device: "; 
 		_filename.empty() ? (ss << _deviceId) : (ss << _filename);
 		throw Exception(ss.str());
 	}
@@ -146,21 +146,20 @@ bool VideoCapture::open()
 
 void VideoCapture::release()
 {
-	Log("trace") << "[VideoCapture:" << this << "] Release" << endl;
+	LogTrace("VideoCapture", this) << "Release" << endl;
 	FastMutex::ScopedLock lock(_mutex);
-	Log("trace") << "[VideoCapture:" << this << "] Release 1" << endl;
 	if (_capture.isOpened())
 		_capture.release();
 	_isOpened = false;
-	Log("trace") << "[VideoCapture:" << this << "] Release: OK" << endl;
+	LogTrace("VideoCapture", this) << "Release: OK" << endl;
 }
 
 
-void VideoCapture::grab()
+cv::Mat VideoCapture::grab()
 {	
-	//Log("trace") << "[VideoCapture:" << this << "] Grab" << endl;
+	//LogTrace("VideoCapture", this) << "Grab" << endl;
 
-	if (open()) {
+	//if (open()) {
 
 		FastMutex::ScopedLock lock(_mutex);	
 
@@ -174,16 +173,22 @@ void VideoCapture::grab()
 			_capture.open(_filename);
 			_capture >> _frame;
 		}
+		
+		if (!_capture.isOpened())
+			throw Exception("The capture is closed.");
 
 		_width = _frame.cols;
 		_height = _frame.rows;
 
 		// Update our FPS counter.
 		_counter.tick();
-	}
+
+		return _frame;
+	//}
 }
 
 
+/*
 bool VideoCapture::check()
 {	
 	grab();	
@@ -193,20 +198,21 @@ bool VideoCapture::check()
 	// TODO: Check COM is multithreaded when using dshow highgui.
 
 	// Ensure the captured frame is not empty.
-	if (!_frame.cols ||!_frame.rows ) {
+	if (!frame.cols ||!frame.rows ) {
 		stringstream ss;
-		ss << "Please check your video device: "; 
+		ss << "Cannot open video capture, please check device: "; 
 		_filename.empty() ? (ss << _deviceId) : (ss << _filename);
 		throw Exception(ss.str());
 	}
 
 	return true;
 }
+*/
 
 
 void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 {
-	Log("trace") << "[VideoCapture:" << this << "] Get Frame: " << width << "x" << height << endl;
+	LogTrace("VideoCapture", this) << "Get Frame: " << width << "x" << height << endl;
 
 	FastMutex::ScopedLock lock(_mutex);	
 
@@ -228,8 +234,8 @@ void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 void VideoCapture::attach(const PacketDelegateBase& delegate)
 {
 	PacketDispatcher::attach(delegate);
-	Log("trace") << "[VideoCapture:" << this << "] Added Delegate: " << refCount() << endl;
-	if (!isRunning()) //refCount == 1
+	LogTrace("VideoCapture", this) << "Added Delegate: " << refCount() << endl;
+	if (!isRunning() && flags().has(SyncWithDelegates)) //refCount == 1
 		start();
 }
 
@@ -237,8 +243,8 @@ void VideoCapture::attach(const PacketDelegateBase& delegate)
 bool VideoCapture::detach(const PacketDelegateBase& delegate) 
 {
 	if (PacketDispatcher::detach(delegate)) {
-		Log("trace") << "[VideoCapture:" << this << "] Removed Delegate: " << refCount() << endl;
-		if (refCount() == 0) //isRunning() && 
+		LogTrace("VideoCapture", this) << "Removed Delegate: " << refCount() << endl;
+		if (refCount() == 0 && flags().has(SyncWithDelegates)) //isRunning() && 
 			stop();
 		return true;
 	}
@@ -248,81 +254,73 @@ bool VideoCapture::detach(const PacketDelegateBase& delegate)
 
 void VideoCapture::run() 
 {
-	Log("trace") << "Video Capture Initializing:"		
+	LogTrace() << "Video Capture Initializing:"		
 		<< "\n\tPID: " << this
 		<< "\n\tDevice ID: " << _deviceId
 		<< "\n\tFilename: " << _filename
 		<< "\n\tWidth: " << _width
 		<< "\n\tHeight: " << _height
 		<< endl;
+	
+	cv::Mat frame = grab();
+	while (!_stop) {
+		try {	
+			if (refCount() > 0) {
+				frame = grab();
+				MatPacket packet(&frame);	
+				if (!_stop && packet.width && packet.height) {
+					/*
+					LogTrace("VideoCapture", this) << "Dispatch: " 
+					<< "\n\tFPS: " << _counter.fps
+					<< "\n\tWidth: " << packet.width
+					<< "\n\tHeight: " << packet.height
+					<< "\n\tSize: " << packet.size()
+					<< endl;
+					*/
 
-	try 
-	{	
-		while (!_stop) {
-			try 
-			{	
-				if (refCount() > 0) {
-					grab();
-					MatPacket packet(&_frame);		
-					if (!_stop && packet.width && packet.height) {
-						/*
-						Log("trace") << "[VideoCapture:" << this << "] Dispatch: " 
-						<< "\n\tFPS: " << _counter.fps
-						<< "\n\tWidth: " << packet.width
-						<< "\n\tHeight: " << packet.height
-						<< "\n\tSize: " << packet.size()
-						<< endl;
-						*/
-
-						dispatch(this, packet);
-						//Log("trace") << "[VideoCapture:" << this << "] Dispatch: OK" << endl;
-					}
+					dispatch(this, packet);
+					//LogTrace("VideoCapture", this) << "Dispatch: OK" << endl;
 				}
-			} 
-			catch (cv::Exception& exc) 
-			{
-				Log("error") << "[VideoCapture:" << this << "] OpenCV Error: " << exc.err << endl;
-				// TODO: Stop the capture?
+				
+				// Wait 5ms for the CPU to breathe.
+				Thread::sleep(5);
 			}
-			catch (Poco::Exception& exc) 
-			{
-				Log("error") << "[VideoCapture:" << this << "] Error: " << exc.displayText() << endl;
-				exc.rethrow();
-			}
-			catch (...) 
-			{
-				Log("error") << "[VideoCapture:" << this << "] Caught Unknown Exception" << endl;
-				throw;
-			}
-			//}
+
+			// Wait 50ms eash iter while we are waiting for delegates.
+			else
+				Thread::sleep(50);
 
 			// NOTE: Failing to call waitKey inside the capture loop
 			// causes strange issues and slowdowns with windows system
 			// calls such as ShellExecuteEx and friends.
 			cv::waitKey(5);
-
-			// Release the CPU.
-			Thread::sleep(5);
 		}
-
-		Log("trace") << "[VideoCapture:" << this << "] Exiting" << endl;
+		catch (cv::Exception& exc) 
+		{
+			LogError("VideoCapture", this) << "OpenCV Error: " << exc.err << endl;
+			break;
+		}
+		catch (Poco::Exception& exc) 
+		{
+			LogError("VideoCapture", this) << "Error: " << exc.displayText() << endl;
+			break;
+		}
+		catch (...) 
+		{
+			LogError("VideoCapture", this) << "Caught Unknown Exception" << endl;
+			break;
+		}
 	}
-	catch (...) 
-	{
-		// Exit
-	}
+	
 
-	// Always try to release the capture.
-	try { release(); } catch (...) {}
-
-	Log("trace") << "[VideoCapture:" << this << "] Exiting: OK" << endl;
+	LogTrace("VideoCapture", this) << "Exiting" << endl;
 }
 
 
-void VideoCapture::setDestroyOnStop(bool flag)
+Flags VideoCapture::flags() const
 {
 	FastMutex::ScopedLock lock(_mutex);
-	_destroyOnStop = flag;
+	return _flags;
 }
 
 
@@ -354,7 +352,7 @@ string	VideoCapture::filename() const
 }
 
 
-string	VideoCapture::name() const 
+string VideoCapture::name() const 
 {
 	FastMutex::ScopedLock lock(_mutex);
 	stringstream ss;
@@ -384,13 +382,6 @@ double VideoCapture::fps() const
 }
 
 
-bool VideoCapture::destroyOnStop() const
-{
-	FastMutex::ScopedLock lock(_mutex);
-	return _destroyOnStop; 
-}
-
-
 cv::VideoCapture& VideoCapture::capture()
 {
 	FastMutex::ScopedLock lock(_mutex);
@@ -399,72 +390,3 @@ cv::VideoCapture& VideoCapture::capture()
 
 
 } } // namespace Sourcey::Media
-
-
-
-/*
-{	
-open();
-
-FastMutex::ScopedLock lock(_mutex);		
-
-// Stop may be true after we enter this scope.
-if (_stop)
-break;
-
-// Break the loop if the capture failed. 
-// Perhaps another application is using the device
-// or it has been unplugged?
-if (!_isOpened) {				
-Log("error") << "[VideoCapture:" << this << "] Please check your video camera" << endl;	
-_stop = true;
-break;
-}
-
-// Attempt to re-open the capture device if closed.
-//_isOpened = _capture.isOpened();
-//if (_deviceId >= 0 && !_isOpened) {
-//	_isOpened = _capture.open(_deviceId);
-//}
-
-packet = VideoPacket(&_frame);
-}
-*/
-
-/*
-// If the capture is disabled keep on looping so we can keep
-// the cv capture alive.
-if (refCount() == 0) {
-Log("trace") << "[VideoCapture:" << this << "] Sleeping" << endl;
-_wakeUp.wait();
-Log("trace") << "[VideoCapture:" << this << "] Waking Up" << endl;
-}	
-*/
-
-
-/*
-_capture >> _frame;
-_width = _frame.cols;
-_height = _frame.rows;
-
-bool isOpen = _capture.isOpened() ? true : 
-_filename.empty() ? 
-_capture.open(_deviceId) : 
-_capture.open(_filename);	
-
-if (_isOpened) {
-*/
-
-// NOTE: Releasing here is necessary because OpenCV
-// frames need to be read inside the same thread 
-// that the capture was opened in.
-// NOTE1: We now require MT Com initialization under
-// windows so this is no longer an issue.
-//_capture.release();
-
-/*
-return true;
-}
-
-return false;
-*/

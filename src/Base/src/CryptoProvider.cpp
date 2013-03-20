@@ -43,7 +43,7 @@
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 using namespace Poco::Crypto;
 
 
@@ -58,13 +58,13 @@ string generateRandomBinaryKey(int size, bool doBase64)
 	ostringstream ostr;
 	try
 	{
-		Random rnd;
+		Poco::Random rnd;
 		rnd.seed();
 		for (int i = 0; i < size; ++i)
 			res.push_back(rnd.nextChar());
 
 		if (doBase64) {
-			Base64Encoder encoder(ostr);
+			Poco::Base64Encoder encoder(ostr);
 			encoder << res;
 			encoder.close();
 			res = ostr.str();
@@ -72,7 +72,7 @@ string generateRandomBinaryKey(int size, bool doBase64)
 	} 
 	catch (...) 
 	{
-		Log("error") << "CryptoProvider: Unknown Error" << endl;
+		LogError() << "CryptoProvider: Unknown Error" << endl;
 	}
 	return res;
 }
@@ -88,7 +88,7 @@ string generateRandomKey(int size)
 	}
 	catch (...)
 	{
-		Log("error") << "CryptoProvider: Unknown Error" << endl;
+		LogError() << "CryptoProvider: Unknown Error" << endl;
 	}
 	return res;
 }
@@ -101,7 +101,7 @@ UInt64 generateRandomNumber(int size)
 	string str;
 	try
 	{	
-		Random rnd;
+		Poco::Random rnd;
 		rnd.seed();
 		while (strm.str().length() < size)
 		{
@@ -112,7 +112,7 @@ UInt64 generateRandomNumber(int size)
 	}
 	catch (...)
 	{
-		Log("error") << "CryptoProvider: Unknown Error" << endl;
+		LogError() << "CryptoProvider: Unknown Error" << endl;
 	}
 	return res;
 }
@@ -122,13 +122,13 @@ string hash(const string& algorithm, const string& data)
 {
 	string hash;
 	if (algorithm == "md5") {
-		MD5Engine engine;
+		Poco::MD5Engine engine;
 		engine.update(data);
-		hash = DigestEngine::digestToHex(engine.digest());
+		hash = Poco::DigestEngine::digestToHex(engine.digest());
 	} else if (algorithm == "sha1") {
-		SHA1Engine engine;
+		Poco::SHA1Engine engine;
 		engine.update(data);
-		hash = DigestEngine::digestToHex(engine.digest());
+		hash = Poco::DigestEngine::digestToHex(engine.digest());
 	}
 	return hash;
 }
@@ -161,7 +161,7 @@ string encrypt(const string& algorithm, const string& data, const string& key, c
 		out = pCipher1->encryptString(data, Cipher::ENC_NONE);
 		if (doBase64) {
 			ostringstream str;
-			Base64Encoder encoder(str);
+			Poco::Base64Encoder encoder(str);
 			encoder << iv;
 			encoder << out;
 			encoder.close();
@@ -202,7 +202,7 @@ string decrypt(const string& algorithm, const string& data, const string& key, c
 		if (isBase64)
 		{
 			istringstream b64strm(data);
-			Base64Decoder decoder(b64strm);
+			Poco::Base64Decoder decoder(b64strm);
 			while (decoder.rdbuf()->sgetc() != EOF && 
 				ivFinal.size() < cipherKey.ivSize()) {
 				char ch = decoder.rdbuf()->sbumpc();
@@ -259,7 +259,7 @@ string decrypt(const string& algorithm, const string& data, const string& key, c
 
 std::string computeHMAC(const std::string& input, const std::string& key) {	
 	/*
-	Log("debug") << "CryptoProvider: Computing HMAC:\n"
+	LogDebug() << "CryptoProvider: Computing HMAC:\n"
 		<< "\tInput: " << input << "\n"
 		<< "\tInput Length: " << input.length() << "\n"
 		<< "\tKey: " << key << "\n"

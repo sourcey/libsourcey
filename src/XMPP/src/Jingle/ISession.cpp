@@ -54,7 +54,7 @@ ISession::ISession(SessionManager& manager,
 	_sid(sid),
 	_destroySources(true)
 {
-	Log("debug") << "[Jingle Session] Created: " << this << endl;
+	LogDebug() << "[Jingle Session] Created: " << this << endl;
 	if (_sid.empty())
 		_sid = CryptoProvider::generateRandomKey(16);
 }
@@ -67,13 +67,13 @@ ISession::ISession(SessionManager& manager, const Jingle& j) :
 	_sid(j.sid()),
 	_destroySources(true)
 {
-	Log("debug") << "[Jingle Session] Created: " << this << endl;
+	LogDebug() << "[Jingle Session] Created: " << this << endl;
 }
 
 
 ISession::~ISession() 
 {
-	Log("debug") << "[Jingle Session] Destroying" << endl;
+	LogDebug() << "[Jingle Session] Destroying" << endl;
 
 	// Sessions should not be deleted manually as they are managed 
 	// by the Session Manager. They must be terminate()'d before 
@@ -82,7 +82,7 @@ ISession::~ISession()
 	removeMediaSources();
 	//Util::ClearVector(_sources);
 	//_manager.removeSession(_sid);
-	Log("debug") << "[Jingle Session] Destroying: OK" << endl;
+	LogDebug() << "[Jingle Session] Destroying: OK" << endl;
 }
 
 
@@ -94,7 +94,7 @@ void ISession::addMediaSource(PacketDispatcher* source)
 
 void ISession::removeMediaSources()
 {
-	Log("debug") << "[Jingle Session:" << this << "] Removing Media Sources: " << _destroySources << endl;
+	LogDebug() << "[Jingle Session:" << this << "] Removing Media Sources: " << _destroySources << endl;
 	if (_destroySources)
 		Util::ClearVector(_sources);
 	else

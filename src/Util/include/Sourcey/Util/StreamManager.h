@@ -36,7 +36,7 @@
 namespace Sourcey { 
 
 
-class StreamManager: protected EventfulManager<std::string, PacketStream>, public ILoggable
+class StreamManager: protected EventfulManager<std::string, PacketStream>, public IPolymorphic
 {
 public:
 	typedef EventfulManager<std::string, PacketStream>	Manager;

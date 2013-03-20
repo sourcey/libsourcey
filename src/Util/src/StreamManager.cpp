@@ -44,7 +44,7 @@ StreamManager::StreamManager(bool freeClosedStreams) :
 
 StreamManager::~StreamManager() 
 {
-	//Log("debug", this) << "Destroying" << endl;
+	//log("debug") << "Destroying" << endl;
 	closeAll();
 }
 
@@ -53,7 +53,7 @@ void StreamManager::closeAll()
 {
 	FastMutex::ScopedLock lock(_mutex);
 
-	Log("debug", this) << "Closing All Streams: " << _items.size() << endl;
+	log("debug") << "Closing All Streams: " << _items.size() << endl;
 	
 	StreamManager::Map::iterator it = _items.begin();
 	StreamManager::Map::iterator it2;
@@ -73,7 +73,7 @@ bool StreamManager::addStream(PacketStream* stream, bool whiny)
 	assert(stream);
 	assert(!stream->name().empty());
 	
-	Log("debug", this) << "Adding Stream: " << stream->name() << endl;
+	log("debug") << "Adding Stream: " << stream->name() << endl;
 
 	if (StreamManager::Manager::add(stream->name(), stream, false)) {
 
@@ -94,7 +94,7 @@ bool StreamManager::removeStream(const string& name)
 {
 	assert(!name.empty());
 
-	Log("debug", this) << "Removing Stream: " << name << endl;		
+	log("debug") << "Removing Stream: " << name << endl;		
 	return StreamManager::Manager::remove(name) != 0;
 }
 */
@@ -104,7 +104,7 @@ bool StreamManager::closeStream(const string& name, bool whiny)
 {
 	assert(!name.empty());
 
-	Log("debug", this) << "Closing Stream: " << name << endl;
+	log("debug") << "Closing Stream: " << name << endl;
 	PacketStream* stream = get(name, whiny);
 	if (stream) {
 		stream->close();
@@ -136,16 +136,16 @@ PacketStream* StreamManager::getDafaultStream()
 
 void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state, const PacketStreamState&)
 {
-	Log("debug", this) << "Stream State Changed: " << state << endl;
+	log("debug") << "Stream State Changed: " << state << endl;
 	
 	if (state.id() == PacketStreamState::Closed) {
 		PacketStream* stream = reinterpret_cast<PacketStream*>(sender);
 		stream->StateChange -= delegate(this, &StreamManager::onStreamStateChange);
 		if (_freeClosedStreams) {
-			Log("debug", this) << "Stream State Changed: Freeing: " << stream->name() << endl;
+			log("debug") << "Stream State Changed: Freeing: " << stream->name() << endl;
 			StreamManager::Manager::free(stream->name());
 		} else {
-			Log("debug", this) << "Stream State Changed: Removing: " << stream->name() << endl;
+			log("debug") << "Stream State Changed: Removing: " << stream->name() << endl;
 			StreamManager::Manager::remove(stream->name());
 		}
 	}

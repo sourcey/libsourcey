@@ -43,7 +43,7 @@ namespace Sourcey {
 namespace TURN {
 
 
-class IAllocation: public ILoggable
+class IAllocation: public IPolymorphic
 	//  All TURN operations revolve around allocations, and all TURN messages
 	//  are associated with an allocation.  An allocation conceptually
 	//  consists of the following state data:

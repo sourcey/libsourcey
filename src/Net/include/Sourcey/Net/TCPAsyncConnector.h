@@ -56,14 +56,14 @@ public:
 		_peerAddress(peerAddress),
 		_timeout(timeout)
 	{	
-		Log("debug") << "[TCPAsyncConnector:" << this << "] Creating" << std::endl;
+		LogDebug() << "[TCPAsyncConnector:" << this << "] Creating" << std::endl;
 		assert(!_socket.isConnected());		
 		_thread.start(*this);
 	}	
 
 	virtual ~TCPAsyncConnector()
 	{
-		Log("debug") << "[TCPAsyncConnector:" << this << "] Destroying" << std::endl;
+		LogDebug() << "[TCPAsyncConnector:" << this << "] Destroying" << std::endl;
 	}
 	
 	virtual void run()
@@ -73,7 +73,7 @@ public:
 			_socket.connect(_peerAddress, _timeout);
 		}
 		catch (Poco::Exception& exc) {
-			Log("error") << "[TCPAsyncConnector:" << this << "] Connection Failed: " << exc.displayText() << std::endl;
+			LogError() << "[TCPAsyncConnector:" << this << "] Connection Failed: " << exc.displayText() << std::endl;
 		}
 		delete this;
 	}

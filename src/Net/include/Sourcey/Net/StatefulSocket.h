@@ -145,7 +145,7 @@ protected:
 
 	virtual void onClose()
 	{
-		Log("trace") << "[StatefulSocketBase:" << this << "] On Close" << std::endl;
+		LogTrace() << "[StatefulSocketBase:" << this << "] On Close" << std::endl;
 		setState(static_cast<SocketBaseT::InterfaceT*>(this), SocketState::Disconnected, _error);
 		SocketBaseT::onClose(); // may result in destructon
 	}

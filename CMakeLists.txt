@@ -84,22 +84,22 @@ set(LibSourcey_BUILD_APPLICATIONS "")   # List of all apps to build
 # to find libraries from these locations first
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
-    #D:/dev/lib/OpenCV2.3/build/x86/vc10/lib
-    #D:/dev/lib/OpenCV2.4/build/lib/Debug
-    #D:/dev/lib/OpenCV2.4/build/install/lib
-    #D:/dev/lib/OpenCV2.4.1/build/x86/vc10/lib
     D:/dev/lib/OpenCV2.4.1/build/install/lib
-    #D:/dev/lib/OpenCV2.4.1/build/x86/vc10/lib
     D:/dev/lib/wxWidgets-2.9.4/lib/vc_lib
     D:/dev/lib/ffmpeg-1.0.1-gpl/lib
     D:/dev/lib/OpenSSL-Win32/lib/VC
     D:/dev/lib/poco-1.4.1p1-all/lib 
+    ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
+    )
+    #D:/dev/lib/OpenCV2.3/build/x86/vc10/lib
+    #D:/dev/lib/OpenCV2.4/build/lib/Debug
+    #D:/dev/lib/OpenCV2.4/build/install/lib
+    #D:/dev/lib/OpenCV2.4.1/build/x86/vc10/lib
+    #D:/dev/lib/OpenCV2.4.1/build/x86/vc10/lib
     #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg/bin
     #D:/dev/lib/ffmpeg/lib
     #D:/dev/apps/MinGW/msys/1.0/local
     #D:/dev/projects/Sourcey/LibSourcey/src/anionu/deps/ffmpeg/bin
-    )
 else()
   set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
     /lib 
@@ -110,19 +110,19 @@ endif()
 # to search these locations first
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
-    #D:/dev/lib/OpenCV2.3/build/include
-    #D:/dev/lib/OpenCV2.4/build/install/include
     D:/dev/lib/OpenCV2.4.1/build/include
     D:/dev/lib/wxWidgets-2.9.4
-    D:/dev/lib/ffmpeg-1.0.1-gpl
+    D:/dev/lib/ffmpeg-1.0.1-gpl/include
     D:/dev/lib/OpenSSL-Win32/include
     D:/dev/lib/poco-1.4.1p1-all
+    ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
+    )
+    #D:/dev/lib/OpenCV2.3/build/include
+    #D:/dev/lib/OpenCV2.4/build/install/include
     #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg
     #D:/dev/lib/ffmpeg
     #D:/dev/apps/MinGW/msys/1.0/local
     #D:/dev/projects/Sourcey/LibSourcey/src/anionu/deps/ffmpeg/include
-    )
 endif()
 
 # ----------------------------------------------------------------------------

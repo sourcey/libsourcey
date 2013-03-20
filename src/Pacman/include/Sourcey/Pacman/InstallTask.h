@@ -75,7 +75,7 @@ struct PackageInstallState: public State
 };
 
 
-class InstallTask: public Poco::Runnable, public StatefulSignal<PackageInstallState>, public ILoggable
+class InstallTask: public Poco::Runnable, public StatefulSignal<PackageInstallState>, public IPolymorphic
 	/// This class is responsible for the installation process
 	/// of a single package.
 	///

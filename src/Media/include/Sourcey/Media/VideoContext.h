@@ -52,8 +52,9 @@ struct VideoConversionContext;
 
 	
 inline AVFrame* CreateVideoFrame(::PixelFormat pixelFmt, int width, int height);
-inline void InitVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, const VideoCodec& oparams);
+inline void InitVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& oparams);
 inline void InitDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts);
+inline void InitVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params);
 inline AVRational GetCodecTimeBase(AVCodec* c, double fps);
 
 

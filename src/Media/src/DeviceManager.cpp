@@ -215,7 +215,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const string& name, int i
 {
 	// If the name is empty, return the default device.
 	if (name.empty() || name == kDefaultDeviceName) {
-		//Log("info") << "Creating default VideoCapturer" << endl;
+		//LogInfo() << "Creating default VideoCapturer" << endl;
 		return getDefaultVideoCaptureDevice(out);
 	}
 
@@ -226,7 +226,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const string& name, int i
 	/*
 	for (vector<Device>::const_iterator it = devices.begin(); it != devices.end(); ++it) {
 		if (name == it->name) {
-			Log("info") << "Creating VideoCapturer for " << name << endl;
+			LogInfo() << "Creating VideoCapturer for " << name << endl;
 			out = *it;
 			return true;
 		}
@@ -236,7 +236,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const string& name, int i
 	// with the filename. The LmiMediaEngine will know to use a FileVideoCapturer
 	// for these devices.
 	if (talk_base::Filesystem::IsFile(name)) {
-		Log("info") << "Creating FileVideoCapturer" << endl;
+		LogInfo() << "Creating FileVideoCapturer" << endl;
 		*out = FileVideoCapturer::CreateFileVideoCapturerDevice(name);
 		return true;
 	}
@@ -352,7 +352,7 @@ bool DeviceManager::shouldDeviceBeIgnored(const string& deviceName, const char* 
 	while (exclusionList[i]) {
 		if (strncasecmp(deviceName.c_str(), exclusionList[i],
 			strlen(exclusionList[i])) == 0) {
-				Log("info") << "Ignoring device " << deviceName << endl;
+				LogInfo() << "Ignoring device " << deviceName << endl;
 				return true;
 		}
 		++i;

@@ -82,7 +82,7 @@ int icompare(const char* s1, const std::string& s2);
 
 bool endsWith(const std::string& str, const std::string& suffix);
 
-std::string getPID(void* ptr);
+std::string getPID(const void* ptr);
 
 StringList &split(const std::string& s, const std::string& delim, StringList &elems, int limit = -1);
 StringList split(const std::string& s, const std::string& delim, int limit = -1);

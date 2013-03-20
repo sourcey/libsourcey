@@ -179,7 +179,7 @@ bool SDESPacket::read(Buffer& buffer)
 		while (remaining >= 4) {
 			SDESChunk* chunk = new SDESChunk();
 			buffer.readUInt32(chunk->ssrc);
-			Log("trace") << "RTCP: SDESPacket: Read Chunk SSRC: " << chunk->ssrc << endl;
+			LogTrace() << "RTCP: SDESPacket: Read Chunk SSRC: " << chunk->ssrc << endl;
 
 			// TODO: Support multiple items per chunk
 			SDESItem* item = new SDESItem();
@@ -207,7 +207,7 @@ void SDESPacket::write(Buffer& buffer) const
 	for (unsigned i = 0; i < _sdesChunks.size(); i++) {
 		SDESChunk* chunk = _sdesChunks[i];
 		
-		Log("debug") << "RTCP: SDESPacket: Writing Chunk SSRC: " << chunk->ssrc << endl;
+		LogDebug() << "RTCP: SDESPacket: Writing Chunk SSRC: " << chunk->ssrc << endl;
 
 		buffer.writeUInt32(chunk->ssrc);
 

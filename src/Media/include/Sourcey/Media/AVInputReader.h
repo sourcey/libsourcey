@@ -1,5 +1,5 @@
-#ifndef SOURCEY_MEDIA_AVFileReader_H
-#define SOURCEY_MEDIA_AVFileReader_H
+#ifndef SOURCEY_MEDIA_AVInputReader_H
+#define SOURCEY_MEDIA_AVInputReader_H
 
 
 #include "Sourcey/PacketDispatcher.h"
@@ -15,6 +15,7 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libavdevice/avdevice.h>
 //#include <libavutil/fifo.h>
 //#include <libswscale/swscale.h>
 }
@@ -24,9 +25,9 @@ namespace Sourcey {
 namespace Media {
 
 
-class AVFileReader: public PacketDispatcher, public IStartable, public Poco::Runnable
-	/// Video file decoder class with reusable code that
-	/// depends on ffmpeg libavcodec/libavformat.
+class AVInputReader: public PacketDispatcher, public IStartable, public Poco::Runnable
+	/// Video capture and file input decoder class with reusable
+	/// code that depends on ffmpeg libavcodec/libavformat.
 {
 public:		
 	struct Options 
@@ -39,6 +40,12 @@ public:
 		double processVideoXSecs;	// Process video frame every X seconds
 		double processAudioXSecs;	// Process audio frame every X seconds
 
+		// Device Input
+		std::string deviceEngine;	// The device capture engine"
+									//		Windows: vfwcap, dshow
+									//		Linux: v4l(video4linux2 or video4linux), dv1394
+		std::string deviceStandard; // Linux only: 'pal', 'secam' or 'ntsc'.
+
 		Options() {
 			disableVideo = false;
 			disableAudio = false;
@@ -47,13 +54,23 @@ public:
 			processAudioXFrame = 0;
 			processVideoXSecs = 0;
 			processAudioXSecs = 0;
+						
+#ifdef WIN32
+			deviceEngine = "vfwcap";
+#else
+			deviceEngine = "v4l";
+			deviceStandard = "ntsc";
+#endif
 		}
 	};
 
-	AVFileReader(const Options& options = Options());
-	virtual ~AVFileReader();
+	AVInputReader(const Options& options = Options());
+	virtual ~AVInputReader();
 	
-	virtual void open(const std::string& ifile);
+	virtual void openFile(const std::string& file);
+	virtual void openDevice(int deviceID, int width = 0, int height = 0, double framerate = 0); 
+	virtual void openDevice(const std::string& device, int width = 0, int height = 0, double framerate = 0);
+	virtual void openStream(const char* filename, AVInputFormat* inputFormat, AVDictionary** formatParams);
 	virtual void close();
 	
 	virtual void start();
@@ -73,9 +90,9 @@ protected:
 	mutable Poco::FastMutex	_mutex;
 	Poco::Thread			_thread;
 	bool					_stop;
-	std::string				_ifile;	
+	//std::string				_ifile;	
 	std::string				_error;
-	AVFormatContext*		_formatCtx;
+	AVFormatContext*		_formatCtx;	
 	VideoDecoderContext*	_video;
 	AudioDecoderContext*	_audio;
 	Options					_options;
@@ -85,5 +102,5 @@ protected:
 } } // namespace Sourcey::Media
 
 
-#endif	// SOURCEY_MEDIA_AVFileReader_H
+#endif	// SOURCEY_MEDIA_AVInputReader_H
 

@@ -53,13 +53,13 @@ public:
 	SocketAcceptorBase(Reactor& reactor/* = Reactor::getDefault()*/) :
 		_reactor(reactor)
 	{
-		Log("trace") << "[TCPSocketAcceptor: " << this << "] Creating" << endl;
+		LogTrace() << "[TCPSocketAcceptor: " << this << "] Creating" << endl;
 	}
 
 
 	virtual ~SocketAcceptorBase()
 	{	
-		Log("trace") << "[TCPSocketAcceptor: " << this << "] Destroying" << endl;
+		LogTrace() << "[TCPSocketAcceptor: " << this << "] Destroying" << endl;
 		close();
 	}
 	
@@ -72,7 +72,7 @@ public:
 
 	virtual void bind(const Address& address)
 	{
-		Log("debug") << "[TCPSocketAcceptor:" << this << "] Binding on " << address << endl;
+		LogDebug() << "[TCPSocketAcceptor:" << this << "] Binding on " << address << endl;
 	
 		_reactor.attach(*this, reactorDelegate(this, &SocketAcceptorBase<ServerSocketT, StreamSocketT>::onAccept, SocketReadable));
 
@@ -83,7 +83,7 @@ public:
 
 	virtual void close()
 	{
-		Log("trace") << "[TCPSocketAcceptor:" << this << "] Closing" << endl;
+		LogTrace() << "[TCPSocketAcceptor:" << this << "] Closing" << endl;
 	
 		_reactor.detach(*this, reactorDelegate(this, &SocketAcceptorBase<ServerSocketT, StreamSocketT>::onAccept, SocketReadable));
 		try	{
@@ -92,7 +92,7 @@ public:
 			ServerSocketT::close();
 		}
 		catch (Poco::IOException& exc) {
-			Log("error") << "[TCPSocketAcceptor:" << this << "] Closing Error: " << exc.displayText() << endl;
+			LogError() << "[TCPSocketAcceptor:" << this << "] Closing Error: " << exc.displayText() << endl;
 		}
 	}
 
@@ -103,7 +103,7 @@ public:
 protected:
 	virtual void onAccept()
 	{
-		Log("trace") << "[TCPSocketAcceptor:" << this << "] On Accept" << endl;
+		LogTrace() << "[TCPSocketAcceptor:" << this << "] On Accept" << endl;
 		StreamSocketT sock = acceptConnection();
 		SocketAccepted.dispatch(this, sock, _reactor);
 	}

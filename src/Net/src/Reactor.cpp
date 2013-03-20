@@ -55,16 +55,16 @@ Reactor::Reactor(int timeout) : //Runner& runner,
 	_timeout(timeout),
 	_stop(false)	
 {
-	cout << "Creating" << endl;
+	log("trace") << "Creating" << endl;
 	_thread.start(*this);
 }
 
 
 Reactor::~Reactor()
 {
-	cout << "Destroying" << endl;
+	log("trace") << "Destroying" << endl;
 	stop();
-	cout << "Destroying: OK" << endl;
+	log("trace") << "Destroying: OK" << endl;
 }
 
 
@@ -83,9 +83,9 @@ void Reactor::run()
 			error.clear();
 
 			if (_delegates.empty()) {				
-				Log("trace", this) << "Sleeping" << endl;
+				log("trace") << "Sleeping" << endl;
 				_wakeUp.wait();		
-				Log("trace", this) << "Waking up" << endl;
+				log("trace") << "Waking up" << endl;
 			}
 			{
 				FastMutex::ScopedLock lock(_mutex);
@@ -113,10 +113,10 @@ void Reactor::run()
 				*/
 			}
 				
-			//Log("trace", this) << "Select In: " << readable.size() << ":" << writable.size() << ":" << error.size() << endl;
+			//log("trace") << "Select In: " << readable.size() << ":" << writable.size() << ":" << error.size() << endl;
 			if (Poco::Net::Socket::select(readable, writable, error, _timeout)) 
 			{
-				//Log("trace", this) << "Select Out: " << readable.size() << ":" << writable.size() << ":" << error.size() << endl;
+				//log("trace") << "Select Out: " << readable.size() << ":" << writable.size() << ":" << error.size() << endl;
 				for (Poco::Net::Socket::SocketList::iterator it = readable.begin(); it != readable.end(); ++it) {
 					dispatch(*it, SocketReadable);
 					
@@ -124,7 +124,7 @@ void Reactor::run()
 					for (DelegateList::iterator ait = _delegates.begin(); ait != _delegates.end(); ++ait) {
 						if (*(*ait)->socket == *it && (*ait)->event == SocketReadable) {
 
-							Log("trace") << "RREACTOE ################################# RECV" << endl;
+							LogTrace() << "RREACTOE ################################# RECV" << endl;
 					
 							char buffer[32];
 
@@ -134,7 +134,7 @@ void Reactor::run()
 							//int n = ((Poco::Net::SecureStreamSocket&)(*it)).receiveBytes(buffer, sizeof(buffer));
 			
 							std::string response(buffer, n);
-							Log("trace") << "RREACTOE ################################# response: " << response << endl;
+							LogTrace() << "RREACTOE ################################# response: " << response << endl;
 						}
 					}
 					*/
@@ -149,13 +149,13 @@ void Reactor::run()
 							Poco::Net::HTTPRequest request("GET", "/");
 							stringstream ss;
 							request.write(ss);	
-							Log("trace") << "RREACTOE  equest Headers: " << ss.str() << endl;
+							LogTrace() << "RREACTOE  equest Headers: " << ss.str() << endl;
 							Poco::Net::SecureStreamSocket sock(*(*ait)->socket);
 							//int n = sock.receiveBytes(buffer, sizeof(buffer));
 							//Poco::Net::SecureStreamSocket sock(*it);
 							int n = sock.sendBytes(ss.str().data(), ss.str().length());
 							//((Poco::Net::SecureStreamSocket&)(*it)).sendBytes(ss.str().data(), ss.str().length());
-							Log("trace") << "RREACTOE  equest Headers: OK" << endl;
+							LogTrace() << "RREACTOE  equest Headers: OK" << endl;
 						}
 					}
 					*/
@@ -164,7 +164,7 @@ void Reactor::run()
 					dispatch(*it, SocketError);
 			} 
 
-			Thread::sleep(3); // gulp!
+			Thread::sleep(5); // gulp!
 		}
 		catch (Exception& exc)
 		{
@@ -176,20 +176,20 @@ void Reactor::run()
 		}
 		catch (...)
 		{
-			Log("error", this) << "Unknown Error" << endl;
+			log("error") << "Unknown Error" << endl;
 			//throw;
 		}
 	}
 	
-	Log("trace", this) << "Shutdown" << endl;
+	log("trace") << "Shutdown" << endl;
 	Shutdown.dispatch(this);
-	Log("trace", this) << "Exiting" << endl;
+	log("trace") << "Exiting" << endl;
 }
 
 
 void Reactor::handleException(const Exception& exc)
 {
-	Log("error", this) << "Error " << exc.displayText() << endl;
+	log("error") << "Error " << exc.displayText() << endl;
 
 #ifdef _DEBUG	
 	exc.rethrow();
@@ -199,7 +199,7 @@ void Reactor::handleException(const Exception& exc)
 
 void Reactor::handleException(const exception& exc)
 {
-	Log("error", this) << "Error " << exc.what() << endl;
+	log("error") << "Error " << exc.what() << endl;
 
 #ifdef _DEBUG	
 	throw exc;
@@ -209,7 +209,7 @@ void Reactor::handleException(const exception& exc)
 	
 void Reactor::stop()
 {
-	Log("trace", this) << "Stopping" << endl;
+	log("trace") << "Stopping" << endl;
 
 	_stop = true;
 	_wakeUp.set();
@@ -219,7 +219,7 @@ void Reactor::stop()
 
 void Reactor::attach(const Poco::Net::Socket& socket, const ReactorDelegate& delegate)
 {
-	Log("trace", this) << "Attach: " << socket.impl() << ": " << delegate.event << endl;
+	log("trace") << "Attach: " << socket.impl() << ": " << delegate.event << endl;
 
 	detach(socket, delegate);
 
@@ -249,13 +249,13 @@ void Reactor::attach(const Poco::Net::Socket& socket, const ReactorDelegate& del
 	}
 	*/
 
-	//Log("trace", this) << "Attach: OK: " << socket.impl() << ": " << delegate.event << endl;
+	//log("trace") << "Attach: OK: " << socket.impl() << ": " << delegate.event << endl;
 }
 
 
 void Reactor::detach(const Poco::Net::Socket& socket, const ReactorDelegate& delegate) 
 {	
-	//Log("trace", this) << "Detach: " << socket.impl() << ": " << delegate.event << endl;
+	//log("trace") << "Detach: " << socket.impl() << ": " << delegate.event << endl;
 
 	FastMutex::ScopedLock lock(_mutex);
 	
@@ -267,13 +267,13 @@ void Reactor::detach(const Poco::Net::Socket& socket, const ReactorDelegate& del
 		}
 	}
 
-	//Log("trace", this) << "Detach: OK: " << socket.impl() << ": " << delegate.event << endl;
+	//log("trace") << "Detach: OK: " << socket.impl() << ": " << delegate.event << endl;
 }
 
 
 void Reactor::detach(const Poco::Net::Socket& socket)
 {
-	//Log("trace", this) << "Detach: " << socket.impl() << endl;
+	//log("trace") << "Detach: " << socket.impl() << endl;
 
 	FastMutex::ScopedLock lock(_mutex);
 
@@ -289,7 +289,7 @@ void Reactor::detach(const Poco::Net::Socket& socket)
 
 void Reactor::dispatch(const Poco::Net::Socket& socket, SocketEvent event)
 {
-	//Log("trace", this) << "Dispatch: " << socket.impl() << endl;
+	//log("trace") << "Dispatch: " << socket.impl() << endl;
 
 	ReactorDelegate* delegate = NULL;
 	{
@@ -335,11 +335,11 @@ void ReactorNotifier::run()
 
 void ReactorNotifier::dispatch(ReactorEvent& event)
 {
-	Log("trace", this) << "[ReactorNotifier:" << this << "] Broadcast: " << event.delegate.socket.impl() << ": " << event.type << endl;
+	log("trace") << "[ReactorNotifier:" << this << "] Broadcast: " << event.delegate.socket.impl() << ": " << event.type << endl;
 	assert(event.delegate.locked);
 	
 	event.delegate.dispatch(&event.reactor, event, 0, 0, 0);
-	Log("trace", this) << "[ReactorNotifier:" << this << "] Broadcast Unlock " << event.delegate.socket.impl() << ": " << event.type << endl;
+	log("trace") << "[ReactorNotifier:" << this << "] Broadcast Unlock " << event.delegate.socket.impl() << ": " << event.type << endl;
 	assert(event.delegate.locked);
 	event.delegate.locked = false;
 }
@@ -347,13 +347,13 @@ void ReactorNotifier::dispatch(ReactorEvent& event)
 
 void ReactorNotifier::removeNotifications(const ReactorDelegate& delegate)
 {
-	Log("trace", this) << "[ReactorNotifier:" << this << "] Removing: " << &delegate << endl;
+	log("trace") << "[ReactorNotifier:" << this << "] Removing: " << &delegate << endl;
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 
 	DispatchQueue<ReactorEvent>::Queue::iterator it = _queue.begin();
 	while (it != _queue.end()) {
 		if ((*it)->delegate == delegate) {
-			Log("trace", this) << "[ReactorNotifier:" << this << "] Deleting Redundant Notification: " << (*it) << endl;
+			log("trace") << "[ReactorNotifier:" << this << "] Deleting Redundant Notification: " << (*it) << endl;
 			delete *it;
 			it = _queue.erase(it);
 		}

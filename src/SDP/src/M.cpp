@@ -49,7 +49,7 @@ M::M(const string& src) :
 {
 	size_t len = src.length();
 	if (src.substr(0, 2) != "m=") {
-		Log("error") << "ERROR: SDP line does not start with <m=>" << endl;
+		LogError() << "ERROR: SDP line does not start with <m=>" << endl;
 	}
 	size_t i = 2;
 	while (src[i] == ' ' && i < len)

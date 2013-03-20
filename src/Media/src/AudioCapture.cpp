@@ -45,14 +45,14 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFo
 	_format(format),
 	_isOpen(false)
 {
-	Log("trace") << "[AudioCapture:" << this << "] Creating" << endl;
+	LogTrace() << "[AudioCapture:" << this << "] Creating" << endl;
 
 	_iParams.deviceId = _deviceId;
 	_iParams.nChannels = _channels;
 	_iParams.firstChannel = 0;
 
 	if (_audio.getDeviceCount() < 1) {
-		Log("warn") << "[AudioCapture:" << this << "] No audio devices found!" << endl;
+		LogWarn() << "[AudioCapture:" << this << "] No audio devices found!" << endl;
 		return;
 	}
 
@@ -66,13 +66,13 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFo
 
 AudioCapture::~AudioCapture()
 {
-	Log("trace") << "[AudioCapture:" << this << "] Destroying" << endl;
+	LogTrace() << "[AudioCapture:" << this << "] Destroying" << endl;
 }
 
 
 void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 {
-	Log("trace") << "[AudioCapture:" << this << "] Opening: " << _channels << ": " << _sampleRate << endl;
+	LogTrace() << "[AudioCapture:" << this << "] Opening: " << _channels << ": " << _sampleRate << endl;
 
 	close();
 
@@ -88,7 +88,7 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 		_audio.openStream(NULL, &_iParams, _format, _sampleRate, &nBufferFrames, &AudioCapture::callback, (void*)this);
 		_error = "";
 		_isOpen = true;
-		Log("trace") << "[AudioCapture:" << this << "] Opening: OK" << endl;
+		LogTrace() << "[AudioCapture:" << this << "] Opening: OK" << endl;
 	}
 	catch (RtError& e) {
 		setError("Failed to open audio capture: " + e.getMessage());
@@ -101,13 +101,13 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 
 void AudioCapture::close()
 {	
-	Log("trace") << "[AudioCapture:" << this << "] Closing" << endl;
+	LogTrace() << "[AudioCapture:" << this << "] Closing" << endl;
 	try {
 		FastMutex::ScopedLock lock(_mutex);
 		_isOpen = false;
 		if (_audio.isStreamOpen())
 			_audio.closeStream();
-		Log("trace") << "[AudioCapture:" << this << "] Closing: OK" << endl;
+		LogTrace() << "[AudioCapture:" << this << "] Closing: OK" << endl;
 	}
 	catch (RtError& e) {
 		setError("Failed to close audio capture: " + e.getMessage());
@@ -120,14 +120,14 @@ void AudioCapture::close()
 
 void AudioCapture::start()
 {	
-	Log("trace") << "[AudioCapture:" << this << "] Starting" << endl;
+	LogTrace() << "[AudioCapture:" << this << "] Starting" << endl;
 
 	if (!isRunning()) {
 		try {
 			FastMutex::ScopedLock lock(_mutex);
 			_audio.startStream();
 			_error = "";
-			Log("trace") << "[AudioCapture:" << this << "] Starting: OK" << endl;
+			LogTrace() << "[AudioCapture:" << this << "] Starting: OK" << endl;
 		}
 		catch (RtError& e) {
 			setError("Failed to start audio capture: " + e.getMessage());
@@ -141,14 +141,14 @@ void AudioCapture::start()
 
 void AudioCapture::stop()
 {	
-	Log("trace") << "[AudioCapture:" << this << "] Stopping" << endl;
+	LogTrace() << "[AudioCapture:" << this << "] Stopping" << endl;
 
 	if (isRunning()) {
 		try {
 			FastMutex::ScopedLock lock(_mutex);
-			Log("trace") << "[AudioCapture:" << this << "] Stopping: Before" << endl;
+			LogTrace() << "[AudioCapture:" << this << "] Stopping: Before" << endl;
 			_audio.stopStream();
-			Log("trace") << "[AudioCapture:" << this << "] Stopping: OK" << endl;
+			LogTrace() << "[AudioCapture:" << this << "] Stopping: OK" << endl;
 		}
 		catch (RtError& e) {
 			setError("Failed to stop audio capture: " + e.getMessage());
@@ -164,7 +164,7 @@ void AudioCapture::stop()
 void AudioCapture::attach(const PacketDelegateBase& delegate)
 {
 	PacketDispatcher::attach(delegate);
-	Log("debug") << "[AudioCapture:" << this << "] Added Delegate: " << refCount() << endl;
+	LogDebug() << "[AudioCapture:" << this << "] Added Delegate: " << refCount() << endl;
 	if (refCount() == 1)
 		start();
 }
@@ -173,10 +173,10 @@ void AudioCapture::attach(const PacketDelegateBase& delegate)
 bool AudioCapture::detach(const PacketDelegateBase& delegate) 
 {
 	if (PacketDispatcher::detach(delegate)) {
-		Log("debug") << "[AudioCapture:" << this << "] Removed Delegate: " << refCount() << endl;
+		LogDebug() << "[AudioCapture:" << this << "] Removed Delegate: " << refCount() << endl;
 		if (refCount() == 0)
 			stop();
-		Log("debug") << "[AudioCapture:" << this << "] Removed Delegate: OK" << endl;
+		LogDebug() << "[AudioCapture:" << this << "] Removed Delegate: OK" << endl;
 		return true;
 	}
 	return false;
@@ -186,7 +186,7 @@ bool AudioCapture::detach(const PacketDelegateBase& delegate)
 void AudioCapture::setError(const string& message)
 {
 	_error = message;
-	Log("error") << "[AudioCapture::" << this << "] Error: " << message << endl;
+	LogError() << "[AudioCapture::" << this << "] Error: " << message << endl;
 	throw Exception(message);
 }
 
@@ -196,14 +196,14 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 {
 	AudioCapture* klass = (AudioCapture*)data;
 
-	//Log("trace") << "[AudioCapture::" << klass << "] Callback" << endl;
+	//LogTrace() << "[AudioCapture::" << klass << "] Callback" << endl;
 	
 	if (status) 
-		Log("error") << "[AudioCapture::" << klass << "] Stream over/underflow detected" << endl;
+		LogError() << "[AudioCapture::" << klass << "] Stream over/underflow detected" << endl;
 
 	assert(inputBuffer != NULL);
 	if (inputBuffer == NULL) {
-		Log("error") << "[AudioCapture::" << klass << "] Input buffer is NULL." << endl;
+		LogError() << "[AudioCapture::" << klass << "] Input buffer is NULL." << endl;
 		return 2;
 	} 
 
@@ -237,14 +237,14 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 		nBufferFrames * klass->numChannels() * size, //sizeof(AUDIO_DATA),
 		(double)streamTime);
 
-	//Log("trace") << "[AudioCapture] AudioPacket: " 
+	//LogTrace() << "[AudioCapture] AudioPacket: " 
 	//	<< "\n\tPacket Ptr: " << inputBuffer
 	//	<< "\n\tPacket Size: " << packet.size() 
 	//	<< "\n\tStream Time: " << packet.time
 	//	<< endl;
 
 	klass->dispatch(klass, packet);
-	//Log("trace") << "[AudioCapture::" << klass << "] Callback: OK" << endl;
+	//LogTrace() << "[AudioCapture::" << klass << "] Callback: OK" << endl;
 	return 0;
 }
 

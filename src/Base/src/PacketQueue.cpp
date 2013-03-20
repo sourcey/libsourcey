@@ -41,19 +41,19 @@ PacketQueue::PacketQueue(PacketDispatcher& dispatcher, Runner& runner, int queue
 	 DispatchQueue<IPacket>(runner, queueSize, dispatchTimeout),
 	_dispatcher(dispatcher)
 {	
-	Log("trace") << "[PacketQueue:" << this << "] Creating" << endl;
+	LogTrace() << "[PacketQueue:" << this << "] Creating" << endl;
 }
 	
 
 PacketQueue::~PacketQueue()
 {
-	Log("trace") << "[PacketQueue:" << this << "] Destroying" << endl;
+	LogTrace() << "[PacketQueue:" << this << "] Destroying" << endl;
 }
 
 
 void PacketQueue::dispatch(IPacket& packet)
 {
-	//Log("trace") << "[PacketQueue:" << this << "] Dispatching: " << &packet << endl;
+	//LogTrace() << "[PacketQueue:" << this << "] Dispatching: " << &packet << endl;
 	_dispatcher.dispatch(this, packet);
 }
 

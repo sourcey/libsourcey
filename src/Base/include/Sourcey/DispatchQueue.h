@@ -41,6 +41,7 @@ namespace Sourcey {
 
 template<class T>
 class DispatchQueue: public Task
+	/// As async dispatch queue which is managed by a Runner.
 {
 public:
 	DispatchQueue(Runner& runner, int queueSize = 1024, int dispatchTimeout = DEFAULT_TIMEOUT) :
@@ -48,20 +49,20 @@ public:
 		_queueSize(queueSize),
 		_timeout(dispatchTimeout)
 	{
-		Log("trace") << "[DispatchQueue:" << this << "] Creating" << std::endl;
+		LogTrace("DispatchQueue", this) << "Creating" << std::endl;
 	}
 	
 
 	virtual void start()
 	{
-		Log("trace") << "[DispatchQueue:" << this << "] Starting" << std::endl;
+		LogTrace("DispatchQueue", this) << "Starting" << std::endl;
 		Task::start();
 	}
 
 
 	virtual void cancel()
 	{
-		Log("trace") << "[DispatchQueue:" << this << "] Stopping" << std::endl;
+		LogTrace("DispatchQueue", this) << "Stopping" << std::endl;
 		clear();
 		Task::cancel();
 	}
@@ -79,10 +80,10 @@ public:
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);	
 
-		Log("trace") << "[DispatchQueue:" << this << "] Adding: " << item << std::endl;
+		LogTrace("DispatchQueue", this) << "Adding: " << item << std::endl;
 				
 		while (static_cast<int>(_queue.size()) >= (_queueSize)) {
-			Log("trace") << "[DispatchQueue:" << this << "] Purging item" << std::endl;
+			LogTrace("DispatchQueue", this) << "Purging item" << std::endl;
 			delete _queue.front();
 			_queue.pop_front();
 		}
@@ -127,7 +128,7 @@ public:
 protected:
 	virtual ~DispatchQueue() 
 	{
-		Log("trace") << "[DispatchQueue:" << this << "] Destroying" << std::endl;
+		LogTrace("DispatchQueue", this) << "Destroying" << std::endl;
 		clear();
 	};
 		

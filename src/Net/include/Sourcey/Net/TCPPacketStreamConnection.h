@@ -39,7 +39,7 @@ namespace Sourcey {
 namespace Net {
 
 
-class TCPPacketStreamConnection: public Poco::Net::TCPServerConnection, public ILoggable
+class TCPPacketStreamConnection: public Poco::Net::TCPServerConnection, public IPolymorphic
 {
 public:
 	TCPPacketStreamConnection(PacketStream* stream, 

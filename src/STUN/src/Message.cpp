@@ -200,32 +200,32 @@ Attribute* Message::get(Attribute::Type type, int index) const
 bool Message::read(Buffer& buf) 
 {			
 	if (!buf.readUInt16(_type)) {
-		Log("error") << "STUN: Not STUN type: " << _type << endl;
+		LogError() << "STUN: Not STUN type: " << _type << endl;
 		return false;
 	}
 
 	if (_type & 0x8000) {
 		// RTP and RTCP set MSB of first byte, since first two bits are version, 
 		// and version is always 2 (10). If set, this is not a STUN packet.
-		//Log("error") << "STUN: Not STUN packet" << endl;
+		//LogError() << "STUN: Not STUN packet" << endl;
 		return false;
 	}
 
 	if (!buf.readUInt16(_size)) {
-		//Log("error") << "STUN: Packet has no size: " << _size << endl;
+		//LogError() << "STUN: Packet has no size: " << _size << endl;
 		return false;
 	}
 
 	string transactionID;
 	if (!buf.readString(transactionID, 16)) {
-		//Log("error") << "STUN: Packet has no Transaction ID: " << transactionID << endl;
+		//LogError() << "STUN: Packet has no Transaction ID: " << transactionID << endl;
 		return false;
 	}
 	assert(transactionID.size() == 16);
 	_transactionID = transactionID;
 
 	if (_size > buf.remaining()) {
-		Log("error") << "STUN: Buffer error" << endl;
+		LogError() << "STUN: Buffer error" << endl;
 		return false;
 	}
 
@@ -235,28 +235,28 @@ bool Message::read(Buffer& buf)
 	while (buf.remaining() > rest) {
 		UInt16 attrType, attrLength;
 		if (!buf.readUInt16(attrType)) {
-			Log("error") << "STUN: Attribute has no type: " << attrType << endl;
+			LogError() << "STUN: Attribute has no type: " << attrType << endl;
 			return false;
 		}
 		if (!buf.readUInt16(attrLength)) {
-			Log("error") << "STUN: Attribute has no size: " << attrLength << endl;
+			LogError() << "STUN: Attribute has no size: " << attrLength << endl;
 			return false;
 		}
 
 		Attribute* attr = Attribute::create(attrType, attrLength);
 		if (attr && attr->read(buf)) {
-			//Log("debug") << "STUN: Parsed attribute: " << attrType << ": " << Attribute::typeString(attrType) << ": " << attrLength << endl;
+			//LogDebug() << "STUN: Parsed attribute: " << attrType << ": " << Attribute::typeString(attrType) << ": " << attrLength << endl;
 			_attrs.push_back(attr);
 		} else {
 			// Allow for unrecognised attributes.
 			//return false;	
-			Log("error") << "STUN: Failed to parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
+			LogError() << "STUN: Failed to parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
 		}
 	}
 
 	if (buf.remaining() != rest) {
 		// FIXME: Shouldn't be doing this
-		Log("error") << "STUN: Wrong message size (" << rest << " != " << buf.remaining() << ")" << endl;
+		LogError() << "STUN: Wrong message size (" << rest << " != " << buf.remaining() << ")" << endl;
 		return false;
 	}
 

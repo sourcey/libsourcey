@@ -40,13 +40,13 @@ namespace XML {
 
 Configuration::Configuration()
 {	
-	Log("debug") << "Creating" << endl;
+	LogDebug() << "Creating" << endl;
 }
 
 
 Configuration::~Configuration()
 {
-	Log("debug") << "Destroying" << endl;
+	LogDebug() << "Destroying" << endl;
 }
 
 
@@ -62,7 +62,7 @@ void Configuration::load()
 	FastMutex::ScopedLock lock(_mutex); 
 
 	assert(!_path.empty());
-	Log("debug") << "Loading: " << _path << endl;
+	LogDebug() << "Loading: " << _path << endl;
 
 	pugi::xml_parse_result result = load_file(_path.data()); 
 	if (!result || child("config").empty()) {	
@@ -77,7 +77,7 @@ bool Configuration::save()
 {
 	FastMutex::ScopedLock lock(_mutex); 
 
-	Log("debug") << "Saving: " << _path << endl;
+	LogDebug() << "Saving: " << _path << endl;
 
 	if (!_path.empty())
 		return false;
@@ -107,12 +107,12 @@ bool Configuration::remove(const string& key) //, bool exactMatch
 
 void Configuration::removeAll(const std::string& baseKey)
 {
-	Log("debug") << "Removing All: " << baseKey << endl;
+	LogDebug() << "Removing All: " << baseKey << endl;
 	FastMutex::ScopedLock lock(_mutex); 
 
 	pugi::xpath_node_set properties = select_nodes(format("//property[contains(@name, '%s')]", baseKey).data());
     for (pugi::xpath_node_set::const_iterator it = properties.begin(); it != properties.end(); ++it) {
-		Log("debug") << "Removing: " << (*it).node().attribute("name").value() << endl;
+		LogDebug() << "Removing: " << (*it).node().attribute("name").value() << endl;
 		child("config").remove_child((*it).node());
 	}
 }
@@ -135,7 +135,7 @@ bool Configuration::getRaw(const string& key, string& value) const
 {	
 	FastMutex::ScopedLock lock(_mutex); 
 	
-	//Log("debug") << "Get Raw: " << key << ": " << value << endl;
+	//LogDebug() << "Get Raw: " << key << ": " << value << endl;
 	
     XML::Node property = child("config").find_child_by_attribute("property", "name", key.data());
 	if (!property.empty()) {
@@ -148,7 +148,7 @@ bool Configuration::getRaw(const string& key, string& value) const
 
 void Configuration::setRaw(const string& key, const string& value)
 {	
-	Log("debug") << "Set Raw: " << key << ": " << value << endl;
+	LogDebug() << "Set Raw: " << key << ": " << value << endl;
 	{
 		FastMutex::ScopedLock lock(_mutex); 
 
@@ -175,7 +175,7 @@ void Configuration::keys(StringList& keys, const std::string& baseKey)
 	pugi::xpath_node_set properties = select_nodes(format("//property[contains(@name, '%s')]", baseKey).data());
     for (pugi::xpath_node_set::const_iterator it = properties.begin(); it != properties.end(); ++it) {
 		string value = (*it).node().attribute("name").value();
-		Log("debug") << "Keys: " << baseKey << ": " << value << endl;
+		LogDebug() << "Keys: " << baseKey << ": " << value << endl;
 		keys.push_back(value);
 	}
 }

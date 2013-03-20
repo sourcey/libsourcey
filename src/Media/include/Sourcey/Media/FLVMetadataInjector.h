@@ -87,14 +87,14 @@ public:
 		_waitingForKeyframe(false),
 		_timestampOffset(0)
 	{
-			Log("debug") << "[FLVMetadataInjector:" << this << "] Creating" << std::endl;
+			LogDebug() << "[FLVMetadataInjector:" << this << "] Creating" << std::endl;
 	}
 					
 	virtual void onStreamStateChange(const PacketStreamState& state) 
 		/// This method is called by the Packet Stream
 		/// whenever the stream is restarted.
 	{ 
-		Log("debug") << "[FLVMetadataInjector:" << this << "] Stream State Change: " << state << std::endl;
+		LogDebug() << "[FLVMetadataInjector:" << this << "] Stream State Change: " << state << std::endl;
 		switch (state.id()) {
 		case PacketStreamState::Running:
 			_initial = true;
@@ -134,13 +134,13 @@ public:
 					// Drop all frames until we receive the first keyframe.
 					//fastIsFLVHeader(reinterpret_cast<char*>(mpacket->data())
 					if (!fastIsFLVKeyFrame(reinterpret_cast<char*>(mpacket->data()))) {
-						Log("debug") << "[FLVMetadataInjector:" << this << "] Waiting for Keyframe" << std::endl;
+						LogDebug() << "[FLVMetadataInjector:" << this << "] Waiting for Keyframe" << std::endl;
 						return;
 					}
 
 					// Create and dispatch our custom header.
 					_waitingForKeyframe = false;				
-					Log("debug") << "[FLVMetadataInjector:" << this << "] Got Keyframe" << std::endl;
+					LogDebug() << "[FLVMetadataInjector:" << this << "] Got Keyframe" << std::endl;
 					Buffer flvHeader(512);
 					writeFLVHeader(flvHeader);
 
@@ -169,7 +169,7 @@ public:
 		}
 
 		// Just proxy the packet if no modification is required.
-		//Log("debug") << "[FLVMetadataInjector:" << this << "] Proxy Packet" << std::endl;
+		//LogDebug() << "[FLVMetadataInjector:" << this << "] Proxy Packet" << std::endl;
 		dispatch(this, packet);
 	}
 	
@@ -178,7 +178,7 @@ public:
 		/// No more need to copy data with this method.
 	{
 		UInt32 val = HostToNetwork32(timestamp);	
-		Log("debug") << "[FLVMetadataInjector:" << this << "] Updating timestamp: "
+		LogDebug() << "[FLVMetadataInjector:" << this << "] Updating timestamp: "
 			<< "\n\tTimestamp: " << timestamp
 			<< "\n\tFrame Number: " << _fpsCounter.frames
 			<< "\n\tFrame Rate: " << _fpsCounter.fps
@@ -192,12 +192,12 @@ public:
 		// the start of the tag.
 		int offset = buf.position();
 		if (buf.size() < offset + 4) {
-			Log("error") << "[FLVMetadataInjector:" << this << "] The FLV tag buffer is too small." << std::endl;
+			LogError() << "[FLVMetadataInjector:" << this << "] The FLV tag buffer is too small." << std::endl;
 			return;
 		}
 		
 		/*
-		Log("debug") << "[FLVMetadataInjector:" << this << "] Updating timestamp: "
+		LogDebug() << "[FLVMetadataInjector:" << this << "] Updating timestamp: "
 			<< "\n\tTimestamp: " << timestamp
 			<< "\n\tFrame Number: " << _fpsCounter.frames
 			<< "\n\tFrame Rate: " << _fpsCounter.fps
@@ -330,7 +330,7 @@ public:
 		// Write tag size
 		buf.writeUInt32(dataSize + 11);
 			
-		//Log("debug") << "FLV Header:" 
+		//LogDebug() << "FLV Header:" 
 		//	<< "\n\tType: " << (int)tagType
 		//	<< "\n\tData Size: " << dataSize
 		//	<< "\n\tTimestamp: " << timestamp
@@ -408,7 +408,7 @@ public:
 				break;	
 			}				
 
-			Log("debug") << "FLV Tag:" 
+			LogDebug() << "FLV Tag:" 
 				<< "\n\tType: " << (int)tagType
 				<< "\n\tTag Size: " << previousTagSize
 				<< "\n\tData Size: " << dataSize

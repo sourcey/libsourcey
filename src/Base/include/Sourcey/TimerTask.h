@@ -45,8 +45,8 @@ class Runner;
 	
 
 class TimerTask: public Task
-	/// This class defines a TimerTask which is responsible
-	/// for sending callbacks at specified time intervals.
+	/// This class is an async a timer task which sends
+	/// callbacks at specified timeout intervals.
 	///
 	/// TimerTasks with only a timeout value and no repeat
 	/// interval will be stopped after the initial timeout.
@@ -111,46 +111,3 @@ protected:
 
 
 #endif // SOURCEY_TimerTask_H
-
-
-
-	
-	//virtual bool again();
-		/// Start the timer, and if it is repeating restart
-		/// it using the repeat value as the timeout.
-
-	///Timeout _timeout;
-	////* = Runner::getDefault()*/
-	//bool autoStart = false, 
-	//bool runOnce = false, 
-	//const std::string& name = ""
-		  
-	/*
-	Runner& _runner;	
-	bool _runOnce;
-	bool _running;
-	bool _destroyed;
-	std::string _name;
-	template <class DeletableT> 
-	friend class GarbageCollectionTask;
-	*/	
-
-	/*
-	virtual void destroy();
-		/// Called from outside to abort the task without any
-		/// more callbacks. The task instance will be deleted
-		/// shortly by the Runner.	
-
-	virtual bool runOnce() const;
-	virtual bool running() const;
-	virtual bool destroyed() const;
-	
-	virtual std::string name() const;
-	virtual void setName(const std::string& name);
-		  
-	virtual Runner& runner() { return _runner; }
-	
-	virtual void run() = 0;
-	///TimerTask(const TimerTask&) {}
-	///virtual ~Task() {}
-	*/

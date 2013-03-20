@@ -45,7 +45,7 @@ namespace Net {
 
 	
 template <class DatagramSocketT, TransportProtocol TransportT, class ISocketT = IPacketSocket>
-class AsyncPacketSocketBase: public DatagramSocketT, public ISocketT, public ILoggable
+class AsyncPacketSocketBase: public DatagramSocketT, public ISocketT, public IPolymorphic
 	/// This class implements a reactor based packet socket.
 	/// This class is designed to used with UDP socket types. 
 {

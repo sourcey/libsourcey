@@ -46,13 +46,13 @@ namespace JSON {
 // ---------------------------------------------------------------------
 Configuration::Configuration()
 {	
-	Log("trace") << "[JSONConfiguration] Creating" << endl;
+	LogTrace() << "[JSONConfiguration] Creating" << endl;
 }
 
 
 Configuration::~Configuration()
 {
-	Log("trace") << "[JSONConfiguration] Destroying" << endl;
+	LogTrace() << "[JSONConfiguration] Destroying" << endl;
 }
 
 
@@ -70,7 +70,7 @@ void Configuration::load(bool create)
 	if (_path.empty())
 		throw Exception("Configuration file path must be set.");
 
-	Log("debug") << "[JSONConfiguration] Loading: " << _path << endl;
+	LogDebug() << "[JSONConfiguration] Loading: " << _path << endl;
 	
 	if (create && !File(_path).exists())
 		File(_path).createFile();
@@ -94,7 +94,7 @@ void Configuration::save()
 	if (_path.empty())
 		throw Exception("Configuration file path must be set.");
 
-	Log("debug") << "[JSONConfiguration] Saving: " << _path << endl;
+	LogDebug() << "[JSONConfiguration] Saving: " << _path << endl;
 	
 	// Will throw on error
 	JSON::saveFile(*this, _path);
@@ -118,7 +118,7 @@ bool Configuration::remove(const string& key)
 
 void Configuration::removeAll(const std::string& baseKey)
 {
-	Log("trace") << "Removing All: " << baseKey << endl;
+	LogTrace() << "Removing All: " << baseKey << endl;
 	FastMutex::ScopedLock lock(_mutex); 	
 	
     Members members = this->getMemberNames();

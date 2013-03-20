@@ -85,7 +85,7 @@ string A::attributeValue()
 		return _attributes;
 	int pos = (int)_attributes.find(":");
 	if (_attributes.length() <= pos + 1) {
-		Log("error") << "Invalid a field in SDP packet" << endl;
+		LogError() << "Invalid a field in SDP packet" << endl;
 		return "";
 	}
 	return _attributes.substr( pos + 1, _attributes.length() - 2);

@@ -87,13 +87,13 @@ DigestAuthenticator::DigestAuthenticator(const string& realm, const string& vers
 	_usingRFC2617(usingRFC2617),
 	_opaque(CryptoProvider::hash("md5", realm))
 {
-	Log("trace") << "[DigestAuthenticator] Creating" << endl;
+	LogTrace() << "[DigestAuthenticator] Creating" << endl;
 }
 
 
 DigestAuthenticator::~DigestAuthenticator() 
 {
-	Log("trace") << "[DigestAuthenticator] Destroying" << endl;
+	LogTrace() << "[DigestAuthenticator] Destroying" << endl;
 }
 
 
@@ -112,14 +112,14 @@ string DigestAuthenticator::parseHeaderSegment(const string& key)
 		value = _lastRequest.substr(start, end-start);
 		replaceInPlace(value,"\"", "");
 	}
-	//Log("trace") << format("Parse: Key: %s, Value: %s, start: %d, end: %d", key, value, start, end));
+	//LogTrace() << format("Parse: Key: %s, Value: %s, start: %d, end: %d", key, value, start, end));
 	return value;
 }
 
 
 bool DigestAuthenticator::validateRequest(UserManager* authenticator, const string& request) 
 {
-	Log("trace") << "[DigestAuthenticator] Validating Request: " + request << endl;
+	LogTrace() << "[DigestAuthenticator] Validating Request: " + request << endl;
 
 	_lastRequest = request;
 	string hash;
@@ -133,7 +133,7 @@ bool DigestAuthenticator::validateRequest(UserManager* authenticator, const stri
 	string response = parseHeaderSegment("response");
 
 	/*
-	Log("trace") << "Digest Authenticator:"
+	LogTrace() << "Digest Authenticator:"
 		<< "\n\tHTTP Method: " << httpMethod
 		<< "\n\tUsername: " << username
 		<< "\n\tURI: " << uri

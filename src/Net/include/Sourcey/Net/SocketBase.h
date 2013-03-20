@@ -44,7 +44,7 @@ namespace Net {
 
 	
 template <class StreamSocketT, TransportProtocol TransportT, class ISocketT = ISocket>
-class SocketBase: public StreamSocketT, public ISocketT, public ILoggable
+class SocketBase: public StreamSocketT, public ISocketT, public IPolymorphic
 	/// This class implements a reactor based socket.
 	/// This class is designed to used with TCP and SSL
 	/// socket types. 

@@ -97,7 +97,7 @@ typedef ReactorDelegateBase ReactorDelegate;
 
 // ---------------------------------------------------------------------
 //
-class Reactor: public Poco::Runnable, public ILoggable
+class Reactor: public Poco::Runnable, public IPolymorphic
 	/// This class implements the Reactor pattern described in
 	/// the book "Pattern Languages of Program Design" by Jim
 	/// Coplien and Douglas C. Schmidt (Addison Wesley, 1995).

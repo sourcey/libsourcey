@@ -30,6 +30,7 @@
 
 
 #include "Sourcey/Base.h"
+#include "Sourcey/IPolymorphic.h"
 #include "Sourcey/Buffer.h"
 #include "Sourcey/Logger.h"
 
@@ -37,15 +38,11 @@
 
 
 namespace Sourcey {
-
-
-//class PacketDispatcher;
 	
 	
 struct IPacketInfo
-	/// An abstract interface for packet sources to provide
-	/// extra information about packets. For instance sockets
-	/// will include the receiver address etc.
+	/// An abstract interface for packet sources to
+	/// provide extra information about packets.
 { 
 	IPacketInfo() {}; 
 	virtual ~IPacketInfo() {}; 
@@ -54,29 +51,30 @@ struct IPacketInfo
 };
 
 
-struct IPacket: public IPolymorphic//, public ILoggable
+struct IPacket: public IPolymorphic
+	/// The base packet class which can be extended by each
+	/// protocol implementation for polymorphic callbacks
+	/// using the PacketDispatcher and friends.
 { 
 	void* source;
-		// Provides an optional reference pointer to the 
-		// packet broadcast source. 
-		// Usually a deirvative of PacketDispatcher.
+		// Optional packet source pointer reference. 
+		// Usually a subclass of PacketDispatcher.
 
 	IPacketInfo* info;
-		// Provides optional information about the packet.
+		// Optional extra information about the packet.
 		// This pointer is managed by the packet.
 		// @see IPacketInfo.
 
 	void* opaque;
-		// Provides an optional client data pointer.
+		// Optional client data pointer.
 		// This pointer is not managed by the packet.
 	
 	IPacket(void* source = NULL, IPacketInfo* info = NULL) :
-		source(source), info(info), opaque(NULL) {} //freeOnDestroy(freeOnDestroy), , freeOnDestroy = false
+		source(source), info(info), opaque(NULL) {}
 	
 	IPacket(const IPacket& r) : 
 		source(r.source),
 		info(r.info ? r.info->clone() : NULL),
-		//freeOnDestroy(r.freeOnDestroy),
 		opaque(r.opaque)
 	{
 	}
@@ -85,7 +83,6 @@ struct IPacket: public IPolymorphic//, public ILoggable
 	{
 		source = r.source;
 		info = (r.info ? r.info->clone() : NULL);
-		//freeOnDestroy = r.freeOnDestroy;
 		opaque = r.opaque;
 		return *this;
 	}
@@ -122,10 +119,9 @@ struct IPacket: public IPolymorphic//, public ILoggable
 
 
 struct DataPacket: public IPacket 
-	/// The data packet is the default packet that is passed
-	/// around the system. Bear in mind that the internal data
-	/// is only referenced and will most likely be deleted once
-	/// the packet goes out of scope.
+	/// The default data packet type.
+	/// Data packets consist of an optionally
+	/// managed data pointer, and a size value.
 {	
 	DataPacket(unsigned char* data = NULL, size_t size = 0, bool freeOnDestroy = false) : 
 		_data(data), _size(size), freeOnDestroy(freeOnDestroy)
@@ -194,8 +190,8 @@ struct DataPacket: public IPacket
 	}
 
 	bool freeOnDestroy;
-		/// This flag tells the implementation that internal
-		/// packet data must be freed on destruction.
+		/// Set this flag to true to 
+		/// delete packet data on destruction.
 	
 protected:
 	unsigned char* _data;

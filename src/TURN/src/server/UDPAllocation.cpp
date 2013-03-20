@@ -59,13 +59,13 @@ UDPAllocation::UDPAllocation(Server& server,
 	_relaySocket.bind(Net::Address(server.options().listenAddr.host(), 0));
 	_relaySocket.attach(packetDelegate(this, &UDPAllocation::onPacketReceived,1));
 
-	Log("trace", this) << " Initializing on address: " << _relaySocket.address() << endl;
+	log("trace") << " Initializing on address: " << _relaySocket.address() << endl;
 }
 
 
 UDPAllocation::~UDPAllocation() 
 {
-	Log("trace", this) << "Destroying" << endl;	
+	log("trace") << "Destroying" << endl;	
 	_relaySocket.detach(packetDelegate(this, &UDPAllocation::onPacketReceived));
 	_relaySocket.close();
 }
@@ -73,7 +73,7 @@ UDPAllocation::~UDPAllocation()
 
 bool UDPAllocation::handleRequest(const Request& request) 
 {	
-	Log("trace", this) << "Handle Request" << endl;	
+	log("trace") << "Handle Request" << endl;	
 
 	if (!ServerAllocation::handleRequest(request)) {
 		if (request.type() == STUN::Message::SendIndication)
@@ -88,7 +88,7 @@ bool UDPAllocation::handleRequest(const Request& request)
 
 void UDPAllocation::handleSendIndication(const Request& request) 
 {	
-	Log("trace", this) << "Handle Send Indication" << endl;
+	log("trace") << "Handle Send Indication" << endl;
 
 	// The message is first checked for validity.  The Send indication MUST
 	// contain both an XOR-PEER-ADDRESS attribute and a DATA attribute.  If
@@ -98,14 +98,14 @@ void UDPAllocation::handleSendIndication(const Request& request)
 
 	const STUN::XorPeerAddress* peerAttr = request.get<STUN::XorPeerAddress>();
 	if (!peerAttr || peerAttr && peerAttr->family() != 1) {
-		Log("error", this) << "Send Indication Error: No Peer Address" << endl;
+		log("error") << "Send Indication Error: No Peer Address" << endl;
 		// silently disgarded...
 		return;
 	}
 
 	const STUN::Data* dataAttr = request.get<STUN::Data>();
 	if (!dataAttr) {
-		Log("error", this) << "Send Indication Error: No Data Attribute" << endl;
+		log("error") << "Send Indication Error: No Data Attribute" << endl;
 		// silently disgarded...
 		return;
 	}
@@ -127,7 +127,7 @@ void UDPAllocation::handleSendIndication(const Request& request)
 	
 	Net::Address peerAddress = peerAttr->address();
 	if (!hasPermission(peerAddress.host())) {
-		Log("error", this) << "Send Indication Error: No permission: " << peerAddress.host().toString() << endl;
+		log("error") << "Send Indication Error: No permission: " << peerAddress.host().toString() << endl;
 		// silently disgarded...
 		return;
 	}
@@ -149,7 +149,7 @@ void UDPAllocation::handleSendIndication(const Request& request)
 
 	// The resulting UDP datagram is then sent to the peer.
 	
-	Log("trace", this) << "Relaying Send Indication: " 
+	log("trace") << "Relaying Send Indication: " 
 		<< "\r\tFrom: " << request.remoteAddr.toString()
 		<< "\r\tTo: " << peerAttr->address().toString()
 		<< endl;	
@@ -174,10 +174,10 @@ void UDPAllocation::onPacketReceived(void* sender, DataPacket& packet)
 	if (!isOK())
 		return;
 
-	Log("trace", this) << "Received UDP Datagram from " << source->peerAddress.toString() << endl;	
+	log("trace") << "Received UDP Datagram from " << source->peerAddress.toString() << endl;	
 	
 	if (!hasPermission(source->peerAddress.host())) {
-		Log("trace", this) << "No Permission: " << source->peerAddress.host().toString() << endl;	
+		log("trace") << "No Permission: " << source->peerAddress.host().toString() << endl;	
 		return;
 	}
 
@@ -196,7 +196,7 @@ void UDPAllocation::onPacketReceived(void* sender, DataPacket& packet)
 	
 	FastMutex::ScopedLock lock(_mutex);
 
-	Log("trace", this) << "Sending Data Indication:" 
+	log("trace") << "Sending Data Indication:" 
 		<< "\n\tFrom: " << source->peerAddress.toString()
 		<< "\n\tTo: " << _tuple.remote().toString()
 		//<< "\tData: " << string(packet.data, packet.size)

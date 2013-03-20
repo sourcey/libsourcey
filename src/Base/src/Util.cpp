@@ -100,7 +100,7 @@ string dtoa(double d)
 }
 
 
-string getPID(void* ptr)
+string getPID(const void* ptr)
 {
 	stringstream out;
 	out << ptr;
@@ -139,7 +139,6 @@ StringList split(const string& s, const string& delim, int limit)
     StringList elems;
     return split(s, delim, elems, limit);
 };
-
 
 
 StringList &split(const string& s, char delim, StringList &elems, int limit) 

@@ -33,9 +33,8 @@ class MotionDetectorStream: public PacketStream
 public:
 	MotionDetectorStream()
 	{	
-
-		VideoCapture* video = MediaFactory::instance()->video.getCapture(0);		//new VideoCapture(0); //
-		attach(video, false);
+		VideoCapture* video = new VideoCapture(0); //MediaFactory::instance()->video.getCapture(0);		//new VideoCapture(0); //
+		attach(video, true);
 
 		Format format;
 		AllocateOpenCVInputFormat(video, format);
@@ -54,7 +53,7 @@ public:
 
 	void onVideoEncoded(void* sender, MatPacket& packet)
 	{
-		Log("trace") << "[MotionDetectorApp] Video Encoded" << endl;
+		LogTrace() << "[MotionDetectorApp] Video Encoded" << endl;
 
 		cv::imshow("Motion Image", *packet.mat);
 		cv::waitKey(10);
@@ -68,14 +67,10 @@ public:
 int main(int argc, char** argv)
 {
 	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
-	
-	Media::MediaFactory::initialize();
-	Media::MediaFactory::instance()->loadVideo();
-	Media::MediaFactory::instance()->loadAudio();
 
 	MotionDetectorStream test;
 	test.start();
-	/*
+	/*	
 	MotionDetectorStream test1;
 	test1.start();	
 	MotionDetectorStream test2;

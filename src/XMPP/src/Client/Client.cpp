@@ -66,7 +66,7 @@ void Client::setCredentials(const string& jid,
 							const string& domain, 
 							short port) 
 {
-	Log("debug", this) << "Setting Credentials: " << jid << ": " << password << endl; 
+	Log("debug") << "Setting Credentials: " << jid << ": " << password << endl; 
 	
 	_credentials.jid = jid;
 	_credentials.password = password;
@@ -77,7 +77,7 @@ void Client::setCredentials(const string& jid,
 
 void Client::login() 
 {
-	Log("debug", this) << "Logging in as " << _credentials.jid << endl; 
+	Log("debug") << "Logging in as " << _credentials.jid << endl; 
 
 	assert(_credentials.valid());
 
@@ -97,7 +97,7 @@ void Client::login()
 	
 void Client::logout() 
 {
-	Log("debug", this) << "Logging out" << endl; 	
+	Log("debug") << "Logging out" << endl; 	
 	
 	cleanup();
 
@@ -263,19 +263,19 @@ void HandleXMPPLogger(void* const clientdata,
 
 	switch (level) {
 	case XMPP_LEVEL_DEBUG:
-		//Log("debug") << "Trace: " << message << endl; 
+		//LogDebug() << "Trace: " << message << endl; 
 		break;
 
 	case XMPP_LEVEL_INFO:
-		Log("debug") << "Info: " << message << endl; 
+		LogDebug() << "Info: " << message << endl; 
 		break;
 
 	case XMPP_LEVEL_WARN:
-		Log("warn") << "Warning: " << message << endl; 
+		LogWarn() << "Warning: " << message << endl; 
 		break;
 
 	case XMPP_LEVEL_ERROR:
-		Log("error") << "Error: " << message << endl; 
+		LogError() << "Error: " << message << endl; 
 
 		//string errorType(area);		
 		//errorType[0] = toupper(errorType[0]);
@@ -309,7 +309,7 @@ XMPPTask::XMPPTask(Client& client, Runner& runner) :
 
 XMPPTask::~XMPPTask()
 {	
-	//Log("debug", this) << "Destroying" << endl;	
+	//Log("debug") << "Destroying" << endl;	
 
 	// Release our connection and context
 	xmpp_conn_release(_connection);
@@ -322,7 +322,7 @@ XMPPTask::~XMPPTask()
 	_context = NULL;
 	_log = NULL;
 	
-	Log("debug", this) << "Destroying XMPP: OK" << endl;		
+	Log("debug") << "Destroying XMPP: OK" << endl;		
 }
 
 
@@ -330,7 +330,7 @@ void XMPPTask::start()
 {
 	FastMutex::ScopedLock lock(_mutex);
 	
-	Log("debug", this) << "Starting XMPP" << endl;	
+	Log("debug") << "Starting XMPP" << endl;	
 
     // Initialize libstrophe
     xmpp_initialize();
@@ -350,7 +350,7 @@ void XMPPTask::start()
 		_client.credentials().domain.empty() ? NULL : _client.credentials().domain.data(), 
 		_client.credentials().port, HandleXMPPConnection, this);
 	
-	Log("debug", this) << "Starting XMPP: OK" << endl;		
+	Log("debug") << "Starting XMPP: OK" << endl;		
 
 	Task::start();
 }
@@ -366,14 +366,14 @@ void XMPPTask::send(const Stanza& stanza)
 
 void XMPPTask::send(const string& raw)
 {
-	Log("debug", this) << "SEND: " << raw.length() << ": >>>>>>>>>>>>>>>>>>>>\n" << raw << endl;
+	Log("debug") << "SEND: " << raw.length() << ": >>>>>>>>>>>>>>>>>>>>\n" << raw << endl;
 	
 	FastMutex::ScopedLock lock(_mutex);
 
 	// No exception is thrown because we are
 	// most likely inside the runner loop.
 	if (!_connection) {
-		Log("error", this) << "Dropping stanza. The XMPP client is not connected." << endl;
+		Log("error") << "Dropping stanza. The XMPP client is not connected." << endl;
 		return;
 	}
 	
@@ -456,12 +456,12 @@ void XMPPTask::onSendStanza(void*, XMPP::Stanza& stanza)
 
 void XMPPTask::onRecvStanza(xmpp_stanza_t* const stanza)
 {	
-	Log("debug", this) << "RECV >>>>>>>>>>>>>>>>>>>>" << endl;
+	Log("debug") << "RECV >>>>>>>>>>>>>>>>>>>>" << endl;
 	char* buf;
 	size_t len;
 	int ret;
 	if ((ret = xmpp_stanza_to_text(stanza, &buf, &len)) == 0) {
-		Log("debug", this) << string(buf, len) << endl;
+		Log("debug") << string(buf, len) << endl;
 		Stanza* s = Stanza::create(buf);
 		if (s) {
 			FastMutex::ScopedLock lock(_mutex);
@@ -469,7 +469,7 @@ void XMPPTask::onRecvStanza(xmpp_stanza_t* const stanza)
 			delete s;
 		}
 		else
-			Log("error", this) << "Cannot create stanza." << endl;
+			Log("error") << "Cannot create stanza." << endl;
 		delete buf;
 	}
 }

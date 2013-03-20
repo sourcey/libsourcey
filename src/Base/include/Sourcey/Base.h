@@ -85,7 +85,34 @@
 // Pull in basic definitions
 //
 #include "Poco/Foundation.h"
-#include "Sourcey/Types.h"
+#include "Poco/Types.h"
+#include "Poco/Exception.h"
+
+#include <string>
+#include <vector>
+#include <map>
+
+
+//
+// Forward some Poco types to Sourcey namespace
+// to reduce namespace pollution.
+//
+using Poco::Int8;
+using Poco::UInt8;
+using Poco::Int16;
+using Poco::UInt16;
+using Poco::Int32;
+using Poco::UInt32;
+using Poco::Int32;
+using Poco::UInt32;
+using Poco::Int64;
+using Poco::UInt64;
+
+using Poco::Exception;
+
+typedef std::vector<std::string>			StringList;
+typedef std::map<std::string, std::string>	StringMap;
+typedef std::pair<std::string, std::string> Metadata;
 
 
 #endif // SOURCEY_H

@@ -81,7 +81,7 @@ void Client::connect(const Net::Address& serverAddr)
 
 void Client::connect()
 {
-	Log("trace", this) << "SocketIO Connecting" << endl;
+	log("trace") << "SocketIO Connecting" << endl;
 
 	reset();
 
@@ -115,7 +115,7 @@ void Client::connect()
 
 void Client::close()
 {			
-	Log("trace", this) << "Closing" << endl;
+	log("trace") << "Closing" << endl;
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		
@@ -131,7 +131,7 @@ void Client::close()
 	}
 	onClose();
 
-	Log("trace", this) << "Closing: OK" << endl;	
+	log("trace") << "Closing: OK" << endl;	
 }
 
 
@@ -139,7 +139,7 @@ void Client::sendInitialRequest()
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);
 	
-	Log("trace", this) << "Sending Handshake" << endl;	
+	log("trace") << "Sending Handshake" << endl;	
 	
 	ostringstream uri;
 	uri << (_socket.transport() == Net::SSLTCP ? "https://" : "http://")
@@ -151,7 +151,7 @@ void Client::sendInitialRequest()
 	HTTP::Response& response = transaction.response();
 	transaction.send();
 
-	Log("trace", this) << "SocketIO Handshake Response:" 
+	log("trace") << "SocketIO Handshake Response:" 
 		<< "\n\tStatus: " << response.getStatus()
 		<< "\n\tReason: " << response.getReason()
 		<< "\n\tResponse: " << response.body.str()
@@ -181,7 +181,7 @@ void Client::sendInitialRequest()
 	// Check websockets are supported
 	bool wsSupported = false;
 	for (int i = 0; i < _protocols.size(); i++) {
-		Log("trace", this) << "Supports Protocol: " << _protocols[i] << endl;
+		log("trace") << "Supports Protocol: " << _protocols[i] << endl;
 		if (_protocols[i] == "websocket") {
 			wsSupported = true;
 			break;
@@ -256,7 +256,7 @@ Transaction* Client::createTransaction(const SocketIO::Packet& request, long tim
 
 int Client::sendHeartbeat()
 {
-	Log("trace", this) << "Heart Beat" << endl;
+	log("trace") << "Heart Beat" << endl;
 	return socket().send("2::", 3);
 }
 
@@ -315,7 +315,7 @@ void Client::reset()
 
 void Client::setError(const string& error)
 {
-	Log("error", this) << "Error: " << error << std::endl;
+	log("error") << "Error: " << error << std::endl;
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		_error = error;	
@@ -328,7 +328,7 @@ void Client::setError(const string& error)
 
 void Client::onConnect()
 {
-	Log("trace", this) << "Connected" << endl;	
+	log("trace") << "Connected" << endl;	
 			
 	setState(this, ClientState::Connected);
 
@@ -347,14 +347,14 @@ void Client::onConnect()
 
 void Client::onOnline()
 {
-	Log("trace", this) << "Online" << endl;	
+	log("trace") << "Online" << endl;	
 	setState(this, ClientState::Online);
 }
 
 
 void Client::onClose()
 {
-	Log("trace", this) << "Disconnected" << endl;
+	log("trace") << "Disconnected" << endl;
 	setState(this, ClientState::Disconnected, error());
 
 	// Keep trying to reconnect via timer callbacks
@@ -363,26 +363,26 @@ void Client::onClose()
 
 void Client::onPacket(SocketIO::Packet& packet)
 {
-	Log("trace", this) << "On Packet" << endl;		
+	log("trace") << "On Packet" << endl;		
 	PacketDispatcher::dispatch(this, packet);
 }
 
 	
 void Client::onHeartBeatTimer(void*)
 {
-	Log("trace", this) << "On Heart Beat Timer" << endl;
+	log("trace") << "On Heart Beat Timer" << endl;
 	
 	if (socket().isConnected())
 		sendHeartbeat();
 
 	// Try to reconnect if the connection was closed in error
 	else if (socket().isError()) {	
-		Log("info", this) << "Attempting to reconnect" << endl;	
+		log("info") << "Attempting to reconnect" << endl;	
 		try {
 			connect();
 		} 
 		catch (Poco::Exception& exc) {			
-			Log("error", this) << "Reconnection attempt failed: " << exc.displayText() << endl;
+			log("error") << "Reconnection attempt failed: " << exc.displayText() << endl;
 		}	
 	}
 }
@@ -415,7 +415,7 @@ void Client::onSocketData(void*, Buffer& data, const Net::Address&)
 	if (packet.read(data))
 		onPacket(packet);
 	else
-		Log("warn", this) << "Unable to create SocketIO packet." << endl;	
+		log("warn") << "Unable to create SocketIO packet." << endl;	
 }
 
 
@@ -457,7 +457,7 @@ void Client::onHeartBeatTimer(TimerCallback<Socket>&)
 
 void Client::onError() 
 {
-	Log("warn", this) << "On Error" << endl;
+	log("warn") << "On Error" << endl;
 }
 */
 
@@ -538,7 +538,7 @@ void Client::onError()
 //	if (_secure)
 //		_uri.setScheme("wss");
 //
-//	Log("debug") << "[SocketIO::Socket]	Connecting to " << _uri.toString() << endl;
+//	LogDebug() << "[SocketIO::Socket]	Connecting to " << _uri.toString() << endl;
 //
 //	if (sendHandshakeRequest()) {
 //				
@@ -560,7 +560,7 @@ void Client::onError()
 //{
 //	// NOTE: No need for mutex lock because this method is called from connect()
 //	
-//	Log("trace") << "[SocketIO::Socket] Sending Handshake" << endl;
+//	LogTrace() << "[SocketIO::Socket] Sending Handshake" << endl;
 //	
 //	
 //	URI uri("http://" + _serverAddr.toString() + "/socket.io/1/");	
@@ -580,7 +580,7 @@ void Client::onError()
 //		throw Exception(format("SocketIO handshake failed: HTTP Error: %d %s", 
 //			static_cast<int>(response.getStatus()), response.getReason()));		
 //
-//	Log("trace") << "[SocketIO::Socket] Handshake Response:" 
+//	LogTrace() << "[SocketIO::Socket] Handshake Response:" 
 //		<< "\n\tStatus: " << response.getStatus()
 //		<< "\n\tReason: " << response.getReason()
 //		<< "\n\tResponse: " << response.body.str()
@@ -604,7 +604,7 @@ void Client::onError()
 //	// Check websockets are supported
 //	bool wsSupported = false;
 //	for (int i = 0; i < _protocols.size(); i++) {
-//		Log("debug") << "[SocketIO::Socket] Supports Protocol: " << _protocols[i] << endl;	
+//		LogDebug() << "[SocketIO::Socket] Supports Protocol: " << _protocols[i] << endl;	
 //		if (_protocols[i] == "websocket") {
 //			wsSupported = true;
 //			break;
@@ -620,14 +620,14 @@ void Client::onError()
 //
 //void SocketBase::close()
 //{			
-//	Log("trace") << "[SocketIO::Socket] Closing" << endl;	
+//	LogTrace() << "[SocketIO::Socket] Closing" << endl;	
 //
 //	if (!isError())
 //		Timer::getDefault().stop(TimerCallback<Socket>(this, &SocketBase::onHeartBeatTimer));
 //	
 //	WebSocketBase::close();
 //
-//	Log("trace") << "[SocketIO::Socket] Closing: OK" << endl;	
+//	LogTrace() << "[SocketIO::Socket] Closing: OK" << endl;	
 //}
 //
 //
@@ -688,19 +688,19 @@ void Client::onError()
 //
 //void SocketBase::onHeartBeatTimer(TimerCallback<Socket>&) 
 //{
-//	Log("trace") << "[SocketIO::Socket] Heart Beat Timer" << endl;
+//	LogTrace() << "[SocketIO::Socket] Heart Beat Timer" << endl;
 //	
 //	if (isConnected())
 //		sendHeartbeat();
 //
 //	// Try to reconnect if the connection was closed in error
 //	else if (isError()) {	
-//		Log("trace") << "[SocketIO::Socket] Attempting to reconnect" << endl;	
+//		LogTrace() << "[SocketIO::Socket] Attempting to reconnect" << endl;	
 //		try {
 //			connect();
 //		} 
 //		catch (Poco::Exception& exc) {			
-//			Log("error") << "[SocketIO::Socket] Reconnection attempt failed: " << exc.displayText() << endl;
+//			LogError() << "[SocketIO::Socket] Reconnection attempt failed: " << exc.displayText() << endl;
 //		}	
 //	}
 //}
@@ -708,7 +708,7 @@ void Client::onError()
 //
 //int SocketBase::sendHeartbeat()
 //{
-//	Log("trace") << "[SocketIO::Socket] Heart Beat" << endl;
+//	LogTrace() << "[SocketIO::Socket] Heart Beat" << endl;
 //	return WebSocketBase::send("2::", 3);
 //}
 //
@@ -815,7 +815,7 @@ void Client::onError()
 	string body(response.substr(pos, response.length()));
 	socket.shutdownSend();
 
-	Log("debug") << "[SocketIO::Socket] Handshake:" 
+	LogDebug() << "[SocketIO::Socket] Handshake:" 
 		//<< "\n\tRequest: " << ss.str()
 		<< "\n\tStatus: " << status
 		<< "\n\tResponse: " << response

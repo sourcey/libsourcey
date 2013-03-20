@@ -42,13 +42,13 @@ VideoAnalyzer::VideoAnalyzer(const Options& options) :
 	_audio(NULL),
 	_videoConv(NULL)
 {
-	Log("trace") << "[VideoAnalyzer:" << this <<"] Creating" << endl;
+	LogTrace() << "[VideoAnalyzer:" << this <<"] Creating" << endl;
 }
 
 
 VideoAnalyzer::~VideoAnalyzer() 
 {
-	Log("trace") << "[VideoAnalyzer:" << this <<"] Destroying" << endl;
+	LogTrace() << "[VideoAnalyzer:" << this <<"] Destroying" << endl;
 	
 	if (_video)
 		delete _video;
@@ -68,7 +68,7 @@ void VideoAnalyzer::start()
 	//if (_options.ofile.empty())
 	//	throw Poco::FileException("Please specify an output file.");
 
-	Log("trace") << "[VideoAnalyzer:" << this <<"] Loading: " << _options.ifile << endl;
+	LogTrace() << "[VideoAnalyzer:" << this <<"] Loading: " << _options.ifile << endl;
 
 	_error = "";
 	
@@ -80,7 +80,7 @@ void VideoAnalyzer::start()
 		//	throw Poco::OpenFileException("Cannot open output file: " + _options.ofile);
 
 		// Open the input file decoder.
-		_reader.open(_options.ifile);
+		_reader.openFile(_options.ifile);
 		
 		if (_reader.video()) {
 			//if (_options.maxFPS)
@@ -115,7 +115,7 @@ void VideoAnalyzer::start()
 	catch (Exception& exc) 
 	{
 		_error = exc.displayText();
-		Log("error") << "[VideoAnalyzer:" << this << "] Error: " << _error << endl;
+		LogError() << "[VideoAnalyzer:" << this << "] Error: " << _error << endl;
 		exc.rethrow();
 	}
 }
@@ -123,7 +123,7 @@ void VideoAnalyzer::start()
 
 void VideoAnalyzer::stop() 
 {
-	Log("trace") << "[VideoAnalyzer:" << this <<"] Destroying" << endl;
+	LogTrace() << "[VideoAnalyzer:" << this <<"] Destroying" << endl;
 	
 	// Can't lock here in case we inside a callback.
 	//FastMutex::ScopedLock lock(_mutex); 
@@ -173,7 +173,7 @@ void VideoAnalyzer::processSpectrum(VideoAnalyzer::Stream& stream, double time)
 		if (packet.value < packet.min)
 			packet.min = packet.value;
 		//printf("re=%10f im=%10f im=%10f\n", stream.rdftData[i], stream.rdftData[i+1]);
-		//Log("trace") << "[VideoAnalyzer:" << this << "] Value: " 
+		//LogTrace() << "[VideoAnalyzer:" << this << "] Value: " 
 		//	<< stream.rdftData[i] << ": " << stream.rdftData[i+1] << endl;
 		sum += packet.value; 
 	}
@@ -191,7 +191,7 @@ void VideoAnalyzer::processSpectrum(VideoAnalyzer::Stream& stream, double time)
 /*
 void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 {
-	Log("trace") << "[VideoAnalyzer:" << this << "] Writing:"
+	LogTrace() << "[VideoAnalyzer:" << this << "] Writing:"
 		<< packet.name << "," << packet.time << "," << packet.value << "," 
 		<< packet.min << "," << packet.max << endl;
 
@@ -203,7 +203,7 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 
 void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 {
-	Log("trace") << "[VideoAnalyzer:" << this << "] On Video: " 
+	LogTrace() << "[VideoAnalyzer:" << this << "] On Video: " 
 		<< packet.size() << ": " << packet.time << endl;
 	
 	FastMutex::ScopedLock lock(_mutex); 
@@ -214,7 +214,7 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 	// Skip frames if we exceed the maximum processing framerate.
 	double fps = _video->frames / packet.time;
 	if (_options.maxFPS > 0 && fps > _options.maxFPS) {
-		Log("trace") << "[VideoAnalyzer:" << this << "] Skipping video frame at fps: " << fps << endl;
+		LogTrace() << "[VideoAnalyzer:" << this << "] Skipping video frame at fps: " << fps << endl;
 		return;
 	}
 	*/
@@ -286,7 +286,7 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 
 void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 {
-	//Log("trace") << "[VideoAnalyzer:" << this << "] On Audio: " << packet.size() << ": " << packet.time << endl;	
+	//LogTrace() << "[VideoAnalyzer:" << this << "] On Audio: " << packet.size() << ": " << packet.time << endl;	
 
 	FastMutex::ScopedLock lock(_mutex); 
 		
@@ -294,7 +294,7 @@ void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 	// Skip frames if we exceed the maximum processing framerate.
 	double fps = _audio->frames / packet.time;
 	if (_options.maxFPS > 0 && fps > _options.maxFPS) {
-		Log("trace") << "[VideoAnalyzer:" << this << "] Skipping audio frame at fps: " << fps << endl;
+		LogTrace() << "[VideoAnalyzer:" << this << "] Skipping audio frame at fps: " << fps << endl;
 		return;
 	}
 	*/
@@ -326,9 +326,9 @@ void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 
 void VideoAnalyzer::onReadComplete(void* sender)
 {
-	Log("trace") << "[VideoAnalyzer:" << this << "] On Read Complete" << endl;	
+	LogTrace() << "[VideoAnalyzer:" << this << "] On Read Complete" << endl;	
 
-	AVFileReader* reader = reinterpret_cast<AVFileReader*>(sender);	
+	AVInputReader* reader = reinterpret_cast<AVInputReader*>(sender);	
 	{
 		FastMutex::ScopedLock lock(_mutex); 
 		if (_error.empty())
@@ -339,7 +339,7 @@ void VideoAnalyzer::onReadComplete(void* sender)
 }
 
 
-AVFileReader& VideoAnalyzer::reader()
+AVInputReader& VideoAnalyzer::reader()
 { 
 	FastMutex::ScopedLock lock(_mutex);
 	return _reader; 
@@ -395,7 +395,7 @@ VideoAnalyzer::Stream::~Stream()
 	
 void VideoAnalyzer::Stream::initialize(int rdftBits, int rdftSize)
 {
-	Log("trace") << "[VideoAnalyzerStream:" << this << ":" << name << "] Initializing" << endl;	
+	LogTrace() << "[VideoAnalyzerStream:" << this << ":" << name << "] Initializing" << endl;	
 
 	lastPTS		= 0;
 	frames		= 0;
@@ -407,7 +407,7 @@ void VideoAnalyzer::Stream::initialize(int rdftBits, int rdftSize)
 	
 void VideoAnalyzer::Stream::uninitialize()
 {
-	Log("trace") << "[VideoAnalyzerStream:" << this << ":" << name << "] Uninitializing" << endl;	
+	LogTrace() << "[VideoAnalyzerStream:" << this << ":" << name << "] Uninitializing" << endl;	
 	
 	if (rdft)
 		av_rdft_end(rdft);

@@ -81,13 +81,13 @@ AVEncoder::AVEncoder() :
 	_audioFifo(NULL),
 	_audioFifoOutBuffer(NULL)
 {
-	Log("debug") << "[AVEncoder:" << this << "] Initializing" << endl;
+	LogDebug() << "[AVEncoder:" << this << "] Initializing" << endl;
 }
 
 
 AVEncoder::~AVEncoder()
 {
-	Log("debug") << "[AVEncoder:" << this << "] Destroying" << endl;
+	LogDebug() << "[AVEncoder:" << this << "] Destroying" << endl;
 	
 	//setState(this, EncoderState::Stopped);
 	//cleanup();
@@ -100,7 +100,7 @@ int DispatchOutputPacket(void* opaque, UInt8* buffer, int bufferSize)
 	// Callback example at: http://lists.mplayerhq.hu/pipermail/libav-client/2009-May/003034.html
 	AVEncoder* klass = reinterpret_cast<AVEncoder*>(opaque);
 	if (klass) {
-		//Log("trace") << "[AVEncoder::" << klass << "] Dispatching Packet: " << bufferSize << endl;
+		//LogTrace() << "[AVEncoder::" << klass << "] Dispatching Packet: " << bufferSize << endl;
 		MediaPacket packet(buffer, bufferSize);
 		klass->dispatch(klass, packet);
 	}   
@@ -113,20 +113,16 @@ void AVEncoder::initialize()
 {
 	assert(!isActive());
 
-	Log("debug") << "[AVEncoder:" << this << "] Starting:"
+	LogDebug() << "[AVEncoder:" << this << "] Starting:"
 		<< "\n\tPID: " << this
 		<< "\n\tFormat: " << _options.oformat.label
 		<< "\n\tStarting At: " << time(0)
-		<< "\n\tVideo: " << _options.oformat.video.toString()
-		<< "\n\tAudio: " << _options.oformat.audio.toString()
+		<< "\n\tVideo In: " << _options.oformat.video.toString()
+		<< "\n\tVideo Out: " << _options.oformat.video.toString()
+		<< "\n\tAudio In: " << _options.oformat.audio.toString()
+		<< "\n\tAudio Out: " << _options.oformat.audio.toString()
 		<< "\n\tDuration: " << _options.duration
 		<< endl;
-	
-	//Log("debug") << "[AVEncoder:" << this << "] Input Format:" << endl;
-	//_options.iformat.print(cout);
-
-	//Log("debug") << "[AVEncoder:" << this << "] Output Format:" << endl;
-	//_options.oformat.print(cout);
 
 	try {
 		// Lock our mutex during initialization
@@ -140,6 +136,9 @@ void AVEncoder::initialize()
 			throw Exception("An output container format must be specified.");		
 
 		av_register_all(); 
+
+		// http://projects.blender.org/scm/viewvc.php/*checkout*/trunk/blender/source/gameengine/VideoTexture/VideoFFmpeg.cpp?root=bf-blender&revision=54259&content-type=text%2Fplain&pathrev=54259
+
 
 		// Allocate the output media context
 		_formatCtx = avformat_alloc_context();
@@ -247,7 +246,7 @@ void AVEncoder::initialize()
 		setState(this, EncoderState::Ready);
 	} 
 	catch (Exception& exc) {
-		Log("error") << "[AVEncoder:" << this << "] Error: " << exc.displayText() << endl;
+		LogError() << "[AVEncoder:" << this << "] Error: " << exc.displayText() << endl;
 		
 		cleanup();
 		setState(this, EncoderState::Error, exc.displayText());
@@ -258,7 +257,7 @@ void AVEncoder::initialize()
 
 void AVEncoder::uninitialize()
 {
-	Log("debug") << "[AVEncoder:" << this << "] Stopping" << endl;
+	LogDebug() << "[AVEncoder:" << this << "] Stopping" << endl;
 	
 	//setState(this, EncoderState::None);
 
@@ -270,7 +269,7 @@ void AVEncoder::uninitialize()
 
 void AVEncoder::cleanup()
 {
-	Log("debug") << "[AVEncoder:" << this << "] Cleanup" << endl;
+	LogDebug() << "[AVEncoder:" << this << "] Cleanup" << endl;
 
  	// Lock our mutex during closure
 	FastMutex::ScopedLock lock(_mutex);	
@@ -363,18 +362,18 @@ void AVEncoder::cleanup()
 	_audio->Time = 0;
 	*/
 
-	Log("debug") << "[AVEncoder:" << this << "] Cleanup: OK" << endl;
+	LogDebug() << "[AVEncoder:" << this << "] Cleanup: OK" << endl;
 }
 
 
 void AVEncoder::process(IPacket& packet)
 {	
 	if (!isActive()) {
-		Log("debug") << "[AVEncoder:" << this << "] Encoder not ready: Dropping Packet: " << packet.className() << endl;
+		LogDebug() << "[AVEncoder:" << this << "] Encoder not ready: Dropping Packet: " << packet.className() << endl;
 		return;
 	}	
 
-	//Log("trace") << "[AVEncoder:" << this << "] Processing Packet: " << &packet << ": " << packet.className() << endl;
+	//LogTrace() << "[AVEncoder:" << this << "] Processing Packet: " << &packet << ": " << packet.className() << endl;
 
 	// We may be receiving either audio or video packets	
 	VideoPacket* videoPacket = dynamic_cast<VideoPacket*>(&packet);
@@ -391,13 +390,13 @@ void AVEncoder::process(IPacket& packet)
 
 	dispatch(this, packet);
 
-	Log("error") << "[AVEncoder:" << this << "] Failed to encode packet" << endl;
+	LogError() << "[AVEncoder:" << this << "] Failed to encode packet" << endl;
 }
 
 					
 void AVEncoder::onStreamStateChange(const PacketStreamState& state) 
 { 
-	Log("debug") << "[AVEncoder:" << this << "] Stream State Changed: " << state << endl;
+	LogDebug() << "[AVEncoder:" << this << "] Stream State Changed: " << state << endl;
 
 	switch (state.id()) {
 	case PacketStreamState::Running:
@@ -434,7 +433,7 @@ RecorderOptions& AVEncoder::options()
 // -------------------------------------------------------------------
 bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, int height)
 {
-	//Log("trace") << "[AVEncoder:" << this << "] Encoding Video Packet: " << bufferSize << endl;
+	//LogTrace() << "[AVEncoder:" << this << "] Encoding Video Packet: " << bufferSize << endl;
 
 	// Lock the mutex while encoding
 	//FastMutex::ScopedLock lock(_mutex);
@@ -479,7 +478,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 		
  		// Encode the frame 
 		if (!_video->encode(buffer, bufferSize, opacket)) {
-			Log("warn") << "[AVEncoder:" << this << "] Failed to encode video frame" << endl;
+			LogWarn() << "[AVEncoder:" << this << "] Failed to encode video frame" << endl;
 			return false;
 		}
 		
@@ -489,7 +488,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 	if (opacket.size > 0) {
 		 
 		/*
-		Log("trace") << "[AVEncoder:" << this << "] Writing Video Packet: " 
+		LogTrace() << "[AVEncoder:" << this << "] Writing Video Packet: " 
 			<< opacket.pts << ": " 
 			<< opacket.dts << ": " 
 			//<< _video->pts << ": "
@@ -505,7 +504,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 	
 		// Write the encoded frame to the output file / stream.
 		if (av_interleaved_write_frame(_formatCtx, &opacket) < 0) {
-			Log("error") << "[AVEncoder:" << this << "] Failed to write video frame" << endl;
+			LogError() << "[AVEncoder:" << this << "] Failed to write video frame" << endl;
 			return false;
 		}
 	}
@@ -520,7 +519,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 {
 	/*
-	Log("trace") << "[AVEncoder:" << this << "] Encoding Audio Packet:\n" 
+	LogTrace() << "[AVEncoder:" << this << "] Encoding Audio Packet:\n" 
 		<< "Frame Size: " << bufferSize << "\n"
 		<< "Buffer Size: " << _audio->bufferSize << "\n"
 		//<< "Duration: " << frameDuration << "\n" 
@@ -535,7 +534,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 	// video frame to be encoded before we start encoding audio
 	// otherwise we get errors for some codecs.
 	if (_video && _fpsCounter.frames == 0) {
-		Log("trace") << "[AVEncoder:" << this << "] Encoding Audio Packet: Dropping audio frames until we have video." << endl;
+		LogTrace() << "[AVEncoder:" << this << "] Encoding Audio Packet: Dropping audio frames until we have video." << endl;
 		return false;
 	}
 	*/
@@ -563,7 +562,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 
 	 		// Write the encoded frame to the output file
 			if (av_interleaved_write_frame(_formatCtx, &opacket) != 0) {
-				Log("error") << "[AVEncoder:" << this << "] Failed to write audio frame" << endl;
+				LogError() << "[AVEncoder:" << this << "] Failed to write audio frame" << endl;
 				return false;
 			}
 		} 
@@ -599,7 +598,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 			ctx->width, ctx->height, ctx->pix_fmt,
 			SWS_BICUBIC, NULL, NULL, NULL);
 
-		Log("trace") << "[AVEncoder:" << this << "] Initializing Video Conversion Context:\n" 
+		LogTrace() << "[AVEncoder:" << this << "] Initializing Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << width
 			<< "\n\tInput Height: " << height
 			<< "\n\tInput Pixel Format: " << _options.iformat.video.pixelFmt
@@ -626,7 +625,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 
 		opacket.pts = clock() - _startTime;
 
-		Log("trace") << "[AVEncoder:" << this << "] Video Frame Information:\n" 
+		LogTrace() << "[AVEncoder:" << this << "] Video Frame Information:\n" 
 			//<< "\n\tCalculated PTS: " << pts //_video->oframe->pts
 			//<< "\n\tCalculated PTS 1: " << ((double)_video->stream->pts.val * _video->stream->codec->time_base.num / _video->stream->codec->time_base.den) //_video->oframe->pts
 			<< "\n\tPacket PTS: " << opacket.pts
@@ -701,7 +700,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 			//_audio->stream->pts.val; //
 			//opacket.pts = (_video->oframe->pts / 2)  + 1;
 			
-			Log("trace") << "[AVEncoder:" << this << "] Audio Frame Information:\n" 
+			LogTrace() << "[AVEncoder:" << this << "] Audio Frame Information:\n" 
 				<< "\n\tPacket PTS: " << opacket.pts
 				<< "\n\tPacket Size: " << opacket.size
 				<< "\n\tStream PTS: " << (double)_audio->stream->pts.val
@@ -717,12 +716,12 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 	 	// Write the encoded frame to the output file
 		int result = av_interleaved_write_frame(_formatCtx, &opacket);
 		if (result != 0) {
-			Log("error") << "[AVEncoder:" << this << "] Failed to write audio frame" << endl;
+			LogError() << "[AVEncoder:" << this << "] Failed to write audio frame" << endl;
 			return false;
 		}
 	} 
 	else {
-		Log("warn") << "[AVEncoder:" << this << "] Encoded video frame size is NULL; it may have been buffered" << endl;
+		LogWarn() << "[AVEncoder:" << this << "] Encoded video frame size is NULL; it may have been buffered" << endl;
 		return false;
 	}
 	
@@ -731,7 +730,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 
 	/*	
 	
-	Log("trace") << "[AVEncoder:" << this << "] Audio Packet: " << size << endl;
+	LogTrace() << "[AVEncoder:" << this << "] Audio Packet: " << size << endl;
 
 
 	av_fifo_generic_write(_audio->Fifo, (UInt8 *)buffer, bufferSize, NULL);
@@ -752,7 +751,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 				_audio->stream->codec->coded_frame->key_frame) 
                 packet.flags |= AV_PKT_FLAG_KEY;
 
-				Log("debug") << "[AVEncoder:" << this << "] Encoded audio frame:" 
+				LogDebug() << "[AVEncoder:" << this << "] Encoded audio frame:" 
 					<< "\n\tFrame Size: " << size << "\n"
 					<< "\n\tCoded Frame: " << _audio->stream->codec->coded_frame << "\n"
 					<< "\n\tKey Frame: " << (packet.flags & AV_PKT_FLAG_KEY) << "\n"
@@ -768,12 +767,12 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 	 		// Write the encoded frame to the output file
 			int result = av_interleaved_write_frame(_formatCtx, &packet);
 			if (result != 0) {
-				Log("error") << "[AVEncoder:" << this << "] Failed to write audio frame" << endl;
+				LogError() << "[AVEncoder:" << this << "] Failed to write audio frame" << endl;
 				return false;
 			}
 		} 
 		else {
-			Log("warn") << "[AVEncoder:" << this << "] Encoded video frame size is NULL; it may have been buffered" << endl;
+			LogWarn() << "[AVEncoder:" << this << "] Encoded video frame size is NULL; it may have been buffered" << endl;
 			return false;
 		}
 	}
