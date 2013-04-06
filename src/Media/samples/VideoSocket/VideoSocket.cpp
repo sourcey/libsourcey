@@ -133,7 +133,7 @@ Format MP4 = Format("MP4", "mp4",
 
 
 // Global for now
-Format currentFormat = MJPEG; //FLVSpeex16000; //FLVSpeex16000NoVideo; //MJPEG; //H264AAC; //MP38000; //MP38000; //MP38000; //MP344100; //MP344100; //AAC44100; //FLVNoAudio; //FLVNellyMoser11025NoVideo; //FLVSpeex16000NoVideo; //FLVNellyMoser11025NoVideo; //FLVH264NoAudio; //MP344100; //FLVNellyMoser11025NoVideo; //FLVH264NoAudio; //FLVNellyMoser11025NoVideo; //FLVNellyMoser11025NoVideo; //FLVNellyMoser11025NoVideo; FLVNellyMoser11025NoVideo; //MP344100; 
+Format currentFormat = FLVNoAudio; //MJPEG; //FLVNoAudio; //FLVSpeex16000; //FLVSpeex16000NoVideo; //MJPEG; //H264AAC; //MP38000; //MP38000; //MP38000; //MP344100; //MP344100; //AAC44100; //FLVNoAudio; //FLVNellyMoser11025NoVideo; //FLVSpeex16000NoVideo; //FLVNellyMoser11025NoVideo; //FLVH264NoAudio; //MP344100; //FLVNellyMoser11025NoVideo; //FLVH264NoAudio; //FLVNellyMoser11025NoVideo; //FLVNellyMoser11025NoVideo; //FLVNellyMoser11025NoVideo; FLVNellyMoser11025NoVideo; //MP344100; 
 AVInputReader* avVideoCapture = NULL;
 VideoCapture* videoCapture = NULL;
 AudioCapture* audioCapture = NULL;
@@ -168,7 +168,7 @@ public:
 						
 			if (avVideoCapture) {
 				stream.attach(avVideoCapture, false);
-				InitVideoCodecFromContext(avVideoCapture->video()->ctx, options.iformat.video);
+				Media::InitVideoCodecFromContext(avVideoCapture->video()->ctx, options.iformat.video);
 			}
 
 			else {
@@ -377,22 +377,19 @@ public:
 int main(int argc, char** argv)
 {
 	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
-		
-		
-	avVideoCapture = new AVInputReader();
-	avVideoCapture->openDevice(0);
-	//avVideoCapture->openFile("big_buck_bunny.mp4");
-	avVideoCapture->start();
+				
+	MediaFactory::initialize();
 
-	avVideoCapture = new AVInputReader();
-	avVideoCapture->openDevice(0);
+	//avVideoCapture = new AVInputReader();
+	//avVideoCapture->openDevice(0);
 	//avVideoCapture->openFile("big_buck_bunny.mp4");
-	avVideoCapture->start();
+	//avVideoCapture->start();
 	
 	if (!avVideoCapture) {
+		//MediaFactory::instance()->loadVideo();	
 		currentFormat.video.quality = 100;
 		if (currentFormat.video.enabled) {
-			videoCapture = MediaFactory::instance()->createVideoCapture(0);
+			videoCapture = MediaFactory::instance()->getVideoCapture(0);
 		}
 		if (currentFormat.audio.enabled) {
 			audioCapture = MediaFactory::instance()->createAudioCapture(0, 

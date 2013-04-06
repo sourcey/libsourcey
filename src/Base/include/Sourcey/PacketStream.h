@@ -131,6 +131,10 @@ public:
 	
 	virtual bool isRunning() const;
 		/// Returns true is the stream is in the Running state.
+	
+	virtual bool waitForReady();
+		/// Locks until the current process queue iteration is complete.
+		/// For for safe access after calling reset() or stop().
 
 	virtual int numSources() const;
 	virtual int numProcessors() const;
@@ -186,7 +190,7 @@ protected:
 	mutable Poco::FastMutex	_mutex;
 
 	std::string _name;
-	Poco::Event _processing;
+	Poco::Event _ready;
 	PacketAdapterList _sources;
 	PacketAdapterList _processors;
 	void* _clientData;

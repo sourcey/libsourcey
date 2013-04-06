@@ -66,9 +66,17 @@ public:
 
 	virtual void process(IPacket& packet);
 
-	virtual bool encodeAudio(unsigned char* buffer, int bufferSize);
+	virtual void createVideo();
+	virtual void freeVideo();
 	virtual bool encodeVideo(unsigned char* buffer, int bufferSize, int width, int height);
-	RecorderOptions& options(); // { return _options; };
+	
+	virtual void createAudio();
+	virtual void freeAudio();
+	virtual bool encodeAudio(unsigned char* buffer, int bufferSize);
+		
+	RecorderOptions& options();
+	VideoEncoderContext* video();
+	AudioEncoderContext* audio();
 
 protected:			
 	virtual void onStreamStateChange(const PacketStreamState& state);
@@ -103,7 +111,6 @@ protected:
 	clock_t			_audioTime;	
 	AVFifoBuffer*	_audioFifo;		
 	UInt8*			_audioFifoOutBuffer;
-	int				_audioOutSize;
 };
 
 

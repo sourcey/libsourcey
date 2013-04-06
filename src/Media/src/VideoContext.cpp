@@ -89,11 +89,12 @@ void VideoContext::close()
 		ctx = NULL;
 	}
 
-	if (stream)	{
-		stream = NULL;
+	// Streams are managed differently by each impl
+	//if (stream)	{
+		//stream = NULL;
 		// NOTE: The stream is managed by the AVFormatContext
 		//av_freep(stream);
-	}
+	//}
 	
 	pts = 0.0;
 	error = "";
@@ -107,7 +108,8 @@ void VideoContext::close()
 // Video Encoder Context
 //
 // ---------------------------------------------------------------------
-VideoEncoderContext::VideoEncoderContext() :
+VideoEncoderContext::VideoEncoderContext(AVFormatContext* format) :
+	format(format),
 	conv(NULL),
 	buffer(NULL),
 	bufferSize(0)
@@ -121,9 +123,9 @@ VideoEncoderContext::~VideoEncoderContext()
 }
 
 
-void VideoEncoderContext::create(AVFormatContext* oc) //, const VideoCodec& params
+void VideoEncoderContext::create() //, const VideoCodec& params
 {
-	LogDebug() << "[VideoEncoderContext:" << this << "] Creating: " 
+	LogDebug("VideoEncoderContext", this) << "Creating: " 
 		<< "\n\tInput: " << iparams.toString() 
 		<< "\n\tOutput: " << oparams.toString() 
 		<< endl;
@@ -132,32 +134,30 @@ void VideoEncoderContext::create(AVFormatContext* oc) //, const VideoCodec& para
 	
 	// Find the video encoder
 	codec = avcodec_find_encoder_by_name(oparams.encoder.data());
-	if (!codec)
-   		throw Exception("Video encoder not found.");
+	if (!codec) {
+		codec = avcodec_find_encoder(format->oformat->video_codec);
+		if (!codec)
+   			throw Exception("Video encoder not found.");
+	}
 
-	oc->oformat->video_codec = codec->id;
+	format->oformat->video_codec = codec->id;
 	
 	// Add a video stream that uses the format's default video 
 	// codec to the format context's streams[] array.
-	stream = avformat_new_stream(oc, codec);
+	stream = avformat_new_stream(format, codec);
 	if (!stream)
 		throw Exception("Failed to create video stream.");	
 	
 	ctx = stream->codec;
 
 	InitVideoEncoderContext(ctx, codec, oparams);
+	
+	// Create the video conversion context if needed
+	createConverter();
 
 	// Some formats want stream headers to be separate
-	if (oc->oformat->flags & AVFMT_GLOBALHEADER)
+	if (format->oformat->flags & AVFMT_GLOBALHEADER)
 		ctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
-		
-	// Allocate the conversion context
-	if (iparams.width != oparams.width ||
-		iparams.height != oparams.height ||
-		strcmp(iparams.pixelFmt, oparams.pixelFmt) != 0) {
-		conv = new VideoConversionContext();
-		conv->create(iparams, oparams);
-	}
 
 	// Allocate the input frame
 	frame = CreateVideoFrame(av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
@@ -165,27 +165,68 @@ void VideoEncoderContext::create(AVFormatContext* oc) //, const VideoCodec& para
 		throw Exception("Cannot allocate input frame.");
 	
 	// Allocate the encode buffer
-	// XXX: Disabling in favour of encoder maanged buffer
+	// XXX: Disabling in favour of encoder manged buffer
     //bufferSize = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
     //buffer = (UInt8*)av_malloc(bufferSize);
 }
- 
 
-void VideoEncoderContext::close()
+
+void VideoEncoderContext::createConverter()
 {
-	LogDebug() << "[VideoEncoderContext:" << this << "] Closing" << endl;
+	if (conv)
+		throw Exception("A conversion context already exists.");
+		
+	// Create the conversion context
+	if (iparams.width != oparams.width ||
+		iparams.height != oparams.height ||
+		strcmp(iparams.pixelFmt, oparams.pixelFmt) != 0) {
+		conv = new VideoConversionContext();
+		conv->create(iparams, oparams);
+	}
+}
 
-	VideoContext::close();
-	
+
+void VideoEncoderContext::freeConverter()
+{
 	if (conv) {
 		delete conv;
 		conv = NULL;
 	}
 
+	//if (frame) {
+	//	av_free(frame);
+	//	frame = NULL;
+	//}
+}
+ 
+
+void VideoEncoderContext::close()
+{
+	LogDebug("VideoEncoderContext", this) << "Closing" << endl;
+
+	VideoContext::close();
+	
+	freeConverter();
+	
+	/*
 	if (buffer) {
 		av_free(buffer);
 		buffer = NULL;
 	}
+	
+	// Free the stream
+	if (stream && format && format->nb_streams) {		
+		for (unsigned int i = 0; i < format->nb_streams; i++) {
+			if (format->streams[i] == stream) {		
+				LogTrace("VideoContext", this) << "Closing: Removing Stream: " << stream << endl;
+				av_freep(&format->streams[i]->codec);
+				av_freep(&format->streams[i]);
+				stream = NULL;
+				format->nb_streams--;
+			}
+		}
+	}
+	*/
 }
 
 
@@ -239,10 +280,10 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 	int frameEncoded = 0;
 	if (avcodec_encode_video2(ctx, &opacket, oframe, &frameEncoded) < 0) {
 		error = "Fatal Encoder Error";
-		LogError() << "[VideoCodecEncoderContext:" << this << "] Fatal Encoder Error" << endl;
+		LogError("VideoEncoderContext", this) << error << endl;
 		throw Exception(error);
     }
-
+	
 	if (frameEncoded) {		
 		if (ctx->coded_frame->key_frame) 
 		    opacket.flags |= AV_PKT_FLAG_KEY;
@@ -328,7 +369,7 @@ void VideoCodecEncoderContext::create() //, const VideoCodec& paramsconst VideoC
 		throw Exception("Cannot allocate input frame.");
 	
 	// Allocate the encode buffer
-	// XXX: Disabling in favour of encoder maanged buffer
+	// XXX: Disabling in favour of encoder manged buffer
     //bufferSize = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
     //buffer = (UInt8*)av_malloc(bufferSize);
 }
@@ -358,7 +399,6 @@ bool VideoCodecEncoderContext::encode(unsigned char* data, int size, AVPacket& o
 	assert(size);
     AVPacket ipacket;
     av_init_packet(&ipacket);
-    ipacket.stream_index = stream->index;
     ipacket.data = data;
     ipacket.size = size;
 	return encode(ipacket, opacket);
@@ -751,20 +791,6 @@ void InitVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
 	// Update any modified values
 	oparams.pixelFmt = av_get_pix_fmt_name(ctx->pix_fmt);
 }
-
-
-void InitVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
-{
-	params.encoder = avcodec_get_name(ctx->codec_id);
-	params.pixelFmt = av_get_pix_fmt_name(ctx->pix_fmt);
-	params.width = ctx->width;
-	params.height = ctx->height;
-	params.sampleRate = ctx->sample_rate;
-	params.bitRate = ctx->bit_rate;
-	params.fps = 
-		ctx->time_base.den / 
-		ctx->time_base.num;
-}
     
 
 void InitDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts)
@@ -1061,7 +1087,7 @@ void VideoEncoderContext::reset()
 			ctx->width, ctx->height, ctx->pix_fmt,
 			SWS_BICUBIC, NULL, NULL, NULL);
 
-		LogTrace() << "[VideoEncoderContext:" << this << "] Video Conversion Context:\n" 
+		LogTrace("VideoEncoderContext", this) << "Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << iparams.width
 			<< "\n\tInput Height: " << iparams.height
 			<< "\n\tInput Pixel Format: " << iparams.pixelFmt
@@ -1079,7 +1105,7 @@ void VideoEncoderContext::reset()
 	int len = avcodec_encode_video(ctx, this->buffer, this->bufferSize, oframe);
 	if (len < 0) {
 		error = "Encoder error";
-		LogError() << "[VideoEncoderContext:" << this << "] Encoder Error" << endl;
+		LogError("VideoEncoderContext", this) << "Encoder Error" << endl;
 		return false;
     }
 				
@@ -1141,7 +1167,7 @@ void VideoContext::reset()
 		if (opacket.dts != AV_NOPTS_VALUE)
 			opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);		
 		
-		LogTrace() << "[VideoEncoderContext:" << this << "] Encoding Video Packet:\n"
+		LogTrace("VideoEncoderContext", this) << "Encoding Video Packet:\n"
 			//<< "\n\AV_NOPTS_VALUE: " << (ctx->coded_frame->pts != AV_NOPTS_VALUE)
 			//<< "\n\ctx->coded_frame: " << ctx->coded_frame
 			//<< "\n\ctx->coded_frame->pts: " << ctx->coded_frame->pts
@@ -1189,7 +1215,7 @@ void VideoContext::reset()
 			ctx->width, ctx->height, ctx->pix_fmt,
 			SWS_BICUBIC, NULL, NULL, NULL);
 
-		LogTrace() << "[VideoEncoderContext:" << this << "] Video Conversion Context:\n" 
+		LogTrace("VideoEncoderContext", this) << "Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << iparams.width
 			<< "\n\tInput Height: " << iparams.height
 			<< "\n\tInput Pixel Format: " << iparams.pixelFmt
@@ -1401,7 +1427,7 @@ double VideoContext::pts()
 	int len = avcodec_encode_video2(ctx, this->buffer, this->bufferSize, (short*)buffer);
     if (len < 0) {
 		error = "Encoder error";
-		LogError() << "[VideoEncoderContext:" << this << "] Decoding Video: Error: " << error << endl;
+		LogError("VideoEncoderContext", this) << "Decoding Video: Error: " << error << endl;
 		return -1;
     }
 
