@@ -80,23 +80,24 @@ struct AudioContext
 struct AudioResampler;
 struct AudioEncoderContext: public AudioContext
 {
-	AudioEncoderContext();
+	AudioEncoderContext(AVFormatContext* format);
 	virtual ~AudioEncoderContext();	
 	
-	virtual void create(AVFormatContext* oc);
+	virtual void create();
 	//virtual void open();
 	virtual void close();
 	
 	virtual bool encode(unsigned char* data, int size, AVPacket& opacket);
 	virtual bool encode(AVPacket& ipacket, AVPacket& opacket);	
 	
-	AudioResampler* resampler;
-	
-    int				samplesPerFrame;
-    int				outputBytes;
+	AVFormatContext* format;
+	AudioResampler*  resampler;
 
 	AudioCodec		iparams;
 	AudioCodec		oparams;
+	
+    int				samplesPerFrame;
+    int				outputFrameSize;
 };
 
 

@@ -392,7 +392,7 @@ double FormField::doubleValue() const
 bool FormField::boolValue() const
 {
 	string val = value();
-	return val == "1" || val == "true" ? true : false;
+	return val == "1" || val == "true" || val == "on" ? true : false;
 }
 
 

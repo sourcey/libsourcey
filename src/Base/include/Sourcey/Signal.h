@@ -43,15 +43,18 @@ namespace Sourcey {
 
 template <class DelegateT, DelegateDefaultParams>
 class SignalBase 
-	/// This class implements a thread-safe signal which broadcasts
-	/// data to multiple delegates.
+	/// This class implements a thread-safe signal which
+	/// broadcasts data to multiple listeners.
 {
 public:
 	typedef std::list<DelegateT*>				  DelegateList;
 	typedef typename DelegateList::iterator       Iterator;
 	typedef typename DelegateList::const_iterator ConstIterator;
 
-	SignalBase() : _hasCancelled(false), _refCount(0)
+	SignalBase() : 
+		_enabled(true), 
+		_dirty(false), 
+		_refCount(0)
 	{
 	}	
 
@@ -80,7 +83,7 @@ public:
 		for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
 			if (delegate.equals(*it) && !(*it)->cancelled()) {	
 				(*it)->cancel();
-				_hasCancelled = true;
+				_dirty = true;
 				_refCount--;
 				return true;
 			}
@@ -95,7 +98,7 @@ public:
 		for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
 			if (klass == (*it)->object() && !(*it)->cancelled()) {	
 				(*it)->cancel();
-				_hasCancelled = true;
+				_dirty = true;
 				_refCount--;
 			}
 		}
@@ -122,7 +125,7 @@ public:
 		while (it != _delegates.end()) {
 			DelegateT* delegate = *it;
 			if (delegate->cancelled()) {
-				assert(_hasCancelled);
+				assert(_dirty);
 				delete delegate;
 				it = _delegates.erase(it);
 			}
@@ -130,30 +133,44 @@ public:
 				++it;
 		}
 
-		_hasCancelled = false;
+		_dirty = false;
 	}
 
 	virtual void obtain(DelegateList& active) 
-		/// Obtains a list of active delegates, and deletes
-		/// cancelled delegates.
+		/// Obtains a list of active delegates,
+		/// and deletes any redundant delegates.
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		Iterator it = _delegates.begin(); 
 		while (it != _delegates.end()) {
 			DelegateT* delegate = *it;
 			if (delegate->cancelled()) {
-				assert(_hasCancelled);
+				assert(_dirty);
 				delete delegate;
 				it = _delegates.erase(it);
 			}
 			else {
-				active.push_back(delegate);
+				if (_enabled) // skip if disabled
+					active.push_back(delegate);
 				++it;
 			}
 		}
 
-		_hasCancelled = false;
+		_dirty = false;
 	}
+
+	virtual void enable(bool flag = true) 
+	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
+		_enabled = flag;
+	}
+
+	virtual bool enabled() 
+	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
+		return _enabled;
+	}
+
 
 	virtual int refCount() const 
 	{
@@ -205,7 +222,8 @@ public:
 		
 protected:
 	DelegateList _delegates;
-	bool _hasCancelled;	
+	bool _enabled;	
+	bool _dirty;
 	int _refCount;
 
 	mutable Poco::FastMutex	_mutex;

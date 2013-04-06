@@ -46,28 +46,28 @@ MotionDetector::MotionDetector(const Options& options) :
 	_motionStartedAt(0), 
 	_motionSegmentEndingAt(0)
 {
-	LogDebug() << "[MotionDetector:" << this <<"] Creating" << endl;
+	LogDebug("MotionDetector", this) << "Creating" << endl;
 }
 
 
 MotionDetector::~MotionDetector() 
 {
-	LogDebug() << "[MotionDetector:" << this <<"] Destroying" << endl;
+	LogDebug("MotionDetector", this) << "Destroying" << endl;
 		
 	// Synchronization issues; wait for computational
 	// tasks to finish before returning.
 	while (isProcessing()) {
-		LogDebug() << "[MotionDetector:" << this <<"] Waiting for computational tasks to finish." << endl;
+		LogDebug("MotionDetector", this) << "Waiting for computational tasks to finish." << endl;
 		Thread::sleep(5);
 	}
 
-	LogDebug() << "[MotionDetector:" << this <<"] Destroying: OK" << endl;
+	LogDebug("MotionDetector", this) << "Destroying: OK" << endl;
 }
 
 
 void MotionDetector::onStreamStateChange(const PacketStreamState&)
 {
-	LogDebug() << "[MotionDetector:" << this <<"] Reset Stream State" << endl;
+	LogDebug("MotionDetector", this) << "Reset Stream State" << endl;
 	
 	setState(this, MotionDetectorState::Idle);
 
@@ -88,7 +88,7 @@ bool MotionDetector::accepts(IPacket& packet)
 
 void MotionDetector::process(IPacket& packet)
 {
-	LogTrace() << "[MotionDetector:" << this <<"] Processing" << endl;
+	LogTrace("MotionDetector", this) << "Processing" << endl;
 
 	MatPacket* mpacket = dynamic_cast<MatPacket*>(&packet);		
 	if (!mpacket) {
@@ -103,12 +103,14 @@ void MotionDetector::process(IPacket& packet)
 	cv::Mat& source = *mpacket->mat;
 	cv::Mat mask(source.size(), CV_8UC1);
 	{
-		FastMutex::ScopedLock lock(_mutex); 
-	
+		FastMutex::ScopedLock lock(_mutex); 	
 		_processing = true;
 		_timestamp = (double)clock() / CLOCKS_PER_SEC; // mpacket->time;
-		updateMHI(source);
-		computeMotionState();	
+	}
+	updateMHI(source);
+	computeMotionState();			
+	{
+		FastMutex::ScopedLock lock(_mutex); 
 
 		// Create the single channel mask.
 		_mhi.convertTo(mask, CV_8UC1, 255.0 / _options.stableMotionLifetime, 
@@ -116,7 +118,6 @@ void MotionDetector::process(IPacket& packet)
 
 		opacket = MatPacket(&mask);
 		_processing = false;	
-
 		//cv::imshow("Motion Image", mask);
 		//cv::imshow("Mask Image", _mhi);
 		//cv::waitKey(10);
@@ -125,14 +126,12 @@ void MotionDetector::process(IPacket& packet)
 	// NOTE: Dispatched images are GRAY8 so encoders will
 	// need to adjust the input pixel format accordingly.
 	dispatch(this, opacket);
-	
-	LogTrace() << "[MotionDetector:" << this <<"] Processing: OK" << endl;
 }
 
 
 void MotionDetector::updateMHI(cv::Mat& source)
 {
-	//FastMutex::ScopedLock lock(_mutex); 
+	FastMutex::ScopedLock lock(_mutex); 
 
 	cv::Mat grey; //(source.size(), CV_8UC1);
 	cv::cvtColor(source, grey, CV_RGB2GRAY);
@@ -159,10 +158,9 @@ void MotionDetector::updateMHI(cv::Mat& source)
 
 void MotionDetector::computeMotionState() 
 { 
-	LogDebug() << "[MotionDetector:" << this <<"] Update Motion State: " << state().toString() 
-		<< ": " << _motionLevel << ":" << _options.motionThreshold << endl;
-	
-	//FastMutex::ScopedLock lock(_mutex); 
+	//LogDebug("MotionDetector", this) << "Update Motion State: " << state().toString() 
+	//	<< ": " << _motionLevel << ":" << _options.motionThreshold << endl;	
+	FastMutex::ScopedLock lock(_mutex); 
 
 	time_t currentTime = time(0);
 		
@@ -174,7 +172,7 @@ void MotionDetector::computeMotionState()
 			_motionCanStartAt = currentTime + _options.preSurveillanceDelay;
 			setState(this, MotionDetectorState::Waiting);
 			
-			LogDebug() << "[MotionDetector:" << this <<"] UpdateMotionState: Set to Waiting" << endl;
+			LogDebug("MotionDetector", this) << "Updating State: Set => Waiting" << endl;
 		}
 		break;
 	case MotionDetectorState::Waiting: 
@@ -183,7 +181,7 @@ void MotionDetector::computeMotionState()
 			// to Vigilant...
 			if (currentTime > _motionCanStartAt) {				
 				setState(this, MotionDetectorState::Vigilant);			
-				//LogDebug() << "[MotionDetector:" << this <<"] UpdateMotionState: Set to Vigilant" << endl;
+				LogDebug("MotionDetector", this) << "Updating State: Set => Vigilant" << endl;
 			}
 		}
 		break;
@@ -192,6 +190,8 @@ void MotionDetector::computeMotionState()
 			// If motion threshold is exceeded then set our state
 			// to Triggered...
 			if (_motionLevel > _options.motionThreshold) {
+				LogDebug("MotionDetector", this) << "Updating State: Motion Detected: " 
+					<< _motionLevel << ">" << _options.motionThreshold << endl;
 
 				// We need x number of motion frames before we 
 				// consider motion stable and trigger the alarm.				
@@ -201,7 +201,6 @@ void MotionDetector::computeMotionState()
 				if (_motionFrameCount == 0) _stopwatch.start();
 				if (_stopwatch.elapsed() < _options.stableMotionLifetime * 1000000) {
 					_motionFrameCount++;
-					LogDebug() << "Motion Frames Detected: " << _motionFrameCount << endl;
 										
 					// Stable motion detected, set our state to Triggered
 					if (_motionFrameCount >= _options.stableMotionNumFrames) {	
@@ -213,16 +212,15 @@ void MotionDetector::computeMotionState()
 							currentTime + _options.minTriggeredDuration, 				
 							_motionStartedAt + _options.maxTriggeredDuration);
 						setState(this, MotionDetectorState::Triggered);
-						//LogDebug() << "[MotionDetector:" << this <<"] UpdateMotionState: Set to Triggered" << endl;
+						LogDebug("MotionDetector", this) << "Updating State: Vigilant => Triggered" << endl;
 					}
 				} else {
 					_stopwatch.stop();
 					_stopwatch.reset();
 					_motionSegmentEndingAt = 0;
 					_motionFrameCount = 0;
-					LogDebug() << "Motion Timer Dead" << endl;
-				}
-				LogDebug() << "Motion Detected" << endl;				
+					LogDebug("MotionDetector", this) << "Updating State: Motion Timer Expired" << endl;
+				}			
 			}
 		}
 		break;
@@ -233,7 +231,7 @@ void MotionDetector::computeMotionState()
 			if (currentTime > _motionSegmentEndingAt) {				
 				_motionCanStartAt = currentTime + _options.postMotionEndedDelay;
 				setState(this, MotionDetectorState::Waiting);
-				LogDebug() << "[MotionDetector:" << this <<"] UpdateMotionState: Set to Waiting" << endl;
+				LogDebug("MotionDetector", this) << "Updating State: Triggered => Waiting" << endl;
 			}
 
 			// If motion threshold is exceeded while triggered
@@ -242,7 +240,8 @@ void MotionDetector::computeMotionState()
 				_motionSegmentEndingAt = min<time_t>(
 					currentTime + _options.minTriggeredDuration, 				
 					_motionStartedAt + _options.maxTriggeredDuration);	
-				LogDebug() << "[MotionDetector:" << this <<"] Triggered: Extending to: " << _motionSegmentEndingAt << endl;			
+				LogDebug("MotionDetector", this) << "Updating State: Extend Triggered Duration: " 
+					<< _motionSegmentEndingAt << endl;			
 			}
 		}
 		break;

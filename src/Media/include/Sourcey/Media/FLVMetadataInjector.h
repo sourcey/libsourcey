@@ -177,12 +177,14 @@ public:
 		/// Updates the timestamp in the given FLV tag buffer.
 		/// No more need to copy data with this method.
 	{
-		UInt32 val = HostToNetwork32(timestamp);	
+		UInt32 val = HostToNetwork32(timestamp);
+		/*
 		LogDebug() << "[FLVMetadataInjector:" << this << "] Updating timestamp: "
 			<< "\n\tTimestamp: " << timestamp
 			<< "\n\tFrame Number: " << _fpsCounter.frames
 			<< "\n\tFrame Rate: " << _fpsCounter.fps
 			<< std::endl;	
+			*/
 		std::memcpy(buf + 4, reinterpret_cast<const char*>(&val) + 1, 3);
 	}
 

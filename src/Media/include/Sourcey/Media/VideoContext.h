@@ -88,21 +88,25 @@ struct VideoContext
 //
 struct VideoEncoderContext: public VideoContext
 {
-	VideoEncoderContext();
+	VideoEncoderContext(AVFormatContext* format);
 	virtual ~VideoEncoderContext();	
 	
-	virtual void create(AVFormatContext* oc);
-	//virtual void open(); //, const VideoCodec& params
+	virtual void create();
+	//virtual void open();
 	virtual void close();
 	
 	virtual bool encode(unsigned char* data, int size, AVPacket& opacket);
 	virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
 	virtual bool encode(AVFrame* iframe, AVPacket& opacket);
-		
+	
+	virtual void createConverter();
+	virtual void freeConverter();
+	
 	VideoConversionContext* conv;
+	AVFormatContext* format;
 
-    UInt8*			buffer;
-    int				bufferSize;
+    UInt8*	buffer;
+    int		bufferSize;
 
 	VideoCodec	iparams;
 	VideoCodec	oparams;
@@ -180,6 +184,22 @@ struct VideoConversionContext
 	VideoCodec iparams;
 	VideoCodec oparams;
 };
+
+
+// ---------------------------------------------------------------------
+//
+void InitVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
+{
+	params.encoder = avcodec_get_name(ctx->codec_id);
+	params.pixelFmt = av_get_pix_fmt_name(ctx->pix_fmt);
+	params.width = ctx->width;
+	params.height = ctx->height;
+	params.sampleRate = ctx->sample_rate;
+	params.bitRate = ctx->bit_rate;
+	params.fps = 
+		ctx->time_base.den / 
+		ctx->time_base.num;
+}
 
 
 
