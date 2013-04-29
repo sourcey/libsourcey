@@ -38,77 +38,36 @@
 #include "Sourcey/Media/FPSCounter.h"
 #include "Sourcey/Media/Format.h"
 
-
 extern "C" {
 #include <libavcodec/avfft.h>
 }
-
-//#include "Sourcey/Media/MatrixConverter.h"
-//#include "Sourcey/Media/MotionDetector.h"
-//#include "Sourcey/Media/FFT.h"
-
-//#include <iostream>
-
-//#include "Poco/Thread.h"
-//#include "Poco/Stopwatch.h"
-//#include "Poco/Timestamp.h"
 
 
 namespace Sourcey {
 namespace Media {
 
 
-/*
-struct VideoAnalyzerState: public State
-{
-	enum Type
-	{
-		None,
-		Working,
-		Success,
-		Failed
-	};
-	
-	std::string str(unsigned int id) const 
-	{ 	
-		switch (id) {
-		case None:		return "None";
-		case Working:	return "Working";
-		case Success:	return "Success";
-		case Failed:	return "Failed";
-		}
-		return "None";
-	};
-};
-*/
-
-
-class VideoAnalyzer //: public IPacketProcessor //StatefulSignal<VideoAnalyzerState>
+class VideoAnalyzer //: public IPacketProcessor
 	/// This class provides basic AV spectrum analysis on a 
 	/// video using the Fourier Transform algorithm.
 	/// Data is outputted in CSV format.
 	///
 	/// TODO: 
-	///		- Extend with more options and algorithms
-	///		- Normalize audio and video level values
-	///		- Differentiate audio channels
+	///		- Pluggable algorithms and processors
+	///		- Normalization (scaling) for output values
+	///		- Process multiple audio channels properly
+	///		- Inherit from IPacketProcessor
 {
 public:
 	struct Options 
 	{	
 		std::string ifile;	// The input video file.
-		//std::string ofile;	// The output CSV file.
-
-		int numFFTBits;		// Size of the FFT input array: 
-							// (1 << nbits) for DCT-II, DCT-III and DST-I (1 << nbits) + 1 for DCT-I
-
-		//int maxFPS;			// Maximum processing frame rate. 0 for no limit.
-		bool blocking;		// Blocking mode (disable async)
+		int rdftSize;		// Size of the FFT input array
+		//bool blocking;		// Blocking mode (disable async)
 
 		Options() {
-			numFFTBits = 8;
-			//maxFPS = 0;
-			blocking = false;
+			rdftSize = 1024;
+			//blocking = false;
 		}
 	};
 
@@ -117,46 +76,59 @@ public:
 		std::string name;
 		RDFTContext* rdft;
 		FFTSample* rdftData;
-		double lastPTS;
+		int rdftSize;
+		int rdftBits;
 		Int64 frames;
 		int filled;
 		
-		Stream(const std::string& name);
+		Stream(const std::string& name, int rdftSize);
 		~Stream();
 		
-		void initialize(int rdftBits, int rdftSize);
+		void initialize();
 		void uninitialize();
+
+		void fft();
+			/// Preforms FFT on internal rdftData
 	};
 
 	struct Packet 
 	{
-		//std::string name;
 		double time;
 		double value;
-		double min;
-		double max;
-		Packet(double time = 0.0, double value = 0.0, double min = 99999.9, double max = -99999.9); //const std::string& name, 
+		//double min;
+		//double max;
+		Packet(double time = 0.0, double value = 0.0); //, double min = 99999.9, double max = -99999.9
 	};
 
 public:
 	VideoAnalyzer(const VideoAnalyzer::Options& options = VideoAnalyzer::Options());
 	virtual ~VideoAnalyzer();
-	
-public:		
+				
+	virtual void initialize();
+		/// Set everything up, and open the input file.
+
+	virtual void uninitialize();
+		/// Stop processing and free everything.
+
 	virtual void start();
+		/// Begin processing.
+
 	virtual void stop();
+		/// Stop processing.
+	
+	Signal2<const VideoAnalyzer::Stream&, const VideoAnalyzer::Packet&> PacketOut;
+		/// Signals on VideoAnalyzer::Packet output
+		/// Raw FFT data is available via VideoAnalyzer::Stream->rdftData
+
+	NullSignal Complete;
+		/// Signals on analysis complete
 		
-	//virtual std::ofstream& ofile();
 	virtual AVInputReader& reader();
 	virtual Options& options();
 	virtual std::string error() const;
 	
-	Signal2<const VideoAnalyzer::Stream&, const VideoAnalyzer::Packet&> PacketOut;
-	NullSignal Complete;
-	
 protected:
-	virtual void processSpectrum(VideoAnalyzer::Stream& name, double time);
-	//virtual void writeCSV(const VideoAnalyzer::Packet& packet);
+	AVFrame* getGrayVideoFrame();
 	
 	virtual void onReadComplete(void* sender);
 	virtual void onVideo(void* sender, VideoPacket& packet);
@@ -169,7 +141,6 @@ protected:
 	
 	Options _options;
 	std::string	_error;
-	//std::ofstream _ofile;
 	AVInputReader _reader;
 	VideoAnalyzer::Stream* _video;
 	VideoAnalyzer::Stream* _audio;	
@@ -177,34 +148,30 @@ protected:
 };
 
 
-///
-/// FFT Helpers
-/// Based on http://www.codeproject.com/Articles/6855/FFT-of-waveIn-audio-signals
-///
+// ---------------------------------------------------------------------
+// FFT Helpers
+// Based on http://www.codeproject.com/Articles/6855/FFT-of-waveIn-audio-signals
+//
+inline float CalculateFrequencyIntensity(VideoAnalyzer::Stream& stream);
+inline float CalculateCentroidFrequency(VideoAnalyzer::Stream& stream);
 
-inline double GetFrequencyIntensity(double re, double im)
-{
-    return sqrt((re*re)+(im*im));
-}
+inline double GetFrequencyIntensity(double re, double im);
+inline double GetDecibels(double re, double im);
+inline double GetAmplitude(double re, double im, int len);
+inline double GetAmplitudeScaled(double re, double im, int len, int scale);
 
-inline double GetDecibels(double re, double im)
-{
-	return (re == 0 && im == 0) ? 0 : 
-		10.0 * log10(re*re+im*im);
-}
-
-inline double GetAmplitude(double re, double im, int len) 
-{
-	return GetFrequencyIntensity(re,im)/(len);
-}
-
-inline double GetAmplitudeScaled(double re, double im, int len, int scale) 
-{
-	return static_cast<int>(GetAmplitude(re,im,len)) % scale;
-}
+#ifdef WIN32
+inline double log2(double n);
+#endif
 
 
 } } // namespace Sourcey::Media
 
 
 #endif
+
+
+
+
+	//virtual void writeCSV(const VideoAnalyzer::Packet& packet);, double time
+	//std::ofstream _ofile;

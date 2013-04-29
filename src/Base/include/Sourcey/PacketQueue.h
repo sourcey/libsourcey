@@ -29,7 +29,7 @@
 #define SOURCEY_PacketQueue_H
 
 
-#include "Sourcey/PacketDispatcher.h"
+#include "Sourcey/PacketEmitter.h"
 #include "Sourcey/DispatchQueue.h"
 
 
@@ -39,13 +39,13 @@ namespace Sourcey {
 class PacketQueue: public DispatchQueue<IPacket>
 {
 public:
-	PacketQueue(PacketDispatcher& dispatcher, Runner& runner, int queueSize = 1024, int dispatchTimeout = DEFAULT_TIMEOUT);
+	PacketQueue(PacketEmitter& dispatcher, Runner& runner, int queueSize = 1024, int dispatchTimeout = DEFAULT_TIMEOUT);
 	
-	virtual void dispatch(IPacket& packet);
+	virtual void emit(IPacket& packet);
 
 protected:
 	virtual ~PacketQueue();
-	PacketDispatcher&	_dispatcher;
+	PacketEmitter&	_dispatcher;
 };
 
 

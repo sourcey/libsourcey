@@ -149,7 +149,7 @@ Int64 Timer::count()
 void Timer::timerCallback(int status)
 {
 	_count++;
-	OnTimeout.dispatch(this, _count);
+	OnTimeout.emit(this, _count);
 }
 
 

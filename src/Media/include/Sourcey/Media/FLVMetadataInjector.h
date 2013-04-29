@@ -145,7 +145,7 @@ public:
 					writeFLVHeader(flvHeader);
 
 					MediaPacket opacket((unsigned char*)flvHeader.bytes(), flvHeader.size());
-					dispatch(this, opacket);
+					emit(this, opacket);
 				}
 
 				// A correct FPS value must be sent to the flash
@@ -163,14 +163,14 @@ public:
 				//buf.position(offset);	
 
 				// Dispatch the modified packet...
-				dispatch(this, *mpacket);
+				emit(this, *mpacket);
 				return;
 			}
 		}
 
 		// Just proxy the packet if no modification is required.
 		//LogDebug() << "[FLVMetadataInjector:" << this << "] Proxy Packet" << std::endl;
-		dispatch(this, packet);
+		emit(this, packet);
 	}
 	
 	virtual void fastUpdateTimestamp(char* buf, UInt32 timestamp)

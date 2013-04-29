@@ -89,7 +89,7 @@ void PacketStream::start()
 
 		// Attach and start synchronized runnables
 		for (PacketAdapterList::iterator sit = _sources.begin(); sit != _sources.end(); ++sit) {
-			PacketDispatcher* source = (*sit).ptr;
+			PacketEmitter* source = (*sit).ptr;
 			source->attach(packetDelegate(this, &PacketStream::onSourcePacket));
 			if ((*sit).syncState) {
 				IStartable* runnable = dynamic_cast<IStartable*>((*sit).ptr);
@@ -124,7 +124,7 @@ void PacketStream::stop()
 
 		// Stop synchronized runnables
 		for (PacketAdapterList::iterator sit = _sources.begin(); sit != _sources.end(); ++sit) {
-			PacketDispatcher* source = (*sit).ptr;
+			PacketEmitter* source = (*sit).ptr;
 			source->detach(packetDelegate(this, &PacketStream::onSourcePacket));
 			if ((*sit).syncState) {
 				IStartable* runnable = dynamic_cast<IStartable*>((*sit).ptr);
@@ -195,7 +195,7 @@ void PacketStream::onStateChange(PacketStreamState& state, const PacketStreamSta
 }
 
 
-void PacketStream::attach(PacketDispatcher* source, bool freePointer, bool syncState) 
+void PacketStream::attach(PacketEmitter* source, bool freePointer, bool syncState) 
 {
 	LogTrace("PacketStream", this) << "Attaching Source " << source << endl;
 	_ready.wait();
@@ -221,7 +221,7 @@ void PacketStream::attach(IPacketProcessor* proc, int order, bool freePointer)
 }
 
 
-void PacketStream::detach(PacketDispatcher* source) 
+void PacketStream::detach(PacketEmitter* source) 
 {
 	LogTrace("PacketStream", this) << "Detaching Source: " << source << endl;
 	_ready.wait();
@@ -261,14 +261,14 @@ void PacketStream::detach(IPacketProcessor* proc)
 void PacketStream::attach(const PacketDelegateBase& delegate)
 {
 	LogTrace("PacketStream", this) << "Attaching Delegate: " << delegate.object() << endl;
-	PacketDispatcher::attach(delegate);
+	PacketEmitter::attach(delegate);
 }
 
 
 bool PacketStream::detach(const PacketDelegateBase& delegate)
 {
 	LogTrace("PacketStream", this) << "Detaching Delegate: " << delegate.object() << endl;
-	return PacketDispatcher::detach(delegate);
+	return PacketEmitter::detach(delegate);
 }
 
 
@@ -366,7 +366,7 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 		// Set the ready event, allowing the stream to be
 		// closed inside Failed event callback.
 		_ready.set();
-		setState(this, PacketStreamState::Failed, exc.displayText());
+		setState(this, PacketStreamState::Error, exc.displayText());
 		return;
 	}	
 	
@@ -390,7 +390,7 @@ void PacketStream::onDispatchPacket(void*, IPacket& packet)
 	}
 
 	//LogTrace("PacketStream", this) << "Dispatching: " << &packet << ": " << packet.className() << endl;
-	dispatch(this, packet);
+	emit(this, packet);
 	//LogTrace("PacketStream", this) << "Dispatching: OK: " << &packet << ": " << packet.className() << endl;	
 }
 

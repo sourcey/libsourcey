@@ -118,7 +118,7 @@ public:
 		}
 
 		vpacket.mat = &_mat;
-		dispatch(this, vpacket);
+		emit(this, vpacket);
 	}
 
 	cv::Mat _mat;

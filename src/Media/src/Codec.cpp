@@ -37,7 +37,6 @@ namespace Media {
 
 
 // ---------------------------------------------------------------------
-//
 Codec::Codec() : 
 	name("Unknown"), sampleRate(0), bitRate(0), quality(0), enabled(false) 
 {
@@ -88,7 +87,6 @@ void Codec::print(ostream& ost)
 
 
 // ---------------------------------------------------------------------
-//
 AudioCodec::AudioCodec() : 
 	Codec("Unknown", DEFAULT_AUDIO_SAMPLE_RATE, DEFAULT_AUDIO_BIT_RATE, false), 
 	channels(DEFAULT_AUDIO_CHANNELS), sampleFmt(DEFAULT_AUDIO_SAMPLE_FMT) 
@@ -140,7 +138,6 @@ void AudioCodec::print(ostream& ost)
 
 
 // ---------------------------------------------------------------------
-//
 VideoCodec::VideoCodec() : 
 	Codec("Unknown", DEFAULT_VIDEO_SAMPLE_RATE, DEFAULT_VIDEO_BIT_RATE, false), 
 	width(0), height(0), fps(0), pixelFmt(DEFAULT_VIDEO_PIXEL_FMT) 

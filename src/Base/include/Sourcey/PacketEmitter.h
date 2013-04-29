@@ -25,8 +25,8 @@
 //
 
 
-#ifndef SOURCEY_PacketDispatcher_H
-#define SOURCEY_PacketDispatcher_H
+#ifndef SOURCEY_PacketEmitter_H
+#define SOURCEY_PacketEmitter_H
 
 
 #include "Sourcey/PacketSignal.h"
@@ -41,7 +41,7 @@ namespace Sourcey {
 struct PacketStreamState;
 
 
-class PacketDispatcher: public PacketSignal
+class PacketEmitter: public PacketSignal
 	/// The packet dispatcher is a generic interface used
 	/// extensively within LibSourcey by classes that emit 
 	/// the IPacket type.
@@ -56,13 +56,13 @@ public:
 };
 
 
-typedef std::vector<PacketDispatcher*> PacketDispatcherList;
+typedef std::vector<PacketEmitter*> PacketEmitterList;
 
 
 } // namespace Sourcey
 
 
-#endif // SOURCEY_PacketDispatcher_H
+#endif // SOURCEY_PacketEmitter_H
 
 	
 
@@ -70,8 +70,8 @@ typedef std::vector<PacketDispatcher*> PacketDispatcherList;
 		//Poco::FastMutex::ScopedLock lock(_mutex);
 		//_packetNumber = 0; 
 
-	PacketDispatcher() : _packetNumber(0) {};
-	virtual ~PacketDispatcher() {};
+	PacketEmitter() : _packetNumber(0) {};
+	virtual ~PacketEmitter() {};
 
 	virtual void operator += (const PacketDelegateBase& delegate)
 	{ 
@@ -105,13 +105,13 @@ typedef std::vector<PacketDispatcher*> PacketDispatcherList;
 	*/
 
 	/*
-	virtual void dispatch(void* sender, IPacket& packet) 
+	virtual void emit(void* sender, IPacket& packet) 
 	{
 		{
 			Poco::FastMutex::ScopedLock lock(_mutex);
 			_packetNumber++;
 		}
-		PacketSignal::dispatch(sender, packet); 
+		PacketSignal::emit(sender, packet); 
 	}
 
 	virtual UInt32 packetNumber() const

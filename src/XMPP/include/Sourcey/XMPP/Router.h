@@ -133,7 +133,6 @@ struct Filter: public Flags
 
 
 // ---------------------------------------------------------------------
-//
 struct XMPPDelegate: public PacketDelegateBase
 {
 	typedef Filter DataT;
@@ -199,7 +198,6 @@ DefinePolymorphicDelegateWithArg(xmppDelegate, IPacket, XMPPDelegate, const Filt
 
 
 // ---------------------------------------------------------------------
-//
 struct CommandDelegate: public XMPPDelegate
 {
 	CommandDelegate(const Filter& filter = Filter()) : XMPPDelegate(filter) {};
@@ -230,7 +228,6 @@ DefinePolymorphicDelegateWithArg(commandDelegate, IPacket, CommandDelegate, cons
 
 
 // ---------------------------------------------------------------------
-//
 struct XPathDelegate: public XMPPDelegate
 {
 	XPathDelegate(const Filter& filter = Filter()) : XMPPDelegate(filter) {};

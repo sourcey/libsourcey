@@ -60,16 +60,16 @@ FormatRegistry& FormatRegistry::instance()
 }
 
 
-Format& FormatRegistry::get(const string& label) 
+Format& FormatRegistry::get(const string& name) 
 {
 	FastMutex::ScopedLock lock(_mutex);
 	for (unsigned int i = 0; i < _formats.size(); i++) {
-		if (_formats[i].label == label) {
+		if (_formats[i].name == name) {
 			return _formats[i];
 		}
 	}
            
-	throw Poco::NotFoundException("No media format for: " + label);
+	throw Poco::NotFoundException("No media format for: " + name);
 }
 
 
@@ -86,12 +86,12 @@ Format& FormatRegistry::getByID(const string& id)
 }
 
 
-Format& FormatRegistry::getOrDefault(const string& label) 
+Format& FormatRegistry::getOrDefault(const string& name) 
 {
 	{
 		FastMutex::ScopedLock lock(_mutex);
 		for (unsigned int i = 0; i < _formats.size(); i++) {
-			if (_formats[i].label == label) {
+			if (_formats[i].name == name) {
 				return _formats[i];
 			}
 		}
@@ -115,11 +115,11 @@ Format& FormatRegistry::getDefault()
 }
 
 
-bool FormatRegistry::exists(const string& label)
+bool FormatRegistry::exists(const string& name)
 {
 	FastMutex::ScopedLock lock(_mutex);
 	for (unsigned int i = 0; i < _formats.size(); i++) {
-		if (_formats[i].label == label) {
+		if (_formats[i].name == name) {
 			return true;
 		}
 	}
@@ -144,19 +144,19 @@ FormatList FormatRegistry::formats() const
 
 void FormatRegistry::registerFormat(const Format& format)	
 { 
-	unregisterFormat(format.label);
+	unregisterFormat(format.name);
 	FastMutex::ScopedLock lock(_mutex);
     _formats.push_back(format);
 }
 
 
-bool FormatRegistry::unregisterFormat(const string& label)	
+bool FormatRegistry::unregisterFormat(const string& name)	
 { 
 	FastMutex::ScopedLock lock(_mutex);
 	for (FormatList::iterator it = _formats.begin(); it != _formats.end(); ++it) {
-		if ((*it).label == label) {
+		if ((*it).name == name) {
 			_formats.erase(it);
-			if (_default == label)
+			if (_default == name)
 				_default = "";
 			return true;
 		}
@@ -165,10 +165,10 @@ bool FormatRegistry::unregisterFormat(const string& label)
 }
 
 
-void FormatRegistry::setDefault(const string& label)
+void FormatRegistry::setDefault(const string& name)
 {
 	FastMutex::ScopedLock lock(_mutex);
-	_default = label;
+	_default = name;
 }
 
 

@@ -32,7 +32,7 @@
 #include "Sourcey/Logger.h"
 #include "Sourcey/Stateful.h"
 #include "Sourcey/IStartable.h"
-#include "Sourcey/PacketDispatcher.h"
+#include "Sourcey/PacketEmitter.h"
 #include "Sourcey/IPacketProcessor.h"
 
 #include "Poco/Mutex.h"
@@ -43,14 +43,14 @@ namespace Sourcey {
 
 
 struct PacketAdapterReference
-	/// Provides a reference to a PacketDispatcher instance.
+	/// Provides a reference to a PacketEmitter instance.
 {
-	PacketDispatcher* ptr;
+	PacketEmitter* ptr;
 	int order;
 	bool freePointer;	
 	bool syncState;
 
-	PacketAdapterReference(PacketDispatcher* ptr = NULL, int order = 0, 
+	PacketAdapterReference(PacketEmitter* ptr = NULL, int order = 0, 
 		bool freePointer = true, bool syncState = false) : 
 		ptr(ptr), order(order), freePointer(freePointer), 
 		syncState(syncState) {}
@@ -75,7 +75,7 @@ struct PacketStreamState: public State
 		Resetting,
 		Closing,
 		Closed,
-		Failed,
+		Error,
 	};
 
 	std::string str(unsigned int id) const 
@@ -87,7 +87,7 @@ struct PacketStreamState: public State
 		case Resetting:			return "Resetting";
 		case Closing:			return "Closing";
 		case Closed:			return "Closed";
-		case Failed:			return "Failed";
+		case Error:				return "Error";
 		default:				assert(false);
 		}
 		return "undefined"; 
@@ -95,9 +95,9 @@ struct PacketStreamState: public State
 };
 
 
-class PacketStream: public PacketDispatcher, public StatefulSignal<PacketStreamState>, public IStartable
+class PacketStream: public PacketEmitter, public StatefulSignal<PacketStreamState>, public IStartable
 	/// This class provides an interface for processing packets.
-	/// A packet stream consists of a single PacketDispatcher,
+	/// A packet stream consists of a single PacketEmitter,
 	/// one or many IPacketProcessor instances, and one or many 
 	/// callback receivers.
 { 
@@ -117,14 +117,21 @@ public:
 		/// Closes the stream and transitions the internal state
 		/// to Disconnected. This method is called by the destructor.
 	
-	virtual void attach(PacketDispatcher* source, bool freePointer = true, bool syncState = false);
-	virtual void detach(PacketDispatcher* source);
+	virtual void attach(PacketEmitter* source, bool freePointer = true, bool syncState = false);
+	virtual void detach(PacketEmitter* source);
 
 	virtual void attach(IPacketProcessor* proc, int order = 0, bool freePointer = true);
 	virtual void detach(IPacketProcessor* proc);
 	
 	virtual void attach(const PacketDelegateBase& delegate);
 	virtual bool detach(const PacketDelegateBase& delegate);
+
+	virtual int numSources() const;
+	virtual int numProcessors() const;
+	virtual int numAdapters() const;
+
+	PacketAdapterList adapters() const;
+		/// Returns a list of all stream sources and processors.
 	
 	virtual std::string name() const;
 		/// Returns the name of the stream.
@@ -133,14 +140,10 @@ public:
 		/// Returns true is the stream is in the Running state.
 	
 	virtual bool waitForReady();
-		/// Locks until the current process queue iteration is complete.
-		/// For for safe access after calling reset() or stop().
-
-	virtual int numSources() const;
-	virtual int numProcessors() const;
-	virtual int numAdapters() const;
-
-	PacketAdapterList adapters() const;
+		/// Locks until the internal ready event is signalled.
+		/// This enables safe stream adapter access after calling
+		/// stop() by waiting until the current adapter queue
+		/// iteration is complete.
 	
 	virtual void setClientData(void* data);
 	virtual void* clientData() const;

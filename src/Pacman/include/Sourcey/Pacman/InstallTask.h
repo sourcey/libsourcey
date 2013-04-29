@@ -53,7 +53,6 @@ struct PackageInstallState: public State
 		Downloading,
 		Unpacking,
 		Finalizing,
-		//Incomplete,
 		Installed,
 		Failed
 	};
@@ -65,7 +64,6 @@ struct PackageInstallState: public State
 		case Downloading:			return "Downloading";
 		case Unpacking:				return "Unpacking";
 		case Finalizing:			return "Finalizing";
-		//case Incomplete:			return "Incomplete";
 		case Installed:				return "Installed";
 		case Failed:				return "Failed";
 		default: assert(false);
@@ -75,11 +73,13 @@ struct PackageInstallState: public State
 };
 
 
-class InstallTask: public Poco::Runnable, public StatefulSignal<PackageInstallState>, public IPolymorphic
-	/// This class is responsible for the installation process
-	/// of a single package.
+class InstallTask: 
+	public Poco::Runnable, 
+	public StatefulSignal<PackageInstallState>, 
+	public IPolymorphic
 	///
-	/// TODO: Revise mutex usage for better thread safety.
+	/// This class implements actual package 
+	/// installation procedure.
 {
 public:
 	struct Options 
@@ -89,15 +89,20 @@ public:
 									// be installed.
 		std::string sdkVersion;		// If set then the latest package version for
 									// given SDK version will be installed.
+		std::string installDir;		// Install to the following location, overriding 
+									// the manager default installDir.
 
 		Options() {
 			version = "";
 			sdkVersion = "";
+			installDir = "";
 		}
 	};
 
 public:
-	InstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote, const Options& options = Options());
+	InstallTask(PackageManager& manager, 
+				LocalPackage* local, RemotePackage* remote, 
+				const Options& options = Options());
 	virtual ~InstallTask();	
 
 	virtual void start();
@@ -121,12 +126,14 @@ public:
 
 	virtual LocalPackage* local() const;
 	virtual RemotePackage* remote() const;
+	virtual Options& options();
 	
+	virtual bool valid() const;
 	virtual bool cancelled() const;
 	virtual bool failed() const;
 	virtual bool success() const;
 	virtual bool complete() const;
-	virtual bool valid() const;
+	virtual int progress() const;
 
 	virtual void onStateChange(PackageInstallState& state, const PackageInstallState& oldState);
 	virtual void onResponseProgress(void* sender, HTTP::TransferState& state);

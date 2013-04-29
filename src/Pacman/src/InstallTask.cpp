@@ -237,8 +237,11 @@ void InstallTask::onResponseProgress(void* sender, HTTP::TransferState& state)
 {
 	log("debug") << "Download Progress: " << state.progress() << endl;
 
-	// Progress 0 - 75 covers download
-	setProgress(state.progress() * 0.75);
+	// Progress 1 - 75 covers download
+	// Increments of 10 or greater
+	int prog = state.progress() * 0.75;
+	if (prog > 0 && prog > progress() + 10)
+		setProgress(prog);
 }
 
 
@@ -308,6 +311,12 @@ void InstallTask::doFinalize()
 
 	bool errors = false;
 	Path outputDir(_manager.getIntermediatePackageDir(_local->id()));
+	string installDir = _options.installDir.empty() ? 
+							_manager.options().installDir : 
+								_options.installDir;
+
+	// Ensure the install directory exists
+	File(installDir).createDirectories();
 
 	// Move all extracted files to the installation path
 	DirectoryIterator fIt(outputDir);
@@ -316,8 +325,8 @@ void InstallTask::doFinalize()
 	{
 		try
 		{
-			log("debug") << "Moving: " << fIt.path().toString() << endl;
-			File(fIt.path()).moveTo(_manager.options().installDir);
+			log("debug") << "Moving: " << fIt.path().toString() << " <<=>> " << installDir  << endl;
+			File(fIt.path()).moveTo(installDir);
 		}
 		catch (Exception& exc)
 		{
@@ -384,7 +393,7 @@ void InstallTask::setComplete()
 	
 	// The task will be destroyed
 	// as a result of this signal.
-	Complete.dispatch(this);
+	Complete.emit(this);
 }
 
 
@@ -394,7 +403,14 @@ void InstallTask::setProgress(int value)
 		FastMutex::ScopedLock lock(_mutex);	
 		_progress = value;
 	}
-	Progress.dispatch(this, value);
+	Progress.emit(this, value);
+}
+
+
+int InstallTask::progress() const
+{
+	FastMutex::ScopedLock lock(_mutex);
+	return _progress;
 }
 
 
@@ -447,233 +463,11 @@ RemotePackage* InstallTask::remote() const
 }
 
 
-} } // namespace Sourcey::Pacman
-
-
-
-
-		/*
-void InstallTask::printlog(std::ostream& ost) const
-{
-	ost << "["
-		<< className()
-		<< ":"
-		<< local()->name()
-		<< ":"
-		<< state()
-		<< "] ";
-}
-
-
-		_local->setState("Installed");
-		_local->clearErrors();
-		_local->setVersion(_local->latestAsset().version());
-
-		_local->setState("Failed");
-		if (!state.message().empty())
-			_local->addError(state.message());
-	//Task(manager.runner(), false, false, local->name()),
-			*/
-
-/*
-	//transaction->Complete += delegate(this, &InstallTask::onTransactionComplete);
-void InstallTask::onTransactionComplete(void* sender, HTTP::Response& response)
-{
-	log("debug") << "Download Complete: " << response.success() << endl;
-	
-	if (response.success())		
-		setState(this, PackageInstallState::Unpacking);
-	else
-		setState(this, PackageInstallState::Failed, response.error);
-}
-*/
-
-		/*
-		case PackageInstallState::Incomplete:
-			_local->setState("Incomplete");
-
-			log("info") << "Package Incomplete:" 
-				<< "\n\tName: " << _local->name()
-				<< "\n\tVersion: " << _local->version()
-				<< endl;
-#ifdef _DEBUG
-			_local->print(cout);	
-#endif
-			break;
-
-			log("info") << "Package Installed:" 
-				<< "\n\tName: " << _local->name()
-				<< "\n\tVersion: " << _local->version()
-				<< endl;
-#ifdef _DEBUG
-			_local->print(cout);	
-#endif
-			*/
-
-			/*
-			_local->setState("Installing");
-			_local->setInstallState("Downloading");
-			_local->setInstallState("Finalizing");
-			setComplete(format("%s successfully updated to version %s", 
-				_local->name(), 
-				_remote->latestAsset().version()));
-				*/
-/*
-
-
-
-void InstallTask::setFailed(const string& message) 
+InstallTask::Options& InstallTask::options() 
 { 
-	if (!stateEquals(PackageInstallState::Failed)) {		
-		log("error") << "Package Install Failed: " << message << endl;
-		if (message.length)
-			_local->addError(message);
-		_local->setState("Failed");
-		_local->setInstallState("Failed");		
-		_manager.saveLocalPackage(*local);
-		setState(this, PackageInstallState::Installed, message);
-	}
-};
-
-
-void InstallTask::setComplete(const string& message)
-{	
-	if (!stateEquals(PackageInstallState::Incomplete)) {
-	if (!stateEquals(PackageInstallState::Installed)) {
-		_local->setState("Installed");
-		_local->setInstallState("Installed");
-		_local->setVersion(_local->latestAsset().version());
-		_manager.saveLocalPackage(*local);
-		setState(this, PackageInstallState::Installed, message);		
-
-		log("info") << "Package Installed:" 
-			<< "\n\tName: " << _local->name()
-			<< "\n\tVersion: " << _local->version()
-			<< endl;
-#ifdef _DEBUG
-		_local->print(cout);	
-#endif
-	}
+	FastMutex::ScopedLock lock(_mutex);
+	return _options;
 }
 
 
-void InstallTask::setIncomplete(const string& message)
-{	
-	if (!stateEquals(PackageInstallState::Incomplete)) {
-		_local->setState("Incomplete");
-		_local->setInstallState("Incomplete");
-		//_local->setVersion(_local->latestAsset().version());
-		_manager.saveLocalPackage(*local);
-		setState(this, PackageInstallState::Incomplete, message);		
-
-		log("info") << "Package Incomplete:" 
-			<< "\n\tName: " << _local->name()
-			<< "\n\tVersion: " << _local->version()
-			<< endl;
-#ifdef _DEBUG
-		_local->print(cout);	
-#endif
-	}
-}
-
-
-	virtual void onStateChange(T& state, const T& oldState);
-void InstallTask::transitionState()
-{
-	
-		// If any errors are enountered we set the overall
-		// state to failed.
-		//if (state.error)
-		//	throw Exception(state.message());
-
-	try {
-		switch (state().id()) {	
-		case PackageInstallState::None:
-			_local->setState("Installing");
-			_local->setInstallState("Installing");
-			doDownload();
-			break;
-
-		case PackageInstallState::Downloading:
-			_local->setInstallState("Downloading");
-			doUnpack();
-			break;
-
-		case PackageInstallState::Unpacking:
-			_local->setInstallState("Finalizing");
-			doFinalize();
-			break;
-
-		case PackageInstallState::Finalizing:
-			setComplete(format("%s successfully updated to version %s", 
-				_local->name(), 
-				_remote->latestAsset().version()));
-			break;
-
-		default: assert(false);
-		}
-	}
-	catch (Exception& exc) {
-		setFailed(exc.displayText());
-	}
-}
-*/
-
-
-
-/*
-bool InstallTask::setState(unsigned int id, const string& message) 
-{
-	if (Stateful<PackageInstallState>::setState(id, message)) {
-
-		try {
-			switch (id) {	
-			case PackageInstallState::Downloading:
-				doDownload();
-				break;
-
-			case PackageInstallState::Unpacking:
-				doUnpack();
-				break;
-
-			case PackageInstallState::Finalizing:
-				doFinalize();
-				break;
-
-			case PackageInstallState::FinalizingInstalled:
-				setComplete(format("%s successfully updated to version %s", 
-					manifest.name(), 
-					string(manifest.latestAsset().attribute("version").value())));
-				break;
-			}
-		}
-		catch (Exception& exc) {
-			setFailed(exc.displayText());
-		}
-
-		return true;
-	}
-	return false;
-}
-*/
-
-
-/*
-void InstallTask::parsePackageResponse(JSON::Document& response)
-{
-	log("debug") << "Parsing Updated Package" << endl; 
-	
-	JSON::Node updatedPackage = response.select_single_node(format("//package[@name='%s']", manifest.name()).data()).node();
-	if (updatedPackage.empty())
-		setFailed("No manifest was returned from the server");
-	else if (updatedPackage.child("update").empty())
-		setComplete("No updates are available");
-	else {
-		manifest.remove_child("package");
-		ostringstream ss;
-		updatedPackage.print(ss);
-		manifest.load(ss.str().data());
-		setState(this, PackageInstallState::QueryingPackageListInstalled);
-	}
-}
-*/
+} } // namespace Sourcey::Pacman

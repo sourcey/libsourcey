@@ -138,7 +138,7 @@ ISession* SessionManager::createSession(const Jingle& j, bool whiny)
 			s = it->second(*this, j);
 		}
 		assert(s);
-		SessionCreated.dispatch(this, s, j);
+		SessionCreated.emit(this, s, j);
 		addSession(s); //)
 		//throw Exception("Jingle session already exists: " + s->sid());
 	}

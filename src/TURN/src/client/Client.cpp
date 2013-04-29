@@ -900,7 +900,7 @@ void Client::handleDataIndication(const STUN::Message& response)
 	if (!isTerminated())
 		_observer.onRelayedData(*this, dataAttr->bytes(), dataAttr->size(), peerAttr->address());
 		
-	//OnData.dispatch(this, dataAttr->bytes(), dataAttr->size(), peerAttr->address());
+	//OnData.emit(this, dataAttr->bytes(), dataAttr->size(), peerAttr->address());
 	FastMutex::ScopedLock lock(_mutex); 
 	//STUN::DataPacket packet(dataAttr->bytes(), dataAttr->size(), _socket->address(), peerAttr->address());
 	//DataIndicationReceived.notify(this, packet);

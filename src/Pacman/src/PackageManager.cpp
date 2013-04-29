@@ -71,10 +71,8 @@ PackageManager::~PackageManager()
 
 	
 // ---------------------------------------------------------------------
-//
 //	Initialization Methods
 //
-// ---------------------------------------------------------------------
 void PackageManager::initialize()
 {
 	createDirectories();
@@ -205,7 +203,7 @@ void PackageManager::loadLocalPackages(const string& dir)
 		if (fIt.name().find("manifest") != string::npos &&
 			fIt.name().find(".json") != string::npos) {
 				
-			LogDebug() << "[PackageManager] Package found: " << fIt.name() << endl;
+			LogDebug() << "[PackageManager] Local package found: " << fIt.name() << endl;
 			try {
 				JSON::Value root;
 				JSON::loadFile(root, fIt.path().toString());
@@ -214,7 +212,8 @@ void PackageManager::loadLocalPackages(const string& dir)
 					delete package;
 					throw Exception("The local package is invalid");
 				}
-
+				
+				LogDebug() << "[PackageManager] Local package added: " << package->name() << endl;
 				localPackages().add(package->id(), package);
 			}
 			catch (std::exception& exc) {
@@ -273,10 +272,8 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 
 
 // ---------------------------------------------------------------------
-//
 //	Package Installation Methods
 //
-// ---------------------------------------------------------------------
 InstallTask* PackageManager::installPackage(const string& name, const InstallTask::Options& options, bool whiny)
 {	
 	LogDebug() << "[PackageManager] Installing Package: " << name << endl;	
@@ -460,7 +457,7 @@ bool PackageManager::uninstallPackage(const string& id, bool whiny)
 		file.remove();	
 
 		// Notify the outside application
-		PackageUninstalled.dispatch(this, *package);
+		PackageUninstalled.emit(this, *package);
 		
 		// Free package reference from memory
 		localPackages().remove(package);
@@ -492,14 +489,18 @@ bool PackageManager::uninstallPackages(const StringList& ids, bool whiny)
 
 InstallTask* PackageManager::createInstallTask(PackagePair& pair, const InstallTask::Options& options) //const string& name, InstallMonitor* monitor)
 {	
+	// Ensure we only have one task per package
+	if (getInstallTask(pair.remote.id()))
+		throw Exception(pair.remote.name() + "is already installing.");
+
 	InstallTask* task = new InstallTask(*this, &pair.local, &pair.remote, options);
 	task->Complete += delegate(this, &PackageManager::onPackageInstallComplete, -1); // lowest priority to remove task
-	//task->start();
-
-	FastMutex::ScopedLock lock(_mutex);
-	_tasks.push_back(task);
-
-	return task;
+	{
+		FastMutex::ScopedLock lock(_mutex);
+		_tasks.push_back(task);
+	}
+	TaskAdded.emit(this, *task);
+	return task; // must call task->start()
 }
 
 
@@ -547,7 +548,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 				assert(it->second->state() == "Installed" 
 					&& it->second->installState() == "Installed");
 				
-				PackageInstalled.dispatch(this, *it->second);
+				PackageInstalled.emit(this, *it->second);
 				/*
 				if (it->second->state() != "Installed" ||
 					it->second->installState() != "Installed") {
@@ -574,10 +575,22 @@ bool PackageManager::finalizeInstallations(bool whiny)
 
 
 // ---------------------------------------------------------------------
+// Task Helper Methods
 //
+InstallTask* PackageManager::getInstallTask(const std::string& id) const
+{
+	FastMutex::ScopedLock lock(_mutex);
+	for (InstallTaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); it++) {
+		if ((*it)->remote()->id() == id)
+			return *it;
+	}
+	return NULL;
+}
+
+
+// ---------------------------------------------------------------------
 // Package Helper Methods
 //
-// ---------------------------------------------------------------------
 PackagePair PackageManager::getPackagePair(const string& id) const
 {		
 	FastMutex::ScopedLock lock(_mutex);
@@ -664,10 +677,8 @@ bool PackageManager::checkInstallManifest(LocalPackage& package)
 	
 
 // ---------------------------------------------------------------------
-//
 // File Helper Methods
 //
-// ---------------------------------------------------------------------
 void PackageManager::clearCache()
 {
 	Path path(options().cacheDir);
@@ -779,17 +790,18 @@ LocalPackageStore& PackageManager::localPackages()
 
 
 // ---------------------------------------------------------------------
-//
 // Event Handlers
 //
-// ---------------------------------------------------------------------
 void PackageManager::onPackageInstallComplete(void* sender)
 {
 	InstallTask* task = reinterpret_cast<InstallTask*>(sender);
 	
 	LogTrace() << "[PackageManager] Package Install Complete: " << task->state().toString() << endl;
 
-	PackageInstalled.dispatch(this, *task->local());
+	if (task->local()->isInstalled())
+		PackageInstalled.emit(this, *task->local());
+
+	TaskRemoved.emit(this, *task);
 
 	// Save the local package
 	saveLocalPackage(*task->local());

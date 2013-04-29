@@ -50,7 +50,7 @@ typedef AsyncPacketSocketBase<Poco::Net::DatagramSocket, UDP> UDPPacketSocket;
 
 
 /*
-class UDPPacketSocket: public IPacketSocket, public Poco::Net::DatagramSocket //, public PacketFactory, public PacketDispatcher
+class UDPPacketSocket: public IPacketSocket, public Poco::Net::DatagramSocket //, public PacketFactory, public PacketEmitter
 	/// This class provides efficient UDP messaging for
 	/// LibSourcey.
 	///

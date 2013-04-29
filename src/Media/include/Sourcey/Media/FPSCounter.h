@@ -44,7 +44,7 @@ struct FPSCounter
 	clock_t end;
 	double duration;
 	double fps;
-	double frames;
+	UInt64 frames;
 
 	FPSCounter()
 	{
@@ -63,7 +63,7 @@ struct FPSCounter
 		start = 0;
 		end = 0;
 		duration = 0;
-		fps = 0;
+		fps = 0.0;
 		frames = 0;
 	}
 
@@ -82,14 +82,17 @@ struct FPSCounter
 		end = clock();
 		duration += (double)(end - start) / CLOCKS_PER_SEC;
 		frames++;
-		fps = frames / duration;
+		fps = (1.0 * frames) / duration;
 		return fps;
 	}
 };
 
 
 class FPSLimiter: public IPacketProcessor
-	/// This class limits the throughput rate of IPackets.
+	/// This class limits the throughput rate of IPackets
+	/// in a PacketStream.
+	/// If the throughput rate exceeds the max secified FPS
+	/// packets will be dropped.
 {
 public:
 	FPSLimiter(int max) : _max(max)
@@ -120,7 +123,7 @@ public:
 	{
 		//LogTrace() << "[FPSLimiter:" << this <<"] Processing" << std::endl;
 		_counter.tick();
-		dispatch(this, packet);
+		emit(this, packet);
 	};
 	
 	virtual FPSCounter& counter()

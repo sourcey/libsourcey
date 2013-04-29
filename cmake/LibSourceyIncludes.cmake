@@ -193,9 +193,9 @@ macro(set_module_found module)
   foreach (component ${${module}_FIND_COMPONENTS})
     list(APPEND _${module}_REQUIRED_VARS ${module}_${component}_LIBRARIES ${module}_${component}_INCLUDE_DIRS)
     #if (${module}_${component}_FOUND)
-    #  #message(STATUS "Required ${module} component ${component} present.")
+    #  message(STATUS "Required ${module} component ${component} present.")
     #else ()
-    #  #message(STATUS "Required ${module} component ${component} missing.")
+    #  message(STATUS "Required ${module} component ${component} missing.")
     #endif ()
   endforeach ()
 
@@ -340,7 +340,8 @@ endmacro()
 #
 # Finds the given component library and include paths.
 #
-macro(find_component_paths module component library header)
+macro(find_component_paths module component library header)  
+  # message(STATUS "Find Component Paths=${module}:${component}:${library}:${header}")
 
   set_component_alias(${module} ${component})  
   set_component_notfound(${module} ${component})
@@ -354,24 +355,28 @@ macro(find_component_paths module component library header)
 
   # Create a Debug and a Release list for multi configuration builds.
   # NOTE: <module>_CONFIGURATION_TYPES must be set to use this.
-  if (${module}_MULTI_CONFIGURATION AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
+  if (${module}_MULTI_CONFIGURATION AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))  
     find_library(${ALIAS_RELEASE_LIBRARIES} 
       NAMES
-        lib${library}.a         
-        lib${library}.so
-        ${library}.lib
-        ${library}
+        ${library}     
+        #lib${library} 
+        #lib${library}.so
+        #${library}.lib
+        #${library}
+      #  ${LibSourcey_SOURCE_DIR}/anionu-deps/poco
       #HINTS
-      #  ${${ALIAS_LIBRARY_DIRS}}
-    ) 
+      PATHS
+        ${${ALIAS_LIBRARY_DIRS}}
+    )
     find_library(${ALIAS_DEBUG_LIBRARIES} 
       NAMES
-        lib${library}d.a       
-        lib${library}d.so
-        ${library}d.lib
         ${library}d
+        #lib${library}d.a       
+        #lib${library}d.so
+        #${library}d.lib
       #HINTS
-      #  ${${ALIAS_LIBRARY_DIRS}}
+      PATHS
+        ${${ALIAS_LIBRARY_DIRS}}
     )     
     if (${ALIAS_RELEASE_LIBRARIES})   
       list(APPEND ${ALIAS_LIBRARIES} "optimized" ${${ALIAS_RELEASE_LIBRARIES}})
@@ -382,12 +387,13 @@ macro(find_component_paths module component library header)
   else()
     find_library(${ALIAS_LIBRARIES}
       NAMES # setting in order might help overcome find_library bugs :/
-        lib${library}.so     
-        lib${library}.a 
-        ${library}.lib
+        #lib${library}.so     
+        #lib${library}.a 
+        #${library}.lib
         ${library}
       #HINTS
-      #  ${${ALIAS_LIBRARY_DIRS}}
+      PATHS
+        ${${ALIAS_LIBRARY_DIRS}}
     )
   endif()  
 
@@ -404,7 +410,7 @@ endmacro()
 #
 macro(find_component module component pkgconfig library header)
 	 
-  #message("Find Component=${module}:${component}:${pkgconfig}:${library}:${header}")
+  # message("Find Component=${module}:${component}:${pkgconfig}:${library}:${header}")
 
   set_component_alias(${module} ${component})
 
@@ -505,8 +511,8 @@ macro(find_multi_component module component pkgconfig library header)
     #set(${ALIAS_LIBRARIES})
     find_library(${ALIAS_LIBRARIES} 
       NAMES # setting in order might help overcome find_library bugs :/
-        lib${library}.a 
-        ${library}.lib
+        #lib${library}.a 
+        #${library}.lib
         ${library}
       HINTS
         ${PC_LIB${component}_LIBDIR}

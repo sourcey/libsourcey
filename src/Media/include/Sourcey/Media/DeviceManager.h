@@ -43,6 +43,24 @@
 namespace Sourcey {
 namespace Media {
 
+
+struct Device 
+	/// Represents a system audio, video or render device.
+{
+	Device();
+	Device(const std::string& type, int id, 
+		const std::string& name, const std::string& guid = "", 
+		bool isDefault = false);
+	
+	void print(std::ostream& os);
+
+	int id;
+	std::string type; // audioin, audioout, video
+	std::string name;
+	std::string guid;
+	bool isDefault;
+};
+
 	
 enum MediaCapabilities 
 {
@@ -51,39 +69,6 @@ enum MediaCapabilities
 	VIDEO_RECV = 1 << 2,
 	VIDEO_SEND = 1 << 3,
 };
-
-
-struct Device 
-	/// Represents a system audio, video or render device.
-{
-	Device();
-	Device(const std::string& type, const std::string& name, int id, const std::string& guid = "");
-	
-	void print(std::ostream& os);
-
-	int id;
-	std::string type; // generally audioin, audioout, video
-	std::string name;
-	std::string guid;
-};
-
-
-/*
-struct Device 
-	/// Used to represent an audio or video capture or render device.
-{
-  Device() {}
-  Device(const std::string& first, int second)
-      : name(first),
-        id(talk_base::ToString(second)) {
-  }
-  Device(const std::string& first, const std::string& second)
-      : name(first), id(second) {}
-
-  std::string name;
-  std::string id;
-};
-*/
 
 
 class IDeviceManager
@@ -96,9 +81,6 @@ public:
 	// Initialization
 	virtual bool initialize() = 0;
 	virtual void uninitialize() = 0;
-
-	// Capabilities
-	virtual int getCapabilities() = 0;
 
 	// Device enumeration
 	virtual bool getAudioInputDevices(std::vector<Device>& devices) = 0;
@@ -120,6 +102,11 @@ public:
 	virtual bool getDefaultAudioInputDevice(Device& device) = 0;
 	virtual bool getDefaultAudioOutputDevice(Device& device) = 0;
 	virtual bool getDefaultVideoCaptureDevice(Device& device) = 0;
+
+	// Capabilities
+	virtual int getCapabilities() = 0;
+
+	virtual void print(std::ostream& ost) = 0;
 
 	NullSignal SignalDevicesChange;
 

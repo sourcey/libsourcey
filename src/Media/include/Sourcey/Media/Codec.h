@@ -42,7 +42,6 @@ namespace Media {
 
 
 // ---------------------------------------------------------------------
-//
 struct Codec 
 	/// Specifies a codec for encoding/decoding media.
 {	
@@ -74,7 +73,6 @@ struct Codec
 
 /*
 // ---------------------------------------------------------------------
-//
 struct SampleFormat 
 	/// Common sample formats for audio encoding/decoding.
 	/// The ID values match their constituent AV_SAMPLE_FMT_XXX
@@ -102,7 +100,6 @@ struct SampleFormat
 
 
 // ---------------------------------------------------------------------
-//
 #define DEFAULT_AUDIO_SAMPLE_RATE	44100
 #define DEFAULT_AUDIO_BIT_RATE		64000
 #define DEFAULT_AUDIO_CHANNELS		2
@@ -135,7 +132,6 @@ struct AudioCodec: public Codec
 
 
 // ---------------------------------------------------------------------
-//
 #define DEFAULT_VIDEO_SAMPLE_RATE	(384000)				// 128 – 384 kbit/s – business-oriented videoconferencing quality using video compression
 #define DEFAULT_VIDEO_BIT_RATE		(9000)					// Default value for RTP	
 #define DEFAULT_VIDEO_PIXEL_FMT		"yuv420p"

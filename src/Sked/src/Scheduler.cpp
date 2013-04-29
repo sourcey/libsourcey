@@ -162,11 +162,11 @@ void Scheduler::run()
 		// Dispatch the Idle signal
 		// TODO: Send Idle complete iteration of all tasks, 
 		// rather than after each task.
-		Idle.dispatch(this);
+		Idle.emit(this);
 	}
 			
 	log("trace") << "Shutdown" << endl;		
-	Shutdown.dispatch(this);
+	Shutdown.emit(this);
 	log("trace") << "Exiting" << endl;
 }
 
@@ -183,10 +183,10 @@ void Scheduler::update()
 		Sked::Task* task = reinterpret_cast<Sked::Task*>(*it);
 		//assert(task);
 		if (task->destroyed()) {
-			log("trace") << "Clearing Destroyed: " << task << endl;
-			onRemove(task);
-			delete task;
 			it = _tasks.erase(it);
+			onRemove(task);
+			log("trace") << "Destroying: " << task << endl;
+			delete task;
 		}
 		else {
 			++it;

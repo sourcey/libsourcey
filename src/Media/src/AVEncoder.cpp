@@ -48,36 +48,28 @@ FastMutex AVEncoder::_mutex;
 
 
 AVEncoder::AVEncoder(const RecorderOptions& options) :
-	_options(options),
-	_outIOBuffer(NULL),
-	_outIOBufferSize(MAX_VIDEO_PACKET_SIZE),
+	_options(options),	
 	_formatCtx(NULL),
-	_startTime(0),
 	_video(NULL),
-	_videoPTS(0),
-	_videoLastPTS(0),
-	_videoTime(0),
-	_videoLastTime(0),
 	_audio(NULL),
 	_audioFifo(NULL),
-	_audioFifoOutBuffer(NULL)
+	_audioBuffer(NULL),
+	_ioBuffer(NULL),
+	_ioBufferSize(MAX_VIDEO_PACKET_SIZE),
+	_startTime(0)
 {
 }
 
 
-AVEncoder::AVEncoder() : 
-	_outIOBuffer(NULL),
-	_outIOBufferSize(MAX_VIDEO_PACKET_SIZE),
+AVEncoder::AVEncoder() : 	
 	_formatCtx(NULL),
-	_startTime(0),
 	_video(NULL),
-	_videoPTS(0),
-	_videoLastPTS(0),
-	_videoTime(0),
-	_videoLastTime(0),
 	_audio(NULL),
 	_audioFifo(NULL),
-	_audioFifoOutBuffer(NULL)
+	_audioBuffer(NULL),
+	_ioBuffer(NULL),
+	_ioBufferSize(MAX_VIDEO_PACKET_SIZE),
+	_startTime(0)
 {
 	LogDebug("AVEncoder", this) << "Initializing" << endl;
 }
@@ -100,7 +92,7 @@ int DispatchOutputPacket(void* opaque, UInt8* buffer, int bufferSize)
 	if (klass) {
 		//LogTrace("AVEncoder", klass) << "Dispatching Packet: " << bufferSize << endl;
 		MediaPacket packet(buffer, bufferSize);
-		klass->dispatch(klass, packet);
+		klass->emit(klass, packet);
 	}   
 
     return bufferSize;
@@ -113,11 +105,8 @@ void AVEncoder::initialize()
 
 	LogDebug("AVEncoder", this) << "Starting:"
 		<< "\n\tPID: " << this
-		<< "\n\tFormat: " << _options.oformat.label
-		<< "\n\tVideo In: " << _options.oformat.video.toString()
-		<< "\n\tVideo Out: " << _options.oformat.video.toString()
-		<< "\n\tAudio In: " << _options.oformat.audio.toString()
-		<< "\n\tAudio Out: " << _options.oformat.audio.toString()
+		<< "\n\tInput Format: " << _options.iformat.toString()
+		<< "\n\tOutput Format: " << _options.oformat.toString()
 		<< "\n\tDuration: " << _options.duration
 		<< endl;
 
@@ -136,6 +125,7 @@ void AVEncoder::initialize()
 			av_register_all(); 
 
 			// Allocate the output media context
+			assert(!_formatCtx);
 			_formatCtx = avformat_alloc_context();
 			if (!_formatCtx) 
 				throw Exception("Cannot allocate format context.");
@@ -147,7 +137,7 @@ void AVEncoder::initialize()
 			string ofmt = _options.ofile.empty() ? ("." + string(_options.oformat.id)) : _options.ofile;		
 			_formatCtx->oformat = av_guess_format(_options.oformat.id, ofmt.data(), NULL);	
 			if (!_formatCtx->oformat)
-				throw Exception("Cannot find suitable encoding format for " + _options.oformat.label);
+				throw Exception("Cannot find suitable encoding format for " + _options.oformat.name);			
 		}
 
 		// Initialize encoder contexts
@@ -163,10 +153,10 @@ void AVEncoder::initialize()
 				// Operating in streaming mode. Generated packets can be
 				// obtained by connecting to the PacketEncoded signal.
 				// Setup the output IO context for our output stream.
-				_outIOBuffer = new unsigned char[_outIOBufferSize];
-				_outIO = avio_alloc_context(_outIOBuffer, _outIOBufferSize, 0, this, 0, DispatchOutputPacket, 0); //_outIO, 
-				//_outIO->is_streamed = 1;
-				_formatCtx->pb = _outIO;
+				_ioBuffer = new unsigned char[_ioBufferSize];
+				_ioCtx = avio_alloc_context(_ioBuffer, _ioBufferSize, 0, this, 0, DispatchOutputPacket, 0);
+				//_ioCtx->is_streamed = 1;
+				_formatCtx->pb = _ioCtx;
 			}
 			else {
 
@@ -188,6 +178,8 @@ void AVEncoder::initialize()
 
 			// Send the format information to sdout
 			av_dump_format(_formatCtx, 0, _options.ofile.data(), 1);
+
+			_startTime = clock();
 		}
 
 		setState(this, EncoderState::Ready);
@@ -257,9 +249,9 @@ void AVEncoder::cleanup()
 			_formatCtx = NULL;
 		}
 	
-		if (_outIOBuffer) {
-			delete _outIOBuffer;
-			_outIOBuffer = NULL;
+		if (_ioBuffer) {
+			delete _ioBuffer;
+			_ioBuffer = NULL;
 		}
 	}
 
@@ -270,11 +262,9 @@ void AVEncoder::cleanup()
 void AVEncoder::process(IPacket& packet)
 {	
 	if (!isActive()) {
-		LogDebug("AVEncoder", this) << "Encoder not ready: Dropping Packet: " << packet.className() << endl;
+		LogWarn("AVEncoder", this) << "Encoder not initialized: Dropping Packet: " << packet.className() << endl;
 		return;
-	}	
-
-	//LogTrace("AVEncoder", this) << "Processing Packet: " << &packet << ": " << packet.className() << endl;
+	}
 
 	// We may be receiving either audio or video packets	
 	VideoPacket* videoPacket = dynamic_cast<VideoPacket*>(&packet);
@@ -288,10 +278,9 @@ void AVEncoder::process(IPacket& packet)
 		encodeAudio(audioPacket->data(), audioPacket->size());
 		return;
 	}
-
-	dispatch(this, packet);
-
-	LogError("AVEncoder", this) << "Failed to encode packet" << endl;
+	
+	LogWarn("AVEncoder", this) << "Cannot encode source packet" << endl;
+	emit(this, packet);
 }
 
 					
@@ -306,7 +295,7 @@ void AVEncoder::onStreamStateChange(const PacketStreamState& state)
 		break;
 		
 	case PacketStreamState::Stopped:
-	case PacketStreamState::Failed:
+	case PacketStreamState::Error:
 	case PacketStreamState::Resetting:
 		if (stateEquals(EncoderState::Encoding))
 			uninitialize();
@@ -316,7 +305,7 @@ void AVEncoder::onStreamStateChange(const PacketStreamState& state)
 	//case PacketStreamState::Closed:
 	}
 
-	PacketDispatcher::onStreamStateChange(state);
+	PacketEmitter::onStreamStateChange(state);
 }
 
 
@@ -348,11 +337,11 @@ AudioEncoderContext* AVEncoder::audio()
 void AVEncoder::createVideo()
 {
 	FastMutex::ScopedLock lock(_mutex);	
-	LogTrace("AVEncoder", this) << "Creating Video" << endl;
 	assert(!_video);
 
 	// Initialize the video encoder (if required)
-	if (_options.oformat.video.enabled && _formatCtx->oformat->video_codec != CODEC_ID_NONE) {
+	if (_options.oformat.video.enabled) { //&& _formatCtx->oformat->video_codec != CODEC_ID_NONE		
+		LogTrace("AVEncoder", this) << "Creating Video" << endl;
 		_video = new VideoEncoderContext(_formatCtx);
 		_video->iparams = _options.iformat.video;
 		_video->oparams = _options.oformat.video;
@@ -390,7 +379,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 		throw Exception("No video context");
 
 	if (!buffer || !bufferSize || !width || !height)
-		throw Exception("Failed to encode video frame.");
+		throw Exception("Cannot encode video frame.");
 	
 	// Recreate the conversion context if the
 	// input resolution changes.
@@ -414,46 +403,33 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 	} 
 	else {
 		
-		/*
-		//_video->oframe->pts = _video->pts;
-
-		// PTS value will increment by 1 for input each frame at defined FPS value.
-		// PTS value will need to be dynamically generated for variable FPS rates.	
-		_fpsCounter.tick();
-		//if (_video->oframe->pts == AV_NOPTS_VALUE)
-		//	_video->oframe->pts = 0;
-		//else {
-			double fpsDiff = (_video->codec->time_base.den / _fpsCounter.fps);
-			_video->pts = _video->pts + fpsDiff;
-			//_video->dts = _video->pts + fpsDiff;
-			//_video->oframe->pts = _video->pts;
-		//}
-		*/
-		
  		// Encode the frame 
 		if (!_video->encode(buffer, bufferSize, opacket)) {
-			LogWarn("AVEncoder", this) << "Failed to encode video frame" << endl;
+			LogWarn("AVEncoder", this) << "Cannot encode video frame" << endl;
 			return false;
 		}
 	}
 
 	if (opacket.size > 0) {
-		 
-		/*
-		LogTrace("AVEncoder", this) << "Writing Video Packet: " 
-			<< opacket.pts << ": " 
-			<< opacket.dts << ": " 
-			//<< _video->pts << ": "
-			//<< ((1000.0 / _fpsCounter.fps) * _fpsCounter.frames)
-			<< endl;
+		assert(opacket.stream_index == _video->stream->index);
 		
-		if (opacket.pts == AV_NOPTS_VALUE) 
-			opacket.pts = (1000.0 / _fpsCounter.fps) * _fpsCounter.frames;
+		// Calculate dynamic PTS based on duration
+		// Using MythTV AVFormatWriter as a guide
+		_videoFPS.tick();
+		opacket.pts = (double)_videoFPS.duration * _video->stream->time_base.den / _video->stream->time_base.num;
+		opacket.dts = AV_NOPTS_VALUE;
+
+		/*
+		LogTrace() << "[AVEncoder:" << this << "] Writing Video:" 
+			<< "\n\tPTS: " << opacket.pts
+			<< "\n\tDTS: " << opacket.dts
+			<< "\n\tDuration: " << opacket.duration
+			<< endl;
 			*/
-	
+
 		// Write the encoded frame to the output file / stream.
 		if (av_interleaved_write_frame(_formatCtx, &opacket) < 0) {
-			LogError("AVEncoder", this) << "Failed to write video frame" << endl;
+			LogError("AVEncoder", this) << "Cannot write video frame" << endl;
 			return false;
 		}
 	}
@@ -469,28 +445,27 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 void AVEncoder::createAudio()
 {
 	FastMutex::ScopedLock lock(_mutex);	
+	assert(!_audio);
 
 	// Initialize the audio encoder (if required)
-	if (_options.oformat.audio.enabled && _formatCtx->oformat->audio_codec != CODEC_ID_NONE) {
+	if (_options.oformat.audio.enabled) { //&& _formatCtx->oformat->audio_codec != CODEC_ID_NONE		
+		LogTrace("AVEncoder", this) << "Creating Audio" << endl;
 		_audio = new AudioEncoderContext(_formatCtx);
 		_audio->iparams = _options.iformat.audio;
 		_audio->oparams = _options.oformat.audio;
 		_audio->create();
-		_audio->open();			
-
-		// Set the output frame size for encoding
-		//_audio->outputFrameSize = _audio->stream->codec->frame_size * 
-		//	av_get_bytes_per_sample(_audio->stream->codec->sample_fmt) * 
-		//	_audio->stream->codec->channels;
-
-		// The encoder may require a minimum number of raw audio samples for each encoding but we can't
-		// guarantee we'll get this minimum each time an audio frame is decoded from the in file so 
-		// we use a FIFO to store up incoming raw samples until we have enough for one call to the codec.
-		_audioFifo = av_fifo_alloc(2 * MAX_AUDIO_PACKET_SIZE);
+		_audio->open();
+		
+		// The encoder may require a minimum number of raw audio
+		// samples for each encoding but we can't guarantee we'll
+		// get this minimum each time an audio frame is decoded
+		// from the in file, so we use a FIFO to store up incoming
+		// raw samples until we have enough to call the codec.
+		_audioFifo = av_fifo_alloc(_audio->outputFrameSize * 2);
 
 		// Allocate a buffer to read OUT of the FIFO into. 
 		// The FIFO maintains its own buffer internally.
-		_audioFifoOutBuffer = (UInt8*)av_malloc(2 * MAX_AUDIO_PACKET_SIZE);
+		_audioBuffer = (UInt8*)av_malloc(_audio->outputFrameSize);
 	}
 }
 
@@ -503,83 +478,308 @@ void AVEncoder::freeAudio()
 		delete _audio;
 		_audio = NULL;
 	}
+	
+	if (_audioFifo) {
+		av_fifo_free(_audioFifo);
+		_audioFifo = NULL;
+	}
+	
+	if (_audioBuffer) {
+		av_free(_audioBuffer);
+		_audioBuffer = NULL;
+	}
 }
 
 
 bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 {
-	/*
 	LogTrace("AVEncoder", this) << "Encoding Audio Packet:\n" 
-		<< "Frame Size: " << bufferSize << "\n"
-		<< "Buffer Size: " << _audio->bufferSize << "\n"
+		<< "Buffer Size: " << bufferSize << "\n"
+		<< "Frame Size: " << _audio->outputFrameSize << "\n"
 		//<< "Duration: " << frameDuration << "\n" 
 		<< endl;
-	*/
-
-	// Lock the mutex while encoding
-	FastMutex::ScopedLock lock(_mutex);	
-
-	/*
-	// If we are encoding a multiplex stream wait for the first
-	// video frame to be encoded before we start encoding audio
-	// otherwise we get errors for some codecs.
-	if (_video && _fpsCounter.frames == 0) {
-		LogTrace("AVEncoder", this) << "Encoding Audio Packet: Dropping audio frames until we have video." << endl;
-		return false;
-	}
-	*/
 	
 	assert(buffer);
 	assert(bufferSize);
 
+	// Lock the mutex while encoding
+	FastMutex::ScopedLock lock(_mutex);	
+
 	if (!isActive())
 		throw Exception("The encoder is not initialized");
 	
-	if (_audio) 
+	if (!_audio) 
 		throw Exception("No audio context");
 	
 	if (!buffer || !bufferSize) 
 		throw Exception("Invalid audio input");
-	
-	// TODO: Does latest FFmpeg still require use of fifo?
+		
+	// TODO: Move FIFO to the encoder context.
+	bool res = false;
 	av_fifo_generic_write(_audioFifo, (UInt8 *)buffer, bufferSize, NULL);
 	while (av_fifo_size(_audioFifo) >= _audio->outputFrameSize) {
-		av_fifo_generic_read(_audioFifo, _audioFifoOutBuffer, _audio->outputFrameSize, NULL);
-
- 		// Encode a frame of AudioOutSize bytes
-		AVPacket opacket;	
-
-		//int size = _audio->encode(_audioFifoOutBuffer, _audio->outputFrameSize, opacket);
-		if (_audio->encode(_audioFifoOutBuffer, _audio->outputFrameSize, opacket)) {
+		av_fifo_generic_read(_audioFifo, _audioBuffer, _audio->outputFrameSize, NULL);
+		
+		AVPacket opacket;
+		if (_audio->encode(_audioBuffer, _audio->outputFrameSize, opacket)) {
+		//if (_audio->encode(buffer, bufferSize, opacket)) {
+			assert(opacket.stream_index == _audio->stream->index);
+			assert(opacket.data);
+			assert(opacket.size);
+			
+			_audioFPS.tick();
+			// NOTE: No need to specify audio PTS for MPEG4,
+			// but we should run further tests with other codecs.
+			//opacket.pts = (double)_audioFPS.duration * _audio->stream->time_base.den / _audio->stream->time_base.num;
+			//opacket.dts = AV_NOPTS_VALUE;
+			
+			/*
+			LogTrace() << "[AVEncoder:" << this << "] Writing Audio:" 
+				<< "\n\tPacket Size: " << opacket.size
+				<< "\n\tPTS: " << opacket.pts
+				<< "\n\tDTS: " << opacket.dts
+				<< "\n\tDuration: " << opacket.duration
+				<< endl;
+				*/
 
 	 		// Write the encoded frame to the output file
 			if (av_interleaved_write_frame(_formatCtx, &opacket) != 0) {
-				LogError("AVEncoder", this) << "Failed to write audio frame" << endl;
-				return false;
+				LogError("AVEncoder", this) << "Cannot write audio frame" << endl;
 			}
+			else res = true;
 		} 
-		else {
-			// Encoded video frame is empty, it may have been buffered.
-			return false;
-		}
 	}
 	
-	return true;
+	return res;
 }
 
 
 } } // namespace Sourcey::Media
 
 
+		
+	
+	/*
+	// If we are encoding a multiplex stream wait for the first
+	// video frame to be encoded before we start encoding audio
+	// otherwise we get errors for some codecs.
+	if (_video && _videoFPS.frames == 0) {
+		LogTrace("AVEncoder", this) << "Encoding Audio Packet: Dropping audio frames until we have video." << endl;
+		return false;
+	}
+	*/
+	/*
+		//if (_audio->encode(buffer, bufferSize, opacket)) { //_audio->outputFrameSizebufferSize
+		*/
+		
+	// while(packet->size > 0)
+	// {
+	// 	 int ret = avcodec_decode_video2(..., ipacket);
+	// 	 if(ret < -1)
+	//		throw std::exception("error");
+	//
+	//	 ipacket->size -= ret;
+	//	 ipacket->data += ret;
+	// }
 
+	//unsigned char* bytes = buffer;
+	//int bytesRemaining = bufferSize;
+	//assert(bufferSize > _audio->outputFrameSize);
+	//while (bytesRemaining) // && !frameDecoded
+	//{
+		/*
+		avcodec_get_frame_defaults(frame);
+		bytesDecoded = avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);		
+		if (bytesDecoded < 0) {
+			LogError() << "[AudioDecoderContext:" << this << "] Decoder Error" << endl;
+			error = "Decoder error";
+			throw Exception(error);
+		}
+		*/
+	//}
+		
+		//bytesRemaining -= _audio->outputFrameSize;
+		//buffer += _audio->outputFrameSize;
+
+		
+			// Calculate dynamic PTS based on framerate
+			//_audioFPS.tick();
+			//_audioPTS += _audio->ctx->time_base.den / _audioFPS.fps;
+			//if (_audioPTS < opacket.pts)
+			//	_audioPTS = opacket.pts;
+			//_audioPTS++;
+			//opacket.pts = _audioPTS;
+			//opacket.dts = _audioPTS;		
+		
+			//opacket.pts = AV_NOPTS_VALUE;
+			//opacket.dts = AV_NOPTS_VALUE;	
+					
+			// NOTE: Duration and PTS have no bearing on output 
+			// file duration and playback speed when audio only.
+			//double frameDuration = _audioTime ? ((clock() - _audioTime)) : 1;	// / CLOCKS_PER_SEC
+			//_audioTime = clock();
+			//opacket.duration = frameDuration;
+
+
+		// Set the frame duration of dynamic frames.
+		// FFmpeg will calculate the PTS for us.		
+			
+		//unsigned frameDuration = _videoTime ? (clock() - _videoTime) : 1;		
+
+		//opacket.pts = AV_NOPTS_VALUE;
+		//opacket.duration = 100; 
+		//AV_NOPTS_VALUE
+
+		//opacket.duration = 5; //frameDuration * 2; //_frameDuration ? (clock() - _frameDuration) : 1;
+		//LogDebug("AVEncoder", this) << "_videoTime: " << _videoTime << endl;
+		//LogDebug("AVEncoder", this) << "opacket.duration: " << opacket.duration << endl;
+		
+			
+		// PTS value will increment by 1 for input each frame at defined FPS value.
+		// PTS value will need to be dynamically generated for variable FPS rates.
+		//_videoFPS.tick();
+		//if (_video->frame->pts == AV_NOPTS_VALUE)
+		//	_video->frame->pts = 0;
+		//else {
+			//_video->frame->pts = _videoPTS;
+		//}
+		/*		
+		
+			//<< "\n\tTest PTS: " << av_rescale_q(_videoPTS, _video->ctx->time_base, _video->stream->time_base)
+			//<< "\n\tTest PTS 1: " << av_rescale_q(frameDuration, _video->ctx->time_base, _video->stream->time_base)
+			//<< "\n\tTest PTS 2: " << (_video->ctx->time_base.den * 1.0) / (_video->stream->time_base.num  * 1.0)
+			//<< "\n\tTest PTS 4 " << av_rescale_q(_video->pts, _video->ctx->time_base, _video->stream->time_base)
+			//<< "\n\tFrame Duration: " << (frameDuration)
+			//<< "\n\tFPS Den: " << (_video->ctx->time_base.den)
+			<< "\n\tFPS: " << (_videoFPS.fps)
+			<< "\n\t>codec->time_base: " << (_video->stream->time_base.den / _video->stream->time_base.num / 1000)
+			<< "\n\t>codec->time_base: " << (_video->stream->time_base.den / _video->stream->time_base.num)
+			<< "\n\t>stream->time_base: " << (av_gettime() - _startTime)
+			<< "\n\tFPS Duration: " << (_videoFPS.duration)
+			<< "\n\t_videoPTS: " << _videoPTS
+			//<< "\n\tFrame PTS: " << _video->frame->ti
+			//<< "\n\tVIDEO PTS: " << _video->pts
+
+
+		end = clock();
+		duration += (double)(end - start) / CLOCKS_PER_SEC;
+		frames++;
+		fps = (1.0 * frames) / duration;
+		return fps;		
+		
+		_videoFPS.tick();
+		double val = (_video->ctx->time_base.den * 1.0) / (_videoFPS.fps * 1.0);
+		//val = 
+		double fpsDiff = val; //_videoFPS.frames > val ? (_videoFPS.frames * 1.0) : val; //val; //fps ? () : 1; //  * 1.0
+		_videoPTS = _videoPTS + fpsDiff;
+		opacket.pts = _videoPTS;
+		opacket.dts = _videoPTS;
+		*/
+		// ------------------------------------------
+		//(double)
+		//   * 1.0		//double fpsDiff = _videoFPS.fps ? ((_video->ctx->time_base.den * 1.0) / (_videoFPS.fps  * 1.0)) : 1;
+		//double val = ((double)(_video->ctx->time_base.den * 1.0) / (double)(_videoFPS.fps  * 1.0));
+			 // * 1.0; //_videoPTS + val; //fpsDiff; //_videoPTS + fpsDiff;
+		//double _videoFPS.frames > ((int)_videoPTS + val) ? (double)(_videoFPS.frames * 1.0) : val;
+		//if (_videoPTS < opacket.pts)
+		// ---------------------------------------------
+
+
+		//audio_pts = (double)audio_st->pts.val * audio_st->time_base.num / audio_st->time_base.den;
+			
+		//double frameDuration = _videoTime ? ((clock() - _videoTime)) : 1;	// / CLOCKS_PER_SEC
+		//_videoPTS = _videoPTS + ((_video->ctx->time_base.den * 1.0) / frameDuration);
+		//_videoTime = clock();
+		//LogDebug("AVEncoder", this) << "### Frame Duration: " << frameDuration << endl;
+		//_videoPTS + 
+		//_videoPTS = _videoPTS + frameDuration; //(frameDuration * ((_video->ctx->time_base.den * 1.0) / (_videoFPS.fps  * 1.0)));
+			//_video->stream->time_base.den / (1000000.0 * _video->stream->time_base.num));
+			//_videoPTS + frameDuration;
+		//opacket.pts = (double)opacket.pts * _video->stream->time_base.num / _video->stream->time_base.den;
+		
+		//_videoPTS; //int64_t((double)frameDuration * _video->stream->time_base.den / (1000000.0 * _video->stream->time_base.num)); //
+		
+		
+			//opacket.pts = _videoPTS;
+			//opacket.dts = _videoPTS;
+
+		//LogDebug("AVEncoder", this) << "_video->stream->start_time: " << _video->stream->start_time << endl;
+		//LogDebug("AVEncoder", this) << "opacket.pts: " << opacket.pts << endl;
+       //fPacket.pts = int64_t((double)encodeInfo->start_time
+       //        * fStream->time_base.den / (1000000.0 * fStream->time_base.num)
+       //        + 0.5);
+	   /*
+       TRACE_PACKET("  PTS: %lld  (stream->time_base: (%d/%d), "
+               "codec->time_base: (%d/%d))\n", fPacket.pts,
+               fStream->time_base.num, fStream->time_base.den,
+               fStream->codec->time_base.num, fStream->codec->time_base.den);
+			   */
+
+		//fPacket.pts = (encodeInfo->start_time * fStream->time_base.den / fStream->time_base.num) / 1000000;
+
+		//opacket.pts /= 1000; //av_rescale_q(_videoPTS, _video->ctx->time_base, _video->stream->time_base); //_videoPTS; //av_rescale_q(_videoPTS, _video->ctx->time_base, _video->stream->time_base);
+		//LogDebug("AVEncoder", this) << "opacket.pts: " << opacket.pts << endl;
+
+		//_videoTime = clock();	
+		//_frameDuration = clock();	
+		
+		//LogTrace() << "@@@@@@@@@@@@@@@@@@@@ [AVEncoder:" << this << "] Video PTS:" << opacket.pts++ << endl;
 
 		/*
-		// Set the encoder codec
-		if (_options.oformat.video.enabled)
-			_formatCtx->oformat->video_codec = static_cast<CodecID>(_options.oformat.video.id);
-		if (_options.oformat.audio.enabled)
-			_formatCtx->oformat->audio_codec = static_cast<CodecID>(_options.oformat.audio.id);		
+		_videoPTS += _video->ctx->time_base.den / (_videoFPS.fps + 3);
+		if (_videoPTS < opacket.pts)
+			_videoPTS = opacket.pts;
+		opacket.pts = _videoPTS;
+		opacket.dts = _videoPTS; //AV_NOPTS_VALUE;
+		*/
 		
+		//m_pkt->pts = tc * m_videoStream->time_base.den / m_videoStream->time_base.num / 1000; // / 1000;
+
+		/*
+		_videoPTS += 5;
+		opacket.pts = AV_NOPTS_VALUE;
+		opacket.dts = AV_NOPTS_VALUE;_videoPTS; //
+					
+		//double frameDuration = _videoTime ? ((clock() - _videoTime)) : 1;	// / CLOCKS_PER_SEC
+		//_videoTime = clock();
+		//_videoFPS.tick();
+		//opacket.duration = frameDuration;
+
+		//if (!_videoTime)
+		//	_videoTime = clock();
+		//else
+		//	_videoTime = clock();
+		*/
+		
+
+		// Set the output frame size for encoding
+		//_audio->outputFrameSize = _audio->stream->codec->frame_size * 
+		//	av_get_bytes_per_sample(_audio->stream->codec->sample_fmt) * 
+		//	_audio->stream->codec->channels;
+		/*
+		//_video->oframe->pts = _video->pts;
+
+		// PTS value will increment by 1 for input each frame at defined FPS value.
+		// PTS value will need to be dynamically generated for variable FPS rates.	
+		_videoFPS.tick();
+		//if (_video->oframe->pts == AV_NOPTS_VALUE)
+		//	_video->oframe->pts = 0;
+		//else {
+			double fpsDiff = (_video->codec->time_base.den / _videoFPS.fps);
+			_video->pts = _video->pts + fpsDiff;
+			//_video->dts = _video->pts + fpsDiff;
+			//_video->oframe->pts = _video->pts;
+		//}
+		*/
+
+		/*
+
+			// Set the encoder codec
+			if (_options.oformat.video.enabled)
+				_formatCtx->oformat->video_codec = static_cast<CodecID>(_options.oformat.video.id);
+			if (_options.oformat.audio.enabled)
+				_formatCtx->oformat->audio_codec = static_cast<CodecID>(_options.oformat.audio.id);	
+
 		for (int i=0; i< _formatCtx->nb_streams; i++) {
 			if (_formatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO && 
 				_video == NULL) {
@@ -595,4 +795,54 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 		if (_video == NULL && 
 			_audio == NULL)
 			throw Exception("Could not find a valid media stream");
+		*/
+
+
+		
+		/*		 	
+		Log("debug") << "[AVEncoder" << this << "] _frameDuration: " << _frameDuration << endl;
+
+		Log("debug") << "[AVEncoder" << this << "] frameDuration: " << frameDuration << endl;
+		unsigned frameDuration = 
+		_frameDuration = clock();	
+		// PTS value will increment by 1 for input each frame at defined FPS value.
+		// PTS value will need to be dynamically generated for variable FPS rates.
+		_videoFPS.tick();
+		//if (_videoOutFrame->pts == AV_NOPTS_VALUE)
+		//	_videoOutFrame->pts = 0;
+		//else {
+			Log("debug") << "[AVEncoder" << this << "] Last PTS: " << _videoPTS << endl;
+			Log("debug") << "[AVEncoder" << this << "] Current FPS: " << _videoFPS.fps << endl;
+			Log("debug") << "[AVEncoder" << this << "] FPS Den: " << _video->ctx->time_base.den << endl;
+			Log("debug") << "[AVEncoder" << this << "] FPS Den: " << ( _video->ctx->time_base.den * 1.0) << endl;
+			Log("debug") << "[AVEncoder" << this << "] FPS Den: " << ((_video->ctx->time_base.den * 1.0) / _videoFPS.fps) << endl;
+			double fpsDiff = _videoFPS.fps > 0 ? ((_video->ctx->time_base.den * 1000.0) / _videoFPS.fps) : 0;
+			//_videoPTS = _videoPTS + fpsDiff;
+			//_videoPTS += _video->stream->codec->time_base.den/(_video->stream->codec->time_base.num/(_videoFPS.duration/1000.0));
+			opacket.pts = _videoPTS;
+			//_videoOutFrame->pts = _videoPTS;
+		
+			Log("debug") << "[AVEncoder" << this << "] FPS Difference: " << fpsDiff << endl;
+			Log("debug") << "[AVEncoder" << this << "] Calculated PTS: " << _videoPTS << endl;
+			Log("debug") << "[AVEncoder" << this << "] FPS Difference 1: " << (1.0 / fpsDiff) << endl;
+			Log("debug") << "[AVEncoder" << this << "] Using PTS: " << _videoOutFrame->pts << endl;
+		}
+		*/
+
+		/*
+		_videoFPS.tick();
+		LogTrace("AVEncoder", this) << "Writing Video Packet: " 
+			<< opacket.pts << ": " 
+			<< opacket.dts << ": " 
+			<< _video->pts << ": "
+			//<< ((1000.0 / _videoFPS.fps) * _videoFPS.frames)
+			<< endl;
+		
+		//if (opacket.pts == AV_NOPTS_VALUE) 
+		//opacket.pts = (_video->codec->time_base.den / _videoFPS.fps) * _videoFPS.frames;		
+		//_videoPTS += ctx->time_base.den/(ctx->time_base.num/(/durationInMS/50/1000.0));
+		//pts += 1000/(1/(/durationInMS/100/1000.0)); //ctx->time_base.den/(ctx->time_base.num/(/durationInMS/100/1000.0));
+		//	if (_videoStream->codec->coded_frame->pts != AV_NOPTS_VALUE)
+		//		packet.pts = av_rescale_q(_videoStream->codec->coded_frame->pts, _videoStream->codec->time_base, _videoStream->time_base);
+		//	_videoPTS += _videoStream->codec->time_base.den/(_videoStream->codec->time_base.num/(durationInMS/1000.0));
 		*/

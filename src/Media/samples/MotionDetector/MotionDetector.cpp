@@ -26,8 +26,7 @@ namespace Media {
 // ----------------------------------------------------------------------------
 //
 // Motion Detector Stream
-//
-// ----------------------------------------------------------------------------
+//-------
 class MotionDetectorStream: public PacketStream
 {
 public:

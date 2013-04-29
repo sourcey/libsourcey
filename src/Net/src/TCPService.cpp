@@ -128,36 +128,36 @@ void TCPService::stop()
 
 
 // ---------------------------------------------------------------------
-//
 // Flash Policy Request Handler
 //
-// ---------------------------------------------------------------------
-FlashPolicyRequestHandler::FlashPolicyRequestHandler(const StreamSocket& s) : 
-	TCPServerConnection(s)
+FlashPolicyRequestHandler::FlashPolicyRequestHandler(const StreamSocket& s, bool isHTTP) : 
+	TCPServerConnection(s), _isHTTP(isHTTP)
 {
 }
 
 
 void FlashPolicyRequestHandler::run()
-{	
-	string policy("<?xml version=\"1.0\"?><cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>");
+{		
+	// Send an all access policy file by default
+	string policy;
+	if (_isHTTP)
+		policy += "HTTP/1.1 200 OK\r\nContent-Type: text/x-cross-domain-policy\r\nX-Permitted-Cross-Domain-Policies: all\r\n\r\n";
+	policy += "<?xml version=\"1.0\"?><cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
 	socket().sendBytes(policy.data(), policy.length()+1);
-	LogDebug() << "ProxyServer: Sending policy file response: " << policy << endl;
+	LogDebug() << "Sending policy file response: " << policy << endl;
 }
 
 
 // ---------------------------------------------------------------------
+// Null Request Handler
 //
-// Bad Request Handler
-//
-// ---------------------------------------------------------------------
-BadRequestHandler::BadRequestHandler(const StreamSocket& s) : 
+NullRequestHandler::NullRequestHandler(const StreamSocket& s) : 
 	TCPServerConnection(s)
 {
 }	
 
 
-void BadRequestHandler::run() 
+void NullRequestHandler::run() 
 {
 	LogDebug() << "Bad Request Handler" << endl;	
 	socket().close();

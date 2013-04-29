@@ -84,37 +84,48 @@ protected:
 protected:
 	static Poco::FastMutex _mutex; // Protects avcodec_open/close()
 
-	RecorderOptions	_options;	
-	FPSCounter		_fpsCounter;
+	RecorderOptions	_options;
 	AVFormatContext* _formatCtx;
 	clock_t			_startTime;
-	AVIOContext*	_outIO;
-	unsigned char*  _outIOBuffer; 
-	int				_outIOBufferSize; 
+	AVIOContext*	_ioCtx;
+	unsigned char*  _ioBuffer; 
+	int				_ioBufferSize; 
 
 	//
  	// Video
 	//
 	VideoEncoderContext* _video;
-
- 	// The following variables allow for dynamically
-	// calculated video presentation timestamps (PTS).
-	Int64			_videoPTS;
-	Int64			_videoLastPTS;
-	clock_t			_videoTime;
-	clock_t			_videoLastTime;
+	FPSCounter		_videoFPS;
+	//clock_t			_videoTime;
 
 	//
  	// Audio
 	//
 	AudioEncoderContext* _audio;
-	clock_t			_audioTime;	
 	AVFifoBuffer*	_audioFifo;		
-	UInt8*			_audioFifoOutBuffer;
+	UInt8*			_audioBuffer;
+	FPSCounter		_audioFPS;
+	//clock_t			_audioTime;	
 };
 
 
+} } // namespace Sourcey::Media
+
+
+#endif	// SOURCEY_MEDIA_AVEncoder_H
+
+
+
+	//UInt32			_frameDuration;
+
+ 	// The following variables allow for dynamically
+	// calculated video presentation timestamps (PTS).
+	//Int64			_videoPTS;
+
+
 /*
+	//Int64			_videoLastPTS;
+	//clock_t			_videoLastTime;
 inline std::string GetEncoderFromCodecName(const std::string& name) 
 	/// Attempts to get the FFmpeg encoder from a codec name.
 {	
@@ -138,10 +149,3 @@ success:
 	 return c->name;
 }
 */
-
-
-} } // namespace Sourcey::Media
-
-
-#endif	// SOURCEY_MEDIA_AVEncoder_H
-

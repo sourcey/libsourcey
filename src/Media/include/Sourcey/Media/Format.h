@@ -53,32 +53,11 @@ struct Format
 		Multiplex	= 3		/// both video & audio
 	};
 
-	/*
-	enum ID 
-	{
-		Unknown		= 0,
-		Raw			= 1,
-
-		/// Video
-		MP4			= 2,
-		FLV			= 3,
-		OGG			= 4,
-		AVI			= 5,
-		MJPEG		= 6,
-		MPNG		= 7,
-
-		/// Audio
-		M4A			= 20,
-		MP3			= 21
-	};
-	*/
-
 	//
 	// Base Format Variables
 	//
-	std::string label;		/// The display name of this format.
+	std::string name;		/// The display name of this format.
 	const char* id;			/// The short name of this format.
-	Type type;				/// The format type.
 	
 	VideoCodec video;		/// The video codec.
 	AudioCodec audio;		/// The audio codec.
@@ -90,20 +69,23 @@ struct Format
 	//
 	Format();
 
-	Format(const std::string& label, const char* id, 
+	Format(const std::string& name, const char* id, 
 		const VideoCodec& video, const AudioCodec& audio, int priority = 0);
 		/// Multiplex format constructor
 	
-	Format(const std::string& label, const char* id, 
+	Format(const std::string& name, const char* id, 
 		const VideoCodec& video, int priority = 0);
 		/// Video only format constructor
 	
-	Format(const std::string& label, const char* id, 
+	Format(const std::string& name, const char* id, 
 		const AudioCodec& audio, int priority = 0);
 		/// Audio only format constructor
 
 	Format(const Format& r);
-	
+		
+	Type type() const;
+		/// The format type.
+
 	virtual std::string toString() const;
 	virtual void print(std::ostream& ost);
 
@@ -125,6 +107,26 @@ typedef std::vector<Format*> FormatPList;
 
 
 
+
+	/*
+	enum ID 
+	{
+		Unknown		= 0,
+		Raw			= 1,
+
+		/// Video
+		MP4			= 2,
+		FLV			= 3,
+		OGG			= 4,
+		AVI			= 5,
+		MJPEG		= 6,
+		MPNG		= 7,
+
+		/// Audio
+		M4A			= 20,
+		MP3			= 21
+	};
+	*/
 	//
 	/// Methods
 	//	

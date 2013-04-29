@@ -38,10 +38,8 @@ namespace Util {
 
 /*
 // ---------------------------------------------------------------------
-//
 // Socket Tools
 //
-// ---------------------------------------------------------------------
 
 
 // Checks if a port local number is available and returns a boolean value.

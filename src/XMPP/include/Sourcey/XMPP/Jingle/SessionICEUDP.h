@@ -35,7 +35,7 @@
 #include "Sourcey/XMPP/Jingle/ISession.h"
 #include "Sourcey/XMPP/Jingle/Jingle.h"
 #include "Sourcey/ICE/Agent.h"
-#include "Sourcey/PacketDispatcher.h"
+#include "Sourcey/PacketEmitter.h"
 #include "Sourcey/Util/UserManager.h"
 #include "Sourcey/Signal.h"
 
@@ -72,7 +72,7 @@ public:
 		// Sets the ICE agent instance for us to use. This MUST be
 		// done before initiating the session, generally via the
 		// Session Manager's SessionCreated callback.
-		// NOTE: A PacketDispatcher should be added for each ICE
+		// NOTE: A PacketEmitter should be added for each ICE
 		// Media Stream with corresponding indexes.
 
 	virtual void initiate();
@@ -89,7 +89,7 @@ public:
 		// sends it to the internal ICE ice for processing. The data
 		// may be a STUN message, media data, or an XMPP stanza.
 	
-	virtual PacketDispatcher* geStreamMediaSource(const ICE::MediaStream& stream);
+	virtual PacketEmitter* geStreamMediaSource(const ICE::MediaStream& stream);
 	virtual void removeMediaSources();
 
 	//
@@ -140,13 +140,13 @@ public:
 		// considered not authenticated.	
 
 	/*
-	virtual PacketDispatcher*& associateMediaSource(Agent& agent, MediaStream& stream) = 0;
-		// Called when it is time to associate a PacketDispatcher with a
+	virtual PacketEmitter*& associateMediaSource(Agent& agent, MediaStream& stream) = 0;
+		// Called when it is time to associate a PacketEmitter with a
 		// media stream. If we are the controlling agent and a
 		// MediaSource is already associated with the media stream then
-		// this method will not be called. If the PacketDispatcher object is
+		// this method will not be called. If the PacketEmitter object is
 		// NULL the Media  Stream is set to Failed. The media stream is
-		// NOT responsible for freeing the PacketDispatcher.
+		// NOT responsible for freeing the PacketEmitter.
 		*/
 
 	//Signal<const DataPacket&> OnData;

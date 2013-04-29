@@ -12,7 +12,6 @@ namespace Pacman {
 	
 	/*
 // ---------------------------------------------------------------------
-//
 inline bool parseRemotePackageRequest(RemotePackageMap& packages, const std::string& data) 
 	/// Returns a comma delimited package name string.
 {
@@ -39,7 +38,6 @@ inline bool parseRemotePackageRequest(RemotePackageMap& packages, const std::str
 
 
 // ---------------------------------------------------------------------
-//
 struct Package: public IPackage, public XML::Document
 	/// This class provides an XML representation of a package
 	/// which is available to the Package Manager.
@@ -83,7 +81,6 @@ struct Package: public IPackage, public XML::Document
 
 
 // ---------------------------------------------------------------------
-//
 struct RemotePackage: public RemoteIPackage, public XML::Document
 	/// This class provides an XML representation of a package
 	/// that exists on the remote server.
@@ -95,7 +92,6 @@ struct RemotePackage: public RemoteIPackage, public XML::Document
 
 
 // ---------------------------------------------------------------------
-//
 struct LocalPackage: public LocalIPackage, public XML::Document
 	/// This class provides an XML representation of a package
 	/// that exists on the local filesystem.

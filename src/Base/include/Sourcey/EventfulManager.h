@@ -45,12 +45,12 @@ public:
 public:	
 	virtual void onAdd(const TKey&, TValue* item) 
 	{
-		ItemAdded.dispatch(this, *item);
+		ItemAdded.emit(this, *item);
 	}
 
 	virtual void onRemove(const TKey&, TValue* item) 
 	{ 
-		ItemRemoved.dispatch(this, *item); 
+		ItemRemoved.emit(this, *item); 
 	}
 
 	Signal<TValue&>			ItemAdded;

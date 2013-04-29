@@ -297,7 +297,7 @@ int VideoEncoder::encode(unsigned char *input, int inputSize) ///*, unsigned cha
 			_params.oformat.video.height,
 			_oFrame->pts);
 
-		dispatch(this, packet);
+		emit(this, packet);
 	}
 
     return size;

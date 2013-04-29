@@ -64,8 +64,8 @@ Client::Client(Net::IWebSocket& socket, Runner& runner, const Net::Address& serv
 
 Client::~Client() 
 {
-	close();
 	_timer->destroy();
+	// NOTE: Do not call socket.close() here
 }
 
 
@@ -364,7 +364,7 @@ void Client::onClose()
 void Client::onPacket(SocketIO::Packet& packet)
 {
 	log("trace") << "On Packet" << endl;		
-	PacketDispatcher::dispatch(this, packet);
+	PacketEmitter::emit(this, packet);
 }
 
 	

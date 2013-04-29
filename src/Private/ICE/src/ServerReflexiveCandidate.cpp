@@ -187,7 +187,7 @@ void ServerReflexiveCandidate::onSTUNTransactionComplete(STUN::Transaction* tran
 		return;
 	}
 
-	ConnectivityCheckSuccess.dispatch(this, *transaction);
+	ConnectivityCheckSuccess.emit(this, *transaction);
 	_transaction = NULL;
 }
 
@@ -205,7 +205,7 @@ void ServerReflexiveCandidate::onSTUNTransactionTimeout(STUN::Transaction* trans
 		setState(this, CandidateState::Failed);
 	}
 
-	ConnectivityCheckFailed.dispatch(this, *transaction);
+	ConnectivityCheckFailed.emit(this, *transaction);
 	_transaction = NULL;
 }
 */

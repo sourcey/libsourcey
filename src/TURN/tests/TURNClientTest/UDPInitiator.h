@@ -56,7 +56,7 @@ protected:
 		case ClientState::Authorizing:		
 			break;
 		case ClientState::Success:
-			AllocationCreated.dispatch(this);
+			AllocationCreated.emit(this);
 			break;
 		case ClientState::Failed:				
 			break;

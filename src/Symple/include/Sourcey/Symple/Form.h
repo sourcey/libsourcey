@@ -130,9 +130,6 @@ public:
 		/// submit 		The form-submitting entity is submitting data to the form-processing entity.
 		/// cancel 		The form-submitting entity has cancelled submission of data to the form-processing entity.
 		/// result 		The form-processing entity is returning data to the form-submitting entity.
-	
-	void setRebuild(bool flag);
-		/// Notifies the form-submitting entity that the form should be rebuilt.
 
 	void setPartial(bool flag);
 		/// Notifies the form is a partial section of the form.

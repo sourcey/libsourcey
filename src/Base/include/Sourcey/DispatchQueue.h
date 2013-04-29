@@ -68,7 +68,7 @@ public:
 	}
 
 
-	virtual void dispatch(T& item) = 0;
+	virtual void emit(T& item) = 0;
 		// Called inside the Runner thread to dispatch an item.
 		//
 		// Overriding classes implement broadcasting logic here.
@@ -117,7 +117,7 @@ public:
 				_queue.pop_front();
 			}
 
-			dispatch(*item);
+			emit(*item);
 			delete item;
 		}
 		//_stopwatch.stop();

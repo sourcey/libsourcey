@@ -71,7 +71,7 @@ public:
 		encoder.close();		
 		std::string base64(ostr.str());
 		DataPacket opacket((unsigned char*)base64.data(), base64.size());
-		dispatch(this, opacket);
+		emit(this, opacket);
 
 		LogTrace() << "[Base64PacketEncoder:" << this << "] Processing: OK" << std::endl;
 	}

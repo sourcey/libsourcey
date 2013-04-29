@@ -178,38 +178,38 @@ public:
 		return _refCount;
 	}
 
-	virtual void dispatch(Void sender) 
+	virtual void emit(Void sender) 
 	{
 		Void empty = 0;
-		dispatch(sender, (P)empty, (P2)empty, (P3)empty, (P4)empty);
+		emit(sender, (P)empty, (P2)empty, (P3)empty, (P4)empty);
 	}
 
-	virtual void dispatch(Void sender, P arg) 
+	virtual void emit(Void sender, P arg) 
 	{
 		Void empty = 0;
-		dispatch(sender, arg, (P2)empty, (P3)empty, (P4)empty);
+		emit(sender, arg, (P2)empty, (P3)empty, (P4)empty);
 	}
 
-	virtual void dispatch(Void sender, P arg, P2 arg2) 
+	virtual void emit(Void sender, P arg, P2 arg2) 
 	{
 		Void empty = 0;
-		dispatch(sender, arg, arg2, (P3)empty, (P4)empty);
+		emit(sender, arg, arg2, (P3)empty, (P4)empty);
 	}	
 
-	virtual void dispatch(Void sender, P arg, P2 arg2, P3 arg3) 
+	virtual void emit(Void sender, P arg, P2 arg2, P3 arg3) 
 	{
 		Void empty = 0;
-		dispatch(sender, arg, arg2, arg3, (P4)empty);
+		emit(sender, arg, arg2, arg3, (P4)empty);
 	}
 
-	virtual void dispatch(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) 
+	virtual void emit(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) 
 	{
 		DelegateList toNotify;
 		obtain(toNotify);
 		try {
 			for (Iterator it = toNotify.begin(); it != toNotify.end(); ++it) {
 				if ((*it)->accepts(sender, arg, arg2, arg3, arg4))
-					(*it)->dispatch(sender, arg, arg2, arg3, arg4); 
+					(*it)->emit(sender, arg, arg2, arg3, arg4); 
 			}
 		}
 		catch (StopPropagation&) {

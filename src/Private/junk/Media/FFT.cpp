@@ -1,9 +1,43 @@
+//
+// LibSourcey
+// Copyright (C) 2005, Sourcey <http://sourcey.com>
+//
+// LibSourcey is is distributed under a dual license that allows free, 
+// open source use and closed source use under a standard commercial
+// license.
+//
+// Non-Commercial Use:
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// 
+// Commercial Use:
+// Please contact mail@sourcey.com
+//
+
+
 #include "Sourcey/Media/FFT.h"
-#include <vector>
-#include <cassert>
 
+#include <assert.h>
+#include <math.h>
+//#include <cmath.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <limits>
+#include <iterator>
 
-#define PI 3.14159265
+#include <sstream>
+#include <algorithm>
+
 
 using namespace std;
 
@@ -12,223 +46,212 @@ namespace Sourcey {
 namespace Media {
 
 
-FFT::FFT(int n, bool inverse) : 
-	n(n), inverse(inverse), result(vector<Complex>(n))
+	/*
+// -------------------------------------------------------------------
+//
+const int kMaxFFTPow2Size = 24;
+
+
+// Normal constructor: allocates for a given fftSize.
+FFTFrame::FFTFrame(unsigned fftSize)
+    : _FFTSize(fftSize)
+    //, _log2FFTSize(static_cast<unsigned>(log2(fftSize)))
+    , _forwardContext(0)
+    //, _inverseContext(0)
+    , _complexData(new float(fftSize))
+    , _realData(new float(fftSize / 2))
+    , _imagData(new float(fftSize / 2))
 {
-    lgN = 0;
-    for (int i = n; i > 1; i >>= 1)
-    {
-        ++lgN;
-        assert((i & 1) == 0);
-    }
-    omega.resize(lgN);
-    int m = 1;
-    for (int s = 0; s < lgN; ++s)
-    {
-        m <<= 1;
-        if (inverse)
-            omega[s] = exp(Complex(0, 2.0 * PI / m));
-        else
-            omega[s] = exp(Complex(0, -2.0 * PI / m));
-    }
+    // We only allow power of two.
+    assert(1UL << log2FFTSize() == _FFTSize);
+
+    _forwardContext = contextForSize(fftSize, DFT_R2C);
+    //_inverseContext = contextForSize(fftSize, IDFT_C2R);
 }
 
-
-vector<FFT::Complex> FFT::transform(const vector<Complex>& buf)
+// Copy constructor.
+FFTFrame::FFTFrame(const FFTFrame& frame)
+    : _FFTSize(frame._FFTSize)
+    //, _log2FFTSize(frame._log2FFTSize)
+    , _forwardContext(0)
+    //, _inverseContext(0)
+    , _complexData(new float(frame._FFTSize))
+    , _realData(new float(frame._FFTSize / 2))
+    , _imagData(new float(frame._FFTSize / 2))
 {
-    bitReverseCopy(buf, result);
-    int m = 1;
-    for (int s = 0; s < lgN; ++s)
-    {
-        m <<= 1;
-        for (int k = 0; k < n; k += m)
-        {
-            Complex current_omega = 1;
-            for (int j = 0; j < (m >> 1); ++j)
-            {
-                Complex t = current_omega * result[k + j + (m >> 1)];
-                Complex u = result[k + j];
-                result[k + j] = u + t;
-                result[k + j + (m >> 1)] = u - t;
-                current_omega *= omega[s];
-            }
-        }
-    }
-    if (inverse == false)
-        for (int i = 0; i < n; ++i)
-            result[i] /= n;
-    return result;
+    _forwardContext = contextForSize(_FFTSize, DFT_R2C);
+    //_inverseContext = contextForSize(_FFTSize, IDFT_C2R);
+
+    // Copy/setup frame data.
+    unsigned nbytes = sizeof(float) * (_FFTSize / 2);
+    memcpy(realData(), frame.realData(), nbytes);
+    memcpy(realData(), frame.realData(), nbytes);
+    memcpy(imagData(), frame.imagData(), nbytes);
 }
 
-
-double FFT::getIntensity(Complex c)
+FFTFrame::~FFTFrame()
 {
-    return abs(c);
+    av_rdft_end(_forwardContext);
+    //av_rdft_end(_inverseContext);
+	
+	delete [] _complexData;
+	delete [] _realData;
+	delete [] _imagData;
 }
 
-
-double FFT::getPhase(Complex c)
+void FFTFrame::doFFT(const float* data)
 {
-    return arg(c);
-}
+    // Copy since processing is in-place.
+    float* p = _complexData; //.data();
+    memcpy(p, data, sizeof(float) * _FFTSize);
 
+    // Compute Forward transform.
+    av_rdft_calc(_forwardContext, p);
 
-double FFT::getDecibels(Complex& c, double scale)
-{
-	return scale * log10(abs(c));
-}
+    // De-interleave to separate real and complex arrays.
+    int len = _FFTSize / 2;
 
+    // FIXME: see above comment in multiply() about scaling.
+    const float scale = 2.0f;
 
-void FFT::bitReverseCopy(const vector<Complex>& src, vector<Complex>& dest) const
-{
-    for (int i = 0; i < n; ++i)
-    {
-        int index = i, rev = 0;
-        for (int j = 0; j < lgN; ++j)
-        {
-            rev = (rev << 1) | (index & 1);
-            index >>= 1;
-        }
-        dest[rev] = src[i];
+    for (int i = 0; i < len; ++i) {
+        int baseComplexIndex = 2 * i;
+        // _realData[0] is the DC component and _imagData[0]
+		// is the nyquist component since the interleaved 
+		// complex data is packed.
+        _realData[i] = scale * p[baseComplexIndex];
+        _imagData[i] = scale * p[baseComplexIndex + 1];
     }
 }
 
 
-} // namespace Media
-} // namespace Sourcey
+float* FFTFrame::realData() const
+{
+    return const_cast<float*>(_realData); //.data());
+}
+
+float* FFTFrame::imagData() const
+{
+    return const_cast<float*>(_imagData); //.data());
+}
+
+
+
+RDFTContext* FFTFrame::contextForSize(unsigned fftSize, RDFTransformType trans)
+{
+    assert(fftSize);
+    int pow2size = static_cast<int>(log2(fftSize));
+    assert(pow2size < kMaxFFTPow2Size);
+
+    RDFTContext* context = av_rdft_init(pow2size, trans);
+    return context;
+}
+
+
+// -------------------------------------------------------------------
+//
+void vsmul(const float* sourceP, int sourceStride, const float* scale, float* destP, int destStride, size_t framesToProcess)
+{
+    int n = framesToProcess;
+    float k = *scale;
+    while (n--) {
+        *destP = k * *sourceP;
+        sourceP += sourceStride;
+        destP += destStride;
+    }
+}
+
+void zvmul(const float* real1P, const float* imag1P, const float* real2P, const float* imag2P, float* realDestP, float* imagDestP, size_t framesToProcess)
+{
+    unsigned i = 0;
+    for (; i < framesToProcess; ++i) {
+        // Read and compute result before storing them, in case the
+        // destination is the same as one of the sources.
+        float realResult = real1P[i] * real2P[i] - imag1P[i] * imag2P[i];
+        float imagResult = real1P[i] * imag2P[i] + imag1P[i] * real2P[i];
+
+        realDestP[i] = realResult;
+        imagDestP[i] = imagResult;
+    }
+}
+*/
+	
+/*
+float* FFTFrame::getUpToDateComplexData()
+{
+    // FIXME: if we can't completely get rid of this method, SSE
+    // optimization could be considered if it shows up hot on profiles.
+    int len = _FFTSize / 2;
+    for (int i = 0; i < len; ++i) {
+        int baseComplexIndex = 2 * i;
+        _complexData[baseComplexIndex] = _realData[i];
+        _complexData[baseComplexIndex + 1] = _imagData[i];
+    }
+    return const_cast<float*>(_complexData); //.data());
+}
+*/
 
 
 
 /*
-#include "Fft.h"
-#include "Poco/Exception.h"
-
-
-using namespace std;
-using namespace Poco;
-
-
-// log (1) = 0, log(2) = 1, log(3) = 2, log(4) = 2 ...
-
-const double PI = 2.0 * asin (1.0);
-
-// points must be a power of 2
-
-Fft::Fft (unsigned points, unsigned sampleRate)
-	: _points (points), _sampleRate (sampleRate)
+void FFTFrame::doInverseFFT(float* data)
 {
-    _tape.resize (_points);
-    _sqrtPoints = sqrt (static_cast<double> (_points));
-    // calculate binary log
-    _logPoints = 0;
-    points--;
-    while (points != 0)
-    {
-        points >>= 1;
-        _logPoints++;
-    }
+    // Prepare interleaved data.
+    float* interleavedData = getUpToDateComplexData();
 
-    _aBitRev.resize (_points);
-    _X.resize (_points);
-    _W.resize (_logPoints + 1);
-    // Precompute complex exponentials
-    int _2_l = 2;
-    for (unsigned l = 1; l <= _logPoints; l++)
-    {
-        _W[l].resize (_points);
+    // Compute inverse transform.
+    av_rdft_calc(_inverseContext, interleavedData);
 
-        for (unsigned i = 0; i != _points; i++ )
-        {
-            double re =  cos (2. * PI * i / _2_l);
-            double im = -sin (2. * PI * i / _2_l);
-            _W[l][i] = Complex (re, im);
-        }
-        _2_l *= 2;
-    }
-
-    // set up bit reverse mapping
-    int rev = 0;
-    unsigned halfPoints = _points/2;
-    for (unsigned i = 0; i < _points - 1; i++)
-    {
-        _aBitRev [i] = static_cast<unsigned> (rev);
-        unsigned mask = halfPoints;
-        // add 1 backwards
-        while (rev >= static_cast<int> (mask))
-        {
-            rev -= mask; // turn off this bit
-            mask >>= 1;
-        }
-        rev += mask;
-    }
-    _aBitRev [_points-1] = _points-1;
-}
-
-void Fft::DataIn (vector<int> const & data)
-{
-	if (data.size () > _points)
-		throw Exception ("Sample buffer larger than FFT capacity");
-    // make space for samples at the end of tape
-    // shifting previous samples towards the beginning
-	// to           from
-	// v-------------|
-	// xxxxxxxxxxxxxxyyyyyyyyy
-	// yyyyyyyyyoooooooooooooo
-	// <- old -><- free tail->
-	copy (_tape.begin () + data.size (), _tape.end (), _tape.begin ());
-	copy (data.begin (), data.end (), _tape.begin () + (_points - data.size ()));
-
-    // Initialize the FFT buffer
-    for (unsigned i = 0; i != _points; ++i)
-        PutAt (i, _tape [i]);
-}
-
-//----------------------------------------------------------------
-//               0   1   2   3   4   5   6   7
-//  level   1
-//  step    1                                     0
-//  increm  2                                   W 
-//  j = 0        <--->   <--->   <--->   <--->   1
-//  level   2
-//  step    2
-//  increm  4                                     0
-//  j = 0        <------->       <------->      W      1
-//  j = 1            <------->       <------->   2   W
-//  level   3                                         2
-//  step    4
-//  increm  8                                     0
-//  j = 0        <--------------->              W      1
-//  j = 1            <--------------->           3   W      2
-//  j = 2                <--------------->            3   W      3
-//  j = 3                    <--------------->             3   W
-//                                                              3
-//----------------------------------------------------------------
-
-void Fft::Transform (vector<int> const & data)
-{
-	DataIn (data);
-
-    // step = 2 ^ (level-1)
-    // increm = 2 ^ level;
-    unsigned step = 1;
-    for (unsigned level = 1; level <= _logPoints; level++)
-    {
-        unsigned increm = step * 2;
-        for (unsigned j = 0; j < step; j++)
-        {
-            // U = exp ( - 2 PI j / 2 ^ level )
-            Complex U = _W [level][j];
-            for (unsigned i = j; i < _points; i += increm)
-            {
-                // butterfly
-                Complex T = U;
-                T *= _X [i+step];
-                _X [i+step] = _X[i];
-                _X [i+step] -= T;
-                _X [i] += T;
-            }
-        }
-        step *= 2;
-    }
+    // Scale so that a forward then inverse FFT yields exactly the original data.
+    const float scale = 1.0 / _FFTSize;
+    vsmul(interleavedData, 1, &scale, data, 1, _FFTSize);
 }
 */
+
+
+/*
+// Creates a blank/empty frame (interpolate() must later be called).
+FFTFrame::FFTFrame()
+    : _FFTSize(0)
+    , _log2FFTSize(0)
+    , _forwardContext(0)
+    , _inverseContext(0)
+{
+}
+*/
+/*
+void FFTFrame::multiply(const FFTFrame& frame)
+{
+    FFTFrame& frame1 = *this;
+    FFTFrame& frame2 = const_cast<FFTFrame&>(frame);
+
+    float* realP1 = frame1.realData();
+    float* imagP1 = frame1.imagData();
+    const float* realP2 = frame2.realData();
+    const float* imagP2 = frame2.imagData();
+
+    unsigned halfSize = fftSize() / 2;
+    float real0 = realP1[0];
+    float imag0 = imagP1[0];
+
+    zvmul(realP1, imagP1, realP2, imagP2, realP1, imagP1, halfSize); 
+
+    // Multiply the packed DC/nyquist component
+    realP1[0] = real0 * realP2[0];
+    imagP1[0] = imag0 * imagP2[0];
+
+    // Scale accounts the peculiar scaling of vecLib on the Mac.
+    // This ensures the right scaling all the way back to inverse FFT.
+    // FIXME: if we change the scaling on the Mac then this scale
+    // factor will need to change too.
+    float scale = 0.5f;
+
+    vsmul(realP1, 1, &scale, realP1, 1, halfSize);
+    vsmul(imagP1, 1, &scale, imagP1, 1, halfSize);
+}
+*/
+
+
+
+} // namespace Media 
+} // namespace Sourcey

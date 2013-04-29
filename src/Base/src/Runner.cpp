@@ -252,12 +252,12 @@ void Runner::run()
 
 		// Dispatch the Idle signal
 		// TODO: Idle on each complete iteration of all tasks
-		Idle.dispatch(this);
+		Idle.emit(this);
 	}	
 			
 	log("trace") << "Shutdown" << endl;
 		
-	Shutdown.dispatch(this);
+	Shutdown.emit(this);
 
 	log("trace") << "Exiting" << endl;
 }

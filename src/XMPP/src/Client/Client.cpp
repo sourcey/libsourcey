@@ -289,7 +289,6 @@ static xmpp_log_t XMPPLogger = { HandleXMPPLogger, NULL };
 
 
 // ---------------------------------------------------------------------
-//
 XMPPTask::XMPPTask(Client& client, Runner& runner) :
 	Task(runner, true),
 	_client(client),

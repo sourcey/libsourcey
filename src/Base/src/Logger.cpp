@@ -40,10 +40,8 @@ namespace Sourcey {
 
 
 // ---------------------------------------------------------------------
-//
 // Logger
 //
-// ---------------------------------------------------------------------
 Logger*		Logger::_instance;
 FastMutex	Logger::_mutex;
 
@@ -172,10 +170,8 @@ LogStream Logger::send(const char* level, const void* ptr, const string& realm) 
 
 
 // ---------------------------------------------------------------------
-//
 // Log Stream
 //
-// ---------------------------------------------------------------------
 LogStream::LogStream(LogLevel level, const string& realm, const void* ptr) : 
 	level(level), realm(realm), pid(ptr ? Util::getPID(ptr) : "") 
 {
@@ -189,10 +185,8 @@ LogStream::LogStream(LogLevel level, const string& realm, const string& pid) :
 
 	
 // ---------------------------------------------------------------------
-//
 // Log Channel
 //
-// ---------------------------------------------------------------------
 LogChannel::LogChannel(const string& name, LogLevel level, const char* dateFormat) : 
 	_name(name), 
 	_level(level), 
@@ -225,10 +219,8 @@ void LogChannel::format(const LogStream& stream, ostream& ost)
 
 
 // ---------------------------------------------------------------------
-//
 // Console Channel
 //
-// ---------------------------------------------------------------------
 ConsoleChannel::ConsoleChannel(const string& name, LogLevel level, const char* dateFormat) : 
 	LogChannel(name, level, dateFormat) 
 {
@@ -255,10 +247,8 @@ void ConsoleChannel::write(const LogStream& stream)
 
 
 // ---------------------------------------------------------------------
-//
 // File Channel
 //
-// ---------------------------------------------------------------------
 FileChannel::FileChannel(const string& name,
 						 const string& path, 
 						 LogLevel level, 
@@ -341,10 +331,8 @@ string FileChannel::path() const
 
 
 // ---------------------------------------------------------------------
-//
 // Rotating File Channel
 //
-// ---------------------------------------------------------------------
 RotatingFileChannel::RotatingFileChannel(const string& name,
 	                                     const string& dir, 
 										 LogLevel level, 
@@ -418,10 +406,8 @@ void RotatingFileChannel::rotate()
 
 /*
 // ---------------------------------------------------------------------
-//
 // Evented File Channel
 //
-// ---------------------------------------------------------------------
 EventedFileChannel::EventedFileChannel(const string& name,
 						 const string& dir, 
 						 LogLevel level, 
@@ -444,6 +430,6 @@ void EventedFileChannel::write(const LogStream& stream, LogLevel level, const IP
 		return;
 
 	FileChannel::write(message, level, ptr);	
-	OnLogStream.dispatch(this, message, level, ptr);
+	OnLogStream.emit(this, message, level, ptr);
 }
 */

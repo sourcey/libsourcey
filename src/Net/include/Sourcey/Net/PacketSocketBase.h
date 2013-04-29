@@ -84,7 +84,7 @@ public:
 		/// Override this method to resolve conflict with 
 		/// attach() in Poco::Net::SecureStreamSocket.
 	{
-		PacketDispatcher::attach(delegate);
+		PacketEmitter::attach(delegate);
 	}
 
 
@@ -104,7 +104,7 @@ protected:
 		}
 
 		packet->info = new PacketInfo(*this, peerAddress());
-		PacketDispatcher::dispatch(static_cast<ISocketT*>(this), *packet);	
+		PacketEmitter::emit(static_cast<ISocketT*>(this), *packet);	
 		delete packet;
 	}
 

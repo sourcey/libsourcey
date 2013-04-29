@@ -41,10 +41,8 @@ namespace Jingle {
 
 
 // ---------------------------------------------------------------------
-//
 // Jingle
 //
-// ---------------------------------------------------------------------
 Jingle::Default::Default(
 	const string& action,
 	const string& initiator,
@@ -253,10 +251,8 @@ Jingle::Candidate Jingle::highestPriorityCandidate() const
 
 
 // ---------------------------------------------------------------------
-//
 // Jingle::Content
 //
-// ---------------------------------------------------------------------
 Jingle::Content::Content()
 {
 }
@@ -305,10 +301,8 @@ Jingle::Transport Jingle::Content::transport() const
 
 
 // ---------------------------------------------------------------------
-//
 // Jingle::Content::Description
 //
-// ---------------------------------------------------------------------
 Jingle::Description::Description(XML::Node& node) :
 	XML::Node(node)
 {
@@ -338,10 +332,8 @@ Jingle::Description Jingle::Description::setMediaType(const string& media)
 
 
 // ---------------------------------------------------------------------
-//
 // Jingle::Content::Transport
 //
-// ---------------------------------------------------------------------
 Jingle::Transport::Transport(XML::Node& node) :
 	XML::Node(node)
 {
@@ -364,10 +356,8 @@ Jingle::RemoteCandidate Jingle::Transport::addRemoteCandidate()
 
 
 // ---------------------------------------------------------------------
-//
 // Jingle::PayloadType
 //
-// ---------------------------------------------------------------------
 Jingle::PayloadType::PayloadType(XML::Node& node) :
 	XML::Node(node)
 {
@@ -410,10 +400,8 @@ Jingle::PayloadType Jingle::PayloadType::setChannels(int channels)
 
 
 // ---------------------------------------------------------------------
-//
 // Jingle::Candidate
 //
-// ---------------------------------------------------------------------
 Jingle::Candidate::Candidate()
 {
 }
@@ -523,10 +511,8 @@ Jingle::Candidate Jingle::Candidate::setType(const string& type)
 
 
 // ---------------------------------------------------------------------
-//
 // Jingle::RemoteCandidate
 //
-// ---------------------------------------------------------------------
 Jingle::RemoteCandidate::RemoteCandidate()
 {
 }

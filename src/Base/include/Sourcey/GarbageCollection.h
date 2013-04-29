@@ -77,7 +77,6 @@ private:
 
 
 // ---------------------------------------------------------------------
-//
 template <class DeletableT>
 class DelayedGarbageCollectionTask: public Task
 {

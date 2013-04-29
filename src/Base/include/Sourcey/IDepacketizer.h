@@ -47,12 +47,12 @@ public:
 	virtual void process(IPacket& packet) = 0;
 		// Processes incoming packets.
 
-	virtual void dispatch(IPacket& packet)
+	virtual void emit(IPacket& packet)
 		// Sends a packet to the handler and increments
 		// the sequence counter.
 	{
 		_sequenceNumber++;	
-		IPacketProcessor::dispatch(this, packet);
+		IPacketProcessor::emit(this, packet);
 	}
 
 	void setSequenceNumber(int n) { _sequenceNumber =  n; }

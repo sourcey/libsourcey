@@ -55,8 +55,8 @@ Client::Client(Net::IWebSocket& socket, Runner& runner, const Client::Options& o
 Client::~Client() 
 {
 	log("trace") << "Destroying" << std::endl;
-	close();
-	log("trace") << "Destroying: OK" << std::endl;
+	//close();
+	//log("trace") << "Destroying: OK" << std::endl;
 }
 
 
@@ -89,15 +89,31 @@ int Client::send(const std::string data)
 }
 
 
-int Client::send(Message& message, bool ack)
+int Client::send(const Message& message, bool ack)
 {	
 	assert(isOnline());
-	message.setFrom(ourPeer().address());
-	assert(message.valid());
-	assert(message.to().id() != message.from().id());
-	log("trace") << "Sending Message: " 
-		<< message.id() << ":\n" 
-		<< JSON::stringify(message, true) << std::endl;
+	Message m(message);
+	m.setFrom(ourPeer().address());
+	assert(m.valid());
+	assert(m.to().id() != m.from().id());
+	//log("trace") << "Sending Message: " 
+	//	<< message.id() << ":\n" 
+	//	<< JSON::stringify(message, true) << std::endl;
+	return SocketIO::Client::send(message, false);
+}
+
+
+int Client::respond(const Message& message, bool ack)
+{
+	assert(isOnline());	
+	Message m(message);
+	m.setTo(m.from());
+	m.setFrom(ourPeer().address());
+	assert(m.valid());
+	assert(m.to().id() != m.from().id());
+	//log("trace") << "Responding Message: " 
+	//	<< m.id() << ":\n" 
+	//	<< JSON::stringify(m, true) << std::endl;
 	return SocketIO::Client::send(message, false);
 }
 
@@ -107,7 +123,7 @@ void Client::createPresence(Presence& p)
 	log("trace") << "Creating Presence" << std::endl;
 
 	Peer& peer = ourPeer();
-	UpdatePresenceData.dispatch(this, peer);
+	UpdatePresenceData.emit(this, peer);
 	p["data"] = peer;
 }
 
@@ -132,13 +148,6 @@ int Client::sendPresence(const Address& to, bool probe)
 	p.setProbe(probe);
 	p.setTo(to);
 	return send(p);
-}
-
-
-int Client::respond(Message& message)
-{
-	message.setTo(message.from());
-	return send(message);
 }
 
 
@@ -235,7 +244,7 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 
 			// Notify the outside application of the response 
 			// status before we transition the client state.
-			Announce.dispatch(this, _announceStatus);
+			Announce.emit(this, _announceStatus);
 
 			if (_announceStatus != 200)
 				throw Exception(data["message"].asString()); //"Announce Error: " + 
@@ -261,7 +270,7 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 		break;		
 
 	case TransactionState::Failed:
-		Announce.dispatch(this, _announceStatus);
+		Announce.emit(this, _announceStatus);
 		setError(state.message());
 		break;
 	}
@@ -291,23 +300,23 @@ void Client::onPacket(SocketIO::Packet& packet)
 		log("trace") << "Packet Created: Symple Type: " << type << std::endl;
 		if (type == "message") {
 			Message m(data);
-			PacketDispatcher::dispatch(this, m);
+			PacketEmitter::emit(this, m);
 		}
 		else if (type == "command") {
 			Command c(data);
-			PacketDispatcher::dispatch(this, c);
+			PacketEmitter::emit(this, c);
 		}
 		else if (type == "presence") {
 			Presence p(data);
 			if (p.isMember("data"))
 				_roster.update(p["data"], false);
-			PacketDispatcher::dispatch(this, p);
+			PacketEmitter::emit(this, p);
 			if (p.isProbe())
 				sendPresence(p.from());
 		}
 	}
 	else
-		PacketDispatcher::dispatch(this, packet);
+		PacketEmitter::emit(this, packet);
 }
 
 
@@ -412,7 +421,7 @@ void Client::onError()
 //	LogTrace() << "[Symple::Client] Creating Presence" << endl;
 //
 //	Peer& peer = /*_roster.*/ourPeer();
-//	UpdatePresenceData.dispatch(this, peer);
+//	UpdatePresenceData.emit(this, peer);
 //	//p.setFrom(peer.address()); //ourPeer());
 //	p["data"] = peer;
 //}
@@ -479,7 +488,7 @@ void Client::onError()
 //
 //			// Notify the outside application of the response 
 //			// status before we transition the client state.
-//			Announce.dispatch(this, _announceStatus);
+//			Announce.emit(this, _announceStatus);
 //
 //			if (_announceStatus != 200)
 //				throw Exception(data["message"].asString()); //"Announce Error: " + 
@@ -505,7 +514,7 @@ void Client::onError()
 //		break;		
 //
 //	case TransactionState::Failed:
-//		Announce.dispatch(this, _announceStatus);
+//		Announce.emit(this, _announceStatus);
 //		setError(state.message());
 //		break;
 //	}
@@ -558,19 +567,19 @@ void Client::onError()
 //		LogTrace() << "[Symple::Client] Packet Created: Symple Type: " << type << endl;
 //		if (type == "message") {
 //			Message m(data);
-//			dispatch(this, m);
+//			emit(this, m);
 //			return false; // stop propagation
 //		}
 //		else if (type == "command") {
 //			Command c(data);
-//			dispatch(this, c);
+//			emit(this, c);
 //			return false; // stop propagation
 //		}
 //		else if (type == "presence") {
 //			Presence p(data);
 //			if (p.isMember("data"))
 //				_roster.update(p["data"], false);
-//			dispatch(this, p);
+//			emit(this, p);
 //			if (p.isProbe())
 //				sendPresence(p.from());
 //			return false; // stop propagation

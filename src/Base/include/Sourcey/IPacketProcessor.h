@@ -29,13 +29,13 @@
 #define SOURCEY_IPacketProcessor_H
 
 
-#include "Sourcey/PacketDispatcher.h"
+#include "Sourcey/PacketEmitter.h"
 
 
 namespace Sourcey {
 
 
-class IPacketProcessor: public PacketDispatcher
+class IPacketProcessor: public PacketEmitter
 	/// This class is a virtual interface for processors that
 	/// process and emit the IPacket type. 
 	/// IPacketProcessor derive classes generally belong to a 

@@ -48,18 +48,42 @@ public:
 	Win32DeviceManager();
 	virtual ~Win32DeviceManager();
 
-	// Initialization
 	virtual bool initialize();
 	virtual void uninitialize();
 
 	virtual bool getVideoCaptureDevices(std::vector<Device>& devs);
+	virtual bool getDefaultAudioOutputDevice(Device& device);
+	virtual bool getDefaultAudioInputDevice(Device& device);
+	virtual bool getDefaultVideoCaptureDevice(Device& device);
 
 private:
 	virtual bool getAudioDevices(bool input, std::vector<Device>& devs);
-	virtual bool getDefaultVideoCaptureDevice(Device& device);
+	virtual bool getDefaultAudioDevice(bool input, Device& device);
 
-	bool _need_couninitialize;
+	bool _needCoUninitialize;
 };
+
+
+/*
+class Win32DeviceWatcher : public DeviceWatcher, public talk_base::Win32Window 
+{
+public:
+	explicit Win32DeviceWatcher(Win32DeviceManager* dm);
+	virtual ~Win32DeviceWatcher();
+	virtual bool start();
+	virtual void stop();
+
+private:
+	HDEVNOTIFY Register(REFGUID guid);
+	void Unregister(HDEVNOTIFY notify);
+	virtual bool OnMessage(UINT msg, WPARAM wp, LPARAM lp, LRESULT& result);
+
+	Win32DeviceManager* manager_;
+	HDEVNOTIFY audio_notify_;
+	HDEVNOTIFY video_notify_;
+};
+*/
+
 
 } } // namespace Sourcey::Media
 

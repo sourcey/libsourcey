@@ -41,7 +41,6 @@ namespace RTCP {
 
 
 // ---------------------------------------------------------------------
-//
 SDESItem::SDESItem() :
     type(SDESItem::Unknown),
 	length(2) // length minus content
@@ -89,7 +88,6 @@ void SDESItem::print(ostream& os) const
 
 
 // ---------------------------------------------------------------------
-//
 SDESChunk::SDESChunk(UInt32 ssrc) 
 {
     this->ssrc = ssrc;
@@ -146,7 +144,6 @@ void SDESChunk::print(ostream& os) const
 
 
 // ---------------------------------------------------------------------
-//
 SDESPacket::SDESPacket() :
 	Packet(Packet::SDES)
 {    

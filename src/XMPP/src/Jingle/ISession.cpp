@@ -40,10 +40,8 @@ namespace Jingle {
 
 
 // ---------------------------------------------------------------------
-//
 // Session
 //
-// ---------------------------------------------------------------------
 ISession::ISession(SessionManager& manager,
 				   const string& initiator, 
 				   const string& responder, 
@@ -86,7 +84,7 @@ ISession::~ISession()
 }
 
 
-void ISession::addMediaSource(PacketDispatcher* source) 
+void ISession::addMediaSource(PacketEmitter* source) 
 { 
 	_sources.push_back(source); 
 }
@@ -109,9 +107,9 @@ void ISession::print(std::ostream& ost)
 
 
 /*
-PacketDispatcher* ISession::getMediaSource(const std::string& name) 
+PacketEmitter* ISession::getMediaSource(const std::string& name) 
 {
-	for (PacketDispatcherList::const_iterator it = _sources.begin(); it != _sources.end(); ++it) {
+	for (PacketEmitterList::const_iterator it = _sources.begin(); it != _sources.end(); ++it) {
 		if ((*it)->name() == name) {
 			return *it;
 		}

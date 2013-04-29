@@ -41,10 +41,8 @@ namespace Pacman {
 
 
 // ---------------------------------------------------------------------
-//
 // Base Package
-//
-// ---------------------------------------------------------------------	
+//	
 Package::Package()
 {
 }
@@ -176,10 +174,8 @@ void Package::print(std::ostream& ost) const
 
 
 // ---------------------------------------------------------------------
-//
 // Package Asset
-//
-// ---------------------------------------------------------------------	
+//	
 Package::Asset::Asset(JSON::Value& src) :
 	root(src)
 {
@@ -244,10 +240,8 @@ bool Package::Asset::operator == (const Asset& r) const
 
 
 // ---------------------------------------------------------------------
-//
 // Remote Package
-//
-// ---------------------------------------------------------------------	
+//	
 RemotePackage::RemotePackage()
 {
 }
@@ -265,10 +259,8 @@ RemotePackage::~RemotePackage()
 
 
 // ---------------------------------------------------------------------
-//
 // Local Package
-//
-// ---------------------------------------------------------------------	
+//	
 LocalPackage::LocalPackage()
 {
 }
@@ -418,10 +410,8 @@ bool LocalPackage::valid() const
 
 
 // ---------------------------------------------------------------------
-//
 // Local Package Manifest
-//
-// ---------------------------------------------------------------------	
+//	
 LocalPackage::Manifest::Manifest(JSON::Value& src) :
 	root(src)
 {
@@ -451,10 +441,8 @@ bool LocalPackage::Manifest::empty() const
 
 
 // ---------------------------------------------------------------------
-//
 // IPackage Pair
-//
-// ---------------------------------------------------------------------	
+//	
 PackagePair::PackagePair(LocalPackage& local, RemotePackage& remote) :
 	local(local), remote(remote)
 {

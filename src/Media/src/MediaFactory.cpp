@@ -39,10 +39,8 @@ namespace Media {
 
 
 // ---------------------------------------------------------------------
-//
 // Media Factory
 //
-// ---------------------------------------------------------------------
 MediaFactory*	MediaFactory::_instance;
 FastMutex		MediaFactory::_mutex;
 
@@ -124,7 +122,7 @@ void MediaFactory::loadVideo()
 		} 
 		catch (...) 
 		{
-			LogError() << "[MediaFactory] Failed to load video capture." << endl;
+			LogError() << "[MediaFactory] Cannot load video capture." << endl;
 			_map[devs[0].id] = NULL;
 		}
 	}
@@ -206,10 +204,8 @@ void MediaFactory::unloadAudio()
 }
 
 // ---------------------------------------------------------------------
-//
 // Media Factory Video
 //
-// ---------------------------------------------------------------------
 MediaFactory::Video::Video(MediaFactory* factory) :
 	_factory(factory)
 {
@@ -266,10 +262,8 @@ void MediaFactory::Video::onRefCountChange(const void* pSender, int& refCount) {
 
 
 // ---------------------------------------------------------------------
-//
 // Media Factory Audio
 //
-// ---------------------------------------------------------------------
 MediaFactory::Audio::Audio(MediaFactory* factory) :
 	_factory(factory)
 {

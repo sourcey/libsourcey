@@ -361,7 +361,7 @@ protected:
 		/// Creates and dispatches a packet from received data.
 	{		
 		// May be overridden for custom handling...	
-		Data.dispatch(this, buffer, peerAddress());	
+		Data.emit(this, buffer, peerAddress());	
 	}
 
 
@@ -379,7 +379,7 @@ protected:
 			_reactor.detach(*this, reactorDelegate(this, &SocketBase::onConnect, SocketWritable));	
 			_connected = true;
 		}
-		Connected.dispatch(static_cast<ISocketT*>(this));
+		Connected.emit(static_cast<ISocketT*>(this));
 	}
 
 
@@ -399,7 +399,7 @@ protected:
 			destroy = _deleteOnClose;
 		}
 		
-		Closed.dispatch(static_cast<ISocketT*>(this));
+		Closed.emit(static_cast<ISocketT*>(this));
 
 		if (destroy) {
 			Log("trace", this) << "On Close: Deleting" << std::endl;	
@@ -426,7 +426,7 @@ protected:
 			_error = err;
 		}
 		int n = errorno();
-		Error.dispatch(static_cast<ISocketT*>(this), n, _error);
+		Error.emit(static_cast<ISocketT*>(this), n, _error);
 		close();
 	}
 
@@ -500,7 +500,7 @@ protected:
 		}
 
 		packet->info = new PacketInfo(*this, peerAddress());
-		dispatch(static_cast<ISocketT*>(this), *packet);	
+		emit(static_cast<ISocketT*>(this), *packet);	
 		delete packet;
 	}
 	*/

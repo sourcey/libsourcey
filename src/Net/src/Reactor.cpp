@@ -106,62 +106,18 @@ void Reactor::run()
 						break;
 					}
 				}
-				/*
-				readable = _readable;
-				writable = _writable;
-				error = _error;
-				*/
 			}
 				
-			//log("trace") << "Select In: " << readable.size() << ":" << writable.size() << ":" << error.size() << endl;
 			if (Poco::Net::Socket::select(readable, writable, error, _timeout)) 
 			{
-				//log("trace") << "Select Out: " << readable.size() << ":" << writable.size() << ":" << error.size() << endl;
 				for (Poco::Net::Socket::SocketList::iterator it = readable.begin(); it != readable.end(); ++it) {
-					dispatch(*it, SocketReadable);
-					
-					/*
-					for (DelegateList::iterator ait = _delegates.begin(); ait != _delegates.end(); ++ait) {
-						if (*(*ait)->socket == *it && (*ait)->event == SocketReadable) {
-
-							LogTrace() << "RREACTOE ################################# RECV" << endl;
-					
-							char buffer[32];
-
-							Poco::Net::SecureStreamSocket sock(*(*ait)->socket);
-							int n = sock.receiveBytes(buffer, sizeof(buffer));
-
-							//int n = ((Poco::Net::SecureStreamSocket&)(*it)).receiveBytes(buffer, sizeof(buffer));
-			
-							std::string response(buffer, n);
-							LogTrace() << "RREACTOE ################################# response: " << response << endl;
-						}
-					}
-					*/
+					emit(*it, SocketReadable);
 				}
 				for (Poco::Net::Socket::SocketList::iterator it = writable.begin(); it != writable.end(); ++it) {
-					dispatch(*it, SocketWritable);
-					
-					/*
-					for (DelegateList::iterator ait = _delegates.begin(); ait != _delegates.end(); ++ait) {
-						if (*(*ait)->socket == *it && (*ait)->event == SocketWritable) {
-	
-							Poco::Net::HTTPRequest request("GET", "/");
-							stringstream ss;
-							request.write(ss);	
-							LogTrace() << "RREACTOE  equest Headers: " << ss.str() << endl;
-							Poco::Net::SecureStreamSocket sock(*(*ait)->socket);
-							//int n = sock.receiveBytes(buffer, sizeof(buffer));
-							//Poco::Net::SecureStreamSocket sock(*it);
-							int n = sock.sendBytes(ss.str().data(), ss.str().length());
-							//((Poco::Net::SecureStreamSocket&)(*it)).sendBytes(ss.str().data(), ss.str().length());
-							LogTrace() << "RREACTOE  equest Headers: OK" << endl;
-						}
-					}
-					*/
+					emit(*it, SocketWritable);
 				}
 				for (Poco::Net::Socket::SocketList::iterator it = error.begin(); it != error.end(); ++it)
-					dispatch(*it, SocketError);
+					emit(*it, SocketError);
 			} 
 
 			Thread::sleep(5); // gulp!
@@ -177,12 +133,14 @@ void Reactor::run()
 		catch (...)
 		{
 			log("error") << "Unknown Error" << endl;
-			//throw;
+#ifdef _DEBUG	
+			throw 0;
+#endif
 		}
 	}
 	
 	log("trace") << "Shutdown" << endl;
-	Shutdown.dispatch(this);
+	Shutdown.emit(this);
 	log("trace") << "Exiting" << endl;
 }
 
@@ -287,7 +245,7 @@ void Reactor::detach(const Poco::Net::Socket& socket)
 }
 
 
-void Reactor::dispatch(const Poco::Net::Socket& socket, SocketEvent event)
+void Reactor::emit(const Poco::Net::Socket& socket, SocketEvent event)
 {
 	//log("trace") << "Dispatch: " << socket.impl() << endl;
 
@@ -303,7 +261,7 @@ void Reactor::dispatch(const Poco::Net::Socket& socket, SocketEvent event)
 	}
 
 	if (delegate)
-		delegate->dispatch(this, *this, socket, event, 0);
+		delegate->emit(this, *this, socket, event, 0);
 }
 
 
@@ -319,7 +277,6 @@ Reactor& Reactor::getDefault()
 	return *sh.get();
 }
 // ---------------------------------------------------------------------
-//
 ReactorNotifier::ReactorNotifier(Reactor& reactor, Runner& runner, int queueSize, int dispatchTimeout) : 
 	DispatchQueue<ReactorEvent>(runner, queueSize, dispatchTimeout),
 	_reactor(reactor)
@@ -333,12 +290,12 @@ void ReactorNotifier::run()
 }
 
 
-void ReactorNotifier::dispatch(ReactorEvent& event)
+void ReactorNotifier::emit(ReactorEvent& event)
 {
 	log("trace") << "[ReactorNotifier:" << this << "] Broadcast: " << event.delegate.socket.impl() << ": " << event.type << endl;
 	assert(event.delegate.locked);
 	
-	event.delegate.dispatch(&event.reactor, event, 0, 0, 0);
+	event.delegate.emit(&event.reactor, event, 0, 0, 0);
 	log("trace") << "[ReactorNotifier:" << this << "] Broadcast Unlock " << event.delegate.socket.impl() << ": " << event.type << endl;
 	assert(event.delegate.locked);
 	event.delegate.locked = false;

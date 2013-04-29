@@ -199,7 +199,7 @@ void Transaction::processRequest(ostream& ostr)
 void Transaction::setRequestState(TransferState::Type state)
 {
 	_requestState.state = state;
-	RequestProgress.dispatch(this, _requestState);
+	RequestProgress.emit(this, _requestState);
 }
 
 
@@ -256,14 +256,14 @@ void Transaction::processResponse(istream& istr)
 void Transaction::setResponseState(TransferState::Type state)
 {
 	_responseState.state = state;
-	ResponseProgress.dispatch(this, _responseState);
+	ResponseProgress.emit(this, _responseState);
 }
 
 
 void Transaction::dispatchCallbacks()
 {	
 	if (!cancelled())
-		Complete.dispatch(this, _response);
+		Complete.emit(this, _response);
 }
 
 

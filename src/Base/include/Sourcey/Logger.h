@@ -93,7 +93,6 @@ struct LogStream;
 
 
 // ---------------------------------------------------------------------
-//
 class LogChannel
 {
 public:	
@@ -118,7 +117,6 @@ protected:
 
 
 // ---------------------------------------------------------------------
-//
 class ConsoleChannel: public LogChannel
 {		
 public:
@@ -131,7 +129,6 @@ public:
 
 
 // ---------------------------------------------------------------------
-//
 class FileChannel: public LogChannel
 {	
 public:
@@ -159,7 +156,6 @@ protected:
 
 
 // ---------------------------------------------------------------------
-//
 class RotatingFileChannel: public LogChannel
 {	
 public:
@@ -218,7 +214,6 @@ typedef std::map<std::string, LogChannel*> LogMap;
 
 
 // ---------------------------------------------------------------------
-//
 class Logger 
 {
 public:
@@ -269,7 +264,6 @@ protected:
 
 
 // ---------------------------------------------------------------------
-//
 struct LogStream
 {
 	LogLevel level;

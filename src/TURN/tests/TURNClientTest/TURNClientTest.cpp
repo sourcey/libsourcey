@@ -145,7 +145,7 @@ struct ClientTest
 	{
 		Log("debug") << "############################# ClientTestRunner: TestDone: " << success << endl;
 		result = success ? Success : Failed;
-		//TestDone.dispatch(this, result);
+		//TestDone.emit(this, result);
 	}
 };
 

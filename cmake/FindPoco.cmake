@@ -70,7 +70,8 @@ if (NOT Poco_FOUND)
       /PageCompiler/include
       /Util/include
       /XML/include
-      /Zip/include)    
+      /Zip/include
+      )    
   endif()
       
   # Check for all possible components 

@@ -47,9 +47,9 @@ public:
 	FormatRegistry();
 	virtual ~FormatRegistry();
 	
-    virtual Format& get(const std::string& label);
+    virtual Format& get(const std::string& name);
     virtual Format& getByID(const std::string& id);
-    virtual Format& getOrDefault(const std::string& label);
+    virtual Format& getOrDefault(const std::string& name);
     virtual Format& getDefault();
 		/// Returns the default media format.
 		/// If a default has been specified it will be
@@ -58,16 +58,16 @@ public:
 	
     virtual void registerFormat(const Format& format);
 		/// Registers the given media format overriding 
-		/// existing media formats of the same label.
+		/// existing media formats of the same name.
 
-    virtual bool unregisterFormat(const std::string& label);
+    virtual bool unregisterFormat(const std::string& name);
 		/// Unregisters the media format matching the
-		/// given label. 
+		/// given name. 
 
-    virtual void setDefault(const std::string& label);
+    virtual void setDefault(const std::string& name);
 		/// Sets the default fallback media format.
 
-    virtual bool exists(const std::string& label);
+    virtual bool exists(const std::string& name);
     virtual void clear();
 
     virtual FormatList formats() const;

@@ -45,10 +45,8 @@ namespace HTTP {
 
 
 // ---------------------------------------------------------------------
-//
 // Digest Authenticator
 //
-// ---------------------------------------------------------------------
 //
 //	Client requests uri:
 //	-------------------------------------
@@ -79,7 +77,6 @@ namespace HTTP {
 //		qop=auth, nc=00000001, 
 //		cnonce = "8d1b34edb475994b" 
 //
-// ---------------------------------------------------------------------
 DigestAuthenticator::DigestAuthenticator(const string& realm, const string& version, bool usingRFC2617) : 
 	Authenticator(),
 	_realm(realm),

@@ -54,7 +54,7 @@ void InstallMonitor::onInstallStateChange(void* sender, PackageInstallState& sta
 
 	LogDebug() << "[InstallMonitor] onInstallStateChange: " << task << ": " << state.toString() << endl;
 
-	InstallStateChange.dispatch(this, *task, state, oldState);
+	InstallStateChange.emit(this, *task, state, oldState);
 }
 
 
@@ -65,7 +65,7 @@ void InstallMonitor::onInstallComplete(void* sender)
 	LogDebug() << "[InstallMonitor] Package Install Complete: " << task->state().toString() << endl;
 
 	// Notify listeners when each package completes.
-	InstallComplete.dispatch(this, *task->local());
+	InstallComplete.emit(this, *task->local());
 	
 	int progress = 0;
 	{
@@ -91,7 +91,7 @@ void InstallMonitor::onInstallComplete(void* sender)
 	setProgress(progress);
 
 	if (isComplete())
-		Complete.dispatch(this, _packages);
+		Complete.emit(this, _packages);
 }
 
 
@@ -129,7 +129,7 @@ void InstallMonitor::setProgress(int value)
 		Poco::FastMutex::ScopedLock lock(_mutex);	
 		_progress = value;
 	}
-	Progress.dispatch(this, value);
+	Progress.emit(this, value);
 }
 
 
@@ -195,7 +195,7 @@ bool InstallMonitor::isComplete() const
 				<< _tasks.size() << " packages to complete" << endl;
 
 		// Notify listeners when each package completes.
-		InstallComplete.dispatch(this, *task->local);
+		InstallComplete.emit(this, *task->local);
 		
 		// Remove the package reference.
 		for (InstallTaskList::iterator it = _tasks.begin(); it != _tasks.end();) {

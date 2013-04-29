@@ -131,7 +131,7 @@ int main(int argc, char** argv)
 
 	Symple::Command c;
 	c.setNode("badddd");
-	client.TestSignal.dispatch(&client, c);
+	client.TestSignal.emit(&client, c);
 
 
 	//system("pause");

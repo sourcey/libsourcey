@@ -59,7 +59,6 @@ inline AVRational GetCodecTimeBase(AVCodec* c, double fps);
 
 
 // ---------------------------------------------------------------------
-//
 struct VideoContext
 	/// Base video context which all encoders and decoders extend
 {
@@ -85,7 +84,6 @@ struct VideoContext
 
 
 // ---------------------------------------------------------------------
-//
 struct VideoEncoderContext: public VideoContext
 {
 	VideoEncoderContext(AVFormatContext* format);
@@ -114,7 +112,6 @@ struct VideoEncoderContext: public VideoContext
 
 
 // ---------------------------------------------------------------------
-//
 struct VideoCodecEncoderContext: public VideoContext
 {
 	VideoCodecEncoderContext();
@@ -139,7 +136,6 @@ struct VideoCodecEncoderContext: public VideoContext
 
 
 // ---------------------------------------------------------------------
-//
 struct VideoDecoderContext: public VideoContext
 {
 	VideoDecoderContext();
@@ -168,7 +164,6 @@ struct VideoDecoderContext: public VideoContext
 
 
 // ---------------------------------------------------------------------
-//
 struct VideoConversionContext
 {
 	VideoConversionContext();
@@ -187,7 +182,6 @@ struct VideoConversionContext
 
 
 // ---------------------------------------------------------------------
-//
 void InitVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
 {
 	params.encoder = avcodec_get_name(ctx->codec_id);
