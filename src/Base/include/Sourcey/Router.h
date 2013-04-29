@@ -31,14 +31,14 @@
 
 #include "Sourcey/Runner.h"
 #include "Sourcey/IPacket.h"
-#include "Sourcey/PacketDispatcher.h"
+#include "Sourcey/PacketEmitter.h"
 #include "Sourcey/PacketQueue.h"
 
 
 namespace Sourcey {
 
 
-class Router: public PacketDispatcher
+class Router: public PacketEmitter
 	/// The Router acts as a asynchronous notification queue
 	/// for the IPacket type.
 	///

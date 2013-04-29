@@ -45,7 +45,7 @@ namespace Sourcey {
 namespace Media {
 
 
-// Initialize to empty string.
+// Initialize to empty string
 const char IDeviceManager::kDefaultDeviceName[] = "";
 
 
@@ -57,15 +57,19 @@ Device::Device() :
 }
 
 
-Device::Device(const string& type, const string& name, int id, const string& guid) : 
-	type(type), name(name), id(id), guid(guid) 
+Device::Device(const string& type, int id, const string& name, const string& guid, bool isDefault) : 
+	type(type), id(id), name(name), guid(guid), isDefault(isDefault)
 {
 }
 
 	
 void Device::print(ostream& os) 
 {		
-	os << "Device[" << type << ": " << id << ": " << name << "]" << endl;
+	os << "Device[" 
+		<< type << ": " 
+		<< id << ": " 
+		<< name << ": " 
+		<< isDefault << "]" << endl;
 }
 
 
@@ -80,18 +84,16 @@ DeviceManager::DeviceManager() :
 
 DeviceManager::~DeviceManager()
 {
-	if (initialized()) {
+	if (initialized())
 		uninitialize();
-	}
 }
 
 
 bool DeviceManager::initialize() 
 {
 	if (!initialized()) {
-		if (watcher() && !watcher()->start()) {
+		if (watcher() && !watcher()->start())
 			return false;
-		}
 		setInitialized(true);
 	}
 	return true;
@@ -282,7 +284,7 @@ bool DeviceManager::getAudioDevice(bool input, Device& out, const string& name, 
 {
 	// If the name is empty, return the default device id.
 	if (name.empty() || name == kDefaultDeviceName) {
-		out = Device(input ? "audioin" : "audioout", name, -1);
+		out = Device(input ? "audioin" : "audioout", -1, name);
 		return true;
 	}
 
@@ -330,14 +332,14 @@ bool DeviceManager::getDefaultAudioOutputDevice(Device& device)
 
 bool DeviceManager::getDefaultAudioInputDevice(Device& device) 
 {
-	device = Device("audioin", "None", -1);
+	device = Device("audioin", -1, "None");
 	return true;
 }
 
 
 bool DeviceManager::getDefaultAudioOutputDevice(Device& device) 
 {
-	device = Device("audioout", "None", -1);
+	device = Device("audioout", -1, "None");
 	return true;
 }
 

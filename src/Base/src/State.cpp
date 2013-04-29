@@ -79,7 +79,6 @@ string State::toString() const
 
 
 // ---------------------------------------------------------------------
-//
 MutexState::MutexState(State::ID id) : 
 	State(id)
 { 
@@ -87,7 +86,6 @@ MutexState::MutexState(State::ID id) :
 
 
 // ---------------------------------------------------------------------
-//
 StateSignal::StateSignal(State::ID id) : 
 	MutexState(id)
 { 
@@ -118,7 +116,7 @@ bool StateSignal::canChange(State::ID id)
 void StateSignal::onChange(ID id, ID prev) 
 {
 	// Can be overridden
-	Change.dispatch(this, id, prev);
+	Change.emit(this, id, prev);
 }
 
 

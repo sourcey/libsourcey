@@ -38,38 +38,87 @@ namespace Media {
 
 
 Format::Format() : 
-	label("Unknown"), id("rawvideo"), type(None), priority(0)
+	name("Unknown"), id("rawvideo"), priority(0)
 {
 }
 
 
-Format::Format(const string& label, const char* id, const VideoCodec& video, const AudioCodec& audio, int priority) : 
-	label(label), id(id), type(Multiplex), video(video), audio(audio), priority(priority)
+Format::Format(const string& name, const char* id, const VideoCodec& video, const AudioCodec& audio, int priority) : 
+	name(name), id(id), video(video), audio(audio), priority(priority)
 {
 }
 
 
-Format::Format(const string& label, const char* id, const VideoCodec& video, int priority) : 
-	label(label), id(id), type(Video), video(video), priority(priority)
+Format::Format(const string& name, const char* id, const VideoCodec& video, int priority) : 
+	name(name), id(id), video(video), priority(priority)
 {
 }
 
 
-Format::Format(const string& label, const char* id, const AudioCodec& audio, int priority) : 
-	label(label), id(id), type(Audio), audio(audio), priority(priority)
+Format::Format(const string& name, const char* id, const AudioCodec& audio, int priority) : 
+	name(name), id(id), audio(audio), priority(priority)
 {
 }
 
 	
 Format::Format(const Format& r) :
-	label(r.label),
+	name(r.name),
 	id(r.id),
-	type(r.type),
 	video(r.video),
 	audio(r.audio),
 	priority(r.priority) 
 {
 }
+
+	
+Format::Type Format::type() const
+{
+	if (video.enabled && audio.enabled)
+		return Format::Multiplex;
+	else if (video.enabled)
+		return Format::Video;
+	else if (audio.enabled)
+		return Format::Audio;
+	else
+		return Format::None;
+}
+
+
+string Format::toString() const 
+{
+	ostringstream os;
+	os << "Format[" << name << ":"  << id;
+	if (video.enabled)
+		os << "\n\t" << video.toString();
+	if (audio.enabled)
+		os << "\n\t" << audio.toString();
+	os << "]";
+	return os.str();
+}
+
+
+void Format::print(std::ostream& ost)
+{
+	ost << "Format[" << name << ":"  << id;
+	if (video.enabled) {
+		ost << "\n";
+		video.print(ost);
+		//ost << "\n";
+	}
+	if (audio.enabled) {
+		ost << "\n";
+		audio.print(ost);
+		//ost << "\n";
+	}
+	ost << "\n]";
+}
+
+
+} // namespace Media 
+} // namespace Sourcey
+
+
+
 
 
 /*
@@ -94,16 +143,6 @@ string Format::encoderName() const
 	return Format::idToEncoderName(id);
 }
 */
-
-
-string Format::toString() const 
-{
-	ostringstream os;
-	os << "Format[" << label << ":"  << id << "]";
-	return os.str();
-}
-
-
 /*
 Format::ID Format::nameToID(const std::string& name) 
 {
@@ -181,26 +220,3 @@ std::string Format::idToEncoderName(const char* id)
 		<< "\n\tName: " << name()
 */
 
-
-void Format::print(std::ostream& ost)
-{
-	ost << "Format["
-		<< "\n\tLabel: " << label
-		<< "\n\tID: " << id
-		<< "\n\tType: " << type;
-	if (video.enabled) {
-		ost << "\n";
-		video.print(ost);
-		//ost << "\n";
-	}
-	if (audio.enabled) {
-		ost << "\n";
-		audio.print(ost);
-		//ost << "\n";
-	}
-	ost << "\n]";
-}
-
-
-} // namespace Media 
-} // namespace Sourcey

@@ -132,7 +132,7 @@ void VideoAnalyzer::onReadComplete(void* sender)
 			_error = reader->error();
 	}
 
-	Complete.dispatch(this);
+	Complete.emit(this);
 }
 
 

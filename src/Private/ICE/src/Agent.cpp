@@ -466,10 +466,8 @@ bool Agent::processUpdatedAnswerSDP(const SDP::Message& sdp) {
 
 
 // ---------------------------------------------------------------------
-//
 // SDP Parsing Functions
 //
-// ---------------------------------------------------------------------
 bool Agent::generateSDP(SDP::Message& sdp) 
 {
 	Log("debug", this) << "Generating Local SDP" << endl;
@@ -526,10 +524,8 @@ bool Agent::generateSDP(SDP::Message& sdp)
 
 
 // ---------------------------------------------------------------------
-//
 // Media Stream Functions
 //
-// ---------------------------------------------------------------------
 MediaStream* Agent::createMediaStream(const string& title, int nComponents, const string& mediaType, const string& mediaProfile) 
 {	
 	MediaStream* stream = new MediaStream(*this, _streams.size() + 1, title, nComponents, mediaType, mediaProfile);
@@ -597,10 +593,8 @@ void Agent::printLog(std::ostream& ost) const
 
 
 // ---------------------------------------------------------------------
-//
 // Events & Callbacks
 //
-// ---------------------------------------------------------------------
 
 /*
 void Agent::onMediaStreamLocalCandidatesGathered(MediaStream* stream, LocalCandidateList&) {
@@ -805,10 +799,8 @@ void Agent::onMediaStreamSubsequentCheckingComplete(MediaStream* stream)
 
 
 // ---------------------------------------------------------------------
-//
 // Accessors
 //
-// ---------------------------------------------------------------------
 
 Options& Agent::options() 
 { 

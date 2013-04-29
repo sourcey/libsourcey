@@ -92,7 +92,7 @@ void MotionDetector::process(IPacket& packet)
 
 	MatPacket* mpacket = dynamic_cast<MatPacket*>(&packet);		
 	if (!mpacket) {
-		dispatch(this, packet);
+		emit(this, packet);
 		return;
 	}
 	
@@ -125,7 +125,7 @@ void MotionDetector::process(IPacket& packet)
 
 	// NOTE: Dispatched images are GRAY8 so encoders will
 	// need to adjust the input pixel format accordingly.
-	dispatch(this, opacket);
+	emit(this, opacket);
 }
 
 

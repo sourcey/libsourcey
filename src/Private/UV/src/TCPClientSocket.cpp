@@ -497,7 +497,7 @@ void TCPClientSocket::receive(Buffer& buffer)
 {
 	// No processing done by default..
 	//packetize(buffer);
-	OnData.dispatch(this, buffer);
+	OnData.emit(this, buffer);
 }
 
 

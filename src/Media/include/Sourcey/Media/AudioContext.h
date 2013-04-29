@@ -96,8 +96,14 @@ struct AudioEncoderContext: public AudioContext
 	AudioCodec		iparams;
 	AudioCodec		oparams;
 	
-    int				samplesPerFrame;
+    int				inputFrameSize;
     int				outputFrameSize;
+	
+	//AVFifoBuffer*	fifo;		
+	//UInt8*		fifoBuffer;
+
+    //unsigned char*	buffer;
+    //int				bufferSize;
 };
 
 
@@ -130,7 +136,6 @@ struct AudioDecoderContext: public AudioContext
 
 
 // ---------------------------------------------------------------------
-//
 struct AudioResampler
 {
 	AudioResampler();

@@ -31,7 +31,7 @@
 
 #include "Sourcey/Base.h"
 #include "Sourcey/PacketFactory.h"
-#include "Sourcey/PacketDispatcher.h"
+#include "Sourcey/PacketEmitter.h"
 #include "Sourcey/Net/ISocket.h"
 
 
@@ -39,13 +39,13 @@ namespace Sourcey {
 namespace Net {
 
 
-class IPacketSocket: public ISocket, public PacketDispatcher, public PacketFactory
+class IPacketSocket: public ISocket, public PacketEmitter, public PacketFactory
 	/// LibSourcey's IPacketSocket interface extends ISocket   
 	/// to act as a pluggable PacketStream adapter which may
 	/// be a source or destination for IPackets.
 	///
 	/// Packets may received by attaching delegates using the 
-	/// PacketDispatcher signal methods.
+	/// PacketEmitter signal methods.
 {
 public:
 	IPacketSocket() {};

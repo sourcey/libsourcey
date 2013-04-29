@@ -38,8 +38,7 @@ namespace TURN {
 // ----------------------------------------------------------------------------
 //
 // Media Formats
-//
-// ----------------------------------------------------------------------------		
+//-------		
 Format MP344100 = Format("MP3", "mp3", 
 	VideoCodec(),
 	AudioCodec("MP3", "libmp3lame", 2, 44100, 128000, "s16p"));	
@@ -85,8 +84,7 @@ TURNMediaProvider* ourMediaProvider = NULL;
 // ----------------------------------------------------------------------------
 //
 // TCP TURN Initiator
-//
-// ----------------------------------------------------------------------------
+//-------
 class TURNMediaProvider: public Sourcey::TURN::ITCPClientObserver
 {
 public:
@@ -176,7 +174,7 @@ protected:
 		case TURN::ClientState::Authorizing:
 			break;
 		case TURN::ClientState::Success:
-			AllocationCreated.dispatch(this, this->client);
+			AllocationCreated.emit(this, this->client);
 			break;
 		case TURN::ClientState::Failed:
 			assert(0 && "Allocation failed");
@@ -191,7 +189,7 @@ protected:
 		Log("debug") << "[TURNMediaProvider: " << this << "] Connection Created: " << peerAddr << endl;
 		ourPeerAddr = peerAddr; // Current peer
 
-		ConnectionCreated.dispatch(this, this->client, peerAddr);
+		ConnectionCreated.emit(this, this->client, peerAddr);
 
 		// Restart the media steram for each new peer
 		stopMedia();
@@ -235,8 +233,7 @@ protected:
 // ----------------------------------------------------------------------------
 //
 // Media Connection
-//
-// ----------------------------------------------------------------------------
+//-------
 class AddressRequestHandler: public Poco::Net::TCPServerConnection
 {
 public:
@@ -287,8 +284,7 @@ public:
 // ----------------------------------------------------------------------------
 //
 // HTTP Connection Factory
-//
-// ----------------------------------------------------------------------------
+//-------
 class AddressRequestHandlerFactory: public Poco::Net::TCPServerConnectionFactory
 {
 public:
@@ -334,8 +330,7 @@ public:
 // ----------------------------------------------------------------------------
 //
 // HTTP Relay Address Service
-//
-// ----------------------------------------------------------------------------
+//-------
 class RelayAddressService: public TCPService
 {
 public:

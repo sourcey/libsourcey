@@ -84,10 +84,10 @@ public:
 			header << "\r\n";
 			std::string httpData(header.str());
 			DataPacket httpHeader((unsigned char*)httpData.data(), httpData.size());
-			dispatch(this, httpHeader);
+			emit(this, httpHeader);
 		}
 
-		dispatch(this, packet);
+		emit(this, packet);
 
 		//LogTrace() << "[StreamingPacketizer:" << this << "] Processing: OK" << std::endl;
 	}

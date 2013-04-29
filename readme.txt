@@ -6,12 +6,20 @@ EXTERNAL DEPENDENCIES
 
 OpennSSL >= 0.98
 -------------------------------------------------
+tar zxvf openssl-1.0.1e.tar.gz
+cd openssl-1.0.1e
+./configure mingw --prefix=/usr/local shared
+make
+make install
 
 
 Poco >= 1.4
 -------------------------------------------------
-
-./configure --no-tests --no-samples --omit=Data,Data/SQLite,Data/MySQL,Data/ODBC,PageCompiler,PageCompiler/File2Page
+tar zxvf poco-1.4.6p1-all.tar.gz
+cd poco-1.4.6p1-all		
+./configure --shared --no-tests --no-samples --omit=XML,Data,Data/SQLite,Data/MySQL,Data/ODBC,PageCompiler,PageCompiler/File2Page
+make
+make install
 
 
 OpenCV >= 2.3

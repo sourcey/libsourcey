@@ -226,7 +226,7 @@ int AudioEncoder::encode(unsigned char *input, int inputSize)
 		//packet.size = size;
 		//packet.time = time(0); // Set to pts?
 		AudioPacket packet(_outBuffer, size);
-		dispatch(this, packet);
+		emit(this, packet);
 	}
 
 	return size;

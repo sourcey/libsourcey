@@ -68,7 +68,7 @@ public:
 			buf.consume(size);
 			rtpPacket.header().payloadType = _payloadType;
 			rtpPacket.header().marker = buf.eof();
-			dispatch(this, rtpPacket);
+			emit(this, rtpPacket);
 		}
 	};
 

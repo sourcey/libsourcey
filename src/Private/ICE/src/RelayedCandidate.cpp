@@ -190,7 +190,7 @@ void RelayedCandidate::onRelayedData(TURN::Client&, const char* data, int size, 
 	Buffer buf(data, size); // make TURN dispatch buffers for speedup
 	STUN::Message message;
 	if (message.read(buf))
-		STUNMessageReceived.dispatch(this, message, peerAddress);
+		STUNMessageReceived.emit(this, message, peerAddress);
 	else {
 		DataPacket packet((unsigned char*)data, size); // data is only referenced
 		_component.stream().agent().observer().onMediaOnData(
@@ -382,7 +382,7 @@ bool RelayedCandidate::send(STUN::Transaction* transaction) {
 	//_transaction = transaction; // The transaction pointer is automatically deleted on response or timeout.
 	//_component.socket()->TransactionResponse += delegate(this, &RelayedCandidate::onTransactionResponse);
 	//_component.socket()->TransactionTimeout += delegate(this, &RelayedCandidate::onTransactionTimeout);
-	//return _component.dispatch(_transaction);
+	//return _component.emit(_transaction);
 	return false;
 }
 	

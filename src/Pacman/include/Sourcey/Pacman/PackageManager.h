@@ -161,22 +161,6 @@ public:
 		/// The returned InstallMonitor will be NULL no tasks were created.	
 		/// The returned InstallMonitor must be freed by the outside application.	
 
-	/*
-	virtual bool installPackage(const std::string& name, InstallMonitor* monitor = NULL, 
-		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
-		/// Installs a single package.
-
-	virtual bool updatePackages(const StringList& ids, InstallMonitor* monitor = NULL, 
-		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
-		/// Updates multiple packages.
-		/// The package will be installed if it does not exist.
-
-	virtual bool updatePackage(const std::string& name, InstallMonitor* monitor = NULL, 
-		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
-		/// Updates a single package.
-		/// The package will be installed if it does not exist.
-		*/
-
 	virtual bool updateAllPackages(bool whiny = false); //InstallMonitor* monitor = NULL, 
 		/// Updates all installed packages.
 
@@ -201,6 +185,11 @@ public:
 		/// Aborts all package installation tasks. All tasks must
 		/// be aborted before clearing local or remote manifests.
 		
+	//
+	/// Task Helper Methods
+	//	
+	virtual InstallTask* getInstallTask(const std::string& id) const;
+
 	//
 	/// Package Helper Methods
 	//	
@@ -276,6 +265,9 @@ public:
 	///
 	Signal<LocalPackage&> PackageInstalled;
 	Signal<LocalPackage&> PackageUninstalled;
+	
+	Signal<InstallTask&> TaskAdded;
+	Signal<InstallTask&> TaskRemoved;
 
 protected:
 
@@ -298,3 +290,21 @@ protected:
 
 
 #endif // SOURCEY_Pacman_PackageManager_H
+
+
+
+	/*
+	virtual bool installPackage(const std::string& name, InstallMonitor* monitor = NULL, 
+		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
+		/// Installs a single package.
+
+	virtual bool updatePackages(const StringList& ids, InstallMonitor* monitor = NULL, 
+		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
+		/// Updates multiple packages.
+		/// The package will be installed if it does not exist.
+
+	virtual bool updatePackage(const std::string& name, InstallMonitor* monitor = NULL, 
+		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
+		/// Updates a single package.
+		/// The package will be installed if it does not exist.
+		*/

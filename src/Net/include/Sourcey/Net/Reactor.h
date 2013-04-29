@@ -50,7 +50,7 @@ struct DelegateCallback<C, 11, false, Reactor, Socket, Event>
 	/// empty() callback function.
 {
 	typedef void (C::*Method)();
-	virtual void dispatch(Void, Reactor, Socket, Event, Void) const {
+	virtual void emit(Void, Reactor, Socket, Event, Void) const {
 		(_object->*_method)();
 	}
 	DefineCallbackFields
@@ -66,7 +66,6 @@ class ReactorEvent;
 
 
 // ---------------------------------------------------------------------
-//
 enum SocketEvent
 {
 	SocketReadable	= 0x02, 
@@ -96,7 +95,6 @@ typedef ReactorDelegateBase ReactorDelegate;
 
 
 // ---------------------------------------------------------------------
-//
 class Reactor: public Poco::Runnable, public IPolymorphic
 	/// This class implements the Reactor pattern described in
 	/// the book "Pattern Languages of Program Design" by Jim
@@ -139,9 +137,9 @@ public:
 	virtual const char* className() const { return "Reactor"; };
 	
 protected:	
-	void dispatch(const Poco::Net::Socket& socket, SocketEvent event);
-		/// Dispatches the given event notification to all delegate
-		/// registered to the given socket.
+	void emit(const Poco::Net::Socket& socket, SocketEvent event);
+		/// Emits the given event notification to all delegate
+		/// registered on the given socket.
 	
 	virtual void handleException(const Exception& exc);
 	virtual void handleException(const std::exception& exc);
@@ -171,7 +169,6 @@ protected:
 
 
 // ---------------------------------------------------------------------
-//
 template <class C>
 static Delegate<C, 
 	ReactorDelegate,

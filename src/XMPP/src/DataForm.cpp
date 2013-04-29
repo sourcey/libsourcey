@@ -46,10 +46,8 @@ const char* DEFAULT_FORM = "<x type=\"%s\"/>\n";
 
 
 // ---------------------------------------------------------------------
-//
 // Data DataForm Document
 //
-// ---------------------------------------------------------------------
 FormDocument::FormDocument(const string& type)
 {
 	reinterpret_cast<Document*>(this)->load(
@@ -82,10 +80,8 @@ DataForm FormDocument::form()
 
 
 // ---------------------------------------------------------------------
-//
 // Data Form
 //
-// ---------------------------------------------------------------------
 DataForm::DataForm() 
 {
 }
@@ -190,10 +186,8 @@ FormLayoutPage DataForm::addPage(const string& label)
 
 
 // ---------------------------------------------------------------------
-//
 // Data Form Layout Container
 //
-// ---------------------------------------------------------------------
 /*
 FormLayoutContainer::FormLayoutContainer(DataForm& form, const string& label) :
 	Node(form.appendChild)
@@ -262,10 +256,8 @@ FormLayoutContainer FormLayoutContainer::addFieldRef(const FormField& field)
 
 
 // ---------------------------------------------------------------------
-//
 // Data Form Layout Page
 //
-// ---------------------------------------------------------------------
 FormLayoutPage::FormLayoutPage(DataForm& form, const string& label) :
 	FormLayoutContainer(form.appendChild("page"), label)
 {
@@ -296,10 +288,8 @@ FormLayoutSection FormLayoutPage::addSection(const string& label)
 
 
 // ---------------------------------------------------------------------
-//
 // Data Form Layout Section
 //
-// ---------------------------------------------------------------------
 FormLayoutSection::FormLayoutSection(FormLayoutPage& page, const string& label) :
 	FormLayoutContainer(page.appendChild("section"), label)
 {
@@ -320,10 +310,8 @@ FormLayoutSection::~FormLayoutSection()
 
 
 // ---------------------------------------------------------------------
-//
 // Data Form Field
 //
-// ---------------------------------------------------------------------
 FormField::FormField()
 {
 }

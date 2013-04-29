@@ -40,10 +40,8 @@ namespace JSON {
 
 
 // ---------------------------------------------------------------------
-//
 // JSON Configuration
 //
-// ---------------------------------------------------------------------
 Configuration::Configuration()
 {	
 	LogTrace() << "[JSONConfiguration] Creating" << endl;

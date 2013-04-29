@@ -106,10 +106,10 @@ public:
 			// so we don't need to copy packet data.
 			std::string httpData(header.str());
 			DataPacket httpHeader((unsigned char*)httpData.data(), httpData.size());
-			dispatch(this, httpHeader);
+			emit(this, httpHeader);
 
 			// Proxy the input packet.
-			dispatch(this, packet);
+			emit(this, packet);
 		}
 		else {
 			
@@ -123,7 +123,7 @@ public:
 
 			DataPacket opacket;
 			opacket.read(obuf);
-			dispatch(this, opacket);
+			emit(this, opacket);
 		}
 
 		//LogTrace() << "[MultipartPacketizer:" << this << "] Processing: OK" << std::endl;

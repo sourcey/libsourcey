@@ -25,36 +25,46 @@
 //
 
 
-#ifndef SOURCEY_MEDIA_ICapture_H
-#define SOURCEY_MEDIA_ICapture_H
+#ifndef SOURCEY_Token_H
+#define SOURCEY_Token_H
 
 
-#include "Sourcey/PacketEmitter.h"
-#include "Sourcey/IStartable.h"
-
-#include <list>
+#include "Sourcey/Base.h"
+#include "Sourcey/Timeout.h"
+#include "Sourcey/CryptoProvider.h"
 
 
 namespace Sourcey {
-namespace Media {
 
 
-class ICapture: public PacketEmitter, public IStartable
+class Token: public Timeout
 {
 public:
-	ICapture() {};
-	virtual ~ICapture() {};
+	Token(long duration) : 
+		Timeout(duration), _id(CryptoProvider::generateRandomKey(32)) {}
 
-	virtual void start() = 0;
-	virtual void stop() = 0;
+	Token(const std::string& id = CryptoProvider::generateRandomKey(32), long duration = 10000) : 
+		Timeout(duration), _id(id) {}
+	
+	std::string id() const { return _id; }
+	
+	bool operator == (const Token& r) const {
+		return id()  == r.id();
+	}
+	
+	bool operator == (const std::string& r) const {
+		return id() == r;
+	}
+
+protected:
+	std::string _id;
 };
 
 
-typedef std::list<ICapture*> ICaptureList;
+typedef std::vector<Token> TokenList;
 
 
-} // namespace Media 
 } // namespace Sourcey
 
 
-#endif // SOURCEY_MEDIA_ICapture_H
+#endif

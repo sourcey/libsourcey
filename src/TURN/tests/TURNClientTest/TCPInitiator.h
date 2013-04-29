@@ -64,20 +64,20 @@ protected:
 			break;
 		case ClientState::Authorizing:
 			//success = true;
-			//TestDone.dispatch(this, success);
+			//TestDone.emit(this, success);
 			//client.terminate();
 			break;
 		case ClientState::Success:
-			AllocationCreated.dispatch(this, *this->client);
+			AllocationCreated.emit(this, *this->client);
 			success = true;
-			TestDone.dispatch(this, success);
+			TestDone.emit(this, success);
 			//client.terminate();
 			break;
 		case ClientState::Failed:
 			//assert(false);
 			//throw Exception(state.toString());
 			success = false;
-			TestDone.dispatch(this, success);
+			TestDone.emit(this, success);
 			break;
 		case ClientState::Terminated:				
 			break;
@@ -105,8 +105,8 @@ protected:
 		lastPeerAddr = peerAddr; // last peer
 		success = true;
 		
-		ConnectionCreated.dispatch(this, *this->client);
-		TestDone.dispatch(this, success);
+		ConnectionCreated.emit(this, *this->client);
+		TestDone.emit(this, success);
 	}
 	
 	void onClientConnectionState(TCPClient& client, Net::IPacketSocket*, 

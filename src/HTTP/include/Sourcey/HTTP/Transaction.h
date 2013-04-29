@@ -69,7 +69,6 @@ struct TransferState
 
 
 // ---------------------------------------------------------------------
-//
 class Transaction: public StatefulSignal<TransactionState>, public ISendable, public IPolymorphic
 	/// Implements a HTTP transaction.
 	///

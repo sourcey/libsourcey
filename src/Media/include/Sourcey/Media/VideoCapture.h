@@ -51,7 +51,6 @@ namespace Media {
 
 
 // ---------------------------------------------------------------------
-//
 struct VideoDelegate: public PacketDelegateBase
 	/// Polymorphic packet delegate for the VideoPacket type.
 {
@@ -170,8 +169,8 @@ inline void AllocateOpenCVInputFormat(const VideoCapture* capture, Format& forma
 	/// our encoders.
 {
 	assert(capture);
-	format.type = Format::Video;
-	format.label = "OpenCV";
+	//format.type = Format::Video;
+	format.name = "OpenCV";
 	format.id = "mjpeg";
 	format.video.encoder = "mjpeg";
 	format.video.pixelFmt = "bgr24";

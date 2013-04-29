@@ -165,7 +165,7 @@ int LocalCandidate::send(const char* data, int size, const Net::Address& peerAdd
 	Log("debug", this) << "Sending Data to " << peerAddress.toString() << endl;
 
 	assert(_component);	
-	return _component.dispatch(data, size, peerAddress);
+	return _component.emit(data, size, peerAddress);
 }
 
 
@@ -174,7 +174,7 @@ int LocalCandidate::send(const IPacket& packet, const Net::Address& peerAddress)
 	Log("debug", this) << "Sending STUN to " << peerAddress.toString() << endl;
 	
 	assert(_component);	
-	return _component.dispatch(message, peerAddress);
+	return _component.emit(message, peerAddress);
 }
 
 
@@ -209,7 +209,7 @@ void LocalCandidate::onTransactionStateChange(void* sender, TransactionState& st
 	switch (state.id()) {	
 	case TransactionState::Success:
 	case TransactionState::Failed:
-		ConnectivityCheckResponse.dispatch(this, *_transaction);
+		ConnectivityCheckResponse.emit(this, *_transaction);
 		//delete _transaction;
 		_transaction = NULL;
 		break;
@@ -228,7 +228,7 @@ void LocalCandidate::onSTUNTransactionComplete(STUN::Transaction* transaction, N
 
 	Log("debug", this) << "Current Transaction Complete: " << transaction->response().toString() << endl;
 
-	ConnectivityCheckSuccess.dispatch(this, *transaction);
+	ConnectivityCheckSuccess.emit(this, *transaction);
 	_transaction = NULL;
 }
 
@@ -241,7 +241,7 @@ void LocalCandidate::onSTUNTransactionTimeout(STUN::Transaction* transaction) {
 
 	Log("debug", this) << "Current Transaction Timeout: Request: " << transaction->request().toString() << endl;
 
-	ConnectivityCheckFailed.dispatch(this, *transaction);
+	ConnectivityCheckFailed.emit(this, *transaction);
 	_transaction = NULL;
 }
 */

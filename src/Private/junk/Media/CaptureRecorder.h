@@ -35,7 +35,7 @@
 #include "Sourcey/Media/CaptureEncoder.h"
 #include "Sourcey/Media/AVEncoder.h"
 #include "Sourcey/Stateful.h"
-#include "Sourcey/PacketDispatcher.h"
+#include "Sourcey/PacketEmitter.h"
 #include "Sourcey/Signal.h"
 
 #include "Poco/DateTimeFormatter.h"

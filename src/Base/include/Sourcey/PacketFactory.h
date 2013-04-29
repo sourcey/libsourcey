@@ -29,7 +29,7 @@
 #define SOURCEY_PacketFactory_H
 
 
-#include "Sourcey/PacketDispatcher.h"
+#include "Sourcey/PacketEmitter.h"
 #include "Sourcey/Buffer.h"
 
 #include "Poco/Thread.h"
@@ -53,7 +53,6 @@ typedef std::vector<IPacketCreationStrategy*> PacketCreationStrategyList;
 
 
 // ---------------------------------------------------------------------
-//
 template <class PacketT>
 struct PacketCreationStrategy: public IPacketCreationStrategy
 	/// This template class implements an adapter that sits between
@@ -80,7 +79,6 @@ protected:
 
 
 // ---------------------------------------------------------------------
-//
 struct PacketRegistry
 {
 	PacketRegistry() {}
@@ -147,7 +145,6 @@ protected:
 
 
 // ---------------------------------------------------------------------
-//
 struct PacketFactory: public PacketRegistry
 {
 	virtual bool onPacketCreated(IPacket*) {

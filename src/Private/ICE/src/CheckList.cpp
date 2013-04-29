@@ -146,10 +146,8 @@ void CheckList::stopTriggeredChecks()
 
 
 // ---------------------------------------------------------------------
-//
 // Connectivity Checking
 //
-// ---------------------------------------------------------------------
 void CheckList::startConnectivityChecks() 
 {
 	Log("debug", this) << "Starting Connectivity Checks" << endl;	
@@ -417,10 +415,8 @@ void CheckList::onTriggeredCheck(TimerCallback<CheckList>& timer)
 
 
 // ---------------------------------------------------------------------
-//
 // Candidates
 //
-// ---------------------------------------------------------------------
 void CheckList::createCandidatePairs() 
 {	
 	Log("debug", this) << "Forming Candidate Pairs: " 
@@ -1161,10 +1157,8 @@ bool CheckList::doUpdateStates()
 
 
 // ---------------------------------------------------------------------
-//
 // Events
 //
-// ---------------------------------------------------------------------
 void CheckList::onReceiveSTUNMessage(void* sender, const STUN::Message& message, const Net::Address& peerAddress)
 {
 	Log("debug", this) << "Received: " << message.toString() << endl;

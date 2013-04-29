@@ -168,7 +168,7 @@ void IOStream::handleReadCommon(uv_stream_t* handle, ssize_t nread, uv_buf_t buf
 	// EOF or Error
 	if (nread == -1)  {
 		io->setErrno(uv_last_error(io->_loop));
-		io->OnRead.dispatch(io, NULL, 0);
+		io->OnRead.emit(io, NULL, 0);
 		return;
 	}
 
@@ -180,7 +180,7 @@ void IOStream::handleReadCommon(uv_stream_t* handle, ssize_t nread, uv_buf_t buf
 			assert(pending == UV_UNKNOWN_HANDLE);
 		}
 		
-		io->OnRead.dispatch(io, buf.base, nread);
+		io->OnRead.emit(io, buf.base, nread);
 	}
 }
 

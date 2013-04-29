@@ -105,7 +105,7 @@ protected:
 	{
 		LogTrace() << "[TCPSocketAcceptor:" << this << "] On Accept" << endl;
 		StreamSocketT sock = acceptConnection();
-		SocketAccepted.dispatch(this, sock, _reactor);
+		SocketAccepted.emit(this, sock, _reactor);
 	}
 
 	

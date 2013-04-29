@@ -30,7 +30,7 @@
 
 
 #include "Sourcey/XMPP/Jingle/Jingle.h"
-#include "Sourcey/PacketDispatcher.h"
+#include "Sourcey/PacketEmitter.h"
 #include "Sourcey/Stateful.h"
 #include "Sourcey/Util/UserManager.h"
 #include "Sourcey/RTP/Codec.h"
@@ -106,7 +106,7 @@ struct SessionState: public State
 class SessionManager;
 
 
-class ISession: public StatefulSignal<SessionState>, public PacketDispatcher
+class ISession: public StatefulSignal<SessionState>, public PacketEmitter
 {
 public:	
 	ISession(SessionManager& manager,
@@ -136,9 +136,9 @@ public:
 	virtual std::string initiator() const { return _initiator; };
 	virtual std::string responder() const { return _responder; };
 	virtual SessionManager& manager() const { return _manager; };
-	virtual PacketDispatcherList sources() const { return _sources; };
+	virtual PacketEmitterList sources() const { return _sources; };
 	
-	virtual void addMediaSource(PacketDispatcher* source);
+	virtual void addMediaSource(PacketEmitter* source);
 	virtual void removeMediaSources();
 		// Depending on weather the destroySources flag is set
 		// the sources may or may not be destroyed.
@@ -150,7 +150,7 @@ protected:
 	std::string _sid;
     std::string _initiator;
     std::string _responder;
-	PacketDispatcherList _sources;
+	PacketEmitterList _sources;
 	bool _destroySources;
 
 	friend class SessionManager;
@@ -176,11 +176,11 @@ public:
 		// added to the stack. Returning false here will prevent creation,
 		// and the session pointer will be deleted.
 
-	virtual PacketDispatcher* onCreateMediaSource(ISession* session, const std::string& mediaType, 
+	virtual PacketEmitter* onCreateMediaSource(ISession* session, const std::string& mediaType, 
 		const std::string& mediaProfile, const RTP::Codec& codec) = 0;
-		// Called when signaling has completed and a PacketDispatcher can be
+		// Called when signaling has completed and a PacketEmitter can be
 		// associated with the session. The ISession will take ownership of 
-		// the PacketDispatcher.
+		// the PacketEmitter.
 
 	virtual IUser* onAuthenticateICEConnectivityCheck(ISession* session, const std::string& username) = 0;
 		// Called when a STUN binding request is received from a peer.

@@ -54,11 +54,11 @@ struct IPacketInfo
 struct IPacket: public IPolymorphic
 	/// The base packet class which can be extended by each
 	/// protocol implementation for polymorphic callbacks
-	/// using the PacketDispatcher and friends.
+	/// using the PacketEmitter and friends.
 { 
 	void* source;
 		// Optional packet source pointer reference. 
-		// Usually a subclass of PacketDispatcher.
+		// Usually a subclass of PacketEmitter.
 
 	IPacketInfo* info;
 		// Optional extra information about the packet.

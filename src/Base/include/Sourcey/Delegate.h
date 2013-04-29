@@ -60,7 +60,7 @@ namespace Sourcey {
 	virtual bool cancelled() const = 0;								\
 	virtual int priority() const = 0;								\
 	virtual bool equals(const Class*) const = 0;					\
-	virtual void dispatch(Void, P, P2, P3, P4) const = 0;			\
+	virtual void emit(Void, P, P2, P3, P4) const = 0;			\
 	virtual bool accepts(Void, P, P2, P3, P4) { return true; }		\
 	static bool ComparePrioroty(const Class* l, const Class* r) {	\
 		return l->priority() > r->priority();						\
@@ -79,7 +79,7 @@ template<class C>
 struct DelegateCallback<C, 0, true>
 {
 	typedef void (C::*Method)(Void);	
-	virtual void dispatch(Void sender, Void, Void, Void, Void) const {
+	virtual void emit(Void sender, Void, Void, Void, Void) const {
 		(_object->*_method)(sender);
 	}
 
@@ -91,7 +91,7 @@ template<class C>
 struct DelegateCallback<C, 0, false>
 {
 	typedef void (C::*Method)();	
-	virtual void dispatch(Void sender, Void, Void, Void, Void) const {
+	virtual void emit(Void sender, Void, Void, Void, Void) const {
 		(_object->*_method)();
 	}
 
@@ -103,7 +103,7 @@ template<class C, typename P>
 struct DelegateCallback<C, 1, true, P> 
 {
 	typedef void (C::*Method)(Void, P);	
-	virtual void dispatch(Void sender, P arg, Void, Void, Void) const {
+	virtual void emit(Void sender, P arg, Void, Void, Void) const {
 		(_object->*_method)(sender, arg);
 	}
 
@@ -115,7 +115,7 @@ template<class C, typename P>
 struct DelegateCallback<C, 1, false, P> 
 {
 	typedef void (C::*Method)(P);	
-	virtual void dispatch(Void, P arg, Void, Void, Void) const {
+	virtual void emit(Void, P arg, Void, Void, Void) const {
 		(_object->*_method)(arg);
 	}
 
@@ -127,7 +127,7 @@ template<class C, typename P, typename P2>
 struct DelegateCallback<C, 2, true, P, P2> 
 {
 	typedef void (C::*Method)(Void, P, P2);	
-	virtual void dispatch(Void sender, P arg, P2 arg2, Void, Void) const {
+	virtual void emit(Void sender, P arg, P2 arg2, Void, Void) const {
 		(_object->*_method)(sender, arg, arg2);
 	}
 
@@ -139,7 +139,7 @@ template<class C, typename P, typename P2>
 struct DelegateCallback<C, 2, false, P, P2> 
 {
 	typedef void (C::*Method)(P, P2);	
-	virtual void dispatch(Void, P arg, P2 arg2, Void, Void) const {
+	virtual void emit(Void, P arg, P2 arg2, Void, Void) const {
 		(_object->*_method)(arg, arg2);
 	}
 
@@ -151,7 +151,7 @@ template<class C, typename P, typename P2, typename P3>
 struct DelegateCallback<C, 3, true, P, P2, P3> 
 {
 	typedef void (C::*Method)(Void, P, P2, P3);	
-	virtual void dispatch(Void sender, P arg, P2 arg2, P3 arg3, Void) const {
+	virtual void emit(Void sender, P arg, P2 arg2, P3 arg3, Void) const {
 		(_object->*_method)(sender, arg, arg2, arg3);
 	}
 
@@ -163,7 +163,7 @@ template<class C, typename P, typename P2, typename P3> //, typename P4
 struct DelegateCallback<C, 3, false, P, P2, P3> 
 {
 	typedef void (C::*Method)(P, P2, P3);	
-	virtual void dispatch(Void, P arg, P2 arg2, P3 arg3, Void) const {
+	virtual void emit(Void, P arg, P2 arg2, P3 arg3, Void) const {
 		(_object->*_method)(arg, arg2, arg3);
 	}
 
@@ -175,7 +175,7 @@ template<class C, typename P, typename P2, typename P3, typename P4>
 struct DelegateCallback<C, 4, true, P, P2, P3, P4> 
 {
 	typedef void (C::*Method)(Void, P, P2, P3, P4);	
-	virtual void dispatch(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) const {
+	virtual void emit(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) const {
 		(_object->*_method)(sender, arg, arg2, arg3, arg4);
 	}
 
@@ -187,7 +187,7 @@ template<class C, typename P, typename P2, typename P3, typename P4>
 struct DelegateCallback<C, 4, false, P, P2, P3, P4> 
 {
 	typedef void (C::*Method)(P, P2, P3, P4);	
-	virtual void dispatch(Void, P arg, P2 arg2, P3 arg3, P4 arg4) const {
+	virtual void emit(Void, P arg, P2 arg2, P3 arg3, P4 arg4) const {
 		(_object->*_method)(arg, arg2, arg3, arg4);
 	}
 
@@ -244,9 +244,9 @@ public:
 		return new Delegate(*this);
 	}
 	
-	virtual void dispatch(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) const {
+	virtual void emit(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) const {
 		if (!_cancelled)
-			CallbackT::dispatch(sender, arg, arg2, arg3, arg4);
+			CallbackT::emit(sender, arg, arg2, arg3, arg4);
 	}
 	
 	virtual bool equals(const DerivedT* r) const { 

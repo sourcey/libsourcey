@@ -98,7 +98,6 @@ typedef xmpp_stream_error_t StreamError;
 
 
 // ---------------------------------------------------------------------
-//
 class Client: public StatefulSignal<ClientState>, public IPolymorphic
 {
 public:
@@ -148,7 +147,6 @@ protected:
 
 
 // ---------------------------------------------------------------------
-//
 class XMPPTask: public Task, public IPolymorphic
 {
 public:

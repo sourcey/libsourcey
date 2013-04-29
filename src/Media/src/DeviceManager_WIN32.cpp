@@ -30,6 +30,8 @@
 
 #include "Poco/UnicodeConverter.h"
 
+#include "RtAudio.h"
+
 #include <atlbase.h>
 #include <dbt.h>
 #include <strmif.h>  // must come before ks.h
@@ -67,27 +69,6 @@ IDeviceManager* DeviceManagerFactory::create()
 }
 
 
-/*
-class Win32DeviceWatcher : public DeviceWatcher, public talk_base::Win32Window 
-{
-public:
-	explicit Win32DeviceWatcher(Win32DeviceManager* dm);
-	virtual ~Win32DeviceWatcher();
-	virtual bool start();
-	virtual void stop();
-
-private:
-	HDEVNOTIFY Register(REFGUID guid);
-	void Unregister(HDEVNOTIFY notify);
-	virtual bool OnMessage(UINT msg, WPARAM wp, LPARAM lp, LRESULT& result);
-
-	Win32DeviceManager* manager_;
-	HDEVNOTIFY audio_notify_;
-	HDEVNOTIFY video_notify_;
-};
-*/
-
-
 static const char* kFilteredAudioDevicesName[] = {
 	NULL,
 };
@@ -97,25 +78,24 @@ static const char* const kFilteredVideoDevicesName[] =  {
 	"Bluetooth Video",         // Bad Sony viao bluetooth sharing driver
 	NULL,
 };
-static const wchar_t kFriendlyName[] = L"FriendlyName";
-static const wchar_t kDevicePath[] = L"DevicePath";
 static const char kUsbDevicePathPrefix[] = "\\\\?\\usb";
 static bool getDevices(const CLSID& catid, vector<Device>& out);
-static bool getCoreAudioDevices(bool input, vector<Device>& devs);
-static bool getWaveDevices(bool input, vector<Device>& devs);
 
 
+// ---------------------------------------------------------------------
+// Win32 Device Manager
+//
 Win32DeviceManager::Win32DeviceManager() : 
-	_need_couninitialize(false) 
+	_needCoUninitialize(false) 
 {
-	LogTrace() << "[DeviceManager] Creating" << endl;
+	LogTrace("DeviceManager") << "Creating" << endl;
 	//setWatcher(new Win32DeviceWatcher(this));
 }
 
 
 Win32DeviceManager::~Win32DeviceManager() 
 {
-	LogTrace() << "[DeviceManager] Destroying" << endl;
+	LogTrace("DeviceManager") << "Destroying" << endl;
 	if (initialized()) {
 		uninitialize();
 	}
@@ -124,51 +104,136 @@ Win32DeviceManager::~Win32DeviceManager()
 
 bool Win32DeviceManager::initialize() 
 {
-	LogTrace() << "[DeviceManager] Initializing" << endl;
+	LogTrace("DeviceManager") << "Initializing" << endl;
 	if (!initialized()) {
 		HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 		//HRESULT hr = CoInitialize(NULL);
-		_need_couninitialize = SUCCEEDED(hr);
+		_needCoUninitialize = SUCCEEDED(hr);
 		if (FAILED(hr)) {
 			if (hr != RPC_E_CHANGED_MODE) {
-				LogError() << "[DeviceManager] CoInitialize failed, hr=" << hr << endl;
+				LogError("DeviceManager") << "CoInitialize failed, hr=" << hr << endl;
 				return false;
 			}
 			else
-				LogWarn() << "[DeviceManager] CoInitialize Changed Mode" << endl;
+				LogWarn("DeviceManager") << "CoInitialize Changed Mode" << endl;
 		}
 		if (watcher() && !watcher()->start()) {
-			LogError() << "[DeviceManager] Failed to start watcher" << endl;
+			LogError("DeviceManager") << "Cannot start watcher" << endl;
 			return false;
 		}
 		setInitialized(true);
 	}
-	LogTrace() << "[DeviceManager] Initializing: OK" << endl;
+	LogTrace("DeviceManager") << "Initializing: OK" << endl;
 	return true;
 }
 
 
 void Win32DeviceManager::uninitialize() 
 {
-	LogTrace() << "[DeviceManager] Uninitializing" << endl;
+	LogTrace("DeviceManager") << "Uninitializing" << endl;
 
 	if (initialized()) {
 		if (watcher())
 			watcher()->stop();
-		if (_need_couninitialize) {
+		if (_needCoUninitialize) {
 			CoUninitialize();
-			_need_couninitialize = false;
+			_needCoUninitialize = false;
 		}
 		setInitialized(false);
 	}
-	LogTrace() << "[DeviceManager] Uninitializing: OK" << endl;
+	LogTrace("DeviceManager") << "Uninitializing: OK" << endl;
+}
+
+
+bool Win32DeviceManager::getAudioDevices(bool input, vector<Device>& devs) 
+{
+	devs.clear();
+
+	// Since we are using RtAudio for device capture, we should
+	// use RtAudio to enumerate devices to ensure indexes match.	
+	RtAudio audio;
+	try 
+	{
+		// Determine the number of devices available
+		unsigned int devices = audio.getDeviceCount();
+
+		// Scan through devices for various capabilities
+		RtAudio::DeviceInfo info;
+		for (unsigned int i = 0; i <= devices; i++) {
+			info = audio.getDeviceInfo(i);
+			if (info.probed == true &&
+				(input && info.inputChannels > 0) || 
+				(!input && info.outputChannels > 0)) {	
+				/*
+					*/
+				LogTrace("Win32DeviceManager", this) << "Device:" 
+					<< "\n\tName: " << info.name
+					<< "\n\tOutput Channels: " << info.outputChannels
+					<< "\n\tInput Channels: " << info.inputChannels
+					<< "\n\tDuplex Channels: " << info.duplexChannels
+					<< "\n\tDefault Output: " << info.isDefaultOutput
+					<< "\n\tDefault Input: " << info.isDefaultInput
+					<< endl;
+				
+				Device dev((input ? "audioin" : "audioout"), i, info.name, "", 
+					(input ? info.isDefaultInput : info.isDefaultOutput));
+				devs.push_back(dev);
+			}
+		}
+	} 
+	catch(...) {}
+
+	return filterDevices(devs, kFilteredAudioDevicesName);
+}
+
+
+bool Win32DeviceManager::getDefaultAudioDevice(bool input, Device& device) 
+{
+	bool ret = false;
+	vector<Device> devices;
+	ret = (getAudioDevices(input, devices) && !devices.empty());
+	if (ret) {
+		// Use the first device by default
+		device = devices[0];
+
+		// Loop through devices to check if any are explicitly 
+		// set as default
+		for (size_t i = 0; i < devices.size(); ++i) {
+			if (devices[i].isDefault) {
+				device = devices[i];
+			}
+		}
+	}
+	return ret;
+}
+
+
+bool Win32DeviceManager::getDefaultAudioInputDevice(Device& device) 
+{	
+	return getDefaultAudioDevice(true, device);
+}
+
+
+bool Win32DeviceManager::getDefaultAudioOutputDevice(Device& device) 
+{
+	return getDefaultAudioDevice(false, device);
+}
+
+
+bool Win32DeviceManager::getVideoCaptureDevices(vector<Device>& devices) 
+{
+	devices.clear();
+	if (!getDevices(CLSID_VideoInputDeviceCategory, devices)) {
+		return false;
+	}
+	return filterDevices(devices, kFilteredVideoDevicesName);
 }
 
 
 bool Win32DeviceManager::getDefaultVideoCaptureDevice(Device& device) 
 {
 	bool ret = false;
-	// If there are multiple capture devices, we want the first USB one.
+	// If there are multiple capture devices, we want the first USB device.
 	// This avoids issues with defaulting to virtual cameras or grabber cards.
 	vector<Device> devices;
 	ret = (getVideoCaptureDevices(devices) && !devices.empty());
@@ -187,6 +252,63 @@ bool Win32DeviceManager::getDefaultVideoCaptureDevice(Device& device)
 }
 
 
+bool getDevices(const CLSID& catid, vector<Device>& devices) 
+{
+	HRESULT hr;
+
+	// CComPtr is a scoped pointer that will be auto released when going
+	// out of scope. CoUninitialize must not be called before the
+	// release.
+	CComPtr<ICreateDevEnum> sys_dev_enum;
+	CComPtr<IEnumMoniker> cam_enum;
+	if (FAILED(hr = sys_dev_enum.CoCreateInstance(CLSID_SystemDeviceEnum)) ||
+		FAILED(hr = sys_dev_enum->CreateClassEnumerator(catid, &cam_enum, 0))) {
+			LogError("DeviceManager") << "Cannot create device enumerator, hr="  << hr << endl;
+			return false;
+	}
+
+	// Only enum devices if CreateClassEnumerator returns S_OK. If there are no
+	// devices available, S_FALSE will be returned, but enumMk will be NULL.
+	if (hr == S_OK) {
+		CComPtr<IMoniker> mk;
+		while (cam_enum->Next(1, &mk, NULL) == S_OK) {
+			CComPtr<IPropertyBag> bag;
+			if (SUCCEEDED(mk->BindToStorage(NULL, NULL,
+				__uuidof(bag), reinterpret_cast<void**>(&bag)))) {
+					CComVariant name, path;
+					string type_str, name_str, path_str;
+					if (SUCCEEDED(bag->Read(L"FriendlyName", &name, 0)) &&
+						name.vt == VT_BSTR) {
+							Poco::UnicodeConverter::toUTF8(name.bstrVal, name_str);
+							//name_str = talk_base::ToUtf8(name.bstrVal);
+							// Get the device id if one exists.
+							if (SUCCEEDED(bag->Read(L"DevicePath", &path, 0)) &&
+								path.vt == VT_BSTR) {
+									Poco::UnicodeConverter::toUTF8(path.bstrVal, path_str);
+									//path_str = talk_base::ToUtf8(path.bstrVal);
+							}
+							if (catid == CLSID_VideoInputDeviceCategory)
+								type_str = "video";
+							else 
+								assert(0 && "unknown type");
+							devices.push_back(Device(type_str, (int)devices.size(), name_str, path_str));
+					}
+			}
+			mk = NULL;
+		}
+	}
+
+	return true;
+}
+
+
+/*
+static const wchar_t kFriendlyName[] = L"FriendlyName";
+static const wchar_t kDevicePath[] = L"DevicePath";
+static bool getCoreAudioDevices(bool input, vector<Device>& devs);
+static bool getWaveDevices(bool input, vector<Device>& devs);
+
+
 bool Win32DeviceManager::getAudioDevices(bool input, vector<Device>& devs) 
 {
 	devs.clear();
@@ -200,72 +322,6 @@ bool Win32DeviceManager::getAudioDevices(bool input, vector<Device>& devs)
 			return false;
 	}
 	return filterDevices(devs, kFilteredAudioDevicesName);
-}
-
-
-bool Win32DeviceManager::getVideoCaptureDevices(vector<Device>& devices) 
-{
-	devices.clear();
-	if (!getDevices(CLSID_VideoInputDeviceCategory, devices)) {
-		return false;
-	}
-	return filterDevices(devices, kFilteredVideoDevicesName);
-}
-
-
-bool getDevices(const CLSID& catid, vector<Device>& devices) 
-{
-	HRESULT hr;
-
-	// CComPtr is a scoped pointer that will be auto released when going
-	// out of scope. CoUninitialize must not be called before the
-	// release.
-	CComPtr<ICreateDevEnum> sys_dev_enum;
-	CComPtr<IEnumMoniker> cam_enum;
-	if (FAILED(hr = sys_dev_enum.CoCreateInstance(CLSID_SystemDeviceEnum)) ||
-		FAILED(hr = sys_dev_enum->CreateClassEnumerator(catid, &cam_enum, 0))) {
-			LogError() << "[DeviceManager] Failed to create device enumerator, hr="  << hr << endl;
-			return false;
-	}
-
-	// Only enum devices if CreateClassEnumerator returns S_OK. If there are no
-	// devices available, S_FALSE will be returned, but enumMk will be NULL.
-	if (hr == S_OK) {
-		CComPtr<IMoniker> mk;
-		while (cam_enum->Next(1, &mk, NULL) == S_OK) {
-/*
-#ifdef HAVE_LOGITECH_HEADERS
-			// Initialize Logitech device if applicable
-			MaybeLogitechDeviceReset(mk);
-#endif
-*/
-			CComPtr<IPropertyBag> bag;
-			if (SUCCEEDED(mk->BindToStorage(NULL, NULL,
-				__uuidof(bag), reinterpret_cast<void**>(&bag)))) {
-					CComVariant name, path;
-					string type_str, name_str, path_str;
-					if (SUCCEEDED(bag->Read(kFriendlyName, &name, 0)) &&
-						name.vt == VT_BSTR) {
-							Poco::UnicodeConverter::toUTF8(name.bstrVal, name_str);
-							//name_str = talk_base::ToUtf8(name.bstrVal);
-							// Get the device id if one exists.
-							if (SUCCEEDED(bag->Read(kDevicePath, &path, 0)) &&
-								path.vt == VT_BSTR) {
-									Poco::UnicodeConverter::toUTF8(path.bstrVal, path_str);
-									//path_str = talk_base::ToUtf8(path.bstrVal);
-							}
-							if (catid == CLSID_VideoInputDeviceCategory)
-								type_str = "video";
-							else 
-								assert(0 && "unknown type");
-							devices.push_back(Device(type_str, name_str, (int)devices.size(), path_str));
-					}
-			}
-			mk = NULL;
-		}
-	}
-
-	return true;
 }
 
 
@@ -297,7 +353,7 @@ HRESULT getDeviceFromImmDevice(IMMDevice* device, Device& out) {
 		return hr;
 	}
 
-	// Get the endpoint's name and id.
+	// Get the endpoint's name and guid.
 	string name, guid;
 	hr = getStringProp(props, PKEY_Device_FriendlyName, &name);
 	if (SUCCEEDED(hr)) {
@@ -321,7 +377,9 @@ bool getCoreAudioDevices(bool input, vector<Device>& devs)
 		__uuidof(IMMDeviceEnumerator), reinterpret_cast<void**>(&enumerator));
 	if (SUCCEEDED(hr)) {
 		CComPtr<IMMDeviceCollection> devices;
-		hr = enumerator->EnumAudioEndpoints((input ? eCapture : eRender),
+
+		// Enumerate ALL devices, so we can get the correct system index
+		hr = enumerator->EnumAudioEndpoints(eAll, //(input ? eCapture : eRender),
 			DEVICE_STATE_ACTIVE, &devices);
 		if (SUCCEEDED(hr)) {
 			unsigned int count;
@@ -331,18 +389,40 @@ bool getCoreAudioDevices(bool input, vector<Device>& devs)
 				for (unsigned int i = 0; i < count; i++) {
 					CComPtr<IMMDevice> device;
 
-					// Get pointer to endpoint number i.
+					// Get pointer to endpoint
 					hr = devices->Item(i, &device);
-					if (FAILED(hr)) {
+					if (FAILED(hr))
 						break;
-					}
+					
+					// Get an endpoint interface for the current device
+					IMMEndpoint* endpoint = NULL;
+					hr = device->QueryInterface(__uuidof(IMMEndpoint), (void**)&endpoint);
+					if (FAILED(hr))
+						break;
 
+					// Get the data flow for the current device
+					EDataFlow dataFlow;
+					hr = endpoint->GetDataFlow(&dataFlow);
+					if (FAILED(hr))
+						break;
+
+					// Get next device if data flow is not as specified 
+					if (dataFlow != (input ? eCapture : eRender))
+						continue;
+
+					//device->QueryInterface(__uuidof(IMMEndpoint))
+					// You can get the flow (render or capture) by calling IMMDevice::QueryInterface(__uuidof(IMMEndpoint)) and then IMMEndpoint::GetDataFlow.
+					// http://social.msdn.microsoft.com/Forums/en-US/windowspro-audiodevelopment/thread/50889257-7200-4137-851d-6cc690234863/
+					//device
+					
 					Device dev(input ? "audioin" : "audioout", "", i);
+					
+					LogTrace("DeviceManager") << "Enumerating Device: " << i << endl;
 					hr = getDeviceFromImmDevice(device, dev);
 					if (SUCCEEDED(hr)) {
 						devs.push_back(dev);
 					} else {
-						LogWarn() << "[DeviceManager] Cannot query IMM Device, skipping.  HR=" << hr << endl;
+						LogWarn("DeviceManager") << "Cannot query IMM Device, skipping.  HR=" << hr << endl;
 						hr = S_FALSE;
 					}
 				}
@@ -351,7 +431,7 @@ bool getCoreAudioDevices(bool input, vector<Device>& devs)
 	}
 
 	if (FAILED(hr)) {
-		LogWarn() << "[DeviceManager] getCoreAudioDevices failed with hr " << hr << endl;
+		LogWarn("DeviceManager") << "getCoreAudioDevices failed with hr " << hr << endl;
 		return false;
 	}
 	return true;
@@ -389,6 +469,7 @@ bool getWaveDevices(bool input, vector<Device>& devs)
 	}
 	return true;
 }
+*/
 
 
 /*

@@ -233,7 +233,7 @@ void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 
 void VideoCapture::attach(const PacketDelegateBase& delegate)
 {
-	PacketDispatcher::attach(delegate);
+	PacketEmitter::attach(delegate);
 	LogTrace("VideoCapture", this) << "Added Delegate: " << refCount() << endl;
 	if (!isRunning() && flags().has(SyncWithDelegates)) //refCount == 1
 		start();
@@ -242,7 +242,7 @@ void VideoCapture::attach(const PacketDelegateBase& delegate)
 
 bool VideoCapture::detach(const PacketDelegateBase& delegate) 
 {
-	if (PacketDispatcher::detach(delegate)) {
+	if (PacketEmitter::detach(delegate)) {
 		LogTrace("VideoCapture", this) << "Removed Delegate: " << refCount() << endl;
 		if (refCount() == 0 && flags().has(SyncWithDelegates)) //isRunning() && 
 			stop();
@@ -278,7 +278,7 @@ void VideoCapture::run()
 					<< endl;
 					*/
 
-					dispatch(this, packet);
+					emit(this, packet);
 					//LogTrace("VideoCapture", this) << "Dispatch: OK" << endl;
 				}
 				

@@ -40,7 +40,6 @@ namespace Sourcey {
 
 
 // ---------------------------------------------------------------------
-//
 template<typename T>
 class Stateful
 	/// This class implements a simple state machine.
@@ -99,7 +98,6 @@ protected:
 
 
 // ---------------------------------------------------------------------
-//
 template<typename T>
 class MutexStateful: public Stateful<T>
 	/// This class adds thread safety the base
@@ -136,7 +134,6 @@ protected:
 
 
 // ---------------------------------------------------------------------
-//
 template<typename T>
 class StatefulSignal: public MutexStateful<T>
 	/// This class adds a StateChange signal
@@ -154,7 +151,7 @@ protected:
 	{ 
 		T oldState = MutexStateful<T>::state();
 		if (Stateful<T>::setState(id, message)) {
-			StateChange.dispatch(sender, MutexStateful<T>::state(), oldState);
+			StateChange.emit(sender, MutexStateful<T>::state(), oldState);
 			return true;
 		}
 		return false;

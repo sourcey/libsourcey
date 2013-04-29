@@ -37,7 +37,7 @@ using namespace Poco;
 namespace Sourcey {
 
 
-PacketQueue::PacketQueue(PacketDispatcher& dispatcher, Runner& runner, int queueSize, int dispatchTimeout) :
+PacketQueue::PacketQueue(PacketEmitter& dispatcher, Runner& runner, int queueSize, int dispatchTimeout) :
 	 DispatchQueue<IPacket>(runner, queueSize, dispatchTimeout),
 	_dispatcher(dispatcher)
 {	
@@ -51,10 +51,10 @@ PacketQueue::~PacketQueue()
 }
 
 
-void PacketQueue::dispatch(IPacket& packet)
+void PacketQueue::emit(IPacket& packet)
 {
 	//LogTrace() << "[PacketQueue:" << this << "] Dispatching: " << &packet << endl;
-	_dispatcher.dispatch(this, packet);
+	_dispatcher.emit(this, packet);
 }
 
 

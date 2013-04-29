@@ -93,12 +93,6 @@ void Form::setAction(const string& action)
 }
 
 
-void Form::setRebuild(bool flag) 
-{
-	root()["rebuild"] = flag;
-}
-
-
 bool Form::valid()
 {
 	return FormElement::valid() 
@@ -108,10 +102,8 @@ bool Form::valid()
 
 
 // ---------------------------------------------------------------------
-//
 // Form Element
 //
-// ---------------------------------------------------------------------
 FormElement::FormElement() :
 	_root(NULL)
 {
@@ -345,10 +337,8 @@ JSON::Value& FormElement::root() const
 
 
 // ---------------------------------------------------------------------
-//
 // Form Field
 //
-// ---------------------------------------------------------------------
 FormField::FormField()
 {
 }

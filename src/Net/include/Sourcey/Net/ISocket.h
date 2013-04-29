@@ -98,8 +98,8 @@ typedef std::vector<ISocket*> ISocketList;
 
 
 //#include "Sourcey/PacketFactory.h"
-//#include "Sourcey/PacketDispatcher.h"
+//#include "Sourcey/PacketEmitter.h"
 	//ISocket() {};
 	//ISocket(const ISocket& r) :
 	//	PacketFactory(r) {}; // delegates are not copied
-	//: public PacketFactory, public PacketDispatcher
+	//: public PacketFactory, public PacketEmitter

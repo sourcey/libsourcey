@@ -199,7 +199,7 @@ void UDPSocket::onRecv(uv_udp_t* handle, ssize_t nread, uv_buf_t buf, struct soc
 	}
 
 	Net::Address peerAddress(addr, sizeof *addr);
-	socket->OnRecv.dispatch(socket, buf.base, nread, peerAddress);
+	socket->OnRecv.emit(socket, buf.base, nread, peerAddress);
 }
 
 
@@ -214,7 +214,7 @@ void UDPSocket::onSend(uv_udp_send_t* req, int status)
 		socket->setErrno(uv_last_error(socket->_loop));
 		
 	// TODO: Move to after callbak
-	socket->OnSend.dispatch(socket, sr->buf.base, sr->buf.len, sr->addr);
+	socket->OnSend.emit(socket, sr->buf.base, sr->buf.len, sr->addr);
 
 	delete sr;
 }
@@ -733,7 +733,7 @@ void UDPSocket::receive(Buffer& buffer)
 {
 	// No processing done by default..
 	//packetize(buffer);
-	OnData.dispatch(this, buffer);
+	OnData.emit(this, buffer);
 }
 
 

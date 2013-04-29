@@ -45,7 +45,7 @@ struct DelegateCallback<C, 8, false, PolymorphicT>
 {
 	typedef void (C::*Method)(PolymorphicT&); 
 	DefineCallbackFields
-	virtual void dispatch(Void /* sender */, IPolymorphic& data, Void, Void, Void) const {
+	virtual void emit(Void /* sender */, IPolymorphic& data, Void, Void, Void) const {
 		PolymorphicT* castData = dynamic_cast<PolymorphicT*>(&data);
 		if (castData) {
 			(_object->*_method)(*castData);
@@ -59,7 +59,7 @@ struct DelegateCallback<C, 8, true, PolymorphicT>
 {
 	typedef void (C::*Method)(Void, PolymorphicT&);
 	DefineCallbackFields
-	virtual void dispatch(Void sender, IPolymorphic& data, Void, Void, Void) const {
+	virtual void emit(Void sender, IPolymorphic& data, Void, Void, Void) const {
 		PolymorphicT* castData = dynamic_cast<PolymorphicT*>(&data);
 		if (castData) {
 			(_object->*_method)(sender, *castData);

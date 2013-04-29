@@ -132,7 +132,7 @@ void HostCandidate::onSTUNPacketReceived(void* sender, STUN::Message& message
 	// to which this candidate belongs (first priority) for processing
 	// connectivity check responses, or the Check List, where it will
 	// be treated as a connectivity check request from the remore peer.
-	STUNMessageReceived.dispatch(this, message, source->peerAddress);
+	STUNMessageReceived.emit(this, message, source->peerAddress);
 }
 
 

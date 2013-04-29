@@ -67,7 +67,6 @@ public:
 	
 
 // ---------------------------------------------------------------------
-//
 class IPacketWebSocket: public IPacketSocket
 {
 public:
@@ -89,7 +88,6 @@ public:
 
 
 // ---------------------------------------------------------------------
-//
 template <class SocketBaseT>
 class WebSocketBase: public SocketBaseT
 {
@@ -312,7 +310,7 @@ protected:
 	{
 		log("debug") << "Web Socket Online" << endl;
 
-		Online.dispatch(static_cast<SocketBaseT::InterfaceT*>(this));
+		Online.emit(static_cast<SocketBaseT::InterfaceT*>(this));
 	}
 
 

@@ -45,7 +45,7 @@ struct Package: public JSON::Value
 		/// asset containing files belonging to
 		/// the parent package.
 	{
-		Asset(JSON::Value& src);
+		Asset(JSON::Value& src = JSON::Value());
 		virtual ~Asset();
 		
 		virtual std::string fileName() const;
@@ -101,7 +101,6 @@ struct Package: public JSON::Value
 
 
 // ---------------------------------------------------------------------
-//
 struct RemotePackage: public Package
 	/// This class is a JSON representation of an
 	/// package existing on the remote server that
@@ -114,7 +113,6 @@ struct RemotePackage: public Package
 
 
 // ---------------------------------------------------------------------
-//
 struct LocalPackage: public Package
 	/// This class is a JSON representation of an
 	/// installed local package that exists on the
@@ -195,7 +193,6 @@ struct LocalPackage: public Package
 
 
 // ---------------------------------------------------------------------
-//
 struct PackagePair
 	/// This class provides pairing of a local and a
 	/// remote package.

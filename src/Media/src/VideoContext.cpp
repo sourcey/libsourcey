@@ -104,10 +104,8 @@ void VideoContext::close()
 
 
 // ---------------------------------------------------------------------
-//
 // Video Encoder Context
 //
-// ---------------------------------------------------------------------
 VideoEncoderContext::VideoEncoderContext(AVFormatContext* format) :
 	format(format),
 	conv(NULL),
@@ -146,7 +144,7 @@ void VideoEncoderContext::create() //, const VideoCodec& params
 	// codec to the format context's streams[] array.
 	stream = avformat_new_stream(format, codec);
 	if (!stream)
-		throw Exception("Failed to create video stream.");	
+		throw Exception("Cannot create video stream.");	
 	
 	ctx = stream->codec;
 
@@ -272,6 +270,7 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 	oframe->pts = iframe->pts;
 
     av_init_packet(&opacket);	
+    opacket.stream_index = stream->index;
 	opacket.data = NULL; // use encoder assigned buffer
 	opacket.size = 0;
 	//opacket.data = this->buffer; // use our buffer, not ffmpeg assigned
@@ -286,15 +285,14 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 	
 	if (frameEncoded) {		
 		if (ctx->coded_frame->key_frame) 
-		    opacket.flags |= AV_PKT_FLAG_KEY;
-
-		/*	
+		    opacket.flags |= AV_PKT_FLAG_KEY; 
         if (opacket.pts != AV_NOPTS_VALUE)
             opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
         if (opacket.dts != AV_NOPTS_VALUE)
             opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
-
-		LogTrace() << "[VideoCodecEncoderContext:" << this << "] Encoded PTS:\n" 
+		
+		/*
+		LogTrace() << "[VideoCodecEncoderContext:" << this << "] Encoded PTS:" 
 			//<< "\n\tPTS: " << av_ts2str(opacket.pts)
 			//<< "\n\tDTS: " << av_ts2str(opacket.dts)
 			//<< "\n\tPTS Time: " << av_ts2timestr(opacket.pts, &stream->time_base)
@@ -306,8 +304,8 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 			//<< "\n\tCodec Time Num: " << ctx->time_base.num
 			//<< "\n\tStream Time Den: " << stream->time_base.den
 			//<< "\n\tStream Time Num: " << stream->time_base.num
-			<< endl; 
-		*/
+			<< endl;
+			*/
     }
 	
 	return frameEncoded > 0;
@@ -315,10 +313,8 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 
 
 // ---------------------------------------------------------------------
-//
 // Video Codec Encoder Context
 //
-// ---------------------------------------------------------------------
 VideoCodecEncoderContext::VideoCodecEncoderContext() :
 	conv(NULL),
 	buffer(NULL),
@@ -444,15 +440,17 @@ bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 		throw Exception(error);
     }
 
-	if (frameEncoded) {		
+	if (frameEncoded) {	
 		if (ctx->coded_frame->key_frame) 
 		    opacket.flags |= AV_PKT_FLAG_KEY;
+		// No stream pointer
+		//opacket.stream_index = stream->index;
+        //if (opacket.pts != AV_NOPTS_VALUE)
+        //    opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
+        //if (opacket.dts != AV_NOPTS_VALUE)
+        //    opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
 
 		/*	
-        if (opacket.pts != AV_NOPTS_VALUE)
-            opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
-        if (opacket.dts != AV_NOPTS_VALUE)
-            opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
 
 		LogTrace() << "[VideoCodecEncoderContext:" << this << "] Encoded PTS:\n" 
 			//<< "\n\tPTS: " << av_ts2str(opacket.pts)
@@ -475,10 +473,8 @@ bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 
 
 // ---------------------------------------------------------------------
-//
 // Video Decoder Context
 //
-// ---------------------------------------------------------------------
 VideoDecoderContext::VideoDecoderContext()
 {
 }
@@ -563,7 +559,7 @@ bool VideoDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 
 	/*
 	while (bytesRemaining) { // && !frameDecoded
-		//LogDebug() << "#################### [VideoDecoderContext:" << this << "] Decoding: " << ipacket.pts << endl;
+		//LogDebug() << "[VideoDecoderContext:" << this << "] Decoding: " << ipacket.pts << endl;
 		bytesRemaining -= bytesDecoded;
 	}
 	*/
@@ -578,6 +574,7 @@ bool VideoDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 			<< "\n\tPacket DTS: " << opacket.dts
 			<< "\n\tFrame Packet PTS: " << frame->pkt_pts
 			<< "\n\tFrame Packet DTS: " << frame->pkt_dts
+			<< "\n\tFrame Size: " << ctx->frame_size
 			<< endl;
 			*/
 		
@@ -610,10 +607,8 @@ bool VideoDecoderContext::flush(AVPacket& opacket)
 
 
 // ---------------------------------------------------------------------
-//
 // Video Conversion Context
 //
-// ---------------------------------------------------------------------
 VideoConversionContext::VideoConversionContext() :
 	oframe(NULL),
 	ctx(NULL)
@@ -642,6 +637,8 @@ void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec&
         throw Exception("Conversion context already initialized.");
 
 	oframe = avcodec_alloc_frame();
+	oframe->width = oparams.width;
+	oframe->height = oparams.height;
     avpicture_alloc(reinterpret_cast<AVPicture*>(oframe), 
 		av_get_pix_fmt(oparams.pixelFmt), oparams.width, oparams.height);
 	ctx = sws_getContext(
@@ -694,10 +691,8 @@ AVFrame* VideoConversionContext::convert(AVFrame* iframe)
 
 
 // ---------------------------------------------------------------------
-//
 // Inlines & Helpers
-//
-// ---------------------------------------------------------------------		
+//		
 AVFrame* CreateVideoFrame(::PixelFormat pixelFmt, int width, int height)
 {
     AVFrame* picture = avcodec_alloc_frame();
@@ -737,11 +732,11 @@ void InitVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
 	ctx->frame_number = 0;
 
 	// Time base: this is the fundamental unit of time (in seconds) in terms
-	// of which frame timestamps are represented. for fixed-fps content,
+	// of which frame timestamps are represented. For fixed-fps content,
 	// timebase should be 1/framerate and timestamp increments should be
 	// identically 1.
 	ctx->time_base.den = oparams.fps;
-	ctx->time_base.num = 1;
+	ctx->time_base.num = 1; //000; //; //
 
 	// Emit one intra frame every twelve frames at most
 	ctx->gop_size = 12; // oparams.fps;
@@ -1401,8 +1396,8 @@ double VideoContext::pts()
 
 		int result = av_interleaved_write_frame(oc, &opacket);
 		if (result < 0) {
-			LogError() << "[AVEncoder" << this << "] Failed to write video frame." << endl;
-			//throw Exception("Failed to write video frame");
+			LogError() << "[AVEncoder" << this << "] Cannot write video frame." << endl;
+			//throw Exception("Cannot write video frame");
 			return false;
 		}
 	} 

@@ -212,9 +212,9 @@ public:
 			throw Exception("The encoder is not initilaized.");
 
 		// No encoding takes place, just relay the packet.
-		//PacketEncoded.dispatch(this, static_cast<Packet&>(packet));
+		//PacketEncoded.emit(this, static_cast<Packet&>(packet));
 
-		PacketEncoded.dispatch(this, packet);
+		PacketEncoded.emit(this, packet);
 	}
 
 	// Connect to PacketEncoded signal to receive encoded packets.

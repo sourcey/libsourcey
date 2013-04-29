@@ -40,7 +40,6 @@ namespace RTCP {
 
 
 // ---------------------------------------------------------------------
-//
 struct SDESItem
 	/// The class SDESItem is used for storing a source description item
 	/// (type of description, description string) for an RTP end system.
@@ -87,7 +86,6 @@ struct SDESItem
 
 
 // ---------------------------------------------------------------------
-//
 class SDESChunk
 	/// The class SDESChunk is used for storing SDESItem objects
 	/// for one RTP end system.
@@ -115,7 +113,6 @@ protected:
 
 
 // ---------------------------------------------------------------------
-//
 class SDESPacket: public RTCP::Packet
 	/// Source Description RTCP Packet
 	///

@@ -88,7 +88,7 @@ int WriteOutputPacket(void* opaque, uint8_t* buffer, int bufferSize)
 		//packet.data = buffer;
 		//packet.time = time(0); // Set to pts?
 		//packet.size = bufferSize;
-		//klass->PacketEncoded.dispatch(klass, packet);
+		//klass->PacketEncoded.emit(klass, packet);
 		MediaPacket packet(buffer, bufferSize);
 		klass->dispatch(klass, packet);
 	}   
@@ -317,7 +317,7 @@ void AVEncoder::onStreamStateChange(const PacketStreamState& state)
 	//case PacketStreamState::Closed:
 	}
 
-	PacketDispatcher::onStreamStateChange(state);
+	PacketEmitter::onStreamStateChange(state);
 }
 
 // -------------------------------------------------------------------

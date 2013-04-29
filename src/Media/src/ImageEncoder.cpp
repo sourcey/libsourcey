@@ -113,7 +113,7 @@ void ImageEncoder::process(IPacket& packet)
 	mpacket->setSize(buffer.size());
 	
 	//LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket << endl;
-	dispatch(this, *mpacket);
+	emit(this, *mpacket);
 	//LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: OK: " << mpacket << endl;
 }
 

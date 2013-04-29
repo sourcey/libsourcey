@@ -152,7 +152,7 @@ public:
 		Log("trace") << "Running Packet Signal Test" << endl;
 		BroadcastPacket += packetDelegate(this, &Tests::onBroadcastPacket, 0);
 		DataPacket packet;
-		BroadcastPacket.dispatch(this, packet);
+		BroadcastPacket.emit(this, packet);
 		Util::pause();
 		Log("trace") << "Running Packet Signal Test: END" << endl;
 	}

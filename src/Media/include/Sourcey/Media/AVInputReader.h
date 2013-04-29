@@ -2,7 +2,7 @@
 #define SOURCEY_MEDIA_AVInputReader_H
 
 
-#include "Sourcey/PacketDispatcher.h"
+#include "Sourcey/PacketEmitter.h"
 #include "Sourcey/IStartable.h"
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/VideoContext.h"
@@ -15,9 +15,9 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#ifdef LIBAVDEVICE_VERSION
 #include <libavdevice/avdevice.h>
-//#include <libavutil/fifo.h>
-//#include <libswscale/swscale.h>
+#endif
 }
 
 
@@ -25,7 +25,7 @@ namespace Sourcey {
 namespace Media {
 
 
-class AVInputReader: public PacketDispatcher, public IStartable, public Poco::Runnable
+class AVInputReader: public PacketEmitter, public IStartable, public Poco::Runnable
 	/// Video capture and file input decoder class with reusable
 	/// code that depends on ffmpeg libavcodec/libavformat.
 {
@@ -68,8 +68,10 @@ public:
 	virtual ~AVInputReader();
 	
 	virtual void openFile(const std::string& file);
+#ifdef LIBAVDEVICE_VERSION
 	virtual void openDevice(int deviceID, int width = 0, int height = 0, double framerate = 0); 
 	virtual void openDevice(const std::string& device, int width = 0, int height = 0, double framerate = 0);
+#endif
 	virtual void openStream(const char* filename, AVInputFormat* inputFormat, AVDictionary** formatParams);
 	virtual void close();
 	

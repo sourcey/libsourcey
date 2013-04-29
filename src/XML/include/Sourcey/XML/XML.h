@@ -51,7 +51,6 @@ typedef pugi::xml_attribute Attribute;
 
 
 // ---------------------------------------------------------------------
-//
 class Node: public pugi::xml_node 
 {
 public:
@@ -70,7 +69,6 @@ public:
 
 
 // ---------------------------------------------------------------------
-//
 class Document: public pugi::xml_document, public IPacket
 {
 public:

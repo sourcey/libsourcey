@@ -68,11 +68,11 @@ public:
 				onBusy();
 
 				for (Socket::SocketList::iterator it = readable.begin(); it != readable.end(); ++it)
-					dispatch(*it, _pReadableNotification);
+					emit(*it, _pReadableNotification);
 				for (Socket::SocketList::iterator it = writable.begin(); it != writable.end(); ++it)
-					dispatch(*it, _pWritableNotification);
+					emit(*it, _pWritableNotification);
 				for (Socket::SocketList::iterator it = except.begin(); it != except.end(); ++it)
-					dispatch(*it, _pErrorNotification);
+					emit(*it, _pErrorNotification);
 					*/
 			} 
 			/*

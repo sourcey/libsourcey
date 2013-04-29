@@ -80,7 +80,7 @@ void handleRead(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) //, uv_handle_
 	// EOF or Error
 	if (nread == -1)  {
 		socket->setErrno(uv_last_error(socket->loop()));
-		socket->OnRead.dispatch(socket, NULL, 0);
+		socket->OnRead.emit(socket, NULL, 0);
 		return;
 	}
 
@@ -92,7 +92,7 @@ void handleRead(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) //, uv_handle_
 			assert(pending == UV_UNKNOWN_HANDLE);
 		}
 		
-		socket->OnRead.dispatch(socket, buf.base, buf.len);
+		socket->OnRead.emit(socket, buf.base, buf.len);
 	//}
 }
 		*/
@@ -237,7 +237,7 @@ TCPContext* TCPContext::acceptConnection()
 	int r = uv_accept(_stream, conn->_stream);
 	assert(r == 0); // uv_accept should always work.
 	conn->readStart();
-	OnAcceptConnection.dispatch(this, conn);
+	OnAcceptConnection.emit(this, conn);
 	return NULL;
 }
 
@@ -253,7 +253,7 @@ void TCPContext::onConnected(int status) //ConnectReq* req,
 	else
 		readStart();
 
-	OnConnected.dispatch(this, status);
+	OnConnected.emit(this, status);
 }
 
 

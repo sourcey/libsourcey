@@ -75,7 +75,7 @@ struct ClientState: public State
 	
 // ---------------------------------------------------------------------
 //
-class Client: public StatefulSignal<ClientState>, public PacketDispatcher, public IPolymorphic
+class Client: public StatefulSignal<ClientState>, public PacketEmitter, public IPolymorphic
 {
 public:
 	Client(Net::IWebSocket& socket, Runner& runner);
@@ -210,7 +210,6 @@ typedef SocketIO::ClientBase<
 
 /*
 // ---------------------------------------------------------------------
-//
 typedef SocketIO::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
@@ -221,7 +220,6 @@ typedef SocketIO::ClientBase<
 
 
 // ---------------------------------------------------------------------
-//
 typedef SocketIO::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
@@ -242,7 +240,6 @@ typedef SocketIO::ClientBase<
 
 
 // ---------------------------------------------------------------------
-//
 //template <class WebSocketBaseT>
 //class ClientBase: public WebSocketBaseT
 //{
@@ -511,7 +508,6 @@ typedef SocketIO::ClientBase<
 
 /*
 // ---------------------------------------------------------------------
-//
 typedef SocketIO::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 

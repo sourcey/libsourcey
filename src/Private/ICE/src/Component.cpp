@@ -330,10 +330,8 @@ void Component::sendRTCPPacket(void*, RTP::RTCP::Packet& packet)
 
 
 // ---------------------------------------------------------------------
-//
 // Host Candidates
 //
-// ---------------------------------------------------------------------
 void Component::gatherHostCandidates() 
 {	
 	Log("debug", this) << "Gathering Host Candidates" << endl;
@@ -380,10 +378,8 @@ void Component::gatherHostCandidates()
 
 
 // ---------------------------------------------------------------------
-//
 // Server Reflexive Candidates
 //
-// ---------------------------------------------------------------------
 void Component::gatherServerReflexiveCandidates() 
 {
 	if (_stream.agent().options().disableSTUN)
@@ -415,10 +411,8 @@ void Component::gatherServerReflexiveCandidates()
 
 
 // ---------------------------------------------------------------------
-//
 // Relayed Candidates
 //
-// ---------------------------------------------------------------------
 void Component::gatherRelayedCandidates() 
 {
 	if (_stream.agent().options().disableRelay)
@@ -625,10 +619,8 @@ void Component::selectDefaultLocalCandidate()
 		*/
 
 // ---------------------------------------------------------------------
-//
 // Events
 //
-// ---------------------------------------------------------------------
 /*
 void Component::onDataPacketReceived(Net::ISocket& socket, Packet* packet, const Net::Address& localAddress, const Net::Address& peerAddress) {
 	DataPacket* data = dynamic_cast<DataPacket*>(packet);
@@ -748,7 +740,7 @@ void Component::onDataPacketReceived(Net::ISocket& socket, Packet* packet, const
 //				*/
 //
 //				// Authenticated! Send the response to the system for processing.
-//				ReceivedConnectivityCheckSuccess.dispatch(this, response);	
+//				ReceivedConnectivityCheckSuccess.emit(this, response);	
 //			}
 //		//}
 //		
@@ -803,10 +795,8 @@ void Component::onDataPacketReceived(Net::ISocket& socket, Packet* packet, const
 
 
 // ---------------------------------------------------------------------
-//
 // Connectivity
 //
-// ---------------------------------------------------------------------
 /*
 int Component::send(const char* data, int size) 
 {	
@@ -976,7 +966,7 @@ void Component::onSTUNTransactionTimeout(STUN::TransactionIPacket& packet) {
 
 	// Catch STUN Binding Request failures.
 	else {
-		ReceivedConnectivityCheckFailed.dispatch(this, packet);
+		ReceivedConnectivityCheckFailed.emit(this, packet);
 	}
 }
 */

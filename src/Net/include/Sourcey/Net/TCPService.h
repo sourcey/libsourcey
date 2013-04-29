@@ -99,27 +99,25 @@ typedef std::map<std::string, TCPService*> TCPServiceMap;
 
 
 // ---------------------------------------------------------------------
-//
 // Flash Policy Request Handler
 //
-// ---------------------------------------------------------------------
 class FlashPolicyRequestHandler: public Poco::Net::TCPServerConnection
 {
 public:
-	FlashPolicyRequestHandler(const Poco::Net::StreamSocket& s);
+	FlashPolicyRequestHandler(const Poco::Net::StreamSocket& s, bool isHTTP = false);
 	void run();
+
+	bool _isHTTP;
 };
 
 
 // ---------------------------------------------------------------------
+// Null Request Handler
 //
-// Request Handler
-//
-// ---------------------------------------------------------------------
-class BadRequestHandler: public Poco::Net::TCPServerConnection
+class NullRequestHandler: public Poco::Net::TCPServerConnection
 {
 public:
-	BadRequestHandler(const Poco::Net::StreamSocket& s);		
+	NullRequestHandler(const Poco::Net::StreamSocket& s);		
 	void run();
 };
 

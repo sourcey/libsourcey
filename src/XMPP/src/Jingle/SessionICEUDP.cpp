@@ -118,7 +118,7 @@ void SessionICEUDP::initiate()
 	/*	
 	if (!stream.agent().isControlling() &&
 		stream.agent().options().senders != "recvonly") {
-		PacketDispatcher* source = geStreamMediaSource(stream);
+		PacketEmitter* source = geStreamMediaSource(stream);
 		if (!source) {
 			assert(false);
 			return false;
@@ -132,7 +132,7 @@ void SessionICEUDP::initiate()
 			if (!stream.source())
 				stream.setMediaSource(getMediaSource(stream.name()));
 			if (!stream.source())
-				throw Exception("Media Stream has no PacketDispatcher.");
+				throw Exception("Media Stream has no PacketEmitter.");
 		}
 	}
 	*/
@@ -261,7 +261,7 @@ void SessionICEUDP::removeMediaSources()
 		MediaStreamMap streams = _ice->streams();
 		for (ICE::MediaStreamMap::iterator it = streams.begin(); it != streams.end(); ++it) {
 			MediaStream* stream = it->second;
-			PacketDispatcher* source = geStreamMediaSource(*stream);
+			PacketEmitter* source = geStreamMediaSource(*stream);
 			if (!source)
 				continue;
 					
@@ -278,7 +278,7 @@ void SessionICEUDP::removeMediaSources()
 }
 
 
-PacketDispatcher* SessionICEUDP::geStreamMediaSource(const ICE::MediaStream& stream)
+PacketEmitter* SessionICEUDP::geStreamMediaSource(const ICE::MediaStream& stream)
 {
 	if (static_cast<int>(_sources.size()) < stream.index()) {
 		return false;
@@ -291,10 +291,8 @@ PacketDispatcher* SessionICEUDP::geStreamMediaSource(const ICE::MediaStream& str
 
 
 // ---------------------------------------------------------------------
-//
 // ICE Events
 //
-// ---------------------------------------------------------------------
 bool SessionICEUDP::onMediaStreamCreated(ICE::Agent& agent, ICE::MediaStream& stream) 
 {
 	LogDebug() << "[SessionICEUDP:" << this << "] Media Stream Created" << endl;
@@ -327,7 +325,7 @@ const IUser* SessionICEUDP::authenticateBindingRequest(ICE::Agent& agent, const 
 	peerUsername = peerUsername.substr(0, index);
 	if (username == peerUsername) {
 		// If it is then we request authentication.
-		AuthenticateICEConnectivityCheck.dispatch(this, username, user);
+		AuthenticateICEConnectivityCheck.emit(this, username, user);
 	} else
 		LogError() << "[SessionICEUDP:" << this << "] ICE Binding request not equal to peer: " << username << ": " << peerUsername << endl;
 	return user;
@@ -346,7 +344,7 @@ void SessionICEUDP::onSelectedPairsChanged(Agent& agent, MediaStream& stream, Co
 	/*
 	// change our media destination to the new selected pair	
 	if (_ice->options().senders != "recvonly") {
-		PacketDispatcher* source = geStreamMediaSource(stream);
+		PacketEmitter* source = geStreamMediaSource(stream);
 		if (source) {
 			source->attach(packetDelegate(this, &Component::onAudioCapture));
 
@@ -371,7 +369,7 @@ void SessionICEUDP::onMediaOnData(ICE::Agent& agent, ICE::MediaStream& stream, C
 
 	// Delegates may wish to differentiate RTP from RTCP
 	// packets by creating a callback delegate for each.
-	dispatch(this, (IPacket&)packet);
+	emit(this, (IPacket&)packet);
 }
 
 
@@ -422,7 +420,7 @@ void SessionICEUDP::onICEStateChange(ICE::Agent& agent, ICE::State& state)
 				for (ICE::MediaStreamMap::iterator it = streams.begin(); it != streams.end(); ++it) {
 					MediaStream* stream = it->second;
 
-					PacketDispatcher* source = geStreamMediaSource(*stream);
+					PacketEmitter* source = geStreamMediaSource(*stream);
 					if (!source)
 						throw Exception("No media source for stream: " + stream->name());
 					
@@ -487,10 +485,8 @@ void SessionICEUDP::onICEStateChange(ICE::Agent& agent, ICE::State& state)
 
 
 // ---------------------------------------------------------------------
-//
 // Helpers
 //
-// ---------------------------------------------------------------------
 //
 // <iq from='juliet@capulet.lit/balcony'
 //     id='yd71f495'

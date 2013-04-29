@@ -30,15 +30,16 @@
 
 
 #include "Sourcey/SocketIO/Client.h"
+#include "Sourcey/Util/TimedManager.h"
 #include "Sourcey/Net/Reactor.h"
 #include "Sourcey/Net/WebSocket.h"
-#include "Sourcey/Util/TimedManager.h"
+#include "Sourcey/Symple/Roster.h"
 #include "Sourcey/Symple/Message.h"
-#include "Sourcey/Symple/Command.h"
 #include "Sourcey/Symple/Presence.h"
+#include "Sourcey/Symple/Command.h"
+#include "Sourcey/Symple/Event.h"
 #include "Sourcey/Symple/Form.h"
 #include "Sourcey/Symple/Peer.h"
-#include "Sourcey/Symple/Roster.h"
 
 
 namespace Sourcey {
@@ -80,11 +81,12 @@ public:
 	void close();
 
 	virtual int send(const std::string data);
-	virtual int send(Message& message, bool ack = false);
+	virtual int send(const Message& message, bool ack = false);
+		/// Sends a message.
 
-	virtual int respond(Message& message);
-		/// Responds to an incoming message and sends it.
-		/// NOTE: Internal message data is modified.
+	virtual int respond(const Message& message, bool ack = false);
+		/// Responds to an incoming message and sends it
+		/// by swapping the 'to' and 'from' fields.
 
 	virtual int sendPresence(bool probe = false);
 		/// Broadcasts presence to the user group scope.
@@ -100,8 +102,7 @@ public:
 		/// current session or throws an exception.
 
 	virtual Roster& roster();
-		/// Returns the roster which stores all online
-		/// peers.
+		/// Returns the roster which stores all online peers.
 
 	virtual PersistenceT& persistence();
 		/// Returns the persistence manager which stores
@@ -201,7 +202,7 @@ typedef Symple::ClientBase<
 //
 enum FilterFlags 
 {
-	AcceptResquests		= 0x01, 
+	AcceptRequests		= 0x01, 
 	AcceptResponses		= 0x02
 };
 
@@ -232,8 +233,8 @@ struct MessageDelegate: public PacketDelegateBase
 	{
 		Message* packet = dynamic_cast<Message*>(&data);
 		if (packet &&
-			(!filter.has(AcceptResquests) || 
-				(filter.has(AcceptResquests) && packet->isRequest())) &&
+			(!filter.has(AcceptRequests) || 
+				(filter.has(AcceptRequests) && packet->isRequest())) &&
 			(!filter.has(AcceptResponses) || 
 				(filter.has(AcceptResponses) && !packet->isRequest()))) {
 			return true;
@@ -246,6 +247,8 @@ struct MessageDelegate: public PacketDelegateBase
 DefinePolymorphicDelegateWithArg(messageDelegate, IPacket, MessageDelegate, const Filter&, Filter())
 
 
+// ---------------------------------------------------------------------
+//
 struct CommandDelegate: public MessageDelegate
 {
 	CommandDelegate(const Filter& filter = Filter()) : MessageDelegate(filter) {};
@@ -265,6 +268,49 @@ struct CommandDelegate: public MessageDelegate
 DefinePolymorphicDelegateWithArg(commandDelegate, IPacket, CommandDelegate, const Filter&, Filter())
 
 
+// ---------------------------------------------------------------------
+//
+struct PresenceDelegate: public MessageDelegate
+{
+	PresenceDelegate() : MessageDelegate(AcceptRequests) {};
+	PresenceDelegate(const PresenceDelegate& r) : MessageDelegate(r) {};
+
+	virtual bool accepts(void* sender, IPacket& data, Void empty2, Void empty3, Void empty4) 
+	{
+		if (MessageDelegate::accepts(sender, data, empty2, empty3, empty4)) {
+			Presence* p = dynamic_cast<Presence*>(&data);
+			return p && p->type() == "presence";
+		}
+		return false;
+	}
+};
+
+
+DefinePolymorphicDelegate(presenceDelegate, IPacket, PresenceDelegate)
+
+
+// ---------------------------------------------------------------------
+//
+struct EventDelegate: public MessageDelegate
+{
+	EventDelegate() : MessageDelegate(AcceptRequests) {};
+	EventDelegate(const EventDelegate& r) : MessageDelegate(r) {};
+
+	virtual bool accepts(void* sender, IPacket& data, Void empty2, Void empty3, Void empty4) 
+	{
+		if (MessageDelegate::accepts(sender, data, empty2, empty3, empty4)) {
+			Event* e = dynamic_cast<Event*>(&data);
+			return e && e->type() == "event" && 
+				(filter.path.empty() || e->name() == filter.path);
+		}
+		return false;
+	}
+};
+
+
+DefinePolymorphicDelegate(eventDelegate, IPacket, EventDelegate)
+
+
 } } // namespace Sourcey::Symple
 
 
@@ -277,7 +323,6 @@ DefinePolymorphicDelegateWithArg(commandDelegate, IPacket, CommandDelegate, cons
 
 /*
 // ---------------------------------------------------------------------
-//
 typedef Symple::Client< 
 	SocketIO::SocketBase< 
 		Net::WebSocketBase< 
@@ -307,7 +352,6 @@ typedef Symple::Client<
 	//Runner& _runner;
 /*
 // ---------------------------------------------------------------------
-//
 class IClient: public SocketIO::Client
 	/// Maximum simplicity. Maximum scope.
 {
@@ -375,7 +419,6 @@ protected:
 
 
 // ---------------------------------------------------------------------
-//
 template <class SocketIO::Client>
 class Client: public SocketIO::Client
 {
@@ -446,7 +489,7 @@ public:
 		LogTrace() << "[Symple::Client:" << this << "] Creating Presence" << std::endl;
 
 		Peer& peer = ourPeer();
-		UpdatePresenceData.dispatch(this, peer);
+		UpdatePresenceData.emit(this, peer);
 		p["data"] = peer;
 	}
 
@@ -576,7 +619,7 @@ protected:
 
 				// Notify the outside application of the response 
 				// status before we transition the client state.
-				Announce.dispatch(this, _announceStatus);
+				Announce.emit(this, _announceStatus);
 
 				if (_announceStatus != 200)
 					throw Exception(data["message"].asString()); //"Announce Error: " + 
@@ -602,7 +645,7 @@ protected:
 			break;		
 
 		case TransactionState::Failed:
-			Announce.dispatch(this, _announceStatus);
+			Announce.emit(this, _announceStatus);
 			setError(state.message());
 			break;
 		}
@@ -642,19 +685,19 @@ protected:
 			LogTrace() << "[Symple::Client:" << this << "] Packet Created: Symple Type: " << type << std::endl;
 			if (type == "message") {
 				Message m(data);
-				dispatch(this, m);
+				emit(this, m);
 				return false; // stop propagation
 			}
 			else if (type == "command") {
 				Command c(data);
-				dispatch(this, c);
+				emit(this, c);
 				return false; // stop propagation
 			}
 			else if (type == "presence") {
 				Presence p(data);
 				if (p.isMember("data"))
 					_roster.update(p["data"], false);
-				dispatch(this, p);
+				emit(this, p);
 				if (p.isProbe())
 					sendPresence(p.from());
 				return false; // stop propagation
@@ -700,7 +743,6 @@ protected:
 
 
 // ---------------------------------------------------------------------
-//
 typedef Symple::Client< 
 	SocketIO::SocketBase< 
 		Net::WebSocketBase< 

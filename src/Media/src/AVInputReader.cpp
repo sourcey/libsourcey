@@ -39,12 +39,12 @@ void AVInputReader::openFile(const string& file)
 }
 
 
+#ifdef LIBAVDEVICE_VERSION
 void AVInputReader::openDevice(int deviceID, int width, int height, double framerate)
 {
 	string device;
 
 #ifdef WIN32
-
 	// Only vfwcap supports index based input, 
 	// dshow requires full device name.
 	// TODO: Determine device name for for given 
@@ -56,7 +56,6 @@ void AVInputReader::openDevice(int deviceID, int width, int height, double frame
 	// Video For Windows driver
 	device = Poco::format("%d", deviceID);
 #else
-
 	if (_options.deviceEngine == "dv1394") {
 		device = Poco::format("/dev/dv1394/%d", deviceID);
 	} 
@@ -79,10 +78,8 @@ void AVInputReader::openDevice(const string& device, int width, int height, doub
 	AVDictionary*  iparams = NULL;
         
 #ifdef WIN32
-
     iformat = av_find_input_format(_options.deviceEngine.data());
 #else
-
 	if (_options.deviceEngine == "dv1394") {
         iformat = av_find_input_format("dv1394");
 	} 
@@ -119,6 +116,7 @@ void AVInputReader::openDevice(const string& device, int width, int height, doub
 
 	av_dict_free(&iparams);
 }
+#endif
 
 
 void AVInputReader::openStream(const char* filename, AVInputFormat* inputFormat, AVDictionary** formatParams)
@@ -149,6 +147,7 @@ void AVInputReader::openStream(const char* filename, AVInputFormat* inputFormat,
 			_audio->open();
 		}
 	}
+
 	if (_video == NULL && 
 		_audio == NULL)
 		throw Exception("Could not find a valid media stream.");
@@ -236,7 +235,7 @@ void AVInputReader::run()
 							//LogTrace("AVInputReader", this) << "Decoded Video: " << _video->pts << endl;
 							VideoPacket video(opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
 							video.opaque = &opacket;
-							dispatch(this, video);
+							emit(this, video);
 						}
 					}
 					//else
@@ -245,13 +244,12 @@ void AVInputReader::run()
 				}
 				else if (_audio && ipacket.stream_index == _audio->stream->index) {	
 					if ((!_options.processAudioXFrame || (audioFrames % _options.processAudioXFrame) == 0) &&
-						(!_options.processAudioXSecs || !_audio->pts || ((ipacket.pts * av_q2d(_audio->stream->time_base)) - _audio->pts) > _options.processAudioXSecs) &&
-						(!_options.iFramesOnly || (ipacket.flags & AV_PKT_FLAG_KEY))) {
+						(!_options.processAudioXSecs || !_audio->pts || ((ipacket.pts * av_q2d(_audio->stream->time_base)) - _audio->pts) > _options.processAudioXSecs)) {
 						if (_audio->decode(ipacket, opacket)) {			
 							//LogTrace("AVInputReader", this) << "Decoded Audio: " << _audio->pts << endl;
 							AudioPacket audio(opacket.data, opacket.size, _audio->pts);
 							audio.opaque = &opacket;
-							dispatch(this, audio);
+							emit(this, audio);
 						}	
 					}
 					//else
@@ -269,7 +267,7 @@ void AVInputReader::run()
 						//LogTrace("AVInputReader", this) << "Broadcasting Audio: " << _video->pts << endl;
 						AudioPacket audio(_audio->buffer, len, _audio->pts);
 						audio.opaque = &ipacket; //_audio;
-						dispatch(this, audio);
+						emit(this, audio);
 					}
 					break;
 					*/
@@ -297,7 +295,7 @@ void AVInputReader::run()
 					if (gotFrame) {
 						VideoPacket video(opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
 						video.opaque = &opacket;
-						dispatch(this, video);
+						emit(this, video);
 					} 					
 					av_free_packet(&opacket);
 					if (!gotFrame)
@@ -311,7 +309,7 @@ void AVInputReader::run()
 					if (gotFrame) {
 						AudioPacket audio(opacket.data, opacket.size, _audio->pts);
 						audio.opaque = &opacket;
-						dispatch(this, audio);
+						emit(this, audio);
 					}					
 					av_free_packet(&opacket);
 					if (!gotFrame)
@@ -338,7 +336,7 @@ void AVInputReader::run()
 	}
 
 	LogTrace("AVInputReader", this) << "Exiting" << endl;
-	ReadComplete.dispatch(this);
+	ReadComplete.emit(this);
 }
 
 

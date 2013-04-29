@@ -38,7 +38,6 @@ namespace RTP {
 
 
 // ---------------------------------------------------------------------
-//
 Codec::Codec(int id, const string& name, int sampleRate, int bitRate) : //const string& name, 
 	Media::Codec(name, sampleRate, bitRate, true), id(id)
 {
@@ -119,7 +118,6 @@ string Codec::toSDP() const
 
 
 // ---------------------------------------------------------------------
-//
 AudioCodec::AudioCodec(const Codec& r) :
 	Codec(r)
 {
@@ -133,7 +131,6 @@ AudioCodec::AudioCodec(const std::string& sdp) :
 
 
 // ---------------------------------------------------------------------
-//
 VideoCodec::VideoCodec(const Codec& r) :
 	Codec(r)
 {

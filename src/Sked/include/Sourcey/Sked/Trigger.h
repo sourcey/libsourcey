@@ -72,7 +72,6 @@ enum MonthOfTheYeay
           
 
 // ---------------------------------------------------------------------
-//
 struct Trigger: public JSON::ISerializable
 {
 	Trigger(const std::string& type = "", const std::string& name = "");
@@ -120,7 +119,6 @@ struct Trigger: public JSON::ISerializable
 
 
 // ---------------------------------------------------------------------
-//
 struct OnceOnlyTrigger: public Trigger
 {
 	OnceOnlyTrigger();
@@ -135,7 +133,6 @@ struct OnceOnlyTrigger: public Trigger
 
 
 // ---------------------------------------------------------------------
-//
 struct IntervalTrigger: public Trigger
 {
 	IntervalTrigger();
@@ -158,7 +155,6 @@ struct IntervalTrigger: public Trigger
 
 
 // ---------------------------------------------------------------------
-//
 struct DailyTrigger: public Trigger
 {
 	DailyTrigger();

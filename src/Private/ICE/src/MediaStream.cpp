@@ -692,10 +692,8 @@ void MediaStream::stopSendingMedia()
 
 
 // ---------------------------------------------------------------------
-//
 // Local Candidate Gathering
 //
-// ---------------------------------------------------------------------
 void MediaStream::startGatheringLocalCandidates() 
 {
 	//FastMutex::ScopedLock lock(_mutex);
@@ -933,7 +931,7 @@ bool MediaStream::tryAddLocalCandidate(LocalCandidate* candidate, bool deleteIfP
 	_localCandidates.push_back(candidate);
 	_localCandidates.sort(Candidate::CompareProiroty); 
 	
-	LocalCandidateAdded.dispatch(this, *candidate);
+	LocalCandidateAdded.emit(this, *candidate);
 	return true;
 }
 
@@ -1010,10 +1008,8 @@ void MediaStream::addCodec(const Media::Codec& codec)
 
 
 // ---------------------------------------------------------------------
-//
 // Remote Candidate Parsing
 //
-// ---------------------------------------------------------------------
 
 bool MediaStream::tryAddRemoteCandidate(RemoteCandidate* candidate, bool deleteIfPruned) 
 {
@@ -1081,7 +1077,7 @@ bool MediaStream::tryAddRemoteCandidate(RemoteCandidate* candidate, bool deleteI
 	Log("debug", this) << "Added Remote Candidate:" 
 		<< "\n\t" << candidate->toString() << endl;	
 
-	RemoteCandidateAdded.dispatch(this, *candidate);
+	RemoteCandidateAdded.emit(this, *candidate);
 	return true;
 }
 

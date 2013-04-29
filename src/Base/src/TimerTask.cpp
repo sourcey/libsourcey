@@ -151,7 +151,7 @@ bool TimerTask::afterRun()
 void TimerTask::run()
 { 
 	LogTrace() << "[TimerTask:" << this << "] Running" << endl;
-	Timeout.dispatch(this);
+	Timeout.emit(this);
 	onTimeout();
 }
 

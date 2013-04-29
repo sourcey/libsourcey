@@ -83,14 +83,20 @@ set(LibSourcey_BUILD_APPLICATIONS "")   # List of all apps to build
 # Append some common search paths for find_library
 # to find libraries from these locations first
 if(WIN32)
+  SET(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
+  SET(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a") # ".dll"
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     D:/dev/lib/OpenCV2.4.1/build/install/lib
     D:/dev/lib/wxWidgets-2.9.4/lib/vc_lib
-    D:/dev/lib/ffmpeg-1.0.1-gpl/lib
     D:/dev/lib/OpenSSL-Win32/lib/VC
     D:/dev/lib/poco-1.4.1p1-all/lib 
+    ${LibSourcey_SOURCE_DIR}/anionu-deps/ffmpeg/lib
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
     )
+    
+    #${LibSourcey_SOURCE_DIR}/anionu-deps/poco/lib
+    #${LibSourcey_SOURCE_DIR}/anionu-deps/openssl/lib
+    #D:/dev/lib/ffmpeg-1.0.1-gpl/lib
     #D:/dev/lib/OpenCV2.3/build/x86/vc10/lib
     #D:/dev/lib/OpenCV2.4/build/lib/Debug
     #D:/dev/lib/OpenCV2.4/build/install/lib
@@ -101,6 +107,8 @@ if(WIN32)
     #D:/dev/apps/MinGW/msys/1.0/local
     #D:/dev/projects/Sourcey/LibSourcey/src/anionu/deps/ffmpeg/bin
 else()
+  SET(CMAKE_FIND_LIBRARY_PREFIXES "lib")
+  SET(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
   set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
     /lib 
     /usr/lib)
@@ -112,11 +120,15 @@ if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     D:/dev/lib/OpenCV2.4.1/build/include
     D:/dev/lib/wxWidgets-2.9.4
-    D:/dev/lib/ffmpeg-1.0.1-gpl/include
     D:/dev/lib/OpenSSL-Win32/include
-    D:/dev/lib/poco-1.4.1p1-all
+    D:/dev/lib/poco-1.4.1p1-all    
+    ${LibSourcey_SOURCE_DIR}/anionu-deps/ffmpeg/include
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
     )
+    
+    #${LibSourcey_SOURCE_DIR}/anionu-deps/openssl/include
+    #${LibSourcey_SOURCE_DIR}/anionu-deps/poco/include
+    #D:/dev/lib/ffmpeg-1.0.1-gpl/include
     #D:/dev/lib/OpenCV2.3/build/include
     #D:/dev/lib/OpenCV2.4/build/install/include
     #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg
