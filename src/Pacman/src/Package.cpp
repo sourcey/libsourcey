@@ -97,76 +97,7 @@ string Package::description() const
 }
 
 
-JSON::Value& Package::assets()
-{
-	return (*this)["assets"];
-}
-
-
-Package::Asset Package::latestAsset()
-{
-	if (this->assets().empty())
-		throw Exception("Package has no assets");
-
-	// The latest asset may not be in order, so make
-	// sure we return the latest one.
-	JSON::Value& assets = this->assets();
-	JSON::Value& asset = assets[(size_t)0];
-	for (unsigned i = 0; i < assets.size(); i++) {
-		if (Util::compareVersion(assets[i]["version"].asString(), asset["version"].asString())) {
-			asset = assets[i];
-		}
-	}
-	
-	return Asset(asset);
-}
-
-
-Package::Asset Package::lastestAssetForVersion(const string& version)
-{
-	if (this->assets().empty())
-		throw Exception("Package has no assets");
-
-	JSON::Value& assets = this->assets();
-	JSON::Value& asset = assets[(size_t)0];
-	for (unsigned i = 0; i < assets.size(); i++) {
-		if (assets[i]["version"].asString() == version) {
-			asset = assets[i];
-			break;
-		}
-	}
-
-	if (asset["version"].asString() != version)
-		throw Exception("No asset with version " + version);
-	
-	return Asset(asset);
-}
-
-
-Package::Asset Package::latestAssetForSDK(const string& version)
-{
-	if (this->assets().empty())
-		throw Exception("Package has no assets");
-
-	JSON::Value& assets = this->assets();
-	JSON::Value& asset = assets[(size_t)0];
-	for (unsigned i = 0; i < assets.size(); i++) {		
-		if (assets[i]["sdk-version"].asString() == version && (
-			asset["sdk-version"].asString() != version || 
-			Util::compareVersion(assets[i]["version"].asString(), asset["version"].asString()))) {
-			asset = assets[i];
-		}
-	}
-
-	if (asset["sdk-version"].asString() != version)
-		throw Exception("No asset with SDK version " + version);
-
-	return Asset(asset);
-}
-
-
-
-void Package::print(std::ostream& ost) const
+void Package::print(ostream& ost) const
 {
 	JSON::StyledWriter writer;
 	ost << writer.write(*this);
@@ -205,9 +136,15 @@ string Package::Asset::sdkVersion() const
 }
 
 
-std::string Package::Asset::url(int index) const
+string Package::Asset::url(int index) const
 {
 	return root["mirrors"][(size_t)index]["url"].asString();
+}
+
+
+int Package::Asset::fileSize() const
+{
+	return root.get("file-size", 0).asInt();
 }
 
 
@@ -219,7 +156,7 @@ bool Package::Asset::valid() const
 }
 
 
-void Package::Asset::print(std::ostream& ost) const
+void Package::Asset::print(ostream& ost) const
 {
 	JSON::StyledWriter writer;
 	ost << writer.write(root);
@@ -258,6 +195,74 @@ RemotePackage::~RemotePackage()
 }
 
 
+JSON::Value& RemotePackage::assets()
+{
+	return (*this)["assets"];
+}
+
+
+Package::Asset RemotePackage::latestAsset()
+{
+	if (this->assets().empty())
+		throw Exception("Package has no assets");
+
+	// The latest asset may not be in order, so make
+	// sure we return the latest one.
+	JSON::Value& assets = this->assets();
+	JSON::Value& asset = assets[(size_t)0];
+	for (unsigned i = 0; i < assets.size(); i++) {
+		if (Util::compareVersion(assets[i]["version"].asString(), asset["version"].asString())) {
+			asset = assets[i];
+		}
+	}
+	
+	return Asset(asset);
+}
+
+
+Package::Asset RemotePackage::lastestAssetForVersion(const string& version)
+{
+	if (this->assets().empty())
+		throw Exception("Package has no assets");
+
+	JSON::Value& assets = this->assets();
+	JSON::Value& asset = assets[(size_t)0];
+	for (unsigned i = 0; i < assets.size(); i++) {
+		if (assets[i]["version"].asString() == version) {
+			asset = assets[i];
+			break;
+		}
+	}
+
+	if (asset["version"].asString() != version)
+		throw Exception("No asset with version " + version);
+	
+	return Asset(asset);
+}
+
+
+Package::Asset RemotePackage::latestAssetForSDK(const string& version)
+{
+	if (this->assets().empty())
+		throw Exception("Package has no assets");
+
+	JSON::Value& assets = this->assets();
+	JSON::Value& asset = assets[(size_t)0];
+	for (unsigned i = 0; i < assets.size(); i++) {		
+		if (assets[i]["sdk-version"].asString() == version && (
+			asset["sdk-version"].asString() != version || 
+			Util::compareVersion(assets[i]["version"].asString(), asset["version"].asString()))) {
+			asset = assets[i];
+		}
+	}
+
+	if (asset["sdk-version"].asString() != version)
+		throw Exception("No asset with SDK version " + version);
+
+	return Asset(asset);
+}
+
+
 // ---------------------------------------------------------------------
 // Local Package
 //	
@@ -276,14 +281,24 @@ LocalPackage::LocalPackage(const RemotePackage& src) :
 	Package(src)
 {
 	assert(src.valid());	
-	removeMember("installed");
-	assets().clear();
+
+	// Clear unwanted remote package fields
+	//removeMember("state");
+	//removeMember("install-state");
+	//removeMember("version");
+	removeMember("assets");
 	assert(valid());
 }
 
 
 LocalPackage::~LocalPackage()
 {
+}
+
+
+Package::Asset LocalPackage::installedAsset()
+{
+	return Package::Asset((*this)["asset"]);
 }
 
 
@@ -298,7 +313,8 @@ void LocalPackage::setState(const string& state)
 	assert(
 		state == "Installing" || 
 		state == "Installed" ||
-		state == "Failed"
+		state == "Failed" ||
+		state == "Uninstalled"
 	);
 
 	(*this)["state"] = state;
@@ -314,36 +330,22 @@ void LocalPackage::setInstallState(const string& state)
 void LocalPackage::setVersion(const string& version)
 {
 	if (state() != "Installed")
-		throw Exception("Package must be installed before the version is set");
+		throw Exception("Package must be installed before the version is set.");
 	
 	(*this)["version"] = version;
 }
 
 
-bool LocalPackage::isInstalled()
+bool LocalPackage::isInstalled() const
 {
 	return state() == "Installed";
 }
 
 
-bool LocalPackage::isFailed()
+bool LocalPackage::isFailed() const
 {
 	return state() == "Failed";
 }
-
-
-/*
-void LocalPackage::setInstalled(bool flag)
-{
-	assert(valid());
-	
-	child("package").remove_(*this)["version");
-	child("package").remove_(*this)["installed");
-	
-	child("package").append_(*this)["version").set_value(latestAsset().version().data());
-	child("package").append_(*this)["installed").set_value(flag);
-}
-*/
 
 
 string LocalPackage::state() const
@@ -358,24 +360,54 @@ string LocalPackage::installState() const
 }
 
 
+string LocalPackage::installDir() const
+{
+	return get("install-dir", "").asString();
+}
+
+
+string LocalPackage::getInstalledFilePath(const string& fileName, bool whiny)
+{
+	string dir = installDir();
+	if (whiny && dir.empty())
+		throw Exception("Package install directory is not set.");
+	Path path(dir);
+	path.makeDirectory();
+	path.setFileName(fileName);
+	return path.toString();
+}
+
+
 string LocalPackage::version() const
 {
 	return get("version", "0.0.0").asString();
 }
 
 
-bool LocalPackage::isLatestVersion(const Package::Asset& asset) const
+bool LocalPackage::isLatestVersion(const Package::Asset& lastestRemoteAsset) const
 {
 	// If L is greater than R the function returns true.
 	// If L is equal or less than R the function returns false.
-	return !Util::compareVersion(asset.version(), version());
+	return !Util::compareVersion(lastestRemoteAsset.version(), version());
 }
 
 
-Package::Asset LocalPackage::copyAsset(const Package::Asset& asset)
+void LocalPackage::setInstalledAsset(const Package::Asset& installedRemoteAsset)
 {
-	// Prepend a copy of the remote asset and return it
-	return Asset(assets().append(asset.root));
+	if (state() != "Installed")
+		throw Exception("Package must be installed before asset can be set.");
+
+	if (!installedRemoteAsset.valid())
+		throw Exception("Remote asset is invalid.");
+
+	(*this)["asset"] = installedRemoteAsset.root;
+	setVersion(installedRemoteAsset.version());
+}
+
+
+void LocalPackage::setInstallDir(const string& dir)
+{
+	(*this)["install-dir"] = dir;
 }
 
 
@@ -441,18 +473,45 @@ bool LocalPackage::Manifest::empty() const
 
 
 // ---------------------------------------------------------------------
-// IPackage Pair
+// Package Pair
 //	
-PackagePair::PackagePair(LocalPackage& local, RemotePackage& remote) :
+PackagePair::PackagePair(LocalPackage* local, RemotePackage* remote) :
 	local(local), remote(remote)
 {
+}
+	
+
+string PackagePair::id() const
+{
+	return local ? local->id() : remote ? remote->id() : "";
+}
+
+
+string PackagePair::name() const
+{
+	return local ? local->id() : remote ? remote->name() : "";
+}
+
+
+string PackagePair::type() const
+{
+	return local ? local->type() : remote ? remote->type() : "";
+}
+
+
+string PackagePair::author() const
+{
+	return local ? local->author() : remote ? remote->author() : "";
 }
 
 
 bool PackagePair::valid() const
 {
-	return local.valid() 
-		&& remote.valid();
+	// Packages must be valid, and
+	// must have at least one package.
+	return (!local || local->valid())
+		&& (!remote || remote->valid()) 
+		&& (local || remote);
 }
 
 
