@@ -53,8 +53,7 @@ InstallTask::InstallTask(PackageManager& manager, LocalPackage* local, RemotePac
 	_local(local),
 	_remote(remote),
 	_options(options),
-	_progress(0),
-	_cancelled(false)
+	_progress(0)
 {
 	assert(valid());
 }
@@ -76,47 +75,63 @@ void InstallTask::start()
 
 void InstallTask::cancel()
 {
-	{
-		FastMutex::ScopedLock lock(_mutex);
-		_cancelled = true;
-		_transaction.cancel();
-	}
-	//_thread.join(); // Thread deleted on callback
+	setState(this, PackageInstallState::Cancelled, "Cancelled by user.");
 }
 
 
 void InstallTask::run()
 {
 	try {	
+		// Prepare environment and install options
+		{
+			FastMutex::ScopedLock lock(_mutex);
 
-		// Check against provided options to make sure that
-		// we can proceed with task creation.
-		if (!_options.version.empty())
-			_remote->lastestAssetForVersion(_options.version); // throw if none
-		if (!_options.sdkVersion.empty())
-			_remote->latestAssetForSDK(_options.sdkVersion); // throw if none
+			// Check against provided options to make sure that
+			// we can proceed with task creation.
+			if (!_options.version.empty())
+				_remote->lastestAssetForVersion(_options.version); // throw if none
+			if (!_options.sdkVersion.empty())
+				_remote->latestAssetForSDK(_options.sdkVersion); // throw if none
 
-		// If the package failed previously we might need
-		// to clear the file cache.
-		if (_manager.options().clearFailedCache)
-			_manager.clearPackageCache(*_local);
+			// Set default install directory if none was given
+			if (_options.installDir.empty()) {
+				
+				// Use the current install dir if the local package already exists
+				if (!_local->installDir().empty()) {
+					_options.installDir = _local->installDir();
+				}
+
+				// Or use the manager default
+				else
+					_options.installDir = _manager.options().installDir;
+			}
+			_local->setInstallDir(_options.installDir);
+
+			// If the package failed previously we might need
+			// to clear the file cache.
+			if (_manager.options().clearFailedCache)
+				_manager.clearPackageCache(*_local);
+		}
 		
 		// Kick off the state machine. If any errors are
 		// encountered an exception will be thrown and the
 		// task will fail.
-		setProgress(0);
 		doDownload();
-		setProgress(75);
+		if (cancelled()) goto Complete;
 		doUnpack();
-		setProgress(90);
+		if (cancelled()) goto Complete;
 		doFinalize();
+			
+		// Transition the internal state if finalization was a success.
+		// This will complete the installation process.
+		setState(this, PackageInstallState::Installed);
 	}
 	catch (Exception& exc) {		
 		log("error") << "Install Failed: " << exc.displayText() << endl; 
 		setState(this, PackageInstallState::Failed, exc.displayText());
 	}
 	
-	setProgress(100);
+Complete:
 	setComplete();
 	delete this;
 }
@@ -126,38 +141,46 @@ void InstallTask::onStateChange(PackageInstallState& state, const PackageInstall
 {
 	log("debug") << "State Changed to " << state.toString() << endl; 	
 	{
-		FastMutex::ScopedLock lock(_mutex);
-
-		// Check for cancellation each time the state is transitioned
-		// and throw an exception to break out of the current scope.
-		if (_cancelled && state.id() != PackageInstallState::Failed)
-			throw Exception("Installation cancelled by user intervention.");
+		LocalPackage* local = this->local();
+		switch (state.id()) 
+		{			
+		case PackageInstallState::Downloading:
+			setProgress(0);
+			break;
+		case PackageInstallState::Unpacking:
+			setProgress(75);
+			break;
+		case PackageInstallState::Finalizing:
+			setProgress(90);
+			break;
+		case PackageInstallState::Installed:
+			local->setState("Installed");
+			local->clearErrors();
+			local->setInstalledAsset(getRemoteAsset());
+			setProgress(100);
+			break;
+		case PackageInstallState::Cancelled:
+			local->setState("Failed");
+			{
+				FastMutex::ScopedLock lock(_mutex);
+				_transaction.cancel();
+			}
+			setProgress(100);
+			break;			
+		case PackageInstallState::Failed:
+			local->setState("Failed");
+			if (!state.message().empty())
+				local->addError(state.message());
+			setProgress(100);
+			break;
+		default: 
+			local->setState("Installing");	
+		}
 
 		// Set the package install task so we know from which state to
 		// resume installation.
 		// TODO: Should this be reset by the clearFailedCache option?
-		_local->setInstallState(state.toString());
-
-		switch (state.id()) {			
-		case PackageInstallState::Downloading:
-			break;
-		case PackageInstallState::Unpacking:
-			break;
-		case PackageInstallState::Finalizing:
-			break;
-		case PackageInstallState::Installed:
-			_local->setState("Installed");
-			_local->clearErrors();
-			_local->setVersion(_local->latestAsset().version());
-			break;
-		case PackageInstallState::Failed:
-			_local->setState("Failed");
-			if (!state.message().empty())
-				_local->addError(state.message());
-			break;
-		default: 
-			_local->setState("Installing");	
-		}
+		local->setInstallState(state.toString());
 	}
 
 	StatefulSignal<PackageInstallState>::onStateChange(state, oldState);
@@ -168,47 +191,26 @@ void InstallTask::doDownload()
 {
 	setState(this, PackageInstallState::Downloading);
 
-	//if (_local->isLatestVersion(_remote->latestAsset()))
-	//	throw Exception("This local package is already up to date");
-	
-	//Package::Asset localAsset = _local->latestAsset();
-	Package::Asset remoteAsset = !_options.version.empty() ? 
-		_remote->lastestAssetForVersion(_options.version) : 
-			!_options.sdkVersion.empty() ?
-				_remote->latestAssetForSDK(_options.sdkVersion) :
-					_remote->latestAsset();
-
-	if (!remoteAsset.valid())
+	Package::Asset asset = getRemoteAsset();
+	if (!asset.valid())
 		throw Exception("Package download failed: The remote asset is invalid.");
 
-	string uri = remoteAsset.url();
-	string filename = remoteAsset.fileName();
-
-	// If the local package manifest already has a listing of
-	// the latest remote asset, and the file already exists in
-	// the cache we can skip the download.
-	if (!_local->assets().empty() &&
-		_manager.hasCachedFile(_local->latestAsset().fileName()) && 
-		_local->latestAsset() == remoteAsset) {
+	// If the remote asset already exists in the cache, we can 
+	// skip the download. 
+	if (_manager.hasCachedFile(asset)) {
 		log("debug") << "File exists, skipping download" << endl;		
 		setState(this, PackageInstallState::Unpacking);
 		return;
 	}
 	
-	// Copy the new remote asset to our local manifest.
-	// TODO: Remove current listing if any - we end up
-	// with multiple entries.
-	Package::Asset localAsset = _local->copyAsset(remoteAsset);
-	
 	log("debug") << "Initializing Download:" 
-		<< "\n\tURI: " << uri
-		<< "\n\tRemote Filename: " << filename
-		<< "\n\tLocal Filename: " << localAsset.fileName()
+		<< "\n\tURI: " << asset.url()
+		<< "\n\tFilename: " << asset.fileName()
 		<< endl;
 
 	// Initialize a HTTP transaction to download the file.
 	// If the transaction fails an exception will be thrown.
-	HTTP::Request* request = new HTTP::Request("GET", uri);	
+	HTTP::Request* request = new HTTP::Request("GET", asset.url());	
 	if (!_manager.options().httpUsername.empty()) {
 		Poco::Net::HTTPBasicCredentials cred(
 			_manager.options().httpUsername, 
@@ -217,19 +219,15 @@ void InstallTask::doDownload()
 	}
 
 	_transaction.setRequest(request);
-	_transaction.setOutputPath(_manager.getCacheFilePath(localAsset.fileName()).toString());
+	_transaction.setOutputPath(_manager.getCacheFilePath(asset.fileName()).toString());
 	_transaction.ResponseProgress += delegate(this, &InstallTask::onResponseProgress);
 	if (!_transaction.send() && 
 		!_transaction.cancelled())
-		throw Exception(format("Failed to download package files: HTTP Error: %d %s", 
+		throw Exception(format("Cannot download package files: HTTP Error: %d %s", 
 			static_cast<int>(_transaction.response().getStatus()), 
 			_transaction.response().getReason()));
 	
 	log("debug") << "Download Complete" << endl; 
-	
-	// Transition the internal state since the HTTP
-	// transaction was a success.
-	setState(this, PackageInstallState::Unpacking);
 }
 
 
@@ -249,15 +247,15 @@ void InstallTask::doUnpack()
 {
 	setState(this, PackageInstallState::Unpacking);
 		
-	Package::Asset localAsset = _local->latestAsset();
-	if (!localAsset.valid())
-		throw Exception("The local package can't be extracted");
+	Package::Asset asset = getRemoteAsset();
+	if (!asset.valid())
+		throw Exception("The package can't be extracted");
 	
 	// Get the input file and check veracity
-	Path filePath(_manager.getCacheFilePath(localAsset.fileName()));
+	Path filePath(_manager.getCacheFilePath(asset.fileName()));
 	if (!File(filePath).exists())
 		throw Exception("The local package file does not exist: " + filePath.toString());	
-	if (!_manager.isSupportedFileType(localAsset.fileName()))
+	if (!_manager.isSupportedFileType(asset.fileName()))
 		throw Exception("The local package has an unsupported file extension: " + filePath.getExtension());
 	
 	// Create the output directory
@@ -280,9 +278,6 @@ void InstallTask::doUnpack()
 	c.decompressAllFiles();
 	c.EError -= Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const string> >(this, &InstallTask::onDecompressionError);
 	c.EOk -=Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path> >(this, &InstallTask::onDecompressionOk);
-	
-	// Transition the internal state on success
-	setState(this, PackageInstallState::Finalizing);
 }
 
 
@@ -311,9 +306,7 @@ void InstallTask::doFinalize()
 
 	bool errors = false;
 	Path outputDir(_manager.getIntermediatePackageDir(_local->id()));
-	string installDir = _options.installDir.empty() ? 
-							_manager.options().installDir : 
-								_options.installDir;
+	string installDir = options().installDir;
 
 	// Ensure the install directory exists
 	File(installDir).createDirectories();
@@ -326,7 +319,7 @@ void InstallTask::doFinalize()
 		try
 		{
 			log("debug") << "Moving: " << fIt.path().toString() << " <<=>> " << installDir  << endl;
-			File(fIt.path()).moveTo(installDir);
+			File(fIt.path()).moveTo(options().installDir);
 		}
 		catch (Exception& exc)
 		{
@@ -343,10 +336,11 @@ void InstallTask::doFinalize()
 	}
 
 	// The package requires finalizing at a later date. 
-	// The current task will be terminated.
+	// The current task will be canceled, and the package
+	// saved with the Installing state.
 	if (errors) {
-		log("debug") << "Finalization failed" << endl;
-		_cancelled = true;
+		log("debug") << "Finalization failed, cancelling task" << endl;
+		cancel();
 		return;
 	}
 	
@@ -368,10 +362,6 @@ void InstallTask::doFinalize()
 	}
 
 	log("debug") << "Finalization Complete" << endl;
-	
-	// Transition the internal state if finalization was a success.
-	// This will complete the installation process.
-	setState(this, PackageInstallState::Installed);
 }
 
 
@@ -379,6 +369,7 @@ void InstallTask::setComplete()
 {
 	{
 		FastMutex::ScopedLock lock(_mutex);
+		assert(_progress == 100);
 
 		log("info") << "Package Install Complete:" 
 			<< "\n\tName: " << _local->name()
@@ -407,6 +398,17 @@ void InstallTask::setProgress(int value)
 }
 
 
+Package::Asset InstallTask::getRemoteAsset() const
+{
+	FastMutex::ScopedLock lock(_mutex);
+	return !_options.version.empty() ? 
+		_remote->lastestAssetForVersion(_options.version) : 
+			!_options.sdkVersion.empty() ?
+				_remote->latestAssetForSDK(_options.sdkVersion) :
+					_remote->latestAsset();
+}
+
+
 int InstallTask::progress() const
 {
 	FastMutex::ScopedLock lock(_mutex);
@@ -425,8 +427,7 @@ bool InstallTask::valid() const
 
 bool InstallTask::cancelled() const
 {
-	FastMutex::ScopedLock lock(_mutex);
-	return _cancelled;
+	return stateEquals(PackageInstallState::Cancelled);
 }
 
 
@@ -445,6 +446,7 @@ bool InstallTask::success() const
 bool InstallTask::complete() const
 {
 	return stateEquals(PackageInstallState::Installed) 
+		|| stateEquals(PackageInstallState::Cancelled) 
 		|| stateEquals(PackageInstallState::Failed);
 }
 
@@ -471,3 +473,32 @@ InstallTask::Options& InstallTask::options()
 
 
 } } // namespace Sourcey::Pacman
+
+
+
+
+	//if (_local->isLatestVersion(_remote->latestAsset()))
+	//	throw Exception("This local package is already up to date");	
+	//Package::Asset localAsset = _local->latestAsset();
+
+	// If the local package manifest already has a listing of
+	// the latest remote asset, and the file already exists in
+	// the cache we can skip the download.
+
+	//string uri = asset.url();
+	//string filename = asset.fileName();
+
+	/* //.fileName()
+	if (!_local->assets().empty() &&
+		_manager.hasCachedFile(_local->latestAsset().fileName()) && 
+		_local->latestAsset() == asset) {
+		log("debug") << "File exists, skipping download" << endl;		
+		setState(this, PackageInstallState::Unpacking);
+		return;
+	}
+	
+	// Copy the new remote asset to our local manifest.
+	// TODO: Remove current listing if any - we end up with multiple entries.
+	// NOTE: localAsset only gets set when installed
+	//Package::Asset localAsset = _local->copyAsset(asset);
+	*/

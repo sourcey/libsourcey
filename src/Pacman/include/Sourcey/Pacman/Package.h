@@ -30,6 +30,7 @@
 
 
 #include "Sourcey/JSON/JSON.h"
+#include "Poco/Path.h"
 
 
 namespace Sourcey { 
@@ -45,13 +46,14 @@ struct Package: public JSON::Value
 		/// asset containing files belonging to
 		/// the parent package.
 	{
-		Asset(JSON::Value& src = JSON::Value());
+		Asset(JSON::Value& src);
 		virtual ~Asset();
 		
 		virtual std::string fileName() const;
 		virtual std::string version() const;
 		virtual std::string sdkVersion() const;
 		virtual std::string url(int index = 0) const;
+		virtual int fileSize() const;
 
 		virtual bool valid() const;
 
@@ -73,6 +75,23 @@ struct Package: public JSON::Value
 	virtual std::string author() const;
 	virtual std::string description() const;
 
+	virtual bool valid() const;
+
+	virtual void print(std::ostream& ost) const;
+};
+
+
+// ---------------------------------------------------------------------
+//
+struct RemotePackage: public Package
+	/// This class is a JSON representation of an
+	/// package existing on the remote server that
+	/// may be downloaded and installed.
+{
+	RemotePackage();
+	RemotePackage(const JSON::Value& src);
+	virtual ~RemotePackage();
+
 	virtual JSON::Value& assets();	
 
 	virtual Asset latestAsset();
@@ -93,26 +112,11 @@ struct Package: public JSON::Value
 		/// The package JSON must have a "sdk-version" member
 		/// for this function to work as intended.
 		/// Throws an exception if no asset exists.
-
-	virtual bool valid() const;
-
-	virtual void print(std::ostream& ost) const;
 };
 
 
 // ---------------------------------------------------------------------
-struct RemotePackage: public Package
-	/// This class is a JSON representation of an
-	/// package existing on the remote server that
-	/// may be downloaded and installed.
-{
-	RemotePackage();
-	RemotePackage(const JSON::Value& src);
-	virtual ~RemotePackage();
-};
-
-
-// ---------------------------------------------------------------------
+//
 struct LocalPackage: public Package
 	/// This class is a JSON representation of an
 	/// installed local package that exists on the
@@ -142,46 +146,60 @@ struct LocalPackage: public Package
 		//	2) Remove asset mirror elements.
 
 	virtual ~LocalPackage();
-
-	virtual std::string version() const;
-		/// Returns the installed package version.		
 	
+	virtual void setState(const std::string& state);
+		/// Set's the package state. Possible values are:
+		/// Installing, Installed, Failed, Uninstalled.
+		/// If the packages completes while still Installing, 
+		/// this means the package has yet to be finalized.
+
+	virtual void setInstallState(const std::string& state);
+		/// Set's the package installation state.
+		/// See PackageInstallState for possible values.
+
+	virtual void setInstallDir(const std::string& dir);
+		/// Set's the installation directory for this package.
+	
+	virtual void setInstalledAsset(const Package::Asset& installedRemoteAsset);
+		/// Sets the installed asset, once installed.
+		/// This method also sets the version.
+
 	virtual void setVersion(const std::string& state);
 		/// Sets the current version of the local package.
 		/// Installation must be complete.
+
+	virtual std::string version() const;
+		/// Returns the installed package version.
 	
 	virtual std::string state() const;
-		/// Returns the current state of the local package.	
-	
-	virtual void setState(const std::string& state);
-		/// Set's the package state:
-		/// Installing, Installed, Failed.
-		/// An incomplete state means the package has yet
-		/// to be finalized.
-	
+		/// Returns the current state of this package.	
+		
 	virtual std::string installState() const;
-		/// Returns the current installation state of the 
-		/// local package.	
+		/// Returns the installation state of this package.
 
-	virtual void setInstallState(const std::string& state);
-		/// Set's the package installation state:
-		/// See PackageInstallState for possible values.
+	virtual std::string installDir() const;
+		/// Returns the installation directory for this package.
 
-	virtual bool isInstalled();
+	virtual Asset installedAsset();
+		/// Returns the installed asset, if any.
+
+	virtual bool isInstalled() const;
 		/// Returns true or false depending on weather or
 		/// not the package is installed successfully.
 		/// False if package is in Failed state.
 
-	virtual bool isFailed();
+	virtual bool isFailed() const;
 
 	virtual Manifest manifest();
 		/// Returns the installation manifest.
 	
-	virtual bool isLatestVersion(const Package::Asset& asset) const;
+	virtual bool isLatestVersion(const Package::Asset& lastestRemoteAsset) const;
 		/// Checks if the given asset is a newer than the
-		/// current version.
-
-	virtual Asset copyAsset(const Package::Asset& asset);
+		/// current version.	
+	
+	virtual std::string getInstalledFilePath(const std::string& fileName, bool whiny = false);
+		/// Returns the full full path of the installed file.
+		/// Thrown an exception if the install directory is unset.
 	
 	virtual JSON::Value& errors();
 	virtual void addError(const std::string& message);
@@ -193,17 +211,26 @@ struct LocalPackage: public Package
 
 
 // ---------------------------------------------------------------------
+//
 struct PackagePair
 	/// This class provides pairing of a local and a
 	/// remote package.
 {
-	PackagePair(LocalPackage& local, RemotePackage& remote);
+	PackagePair(LocalPackage* local = NULL, RemotePackage* remote = NULL);
 	
 	virtual bool valid() const;
 
-	LocalPackage& local;
-	RemotePackage& remote;
+	std::string id() const;
+	std::string name() const;
+	std::string type() const;
+	std::string author() const;
+	
+	LocalPackage* local;
+	RemotePackage* remote;
 };
+
+
+typedef std::vector<PackagePair> PackagePairList;
 
 
 } } // namespace Sourcey::Pacman

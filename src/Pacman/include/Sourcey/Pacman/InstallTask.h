@@ -54,6 +54,7 @@ struct PackageInstallState: public State
 		Unpacking,
 		Finalizing,
 		Installed,
+		Cancelled,
 		Failed
 	};
 
@@ -65,6 +66,7 @@ struct PackageInstallState: public State
 		case Unpacking:				return "Unpacking";
 		case Finalizing:			return "Finalizing";
 		case Installed:				return "Installed";
+		case Cancelled:				return "Cancelled";
 		case Failed:				return "Failed";
 		default: assert(false);
 		}
@@ -124,6 +126,8 @@ public:
 		/// Called when the task completes either
 		/// successfully or in error.
 
+	virtual Package::Asset getRemoteAsset() const;
+
 	virtual LocalPackage* local() const;
 	virtual RemotePackage* remote() const;
 	virtual Options& options();
@@ -166,7 +170,6 @@ protected:
 	RemotePackage*	_remote;
 	Options			_options;
 	int             _progress;
-	bool			_cancelled;
 	HTTP::Transaction _transaction;
 	
 	friend class PackageManager;

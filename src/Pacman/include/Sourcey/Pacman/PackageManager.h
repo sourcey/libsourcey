@@ -111,8 +111,8 @@ public:
 	virtual bool initialized() const;
 
 	virtual void createDirectories();
-		/// Creates the package manager directory structure if it
-		/// does not already exist.
+		/// Creates the package manager directory structure
+		/// if it does not already exist.
 	
 	virtual void queryRemotePackages();
 		/// Queries the server for a list of available packages.
@@ -180,20 +180,28 @@ public:
 		/// files to their target destination. If files are to be
 		/// overwritten they must not be in use of finalization
 		/// will fail.	
-	
-	virtual void abortAllTasks();
-		/// Aborts all package installation tasks. All tasks must
-		/// be aborted before clearing local or remote manifests.
 		
 	//
 	/// Task Helper Methods
 	//	
 	virtual InstallTask* getInstallTask(const std::string& id) const;
+		/// Gets the install task for the given package ID.
+
+	virtual InstallTaskList tasks() const;
+		/// Returns a list of all tasks.
+	
+	virtual void cancelAllTasks();
+		/// Aborts all package installation tasks. All tasks must
+		/// be aborted before clearing local or remote manifests.
 
 	//
 	/// Package Helper Methods
 	//	
-	virtual PackagePair getPackagePair(const std::string& id) const;
+	virtual PackagePairList getPackagePairs() const;
+		/// Returns all package pairs, valid or invalid.
+		/// Some pairs may not have both local and remote pointers.
+
+	virtual PackagePair getPackagePair(const std::string& id, bool whiny = false) const;
 		/// Returns a local and remote package pair.
 		/// An exception will be thrown if either the local or
 		/// remote packages aren't available or are invalid.	
@@ -218,7 +226,7 @@ public:
 		/// Exceptions will be thrown if the package does not exist,
 		/// or is not fully installed.
 	
-	virtual bool checkInstallManifest(LocalPackage& package);
+	virtual bool verifyInstallManifest(LocalPackage& package);
 		/// Checks the veracity of the install manifest for the given
 		/// package and and ensures all package files exist on the
 		/// file system.
@@ -235,7 +243,7 @@ public:
 	virtual bool clearCacheFile(const std::string& fileName, bool whiny = false);
 		/// Clears a file from the local cache.
 
-	virtual bool hasCachedFile(const std::string& fileName);
+	virtual bool hasCachedFile(Package::Asset& asset);
 		/// Checks if a package archive exists in the local cache.
 	
 	virtual bool isSupportedFileType(const std::string& fileName);
@@ -244,26 +252,21 @@ public:
 	virtual Poco::Path getCacheFilePath(const std::string& fileName);
 		/// Returns the full path of the cached file if it exists,
 		/// or an empty path if the file doesn't exist.
-	
-	virtual Poco::Path getInstallFilePath(const std::string& fileName);
-		/// Returns the full path of the installed file if it exists,
-		/// or an empty path if the file doesn't exist.
-	
 	virtual Poco::Path getIntermediatePackageDir(const std::string& id);
 		/// Returns the the intermediate package directory for the
 		/// given package ID.
 	
-	/// 
+	// 
 	/// Accessors
-	///
+	//
 	virtual Options& options();
 	virtual RemotePackageStore& remotePackages();
 	virtual LocalPackageStore& localPackages();
 		
-	/// 
+	//
 	/// Events
-	///
-	Signal<LocalPackage&> PackageInstalled;
+	//
+	Signal<LocalPackage&> PackageComplete;
 	Signal<LocalPackage&> PackageUninstalled;
 	
 	Signal<InstallTask&> TaskAdded;
@@ -272,7 +275,7 @@ public:
 protected:
 
 	//
-	/// Event Callbacks
+	/// Callbacks
 	//
 	virtual void onPackageInstallComplete(void* sender);
 	
@@ -281,7 +284,7 @@ protected:
 	Options				_options;
 	LocalPackageStore	_localPackages;
 	RemotePackageStore	_remotePackages;
-	InstallTaskList _tasks;
+	InstallTaskList		_tasks;
 };
 
 
@@ -293,7 +296,11 @@ protected:
 
 
 
-	/*
+	/*	
+	//virtual Poco::Path getInstalledFilePath(const std::string& fileName);
+		/// Returns the full path of the installed file if it exists,
+		/// or an empty path if the file doesn't exist.
+	
 	virtual bool installPackage(const std::string& name, InstallMonitor* monitor = NULL, 
 		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
 		/// Installs a single package.
