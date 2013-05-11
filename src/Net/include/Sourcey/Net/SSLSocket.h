@@ -37,7 +37,7 @@
 #include "Poco/Net/SecureStreamSocket.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 
 
@@ -45,7 +45,7 @@ typedef SocketBase<Poco::Net::SecureStreamSocket, SSLTCP>        SSLSocket;
 typedef PacketSocketBase<Poco::Net::SecureStreamSocket, SSLTCP>  SSLPacketSocket;
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 #endif // SOURCEY_NET_SSLSocket_H

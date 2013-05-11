@@ -35,7 +35,7 @@
 #include "Sourcey/Net/Address.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 	
 
@@ -91,7 +91,7 @@ public:
 typedef std::vector<ISocket*> ISocketList;
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 #endif // SOURCEY_NET_ISocket_H

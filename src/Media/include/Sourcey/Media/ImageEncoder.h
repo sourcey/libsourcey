@@ -36,7 +36,7 @@
 #include <opencv/highgui.h>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -73,7 +73,7 @@ private:
 };
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 #endif	// SOURCEY_MEDIA_ImageEncoder_H

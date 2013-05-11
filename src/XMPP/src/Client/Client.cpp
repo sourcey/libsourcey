@@ -44,7 +44,7 @@ using namespace std;
 using Poco::FastMutex;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 
 
@@ -110,7 +110,7 @@ void Client::cleanup()
 {
 	if (_task) {
 		// Stop receiving outbound Stanzas
-		_router.detachAll(_task);
+		_router.detach(_task);
 
 		_task->destroy();
 		_task = NULL;
@@ -475,4 +475,4 @@ void XMPPTask::onRecvStanza(xmpp_stanza_t* const stanza)
 
 
 } // namespace XMPP 
-} // namespace Sourcey
+} // namespace Scy

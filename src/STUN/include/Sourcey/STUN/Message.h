@@ -33,7 +33,7 @@
 #include "Sourcey/IPacket.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace STUN {
 
 
@@ -140,7 +140,7 @@ private:
 };
 
 
-} } // namespace Sourcey::STUN
+} } // namespace Scy::STUN
 
 
 #endif //  SOURCEY_STUN_MESSAGE_H

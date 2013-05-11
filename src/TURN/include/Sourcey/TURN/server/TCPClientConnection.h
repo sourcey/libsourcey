@@ -36,7 +36,7 @@
 #include "Sourcey/Net/Reactor.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 	
@@ -69,7 +69,7 @@ typedef BasicManager<UInt32, TCPClientConnection>	ClientConnectionManager;
 typedef ClientConnectionManager::Map				ClientConnectionMap;
 
 
-} } // namespace Sourcey::TURN
+} } // namespace Scy::TURN
 
 
 #endif // SOURCEY_TURN_TCPClientConnection_H

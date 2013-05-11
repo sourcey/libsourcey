@@ -33,11 +33,11 @@
 
 
 using namespace std;
-using namespace Sourcey::XML;
+using namespace Scy::XML;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 
 
@@ -141,7 +141,7 @@ string Command::note() const
 
 string Command::param(int n) const 
 {
-	StringList params = Util::split(node(), ":");
+	StringVec params = Util::split(node(), ":");
 	assert(params.size() >= n);
 	if (params.size() < n)
 		return "";
@@ -149,9 +149,9 @@ string Command::param(int n) const
 }
 
 
-StringList Command::params() 
+StringVec Command::params() 
 {
-	StringList params = Util::split(node(), ":");
+	StringVec params = Util::split(node(), ":");
 	return params;
 }
 
@@ -293,4 +293,4 @@ bool Command::matches(const string& xnode) const
 
 
 } // namespace XMPP 
-} // namespace Sourcey
+} // namespace Scy

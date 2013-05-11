@@ -32,9 +32,9 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Util {
 
 
 } // namespace Util
-} // namespace Sourcey
+} // namespace Scy

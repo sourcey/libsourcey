@@ -33,7 +33,7 @@
 #include <string>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace CryptoProvider {
 
 
@@ -49,7 +49,7 @@ std::string computeHMAC(const std::string& input, const std::string& key);
 
 
 } // namespace CryptoProvider
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_CryptoProvider_H

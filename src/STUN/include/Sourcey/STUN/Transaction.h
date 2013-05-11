@@ -33,7 +33,7 @@
 #include "Sourcey/STUN/Message.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace STUN {
 
 
@@ -54,7 +54,7 @@ protected:
 };
 
 
-} } // namespace Sourcey::STUN
+} } // namespace Scy::STUN
 
 
 #endif // SOURCEY_STUN_Transaction_H

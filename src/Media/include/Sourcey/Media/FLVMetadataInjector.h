@@ -39,7 +39,7 @@
 #include <sstream>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -144,7 +144,7 @@ public:
 					Buffer flvHeader(512);
 					writeFLVHeader(flvHeader);
 
-					MediaPacket opacket((unsigned char*)flvHeader.bytes(), flvHeader.size());
+					MediaPacket opacket(reinterpret_cast<unsigned char*>(flvHeader.bytes()), flvHeader.size());
 					emit(this, opacket);
 				}
 
@@ -153,7 +153,7 @@ public:
 				_fpsCounter.tick();
 		
 				// Generate the timestamp based on frame rate and number.
-				UInt32 timestamp = (1000.0 / _fpsCounter.fps) * _fpsCounter.frames;		
+				UInt32 timestamp = static_cast<UInt32>((1000.0 / _fpsCounter.fps) * _fpsCounter.frames);		
 
 				// Update the output packet's timestamp.
 				fastUpdateTimestamp(reinterpret_cast<char*>(mpacket->data()), timestamp);	
@@ -464,7 +464,7 @@ protected:
 
 
 } // namespace Media 
-} // namespace Sourcey 
+} // namespace Scy 
 
 
 #endif

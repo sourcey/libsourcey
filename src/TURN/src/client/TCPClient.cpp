@@ -39,11 +39,11 @@ using namespace Poco;
 using namespace Poco::Net;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 
-TCPClient::TCPClient(ITCPClientObserver& observer, Net::Reactor& reactor, Runner& runner, const Client::Options& options) : 
+TCPClient::TCPClient(TCPClientObserver& observer, Net::Reactor& reactor, Runner& runner, const Client::Options& options) : 
 	Client(observer, reactor, runner, options), 
 	_observer(observer)
 {
@@ -437,7 +437,7 @@ int TCPClient::transportProtocol()
 }
 
 
-} } //  namespace Sourcey::TURN
+} } //  namespace Scy::TURN
 
 
 

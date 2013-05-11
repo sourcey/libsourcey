@@ -31,7 +31,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 
@@ -86,4 +86,4 @@ string FiveTuple::toString() const
 }
 
 
-} } // namespace Sourcey::TURN
+} } // namespace Scy::TURN

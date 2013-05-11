@@ -38,14 +38,14 @@
 #include "Sourcey/Flaggable.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 		
 
 typedef TimedManager<std::string, IPacket> PersistenceT;
 
 
-class Router: public Sourcey::Router
+class Router: public Scy::Router
 	/// The XMPP router is responsibe for routing XMPP stanzas between
 	/// the interface, application and remote clients. As such certain 
 	/// guidelines must be adhered to during stanza creation.
@@ -250,7 +250,7 @@ DefinePolymorphicDelegateWithArg(xpathDelegate, IPacket, XPathDelegate, const Fi
 
 
 } // namespace XMPP
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_XMPP_Router_H

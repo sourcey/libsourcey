@@ -36,7 +36,7 @@
 #include <sstream>
 
 	
-namespace Sourcey { 
+namespace Scy { 
 namespace HTTP {
 
 
@@ -88,7 +88,7 @@ private:
 };
 
 
-} } // namespace Sourcey::HTTP
+} } // namespace Scy::HTTP
 
 
 #endif

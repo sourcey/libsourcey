@@ -40,7 +40,7 @@ extern "C" {
 #include <opencv/cv.h>
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace Media {
 
 
@@ -127,7 +127,7 @@ public:
 };
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 #endif

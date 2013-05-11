@@ -29,7 +29,7 @@
 #define SOURCEY_Pacman_Config_H
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace Pacman {
 
 	
@@ -37,11 +37,11 @@ namespace Pacman {
 #define DEFAULT_API_INDEX_URI "/packages.json"
 #define DEFAULT_PACKAGE_CACHE_DIR "pacman/cache"
 #define DEFAULT_PACKAGE_INTERMEDIATE_DIR "pacman/data"
-#define DEFAULT_PACKAGE_INSTALL_DIR ""
+#define DEFAULT_PACKAGE_INSTALL_DIR "pacman/install"
 #define DEFAULT_PLATFORM "win32"
 
 
-} } // namespace Sourcey::Pacman
+} } // namespace Scy::Pacman
 
 
 #endif // SOURCEY_Pacman_Config_H

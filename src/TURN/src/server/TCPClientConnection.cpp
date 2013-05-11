@@ -35,7 +35,7 @@ using namespace Poco;
 using namespace Poco::Net;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 
@@ -158,4 +158,4 @@ UInt32 TCPClientConnection::connectionID() const
 }
 
 
-} } // namespace Sourcey::TURN
+} } // namespace Scy::TURN

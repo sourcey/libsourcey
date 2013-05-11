@@ -33,7 +33,7 @@
 #include "Sourcey/IPacket.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace RTP {
 
 
@@ -142,7 +142,7 @@ protected:
 
 
 } // namespace RTP
-} // namespace Sourcey 
+} // namespace Scy 
 
 
 #endif

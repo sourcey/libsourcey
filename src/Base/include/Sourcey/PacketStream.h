@@ -39,7 +39,7 @@
 #include "Poco/Event.h"
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 struct PacketAdapterReference
@@ -181,7 +181,7 @@ public:
 	}
 
 protected:
-	virtual void detachAll();
+	virtual void detach();
 		/// Detaches all stream adapters, and frees 
 		/// pointers if the adapters are managed.
 	
@@ -200,7 +200,7 @@ protected:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_PacketStream_H

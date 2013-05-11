@@ -35,7 +35,7 @@
 #include <vector>
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 struct PacketStreamState;
@@ -59,7 +59,7 @@ public:
 typedef std::vector<PacketEmitter*> PacketEmitterList;
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_PacketEmitter_H
@@ -85,7 +85,7 @@ typedef std::vector<PacketEmitter*> PacketEmitterList;
 	
 	virtual void operator -= (const void* klass) 
 	{ 
-		PacketSignal::detachAll(klass); 
+		PacketSignal::detach(klass); 
 	}
 
 	virtual void attach(const PacketDelegateBase& delegate)
@@ -98,9 +98,9 @@ typedef std::vector<PacketEmitter*> PacketEmitterList;
 		PacketSignal::detach(delegate);
 	}
 	
-	virtual void detachAll(const void* klass) 
+	virtual void detach(const void* klass) 
 	{
-		PacketSignal::detachAll(klass);
+		PacketSignal::detach(klass);
 	}
 	*/
 

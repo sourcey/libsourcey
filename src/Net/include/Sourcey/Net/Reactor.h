@@ -41,7 +41,7 @@
 #include <deque>
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 template<class C, typename Reactor, typename Socket, typename Event>
@@ -203,7 +203,7 @@ static Delegate<C,
 }
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 #endif // SOURCEY_NET_Reactor_H

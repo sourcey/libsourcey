@@ -35,7 +35,7 @@
 #include <list>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -54,7 +54,7 @@ typedef std::list<ICapture*> ICaptureList;
 
 
 } // namespace Media 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_MEDIA_ICapture_H

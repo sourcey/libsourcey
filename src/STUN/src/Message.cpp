@@ -32,7 +32,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace STUN {
 
 
@@ -280,7 +280,7 @@ void Message::write(Buffer& buf) const
 }
 
 
-} } // namespace Sourcey::STUN
+} } // namespace Scy::STUN
 
 
 /*

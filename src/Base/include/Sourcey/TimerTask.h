@@ -38,7 +38,7 @@
 #include <string>
 
 
-namespace Sourcey {
+namespace Scy {
 	
 
 class Runner;
@@ -82,8 +82,8 @@ public:
 	virtual long interval() const;
 		/// Returns the timer interval value.
 	
-	virtual Sourcey::Timeout& scheduleAt();
-	virtual Sourcey::Timeout scheduleAt() const;
+	virtual Scy::Timeout& scheduleAt();
+	virtual Scy::Timeout scheduleAt() const;
 		/// Returns the next scheduled time value.
 	
 	virtual void onTimeout();
@@ -103,11 +103,11 @@ protected:
 	
 	long _timeout;
 	long _interval;
-	Sourcey::Timeout _scheduleAt;
+	Scy::Timeout _scheduleAt;
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_TimerTask_H

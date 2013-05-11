@@ -42,7 +42,7 @@
 #include "Sourcey/Symple/Peer.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Symple {
 
 	
@@ -311,7 +311,7 @@ struct EventDelegate: public MessageDelegate
 DefinePolymorphicDelegate(eventDelegate, IPacket, EventDelegate)
 
 
-} } // namespace Sourcey::Symple
+} } // namespace Scy::Symple
 
 
 #endif //  SOURCEY_Symple_Client_H

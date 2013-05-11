@@ -46,7 +46,7 @@ using namespace Poco;
 //using namespace Poco::Net;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 
 
@@ -265,7 +265,7 @@ void Reactor::emit(const Poco::Net::Socket& socket, SocketEvent event)
 }
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 /*

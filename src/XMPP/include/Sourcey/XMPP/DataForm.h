@@ -31,7 +31,7 @@
 #include "Sourcey/XML/XML.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 
 
@@ -170,7 +170,7 @@ struct FormLayoutSection: public FormLayoutContainer
 
 
 } // namespace XMPP 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_XMPP_DataForm_H

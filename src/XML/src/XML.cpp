@@ -31,7 +31,7 @@
 using namespace std; 
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XML {
 
 
@@ -140,4 +140,4 @@ void Document::write(Buffer& buf) const
 
 
 } // namespace XML
-} // namespace Sourcey
+} // namespace Scy

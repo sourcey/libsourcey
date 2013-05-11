@@ -33,7 +33,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace RTP {
 
 
@@ -271,4 +271,4 @@ UInt16 Packet::computeChecksum(UInt16* data, int length) const
 
 
 } // namespace RTP
-} // namespace Sourcey
+} // namespace Scy

@@ -32,7 +32,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace STUN {
 
 
@@ -971,4 +971,4 @@ void TransportPrefs::write(Buffer& buf) const {
 */
 
 
-} } // namespace Sourcey::STUN
+} } // namespace Scy::STUN

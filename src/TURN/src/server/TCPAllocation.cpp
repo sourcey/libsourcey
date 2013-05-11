@@ -35,7 +35,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 
@@ -73,8 +73,8 @@ TCPAllocation::~TCPAllocation()
 	PeerConnectionMap& peers = _peers.items();	
 	for (PeerConnectionMap::iterator it = peers.begin(); it != peers.end(); ++it) {
 		Log("trace", this) << "Destroying: Closing Peer: " << it->second << endl;	
-		//it->second->Connected.detachAll(this);
-		//it->second->Closed.detachAll(this);
+		//it->second->Connected.detach(this);
+		//it->second->Closed.detach(this);
 		//it->second->Closed -= delegate(this, &TCPAllocation::onPeerDisconnected);	
 		it->second->close();
 		//delete it->second;
@@ -178,7 +178,7 @@ bool TCPAllocation::onTimer()
 
 	// Here we clean up expired peer connections, nothing else. 
 	// All other connection types are self maintaining.		
-	PeerConnectionMap peers = this->peers().copy();	
+	PeerConnectionMap peers = this->peers().items();	
 	for (PeerConnectionMap::iterator it = peers.begin(); it != peers.end(); ++it) {
 		if (it->second->expired()) {
 			assert(it->second->client() == NULL);
@@ -413,7 +413,7 @@ Net::Address TCPAllocation::relayedAddress() const
 }
 
 
-} } //  namespace Sourcey::TURN
+} } //  namespace Scy::TURN
 
 
 

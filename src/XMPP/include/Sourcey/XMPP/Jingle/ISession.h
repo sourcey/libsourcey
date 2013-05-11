@@ -38,7 +38,7 @@
 #include <assert.h>
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace XMPP {
 namespace Jingle {
 
@@ -162,7 +162,7 @@ protected:
 
 } // namespace Jingle
 } // namespace XMPP 
-} // namespace Sourcey 
+} // namespace Scy 
 
 
 #endif // ANIONU_JINGLE_SESSION_H

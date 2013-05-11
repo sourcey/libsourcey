@@ -34,7 +34,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace XML {
 
 
@@ -168,7 +168,7 @@ void Configuration::setRaw(const string& key, const string& value)
 }
 
 
-void Configuration::keys(StringList& keys, const std::string& baseKey)
+void Configuration::keys(StringVec& keys, const std::string& baseKey)
 {
 	FastMutex::ScopedLock lock(_mutex); 
 
@@ -181,5 +181,5 @@ void Configuration::keys(StringList& keys, const std::string& baseKey)
 }
 
 
-} } // namespace Sourcey::XML
+} } // namespace Scy::XML
 

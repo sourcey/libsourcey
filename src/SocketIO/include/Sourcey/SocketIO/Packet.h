@@ -33,7 +33,7 @@
 #include "Sourcey/JSON/JSON.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SocketIO {
 	
 
@@ -115,7 +115,7 @@ protected:
 };
 
 
-} } // namespace Sourcey::SocketIO
+} } // namespace Scy::SocketIO
 
 
 #endif //  SOURCEY_SOCKETIO_Packet_H

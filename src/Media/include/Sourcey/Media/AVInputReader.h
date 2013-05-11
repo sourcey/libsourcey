@@ -21,7 +21,7 @@ extern "C" {
 }
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -101,7 +101,7 @@ protected:
 };
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 #endif	// SOURCEY_MEDIA_AVInputReader_H

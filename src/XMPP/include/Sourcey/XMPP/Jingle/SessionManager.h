@@ -39,7 +39,7 @@
 #include <map>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 namespace Jingle {
 
@@ -125,7 +125,7 @@ protected:
 
 } // namespace Jingle
 } // namespace XMPP 
-} // namespace Sourcey 
+} // namespace Scy 
 
 
 #endif // SOURCEY_XMPP_JINGLE_SessionManager_H

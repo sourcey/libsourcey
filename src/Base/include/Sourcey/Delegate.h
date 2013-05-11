@@ -33,7 +33,7 @@
 #include "Sourcey/Logger.h"
 
 
-namespace Sourcey {
+namespace Scy {
 	
 
 #define Void void*
@@ -336,7 +336,7 @@ static Delegate<C,
 }
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_Delegate_H

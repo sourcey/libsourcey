@@ -59,7 +59,7 @@
 using namespace std; 
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 	
 
@@ -547,7 +547,7 @@ bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 */
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 /*

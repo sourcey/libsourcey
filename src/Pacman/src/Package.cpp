@@ -28,7 +28,10 @@
 #include "Sourcey/Pacman/Package.h"
 #include "Sourcey/Util.h"
 #include "Sourcey/Logger.h"
+
 #include "Poco/Format.h"
+#include "Poco/File.h"
+
 #include "assert.h"
 
 
@@ -36,7 +39,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace Pacman {
 
 
@@ -203,63 +206,65 @@ JSON::Value& RemotePackage::assets()
 
 Package::Asset RemotePackage::latestAsset()
 {
-	if (this->assets().empty())
+	JSON::Value& assets = this->assets();
+	if (assets.empty())
 		throw Exception("Package has no assets");
 
-	// The latest asset may not be in order, so make
-	// sure we return the latest one.
-	JSON::Value& assets = this->assets();
-	JSON::Value& asset = assets[(size_t)0];
-	for (unsigned i = 0; i < assets.size(); i++) {
-		if (Util::compareVersion(assets[i]["version"].asString(), asset["version"].asString())) {
-			asset = assets[i];
+	// The latest asset may not be in order, so
+	// make sure we always return the latest one.
+	size_t index = 0;
+	if (assets.size() > 1) {
+		for (unsigned i = 1; i < assets.size(); i++) {
+			if (Util::compareVersion(assets[i]["version"].asString(), assets[index]["version"].asString())) {
+				index = i;
+			}
 		}
 	}
 	
-	return Asset(asset);
+	return Asset(assets[index]);
 }
 
 
-Package::Asset RemotePackage::lastestAssetForVersion(const string& version)
+Package::Asset RemotePackage::assetVersion(const string& version)
 {
-	if (this->assets().empty())
+	JSON::Value& assets = this->assets();
+	if (assets.empty())
 		throw Exception("Package has no assets");
 
-	JSON::Value& assets = this->assets();
-	JSON::Value& asset = assets[(size_t)0];
+	size_t index = -1;
 	for (unsigned i = 0; i < assets.size(); i++) {
 		if (assets[i]["version"].asString() == version) {
-			asset = assets[i];
+			index = i;
 			break;
 		}
 	}
 
-	if (asset["version"].asString() != version)
-		throw Exception("No asset with version " + version);
+	if (index == -1)
+		throw Exception("No package asset with version " + version);
 	
-	return Asset(asset);
+	return Asset(assets[index]);
 }
 
 
-Package::Asset RemotePackage::latestAssetForSDK(const string& version)
+Package::Asset RemotePackage::latestSDKAsset(const string& version)
 {
-	if (this->assets().empty())
-		throw Exception("Package has no assets");
-
 	JSON::Value& assets = this->assets();
-	JSON::Value& asset = assets[(size_t)0];
+	if (assets.empty())
+		throw Exception("Package has no assets");
+	
+	size_t index = -1;
 	for (unsigned i = 0; i < assets.size(); i++) {		
 		if (assets[i]["sdk-version"].asString() == version && (
-			asset["sdk-version"].asString() != version || 
-			Util::compareVersion(assets[i]["version"].asString(), asset["version"].asString()))) {
-			asset = assets[i];
+			assets[index]["sdk-version"].asString() != version || 
+			Util::compareVersion(assets[i]["version"].asString(), assets[index]["version"].asString()))) {
+			index = i;
 		}
 	}
+	
+	if (index == -1)
+		throw Exception("No package asset with SDK version " + version);
 
-	if (asset["sdk-version"].asString() != version)
-		throw Exception("No asset with SDK version " + version);
-
-	return Asset(asset);
+	return Asset(assets[index]);
 }
 
 
@@ -296,7 +301,7 @@ LocalPackage::~LocalPackage()
 }
 
 
-Package::Asset LocalPackage::installedAsset()
+Package::Asset LocalPackage::asset()
 {
 	return Package::Asset((*this)["asset"]);
 }
@@ -350,7 +355,7 @@ bool LocalPackage::isFailed() const
 
 string LocalPackage::state() const
 {
-	return get("state", "Incomplete").asString();
+	return get("state", "Installing").asString();
 }
 
 
@@ -378,18 +383,128 @@ string LocalPackage::getInstalledFilePath(const string& fileName, bool whiny)
 }
 
 
+void LocalPackage::setVersionLock(const string& version)
+{
+	if (version.empty())
+		(*this).removeMember("version-lock");
+	else
+		(*this)["version-lock"] = version;
+}
+
+
+void LocalPackage::setSDKVersionLock(const string& version)
+{
+	if (version.empty())
+		(*this).removeMember("sdk-version-lock");
+	else
+		(*this)["sdk-version-lock"] = version;
+}
+
+
 string LocalPackage::version() const
 {
 	return get("version", "0.0.0").asString();
 }
 
 
-bool LocalPackage::isLatestVersion(const Package::Asset& lastestRemoteAsset) const
+string LocalPackage::versionLock() const
 {
+	return get("version-lock", "").asString();
+}
+
+
+string LocalPackage::sdkVersionLock() const
+{
+	return get("sdk-version-lock", "").asString();
+}
+
+
+bool LocalPackage::verifyInstallManifest()
+{	
+	LogDebug("LocalPackage", this) << name() 
+		<< ": Verifying install manifest" << endl;
+
+	// Check file system for each manifest file
+	LocalPackage::Manifest manifest = this->manifest();
+	for (JSON::ValueIterator it = manifest.root.begin(); it != manifest.root.end(); it++) {		
+		string path = this->getInstalledFilePath((*it).asString(), false);
+		LogDebug("LocalPackage", this) << name() 
+			<< ": Checking: " << path << endl;
+		File file(path);
+		if (!file.exists()) {
+			LogError("PackageManager", this) << name() 
+				<< ": Missing package file: " << path << endl;
+			return false;
+		}
+	}
+	
+	return true;
+}
+
+
+		/*
+
+		Asset bestAsset = 
+		if (bestAsset)
+
+		try {
+
+			// The best SDK version only needs to be newer if the
+			// installed asset matches the locked SDK version.
+			if (asset().sdkVersion() != sdkVersionLock())
+				return false;
+		}
+		catch (Exception& exc) {
+			// Return false, although we won't be able to update
+			// at all, since there are no available SDK assets :(
+			return false;
+		}
+
+bool LocalPackage::isUpToDate(RemotePackage& remote)
+{
+	// Return true if the locked version is already installed
+	if (!versionLock().empty()) {
+		return versionLock() == version();
+	}
+	
+	JSON::Value tmp;
+	Package::Asset bestAsset(tmp);
+
+	// Get the best asset from the locked SDK version, if any
+	if (!sdkVersionLock().empty()) {
+		try {
+			bestAsset = remote.latestSDKAsset(sdkVersionLock());
+
+			// The best SDK version only needs to be newer if the
+			// installed asset matches the locked SDK version.
+			if (asset().sdkVersion() != sdkVersionLock())
+				return false;
+		}
+		catch (Exception& exc) {
+			// Return false, although we won't be able to update
+			// at all, since there are no available SDK assets :(
+			return false;
+		}
+	}
+
+	// Otherwise get the latest available asset
+	else {
+		try {
+			bestAsset = remote.latestAsset();
+		}
+		catch (Exception& exc) {
+			// Return false, there are no available SDK assets.
+			// The remote package is not valid!
+			assert(0 && "invalid remote package");
+			return false;
+		}
+	}
+	
 	// If L is greater than R the function returns true.
 	// If L is equal or less than R the function returns false.
-	return !Util::compareVersion(lastestRemoteAsset.version(), version());
+	return !Util::compareVersion(bestAsset.version(), version());
 }
+		*/
 
 
 void LocalPackage::setInstalledAsset(const Package::Asset& installedRemoteAsset)
@@ -489,7 +604,7 @@ string PackagePair::id() const
 
 string PackagePair::name() const
 {
-	return local ? local->id() : remote ? remote->name() : "";
+	return local ? local->name() : remote ? remote->name() : "";
 }
 
 
@@ -515,7 +630,7 @@ bool PackagePair::valid() const
 }
 
 
-} } // namespace Sourcey::Pacman
+} } // namespace Scy::Pacman
 
 
 

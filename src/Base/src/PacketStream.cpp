@@ -39,7 +39,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 PacketStream::PacketStream(const string& name) : 
@@ -175,7 +175,7 @@ void PacketStream::close()
 		stop();
 
 	setState(this, PacketStreamState::Closing);	
-	detachAll();	
+	detach();	
 	setState(this, PacketStreamState::Closed); // may result in destruction
 
 	LogTrace("PacketStream", this) << "Closing: OK" << endl;
@@ -272,7 +272,7 @@ bool PacketStream::detach(const PacketDelegateBase& delegate)
 }
 
 
-void PacketStream::detachAll()
+void PacketStream::detach()
 {
 	LogTrace("PacketStream", this) << "Detaching All" << endl;
 		
@@ -457,4 +457,4 @@ void* PacketStream::clientData() const
 }
 
 
-} // namespace Sourcey
+} // namespace Scy

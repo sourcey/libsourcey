@@ -40,7 +40,7 @@ using namespace std;
 using namespace Poco; 
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Sked {
 
 
@@ -240,4 +240,4 @@ void DailyTrigger::update()
 }
 
 
-} } // namespace Sourcey::Sked
+} } // namespace Scy::Sked

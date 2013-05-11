@@ -31,13 +31,15 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SDP { 
 
 
 I::I(const string& src) : Line(Line::I, 9) {
 	assert(src.substr(0, 2) == "i=");
-	_sessionInformation = Util::trim(src.substr(2, src.length()-2));
+	string attr(src.substr(2, src.length()-2));
+	Util::trim(attr);
+	_sessionInformation = attr;
 }
 
 
@@ -60,5 +62,5 @@ string I::toString() {
 }
 
 
-} // namespace Sourcey
+} // namespace Scy
 } // namespace SDP 

@@ -39,7 +39,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 namespace Jingle {
 
@@ -61,7 +61,7 @@ SessionManager::~SessionManager()
 	LogDebug() << "[JingleSessionManager] Destroying" << endl;
 	//FastMutex::ScopedLock lock(_mutex);
 
-	_router.detachAll(this);	
+	_router.detach(this);	
 	terminateAll();
 }
 
@@ -212,4 +212,4 @@ Router& SessionManager::router()
 
 } // namespace Jingle
 } // namespace XMPP 
-} // namespace Sourcey
+} // namespace Scy

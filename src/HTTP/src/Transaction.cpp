@@ -47,7 +47,7 @@ using namespace Poco;
 using namespace Poco::Net;
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace HTTP {
 
 
@@ -88,14 +88,14 @@ bool Transaction::send()
 		_uri = URI(_request->getURI());
 		_request->setURI(_uri.getPathAndQuery()); // ensure URI only in request
 
-		log("trace") << "Running:" 
+		log("trace") << "Sending:" 
 			<< "\n\tMethod: " << _request->getMethod()
-			<< "\n\tHas Credentials: " << _request->hasCredentials()
 			<< "\n\tURL: " << _uri.toString()
-			<< "\n\tURI: " << _request->getURI()
-			<< "\n\tHost: " << _uri.getHost()
-			<< "\n\tPort: " << _uri.getPort()
-			<< "\n\tOutput Path: " << _outputPath
+			<< "\n\tIsAuthenticated: " << _request->hasCredentials()
+			//<< "\n\tURI: " << _request->getURI()
+			//<< "\n\tHost: " << _uri.getHost()
+			//<< "\n\tPort: " << _uri.getPort()
+			//<< "\n\tOutput Path: " << _outputPath
 			<< endl;
 		
 		assert(!_uri.getScheme().empty());
@@ -125,20 +125,18 @@ bool Transaction::send()
 	}
 	catch (StopPropagation&) {
 		log("trace") << "Cancelled" << endl;
+
+		// In the transaction was cancelled we return
+		// false here. onComplete() will not be called.
 		return false;
 	}
 	catch (Exception& exc) {
 		log("error") << "Failed: " << exc.displayText() << endl;
 		_response.error = exc.displayText();
 		setState(this, TransactionState::Failed, _response.error);
-		//exc.rethrow();
 	}
 
-	log("trace") << "Response: " 
-		<< _response.getStatus() << ": " 
-		<< _response.getReason() << endl;
-
-	dispatchCallbacks();
+	onComplete();
 	return _response.success();
 }
 
@@ -146,25 +144,19 @@ bool Transaction::send()
 void Transaction::cancel()
 {
 	log("trace") << "Cancelling" << endl;
+	assert(!cancelled());
 	setState(this, TransactionState::Cancelled);
 }
 
 
 void Transaction::processRequest(ostream& ostr)
 {
-	//stringstream ss;
-	//_request->write(ss);	
-	//log("trace") << "Request Headers: " << ss.str() << endl;
-
 	try 
 	{
 		TransferState& st = _requestState;
 		st.total = _request->getContentLength();
 		setRequestState(TransferState::Running);
-		if (_request->form) 
-		{
-			//log("trace") << "Request Body: " << string(ss.str().data(), 100) << endl;
-			
+		if (_request->form) {	
 			char c;
 			streambuf* pbuf = _request->body.rdbuf(); 
 			while (pbuf->sgetc() != EOF) {				
@@ -175,12 +167,9 @@ void Transaction::processRequest(ostream& ostr)
 					if (cancelled()) {
 						setRequestState(TransferState::Cancelled);
 						throw StopPropagation();
-					}
-					
-					log("trace") << "Upload progress: " << 
-						st.current << " of " << 
-						st.total << endl;
-
+					}					
+					//log("trace") << "Upload progress: " << 
+					//	st.current << " of " << st.total << endl;
 					setRequestState(TransferState::Running);
 				}
 			}		
@@ -205,10 +194,6 @@ void Transaction::setRequestState(TransferState::Type state)
 
 void Transaction::processResponse(istream& istr)
 {	
-	//stringstream ss;
-	//_response.write(ss);	
-	//log("trace") << "Response Headers: " << ss.str() << endl;
-
 	try 
 	{	
 		char c;
@@ -221,8 +206,7 @@ void Transaction::processResponse(istream& istr)
 		st.total = _response.getContentLength();
 		setResponseState(TransferState::Running);
 		istr.get(c);
-		while (istr && ostr)
-		{
+		while (istr && ostr) {
 			st.current++;
 			ostr.put(c);
 			istr.get(c);
@@ -230,12 +214,9 @@ void Transaction::processResponse(istream& istr)
 				if (cancelled()) {
 					setResponseState(TransferState::Cancelled);
 					throw StopPropagation();
-				}
-				
-				log("trace") << "Download progress: " 
-					<< st.current << " of " 
-					<< st.total << endl;
-	
+				}				
+				//log("trace") << "Download progress: " 
+				//	<< st.current << " of " << st.total << endl;	
 				setResponseState(TransferState::Running);
 			}
 		}
@@ -260,7 +241,7 @@ void Transaction::setResponseState(TransferState::Type state)
 }
 
 
-void Transaction::dispatchCallbacks()
+void Transaction::onComplete()
 {	
 	if (!cancelled())
 		Complete.emit(this, _response);
@@ -336,85 +317,4 @@ void* Transaction::clientData() const
 }
 
 
-} } // namespace Sourcey::HTTP
-
-
-	
-	
-				//ch = pbuf->sbumpc();
-				//ostr << ch;
-			//std::streamsize _requestState.current = 0;
-
-	/*
-	char c;
-				//ch = pbuf->sbumpc();
-				//ostr << ch;
-	char c;
-	std::streamsize _requestState.current = 0;
-	std::streamsize total = _request->getContentLength();
-	ostream& istr =_request->body;
-	ostr.get(c);
-	while (ostr && istr)
-	{
-		++_requestState.current;
-		istr.put(c);
-		ostr.get(c);
-		if (_requestState.current % 32768 == 0) {					
-			if (cancelled()) {
-				setResponseState(TransferState::Cancelled, _requestState.current);
-				throw StopPropagation();
-			}
-				
-			log("trace") << "Upload progress: " << _requestState.current << " of " << total << endl;
-			//log("trace") << "Upload progress: " << _requestState.current << endl;
-			setResponseState(TransferState::Running, _requestState.current);
-		}
-	}
-
-	
-	*/
-			
-	//char c;
-
-	
-
-	/*
-	ofstream* ofstr = NULL;	
-	if (!_outputPath.empty()) {
-		ofstr = new ofstream(_outputPath.data());
-		if (!ofstr->is_open())
-			throw Exception("Cannot open output file: " + _outputPath);
-	}
-	ostream& ostr = ofstr ? reinterpret_cast<ostream&>(*ofstr) : _response.body;
-	*/
-			
-	/*
-	try 
-	{
-		// If no output path is set copy the response data to 
-		// our response object.
-		if (_outputPath.empty()) {
-			StreamCopier::copyStream(ist, _response.body);
-			//StreamCopier::copyStreamUnbuffered(rs, _response.data);
-		}
-		
-		// Otherwise save the response to the output file.
-		else {
-			log("trace") << "Saving output file: " << _outputPath << endl;
-			Path dir(_outputPath);
-			dir.setFileName("");
-			File(dir).createDirectories();	
-			FileOutputStream ofstr(_outputPath);
-			StreamCopier::copyStream(ist, ofstr);
-			//StreamCopier::copyStreamUnbuffered(ist, ofstr);
-		}
-
-		setResponseState(TransferState::Complete, 0);
-	}
-	catch (Exception& exc) 
-	{
-		log("trace") << "Response Error: " << exc.displayText() << endl;
-		setResponseState(TransferState::Failed, 0);
-		exc.rethrow();
-	}
-	*/
+} } // namespace Scy::HTTP

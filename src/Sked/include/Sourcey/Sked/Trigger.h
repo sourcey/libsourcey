@@ -36,7 +36,7 @@
 #include "Poco/Timespan.h"
 
 	
-namespace Sourcey {
+namespace Scy {
 namespace Sked {
 
 
@@ -172,7 +172,7 @@ struct DailyTrigger: public Trigger
 };
 	
 
-} } // namespace Sourcey::Sked
+} } // namespace Scy::Sked
 
 
 #endif // SOURCEY_Sked_Trigger_H

@@ -33,7 +33,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 static const int DEFAULT_SIZE = 4096;
@@ -443,7 +443,7 @@ size_t Buffer::readNextNumber(unsigned int& val)
 		_bytes[_pos + len] != '\n' && 
 		_bytes[_pos + len] != '\r')
 		len++;
-	val = Util::atoi(string(_bytes + _pos, len));
+	val = Util::fromString<UInt32>(string(_bytes + _pos, len));
 	if (_end > _pos + len)
 		_pos += len;
 	else
@@ -542,7 +542,7 @@ const UInt64 Buffer::peekUInt64()
 }
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 /*

@@ -31,9 +31,9 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Sourcey;
+using namespace Scy;
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 	
@@ -706,7 +706,7 @@ void InitDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, c
 }
 
 	
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 

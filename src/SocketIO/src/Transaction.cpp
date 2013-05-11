@@ -35,7 +35,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SocketIO {
 
 
@@ -110,4 +110,4 @@ void Transaction::onComplete()
 }
 
 
-} } // namespace Sourcey::SocketIO
+} } // namespace Scy::SocketIO

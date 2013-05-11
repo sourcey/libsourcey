@@ -33,7 +33,7 @@
 #include "Sourcey/TURN/FiveTuple.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 
@@ -74,7 +74,7 @@ protected:
 typedef std::map<FiveTuple, ServerAllocation*> ServerAllocationMap;
 
 
-} } // namespace Sourcey::TURN
+} } // namespace Scy::TURN
 
 
 #endif // SOURCEY_TURN_ServerAllocation_H

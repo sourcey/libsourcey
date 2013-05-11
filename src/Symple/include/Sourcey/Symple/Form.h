@@ -33,19 +33,14 @@
 #include "Sourcey/Symple/Command.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Symple {
 
 	
 class Form;
-class FormField;
-
-
+class FormField; 
 class FormElement
-	/// Base implementation for form pages and fields.
-	/// Remember, all methods operate at the _root value scope,
-	/// therefore to operate at the form scope methods should
-	/// be called on the Form object.
+	/// Base implementation for form pages, sections and fields.
 {
 public:
 	FormElement();
@@ -59,9 +54,9 @@ public:
 	std::string label() const;
 	
 	void setType(const std::string& type);
-		/// Possible "type" values: 
-		/// page, section, text, text-multi, list, list-multi, 
-		/// checkbox, media, custom
+		/// Possible "type" values
+		///	  page, section, text, text-multi,
+		///	  list, list-multi, checkbox, media, custom
 	
 	void setId(const std::string& id);
 	void setLabel(const std::string& text);
@@ -92,22 +87,28 @@ public:
 
 	bool clearElements(const std::string& id, bool partial = false);
 		/// Clears child elements matching the given ID.
+	
+	void clear();
+		/// Clear the entire form.
+
+	bool valid() const;
+		/// Returns true if the form element is valid.
 		
 	int numElements();
 		/// Returns the number of child elements.
 
 	bool hasErrors();
+		/// Returns true if any fields have errors.
+
 	bool hasPages();
-	
-	void clear();
-	bool valid() const;
+		/// Returns true if the form has multiple pages.
 
 	JSON::Value& root() const;
 
 protected:
 	JSON::Value* _root;
-		/// The root pointer is just a reference
-		/// to an externally managed JSON value..
+		/// The root pointer is just a reference to
+		/// the externally managed JSON value memory.
 };
 
 
@@ -174,8 +175,42 @@ public:
 };
 
 
+class IFormProcessor
+	/// This class provides a unified interface for   
+	/// client side processing of Symple Form transactions.
+{	
+public:
+	virtual ~IFormProcessor() = 0 {};
+
+	virtual void buildForm(Form& form, FormElement& element) {};
+		/// Builds the config form for this module. The defaultScope 
+		/// argument is only applicable for classes using
+		/// ScopedConfiguration, such as IModes.
+
+	virtual void parseForm(Form& form, FormElement& element) {};
+		/// Parses the config form for this module. 
+		/// Errors can be added to any invalid FormFields to
+		/// resubmit the form to the client for correction.
+
+	virtual bool isConfigurable() const { return false; }
+		/// This method is called to determine weather this module has 
+		/// any configurable methods. If false is returned then 
+		/// buildForm() will never be called.	
+
+	virtual bool hasParsableFields(Symple::Form& form) const { return false; }
+		/// Checks if there is any parsable fields for the given form.
+		/// If no items exist then parseForm() will not be called.
+
+	virtual std::string documentFile() { return ""; };
+		/// This method returns the optional relative path (from the 
+		/// application binary dir) to the information/help guide 
+		/// pertaining to configurable fields in this form module.
+		/// Information files are generally in Markdown format.
+};
+
+
 } // namespace Symple 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_Symple_Form_H

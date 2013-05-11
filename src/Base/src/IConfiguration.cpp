@@ -37,7 +37,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 IConfiguration::IConfiguration()
@@ -242,4 +242,4 @@ bool IConfiguration::parseBool(const std::string& value)
 }
 
 
-} // namespace Sourcey
+} // namespace Scy

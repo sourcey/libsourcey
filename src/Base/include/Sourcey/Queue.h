@@ -34,7 +34,7 @@
 #include <queue>
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 template<typename T>
@@ -147,7 +147,7 @@ public:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 

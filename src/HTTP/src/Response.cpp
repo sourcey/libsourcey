@@ -33,7 +33,7 @@ using namespace Poco;
 using namespace Poco::Net;
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace HTTP {
 	
 
@@ -78,4 +78,4 @@ bool Response::success()
 }
 
 
-} } // namespace Sourcey::HTTP
+} } // namespace Scy::HTTP

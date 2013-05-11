@@ -31,10 +31,10 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Sourcey;
+using namespace Scy;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -735,7 +735,7 @@ void InitVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
 	// of which frame timestamps are represented. For fixed-fps content,
 	// timebase should be 1/framerate and timestamp increments should be
 	// identically 1.
-	ctx->time_base.den = oparams.fps;
+	ctx->time_base.den = (int)oparams.fps;
 	ctx->time_base.num = 1; //000; //; //
 
 	// Emit one intra frame every twelve frames at most
@@ -797,7 +797,7 @@ void InitDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, c
 		
 	// Local PTS value represented as decimal seconds
     if (opacket->dts != AV_NOPTS_VALUE) {
-		*pts = opacket->pts;
+		*pts = (double)opacket->pts;
 		*pts *= av_q2d(stream->time_base);
 	}
 
@@ -880,7 +880,7 @@ AVRational GetCodecTimeBase(AVCodec* codec, double fps)
 
 
 	
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 		
 

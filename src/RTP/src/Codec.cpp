@@ -33,7 +33,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace RTP {
 
 
@@ -66,7 +66,7 @@ Codec::Codec(const std::string& sdp) //:
 	// codec id
 	end = value.find(" ");
 	if (end != string::npos) {
-		id = Util::atoi(value.substr(start, end).c_str());
+		id = Util::fromString<UInt32>(value.substr(start, end).c_str());
 	}
 
 	// codec name
@@ -79,7 +79,7 @@ Codec::Codec(const std::string& sdp) //:
 	// clockrate
 	start = end+1;
 	end = value.length(); 
-	sampleRate = Util::atoi(value.substr(start, end-start).c_str());
+	sampleRate = Util::fromString<UInt32>(value.substr(start, end-start).c_str());
 }
 
 
@@ -165,4 +165,4 @@ string VideoCodec::toString() const
 
 
 } // namespace RTP 
-} // namespace Sourcey
+} // namespace Scy

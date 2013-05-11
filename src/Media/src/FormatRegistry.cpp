@@ -37,7 +37,7 @@ using Poco::FastMutex;
 using Poco::format;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -172,4 +172,4 @@ void FormatRegistry::setDefault(const string& name)
 }
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media

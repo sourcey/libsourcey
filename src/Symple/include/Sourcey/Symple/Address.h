@@ -32,7 +32,7 @@
 #include "Sourcey/JSON/JSON.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Symple {
 
 
@@ -92,7 +92,7 @@ protected:
 
 
 } // namespace Symple 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_Symple_Address_H

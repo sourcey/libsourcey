@@ -32,7 +32,7 @@
 #include "Sourcey/Pacman/InstallTask.h"
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace Pacman {
 
 
@@ -106,7 +106,7 @@ inline std::string getInstallTaskNamesString(LocalPackageList& packages)
 }
 
 
-} } // namespace Sourcey::Pacman
+} } // namespace Scy::Pacman
 
 
 #endif // SOURCEY_Pacman_InstallMonitor_H

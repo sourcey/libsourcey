@@ -33,7 +33,7 @@
 #include "Sourcey/XMPP/DataForm.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 
 
@@ -70,7 +70,7 @@ public:
 	std::string note() const;
 	std::string action() const;
 	std::string param(int n) const;
-	StringList params();
+	StringVec params();
 	//DataForm form(bool create = false);
 	
 	Command setNode(const std::string& node);	
@@ -137,7 +137,7 @@ public:
 
 
 } // namespace XMPP 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_XMPP_COMMAND_H

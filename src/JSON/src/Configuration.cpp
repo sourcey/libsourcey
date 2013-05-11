@@ -35,22 +35,18 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace JSON {
 
 
-// ---------------------------------------------------------------------
-// JSON Configuration
-//
-Configuration::Configuration()
+Configuration::Configuration() :
+	_loaded(false)
 {	
-	LogTrace() << "[JSONConfiguration] Creating" << endl;
 }
 
 
 Configuration::~Configuration()
 {
-	LogTrace() << "[JSONConfiguration] Destroying" << endl;
 }
 
 
@@ -66,22 +62,22 @@ void Configuration::load(bool create)
 	FastMutex::ScopedLock lock(_mutex); 
 
 	if (_path.empty())
-		throw Exception("Configuration file path must be set.");
+		throw Exception("Cannot load: Configuration file path must be set.");
 
 	LogDebug() << "[JSONConfiguration] Loading: " << _path << endl;
 	
 	if (create && !File(_path).exists())
 		File(_path).createFile();
 	
-	try
-    {	
-		// Will throw on error
+	try {	
 		JSON::loadFile(*this, _path);
 	}
-    catch (DataFormatException& exc)
-    {
-		// The file may be empty, that's OK
+    catch (...) {
+		// The config file may be empty,
+		// but the path is set so we can save.
     }
+
+	_loaded = true;
 }
 
 
@@ -90,12 +86,26 @@ void Configuration::save()
 	FastMutex::ScopedLock lock(_mutex); 
 	
 	if (_path.empty())
-		throw Exception("Configuration file path must be set.");
+		throw Exception("Cannot save: Configuration file path must be set.");
 
 	LogDebug() << "[JSONConfiguration] Saving: " << _path << endl;
 	
 	// Will throw on error
 	JSON::saveFile(*this, _path);
+}
+
+
+std::string Configuration::path()
+{
+	FastMutex::ScopedLock lock(_mutex); 
+	return _path;
+}
+
+
+bool Configuration::loaded()
+{
+	FastMutex::ScopedLock lock(_mutex); 
+	return _loaded;
 }
 
 
@@ -163,7 +173,7 @@ void Configuration::setRaw(const string& key, const string& value)
 }
 
 
-void Configuration::keys(StringList& keys, const std::string& baseKey)
+void Configuration::keys(StringVec& keys, const std::string& baseKey)
 {
 	FastMutex::ScopedLock lock(_mutex); 
 		
@@ -175,4 +185,4 @@ void Configuration::keys(StringList& keys, const std::string& baseKey)
 }
 
 
-} } // namespace Sourcey::JSON
+} } // namespace Scy::JSON

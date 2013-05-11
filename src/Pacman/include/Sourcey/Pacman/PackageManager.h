@@ -50,7 +50,7 @@
 #include <assert.h>
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace Pacman {
 
 
@@ -79,6 +79,7 @@ public:
 		std::string interDir;
 		std::string installDir;
 
+		// Platform (win32, linux, max)
 		std::string platform;
 
 		// This flag tells the package manager weather or not
@@ -89,9 +90,11 @@ public:
 			endpoint				= DEFAULT_API_ENDPOINT;
 			indexURI				= DEFAULT_API_INDEX_URI;
 
-			cacheDir				= Poco::Path::current() + DEFAULT_PACKAGE_CACHE_DIR;
-			interDir				= Poco::Path::current() + DEFAULT_PACKAGE_INTERMEDIATE_DIR;
-			installDir				= Poco::Path::current() + DEFAULT_PACKAGE_INSTALL_DIR;
+			Poco::Path root(Poco::Path::current());
+			root.makeDirectory();
+			cacheDir				= root.toString() + DEFAULT_PACKAGE_CACHE_DIR;
+			interDir				= root.toString() + DEFAULT_PACKAGE_INTERMEDIATE_DIR;
+			installDir				= root.toString() + DEFAULT_PACKAGE_INSTALL_DIR;
 
 			platform				= DEFAULT_PLATFORM;
 			clearFailedCache		= true;
@@ -134,37 +137,38 @@ public:
 	//
 	/// Package Installation Methods
 	//
-	virtual InstallTask* installPackage(const std::string& name, //InstallMonitor* monitor = NULL, 
+	virtual InstallTask* installPackage(const std::string& name,
 		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
 		/// Installs a single package.
 		/// The returned InstallTask must be started.
 
-	virtual InstallMonitor* installPackages(const StringList& ids,// InstallMonitor* monitor = NULL, 
-		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
+	virtual bool installPackages(const StringVec& ids, 
+		const InstallTask::Options& options = InstallTask::Options(),
+		InstallMonitor* monitor = NULL, bool whiny = false);
 		/// Installs multiple packages.
 		/// The same options will be passed to each task.
 		/// The returned InstallTask(s) must be started.	
 		/// The returned InstallMonitor will be NULL no tasks were created.	
 		/// The returned InstallMonitor must be freed by the outside application.	
 
-	virtual InstallTask* updatePackage(const std::string& name, //InstallMonitor* monitor = NULL, 
+	virtual InstallTask* updatePackage(const std::string& name, 
 		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
 		/// Updates a single package.
 		/// Throws an exception if the package does exist.
 		/// The returned InstallTask must be started.
 
-	virtual InstallMonitor* updatePackages(const StringList& ids,// InstallMonitor* monitor = NULL, 
-		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
+	virtual bool updatePackages(const StringVec& ids, 
+		const InstallTask::Options& options = InstallTask::Options(), 
+		InstallMonitor* monitor = NULL, bool whiny = false);
 		/// Updates multiple packages.
 		/// Throws an exception if the package does exist.
 		/// The returned InstallTask(s) must be started.	
-		/// The returned InstallMonitor will be NULL no tasks were created.	
-		/// The returned InstallMonitor must be freed by the outside application.	
+		/// The InstallMonitor must be freed by the outside application.	
 
 	virtual bool updateAllPackages(bool whiny = false); //InstallMonitor* monitor = NULL, 
 		/// Updates all installed packages.
 
-	virtual bool uninstallPackages(const StringList& ids, bool whiny = false);
+	virtual bool uninstallPackages(const StringVec& ids, bool whiny = false);
 		/// Uninstalls multiple packages.
 
 	virtual bool uninstallPackage(const std::string& id, bool whiny = false);
@@ -217,16 +221,22 @@ public:
 		const InstallTask::Options& options = InstallTask::Options());
 		/// Creates a package installation task for the given pair.
 	
-	virtual bool isLatestVersion(PackagePair& pair);
-		/// Checks if a newer version is available for the given
-		/// package pair.
-	
 	virtual std::string installedPackageVersion(const std::string& id) const;
 		/// Returns the version number of an installed package.
 		/// Exceptions will be thrown if the package does not exist,
 		/// or is not fully installed.
+		
+	virtual Package::Asset getAssetToInstall(PackagePair& pair, const InstallTask::Options& options);
+		/// Returns the best asset to install, or throws a descriptive 
+		/// exception if no updates are available, or the package is 
+		/// already up to date.
+		/// This method takes version and SDK locks into consideration.
+
+	//virtual bool isUpToDate(PackagePair& pair);
+		/// Checks if a newer version is available for the given
+		/// package pair.
 	
-	virtual bool verifyInstallManifest(LocalPackage& package);
+	//virtual bool verifyInstallManifest(LocalPackage& package);
 		/// Checks the veracity of the install manifest for the given
 		/// package and and ensures all package files exist on the
 		/// file system.
@@ -271,6 +281,9 @@ public:
 	
 	Signal<InstallTask&> TaskAdded;
 	Signal<InstallTask&> TaskRemoved;
+	//Signal<const std::string&/* type */, InstallTask&> TaskState;
+		/// TaskState notifies the PackageState of each running task.
+		/// Installing is used when a bew task is created.
 
 protected:
 
@@ -289,7 +302,7 @@ protected:
 
 
 
-} } // namespace Sourcey::Pacman
+} } // namespace Scy::Pacman
 
 
 #endif // SOURCEY_Pacman_PackageManager_H
@@ -305,7 +318,7 @@ protected:
 		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
 		/// Installs a single package.
 
-	virtual bool updatePackages(const StringList& ids, InstallMonitor* monitor = NULL, 
+	virtual bool updatePackages(const StringVec& ids, InstallMonitor* monitor = NULL, 
 		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
 		/// Updates multiple packages.
 		/// The package will be installed if it does not exist.

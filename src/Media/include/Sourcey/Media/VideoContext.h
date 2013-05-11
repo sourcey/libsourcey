@@ -44,7 +44,7 @@ extern "C" {
 }
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -197,7 +197,7 @@ void InitVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
 
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 #endif	// SOURCEY_MEDIA_VideoContext_H

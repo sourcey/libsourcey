@@ -41,7 +41,7 @@
 #include <vector>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace RTP {
 namespace RTCP {
 
@@ -80,7 +80,7 @@ protected:
 
 } // namespace RTCP
 } // namespace RTP
-} // namespace Sourcey 
+} // namespace Scy 
 
 
 #endif

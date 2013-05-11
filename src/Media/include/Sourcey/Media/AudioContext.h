@@ -45,7 +45,7 @@ extern "C" {
 }
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 	
@@ -155,7 +155,7 @@ struct AudioResampler
 };
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 #endif	// SOURCEY_MEDIA_AudioContext_H

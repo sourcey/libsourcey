@@ -40,7 +40,7 @@
 #include "Poco/Thread.h"
 
 	
-namespace Sourcey { 
+namespace Scy { 
 namespace HTTP {
 
 
@@ -70,10 +70,8 @@ struct TransferState
 
 // ---------------------------------------------------------------------
 class Transaction: public StatefulSignal<TransactionState>, public ISendable, public IPolymorphic
-	/// Implements a HTTP transaction.
-	///
-	/// TODO: Use PacketTransaction semantics
-	///
+	/// Implements a stateful HTTP request/response 
+	/// transaction with progress updates.
 {
 public:
 	Transaction(Request* request = NULL);
@@ -81,6 +79,8 @@ public:
 
 	virtual bool send();
 	virtual void cancel();
+		/// Cancels the transaction.
+		/// onComplete() will never be called.
 	
 	virtual Request& request();
 	virtual Response& response();
@@ -103,8 +103,8 @@ public:
 		/// Sets an arbitrary pointer to associate with
 		/// this transaction.
 	
-	Signal<TransferState&> RequestProgress;
-	Signal<TransferState&> ResponseProgress;
+	Signal<TransferState&> RequestProgress;  /// upload progress
+	Signal<TransferState&> ResponseProgress; /// download progress
 	Signal<Response&> Complete;
 	
 	virtual const char* className() const { return "HTTPTransaction"; }
@@ -112,7 +112,7 @@ public:
 protected:
 	virtual void processRequest(std::ostream &ost);
 	virtual void processResponse(std::istream &ist);
-	virtual void dispatchCallbacks();
+	virtual void onComplete();
 	
 	virtual void setRequestState(TransferState::Type state);
 	virtual void setResponseState(TransferState::Type state);
@@ -130,7 +130,7 @@ protected:
 };
 
 
-} } // namespace Sourcey::HTTP
+} } // namespace Scy::HTTP
 
 
 #endif

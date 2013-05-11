@@ -32,7 +32,7 @@
 #include "Sourcey/RTP/Types.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Util {
 	
 
@@ -42,7 +42,7 @@ static inline UInt8 ExtractBits(UInt8 byte, int bitsCount, int shift) {
 
 
 } // namespace Util
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_RTP_Utilities_H

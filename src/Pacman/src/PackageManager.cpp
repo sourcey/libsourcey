@@ -43,7 +43,7 @@ using namespace Poco;
 using namespace Poco::Net;
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace Pacman {
 
 
@@ -198,12 +198,9 @@ void PackageManager::loadLocalPackages(const string& dir)
 
 	DirectoryIterator fIt(dir);
 	DirectoryIterator fEnd;
-	while (fIt != fEnd)
-	{		
-		if (fIt.name().find("manifest") != string::npos &&
-			fIt.name().find(".json") != string::npos) {
-				
-			LogDebug("PackageManager", this) << "Local package found: " << fIt.path().toString() << endl;
+	while (fIt != fEnd) {		
+		if (fIt.name().find(".json") != string::npos) {				
+			LogDebug("PackageManager", this) << "Local package found: " << fIt.name() << endl;
 			try {
 				JSON::Value root;
 				JSON::loadFile(root, fIt.path().toString());
@@ -234,7 +231,7 @@ bool PackageManager::saveLocalPackages(bool whiny)
 	LogTrace("PackageManager", this) << "Saving Local Packages" << endl;
 
 	bool res = true;
-	LocalPackageMap toSave = localPackages().copy();
+	LocalPackageMap toSave = localPackages().items();
 	for (LocalPackageMap::const_iterator it = toSave.begin(); it != toSave.end(); ++it) {
 		if (!saveLocalPackage(static_cast<LocalPackage&>(*it->second), whiny))
 			res = false;
@@ -248,14 +245,10 @@ bool PackageManager::saveLocalPackages(bool whiny)
 
 bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 {
-	LogTrace("PackageManager", this) << "Saving Local Package: " << package.id() << endl;
-
-	//FastMutex::ScopedLock lock(_mutex);
 	bool res = false;
-
 	try {
-		string path(format("%s/manifest_%s.json", options().interDir, package.id()));
-		LogDebug("PackageManager", this) << "Saving Package: " << path << endl;
+		string path(format("%s/%s.json", options().interDir, package.id()));
+		LogDebug("PackageManager", this) << "Saving Local Package: " << package.id() << endl;
 		JSON::saveFile(package, path);
 		res = true;
 	}
@@ -263,10 +256,7 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 		LogError("PackageManager", this) << "Save Error: " << exc.displayText() << endl;
 		if (whiny)
 			exc.rethrow();
-	}	
-
-	LogTrace("PackageManager", this) << "Saving Local Package: OK: " << package.id() << endl;
-
+	}
 	return res;
 }
 
@@ -286,37 +276,16 @@ InstallTask* PackageManager::installPackage(const string& name, const InstallTas
 			queryRemotePackages();
 
 		PackagePair pair = getOrCreatePackagePair(name);
+		Package::Asset asset = getAssetToInstall(pair, options);
 
-		// Check the existing package veracity if one exists.
-		// If the package is up to date we have nothing to do 
-		// so just return a NULL pointer but do not throw.
-		if (pair.local->isInstalled()) {
-			if (verifyInstallManifest(*pair.local)) {
-				LogDebug("PackageManager", this) 
-					<< pair.local->name() << ": Manifest is valid" << endl;			
-				if (isLatestVersion(pair)) {
-					ostringstream ost;
-					ost << pair.local->name() << " is already up to date: " 
-						<< pair.local->version() << " >= " 
-						<< pair.remote->latestAsset().version() << endl;
-					throw Exception(ost.str());
-				}
-			}
-		}
-		
-		// Verify installation options before we create the task.
-		if (!options.version.empty())
-			pair.remote->lastestAssetForVersion(options.version); // throw if none
-		if (!options.sdkVersion.empty())
-			pair.remote->latestAssetForSDK(options.sdkVersion); // throw if none
+		// Set the version option as the version to install.
+		// KLUDGE: Instead of modifying options, we should have 
+		// a better way of sending the asset/version to the InstallTask.
+		InstallTask::Options opts(options);
+		opts.version = asset.version();
 	
-		LogInfo() 
-			<< "Updating "
-			<< pair.local->name() << " " 
-			<< pair.local->version() << " to " 
-			<< pair.remote->latestAsset().version() << endl;
-	
-		return createInstallTask(pair, options);
+		LogInfo() << "Installing " << pair.name() << " " << asset.version() << endl;	
+		return createInstallTask(pair, opts);
 	}
 	catch (Exception& exc) 
 	{
@@ -329,32 +298,86 @@ InstallTask* PackageManager::installPackage(const string& name, const InstallTas
 }
 
 
-InstallMonitor* PackageManager::installPackages(const StringList& ids, const InstallTask::Options& options, bool whiny)
+Package::Asset PackageManager::getAssetToInstall(PackagePair& pair, const InstallTask::Options& options)
+{
+	bool isInstalledAndVerified =
+		pair.local->isInstalled() && 
+		pair.local->verifyInstallManifest();
+	
+	LogDebug("PackageManager", this) << "Getting Best Asset:"
+		<< "\n\tName:" << pair.local->name() 
+		<< "\n\tVersion:" << pair.local->version() 
+		<< "\n\tVersion Lock:" << pair.local->versionLock() 
+		<< "\n\tSDK Version Lock:" << pair.local->sdkVersionLock() 
+		<< "\n\tVerified:" << isInstalledAndVerified
+		<< endl;
+
+	// Return true if the locked version is already installed
+	if (!pair.local->versionLock().empty() || !options.version.empty()) {
+		string versionLock = options.version.empty() ? pair.local->versionLock() : options.version;
+		// TODO: assert valid version?
+
+		// Make sure the version option matches the lock, if both were set
+		if (!options.version.empty() && !pair.local->versionLock().empty() && 
+			options.version != pair.local->versionLock())
+			throw Exception("Invalid version option: Package locked at version: " + pair.local->versionLock());
+
+		// If everything is in order there is nothing to install
+		if (isInstalledAndVerified && pair.local->versionLock() == pair.local->version())
+			throw Exception("Package already up to date. Locked at " + pair.local->versionLock());
+
+		// Return the locked asset, or thorow
+		return pair.remote->assetVersion(versionLock);
+	}
+	
+	// Get the best asset from the locked SDK version, if applicable
+	if (!pair.local->sdkVersionLock().empty() || !options.sdkVersion.empty()) {		
+				
+		// Make sure the version option matches the lock, if both were set
+		if (!options.sdkVersion.empty() && !pair.local->sdkVersionLock().empty() && 
+			options.sdkVersion != pair.local->sdkVersionLock())
+			throw Exception("Invalid SDK version option: Package locked at SDK version: " + pair.local->sdkVersionLock());
+		
+		// Get the latest asset for SDK version
+		Package::Asset sdkAsset = pair.remote->latestSDKAsset(pair.local->sdkVersionLock()); // throw if none
+		
+		// If everything is in order there is nothing to install
+		if (isInstalledAndVerified && pair.local->asset().sdkVersion() == pair.local->sdkVersionLock() &&
+			!Util::compareVersion(sdkAsset.version(), pair.local->version()))
+			throw Exception("Package already up to date for SDK: " + pair.local->sdkVersionLock());
+
+		return sdkAsset;
+	}
+	
+	// If all else fails return the latest asset!
+	Package::Asset latestAsset = pair.remote->latestAsset();
+	if (isInstalledAndVerified && !Util::compareVersion(latestAsset.version(), pair.local->version()))
+		throw Exception("Package already up to date.");
+
+	return latestAsset;
+}
+
+
+bool PackageManager::installPackages(const StringVec& ids, const InstallTask::Options& options, InstallMonitor* monitor, bool whiny)
 {	
-	InstallMonitor* monitor = new InstallMonitor();
+	bool res = true;	
 	try 
 	{
-		for (StringList::const_iterator it = ids.begin(); it != ids.end(); ++it) {
+		for (StringVec::const_iterator it = ids.begin(); it != ids.end(); ++it) {
 			InstallTask* task = installPackage(*it, options, whiny);
-			if (task)
-				monitor->addTask(task);
-		}
-
-		// Delete the monitor and return NULL
-		// if no tasks were created.
-		if (monitor->tasks().empty()) {
-			delete monitor;
-			return NULL;
+			if (task) {
+				if (monitor)
+					monitor->addTask(task);
+				res = false;
+			}
 		}
 	}
 	catch (Exception& exc) 
 	{
-		delete monitor;
 		assert(whiny);
 		exc.rethrow();
 	}
-
-	return monitor;
+	return res;
 }
 
 
@@ -378,16 +401,16 @@ InstallTask* PackageManager::updatePackage(const string& name, const InstallTask
 }
 
 
-InstallMonitor* PackageManager::updatePackages(const StringList& ids, const InstallTask::Options& options, bool whiny)
+bool PackageManager::updatePackages(const StringVec& ids, const InstallTask::Options& options, InstallMonitor* monitor, bool whiny)
 {	
 	// An update action is essentially the same as an install
 	// action, except we will make sure local package exists 
 	// before we continue.
 	{
-		for (StringList::const_iterator it = ids.begin(); it != ids.end(); ++it) {
+		for (StringVec::const_iterator it = ids.begin(); it != ids.end(); ++it) {
 			if (!localPackages().exists(*it)) {
 				string error("Update Failed: " + *it + " is not installed.");
-				LogError("PackageManager", this) << "" << error << endl;	
+				LogError("PackageManager", this) << error << endl;	
 				if (whiny)
 					throw Exception(error);
 				else
@@ -396,24 +419,19 @@ InstallMonitor* PackageManager::updatePackages(const StringList& ids, const Inst
 		}
 	}
 	
-	return installPackages(ids, options, whiny);
+	return installPackages(ids, options, monitor, whiny);
 }
 
 
-bool PackageManager::updateAllPackages(bool whiny) //InstallMonitor* monitor, 
+bool PackageManager::updateAllPackages(bool whiny)
 {
-	bool res = true;
-	
+	bool res = true;	
 	LocalPackageMap& packages = localPackages().items();
 	for (LocalPackageMap::const_iterator it = packages.begin(); it != packages.end(); ++it) {	
-		//if (!updatePackage(it->second->name(), monitor, InstallTask::Options(), whiny))
-		//	res = false;	
 		InstallTask::Options options;
 		InstallTask* task = updatePackage(it->second->name(), options, whiny);
 		if (!task)
 			res = false;
-		//else if (monitor)
-		//	monitor->addTask(task);
 	}
 	
 	return res;
@@ -423,20 +441,15 @@ bool PackageManager::updateAllPackages(bool whiny) //InstallMonitor* monitor,
 bool PackageManager::uninstallPackage(const string& id, bool whiny)
 {
 	LogDebug("PackageManager", this) << "Uninstalling Package: " << id << endl;	
-	//FastMutex::ScopedLock lock(_mutex);
 	
 	try 
 	{
 		LocalPackage* package = localPackages().get(id, true);
-		LogDebug("PackageManager", this) << "Uninstalling Package: " << JSON::stringify(*package, true)  << endl;	
-
-		try 
-		{	
+		try {	
 			// Delete package files from manifest
+			// NOTE: If some files fail to delete we still consider the uninstall a success.	
 			LocalPackage::Manifest manifest = package->manifest();
 			if (!manifest.empty()) {
-	
-				// NOTE: If some files fail to delete we still consider the uninstall a success.	
 				for (JSON::ValueIterator it = manifest.root.begin(); it != manifest.root.end(); it++) {
 					LogDebug("PackageManager", this) << "Uninstalling file: " << (*it).asString() << endl;	
 					try {							
@@ -451,12 +464,12 @@ bool PackageManager::uninstallPackage(const string& id, bool whiny)
 			}		
 	
 			// Delete package manifest file
-			File file(format("%s/manifest_%s.json", options().interDir, package->id()));
+			File file(format("%s/%s.json", options().interDir, package->id()));
 			file.remove();	
 		}
-		catch (Exception& exc) 
-		{
+		catch (Exception& exc) {
 			LogError("PackageManager", this) << "Uninstall Error: " << exc.displayText() << endl;
+			// Swallow and continue...
 		}
 
 		// Set the package as Uninstalled
@@ -482,10 +495,10 @@ bool PackageManager::uninstallPackage(const string& id, bool whiny)
 }
 
 
-bool PackageManager::uninstallPackages(const StringList& ids, bool whiny)
+bool PackageManager::uninstallPackages(const StringVec& ids, bool whiny)
 {	
 	bool res = true;
-	for (StringList::const_iterator it = ids.begin(); it != ids.end(); ++it) {
+	for (StringVec::const_iterator it = ids.begin(); it != ids.end(); ++it) {
 		if (!uninstallPackage(*it, whiny))
 			res = false;
 	}
@@ -624,8 +637,8 @@ PackagePairList PackageManager::getPackagePairs() const
 {	
 	PackagePairList pairs;
 	FastMutex::ScopedLock lock(_mutex);
-	LocalPackageMap& lpackages = _localPackages.copy();
-	RemotePackageMap& rpackages = _remotePackages.copy();
+	LocalPackageMap lpackages = _localPackages.items();
+	RemotePackageMap rpackages = _remotePackages.items();
 	for (LocalPackageMap::const_iterator lit = lpackages.begin(); lit != lpackages.end(); ++lit) {
 		pairs.push_back(PackagePair(lit->second));
 	}
@@ -672,15 +685,6 @@ PackagePair PackageManager::getOrCreatePackagePair(const string& id)
 }
 
 
-bool PackageManager::isLatestVersion(PackagePair& pair)
-{		
-	assert(pair.valid());
-	if (!pair.local->isLatestVersion(pair.remote->latestAsset()))
-		return false;
-	return true;
-}
-
-
 string PackageManager::installedPackageVersion(const string& id) const
 {
 	FastMutex::ScopedLock lock(_mutex);
@@ -692,6 +696,15 @@ string PackageManager::installedPackageVersion(const string& id) const
 		throw Exception("The local package is not installed.");
 
 	return local->version();
+}
+
+
+/*
+bool PackageManager::isUpToDate(PackagePair& pair)
+{		
+	assert(pair.valid());
+	return pair.local && pair.remote && 
+		pair.local->isUpToDate(*pair.remote);
 }
 
 
@@ -716,6 +729,7 @@ bool PackageManager::verifyInstallManifest(LocalPackage& package)
 	
 	return true;
 }
+*/
 	
 
 // ---------------------------------------------------------------------
@@ -852,9 +866,42 @@ void PackageManager::onPackageInstallComplete(void* sender)
 }
 
 
-} } // namespace Sourcey::Pacman
+} } // namespace Scy::Pacman
 
 
+
+		/*
+		// Check the existing package veracity if one exists.
+		// If the package is up to date we have nothing to do 
+		// so just return a NULL pointer but do not throw.
+		if (pair.local->isInstalled()) {
+			if (verifyInstallManifest(*pair.local)) {
+				LogDebug("PackageManager", this) 
+					<< pair.local->name() << ": Manifest is valid" << endl;			
+				if (isUpToDate(pair)) {
+					ostringstream ost;
+					ost << pair.local->name() << " is already up to date: " 
+						<< pair.local->version() //<< " >= " 
+						//<< pair.remote->latestAsset().version() 
+						<< endl;
+					throw Exception(ost.str());
+				}
+			}
+		}
+		
+		// Verify installation options before we create the task.
+		if (!options.version.empty()) {
+			if (pair.local->versionLock() != options.version)
+				throw Exception("Cannot install: Package locked at version: " + pair.local->versionLock());
+			pair.remote->assetVersion(options.version); // throw if none
+		}
+		if (!options.sdkVersion.empty()) {			
+			if (pair.local->versionLock() != options.version)
+				throw Exception("Cannot install: Package locked at SDK version: " + pair.local->sdkVersionLock());
+			pair.remote->latestSDKAsset(options.sdkVersion); // throw if none
+		} << " to " 
+			<< pair.remote->latestAsset().version()
+		*/
 
 
 
@@ -863,7 +910,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 	try 
 	{
 		bool res = true;
-		for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
+		for (StringVec::const_iterator it = names.begin(); it != names.end(); ++it) {
 			InstallTask* task = updatePackage(*it, options, whiny);
 			if (!task)
 				res = false;
@@ -915,7 +962,7 @@ bool PackageManager::installPackage(const string& name, InstallMonitor* monitor,
 			if (verifyInstallManifest(pair.local)) {
 				LogDebug() 
 					<< pair.local->name() << " manifest is valid" << endl;			
-				if (isLatestVersion(pair)) {
+				if (isUpToDate(pair)) {
 					LogInfo() 
 						<< pair.local->name() << " is already up to date: " 
 						<< pair.local->version() << " >= " 
@@ -947,10 +994,10 @@ bool PackageManager::installPackage(const string& name, InstallMonitor* monitor,
 }
 
 
-bool PackageManager::installPackages(const StringList& names, InstallMonitor* monitor, const InstallTask::Options& options, bool whiny)
+bool PackageManager::installPackages(const StringVec& names, InstallMonitor* monitor, const InstallTask::Options& options, bool whiny)
 {	
 	bool res = true;
-	for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
+	for (StringVec::const_iterator it = names.begin(); it != names.end(); ++it) {
 		if (!installPackage(*it, monitor, options, whiny))
 			res = false;
 	}
@@ -978,10 +1025,10 @@ bool PackageManager::updatePackage(const string& name, InstallMonitor* monitor, 
 }
 
 
-bool PackageManager::updatePackages(const StringList& names, InstallMonitor* monitor, const InstallTask::Options& options, bool whiny)
+bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* monitor, const InstallTask::Options& options, bool whiny)
 {
 	bool res = true;
-	for (StringList::const_iterator it = names.begin(); it != names.end(); ++it) {
+	for (StringVec::const_iterator it = names.begin(); it != names.end(); ++it) {
 		if (!updatePackage(*it, monitor, options, whiny))		
 			res = false;
 	}	
@@ -1064,11 +1111,11 @@ bool PackageManager::updatePackages(const StringList& names, InstallMonitor* mon
 
 
 	/*
-	if (isLatestVersion(PackagePair& pair)) {
+	if (isUpToDate(PackagePair& pair)) {
 		return NULL;
 	}
 	// If the package is already up to date then do nothing.
-	//if (isLatestVersion(name))
+	//if (isUpToDate(name))
 		//LogDebug("PackageManager", this) << "Uninstalling Package: " << name << endl;	
 		//throw Exception(
 		//	format("%s is already up to date: %s >= %s",
@@ -1175,7 +1222,7 @@ PackagePair PackageManager::getPackagePair(const string& name, bool whiny)
 }
 
 
-bool PackageManager::isLatestVersion(const string& name)
+bool PackageManager::isUpToDate(const string& name)
 {	
 	FastMutex::ScopedLock lock(_mutex);
 	
@@ -1188,7 +1235,7 @@ bool PackageManager::isLatestVersion(const string& name)
 	if (!remote->valid())
 		throw Exception("The remote package is invalid");
 		
-	if (!local->isLatestVersion(remote->latestAsset())) {	
+	if (!local->isUpToDate(remote->latestAsset())) {	
 		LogInfo() 
 			<< name << " has a new version available: " 
 			<< local->version() << " <= " 

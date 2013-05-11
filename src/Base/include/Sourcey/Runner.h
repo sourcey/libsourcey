@@ -38,7 +38,7 @@
 #include <deque>
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 class Runner: public Poco::Runnable, public IPolymorphic
@@ -130,7 +130,7 @@ protected:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_Runner_H

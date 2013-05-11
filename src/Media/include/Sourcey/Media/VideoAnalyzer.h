@@ -43,7 +43,7 @@ extern "C" {
 }
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -152,8 +152,8 @@ protected:
 // FFT Helpers
 // Based on http://www.codeproject.com/Articles/6855/FFT-of-waveIn-audio-signals
 //
-inline float CalculateFrequencyIntensity(VideoAnalyzer::Stream& stream);
-inline float CalculateCentroidFrequency(VideoAnalyzer::Stream& stream);
+inline double CalculateFrequencyIntensity(VideoAnalyzer::Stream& stream);
+inline double CalculateCentroidFrequency(VideoAnalyzer::Stream& stream);
 
 inline double GetFrequencyIntensity(double re, double im);
 inline double GetDecibels(double re, double im);
@@ -165,7 +165,7 @@ inline double log2(double n);
 #endif
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 #endif

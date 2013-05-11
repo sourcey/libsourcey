@@ -33,12 +33,12 @@
 using namespace std;
 using namespace Poco;
 
-using Sourcey::Net::Transaction;
-using Sourcey::Net::IPacketSocket;
-using Sourcey::Net::Address;
+using Scy::Net::Transaction;
+using Scy::Net::IPacketSocket;
+using Scy::Net::Address;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace STUN {
 
 
@@ -85,7 +85,7 @@ void Transaction::onResponse()
 
 
 
-} } // namespace Sourcey::STUN
+} } // namespace Scy::STUN
 
 
 

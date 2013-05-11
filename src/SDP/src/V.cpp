@@ -33,7 +33,7 @@ using namespace std;
 
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SDP { 
 
 
@@ -45,7 +45,7 @@ V::V(const string& src) :
 		LogError() << "ERROR: SDP line does not start with <v=>" << std::endl;
 	}
 
-	_version = Util::atoi(src.substr(2, src.length()).c_str());
+	_version = Util::fromString<UInt32>(src.substr(2, src.length()).c_str());
 }
 
 
@@ -70,10 +70,10 @@ void V::setVersion(unsigned int ver)
 
 string V::toString() 
 {
-	return "v=" + Util::itoa(_version);
+	return "v=" + Util::toString(_version);
 }
 
 
 } // namespace SDP 
-} // namespace Sourcey
+} // namespace Scy
 

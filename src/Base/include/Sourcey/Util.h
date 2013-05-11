@@ -45,33 +45,36 @@
 #define ARRAY_SIZE(x) (static_cast<int>((sizeof(x)/sizeof(x[0]))))
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Util {
 
 
-UInt32 getTime();
-
-std::string itoa(unsigned i);
-unsigned atoi(const std::string& str);
-std::string dtoa(double d);
-double atod(const std::string& str);
+UInt64 getTime();
+	/// Returns the current time
 
 template<typename T>
-std::string tostr(const T &t) {
+std::string toString(const T &t) 
+	/// Converts any interger at string
+{
     std::ostringstream oss;
     oss << t;
     return oss.str();
 }
 
 template<typename T>
-T strto(const std::string& s) {
+T fromString(const std::string& s) 
+	/// Converts any string to interger.
+	/// Ensure the interger type has sufficient storage capacity.
+{
     std::istringstream iss(s);
-    T t;
-    iss >> t;
-    return t;
+    T x;
+	if (!(iss >> x))
+		return 0;
+    return x;
 }
 
-bool isNumber(const std::string& str);
+std::string getPID(const void* ptr);
+	/// Returns the object PID and a string
 
 void removeSpecialCharacters(std::string& str, bool allowSpaces = false);
 void replaceSpecialCharacters(std::string& str, char with = '_', bool allowSpaces = false);
@@ -80,27 +83,24 @@ void underscore(std::string& str);
 int icompare(const char* s1, const char* s2);
 int icompare(const char* s1, const std::string& s2);
 
+bool isNumber(const std::string& str);
+	/// Checks if the string is a number
+
 bool endsWith(const std::string& str, const std::string& suffix);
 
-std::string getPID(const void* ptr);
+StringVec &split(const std::string& s, const std::string& delim, StringVec &elems, int limit = -1);
+StringVec split(const std::string& s, const std::string& delim, int limit = -1);
 
-StringList &split(const std::string& s, const std::string& delim, StringList &elems, int limit = -1);
-StringList split(const std::string& s, const std::string& delim, int limit = -1);
+StringVec &split(const std::string& s, char delim, StringVec &elems, int limit = -1);
+StringVec split(const std::string& s, char delim, int limit = -1);
 
-StringList &split(const std::string& s, char delim, StringList &elems, int limit = -1);
-StringList split(const std::string& s, char delim, int limit = -1);
-
-std::string trim(const std::string& str);
-	///
+void trim(std::string& str);
 	/// Removes whitespace from beginning and end of Strings.
-	/// @param s	String from which to remove whitespace (or rather copy and remove whitespace from)
-	///
+	/// @param str String from which to remove whitespace
 
-std::string escape(const std::string& str);
-	///
+void escape(std::string& str);
 	/// Does some fancy escaping. (& --> &amp;amp;, etc).
 	/// @param str A string to escape.
-	///
 
 bool compareVersion(const std::string& l, const std::string& r);
 	/// This function compares two version strings ie. 3.7.8.0 > 3.2.1.0
@@ -108,21 +108,18 @@ bool compareVersion(const std::string& l, const std::string& r);
 	/// If L is equal or less than R the function returns false.
 
 bool matchNodes(const std::string& node, const std::string& xnode, const std::string& delim = "\r\n");
-bool matchNodes(const StringList& params, const StringList& xparams);
+bool matchNodes(const StringVec& params, const StringVec& xparams);
 
 void pause();
-	/// Pause the current thread until a key is pressed...
+	/// Pause the current thread until a key is pressed.
 
 template<typename T>
 inline void ClearList(std::list<T*>& L)
-	//
 	/// Delete all elements from a list of pointers.
 	/// @param L List of pointers to delete.
-	//
 {	
 	typename std::list<T*>::iterator it = L.begin();
-	while (it != L.end())
-	{
+	while (it != L.end()) {
 		delete *it;
 		it = L.erase(it);
 	}
@@ -130,14 +127,11 @@ inline void ClearList(std::list<T*>& L)
 
 template<typename T>
 inline void ClearDeque(std::deque<T*>& D)
-	///
 	/// Delete all elements from a list of pointers.
-	/// @param L List of pointers to delete.
-	///
+	/// @param D List of pointers to delete.
 {
 	typename std::deque<T*>::iterator it = D.begin();
-	while (it != D.end())
-	{
+	while (it != D.end()) {
 		delete *it;
 		it = D.erase(it);
 	}
@@ -145,14 +139,11 @@ inline void ClearDeque(std::deque<T*>& D)
 
 template<typename T>
 inline void ClearVector(std::vector<T*>& V)
-	///
 	/// Delete all elements from a vector of pointers.
-	/// @param L Vector of pointers to delete.
-	///
+	/// @param V Vector of pointers to delete.
 {
 	typename std::vector<T*>::iterator it = V.begin();
-	while (it != V.end())
-	{
+	while (it != V.end()) {
 		delete *it;
 		it = V.erase(it);
 	}
@@ -160,15 +151,12 @@ inline void ClearVector(std::vector<T*>& V)
 
 template<typename Key, typename T>
 inline void ClearMap(std::map<Key, T*>& M)
-	///
 	/// Delete all associated values from a map (not the key elements).
 	/// @param M Map of pointer values to delete.
-	///
 {
 	typename std::map<Key, T*>::iterator it = M.begin();
 	typename std::map<Key, T*>::iterator it2;
-	while (it != M.end())
-	{
+	while (it != M.end()) {
 		it2 = it++;
 		delete (*it2).second;
 		M.erase(it2);
@@ -177,16 +165,13 @@ inline void ClearMap(std::map<Key, T*>& M)
 
 template<typename Key, typename T>
 inline void ClearMap(std::map<const Key, T*>& M)
-	///
 	/// Delete all associated values from a map (not the key elements).
 	/// Const key type version.
 	/// @param M Map of pointer values to delete.
-	///
 {
 	typename std::map<const Key, T*>::iterator it = M.begin();
 	typename std::map<const Key, T*>::iterator it2;
-	while (it != M.end())
-	{
+	while (it != M.end()) {
 		it2 = it++;
 		delete (*it2).second;
 		M.erase(it2);
@@ -195,7 +180,7 @@ inline void ClearMap(std::map<const Key, T*>& M)
 
 
 //
-// Windows Helpers
+/// Windows Helpers
 //
 
 #if WIN32
@@ -221,7 +206,7 @@ inline bool isWindowsXpOrLater() {
 
 
 } // namespace Util
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_Util_H

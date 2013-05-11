@@ -35,7 +35,7 @@
 #include "Sourcey/IPacket.h"
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 struct TransactionState: public State 
@@ -279,7 +279,7 @@ protected:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_PacketTransaction_H

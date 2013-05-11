@@ -36,7 +36,7 @@
 #include <iostream>
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 // ---------------------------------------------------------------------
@@ -159,7 +159,7 @@ protected:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_Stateful_H

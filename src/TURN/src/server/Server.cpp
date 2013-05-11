@@ -32,10 +32,10 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Sourcey::Net;
+using namespace Scy::Net;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 
@@ -753,4 +753,4 @@ TCPAllocation* Server::getTCPAllocation(const UInt32& connectionID)
 }
 
 
-} } //  namespace Sourcey::TURN
+} } //  namespace Scy::TURN

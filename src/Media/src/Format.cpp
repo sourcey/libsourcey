@@ -33,7 +33,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -115,7 +115,7 @@ void Format::print(std::ostream& ost)
 
 
 } // namespace Media 
-} // namespace Sourcey
+} // namespace Scy
 
 
 

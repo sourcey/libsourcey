@@ -33,7 +33,7 @@
 #include "Sourcey/Signal.h"
 
 
-namespace Sourcey {
+namespace Scy {
 	
 
 typedef DelegateBase<IPolymorphic&> PolymorphicDelegateBase;
@@ -140,7 +140,7 @@ struct DelegateCallback<C, 8, true, PolymorphicT>
 DefinePolymorphicDelegate(PolymorphicDelegate, IPolymorphic, PolymorphicDelegateBase)
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_PolymorphicSignal_H

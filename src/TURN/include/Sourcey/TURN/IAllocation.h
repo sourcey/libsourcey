@@ -39,7 +39,7 @@
 #include "Poco/Mutex.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 
@@ -155,7 +155,7 @@ protected:
 typedef std::map<FiveTuple,IAllocation*> AllocationMap;
 
 
-} } // namespace Sourcey::TURN
+} } // namespace Scy::TURN
 
 
 #endif // SOURCEY_TURN_IAllocation_H

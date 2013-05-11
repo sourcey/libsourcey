@@ -36,7 +36,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Symple {
 
 
@@ -81,4 +81,4 @@ void Presence::setProbe(bool flag)
 
 
 } // namespace Symple 
-} // namespace Sourcey
+} // namespace Scy

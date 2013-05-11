@@ -34,7 +34,7 @@
 //
 #define SOURCEY_MAJOR_VERSION    0
 #define SOURCEY_MINOR_VERSION    8
-#define SOURCEY_PATCH_VERSION    1
+#define SOURCEY_PATCH_VERSION    2
 
 #define SOURCEY_AUX_STR_EXP(__A) #__A
 #define SOURCEY_AUX_STR(__A)     SOURCEY_AUX_STR_EXP(__A)
@@ -44,7 +44,7 @@
 //
 // Cross platform configuration
 //
-#include "Config.h"
+#include "LibSourceyConfig.h"
 
 #ifdef _WIN32
     // Windows (x64 and x86)
@@ -93,9 +93,13 @@
 #include <map>
 
 
+namespace Scy { 
+
+
 //
-// Forward some Poco types to Sourcey namespace
-// to reduce namespace pollution.
+// Reduce namespace pollution by forwarding some 
+// widely used basic Poco types to our namespace.
+// This way the global namespace remains clean.
 //
 using Poco::Int8;
 using Poco::UInt8;
@@ -110,9 +114,11 @@ using Poco::UInt64;
 
 using Poco::Exception;
 
-typedef std::vector<std::string>			StringList;
+typedef std::vector<std::string>			StringVec;
 typedef std::map<std::string, std::string>	StringMap;
-typedef std::pair<std::string, std::string> Metadata;
+
+
+}
 
 
 #endif // SOURCEY_H

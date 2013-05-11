@@ -32,7 +32,7 @@
 #include <string>
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 struct Flags 
@@ -83,7 +83,7 @@ protected:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_Flaggable_H

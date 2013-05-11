@@ -33,7 +33,7 @@
 #include "Sourcey/SocketIO/Packet.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SocketIO {
 
 
@@ -57,7 +57,7 @@ struct Transaction: public PacketTransaction<SocketIO::Packet>
 };
 
 
-} } // namespace Sourcey::SocketIO
+} } // namespace Scy::SocketIO
 
 
 #endif // SOURCEY_SocketIO_Transaction_H

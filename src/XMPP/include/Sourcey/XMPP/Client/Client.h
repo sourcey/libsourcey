@@ -43,7 +43,7 @@
 #include <vector>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 
 
@@ -200,7 +200,7 @@ protected:
 
 
 } // namespace XMPP
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif  // SOURCEY_XMPP_Client_H

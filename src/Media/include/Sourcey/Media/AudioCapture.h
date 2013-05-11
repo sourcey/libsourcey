@@ -41,7 +41,7 @@
 #include <map>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 	
@@ -126,7 +126,7 @@ inline void AllocateRtAudioInputFormat(const AudioCapture* capture, Format& form
 }
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 #endif

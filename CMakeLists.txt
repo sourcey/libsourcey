@@ -20,6 +20,11 @@ project(LibSourcey)
 
 add_definitions(-DUNICODE -D_UNICODE)
 
+# Set warning level to W3
+if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
+    add_definitions(/W3)
+endif()
+
 # Tell CMake where to locate our .cmake files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
@@ -159,9 +164,9 @@ endif()
 include(LibSourceyCompilerOptions REQUIRED)
 
 # ----------------------------------------------------------------------------
-# Set the location of our platform-dependant Config.h
+# Set the location of our platform-dependant LibSourceyConfig.h
 # ----------------------------------------------------------------------------
-set(LibSourcey_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant Config.h")
+set(LibSourcey_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant LibSourceyConfig.h")
 include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 
 
@@ -205,7 +210,7 @@ endif()
 # Include and third party dependencies
 # ----------------------------------------------------------------------------
 
-# Define known dependencies for our Config.h
+# Define known dependencies for our LibSourceyConfig.h
 # These variables will be modified by include_dependency()
 set(HAVE_PUGIXML 0)
 set(HAVE_RTAUDIO 0)
@@ -249,7 +254,7 @@ if(BUILD_MODULES OR BUILD_APPLICATIONS)
   subdirlist(subdirs "${CMAKE_SOURCE_DIR}/src")
   foreach(name ${subdirs})
     # This variable is so modules can set HAVE_LibSourcey_XXX for our
-    # Config.h inside the child scope. See include_sourcey_modules()
+    # LibSourceyConfig.h inside the child scope. See include_sourcey_modules()
     set(HAVE_LibSourcey_${name} 0)
     set(dir "${CMAKE_SOURCE_DIR}/src/${name}")
     if (EXISTS "${dir}/CMakeLists.txt")
@@ -259,14 +264,14 @@ if(BUILD_MODULES OR BUILD_APPLICATIONS)
 endif()
 
 # ----------------------------------------------------------------------------
-# Build our Config.h file
+# Build our LibSourceyConfig.h file
 #
-# A directory will be created for each platform so the "Config.h" file is
+# A directory will be created for each platform so the "LibSourceyConfig.h" file is
 # not overwritten if cmake generates code in the same path.
 # ----------------------------------------------------------------------------
 add_definitions(-DHAVE_CONFIG_H)
 
-# Variables for Config.h.cmake
+# Variables for LibSourceyConfig.h.cmake
 set(PACKAGE "LibSourcey")
 set(PACKAGE_BUGREPORT "https://github.com/sourcey/LibSourcey/issues")
 set(PACKAGE_NAME "LibSourcey")
@@ -274,10 +279,10 @@ set(PACKAGE_STRING "${PACKAGE} ${LibSourcey_VERSION}")
 set(PACKAGE_TARNAME "${PACKAGE}")
 set(PACKAGE_VERSION "${LibSourcey_VERSION}")
 
-status("Parsing 'Config.h.cmake'")
+status("Parsing 'LibSourceyConfig.h.cmake'")
 configure_file(
-  "${CMAKE_SOURCE_DIR}/cmake/Config.h.cmake" 
-  "${LibSourcey_CONFIG_FILE_INCLUDE_DIR}/Config.h")
+  "${CMAKE_SOURCE_DIR}/cmake/LibSourceyConfig.h.cmake" 
+  "${LibSourcey_CONFIG_FILE_INCLUDE_DIR}/LibSourceyConfig.h")
   
 # ----------------------------------------------------------------------------
 #  Uninstall target for "make uninstall"
@@ -346,7 +351,7 @@ status("    Applications:               ${LibSourcey_BUILD_APPLICATIONS}")
 status("")
 status("    Install path:               ${CMAKE_INSTALL_PREFIX}")
 status("")
-status("    Config.h is in:             ${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
+status("    LibSourceyConfig.h is in:             ${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 status("-----------------------------------------------------------------")
 status("")
 

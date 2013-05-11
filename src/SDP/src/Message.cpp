@@ -45,7 +45,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SDP { 
 
 
@@ -90,7 +90,7 @@ bool Message::read(Buffer& buf)
 bool Message::read(const std::string& src)
 {
 	int idxM = 1;
-	StringList lines = Util::split(src, '\n'); 
+	StringVec lines = Util::split(src, '\n'); 
 	//LogDebug() << "SDP: Parsing lines: " << lines.size() << endl;
 	for (int n = 0; n < lines.size(); n++) {
 		//LogDebug() << "SDP: Parsing line: " << n << ": " << lines[n] << endl;
@@ -219,7 +219,8 @@ string Message::toString() const
 		}
 	}
 
-	return Util::trim(ret) + "\r\n";
+	Util::trim(ret);
+	return ret + "\r\n";
 }
 
 
@@ -257,7 +258,7 @@ bool Message::isICESupported() const
 
 		if ((*it)->type() == Line::M) {
 			M* lineM = reinterpret_cast<M*>(*it);
-			mPort = Util::itoa(lineM->port());
+			mPort = Util::toString(lineM->port());
 			vector<Candidate*> attrs = lineM->lines<Candidate>();
 			for (vector<Candidate*>::const_iterator it1 = attrs.begin(); it1 != attrs.end(); ++it1) {
 
@@ -375,7 +376,7 @@ std::vector<Line*> Message::lines() const
 
 
 } // namespace SDP 
-} // namespace Sourcey
+} // namespace Scy
 
 
 

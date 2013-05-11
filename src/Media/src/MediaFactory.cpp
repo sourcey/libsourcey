@@ -31,10 +31,10 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Sourcey;
+using namespace Scy;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -170,7 +170,7 @@ AudioCapture* MediaFactory::createAudioCapture(int deviceId, int channels, int s
 }
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 

@@ -34,7 +34,7 @@
 #include "Poco/Mutex.h"
 
 
-namespace Sourcey {
+namespace Scy {
 	
 
 class Runner;
@@ -101,7 +101,7 @@ protected:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_Task_H

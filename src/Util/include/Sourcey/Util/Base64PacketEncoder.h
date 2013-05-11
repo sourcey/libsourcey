@@ -35,7 +35,7 @@
 #include <sstream>
 
 
-namespace Sourcey { 
+namespace Scy { 
 
 
 class Base64PacketEncoder: public IPacketProcessor
@@ -78,7 +78,7 @@ public:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif

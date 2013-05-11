@@ -46,7 +46,7 @@
 #include <map>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -213,7 +213,7 @@ struct MatPacket: public VideoPacket
 
 
 } // namespace Media
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_MEDIA_VideoCapture_H

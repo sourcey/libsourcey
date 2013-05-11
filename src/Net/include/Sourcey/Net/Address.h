@@ -36,7 +36,7 @@
 #include "assert.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 
 
@@ -126,7 +126,7 @@ public:
 typedef std::vector<Address*> AddressList;
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 #endif // SOURCEY_SOCKET_ADDRESS_H

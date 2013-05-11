@@ -34,7 +34,7 @@
 #include "Sourcey/STUN/Message.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 	
@@ -67,13 +67,16 @@ struct Request: public STUN::Message
 		socket(r.socket), 
 		localAddress(r.localAddress), 
 		remoteAddr(r.remoteAddr) {}
+
+private:
+	Request& operator = (const Request&) {}
 };
 
 
 typedef std::vector<Net::IP> IPList;
 
 
-} } // namespace Sourcey::TURN
+} } // namespace Scy::TURN
 
 
 #endif // SOURCEY_TURN_Types_H

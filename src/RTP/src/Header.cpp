@@ -32,10 +32,10 @@
 
 
 using namespace std;
-using namespace Sourcey::Util;
+using namespace Scy::Util;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace RTP {
 
 
@@ -152,4 +152,4 @@ void Header::write(Buffer& buffer) const
 
 
 } // namespace RTP
-} // namespace Sourcey 
+} // namespace Scy 

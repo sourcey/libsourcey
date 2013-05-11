@@ -32,7 +32,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Util {
 
 
@@ -86,7 +86,7 @@ bool internetIsOK(bool whiny)
 	bool res = false;
 	try 
 	{
-		res = Sourcey::addressIsOK("http://www.google.com");
+		res = Scy::addressIsOK("http://www.google.com");
 	}
 	catch (Exception&)
 	{
@@ -183,4 +183,4 @@ ok:
 
 
 } // namespace Util
-} // namespace Sourcey
+} // namespace Scy

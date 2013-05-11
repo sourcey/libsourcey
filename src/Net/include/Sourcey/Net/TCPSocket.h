@@ -39,7 +39,7 @@
 #include "Poco/Net/StreamSocket.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 
 	
@@ -126,7 +126,7 @@ typedef PacketSocketBase<Poco::Net::StreamSocket, TCP>  TCPPacketSocket;
 //};
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 #endif // SOURCEY_NET_TCPSocket_H

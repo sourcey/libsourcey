@@ -35,7 +35,7 @@
 #include "Sourcey/Net/ISocket.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 
 
@@ -104,7 +104,7 @@ private:
 };
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 #endif // SOURCEY_NET_IPacketSocket_H
@@ -120,9 +120,9 @@ private:
 #include "Poco/Net/SocketStream.h"
 
 
-#define Poco::Net::StreamSocket, TCP Poco::Net::StreamSocket, Sourcey::Net::TCP
-#define Poco::Net::SecureStreamSocket, SSLTCP Poco::Net::SecureStreamSocket, Sourcey::Net::SSLTCP
-#define UDPContext Poco::Net::DatagramSocket, Sourcey::Net::UDP
+#define Poco::Net::StreamSocket, TCP Poco::Net::StreamSocket, Scy::Net::TCP
+#define Poco::Net::SecureStreamSocket, SSLTCP Poco::Net::SecureStreamSocket, Scy::Net::SSLTCP
+#define UDPContext Poco::Net::DatagramSocket, Scy::Net::UDP
 */
 /*
 	IPacketSocket() {};

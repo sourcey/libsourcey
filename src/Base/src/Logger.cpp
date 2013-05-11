@@ -36,7 +36,7 @@ using namespace Poco;
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 // ---------------------------------------------------------------------
@@ -401,7 +401,7 @@ void RotatingFileChannel::rotate()
 }
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 /*

@@ -35,10 +35,10 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Sourcey::XML;
+using namespace Scy::XML;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 
 
@@ -447,7 +447,7 @@ string FormField::getValue()
 
 int FormField::getIntValue()
 {
-	return atoi(child("value").child_value());
+	return stoi(child("value").child_value());
 }
 
 
@@ -489,4 +489,4 @@ FormField FormField::setError(const string& error)
 
 
 } // namespace XMPP 
-} // namespace Sourcey
+} // namespace Scy

@@ -28,7 +28,7 @@
 #define SOURCEY_IStartable_H
 
 
-namespace Sourcey {
+namespace Scy {
 
 		
 class IStartable
@@ -71,7 +71,7 @@ protected:
 	Poco::Thread _thread;
 };
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_IStartable_H

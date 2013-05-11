@@ -33,7 +33,7 @@ using namespace std;
 
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SDP { 
 
 
@@ -59,8 +59,8 @@ T::T(const string& src) : Line(Line::T, 5)
 	while (src[i] != ' ' && i < len)
 		stopstr += src[i++];
 
-	_startTime = Util::atoi(startstr.c_str());
-	_stopTime  = Util::atoi(stopstr.c_str());
+	_startTime = Util::fromString<UInt32>(startstr.c_str());
+	_stopTime  = Util::fromString<UInt32>(stopstr.c_str());
 }
 
 
@@ -103,10 +103,10 @@ void T::setStopTime(unsigned int stop)
 
 string T::toString() 
 {
-	return "t=" + Util::itoa(_startTime) + " " + Util::itoa(_stopTime);
+	return "t=" + Util::toString(_startTime) + " " + Util::toString(_stopTime);
 }
 
 
-} // namespace Sourcey
+} // namespace Scy
 } // namespace SDP 
 

@@ -40,7 +40,7 @@ using namespace Poco;
 using namespace Poco::Net;
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace HTTP {
 
 
@@ -119,4 +119,4 @@ bool Request::matches(const string& expression) const
 }
 
 
-} } // namespace Sourcey::HTTP
+} } // namespace Scy::HTTP

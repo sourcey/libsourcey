@@ -31,7 +31,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 State::State(State::ID id) : 
@@ -126,7 +126,7 @@ void StateSignal::set(State::ID id)
 }
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 

@@ -33,7 +33,7 @@
 #include "Poco/Path.h"
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace Pacman {
 	
 
@@ -100,13 +100,12 @@ struct RemotePackage: public Package
 		/// For remote packages this is the latest available version.
 		/// Throws an exception if no asset exists.
 
-	virtual Asset lastestAssetForVersion(const std::string& version);
-		/// Returns the latest asset for the specified package version.
+	virtual Asset assetVersion(const std::string& version);
+		/// Returns the latest asset for the given package version.
 		/// Throws an exception if no asset exists.
 	
-	virtual Asset latestAssetForSDK(const std::string& version);
-		/// Returns the latest asset for the specified SDK version,
-		/// or a blank asset.
+	virtual Asset latestSDKAsset(const std::string& version);
+		/// Returns the latest asset for the given SDK version.
 		/// This method is for safely installing plug-ins which
 		/// must be compiled against a specific SDK version.
 		/// The package JSON must have a "sdk-version" member
@@ -135,6 +134,9 @@ struct LocalPackage: public Package
 		//virtual void addDir(const std::string& path);
 		
 		JSON::Value& root;
+
+	private:
+		Manifest& operator = (const Manifest&) {}
 	};
 
 	LocalPackage();
@@ -148,7 +150,7 @@ struct LocalPackage: public Package
 	virtual ~LocalPackage();
 	
 	virtual void setState(const std::string& state);
-		/// Set's the package state. Possible values are:
+		/// Set's the overall package state. Possible values are:
 		/// Installing, Installed, Failed, Uninstalled.
 		/// If the packages completes while still Installing, 
 		/// this means the package has yet to be finalized.
@@ -164,9 +166,21 @@ struct LocalPackage: public Package
 		/// Sets the installed asset, once installed.
 		/// This method also sets the version.
 
-	virtual void setVersion(const std::string& state);
+	virtual void setVersion(const std::string& version);
 		/// Sets the current version of the local package.
 		/// Installation must be complete.
+
+	virtual void setVersionLock(const std::string& version);
+		/// Locks the package at the given version.
+		/// Once set this package will not be updated past
+		/// the given version.
+		/// Pass an empty string to remove the lock.
+
+	virtual void setSDKVersionLock(const std::string& version);
+		/// Locks the package at the given SDK version.
+		/// Once set this package will only update to the most
+		/// recent version with given SDK version.
+		/// Pass an empty string to remove the lock.
 
 	virtual std::string version() const;
 		/// Returns the installed package version.
@@ -179,9 +193,13 @@ struct LocalPackage: public Package
 
 	virtual std::string installDir() const;
 		/// Returns the installation directory for this package.
+	
+	virtual std::string versionLock() const;
+	virtual std::string sdkVersionLock() const;
 
-	virtual Asset installedAsset();
-		/// Returns the installed asset, if any.
+	virtual Asset asset();
+		/// Returns the currently installed asset, if any.
+		/// If none, the returned asset will be empty().
 
 	virtual bool isInstalled() const;
 		/// Returns true or false depending on weather or
@@ -193,9 +211,7 @@ struct LocalPackage: public Package
 	virtual Manifest manifest();
 		/// Returns the installation manifest.
 	
-	virtual bool isLatestVersion(const Package::Asset& lastestRemoteAsset) const;
-		/// Checks if the given asset is a newer than the
-		/// current version.	
+	virtual bool verifyInstallManifest();
 	
 	virtual std::string getInstalledFilePath(const std::string& fileName, bool whiny = false);
 		/// Returns the full full path of the installed file.
@@ -225,6 +241,10 @@ struct PackagePair
 	std::string type() const;
 	std::string author() const;
 	
+	//virtual bool isUpToDate();
+		/// Returns true if there are no possible updates for
+		/// this package, false otherwise.
+	
 	LocalPackage* local;
 	RemotePackage* remote;
 };
@@ -233,7 +253,7 @@ struct PackagePair
 typedef std::vector<PackagePair> PackagePairList;
 
 
-} } // namespace Sourcey::Pacman
+} } // namespace Scy::Pacman
 
 
 #endif // SOURCEY_Pacman_Package_JSON_H

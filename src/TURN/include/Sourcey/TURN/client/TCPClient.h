@@ -38,7 +38,7 @@
 #include <deque>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 	
 
@@ -49,7 +49,7 @@ typedef ConnectionManager::Map								ConnectionManagerMap;
 class TCPClient;
 
 
-struct ITCPClientObserver: public IClientObserver 
+struct TCPClientObserver: public IClientObserver 
 {
 	virtual void onClientConnectionCreated(TCPClient& client, Net::IPacketSocket* socket, const Net::Address& peerAddress) {};
 	virtual void onClientConnectionClosed(TCPClient& client, Net::IPacketSocket* socket, const Net::Address& peerAddress) {};
@@ -65,7 +65,7 @@ struct ITCPClientObserver: public IClientObserver
 class TCPClient: public Client
 {
 public:
-	TCPClient(ITCPClientObserver& observer,
+	TCPClient(TCPClientObserver& observer,
 			  Net::Reactor& reactor,
 			  Runner& runner,
 			  const Client::Options& options = Client::Options());
@@ -97,12 +97,12 @@ public:
 		/// Obtain the TCPStatefulPacketSocket instance from the IPacketSocket
 
 protected:	
-	ITCPClientObserver& _observer;
+	TCPClientObserver& _observer;
 	ConnectionManager _connections;
 };
 
 
-} } //  namespace Sourcey::TURN
+} } //  namespace Scy::TURN
 
 
 #endif // SOURCEY_TURN_TCPClient_H

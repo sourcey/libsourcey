@@ -32,7 +32,7 @@
 #include "Sourcey/Base.h"
 
 
-namespace Sourcey {	
+namespace Scy {	
 	
 
 struct LogStream;
@@ -59,7 +59,7 @@ struct IPolymorphic
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif

@@ -36,7 +36,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 
@@ -245,4 +245,4 @@ bool ServerAllocation::onTimer()
 }
 
 
-} } // namespace Sourcey::TURN
+} } // namespace Scy::TURN

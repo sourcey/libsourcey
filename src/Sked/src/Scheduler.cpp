@@ -37,7 +37,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Sked {
 
 
@@ -263,12 +263,12 @@ Sked::TaskFactory& Scheduler::factory()
 }
 
 
-} } // namespace Sourcey::Sked
+} } // namespace Scy::Sked
 
 
 
 		//Sked::Task* task = reinterpret_cast<Sked::Task*>(next());
-		//Sourcey::Task* task = next(); //reinterpret_cast<Sked::Task*>(next());
+		//Scy::Task* task = next(); //reinterpret_cast<Sked::Task*>(next());
 				//continue;
 			
 			// Push the task back onto the end of the queue
