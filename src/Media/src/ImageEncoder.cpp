@@ -34,10 +34,9 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Sourcey;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -124,4 +123,4 @@ EncoderOptions& ImageEncoder::options()
 }
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media

@@ -38,12 +38,12 @@ using namespace std;
 using namespace Poco; 
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Sked {
 	
 
 Task::Task(const string& type, const string& name) : 
-	Sourcey::Task(true),		
+	Scy::Task(true),		
 	_type(type),
 	_name(name),
 	_scheduler(NULL),
@@ -54,7 +54,7 @@ Task::Task(const string& type, const string& name) :
 
 	
 Task::Task(Sked::Scheduler& scheduler, const string& type, const string& name) : 
-	Sourcey::Task(reinterpret_cast<Scheduler&>(scheduler), true, false),
+	Scy::Task(reinterpret_cast<Scheduler&>(scheduler), true, false),
 	_type(type),
 	_name(name),
 	_scheduler(NULL),
@@ -73,7 +73,7 @@ Task::~Task()
 void Task::start()
 {
 	trigger(); // throw if trigger is NULL
-	Sourcey::Task::start();
+	Scy::Task::start();
 }
 
 
@@ -173,7 +173,7 @@ Sked::Scheduler& Task::scheduler()
 }
 
 
-} } // namespace Sourcey::Sked
+} } // namespace Scy::Sked
 
 
 

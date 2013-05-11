@@ -27,6 +27,7 @@
 
 #include "Sourcey/CryptoProvider.h"
 #include "Sourcey/Logger.h"
+#include "Sourcey/Util.h"
 
 #include "Poco/DigestEngine.h"
 #include "Poco/SHA1Engine.h"
@@ -43,11 +44,10 @@
 
 
 using namespace std;
-//using namespace Poco;
 using namespace Poco::Crypto;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace CryptoProvider {
 
 
@@ -108,7 +108,7 @@ UInt64 generateRandomNumber(int size)
 			strm << rnd.next();
 		}
 		str = strm.str().substr(0, size);
-		res = atoi(str.data());
+		res = Util::fromString<UInt64>(str.data());
 	}
 	catch (...)
 	{
@@ -294,4 +294,4 @@ void decryptFile(const string& password, const string& inputFileName,
 
 
 } // namespace CryptoProvider
-} // namespace Sourcey
+} // namespace Scy

@@ -34,7 +34,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Util {
 
 
@@ -113,7 +113,7 @@ bool parseURIQuery(const string& uri, Poco::Net::NameValueCollection& out)
 
 		// REST parameters are referenced by index
 		if (!value.empty())
-			out.set(itoa(out.size()), value);		
+			out.set(toString(out.size()), value);		
 	}
 	
 	// Parse query parameters
@@ -138,4 +138,4 @@ bool parseURIQuery(const string& uri, Poco::Net::NameValueCollection& out)
 
 
 } // namespace Util
-} // namespace Sourcey
+} // namespace Scy

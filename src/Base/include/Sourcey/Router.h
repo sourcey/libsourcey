@@ -35,7 +35,7 @@
 #include "Sourcey/PacketQueue.h"
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 class Router: public PacketEmitter
@@ -67,7 +67,7 @@ protected:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_Router_H

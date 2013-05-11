@@ -34,14 +34,14 @@
 #include "Sourcey/Sked/Trigger.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Sked {
 
 
 class Scheduler;
 
 
-class Task: public Sourcey::Task, public JSON::ISerializable
+class Task: public Scy::Task, public JSON::ISerializable
 	/// This class extends the Task class to implement
 	/// scheduling capabilities.
 {
@@ -94,7 +94,7 @@ protected:
 	virtual void run() = 0;
 	virtual bool afterRun();
 
-	static bool CompareTimeout(const Sourcey::Task* l, const Sourcey::Task* r)
+	static bool CompareTimeout(const Scy::Task* l, const Scy::Task* r)
 		/// For stl::sort operations
 	{
 		return 
@@ -114,7 +114,7 @@ protected:
 typedef std::vector<Sked::Task*> TaskList;
 	
 
-} } // namespace Sourcey::Sked
+} } // namespace Scy::Sked
 
 
 #endif // SOURCEY_Sked_Task_H
@@ -176,7 +176,7 @@ typedef std::vector<Sked::Task*> TaskList;
 	//Timeout timeout;
 
 
-//#include "Sourcey/Spot/IModule.h"
+//#include "Anionu/Spot/API/Module.h"
 //#include "Sourcey/JSON/ISerializable.h"
 
 	//Task(Scheduler& runner, long timeout = 0, long interval = 0);	

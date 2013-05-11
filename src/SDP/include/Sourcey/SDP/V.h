@@ -33,7 +33,7 @@
 #include "Sourcey/Util.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SDP { 
 
 
@@ -53,7 +53,7 @@ private:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 } // namespace SDP 
 
 

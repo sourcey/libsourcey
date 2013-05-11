@@ -33,7 +33,7 @@
 #include <map>
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 struct IUser 
@@ -83,7 +83,7 @@ public:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_UserManager_H

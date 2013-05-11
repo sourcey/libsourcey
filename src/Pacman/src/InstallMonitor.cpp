@@ -34,7 +34,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace Pacman {
 
 
@@ -154,7 +154,7 @@ bool InstallMonitor::isComplete() const
 }
 
 
-} } // namespace Sourcey::Pacman
+} } // namespace Scy::Pacman
 
 
 

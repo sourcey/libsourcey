@@ -40,7 +40,7 @@
 #include <deque>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 
@@ -203,7 +203,7 @@ protected:
 };
 
 
-} } //  namespace Sourcey::TURN
+} } //  namespace Scy::TURN
 
 
 #endif // SOURCEY_TURN_Client_H

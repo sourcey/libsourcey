@@ -32,7 +32,7 @@
 #include "Sourcey/Stateful.h"
 
 
-namespace Sourcey {	
+namespace Scy {	
 namespace Net {
 	
 
@@ -55,7 +55,7 @@ struct Error
 };
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 #endif

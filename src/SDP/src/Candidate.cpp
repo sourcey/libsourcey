@@ -34,7 +34,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SDP { 
 
 
@@ -74,7 +74,7 @@ Candidate::Candidate(const string& src) :
 	string componentIDstr = "";
 	while (src[i] != ' ' && i < len)
 		componentIDstr += src[i++];
-	_componentID = Util::atoi(componentIDstr.c_str());
+	_componentID = Util::fromString<UInt32>(componentIDstr.c_str());
 	while (src[i] == ' ' && i < len)
 		i++;
 
@@ -88,7 +88,7 @@ Candidate::Candidate(const string& src) :
 	string prioritystr = "";
 	while (src[i] != ' ' && i < len)
 		prioritystr += src[i++];
-	_priority = Util::atoi(prioritystr.c_str());
+	_priority = Util::fromString<UInt32>(prioritystr.c_str());
 	while (src[i] == ' ' && i < len)
 		i++;
 
@@ -102,7 +102,7 @@ Candidate::Candidate(const string& src) :
 	string portstr = "";
 	while (src[i] != ' ' && i < len)
 		portstr += src[i++];
-	_port = Util::atoi(portstr.c_str());
+	_port = Util::fromString<UInt32>(portstr.c_str());
 	while (src[i] == ' ' && i < len)
 		i++;
 
@@ -144,7 +144,7 @@ Candidate::Candidate(const string& src) :
 		string relportstr = "";
 		while (src[i] != ' ' && i < len)
 			relportstr += src[i++];
-		_relPort = Util::atoi(relportstr.c_str());
+		_relPort = Util::fromString<UInt32>(relportstr.c_str());
 		while (src[i] == ' ' && i < len)
 			i++;
 	}
@@ -273,10 +273,10 @@ string Candidate::toString()
 		ret += _foundation;
 
 	ret += " ";
-	if (Util::itoa(_componentID).empty())
+	if (Util::toString(_componentID).empty())
 		ret += "0";
 	else
-		ret += Util::itoa(_componentID);
+		ret += Util::toString(_componentID);
 
 	ret += " ";
 	if (_transport.empty())
@@ -285,10 +285,10 @@ string Candidate::toString()
 		ret += _transport;
 
 	ret += " ";
-	if (Util::itoa(_priority).empty())
+	if (Util::toString(_priority).empty())
 		ret += "0";
 	else
-		ret += Util::itoa(_priority);
+		ret += Util::toString(_priority);
 
 	ret += " ";
 	if (_address.empty())
@@ -297,10 +297,10 @@ string Candidate::toString()
 		ret += _address;
 
 	ret += " ";
-	//if (Util::itoa(_port).empty())
+	//if (Util::toString(_port).empty())
 	//	ret += "0";
 	//else
-	ret += Util::itoa(_port);
+	ret += Util::toString(_port);
 
 	
 	ret += " typ ";
@@ -321,15 +321,15 @@ string Candidate::toString()
 
 		// rel-port
 		ret += " rport ";
-		//if (Util::itoa(_relPort).empty())
+		//if (Util::toString(_relPort).empty())
 		//	ret += "0";
 		//else
-			ret += Util::itoa(_relPort);
+			ret += Util::toString(_relPort);
 	}
 	
 	return ret;
 }
 
 
-} // namespace Sourcey
+} // namespace Scy
 } // namespace SDP 

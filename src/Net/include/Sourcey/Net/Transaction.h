@@ -33,7 +33,7 @@
 #include "Sourcey/Net/IPacketSocket.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 
 
@@ -163,7 +163,7 @@ protected:
 };
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 #endif // SOURCEY_NET_PacketTransaction_H

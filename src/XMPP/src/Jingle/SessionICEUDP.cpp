@@ -40,10 +40,10 @@
 
 using namespace std; 
 using namespace Poco;
-using namespace Sourcey::ICE;
+using namespace Scy::ICE;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 namespace Jingle {
 
@@ -637,16 +637,16 @@ bool SessionICEUDP::sdpToJingle(IQ& iq, const SDP::Message& sdp)
 		Jingle::Description description = content.description();
 		description.setMediaType(m->mediaType());
 
-		StringList payloadTypes = m->payloadTypes();
+		StringVec payloadTypes = m->payloadTypes();
 		for (size_t i = 0; i < payloadTypes.size(); ++i) {
 			SDP::RTPMap* rtpmap = m->rtpmap(payloadTypes[i]);
 			if (rtpmap) {
 				Jingle::PayloadType payload = description.addPayloadType();
-				payload.setId(atoi(rtpmap->payloadType().data()));
+				payload.setId(stoi(rtpmap->payloadType().data()));
 				payload.setName(rtpmap->encodingName());
 				payload.setClockrate(rtpmap->clockRate());
 				if (m->mediaType() == "audio") {
-					payload.setChannels(atoi(rtpmap->encodingParameters().data()));
+					payload.setChannels(stoi(rtpmap->encodingParameters().data()));
 				}
 			}
 		}
@@ -708,7 +708,7 @@ SessionICEUDP::JingleICEUDP::JingleICEUDP(
 
 } // namespace Jingle
 } // namespace XMPP 
-} // namespace Sourcey 
+} // namespace Scy 
 
 
 #endif // HAVE_LIBSOURCEY_ICE

@@ -47,7 +47,7 @@ extern "C" {
 }
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -56,7 +56,7 @@ class AVEncoder: public IPacketEncoder
 	/// which  depends on libavcodec/libavformat.
 {
 public:
-	AVEncoder(const RecorderOptions& options);
+	AVEncoder(const RecordingOptions& options);
 	AVEncoder();
 	virtual ~AVEncoder();
 
@@ -74,7 +74,7 @@ public:
 	virtual void freeAudio();
 	virtual bool encodeAudio(unsigned char* buffer, int bufferSize);
 		
-	RecorderOptions& options();
+	RecordingOptions& options();
 	VideoEncoderContext* video();
 	AudioEncoderContext* audio();
 
@@ -84,7 +84,7 @@ protected:
 protected:
 	static Poco::FastMutex _mutex; // Protects avcodec_open/close()
 
-	RecorderOptions	_options;
+	RecordingOptions	_options;
 	AVFormatContext* _formatCtx;
 	clock_t			_startTime;
 	AVIOContext*	_ioCtx;
@@ -109,7 +109,7 @@ protected:
 };
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 #endif	// SOURCEY_MEDIA_AVEncoder_H

@@ -30,7 +30,7 @@
 #include "Sourcey/Util.h"
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 Timeout::Timeout(long delay, bool autoStart) :
@@ -101,4 +101,4 @@ bool Timeout::expired() const
 }
 
 
-} // namespace Sourcey
+} // namespace Scy

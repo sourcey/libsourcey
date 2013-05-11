@@ -36,7 +36,7 @@
 #include <assert.h>
 
 
-namespace Sourcey { 
+namespace Scy { 
 
 
 template <class TKey, class TValue>
@@ -178,7 +178,7 @@ public:
 		Util::ClearMap(_items);
 	}
 
-	virtual Map copy() const 
+	virtual Map items() const 
 	{ 
 		Poco::FastMutex::ScopedLock lock(_mutex); 	
 		return _items; 
@@ -206,7 +206,7 @@ protected:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_BaseManager_H

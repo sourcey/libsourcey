@@ -31,11 +31,10 @@
 
 #include "Sourcey/Base.h"
 #include "Sourcey/BasicManager.h"
-#include "Sourcey/Logger.h"
 #include "Sourcey/Util/Timer.h"
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 template <class TKey, class TValue>
@@ -56,8 +55,6 @@ public:
 		/// The item pointer MUST be destroyed by the manager or the 
 		/// application will crash.
 	{
-		//LogTrace() << "[TimedManager] Adding: " << item << ": " << timeout << std::endl;
-
 		// Remove existing items for the
 		// given key and store the item.
 		Base::free(name);
@@ -88,7 +85,6 @@ public:
 
 	virtual void onRemove(const TKey& key, TValue* item) 
 	{ 
-		//LogTrace() << "[TimedManager] Removing: " << item << std::endl;
 		Timer::getDefault().stop(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, 0, 0, item));
 		Base::onRemove(key, item);
 	}
@@ -102,14 +98,13 @@ public:
 	virtual void onItemTimeout(TimerCallback<TimedManager>& timer)
 	{
 		TValue* item = reinterpret_cast<TValue*>(timer.opaque());
-		//LogTrace() << "[TimedManager] Item Timeout: " << item << std::endl;
 		if (Base::remove(item))
 			delete item;
 	}
 };
 
 
-} // namespace Sourcey:
+} // namespace Scy:
 
 
 #endif // SOURCEY_TimedManager_H

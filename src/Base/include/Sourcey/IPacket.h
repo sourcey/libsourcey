@@ -37,7 +37,7 @@
 #include <list>
 
 
-namespace Sourcey {
+namespace Scy {
 	
 	
 struct IPacketInfo
@@ -199,7 +199,7 @@ protected:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_PACKET_H

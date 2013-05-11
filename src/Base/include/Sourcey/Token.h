@@ -34,7 +34,7 @@
 #include "Sourcey/CryptoProvider.h"
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 class Token: public Timeout
@@ -64,7 +64,7 @@ protected:
 typedef std::vector<Token> TokenList;
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif

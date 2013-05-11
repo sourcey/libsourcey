@@ -45,7 +45,7 @@
 #include "Sourcey/Net/Address.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace STUN {
 
 
@@ -464,7 +464,7 @@ DECLARE_FIXLEN_STUN_ATTRIBUTE(ICEUseCandidate, 0x0025, FlagAttribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(DontFragment, 0x001A, FlagAttribute)
 
 
-} } // namespace Sourcey::STUN
+} } // namespace Scy::STUN
 
 
 #endif // SOURCEY_STUN_ATTRIBUTES_H

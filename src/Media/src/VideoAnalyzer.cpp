@@ -32,7 +32,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -129,7 +129,7 @@ void VideoAnalyzer::stop()
 	//FastMutex::ScopedLock lock(_mutex); 
 	
 	_reader.ReadComplete -= delegate(this, &VideoAnalyzer::onReadComplete);
-	_reader.detachAll(this);
+	_reader.detach(this);
 	_reader.stop();
 }
 
@@ -355,7 +355,7 @@ void VideoAnalyzer::Stream::fft()
 
 // ---------------------------------------------------------------------
 //
-float CalculateCentroidFrequency(VideoAnalyzer::Stream& stream)
+double CalculateCentroidFrequency(VideoAnalyzer::Stream& stream)
 {
 	// These two values are used for getting the Spectral Centroid
 	// http://en.wikipedia.org/wiki/Spectral_centroid
@@ -367,13 +367,13 @@ float CalculateCentroidFrequency(VideoAnalyzer::Stream& stream)
 		centroidXn += abs(stream.rdftData[i]);
 	}
 			
-	return (float)(centroidFnXn / centroidXn);
+	return centroidFnXn / centroidXn;
 }
 
 
-float CalculateFrequencyIntensity(VideoAnalyzer::Stream& stream)
+double CalculateFrequencyIntensity(VideoAnalyzer::Stream& stream)
 {
-	float intensity = 0.0;			
+	double intensity = 0.0;			
 	for (int i = 0; i < stream.filled / 2; i += 2) {
 		intensity += GetFrequencyIntensity(stream.rdftData[i], stream.rdftData[i+1]);
 	}
@@ -412,7 +412,7 @@ double log2(double n)
 #endif
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 

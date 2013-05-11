@@ -40,7 +40,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SDP { 
 
 
@@ -71,10 +71,10 @@ M::M(const string& src) :
 		if (portstr[j] == '/')
 			np = j;
 	if (np > 0) {
-		_port = Util::atoi(portstr.substr(0, np).c_str());
-		_nPorts =  Util::atoi(portstr.substr(np+1, portstr.length()-(np+1)-1).c_str());
+		_port = Util::fromString<UInt32>(portstr.substr(0, np).c_str());
+		_nPorts =  Util::fromString<UInt32>(portstr.substr(np+1, portstr.length()-(np+1)-1).c_str());
 	} else {
-		_port = Util::atoi(portstr.c_str());
+		_port = Util::fromString<UInt32>(portstr.c_str());
 		_nPorts = 1;
 	}
 	
@@ -218,9 +218,9 @@ string M::toString()
 	string ret = "m=" + _mediaType + " ";
 	
 	if (_nPorts > 1)
-		ret += _port + "/" + Util::itoa(_nPorts);
+		ret += _port + "/" + Util::toString(_nPorts);
 	else
-		ret += Util::itoa(_port);
+		ret += Util::toString(_port);
 
 	ret += " " + _transport;
 
@@ -347,7 +347,7 @@ void M::setIndex(unsigned int index)
 }
 	
 
-StringList M::payloadTypes() const 
+StringVec M::payloadTypes() const 
 { 
 	return _payloadTypes; 
 }
@@ -389,5 +389,5 @@ C* M::connection() const
 */
 
 
-} // namespace Sourcey
+} // namespace Scy
 } // namespace SDP 

@@ -32,7 +32,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SDP { 
 
 
@@ -55,7 +55,7 @@ RemoteCandidate::RemoteCandidate(const string& src) :
 		while (src[i] != ' ' && i < len) {
 			componentIDstr += src[i++];
 		}
-		c->componentID = Util::atoi(componentIDstr.c_str());
+		c->componentID = Util::fromString<UInt32>(componentIDstr.c_str());
 
 		while (src[i] == ' ' && i < len)
 			i++;	
@@ -71,7 +71,7 @@ RemoteCandidate::RemoteCandidate(const string& src) :
 		string portstr = "";
 		while (src[i] != ' ' && i < len)
 			portstr += src[i++];
-		c->port = Util::atoi(portstr.c_str());
+		c->port = Util::fromString<UInt32>(portstr.c_str());
 		while (src[i] == ' ' && i < len)
 			i++;
 
@@ -99,7 +99,7 @@ string RemoteCandidate::toString()
 		if (!(*it)->componentID)
 			ret += "0";
 		else
-			ret += Util::itoa((*it)->componentID);
+			ret += Util::toString((*it)->componentID);
 
 		ret += " ";
 		if ((*it)->address.empty())
@@ -111,7 +111,7 @@ string RemoteCandidate::toString()
 		if (!(*it)->port)
 			ret += "0";
 		else
-			ret += Util::itoa((*it)->port);
+			ret += Util::toString((*it)->port);
 
 		count++;
 	}
@@ -121,4 +121,4 @@ string RemoteCandidate::toString()
 
 
 } // namespace SDP
-} // namespace Sourcey
+} // namespace Scy

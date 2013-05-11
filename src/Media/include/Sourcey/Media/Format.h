@@ -36,7 +36,7 @@
 #include <vector>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -57,7 +57,7 @@ struct Format
 	// Base Format Variables
 	//
 	std::string name;		/// The display name of this format.
-	const char* id;			/// The short name of this format.
+	std::string id;			/// The short name of this format.
 	
 	VideoCodec video;		/// The video codec.
 	AudioCodec audio;		/// The audio codec.
@@ -100,7 +100,7 @@ typedef std::vector<Format*> FormatPList;
 
 
 } // namespace Media
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif

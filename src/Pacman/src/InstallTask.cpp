@@ -44,7 +44,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace Pacman {
 
 
@@ -89,9 +89,9 @@ void InstallTask::run()
 			// Check against provided options to make sure that
 			// we can proceed with task creation.
 			if (!_options.version.empty())
-				_remote->lastestAssetForVersion(_options.version); // throw if none
+				_remote->assetVersion(_options.version); // throw if none
 			if (!_options.sdkVersion.empty())
-				_remote->latestAssetForSDK(_options.sdkVersion); // throw if none
+				_remote->latestSDKAsset(_options.sdkVersion); // throw if none
 
 			// Set default install directory if none was given
 			if (_options.installDir.empty()) {
@@ -106,6 +106,7 @@ void InstallTask::run()
 					_options.installDir = _manager.options().installDir;
 			}
 			_local->setInstallDir(_options.installDir);
+			log("debug") << "Installing To: " << _local->installDir() << endl;
 
 			// If the package failed previously we might need
 			// to clear the file cache.
@@ -237,7 +238,7 @@ void InstallTask::onResponseProgress(void* sender, HTTP::TransferState& state)
 
 	// Progress 1 - 75 covers download
 	// Increments of 10 or greater
-	int prog = state.progress() * 0.75;
+	int prog = static_cast<int>(state.progress() * 0.75);
 	if (prog > 0 && prog > progress() + 10)
 		setProgress(prog);
 }
@@ -292,7 +293,7 @@ void InstallTask::onDecompressionError(const void*, pair<const Poco::Zip::ZipLoc
 
 void InstallTask::onDecompressionOk(const void*, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info)
 {
-	log("debug") << "Decompression Success: " 
+	log("debug") << "Decompressing: " 
 		<< info.second.toString() << endl; 
 	
 	// Add the extracted file to out package manifest
@@ -402,9 +403,9 @@ Package::Asset InstallTask::getRemoteAsset() const
 {
 	FastMutex::ScopedLock lock(_mutex);
 	return !_options.version.empty() ? 
-		_remote->lastestAssetForVersion(_options.version) : 
+		_remote->assetVersion(_options.version) : 
 			!_options.sdkVersion.empty() ?
-				_remote->latestAssetForSDK(_options.sdkVersion) :
+				_remote->latestSDKAsset(_options.sdkVersion) :
 					_remote->latestAsset();
 }
 
@@ -472,12 +473,12 @@ InstallTask::Options& InstallTask::options()
 }
 
 
-} } // namespace Sourcey::Pacman
+} } // namespace Scy::Pacman
 
 
 
 
-	//if (_local->isLatestVersion(_remote->latestAsset()))
+	//if (_local->isUpToDate(_remote->latestAsset()))
 	//	throw Exception("This local package is already up to date");	
 	//Package::Asset localAsset = _local->latestAsset();
 

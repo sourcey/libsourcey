@@ -34,7 +34,7 @@
 #include "Sourcey/Symple/Address.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Symple {
 
 
@@ -72,7 +72,7 @@ protected:
 };
 	
 
-} } // namespace Sourcey::Symple
+} } // namespace Scy::Symple
 
 
 #endif //  SOURCEY_Symple_Router_H

@@ -37,7 +37,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 Timer::Timer() :
@@ -221,4 +221,4 @@ Timer& Timer::getDefault()
 }
 
 
-} // namespace Sourcey
+} // namespace Scy

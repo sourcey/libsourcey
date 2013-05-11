@@ -40,14 +40,14 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
 FastMutex AVEncoder::_mutex;
 
 
-AVEncoder::AVEncoder(const RecorderOptions& options) :
+AVEncoder::AVEncoder(const RecordingOptions& options) :
 	_options(options),	
 	_formatCtx(NULL),
 	_video(NULL),
@@ -119,7 +119,7 @@ void AVEncoder::initialize()
 				!_options.oformat.audio.enabled)
 				throw Exception("Either video or audio parameters must be specified.");
 
-			if (!_options.oformat.id)
+			if (_options.oformat.id.empty())
 				throw Exception("An output container format must be specified.");		
 
 			av_register_all(); 
@@ -135,7 +135,7 @@ void AVEncoder::initialize()
 		
 			// Set the container codec
 			string ofmt = _options.ofile.empty() ? ("." + string(_options.oformat.id)) : _options.ofile;		
-			_formatCtx->oformat = av_guess_format(_options.oformat.id, ofmt.data(), NULL);	
+			_formatCtx->oformat = av_guess_format(_options.oformat.id.data(), ofmt.data(), NULL);	
 			if (!_formatCtx->oformat)
 				throw Exception("Cannot find suitable encoding format for " + _options.oformat.name);			
 		}
@@ -309,7 +309,7 @@ void AVEncoder::onStreamStateChange(const PacketStreamState& state)
 }
 
 
-RecorderOptions& AVEncoder::options()
+RecordingOptions& AVEncoder::options()
 {
 	FastMutex::ScopedLock lock(_mutex);
 	return _options;
@@ -416,7 +416,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 		// Calculate dynamic PTS based on duration
 		// Using MythTV AVFormatWriter as a guide
 		_videoFPS.tick();
-		opacket.pts = (double)_videoFPS.duration * _video->stream->time_base.den / _video->stream->time_base.num;
+		opacket.pts = (int64_t)_videoFPS.duration * _video->stream->time_base.den / _video->stream->time_base.num;
 		opacket.dts = AV_NOPTS_VALUE;
 
 		/*
@@ -554,7 +554,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 }
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 		

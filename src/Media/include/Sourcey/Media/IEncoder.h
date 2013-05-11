@@ -35,7 +35,7 @@
 #include "Sourcey/Media/Format.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -79,13 +79,13 @@ struct EncoderOptions
 };
 	
 
-struct RecorderOptions: public EncoderOptions
+struct RecordingOptions: public EncoderOptions
 {
 	std::string ifile;	// The input file path.
 	std::string ofile;	// The output file path.
 	long duration;		// The millisecond duration 
 						// of time to record.
-	RecorderOptions(const Format& iformat = Format(),
+	RecordingOptions(const Format& iformat = Format(),
 					const Format& oformat = Format(),
 					const std::string& ifile = "",
 					const std::string& ofile = "",
@@ -94,14 +94,14 @@ struct RecorderOptions: public EncoderOptions
 		ifile(ifile),
 		ofile(ofile),
 		duration(duration) {}
-	RecorderOptions(const EncoderOptions& r) :
+	RecordingOptions(const EncoderOptions& r) :
 		EncoderOptions(r.iformat, r.oformat) {}
-	RecorderOptions(const RecorderOptions& r) : 
+	RecordingOptions(const RecordingOptions& r) : 
 		EncoderOptions(r.iformat, r.oformat),
 		ifile(r.ifile),
 		ofile(r.ofile),
 		duration(r.duration) {}
-	virtual ~RecorderOptions() {};
+	virtual ~RecordingOptions() {};
 };
 
 
@@ -143,7 +143,7 @@ public:
 
 
 } // namespace Media
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_MEDIA_IEncoder_H

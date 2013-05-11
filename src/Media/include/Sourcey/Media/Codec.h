@@ -37,7 +37,7 @@
 #include <list>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -168,7 +168,7 @@ typedef std::list<Codec*> CodecPList;
 
 
 } // namespace Media
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif

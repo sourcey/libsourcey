@@ -33,7 +33,7 @@
 #include <string>
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 class IConfiguration
@@ -174,7 +174,7 @@ private:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_IConfiguration_H

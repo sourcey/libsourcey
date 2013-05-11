@@ -31,10 +31,10 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Sourcey;
+using namespace Scy;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -291,4 +291,4 @@ int AudioCapture::numChannels() const
 }
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media

@@ -35,15 +35,15 @@ using namespace Poco;
 using namespace Poco::Net;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 	
 
 TCPPeerConnection::TCPPeerConnection(TCPAllocation& allocation, Net::Reactor& reactor) : 
-	Net::TCPPacketSocket(reactor), //, true
+	Net::TCPPacketSocket(reactor),
 	_allocation(allocation),
 	_timeout(PEER_CONNECTION_TIMEOUT * 1000),
-	_connectionID(CryptoProvider::generateRandomNumber(8)),
+	_connectionID(CryptoProvider::generateRandomNumber(8) & 0xFFFFFFFF),
 	_client(NULL)
 {
 	while (_allocation.peers().exists(_connectionID))
@@ -58,7 +58,7 @@ TCPPeerConnection::TCPPeerConnection(TCPAllocation& allocation, const Poco::Net:
 	Net::TCPPacketSocket(socket, reactor), //, true
 	_allocation(allocation),
 	_timeout(PEER_CONNECTION_TIMEOUT * 1000),
-	_connectionID(CryptoProvider::generateRandomNumber(8)),
+	_connectionID(CryptoProvider::generateRandomNumber(8) & 0xFFFFFFFF),
 	_client(NULL)
 {
 	LogTrace() << "[TCPPeerConnection:" << this << "] Creating" << endl;
@@ -225,4 +225,4 @@ bool TCPPeerConnection::expired() const
 }
 
 
-} } // namespace Sourcey::TURN
+} } // namespace Scy::TURN

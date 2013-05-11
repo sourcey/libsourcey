@@ -39,7 +39,7 @@ using namespace Poco;
 using namespace Poco::Net;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 
@@ -1036,5 +1036,5 @@ Net::Address Client::relayedAddress() const
 }
 
 
-} } //  namespace Sourcey::TURN
+} } //  namespace Scy::TURN
 

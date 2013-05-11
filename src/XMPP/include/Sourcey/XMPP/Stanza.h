@@ -33,7 +33,7 @@
 #include "Sourcey/XML/XML.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 
 
@@ -140,7 +140,7 @@ struct Error: public XML::Node
 };
 
 
-} // namespace Sourcey 
+} // namespace Scy 
 } // namespace XMPP
 
 

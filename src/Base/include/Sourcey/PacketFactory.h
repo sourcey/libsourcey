@@ -35,7 +35,7 @@
 #include "Poco/Thread.h"
 
 
-namespace Sourcey {
+namespace Scy {
 
 	
 struct IPacketCreationStrategy
@@ -172,7 +172,7 @@ struct PacketFactory: public PacketRegistry
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_PacketFactory_H

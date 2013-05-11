@@ -40,7 +40,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace HTTP {
 
 
@@ -188,4 +188,4 @@ string DigestAuthenticator::prepare401Header(const string& extra)
 }
 
 
-} } // namespace Sourcey::HTTP
+} } // namespace Scy::HTTP

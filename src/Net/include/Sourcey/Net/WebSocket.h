@@ -39,7 +39,7 @@
 #include "Poco/Net/SecureStreamSocket.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 	
 
@@ -122,7 +122,7 @@ public:
 	{
 		_headerState = 0;
 	
-		log("debug") << "Web Socket Connecting to " << _uri.toString() << endl;	
+		log("debug") << "Web Socket Connecting to " << _uri.toString() << std::endl;	
 
 		// Will throw on error
 		SocketBaseT::connect(Address(_uri.getHost(), port()));
@@ -131,7 +131,7 @@ public:
 
 	virtual void close()
 	{
-		log("debug") << "WebSocket Closing" << endl;
+		log("debug") << "WebSocket Closing" << std::endl;
 		_headerState = 0;
 	
 		try {
@@ -144,7 +144,7 @@ public:
 		}
 		catch (Exception& exc) {
 			// Not a fatal error
-			log("warn") << "WebSocket Closing Error: " << exc.displayText() << endl;
+			log("warn") << "WebSocket Closing Error: " << exc.displayText() << std::endl;
 		}
 
 		SocketBaseT::close();
@@ -153,7 +153,7 @@ public:
 
 	void sendHandshake()
 	{
-		log("debug") << "Sending Handshake" << endl;
+		log("debug") << "Sending Handshake" << std::endl;
 
 		Poco::Net::SocketStream ss(*this);
 	
@@ -184,11 +184,11 @@ public:
 
 	virtual int send(const char* data, int size)
 	{
-		//log("trace") << "Send: " << (std::string(data, size)) << endl;	
+		//log("trace") << "Send: " << (std::string(data, size)) << std::endl;	
 		Poco::Net::SocketStream ss(*this);
-		ss.put(0x00);
+		ss.put(static_cast<unsigned char>(0x00));
 		ss.write(data, size);
-		ss.put(0xff);
+		ss.put(static_cast<unsigned char>(0xff));
 		ss.flush();
 		return size;
 	}
@@ -204,18 +204,18 @@ public:
 
 	virtual void recv(Buffer& buffer) 
 	{
-		log("trace") << "On Data: " << buffer.size() << endl;
+		log("trace") << "On Data: " << buffer.size() << std::endl;
 	
 		if (buffer.size() == 0 || (
 			buffer.size() == 2 && buffer.data()[0] == 0xff && buffer.data()[1] == 0x00)) {
-			log("debug") << "Recv Close" << endl;
+			log("debug") << "Recv Close" << std::endl;
 			close();
 			return;
 		}
 	
 		// Read Messages
 		else if (_headerState == 2) {
-			log("trace") << "Parsing Messages: " << buffer.size() << endl;
+			log("trace") << "Parsing Messages: " << buffer.size() << std::endl;
 		
 			while (!buffer.eof()) {
 				std::string message;
@@ -223,15 +223,15 @@ public:
 				buffer.readUInt8(start);
 
 				if (start != 0x00) {
-					log("warn") << "Message contains bad start code" << endl;
+					log("warn") << "Message contains bad start code" << std::endl;
 					return;
 				}
 
-				if (buffer.readToNext(message, 0xff) == 0) {
+				if (buffer.readToNext(message, static_cast<unsigned char>(0xff)) == 0) {
 					buffer.readString(message, buffer.remaining() - 1);
 				}
 			
-				log("trace") << "Parsed Message: " << message << endl;
+				log("trace") << "Parsed Message: " << message << std::endl;
 				Buffer msgBuf(message.data(), message.size());
 				packetize(msgBuf);
 				buffer++;
@@ -243,9 +243,9 @@ public:
 		else if (_headerState == 0) { //stateEquals(ClientState::Connected)
 
 			std::string request(buffer.data(), buffer.size());
-			log("debug") << "Parsing Header: " << request << endl;			
+			log("debug") << "Parsing Header: " << request << std::endl;			
 			if (strncmp(request.data(), "HTTP/1.1 101 ", 13) == 0) {
-				log("debug") << "Received HTTP Response" << endl;	
+				log("debug") << "Received HTTP Response" << std::endl;	
 				size_t pos = pos = request.find("\r\n\r\n");
 				if (pos != std::string::npos) {
 					buffer.setPosition(pos + 4);
@@ -264,7 +264,7 @@ public:
 		if (_headerState == 1 && buffer.remaining() >= 16) {
 			std::string replyDigest;
 			buffer.readString(replyDigest, 16);
-			log("debug") << "Reply Digest: " << replyDigest << endl;
+			log("debug") << "Reply Digest: " << replyDigest << std::endl;
 			_headerState = 2;
 
 			// TODO: Validate Digest
@@ -301,14 +301,14 @@ public:
 protected:	
 	virtual void onConnect()
 	{
-		log("debug") << "Web Socket Connected" << endl;
+		log("debug") << "Web Socket Connected" << std::endl;
 		SocketBaseT::onConnect();
 		sendHandshake();
 	}
 
 	virtual void onOnline()
 	{
-		log("debug") << "Web Socket Online" << endl;
+		log("debug") << "Web Socket Online" << std::endl;
 
 		Online.emit(static_cast<SocketBaseT::InterfaceT*>(this));
 	}
@@ -330,7 +330,7 @@ typedef WebSocketBase< Net::PacketSocketBase< ::Poco::Net::StreamSocket, TCP, Ne
 typedef WebSocketBase< Net::PacketSocketBase< ::Poco::Net::SecureStreamSocket, SSLTCP, Net::IPacketWebSocket > >  SSLPacketWebSocket;
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 #endif //  SOURCEY_NET_WebSocket_H

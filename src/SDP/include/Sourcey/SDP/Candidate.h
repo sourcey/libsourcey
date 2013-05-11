@@ -35,7 +35,7 @@
 #include <string>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SDP { 
 
 
@@ -79,7 +79,7 @@ private:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 } // namespace SDP 
 
 

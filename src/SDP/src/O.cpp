@@ -32,7 +32,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SDP { 
 
 
@@ -191,5 +191,5 @@ string O::toString() {
 }
 
 
-} // namespace Sourcey
+} // namespace Scy
 } // namespace SDP 

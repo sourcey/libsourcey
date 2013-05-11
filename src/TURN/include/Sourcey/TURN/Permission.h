@@ -39,7 +39,7 @@
 #include <map>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 
@@ -72,7 +72,7 @@ struct Permission
 typedef std::vector<Permission> PermissionList;
 
 
-} } // namespace Sourcey::TURN
+} } // namespace Scy::TURN
 
 
 #endif // SOURCEY_TURN_Permission_H

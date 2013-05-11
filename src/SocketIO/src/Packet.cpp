@@ -35,7 +35,7 @@ using namespace std;
 using Poco::format;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SocketIO {
 
 
@@ -146,14 +146,14 @@ bool Packet::read(Buffer& buf)
 
 	string data;
 	buf.readString(data, buf.size());
-	StringList content = Util::split(data, ':', 4);
+	StringVec content = Util::split(data, ':', 4);
 	if (content.size() < 1) {
 		//LogDebug() << "[SocketIO::Packet:" << this << "] Reading: Invalid Data: " << content.size() << endl;
 		return false;
 	}
 		
 	if (!content[0].empty()) {
-		_type = Util::atoi(content[0]);
+		_type = Util::fromString<UInt32>(content[0]);
 		//LogDebug() << "[SocketIO::Packet:" << this << "] Reading: Type: " << typeString() << endl;
 	}
 
@@ -164,7 +164,7 @@ bool Packet::read(Buffer& buf)
 	}
 	if (content.size() >= 2 && !content[1].empty()) {
 		_ack = (content[1].find('+') != string::npos);
-		_id = Util::atoi(content[1]);
+		_id = Util::fromString<UInt32>(content[1]);
 	}	
 	if (content.size() >= 3 && !content[2].empty()) {
 		_endpoint = content[2];
@@ -183,7 +183,7 @@ bool Packet::read(Buffer& buf)
 		}
 
 		_ack = true; // This is mostly for requests, but we'll set it anyway
-		_id = Util::atoi(content[0]);
+		_id = Util::fromString<UInt32>(content[0]);
 		_message = content[1];
 	}
 
@@ -317,4 +317,4 @@ void Packet::print(ostream& os) const
 
 
 
-} } // namespace Sourcey::SocketIO
+} } // namespace Scy::SocketIO

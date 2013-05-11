@@ -36,7 +36,7 @@
 #include "Sourcey/Net/Reactor.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 	
 
@@ -86,7 +86,7 @@ typedef BasicManager<UInt32, TCPPeerConnection>	PeerConnectionManager;
 typedef PeerConnectionManager::Map				PeerConnectionMap;
 
 
-} } // namespace Sourcey::TURN
+} } // namespace Scy::TURN
 
 
 #endif // SOURCEY_TURN_TCPPeerConnection_H

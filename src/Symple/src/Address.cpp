@@ -34,7 +34,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Symple {
 
 
@@ -70,7 +70,7 @@ Address::Address(const string& id)
 
 bool Address::parse(const string& id)
 {
-	StringList elems;
+	StringVec elems;
 	Util::split(id, ':', elems);
 	if (elems.size() >= 1)
 		group = elems[0];
@@ -178,4 +178,4 @@ bool Address::operator == (string& r)
 
 
 } // namespace Symple 
-} // namespace Sourcey
+} // namespace Scy

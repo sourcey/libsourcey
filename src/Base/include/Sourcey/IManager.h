@@ -29,29 +29,31 @@
 #define SOURCEY_IManager_H
 
 
-namespace Sourcey { 
+namespace Scy { 
 
 
 template <class TKey, class TValue>
 class IManager
+	/// Abstract interface for managing
+	/// an indexed map of pointers.
 {	
 public:
 	IManager() {};
 	virtual ~IManager() {}
 
 	virtual bool add(const TKey& key, TValue* item, bool whiny = true) = 0;
-	virtual bool free(const TKey& key) = 0;
-	virtual TValue* remove(const TKey& key) = 0;
 	virtual bool remove(const TValue* item) = 0;
+	virtual TValue* remove(const TKey& key) = 0;
 	virtual bool exists(const TKey& key) const = 0;
 	virtual bool exists(const TValue* item) const = 0;
+	virtual bool free(const TKey& key) = 0;
 	virtual bool empty() const = 0;
 	virtual TValue* get(const TKey& key, bool whiny = true) const = 0;
 	virtual void clear() = 0;
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_IManager_H

@@ -42,7 +42,7 @@
 #include <string.h>
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 enum LogLevel
@@ -322,7 +322,7 @@ inline LogStream LogFatal(const char* realm = "", const void* ptr = NULL)
 	{ return LogStream(FatalLevel, realm, ptr); }
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif

@@ -35,7 +35,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 TimerTask::TimerTask(long timeout, long interval) : 
@@ -191,21 +191,21 @@ long TimerTask::interval() const
 }
 	
 
-Sourcey::Timeout& TimerTask::scheduleAt()
+Scy::Timeout& TimerTask::scheduleAt()
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	return _scheduleAt;
 }
 	
 
-Sourcey::Timeout TimerTask::scheduleAt() const
+Scy::Timeout TimerTask::scheduleAt() const
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	return _scheduleAt;
 }
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 

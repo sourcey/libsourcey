@@ -35,7 +35,7 @@
 #include "Sourcey/Symple/Address.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Symple {
 
 
@@ -98,7 +98,7 @@ public:
 
 
 } // namespace Symple 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_Symple_Message_H

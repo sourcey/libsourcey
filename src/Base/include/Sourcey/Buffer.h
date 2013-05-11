@@ -38,7 +38,7 @@
 #include <cstring>
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 class Buffer 
@@ -126,7 +126,7 @@ private:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif  // SOURCEY_Buffer_H

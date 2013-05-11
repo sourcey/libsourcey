@@ -41,7 +41,7 @@
 #include "Poco/Net/NameValueCollection.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SocketIO {
 
 
@@ -143,7 +143,7 @@ protected:
 	Net::IWebSocket& _socket;
 	Runner&			_runner;
 	Net::Address	_serverAddr;
-	StringList		_protocols;
+	StringVec		_protocols;
 	std::string		_sessionID;
 	std::string		_error;
 	int				_heartBeatTimeout;
@@ -197,7 +197,7 @@ typedef SocketIO::ClientBase<
 > SSLClient;
 
 
-} } // namespace Sourcey::SocketIO
+} } // namespace Scy::SocketIO
 
 
 #endif //  SOURCEY_SOCKETIO_Client_H
@@ -335,15 +335,15 @@ typedef SocketIO::ClientBase<
 //				static_cast<int>(response.getStatus()), response.getReason()));
 //
 //		// Parse the response response
-//		StringList respData = Util::split(response.body.str(), ':', 4);
+//		StringVec respData = Util::split(response.body.str(), ':', 4);
 //		if (respData.size() < 4)
 //			throw Exception(response.empty() ? 
 //				"Invalid SocketIO handshake response." : Poco::format(
 //				"Invalid SocketIO handshake response: %s", response.body.str()));
 //	
 //		_sessionID = respData[0];
-//		_heartBeatTimeout = Util::atoi(respData[1]);
-//		_connectionClosingTimeout = Util::atoi(respData[2]);
+//		_heartBeatTimeout = Util::fromString<UInt32>(respData[1]);
+//		_connectionClosingTimeout = Util::fromString<UInt32>(respData[2]);
 //		_protocols = Util::split(respData[3], ',');
 //
 //		// Check websockets are supported
@@ -497,7 +497,7 @@ typedef SocketIO::ClientBase<
 //	mutable Poco::FastMutex	_mutex;
 //	
 //	Net::Address	_serverAddr;
-//	StringList		_protocols;
+//	StringVec		_protocols;
 //	std::string		_sessionID;
 //	int				_heartBeatTimeout;
 //	int				_connectionClosingTimeout;

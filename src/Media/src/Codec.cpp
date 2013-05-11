@@ -32,7 +32,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -193,7 +193,7 @@ void VideoCodec::print(ostream& ost)
 
 
 } // namespace Media 
-} // namespace Sourcey
+} // namespace Scy
 
 
 

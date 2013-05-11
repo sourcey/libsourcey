@@ -36,7 +36,7 @@
 //#include <opencv/highgui.h>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 	
 
@@ -278,7 +278,7 @@ struct Format
 */
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 #endif // SOURCEY_MEDIA_Types_H

@@ -34,7 +34,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP { 
 namespace Jingle {
 
@@ -122,4 +122,4 @@ PacketEmitter* ISession::getMediaSource(const std::string& name)
 
 } // namespace Jingle
 } // namespace XMPP 
-} // namespace Sourcey 
+} // namespace Scy 

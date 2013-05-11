@@ -33,7 +33,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -277,4 +277,4 @@ bool MotionDetector::isRunning() const
 }
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media

@@ -39,7 +39,7 @@
 #include "Poco/Mutex.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 
 	
@@ -477,7 +477,7 @@ protected:
 };
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 #endif // SOURCEY_NET_SocketBase_H

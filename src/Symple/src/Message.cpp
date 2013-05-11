@@ -37,7 +37,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Symple {
 
 
@@ -294,4 +294,4 @@ bool Message::hasData(const string& name)
 
 
 } // namespace Symple 
-} // namespace Sourcey
+} // namespace Scy

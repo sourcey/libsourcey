@@ -35,7 +35,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace RTP {
 namespace RTCP {
 
@@ -115,4 +115,4 @@ void SenderReportPacket::print(std::ostream& os) const
 
 } // namespace RTCP
 } // namespace RTP
-} // namespace Sourcey 
+} // namespace Scy 

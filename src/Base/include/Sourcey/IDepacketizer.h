@@ -32,7 +32,7 @@
 #include "Sourcey/IPacketProcessor.h"
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 //template <class T>
@@ -62,7 +62,7 @@ protected:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_IDepacketizerR_H

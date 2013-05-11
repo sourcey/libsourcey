@@ -35,7 +35,7 @@
 #include <vector>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -82,7 +82,7 @@ private:
 };
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 #endif // SOURCEY_MEDIA_FormatRegistry_H

@@ -37,7 +37,7 @@
 #include <algorithm>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 	
 	
@@ -72,7 +72,7 @@ struct IServerObserver
 };
 
 
-} } //  namespace Sourcey::TURN
+} } //  namespace Scy::TURN
 
 
 #endif // SOURCEY_TURN_SERVER_IServerObserver_H

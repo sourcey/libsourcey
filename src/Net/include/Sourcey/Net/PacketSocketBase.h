@@ -35,7 +35,7 @@
 #include "Sourcey/Net/SocketBase.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 
 	
@@ -124,7 +124,7 @@ protected:
 };
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 #endif // SOURCEY_NET_PacketSocketBase_H

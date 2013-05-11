@@ -34,7 +34,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 Router::Router(Runner& runner) :
@@ -76,4 +76,4 @@ Router& Router::operator >> (IPacket& packet)
 }
 	
 
-} // namespace Sourcey
+} // namespace Scy

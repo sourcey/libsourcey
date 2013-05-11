@@ -37,7 +37,7 @@
 #include <sstream>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XML {
 
 
@@ -106,7 +106,7 @@ public:
 
 
 } // namespace XML
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_XML_H

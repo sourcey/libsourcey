@@ -41,7 +41,7 @@
 #include <math.h>
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 inline unsigned long long htonll(unsigned long long v) {
@@ -241,7 +241,7 @@ inline UInt64 GetLE64(const void* memory) {
 }
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_ByteOrder_H

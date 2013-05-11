@@ -35,10 +35,10 @@
 
 using namespace std; 
 using namespace Poco;
-using namespace Sourcey::XML;
+using namespace Scy::XML;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 
 
@@ -429,4 +429,4 @@ void Presence::setShow(const string& show)
 
 
 } // namespace XMPP 
-} // namespace Sourcey
+} // namespace Scy

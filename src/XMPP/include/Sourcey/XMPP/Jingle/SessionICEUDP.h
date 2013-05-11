@@ -42,7 +42,7 @@
 #include <assert.h>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 namespace Jingle {
 
@@ -166,7 +166,7 @@ private:
 
 } // namespace Jingle
 } // namespace XMPP 
-} // namespace Sourcey 
+} // namespace Scy 
 
 
 #endif // HAVE_LIBSOURCEY_ICE

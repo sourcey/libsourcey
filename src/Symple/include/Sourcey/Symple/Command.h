@@ -34,7 +34,7 @@
 #include "Sourcey/Symple/Message.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Symple {
 
 
@@ -55,13 +55,13 @@ public:
 	bool valid() const;
 
 	std::string param(int n) const;
-	StringList params();
+	StringVec params();
 	bool matches(const std::string& xnode) const;
 };
 
 
 } // namespace Symple 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_Symple_Command_H

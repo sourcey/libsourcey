@@ -51,18 +51,8 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Util {
-
-
-double atod(const string& str)
-{
-	istringstream i(str);
-	double x;
-	if (!(i >> x))
-		return 0;
-	return x;
-} 
 
 
 bool isNumber(const string& str)
@@ -75,49 +65,20 @@ bool isNumber(const string& str)
 }
 
 
-unsigned atoi(const string& str)
-{
-	istringstream i(str);
-	unsigned x;
-	if (!(i >> x)) x = 0;
-	return x;
-}
-
-
-string itoa(unsigned i)
-{
-	ostringstream out;
-	out << i;
-	return out.str();
-}
-
-
-string dtoa(double d)
-{
-	stringstream out;
-	out << d;
-	return out.str();
-}
-
-
 string getPID(const void* ptr)
 {
-	stringstream out;
-	out << ptr;
-	return out.str();
+	return toString<const void*>(ptr);
 }
 
 
-string trim(const string& str) 
+void trim(string& str) 
 {	
-	string what = str;
-	what.erase(0, what.find_first_not_of(' '));       //prefixing spaces
-	what.erase(what.find_last_not_of(' ')+1);         //surfixing spaces
-	return what;
+	str.erase(0, str.find_first_not_of(' '));	// prefixing spaces
+	str.erase(str.find_last_not_of(' ') + 1);	// surfixing spaces
 }
 
 
-StringList &split(const string& s, const string& delim, StringList &elems, int limit) 
+StringVec &split(const string& s, const string& delim, StringVec &elems, int limit) 
 {
 	bool final = false;
 	std::string::size_type prev = 0, pos = 0;
@@ -134,14 +95,14 @@ StringList &split(const string& s, const string& delim, StringList &elems, int l
 }
 
 
-StringList split(const string& s, const string& delim, int limit) 
+StringVec split(const string& s, const string& delim, int limit) 
 {
-    StringList elems;
+    StringVec elems;
     return split(s, delim, elems, limit);
 };
 
 
-StringList &split(const string& s, char delim, StringList &elems, int limit) 
+StringVec &split(const string& s, char delim, StringVec &elems, int limit) 
 {
     stringstream ss(s);
     string item;
@@ -156,30 +117,28 @@ StringList &split(const string& s, char delim, StringList &elems, int limit)
 }
 
 
-StringList split(const string& s, char delim, int limit) 
+StringVec split(const string& s, char delim, int limit) 
 {
-    StringList elems;
+    StringVec elems;
     return split(s, (char)delim, elems, limit);
 }
 
 
-string escape(const string& str) 
+void escape(string& str) 
 {
-	string what = str;
 	const char escape_chars[] = { '&', '<', '>', '\'', '"' };
 	const string escape_seqs[] = { "amp;", "lt;", "gt;", "apos;", "quot;" };
 	const unsigned escape_size = 5;
-	for (size_t val, i = 0; i < what.length(); ++i) {
+	for (size_t val, i = 0; i < str.length(); ++i) {
 		for (val = 0; val < escape_size; ++val) {
-			if (what[i] == escape_chars[val]) {
-				what[i] = '&';
-				what.insert(i+1, escape_seqs[val]);
+			if (str[i] == escape_chars[val]) {
+				str[i] = '&';
+				str.insert(i + 1, escape_seqs[val]);
 				i += escape_seqs[val].length();
 				break;
 			}
 		}
 	}
-	return what;
 }
 
 
@@ -205,13 +164,13 @@ bool compareVersion(const string& l, const string& r)
 		return true;
 
 	bool isEqual = true;
-	StringList lnums = split(l, ".");
-	StringList rnums = split(r, ".");
+	StringVec lnums = split(l, ".");
+	StringVec rnums = split(r, ".");
 	for (unsigned i = 0; i < lnums.size(); i++) {			
 		if (rnums.size() < i + 1)
 			break;		
-		unsigned ln = atoi(lnums[i]);
-		unsigned rn = atoi(rnums[i]);
+		int ln = Util::fromString<UInt32>(lnums[i]);
+		int rn = Util::fromString<UInt32>(rnums[i]);
 		if (ln < rn)
 			return false;
 		else if (ln > rn)
@@ -246,13 +205,13 @@ void underscore(string& str)
 
 bool matchNodes(const string& node, const string& xnode, const string& delim)
 {
-	StringList params = Util::split(node, delim);
-	StringList xparams = Util::split(xnode, delim);
+	StringVec params = Util::split(node, delim);
+	StringVec xparams = Util::split(xnode, delim);
 	return matchNodes(params, xparams);
 }
 
 
-bool matchNodes(const StringList& params, const StringList& xparams)
+bool matchNodes(const StringVec& params, const StringVec& xparams)
 {
 	// xparams is a simple matcher pattern with nodes and
 	// * as windcard.
@@ -284,15 +243,15 @@ bool matchNodes(const StringList& params, const StringList& xparams)
 
 
 #if WIN32
-UInt32 getTime() {
+UInt64 getTime() {
 	return ::GetTickCount();
 }
 #else
 static int ClocksPerSec = sysconf(_SC_CLK_TCK);
-UInt32 getTime() {
+UInt64 getTime() {
 	tms t;
 	clock_t result = times(&t);
-	return result & 0xFFFFFFFF;
+	return (UInt64)result;
 }
 #endif
 
@@ -313,4 +272,4 @@ bool getOsVersion(int* major, int* minor, int* build) {
 
 
 } // namespace Util
-} // namespace Sourcey
+} // namespace Scy

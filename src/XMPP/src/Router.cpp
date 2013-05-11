@@ -35,12 +35,12 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 
 
 Router::Router(Runner& runner, const string& jid) :
-	Sourcey::Router(runner),
+	Scy::Router(runner),
 	_jid(jid) 
 {	
 }
@@ -187,4 +187,4 @@ Router& Router::operator >> (Stanza& stanza)
 
 
 } // namespace XMPP 
-} // namespace Sourcey
+} // namespace Scy

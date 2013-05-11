@@ -36,7 +36,7 @@
 #include <vector>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace RTP {
 
 
@@ -101,7 +101,7 @@ struct Header
 
 
 } // namespace RTP
-} // namespace Sourcey 
+} // namespace Scy 
 
 
 #endif

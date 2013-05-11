@@ -41,7 +41,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -451,7 +451,7 @@ void DeviceManager::print(ostream& ost)
 }
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 

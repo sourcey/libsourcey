@@ -32,7 +32,7 @@
 #include "Sourcey/Base.h"
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace RTP {
 	
 	
@@ -44,7 +44,7 @@ const int kRtpMaxSources = 16;
 const int kBytesPerCSRC = 4;
 
 
-} } // namespace Sourcey::RTP
+} } // namespace Scy::RTP
 
 
 #endif // SOURCEY_RTP_Types_H

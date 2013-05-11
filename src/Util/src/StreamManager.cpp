@@ -33,7 +33,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 StreamManager::StreamManager(bool freeClosedStreams) :
@@ -171,4 +171,4 @@ void StreamManager::print(std::ostream& os) const
 }
 
 
-} // namespace Sourcey
+} // namespace Scy

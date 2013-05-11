@@ -39,7 +39,7 @@
 #include <vector>
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 class ITimerCallback 
@@ -197,7 +197,7 @@ protected:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_Timer_H

@@ -35,14 +35,14 @@
 #include "Poco/Net/DatagramSocket.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 
 
 typedef AsyncPacketSocketBase<Poco::Net::DatagramSocket, UDP> UDPPacketSocket;
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 #endif // SOURCEY_NET_UDPPacketSocket_H

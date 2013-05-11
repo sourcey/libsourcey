@@ -32,11 +32,11 @@
 #include "Sourcey/Net/Address.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Util {
 
 
-} } // namespace Sourcey::Util
+} } // namespace Scy::Util
 
 
 #endif

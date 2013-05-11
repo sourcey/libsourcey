@@ -33,7 +33,7 @@
 #include "Sourcey/Task.h"
 
 
-namespace Sourcey {
+namespace Scy {
 	
 
 class Runner;
@@ -118,7 +118,7 @@ private:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_GarbageCollection_H

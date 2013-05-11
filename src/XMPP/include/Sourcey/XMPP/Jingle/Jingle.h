@@ -33,7 +33,7 @@
 //#include "Sourcey/XMPP/Jingle/Jingle.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 
 
@@ -277,7 +277,7 @@ struct Jingle: public XML::Node //Query
 
 } // namespace Jingle
 } // namespace XMPP 
-} // namespace Sourcey 
+} // namespace Scy 
 
 
 #endif // SOURCEY_XMPP_JINGLE_Jingle_H

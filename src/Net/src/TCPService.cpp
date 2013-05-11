@@ -36,7 +36,7 @@ using namespace Poco;
 using namespace Poco::Net;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 
 
@@ -164,4 +164,4 @@ void NullRequestHandler::run()
 }
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net

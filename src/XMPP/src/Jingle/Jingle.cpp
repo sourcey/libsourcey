@@ -35,7 +35,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace XMPP {
 namespace Jingle {
 
@@ -551,4 +551,4 @@ Jingle::RemoteCandidate Jingle::RemoteCandidate::setPort(int port)
 
 } // namespace Jingle
 } // namespace XMPP 
-} // namespace Sourcey 
+} // namespace Scy 

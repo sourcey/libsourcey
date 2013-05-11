@@ -37,7 +37,7 @@
 #include "Sourcey/SDP/RTPMap.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SDP { 
 
 
@@ -83,7 +83,7 @@ public:
 	std::string getAttribute(const std::string& type, int index = 0) const;
 
 	unsigned int numPayloadTypes() const;
-	StringList payloadTypes() const;
+	StringVec payloadTypes() const;
 	std::string payloadType(unsigned int i) const;
 	std::string mediaType() const;
 	unsigned int numPorts() const;
@@ -113,14 +113,14 @@ private:
 	unsigned int _port;
 	unsigned int _nPorts;
 	std::string _transport;
-	StringList _payloadTypes;
+	StringVec _payloadTypes;
 	std::vector<Line*> _lines;
 	//C* _connection;
 };
 
 
 } // namespace SDP 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif

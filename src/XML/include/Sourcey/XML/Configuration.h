@@ -33,7 +33,7 @@
 #include "Sourcey/XML/XML.h"
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace XML {
 
 
@@ -50,7 +50,7 @@ public:
 	virtual bool remove(const std::string& key);
 	virtual void removeAll(const std::string& baseKey);
 	virtual void replace(const std::string& from, const std::string& to);
-	virtual void keys(StringList& keys, const std::string& baseKey = "");
+	virtual void keys(StringVec& keys, const std::string& baseKey = "");
 	virtual void print(std::ostream& ost);
 
 	// See IConfiguration for data accesors
@@ -64,7 +64,7 @@ protected:
 };
 
 
-} } // namespace Sourcey::XML
+} } // namespace Scy::XML
 
 
 #endif // SOURCEY_XML_Configuration_H

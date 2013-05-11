@@ -34,7 +34,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -389,4 +389,4 @@ cv::VideoCapture& VideoCapture::capture()
 }
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media

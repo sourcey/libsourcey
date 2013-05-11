@@ -54,7 +54,7 @@
 #endif
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -113,7 +113,7 @@ protected:
 };
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media
 
 
 #endif

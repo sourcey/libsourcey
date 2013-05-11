@@ -35,7 +35,7 @@
 #include "Poco/Thread.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 
 
@@ -86,7 +86,7 @@ protected:
 };
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 #endif // SOURCEY_TCPAsyncConnector_H

@@ -34,7 +34,7 @@ using namespace std;
 
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SDP { 
 
 
@@ -65,7 +65,7 @@ RTPMap::RTPMap(const string& src) :
 	string clockratestr = "";
 	while (src[i] != ' ' && src[i] != '/' && i < len)
 		clockratestr += src[i++];
-	_clockRate = Util::atoi(clockratestr.c_str());
+	_clockRate = Util::fromString<UInt32>(clockratestr.c_str());
 
 	if (src[i] == '/' && i < len) {
 		// encoding parameters
@@ -101,7 +101,7 @@ string RTPMap::toString()
 	if (!_clockRate)
 		ret += "0";
 	else
-		ret += Util::itoa(_clockRate);
+		ret += Util::toString(_clockRate);
 
 	if (!_encodingParameters.empty()) {
 		ret += "/";
@@ -112,5 +112,5 @@ string RTPMap::toString()
 }
 
 
-} // namespace Sourcey
+} // namespace Scy
 } // namespace SDP 

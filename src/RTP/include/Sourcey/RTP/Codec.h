@@ -36,7 +36,7 @@
 #include <list>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace RTP { 
 
 
@@ -71,7 +71,7 @@ struct VideoCodec: public Codec
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 } // namespace RTP 
 
 

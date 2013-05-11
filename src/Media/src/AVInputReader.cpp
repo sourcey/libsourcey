@@ -5,10 +5,10 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Sourcey;
+using namespace Scy;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Media {
 
 
@@ -375,4 +375,4 @@ string AVInputReader::error() const
 }
 
 
-} } // namespace Sourcey::Media
+} } // namespace Scy::Media

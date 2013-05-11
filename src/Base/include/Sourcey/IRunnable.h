@@ -32,7 +32,7 @@
 #include "Poco/Thread.h"
 
 
-namespace Sourcey {
+namespace Scy {
 
 		
 class IRunnable: public Poco::Runnable
@@ -45,7 +45,7 @@ public:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_IRunnable_H

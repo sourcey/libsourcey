@@ -34,7 +34,7 @@
 #include <sstream>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 
@@ -105,7 +105,7 @@ private:
 };
 
 
-} } // namespace Sourcey::TURN
+} } // namespace Scy::TURN
 
 
 #endif // SOURCEY_TURN_FiveTuple_H

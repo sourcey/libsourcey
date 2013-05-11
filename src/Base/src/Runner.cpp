@@ -38,7 +38,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 
 
 Runner::Runner() : 
@@ -295,4 +295,4 @@ Runner& Runner::getDefault()
 }
 
 
-} // namespace Sourcey
+} // namespace Scy

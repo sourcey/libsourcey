@@ -32,10 +32,10 @@
 #include <vector>
 
 
-namespace Sourcey {
+namespace Scy {
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_XMPP_Types_H

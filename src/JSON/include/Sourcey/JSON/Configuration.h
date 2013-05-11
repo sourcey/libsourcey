@@ -35,7 +35,7 @@
 #include "Poco/Mutex.h"
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace JSON {
 
 
@@ -52,8 +52,11 @@ public:
 	virtual bool remove(const std::string& key);
 	virtual void removeAll(const std::string& baseKey);
 	virtual void replace(const std::string& from, const std::string& to);
-	virtual void keys(StringList& keys, const std::string& baseKey = "");
+	virtual void keys(StringVec& keys, const std::string& baseKey = "");
 	virtual void print(std::ostream& ost);
+	
+	virtual std::string path();
+	virtual bool loaded();
 
 	// See IConfiguration for data accessors
 
@@ -61,12 +64,13 @@ protected:
 	virtual bool getRaw(const std::string& key, std::string& value) const;
 	virtual void setRaw(const std::string& key, const std::string& value);
 
+	bool _loaded;
 	std::string _path;
 	mutable Poco::FastMutex _mutex;
 };
 
 
-} } // namespace Sourcey::JSON
+} } // namespace Scy::JSON
 
 
 #endif // SOURCEY_JSON_Configuration_H

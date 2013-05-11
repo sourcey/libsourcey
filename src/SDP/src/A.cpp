@@ -35,7 +35,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SDP { 
 
 
@@ -43,7 +43,9 @@ A::A(const string& src) :
 	Line(Line::A, 10) 
 {
 	assert(src.substr(0, 2) == "a=");
-	_attributes = Util::trim(src.substr(2, src.length()-2));
+	string attr(src.substr(2, src.length()-2));
+	Util::trim(attr);
+	_attributes = attr;
 }
 
 
@@ -92,7 +94,7 @@ string A::attributeValue()
 }
 
 
-} // namespace Sourcey
+} // namespace Scy
 } // namespace SDP 
 
 

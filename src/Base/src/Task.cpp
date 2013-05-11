@@ -36,7 +36,7 @@
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 
 	
 Task::Task(bool repeating) : 
@@ -142,7 +142,7 @@ Runner& Task::runner()
 }
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 

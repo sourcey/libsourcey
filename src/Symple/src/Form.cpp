@@ -35,7 +35,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Symple {
 
 
@@ -369,13 +369,13 @@ string FormField::value() const
 	
 int FormField::intValue() const
 {
-	return Util::atoi(value());
+	return Util::fromString<UInt32>(value());
 }
 
 	
 double FormField::doubleValue() const
 {
-	return Util::atod(value());
+	return Util::fromString<double>(value());
 }
 
 	
@@ -407,13 +407,13 @@ void FormField::setValue(const string& value)
 
 void FormField::setValue(int value)
 {
-	setValue(Util::tostr<int>(value));
+	setValue(Util::toString<int>(value));
 }
 
 
 void FormField::setValue(double value)
 {
-	setValue(Util::dtoa(value));
+	setValue(Util::toString<double>(value));
 }
 
 
@@ -431,13 +431,13 @@ void FormField::addValue(const string& value)
 
 void FormField::addValue(int value)
 {
-	addValue(Util::tostr<int>(value));
+	addValue(Util::toString<int>(value));
 }
 
 
 void FormField::addValue(double value)
 {
-	addValue(Util::dtoa(value));
+	addValue(Util::toString<double>(value));
 }
 
 
@@ -448,4 +448,4 @@ void FormField::addValue(bool value)
 
 
 } // namespace Symple 
-} // namespace Sourcey
+} // namespace Scy

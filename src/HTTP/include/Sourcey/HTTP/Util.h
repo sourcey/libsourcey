@@ -33,7 +33,7 @@
 #include "Poco/Net/NameValueCollection.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Util {
 
 
@@ -49,13 +49,13 @@ std::string parseHeader(const std::string& request, const std::string& name);
 std::string parseCookieItem(const std::string& cookie, const std::string& item);
 	// Parses an item from a HTTP cookie.
 
-//bool parseRestfulQuery(const std::string& request, StringList& out);
+//bool parseRestfulQuery(const std::string& request, StringVec& out);
 
 bool parseURIQuery(const std::string& uri, Poco::Net::NameValueCollection& out);
 
 
 } // namespace Util
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_HTTP_Utilities_h

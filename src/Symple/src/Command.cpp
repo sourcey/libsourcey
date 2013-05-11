@@ -35,7 +35,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Symple {
 
 
@@ -99,7 +99,7 @@ void Command::setAction(const string& action)
 
 string Command::param(int n) const 
 {
-	StringList params = Util::split(node(), ':');
+	StringVec params = Util::split(node(), ':');
 	assert(params.size() >= n);
 	if (params.size() < n)
 		return "";
@@ -107,9 +107,9 @@ string Command::param(int n) const
 }
 
 
-StringList Command::params() 
+StringVec Command::params() 
 {
-	StringList params = Util::split(node(), ':');
+	StringVec params = Util::split(node(), ':');
 	return params;
 }
 
@@ -121,4 +121,4 @@ bool Command::matches(const string& xnode) const
 
 
 } // namespace Symple 
-} // namespace Sourcey
+} // namespace Scy

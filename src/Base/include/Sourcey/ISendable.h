@@ -32,7 +32,7 @@
 #include "Poco/Thread.h"
 
 
-namespace Sourcey {
+namespace Scy {
 
 		
 class ISendable
@@ -76,7 +76,7 @@ protected:
 };
 
 
-} // namespace Sourcey
+} // namespace Scy
 
 
 #endif // SOURCEY_ISendable_H

@@ -38,7 +38,7 @@
 #include "Poco/Zip/ZipLocalFileHeader.h"
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace Pacman {
 
 	
@@ -87,12 +87,12 @@ public:
 	struct Options 
 		/// Package installation options.
 	{
-		std::string version;		// If set then the given package version will
-									// be installed.
-		std::string sdkVersion;		// If set then the latest package version for
-									// given SDK version will be installed.
-		std::string installDir;		// Install to the following location, overriding 
-									// the manager default installDir.
+		std::string version;			// If set then the given package version will be installed.
+		std::string sdkVersion;			// If set then the latest package version for given SDK
+										// version will be installed.
+		std::string installDir;			// Install to the given location, otherwise the manager default
+										// installDir will be used.
+		//bool copyManifestToInstallDir;  // Copys the local package.json file to the install directory.
 
 		Options() {
 			version = "";
@@ -180,7 +180,7 @@ protected:
 typedef std::vector<InstallTask*> InstallTaskList;
 
 
-} } // namespace Sourcey::Pacman
+} } // namespace Scy::Pacman
 
 
 #endif // SOURCEY_Pacman_InstallTask_H

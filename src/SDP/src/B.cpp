@@ -32,7 +32,7 @@ using namespace std;
 
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SDP { 
 
 
@@ -42,7 +42,7 @@ B::B(const string& src) :
 	string::size_type index = src.find(":");
 	if (index != string::npos) {
 		_type = src.substr(0, index);
-		_bandwidth = Util::atoi(src.substr(index+1, src.length()));
+		_bandwidth = Util::fromString<UInt32>(src.substr(index+1, src.length()));
 	}
 }
 
@@ -52,9 +52,9 @@ B::~B() {
 
 
 string B::toString() {
-	return "b=" + _type + ":" + Util::itoa(_bandwidth);
+	return "b=" + _type + ":" + Util::toString(_bandwidth);
 }
 
 
-} // namespace Sourcey
+} // namespace Scy
 } // namespace SDP 

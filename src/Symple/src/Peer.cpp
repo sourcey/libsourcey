@@ -34,7 +34,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Symple {
 
 
@@ -160,4 +160,4 @@ void Peer::setHost(const std::string& host)
 
 
 } // namespace Symple 
-} // namespace Sourcey
+} // namespace Scy

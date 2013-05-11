@@ -34,12 +34,12 @@
 
 using namespace Poco;
 using namespace Poco::Net;
-using namespace Sourcey::Net;
+using namespace Scy::Net;
 */
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Symple {
 
 
@@ -641,4 +641,4 @@ void Client::onError()
 //}
 
 
-} } // namespace Sourcey::Symple
+} } // namespace Scy::Symple

@@ -40,7 +40,7 @@ using namespace Poco::Net;
 using namespace std;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace SocketIO {
 
 
@@ -167,15 +167,15 @@ void Client::sendInitialRequest()
 			static_cast<int>(response.getStatus()), response.getReason()));
 
 	// Parse the response response
-	StringList respData = Util::split(response.body.str(), ':', 4);
+	StringVec respData = Util::split(response.body.str(), ':', 4);
 	if (respData.size() < 4)
 		throw Exception(response.empty() ? 
 			"Invalid SocketIO handshake response." : Poco::format(
 			"Invalid SocketIO handshake response: %s", response.body.str()));
 	
 	_sessionID = respData[0];
-	_heartBeatTimeout = Util::atoi(respData[1]);
-	_connectionClosingTimeout = Util::atoi(respData[2]);
+	_heartBeatTimeout = Util::fromString<UInt32>(respData[1]);
+	_connectionClosingTimeout = Util::fromString<UInt32>(respData[2]);
 	_protocols = Util::split(respData[3], ',');
 
 	// Check websockets are supported
@@ -337,8 +337,8 @@ void Client::onConnect()
 
 	// Start the heartbeat timer if cancelled
 	if (_timer->cancelled()) {	
-		_timer->setTimeout((_heartBeatTimeout * .75) * 1000);
-		_timer->setInterval((_heartBeatTimeout * .75) * 1000);
+		_timer->setTimeout((long)(_heartBeatTimeout * .75) * 1000);
+		_timer->setInterval((long)(_heartBeatTimeout * .75) * 1000);
 		_timer->Timeout += delegate(this, &Client::onHeartBeatTimer);
 		_timer->start();
 	}
@@ -420,7 +420,7 @@ void Client::onSocketData(void*, Buffer& data, const Net::Address&)
 
 
 
-} } // namespace Sourcey::SocketIO
+} } // namespace Scy::SocketIO
 
 
 
@@ -590,15 +590,15 @@ void Client::onError()
 //	//	throw Exception(format("SocketIO handshake failed with %d", status));	
 //
 //	// Parse the response response
-//	StringList respData = Util::split(response.body.str(), ':', 4);
+//	StringVec respData = Util::split(response.body.str(), ':', 4);
 //	if (respData.size() < 4)
 //		throw Exception(response.empty() ? 
 //			"Invalid SocketIO handshake response." : format(
 //			"Invalid SocketIO handshake response: %s", response.body.str()));
 //	
 //	_sessionID = respData[0];
-//	_heartBeatTimeout = Util::atoi(respData[1]);
-//	_connectionClosingTimeout = Util::atoi(respData[2]);
+//	_heartBeatTimeout = Util::fromString<UInt32>(respData[1]);
+//	_connectionClosingTimeout = Util::fromString<UInt32>(respData[2]);
 //	_protocols = Util::split(respData[3], ',');
 //
 //	// Check websockets are supported
@@ -810,7 +810,7 @@ void Client::onError()
 	int size = socket.receiveBytes(buffer, sizeof(buffer));	
 	string response(buffer, size);
 	size_t pos = response.find(" "); pos++;
-	int status = Util::atoi(response.substr(pos, response.find(" ", pos) + 1));
+	int status = Util::fromString<UInt32>(response.substr(pos, response.find(" ", pos) + 1));
 	pos = response.find("\r\n\r\n", pos); pos += 4;
 	string body(response.substr(pos, response.length()));
 	socket.shutdownSend();

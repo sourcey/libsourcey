@@ -42,7 +42,7 @@
 #include <vector>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Sked {
 
 
@@ -82,7 +82,7 @@ protected:
 };
 
 
-} } // namespace Sourcey::Sked
+} } // namespace Scy::Sked
 
 
 #endif // SOURCEY_Sked_Scheduler_H
