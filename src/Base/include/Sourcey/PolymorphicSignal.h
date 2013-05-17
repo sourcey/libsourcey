@@ -29,7 +29,7 @@
 #define SOURCEY_PolymorphicSignal_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 #include "Sourcey/Signal.h"
 
 

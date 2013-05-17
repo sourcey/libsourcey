@@ -29,7 +29,7 @@
 #define SOURCEY_ByteOrder_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 
 
 #ifdef _WIN32

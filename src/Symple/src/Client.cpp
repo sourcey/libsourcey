@@ -294,17 +294,24 @@ void Client::onPacket(SocketIO::Packet& packet)
 
 	if (packet.type() == SocketIO::Packet::Message || 
 		packet.type() == SocketIO::Packet::JSON) {
-
 		JSON::Value data = packet.json();
 		string type(data["type"].asString());
 		log("trace") << "Packet Created: Symple Type: " << type << std::endl;
 		if (type == "message") {
 			Message m(data);
 			PacketEmitter::emit(this, m);
+			if (m.isRequest()) {
+				m.setStatus(404);
+				respond(m);
+			}
 		}
 		else if (type == "command") {
 			Command c(data);
 			PacketEmitter::emit(this, c);
+			if (c.isRequest()) {
+				c.setStatus(404);
+				respond(c);
+			}
 		}
 		else if (type == "presence") {
 			Presence p(data);
@@ -334,6 +341,9 @@ void Client::reset()
 	_announceStatus = 500;
 	_ourID = "";
 }
+
+
+} } // namespace Scy::Symple
 
 
 
@@ -639,6 +649,3 @@ void Client::onError()
 //	send(message);
 //	return *this;
 //}
-
-
-} } // namespace Scy::Symple

@@ -25,8 +25,8 @@
 //
 
 
-#ifndef ANIONU_JINGLE_SESSION_H
-#define ANIONU_JINGLE_SESSION_H
+#ifndef Sourcey_JINGLE_SESSION_H
+#define Sourcey_JINGLE_SESSION_H
 
 
 #include "Sourcey/XMPP/Jingle/Jingle.h"
@@ -165,7 +165,7 @@ protected:
 } // namespace Scy 
 
 
-#endif // ANIONU_JINGLE_SESSION_H
+#endif // Sourcey_JINGLE_SESSION_H
 
 /*
 class SessionManager 

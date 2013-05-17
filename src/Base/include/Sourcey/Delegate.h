@@ -29,7 +29,7 @@
 #define SOURCEY_Delegate_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 #include "Sourcey/Logger.h"
 
 

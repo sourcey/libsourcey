@@ -41,7 +41,7 @@ namespace Scy {
 
 template<class T>
 class DispatchQueue: public Task
-	/// As async dispatch queue which is managed by a Runner.
+	/// As async dispatch queue which is managed by a Runner instance.
 {
 public:
 	DispatchQueue(Runner& runner, int queueSize = 1024, int dispatchTimeout = DEFAULT_TIMEOUT) :

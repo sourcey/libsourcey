@@ -29,7 +29,7 @@
 #define SOURCEY_JSON_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 #include "json/json.h"
 #include <fstream>
 
@@ -102,7 +102,7 @@ inline std::string stringify(const JSON::Value& root, bool pretty = false)
 inline void assertMember(const JSON::Value& root,  const std::string& name) 
 {
 	if (!root.isMember(name))
-		throw Exception("A '" + name + "' member is required.");
+		throw Poco::Exception("A '" + name + "' member is required.");
 }
 
 

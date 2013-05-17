@@ -363,7 +363,7 @@ macro(find_component_paths module component library header)
         #lib${library}.so
         #${library}.lib
         #${library}
-      #  ${LibSourcey_SOURCE_DIR}/anionu-deps/poco
+      #  ${LibSourcey_SOURCE_DIR}/anionu-abi/poco
       #HINTS
       PATHS
         ${${ALIAS_LIBRARY_DIRS}}

@@ -29,28 +29,22 @@
 #define SOURCEY_Util_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 
-#include <vector>
 #include <string>
 #include <sstream>
-#include <map>
+#include <vector>
 #include <list>
 #include <deque>
-	
-
-#define MINVALUE(X,Y) ((X)<(Y)) ? (X) : (Y)
-#define MAXVALUE(X,Y) ((X)>(Y)) ? (X) : (Y)
-
-#define ARRAY_SIZE(x) (static_cast<int>((sizeof(x)/sizeof(x[0]))))
+#include <map>
 
 
 namespace Scy {
 namespace Util {
 
-
-UInt64 getTime();
-	/// Returns the current time
+//
+/// String Utils
+//
 
 template<typename T>
 std::string toString(const T &t) 
@@ -72,6 +66,9 @@ T fromString(const std::string& s)
 		return 0;
     return x;
 }
+
+UInt64 getTime();
+	/// Returns the current time
 
 std::string getPID(const void* ptr);
 	/// Returns the object PID and a string
@@ -110,8 +107,10 @@ bool compareVersion(const std::string& l, const std::string& r);
 bool matchNodes(const std::string& node, const std::string& xnode, const std::string& delim = "\r\n");
 bool matchNodes(const StringVec& params, const StringVec& xparams);
 
-void pause();
-	/// Pause the current thread until a key is pressed.
+
+//
+/// Cantainer Methods
+//
 
 template<typename T>
 inline void ClearList(std::list<T*>& L)
@@ -180,8 +179,14 @@ inline void ClearMap(std::map<const Key, T*>& M)
 
 
 //
-/// Windows Helpers
+/// System Tools
 //
+
+void pause();
+	/// Pause the current thread until a key is pressed.
+
+
+/// Windows Helpers
 
 #if WIN32
 enum WindowsMajorVersions {

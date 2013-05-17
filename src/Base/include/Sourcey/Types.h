@@ -25,26 +25,55 @@
 //
 
 
-#ifndef SOURCEY_RTP_Types_H
-#define SOURCEY_RTP_Types_H
+#ifndef SOURCEY_Types_H
+#define SOURCEY_Types_H
 
 
-#include "Sourcey/Types.h"
+#include "Sourcey/Base.h"
+#include "Poco/Foundation.h"
+#include "Poco/Exception.h"
+#include "Poco/Mutex.h"
+
+#include <vector>
+#include <map>
 
 
-namespace Scy { 
-namespace RTP {
+//
+/// Cross platform normalization
+//
+#ifdef WIN32
+#define strncasecmp strnicmp
+#define strcasecmp stricmp
+#endif 
+
+
+namespace Scy {
+
 	
-	
-#define RTP_MAX_PACKET_LEN 1500
+//
+// Reduce namespace pollution by forwarding some 
+// extensively used basic Poco types to our namespace.
+//
+using Poco::Exception;
+using Poco::Mutex;
 
-const int kRtpBaseHeaderSize = 12;
-const UInt8 kRtpVersionNumber = 2;
-const int kRtpMaxSources = 16;
-const int kBytesPerCSRC = 4;
+using Poco::Int8;
+using Poco::UInt8;
+using Poco::Int16;
+using Poco::UInt16;
+using Poco::Int32;
+using Poco::UInt32;
+using Poco::Int32;
+using Poco::UInt32;
+using Poco::Int64;
+using Poco::UInt64;
 
 
-} } // namespace Scy::RTP
+typedef std::vector<std::string>			StringVec;
+typedef std::map<std::string, std::string>	StringMap;
 
 
-#endif // SOURCEY_RTP_Types_H
+} // namespace Scy
+
+
+#endif // SOURCEY_Types_H

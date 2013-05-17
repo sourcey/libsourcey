@@ -29,7 +29,7 @@
 #define SOURCEY_PacketSignal_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 #include "Sourcey/IPacket.h"
 #include "Sourcey/PolymorphicSignal.h"
 

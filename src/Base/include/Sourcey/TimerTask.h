@@ -29,7 +29,7 @@
 #define SOURCEY_TimerTask_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 #include "Sourcey/Task.h"
 #include "Sourcey/Signal.h"
 #include "Sourcey/Timeout.h"

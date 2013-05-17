@@ -29,7 +29,7 @@
 #define SOURCEY_CryptoProvider_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 #include <string>
 
 

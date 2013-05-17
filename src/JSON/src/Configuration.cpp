@@ -170,6 +170,7 @@ void Configuration::setRaw(const string& key, const string& value)
 		FastMutex::ScopedLock lock(_mutex); 
 		(*this)[key] = value;
 	}
+	PropertyChanged.emit(this, key, value);
 }
 
 

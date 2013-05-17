@@ -30,7 +30,7 @@
 
 # The default components to find
 if (NOT Poco_FIND_COMPONENTS)
-  set(Poco_FIND_COMPONENTS Zip Net NetSSL Crypto Util XML Foundation)
+  set(Poco_FIND_COMPONENTS Foundation Net NetSSL Crypto Util Zip) # XML
 endif()
 
 # Link library type
@@ -44,8 +44,8 @@ if (NOT Poco_FOUND)
   set(Poco_LIB_SUFFIX "")
   if(WIN32 AND MSVC)
     set(Poco_MULTI_CONFIGURATION TRUE)
-    add_definitions(-DPOCO_NO_AUTOMATIC_LIBS)
-    add_definitions(-DPOCO_NO_UNWINDOWS)
+    #add_definitions(-DPOCO_NO_AUTOMATIC_LIBS)
+    #add_definitions(-DPOCO_NO_UNWINDOWS)
     if(Poco_LINK_SHARED_LIBS)
       add_definitions(-DPOCO_DLL)
     else()

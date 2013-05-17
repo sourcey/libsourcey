@@ -30,7 +30,7 @@
 
 
 //
-// Version number  
+/// Version number  
 //
 #define SOURCEY_MAJOR_VERSION    0
 #define SOURCEY_MINOR_VERSION    8
@@ -42,7 +42,7 @@
 
 
 //
-// Cross platform configuration
+/// Cross platform configuration
 //
 #include "LibSourceyConfig.h"
 
@@ -70,55 +70,6 @@
     // Mac OS
     #define APPLE
 #endif
-
-
-//
-// Cross platform normalization
-//
-#ifdef WIN32
-#define strncasecmp strnicmp
-#define strcasecmp stricmp
-#endif 
-
-
-//
-// Pull in basic definitions
-//
-#include "Poco/Foundation.h"
-#include "Poco/Types.h"
-#include "Poco/Exception.h"
-
-#include <string>
-#include <vector>
-#include <map>
-
-
-namespace Scy { 
-
-
-//
-// Reduce namespace pollution by forwarding some 
-// widely used basic Poco types to our namespace.
-// This way the global namespace remains clean.
-//
-using Poco::Int8;
-using Poco::UInt8;
-using Poco::Int16;
-using Poco::UInt16;
-using Poco::Int32;
-using Poco::UInt32;
-using Poco::Int32;
-using Poco::UInt32;
-using Poco::Int64;
-using Poco::UInt64;
-
-using Poco::Exception;
-
-typedef std::vector<std::string>			StringVec;
-typedef std::map<std::string, std::string>	StringMap;
-
-
-}
 
 
 #endif // SOURCEY_H

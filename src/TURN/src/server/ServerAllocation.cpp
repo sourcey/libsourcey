@@ -220,10 +220,8 @@ UInt32 ServerAllocation::timeRemaining()
 	time_t currentTime = time(0);	
 
 	UInt32 remaining = static_cast<UInt32>(
-		MINVALUE(
-			_lifetime - (currentTime - _updatedAt),
-			_maxLifetime - (currentTime - _createdAt)
-		)
+		min(static_cast<UInt32>(_lifetime - (currentTime - _updatedAt)),
+			static_cast<UInt32>(_maxLifetime - (currentTime - _createdAt)))
 	);
 	
 	//log("trace") << "Seconds Remaining: " 
