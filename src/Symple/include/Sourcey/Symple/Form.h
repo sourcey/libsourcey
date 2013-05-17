@@ -175,40 +175,6 @@ public:
 };
 
 
-class IFormProcessor
-	/// This class provides a unified interface for   
-	/// client side processing of Symple Form transactions.
-{	
-public:
-	virtual ~IFormProcessor() = 0 {};
-
-	virtual void buildForm(Form& form, FormElement& element) {};
-		/// Builds the config form for this module. The defaultScope 
-		/// argument is only applicable for classes using
-		/// ScopedConfiguration, such as IModes.
-
-	virtual void parseForm(Form& form, FormElement& element) {};
-		/// Parses the config form for this module. 
-		/// Errors can be added to any invalid FormFields to
-		/// resubmit the form to the client for correction.
-
-	virtual bool isConfigurable() const { return false; }
-		/// This method is called to determine weather this module has 
-		/// any configurable methods. If false is returned then 
-		/// buildForm() will never be called.	
-
-	virtual bool hasParsableFields(Symple::Form& form) const { return false; }
-		/// Checks if there is any parsable fields for the given form.
-		/// If no items exist then parseForm() will not be called.
-
-	virtual std::string documentFile() { return ""; };
-		/// This method returns the optional relative path (from the 
-		/// application binary dir) to the information/help guide 
-		/// pertaining to configurable fields in this form module.
-		/// Information files are generally in Markdown format.
-};
-
-
 } // namespace Symple 
 } // namespace Scy
 

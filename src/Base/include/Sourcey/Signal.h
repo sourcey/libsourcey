@@ -29,7 +29,7 @@
 #define SOURCEY_Signal_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 #include "Sourcey/Delegate.h"
 #include "Sourcey/Util.h"
 #include "Poco/Mutex.h"

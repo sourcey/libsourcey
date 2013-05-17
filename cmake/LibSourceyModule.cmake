@@ -92,10 +92,13 @@ macro(define_sourcey_module name)
     INSTALL_NAME_DIR lib
     LINKER_LANGUAGE CXX)
     
-  install(TARGETS ${name}
-    RUNTIME DESTINATION bin COMPONENT main
-    LIBRARY DESTINATION lib COMPONENT main
-    ARCHIVE DESTINATION lib COMPONENT main)        
+  # Add install routine, unless lib is header only
+  if (lib_srcs)
+    install(TARGETS ${name}
+      RUNTIME DESTINATION bin COMPONENT main
+      LIBRARY DESTINATION lib COMPONENT main
+      ARCHIVE DESTINATION lib COMPONENT main)   
+  endif()      
   
   # Build samples
   if(BUILD_MODULE_SAMPLES AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/samples)

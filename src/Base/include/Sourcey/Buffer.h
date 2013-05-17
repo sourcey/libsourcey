@@ -30,7 +30,7 @@
 
 
 #include "Sourcey/ByteOrder.h"
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 
 #include <string>
 #include <algorithm>

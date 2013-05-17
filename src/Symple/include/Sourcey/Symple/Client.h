@@ -114,7 +114,7 @@ public:
 	virtual Client& operator >> (Message& message);	
 		/// Stream operator alias for send().
 
-	Signal<int&> Announce;
+	Signal<const int&> Announce;
 		/// Notifies the outside application about the 
 		/// response status code of our announce() call.
 		/// Possible status codes are:

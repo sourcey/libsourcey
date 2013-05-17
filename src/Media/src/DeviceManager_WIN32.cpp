@@ -55,6 +55,8 @@
 #endif
 */
 
+#define ARRAY_SIZE(x) (static_cast<int>((sizeof(x)/sizeof(x[0]))))
+
 
 using namespace std; 
 

@@ -29,29 +29,26 @@
 #define SOURCEY_IConfiguration_H
 
 
+#include "Sourcey/Signal.h"
 #include "Poco/Mutex.h"
-#include <string>
 
 
 namespace Scy {
 
 
 class IConfiguration
-	/// IConfiguration is an abstract base class for different
-	/// kinds of configuration data, such as INI files, property files,
-	/// XML configuration files or the Windows Registry.
+	/// IConfiguration is an abstract base class for managing 
+	/// different kinds of configuration data such as JSON, XML,
+	/// SQL or Windows Registry.
 	///
-	/// IConfigurationuration property keys have a hierarchical format, consisting
+	/// IConfiguration property keys have a hierarchical format, consisting
 	/// of names separated by periods. The exact interpretation of key names
 	/// is up to the actual subclass implementation of IConfiguration.
 	/// Keys are case sensitive.
 	///
 	/// All public methods are synchronized, so the class is safe for multithreaded use.
-	/// IConfiguration implements reference counting based garbage collection.
 	///
 	/// Subclasses must override the getRaw() and setRaw() and methods.
-	///
-	/// NOTE: This class was taken from Poco's Util library to remove dependency on that library.
 {
 public:
 	IConfiguration();	
@@ -155,6 +152,9 @@ public:
 		/// Sets the property with the given key to the given value.
 		/// An already existing value for the key is overwritten.
 
+	Signal2<const std::string&, const std::string&> PropertyChanged;
+		/// The Key and Value of the changed configuration property.
+
 protected:
 	virtual bool getRaw(const std::string& key, std::string& value) const = 0;
 		/// If the property with the given key exists, stores the property's value
@@ -165,6 +165,9 @@ protected:
 	virtual void setRaw(const std::string& key, const std::string& value) = 0;
 		/// Sets the property with the given key to the given value.
 		/// An already existing value for the key is overwritten.
+		///
+		/// The implementation is responsible for emitting the 
+		/// PropertyChanged signal.
 
 	static int parseInt(const std::string& value);
 	static bool parseBool(const std::string& value);

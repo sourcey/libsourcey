@@ -29,7 +29,7 @@
 #define SOURCEY_GarbageCollection_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 #include "Sourcey/Task.h"
 
 

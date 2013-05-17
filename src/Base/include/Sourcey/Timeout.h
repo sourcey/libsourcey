@@ -29,7 +29,7 @@
 #define SOURCEY_Timeout_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 
 
 namespace Scy {

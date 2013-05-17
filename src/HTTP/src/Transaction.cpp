@@ -243,8 +243,8 @@ void Transaction::setResponseState(TransferState::Type state)
 
 void Transaction::onComplete()
 {	
-	if (!cancelled())
-		Complete.emit(this, _response);
+	assert(!cancelled());
+	Complete.emit(this, _response);
 }
 
 

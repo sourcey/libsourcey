@@ -29,7 +29,7 @@
 #define SOURCEY_Task_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 
 #include "Poco/Mutex.h"
 
