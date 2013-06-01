@@ -27,15 +27,7 @@
 
 #include "Sourcey/Symple/Client.h"
 
-/*
-#include "Sourcey/Symple/Message.h"
-#include "Sourcey/Logger.h"
 
-
-using namespace Poco;
-using namespace Poco::Net;
-using namespace Scy::Net;
-*/
 using namespace std;
 
 
@@ -48,21 +40,21 @@ Client::Client(Net::IWebSocket& socket, Runner& runner, const Client::Options& o
 	_options(options),
 	_announceStatus(500)
 {
-	log("trace") << "Creating" << std::endl;
+	log("trace") << "Creating" << endl;
 }
 
 
 Client::~Client() 
 {
-	log("trace") << "Destroying" << std::endl;
+	log("trace") << "Destroying" << endl;
 	//close();
-	//log("trace") << "Destroying: OK" << std::endl;
+	//log("trace") << "Destroying: OK" << endl;
 }
 
 
 void Client::connect()
 {
-	log("trace") << "Connecting" << std::endl;		
+	log("trace") << "Connecting" << endl;		
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		assert(!_options.user.empty());
@@ -76,51 +68,57 @@ void Client::connect()
 
 void Client::close()
 {
-	log("trace") << "Closing" << std::endl;
-
+	log("trace") << "Closing" << endl;
 	SocketIO::Client::close();
 }
 
 
-int Client::send(const std::string data)
-{
-	assert(isOnline());
-	return SocketIO::Client::send(SocketIO::Packet::Message, data, false);
-}
-
-
-int Client::send(const Message& message, bool ack)
+int Client::send(Message& m, bool ack)
 {	
 	assert(isOnline());
-	Message m(message);
 	m.setFrom(ourPeer().address());
-	assert(m.valid());
-	assert(m.to().id() != m.from().id());
+
+	if (m.to().id() == m.from().id())
+		throw Exception("Cannot send message with matching sender and recipient.");
+
+	if (!m.valid())
+		throw Exception("Cannot send invalid message.");	
+	
+	//Message m(message);
+	//if (m.from() != ourPeer().address())
+	//	throw Exception("Cannot send message from another peer.");
 	//log("trace") << "Sending Message: " 
 	//	<< message.id() << ":\n" 
-	//	<< JSON::stringify(message, true) << std::endl;
-	return SocketIO::Client::send(message, false);
+	//	<< JSON::stringify(message, true) << endl;
+	return SocketIO::Client::send(m, false);
 }
 
 
-int Client::respond(const Message& message, bool ack)
+int Client::send(const string data, bool ack)
 {
-	assert(isOnline());	
-	Message m(message);
+	Message m;
+	m.read(data);
+	return send(data, ack);
+}
+
+
+int Client::respond(Message& m, bool ack)
+{
 	m.setTo(m.from());
-	m.setFrom(ourPeer().address());
-	assert(m.valid());
-	assert(m.to().id() != m.from().id());
+	//m.setFrom(ourPeer().address());	
+	//assert(isOnline());	
+	//assert(m.valid());
+	//assert(m.to().id() != m.from().id());
 	//log("trace") << "Responding Message: " 
 	//	<< m.id() << ":\n" 
-	//	<< JSON::stringify(m, true) << std::endl;
-	return SocketIO::Client::send(message, false);
+	//	<< JSON::stringify(m, true) << endl;
+	return send(m, ack);
 }
 
 
 void Client::createPresence(Presence& p)
 {
-	log("trace") << "Creating Presence" << std::endl;
+	log("trace") << "Creating Presence" << endl;
 
 	Peer& peer = ourPeer();
 	UpdatePresenceData.emit(this, peer);
@@ -130,7 +128,7 @@ void Client::createPresence(Presence& p)
 
 int Client::sendPresence(bool probe)
 {
-	log("trace") << "Broadcasting Presence" << std::endl;
+	log("trace") << "Broadcasting Presence" << endl;
 
 	Presence p;
 	createPresence(p);
@@ -141,7 +139,7 @@ int Client::sendPresence(bool probe)
 
 int Client::sendPresence(const Address& to, bool probe)
 {
-	log("trace") << "Sending Presence" << std::endl;
+	log("trace") << "Sending Presence" << endl;
 	
 	Presence p;
 	createPresence(p);
@@ -188,7 +186,7 @@ Client::Options& Client::options()
 }
 
 
-std::string Client::ourID() const
+string Client::ourID() const
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);
 	return _ourID;
@@ -198,7 +196,7 @@ std::string Client::ourID() const
 Peer& Client::ourPeer()
 {	
 	Poco::FastMutex::ScopedLock lock(_mutex);
-	log("trace") << "Getting Our Peer: " << _ourID << std::endl;
+	log("trace") << "Getting Our Peer: " << _ourID << endl;
 	if (_ourID.empty())
 		throw Exception("No active peer session is available.");
 	return *_roster.get(_ourID, true);
@@ -232,7 +230,7 @@ int Client::announce()
 
 void Client::onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
 {
-	log("trace") << "Announce Response: " << state.toString() << std::endl;
+	log("trace") << "Announce Response: " << state.toString() << endl;
 	
 	SocketIO::Transaction* transaction = reinterpret_cast<SocketIO::Transaction*>(sender);
 	switch (state.id()) {	
@@ -279,7 +277,7 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 
 void Client::onOnline()
 {
-	log("trace") << "On Online" << std::endl;
+	log("trace") << "On Online" << endl;
 
 	// Override this method because we are not quite
 	// ready to transition to Online yet - we still
@@ -290,36 +288,43 @@ void Client::onOnline()
 
 void Client::onPacket(SocketIO::Packet& packet) 
 {
-	log("trace") << "On Packet: " << packet.className() << std::endl;
+	log("trace") << "On Packet: " << packet.className() << endl;
 
 	if (packet.type() == SocketIO::Packet::Message || 
 		packet.type() == SocketIO::Packet::JSON) {
-		JSON::Value data = packet.json();
-		string type(data["type"].asString());
-		log("trace") << "Packet Created: Symple Type: " << type << std::endl;
-		if (type == "message") {
-			Message m(data);
-			PacketEmitter::emit(this, m);
-			if (m.isRequest()) {
-				m.setStatus(404);
-				respond(m);
+			
+		//JSON::Value data = packet.json();
+		JSON::Value data;
+		JSON::Reader reader;
+		if (reader.parse(packet.message(), data)) {
+			string type(data["type"].asString());
+			log("trace") << "Symple Packet Created: " << type << endl;
+			if (type == "message") {
+				Message m(data);
+				PacketEmitter::emit(this, m);
+				if (m.isRequest()) {
+					m.setStatus(404);
+					log("info") << "Message not handled: " << m.id() << endl;
+					respond(m);
+				}
 			}
-		}
-		else if (type == "command") {
-			Command c(data);
-			PacketEmitter::emit(this, c);
-			if (c.isRequest()) {
-				c.setStatus(404);
-				respond(c);
+			else if (type == "command") {
+				Command c(data);
+				PacketEmitter::emit(this, c);
+				if (c.isRequest()) {
+					c.setStatus(404);
+					log("info") << "Command not handled: " << c.id() << ": " << c.node() << endl;
+					respond(c);
+				}
 			}
-		}
-		else if (type == "presence") {
-			Presence p(data);
-			if (p.isMember("data"))
-				_roster.update(p["data"], false);
-			PacketEmitter::emit(this, p);
-			if (p.isProbe())
-				sendPresence(p.from());
+			else if (type == "presence") {
+				Presence p(data);
+				if (p.isMember("data"))
+					_roster.update(p["data"], false);
+				PacketEmitter::emit(this, p);
+				if (p.isProbe())
+					sendPresence(p.from());
+			}
 		}
 	}
 	else
@@ -329,7 +334,7 @@ void Client::onPacket(SocketIO::Packet& packet)
 
 void Client::onClose()
 {
-	log("trace") << "Symple Closing" << std::endl;
+	log("trace") << "Symple Closing" << endl;
 	SocketIO::Client::onClose();
 	reset();
 }
@@ -361,7 +366,7 @@ void Client::onError()
 		//SocketIO::Packet* p = dynamic_cast<SocketIO::Packet*>(packet);
 		//JSON::Value data = packet.json();
 		//if (!data.isObject() || data.isNull()) {
-		//	log("warning") << "Packet is not a JSON object" << std::endl;
+		//	log("warning") << "Packet is not a JSON object" << endl;
 		//	return true; // continue propagation
 		//}
 			//return false; // stop propagation
@@ -406,7 +411,7 @@ void Client::onError()
 //}
 //
 //
-//int Client::send(const std::string data)
+//int Client::send(const string data)
 //{
 //	assert(isOnline());
 //	return SocketIO::Socket::send(SocketIO::Packet::Message, data, false);

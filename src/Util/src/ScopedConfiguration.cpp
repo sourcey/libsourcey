@@ -34,9 +34,9 @@ using namespace std;
 namespace Scy {
 
 
-ScopedConfiguration::ScopedConfiguration(IConfiguration& config, const string& moduleScope, const string& defaultScope) :
+ScopedConfiguration::ScopedConfiguration(IConfiguration& config, const string& currentScope, const string& defaultScope) :
 	config(config),
-	moduleScope(moduleScope),
+	currentScope(currentScope),
 	defaultScope(defaultScope)
 {
 }
@@ -44,7 +44,7 @@ ScopedConfiguration::ScopedConfiguration(IConfiguration& config, const string& m
 
 ScopedConfiguration::ScopedConfiguration(const ScopedConfiguration& r) :
 	config(r.config),
-	moduleScope(r.moduleScope),
+	currentScope(r.currentScope),
 	defaultScope(r.defaultScope)
 {
 }
@@ -54,7 +54,7 @@ string ScopedConfiguration::getString(const string& key, const string& defaultVa
 {
 	return forceDefaultScope ? 
 		config.getString(getDafaultKey(key), defaultValue) :
-			config.getString(getModuleScope(key), 
+			config.getString(getCurrentScope(key), 
 				config.getString(getDafaultKey(key), defaultValue));
 }
 
@@ -63,7 +63,7 @@ int ScopedConfiguration::getInt(const string& key, int defaultValue, bool forceD
 {
 	return forceDefaultScope ?
 		config.getInt(getDafaultKey(key), defaultValue) :
-			config.getInt(getModuleScope(key), 
+			config.getInt(getCurrentScope(key), 
 				config.getInt(getDafaultKey(key), defaultValue));
 }
 
@@ -72,7 +72,7 @@ double ScopedConfiguration::getDouble(const string& key, double defaultValue, bo
 {
 	return forceDefaultScope ? 
 		config.getDouble(getDafaultKey(key), defaultValue) :
-			config.getDouble(getModuleScope(key), 
+			config.getDouble(getCurrentScope(key), 
 				config.getDouble(getDafaultKey(key), defaultValue));
 }
 
@@ -81,7 +81,7 @@ bool ScopedConfiguration::getBool(const string& key, bool defaultValue, bool for
 {
 	return forceDefaultScope ? 
 		config.getBool(getDafaultKey(key), defaultValue) :
-			config.getBool(getModuleScope(key), 
+			config.getBool(getCurrentScope(key), 
 				config.getBool(getDafaultKey(key), defaultValue));
 }
 
@@ -110,9 +110,9 @@ void ScopedConfiguration::setBool(const string& key, bool value, bool defaultSco
 }
 
 
-string ScopedConfiguration::getModuleScope(const string& key) const
+string ScopedConfiguration::getCurrentScope(const string& key) const
 {	
-	return moduleScope + key;
+	return currentScope + key;
 }
 
 
@@ -124,7 +124,7 @@ string ScopedConfiguration::getDafaultKey(const string& key) const
 
 string ScopedConfiguration::getScopedKey(const string& key, bool defaultScope) const
 {
-	return defaultScope ? getDafaultKey(key) : getModuleScope(key);
+	return defaultScope ? getDafaultKey(key) : getCurrentScope(key);
 }
 
 

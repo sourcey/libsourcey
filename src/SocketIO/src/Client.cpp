@@ -27,16 +27,7 @@
 
 #include "Sourcey/SocketIO/Client.h"
 
-/*
-#include "Sourcey/SocketIO/Packet.h"
-#include "Sourcey/HTTP/Transaction.h"
 
-#include "Poco/Format.h"
-
-
-using namespace Poco;
-using namespace Poco::Net;
-*/
 using namespace std;
 
 
@@ -96,7 +87,7 @@ void Client::connect()
 	sendInitialRequest();
 
 	Poco::FastMutex::ScopedLock lock(_mutex);
-
+	
 	// Initialize the websocket
 	_socket.Connected += delegate(this, &Client::onSocketConnect);
 	_socket.Online += delegate(this, &Client::onSocketOnline);
@@ -108,8 +99,9 @@ void Client::connect()
 		<< _serverAddr.toString()
 		<< "/socket.io/1/websocket/"
 		<< _sessionID;
+	
+	log("trace") << "Connecting: " << uri.str() << endl;
 	_socket.connect(uri.str());
-
 }
 
 
@@ -139,13 +131,12 @@ void Client::sendInitialRequest()
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);
 	
-	log("trace") << "Sending Handshake" << endl;	
-	
 	ostringstream uri;
 	uri << (_socket.transport() == Net::SSLTCP ? "https://" : "http://")
 		<< _serverAddr.toString()
 		<< "/socket.io/1/";
-
+		
+	log("trace") << "Sending Handshake" << endl;	
 	HTTP::Request* request = new HTTP::Request("POST", uri.str());	
 	HTTP::Transaction transaction(request);
 	HTTP::Response& response = transaction.response();

@@ -61,6 +61,7 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFo
 		
 	// Open the audio stream or throw an exception.
 	open(); //channels, sampleRate
+	LogTrace("AudioCapture", this) << "Creating: OK" << endl;
 }
 
 
@@ -74,7 +75,8 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 {
 	LogTrace("AudioCapture", this) << "Opening: " << _channels << ": " << _sampleRate << endl;
 
-	close();
+	if (isOpen())
+		close();
 
 	FastMutex::ScopedLock lock(_mutex);
 	
@@ -157,7 +159,6 @@ void AudioCapture::stop()
 			setError("Cannot stop audio capture.");
 		}
 	}
-
 }
 
 
@@ -186,7 +187,7 @@ bool AudioCapture::detach(const PacketDelegateBase& delegate)
 void AudioCapture::setError(const string& message)
 {
 	_error = message;
-	LogError() << "[AudioCapture::" << this << "] Error: " << message << endl;
+	LogError("AudioCapture", this) << "Error: " << message << endl;
 	throw Exception(message);
 }
 
@@ -196,14 +197,14 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 {
 	AudioCapture* klass = (AudioCapture*)data;
 
-	//LogTrace() << "[AudioCapture::" << klass << "] Callback" << endl;
+	LogTrace("AudioCapture", klass) << "Callback" << endl;
 	
 	if (status) 
-		LogError() << "[AudioCapture::" << klass << "] Stream over/underflow detected" << endl;
+		LogError("AudioCapture", klass) << "Stream over/underflow detected" << endl;
 
 	assert(inputBuffer != NULL);
 	if (inputBuffer == NULL) {
-		LogError() << "[AudioCapture::" << klass << "] Input buffer is NULL." << endl;
+		LogError("AudioCapture", klass) << "Input buffer is NULL." << endl;
 		return 2;
 	} 
 
@@ -244,7 +245,7 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 	//	<< endl;
 
 	klass->emit(klass, packet);
-	//LogTrace() << "[AudioCapture::" << klass << "] Callback: OK" << endl;
+	//LogTrace("AudioCapture", klass) << "Callback: OK" << endl;
 	return 0;
 }
 

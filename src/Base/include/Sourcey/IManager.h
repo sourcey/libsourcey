@@ -48,6 +48,7 @@ public:
 	virtual bool exists(const TValue* item) const = 0;
 	virtual bool free(const TKey& key) = 0;
 	virtual bool empty() const = 0;
+	virtual int size() const = 0;
 	virtual TValue* get(const TKey& key, bool whiny = true) const = 0;
 	virtual void clear() = 0;
 };

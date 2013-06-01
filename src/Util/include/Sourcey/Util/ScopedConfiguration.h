@@ -46,7 +46,7 @@ class ScopedConfiguration
 	///		Default: modes.[name].[value]
 {	
 public:
-	ScopedConfiguration(IConfiguration& config, const std::string& moduleScope, const std::string& defaultScope);
+	ScopedConfiguration(IConfiguration& config, const std::string& currentScope, const std::string& defaultScope);
 	ScopedConfiguration(const ScopedConfiguration& r);
 
 	std::string getString(const std::string& key, const std::string& defaultValue, bool forceDefaultScope = false) const;
@@ -59,12 +59,12 @@ public:
 	void setDouble(const std::string& key, double value, bool defaultScope = false);
 	void setBool(const std::string& key, bool value, bool defaultScope = false);
 	
-	std::string getModuleScope(const std::string& key) const;
+	std::string getCurrentScope(const std::string& key) const;
 	std::string getDafaultKey(const std::string& key) const;
 	std::string getScopedKey(const std::string& key, bool defaultScope = false) const;
 
 	IConfiguration& config;
-	std::string moduleScope;
+	std::string currentScope;
 	std::string defaultScope;
 
 private:	

@@ -69,6 +69,7 @@ void PacketStream::start()
 		return;
 	}
 
+	assert(numAdapters() > 0);
 	{	
 		FastMutex::ScopedLock lock(_mutex);
 
@@ -78,6 +79,7 @@ void PacketStream::start()
 		for (PacketAdapterList::iterator pit = _processors.begin(); pit != _processors.end(); ++pit) {
 			thisProc = reinterpret_cast<IPacketProcessor*>((*pit).ptr);
 			if (lastProc) {
+				LogTrace("PacketStream", this) << "Connecting Processor: " << thisProc << endl;
 				lastProc->attach(packetDelegate(thisProc, &IPacketProcessor::process));
 			}
 			lastProc = thisProc;
@@ -90,6 +92,7 @@ void PacketStream::start()
 		// Attach and start synchronized runnables
 		for (PacketAdapterList::iterator sit = _sources.begin(); sit != _sources.end(); ++sit) {
 			PacketEmitter* source = (*sit).ptr;
+			LogTrace("PacketStream", this) << "Connecting Source: " << source << endl;
 			source->attach(packetDelegate(this, &PacketStream::onSourcePacket));
 			if ((*sit).syncState) {
 				IStartable* runnable = dynamic_cast<IStartable*>((*sit).ptr);

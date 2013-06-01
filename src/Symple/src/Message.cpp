@@ -44,7 +44,7 @@ namespace Symple {
 Message::Message() :
 	JSON::Value(Json::objectValue)
 {
-	(*this)["id"] = CryptoProvider::generateRandomKey(32);
+	(*this)["id"] = CryptoProvider::generateRandomKey(16);
 	(*this)["type"] = "message";
 }
 
@@ -53,7 +53,7 @@ Message::Message(const Message& root) :
 	JSON::Value(root)
 {
 	if (!isMember("id"))
-		(*this)["id"] = CryptoProvider::generateRandomKey(32);
+		(*this)["id"] = CryptoProvider::generateRandomKey(16);
 	if (!isMember("type"))
 		(*this)["type"] = "message";
 }
@@ -63,7 +63,7 @@ Message::Message(const JSON::Value& root) :
 	JSON::Value(root)
 {
 	if (!isMember("id"))
-		(*this)["id"] = CryptoProvider::generateRandomKey(32);
+		(*this)["id"] = CryptoProvider::generateRandomKey(16);
 	if (!isMember("type"))
 		(*this)["type"] = "message";
 }
@@ -82,10 +82,16 @@ IPacket* Message::clone() const
 
 bool Message::read(Buffer& buf) 
 {
-	string document;
-	buf.readString(document, buf.remaining());	
+	string root;
+	buf.readString(root, buf.remaining());	
+	return read(root);
+}
+
+
+bool Message::read(const std::string& root)
+{
 	JSON::Reader reader;
-	return reader.parse(document, *this);
+	return reader.parse(root, *this);
 }
 
 
@@ -97,14 +103,14 @@ void Message::write(Buffer& buf) const
 
 size_t Message::size() const
 {
+	// KLUDGE: is there a better way?
 	return JSON::stringify(*this).size();
 }
 
 	
 void Message::print(ostream& os) const
 {
-	JSON::StyledWriter writer;
-	os << writer.write(*this);
+	os << JSON::stringify(*this, true);
 }
 
 

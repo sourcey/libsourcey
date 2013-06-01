@@ -288,9 +288,6 @@ LocalPackage::LocalPackage(const RemotePackage& src) :
 	assert(src.valid());	
 
 	// Clear unwanted remote package fields
-	//removeMember("state");
-	//removeMember("install-state");
-	//removeMember("version");
 	removeMember("assets");
 	assert(valid());
 }

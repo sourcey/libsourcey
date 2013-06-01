@@ -164,6 +164,7 @@ VideoCapture* MediaFactory::createVideoCapture(const string& file, bool destroyO
 
 AudioCapture* MediaFactory::createAudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format) //, bool destroyOnStop
 {
+	LogTrace() << "[MediaFactory] Create Audio Capture: " << deviceId << endl;
 	AudioCapture* capture = new AudioCapture(deviceId, channels, sampleRate, format);
 	//capture->setDestroyOnStop(destroyOnStop);
 	return capture;

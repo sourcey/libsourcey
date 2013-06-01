@@ -48,7 +48,7 @@ public:
 	virtual ~Message();
 
 	virtual IPacket* clone() const;
-	
+
 	virtual bool valid() const;
 	virtual void clear();
 	virtual void clearData();
@@ -62,9 +62,7 @@ public:
 	
 	void setType(const std::string& type);
 	void setTo(const Address& to);	
-	//void setTo(const std::string& to);	
 	void setFrom(const Address& from);
-	//void setFrom(const std::string& from);
 
 	void setStatus(int code);
 		/// HTTP status codes are used to describe the message response.
@@ -86,6 +84,7 @@ public:
 	bool hasData(const std::string& name);
 	
 	virtual bool read(Buffer& buf);
+	virtual bool read(const std::string& root);
 	virtual void write(Buffer& buf) const;
 	
 	bool isRequest() const;	
