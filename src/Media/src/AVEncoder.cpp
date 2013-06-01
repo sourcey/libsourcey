@@ -78,9 +78,6 @@ AVEncoder::AVEncoder() :
 AVEncoder::~AVEncoder()
 {
 	LogDebug("AVEncoder", this) << "Destroying" << endl;
-	
-	//setState(this, EncoderState::Stopped);
-	//cleanup();
 	uninitialize();
 }
 
@@ -103,8 +100,7 @@ void AVEncoder::initialize()
 {
 	assert(!isActive());
 
-	LogDebug("AVEncoder", this) << "Starting:"
-		<< "\n\tPID: " << this
+	LogDebug("AVEncoder", this) << "Initializing:"
 		<< "\n\tInput Format: " << _options.iformat.toString()
 		<< "\n\tOutput Format: " << _options.oformat.toString()
 		<< "\n\tDuration: " << _options.duration
@@ -142,8 +138,7 @@ void AVEncoder::initialize()
 
 		// Initialize encoder contexts
 		createVideo();
-		createAudio();
-		
+		createAudio();		
 		{
 			// Lock our mutex during initialization
 			FastMutex::ScopedLock lock(_mutex);
@@ -185,8 +180,7 @@ void AVEncoder::initialize()
 		setState(this, EncoderState::Ready);
 	} 
 	catch (Exception& exc) {
-		LogError("AVEncoder", this) << "Error: " << exc.displayText() << endl;
-		
+		LogError("AVEncoder", this) << "Error: " << exc.displayText() << endl;		
 		cleanup();
 		setState(this, EncoderState::Error, exc.displayText());
 		exc.rethrow();
@@ -196,12 +190,8 @@ void AVEncoder::initialize()
 
 void AVEncoder::uninitialize()
 {
-	LogDebug("AVEncoder", this) << "Stopping" << endl;
-	
-	//setState(this, EncoderState::None);
-
-	cleanup();
-	
+	LogDebug("AVEncoder", this) << "Uninitializing" << endl;
+	cleanup();	
 	setState(this, EncoderState::Stopped);
 }
 
@@ -209,7 +199,6 @@ void AVEncoder::uninitialize()
 void AVEncoder::cleanup()
 {
 	LogDebug("AVEncoder", this) << "Cleanup" << endl;
-
 	{
  		// Lock our mutex during closure
 		FastMutex::ScopedLock lock(_mutex);	
@@ -222,8 +211,7 @@ void AVEncoder::cleanup()
 
     // Delete stream encoders
 	freeVideo();
-	freeAudio();	
-
+	freeAudio();
 	{
  		// Lock our mutex during closure
 		FastMutex::ScopedLock lock(_mutex);	
@@ -261,6 +249,7 @@ void AVEncoder::cleanup()
 
 void AVEncoder::process(IPacket& packet)
 {	
+	// TODO: Move to AVPacketEncoder class
 	if (!isActive()) {
 		LogWarn("AVEncoder", this) << "Encoder not initialized: Dropping Packet: " << packet.className() << endl;
 		return;
@@ -286,6 +275,7 @@ void AVEncoder::process(IPacket& packet)
 					
 void AVEncoder::onStreamStateChange(const PacketStreamState& state) 
 { 
+	// TODO: Move to AVPacketEncoder class
 	LogDebug("AVEncoder", this) << "Stream State Changed: " << state << endl;
 
 	switch (state.id()) {
@@ -364,7 +354,7 @@ void AVEncoder::freeVideo()
 
 bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, int height)
 {
-	//LogTrace("AVEncoder", this) << "Encoding Video Packet: " << bufferSize << endl;
+	LogTrace("AVEncoder", this) << "Encoding Video Packet: " << bufferSize << endl;	
 
 	// Lock the mutex while encoding
 	FastMutex::ScopedLock lock(_mutex);
@@ -418,12 +408,14 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 		_videoFPS.tick();
 		opacket.pts = (int64_t)_videoFPS.duration * _video->stream->time_base.den / _video->stream->time_base.num;
 		opacket.dts = AV_NOPTS_VALUE;
-
+		
 		/*
 		LogTrace() << "[AVEncoder:" << this << "] Writing Video:" 
 			<< "\n\tPTS: " << opacket.pts
 			<< "\n\tDTS: " << opacket.dts
 			<< "\n\tDuration: " << opacket.duration
+			<< "\n\tFPS Duration: " << _videoFPS.duration
+			<< "\n\tOpts Duration: " << _options.duration
 			<< endl;
 			*/
 
@@ -493,11 +485,7 @@ void AVEncoder::freeAudio()
 
 bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 {
-	LogTrace("AVEncoder", this) << "Encoding Audio Packet:\n" 
-		<< "Buffer Size: " << bufferSize << "\n"
-		<< "Frame Size: " << _audio->outputFrameSize << "\n"
-		//<< "Duration: " << frameDuration << "\n" 
-		<< endl;
+	LogTrace("AVEncoder", this) << "Encoding Audio Packet: " << bufferSize << endl;
 	
 	assert(buffer);
 	assert(bufferSize);

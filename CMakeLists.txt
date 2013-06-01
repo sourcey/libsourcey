@@ -95,14 +95,14 @@ if(WIN32)
     #D:/dev/lib/OpenCV2.4.1/build/install/lib
     #D:/dev/lib/OpenSSL-Win32/lib/VC/static
     #D:/dev/lib/poco-1.4.6p1-all/lib 
+    #D:/dev/lib/ffmpeg-1.0.1-gpl/lib
     ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/vs2010
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/lib/vs2010
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/poco/lib/vs2010
+    ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/vc10
+    ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/lib/vc10
+    ${LibSourcey_SOURCE_DIR}/anionu-abi/poco/lib/vc10
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
     )
     
-    #D:/dev/lib/ffmpeg-1.0.1-gpl/lib
     #D:/dev/lib/OpenCV2.3/build/x86/vc10/lib
     #D:/dev/lib/OpenCV2.4/build/lib/Debug
     #D:/dev/lib/OpenCV2.4/build/install/lib
@@ -124,10 +124,10 @@ endif()
 # to search these locations first
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    D:/dev/lib/OpenCV2.4.1/build/include
     D:/dev/lib/wxWidgets-2.9.4
-    D:/dev/lib/OpenSSL-Win32/include
-    D:/dev/lib/poco-1.4.6p1-all    
+    #D:/dev/lib/OpenSSL-Win32/include
+    #D:/dev/lib/poco-1.4.6p1-all    
+    #D:/dev/lib/ffmpeg-1.0.1-gpl/include
     ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/include
     ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/include
     ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/include
@@ -135,9 +135,9 @@ if(WIN32)
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
     )
     
-    #D:/dev/lib/ffmpeg-1.0.1-gpl/include
     #D:/dev/lib/OpenCV2.3/build/include
     #D:/dev/lib/OpenCV2.4/build/install/include
+    #D:/dev/lib/OpenCV2.4.1/build/include
     #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg
     #D:/dev/lib/ffmpeg
     #D:/dev/apps/MinGW/msys/1.0/local

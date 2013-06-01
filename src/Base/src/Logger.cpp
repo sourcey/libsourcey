@@ -168,7 +168,6 @@ LogStream Logger::send(const char* level, const void* ptr, const string& realm) 
 
 
 
-
 // ---------------------------------------------------------------------
 // Log Stream
 //
@@ -234,10 +233,10 @@ void ConsoleChannel::write(const LogStream& stream)
 	
 	ostringstream ss;
 	format(stream, ss);
-#if defined(_CONSOLE) || defined(_DEBUG)
+#if defined(_CONSOLE) && defined(_DEBUG)
 	cout << ss.str();
 #endif
-#if defined(_MSC_VER) && defined(_DEBUG)
+#if defined(_MSC_VER) && defined(_DEBUG) 
 	string s(ss.str());
 	wstring temp(s.length(), L' ');
 	copy(s.begin(), s.end(), temp.begin());
@@ -305,10 +304,10 @@ void FileChannel::write(const LogStream& stream)
 	_fstream << ss.str();
 	_fstream.flush();
 
-#if defined(_DEBUG) && defined(_CONSOLE)
+#if defined(_CONSOLE) && defined(_DEBUG)
 	cout << ss.str();
 #endif
-#if defined(_DEBUG) && defined(_MSC_VER)
+#if defined(_MSC_VER) && defined(_DEBUG) 
 	string s(ss.str());
 	wstring temp(s.length(), L' ');
 	copy(s.begin(), s.end(), temp.begin());
@@ -371,11 +370,11 @@ void RotatingFileChannel::write(const LogStream& stream)
 	format(stream, ss);
 	*_fstream << ss.str();
 	_fstream->flush();
-
-#if defined(_DEBUG) && defined(_CONSOLE)
+	
+#if defined(_CONSOLE) // && defined(_DEBUG)
 	cout << ss.str();
 #endif
-#if defined(_DEBUG) && defined(_MSC_VER)
+#if defined(_MSC_VER) // && defined(_DEBUG) 
 	string s(ss.str());
 	wstring temp(s.length(), L' ');
 	copy(s.begin(), s.end(), temp.begin());

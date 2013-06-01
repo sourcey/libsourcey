@@ -115,7 +115,8 @@ template<class C, typename P>
 struct DelegateCallback<C, 1, false, P> 
 {
 	typedef void (C::*Method)(P);	
-	virtual void emit(Void, P arg, Void, Void, Void) const {
+	virtual void emit(Void, P arg, Void, Void, Void) const 
+	{
 		(_object->*_method)(arg);
 	}
 
@@ -127,7 +128,8 @@ template<class C, typename P, typename P2>
 struct DelegateCallback<C, 2, true, P, P2> 
 {
 	typedef void (C::*Method)(Void, P, P2);	
-	virtual void emit(Void sender, P arg, P2 arg2, Void, Void) const {
+	virtual void emit(Void sender, P arg, P2 arg2, Void, Void) const 
+	{
 		(_object->*_method)(sender, arg, arg2);
 	}
 
@@ -139,7 +141,8 @@ template<class C, typename P, typename P2>
 struct DelegateCallback<C, 2, false, P, P2> 
 {
 	typedef void (C::*Method)(P, P2);	
-	virtual void emit(Void, P arg, P2 arg2, Void, Void) const {
+	virtual void emit(Void, P arg, P2 arg2, Void, Void) const 
+	{
 		(_object->*_method)(arg, arg2);
 	}
 
@@ -151,7 +154,8 @@ template<class C, typename P, typename P2, typename P3>
 struct DelegateCallback<C, 3, true, P, P2, P3> 
 {
 	typedef void (C::*Method)(Void, P, P2, P3);	
-	virtual void emit(Void sender, P arg, P2 arg2, P3 arg3, Void) const {
+	virtual void emit(Void sender, P arg, P2 arg2, P3 arg3, Void) const
+	{
 		(_object->*_method)(sender, arg, arg2, arg3);
 	}
 
@@ -163,7 +167,8 @@ template<class C, typename P, typename P2, typename P3> //, typename P4
 struct DelegateCallback<C, 3, false, P, P2, P3> 
 {
 	typedef void (C::*Method)(P, P2, P3);	
-	virtual void emit(Void, P arg, P2 arg2, P3 arg3, Void) const {
+	virtual void emit(Void, P arg, P2 arg2, P3 arg3, Void) const 
+	{
 		(_object->*_method)(arg, arg2, arg3);
 	}
 
@@ -175,7 +180,8 @@ template<class C, typename P, typename P2, typename P3, typename P4>
 struct DelegateCallback<C, 4, true, P, P2, P3, P4> 
 {
 	typedef void (C::*Method)(Void, P, P2, P3, P4);	
-	virtual void emit(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) const {
+	virtual void emit(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) const 
+	{
 		(_object->*_method)(sender, arg, arg2, arg3, arg4);
 	}
 
@@ -187,7 +193,8 @@ template<class C, typename P, typename P2, typename P3, typename P4>
 struct DelegateCallback<C, 4, false, P, P2, P3, P4> 
 {
 	typedef void (C::*Method)(P, P2, P3, P4);	
-	virtual void emit(Void, P arg, P2 arg2, P3 arg3, P4 arg4) const {
+	virtual void emit(Void, P arg, P2 arg2, P3 arg3, P4 arg4) const 
+	{
 		(_object->*_method)(arg, arg2, arg3, arg4);
 	}
 
@@ -221,45 +228,58 @@ class Delegate: public BaseT, public CallbackT
 	/// an DelegateBase and an object receiving notifications from it.
 {
 public:
-	typedef /*typename*/ DelegateBase<P, P2, P3, P4> DerivedT;
+	typedef DelegateBase<P, P2, P3, P4> DerivedT;
 	typedef typename CallbackT::Method Method;
 	typedef typename BaseT::DataT DataT;
 
 	Delegate(C* object, Method method, int priority = 0) : 
 		CallbackT(object, method),
 		_priority(priority), 
-		_cancelled(false) {}
+		_cancelled(false) 
+	{
+	}
 
 	Delegate(C* object, Method method, DataT filter, int priority = 0) :
 		BaseT(filter), CallbackT(object, method), 
 		_priority(priority), 
-		_cancelled(false) {} 
+		_cancelled(false) 
+	{
+	} 
 
 	Delegate(const Delegate& r) : 
 		BaseT(r), CallbackT(r), 
 		_priority(r._priority), 
-		_cancelled(r._cancelled) {}
+		_cancelled(r._cancelled) 
+	{
+	}	
+
+	virtual ~Delegate() 
+	{ 
+	}
 	
-	virtual BaseT* clone() const {
+	BaseT* clone() const 
+	{
 		return new Delegate(*this);
 	}
 	
-	virtual void emit(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) const {
+	void emit(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) const 
+	{
 		if (!_cancelled)
 			CallbackT::emit(sender, arg, arg2, arg3, arg4);
 	}
 	
-	virtual bool equals(const DerivedT* r) const { 
+	bool equals(const DerivedT* r) const 
+	{ 
 		const Delegate* delegate = dynamic_cast<const Delegate*>(r);
 		return delegate && 
 			   delegate->_object == CallbackT::_object && 
 			   delegate->_method == CallbackT::_method;
 	}	
 
-	virtual void cancel() { _cancelled = true; };
-	virtual bool cancelled() const { return _cancelled; };
-	virtual int priority() const { return _priority; };
-	virtual Void object() const { return CallbackT::_object; };	
+	void cancel() { _cancelled = true; };
+	bool cancelled() const { return _cancelled; };
+	int priority() const { return _priority; };
+	Void object() const { return CallbackT::_object; };	
 
 protected:
 	Delegate();

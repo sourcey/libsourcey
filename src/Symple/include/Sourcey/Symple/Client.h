@@ -80,13 +80,13 @@ public:
 	void connect();
 	void close();
 
-	virtual int send(const std::string data);
-	virtual int send(const Message& message, bool ack = false);
+	virtual int send(const std::string data, bool ack = false);
+	virtual int send(Message& message, bool ack = false);
 		/// Sends a message.
 
-	virtual int respond(const Message& message, bool ack = false);
-		/// Responds to an incoming message and sends it
-		/// by swapping the 'to' and 'from' fields.
+	virtual int respond(Message& message, bool ack = false);
+		/// Responds to the given message.
+		/// The 'to' and 'from' fields will be swapped.
 
 	virtual int sendPresence(bool probe = false);
 		/// Broadcasts presence to the user group scope.

@@ -172,6 +172,12 @@ public:
 		return _items.empty();
 	}
 
+	virtual int size() const
+	{
+		Poco::FastMutex::ScopedLock lock(_mutex); 	
+		return _items.size();
+	}
+
 	virtual void clear()
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex); 	

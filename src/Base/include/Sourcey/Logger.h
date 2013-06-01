@@ -117,6 +117,7 @@ protected:
 
 
 // ---------------------------------------------------------------------
+//
 class ConsoleChannel: public LogChannel
 {		
 public:
@@ -129,6 +130,7 @@ public:
 
 
 // ---------------------------------------------------------------------
+//
 class FileChannel: public LogChannel
 {	
 public:
@@ -156,6 +158,7 @@ protected:
 
 
 // ---------------------------------------------------------------------
+//
 class RotatingFileChannel: public LogChannel
 {	
 public:
@@ -264,6 +267,7 @@ protected:
 
 
 // ---------------------------------------------------------------------
+//
 struct LogStream
 {
 	LogLevel level;

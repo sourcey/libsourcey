@@ -62,7 +62,11 @@ public:
 		clear();
 	}
 
-	virtual void attach(const DelegateT& delegate) 
+	void operator += (const DelegateT& delegate) { attach(delegate); }	
+	void operator -= (const DelegateT& delegate) { detach(delegate); }	
+	void operator -= (const Void klass) { detach(klass); }
+
+	void attach(const DelegateT& delegate) 
 		/// Attaches a delegate to the signal. If the delegate is
 		/// equal to an already existing one it will simply replace
 		/// the existing delegate.
@@ -74,7 +78,7 @@ public:
 		_refCount++;
 	}
 
-	virtual bool detach(const DelegateT& delegate) 
+	bool detach(const DelegateT& delegate) 
 		/// Detaches a delegate from the signal.
 		/// Returns true if the delegate was detached, false otherwise.
 	{
@@ -95,7 +99,7 @@ public:
 		return res;
 	}
 
-	virtual void detach(const Void klass) 
+	void detach(const Void klass) 
 		/// Detaches all delegates associated with the given instance.
 	{
 		{
@@ -111,20 +115,7 @@ public:
 		cleanup();
 	}
 
-	virtual void clear() 
-	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
-		Util::ClearList(_delegates);
-		_refCount = 0;
-	}
-
-	virtual DelegateList delegates() const 
-	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
-		return _delegates;
-	}
-
-	virtual void cleanup() 
+	void cleanup() 
 		/// Deletes cancelled delegates.
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
@@ -143,7 +134,7 @@ public:
 		_dirty = false;
 	}
 
-	virtual void obtain(DelegateList& active) 
+	void obtain(DelegateList& active) 
 		/// Obtains a list of active delegates,
 		/// and deletes any redundant delegates.
 	{
@@ -166,50 +157,62 @@ public:
 		_dirty = false;
 	}
 
-	virtual void enable(bool flag = true) 
+	void clear() 
+	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
+		Util::ClearList(_delegates);
+		_refCount = 0;
+	}
+
+	DelegateList delegates() const 
+	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
+		return _delegates;
+	}
+
+	void enable(bool flag = true) 
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		_enabled = flag;
 	}
 
-	virtual bool enabled() 
+	bool enabled() 
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		return _enabled;
 	}
-
-
-	virtual int refCount() const 
+	
+	int refCount() const 
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		return _refCount;
 	}
 
-	virtual void emit(Void sender) 
+	void emit(Void sender) 
 	{
 		Void empty = 0;
 		emit(sender, (P)empty, (P2)empty, (P3)empty, (P4)empty);
 	}
 
-	virtual void emit(Void sender, P arg) 
+	void emit(Void sender, P arg) 
 	{
 		Void empty = 0;
 		emit(sender, arg, (P2)empty, (P3)empty, (P4)empty);
 	}
 
-	virtual void emit(Void sender, P arg, P2 arg2) 
+	void emit(Void sender, P arg, P2 arg2) 
 	{
 		Void empty = 0;
 		emit(sender, arg, arg2, (P3)empty, (P4)empty);
 	}	
 
-	virtual void emit(Void sender, P arg, P2 arg2, P3 arg3) 
+	void emit(Void sender, P arg, P2 arg2, P3 arg3) 
 	{
 		Void empty = 0;
 		emit(sender, arg, arg2, arg3, (P4)empty);
 	}
 
-	virtual void emit(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) 
+	void emit(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) 
 	{
 		DelegateList toNotify;
 		obtain(toNotify);
@@ -222,10 +225,6 @@ public:
 		catch (StopPropagation&) {
 		}
 	}
-
-	virtual void operator += (const DelegateT& delegate) { attach(delegate); }	
-	virtual void operator -= (const DelegateT& delegate) { detach(delegate); }	
-	virtual void operator -= (const Void klass) { detach(klass); }
 		
 protected:
 	DelegateList _delegates;

@@ -313,7 +313,7 @@ protected:
 				// Get the readable size.
 				// NOTE: This is not available for SecureStreamSocket in
 				// which case we use buffer capacity to determine read size.
-				size = min(StreamSocketT::available(), MAX_TCP_PACKET_SIZE);
+				size = std::min<int>(StreamSocketT::available(), MAX_TCP_PACKET_SIZE);
 				size = size ? size : _buffer.capacity();
 
 				// Resize our buffer as required.

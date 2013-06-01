@@ -201,12 +201,12 @@ void PackageManager::loadLocalPackages(const string& dir)
 	while (fIt != fEnd) {		
 		if (fIt.name().find(".json") != string::npos) {				
 			LogDebug("PackageManager", this) << "Local package found: " << fIt.name() << endl;
+			LocalPackage* package = NULL;
 			try {
 				JSON::Value root;
 				JSON::loadFile(root, fIt.path().toString());
-				LocalPackage* package = new LocalPackage(root);
+				package = new LocalPackage(root);
 				if (!package->valid()) {
-					delete package;
 					throw Exception("The local package is invalid");
 				}
 				
@@ -215,9 +215,13 @@ void PackageManager::loadLocalPackages(const string& dir)
 			}
 			catch (Exception& exc) {
 				LogError("PackageManager", this) << "Load Error: " << exc.displayText() << endl;
+				if (package)
+					delete package;
 			}
 			catch (exception& exc) { // Thrown by JSON parser
 				LogError("PackageManager", this) << "Manifest Load Error: " << exc.what() << endl;
+				if (package)
+					delete package;
 			}
 		}
 
