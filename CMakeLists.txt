@@ -50,6 +50,7 @@ set_option(BUILD_MODULE_TESTS         "Build module test applications?"         
 set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs"                       ON)
 set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs (not MSCV only)"       ON )
 set_option(BUILD_WITH_STATIC_CRT      "Enables staticaly linked CRT for staticaly linked libraries" OFF)
+set_option(BUILD_ALPHA                "Build alpha devlopment modules"                           OFF)
 
 # ----------------------------------------------------------------------------
 # OpenCV build options

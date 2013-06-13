@@ -12,11 +12,11 @@ CMemLeakDetect memLeakDetect;
 using namespace std;
 using namespace Poco;
 using namespace Poco::Util;
-using namespace Sourcey::Net;
-using namespace Sourcey::TURN;
+using namespace Scy::Net;
+using namespace Scy::TURN;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 
@@ -193,7 +193,7 @@ void TURNServer::onServerAllocationRemoving(Server* server, IAllocation* alloc)
 }
 
 
-} } // namespace Sourcey::TURN
+} } // namespace Scy::TURN
 
 
 POCO_SERVER_MAIN(TURNServer)

@@ -14,11 +14,11 @@
 
 
 using namespace std;
-using namespace Sourcey;
-using namespace Sourcey::Net;
-using namespace Sourcey::Media;
-using namespace Sourcey::TURN;
-using namespace Sourcey::Util;
+using namespace Scy;
+using namespace Scy::Net;
+using namespace Scy::Media;
+using namespace Scy::TURN;
+using namespace Scy::Util;
 
 
 /*
@@ -31,7 +31,7 @@ CMemLeakDetect memLeakDetect;
 */
 
 
-namespace Sourcey { 
+namespace Scy { 
 namespace TURN {	
 
 		
@@ -85,7 +85,7 @@ TURNMediaProvider* ourMediaProvider = NULL;
 //
 // TCP TURN Initiator
 //-------
-class TURNMediaProvider: public Sourcey::TURN::ITCPClientObserver
+class TURNMediaProvider: public Scy::TURN::ITCPClientObserver
 {
 public:
 	TURN::TCPClient client;
@@ -345,7 +345,7 @@ public:
 };
 
 
-} } // namespace Sourcey::TURN
+} } // namespace Scy::TURN
 
 
 
@@ -364,7 +364,7 @@ int main(int argc, char** argv)
 	//	ourMediaFormat.audio.sampleRate);	
 
 	// Create client
-	Sourcey::Net::Reactor reactor;
+	Scy::Net::Reactor reactor;
 	Runner runner;
 	Net::IP peerIP("127.0.0.1");
 	TURN::Client::Options co;

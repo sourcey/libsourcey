@@ -2,26 +2,18 @@
 // LibSourcey
 // Copyright (C) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is is distributed under a dual license that allows free, 
-// open source use and closed source use under a standard commercial
-// license.
+// LibSourcey is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
 //
-// Non-Commercial Use:
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
+// LibSourcey is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
-// Commercial Use:
-// Please contact mail@sourcey.com
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
 
@@ -51,6 +43,7 @@ namespace Media {
 
 
 // ---------------------------------------------------------------------
+//
 struct VideoDelegate: public PacketDelegateBase
 	/// Polymorphic packet delegate for the VideoPacket type.
 {
@@ -100,20 +93,19 @@ class VideoCapture: public ICapture, public Poco::Runnable
 {
 public:
 	enum Flag 
+		/// Settings flags for different operational modes
 	{
 		DestroyOnStop		= 0x01, 
 		SyncWithDelegates	= 0x02,
-		ErrorState			= 0x04//,
-		//		= 0x08,
-		//		= 0x10,
-		//		= 0x20,
+		WaitForDelegates	= 0x04,
+		ErrorState			= 0x10
 	};
 
-	VideoCapture(int deviceId); 
-		/// Creates and opens the given device ID
+	VideoCapture(int deviceId, unsigned flags = 0); 
+		/// Creates and opens the given device
 		/// Should be created in the main thread
 
-	VideoCapture(const std::string& filename);
+	VideoCapture(const std::string& filename, unsigned flags = 0);
 		/// Creates and opens the given video file
 		/// Can be created in any thread
 
@@ -129,10 +121,11 @@ public:
 	
 	virtual bool isOpened() const;
 	virtual bool isRunning() const;
-
+	
 	virtual int deviceId() const;
 	virtual std::string	filename() const;
 	virtual std::string	name() const;
+	virtual std::string	error() const;
 	virtual int width() const;
 	virtual int height() const;
 	virtual double fps() const;
@@ -144,23 +137,25 @@ protected:
 	virtual void release();
 	virtual cv::Mat grab();
 	virtual void run();
+	virtual void setError(const std::string& error);
 
 private:   
 	mutable Poco::FastMutex _mutex;
 
-	Poco::Thread		_thread;
-	cv::VideoCapture	_capture;
-	cv::Mat				_frame;	
-	Flags				_flags;	
-	int					_deviceId;	// Source device to capture from
-	std::string			_filename;	// Source file to capture from
-	int					_width;		// Capture width
-	int					_height;	// Capture height
-	bool                _isImage;	// Source file is an image or not
-	bool				_isOpened;
-	bool				_stop;
-	FPSCounter			_counter;
-	Poco::Event			_wakeUp;
+	cv::VideoCapture _capture;
+	cv::Mat		_frame;		// Current video image
+	int		_deviceId;		// Source device to capture from
+	int		_width;			// Capture width
+	int		_height;		// Capture height
+	bool	_isImage;		// Source file is an image or not
+	bool	_isOpened;
+	bool	_stop;
+	Flags	_flags;	
+	std::string	_error;		// Error message if any
+	std::string	_filename;	// Source file to capture from if any
+	FPSCounter	_counter;
+	Poco::Event	_capturing;
+	Poco::Thread _thread;
 };
 
 
@@ -199,10 +194,6 @@ struct MatPacket: public VideoPacket
 		VideoPacket((unsigned char*)mat->data, mat->total(), mat->cols, mat->rows, time),
 		mat(mat) {};
 
-	//void init(cv::Mat* mat) const {
-	//	data = 
-	//}	
-
 	virtual IPacket* clone() const {
 		return new MatPacket(*this);
 	}	
@@ -211,87 +202,8 @@ struct MatPacket: public VideoPacket
 }; 
 
 
-
 } // namespace Media
 } // namespace Scy
 
 
 #endif // SOURCEY_MEDIA_VideoCapture_H
-
-
-
-/*
-template <class C>
-class VideoCallback: public Callback<C, const VideoPacket, false>
-	/// This template class implements an adapter that sits between
-	/// a Notifier and an object receiving notifications from it.
-{
-public:
-	typedef Callback<C, const VideoPacket, false> CallbackBase;
-
-	VideoCallback(C* object, Method method, double fps = 0) : //ICaptureFilter* filter = NULL, 
-	  Callback(object, method), _fps(fps) {} //_filter(filter), 
-
-	VideoCallback(const Callback& r) : 
-		Callback(r._object, r._method), 
-		_filter(r._filter),
-		_fps(r._fps){}, _fps(fps)
-	
-	virtual ICallback* clone() const { return new VideoCallback(*this); }
-	virtual bool accepts(IPolymorphic& data) 
-	{	
-		// Skip frames if we exceed the maximum FPS
-		if (_fps) {
-			if (_counter.started()) {
-				_counter.endFrame();
-				//std::LogDebug() << "counter fps: " << _counter.fps << std::endl;
-				if (_counter.fps > _fps) {
-					//std::LogDebug() << "skipping frame" << std::endl;
-					return false;
-				}
-			}
-			_counter.startFrame();
-		}
-
-		return CallbackBase::accepts(data);
-	}
-	
-private:
-	VideoCallback();
-
-	double		_fps;
-	FPSCounter	_counter;
-	//ICaptureFilter* _filter;
-	//C*     _object;
-	//Method _method;
-};
-*/
-
-
-/*
-DefinePolymorphicDelegateWithArg(videoDelegate, VideoPacket, VideoDelegate)
-template <class C, typename VideoPacket>
-static Delegate<C, 
-	VideoDelegate,
-	DelegateCallback<C, 8, false, VideoPacket>, IPolymorphic&
-> PolymorphicDelegate(C* pObj, void (C::*Method)(VideoPacket&), double fps = 0, int priority = 0) 
-{
-	return Delegate<C, 
-		VideoDelegate,
-		DelegateCallback<C, 8, false, VideoPacket>, IPolymorphic&
-	>(pObj, Method, fps, priority);
-}
-
-
-template <class C, typename VideoPacket>
-static Delegate<C, 
-	VideoDelegate,
-	DelegateCallback<C, 8, true, VideoPacket>, IPolymorphic&
-> PolymorphicDelegate(C* pObj, void (C::*Method)(Void, VideoPacket&), double fps = 0, int priority = 0) 
-{
-	return Delegate<C, 
-		VideoDelegate,
-		DelegateCallback<C, 8, true, VideoPacket>, IPolymorphic&
-	>(pObj, Method, fps, priority);
-}
-*/

@@ -2,26 +2,18 @@
 // LibSourcey
 // Copyright (C) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is is distributed under a dual license that allows free, 
-// open source use and closed source use under a standard commercial
-// license.
+// LibSourcey is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
 //
-// Non-Commercial Use:
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
+// LibSourcey is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
-// Commercial Use:
-// Please contact mail@sourcey.com
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
 
@@ -83,7 +75,6 @@ void Logger::setInstance(Logger* logger)
 
 
 Logger::Logger() :
-	_nullChannel(new LogChannel("null")),
 	_defaultChannel(NULL)
 {
 	//cout << "[Logger:" << this << "] Creating" << endl;
@@ -92,17 +83,20 @@ Logger::Logger() :
 
 Logger::~Logger()
 {	
-	//cout << "[Logger:" << this << "] Destroying" << endl;
-	Util::ClearMap(_map);
-	delete _nullChannel;
-	//cout << "[Logger:" << this << "] Destroying: OK" << endl;
+	LogDebug("Logger", this) << "Destroying" << endl;
+	{
+		FastMutex::ScopedLock lock(_mutex);
+		Util::ClearMap(_map);
+		_defaultChannel = NULL;
+	}
 }
 
 
 void Logger::add(LogChannel* channel) 
 {
+	LogDebug("Logger", this) << "Adding Channel: " << channel->name() << endl;
 	FastMutex::ScopedLock lock(_mutex);
-	// The first channel to be added will be our default channel.
+	// The first channel that is added will be our default channel.
 	if (_defaultChannel == NULL)
 		_defaultChannel = channel;
 	_map[channel->name()] = channel;
@@ -111,6 +105,7 @@ void Logger::add(LogChannel* channel)
 
 void Logger::remove(const string& name, bool deletePointer) 
 {
+	LogDebug("Logger", this) << "Removing Channel: " << name << endl;
 	FastMutex::ScopedLock lock(_mutex);
 	LogMap::iterator it = _map.find(name);	
 	assert(it != _map.end());
@@ -124,48 +119,64 @@ void Logger::remove(const string& name, bool deletePointer)
 }
 
 
-LogChannel& Logger::get(const string& name) const
+LogChannel* Logger::get(const string& name, bool whiny) const
 {
 	FastMutex::ScopedLock lock(_mutex);
 	LogMap::const_iterator it = _map.find(name);	
-	if (it == _map.end())
+	if (it != _map.end())
+		return it->second;
+	if (whiny)
 		throw Poco::NotFoundException("No log channel named: " + name);
-	return *it->second;	 	
+	return NULL;
 }
 
 
 void Logger::setDefault(const string& name)
 {
-	_defaultChannel = &get(name);
+	LogDebug("Logger", this) << "Set Default Channel: " << name << endl;
+	_defaultChannel = get(name, true);
 }
 
 
-LogChannel& Logger::getDefault() const
+LogChannel* Logger::getDefault() const
 {
-	FastMutex::ScopedLock lock(_mutex);	
-	return *(_defaultChannel != NULL ? _defaultChannel : _nullChannel);
+	FastMutex::ScopedLock lock(_mutex);
+	return _defaultChannel;
 }
 
 
 void Logger::write(const LogStream& stream)
 {	
 	// will write to the null channel if no default channel exists
-	getDefault().write(stream);
+	LogChannel* c = getDefault();
+	if (c)
+		c->write(stream);
 }
 
 
 void Logger::write(const char* channel, const LogStream& stream)
 {	
 	// will throw if the specified channel doesn't exist
-	get(channel).write(stream);
+	LogChannel* c = get(channel);
+	if (c)
+		c->write(stream);
+}
+
+
+void Logger::write(const string& message, const char* level, 
+		const string& realm, const void* ptr) const
+{
+	// will write to the null channel if no default channel exists
+	LogChannel* c = getDefault();
+	if (c)
+		c->write(message, getLogLevelFromString(level), realm, ptr);
 }
 
 	
-LogStream Logger::send(const char* level, const void* ptr, const string& realm) const
+LogStream Logger::send(const char* level, const string& realm, const void* ptr) const
 {
 	return LogStream(getLogLevelFromString(level), realm, ptr);
 }
-
 
 
 // ---------------------------------------------------------------------
@@ -191,6 +202,14 @@ LogChannel::LogChannel(const string& name, LogLevel level, const char* dateForma
 	_level(level), 
 	_dateFormat(dateFormat)
 {
+}
+
+
+void LogChannel::write(const string& message, LogLevel level, const string& realm, const void* ptr) 
+{	
+	LogStream stream(level, realm, ptr);
+	stream << message;
+	write(stream);
 }
 
 
@@ -242,7 +261,7 @@ void ConsoleChannel::write(const LogStream& stream)
 	copy(s.begin(), s.end(), temp.begin());
 	OutputDebugString(temp.data());
 #endif
-};
+}
 
 
 // ---------------------------------------------------------------------
@@ -423,7 +442,7 @@ EventedFileChannel::~EventedFileChannel()
 }
 
 
-void EventedFileChannel::write(const LogStream& stream, LogLevel level, const IPolymorphic* ptr) 
+void EventedFileChannel::write(const LogStream& stream, LogLevel level, const string& realm, const void* ptr) 
 {	
 	if (this->level() > level)
 		return;

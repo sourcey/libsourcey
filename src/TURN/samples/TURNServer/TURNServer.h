@@ -18,7 +18,7 @@
 #include <assert.h>
 
 
-namespace Sourcey {
+namespace Scy {
 namespace TURN {
 
 
@@ -60,7 +60,7 @@ private:
 };
 
 
-} } // namespace Sourcey::TURN
+} } // namespace Scy::TURN
 
 
 #endif // SOURCEY_TURNServer_H

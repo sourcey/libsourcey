@@ -2,26 +2,18 @@
 // LibSourcey
 // Copyright (C) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is is distributed under a dual license that allows free, 
-// open source use and closed source use under a standard commercial
-// license.
+// LibSourcey is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
 //
-// Non-Commercial Use:
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
+// LibSourcey is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
-// Commercial Use:
-// Please contact mail@sourcey.com
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
 
@@ -44,9 +36,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <map>
-#include <list>
 #include <assert.h>
 
 
@@ -79,7 +68,7 @@ public:
 		std::string interDir;
 		std::string installDir;
 
-		// Platform (win32, linux, max)
+		// Platform (win32, linux, mac)
 		std::string platform;
 
 		// This flag tells the package manager weather or not
@@ -96,7 +85,7 @@ public:
 			interDir				= root.toString() + DEFAULT_PACKAGE_INTERMEDIATE_DIR;
 			installDir				= root.toString() + DEFAULT_PACKAGE_INSTALL_DIR;
 
-			platform				= DEFAULT_PLATFORM;
+			platform				= DEFAULT_PLATFORM; // TODO: Set for current system
 			clearFailedCache		= true;
 		}
 	};
@@ -165,7 +154,7 @@ public:
 		/// The returned InstallTask(s) must be started.	
 		/// The InstallMonitor must be freed by the outside application.	
 
-	virtual bool updateAllPackages(bool whiny = false); //InstallMonitor* monitor = NULL, 
+	virtual bool updateAllPackages(bool whiny = false);
 		/// Updates all installed packages.
 
 	virtual bool uninstallPackages(const StringVec& ids, bool whiny = false);
@@ -229,17 +218,8 @@ public:
 	virtual Package::Asset getAssetToInstall(PackagePair& pair, const InstallTask::Options& options);
 		/// Returns the best asset to install, or throws a descriptive 
 		/// exception if no updates are available, or the package is 
-		/// already up to date.
+		/// is up to date.
 		/// This method takes version and SDK locks into consideration.
-
-	//virtual bool isUpToDate(PackagePair& pair);
-		/// Checks if a newer version is available for the given
-		/// package pair.
-	
-	//virtual bool verifyInstallManifest(LocalPackage& package);
-		/// Checks the veracity of the install manifest for the given
-		/// package and and ensures all package files exist on the
-		/// file system.
 		
 	//
 	/// File Helper Methods
@@ -281,9 +261,6 @@ public:
 	
 	Signal<InstallTask&> TaskAdded;
 	Signal<InstallTask&> TaskRemoved;
-	//Signal<const std::string&/* type */, InstallTask&> TaskState;
-		/// TaskState notifies the PackageState of each running task.
-		/// Installing is used when a bew task is created.
 
 protected:
 
@@ -310,6 +287,19 @@ protected:
 
 
 	/*	
+	//Signal<const std::string&, InstallTask&> TaskState;
+		/// TaskState notifies the PackageState of each running task.
+		/// Installing is used when a bew task is created.
+
+	//virtual bool isUpToDate(PackagePair& pair);
+		/// Checks if a newer version is available for the given
+		/// package pair.
+	
+	//virtual bool verifyInstallManifest(LocalPackage& package);
+		/// Checks the veracity of the install manifest for the given
+		/// package and and ensures all package files exist on the
+		/// file system.
+
 	//virtual Poco::Path getInstalledFilePath(const std::string& fileName);
 		/// Returns the full path of the installed file if it exists,
 		/// or an empty path if the file doesn't exist.

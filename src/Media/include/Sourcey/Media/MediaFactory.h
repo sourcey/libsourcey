@@ -2,26 +2,18 @@
 // LibSourcey
 // Copyright (C) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is is distributed under a dual license that allows free, 
-// open source use and closed source use under a standard commercial
-// license.
+// LibSourcey is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
 //
-// Non-Commercial Use:
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
+// LibSourcey is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
-// Commercial Use:
-// Please contact mail@sourcey.com
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
 
@@ -69,7 +61,7 @@ public:
 
 	IDeviceManager& devices();	
 		
-	void loadVideo();
+	void loadVideo(unsigned flags = 0);
 		/// Preload a VideoCapture instance for each camera.
 		/// This method should be called on application initialization,
 		/// from the main thread.
@@ -79,12 +71,12 @@ public:
 	void unloadVideo();
 		/// Destroy all managed VideoCapture instances.
 
-	virtual VideoCapture* getVideoCapture(int deviceId);
+	virtual VideoCapture* getVideoCapture(int deviceId, unsigned flags = 0);
 		/// Gets or creates a VideoCapture from given device ID.
 		/// Camera captures are managed internally, and must 
 		/// NOT be destroyed after use.
 
-	virtual VideoCapture* createVideoCapture(const std::string& file, bool destroyOnStop = false);
+	virtual VideoCapture* createFileCapture(const std::string& file, unsigned flags = 0);
 		/// Creates a VideoCapture from given source file.
 		/// Unline camera captures, file captures must be destroyed after use.
 		/// Setting destroyOnStop to true will automatically delete the
