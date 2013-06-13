@@ -22,10 +22,10 @@ CMemLeakDetect memLeakDetect;
 using namespace std;
 using namespace Poco;
 using namespace Poco::Util;
-using namespace Sourcey::Net;
+using namespace Scy::Net;
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 
 
@@ -98,10 +98,10 @@ void EchoServer::handleCommand(const string& name, const string& value)
 		stopOptionsProcessing();
 	}
 	else if(name == "port") {
-		_port = Util::atoi(value);
+		_port = Util::fromString<short>(value);
 	}
 	else if(name == "logfile") {
-		FileChannel* log = dynamic_cast<FileChannel*>(&Sourcey::Logger::instance().get("VideoAnalyzer"));
+		FileChannel* log = dynamic_cast<FileChannel*>(Scy::Logger::instance().get("VideoAnalyzer"));
 		log->setPath(value);
 	}
 }
@@ -175,7 +175,7 @@ void EchoServer::onSocketClosed(void* sender)
 */
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 POCO_SERVER_MAIN(EchoServer)

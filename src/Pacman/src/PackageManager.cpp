@@ -2,26 +2,18 @@
 // LibSourcey
 // Copyright (C) 2005, Sourcey <http://sourcey.com>
 //
-// LibSourcey is is distributed under a dual license that allows free, 
-// open source use and closed source use under a standard commercial
-// license.
+// LibSourcey is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
 //
-// Non-Commercial Use:
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
+// LibSourcey is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
-// Commercial Use:
-// Please contact mail@sourcey.com
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
 
@@ -328,7 +320,7 @@ Package::Asset PackageManager::getAssetToInstall(PackagePair& pair, const Instal
 
 		// If everything is in order there is nothing to install
 		if (isInstalledAndVerified && pair.local->versionLock() == pair.local->version())
-			throw Exception("Package already up to date. Locked at " + pair.local->versionLock());
+			throw Exception("Package is up to date. Locked at " + pair.local->versionLock());
 
 		// Return the locked asset, or thorow
 		return pair.remote->assetVersion(versionLock);
@@ -348,7 +340,7 @@ Package::Asset PackageManager::getAssetToInstall(PackagePair& pair, const Instal
 		// If everything is in order there is nothing to install
 		if (isInstalledAndVerified && pair.local->asset().sdkVersion() == pair.local->sdkVersionLock() &&
 			!Util::compareVersion(sdkAsset.version(), pair.local->version()))
-			throw Exception("Package already up to date for SDK: " + pair.local->sdkVersionLock());
+			throw Exception("Package is up to date for SDK: " + pair.local->sdkVersionLock());
 
 		return sdkAsset;
 	}
@@ -356,7 +348,7 @@ Package::Asset PackageManager::getAssetToInstall(PackagePair& pair, const Instal
 	// If all else fails return the latest asset!
 	Package::Asset latestAsset = pair.remote->latestAsset();
 	if (isInstalledAndVerified && !Util::compareVersion(latestAsset.version(), pair.local->version()))
-		throw Exception("Package already up to date.");
+		throw Exception("Package is up to date.");
 
 	return latestAsset;
 }
@@ -884,7 +876,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 					<< pair.local->name() << ": Manifest is valid" << endl;			
 				if (isUpToDate(pair)) {
 					ostringstream ost;
-					ost << pair.local->name() << " is already up to date: " 
+					ost << pair.local->name() << " is is up to date: " 
 						<< pair.local->version() //<< " >= " 
 						//<< pair.remote->latestAsset().version() 
 						<< endl;
@@ -968,7 +960,7 @@ bool PackageManager::installPackage(const string& name, InstallMonitor* monitor,
 					<< pair.local->name() << " manifest is valid" << endl;			
 				if (isUpToDate(pair)) {
 					LogInfo() 
-						<< pair.local->name() << " is already up to date: " 
+						<< pair.local->name() << " is is up to date: " 
 						<< pair.local->version() << " >= " 
 						<< pair.remote->latestAsset().version() << endl;
 					//return true;
@@ -1118,11 +1110,11 @@ bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* moni
 	if (isUpToDate(PackagePair& pair)) {
 		return NULL;
 	}
-	// If the package is already up to date then do nothing.
+	// If the package is is up to date then do nothing.
 	//if (isUpToDate(name))
 		//LogDebug("PackageManager", this) << "Uninstalling Package: " << name << endl;	
 		//throw Exception(
-		//	format("%s is already up to date: %s >= %s",
+		//	format("%s is is up to date: %s >= %s",
 		//		name, local->version(), remote->latestAsset().version()));
 		//return NULL;
 
@@ -1274,7 +1266,7 @@ bool PackageManager::isUpToDate(const string& name)
 	}
 	
 	LogDebug() 
-		<< name << " is already up to date: " 
+		<< name << " is is up to date: " 
 		<< local->version() << " >= " 
 		<< remote->latestAsset().version() << endl;
 

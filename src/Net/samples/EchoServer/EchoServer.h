@@ -11,7 +11,7 @@
 #include "Poco/Util/HelpFormatter.h"
 
 
-namespace Sourcey {
+namespace Scy {
 namespace Net {
 
 
@@ -43,7 +43,7 @@ private:
 };
 
 
-} } // namespace Sourcey::Net
+} } // namespace Scy::Net
 
 
 #endif // SOURCEY_NET_EchoServer_H
