@@ -24,7 +24,6 @@
 #include "Sourcey/PacketStream.h"
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/IEncoder.h"
-#include "Sourcey/Media/FPSCounter.h"
 #include "Sourcey/Media/VideoContext.h"
 #include "Sourcey/Media/AudioContext.h"
 
@@ -87,7 +86,7 @@ protected:
  	// Video
 	//
 	VideoEncoderContext* _video;
-	FPSCounter		_videoFPS;
+	//FPSCounter		_videoFPS;
 	//clock_t			_videoTime;
 
 	//
@@ -96,7 +95,7 @@ protected:
 	AudioEncoderContext* _audio;
 	AVFifoBuffer*	_audioFifo;		
 	UInt8*			_audioBuffer;
-	FPSCounter		_audioFPS;
+	//FPSCounter		_audioFPS;
 	//clock_t			_audioTime;	
 };
 

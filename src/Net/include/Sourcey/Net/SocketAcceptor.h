@@ -32,7 +32,7 @@
 #include "Poco/Net/SecureStreamSocket.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 
@@ -110,7 +110,7 @@ typedef SocketAcceptorBase<Poco::Net::ServerSocket, Poco::Net::StreamSocket>    
 typedef SocketAcceptorBase<Poco::Net::SecureServerSocket, Poco::Net::SecureStreamSocket> SSLSocketAcceptor;
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif // SOURCEY_NET_SocketAcceptor_H

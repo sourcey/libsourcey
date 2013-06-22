@@ -24,6 +24,7 @@
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/VideoCapture.h"
 #include "Sourcey/Media/AudioCapture.h"
+#include "Sourcey/Media/FormatRegistry.h"
 
 #include "Poco/Foundation.h"
 #include "Poco/Mutex.h"
@@ -58,8 +59,6 @@ public:
 	static MediaFactory* instance();
 	static void initialize();	
 	static void uninitialize();
-
-	IDeviceManager& devices();	
 		
 	void loadVideo(unsigned flags = 0);
 		/// Preload a VideoCapture instance for each camera.
@@ -90,6 +89,9 @@ public:
 		/// The instance must be destroyed after use.
 		/// Setting destroyOnStop to true will automatically delete the
 		/// instance when it is stopped, or packet delegate count reaches 0.
+	
+	IDeviceManager& devices();	
+	FormatRegistry& formats();	
 
 protected:
 	MediaFactory();
@@ -98,6 +100,7 @@ protected:
 	~MediaFactory();
 	
 	IDeviceManager*			_devices;
+	FormatRegistry			_formats;	
 	std::map<int, VideoCapture*> _map;
 
 	static MediaFactory*	_instance;

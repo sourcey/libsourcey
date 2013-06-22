@@ -61,6 +61,8 @@ public:
 		// The TransactionID is used to determine if this connection
 		// is bound with a Connect request, in which case a response
 		// must be sent on connection success/error.
+
+	virtual const char* className() const { return "TCPPeerConnection"; }
 	
 protected:
 	void recv(Buffer& buffer);
@@ -71,6 +73,8 @@ protected:
 	UInt32					_connectionID;
 	Timeout					_timeout;
 	TCPClientConnection*	_client;
+	Buffer					_earlyDataBuffer;	
+	mutable Poco::FastMutex _mutex;
 };
 
 

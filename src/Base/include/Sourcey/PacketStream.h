@@ -31,7 +31,7 @@
 #include "Poco/Event.h"
 
 
-namespace Scy {
+namespace scy {
 
 
 struct PacketAdapterReference
@@ -110,10 +110,31 @@ public:
 		/// to Disconnected. This method is called by the destructor.
 	
 	virtual void attach(PacketEmitter* source, bool freePointer = true, bool syncState = false);
-	virtual void detach(PacketEmitter* source);
+		/// Attaches a source packet emitter to the stream.
+		/// If freePointer is true, the pointer will be deleted when
+		/// the stream is closed.
+		/// If syncState and the PacketEmitter inherits from IStratable
+		/// the source's start() and stop() methods will be called
+		/// when the stream  is started and stopped.
+
+	virtual bool detach(PacketEmitter* source);
+		/// Detaches a source packet emitter to the stream.
+		/// NOTE: If you use this method the pointer will not be
+		/// freed when the stream closes, even if freePointer was  
+		/// true when calling attach().
 
 	virtual void attach(IPacketProcessor* proc, int order = 0, bool freePointer = true);
-	virtual void detach(IPacketProcessor* proc);
+		/// Attaches a source packet emitter to the stream.
+		/// The order value determines the order in which stream 
+		/// processors are called.
+		/// If freePointer is true, the pointer will be deleted when
+		/// the stream closes.
+
+	virtual bool detach(IPacketProcessor* proc);
+		/// Detaches a source packet processor to the stream.
+		/// NOTE: If you use this method the pointer will not be
+		/// freed when the stream closes, even if freePointer was  
+		/// true when calling attach().
 	
 	virtual void attach(const PacketDelegateBase& delegate);
 	virtual bool detach(const PacketDelegateBase& delegate);
@@ -173,7 +194,7 @@ public:
 	}
 
 protected:
-	virtual void detach();
+	virtual void cleanup();
 		/// Detaches all stream adapters, and frees 
 		/// pointers if the adapters are managed.
 	
@@ -192,7 +213,7 @@ protected:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_PacketStream_H

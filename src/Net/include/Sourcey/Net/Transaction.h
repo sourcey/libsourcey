@@ -25,7 +25,7 @@
 #include "Sourcey/Net/IPacketSocket.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 
@@ -45,24 +45,28 @@ public:
 		PacketTransaction<PacketT>(runner, timeout, retries), 
 		_socket(socket), _localAddress(localAddress), _peerAddress(peerAddress)
 	{
-		LogDebug() << "[NetTransaction:" << this << "] Creating" << std::endl;
+		LogDebug("NetTransaction", this) << "Creating" << std::endl;
 	}
 
 	virtual bool send()
 	{
-		if (_socket)
-			_socket->attach(packetDelegate(this, &Transaction::onPotentialResponse, 100));
-		if (!_socket || _socket->send(PacketTransaction<PacketT>::_request, _peerAddress))
-			return PacketTransaction<PacketT>::send();
+		LogDebug("NetTransaction", this) << "Sending" << std::endl;
+		{
+			Poco::FastMutex::ScopedLock lock(_mutex);
+			if (_socket)
+				_socket->attach(packetDelegate(this, &Transaction::onPotentialResponse, 100));
+			if (!_socket || _socket->send(PacketTransaction<PacketT>::_request, _peerAddress))
+				return PacketTransaction<PacketT>::send();
+		}
 		setState(this, TransactionState::Failed);
 		return false;
 	}
 	
 	virtual void cancel()
 	{
-		LogDebug() << "[NetTransaction:" << this << "] Canceling" << std::endl;
+		LogDebug("NetTransaction", this) << "Canceling" << std::endl;
 		{
-			Poco::FastMutex::ScopedLock lock(PacketTransaction<PacketT>::_mutex);
+			Poco::FastMutex::ScopedLock lock(_mutex);
 			if (_socket) {
 				_socket->detach(packetDelegate(this, &Transaction::onPotentialResponse));
 				_socket = NULL;
@@ -79,12 +83,12 @@ public:
 
 	virtual void onResponse()
 	{
-		LogDebug() << "[NetTransaction:" << this << "] Response" << std::endl;
+		LogDebug("NetTransaction", this) << "Response" << std::endl;
 		{
 			// Detach delegates onResponse before state callback.
 			// Remove callbacks, but do not nullify the socket,
 			// because the outside application might need it.
-			Poco::FastMutex::ScopedLock lock(PacketTransaction<PacketT>::_mutex);
+			Poco::FastMutex::ScopedLock lock(_mutex);
 			if (_socket) {
 				_socket->detach(packetDelegate(this, &Transaction::onPotentialResponse));
 				//_socket = NULL;
@@ -95,10 +99,10 @@ public:
 
 	virtual void onComplete()
 	{
-		LogDebug() << "[NetTransaction:" << this << "] Complete" << std::endl;
+		LogDebug("NetTransaction", this) << "Complete" << std::endl;
 		{
 			// Nullify the socket on completion.
-			Poco::FastMutex::ScopedLock lock(PacketTransaction<PacketT>::_mutex);
+			Poco::FastMutex::ScopedLock lock(_mutex);
 			if (_socket) {
 				//_socket->detach(packetDelegate(this, &Transaction::onPotentialResponse));
 				_socket = NULL;
@@ -109,33 +113,38 @@ public:
 	
 	Address& localAddress() 
 	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
 		return _localAddress;
 	}
 	
 	Address localAddress() const
 	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
 		return _localAddress;
 	}
 	
 	Address& peerAddress() 
 	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
 		return _peerAddress;
 	}
 	
 	Address peerAddress() const
 	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
 		return _peerAddress;
 	}
 	
 	IPacketSocket* socket() 
 	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
 		return _socket;
 	}
 
 protected:
 	virtual ~Transaction()
 	{
-		LogDebug() << "[Transaction:" << this << "] Destroying" << std::endl;
+		LogDebug("NetTransaction", this) << "Destroying" << std::endl;
 	}
 
 	virtual bool match(const PacketT& packet) 
@@ -144,7 +153,8 @@ protected:
 		assert(info);
 		if (!info)
 			return false;
-
+		
+		Poco::FastMutex::ScopedLock lock(_mutex);
 		return _localAddress == info->localAddress 
 			&& _peerAddress == info->peerAddress;
 	};
@@ -152,10 +162,13 @@ protected:
 	IPacketSocket* _socket;
 	Address _localAddress;
 	Address _peerAddress;
+
+private:
+	mutable Poco::FastMutex	_mutex;
 };
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif // SOURCEY_NET_PacketTransaction_H

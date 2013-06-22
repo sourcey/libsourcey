@@ -24,7 +24,7 @@
 #include "Sourcey/Types.h"
 
 
-namespace Scy {	
+namespace scy {	
 	
 
 struct LogStream;
@@ -51,7 +51,7 @@ struct IPolymorphic
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif

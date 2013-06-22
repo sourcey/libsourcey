@@ -43,12 +43,14 @@
  */
 
 // RtAudio: Version 4.0.11
+// Changes marked LibSourcey
 
 #ifndef __RTAUDIO_H
 #define __RTAUDIO_H
 
 #include <string>
 #include <vector>
+#include <assert.h>
 #include "RtError.h"
 
 /*! \typedef typedef unsigned long RtAudioFormat;
@@ -873,13 +875,133 @@ public:
 };
 
 #endif
-
+#define __WINDOWS_DS__
 #if defined(__WINDOWS_DS__)
+
+// LibSourcey
+//  - Global std::vector<DsDevice> dsDevices cauing MT troubles
+//  - moved DsDevice to header
+//	- We now call DS every time list data needs to be accessed, which  
+// should not be very often.
+//  - Code removed: line below and changed all references to singleton.
+
+// A critical section guard - create on the stack to provide 
+// automatic locking/unlocking even in the face of uncaught exceptions
+
+class RtScopeMutex
+{
+    public:
+        RtScopeMutex(CRITICAL_SECTION& cs)
+            : criticalSection(cs)
+        {
+            EnterCriticalSection(&criticalSection);
+        }
+        ~RtScopeMutex()
+        {
+            LeaveCriticalSection(&criticalSection);
+        }
+    private:
+        CRITICAL_SECTION&  criticalSection;
+};
+
+
+struct DsDevice {
+  LPGUID id[2];
+  bool validId[2];
+  bool found;
+  std::string name;
+
+  DsDevice()
+  : found(false) { validId[0] = false; validId[1] = false; }
+};
+
+
+// A thread-safe singleton to manage devices
+//
+// Sorry about the singleton, but it was the easiest
+// way of providing global access to the device list.
+class RtDeviceManager
+{
+private:
+    static RtDeviceManager* _instance;
+    static CRITICAL_SECTION _initLock;
+    mutable CRITICAL_SECTION _instanceLock;
+	std::vector< DsDevice > dsDevices;
+
+    RtDeviceManager() {
+        InitializeCriticalSection(&_instanceLock);
+	}
+    ~RtDeviceManager() {
+        DeleteCriticalSection(&_instanceLock);
+	}
+
+public:
+
+    // Not thread-safe - to be called from the main application thread
+    static void initialize() {
+        InitializeCriticalSection(&_initLock);
+        _instance = NULL;
+    }
+
+    // Not thread-safe - to be called from the main application thread
+    static void uninitialize() {
+        delete _instance;
+		_instance = NULL;
+        DeleteCriticalSection(&_initLock);
+    }
+	
+	static RtDeviceManager* RtDeviceManager::instance() 
+	{
+		if (_instance == NULL) {
+			RtScopeMutex lock(_initLock);
+			if (_instance == NULL)
+				_instance = new RtDeviceManager;
+		}
+		return _instance;
+	} 
+
+    void push_back(const DsDevice& data)
+    {
+		RtScopeMutex lock(_instanceLock);
+        dsDevices.push_back(data);
+    }
+
+	const DsDevice operator [] (std::size_t index) const 
+	{
+		RtScopeMutex lock(_instanceLock);
+		DsDevice dev;
+		if (index > dsDevices.size())
+			throw std::exception("out of range");
+		dev = dsDevices[index];
+        return dev;
+	}
+
+    size_t size() const
+    {
+		RtScopeMutex lock(_instanceLock);
+        dsDevices.size();
+    }
+
+	std::vector< DsDevice >& list()
+    {
+		RtScopeMutex lock(_instanceLock);
+        return dsDevices;
+    }
+	
+
+	void setDevices(const std::vector< DsDevice >& list)
+    {
+		assert(!list.empty());
+		RtScopeMutex lock(_instanceLock);
+		dsDevices.clear();
+		dsDevices = list;
+		assert(!dsDevices.empty());
+    }
+};
 
 class RtApiDs: public RtApi
 {
 public:
-
   RtApiDs();
   ~RtApiDs();
   RtAudio::Api getCurrentApi( void ) { return RtAudio::WINDOWS_DS; };

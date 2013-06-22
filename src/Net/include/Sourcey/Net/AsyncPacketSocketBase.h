@@ -32,7 +32,7 @@
 #include "Poco/Mutex.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 	
@@ -54,7 +54,7 @@ public:
 		_buffer(MAX_UDP_PACKET_SIZE),
 		_queue(new PacketQueue(*this, _runner))
 	{
-		Log("trace", this) << "Creating" << std::endl;
+		log() << "Creating" << std::endl;
 	}
 
 
@@ -68,7 +68,7 @@ public:
 		_buffer(MAX_UDP_PACKET_SIZE),
 		_queue(new PacketQueue(*this, _runner))
 	{
-		Log("trace", this) << "Creating from " << socket.address().toString() << std::endl;
+		log() << "Creating from " << socket.address().toString() << std::endl;
 		bindEvents();
 	}
 
@@ -82,23 +82,23 @@ public:
 		_deleteOnClose(r._deleteOnClose),
 		_queue(new PacketQueue(*this, _runner))
 	{
-		Log("trace", this) << "Creating from " << r.address() << std::endl;	
+		log() << "Creating from " << r.address() << std::endl;	
 		bindEvents();
 	}
 
 
 	virtual ~AsyncPacketSocketBase() 
 	{	
-		Log("trace", this) << "Destroying" << std::endl;
+		log() << "Destroying" << std::endl;
 		_queue->destroy();
 		unbindEvents();
-		Log("trace", this) << "Destroying: OK" << std::endl;
+		log() << "Destroying: OK" << std::endl;
 	}
 	
 
 	virtual void bind(const Address& address, bool reuseAddress = false)
 	{	
-		Log("trace", this) << "Binding on " << address << endl;
+		log() << "Binding on " << address << endl;
 
 		if (isBound())
 			throw Exception("Socket already bound.");
@@ -118,7 +118,7 @@ public:
 
 	virtual void connect(const Address& peerAddress) 
 	{
-		Log("trace", this) << "Connecting to " << peerAddress << std::endl;	
+		log() << "Connecting to " << peerAddress << std::endl;	
 
 		if (isConnected())
 			throw Exception("Socket already connected.");
@@ -138,7 +138,7 @@ public:
 
 	virtual void close()
 	{
-		Log("trace", this) << "Closing" << std::endl;
+		log() << "Closing" << std::endl;
 
 		if (isConnected()) {
 			unbindEvents();
@@ -156,7 +156,7 @@ public:
 	}
 
 
-	virtual int send(const char* data, int size) 
+	virtual int send(const char* data, int size, int flags = 0) 
 	{
 		// NOTE: Must be connected to peer to send
 		// without specifying peer address.
@@ -165,14 +165,14 @@ public:
 	}
 
 
-	virtual int send(const char* data, int size, const Address& peerAddress)
+	virtual int send(const char* data, int size, const Address& peerAddress, int flags = 0)
 	{
 		assert(size <= MAX_UDP_PACKET_SIZE);
 		try	{
-			Log("trace", this) << "SEND: " << size << ": " 
+			log() << "SEND: " << size << ": " 
 				<< address() << "-->" 
 				<< peerAddress << std::endl;
-			return DatagramSocketT::sendBytes(data, size);
+			return DatagramSocketT::sendBytes(data, size, flags);
 		}	
 		catch (Poco::IOException& exc) {
 			// Don't set the error here, the error
@@ -183,38 +183,38 @@ public:
 	}
 
 
-	virtual int send(const DataPacket& packet) 
+	virtual int send(const DataPacket& packet, int flags = 0) 
 	{
 		// Most large packets, ie. MediaPackets derive 
 		// from DataPacket, so they can be sent directly 
 		// without buffering any data.
-		return send((const char*)packet.data(), packet.size());
+		return send((const char*)packet.data(), packet.size(), flags);
 	}
 
 
-	virtual int send(const DataPacket& packet, const Address& peerAddress)
+	virtual int send(const DataPacket& packet, const Address& peerAddress, int flags = 0)
 	{
 		assert(peerAddress == this->peerAddress());
-		return send(packet);
+		return send(packet, flags);
 	}
 
 
-	virtual int send(const IPacket& packet) 
+	virtual int send(const IPacket& packet, int flags = 0) 
 	{
 		Buffer buf(packet.size() > 0 ? packet.size() : MAX_UDP_PACKET_SIZE);
 		packet.write(buf);
-		return send(buf.data(), buf.size());
+		return send(buf.data(), buf.size(), flags);
 	}
 
 
-	virtual int send(const IPacket& packet, const Address& peerAddress)
+	virtual int send(const IPacket& packet, const Address& peerAddress, int flags = 0)
 	{
 		// Unlike TCP sockets our packets are generally
 		// limited by a 1500 MTU so let's just copy the 
 		// packet data.
 		Buffer buf(MAX_UDP_PACKET_SIZE);
 		packet.write(buf);	
-		return send(buf.data(), buf.size(), peerAddress);
+		return send(buf.data(), buf.size(), peerAddress, flags);
 	}
 
 
@@ -320,7 +320,7 @@ public:
 protected:
 	virtual void onReadable() 
 	{
-		Log("trace", this) << "On Readable" << std::endl;
+		log() << "On Readable" << std::endl;
 
 		try	{
 			int size = 0;
@@ -340,13 +340,13 @@ protected:
 				// This is preferable to allocating a large buffer at startup.
 				assert(_buffer.capacity() >= size);
 				//if (_buffer.capacity() < size) {
-				//	Log("trace", this) << "Resizing buffer: " << size << std::endl;
+				//	log() << "Resizing buffer: " << size << std::endl;
 				//	_buffer.reserve(size);
 				//}
 
 				// Read bytes from the socket into the output buffer.
 				size = DatagramSocketT::receiveFrom(_buffer.bytes(), size, peerAddress);
-				Log("trace", this) << "RECV: " << size << ": "
+				log() << "RECV: " << size << ": "
 					<< DatagramSocketT::address().toString() << "<--" 
 					<< peerAddress << std::endl;
 				_buffer.setPosition(0);
@@ -358,7 +358,7 @@ protected:
 				recv(*buffer, peerAddress);
 			}
 			else {
-				Log("trace", this) << "Received EOF" << std::endl;
+				log() << "Received EOF" << std::endl;
 				throw Poco::IOException("Peer closed connection");
 			}
 		}
@@ -399,7 +399,7 @@ protected:
 
 	virtual void onBind() 
 	{
-		Log("trace", this) << "On Bind" << std::endl;	
+		log() << "On Bind" << std::endl;	
 		Poco::FastMutex::ScopedLock lock(_mutex); 
 		_error = "";
 		_bound = true;
@@ -409,7 +409,7 @@ protected:
 
 	virtual void onConnect() 
 	{
-		Log("trace", this) << "On Connect" << std::endl;	
+		log() << "On Connect" << std::endl;	
 		{
 			Poco::FastMutex::ScopedLock lock(_mutex); 
 			_error = "";
@@ -422,7 +422,7 @@ protected:
 
 	virtual void onClose()
 	{
-		Log("trace", this) << "On Close" << std::endl;
+		log() << "On Close" << std::endl;
 	
 		// This method must be called from close()
 
@@ -439,7 +439,7 @@ protected:
 		Closed.emit(static_cast<ISocketT*>(this));
 
 		if (destroy) {
-			Log("trace", this) << "Delete on close" << std::endl;	
+			log() << "Delete on close" << std::endl;	
 			delete this;
 		}
 	}
@@ -499,7 +499,7 @@ protected:
 };
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif // SOURCEY_NET_AsyncPacketSocketBase_H
@@ -539,7 +539,7 @@ protected:
 		// accordingly.
 		int recvSize = DatagramSocketT::getReceiveBufferSize();
 		if (recvSize != static_cast<int>(_buffer.capacity())) {
-			Log("trace", this) << "Buffer Size: " << recvSize << std::endl;
+			log() << "Buffer Size: " << recvSize << std::endl;
 			_buffer.reserve(recvSize);
 		}	
 		_buffer.clear();

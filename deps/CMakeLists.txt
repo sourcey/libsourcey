@@ -3,14 +3,19 @@ if(BUILD_DEPENDENCIES AND BUILD_DEPENDENCY_RtAudio)
   add_subdirectory(RtAudio)
 endif()
 
-ask_build_sourcey_dependency(pugixml)
-if(BUILD_DEPENDENCIES AND BUILD_DEPENDENCY_pugixml) 
-  add_subdirectory(pugixml)
-endif()
-
 ask_build_sourcey_dependency(jsoncpp)
 if(BUILD_DEPENDENCIES AND BUILD_DEPENDENCY_jsoncpp) 
   add_subdirectory(jsoncpp)
+endif()
+
+ask_build_sourcey_dependency(libuv)
+if(BUILD_DEPENDENCIES AND BUILD_DEPENDENCY_libuv) 
+  add_subdirectory(libuv)
+endif()
+
+ask_build_sourcey_dependency(pugixml)
+if(BUILD_DEPENDENCIES AND BUILD_DEPENDENCY_pugixml) 
+  add_subdirectory(pugixml)
 endif()
 
 ask_build_sourcey_dependency(libstrophe)

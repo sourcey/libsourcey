@@ -25,7 +25,7 @@
 #include "Poco/Mutex.h"
 
 
-namespace Scy {
+namespace scy {
 
 
 class IConfiguration
@@ -169,7 +169,7 @@ private:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_IConfiguration_H

@@ -24,7 +24,7 @@
 #include "Sourcey/PacketEmitter.h"
 
 
-namespace Scy {
+namespace scy {
 
 
 class IPacketProcessor: public PacketEmitter
@@ -52,7 +52,7 @@ public:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_IPacketProcessor_H

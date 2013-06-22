@@ -35,7 +35,7 @@ namespace TURN {
 	
 
 typedef BasicManager<Net::Address, Net::TCPStatefulPacketSocket>	ConnectionManager;
-typedef ConnectionManager::Map								ConnectionManagerMap;
+typedef ConnectionManager::Map										ConnectionManagerMap;
 
 
 class TCPClient;
@@ -58,8 +58,8 @@ class TCPClient: public Client
 {
 public:
 	TCPClient(TCPClientObserver& observer,
-			  Net::Reactor& reactor,
-			  Runner& runner,
+			  const Client::Options& options = Client::Options());
+	TCPClient(TCPClientObserver& observer, Net::Reactor& reactor, Runner& runner,
 			  const Client::Options& options = Client::Options());
 	virtual ~TCPClient();
 
@@ -87,6 +87,8 @@ public:
 	bool getPeerAddress(Net::IPacketSocket* conn, Net::Address& peerAddress);
 	//Net::TCPStatefulPacketSocket* getConnection(const Net::Address& peerAddress);
 		/// Obtain the TCPStatefulPacketSocket instance from the IPacketSocket
+
+	virtual const char* className() const { return "TURNTCPClient"; };
 
 protected:	
 	TCPClientObserver& _observer;

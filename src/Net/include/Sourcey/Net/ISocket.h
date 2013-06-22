@@ -27,7 +27,7 @@
 #include "Sourcey/Net/Address.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 	
 
@@ -41,10 +41,10 @@ public:
 	virtual void connect(const Address& address) = 0;
 	virtual void close() = 0;
 		
-	virtual int send(const char* data, int size) = 0;
-	virtual int send(const char* data, int size, const Address& peerAddress) = 0;
-	virtual int send(const IPacket& packet) = 0;
-	virtual int send(const IPacket& packet, const Address& peerAddress) = 0;
+	virtual int send(const char* data, int size, int flags = 0) = 0;
+	virtual int send(const char* data, int size, const Address& peerAddress, int flags = 0) = 0;
+	virtual int send(const IPacket& packet, int flags = 0) = 0;
+	virtual int send(const IPacket& packet, const Address& peerAddress, int flags = 0) = 0;
 	
 	virtual Address address() const = 0;
 		/// The locally bound address.
@@ -83,7 +83,7 @@ public:
 typedef std::vector<ISocket*> ISocketList;
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif // SOURCEY_NET_ISocket_H

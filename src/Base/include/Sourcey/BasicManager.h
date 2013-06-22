@@ -28,7 +28,7 @@
 #include <assert.h>
 
 
-namespace Scy { 
+namespace scy { 
 
 
 template <class TKey, class TValue>
@@ -204,7 +204,7 @@ protected:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_BaseManager_H

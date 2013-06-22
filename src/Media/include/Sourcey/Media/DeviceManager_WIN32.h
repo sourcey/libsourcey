@@ -21,13 +21,15 @@
 #ifndef SOURCEY_MEDIA_DeviceManager_WIN32_H
 #define SOURCEY_MEDIA_DeviceManager_WIN32_H
 
+#ifndef __WINDOWS_DS__
+#define __WINDOWS_DS__
+#endif
+
 
 #include <string>
 #include <vector>
 
 #include "Sourcey/Media/DeviceManager.h"
-//#include "talk/base/sigslot.h"
-//#include "talk/base/stringencode.h"
 
 
 namespace Scy {
@@ -53,6 +55,7 @@ private:
 	virtual bool getDefaultAudioDevice(bool input, Device& device);
 
 	bool _needCoUninitialize;
+	static Poco::FastMutex _mutex;
 };
 
 

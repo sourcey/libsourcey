@@ -29,7 +29,7 @@
 #include <list>
 
 
-namespace Scy {
+namespace scy {
 	
 	
 struct IPacketInfo
@@ -191,7 +191,7 @@ protected:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_PACKET_H

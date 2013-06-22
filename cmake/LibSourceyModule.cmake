@@ -60,7 +60,7 @@ macro(define_sourcey_module name)
 
   # Include external dependencies
   target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
-  add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES}) # requires complete recompile on some systems
+  add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES})
   
   # Include library and header directories
   include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
@@ -100,15 +100,21 @@ macro(define_sourcey_module name)
       ARCHIVE DESTINATION lib COMPONENT main)   
   endif()      
   
-  # Build samples
-  if(BUILD_MODULE_SAMPLES AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/samples)
-    add_subdirectory(samples)
+  # Build samples  
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/samples)
+    ask_build_sourcey_sample(${name})
+    if(BUILD_MODULE_SAMPLES AND BUILD_SAMPLE_${name}) 
+      add_subdirectory(samples)
+    endif() 
   endif() 
   
   # Build tests
-  if(BUILD_MODULE_TESTS AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-    add_subdirectory(tests)
-  endif()       
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    ask_build_sourcey_test(${name})
+    if(BUILD_MODULE_TESTS AND BUILD_TEST_${name}) 
+      add_subdirectory(tests)
+    endif()   
+  endif()     
 endmacro()
 
 
@@ -138,17 +144,17 @@ macro(define_sourcey_module_sample name)
 
   # Include external dependencies
   target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
-  add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES}) # requires complete recompile on some systems
-        
-  #message(STATUS "Defining module sample ${name}:")  
-  #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")  
-  #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")  
-  #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
+  add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES})
 
   # Include library and header directories
   include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
   include_directories(${LibSourcey_INCLUDE_DIRS})
   link_directories(${LibSourcey_LIBRARY_DIRS})  
+        
+  message(STATUS "Defining module sample ${name}:")  
+  message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")  
+  message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")  
+  message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
    
   if(ENABLE_SOLUTION_FOLDERS)
     set_target_properties(${name} PROPERTIES FOLDER "samples")

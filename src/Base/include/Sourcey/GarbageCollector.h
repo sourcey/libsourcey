@@ -17,36 +17,46 @@
 //
 
 
-#ifndef SOURCEY_GarbageCollection_H
-#define SOURCEY_GarbageCollection_H
+#ifndef SOURCEY_GarbageCollector_H
+#define SOURCEY_GarbageCollector_H
 
 
 #include "Sourcey/Types.h"
 #include "Sourcey/Task.h"
+#include "Sourcey/Runner.h"
+#include "Sourcey/Timeout.h"
 
 
-namespace Scy {
+namespace scy {
 	
 
 class Runner;
 
+	
+template <class T>
+void deleteLater(void* ptr)
+	/// Schedules a pointer for async garbage collection.
+{
+	(void)new GarbageCollectorTask<T>(Runner::getDefault(), ptr);
+}
+
 
 template <class DeletableT>
-class GarbageCollectionTask: public Task
+class GarbageCollectorTask: public Task
 {
 public:
-	GarbageCollectionTask(Runner& runner, void* ptr) : 
+	GarbageCollectorTask(Runner& runner, void* ptr) : 
 	  Task(runner, false, true), _ptr(ptr) {
 		  /*
 #ifdef _DEBUG
 		  ostringstream ss;
-		  ss << "GarbageCollection[" << _ptr << "]";
+		  ss << "GarbageCollector[" << _ptr << "]";
 		  _name = ss.str();
 #endif
 		  */
 	}
 
-	~GarbageCollectionTask() {
+	~GarbageCollectorTask() {
 		if (_ptr)
 			free();
 	}
@@ -54,6 +64,7 @@ public:
 	virtual void free() {
 		if (_ptr) {
 			DeletableT* ptr = static_cast<DeletableT*>(_ptr);
+			LogTrace("GarbageCollectorTask") << "Freeing: " << ptr << endl;
 			delete ptr;
 			_ptr = NULL;
 		}
@@ -69,22 +80,23 @@ private:
 
 
 // ---------------------------------------------------------------------
+//
 template <class DeletableT>
-class DelayedGarbageCollectionTask: public Task
+class DelayedGarbageCollectorTask: public Task
 {
 public:
-	DelayedGarbageCollectionTask(Runner& runner, void* ptr, UInt32 delay = 100) :
+	DelayedGarbageCollectorTask(Runner& runner, void* ptr, UInt32 delay = 100) :
 	  Task(runner, true, true), _ptr(ptr), _timeout(delay, true) {
 		  /*
 #ifdef _DEBUG
 		  ostringstream ss;
-		  ss << "TimedGarbageCollection[" << _ptr << "]";
+		  ss << "DelayedGarbageCollectorTask[" << _ptr << "]";
 		  _name = ss.str();
 #endif
 		  */
 	}
 
-	~DelayedGarbageCollectionTask() {
+	~DelayedGarbageCollectorTask() {
 		if (_ptr)
 			free();
 	}
@@ -110,7 +122,7 @@ private:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
-#endif // SOURCEY_GarbageCollection_H
+#endif // SOURCEY_GarbageCollector_H

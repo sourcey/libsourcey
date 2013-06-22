@@ -21,7 +21,7 @@
 #include "Sourcey/Logger.h"
 
 
-namespace Scy {
+namespace scy {
 	
 
 LogStream IPolymorphic::log(const char* level) const 

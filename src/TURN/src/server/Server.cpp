@@ -46,7 +46,7 @@ Server::Server(IServerObserver& observer, Net::Reactor& reactor, Runner& runner,
 
 Server::~Server() 
 {
-	////Timer::getDefault().stop(TimerCallback<Server>(this, &ServerAllocation::onTimer));
+	//Timer::getDefault().stop(TimerCallback<Server>(this, &ServerAllocation::onTimer));
 	//_socketUDP.detach(packetDelegate<Server, STUN::Message>(this, &Server::onPacketReceived, 1));
 	log("trace") << "Destroying" << endl;	
 	stop();	
@@ -116,24 +116,6 @@ void Server::onTCPConnectionAccepted(void* sender, Poco::Net::StreamSocket& sock
 }
 
 
-/*
-void Server::onTCPConnectionClosed(void* sender)
-{
-	TCPPacketSocket* socket = reinterpret_cast<TCPPacketSocket*>(sender);
-
-	log("trace") << "TCP Connection Closed: " << socket->peerAddress() << endl;	
-	
-	// NOTE: Terminate associated allocation
-	//FiveTuple tuple(socket->peerAddress(), socket->localAddress(), socket->transport());
-	//ServerAllocation* allocation = getAllocation(tuple);
-	//if (allocation) {
-	//}	
-
-	delete socket;
-}
-*/
-
-
 void Server::onPacketReceived(void* sender, STUN::Message& message) 
 {
 	log("trace") << "STUN Packet Received: " << message.toString() << endl;	
@@ -148,39 +130,6 @@ void Server::onPacketReceived(void* sender, STUN::Message& message)
 	Request request(source->socket, message, source->localAddress, source->peerAddress);
 	AuthenticationState state = _observer.authenticateRequest(this, request);
 	handleRequest(request, state);
-	
-	/*, state
-	//handleRequest(request);
-	_observer.authenticateRequest(this, request)
-	if (state != Authenticating)
-	// NOTE: It is the job of the Server Observer to call the
-	// handleAuthorizedRequest method.
-	AuthenticationState result = _observer.authenticateRequest(this, request);
-	switch (result) {
-		case Authenticating: 
-			log("trace") << "STUN Request Authenticating" << endl;
-			break;
-
-		case Authorized: 
-			log("trace") << "STUN Request Authorized" << endl;
-			handleAuthorizedRequest(request);
-			break;
-
-		case Unauthorized: 
-			log("trace") << "Unauthorized STUN Request" << endl;
-			sendError(request, 401, "Unauthorized");
-			break;
-	}
-
-	if (_observer->authenticate(request) == Unauthorized)
-		return;
-	}
-	else {
-		log("trace") << "Unauthorized STUN Request" << endl;
-		sendError(request, 401, "Unauthorized");
-		return;
-	}
-	*/
 }
 
 
@@ -681,15 +630,14 @@ Runner& Server::runner()
 	FastMutex::ScopedLock lock(_mutex);
 	return _runner;
 }
-/*
-*/
 
 
 void Server::addAllocation(ServerAllocation* alloc) 
 {
 	{
 		FastMutex::ScopedLock lock(_mutex);
-
+		
+		log("trace") << "Adding allocation" << endl;
 		assert(_allocations.find(alloc->tuple()) == _allocations.end());
 		_allocations[alloc->tuple()] = alloc;
 
@@ -706,7 +654,8 @@ void Server::removeAllocation(ServerAllocation* alloc)
 {
 	{
 		FastMutex::ScopedLock lock(_mutex);
-
+		
+		log("trace") << "Removing allocation" << endl;
 		ServerAllocationMap::iterator it = _allocations.find(alloc->tuple());
 		assert(it != _allocations.end());
 		_allocations.erase(it);

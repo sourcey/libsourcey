@@ -57,6 +57,85 @@ typedef double AUDIO_DATA;
 #define AUDIO_FORMAT RTAUDIO_FLOAT64
 */
 
+/*
+class RtApi
+{
+public:
+
+  RtApi();
+  virtual ~RtApi();
+  virtual RtAudio::Api getCurrentApi( void ) = 0;
+  virtual unsigned int getDeviceCount( void ) = 0;
+  virtual RtAudio::DeviceInfo getDeviceInfo( unsigned int device ) = 0;
+  virtual unsigned int getDefaultInputDevice( void );
+  virtual unsigned int getDefaultOutputDevice( void );
+  void openStream( RtAudio::StreamParameters *outputParameters,
+                   RtAudio::StreamParameters *inputParameters,
+                   RtAudioFormat format, unsigned int sampleRate,
+                   unsigned int *bufferFrames, RtAudioCallback callback,
+                   void *userData, RtAudio::StreamOptions *options );
+  virtual void closeStream( void );
+  virtual void startStream( void ) = 0;
+  virtual void stopStream( void ) = 0;
+  virtual void abortStream( void ) = 0;
+  long getStreamLatency( void );
+  unsigned int getStreamSampleRate( void );
+  virtual double getStreamTime( void );
+  bool isStreamOpen( void ) const { return stream_.state != STREAM_CLOSED; };
+  bool isStreamRunning( void ) const { return stream_.state == STREAM_RUNNING; };
+  void showWarnings( bool value ) { showWarnings_ = value; };
+};
+
+
+inline RtAudio::Api AudioAPI :: getCurrentApi( void ) throw() { 
+	return rtapi_->getCurrentApi();
+}
+inline unsigned int AudioAPI :: getDeviceCount( void ) throw() {
+	return rtapi_->getDeviceCount();
+}
+inline RtAudio::DeviceInfo AudioAPI :: getDeviceInfo( unsigned int device ) { 
+	return rtapi_->getDeviceInfo( device ); 
+}
+inline unsigned int AudioAPI :: getDefaultInputDevice( void ) throw() { 
+	return rtapi_->getDefaultInputDevice();
+}
+inline unsigned int AudioAPI :: getDefaultOutputDevice( void ) throw() {
+	return rtapi_->getDefaultOutputDevice(); 
+}
+inline void AudioAPI :: closeStream( void ) throw() { 
+	return rtapi_->closeStream();
+}
+inline void AudioAPI :: startStream( void ) { 
+	return rtapi_->startStream(); 
+}
+inline void AudioAPI :: stopStream( void )  {
+	return rtapi_->stopStream(); 
+}
+inline void AudioAPI :: abortStream( void ) { 
+	return rtapi_->abortStream(); 
+}
+inline bool AudioAPI :: isStreamOpen( void ) const throw() { 
+	return rtapi_->isStreamOpen(); 
+}
+inline bool AudioAPI :: isStreamRunning( void ) const throw() { 
+	return rtapi_->isStreamRunning();
+}
+inline long AudioAPI :: getStreamLatency( void ) { 
+	return rtapi_->getStreamLatency();
+}
+inline unsigned int AudioAPI :: getStreamSampleRate( void ) { 
+	return rtapi_->getStreamSampleRate(); 
+};
+inline double AudioAPI :: getStreamTime( void ) 
+{ 
+	return rtapi_->getStreamTime();
+}
+inline void AudioAPI :: showWarnings( bool value ) throw() { 
+	rtapi_->showWarnings( value ); 
+}
+*/
+
+
 
 DefinePolymorphicDelegateWithArg(audioDelegate, IPacket, PacketDelegateBase, Void, NULL)
 

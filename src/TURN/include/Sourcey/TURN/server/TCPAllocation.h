@@ -74,7 +74,6 @@ protected:
 	ClientConnectionManager	_clients;
 	PeerConnectionManager	_peers;
 	Net::TCPSocketAcceptor	_acceptor;
-	mutable Poco::FastMutex	_mutex;
 };
 
 

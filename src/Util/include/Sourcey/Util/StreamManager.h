@@ -28,36 +28,39 @@
 namespace Scy { 
 
 
-class StreamManager: protected EventfulManager<std::string, PacketStream>, public IPolymorphic
+class StreamManager: public EventfulManager<std::string, PacketStream>, public IPolymorphic
 {
 public:
 	typedef EventfulManager<std::string, PacketStream>	Manager;
-	typedef Manager::Base::Map							Map;
+	typedef Manager::Map								Map;
 
 public:
 	StreamManager(bool freeClosedStreams = true);
 	virtual ~StreamManager();
 
-	virtual PacketStream* getStream(const std::string& name, bool whiny = false);
-		/// Returns the PacketStream instance or throws a
-		/// NotFoundException exception.
-
+	virtual bool addStream(PacketStream* stream, bool whiny = true);	
+	virtual bool closeStream(const std::string& name, bool whiny = true);	
+	virtual void closeAll();	
+	virtual PacketStream* getStream(const std::string& name, bool whiny = true);
     virtual PacketStream* getDafaultStream();
-		/// Returns the first stream in the list.
-
-	virtual void onStreamStateChange(void* sender, PacketStreamState& state, const PacketStreamState&);	
+		/// Returns the first stream in the list, or NULL.
 
 	virtual Map streams() const;
-	
+
 	virtual void print(std::ostream& os) const;
 
 	virtual const char* className() const { return "StreamManager"; }
 
-protected:
-	virtual bool addStream(PacketStream* stream, bool whiny = false);
-	virtual bool closeStream(const std::string& name, bool whiny = false);	
-	virtual void closeAll();	
+protected:	
+	virtual void onAdd(PacketStream* task);
+		/// Called after a stream is added.
 
+	virtual void onRemove(PacketStream* task);
+		/// Called after a stream is removed.
+
+	virtual void onStreamStateChange(void* sender, PacketStreamState& state, const PacketStreamState&);	
+	
+protected:	
 	bool _freeClosedStreams;
 };
 

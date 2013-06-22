@@ -24,7 +24,7 @@
 #include "Sourcey/Types.h"
 
 
-namespace Scy {
+namespace scy {
 
 
 class Timeout 
@@ -55,7 +55,7 @@ protected:
 
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif

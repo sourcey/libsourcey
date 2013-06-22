@@ -68,7 +68,7 @@ void Scheduler::run()
 {
 	log("trace") << "Running" << endl;
 
-	while (!_stop) 
+	while (!_stopped) 
 	{	
 		// Update and sort the task list bringing the
 		// next scheduled task to the front of the list.

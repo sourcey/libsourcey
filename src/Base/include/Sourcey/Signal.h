@@ -29,7 +29,7 @@
 #include <assert.h>
 
 
-namespace Scy {
+namespace scy {
 
 
 template <class DelegateT, DelegateDefaultParams>
@@ -260,7 +260,7 @@ template <typename P, typename P2, typename P3, typename P4>
 class Signal4: public SignalBase<DelegateBase<P, P2, P3, P4>, P, P2, P3, P4> {};
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_Signal_H

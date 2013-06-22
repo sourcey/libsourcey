@@ -82,6 +82,7 @@ static bool getDevices(const CLSID& catid, vector<Device>& out);
 Win32DeviceManager::Win32DeviceManager() : 
 	_needCoUninitialize(false) 
 {
+	RtDeviceManager::initialize();
 	LogTrace("DeviceManager") << "Creating" << endl;
 	//setWatcher(new Win32DeviceWatcher(this));
 }
@@ -90,6 +91,7 @@ Win32DeviceManager::Win32DeviceManager() :
 Win32DeviceManager::~Win32DeviceManager() 
 {
 	LogTrace("DeviceManager") << "Destroying" << endl;
+	RtDeviceManager::uninitialize();
 	if (initialized()) {
 		uninitialize();
 	}
@@ -142,6 +144,8 @@ void Win32DeviceManager::uninitialize()
 bool Win32DeviceManager::getAudioDevices(bool input, vector<Device>& devs) 
 {
 	devs.clear();
+	
+	static Poco::FastMutex _mutex;
 
 	// Since we are using RtAudio for device capture, we should
 	// use RtAudio to enumerate devices to ensure indexes match.	
@@ -158,8 +162,6 @@ bool Win32DeviceManager::getAudioDevices(bool input, vector<Device>& devs)
 			if (info.probed == true &&
 				(input && info.inputChannels > 0) || 
 				(!input && info.outputChannels > 0)) {	
-				/*
-					*/
 				LogTrace("Win32DeviceManager", this) << "Device:" 
 					<< "\n\tName: " << info.name
 					<< "\n\tOutput Channels: " << info.outputChannels

@@ -23,6 +23,7 @@
 
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/Format.h"
+#include "Sourcey/Media/FPSCounter.h"
 
 //#include "Poco/Mutex.h"
 
@@ -70,6 +71,7 @@ struct VideoContext
 	AVCodecContext* ctx;	// encoder or decoder context
 	AVCodec* codec;			// encoder or decoder codec
 	AVFrame* frame;			// encoded or decoded frame
+	FPSCounter fps;			// encoder or decoder fps rate
     double pts;				// pts in decimal seconds
     std::string error;		// error message
 };

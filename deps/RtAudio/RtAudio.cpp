@@ -39,6 +39,7 @@
 /************************************************************************/
 
 // RtAudio: Version 4.0.11
+// Changes marked LibSourcey
 
 #include "RtAudio.h"
 #include <iostream>
@@ -274,16 +275,21 @@ void RtApi :: openStream( RtAudio::StreamParameters *oParams,
   bool result;
 
   if ( oChannels > 0 ) {
+	  
 
+	std::cout << "Probe Input:" << std::endl;
     result = probeDeviceOpen( oParams->deviceId, OUTPUT, oChannels, oParams->firstChannel,
                               sampleRate, format, bufferFrames, options );
+	std::cout << "Probe Input: END" << std::endl;
     if ( result == false ) error( RtError::SYSTEM_ERROR );
   }
 
   if ( iChannels > 0 ) {
-
+	  
+	std::cout << "Probe Output:" << std::endl;
     result = probeDeviceOpen( iParams->deviceId, INPUT, iChannels, iParams->firstChannel,
                               sampleRate, format, bufferFrames, options );
+	std::cout << "Probe Output: END" << std::endl;
     if ( result == false ) {
       if ( oChannels > 0 ) closeStream();
       error( RtError::SYSTEM_ERROR );
@@ -3574,17 +3580,15 @@ static const char* getErrorString( int code );
 
 extern "C" unsigned __stdcall callbackHandler( void *ptr );
 
-struct DsDevice {
-  LPGUID id[2];
-  bool validId[2];
-  bool found;
-  std::string name;
 
-  DsDevice()
-  : found(false) { validId[0] = false; validId[1] = false; }
-};
+// LibSourcey changed:
+//std::vector< DsDevice > dsDevices;
 
-std::vector< DsDevice > dsDevices;
+
+CRITICAL_SECTION RtDeviceManager::_initLock;
+RtDeviceManager* RtDeviceManager::_instance = NULL;
+
+
 
 RtApiDs :: RtApiDs()
 {
@@ -3616,6 +3620,8 @@ unsigned int RtApiDs :: getDefaultInputDevice( void )
 
 unsigned int RtApiDs :: getDeviceCount( void )
 {
+  std::vector< DsDevice > dsDevices = RtDeviceManager::instance()->list();
+
   // Set query flag for previously found devices to false, so that we
   // can check for any devices that have disappeared.
   for ( unsigned int i=0; i<dsDevices.size(); i++ )
@@ -3639,6 +3645,10 @@ unsigned int RtApiDs :: getDeviceCount( void )
     error( RtError::WARNING );
   }
 
+  /*
+  // LibSourcey: Disabling this as dsDevices is not current 
+  // with async callbacks from deviceQueryCallback.
+
   // Clean out any devices that may have disappeared.
   std::vector< int > indices;
   for ( unsigned int i=0; i<dsDevices.size(); i++ )
@@ -3647,11 +3657,17 @@ unsigned int RtApiDs :: getDeviceCount( void )
   for ( unsigned int i=0; i<indices.size(); i++ )
     dsDevices.erase( dsDevices.begin()-nErased++ );
 
+  // LibSourcey
+	std::cout << "RtApiDs: getDeviceCount: setDevices: " << dsDevices.size() << std::endl;
+  RtDeviceManager::instance()->setDevices(dsDevices);
+  */
+
   return dsDevices.size();
 }
 
 RtAudio::DeviceInfo RtApiDs :: getDeviceInfo( unsigned int device )
 {
+	std::vector< DsDevice > dsDevices = RtDeviceManager::instance()->list();
   RtAudio::DeviceInfo info;
   info.probed = false;
 
@@ -3828,6 +3844,10 @@ bool RtApiDs :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigned 
                                  RtAudioFormat format, unsigned int *bufferSize,
                                  RtAudio::StreamOptions *options )
 {
+	
+	std::cout << "RtApiDs :: probeDeviceOpe" << std::endl;
+	std::vector< DsDevice > dsDevices = RtDeviceManager::instance()->list();
+
   if ( channels + firstChannel > 2 ) {
     errorText_ = "RtApiDs::probeDeviceOpen: DirectSound does not support more than 2 channels per device.";
     return FAILURE;
@@ -4436,12 +4456,15 @@ void RtApiDs :: startStream()
 
 void RtApiDs :: stopStream()
 {
+	std::cout << "RtApiDs :: stopStream()" << std::endl;
   verifyStream();
+	//std::cout << "RtApiDs :: stopStream() 1" << std::endl;
   if ( stream_.state == STREAM_STOPPED ) {
     errorText_ = "RtApiDs::stopStream(): the stream is already stopped!";
     error( RtError::WARNING );
     return;
   }
+	//std::cout << "RtApiDs :: stopStream() 2" << std::endl;
 
   HRESULT result = 0;
   LPVOID audioPtr;
@@ -4472,6 +4495,7 @@ void RtApiDs :: stopStream()
       errorText_ = errorStream_.str();
       goto unlock;
     }
+	//std::cout << "RtApiDs :: stopStream() 3" << std::endl;
 
     // Zero the DS buffer
     ZeroMemory( audioPtr, dataLen );
@@ -4487,21 +4511,24 @@ void RtApiDs :: stopStream()
     // If we start playing again, we must begin at beginning of buffer.
     handle->bufferPointer[0] = 0;
   }
-
+  
+	//std::cout << "RtApiDs :: stopStream() 4" << std::endl;
   if ( stream_.mode == INPUT || stream_.mode == DUPLEX ) {
     LPDIRECTSOUNDCAPTUREBUFFER buffer = (LPDIRECTSOUNDCAPTUREBUFFER) handle->buffer[1];
     audioPtr = NULL;
     dataLen = 0;
 
     stream_.state = STREAM_STOPPED;
-
+	
+	//std::cout << "RtApiDs :: stopStream() 41" << std::endl;
     result = buffer->Stop();
     if ( FAILED( result ) ) {
       errorStream_ << "RtApiDs::stopStream: error (" << getErrorString( result ) << ") stopping input buffer!";
       errorText_ = errorStream_.str();
       goto unlock;
     }
-
+	
+	//std::cout << "RtApiDs :: stopStream() 42" << std::endl;
     // Lock the buffer and clear it so that if we start to play again,
     // we won't have old data playing.
     result = buffer->Lock( 0, handle->dsBufferSize[1], &audioPtr, &dataLen, NULL, NULL, 0 );
@@ -4510,7 +4537,8 @@ void RtApiDs :: stopStream()
       errorText_ = errorStream_.str();
       goto unlock;
     }
-
+	
+	//std::cout << "RtApiDs :: stopStream() 5" << std::endl;
     // Zero the DS buffer
     ZeroMemory( audioPtr, dataLen );
 
@@ -4525,8 +4553,10 @@ void RtApiDs :: stopStream()
     // If we start recording again, we must begin at beginning of buffer.
     handle->bufferPointer[1] = 0;
   }
+	std::cout << "RtApiDs :: stopStream() END" << std::endl;
 
  unlock:
+	std::cout << "RtApiDs :: stopStream() UNLOCK" << std::endl;
   timeEndPeriod( 1 ); // revert to normal scheduler frequency on lesser windows.
   if ( FAILED( result ) ) error( RtError::SYSTEM_ERROR );
 }
@@ -4548,381 +4578,399 @@ void RtApiDs :: abortStream()
 
 void RtApiDs :: callbackEvent()
 {
-  if ( stream_.state == STREAM_STOPPED || stream_.state == STREAM_STOPPING ) {
-    Sleep( 50 ); // sleep 50 milliseconds
-    return;
-  }
+  try {
+		/// LibSourcey: Errors thrown inside callback thread crashing 
+		/// the application when stop() called. Not cool!!!
+		/// Catch and swallow thrown exceptions
 
-  if ( stream_.state == STREAM_CLOSED ) {
-    errorText_ = "RtApiDs::callbackEvent(): the stream is closed ... this shouldn't happen!";
-    error( RtError::WARNING );
-    return;
-  }
+	//std::cout << "RtApiDs :: callbackEvent()" << std::endl;
+	  if ( stream_.state == STREAM_STOPPED || stream_.state == STREAM_STOPPING ) {
+		//std::cout << "RtApiDs :: callbackEvent() Sleeping" << std::endl;
+		Sleep( 50 ); // sleep 50 milliseconds
+		//std::cout << "RtApiDs :: callbackEvent() Sleeping 1" << std::endl;
+		return;
+	  }
 
-  CallbackInfo *info = (CallbackInfo *) &stream_.callbackInfo;
-  DsHandle *handle = (DsHandle *) stream_.apiHandle;
+	  if ( stream_.state == STREAM_CLOSED ) {
+		//std::cout << "RtApiDs :: callbackEvent() Sleeping" << std::endl;
+		errorText_ = "RtApiDs::callbackEvent(): the stream is closed ... this shouldn't happen!";
+		error( RtError::WARNING );
+		return;
+	  }
 
-  // Check if we were draining the stream and signal is finished.
-  if ( handle->drainCounter > stream_.nBuffers + 2 ) {
+	  CallbackInfo *info = (CallbackInfo *) &stream_.callbackInfo;
+	  DsHandle *handle = (DsHandle *) stream_.apiHandle;
 
-    stream_.state = STREAM_STOPPING;
-    if ( handle->internalDrain == false )
-      SetEvent( handle->condition );
-    else
-      stopStream();
-    return;
-  }
+	  // Check if we were draining the stream and signal is finished.
+	  if ( handle->drainCounter > stream_.nBuffers + 2 ) {
 
-  // Invoke user callback to get fresh output data UNLESS we are
-  // draining stream.
-  if ( handle->drainCounter == 0 ) {
-    RtAudioCallback callback = (RtAudioCallback) info->callback;
-    double streamTime = getStreamTime();
-    RtAudioStreamStatus status = 0;
-    if ( stream_.mode != INPUT && handle->xrun[0] == true ) {
-      status |= RTAUDIO_OUTPUT_UNDERFLOW;
-      handle->xrun[0] = false;
-    }
-    if ( stream_.mode != OUTPUT && handle->xrun[1] == true ) {
-      status |= RTAUDIO_INPUT_OVERFLOW;
-      handle->xrun[1] = false;
-    }
-    int cbReturnValue = callback( stream_.userBuffer[0], stream_.userBuffer[1],
-                                  stream_.bufferSize, streamTime, status, info->userData );
-    if ( cbReturnValue == 2 ) {
-      stream_.state = STREAM_STOPPING;
-      handle->drainCounter = 2;
-      abortStream();
-      return;
-    }
-    else if ( cbReturnValue == 1 ) {
-      handle->drainCounter = 1;
-      handle->internalDrain = true;
-    }
-  }
+		stream_.state = STREAM_STOPPING;
+		if ( handle->internalDrain == false )
+		  SetEvent( handle->condition );
+		else
+		  stopStream();
+		return;
+	  }
 
-  HRESULT result;
-  DWORD currentWritePointer, safeWritePointer;
-  DWORD currentReadPointer, safeReadPointer;
-  UINT nextWritePointer;
+	  // Invoke user callback to get fresh output data UNLESS we are
+	  // draining stream.
+	  if ( handle->drainCounter == 0 ) {
+		RtAudioCallback callback = (RtAudioCallback) info->callback;
+		double streamTime = getStreamTime();
+		RtAudioStreamStatus status = 0;
+		if ( stream_.mode != INPUT && handle->xrun[0] == true ) {
+		  status |= RTAUDIO_OUTPUT_UNDERFLOW;
+		  handle->xrun[0] = false;
+		}
+		if ( stream_.mode != OUTPUT && handle->xrun[1] == true ) {
+		  status |= RTAUDIO_INPUT_OVERFLOW;
+		  handle->xrun[1] = false;
+		}
+		int cbReturnValue = callback( stream_.userBuffer[0], stream_.userBuffer[1],
+									  stream_.bufferSize, streamTime, status, info->userData );
+		if ( cbReturnValue == 2 ) {
+		  stream_.state = STREAM_STOPPING;
+		  handle->drainCounter = 2;
+		  abortStream();
+		  return;
+		}
+		else if ( cbReturnValue == 1 ) {
+		  handle->drainCounter = 1;
+		  handle->internalDrain = true;
+		}
+	  }
 
-  LPVOID buffer1 = NULL;
-  LPVOID buffer2 = NULL;
-  DWORD bufferSize1 = 0;
-  DWORD bufferSize2 = 0;
+	  HRESULT result;
+	  DWORD currentWritePointer, safeWritePointer;
+	  DWORD currentReadPointer, safeReadPointer;
+	  UINT nextWritePointer;
 
-  char *buffer;
-  long bufferBytes;
+	  LPVOID buffer1 = NULL;
+	  LPVOID buffer2 = NULL;
+	  DWORD bufferSize1 = 0;
+	  DWORD bufferSize2 = 0;
 
-  if ( buffersRolling == false ) {
-    if ( stream_.mode == DUPLEX ) {
-      //assert( handle->dsBufferSize[0] == handle->dsBufferSize[1] );
+	  char *buffer;
+	  long bufferBytes;
 
-      // It takes a while for the devices to get rolling. As a result,
-      // there's no guarantee that the capture and write device pointers
-      // will move in lockstep.  Wait here for both devices to start
-      // rolling, and then set our buffer pointers accordingly.
-      // e.g. Crystal Drivers: the capture buffer starts up 5700 to 9600
-      // bytes later than the write buffer.
+	  if ( buffersRolling == false ) {
+		if ( stream_.mode == DUPLEX ) {
+		  //assert( handle->dsBufferSize[0] == handle->dsBufferSize[1] );
 
-      // Stub: a serious risk of having a pre-emptive scheduling round
-      // take place between the two GetCurrentPosition calls... but I'm
-      // really not sure how to solve the problem.  Temporarily boost to
-      // Realtime priority, maybe; but I'm not sure what priority the
-      // DirectSound service threads run at. We *should* be roughly
-      // within a ms or so of correct.
+		  // It takes a while for the devices to get rolling. As a result,
+		  // there's no guarantee that the capture and write device pointers
+		  // will move in lockstep.  Wait here for both devices to start
+		  // rolling, and then set our buffer pointers accordingly.
+		  // e.g. Crystal Drivers: the capture buffer starts up 5700 to 9600
+		  // bytes later than the write buffer.
 
-      LPDIRECTSOUNDBUFFER dsWriteBuffer = (LPDIRECTSOUNDBUFFER) handle->buffer[0];
-      LPDIRECTSOUNDCAPTUREBUFFER dsCaptureBuffer = (LPDIRECTSOUNDCAPTUREBUFFER) handle->buffer[1];
+		  // Stub: a serious risk of having a pre-emptive scheduling round
+		  // take place between the two GetCurrentPosition calls... but I'm
+		  // really not sure how to solve the problem.  Temporarily boost to
+		  // Realtime priority, maybe; but I'm not sure what priority the
+		  // DirectSound service threads run at. We *should* be roughly
+		  // within a ms or so of correct.
 
-      DWORD startSafeWritePointer, startSafeReadPointer;
+		  LPDIRECTSOUNDBUFFER dsWriteBuffer = (LPDIRECTSOUNDBUFFER) handle->buffer[0];
+		  LPDIRECTSOUNDCAPTUREBUFFER dsCaptureBuffer = (LPDIRECTSOUNDCAPTUREBUFFER) handle->buffer[1];
 
-      result = dsWriteBuffer->GetCurrentPosition( NULL, &startSafeWritePointer );
-      if ( FAILED( result ) ) {
-        errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current write position!";
-        errorText_ = errorStream_.str();
-        error( RtError::SYSTEM_ERROR );
-      }
-      result = dsCaptureBuffer->GetCurrentPosition( NULL, &startSafeReadPointer );
-      if ( FAILED( result ) ) {
-        errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current read position!";
-        errorText_ = errorStream_.str();
-        error( RtError::SYSTEM_ERROR );
-      }
-      while ( true ) {
-        result = dsWriteBuffer->GetCurrentPosition( NULL, &safeWritePointer );
-        if ( FAILED( result ) ) {
-          errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current write position!";
-          errorText_ = errorStream_.str();
-          error( RtError::SYSTEM_ERROR );
-        }
-        result = dsCaptureBuffer->GetCurrentPosition( NULL, &safeReadPointer );
-        if ( FAILED( result ) ) {
-          errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current read position!";
-          errorText_ = errorStream_.str();
-          error( RtError::SYSTEM_ERROR );
-        }
-        if ( safeWritePointer != startSafeWritePointer && safeReadPointer != startSafeReadPointer ) break;
-        Sleep( 1 );
-      }
+		  DWORD startSafeWritePointer, startSafeReadPointer;
 
-      //assert( handle->dsBufferSize[0] == handle->dsBufferSize[1] );
+		  result = dsWriteBuffer->GetCurrentPosition( NULL, &startSafeWritePointer );
+		  if ( FAILED( result ) ) {
+			errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current write position!";
+			errorText_ = errorStream_.str();
+			error( RtError::SYSTEM_ERROR );
+		  }
+		  result = dsCaptureBuffer->GetCurrentPosition( NULL, &startSafeReadPointer );
+		  if ( FAILED( result ) ) {
+			errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current read position!";
+			errorText_ = errorStream_.str();
+			error( RtError::SYSTEM_ERROR );
+		  }
+		  while ( true ) {
+			result = dsWriteBuffer->GetCurrentPosition( NULL, &safeWritePointer );
+			if ( FAILED( result ) ) {
+			  errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current write position!";
+			  errorText_ = errorStream_.str();
+			  error( RtError::SYSTEM_ERROR );
+			}
+			result = dsCaptureBuffer->GetCurrentPosition( NULL, &safeReadPointer );
+			if ( FAILED( result ) ) {
+			  errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current read position!";
+			  errorText_ = errorStream_.str();
+			  error( RtError::SYSTEM_ERROR );
+			}
+			if ( safeWritePointer != startSafeWritePointer && safeReadPointer != startSafeReadPointer ) break;
+			Sleep( 1 );
+		  }
 
-      handle->bufferPointer[0] = safeWritePointer + handle->dsPointerLeadTime[0];
-      if ( handle->bufferPointer[0] >= handle->dsBufferSize[0] ) handle->bufferPointer[0] -= handle->dsBufferSize[0];
-      handle->bufferPointer[1] = safeReadPointer;
-    }
-    else if ( stream_.mode == OUTPUT ) {
+		  //assert( handle->dsBufferSize[0] == handle->dsBufferSize[1] );
 
-      // Set the proper nextWritePosition after initial startup.
-      LPDIRECTSOUNDBUFFER dsWriteBuffer = (LPDIRECTSOUNDBUFFER) handle->buffer[0];
-      result = dsWriteBuffer->GetCurrentPosition( &currentWritePointer, &safeWritePointer );
-      if ( FAILED( result ) ) {
-        errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current write position!";
-        errorText_ = errorStream_.str();
-        error( RtError::SYSTEM_ERROR );
-      }
-      handle->bufferPointer[0] = safeWritePointer + handle->dsPointerLeadTime[0];
-      if ( handle->bufferPointer[0] >= handle->dsBufferSize[0] ) handle->bufferPointer[0] -= handle->dsBufferSize[0];
-    }
+		  handle->bufferPointer[0] = safeWritePointer + handle->dsPointerLeadTime[0];
+		  if ( handle->bufferPointer[0] >= handle->dsBufferSize[0] ) handle->bufferPointer[0] -= handle->dsBufferSize[0];
+		  handle->bufferPointer[1] = safeReadPointer;
+		}
+		else if ( stream_.mode == OUTPUT ) {
 
-    buffersRolling = true;
-  }
+		  // Set the proper nextWritePosition after initial startup.
+		  LPDIRECTSOUNDBUFFER dsWriteBuffer = (LPDIRECTSOUNDBUFFER) handle->buffer[0];
+		  result = dsWriteBuffer->GetCurrentPosition( &currentWritePointer, &safeWritePointer );
+		  if ( FAILED( result ) ) {
+			errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current write position!";
+			errorText_ = errorStream_.str();
+			error( RtError::SYSTEM_ERROR );
+		  }
+		  handle->bufferPointer[0] = safeWritePointer + handle->dsPointerLeadTime[0];
+		  if ( handle->bufferPointer[0] >= handle->dsBufferSize[0] ) handle->bufferPointer[0] -= handle->dsBufferSize[0];
+		}
 
-  if ( stream_.mode == OUTPUT || stream_.mode == DUPLEX ) {
+		buffersRolling = true;
+	  }
+
+	  if ( stream_.mode == OUTPUT || stream_.mode == DUPLEX ) {
     
-    LPDIRECTSOUNDBUFFER dsBuffer = (LPDIRECTSOUNDBUFFER) handle->buffer[0];
+		LPDIRECTSOUNDBUFFER dsBuffer = (LPDIRECTSOUNDBUFFER) handle->buffer[0];
 
-    if ( handle->drainCounter > 1 ) { // write zeros to the output stream
-      bufferBytes = stream_.bufferSize * stream_.nUserChannels[0];
-      bufferBytes *= formatBytes( stream_.userFormat );
-      memset( stream_.userBuffer[0], 0, bufferBytes );
-    }
+		if ( handle->drainCounter > 1 ) { // write zeros to the output stream
+		  bufferBytes = stream_.bufferSize * stream_.nUserChannels[0];
+		  bufferBytes *= formatBytes( stream_.userFormat );
+		  memset( stream_.userBuffer[0], 0, bufferBytes );
+		}
 
-    // Setup parameters and do buffer conversion if necessary.
-    if ( stream_.doConvertBuffer[0] ) {
-      buffer = stream_.deviceBuffer;
-      convertBuffer( buffer, stream_.userBuffer[0], stream_.convertInfo[0] );
-      bufferBytes = stream_.bufferSize * stream_.nDeviceChannels[0];
-      bufferBytes *= formatBytes( stream_.deviceFormat[0] );
-    }
-    else {
-      buffer = stream_.userBuffer[0];
-      bufferBytes = stream_.bufferSize * stream_.nUserChannels[0];
-      bufferBytes *= formatBytes( stream_.userFormat );
-    }
+		// Setup parameters and do buffer conversion if necessary.
+		if ( stream_.doConvertBuffer[0] ) {
+		  buffer = stream_.deviceBuffer;
+		  convertBuffer( buffer, stream_.userBuffer[0], stream_.convertInfo[0] );
+		  bufferBytes = stream_.bufferSize * stream_.nDeviceChannels[0];
+		  bufferBytes *= formatBytes( stream_.deviceFormat[0] );
+		}
+		else {
+		  buffer = stream_.userBuffer[0];
+		  bufferBytes = stream_.bufferSize * stream_.nUserChannels[0];
+		  bufferBytes *= formatBytes( stream_.userFormat );
+		}
 
-    // No byte swapping necessary in DirectSound implementation.
+		// No byte swapping necessary in DirectSound implementation.
 
-    // Ahhh ... windoze.  16-bit data is signed but 8-bit data is
-    // unsigned.  So, we need to convert our signed 8-bit data here to
-    // unsigned.
-    if ( stream_.deviceFormat[0] == RTAUDIO_SINT8 )
-      for ( int i=0; i<bufferBytes; i++ ) buffer[i] = (unsigned char) ( buffer[i] + 128 );
+		// Ahhh ... windoze.  16-bit data is signed but 8-bit data is
+		// unsigned.  So, we need to convert our signed 8-bit data here to
+		// unsigned.
+		if ( stream_.deviceFormat[0] == RTAUDIO_SINT8 )
+		  for ( int i=0; i<bufferBytes; i++ ) buffer[i] = (unsigned char) ( buffer[i] + 128 );
 
-    DWORD dsBufferSize = handle->dsBufferSize[0];
-    nextWritePointer = handle->bufferPointer[0];
+		DWORD dsBufferSize = handle->dsBufferSize[0];
+		nextWritePointer = handle->bufferPointer[0];
+	
+		//std::cout << "RtApiDs :: callbackEvent() 5" << std::endl;
+		DWORD endWrite, leadPointer;
+		while ( true ) {
+		  // Find out where the read and "safe write" pointers are.
+		  result = dsBuffer->GetCurrentPosition( &currentWritePointer, &safeWritePointer );
+		  if ( FAILED( result ) ) {
+			errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current write position!";
+			errorText_ = errorStream_.str();
+			error( RtError::SYSTEM_ERROR );
+		  }
 
-    DWORD endWrite, leadPointer;
-    while ( true ) {
-      // Find out where the read and "safe write" pointers are.
-      result = dsBuffer->GetCurrentPosition( &currentWritePointer, &safeWritePointer );
-      if ( FAILED( result ) ) {
-        errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current write position!";
-        errorText_ = errorStream_.str();
-        error( RtError::SYSTEM_ERROR );
-      }
+		  // We will copy our output buffer into the region between
+		  // safeWritePointer and leadPointer.  If leadPointer is not
+		  // beyond the next endWrite position, wait until it is.
+		  leadPointer = safeWritePointer + handle->dsPointerLeadTime[0];
+		  ////std::cout << "safeWritePointer = " << safeWritePointer << ", leadPointer = " << leadPointer << ", nextWritePointer = " << nextWritePointer << std::endl;
+		  if ( leadPointer > dsBufferSize ) leadPointer -= dsBufferSize;
+		  if ( leadPointer < nextWritePointer ) leadPointer += dsBufferSize; // unwrap offset
+		  endWrite = nextWritePointer + bufferBytes;
 
-      // We will copy our output buffer into the region between
-      // safeWritePointer and leadPointer.  If leadPointer is not
-      // beyond the next endWrite position, wait until it is.
-      leadPointer = safeWritePointer + handle->dsPointerLeadTime[0];
-      //std::cout << "safeWritePointer = " << safeWritePointer << ", leadPointer = " << leadPointer << ", nextWritePointer = " << nextWritePointer << std::endl;
-      if ( leadPointer > dsBufferSize ) leadPointer -= dsBufferSize;
-      if ( leadPointer < nextWritePointer ) leadPointer += dsBufferSize; // unwrap offset
-      endWrite = nextWritePointer + bufferBytes;
+		  // Check whether the entire write region is behind the play pointer.
+		  if ( leadPointer >= endWrite ) break;
 
-      // Check whether the entire write region is behind the play pointer.
-      if ( leadPointer >= endWrite ) break;
+		  // If we are here, then we must wait until the leadPointer advances
+		  // beyond the end of our next write region. We use the
+		  // Sleep() function to suspend operation until that happens.
+		  double millis = ( endWrite - leadPointer ) * 1000.0;
+		  millis /= ( formatBytes( stream_.deviceFormat[0]) * stream_.nDeviceChannels[0] * stream_.sampleRate);
+		  if ( millis < 1.0 ) millis = 1.0;
+		  Sleep( (DWORD) millis );
+		}
 
-      // If we are here, then we must wait until the leadPointer advances
-      // beyond the end of our next write region. We use the
-      // Sleep() function to suspend operation until that happens.
-      double millis = ( endWrite - leadPointer ) * 1000.0;
-      millis /= ( formatBytes( stream_.deviceFormat[0]) * stream_.nDeviceChannels[0] * stream_.sampleRate);
-      if ( millis < 1.0 ) millis = 1.0;
-      Sleep( (DWORD) millis );
-    }
+		if ( dsPointerBetween( nextWritePointer, safeWritePointer, currentWritePointer, dsBufferSize )
+			 || dsPointerBetween( endWrite, safeWritePointer, currentWritePointer, dsBufferSize ) ) { 
+		  // We've strayed into the forbidden zone ... resync the read pointer.
+		  handle->xrun[0] = true;
+		  nextWritePointer = safeWritePointer + handle->dsPointerLeadTime[0] - bufferBytes;
+		  if ( nextWritePointer >= dsBufferSize ) nextWritePointer -= dsBufferSize;
+		  handle->bufferPointer[0] = nextWritePointer;
+		  endWrite = nextWritePointer + bufferBytes;
+		}
 
-    if ( dsPointerBetween( nextWritePointer, safeWritePointer, currentWritePointer, dsBufferSize )
-         || dsPointerBetween( endWrite, safeWritePointer, currentWritePointer, dsBufferSize ) ) { 
-      // We've strayed into the forbidden zone ... resync the read pointer.
-      handle->xrun[0] = true;
-      nextWritePointer = safeWritePointer + handle->dsPointerLeadTime[0] - bufferBytes;
-      if ( nextWritePointer >= dsBufferSize ) nextWritePointer -= dsBufferSize;
-      handle->bufferPointer[0] = nextWritePointer;
-      endWrite = nextWritePointer + bufferBytes;
-    }
+		// Lock free space in the buffer
+		result = dsBuffer->Lock( nextWritePointer, bufferBytes, &buffer1,
+								 &bufferSize1, &buffer2, &bufferSize2, 0 );
+		if ( FAILED( result ) ) {
+		  errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") locking buffer during playback!";
+		  errorText_ = errorStream_.str();
+		  error( RtError::SYSTEM_ERROR );
+		}
 
-    // Lock free space in the buffer
-    result = dsBuffer->Lock( nextWritePointer, bufferBytes, &buffer1,
-                             &bufferSize1, &buffer2, &bufferSize2, 0 );
-    if ( FAILED( result ) ) {
-      errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") locking buffer during playback!";
-      errorText_ = errorStream_.str();
-      error( RtError::SYSTEM_ERROR );
-    }
+		// Copy our buffer into the DS buffer
+		CopyMemory( buffer1, buffer, bufferSize1 );
+		if ( buffer2 != NULL ) CopyMemory( buffer2, buffer+bufferSize1, bufferSize2 );
 
-    // Copy our buffer into the DS buffer
-    CopyMemory( buffer1, buffer, bufferSize1 );
-    if ( buffer2 != NULL ) CopyMemory( buffer2, buffer+bufferSize1, bufferSize2 );
+		// Update our buffer offset and unlock sound buffer
+		dsBuffer->Unlock( buffer1, bufferSize1, buffer2, bufferSize2 );
+		if ( FAILED( result ) ) {
+		  errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") unlocking buffer during playback!";
+		  errorText_ = errorStream_.str();
+		  error( RtError::SYSTEM_ERROR );
+		}
+		nextWritePointer = ( nextWritePointer + bufferSize1 + bufferSize2 ) % dsBufferSize;
+		handle->bufferPointer[0] = nextWritePointer;
 
-    // Update our buffer offset and unlock sound buffer
-    dsBuffer->Unlock( buffer1, bufferSize1, buffer2, bufferSize2 );
-    if ( FAILED( result ) ) {
-      errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") unlocking buffer during playback!";
-      errorText_ = errorStream_.str();
-      error( RtError::SYSTEM_ERROR );
-    }
-    nextWritePointer = ( nextWritePointer + bufferSize1 + bufferSize2 ) % dsBufferSize;
-    handle->bufferPointer[0] = nextWritePointer;
+		if ( handle->drainCounter ) {
+		  handle->drainCounter++;
+		  goto unlock;
+		}
+	  }
+  
+	  if ( stream_.mode == INPUT || stream_.mode == DUPLEX ) {
 
-    if ( handle->drainCounter ) {
-      handle->drainCounter++;
-      goto unlock;
-    }
-  }
+		// Setup parameters.
+		if ( stream_.doConvertBuffer[1] ) {
+		  buffer = stream_.deviceBuffer;
+		  bufferBytes = stream_.bufferSize * stream_.nDeviceChannels[1];
+		  bufferBytes *= formatBytes( stream_.deviceFormat[1] );
+		}
+		else {
+		  buffer = stream_.userBuffer[1];
+		  bufferBytes = stream_.bufferSize * stream_.nUserChannels[1];
+		  bufferBytes *= formatBytes( stream_.userFormat );
+		}
 
-  if ( stream_.mode == INPUT || stream_.mode == DUPLEX ) {
+		LPDIRECTSOUNDCAPTUREBUFFER dsBuffer = (LPDIRECTSOUNDCAPTUREBUFFER) handle->buffer[1];
+		long nextReadPointer = handle->bufferPointer[1];
+		DWORD dsBufferSize = handle->dsBufferSize[1];
 
-    // Setup parameters.
-    if ( stream_.doConvertBuffer[1] ) {
-      buffer = stream_.deviceBuffer;
-      bufferBytes = stream_.bufferSize * stream_.nDeviceChannels[1];
-      bufferBytes *= formatBytes( stream_.deviceFormat[1] );
-    }
-    else {
-      buffer = stream_.userBuffer[1];
-      bufferBytes = stream_.bufferSize * stream_.nUserChannels[1];
-      bufferBytes *= formatBytes( stream_.userFormat );
-    }
+		// Find out where the write and "safe read" pointers are.
+		result = dsBuffer->GetCurrentPosition( &currentReadPointer, &safeReadPointer );
+		if ( FAILED( result ) ) {
+		  errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current read position!";
+		  errorText_ = errorStream_.str();
+		  error( RtError::SYSTEM_ERROR );
+		}
 
-    LPDIRECTSOUNDCAPTUREBUFFER dsBuffer = (LPDIRECTSOUNDCAPTUREBUFFER) handle->buffer[1];
-    long nextReadPointer = handle->bufferPointer[1];
-    DWORD dsBufferSize = handle->dsBufferSize[1];
+		if ( safeReadPointer < (DWORD)nextReadPointer ) safeReadPointer += dsBufferSize; // unwrap offset
+		DWORD endRead = nextReadPointer + bufferBytes;
 
-    // Find out where the write and "safe read" pointers are.
-    result = dsBuffer->GetCurrentPosition( &currentReadPointer, &safeReadPointer );
-    if ( FAILED( result ) ) {
-      errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current read position!";
-      errorText_ = errorStream_.str();
-      error( RtError::SYSTEM_ERROR );
-    }
+		// Handling depends on whether we are INPUT or DUPLEX. 
+		// If we're in INPUT mode then waiting is a good thing. If we're in DUPLEX mode,
+		// then a wait here will drag the write pointers into the forbidden zone.
+		// 
+		// In DUPLEX mode, rather than wait, we will back off the read pointer until 
+		// it's in a safe position. This causes dropouts, but it seems to be the only 
+		// practical way to sync up the read and write pointers reliably, given the 
+		// the very complex relationship between phase and increment of the read and write 
+		// pointers.
+		//
+		// In order to minimize audible dropouts in DUPLEX mode, we will
+		// provide a pre-roll period of 0.5 seconds in which we return
+		// zeros from the read buffer while the pointers sync up.
 
-    if ( safeReadPointer < (DWORD)nextReadPointer ) safeReadPointer += dsBufferSize; // unwrap offset
-    DWORD endRead = nextReadPointer + bufferBytes;
+		if ( stream_.mode == DUPLEX ) {
+		  if ( safeReadPointer < endRead ) {
+			if ( duplexPrerollBytes <= 0 ) {
+			  // Pre-roll time over. Be more agressive.
+			  int adjustment = endRead-safeReadPointer;
 
-    // Handling depends on whether we are INPUT or DUPLEX. 
-    // If we're in INPUT mode then waiting is a good thing. If we're in DUPLEX mode,
-    // then a wait here will drag the write pointers into the forbidden zone.
-    // 
-    // In DUPLEX mode, rather than wait, we will back off the read pointer until 
-    // it's in a safe position. This causes dropouts, but it seems to be the only 
-    // practical way to sync up the read and write pointers reliably, given the 
-    // the very complex relationship between phase and increment of the read and write 
-    // pointers.
-    //
-    // In order to minimize audible dropouts in DUPLEX mode, we will
-    // provide a pre-roll period of 0.5 seconds in which we return
-    // zeros from the read buffer while the pointers sync up.
+			  handle->xrun[1] = true;
+			  // Two cases:
+			  //   - large adjustments: we've probably run out of CPU cycles, so just resync exactly,
+			  //     and perform fine adjustments later.
+			  //   - small adjustments: back off by twice as much.
+			  if ( adjustment >= 2*bufferBytes )
+				nextReadPointer = safeReadPointer-2*bufferBytes;
+			  else
+				nextReadPointer = safeReadPointer-bufferBytes-adjustment;
 
-    if ( stream_.mode == DUPLEX ) {
-      if ( safeReadPointer < endRead ) {
-        if ( duplexPrerollBytes <= 0 ) {
-          // Pre-roll time over. Be more agressive.
-          int adjustment = endRead-safeReadPointer;
+			  if ( nextReadPointer < 0 ) nextReadPointer += dsBufferSize;
 
-          handle->xrun[1] = true;
-          // Two cases:
-          //   - large adjustments: we've probably run out of CPU cycles, so just resync exactly,
-          //     and perform fine adjustments later.
-          //   - small adjustments: back off by twice as much.
-          if ( adjustment >= 2*bufferBytes )
-            nextReadPointer = safeReadPointer-2*bufferBytes;
-          else
-            nextReadPointer = safeReadPointer-bufferBytes-adjustment;
+			}
+			else {
+			  // In pre=roll time. Just do it.
+			  nextReadPointer = safeReadPointer - bufferBytes;
+			  while ( nextReadPointer < 0 ) nextReadPointer += dsBufferSize;
+			}
+			endRead = nextReadPointer + bufferBytes;
+		  }
+		}
+		else { // mode == INPUT
+		  while ( safeReadPointer < endRead && stream_.callbackInfo.isRunning ) {
+			// See comments for playback.
+			double millis = (endRead - safeReadPointer) * 1000.0;
+			millis /= ( formatBytes(stream_.deviceFormat[1]) * stream_.nDeviceChannels[1] * stream_.sampleRate);
+			if ( millis < 1.0 ) millis = 1.0;
+			Sleep( (DWORD) millis );
 
-          if ( nextReadPointer < 0 ) nextReadPointer += dsBufferSize;
-
-        }
-        else {
-          // In pre=roll time. Just do it.
-          nextReadPointer = safeReadPointer - bufferBytes;
-          while ( nextReadPointer < 0 ) nextReadPointer += dsBufferSize;
-        }
-        endRead = nextReadPointer + bufferBytes;
-      }
-    }
-    else { // mode == INPUT
-      while ( safeReadPointer < endRead && stream_.callbackInfo.isRunning ) {
-        // See comments for playback.
-        double millis = (endRead - safeReadPointer) * 1000.0;
-        millis /= ( formatBytes(stream_.deviceFormat[1]) * stream_.nDeviceChannels[1] * stream_.sampleRate);
-        if ( millis < 1.0 ) millis = 1.0;
-        Sleep( (DWORD) millis );
-
-        // Wake up and find out where we are now.
-        result = dsBuffer->GetCurrentPosition( &currentReadPointer, &safeReadPointer );
-        if ( FAILED( result ) ) {
-          errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current read position!";
-          errorText_ = errorStream_.str();
-          error( RtError::SYSTEM_ERROR );
-        }
+			// Wake up and find out where we are now.
+			result = dsBuffer->GetCurrentPosition( &currentReadPointer, &safeReadPointer );
+			if ( FAILED( result ) ) {
+			  errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") getting current read position!";
+			  errorText_ = errorStream_.str();
+			  error( RtError::SYSTEM_ERROR );
+			}
       
-        if ( safeReadPointer < (DWORD)nextReadPointer ) safeReadPointer += dsBufferSize; // unwrap offset
-      }
-    }
+			if ( safeReadPointer < (DWORD)nextReadPointer ) safeReadPointer += dsBufferSize; // unwrap offset
+		  }
+		}
 
-    // Lock free space in the buffer
-    result = dsBuffer->Lock( nextReadPointer, bufferBytes, &buffer1,
-                             &bufferSize1, &buffer2, &bufferSize2, 0 );
-    if ( FAILED( result ) ) {
-      errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") locking capture buffer!";
-      errorText_ = errorStream_.str();
-      error( RtError::SYSTEM_ERROR );
-    }
+		// Lock free space in the buffer
+		result = dsBuffer->Lock( nextReadPointer, bufferBytes, &buffer1,
+								 &bufferSize1, &buffer2, &bufferSize2, 0 );
+		if ( FAILED( result ) ) {
+		
+			std::cout << "RtApiDs :: callbackEvent() dsBuffer" << std::endl;
+		  errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") locking capture buffer!";
+		  errorText_ = errorStream_.str();
+		  error( RtError::SYSTEM_ERROR );
+		}
 
-    if ( duplexPrerollBytes <= 0 ) {
-      // Copy our buffer into the DS buffer
-      CopyMemory( buffer, buffer1, bufferSize1 );
-      if ( buffer2 != NULL ) CopyMemory( buffer+bufferSize1, buffer2, bufferSize2 );
-    }
-    else {
-      memset( buffer, 0, bufferSize1 );
-      if ( buffer2 != NULL ) memset( buffer + bufferSize1, 0, bufferSize2 );
-      duplexPrerollBytes -= bufferSize1 + bufferSize2;
-    }
+		if ( duplexPrerollBytes <= 0 ) {
+		  // Copy our buffer into the DS buffer
+		  CopyMemory( buffer, buffer1, bufferSize1 );
+		  if ( buffer2 != NULL ) CopyMemory( buffer+bufferSize1, buffer2, bufferSize2 );
+		}
+		else {
+		  memset( buffer, 0, bufferSize1 );
+		  if ( buffer2 != NULL ) memset( buffer + bufferSize1, 0, bufferSize2 );
+		  duplexPrerollBytes -= bufferSize1 + bufferSize2;
+		}
 
-    // Update our buffer offset and unlock sound buffer
-    nextReadPointer = ( nextReadPointer + bufferSize1 + bufferSize2 ) % dsBufferSize;
-    dsBuffer->Unlock( buffer1, bufferSize1, buffer2, bufferSize2 );
-    if ( FAILED( result ) ) {
-      errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") unlocking capture buffer!";
-      errorText_ = errorStream_.str();
-      error( RtError::SYSTEM_ERROR );
-    }
-    handle->bufferPointer[1] = nextReadPointer;
+		// Update our buffer offset and unlock sound buffer
+		nextReadPointer = ( nextReadPointer + bufferSize1 + bufferSize2 ) % dsBufferSize;
+		dsBuffer->Unlock( buffer1, bufferSize1, buffer2, bufferSize2 );
+		if ( FAILED( result ) ) {
+		  errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") unlocking capture buffer!";
+		  errorText_ = errorStream_.str();
+		  error( RtError::SYSTEM_ERROR );
+		}
+		handle->bufferPointer[1] = nextReadPointer;
 
-    // No byte swapping necessary in DirectSound implementation.
+		// No byte swapping necessary in DirectSound implementation.
 
-    // If necessary, convert 8-bit data from unsigned to signed.
-    if ( stream_.deviceFormat[1] == RTAUDIO_SINT8 )
-      for ( int j=0; j<bufferBytes; j++ ) buffer[j] = (signed char) ( buffer[j] - 128 );
+		// If necessary, convert 8-bit data from unsigned to signed.
+		if ( stream_.deviceFormat[1] == RTAUDIO_SINT8 )
+		  for ( int j=0; j<bufferBytes; j++ ) buffer[j] = (signed char) ( buffer[j] - 128 );
 
-    // Do buffer conversion if necessary.
-    if ( stream_.doConvertBuffer[1] )
-      convertBuffer( stream_.userBuffer[1], stream_.deviceBuffer, stream_.convertInfo[1] );
-  }
+		// Do buffer conversion if necessary.
+		if ( stream_.doConvertBuffer[1] )
+		  convertBuffer( stream_.userBuffer[1], stream_.deviceBuffer, stream_.convertInfo[1] );
+	  }
+  
+	}
+	catch (RtError& exc)
+	{
+		std::cout << "RtApiDs :: callbackEvent: Swallowing: " << exc.what() << std::endl;
+	}
 
  unlock:
   RtApi::tickStreamTime();
@@ -4998,7 +5046,10 @@ static BOOL CALLBACK deviceQueryCallback( LPGUID lpguid,
     }
     object->Release();
   }
-
+  
+	  // LibSourcey
+	std::vector< DsDevice > dsDevices = RtDeviceManager::instance()->list();
+	 
   // If good device, then save its name and guid.
   std::string name = convertTChar( description );
   if ( name == "Primary Sound Driver" || name == "Primary Sound Capture Driver" )
@@ -5031,7 +5082,10 @@ static BOOL CALLBACK deviceQueryCallback( LPGUID lpguid,
       device.validId[0] = true;
     }
     dsDevices.push_back( device );
-  }
+  }  
+
+	  // LibSourcey
+	  RtDeviceManager::instance()->setDevices(dsDevices);
 
   return TRUE;
 }
@@ -7711,8 +7765,11 @@ void RtApi :: error( RtError::Type type )
   errorStream_.str(""); // clear the ostringstream
   if ( type == RtError::WARNING && showWarnings_ == true )
     std::cerr << '\n' << errorText_ << "\n\n";
-  else if ( type != RtError::WARNING )
+  else if ( type != RtError::WARNING ) {
+	// LibSourcey adding cout error
+    std::cerr << '\n' << errorText_ << "\n\n";
     throw( RtError( errorText_, type ) );
+  }
 }
 
 void RtApi :: verifyStream()

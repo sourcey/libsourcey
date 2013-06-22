@@ -20,6 +20,7 @@
 #include "Sourcey/Media/MediaFactory.h"
 #include "Sourcey/Logger.h"
 
+#include "RtAudio.h"
 
 using namespace std;
 using namespace Poco;
@@ -75,8 +76,7 @@ MediaFactory::MediaFactory()
 
 MediaFactory::~MediaFactory()
 {	
-	//cout << "MediaFactory::~MediaFactory" << endl;
-
+	//cout << "MediaFactory::~MediaFactory" << endl;	
 	if (_devices) {
 		_devices->uninitialize();
 		delete _devices;
@@ -88,6 +88,13 @@ IDeviceManager& MediaFactory::devices()
 { 
 	FastMutex::ScopedLock lock(_mutex);
 	return *_devices; 
+}
+
+
+FormatRegistry& MediaFactory::formats() 
+{ 
+	FastMutex::ScopedLock lock(_mutex);
+	return _formats; 
 }
 
 
@@ -156,6 +163,8 @@ VideoCapture* MediaFactory::createFileCapture(const string& file, unsigned flags
 AudioCapture* MediaFactory::createAudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format) //, bool destroyOnStop
 {
 	LogTrace("MediaFactory") << "Create Audio Capture: " << deviceId << endl;
+	if (deviceId < 0)
+		throw Exception("Invalid audio device ID");
 	AudioCapture* capture = new AudioCapture(deviceId, channels, sampleRate, format);
 	return capture;
 }

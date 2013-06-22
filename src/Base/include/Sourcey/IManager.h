@@ -21,7 +21,7 @@
 #define SOURCEY_IManager_H
 
 
-namespace Scy { 
+namespace scy { 
 
 
 template <class TKey, class TValue>
@@ -46,7 +46,7 @@ public:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_IManager_H

@@ -26,7 +26,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 
@@ -170,4 +170,4 @@ void TCPPacketStreamConnection::onStreamStateChange(void*, PacketStreamState& st
 }
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net

@@ -25,6 +25,7 @@
 using namespace std;
 using namespace Poco;
 
+// TODO: Inner loop timeout recovery procedure
 
 namespace Scy {
 namespace Media {
@@ -38,7 +39,7 @@ VideoCapture::VideoCapture(int deviceId, unsigned flags) :
 	_flags(flags),
 	_capturing(false),
 	_isOpened(false),
-	_stop(false)
+	_stopping(false)
 {
 	LogTrace("VideoCapture", this) << "Creating: " << deviceId << endl;
 	open();
@@ -55,7 +56,7 @@ VideoCapture::VideoCapture(const string& filename, unsigned flags) :
 	_flags(flags),
 	_capturing(false),
 	_isOpened(false),
-	_stop(false) 
+	_stopping(false) 
 {
 	LogTrace("VideoCapture", this) << "Creating: " << filename << endl;
 	open();
@@ -68,7 +69,7 @@ VideoCapture::~VideoCapture()
 	LogTrace("VideoCapture", this) << "Destroying" << endl;
 
 	if (_thread.isRunning()) {
-		_stop = true;
+		_stopping = true;
 		//_wakeUp.set();
 
 		// Because we are calling join on the thread
@@ -96,7 +97,7 @@ void VideoCapture::start()
 			if (!_isOpened)
 				throw Exception("The capture must be opened before starting the thread.");
 
-			_stop = false;
+			_stopping = false;
 			_counter.reset();	
 			_thread.start(*this);
 		}
@@ -116,7 +117,7 @@ void VideoCapture::stop()
 	LogTrace("VideoCapture", this) << "Stopping" << endl;
 	if (_thread.isRunning()) {
 		LogTrace("VideoCapture", this) << "Terminating Thread" << endl;		
-		_stop = true;
+		_stopping = true;
 		_thread.join();
 	}
 
@@ -172,16 +173,22 @@ void VideoCapture::run()
 			<< endl;
 	
 		cv::Mat frame = grab();
-		while (!_stop) 
-		{			
+		while (!_stopping) 
+		{	
+			// NOTE: Failing to call waitKey inside the capture 
+			// loop causes strange issues and slowdowns with windows 
+			// system calls such as ShellExecuteEx and friends.
+			cv::waitKey(5);
+
 			// Grab a frame if we have delegates or aren't syncing with them
 			hasDelegates = refCount() > 0;
 			if (hasDelegates || (!hasDelegates && !syncWithDelegates)) {
 				frame = grab();
 				MatPacket packet(&frame);	
-				if (hasDelegates && packet.width && packet.height) { //!_stop && 
-					// LogTrace("VideoCapture", this) << "Emitting: " << _counter.fps << endl;
-					emit(this, packet);
+				if (hasDelegates && packet.width && packet.height) { //!_stopping && 
+					LogTrace("VideoCapture", this) << "Emitting: " << _counter.fps << endl;
+					emit(this, packet);					
+					LogTrace("VideoCapture", this) << "Emitting: OK" << endl;
 				}
 				
 				// Wait 5ms for the CPU to breathe
@@ -191,11 +198,6 @@ void VideoCapture::run()
 			// Wait 50ms each iter while in limbo
 			else
 				Thread::sleep(50);
-
-			// NOTE: Failing to call waitKey inside the capture 
-			// loop causes strange issues and slowdowns with windows 
-			// system calls such as ShellExecuteEx and friends.
-			cv::waitKey(5);
 		}	
 	}
 	catch (cv::Exception& exc) 
@@ -227,6 +229,8 @@ void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 	FastMutex::ScopedLock lock(_mutex);	
 
 	// Don't actually grab a frame here, just copy the current frame.
+	// NOTE: If the WaitForDelegates flag is set, and no delegates are 
+	// listening the current frame will not update, consider removing the flag.
 	if (!_isOpened)
 		throw Exception("Video capture failed: " + (error().length() ? error() : string("Video device not open.")));
 
@@ -264,7 +268,7 @@ bool VideoCapture::detach(const PacketDelegateBase& delegate)
 
 cv::Mat VideoCapture::grab()
 {	
-	LogTrace("VideoCapture", this) << "Grabing" << endl;
+	//LogTrace("VideoCapture", this) << "Grabing" << endl;
 	FastMutex::ScopedLock lock(_mutex);	
 
 	// Grab a frame from the capture source
@@ -284,10 +288,8 @@ cv::Mat VideoCapture::grab()
 	_width = _frame.cols;
 	_height = _frame.rows;
 
-	// Let it be known that capturing is active
+	// Send the capturing event to notify the main thread
 	_capturing.set();
-
-	// Update the FPS counter
 	_counter.tick();
 
 	return _frame;

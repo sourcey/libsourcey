@@ -55,6 +55,8 @@ public:
 		/// permissions and state etc.
 		/// If this call returns false the allocation will be deleted.
 
+	virtual Server& server(); 
+
 	virtual const char* className() const { return "ServerAllocation"; };
 
 protected:

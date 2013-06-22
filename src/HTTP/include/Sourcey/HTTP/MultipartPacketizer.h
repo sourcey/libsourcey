@@ -78,25 +78,31 @@ public:
 	virtual void process(IPacket& packet)
 	{		
 		//LogTrace() << "[MultipartPacketizer:" << this << "] Processing" << std::endl;
+		std::ostringstream headers;
 
-		std::ostringstream header;
 
 		// Write the initial HTTP response header		
-		if (_initial) {				
-			writeInitialHTTPHeaders(header);
-			header << "\r\n";
-			_initial = false;
+		if (_initial) {			
+			_initial = false;	
+			writeInitialHTTPHeaders(headers);
+			headers << "\r\n";
+
+			// Send the initial HTTP header.
+			std::string httpData(headers.str());
+			DataPacket httpHeader((unsigned char*)httpData.data(), httpData.size());
+			emit(this, httpHeader);
+			headers.str("");
 		}
 
 		// Write the chunk header
-		writeChunkHTTPHeaders(header);
-		header << "\r\n";
+		writeChunkHTTPHeaders(headers);
+		headers << "\r\n";
 		
 		if (!_dontFragment) {
 
 			// Broadcast the HTTP header as a separate packet
 			// so we don't need to copy packet data.
-			std::string httpData(header.str());
+			std::string httpData(headers.str());
 			DataPacket httpHeader((unsigned char*)httpData.data(), httpData.size());
 			emit(this, httpHeader);
 
@@ -110,7 +116,7 @@ public:
 			packet.write(ibuf);
 			
 			Buffer obuf;
-			obuf.writeString(header.str());
+			obuf.writeString(headers.str());
 			obuf.writeBytes(ibuf.data(), ibuf.size());
 
 			DataPacket opacket;

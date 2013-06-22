@@ -25,19 +25,28 @@
 #include "Sourcey/Net/Types.h"
 #include "Sourcey/Net/Reactor.h"
 #include "Sourcey/Net/PacketSocketBase.h"
-//#include "Sourcey/Net/StatefulSocket.h"
-//#include "Sourcey/Net/WebSocket.h"
 
 #include "Poco/Net/StreamSocket.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 	
 typedef SocketBase<Poco::Net::StreamSocket, TCP>        TCPSocket;
 typedef PacketSocketBase<Poco::Net::StreamSocket, TCP>  TCPPacketSocket;
 
+
+} } // namespace scy::Net
+
+
+#endif // SOURCEY_NET_TCPSocket_H
+
+
+
+
+//#include "Sourcey/Net/StatefulSocket.h"
+//#include "Sourcey/Net/WebSocket.h"
 
 
 //typedef TCPSocket SocketBase<Poco::Net::StreamSocket>;
@@ -116,9 +125,3 @@ typedef PacketSocketBase<Poco::Net::StreamSocket, TCP>  TCPPacketSocket;
 //	bool					_connected;
 //	bool					_deleteOnClose;
 //};
-
-
-} } // namespace Scy::Net
-
-
-#endif // SOURCEY_NET_TCPSocket_H

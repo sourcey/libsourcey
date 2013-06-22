@@ -24,39 +24,26 @@
 #include "Poco/SingletonHolder.h"
 
 
-/*
-#include "Poco/Net/HTTPRequest.h"
-#include "Poco/Net/StreamSocket.h"
-#include "Poco/Net/SecureStreamSocket.h"
-
-//#include "Sourcey/HTTP/Request.h"
-*/
-
-
 using namespace std;
 using namespace Poco;
-//using namespace Poco::Net;
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 
-Reactor::Reactor(int timeout) : //Runner& runner, 
+Reactor::Reactor(int timeout) : 
 	_thread("Reactor"),
 	_timeout(timeout),
 	_stop(false)	
 {
-	log("trace") << "Creating" << endl;
 	_thread.start(*this);
 }
 
 
 Reactor::~Reactor()
 {
-	log("trace") << "Destroying" << endl;
 	stop();
-	log("trace") << "Destroying: OK" << endl;
 }
 
 
@@ -177,12 +164,12 @@ void Reactor::attach(const Poco::Net::Socket& socket, const ReactorDelegate& del
 	
 	ReactorDelegate* d = delegate.clone();
 	d->socket = Poco::Net::Socket(socket);
-	//d->socket = &socket;
 	_delegates.push_back(d);
 	
 	_wakeUp.set();	
 	
 	/*
+	//d->socket = &socket;
 	switch (delegate.event) {
 	case SocketReadable:
 		_readable.push_back(socket);
@@ -206,7 +193,6 @@ void Reactor::attach(const Poco::Net::Socket& socket, const ReactorDelegate& del
 void Reactor::detach(const Poco::Net::Socket& socket, const ReactorDelegate& delegate) 
 {	
 	//log("trace") << "Detach: " << socket.impl() << ": " << delegate.event << endl;
-
 	FastMutex::ScopedLock lock(_mutex);
 	
 	for (DelegateList::iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
@@ -216,15 +202,12 @@ void Reactor::detach(const Poco::Net::Socket& socket, const ReactorDelegate& del
 			break;
 		}
 	}
-
-	//log("trace") << "Detach: OK: " << socket.impl() << ": " << delegate.event << endl;
 }
 
 
 void Reactor::detach(const Poco::Net::Socket& socket)
 {
 	//log("trace") << "Detach: " << socket.impl() << endl;
-
 	FastMutex::ScopedLock lock(_mutex);
 
 	for (DelegateList::iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
@@ -240,7 +223,6 @@ void Reactor::detach(const Poco::Net::Socket& socket)
 void Reactor::emit(const Poco::Net::Socket& socket, SocketEvent event)
 {
 	//log("trace") << "Dispatch: " << socket.impl() << endl;
-
 	ReactorDelegate* delegate = NULL;
 	{
 		FastMutex::ScopedLock lock(_mutex);	
@@ -257,56 +239,11 @@ void Reactor::emit(const Poco::Net::Socket& socket, SocketEvent event)
 }
 
 
-} } // namespace Scy::Net
-
-
-/*
-
-
 Reactor& Reactor::getDefault() 
 {
 	static Poco::SingletonHolder<Reactor> sh;
 	return *sh.get();
 }
-// ---------------------------------------------------------------------
-ReactorNotifier::ReactorNotifier(Reactor& reactor, Runner& runner, int queueSize, int dispatchTimeout) : 
-	DispatchQueue<ReactorEvent>(runner, queueSize, dispatchTimeout),
-	_reactor(reactor)
-{
-}
 
 
-void ReactorNotifier::run()
-{	
-	DispatchQueue<ReactorEvent>::run();
-}
-
-
-void ReactorNotifier::emit(ReactorEvent& event)
-{
-	log("trace") << "[ReactorNotifier:" << this << "] Broadcast: " << event.delegate.socket.impl() << ": " << event.type << endl;
-	assert(event.delegate.locked);
-	
-	event.delegate.emit(&event.reactor, event, 0, 0, 0);
-	log("trace") << "[ReactorNotifier:" << this << "] Broadcast Unlock " << event.delegate.socket.impl() << ": " << event.type << endl;
-	assert(event.delegate.locked);
-	event.delegate.locked = false;
-}
-
-
-void ReactorNotifier::removeNotifications(const ReactorDelegate& delegate)
-{
-	log("trace") << "[ReactorNotifier:" << this << "] Removing: " << &delegate << endl;
-	Poco::FastMutex::ScopedLock lock(_mutex);	
-
-	DispatchQueue<ReactorEvent>::Queue::iterator it = _queue.begin();
-	while (it != _queue.end()) {
-		if ((*it)->delegate == delegate) {
-			log("trace") << "[ReactorNotifier:" << this << "] Deleting Redundant Notification: " << (*it) << endl;
-			delete *it;
-			it = _queue.erase(it);
-		}
-		else ++it;
-	}
-}
-*/
+} } // namespace scy::Net

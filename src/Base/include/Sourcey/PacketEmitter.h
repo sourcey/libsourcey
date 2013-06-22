@@ -27,7 +27,7 @@
 #include <vector>
 
 
-namespace Scy {
+namespace scy {
 
 
 struct PacketStreamState;
@@ -51,7 +51,7 @@ public:
 typedef std::vector<PacketEmitter*> PacketEmitterList;
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_PacketEmitter_H

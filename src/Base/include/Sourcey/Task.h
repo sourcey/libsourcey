@@ -26,7 +26,7 @@
 #include "Poco/Mutex.h"
 
 
-namespace Scy {
+namespace scy {
 	
 
 class Runner;
@@ -93,7 +93,7 @@ protected:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_Task_H
@@ -177,7 +177,7 @@ class TaskBase: public SocketBase<StreamSocketT, TransportT, ISocketT>
 //#include <string>
 
 //template <class DeletableT>
-//class GarbageCollectionTask;
+//class GarbageCollectorTask;
 	//virtual Runner& runner() { return _runner; }
 
 //Runner& runner,
@@ -189,4 +189,4 @@ class TaskBase: public SocketBase<StreamSocketT, TransportT, ISocketT>
 	//Runner& _runner;	
 	//bool _runOnce;
 	//template <class DeletableT> 
-	//friend class GarbageCollectionTask;
+	//friend class GarbageCollectorTask;

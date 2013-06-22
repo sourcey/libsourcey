@@ -25,7 +25,7 @@
 #include "Sourcey/Signal.h"
 
 
-namespace Scy { 
+namespace scy { 
 
 	
 template <class TKey, class TValue>
@@ -51,7 +51,7 @@ public:
 
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_EventfulManager_H

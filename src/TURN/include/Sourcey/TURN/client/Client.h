@@ -105,12 +105,12 @@ public:
 			serverAddr				= Net::Address("127.0.0.1", 3478);
 		}
 	};
-
+	
 public:
-	Client(IClientObserver& observer,
-		   Net::Reactor& reactor,
-		   Runner& runner,
-		   const Options& options = Options());
+	Client(IClientObserver& observer, 
+		const Options& options = Options());
+	Client(IClientObserver& observer, Net::Reactor& reactor, Runner& runner, 
+		const Options& options = Options());
 	virtual ~Client();
 
 	virtual void initiate();
@@ -169,6 +169,8 @@ public:
 	virtual void onTransactionStateChange(void* sender, TransactionState& state, const TransactionState&);	
 	virtual void onTimer(void*);
 	//virtual void onTimer(TimerCallback<Client>& timer);
+
+	virtual const char* className() const { return "TURNClient"; };
 
 protected:
 	IClientObserver&	_observer;

@@ -28,7 +28,7 @@
 #include <deque>
 
 
-namespace Scy {
+namespace scy {
 
 
 template<class T>
@@ -139,7 +139,7 @@ protected:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_DispatchQueue_H

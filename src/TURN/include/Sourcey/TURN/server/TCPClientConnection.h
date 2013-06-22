@@ -46,6 +46,8 @@ public:
 	TCPPeerConnection* peer() const;
 
 	UInt32 connectionID() const;
+
+	virtual const char* className() const { return "TCPClientConnection"; }
 	
 protected:
 	void recv(Buffer& buffer);
@@ -53,7 +55,8 @@ protected:
 
 	TCPAllocation&			_allocation;
 	UInt32					_connectionID;
-	TCPPeerConnection*		_peer;
+	TCPPeerConnection*		_peer;	
+	mutable Poco::FastMutex _mutex;
 };
 
 

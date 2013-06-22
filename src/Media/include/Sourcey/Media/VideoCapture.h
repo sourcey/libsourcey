@@ -149,7 +149,7 @@ private:
 	int		_height;		// Capture height
 	bool	_isImage;		// Source file is an image or not
 	bool	_isOpened;
-	bool	_stop;
+	bool	_stopping;
 	Flags	_flags;	
 	std::string	_error;		// Error message if any
 	std::string	_filename;	// Source file to capture from if any

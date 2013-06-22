@@ -27,7 +27,7 @@
 #include "Poco/Thread.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 
@@ -78,7 +78,7 @@ protected:
 };
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif // SOURCEY_TCPAsyncConnector_H

@@ -43,7 +43,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy {
+namespace scy {
 namespace Util {
 
 
@@ -264,4 +264,4 @@ bool getOsVersion(int* major, int* minor, int* build) {
 
 
 } // namespace Util
-} // namespace Scy
+} // namespace scy
