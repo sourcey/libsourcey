@@ -23,7 +23,7 @@
 
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/Format.h"
-//#include "Sourcey/Media/FPSCounter.h"
+#include "Sourcey/Media/FPSCounter.h"
 //#include "Sourcey/Media/IEncoder.h"
 
 //#include "Poco/Mutex.h"
@@ -58,12 +58,13 @@ struct AudioContext
 	virtual void close();	
 		/// Close the AVCodecContext
 
-	AVStream* stream;		// The encoder or decoder stream
-	AVCodecContext* ctx;	// The encoder or decoder context
-	AVCodec* codec;			// The encoder or decoder codec
-	AVFrame* frame;			// The encoded or decoded frame
-    double pts;				// PTS in decimal seconds
-    std::string error;		// Error message
+	AVStream* stream;		// encoder or decoder stream
+	AVCodecContext* ctx;	// encoder or decoder context
+	AVCodec* codec;			// encoder or decoder codec
+	AVFrame* frame;			// encoded or decoded frame
+	FPSCounter fps;			// encoder or decoder fps rate
+    double pts;				// pts in decimal seconds	
+    std::string error;		// error message
 };
 
 

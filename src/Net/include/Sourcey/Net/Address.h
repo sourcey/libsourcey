@@ -28,7 +28,7 @@
 #include "assert.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 
@@ -118,7 +118,7 @@ public:
 typedef std::vector<Address*> AddressList;
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif // SOURCEY_SOCKET_ADDRESS_H

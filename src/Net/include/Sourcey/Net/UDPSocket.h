@@ -27,14 +27,14 @@
 #include "Poco/Net/DatagramSocket.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 
 typedef AsyncPacketSocketBase<Poco::Net::DatagramSocket, UDP> UDPPacketSocket;
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif // SOURCEY_NET_UDPPacketSocket_H

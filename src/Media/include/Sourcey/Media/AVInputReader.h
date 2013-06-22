@@ -91,7 +91,7 @@ public:
 protected:		
 	mutable Poco::FastMutex	_mutex;
 	Poco::Thread			_thread;
-	bool					_stop;
+	bool					_stopping;
 	//std::string				_ifile;	
 	std::string				_error;
 	AVFormatContext*		_formatCtx;	

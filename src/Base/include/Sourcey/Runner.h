@@ -30,7 +30,7 @@
 #include <deque>
 
 
-namespace Scy {
+namespace scy {
 
 
 class Runner: public Poco::Runnable, public IPolymorphic
@@ -67,13 +67,6 @@ public:
 		/// Runner instances may be initialized individually.
 		/// The default runner should be kept for short running
 		/// tasks such as timers in order to maintain performance.
-	
-	template <class T>
-	void deleteLater(void* ptr)
-		/// Schedules a pointer for asynchronous deletion.
-	{
-		(void)new GarbageCollectionTask<T>(*this, ptr);
-	}
 	
 	NullSignal Idle;
 	NullSignal Shutdown;
@@ -118,11 +111,11 @@ protected:
 	TaskList		_tasks;
 	Poco::Thread	_thread;
 	Poco::Event		_wakeUp;
-	bool			_stop;
+	bool			_stopped;
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_Runner_H

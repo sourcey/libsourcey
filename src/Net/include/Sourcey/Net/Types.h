@@ -24,7 +24,7 @@
 #include "Sourcey/Stateful.h"
 
 
-namespace Scy {	
+namespace scy {	
 namespace Net {
 	
 
@@ -47,7 +47,7 @@ struct Error
 };
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif

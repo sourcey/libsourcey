@@ -284,7 +284,8 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 			throw Exception(error);
 		}
 		
-		if (frameEncoded) {
+		if (frameEncoded) {	
+			fps.tick();
 			opacket.stream_index = stream->index;	
 			opacket.flags |= AV_PKT_FLAG_KEY;
 			if (opacket.pts != AV_NOPTS_VALUE)
@@ -455,7 +456,8 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 	}
 	*/
 
-	if (frameDecoded) {
+	if (frameDecoded) {	
+		fps.tick();
 		InitDecodedAudioPacket(stream, ctx, frame, &opacket, &pts);
 
 		/*

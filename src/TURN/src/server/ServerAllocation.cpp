@@ -40,9 +40,9 @@ ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple, const
 	_server.addAllocation(this);
 	
 	log("trace") << "Created: " 
+		<< "\r\tUsername: " << username
 		<< "\r\tLifetime: " << _lifetime
 		<< "\r\tMaximum Lifetime: " << _maxLifetime
-		<< "\r\tUsername: " << username
 		<< endl;
 }
 
@@ -50,6 +50,7 @@ ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple, const
 ServerAllocation::~ServerAllocation() 
 {
 	log("trace") << "Destroying:" 
+		<< "\r\tUsername: " << username()
 		<< "\n\tBandwidth Limit: " << bandwidthLimit()
 		<< "\n\tBandwidth Used: " << bandwidthUsed()
 		<< "\n\tBandwidth Remaining: " << bandwidthRemaining()
@@ -64,8 +65,8 @@ bool ServerAllocation::handleRequest(const Request& request)
 {	
 	log("trace") << "Handle Request" << endl;	
 	
-	// FIXME: Adding this check as we seem to be receiving requests
-	// after the allocation is received under heavy traffic.
+	// FIXME: Adding this check as there is a possibility receiving 
+	// requests after the allocation is received under heavy traffic.
 	assert(isOK());
 
 	if (request.type() == STUN::Message::CreatePermission)
@@ -97,15 +98,14 @@ void ServerAllocation::handleRefreshRequest(const Request& request)
 	// of the client's requested lifetime and the server's maximum allowed
 	// lifetime.  If this computed value is greater than the default
 	// lifetime, then the "desired lifetime" is the computed value.
-	// Otherwise, the "desired lifetime" is the default lifetime.
-	
+	// Otherwise, the "desired lifetime" is the default lifetime.	
 
 	// Compute the appropriate LIFETIME for this allocation.
 	const STUN::Lifetime* lifetimeAttr = request.get<STUN::Lifetime>();
 	if (!lifetimeAttr) {
 		return;
 	}	
-	UInt32 desiredLifetime = min(_server.options().allocationMaxLifetime / 1000, lifetimeAttr->value()); //
+	UInt32 desiredLifetime = min(_server.options().allocationMaxLifetime / 1000, lifetimeAttr->value());
 	//lifetime = min(lifetime, lifetimeAttr->value() * 1000);
 
 	// Subsequent processing depends on the "desired lifetime" value:
@@ -222,6 +222,13 @@ UInt32 ServerAllocation::timeRemaining()
 	//	<< endl;
 
 	return remaining > 0 ? remaining : 0;
+}
+
+
+Server& ServerAllocation::server()
+{
+	FastMutex::ScopedLock lock(_mutex);
+	return _server;
 }
 
 

@@ -34,7 +34,7 @@
 #include <string.h>
 
 
-namespace Scy {
+namespace scy {
 
 
 enum LogLevel
@@ -323,7 +323,7 @@ public:
 #endif
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif

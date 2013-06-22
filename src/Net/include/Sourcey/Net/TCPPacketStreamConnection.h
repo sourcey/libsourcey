@@ -27,7 +27,7 @@
 #include "Poco/Net/TCPServerConnection.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 
@@ -61,7 +61,7 @@ protected:
 };
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif // SOURCEY_NET_TCPPacketStreamConnection_H

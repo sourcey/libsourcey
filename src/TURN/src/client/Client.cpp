@@ -35,6 +35,17 @@ namespace Scy {
 namespace TURN {
 
 
+Client::Client(IClientObserver& observer, const Options& options) : 
+	_observer(observer),
+	_options(options),
+	_reactor(Net::Reactor::getDefault()),
+	_runner(Runner::getDefault()),
+	_socket(NULL),
+	_timer(NULL)
+{
+}
+
+
 Client::Client(IClientObserver& observer, Net::Reactor& reactor, Runner& runner, const Options& options) : 
 	_observer(observer),
 	_options(options),
@@ -48,7 +59,7 @@ Client::Client(IClientObserver& observer, Net::Reactor& reactor, Runner& runner,
 
 Client::~Client() 
 {
-	LogTrace() << "[TURNClient:" << this << "] Destroying" << endl;
+	log() << "Destroying" << endl;
 
 	assert(isTerminated());
 }
@@ -56,7 +67,7 @@ Client::~Client()
 
 void Client::initiate() 
 {
-	LogTrace() << "TURN Client Connecting to " 
+	log() << "TURN Client Connecting to " 
 		<< _options.serverAddr.toString() 
 		<< endl;
 	
@@ -73,7 +84,7 @@ void Client::initiate()
 
 void Client::terminate()
 {
-	LogTrace() << "[TURN::Client:" << this << "] Terminating" << endl;	
+	log() << "Terminating" << endl;	
 
 	//Timer::getDefault().stop(TimerCallback<Client>(this, &Client::onTimer));	
 	{
@@ -87,7 +98,7 @@ void Client::terminate()
 	
 		//Util::ClearVector(_transactions);
 		for (vector<STUN::Transaction*>::iterator it = _transactions.begin(); it != _transactions.end(); ++it) {
-			LogTrace() << "[TURN::Client:" << this << "] Terminating: Transaction: " << *it << endl;	
+			log() << "Terminating: Transaction: " << *it << endl;	
 			(*it)->StateChange -= delegate(this, &Client::onTransactionStateChange);	
 			(*it)->cancel();
 			//delete *it;
@@ -106,13 +117,13 @@ void Client::terminate()
 	
 	setState(ClientState::Terminated);
 
-	LogTrace() << "[TURN::Client:" << this << "] Terminating: OK" << endl;	
+	log() << "Terminating: OK" << endl;	
 }
 
 
 void Client::onClientConnect(void* sender)
 {
-	LogTrace() << "[TURNClient:" << this << "] Client Connected" << endl;	
+	log() << "Client Connected" << endl;	
 	//Timer::getDefault().start(TimerCallback<Client>(this, &Client::onTimer, _options.timerInterval, _options.timerInterval));
 	assert(!_timer);
 	_timer = new TimerTask(_options.timerInterval, _options.timerInterval);
@@ -125,7 +136,7 @@ void Client::onClientConnect(void* sender)
 
 void Client::onClientDisconnect(void* sender)
 {
-	LogTrace() << "[TURNClient:" << this << "] Client Disconnected" << endl;	
+	log() << "Client Disconnected" << endl;	
 	terminate();
 }
 
@@ -133,7 +144,7 @@ void Client::onClientDisconnect(void* sender)
 /*
 void Client::onConnectStateChange(void* sender, Net::SocketState& state, const Net::SocketState&)
 {
-	LogTrace() << "[TURNClient:" << this << "] Connection State Changed: " << state.toString() << endl;	
+	log() << "Connection State Changed: " << state.toString() << endl;	
 	
 	switch (state.id()) {
 	case Net::SocketState::Connected:
@@ -165,7 +176,7 @@ void Client::sendRefresh()
 	// explicitly delete the allocation.  A client MAY refresh an allocation
 	// at any time for other reasons.
 		
-	LogTrace() << "[TURNClient:" << this << "] Sending refresh allocation request" << endl;	
+	log() << "Sending refresh allocation request" << endl;	
 
 	STUN::Transaction* transaction = createTransaction();
 	transaction->request().setType(STUN::Message::Refresh);
@@ -181,7 +192,7 @@ void Client::sendRefresh()
 
 void Client::handleRefreshResponse(const STUN::Message& response) 
 {
-	LogTrace() << "[TURNClient:" << this << "] Received a Refresh Response: " << response.toString() << endl;	
+	log() << "Received a Refresh Response: " << response.toString() << endl;	
 
 	assert(response.type() == STUN::Message::Refresh);	
 
@@ -210,7 +221,7 @@ void Client::handleRefreshResponse(const STUN::Message& response)
 
 	setLifetime(lifetimeAttr->value());
 	
-	LogTrace() << "[TURNClient:" << this << "] Refreshed allocation expires in: " << timeRemaining() << endl;	
+	log() << "Refreshed allocation expires in: " << timeRemaining() << endl;	
 
 	// If lifetime is 0 the allocation will be cleaned up by garbage collection.
 }
@@ -218,7 +229,7 @@ void Client::handleRefreshResponse(const STUN::Message& response)
 
 void Client::onReceiveSTUNMessage(void* sender, STUN::Message& message) 
 {
-	LogTrace() << "[TURNClient:" << this << "] Received a STUN Message: " << message.toString() << endl;	
+	log() << "Received a STUN Message: " << message.toString() << endl;	
 	
 	handleResponse(message);
 }
@@ -226,7 +237,7 @@ void Client::onReceiveSTUNMessage(void* sender, STUN::Message& message)
 
 bool Client::removeTransaction(STUN::Transaction* transaction)
 {
-	LogTrace() << "[TURNClient:" << this << "] Removing Transaction: " << transaction << endl;
+	log() << "Removing Transaction: " << transaction << endl;
 
 	FastMutex::ScopedLock lock(_mutex); 
 	
@@ -276,7 +287,7 @@ void Client::authenticateRequest(STUN::Message& request)
 bool Client::sendAuthenticatedTransaction(STUN::Transaction* transaction)
 {	
 	authenticateRequest(transaction->request());
-	LogTrace() << "[TURNClient:" << this << "] Sending Authenticated Transaction: " << transaction->request().toString() << endl;
+	log() << "Sending Authenticated Transaction: " << transaction->request().toString() << endl;
 	return transaction->send();
 }
 
@@ -333,7 +344,7 @@ bool Client::handleResponse(const STUN::Message& response)
 
 void Client::sendAllocate() 
 {
-	LogTrace() << "[TURNClient:" << this << "] Sending allocation request" << endl;
+	log() << "Sending allocation request" << endl;
 
 	assert(_options.username.size());
 	assert(_options.password.size());
@@ -479,7 +490,7 @@ void Client::handleAllocateResponse(const STUN::Message& response)
 	}
 	_relayedAddress = Net::Address(relayedAttr->ipString(), relayedAttr->port());	
 
-	LogTrace() << "[TURNClient:" << this << "] Allocation Response:" 
+	log() << "Allocation Response:" 
 		<< "\n\tRelayed Address: " << _relayedAddress.toString()
 		<< "\n\tMapped Address: " << _mappedAddress.toString()
 		<< "\n\tLifetime: " << lifetimeAttr->value()
@@ -507,7 +518,7 @@ void Client::handleAllocateErrorResponse(const STUN::Message& response)
 		return;
 	}
 	
-	LogTrace() << "[TURNClient:" << this << "] Allocation Error Response: " 
+	log() << "Allocation Error Response: " 
 		<< errorAttr->errorCode() << endl;
 
 	// If the client receives an Allocate error response, then the
@@ -569,7 +580,7 @@ void Client::handleAllocateErrorResponse(const STUN::Message& response)
 				
 					// Now that our realm and nonce are set we can re-send the allocate request.
 					if (_realm.size() && _nonce.size()) {					
-						LogTrace() << "Re-sending allocation request" << endl;
+						log() << "Re-sending allocation request" << endl;
 						sendAllocate();
 						return;
 					}
@@ -694,7 +705,7 @@ void Client::addPermission(const Net::IP& peerIP)
 
 void Client::sendCreatePermission()
 {
-	LogTrace() << "[TURNClient:" << this << "] Send Create Permission Request" << endl;
+	log() << "Send Create Permission Request" << endl;
 
 	assert(!_permissions.empty());
 
@@ -713,7 +724,7 @@ void Client::sendCreatePermission()
 	transaction->request().setType(STUN::Message::CreatePermission);
 	
 	for (PermissionList::const_iterator it = _permissions.begin(); it != _permissions.end(); ++it) {
-		LogTrace() << "[TURNClient:" << this << "] Create Permission Request: " << (*it).ip.toString() << endl;
+		log() << "Create Permission Request: " << (*it).ip.toString() << endl;
 		STUN::XorPeerAddress* peerAttr = new STUN::XorPeerAddress;
 		peerAttr->setFamily(1);
 		peerAttr->setPort(0);
@@ -730,7 +741,7 @@ void Client::handleCreatePermissionResponse(const STUN::Message& response)
 	// If the client receives a valid CreatePermission success response,
 	// then the client updates its data structures to indicate that the
 	// permissions have been installed or refreshed.	
-	LogTrace() << "[TURNClient:" << this << "] Permission Created" << endl;
+	log() << "Permission Created" << endl;
 	
 	// Send all queued requests...
 	{
@@ -767,7 +778,7 @@ void Client::handleCreatePermissionResponse(const STUN::Message& response)
 
 void Client::handleCreatePermissionErrorResponse(const STUN::Message& response) 
 {	
-	LogWarn() << "[TURNClient:" << this << "] Permission Creation Failed" << endl;
+	LogWarn() << "Permission Creation Failed" << endl;
 
 	removeAllPermissions();
 	
@@ -798,7 +809,7 @@ void Client::sendChannelBind(const Net::IP& peerIP)
 
 void Client::sendData(const char* data, int size, const Net::Address& peerAddress) 
 {
-	LogTrace() << "[TURNClient:" << this << "] Sending Data Indication to peer: " 
+	log() << "Sending Data Indication to peer: " 
 		<< peerAddress.toString() << endl;
 
 	STUN::Message* request = new STUN::Message;
@@ -841,7 +852,7 @@ void Client::sendData(const char* data, int size, const Net::Address& peerAddres
 	// Queued requests will be sent when the CreatePermission
 	// callback is received from the server.
 	else if (stateEquals(ClientState::Authorizing)) {	
-		LogTrace() << "[TURNClient:" << this << "] Queueing outgoing request: " 
+		log() << "Queueing outgoing request: " 
 			<< request->toString() << endl;
 		FastMutex::ScopedLock lock(_mutex);
 		_pendingRequests.push_back(request);	
@@ -887,7 +898,7 @@ void Client::handleDataIndication(const STUN::Message& response)
 		return;
 	}	
 
-	LogTrace() << "[TURNClient:" << this << "] Handle Data Indication: " << response.toString() << endl;
+	log() << "Handle Data Indication: " << response.toString() << endl;
 
 	if (!isTerminated())
 		_observer.onRelayedData(*this, dataAttr->bytes(), dataAttr->size(), peerAttr->address());
@@ -901,7 +912,7 @@ void Client::handleDataIndication(const STUN::Message& response)
 
 void Client::onTransactionStateChange(void* sender, TransactionState& state, const TransactionState&) 
 {
-	LogTrace() << "[TURNClient:" << this << "] Transaction State Changed: " << sender << ": " << state.toString() << endl;
+	log() << "Transaction State Changed: " << sender << ": " << state.toString() << endl;
 
 	STUN::Transaction* transaction = reinterpret_cast<STUN::Transaction*>(sender);
 	transaction->response().opaque = transaction;	
@@ -915,7 +926,7 @@ void Client::onTransactionStateChange(void* sender, TransactionState& state, con
 
 	case TransactionState::Success: 
 		{	
-			LogTrace() << "[TURNClient:" << this << "] STUN Transaction Success Response:" 
+			log() << "STUN Transaction Success Response:" 
 				<< "\n\tState: " << state.toString()
 				<< "\n\tFrom: " << transaction->peerAddress().toString()
 				<< "\n\tRequest: " << transaction->request().toString()
@@ -924,14 +935,14 @@ void Client::onTransactionStateChange(void* sender, TransactionState& state, con
 			
 			if (removeTransaction(transaction)) {
 				if (!handleResponse(transaction->response()))
-					LogTrace() << "[TURNClient:" << this << "] Unhandled STUN Response: " << transaction->response().toString() << endl;	
+					log() << "Unhandled STUN Response: " << transaction->response().toString() << endl;	
 				//delete transaction;
 			}
 		}
 		break;
 
 	case TransactionState::Failed:
-		LogWarn() << "[TURNClient:" << this << "] STUN Transaction Error Response:" 
+		LogWarn() << "STUN Transaction Error Response:" 
 				<< "\n\tState: " << state.toString()
 				<< "\n\tFrom: " << transaction->peerAddress().toString()
 				<< "\n\tData: " << transaction->response().toString()

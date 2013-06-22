@@ -35,35 +35,6 @@ namespace Scy {
 namespace Media {
 
 
-typedef enum {
-	AMF_DATA_TYPE_NUMBER      = 0x00,
-	AMF_DATA_TYPE_BOOL        = 0x01,
-	AMF_DATA_TYPE_STRING      = 0x02,
-	AMF_DATA_TYPE_OBJECT      = 0x03,
-	AMF_DATA_TYPE_NULL        = 0x05,
-	AMF_DATA_TYPE_UNDEFINED   = 0x06,
-	AMF_DATA_TYPE_REFERENCE   = 0x07,
-	AMF_DATA_TYPE_MIXEDARRAY  = 0x08,
-	AMF_DATA_TYPE_OBJECT_END  = 0x09,
-	AMF_DATA_TYPE_ARRAY       = 0x0a,
-	AMF_DATA_TYPE_DATE        = 0x0b,
-	AMF_DATA_TYPE_LONG_STRING = 0x0c,
-	AMF_DATA_TYPE_UNSUPPORTED = 0x0d,
-} AMFDataType;
-			
-enum {
-	FLV_TAG_TYPE_AUDIO	= 0x08,
-	FLV_TAG_TYPE_VIDEO	= 0x09,
-	FLV_TAG_TYPE_SCRIPT = 0x12,
-};
-
-enum {
-	FLV_FRAME_KEY        = 1 << 4,
-	FLV_FRAME_INTER      = 2 << 4,
-	FLV_FRAME_DISP_INTER = 3 << 4,
-};
-
-
 class FLVMetadataInjector: public IPacketizer
 	/// This class implements a packetizer which appends correct
 	/// stream headers and modifies the timestamp of FLV packets
@@ -72,6 +43,34 @@ class FLVMetadataInjector: public IPacketizer
 	/// have the option of restarting the encoder stream.
 {
 public:
+	typedef enum {
+		AMF_DATA_TYPE_NUMBER      = 0x00,
+		AMF_DATA_TYPE_BOOL        = 0x01,
+		AMF_DATA_TYPE_STRING      = 0x02,
+		AMF_DATA_TYPE_OBJECT      = 0x03,
+		AMF_DATA_TYPE_NULL        = 0x05,
+		AMF_DATA_TYPE_UNDEFINED   = 0x06,
+		AMF_DATA_TYPE_REFERENCE   = 0x07,
+		AMF_DATA_TYPE_MIXEDARRAY  = 0x08,
+		AMF_DATA_TYPE_OBJECT_END  = 0x09,
+		AMF_DATA_TYPE_ARRAY       = 0x0a,
+		AMF_DATA_TYPE_DATE        = 0x0b,
+		AMF_DATA_TYPE_LONG_STRING = 0x0c,
+		AMF_DATA_TYPE_UNSUPPORTED = 0x0d,
+	} AMFDataType;
+			
+	enum {
+		FLV_TAG_TYPE_AUDIO	= 0x08,
+		FLV_TAG_TYPE_VIDEO	= 0x09,
+		FLV_TAG_TYPE_SCRIPT = 0x12,
+	};
+
+	enum {
+		FLV_FRAME_KEY        = 1 << 4,
+		FLV_FRAME_INTER      = 2 << 4,
+		FLV_FRAME_DISP_INTER = 3 << 4,
+	};
+
 	FLVMetadataInjector(const Format& format) :
 		_format(format),
 		_initial(true),
@@ -79,14 +78,14 @@ public:
 		_waitingForKeyframe(false),
 		_timestampOffset(0)
 	{
-			LogDebug() << "[FLVMetadataInjector:" << this << "] Creating" << std::endl;
+		LogDebug("FLVMetadataInjector", this) << "Creating" << std::endl;
 	}
 					
 	virtual void onStreamStateChange(const PacketStreamState& state) 
 		/// This method is called by the Packet Stream
 		/// whenever the stream is restarted.
 	{ 
-		LogDebug() << "[FLVMetadataInjector:" << this << "] Stream State Change: " << state << std::endl;
+		LogDebug("FLVMetadataInjector", this) << "Stream State Change: " << state << std::endl;
 		switch (state.id()) {
 		case PacketStreamState::Running:
 			_initial = true;
@@ -126,13 +125,13 @@ public:
 					// Drop all frames until we receive the first keyframe.
 					//fastIsFLVHeader(reinterpret_cast<char*>(mpacket->data())
 					if (!fastIsFLVKeyFrame(reinterpret_cast<char*>(mpacket->data()))) {
-						LogDebug() << "[FLVMetadataInjector:" << this << "] Waiting for Keyframe" << std::endl;
+						LogDebug("FLVMetadataInjector", this) << "Waiting for keyframe, dropping packet" << std::endl;
 						return;
 					}
 
 					// Create and dispatch our custom header.
 					_waitingForKeyframe = false;				
-					LogDebug() << "[FLVMetadataInjector:" << this << "] Got Keyframe" << std::endl;
+					LogDebug("FLVMetadataInjector", this) << "Got keyframe, prepending headers" << std::endl;
 					Buffer flvHeader(512);
 					writeFLVHeader(flvHeader);
 
@@ -161,7 +160,7 @@ public:
 		}
 
 		// Just proxy the packet if no modification is required.
-		//LogDebug() << "[FLVMetadataInjector:" << this << "] Proxy Packet" << std::endl;
+		//LogDebug("FLVMetadataInjector", this) << "Proxy Packet" << std::endl;
 		emit(this, packet);
 	}
 	
@@ -171,7 +170,7 @@ public:
 	{
 		UInt32 val = HostToNetwork32(timestamp);
 		/*
-		LogDebug() << "[FLVMetadataInjector:" << this << "] Updating timestamp: "
+		LogDebug("FLVMetadataInjector", this) << "Updating timestamp: "
 			<< "\n\tTimestamp: " << timestamp
 			<< "\n\tFrame Number: " << _fpsCounter.frames
 			<< "\n\tFrame Rate: " << _fpsCounter.fps
@@ -186,12 +185,12 @@ public:
 		// the start of the tag.
 		int offset = buf.position();
 		if (buf.size() < offset + 4) {
-			LogError() << "[FLVMetadataInjector:" << this << "] The FLV tag buffer is too small." << std::endl;
+			LogError("FLVMetadataInjector", this) << "The FLV tag buffer is too small." << std::endl;
 			return;
 		}
 		
 		/*
-		LogDebug() << "[FLVMetadataInjector:" << this << "] Updating timestamp: "
+		LogDebug("FLVMetadataInjector", this) << "Updating timestamp: "
 			<< "\n\tTimestamp: " << timestamp
 			<< "\n\tFrame Number: " << _fpsCounter.frames
 			<< "\n\tFrame Rate: " << _fpsCounter.fps

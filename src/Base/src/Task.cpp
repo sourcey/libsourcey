@@ -28,7 +28,7 @@
 using namespace std;
 
 
-namespace Scy {
+namespace scy {
 
 	
 Task::Task(bool repeating) : 
@@ -134,7 +134,7 @@ Runner& Task::runner()
 }
 
 
-} // namespace Scy
+} // namespace scy
 
 
 

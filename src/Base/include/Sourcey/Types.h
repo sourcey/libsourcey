@@ -39,7 +39,7 @@
 #endif 
 
 
-namespace Scy {
+namespace scy {
 
 	
 //
@@ -65,7 +65,7 @@ typedef std::vector<std::string>			StringVec;
 typedef std::map<std::string, std::string>	StringMap;
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_Types_H

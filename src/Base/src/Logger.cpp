@@ -28,7 +28,7 @@ using namespace Poco;
 using namespace std;
 
 
-namespace Scy {
+namespace scy {
 
 
 // ---------------------------------------------------------------------
@@ -224,12 +224,13 @@ void LogChannel::format(const LogStream& stream, ostream& ost)
 	if (_dateFormat)
 		ost << Poco::DateTimeFormatter::format(Poco::Timestamp(), _dateFormat);
 	ost << " [" << getStringFromLogLevel(stream.level) << "] ";
-	if (!stream.realm.empty() && !stream.pid.empty()) {		
-		ost << "["
-			<< stream.realm
-			<< ":"
-			<< stream.pid
-			<< "] ";
+	if (!stream.realm.empty() || !stream.pid.empty()) {		
+		ost << "[";		
+		if (!stream.realm.empty())
+			ost << stream.realm;
+		if (!stream.pid.empty())
+			ost << ":" << stream.pid;
+		ost << "] ";
 	}
 	ost << stream.message.str();
 	ost.flush();
@@ -419,7 +420,7 @@ void RotatingFileChannel::rotate()
 }
 
 
-} // namespace Scy
+} // namespace scy
 
 
 /*

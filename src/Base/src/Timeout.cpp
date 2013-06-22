@@ -22,7 +22,7 @@
 #include "Sourcey/Util.h"
 
 
-namespace Scy {
+namespace scy {
 
 
 Timeout::Timeout(long delay, bool autoStart) :
@@ -93,4 +93,4 @@ bool Timeout::expired() const
 }
 
 
-} // namespace Scy
+} // namespace scy

@@ -27,7 +27,7 @@
 //#include <iostream>
 
 
-namespace Scy {
+namespace scy {
 
 
 struct State 
@@ -238,7 +238,7 @@ protected:
 */
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_Stateful_H

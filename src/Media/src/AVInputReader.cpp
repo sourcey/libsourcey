@@ -18,7 +18,7 @@ AVInputReader::AVInputReader(const Options& options)  :
 	_formatCtx(NULL),
 	_video(NULL),
 	_audio(NULL),
-	_stop(false)
+	_stopping(false)
 {		
 	LogTrace("AVInputReader", this) << "Creating" << endl;
 }
@@ -187,7 +187,7 @@ void AVInputReader::start()
 	if (_video || _audio &&
 		!_thread.isRunning()) {
 		LogTrace("AVInputReader", this) << "Initializing Thread" << endl;
-		_stop = false;
+		_stopping = false;
 		_thread.start(*this);
 	}
 
@@ -203,7 +203,7 @@ void AVInputReader::stop()
 
 	if (_thread.isRunning()) {
 		LogTrace("AVInputReader", this) << "Terminating Thread" << endl;		
-		_stop = true;
+		_stopping = true;
 		_thread.join();
 	}
 
@@ -220,7 +220,7 @@ void AVInputReader::run()
 		int res;
 		int videoFrames = 0;
 		int audioFrames = 0;
-		while (!_stop) {
+		while (!_stopping) {
 			
 			AVPacket ipacket;
 			AVPacket opacket;

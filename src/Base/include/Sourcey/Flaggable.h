@@ -24,7 +24,7 @@
 #include <string>
 
 
-namespace Scy {
+namespace scy {
 
 
 struct Flags 
@@ -75,7 +75,7 @@ protected:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_Flaggable_H

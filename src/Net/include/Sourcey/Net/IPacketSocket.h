@@ -27,7 +27,7 @@
 #include "Sourcey/Net/ISocket.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 
@@ -45,8 +45,8 @@ public:
 		PacketFactory(r) {}; // delegates are not copied
 	virtual ~IPacketSocket() {};
 	
-	virtual int send(const IPacket& packet) = 0;
-	virtual int send(const IPacket& packet, const Address& peerAddress) = 0;
+	virtual int send(const IPacket& packet, int flags = 0) = 0;
+	virtual int send(const IPacket& packet, const Address& peerAddress, int flags = 0) = 0;
 
 	virtual void send(IPacket& packet) = 0; 
 		/// This method provides delegate compatibility.
@@ -96,7 +96,7 @@ private:
 };
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif // SOURCEY_NET_IPacketSocket_H
@@ -112,9 +112,9 @@ private:
 #include "Poco/Net/SocketStream.h"
 
 
-#define Poco::Net::StreamSocket, TCP Poco::Net::StreamSocket, Scy::Net::TCP
-#define Poco::Net::SecureStreamSocket, SSLTCP Poco::Net::SecureStreamSocket, Scy::Net::SSLTCP
-#define UDPContext Poco::Net::DatagramSocket, Scy::Net::UDP
+#define Poco::Net::StreamSocket, TCP Poco::Net::StreamSocket, scy::Net::TCP
+#define Poco::Net::SecureStreamSocket, SSLTCP Poco::Net::SecureStreamSocket, scy::Net::SSLTCP
+#define UDPContext Poco::Net::DatagramSocket, scy::Net::UDP
 */
 /*
 	IPacketSocket() {};

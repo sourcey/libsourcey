@@ -31,7 +31,7 @@
 #include <map>
 
 
-namespace Scy {
+namespace scy {
 namespace Util {
 
 //
@@ -203,7 +203,7 @@ inline bool isWindowsXpOrLater() {
 
 
 } // namespace Util
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_Util_H

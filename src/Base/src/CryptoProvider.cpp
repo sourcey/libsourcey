@@ -39,7 +39,7 @@ using namespace std;
 using namespace Poco::Crypto;
 
 
-namespace Scy {
+namespace scy {
 namespace CryptoProvider {
 
 
@@ -286,4 +286,4 @@ void decryptFile(const string& password, const string& inputFileName,
 
 
 } // namespace CryptoProvider
-} // namespace Scy
+} // namespace scy

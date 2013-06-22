@@ -26,7 +26,7 @@
 #include "Poco/Net/NameValueCollection.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Util {
 
 
@@ -38,7 +38,7 @@ namespace Util {
 
 
 } // namespace Util
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_NET_Util_H

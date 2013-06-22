@@ -26,7 +26,7 @@
 #include "Sourcey/PolymorphicSignal.h"
 
 
-namespace Scy {
+namespace scy {
 	
 	
 typedef DelegateBase<IPacket&> PacketDelegateBase;
@@ -35,7 +35,7 @@ typedef SignalBase<PacketDelegateBase, IPacket&> PacketSignal;
 DefinePolymorphicDelegate(packetDelegate, IPacket, PacketDelegateBase)
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_PacketSignal_H

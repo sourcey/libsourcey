@@ -31,7 +31,7 @@
 #include "Poco/Mutex.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 	
@@ -50,7 +50,7 @@ public:
 		_connected(false),
 		_deleteOnClose(false)
 	{
-		Log("trace", this) << "Creating" << std::endl;
+		log() << "Creating" << std::endl;
 	}
 
 
@@ -60,7 +60,7 @@ public:
 		_connected(false),
 		_deleteOnClose(false)
 	{
-		Log("trace", this) << "Creating from " << socket.address().toString() << std::endl;
+		log() << "Creating from " << socket.address().toString() << std::endl;
 		bindEvents();
 	}
 
@@ -71,16 +71,16 @@ public:
 		_connected(r._connected),
 		_deleteOnClose(r._deleteOnClose)
 	{
-		Log("trace", this) << "Creating from " << r.address() << std::endl;	
+		log() << "Creating from " << r.address() << std::endl;	
 		bindEvents();
 	}
 
 
 	virtual ~SocketBase() 
 	{	
-		Log("trace", this) << "Destroying" << std::endl;
+		log() << "Destroying" << std::endl;
 		unbindEvents();
-		Log("trace", this) << "Destroying: OK" << std::endl;
+		log() << "Destroying: OK" << std::endl;
 	}
 
 
@@ -92,7 +92,7 @@ public:
 
 	virtual void connect(const Address& peerAddress, int timeout) 
 	{
-		Log("trace", this) << "Connecting to " << peerAddress.toString() << std::endl;	
+		log() << "Connecting to " << peerAddress.toString() << std::endl;	
 
 		if (isConnected())
 			throw Exception("Socket already connected");
@@ -108,7 +108,7 @@ public:
 			resetBuffer();
 		} 
 		catch (Poco::Exception& exc) {
-			Log("trace", this) << "Connection failed: " << exc.displayText() << std::endl;	
+			log("error") << "Connection failed: " << exc.displayText() << std::endl;	
 			setError(exc.displayText());
 			exc.rethrow();
 		}
@@ -117,7 +117,7 @@ public:
 
 	virtual void close()
 	{
-		Log("trace", this) << "Closing" << std::endl;
+		log() << "Closing" << std::endl;
 
 		if (isConnected()) {
 			unbindEvents();
@@ -128,74 +128,79 @@ public:
 				StreamSocketT::close();
 			}
 			catch (Poco::IOException& exc) {
-				Log("warn", this) << "Closing Error: " << exc.displayText() << std::endl;
+				log("warn") << "Closing Error: " << exc.displayText() << std::endl;
 			}
 			onClose(); // May result in destruction
 		}
 	}
 
 
-	virtual int send(const char* data, int size) 
+	virtual int send(const char* data, int size, int flags = 0) 
 	{
 		assert(size <= MAX_TCP_PACKET_SIZE);
+		int ret = -1;
 		try	{
-			Log("trace", this) << "SEND: " << size << ": " 
+			log() << "SEND: " << size << ": " 
 				<< address().toString() << "-->" 
 				<< peerAddress().toString() << std::endl;
-			return StreamSocketT::sendBytes(data, size);
+			ret = StreamSocketT::sendBytes(data, size, flags);
+			log() << "SEND: 1" << std::endl;
 		}	
 		catch (Poco::IOException& exc) {
+			log("error") << "Send Error: " << exc.displayText() << std::endl;
 			// Don't set the error here, the error
 			// always comes back though the reactor.
-			Log("error", this) << "Send Error: " << exc.displayText() << std::endl;
+			//assert(error().empty());
+			exc.rethrow(); // rethrow
 		}
-		return -1; // error
+		return ret; // error
 	}
 
 
-	virtual int send(const char* data, int size, const Address& peerAddress)
+	virtual int send(const char* data, int size, const Address& peerAddress, int flags = 0)
 	{
 		assert(peerAddress == this->peerAddress());
-		return send(data, size);
+		return send(data, size, flags);
 	}
 
 
-	virtual int send(const DataPacket& packet) 
+	virtual int send(const DataPacket& packet, int flags = 0) 
 	{
 		// Most large packets, ie. MediaPackets derive 
 		// from DataPacket, so they can be sent directly 
 		// without buffering any data.
-		return send((const char*)packet.data(), packet.size());
+		return send((const char*)packet.data(), packet.size(), flags);
 	}
 
 
-	virtual int send(const DataPacket& packet, const Address& peerAddress)
+	virtual int send(const DataPacket& packet, const Address& peerAddress, int flags = 0)
 	{
 		assert(peerAddress == this->peerAddress());
-		return send(packet);
+		return send(packet, flags);
 	}
 
 
-	virtual int send(const IPacket& packet) 
+	virtual int send(const IPacket& packet, int flags = 0) 
 	{
-		// Currently a nocopy solution for sending IPackets is
-		// impossible unless a generic data member exists such
-		// as for DataPacket. 
-		// Furthermore, dynamically generated packets may opt
-		// to return a size of 0, in which case a smaller buffer
-		// of 1500 bytes is allocated, but if packet data exceeds
-		// this size memcpy will be called twice; once on create,
-		// and once on reserve.
+		// N nocopy solution for sending IPackets is not currently
+		// possible since some packets are only generated when
+		// IPacket::write() is called, such as for STUN and RTP packets.
+		// For sending data packets the send(DataPacket&) should be used.
+		//
+		// Furthermore, some dynamically generated packets may return
+		// a size of 0, in which case a smaller buffer of 1500 bytes is 
+		// allocated, but if packet data exceeds this size memcpy will be 
+		// called twice; once on Buffer::create(), and once on Buffer::reserve().
 		Buffer buf(packet.size() > 0 ? packet.size() : 1500);
 		packet.write(buf);
-		return send(buf.data(), buf.size());
+		return send(buf.data(), buf.size(), flags);
 	}
 
 
-	virtual int send(const IPacket& packet, const Address& peerAddress)
+	virtual int send(const IPacket& packet, const Address& peerAddress, int flags = 0)
 	{
 		assert(peerAddress == this->peerAddress());
-		return send(packet);
+		return send(packet, flags);
 	}
 
 
@@ -294,7 +299,7 @@ public:
 protected:
 	virtual void onReadable() 
 	{
-		Log("trace", this) << "On Readable" << std::endl;
+		log() << "On Readable" << std::endl;
 
 		try	{
 			int size = 0;
@@ -311,13 +316,13 @@ protected:
 				// Resize our buffer as required.
 				// This is preferable to allocating a large buffer at startup.
 				if (_buffer.capacity() < size) {
-					Log("trace", this) << "Resizing buffer: " << size << std::endl;
+					log() << "Resizing buffer: " << size << std::endl;
 					_buffer.reserve(size);
 				}
 
 				// Read bytes from the socket into the output buffer.
 				size = StreamSocketT::receiveBytes(_buffer.bytes(), size);
-				Log("trace", this) << "RECV: " << size << ": "
+				log() << "RECV: " << size << ": "
 					<< StreamSocketT::address().toString() << "<--" 
 					<< StreamSocketT::peerAddress().toString() << std::endl;
 				_buffer.setPosition(0);
@@ -329,14 +334,14 @@ protected:
 				recv(*buffer);
 			}
 			else {
-				Log("trace", this) << "Received EOF" << std::endl;
+				log() << "Received EOF" << std::endl;
 				throw Poco::IOException("Peer closed connection");
 			}
 		}
 		// ConnectionAbortedException
 		// ConnectionResetException
 		catch (Poco::IOException& exc) {
-			setError(exc.displayText()); // will probably result in deletion
+			setError(exc.displayText()); // may result in deletion
 		}
 	}
 
@@ -359,7 +364,7 @@ protected:
 
 	virtual void onConnect() 
 	{
-		Log("trace", this) << "On Connect" << std::endl;	
+		log() << "On Connect" << std::endl;	
 
 		//StreamSocketT::setBlocking(true);
 		{
@@ -377,7 +382,7 @@ protected:
 
 	virtual void onClose()
 	{
-		Log("trace", this) << "On Close" << std::endl;
+		log() << "On Close" << std::endl;
 	
 		// This method must be called from close()
 
@@ -394,7 +399,9 @@ protected:
 		Closed.emit(static_cast<ISocketT*>(this));
 
 		if (destroy) {
-			Log("trace", this) << "On Close: Deleting" << std::endl;	
+			log() << "On Close: Deleting" << std::endl;	
+			// TODO: Delayed garbage collection.
+			// Leaving as is for now because it will help us locate bugs.
 			delete this;
 		}
 	}
@@ -412,7 +419,7 @@ protected:
 
 	virtual void setError(const std::string& err)
 	{
-		Log("error", this) << "Error: " << err << std::endl;
+		log("error") << "Socket Error: " << err << std::endl;
 		{
 			Poco::FastMutex::ScopedLock lock(_mutex); 
 			_error = err;
@@ -432,7 +439,7 @@ protected:
 		// accordingly.
 		int recvSize = StreamSocketT::getReceiveBufferSize();
 		if (recvSize != static_cast<int>(_buffer.capacity())) {
-			Log("trace", this) << "Buffer Size: " << recvSize << std::endl;
+			log() << "Buffer Size: " << recvSize << std::endl;
 			_buffer.reserve(recvSize);
 		}	
 		_buffer.clear();
@@ -460,16 +467,18 @@ protected:
 
 	
 protected:
+	Buffer		_buffer;
+	Reactor&	_reactor;
+	std::string	_error;
+	bool		_connected;
+	bool		_deleteOnClose;
+
+private:
 	mutable Poco::FastMutex _mutex;
-	Buffer					_buffer;
-	Reactor&				_reactor;
-	std::string				_error;
-	bool					_connected;
-	bool					_deleteOnClose;
 };
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif // SOURCEY_NET_SocketBase_H

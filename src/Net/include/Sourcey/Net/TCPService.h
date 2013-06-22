@@ -33,7 +33,7 @@
 #include <map>
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 
@@ -114,6 +114,6 @@ public:
 };
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 #endif // SOURCEY_NET_TCPService_H

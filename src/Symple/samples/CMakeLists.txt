@@ -3,4 +3,4 @@
 #
 # ----------------------------------------------------------------------------
 
-add_subdirectory(VideoSocket)
+add_subdirectory(MediaServer)

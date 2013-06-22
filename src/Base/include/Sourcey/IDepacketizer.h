@@ -24,7 +24,7 @@
 #include "Sourcey/IPacketProcessor.h"
 
 
-namespace Scy {
+namespace scy {
 
 
 //template <class T>
@@ -54,7 +54,7 @@ protected:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_IDepacketizerR_H

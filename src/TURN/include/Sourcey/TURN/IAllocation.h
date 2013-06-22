@@ -132,14 +132,14 @@ public:
 	virtual const char* className() const { return "IAllocation"; };
 
 protected:
-	FiveTuple		_tuple;
-	std::string		_username;
-	UInt32			_lifetime;
-	UInt32			_createdAt;
-	UInt32			_updatedAt;
+	UInt32 _lifetime;
+	UInt32 _createdAt;
+	UInt32 _updatedAt;
+	UInt32 _bandwidthLimit;
+	UInt32 _bandwidthUsed;
+	FiveTuple _tuple;
+	std::string	_username;
 	PermissionList	_permissions;
-	UInt32			_bandwidthLimit;
-	UInt32			_bandwidthUsed;
 	mutable Poco::FastMutex _mutex;
 };
 

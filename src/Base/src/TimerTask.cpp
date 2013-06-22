@@ -27,7 +27,7 @@
 using namespace std;
 
 
-namespace Scy {
+namespace scy {
 
 
 TimerTask::TimerTask(long timeout, long interval) : 
@@ -94,7 +94,7 @@ bool TimerTask::beforeRun()
 			_scheduleAt.setDelay(_interval);
 			_scheduleAt.reset();
 		}
-		LogTrace() << "[TimerTask:" << this << "] Before Run: Timeout"  << endl;
+		//LogTrace() << "[TimerTask:" << this << "] Before Run: Timeout"  << endl;
 		return true;
 	}
 	return false;
@@ -119,30 +119,19 @@ bool TimerTask::afterRun()
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);	
 		cancel = _scheduleAt.expired();
-		LogTrace() << "[TimerTask:" << this << "] After Run: " 
-			<< cancel << ": " 
-			<< _scheduleAt.remaining() << endl;
+		//LogTrace() << "[TimerTask:" << this << "] After Run: " 
+		//	<< cancel << ": " 
+		//	<< _scheduleAt.remaining() << endl;
 	}
 	if (cancel)
 		Task::cancel();
 	return true;
 }
 
-		/*
-		if (_scheduleAt.expired()) {
-			if (_interval > 0) {
-				_scheduleAt.setDelay(_interval);
-				_scheduleAt.reset();
-			}
-			LogTrace() << "[TimerTask:" << this << "] Can Run: Timeout"  << endl;
-			return true;
-		}
-		*/
-
 
 void TimerTask::run()
 { 
-	LogTrace() << "[TimerTask:" << this << "] Running" << endl;
+	//LogTrace() << "[TimerTask:" << this << "] Running" << endl;
 	Timeout.emit(this);
 	onTimeout();
 }
@@ -183,23 +172,34 @@ long TimerTask::interval() const
 }
 	
 
-Scy::Timeout& TimerTask::scheduleAt()
+scy::Timeout& TimerTask::scheduleAt()
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	return _scheduleAt;
 }
 	
 
-Scy::Timeout TimerTask::scheduleAt() const
+scy::Timeout TimerTask::scheduleAt() const
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	return _scheduleAt;
 }
 
 
-} // namespace Scy
+} // namespace scy
 
 
+
+		/*
+		if (_scheduleAt.expired()) {
+			if (_interval > 0) {
+				_scheduleAt.setDelay(_interval);
+				_scheduleAt.reset();
+			}
+			LogTrace() << "[TimerTask:" << this << "] Can Run: Timeout"  << endl;
+			return true;
+		}
+		*/
 
 
 	/*

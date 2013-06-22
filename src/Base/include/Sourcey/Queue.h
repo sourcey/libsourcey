@@ -26,7 +26,7 @@
 #include <queue>
 
 
-namespace Scy {
+namespace scy {
 
 
 template<typename T>
@@ -139,7 +139,7 @@ public:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 

@@ -31,7 +31,7 @@
 #include "Poco/Net/SecureStreamSocket.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 	
 
@@ -43,9 +43,6 @@ public:
 	virtual void connect(const std::string& uri) = 0;
 	virtual void connect() = 0;
 	virtual void close() = 0;
-	
-	//virtual int send(const char* data, int size) = 0;
-	//virtual int send(const IPacket& packet) = 0;
 	
 	virtual void setProtocol(const std::string& proto) = 0;
 	virtual void setCookie(const std::string& cookie) = 0;
@@ -59,6 +56,7 @@ public:
 	
 
 // ---------------------------------------------------------------------
+//
 class IPacketWebSocket: public IPacketSocket
 {
 public:
@@ -80,6 +78,7 @@ public:
 
 
 // ---------------------------------------------------------------------
+//
 template <class SocketBaseT>
 class WebSocketBase: public SocketBaseT
 {
@@ -89,7 +88,6 @@ public:
 	{  
 	}
 
-
 	WebSocketBase(Reactor& reactor, const std::string& uri) :
 		SocketBaseT(reactor),
 		_headerState(0),
@@ -97,18 +95,15 @@ public:
 	{
 	}
 
-
 	virtual ~WebSocketBase()
 	{
 	}
-
 
 	virtual void connect(const std::string& uri)
 	{
 		_uri = uri;
 		connect();
 	}
-
 
 	virtual void connect()
 	{
@@ -119,7 +114,6 @@ public:
 		// Will throw on error
 		SocketBaseT::connect(Address(_uri.getHost(), port()));
 	}
-
 
 	virtual void close()
 	{
@@ -141,7 +135,6 @@ public:
 
 		SocketBaseT::close();
 	}
-
 
 	void sendHandshake()
 	{
@@ -173,7 +166,6 @@ public:
 		//onHandshake();
 	}
 
-
 	virtual int send(const char* data, int size)
 	{
 		//log("trace") << "Send: " << (std::string(data, size)) << std::endl;	
@@ -185,14 +177,12 @@ public:
 		return size;
 	}
 
-
 	virtual int send(const IPacket& packet)
 	{
 		Buffer buf;
 		packet.write(buf);
 		return send(buf.data(), buf.size());
 	}
-
 
 	virtual void recv(Buffer& buffer) 
 	{
@@ -264,29 +254,25 @@ public:
 			onOnline();
 		}
 	}
-
 	
 	virtual void setProtocol(const std::string& proto)
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		_protocol = proto;
 	}
-
-
+	
 	virtual void setCookie(const std::string& cookie)
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		_cookie = cookie;
 	}
-
-	
+		
 	virtual UInt16 port()
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
 		return _uri.getPort() ? _uri.getPort() : (_uri.getScheme() == "wss" ? 443 : 80);
 	}
 
-	
 	virtual const char* className() const { return "WebSocketBase"; }
 	
 
@@ -322,7 +308,7 @@ typedef WebSocketBase< Net::PacketSocketBase< ::Poco::Net::StreamSocket, TCP, Ne
 typedef WebSocketBase< Net::PacketSocketBase< ::Poco::Net::SecureStreamSocket, SSLTCP, Net::IPacketWebSocket > >  SSLPacketWebSocket;
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif //  SOURCEY_NET_WebSocket_H

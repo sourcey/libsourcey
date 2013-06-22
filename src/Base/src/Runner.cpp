@@ -29,13 +29,14 @@
 using namespace std;
 using namespace Poco;
 
+// TODO: Inner loop timeout recovery procedure
 
-namespace Scy {
+namespace scy {
 
 
 Runner::Runner() : 
 	_thread("Runner"),
-	_stop(false) 
+	_stopped(false) 
 {	
 	_thread.start(*this);
 }
@@ -46,7 +47,7 @@ Runner::~Runner()
 	//cout << "[Runner:" << this << "] Destroying" << endl;
 	{
 		FastMutex::ScopedLock lock(_mutex);	
-		_stop = true;
+		_stopped = true;
 		_wakeUp.set();
 	}
 	
@@ -199,7 +200,7 @@ void Runner::clear()
 
 void Runner::run()
 {
-	while (!_stop) 
+	while (!_stopped) 
 	{
 		Task* task = next();
 		
@@ -207,9 +208,9 @@ void Runner::run()
 		if (task) {
 			//log("trace") << "Before Run Task: " << task << endl;
 			if (task->beforeRun()) {
-				log("trace") << "Run Task: " << task << endl;
+				//log("trace") << "Run Task: " << task << endl;
 				task->run();	
-				log("trace") << "After Task: " << task << endl;
+				//log("trace") << "After Task: " << task << endl;
 				if (task->afterRun())			
 					onRun(task);
 				else
@@ -287,4 +288,4 @@ Runner& Runner::getDefault()
 }
 
 
-} // namespace Scy
+} // namespace scy

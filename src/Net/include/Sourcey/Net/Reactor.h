@@ -33,7 +33,7 @@
 #include <deque>
 
 
-namespace Scy {
+namespace scy {
 
 
 template<class C, typename Reactor, typename Socket, typename Event>
@@ -118,11 +118,9 @@ public:
 	virtual void detach(const Poco::Net::Socket& socket);
 		/// Detaches all delegates from the given socket.
 	
-	//static Reactor& getDefault();
+	static Reactor& getDefault();
 		/// Returns the default Reactor singleton, although
 		/// Reactor instances may be initialized individually.
-	
-	//Runner& runner();
 	
 	NullSignal Shutdown;
 
@@ -152,15 +150,8 @@ protected:
 };
 
 
-	/*
-	//Runner&			_runner;
-	Poco::Net::Socket::SocketList _readable;
-	Poco::Net::Socket::SocketList _writable;
-	Poco::Net::Socket::SocketList _error;
-	*/
-
-
 // ---------------------------------------------------------------------
+//
 template <class C>
 static Delegate<C, 
 	ReactorDelegate,
@@ -195,7 +186,7 @@ static Delegate<C,
 }
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif // SOURCEY_NET_Reactor_H

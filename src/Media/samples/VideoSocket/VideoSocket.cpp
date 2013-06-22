@@ -11,6 +11,7 @@
 #include "Sourcey/Net/TCPService.h"
 #include "Sourcey/HTTP/MultipartPacketizer.h"
 #include "Sourcey/HTTP/StreamingPacketizer.h"
+#include "Sourcey/HTTP/ChunkedPacketizer.h"
 #include "Sourcey/HTTP/Request.h"
 #include "Sourcey/Util/Base64PacketEncoder.h"
 #include "Poco/SingletonHolder.h"
@@ -86,7 +87,8 @@ public:
 				stream.attach(encoder, 9, true);
 				
 				// And attach a HTTP streaming packetizer
-				HTTP::StreamingPacketizer* packetizer = new HTTP::StreamingPacketizer("image/jpeg");
+				//HTTP::StreamingPacketizer* packetizer = new HTTP::StreamingPacketizer("image/jpeg");
+				HTTP::ChunkedPacketizer* packetizer = new HTTP::ChunkedPacketizer("image/jpeg");
 				stream.attach(packetizer, 10, true);			
 			}
 			else if ((options.oformat.name.find("mjpeg") != string::npos)) {
@@ -122,8 +124,8 @@ public:
 
 	void onVideoEncoded(void* sender, DataPacket& packet)
 	{
-		//LogTrace("MediaConnection") << "Sending Packet: "
-		// << packet.size() << ": " << fpsCounter.fps << endl;
+		LogTrace("MediaConnection") << "Sending Packet: "
+		 << packet.size() << ": " << fpsCounter.fps << endl;
 		try
 		{					
 			socket().sendBytes(packet.data(), packet.size());
@@ -144,6 +146,58 @@ public:
 	AVEncoder* encoder;
 	PacketStream stream;
 	FPSCounter fpsCounter;
+};
+
+
+// ---------------------------------------------------------------------
+//
+class SnapshotConnection: public TCPServerConnection
+{
+public:
+	SnapshotConnection(const StreamSocket& sock, VideoCapture* videoCapture = NULL, int width = 480, int height = 320) : 
+		TCPServerConnection(sock), videoCapture(videoCapture), width(width), height(height)
+	{		
+		LogTrace("SnapshotConnection") << "Creating: " 
+			<< "\n\tWidth: " << width
+			<< "\n\tHeight: " << height
+			<< endl;
+	}
+
+	~SnapshotConnection() 
+	{
+		LogTrace("SnapshotConnection") << "Destroying" << endl;
+	}
+
+	virtual void run()
+	{
+		cv::Mat frame;
+		videoCapture->getFrame(frame, width, height);
+	
+		vector<unsigned char> buffer;
+		vector<int> param = vector<int>(2);
+		param[0] = CV_IMWRITE_JPEG_QUALITY;
+		param[1] = 95; // default(95) 0-100
+
+		cv::imencode(".jpg", frame, buffer, param);
+
+		LogDebug("SnapshotConnection") << "Taking Snapshot Image: " 
+			<< "\n\tWidth: " << frame.cols 
+			<< "\n\tHeight: " << frame.rows 
+			<< "\n\tCapture Width: " << videoCapture->width()
+			<< "\n\tCapture Height: " << videoCapture->height()
+			<< "\n\tType: " << frame.type()
+			<< "\n\tInput Size: " << frame.total() 
+			<< "\n\tOutput Size: " << buffer.size()
+			<< endl;
+
+		unsigned char* data = new unsigned char[buffer.size()];
+		copy(buffer.begin(), buffer.end(), data);
+		socket().sendBytes((const char*)data, buffer.size());
+	}
+	
+	int width;
+	int height;
+	VideoCapture* videoCapture;
 };
 
 
@@ -188,8 +242,7 @@ public:
 		formatRegistry.registerFormat(Format("mjpeg-base64-mxhr", "mjpeg", 
 			VideoCodec("MJPEG", "mjpeg", 196, 128, 25, 48000, 128000, "yuvj420p")));
 	}
-
-
+	
 
 	TCPServerConnection* createConnection(const StreamSocket& socket) 
 	{  
@@ -221,26 +274,38 @@ public:
 				<< "\n\tRequest: " << requestData
 				<< endl;
 
-			HTTP::Request* request = new HTTP::Request();
+			//HTTP::Request* request = new 
+			HTTP::Request request;
 			istringstream ist(requestData);
-			request->read(ist);
+			request.read(ist);
 
-			if ((request->matches("/streaming"))) {
+			/*
+			1 Connection + disconnect
+			-----------------------------------------------------------
+			Total 5 Memory Leaks: 1048 bytes Total Alocations 9402
+
+						
+			2 Connections + disconnect
+			-----------------------------------------------------------
+			Total 5 Memory Leaks: 1048 bytes Total Alocations 16775
+			*/
+
+			if ((request.matches("/streaming"))) {
 			
 				RecordingOptions options;
 						
 				// An exception will be thrown if no format was provided, 
 				// or if the request format is not registered.
-				options.oformat = formatRegistry.get(request->params().get("format"));
+				options.oformat = formatRegistry.get(request.params().get("format"));
 
-				if (request->params().has("width"))		
-					options.oformat.video.width = Util::fromString<UInt32>(request->params().get("width"));
-				if (request->params().has("height"))	
-					options.oformat.video.height = Util::fromString<UInt32>(request->params().get("height"));
-				if (request->params().has("fps"))		
-					options.oformat.video.fps = Util::fromString<UInt32>(request->params().get("fps"));
-				if (request->params().has("quality"))	
-					options.oformat.video.quality = Util::fromString<UInt32>(request->params().get("quality"));
+				if (request.params().has("width"))		
+					options.oformat.video.width = Util::fromString<UInt32>(request.params().get("width"));
+				if (request.params().has("height"))	
+					options.oformat.video.height = Util::fromString<UInt32>(request.params().get("height"));
+				if (request.params().has("fps"))		
+					options.oformat.video.fps = Util::fromString<UInt32>(request.params().get("fps"));
+				if (request.params().has("quality"))	
+					options.oformat.video.quality = Util::fromString<UInt32>(request.params().get("quality"));
 
 				// Video captures should always be instantiated
 				// in the main thread. See MediaFactory::loadVideo
@@ -269,7 +334,14 @@ public:
 #endif			
 			
 				LogTrace("MediaConnectionFactory") << "Creating Media Connection" << endl;
+				//if (request)
 				return new MediaConnection(socket, options, videoCapture, audioCapture);	
+			}
+			else if ((request.matches("/snapshot"))) {				
+				VideoCapture* videoCapture = MediaFactory::instance()->getVideoCapture(0);
+				int width = Scy::Util::fromString<int>(request.params().get("width", Scy::Util::toString(videoCapture->width() ? videoCapture->width() : 480)));
+				int height = Scy::Util::fromString<int>(request.params().get("height", Scy::Util::toString(videoCapture->height() ? videoCapture->height() : 320)));
+				return new SnapshotConnection(socket, videoCapture, width, height);	
 			}
 		}
 		catch (Exception& exc)
@@ -291,10 +363,12 @@ public:
 	MediaServer(unsigned short port) :
 		TCPService(new MediaConnectionFactory(), port)
 	{		
+		LogTrace("MediaServer") << "Creating" << endl;
 	}
 
 	~MediaServer()
-	{
+	{		
+		LogTrace("MediaServer") << "Destroying" << endl;
 	}
 };
 
@@ -309,7 +383,7 @@ int main(int argc, char** argv)
 	MediaFactory::initialize();
 
 	// Pre initialize video captures in the main thread.
-	MediaFactory::instance()->loadVideo(VideoCapture::SyncWithDelegates);
+	//MediaFactory::instance()->loadVideo(VideoCapture::SyncWithDelegates);
 
 #if 0
 	//gAVVideoCapture = new AVInputReader();
@@ -330,17 +404,25 @@ int main(int argc, char** argv)
 	}
 #endif
 	
-	MediaServer srv(328);
-	srv.start();
+	{
+		MediaServer srv(328);
+		srv.start();
 	
-	char o = 0;
-	while (o != 'Q') {	
-		cout << 
-			"COMMANDS:\n\n"
-			"  Q	Quit.\n\n";
+		char o = 0;
+		while (o != 'Q') {	
+			cout << 
+				"COMMANDS:\n\n"
+				"  Q	Quit.\n\n";
 		
-		o = toupper(getch());
+			o = toupper(getch());
+		}
 	}
+	
+	LogTrace("Application") << "Freeing Video Captures" << endl;
+	MediaFactory::instance()->unloadVideo();
+	MediaFactory::uninitialize();
+	LogTrace("Application") << "Exiting" << endl;
+	Logger::uninitialize();
 	return 0;
 }
 

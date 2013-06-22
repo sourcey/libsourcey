@@ -25,7 +25,7 @@
 using namespace std;
 
 
-namespace Scy {
+namespace scy {
 
 
 static const int DEFAULT_SIZE = 4096;
@@ -534,7 +534,7 @@ const UInt64 Buffer::peekUInt64()
 }
 
 
-} // namespace Scy
+} // namespace scy
 
 
 /*

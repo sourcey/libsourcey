@@ -27,7 +27,7 @@
 #include "Sourcey/Net/SocketBase.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 	
@@ -47,30 +47,14 @@ public:
 	{
 	}
 
-
 	PacketSocketBase(const /*Packet*/SocketBase& rhs) : 
 		SocketBase<StreamSocketT, TransportT, ISocketT>(rhs)
 	{
 	}
 
-
 	virtual ~PacketSocketBase() 
 	{	
-	}
-
-	/*
-	virtual void send(IPacket& packet)
-	{
-		// Always try to cast packets as DataPacket types
-		// so we can avoid copying data.
-		DataPacket* dataPacket = packet.as<DataPacket>();
-		if (dataPacket)
-			send(*dataPacket);
-		else
-			send(reinterpret_cast<const IPacket&>(packet));
-	}
-	*/
-		
+	}		
 	
 	virtual void attach(const PacketDelegateBase& delegate) 
 		/// Override this method to resolve conflict with 
@@ -79,10 +63,8 @@ public:
 		PacketEmitter::attach(delegate);
 	}
 
-
 	virtual const char* className() const { return "PacketSocketBase"; }
-
-	
+		
 protected:
 	virtual void packetize(Buffer& buffer)
 		// Creates and dispatches a packet utilizing the available 
@@ -116,13 +98,26 @@ protected:
 };
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif // SOURCEY_NET_PacketSocketBase_H
 
 
 
+
+	/*
+	virtual void send(IPacket& packet)
+	{
+		// Always try to cast packets as DataPacket types
+		// so we can avoid copying data.
+		DataPacket* dataPacket = packet.as<DataPacket>();
+		if (dataPacket)
+			send(*dataPacket);
+		else
+			send(reinterpret_cast<const IPacket&>(packet));
+	}
+	*/
 
 	/*
 //#include "Sourcey/Net/Types.h"

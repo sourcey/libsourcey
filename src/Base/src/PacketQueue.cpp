@@ -26,7 +26,7 @@ using namespace Poco;
 using namespace Poco;
 
 
-namespace Scy {
+namespace scy {
 
 
 PacketQueue::PacketQueue(PacketEmitter& dispatcher, Runner& runner, int queueSize, int dispatchTimeout) :
@@ -50,4 +50,4 @@ void PacketQueue::emit(IPacket& packet)
 }
 
 
-} // namespace Scy
+} // namespace scy

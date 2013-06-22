@@ -275,14 +275,15 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 		throw Exception(error);
     }
 	
-	if (frameEncoded) {		
+	if (frameEncoded) {
+		fps.tick();
 		if (ctx->coded_frame->key_frame) 
 		    opacket.flags |= AV_PKT_FLAG_KEY; 
         if (opacket.pts != AV_NOPTS_VALUE)
             opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
         if (opacket.dts != AV_NOPTS_VALUE)
             opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
-		
+				
 		/*
 		LogTrace() << "[VideoCodecEncoderContext:" << this << "] Encoded PTS:" 
 			//<< "\n\tPTS: " << av_ts2str(opacket.pts)
@@ -432,7 +433,8 @@ bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 		throw Exception(error);
     }
 
-	if (frameEncoded) {	
+	if (frameEncoded) {		
+		fps.tick();
 		if (ctx->coded_frame->key_frame) 
 		    opacket.flags |= AV_PKT_FLAG_KEY;
 		// No stream pointer
@@ -556,7 +558,8 @@ bool VideoDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 	}
 	*/
 
-	if (frameDecoded) {
+	if (frameDecoded) {	
+		fps.tick();
 		InitDecodedVideoPacket(stream, ctx, frame, &opacket, &pts);
 		/*
 		LogTrace() << "[VideoDecoderContext:" << this << "] Decoded Frame:" 		
@@ -616,7 +619,7 @@ VideoConversionContext::~VideoConversionContext()
 
 void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec& oparams)
 {
-	LogTrace() << "[VideoConversionContext:" << this << "] Creating:" 
+	LogTrace("VideoConversionContext", this) << "Creating:" 
 		<< "\n\tInput Width: " << iparams.width
 		<< "\n\tInput Height: " << iparams.height
 		<< "\n\tInput Pixel Format: " << iparams.pixelFmt
@@ -643,13 +646,13 @@ void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec&
 	this->iparams = iparams;
 	this->oparams = oparams;
 	
-	LogTrace() << "[VideoConversionContext:" << this << "] Creating: OK" << endl;
+	LogTrace("VideoConversionContext", this) << "Creating: OK" << endl;
 }
 	
 
 void VideoConversionContext::free()
 {
-	LogTrace() << "[VideoConversionContext:" << this << "] Closing" << endl;
+	LogTrace("VideoConversionContext", this) << "Closing" << endl;
 
 	if (oframe) {
 		av_free(oframe);
@@ -661,7 +664,7 @@ void VideoConversionContext::free()
 		ctx = NULL;
 	}
 
-	LogTrace() << "[VideoConversionContext:" << this << "] Closing: OK" << endl;
+	LogTrace("VideoConversionContext", this) << "Closing: OK" << endl;
 }
 
 

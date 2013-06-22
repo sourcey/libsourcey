@@ -24,7 +24,7 @@
 using namespace std;
 
 
-namespace Scy {
+namespace scy {
 namespace Util {
 
 
@@ -78,7 +78,7 @@ bool internetIsOK(bool whiny)
 	bool res = false;
 	try 
 	{
-		res = Scy::addressIsOK("http://www.google.com");
+		res = scy::addressIsOK("http://www.google.com");
 	}
 	catch (Exception&)
 	{
@@ -175,4 +175,4 @@ ok:
 
 
 } // namespace Util
-} // namespace Scy
+} // namespace scy

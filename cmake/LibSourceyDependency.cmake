@@ -15,12 +15,14 @@ macro(define_sourcey_dependency name)
   project(${name})
   
   # Add library source files
-  if (NOT ${name}_SOURCE_FILES)
-    if (NOT ${name}_SOURCE_PATH)
+  if (NOT ${name}_SOURCE_FILES)  
+    if (NOT ${name}_SOURCE_PATH)      
       set(${name}_SOURCE_PATH "src/*.c*")
     endif() 
     file(GLOB_RECURSE ${name}_SOURCE_FILES ${${name}_SOURCE_PATH})
+    message("${name}: Globbing All: ${${name}_SOURCE_FILES}")  
   endif() 
+  message("${name}: All: ${${name}_SOURCE_FILES}")  
   
   # Add library header files
   if (NOT ${name}_HEADER_FILES)
@@ -34,6 +36,10 @@ macro(define_sourcey_dependency name)
   source_group("Include" FILES ${${name}_HEADER_FILES})
       
   add_library(${name} STATIC ${${name}_SOURCE_FILES} ${${name}_HEADER_FILES})
+  
+  if (${name}_DEPENDENCIES)
+    add_dependencies(${name} ${${name}_DEPENDENCIES})
+  endif()
   
   #message(STATUS "- Linking Spot dependency ${name} with libraries: ${LibSourcey_INCLUDE_LIBRARIES}")    
   #message("${name}: Library Dirs: ${LibSourcey_LIBRARY_DIRS}")    

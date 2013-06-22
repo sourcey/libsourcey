@@ -25,7 +25,7 @@
 #include "Sourcey/DispatchQueue.h"
 
 
-namespace Scy {
+namespace scy {
 
 
 class PacketQueue: public DispatchQueue<IPacket>
@@ -41,7 +41,7 @@ protected:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_PacketQueue_H

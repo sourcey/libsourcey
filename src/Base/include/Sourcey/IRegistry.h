@@ -25,7 +25,7 @@
 #include <map>
 
 
-namespace Scy {
+namespace scy {
 
 
 template<class ItemT> 
@@ -73,7 +73,7 @@ private:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_IRegistry_H

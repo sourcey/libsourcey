@@ -27,7 +27,7 @@
 #include "Sourcey/IPacket.h"
 
 
-namespace Scy {
+namespace scy {
 
 
 struct TransactionState: public State 
@@ -261,17 +261,18 @@ protected:
 	
 
 protected:
-	mutable Poco::FastMutex	_mutex;
-	
 	PacketT _request;
 	PacketT _response;
 	bool _cancelled;
 	int _retries;		// The maximum number of attempts before the transaction is considered failed.
 	int _attempts;		// The number of times the transaction has been sent.	
+
+private:
+	mutable Poco::FastMutex	_mutex;
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_PacketTransaction_H

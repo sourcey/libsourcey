@@ -200,7 +200,7 @@ endmacro()
 # define_sourcey_module for each module.
 #
 macro(ask_build_sourcey_module name)
-  if(BUILD_MODULES)
+  if(BUILD_MODULE_MODULES)
     set(BUILD_MODULE_${name} ON CACHE BOOL "Build LibSourcey module: ${name}")   
   endif()    
   if(BUILD_MODULE_${name})
@@ -208,6 +208,44 @@ macro(ask_build_sourcey_module name)
     set(LibSourcey_BUILD_MODULES ${LibSourcey_BUILD_MODULES} PARENT_SCOPE)
   endif()    
   mark_as_advanced(FORCE BUILD_MODULE_${name})  
+endmacro()
+
+
+#
+### Macro: ask_build_sourcey_test
+#
+# Optionally build a LibSourcey test.
+# This should be called before include_dependency and
+# define_sourcey_test for each test.
+#
+macro(ask_build_sourcey_test name)
+  if(BUILD_MODULE_TESTS)
+    set(BUILD_TEST_${name} ON CACHE BOOL "Build LibSourcey test: ${name}")   
+  endif()    
+  if(BUILD_TEST_${name})
+    set(LibSourcey_BUILD_TESTS ${LibSourcey_BUILD_TESTS} ${name})   
+    set(LibSourcey_BUILD_TESTS ${LibSourcey_BUILD_TESTS} PARENT_SCOPE)
+  endif()    
+  mark_as_advanced(FORCE BUILD_TEST_${name})  
+endmacro()
+
+
+#
+### Macro: ask_build_sourcey_sample
+#
+# Optionally build a LibSourcey sample.
+# This should be called before include_dependency and
+# define_sourcey_sample for each sample.
+#
+macro(ask_build_sourcey_sample name)
+  if(BUILD_SAMPLES)
+    set(BUILD_SAMPLE_${name} ON CACHE BOOL "Build LibSourcey sample: ${name}")   
+  endif()    
+  if(BUILD_SAMPLE_${name})
+    set(LibSourcey_BUILD_SAMPLES ${LibSourcey_BUILD_SAMPLES} ${name})   
+    set(LibSourcey_BUILD_SAMPLES ${LibSourcey_BUILD_SAMPLES} PARENT_SCOPE)
+  endif()    
+  mark_as_advanced(FORCE BUILD_SAMPLE_${name})  
 endmacro()
 
 

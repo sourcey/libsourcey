@@ -21,6 +21,9 @@ using namespace Scy::TURN;
 using namespace Scy::Util;
 
 
+// TODO: Simplify this to an echo client.
+// Use the Symple MediaServer for media streaming example.
+
 /*
 // Detect Memory Leaks
 #ifdef _DEBUG
@@ -36,9 +39,8 @@ namespace TURN {
 
 		
 // ----------------------------------------------------------------------------
+// Media Formats	
 //
-// Media Formats
-//-------		
 Format MP344100 = Format("MP3", "mp3", 
 	VideoCodec(),
 	AudioCodec("MP3", "libmp3lame", 2, 44100, 128000, "s16p"));	
@@ -82,21 +84,20 @@ TURNMediaProvider* ourMediaProvider = NULL;
 
 
 // ----------------------------------------------------------------------------
-//
 // TCP TURN Initiator
-//-------
-class TURNMediaProvider: public Scy::TURN::ITCPClientObserver
+//
+class TURNMediaProvider: public Scy::TURN::TCPClientObserver
 {
 public:
 	TURN::TCPClient client;
 	Net::IP			peerIP;	
-	Net::Address	ourPeerAddr;	
+	Net::Address	currentPeerAddr;	
 	PacketStream    stream;
 
 	Signal<TURN::Client&> AllocationCreated;
 	Signal2<TURN::Client&, const Net::Address&> ConnectionCreated;
 
-	TURNMediaProvider(Net::Reactor& reactor, Runner& runner, const TURN::Client::Options options, const Net::IP& peerIP) : 
+	TURNMediaProvider(Net::Reactor& reactor, Runner& runner, const TURN::Client::Options& options, const Net::IP& peerIP) : 
 		client(*this, reactor, runner, options), peerIP(peerIP)
 	{
 	}
@@ -109,7 +110,7 @@ public:
 
 	void initiate() 
 	{
-		Log("debug") << "[TURNMediaProvider: " << this << "] Initializing" << endl;		
+		LogDebug() << "[TURNMediaProvider: " << this << "] Initializing" << endl;		
 		terminate();
 
 		try	{
@@ -117,7 +118,7 @@ public:
 			client.initiate();
 		} 
 		catch (Poco::Exception& exc) {
-			Log("error") << "[TURNMediaProvider: " << this << "] Error: " << exc.displayText() << std::endl;
+			LogError()  << "[TURNMediaProvider: " << this << "] Error: " << exc.displayText() << std::endl;
 		}
 	}
 
@@ -127,7 +128,7 @@ public:
 	}
 
 	void playMedia() {
-		Log("debug") << "[TURNMediaProvider: " << this << "] Play Media" << endl;
+		LogDebug() << "[TURNMediaProvider: " << this << "] Play Media" << endl;
 
 		RecorderOptions options;
 		options.oformat = ourMediaFormat;			
@@ -151,20 +152,20 @@ public:
 		
 		stream += packetDelegate(this, &TURNMediaProvider::onMediaEncoded);
 		stream.start();	
-		Log("debug") << "[TURNMediaProvider: " << this << "] Play Media: OK" << endl;
+		LogDebug() << "[TURNMediaProvider: " << this << "] Play Media: OK" << endl;
 	}
 
 	void stopMedia() {
-		Log("debug") << "[TURNMediaProvider: " << this << "] Stop Media" << endl;
+		LogDebug() << "[TURNMediaProvider: " << this << "] Stop Media" << endl;
 		stream -= packetDelegate(this, &TURNMediaProvider::onMediaEncoded);
 		stream.close();	
-		Log("debug") << "[TURNMediaProvider: " << this << "] Stop Media: OK" << endl;
+		LogDebug() << "[TURNMediaProvider: " << this << "] Stop Media: OK" << endl;
 	}
 
 protected:
 	void onRelayStateChange(TURN::Client& client, TURN::ClientState& state, const TURN::ClientState&) 
 	{
-		Log("debug") << "[TURNMediaProvider: " << this << "] State Changed: " << state.toString() << endl;
+		LogDebug() << "[TURNMediaProvider: " << this << "] State Changed: " << state.toString() << endl;
 
 		switch(state.id()) {
 		case TURN::ClientState::Waiting:				
@@ -186,31 +187,31 @@ protected:
 	
 	void onClientConnectionCreated(TURN::TCPClient& client, Net::IPacketSocket* sock, const Net::Address& peerAddr) //UInt32 connectionID, 
 	{
-		Log("debug") << "[TURNMediaProvider: " << this << "] Connection Created: " << peerAddr << endl;
-		ourPeerAddr = peerAddr; // Current peer
+		LogDebug() << "[TURNMediaProvider: " << this << "] Connection Created: " << peerAddr << endl;
+		currentPeerAddr = peerAddr; // Current peer
 
 		ConnectionCreated.emit(this, this->client, peerAddr);
 
 		// Restart the media steram for each new peer
 		stopMedia();
 		playMedia();
-		Log("debug") << "[TURNMediaProvider: " << this << "] Connection Created: OK: " << peerAddr << endl;
+		LogDebug() << "[TURNMediaProvider: " << this << "] Connection Created: OK: " << peerAddr << endl;
 	}
 	
 	void onClientConnectionState(TURN::TCPClient& client, Net::IPacketSocket*, 
 		Net::SocketState& state, const Net::SocketState& oldState) 
 	{
-		Log("debug") << "[TURNMediaProvider: " << this << "] Connection State: " << state.toString() << endl;
+		LogDebug() << "[TURNMediaProvider: " << this << "] Connection State: " << state.toString() << endl;
 	}
 
 	void onRelayedData(TURN::Client& client, const char* data, int size, const Net::Address& peerAddr)
 	{
-		Log("debug") << "[TURNMediaProvider: " << this << "] Received Data: " << string(data, size) <<  ": " << peerAddr << endl;
+		LogDebug() << "[TURNMediaProvider: " << this << "] Received Data: " << string(data, size) <<  ": " << peerAddr << endl;
 	}
 	
 	void onAllocationPermissionsCreated(TURN::Client& client, const TURN::PermissionList& permissions)
 	{
-		Log("debug") << "[TURNMediaProvider: " << this << "] Permissions Created" << endl;
+		LogDebug() << "[TURNMediaProvider: " << this << "] Permissions Created" << endl;
 	}
 
 	void onMediaEncoded(void* sender, DataPacket& packet)
@@ -219,21 +220,19 @@ protected:
 		
 		try {
 			// Send the media to our peer
-			client.sendData((const char*)packet.data(), packet.size(), ourPeerAddr);
+			client.sendData((const char*)packet.data(), packet.size(), currentPeerAddr);
 		}
 		catch (Exception& exc) {
-			Log("error") << "[TURNMediaProvider: " << this << "] Send Error: " << exc.displayText() << endl;
+			LogError()  << "[TURNMediaProvider: " << this << "] Send Error: " << exc.displayText() << endl;
 			terminate();
 		}
 	}
 };
 
 
-
 // ----------------------------------------------------------------------------
-//
 // Media Connection
-//-------
+//
 class AddressRequestHandler: public Poco::Net::TCPServerConnection
 {
 public:
@@ -265,16 +264,16 @@ public:
 	
 	void onAllocationCreated(void* sender, TURN::Client& client) //
 	{
-		Log("debug") << "[AddressRequestHandler] Allocation Created" << endl;
+		LogDebug() << "[AddressRequestHandler] Allocation Created" << endl;
 					
 		// Write the relay address	
 		assert(ourMediaProvider);
 		string data = ourMediaProvider->client.relayedAddress().toString();
 		socket().sendBytes(data.data(), data.size());
 
-		Log("debug") << "[AddressRequestHandler] Allocation Created 1" << endl;		
+		LogDebug() << "[AddressRequestHandler] Allocation Created 1" << endl;		
 		wakeUp.set();
-		Log("debug") << "[AddressRequestHandler] Allocation Created 2" << endl;
+		LogDebug() << "[AddressRequestHandler] Allocation Created 2" << endl;
 	}
 	
 	Poco::Event wakeUp;
@@ -282,9 +281,8 @@ public:
 
 
 // ----------------------------------------------------------------------------
-//
 // HTTP Connection Factory
-//-------
+//
 class AddressRequestHandlerFactory: public Poco::Net::TCPServerConnectionFactory
 {
 public:
@@ -319,7 +317,7 @@ public:
 		}
 		catch (Exception& exc)
 		{
-			Log("error") << exc.displayText() << endl;
+			LogError()  << exc.displayText() << endl;
 		}
 
 		return new BadRequestHandler(sock);
@@ -328,9 +326,8 @@ public:
 
 
 // ----------------------------------------------------------------------------
-//
 // HTTP Relay Address Service
-//-------
+//
 class RelayAddressService: public TCPService
 {
 public:
@@ -364,8 +361,8 @@ int main(int argc, char** argv)
 	//	ourMediaFormat.audio.sampleRate);	
 
 	// Create client
-	Scy::Net::Reactor reactor;
 	Runner runner;
+	Net::Reactor reactor;
 	Net::IP peerIP("127.0.0.1");
 	TURN::Client::Options co;
 	co.serverAddr = Net::Address("127.0.0.1", 3478); // "173.230.150.125"

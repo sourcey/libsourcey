@@ -10,8 +10,8 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Sourcey;
-using namespace Sourcey::Media;
+using namespace Scy;
+using namespace Scy::Media;
 
 
 IDeviceManager* devices;
@@ -28,7 +28,7 @@ CMemLeakDetect memLeakDetect;
 
 int main(int argc, char** argv)
 {
-	Sourcey::Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
+	Scy::Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
 
 	devices = DeviceManagerFactory::create();
 	devices->initialize();
