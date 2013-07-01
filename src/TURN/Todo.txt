@@ -1,9 +1,0 @@
-IAllocation Timeout
-create permissions
-
-Deleted control IConnection removes allocation (for tcp)
-Deleted peer/data removes relative peer/data IConnection
-
-Add MESSAGE-INTEGRITY attribute to success respoinses
-
-Support STUN binding method

@@ -22,31 +22,31 @@
 
 
 #include "Sourcey/Net/Transaction.h"
+#include "Sourcey/Net/Socket.h"
 #include "Sourcey/STUN/Message.h"
 
 
-namespace Scy {
-namespace STUN {
+namespace scy {
+namespace stun {
 
 
-struct Transaction: public Net::Transaction<Message>
+class Transaction: public net::Transaction<Message>
 {
-	Transaction(Runner& runner, 
-				Net::IPacketSocket* socket, 
-				const Net::Address& localAddress, 
-				const Net::Address& peerAddress, 
+public:
+	Transaction(net::Socket& socket, 
+				const net::Address& peerAddress, 
 				long timeout = 10000, 
-				int retries = 1);
+				int retries = 1,
+				uv_loop_t* loop = NULL);
 	
-	virtual bool match(const Message& message);
-	virtual void onResponse();
-
-protected:
 	virtual ~Transaction();
+
+	virtual bool checkResponse(const Message& message);
+	virtual void onSuccess();
 };
 
 
-} } // namespace Scy::STUN
+} } // namespace scy::STUN
 
 
 #endif // SOURCEY_STUN_Transaction_H

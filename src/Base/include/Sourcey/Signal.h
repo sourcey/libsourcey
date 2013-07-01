@@ -64,7 +64,7 @@ public:
 		/// the existing delegate.
 	{
 		detach(delegate);
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		_delegates.push_back(delegate.clone());
 		_delegates.sort(DelegateT::ComparePrioroty); 
 		_refCount++;
@@ -76,7 +76,7 @@ public:
 	{
 		bool res = false;
 		{
-			Poco::FastMutex::ScopedLock lock(_mutex);
+			//Poco::FastMutex::ScopedLock lock(_mutex);
 			for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
 				if (delegate.equals(*it) && !(*it)->cancelled()) {	
 					(*it)->cancel();
@@ -95,7 +95,7 @@ public:
 		/// Detaches all delegates associated with the given instance.
 	{
 		{
-			Poco::FastMutex::ScopedLock lock(_mutex);
+			//Poco::FastMutex::ScopedLock lock(_mutex);
 			for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
 				if (klass == (*it)->object() && !(*it)->cancelled()) {	
 					(*it)->cancel();
@@ -110,7 +110,7 @@ public:
 	void cleanup() 
 		/// Deletes cancelled delegates.
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		if (_dirty) {
 			Iterator it = _delegates.begin(); 
 			while (it != _delegates.end()) {
@@ -130,7 +130,7 @@ public:
 		/// Obtains a list of active delegates,
 		/// and deletes any redundant delegates.
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		Iterator it = _delegates.begin(); 
 		while (it != _delegates.end()) {
 			DelegateT* delegate = *it;
@@ -151,32 +151,32 @@ public:
 
 	void clear() 
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
-		Util::ClearList(_delegates);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
+		util::ClearList(_delegates);
 		_refCount = 0;
 	}
 
 	DelegateList delegates() const 
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		return _delegates;
 	}
 
 	void enable(bool flag = true) 
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		_enabled = flag;
 	}
 
 	bool enabled() 
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		return _enabled;
 	}
 	
 	int refCount() const 
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		return _refCount;
 	}
 
@@ -224,7 +224,7 @@ protected:
 	bool _dirty;
 	int _refCount;
 
-	mutable Poco::FastMutex	_mutex;
+	//mutable Poco::FastMutex	_mutex;
 };
 
 

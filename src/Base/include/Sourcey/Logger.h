@@ -173,31 +173,31 @@ struct LogStream
 
 
 //
-// Global log stream accessors
+// Global log stream accessors for scy
 //
+inline LogStream traceL(const char* realm = "", const void* ptr = NULL) 
+	{ return LogStream(TraceLevel, realm, ptr); }
+
+inline LogStream debugL(const char* realm = "", const void* ptr = NULL) 
+	{ return LogStream(DebugLevel, realm, ptr); }
+
+inline LogStream infoL(const char* realm = "", const void* ptr = NULL) 
+	{ return LogStream(InfoLevel, realm, ptr); }
+
+inline LogStream warnL(const char* realm = "", const void* ptr = NULL) 
+	{ return LogStream(WarningLevel, realm, ptr); }
+
+inline LogStream errorL(const char* realm = "", const void* ptr = NULL) 
+	{ return LogStream(ErrorLevel, realm, ptr); }
+
+inline LogStream fatalL(const char* realm = "", const void* ptr = NULL) 
+	{ return LogStream(FatalLevel, realm, ptr); }
+
 inline LogStream Log(const char* level = "debug", const char* realm = "", const void* ptr = NULL) 
 	{ return LogStream(getLogLevelFromString(level), realm, ptr); }
 
 inline LogStream Log(const char* level, const void* ptr, const char* realm = "") 
 	{ return LogStream(getLogLevelFromString(level), realm, ptr); }
-
-inline LogStream LogTrace(const char* realm = "", const void* ptr = NULL) 
-	{ return LogStream(TraceLevel, realm, ptr); }
-
-inline LogStream LogDebug(const char* realm = "", const void* ptr = NULL) 
-	{ return LogStream(DebugLevel, realm, ptr); }
-
-inline LogStream LogInfo(const char* realm = "", const void* ptr = NULL) 
-	{ return LogStream(InfoLevel, realm, ptr); }
-
-inline LogStream LogWarn(const char* realm = "", const void* ptr = NULL) 
-	{ return LogStream(WarningLevel, realm, ptr); }
-
-inline LogStream LogError(const char* realm = "", const void* ptr = NULL) 
-	{ return LogStream(ErrorLevel, realm, ptr); }
-
-inline LogStream LogFatal(const char* realm = "", const void* ptr = NULL) 
-	{ return LogStream(FatalLevel, realm, ptr); }
 
 
 // ---------------------------------------------------------------------

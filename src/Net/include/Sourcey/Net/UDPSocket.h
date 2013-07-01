@@ -17,100 +17,53 @@
 //
 
 
-#ifndef SOURCEY_NET_UDPPacketSocket_H
-#define SOURCEY_NET_UDPPacketSocket_H
+#ifndef SOURCEY_Net_UDPSocket_H
+#define SOURCEY_Net_UDPSocket_H
 
 
-#include "Sourcey/Base.h"
-#include "Sourcey/Net/AsyncPacketSocketBase.h"
-
-#include "Poco/Net/DatagramSocket.h"
+#include "Sourcey/UV/UVPP.h"
+#include "Sourcey/UV/UDPBase.h"
+#include "Sourcey/Net/Socket.h"	
+#include "Sourcey/Net/Types.h"
+#include "Sourcey/Net/Address.h"
 
 
 namespace scy {
-namespace Net {
+namespace net {
+
+	
+typedef uv::UDPBase UDPBase;
 
 
-typedef AsyncPacketSocketBase<Poco::Net::DatagramSocket, UDP> UDPPacketSocket;
-
-
-} } // namespace scy::Net
-
-
-#endif // SOURCEY_NET_UDPPacketSocket_H
-
-
-
-/*
-class UDPPacketSocket: public IPacketSocket, public Poco::Net::DatagramSocket //, public PacketFactory, public PacketEmitter
-	/// This class provides efficient UDP messaging for
-	/// LibSourcey.
-	///
-	/// This implementation uses an asynchronous message queue
-	/// for dispatching received packets and minimize packet
-	/// loss. The message queue runs inside the Runner thread. 
+class UDPSocket: public net::Socket
+	/// UDPSocket is a disposable UDP socket wrapper
+	/// for UDPBase which can be created on the stack.
+	/// See UDPBase for implementation details.
 {
-public:
-	UDPPacketSocket(Reactor& reactor, 
-		      Runner& runner);
-	UDPPacketSocket(const UDPPacketSocket& r);
-	virtual ~UDPPacketSocket();
-
-	virtual void close();	
-
-	virtual void connect(const Address& address);
-		/// Restricts incoming and outgoing
-		/// packets to the specified address.
-		///
-		/// Cannot be used together with bind().
-
-	virtual void bind(const Address& address, bool reuseAddress = false);
-		/// Bind a local address to the socket.
-		///
-		/// This is usually only done when establishing a server
-		/// socket. 
-		///
-		/// If reuseAddress is true, sets the SO_REUSEADDR
-		/// socket option.
-		///
-		/// Cannot be used together with connect().
-		
-	virtual int send(const char* data, int size);
-	virtual int send(const char* data, int size, const Address& peerAddress);
-	virtual int send(const DataPacket& packet);
-	virtual int send(const DataPacket& packet, const Address& peerAddress);
-	virtual int send(const IPacket& packet);
-	virtual int send(const IPacket& packet, const Address& peerAddress);
-	virtual void send(IPacket& packet);
-
-	virtual bool isConnected() const;
-	virtual bool isError() const;	
+public:	
+	typedef UDPBase Base;
+	typedef std::vector<UDPSocket> List;
 	
-	Address address() const;
-	Address peerAddress() const;
-	TransportProtocol transport() const;
-	void setError(const std::string& err);
-	std::string error() const;
-	int errorno() const;
-	Reactor& reactor();
-	Runner& runner();
+	UDPSocket();
+		/// Creates an unconnected UDP socket.
+
+	UDPSocket(UDPBase* base, bool shared = false);
+		/// Creates the Socket and attaches the given SocketBase.
+		///
+		/// The SocketBase must be a UDPBase, otherwise an
+		/// exception will be thrown.
+
+	UDPSocket(const Socket& socket);
+		/// Creates the UDPSocket with the SocketBase
+		/// from another socket. The SocketBase must be
+		/// a UDPBase, otherwise an exception will be thrown.
 	
-protected:
-	virtual void recv(Buffer& buffer, const Address& peerAddress);
-	virtual void packetize(Buffer& buffer, const Address& peerAddress);
-
-	virtual void onReadable();
-	virtual void onError();
-
-	virtual void bindEvents();	
-	virtual void unbindEvents();	
-
-	Reactor&		_reactor;
-	Runner&			_runner;
-	Buffer			_buffer;
-	bool			_closed;
-	PacketQueue*	_queue;
-	std::string		_error;
-	mutable Poco::FastMutex	_mutex;
+	UDPBase& base() const;
+		/// Returns the socket's SocketBase instance.
 };
-*/
+
+
+} } // namespace scy::uv
+
+
+#endif // SOURCEY_Net_UDPSocket_H

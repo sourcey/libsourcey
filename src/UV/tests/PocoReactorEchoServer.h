@@ -100,12 +100,12 @@ public:
 	
 	void run()
 	{		
-		scy::Log("debug") << "[UVEchoServer:" << this << "] Liistening: " << _socket.address().toString() << std::endl;
+		scy::Log("debug") << "[UVEchoServer:" << this << "] Liistening: " << _socket.address() << std::endl;
 		_socket.listen(1000);
 		Poco::Net::SocketAcceptor<EchoServiceHandler> acceptor(_socket, _reactor);
-		scy::Log("debug") << "[UVEchoServer:" << this << "] Liistening 1: " << _socket.address().toString() << std::endl;
+		scy::Log("debug") << "[UVEchoServer:" << this << "] Liistening 1: " << _socket.address() << std::endl;
 		_ready.set();
-		scy::Log("debug") << "[UVEchoServer:" << this << "] Liistening 2: " << _socket.address().toString() << std::endl;
+		scy::Log("debug") << "[UVEchoServer:" << this << "] Liistening 2: " << _socket.address() << std::endl;
 		_reactor.run();
 
 	}

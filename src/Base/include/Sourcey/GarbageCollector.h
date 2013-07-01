@@ -64,7 +64,7 @@ public:
 	virtual void free() {
 		if (_ptr) {
 			DeletableT* ptr = static_cast<DeletableT*>(_ptr);
-			LogTrace("GarbageCollectorTask") << "Freeing: " << ptr << endl;
+			traceL("GarbageCollectorTask") << "Freeing: " << ptr << endl;
 			delete ptr;
 			_ptr = NULL;
 		}

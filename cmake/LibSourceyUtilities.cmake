@@ -238,7 +238,7 @@ endmacro()
 # define_sourcey_sample for each sample.
 #
 macro(ask_build_sourcey_sample name)
-  if(BUILD_SAMPLES)
+  if(BUILD_MODULE_SAMPLES)
     set(BUILD_SAMPLE_${name} ON CACHE BOOL "Build LibSourcey sample: ${name}")   
   endif()    
   if(BUILD_SAMPLE_${name})

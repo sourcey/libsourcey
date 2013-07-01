@@ -20,9 +20,9 @@ macro(define_sourcey_dependency name)
       set(${name}_SOURCE_PATH "src/*.c*")
     endif() 
     file(GLOB_RECURSE ${name}_SOURCE_FILES ${${name}_SOURCE_PATH})
-    message("${name}: Globbing All: ${${name}_SOURCE_FILES}")  
+    #message("${name}: Globbing Sourcey Files: ${${name}_SOURCE_FILES}")  
   endif() 
-  message("${name}: All: ${${name}_SOURCE_FILES}")  
+  #message("${name}: Sourcey Files: ${${name}_SOURCE_FILES}")  
   
   # Add library header files
   if (NOT ${name}_HEADER_FILES)

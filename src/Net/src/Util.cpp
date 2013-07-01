@@ -25,7 +25,7 @@ using namespace std;
 
 
 namespace scy {
-namespace Util {
+namespace util {
 
 
 /*
@@ -159,7 +159,7 @@ string getPublicIPAddress(bool whiny)
 		}
 		catch (Exception& exc)
 		{
-			LogError() << exc.displayText() << endl;
+			errorL() << exc.displayText() << endl;
 		}
 	}
 
@@ -174,5 +174,5 @@ ok:
 */
 
 
-} // namespace Util
+} // namespace util
 } // namespace scy

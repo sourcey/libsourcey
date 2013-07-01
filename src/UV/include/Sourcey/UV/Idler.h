@@ -22,18 +22,21 @@
 
 
 #include "Sourcey/UV/UVPP.h"
+#include "Sourcey/UV/Base.h"
 
 
 namespace scy {
-namespace UV {
+namespace uv {
 	
 
-class Idler: public UV::Base
+class Idler: public uv::Base<>
+	/// https://github.com/AlloSphere-Research-Group/alive/blob/master/archived/av/uv_utils.h
 {
 public:
-	Idler(uv_loop_t* loop = uv_default_loop());
+	Idler();
 	virtual ~Idler();	
 	
+	virtual void init();	
 	virtual void start();	
 	virtual void stop();
 
@@ -51,7 +54,7 @@ protected:
 UVStatusCallback(Idler, onIdle, uv_idle_t);
 
 
-} } // namespace scy::UV
+} } // namespace scy::uv
 
 
 #endif // SOURCEY_UV_Idler_H

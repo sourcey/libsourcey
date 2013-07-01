@@ -27,17 +27,10 @@
 
 
 namespace scy {
-namespace Util {
+namespace util {
 
 
-// Socket
-//bool portIsAvailable(int port);	
-//bool addressIsOK(const std::string& uri, bool whiny = true);
-//bool internetIsOK(bool whiny = true);	
-//std::string getPublicIPAddress(bool whiny = true);
-
-
-} // namespace Util
+} // namespace util
 } // namespace scy
 
 

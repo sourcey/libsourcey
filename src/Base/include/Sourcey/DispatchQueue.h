@@ -41,20 +41,20 @@ public:
 		_queueSize(queueSize),
 		_timeout(dispatchTimeout)
 	{
-		LogTrace("DispatchQueue", this) << "Creating" << std::endl;
+		traceL("DispatchQueue", this) << "Creating" << std::endl;
 	}
 	
 
 	virtual void start()
 	{
-		LogTrace("DispatchQueue", this) << "Starting" << std::endl;
+		traceL("DispatchQueue", this) << "Starting" << std::endl;
 		Task::start();
 	}
 
 
 	virtual void cancel()
 	{
-		LogTrace("DispatchQueue", this) << "Stopping" << std::endl;
+		traceL("DispatchQueue", this) << "Stopping" << std::endl;
 		clear();
 		Task::cancel();
 	}
@@ -72,10 +72,10 @@ public:
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);	
 
-		LogTrace("DispatchQueue", this) << "Adding: " << item << std::endl;
+		traceL("DispatchQueue", this) << "Adding: " << item << std::endl;
 				
 		while (static_cast<int>(_queue.size()) >= (_queueSize)) {
-			LogTrace("DispatchQueue", this) << "Purging item" << std::endl;
+			traceL("DispatchQueue", this) << "Purging item" << std::endl;
 			delete _queue.front();
 			_queue.pop_front();
 		}
@@ -88,7 +88,7 @@ public:
 		// Clears all queued items.
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);	
-		Util::ClearDeque(_queue);
+		util::ClearDeque(_queue);
 	}
 
 
@@ -120,7 +120,7 @@ public:
 protected:
 	virtual ~DispatchQueue() 
 	{
-		LogTrace("DispatchQueue", this) << "Destroying" << std::endl;
+		traceL("DispatchQueue", this) << "Destroying" << std::endl;
 		clear();
 	};
 		

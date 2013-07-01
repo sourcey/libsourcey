@@ -40,25 +40,25 @@ PacketStream::PacketStream(const string& name) :
 	_ready(false),
 	_clientData(NULL)
 {
-	LogTrace("PacketStream", this) << "Creating" << endl;
+	traceL("PacketStream", this) << "Creating" << endl;
 	_ready.set();
 }
 
 
 PacketStream::~PacketStream()
 {
-	LogTrace("PacketStream", this) << "Destroying" << endl;
+	traceL("PacketStream", this) << "Destroying" << endl;
 	close();
-	LogTrace("PacketStream", this) << "Destroying: OK" << endl;
+	traceL("PacketStream", this) << "Destroying: OK" << endl;
 }
 
 
 void PacketStream::start()
 {	
-	LogTrace("PacketStream", this) << "Starting" << endl;
+	traceL("PacketStream", this) << "Starting" << endl;
 
 	if (stateEquals(PacketStreamState::Running))  {
-		LogTrace("PacketStream", this) << "Already Running" << endl;
+		traceL("PacketStream", this) << "Already Running" << endl;
 		return;
 	}
 
@@ -72,7 +72,7 @@ void PacketStream::start()
 		for (PacketAdapterList::iterator pit = _processors.begin(); pit != _processors.end(); ++pit) {
 			thisProc = reinterpret_cast<IPacketProcessor*>((*pit).ptr);
 			if (lastProc) {
-				LogTrace("PacketStream", this) << "Connecting Processor: " << thisProc << endl;
+				traceL("PacketStream", this) << "Connecting Processor: " << thisProc << endl;
 				lastProc->attach(packetDelegate(thisProc, &IPacketProcessor::process));
 			}
 			lastProc = thisProc;
@@ -86,12 +86,12 @@ void PacketStream::start()
 		// Attach and start synchronized runnables
 		for (PacketAdapterList::iterator sit = _sources.begin(); sit != _sources.end(); ++sit) {
 			PacketEmitter* source = (*sit).ptr;
-			LogTrace("PacketStream", this) << "Connecting Source: " << source << endl;
+			traceL("PacketStream", this) << "Connecting Source: " << source << endl;
 			source->attach(packetDelegate(this, &PacketStream::onSourcePacket));
 			if ((*sit).syncState) {
 				IStartable* runnable = dynamic_cast<IStartable*>((*sit).ptr);
 				if (runnable) {
-					LogTrace("PacketStream", this) << "Starting Source: " << source << endl;
+					traceL("PacketStream", this) << "Starting Source: " << source << endl;
 					runnable->start();
 				}
 			}
@@ -104,11 +104,11 @@ void PacketStream::start()
 
 void PacketStream::stop()
 {
-	LogTrace("PacketStream", this) << "Stopping" << endl;
+	traceL("PacketStream", this) << "Stopping" << endl;
 	
 	if (stateEquals(PacketStreamState::Stopped) ||
 		stateEquals(PacketStreamState::Closed)) {
-		LogTrace("PacketStream", this) << "Already Stopped" << endl;
+		traceL("PacketStream", this) << "Already Stopped" << endl;
 		return;
 	}
 
@@ -125,7 +125,7 @@ void PacketStream::stop()
 			if ((*sit).syncState) {
 				IStartable* runnable = dynamic_cast<IStartable*>((*sit).ptr);
 				if (runnable) {
-					LogTrace("PacketStream", this) << "Stopping Source: " << source << endl;
+					traceL("PacketStream", this) << "Stopping Source: " << source << endl;
 					runnable->stop();
 				}
 			}
@@ -150,7 +150,7 @@ void PacketStream::stop()
 
 void PacketStream::reset()
 {
-	LogTrace("PacketStream", this) << "Resetting Stream" << endl;
+	traceL("PacketStream", this) << "Resetting Stream" << endl;
 	
 	// TODO: Refactor
 	setState(this, PacketStreamState::Resetting);
@@ -160,11 +160,11 @@ void PacketStream::reset()
 
 void PacketStream::close()
 {
-	LogTrace("PacketStream", this) << "Closing" << endl;
+	traceL("PacketStream", this) << "Closing" << endl;
 
 	if (stateEquals(PacketStreamState::Closing) || 
 		stateEquals(PacketStreamState::Closed)) {
-		LogTrace("PacketStream", this) << "Already Closing" << endl;
+		traceL("PacketStream", this) << "Already Closing" << endl;
 		return;
 	}
 	
@@ -175,13 +175,13 @@ void PacketStream::close()
 	cleanup();	
 	setState(this, PacketStreamState::Closed); // may result in destruction
 
-	LogTrace("PacketStream", this) << "Closing: OK" << endl;
+	traceL("PacketStream", this) << "Closing: OK" << endl;
 }
 
 
 void PacketStream::attach(PacketEmitter* source, bool freePointer, bool syncState) 
 {
-	LogTrace("PacketStream", this) << "Attaching Source " << source << endl;
+	traceL("PacketStream", this) << "Attaching Source " << source << endl;
 	if (stateEquals(PacketStreamState::Running))
 		throw Exception("Cannot attach source to running stream.");
 	
@@ -190,13 +190,13 @@ void PacketStream::attach(PacketEmitter* source, bool freePointer, bool syncStat
 	FastMutex::ScopedLock lock(_mutex);
 	_sources.push_back(PacketAdapterReference(source, 0, freePointer, syncState));
 	sort(_sources.begin(), _sources.end(), PacketAdapterReference::CompareOrder);
-	LogTrace("PacketStream", this) << "Attaching Source " << source << ": OK" << endl;
+	traceL("PacketStream", this) << "Attaching Source " << source << ": OK" << endl;
 }
 
 
 void PacketStream::attach(IPacketProcessor* proc, int order, bool freePointer) 
 {
-	LogTrace("PacketStream", this) << "Attaching Processor " << proc << endl;
+	traceL("PacketStream", this) << "Attaching Processor " << proc << endl;
 	if (stateEquals(PacketStreamState::Running))
 		throw Exception("Cannot attach processor to running stream.");
 	
@@ -205,13 +205,13 @@ void PacketStream::attach(IPacketProcessor* proc, int order, bool freePointer)
 	FastMutex::ScopedLock lock(_mutex);
 	_processors.push_back(PacketAdapterReference(proc, order == 0 ? _processors.size() : order, freePointer));
 	sort(_processors.begin(), _processors.end(), PacketAdapterReference::CompareOrder);
-	LogTrace("PacketStream", this) << "Attaching Processor " << proc << ": OK" << endl;
+	traceL("PacketStream", this) << "Attaching Processor " << proc << ": OK" << endl;
 }
 
 
 bool PacketStream::detach(PacketEmitter* source) 
 {
-	LogTrace("PacketStream", this) << "Detaching Source: " << source << endl;
+	traceL("PacketStream", this) << "Detaching Source: " << source << endl;
 	if (stateEquals(PacketStreamState::Running))
 		throw Exception("Cannot detach source from running stream.");
 
@@ -220,7 +220,7 @@ bool PacketStream::detach(PacketEmitter* source)
 	FastMutex::ScopedLock lock(_mutex);
 	for (PacketAdapterList::iterator it = _sources.begin(); it != _sources.end(); ++it) {
 		if ((*it).ptr == source) {
-			LogTrace("PacketStream", this) << "Detaching Source: " << source << ": OK" << endl;
+			traceL("PacketStream", this) << "Detaching Source: " << source << ": OK" << endl;
 			(*it).ptr->detach(packetDelegate(this, &PacketStream::onSourcePacket));
 			//if ((*it).freePointer)
 			//	delete (*it).ptr;
@@ -234,7 +234,7 @@ bool PacketStream::detach(PacketEmitter* source)
 
 bool PacketStream::detach(IPacketProcessor* proc) 
 {
-	LogTrace("PacketStream", this) << "Detaching Processor: " << proc << endl;
+	traceL("PacketStream", this) << "Detaching Processor: " << proc << endl;
 	if (stateEquals(PacketStreamState::Running))
 		throw Exception("Cannot detach processor from running stream.");
 	
@@ -243,7 +243,7 @@ bool PacketStream::detach(IPacketProcessor* proc)
 	FastMutex::ScopedLock lock(_mutex);
 	for (PacketAdapterList::iterator it = _processors.begin(); it != _processors.end(); ++it) {
 		if ((*it).ptr == proc) {
-			LogTrace("PacketStream", this) << "Detaching Processor: " << proc << ": OK" << endl;
+			traceL("PacketStream", this) << "Detaching Processor: " << proc << ": OK" << endl;
 			//if ((*it).freePointer)
 			//	delete (*it).ptr;
 			_processors.erase(it);
@@ -256,21 +256,21 @@ bool PacketStream::detach(IPacketProcessor* proc)
 
 void PacketStream::attach(const PacketDelegateBase& delegate)
 {
-	LogTrace("PacketStream", this) << "Attaching Delegate: " << delegate.object() << endl;
+	traceL("PacketStream", this) << "Attaching Delegate: " << delegate.object() << endl;
 	PacketEmitter::attach(delegate);
 }
 
 
 bool PacketStream::detach(const PacketDelegateBase& delegate)
 {
-	LogTrace("PacketStream", this) << "Detaching Delegate: " << delegate.object() << endl;
+	traceL("PacketStream", this) << "Detaching Delegate: " << delegate.object() << endl;
 	return PacketEmitter::detach(delegate);
 }
 
 
 void PacketStream::cleanup()
 {
-	LogTrace("PacketStream", this) << "Detaching All" << endl;		
+	traceL("PacketStream", this) << "Detaching All" << endl;		
 	if (stateEquals(PacketStreamState::Running)) {
 		assert(0);
 		throw Exception("Cannot detach apapters from running stream.");
@@ -278,11 +278,11 @@ void PacketStream::cleanup()
 	
 	waitForReady();
 
-	LogTrace("PacketStream", this) << "Detaching All: Sources" << endl;		
+	traceL("PacketStream", this) << "Detaching All: Sources" << endl;		
 	FastMutex::ScopedLock lock(_mutex);
 	PacketAdapterList::iterator sit = _sources.begin();
 	while (sit != _sources.end()) {
-		LogTrace("PacketStream", this) << "Detaching Source: " << (*sit).ptr << endl;
+		traceL("PacketStream", this) << "Detaching Source: " << (*sit).ptr << endl;
 		(*sit).ptr->detach(packetDelegate(this, &PacketStream::onSourcePacket));
 
 		// Delete source pointer asynchronously so the stream may be 
@@ -291,34 +291,34 @@ void PacketStream::cleanup()
 		//	deleteLater<PacketEmitter>((*sit).ptr);
 			//delete (*sit).ptr;
 
-		LogTrace("PacketStream", this) << "Detaching Source: " << (*sit).ptr << ": OK" << endl;
+		traceL("PacketStream", this) << "Detaching Source: " << (*sit).ptr << ": OK" << endl;
 		sit = _sources.erase(sit);
 	}	
 	
-	LogTrace("PacketStream", this) << "Detaching All: Processors" << endl;
+	traceL("PacketStream", this) << "Detaching All: Processors" << endl;
 	PacketAdapterList::iterator pit = _processors.begin();
 	while (pit != _processors.end()) {
-		LogTrace("PacketStream", this) << "Detaching Processor: " << (*pit).ptr << endl;
+		traceL("PacketStream", this) << "Detaching Processor: " << (*pit).ptr << endl;
 		//if ((*pit).freePointer)
 		//	deleteLater<IPacketProcessor>((*pit).ptr);
 			//delete (*pit).ptr;
-		LogTrace("PacketStream", this) << "Detaching Processor: " << (*pit).ptr << ": OK" << endl;
+		traceL("PacketStream", this) << "Detaching Processor: " << (*pit).ptr << ": OK" << endl;
 		pit = _processors.erase(pit);
 	}
 
-	LogTrace("PacketStream", this) << "Detaching All: OK" << endl;
+	traceL("PacketStream", this) << "Detaching All: OK" << endl;
 }
 	
 
 void PacketStream::onSourcePacket(void*, IPacket& packet) 
 {	
-	LogTrace("PacketStream", this) << "On Source Packet: " 
+	traceL("PacketStream", this) << "On Source Packet: " 
 		<< &packet << ": " << packet.className() << endl;
 	
 	try {	
 		do {
 			if (!isRunning() || !enabled()) {
-				LogDebug("PacketStream", this) << "Dropping Source Packet: " 
+				debugL("PacketStream", this) << "Dropping Source Packet: " 
 					<< &packet << ": " << enabled() << ": " << state() << endl;	
 				//_ready.set(); 
 				break;
@@ -341,7 +341,7 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 					// If the first processor in the chain rejects  
 					// the packet then the packet will be dropped.
 					if (!firstProc->accepts(packet)) {
-						LogWarn("PacketStream", this) << "Source Packet Rejected: " 
+						warnL("PacketStream", this) << "Source Packet Rejected: " 
 							<< firstProc << ": " << packet.className() << endl;
 						firstProc = NULL;
 						//_ready.set(); 
@@ -353,7 +353,7 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 			// Send the packet to the first processor, it will pass 
 			// the packet on down the line...
 			if (firstProc) {
-				LogTrace("PacketStream", this) << "Start Process Chain: " 
+				traceL("PacketStream", this) << "Start Process Chain: " 
 					<< &packet << ": " << firstProc << ": " << packet.className() << endl;
 
 				firstProc->process(packet);
@@ -361,7 +361,7 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 
 			// If there are no processors then we proxy the packet.
 			else {
-				LogTrace("PacketStream", this) << "Proxying: " 
+				traceL("PacketStream", this) << "Proxying: " 
 					<< &packet << ": " << packet.className() << endl;
 				onDispatchPacket(this, packet);
 			}
@@ -376,7 +376,7 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 	// Catch any exceptions thrown within the processor scope 
 	// and set the stream to error state.
 	catch (Exception& exc) {
-		LogError("PacketStream", this) << "Processor Error: " << exc.displayText() << endl;
+		errorL("PacketStream", this) << "Processor Error: " << exc.displayText() << endl;
 		// Set the ready event, allowing the stream to be
 		// closed inside Error state callback.
 		//_ready.set();
@@ -384,7 +384,7 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 		setState(this, PacketStreamState::Error, exc.displayText());
 	}	
 	
-	LogTrace("PacketStream", this) << "End Process Chain: " 
+	traceL("PacketStream", this) << "End Process Chain: " 
 		<< &packet << ": " << packet.className() << endl;
 }
 
@@ -394,20 +394,20 @@ void PacketStream::onDispatchPacket(void*, IPacket& packet)
 	// No more adapters to process, ensure the stream 
 	// is still running before we dispatch the goods.
 	if (!isRunning() || !enabled()) {
-		LogDebug() << "[PacketStream:" << this << "] Dropping Late Packet: " 
+		debugL() << "[PacketStream:" << this << "] Dropping Late Packet: " 
 			<< &packet << ": " << enabled() << ": " << state() << endl;	
 		return;
 	}
 
-	LogTrace("PacketStream", this) << "Dispatching: " << &packet << ": " << packet.className() << endl;
+	traceL("PacketStream", this) << "Dispatching: " << &packet << ": " << packet.className() << endl;
 	emit(this, packet);
-	LogTrace("PacketStream", this) << "Dispatching: OK: " << &packet << ": " << packet.className() << endl;	
+	traceL("PacketStream", this) << "Dispatching: OK: " << &packet << ": " << packet.className() << endl;	
 }
 
 
 void PacketStream::onStateChange(PacketStreamState& state, const PacketStreamState& oldState)
 {
-	LogTrace("PacketStream", this) << "State changed from " << oldState << " to " << state << endl;
+	traceL("PacketStream", this) << "State changed from " << oldState << " to " << state << endl;
 	if (state.id() != PacketStreamState::Closed &&
 		state.id() != PacketStreamState::None) {
 		PacketAdapterList adapters = this->adapters();
@@ -420,9 +420,9 @@ void PacketStream::onStateChange(PacketStreamState& state, const PacketStreamSta
 
 bool PacketStream::waitForReady()
 {	
-	LogTrace("PacketStream", this) << "Waiting for ready" << endl;
+	traceL("PacketStream", this) << "Waiting for ready" << endl;
 	bool res = true; //_ready.tryWait(2000);
-	LogTrace("PacketStream", this) << "Waiting for ready: " << res << endl;
+	traceL("PacketStream", this) << "Waiting for ready: " << res << endl;
 	assert(res && "packet stream locked");
 	return res;
 }

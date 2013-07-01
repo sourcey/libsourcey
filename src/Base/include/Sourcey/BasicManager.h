@@ -50,19 +50,18 @@ public:
 
 	virtual bool add(const TKey& key, TValue* item, bool whiny = true) 
 	{	
-		{
-			Poco::FastMutex::ScopedLock lock(_mutex);
-			if (exists(key)) {
-				if (whiny) {
-					std::ostringstream ss;
-					ss << "An item already exists: " << key << std::endl;
-					throw Poco::NotFoundException(ss.str());
-					//throw Poco::ExistsException("Item already exists");
-				}
-				return false;
+		if (exists(key)) {
+			if (whiny) {
+				std::ostringstream ss;
+				ss << "An item already exists: " << key << std::endl;
+				throw Poco::NotFoundException(ss.str());
+				//throw Poco::ExistsException("Item already exists");
 			}
-		
-			_items[key] = item;
+			return false;
+		}
+		{		
+			Poco::FastMutex::ScopedLock lock(_mutex);
+			_map[key] = item;
 		}
 		onAdd(key, item);
 		return true;		
@@ -73,7 +72,7 @@ public:
 		// NOTE: This method will not delete existing values.
 		{
 			Poco::FastMutex::ScopedLock lock(_mutex);
-			_items[key] = item;
+			_map[key] = item;
 		}
 		onAdd(key, item);
 	}
@@ -81,8 +80,8 @@ public:
 	virtual TValue* get(const TKey& key, bool whiny = true) const 
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex); 
-		typename Map::const_iterator it = _items.find(key);	
-		if (it != _items.end()) {
+		typename Map::const_iterator it = _map.find(key);	
+		if (it != _map.end()) {
 			return it->second;	 
 		} else if (whiny) {
 			std::ostringstream ss;
@@ -96,7 +95,6 @@ public:
 
 	virtual bool free(const TKey& key) 
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
 		TValue* item = remove(key);
 		if (item) {
 			delete item;
@@ -110,10 +108,10 @@ public:
 		TValue* item = NULL;
 		{
 			Poco::FastMutex::ScopedLock lock(_mutex);
-			typename Map::iterator it = _items.find(key);	
-			if (it != _items.end()) {
+			typename Map::iterator it = _map.find(key);	
+			if (it != _map.end()) {
 				item = it->second;
-				_items.erase(it);
+				_map.erase(it);
 			}
 		}
 		if (item)
@@ -127,11 +125,11 @@ public:
 		TValue* ptr = NULL;
 		{
 			Poco::FastMutex::ScopedLock lock(_mutex); 	
-			for (typename Map::iterator it = _items.begin(); it != _items.end(); ++it) {
+			for (typename Map::iterator it = _map.begin(); it != _map.end(); ++it) {
 				if (item == it->second) {
 					key = it->first;
 					ptr = it->second;
-					_items.erase(it);
+					_map.erase(it);
 					break;
 				}
 			}
@@ -144,14 +142,14 @@ public:
 	virtual bool exists(const TKey& key) const 
 	{ 
 		Poco::FastMutex::ScopedLock lock(_mutex); 	
-		typename Map::const_iterator it = _items.find(key);	
-		return it != _items.end();	 
+		typename Map::const_iterator it = _map.find(key);	
+		return it != _map.end();	 
 	}
 
 	virtual bool exists(const TValue* item) const 
 	{ 
 		Poco::FastMutex::ScopedLock lock(_mutex); 	
-		for (typename Map::const_iterator it = _items.begin(); it != _items.end(); ++it) {
+		for (typename Map::const_iterator it = _map.begin(); it != _map.end(); ++it) {
 			if (item == it->second)
 				return true;
 		}
@@ -161,31 +159,31 @@ public:
 	virtual bool empty() const
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex); 	
-		return _items.empty();
+		return _map.empty();
 	}
 
 	virtual int size() const
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex); 	
-		return _items.size();
+		return _map.size();
 	}
 
 	virtual void clear()
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex); 	
-		Util::ClearMap(_items);
+		util::ClearMap(_map);
 	}
 
-	virtual Map items() const 
+	virtual Map map() const 
 	{ 
 		Poco::FastMutex::ScopedLock lock(_mutex); 	
-		return _items; 
+		return _map; 
 	}
 
-	virtual Map& items() 
+	virtual Map& map() 
 	{ 
 		Poco::FastMutex::ScopedLock lock(_mutex); 	
-		return _items; 
+		return _map; 
 	}
 
 	virtual void onAdd(const TKey&, TValue*) 
@@ -199,7 +197,7 @@ public:
 	}
 
 protected:
-	Map _items;	
+	Map _map;	
 	mutable Poco::FastMutex _mutex;
 };
 

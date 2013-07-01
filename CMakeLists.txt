@@ -202,7 +202,7 @@ include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 # Include standard Libraries
 # ----------------------------------------------------------------------------
 if(MSVC)
-  set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} ws2_32.lib dsound.lib winmm.lib strmiids.lib)  
+  set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} ws2_32.lib dsound.lib winmm.lib strmiids.lib  advapi32.lib iphlpapi.lib psapi.lib ws2_32.lib shell32.lib)  
 elseif(MSYS)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lws2_32 -liphlpapi")
 elseif(LINUX)

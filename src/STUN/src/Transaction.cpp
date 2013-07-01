@@ -18,75 +18,77 @@
 
 
 #include "Sourcey/STUN/Transaction.h"
+#include "Sourcey/Net/Socket.h"
 #include "Sourcey/Logger.h"
 #include <iostream>
 
 
 using namespace std;
-using namespace Poco;
 
-using Scy::Net::Transaction;
-using Scy::Net::IPacketSocket;
-using Scy::Net::Address;
-
-
-namespace Scy {
-namespace STUN {
+using scy::net::Transaction;
+using scy::net::SocketBase;
+using scy::net::Address;
+using scy::net::Socket;
 
 
-Transaction::Transaction(Runner& runner, 
-						 IPacketSocket* socket, 
-						 const Address& localAddress, 
+namespace scy {
+namespace stun {
+
+
+Transaction::Transaction(Socket& socket, 
+						 //const Address& localAddress, 
 						 const Address& peerAddress,
 						 long timeout, 
-						 int retries) : 
-	Net::Transaction<Message>(runner, socket, localAddress, peerAddress, timeout, retries)
+						 int retries, 
+						 uv_loop_t* loop) : 
+	net::Transaction<Message>(socket, peerAddress, timeout, retries, loop) //localAddress, 
 {
-	LogDebug() << "[STUNTransaction:" << this << "] Initializing" << std::endl;
+	debugL("STUNTransaction", this) << "Initializing" << std::endl;
+
+	// Register STUN message creation strategy
+	net::Transaction<Message>::factory.registerPacketType<stun::Message>(0);
 }
 
 
 Transaction::~Transaction() 
 {
-	LogDebug() << "[STUNTransaction:" << this << "] Destroying" << std::endl;	
+	debugL("STUNTransaction", this) << "Destroying" << std::endl;	
 }
 
 
-bool Transaction::match(const Message& message) 
+bool Transaction::checkResponse(const Message& message) 
 {
-	//LogDebug() << "[STUNTransaction:" << this << "] Match" << std::endl;	
-
-	return Net::Transaction<Message>::match(message) 
+	return net::Transaction<Message>::checkResponse(message) 
 		&& _request.transactionID() == message.transactionID();
 }
 
 
-void Transaction::onResponse()
+void Transaction::onSuccess()
 {
-	LogDebug() << "[STUNTransaction:" << this << "] On Response" << std::endl;	
+	debugL("STUNTransaction", this) << "On Response" << std::endl;	
 	_response.setType(_request.type());
 	_response.setState(Message::SuccessResponse);
-	if (_response.get<STUN::ErrorCode>())
+	if (_response.get<stun::ErrorCode>())
 		_response.setState(Message::ErrorResponse);
 	else if (_response.type() == Message::SendIndication ||
 		_response.type() == Message::DataIndication)
 		_response.setState(Message::Indication);
 
-	Net::Transaction<Message>::onResponse();
+	net::Transaction<Message>::onSuccess();
 }
 
 
 
-} } // namespace Scy::STUN
+} } // namespace scy::STUN
 
 
 
 
 
 /*
-bool Transaction::match(const Message& message, const Net::Address& localAddress, const Net::Address& peerAddress)
+bool Transaction::match(const Message& message, const net::Address& localAddress, const net::Address& peerAddress)
 {
-	LogDebug() << "[STUNTransaction:" << this << "] Match" << std::endl;	
+	debugL("STUNTransaction", this) << "Match" << std::endl;	
 
 	return _request.transactionID() == message.transactionID()
 		&& _localAddress == localAddress
@@ -97,9 +99,9 @@ bool Transaction::match(const Message& message, const Net::Address& localAddress
 
 /*
 	response = response;
-void Transaction::onPacketReceived(void* sender, Message& message) //, Net::IPacketSocket& socket, const Net::Address& localAddress, const Net::Address& peerAddress
+void Transaction::onPacketReceived(void* sender, Message& message) //, net::SocketBase& socket, const net::Address& localAddress, const net::Address& peerAddress
 {
-	Net::PacketInfo* source = reinterpret_cast<Net::PacketInfo*>(message.info);
+	net::PacketInfo* source = reinterpret_cast<net::PacketInfo*>(message.info);
 	assert(source);
 	if (!source)
 		return;
@@ -120,16 +122,16 @@ void Transaction::onPacketReceived(void* sender, Message& message) //, Net::IPac
 /*
 void Transaction::cancel() 
 {
-	LogDebug() << "[STUNTransaction:" << this << "] Cancelling" << std::endl;
+	debugL("STUNTransaction", this) << "Cancelling" << std::endl;
 	socket.detach(PolymorphicDelegate<Transaction, Message>(this, &Transaction::onPacketReceived, 0));
 	Timer::getDefault().stop(TimerCallback<Transaction>(this, &Transaction::onTransactionTimeout));
 }
 
-bool Transaction::receive(const Message& message, const Net::Address& localAddress, const Net::Address& peerAddress)
+bool Transaction::receive(const Message& message, const net::Address& localAddress, const net::Address& peerAddress)
 {	
 	if (match(message, localAddress, peerAddress)) {	
 		update(message);
-		LogDebug() << "[STUNTransaction:" << this << "] Transaction Response Received: " << response.toString() << std::endl;
+		debugL("STUNTransaction", this) << "Transaction Response Received: " << response.toString() << std::endl;
 		Timer::getDefault().stop(TimerCallback<Transaction>(this, &Transaction::onTransactionTimeout));
 		setState(this, TransactionState::Success);
 		return true;

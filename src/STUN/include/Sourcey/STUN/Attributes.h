@@ -37,8 +37,8 @@
 #include "Sourcey/Net/Address.h"
 
 
-namespace Scy {
-namespace STUN {
+namespace scy {
+namespace stun {
 
 
 class Attribute 
@@ -137,7 +137,7 @@ public:
 	AddressAttribute(UInt16 type);
 	AddressAttribute(const AddressAttribute& r);
 
-	virtual STUN::Attribute* clone();
+	virtual stun::Attribute* clone();
 
 	static const UInt16 Size = 8;
 
@@ -145,7 +145,7 @@ public:
 	virtual UInt16 port() const { return _port; }
 	virtual UInt32 ip() const { return _ip; }
 	virtual std::string ipString() const;
-	virtual Net::Address address() const;
+	virtual net::Address address() const;
 
 	virtual void setFamily(UInt8 family) { _family = family; }
 	virtual void setIP(UInt32 ip) { _ip = ip; }
@@ -456,7 +456,7 @@ DECLARE_FIXLEN_STUN_ATTRIBUTE(ICEUseCandidate, 0x0025, FlagAttribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(DontFragment, 0x001A, FlagAttribute)
 
 
-} } // namespace Scy::STUN
+} } // namespace scy::STUN
 
 
 #endif // SOURCEY_STUN_ATTRIBUTES_H
