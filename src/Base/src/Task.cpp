@@ -55,14 +55,14 @@ Task::Task(Runner& runner, bool repeating, bool autoStart) :
 
 Task::~Task()
 {
-	LogTrace() << "[Task:" << this << "] Destroying" << endl;
+	traceL() << "[Task:" << this << "] Destroying" << endl;
 	//assert(destroyed());
 }
 
 
 void Task::start()
 { 
-	LogTrace() << "[Task:" << this << "] Starting" << endl;
+	traceL() << "[Task:" << this << "] Starting" << endl;
 	if (cancelled())
 		runner().start(this);
 }
@@ -70,7 +70,7 @@ void Task::start()
 
 void Task::cancel()			
 {
-	LogTrace() << "[Task:" << this << "] Cancelling" << endl;
+	traceL() << "[Task:" << this << "] Cancelling" << endl;
 	if (!cancelled())
 		runner().cancel(this);
 }
@@ -78,7 +78,7 @@ void Task::cancel()
 
 void Task::destroy()			
 {
-	LogTrace() << "[Task:" << this << "] Destroying" << endl;
+	traceL() << "[Task:" << this << "] Destroying" << endl;
 	if (!destroyed())
 		runner().destroy(this);
 }

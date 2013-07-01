@@ -47,7 +47,7 @@ Router::~Router()
 
 void Router::send(const IPacket& packet)
 {
-	LogDebug() << "[Router] Queuing: " << packet.className() << endl;
+	debugL() << "[Router] Queuing: " << packet.className() << endl;
 
 	Mutex::ScopedLock lock(_mutex);
 	_task->push(packet.clone());

@@ -20,13 +20,15 @@
 #include "Sourcey/Buffer.h"
 #include "Sourcey/Util.h"
 #include "Sourcey/Logger.h"
+#include "Sourcey/Types.h"
 
 
 using namespace std;
+using std::memcpy;
+using std::min;
 
 
 namespace scy {
-
 
 static const int DEFAULT_SIZE = 4096;
 
@@ -37,8 +39,6 @@ Buffer::Buffer()
 	_end  = 0;
 	_max = DEFAULT_SIZE;
 	_bytes = new char[_max];
-
-	// LogTrace() << this << ": Creating Buffer: " << _max << endl;
 }
 
 
@@ -48,8 +48,6 @@ Buffer::Buffer(size_t len)
 	_end  = 0;
 	_max = len;
 	_bytes = new char[_max];
-
-	// LogTrace() << this << ": Creating Buffer: " << _max << endl;
 }
 
 
@@ -60,8 +58,6 @@ Buffer::Buffer(const char* bytes, size_t len)
 	_max = len;
 	_bytes = new char[_max];
 	memcpy(_bytes, bytes, _end);
-
-	// LogTrace() << this << ": Creating Buffer: " << _max << endl;
 }
 
 
@@ -72,8 +68,6 @@ Buffer::Buffer(const char* bytes)
 	_max = _end;
 	_bytes = new char[_max];
 	memcpy(_bytes, bytes, _end);
-
-	// LogTrace() << this << ": Creating Buffer: " << _max << endl;
 }
 
 
@@ -83,61 +77,61 @@ Buffer::~Buffer()
 }
 
 
-bool Buffer::readUInt8(UInt8& val) 
+bool Buffer::readU8(UInt8& val) 
 {
-	return readBytes(reinterpret_cast<char*>(&val), 1);
+	return read(reinterpret_cast<char*>(&val), 1);
 }
 
 
-bool Buffer::readUInt16(UInt16& val) 
+bool Buffer::readU16(UInt16& val) 
 {
 	UInt16 v;
-	if (!readBytes(reinterpret_cast<char*>(&v), 2)) {
+	if (!read(reinterpret_cast<char*>(&v), 2)) {
 		return false;
 	} else {
-		val = NetworkToHost16(v);
+		val = ntohs(v);
 		return true;
 	}
 }
 
 
-bool Buffer::readUInt24(UInt32& val) 
+bool Buffer::readU24(UInt32& val) 
 {
 	UInt32 v = 0;
-	if (!readBytes(reinterpret_cast<char*>(&v) + 1, 3)) {
+	if (!read(reinterpret_cast<char*>(&v) + 1, 3)) {
 		return false;
 	} else {
-		val = NetworkToHost32(v);
+		val = ntohl(v);
 		return true;
 	}
 }
 
 
-bool Buffer::readUInt32(UInt32& val) 
+bool Buffer::readU32(UInt32& val) 
 {
 	UInt32 v;
-	if (!readBytes(reinterpret_cast<char*>(&v), 4)) {
+	if (!read(reinterpret_cast<char*>(&v), 4)) {
 		return false;
 	} else {
-		val = NetworkToHost32(v);
+		val = ntohl(v);
 		return true;
 	}
 }
 
 
-bool Buffer::readUInt64(UInt64& val) 
+bool Buffer::readU64(UInt64& val) 
 {
 	UInt64 v;
-	if (!readBytes(reinterpret_cast<char*>(&v), 8)) {
+	if (!read(reinterpret_cast<char*>(&v), 8)) {
 		return false;
 	} else {
-		val = NetworkToHost64(v);
+		val = ntohll(v);
 		return true;
 	}
 }
 
 
-bool Buffer::readString(string& val, size_t len) 
+bool Buffer::read(string& val, size_t len) 
 {
 	if (len > remaining()) {
 		return false;
@@ -149,10 +143,9 @@ bool Buffer::readString(string& val, size_t len)
 }
 
 
-bool Buffer::readBytes(char* val, size_t len) 
+bool Buffer::read(char* val, size_t len) 
 {
 	if (len > remaining()) {
-		LogError() << this << ": Buffer: Unable to read passed boundary." << endl;
 		return false;
 	} else {
 		memcpy(val, _bytes + _pos, len);
@@ -162,47 +155,47 @@ bool Buffer::readBytes(char* val, size_t len)
 }
 
 
-void Buffer::writeUInt8(UInt8 val) 
+void Buffer::writeU8(UInt8 val) 
 {
-	writeBytes(reinterpret_cast<const char*>(&val), 1);
+	write(reinterpret_cast<const char*>(&val), 1);
 }
 
 
-void Buffer::writeUInt16(UInt16 val) 
+void Buffer::writeU16(UInt16 val) 
 {
-	UInt16 v = HostToNetwork16(val);
-	writeBytes(reinterpret_cast<const char*>(&v), 2);
+	UInt16 v = htons(val);
+	write(reinterpret_cast<const char*>(&v), 2);
 }
 
 
-void Buffer::writeUInt24(UInt32 val) 
+void Buffer::writeU24(UInt32 val) 
 {
-	UInt32 v = HostToNetwork32(val);
-	writeBytes(reinterpret_cast<const char*>(&v) + 1, 3);
+	UInt32 v = htonl(val);
+	write(reinterpret_cast<const char*>(&v) + 1, 3);
 }
 
 
-void Buffer::writeUInt32(UInt32 val) 
+void Buffer::writeU32(UInt32 val) 
 {
-	UInt32 v = HostToNetwork32(val);
-	writeBytes(reinterpret_cast<const char*>(&v), 4);
+	UInt32 v = htonl(val);
+	write(reinterpret_cast<const char*>(&v), 4);
 }
 
 
-void Buffer::writeUInt64(UInt64 val) 
+void Buffer::writeU64(UInt64 val) 
 {
-	UInt64 v = HostToNetwork64(val);
-	writeBytes(reinterpret_cast<const char*>(&v), 8);
+	UInt64 v = htonll(val);
+	write(reinterpret_cast<const char*>(&v), 8);
 }
 
 
-void Buffer::writeString(const string& val) 
+void Buffer::write(const string& val) 
 {
-	writeBytes(val.c_str(), val.size());
+	write(val.c_str(), val.size());
 }
 
 
-void Buffer::writeBytes(const char* val, size_t len) 
+void Buffer::write(const char* val, size_t len) 
 {
 	if (_end + len > _max)
 		reserve(max(_max + len, 3 * _max / 2));
@@ -213,47 +206,47 @@ void Buffer::writeBytes(const char* val, size_t len)
 }
 
 
-void Buffer::updateUInt8(UInt8 val, size_t pos) 
+void Buffer::updateU8(UInt8 val, size_t pos) 
 {
-	updateBytes(reinterpret_cast<const char*>(&val), 1, pos);
+	update(reinterpret_cast<const char*>(&val), 1, pos);
 }
 
 
-void Buffer::updateUInt16(UInt16 val, size_t pos) 
+void Buffer::updateU16(UInt16 val, size_t pos) 
 {
-	UInt16 v = HostToNetwork16(val);
-	updateBytes(reinterpret_cast<const char*>(&v), 2, pos);
+	UInt16 v = htons(val);
+	update(reinterpret_cast<const char*>(&v), 2, pos);
 }
 
 
-void Buffer::updateUInt24(UInt32 val, size_t pos) 
+void Buffer::updateU24(UInt32 val, size_t pos) 
 {
-	UInt32 v = HostToNetwork32(val);
-	updateBytes(reinterpret_cast<const char*>(&v) + 1, 3, pos);
+	UInt32 v = htonl(val);
+	update(reinterpret_cast<const char*>(&v) + 1, 3, pos);
 }
 
 
-void Buffer::updateUInt32(UInt32 val, size_t pos) 
+void Buffer::updateU32(UInt32 val, size_t pos) 
 {
-	UInt32 v = HostToNetwork32(val);
-	updateBytes(reinterpret_cast<const char*>(&v), 4, pos);
+	UInt32 v = htonl(val);
+	update(reinterpret_cast<const char*>(&v), 4, pos);
 }
 
 
-void Buffer::updateUInt64(UInt64 val, size_t pos) 
+void Buffer::updateU64(UInt64 val, size_t pos) 
 {
-	UInt64 v = HostToNetwork64(val);
-	updateBytes(reinterpret_cast<const char*>(&v), 8, pos);
+	UInt64 v = htonll(val);
+	update(reinterpret_cast<const char*>(&v), 8, pos);
 }
 
 
-void Buffer::updateString(const string& val, size_t pos) 
+void Buffer::update(const string& val, size_t pos) 
 {
-	updateBytes(val.c_str(), val.size(), pos);
+	update(val.c_str(), val.size(), pos);
 }
 
 
-bool Buffer::updateBytes(const char* val, size_t len, size_t pos) 
+bool Buffer::update(const char* val, size_t len, size_t pos) 
 {	
 	if ((pos + len) > remaining())
 		return false;
@@ -276,13 +269,13 @@ bool Buffer::eol() const
 }
 
 
-void Buffer::setPosition(size_t pos)
+void Buffer::position(size_t pos)
 { 
 	_pos = pos;
 }
 
 
-void Buffer::setSize(size_t size) 
+void Buffer::size(size_t size) 
 { 
 	if (size > _max)
 		reserve(size);
@@ -290,17 +283,35 @@ void Buffer::setSize(size_t size)
 		_end = size; 
 }
 
+	
+/*
+void Buffer::resize(std::size_t size, bool preserve)
+{
+	char* ptr = new char[size];	
+	if (preserve) {
+		// memcpy current buffer content
+		std::size_t n = size > _size ? _size : size;
+		std::memcpy(ptr, _bytes, n);
+	}
+	delete [] _bytes;
+	_bytes  = ptr;
+	_size = size;
+}
+*/
+
 
 void Buffer::reserve(size_t size) 
 {
-	size_t len = min(_end, size);
-	char* newBytes = new char[size];
-	memcpy(newBytes, _bytes, len);
-	delete[] _bytes;
+	//if (size > _max) {
+		size_t len = min<size_t>(_end, size);
+		char* newBytes = new char[size];
+		memcpy(newBytes, _bytes, len);
+		delete[] _bytes;
 
-	_end	= len;
-	_max	= size;
-	_bytes	= newBytes;
+		_end	= len;
+		_max	= size;
+		_bytes	= newBytes;
+	//}
 }
 
 
@@ -332,7 +343,85 @@ void Buffer::clear()
 }
 
 
-size_t Buffer::skipToChar(char c) 
+const char Buffer::peek() 
+{
+	if (_end > _pos)
+		return (const char)_bytes[_pos];
+	errorL("Buffer", this) << "Peeking next character is NULL" << endl;
+	return 0;
+}
+
+
+const UInt8 Buffer::peekU8()
+{
+	UInt8 v;
+	if (read(reinterpret_cast<char*>(&v), 1)) {
+		_pos -= 1;
+		return v;
+	}
+	
+	warnL("Buffer", this) << "Peeking UInt8: NULL" << endl;
+	return 0;
+}
+
+
+const UInt16 Buffer::peekU16()
+{	
+	UInt16 v;
+	if (read(reinterpret_cast<char*>(&v), 2)) {
+		_pos -= 2;
+		return ntohs(v);
+	}
+	
+	warnL("Buffer", this) << "Peeking UInt16: NULL" << endl;
+	return 0;
+}
+
+
+const UInt32 Buffer::peekU24()
+{	
+	UInt32 v;
+	if (read(reinterpret_cast<char*>(&v), 3)) {
+		_pos -= 3;
+		return ntohl(v);
+	}
+	
+	warnL("Buffer", this) << "Peeking UInt24: NULL" << endl;
+	return 0;
+}
+
+
+const UInt32 Buffer::peekU32()
+{
+	UInt32 v;
+	if (read(reinterpret_cast<char*>(&v), 4)) {
+		_pos -= 4;
+		return ntohl(v);
+	}
+	
+	warnL("Buffer", this) << "Peeking UInt32: NULL" << endl;
+	return 0;
+}
+
+
+const UInt64 Buffer::peekU64()
+{
+	UInt32 v;
+	if (read(reinterpret_cast<char*>(&v), 8)) {
+		_pos -= 8;
+		return ntohll(v);
+	}
+	
+	warnL("Buffer", this) << "Peeking UInt64: NULL" << endl;
+	return 0;
+}
+
+
+//
+// String Parser - make a separate class?
+//
+
+int Buffer::skipToChar(char c) 
 {
 	size_t len = 0;
 	while (_end > _pos + len &&
@@ -346,7 +435,7 @@ size_t Buffer::skipToChar(char c)
 }
 
 
-size_t Buffer::skipWhitespace() 
+int Buffer::skipWhitespace() 
 {
 	size_t len = 0;
 	while (_end > _pos + len &&
@@ -360,7 +449,7 @@ size_t Buffer::skipWhitespace()
 }
 
 	
-size_t Buffer::skipToNextLine() 
+int Buffer::skipToNextLine() 
 {
 	size_t len = 0;
 	while (_end > _pos + len &&
@@ -376,7 +465,7 @@ size_t Buffer::skipToNextLine()
 }
 
 
-size_t Buffer::skipNextWord() 
+int Buffer::skipNextWord() 
 {	
 	size_t len = skipWhitespace();
 	while (_end > _pos + len &&
@@ -393,7 +482,7 @@ size_t Buffer::skipNextWord()
 }
 
 
-size_t Buffer::readToNext(string& val, char c) 
+int Buffer::readToNext(string& val, char c) 
 {
 	size_t len = 0;
 	while (_end > _pos + len &&
@@ -408,7 +497,7 @@ size_t Buffer::readToNext(string& val, char c)
 }
 
 
-size_t Buffer::readNextWord(string& val) 
+int Buffer::readNextWord(string& val) 
 {	
 	size_t len = skipWhitespace();
 	while (_end > _pos + len && 
@@ -426,7 +515,7 @@ size_t Buffer::readNextWord(string& val)
 }
 
 
-size_t Buffer::readNextNumber(unsigned int& val) 
+int Buffer::readNextNumber(unsigned int& val) 
 {	
 	size_t len = skipWhitespace();
 	while (_end > _pos + len && 
@@ -435,7 +524,7 @@ size_t Buffer::readNextNumber(unsigned int& val)
 		_bytes[_pos + len] != '\n' && 
 		_bytes[_pos + len] != '\r')
 		len++;
-	val = Util::fromString<UInt32>(string(_bytes + _pos, len));
+	val = util::fromString<UInt32>(string(_bytes + _pos, len));
 	if (_end > _pos + len)
 		_pos += len;
 	else
@@ -444,7 +533,7 @@ size_t Buffer::readNextNumber(unsigned int& val)
 }
 
 
-size_t Buffer::readLine(string& val)
+int Buffer::readLine(string& val)
 {	
 	size_t len = 0;
 	while (_end > _pos + len &&
@@ -459,107 +548,4 @@ size_t Buffer::readLine(string& val)
 	return len;
 }
 
-
-const char Buffer::peekChar() 
-{
-	if (_end > _pos)
-		return (const char)_bytes[_pos];
-	LogError() << "Peeking next character is NULL" << endl;
-	return 0;
-}
-
-
-const UInt8 Buffer::peekUInt8()
-{
-	UInt8 v;
-	if (readBytes(reinterpret_cast<char*>(&v), 1)) {
-		_pos -= 1;
-		return v;
-	}
-	
-	LogWarn() << "Peeking UInt8: NULL" << endl;
-	return 0;
-}
-
-
-const UInt16 Buffer::peekUInt16()
-{	
-	UInt16 v;
-	if (readBytes(reinterpret_cast<char*>(&v), 2)) {
-		_pos -= 2;
-		return NetworkToHost16(v);
-	}
-	
-	LogWarn() << "Peeking UInt16: NULL" << endl;
-	return 0;
-}
-
-
-const UInt32 Buffer::peekUInt24()
-{	
-	UInt32 v;
-	if (readBytes(reinterpret_cast<char*>(&v), 3)) {
-		_pos -= 3;
-		return NetworkToHost32(v);
-	}
-	
-	LogWarn() << "Peeking UInt24: NULL" << endl;
-	return 0;
-}
-
-
-const UInt32 Buffer::peekUInt32()
-{
-	UInt32 v;
-	if (readBytes(reinterpret_cast<char*>(&v), 4)) {
-		_pos -= 4;
-		return NetworkToHost32(v);
-	}
-	
-	LogWarn() << "Peeking UInt32: NULL" << endl;
-	return 0;
-}
-
-
-const UInt64 Buffer::peekUInt64()
-{
-	UInt32 v;
-	if (readBytes(reinterpret_cast<char*>(&v), 8)) {
-		_pos -= 8;
-		return NetworkToHost64(v);
-	}
-	
-	LogWarn() << "Peeking UInt64: NULL" << endl;
-	return 0;
-}
-
-
 } // namespace scy
-
-
-/*
- * libjingle
- * Copyright 2004--2006, Google Inc.
- *
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following conditions are met:
- *
- *  1. Redistributions of source code must retain the above copyright notice, 
- *     this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above copyright notice,
- *     this list of conditions and the following disclaimer in the documentation
- *     and/or other materials provided with the distribution.
- *  3. The name of the author may not be used to endorse or promote products 
- *     derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVS; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */

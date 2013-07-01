@@ -64,7 +64,7 @@ string generateRandomBinaryKey(int size, bool doBase64)
 	} 
 	catch (...) 
 	{
-		LogError() << "CryptoProvider: Unknown Error" << endl;
+		errorL() << "CryptoProvider: Unknown Error" << endl;
 	}
 	return res;
 }
@@ -80,7 +80,7 @@ string generateRandomKey(int size)
 	}
 	catch (...)
 	{
-		LogError() << "CryptoProvider: Unknown Error" << endl;
+		errorL() << "CryptoProvider: Unknown Error" << endl;
 	}
 	return res;
 }
@@ -100,11 +100,11 @@ UInt64 generateRandomNumber(int size)
 			strm << rnd.next();
 		}
 		str = strm.str().substr(0, size);
-		res = Util::fromString<UInt64>(str.data());
+		res = util::fromString<UInt64>(str.data());
 	}
 	catch (...)
 	{
-		LogError() << "CryptoProvider: Unknown Error" << endl;
+		errorL() << "CryptoProvider: Unknown Error" << endl;
 	}
 	return res;
 }
@@ -251,7 +251,7 @@ string decrypt(const string& algorithm, const string& data, const string& key, c
 
 std::string computeHMAC(const std::string& input, const std::string& key) {	
 	/*
-	LogDebug() << "CryptoProvider: Computing HMAC:\n"
+	debugL() << "CryptoProvider: Computing HMAC:\n"
 		<< "\tInput: " << input << "\n"
 		<< "\tInput Length: " << input.length() << "\n"
 		<< "\tKey: " << key << "\n"

@@ -22,53 +22,67 @@
 
 
 #include "Sourcey/UV/UVPP.h"
+#include "Sourcey/UV/Base.h"
 #include "Sourcey/Types.h"
 #include "Sourcey/Signal.h"
 
 
 namespace scy {
-namespace UV {
+namespace uv {
 
 
-class Timer: public UV::Base
+class Timer: public uv::Base<>
 	/// Wraps libev's ev_timer watcher. Used to get woken up at a specified time
 	/// in the future.
 {
 public:
+	Timer(Int64 timeout, Int64 interval = 0, uv_loop_t* loop = uv_default_loop());
 	Timer(uv_loop_t* loop = uv_default_loop());
 	virtual ~Timer();
-
-	virtual bool start(Int64 timeout, Int64 interval = 0);
-		// Start the timer, an interval value of zero will only trigger once after
-		// timeout.
+	
+	virtual bool start(Int64 interval);
+	virtual bool start(Int64 timeout, Int64 interval);
+		/// Start the timer, an interval value of zero will only trigger
+		/// once after timeout.
 
 	virtual bool stop();
-
+		/// Stops the timer.
+	
+	virtual bool restart();
+		/// Restarts the timer, even if it hasn't been started yet.
+		/// An interval or interval must be set or an exception will be thrown.
+	
 	virtual bool again();
-		// Stop the timer, and if it is repeating restart it using the repeat value
-		// as the timeout. If the timer has never been started before it returns -1
-		// and sets the error to UV_EINVAL.
+		// Stop the timer, and if it is repeating restart it using the
+		// repeat value as the timeout. If the timer has never been started
+		// before it returns -1 and sets the error to UV_EINVAL.
 
 	virtual void setInterval(Int64 interval);
-		// Set the repeat value. Note that if the repeat value is set from a timer
-		// callback it does not immediately take effect. If the timer was non-repeating
-		// before, it will have been stopped. If it was repeating, then the old repeat
-		// value will have been used to schedule the next timeout.
+		/// Set the repeat value. Note that if the repeat value is set from
+		/// a timer callback it does not immediately take effect. If the timer
+		/// was non-repeating before, it will have been stopped. If it was repeating,
+		/// then the old repeat value will have been used to schedule the next timeout.
 
-	virtual Int64 getInterval();
+	virtual bool active() const;
+	
+	virtual Int64 timeout() const;
+	virtual Int64 interval() const;
 	
 	Int64 count();
 
-	void timerCallback(int status);
+	void onTimeout();
 	
-	Signal<Int64> OnTimeout;	
+	NullSignal Timeout;	
 
 protected:	
-	void updateState();
-		
-	uv_timer_t	_handle;
-	Int64		_count;
-	bool		_active;
+	virtual void init();
+	//virtual void close();
+
+	//void updateState();
+	Int64 _count;
+	Int64 _timeout;
+	Int64 _interval;
+	//bool _active;
 };
 
 
@@ -76,10 +90,12 @@ protected:
 // UV Callbacks
 //
 
-UVStatusCallback(Timer, timerCallback, uv_timer_t);
+UVEmptyStatusCallback(Timer, onTimeout, uv_timer_t);
 
 
-} } // namespace scy::UV
+} } // namespace scy::uv
 
 
 #endif // SOURCEY_UV_Timer_H
+
+

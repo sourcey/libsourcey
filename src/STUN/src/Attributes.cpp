@@ -24,8 +24,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace STUN {
+namespace scy {
+namespace stun {
 
 
 Attribute::Attribute(UInt16 type, UInt16 size) : 
@@ -113,137 +113,137 @@ Attribute* Attribute::create(UInt16 type, UInt16 size)
 	case Attribute::MappedAddress:
 		if (size != AddressAttribute::Size)
 			return NULL;
-		return new STUN::MappedAddress();
+		return new stun::MappedAddress();
 
 	case Attribute::XorMappedAddress:
 		if (size != AddressAttribute::Size)
 			return NULL;
-		return new STUN::XorMappedAddress();
+		return new stun::XorMappedAddress();
 
 	case Attribute::XorRelayedAddress:
 		if (size != AddressAttribute::Size)
 			return NULL;
-		return new STUN::XorRelayedAddress();
+		return new stun::XorRelayedAddress();
 
 	case Attribute::XorPeerAddress:
 		if (size != AddressAttribute::Size)
 			return NULL;
-		return new STUN::XorPeerAddress();
+		return new stun::XorPeerAddress();
 
 	case Attribute::AlternateServer:
 		if (size != AddressAttribute::Size)
 			return NULL;
-		return new STUN::AlternateServer();
+		return new stun::AlternateServer();
 
 	case Attribute::ErrorCode:
 		if (size < ErrorCode::MinSize)
 			return NULL;
-		return new STUN::ErrorCode(size);
+		return new stun::ErrorCode(size);
 
 	case Attribute::UnknownAttributes:
-		return new STUN::UnknownAttributes(size);
+		return new stun::UnknownAttributes(size);
 
 	case Attribute::Fingerprint:
 		if (size != UInt32Attribute::Size)
 			return NULL;
-		return new STUN::Fingerprint();
+		return new stun::Fingerprint();
 
 	case Attribute::RequestedTransport:
 		if (size != UInt32Attribute::Size)
 			return NULL;
-		return new STUN::RequestedTransport();	
+		return new stun::RequestedTransport();	
 
 	case Attribute::Lifetime:
 		if (size != UInt32Attribute::Size)
 			return NULL;
-		return new STUN::Lifetime();	
+		return new stun::Lifetime();	
 
 	case Attribute::Bandwidth:
 		if (size != UInt32Attribute::Size)
 			return NULL;
-		return new STUN::Bandwidth();	
+		return new stun::Bandwidth();	
 
 	case Attribute::ChannelNumber:
 		if (size != UInt32Attribute::Size)
 			return NULL;
-		return new STUN::ICEUseCandidate();
+		return new stun::ICEUseCandidate();
 		
 	case Attribute::ConnectionID:
 		if (size != UInt32Attribute::Size)
 			return NULL;
-		return new STUN::ConnectionID();
+		return new stun::ConnectionID();
 
 	case Attribute::MessageIntegrity:
-		return (size == 20) ? new STUN::MessageIntegrity() : NULL;
+		return (size == 20) ? new stun::MessageIntegrity() : NULL;
 
 	case Attribute::Nonce:
-		return (size <= 128) ? new STUN::Nonce(size) : NULL;
+		return (size <= 128) ? new stun::Nonce(size) : NULL;
 
 	case Attribute::Realm:
-		return (size <= 128) ? new STUN::Realm(size) : NULL;
+		return (size <= 128) ? new stun::Realm(size) : NULL;
 
 	case Attribute::Software:
-		return (size <= 128) ? new STUN::Software(size) : NULL;
+		return (size <= 128) ? new stun::Software(size) : NULL;
 
 	case Attribute::ReservationToken:
-		return (size == 8) ? new STUN::ReservationToken() : NULL;		
+		return (size == 8) ? new stun::ReservationToken() : NULL;		
 
 	case Attribute::MagicCookie:
-		return (size == 4) ? new STUN::MagicCookie() : NULL;		
+		return (size == 4) ? new stun::MagicCookie() : NULL;		
 
 	case Attribute::Data:
-		return new STUN::Data(size);
+		return new stun::Data(size);
 
 	case Attribute::Username:
-		return (size <= 128) ? new STUN::Username(size) : NULL;
+		return (size <= 128) ? new stun::Username(size) : NULL;
 
 	case Attribute::Password:
-		return (size <= 128) ? new STUN::Password(size) : NULL;
+		return (size <= 128) ? new stun::Password(size) : NULL;
 
 	case Attribute::ICEPriority:
 		if (size != UInt32Attribute::Size)
 			return NULL;
-		return new STUN::ICEPriority();
+		return new stun::ICEPriority();
 
 	case Attribute::ICEControlled:
 		if (size != UInt64Attribute::Size)
 			return NULL;
-		return new STUN::ICEControlled();
+		return new stun::ICEControlled();
 
 	case Attribute::ICEControlling:
 		if (size != UInt64Attribute::Size)
 			return NULL;
-		return new STUN::ICEControlling();
+		return new stun::ICEControlling();
 
 	case Attribute::ICEUseCandidate:
-		return (size == 0) ? new STUN::ICEUseCandidate() : NULL;
+		return (size == 0) ? new stun::ICEUseCandidate() : NULL;
 		
 	case Attribute::DontFragment:
 		if (size != FlagAttribute::Size)
 			return NULL;
-		return new STUN::DontFragment();
+		return new stun::DontFragment();
 		
 	case Attribute::EventPort:
 		if (size != UInt8Attribute::Size)
 			return NULL;
-		return new STUN::EventPort();
+		return new stun::EventPort();
 
 	//case Attribute::UnknownAttributes:
-	//	return (size % 2 == 0) ? new STUN::UnknownAttributes(size) : NULL;
+	//	return (size % 2 == 0) ? new stun::UnknownAttributes(size) : NULL;
 	//	break;
 
 	//case Attribute::TransportPrefs:
 	//	if ((size != TransportPrefs::Size1) &&
 	//		(size != TransportPrefs::Size2))
 	//		return NULL;
-	//	return new STUN::TransportPrefs(size);
+	//	return new stun::TransportPrefs(size);
 
 	//case Attribute::MagicCookie:
-	//	return (size == 4) ? new STUN::MagicCookie() : NULL;
+	//	return (size == 4) ? new stun::MagicCookie() : NULL;
 	//	break;
 
 	default:
-		LogError() << "[STUN] Unable to create attribute for type: " << type << endl;
+		errorL() << "[STUN] Unable to create attribute for type: " << type << endl;
 		break;
 	}
 
@@ -291,9 +291,9 @@ string AddressAttribute::ipString() const
 }
 
 
-Net::Address AddressAttribute::address() const 
+net::Address AddressAttribute::address() const 
 { 
-	return Net::Address(ipString(), _port); 
+	return net::Address(ipString(), _port); 
 }
 
 
@@ -308,13 +308,13 @@ void AddressAttribute::setIP(const string& ip)
 bool AddressAttribute::read(Buffer& buf) 
 {
 	UInt8 dummy;
-	if (!buf.readUInt8(dummy))
+	if (!buf.readU8(dummy))
 		return false;
-	if (!buf.readUInt8(_family))
+	if (!buf.readU8(_family))
 		return false;
-	if (!buf.readUInt16(_port))
+	if (!buf.readU16(_port))
 		return false;
-	if (!buf.readUInt32(_ip))
+	if (!buf.readU32(_ip))
 		return false;
 	return true;
 }
@@ -322,10 +322,10 @@ bool AddressAttribute::read(Buffer& buf)
 
 void AddressAttribute::write(Buffer& buf) const 
 {
-	buf.writeUInt8(0);
-	buf.writeUInt8(_family);
-	buf.writeUInt16(_port);
-	buf.writeUInt32(_ip);
+	buf.writeU8(0);
+	buf.writeU8(_family);
+	buf.writeU16(_port);
+	buf.writeU32(_ip);
 }
 
 
@@ -367,7 +367,7 @@ void UInt8Attribute::setBit(int index, bool value)
 
 bool UInt8Attribute::read(Buffer& buf) 
 {
-	if (!buf.readUInt8(_bits)) {		
+	if (!buf.readU8(_bits)) {		
 		return false;
 	}
 	return true;
@@ -376,7 +376,7 @@ bool UInt8Attribute::read(Buffer& buf)
 
 void UInt8Attribute::write(Buffer& buf) const 
 {
-	buf.writeUInt8(_bits);
+	buf.writeU8(_bits);
 }
 
 
@@ -418,7 +418,7 @@ void UInt32Attribute::setBit(int index, bool value)
 
 bool UInt32Attribute::read(Buffer& buf) 
 {
-	if (!buf.readUInt32(_bits)) {		
+	if (!buf.readU32(_bits)) {		
 		return false;
 	}
 	return true;
@@ -426,7 +426,7 @@ bool UInt32Attribute::read(Buffer& buf)
 
 void UInt32Attribute::write(Buffer& buf) const 
 {
-	buf.writeUInt32(_bits);
+	buf.writeU32(_bits);
 }
 
 
@@ -468,7 +468,7 @@ void UInt64Attribute::setBit(int index, bool value)
 
 bool UInt64Attribute::read(Buffer& buf) 
 {
-	if (!buf.readUInt64(_bits))	
+	if (!buf.readU64(_bits))	
 		return false;
 	return true;
 }
@@ -476,7 +476,7 @@ bool UInt64Attribute::read(Buffer& buf)
 
 void UInt64Attribute::write(Buffer& buf) const 
 {
-	buf.writeUInt64(_bits);
+	buf.writeU64(_bits);
 }
 
 
@@ -576,7 +576,7 @@ bool StringAttribute::read(Buffer& buf)
 	//if (_bytes)
 		delete [] _bytes;
 	_bytes = new char[size()];	
-	if (!buf.readBytes(_bytes, size()))
+	if (!buf.read(_bytes, size()))
 		return false;
 	return true;
 }
@@ -585,7 +585,7 @@ bool StringAttribute::read(Buffer& buf)
 void StringAttribute::write(Buffer& buf) const 
 {
 	if (_bytes) {
-		buf.writeBytes(_bytes, size());
+		buf.write(_bytes, size());
 	}
 }
 
@@ -616,13 +616,13 @@ Fingerprint::Fingerprint() :
 
 	/*
 void Fingerprint::write(Buffer& buf) const {
-	buf.writeUInt32(_crc32);
+	buf.writeU32(_crc32);
 }
 
 
 bool Fingerprint::read(Buffer& buf) {
 	try {
-		buf.readUInt32(_crc32);
+		buf.readU32(_crc32);
 	}
 	catch(...) {
 		return false;
@@ -663,19 +663,19 @@ Attribute* MessageIntegrity::clone()
 	
 bool MessageIntegrity::verifyHmac(const string& key) const 
 {
-	//LogDebug() << "Message: Verify HMAC: " << key << endl;
+	//debugL() << "Message: Verify HMAC: " << key << endl;
 
 	assert(key.size());
 	assert(!_hmac.empty());
 	assert(!_input.empty());
 
-	//LogDebug() << "Message: Packet integrity input (" << _input << ")" << endl;
-	//LogDebug() << "Message: Packet integrity key (" << key << ")" << endl;
+	//debugL() << "Message: Packet integrity input (" << _input << ")" << endl;
+	//debugL() << "Message: Packet integrity key (" << key << ")" << endl;
 
 	string hmac = CryptoProvider::computeHMAC(_input, key);
 	assert(hmac.size() == Size);
 
-	//LogDebug() << "Message: Verifying message integrity (" << hmac << ":" << _hmac << ")" << endl;
+	//debugL() << "Message: Verifying message integrity (" << hmac << ":" << _hmac << ")" << endl;
 
 	return _hmac == hmac;
 }
@@ -683,31 +683,34 @@ bool MessageIntegrity::verifyHmac(const string& key) const
 
 bool MessageIntegrity::read(Buffer& buf) 
 {
-	//LogDebug() << "Message: Read HMAC" << endl;
+	//debugL() << "Message: Read HMAC" << endl;
 
 	// Read the HMAC value.
-	if (!buf.readString(_hmac, Size))
+	if (!buf.read(_hmac, MessageIntegrity::Size))
 		return false;
 
-	//LogDebug() << "Message: Parsed message integrity (" << _hmac << ")" << endl;
+	//debugL() << "Message: Parsed message integrity (" << _hmac << ")" << endl;
 
 	// Remember the original position ans reset the buffer 
 	// position to 0.	
-	size_t originalPos = buf.position();
-	buf.setPosition(0);
+	int originalPos = buf.position();
+	buf.position(0);
 
 	// Get the message prior to the current attribute and
 	// fill the attribute with dummy content.
-	Buffer hmacBuf(buf.data(), buf.size() - Size);
-	hmacBuf.writeString("00000000000000000000");
+	//Buffer hmacBuf(buf.data(), buf.size() - MessageIntegrity::Size);
+	Buffer hmacBuf;
+	hmacBuf.write(buf.data(), buf.size() - MessageIntegrity::Size);
+	hmacBuf.write("00000000000000000000");
 
 	// Ensure the STUN message size value represents the real 
 	// size of the buffered message.
-	hmacBuf.updateUInt32((UInt32)buf.size(), 2);
+	//hmacBuf.updateU32((UInt32)buf.size(), 2);
+	hmacBuf.updateU32((UInt32)buf.size(), 2);
 	_input.assign(hmacBuf.data(), hmacBuf.size());
 	  
 	// Reset the original position of the buffer.
-	buf.setPosition(originalPos);
+	buf.position(originalPos);
 
 	return true;
 }
@@ -715,7 +718,7 @@ bool MessageIntegrity::read(Buffer& buf)
 
 void MessageIntegrity::write(Buffer& buf) const 
 {
-	//LogDebug() << "Message: Write HMAC" << endl;
+	//debugL() << "Message: Write HMAC" << endl;
 
 	// If the key (password) is present we will compute the 
 	// HMAC for the current message, otherwise the attribute
@@ -724,23 +727,25 @@ void MessageIntegrity::write(Buffer& buf) const
 
 		// Get the message prior to the current attribute and
 		// fill the attribute with dummy content.
-		Buffer hmacBuf(buf.data(), buf.size());
-		hmacBuf.writeString("00000000000000000000");
+		//Buffer hmacBuf(buf.data(), buf.size());		
+		Buffer hmacBuf;
+		hmacBuf.write(buf.data(), buf.size());
+		hmacBuf.write("00000000000000000000");
 
 		// Ensure the STUN message size value represents the real 
 		// size of the buffered message.
-		hmacBuf.updateUInt32((UInt32)buf.size() + Size, 2);
+		hmacBuf.updateU32((UInt32)buf.size() + MessageIntegrity::Size, 2);
 
 		string input(hmacBuf.data(), hmacBuf.size());
 		string hmac(CryptoProvider::computeHMAC(input, _key));
-		assert(hmac.size() == Size);
+		assert(hmac.size() == MessageIntegrity::Size);
 
 		// Append the real HAMC to the buffer.
-		buf.writeBytes(hmac.data(), Size);
+		buf.write(hmac.data(), MessageIntegrity::Size);
 	}
 	else {
 		assert(!_hmac.empty());
-		buf.writeBytes(_hmac.data(), Size);
+		buf.write(_hmac.data(), MessageIntegrity::Size);
 	}
 }
 
@@ -770,12 +775,6 @@ ErrorCode::~ErrorCode()
 
 Attribute* ErrorCode::clone() 
 {
-	//ErrorCode* attr = new ErrorCode();
-	//attr->setErrorCode(errorCode());
-	//attr->setErrorClass(errorClass());
-	//attr->setErrorNumber(errorNumber());
-	//attr->setReason(reason());
-	//return attr;
 	return new ErrorCode(*this);
 }
 	
@@ -802,15 +801,15 @@ void ErrorCode::setReason(const string& reason)
 bool ErrorCode::read(Buffer& buf) 
 {
 	UInt32 val;
-	if (!buf.readUInt32(val))
+	if (!buf.readU32(val))
 		return false;
 
 	if ((val >> 11) != 0)
-		LogDebug() << "error-code bits not zero";
+		errorL() << "error-code bits not zero";
 
 	setErrorCode(val);
 
-	if (!buf.readString(_reason, size() - 4))
+	if (!buf.read(_reason, size() - 4))
 		return false;
 
 	return true;
@@ -818,8 +817,8 @@ bool ErrorCode::read(Buffer& buf)
 
 void ErrorCode::write(Buffer& buf) const 
 {
-	buf.writeUInt32(errorCode());
-	buf.writeString(_reason);
+	buf.writeU32(errorCode());
+	buf.write(_reason);
 }
 
 
@@ -884,7 +883,7 @@ bool UInt16ListAttribute::read(Buffer& buf)
 {
 	for (int i = 0; i < size() / 2; i++) {
 		UInt16 attr;
-		if (!buf.readUInt16(attr))
+		if (!buf.readU16(attr))
 			return false;
 		_attrTypes.push_back(attr);
 	}
@@ -894,73 +893,8 @@ bool UInt16ListAttribute::read(Buffer& buf)
 void UInt16ListAttribute::write(Buffer& buf) const 
 {
 	for (unsigned i = 0; i < _attrTypes.size(); i++)
-		buf.writeUInt16(_attrTypes[i]);
+		buf.writeU16(_attrTypes[i]);
 }
 
 
-/*
-TransportPrefs::TransportPrefs(UInt16 type, UInt16 size) : 
-	Attribute(type, size), _preallocate(false), _prefs(0), _address(0) 
-{
-}
-
-
-TransportPrefs::~TransportPrefs() {
-	delete _address;
-}
-
-
-void TransportPrefs::setPreallocateAddress(
-	AddressAttribute* address) {
-		if (!address) {
-			_preallocate = false;
-			_address = 0;
-			setLength(Size1);
-		} else {
-			_preallocate = true;
-			_address = address;
-			setLength(Size2);
-		}
-}
-
-
-bool TransportPrefs::read(Buffer& buf) 
-{
-	UInt32 val;
-	if (!buf.readUInt32(val))
-		return false;
-
-	if ((val >> 3) != 0)
-		LogDebug() << "transport-preferences bits not zero";
-
-	_preallocate = static_cast<bool>((val >> 2) & 0x1);
-	_prefs = (UInt8)(val & 0x3);
-
-	if (_preallocate && (_prefs == 3))
-		LogDebug() << "transport-preferences imcompatible P and Typ";
-
-	if (!_preallocate) {
-		if (size() != UInt32Attribute::Size)
-			return false;
-	} else {
-		if (size() != UInt32Attribute::Size + AddressAttribute::Size)
-			return false;
-
-		_address = new AddressAttribute(SourceAddress);
-		_address->read(buf);
-	}
-
-	return true;
-}
-
-
-void TransportPrefs::write(Buffer& buf) const {
-	buf.writeUInt32((_preallocate ? 4 : 0) | _prefs);
-
-	if (_preallocate)
-		_address->write(buf);
-}
-*/
-
-
-} } // namespace Scy::STUN
+} } // namespace scy::STUN

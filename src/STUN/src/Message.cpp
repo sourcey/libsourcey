@@ -24,8 +24,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace STUN {
+namespace scy {
+namespace stun {
 
 
 Message::Message() : 
@@ -145,11 +145,12 @@ string Message::typeString() const
 
 string Message::toString() const 
 {
-	ostringstream ss;
-	ss << "STUN[" << typeString() << ":" << transactionID() << "]";
-	//for (unsigned i = 0; i < _attrs.size(); i++)
-	//	os << ":" << _attrs[i]->typeString();
-	return ss.str();
+	ostringstream os;
+	os << "STUN[" << transactionID() << ":" << typeString();
+	for (unsigned i = 0; i < _attrs.size(); i++)
+		os << ":" << _attrs[i]->typeString();
+	os << "]";
+	return os.str();
 }
 
 
@@ -191,34 +192,34 @@ Attribute* Message::get(Attribute::Type type, int index) const
 
 bool Message::read(Buffer& buf) 
 {			
-	if (!buf.readUInt16(_type)) {
-		LogError() << "STUN: Not STUN type: " << _type << endl;
+	if (!buf.readU16(_type)) {
+		errorL("STUNMessage") << "Not STUN type: " << _type << endl;
 		return false;
 	}
 
 	if (_type & 0x8000) {
 		// RTP and RTCP set MSB of first byte, since first two bits are version, 
 		// and version is always 2 (10). If set, this is not a STUN packet.
-		//LogError() << "STUN: Not STUN packet" << endl;
+		//errorL("STUNMessage") << "Not STUN packet" << endl;
 		return false;
 	}
 
-	if (!buf.readUInt16(_size)) {
-		//LogError() << "STUN: Packet has no size: " << _size << endl;
+	if (!buf.readU16(_size)) {
+		//errorL("STUNMessage") << "Packet has no size: " << _size << endl;
 		return false;
 	}
 
 	string transactionID;
-	if (!buf.readString(transactionID, 16)) {
-		//LogError() << "STUN: Packet has no Transaction ID: " << transactionID << endl;
+	if (!buf.read(transactionID, 16)) {
+		//errorL("STUNMessage") << "Packet has no Transaction ID: " << transactionID << endl;
 		return false;
 	}
 	assert(transactionID.size() == 16);
 	_transactionID = transactionID;
 
 	if (_size > buf.remaining()) {
-		LogError() << "STUN: Buffer error" << endl;
-		return false;
+		warnL("STUNMessage") << "Buffer error: " << _size << " > " << buf.remaining() << endl;
+		//return false;
 	}
 
 	_attrs.resize(0);
@@ -226,29 +227,29 @@ bool Message::read(Buffer& buf)
 	size_t rest = buf.remaining() - _size;
 	while (buf.remaining() > rest) {
 		UInt16 attrType, attrLength;
-		if (!buf.readUInt16(attrType)) {
-			LogError() << "STUN: Attribute has no type: " << attrType << endl;
+		if (!buf.readU16(attrType)) {
+			errorL("STUNMessage") << "Attribute has no type: " << attrType << endl;
 			return false;
 		}
-		if (!buf.readUInt16(attrLength)) {
-			LogError() << "STUN: Attribute has no size: " << attrLength << endl;
+		if (!buf.readU16(attrLength)) {
+			errorL("STUNMessage") << "Attribute has no size: " << attrLength << endl;
 			return false;
 		}
 
 		Attribute* attr = Attribute::create(attrType, attrLength);
 		if (attr && attr->read(buf)) {
-			//LogDebug() << "STUN: Parsed attribute: " << attrType << ": " << Attribute::typeString(attrType) << ": " << attrLength << endl;
+			//debugL("STUNMessage") << "Parsed attribute: " << attrType << ": " << Attribute::typeString(attrType) << ": " << attrLength << endl;
 			_attrs.push_back(attr);
 		} else {
 			// Allow for unrecognised attributes.
 			//return false;	
-			LogError() << "STUN: Failed to parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
+			errorL("STUNMessage") << "Failed to parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
 		}
 	}
 
 	if (buf.remaining() != rest) {
 		// FIXME: Shouldn't be doing this
-		LogError() << "STUN: Wrong message size (" << rest << " != " << buf.remaining() << ")" << endl;
+		errorL("STUNMessage") << "Wrong message size (" << rest << " != " << buf.remaining() << ")" << endl;
 		return false;
 	}
 
@@ -258,47 +259,18 @@ bool Message::read(Buffer& buf)
 
 void Message::write(Buffer& buf) const 
 {
-	buf.writeUInt16(_type);
-	buf.writeUInt16(_size);
-	buf.writeString(_transactionID);
+	buf.writeU16(_type);
+	buf.writeU16(_size);
+	buf.write(_transactionID);
 
-	// TODO: Move Message Integrity to end
+	// TODO: Shift Message Integrity to end
 
 	for (unsigned i = 0; i < _attrs.size(); i++) {
-		buf.writeUInt16(_attrs[i]->type());
-		buf.writeUInt16(_attrs[i]->size()); 
+		buf.writeU16(_attrs[i]->type());
+		buf.writeU16(_attrs[i]->size()); 
 		_attrs[i]->write(buf);
 	}
 }
 
 
-} } // namespace Scy::STUN
-
-
-/*
- * libjingle
- * Copyright 2004--2006, Google Inc.
- *
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following conditions are met:
- *
- *  1. Redistributions of source code must retain the above copyright notice, 
- *     this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above copyright notice,
- *     this list of conditions and the following disclaimer in the documentation
- *     and/or other materials provided with the distribution.
- *  3. The name of the author may not be used to endorse or promote products 
- *     derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
+} } // namespace scy::STUN

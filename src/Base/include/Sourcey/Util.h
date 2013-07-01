@@ -32,7 +32,7 @@
 
 
 namespace scy {
-namespace Util {
+namespace util {
 
 //
 /// String Utils
@@ -68,6 +68,8 @@ std::string getPID(const void* ptr);
 void removeSpecialCharacters(std::string& str, bool allowSpaces = false);
 void replaceSpecialCharacters(std::string& str, char with = '_', bool allowSpaces = false);
 void underscore(std::string& str);
+
+std::string dumpbin(const char* data, size_t len);
 
 int icompare(const char* s1, const char* s2);
 int icompare(const char* s1, const std::string& s2);
@@ -202,7 +204,7 @@ inline bool isWindowsXpOrLater() {
 #endif
 
 
-} // namespace Util
+} // namespace util
 } // namespace scy
 
 

@@ -29,7 +29,7 @@
 
 
 namespace scy {
-namespace Net {
+namespace net {
 
 
 typedef Poco::Net::IPAddress IP;
@@ -118,7 +118,7 @@ public:
 typedef std::vector<Address*> AddressList;
 
 
-} } // namespace scy::Net
+} } // namespace scy::net
 
 
 #endif // SOURCEY_SOCKET_ADDRESS_H

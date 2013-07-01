@@ -22,52 +22,64 @@
 
 
 #include "uv.h"
+#include "Sourcey/Signal.h"
 #include <string>
 
-
-#define RunDefaultLoop uv_run(uv_default_loop(), UV_RUN_DEFAULT)
-#define StopDefaultLoop uv_stop(uv_default_loop())
-
-
-#define UVCallback(ClassName, Function, Handle)						\
-															\
-	static void _Function(Handle* handle) {						\
-		static_cast<ClassName*>(handle->data)->Function();			\
-    };														\
+	
+#if defined(UNIX) && !defined(INVALID_SOCKET)
+#define INVALID_SOCKET -1
+#endif
 
 
-#define UVStatusCallback(ClassName, Function, Handle)				\
-															\
-	static void Function(Handle* handle, int status) {			\
-		ClassName* self = static_cast<ClassName*>(handle->data);		\
-		if (status)											\
-			self->setErrno(uv_last_error(self->loop()));	\
-		self->Function(status);									\
-    }														\
+#define UVCallback(ClassName, Function, Handle)						 \
+															         \
+	static void _Function(Handle* handle) {						     \
+		static_cast<ClassName*>(handle->data)->Function();			 \
+    };														         \
+
+
+#define UVStatusCallback(ClassName, Function, Handle)				 \
+															         \
+	static void Function(Handle* handle, int status) {			     \
+		ClassName* self = static_cast<ClassName*>(handle->data);	 \
+		if (status)											         \
+			self->setLastError();	                                 \
+		self->Function(status);									     \
+    }														         \
+	
+
+#define UVEmptyStatusCallback(ClassName, Function, Handle)			 \
+															         \
+	static void Function(Handle* handle, int status) {			     \
+		ClassName* self = static_cast<ClassName*>(handle->data);	 \
+		if (status)											         \
+			self->setLastError();	                                 \
+		self->Function();									         \
+    }														         \
 
 
 #define UVReadCallback(ClassName, Function, Handle)				    \
-															\
-	static void Function(Handle* handle, ssize_t nread, uv_buf_t buf) {			\
-		ClassName* self = static_cast<ClassName*>(handle->data);		\
+															        \
+	static void Function(Handle* handle, ssize_t nread, uv_buf_t buf) {	\
+		ClassName* self = static_cast<ClassName*>(handle->data);	\
 		if (nread == -1)											\
-			self->setErrno(uv_last_error(self->loop()));	\
-		self->Function(handle, nread, buf);									\
-    }														\
+			self->setLastError();	                                \
+		self->Function(handle, nread, buf);							\
+    }														        \
 
 
 #define UVStatusCallbackWithType(ClassName, Function, Handle)		\
-															\
-	static void Function(Handle* handle, int status) {			\
-		ClassName* self = static_cast<ClassName*>(handle->data);		\
-		if (status)											\
-			self->setErrno(uv_last_error(self->loop()));	\
-		self->Function(handle, status);							\
-    }														\
+															        \
+	static void Function(Handle* handle, int status) {			    \
+		ClassName* self = static_cast<ClassName*>(handle->data);	\
+		if (status)											        \
+			self->setLastError();	                                \
+		self->Function(handle, status);							    \
+    }														        \
 
 
 namespace scy {
-namespace UV {
+namespace uv {
 
 
 //
@@ -104,36 +116,40 @@ typedef struct uv_counters_s		CountersHandle;
 //typedef struct uv_buf_t				Buffer;
 
 
-class Base
-{
-public:
-	Base(uv_loop_t* loop = uv_default_loop()) : _loop(loop) {}
-	virtual ~Base() {};
+/*
+struct EventLoop {
+	EventLoop(uv_loop_t)
+}
+*/
+
+//
+// Helpers
+//
 	
-	// virtual so implementations can provide
-	// mutex protection or whatever...
-	virtual void setErrno(const uv_err_t& err) { _error = err; }
-	virtual uv_err_t error() { return _error; }
-	virtual std::string errorMessage() { return uv_strerror(_error); }	
-	virtual uv_loop_t* loop() { return _loop; }
-
-protected:	
-	uv_err_t	_error;
-	uv_loop_t*	_loop;
-};
-
-
-inline uv_buf_t defaultAlloc(uv_handle_t* handle, size_t size)
+inline void throwLastError(
+	uv_loop_t* loop = uv_default_loop(),
+	const std::string& prefix = "",
+	const std::string& suffix = "") 
 {
-	uv_buf_t buf;
-	buf.base = new char[size];
-	buf.len = size;
-	return buf;
+	throw Exception(
+		prefix + uv_strerror(
+			uv_last_error(loop)) + suffix);
 }
 
+
+//
+// Default callbacks
+//
 	
-inline void defaultClose(uv_handle_t* handle)
+static void afterWrite(uv_write_t* req, int status) 
 {
+	delete req;
+}
+
+static void afterShutdown(uv_shutdown_t* req, int status) 
+{	
+	traceL("Stream") << "After Shutdown" << std::endl;
+	delete req;
 }
 
 
@@ -172,7 +188,29 @@ inline bool from_ip6_addr(ip6_addr* src, std::string& ip, int& port)
 }
 
 
-} } // namespace scy::UV
+} } // namespace scy::uv
 
 
 #endif // SOURCEY_UV_UVPP_H
+
+
+
+
+/*
+
+
+inline uv_buf_t defaultAlloc(uv_handle_t* handle, size_t size)
+	// NOTE: All data allocated via this function must be freed!
+{
+	uv_buf_t buf;
+	buf.base = new char[size];
+	buf.len = size;
+	return buf;
+}
+
+	
+inline void defaultClose(uv_handle_t* handle)
+{
+	delete handle;
+}
+*/

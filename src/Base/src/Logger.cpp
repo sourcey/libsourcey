@@ -83,10 +83,10 @@ Logger::Logger() :
 
 Logger::~Logger()
 {	
-	LogDebug("Logger", this) << "Destroying" << endl;
+	debugL("Logger", this) << "Destroying" << endl;
 	{
 		FastMutex::ScopedLock lock(_mutex);
-		Util::ClearMap(_map);
+		util::ClearMap(_map);
 		_defaultChannel = NULL;
 	}
 }
@@ -94,7 +94,7 @@ Logger::~Logger()
 
 void Logger::add(LogChannel* channel) 
 {
-	LogDebug("Logger", this) << "Adding Channel: " << channel->name() << endl;
+	debugL("Logger", this) << "Adding Channel: " << channel->name() << endl;
 	FastMutex::ScopedLock lock(_mutex);
 	// The first channel that is added will be our default channel.
 	if (_defaultChannel == NULL)
@@ -105,7 +105,7 @@ void Logger::add(LogChannel* channel)
 
 void Logger::remove(const string& name, bool deletePointer) 
 {
-	LogDebug("Logger", this) << "Removing Channel: " << name << endl;
+	debugL("Logger", this) << "Removing Channel: " << name << endl;
 	FastMutex::ScopedLock lock(_mutex);
 	LogMap::iterator it = _map.find(name);	
 	assert(it != _map.end());
@@ -133,7 +133,7 @@ LogChannel* Logger::get(const string& name, bool whiny) const
 
 void Logger::setDefault(const string& name)
 {
-	LogDebug("Logger", this) << "Set Default Channel: " << name << endl;
+	debugL("Logger", this) << "Set Default Channel: " << name << endl;
 	_defaultChannel = get(name, true);
 }
 
@@ -183,7 +183,7 @@ LogStream Logger::send(const char* level, const string& realm, const void* ptr) 
 // Log Stream
 //
 LogStream::LogStream(LogLevel level, const string& realm, const void* ptr) : 
-	level(level), realm(realm), pid(ptr ? Util::getPID(ptr) : "") 
+	level(level), realm(realm), pid(ptr ? util::getPID(ptr) : "") , message()
 {
 }
 

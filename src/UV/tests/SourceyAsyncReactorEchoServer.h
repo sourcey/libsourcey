@@ -177,7 +177,7 @@ struct AsyncReactorSocket: public IAsyncReactorHandler
 class SourceyAsyncReactorEchoServer: public Poco::Runnable
 {
 public:	
-	SourceyAsyncReactorEchoServer(short port, scy::Net::AsyncReactor& reactor):
+	SourceyAsyncReactorEchoServer(short port, scy::net::AsyncReactor& reactor):
 		_socket(Poco::Net::SocketAddress("127.0.0.1", port)),
 		_reactor(reactor),
 		_handler(_socket),
@@ -202,24 +202,24 @@ public:
 	
 	void run()
 	{		
-		scy::Log("debug") << "[SourceyAsyncReactorEchoServer:" << this << "] Listening: " << _socket.address().toString() << std::endl;
+		scy::Log("debug") << "[SourceyAsyncReactorEchoServer:" << this << "] Listening: " << _socket.address() << std::endl;
 		//_socket.bind(_socket.address());
 		//_socket.listen(1000);
 		//Poco::Net::SocketAcceptor<EchoServiceHandler> acceptor(_socket, _reactor);
-		//scy::Log("debug") << "[UVEchoServer:" << this << "] Liistening 1: " << _socket.address().toString() << std::endl;
+		//scy::Log("debug") << "[UVEchoServer:" << this << "] Liistening 1: " << _socket.address() << std::endl;
 		_ready.set();
-		//scy::Log("debug") << "[UVEchoServer:" << this << "] Liistening 2: " << _socket.address().toString() << std::endl;
+		//scy::Log("debug") << "[UVEchoServer:" << this << "] Liistening 2: " << _socket.address() << std::endl;
 		_reactor.attach(_socket, _handler, AsyncReactor::Readable);
 		_reactor.run();
 	}
 
 protected:
 	Poco::Net::ServerSocket _socket;
-	scy::Net::AsyncReactor& _reactor;
+	scy::net::AsyncReactor& _reactor;
 	AsyncReactorSocket _handler;
 	Poco::Thread _thread;
 	Poco::Event  _ready;
 };
 
 
-} } // namespace scy::Net
+} } // namespace scy::net

@@ -1,134 +1,136 @@
 #include "Sourcey/UV/UVPP.h"
-#include "Sourcey/UV/TCPSocket.h"
-#include "Sourcey/UV/SSLSocket.h"
+#include "Sourcey/Net/TCPSocket.h"
+#include "Sourcey/Net/SSLSocket.h"
 #include "Sourcey/Net/Address.h"
 #include "Sourcey/Logger.h"
 #include <memory>
 
 
 namespace scy {
-namespace UV {
+namespace uv {
 
 
-template <class SocketT>
-class UVEchoServer//: public SocketT
+template <typename SocketT>
+class UVEchoServer: public CountedObject
 {
-public:		
+public:
+	typename SocketT socket;
+	typename SocketT::List sockets;
+	net::Address address;
 
-	UVEchoServer(short port):
-		_address(Poco::Net::SocketAddress("127.0.0.1", port)),
-		//_thread("UVEchoServer"),
-		_stopped(false)
+	UVEchoServer(short port, bool ghost = false) :
+		address("127.0.0.1", port)
 	{
-		//_thread.start(*this);
-		//_ready.wait();
-		//uv_unref(_socket.loop());
+		// Unref the socket handle if running in ghost mode.
+		// This way the server won't prevent the main uv_loop 
+		// from exiting when other processed complete.
+		if (ghost)
+			uv_unref(reinterpret_cast<SocketT::Base&>(socket.base()).handle());
 	}
 
 	~UVEchoServer()
 	{
-		//uv_unref(_socket.loop());
-		_stopped = true;
-		//_thread.join();
-	}
+		traceL("UVEchoServer", this) << "Destroying" << std::endl;
+		assert(socket.base().refCount() == 1);
 
-	Poco::UInt16 port() const
-	{
-		return _socket.address().port();
+		// This will close the server socket, and should cause the
+		// main loop to terminate if there are no active processes.
+		sockets.clear();
+
+		// Shutdown gracefully
+		//traceL("UVEchoServer", this) << "Destroying: Shutdown:" << &socket.base() << std::endl;
+		//socket.shutdown();
+
+		traceL("UVEchoServer", this) << "Destroying: OK" << std::endl;
 	}
 	
 	void run()
 	{	
-		//DefaultLoop
-		_socket.bind(_address);
-		_socket.listen();
-		_socket.OnAcceptConnection += scy::delegate(this, &UVEchoServer::onAccept);
-		//_ready.set();
-		//while (!_stopped)
-		//{
-		//	Sleep(20);
-		//}
-		//uv_unref(_socket.loop());
-		//uv_run(_socket.loop());
-	}
-	//typename SocketPtr TCPSocket::Ptr;
-
-	std::vector<scy::UV::TCPSocket::Ptr> sockets;
-	//typedef
-	
-	void onAccept(void* sender, scy::UV::TCPSocket::Ptr& conn) //, bool& reg
-	{	
-		scy::Log("debug") << "[UVEchoServer:" << this << "] onAccept: " << sender << std::endl;
-		conn.OnRecv += scy::delegate(this, &UVEchoServer::onRead);
-		conn.OnClose += scy::delegate(this, &UVEchoServer::onClose);
-		sockets.push_back(conn);
-		//SocketPtr ptr(conn);
-		//reg = true;
-		// NOTE: Not handling pointers
+		traceL("UVEchoServer", this) << "Serrun " << socket.base().refCount() << endl;
+		assert(socket.base().refCount() == 1);
+		socket.bind(address);
+		socket.listen();
+		socket.base().AcceptConnection += delegate(this, &UVEchoServer::onAccept);		
+		traceL("UVEchoServer", this) << "Server listening on " << port() << endl;
 	}
 
-	void onClose(void* sender, int error) 
+	void stop() 
 	{
-		SocketT* socket = reinterpret_cast<SocketT*>(sender);	
-		for (unsigned i = 0; i < sockets.size(); i++) {
-			if (socket == reinterpret_cast<SocketT*>(&sockets[i])) {
-				socket->release();
+		socket.close();
+	}
+	
+	void onAccept(void* sender, const net::TCPSocket& sock)
+	{	
+		sockets.push_back(sock);
+		SocketT& socket = sockets.back();
+		traceL("UVEchoServer", this) << "On Accept: " << &socket.base() << std::endl;
+		socket.Recv += delegate(this, &UVEchoServer::onSocketRecv);
+		socket.Error += delegate(this, &UVEchoServer::onSocketError);
+		socket.Close += delegate(this, &UVEchoServer::onSocketClose);
+	}
+	
+	void onSocketRecv(void* sender, net::SocketPacket& packet) 
+	{
+		SocketT* socket = reinterpret_cast<SocketT*>(sender);
+		traceL("UVEchoServer", this) << "On Recv: " 
+			<< socket << ": " << packet.buffer << std::endl;
+
+		// Echo it back
+		socket->send(packet);
+	}
+
+	void onSocketError(void* sender, int syserr, const std::string& message) 
+	{
+		traceL("UVEchoServer", this) << "On Error: " << syserr << ": " << message << std::endl;
+	}
+
+	void onSocketClose(void* sender) 
+	{
+		traceL("UVEchoServer", this) << "On Close" << std::endl;
+		releaseSocket(reinterpret_cast<SocketT*>(sender));
+	}
+
+	void releaseSocket(typename SocketT* socket) 
+	{		
+		for (SocketT::List::iterator it = sockets.begin(); it != sockets.end(); ++it) { //::Ptr
+			if (socket == &(*it)) { //.base()
+				traceL("UVEchoServer", this) << "Removing: " << socket << std::endl;
+
+				// All we need to do is erase the socket in order to 
+				// deincrement the ref counter and destroy the socket.
+				assert(socket->base().refCount() == 1);
+				sockets.erase(it);
+				return;
 			}
 		}
 	}
 
-
-	void onRead(void* sender, const char* data, int len) 
+	UInt16 port()
 	{
-		scy::Log("debug") << "[UVEchoServer:" << this << "] onRead: " << sender << std::endl;
-		scy::UV::TCPSocket* socket = reinterpret_cast<scy::UV::TCPSocket*>(sender);
-		socket->send(data, len);
+		return socket.address().port();
 	}
-
-protected:
-	SocketT _socket;
-	scy::Net::Address _address;
-	bool         _stopped;
 };
-
-
-} } // namespace scy::UV
-
-
-/*
-	//Poco::Thread _thread;
-	//Poco::Event  _ready;
-
-		//_socket.bind(scy::Net::Address("127.0.0.1", port));
-		//_ready.set();
-		//SocketAcceptor<EchoServiceHandler> acceptor(_socket, _reactor);
-		//_reactor.run();
-	//Poco::Net::ServerSocket _socket;
-	//Poco::Net::SocketReactor _reactor;
-
-class UVEchoServer: public TCPSocket, public Poco::Runnable
-{
-public:
-	
-	UVEchoServer()
-	{	
-		_thread.start(*this);
-	}
 	
 
-	UV~UVEchoServer()
-	{
-	}
-
-	
-	virtual void run()
-	{
-	}
+// Some generic server types
+typedef uv::UVEchoServer<net::TCPSocket> TCPEchoServer;
+//typedef uv::UVEchoServer<net::SSLSocket> SSLEchoServer;
 
 
-protected:
-	scy::Thread _thread;
-};
+} } // namespace scy::uv
 
-*/
 
+		
+		//assert(sender == &socket);
+		//assert(sender == &socket); //packet.data(), packet.size());
+		//traceL("UVEchoServer", this) << "On Recv: " << packet.buffer << std::endl;
+		//socket.send(packet.data(), packet.size());
+
+		/*
+		SocketT socket(sock); //.get()
+		traceL("UVEchoServer", this) << "On Accept: " << &socket.base() << std::endl;
+		socket.Recv += delegate(this, &UVEchoServer::onSocketRecv);
+		socket.Error += delegate(this, &UVEchoServer::onSocketError);
+		socket.Close += delegate(this, &UVEchoServer::onSocketClose);
+		sockets.push_back(socket);
+		*/

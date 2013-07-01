@@ -153,7 +153,7 @@ protected:
 	friend class Runner;
 };
 
-class TaskBase: public SocketBase<StreamSocketT, TransportT, ISocketT>
+class TaskBase: public SocketBase<StreamSocketT, TransportT, SocketBaseT>
 */
 
 	//std::string _name;

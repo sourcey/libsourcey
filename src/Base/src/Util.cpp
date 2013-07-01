@@ -44,7 +44,7 @@ using namespace Poco;
 
 
 namespace scy {
-namespace Util {
+namespace util {
 
 
 bool isNumber(const string& str)
@@ -148,6 +148,23 @@ void pause()
 }
 
 
+string dumpbin(const char* data, size_t len)
+{
+	string output;
+	for (size_t i = 0; i < len; i++) {
+		char byte = data[i];
+		for (size_t mask = 0x80; mask > 0; mask >>= 1) {
+			output.push_back(byte & mask ? '1' : '0');
+		}
+		if (i % 4 == 3)
+			output.push_back('\n');
+		else
+			output.push_back(' ');
+	}
+	return output;
+}
+
+
 bool compareVersion(const string& l, const string& r) 
 {
 	if (l.empty())
@@ -161,8 +178,8 @@ bool compareVersion(const string& l, const string& r)
 	for (unsigned i = 0; i < lnums.size(); i++) {			
 		if (rnums.size() < i + 1)
 			break;		
-		int ln = Util::fromString<UInt32>(lnums[i]);
-		int rn = Util::fromString<UInt32>(rnums[i]);
+		int ln = util::fromString<UInt32>(lnums[i]);
+		int rn = util::fromString<UInt32>(rnums[i]);
 		if (ln < rn)
 			return false;
 		else if (ln > rn)
@@ -197,8 +214,8 @@ void underscore(string& str)
 
 bool matchNodes(const string& node, const string& xnode, const string& delim)
 {
-	StringVec params = Util::split(node, delim);
-	StringVec xparams = Util::split(xnode, delim);
+	StringVec params = util::split(node, delim);
+	StringVec xparams = util::split(xnode, delim);
 	return matchNodes(params, xparams);
 }
 
@@ -263,5 +280,5 @@ bool getOsVersion(int* major, int* minor, int* build) {
 #endif
 
 
-} // namespace Util
+} // namespace util
 } // namespace scy

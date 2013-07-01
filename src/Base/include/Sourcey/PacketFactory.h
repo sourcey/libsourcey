@@ -24,7 +24,7 @@
 #include "Sourcey/PacketEmitter.h"
 #include "Sourcey/Buffer.h"
 
-#include "Poco/Thread.h"
+//#include "Poco/Thread.h"
 
 
 namespace scy {
@@ -35,7 +35,7 @@ struct IPacketCreationStrategy
 	virtual IPacket* create(Buffer& buffer) const = 0;	
 	virtual int priority() const = 0; // 0 - 100
 
-	static bool CompareProiroty(const IPacketCreationStrategy* l, const IPacketCreationStrategy* r) {
+	static bool compareProiroty(const IPacketCreationStrategy* l, const IPacketCreationStrategy* r) {
 		return l->priority() > r->priority();
 	}
 };
@@ -45,6 +45,7 @@ typedef std::vector<IPacketCreationStrategy*> PacketCreationStrategyList;
 
 
 // ---------------------------------------------------------------------
+//
 template <class PacketT>
 struct PacketCreationStrategy: public IPacketCreationStrategy
 	/// This template class implements an adapter that sits between
@@ -71,26 +72,27 @@ protected:
 
 
 // ---------------------------------------------------------------------
+//
 struct PacketRegistry
 {
 	PacketRegistry() {}
 	PacketRegistry(const PacketRegistry& r) : 
 		_types(r._types) {};		
 	virtual ~PacketRegistry() {
-		Util::ClearVector(_types);
+		util::ClearVector(_types);
 	}
 
 	template <class PacketT>
 	void registerPacketType(int priority) {
 		unregisterPacketType<PacketT>(); // ensure unique values
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		_types.push_back(new PacketCreationStrategy<PacketT>(priority));
-		sort(_types.begin(), _types.end(), IPacketCreationStrategy::CompareProiroty);
+		sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
 	}
 
 	template <class PacketT>
 	void unregisterPacketType() {
-		Poco::FastMutex::ScopedLock lock(_mutex);		
+		//Poco::FastMutex::ScopedLock lock(_mutex);		
 		for (typename PacketCreationStrategyList::iterator it = _types.begin(); it != _types.end(); ++it) {
 			if (dynamic_cast<PacketCreationStrategy<PacketT>*>(*it) != 0) {
 				delete *it;
@@ -103,14 +105,14 @@ struct PacketRegistry
 	template <class StrategyT>
 	void registerStrategy(int priority) {
 		unregisterStrategy<StrategyT>(); // ensure unique values
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		_types.push_back(new StrategyT(priority));
-		sort(_types.begin(), _types.end(), IPacketCreationStrategy::CompareProiroty);
+		sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
 	}
 
 	template <class StrategyT>
 	void unregisterStrategy() {
-		Poco::FastMutex::ScopedLock lock(_mutex);		
+		//Poco::FastMutex::ScopedLock lock(_mutex);		
 		for (typename PacketCreationStrategyList::iterator it = _types.begin(); it != _types.end(); ++it) {
 			if (dynamic_cast<StrategyT*>(*it) != 0) {
 				delete *it;
@@ -121,22 +123,23 @@ struct PacketRegistry
 	}
 
 	PacketCreationStrategyList& types() {
-		Poco::FastMutex::ScopedLock lock(_mutex);		
+		//Poco::FastMutex::ScopedLock lock(_mutex);		
 		return _types;
 	}
 
 	PacketCreationStrategyList types() const {
-		Poco::FastMutex::ScopedLock lock(_mutex);		
+		//Poco::FastMutex::ScopedLock lock(_mutex);		
 		return _types;
 	}
 
 protected:
 	PacketCreationStrategyList _types;
-	mutable Poco::FastMutex	_mutex;
+	//mutable Poco::FastMutex	_mutex;
 };
 
 
 // ---------------------------------------------------------------------
+//
 struct PacketFactory: public PacketRegistry
 {
 	virtual bool onPacketCreated(IPacket*) {
@@ -145,7 +148,7 @@ struct PacketFactory: public PacketRegistry
 	}
 
 	virtual IPacket* createPacket(Buffer& buffer) {
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		assert(!_types.empty() && "no packet types registered");
 		size_t offset = buffer.position();
 		for (unsigned i = 0; i < _types.size(); i++) {
@@ -157,7 +160,7 @@ struct PacketFactory: public PacketRegistry
 				}
 				return packet;
 			}
-			buffer.setPosition(offset);
+			buffer.position(offset);
 		}
 		return NULL;
 	}

@@ -60,7 +60,7 @@ bool Timeout::running() const
 
 void Timeout::start() 
 {
-	_startAt = Util::getTime();
+	_startAt = util::getTime();
 }
 
 
@@ -72,13 +72,13 @@ void Timeout::stop()
 
 void Timeout::reset() 
 {
-	_startAt = Util::getTime();
+	_startAt = util::getTime();
 }
 
 
 long Timeout::remaining() const 
 {
-	time_t current = Util::getTime();
+	time_t current = util::getTime();
 	long remaining = static_cast<long>(_delay - (current - _startAt));
 	return remaining > 0 ? remaining : 0;
 }

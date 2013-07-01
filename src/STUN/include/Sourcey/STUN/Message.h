@@ -25,8 +25,8 @@
 #include "Sourcey/IPacket.h"
 
 
-namespace Scy {
-namespace STUN {
+namespace scy {
+namespace stun {
 
 
 typedef std::string TransactionID;
@@ -132,7 +132,7 @@ private:
 };
 
 
-} } // namespace Scy::STUN
+} } // namespace scy::STUN
 
 
 #endif //  SOURCEY_STUN_MESSAGE_H

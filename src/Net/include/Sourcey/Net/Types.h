@@ -25,14 +25,14 @@
 
 
 namespace scy {	
-namespace Net {
+namespace net {
 	
 
 const int MAX_TCP_PACKET_SIZE = 64 * 1024;
 const int MAX_UDP_PACKET_SIZE = 1500;
 
 
-enum TransportProtocol 
+enum TransportType 
 {
 	UDP,
 	TCP,
@@ -40,14 +40,16 @@ enum TransportProtocol
 };
 
 
+/*
 struct Error 
 {
 	std::string message;
 	int error;
 };
+*/
 
 
-} } // namespace scy::Net
+} } // namespace scy::net
 
 
 #endif

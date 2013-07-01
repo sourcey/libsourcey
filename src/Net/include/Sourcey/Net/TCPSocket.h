@@ -17,111 +17,146 @@
 //
 
 
-#ifndef SOURCEY_NET_TCPSocket_H
-#define SOURCEY_NET_TCPSocket_H
+#ifndef SOURCEY_Net_TCPSocket_H
+#define SOURCEY_Net_TCPSocket_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/UV/UVPP.h"
+#include "Sourcey/UV/TCPBase.h"
+#include "Sourcey/Net/Socket.h"
+#include "Sourcey/Net/Address.h"
 #include "Sourcey/Net/Types.h"
-#include "Sourcey/Net/Reactor.h"
-#include "Sourcey/Net/PacketSocketBase.h"
-
-#include "Poco/Net/StreamSocket.h"
+#include "Poco/Net/NetException.h"
+#include "Poco/NumberFormatter.h"
+#include "Poco/Format.h"
 
 
 namespace scy {
-namespace Net {
-
+namespace net {
 	
-typedef SocketBase<Poco::Net::StreamSocket, TCP>        TCPSocket;
-typedef PacketSocketBase<Poco::Net::StreamSocket, TCP>  TCPPacketSocket;
+	
+typedef uv::TCPBase TCPBase;
 
 
-} } // namespace scy::Net
+class TCPSocket: public net::Socket
+	/// TCPSocket is a disposable TCP socket wrapper
+	/// for TCPBase which can be created on the stack.
+	/// See TCPBase for implementation details.
+{
+public:	
+	typedef TCPBase Base;
+	typedef std::vector<TCPSocket> List;
+	
+	TCPSocket();
+		/// Creates an unconnected TCP socket.
+
+	TCPSocket(TCPBase* base, bool shared = false);
+		/// Creates the Socket and attaches the given SocketBase.
+		///
+		/// The SocketBase must be a TCPBase, otherwise an
+		/// exception will be thrown.
+
+	TCPSocket(const Socket& socket);
+		/// Creates the UDPSocket with the SocketBase
+		/// from another socket. The SocketBase must be
+		/// a UDPBase, otherwise an exception will be thrown.
+	
+	TCPBase& base() const;
+		/// Returns the SocketBase for this socket.
+};
+
+/*
 
 
-#endif // SOURCEY_NET_TCPSocket_H
+
+typedef SocketHandle<TCPSocket> TCPSocket;
+
+
+
+//using scy::uv::TCPBase;
+class TCPSocket: public SocketHandle
+	/// SocketHandle is a disposable socket wrapper for
+	/// SocketBase types which can be created on the stack
+	/// for easy reference counted memory management for 
+	/// the underlying socket instance.
+{
+public:		
+	typedef TCPSocket Base;
+	typedef std::vector<TCPSocket> List;
+
+	TCPSocket(bool create = false) :
+		SocketHandle(create ? new TCPSocket : NULL)
+	{
+	}
+
+	TCPSocket(TCPSocket* ptr) :
+		SocketHandle(ptr)
+	{
+	}
+
+	TCPSocket(const SocketHandle& socket) : 
+		SocketHandle(socket)
+	{
+	}
+	
+	virtual void assertInstance(const SocketBase* ptr) 
+	{	
+		if (!dynamic_cast<const TCPSocket*>(ptr))
+			throw Exception("Cannot assign incompatible socket");
+	}	
+
+	TCPSocket* operator -> ()
+	{
+		reinterpret_cast<TCPSocket*>(SocketHandle::operator -> ());
+	}
+
+	const TCPSocket* operator -> () const
+	{
+		reinterpret_cast<const TCPSocket*>(SocketHandle::operator -> ());
+	}
+
+	TCPSocket& operator * ()
+	{
+		reinterpret_cast<const TCPSocket*>(SocketHandle::operator * ());
+	}
+
+	const TCPSocket& operator * () const
+	{
+		reinterpret_cast<const TCPSocket*>(SocketHandle::operator * ());
+	}
+
+};
+*/
+
+} } // namespace scy::uv
+
+
+#endif // SOURCEY_Net_TCPSocket_H
 
 
 
 
-//#include "Sourcey/Net/StatefulSocket.h"
-//#include "Sourcey/Net/WebSocket.h"
+/*
+class TCPSocket: public net::Socket
+	/// TCPSocket is a disposable TCP socket wrapper
+	/// for TCPBase which can be created on the stack.
+	/// See TCPBase for implementation details.
+{
+public:	
+	typedef TCPBase Base;
+	typedef std::vector<TCPSocket> List;
+	
+	TCPSocket();
+		/// Creates an unconnected TCP socket.
 
+	TCPSocket(TCPBase* base);
 
-//typedef TCPSocket SocketBase<Poco::Net::StreamSocket>;
-//typedef SSLTCPSocket1 SocketBase<Poco::Net::SecureStreamSocket>;
-
-
-//class TCPSocket: public ISocket, public Poco::Net::StreamSocket
-//	/// This class implements a generic TCP socket interface
-//	/// over the top of Poco's StreamSocket.
-//{
-//public:
-//	TCPSocket(Reactor& reactor/* = Reactor::getDefault()*/, bool deleteOnClose = false);
-//	TCPSocket(const Poco::Net::StreamSocket& socket, Reactor& reactor/* = Reactor::getDefault()*/, bool deleteOnClose = false);
-//	TCPSocket(const TCPSocket& r);
-//	
-//	virtual ~TCPSocket();
-//	
-//	virtual void connect(const Address& peerAddress);
-//	virtual void connect(const Address& peerAddress, int timeout);
-//		/// Connects to the given peer address.
-//		///
-//		/// A Poco::Net::ConnectionRefusedException or a
-//		/// Poco::TimeoutException is thrown on failure.
-//	
-//	virtual void close();
-//		/// Closes the underlying socket.
-//		//
-//		/// On a side note: When the StreamSocket's reference
-//		/// count reaches 0 the underlying socket will be
-//		/// automatically closed.
-//
-//	virtual int send(const char* data, int size);
-//	virtual int send(const char* data, int size, const Address& peerAddress);
-//	virtual int send(const DataPacket& packet);
-//	virtual int send(const DataPacket& packet, const Address& peerAddress);
-//	virtual int send(const IPacket& packet);
-//	virtual int send(const IPacket& packet, const Address& peerAddress);
-//	virtual void send(IPacket& packet);
-//
-//	virtual void setError(const std::string& err);
-//		/// Sets the error message and closes the socket.
-//	
-//	virtual bool isConnected();
-//	virtual bool isError();
-//
-//	virtual void deleteOnClose(bool flag);
-//		/// When true the socket instance will automatically delete 
-//		/// itself after a call to close().
-//
-//	TransportProtocol transport() const;
-//	Address address() const;
-//	Address peerAddress() const;
-//	std::string error() const;
-//	int errorno() const;
-//	Reactor& reactor();
-//
-//	virtual void bindEvents();	
-//	virtual void unbindEvents();
-//	
-//protected:		
-//	virtual void recv(Buffer& buffer);
-//	virtual void packetize(Buffer& buffer);
-//
-//	virtual void onReadable();
-//	virtual void onConnect();
-//	virtual void onClose();
-//	virtual void onError();
-//		
-//	virtual void resetBuffer();
-//	
-//protected:
-//	mutable Poco::FastMutex _mutex;
-//	Buffer					_buffer;
-//	Reactor&				_reactor;
-//	std::string				_error;
-//	bool					_connected;
-//	bool					_deleteOnClose;
-//};
+	TCPSocket(const SocketHandle& socket);
+		/// Creates the UDPSocket with the SocketBase
+		/// from another socket. The SocketBase must be
+		/// a UDPBase, otherwise an exception will be thrown.
+	
+	TCPBase* base() const;
+		/// Returns the SocketBase for this socket.
+};
+*/

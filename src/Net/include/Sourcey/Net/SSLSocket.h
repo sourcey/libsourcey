@@ -17,111 +17,171 @@
 //
 
 
-#ifndef SOURCEY_NET_SSLSocket_H
-#define SOURCEY_NET_SSLSocket_H
+#ifndef SOURCEY_Net_SSLSocket_H
+#define SOURCEY_Net_SSLSocket_H
 
 
-#include "Sourcey/Base.h"
-#include "Sourcey/Net/Types.h"
-#include "Sourcey/Net/Reactor.h"
-#include "Sourcey/Net/PacketSocketBase.h"
+#include "Sourcey/UV/UVPP.h"
+#include "Sourcey/UV/TCPBase.h"
+#include "Sourcey/Net/Socket.h"
+#include "Sourcey/Net/SSLContext.h"
 
-#include "Poco/Net/SecureStreamSocket.h"
+#include "Poco/Net/SSLException.h"
+#include "Poco/Net/Context.h"
+#include "Poco/Net/Session.h"
 
 
 namespace scy {
-namespace Net {
+namespace net {
 
 
-typedef SocketBase<Poco::Net::SecureStreamSocket, SSLTCP>        SSLSocket;
-typedef PacketSocketBase<Poco::Net::SecureStreamSocket, SSLTCP>  SSLPacketSocket;
+class SSLBase: public uv::TCPBase	
+{
+public:	
+	SSLBase();
+	SSLBase(Poco::Net::Context::Ptr sslContext);
+	SSLBase(Poco::Net::Context::Ptr sslContext, Poco::Net::Session::Ptr session);
+
+	//virtual void connect(const Address& peerAddress);	
+		/// Initializes the socket and establishes a secure connection to 
+		/// the TCP server at the given address.
+		///
+		/// The SSL handshake is performed the first time sendBytes(), 
+		/// receiveBytes() or completeHandshake() is called.	
+	
+	virtual bool shutdown();
+
+	virtual void close();
+		/// Closes the socket.
+		///
+		/// Shuts down the connection by attempting
+		/// an orderly SSL shutdown, then actually
+		/// shutting down the TCP connection.
+	
+	virtual int send(const char* data, int len, int flags = 0);
+		
+	int available() const;
+		/// Returns the number of bytes available from the
+		/// SSL buffer for immediate reading.
+	
+	X509* peerCertificate() const;
+		/// Returns the peer's certificate.
+		
+	Poco::Net::Context::Ptr context() const;
+		/// Returns the SSL context used for this socket.
+			
+	Poco::Net::Session::Ptr currentSession();
+		/// Returns the SSL session of the current connection,
+		/// for reuse in a future connection (if session caching
+		/// is enabled).
+		///
+		/// If no connection is established, returns null.
+		
+	void useSession(Poco::Net::Session::Ptr session);
+		/// Sets the SSL session to use for the next
+		/// connection. Setting a previously saved Session
+		/// object is necessary to enable session caching.
+		///
+		/// To remove the currently set session, a null pointer
+		/// can be given.
+		///
+		/// Must be called before connect() to be effective.
+		
+	bool sessionWasReused();
+		/// Returns true if a reused session was negotiated during
+		/// the handshake.
+
+	virtual void onConnected(int status);
+
+	virtual void onRead(const char* data, int len);
+		/// Reads raw encrypred SSL data
+
+	virtual void onRecv(Buffer& buf);	
+		/// Reads and emits decrypted SSL data
+		
+protected:
+	virtual void* instance() { return this; }
+	virtual ~SSLBase();
+
+protected:
+	net::SSLContext _sslBuffer;
+	Poco::Net::Context::Ptr _context;
+	Poco::Net::Session::Ptr _session;
+
+	friend class net::SSLContext;
+};
 
 
-} } // namespace scy::Net
+class SSLSocket: public Socket
+	/// SSLSocket is a disposable SSL socket wrapper
+	/// for SSLBase which can be created on the stack.
+	/// See SSLBase for implementation details.
+{
+public:	
+	typedef net::SSLBase Base;
+	typedef std::vector<SSLSocket> List;
+	
+	SSLSocket();
+		/// Creates an unconnected SSL socket.
+
+	SSLSocket(Poco::Net::Context::Ptr sslContext);
+	SSLSocket(Poco::Net::Context::Ptr sslContext, Poco::Net::Session::Ptr session);
+
+	SSLSocket(SSLBase* base, bool shared = false);
+		/// Creates the Socket and attaches the given SocketBase.
+		///
+		/// The SocketBase must be a SSLBase, otherwise an
+		/// exception will be thrown.
+
+	SSLSocket(const Socket& socket);
+		/// Creates the SSLSocket with the SocketBase
+		/// from another socket. The SocketBase must be
+		/// a SSLBase, otherwise an exception will be thrown.
+	
+	SSLBase& base() const;
+		/// Returns the SocketBase for this socket.
+};
 
 
-#endif // SOURCEY_NET_SSLSocket_H
+//typedef SocketHandle<SSLSocket> SSLSocketHandle;
+
+
+} } // namespace scy::uv
+
+
+#endif // SOURCEY_Net_SSLSocket_H 
 
 
 
 
+	
+/*
 
+typedef SSLBase SSLSocket;
+class SSLBase;
+class SSLSocket: public Socket
+	/// SSLSocket is a disposable SSL socket wrapper
+	/// for SSLBase which can be created on the stack.
+	/// See SSLBase for implementation details.
+{
+public:	
+	typedef net::SSLBase Base;
+	typedef std::vector<SSLSocket> List;
+	
+	SSLSocket();
+		/// Creates an unconnected SSL socket.
 
-	/*
-//#include "Sourcey/Net/StatefulSocket.h"
-//#include "Sourcey/Net/WebSocket.h"
+	SSLSocket(Poco::Net::Context::Ptr sslContext);
+	SSLSocket(Poco::Net::Context::Ptr sslContext, Poco::Net::Session::Ptr session);
+
+	SSLSocket(const SocketHandle& socket);
+		/// Creates the SSLSocket with the SocketBase
+		/// from another socket. The SocketBase must be
+		/// a SSLBase, otherwise an exception will be thrown.
+
+	SSLSocket(SSLBase* base);
+	
+	SSLBase* base() const;
+		/// Returns the SocketBase for this socket.
+};
 */
-
-
-//class SSLSocket: public ISocket, public Poco::Net::StreamSocket
-//	/// This class implements a generic TCP socket interface
-//	/// over the top of Poco's StreamSocket.
-//{
-//public:
-//	SSLSocket(Reactor& reactor/* = Reactor::getDefault()*/, bool deleteOnClose = false);
-//	SSLSocket(const Poco::Net::StreamSocket& socket, Reactor& reactor/* = Reactor::getDefault()*/, bool deleteOnClose = false);
-//	SSLSocket(const SSLSocket& r);
-//	
-//	virtual ~SSLSocket();
-//	
-//	virtual void connect(const Address& peerAddress);
-//	virtual void connect(const Address& peerAddress, int timeout);
-//		/// Connects to the given peer address.
-//		///
-//		/// A Poco::Net::ConnectionRefusedException or a
-//		/// Poco::TimeoutException is thrown on failure.
-//	
-//	virtual void close();
-//		/// Closes the underlying socket.
-//		//
-//		/// On a side note: When the StreamSocket's reference
-//		/// count reaches 0 the underlying socket will be
-//		/// automatically closed.
-//
-//	virtual int send(const char* data, int size);
-//	virtual int send(const char* data, int size, const Address& peerAddress);
-//	virtual int send(const DataPacket& packet);
-//	virtual int send(const DataPacket& packet, const Address& peerAddress);
-//	virtual int send(const IPacket& packet);
-//	virtual int send(const IPacket& packet, const Address& peerAddress);
-//	virtual void send(IPacket& packet);
-//
-//	virtual void setError(const std::string& err);
-//		/// Sets the error message and closes the socket.
-//	
-//	virtual bool isConnected();
-//	virtual bool isError();
-//
-//	virtual void deleteOnClose(bool flag);
-//		/// When true the socket instance will automatically delete 
-//		/// itself after a call to close().
-//
-//	TransportProtocol transport() const;
-//	Address address() const;
-//	Address peerAddress() const;
-//	std::string error() const;
-//	int errorno() const;
-//	Reactor& reactor();
-//
-//	virtual void bindEvents();	
-//	virtual void unbindEvents();
-//	
-//protected:		
-//	virtual void recv(Buffer& buffer);
-//	virtual void packetize(Buffer& buffer);
-//
-//	virtual void onReadable();
-//	virtual void onConnect();
-//	virtual void onClose();
-//	virtual void onError();
-//		
-//	virtual void resetBuffer();
-//	
-//protected:
-//	mutable Poco::FastMutex _mutex;
-//	Buffer					_buffer;
-//	Reactor&				_reactor;
-//	std::string				_error;
-//	bool					_connected;
-//	bool					_deleteOnClose;
-//};

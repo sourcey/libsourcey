@@ -25,27 +25,32 @@ using namespace std;
 
 
 namespace scy {
-namespace UV {
+namespace uv {
 
 	
-Idler::Idler(uv_loop_t* loop) :
-	Base(loop)
+Idler::Idler() //uv_loop_t* loop) :
+	//Base<Base>(loop)
 {
-	LogTrace("Idler", this) << "Creating" << endl;
-	_handle.data = this;
-    uv_idle_init(loop, &_handle);
+	traceL("Idler", this) << "Creating" << endl;
 }
 
 	
 Idler::~Idler() 
 {	
-	LogTrace("Idler", this) << "Destroying" << endl;
+	traceL("Idler", this) << "Destroying" << endl;
+}
+
+
+void Idler::init()
+{
+	_handle.data = this;
+    uv_idle_init(loop(), &_handle);
 }
 	
 
 void Idler::start() 
 {		
-    uv_idle_start(&_handle, UV::onIdle);
+    uv_idle_start(&_handle, uv::onIdle);
 }
 
 
@@ -57,8 +62,8 @@ void Idler::stop()
 
 void Idler::onIdle(int status) 
 {
-	LogTrace("Idler", this) << "On Idle: " << status << endl;
+	traceL("Idler", this) << "On Idle: " << status << endl;
 }
 
 
-} } // namespace scy::UV
+} } // namespace scy::uv

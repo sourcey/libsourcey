@@ -42,8 +42,9 @@ public:
 	explicit Buffer(const char* bytes);
 	~Buffer();
 
-	char* bytes() const { return _bytes; }
+	char* begin() const { return _bytes; }
 	char* data() const { return _bytes + _pos; }
+	char* end() const { return _bytes + _end; }
 
 	size_t size() const { return _end; }
 	size_t remaining() const { return _end - _pos; }
@@ -53,64 +54,69 @@ public:
 	bool eof() const;
 	bool eol() const;
 
-	void setPosition(size_t pos);
-	void setSize(size_t size); // sets size value, careful!
-
 	void reserve(size_t size);
+		// Request a change in capacity
+
 	void consume(size_t size);
 	void shift(size_t size);
+	void position(size_t pos);
+	void size(size_t size); // sets size value, careful!
 	void clear();
-
-	bool readUInt8(UInt8& val);
-	bool readUInt16(UInt16& val);
-	bool readUInt24(UInt32& val);
-	bool readUInt32(UInt32& val);
-	bool readUInt64(UInt64& val);
-	bool readString(std::string& val, size_t len);
-	bool readBytes(char* val, size_t len);
-
-	void writeUInt8(UInt8 val);
-	void writeUInt16(UInt16 val);
-	void writeUInt24(UInt32 val);
-	void writeUInt32(UInt32 val);
-	void writeUInt64(UInt64 val);
-	void writeString(const std::string& val);
-	void writeBytes(const char* val, size_t len);
 	
-	const char peekChar();
-	const UInt8 peekUInt8();
-	const UInt16 peekUInt16();
-	const UInt32 peekUInt24();
-	const UInt32 peekUInt32();
-	const UInt64 peekUInt64();
+	bool read(char* val, size_t len);
+	bool read(std::string& val, size_t len);
+	bool readU8(UInt8& val);
+	bool readU16(UInt16& val);
+	bool readU24(UInt32& val);
+	bool readU32(UInt32& val);
+	bool readU64(UInt64& val);
+	
+	void write(const char* val, size_t len);
+	void write(const std::string& val);
+	void writeU8(UInt8 val);
+	void writeU16(UInt16 val);
+	void writeU24(UInt32 val);
+	void writeU32(UInt32 val);
+	void writeU64(UInt64 val);
+	
+	const char peek();
+	const UInt8 peekU8();
+	const UInt16 peekU16();
+	const UInt32 peekU24();
+	const UInt32 peekU32();
+	const UInt64 peekU64();
+	
+	bool update(const char* val, size_t len, size_t pos);
+	void update(const std::string& val, size_t pos);
+	void updateU8(UInt8 val, size_t pos);
+	void updateU16(UInt16 val, size_t pos);
+	void updateU24(UInt32 val, size_t pos);
+	void updateU32(UInt32 val, size_t pos);
+	void updateU64(UInt64 val, size_t pos);
 
-	void updateUInt8(UInt8 val, size_t pos);
-	void updateUInt16(UInt16 val, size_t pos);
-	void updateUInt24(UInt32 val, size_t pos);
-	void updateUInt32(UInt32 val, size_t pos);
-	void updateUInt64(UInt64 val, size_t pos);
-	void updateString(const std::string& val, size_t pos);
-	bool updateBytes(const char* val, size_t len, size_t pos);
+	int skipToChar(char c);
+	int skipWhitespace();
+	int skipToNextLine();
+	int skipNextWord();
+	int readNextWord(std::string& val);
+	int readNextNumber(unsigned int& val);
+	int readLine(std::string& val);
+	int readToNext(std::string& val, char c);
 
-	size_t skipToChar(char c);
-	size_t skipWhitespace();
-	size_t skipToNextLine();
-	size_t skipNextWord();
-	size_t readNextWord(std::string& val);
-	size_t readNextNumber(unsigned int& val);
-	size_t readLine(std::string& val);
-	size_t readToNext(std::string& val, char c);
+	std::string toString() { return _bytes; }
 
 	void operator++(int) { _pos++; }			// increment position by 1
-	void operator--(int) { _pos--; }				// deincrement position by 1
+	void operator--(int) { _pos--; }			// deincrement position by 1
 	
 	void operator+=(int val) { _pos += val; }	// increment position by x
 	void operator-=(int val) { _pos -= val; }	// deincrement position by x
 	
-	//T& operator [] (std::size_t index)
-	//const T& operator [] (std::size_t index) const
+    friend std::ostream& operator << (std::ostream& stream, const Buffer& buf) 
+	{
+		return stream.write(buf.data(), buf.size());
+    }
 
-private:
+protected:
 	char* _bytes;
 	size_t _max;	// size of internal buffer
 	size_t _pos;	// current read position

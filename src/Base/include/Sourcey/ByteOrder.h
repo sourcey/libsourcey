@@ -36,6 +36,7 @@
 namespace scy {
 
 
+// Host to network 64
 inline unsigned long long htonll(unsigned long long v) {
 	union { unsigned long lv[2]; unsigned long long llv; } u;
 	u.lv[0] = htonl(v >> 32);
@@ -43,6 +44,8 @@ inline unsigned long long htonll(unsigned long long v) {
 	return u.llv;
 }
 
+
+// Network to host 64
 inline unsigned long long ntohll(unsigned long long v) {
 	union { unsigned long lv[2]; unsigned long long llv; } u;
 	u.llv = v;
@@ -54,43 +57,6 @@ inline unsigned long long ntohll(unsigned long long v) {
 inline bool isHostBigEndian() {
 	static const int number = 1;
 	return (0 == *reinterpret_cast<const char*>(&number));
-}
-
-
-inline UInt16 HostToNetwork16(UInt16 n) {
-	return htons(n);
-}
-
-
-inline UInt32 HostToNetwork32(UInt32 n) {
-	return htonl(n);
-}
-
-
-inline UInt64 HostToNetwork64(UInt64 n) {	
-	//union { unsigned long lv[2]; unsigned long long llv; } u;
-	//u.lv[0] = htonl(n >> 32);
-	//u.lv[1] = htonl(n & 0xFFFFFFFFULL);
-	//return u.llv;
-	return htonll(n);
-}
-
-
-inline UInt16 NetworkToHost16(UInt16 n) {
-	return ntohs(n);
-}
-
-
-inline UInt32 NetworkToHost32(UInt32 n) {
-	return ntohl(n);
-}
-
-
-inline UInt64 NetworkToHost64(UInt64 n) {
-	//union { unsigned long lv[2]; unsigned long long llv; } u;
-	//u.llv = n;
-	//return ((unsigned long long)ntohl(u.lv[0]) << 32) | (unsigned long long)ntohl(u.lv[1]);
-	return ntohll(n);
 }
 
 
