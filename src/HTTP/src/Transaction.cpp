@@ -39,10 +39,12 @@ using namespace Poco;
 using namespace Poco::Net;
 
 
-namespace Scy { 
-namespace HTTP {
+namespace scy { 
+namespace http {
 
 
+
+	/*
 Transaction::Transaction(Request* request) : 
 	_request(request),
 	_session(NULL),
@@ -56,7 +58,7 @@ Transaction::Transaction(Request* request) :
 Transaction::~Transaction()
 {
 	log("trace") << "Destroying" << endl;
-	// Free HTTP client session like so as base is protected
+	// Beed to cast HTTP client session to free it since base is protected
 	if (_session) {
 		if (_uri.getScheme() == "http")
 			delete static_cast<HTTPClientSession*>(_session);
@@ -74,7 +76,7 @@ bool Transaction::send()
 	assert(_request);
 	try 
 	{
-		setState(this, TransactionState::Running);
+		setState(this, net::TransactionState::Running);
 	
 		_request->prepare();
 		_uri = URI(_request->getURI());
@@ -112,7 +114,7 @@ bool Transaction::send()
 
 		if (!cancelled())
 			setState(this, _response.success() ? 
-				TransactionState::Success : TransactionState::Failed, 
+				net::TransactionState::Success : net::TransactionState::Failed, 
 				_response.getReason());
 	}
 	catch (StopPropagation&) {
@@ -125,7 +127,7 @@ bool Transaction::send()
 	catch (Exception& exc) {
 		log("error") << "Failed: " << exc.displayText() << endl;
 		_response.error = exc.displayText();
-		setState(this, TransactionState::Failed, _response.error);
+		setState(this, net::TransactionState::Failed, _response.error);
 	}
 
 	onComplete();
@@ -137,7 +139,7 @@ void Transaction::cancel()
 {
 	log("trace") << "Cancelling" << endl;
 	assert(!cancelled());
-	setState(this, TransactionState::Cancelled);
+	setState(this, net::TransactionState::Cancelled);
 }
 
 
@@ -145,9 +147,9 @@ void Transaction::processRequest(ostream& ostr)
 {
 	try 
 	{
-		TransferState& st = _requestState;
+		TransferProgress& st = _requestState;
 		st.total = _request->getContentLength();
-		setRequestState(TransferState::Running);
+		setRequestState(TransferProgress::Running);
 		if (_request->form) {	
 			char c;
 			streambuf* pbuf = _request->body.rdbuf(); 
@@ -157,30 +159,30 @@ void Transaction::processRequest(ostream& ostr)
 				st.current++;
 				if (st.current % 32768 == 0) {					
 					if (cancelled()) {
-						setRequestState(TransferState::Cancelled);
+						setRequestState(TransferProgress::Cancelled);
 						throw StopPropagation();
 					}					
 					//log("trace") << "Upload progress: " << 
 					//	st.current << " of " << st.total << endl;
-					setRequestState(TransferState::Running);
+					setRequestState(TransferProgress::Running);
 				}
 			}		
 		}
-		setRequestState(TransferState::Complete);
+		setRequestState(TransferProgress::Complete);
 	}
 	catch (Exception& exc) 
 	{
 		log("error") << "Request Error: " << exc.displayText() << endl;
-		setRequestState(TransferState::Failed);
+		setRequestState(TransferProgress::Failed);
 		exc.rethrow();
 	}	
 }
 
 
-void Transaction::setRequestState(TransferState::Type state)
+void Transaction::setRequestState(TransferProgress::Type state)
 {
 	_requestState.state = state;
-	RequestProgress.emit(this, _requestState);
+	UploadProgress.emit(this, _requestState);
 }
 
 
@@ -194,9 +196,9 @@ void Transaction::processResponse(istream& istr)
 		ostream& ostr = fstr ? 
 			static_cast<ostream&>(*fstr) : 
 			static_cast<ostream&>(_response.body);
-		TransferState& st = _responseState;
+		TransferProgress& st = _responseState;
 		st.total = _response.getContentLength();
-		setResponseState(TransferState::Running);
+		setResponseState(TransferProgress::Running);
 		istr.get(c);
 		while (istr && ostr) {
 			st.current++;
@@ -204,32 +206,32 @@ void Transaction::processResponse(istream& istr)
 			istr.get(c);
 			if (st.current % 32768 == 0) {					
 				if (cancelled()) {
-					setResponseState(TransferState::Cancelled);
+					setResponseState(TransferProgress::Cancelled);
 					throw StopPropagation();
 				}				
 				//log("trace") << "Download progress: " 
 				//	<< st.current << " of " << st.total << endl;	
-				setResponseState(TransferState::Running);
+				setResponseState(TransferProgress::Running);
 			}
 		}
 				
 		if (fstr)
 			fstr->close();
 		
-		setResponseState(TransferState::Complete);
+		setResponseState(TransferProgress::Complete);
 	}
 	catch (Exception& exc) 
 	{
 		log("error") << "Response Error: " << exc.displayText() << endl;
-		setResponseState(TransferState::Failed);
+		setResponseState(TransferProgress::Failed);
 		exc.rethrow();
 	}
 }
 
-void Transaction::setResponseState(TransferState::Type state)
+void Transaction::setResponseState(TransferProgress::Type state)
 {
 	_responseState.state = state;
-	ResponseProgress.emit(this, _responseState);
+	DownloadProgress.emit(this, _responseState);
 }
 
 
@@ -242,7 +244,7 @@ void Transaction::onComplete()
 
 bool Transaction::cancelled()
 {
-	return stateEquals(TransactionState::Cancelled);
+	return stateEquals(net::TransactionState::Cancelled);
 }
 
 
@@ -260,14 +262,14 @@ Response& Transaction::response()
 }
 
 
-TransferState& Transaction::requestState() 
+TransferProgress& Transaction::requestState() 
 {
 	FastMutex::ScopedLock lock(_mutex);
 	return _requestState; 
 }
 
 
-TransferState& Transaction::responseState() 
+TransferProgress& Transaction::responseState() 
 { 
 	FastMutex::ScopedLock lock(_mutex);
 	return _requestState; 
@@ -307,6 +309,7 @@ void* Transaction::clientData() const
 	FastMutex::ScopedLock lock(_mutex);
 	return _clientData;
 }
+*/
 
 
-} } // namespace Scy::HTTP
+} } // namespace scy::http

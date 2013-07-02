@@ -45,7 +45,7 @@ Socket::Socket(SocketBase* base, bool shared, SocketEmitter* emitter) :
 		emitter : new SocketEmitter(this))
 {
 	if (_base) {
-		_base->registerEmitter(*_emitter, shared);
+		_base->addObserver(*_emitter, shared);
 	}
 }
 
@@ -56,7 +56,7 @@ Socket::Socket(const Socket& socket, SocketEmitter* emitter) :
 		emitter : new SocketEmitter(this))
 {	
 	if (_base) {
-		_base->registerEmitter(*_emitter, true);
+		_base->addObserver(*_emitter, true);
 	}
 }
 
@@ -72,9 +72,9 @@ Socket& Socket::assign(SocketBase* base, bool shared)
 	//traceL("Socket", this) << "Assigning: " << base << endl;	
 	if (_base != base)
 	{
-		if (_base) _base->unregisterEmitter(*_emitter);
+		if (_base) _base->removeObserver(*_emitter);
 		_base = base;
-		if (_base) _base->registerEmitter(*_emitter, shared);
+		if (_base) _base->addObserver(*_emitter, shared);
 	}
 	return *this;
 }
@@ -83,7 +83,7 @@ Socket& Socket::assign(SocketBase* base, bool shared)
 Socket::~Socket()
 {
 	if (_base)
-		_base->unregisterEmitter(*_emitter);
+		_base->removeObserver(*_emitter);
 	if (_emitter)
 		delete _emitter;
 }
@@ -202,11 +202,28 @@ int Socket::isNull() const
 
 
 //
+// SocketObserver methods
+//
+
+SocketObserver::SocketObserver(int priority) : 
+	priority(priority)
+{
+	//traceL("SocketObserver", this) << "Creating" << endl;	
+}
+	
+
+SocketObserver::~SocketObserver()
+{
+	//traceL("SocketObserver", this) << "Destroying" << endl;	
+}
+
+
+//
 // SocketEmitter methods
 //
 
 SocketEmitter::SocketEmitter(Socket* socket, int priority) : 
-	socket(socket), priority(priority)
+	SocketObserver(priority), socket(socket)
 {
 	//traceL("SocketEmitter", this) << "Creating" << endl;	
 }
@@ -251,36 +268,36 @@ void SocketEmitter::onClose()
 // SocketBase methods
 //
 
-void SocketBase::registerEmitter(SocketEmitter& emitter, bool shared) 
+void SocketBase::addObserver(SocketObserver& observer, bool shared) 
 {
-	traceL("SocketBase", this) << "Duplicating socket: " << &emitter << endl;
-	_emitters.push_back(&emitter);		
-	sortEmitters();
+	traceL("SocketBase", this) << "Duplicating socket: " << &observer << endl;
+	_observers.push_back(&observer);		
+	sortObservers();
 	if (shared)
 		duplicate();
-	traceL("SocketBase", this) << "Duplicated socket: " << &emitter << endl;
+	traceL("SocketBase", this) << "Duplicated socket: " << &observer << endl;
 }
 
 
-void SocketBase::unregisterEmitter(SocketEmitter& emitter)  
+void SocketBase::removeObserver(SocketObserver& observer)  
 {	
 	/// TODO: Ensure socket destruction when released?
-	for (vector<SocketEmitter*>::iterator it = _emitters.begin(); it != _emitters.end(); ++it) {
-		if ((*it) == &emitter) {
-			traceL("SocketBase", this) << "Releasing socket: " << &emitter << endl;
-			_emitters.erase(it);
-			sortEmitters();
+	for (vector<SocketObserver*>::iterator it = _observers.begin(); it != _observers.end(); ++it) {
+		if ((*it) == &observer) {
+			traceL("SocketBase", this) << "Releasing socket: " << &observer << endl;
+			_observers.erase(it);
+			sortObservers();
 			release();
 			return;
 		}
 	}
-	assert(0 && "unknown socket emitter");
+	assert(0 && "unknown socket observer");
 }
 
 
-void SocketBase::sortEmitters()  
+void SocketBase::sortObservers()  
 {	
-	sort(_emitters.begin(), _emitters.end(), SocketEmitter::compareProiroty);
+	sort(_observers.begin(), _observers.end(), SocketObserver::compareProiroty);
 }
 
 
@@ -314,29 +331,29 @@ int SocketBase::send(const IPacket& packet, const Address& peerAddress, int flag
 
 void SocketBase::emitConnect() 
 {
-	for (int i = 0; i < _emitters.size(); i++) 
-		_emitters[i]->onConnect();
+	for (int i = 0; i < _observers.size(); i++) 
+		_observers[i]->onConnect();
 }
 
 
 void SocketBase::emitRecv(Buffer& buf, const Address& peerAddr)
 {
-	for (int i = 0; i < _emitters.size(); i++) 
-		_emitters[i]->onRecv(buf, peerAddr);
+	for (int i = 0; i < _observers.size(); i++) 
+		_observers[i]->onRecv(buf, peerAddr);
 }
 
 
 void SocketBase::emitError(int syserr, const string& message)
 {
-	for (int i = 0; i < _emitters.size(); i++) 
-		_emitters[i]->onError(syserr, message);
+	for (int i = 0; i < _observers.size(); i++) 
+		_observers[i]->onError(syserr, message);
 }
 
 
 void SocketBase::emitClose()
 {
-	for (int i = 0; i < _emitters.size(); i++) 
-		_emitters[i]->onClose();
+	for (int i = 0; i < _observers.size(); i++) 
+		_observers[i]->onClose();
 }
 
 

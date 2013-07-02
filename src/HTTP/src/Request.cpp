@@ -18,7 +18,7 @@
 
 
 #include "Sourcey/HTTP/Request.h"
-#include "Sourcey/HTTP/Authenticator.h"
+//#include "Sourcey/HTTP/Authenticator.h"
 #include "Sourcey/HTTP/Util.h"
 
 #include "Poco/DateTimeFormat.h"
@@ -32,8 +32,8 @@ using namespace Poco;
 using namespace Poco::Net;
 
 
-namespace Scy { 
-namespace HTTP {
+namespace scy { 
+namespace http {
 
 
 Request::Request() : 
@@ -95,7 +95,7 @@ void Request::prepare()
 void Request::read(istream& istr)
 {
 	Poco::Net::HTTPRequest::read(istr);
-	Util::parseURIQuery(getURI(), _params);
+	util::parseURIQuery(getURI(), _params);
 }
 
 			
@@ -107,8 +107,8 @@ const NameValueCollection& Request::params() const
 
 bool Request::matches(const string& expression) const
 {
-	return Util::matchURI(getURI(), expression);
+	return util::matchURI(getURI(), expression);
 }
 
 
-} } // namespace Scy::HTTP
+} } // namespace scy::http

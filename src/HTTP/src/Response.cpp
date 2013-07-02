@@ -25,8 +25,8 @@ using namespace Poco;
 using namespace Poco::Net;
 
 
-namespace Scy { 
-namespace HTTP {
+namespace scy { 
+namespace http {
 	
 
 Response::Response()
@@ -70,4 +70,4 @@ bool Response::success()
 }
 
 
-} } // namespace Scy::HTTP
+} } // namespace scy::http

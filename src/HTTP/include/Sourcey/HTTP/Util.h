@@ -25,8 +25,8 @@
 #include "Poco/Net/NameValueCollection.h"
 
 
-namespace Scy {
-namespace Util {
+namespace scy {
+namespace util {
 
 
 std::string parseURI(const std::string& request);
@@ -46,8 +46,8 @@ std::string parseCookieItem(const std::string& cookie, const std::string& item);
 bool parseURIQuery(const std::string& uri, Poco::Net::NameValueCollection& out);
 
 
-} // namespace Util
-} // namespace Scy
+} // namespace util
+} // namespace scy
 
 
 #endif // SOURCEY_HTTP_Utilities_h

@@ -17,97 +17,126 @@
 //
 
 
-#ifndef SOURCEY_HTTP_Transaction_H
-#define SOURCEY_HTTP_Transaction_H
+#ifndef SOURCEY_HTTP_ServerConnection_H
+#define SOURCEY_HTTP_ServerConnection_H
 
 
-#include "Sourcey/Stateful.h"
-#include "Sourcey/ISendable.h"
-#include "Sourcey/Net/Transaction.h"
+
+#include "Sourcey/Timeout.h"
+#include "Sourcey/Net/TCPSocket.h"
 #include "Sourcey/HTTP/Request.h"
 #include "Sourcey/HTTP/Response.h"
 #include "Sourcey/HTTP/Parser.h"
-
-#include "Poco/Net/HTTPSession.h"
-#include "Poco/URI.h"
-#include "Poco/Thread.h"
+#include "Sourcey/HTTP/Packetizers.h"
 
 	
 namespace scy { 
 namespace http {
 
-
-struct TransferProgress 
+		
+class Connection: public ParserObserver, public net::SocketObserver
+	/// TODO: 
+	///		- extend SocketObserver
+	///		- attach output IPacketizer
+	///     - 
+	//add timeout
 {
-	enum Type
-	{
-		None,
-		Running,
-		Complete,
-		Cancelled,	/// cancelled as result of user intervention
-		Failed,
-	};
+public:
+    Connection(const net::Socket& socket, http_parser_type type);
+					
+	virtual bool sendHeaders(bool whiny = false);
+	virtual bool sendBytes(const char* buf, size_t len, bool whiny = false);
+
+	virtual void close();
+
+	bool closed();
+	bool expired();
+
+	Request& request();	
+	Response& response();
+	net::Socket& socket();
+	Buffer& buffer();
 	
-	Type state;
-	std::streamsize current;
-	std::streamsize total;
+    virtual Poco::Net::HTTPMessage* headers() = 0;
 
-	TransferProgress() :	
-		current(0), total(0), state(None) {}
+protected:
 
-	double progress() {
-		return (current / (total * 1.0)) * 100;
-	}
+	//
+	/// Socket emitter callbacks
+	virtual void onConnect() {};
+	virtual void onRecv(Buffer& buf, const net::Address& peerAddr);
+	virtual void onError(int syserr, const std::string& message) {};
+	virtual void onClose();
+		
+	//
+	/// Parser callbacks
+    virtual void onParserHeader(const std::string& name, const std::string& value);
+	virtual void onParserHeadersDone() = 0;
+	virtual void onParserChunk(const char* buf, size_t len) = 0;
+    virtual void onParserError(const ParserError& err);
+    virtual void onParserDone() = 0;
+
+
+protected:
+    virtual ~Connection();
+
+    Request* _request;
+    Response* _response;
+    net::Socket _socket;	
+	Timeout _timeout;
+	Buffer _buffer;
+    Parser _parser;
+	bool _closed;
+	bool _sentResponseHeaders;
+	IPacketizer* _packetizer;
+	
+	friend class Parser;
 };
 
 
+} } // namespace scy::http
 
 
+#endif
 
-/**
-    * This is the base class for incoming http messages (requests or responses 
-    * for servers or clients respectively). These will be created by a Parser 
-    * after parsing headers and will be passed to a request/response handler 
-    * for further processing and registering event listeners. It implements 
-    * the ReadableStream interface and read-only access to encapsulated
-    * instance of detail::http_message.
-    *
-    * Emits the following events:
-    *   data  - when a chunk of the body is received
-    *   end   - the body is finished and no more data events to come
-    *   close - the connection was terminated before finishing
-    *   error - there was an error with the connection or HTTP parsing
-    */
-	/*
-class Transaction : public net::Transaction<http::Request>
+//#include "Sourcey/Stateful.h"
+//#include "Sourcey/ISendable.h"
+//#include "Sourcey/Net/ServerConnection.h"
+//#include "Poco/Net/HTTPSession.h"
+//#include "Poco/URI.h"
+//#include "Poco/Thread.h"
+
+		
+/*
+ //: public net::SocketEmitter
+ //Buffer& buf, const net::Address& peerAddr
+class ServerResponser
+	// TODO: Chunked ServerConnection Handler
 {
-protected:
-    Parser* parser_;
-
-    net::Socket* socket_;
-
-    bool complete_;
-    bool readable_;
-    bool paused_;
-    std::vector<Buffer> pendings_;
-    bool endEmitted_;
-    http_start_line message_;
-    headers_type headers_;
-    headers_type trailers_;
-    bool body_;
-
-
-    bool readable();
-    void pause();
-    void resume();
-
-    void destroy(const Exception& e);
-
 public:
-    Transaction(net::Socket* socket, Parser* parser);
+	virtual void handleRequest(ServerConnection* connection, Request& request, Response& response) = 0;
+};
 
-    virtual ~Transaction() {}
 
+class DefaultServerResponser
+	// TODO: Chunked ServerConnection Handler
+{
+public:
+	virtual void handleRequest(ServerConnection* connection, Request& request, Response& response);
+};
+*/
+
+
+
+
+
+    /**
+	//virtual void onConnect();
+    * 
+    */
+	/*, Parser* parser)
+	
+protected:
     Parser* parser();
 
     net::Socket* socket();
@@ -124,51 +153,53 @@ public:
     bool shouldKeepAlive();
     bool upgrade();
 
-    void end();
-
+    void _emitPending(std::function<void()> callback);
+    void _emitData(const Buffer& buf);
+    void _emitEnd();
+    void _addHeaderLine(const std::string& field, const std::string& value);
+	
     // TODO: handle encoding
     //void setEncoding();
 
-    const headers_type& headers() const;
+    const headers_type& headers();
     bool has_header(const std::string& name);
     const std::string& get_header(const std::string& name);
 
     const headers_type& trailers() const;
     bool has_trailer(const std::string& name);
     const std::string& get_trailer(const std::string& name);
-
-    void onParserHeader(const std::string& name, const std::string& value);
-    void onParserError(const Exception& e);
-    void onParserChunk(const Buffer& body);
-    virtual void onParserHeadersDone();
-
-protected:
-
-};
 	*/
 	
-    /**
-    * Called from parser to signal end of message
-    */
-		
 	/*
-    void _emitPending(std::function<void()> callback);
-    void _emitData(const Buffer& buf);
-    void _emitEnd();
-    void _addHeaderLine(const std::string& field, const std::string& value);
+    bool complete_;
+    bool readable_;
+    bool paused_;
+    std::vector<Buffer> pendings_;
+    bool endEmitted_;
+    http_start_line message_;
+    headers_type headers_;
+    headers_type trailers_;
+    bool body_;
+
+
+    bool readable();
+    void pause();
+    void resume();
+
+    void destroy(const ParserError& err);
 	*/
 
 /*
 
 // ---------------------------------------------------------------------
 //
-class Transaction: public StatefulSignal<net::TransactionState>, public ISendable, public IPolymorphic
+class ServerConnection: public StatefulSignal<net::ServerConnectionState>, public ISendable, public IPolymorphic
 	/// Implements a stateful HTTP request/response 
 	/// transaction with progress updates.
 {
 public:
-	Transaction(Request* request = NULL);
-	virtual ~Transaction();
+	ServerConnection(Request* request = NULL);
+	virtual ~ServerConnection();
 
 	virtual bool send();
 	virtual void cancel();
@@ -200,7 +231,7 @@ public:
 	Signal<TransferProgress&> DownloadProgress;
 	Signal<Response&> Complete;
 	
-	virtual const char* className() const { return "HTTPTransaction"; }
+	virtual const char* className() const { return "ServerConnection"; }
 	
 protected:
 	virtual void processRequest(std::ostream &ost);
@@ -222,9 +253,3 @@ protected:
 	mutable Poco::FastMutex	_mutex;
 };
 */
-
-
-} } // namespace scy::http
-
-
-#endif

@@ -3,15 +3,15 @@
 #
 # The following variabled will be defined:
 #
-#  libuv_FOUND
-#  libuv_INCLUDE_DIR
-#  libuv_LIBRARY
+#  LibUV_FOUND
+#  LibUV_INCLUDE_DIR
+#  LibUV_LIBRARY
 #
 
 # ----------------------------------------------------------------------
 # Find libuv include path
 # ----------------------------------------------------------------------
-FIND_PATH(libuv_INCLUDE_DIR     
+FIND_PATH(LibUV_INCLUDE_DIR     
   NAMES 
   	uv.h   
   PATHS
@@ -25,7 +25,7 @@ FIND_PATH(libuv_INCLUDE_DIR
 # ----------------------------------------------------------------------
 if(WIN32 AND MSVC)
   
-  find_library(libuv_DEBUG_LIBRARY 
+  find_library(LibUV_DEBUG_LIBRARY 
     NAMES 
       libuvd
     PATHS 
@@ -35,7 +35,7 @@ if(WIN32 AND MSVC)
       /usr/local/lib
     )
     
-  find_library(libuv_RELEASE_LIBRARY 
+  find_library(LibUV_RELEASE_LIBRARY 
     NAMES 
       libuv
     PATHS 
@@ -45,28 +45,28 @@ if(WIN32 AND MSVC)
       /usr/local/lib
     )
     
-  if(libuv_DEBUG_LIBRARY OR libuv_RELEASE_LIBRARY)  
+  if(LibUV_DEBUG_LIBRARY OR LibUV_RELEASE_LIBRARY)  
     if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)            
-      if (libuv_RELEASE_LIBRARY) 
-        list(APPEND libuv_LIBRARY "optimized" ${libuv_RELEASE_LIBRARY})
+      if (LibUV_RELEASE_LIBRARY) 
+        list(APPEND LibUV_LIBRARY "optimized" ${LibUV_RELEASE_LIBRARY})
       endif()
-      if (libuv_DEBUG_LIBRARY)
-        list(APPEND libuv_LIBRARY "debug" ${libuv_DEBUG_LIBRARY})
+      if (LibUV_DEBUG_LIBRARY)
+        list(APPEND LibUV_LIBRARY "debug" ${LibUV_DEBUG_LIBRARY})
       endif()
     else()    
-      if (libuv_RELEASE_LIBRARY) 
-        list(APPEND libuv_LIBRARY ${libuv_RELEASE_LIBRARY})
-      elseif (libuv_DEBUG_LIBRARY) 
-        list(APPEND libuv_LIBRARY ${libuv_DEBUG_LIBRARY})
+      if (LibUV_RELEASE_LIBRARY) 
+        list(APPEND LibUV_LIBRARY ${LibUV_RELEASE_LIBRARY})
+      elseif (LibUV_DEBUG_LIBRARY) 
+        list(APPEND LibUV_LIBRARY ${LibUV_DEBUG_LIBRARY})
       endif()
     endif()  
-    mark_as_advanced(libuv_DEBUG_LIBRARY libuv_RELEASE_LIBRARY)
+    mark_as_advanced(LibUV_DEBUG_LIBRARY LibUV_RELEASE_LIBRARY)
   endif()
 
 else()
 
   # TODO: libuv lib names for various systems
-  #set(libuv_LIB_NAMES "libuv")
+  #set(LibUV_LIB_NAMES "libuv")
 
   #if(CMAKE_COMPILER_IS_GNUCXX)
   #  # Get the GCC compiler version
@@ -75,10 +75,10 @@ else()
   #               OUTPUT_VARIABLE _gcc_COMPILER_VERSION
   #               OUTPUT_STRIP_TRAILING_WHITESPACE)
   #
-  #  set(libuv_LIB_NAMES ${libuv_LIB_NAMES} libjson_linux-gcc-${_gcc_COMPILER_VERSION}_libmt.so)
+  #  set(LibUV_LIB_NAMES ${LibUV_LIB_NAMES} libjson_linux-gcc-${_gcc_COMPILER_VERSION}_libmt.so)
   #endif()
 
-  find_library(libuv_LIBRARY 
+  find_library(LibUV_LIBRARY 
     NAMES 
       libuv
       liblibuv
@@ -91,21 +91,21 @@ else()
 
 endif()
 
-if(libuv_LIBRARY AND libuv_INCLUDE_DIR)
-  set(libuv_FOUND 1)
-  mark_as_advanced(libuv_LIBRARY libuv_INCLUDE_DIR)
+if(LibUV_LIBRARY AND LibUV_INCLUDE_DIR)
+  set(LibUV_FOUND 1)
+  mark_as_advanced(LibUV_LIBRARY LibUV_INCLUDE_DIR)
 else()
-  set(libuv_FOUND 0)
+  set(LibUV_FOUND 0)
 endif()
 
-#get_filename_component(libuv_LIBRARY_DIR "${libuv_LIBRARY}" PATH)
-#get_filename_component(libuv_LIBRARY "${libuv_LIBRARY}" NAME)
+#get_filename_component(LibUV_LIBRARY_DIR "${LibUV_LIBRARY}" PATH)
+#get_filename_component(LibUV_LIBRARY "${LibUV_LIBRARY}" NAME)
     
 # ----------------------------------------------------------------------
 # Display status
 # ----------------------------------------------------------------------
-if(NOT libuv_FOUND)
-   if(libuv_FIND_REQUIRED)
+if(NOT LibUV_FOUND)
+   if(LibUV_FIND_REQUIRED)
       message(FATAL_ERROR "libuv was not found. Please build dependencies first, or specify the path manually.")
    endif()
 endif()

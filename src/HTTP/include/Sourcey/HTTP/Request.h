@@ -28,8 +28,8 @@
 #include <sstream>
 
 	
-namespace Scy { 
-namespace HTTP {
+namespace scy { 
+namespace http {
 
 
 class Request: public Poco::Net::HTTPRequest
@@ -69,7 +69,7 @@ public:
 		/// An optional HTML form.
 
 	std::stringstream body;
-		/// The HTTP request data.
+		/// The HTTP request body data.
 
 protected:
 	NameValueCollection _params;
@@ -80,7 +80,7 @@ private:
 };
 
 
-} } // namespace Scy::HTTP
+} } // namespace scy::http
 
 
 #endif

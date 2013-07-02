@@ -25,8 +25,8 @@
 #include <sstream>
 
 	
-namespace Scy { 
-namespace HTTP {
+namespace scy { 
+namespace http {
 
 
 class Response: public Poco::Net::HTTPResponse
@@ -65,7 +65,7 @@ public:
 };
 
 
-} } // namespace Scy::HTTP
+} } // namespace scy::http
 
 
 #endif
