@@ -225,6 +225,7 @@ set(HAVE_FFMPEG 0)
 set(HAVE_OPENCV 0)
 set(HAVE_WXWIDGETS 0)
 set(HAVE_LIBUV 0)
+set(HAVE_HTTP_PARSER 0)
   
 if(BUILD_DEPENDENCIES)
   # TODO: Search for library and conditional build

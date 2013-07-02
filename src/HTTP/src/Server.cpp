@@ -17,28 +17,118 @@
 //
 
 
-#include "Sourcey/HTTP/Server.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Util.h"
-
-#include "Poco/Net/HTTPServerConnection.h"
-
 
 using namespace std;
 
 
-namespace Scy { 
-namespace HTTP {
+#include "Sourcey/HTTP/Server.h"
+#include "Sourcey/Logger.h"
+#include "Sourcey/Util.h"
+
+
+namespace scy { 
+namespace http {
+
+
+// -------------------------------------------------------------------
+// Server Connection
+//
+ServerConnection::ServerConnection(Server& server, const net::Socket& socket) : 
+	Connection(socket, HTTP_REQUEST), _server(server), _responder(NULL)
+{	
+	traceL("ServerConnection", this) << "Creating" << endl;
+}
 
 	
-Server::Server(Poco::Net::HTTPRequestHandlerFactory::Ptr pFactory, const Poco::Net::ServerSocket& socket, Poco::Net::HTTPServerParams::Ptr pParams):
+ServerConnection::~ServerConnection() 
+{	
+	traceL("ServerConnection", this) << "Destroying" << endl;
+	if (_responder)
+		delete _responder;
+}
+
+
+Poco::Net::HTTPMessage* ServerConnection::headers() 
+{ 
+	return static_cast<Poco::Net::HTTPMessage*>(_response); 
+}
+
+
+bool ServerConnection::respond(bool whiny)
+{
+	traceL("ServerConnection", this) << "Respond" << endl;
+	
+	// KLUDGE: Temp solution for quick sending small requests only.
+	// Use Connection::sendBytes() for nocopy binary stream.
+	return sendBytes(
+		_response->body.str().data(),
+		_response->body.str().length());
+}
+
+			
+Server& ServerConnection::server()
+{
+	return _server;
+}
+	
+
+//
+// Parser callbacks
+//
+
+void ServerConnection::onParserHeadersDone() 
+{
+	// When headers have been parsed we instantiate the request handler
+	_responder = _server.createResponser(*this);
+	assert(_responder);
+	_responder->onRequestHeaders(*_request);
+}
+
+
+void ServerConnection::onParserChunk(const char* buf, size_t len)
+{
+	// Just keep request body / chunks to the handler.
+	// The handler can manage the buffer as required.
+	_buffer.write(buf, len);
+
+	assert(_responder);
+	_responder->onRequestBody(_buffer);
+}
+
+
+void ServerConnection::onParserDone() 
+{
+	traceL("ServerConnection", this) << "On Message Complete" << endl;	
+
+	// The HTTP request is complete.
+	// The request handler can give a response.
+	assert(_responder);
+	_responder->onRequestComplete(*_request, *_response);
+}
+
+
+} } // namespace scy::http
+
+
+
+
+
+
+
+
+
+
+
+	/*
+
+Server::Server(Poco::Net::HTTPServerResponserFactory::Ptr pFactory, const Poco::Net::ServerSocket& socket, Poco::Net::HTTPServerParams::Ptr pParams):
 	Poco::Net::TCPServer(new ServerConnectionFactory(this, pParams, pFactory), socket, pParams),
 	_pFactory(pFactory)
 {
 }
 
 
-Server::Server(Poco::Net::HTTPRequestHandlerFactory::Ptr pFactory, Poco::ThreadPool& threadPool, 
+Server::Server(Poco::Net::HTTPServerResponserFactory::Ptr pFactory, Poco::ThreadPool& threadPool, 
 		const Poco::Net::ServerSocket& socket, Poco::Net::HTTPServerParams::Ptr pParams):
 	Poco::Net::TCPServer(new ServerConnectionFactory(this, pParams, pFactory), threadPool, socket, pParams),
 	_pFactory(pFactory)
@@ -50,7 +140,7 @@ Server::~Server()
 {
 	{		
 		Poco::FastMutex::ScopedLock lock(_mutex);
-		Scy::Util::ClearVector(_connectionHooks);
+		scy::util::ClearVector(_connectionHooks);
 	}
 }
 
@@ -72,13 +162,14 @@ ServerConnectionHookVec Server::connectionHooks() const
 Poco::Net::TCPServerConnection* Server::handleSocketConnection(const Poco::Net::StreamSocket& socket)
 {	
 	Poco::Net::TCPServerConnection* conn = NULL;
-	/*
+
+
 	// TODO: How does POCO handle these half-open requests
 	try 
 	{
 		ServerConnectionHookVec hooks = connectionHooks();
 		if (!hooks.empty()) {
-			LogTrace("HTTPServer") << "Reading Request" << endl;
+			traceL("HTTPServer") << "Reading Request" << endl;
 			Poco::Net::StreamSocket ss(socket);
 			char buffer[4096];
 			ss.setReceiveTimeout(Poco::Timespan(2,0));
@@ -94,14 +185,13 @@ Poco::Net::TCPServerConnection* Server::handleSocketConnection(const Poco::Net::
 	catch (Exception& exc) {
 		LogError("HTTPServer") << "Hook Error: " << exc.displayText() << endl;
 	}
-	*/
 	return conn;
 }
 
 
 // ---------------------------------------------------------------------
 //
-ServerConnectionFactory::ServerConnectionFactory(Server* server, Poco::Net::HTTPServerParams::Ptr pParams, Poco::Net::HTTPRequestHandlerFactory::Ptr pFactory):
+ServerConnectionFactory::ServerConnectionFactory(Server* server, Poco::Net::HTTPServerParams::Ptr pParams, Poco::Net::HTTPServerResponserFactory::Ptr pFactory):
 	_server(server),
 	_pParams(pParams),
 	_pFactory(pFactory)
@@ -117,15 +207,11 @@ ServerConnectionFactory::~ServerConnectionFactory()
 
 Poco::Net::TCPServerConnection* ServerConnectionFactory::createConnection(const Poco::Net::StreamSocket& socket)
 {
-	/*
 	Poco::Net::TCPServerConnection* conn = _server->handleSocketConnection(socket);
 	if (conn) {		
-		LogTrace("ServerConnectionFactory") << "Hook Overriding" << endl;
+		traceL("ServerConnectionFactory") << "Hook Overriding" << endl;
 		return conn;
 	}
-	*/
-	return new Poco::Net::HTTPServerConnection(socket, _pParams, _pFactory);
+	return new Poco::Net::ServerConnection(socket, _pParams, _pFactory);
 }
-
-
-} } // namespace Scy::HTTP
+	*/

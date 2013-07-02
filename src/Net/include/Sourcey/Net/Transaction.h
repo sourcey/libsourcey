@@ -239,7 +239,7 @@ protected:
 };
 
 
-template <class PacketT>
+template <class PacketT> //, class EmitterT
 class Transaction: public PacketTransaction<PacketT>, public PacketSocketEmitter
 	/// This class provides request/response functionality for IPacket
 	/// types emitted from a SocketBase.
@@ -258,14 +258,14 @@ public:
 		debugL("NetTransaction", this) << "Creating" << std::endl;
 
 		// Default options, can be overridden
-		PacketSocketEmitter::socket->base().registerEmitter(*this, true);
+		PacketSocketEmitter::socket->base().addObserver(*this, true);
 		PacketSocketEmitter::priority = 100;
 	}
 
 	virtual ~Transaction()
 	{
 		debugL("NetTransaction", this) << "Destroying" << std::endl;
-		PacketSocketEmitter::socket->base().unregisterEmitter(*this);
+		PacketSocketEmitter::socket->base().removeObserver(*this);
 	}
 
 	virtual bool send()

@@ -24,7 +24,7 @@ macro(include_dependency name)
   
   # Exit message on failure
   if (NOT ${var_root}_FOUND)
-    message("Failed to include dependency: ${name}") 
+    message("Failed to include dependency: ${name}. Please build LibSourcey dependencies first by enabling BUILD_DEPENDENCIES and disabling BUILD_MODULES and BUILD_APPLICATIONS") 
     return()
   endif()
   

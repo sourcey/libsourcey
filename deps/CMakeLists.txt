@@ -13,6 +13,11 @@ if(BUILD_DEPENDENCIES AND BUILD_DEPENDENCY_libuv)
   add_subdirectory(libuv)
 endif()
 
+ask_build_sourcey_dependency(http_parser)
+if(BUILD_DEPENDENCIES AND BUILD_DEPENDENCY_http_parser) 
+  add_subdirectory(http_parser)
+endif()
+
 ask_build_sourcey_dependency(pugixml)
 if(BUILD_DEPENDENCIES AND BUILD_DEPENDENCY_pugixml) 
   add_subdirectory(pugixml)

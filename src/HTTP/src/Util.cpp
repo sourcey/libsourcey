@@ -26,8 +26,8 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy {
-namespace Util {
+namespace scy {
+namespace util {
 
 
 string parseURI(const string& request) 
@@ -51,7 +51,7 @@ string parseURI(const string& request)
 bool matchURI(const std::string& uri, const std::string& expression) 
 {
 	string::size_type index = uri.find("?");
-	return Util::matchNodes(uri.substr(0, index), expression, "/");
+	return util::matchNodes(uri.substr(0, index), expression, "/");
 }
 
 
@@ -129,5 +129,5 @@ bool parseURIQuery(const string& uri, Poco::Net::NameValueCollection& out)
 }
 
 
-} // namespace Util
-} // namespace Scy
+} // namespace util
+} // namespace scy

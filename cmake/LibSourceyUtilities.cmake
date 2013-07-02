@@ -200,7 +200,7 @@ endmacro()
 # define_sourcey_module for each module.
 #
 macro(ask_build_sourcey_module name)
-  if(BUILD_MODULE_MODULES)
+  if(BUILD_MODULES)
     set(BUILD_MODULE_${name} ON CACHE BOOL "Build LibSourcey module: ${name}")   
   endif()    
   if(BUILD_MODULE_${name})

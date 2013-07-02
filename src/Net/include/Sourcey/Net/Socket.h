@@ -21,11 +21,6 @@
 #define SOURCEY_NET_SocketBase_H
 
 
-/*
-#include "Sourcey/UV/UVPP.h"
-#include "Sourcey/UV/Base.h"
-*/
-
 #include "Sourcey/Base.h"
 #include "Sourcey/Memory.h"
 #include "Sourcey/IPacket.h"
@@ -39,8 +34,11 @@ namespace net {
 
 
 class Socket;
-class SocketEmitter;
 class SocketPacket;
+class SocketObserver;
+class SocketEmitter;
+
+
 class SocketBase
 	/// SocketBase is the abstract base interface from      
 	/// which all socket contexts derive.
@@ -82,17 +80,17 @@ public:
 	virtual void release() = 0;
 	virtual int refCount() const = 0;
 	
-	virtual void registerEmitter(SocketEmitter& emitter, bool shared = false);
-	virtual void unregisterEmitter(SocketEmitter& emitter);
-	virtual void sortEmitters();
+	virtual void addObserver(SocketObserver& observer, bool shared = false);
+	virtual void removeObserver(SocketObserver& observer);
+	virtual void sortObservers();
 
 protected:
 	virtual ~SocketBase() {};
 
-	std::vector<SocketEmitter*> _emitters;
+	std::vector<SocketObserver*> _observers;
 	
 	friend class Socket;
-	friend class SocketEmitter;
+	friend class SocketObserver;
 };
 
 
@@ -233,15 +231,59 @@ protected:
 
 // -------------------------------------------------------------------
 //
-class SocketEmitter
-	/// SocketEmitter can be extended by any class to receive
-	/// socket callback events.
+class SocketObserver
+	/// SocketObserver is the short and sweet socket event handling 
+	/// interface which is also directly responsible for incrementing and 
+	/// deincrementing the reference count of the underlying SocketBase.
+	/// 
+	/// This class can also be extended to implement custom processing 
+	/// for received socket data before it is dispatched to the application.
+	/// See the SocketEmitter, PacketSocket and Transaction classes for ideas.
+	///
+	/// TODO: SocketBase pointer here
+	///
+{
+public:
+	SocketObserver(int priority = 0);
+	
+	virtual ~SocketObserver();
+
+	virtual void onConnect() = 0;
+	virtual void onRecv(Buffer& buf, const Address& peerAddr) = 0;
+	virtual void onError(int syserr, const std::string& message) = 0;
+	virtual void onClose() = 0;
+	
+	int priority;
+		/// A higher priority gives the current observer
+		/// precedence in the socket callback chain.
+
+	static bool compareProiroty(const SocketObserver* l, const SocketObserver* r) {
+		return l->priority > r->priority;
+	}
+};
+
+
+// -------------------------------------------------------------------
+//
+class SocketEmitter: public SocketObserver
+	/// SocketEmitter is an proxy layer which is attached to a
+	/// SocketBase instance to handle socket events.
+	///
+	/// SocketEmitters are directly responsible for incrementing and 
+	/// deincrementing the reference count of the managing SocketBase.
+	/// 
+	/// This class can also be extended to implement custom processing 
+	/// for received socket data before it is dispatched to the application.
+	/// See the PacketSocketEmitter and Transaction classes for ideas.
+	///
+	/// TODO: Rename to SocketObserver, and extend as SocketEmitter with signals
+	///
 {
 public:
 	SocketEmitter(Socket* socket = NULL, int priority = 0);
 		/// Creates the SocketEmitter
-		/// The Socket instance must be set before 
-		/// any callbacks come back.
+		/// The Socket instance can be NULL, but it must be set 
+		/// before any callbacks come back.
 	
 	virtual ~SocketEmitter();
 
@@ -251,11 +293,6 @@ public:
 	virtual void onClose();
 	
 	Socket* socket;
-	int priority;
-
-	static bool compareProiroty(const SocketEmitter* l, const SocketEmitter* r) {
-		return l->priority > r->priority;
-	}
 };
 
 

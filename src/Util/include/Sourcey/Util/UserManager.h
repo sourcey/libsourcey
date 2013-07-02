@@ -20,7 +20,6 @@
 #ifndef SOURCEY_UserManager_H
 #define SOURCEY_UserManager_H
 
-
 #include "Sourcey/EventfulManager.h"
 #include <map>
 
