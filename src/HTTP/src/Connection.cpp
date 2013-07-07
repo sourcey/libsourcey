@@ -34,7 +34,6 @@ namespace scy {
 namespace http {
 
 
-
 Connection::Connection(const net::Socket& socket, http_parser_type type) : 
 	_parser(*this, type),
 	_request(new Request),
@@ -65,15 +64,16 @@ Connection::~Connection()
 bool Connection::sendHeaders(bool whiny)
 {
 	assert(!_sentResponseHeaders);
-	assert(headers());
+	assert(outgoingHeaders());
 	
 	ostringstream os;
-	headers()->write(os);
+	outgoingHeaders()->write(os);
 	string headers(os.str().data(), os.str().length());
 
-	_timeout.start();
+	traceL("Connection", this) << "Send Headers >>>>: " << headers << endl; // remove me
 
-	traceL("Client", this) << "Send Headers >>>>: " << headers << std::endl; // remove me
+	_timeout.start();
+	_sentResponseHeaders = true;
 
 	return _socket.send(headers.data(), headers.length()) > 0;
 }
@@ -86,23 +86,38 @@ bool Connection::sendBytes(const char* buf, size_t len, bool whiny)
 	// TODO: Send mutex in the future - not needed 
 	// now because we are running in single thread mode.
 
-	traceL("Client", this) << ">>>> SEND: " << string(buf, len) << std::endl; // remove me
-
 	// Send headers
 	if (!_sentResponseHeaders) 
 		sendHeaders(whiny);
 
-	// Send body / chunk
-	bool res = _socket.send(buf, len) > 0;
-	
-	// Close unless keepalive
-	traceL("Client", this) << ">>>> keepalive: " << _response->getKeepAlive() << std::endl; 
-	if (!_response->getKeepAlive()) {
-		_socket.close();
-	}
+	//traceL("Connection", this) << "SEND >>>>\n" << string(buf, len) << endl; // remove me
 
-	return res;
-}	
+	// Send body / chunk
+	return _socket.send(buf, len) > 0;
+}
+
+
+void Connection::close()
+{
+	traceL("Connection", this) << "Close" << endl;	
+	assert(!_closed);
+	assert(_socket.base().refCount() == 2);
+	
+	_closed = true;
+	_socket.base().removeObserver(*this);
+	_socket.close();
+
+	onClose();
+		
+	deleteLater<Connection>(this); // destroy it
+}
+
+
+void Connection::onClose()
+{
+	Close.emit(this);
+}
+
 
 Request& Connection::request()
 {
@@ -120,6 +135,12 @@ net::Socket& Connection::socket()
 {
 	return _socket;
 }
+	
+
+Buffer& Connection::buffer()
+{
+	return static_cast<net::TCPBase&>(_socket.base()).buffer();
+}
 
 	
 bool Connection::closed()
@@ -134,19 +155,11 @@ bool Connection::expired()
 }
 
 
-void Connection::close()
-{
-	_closed = true;
-	_socket.close();
-	_socket.base().removeObserver(*this);
-}
-
-
 //
 // Socket callbacks
 //
 
-void Connection::onRecv(Buffer& buf, const net::Address& peerAddr)
+void Connection::onSocketRecv(Buffer& buf, const net::Address& peerAddr)
 {
 	traceL("Connection", this) << "On socket recv" << endl;	
 	_timeout.stop();
@@ -154,9 +167,12 @@ void Connection::onRecv(Buffer& buf, const net::Address& peerAddr)
 }
 
 
-void Connection::onClose()
+void Connection::onSocketClose()
 {
-	traceL("Connection", this) << "On socket close: " << _socket.Close.refCount() << endl;	
+	traceL("Connection", this) << "On socket close" << endl;	
+
+	// Close the connection when the socket closes
+	close();
 }
 
 
@@ -166,12 +182,11 @@ void Connection::onClose()
 
 void Connection::onParserHeader(const string& name, const string& value) 
 {
-	traceL("Connection", this) << "On header: " << name << ": " << value << endl;	
-
+	//traceL("Connection", this) << "On header: " << name << ": " << value << endl;	
 	// TODO: handle onStatus and do request status line handling there
-
-	headers()->add(name, value);
+	//incomingHeaders()->add(name, value);
 }
+
 
 void Connection::onParserError(const ParserError& err)
 {
@@ -184,6 +199,16 @@ void Connection::onParserError(const ParserError& err)
 
 
 
+	
+	/*
+	bool res = _socket.send(buf, len) > 0;
+
+	// Close unless keepalive
+	if (!_response->getKeepAlive()) {
+		traceL("Client", this) << "Closing: No keepalive" << endl; 
+		_socket.close();
+	}
+	*/	
 
 
 

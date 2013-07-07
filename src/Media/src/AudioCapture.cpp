@@ -23,11 +23,11 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Scy;
+using namespace scy;
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format) : 
@@ -37,14 +37,14 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFo
 	_format(format),
 	_isOpen(false)
 {
-	LogTrace("AudioCapture", this) << "Creating" << endl;
+	traceL("AudioCapture", this) << "Creating" << endl;
 
 	_iParams.deviceId = _deviceId;
 	_iParams.nChannels = _channels;
 	_iParams.firstChannel = 0;
 
 	if (_audio.getDeviceCount() < 1) {
-		LogWarn("AudioCapture", this) << "No audio devices found!" << endl;
+		warnL("AudioCapture", this) << "No audio devices found!" << endl;
 		return;
 	}
 
@@ -53,13 +53,13 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFo
 		
 	// Open the audio stream or throw an exception.
 	open(); //channels, sampleRate
-	LogTrace("AudioCapture", this) << "Creating: OK" << endl;
+	traceL("AudioCapture", this) << "Creating: OK" << endl;
 }
 
 
 AudioCapture::~AudioCapture()
 {
-	LogTrace("AudioCapture", this) << "Destroying" << endl;
+	traceL("AudioCapture", this) << "Destroying" << endl;
 }
 
 
@@ -69,7 +69,7 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 		close();
 
 	FastMutex::ScopedLock lock(_mutex);
-	LogTrace("AudioCapture", this) << "Opening: " << _channels << ": " << _sampleRate << endl;
+	traceL("AudioCapture", this) << "Opening: " << _channels << ": " << _sampleRate << endl;
 	
 	//_channels = channels;
 	//_sampleRate = sampleRate;
@@ -81,7 +81,7 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 		_audio.openStream(NULL, &_iParams, _format, _sampleRate, &nBufferFrames, &AudioCapture::callback, (void*)this);
 		_error = "";
 		_isOpen = true;
-		LogTrace("AudioCapture", this) << "Opening: OK" << endl;
+		traceL("AudioCapture", this) << "Opening: OK" << endl;
 	}
 	catch (RtError& e) {
 		setError("Cannot open audio capture: " + e.getMessage());
@@ -94,13 +94,13 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 
 void AudioCapture::close()
 {	
-	LogTrace("AudioCapture", this) << "Closing" << endl;
+	traceL("AudioCapture", this) << "Closing" << endl;
 	try {
 		FastMutex::ScopedLock lock(_mutex);
 		_isOpen = false;
 		if (_audio.isStreamOpen())
 			_audio.closeStream();
-		LogTrace("AudioCapture", this) << "Closing: OK" << endl;
+		traceL("AudioCapture", this) << "Closing: OK" << endl;
 	}
 	catch (RtError& e) {
 		setError("Cannot close audio capture: " + e.getMessage());
@@ -113,14 +113,14 @@ void AudioCapture::close()
 
 void AudioCapture::start()
 {	
-	LogTrace("AudioCapture", this) << "Starting" << endl;
+	traceL("AudioCapture", this) << "Starting" << endl;
 
 	if (!isRunning()) {
 		try {
 			FastMutex::ScopedLock lock(_mutex);
 			_audio.startStream();
 			_error = "";
-			LogTrace("AudioCapture", this) << "Starting: OK" << endl;
+			traceL("AudioCapture", this) << "Starting: OK" << endl;
 		}
 		catch (RtError& e) {
 			setError("Cannot start audio capture: " + e.getMessage());
@@ -134,14 +134,14 @@ void AudioCapture::start()
 
 void AudioCapture::stop()
 {	
-	LogTrace("AudioCapture", this) << "Stopping" << endl;
+	traceL("AudioCapture", this) << "Stopping" << endl;
 
 	if (isRunning()) {
 		try {
 			FastMutex::ScopedLock lock(_mutex);
-			LogTrace("AudioCapture", this) << "Stopping: Before" << endl;
+			traceL("AudioCapture", this) << "Stopping: Before" << endl;
 			_audio.stopStream();
-			LogTrace("AudioCapture", this) << "Stopping: OK" << endl;
+			traceL("AudioCapture", this) << "Stopping: OK" << endl;
 		}
 		catch (RtError& e) {
 			setError("Cannot stop audio capture: " + e.getMessage());
@@ -156,7 +156,7 @@ void AudioCapture::stop()
 void AudioCapture::attach(const PacketDelegateBase& delegate)
 {
 	PacketEmitter::attach(delegate);
-	LogDebug("AudioCapture", this) << "Added Delegate: " << refCount() << endl;
+	debugL("AudioCapture", this) << "Added Delegate: " << refCount() << endl;
 	if (refCount() == 1)
 		start();
 }
@@ -165,10 +165,10 @@ void AudioCapture::attach(const PacketDelegateBase& delegate)
 bool AudioCapture::detach(const PacketDelegateBase& delegate) 
 {
 	if (PacketEmitter::detach(delegate)) {
-		LogDebug("AudioCapture", this) << "Removed Delegate: " << refCount() << endl;
+		debugL("AudioCapture", this) << "Removed Delegate: " << refCount() << endl;
 		if (refCount() == 0)
 			stop();
-		LogDebug("AudioCapture", this) << "Removed Delegate: OK" << endl;
+		debugL("AudioCapture", this) << "Removed Delegate: OK" << endl;
 		return true;
 	}
 	return false;
@@ -178,7 +178,7 @@ bool AudioCapture::detach(const PacketDelegateBase& delegate)
 void AudioCapture::setError(const string& message)
 {
 	_error = message;
-	LogError("AudioCapture", this) << "Error: " << message << endl;
+	errorL("AudioCapture", this) << "Error: " << message << endl;
 	throw Exception(message);
 }
 
@@ -189,11 +189,11 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 	AudioCapture* klass = (AudioCapture*)data;
 	
 	if (status) 
-		LogError("AudioCapture", klass) << "Stream over/underflow detected" << endl;
+		errorL("AudioCapture", klass) << "Stream over/underflow detected" << endl;
 
 	assert(inputBuffer != NULL);
 	if (inputBuffer == NULL) {
-		LogError("AudioCapture", klass) << "Input buffer is NULL." << endl;
+		errorL("AudioCapture", klass) << "Input buffer is NULL." << endl;
 		return 2;
 	} 
 
@@ -222,19 +222,18 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 		size = 8;
 	else assert(0 && "unknown audio capture format");
 
-	AudioPacket packet(
-		(unsigned char*)inputBuffer, 
+	AudioPacket packet((const char*)inputBuffer, 
 		nBufferFrames * klass->numChannels() * size, //sizeof(AUDIO_DATA),
 		(double)streamTime);
 
-	//LogTrace() << "[AudioCapture] AudioPacket: " 
+	//traceL() << "[AudioCapture] AudioPacket: " 
 	//	<< "\n\tPacket Ptr: " << inputBuffer
 	//	<< "\n\tPacket Size: " << packet.size() 
 	//	<< "\n\tStream Time: " << packet.time
 	//	<< endl;
 
 	klass->emit(klass, packet);
-	//LogTrace("AudioCapture", klass) << "Callback: OK" << endl;
+	//traceL("AudioCapture", klass) << "Callback: OK" << endl;
 	return 0;
 }
 
@@ -281,4 +280,4 @@ int AudioCapture::numChannels() const
 }
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av

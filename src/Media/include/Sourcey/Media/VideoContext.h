@@ -37,8 +37,8 @@ extern "C" {
 }
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 struct VideoConversionContext;
@@ -191,7 +191,7 @@ void InitVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
 
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif	// SOURCEY_MEDIA_VideoContext_H

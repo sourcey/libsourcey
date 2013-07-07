@@ -25,8 +25,8 @@
 #include "Sourcey/IPacket.h"
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 
 
 class Packet: public IPacket 
@@ -133,8 +133,8 @@ protected:
 };
 
 
-} // namespace RTP
-} // namespace Scy 
+} // namespace rtp
+} // namespace scy 
 
 
 #endif

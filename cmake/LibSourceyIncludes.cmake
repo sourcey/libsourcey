@@ -110,6 +110,7 @@ macro(include_sourcey_modules)
       set(LibSourcey_${name}_DEBUG LibSourcey_${name}_DEBUG-NOTFOUND)
       set(LibSourcey_${name}_DEBUG LibSourcey_${name}_DEBUG-NOTFOUND PARENT_SCOPE)  
       
+    
       # Since CMake doesn't give priority to the PATHS parameter, we need to search twice:
       # once using NO_DEFAULT_PATH, and once using default values.         
       find_library(LibSourcey_${name}_RELEASE "${lib_name}" 

@@ -25,7 +25,7 @@ using namespace std;
 
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
@@ -34,10 +34,10 @@ V::V(const string& src) :
 {
 	size_t len = src.length();
 	if (src.substr(0, 2) != "v=") {
-		LogError() << "ERROR: SDP line does not start with <v=>" << std::endl;
+		errorL() << "ERROR: SDP line does not start with <v=>" << std::endl;
 	}
 
-	_version = Util::fromString<UInt32>(src.substr(2, src.length()).c_str());
+	_version = util::fromString<UInt32>(src.substr(2, src.length()).c_str());
 }
 
 
@@ -62,10 +62,10 @@ void V::setVersion(unsigned int ver)
 
 string V::toString() 
 {
-	return "v=" + Util::toString(_version);
+	return "v=" + util::toString(_version);
 }
 
 
 } // namespace SDP 
-} // namespace Scy
+} // namespace scy
 

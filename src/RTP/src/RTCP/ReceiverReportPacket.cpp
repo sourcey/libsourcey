@@ -27,8 +27,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 namespace RTCP {
 
 
@@ -60,18 +60,18 @@ bool ReceiverReportPacket::read(Buffer& buffer)
 
 	if (RTCP::Packet::read(buffer)) {
 		
-		buffer.readUInt32(ssrc);
+		buffer.readU32(ssrc);
 		
 		int remaining = length - 4 - 4;
 		while (remaining >= 24) {			
 			ReceiverReportBlock* report = new ReceiverReportBlock;
-			buffer.readUInt32(report->ssrc);
-			buffer.readUInt8(report->fractionLost);
-			buffer.readUInt16(report->totalLost);
-			buffer.readUInt32(report->highestSeqNum);
-			buffer.readUInt32(report->jitter);
-			buffer.readUInt32(report->lsr);
-			buffer.readUInt32(report->dlsr);
+			buffer.readU32(report->ssrc);
+			buffer.readU8(report->fractionLost);
+			buffer.readU16(report->totalLost);
+			buffer.readU32(report->highestSeqNum);
+			buffer.readU32(report->jitter);
+			buffer.readU32(report->lsr);
+			buffer.readU32(report->dlsr);
 			addReport(report);
 			remaining -= 24;
 		}
@@ -87,17 +87,17 @@ void ReceiverReportPacket::write(Buffer& buffer) const
 {
 	RTCP::Packet::write(buffer);
 	
-	buffer.writeUInt32(ssrc);
+	buffer.writeU32(ssrc);
 		
 	for (std::vector<ReceiverReportBlock*>::const_iterator it = _reports.begin(); it != _reports.end(); ++it) {
 		ReceiverReportBlock* report = *it;
-		buffer.writeUInt32(report->ssrc);
-		buffer.writeUInt8(report->fractionLost);
-		buffer.writeUInt16(report->totalLost);
-		buffer.writeUInt32(report->highestSeqNum);
-		buffer.writeUInt32(report->jitter);
-		buffer.writeUInt32(report->lsr);
-		buffer.writeUInt32(report->dlsr);
+		buffer.writeU32(report->ssrc);
+		buffer.writeU8(report->fractionLost);
+		buffer.writeU16(report->totalLost);
+		buffer.writeU32(report->highestSeqNum);
+		buffer.writeU32(report->jitter);
+		buffer.writeU32(report->lsr);
+		buffer.writeU32(report->dlsr);
 	}
 }
 
@@ -138,5 +138,5 @@ void ReceiverReportPacket::print(std::ostream& os) const
 
 
 } // namespace RTCP
-} // namespace RTP
-} // namespace Scy 
+} // namespace rtp
+} // namespace scy 

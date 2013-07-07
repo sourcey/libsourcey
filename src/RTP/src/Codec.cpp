@@ -25,19 +25,19 @@
 using namespace std;
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 
 
 // ---------------------------------------------------------------------
 Codec::Codec(int id, const string& name, int sampleRate, int bitRate) : //const string& name, 
-	Media::Codec(name, sampleRate, bitRate, true), id(id)
+	av::Codec(name, sampleRate, bitRate, true), id(id)
 {
 }
 
 	
 Codec::Codec(const Codec& r) :
-	Media::Codec(r.name, r.sampleRate, r.bitRate, r.enabled), id(r.id)
+	av::Codec(r.name, r.sampleRate, r.bitRate, r.enabled), id(r.id)
 {
 }
 
@@ -58,7 +58,7 @@ Codec::Codec(const std::string& sdp) //:
 	// codec id
 	end = value.find(" ");
 	if (end != string::npos) {
-		id = Util::fromString<UInt32>(value.substr(start, end).c_str());
+		id = util::fromString<UInt32>(value.substr(start, end).c_str());
 	}
 
 	// codec name
@@ -71,7 +71,7 @@ Codec::Codec(const std::string& sdp) //:
 	// clockrate
 	start = end+1;
 	end = value.length(); 
-	sampleRate = Util::fromString<UInt32>(value.substr(start, end-start).c_str());
+	sampleRate = util::fromString<UInt32>(value.substr(start, end-start).c_str());
 }
 
 
@@ -156,5 +156,5 @@ string VideoCodec::toString() const
 */
 
 
-} // namespace RTP 
-} // namespace Scy
+} // namespace rtp 
+} // namespace scy

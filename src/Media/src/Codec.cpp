@@ -24,8 +24,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 // ---------------------------------------------------------------------
@@ -184,8 +184,8 @@ void VideoCodec::print(ostream& ost)
 }
 
 
-} // namespace Media 
-} // namespace Scy
+} // namespace av 
+} // namespace scy
 
 
 

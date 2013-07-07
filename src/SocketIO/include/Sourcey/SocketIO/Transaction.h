@@ -21,21 +21,21 @@
 #define SOURCEY_SocketIO_Transaction_H
 
 
-#include "Sourcey/PacketTransaction.h"
+#include "Sourcey/Net/Transaction.h"
 #include "Sourcey/SocketIO/Packet.h"
 
 
-namespace Scy {
-namespace SocketIO {
+namespace scy {
+namespace sockio {
 
 
 class Client;
 
 
-struct Transaction: public PacketTransaction<SocketIO::Packet>
+struct Transaction: public net::PacketTransaction<sockio::Packet>
 {
-	Transaction(SocketIO::Client& client, long timeout = 10000);
-	Transaction(SocketIO::Client& client, const SocketIO::Packet& request, long timeout = 10000);
+	Transaction(sockio::Client& client, long timeout = 10000);
+	Transaction(sockio::Client& client, const sockio::Packet& request, long timeout = 10000);
 	virtual ~Transaction();
 	
 	virtual bool send();
@@ -45,11 +45,11 @@ struct Transaction: public PacketTransaction<SocketIO::Packet>
 	virtual void onResponse();
 	virtual void onComplete();
 
-	SocketIO::Client& client;
+	sockio::Client& client;
 };
 
 
-} } // namespace Scy::SocketIO
+} } // namespace scy::sockio
 
 
 #endif // SOURCEY_SocketIO_Transaction_H

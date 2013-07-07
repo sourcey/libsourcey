@@ -27,8 +27,8 @@
 #include "Sourcey/Symple/Address.h"
 
 
-namespace Scy {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 
 class Message: public JSON::Value, public IPacket
@@ -84,12 +84,12 @@ public:
 
 	void print(std::ostream& os) const;
 	
-	virtual const char* className() const { return "Symple::Message"; }
+	virtual const char* className() const { return "smple::Message"; }
 };
 
 
-} // namespace Symple 
-} // namespace Scy
+} // namespace smple 
+} // namespace scy
 
 
 #endif // SOURCEY_Symple_Message_H

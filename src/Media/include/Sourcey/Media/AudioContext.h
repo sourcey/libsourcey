@@ -37,8 +37,8 @@ extern "C" {
 }
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 	
 inline void InitDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts);
@@ -148,7 +148,7 @@ struct AudioResampler
 };
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif	// SOURCEY_MEDIA_AudioContext_H

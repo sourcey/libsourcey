@@ -27,8 +27,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 namespace RTCP {
 
 
@@ -54,12 +54,12 @@ bool SenderReportPacket::read(Buffer& buffer)
 {
 	if (RTCP::Packet::read(buffer)) {
 		
-		buffer.readUInt32(ssrc);
-		buffer.readUInt32(ntpMsw);
-		buffer.readUInt32(ntpLsw);
-		buffer.readUInt32(rtpTimestamp);
-		buffer.readUInt32(senderPacketCount);
-		buffer.readUInt32(senderOctetCount);
+		buffer.readU32(ssrc);
+		buffer.readU32(ntpMsw);
+		buffer.readU32(ntpLsw);
+		buffer.readU32(rtpTimestamp);
+		buffer.readU32(senderPacketCount);
+		buffer.readU32(senderOctetCount);
 		return true;
 	}
 
@@ -71,12 +71,12 @@ void SenderReportPacket::write(Buffer& buffer) const
 {
 	RTCP::Packet::write(buffer);
 	
-	buffer.writeUInt32(ssrc);
-	buffer.writeUInt32(ntpMsw);
-	buffer.writeUInt32(ntpLsw);
-	buffer.writeUInt32(rtpTimestamp);
-	buffer.writeUInt32(senderPacketCount);
-	buffer.writeUInt32(senderOctetCount);
+	buffer.writeU32(ssrc);
+	buffer.writeU32(ntpMsw);
+	buffer.writeU32(ntpLsw);
+	buffer.writeU32(rtpTimestamp);
+	buffer.writeU32(senderPacketCount);
+	buffer.writeU32(senderOctetCount);
 }
 
 
@@ -106,5 +106,5 @@ void SenderReportPacket::print(std::ostream& os) const
 
 
 } // namespace RTCP
-} // namespace RTP
-} // namespace Scy 
+} // namespace rtp
+} // namespace scy 

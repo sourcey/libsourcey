@@ -10,8 +10,8 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Scy;
-using namespace Scy::Media;
+using namespace scy;
+using namespace scy::av;
 
 
 IDeviceManager* devices;
@@ -22,13 +22,13 @@ IDeviceManager* devices;
 #ifdef _DEBUG
 #include "MemLeakDetect/MemLeakDetect.h"
 CMemLeakDetect memLeakDetect;
-#endif<DataPacket>
+#endif<RawPacket>
 */
 
 
 int main(int argc, char** argv)
 {
-	Scy::Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
+	scy::Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
 
 	devices = DeviceManagerFactory::create();
 	devices->initialize();

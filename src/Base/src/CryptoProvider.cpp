@@ -17,7 +17,7 @@
 //
 
 
-#include "Sourcey/CryptoProvider.h"
+#include "Sourcey/Crypto.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Util.h"
 
@@ -40,11 +40,11 @@ using namespace Poco::Crypto;
 
 
 namespace scy {
-namespace CryptoProvider {
+namespace crypt {
 
 
 // Generates a random binary key
-string generateRandomBinaryKey(int size, bool doBase64)
+string randomBinaryKey(int size, bool doBase64)
 {
 	string res;
 	ostringstream ostr;
@@ -64,29 +64,29 @@ string generateRandomBinaryKey(int size, bool doBase64)
 	} 
 	catch (...) 
 	{
-		errorL() << "CryptoProvider: Unknown Error" << endl;
+		errorL() << "crypt: Unknown Error" << endl;
 	}
 	return res;
 }
 
 
 // Generates a random key
-string generateRandomKey(int size)
+string randomKey(int size)
 {
 	string res;
 	try
 	{	
-		res = hash("md5", generateRandomBinaryKey(size)).substr(0, size);
+		res = hash("md5", randomBinaryKey(size)).substr(0, size);
 	}
 	catch (...)
 	{
-		errorL() << "CryptoProvider: Unknown Error" << endl;
+		errorL() << "crypt: Unknown Error" << endl;
 	}
 	return res;
 }
 
 
-UInt64 generateRandomNumber(int size)
+UInt64 randomNumber(int size)
 {
 	UInt64 res = 0;
 	stringstream strm;
@@ -104,7 +104,7 @@ UInt64 generateRandomNumber(int size)
 	}
 	catch (...)
 	{
-		errorL() << "CryptoProvider: Unknown Error" << endl;
+		errorL() << "crypt: Unknown Error" << endl;
 	}
 	return res;
 }
@@ -241,7 +241,7 @@ string decrypt(const string& algorithm, const string& data, const string& key, c
 
 
 #ifdef WIN32
-//hack for name collision of OCSP_RESPONSE and wincrypt.h in latest openssl release 0.9.8h
+//hack for name collision of OCSP_RESPONSE and winCrypto.h in latest openssl release 0.9.8h
 //http://www.google.com/search?q=OCSP%5fRESPONSE+wincrypt%2eh
 //continue to watch this issue for a real fix.
 #undef OCSP_RESPONSE
@@ -251,7 +251,7 @@ string decrypt(const string& algorithm, const string& data, const string& key, c
 
 std::string computeHMAC(const std::string& input, const std::string& key) {	
 	/*
-	debugL() << "CryptoProvider: Computing HMAC:\n"
+	debugL() << "crypt: Computing HMAC:\n"
 		<< "\tInput: " << input << "\n"
 		<< "\tInput Length: " << input.length() << "\n"
 		<< "\tKey: " << key << "\n"
@@ -285,5 +285,5 @@ void decryptFile(const string& password, const string& inputFileName,
 }
 
 
-} // namespace CryptoProvider
+} // namespace crypt
 } // namespace scy

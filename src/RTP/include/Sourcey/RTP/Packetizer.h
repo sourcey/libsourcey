@@ -26,8 +26,8 @@
 #include "Sourcey/RTP/Packet.h"
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 
 
 class Packetizer: public IPacketizer
@@ -55,8 +55,8 @@ public:
 		int size = 0;
 		while (!buf.eof()) {		
 			size = std::min<int>((int)buf.size() - buf.position(), (int)_mtu - _headerLength);			
-			_timestamp = Util::getTime();
-			RTP::Packet rtpPacket(buf.data(), size, _sequenceNumber++, _timestamp, _ssrc);
+			_timestamp = util::getTime();
+			rtp::Packet rtpPacket(buf.data(), size, _sequenceNumber++, _timestamp, _ssrc);
 			buf.consume(size);
 			rtpPacket.header().payloadType = _payloadType;
 			rtpPacket.header().marker = buf.eof();
@@ -78,8 +78,8 @@ protected:
 };
 
 
-} // namespace RTP
-} // namespace Scy 
+} // namespace rtp
+} // namespace scy 
 
 
 #endif

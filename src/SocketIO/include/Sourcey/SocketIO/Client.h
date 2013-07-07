@@ -21,8 +21,8 @@
 #define SOURCEY_SOCKETIO_Client_H
 
 
-#include "Sourcey/Net/Reactor.h"
-#include "Sourcey/Net/WebSocket.h"
+//#include "Sourcey/Net/Reactor.h"
+#include "Sourcey/HTTP/WebSocket.h"
 #include "Sourcey/SocketIO/Packet.h"
 #include "Sourcey/SocketIO/Transaction.h"
 #include "Sourcey/HTTP/Transaction.h"
@@ -33,8 +33,8 @@
 #include "Poco/Net/NameValueCollection.h"
 
 
-namespace Scy {
-namespace SocketIO {
+namespace scy {
+namespace sockio {
 
 
 struct ClientState: public State 
@@ -71,10 +71,10 @@ class Client: public StatefulSignal<ClientState>, public PacketEmitter, public I
 {
 public:
 	Client(Net::IWebSocket& socket, Runner& runner);
-	Client(Net::IWebSocket& socket, Runner& runner, const Net::Address& serverAddr);
+	Client(Net::IWebSocket& socket, Runner& runner, const net::Address& serverAddr);
 	virtual ~Client();
 	
-	virtual void connect(const Net::Address& serverAddr);
+	virtual void connect(const net::Address& serverAddr);
 	virtual void connect();
 	virtual void close();
 
@@ -87,21 +87,21 @@ public:
 	virtual int emit(const std::string& event, const JSON::Value& data, bool ack = false);
 		// Sends an Event packet
 
-	virtual int send(SocketIO::Packet::Type type, const std::string& data, bool ack = false);
+	virtual int send(sockio::Packet::Type type, const std::string& data, bool ack = false);
 		// Creates and sends packet from the given data
 
-	virtual int send(const SocketIO::Packet& packet);
+	virtual int send(const sockio::Packet& packet);
 		// Sends the given packet
 	
 	virtual int sendConnect(const std::string& endpoint = "", const std::string& query = "");
 		// Sends a Connect packet
 	
-	virtual Transaction* createTransaction(const SocketIO::Packet& request, long timeout = 10000);
+	virtual Transaction* createTransaction(const sockio::Packet& request, long timeout = 10000);
 		// Creates a packet transaction
 
 	virtual Runner& runner() const;
 	virtual Net::IWebSocket& socket() const;
-	virtual Net::Address serverAddr() const;
+	virtual net::Address serverAddr() const;
 	virtual std::string sessionID() const;	
 	virtual std::string error() const;
 		
@@ -121,20 +121,20 @@ protected:
 	virtual void onConnect();
 	virtual void onOnline();
 	virtual void onClose();
-	virtual void onPacket(SocketIO::Packet& packet);
+	virtual void onPacket(sockio::Packet& packet);
 	
 	virtual void onHeartBeatTimer(void*);
 	virtual void onSocketConnect(void*);
 	virtual void onSocketOnline(void*);
 	virtual void onSocketClose(void*);
-	virtual void onSocketData(void*, Buffer& data, const Net::Address&);
+	virtual void onSocketData(void*, Buffer& data, const net::Address&);
 
 protected:
 	mutable Poco::FastMutex	_mutex;
 	
 	Net::IWebSocket& _socket;
 	Runner&			_runner;
-	Net::Address	_serverAddr;
+	net::Address	_serverAddr;
 	StringVec		_protocols;
 	std::string		_sessionID;
 	std::string		_error;
@@ -156,7 +156,7 @@ public:
 	{
 	}
 
-	ClientBase(Net::Reactor& reactor, const Net::Address& serverAddr, Runner& runner = Runner::getDefault()) :
+	ClientBase(Net::Reactor& reactor, const net::Address& serverAddr, Runner& runner = Runner::getDefault()) :
 		_socket(reactor),
 		Client(_socket, runner, serverAddr)
 	{
@@ -169,7 +169,7 @@ protected:
 
 // ---------------------------------------------------------------------
 //
-typedef SocketIO::ClientBase< 
+typedef sockio::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
 			Net::SocketBase< Poco::Net::StreamSocket, Net::TCP, Net::IWebSocket >
@@ -180,7 +180,7 @@ typedef SocketIO::ClientBase<
 
 // ---------------------------------------------------------------------
 //
-typedef SocketIO::ClientBase< 
+typedef sockio::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
 			Net::SocketBase< Poco::Net::SecureStreamSocket, Net::SSLTCP, Net::IWebSocket >
@@ -189,7 +189,7 @@ typedef SocketIO::ClientBase<
 > SSLClient;
 
 
-} } // namespace Scy::SocketIO
+} } // namespace scy::sockio
 
 
 #endif //  SOURCEY_SOCKETIO_Client_H
@@ -202,20 +202,20 @@ typedef SocketIO::ClientBase<
 
 /*
 // ---------------------------------------------------------------------
-typedef SocketIO::ClientBase< 
+typedef sockio::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
-			Net::SocketBase< ::TCPContext, Net::IWebSocket >  //SocketIO::ISocket 
+			Net::SocketBase< ::TCPContext, Net::IWebSocket >  //sockio::ISocket 
 		> 
 	> 
 > Client;
 
 
 // ---------------------------------------------------------------------
-typedef SocketIO::ClientBase< 
+typedef sockio::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
-			Net::SocketBase< ::SSLContext, SocketIO::ISocket > 
+			Net::SocketBase< ::SSLContext, sockio::ISocket > 
 		> 
 	> 
 > SSLClient;
@@ -224,7 +224,7 @@ typedef SocketIO::ClientBase<
 
 
 	
-	//Signal<SocketIO::Packet> Packet;
+	//Signal<sockio::Packet> Packet;
 		/// Signals data received by the socket.
 	//virtual Net::IWebSocket* createSocket() = 0;
 		// Creates the underlying socket instance
@@ -243,7 +243,7 @@ typedef SocketIO::ClientBase<
 //	}
 //
 //
-//	ClientBase(Net::Reactor& reactor, const Net::Address& serverAddr) :
+//	ClientBase(Net::Reactor& reactor, const net::Address& serverAddr) :
 //		WebSocketBaseT(reactor),
 //		_serverAddr(serverAddr),
 //		_timer(NULL)
@@ -260,7 +260,7 @@ typedef SocketIO::ClientBase<
 //	}
 //
 //
-//	virtual void connect(const Net::Address& serverAddr)
+//	virtual void connect(const net::Address& serverAddr)
 //	{	
 //		{
 //			Poco::FastMutex::ScopedLock lock(_mutex);
@@ -291,7 +291,7 @@ typedef SocketIO::ClientBase<
 //		if (_socket->transport() == Net::SSLTCP)
 //			_uri.setScheme("wss");
 //		_uri.setPath("/socket.io/1/websocket/" + _sessionID);
-//		_socket->registerPacketType<SocketIO::Packet>(10);
+//		_socket->registerPacketType<sockio::Packet>(10);
 //		_socket->connect();
 //	}
 //
@@ -306,9 +306,9 @@ typedef SocketIO::ClientBase<
 //		if (_socket->transport() == Net::SSLTCP)
 //			uri.setScheme("https");
 //
-//		HTTP::Request* request = new HTTP::Request("POST", uri.toString());	
-//		HTTP::Transaction transaction(request);
-//		HTTP::Response& response = transaction.response();
+//		http::Request* request = new http::Request("POST", uri.toString());	
+//		http::Transaction transaction(request);
+//		http::Response& response = transaction.response();
 //		transaction.send();
 //
 //		Log("trace", this) << "SocketIO Handshake Response:" 
@@ -327,16 +327,16 @@ typedef SocketIO::ClientBase<
 //				static_cast<int>(response.getStatus()), response.getReason()));
 //
 //		// Parse the response response
-//		StringVec respData = Util::split(response.body.str(), ':', 4);
+//		StringVec respData = util::split(response.body.str(), ':', 4);
 //		if (respData.size() < 4)
 //			throw Exception(response.empty() ? 
 //				"Invalid SocketIO handshake response." : Poco::format(
 //				"Invalid SocketIO handshake response: %s", response.body.str()));
 //	
 //		_sessionID = respData[0];
-//		_heartBeatTimeout = Util::fromString<UInt32>(respData[1]);
-//		_connectionClosingTimeout = Util::fromString<UInt32>(respData[2]);
-//		_protocols = Util::split(respData[3], ',');
+//		_heartBeatTimeout = util::fromString<UInt32>(respData[1]);
+//		_connectionClosingTimeout = util::fromString<UInt32>(respData[2]);
+//		_protocols = util::split(respData[3], ',');
 //
 //		// Check websockets are supported
 //		bool wsSupported = false;
@@ -391,7 +391,7 @@ typedef SocketIO::ClientBase<
 //	}
 //
 //
-//	virtual int send(SocketIO::Packet::Type type, const std::string& data, bool ack)
+//	virtual int send(sockio::Packet::Type type, const std::string& data, bool ack)
 //	{
 //		Packet packet(type, data, ack);
 //		return send(packet);
@@ -412,7 +412,7 @@ typedef SocketIO::ClientBase<
 //	}
 //
 //
-//	virtual int send(const SocketIO::Packet& packet)
+//	virtual int send(const sockio::Packet& packet)
 //	{
 //		return _socket->send(packet);
 //	}
@@ -460,7 +460,7 @@ typedef SocketIO::ClientBase<
 //	}
 //	
 //
-//	virtual const char* className() const { return "SocketIO::SocketBase"; }
+//	virtual const char* className() const { return "sockio::SocketBase"; }
 //
 //	
 //protected:
@@ -488,7 +488,7 @@ typedef SocketIO::ClientBase<
 //protected:
 //	mutable Poco::FastMutex	_mutex;
 //	
-//	Net::Address	_serverAddr;
+//	net::Address	_serverAddr;
 //	StringVec		_protocols;
 //	std::string		_sessionID;
 //	int				_heartBeatTimeout;
@@ -500,18 +500,18 @@ typedef SocketIO::ClientBase<
 
 /*
 // ---------------------------------------------------------------------
-typedef SocketIO::ClientBase< 
+typedef sockio::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
-			Net::SocketBase< ::TCPContext, SocketIO::ISocket > 
+			Net::SocketBase< ::TCPContext, sockio::ISocket > 
 		> 
 	> 
 > Client;
 
-typedef SocketIO::ClientBase< 
+typedef sockio::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
-			Net::SocketBase< ::SSLContext, SocketIO::ISocket > 
+			Net::SocketBase< ::SSLContext, sockio::ISocket > 
 		> 
 	> 
 > SSLClient;
@@ -536,8 +536,8 @@ typedef SocketIO::ClientBase<
 		return _socket;
 	}
 	*/
-//typedef SocketIO::SocketBase< Net::SocketBase< ::SSLContext, SocketIO::ISocket> > SSLSocket;
- //Net::SocketBase< ::TCPContext, SocketIO::ISocket>
+//typedef sockio::SocketBase< Net::SocketBase< ::SSLContext, sockio::ISocket> > SSLSocket;
+ //Net::SocketBase< ::TCPContext, sockio::ISocket>
 	//bool			_secure;
 	//Net::IWebSocket* _socket;
 
@@ -566,16 +566,16 @@ typedef SocketIO::ClientBase<
 	virtual void setCookie(const std::string& cookie) = 0;
 
 	SocketBase(Net::ISocket& socket, Net::Reactor& reactor);
-	SocketBase(Net::ISocket& socket, Net::Reactor& reactor, const Net::Address& serverAddr);
+	SocketBase(Net::ISocket& socket, Net::Reactor& reactor, const net::Address& serverAddr);
 	*/
 
 
 
-//typedef SocketIO::SocketBase<Net::SSLContext, SocketIO::ISocket> SSLSocket;
+//typedef sockio::SocketBase<Net::SSLContext, sockio::ISocket> SSLSocket;
 
 
 	/*
-class Socket: public SocketIO::SocketBase<Net::TCPContext, SocketIO::ISocket>
+class Socket: public sockio::SocketBase<Net::TCPContext, sockio::ISocket>
 {
 public:
 	Socket(Reactor& reactor) : 
@@ -599,7 +599,7 @@ public:
 
 , public SocketBase
 template <class SocketBaseT, Net::TransportProtocol TransportT>
-class Socket: public SocketIO::SocketBase<SocketT, TransportT>, public SocketBase
+class Socket: public sockio::SocketBase<SocketT, TransportT>, public SocketBase
 {
 public:
 	Socket(Reactor& reactor) : 
@@ -624,19 +624,19 @@ public:
 
 
 	SocketBase(Net::ISocket& socket, Net::Reactor& reactor);
-	SocketBase(Net::ISocket& socket, Net::Reactor& reactor, const Net::Address& serverAddr);
+	SocketBase(Net::ISocket& socket, Net::Reactor& reactor, const net::Address& serverAddr);
 	virtual ~SocketBase();
 	
-	void connect(const Net::Address& serverAddr);	
+	void connect(const net::Address& serverAddr);	
 	void connect();
 	void close();
 	
 	virtual int sendConnect(const std::string& endpoint = "", const std::string& query = "");
 
-	virtual int send(SocketIO::Packet::Type type, const std::string& data, bool ack = false);	
+	virtual int send(sockio::Packet::Type type, const std::string& data, bool ack = false);	
 	virtual int send(const std::string& data, bool ack = false); // Message packet
 	virtual int send(const JSON::Value& data, bool ack = false); // JSON packet
-	virtual int send(const SocketIO::Packet& packet);
+	virtual int send(const sockio::Packet& packet);
 	virtual int emit(const std::string& event, const JSON::Value& data, bool ack = false);
 		// Sends an Event packet
 

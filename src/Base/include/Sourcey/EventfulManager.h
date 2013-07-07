@@ -21,33 +21,11 @@
 #define SOURCEY_EventfulManager_H
 
 
-#include "Sourcey/BasicManager.h"
+#include "Sourcey/Manager.h"
 #include "Sourcey/Signal.h"
 
 
 namespace scy { 
-
-	
-template <class TKey, class TValue>
-class EventfulManager: public BasicManager<TKey, TValue>
-{	
-public:
-	typedef BasicManager<TKey, TValue> Base;
-
-public:	
-	virtual void onAdd(const TKey&, TValue* item) 
-	{
-		ItemAdded.emit(this, *item);
-	}
-
-	virtual void onRemove(const TKey&, TValue* item) 
-	{ 
-		ItemRemoved.emit(this, *item); 
-	}
-
-	Signal<TValue&>			ItemAdded;
-	Signal<const TValue&>	ItemRemoved;	
-};
 
 
 

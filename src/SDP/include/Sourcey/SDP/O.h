@@ -25,7 +25,7 @@
 #include <iostream>
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
@@ -65,7 +65,7 @@ private:
 };
 
 
-} // namespace Scy
+} // namespace scy
 } // namespace SDP 
 
 

@@ -24,11 +24,11 @@
 
 
 using namespace std;
-using namespace Scy::Util;
+using namespace scy::util;
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 
 
 Header::Header() :
@@ -65,14 +65,14 @@ size_t Header::size() const
 int Header::read(const UInt8* buffer, int bufferSize)
 {
 	if (bufferSize < kRtpBaseHeaderSize) {
-		LogError() << "RTP: Header: Buffer size too small: "
+		errorL() << "RTP: Header: Buffer size too small: "
 			<< bufferSize << ": " << kRtpBaseHeaderSize << endl;
 		return -1;
 	}
 
 	int version = ExtractBits(buffer[0], 2, 6);
 	if (version != kRtpVersionNumber) {
-		LogError() << "RTP: Header: Wrong version number: " 
+		errorL() << "RTP: Header: Wrong version number: " 
 			<< version << ": " << kRtpVersionNumber << endl;
 		return -1;
 	}
@@ -91,7 +91,7 @@ int Header::read(const UInt8* buffer, int bufferSize)
 	assert(this->csrcCount < 16);
 
 	if (bufferSize < this->size()) {
-		LogError() << "RTP: Header: Buffer size too small for header: "
+		errorL() << "RTP: Header: Buffer size too small for header: "
 			<< bufferSize << ": " << size() << endl;
 		return -1;
 	}
@@ -139,9 +139,9 @@ void Header::write(Buffer& buffer) const
 	assert(buffer.position() == 0);
 	assert(buffer.capacity() > this->size());
 	write(reinterpret_cast<UInt8*>(buffer.data()), static_cast<int>(buffer.capacity()));
-	buffer.setSize(this->size());
+	buffer.size(this->size());
 }
 
 
-} // namespace RTP
-} // namespace Scy 
+} // namespace rtp
+} // namespace scy 

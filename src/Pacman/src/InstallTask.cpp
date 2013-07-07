@@ -36,8 +36,8 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy { 
-namespace Pacman {
+namespace scy { 
+namespace pcman {
 
 
 InstallTask::InstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote, const Options& options) :
@@ -203,7 +203,7 @@ void InstallTask::doDownload()
 
 	// Initialize a HTTP transaction to download the file.
 	// If the transaction fails an exception will be thrown.
-	HTTP::Request* request = new HTTP::Request("GET", asset.url());	
+	http::Request* request = new http::Request("GET", asset.url());	
 	if (!_manager.options().httpUsername.empty()) {
 		Poco::Net::HTTPBasicCredentials cred(
 			_manager.options().httpUsername, 
@@ -224,7 +224,7 @@ void InstallTask::doDownload()
 }
 
 
-void InstallTask::onResponseProgress(void* sender, HTTP::TransferState& state)
+void InstallTask::onResponseProgress(void* sender, http::TransferState& state)
 {
 	log("debug") << "Download Progress: " << state.progress() << endl;
 
@@ -465,7 +465,7 @@ InstallTask::Options& InstallTask::options()
 }
 
 
-} } // namespace Scy::Pacman
+} } // namespace scy::Pacman
 
 
 

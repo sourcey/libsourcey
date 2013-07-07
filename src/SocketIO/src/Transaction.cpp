@@ -27,33 +27,33 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy {
-namespace SocketIO {
+namespace scy {
+namespace sockio {
 
 
 Transaction::Transaction(Client& client, long timeout) : 
 	PacketTransaction<Packet>(client.runner(), timeout, 0), client(client)
 {
-	LogDebug("SocketIOTransaction", this) << "Creating" << endl;
+	debugL("SocketIOTransaction", this) << "Creating" << endl;
 }
 
 
 Transaction::Transaction(Client& client, const Packet& request, long timeout) : 
 	PacketTransaction<Packet>(client.runner(), request, timeout, 0), client(client)
 {
-	LogDebug("SocketIOTransaction", this) << "Creating" << endl;
+	debugL("SocketIOTransaction", this) << "Creating" << endl;
 }
 
 
 Transaction::~Transaction() 
 {
-	LogDebug("SocketIOTransaction", this) << "Destroying" << endl;	
+	debugL("SocketIOTransaction", this) << "Destroying" << endl;	
 }
 
 
 bool Transaction::send()
 {
-	LogDebug("SocketIOTransaction", this) << "Sending" << endl;	
+	debugL("SocketIOTransaction", this) << "Sending" << endl;	
 	_request.setAck(true);	
 	client += packetDelegate(this, &Transaction::onPotentialResponse, 100);
 	if (client.send(_request)) //, true
@@ -64,7 +64,7 @@ bool Transaction::send()
 	
 void Transaction::onPotentialResponse(void*, Packet& packet)
 {
-	//LogDebug("SocketIOTransaction", this) << "Potential Response: " 
+	//debugL("SocketIOTransaction", this) << "Potential Response: " 
 	//	<< packet.className() << endl;	
 	if (process(packet))
 		throw StopPropagation();
@@ -79,7 +79,7 @@ bool Transaction::match(const Packet& packet)
 
 void Transaction::onResponse()
 {
-	LogDebug("SocketIOTransaction", this) << "Response" << endl;
+	debugL("SocketIOTransaction", this) << "Response" << endl;
 	client -= packetDelegate(this, &Transaction::onPotentialResponse);	
 	PacketTransaction<Packet>::onResponse();
 }
@@ -87,10 +87,10 @@ void Transaction::onResponse()
 
 void Transaction::onComplete()
 {
-	LogDebug("SocketIOTransaction", this) << "Complete" << endl;
+	debugL("SocketIOTransaction", this) << "Complete" << endl;
 	//client -= packetDelegate(this, &Transaction::onPotentialResponse);
 	PacketTransaction<Packet>::onComplete();
 }
 
 
-} } // namespace Scy::SocketIO
+} } // namespace scy::sockio

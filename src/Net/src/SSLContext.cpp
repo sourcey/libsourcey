@@ -105,13 +105,13 @@ void SSLContext::addEncryptedData(const char* data, size_t len)
 }
 
 
-void SSLContext::addApplicationData(const std::string& s)
+void SSLContext::addOutgoingData(const std::string& s)
 {
-	addApplicationData(s.c_str(), s.size());
+	addOutgoingData(s.c_str(), s.size());
 }
 
 
-void SSLContext::addApplicationData(const char* data, size_t len) 
+void SSLContext::addOutgoingData(const char* data, size_t len) 
 {
 	std::copy(data, data+len, std::back_inserter(_bufferOut));
 }

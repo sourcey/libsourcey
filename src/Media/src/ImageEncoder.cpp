@@ -28,15 +28,15 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 ImageEncoder::ImageEncoder(EncoderOptions& options, vector<int> cvParams) : 
 	_options(options),
 	_params(cvParams)
 {	
-	LogDebug() << "[ImageEncoder" << this << "] Creating" << endl;
+	debugL() << "[ImageEncoder" << this << "] Creating" << endl;
 
 	if (_options.oformat.id == "jpeg" ||
 		_options.oformat.id == "mjpeg")
@@ -53,7 +53,7 @@ ImageEncoder::ImageEncoder(EncoderOptions& options, vector<int> cvParams) :
 
 ImageEncoder::~ImageEncoder()
 {
-	LogDebug() << "[ImageEncoder" << this << "] Destroy" << endl;
+	debugL() << "[ImageEncoder" << this << "] Destroy" << endl;
 }
 
 	
@@ -75,7 +75,7 @@ bool ImageEncoder::accepts(IPacket& packet)
 
 void ImageEncoder::process(IPacket& packet)
 { 
-	//LogTrace() << "[ImageEncoder:" << this <<"] Processing" << endl;
+	//traceL() << "[ImageEncoder:" << this <<"] Processing" << endl;
 
 	MatPacket* mpacket = reinterpret_cast<MatPacket*>(&packet);	
 	if (!mpacket->mat)
@@ -86,11 +86,11 @@ void ImageEncoder::process(IPacket& packet)
 	// FIXME: If the video capture is stopped before
 	// this callback completes our Mat is corrupted.
 	cv::Mat& source = *mpacket->mat;
-	LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket->mat << endl;
-	LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: " << source.cols << endl;
-	LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: " << source.rows << endl;
-	LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: " << _options.oformat.video.width << endl;
-	LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: " << _options.oformat.video.height << endl;
+	traceL() << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket->mat << endl;
+	traceL() << "[ImageEncoder:" << this <<"] Broadcasting: " << source.cols << endl;
+	traceL() << "[ImageEncoder:" << this <<"] Broadcasting: " << source.rows << endl;
+	traceL() << "[ImageEncoder:" << this <<"] Broadcasting: " << _options.oformat.video.width << endl;
+	traceL() << "[ImageEncoder:" << this <<"] Broadcasting: " << _options.oformat.video.height << endl;
 	if (source.cols != _options.oformat.video.width &&
 		source.rows != _options.oformat.video.height) {
 		cv::Mat resized;
@@ -100,12 +100,13 @@ void ImageEncoder::process(IPacket& packet)
 	else		
 		cv::imencode(_extension, source, buffer, _params);
 	
-	mpacket->setData(&buffer[0]);
-	mpacket->setSize(buffer.size());
+	// Temp reference on the stack only
+	mpacket->_data = (char*)&buffer[0];
+	mpacket->_size = buffer.size();
 	
-	//LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket << endl;
+	//traceL() << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket << endl;
 	emit(this, *mpacket);
-	//LogTrace() << "[ImageEncoder:" << this <<"] Broadcasting: OK: " << mpacket << endl;
+	//traceL() << "[ImageEncoder:" << this <<"] Broadcasting: OK: " << mpacket << endl;
 }
 
 	
@@ -115,4 +116,4 @@ EncoderOptions& ImageEncoder::options()
 }
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av

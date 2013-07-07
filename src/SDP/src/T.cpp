@@ -25,7 +25,7 @@ using namespace std;
 
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
@@ -33,7 +33,7 @@ T::T(const string& src) : Line(Line::T, 5)
 {
 	size_t len = src.length();
 	if (src.substr(0, 2) != "t=") {
-		LogError() << "ERROR: SDP line does not start with <t=>" << std::endl;
+		errorL() << "ERROR: SDP line does not start with <t=>" << std::endl;
 	}
 	
 	size_t i = 2;
@@ -51,8 +51,8 @@ T::T(const string& src) : Line(Line::T, 5)
 	while (src[i] != ' ' && i < len)
 		stopstr += src[i++];
 
-	_startTime = Util::fromString<UInt32>(startstr.c_str());
-	_stopTime  = Util::fromString<UInt32>(stopstr.c_str());
+	_startTime = util::fromString<UInt32>(startstr.c_str());
+	_stopTime  = util::fromString<UInt32>(stopstr.c_str());
 }
 
 
@@ -95,10 +95,10 @@ void T::setStopTime(unsigned int stop)
 
 string T::toString() 
 {
-	return "t=" + Util::toString(_startTime) + " " + Util::toString(_stopTime);
+	return "t=" + util::toString(_startTime) + " " + util::toString(_stopTime);
 }
 
 
-} // namespace Scy
+} // namespace scy
 } // namespace SDP 
 

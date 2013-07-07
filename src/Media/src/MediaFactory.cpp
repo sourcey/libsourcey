@@ -24,11 +24,11 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Scy;
+using namespace scy;
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 // ---------------------------------------------------------------------
@@ -100,7 +100,7 @@ FormatRegistry& MediaFactory::formats()
 
 void MediaFactory::loadVideo(unsigned flags)
 {
-	LogDebug("MediaFactory") << "Preloading Video Captures" << endl;
+	debugL("MediaFactory") << "Preloading Video Captures" << endl;
 	
 	// Depreciated code used to preload captures on application load.
 	FastMutex::ScopedLock lock(_mutex);
@@ -113,7 +113,7 @@ void MediaFactory::loadVideo(unsigned flags)
 	for (size_t i = 0; i < devs.size(); ++i) {
 		try 
 		{
-			LogTrace("MediaFactory") << "Loading Video: " << devs[0].id << endl;
+			traceL("MediaFactory") << "Loading Video: " << devs[0].id << endl;
 
 			// TODO: Receive callback on capture error or closure.
 			VideoCapture* capture = new VideoCapture(devs[0].id, flags);
@@ -121,7 +121,7 @@ void MediaFactory::loadVideo(unsigned flags)
 		} 
 		catch (...) 
 		{
-			LogError("MediaFactory") << "Cannot load video capture." << endl;
+			errorL("MediaFactory") << "Cannot load video capture." << endl;
 			_map[devs[0].id] = NULL;
 		}
 	}
@@ -138,7 +138,7 @@ void MediaFactory::unloadVideo()
 
 VideoCapture* MediaFactory::getVideoCapture(int deviceId, unsigned flags) 
 {
-	LogTrace("MediaFactory") << "Get Video Capture: " << deviceId << endl;
+	traceL("MediaFactory") << "Get Video Capture: " << deviceId << endl;
 	FastMutex::ScopedLock lock(_mutex);
 	VideoCaptureMap::iterator it = _map.find(deviceId);
 	if (it != _map.end())
@@ -154,7 +154,7 @@ VideoCapture* MediaFactory::getVideoCapture(int deviceId, unsigned flags)
 
 VideoCapture* MediaFactory::createFileCapture(const string& file, unsigned flags) 
 {
-	LogTrace("MediaFactory") << "Get Video Capture: " << file << endl;
+	traceL("MediaFactory") << "Get Video Capture: " << file << endl;
 	VideoCapture* capture = new VideoCapture(file, flags);
 	return capture;
 }
@@ -162,7 +162,7 @@ VideoCapture* MediaFactory::createFileCapture(const string& file, unsigned flags
 
 AudioCapture* MediaFactory::createAudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format) //, bool destroyOnStop
 {
-	LogTrace("MediaFactory") << "Create Audio Capture: " << deviceId << endl;
+	traceL("MediaFactory") << "Create Audio Capture: " << deviceId << endl;
 	if (deviceId < 0)
 		throw Exception("Invalid audio device ID");
 	AudioCapture* capture = new AudioCapture(deviceId, channels, sampleRate, format);
@@ -170,4 +170,4 @@ AudioCapture* MediaFactory::createAudioCapture(int deviceId, int channels, int s
 }
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av

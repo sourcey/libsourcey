@@ -33,8 +33,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 // Initialize to empty string
@@ -209,7 +209,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const string& name, int i
 {
 	// If the name is empty, return the default device.
 	if (name.empty() || name == kDefaultDeviceName) {
-		//LogInfo() << "Creating default VideoCapturer" << endl;
+		//infoL() << "Creating default VideoCapturer" << endl;
 		return getDefaultVideoCaptureDevice(out);
 	}
 
@@ -220,7 +220,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const string& name, int i
 	/*
 	for (vector<Device>::const_iterator it = devices.begin(); it != devices.end(); ++it) {
 		if (name == it->name) {
-			LogInfo() << "Creating VideoCapturer for " << name << endl;
+			infoL() << "Creating VideoCapturer for " << name << endl;
 			out = *it;
 			return true;
 		}
@@ -230,7 +230,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const string& name, int i
 	// with the filename. The LmiMediaEngine will know to use a FileVideoCapturer
 	// for these devices.
 	if (talk_base::Filesystem::IsFile(name)) {
-		LogInfo() << "Creating FileVideoCapturer" << endl;
+		infoL() << "Creating FileVideoCapturer" << endl;
 		*out = FileVideoCapturer::CreateFileVideoCapturerDevice(name);
 		return true;
 	}
@@ -346,7 +346,7 @@ bool DeviceManager::shouldDeviceBeIgnored(const string& deviceName, const char* 
 	while (exclusionList[i]) {
 		if (strncasecmp(deviceName.c_str(), exclusionList[i],
 			strlen(exclusionList[i])) == 0) {
-				LogInfo() << "Ignoring device " << deviceName << endl;
+				traceL() << "Ignoring device " << deviceName << endl;
 				return true;
 		}
 		++i;
@@ -443,7 +443,7 @@ void DeviceManager::print(ostream& ost)
 }
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 

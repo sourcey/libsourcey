@@ -24,7 +24,7 @@
 #include "Sourcey/IConfiguration.h"
 
 
-namespace Scy {
+namespace scy {
 	
 
 class ScopedConfiguration 
@@ -64,7 +64,7 @@ private:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_ScopedConfiguration_H

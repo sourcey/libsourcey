@@ -24,7 +24,7 @@
 #include <map>
 
 
-namespace Scy {
+namespace scy {
 
 
 struct IUser 
@@ -74,7 +74,7 @@ public:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_UserManager_H

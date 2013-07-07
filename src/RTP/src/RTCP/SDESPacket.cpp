@@ -26,8 +26,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 namespace RTCP {
 
 
@@ -89,7 +89,7 @@ SDESChunk::SDESChunk(UInt32 ssrc)
 
 SDESChunk::~SDESChunk() 
 {
-	Util::ClearVector(_sdesItems);
+	util::ClearVector(_sdesItems);
 }
 
 
@@ -144,7 +144,7 @@ SDESPacket::SDESPacket() :
 
 SDESPacket::~SDESPacket() 
 {
-	Util::ClearVector(_sdesChunks);
+	util::ClearVector(_sdesChunks);
 }
 
 
@@ -167,14 +167,14 @@ bool SDESPacket::read(Buffer& buffer)
 		int remaining = length - 4;
 		while (remaining >= 4) {
 			SDESChunk* chunk = new SDESChunk();
-			buffer.readUInt32(chunk->ssrc);
-			LogTrace() << "RTCP: SDESPacket: Read Chunk SSRC: " << chunk->ssrc << endl;
+			buffer.readU32(chunk->ssrc);
+			traceL() << "RTCP: SDESPacket: Read Chunk SSRC: " << chunk->ssrc << endl;
 
 			// TODO: Support multiple items per chunk
 			SDESItem* item = new SDESItem();
-			buffer.readUInt8(item->type);
-			buffer.readUInt8(item->length);
-			buffer.readString(item->content, item->length - 2);
+			buffer.readU8(item->type);
+			buffer.readU8(item->length);
+			buffer.read(item->content, item->length - 2);
 
 			chunk->addSDESItem(item);
 			addSDESChunk(chunk);
@@ -196,15 +196,15 @@ void SDESPacket::write(Buffer& buffer) const
 	for (unsigned i = 0; i < _sdesChunks.size(); i++) {
 		SDESChunk* chunk = _sdesChunks[i];
 		
-		LogDebug() << "RTCP: SDESPacket: Writing Chunk SSRC: " << chunk->ssrc << endl;
+		debugL() << "RTCP: SDESPacket: Writing Chunk SSRC: " << chunk->ssrc << endl;
 
-		buffer.writeUInt32(chunk->ssrc);
+		buffer.writeU32(chunk->ssrc);
 
 		for (unsigned ia = 0; ia < chunk->items().size(); ia++) {
 			SDESItem* item = chunk->items()[ia];
-			buffer.writeUInt8(item->type);
-			buffer.writeUInt8(item->length);
-			buffer.writeString(item->content);
+			buffer.writeU8(item->type);
+			buffer.writeU8(item->length);
+			buffer.write(item->content);
 		}
 	}
 }
@@ -240,5 +240,5 @@ void SDESPacket::print(std::ostream& os) const
 
 
 } // namespace RTCP
-} // namespace RTP
-} // namespace Scy 
+} // namespace rtp
+} // namespace scy 

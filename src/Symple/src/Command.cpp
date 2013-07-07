@@ -19,7 +19,7 @@
 
 #include "Sourcey/Symple/Command.h"
 #include "Sourcey/Util.h"
-#include "Sourcey/CryptoProvider.h"
+#include "Sourcey/Crypto.h"
 #include "assert.h"
 
 
@@ -27,8 +27,8 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 
 Command::Command() 
@@ -91,7 +91,7 @@ void Command::setAction(const string& action)
 
 string Command::param(int n) const 
 {
-	StringVec params = Util::split(node(), ':');
+	StringVec params = util::split(node(), ':');
 	assert(params.size() >= n);
 	if (params.size() < n)
 		return "";
@@ -101,16 +101,16 @@ string Command::param(int n) const
 
 StringVec Command::params() 
 {
-	StringVec params = Util::split(node(), ':');
+	StringVec params = util::split(node(), ':');
 	return params;
 }
 
 
 bool Command::matches(const string& xnode) const 
 {
-	return Util::matchNodes(node(), xnode, ":");
+	return util::matchNodes(node(), xnode, ":");
 }
 
 
-} // namespace Symple 
-} // namespace Scy
+} // namespace smple 
+} // namespace scy

@@ -3,7 +3,7 @@
 #include "Sourcey/PacketStream.h"
 #include "Sourcey/CryptoProvider.h"
 #include "Sourcey/Util.h"
-#include "Sourcey/Net/TCPService.h"
+//#include "Sourcey/Net/TCPService.h"
 #include "Sourcey/Net/WebSocket.h"
 
 #include "Sourcey/HTTP/Server.h"
@@ -50,17 +50,17 @@ CMemLeakDetect memLeakDetect;
 
 
 using namespace std;
-using namespace Scy;
-using namespace Scy::Media;
+using namespace scy;
+using namespace scy::av;
 
 
-namespace Scy { 
+namespace scy { 
 
 	
 class MediaServer;
 
 
-struct StreamingOptions: public Media::RecordingOptions
+struct StreamingOptions: public av::RecordingOptions
 {	
 	std::string packetizer;		// HTTP response packetizer [chunked, multipart]
 	std::string encoding;		// The packet content encoding method [Base64, ...]
@@ -76,7 +76,7 @@ struct StreamingOptions: public Media::RecordingOptions
 
 void setupPacketStream(PacketStream& stream, const StreamingOptions& options, bool freeAudio = true) 
 {	
-	LogTrace() << "Setup Packet Stream" << endl;
+	traceL() << "Setup Packet Stream" << endl;
 
 	// Attach media captures
 	if (options.oformat.video.enabled) {
@@ -134,7 +134,7 @@ void setupPacketStream(PacketStream& stream, const StreamingOptions& options, bo
 		stream.attach(injector, 10);
 	}
 	
-	LogTrace() << "Setup Packet Stream: OK" << endl;
+	traceL() << "Setup Packet Stream: OK" << endl;
 }
 
 
@@ -153,7 +153,7 @@ public:
 		
 	void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 	{
-		LogDebug("HTTPStreamingConnectionHandler") << "Running: " 
+		debugL("HTTPStreamingConnectionHandler") << "Running: " 
 			<< "\n\tOutput Format: " << options.oformat.name
 			<< "\n\tOutput Encoding: " << options.encoding
 			<< "\n\tOutput Packetizer: " << options.packetizer
@@ -172,9 +172,9 @@ public:
 			stream.start();			
 
 			// Wait for stop signal
-			LogTrace("StreamingRequestHandler") << "Waiting" << endl;				
+			traceL("StreamingRequestHandler") << "Waiting" << endl;				
 			stopSignal.wait();
-			LogTrace("StreamingRequestHandler") << "Stopped" << endl;
+			traceL("StreamingRequestHandler") << "Stopped" << endl;
 			
 			stream -= packetDelegate(this, &StreamingRequestHandler::onVideoEncoded);
 			stream.stop();
@@ -183,15 +183,15 @@ public:
 		}
 		catch (Poco::Exception& exc)
 		{
-			LogError("StreamingRequestHandler") << "Error: " << exc.displayText() << endl;
+			errorL("StreamingRequestHandler") << "Error: " << exc.displayText() << endl;
 		}
 
-		LogTrace("StreamingRequestHandler") << "Exiting" << endl;
+		traceL("StreamingRequestHandler") << "Exiting" << endl;
 	}
 
-	void onVideoEncoded(void* sender, DataPacket& packet)
+	void onVideoEncoded(void* sender, RawPacket& packet)
 	{
-		LogTrace("StreamingRequestHandler") << "Sending Packet: " << packet.size() << ": " << fpsCounter.fps << endl;
+		traceL("StreamingRequestHandler") << "Sending Packet: " << packet.size() << ": " << fpsCounter.fps << endl;
 		try
 		{	
 			socket.sendBytes((const char*)packet.data(), packet.size());
@@ -199,7 +199,7 @@ public:
 		}
 		catch (Poco::Exception& exc)
 		{
-			LogError("StreamingRequestHandler") << "Error: " << exc.displayText() << endl;
+			errorL("StreamingRequestHandler") << "Error: " << exc.displayText() << endl;
 			stopSignal.set();
 		}
 	}
@@ -224,24 +224,24 @@ public:
 */
 
 
-class RelayedStreamingAllocation: public TURN::TCPClientObserver
+class RelayedStreamingAllocation: public turn::TCPClientObserver
 {
 public:
 	Runner			runner;
 	Net::Reactor	reactor;
 
 	Net::IP			peerIP;	
-	TURN::TCPClient client;
+	turn::TCPClient client;
 	
 	StreamManager	streams;
 	StreamingOptions options;	
 	int				frameNumber;
 	bool			connected;
 
-	Signal<TURN::Client&> AllocationCreated;
-	Signal2<TURN::Client&, const Net::Address&> ConnectionCreated;
+	Signal<turn::Client&> AllocationCreated;
+	Signal2<turn::Client&, const net::Address&> ConnectionCreated;
 
-	RelayedStreamingAllocation(const StreamingOptions& options, const TURN::Client::Options& clientOptions, const Net::IP& peerIP) : 
+	RelayedStreamingAllocation(const StreamingOptions& options, const turn::Client::Options& clientOptions, const Net::IP& peerIP) : 
 		client(*this, reactor, runner, clientOptions), options(options), peerIP(peerIP), frameNumber(0), connected(false)
 	{
 	}
@@ -258,26 +258,26 @@ public:
 
 	void initiate() 
 	{
-		LogDebug("RelayedStreamingAllocation", this) << "Initiating" << endl;		
+		debugL("RelayedStreamingAllocation", this) << "Initiating" << endl;		
 		//terminate();
 		try	
 		{		
 			// Initiate the TRUN client allocation
-			LogDebug("RelayedStreamingAllocation", this) << "Adding Persission" << endl;		
+			debugL("RelayedStreamingAllocation", this) << "Adding Persission" << endl;		
 			client.addPermission(peerIP);	
-			LogDebug("RelayedStreamingAllocation", this) << "Initiating Client" << endl;		
+			debugL("RelayedStreamingAllocation", this) << "Initiating Client" << endl;		
 			client.initiate();
 		} 
 		catch (Poco::Exception& exc) {
-			LogError()  << "[RelayedStreamingAllocation: " << this << "] Error: " << exc.displayText() << std::endl;
+			errorL()  << "[RelayedStreamingAllocation: " << this << "] Error: " << exc.displayText() << std::endl;
 			assert(0);
 		}
-		LogDebug("RelayedStreamingAllocation", this) << "Initiating: OK" << endl;	
+		debugL("RelayedStreamingAllocation", this) << "Initiating: OK" << endl;	
 	}
 
 	void terminate() 
 	{
-		LogDebug("RelayedStreamingAllocation", this) << "Terminating" << endl;	
+		debugL("RelayedStreamingAllocation", this) << "Terminating" << endl;	
 		client.terminate();
 
 		// Free all managed packet streams
@@ -285,35 +285,35 @@ public:
 	}
 
 protected:
-	void onRelayStateChange(TURN::Client& client, TURN::ClientState& state, const TURN::ClientState&) 
+	void onRelayStateChange(turn::Client& client, turn::ClientState& state, const turn::ClientState&) 
 	{
-		LogDebug("RelayedStreamingAllocation", this) << "Relay State Changed: " << state.toString() << endl;
+		debugL("RelayedStreamingAllocation", this) << "Relay State Changed: " << state.toString() << endl;
 
 		switch(state.id()) {
-		case TURN::ClientState::Waiting:				
+		case turn::ClientState::Waiting:				
 			break;
-		case TURN::ClientState::Allocating:				
+		case turn::ClientState::Allocating:				
 			break;
-		case TURN::ClientState::Authorizing:
+		case turn::ClientState::Authorizing:
 			break;
-		case TURN::ClientState::Success:
+		case turn::ClientState::Success:
 			AllocationCreated.emit(this, this->client);
 			break;
-		case TURN::ClientState::Failed:
+		case turn::ClientState::Failed:
 			assert(0 && "Allocation failed");
 			break;
-		case TURN::ClientState::Terminated:	
+		case turn::ClientState::Terminated:	
 			break;
 		}
 	}
 	
-	void onClientConnectionCreated(TURN::TCPClient& client, Net::IPacketSocket* socket, const Net::Address& peerAddr) //UInt32 connectionID, 
+	void onClientConnectionCreated(turn::TCPClient& client, Net::IPacketSocket* socket, const net::Address& peerAddr) //UInt32 connectionID, 
 	{
-		LogDebug("RelayedStreamingAllocation", this) << "################# Connection Created: " << peerAddr << endl;
+		debugL("RelayedStreamingAllocation", this) << "################# Connection Created: " << peerAddr << endl;
 		
 		// Just allow one stream for now
 		if (this->streams.size() == 1) {
-			LogDebug("RelayedStreamingAllocation", this) << "@@@@@@@@@@@@@@@@@@@@@@@@@@ Rejecting Connection" << endl;
+			debugL("RelayedStreamingAllocation", this) << "@@@@@@@@@@@@@@@@@@@@@@@@@@ Rejecting Connection" << endl;
 			return;
 		}
 
@@ -339,16 +339,16 @@ protected:
 			this->streams.addStream(stream);
 		} 
 		catch (Poco::Exception& exc) {
-			LogError()  << "[RelayedStreamingAllocation: " << this << "] Stream Error: " << exc.displayText() << std::endl;
+			errorL()  << "[RelayedStreamingAllocation: " << this << "] Stream Error: " << exc.displayText() << std::endl;
 			assert(0);
 		}
 
-		LogDebug("RelayedStreamingAllocation", this) << "Connection Created: OK: " << peerAddr << endl;
+		debugL("RelayedStreamingAllocation", this) << "Connection Created: OK: " << peerAddr << endl;
 	}
 		
-	void onClientConnectionClosed(TURN::TCPClient& client, Net::IPacketSocket* socket, const Net::Address& peerAddress)
+	void onClientConnectionClosed(turn::TCPClient& client, Net::IPacketSocket* socket, const net::Address& peerAddress)
 	{
-		LogDebug("RelayedStreamingAllocation", this) << "!!!!!!!!!!!!!!!!!!!!!!!! Connection Closed: " << peerAddress << endl;
+		debugL("RelayedStreamingAllocation", this) << "!!!!!!!!!!!!!!!!!!!!!!!! Connection Closed: " << peerAddress << endl;
 
 		try	
 		{	
@@ -362,22 +362,22 @@ protected:
 			}
 		} 
 		catch (Poco::Exception& exc) {
-			LogError()  << "[RelayedStreamingAllocation: " << this << "] Stream Error: " << exc.displayText() << std::endl;
+			errorL()  << "[RelayedStreamingAllocation: " << this << "] Stream Error: " << exc.displayText() << std::endl;
 			assert(0);
 		}
 	}
 
-	void onRelayedData(TURN::Client& client, const char* data, int size, const Net::Address& peerAddr)
+	void onRelayedData(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
 	{
-		LogDebug("RelayedStreamingAllocation", this) << "Received data from peer: " << string(data, size) <<  ": " << peerAddr << endl;
+		debugL("RelayedStreamingAllocation", this) << "Received data from peer: " << string(data, size) <<  ": " << peerAddr << endl;
 	
 		// The remore peer is a web browser, the HTTP request sent 
 		// to the relayed address will be the first thing we see...
 	}
 
-	void onAllocationPermissionsCreated(TURN::Client& client, const TURN::PermissionList& permissions)
+	void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
 	{
-		LogDebug("RelayedStreamingAllocation", this) << "Permissions Created" << endl;
+		debugL("RelayedStreamingAllocation", this) << "Permissions Created" << endl;
 	}
 };
 
@@ -389,33 +389,33 @@ protected:
 
 	void playMedia() 
 	{
-		LogDebug("RelayedStreamingAllocation", this) << "Play Media" << endl;
+		debugL("RelayedStreamingAllocation", this) << "Play Media" << endl;
 
 		// Create the packet stream
-		//LogDebug("RelayedStreamingAllocation", this) << "Setup Packet Stream" << endl;	
+		//debugL("RelayedStreamingAllocation", this) << "Setup Packet Stream" << endl;	
 		//setupPacketStream(stream, options);
-		//LogDebug("RelayedStreamingAllocation", this) << "Setup Packet Stream: OK" << endl;	
+		//debugL("RelayedStreamingAllocation", this) << "Setup Packet Stream: OK" << endl;	
 
 		// Start the stream
 		stream += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
 		stream.start();		
 
-		LogDebug("RelayedStreamingAllocation", this) << "Play Media: OK" << endl;
+		debugL("RelayedStreamingAllocation", this) << "Play Media: OK" << endl;
 	}
 
 	void stopMedia()
 	{
-		LogDebug("RelayedStreamingAllocation", this) << "Stop Media" << endl;
+		debugL("RelayedStreamingAllocation", this) << "Stop Media" << endl;
 		stream -= packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
 		stream.close();	
-		LogDebug("RelayedStreamingAllocation", this) << "Stop Media: OK" << endl;
+		debugL("RelayedStreamingAllocation", this) << "Stop Media: OK" << endl;
 	}
 	*/
 
 	/*
-	void onMediaEncoded(void* sender, DataPacket& packet)
+	void onMediaEncoded(void* sender, RawPacket& packet)
 	{
-		LogDebug("RelayedStreamingAllocation", this) << "$$$$$$$$$$$$$$ Sending Packet: " << packet.size() << string((const char*)packet.data(), 100)  << endl;
+		debugL("RelayedStreamingAllocation", this) << "$$$$$$$$$$$$$$ Sending Packet: " << packet.size() << string((const char*)packet.data(), 100)  << endl;
 		
 		//assert(currentPeerAddr.valid());
 		try {
@@ -426,12 +426,12 @@ protected:
 			//client.sendData(oss.str().data(), oss.str().length(), currentPeerAddr);
 		}
 		catch (Exception& exc) {
-			LogError("RelayedStreamingAllocation", this) << "^^^^^^^^^^^^^^^^^^^^^^^^ Send Error: " << exc.displayText() << endl;
+			errorL("RelayedStreamingAllocation", this) << "^^^^^^^^^^^^^^^^^^^^^^^^ Send Error: " << exc.displayText() << endl;
 			
 			// TODO: Calling stream.stop() inside stream callback causing deadlock
 			terminate();
 		}
-		LogDebug("RelayedStreamingAllocation", this) << "!$$$$$$$$$$$$$$ Sending Packet: OK: " << packet.size() << endl;
+		debugL("RelayedStreamingAllocation", this) << "!$$$$$$$$$$$$$$ Sending Packet: OK: " << packet.size() << endl;
 	}
 	*/
 
@@ -452,10 +452,10 @@ protected:
 		//playMedia();
 		*/
 	/*
-	void onClientConnectionState(TURN::TCPClient& client, Net::IPacketSocket*, 
+	void onClientConnectionState(turn::TCPClient& client, Net::IPacketSocket*, 
 		Net::SocketState& state, const Net::SocketState& oldState) 
 	{
-		LogDebug("RelayedStreamingAllocation", this) << "@@@@@@@@@@@@@@@@@@@@@ Connection State: " << state.toString() << endl;
+		debugL("RelayedStreamingAllocation", this) << "@@@@@@@@@@@@@@@@@@@@@ Connection State: " << state.toString() << endl;
 	}
 
 		//assert(currentPeerAddr.valid());
@@ -481,7 +481,7 @@ public:
 		
 	void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 	{
-		LogDebug("RelayedStreamingRequestHandler") << "Running: " 
+		debugL("RelayedStreamingRequestHandler") << "Running: " 
 			<< "\n\tOutput Format: " << options.oformat.name
 			<< "\n\tOutput Encoding: " << options.encoding
 			<< "\n\tOutput Packetizer: " << options.packetizer
@@ -491,8 +491,8 @@ public:
 		this->response = &response;
 				
 		//Net::IP peerIP("127.0.0.1");
-		TURN::Client::Options co;
-		co.serverAddr = Net::Address("127.0.0.1", 3478); // "173.230.150.125"
+		turn::Client::Options co;
+		co.serverAddr = net::Address("127.0.0.1", 3478); // "173.230.150.125"
 		co.lifetime  = 120 * 1000;	// 2 minutes
 		co.timeout = 10 * 1000;
 		co.timerInterval = 3 * 1000;
@@ -503,21 +503,21 @@ public:
 		allocation->AllocationCreated += delegate(this, &RelayedStreamingRequestHandler::onAllocationCreated);
 		allocation->initiate();
 		
-		LogDebug("RelayedStreamingRequestHandler", this) << "Waiting" << endl;	
+		debugL("RelayedStreamingRequestHandler", this) << "Waiting" << endl;	
 		stopSignal.wait();
-		LogDebug("RelayedStreamingRequestHandler", this) << "Stopped" << endl;	
+		debugL("RelayedStreamingRequestHandler", this) << "Stopped" << endl;	
 		
 		allocation->AllocationCreated -= delegate(this, &RelayedStreamingRequestHandler::onAllocationCreated);
 
 		// TODO: The allocation will outlive this handler instance
 		// Manage allocation via MediaService?
 
-		LogDebug("RelayedStreamingRequestHandler", this) << "Exiting" << endl;
+		debugL("RelayedStreamingRequestHandler", this) << "Exiting" << endl;
 	}
 	
-	void onAllocationCreated(void* sender, TURN::Client& client)
+	void onAllocationCreated(void* sender, turn::Client& client)
 	{
-		LogDebug("RelayedStreamingRequestHandler", this) << "Allocation Created" << endl;
+		debugL("RelayedStreamingRequestHandler", this) << "Allocation Created" << endl;
 					
 		// Write the relay address	
 		assert(this->response);
@@ -525,9 +525,9 @@ public:
 			<< allocation->client.relayedAddress().toString()
 			<< std::flush;
 
-		LogDebug("RelayedStreamingRequestHandler", this) << "Allocation Created 1" << endl;		
+		debugL("RelayedStreamingRequestHandler", this) << "Allocation Created 1" << endl;		
 		stopSignal.set();
-		LogDebug("RelayedStreamingRequestHandler", this) << "Allocation Created 2" << endl;
+		debugL("RelayedStreamingRequestHandler", this) << "Allocation Created 2" << endl;
 	}
 	
 	RelayedStreamingAllocation* allocation;
@@ -561,7 +561,7 @@ public:
 
 	void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 	{
-		LogTrace("SnapshotRequestHandler") << "Running" << endl;
+		traceL("SnapshotRequestHandler") << "Running" << endl;
 
 		cv::Mat frame;
 		videoCapture->getFrame(frame, width, height);
@@ -572,7 +572,7 @@ public:
 		param[1] = 95; // default(95) 0-100
 		cv::imencode(".jpg", frame, buffer, param);
 
-		LogDebug("SnapshotRequestHandler") << "Taking Snapshot Image: " 
+		debugL("SnapshotRequestHandler") << "Taking Snapshot Image: " 
 			<< "\n\tWidth: " << frame.cols 
 			<< "\n\tHeight: " << frame.rows 
 			<< "\n\tCapture Width: " << videoCapture->width()
@@ -610,7 +610,7 @@ public:
 		
 	void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
 	{
-		LogTrace("WebSocketRequestHandler") << "Running" << endl;
+		traceL("WebSocketRequestHandler") << "Running" << endl;
 
 		try
 		{			
@@ -640,16 +640,16 @@ public:
 				stream.start();	
 
 				// Wait for stop signal
-				LogTrace("WebSocketRequestHandler") << "Waiting" << endl;				
+				traceL("WebSocketRequestHandler") << "Waiting" << endl;				
 				stopSignal.wait();
-				LogTrace("WebSocketRequestHandler") << "Stopped" << endl;
+				traceL("WebSocketRequestHandler") << "Stopped" << endl;
 			
 				stream -= packetDelegate(this, &WebSocketRequestHandler::onVideoEncoded);
 				stream.stop();		
 			}
 			catch (Poco::Exception& exc)
 			{
-				LogError("WebSocketRequestHandler") << "Error: " << exc.displayText() << endl;
+				errorL("WebSocketRequestHandler") << "Error: " << exc.displayText() << endl;
 			}
 			
 			/*	
@@ -663,11 +663,11 @@ public:
 			}
 			while (n > 0 || (flags & Poco::Net::WebSocket::FRAME_OP_BITMASK) != Poco::Net::WebSocket::FRAME_OP_CLOSE);
 			*/
-			LogTrace("WebSocketRequestHandler") << "Stopped" << endl;
+			traceL("WebSocketRequestHandler") << "Stopped" << endl;
 		}
 		catch (Poco::Net::WebSocketException& exc)
 		{
-			LogError("WebSocketRequestHandler") << "Error: " << exc.code() << ": " << exc.displayText() << endl;			
+			errorL("WebSocketRequestHandler") << "Error: " << exc.code() << ": " << exc.displayText() << endl;			
 			switch (exc.code())
 			{
 			case Poco::Net::WebSocket::WS_ERR_HANDSHAKE_UNSUPPORTED_VERSION:
@@ -683,12 +683,12 @@ public:
 			}
 		}
 		
-		LogTrace("WebSocketRequestHandler") << "Exiting" << endl;
+		traceL("WebSocketRequestHandler") << "Exiting" << endl;
 	}
 	
-	void onVideoEncoded(void* sender, DataPacket& packet)
+	void onVideoEncoded(void* sender, RawPacket& packet)
 	{
-		LogTrace("WebSocketRequestHandler") << "Sending Packet: "
+		traceL("WebSocketRequestHandler") << "Sending Packet: "
 			<< packet.size() << ": " << fpsCounter.fps << endl;
 		try
 		{	
@@ -698,7 +698,7 @@ public:
 		}
 		catch (Poco::Exception& exc)
 		{
-			LogError("StreamingRequestHandler") << "Error: " << exc.displayText() << endl;
+			errorL("StreamingRequestHandler") << "Error: " << exc.displayText() << endl;
 			stopSignal.set();
 		}
 	}
@@ -735,27 +735,27 @@ public:
 			// Log incoming requests
 			stringstream rawRequest;
 			request.write(rawRequest);
-			LogInfo("HTTPStreamingConnectionFactory")
+			infoL("HTTPStreamingConnectionFactory")
 				<< "Incoming connection from " << request.clientAddress().toString() 
 				<< ": Request:\n" << rawRequest.str() << endl;
 			
 			// Parse streaming options from query
 			StreamingOptions options(_server);
 			Poco::Net::NameValueCollection params;
-			Util::parseURIQuery(request.getURI(), params);
+			util::parseURIQuery(request.getURI(), params);
 			FormatRegistry& formats = MediaFactory::instance()->formats();				
 
 			// An exception will be thrown if no format was provided, 
 			// or if the request format is not registered.
 			options.oformat = formats.get(params.get("format", "MJPEG"));
 			if (params.has("width"))		
-				options.oformat.video.width = Util::fromString<UInt32>(params.get("width"));
+				options.oformat.video.width = util::fromString<UInt32>(params.get("width"));
 			if (params.has("height"))	
-				options.oformat.video.height = Util::fromString<UInt32>(params.get("height"));
+				options.oformat.video.height = util::fromString<UInt32>(params.get("height"));
 			if (params.has("fps"))		
-				options.oformat.video.fps = Util::fromString<UInt32>(params.get("fps"));
+				options.oformat.video.fps = util::fromString<UInt32>(params.get("fps"));
 			if (params.has("quality"))	
-				options.oformat.video.quality = Util::fromString<UInt32>(params.get("quality"));
+				options.oformat.video.quality = util::fromString<UInt32>(params.get("quality"));
 
 			// Response encoding and packetizer options
 			options.encoding = params.get("encoding", "");
@@ -765,15 +765,15 @@ public:
 			// See MediaFactory::loadVideo			
 			VideoCapture* videoCapture = NULL;
 			AudioCapture* audioCapture = NULL;
-			MediaFactory* mediaFactory = Media::MediaFactory::instance();
+			MediaFactory* mediaFactory = av::MediaFactory::instance();
 			if (options.oformat.video.enabled) {
-				Media::Device video;
+				av::Device video;
 				mediaFactory->devices().getDefaultVideoCaptureDevice(video);
 				options.videoCapture = mediaFactory->getVideoCapture(video.id);
 				AllocateOpenCVInputFormat(options.videoCapture, options.iformat);	
 			}
 			if (options.oformat.audio.enabled) {
-				Media::Device audio;
+				av::Device audio;
 				mediaFactory->devices().getDefaultAudioInputDevice(audio);
 				options.audioCapture = mediaFactory->createAudioCapture(audio.id, 
 					options.oformat.audio.channels, 
@@ -816,10 +816,10 @@ public:
 		}
 		catch (Exception& exc)
 		{
-			LogError("StreamingRequestHandlerFactory") << "Request Error: " << exc.displayText() << endl;
+			errorL("StreamingRequestHandlerFactory") << "Request Error: " << exc.displayText() << endl;
 		}
 		
-		LogError("StreamingRequestHandlerFactory") << "Bad Request" << endl;
+		errorL("StreamingRequestHandlerFactory") << "Bad Request" << endl;
 		return new HTTP::BadRequestHandler;	
 	}
 
@@ -836,17 +836,17 @@ public:
 	MediaServer(const Poco::Net::ServerSocket& socket) :
 		HTTP::Server(new HTTPStreamingConnectionFactory(this), socket, new Poco::Net::HTTPServerParams)
 	{		
-		LogTrace("MediaServer") << "Creating" << endl;
+		traceL("MediaServer") << "Creating" << endl;
 	}
 
 	~MediaServer()
 	{		
-		LogTrace("MediaServer") << "Destroying" << endl;
+		traceL("MediaServer") << "Destroying" << endl;
 	}
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 int main(int argc, char** argv)
@@ -857,8 +857,8 @@ int main(int argc, char** argv)
 	MediaFactory::initialize();
 	MediaFactory::instance()->loadVideo();
 	
-	//Media::Device video;
-	//Media::Device audio;
+	//av::Device video;
+	//av::Device audio;
 	//MediaFactory::instance()->devices().getDefaultVideoCaptureDevice(video);
 	//MediaFactory::instance()->devices().getDefaultAudioInputDevice(audio);
 
@@ -943,17 +943,17 @@ public:
 		try 
 		{			
 			if (rawRequest.find("policy-file-request") != string::npos) {
-				LogTrace("StreamingRequestHandlerFactory") << "Sending Flash Crossdomain XMLSocket Policy" << endl;
+				traceL("StreamingRequestHandlerFactory") << "Sending Flash Crossdomain XMLSocket Policy" << endl;
 				return new Net::FlashPolicyRequestHandler(socket, false);
 			}
 			else if (rawRequest.find("crossdomain.xml") != string::npos) {
-				LogTrace("StreamingRequestHandlerFactory") << "Sending Flash Crossdomain HTTP Policy" << endl;
+				traceL("StreamingRequestHandlerFactory") << "Sending Flash Crossdomain HTTP Policy" << endl;
 				return new Net::FlashPolicyRequestHandler(socket, true);
 			}			
 		}
 		catch (Exception& exc)
 		{
-			LogError("ServerConnectionHook") << "Bad Request: " << exc.displayText() << endl;
+			errorL("ServerConnectionHook") << "Bad Request: " << exc.displayText() << endl;
 		}	
 		return NULL;
 	};
@@ -1000,7 +1000,7 @@ public:
 		//response.s
 		//request.
 
-		LogDebug() << "Sending policy file response: " << policy << endl;
+		debugL() << "Sending policy file response: " << policy << endl;
 	}
 };
 */
@@ -1017,7 +1017,7 @@ class StreamingRequestHandlerFactory: public Poco::Net::HTTPRequestHandlerFactor
 public:
 	Poco::Net::TCPServerConnection* createConnection(const Poco::Net::StreamSocket& socket) 
 	{  
-		LogTrace("StreamingRequestHandlerFactory") << "Creating Connection" << endl;
+		traceL("StreamingRequestHandlerFactory") << "Creating Connection" << endl;
 	
 		Poco::Net::StreamSocket sock(socket);
 		try 
@@ -1032,7 +1032,7 @@ public:
 			// Log genuine incoming connections to our production log.
 			// Disabling for now because service may be hammered for 
 			// snapshots for pseudo MJPEG stream.
-			LogTrace("StreamingRequestHandlerFactory")
+			traceL("StreamingRequestHandlerFactory")
 				<< "Incoming HTTP connection: " << sock.peerAddress().toString() 
 				<< "\n\tRequest: " << rawRequest
 				<< endl;
@@ -1041,7 +1041,7 @@ public:
 			// Flash policy-file-requests
 			if ((rawRequest.find("policy-file-request") != string::npos) ||
 				(rawRequest.find("crossdomain") != string::npos)) {
-				LogTrace("StreamingRequestHandlerFactory") << "Sending Flash Crossdomain Policy" << endl;
+				traceL("StreamingRequestHandlerFactory") << "Sending Flash Crossdomain Policy" << endl;
 				return new Net::FlashPolicyRequestHandler(sock);
 			}
 
@@ -1050,7 +1050,7 @@ public:
 		}
 		catch (Exception& exc)
 		{
-			LogError("StreamingRequestHandlerFactory") << "Bad Request: " << exc.displayText() << endl;
+			errorL("StreamingRequestHandlerFactory") << "Bad Request: " << exc.displayText() << endl;
 		}
 
 		return new Net::NullRequestHandler(sock);
@@ -1118,17 +1118,17 @@ public:
 			// An exception will be thrown if no format was provided, 
 			// or if the request format is not registered.
 			Poco::Net::NameValueCollection params;
-			Util::parseURIQuery(request.getURI(), params);
+			util::parseURIQuery(request.getURI(), params);
 			FormatRegistry& formats = MediaFactory::instance()->formats();	
 			options.oformat = formats.get(params.get("format"));
 			if (params.has("width"))		
-				options.oformat.video.width = Util::fromString<UInt32>(params.get("width"));
+				options.oformat.video.width = util::fromString<UInt32>(params.get("width"));
 			if (params.has("height"))	
-				options.oformat.video.height = Util::fromString<UInt32>(params.get("height"));
+				options.oformat.video.height = util::fromString<UInt32>(params.get("height"));
 			if (params.has("fps"))		
-				options.oformat.video.fps = Util::fromString<UInt32>(params.get("fps"));
+				options.oformat.video.fps = util::fromString<UInt32>(params.get("fps"));
 			if (params.has("quality"))	
-				options.oformat.video.quality = Util::fromString<UInt32>(params.get("quality"));
+				options.oformat.video.quality = util::fromString<UInt32>(params.get("quality"));
 				*/
 	
 			/*
@@ -1143,20 +1143,20 @@ public:
 			// Flash policy-file-requests
 			if ((rawRequest.find("policy-file-request") != string::npos) ||
 				(rawRequest.find("crossdomain") != string::npos)) {
-				LogTrace("StreamingRequestHandlerFactory") << "Sending Flash Crossdomain Policy" << endl;
+				traceL("StreamingRequestHandlerFactory") << "Sending Flash Crossdomain Policy" << endl;
 				return new FlashPolicyRequestHandler1(sock);
 			}
 
 			// Log genuine incoming connections to our production log.
 			// Disabling for now because service may be hammered for 
 			// snapshots for pseudo MJPEG stream.
-			LogTrace("StreamingRequestHandlerFactory")
+			traceL("StreamingRequestHandlerFactory")
 				<< "Incoming HTTP connection: " << request.clientAddress().toString() 
 				<< "\n\tRequest: " << rawRequest
 				<< endl;
 
-			//HTTP::Request* request = new 
-			HTTP::Request request;
+			//http::Request* request = new 
+			http::Request request;
 			istringstream ist(rawRequest);
 			request.read(ist);
 			*/
@@ -1195,8 +1195,8 @@ public:
 
 	/*
 				//VideoCapture* videoCapture = MediaFactory::instance()->getVideoCapture(0);
-				//int width = Scy::Util::fromString<int>(request.params().get("width", Scy::Util::toString(videoCapture->width() ? videoCapture->width() : 480)));
-				//int height = Scy::Util::fromString<int>(request.params().get("height", Scy::Util::toString(videoCapture->height() ? videoCapture->height() : 320)));
+				//int width = scy::util::fromString<int>(request.params().get("width", scy::util::toString(videoCapture->width() ? videoCapture->width() : 480)));
+				//int height = scy::util::fromString<int>(request.params().get("height", scy::util::toString(videoCapture->height() ? videoCapture->height() : 320)));
 
 // ----------------------------------------------------------------------------
 // HTTP Connection Factory
@@ -1206,7 +1206,7 @@ class StreamingRequestHandlerFactory: public Poco::Net::HTTPRequestHandlerFactor
 public:
 	TCPServerConnection* createConnection(const StreamSocket& socket) 
 	{  
-		LogTrace("StreamingRequestHandlerFactory") << "Creating Connection" << endl;
+		traceL("StreamingRequestHandlerFactory") << "Creating Connection" << endl;
 	
 		StreamSocket sock(socket);
 		try 
@@ -1222,20 +1222,20 @@ public:
 			// Flash policy-file-requests
 			if ((rawRequest.find("policy-file-request") != string::npos) ||
 				(rawRequest.find("crossdomain") != string::npos)) {
-				LogTrace("StreamingRequestHandlerFactory") << "Sending Flash Crossdomain Policy" << endl;
+				traceL("StreamingRequestHandlerFactory") << "Sending Flash Crossdomain Policy" << endl;
 				return new FlashPolicyRequestHandler1(sock);
 			}
 
 			// Log genuine incoming connections to our production log.
 			// Disabling for now because service may be hammered for 
 			// snapshots for pseudo MJPEG stream.
-			LogTrace("StreamingRequestHandlerFactory")
+			traceL("StreamingRequestHandlerFactory")
 				<< "Incoming HTTP connection: " << sock.peerAddress().toString() 
 				<< "\n\tRequest: " << rawRequest
 				<< endl;
 
-			//HTTP::Request* request = new 
-			HTTP::Request request;
+			//http::Request* request = new 
+			http::Request request;
 			istringstream ist(rawRequest);
 			request.read(ist);
 
@@ -1249,13 +1249,13 @@ public:
 				options.oformat = formats.get(request.params().get("format"));
 
 				if (request.params().has("width"))		
-					options.oformat.video.width = Util::fromString<UInt32>(request.params().get("width"));
+					options.oformat.video.width = util::fromString<UInt32>(request.params().get("width"));
 				if (request.params().has("height"))	
-					options.oformat.video.height = Util::fromString<UInt32>(request.params().get("height"));
+					options.oformat.video.height = util::fromString<UInt32>(request.params().get("height"));
 				if (request.params().has("fps"))		
-					options.oformat.video.fps = Util::fromString<UInt32>(request.params().get("fps"));
+					options.oformat.video.fps = util::fromString<UInt32>(request.params().get("fps"));
 				if (request.params().has("quality"))	
-					options.oformat.video.quality = Util::fromString<UInt32>(request.params().get("quality"));
+					options.oformat.video.quality = util::fromString<UInt32>(request.params().get("quality"));
 
 				// Video captures should always be instantiated
 				// in the main thread. See MediaFactory::loadVideo
@@ -1283,20 +1283,20 @@ public:
 				}
 #endif			
 			
-				LogTrace("StreamingRequestHandlerFactory") << "Creating Media Connection" << endl;
+				traceL("StreamingRequestHandlerFactory") << "Creating Media Connection" << endl;
 				//if (request)
 				return new StreamingRequestHandler(socket, options, videoCapture, audioCapture);	
 			}
 			else if ((request.matches("/snapshot"))) {				
 				VideoCapture* videoCapture = MediaFactory::instance()->getVideoCapture(0);
-				int width = Scy::Util::fromString<int>(request.params().get("width", Scy::Util::toString(videoCapture->width() ? videoCapture->width() : 480)));
-				int height = Scy::Util::fromString<int>(request.params().get("height", Scy::Util::toString(videoCapture->height() ? videoCapture->height() : 320)));
+				int width = scy::util::fromString<int>(request.params().get("width", scy::util::toString(videoCapture->width() ? videoCapture->width() : 480)));
+				int height = scy::util::fromString<int>(request.params().get("height", scy::util::toString(videoCapture->height() ? videoCapture->height() : 320)));
 				return new SnapshotRequestHandler(socket, videoCapture, width, height);	
 			}
 		}
 		catch (Exception& exc)
 		{
-			LogError("StreamingRequestHandlerFactory") << "Bad Request: " << exc.displayText() << endl;
+			errorL("StreamingRequestHandlerFactory") << "Bad Request: " << exc.displayText() << endl;
 		}
 
 		return new NullRequestHandler(sock);
@@ -1313,12 +1313,12 @@ public:
 	MediaServer(unsigned short port) :
 		TCPService(new StreamingRequestHandlerFactory(), port)
 	{		
-		LogTrace("MediaServer") << "Creating" << endl;
+		traceL("MediaServer") << "Creating" << endl;
 	}
 
 	~MediaServer()
 	{		
-		LogTrace("MediaServer") << "Destroying" << endl;
+		traceL("MediaServer") << "Destroying" << endl;
 	}
 };
 		*/

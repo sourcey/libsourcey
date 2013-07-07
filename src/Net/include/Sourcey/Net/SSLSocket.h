@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/UV/UVPP.h"
-#include "Sourcey/UV/TCPBase.h"
+#include "Sourcey/Net/TCPBase.h"
 #include "Sourcey/Net/Socket.h"
 #include "Sourcey/Net/SSLContext.h"
 
@@ -91,14 +91,11 @@ public:
 		/// Returns true if a reused session was negotiated during
 		/// the handshake.
 
-	virtual void onConnected(int status);
+	virtual void onConnect(int status);
 
 	virtual void onRead(const char* data, int len);
 		/// Reads raw encrypred SSL data
 
-	virtual void onRecv(Buffer& buf);	
-		/// Reads and emits decrypted SSL data
-		
 protected:
 	virtual void* instance() { return this; }
 	virtual ~SSLBase();

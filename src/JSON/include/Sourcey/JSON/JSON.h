@@ -26,7 +26,7 @@
 #include <fstream>
 
 
-namespace Scy {
+namespace scy {
 namespace JSON {
 
 	
@@ -170,7 +170,7 @@ inline bool findNestedObjectWithProperty(JSON::Value& root, JSON::Value*& result
 
 
 } // namespace JSON
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_JSON_H

@@ -25,8 +25,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 
 
 Packet::Packet(const char* payload, int payloadLength,
@@ -66,7 +66,7 @@ Packet::Packet(const Header& header, const char* payload, int payloadLength) :
 		payloadLength -= 4;	// Minimum size of extension header
 
 		short tmp = *((short *)(payload+2));
-		tmp = NetworkToHost16(tmp);
+		tmp = ntohs(tmp); // NetworkToHost16
 		tmp *= 4;		// ext. _header length is in words (4 bytes)
 		_extensionLength += tmp;
 		payloadLength -= tmp;
@@ -134,18 +134,18 @@ bool Packet::read(Buffer& buf)
 	//assert(buf.size() < RTP_MAX_PACKET_LEN);
 
 	if (buf.size() == 0) {
-		LogError() << "RTP: Received empty packet." << endl;
+		errorL() << "RTP: Received empty packet." << endl;
 		return false;
 	}
 
 	if (buf.size() < 12) {
 		// Too small to contain an RTP header 
-		LogError() << "RTP: Packet too small to contain an RTP header." << endl;
+		errorL() << "RTP: Packet too small to contain an RTP header." << endl;
 		return false;
 	}
 
 	if (!_header.read(buf)) {
-		LogError() << "RTP: Invalid RTP header." << endl;
+		errorL() << "RTP: Invalid RTP header." << endl;
 		return false;
 	}
 	
@@ -160,7 +160,7 @@ bool Packet::read(Buffer& buf)
 		payloadLength -= 4;	// Minimum size of extension header
 		
 		short tmp = *((short *)(buf.data() + 2));
-		tmp = NetworkToHost16(tmp);
+		tmp = ntohs(tmp); // NetworkToHost16
 		tmp *= 4;		// ext. header length is in words (4 bytes)
 		_extensionLength += tmp;
 		payloadLength -= tmp;
@@ -188,20 +188,20 @@ void Packet::write(Buffer& buf) const
 	/*
 	char* hdr = _header.getBytes();
 	int hdrSize = _header.size();
-	buf.writeBytes(hdr, hdrSize);
+	buf.write(hdr, hdrSize);
 	delete [] hdr;
 	*/
 	_header.write(buf);
 
 	if (_extensionLength > 0) {
-		buf.writeBytes(_extensionHeader, _extensionLength);
+		buf.write(_extensionHeader, _extensionLength);
 	}
 
-	buf.writeBytes(_payload, _payloadLength);
+	buf.write(_payload, _payloadLength);
 
 	if (_zrtpChecksum) {
-		UInt16 chkSum = computeChecksum((UInt16*)buf.bytes(), buf.size()-20);
-		buf.writeUInt16(chkSum);
+		UInt16 chkSum = computeChecksum((UInt16*)buf.begin(), buf.size()-20);
+		buf.writeU16(chkSum);
 	}
 }
 
@@ -262,5 +262,5 @@ UInt16 Packet::computeChecksum(UInt16* data, int length) const
 }
 
 
-} // namespace RTP
-} // namespace Scy
+} // namespace rtp
+} // namespace scy

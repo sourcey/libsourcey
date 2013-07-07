@@ -26,8 +26,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 namespace RTCP {
 
 
@@ -56,13 +56,13 @@ bool AppPacket::read(Buffer& buffer)
 	if (RTCP::Packet::read(buffer)) {
 		
 		if (buffer.size() < 4) {
-			LogError() << "Buffer too short to parse APP packet." << endl;
+			errorL() << "Buffer too short to parse APP packet." << endl;
 			return false;
 		}
 		
-		buffer.readUInt32(ssrc);		
-		buffer.readString(name, 4);
-		buffer.readString(data, length - 12);
+		buffer.readU32(ssrc);		
+		buffer.read(name, 4);
+		buffer.read(data, length - 12);
 		return true;
 	}
 
@@ -75,9 +75,9 @@ void AppPacket::write(Buffer& buffer) const
 	assert(name.length() <= 4); // name is one octet in length
 
 	RTCP::Packet::write(buffer);	
-	buffer.writeUInt32(ssrc);	
-	buffer.writeBytes(name.data(), 4);
-	buffer.writeString(data);
+	buffer.writeU32(ssrc);	
+	buffer.write(name.data(), 4);
+	buffer.write(data);
 }
 
 
@@ -104,5 +104,5 @@ void AppPacket::print(std::ostream& os) const
 
 
 } // namespace RTCP
-} // namespace RTP
-} // namespace Scy 
+} // namespace rtp
+} // namespace scy 

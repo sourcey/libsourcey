@@ -22,137 +22,100 @@
 
 
 #include "Sourcey/UV/UVPP.h"
-#include "Sourcey/Memory.h"
+#include "Sourcey/Logger.h"
+//#include "Sourcey/Memory.h"
+#include "assert.h"
 
 
 namespace scy {
 namespace uv {
 
-	
-// -------------------------------------------------------------------
-//
-struct EventLoop
-{
-	uv_loop_t* loop;
-
-	EventLoop(uv_loop_t* loop = uv_default_loop()) : 
-		loop(loop) 
-	{
-	}
-	
-	void run() 
-	{ 
-		uv_run(loop, UV_RUN_DEFAULT);
-	}
-
-	void stop() 
-	{ 
-		uv_stop(loop); 
-	}
-
-	void cleanup(bool destroy = false) 
-	{ 
-		// print active handles
-		uv_walk(loop, EventLoop::onPrintHandle, NULL);
-
-		// run until handles are closed 
-		run(); 
-		if (destroy) {
-			uv_loop_delete(loop);
-			loop = NULL;
-		}
-	}	
-	
-	void waitForKill() 
-	{ 
-		uv_signal_t sig;
-		sig.data = NULL;
-		uv_signal_init(loop, &sig);
-		uv_signal_start(&sig, EventLoop::onKillSignal, SIGINT);
-		run();
-	}
-			
-	static void onKillSignal(uv_signal_t *req, int signum)
-	{
-		uv_signal_stop(req);
-	}
-	
-	static void onPrintHandle(uv_handle_t* handle, void* arg) 
-	{
-		debugL("EventLoop") << "#### Active Handle: " << handle << std::endl;
-	}
-};
-
 
 // -------------------------------------------------------------------
 //
-struct AsyncDestructor
+struct AsyncDeleter
 {
 	uv_handle_t* handle;
 
-	AsyncDestructor(uv_handle_t* handle) : 
+	AsyncDeleter(uv_handle_t* handle) : 
 		handle(handle) 
 	{
-		debugL("AsyncDestructor", this) << "Creating: " << handle << std::endl;
+		debugL("AsyncDeleter", this) << "Creating: " << handle << std::endl;
 		assert(handle->loop);
 		handle->data = this;
 	}
 
-	~AsyncDestructor()
+	~AsyncDeleter()
 	{
-		debugL("AsyncDestructor", this) << "Destroying" << std::endl;
+		debugL("AsyncDeleter", this) << "Destroying" << std::endl;
 		assert(handle == NULL);
 	}
 	
 	void run() 
 	{ 				
-		debugL("AsyncDestructor", this) << "Running: " << handle << std::endl;
+		debugL("AsyncDeleter", this) << "Running: " << handle << std::endl;
 		// handle->reqs_pending = 0
 
 		// Call uv_close resulting in the async destruction of  
 		// the handle and the current instance.
-		uv_close(handle, AsyncDestructor::afterClose);
+		uv_close(handle, AsyncDeleter::afterClose);
 
 		assert(uv_is_closing(handle));
 			
 		// NOTE: We don't run the loop for cleanup here anymore.
 		// It is now the responsibility of the application to call
 		// uv_run on the loop before it is destroyed.
-		// See EventLoop::cleanup()
+		// See Runner::cleanup()
 		
 		/*
 		// Determine weather the event loop is currently active.
 		// If not we need to run a single iteration so we can free
 		// memory associated with the handle.
 		if (handle->loop->active_handles == 1) {
-			debugL("AsyncDestructor", this) << "Running cleanup loop" << std::endl;
+			debugL("AsyncDeleter", this) << "Running cleanup loop" << std::endl;
 			uv_run(handle->loop, UV_RUN_DEFAULT); // UV_RUN_ONCE doesn't seem to work?
-			debugL("AsyncDestructor", this) << "Running cleanup loop: OK" << std::endl;
+			debugL("AsyncDeleter", this) << "Running cleanup loop: OK" << std::endl;
 		}
 		*/
 	}
 		
 	static void afterClose(uv_handle_t* handle)
 	{
-		AsyncDestructor* self = reinterpret_cast<AsyncDestructor*>(handle->data);
-		traceL("AsyncDestructor", self) << "After Close: " << handle << std::endl;		
+		traceL("AsyncDeleter") << "After Close: " << handle << std::endl;		
+		AsyncDeleter* self = reinterpret_cast<AsyncDeleter*>(handle->data);
+		//traceL("AsyncDeleter", self) << "After Close: " << handle << std::endl;		
 		assert(self->handle);
 		assert(self->handle == handle);	
 		assert(self->handle->data == self);	
 		assert(uv_is_closing(self->handle));
 		
 		// print active handles
-		uv_walk(self->handle->loop, EventLoop::onPrintHandle, NULL);
+		traceL("AsyncDeleter") << "After Close: Printing Handles" << std::endl;	
+		uv_walk(self->handle->loop, AsyncDeleter::onPrintHandle, NULL);
+		traceL("AsyncDeleter") << "After Close: Printing Handles: OK" << std::endl;	
 
 		delete self->handle;
 		self->handle = NULL;
 		delete self;
+	}
+	
+	static void onPrintHandle(uv_handle_t* handle, void* arg) 
+	{
+		debugL("AsyncDeleter") << "#### Active Handle: " << handle << std::endl;
 	}
 };
 
 
 // -------------------------------------------------------------------
 //
+class StandardObject
+	/// A standard base class for objects which can be 
+	/// created and destroyed on the heap or stack ie.
+	/// no garbage colleaction.
+{
+};
+
+
 template <class MemoryT = StandardObject>
 class Base: public MemoryT
 	/// A base class for extending libuv and handling the
@@ -238,10 +201,10 @@ public:
 	virtual void setError(const uv_err_t& err) 
 		/// Sets the error content and triggers callbacks.
 	{ 
-		errorL("Base", this) << "Set Error: " 
-			<< err.code << ": " 
-			<< err.sys_errno_ << ": " 
-			<< uv_strerror(err) << std::endl;
+		//errorL("Base", this) << "Set Error: " 
+		//	<< err.code << ": " 
+		//	<< err.sys_errno_ << ": " 
+		//	<< uv_strerror(err) << std::endl;
 		assert(_error.code != err.code);
 		_error = err; 
 		onError(err.sys_errno_);
@@ -269,18 +232,17 @@ protected:
 		/// Closes and destroys the libuv handle
 		/// without destroying the current instance.
 	{
-		traceL("Base", this) << "Closing" << std::endl;	
+		traceL("Base", this) << "Closing: " << _handle << std::endl;	
 		if (_handle) {
-			traceL("Base", this) << "Closing handle: " << _handle << std::endl;	
 			assert(!uv_is_closing(_handle));
-			AsyncDestructor* async = new AsyncDestructor(_handle);
+			AsyncDeleter* async = new AsyncDeleter(_handle);
 			async->run();
 			assert(uv_is_closing(_handle));
 			_handle = NULL;
 			onClose();
 		}
 		else
-			warnL("Base", this) << "Handle already closing: " << _handle << std::endl;	
+			warnL("Base", this) << "Already closing: " << _handle << std::endl;	
 	}
 
 	virtual void onError(int syserr) 
@@ -300,7 +262,7 @@ protected:
 	uv_loop_t* _loop;
 	uv_err_t _error;
 	void* _instance;
-	bool _closeOnError;
+	//bool _closeOnError;
 };
 
 

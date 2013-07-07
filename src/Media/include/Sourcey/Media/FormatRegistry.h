@@ -27,8 +27,8 @@
 #include <vector>
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 class FormatRegistry 
@@ -74,7 +74,7 @@ private:
 };
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif // SOURCEY_MEDIA_FormatRegistry_H

@@ -27,8 +27,8 @@
 #include <list>
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 class ICapture: public PacketEmitter, public IStartable
@@ -45,8 +45,8 @@ public:
 typedef std::list<ICapture*> ICaptureList;
 
 
-} // namespace Media 
-} // namespace Scy
+} // namespace av 
+} // namespace scy
 
 
 #endif // SOURCEY_MEDIA_ICapture_H

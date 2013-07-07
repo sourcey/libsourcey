@@ -31,8 +31,8 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy { 
-namespace Pacman {
+namespace scy { 
+namespace pcman {
 
 
 // ---------------------------------------------------------------------
@@ -207,7 +207,7 @@ Package::Asset RemotePackage::latestAsset()
 	size_t index = 0;
 	if (assets.size() > 1) {
 		for (unsigned i = 1; i < assets.size(); i++) {
-			if (Util::compareVersion(assets[i]["version"].asString(), assets[index]["version"].asString())) {
+			if (util::compareVersion(assets[i]["version"].asString(), assets[index]["version"].asString())) {
 				index = i;
 			}
 		}
@@ -248,7 +248,7 @@ Package::Asset RemotePackage::latestSDKAsset(const string& version)
 	for (unsigned i = 0; i < assets.size(); i++) {		
 		if (assets[i]["sdk-version"].asString() == version && (
 			assets[index]["sdk-version"].asString() != version || 
-			Util::compareVersion(assets[i]["version"].asString(), assets[index]["version"].asString()))) {
+			util::compareVersion(assets[i]["version"].asString(), assets[index]["version"].asString()))) {
 			index = i;
 		}
 	}
@@ -410,18 +410,18 @@ string LocalPackage::sdkVersionLock() const
 
 bool LocalPackage::verifyInstallManifest()
 {	
-	LogDebug("LocalPackage", this) << name() 
+	debugL("LocalPackage", this) << name() 
 		<< ": Verifying install manifest" << endl;
 
 	// Check file system for each manifest file
 	LocalPackage::Manifest manifest = this->manifest();
 	for (JSON::ValueIterator it = manifest.root.begin(); it != manifest.root.end(); it++) {		
 		string path = this->getInstalledFilePath((*it).asString(), false);
-		LogDebug("LocalPackage", this) << name() 
+		debugL("LocalPackage", this) << name() 
 			<< ": Checking: " << path << endl;
 		File file(path);
 		if (!file.exists()) {
-			LogError("PackageManager", this) << name() 
+			errorL("PackageManager", this) << name() 
 				<< ": Missing package file: " << path << endl;
 			return false;
 		}
@@ -491,7 +491,7 @@ bool LocalPackage::isUpToDate(RemotePackage& remote)
 	
 	// If L is greater than R the function returns true.
 	// If L is equal or less than R the function returns false.
-	return !Util::compareVersion(bestAsset.version(), version());
+	return !util::compareVersion(bestAsset.version(), version());
 }
 		*/
 
@@ -619,7 +619,7 @@ bool PackagePair::valid() const
 }
 
 
-} } // namespace Scy::Pacman
+} } // namespace scy::Pacman
 
 
 

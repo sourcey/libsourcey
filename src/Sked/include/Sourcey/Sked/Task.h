@@ -26,14 +26,14 @@
 #include "Sourcey/Sked/Trigger.h"
 
 
-namespace Scy {
-namespace Sked {
+namespace scy {
+namespace sked {
 
 
 class Scheduler;
 
 
-class Task: public Scy::Task, public JSON::ISerializable
+class Task: public scy::Task, public JSON::ISerializable
 	/// This class extends the Task class to implement
 	/// scheduling capabilities.
 {
@@ -56,11 +56,11 @@ public:
 		setTrigger(p);
 		return p;
 	}
-	void setTrigger(Sked::Trigger* trigger);
+	void setTrigger(sked::Trigger* trigger);
 
-	Sked::Trigger& trigger();
+	sked::Trigger& trigger();
 		/// Returns a reference to the associated 
-		/// Sked::Trigger or throws an exception.
+		/// sked::Trigger or throws an exception.
 	
 	Scheduler& scheduler();
 		/// Returns a reference to the associated 
@@ -69,7 +69,7 @@ public:
 	Int64 remaining() const;
 		/// Returns the milliseconds remaining 
 		/// until the next scheduled timeout.
-		/// An Sked::Trigger must be associated
+		/// An sked::Trigger must be associated
 		/// or an exception will be thrown.
 	
 	std::string type() const;
@@ -86,7 +86,7 @@ protected:
 	virtual void run() = 0;
 	virtual bool afterRun();
 
-	static bool CompareTimeout(const Scy::Task* l, const Scy::Task* r)
+	static bool CompareTimeout(const scy::Task* l, const scy::Task* r)
 		/// For stl::sort operations
 	{
 		return 
@@ -94,8 +94,8 @@ protected:
 			reinterpret_cast<const Task*>(r)->remaining();
 	}
 	
-	Sked::Scheduler* _scheduler;
-	Sked::Trigger*   _trigger;
+	sked::Scheduler* _scheduler;
+	sked::Trigger*   _trigger;
 	std::string      _type;
 	std::string      _name;
 
@@ -103,10 +103,10 @@ protected:
 };
 
 
-typedef std::vector<Sked::Task*> TaskList;
+typedef std::vector<sked::Task*> TaskList;
 	
 
-} } // namespace Scy::Sked
+} } // namespace scy::Sked
 
 
 #endif // SOURCEY_Sked_Task_H

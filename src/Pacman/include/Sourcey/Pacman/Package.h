@@ -25,8 +25,8 @@
 #include "Poco/Path.h"
 
 
-namespace Scy { 
-namespace Pacman {
+namespace scy { 
+namespace pcman {
 	
 
 struct Package: public JSON::Value
@@ -245,7 +245,7 @@ struct PackagePair
 typedef std::vector<PackagePair> PackagePairList;
 
 
-} } // namespace Scy::Pacman
+} } // namespace scy::Pacman
 
 
 #endif // SOURCEY_Pacman_Package_JSON_H

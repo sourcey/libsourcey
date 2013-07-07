@@ -248,10 +248,10 @@ public:
 	
 	virtual ~SocketObserver();
 
-	virtual void onConnect() = 0;
-	virtual void onRecv(Buffer& buf, const Address& peerAddr) = 0;
-	virtual void onError(int syserr, const std::string& message) = 0;
-	virtual void onClose() = 0;
+	virtual void onSocketConnect() = 0;
+	virtual void onSocketRecv(Buffer& buf, const Address& peerAddr) = 0;
+	virtual void onSocketError(int syserr, const std::string& message) = 0;
+	virtual void onSocketClose() = 0;
 	
 	int priority;
 		/// A higher priority gives the current observer
@@ -287,10 +287,10 @@ public:
 	
 	virtual ~SocketEmitter();
 
-	virtual void onConnect();
-	virtual void onRecv(Buffer& buf, const Address& peerAddr);
-	virtual void onError(int syserr, const std::string& message);
-	virtual void onClose();
+	virtual void onSocketConnect();
+	virtual void onSocketRecv(Buffer& buf, const Address& peerAddr);
+	virtual void onSocketError(int syserr, const std::string& message);
+	virtual void onSocketClose();
 	
 	Socket* socket;
 };

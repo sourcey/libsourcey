@@ -20,7 +20,7 @@
 #include "Sourcey/HTTP/Parser.h"
 #include "Sourcey/HTTP/Connection.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/CryptoProvider.h"
+#include "Sourcey/Crypto.h"
 #include "Sourcey/HTTP/Util.h"
 
 
@@ -32,12 +32,13 @@ namespace scy {
 namespace http {
 
 
-Parser::Parser(ParserObserver& observer, http_parser_type type) : 
+Parser::Parser(ParserObserver& observer, http_parser_type type) : ///, Poco::Net::HTTPMessage* headers
 	_observer(observer), 
+	//_headers(headers), 
 	_error(NULL),
-	_parsing(false), 
-	_upgrade(true), 
-	_wasHeaderValue(true)
+	_parsing(false)//, 
+	//_upgrade(true), 
+	//_wasHeaderValue(true)
 {	
 	traceL("Parser", this) << "Creating" << endl;
 
@@ -147,13 +148,13 @@ bool Parser::parsing() const
 
 bool Parser::upgrade() const 
 {
-	return _upgrade;
+	return _parser.upgrade > 0;
 }
 
 
 bool Parser::shouldKeepAlive() const 
 {
-  return _shouldKeepAlive;
+	return http_should_keep_alive(&_parser);
 }
 
 
@@ -168,6 +169,8 @@ void Parser::onHeader(const string& name, const string& value)
 	//if (!_observer) {
 	//  prepare_incoming();
 	//}	
+	
+	_observer.incomingHeaders()->add(name, value);
 	_observer.onParserHeader(name, value);
 }
 
@@ -175,7 +178,7 @@ void Parser::onHeader(const string& name, const string& value)
 void Parser::onBody(const char* buf, size_t off, size_t len)
 {
 	traceL("Parser", this) << "onBody" << endl;	
-	_observer.onParserChunk(buf+off, len); //Buffer(buf+off,len)
+	_observer.onParserChunk(buf + off, len); //Buffer(buf+off,len)
 }
 
 
@@ -220,8 +223,10 @@ int Parser::on_url_(http_parser* parser, const char *at, size_t len)
 	//traceL("Parser", self) << "on_url_" << endl;	
 	assert(self);
 	assert(at && len);
-
+	
 	// TODO
+	http::Request* request = dynamic_cast<http::Request*>(self->_observer.incomingHeaders());
+	request->setURI(string(at, len));
 
 	/*
 	if (!self->start_line_.url(at, len)) {
@@ -243,7 +248,8 @@ int Parser::on_header_field_(http_parser* parser, const char* at, size_t len)
 	if (self->_wasHeaderValue) {
 		// new field started
 		if (!self->_lastHeaderField.empty()) {
-			// add new entry
+
+			// add new entry and callback
 			self->onHeader(self->_lastHeaderField, self->_lastHeaderValue);
 			self->_lastHeaderValue.clear();
 		}
@@ -291,6 +297,35 @@ int Parser::on_headers_complete_(http_parser* parser)
 		// add new entry
 		self->onHeader(self->_lastHeaderField, self->_lastHeaderValue);
 	}
+
+	Poco::Net::HTTPMessage* headers = self->_observer.incomingHeaders();
+			
+	// HTTP version
+	//start_line_.version(parser_.http_major, parser_.http_minor);
+
+	// KeepAlive
+	headers->setKeepAlive(http_should_keep_alive(parser));
+
+	//
+	/// Response
+	http::Response* response = dynamic_cast<http::Response*>(headers);
+	if (response) {
+		
+		// HTTP status
+		response->setStatus((Poco::Net::HTTPResponse::HTTPStatus)parser->status_code);
+	}
+	
+	//
+	/// Request
+	http::Request* request = dynamic_cast<http::Request*>(headers);
+	if (request) {
+		
+		// HTTP method
+		request->setMethod(http_method_str(static_cast<http_method>(parser->method))); //)
+	}
+
+
+
 
 	/*
 	if (!self->_observer) {
@@ -561,7 +596,7 @@ void Parser::validate_incoming() {
 /*
 #include "Sourcey/HTTP/Authenticator.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/CryptoProvider.h"
+#include "Sourcey/Crypto.h"
 #include "Sourcey/HTTP/Util.h"
 
 #include "Poco/Base64Decoder.h"
@@ -616,7 +651,7 @@ DigestAuthenticator::DigestAuthenticator(const string& realm, const string& vers
 	_realm(realm),
 	_version(version),
 	_usingRFC2617(usingRFC2617),
-	_opaque(CryptoProvider::hash("md5", realm))
+	_opaque(crypt::hash("md5", realm))
 {
 	traceL() << "[DigestAuthenticator] Creating" << endl;
 }
@@ -671,17 +706,17 @@ bool DigestAuthenticator::validateRequest(UserManager* authenticator, const stri
 	if (!user) 
 		return false;
 
-	string ha1 = CryptoProvider::hash("md5", format("%s:%s:%s", username, _realm, user->password()));
-	string ha2 = CryptoProvider::hash("md5", format("%s:%s", httpMethod, uri));
+	string ha1 = crypt::hash("md5", format("%s:%s:%s", username, _realm, user->password()));
+	string ha2 = crypt::hash("md5", format("%s:%s", httpMethod, uri));
 
 	if (_usingRFC2617 && qop.size()) {
 		// Using advanced digest authentication
 		// Hash = md5(HA1:nonce:nc:cnonce:qop:HA2) 
-		hash = CryptoProvider::hash("md5", format("%s:%s:%s:%s:%s:%s", ha1, nonce, nc, cnonce, qop, ha2));
+		hash = crypt::hash("md5", format("%s:%s:%s:%s:%s:%s", ha1, nonce, nc, cnonce, qop, ha2));
 	} else {
 		// Using standard digest authentication
 		// Hash = md5(HA1:nonce:HA2) 
-		hash = CryptoProvider::hash("md5", format("%s:%s:%s", ha1, nonce, ha2));
+		hash = crypt::hash("md5", format("%s:%s:%s", ha1, nonce, ha2));
 	}
 
 	return hash == response;
@@ -690,7 +725,7 @@ bool DigestAuthenticator::validateRequest(UserManager* authenticator, const stri
 
 string DigestAuthenticator::prepare401Header(const string& extra) 
 {
-	_noonce = CryptoProvider::generateRandomKey(32);
+	_noonce = crypt::randomKey(32);
 	if (_usingRFC2617) {
 		return format(
 			"%s 401 Unauthorized\r\n"

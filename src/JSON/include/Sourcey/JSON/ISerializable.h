@@ -25,7 +25,7 @@
 #include <ostream>
 
 
-namespace Scy {
+namespace scy {
 namespace JSON {
 
 
@@ -70,7 +70,7 @@ inline bool deserialize(ISerializable* pObj, std::string& input)
 }
 
 
-} } // namespace Scy::JSON
+} } // namespace scy::JSON
 
 
 #endif // SOURCEY_JSON_ISerializable.h

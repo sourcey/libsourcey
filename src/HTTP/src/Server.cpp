@@ -29,6 +29,115 @@ using namespace std;
 namespace scy { 
 namespace http {
 
+	
+Server::Server(short port, ServerResponserFactory* factory) :
+	address("0.0.0.0", port),
+	factory(factory)
+{
+	traceL("Server", this) << "Creating" << endl;
+}
+
+
+Server::~Server()
+{
+	traceL("Server", this) << "Destroying" << endl;
+	shutdown();
+}
+
+	
+void Server::start()
+{	
+	assert(socket.base().refCount() == 1);
+
+	// TODO: Register self as an observer
+	socket.base().AcceptConnection += delegate(this, &Server::onAccept);	
+	socket.Close += delegate(this, &Server::onClose);
+	socket.bind(address);
+	socket.listen();
+
+	traceL("Server", this) << "Server listening on " << port() << endl;		
+
+	//timer.Timeout += delegate(this, &Server::onTimer);
+	//timer.start(5000, 5000);
+}
+
+
+void Server::shutdown() 
+{		
+	traceL("Server", this) << "Shutdown ####################################" << endl;
+
+	socket.base().AcceptConnection -= delegate(this, &Server::onAccept);	
+	socket.Close -= delegate(this, &Server::onClose);
+	socket.close();
+	
+	traceL("Server", this) << "Shutdown 1 ####################################" << endl;
+
+	//timer.stop();
+	if (!connections.empty())
+		Shutdown.emit(this);
+	
+	traceL("Server", this) << "Shutdown 2 ####################################" << endl;
+
+	// Connections must remove themselves
+	assert(connections.empty());
+	assert(socket.base().refCount() == 1);
+}
+
+
+UInt16 Server::port()
+{
+	return socket.address().port();
+}	
+
+
+ServerConnection* Server::createConnection(const net::Socket& sock)
+{
+	return new ServerConnection(*this, sock);
+}
+
+
+ServerResponser* Server::createResponser(ServerConnection& conn)
+{
+	// The initial HTTP request headers have already
+	// been parsed by now, but the request body may 
+	// be incomplete (especially if chunked).
+	return factory->createResponser(conn);
+}
+
+
+void Server::addConnection(ServerConnection* conn) 
+{		
+	traceL("Server", this) << "Adding Connection: " << conn << endl;
+	connections.push_back(conn);
+}
+
+
+void Server::removeConnection(ServerConnection* conn) 
+{		
+	traceL("Server", this) << "Removing Connection: " << conn << endl;
+	for (ServerConnectionList::iterator it = connections.begin(); it != connections.end(); ++it) {
+		if (conn == *it) {
+			connections.erase(it);
+			return;
+		}
+	}
+	assert(0 && "unknown connection");
+}
+
+
+void Server::onAccept(void* sender, const net::TCPSocket& sock)
+{	
+	traceL("Server", this) << "On server accept" << endl;
+	ServerConnection* conn = createConnection(sock);
+	assert(conn);
+}
+
+
+void Server::onClose(void* sender) 
+{
+	traceL("Server", this) << "On server socket close" << endl;
+}
+
 
 // -------------------------------------------------------------------
 // Server Connection
@@ -37,6 +146,8 @@ ServerConnection::ServerConnection(Server& server, const net::Socket& socket) :
 	Connection(socket, HTTP_REQUEST), _server(server), _responder(NULL)
 {	
 	traceL("ServerConnection", this) << "Creating" << endl;
+	server.Shutdown += delegate(this, &ServerConnection::onShutdown);
+	server.addConnection(this);
 }
 
 	
@@ -47,10 +158,40 @@ ServerConnection::~ServerConnection()
 		delete _responder;
 }
 
+	
+void ServerConnection::close()
+{
+	_server.Shutdown -= delegate(this, &ServerConnection::onShutdown);
+	_server.removeConnection(this);
+	Connection::close(); // close and destroy
+}
 
-Poco::Net::HTTPMessage* ServerConnection::headers() 
+
+void ServerConnection::onShutdown(void*)
+{
+	close();
+}
+
+
+void ServerConnection::onClose() 
+{
+	// Proxy the socket onClose to the responder
+	if (_responder)
+		_responder->onClose();
+
+	Connection::onClose();
+}
+
+
+Poco::Net::HTTPMessage* ServerConnection::incomingHeaders() 
 { 
-	return static_cast<Poco::Net::HTTPMessage*>(_response); 
+	return static_cast<Poco::Net::HTTPMessage*>(_request);
+}
+
+
+Poco::Net::HTTPMessage* ServerConnection::outgoingHeaders() 
+{ 
+	return static_cast<Poco::Net::HTTPMessage*>(_response);
 }
 
 
@@ -60,9 +201,9 @@ bool ServerConnection::respond(bool whiny)
 	
 	// KLUDGE: Temp solution for quick sending small requests only.
 	// Use Connection::sendBytes() for nocopy binary stream.
-	return sendBytes(
-		_response->body.str().data(),
-		_response->body.str().length());
+	string body(_response->body.str());
+	_response->setContentLength(body.length());
+	return sendBytes(body.data(), body.length());
 }
 
 			
@@ -87,23 +228,39 @@ void ServerConnection::onParserHeadersDone()
 
 void ServerConnection::onParserChunk(const char* buf, size_t len)
 {
+	traceL("ServerConnection", this) << "On Parser Chunk" << endl;	
+
 	// Just keep request body / chunks to the handler.
 	// The handler can manage the buffer as required.
-	_buffer.write(buf, len);
+	//_buffer.write(buf, len);
 
-	assert(_responder);
-	_responder->onRequestBody(_buffer);
+	//assert(_responder);
+	//_responder->onRequestBody(_buffer);
+	_responder->onRequestBody(buffer());
 }
 
 
 void ServerConnection::onParserDone() 
 {
-	traceL("ServerConnection", this) << "On Message Complete" << endl;	
+	traceL("ServerConnection", this) << "On Request Complete" << endl;	
+	
+	/*
+	ostringstream os;
+	_request->write(os);
+	string headers(os.str().data(), os.str().length());
+
+	traceL("ServerConnection", this) << "Request Headers >>>> " << headers << endl; // remove me
+	*/
+
 
 	// The HTTP request is complete.
 	// The request handler can give a response.
 	assert(_responder);
 	_responder->onRequestComplete(*_request, *_response);
+	//traceL("ServerConnection", this) << "On Message Complete 1" << endl;	
+	//traceL("ServerConnection", this) << "On Message Complete 2" << endl;
+	//traceL("ServerConnection", this) << "On Message Complete 2: " << _request->getKeepAlive() << endl;	
+	//traceL("ServerConnection", this) << "On Message Complete 2: " << _response->getKeepAlive() << endl;
 }
 
 
@@ -113,6 +270,33 @@ void ServerConnection::onParserDone()
 
 
 
+	
+
+	/*
+	
+
+	bool res = sendBytes(body.data(), body.length());
+
+	// Set Connection: Close unless otherwise stated
+	if (!isExplicitKeepAlive(_request) || 
+		_response->hasContentLength()) {
+		traceL("ServerConnection", this) << "Respond: No keepalive" << endl;	
+		_response->setKeepAlive(false);
+	}
+	*/
+	/* 	
+	// KLUDGE: Temp solution for quick sending small requests only.
+	// Use Connection::sendBytes() for nocopy binary stream.
+	bool res = sendBytes(
+		_response->body.str().data(),
+		_response->body.str().length());
+	
+	// Close unless keepalive is set
+	if (!_response->getKeepAlive()) {
+		traceL("Client", this) << "Closing: No keepalive" << endl; 
+		close();
+	}	
+	*/
 
 
 
@@ -183,7 +367,7 @@ Poco::Net::TCPServerConnection* Server::handleSocketConnection(const Poco::Net::
 		}
 	}
 	catch (Exception& exc) {
-		LogError("HTTPServer") << "Hook Error: " << exc.displayText() << endl;
+		errorL("HTTPServer") << "Hook Error: " << exc.displayText() << endl;
 	}
 	return conn;
 }

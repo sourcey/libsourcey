@@ -22,11 +22,11 @@
 
 
 #include "Sourcey/Base.h"
-#include "Sourcey/BasicManager.h"
+#include "Sourcey/Manager.h"
 #include "Sourcey/Util/Timer.h"
 
 
-namespace Scy {
+namespace scy {
 
 
 template <class TKey, class TValue>
@@ -96,7 +96,7 @@ public:
 };
 
 
-} // namespace Scy:
+} // namespace scy:
 
 
 #endif // SOURCEY_TimedManager_H

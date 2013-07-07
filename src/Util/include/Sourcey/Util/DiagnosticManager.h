@@ -21,11 +21,11 @@
 #define SOURCEY_DiagnosticManager_H
 
 
-#include "Sourcey/BasicManager.h"
+#include "Sourcey/Manager.h"
 #include "Sourcey/Stateful.h"
 
 
-namespace Scy {
+namespace scy {
 	
 	
 struct DiagnosticState: public State 
@@ -143,7 +143,7 @@ public:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_DiagnosticManager_H

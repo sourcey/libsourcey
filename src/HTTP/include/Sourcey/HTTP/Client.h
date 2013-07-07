@@ -26,7 +26,7 @@
 #include "Sourcey/HTTP/Request.h"
 #include "Sourcey/HTTP/Response.h"
 #include "Sourcey/HTTP/Parser.h"
-#include "Sourcey/UV/Timer.h"
+#include "Sourcey/Timer.h"
 /*
 #include "Poco/Net/HTTPResponse.h"
 #include "Poco/Base64Encoder.h"
@@ -39,53 +39,52 @@ namespace scy {
 namespace http {
 
 
-
-
 class Client;
 class ClientConnection: public Connection
 {
 public:
     ClientConnection(Client& client, const net::Address& address);
-	
-	//virtual void connect(bool whiny = false);
-		/// Force the HTTP connection
 
 	virtual void send(bool whiny = false);
 		/// Sends the HTTP rerquest
 		/// Calls connect() internally if thew socket
 		/// is not already connecting or connected.
+	
+	virtual void close();
+		/// Close the HTTP connection
 		
 	//
-	/// Client callback signals
+	/// Status signals
 	Signal<Response&> ResponseHeaders;
-	Signal<Buffer&> ResponseChunk;	
-	Signal<const Response&> Complete;
-		/// May be success or error response
-	
-				
-	Poco::Net::HTTPMessage* headers();
-	Client& client();	
-	
-protected:
-	
-	//
-	/// Socket callback signals
-	virtual void onConnect();
-
-	//
-	/// HTTP parser callbacks
-    virtual void onParserHeadersDone();	
-    virtual void onParserChunk(const char* buf, size_t len);
-    virtual void onParserDone();
+	Signal<Buffer&> ResponseBody;	
+	Signal<const Response&> ResponseComplete;
+		/// May be success or error response		
 	
 protected:
     virtual ~ClientConnection();
 
+	Poco::Net::HTTPMessage* incomingHeaders();
+	Poco::Net::HTTPMessage* outgoingHeaders();
+				
+	Client& client();
+	
+	//
+	/// Socket callbacks
+	virtual void onSocketConnect();
+
+	//
+	/// Parser callbacks
+    virtual void onParserHeadersDone();	
+    virtual void onParserChunk(const char* buf, size_t len);
+    virtual void onParserDone();
+
+	//
+	/// Client signals
+	void onShutdown(void*);
+	
+protected:	
 	Client& _client;
 	net::Address _address;
-	//bool _sendOnConnect;
-	
-	friend class Client;
 };
 
 
@@ -100,6 +99,8 @@ class Client
 public:
 	Client();
 	virtual ~Client();
+
+	void shutdown();
 	
 	ClientConnection* createConnection(const net::Address& address)
 	{
@@ -109,12 +110,17 @@ public:
 	template<class ConnectionT>
 	ClientConnection* createConnectionT(const net::Address& address)
 	{
-		ConnectionT* conn = new ConnectionT(*this, address);
-		connections.push_back(conn);
-		return conn;
+		//ConnectionT* conn = new ConnectionT(*this, address);
+		//addConnection(conn);
+		return new ConnectionT(*this, address); //conn;
 	}
 	
 	void onTimer(void*);
+
+	virtual void addConnection(ClientConnection* conn);
+	virtual void removeConnection(ClientConnection* conn);
+
+	NullSignal Shutdown;
 
 protected:	
 	friend class ClientConnection;
@@ -134,9 +140,6 @@ protected:
 		//conn->Complete += delegate(this, &Client::onConnectionComplete);	
 	//void onConnectionComplete(void* sender, const Response& response);
 		//addConnection(conn);
-
-	//void addConnection(ClientConnection* conn);
-	//void removeConnection(ClientConnection* conn);
 
 
 

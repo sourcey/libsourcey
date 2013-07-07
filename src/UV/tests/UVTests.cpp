@@ -165,7 +165,7 @@ public:
 	};
 
 	static Result Benchmark;
-	static uv::EventLoop Loop; 
+	static Runner Loop; 
 
 
 	static void onKillSignal2(uv_signal_t *req, int signum)
@@ -371,4 +371,4 @@ int main(int argc, char** argv)
 
 
 Tests::Result Tests::Benchmark;
-uv::EventLoop Tests::Loop;
+Runner Tests::Loop;

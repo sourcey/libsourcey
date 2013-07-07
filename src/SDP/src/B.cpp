@@ -24,7 +24,7 @@ using namespace std;
 
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
@@ -34,7 +34,7 @@ B::B(const string& src) :
 	string::size_type index = src.find(":");
 	if (index != string::npos) {
 		_type = src.substr(0, index);
-		_bandwidth = Util::fromString<UInt32>(src.substr(index+1, src.length()));
+		_bandwidth = util::fromString<UInt32>(src.substr(index+1, src.length()));
 	}
 }
 
@@ -44,9 +44,9 @@ B::~B() {
 
 
 string B::toString() {
-	return "b=" + _type + ":" + Util::toString(_bandwidth);
+	return "b=" + _type + ":" + util::toString(_bandwidth);
 }
 
 
-} // namespace Scy
+} // namespace scy
 } // namespace SDP 

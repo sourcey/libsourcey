@@ -32,8 +32,8 @@
 //#include "talk/base/stringencode.h"
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 struct Device 
@@ -197,7 +197,7 @@ private:
 };
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif  // SOURCEY_MEDIA_DeviceManager_H

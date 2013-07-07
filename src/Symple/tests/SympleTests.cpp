@@ -7,8 +7,8 @@
 
 
 using namespace std;
-using namespace Sourcey;
-using namespace Sourcey::Util;
+using namespace scy;
+using namespace scy::util;
 using namespace Poco;
 using namespace Poco::Net;
 
@@ -23,8 +23,8 @@ CMemLeakDetect memLeakDetect;
 */
 
 
-namespace Sourcey {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 	
 #define SERVER_HOST "127.0.0.1"
@@ -48,18 +48,18 @@ public:
 	{	
 		// NOTE: The server should use anonymous 
 		// authentication for this test.
-		Symple::Client::Options options;
+		smple::Client::Options options;
 		//options.token = ""; used for authentication
 		options.user = "test";
 		options.group = "global";
 		options.name = "crash";
 		options.type = "testapp";
-		options.serverAddr = Net::Address(SERVER_HOST, SERVER_PORT);
+		options.serverAddr = net::Address(SERVER_HOST, SERVER_PORT);
 	
 #if USE_SSL
-		Symple::SSLClient client(reactor, runner, options);
+		smple::SSLClient client(reactor, runner, options);
 #else
-		Symple::TCPClient client(reactor, runner, options);
+		smple::TCPClient client(reactor, runner, options);
 #endif
 
 		client.StateChange += delegate(this, &Tests::onConnectionStateChange);
@@ -72,33 +72,33 @@ public:
 		// TODO: Presence Test
 		// TODO: Ack Test
 
-		Util::pause();
+		util::pause();
 	}
 
 
-	void onConnectionStateChange(void* sender, SocketIO::ClientState& state, const SocketIO::ClientState& oldState) 
+	void onConnectionStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState) 
 	{
-		Symple::Client* client = reinterpret_cast<Symple::Client*>(sender);	
+		smple::Client* client = reinterpret_cast<smple::Client*>(sender);	
 		Log("debug") << "Connection State Changed: " << state.toString() << ": " << client->socket().address() << endl;
 		
 		switch (state.id()) {
-		case SocketIO::ClientState::Connecting:
+		case sockio::ClientState::Connecting:
 			break;
-		case SocketIO::ClientState::Connected: 
+		case sockio::ClientState::Connected: 
 			break;
-		//case SocketIO::ClientState::Handshaking: 
+		//case sockio::ClientState::Handshaking: 
 		//	break;
-		case SocketIO::ClientState::Online: 
+		case sockio::ClientState::Online: 
 			ready.set(); // pass
 			break;
-		case SocketIO::ClientState::Disconnected: 
+		case sockio::ClientState::Disconnected: 
 			ready.set(); // fail
 			break;
 		}
 	}
 
 
-	void onUpdatePresenceData(void*, Symple::Peer& peer)
+	void onUpdatePresenceData(void*, smple::Peer& peer)
 	{
 		Log("debug") << "Updating Client Data" << endl;
 		
@@ -110,7 +110,7 @@ public:
 };
 
 
-} } // namespace Sourcey::Symple
+} } // namespace scy::smple
 
 
 int main(int argc, char** argv) 
@@ -123,7 +123,7 @@ int main(int argc, char** argv)
 		Context::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");	
 	SSLManager::instance().initializeClient(0, ptrCert, ptrContext);
 	{
-		Sourcey::Symple::Tests run;
+		scy::smple::Tests run;
 	}		
 	Poco::Net::SSLManager::instance().shutdown();
 	Logger::uninitialize();

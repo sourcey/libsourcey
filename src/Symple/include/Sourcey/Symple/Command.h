@@ -26,8 +26,8 @@
 #include "Sourcey/Symple/Message.h"
 
 
-namespace Scy {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 
 class Command: public Message
@@ -52,8 +52,8 @@ public:
 };
 
 
-} // namespace Symple 
-} // namespace Scy
+} // namespace smple 
+} // namespace scy
 
 
 #endif // SOURCEY_Symple_Command_H

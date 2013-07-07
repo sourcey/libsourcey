@@ -30,8 +30,8 @@
 //#include "talk/session/phone/mediacommon.h"
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 class FakeDeviceManager: public IDeviceManager 
@@ -181,7 +181,7 @@ private:
 };
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif  // SOURCEY_MEDIA_DeviceManager_FAKE_H

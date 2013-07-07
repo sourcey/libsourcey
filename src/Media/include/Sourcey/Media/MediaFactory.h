@@ -47,8 +47,8 @@
 #endif
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 class MediaFactory
@@ -108,7 +108,7 @@ protected:
 };
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif

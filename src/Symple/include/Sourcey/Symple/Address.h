@@ -24,8 +24,8 @@
 #include "Sourcey/JSON/JSON.h"
 
 
-namespace Scy {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 
 class Address: public JSON::Value
@@ -83,8 +83,8 @@ protected:
 };
 
 
-} // namespace Symple 
-} // namespace Scy
+} // namespace smple 
+} // namespace scy
 
 
 #endif // SOURCEY_Symple_Address_H

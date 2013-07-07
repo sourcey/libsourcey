@@ -33,8 +33,8 @@
 #include <map>
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 	
 
@@ -197,7 +197,7 @@ inline void AllocateRtAudioInputFormat(const AudioCapture* capture, Format& form
 }
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif

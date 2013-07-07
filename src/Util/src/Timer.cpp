@@ -29,7 +29,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy {
+namespace scy {
 
 
 Timer::Timer() :
@@ -46,7 +46,7 @@ Timer::~Timer()
 	_stop = true;
 	_wakeUp.set();
 	_thread.join();
-	Util::ClearVector(_callbacks);	
+	util::ClearVector(_callbacks);	
 	cout << "[Timer:" << this << "] Destroying: OK" << endl;
 }
 
@@ -213,4 +213,4 @@ Timer& Timer::getDefault()
 }
 
 
-} // namespace Scy
+} // namespace scy

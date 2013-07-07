@@ -91,7 +91,7 @@ bool internetIsOK(bool whiny)
 
 // Returns the remote/public IP address of the current network.
 //
-// The only truly reliable way of achieving this is through a public Anionu::API.
+// The only truly reliable way of achieving this is through a public anio::api.
 // There are a couple of services available for this purpose:
 //		1) http://www.whatismyip.com/automation/n09230945.asp (IP) 
 //		2) http://checkip.dyndns.org/ (IP) 

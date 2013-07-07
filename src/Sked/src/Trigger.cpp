@@ -32,8 +32,8 @@ using namespace std;
 using namespace Poco; 
 
 
-namespace Scy {
-namespace Sked {
+namespace scy {
+namespace sked {
 
 
 Trigger::Trigger(const string& type, const string& name) :
@@ -67,20 +67,20 @@ bool Trigger::expired()
 
 void Trigger::serialize(JSON::Value& root)
 {
-	LogTrace() << "Serializing" << endl;	
+	traceL() << "Serializing" << endl;	
 	
 	root["type"] = type;
 	root["name"] = name;
-	root["createdAt"] = DateTimeFormatter::format(createdAt, Sked::DateFormat);
-	root["scheduleAt"] = DateTimeFormatter::format(scheduleAt, Sked::DateFormat);
-	root["lastRunAt"] = DateTimeFormatter::format(lastRunAt, Sked::DateFormat);
+	root["createdAt"] = DateTimeFormatter::format(createdAt, sked::DateFormat);
+	root["scheduleAt"] = DateTimeFormatter::format(scheduleAt, sked::DateFormat);
+	root["lastRunAt"] = DateTimeFormatter::format(lastRunAt, sked::DateFormat);
 	root["timesRun"] = timesRun;
 }
 
 
 void Trigger::deserialize(JSON::Value& root)
 {
-	LogTrace() << "Deserializing" << endl;
+	traceL() << "Deserializing" << endl;
 	
 	JSON::assertMember(root, "type");
 	JSON::assertMember(root, "name");
@@ -92,9 +92,9 @@ void Trigger::deserialize(JSON::Value& root)
 	int tzd;
 	type = root["type"].asString();
 	name = root["name"].asString();
-	createdAt = DateTimeParser::parse(Sked::DateFormat, root["createdAt"].asString(), tzd);
-	scheduleAt = DateTimeParser::parse(Sked::DateFormat, root["scheduleAt"].asString(), tzd);
-	lastRunAt = DateTimeParser::parse(Sked::DateFormat, root["lastRunAt"].asString(), tzd);
+	createdAt = DateTimeParser::parse(sked::DateFormat, root["createdAt"].asString(), tzd);
+	scheduleAt = DateTimeParser::parse(sked::DateFormat, root["scheduleAt"].asString(), tzd);
+	lastRunAt = DateTimeParser::parse(sked::DateFormat, root["lastRunAt"].asString(), tzd);
 	timesRun = root["timesRun"].asInt();
 }
 
@@ -134,7 +134,7 @@ bool IntervalTrigger::expired()
 
 void IntervalTrigger::serialize(JSON::Value& root)
 {
-	LogTrace() << "Serializing" << endl;	
+	traceL() << "Serializing" << endl;	
 
 	Trigger::serialize(root);
 	
@@ -147,7 +147,7 @@ void IntervalTrigger::serialize(JSON::Value& root)
 
 void IntervalTrigger::deserialize(JSON::Value& root)
 {
-	LogTrace() << "[IntervalTrigger] Deserializing" << endl;
+	traceL() << "[IntervalTrigger] Deserializing" << endl;
 	
 	JSON::assertMember(root, "interval");
 	JSON::assertMember(root["interval"], "days");
@@ -221,15 +221,15 @@ void DailyTrigger::update()
 		timeOfDay.microsecond());
 	
 	/*
-	LogTrace() << "[DailyTrigger] Updating: "
+	traceL() << "[DailyTrigger] Updating: "
 			<< "\n\tDayOfWeek: " << next.dayOfWeek()
-			<< "\n\tNowTime: " << Poco::DateTimeFormatter::format(now, Poco::Sked::DateFormat)
-			<< "\n\tPrevTime: " << Poco::DateTimeFormatter::format(prev, Poco::Sked::DateFormat)
-			<< "\n\tNextTime: " << Poco::DateTimeFormatter::format(next, Poco::Sked::DateFormat)
-			<< "\n\tScheduleTime: " << Poco::DateTimeFormatter::format(scheduleAt, Poco::Sked::DateFormat)
+			<< "\n\tNowTime: " << Poco::DateTimeFormatter::format(now, Poco::sked::DateFormat)
+			<< "\n\tPrevTime: " << Poco::DateTimeFormatter::format(prev, Poco::sked::DateFormat)
+			<< "\n\tNextTime: " << Poco::DateTimeFormatter::format(next, Poco::sked::DateFormat)
+			<< "\n\tScheduleTime: " << Poco::DateTimeFormatter::format(scheduleAt, Poco::sked::DateFormat)
 			<< endl;
 			*/
 }
 
 
-} } // namespace Scy::Sked
+} } // namespace scy::Sked

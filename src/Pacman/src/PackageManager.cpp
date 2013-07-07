@@ -35,8 +35,8 @@ using namespace Poco;
 using namespace Poco::Net;
 
 
-namespace Scy { 
-namespace Pacman {
+namespace scy { 
+namespace pcman {
 
 
 //
@@ -114,7 +114,7 @@ void PackageManager::queryRemotePackages()
 {	
 	FastMutex::ScopedLock lock(_mutex);
 	
-	LogDebug("PackageManager", this) << "Querying Packages: " 
+	debugL("PackageManager", this) << "Querying Packages: " 
 		<< _options.endpoint << _options.indexURI << endl;
 
 	if (!_tasks.empty())
@@ -123,19 +123,19 @@ void PackageManager::queryRemotePackages()
 	try {
 
 		// Make the API call to retrieve the remote manifest
-		HTTP::Request* request = new HTTP::Request("GET", _options.endpoint + _options.indexURI);	
+		http::Request* request = new http::Request("GET", _options.endpoint + _options.indexURI);	
 		if (!_options.httpUsername.empty()) {
 			Poco::Net::HTTPBasicCredentials cred(_options.httpUsername, _options.httpPassword);
 			cred.authenticate(*request); 
 		}
 
-		HTTP::Transaction transaction(request);
-		HTTP::Response& response = transaction.response();
+		http::Transaction transaction(request);
+		http::Response& response = transaction.response();
 		if (!transaction.send())
 			throw Exception(format("Failed to query packages from server: HTTP Error: %d %s", 
 				static_cast<int>(response.getStatus()), response.getReason()));			
 
-		LogDebug("PackageManager", this) << "Package Query Response:" 
+		debugL("PackageManager", this) << "Package Query Response:" 
 			<< "\n\tStatus: " << response.getStatus()
 			<< "\n\tReason: " << response.getReason()
 			<< "\n\tResponse: " << response.body.str()
@@ -152,17 +152,17 @@ void PackageManager::queryRemotePackages()
 		for (JSON::ValueIterator it = root.begin(); it != root.end(); it++) {		
 			RemotePackage* package = new RemotePackage(*it);
 			if (!package->valid()) {
-				LogError("PackageManager", this) << "Invalid package: " << package->id() << endl;
+				errorL("PackageManager", this) << "Invalid package: " << package->id() << endl;
 				delete package;
 				continue;
 			}
 			_remotePackages.add(package->id(), package);
 		}
 
-		LogDebug("PackageManager", this) << "Querying Packages: Success" << endl;
+		debugL("PackageManager", this) << "Querying Packages: Success" << endl;
 	}
 	catch (Exception& exc) {
-		LogError("PackageManager", this) << "Package Query Error: " << exc.displayText() << endl;
+		errorL("PackageManager", this) << "Package Query Error: " << exc.displayText() << endl;
 		exc.rethrow();
 	}
 }
@@ -186,13 +186,13 @@ void PackageManager::loadLocalPackages()
 
 void PackageManager::loadLocalPackages(const string& dir)
 {
-	LogDebug("PackageManager", this) << "Loading manifests: " << dir << endl;		
+	debugL("PackageManager", this) << "Loading manifests: " << dir << endl;		
 
 	DirectoryIterator fIt(dir);
 	DirectoryIterator fEnd;
 	while (fIt != fEnd) {		
 		if (fIt.name().find(".json") != string::npos) {				
-			LogDebug("PackageManager", this) << "Local package found: " << fIt.name() << endl;
+			debugL("PackageManager", this) << "Local package found: " << fIt.name() << endl;
 			LocalPackage* package = NULL;
 			try {
 				JSON::Value root;
@@ -202,16 +202,16 @@ void PackageManager::loadLocalPackages(const string& dir)
 					throw Exception("The local package is invalid");
 				}
 				
-				LogDebug("PackageManager", this) << "Local package added: " << package->name() << endl;
+				debugL("PackageManager", this) << "Local package added: " << package->name() << endl;
 				localPackages().add(package->id(), package);
 			}
 			catch (Exception& exc) {
-				LogError("PackageManager", this) << "Load Error: " << exc.displayText() << endl;
+				errorL("PackageManager", this) << "Load Error: " << exc.displayText() << endl;
 				if (package)
 					delete package;
 			}
 			catch (exception& exc) { // Thrown by JSON parser
-				LogError("PackageManager", this) << "Manifest Load Error: " << exc.what() << endl;
+				errorL("PackageManager", this) << "Manifest Load Error: " << exc.what() << endl;
 				if (package)
 					delete package;
 			}
@@ -224,16 +224,16 @@ void PackageManager::loadLocalPackages(const string& dir)
 
 bool PackageManager::saveLocalPackages(bool whiny)
 {
-	LogTrace("PackageManager", this) << "Saving Local Packages" << endl;
+	traceL("PackageManager", this) << "Saving Local Packages" << endl;
 
 	bool res = true;
-	LocalPackageMap toSave = localPackages().items();
+	LocalPackageMap toSave = localPackages().map();
 	for (LocalPackageMap::const_iterator it = toSave.begin(); it != toSave.end(); ++it) {
 		if (!saveLocalPackage(static_cast<LocalPackage&>(*it->second), whiny))
 			res = false;
 	}
 
-	LogTrace("PackageManager", this) << "Saving Local Packages: OK" << endl;
+	traceL("PackageManager", this) << "Saving Local Packages: OK" << endl;
 
 	return res;
 }
@@ -244,12 +244,12 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 	bool res = false;
 	try {
 		string path(format("%s/%s.json", options().interDir, package.id()));
-		LogDebug("PackageManager", this) << "Saving Local Package: " << package.id() << endl;
+		debugL("PackageManager", this) << "Saving Local Package: " << package.id() << endl;
 		JSON::saveFile(package, path);
 		res = true;
 	}
 	catch (Exception& exc) {
-		LogError("PackageManager", this) << "Save Error: " << exc.displayText() << endl;
+		errorL("PackageManager", this) << "Save Error: " << exc.displayText() << endl;
 		if (whiny)
 			exc.rethrow();
 	}
@@ -262,7 +262,7 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 //
 InstallTask* PackageManager::installPackage(const string& name, const InstallTask::Options& options, bool whiny)
 {	
-	LogDebug("PackageManager", this) << "Installing Package: " << name << endl;	
+	debugL("PackageManager", this) << "Installing Package: " << name << endl;	
 
 	try 
 	{
@@ -280,12 +280,12 @@ InstallTask* PackageManager::installPackage(const string& name, const InstallTas
 		InstallTask::Options opts(options);
 		opts.version = asset.version();
 	
-		LogInfo() << "Installing " << pair.name() << " " << asset.version() << endl;	
+		infoL() << "Installing " << pair.name() << " " << asset.version() << endl;	
 		return createInstallTask(pair, opts);
 	}
 	catch (Exception& exc) 
 	{
-		LogError("PackageManager", this) << "Error: " << exc.displayText() << endl;
+		errorL("PackageManager", this) << "Error: " << exc.displayText() << endl;
 		if (whiny)
 			exc.rethrow();
 	}
@@ -300,7 +300,7 @@ Package::Asset PackageManager::getAssetToInstall(PackagePair& pair, const Instal
 		pair.local->isInstalled() && 
 		pair.local->verifyInstallManifest();
 	
-	LogDebug("PackageManager", this) << "Getting Best Asset:"
+	debugL("PackageManager", this) << "Getting Best Asset:"
 		<< "\n\tName:" << pair.local->name() 
 		<< "\n\tVersion:" << pair.local->version() 
 		<< "\n\tVersion Lock:" << pair.local->versionLock() 
@@ -339,7 +339,7 @@ Package::Asset PackageManager::getAssetToInstall(PackagePair& pair, const Instal
 		
 		// If everything is in order there is nothing to install
 		if (isInstalledAndVerified && pair.local->asset().sdkVersion() == pair.local->sdkVersionLock() &&
-			!Util::compareVersion(sdkAsset.version(), pair.local->version()))
+			!util::compareVersion(sdkAsset.version(), pair.local->version()))
 			throw Exception("Package is up to date for SDK: " + pair.local->sdkVersionLock());
 
 		return sdkAsset;
@@ -347,7 +347,7 @@ Package::Asset PackageManager::getAssetToInstall(PackagePair& pair, const Instal
 	
 	// If all else fails return the latest asset!
 	Package::Asset latestAsset = pair.remote->latestAsset();
-	if (isInstalledAndVerified && !Util::compareVersion(latestAsset.version(), pair.local->version()))
+	if (isInstalledAndVerified && !util::compareVersion(latestAsset.version(), pair.local->version()))
 		throw Exception("Package is up to date.");
 
 	return latestAsset;
@@ -385,7 +385,7 @@ InstallTask* PackageManager::updatePackage(const string& name, const InstallTask
 	{
 		if (!localPackages().exists(name)) {
 			string error("Update Failed: " + name + " is not installed.");
-			LogError("PackageManager", this) << "" << error << endl;	
+			errorL("PackageManager", this) << "" << error << endl;	
 			if (whiny)
 				throw Exception(error);
 			else
@@ -406,7 +406,7 @@ bool PackageManager::updatePackages(const StringVec& ids, const InstallTask::Opt
 		for (StringVec::const_iterator it = ids.begin(); it != ids.end(); ++it) {
 			if (!localPackages().exists(*it)) {
 				string error("Update Failed: " + *it + " is not installed.");
-				LogError("PackageManager", this) << error << endl;	
+				errorL("PackageManager", this) << error << endl;	
 				if (whiny)
 					throw Exception(error);
 				else
@@ -422,7 +422,7 @@ bool PackageManager::updatePackages(const StringVec& ids, const InstallTask::Opt
 bool PackageManager::updateAllPackages(bool whiny)
 {
 	bool res = true;	
-	LocalPackageMap& packages = localPackages().items();
+	LocalPackageMap& packages = localPackages().map();
 	for (LocalPackageMap::const_iterator it = packages.begin(); it != packages.end(); ++it) {	
 		InstallTask::Options options;
 		InstallTask* task = updatePackage(it->second->name(), options, whiny);
@@ -436,7 +436,7 @@ bool PackageManager::updateAllPackages(bool whiny)
 
 bool PackageManager::uninstallPackage(const string& id, bool whiny)
 {
-	LogDebug("PackageManager", this) << "Uninstalling Package: " << id << endl;	
+	debugL("PackageManager", this) << "Uninstalling Package: " << id << endl;	
 	
 	try 
 	{
@@ -447,13 +447,13 @@ bool PackageManager::uninstallPackage(const string& id, bool whiny)
 			LocalPackage::Manifest manifest = package->manifest();
 			if (!manifest.empty()) {
 				for (JSON::ValueIterator it = manifest.root.begin(); it != manifest.root.end(); it++) {
-					LogDebug("PackageManager", this) << "Uninstalling file: " << (*it).asString() << endl;	
+					debugL("PackageManager", this) << "Uninstalling file: " << (*it).asString() << endl;	
 					try {							
 						File file(package->getInstalledFilePath((*it).asString()));
 						file.remove();
 					}
 					catch (Exception& exc) {
-						LogError("PackageManager", this) << "Uninstall File Error: " << exc.displayText() << endl;
+						errorL("PackageManager", this) << "Uninstall File Error: " << exc.displayText() << endl;
 					}
 				}
 				manifest.root.clear();
@@ -464,7 +464,7 @@ bool PackageManager::uninstallPackage(const string& id, bool whiny)
 			file.remove();	
 		}
 		catch (Exception& exc) {
-			LogError("PackageManager", this) << "Uninstall Error: " << exc.displayText() << endl;
+			errorL("PackageManager", this) << "Uninstall Error: " << exc.displayText() << endl;
 			// Swallow and continue...
 		}
 
@@ -480,7 +480,7 @@ bool PackageManager::uninstallPackage(const string& id, bool whiny)
 	}
 	catch (Exception& exc) 
 	{
-		LogError("PackageManager", this) << "Uninstall Error: " << exc.displayText() << endl;
+		errorL("PackageManager", this) << "Uninstall Error: " << exc.displayText() << endl;
 		if (whiny)
 			exc.rethrow();
 		else 
@@ -523,15 +523,15 @@ bool PackageManager::hasUnfinalizedPackages()
 {	
 	//FastMutex::ScopedLock lock(_mutex);
 
-	LogDebug("PackageManager", this) << "Checking if Finalization Required" << endl;
+	debugL("PackageManager", this) << "Checking if Finalization Required" << endl;
 	
 	bool res = false;	
 	//LocalPackageMap toCheck(_localPackages.items());
-	LocalPackageMap& packages = localPackages().items();
+	LocalPackageMap& packages = localPackages().map();
 	for (LocalPackageMap::const_iterator it = packages.begin(); it != packages.end(); ++it) {
 		if (it->second->state() == "Installing" && 
 			it->second->installState() == "Finalizing") {
-			LogDebug("PackageManager", this) << "Finalization required: " << it->second->name() << endl;
+			debugL("PackageManager", this) << "Finalization required: " << it->second->name() << endl;
 			res = true;
 		}
 	}
@@ -542,18 +542,18 @@ bool PackageManager::hasUnfinalizedPackages()
 
 bool PackageManager::finalizeInstallations(bool whiny)
 {
-	LogDebug("PackageManager", this) << "Finalizing Installations" << endl;
+	debugL("PackageManager", this) << "Finalizing Installations" << endl;
 	
 	//FastMutex::ScopedLock lock(_mutex);
 	
 	bool res = true;
 	
-	LocalPackageMap& packages = localPackages().items();
+	LocalPackageMap& packages = localPackages().map();
 	for (LocalPackageMap::const_iterator it = packages.begin(); it != packages.end(); ++it) {
 		try {
 			if (it->second->state() == "Installing" && 
 				it->second->installState() == "Finalizing") {
-				LogDebug("PackageManager", this) << "Finalizing: " << it->second->name() << endl;
+				debugL("PackageManager", this) << "Finalizing: " << it->second->name() << endl;
 
 				// Create an install task on the stack - we just
 				// have to move some files so no async required.
@@ -575,7 +575,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 			}
 		}
 		catch (Exception& exc) {
-			LogError("PackageManager", this) << "Finalize Error: " << exc.displayText() << endl;
+			errorL("PackageManager", this) << "Finalize Error: " << exc.displayText() << endl;
 			res = false;
 			if (whiny)
 				exc.rethrow();
@@ -706,18 +706,18 @@ bool PackageManager::isUpToDate(PackagePair& pair)
 
 bool PackageManager::verifyInstallManifest(LocalPackage& package)
 {	
-	LogDebug("PackageManager", this) << package.name() 
+	debugL("PackageManager", this) << package.name() 
 		<< ": Verifying install manifest" << endl;
 
 	// Check file system for each manifest file
 	LocalPackage::Manifest manifest = package.manifest();
 	for (JSON::ValueIterator it = manifest.root.begin(); it != manifest.root.end(); it++) {		
 		string path = package.getInstalledFilePath((*it).asString(), false);
-		LogDebug("PackageManager", this) << package.name() 
+		debugL("PackageManager", this) << package.name() 
 			<< ": Checking: " << path << endl;
 		File file(path);
 		if (!file.exists()) {
-			LogError("PackageManager", this) << package.name() 
+			errorL("PackageManager", this) << package.name() 
 				<< ": Missing package file: " << path << endl;
 			return false;
 		}
@@ -762,7 +762,7 @@ bool PackageManager::clearCacheFile(const string& fileName, bool whiny)
 		return true;
 	}
 	catch (Exception& exc) {
-		LogError("PackageManager", this) << "Clear Cache Error: " 
+		errorL("PackageManager", this) << "Clear Cache Error: " 
 			<< fileName << ": " << exc.displayText() << endl;
 		if (whiny)
 			exc.rethrow();
@@ -802,7 +802,7 @@ Path PackageManager::getCacheFilePath(const string& fileName)
 	
 Path PackageManager::getIntermediatePackageDir(const string& id)
 {
-	LogDebug("PackageManager", this) << "getIntermediatePackageDir 0" << endl;
+	debugL("PackageManager", this) << "getIntermediatePackageDir 0" << endl;
 		
 	Path dir(options().interDir);
 	dir.makeDirectory();
@@ -840,7 +840,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 {
 	InstallTask* task = reinterpret_cast<InstallTask*>(sender);
 	
-	LogTrace("PackageManager", this) << "Package Install Complete: " << task->state().toString() << endl;
+	traceL("PackageManager", this) << "Package Install Complete: " << task->state().toString() << endl;
 
 	PackageComplete.emit(this, *task->local());
 
@@ -862,7 +862,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 }
 
 
-} } // namespace Scy::Pacman
+} } // namespace scy::Pacman
 
 
 
@@ -872,7 +872,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 		// so just return a NULL pointer but do not throw.
 		if (pair.local->isInstalled()) {
 			if (verifyInstallManifest(*pair.local)) {
-				LogDebug("PackageManager", this) 
+				debugL("PackageManager", this) 
 					<< pair.local->name() << ": Manifest is valid" << endl;			
 				if (isUpToDate(pair)) {
 					ostringstream ost;
@@ -933,7 +933,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 /*
 bool PackageManager::installPackage(const string& name, InstallMonitor* monitor, const InstallTask::Options& options, bool whiny)
 {	
-	LogDebug("PackageManager", this) << "Installing Package: " << name << endl;	
+	debugL("PackageManager", this) << "Installing Package: " << name << endl;	
 
 	try 
 	{
@@ -956,10 +956,10 @@ bool PackageManager::installPackage(const string& name, InstallMonitor* monitor,
 		// just return as success.
 		if (pair.local->isInstalled()) {
 			if (verifyInstallManifest(pair.local)) {
-				LogDebug() 
+				debugL() 
 					<< pair.local->name() << " manifest is valid" << endl;			
 				if (isUpToDate(pair)) {
-					LogInfo() 
+					infoL() 
 						<< pair.local->name() << " is is up to date: " 
 						<< pair.local->version() << " >= " 
 						<< pair.remote->latestAsset().version() << endl;
@@ -968,7 +968,7 @@ bool PackageManager::installPackage(const string& name, InstallMonitor* monitor,
 			}
 		}
 	
-		LogInfo() 
+		infoL() 
 			<< pair.local->name() << " is updating: " 
 			<< pair.local->version() << " <= " 
 			<< pair.remote->latestAsset().version() << endl;
@@ -979,7 +979,7 @@ bool PackageManager::installPackage(const string& name, InstallMonitor* monitor,
 	}
 	catch (Exception& exc) 
 	{
-		LogError("PackageManager", this) << "Error: " << exc.displayText() << endl;
+		errorL("PackageManager", this) << "Error: " << exc.displayText() << endl;
 		if (whiny)
 			exc.rethrow();
 		else 
@@ -1009,7 +1009,7 @@ bool PackageManager::updatePackage(const string& name, InstallMonitor* monitor, 
 	{
 		if (!localPackages().exists(name)) {
 			string error("Update Failed: " + name + " is not installed");
-			LogError("PackageManager", this) << "" << error << endl;	
+			errorL("PackageManager", this) << "" << error << endl;	
 			if (whiny)
 				throw Exception(error);
 			else
@@ -1081,9 +1081,9 @@ bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* moni
 			pugi::json_parse_result result = package->load_file(fIt.path().toString().data());
 			if (!package->valid()) {				
 				if (!result)
-					LogError("PackageManager", this) << "Package Load Error: " << result.description() << endl;
+					errorL("PackageManager", this) << "Package Load Error: " << result.description() << endl;
 				else
-					LogError("PackageManager", this) << "Package Load Error: " << package->id() << endl;
+					errorL("PackageManager", this) << "Package Load Error: " << package->id() << endl;
 				package->print(cout);
 				delete package;
 			}
@@ -1095,7 +1095,7 @@ bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* moni
 				//	throw NotFoundException(path.toString());
 			/*
 			for (pugi::json_node node = manifest.first_child(); node; node = node.next_sibling()) {
-				LogDebug("PackageManager", this) << "Uninstalling file: " << node.attribute("path").value() << endl;	
+				debugL("PackageManager", this) << "Uninstalling file: " << node.attribute("path").value() << endl;	
 				Path path(getInstalledFilePath(node.attribute("path").value()));
 				File file(path);
 				//if (!file.exists())
@@ -1112,7 +1112,7 @@ bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* moni
 	}
 	// If the package is is up to date then do nothing.
 	//if (isUpToDate(name))
-		//LogDebug("PackageManager", this) << "Uninstalling Package: " << name << endl;	
+		//debugL("PackageManager", this) << "Uninstalling Package: " << name << endl;	
 		//throw Exception(
 		//	format("%s is is up to date: %s >= %s",
 		//		name, local->version(), remote->latestAsset().version()));
@@ -1158,7 +1158,7 @@ bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* moni
 	DirectoryIterator dEnd;
 	while (dIt != dEnd)
 	{
-		LogDebug("PackageManager", this) << "Finalizing: Found: " << dIt.path().toString() << endl;
+		debugL("PackageManager", this) << "Finalizing: Found: " << dIt.path().toString() << endl;
 		
 		// InstallTasks are located inside their respective folders.
 		DirectoryIterator fIt(dIt.path());
@@ -1167,7 +1167,7 @@ bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* moni
 		{	
 			try
 			{
-				LogDebug("PackageManager", this) << "Finalizing: Installing: " << fIt.path().toString() << endl;
+				debugL("PackageManager", this) << "Finalizing: Installing: " << fIt.path().toString() << endl;
 				File(fIt.path()).moveTo(_options.installDir);
 				++fIt;
 			}
@@ -1178,7 +1178,7 @@ bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* moni
 				// must be called from an external process before the
 				// installation can be completed.
 				errors = true;
-				LogError() << "[InstallTask] Finalizing Error: " << exc.displayText() << endl;
+				errorL() << "[InstallTask] Finalizing Error: " << exc.displayText() << endl;
 			}
 		}
 
@@ -1193,14 +1193,14 @@ bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* moni
 
 			/*
 			if (remove(_options.interDir.data()) == 0)
-				LogDebug("PackageManager", this) << "Finalizing: Deleted: " << fIt.path().toString() << endl;
+				debugL("PackageManager", this) << "Finalizing: Deleted: " << fIt.path().toString() << endl;
 			else
-				LogError("PackageManager", this) << "Finalizing: Delete Error: " << fIt.path().toString() << endl;
+				errorL("PackageManager", this) << "Finalizing: Delete Error: " << fIt.path().toString() << endl;
 				*/
 	/* 
 	FastMutex::ScopedLock lock(_mutex);
 	//const string& name
-	//if (Util::compareVersion(remote->latestAsset().version(), local->version()))
+	//if (util::compareVersion(remote->latestAsset().version(), local->version()))
 	//	return false;
 
 	LocalPackage* local = _localPackages.get(name, true);
@@ -1232,14 +1232,14 @@ bool PackageManager::isUpToDate(const string& name)
 		throw Exception("The remote package is invalid");
 		
 	if (!local->isUpToDate(remote->latestAsset())) {	
-		LogInfo() 
+		infoL() 
 			<< name << " has a new version available: " 
 			<< local->version() << " <= " 
 			<< remote->latestAsset().version() << endl;
 		return false;
 	}
 
-	//if (Util::compareVersion(remote->latestAsset().version(), local->version()))
+	//if (util::compareVersion(remote->latestAsset().version(), local->version()))
 	//	return false;
 	
 	// Check file system for each manifest file
@@ -1248,7 +1248,7 @@ bool PackageManager::isUpToDate(const string& name)
 		Path path(getInstalledFilePath(node.attribute("path").value()));
 		File file(path);
 		if (!file.exists()) {
-			LogError("PackageManager", this) << "Local package missing file: " << path.toString() << endl;
+			errorL("PackageManager", this) << "Local package missing file: " << path.toString() << endl;
 			return false;
 		}
 	}
@@ -1258,14 +1258,14 @@ bool PackageManager::isUpToDate(const string& name)
 	}
 	catch (Exception& exc) 
 	{
-		LogError("PackageManager", this) << "Error: " << exc.displayText() << endl;
+		errorL("PackageManager", this) << "Error: " << exc.displayText() << endl;
 		if (whiny)
 			exc.rethrow();
 		else 
 			return false;
 	}
 	
-	LogDebug() 
+	debugL() 
 		<< name << " is is up to date: " 
 		<< local->version() << " >= " 
 		<< remote->latestAsset().version() << endl;

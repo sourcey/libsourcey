@@ -30,48 +30,48 @@ using namespace std;
 using namespace Poco; 
 
 
-namespace Scy {
-namespace Sked {
+namespace scy {
+namespace sked {
 	
 
 Task::Task(const string& type, const string& name) : 
-	Scy::Task(true),		
+	scy::Task(true),		
 	_type(type),
 	_name(name),
 	_scheduler(NULL),
 	_trigger(NULL)
 {
-	LogTrace() << "Creating" << endl;
+	traceL() << "Creating" << endl;
 }
 
 	
-Task::Task(Sked::Scheduler& scheduler, const string& type, const string& name) : 
-	Scy::Task(reinterpret_cast<Scheduler&>(scheduler), true, false),
+Task::Task(sked::Scheduler& scheduler, const string& type, const string& name) : 
+	scy::Task(reinterpret_cast<Scheduler&>(scheduler), true, false),
 	_type(type),
 	_name(name),
 	_scheduler(NULL),
 	_trigger(NULL)
 {
-	LogTrace() << "Creating" << endl;
+	traceL() << "Creating" << endl;
 }
 
 
 Task::~Task()
 {
-	LogTrace() << "Destroying" << endl;
+	traceL() << "Destroying" << endl;
 }
 
 
 void Task::start()
 {
 	trigger(); // throw if trigger is NULL
-	Scy::Task::start();
+	scy::Task::start();
 }
 
 
 void Task::serialize(JSON::Value& root)
 {
-	LogTrace() << "Serializing" << endl;	
+	traceL() << "Serializing" << endl;	
 	
 	Poco::FastMutex::ScopedLock lock(_mutex);
 	
@@ -83,7 +83,7 @@ void Task::serialize(JSON::Value& root)
 
 void Task::deserialize(JSON::Value& root)
 {
-	LogTrace() << "Deserializing" << endl;
+	traceL() << "Deserializing" << endl;
 	
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	
@@ -115,7 +115,7 @@ bool Task::afterRun()
 }
 
 
-void Task::setTrigger(Sked::Trigger* trigger)
+void Task::setTrigger(sked::Trigger* trigger)
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	if (_trigger)
@@ -142,30 +142,30 @@ Int64 Task::remaining() const
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	if (!_trigger)
-		throw Exception("Tasks must be associated with a Sked::Trigger instance.");
+		throw Exception("Tasks must be associated with a sked::Trigger instance.");
 	return _trigger->remaining();
 }
 
 
-Sked::Trigger& Task::trigger()
+sked::Trigger& Task::trigger()
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	if (!_trigger)
-		throw Exception("Tasks must be associated with a Sked::Trigger instance.");
+		throw Exception("Tasks must be associated with a sked::Trigger instance.");
 	return *_trigger;
 }
 
 
-Sked::Scheduler& Task::scheduler()						 
+sked::Scheduler& Task::scheduler()						 
 { 
 	Poco::FastMutex::ScopedLock lock(_mutex);	
 	if (!_scheduler)
-		throw Exception("Tasks must be started with a Sked::Scheduler instance.");
+		throw Exception("Tasks must be started with a sked::Scheduler instance.");
 	return *_scheduler;
 }
 
 
-} } // namespace Scy::Sked
+} } // namespace scy::Sked
 
 
 
@@ -185,23 +185,23 @@ void Task::setName(const string& name)
 		throw Exception("A time member is required.");
 	
 	int tzd;
-	DateTime time(DateTimeParser::parse(Sked::DateFormat, root["time"].asString(), tzd));
+	DateTime time(DateTimeParser::parse(sked::DateFormat, root["time"].asString(), tzd));
 	schedule(time);
 	*/
 
 		//root["time"] = DateTimeFormatter::format(time(), 
-		//	Sked::DateFormat);
+		//	sked::DateFormat);
 
 		//if (!root.isMember("time"))
 		//	throw Exception("A time member is required.");
 	
 		//int tzd;
-		//DateTime time(DateTimeParser::parse(Sked::DateFormat, root["time"].asString(), tzd));
+		//DateTime time(DateTimeParser::parse(sked::DateFormat, root["time"].asString(), tzd));
 		//schedule(time);
 
 
 	//if (!&trigger())
-	//	throw Exception("A Sked::Trigger is required to start the task.");
+	//	throw Exception("A sked::Trigger is required to start the task.");
 
 
 /*
@@ -235,9 +235,9 @@ DateTime Task::time() const
     //DateTime now;
     //Timespan s = now += time;
     //Timespan s = time - now;	
-	//LogTrace() << "[Task:" << this << "] Time Now: " << DateTimeFormatter::format(now, Sked::DateFormat) << endl;
-	//LogTrace() << "[Task:" << this << "] Time Trigger: " << DateTimeFormatter::format(time, Sked::DateFormat) << endl;
-	//LogTrace() << "[Task:" << this << "] Timeout in " << (diff / 1000) << endl;
+	//traceL() << "[Task:" << this << "] Time Now: " << DateTimeFormatter::format(now, sked::DateFormat) << endl;
+	//traceL() << "[Task:" << this << "] Time Trigger: " << DateTimeFormatter::format(time, sked::DateFormat) << endl;
+	//traceL() << "[Task:" << this << "] Timeout in " << (diff / 1000) << endl;
 	//start();
 
     //DateTime now;
@@ -288,16 +288,16 @@ void Task::schedule(const string& time, const string& fmt)
 /*
 void Task::serialize(JSON::Value& root)
 {
-	LogTrace() << "Serializing" << endl;	
+	traceL() << "Serializing" << endl;	
 	
 	root["time"] = DateTimeFormatter::format(time(), 
-		Sked::DateFormat);
+		sked::DateFormat);
 }
 
 
 void Task::deserialize(JSON::Value& root)
 {
-	LogTrace() << "Deserializing" << endl;
+	traceL() << "Deserializing" << endl;
 
 	if (!root.isMember("time"))
 		throw Exception("A time member is required.");

@@ -25,7 +25,7 @@
 #include "Sourcey/PacketStream.h"
 
 
-namespace Scy { 
+namespace scy { 
 
 
 class StreamManager: public EventfulManager<std::string, PacketStream>, public IPolymorphic
@@ -65,7 +65,7 @@ protected:
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_StreamManager_H

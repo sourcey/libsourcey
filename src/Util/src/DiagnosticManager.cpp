@@ -23,7 +23,7 @@
 using namespace std;
 
 
-namespace Scy {
+namespace scy {
 	
 	
 IDiagnostic::IDiagnostic()
@@ -93,18 +93,18 @@ bool IDiagnostic::failed() const
 //	
 DiagnosticManager::DiagnosticManager()
 {	
-	LogTrace() << "Creating" << endl;
+	traceL() << "Creating" << endl;
 }
 
 
 DiagnosticManager::~DiagnosticManager() 
 {
-	LogTrace() << "Destroying" << endl;
+	traceL() << "Destroying" << endl;
 }
 
 void DiagnosticManager::resetAll()
 {
-	Map tests = items();
+	Map tests = store();
 	for (Map::const_iterator it = tests.begin(); it != tests.end(); ++it) {	
 		it->second->reset();
 	}
@@ -113,7 +113,7 @@ void DiagnosticManager::resetAll()
 
 void DiagnosticManager::checkAll()
 {
-	Map tests = items();
+	Map tests = store();
 	for (Map::const_iterator it = tests.begin(); it != tests.end(); ++it) {	
 		it->second->check();
 	}
@@ -122,7 +122,7 @@ void DiagnosticManager::checkAll()
 
 bool DiagnosticManager::allComplete()
 {
-	Map tests = items();
+	Map tests = store();
 	for (Map::const_iterator it = tests.begin(); it != tests.end(); ++it) {	
 		if (!it->second->complete())
 			return false;
@@ -136,7 +136,7 @@ bool DiagnosticManager::addDiagnostic(IDiagnostic* test)
 	assert(test);
 	assert(!test->name.empty());
 	
-	LogTrace() << "Adding Diagnostic: " << test->name << endl;	
+	traceL() << "Adding Diagnostic: " << test->name << endl;	
 	test->StateChange += delegate(this, &DiagnosticManager::onDiagnosticStateChange);
 	return DiagnosticStore::add(test->name, test);
 }
@@ -146,7 +146,7 @@ bool DiagnosticManager::freeDiagnostic(const string& name)
 {
 	assert(!name.empty());
 
-	LogTrace() << "Removing Diagnostic: " << name << endl;	
+	traceL() << "Removing Diagnostic: " << name << endl;	
 	IDiagnostic* test = DiagnosticStore::remove(name);
 	if (test) {
 		// TODO: 
@@ -167,11 +167,11 @@ IDiagnostic* DiagnosticManager::getDiagnostic(const string& name)
 void DiagnosticManager::onDiagnosticStateChange(void* sender, DiagnosticState& state, const DiagnosticState&)
 {
 	IDiagnostic* test = reinterpret_cast<IDiagnostic*>(sender);
-	LogTrace() << "Diagnostic State Change: " << test->name << ": " << state.toString() << endl;
+	traceL() << "Diagnostic State Change: " << test->name << ": " << state.toString() << endl;
 
 	if (test->complete() && allComplete())
 		DiagnosticsComplete.emit(this);
 }
 
 
-} // namespace Scy
+} // namespace scy

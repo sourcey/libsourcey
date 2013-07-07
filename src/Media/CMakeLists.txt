@@ -6,6 +6,7 @@ if(BUILD_MODULES AND BUILD_MODULE_Media)
   include_dependency(JsonCpp REQUIRED)   
   include_dependency(OpenCV REQUIRED)   
   include_dependency(RtAudio REQUIRED)
+  include_dependency(LibUV REQUIRED)
 
-  define_sourcey_module(Media Base Net)
+  define_sourcey_module(Media Base Net UV)
 endif()

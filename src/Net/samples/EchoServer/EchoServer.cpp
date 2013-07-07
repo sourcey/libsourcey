@@ -22,10 +22,10 @@ CMemLeakDetect memLeakDetect;
 using namespace std;
 using namespace Poco;
 using namespace Poco::Util;
-using namespace Scy::Net;
+using namespace scy::Net;
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 
@@ -98,10 +98,10 @@ void EchoServer::handleCommand(const string& name, const string& value)
 		stopOptionsProcessing();
 	}
 	else if(name == "port") {
-		_port = Util::fromString<short>(value);
+		_port = util::fromString<short>(value);
 	}
 	else if(name == "logfile") {
-		FileChannel* log = dynamic_cast<FileChannel*>(Scy::Logger::instance().get("VideoAnalyzer"));
+		FileChannel* log = dynamic_cast<FileChannel*>(scy::Logger::instance().get("VideoAnalyzer"));
 		log->setPath(value);
 	}
 }
@@ -148,13 +148,13 @@ void EchoServer::onSocketCreated(void* sender, Poco::Net::StreamSocket& socket, 
 	
 	TCPPacketSocket* sock = new TCPPacketSocket(socket, reactor);
 	sock->setDeleteOnClose(true);
-	sock->registerPacketType<DataPacket>(1);
+	sock->registerPacketType<RawPacket>(1);
 	sock->attach(packetDelegate(this, &EchoServer::onRequestReceived));
 	//sock->Closed += delegate(this, &EchoServer::onSocketClosed, -1);	
 }
 
 
-void EchoServer::onRequestReceived(void* sender, DataPacket& packet) 
+void EchoServer::onRequestReceived(void* sender, RawPacket& packet) 
 {
 	TCPPacketSocket* socket = reinterpret_cast<TCPPacketSocket*>(sender);	
 
@@ -175,7 +175,7 @@ void EchoServer::onSocketClosed(void* sender)
 */
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 POCO_SERVER_MAIN(EchoServer)

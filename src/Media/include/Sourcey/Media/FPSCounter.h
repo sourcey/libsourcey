@@ -26,8 +26,8 @@
 #include "Sourcey/IPacketProcessor.h"
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 struct FPSCounter 
@@ -95,7 +95,7 @@ public:
 		/// Reject the packet if we have exceeded the maximum FPS.
 	{ 
 		/*
-		LogTrace() << "[FPSLimiter:" << this <<"] Accepting: \n" 
+		traceL() << "[FPSLimiter:" << this <<"] Accepting: \n" 
 			<< "\n\tFPS Limit: " << _max
 			<< "\n\tCurrent FPS: " << _counter.fps
 			<< "\n\tAcceptable: " << (static_cast<int>(_counter.fps) <= _max)
@@ -113,7 +113,7 @@ public:
 
 	virtual void process(IPacket& packet) 
 	{
-		//LogTrace() << "[FPSLimiter:" << this <<"] Processing" << std::endl;
+		//traceL() << "[FPSLimiter:" << this <<"] Processing" << std::endl;
 		_counter.tick();
 		emit(this, packet);
 	};
@@ -129,7 +129,7 @@ protected:
 };
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif // SOURCEY_MEDIA_FPSCounter_H

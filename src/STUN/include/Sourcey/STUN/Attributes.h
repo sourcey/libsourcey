@@ -33,7 +33,7 @@
 
 #include "Sourcey/Base.h"
 #include "Sourcey/Buffer.h"
-#include "Sourcey/CryptoProvider.h"
+#include "Sourcey/Crypto.h"
 #include "Sourcey/Net/Address.h"
 
 

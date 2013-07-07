@@ -28,8 +28,8 @@
 #include <vector>
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 
 
 struct Header 
@@ -92,8 +92,8 @@ struct Header
 };
 
 
-} // namespace RTP
-} // namespace Scy 
+} // namespace rtp
+} // namespace scy 
 
 
 #endif

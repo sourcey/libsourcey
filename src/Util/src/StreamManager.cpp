@@ -25,7 +25,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy {
+namespace scy {
 
 
 StreamManager::StreamManager(bool freeClosedStreams) :
@@ -45,16 +45,16 @@ void StreamManager::closeAll()
 {
 	FastMutex::ScopedLock lock(_mutex);
 	
-	log("debug") << "Closing All Streams: " << _items.size() << endl;	
-	StreamManager::Map::iterator it = _items.begin();
+	log("debug") << "Closing All Streams: " << _store.size() << endl;	
+	StreamManager::Map::iterator it = _store.begin();
 	StreamManager::Map::iterator it2;
-	while (it != _items.end()) {
+	while (it != _store.end()) {
 		it2 = it++;
 		(*it2).second->StateChange -= delegate(this, &StreamManager::onStreamStateChange);
 		(*it2).second->close();
 		if (_freeClosedStreams)
 			delete (*it2).second;
-		_items.erase(it2);
+		_store.erase(it2);
 	}
 }
 
@@ -92,8 +92,8 @@ PacketStream* StreamManager::getDafaultStream()
 	FastMutex::ScopedLock lock(_mutex);
 
 	// Returns the first stream or NULL.
-	if (!_items.empty()) {
-		StreamManager::Map::const_iterator it = _items.begin();
+	if (!_store.empty()) {
+		StreamManager::Map::const_iterator it = _store.begin();
 		return it->second;
 	}
 
@@ -144,7 +144,7 @@ void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state, 
 StreamManager::Map StreamManager::streams() const 
 { 
 	FastMutex::ScopedLock lock(_mutex);
-	return _items; 
+	return _store; 
 }
 
 
@@ -153,14 +153,14 @@ void StreamManager::print(std::ostream& os) const
 	FastMutex::ScopedLock lock(_mutex);
 
 	os << "StreamManager[";
-	for (StreamManager::Map::const_iterator it = _items.begin(); it != _items.end(); ++it) {	
+	for (StreamManager::Map::const_iterator it = _store.begin(); it != _store.end(); ++it) {	
 		os << "\n\t" << it->second << ": " << it->first;
 	}
 	os << "\n]";
 }
 
 
-} // namespace Scy
+} // namespace scy
 
 
 

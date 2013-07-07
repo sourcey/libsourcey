@@ -24,8 +24,8 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 VideoAnalyzer::VideoAnalyzer(const Options& options) : 
@@ -34,13 +34,13 @@ VideoAnalyzer::VideoAnalyzer(const Options& options) :
 	_audio(NULL),
 	_videoConv(NULL)
 {
-	LogTrace() << "[VideoAnalyzer:" << this <<"] Creating" << endl;
+	traceL() << "[VideoAnalyzer:" << this <<"] Creating" << endl;
 }
 
 
 VideoAnalyzer::~VideoAnalyzer() 
 {
-	LogTrace() << "[VideoAnalyzer:" << this <<"] Destroying" << endl;
+	traceL() << "[VideoAnalyzer:" << this <<"] Destroying" << endl;
 	uninitialize();
 }
 
@@ -50,7 +50,7 @@ void VideoAnalyzer::initialize()
 	if (_options.ifile.empty())
 		throw Poco::FileException("Please specify an input file.");
 
-	LogTrace("VideoAnalyzer", this) << "Loading: " << _options.ifile << endl;
+	traceL("VideoAnalyzer", this) << "Loading: " << _options.ifile << endl;
 
 	_error = "";
 
@@ -77,7 +77,7 @@ void VideoAnalyzer::initialize()
 	
 void VideoAnalyzer::uninitialize()
 {
-	//LogTrace() << "[VideoAnalyzerStream:" << this << ":" << name << "] Uninitializing" << endl;	
+	//traceL() << "[VideoAnalyzerStream:" << this << ":" << name << "] Uninitializing" << endl;	
 	stop();
 	
 	//FastMutex::ScopedLock lock(_mutex); 
@@ -108,7 +108,7 @@ void VideoAnalyzer::start()
 	catch (Exception& exc) 
 	{
 		_error = exc.displayText();
-		LogError("VideoAnalyzer", this) << "Error: " << _error << endl;
+		errorL("VideoAnalyzer", this) << "Error: " << _error << endl;
 		exc.rethrow();
 	}
 }
@@ -128,7 +128,7 @@ void VideoAnalyzer::stop()
 
 void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 {
-	//LogTrace("VideoAnalyzer", this) << "On Video: " 
+	//traceL("VideoAnalyzer", this) << "On Video: " 
 	//	<< packet.size() << ": " << packet.time << endl;
 	
 	VideoAnalyzer::Packet pkt(packet.time);
@@ -164,7 +164,7 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 		pkt.value /= frames;
 		pkt.value = sqrt(pkt.value); ///= _video->rdftSize;
 
-		LogTrace("VideoAnalyzer", this) << "Video Output: "
+		traceL("VideoAnalyzer", this) << "Video Output: "
 			<< pkt.time << ", " << pkt.value << endl;
 		PacketOut.emit(this, *_video, pkt);
 	}
@@ -172,7 +172,7 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 
 void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 {
-	//LogTrace("VideoAnalyzer", this) << "On Audio: " 
+	//traceL("VideoAnalyzer", this) << "On Audio: " 
 	//  << packet.size() << ": " << packet.time << endl;	
 
 	FastMutex::ScopedLock lock(_mutex);		
@@ -205,7 +205,7 @@ void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 		// Calculate the average value for this video frame
 		pkt.value /= frames;
 
-		LogTrace("VideoAnalyzer", this) << "Audio Output: "
+		traceL("VideoAnalyzer", this) << "Audio Output: "
 			<< pkt.time << ", " << pkt.value << endl;
 		PacketOut.emit(this, *_audio, pkt);
 	}
@@ -240,7 +240,7 @@ AVFrame* VideoAnalyzer::getGrayVideoFrame()
 
 void VideoAnalyzer::onReadComplete(void* sender)
 {
-	LogTrace("VideoAnalyzer", this) << "On Read Complete" << endl;	
+	traceL("VideoAnalyzer", this) << "On Read Complete" << endl;	
 
 	AVInputReader* reader = reinterpret_cast<AVInputReader*>(sender);	
 	{
@@ -293,7 +293,7 @@ VideoAnalyzer::Stream::Stream(const std::string& name, int rdftSize) :
 	name(name), rdftSize(rdftSize), rdftBits(static_cast<int>(log2(rdftSize))), 
 	rdft(NULL), rdftData(NULL), frames(0), filled(0)
 {	
-	LogTrace() << "[VideoAnalyzerStream:" << this << ":" << name << "] Creating: " 
+	traceL() << "[VideoAnalyzerStream:" << this << ":" << name << "] Creating: " 
 		<< rdftSize << ": " << rdftBits << endl;	
 
     assert(rdftSize);
@@ -329,7 +329,7 @@ void VideoAnalyzer::Stream::initialize()
 	
 void VideoAnalyzer::Stream::uninitialize()
 {
-	//LogTrace() << "[VideoAnalyzerStream:" << this << ":" << name << "] Uninitializing" << endl;	
+	//traceL() << "[VideoAnalyzerStream:" << this << ":" << name << "] Uninitializing" << endl;	
 	
 	if (rdft)
 		av_rdft_end(rdft);
@@ -404,7 +404,7 @@ double log2(double n)
 #endif
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 
@@ -412,7 +412,7 @@ double log2(double n)
 	//FFMIN(_reader.audio()->frameSize, packet.size());
 	//_audio->filled = 0;
 	//if (_audio->filled != _audio->rdftSize)
-	//	LogWarn() << "################# [VideoAnalyzer:" << this << "] Audio FFT Wrong Size: " 
+	//	warnL() << "################# [VideoAnalyzer:" << this << "] Audio FFT Wrong Size: " 
 	//		<< _audio->filled << " != " << _audio->rdftSize << endl;	
 
 	//calculateFrequencyIntensity(*_audio, packet.time);
@@ -424,7 +424,7 @@ double log2(double n)
 	avg = sum / (stream.filled / 4);
 	packet.value = avg;	
 	
-	LogTrace("VideoAnalyzer", this) << "Video Output:"
+	traceL("VideoAnalyzer", this) << "Video Output:"
 		<< packet.time << "," << packet.value << "," 
 		<< packet.min << "," << packet.max << endl;
 
@@ -441,7 +441,7 @@ double log2(double n)
 			for (rdft_bits = 1; 1 << rdft_bits < 2 * _reader.video()->ctx->height; rdft_bits++);
 			win_size = 1 << rdft_bits;
 
-			LogTrace() << "[VideoAnalyzer:" << this <<"] rdft_bits: " << rdft_bits << ": " << win_size << ": " << (sizeof(*_video->rdftData) *
+			traceL() << "[VideoAnalyzer:" << this <<"] rdft_bits: " << rdft_bits << ": " << win_size << ": " << (sizeof(*_video->rdftData) *
 					(_reader.video()->ctx->width * 
 					 _reader.video()->ctx->height)) << endl;
 					 */
@@ -450,7 +450,7 @@ double log2(double n)
 /*
 void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 {
-	LogTrace("VideoAnalyzer", this) << "Writing:"
+	traceL("VideoAnalyzer", this) << "Writing:"
 		<< packet.name << "," << packet.time << "," << packet.value << "," 
 		<< packet.min << "," << packet.max << endl;
 
@@ -490,7 +490,7 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 		if (value < min)
 			min = value;
 		//printf("re=%10f im=%10f im=%10f\n", stream.rdftData[i], stream.rdftData[i+1]);
-		//LogTrace("VideoAnalyzer", this) << "Value: " 
+		//traceL("VideoAnalyzer", this) << "Value: " 
 		//	<< stream.rdftData[i] << ": " << stream.rdftData[i+1] << endl;
 		sum += value; 
 	}
@@ -500,7 +500,7 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 	avg = sum / (stream.filled / 4);
 	value = avg;	
 	
-	LogTrace("VideoAnalyzer", this) << "Video Output:"
+	traceL("VideoAnalyzer", this) << "Video Output:"
 		<< time << "," << value << "," 
 		<< min << "," << max << endl;
 
@@ -522,7 +522,7 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 		if (packet.value < packet.min)
 			packet.min = packet.value;
 		//printf("re=%10f im=%10f im=%10f\n", stream.rdftData[i], stream.rdftData[i+1]);
-		//LogTrace("VideoAnalyzer", this) << "Value: " 
+		//traceL("VideoAnalyzer", this) << "Value: " 
 		//	<< stream.rdftData[i] << ": " << stream.rdftData[i+1] << endl;
 		sum += packet.value; 
 	}
@@ -532,7 +532,7 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 	avg = sum / (stream.filled / 4);
 	packet.value = avg;	
 	
-	LogTrace("VideoAnalyzer", this) << "Video Output:"
+	traceL("VideoAnalyzer", this) << "Video Output:"
 		<< packet.time << "," << packet.value << "," 
 		<< packet.min << "," << packet.max << endl;
 
@@ -575,7 +575,7 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
             k++;
         }
     }
-	LogTrace("VideoAnalyzer", this) << "^^^^^^^^^^^^^^^^^^ Video: " 
+	traceL("VideoAnalyzer", this) << "^^^^^^^^^^^^^^^^^^ Video: " 
 		<< greyFrame->fr << endl;
 
 
@@ -595,18 +595,18 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
             z.filled = 0;
         }
     }
-	LogWarn() << "@@@@ [VideoAnalyzer:" << this << "] Filled: " << _video->filled << endl;	
+	warnL() << "@@@@ [VideoAnalyzer:" << this << "] Filled: " << _video->filled << endl;	
 	*/
 
 	
 	//if (_video->filled != _video->rdftSize)
-	//	LogWarn() << "################# [VideoAnalyzer:" << this << "] Video FFT Wrong Size: " 
+	//	warnL() << "################# [VideoAnalyzer:" << this << "] Video FFT Wrong Size: " 
 	//		<< _video->filled << " != " << _video->rdftSize << endl;	
 	/*
 	// Skip frames if we exceed the maximum processing framerate.
 	double fps = _audio->frames / packet.time;
 	if (_options.maxFPS > 0 && fps > _options.maxFPS) {
-		LogTrace("VideoAnalyzer", this) << "Skipping audio frame at fps: " << fps << endl;
+		traceL("VideoAnalyzer", this) << "Skipping audio frame at fps: " << fps << endl;
 		return;
 	}
 	*/
@@ -616,7 +616,7 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 	// Skip frames if we exceed the maximum processing framerate.
 	double fps = _video->frames / packet.time;
 	if (_options.maxFPS > 0 && fps > _options.maxFPS) {
-		LogTrace("VideoAnalyzer", this) << "Skipping video frame at fps: " << fps << endl;
+		traceL("VideoAnalyzer", this) << "Skipping video frame at fps: " << fps << endl;
 		return;
 	}
 	*/

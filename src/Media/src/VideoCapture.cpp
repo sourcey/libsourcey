@@ -27,8 +27,8 @@ using namespace Poco;
 
 // TODO: Inner loop timeout recovery procedure
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 VideoCapture::VideoCapture(int deviceId, unsigned flags) : 
@@ -41,7 +41,7 @@ VideoCapture::VideoCapture(int deviceId, unsigned flags) :
 	_isOpened(false),
 	_stopping(false)
 {
-	LogTrace("VideoCapture", this) << "Creating: " << deviceId << endl;
+	traceL("VideoCapture", this) << "Creating: " << deviceId << endl;
 	open();
 	start();
 }
@@ -58,7 +58,7 @@ VideoCapture::VideoCapture(const string& filename, unsigned flags) :
 	_isOpened(false),
 	_stopping(false) 
 {
-	LogTrace("VideoCapture", this) << "Creating: " << filename << endl;
+	traceL("VideoCapture", this) << "Creating: " << filename << endl;
 	open();
 	start();
 }
@@ -66,7 +66,7 @@ VideoCapture::VideoCapture(const string& filename, unsigned flags) :
 
 VideoCapture::~VideoCapture() 
 {	
-	LogTrace("VideoCapture", this) << "Destroying" << endl;
+	traceL("VideoCapture", this) << "Destroying" << endl;
 
 	if (_thread.isRunning()) {
 		_stopping = true;
@@ -82,18 +82,18 @@ VideoCapture::~VideoCapture()
 	// Try to release the capture.
 	//try { release(); } catch (...) {}
 
-	LogTrace("VideoCapture", this) << "Destroying: OK" << endl;
+	traceL("VideoCapture", this) << "Destroying: OK" << endl;
 }
 
 
 void VideoCapture::start() 
 {
-	LogTrace("VideoCapture", this) << "Starting" << endl;
+	traceL("VideoCapture", this) << "Starting" << endl;
 	{
 		FastMutex::ScopedLock lock(_mutex);
 
 		if (!_thread.isRunning()) {
-			LogTrace("VideoCapture", this) << "Initializing Thread" << endl;
+			traceL("VideoCapture", this) << "Initializing Thread" << endl;
 			if (!_isOpened)
 				throw Exception("The capture must be opened before starting the thread.");
 
@@ -106,17 +106,17 @@ void VideoCapture::start()
 	// Wait for up to 1 second for initialization.
 	// Since the actual capture is already open,
 	// all we need to do is wait for the thread.	
-	LogTrace("VideoCapture", this) << "Starting: Wait" << endl;
+	traceL("VideoCapture", this) << "Starting: Wait" << endl;
 	_capturing.tryWait(1000);
-	LogTrace("VideoCapture", this) << "Starting: OK" << endl;
+	traceL("VideoCapture", this) << "Starting: OK" << endl;
 }
 
 
 void VideoCapture::stop() 
 {
-	LogTrace("VideoCapture", this) << "Stopping" << endl;
+	traceL("VideoCapture", this) << "Stopping" << endl;
 	if (_thread.isRunning()) {
-		LogTrace("VideoCapture", this) << "Terminating Thread" << endl;		
+		traceL("VideoCapture", this) << "Terminating Thread" << endl;		
 		_stopping = true;
 		_thread.join();
 	}
@@ -128,7 +128,7 @@ void VideoCapture::stop()
 
 bool VideoCapture::open()
 {
-	LogTrace("VideoCapture", this) << "Open" << endl;
+	traceL("VideoCapture", this) << "Open" << endl;
 	FastMutex::ScopedLock lock(_mutex);
 
 	_isOpened = _capture.isOpened() ? true : 
@@ -149,12 +149,12 @@ bool VideoCapture::open()
 
 void VideoCapture::release()
 {
-	LogTrace("VideoCapture", this) << "Release" << endl;
+	traceL("VideoCapture", this) << "Release" << endl;
 	FastMutex::ScopedLock lock(_mutex);
 	if (_capture.isOpened())
 		_capture.release();
 	_isOpened = false;
-	LogTrace("VideoCapture", this) << "Release: OK" << endl;
+	traceL("VideoCapture", this) << "Release: OK" << endl;
 }
 
 
@@ -164,7 +164,7 @@ void VideoCapture::run()
 	{	
 		bool hasDelegates = false;
 		bool syncWithDelegates = flags().has(SyncWithDelegates);
-		LogTrace("VideoCapture", this) << "Running:"		
+		traceL("VideoCapture", this) << "Running:"		
 			<< "\n\tDevice ID: " << _deviceId
 			<< "\n\tFilename: " << _filename
 			<< "\n\tWidth: " << _width
@@ -186,9 +186,9 @@ void VideoCapture::run()
 				frame = grab();
 				MatPacket packet(&frame);	
 				if (hasDelegates && packet.width && packet.height) { //!_stopping && 
-					LogTrace("VideoCapture", this) << "Emitting: " << _counter.fps << endl;
+					traceL("VideoCapture", this) << "Emitting: " << _counter.fps << endl;
 					emit(this, packet);					
-					LogTrace("VideoCapture", this) << "Emitting: OK" << endl;
+					traceL("VideoCapture", this) << "Emitting: OK" << endl;
 				}
 				
 				// Wait 5ms for the CPU to breathe
@@ -219,13 +219,13 @@ void VideoCapture::run()
 	}
 	
 	_capturing.reset();
-	LogTrace("VideoCapture", this) << "Exiting" << endl;
+	traceL("VideoCapture", this) << "Exiting" << endl;
 }
 
 
 void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 {
-	LogTrace("VideoCapture", this) << "Get Frame: " << width << "x" << height << endl;
+	traceL("VideoCapture", this) << "Get Frame: " << width << "x" << height << endl;
 	FastMutex::ScopedLock lock(_mutex);	
 
 	// Don't actually grab a frame here, just copy the current frame.
@@ -248,7 +248,7 @@ void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 void VideoCapture::attach(const PacketDelegateBase& delegate)
 {
 	PacketEmitter::attach(delegate);
-	LogTrace("VideoCapture", this) << "Added Delegate: " << refCount() << endl;
+	traceL("VideoCapture", this) << "Added Delegate: " << refCount() << endl;
 	if (!isRunning() && flags().has(SyncWithDelegates)) //refCount == 1
 		start();
 }
@@ -257,7 +257,7 @@ void VideoCapture::attach(const PacketDelegateBase& delegate)
 bool VideoCapture::detach(const PacketDelegateBase& delegate) 
 {
 	if (PacketEmitter::detach(delegate)) {
-		LogTrace("VideoCapture", this) << "Removed Delegate: " << refCount() << endl;
+		traceL("VideoCapture", this) << "Removed Delegate: " << refCount() << endl;
 		if (refCount() == 0 && flags().has(SyncWithDelegates)) //isRunning() && 
 			stop();
 		return true;
@@ -268,7 +268,7 @@ bool VideoCapture::detach(const PacketDelegateBase& delegate)
 
 cv::Mat VideoCapture::grab()
 {	
-	//LogTrace("VideoCapture", this) << "Grabing" << endl;
+	//traceL("VideoCapture", this) << "Grabing" << endl;
 	FastMutex::ScopedLock lock(_mutex);	
 
 	// Grab a frame from the capture source
@@ -298,7 +298,7 @@ cv::Mat VideoCapture::grab()
 
 void VideoCapture::setError(const string& error)
 {
-	LogError("VideoCapture", this) << error << endl;
+	errorL("VideoCapture", this) << error << endl;
 	FastMutex::ScopedLock lock(_mutex);	
 	_error = error;
 }
@@ -383,7 +383,7 @@ cv::VideoCapture& VideoCapture::capture()
 }
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 

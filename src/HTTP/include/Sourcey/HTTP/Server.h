@@ -21,9 +21,6 @@
 #define SOURCEY_HTTP_Server_H
 
 
-
-
-
 #include "Sourcey/Base.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Net/Socket.h"
@@ -31,7 +28,7 @@
 #include "Sourcey/HTTP/Request.h"
 #include "Sourcey/HTTP/Response.h"
 #include "Sourcey/HTTP/Parser.h"
-#include "Sourcey/UV/Timer.h"
+#include "Sourcey/Timer.h"
 
 	
 namespace scy { 
@@ -41,33 +38,39 @@ namespace http {
 class Server;
 class ServerResponser;
 class ServerConnection: public Connection
-	/// TODO: 
-	///		- extend SocketObserver
-	///		- attach output IPacketizer
 {
 public:
     ServerConnection(Server& server, const net::Socket& socket);
 	
 	virtual bool respond(bool whiny = false);
-				
-	Poco::Net::HTTPMessage* headers();
-	Server& server();		
+	
+	virtual void close();
+		/// Close the HTTP connection
 	
 protected:
+    virtual ~ServerConnection();
+				
+	Poco::Net::HTTPMessage* incomingHeaders();
+	Poco::Net::HTTPMessage* outgoingHeaders();
+	Server& server();
+	
+	//
+	/// Socket callbacks
+	virtual void onClose();
 
 	//
 	/// Parser callbacks
     virtual void onParserHeadersDone();	
     virtual void onParserChunk(const char* buf, size_t len);
     virtual void onParserDone();
+
+	//
+	/// Server callbacks
+	void onShutdown(void*);
 	
 protected:
-    virtual ~ServerConnection();
-
 	Server& _server;
-	ServerResponser* _responder;
-	
-	friend class Server;
+	ServerResponser* _responder;	
 };
 
 
@@ -95,8 +98,7 @@ public:
 	virtual void onRequestHeaders(Request& request) {}
 	virtual void onRequestBody(const Buffer& body) {}
 	virtual void onRequestComplete(Request& request, Response& response) {}
-
-	//virtual void onClose() = 0;
+	virtual void onClose() {};
 
 	ServerConnection& connection()
 	{
@@ -145,91 +147,27 @@ public:
 	ServerResponserFactory* factory;
 	net::TCPSocket socket;
 	net::Address address;
-	uv::Timer _timer;
+	//uv::Timer timer;
 
-	Server(short port, ServerResponserFactory* factory) :
-		address("0.0.0.0", port),
-		factory(factory)
-	{
-	}
-
-	virtual ~Server()
-	{
-		traceL("Server", this) << "Destroying" << std::endl;
-
-		// This will close the server socket, and should cause the
-		// main loop to terminate if there are no active processes.
-		for (int i = 0; i < connections.size(); i++)
-			delete connections[i];
-
-		assert(socket.base().refCount() == 1);
-	}
+	Server(short port, ServerResponserFactory* factory);
+	virtual ~Server();
 	
-	void start()
-	{	
-		assert(socket.base().refCount() == 1);
-		socket.bind(address);
-		socket.listen();
-		socket.base().AcceptConnection += delegate(this, &Server::onAccept);	
-		socket.Close += delegate(this, &Server::onClose);
+	void start();
+	void shutdown();
 
-		traceL("Server", this) << "Server listening on " << port() << std::endl;		
+	UInt16 port();	
 
-		_timer.Timeout += delegate(this, &Server::onTimer);
-		_timer.start(5000, 5000);
-	}
-
-	void stop() 
-	{
-		socket.close();
-	}
-
-	UInt16 port()
-	{
-		return socket.address().port();
-	}
-
+	NullSignal Shutdown;
 
 protected:	
-	ServerConnection* createConnection(const net::Socket& sock)
-	{
-		return new ServerConnection(*this, sock);
-	}
+	ServerConnection* createConnection(const net::Socket& sock);
+	ServerResponser* createResponser(ServerConnection& conn);
 
-	ServerResponser* createResponser(ServerConnection& conn)
-	{
-		// The initial HTTP request headers have already
-		// been parsed by now, but the request body may 
-		// be incomplete (especially if chunked).
-		return factory->createResponser(conn);
-	}
+	virtual void addConnection(ServerConnection* conn);
+	virtual void removeConnection(ServerConnection* conn);
 
-	void onAccept(void* sender, const net::TCPSocket& sock)
-	{	
-		traceL("Server", this) << "On Accept" << std::endl;
-		ServerConnection* conn = createConnection(sock);
-		if (conn)
-			connections.push_back(conn);
-	}
-
-	void onTimer(void*)
-	{
-		for (ServerConnectionList::iterator it = connections.begin(); it != connections.end();) {
-			if ((*it)->closed()) {
-				traceL("Server", this) << "Deleting Connection: " << (*it) << std::endl;
-				delete *it;
-				it = connections.erase(it);
-			}
-			else
-				++it;
-		}
-	}
-
-	void onClose(void* sender) 
-	{
-		traceL("Server", this) << "On Close" << std::endl;
-		//assert(0 && "server socket closed");
-	}
+	void onAccept(void* sender, const net::TCPSocket& sock);
+	void onClose(void* sender);
 
 	friend class ServerConnection;
 };
@@ -238,6 +176,27 @@ protected:
 } } // namespace scy::http
 
 
+	
+	/*
+	void onTimer(void*)
+	{
+		ServerConnectionList conns = ServerConnectionList(connections);
+		for (ServerConnectionList::iterator it = conns.begin(); it != conns.end();) {
+			if ((*it)->closed()) {
+				traceL("Server", this) << "Deleting Connection: " << (*it) << std::endl;
+				//delete *it;
+				it = connections.erase(it);
+			}
+			else
+				++it;
+		}
+	}
+	*/
+
+		// This will close the server socket, and should cause the
+		// main loop to terminate if there are no active processes.
+		//for (int i = 0; i < connections.size(); i++)
+		//	delete connections[i];
 
 /*
 
@@ -542,7 +501,7 @@ public:
 		}
 		catch (Exception& exc)
 		{
-			LogError("ServerConnectionHook") << "Bad Request: " << exc.displayText() << std::endl;
+			errorL("ServerConnectionHook") << "Bad Request: " << exc.displayText() << std::endl;
 		}	
 		return NULL;
 	};

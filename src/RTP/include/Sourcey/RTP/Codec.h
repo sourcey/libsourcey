@@ -28,11 +28,11 @@
 #include <list>
 
 
-namespace Scy {
-namespace RTP { 
+namespace scy {
+namespace rtp { 
 
 
-struct Codec: public Media::Codec
+struct Codec: public av::Codec
 {
 	int id;
 	
@@ -63,8 +63,8 @@ struct VideoCodec: public Codec
 };
 
 
-} // namespace Scy
-} // namespace RTP 
+} // namespace scy
+} // namespace rtp 
 
 
 #endif

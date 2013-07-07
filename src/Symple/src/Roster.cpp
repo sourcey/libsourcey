@@ -25,19 +25,19 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 
 Roster::Roster()
 {	
-	//LogTrace("Roster", this) << "Creating" << endl;
+	//traceL("Roster", this) << "Creating" << endl;
 }
 	
 
 Roster::~Roster() 
 {
-	//LogTrace("Roster", this) << "Destroying" << endl;
+	//traceL("Roster", this) << "Destroying" << endl;
 }
 
 
@@ -48,7 +48,7 @@ void Roster::update(const JSON::Value& data, bool whiny)
 		data.isMember("user") && 
 		data.isMember("name") && 
 		data.isMember("type")) {
-		LogTrace("Roster", this) << "Updating: " << JSON::stringify(data, true) << endl;
+		traceL("Roster", this) << "Updating: " << JSON::stringify(data, true) << endl;
 		string id = data["id"].asString();
 		Peer* peer = get(id, false);
 		if (!peer) {
@@ -64,7 +64,7 @@ void Roster::update(const JSON::Value& data, bool whiny)
 	}
 	else {
 		string error("Bad presence data: " + JSON::stringify(data));
-		LogError("Roster", this) << error << endl;	
+		errorL("Roster", this) << error << endl;	
 		if (whiny)
 			throw Exception(error);
 	}
@@ -74,7 +74,7 @@ void Roster::update(const JSON::Value& data, bool whiny)
 Peer* Roster::getByHost(const string& host)
 {
 	FastMutex::ScopedLock lock(_mutex);
-	for (PeerMap::const_iterator it = _items.begin(); it != _items.end(); ++it) {	
+	for (PeerMap::const_iterator it = _store.begin(); it != _store.end(); ++it) {	
 		if (it->second->host() == host)
 			return it->second;
 	}
@@ -85,7 +85,7 @@ Peer* Roster::getByHost(const string& host)
 Roster::PeerMap Roster::peers() const 
 { 
 	FastMutex::ScopedLock lock(_mutex);
-	return _items; 
+	return _store; 
 }
 
 
@@ -94,11 +94,11 @@ void Roster::print(ostream& os) const
 	FastMutex::ScopedLock lock(_mutex);
 
 	os << "Roster[";
-	for (PeerMap::const_iterator it = _items.begin(); it != _items.end(); ++it) {	
+	for (PeerMap::const_iterator it = _store.begin(); it != _store.end(); ++it) {	
 		os << "\n\t" << it->second << ": " << it->first;
 	}
 	os << "\n]";
 }
 
 
-} } // namespace Scy::Symple
+} } // namespace scy::smple

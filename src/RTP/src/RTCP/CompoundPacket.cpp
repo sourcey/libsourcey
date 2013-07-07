@@ -26,8 +26,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 namespace RTCP {
 	
 
@@ -47,14 +47,14 @@ CompoundPacket::CompoundPacket()
 
 CompoundPacket::~CompoundPacket() 
 {
-	Util::ClearVector(_packets);
+	util::ClearVector(_packets);
 }
 
 
 bool CompoundPacket::read(Buffer& buffer) 
 {
 	if (buffer.size() < 4) {
-		LogError() << "RTCP: Received empty packet." << endl;
+		errorL() << "RTCP: Received empty packet." << endl;
 		return false;
 	}
 
@@ -70,11 +70,11 @@ bool CompoundPacket::read(Buffer& buffer)
 		buffer++;
 		UInt8 type;
 		UInt16 length;
-		buffer.readUInt8(type);
-		buffer.readUInt16(length);
-		buffer.setPosition(startPos);
+		buffer.readU8(type);
+		buffer.readU16(length);
+		buffer.position(startPos);
 		
-		LogDebug() << "RTCP: Parsing packet with type " 
+		debugL() << "RTCP: Parsing packet with type " 
 			<< (int)type << " and length: " << (int)length << ". " 
 			<< "Remaining in buffer " << buffer.remaining() << "."
 			<< endl;
@@ -102,13 +102,13 @@ bool CompoundPacket::read(Buffer& buffer)
 				break;
 
 			default:
-				LogError() << "RTCP: Parsed unknown packet type " << (int)type << endl;                
+				errorL() << "RTCP: Parsed unknown packet type " << (int)type << endl;                
 				goto error;
 				break;
 		};
 		
 		if (!packet->read(buffer)) {
-			LogError() << "RTCP: Failed to parse packet with type " << (int)type << endl;            
+			errorL() << "RTCP: Failed to parse packet with type " << (int)type << endl;            
 			goto error;
 		}
 
@@ -123,11 +123,11 @@ bool CompoundPacket::read(Buffer& buffer)
 			delete packet;
 
 		// consume failed packet bytes...
-		buffer.setPosition(startPos);
+		buffer.position(startPos);
 		buffer.consume(length);
 		errorCount++;
 		if (errorCount > maxErrors) {
-			LogError() << "RTCP: Parse failed because of too many errors: " << errorCount << endl;
+			errorL() << "RTCP: Parse failed because of too many errors: " << errorCount << endl;
 			return false;
 		}
 	}
@@ -139,7 +139,7 @@ bool CompoundPacket::read(Buffer& buffer)
 void CompoundPacket::write(Buffer& buffer) const 
 {
     for (int i = 0; i < _packets.size(); i++) {		
-		//LogDebug() << "RTCP: Writing packet:" << endl;
+		//debugL() << "RTCP: Writing packet:" << endl;
 		//_packets[i]->print(cout);
 		_packets[i]->write(buffer);
 	}
@@ -183,5 +183,5 @@ void CompoundPacket::print(std::ostream& os) const
 
 
 } // namespace RTCP
-} // namespace RTP
-} // namespace Scy 
+} // namespace rtp
+} // namespace scy 

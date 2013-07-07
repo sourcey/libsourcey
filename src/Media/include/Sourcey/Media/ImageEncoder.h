@@ -28,8 +28,8 @@
 #include <opencv/highgui.h>
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 class ImageEncoder: public IPacketEncoder
@@ -65,7 +65,7 @@ private:
 };
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif	// SOURCEY_MEDIA_ImageEncoder_H

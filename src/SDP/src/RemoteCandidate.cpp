@@ -24,7 +24,7 @@
 using namespace std;
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
@@ -35,7 +35,7 @@ RemoteCandidate::RemoteCandidate(const string& src) :
 	// a=remote-candidates1 192.168.2.101 16052 1 192.168.2.101 16052
 	size_t len = src.length();
 	if (src.substr(0, 19) != "a=remote-candidates") {
-		LogError() << "ERROR: SDP line does not start with <a=remote-candidates>" << std::endl;
+		errorL() << "ERROR: SDP line does not start with <a=remote-candidates>" << std::endl;
 	}
 	size_t i = 20;
 
@@ -47,7 +47,7 @@ RemoteCandidate::RemoteCandidate(const string& src) :
 		while (src[i] != ' ' && i < len) {
 			componentIDstr += src[i++];
 		}
-		c->componentID = Util::fromString<UInt32>(componentIDstr.c_str());
+		c->componentID = util::fromString<UInt32>(componentIDstr.c_str());
 
 		while (src[i] == ' ' && i < len)
 			i++;	
@@ -63,7 +63,7 @@ RemoteCandidate::RemoteCandidate(const string& src) :
 		string portstr = "";
 		while (src[i] != ' ' && i < len)
 			portstr += src[i++];
-		c->port = Util::fromString<UInt32>(portstr.c_str());
+		c->port = util::fromString<UInt32>(portstr.c_str());
 		while (src[i] == ' ' && i < len)
 			i++;
 
@@ -74,7 +74,7 @@ RemoteCandidate::RemoteCandidate(const string& src) :
 
 RemoteCandidate::~RemoteCandidate() 
 {	
-	Util::ClearVector(_candidates);
+	util::ClearVector(_candidates);
 }
 
 
@@ -91,7 +91,7 @@ string RemoteCandidate::toString()
 		if (!(*it)->componentID)
 			ret += "0";
 		else
-			ret += Util::toString((*it)->componentID);
+			ret += util::toString((*it)->componentID);
 
 		ret += " ";
 		if ((*it)->address.empty())
@@ -103,7 +103,7 @@ string RemoteCandidate::toString()
 		if (!(*it)->port)
 			ret += "0";
 		else
-			ret += Util::toString((*it)->port);
+			ret += util::toString((*it)->port);
 
 		count++;
 	}
@@ -113,4 +113,4 @@ string RemoteCandidate::toString()
 
 
 } // namespace SDP
-} // namespace Scy
+} // namespace scy

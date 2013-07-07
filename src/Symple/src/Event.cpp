@@ -27,8 +27,8 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 
 Event::Event() 
@@ -122,5 +122,5 @@ void Event::setTime(const string& time)
 */
 
 
-} // namespace Symple 
-} // namespace Scy
+} // namespace smple 
+} // namespace scy

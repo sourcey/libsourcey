@@ -27,8 +27,8 @@ using namespace std;
 using Poco::format;
 
 
-namespace Scy {
-namespace SocketIO {
+namespace scy {
+namespace sockio {
 
 
 Packet::Packet(Type type, int id, const string& endpoint, const string& message, bool ack) : 
@@ -134,29 +134,29 @@ bool Packet::read(Buffer& buf)
 	if (buf.size() < 3)
 		return false;
 	
-	//LogDebug() << "[SocketIO::Packet:" << this << "] Reading: " << (string(buf.data(), buf.size())) << endl;
+	//debugL() << "[sockio::Packet:" << this << "] Reading: " << (string(buf.data(), buf.size())) << endl;
 
 	string data;
-	buf.readString(data, buf.size());
-	StringVec content = Util::split(data, ':', 4);
+	buf.read(data, buf.size());
+	StringVec content = util::split(data, ':', 4);
 	if (content.size() < 1) {
-		//LogDebug() << "[SocketIO::Packet:" << this << "] Reading: Invalid Data: " << content.size() << endl;
+		//debugL() << "[sockio::Packet:" << this << "] Reading: Invalid Data: " << content.size() << endl;
 		return false;
 	}
 		
 	if (!content[0].empty()) {
-		_type = Util::fromString<UInt32>(content[0]);
-		//LogDebug() << "[SocketIO::Packet:" << this << "] Reading: Type: " << typeString() << endl;
+		_type = util::fromString<UInt32>(content[0]);
+		//debugL() << "[sockio::Packet:" << this << "] Reading: Type: " << typeString() << endl;
 	}
 
 	if (_type < 0 || 
 		_type > 7) {
-		//LogDebug() << "[SocketIO::Packet:" << this << "] Reading: Invalid Type: " << _type << endl;
+		//debugL() << "[sockio::Packet:" << this << "] Reading: Invalid Type: " << _type << endl;
 		return false;
 	}
 	if (content.size() >= 2 && !content[1].empty()) {
 		_ack = (content[1].find('+') != string::npos);
-		_id = Util::fromString<UInt32>(content[1]);
+		_id = util::fromString<UInt32>(content[1]);
 	}	
 	if (content.size() >= 3 && !content[2].empty()) {
 		_endpoint = content[2];
@@ -168,19 +168,19 @@ bool Packet::read(Buffer& buf)
 	// For Ack packets the ID is at the start of the message
 	if (_type == 6) {
 		content.clear();
-		Util::split(_message, '+', content, 2);
+		util::split(_message, '+', content, 2);
 		if (content.size() != 2) {
 			assert(content.size() == 2 && "invalid ack response");
 			return false;
 		}
 
 		_ack = true; // This is mostly for requests, but we'll set it anyway
-		_id = Util::fromString<UInt32>(content[0]);
+		_id = util::fromString<UInt32>(content[0]);
 		_message = content[1];
 	}
 
 	_size = data.length();
-	//LogDebug() << "[SocketIO::Packet:" << this << "] Parse Success: " << toString() << endl;
+	//debugL() << "[sockio::Packet:" << this << "] Parse Success: " << toString() << endl;
 
 	return true;
 }
@@ -190,7 +190,7 @@ void Packet::write(Buffer& buf) const
 {
 	ostringstream ss;
 	print(ss);
-	buf.writeString(ss.str());
+	buf.write(ss.str());
 }
 
 
@@ -309,4 +309,4 @@ void Packet::print(ostream& os) const
 
 
 
-} } // namespace Scy::SocketIO
+} } // namespace scy::sockio

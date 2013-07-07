@@ -21,7 +21,7 @@
 #define SOURCEY_Memory_H
 
 
-#include "Sourcey/UV/UVPP.h"
+#include "Sourcey/Timer.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Types.h"
 #include <vector>
@@ -31,6 +31,52 @@
 namespace scy {
 	
 	
+template <class C>
+class Deleter 
+	/// Simple garbage collector for delayed pointer deletion.
+{
+public:
+	C* ptr;
+
+	Deleter(C* ptr) : ptr(ptr)
+	{
+		traceL("Deleter", this) << "Queueing: " << ptr << std::endl;
+		uv_idle_t* idler = new uv_idle_t;
+		idler->data = this;
+		uv_idle_init(uv_default_loop(), idler);
+		uv_idle_start(idler, Deleter::onNextIteration);
+	}
+
+	~Deleter()
+	{
+		traceL("Deleter", this) << "Deleting: " << ptr << std::endl;
+		delete ptr;
+	}
+
+	static void onNextIteration(uv_idle_t* handle, int status)
+	{
+		traceL("Deleter") << "On next iteration: " << status << std::endl;
+		assert(status == 0);
+		traceL("Deleter") << "On next iteration: Stopping" << std::endl;
+		uv_idle_stop(handle);
+		delete reinterpret_cast<Deleter*>(handle->data);
+		traceL("Deleter") << "On next iteration: Stopping: OK" << std::endl;
+		
+		//delete handle; // FIXME: Causing crash???
+	}
+};
+
+
+template <class C>
+inline Deleter<C>* deleteLater(C* ptr)
+	/// Inline helper for async garbage deletion.
+{
+	return new Deleter<C>(ptr);
+}
+
+
+// -------------------------------------------------------------------
+//
 class CountedObject
 	/// A base class for objects that employ reference
 	/// counting based garbage collection.
@@ -78,7 +124,9 @@ protected:
 	virtual void destroy()
 	{
 		traceL("CountedObject", this) << "Destroy: " << count << std::endl;
-		delete this; // Destuctor logic may be overridden
+		// Destuctor logic may be overridden.
+		// Could also use deleteLater<>
+		delete this; 
 	}
 
 	virtual ~CountedObject()
@@ -94,14 +142,6 @@ protected:
 	
 	//std::atomic<int> count;
 	int count; // TODO: sync
-};
-
-
-class StandardObject
-	/// A standard base class for objects which can be 
-	/// created and destroyed on the heap or stack ie.
-	/// no garbage colleaction.
-{
 };
 
 

@@ -27,7 +27,7 @@
 #include <sstream>
 
 
-namespace Scy { 
+namespace scy { 
 
 
 class Base64PacketEncoder: public IPacketProcessor
@@ -39,16 +39,16 @@ public:
 
 	virtual void process(IPacket& packet)
 	{		
-		//LogTrace() << "[Base64PacketEncoder:" << this << "] Processing" << std::endl;
+		//traceL() << "[Base64PacketEncoder:" << this << "] Processing" << std::endl;
 
 		std::ostringstream ostr;
 		Poco::Base64Encoder encoder(ostr);
 		const char* data = NULL;
 		size_t size = 0;
 
-		// If the packet is a DataPacket we can access
+		// If the packet is a RawPacket we can access
 		// the data pointer directly.
-		DataPacket* p = dynamic_cast<DataPacket*>(&packet);
+		RawPacket* p = dynamic_cast<RawPacket*>(&packet);
 		if (p)
 			encoder.write((const char*)p->data(), p->size());
 		
@@ -62,15 +62,15 @@ public:
 
 		encoder.close();		
 		std::string base64(ostr.str());
-		DataPacket opacket((unsigned char*)base64.data(), base64.size());
+		RawPacket opacket((unsigned char*)base64.data(), base64.size());
 		emit(this, opacket);
 
-		//LogTrace() << "[Base64PacketEncoder:" << this << "] Processing: OK: " << base64.size() << std::endl;
+		//traceL() << "[Base64PacketEncoder:" << this << "] Processing: OK: " << base64.size() << std::endl;
 	}
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif

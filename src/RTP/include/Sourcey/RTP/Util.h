@@ -24,8 +24,8 @@
 #include "Sourcey/RTP/Types.h"
 
 
-namespace Scy {
-namespace Util {
+namespace scy {
+namespace util {
 	
 
 static inline UInt8 ExtractBits(UInt8 byte, int bitsCount, int shift) {
@@ -33,8 +33,8 @@ static inline UInt8 ExtractBits(UInt8 byte, int bitsCount, int shift) {
 }
 
 
-} // namespace Util
-} // namespace Scy
+} // namespace util
+} // namespace scy
 
 
 #endif // SOURCEY_RTP_Utilities_H

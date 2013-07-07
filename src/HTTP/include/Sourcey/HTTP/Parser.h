@@ -18,6 +18,8 @@
 
 //#include "Sourcey/HTTP/Connection.h"
 #include "Sourcey/Net/Socket.h"
+#include "Sourcey/HTTP/Request.h"
+#include "Sourcey/HTTP/Response.h"
 #include <http_parser.h>
 
 
@@ -81,6 +83,9 @@ public:
     virtual void onParserDone() = 0; // Called from parser to signal end of message
 
     virtual void onParserError(const ParserError& err) = 0;
+	
+    virtual Poco::Net::HTTPMessage* incomingHeaders() = 0;
+    virtual Poco::Net::HTTPMessage* outgoingHeaders() = 0;
 };
 
 
@@ -89,7 +94,7 @@ public:
 class Parser
 {
 public:
-    Parser(ParserObserver& observer, http_parser_type type);
+    Parser(ParserObserver& observer, http_parser_type type); //, Poco::Net::HTTPMessage* headers
     ~Parser();
 	
     bool parse(const char* data, std::size_t offset, std::size_t length);	
@@ -103,6 +108,13 @@ public:
     bool parsing() const;
     bool upgrade() const;
     bool shouldKeepAlive() const;
+
+	/*
+    Poco::Net::HTTPMessage* headers()
+	{
+		return _headers;
+	};
+	*/
 
 	//
 	/// Errors
@@ -122,6 +134,7 @@ public:
     /// http_parser_settings callbacks
     static int on_message_begin_(http_parser* parser);
     static int on_url_(http_parser* parser, const char *at, size_t len);
+    //static int on_status_complete_(http_parser* parser);
     static int on_header_field_(http_parser* parser, const char* at, size_t len);
     static int on_header_value_(http_parser* parser, const char* at, size_t len);
     static int on_headers_complete_(http_parser* parser);
@@ -134,13 +147,15 @@ public:
     http_parser _parser;
     http_parser_settings _settings;
 
+	//Poco::Net::HTTPMessage* _headers;
+
     bool _wasHeaderValue;
     std::string _lastHeaderField;
     std::string _lastHeaderValue;
 
     bool _parsing;
-    bool _upgrade;
-    bool _shouldKeepAlive;
+   // bool _upgrade;
+  //  bool _shouldKeepAlive;
 
 	ParserError* _error;
 };

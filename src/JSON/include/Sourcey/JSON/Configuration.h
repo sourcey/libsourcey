@@ -27,7 +27,7 @@
 #include "Poco/Mutex.h"
 
 
-namespace Scy { 
+namespace scy { 
 namespace JSON {
 
 
@@ -62,7 +62,7 @@ protected:
 };
 
 
-} } // namespace Scy::JSON
+} } // namespace scy::JSON
 
 
 #endif // SOURCEY_JSON_Configuration_H
