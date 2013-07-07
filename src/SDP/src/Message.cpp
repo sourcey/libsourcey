@@ -37,7 +37,7 @@
 using namespace std;
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
@@ -60,7 +60,7 @@ Message::Message(const Message& r)
 
 Message::~Message() 
 {
-	Util::ClearVector(_lines);
+	util::ClearVector(_lines);
 	//for (vector<Line*>::iterator it = _lines.begin(); it != _lines.end(); ++it)
 	//	delete *it;
 }
@@ -75,17 +75,17 @@ IPacket* Message::clone() const
 bool Message::read(Buffer& buf)
 {
 	// TODO: Use buffer instead of string for more efficient read methods. 
-	return read(string(buf.bytes(), buf.size()));
+	return read(string(buf.begin(), buf.size()));
 }
 
 
 bool Message::read(const std::string& src)
 {
 	int idxM = 1;
-	StringVec lines = Util::split(src, '\n'); 
-	//LogDebug() << "SDP: Parsing lines: " << lines.size() << endl;
+	StringVec lines = util::split(src, '\n'); 
+	//debugL() << "SDP: Parsing lines: " << lines.size() << endl;
 	for (int n = 0; n < lines.size(); n++) {
-		//LogDebug() << "SDP: Parsing line: " << n << ": " << lines[n] << endl;
+		//debugL() << "SDP: Parsing line: " << n << ": " << lines[n] << endl;
 
 		switch (lines[n][0]) {
 			case 'v':
@@ -122,7 +122,7 @@ bool Message::read(const std::string& src)
 					done = n == lines.size();
 					if (done) continue;
 
-					//LogDebug() << "SDP: Parsing media line: " << n << ": " << lines[n] << endl;
+					//debugL() << "SDP: Parsing media line: " << n << ": " << lines[n] << endl;
 					switch (lines[n][0]) {
 						case 'c':
 							m->addLine(new C(lines[n]));
@@ -148,19 +148,19 @@ bool Message::read(const std::string& src)
 							break;
 						case 'm':
 							// Parse the next media line...
-							//LogDebug() << "SDP: Parsing next media line" << endl;
+							//debugL() << "SDP: Parsing next media line" << endl;
 							done = true;
 							n--;
 							break;
 						default:
-							LogError() << "ERROR: Unknown SDP media line: " << lines[n] << endl;
+							errorL() << "ERROR: Unknown SDP media line: " << lines[n] << endl;
 							break;
 					}
 				} while (!done); }
-				//LogDebug() << "SDP: Parsed media line: " << n << endl;
+				//debugL() << "SDP: Parsed media line: " << n << endl;
 				break;
 			default:
-				LogError() << "ERROR: Unknown SDP line: " << lines[n] << endl;
+				errorL() << "ERROR: Unknown SDP line: " << lines[n] << endl;
 				break;
 		}
 	}
@@ -171,7 +171,7 @@ bool Message::read(const std::string& src)
 
 void Message::write(Buffer& buf) const 
 {
-	buf.writeString(toString());
+	buf.write(toString());
 }
 
 
@@ -211,7 +211,7 @@ string Message::toString() const
 		}
 	}
 
-	Util::trim(ret);
+	util::trim(ret);
 	return ret + "\r\n";
 }
 
@@ -250,7 +250,7 @@ bool Message::isICESupported() const
 
 		if ((*it)->type() == Line::M) {
 			M* lineM = reinterpret_cast<M*>(*it);
-			mPort = Util::toString(lineM->port());
+			mPort = util::toString(lineM->port());
 			vector<Candidate*> attrs = lineM->lines<Candidate>();
 			for (vector<Candidate*>::const_iterator it1 = attrs.begin(); it1 != attrs.end(); ++it1) {
 
@@ -262,7 +262,7 @@ bool Message::isICESupported() const
 			}
 
 			if (!hasIP || !hasPort) {
-				LogError() << "SDP Lines M Port || C IP NOT Matching/Found" << endl;
+				errorL() << "SDP Lines M Port || C IP NOT Matching/Found" << endl;
 				isOK = false;
 				break;
 			}
@@ -283,7 +283,7 @@ string Message::firstMediaFormat() const
 			m = (M*)_lines[i];
 
 	if (!m || m->numPayloadTypes()<1) {
-		LogError() << "ERROR: BUG: SDP packet did not contain <m> line. Defaulting to PCMu" << endl;
+		errorL() << "ERROR: BUG: SDP packet did not contain <m> line. Defaulting to PCMu" << endl;
 		return NULL;
 	}
 
@@ -301,7 +301,7 @@ bool Message::isMediaFormatAvailable(const string& fmt) const
 			m = (M*)_lines[i];
 
 	if (!m || m->numPayloadTypes() < 1) {
-		LogError() << "ERROR: BUG: SDP packet did not contain <m> line. Defaulting to PCMu" << endl;
+		errorL() << "ERROR: BUG: SDP packet did not contain <m> line. Defaulting to PCMu" << endl;
 		return NULL;
 	}
 
@@ -332,7 +332,7 @@ string Message::getSessionLevelAttribute(const string& type, int index) const
 			i++;		
 		}
 	}
-	LogError() << "SDP: No media level attribute: " << type << endl;
+	errorL() << "SDP: No media level attribute: " << type << endl;
 	return "";
 }
 
@@ -368,7 +368,7 @@ std::vector<Line*> Message::lines() const
 
 
 } // namespace SDP 
-} // namespace Scy
+} // namespace scy
 
 
 
@@ -380,7 +380,7 @@ O* Message::sessionSessionIdentifier() const
 {
 	for (unsigned i = 0; i < _lines.size(); i++) {
 		if (!_lines[i])
-			LogError() << "WARNING: SDP lines are null" << endl;
+			errorL() << "WARNING: SDP lines are null" << endl;
 		if (_lines[i]->type() == Line::O) {
 			return reinterpret_cast<O*>(_lines[i]);
 		}
@@ -394,7 +394,7 @@ C* Message::sessionConnection() const
 {
 	for (unsigned i = 0; i < _lines.size(); i++) {
 		if (!_lines[i])
-			LogError() << "WARNING: SDP lines are null" << endl;
+			errorL() << "WARNING: SDP lines are null" << endl;
 		if (_lines[i]->type() == Line::C) {
 			return reinterpret_cast<C*>(_lines[i]);
 		}
@@ -408,7 +408,7 @@ I* Message::sessionInformation() const
 {
 	for (unsigned i = 0; i < _lines.size(); i++) {
 		if (!_lines[i])
-			LogError() << "WARNING: SDP lines are null" << endl;
+			errorL() << "WARNING: SDP lines are null" << endl;
 		if (_lines[i]->type() == Line::C) {
 			return reinterpret_cast<I*>(_lines[i]);
 		}
@@ -432,7 +432,7 @@ string Message::getSessionLevelICEUFrag() {
 
 	for (unsigned i = 0; i < _lines.size();i++) {
 		if (!_lines[i])
-			LogError() << "WARNING: SDP lines are null" << endl;
+			errorL() << "WARNING: SDP lines are null" << endl;
 		if (_lines[i]->type() == Line::A) {
 			aAttr = (A*)_lines[i];
 			if (aAttr->attributeType() == "ice-ufrag")
@@ -449,7 +449,7 @@ string Message::getSessionLevelICEPassword() {
 
 	for (unsigned i = 0; i < _lines.size();i++) {
 		if (!_lines[i])
-			LogError() << "WARNING: SDP lines are null" << endl;
+			errorL() << "WARNING: SDP lines are null" << endl;
 		if (_lines[i]->type() == Line::A) {
 			aAttr = (A*)_lines[i];
 			if (aAttr->attributeType() == "ice-pwd")
@@ -466,7 +466,7 @@ string Message::getKeyMgmt() {
 
 	for (unsigned i = 0; i < _lines.size();i++) {
 		if (!_lines[i])
-			LogError() << "WARNING: SDP lines are null" << endl;
+			errorL() << "WARNING: SDP lines are null" << endl;
 		if (_lines[i]->type() == Line::A) {
 			aAttr = (A*)_lines[i];
 			if (aAttr->attributeType() == "key-mgmt")
@@ -492,7 +492,7 @@ string Message::payloadTypeMatch(SDP &pack) {
 			otherM = (M*)pack._lines[i];
 		
 	if (!thisM || !otherM) {
-		LogError() << "ERROR: BUG: SDP packet did not contain <m> line. Defaulting to PCMu" << endl;
+		errorL() << "ERROR: BUG: SDP packet did not contain <m> line. Defaulting to PCMu" << endl;
 		return "";
 	}
 
@@ -501,7 +501,7 @@ string Message::payloadTypeMatch(SDP &pack) {
 			if (thisM->payloadType(i) == otherM->payloadType(j))
 				return thisM->payloadType(i);
 
-	LogError() << "ERROR: could not match any codec format - trying anyway with PCMu" << endl;
+	errorL() << "ERROR: could not match any codec format - trying anyway with PCMu" << endl;
 	return "";	
 }
 */

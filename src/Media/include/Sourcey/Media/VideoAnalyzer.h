@@ -35,8 +35,8 @@ extern "C" {
 }
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 class VideoAnalyzer //: public IPacketProcessor
@@ -157,7 +157,7 @@ inline double log2(double n);
 #endif
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif

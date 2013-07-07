@@ -26,8 +26,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 namespace RTCP {
 
 
@@ -88,23 +88,23 @@ bool Packet::read(Buffer& buffer)
 	// TODO: Proper checking...
 
 	if (buffer.remaining() < 4) {
-		LogError() << "RTCP: Buffer too small to parse RTCP header. " 
+		errorL() << "RTCP: Buffer too small to parse RTCP header. " 
 			<< "Needed 4 but got " << buffer.remaining() << "."
 			<< endl;
 		return false;
 	}
 	
 	UInt8 info;
-	buffer.readUInt8(info);
+	buffer.readU8(info);
 	this->version = info >> 6;
 	this->padding = info >> 5 & 0x1;
 	this->sources = info & 0x1F;
 	
-	buffer.readUInt8(this->packetType);
-	buffer.readUInt16(this->length);
+	buffer.readU8(this->packetType);
+	buffer.readU16(this->length);
 
 	if (buffer.remaining() < this->length - 4) {
-		LogError() 
+		errorL() 
 			<< "RTCP: Buffer too small to parse RTCP packet: " << (int)this->packetType << ". " 
 			<< "Needed " << (this->length - 4) << " but got " << buffer.remaining() << "."
 			<< endl;
@@ -121,9 +121,9 @@ void Packet::write(Buffer& buffer) const
 		((UInt8)this->padding << 5) |
 		this->sources;
 
-	buffer.writeUInt8(info);
-	buffer.writeUInt8(this->packetType);
-	buffer.writeUInt16(this->computedLength());
+	buffer.writeU8(info);
+	buffer.writeU8(this->packetType);
+	buffer.writeU16(this->computedLength());
 }
 
 
@@ -147,5 +147,5 @@ void Packet::print(std::ostream& os) const
 
 
 } // namespace RTCP
-} // namespace RTP
-} // namespace Scy
+} // namespace rtp
+} // namespace scy

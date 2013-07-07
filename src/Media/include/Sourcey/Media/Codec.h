@@ -29,8 +29,8 @@
 #include <list>
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 // ---------------------------------------------------------------------
@@ -159,8 +159,8 @@ typedef std::list<Codec> CodecList;
 typedef std::list<Codec*> CodecPList;
 
 
-} // namespace Media
-} // namespace Scy
+} // namespace av
+} // namespace scy
 
 
 #endif

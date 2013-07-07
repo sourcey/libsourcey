@@ -126,7 +126,7 @@ void StateSignal::set(State::ID id)
 /*
 #include "Sourcey/Logger.h"
 #include "Sourcey/Runner.h"
-#include "Sourcey/CryptoProvider.h"
+#include "Sourcey/Crypto.h"
 
 #include <assert.h>
 */

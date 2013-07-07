@@ -3,6 +3,7 @@ include_dependency(OpenSSL REQUIRED)
 include_dependency(FFmpeg REQUIRED)
 include_dependency(RtAudio REQUIRED)
 include_dependency(OpenCV REQUIRED)
-#include_dependency(JsonCpp REQUIRED)
+include_dependency(LibUV REQUIRED)
+include_dependency(HttpParser REQUIRED)
   
-define_sourcey_module_sample(MediaServer Base Net Media HTTP TURN STUN Util) #Anionu
+define_sourcey_module_sample(MediaServer Base UV Media Net HTTP TURN STUN Util) #Anionu

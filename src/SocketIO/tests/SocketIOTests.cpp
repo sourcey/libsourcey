@@ -8,8 +8,8 @@
 
 
 using namespace std;
-using namespace Sourcey;
-using namespace Sourcey::Util;
+using namespace scy;
+using namespace scy::util;
 using namespace Poco;
 using namespace Poco::Net;
 
@@ -24,8 +24,8 @@ CMemLeakDetect memLeakDetect;
 */
 
 
-namespace Sourcey {
-namespace SocketIO {
+namespace scy {
+namespace sockio {
 
 	
 #define SERVER_HOST "127.0.0.1"
@@ -34,24 +34,24 @@ namespace SocketIO {
 
 
 // ----------------------------------------------------------------------------
-//
 // SocketIO Client Test
-//-------		
+//	
 class Tests
 {
 	Poco::Event ready;
 
+	/*
 	Net::Reactor reactor;
-	Net::Address srvAddr;
+	net::Address srvAddr;
 	
 public:
 	Tests() :
 		srvAddr(SERVER_HOST, SERVER_PORT)
 	{		
 #if USE_SSL
-		SocketIO::SSLClient client(reactor, srvAddr);
+		sockio::SSLClient client(reactor, srvAddr);
 #else
-		SocketIO::TCPClient client(reactor, srvAddr);
+		sockio::TCPClient client(reactor, srvAddr);
 #endif
 
 		client.StateChange += delegate(this, &Tests::onConnectionStateChange);
@@ -61,34 +61,35 @@ public:
 		
 		// TODO: Test Transaction
 
-		Util::pause();
+		util::pause();
 	}
 
 
-	void onConnectionStateChange(void* sender, SocketIO::ClientState& state, const SocketIO::ClientState& oldState) 
+	void onConnectionStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState) 
 	{
-		SocketIO::Client* client = reinterpret_cast<SocketIO::Client*>(sender);	
+		sockio::Client* client = reinterpret_cast<sockio::Client*>(sender);	
 		Log("debug") << "Connection State Changed: " << state.toString() << ": " << client->socket().address() << endl;
 		
 		switch (state.id()) {
-		case SocketIO::ClientState::Connecting:
+		case sockio::ClientState::Connecting:
 			break;
-		case SocketIO::ClientState::Connected: 
+		case sockio::ClientState::Connected: 
 			break;
-		//case SocketIO::ClientState::Handshaking: 
+		//case sockio::ClientState::Handshaking: 
 		//	break;
-		case SocketIO::ClientState::Online: 
+		case sockio::ClientState::Online: 
 			ready.set(); // pass
 			break;
-		case SocketIO::ClientState::Disconnected: 
+		case sockio::ClientState::Disconnected: 
 			ready.set(); // fail
 			break;
 		}
 	}
+	*/
 };
 
 
-} } // namespace Sourcey::SocketIO
+} } // namespace scy::sockio
 
 
 int main(int argc, char** argv) 
@@ -101,7 +102,7 @@ int main(int argc, char** argv)
 		Context::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");	
 	SSLManager::instance().initializeClient(0, ptrCert, ptrContext);
 	{
-		Sourcey::SocketIO::Tests run;
+		scy::sockio::Tests run;
 	}		
 	Poco::Net::SSLManager::instance().shutdown();
 	Logger::uninitialize();
@@ -114,7 +115,7 @@ int main(int argc, char** argv)
 	//(reactor, srvAddr);
 
 	//Net::SSLSocket socket;
-	//Net::SocketBase<Poco::Net::SecureStreamSocket, Sourcey::Net::SSLTCP> socket;
+	//Net::SocketBase<Poco::Net::SecureStreamSocket, scy::Net::SSLTCP> socket;
 	//Net::TCPStatefulSocket tcpSocket;
 	//Net::SSLStatefulSocket sslSocket;
 
@@ -125,10 +126,10 @@ int main(int argc, char** argv)
 		 //sslSocket(reactor)
 		//Runner runner;		
 		//Net::Reactor reactor;
-		//Net::Address srvAddr("127.0.0.1", 9443);
+		//net::Address srvAddr("127.0.0.1", 9443);
 		
 		/*
-		//SocketIO::Socket socket(reactor, srvAddr);
+		//sockio::Socket socket(reactor, srvAddr);
 		//socket.StateChange += delegate(this, &Tests::onConnectionStateChange);
 		//socket.connect();
 		
@@ -148,8 +149,8 @@ int main(int argc, char** argv)
 
 
 	//SharedPtr<InvalidCertificateHandler> ptrCert = new ConsoleCertificateHandler(false); // ask the user via console
-		"D:\\dev\\projects\\Sourcey\\share\\ssl\\symple.key", 
-		"D:\\dev\\projects\\Sourcey\\share\\ssl\\symple.crt", 
+		"D:\\dev\\projects\\Sourcey\\share\\ssl\\smple.key", 
+		"D:\\dev\\projects\\Sourcey\\share\\ssl\\smple.crt", 
 		"D:\\dev\\projects\\Sourcey\\share\\ssl\\rootcert.pem", 
 	
 	// Note: we must create the passphrase handler prior Context 
@@ -163,18 +164,18 @@ int main(int argc, char** argv)
 		
 		
 	
-	void runConnectionTest(SocketIO::Socket& socket) 
+	void runConnectionTest(sockio::Socket& socket) 
 	{
 		Log("trace") << "[Tests:" << this << "] runConnectionTest" << std::endl;
 		
 		socket.StateChange += delegate(this, &Tests::onConnectionStateChange);
 		socket.connect();
 
-		//BroadcastPacket += PacketDelegate<Tests, DataPacket>(this, &Tests::onBroadcastPacket, 0);
-		//DataPacket packet;
+		//BroadcastPacket += PacketDelegate<Tests, RawPacket>(this, &Tests::onBroadcastPacket, 0);
+		//RawPacket packet;
 		//BroadcastPacket.send(this, packet);
 
-		Util::pause();
+		util::pause();
 		Log("trace") << "[Tests:" << this << "] runConnectionTest: END" << std::endl;
 
 	}
@@ -186,8 +187,8 @@ int main(int argc, char** argv)
 		
 		*/
 
-    //  key: fs.readFileSync("D:\\dev\\projects\\Sourcey\\share\\ssl\\symple.key")
-    //, cert: fs.readFileSync("D:\\dev\\projects\\Sourcey\\share\\ssl\\symple.crt")
+    //  key: fs.readFileSync("D:\\dev\\projects\\Sourcey\\share\\ssl\\smple.key")
+    //, cert: fs.readFileSync("D:\\dev\\projects\\Sourcey\\share\\ssl\\smple.crt")
 	//Context::Ptr ptrContext = new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");		
 
 
@@ -198,7 +199,7 @@ int main(int argc, char** argv)
 				//sslSocket.setBlocking(true);
 				SecureStreamSocket& ss1(reinterpret_cast<SecureStreamSocket&>(sslSocket));
 
-				HTTP::Request request("GET", "/");
+				http::Request request("GET", "/");
 				stringstream ss;
 				request.write(ss);	
 				Log("trace") << "Request Headers: " << ss.str() << endl;
@@ -213,16 +214,16 @@ int main(int argc, char** argv)
 				*/
 
 /*
-	void onConnected(void* sender) //, DataPacket& packet
+	void onConnected(void* sender) //, RawPacket& packet
 	{
 		Net::ISocket* socket = reinterpret_cast<Net::ISocket*>(sender);	
-		//Net::SocketBase<Poco::Net::SecureStreamSocket, Sourcey::Net::SSLTCP>* socket = reinterpret_cast<Net::SocketBase<Poco::Net::SecureStreamSocket, Sourcey::Net::SSLTCP>*>(sender);	
-		//Net::SocketBase<Poco::Net::SecureStreamSocket, Sourcey::Net::SSLTCP>* socket = static_cast<Net::SocketBase<Poco::Net::SecureStreamSocket, Sourcey::Net::SSLTCP>*>(sender);	
+		//Net::SocketBase<Poco::Net::SecureStreamSocket, scy::Net::SSLTCP>* socket = reinterpret_cast<Net::SocketBase<Poco::Net::SecureStreamSocket, scy::Net::SSLTCP>*>(sender);	
+		//Net::SocketBase<Poco::Net::SecureStreamSocket, scy::Net::SSLTCP>* socket = static_cast<Net::SocketBase<Poco::Net::SecureStreamSocket, scy::Net::SSLTCP>*>(sender);	
 		
 		//Net::ISocket* socket = static_cast<Net::ISocket*>(sender);	
 
 		Log("debug") << "########################## [Test:" << this << "] onConnected: " << socket << endl;	
-		//socket->detach(packetDelegate<EchoServer, DataPacket>(this, &EchoServer::onServerSocketRequestReceived));
+		//socket->detach(packetDelegate<EchoServer, RawPacket>(this, &EchoServer::onServerSocketRequestReceived));
 		
 				
 		// SEND THE HTTP REQUEST
@@ -237,12 +238,12 @@ int main(int argc, char** argv)
 		//socket->send(packet);
 	}
 
-	void onResponseReceived(void* sender, DataPacket& packet) 
+	void onResponseReceived(void* sender, RawPacket& packet) 
 	{
 		Net::ISocket* socket = reinterpret_cast<Net::ISocket*>(sender);	
 
 		Log("debug") << "########################## [Test:" << this << "] Packet Received: " << string((const char*)packet.data(), packet.size()) << ": " << socket->peerAddress() << endl;	
-		//socket->detach(packetDelegate<EchoServer, DataPacket>(this, &EchoServer::onServerSocketRequestReceived));
+		//socket->detach(packetDelegate<EchoServer, RawPacket>(this, &EchoServer::onServerSocketRequestReceived));
 
 		// echo the data back
 		//socket->send(packet);
@@ -262,7 +263,7 @@ int main(int argc, char** argv)
 
 		//SocketAddress sa("localhost", 9443);
 		Log("debug") << "testSocketReactor 2" << endl;
-		Sourcey::Net::SourceySocketConnector connector(srvAddr, reactor); //<ClientServiceHandler>
+		scy::Net::SourceySocketConnector connector(srvAddr, reactor); //<ClientServiceHandler>
 		
 		Log("debug") << "testSocketReactor 3" << endl;
 		reactor.run();
@@ -301,10 +302,10 @@ int main(int argc, char** argv)
 		//
 		// Stack Socket
 		//
-		//Net::SocketBase<Poco::Net::SecureStreamSocket, Sourcey::Net::SSLTCP> ss11(reactor);
+		//Net::SocketBase<Poco::Net::SecureStreamSocket, scy::Net::SSLTCP> ss11(reactor);
 		//SecureStreamSocket& ss1(reinterpret_cast<SecureStreamSocket&>(ss11));
 		
-		//Net::SocketBase<Poco::Net::SecureStreamSocket, Sourcey::Net::SSLTCP> ss1(reactor);
+		//Net::SocketBase<Poco::Net::SecureStreamSocket, scy::Net::SSLTCP> ss1(reactor);
 		//ss1.StateChange += delegate(this, &Tests::onConnectionStateChange);	
 		//ss1.connect(srvAddr);	
 		//Net::TCPStatefulSocket ss1(reactor);
@@ -325,7 +326,7 @@ int main(int argc, char** argv)
 		reactor.run();			
 		*/
 		/*
-		HTTP::Request request("GET", "/");
+		http::Request request("GET", "/");
 		stringstream ss;
 		request.write(ss);	
 		Log("trace") << "Request Headers: " << ss.str() << endl;
@@ -347,7 +348,7 @@ int main(int argc, char** argv)
 		SecureStreamSocket ss1(sa);
 		//std::string data("hello, world");
 		
-		HTTP::Request request("GET", "/");
+		http::Request request("GET", "/");
 		stringstream ss;
 		request.write(ss);	
 		Log("trace") << "Request Headers: " << ss.str() << endl;
@@ -368,7 +369,7 @@ int main(int argc, char** argv)
 		//Thread::sleep(300);
 		//assert (srv.currentConnections() == 0);
 
-		Util::pause();
+		util::pause();
 
 		ss1.close();
 		
@@ -423,7 +424,7 @@ class SourceySocketConnector
 	/// to perform custom error handling.
 	///
 	/// The ServiceHandler class must provide a constructor that
-	/// takes a StreamSocket and a Sourcey::Net::Reactor as arguments,
+	/// takes a StreamSocket and a scy::Net::Reactor as arguments,
 	/// e.g.:
 	///     MyServiceHandler(const StreamSocket& socket, ServiceReactor& reactor)
 	///
@@ -441,10 +442,10 @@ public:
 		//_socket.connectNB(address);
 	}
 
-	SourceySocketConnector(SocketAddress& address, Sourcey::Net::Reactor& reactor):
+	SourceySocketConnector(SocketAddress& address, scy::Net::Reactor& reactor):
 		_pReactor(0)
 		/// Creates an acceptor, using the given ServerSocket.
-		/// The SourceySocketConnector registers itself with the given Sourcey::Net::Reactor.
+		/// The SourceySocketConnector registers itself with the given scy::Net::Reactor.
 	{
 		_socket.connect(address);
 		//_socket.connectNB(address);
@@ -457,8 +458,8 @@ public:
 		unregisterConnector();
 	}
 	
-	virtual void registerConnector(Sourcey::Net::Reactor& reactor)
-		/// Registers the SourceySocketConnector with a Sourcey::Net::Reactor.
+	virtual void registerConnector(scy::Net::Reactor& reactor)
+		/// Registers the SourceySocketConnector with a scy::Net::Reactor.
 		///
 		/// A subclass can override this and, for example, also register
 		/// an event handler for a timeout event.
@@ -528,7 +529,7 @@ public:
 		//_socket.setBlocking(true);
 
 		// SEND THE HTTP REQUEST
-		HTTP::Request request("GET", "/");
+		http::Request request("GET", "/");
 		stringstream ss;
 		request.write(ss);	
 		Log("trace") << "SRequest Headers: " << ss.str() << endl;
@@ -578,8 +579,8 @@ protected:
 	{
 	}
 	
-	Sourcey::Net::Reactor* reactor()
-		/// Returns a pointer to the Sourcey::Net::Reactor where
+	scy::Net::Reactor* reactor()
+		/// Returns a pointer to the scy::Net::Reactor where
 		/// this SourceySocketConnector is registered.
 		///
 		/// The pointer may be null.
@@ -599,7 +600,7 @@ private:
 	SourceySocketConnector& operator = (const SourceySocketConnector&);
 	
 	SecureStreamSocket   _socket;
-	Sourcey::Net::Reactor* _pReactor;
+	scy::Net::Reactor* _pReactor;
 };
 
 
@@ -729,7 +730,7 @@ public:
 		onConnect();
 
 		// SEND THE HTTP REQUEST
-		HTTP::Request request("GET", "/");
+		http::Request request("GET", "/");
 		stringstream ss;
 		request.write(ss);	
 		Log("trace") << "SRequest Headers: " << ss.str() << endl;

@@ -23,14 +23,14 @@
 using namespace std;
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
 I::I(const string& src) : Line(Line::I, 9) {
 	assert(src.substr(0, 2) == "i=");
 	string attr(src.substr(2, src.length()-2));
-	Util::trim(attr);
+	util::trim(attr);
 	_sessionInformation = attr;
 }
 
@@ -54,5 +54,5 @@ string I::toString() {
 }
 
 
-} // namespace Scy
+} // namespace scy
 } // namespace SDP 

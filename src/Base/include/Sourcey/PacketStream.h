@@ -22,6 +22,7 @@
 
 
 #include "Sourcey/Logger.h"
+#include "Sourcey/Memory.h"
 #include "Sourcey/Stateful.h"
 #include "Sourcey/IStartable.h"
 #include "Sourcey/PacketEmitter.h"

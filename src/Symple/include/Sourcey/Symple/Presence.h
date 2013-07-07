@@ -26,8 +26,8 @@
 #include "Sourcey/Symple/Message.h"
 
 
-namespace Scy {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 
 class Presence: public Message
@@ -43,8 +43,8 @@ public:
 };
 
 
-} // namespace Symple 
-} // namespace Scy
+} // namespace smple 
+} // namespace scy
 
 
 #endif // SOURCEY_Symple_Presence_H

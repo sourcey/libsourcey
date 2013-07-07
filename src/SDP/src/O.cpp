@@ -24,7 +24,7 @@
 using namespace std;
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
@@ -32,7 +32,7 @@ O::O(const string& src) : Line(Line::O, 2)
 {
 	size_t len = src.length();
 	if (src.substr(0, 2) != "o=") {
-		LogError() << "ERROR: SDP line does not start with <o=>:" << src << std::endl;
+		errorL() << "ERROR: SDP line does not start with <o=>:" << src << std::endl;
 	}
 	size_t i = 2;
 	while (src[i] == ' ' && i < len)
@@ -183,5 +183,5 @@ string O::toString() {
 }
 
 
-} // namespace Scy
+} // namespace scy
 } // namespace SDP 

@@ -23,7 +23,7 @@
 
 #include "Sourcey/Types.h"
 #include "Sourcey/Timeout.h"
-#include "Sourcey/CryptoProvider.h"
+#include "Sourcey/Crypto.h"
 
 
 namespace scy {
@@ -35,9 +35,9 @@ class Token: public Timeout
 {
 public:
 	Token(long duration) : 
-		Timeout(duration), _id(CryptoProvider::generateRandomKey(32)) {}
+		Timeout(duration), _id(crypt::randomKey(32)) {}
 
-	Token(const std::string& id = CryptoProvider::generateRandomKey(32), long duration = 10000) : 
+	Token(const std::string& id = crypt::randomKey(32), long duration = 10000) : 
 		Timeout(duration), _id(id) {}
 	
 	std::string id() const { return _id; }

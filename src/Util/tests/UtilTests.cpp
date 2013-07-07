@@ -10,7 +10,7 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Sourcey;
+using namespace scy;
 
 
 /*
@@ -22,7 +22,7 @@ CMemLeakDetect memLeakDetect;
 */
 
 
-namespace Sourcey {
+namespace scy {
 	
 
 static NamedEvent ready("TestEvent");
@@ -37,7 +37,7 @@ public:
 	{	
 		runTimerTest();
 		
-		Util::pause();
+		util::pause();
 	}
 	
 	
@@ -54,7 +54,7 @@ public:
 		time_t startAt;
 
 		TimerTest(const string& name, int timeout = 1000, int iterations = 5) : 
-			name(name), startAt(Util::getTime()), iteration(0), iterations(iterations)
+			name(name), startAt(util::getTime()), iteration(0), iterations(iterations)
 		{
 			Log("debug") << "[TimerTest:" << name << "] Creating" << endl;	
 			Timer::getDefault().start(TimerCallback<TimerTest>(this, &TimerTest::onTimer, timeout, timeout));
@@ -71,14 +71,14 @@ public:
 			iteration++;
 			if (iteration < iterations) {
 				Log("debug") << "[TimerTest:" << name << "] Callback"
-					<< "\n\tElapsed: " << Util::getTime() - startAt
+					<< "\n\tElapsed: " << util::getTime() - startAt
 					<< "\n\tInterval: " << timer.periodicInterval()
 					<< "\n\tIteration: " << iteration
 					<< endl;
 			}
 			else {
 				Log("debug") << "[TimerTest:" << name << "] Complete #####################################"
-					<< "\n\tTotal Time: " << Util::getTime() - startAt
+					<< "\n\tTotal Time: " << util::getTime() - startAt
 					<< "\n\tCorrect Time: " << timer.periodicInterval() * iterations
 					<< "\n\tIterations: " << iterations
 					<< endl;			
@@ -95,22 +95,22 @@ public:
 		new TimerTest("Periodic 1", 1000, 5);
 		new TimerTest("Single 2", 5000, 1);
 		new TimerTest("Periodic 2", 1000, 5);
-		Util::pause();
+		util::pause();
 		Log("trace") << "Running Timer Test: END" << endl;
 	}
 };
 
 
-} // namespace Sourcey
+} // namespace scy
 
 
 int main(int argc, char** argv) 
 {	
 	Logger::instance().add(new ConsoleChannel("Test", TraceLevel));
 	{
-		Sourcey::Tests app;
+		scy::Tests app;
 	}	
-	Sourcey::Logger::uninitialize();
-	Util::pause();
+	scy::Logger::uninitialize();
+	util::pause();
 	return 0;
 }

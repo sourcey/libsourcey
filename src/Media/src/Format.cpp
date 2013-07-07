@@ -25,8 +25,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 Format::Format() : 
@@ -106,8 +106,8 @@ void Format::print(std::ostream& ost)
 }
 
 
-} // namespace Media 
-} // namespace Scy
+} // namespace av 
+} // namespace scy
 
 
 

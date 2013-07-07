@@ -27,8 +27,8 @@
 #include <deque>
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 
 
 #define MAX_RTP_PACKETS_IN_QUEUE 1024
@@ -55,7 +55,7 @@ struct PacketQueueEntry
 
 	bool received;
 	PacketOrder order;
-	RTP::Packet* packet;
+	rtp::Packet* packet;
 
 	PacketQueueEntry() : received(false), packet(NULL) {}
 };
@@ -87,7 +87,7 @@ public:
 		// Processes and sequentially orders incoming RTP packets,
 		// and outputs T packets.
 	{
-		RTP::Packet* rtpPacket = new RTP::Packet;
+		rtp::Packet* rtpPacket = new rtp::Packet;
 		Buffer buf(RTP_MAX_PACKET_LEN);
 		packet.write(buf);
 		rtpPacket->read(buf);
@@ -97,7 +97,7 @@ public:
 		int packetIndex;
 		
 		/*
-		LogDebug() << "[RTP Depacketizer:" << this << "] Packet Info:"
+		debugL() << "[RTP Depacketizer:" << this << "] Packet Info:"
 			<< "\n\tSequence Number: " << sequenceNumber
 			<< "\n\tRelative Number: " << relativeNumber
 			<< "\n\tPacket Index: " << packetIndex
@@ -113,7 +113,7 @@ public:
 		else if (relativeNumber > 0) {
 			if (relativeNumber > MAX_RTP_PACKETS_IN_QUEUE) {
 				// Sequence number jumped too much for some reason. Reset the queue.
-				LogDebug() << "[RTP Depacketizer] Resetting unstable queue "
+				debugL() << "[RTP Depacketizer] Resetting unstable queue "
 						<< relativeNumber << std::endl;
 				resetQueue();
 			} 
@@ -125,7 +125,7 @@ public:
 				while (static_cast<int>(_queue.size()) > MAX_RTP_PACKETS_IN_QUEUE) {
 					delete _queue.front().packet;
 					_queue.pop_front();
-					//LogDebug() << "[RTP Depacketizer] Purging " << _queue.size() << std::endl;
+					//debugL() << "[RTP Depacketizer] Purging " << _queue.size() << std::endl;
 				}
 			}
 			_lastSequenceNumber = sequenceNumber;
@@ -135,7 +135,7 @@ public:
 			packetIndex = _queue.size() - 1 + relativeNumber;
 			if (packetIndex < 0) {
 				// The packet is too old. Just drop it.
-				LogDebug() << "[RTP Depacketizer] Dropping old packet at "
+				debugL() << "[RTP Depacketizer] Dropping old packet at "
 						<< sequenceNumber << std::endl;
 				delete rtpPacket;
 				return;
@@ -145,7 +145,7 @@ public:
 		assert(packetIndex < static_cast<int>(_queue.size()));
 
 		if (_queue[packetIndex].received) {
-			LogDebug() << "Received duplicate packet with sequence number "
+			debugL() << "Received duplicate packet with sequence number "
 				<< sequenceNumber << std::endl;
 			delete rtpPacket;
 			return;
@@ -159,7 +159,7 @@ public:
 		// last marker position.
 		if (rtpPacket->header().sequenceNumber == (_lastMarkerSequenceNumber + 1)) {
 			_queue[packetIndex].order = PacketQueueEntry::First;
-			//LogDebug() << "[RTP Depacketizer] Received first fragment "
+			//debugL() << "[RTP Depacketizer] Received first fragment "
 			//		<< sequenceNumber << std::endl;
 		}
 
@@ -168,7 +168,7 @@ public:
 		if (rtpPacket->header().marker) {
 			_lastMarkerSequenceNumber = sequenceNumber;
 			_queue[packetIndex].order = PacketQueueEntry::Last;
-			//LogDebug() << "[RTP Depacketizer] Received last fragment "
+			//debugL() << "[RTP Depacketizer] Received last fragment "
 			//		<< sequenceNumber << std::endl;
 		}
 
@@ -177,7 +177,7 @@ public:
 
 	void resetQueue() 
 	{
-		LogDebug() << "[RTP Depacketizer] Resetting queue " << std::endl;
+		debugL() << "[RTP Depacketizer] Resetting queue " << std::endl;
 
 		for (PacketQueue::iterator it = _queue.begin();
 			it != _queue.end(); ++it) {
@@ -188,13 +188,13 @@ public:
 
 	void checkFullPacket(PacketQueue::iterator pos) 
 	{
-		//LogDebug() << "[RTP Depacketizer] Checking for full packet" << std::endl;
+		//debugL() << "[RTP Depacketizer] Checking for full packet" << std::endl;
 
 		/*
 		if (pos->packet->vp8_descriptor().fragmentation_info ==
 		Vp8Descriptor::NOT_FRAGMENTED) {
 		// The packet is not fragmented.
-		rebuildDataPacket(pos, pos);
+		rebuildRawPacket(pos, pos);
 		return;
 		}
 
@@ -231,7 +231,7 @@ public:
 		if (!first->packet || 
 			first->order != PacketQueueEntry::First) {
 			// We don't have first fragment.
-			//LogDebug() << "[RTP Depacketizer] We don't have first fragment" << std::endl;
+			//debugL() << "[RTP Depacketizer] We don't have first fragment" << std::endl;
 			return;
 		}
 
@@ -243,18 +243,18 @@ public:
 		if (!last->packet || 
 			last->order != PacketQueueEntry::Last) {
 			// We don't have last fragment.
-			//LogDebug() << "[RTP Depacketizer] We don't have last fragment" << std::endl;
+			//debugL() << "[RTP Depacketizer] We don't have last fragment" << std::endl;
 			return;
 		}
 
 		// We've found first and last fragments, and we have all fragments in the
 		// middle, so we can rebuild fill packet.
-		rebuildDataPacket(first, last);
+		rebuildRawPacket(first, last);
 	}
 
-	void rebuildDataPacket(PacketQueue::iterator first, PacketQueue::iterator last) 
+	void rebuildRawPacket(PacketQueue::iterator first, PacketQueue::iterator last) 
 	{
-		DataPacket packet;
+		RawPacket packet;
 
 		// Rebuild packet content from the fragments.
 		// TODO: Use CompoundBuffer inside of VideoPacket, so that we don't
@@ -262,9 +262,9 @@ public:
 		
 		Buffer buf;
 		for (PacketQueue::iterator it = first; it <= last; ++it) {			
-			buf.writeBytes(it->packet->payload(), it->packet->payloadLength());
+			buf.write(it->packet->payload(), it->packet->payloadLength());
 
-			//LogDebug() << "[RTP Depacketizer] Rebuilding packet with fragment " 
+			//debugL() << "[RTP Depacketizer] Rebuilding packet with fragment " 
 			//	<< it->packet->header().sequenceNumber << std::endl;
 
 			// Delete packet because we don't need it anymore.
@@ -277,7 +277,7 @@ public:
 
 		packet.read(buf);
 
-		// LogTrace() << "[RTP Depacketizer] Rebuilt data packet: " << packet.size << std::endl;
+		// traceL() << "[RTP Depacketizer] Rebuilt data packet: " << packet.size << std::endl;
 
 		// Output our packet!
 		broadcast(this, packet);
@@ -291,8 +291,8 @@ protected:
 };
 
 
-} // namespace RTP
-} // namespace Scy 
+} // namespace rtp
+} // namespace scy 
 
 
 #endif

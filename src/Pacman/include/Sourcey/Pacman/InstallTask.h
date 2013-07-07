@@ -30,8 +30,8 @@
 #include "Poco/Zip/ZipLocalFileHeader.h"
 
 
-namespace Scy { 
-namespace Pacman {
+namespace scy { 
+namespace pcman {
 
 	
 class PackageManager;
@@ -132,7 +132,7 @@ public:
 	virtual int progress() const;
 
 	virtual void onStateChange(PackageInstallState& state, const PackageInstallState& oldState);
-	virtual void onResponseProgress(void* sender, HTTP::TransferState& state);
+	virtual void onResponseProgress(void* sender, http::TransferState& state);
 	virtual void onDecompressionError(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const std::string>& info);
 	virtual void onDecompressionOk(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info);
 
@@ -162,7 +162,7 @@ protected:
 	RemotePackage*	_remote;
 	Options			_options;
 	int             _progress;
-	HTTP::Transaction _transaction;
+	http::Transaction _transaction;
 	
 	friend class PackageManager;
 	friend class InstallMonitor;	
@@ -172,7 +172,7 @@ protected:
 typedef std::vector<InstallTask*> InstallTaskList;
 
 
-} } // namespace Scy::Pacman
+} } // namespace scy::Pacman
 
 
 #endif // SOURCEY_Pacman_InstallTask_H

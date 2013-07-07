@@ -235,14 +235,14 @@ SocketEmitter::~SocketEmitter()
 }
 
 
-void SocketEmitter::onConnect()
+void SocketEmitter::onSocketConnect()
 {
 	//traceL("SocketEmitter", this) << "On Connect: " << socket->Connect.refCount() << endl;	
 	socket->Connect.emit(socket);
 }
 
 
-void SocketEmitter::onRecv(Buffer& buf, const Address& peerAddr)
+void SocketEmitter::onSocketRecv(Buffer& buf, const Address& peerAddr)
 {
 	//traceL("SocketEmitter", this) << "On Recv: " << socket->Recv.refCount() << endl;	
 	SocketPacket packet(*socket, buf, peerAddr);
@@ -250,14 +250,14 @@ void SocketEmitter::onRecv(Buffer& buf, const Address& peerAddr)
 }
 
 
-void SocketEmitter::onError(int syserr, const string& message) 
+void SocketEmitter::onSocketError(int syserr, const string& message) 
 {
 	//traceL("SocketEmitter", this) << "On Error: " << socket->Error.refCount() << ": " << message << endl;	
 	socket->Error.emit(socket, syserr, message);
 }
 
 
-void SocketEmitter::onClose()
+void SocketEmitter::onSocketClose()
 {
 	//traceL("SocketEmitter", this) << "On Close: " << socket->Close.refCount() << endl;	
 	socket->Close.emit(socket);
@@ -332,28 +332,28 @@ int SocketBase::send(const IPacket& packet, const Address& peerAddress, int flag
 void SocketBase::emitConnect() 
 {
 	for (int i = 0; i < _observers.size(); i++) 
-		_observers[i]->onConnect();
+		_observers[i]->onSocketConnect();
 }
 
 
 void SocketBase::emitRecv(Buffer& buf, const Address& peerAddr)
 {
 	for (int i = 0; i < _observers.size(); i++) 
-		_observers[i]->onRecv(buf, peerAddr);
+		_observers[i]->onSocketRecv(buf, peerAddr);
 }
 
 
 void SocketBase::emitError(int syserr, const string& message)
 {
 	for (int i = 0; i < _observers.size(); i++) 
-		_observers[i]->onError(syserr, message);
+		_observers[i]->onSocketError(syserr, message);
 }
 
 
 void SocketBase::emitClose()
 {
 	for (int i = 0; i < _observers.size(); i++) 
-		_observers[i]->onClose();
+		_observers[i]->onSocketClose();
 }
 
 

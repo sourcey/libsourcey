@@ -34,9 +34,11 @@ namespace http {
 // Client Connection
 //
 ClientConnection::ClientConnection(Client& client, const net::Address& address) : 
-	Connection(net::TCPSocket(new net::TCPBase), HTTP_REQUEST), _client(client), _address(address)
+	Connection(net::TCPSocket(new net::TCPBase), HTTP_RESPONSE), _client(client), _address(address)
 {	
 	traceL("ClientConnection", this) << "Creating" << endl;
+	client.Shutdown += delegate(this, &ClientConnection::onShutdown);
+	client.addConnection(this);
 }
 
 	
@@ -45,17 +47,20 @@ ClientConnection::~ClientConnection()
 	traceL("ClientConnection", this) << "Destroying" << endl;
 }
 
-
-Poco::Net::HTTPMessage* ClientConnection::headers() 
-{ 
-	return static_cast<Poco::Net::HTTPMessage*>(_request); 
+	
+void ClientConnection::close()
+{
+	_client.Shutdown -= delegate(this, &ClientConnection::onShutdown);
+	_client.removeConnection(this);
+	Connection::close();
 }
 
 
 void ClientConnection::send(bool whiny)
 {
-	traceL("ClientConnection", this) << "Respond" << endl;
-	
+	traceL("ClientConnection", this) << "Send Request" << endl;
+
+	// Connect to server
 	_socket.connect(_address);
 }
 
@@ -66,21 +71,40 @@ Client& ClientConnection::client()
 }
 
 
+Poco::Net::HTTPMessage* ClientConnection::incomingHeaders() 
+{ 
+	return static_cast<Poco::Net::HTTPMessage*>(_response);
+}
+
+Poco::Net::HTTPMessage* ClientConnection::outgoingHeaders() 
+{ 
+	return static_cast<Poco::Net::HTTPMessage*>(_request);
+}
+
+
 //
 // Socket callbacks
 //
 
-void ClientConnection::onConnect() 
+void ClientConnection::onSocketConnect() 
 {
 	traceL("ClientConnection", this) << "Connected" << endl;
-
+	
 	// KLUDGE: Temp solution for quick sending small requests only.
 	// Use Connection::sendBytes() for nocopy binary stream.
 	sendBytes(
 		_request->body.str().data(),
 		_request->body.str().length());
-	
-	//close();
+}
+
+
+//
+// Client callbacks
+//
+
+void ClientConnection::onShutdown(void*)
+{
+	close();
 }
 	
 
@@ -96,21 +120,25 @@ void ClientConnection::onParserHeadersDone()
 
 void ClientConnection::onParserChunk(const char* buf, size_t len)
 {
-	// Just keep response body / chunks to the handler.
-	// The handler can manage the buffer as required.
-	_buffer.write(buf, len);
+	traceL("ClientConnection", this) << "On Parser Chunk" << endl;	
 
-	ResponseChunk.emit(this, _buffer);
+	// Just keep appending body chunks to the buffer.
+	// The handler can manage the buffer as required,
+	// including clearing the buffer on each body chunk.
+	//_buffer.write(buf, len);
+	
+	//ResponseBody.emit(this, _buffer);
+	ResponseBody.emit(this, buffer());
 }
 
 
 void ClientConnection::onParserDone() 
 {
-	traceL("ClientConnection", this) << "On Message Complete" << endl;	
+	traceL("ClientConnection", this) << "On Parser Done" << endl;	
 
-	// The entireHTTP message is complete.
-	// Send the complete signal.
-	Complete.emit(this, *_response);
+	// The entire HTTP message is complete.
+	// Emit the Complete signal.
+	ResponseComplete.emit(this, *_response);
 }
 
 
@@ -120,14 +148,50 @@ void ClientConnection::onParserDone()
 Client::Client()
 {
 	traceL("Client", this) << "Creating" << endl;
+
+	//timer.Timeout += delegate(this, &Client::onTimer);
+	//timer.start(5000, 5000);
 }
 
 
 Client::~Client()
 {
 	traceL("Client", this) << "Destroying" << endl;
-	for (int i = 0; i < connections.size(); i++)
-		delete connections[i];
+	shutdown();
+}
+
+
+void Client::shutdown() 
+{
+	traceL("Client", this) << "Shutdown" << endl;
+
+	timer.stop();
+	if (!connections.empty())
+		Shutdown.emit(this);
+
+	// Connections must remove themselves
+	assert(connections.empty());
+}
+
+
+void Client::addConnection(ClientConnection* conn) 
+{		
+	traceL("Client", this) << "Adding Connection: " << conn << endl;
+	connections.push_back(conn);
+}
+
+
+void Client::removeConnection(ClientConnection* conn) 
+{		
+	traceL("Client", this) << "Removing Connection: " << conn << endl;
+	for (ClientConnectionList::iterator it = connections.begin(); it != connections.end(); ++it) {
+		if (conn == *it) {
+			connections.erase(it);
+			traceL("Client", this) << "Removed Connection: " << conn << endl;
+			return;
+		}
+	}
+	assert(0 && "unknown connection");
 }
 
 
@@ -135,17 +199,16 @@ void Client::onTimer(void*)
 {
 	// TODO: Print server stats
 	// TODO: Proper handling for timed out requests.
-	for (ClientConnectionList::iterator it = connections.begin(); it != connections.end();) {
+	traceL("Client", this) << "On timer" << endl;
+
+	ClientConnectionList conns = ClientConnectionList(connections);
+	for (ClientConnectionList::iterator it = conns.begin(); it != conns.end();) {
 		if ((*it)->expired()) {
-			traceL("Server", this) << "Closing Expired Connection: " << (*it) << endl;
+			traceL("Server", this) << "Closing Expired Connection: " << *it << endl;
+			
 			// TODO: Send a HTTP Error 408 or some such
 			(*it)->close();
 			++it;
-		}
-		if ((*it)->closed()) {
-			traceL("Server", this) << "Deleting Closed Connection: " << (*it) << endl;
-			delete *it;
-			it = connections.erase(it);
 		}
 		else
 			++it;
@@ -157,33 +220,27 @@ void Client::onTimer(void*)
 
 
 
+	/*
+	traceL("Client", this) << "Stopping: " << connections.size() << endl;
+	for (int i = 0; i < connections.size(); i++) {
+		traceL("Client", this) << "Stopping: Closing: " << connections[i] << endl;
+		connections[i]->close();
+		traceL("Client", this) << "Stopping: Deleting: " << connections[i] << endl;
+		//delete connections[i];
+	}
+	connections.clear();
+	*/
 
+
+		/*
+		if ((*it)->closed()) {
+			traceL("Server", this) << "Deleting Closed Connection: " << (*it) << endl;
+			delete *it;
+			it = connections.erase(it);
+		}
+		*/
 
 /*
-void Client::addConnection(ClientConnection* conn) 
-{		
-	traceL("Client", this) << "#### Adding: " << conn << endl;
-	connections.push_back(conn);
-}
-
-
-void Client::removeConnection(ClientConnection* conn) 
-{		
-	traceL("Client", this) << "#### Removing: " << conn << endl;
-	for (ClientConnectionList::iterator it = connections.begin(); it != connections.end(); ++it) {
-		if (conn == *it) {
-
-			// All we need to do is erase the socket in order to 
-			// deincrement the ref counter and destroy the socket.
-			//assert(socket->base().refCount() == 1);
-			//delete *it;
-			connections.erase(it);
-			traceL("Client", this) << "#### Removedg: " << conn << endl;
-			return;
-		}
-	}
-	assert(0 && "unknown connection");
-}
 */
 
 

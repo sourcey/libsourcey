@@ -24,7 +24,7 @@
 #include "Sourcey/Logger.h"
 
 
-namespace Scy {
+namespace scy {
 
 
 class RateLimiter
@@ -50,7 +50,7 @@ public:
 		lastCheck = current;
 		allowance += elapsed * (rate / seconds);
 				
-		LogTrace("RateLimiter") << "Can Send:"
+		traceL("RateLimiter") << "Can Send:"
 			<< "\n\tAllowance: " << allowance
 			<< "\n\tElapsed: " << elapsed
 			<< "\n\tRate: " << rate
@@ -59,23 +59,23 @@ public:
 
 		if (allowance > rate) {
 			allowance = rate; // throttle
-			LogTrace("RateLimiter") << "Throttling: " 
+			traceL("RateLimiter") << "Throttling: " 
 				<< allowance << std::endl;
 		}
 		else if (allowance < 1.0) {
-			LogTrace("RateLimiter") << "Message Rate Exceeded: " 
+			traceL("RateLimiter") << "Message Rate Exceeded: " 
 				<< allowance << std::endl;
 			return false;
 		}
 		allowance -= 1.0;
-		LogTrace("RateLimiter") << "Can Send Message: " 
+		traceL("RateLimiter") << "Can Send Message: " 
 			<< allowance << std::endl;
 		return true;
 	}
 };
 
 
-} // namespace Scy
+} // namespace scy
 
 
 #endif // SOURCEY_RateLimiter_H

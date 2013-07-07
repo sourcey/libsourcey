@@ -25,8 +25,8 @@
 #include "Sourcey/JSON/JSON.h"
 
 
-namespace Scy {
-namespace SocketIO {
+namespace scy {
+namespace sockio {
 	
 
 class Packet: public IPacket 
@@ -95,7 +95,7 @@ public:
 	std::string toString() const;
 	void print(std::ostream& os) const;
 
-	virtual const char* className() const { return "SocketIO::Packet"; }
+	virtual const char* className() const { return "sockio::Packet"; }
 
 protected:
 	int _type;
@@ -107,7 +107,7 @@ protected:
 };
 
 
-} } // namespace Scy::SocketIO
+} } // namespace scy::sockio
 
 
 #endif //  SOURCEY_SOCKETIO_Packet_H

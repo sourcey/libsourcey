@@ -53,8 +53,8 @@
 using namespace std; 
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 	
 
 IDeviceManager* DeviceManagerFactory::create() 
@@ -83,14 +83,14 @@ Win32DeviceManager::Win32DeviceManager() :
 	_needCoUninitialize(false) 
 {
 	RtDeviceManager::initialize();
-	LogTrace("DeviceManager") << "Creating" << endl;
+	traceL("DeviceManager") << "Creating" << endl;
 	//setWatcher(new Win32DeviceWatcher(this));
 }
 
 
 Win32DeviceManager::~Win32DeviceManager() 
 {
-	LogTrace("DeviceManager") << "Destroying" << endl;
+	traceL("DeviceManager") << "Destroying" << endl;
 	RtDeviceManager::uninitialize();
 	if (initialized()) {
 		uninitialize();
@@ -100,33 +100,33 @@ Win32DeviceManager::~Win32DeviceManager()
 
 bool Win32DeviceManager::initialize() 
 {
-	LogTrace("DeviceManager") << "Initializing" << endl;
+	traceL("DeviceManager") << "Initializing" << endl;
 	if (!initialized()) {
 		HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 		//HRESULT hr = CoInitialize(NULL);
 		_needCoUninitialize = SUCCEEDED(hr);
 		if (FAILED(hr)) {
 			if (hr != RPC_E_CHANGED_MODE) {
-				LogError("DeviceManager") << "CoInitialize failed, hr=" << hr << endl;
+				errorL("DeviceManager") << "CoInitialize failed, hr=" << hr << endl;
 				return false;
 			}
 			else
-				LogWarn("DeviceManager") << "CoInitialize Changed Mode" << endl;
+				warnL("DeviceManager") << "CoInitialize Changed Mode" << endl;
 		}
 		if (watcher() && !watcher()->start()) {
-			LogError("DeviceManager") << "Cannot start watcher" << endl;
+			errorL("DeviceManager") << "Cannot start watcher" << endl;
 			return false;
 		}
 		setInitialized(true);
 	}
-	LogTrace("DeviceManager") << "Initializing: OK" << endl;
+	traceL("DeviceManager") << "Initializing: OK" << endl;
 	return true;
 }
 
 
 void Win32DeviceManager::uninitialize() 
 {
-	LogTrace("DeviceManager") << "Uninitializing" << endl;
+	traceL("DeviceManager") << "Uninitializing" << endl;
 
 	if (initialized()) {
 		if (watcher())
@@ -137,7 +137,7 @@ void Win32DeviceManager::uninitialize()
 		}
 		setInitialized(false);
 	}
-	LogTrace("DeviceManager") << "Uninitializing: OK" << endl;
+	traceL("DeviceManager") << "Uninitializing: OK" << endl;
 }
 
 
@@ -162,7 +162,7 @@ bool Win32DeviceManager::getAudioDevices(bool input, vector<Device>& devs)
 			if (info.probed == true &&
 				(input && info.inputChannels > 0) || 
 				(!input && info.outputChannels > 0)) {	
-				LogTrace("Win32DeviceManager", this) << "Device:" 
+				traceL("Win32DeviceManager", this) << "Device:" 
 					<< "\n\tName: " << info.name
 					<< "\n\tOutput Channels: " << info.outputChannels
 					<< "\n\tInput Channels: " << info.inputChannels
@@ -259,7 +259,7 @@ bool getDevices(const CLSID& catid, vector<Device>& devices)
 	CComPtr<IEnumMoniker> cam_enum;
 	if (FAILED(hr = sys_dev_enum.CoCreateInstance(CLSID_SystemDeviceEnum)) ||
 		FAILED(hr = sys_dev_enum->CreateClassEnumerator(catid, &cam_enum, 0))) {
-			LogError("DeviceManager") << "Cannot create device enumerator, hr="  << hr << endl;
+			errorL("DeviceManager") << "Cannot create device enumerator, hr="  << hr << endl;
 			return false;
 	}
 
@@ -310,7 +310,7 @@ bool Win32DeviceManager::getAudioDevices(bool input, vector<Device>& devs)
 	devs.clear();
 
 	//if (talk_base::IsWindowsVistaOrLater()) {
-	if (Util::isWindowsVistaOrLater()) {
+	if (util::isWindowsVistaOrLater()) {
 		if (!getCoreAudioDevices(input, devs))
 			return false;
 	} else {
@@ -413,12 +413,12 @@ bool getCoreAudioDevices(bool input, vector<Device>& devs)
 					
 					Device dev(input ? "audioin" : "audioout", "", i);
 					
-					LogTrace("DeviceManager") << "Enumerating Device: " << i << endl;
+					traceL("DeviceManager") << "Enumerating Device: " << i << endl;
 					hr = getDeviceFromImmDevice(device, dev);
 					if (SUCCEEDED(hr)) {
 						devs.push_back(dev);
 					} else {
-						LogWarn("DeviceManager") << "Cannot query IMM Device, skipping.  HR=" << hr << endl;
+						warnL("DeviceManager") << "Cannot query IMM Device, skipping.  HR=" << hr << endl;
 						hr = S_FALSE;
 					}
 				}
@@ -427,7 +427,7 @@ bool getCoreAudioDevices(bool input, vector<Device>& devs)
 	}
 
 	if (FAILED(hr)) {
-		LogWarn("DeviceManager") << "getCoreAudioDevices failed with hr " << hr << endl;
+		warnL("DeviceManager") << "getCoreAudioDevices failed with hr " << hr << endl;
 		return false;
 	}
 	return true;
@@ -543,7 +543,7 @@ bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 */
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 /*

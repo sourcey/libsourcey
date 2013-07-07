@@ -27,8 +27,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 namespace RTCP {
 
 
@@ -62,10 +62,10 @@ bool ByePacket::read(Buffer& buffer)
 {
 	if (RTCP::Packet::read(buffer)) {
 		
-		buffer.readUInt32(ssrc);
+		buffer.readU32(ssrc);
 
 		if (this->computedLength() > 8) {
-			buffer.readString(reason, this->computedLength() - 8 - 1);
+			buffer.read(reason, this->computedLength() - 8 - 1);
 		}
 		return true;
 	}
@@ -78,11 +78,11 @@ void ByePacket::write(Buffer& buffer) const
 {
 	RTCP::Packet::write(buffer);
 	
-	buffer.writeUInt32(ssrc);
+	buffer.writeU32(ssrc);
 	
 	if (!reason.empty()) {
-		buffer.writeUInt8(static_cast<UInt8>(reason.length()));
-		buffer.writeString(reason);
+		buffer.writeU8(static_cast<UInt8>(reason.length()));
+		buffer.write(reason);
 	}
 }
 
@@ -110,5 +110,5 @@ void ByePacket::print(std::ostream& os) const
 
 
 } // namespace RTCP
-} // namespace RTP
-} // namespace Scy 
+} // namespace rtp
+} // namespace scy 

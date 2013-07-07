@@ -27,7 +27,7 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy { 
+namespace scy { 
 namespace JSON {
 
 
@@ -56,7 +56,7 @@ void Configuration::load(bool create)
 	if (_path.empty())
 		throw Exception("Cannot load: Configuration file path must be set.");
 
-	LogDebug() << "[JSONConfiguration] Loading: " << _path << endl;
+	debugL() << "[JSONConfiguration] Loading: " << _path << endl;
 	
 	if (create && !File(_path).exists())
 		File(_path).createFile();
@@ -80,7 +80,7 @@ void Configuration::save()
 	if (_path.empty())
 		throw Exception("Cannot save: Configuration file path must be set.");
 
-	LogDebug() << "[JSONConfiguration] Saving: " << _path << endl;
+	debugL() << "[JSONConfiguration] Saving: " << _path << endl;
 	
 	// Will throw on error
 	JSON::saveFile(*this, _path);
@@ -118,7 +118,7 @@ bool Configuration::remove(const string& key)
 
 void Configuration::removeAll(const std::string& baseKey)
 {
-	LogTrace() << "Removing All: " << baseKey << endl;
+	traceL() << "Removing All: " << baseKey << endl;
 	FastMutex::ScopedLock lock(_mutex); 	
 	
     Members members = this->getMemberNames();
@@ -178,4 +178,4 @@ void Configuration::keys(StringVec& keys, const std::string& baseKey)
 }
 
 
-} } // namespace Scy::JSON
+} } // namespace scy::JSON

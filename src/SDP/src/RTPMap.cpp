@@ -18,7 +18,7 @@
 
 
 #include "Sourcey/SDP/RTPMap.h"
-#include "Sourcey/Util.h"
+#include "Sourcey/util.h"
 #include "Sourcey/Logger.h"
 
 
@@ -26,7 +26,7 @@ using namespace std;
 
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
@@ -38,7 +38,7 @@ RTPMap::RTPMap(const string& src) :
 
 	size_t len = src.length();
 	if (src.substr(0, 8) != "a=rtpmap") {
-		LogError() << "ERROR: Contact sdp line does not start with <a=rtpmap>" << std::endl;
+		errorL() << "ERROR: Contact sdp line does not start with <a=rtpmap>" << std::endl;
 	}
 	size_t i = 9;
 
@@ -57,7 +57,7 @@ RTPMap::RTPMap(const string& src) :
 	string clockratestr = "";
 	while (src[i] != ' ' && src[i] != '/' && i < len)
 		clockratestr += src[i++];
-	_clockRate = Util::fromString<UInt32>(clockratestr.c_str());
+	_clockRate = util::fromString<UInt32>(clockratestr.c_str());
 
 	if (src[i] == '/' && i < len) {
 		// encoding parameters
@@ -93,7 +93,7 @@ string RTPMap::toString()
 	if (!_clockRate)
 		ret += "0";
 	else
-		ret += Util::toString(_clockRate);
+		ret += util::toString(_clockRate);
 
 	if (!_encodingParameters.empty()) {
 		ret += "/";
@@ -104,5 +104,5 @@ string RTPMap::toString()
 }
 
 
-} // namespace Scy
+} // namespace scy
 } // namespace SDP 

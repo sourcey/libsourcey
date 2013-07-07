@@ -19,7 +19,7 @@
 
 #include "Sourcey/Symple/Form.h"
 #include "Sourcey/Util.h"
-#include "Sourcey/CryptoProvider.h"
+#include "Sourcey/Crypto.h"
 #include "assert.h"
 
 
@@ -27,8 +27,8 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 
 Form::Form()
@@ -268,11 +268,11 @@ bool FormElement::clearElements(const string& id, bool partial)
 					partial ? 
 						curID.find(id) != string::npos : 
 						curID == id) {
-					LogTrace() << "Symple Form: Removing Redundant: " << curID << endl;
+					traceL() << "Symple Form: Removing Redundant: " << curID << endl;
 					match = true;
 				}
 				else {
-					LogTrace() << "Symple Form: Keeping: " << curID << endl;
+					traceL() << "Symple Form: Keeping: " << curID << endl;
 					result["elements"].append(element);
 				}
 			}
@@ -283,10 +283,10 @@ bool FormElement::clearElements(const string& id, bool partial)
 			result[members[i]] = root()[members[i]];
 	}
 				
-	LogTrace() << "Symple Form: Removing Redundant Result: " << JSON::stringify(result, true) << endl;
-	LogTrace() << "Symple Form: Removing Redundant Before: " << JSON::stringify(root(), true) << endl;
+	traceL() << "Symple Form: Removing Redundant Result: " << JSON::stringify(result, true) << endl;
+	traceL() << "Symple Form: Removing Redundant Before: " << JSON::stringify(root(), true) << endl;
 	*_root = result;
-	LogTrace() << "Symple Form: Removing Redundant After: " << JSON::stringify(root(), true) << endl;
+	traceL() << "Symple Form: Removing Redundant After: " << JSON::stringify(root(), true) << endl;
 
 	return match;
 }
@@ -361,13 +361,13 @@ string FormField::value() const
 	
 int FormField::intValue() const
 {
-	return Util::fromString<UInt32>(value());
+	return util::fromString<UInt32>(value());
 }
 
 	
 double FormField::doubleValue() const
 {
-	return Util::fromString<double>(value());
+	return util::fromString<double>(value());
 }
 
 	
@@ -399,13 +399,13 @@ void FormField::setValue(const string& value)
 
 void FormField::setValue(int value)
 {
-	setValue(Util::toString<int>(value));
+	setValue(util::toString<int>(value));
 }
 
 
 void FormField::setValue(double value)
 {
-	setValue(Util::toString<double>(value));
+	setValue(util::toString<double>(value));
 }
 
 
@@ -423,13 +423,13 @@ void FormField::addValue(const string& value)
 
 void FormField::addValue(int value)
 {
-	addValue(Util::toString<int>(value));
+	addValue(util::toString<int>(value));
 }
 
 
 void FormField::addValue(double value)
 {
-	addValue(Util::toString<double>(value));
+	addValue(util::toString<double>(value));
 }
 
 
@@ -439,5 +439,5 @@ void FormField::addValue(bool value)
 }
 
 
-} // namespace Symple 
-} // namespace Scy
+} // namespace smple 
+} // namespace scy

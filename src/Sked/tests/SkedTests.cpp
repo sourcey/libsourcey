@@ -10,7 +10,7 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Sourcey;
+using namespace scy;
 
 
 /*
@@ -22,8 +22,8 @@ CMemLeakDetect memLeakDetect;
 */
 
 
-namespace Sourcey {
-namespace Sked {
+namespace scy {
+namespace sked {
 	
 
 static NamedEvent ready("TestEvent");
@@ -46,7 +46,7 @@ public:
 		runSkedTaskTest();
 		//runTimerTest();
 		
-		Util::pause();
+		util::pause();
 	}
 	
 
@@ -55,10 +55,10 @@ public:
 	// Scheduled Task Tests
 	//
 	// ---------------------------------------------------------------------	
-	struct ScheduledTask: public Sked::Task
+	struct ScheduledTask: public sked::Task
 	{
 		ScheduledTask() : //Scheduler& scheduler
-			Sked::Task("ScheduledTask") //scheduler, 
+			sked::Task("ScheduledTask") //scheduler, 
 		{
 			Log("debug") << "[ScheduledTask] Creating ################################" << endl;				
 		}
@@ -76,7 +76,7 @@ public:
 		
 		void serialize(JSON::Value& root)
 		{
-			Sked::Task::serialize(root);
+			sked::Task::serialize(root);
 
 			root["RequiredField"] = "blah";
 		}
@@ -85,7 +85,7 @@ public:
 		{
 			JSON::assertMember(root, "RequiredField");
 
-			Sked::Task::deserialize(root);
+			sked::Task::deserialize(root);
 		}
 	};
 
@@ -199,21 +199,21 @@ public:
 		*/
 		
 		Log("trace") << "Running Scheduled Task Test: END" << endl;
-		Util::pause();
+		util::pause();
 	}
 };
 
 
-} } // namespace Sourcey::Sked
+} } // namespace scy::Sked
 
 
 int main(int argc, char** argv) 
 {	
 	Logger::instance().add(new ConsoleChannel("Test", TraceLevel));
 	{
-		Sked::Tests app;
+		sked::Tests app;
 	}	
 	Logger::uninitialize();
-	Util::pause();
+	util::pause();
 	return 0;
 }

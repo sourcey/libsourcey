@@ -25,8 +25,8 @@
 #include "Sourcey/Symple/Address.h"
 
 
-namespace Scy {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 
 class Peer: public JSON::Value
@@ -67,12 +67,12 @@ public:
 		return os;
 	}
 	
-	virtual const char* className() const { return "Symple::Peer"; }
+	virtual const char* className() const { return "smple::Peer"; }
 };
 
 
-} // namespace Symple 
-} // namespace Scy
+} // namespace smple 
+} // namespace scy
 
 
 #endif // SOURCEY_Symple_Peer_H

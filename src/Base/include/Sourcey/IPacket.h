@@ -112,28 +112,30 @@ class RawPacket: public IPacket
 	/// managed data pointer, and a size value.
 {	
 public:
-	RawPacket(const char* data = NULL, size_t size = 0) : 
+	RawPacket(char* data = NULL, size_t size = 0) : 
 		_data(data), _size(size), freeOnDestroy(false)
 	{
 	}
 
-	RawPacket(void* source, IPacketInfo* info, const char* data = NULL, size_t size = 0) : 
+	RawPacket(const char* data, size_t size = 0) : 
+		_data(NULL), _size(size), freeOnDestroy(false)
+	{
+	}
+
+	RawPacket(void* source, IPacketInfo* info, char* data = NULL, size_t size = 0) : 
 		IPacket(source, info), _data(data), _size(size), freeOnDestroy(false)
 	{
 	}
 
 	RawPacket(const RawPacket& that) : 
 		IPacket(that), 
-		_data(that._data), 
-		_size(that._size), 
+		//_data(that._data), 
+		//_size(that._size), 
+		_data(NULL), 
+		_size(0), 
 		freeOnDestroy(that.freeOnDestroy)
 	{
-		// Clone data if memory is managed
-		if (freeOnDestroy) {
-			char* data = new char[that._size];
-			std::memcpy(data, that._data, that._size);
-			_data = data;
-		}
+		 assign(that._data, that._size);
 	}
 	
 	virtual ~RawPacket() 
@@ -145,19 +147,63 @@ public:
 	virtual IPacket* clone() const 
 	{
 		return new RawPacket(*this);
+	}
+
+	virtual void assign(char* data, size_t size) 
+	{
+		assert(size > 0);
+
+		// If freeOnDestroy is set we memcopy
+		if (freeOnDestroy) {
+
+			// Delete old buffer
+			if (_data)
+				delete _data;
+
+			std::memcpy(_data, data, size);
+			//char* data = new char[buf.size()];
+			//std::memcpy(data, buf.begin(), buf.size());
+			//_data = data;
+		}
+
+		// Otherwise we just refernece the ptr
+		else {
+			_data = data;
+			_size = size; 
+		}
+	}
+
+	virtual void assign(const char* data, size_t size) 
+	{
+		// If data is const we memcpy
+		assert(freeOnDestroy);
+		assert(size > 0);
+		std::memcpy(_data, data, size);
+
+		/*
+		// Clone data if memory is managed
+		if (freeOnDestroy) {
+			char* data = new char[size];
+			std::memcpy(data, that._data, that._size);
+			_data = data;
+		}
+		*/
 	}	
 
 	virtual bool read(Buffer& buf) 
 	{ 
+		assign(buf.begin(), buf.size());
+		/*
 		if (freeOnDestroy) {
 			char* data = new char[buf.size()];
 			std::memcpy(data, buf.begin(), buf.size());
 			_data = data;
 		}
 		else {
-			_data = (char*)buf.begin();
+			_data = buf.begin();
 			_size = buf.size(); 
 		}
+		*/
 		return true;
 	}
 
@@ -166,7 +212,7 @@ public:
 		buf.write(_data, _size); 
 	}
 
-	virtual const char* data() const 
+	virtual char* data() const 
 	{ 
 		return _data; 
 	}
@@ -185,7 +231,7 @@ public:
 		/// Set this flag to true to 
 		/// delete packet data on destruction.
 	
-	const char* _data;
+	char* _data;
 	size_t _size;
 };
 

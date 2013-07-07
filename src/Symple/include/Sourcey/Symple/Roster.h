@@ -26,8 +26,8 @@
 #include "Sourcey/Symple/Address.h"
 
 
-namespace Scy {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 
 class Roster: public EventfulManager<std::string, Peer>
@@ -53,11 +53,11 @@ public:
 	
 	virtual void print(std::ostream& os) const;
 
-	virtual const char* className() const { return "Symple::Roster"; }
+	virtual const char* className() const { return "smple::Roster"; }
 };
 	
 
-} } // namespace Scy::Symple
+} } // namespace scy::smple
 
 
 #endif //  SOURCEY_Symple_Router_H

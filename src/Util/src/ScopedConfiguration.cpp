@@ -23,7 +23,7 @@
 using namespace std;
 
 
-namespace Scy {
+namespace scy {
 
 
 ScopedConfiguration::ScopedConfiguration(IConfiguration& config, const string& currentScope, const string& defaultScope) :
@@ -120,4 +120,4 @@ string ScopedConfiguration::getScopedKey(const string& key, bool defaultScope) c
 }
 
 
-} // namespace Scy
+} // namespace scy

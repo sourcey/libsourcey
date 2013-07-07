@@ -19,7 +19,7 @@
 
 #include "Sourcey/Symple/Message.h"
 #include "Sourcey/Util.h"
-#include "Sourcey/CryptoProvider.h"
+#include "Sourcey/Crypto.h"
 #include "Sourcey/Logger.h"
 #include "Poco/Format.h"
 #include "assert.h"
@@ -29,14 +29,14 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 
 Message::Message() :
 	JSON::Value(Json::objectValue)
 {
-	(*this)["id"] = CryptoProvider::generateRandomKey(16);
+	(*this)["id"] = crypt::randomKey(16);
 	(*this)["type"] = "message";
 }
 
@@ -45,7 +45,7 @@ Message::Message(const Message& root) :
 	JSON::Value(root)
 {
 	if (!isMember("id"))
-		(*this)["id"] = CryptoProvider::generateRandomKey(16);
+		(*this)["id"] = crypt::randomKey(16);
 	if (!isMember("type"))
 		(*this)["type"] = "message";
 }
@@ -55,7 +55,7 @@ Message::Message(const JSON::Value& root) :
 	JSON::Value(root)
 {
 	if (!isMember("id"))
-		(*this)["id"] = CryptoProvider::generateRandomKey(16);
+		(*this)["id"] = crypt::randomKey(16);
 	if (!isMember("type"))
 		(*this)["type"] = "message";
 }
@@ -75,7 +75,7 @@ IPacket* Message::clone() const
 bool Message::read(Buffer& buf) 
 {
 	string root;
-	buf.readString(root, buf.remaining());	
+	buf.read(root, buf.remaining());	
 	return read(root);
 }
 
@@ -89,7 +89,7 @@ bool Message::read(const std::string& root)
 
 void Message::write(Buffer& buf) const 
 {
-	buf.writeString(JSON::stringify(*this));
+	buf.write(JSON::stringify(*this));
 }
 
 
@@ -291,5 +291,5 @@ bool Message::hasData(const string& name)
 }
 
 
-} // namespace Symple 
-} // namespace Scy
+} // namespace smple 
+} // namespace scy

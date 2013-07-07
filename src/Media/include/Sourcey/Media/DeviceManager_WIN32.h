@@ -32,8 +32,8 @@
 #include "Sourcey/Media/DeviceManager.h"
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 class Win32DeviceManager: public DeviceManager 
@@ -80,7 +80,7 @@ private:
 */
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif  // SOURCEY_MEDIA_DeviceManager_WIN32_H

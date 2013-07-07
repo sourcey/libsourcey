@@ -24,8 +24,8 @@
 #include "Sourcey/Pacman/InstallTask.h"
 
 
-namespace Scy { 
-namespace Pacman {
+namespace scy { 
+namespace pcman {
 
 
 typedef std::vector<LocalPackage*> LocalPackageList;
@@ -98,7 +98,7 @@ inline std::string getInstallTaskNamesString(LocalPackageList& packages)
 }
 
 
-} } // namespace Scy::Pacman
+} } // namespace scy::Pacman
 
 
 #endif // SOURCEY_Pacman_InstallMonitor_H

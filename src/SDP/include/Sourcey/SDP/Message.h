@@ -39,7 +39,7 @@
 #include <vector>
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
@@ -113,6 +113,11 @@ public:
 	std::string firstMediaFormat() const;
 	bool isMediaFormatAvailable(const std::string& fmt) const;
 	bool isICESupported() const;
+	
+	size_t size(void) const { 
+		// dynamically generated
+		return 0;
+	}
 
 	virtual const char* className() const { return "SDP::Message"; }
 	
@@ -121,7 +126,7 @@ private:
 };
 
 
-} // namespace Scy
+} // namespace scy
 } // namespace SDP 
 
 

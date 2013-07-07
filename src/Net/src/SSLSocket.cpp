@@ -102,26 +102,6 @@ SSLBase::~SSLBase()
 }
 
 
-/*
-void SSLBase::connect(const Address& peerAddress) 
-{
-	if (!_context) 
-		throw Exception("Cannot connect without SSL context");
-
-	traceL("SSLBase", this) << "Connecting to " << peerAddress << endl;
-	init();
-	const sockaddr_in* addr = reinterpret_cast<const sockaddr_in*>(peerAddress.addr());
-	assert(connectReq.data == this);
-	int r = uv_tcp_connect(&connectReq, (uv_tcp_t*)stream(), *addr, uv::onConnected);
-	if (r) {
-		uv_err_t err = uv_last_error(loop());
-		setError(err);
-		throw Poco::Exception(uv_strerror(err)); // TODO: make exception setError option
-	}
-}
-*/
-
-
 int SSLBase::available() const
 {
 	assert(initialized());
@@ -155,7 +135,7 @@ int SSLBase::send(const char* data, int len, int flags)
 	traceL("SSLBase", this) << "Send: " << len << endl;
 	
 	// Send unencrypted data to the SSL context
-	_sslBuffer.addApplicationData(data, len);
+	_sslBuffer.addOutgoingData(data, len);
 	_sslBuffer.update();
 	return len;
 }
@@ -206,21 +186,12 @@ void SSLBase::onRead(const char* data, int len)
 }
 
 
-void SSLBase::onRecv(Buffer& buf)
+void SSLBase::onConnect(int status)
 {
-	Log("SSLBase", this) << "On Recv: " << buf.size() << endl;		
-	SocketBase::emitRecv(_buffer, peerAddress());
-	//SocketPacket packet(*this, _buffer, peerAddress());
-	//Recv.emit(this, packet);
-}
-
-
-void SSLBase::onConnected(int status)
-{
-	traceL("TCPBase", this) << "On Connected" << endl;
+	traceL("SSLBase", this) << "On Connected" << endl;
 	if (status) {
 		setLastError();
-		errorL("TCPBase", this) << "Connect Failed: " << errorMessage() << endl;
+		errorL("SSLBase", this) << "Connect Failed: " << errorMessage() << endl;
 		return;
 	}
 	else
@@ -246,3 +217,26 @@ void SSLBase::onConnected(int status)
 
 
 } } // namespace scy::uv
+
+
+
+
+
+/*
+void SSLBase::connect(const Address& peerAddress) 
+{
+	if (!_context) 
+		throw Exception("Cannot connect without SSL context");
+
+	traceL("SSLBase", this) << "Connecting to " << peerAddress << endl;
+	init();
+	const sockaddr_in* addr = reinterpret_cast<const sockaddr_in*>(peerAddress.addr());
+	assert(connectReq.data == this);
+	int r = uv_tcp_connect(&connectReq, (uv_tcp_t*)stream(), *addr, uv::onConnected);
+	if (r) {
+		uv_err_t err = uv_last_error(loop());
+		setError(err);
+		throw Poco::Exception(uv_strerror(err)); // TODO: make exception setError option
+	}
+}
+*/

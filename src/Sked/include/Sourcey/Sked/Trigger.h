@@ -28,8 +28,8 @@
 #include "Poco/Timespan.h"
 
 	
-namespace Scy {
-namespace Sked {
+namespace scy {
+namespace sked {
 
 
 enum DaysOfTheWeek
@@ -164,7 +164,7 @@ struct DailyTrigger: public Trigger
 };
 	
 
-} } // namespace Scy::Sked
+} } // namespace scy::Sked
 
 
 #endif // SOURCEY_Sked_Trigger_H

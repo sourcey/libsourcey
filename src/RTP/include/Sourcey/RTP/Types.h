@@ -24,8 +24,8 @@
 #include "Sourcey/Types.h"
 
 
-namespace Scy { 
-namespace RTP {
+namespace scy { 
+namespace rtp {
 	
 	
 #define RTP_MAX_PACKET_LEN 1500
@@ -36,7 +36,7 @@ const int kRtpMaxSources = 16;
 const int kBytesPerCSRC = 4;
 
 
-} } // namespace Scy::RTP
+} } // namespace scy::RTP
 
 
 #endif // SOURCEY_RTP_Types_H

@@ -117,8 +117,8 @@ typedef struct uv_counters_s		CountersHandle;
 
 
 /*
-struct EventLoop {
-	EventLoop(uv_loop_t)
+struct Runner {
+	Runner(uv_loop_t)
 }
 */
 

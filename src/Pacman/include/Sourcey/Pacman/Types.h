@@ -21,11 +21,11 @@
 #define SOURCEY_Pacman_Types_H
 
 
-namespace Scy { 
-namespace Pacman {
+namespace scy { 
+namespace pcman {
 		
 
-} } // namespace Scy::Pacman
+} } // namespace scy::Pacman
 
 
 #endif // SOURCEY_Pacman_Types_H

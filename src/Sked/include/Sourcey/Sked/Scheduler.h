@@ -34,8 +34,8 @@
 #include <vector>
 
 
-namespace Scy {
-namespace Sked {
+namespace scy {
+namespace sked {
 
 
 static const char* DateFormat = "%Y-%m-%d %H:%M:%S %Z";
@@ -49,8 +49,8 @@ public:
 	Scheduler();
 	virtual ~Scheduler();
 
-	virtual void schedule(Sked::Task* task);
-	virtual void cancel(Sked::Task* task);
+	virtual void schedule(sked::Task* task);
+	virtual void cancel(sked::Task* task);
 	virtual void clear();
 		
 	virtual void serialize(JSON::Value& root);
@@ -63,7 +63,7 @@ public:
 		/// although Scheduler instances may also be
 		/// initialized individually.
 	
-	static Sked::TaskFactory& factory();
+	static sked::TaskFactory& factory();
 		/// Returns the TaskFactory singleton.
 	
 	virtual const char* className() const { return "Scheduler"; }
@@ -74,7 +74,7 @@ protected:
 };
 
 
-} } // namespace Scy::Sked
+} } // namespace scy::Sked
 
 
 #endif // SOURCEY_Sked_Scheduler_H

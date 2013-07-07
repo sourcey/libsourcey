@@ -25,8 +25,8 @@
 /// Version number  
 //
 #define SOURCEY_MAJOR_VERSION    0
-#define SOURCEY_MINOR_VERSION    8
-#define SOURCEY_PATCH_VERSION    2
+#define SOURCEY_MINOR_VERSION    9
+#define SOURCEY_PATCH_VERSION    0
 
 #define SOURCEY_AUX_STR_EXP(__A) #__A
 #define SOURCEY_AUX_STR(__A)     SOURCEY_AUX_STR_EXP(__A)

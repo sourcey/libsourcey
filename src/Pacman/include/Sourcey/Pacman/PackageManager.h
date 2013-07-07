@@ -39,8 +39,8 @@
 #include <assert.h>
 
 
-namespace Scy { 
-namespace Pacman {
+namespace scy { 
+namespace pcman {
 
 
 typedef EventfulManager<std::string, LocalPackage>	LocalPackageStore;
@@ -279,7 +279,7 @@ protected:
 
 
 
-} } // namespace Scy::Pacman
+} } // namespace scy::Pacman
 
 
 #endif // SOURCEY_Pacman_PackageManager_H

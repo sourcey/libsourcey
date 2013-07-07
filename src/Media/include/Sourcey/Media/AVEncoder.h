@@ -38,8 +38,8 @@ extern "C" {
 }
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 class AVEncoder: public IPacketEncoder
@@ -100,7 +100,7 @@ protected:
 };
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif	// SOURCEY_MEDIA_AVEncoder_H

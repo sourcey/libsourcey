@@ -19,7 +19,7 @@
 
 #include "Sourcey/SDP/A.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/Util.h"
+#include "Sourcey/util.h"
 #include <iostream>
 #include <assert.h>
 
@@ -27,7 +27,7 @@
 using namespace std;
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
@@ -36,7 +36,7 @@ A::A(const string& src) :
 {
 	assert(src.substr(0, 2) == "a=");
 	string attr(src.substr(2, src.length()-2));
-	Util::trim(attr);
+	util::trim(attr);
 	_attributes = attr;
 }
 
@@ -79,14 +79,14 @@ string A::attributeValue()
 		return _attributes;
 	int pos = (int)_attributes.find(":");
 	if (_attributes.length() <= pos + 1) {
-		LogError() << "Invalid a field in SDP packet" << endl;
+		errorL() << "Invalid a field in SDP packet" << endl;
 		return "";
 	}
 	return _attributes.substr( pos + 1, _attributes.length() - 2);
 }
 
 
-} // namespace Scy
+} // namespace scy
 } // namespace SDP 
 
 

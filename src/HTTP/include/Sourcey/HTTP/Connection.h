@@ -21,7 +21,6 @@
 #define SOURCEY_HTTP_ServerConnection_H
 
 
-
 #include "Sourcey/Timeout.h"
 #include "Sourcey/Net/TCPSocket.h"
 #include "Sourcey/HTTP/Request.h"
@@ -48,6 +47,7 @@ public:
 	virtual bool sendBytes(const char* buf, size_t len, bool whiny = false);
 
 	virtual void close();
+	virtual void onClose();
 
 	bool closed();
 	bool expired();
@@ -57,16 +57,17 @@ public:
 	net::Socket& socket();
 	Buffer& buffer();
 	
-    virtual Poco::Net::HTTPMessage* headers() = 0;
+	NullSignal Close;	
+		/// Close signal fires on connection closure.
 
 protected:
 
 	//
 	/// Socket emitter callbacks
-	virtual void onConnect() {};
-	virtual void onRecv(Buffer& buf, const net::Address& peerAddr);
-	virtual void onError(int syserr, const std::string& message) {};
-	virtual void onClose();
+	virtual void onSocketConnect() {};
+	virtual void onSocketRecv(Buffer& buf, const net::Address& peerAddr);
+	virtual void onSocketError(int syserr, const std::string& message) {};
+	virtual void onSocketClose();
 		
 	//
 	/// Parser callbacks
@@ -84,14 +85,22 @@ protected:
     Response* _response;
     net::Socket _socket;	
 	Timeout _timeout;
-	Buffer _buffer;
+	//Buffer _buffer;
     Parser _parser;
 	bool _closed;
 	bool _sentResponseHeaders;
 	IPacketizer* _packetizer;
 	
 	friend class Parser;
+	friend class Deleter<Connection>;
 };
+
+
+inline bool isExplicitKeepAlive(Poco::Net::HTTPMessage* message) 
+{	
+	const std::string& connection = message->get(Poco::Net::HTTPMessage::CONNECTION, Poco::Net::HTTPMessage::EMPTY);
+	return !connection.empty() && Poco::icompare(connection, Poco::Net::HTTPMessage::CONNECTION_KEEP_ALIVE) == 0;
+}
 
 
 } } // namespace scy::http

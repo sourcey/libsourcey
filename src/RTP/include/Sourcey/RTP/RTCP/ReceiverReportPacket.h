@@ -26,8 +26,8 @@
 #include <vector>
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 namespace RTCP {
 
 
@@ -125,8 +125,8 @@ protected:
 
 
 } // namespace RTCP
-} // namespace RTP
-} // namespace Scy 
+} // namespace rtp
+} // namespace scy 
 
 
 #endif

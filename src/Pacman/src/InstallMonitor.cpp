@@ -26,8 +26,8 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy { 
-namespace Pacman {
+namespace scy { 
+namespace pcman {
 
 
 InstallMonitor::InstallMonitor()
@@ -44,7 +44,7 @@ void InstallMonitor::onInstallStateChange(void* sender, PackageInstallState& sta
 {
 	InstallTask* task = reinterpret_cast<InstallTask*>(sender);
 
-	LogDebug() << "[InstallMonitor] onInstallStateChange: " << task << ": " << state.toString() << endl;
+	debugL() << "[InstallMonitor] onInstallStateChange: " << task << ": " << state.toString() << endl;
 
 	InstallStateChange.emit(this, *task, state, oldState);
 }
@@ -54,7 +54,7 @@ void InstallMonitor::onInstallComplete(void* sender)
 {
 	InstallTask* task = reinterpret_cast<InstallTask*>(sender);
 
-	LogDebug() << "[InstallMonitor] Package Install Complete: " << task->state().toString() << endl;
+	debugL() << "[InstallMonitor] Package Install Complete: " << task->state().toString() << endl;
 
 	// Notify listeners when each package completes.
 	InstallComplete.emit(this, *task->local());
@@ -75,7 +75,7 @@ void InstallMonitor::onInstallComplete(void* sender)
 
 		progress = (_packages.size() - _tasks.size()) / _packages.size();
 
-		LogInfo() << "[InstallMonitor] Waiting on " 
+		infoL() << "[InstallMonitor] Waiting on " 
 			<< _tasks.size() << " packages to complete" << endl;
 	}
 
@@ -146,7 +146,7 @@ bool InstallMonitor::isComplete() const
 }
 
 
-} } // namespace Scy::Pacman
+} } // namespace scy::Pacman
 
 
 
@@ -183,7 +183,7 @@ bool InstallMonitor::isComplete() const
 		if (_tasks.empty())
 			setState(this, InstallMonitorState::Complete);
 		else
-			LogInfo() << "[InstallMonitor] Waiting on " 
+			infoL() << "[InstallMonitor] Waiting on " 
 				<< _tasks.size() << " packages to complete" << endl;
 
 		// Notify listeners when each package completes.
@@ -229,7 +229,7 @@ InstallTask* InstallMonitor::getTask(const std::string& name) const
 		}
 			*/
 			/*
-			LogDebug() << "[PacketStream:" << this << "] Detaching Processor: " << (*it).ptr << endl;
+			debugL() << "[PacketStream:" << this << "] Detaching Processor: " << (*it).ptr << endl;
 			(*it).ptr->detach(polymorphicDelegate(this, &PacketStream::onProcessedPacket));
 			if ((*it).freePointer)
 				delete (*it).ptr;

@@ -27,8 +27,8 @@
 #include "Sourcey/Media/Format.h"
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 struct EncoderState: public State 
@@ -134,8 +134,8 @@ public:
 };
 
 
-} // namespace Media
-} // namespace Scy
+} // namespace av
+} // namespace scy
 
 
 #endif // SOURCEY_MEDIA_IEncoder_H

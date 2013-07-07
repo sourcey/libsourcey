@@ -29,7 +29,7 @@
 #include "Sourcey/SDP/RTPMap.h"
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
@@ -112,7 +112,7 @@ private:
 
 
 } // namespace SDP 
-} // namespace Scy
+} // namespace scy
 
 
 #endif

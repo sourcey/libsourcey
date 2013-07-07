@@ -32,22 +32,22 @@
 #include <vector>
 
 
-namespace Scy {
-namespace Sked {
+namespace scy {
+namespace sked {
 
 
 class Scheduler;
 
 
-template<typename T> Sked::Task* instantiateTask() //Scheduler& scheduler
+template<typename T> sked::Task* instantiateTask() //Scheduler& scheduler
 	{ return new T; } //(scheduler)
-template<typename T> Sked::Trigger* instantiateTrigger()
+template<typename T> sked::Trigger* instantiateTrigger()
 	{ return new T; }
 
 
 class TaskFactory
 	/// The TaskFactory can dynamically instantiate
-	/// registered Sked::Task and Sked::Trigger
+	/// registered sked::Task and sked::Trigger
 	/// classes from named strings.
 {
 public:	
@@ -62,9 +62,9 @@ public:
 	//
 	// Scheduled Tasks
 	//
-	typedef std::map<std::string, Sked::Task*(*)(/*Scheduler&*/)> TaskMap;
+	typedef std::map<std::string, sked::Task*(*)(/*Scheduler&*/)> TaskMap;
 
-    Sked::Task* createTask(const std::string& type/*, Scheduler& scheduler*/) 
+    sked::Task* createTask(const std::string& type/*, Scheduler& scheduler*/) 
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
         TaskMap::iterator it = _tasks.find(type);
@@ -99,9 +99,9 @@ public:
 	//
 	// Schedule Triggers
 	//
-	typedef std::map<std::string, Sked::Trigger*(*)()> TriggerMap;
+	typedef std::map<std::string, sked::Trigger*(*)()> TriggerMap;
 
-    Sked::Trigger* createTrigger(const std::string& type)
+    sked::Trigger* createTrigger(const std::string& type)
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
         TriggerMap::iterator it = _triggers.find(type);
@@ -140,7 +140,7 @@ protected:
 };
 
 
-} } // namespace Scy::Sked
+} } // namespace scy::Sked
 
 
 #endif // SOURCEY_Sked_TaskFactory_H

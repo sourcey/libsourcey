@@ -26,8 +26,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 
 Address::Address() :
@@ -63,7 +63,7 @@ Address::Address(const string& id)
 bool Address::parse(const string& id)
 {
 	StringVec elems;
-	Util::split(id, ':', elems);
+	util::split(id, ':', elems);
 	if (elems.size() >= 1)
 		group = elems[0];
 	if (elems.size() >= 2)
@@ -169,5 +169,5 @@ bool Address::operator == (string& r)
 */
 
 
-} // namespace Symple 
-} // namespace Scy
+} // namespace smple 
+} // namespace scy

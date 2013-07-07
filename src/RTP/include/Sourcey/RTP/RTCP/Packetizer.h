@@ -26,12 +26,12 @@
 #include "Sourcey/RTP/Packet.h"
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 namespace RTCP {
 
 
-class Packetizer: public RTP::Packetizer
+class Packetizer: public rtp::Packetizer
 	/// This class extends the RTP Packetizer to include
 	/// automated and custom RTCP packet generation.
 	///
@@ -53,7 +53,7 @@ public:
 	{
 		// TODO: Implement me!
 
-		RTP::Packetizer::process(packet);
+		rtp::Packetizer::process(packet);
 		
 		if (_rtcpReportInterval.expired()) {
 			_rtcpReportInterval.reset();
@@ -73,8 +73,8 @@ protected:
 
 
 } // namespace RTCP
-} // namespace RTP
-} // namespace Scy 
+} // namespace rtp
+} // namespace scy 
 
 
 #endif

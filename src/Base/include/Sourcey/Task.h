@@ -21,6 +21,7 @@
 #define SOURCEY_Task_H
 
 
+#include "Sourcey/UV/Base.h"
 #include "Sourcey/Types.h"
 
 #include "Poco/Mutex.h"
@@ -89,7 +90,7 @@ protected:
 
 	Runner* _runner;
 	
-	friend class Runner;
+	//friend class Runner;
 };
 
 

@@ -28,8 +28,8 @@
 #include <vector>
 
 
-namespace Scy {
-namespace RTP {
+namespace scy {
+namespace rtp {
 namespace RTCP {
 
 	
@@ -82,13 +82,18 @@ public:
 		// method is used when writing the packet to a
 		// buffer using the write() method.
 		
+	virtual size_t size() const { 
+		// dynamically generated
+		return 0;
+	}
+		
 	virtual const char* className() const { return "RTCPPacket"; }
 };
 
 
 } // namespace RTCP
-} // namespace RTP
-} // namespace Scy 
+} // namespace rtp
+} // namespace scy 
 
 
 #endif

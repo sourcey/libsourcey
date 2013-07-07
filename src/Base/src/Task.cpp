@@ -20,7 +20,7 @@
 #include "Sourcey/Task.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Runner.h"
-#include "Sourcey/CryptoProvider.h"
+#include "Sourcey/Crypto.h"
 
 #include <assert.h>
 
@@ -32,7 +32,7 @@ namespace scy {
 
 	
 Task::Task(bool repeating) : 
-	_id(static_cast<UInt32>(CryptoProvider::generateRandomNumber(8))),
+	_id(static_cast<UInt32>(crypt::randomNumber(8))),
 	_repeating(repeating),
 	_destroyed(false),
 	_cancelled(true),
@@ -42,7 +42,7 @@ Task::Task(bool repeating) :
 
 	
 Task::Task(Runner& runner, bool repeating, bool autoStart) : 
-	_id(static_cast<UInt32>(CryptoProvider::generateRandomNumber(8))),
+	_id(static_cast<UInt32>(crypt::randomNumber(8))),
 	_repeating(repeating),
 	_destroyed(false),
 	_cancelled(true),
@@ -63,24 +63,27 @@ Task::~Task()
 void Task::start()
 { 
 	traceL() << "[Task:" << this << "] Starting" << endl;
-	if (cancelled())
-		runner().start(this);
+	assert(0);
+	//if (cancelled())
+	//	runner().start(this);
 }
 
 
 void Task::cancel()			
 {
 	traceL() << "[Task:" << this << "] Cancelling" << endl;
-	if (!cancelled())
-		runner().cancel(this);
+	assert(0);
+	//if (!cancelled())
+	//	runner().cancel(this);
 }
 
 
 void Task::destroy()			
 {
 	traceL() << "[Task:" << this << "] Destroying" << endl;
-	if (!destroyed())
-		runner().destroy(this);
+	assert(0);
+	//if (!destroyed())
+	//	runner().destroy(this);
 }
 
 

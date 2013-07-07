@@ -23,8 +23,8 @@
 
 #include "Sourcey/SocketIO/Client.h"
 #include "Sourcey/Util/TimedManager.h"
-#include "Sourcey/Net/Reactor.h"
-#include "Sourcey/Net/WebSocket.h"
+//#include "Sourcey/Net/Reactor.h"
+#include "Sourcey/HTTP/WebSocket.h"
 #include "Sourcey/Symple/Roster.h"
 #include "Sourcey/Symple/Message.h"
 #include "Sourcey/Symple/Presence.h"
@@ -34,8 +34,8 @@
 #include "Sourcey/Symple/Peer.h"
 
 
-namespace Scy {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 	
 typedef TimedManager<std::string, Message> PersistenceT;
@@ -43,7 +43,7 @@ typedef TimedManager<std::string, Message> PersistenceT;
 
 // ---------------------------------------------------------------------
 //
-class Client: public SocketIO::Client
+class Client: public sockio::Client
 {
 public:
 	struct Options 
@@ -53,7 +53,7 @@ public:
 		std::string group;
 		std::string name;
 		std::string type;
-		Net::Address serverAddr;
+		net::Address serverAddr;
 
 		Options() {
 			token		= "";
@@ -61,7 +61,7 @@ public:
 			group		= "global";
 			name		= "";
 			type		= "peer";
-			serverAddr	= Net::Address("127.0.0.1", 4000);
+			serverAddr	= net::Address("127.0.0.1", 4000);
 		}
 	};
 
@@ -119,7 +119,7 @@ public:
 		/// Called by createPresence() so outside classes
 		/// can modify the outgoing Peer object.
 
-	virtual const char* className() const { return "Symple::Client"; }
+	virtual const char* className() const { return "smple::Client"; }
 	
 protected:	
 	virtual int announce();
@@ -138,7 +138,7 @@ protected:
 	virtual void onClose();
 
 	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&);
-	virtual void onPacket(SocketIO::Packet& packet);
+	virtual void onPacket(sockio::Packet& packet);
 
 protected:	
 	mutable Poco::FastMutex	_mutex;
@@ -170,7 +170,7 @@ protected:
 
 // ---------------------------------------------------------------------
 //
-typedef Symple::ClientBase< 
+typedef smple::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
 			Net::SocketBase< Poco::Net::StreamSocket, Net::TCP, Net::IWebSocket >
@@ -181,7 +181,7 @@ typedef Symple::ClientBase<
 
 // ---------------------------------------------------------------------
 //
-typedef Symple::ClientBase< 
+typedef smple::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
 			Net::SocketBase< Poco::Net::SecureStreamSocket, Net::SSLTCP, Net::IWebSocket >
@@ -303,7 +303,7 @@ struct EventDelegate: public MessageDelegate
 DefinePolymorphicDelegate(eventDelegate, IPacket, EventDelegate)
 
 
-} } // namespace Scy::Symple
+} } // namespace scy::smple
 
 
 #endif //  SOURCEY_Symple_Client_H
@@ -315,22 +315,22 @@ DefinePolymorphicDelegate(eventDelegate, IPacket, EventDelegate)
 
 /*
 // ---------------------------------------------------------------------
-typedef Symple::Client< 
-	SocketIO::SocketBase< 
+typedef smple::Client< 
+	sockio::SocketBase< 
 		Net::WebSocketBase< 
 			Net::StatefulSocketBase< 
-				Net::SocketBase< ::TCPContext, Symple::IClient > 
+				Net::SocketBase< ::TCPContext, smple::IClient > 
 			> 
 		> 
 	> 
 > Client;
 
 
-typedef Symple::Client< 
-	SocketIO::SocketBase< 
+typedef smple::Client< 
+	sockio::SocketBase< 
 		Net::WebSocketBase< 
 			Net::StatefulSocketBase< 
-				Net::SocketBase< ::SSLContext, Symple::IClient > 
+				Net::SocketBase< ::SSLContext, smple::IClient > 
 			> 
 		> 
 	> 
@@ -344,7 +344,7 @@ typedef Symple::Client<
 	//Runner& _runner;
 /*
 // ---------------------------------------------------------------------
-class IClient: public SocketIO::Client
+class IClient: public sockio::Client
 	/// Maximum simplicity. Maximum scope.
 {
 public:
@@ -411,31 +411,31 @@ protected:
 
 
 // ---------------------------------------------------------------------
-template <class SocketIO::Client>
-class Client: public SocketIO::Client
+template <class sockio::Client>
+class Client: public sockio::Client
 {
 public:
 	Client(Net::Reactor& reactor, Runner& runner, const Client::Options& options = Client::Options()) : 
-		SocketIO::Client(reactor),
+		sockio::Client(reactor),
 		_runner(runner),
 		_options(options),
 		_announceStatus(500)
 	{
-		LogTrace() << "[Symple::Client:" << this << "] Creating" << std::endl;
+		traceL() << "[smple::Client:" << this << "] Creating" << std::endl;
 	}
 
 
 	virtual ~Client() 
 	{
-		LogTrace() << "[Symple::Client:" << this << "] Destroying" << std::endl;
+		traceL() << "[smple::Client:" << this << "] Destroying" << std::endl;
 		close();
-		LogTrace() << "[Symple::Client:" << this << "] Destroying: OK" << std::endl;
+		traceL() << "[smple::Client:" << this << "] Destroying: OK" << std::endl;
 	}
 
 
 	void connect()
 	{
-		LogTrace() << "[Symple::Client:" << this << "] Connecting" << std::endl;
+		traceL() << "[smple::Client:" << this << "] Connecting" << std::endl;
 		
 		{
 			Poco::FastMutex::ScopedLock lock(_mutex);
@@ -444,22 +444,22 @@ public:
 			_srvAddr = _options.serverAddr;
 		}
 		reset();
-		SocketIO::Client::connect();
+		sockio::Client::connect();
 	}
 
 
 	void close()
 	{
-		LogTrace() << "[Symple::Client:" << this << "] Closing" << std::endl;
+		traceL() << "[smple::Client:" << this << "] Closing" << std::endl;
 
-		SocketIO::Client::close();
+		sockio::Client::close();
 	}
 
 
 	virtual int send(const std::string data)
 	{
 		assert(isOnline());
-		return SocketIO::Client::send(SocketIO::Packet::Message, data, false);
+		return sockio::Client::send(sockio::Packet::Message, data, false);
 	}
 
 
@@ -469,16 +469,16 @@ public:
 		message.setFrom(ourPeer().address());
 		assert(message.valid());
 		assert(message.to().id() != message.from().id());
-		LogTrace() << "[Symple::Client:" << this << "] Sending Message: " 
+		traceL() << "[smple::Client:" << this << "] Sending Message: " 
 			<< message.id() << ":\n" 
 			<< JSON::stringify(message, true) << std::endl;
-		return SocketIO::Client::send(message, false);
+		return sockio::Client::send(message, false);
 	}
 
 
 	virtual void createPresence(Presence& p)
 	{
-		LogTrace() << "[Symple::Client:" << this << "] Creating Presence" << std::endl;
+		traceL() << "[smple::Client:" << this << "] Creating Presence" << std::endl;
 
 		Peer& peer = ourPeer();
 		UpdatePresenceData.emit(this, peer);
@@ -488,7 +488,7 @@ public:
 
 	virtual int sendPresence(bool probe = false)
 	{
-		LogTrace() << "[Symple::Client:" << this << "] Broadcasting Presence" << std::endl;
+		traceL() << "[smple::Client:" << this << "] Broadcasting Presence" << std::endl;
 
 		Presence p;
 		createPresence(p);
@@ -499,7 +499,7 @@ public:
 
 	virtual int sendPresence(const Address& to, bool probe = false)
 	{
-		LogTrace() << "[Symple::Client:" << this << "] Sending Presence" << std::endl;
+		traceL() << "[smple::Client:" << this << "] Sending Presence" << std::endl;
 	
 		Presence p;
 		createPresence(p);
@@ -561,7 +561,7 @@ public:
 	virtual Peer& ourPeer()
 	{	
 		Poco::FastMutex::ScopedLock lock(_mutex);
-		LogTrace() << "[Symple::Client:" << this << "] Getting Our Peer: " << _ourID << std::endl;
+		traceL() << "[smple::Client:" << this << "] Getting Our Peer: " << _ourID << std::endl;
 		if (_ourID.empty())
 			throw Exception("No active peer session is available.");
 		return *_roster.get(_ourID, true);
@@ -575,7 +575,7 @@ public:
 	}
 	
 
-	virtual const char* className() const { return "Symple::Client"; }
+	virtual const char* className() const { return "smple::Client"; }
 
 	
 protected:	
@@ -590,8 +590,8 @@ protected:
 			data["name"]	= _options.name;
 			data["type"]	= _options.type;
 		}	
-		SocketIO::Packet p("announce", data, true);
-		SocketIO::Transaction* txn = new SocketIO::Transaction(_runner, *this, p, 1, 5000);
+		sockio::Packet p("announce", data, true);
+		sockio::Transaction* txn = new sockio::Transaction(_runner, *this, p, 1, 5000);
 		txn->StateChange += delegate(this, &Client::onAnnounce);
 		return txn->send();
 	}
@@ -599,9 +599,9 @@ protected:
 
 	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
 	{
-		LogTrace() << "[Symple::Client:" << this << "] Announce Response: " << state.toString() << std::endl;
+		traceL() << "[smple::Client:" << this << "] Announce Response: " << state.toString() << std::endl;
 	
-		SocketIO::Transaction* transaction = reinterpret_cast<SocketIO::Transaction*>(sender);
+		sockio::Transaction* transaction = reinterpret_cast<sockio::Transaction*>(sender);
 		switch (state.id()) {	
 		case TransactionState::Success:
 			try 
@@ -624,7 +624,7 @@ protected:
 				_roster.update(data["data"], true);
 
 				// Transition our state on Online.
-				SocketIO::Client::onOnline();
+				sockio::Client::onOnline();
 
 				// Broadcast a presence probe to our network.
 				sendPresence(true);
@@ -646,7 +646,7 @@ protected:
 
 	virtual void onOnline()
 	{
-		LogTrace() << "[Symple::Client:" << this << "] On Online" << std::endl;
+		traceL() << "[smple::Client:" << this << "] On Online" << std::endl;
 
 		// Override this method because we are not quite
 		// ready to transition to Online yet - we still
@@ -657,24 +657,24 @@ protected:
 
 	virtual bool onPacketCreated(IPacket* packet) 
 	{
-		LogTrace() << "[Symple::Client:" << this << "] Packet Created: " << packet->className() << std::endl;
+		traceL() << "[smple::Client:" << this << "] Packet Created: " << packet->className() << std::endl;
 
 		// Catch incoming messages here so we can parse
 		// messages and handle presence updates.
 
-		SocketIO::Packet* p = dynamic_cast<SocketIO::Packet*>(packet);
+		sockio::Packet* p = dynamic_cast<sockio::Packet*>(packet);
 		if (p && (
-			p->type() == SocketIO::Packet::Message || 
-			p->type() == SocketIO::Packet::JSON)) {
+			p->type() == sockio::Packet::Message || 
+			p->type() == sockio::Packet::JSON)) {
 
 			JSON::Value data = p->json();
 			if (!data.isObject() || data.isNull()) {
-				Log("warning") << "[Symple::Client:" << this << "] Packet is not a JSON object" << std::endl;
+				Log("warning") << "[smple::Client:" << this << "] Packet is not a JSON object" << std::endl;
 				return true; // continue propagation
 			}
 		
 			string type(data["type"].asString());
-			LogTrace() << "[Symple::Client:" << this << "] Packet Created: Symple Type: " << type << std::endl;
+			traceL() << "[smple::Client:" << this << "] Packet Created: Symple Type: " << type << std::endl;
 			if (type == "message") {
 				Message m(data);
 				emit(this, m);
@@ -701,15 +701,15 @@ protected:
 
 	virtual void onClose()
 	{
-		LogTrace() << "[[Symple::Client:" << this << "] Closing" << std::endl;
-		SocketIO::Client::onClose();
+		traceL() << "[[smple::Client:" << this << "] Closing" << std::endl;
+		sockio::Client::onClose();
 		reset();
 	}
 
 
 	virtual void onError()
 	{
-		SocketIO::Client::onClose();
+		sockio::Client::onClose();
 		reset();
 	}
 
@@ -735,22 +735,22 @@ protected:
 
 
 // ---------------------------------------------------------------------
-typedef Symple::Client< 
-	SocketIO::SocketBase< 
+typedef smple::Client< 
+	sockio::SocketBase< 
 		Net::WebSocketBase< 
 			Net::StatefulSocketBase< 
-				Net::SocketBase< ::TCPContext, Symple::IClient > 
+				Net::SocketBase< ::TCPContext, smple::IClient > 
 			> 
 		> 
 	> 
 > Client;
 
 
-typedef Symple::Client< 
-	SocketIO::SocketBase< 
+typedef smple::Client< 
+	sockio::SocketBase< 
 		Net::WebSocketBase< 
 			Net::StatefulSocketBase< 
-				Net::SocketBase< ::SSLContext, Symple::IClient > 
+				Net::SocketBase< ::SSLContext, smple::IClient > 
 			> 
 		> 
 	> 
@@ -760,13 +760,13 @@ typedef Symple::Client<
 
 
 
-//typedef Symple::Client<  > Client; //, Symple::IClient //Symple::SocketBase< ::TCPContext>
-//typedef Symple::Client< SocketIO::SocketBase< Net::StatefulSocketBase< Net::SocketBase< ::SSLContext, Symple::IClient> > > > SSLClient; //, Symple::IClient //Symple::SocketBase< ::SSLContext>
-//SocketIO::SSLSocket
-// Net::SocketBase< ::SSLContext, SocketIO::Client>
+//typedef smple::Client<  > Client; //, smple::IClient //smple::SocketBase< ::TCPContext>
+//typedef smple::Client< sockio::SocketBase< Net::StatefulSocketBase< Net::SocketBase< ::SSLContext, smple::IClient> > > > SSLClient; //, smple::IClient //smple::SocketBase< ::SSLContext>
+//sockio::SSLSocket
+// Net::SocketBase< ::SSLContext, sockio::Client>
 
- //, public Symple::IClient
-//class Client: public SocketIO::Client
+ //, public smple::IClient
+//class Client: public sockio::Client
 	/// Maximum simplicity. Maximum scope.//BaseT
 
 /*
@@ -840,7 +840,7 @@ public:
 		std::string group;
 		std::string name;
 		std::string type;
-		Net::Address serverAddr;
+		net::Address serverAddr;
 		bool secure;
 
 		Options() {
@@ -849,7 +849,7 @@ public:
 			group		= "global";
 			name		= "";
 			type		= "peer";
-			serverAddr	= Net::Address("127.0.0.1", 4000);
+			serverAddr	= net::Address("127.0.0.1", 4000);
 			secure		= false;
 		}
 	};

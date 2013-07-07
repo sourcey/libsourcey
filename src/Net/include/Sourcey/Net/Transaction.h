@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/Net/PacketSocket.h"
-#include "Sourcey/UV/Timer.h"
+#include "Sourcey/Timer.h"
 #include "Sourcey/Stateful.h"
 #include "Sourcey/ISendable.h"
 #include "Sourcey/IPacket.h"

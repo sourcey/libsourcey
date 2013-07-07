@@ -53,7 +53,7 @@ macro(define_sourcey_module name)
     include_sourcey_modules(${module})  
     
     # Fix inter dependency errors
-    if(NOT ${module} MATCHES "Util|UV") 
+    if(NOT ${module} MATCHES "Util") #|UV
       add_dependencies(${name} ${module})
     endif()
   endforeach()  

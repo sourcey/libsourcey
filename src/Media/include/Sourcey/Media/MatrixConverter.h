@@ -32,8 +32,8 @@ extern "C" {
 #include <opencv/cv.h>
 
 
-namespace Scy { 
-namespace Media {
+namespace scy { 
+namespace av {
 
 
 class MatrixConverter: public IPacketizer
@@ -63,7 +63,7 @@ public:
 	
 	virtual bool accepts(IPacket& packet) 
 	{ 
-		return dynamic_cast<const Media::VideoPacket*>(&packet) != 0; 
+		return dynamic_cast<const av::VideoPacket*>(&packet) != 0; 
 	}
 
 	virtual void process(IPacket& packet)
@@ -119,7 +119,7 @@ public:
 };
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif

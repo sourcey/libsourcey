@@ -24,9 +24,9 @@ using namespace std;
 using namespace Poco;
 
 
-namespace Scy {
-namespace Util {
+namespace scy {
+namespace util {
 
 
-} // namespace Util
-} // namespace Scy
+} // namespace util
+} // namespace scy

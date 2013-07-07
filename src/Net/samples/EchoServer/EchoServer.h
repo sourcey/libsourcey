@@ -2,7 +2,7 @@
 #define SOURCEY_NET_EchoServer_H
 
 
-#include "Sourcey/Net/Reactor.h"
+//#include "Sourcey/Net/Reactor.h"
 #include "Sourcey/Net/SocketAcceptor.h"
 
 #include "Poco/Util/ServerApplication.h"
@@ -11,7 +11,7 @@
 #include "Poco/Util/HelpFormatter.h"
 
 
-namespace Scy {
+namespace scy {
 namespace Net {
 
 
@@ -29,7 +29,7 @@ public:
 
 	void onSocketCreated(void* sender, Poco::Net::StreamSocket& socket, Net::Reactor& reactor);	
 	//void onSocketClosed(void* sender);
-	void onRequestReceived(void* sender, DataPacket& packet);
+	void onRequestReceived(void* sender, RawPacket& packet);
 	
 	virtual const char* className() const { return "EchoServer"; }
 	
@@ -43,7 +43,7 @@ private:
 };
 
 
-} } // namespace Scy::Net
+} } // namespace scy::Net
 
 
 #endif // SOURCEY_NET_EchoServer_H

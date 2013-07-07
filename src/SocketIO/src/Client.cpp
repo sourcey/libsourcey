@@ -23,8 +23,8 @@
 using namespace std;
 
 
-namespace Scy {
-namespace SocketIO {
+namespace scy {
+namespace sockio {
 
 
 Client::Client(Net::IWebSocket& socket, Runner& runner) :
@@ -35,7 +35,7 @@ Client::Client(Net::IWebSocket& socket, Runner& runner) :
 }
 
 
-Client::Client(Net::IWebSocket& socket, Runner& runner, const Net::Address& serverAddr) :
+Client::Client(Net::IWebSocket& socket, Runner& runner, const net::Address& serverAddr) :
 	_timer(new TimerTask(runner)),
 	_serverAddr(serverAddr),
 	_socket(socket),
@@ -52,7 +52,7 @@ Client::~Client()
 }
 
 
-void Client::connect(const Net::Address& serverAddr)
+void Client::connect(const net::Address& serverAddr)
 {	
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
@@ -129,9 +129,9 @@ void Client::sendInitialRequest()
 		<< "/socket.io/1/";
 		
 	log("trace") << "Sending Handshake" << endl;	
-	HTTP::Request* request = new HTTP::Request("POST", uri.str());	
-	HTTP::Transaction transaction(request);
-	HTTP::Response& response = transaction.response();
+	http::Request* request = new http::Request("POST", uri.str());	
+	http::Transaction transaction(request);
+	http::Response& response = transaction.response();
 	transaction.send();
 
 	log("trace") << "SocketIO Handshake Response:" 
@@ -150,16 +150,16 @@ void Client::sendInitialRequest()
 			static_cast<int>(response.getStatus()), response.getReason()));
 
 	// Parse the response response
-	StringVec respData = Util::split(response.body.str(), ':', 4);
+	StringVec respData = util::split(response.body.str(), ':', 4);
 	if (respData.size() < 4)
 		throw Exception(response.empty() ? 
 			"Invalid SocketIO handshake response." : Poco::format(
 			"Invalid SocketIO handshake response: %s", response.body.str()));
 	
 	_sessionID = respData[0];
-	_heartBeatTimeout = Util::fromString<UInt32>(respData[1]);
-	_connectionClosingTimeout = Util::fromString<UInt32>(respData[2]);
-	_protocols = Util::split(respData[3], ',');
+	_heartBeatTimeout = util::fromString<UInt32>(respData[1]);
+	_connectionClosingTimeout = util::fromString<UInt32>(respData[2]);
+	_protocols = util::split(respData[3], ',');
 
 	// Check websockets are supported
 	bool wsSupported = false;
@@ -197,7 +197,7 @@ int Client::sendConnect(const string& endpoint, const string& query)
 }
 
 
-int Client::send(SocketIO::Packet::Type type, const string& data, bool ack)
+int Client::send(sockio::Packet::Type type, const string& data, bool ack)
 {
 	Packet packet(type, data, ack);
 	return send(packet);
@@ -218,7 +218,7 @@ int Client::send(const JSON::Value& data, bool ack)
 }
 
 
-int Client::send(const SocketIO::Packet& packet)
+int Client::send(const sockio::Packet& packet)
 {
 	return socket().send(packet);
 }
@@ -231,7 +231,7 @@ int Client::emit(const string& event, const JSON::Value& args, bool ack)
 }
 
 
-Transaction* Client::createTransaction(const SocketIO::Packet& request, long timeout)
+Transaction* Client::createTransaction(const sockio::Packet& request, long timeout)
 {
 	return new Transaction(*this, request, timeout);
 }
@@ -265,7 +265,7 @@ string Client::sessionID() const
 }
 
 
-Net::Address Client::serverAddr() const 
+net::Address Client::serverAddr() const 
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);
 	return _serverAddr;
@@ -344,7 +344,7 @@ void Client::onClose()
 }
 
 
-void Client::onPacket(SocketIO::Packet& packet)
+void Client::onPacket(sockio::Packet& packet)
 {
 	log("trace") << "On Packet" << endl;		
 	PacketEmitter::emit(this, packet);
@@ -392,9 +392,9 @@ void Client::onSocketClose(void*)
 }
 
 
-void Client::onSocketData(void*, Buffer& data, const Net::Address&)
+void Client::onSocketData(void*, Buffer& data, const net::Address&)
 {	
-	SocketIO::Packet packet;
+	sockio::Packet packet;
 	if (packet.read(data))
 		onPacket(packet);
 	else
@@ -403,7 +403,7 @@ void Client::onSocketData(void*, Buffer& data, const Net::Address&)
 
 
 
-} } // namespace Scy::SocketIO
+} } // namespace scy::sockio
 
 
 
@@ -436,7 +436,7 @@ void Client::onHeartBeatTimer(TimerCallback<Socket>&)
 /*
 
 
-	//_socket.registerPacketType<SocketIO::Packet>(10);
+	//_socket.registerPacketType<sockio::Packet>(10);
 
 void Client::onError() 
 {
@@ -484,7 +484,7 @@ void Client::onError()
 //}
 //
 //
-//SocketBase::SocketBase(Net::Reactor& reactor, const Net::Address& serverAddr) :
+//SocketBase::SocketBase(Net::Reactor& reactor, const net::Address& serverAddr) :
 //	WebSocket(reactor),
 //	_serverAddr(serverAddr),
 //	_secure(false)
@@ -498,7 +498,7 @@ void Client::onError()
 //}
 //
 //
-//void SocketBase::connect(const Net::Address& serverAddr)
+//void SocketBase::connect(const net::Address& serverAddr)
 //{	
 //	{
 //		FastMutex::ScopedLock lock(_mutex);
@@ -521,7 +521,7 @@ void Client::onError()
 //	if (_secure)
 //		_uri.setScheme("wss");
 //
-//	LogDebug() << "[SocketIO::Socket]	Connecting to " << _uri.toString() << endl;
+//	debugL() << "[sockio::Socket]	Connecting to " << _uri.toString() << endl;
 //
 //	if (sendHandshakeRequest()) {
 //				
@@ -530,7 +530,7 @@ void Client::onError()
 //			(_heartBeatTimeout * .75) * 1000));
 //	
 //		// Receive SocketIO packets
-//		registerPacketType<SocketIO::Packet>(10);
+//		registerPacketType<sockio::Packet>(10);
 //		
 //		// Initialize the websocket
 //		_uri.setPath("/socket.io/1/websocket/" + _sessionID);
@@ -543,16 +543,16 @@ void Client::onError()
 //{
 //	// NOTE: No need for mutex lock because this method is called from connect()
 //	
-//	LogTrace() << "[SocketIO::Socket] Sending Handshake" << endl;
+//	traceL() << "[sockio::Socket] Sending Handshake" << endl;
 //	
 //	
 //	URI uri("http://" + _serverAddr.toString() + "/socket.io/1/");	
 //	if (_secure)
 //		uri.setScheme("https");
 //
-//	HTTP::Request* request = new HTTP::Request("POST", uri.toString());	
-//	HTTP::Transaction transaction(request);
-//	HTTP::Response& response = transaction.response();
+//	http::Request* request = new http::Request("POST", uri.toString());	
+//	http::Transaction transaction(request);
+//	http::Response& response = transaction.response();
 //
 //	// The server can respond in three different ways:
 //    // 401 Unauthorized: If the server refuses to authorize the client to connect, 
@@ -563,7 +563,7 @@ void Client::onError()
 //		throw Exception(format("SocketIO handshake failed: HTTP Error: %d %s", 
 //			static_cast<int>(response.getStatus()), response.getReason()));		
 //
-//	LogTrace() << "[SocketIO::Socket] Handshake Response:" 
+//	traceL() << "[sockio::Socket] Handshake Response:" 
 //		<< "\n\tStatus: " << response.getStatus()
 //		<< "\n\tReason: " << response.getReason()
 //		<< "\n\tResponse: " << response.body.str()
@@ -573,21 +573,21 @@ void Client::onError()
 //	//	throw Exception(format("SocketIO handshake failed with %d", status));	
 //
 //	// Parse the response response
-//	StringVec respData = Util::split(response.body.str(), ':', 4);
+//	StringVec respData = util::split(response.body.str(), ':', 4);
 //	if (respData.size() < 4)
 //		throw Exception(response.empty() ? 
 //			"Invalid SocketIO handshake response." : format(
 //			"Invalid SocketIO handshake response: %s", response.body.str()));
 //	
 //	_sessionID = respData[0];
-//	_heartBeatTimeout = Util::fromString<UInt32>(respData[1]);
-//	_connectionClosingTimeout = Util::fromString<UInt32>(respData[2]);
-//	_protocols = Util::split(respData[3], ',');
+//	_heartBeatTimeout = util::fromString<UInt32>(respData[1]);
+//	_connectionClosingTimeout = util::fromString<UInt32>(respData[2]);
+//	_protocols = util::split(respData[3], ',');
 //
 //	// Check websockets are supported
 //	bool wsSupported = false;
 //	for (int i = 0; i < _protocols.size(); i++) {
-//		LogDebug() << "[SocketIO::Socket] Supports Protocol: " << _protocols[i] << endl;	
+//		debugL() << "[sockio::Socket] Supports Protocol: " << _protocols[i] << endl;	
 //		if (_protocols[i] == "websocket") {
 //			wsSupported = true;
 //			break;
@@ -603,14 +603,14 @@ void Client::onError()
 //
 //void SocketBase::close()
 //{			
-//	LogTrace() << "[SocketIO::Socket] Closing" << endl;	
+//	traceL() << "[sockio::Socket] Closing" << endl;	
 //
 //	if (!isError())
 //		Timer::getDefault().stop(TimerCallback<Socket>(this, &SocketBase::onHeartBeatTimer));
 //	
 //	WebSocketBase::close();
 //
-//	LogTrace() << "[SocketIO::Socket] Closing: OK" << endl;	
+//	traceL() << "[sockio::Socket] Closing: OK" << endl;	
 //}
 //
 //
@@ -635,7 +635,7 @@ void Client::onError()
 //}
 //
 //
-//int SocketBase::send(SocketIO::Packet::Type type, const string& data, bool ack)
+//int SocketBase::send(sockio::Packet::Type type, const string& data, bool ack)
 //{
 //	Packet packet(type, data, ack);
 //	return send(packet);
@@ -656,7 +656,7 @@ void Client::onError()
 //}
 //
 //
-//int SocketBase::send(const SocketIO::Packet& packet)
+//int SocketBase::send(const sockio::Packet& packet)
 //{
 //	return WebSocketBase::send(packet);
 //}
@@ -671,19 +671,19 @@ void Client::onError()
 //
 //void SocketBase::onHeartBeatTimer(TimerCallback<Socket>&) 
 //{
-//	LogTrace() << "[SocketIO::Socket] Heart Beat Timer" << endl;
+//	traceL() << "[sockio::Socket] Heart Beat Timer" << endl;
 //	
 //	if (isConnected())
 //		sendHeartbeat();
 //
 //	// Try to reconnect if the connection was closed in error
 //	else if (isError()) {	
-//		LogTrace() << "[SocketIO::Socket] Attempting to reconnect" << endl;	
+//		traceL() << "[sockio::Socket] Attempting to reconnect" << endl;	
 //		try {
 //			connect();
 //		} 
 //		catch (Poco::Exception& exc) {			
-//			LogError() << "[SocketIO::Socket] Reconnection attempt failed: " << exc.displayText() << endl;
+//			errorL() << "[sockio::Socket] Reconnection attempt failed: " << exc.displayText() << endl;
 //		}	
 //	}
 //}
@@ -691,7 +691,7 @@ void Client::onError()
 //
 //int SocketBase::sendHeartbeat()
 //{
-//	LogTrace() << "[SocketIO::Socket] Heart Beat" << endl;
+//	traceL() << "[sockio::Socket] Heart Beat" << endl;
 //	return WebSocketBase::send("2::", 3);
 //}
 //
@@ -793,12 +793,12 @@ void Client::onError()
 	int size = socket.receiveBytes(buffer, sizeof(buffer));	
 	string response(buffer, size);
 	size_t pos = response.find(" "); pos++;
-	int status = Util::fromString<UInt32>(response.substr(pos, response.find(" ", pos) + 1));
+	int status = util::fromString<UInt32>(response.substr(pos, response.find(" ", pos) + 1));
 	pos = response.find("\r\n\r\n", pos); pos += 4;
 	string body(response.substr(pos, response.length()));
 	socket.shutdownSend();
 
-	LogDebug() << "[SocketIO::Socket] Handshake:" 
+	debugL() << "[sockio::Socket] Handshake:" 
 		//<< "\n\tRequest: " << ss.str()
 		<< "\n\tStatus: " << status
 		<< "\n\tResponse: " << response

@@ -18,7 +18,6 @@
 
 
 #include "Sourcey/PacketStream.h"
-#include "Sourcey/GarbageCollector.h"
 #include "Sourcey/IStartable.h"
 
 //#include "Sourcey/PacketStream.h"
@@ -224,6 +223,7 @@ bool PacketStream::detach(PacketEmitter* source)
 			(*it).ptr->detach(packetDelegate(this, &PacketStream::onSourcePacket));
 			//if ((*it).freePointer)
 			//	delete (*it).ptr;
+			assert(0);
 			_sources.erase(it);
 			return true;
 		}
@@ -246,6 +246,7 @@ bool PacketStream::detach(IPacketProcessor* proc)
 			traceL("PacketStream", this) << "Detaching Processor: " << proc << ": OK" << endl;
 			//if ((*it).freePointer)
 			//	delete (*it).ptr;
+			assert(0);
 			_processors.erase(it);
 			return true;
 		}

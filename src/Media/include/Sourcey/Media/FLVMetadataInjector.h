@@ -23,6 +23,7 @@
 
 #include "Sourcey/IPacketizer.h"
 #include "Sourcey/Signal.h"
+#include "Sourcey/Types.h"
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/FPSCounter.h"
 #include "Sourcey/Media/Format.h"
@@ -31,8 +32,8 @@
 #include <sstream>
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 class FLVMetadataInjector: public IPacketizer
@@ -78,14 +79,14 @@ public:
 		_waitingForKeyframe(false),
 		_timestampOffset(0)
 	{
-		LogDebug("FLVMetadataInjector", this) << "Creating" << std::endl;
+		debugL("FLVMetadataInjector", this) << "Creating" << std::endl;
 	}
 					
 	virtual void onStreamStateChange(const PacketStreamState& state) 
 		/// This method is called by the Packet Stream
 		/// whenever the stream is restarted.
 	{ 
-		LogDebug("FLVMetadataInjector", this) << "Stream State Change: " << state << std::endl;
+		debugL("FLVMetadataInjector", this) << "Stream State Change: " << state << std::endl;
 		switch (state.id()) {
 		case PacketStreamState::Running:
 			_initial = true;
@@ -100,7 +101,7 @@ public:
 
 	virtual void process(IPacket& packet)
 	{
-		Media::MediaPacket* mpacket = dynamic_cast<Media::MediaPacket*>(&packet);		
+		av::MediaPacket* mpacket = dynamic_cast<av::MediaPacket*>(&packet);		
 		if (mpacket) {
 
 			// Read the first packet to determine weather or not
@@ -124,18 +125,18 @@ public:
 
 					// Drop all frames until we receive the first keyframe.
 					//fastIsFLVHeader(reinterpret_cast<char*>(mpacket->data())
-					if (!fastIsFLVKeyFrame(reinterpret_cast<char*>(mpacket->data()))) {
-						LogDebug("FLVMetadataInjector", this) << "Waiting for keyframe, dropping packet" << std::endl;
+					if (!fastIsFLVKeyFrame(mpacket->data())) {
+						debugL("FLVMetadataInjector", this) << "Waiting for keyframe, dropping packet" << std::endl;
 						return;
 					}
 
 					// Create and dispatch our custom header.
 					_waitingForKeyframe = false;				
-					LogDebug("FLVMetadataInjector", this) << "Got keyframe, prepending headers" << std::endl;
+					debugL("FLVMetadataInjector", this) << "Got keyframe, prepending headers" << std::endl;
 					Buffer flvHeader(512);
 					writeFLVHeader(flvHeader);
 
-					MediaPacket opacket(reinterpret_cast<unsigned char*>(flvHeader.bytes()), flvHeader.size());
+					MediaPacket opacket(flvHeader.data(), flvHeader.size());
 					emit(this, opacket);
 				}
 
@@ -147,7 +148,7 @@ public:
 				UInt32 timestamp = static_cast<UInt32>((1000.0 / _fpsCounter.fps) * _fpsCounter.frames);		
 
 				// Update the output packet's timestamp.
-				fastUpdateTimestamp(reinterpret_cast<char*>(mpacket->data()), timestamp);	
+				fastUpdateTimestamp(mpacket->data(), timestamp);	
 			
 				//int offset = buf.position();
 				//dumpFLVTags(buf);
@@ -160,7 +161,7 @@ public:
 		}
 
 		// Just proxy the packet if no modification is required.
-		//LogDebug("FLVMetadataInjector", this) << "Proxy Packet" << std::endl;
+		//debugL("FLVMetadataInjector", this) << "Proxy Packet" << std::endl;
 		emit(this, packet);
 	}
 	
@@ -168,9 +169,9 @@ public:
 		/// Updates the timestamp in the given FLV tag buffer.
 		/// No more need to copy data with this method.
 	{
-		UInt32 val = HostToNetwork32(timestamp);
+		UInt32 val = htonl(timestamp); // HostToNetwork32
 		/*
-		LogDebug("FLVMetadataInjector", this) << "Updating timestamp: "
+		debugL("FLVMetadataInjector", this) << "Updating timestamp: "
 			<< "\n\tTimestamp: " << timestamp
 			<< "\n\tFrame Number: " << _fpsCounter.frames
 			<< "\n\tFrame Rate: " << _fpsCounter.fps
@@ -185,19 +186,19 @@ public:
 		// the start of the tag.
 		int offset = buf.position();
 		if (buf.size() < offset + 4) {
-			LogError("FLVMetadataInjector", this) << "The FLV tag buffer is too small." << std::endl;
+			errorL("FLVMetadataInjector", this) << "The FLV tag buffer is too small." << std::endl;
 			return;
 		}
 		
 		/*
-		LogDebug("FLVMetadataInjector", this) << "Updating timestamp: "
+		debugL("FLVMetadataInjector", this) << "Updating timestamp: "
 			<< "\n\tTimestamp: " << timestamp
 			<< "\n\tFrame Number: " << _fpsCounter.frames
 			<< "\n\tFrame Rate: " << _fpsCounter.fps
 			<< std::endl;
 			*/
 
-		buf.updateUInt24(timestamp, offset + 4);
+		buf.updateU24(timestamp, offset + 4);
 	}
 
 	virtual bool fastIsFLVHeader(char* buf)
@@ -208,7 +209,7 @@ public:
 	virtual bool isFLVHeader(Buffer& buf)
 	{		
 		std::string signature; 
-		buf.readString(signature, 3);
+		buf.read(signature, 3);
 		return signature == "FLV";
 	}
 
@@ -220,15 +221,15 @@ public:
 		int offset = buf.position();
 
 		//UInt8 tagType; 
-		//buf.readUInt8(tagType);
+		//buf.readU8(tagType);
 		//if (tagType != FLV_TAG_TYPE_VIDEO)
 		//	return false;
 						
 		UInt8 flags;				
-		buf.setPosition(11);
-		buf.readUInt8(flags);	
+		buf.position(11);
+		buf.readU8(flags);	
 					
-		buf.setPosition(offset);
+		buf.position(offset);
 		return (flags & FLV_FRAME_KEY) == FLV_FRAME_KEY;
 	}
 
@@ -244,30 +245,30 @@ public:
 
 		//
 		// FLV Header
-		buf.writeBytes("FLV", 3);
-		buf.writeUInt8(0x01);
-		buf.writeUInt8(
+		buf.write("FLV", 3);
+		buf.writeU8(0x01);
+		buf.writeU8(
 			((_format.video.enabled) ? 1 : 0) | 
 			((_format.audio.enabled) ? 4 : 0));
-		buf.writeUInt32(0x09);
+		buf.writeU32(0x09);
 			
-		buf.writeUInt32(0);	 // previous tag size 
+		buf.writeU32(0);	 // previous tag size 
 
 		//
 		// FLV Metadata Object
-		buf.writeUInt8(FLV_TAG_TYPE_SCRIPT);
+		buf.writeU8(FLV_TAG_TYPE_SCRIPT);
 		int dataSizePos = buf.size() - offset;
-		buf.writeUInt24(0);	// size of data part (sum of all parts below)			
-		buf.writeUInt24(0);	// time stamp
-		buf.writeUInt32(0);	// reserved			
+		buf.writeU24(0);	// size of data part (sum of all parts below)			
+		buf.writeU24(0);	// time stamp
+		buf.writeU32(0);	// reserved			
 
 		int dataStartPos = buf.size() - offset; 
 
-		buf.writeUInt8(AMF_DATA_TYPE_STRING);	// AMF_DATA_TYPE_STRING
+		buf.writeU8(AMF_DATA_TYPE_STRING);	// AMF_DATA_TYPE_STRING
 		writeAMFSring(buf, "onMetaData");
 	
-		buf.writeUInt8(AMF_DATA_TYPE_MIXEDARRAY);
-		buf.writeUInt32(2 + // number of elements in array			
+		buf.writeU8(AMF_DATA_TYPE_MIXEDARRAY);
+		buf.writeU32(2 + // number of elements in array			
 			(_format.video.enabled ? 5 : 0) + 
 			(_format.audio.enabled ? 5 : 0));
 
@@ -313,17 +314,17 @@ public:
 		writeAMFSring(buf, "filesize");
 		writeAMFDouble(buf, 0);	// delayed write
 			
-		buf.writeBytes("", 1);
-		buf.writeUInt8(AMF_DATA_TYPE_OBJECT_END);
+		buf.write("", 1);
+		buf.writeU8(AMF_DATA_TYPE_OBJECT_END);
 	
 		// Write data size
 		int dataSize = buf.size() - dataStartPos;
-		buf.updateUInt24(dataSize, dataSizePos);
+		buf.updateU24(dataSize, dataSizePos);
 			
 		// Write tag size
-		buf.writeUInt32(dataSize + 11);
+		buf.writeU32(dataSize + 11);
 			
-		//LogDebug() << "FLV Header:" 
+		//debugL() << "FLV Header:" 
 		//	<< "\n\tType: " << (int)tagType
 		//	<< "\n\tData Size: " << dataSize
 		//	<< "\n\tTimestamp: " << timestamp
@@ -347,30 +348,30 @@ public:
 			if (buf.size() < 12)
 				break;
 
-			buf.readUInt8(tagType);
+			buf.readU8(tagType);
 			if (tagType != FLV_TAG_TYPE_AUDIO &&	// audio
 				tagType != FLV_TAG_TYPE_VIDEO &&	// video
 				tagType != FLV_TAG_TYPE_SCRIPT)		// script
 				break;
 
-			buf.readUInt24(dataSize);
+			buf.readU24(dataSize);
 			if (dataSize < 100)
 				break;
 				
-			buf.readUInt24(timestamp);
+			buf.readU24(timestamp);
 			if (timestamp < 0)
 				break;
 				
-			buf.readUInt8(timestampExtended);	
+			buf.readU8(timestampExtended);	
 				
-			buf.readUInt24(streamId);
+			buf.readU24(streamId);
 			if (streamId != 0)
 				break;	
 				
 			// Start of data size bytes
 			int dataStartPos = buf.position();
 			
-			buf.readUInt8(flags);	
+			buf.readU8(flags);	
 				
 			bool isKeyFrame = false;
 			bool isInterFrame = false;
@@ -394,14 +395,14 @@ public:
             }
 				
 			// Read to the end of the current tag.
-			buf.setPosition(dataStartPos + dataSize);
-			buf.readUInt32(previousTagSize);
+			buf.position(dataStartPos + dataSize);
+			buf.readU32(previousTagSize);
 			if (previousTagSize == 0) {
 				assert(false);
 				break;	
 			}				
 
-			LogDebug() << "FLV Tag:" 
+			debugL() << "FLV Tag:" 
 				<< "\n\tType: " << (int)tagType
 				<< "\n\tTag Size: " << previousTagSize
 				<< "\n\tData Size: " << dataSize
@@ -428,20 +429,20 @@ public:
 	virtual void writeAMFSring(Buffer& buf, const char* val)
 	{
 		size_t len = strlen(val);
-		buf.writeUInt16(len);
-		buf.writeBytes(val, len);
+		buf.writeU16(len);
+		buf.write(val, len);
 	}
 	
 	virtual void writeAMFDouble(Buffer& buf, double val)
 	{
-		buf.writeUInt8(AMF_DATA_TYPE_NUMBER); // AMF_DATA_TYPE_NUMBER
-		buf.writeUInt64(DoubleToInt(val));
+		buf.writeU8(AMF_DATA_TYPE_NUMBER); // AMF_DATA_TYPE_NUMBER
+		buf.writeU64(DoubleToInt(val));
 	}
 	
 	virtual void writeAMFBool(Buffer& buf, bool val)
 	{
-		buf.writeUInt8(AMF_DATA_TYPE_BOOL); // AMF_DATA_TYPE_NUMBER
-		buf.writeUInt8(val ? 1 : 0);
+		buf.writeU8(AMF_DATA_TYPE_BOOL); // AMF_DATA_TYPE_NUMBER
+		buf.writeU8(val ? 1 : 0);
 	}
 		
 protected:
@@ -454,8 +455,8 @@ protected:
 };
 
 
-} // namespace Media 
-} // namespace Scy 
+} // namespace av 
+} // namespace scy 
 
 
 #endif

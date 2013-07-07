@@ -25,8 +25,8 @@
 #include "Sourcey/Symple/Command.h"
 
 
-namespace Scy {
-namespace Symple {
+namespace scy {
+namespace smple {
 
 	
 class Form;
@@ -167,8 +167,8 @@ public:
 };
 
 
-} // namespace Symple 
-} // namespace Scy
+} // namespace smple 
+} // namespace scy
 
 
 #endif // SOURCEY_Symple_Form_H

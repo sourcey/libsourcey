@@ -22,13 +22,13 @@
 
 
 #include "Sourcey/SDP/A.h"
-#include "Sourcey/Util.h"
+#include "Sourcey/util.h"
 
 #include <string>
 #include <vector>
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
@@ -52,7 +52,7 @@ private:
 };
 
 
-} // namespace Scy
+} // namespace scy
 } // namespace SDP 
 
 

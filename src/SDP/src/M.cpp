@@ -25,14 +25,14 @@
 #include "Sourcey/SDP/Candidate.h"
 #include "Sourcey/SDP/RemoteCandidate.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/Util.h"
+#include "Sourcey/util.h"
 #include <iostream>
 
 
 using namespace std;
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
@@ -41,7 +41,7 @@ M::M(const string& src) :
 {
 	size_t len = src.length();
 	if (src.substr(0, 2) != "m=") {
-		LogError() << "ERROR: SDP line does not start with <m=>" << endl;
+		errorL() << "ERROR: SDP line does not start with <m=>" << endl;
 	}
 	size_t i = 2;
 	while (src[i] == ' ' && i < len)
@@ -63,10 +63,10 @@ M::M(const string& src) :
 		if (portstr[j] == '/')
 			np = j;
 	if (np > 0) {
-		_port = Util::fromString<UInt32>(portstr.substr(0, np).c_str());
-		_nPorts =  Util::fromString<UInt32>(portstr.substr(np+1, portstr.length()-(np+1)-1).c_str());
+		_port = util::fromString<UInt32>(portstr.substr(0, np).c_str());
+		_nPorts =  util::fromString<UInt32>(portstr.substr(np+1, portstr.length()-(np+1)-1).c_str());
 	} else {
-		_port = Util::fromString<UInt32>(portstr.c_str());
+		_port = util::fromString<UInt32>(portstr.c_str());
 		_nPorts = 1;
 	}
 	
@@ -123,7 +123,7 @@ M &M::operator = (const M &src)
 	_transport = src._transport;
 	_payloadTypes = src._payloadTypes;
 	
-	Util::ClearVector(_lines);
+	util::ClearVector(_lines);
 	for (vector<Line*>::const_iterator it = src._lines.begin(); it != src._lines.end(); it++) {
 		addLine(*it);
 	}
@@ -138,7 +138,7 @@ M::~M()
 	//	delete _connection;
 	//if (_information)
 	//	delete _information;
-	//Util::ClearVector(_lines);
+	//util::ClearVector(_lines);
 
 	for (vector<Line*>::iterator it = _lines.begin(); it != _lines.end(); ++it)
 		delete *it;
@@ -210,9 +210,9 @@ string M::toString()
 	string ret = "m=" + _mediaType + " ";
 	
 	if (_nPorts > 1)
-		ret += _port + "/" + Util::toString(_nPorts);
+		ret += _port + "/" + util::toString(_nPorts);
 	else
-		ret += Util::toString(_port);
+		ret += util::toString(_port);
 
 	ret += " " + _transport;
 
@@ -381,5 +381,5 @@ C* M::connection() const
 */
 
 
-} // namespace Scy
+} // namespace scy
 } // namespace SDP 

@@ -76,8 +76,8 @@ public:
 
 	void update();
 	void addEncryptedData(const char* data, size_t len);
-	void addApplicationData(const std::string& data);
-	void addApplicationData(const char* data, size_t len);
+	void addOutgoingData(const std::string& data);
+	void addOutgoingData(const char* data, size_t len);
 		
 	int available() const;
 		/// Returns the number of bytes available in 

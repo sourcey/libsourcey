@@ -23,11 +23,11 @@
 
 #include "Sourcey/SDP/Line.h"
 
-#include "Sourcey/Util.h"
+#include "Sourcey/util.h"
 #include <assert.h>
 
 
-namespace Scy {
+namespace scy {
 namespace SDP { 
 
 
@@ -47,7 +47,7 @@ private:
 };
 
 
-} // namespace Scy
+} // namespace scy
 } // namespace SDP 
 
 

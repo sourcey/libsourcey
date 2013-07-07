@@ -38,8 +38,8 @@
 #include <map>
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 // ---------------------------------------------------------------------
@@ -60,7 +60,7 @@ struct VideoDelegate: public PacketDelegateBase
 		if (_fps) {
 			_counter.tick();
 			if (_counter.fps > _fps) {
-				LogDebug() << "skipping frame" << std::endl;
+				debugL() << "skipping frame" << std::endl;
 				return false;
 			}
 		}		
@@ -182,7 +182,7 @@ struct MatPacket: public VideoPacket
 {
 	cv::Mat* mat;	// For OpenCV generated packets.
 
-	MatPacket(unsigned char* data = NULL,
+	MatPacket(const char* data = NULL,
 				int size = 0,
 				int width = 0,
 				int height = 0,
@@ -191,7 +191,7 @@ struct MatPacket: public VideoPacket
 		mat(NULL) {};
 
 	MatPacket(cv::Mat* mat, double time = 0) :
-		VideoPacket((unsigned char*)mat->data, mat->total(), mat->cols, mat->rows, time),
+		VideoPacket((const char*)mat->data, mat->total(), mat->cols, mat->rows, time),
 		mat(mat) {};
 
 	virtual IPacket* clone() const {
@@ -202,8 +202,8 @@ struct MatPacket: public VideoPacket
 }; 
 
 
-} // namespace Media
-} // namespace Scy
+} // namespace av
+} // namespace scy
 
 
 #endif // SOURCEY_MEDIA_VideoCapture_H

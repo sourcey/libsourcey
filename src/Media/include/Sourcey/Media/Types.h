@@ -28,22 +28,22 @@
 //#include <opencv/highgui.h>
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 	
 
-struct MediaPacket: public DataPacket 
+struct MediaPacket: public RawPacket 
 {
 	double time;
 
-	MediaPacket(unsigned char* data = NULL,
+	MediaPacket(const char* data = NULL,
 				int size = 0,
 				double time = 0) :
-		DataPacket(data, size),
+		RawPacket(data, size),
 		time(time) {};
 
 	MediaPacket(const MediaPacket& r) : 
-		DataPacket(r), 
+		RawPacket(r), 
 		time(r.time)
 	{
 	}
@@ -63,7 +63,7 @@ struct VideoPacket: public MediaPacket
 	int width;
 	int height;
 
-	VideoPacket(unsigned char* data = NULL,
+	VideoPacket(const char* data = NULL,
 				int size = 0,
 				int width = 0,
 				int height = 0,
@@ -91,7 +91,7 @@ struct VideoPacket: public MediaPacket
 
 struct AudioPacket: public MediaPacket 
 {
-	AudioPacket(unsigned char* data = NULL,
+	AudioPacket(const char* data = NULL,
 				int size = 0,
 				double time = 0) : //(double)clock() / CLOCKS_PER_SEC
 		MediaPacket(data, size, time) {};
@@ -270,7 +270,7 @@ struct Format
 */
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif // SOURCEY_MEDIA_Types_H

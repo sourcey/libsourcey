@@ -33,8 +33,8 @@
 #include "Poco/Timestamp.h"
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 template <class EncoderT>
@@ -52,13 +52,13 @@ public:
 		_capture(capture),
 		_destroyOnStop(destroyOnStop)
 	{
-		LogDebug() << "[CaptureEncoder] Creating" << std::endl;
+		debugL() << "[CaptureEncoder] Creating" << std::endl;
 		assert(_capture);	
 	}
 
 	virtual ~CaptureEncoder() 
 	{
-		LogDebug() << "[CaptureEncoder] Destroying" << std::endl;
+		debugL() << "[CaptureEncoder] Destroying" << std::endl;
 
 		// A call to stop() is required before destruction.
 		assert(EncoderT::state().id() == EncoderState::None);
@@ -66,7 +66,7 @@ public:
 
 	virtual void start(/*const ParamT& params*/) 
 	{
-		LogDebug() << "[CaptureEncoder] Starting..." << std::endl;
+		debugL() << "[CaptureEncoder] Starting..." << std::endl;
 		if (!EncoderT::isReady())
 			EncoderT::initialize();
 
@@ -80,7 +80,7 @@ public:
 			
 		} 
 		catch (Exception& exc) {
-			LogError() << "Encoder Error: " << exc.displayText() << std::endl;
+			errorL() << "Encoder Error: " << exc.displayText() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
 			exc.rethrow();
@@ -89,7 +89,7 @@ public:
 
 	virtual void stop() 
 	{
-		LogDebug() << "[CaptureEncoder] Stopping..." << std::endl;
+		debugL() << "[CaptureEncoder] Stopping..." << std::endl;
 		try {
 			assert(_capture);
 			//assert(EncoderT::isReady());
@@ -100,7 +100,7 @@ public:
 			EncoderT::setState(this, EncoderState::None);
 		} 
 		catch (Exception& exc) {
-			LogError() << "Encoder Error: " << exc.displayText() << std::endl;
+			errorL() << "Encoder Error: " << exc.displayText() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 		}
 
@@ -117,7 +117,7 @@ public:
 			int size = EncoderT::encode((unsigned char*)packet.data, packet.size);
 		} 
 		catch (Exception& exc) {
-			LogError() << "Encoder Error: " << exc.displayText() << std::endl;
+			errorL() << "Encoder Error: " << exc.displayText() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
 		}
@@ -145,7 +145,7 @@ public:
 		_capture(capture),
 		_destroyOnStop(destroyOnStop)
 	{
-		LogDebug() << "[RawCaptureEncoder] Creating" << std::endl;
+		debugL() << "[RawCaptureEncoder] Creating" << std::endl;
 		assert(_capture);	
 		EncoderT::setState(this, EncoderState::None);
 	}
@@ -153,7 +153,7 @@ public:
 
 	virtual ~RawCaptureEncoder() 
 	{
-		LogDebug() << "[RawCaptureEncoder] Destroying" << std::endl;
+		debugL() << "[RawCaptureEncoder] Destroying" << std::endl;
 
 		// A call to stop() is required before destruction.
 		assert(state().id() == EncoderState::None);
@@ -161,7 +161,7 @@ public:
 
 	virtual void start() 
 	{
-		LogDebug() << "[RawCaptureEncoder] Starting..." << std::endl;
+		debugL() << "[RawCaptureEncoder] Starting..." << std::endl;
 		try {
 			assert(_capture);
 			//assert(isInitialized());
@@ -171,7 +171,7 @@ public:
 			EncoderT::setState(this, EncoderState::Encoding);
 		} 
 		catch (Exception& exc) {
-			LogError() << "Encoder Error: " << exc.displayText() << std::endl;
+			errorL() << "Encoder Error: " << exc.displayText() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
 			exc.rethrow();
@@ -180,7 +180,7 @@ public:
 
 	virtual void stop() 
 	{
-		LogDebug() << "[RawCaptureEncoder] Stopping..." << std::endl;
+		debugL() << "[RawCaptureEncoder] Stopping..." << std::endl;
 		try {
 			assert(_capture);
 			//assert(isInitialized());
@@ -190,7 +190,7 @@ public:
 			EncoderT::setState(this, EncoderState::None);
 		} 
 		catch (Exception& exc) {
-			LogError() << "Encoder Error: " << exc.displayText() << std::endl;
+			errorL() << "Encoder Error: " << exc.displayText() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 		}
 
@@ -218,7 +218,7 @@ private:
 */
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif // SOURCEY_MEDIA_CaptureEncoder_H

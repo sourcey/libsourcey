@@ -28,8 +28,8 @@
 #include <vector>
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 struct Format 
@@ -91,8 +91,8 @@ typedef std::vector<Format> FormatList;
 typedef std::vector<Format*> FormatPList;
 
 
-} // namespace Media
-} // namespace Scy
+} // namespace av
+} // namespace scy
 
 
 #endif

@@ -21,6 +21,70 @@
 #define SOURCEY_Runner_H
 
 
+#include "Sourcey/Memory.h"
+#include "Sourcey/UV/Base.h"
+
+
+namespace scy {
+
+		
+// -------------------------------------------------------------------
+//
+class Runner
+{
+public:
+	uv_loop_t* loop;
+
+	Runner(uv_loop_t* loop = uv_default_loop()) : 
+		loop(loop) 
+	{
+	}
+	
+	void run() 
+	{ 
+		uv_run(loop, UV_RUN_DEFAULT);
+	}
+
+	void stop() 
+	{ 
+		uv_stop(loop); 
+	}
+
+	void cleanup(bool destroy = false) 
+	{ 
+		// print active handles
+		uv_walk(loop, Runner::onPrintHandle, NULL);
+
+		// run until handles are closed 
+		run(); 
+		if (destroy) {
+			uv_loop_delete(loop);
+			loop = NULL;
+		}
+	}	
+	
+	void waitForKill() 
+	{ 
+		uv_signal_t sig;
+		sig.data = NULL;
+		uv_signal_init(loop, &sig);
+		uv_signal_start(&sig, Runner::onKillSignal, SIGINT);
+		run();
+	}
+			
+	static void onKillSignal(uv_signal_t *req, int signum)
+	{
+		uv_signal_stop(req);
+	}
+	
+	static void onPrintHandle(uv_handle_t* handle, void* arg) 
+	{
+		debugL("Runner") << "#### Active Handle: " << handle << std::endl;
+	}
+};
+
+/*
+#include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Task.h"
 #include "Sourcey/Signal.h"
 #include "Sourcey/IPolymorphic.h"
@@ -28,11 +92,9 @@
 #include "Poco/Event.h"
 
 #include <deque>
+*/
 
-
-namespace scy {
-
-
+/*
 class Runner: public Poco::Runnable, public IPolymorphic
 	/// The Runner is an asynchronous event loop in charge
 	/// of one or many tasks. 
@@ -113,6 +175,7 @@ protected:
 	Poco::Event		_wakeUp;
 	bool			_stopped;
 };
+*/
 
 
 } // namespace scy

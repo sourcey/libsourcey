@@ -21,8 +21,8 @@ extern "C" {
 }
 
 
-namespace Scy {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 class AVInputReader: public PacketEmitter, public IStartable, public Poco::Runnable
@@ -101,7 +101,7 @@ protected:
 };
 
 
-} } // namespace Scy::Media
+} } // namespace scy::av
 
 
 #endif	// SOURCEY_MEDIA_AVInputReader_H
