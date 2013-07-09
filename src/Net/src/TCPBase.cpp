@@ -140,12 +140,14 @@ int TCPBase::send(const char* data, int len, int flags)
 
 int TCPBase::send(const char* data, int len, const net::Address& peerAddress, int flags) 
 {
+	traceL("TCPBase", this) << "Send: " << len << endl;
 	assert(peerAddress == this->peerAddress());
 
 	return Stream::write(data, len);
 }
 
 
+/*
 int TCPBase::send(const IPacket& packet, int flags)
 {
 	return net::SocketBase::send(packet, flags);
@@ -156,6 +158,7 @@ int TCPBase::send(const IPacket& packet, const net::Address& peerAddress, int fl
 {
 	return net::SocketBase::send(packet, peerAddress, flags);
 }
+*/
 
 
 void TCPBase::setNoDelay(bool enable) 
@@ -198,7 +201,6 @@ void TCPBase::acceptConnection()
 
 net::Address TCPBase::address() const
 {
-	//traceL("TCPBase", this) << "Get Address" << endl;
 	struct sockaddr_storage address;
 	int addrlen = sizeof(address);
 	int r = uv_tcp_getsockname(handle<uv_tcp_t>(),
@@ -213,7 +215,6 @@ net::Address TCPBase::address() const
 
 net::Address TCPBase::peerAddress() const
 {
-	//traceL("TCPBase", this) << "Get Peer Address" << endl;
 	struct sockaddr_storage address;
 	int addrlen = sizeof(address);
 	int r = uv_tcp_getpeername(handle<uv_tcp_t>(),
@@ -270,7 +271,7 @@ int TCPBase::refCount() const
 
 void TCPBase::onRead(const char* data, int len)
 {
-	traceL("TCPBase", this) << "On Read: " << len << endl;
+	traceL("TCPBase", this) << "On read: " << len << endl;
 	_buffer.position(0);
 	_buffer.size(len);
 	onRecv(_buffer);
@@ -279,7 +280,7 @@ void TCPBase::onRead(const char* data, int len)
 
 void TCPBase::onRecv(Buffer& buf)
 {
-	traceL("TCPBase", this) << "On Recv: " << buf.size() << endl;
+	traceL("TCPBase", this) << "On recv: " << buf.size() << endl;
 	//net::SocketPacket packet(*this, buf, peerAddress());
 	//assert(instance() == this);
 	//Recv.emit(instance(), packet);
@@ -289,7 +290,7 @@ void TCPBase::onRecv(Buffer& buf)
 
 void TCPBase::onConnect(int status)
 {
-	traceL("TCPBase", this) << "On Connect" << endl;
+	traceL("TCPBase", this) << "On connect" << endl;
 	
 	// Error handled by static callback proxy
 	if (status == 0) {
@@ -297,32 +298,32 @@ void TCPBase::onConnect(int status)
 			emitConnect();
 	}
 	else
-		errorL("TCPBase", this) << "Connection failed: " << errorMessage() << endl;
+		errorL("TCPBase", this) << "Connection failed: " << error().message << endl;
 }
 
 
 void TCPBase::onAcceptConnection(uv_stream_t* handle, int status) 
 {		
 	if (status == 0) {
-		traceL("TCPBase", this) << "On Accept Connection" << endl;
+		traceL("TCPBase", this) << "On accept connection" << endl;
 		acceptConnection();
 	}
 	else
-		errorL("TCPBase", this) << "Accept Connection Failed" << endl;
+		errorL("TCPBase", this) << "Accept connection failed" << endl;
 }
 
 
-void TCPBase::onError(int syserr) 
+void TCPBase::onError(const Error& error) 
 {		
-	errorL("TCPBase", this) << "On Error: " << errorMessage() << endl;	
-	emitError(syserr, errorMessage());
+	errorL("TCPBase", this) << "On error: " << error.message << endl;	
+	emitError(error);
 	close(); // close on error
 }
 
 
 void TCPBase::onClose() 
 {		
-	errorL("TCPBase", this) << "On Close" << endl;	
+	errorL("TCPBase", this) << "On close" << endl;	
 	emitClose();
 }
 
@@ -431,7 +432,7 @@ static void aafterClose(uv_handle_t* peer)
 		//throw Exception Null(node_isolate);
 
 
-	//_sslBuffer->addEncryptedData(data, len);
+	//_sslBuffer->addIncomingData(data, len);
 	//_sslBuffer->update();
 	//send("data", 4);
 	//assert(0);
@@ -512,7 +513,7 @@ static void aafterClose(uv_handle_t* peer)
 	assert(_sslBuffer);
 void on_read_callback(uv_stream_t* tcp, ssize_t nread, uv_buf_t buf) {
   TCPBase* c = static_cast<TCPBase*>(tcp->data);
-  c->_sslBuffer.addEncryptedData(buf.base, nread);
+  c->_sslBuffer.addIncomingData(buf.base, nread);
   c->_sslBuffer.update();
 }
 */
@@ -632,7 +633,7 @@ int dummy_ssl_verify_callback(int ok, X509_STORE_CTX* store) {
 
 void on_read_callback(uv_stream_t* tcp, ssize_t nread, uv_buf_t buf) {
   TCPBase* c = static_cast<TCPBase*>(tcp->data);
-  c->_sslBuffer->addEncryptedData(buf.base, nread);
+  c->_sslBuffer->addIncomingData(buf.base, nread);
   c->_sslBuffer->update();
 }
 
@@ -650,7 +651,7 @@ uv_buf_t on_alloc_callback(uv_handle_t* con, size_t size) {
 	traceL("TCPBase", this) << "On Connected" << endl;
 	if (status) {
 		setLastError();
-		errorL("TCPBase", this) << "Connect Failed: " << errorMessage() << endl;
+		errorL("TCPBase", this) << "Connect Failed: " << error().message << endl;
 		return;
 	}
 	//else

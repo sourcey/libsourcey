@@ -22,6 +22,7 @@ using namespace std;
 
 
 #include "Sourcey/HTTP/Server.h"
+#include "Sourcey/HTTP/WebSocket.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Util.h"
 
@@ -30,7 +31,7 @@ namespace scy {
 namespace http {
 
 	
-Server::Server(short port, ServerResponserFactory* factory) :
+Server::Server(short port, ServerResponderFactory* factory) :
 	address("0.0.0.0", port),
 	factory(factory)
 {
@@ -64,19 +65,15 @@ void Server::start()
 
 void Server::shutdown() 
 {		
-	traceL("Server", this) << "Shutdown ####################################" << endl;
+	traceL("Server", this) << "Shutdown" << endl;
 
 	socket.base().AcceptConnection -= delegate(this, &Server::onAccept);	
 	socket.Close -= delegate(this, &Server::onClose);
 	socket.close();
-	
-	traceL("Server", this) << "Shutdown 1 ####################################" << endl;
 
 	//timer.stop();
 	if (!connections.empty())
 		Shutdown.emit(this);
-	
-	traceL("Server", this) << "Shutdown 2 ####################################" << endl;
 
 	// Connections must remove themselves
 	assert(connections.empty());
@@ -96,12 +93,12 @@ ServerConnection* Server::createConnection(const net::Socket& sock)
 }
 
 
-ServerResponser* Server::createResponser(ServerConnection& conn)
+ServerResponder* Server::createResponder(ServerConnection& conn)
 {
 	// The initial HTTP request headers have already
 	// been parsed by now, but the request body may 
 	// be incomplete (especially if chunked).
-	return factory->createResponser(conn);
+	return factory->createResponder(conn);
 }
 
 
@@ -143,10 +140,14 @@ void Server::onClose(void* sender)
 // Server Connection
 //
 ServerConnection::ServerConnection(Server& server, const net::Socket& socket) : 
-	Connection(socket, HTTP_REQUEST), _server(server), _responder(NULL)
+	Connection(socket), 
+	_server(server), 
+	_responder(NULL)
 {	
 	traceL("ServerConnection", this) << "Creating" << endl;
-	server.Shutdown += delegate(this, &ServerConnection::onShutdown);
+
+	setAdapter(new ServerAdapter(*this));
+	server.Shutdown += delegate(this, &ServerConnection::onServerShutdown);
 	server.addConnection(this);
 }
 
@@ -154,6 +155,7 @@ ServerConnection::ServerConnection(Server& server, const net::Socket& socket) :
 ServerConnection::~ServerConnection() 
 {	
 	traceL("ServerConnection", this) << "Destroying" << endl;
+
 	if (_responder)
 		delete _responder;
 }
@@ -161,25 +163,16 @@ ServerConnection::~ServerConnection()
 	
 void ServerConnection::close()
 {
-	_server.Shutdown -= delegate(this, &ServerConnection::onShutdown);
+	_server.Shutdown -= delegate(this, &ServerConnection::onServerShutdown);
 	_server.removeConnection(this);
+
 	Connection::close(); // close and destroy
 }
 
 
-void ServerConnection::onShutdown(void*)
+void ServerConnection::onServerShutdown(void*)
 {
 	close();
-}
-
-
-void ServerConnection::onClose() 
-{
-	// Proxy the socket onClose to the responder
-	if (_responder)
-		_responder->onClose();
-
-	Connection::onClose();
 }
 
 
@@ -195,15 +188,17 @@ Poco::Net::HTTPMessage* ServerConnection::outgoingHeaders()
 }
 
 
-bool ServerConnection::respond(bool whiny)
+bool ServerConnection::send()
 {
 	traceL("ServerConnection", this) << "Respond" << endl;
-	
+
+	// TODO: Detect end of message and close()
+
 	// KLUDGE: Temp solution for quick sending small requests only.
-	// Use Connection::sendBytes() for nocopy binary stream.
+	// Use Connection::sendRaw() for nocopy binary stream.
 	string body(_response->body.str());
 	_response->setContentLength(body.length());
-	return sendBytes(body.data(), body.length());
+	return sendRaw(body.data(), body.length());
 }
 
 			
@@ -214,54 +209,101 @@ Server& ServerConnection::server()
 	
 
 //
+// Connection callbacks
+//
+
+void ServerConnection::onHeaders() 
+{
+	traceL("ServerConnection", this) << "On headers" << endl;	
+	
+	// Upgrade the connection if required
+	if (_request->hasToken("Connection", "upgrade") && 
+		Poco::icompare(_request->get("Upgrade", ""), "websocket") == 0)
+	{			
+		traceL("ServerConnection", this) << "Upgrading to WebSocket" << endl;
+
+		WebSocketServerAdapter* wsAdapter = new WebSocketServerAdapter;
+		socket().setAdapter(wsAdapter);
+
+		ostringstream oss;
+		_request->write(oss);
+		Buffer buffer(oss.str().data(), oss.str().length());		
+
+		// Send the handshake request to the WS adapter for handling.
+		// If the request fails the connection socket will be closed
+		// resulting in destruction.
+		socket().adapter().onSocketRecv(buffer, socket().peerAddress());
+
+		// TODO: Need to handle error here?
+	}
+
+	// When headers have been parsed we instantiate the request handler
+	_responder = _server.createResponder(*this);
+	assert(_responder);
+	_responder->onHeaders(*_request);
+}
+
+
+void ServerConnection::onPayload(Buffer& buffer)
+{
+	traceL("ServerConnection", this) << "On payload: " << buffer.size() << endl;	
+
+	assert(_responder);
+	_responder->onPayload(buffer);
+}
+
+
+void ServerConnection::onComplete() 
+{
+	traceL("ServerConnection", this) << "On complete" << endl;	
+
+	// The HTTP request is complete.
+	// The request handler can give a response.
+	assert(_responder);
+	_responder->onRequest(*_request, *_response);
+}
+
+
+void ServerConnection::onClose() 
+{
+	if (_responder)
+		_responder->onClose();
+
+	Connection::onClose();
+}
+
+
+
+//
 // Parser callbacks
 //
 
-void ServerConnection::onParserHeadersDone() 
+/*
+void ServerConnection::onParserHeadersEnd() 
 {
 	// When headers have been parsed we instantiate the request handler
-	_responder = _server.createResponser(*this);
+	_responder = _server.createResponder(*this);
 	assert(_responder);
-	_responder->onRequestHeaders(*_request);
+	_responder->onHeaders(*_request);
 }
 
 
 void ServerConnection::onParserChunk(const char* buf, size_t len)
 {
 	traceL("ServerConnection", this) << "On Parser Chunk" << endl;	
-
-	// Just keep request body / chunks to the handler.
-	// The handler can manage the buffer as required.
-	//_buffer.write(buf, len);
-
-	//assert(_responder);
-	//_responder->onRequestBody(_buffer);
-	_responder->onRequestBody(buffer());
 }
 
 
-void ServerConnection::onParserDone() 
+void ServerConnection::onParserEnd() 
 {
 	traceL("ServerConnection", this) << "On Request Complete" << endl;	
-	
-	/*
-	ostringstream os;
-	_request->write(os);
-	string headers(os.str().data(), os.str().length());
 
-	traceL("ServerConnection", this) << "Request Headers >>>> " << headers << endl; // remove me
-	*/
-
-
-	// The HTTP request is complete.
-	// The request handler can give a response.
-	assert(_responder);
-	_responder->onRequestComplete(*_request, *_response);
 	//traceL("ServerConnection", this) << "On Message Complete 1" << endl;	
 	//traceL("ServerConnection", this) << "On Message Complete 2" << endl;
 	//traceL("ServerConnection", this) << "On Message Complete 2: " << _request->getKeepAlive() << endl;	
 	//traceL("ServerConnection", this) << "On Message Complete 2: " << _response->getKeepAlive() << endl;
 }
+*/
 
 
 } } // namespace scy::http
@@ -275,7 +317,7 @@ void ServerConnection::onParserDone()
 	/*
 	
 
-	bool res = sendBytes(body.data(), body.length());
+	bool res = sendRaw(body.data(), body.length());
 
 	// Set Connection: Close unless otherwise stated
 	if (!isExplicitKeepAlive(_request) || 
@@ -286,8 +328,8 @@ void ServerConnection::onParserDone()
 	*/
 	/* 	
 	// KLUDGE: Temp solution for quick sending small requests only.
-	// Use Connection::sendBytes() for nocopy binary stream.
-	bool res = sendBytes(
+	// Use Connection::sendRaw() for nocopy binary stream.
+	bool res = sendRaw(
 		_response->body.str().data(),
 		_response->body.str().length());
 	
@@ -305,14 +347,14 @@ void ServerConnection::onParserDone()
 
 	/*
 
-Server::Server(Poco::Net::HTTPServerResponserFactory::Ptr pFactory, const Poco::Net::ServerSocket& socket, Poco::Net::HTTPServerParams::Ptr pParams):
+Server::Server(Poco::Net::HTTPServerResponderFactory::Ptr pFactory, const Poco::Net::ServerSocket& socket, Poco::Net::HTTPServerParams::Ptr pParams):
 	Poco::Net::TCPServer(new ServerConnectionFactory(this, pParams, pFactory), socket, pParams),
 	_pFactory(pFactory)
 {
 }
 
 
-Server::Server(Poco::Net::HTTPServerResponserFactory::Ptr pFactory, Poco::ThreadPool& threadPool, 
+Server::Server(Poco::Net::HTTPServerResponderFactory::Ptr pFactory, Poco::ThreadPool& threadPool, 
 		const Poco::Net::ServerSocket& socket, Poco::Net::HTTPServerParams::Ptr pParams):
 	Poco::Net::TCPServer(new ServerConnectionFactory(this, pParams, pFactory), threadPool, socket, pParams),
 	_pFactory(pFactory)
@@ -375,7 +417,7 @@ Poco::Net::TCPServerConnection* Server::handleSocketConnection(const Poco::Net::
 
 // ---------------------------------------------------------------------
 //
-ServerConnectionFactory::ServerConnectionFactory(Server* server, Poco::Net::HTTPServerParams::Ptr pParams, Poco::Net::HTTPServerResponserFactory::Ptr pFactory):
+ServerConnectionFactory::ServerConnectionFactory(Server* server, Poco::Net::HTTPServerParams::Ptr pParams, Poco::Net::HTTPServerResponderFactory::Ptr pFactory):
 	_server(server),
 	_pParams(pParams),
 	_pFactory(pFactory)

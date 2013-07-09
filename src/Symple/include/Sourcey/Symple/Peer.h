@@ -29,7 +29,7 @@ namespace scy {
 namespace smple {
 
 
-class Peer: public JSON::Value
+class Peer: public json::Value
 	/// This class represents a peer on the network.
 	/// A Peer object may also contain arbitrary data set by
 	/// the client to share with other peers on the network.
@@ -38,7 +38,7 @@ class Peer: public JSON::Value
 public:		
 	Peer();
 	Peer(const Peer& r);
-	Peer(const JSON::Value& r);
+	Peer(const json::Value& r);
 	virtual ~Peer();
 
 	Address address() const;

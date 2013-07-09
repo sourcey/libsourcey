@@ -18,6 +18,7 @@
 
 
 #include "Sourcey/Media/AVEncoder.h"
+#include "Sourcey/Media/VideoCapture.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Media/FLVMetadataInjector.h"
 
@@ -79,7 +80,9 @@ int DispatchOutputPacket(void* opaque, UInt8* buffer, int bufferSize)
 	// Callback example at: http://lists.mplayerhq.hu/pipermail/libav-client/2009-May/003034.html
 	AVEncoder* klass = reinterpret_cast<AVEncoder*>(opaque);
 	if (klass) {
-		traceL("AVEncoder", klass) << "Dispatching Packet: " << bufferSize << endl;		
+		traceL("AVEncoder", klass) << "Dispatching Packet: " << klass->state() << ": " << bufferSize << endl;		
+		if (!klass->isActive())
+			return bufferSize;
 		assert(klass->isActive());
 		MediaPacket packet((const char*)buffer, bufferSize);
 		klass->emit(klass, packet);
@@ -265,7 +268,7 @@ void AVEncoder::process(IPacket& packet)
 
 	// We may be receiving either audio or video packets	
 	VideoPacket* videoPacket = dynamic_cast<VideoPacket*>(&packet);
-	if (videoPacket) {		
+	if (videoPacket) {
 		encodeVideo((unsigned char*)videoPacket->data(), videoPacket->size(), videoPacket->width, videoPacket->height);
 		return;
 	}
@@ -363,6 +366,8 @@ void AVEncoder::freeVideo()
 bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, int height)
 {
 	traceL("AVEncoder", this) << "Encoding Video Packet: " << bufferSize << endl;	
+	//traceL("AVEncoder", this) << "Encoding Video Packet ###################### state: " << state() << endl;	
+	assert(isActive());
 	
 	RecordingOptions* options = NULL;		
 	AVFormatContext* formatCtx = NULL;
@@ -374,9 +379,13 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 		formatCtx = _formatCtx;
 		video = _video;
 	}
-
+	
 	assert(video);
 	assert(video->frame);
+	assert(buffer);
+	assert(bufferSize);
+	assert(width);
+	assert(height);
 
 	if (!isActive())
 		throw Exception("The encoder is not initialized.");
@@ -385,7 +394,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 		throw Exception("No video context");
 
 	if (!buffer || !bufferSize || !width || !height)
-		throw Exception("Cannot encode video frame.");
+		throw Exception("Invalid video frame.");
 	
 	// Recreate the video conversion context if the
 	// input resolution changes.
@@ -438,6 +447,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 
 		// Write the encoded frame to the output file / stream.
 		assert(isActive());
+		traceL("AVEncoder", this) << "Encoding Video Packet ################## state: " << state() << endl;	
 		if (av_interleaved_write_frame(formatCtx, &opacket) < 0) {
 			errorL("AVEncoder", this) << "Cannot write video frame" << endl;
 			return false;

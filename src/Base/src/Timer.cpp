@@ -26,7 +26,6 @@ using namespace std;
 
 
 namespace scy {
-namespace uv {
 	
 
 Timer::Timer(uv_loop_t* loop) : 
@@ -83,7 +82,7 @@ bool Timer::start(Int64 timeout, Int64 interval)
 	assert(_count == 0);
 	_timeout = timeout;
 	_interval = interval;
-    int r = uv_timer_start(handle<uv_timer_t>(), uv::onTimeout, timeout, interval);
+    int r = uv_timer_start(handle<uv_timer_t>(), Timer::onTimeout, timeout, interval);
     if (r) 
 		setLastError();
 	else {
@@ -181,7 +180,7 @@ void Timer::onTimeout()
 }
 
 
-} } // namespace scy::uv
+} // namespace scy::uv
 
 
 

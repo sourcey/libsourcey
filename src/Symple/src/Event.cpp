@@ -48,7 +48,7 @@ Event::Event(const Event& root) :
 }
 
 
-Event::Event(const JSON::Value& root) :
+Event::Event(const json::Value& root) :
 	Message(root)
 {
 	if (!isMember("type"))

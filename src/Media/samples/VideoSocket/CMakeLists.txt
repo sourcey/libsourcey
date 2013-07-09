@@ -4,5 +4,7 @@ include_dependency(FFmpeg REQUIRED)
 include_dependency(OpenCV REQUIRED)
 include_dependency(RtAudio REQUIRED)
 include_dependency(JsonCpp REQUIRED)
+include_dependency(LibUV REQUIRED)
+include_dependency(HttpParser REQUIRED)
   
-define_sourcey_module_sample(VideoSocket Anionu Base Net Util HTTP Media)
+define_sourcey_module_sample(VideoSocket Base UV Net HTTP Media Util)

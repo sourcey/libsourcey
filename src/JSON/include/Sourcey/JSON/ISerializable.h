@@ -26,15 +26,15 @@
 
 
 namespace scy {
-namespace JSON {
+namespace json {
 
 
 class ISerializable
 {
 public:
    virtual ~ISerializable() {};
-   virtual void serialize(JSON::Value& root) = 0;
-   virtual void deserialize(JSON::Value& root) = 0;
+   virtual void serialize(json::Value& root) = 0;
+   virtual void deserialize(json::Value& root) = 0;
 };
 
 
@@ -43,10 +43,10 @@ inline bool serialize(ISerializable* pObj, std::string& output)
    if (pObj == NULL)
       return false;
  
-   JSON::Value serializeRoot;
+   json::Value serializeRoot;
    pObj->serialize(serializeRoot);
  
-   JSON::StyledWriter writer;
+   json::StyledWriter writer;
    output = writer.write(serializeRoot);
  
    return true;
@@ -58,8 +58,8 @@ inline bool deserialize(ISerializable* pObj, std::string& input)
    if (pObj == NULL)
       return false;
  
-   JSON::Value deserializeRoot;
-   JSON::Reader reader;
+   json::Value deserializeRoot;
+   json::Reader reader;
  
    if (!reader.parse(input, deserializeRoot))
       return false;
@@ -70,7 +70,7 @@ inline bool deserialize(ISerializable* pObj, std::string& input)
 }
 
 
-} } // namespace scy::JSON
+} } // namespace scy::json
 
 
 #endif // SOURCEY_JSON_ISerializable.h

@@ -46,8 +46,7 @@ public:
 		/// Initializes the socket and establishes a secure connection to 
 		/// the TCP server at the given address.
 		///
-		/// The SSL handshake is performed the first time sendBytes(), 
-		/// receiveBytes() or completeHandshake() is called.	
+		/// The SSL handshake is performed when the socket is connected.	
 	
 	virtual bool shutdown();
 
@@ -59,6 +58,7 @@ public:
 		/// shutting down the TCP connection.
 	
 	virtual int send(const char* data, int len, int flags = 0);
+	virtual int send(const char* data, int len, const net::Address& peerAddress, int flags = 0);
 		
 	int available() const;
 		/// Returns the number of bytes available from the

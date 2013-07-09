@@ -44,7 +44,7 @@
 //      - call: SSL_do_handshake()
 //      - call: _sslBuffer.update()
 // 3) when you receive data from the socket, add this to the buffer:
-//      - call: _sslBuffer.addEncryptedData()
+//      - call: _sslBuffer.addIncomingData()
 //      - call: _sslBuffer.update()
  
  
@@ -75,7 +75,7 @@ public:
 		/// Issues an orderly SSL shutdown.
 
 	void update();
-	void addEncryptedData(const char* data, size_t len);
+	void addIncomingData(const char* data, size_t len);
 	void addOutgoingData(const std::string& data);
 	void addOutgoingData(const char* data, size_t len);
 		
@@ -92,7 +92,7 @@ private:
 	SSL* _ssl;
 	BIO* _readBIO; // SSL reads from this buffer (so we write encrypted data into this)
 	BIO* _writeBIO; // SSL writes into this buffer (so we need to send this to the server)
-	std::vector<char> _bufferOut; // application data, what needs to be encrypted and send to server
+	std::vector<char> _bufferOut; // payload, what needs to be encrypted and send to server
 	net::SSLBase* _socket;
 
 	friend class net::SSLBase;

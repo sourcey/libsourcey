@@ -118,8 +118,9 @@ public:
 	}
 
 	RawPacket(const char* data, size_t size = 0) : 
-		_data(NULL), _size(size), freeOnDestroy(false)
+		_data(NULL), _size(size), freeOnDestroy(true)
 	{
+		setData(data, size);
 	}
 
 	RawPacket(void* source, IPacketInfo* info, char* data = NULL, size_t size = 0) : 
@@ -128,14 +129,9 @@ public:
 	}
 
 	RawPacket(const RawPacket& that) : 
-		IPacket(that), 
-		//_data(that._data), 
-		//_size(that._size), 
-		_data(NULL), 
-		_size(0), 
-		freeOnDestroy(that.freeOnDestroy)
+		IPacket(that), _data(NULL), _size(0), freeOnDestroy(that.freeOnDestroy)
 	{
-		 assign(that._data, that._size);
+		 setData(that._data, that._size);
 	}
 	
 	virtual ~RawPacket() 
@@ -149,61 +145,36 @@ public:
 		return new RawPacket(*this);
 	}
 
-	virtual void assign(char* data, size_t size) 
+	virtual void setData(char* data, size_t size) 
 	{
 		assert(size > 0);
 
-		// If freeOnDestroy is set we memcopy
+		// If freeOnDestroy is set we memcpy data
 		if (freeOnDestroy) {
-
-			// Delete old buffer
-			if (_data)
-				delete _data;
-
-			std::memcpy(_data, data, size);
-			//char* data = new char[buf.size()];
-			//std::memcpy(data, buf.begin(), buf.size());
-			//_data = data;
+			setData((const char*)data, size);
 		}
 
-		// Otherwise we just refernece the ptr
+		// Otherwise we just reference the ptr
 		else {
 			_data = data;
 			_size = size; 
 		}
 	}
 
-	virtual void assign(const char* data, size_t size) 
+	virtual void setData(const char* data, size_t size) 
 	{
-		// If data is const we memcpy
+		// If data is const we memcpy data
 		assert(freeOnDestroy);
 		assert(size > 0);
+		if (_data)
+			delete _data;
+		_data = new char[size];
 		std::memcpy(_data, data, size);
-
-		/*
-		// Clone data if memory is managed
-		if (freeOnDestroy) {
-			char* data = new char[size];
-			std::memcpy(data, that._data, that._size);
-			_data = data;
-		}
-		*/
 	}	
 
 	virtual bool read(Buffer& buf) 
 	{ 
-		assign(buf.begin(), buf.size());
-		/*
-		if (freeOnDestroy) {
-			char* data = new char[buf.size()];
-			std::memcpy(data, buf.begin(), buf.size());
-			_data = data;
-		}
-		else {
-			_data = buf.begin();
-			_size = buf.size(); 
-		}
-		*/
+		setData(buf.begin(), buf.size());
 		return true;
 	}
 
@@ -240,3 +211,36 @@ public:
 
 
 #endif // SOURCEY_PACKET_H
+
+
+		/*
+		// Clone data if memory is managed
+		if (freeOnDestroy) {
+			char* data = new char[size];
+			std::memcpy(data, that._data, that._size);
+			_data = data;
+		}
+		*/
+
+		/*
+		if (freeOnDestroy) {
+			char* data = new char[buf.size()];
+			std::memcpy(data, buf.begin(), buf.size());
+			_data = data;
+		}
+		else {
+			_data = buf.begin();
+			_size = buf.size(); 
+		}
+		*/
+
+			/*
+			// Delete old buffer
+			if (_data)
+				delete _data;			
+			_data = new char[size];
+			std::memcpy(_data, data, size);
+			//char* data = new char[buf.size()];
+			//std::memcpy(data, buf.begin(), buf.size());
+			//_data = data;
+			*/

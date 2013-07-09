@@ -159,7 +159,7 @@ private:
 };
 
 
-inline void AllocateOpenCVInputFormat(const VideoCapture* capture, Format& format) 
+inline void setVideoCaptureInputFormat(const VideoCapture* capture, Format& format) 
 	/// Allocates an OpenCV compatible input format for
 	/// our encoders.
 {
@@ -183,16 +183,16 @@ struct MatPacket: public VideoPacket
 	cv::Mat* mat;	// For OpenCV generated packets.
 
 	MatPacket(const char* data = NULL,
-				int size = 0,
-				int width = 0,
-				int height = 0,
-				double time = 0) :
+			  int size = 0,
+			  int width = 0,
+			  int height = 0,
+			  double time = 0) :
 		VideoPacket(data, size, width, height, time),
 		mat(NULL) {};
 
 	MatPacket(cv::Mat* mat, double time = 0) :
-		VideoPacket((const char*)mat->data, mat->total(), mat->cols, mat->rows, time),
-		mat(mat) {};
+		VideoPacket((const char*)mat->data, mat->rows*mat->step, mat->cols, mat->rows, time), //mat->total()
+		mat(mat) {}
 
 	virtual IPacket* clone() const {
 		return new MatPacket(*this);

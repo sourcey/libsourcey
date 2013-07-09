@@ -31,19 +31,19 @@ namespace smple {
 
 
 Address::Address() :
-	JSON::Value(Json::objectValue)
+	json::Value(Json::objectValue)
 {
 }
 
 
 Address::Address(const Address& r) :
-	JSON::Value(r)
+	json::Value(r)
 {
 }
 
 
-Address::Address(const JSON::Value& r) :
-	JSON::Value(r)
+Address::Address(const json::Value& r) :
+	json::Value(r)
 {
 }
 

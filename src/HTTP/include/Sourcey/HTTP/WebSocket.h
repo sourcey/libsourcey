@@ -25,31 +25,24 @@
 #include "Sourcey/Buffer.h"
 #include "Sourcey/Net/Socket.h"
 #include "Sourcey/Net/TCPSocket.h"
-#include "Sourcey/HTTP/Client.h"
+#include "Sourcey/HTTP/Request.h"
+#include "Sourcey/HTTP/Response.h"
+#include "Sourcey/HTTP/Parser.h"
 #include "Poco/Random.h"
-/*
-#include "Sourcey/Net/Reactor.h"
-#include "Sourcey/Net/StatefulSocket.h"
-
-#include "Poco/URI.h"
-#include "Poco/Net/SocketStream.h"
-#include "Poco/Net/StreamSocket.h"
-#include "Poco/Net/SecureStreamSocket.h"
-*/
 
 
 namespace scy {
 namespace http {
 
 	
-class WebSocketBase;
+class WebSocketAdapter;
 class WebSocket: public net::Socket
 	/// WebSocket is a disposable SSL socket wrapper
-	/// for WebSocketBase which can be created on the stack.
-	/// See WebSocketBase for implementation details.
+	/// for WebSocketAdapter which can be created on the stack.
+	/// See WebSocketAdapter for implementation details.
 {
 public:	
-	typedef WebSocketBase Base;
+	typedef WebSocketAdapter Base;
 	typedef std::vector<WebSocket> List;
 	
 	enum Mode
@@ -80,7 +73,7 @@ public:
 	};
 	
 	enum SendFlags
-		/// Combined header flags and opcodes for use with sendFrame().
+		/// Combined header flags and opcodes for use with writeFrame().
 	{
 		FRAME_TEXT   = FRAME_FLAG_FIN | FRAME_OP_TEXT,
 			/// Use this for sending a single text (UTF-8) payload frame.
@@ -135,56 +128,218 @@ public:
 	WebSocket();
 		/// Creates an unconnected WebSocket.
 
-	WebSocket(WebSocketBase* base, bool shared = false);
+	WebSocket(net::SocketBase* base, bool shared = false);
 		/// Creates the Socket and attaches the given SocketBase.
 		///
-		/// The SocketBase must be a WebSocketBase, otherwise an
+		/// The SocketBase must be a WebSocketAdapter, otherwise an
 		/// exception will be thrown.
 
 	WebSocket(const net::Socket& socket);
 		/// Creates the WebSocket with the SocketBase
 		/// from another socket. The SocketBase must be
-		/// a WebSocketBase, otherwise an exception will be thrown.
+		/// a WebSocketAdapter, otherwise an exception will be thrown.
+
+	WebSocketAdapter& adapter() const;
+		/// Returns the WebSocketAdapter for this socket.
 	
-	WebSocketBase& base() const;
-		/// Returns the SocketBase for this socket.
+	virtual bool shutdown(UInt16 statusCode, const std::string& statusMessage);
 };
 	
 	
 // ---------------------------------------------------------------------
 //
-class WebSocketParser
+class WebSocketFramer
 	/// This class implements a WebSocket parser according
 	/// to the WebSocket protocol described in RFC 6455.
 {
 public:
-	WebSocketParser(WebSocketBase* socketBase, bool mustMaskPayload);
-		/// Creates a SocketBase using the given native socket.
+	WebSocketFramer(WebSocket::Mode mode);
+		/// Creates a SocketBase using the given SocketBase.
 
-	virtual ~WebSocketParser();
+	virtual ~WebSocketFramer();
 
-	virtual int sendFrame(const char* buffer, int length, int flags);
-		/// Sends a WebSocket protocol frame.
+	virtual int writeFrame(const char* buffer, int length, int flags, Buffer& frame);
+		/// Writes a WebSocket protocol frame from the given data.
 		
-	virtual int receiveFrame(Buffer& buffer);
+	virtual int readFrame(Buffer& buffer);
 		/// Receives a WebSocket protocol frame.
-		/// Data is read from the given buffer and raw packet
-		/// data is emitted via the WebSocket::Recv signal.
+		///
+		/// The buffer's read position and size will be set to match
+		/// the actual beginning and end of the contained payload.
+		/// This enables us to work with the socket buffer directly
+		/// without copying any data.
 	
-	//WebSocket::Mode mode() const;
-
-
+	//
+	/// Server side
+	void acceptRequest(http::Request& request, http::Response& response);
+	
 	//
 	/// Client side
-
 	void sendHandshakeRequest(); 
-
-	bool handleHandshakeResponse();
-		/// Reads the HTTP handshake response.
-		/// Returns true on success, false on resend
-		/// request, or throws of error.
+		/// Sends the initial WS handshake HTTP request.
+		
+	void createHandshakeRequest(http::Request& request); 
+		/// Appends the WS hanshake HTTP request hearers.
+	
+	bool checkHandshakeResponse(http::Response& response);
+		/// Checks the veracity the HTTP handshake response.
+		/// Returns true on success, false if the request should 
+		/// be resent (in case of authentication), or throws on error.
 
 	void completeHandshake(http::Response& response);
+		/// Verifies the handshake response or thrown and exception.
+
+	bool handshakeComplete() const;
+		/// Return true when the handshake has completed successfully.
+
+protected:
+	int frameFlags() const;
+		/// Returns the frame flags of the most recently received frame.
+		/// Set by readFrame()
+		
+	bool mustMaskPayload() const;
+		/// Returns true if the payload must be masked.	
+		/// Used by writeFrame()
+		
+	WebSocket::Mode mode() const;
+	
+	enum
+	{
+		FRAME_FLAG_MASK   = 0x80,
+		MAX_HEADER_LENGTH = 14
+	};
+
+private:
+	WebSocket::Mode _mode;
+	int _frameFlags;
+	bool _mustMaskPayload;
+	int _headerState;
+	Poco::Random _rnd;
+	std::string _key; // client handshake key
+
+	friend class WebSocketAdapter;
+};
+
+
+// ---------------------------------------------------------------------
+//
+class WebSocketAdapter: public net::SocketAdapter
+{
+public:	
+	WebSocketAdapter(net::Socket* socket, WebSocket::Mode mode); 
+	WebSocketAdapter(WebSocket::Mode mode);
+	
+	virtual int send(const char* data, int len, int flags = WebSocket::FRAME_BINARY);
+	virtual int send(const char* data, int len, const net::Address& peerAddr, int flags = WebSocket::FRAME_BINARY);
+	
+	virtual bool shutdown(UInt16 statusCode, const std::string& statusMessage);
+
+protected:
+	virtual ~WebSocketAdapter();
+
+protected:
+	WebSocketFramer framer;
+
+	friend class WebSocketFramer;
+};
+
+
+// ---------------------------------------------------------------------
+//
+class WebSocketClientAdapter: public WebSocketAdapter
+{
+public:	
+	WebSocketClientAdapter(net::Socket* socket = NULL, http::Request* request = NULL); 
+	
+	virtual void sendRequest(http::Request& request);
+
+	virtual void onSocketConnect();
+	virtual void onSocketRecv(Buffer& buffer, const net::Address& peerAddr);
+
+	http::Request* request;
+
+protected:
+	virtual ~WebSocketClientAdapter();
+};
+
+
+// ---------------------------------------------------------------------
+//
+class WebSocketServerAdapter: public WebSocketAdapter
+{
+public:	
+	WebSocketServerAdapter(net::Socket* socket = NULL); 
+
+	virtual void onSocketRecv(Buffer& buffer, const net::Address& peerAddr);
+
+protected:
+	virtual ~WebSocketServerAdapter();
+};
+
+
+
+} } // namespace scy::Net
+
+
+#endif //  SOURCEY_NET_WebSocket_H
+
+
+
+/* 
+
+	//virtual void onSocketConnect();
+	//virtual void onSocketRecv(Buffer& buffer, const net::Address& peerAddr);
+	
+	//SocketBase* socketBase, bool mustMaskPayload
+	//uv::TCPBase	
+	//Buffer& recvBuffer();
+
+	//virtual void onConnect(int status);
+	//virtual void onRead(const char* data, int len);
+	//virtual void onRecv(Buffer& buf);	
+
+
+	//virtual void* instance() { return this; }	
+
+		/// Reads the raw WS payload
+		/// Receives and emits the framed payload
+
+	//virtual void close();
+		/// Closes the socket.
+		///
+		/// Shuts down the connection by attempting
+		/// an orderly SSL shutdown, then actually
+		/// shutting down the TCP connection.
+		
+	//int available() const;
+		/// Returns the number of bytes available from the
+		/// SSL buffer for immediate reading.
+
+// ---------------------------------------------------------------------
+//
+class WebSocketReceiver
+	/// This class implements a WebSocket parser according
+	/// to the WebSocket protocol described in RFC 6455.
+{
+public:
+	WebSocketFramer(WebSocketAdapter* socketBase, bool mustMaskPayload);
+		/// Creates a SocketBase using the given native socket.
+
+	virtual ~WebSocketFramer();
+
+	virtual int writeFrame(const char* buffer, int length, int flags, Buffer& frame);
+		/// Writes a WebSocket protocol frame from the given data.
+		
+	virtual int readFrame(Buffer& buffer);
+		/// Receives a WebSocket protocol frame.
+		///
+		/// The buffer's read position and size will be set to match
+		/// the actual beginning and end of the contained payload.
+		/// This enables us to work with the socket buffer directly
+		/// without copying any data.
+
+	
+	//WebSocket::Mode mode() const;
 
 
 	//
@@ -198,86 +353,41 @@ public:
 		/// and the handshake is complete.
 
 protected:
+	int frameFlags() const;
+		/// Returns the frame flags of the most recently received frame.
+		
+	bool mustMaskPayload() const;
+		/// Returns true if the payload must be masked.	
+	
 	enum
 	{
 		FRAME_FLAG_MASK   = 0x80,
 		MAX_HEADER_LENGTH = 14
 	};
 
-	int frameFlags() const;
-		/// Returns the frame flags of the most recently received frame.
-		
-	bool mustMaskPayload() const;
-		/// Returns true if the payload must be masked.
-	
-
 private:
-	WebSocketBase* _socketBase;
+	WebSocketAdapter* _socketBase;
+	WebSocketFramer framer;
 	int _frameFlags;
 	bool _mustMaskPayload;
 	int _headerState;
 	Poco::Random _rnd;
 	std::string _key; // client handshake key
 
-	friend class WebSocketBase;
+	friend class WebSocketAdapter;
 };
+*/
 
 
-//
-// inlines
-//
-inline int WebSocketParser::frameFlags() const
-{
-	return _frameFlags;
-}
 
-
-inline bool WebSocketParser::mustMaskPayload() const
-{
-	return _mustMaskPayload;
-}
-
-
-// ---------------------------------------------------------------------
-//
-class WebSocketBase: public uv::TCPBase	
-{
-public:	
-	WebSocketBase();
 	
-	virtual bool shutdown(Poco::UInt16 statusCode, const std::string& statusMessage);
-
-	//virtual void close();
-		/// Closes the socket.
-		///
-		/// Shuts down the connection by attempting
-		/// an orderly SSL shutdown, then actually
-		/// shutting down the TCP connection.
+	/*
 	
+	//WebSocketAdapter& base() const;
+		/// Returns the SocketBase for this socket.
 	virtual int send(const char* data, int len, int flags = WebSocket::FRAME_BINARY);
-		
-	int available() const;
-		/// Returns the number of bytes available from the
-		/// SSL buffer for immediate reading.
-
-	virtual void onConnect(int status);
-
-	virtual void onRead(const char* data, int len);
-		/// Reads the raw WS payload
-
-	virtual void onRecv(Buffer& buf);	
-		/// Reads and emits application data
-		
-protected:
-	virtual void* instance() { return this; }
-	virtual ~WebSocketBase();
-
-protected:
-	WebSocketParser _wsParser;
-
-	friend class WebSocketParser;
-};
-
+	virtual int send(const char* data, int len, const net::Address& peerAddr, int flags = WebSocket::FRAME_BINARY);
+	*/
 
 
 
@@ -352,22 +462,22 @@ public:
 // ---------------------------------------------------------------------
 //
 template <class SocketBaseT>
-class WebSocketBase: public SocketBaseT
+class WebSocketAdapter: public SocketBaseT
 {
 public:
-	WebSocketBase(Reactor& reactor) :
+	WebSocketAdapter(Reactor& reactor) :
 		SocketBaseT(reactor)
 	{  
 	}
 
-	WebSocketBase(Reactor& reactor, const std::string& uri) :
+	WebSocketAdapter(Reactor& reactor, const std::string& uri) :
 		SocketBaseT(reactor),
 		_headerState(0),
 		_uri(uri)
 	{
 	}
 
-	virtual ~WebSocketBase()
+	virtual ~WebSocketAdapter()
 	{
 	}
 
@@ -545,7 +655,7 @@ public:
 		return _uri.getPort() ? _uri.getPort() : (_uri.getScheme() == "wss" ? 443 : 80);
 	}
 
-	virtual const char* className() const { return "WebSocketBase"; }
+	virtual const char* className() const { return "WebSocketAdapter"; }
 	
 
 protected:	
@@ -574,18 +684,11 @@ protected:
 };
 
 
-typedef WebSocketBase< Net::SocketBase< ::Poco::Net::StreamSocket, TCP, Net::IWebSocket > >  WebSocket;
-typedef WebSocketBase< Net::SocketBase< ::Poco::Net::SecureStreamSocket, SSLTCP, Net::IWebSocket > >  SSLWebSocket;
-typedef WebSocketBase< Net::PacketSocketBase< ::Poco::Net::StreamSocket, TCP, Net::IPacketWebSocket > >  PacketWebSocket;
-typedef WebSocketBase< Net::PacketSocketBase< ::Poco::Net::SecureStreamSocket, SSLTCP, Net::IPacketWebSocket > >  SSLPacketWebSocket;
+typedef WebSocketAdapter< Net::SocketBase< ::Poco::Net::StreamSocket, TCP, http::WebSocket > >  WebSocket;
+typedef WebSocketAdapter< Net::SocketBase< ::Poco::Net::SecureStreamSocket, SSLTCP, http::WebSocket > >  SSLWebSocket;
+typedef WebSocketAdapter< Net::PacketSocketBase< ::Poco::Net::StreamSocket, TCP, net::IPacketWebSocket > >  PacketWebSocket;
+typedef WebSocketAdapter< Net::PacketSocketBase< ::Poco::Net::SecureStreamSocket, SSLTCP, net::IPacketWebSocket > >  SSLPacketWebSocket;
 */
-
-
-} } // namespace scy::Net
-
-
-#endif //  SOURCEY_NET_WebSocket_H
-
 
 
 

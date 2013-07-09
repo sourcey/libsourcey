@@ -34,66 +34,58 @@ namespace scy {
 namespace http {
 
 
-Connection::Connection(const net::Socket& socket, http_parser_type type) : 
-	_parser(*this, type),
+Connection::Connection(const net::Socket& socket) : 
 	_request(new Request),
 	_response(new Response),
 	_socket(socket), 
+	_adapter(NULL),
 	_closed(false),
-	_sentResponseHeaders(false),
+	_shouldSendHeaders(true),
 	_timeout(30 * 60 * 1000) // 30 secs
 {	
-	traceL("Connection", this) << "Creating: " << this << endl;
-	_socket.base().addObserver(*this, true);
+	traceL("Connection", this) << "Creating" << endl;
+
+	_socket.Close += delegate(this, &Connection::onSocketClose);
+	_socket.Recv += delegate(this, &Connection::onSocketRecv);
 }
 
 	
 Connection::~Connection() 
 {	
-	traceL("Connection", this) << "Destroying: " << this << endl;
+	traceL("Connection", this) << "Destroying" << endl;
+
 	// Must be close()'d
 	assert(_closed);
 		
 	delete _request;
 	delete _response;
-
-	traceL("Connection", this) << "Destroying: OK" << endl;
 }
 
 
-bool Connection::sendHeaders(bool whiny)
+bool Connection::sendRaw(const char* buf, size_t len, int flags)
 {
-	assert(!_sentResponseHeaders);
+	traceL("Connection", this) << "Send Raw: " << len << endl;
+
+	assert(len > 0);
+	return _socket.send(buf, len, flags) > 0;
+}
+
+
+bool Connection::sendHeaders()
+{
+	assert(_shouldSendHeaders);
 	assert(outgoingHeaders());
 	
 	ostringstream os;
 	outgoingHeaders()->write(os);
 	string headers(os.str().data(), os.str().length());
 
-	traceL("Connection", this) << "Send Headers >>>>: " << headers << endl; // remove me
+	traceL("ConnectionAdapter", this) << "Sending Headers >>>>: " << headers << endl; // remove me
 
 	_timeout.start();
-	_sentResponseHeaders = true;
+	_shouldSendHeaders = false;
 
 	return _socket.send(headers.data(), headers.length()) > 0;
-}
-
-
-bool Connection::sendBytes(const char* buf, size_t len, bool whiny)
-{
-	// TODO: Assert request read complete
-	// TODO: Binary data / file response
-	// TODO: Send mutex in the future - not needed 
-	// now because we are running in single thread mode.
-
-	// Send headers
-	if (!_sentResponseHeaders) 
-		sendHeaders(whiny);
-
-	//traceL("Connection", this) << "SEND >>>>\n" << string(buf, len) << endl; // remove me
-
-	// Send body / chunk
-	return _socket.send(buf, len) > 0;
 }
 
 
@@ -101,10 +93,11 @@ void Connection::close()
 {
 	traceL("Connection", this) << "Close" << endl;	
 	assert(!_closed);
-	assert(_socket.base().refCount() == 2);
+	assert(_socket.base().refCount() == 1);
 	
 	_closed = true;
-	_socket.base().removeObserver(*this);
+	
+	_socket.Close -= delegate(this, &Connection::onSocketClose);
 	_socket.close();
 
 	onClose();
@@ -113,9 +106,35 @@ void Connection::close()
 }
 
 
+void Connection::setAdapter(net::SocketAdapter* adapter)
+{
+	_adapter = adapter;
+	_socket.setAdapter(adapter);
+}
+
+
 void Connection::onClose()
 {
 	Close.emit(this);
+}
+
+
+void Connection::onSocketRecv(void*, net::SocketPacket& packet)
+{		
+	assert(_adapter);
+	_timeout.stop();
+
+	// Handle payload data
+	onPayload(packet.buffer);
+}
+
+
+void Connection::onSocketClose(void* sender) 
+{
+	traceL("Connection", this) << "On socket close" << endl;
+
+	// Close if the socket is desconnected
+	close();
 }
 
 
@@ -137,42 +156,85 @@ net::Socket& Connection::socket()
 }
 	
 
-Buffer& Connection::buffer()
+Buffer& Connection::recvBuffer()
 {
 	return static_cast<net::TCPBase&>(_socket.base()).buffer();
 }
 
 	
-bool Connection::closed()
+bool Connection::closed() const
 {
 	return _closed;
 }
 
 	
-bool Connection::expired()
+bool Connection::shouldSendHeaders() const
+{
+	return _shouldSendHeaders;
+}
+
+
+void Connection::shouldSendHeaders(bool flag)
+{
+	_shouldSendHeaders = flag;
+}
+
+	
+bool Connection::expired() const
 {
 	return _timeout.expired();
 }
 
 
+// -------------------------------------------------------------------
 //
-// Socket callbacks
-//
+ConnectionAdapter::ConnectionAdapter(Connection& connection, http_parser_type type) : 
+	_connection(connection),
+	_parser(type)
+{	
+	traceL("Connection", this) << "Creating: " << this << endl;
 
-void Connection::onSocketRecv(Buffer& buf, const net::Address& peerAddr)
-{
-	traceL("Connection", this) << "On socket recv" << endl;	
-	_timeout.stop();
-	_parser.parse(buf.data(), 0, buf.size());
+	// Setup the HTTP Parser
+	_parser.setObserver(this);
+	if (type == HTTP_REQUEST)
+		_parser.setRequest(&connection.request());
+	else
+		_parser.setResponse(&connection.response());
 }
 
 
-void Connection::onSocketClose()
+ConnectionAdapter::~ConnectionAdapter()
 {
-	traceL("Connection", this) << "On socket close" << endl;	
+}
 
-	// Close the connection when the socket closes
-	close();
+
+int ConnectionAdapter::send(const char* data, int len, int flags)
+{
+	traceL("ConnectionAdapter", this) << "send: " << len << endl;
+	
+	// Send headers on initial send
+	if (_connection.shouldSendHeaders())
+		_connection.sendHeaders();
+
+	// Send body / chunk
+	return socket->base().send(data, len, flags);
+}
+
+
+void ConnectionAdapter::onSocketRecv(Buffer& buf, const net::Address& peerAddr)
+{
+	traceL("ConnectionAdapter", this) << "On socket recv" << endl;	
+	
+	try {
+		// Parse incoming HTTP messages
+		_parser.parse(buf.data(), buf.size());
+	} 
+	catch(Exception& exc) {
+		errorL("ConnectionAdapter", this) << "HTTP Parser Error: " << exc.displayText() << endl;
+
+		// TODO: Handle parser exceptions
+		socket->close();
+	}
 }
 
 
@@ -180,24 +242,101 @@ void Connection::onSocketClose()
 // Parser callbacks
 //
 
-void Connection::onParserHeader(const string& name, const string& value) 
+void ConnectionAdapter::onParserHeader(const string& name, const string& value) 
 {
-	//traceL("Connection", this) << "On header: " << name << ": " << value << endl;	
-	// TODO: handle onStatus and do request status line handling there
-	//incomingHeaders()->add(name, value);
 }
 
 
-void Connection::onParserError(const ParserError& err)
+void ConnectionAdapter::onParserHeadersEnd() 
 {
-	traceL("Connection", this) << "Parser error: " << err.message << endl;	
-	close();
+	traceL("ConnectionAdapter", this) << "On headers end" << endl;	
+
+	_connection.onHeaders();
 }
+
+
+void ConnectionAdapter::onParserChunk(const char* buf, size_t len)
+{
+	traceL("ClientConnection", this) << "On parser chunk" << endl;	
+
+	assert(_connection.recvBuffer().size() == len);
+	net::SocketAdapter::onSocketRecv(_connection.recvBuffer(), socket->peerAddress());
+}
+
+
+void ConnectionAdapter::onParserEnd()
+{
+	traceL("ConnectionAdapter", this) << "On parser end" << endl;	
+
+	_connection.onComplete();
+}
+
+
+void ConnectionAdapter::onParserError(const ParserError& err)
+{
+	warnL("Connection", this) << "On parser error: " << err.message << endl;	
+
+	// Close the connection on parser error
+	_connection.close();
+}
+
+
+} } // namespace scy::http
+
+
+
+	
+/*
+int ConnectionAdapter::send(const char* data, int len, int flags)
+{
+	traceL("ConnectionAdapter", this) << "send: " << len << endl;
+
+	// Send body / chunk
+	return socket->base().send(data, len, flags);
+}
+*/
+
+
+/*
+void ConnectionAdapter::onSocketClose()
+{
+	traceL("ConnectionAdapter", this) << "On socket close" << endl;	
+
+	// Close the connection when the socket closes
+	_connection.close();
+}
+
+//
+// Parser callbacks
+//
+
+*/
 
 	
 
+	/*
+	// Send headers
+	if (!_shouldSendHeaders) 
+		sendHeaders();
+
+	//traceL("Connection", this) << "SEND >>>>\n" << string(buf, len) << endl; // remove me
+
+	// Send body / chunk
+	return _socket.send(buf, len) > 0;
+	*/
 
 
+
+
+
+/*
+bool Connection::sendRaw(const char* buf, size_t len)
+{
+	ostringstream oss;
+	request.write(oss);
+	write(oss.str().data(), oss.str().length());
+}
+*/
 
 	
 	/*
@@ -221,7 +360,7 @@ void Connection::onParserError(const ParserError& err)
 	/*
 	
 	//assert(0);
-	DefaultServerResponser* handler = new DefaultServerResponser();
+	DefaultServerResponder* handler = new DefaultServerResponder();
 	handler->handleRequest(this, *request, *response);
 	*/
 
@@ -230,9 +369,9 @@ void Connection::onParserError(const ParserError& err)
 // ServerConnection Handler
 //
 
-void DefaultServerResponser::handleRequest(ServerConnection* connection, Request& request, Response& response)
+void DefaultServerResponder::handleRequest(ServerConnection* connection, Request& request, Response& response)
 {
-	traceL("DefaultServerResponser", this) << "Handle Request" << endl;
+	traceL("DefaultServerResponder", this) << "Handle Request" << endl;
 	response.body << "hello";
 	connection->respond();
 }
@@ -276,9 +415,9 @@ void DefaultServerResponser::handleRequest(ServerConnection* connection, Request
 	
 	//server.addServerConnection(this);
 	//assert(socket);
-	//SocketEmitter::socket = &this->socket;
-	//this->_socket.base().addObserver(*this, false);
-	//this->_socket.base().removeObserver(*this);
+	//SocketAdapter::socket = &this->socket;
+	//this->_socket.base().addAdapter(*this, false);
+	//this->_socket.base().removeAdapter(*this);
 	//server.removeServerConnection(this);
 
 
@@ -722,6 +861,3 @@ void* ServerConnection::clientData() const
 	return _clientData;
 }
 */
-
-
-} } // namespace scy::http

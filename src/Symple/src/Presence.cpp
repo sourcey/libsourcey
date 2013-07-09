@@ -46,7 +46,7 @@ Presence::Presence(const Presence& root) :
 }
 
 
-Presence::Presence(const JSON::Value& root) :
+Presence::Presence(const json::Value& root) :
 	Message(root)
 {
 	if (!isMember("type"))

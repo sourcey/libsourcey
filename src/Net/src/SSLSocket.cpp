@@ -130,6 +130,12 @@ bool SSLBase::shutdown()
 
 int SSLBase::send(const char* data, int len, int flags) 
 {	
+	return send(data, len, peerAddress(), flags);
+}
+
+
+int SSLBase::send(const char* data, int len, const net::Address& peerAddress, int flags) 
+{	
 	assert(len <= net::MAX_TCP_PACKET_SIZE);	
 	assert(initialized());
 	traceL("SSLBase", this) << "Send: " << len << endl;
@@ -181,7 +187,7 @@ void SSLBase::onRead(const char* data, int len)
 	traceL("SSLBase", this) << "On SSL Read: " << len << endl;
 
 	// SSL encrypted data is sent to the SSL conetext
-	_sslBuffer.addEncryptedData(data, len);
+	_sslBuffer.addIncomingData(data, len);
 	_sslBuffer.update();
 }
 
@@ -191,7 +197,7 @@ void SSLBase::onConnect(int status)
 	traceL("SSLBase", this) << "On Connected" << endl;
 	if (status) {
 		setLastError();
-		errorL("SSLBase", this) << "Connect Failed: " << errorMessage() << endl;
+		errorL("SSLBase", this) << "Connect Failed: " << error().message << endl;
 		return;
 	}
 	else

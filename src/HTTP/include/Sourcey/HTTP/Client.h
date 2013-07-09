@@ -22,10 +22,9 @@
 
 
 #include "Sourcey/Net/Socket.h"
+#include "Sourcey/Net/SSLSocket.h"
 #include "Sourcey/HTTP/Connection.h"
-#include "Sourcey/HTTP/Request.h"
-#include "Sourcey/HTTP/Response.h"
-#include "Sourcey/HTTP/Parser.h"
+#include "Sourcey/HTTP/WebSocket.h"
 #include "Sourcey/Timer.h"
 /*
 #include "Poco/Net/HTTPResponse.h"
@@ -37,27 +36,39 @@
 
 namespace scy { 
 namespace http {
-
+	
 
 class Client;
 class ClientConnection: public Connection
 {
 public:
-    ClientConnection(Client& client, const net::Address& address);
+    ClientConnection(Client& client, const net::Address& address, 
+		const net::Socket& socket = net::TCPSocket());
 
-	virtual void send(bool whiny = false);
-		/// Sends the HTTP rerquest
-		/// Calls connect() internally if thew socket
+	virtual void send();
+		/// Sends the HTTP request.
+		///
+		/// Calls connect() internally if the socket
 		/// is not already connecting or connected.
 	
+	virtual bool flush();
+		/// Flushes the HTTP request output stream.
+	
 	virtual void close();
-		/// Close the HTTP connection
+		/// Forcefully closes the HTTP connection.
+	
+	//
+	/// Internal callbacks
+	virtual void onHeaders();
+	virtual void onPayload(Buffer& buffer);
+	virtual void onComplete();
+	virtual void onClose();
 		
 	//
 	/// Status signals
-	Signal<Response&> ResponseHeaders;
-	Signal<Buffer&> ResponseBody;	
-	Signal<const Response&> ResponseComplete;
+	Signal<Response&> Headers;
+	Signal<Buffer&> Payload;	
+	Signal<const Response&> Complete;
 		/// May be success or error response		
 	
 protected:
@@ -68,19 +79,8 @@ protected:
 				
 	Client& client();
 	
-	//
-	/// Socket callbacks
-	virtual void onSocketConnect();
-
-	//
-	/// Parser callbacks
-    virtual void onParserHeadersDone();	
-    virtual void onParserChunk(const char* buf, size_t len);
-    virtual void onParserDone();
-
-	//
-	/// Client signals
-	void onShutdown(void*);
+	void onSocketConnect(void*);
+	void onClientShutdown(void*);
 	
 protected:	
 	Client& _client;
@@ -89,6 +89,68 @@ protected:
 
 
 typedef std::vector<ClientConnection*> ClientConnectionList;
+	
+
+// -------------------------------------------------------------------
+//
+class ClientAdapter: public ConnectionAdapter
+{
+public:
+    ClientAdapter(ClientConnection& connection) : 
+		ConnectionAdapter(connection, HTTP_RESPONSE)
+	{
+	}
+};
+	
+
+// -------------------------------------------------------------------
+//
+class SecureClientConnection: public ClientConnection
+{
+public:
+    SecureClientConnection(Client& client, const net::Address& address)
+		: ClientConnection(client, address, net::SSLSocket())
+	{
+	}
+
+	virtual ~SecureClientConnection() 
+	{
+	}
+};
+
+
+// -------------------------------------------------------------------
+//
+class WSClientConnection: public ClientConnection
+{
+public:
+    WSClientConnection(Client& client, const net::Address& address) : 
+		ClientConnection(client, address)
+	{
+		setAdapter(new WebSocketClientAdapter(&socket(), &request()));	
+	}
+
+	virtual ~WSClientConnection() 
+	{
+	}
+};
+
+
+// -------------------------------------------------------------------
+//
+class WSSClientConnection: public ClientConnection
+{
+public:
+    WSSClientConnection(Client& client, const net::Address& address) : 
+		ClientConnection(client, address, net::SSLSocket())
+	{
+		setAdapter(new WebSocketClientAdapter(&socket(), &request()));
+	}
+
+	virtual ~WSSClientConnection() 
+	{
+	}
+};
 
 
 // -------------------------------------------------------------------
@@ -108,11 +170,9 @@ public:
 	}
 	
 	template<class ConnectionT>
-	ClientConnection* createConnectionT(const net::Address& address)
+	ConnectionT* createConnectionT(const net::Address& address)
 	{
-		//ConnectionT* conn = new ConnectionT(*this, address);
-		//addConnection(conn);
-		return new ConnectionT(*this, address); //conn;
+		return new ConnectionT(*this, address);
 	}
 	
 	void onTimer(void*);
@@ -126,10 +186,8 @@ protected:
 	friend class ClientConnection;
 	
 	ClientConnectionList connections;
-	uv::Timer timer;
+	Timer timer;
 };
-
-
 
 
 } } // namespace scy::http
@@ -140,6 +198,49 @@ protected:
 		//conn->Complete += delegate(this, &Client::onConnectionComplete);	
 	//void onConnectionComplete(void* sender, const Response& response);
 		//addConnection(conn);
+
+
+
+
+/*
+// -------------------------------------------------------------------
+//
+struct OutputStream//: public std::ostream
+{
+	Connection& connection;
+	Buffer sendBuffer;
+
+	OutputStream(Connection& connection) :
+		connection(connection)
+	{
+	};
+	
+	OutputStream& operator << (const string& data)
+	{
+		sendBuffer.write(data);
+		return *this;
+	}
+	
+	OutputStream& operator << (const char* data)
+	{
+		sendBuffer.write(data);
+		return *this;
+	}
+
+	template<typename T>
+	OutputStream& operator << (const T& data) {
+		sendBuffer.write<T>(data);
+		return *this;
+	}
+
+	OutputStream& operator << (std::ostream&(*f)(std::ostream&)) 
+	{
+		connection.sendRaw(sendBuffer.data(), sendBuffer.size());
+		return *this;
+	}
+};
+*/
+
 
 
 
@@ -174,7 +275,7 @@ protected:
 
 
 	/*
-	uv::Timer timer;
+	Timer timer;
 	void start()
 	{	
 		assert(socket.base().refCount() == 1);
@@ -199,12 +300,12 @@ protected:
 		return socket.address().port();
 	}
 
-	ClientResponser* createResponser(ClientConnection& conn)
+	ClientResponder* createResponder(ClientConnection& conn)
 	{
 		// The initial HTTP request headers have already
 		// been parsed by now, but the request body may 
 		// be incomplete (especially if chunked).
-		return factory->createResponser(conn);
+		return factory->createResponder(conn);
 	}
 	*/
 

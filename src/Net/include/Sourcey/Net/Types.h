@@ -40,15 +40,6 @@ enum TransportType
 };
 
 
-/*
-struct Error 
-{
-	std::string message;
-	int error;
-};
-*/
-
-
 } } // namespace scy::net
 
 

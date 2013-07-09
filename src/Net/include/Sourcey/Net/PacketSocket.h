@@ -35,15 +35,15 @@ namespace net {
 struct PacketInfo;
 class PacketSocket;
 
-class PacketSocketEmitter: public SocketEmitter, public PacketEmitter
+class PacketSocketAdapter: public SocketAdapter, public PacketEmitter
 {	
 public:	
 	PacketFactory factory;	
 	//Socket* socket;
 
-	PacketSocketEmitter(Socket* socket = NULL, int priority = 50) :
-		SocketEmitter(socket, priority)//, socket(socket)
-		/// Creates the PacketSocketEmitter
+	PacketSocketAdapter(Socket* socket = NULL, int priority = 50) :
+		SocketAdapter(socket, priority)//, socket(socket)
+		/// Creates the PacketSocketAdapter
 		/// This class should have a higher priority than standard
 		/// sockets so we can parse data packets first.		
 	{
@@ -54,13 +54,13 @@ public:
 		/// creation strategies. For best performance the most used 
 		/// strategies should have the highest priority.
 	{	
-		traceL("PacketSocketEmitter", this) << "Recv: " << buf.size() << std::endl;
+		traceL("PacketSocketAdapter", this) << "Recv: " << buf.size() << std::endl;
 		//assert(PacketEmitter::refCount() > 0); // ok to remove this
 		assert(buf.position() == 0);
 		buf.position(0);
 		IPacket* pkt = factory.createPacket(buf); //socket->
 		if (!pkt) {
-			warnL("PacketSocketEmitter", this) << "Cannot create packet." << std::endl;	
+			warnL("PacketSocketAdapter", this) << "Cannot create packet." << std::endl;	
 			return;
 		}
 
@@ -80,13 +80,13 @@ class PacketSocket: public Socket
 {
 public:	
 	PacketSocket(const Socket& socket) : 
-		Socket(socket, new PacketSocketEmitter(this))
+		Socket(socket, new PacketSocketAdapter(this))
 	{
 		assert(Socket::base().refCount() >= 2);
 	}
 
 	PacketSocket(SocketBase* base, bool shared = false) : 
-		Socket(base, shared, new PacketSocketEmitter(this))
+		Socket(base, shared, new PacketSocketAdapter(this))
 	{		
 		assert(!shared || Socket::base().refCount() >= 2);
 	}
@@ -95,10 +95,10 @@ public:
 	{
 	}
 
-	PacketSocketEmitter& emitter() const
-		/// Returns the PacketSocketEmitter for this socket.
+	PacketSocketAdapter& adapter() const
+		/// Returns the PacketSocketAdapter for this socket.
 	{
-		return (PacketSocketEmitter&)*_emitter;
+		return (PacketSocketAdapter&)*_adapter;
 	}
 		
 	
@@ -161,9 +161,9 @@ public:
 		/*
 		// Always try to cast packets as RawPacket types
 		// so we can avoid copying data.
-		RawPacket* dataPacket = packet.as<RawPacket>();
-		if (dataPacket)
-			send(*dataPacket);
+		RawPacket* rawPacket = packet.as<RawPacket>();
+		if (rawPacket)
+			send(*rawPacket);
 		else
 			send(reinterpret_cast<const IPacket&>(packet));
 			*/
@@ -237,9 +237,9 @@ protected:
 	{
 		// Always try to cast packets as RawPacket types
 		// so we can avoid copying data.
-		RawPacket* dataPacket = packet.as<RawPacket>();
-		if (dataPacket)
-			send(*dataPacket);
+		RawPacket* rawPacket = packet.as<RawPacket>();
+		if (rawPacket)
+			send(*rawPacket);
 		else
 			send(reinterpret_cast<const IPacket&>(packet));
 	}

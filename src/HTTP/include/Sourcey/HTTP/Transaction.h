@@ -140,7 +140,7 @@ public:
     void onParserHeader(const std::string& name, const std::string& value);
     void onParserError(const Exception& e);
     void onParserChunk(const Buffer& body);
-    virtual void onParserHeadersDone();
+    virtual void onParserHeadersEnd();
 
 protected:
 

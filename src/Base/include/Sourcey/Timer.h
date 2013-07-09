@@ -22,13 +22,11 @@
 
 
 #include "Sourcey/UV/UVPP.h"
-#include "Sourcey/UV/Base.h"
 #include "Sourcey/Types.h"
 #include "Sourcey/Signal.h"
 
 
 namespace scy {
-namespace uv {
 
 
 class Timer: public uv::Base<>
@@ -36,8 +34,8 @@ class Timer: public uv::Base<>
 	/// in the future.
 {
 public:
-	Timer(Int64 timeout, Int64 interval = 0, uv_loop_t* loop = uv_default_loop());
-	Timer(uv_loop_t* loop = uv_default_loop());
+	Timer(Int64 timeout, Int64 interval = 0, uv_loop_t* loop = NULL);
+	Timer(uv_loop_t* loop = NULL);
 	virtual ~Timer();
 	
 	virtual bool start(Int64 interval);
@@ -72,28 +70,23 @@ public:
 
 	void onTimeout();
 	
-	NullSignal Timeout;	
+	NullSignal Timeout;
 
 protected:	
 	virtual void init();
 	//virtual void close();
+	
+	//
+	// UV Callbacks
+	UVEmptyStatusCallback(Timer, onTimeout, uv_timer_t);
 
-	//void updateState();
 	Int64 _count;
 	Int64 _timeout;
 	Int64 _interval;
-	//bool _active;
 };
 
 
-//
-// UV Callbacks
-//
-
-UVEmptyStatusCallback(Timer, onTimeout, uv_timer_t);
-
-
-} } // namespace scy::uv
+} // namespace scy
 
 
 #endif // SOURCEY_UV_Timer_H

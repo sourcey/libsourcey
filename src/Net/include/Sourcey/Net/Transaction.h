@@ -58,14 +58,14 @@ struct TransactionState: public State
 
 
 template <class PacketT>
-class PacketTransaction: public ISendable, public StatefulSignal<TransactionState>, public uv::Timer
+class PacketTransaction: public ISendable, public StatefulSignal<TransactionState>, public Timer
 	/// Provides request/response functionality for IPacket types.
 	///
 	/// This class is fire and forget. The pointer is managed by 
 	/// the Runner instance, and is destroyed when complete.
 {
 public:
-	PacketTransaction(long timeout = 10000, int retries = 0, uv_loop_t* loop = uv_default_loop()) :
+	PacketTransaction(long timeout = 10000, int retries = 0, uv_loop_t* loop = NULL) :
 		Timer(loop),
 		_timeout(timeout),
 		_retries(retries), 
@@ -75,7 +75,7 @@ public:
 		traceL("PacketTransaction", this) << "Creating" << std::endl;
 	}		
 
-	PacketTransaction(const PacketT& request, long timeout = 10000, int retries = 0, uv_loop_t* loop = uv_default_loop()) : 
+	PacketTransaction(const PacketT& request, long timeout = 10000, int retries = 0, uv_loop_t* loop = NULL) : 
 		Timer(loop), //timeout, 0, 
 		_timeout(timeout),
 		_request(request), 
@@ -99,7 +99,7 @@ public:
 			traceL("PacketTransaction", this) << "Sending: " << _request.toString() << std::endl;
 			_attempts++;
 		}
-		setState(this, TransactionState::Running);
+		setState(this, net::TransactionState::Running);
 		if (Timer::active())
 			Timer::stop();
 		Timer::start(_timeout, 0);
@@ -176,10 +176,9 @@ protected:
 		traceL("PacketTransaction", this) << "Destroying" << std::endl;
 		//assert(!stateEquals(TransactionState::Running)); no more mt :)
 		Timer::stop();
-		traceL("PacketTransaction", this) << "Destroying: OK" << std::endl;
 	}
 	
-	virtual bool onResponse(const PacketT& packet)
+	virtual bool onPossibleResponse(const PacketT& packet)
 		/// Processes a potential response candidates
 		/// and updates state on match.
 	{	
@@ -193,7 +192,7 @@ protected:
 			}
 			onSuccess();			
 			setState(this, cancelled() ? 
-				TransactionState::Cancelled : TransactionState::Success);		
+				TransactionState::Cancelled : net::TransactionState::Success);		
 			return true;
 		}
 		return false;
@@ -215,11 +214,11 @@ protected:
 		{		
 			if (cancelled()) {
 				//onSuccess();
-				setState(this, TransactionState::Cancelled);
+				setState(this, net::TransactionState::Cancelled);
 			} 
 			else if (!canSend()) {
 				//onSuccess();
-				setState(this, TransactionState::Failed, "Transaction timeout");
+				setState(this, net::TransactionState::Failed, "Transaction timeout");
 			} 
 			else send();
 		}		
@@ -240,7 +239,7 @@ protected:
 
 
 template <class PacketT> //, class EmitterT
-class Transaction: public PacketTransaction<PacketT>, public PacketSocketEmitter
+class Transaction: public PacketTransaction<PacketT>, public PacketSocketAdapter
 	/// This class provides request/response functionality for IPacket
 	/// types emitted from a SocketBase.
 	/// This class is designed to be derived on a per protocol basis.
@@ -252,20 +251,20 @@ public:
 				int retries = 1, 
 				uv_loop_t* loop = NULL) : 
 		PacketTransaction<PacketT>(timeout, retries, loop), 
-		PacketSocketEmitter(&socket),
+		PacketSocketAdapter(&socket),
 		_peerAddress(peerAddress)
 	{
 		debugL("NetTransaction", this) << "Creating" << std::endl;
 
 		// Default options, can be overridden
-		PacketSocketEmitter::socket->base().addObserver(*this, true);
-		PacketSocketEmitter::priority = 100;
+		PacketSocketAdapter::socket->base().addAdapter(*this, true);
+		PacketSocketAdapter::priority = 100;
 	}
 
 	virtual ~Transaction()
 	{
 		debugL("NetTransaction", this) << "Destroying" << std::endl;
-		PacketSocketEmitter::socket->base().removeObserver(*this);
+		PacketSocketAdapter::socket->base().removeAdapter(*this);
 	}
 
 	virtual bool send()
@@ -274,7 +273,7 @@ public:
 		assert(socket);
 		if (socket->send(PacketTransaction<PacketT>::_request, _peerAddress) > 0)
 			return PacketTransaction<PacketT>::send();
-		setState(this, TransactionState::Failed);
+		setState(this, net::TransactionState::Failed);
 		return false;
 	}
 	
@@ -291,11 +290,11 @@ public:
 
 protected:	
 	virtual void onPacket(IPacket& packet)
-		/// Overrides the PacketSocketEmitter onPacket 
+		/// Overrides the PacketSocketAdapter onPacket 
 		/// callback for checking potential response candidates.
 	{
 		debugL("NetTransaction", this) << "On Packet: " << packet.size() << std::endl;
-		if (onResponse(static_cast<PacketT&>(packet))) {
+		if (onPossibleResponse(static_cast<PacketT&>(packet))) {
 
 			// Stop socket data propagation since
 			// we have handled the packet
@@ -352,30 +351,30 @@ public:
 	virtual bool send()
 	{
 		debugL("NetTransaction", this) << "Sending" << std::endl;
-		_socket.emitter() += packetDelegate(this, &Transaction::onPotentialResponse, 100);
+		_socket.adapter() += packetDelegate(this, &Transaction::onPotentialResponse, 100);
 		if (_socket.base().send(PacketTransaction<PacketT>::_request, _peerAddress))
 			return PacketTransaction<PacketT>::send();
-		setState(this, TransactionState::Failed);
+		setState(this, net::TransactionState::Failed);
 		return false;
 	}
 	
 	virtual void cancel()
 	{
 		debugL("NetTransaction", this) << "Canceling" << std::endl;
-		_socket.emitter() -= packetDelegate(this, &Transaction::onPotentialResponse);
+		_socket.adapter() -= packetDelegate(this, &Transaction::onPotentialResponse);
 		PacketTransaction<PacketT>::cancel();
 	}
 	
 	virtual void onPotentialResponse(void*, PacketT& packet)
 	{
-		if (onResponse(packet))
+		if (onPossibleResponse(packet))
 			throw StopPropagation();
 	}	
 
 	virtual void onSuccess()
 	{
 		debugL("NetTransaction", this) << "Response" << std::endl;
-		_socket.emitter() -= packetDelegate(this, &Transaction::onPotentialResponse);
+		_socket.adapter() -= packetDelegate(this, &Transaction::onPotentialResponse);
 		PacketTransaction<PacketT>::onSuccess();
 	}
 	
@@ -433,8 +432,8 @@ private:
 		//_registered(false)
 		//if (!_registered)
 	
-		//_socket.emitter() += packetDelegate(this, &Transaction::onPotentialResponse, 100);
-		//_socket.emitter() -= packetDelegate(this, &Transaction::onPotentialResponse);
+		//_socket.adapter() += packetDelegate(this, &Transaction::onPotentialResponse, 100);
+		//_socket.adapter() -= packetDelegate(this, &Transaction::onPotentialResponse);
 	/*
 	//Socket& _socket;
 	Socket& socket() 
@@ -450,7 +449,7 @@ private:
 	virtual void onSuccess()
 	{
 		debugL("NetTransaction", this) << "Response" << std::endl;
-		//_socket.emitter() -= packetDelegate(this, &Transaction::onPotentialResponse);
+		//_socket.adapter() -= packetDelegate(this, &Transaction::onPotentialResponse);
 		PacketTransaction<PacketT>::onSuccess();
 	}
 	*/

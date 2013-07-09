@@ -154,7 +154,7 @@ class Stream: public uv::Base<CountedObject>
 	
 		// Handle EOF or error
 		if (nread == -1)  {
-			io->setError(uv_last_error(io->loop()));
+			io->setLastError();
 			return;
 		}
 		else {

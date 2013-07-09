@@ -21,14 +21,11 @@
 #include "Sourcey/Logger.h"
 
 #include "Poco/Net/NetException.h"
-#include "Poco/Net/WebSocket.h"
 #include "Poco/Buffer.h"
 #include "Poco/BinaryWriter.h"
 #include "Poco/BinaryReader.h"
 #include "Poco/MemoryStream.h"
 #include "Poco/Format.h"
-
-
 
 #include "Poco/Buffer.h"
 #include "Poco/MemoryStream.h"
@@ -50,13 +47,15 @@ namespace http {
 
 
 WebSocket::WebSocket() : 
-	net::Socket(new WebSocketBase, false)
+	net::Socket(new net::TCPBase, false, 
+		new WebSocketAdapter(this, WebSocket::WS_CLIENT))
 {
 }
 
 
-WebSocket::WebSocket(WebSocketBase* base, bool shared) : 
-	net::Socket(base, shared) 
+WebSocket::WebSocket(net::SocketBase* base, bool shared) : 
+	net::Socket(base, shared, 
+		new WebSocketAdapter(this, WebSocket::WS_CLIENT))
 {
 }
 
@@ -64,14 +63,20 @@ WebSocket::WebSocket(WebSocketBase* base, bool shared) :
 WebSocket::WebSocket(const Socket& socket) : 
 	net::Socket(socket)
 {
-	if (!dynamic_cast<WebSocketBase*>(_base))
-		throw Exception("Cannot assign incompatible socket");
+	if (!dynamic_cast<WebSocketAdapter*>(_adapter))
+		throw Exception("Cannot assign incompatible socket adapter");
 }
-	
 
-WebSocketBase& WebSocket::base() const
+	
+bool WebSocket::shutdown(UInt16 statusCode, const string& statusMessage)
 {
-	return static_cast<WebSocketBase&>(*_base);
+	return adapter().shutdown(statusCode, statusMessage);
+}
+
+
+WebSocketAdapter& WebSocket::adapter() const
+{
+	return static_cast<WebSocketAdapter&>(Socket::adapter());
 }
 
 
@@ -81,42 +86,80 @@ const string WebSocket::WEBSOCKET_VERSION("13");
 
 // -------------------------------------------------------------------
 //
-WebSocketBase::WebSocketBase() : 
-	_wsParser(this, true) // client socket = mustMaskPayload
+WebSocketAdapter::WebSocketAdapter(net::Socket* socket, WebSocket::Mode mode) : 
+	net::SocketAdapter(socket, 100), framer(mode)
 {
-	traceL("WebSocketBase", this) << "Creating" << endl;
-	assert(_handle);
-	_handle->data = this;
-	connectReq.data = this;
+	traceL("WebSocketAdapter", this) << "Creating" << endl;
 }
 
 	
-WebSocketBase::~WebSocketBase() 
-{	
-	traceL("WebSocketBase", this) << "Destroying" << endl;
-}
-
-	
-bool WebSocketBase::shutdown(UInt16 statusCode, const string& statusMessage)
+WebSocketAdapter::WebSocketAdapter(WebSocket::Mode mode) : 
+	net::SocketAdapter(NULL, 100), framer(mode)
 {
-	//uv::TCPBase::shutdown();	
-	Poco::Buffer<char> buffer(statusMessage.size() + 2);
-	Poco::MemoryOutputStream ostr(buffer.begin(), buffer.size());
-	Poco::BinaryWriter writer(ostr, Poco::BinaryWriter::NETWORK_BYTE_ORDER);
-	writer << statusCode;
-	writer.writeRaw(statusMessage);
-	return send(buffer.begin(), static_cast<int>(ostr.charsWritten()), WebSocket::FRAME_FLAG_FIN | WebSocket::FRAME_OP_CLOSE) > 0;
+	traceL("WebSocketAdapter", this) << "Creating" << endl;
+}
+
+	
+WebSocketAdapter::~WebSocketAdapter() 
+{	
+	traceL("WebSocketAdapter", this) << "Destroying" << endl;
+}
+
+	
+bool WebSocketAdapter::shutdown(UInt16 statusCode, const string& statusMessage)
+{
+	Buffer buffer;
+	buffer.writeU16(statusCode);
+	buffer.write(statusMessage);
+	return socket->base().send(buffer.begin(), buffer.size(), WebSocket::FRAME_FLAG_FIN | WebSocket::FRAME_OP_CLOSE) > 0;
 }
 
 
-int WebSocketBase::send(const char* data, int len, int flags) 
+int WebSocketAdapter::send(const char* data, int len, int flags) 
 {	
-	assert(len <= net::MAX_TCP_PACKET_SIZE);	
-	assert(initialized());
-	traceL("WebSocketBase", this) << "WS Send: " << len << endl;
+	//traceL("WebSocketAdapter", this) << "WS Send: " << len << endl;
+	return send(data, len, socket->peerAddress(), flags);
+}
+
+
+int WebSocketAdapter::send(const char* data, int len, const net::Address& peerAddr, int flags) 
+{	
+	traceL("WebSocketAdapter", this) << "Send: " << string(data, len) << endl;
+	assert(framer.handshakeComplete());
+
+	// Set default binary flag if none specified
+	if (!flags)
+		flags = WebSocket::FRAME_BINARY;
+
+	// Frame and send the data
+	Buffer frame(len + WebSocketFramer::MAX_HEADER_LENGTH);
+	framer.writeFrame(data, len, flags, frame);
+	return socket->base().send(frame.begin(), frame.size(), peerAddr, 0);
+}
+
+
+// -------------------------------------------------------------------
+//
+WebSocketClientAdapter::WebSocketClientAdapter(net::Socket* socket, http::Request* request) : 
+	WebSocketAdapter(socket, WebSocket::WS_CLIENT), request(request)
+{
+	traceL("WebSocketClientAdapter", this) << "Creating" << endl;
+}
+
 	
-	// Send data to the WS parser for framing and sending	
-	return _wsParser.sendFrame(data, len, flags);
+WebSocketClientAdapter::~WebSocketClientAdapter() 
+{	
+	traceL("WebSocketClientAdapter", this) << "Destroying" << endl;
+}
+
+	
+void WebSocketClientAdapter::sendRequest(http::Request& request)
+{
+	framer.createHandshakeRequest(request);
+
+	ostringstream oss;
+	request.write(oss);
+	socket->base().send(oss.str().data(), oss.str().length());
 }
 
 
@@ -124,70 +167,162 @@ int WebSocketBase::send(const char* data, int len, int flags)
 // Callbacks
 // 
 
-void WebSocketBase::onRead(const char* data, int len)
+void WebSocketClientAdapter::onSocketConnect()
 {
-	traceL("WebSocketBase", this) << "On WS Read: " << string(data, len) << endl;
+	traceL("WebSocketClientAdapter", this) << "On connect" << endl;
 	
+	// Send the WS handshake request
+	if (this->request)
+		sendRequest(*this->request);
+	else {
+		http::Request request;
+		sendRequest(request);
+	}
+
+	/*
+		request.setURI("/websocket");
+	http::Request request;
+	request
+	framer.createHandshakeRequest(request);
+
+	ostringstream oss;
+	request.write(oss);
+	socket->base().send(oss.str().data(), oss.str().length());
+	*/
+}
+
+
+void WebSocketClientAdapter::onSocketRecv(Buffer& buffer, const net::Address& peerAddr)
+{
+	traceL("WebSocketClientAdapter", this) << "On recv: " << buffer << endl;
+
 	try {
-		_buffer.position(0);
-		_buffer.size(len);
-		if (_wsParser.connected())
-			_wsParser.receiveFrame(_buffer);
-		else {
-			if (_wsParser.handleHandshakeResponse())
-				emitConnect();
-			else
-				// TODO: Resend authenticated request
-				assert(0);
+		assert(buffer.position() == 0);
+		assert(buffer.size() > 0);
+
+		if (framer.handshakeComplete()) {
+			framer.readFrame(buffer);
+			SocketAdapter::onSocketRecv(buffer, peerAddr);
 		}
 
-	} catch(Exception& exc) {
-		errorL("WebSocketBase", this) << "Handshake Failed: " << exc.displayText() << endl;
+		else {
+			http::Response response;
+			http::Parser parser(&response);
+			parser.parse(buffer.data(), buffer.size(), true);
+			
+			/*
+			istringstream iss;
+			iss.str(buffer.data());
+			http::Response response;
+			response.read(iss); // TODO: HTTP Parser
+			*/
 
-		assert(0);
+
+			// Parse and check the response
+			if (framer.checkHandshakeResponse(response)) {
+				
+				traceL("WebSocketClientAdapter", this) << "Handshake success: Connected" << endl;
+				SocketAdapter::onSocketConnect();
+			}
+				//emitConnect();
+			
+			// TODO: Resend request for authentication
+			else
+				assert(0 && "not implemented");
+		}
+	} 
+	catch(Exception& exc) {
+		warnL("WebSocketClientAdapter", this) << "Handshake failed: " << exc.displayText() << endl;
+
+		socket->close();
+		//assert(0);
 		// TODO: Set and emit custom error message
 		//setError();
 	}
 }
 
 
-void WebSocketBase::onRecv(Buffer& buf)
+// -------------------------------------------------------------------
+//
+WebSocketServerAdapter::WebSocketServerAdapter(net::Socket* socket) : 
+	WebSocketAdapter(socket, WebSocket::WS_SERVER)
 {
-	Log("WebSocketBase", this) << "On WS Recv: " 
-		<< _buffer.position() << ": " << _buffer.size() << ": " << buf << endl;
-	emitRecv(_buffer, peerAddress());
+	traceL("WebSocketServerAdapter", this) << "Creating" << endl;
+}
+
+	
+WebSocketServerAdapter::~WebSocketServerAdapter() 
+{	
+	traceL("WebSocketServerAdapter", this) << "Destroying" << endl;
 }
 
 
-void WebSocketBase::onConnect(int status)
+void WebSocketServerAdapter::onSocketRecv(Buffer& buffer, const net::Address& peerAddr)
 {
-	traceL("WebSocketBase", this) << "On Connected" << endl;
-	if (status) {
-		setLastError();
-		errorL("WebSocketBase", this) << "Connect Failed: " << errorMessage() << endl;
-		return;
-	}
-	else
-		readStart(); 
+	traceL("WebSocketServerAdapter", this) << "On recv: " << buffer << endl;
 	
-	_wsParser.sendHandshakeRequest();
+	assert(buffer.position() == 0);
+	assert(buffer.size() > 0);
 
-	traceL("WebSocketBase", this) << "On Connected: OK" << endl;
+	if (framer.handshakeComplete()) {
+		framer.readFrame(buffer);
+		traceL("WebSocketServerAdapter", this) << "On frame: " << buffer.size() << ": " << buffer << endl;	
+		SocketAdapter::onSocketRecv(buffer, peerAddr);
+	}
+
+	else {
+		try {
+			errorL("WebSocketServerAdapter", this) << "Verifying handshake: " << buffer << endl;
+
+			http::Request request;
+			http::Parser parser(&request);
+			parser.parse(buffer.data(), buffer.size(), true);
+			
+			
+			/*
+			istringstream iss;
+			iss.str(buffer.data());
+			http::Request request;
+			request.read(iss); // TODO: HTTP Parser
+			*/
+			
+			http::Response response;
+
+			// Verify the WebSocket handshake request or throw
+			framer.acceptRequest(request, response);
+
+			errorL("WebSocketServerAdapter", this) << "Handshake success" << endl;
+				
+			// Send response
+			ostringstream oss;
+			response.write(oss);
+			socket->base().send(oss.str().data(), oss.str().length());
+		} 
+		catch(Exception& exc) {
+			errorL("WebSocketServerAdapter", this) << "Handshake failed: " << exc.displayText() << endl;
+			
+			// Handshake failed, set error and close
+			// TODO: Set and emit custom error message
+			//setError();	
+			assert(0);
+			socket->close();		
+		}
+	}
 }
 
 
 // ---------------------------------------------------------------------
 //
-WebSocketParser::WebSocketParser(WebSocketBase* socketBase, bool mustMaskPayload) :
-	_socketBase(socketBase),
+WebSocketFramer::WebSocketFramer(WebSocket::Mode mode) : //bool mustMaskPayload
+	_mode(mode),
 	_frameFlags(0),
 	_headerState(0),
-	_mustMaskPayload(mustMaskPayload)
+	_mustMaskPayload(mode == WebSocket::WS_CLIENT)
 {
 }
 
 
-WebSocketParser::~WebSocketParser()
+WebSocketFramer::~WebSocketFramer()
 {
 }
 
@@ -219,39 +354,24 @@ string computeAccept(const string& key)
 }
 
 
-void WebSocketParser::sendHandshakeRequest()
+void WebSocketFramer::createHandshakeRequest(http::Request& request)
 {
 	assert(_headerState == 0);
 
-	// Send the initial request
+	// Send the handshake request
 	_key = createKey();
-	http::Request request;
 	request.set("Connection", "Upgrade");
 	request.set("Upgrade", "websocket");
 	request.set("Sec-WebSocket-Version", WebSocket::WEBSOCKET_VERSION);
 	request.set("Sec-WebSocket-Key", _key);
 	request.setChunkedTransferEncoding(false);
-	request.setKeepAlive(true);
-
-	ostringstream oss;
-	request.write(oss);
-	_socketBase->write(oss.str().data(), oss.str().length());
 	_headerState++;
 }
 
 
-bool WebSocketParser::handleHandshakeResponse()
+bool WebSocketFramer::checkHandshakeResponse(http::Response& response)
 {	
 	assert(_headerState == 1);
-
-	istringstream iss;
-	iss.str(_socketBase->buffer().data());
-
-	// TODO: Update buffer read pos, and Recv body data
-
-	http::Response response;
-	response.read(iss);
-
 	if (response.getStatus() == http::Response::HTTP_SWITCHING_PROTOCOLS)
 	{
 		// Complete handshake or throw
@@ -259,7 +379,7 @@ bool WebSocketParser::handleHandshakeResponse()
 		
 		// Success
 		_headerState++;
-		assert(connected());
+		assert(handshakeComplete());
 		return true;
 	}
 	else if (response.getStatus() == http::Response::HTTP_UNAUTHORIZED)
@@ -273,71 +393,100 @@ bool WebSocketParser::handleHandshakeResponse()
 	return false;
 }
 
-	
-int WebSocketParser::sendFrame(const char* buffer, int length, int flags)
-{
-	traceL("WebSocketParser") << "sendFrame: BEFORE: " << string((const char*)buffer, length) << ": " << length << ": " << flags << endl;	
-	assert(flags == WebSocket::FRAME_TEXT || flags == WebSocket::FRAME_BINARY);
 
-	Poco::Buffer<char> frame(length + MAX_HEADER_LENGTH);
-	Poco::MemoryOutputStream ostr(frame.begin(), frame.size());
-	Poco::BinaryWriter writer(ostr, Poco::BinaryWriter::NETWORK_BYTE_ORDER);
+void WebSocketFramer::acceptRequest(http::Request& request, http::Response& response)
+{
+	if (request.hasToken("Connection", "upgrade") && Poco::icompare(request.get("Upgrade", ""), "websocket") == 0)
+	{
+		string version = request.get("Sec-WebSocket-Version", "");
+		if (version.empty()) throw Poco::Net::WebSocketException("Missing Sec-WebSocket-Version in handshake request", WebSocket::WS_ERR_HANDSHAKE_NO_VERSION);
+		if (version != WebSocket::WEBSOCKET_VERSION) throw Poco::Net::WebSocketException("Unsupported WebSocket version requested", version, WebSocket::WS_ERR_HANDSHAKE_UNSUPPORTED_VERSION);
+		string key = request.get("Sec-WebSocket-Key", "");
+		Poco::trimInPlace(key);
+		if (key.empty()) throw Poco::Net::WebSocketException("Missing Sec-WebSocket-Key in handshake request", WebSocket::WS_ERR_HANDSHAKE_NO_KEY);
+		
+		response.setStatusAndReason(http::Response::HTTP_SWITCHING_PROTOCOLS);
+		response.set("Upgrade", "websocket");
+		response.set("Connection", "Upgrade");
+		response.set("Sec-WebSocket-Accept", computeAccept(key));
+
+		// Set headerState 2 since the handskake was accepted.
+		_headerState = 2;
+
+		//response.setContentLength(0);
+		//response.send().flush();		
+		//return new WebSocketImpl(static_cast<StreamSocketImpl*>(static_cast<http::RequestImpl&>(request).detachSocket().impl()), false);
+	}
+	else throw Poco::Net::WebSocketException("No WebSocket handshake", WebSocket::WS_ERR_NO_HANDSHAKE);
+}
+
 	
-	writer << static_cast<Poco::UInt8>(flags);
-	Poco::UInt8 lengthByte(0);
+int WebSocketFramer::writeFrame(const char* data, int len, int flags, Buffer& frame)
+{
+	assert(flags == WebSocket::FRAME_TEXT || 
+		flags == WebSocket::FRAME_BINARY);
+
+	assert(frame.capacity() >= len + MAX_HEADER_LENGTH);
+	
+	frame.writeU8(static_cast<UInt8>(flags));
+	UInt8 lenByte(0);
 	if (_mustMaskPayload)
 	{
-		lengthByte |= FRAME_FLAG_MASK;
+		lenByte |= FRAME_FLAG_MASK;
 	}
-	if (length < 126)
+	if (len < 126)
 	{
-		lengthByte |= static_cast<Poco::UInt8>(length);
-		writer << lengthByte;
+		lenByte |= static_cast<UInt8>(len);
+		frame.writeU8(lenByte);
 	}
-	else if (length < 65536)
+	else if (len < 65536)
 	{
-		lengthByte |= 126;
-		writer << lengthByte << static_cast<Poco::UInt16>(length);
+		lenByte |= 126;
+		frame.writeU8(lenByte);
+		frame.writeU16(static_cast<UInt16>(len));
 	}
 	else
 	{
-		lengthByte |= 127;
-		writer << lengthByte << static_cast<Poco::UInt64>(length);
+		lenByte |= 127;
+		frame.writeU8(lenByte);
+		frame.writeU64(static_cast<UInt16>(len));
 	}
 
 	if (_mustMaskPayload)
 	{
-		const Poco::UInt32 mask = _rnd.next();
+		const UInt32 mask = _rnd.next();
 		const char* m = reinterpret_cast<const char*>(&mask);
-		const char* b = reinterpret_cast<const char*>(buffer);
-		writer.writeRaw(m, 4);
-		char* p = frame.begin() + ostr.charsWritten();
-		for (int i = 0; i < length; i++)
+		const char* b = reinterpret_cast<const char*>(data);
+		frame.write(m, 4);
+		char* p = frame.begin() + frame.size();
+		for (int i = 0; i < len; i++)
 		{
 			p[i] = b[i] ^ m[i % 4];
 		}
 	}
 	else
 	{
-		memcpy(frame.begin() + ostr.charsWritten(), buffer, length);
+		memcpy(frame.begin() + frame.size(), data, len);
 	}
-	
-	// Send the frame	
-	return _socketBase->write(frame.begin(), length + static_cast<int>(ostr.charsWritten()));
+
+	// Set the frame size
+	frame.size(len + frame.size());
+
+	return frame.size();
 }
 
 	
-int WebSocketParser::receiveFrame(Buffer& buffer) //char* buffer, int length char* buffer, int length, int
+int WebSocketFramer::readFrame(Buffer& buffer)
 {
-	assert(connected());
+	assert(handshakeComplete());
 	assert(buffer.position() == 0);
-	assert(buffer.size() > MAX_HEADER_LENGTH);
+	assert(buffer.capacity() > MAX_HEADER_LENGTH);
 	
 	char header[MAX_HEADER_LENGTH];	
 	buffer.read(header, 2);
 
 	int length = buffer.size();
-	Poco::UInt8 lengthByte = static_cast<Poco::UInt8>(header[1]);
+	UInt8 lengthByte = static_cast<UInt8>(header[1]);
 	int maskOffset = 0;
 	if (lengthByte & FRAME_FLAG_MASK) maskOffset += 4;
 	lengthByte &= 0x7f;
@@ -355,7 +504,7 @@ int WebSocketParser::receiveFrame(Buffer& buffer) //char* buffer, int length cha
 
 	Poco::MemoryInputStream istr(header, buffer.position());
 	Poco::BinaryReader reader(istr, Poco::BinaryReader::NETWORK_BYTE_ORDER);
-	Poco::UInt8 flags;
+	UInt8 flags;
 	char mask[4];
 	reader >> flags >> lengthByte;
 	_frameFlags = flags;
@@ -363,7 +512,7 @@ int WebSocketParser::receiveFrame(Buffer& buffer) //char* buffer, int length cha
 	int payloadOffset = 2;
 	if ((lengthByte & 0x7f) == 127)
 	{
-		Poco::UInt64 l;
+		UInt64 l;
 		reader >> l;
 		if (l > length)
 			throw Poco::Net::WebSocketException(Poco::format("Insufficient buffer for payload size %Lu", l), WebSocket::WS_ERR_PAYLOAD_TOO_BIG);
@@ -372,7 +521,7 @@ int WebSocketParser::receiveFrame(Buffer& buffer) //char* buffer, int length cha
 	}
 	else if ((lengthByte & 0x7f) == 126)
 	{
-		Poco::UInt16 l;
+		UInt16 l;
 		reader >> l;
 		if (l > length)
 			throw Poco::Net::WebSocketException(Poco::format("Insufficient buffer for payload size %hu", l), WebSocket::WS_ERR_PAYLOAD_TOO_BIG);
@@ -381,40 +530,41 @@ int WebSocketParser::receiveFrame(Buffer& buffer) //char* buffer, int length cha
 	}
 	else
 	{
-		Poco::UInt8 l = lengthByte & 0x7f;
+		UInt8 l = lengthByte & 0x7f;
 		if (l > length)
 			throw Poco::Net::WebSocketException(Poco::format("Insufficient buffer for payload size %u", unsigned(l)), WebSocket::WS_ERR_PAYLOAD_TOO_BIG);
 		payloadLength = static_cast<int>(l);
 	}
 	if (lengthByte & FRAME_FLAG_MASK)
-	{
+	{	
 		reader.readRaw(mask, 4);
 		payloadOffset += 4;
 	}
 
-	int received = payloadOffset + payloadLength;		
-	if (received > length)
+	if (payloadLength > length)
 		throw Poco::Net::WebSocketException("Incomplete frame received", WebSocket::WS_ERR_INCOMPLETE_FRAME);	
+
+	//traceL("WebSocketServerAdapter", this) << "Read frame at: " 
+	//	<< payloadOffset << ": " << payloadLength << ": " << length << endl;	
+
+	// Set the size and position to match payload
+	buffer.position(payloadOffset);
+	buffer.size(payloadLength);
 
 	if (lengthByte & FRAME_FLAG_MASK)
 	{
 		char* p = reinterpret_cast<char*>(buffer.data());
-		for (int i = 0; i < received; i++)
+		for (int i = 0; i < payloadLength; i++)
 		{
 			p[i] ^= mask[i % 4];
 		}
 	}
-		
-	traceL("WebSocketParser", this) << "Recv: " << received << endl;
-	buffer.position(payloadOffset);
-	buffer.size(received);
-	_socketBase->onRecv(buffer);
 
-	return received;
+	return payloadLength;
 }
 
 
-void WebSocketParser::completeHandshake(http::Response& response) //, const string& key HTTPClientSession& cs, 
+void WebSocketFramer::completeHandshake(http::Response& response) //, const string& key HTTPClientSession& cs, 
 {
 	string connection = response.get("Connection", "");
 	if (Poco::icompare(connection, "Upgrade") != 0) 
@@ -428,9 +578,27 @@ void WebSocketParser::completeHandshake(http::Response& response) //, const stri
 }
 
 
-bool WebSocketParser::connected() const
+WebSocket::Mode WebSocketFramer::mode() const
+{
+	return _mode;
+}
+
+
+bool WebSocketFramer::handshakeComplete() const
 {
 	return _headerState == 2;
+}
+
+
+int WebSocketFramer::frameFlags() const
+{
+	return _frameFlags;
+}
+
+
+bool WebSocketFramer::mustMaskPayload() const
+{
+	return _mustMaskPayload;
 }
 
 
@@ -438,19 +606,102 @@ bool WebSocketParser::connected() const
 
 
 
+/*
+	//int received = payloadOffset + payloadLength;		
+	//if (received > length)
+	//	throw Poco::Net::WebSocketException("Incomplete frame received", WebSocket::WS_ERR_INCOMPLETE_FRAME);	
+Buffer& WebSocketAdapter::recvBuffer()
+{
+	return static_cast<net::TCPBase&>(_socket->base()).buffer();
+}
+
+
+void WebSocketAdapter::onSocketRecv(Buffer& buf)
+{
+	Log("WebSocketAdapter", this) << "On WS Recv: " << buf << endl;
+	emitRecv(buf, peerAddress());
+}
+*/
+
+/*
+if (status) {
+	setLastError();
+	errorL("WebSocketAdapter", this) << "Connect Failed: " << error().message << endl;
+	return;
+}
+else
+	readStart(); 
+*/
+
+/*
+
+
+void WebSocketFramer::sendHandshakeRequest()
+{
+}
+
+void WebSocketFramer::createHandshakeRequest(Buffer& request)
+{
+
+}
+*/
+
+	// Send the frame	
+	//return _socketBase->write(frame.begin(), len + static_cast<int>(ostr.charsWritten()));
+
+//char* buffer, int length char* buffer, int length, int
+
+/*
+int WebSocket::send(const char* data, int len, int flags) 
+{	
+	traceL("WebSocketAdapter", this) << "WS Send: " << len << endl;
+	return send(data, len, socket->peerAddress(), flags);
+}
+
+
+int WebSocket::send(const char* data, int len, const net::Address& peerAddr, int flags) 
+{	
+	// Frame and send the data
+	Buffer frame(len + WebSocketFramer::MAX_HEADER_LENGTH);
+	framer.writeFrame(data, len, flags, frame);
+	return socket->send(frame.begin(), frame.size(), peerAddr, 0);
+}
+*/
+
 	
 
 /*
-WebSocket::Mode WebSocketParser::mode() const
+WebSocketAdapter& WebSocket::base() const
+{
+	return static_cast<WebSocketAdapter&>(*_base);
+}
+
+//uv::TCPBase::shutdown();	
+Poco::Buffer<char> buffer(statusMessage.size() + 2);
+Poco::MemoryOutputStream ostr(buffer.begin(), buffer.size());
+Poco::BinaryWriter writer(ostr, Poco::BinaryWriter::NETWORK_BYTE_ORDER);
+writer << statusCode;
+writer.writeRaw(statusMessage);
+return send(buffer.begin(), static_cast<int>(ostr.charsWritten()), WebSocket::FRAME_FLAG_FIN | WebSocket::FRAME_OP_CLOSE) > 0;
+
+// client socket = mustMaskPayload this, 
+	//assert(_handle);
+	//_handle->data = this;
+	//connectReq.data = this;
+*/
+	
+
+/*
+WebSocket::Mode WebSocketFramer::mode() const
 {
 	return mustMaskPayload() ? WebSocket::WS_CLIENT : WebSocket::WS_SERVER;
 }
 */
 
 	/*
-int WebSocketParser::readNBytes(char* buffer, int bytes)
+int WebSocketFramer::readNBytes(char* buffer, int bytes)
 {
-	//traceL("WebSocketParser", this) << "readNBytes: " << bytes << ": " << buffer.size() << endl;
+	//traceL("WebSocketFramer", this) << "readNBytes: " << bytes << ": " << buffer.size() << endl;
 
 	//memcpy(buffer, header + payloadOffset, n - payloadOffset);
 	//_recvBuffer.size()
@@ -463,10 +714,10 @@ int WebSocketParser::readNBytes(char* buffer, int bytes)
 	buffer.read((char*)buffer, bytes);
 	return bytes;
 
-	int received = _socketBase->receiveFrame(reinterpret_cast<char*>(buffer), bytes);
+	int received = _socketBase->readFrame(reinterpret_cast<char*>(buffer), bytes);
 	while (received < bytes)
 	{
-		int n = _socketBase->receiveFrame(reinterpret_cast<char*>(buffer) + received, bytes - received);
+		int n = _socketBase->readFrame(reinterpret_cast<char*>(buffer) + received, bytes - received);
 		if (n > 0)
 			received += n;
 		else
@@ -485,9 +736,9 @@ int WebSocketParser::readNBytes(char* buffer, int bytes)
 	if (received < payloadLength)
 	{
 		received += readNBytes(reinterpret_cast<char*>(buffer) + received, payloadLength - received);
-		traceL("WebSocketParser", this) << "RECV: 1111 received: " << received << endl;
+		traceL("WebSocketFramer", this) << "RECV: 1111 received: " << received << endl;
 		received += (payloadLength - received);
-		traceL("WebSocketParser", this) << "RECV: 222 received: " << received << endl;
+		traceL("WebSocketFramer", this) << "RECV: 222 received: " << received << endl;
 	}
 	assert(payloadOffset < n);
 
@@ -497,11 +748,11 @@ int WebSocketParser::readNBytes(char* buffer, int bytes)
 	//buffer.consume();
 	
 	
-	traceL("WebSocketParser", this) << "RECV: buffer.position: " << buffer.position() << endl;
-	traceL("WebSocketParser", this) << "RECV: buffer.size: " << buffer.size() << endl;
-	traceL("WebSocketParser", this) << "RECV: received: " << received << endl;
-	traceL("WebSocketParser", this) << "RECV: payloadLength: " << payloadLength << endl;
-	traceL("WebSocketParser", this) << "RECV: payloadOffset: " << payloadOffset << endl;
+	traceL("WebSocketFramer", this) << "RECV: buffer.position: " << buffer.position() << endl;
+	traceL("WebSocketFramer", this) << "RECV: buffer.size: " << buffer.size() << endl;
+	traceL("WebSocketFramer", this) << "RECV: received: " << received << endl;
+	traceL("WebSocketFramer", this) << "RECV: payloadLength: " << payloadLength << endl;
+	traceL("WebSocketFramer", this) << "RECV: payloadOffset: " << payloadOffset << endl;
 	
 	*/
 
@@ -517,124 +768,124 @@ int WebSocketParser::readNBytes(char* buffer, int bytes)
 	SSL_set_connect_state(ssl);
 	SSL_do_handshake(ssl);
  
-	_wsParser.init(ssl);
-	_wsParser.update();
+	framer.init(ssl);
+	framer.update();
 
 	emitConnect();
 	*/
 
 
 /*
-SocketImpl* WebSocketParser::acceptConnection(SocketAddress& clientAddr)
+SocketImpl* WebSocketFramer::acceptConnection(SocketAddress& clientAddr)
 {
-	throw Poco::InvalidAccessException("Cannot acceptConnection() on a WebSocketParser");
+	throw Poco::InvalidAccessException("Cannot acceptConnection() on a WebSocketFramer");
 }
 
 
-void WebSocketParser::connect(const SocketAddress& address)
+void WebSocketFramer::connect(const SocketAddress& address)
 {
-	throw Poco::InvalidAccessException("Cannot connect() a WebSocketParser");
+	throw Poco::InvalidAccessException("Cannot connect() a WebSocketFramer");
 }
 
 
-void WebSocketParser::connect(const SocketAddress& address, const Poco::Timespan& timeout)
+void WebSocketFramer::connect(const SocketAddress& address, const Poco::Timespan& timeout)
 {
-	throw Poco::InvalidAccessException("Cannot connect() a WebSocketParser");
+	throw Poco::InvalidAccessException("Cannot connect() a WebSocketFramer");
 }
 
 
-void WebSocketParser::connectNB(const SocketAddress& address)
+void WebSocketFramer::connectNB(const SocketAddress& address)
 {
-	throw Poco::InvalidAccessException("Cannot connectNB() a WebSocketParser");
+	throw Poco::InvalidAccessException("Cannot connectNB() a WebSocketFramer");
 }
 
 
-void WebSocketParser::bind(const SocketAddress& address, bool reuseAddress)
+void WebSocketFramer::bind(const SocketAddress& address, bool reuseAddress)
 {
-	throw Poco::InvalidAccessException("Cannot bind() a WebSocketParser");
+	throw Poco::InvalidAccessException("Cannot bind() a WebSocketFramer");
 }
 
 
-void WebSocketParser::bind6(const SocketAddress& address, bool reuseAddress, bool ipV6Only)
+void WebSocketFramer::bind6(const SocketAddress& address, bool reuseAddress, bool ipV6Only)
 {
-	throw Poco::InvalidAccessException("Cannot bind6() a WebSocketParser");
+	throw Poco::InvalidAccessException("Cannot bind6() a WebSocketFramer");
 }
 
 
-void WebSocketParser::listen(int backlog)
+void WebSocketFramer::listen(int backlog)
 {
-	throw Poco::InvalidAccessException("Cannot listen() on a WebSocketParser");
+	throw Poco::InvalidAccessException("Cannot listen() on a WebSocketFramer");
 }
 
 
-void WebSocketParser::close()
+void WebSocketFramer::close()
 {
 	_socketBase->close();
 	reset();
 }
 
 
-void WebSocketParser::shutdownReceive()
+void WebSocketFramer::shutdownReceive()
 {
 	_socketBase->shutdownReceive();
 }
 
 
-void WebSocketParser::shutdownSend()
+void WebSocketFramer::shutdownSend()
 {
 	_socketBase->shutdownSend();
 }
 
 	
-void WebSocketParser::shutdown()
+void WebSocketFramer::shutdown()
 {
 	_socketBase->shutdown();
 }
 
 
-int WebSocketParser::sendTo(const char* buffer, int length, const SocketAddress& address, int flags)
+int WebSocketFramer::sendTo(const char* buffer, int length, const SocketAddress& address, int flags)
 {
-	throw Poco::InvalidAccessException("Cannot sendTo() on a WebSocketParser");
+	throw Poco::InvalidAccessException("Cannot sendTo() on a WebSocketFramer");
 }
 
 
-int WebSocketParser::receiveFrom(char* buffer, int length, SocketAddress& address, int flags)
+int WebSocketFramer::receiveFrom(char* buffer, int length, SocketAddress& address, int flags)
 {
-	throw Poco::InvalidAccessException("Cannot receiveFrom() on a WebSocketParser");
+	throw Poco::InvalidAccessException("Cannot receiveFrom() on a WebSocketFramer");
 }
 
 
-void WebSocketParser::sendUrgent(unsigned char data)
+void WebSocketFramer::sendUrgent(unsigned char data)
 {
-	throw Poco::InvalidAccessException("Cannot sendUrgent() on a WebSocketParser");
+	throw Poco::InvalidAccessException("Cannot sendUrgent() on a WebSocketFramer");
 }
 
 
-bool WebSocketParser::secure() const
+bool WebSocketFramer::secure() const
 {
 	return _socketBase->secure();
 }
 
 
-void WebSocketParser::setSendTimeout(const Poco::Timespan& timeout)
+void WebSocketFramer::setSendTimeout(const Poco::Timespan& timeout)
 {
 	_socketBase->setSendTimeout(timeout);
 }
 
 
-Poco::Timespan WebSocketParser::getSendTimeout()
+Poco::Timespan WebSocketFramer::getSendTimeout()
 {
 	return _socketBase->getSendTimeout();
 }
 
 
-void WebSocketParser::setReceiveTimeout(const Poco::Timespan& timeout)
+void WebSocketFramer::setReceiveTimeout(const Poco::Timespan& timeout)
 {
 	_socketBase->setReceiveTimeout(timeout);
 }
 
 
-Poco::Timespan WebSocketParser::getReceiveTimeout()
+Poco::Timespan WebSocketFramer::getReceiveTimeout()
 {
 	return _socketBase->getReceiveTimeout();
 }
@@ -645,12 +896,12 @@ Poco::Timespan WebSocketParser::getReceiveTimeout()
 
 
 /*
-void WebSocketBase::connect(const Address& peerAddress) 
+void WebSocketAdapter::connect(const Address& peerAddress) 
 {
 	if (!_context) 
 		throw Exception("Cannot connect without WS context");
 
-	traceL("WebSocketBase", this) << "Connecting to " << peerAddress << endl;
+	traceL("WebSocketAdapter", this) << "Connecting to " << peerAddress << endl;
 	init();
 	const sockaddr_in* addr = reinterpret_cast<const sockaddr_in*>(peerAddress.addr());
 	assert(connectReq.data == this);
@@ -663,26 +914,26 @@ void WebSocketBase::connect(const Address& peerAddress)
 }
 
 
-int WebSocketBase::available() const
+int WebSocketAdapter::available() const
 {
 	assert(initialized());
-	return _wsParser.available();
+	return framer.available();
 }
 
 
-void WebSocketBase::close()
+void WebSocketAdapter::close()
 {
-	traceL("WebSocketBase", this) << "Close" << endl;
+	traceL("WebSocketAdapter", this) << "Close" << endl;
 	TCPBase::close();
 }
 
 
-bool WebSocketBase::shutdown()
+bool WebSocketAdapter::shutdown()
 {
-	traceL("WebSocketBase", this) << "Shutdown" << endl;
+	traceL("WebSocketAdapter", this) << "Shutdown" << endl;
 	try {
 		// Try to gracefully shutdown the WS connection
-		_wsParser.shutdown();
+		framer.shutdown();
 	}
 	catch (...) {}
 	return TCPBase::shutdown();

@@ -18,7 +18,7 @@
 
 
 #include "Sourcey/SocketIO/Packet.h"
-#include "Sourcey/CryptoProvider.h"
+#include "Sourcey/Crypto.h"
 #include "Sourcey/Logger.h"
 #include "Poco/Format.h"
 
@@ -44,7 +44,7 @@ Packet::Packet(Type type, int id, const string& endpoint, const string& message,
 	
 Packet::Packet(Type type, const string& message, bool ack) : 
 	_type(type), 
-	_id(CryptoProvider::generateRandomNumber(4)),
+	_id(crypt::randomNumber(4)),
 	_message(message),
 	_ack(ack),
 	_size(0)
@@ -54,7 +54,7 @@ Packet::Packet(Type type, const string& message, bool ack) :
 	
 Packet::Packet(const string& message, bool ack) : 
 	_type(Packet::Message), 
-	_id(CryptoProvider::generateRandomNumber(4)),
+	_id(crypt::randomNumber(4)),
 	_message(message),
 	_ack(ack),
 	_size(0)
@@ -62,35 +62,35 @@ Packet::Packet(const string& message, bool ack) :
 }
 
 	
-Packet::Packet(const JSON::Value& data, bool ack) : 
+Packet::Packet(const json::Value& data, bool ack) : 
 	_type(Packet::JSON), 
-	_id(CryptoProvider::generateRandomNumber(4)),
-	_message(JSON::stringify(data)),
+	_id(crypt::randomNumber(4)),
+	_message(json::stringify(data)),
 	_ack(ack),
 	_size(0)
 {
 }
 
 	
-Packet::Packet(const string& event, const JSON::Value& data, bool ack) : 
+Packet::Packet(const string& event, const json::Value& data, bool ack) : 
 	_type(Packet::Event), 
-	_id(CryptoProvider::generateRandomNumber(4)),
+	_id(crypt::randomNumber(4)),
 	_ack(ack),
 	_size(0)
 {	
-	JSON::Value root;
+	json::Value root;
 	root["name"] = event;
 
 	// add the data into an array if it isn't already
 	if (!data.isArray()) {
-		JSON::Value array(Json::arrayValue); 
+		json::Value array(Json::arrayValue); 
 		array.append(data);
 		root["args"] = array;
 	}
 	else
 		root["args"] = data;
 		
-	_message = JSON::stringify(root);
+	_message = json::stringify(root);
 }
 
 
@@ -242,15 +242,15 @@ string Packet::message() const
 }
 
 
-JSON::Value Packet::json() const
+json::Value Packet::json() const
 {
 	if (!_message.empty()) {
-		JSON::Value data;
-		JSON::Reader reader;
+		json::Value data;
+		json::Reader reader;
 		if (reader.parse(_message, data))
 			return data;
 	}
-	return JSON::Value();
+	return json::Value();
 }
 
 

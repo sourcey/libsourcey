@@ -103,13 +103,13 @@ public:
 	int readLine(std::string& val);
 	int readToNext(std::string& val, char c);
 
-	std::string toString() { return _bytes; }
-
 	void operator++(int) { _pos++; }			// increment position by 1
 	void operator--(int) { _pos--; }			// deincrement position by 1
 	
 	void operator+=(int val) { _pos += val; }	// increment position by x
 	void operator-=(int val) { _pos -= val; }	// deincrement position by x
+
+	std::string toString() { return std::string(data(), size()); }
 	
     friend std::ostream& operator << (std::ostream& stream, const Buffer& buf) 
 	{

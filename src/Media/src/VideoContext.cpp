@@ -239,8 +239,10 @@ bool VideoEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 	assert(stream);
 	assert(frame);
 	assert(codec);
-
+	
 	frame->data[0] = (UInt8*)ipacket.data;
+	//avpicture_fill((AVPicture *)frame, (UInt8*)ipacket.data, 
+	//	av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
 
 	// TODO: Correctly set the input frame PTS
 	// http://thompsonng.blogspot.com.au/2011/09/ffmpeg-avinterleavedwriteframe-return.html
@@ -630,6 +632,8 @@ void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec&
 
     if (ctx)
         throw Exception("Conversion context already initialized.");
+
+	//assert(av_get_pix_fmt(oparams.pixelFmt) == );
 
 	oframe = avcodec_alloc_frame();
 	oframe->width = oparams.width;

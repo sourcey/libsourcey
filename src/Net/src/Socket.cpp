@@ -31,32 +31,32 @@ namespace scy {
 namespace net {
 	
 
-Socket::Socket(SocketEmitter* emitter) :
+Socket::Socket(SocketAdapter* adapter) :
 	_base(NULL), 
-	_emitter(emitter ? 
-		emitter : new SocketEmitter(this))
+	_adapter(adapter ? 
+		adapter : new SocketAdapter(this))
 {
 }
 
 
-Socket::Socket(SocketBase* base, bool shared, SocketEmitter* emitter) :
+Socket::Socket(SocketBase* base, bool shared, SocketAdapter* adapter) :
 	_base(base), 
-	_emitter(emitter ? 
-		emitter : new SocketEmitter(this))
+	_adapter(adapter ? 
+		adapter : new SocketAdapter(this))
 {
 	if (_base) {
-		_base->addObserver(*_emitter, shared);
+		_base->addAdapter(*_adapter, shared);
 	}
 }
 
 
-Socket::Socket(const Socket& socket, SocketEmitter* emitter) :
+Socket::Socket(const Socket& socket, SocketAdapter* adapter) :
 	_base(socket._base), 
-	_emitter(emitter ? 
-		emitter : new SocketEmitter(this))
+	_adapter(adapter ? 
+		adapter : new SocketAdapter(this))
 {	
 	if (_base) {
-		_base->addObserver(*_emitter, true);
+		_base->addAdapter(*_adapter, true);
 	}
 }
 
@@ -69,12 +69,10 @@ Socket& Socket::operator = (const Socket& socket)
 
 Socket& Socket::assign(SocketBase* base, bool shared)
 {	
-	//traceL("Socket", this) << "Assigning: " << base << endl;	
-	if (_base != base)
-	{
-		if (_base) _base->removeObserver(*_emitter);
+	if (_base != base) {
+		if (_base) _base->removeAdapter(*_adapter);
 		_base = base;
-		if (_base) _base->addObserver(*_emitter, shared);
+		if (_base) _base->addAdapter(*_adapter, shared);
 	}
 	return *this;
 }
@@ -83,9 +81,9 @@ Socket& Socket::assign(SocketBase* base, bool shared)
 Socket::~Socket()
 {
 	if (_base)
-		_base->removeObserver(*_emitter);
-	if (_emitter)
-		delete _emitter;
+		_base->removeAdapter(*_adapter);
+	if (_adapter)
+		delete _adapter;
 }
 
 
@@ -115,25 +113,39 @@ void Socket::bind(const Address& address)
 
 int Socket::send(const char* data, int len, int flags)
 {
-	return _base->send(data, len, flags);
+	return _adapter->send(data, len, flags);
 }
 
 
 int Socket::send(const char* data, int len, const Address& peerAddress, int flags)
 {
-	return _base->send(data, len, peerAddress, flags);
+	return _adapter->send(data, len, peerAddress, flags);
 }
 
 
 int Socket::send(const IPacket& packet, int flags)
 {
-	return _base->send(packet, flags);
+	return send(packet, peerAddress(), flags);
 }
 
 
 int Socket::send(const IPacket& packet, const Address& peerAddress, int flags)
-{
-	return _base->send(packet, peerAddress, flags);
+{	
+	// Try to cast as RawPacket so we can avoid copying anything.
+	// All large packet types, such as video and audio inherit from
+	// RawPacket for this reason.
+	const RawPacket* rawPacket = dynamic_cast<const RawPacket*>(&packet);
+	if (rawPacket)
+		return send((const char*)rawPacket->data(), rawPacket->size(), peerAddress, flags);
+	
+	// Other smaller dynamically generated packets need to be
+	// written to a buffer before sending. 
+	else {
+		Buffer buf;
+		packet.write(buf);
+		traceL("Socket", this) << "Send IPacket: " << buf.size() << endl;	
+		return send(buf.begin(), buf.size(), peerAddress, flags);
+	}
 }
 
 
@@ -159,8 +171,64 @@ net::TransportType Socket::transport() const
 { 
 	return _base->transport();
 }
+	
+
+bool Socket::connected() const 
+{ 
+	return _base->connected();
+}
+	
+
+SocketBase& Socket::base() const
+{
+	assert(_base);
+	return *_base;
+}
+	
+
+SocketAdapter& Socket::adapter() const
+{
+	assert(_adapter);
+	return *_adapter;
+}
 
 
+void Socket::setAdapter(SocketAdapter* adapter)
+{
+	_base->addAdapter(*adapter, true);
+	
+	if (_adapter) {
+		_base->removeAdapter(*_adapter);
+		delete _adapter;
+	}
+	//SocketAdapter* oldAdapter = _adapter;
+
+	_adapter = adapter;
+	_adapter->socket = this;
+}
+
+
+int Socket::isNull() const
+{
+	return _base == 0;
+}
+
+
+//
+// SocketAdapter methods
+//
+/*
+int Socket::send(const IPacket& packet, int flags)
+{
+	return _base->send(packet, flags);
+}
+
+
+int Socket::send(const IPacket& packet, const Address& peerAddress, int flags)
+{
+	return _base->send(packet, peerAddress, flags);
+}
+*/
 /*
 void Socket::duplicate() 
 { 
@@ -179,181 +247,162 @@ int base().refCount() const
 	return _base->refCount();
 }
 */
-	
-
-SocketBase& Socket::base() const
-{
-	assert(_base);
-	return *_base;
-}
-	
-
-SocketEmitter& Socket::emitter() const
-{
-	assert(_emitter);
-	return *_emitter;
-}
-
-
-int Socket::isNull() const
-{
-	return _base == 0;
-}
-
-
-//
-// SocketObserver methods
-//
-
-SocketObserver::SocketObserver(int priority) : 
+/*
+SocketAdapter::SocketAdapter(int priority) : 
 	priority(priority)
 {
-	//traceL("SocketObserver", this) << "Creating" << endl;	
+	//traceL("SocketAdapter", this) << "Creating" << endl;	
 }
 	
 
-SocketObserver::~SocketObserver()
+SocketAdapter::~SocketAdapter()
 {
-	//traceL("SocketObserver", this) << "Destroying" << endl;	
+	//traceL("SocketAdapter", this) << "Destroying" << endl;	
 }
+*/
 
 
 //
-// SocketEmitter methods
+// SocketAdapter methods
 //
 
-SocketEmitter::SocketEmitter(Socket* socket, int priority) : 
-	SocketObserver(priority), socket(socket)
+SocketAdapter::SocketAdapter(Socket* socket, int priority) : 
+	socket(socket), priority(priority) //SocketAdapter(priority), 
 {
-	//traceL("SocketEmitter", this) << "Creating" << endl;	
+	//traceL("SocketAdapter", this) << "Creating" << endl;	
 }
 	
 
-SocketEmitter::~SocketEmitter()
+SocketAdapter::~SocketAdapter()
 {
-	//traceL("SocketEmitter", this) << "Destroying" << endl;	
+	//traceL("SocketAdapter", this) << "Destroying" << endl;	
 }
 
 
-void SocketEmitter::onSocketConnect()
+void SocketAdapter::onSocketConnect()
 {
-	//traceL("SocketEmitter", this) << "On Connect: " << socket->Connect.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "On Connect: " << socket->Connect.refCount() << endl;	
 	socket->Connect.emit(socket);
 }
 
 
-void SocketEmitter::onSocketRecv(Buffer& buf, const Address& peerAddr)
+void SocketAdapter::onSocketRecv(Buffer& buf, const Address& peerAddr)
 {
-	//traceL("SocketEmitter", this) << "On Recv: " << socket->Recv.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "On Recv: " << socket->Recv.refCount() << endl;	
 	SocketPacket packet(*socket, buf, peerAddr);
 	socket->Recv.emit(socket, packet);
 }
 
 
-void SocketEmitter::onSocketError(int syserr, const string& message) 
+void SocketAdapter::onSocketError(const Error& error) //int syserr, const string& message
 {
-	//traceL("SocketEmitter", this) << "On Error: " << socket->Error.refCount() << ": " << message << endl;	
-	socket->Error.emit(socket, syserr, message);
+	//traceL("SocketAdapter", this) << "On Error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
+	socket->Error.emit(socket, error);
 }
 
 
-void SocketEmitter::onSocketClose()
+void SocketAdapter::onSocketClose()
 {
-	//traceL("SocketEmitter", this) << "On Close: " << socket->Close.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "On Close: " << socket->Close.refCount() << endl;	
 	socket->Close.emit(socket);
+}
+
+		
+int SocketAdapter::send(const char* data, int len, int flags)
+{
+	return socket->base().send(data, len, flags);
+}
+
+
+int SocketAdapter::send(const char* data, int len, const Address& peerAddress, int flags)
+{
+	return socket->base().send(data, len, peerAddress, flags);
+}
+
+
+bool SocketAdapter::compareProiroty(const SocketAdapter* l, const SocketAdapter* r) 
+{
+	return l->priority > r->priority;
 }
 
 
 //
 // SocketBase methods
 //
-
-void SocketBase::addObserver(SocketObserver& observer, bool shared) 
+SocketBase::SocketBase() : 
+	_connected(false)
 {
-	traceL("SocketBase", this) << "Duplicating socket: " << &observer << endl;
-	_observers.push_back(&observer);		
-	sortObservers();
-	if (shared)
-		duplicate();
-	traceL("SocketBase", this) << "Duplicated socket: " << &observer << endl;
+	//traceL("SocketAdapter", this) << "Creating" << endl;	
 }
 
 
-void SocketBase::removeObserver(SocketObserver& observer)  
+void SocketBase::addAdapter(SocketAdapter& adapter, bool shared) 
+{
+	traceL("SocketBase", this) << "Duplicating socket: " << &adapter << endl;
+	_adapters.push_back(&adapter);		
+	sortAdapters();
+	if (shared)
+		duplicate();
+	traceL("SocketBase", this) << "Duplicated socket: " << &adapter << endl;
+}
+
+
+void SocketBase::removeAdapter(SocketAdapter& adapter)  
 {	
 	/// TODO: Ensure socket destruction when released?
-	for (vector<SocketObserver*>::iterator it = _observers.begin(); it != _observers.end(); ++it) {
-		if ((*it) == &observer) {
-			traceL("SocketBase", this) << "Releasing socket: " << &observer << endl;
-			_observers.erase(it);
-			sortObservers();
+	for (vector<SocketAdapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
+		if ((*it) == &adapter) {
+			traceL("SocketBase", this) << "Releasing socket: " << &adapter << endl;
+			_adapters.erase(it);
+			sortAdapters();
 			release();
 			return;
 		}
 	}
-	assert(0 && "unknown socket observer");
+	assert(0 && "unknown socket adapter");
 }
 
 
-void SocketBase::sortObservers()  
+void SocketBase::sortAdapters()  
 {	
-	sort(_observers.begin(), _observers.end(), SocketObserver::compareProiroty);
+	sort(_adapters.begin(), _adapters.end(), SocketAdapter::compareProiroty);
 }
+	
 
-
-int SocketBase::send(const IPacket& packet, int flags)
-{
-	return SocketBase::send(packet, peerAddress(), flags);
-}
-
-
-int SocketBase::send(const IPacket& packet, const Address& peerAddress, int flags)
-{	
-	// Always try to cast as RawPacket so we can try 
-	// to send without copying any data.
-
-	const RawPacket* dataPacket = dynamic_cast<const RawPacket*>(&packet);
-	if (dataPacket)
-		return send((const char*)dataPacket->data(), dataPacket->size(), peerAddress, flags);
-	else {
-
-		// A nocopy solution for sending IPackets is not currently
-		// possible since some packets are only generated when
-		// IPacket::write() is called, such as STUN and RTP packets.
-
-		Buffer buf;
-		packet.write(buf);
-		traceL("SocketBase", this) << "Send IPacket: " << buf.size() << endl;	
-		return send(buf.begin(), buf.size(), peerAddress, flags);
-	}
+bool SocketBase::connected() const 
+{ 
+	return _connected;
 }
 
 
 void SocketBase::emitConnect() 
 {
-	for (int i = 0; i < _observers.size(); i++) 
-		_observers[i]->onSocketConnect();
+	_connected = true;
+	for (int i = 0; i < _adapters.size(); i++) 
+		_adapters[i]->onSocketConnect();
 }
 
 
 void SocketBase::emitRecv(Buffer& buf, const Address& peerAddr)
 {
-	for (int i = 0; i < _observers.size(); i++) 
-		_observers[i]->onSocketRecv(buf, peerAddr);
+	for (int i = 0; i < _adapters.size(); i++) 
+		_adapters[i]->onSocketRecv(buf, peerAddr);
 }
 
 
-void SocketBase::emitError(int syserr, const string& message)
+void SocketBase::emitError(const Error& error)
 {
-	for (int i = 0; i < _observers.size(); i++) 
-		_observers[i]->onSocketError(syserr, message);
+	_connected = false;
+	for (int i = 0; i < _adapters.size(); i++) 
+		_adapters[i]->onSocketError(error);
 }
 
 
 void SocketBase::emitClose()
 {
-	for (int i = 0; i < _observers.size(); i++) 
-		_observers[i]->onSocketClose();
+	_connected = false;
+	for (int i = 0; i < _adapters.size(); i++) 
+		_adapters[i]->onSocketClose();
 }
 
 

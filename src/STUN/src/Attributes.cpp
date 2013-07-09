@@ -672,7 +672,7 @@ bool MessageIntegrity::verifyHmac(const string& key) const
 	//debugL() << "Message: Packet integrity input (" << _input << ")" << endl;
 	//debugL() << "Message: Packet integrity key (" << key << ")" << endl;
 
-	string hmac = CryptoProvider::computeHMAC(_input, key);
+	string hmac = crypt::computeHMAC(_input, key);
 	assert(hmac.size() == Size);
 
 	//debugL() << "Message: Verifying message integrity (" << hmac << ":" << _hmac << ")" << endl;
@@ -737,7 +737,7 @@ void MessageIntegrity::write(Buffer& buf) const
 		hmacBuf.updateU32((UInt32)buf.size() + MessageIntegrity::Size, 2);
 
 		string input(hmacBuf.data(), hmacBuf.size());
-		string hmac(CryptoProvider::computeHMAC(input, _key));
+		string hmac(crypt::computeHMAC(input, _key));
 		assert(hmac.size() == MessageIntegrity::Size);
 
 		// Append the real HAMC to the buffer.

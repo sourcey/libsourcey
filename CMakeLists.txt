@@ -96,8 +96,8 @@ if(WIN32)
     #D:/dev/lib/OpenCV2.4.1/build/install/lib
     #D:/dev/lib/OpenSSL-Win32/lib/VC/static
     D:/dev/lib/poco-1.4.6p1-all/lib 
-    #D:/dev/lib/ffmpeg-1.0.1-gpl/lib
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib
+    D:/dev/lib/ffmpeg-1.0.1-gpl/lib
+    #${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib
     ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/vc10
     ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/lib/vc10
     #${LibSourcey_SOURCE_DIR}/anionu-abi/poco/lib/vc10
@@ -128,8 +128,8 @@ if(WIN32)
     D:/dev/lib/wxWidgets-2.9.4
     #D:/dev/lib/OpenSSL-Win32/include
     D:/dev/lib/poco-1.4.6p1-all    
-    #D:/dev/lib/ffmpeg-1.0.1-gpl/include
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/include
+    D:/dev/lib/ffmpeg-1.0.1-gpl/include
+    #${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/include
     ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/include
     ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/include
     #${LibSourcey_SOURCE_DIR}/anionu-abi/poco/include
