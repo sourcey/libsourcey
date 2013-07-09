@@ -183,9 +183,15 @@ void VideoCapture::run()
 			// Grab a frame if we have delegates or aren't syncing with them
 			hasDelegates = refCount() > 0;
 			if (hasDelegates || (!hasDelegates && !syncWithDelegates)) {
+
+				//cv::Mat resized;
+				//cv::resize(frame, resized, cv::Size(300, 200));				
+				//MatPacket packet(&resized);
+				
 				frame = grab();
-				MatPacket packet(&frame);	
+				MatPacket packet(&frame);
 				if (hasDelegates && packet.width && packet.height) { //!_stopping && 
+					traceL("VideoCapture", this) << "Emitting: Step: " << frame.step << endl;
 					traceL("VideoCapture", this) << "Emitting: " << _counter.fps << endl;
 					emit(this, packet);					
 					traceL("VideoCapture", this) << "Emitting: OK" << endl;
@@ -204,7 +210,7 @@ void VideoCapture::run()
 	{
 		setError("OpenCV Error: " + exc.err);
 	}
-	catch (Poco::Exception& exc) 
+	catch (Exception& exc) 
 	{
 		// If we make it here an exception was not properly 
 		// handled inside the signal callback scope which

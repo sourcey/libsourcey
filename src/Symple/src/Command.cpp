@@ -45,7 +45,7 @@ Command::Command(const Command& root) :
 }
 
 
-Command::Command(const JSON::Value& root) :
+Command::Command(const json::Value& root) :
 	Message(root)
 {
 	if (!isMember("type"))

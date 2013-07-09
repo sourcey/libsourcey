@@ -60,12 +60,12 @@ public:
 		   bool ack = false);
 		// Message contructor
 
-	Packet(const JSON::Value& data, 
+	Packet(const json::Value& data, 
 		   bool ack = false);
 		// JSON contructor
 
 	Packet(const std::string& event, 
-		   const JSON::Value& data, 
+		   const json::Value& data, 
 		   bool ack = false);
 		// Event contructor
 
@@ -79,7 +79,7 @@ public:
 	int id() const;
 	std::string endpoint() const;
 	std::string message() const;	
-	JSON::Value json() const;
+	json::Value json() const;
 	
 	void setID(int id);
 	void setEndpoint(const std::string& endpoint);
@@ -95,7 +95,7 @@ public:
 	std::string toString() const;
 	void print(std::ostream& os) const;
 
-	virtual const char* className() const { return "sockio::Packet"; }
+	virtual const char* className() const { return "SocketIOPacket"; }
 
 protected:
 	int _type;

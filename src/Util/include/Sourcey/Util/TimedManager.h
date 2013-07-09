@@ -23,7 +23,7 @@
 
 #include "Sourcey/Base.h"
 #include "Sourcey/Manager.h"
-#include "Sourcey/Util/Timer.h"
+//#include "Sourcey/Util/Timer.h"
 
 
 namespace scy {
@@ -38,8 +38,12 @@ public:
 	typedef BasicManager<TKey, TValue> Base;
 
 public:
-	TimedManager() {};
-	virtual ~TimedManager() {};
+	TimedManager() {		
+		timer.Timeout += delegate(this, &TimedManager::onTimer);
+	};
+	virtual ~TimedManager() {
+		timer.Timeout -= delegate(this, &TimedManager::onTimer);
+	};
 	
 	virtual void add(const TKey& name, TValue* item, long timeout = 0)
 		/// Add the item with a timeout specified by the timeout value.
@@ -51,17 +55,22 @@ public:
 		// given key and store the item.
 		Base::free(name);
 		Base::add(name, item);
-		if (timeout)
-			Timer::getDefault().start(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, timeout, 0, item));
+		//if (timeout)
+		//	timer.start(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, timeout, 0, item));
 	}
 	
 	virtual void expires(const TKey& name, long timeout) 
 	{
 		TValue* item = get(name);
-		if (item) {
-			timeout ? 
-				Timer::getDefault().start(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, timeout, 0, item)) :
-				Timer::getDefault().stop(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, 0, 0, item));
+		if (item) {			
+			assert(0);
+			// need to sort entiries by timeout
+			// and set nearest timeout value
+			//timer.start(5000, 5000);
+
+			//timeout ? 
+			//	timer.start(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, timeout, 0, item)) :
+			//	timer.stop(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, 0, 0, item));
 		}
 	}
 	
@@ -70,29 +79,53 @@ public:
 		if (!exists(item))
 			throw Poco::NotFoundException("Item not found");
 		
-		timeout ? 
-			Timer::getDefault().start(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, timeout, 0, item)) :
-			Timer::getDefault().stop(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, 0, 0, item));
+		
+		assert(0);
+
+
+		//timeout ? 
+		//	timer.start(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, timeout, 0, item)) :
+		//	timer.stop(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, 0, 0, item));
 	}
 
 	virtual void onRemove(const TKey& key, TValue* item) 
 	{ 
-		Timer::getDefault().stop(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, 0, 0, item));
+		//timer.stop(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, 0, 0, item));
 		Base::onRemove(key, item);
 	}
 
 	virtual void clear()
 	{
-		Timer::getDefault().stopAll(this);
+		//timer.stopAll(this);
 		Base::clear();
 	}
 
+	/*
 	virtual void onItemTimeout(TimerCallback<TimedManager>& timer)
 	{
 		TValue* item = reinterpret_cast<TValue*>(timer.opaque());
 		if (Base::remove(item))
 			delete item;
 	}
+	*/
+	
+	void onTimer(void*)
+	{
+		// loop items and destroy
+		/*
+		for (ClientConnectionList::iterator it = connections.begin(); it != connections.end();) {
+			if ((*it)->deleted()) {
+				traceL("Client", this) << "Deleting Connection: " << (*it) << std::endl;
+				delete *it;
+				it = connections.erase(it);
+			}
+			else
+				++it;
+		}
+		*/
+	}
+
+	Timer timer;
 };
 
 

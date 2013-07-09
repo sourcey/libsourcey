@@ -97,9 +97,9 @@ int SSLContext::available() const
 }
 
 
-void SSLContext::addEncryptedData(const char* data, size_t len) 
+void SSLContext::addIncomingData(const char* data, size_t len) 
 {
-	Log("trace") << "SSLContext: addEncryptedData: " << len << endl;
+	Log("trace") << "SSLContext: addIncomingData: " << len << endl;
 	BIO_write(_readBIO, data, len);
 	update();
 }

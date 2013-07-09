@@ -27,7 +27,7 @@
 
 
 namespace scy {
-namespace JSON {
+namespace json {
 
 	
 typedef Json::Value Value;
@@ -37,14 +37,14 @@ typedef Json::FastWriter FastWriter;
 typedef Json::Reader Reader;
 
 	
-inline void loadFile(JSON::Value& root, const std::string& path) 
+inline void loadFile(json::Value& root, const std::string& path) 
 {
 	std::ifstream infile;
 	infile.open(path.data(), std::ifstream::in);
 	if (!infile.is_open())		
 		throw Poco::OpenFileException("Cannot open input file: " + path);
 
-	JSON::Reader reader;
+	json::Reader reader;
 	bool res = reader.parse(infile, root);
 	infile.close();
 	if (!res)
@@ -52,9 +52,9 @@ inline void loadFile(JSON::Value& root, const std::string& path)
 }
 
 
-inline void saveFile(const JSON::Value& root, const std::string& path) 
+inline void saveFile(const json::Value& root, const std::string& path) 
 {
-	JSON::StyledWriter writer;
+	json::StyledWriter writer;
 	std::ofstream outfile;
 	outfile.open(path.data());
 	if (!outfile.is_open())
@@ -65,14 +65,14 @@ inline void saveFile(const JSON::Value& root, const std::string& path)
 }
 
 
-inline void stringify(const JSON::Value& root, std::string& output, bool pretty = false) 
+inline void stringify(const json::Value& root, std::string& output, bool pretty = false) 
 {
 	if (pretty) {
-		JSON::StyledWriter writer;
+		json::StyledWriter writer;
 		output = writer.write(root);
 	}
 	else {
-		JSON::FastWriter writer;
+		json::FastWriter writer;
 		output = writer.write(root);
 
 		// NOTE: The FastWriter appends a newline
@@ -83,7 +83,7 @@ inline void stringify(const JSON::Value& root, std::string& output, bool pretty 
 }
 
 
-inline std::string stringify(const JSON::Value& root, bool pretty = false) 
+inline std::string stringify(const json::Value& root, bool pretty = false) 
 {
 	std::string output;
 	stringify(root, output, pretty);
@@ -91,17 +91,17 @@ inline std::string stringify(const JSON::Value& root, bool pretty = false)
 }
 
 
-inline void assertMember(const JSON::Value& root,  const std::string& name) 
+inline void assertMember(const json::Value& root,  const std::string& name) 
 {
 	if (!root.isMember(name))
 		throw Poco::Exception("A '" + name + "' member is required.");
 }
 
 
-inline void countNestedKeys(JSON::Value& root, const std::string& key, int& count, int depth = 0) 
+inline void countNestedKeys(json::Value& root, const std::string& key, int& count, int depth = 0) 
 {
 	depth++;
-	for (JSON::ValueIterator it = root.begin(); it != root.end(); it++) {
+	for (json::ValueIterator it = root.begin(); it != root.end(); it++) {
 		if ((*it).isObject() && 
 			(*it).isMember(key))
 			count++;
@@ -110,10 +110,10 @@ inline void countNestedKeys(JSON::Value& root, const std::string& key, int& coun
 }
 
 
-inline bool hasNestedKey(JSON::Value& root, const std::string& key, int depth = 0) 
+inline bool hasNestedKey(json::Value& root, const std::string& key, int depth = 0) 
 {
 	depth++;
-	for (JSON::ValueIterator it = root.begin(); it != root.end(); it++) {
+	for (json::ValueIterator it = root.begin(); it != root.end(); it++) {
 		if ((*it).isObject() && 
 			(*it).isMember(key))
 			return true;
@@ -124,7 +124,7 @@ inline bool hasNestedKey(JSON::Value& root, const std::string& key, int depth = 
 }
 
 
-inline bool findNestedObjectWithProperty(JSON::Value& root, JSON::Value*& result, 
+inline bool findNestedObjectWithProperty(json::Value& root, json::Value*& result, 
 	const std::string& key, const std::string& value, 
 	bool partial = true, int index = 0, int depth = 0) 
 	/// Only works for objects with string values.
@@ -136,9 +136,9 @@ inline bool findNestedObjectWithProperty(JSON::Value& root, JSON::Value*& result
 {
 	depth++;
 	if (root.isObject()) {
-		JSON::Value::Members members = root.getMemberNames();
+		json::Value::Members members = root.getMemberNames();
 		for (int i = 0; i < members.size(); i++) {		
-			JSON::Value& test = root[members[i]];
+			json::Value& test = root[members[i]];
 			if (test.isNull())
 				continue;
 			else if (test.isString() && 
@@ -159,7 +159,7 @@ inline bool findNestedObjectWithProperty(JSON::Value& root, JSON::Value*& result
 	}
 	else if (root.isArray()) {		
 		for (int i = 0; i < root.size(); i++) {		
-			JSON::Value& test = root[i];
+			json::Value& test = root[i];
 			if (!test.isNull() && (test.isObject() || test.isArray()) &&
 				findNestedObjectWithProperty(root[i], result, key, value, partial, index, depth))
 				return true;
@@ -169,7 +169,7 @@ inline bool findNestedObjectWithProperty(JSON::Value& root, JSON::Value*& result
 }
 
 
-} // namespace JSON
+} // namespace json
 } // namespace scy
 
 

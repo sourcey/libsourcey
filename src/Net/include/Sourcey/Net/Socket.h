@@ -35,8 +35,8 @@ namespace net {
 
 class Socket;
 class SocketPacket;
-class SocketObserver;
-class SocketEmitter;
+class SocketAdapter;
+class SocketAdapter;
 
 
 class SocketBase
@@ -44,6 +44,8 @@ class SocketBase
 	/// which all socket contexts derive.
 {
 public:
+	SocketBase();
+
 	virtual void connect(const Address& address) = 0;
 	virtual bool shutdown() { throw Exception("Not implemented by protocol"); };
 	virtual void close() = 0;
@@ -53,9 +55,6 @@ public:
 		
 	virtual int send(const char* data, int len, int flags = 0) = 0;
 	virtual int send(const char* data, int len, const Address& peerAddress, int flags = 0) = 0;
-
-	virtual int send(const IPacket& packet, int flags = 0);
-	virtual int send(const IPacket& packet, const Address& peerAddress, int flags = 0);
 	
 	virtual Address address() const = 0;
 		/// The locally bound address.
@@ -66,6 +65,10 @@ public:
 	virtual net::TransportType transport() const = 0;
 		/// The transport protocol: TCP, UDP or SSLTCP.
 		/// See TransportType definition.
+
+	bool connected() const;
+		/// Returns true when the socket is connected 
+		/// to the peer.
 	
 	void* opaque;
 		/// Optional owned client data pointer.
@@ -73,24 +76,25 @@ public:
 	
 	virtual void emitConnect();
 	virtual void emitRecv(Buffer& buf, const Address& peerAddr);
-	virtual void emitError(int syserr, const std::string& message);
+	virtual void emitError(const Error& error);
 	virtual void emitClose();
 
 	virtual void duplicate() = 0;
 	virtual void release() = 0;
 	virtual int refCount() const = 0;
 	
-	virtual void addObserver(SocketObserver& observer, bool shared = false);
-	virtual void removeObserver(SocketObserver& observer);
-	virtual void sortObservers();
+	virtual void addAdapter(SocketAdapter& observer, bool shared = false);
+	virtual void removeAdapter(SocketAdapter& observer);
+	virtual void sortAdapters();
 
 protected:
 	virtual ~SocketBase() {};
-
-	std::vector<SocketObserver*> _observers;
+	
+	bool _connected;
+	std::vector<SocketAdapter*> _adapters;
 	
 	friend class Socket;
-	friend class SocketObserver;
+	friend class SocketAdapter;
 };
 
 
@@ -139,13 +143,13 @@ class Socket
 	/// be extended as necessary for different protocols.
 {
 public:
-	Socket(const Socket& socket, SocketEmitter* emitter = 0);
+	Socket(const Socket& socket, SocketAdapter* adapter = 0);
 		/// Attaches the socket context from the other socket and
 		/// increments the reference count of the socket context.
 		
-	Socket(SocketBase* base, bool shared, SocketEmitter* emitter = 0);
+	Socket(SocketBase* base, bool shared, SocketAdapter* adapter = 0);
 		/// Creates the Socket from the given SocketBase and attaches
-		/// the given or default SocketEmitter.
+		/// the given or default SocketAdapter.
 		///
 		/// If shared is true we increment the SocketBase reference
 		/// count. If not we do not increment the reference count,
@@ -168,12 +172,6 @@ public:
 		
 	virtual ~Socket();
 		/// Destroys the Socket and releases the socket context.
-
-	SocketBase& base() const;
-		/// Returns the SocketBase for this socket.
-
-	SocketEmitter& emitter() const;
-		/// Returns the SocketEmitter for this socket.
 		
 	virtual void connect(const Address& address);
 	virtual bool shutdown();
@@ -187,16 +185,20 @@ public:
 
 	virtual int send(const IPacket& packet, int flags = 0);
 	virtual int send(const IPacket& packet, const Address& peerAddress, int flags = 0);
-	
-	virtual Address address() const;
-		/// The locally bound address.
 
-	virtual Address peerAddress() const;
-		/// The connected peer address.
-
-	virtual net::TransportType transport() const;
+	net::TransportType transport() const;
 		/// The transport protocol: TCP, UDP or SSLTCP.
 		/// See TransportType definition.
+	
+	Address address() const;
+		/// The locally bound address.
+
+	Address peerAddress() const;
+		/// The connected peer address.
+
+	bool connected() const;
+		/// Returns true when the socket is connected 
+		/// to the peer.
 	
 	NullSignal Connect;
 		/// Signals that the socket is connected.
@@ -204,7 +206,7 @@ public:
 	Signal<SocketPacket&> Recv;
 		/// Signals when data is received by the socket.
 
-	Signal2<int, const std::string&> Error;
+	Signal<const Error&> Error;
 		/// Signals that the socket is closed in error.
 		/// This signal will be sent just before the 
 		/// Closed signal.
@@ -212,85 +214,101 @@ public:
 	NullSignal Close;
 		/// Signals that the underlying socket is closed,
 		/// maybe in error.
+
+	SocketBase& base() const;
+		/// Returns the SocketBase for this socket.
+
+	SocketAdapter& adapter() const;
+		/// Returns the SocketAdapter for this socket.
 		
-	//void duplicate();
-	//void release();
-	//int refCount() const;
+	void setAdapter(SocketAdapter* adapter);
+		/// Sets the SocketAdapter instance,
+		/// and deletes the old one.
+		
 	int isNull() const;
 
 protected:		
-	Socket(SocketEmitter* emitter = 0);
+	Socket(SocketAdapter* adapter = 0);
 		/// Creates a NULL socket.
 
 	friend class SocketBase;
 
 	SocketBase* _base;
-	SocketEmitter* _emitter;
+	SocketAdapter* _adapter;
 };
 
 
+/*
+	//void duplicate();
+	//void release();
+	//int refCount() const;
+
 // -------------------------------------------------------------------
 //
-class SocketObserver
-	/// SocketObserver is the short and sweet socket event handling 
+class SocketAdapter
+	/// SocketAdapter is the short and sweet socket event handling 
 	/// interface which is also directly responsible for incrementing and 
 	/// deincrementing the reference count of the underlying SocketBase.
 	/// 
 	/// This class can also be extended to implement custom processing 
 	/// for received socket data before it is dispatched to the application.
-	/// See the SocketEmitter, PacketSocket and Transaction classes for ideas.
+	/// See the SocketAdapter, PacketSocket and Transaction classes for ideas.
 	///
 	/// TODO: SocketBase pointer here
 	///
 {
 public:
-	SocketObserver(int priority = 0);
+	SocketAdapter(int priority = 0);
 	
-	virtual ~SocketObserver();
+	virtual ~SocketAdapter();
 
 	virtual void onSocketConnect() = 0;
 	virtual void onSocketRecv(Buffer& buf, const Address& peerAddr) = 0;
-	virtual void onSocketError(int syserr, const std::string& message) = 0;
+	virtual void onSocketError(const Error& error) = 0;
 	virtual void onSocketClose() = 0;
-	
-	int priority;
-		/// A higher priority gives the current observer
-		/// precedence in the socket callback chain.
-
-	static bool compareProiroty(const SocketObserver* l, const SocketObserver* r) {
-		return l->priority > r->priority;
-	}
 };
 
 
-// -------------------------------------------------------------------
-//
-class SocketEmitter: public SocketObserver
-	/// SocketEmitter is an proxy layer which is attached to a
+	/// SocketAdapter is an proxy layer which is attached to a
 	/// SocketBase instance to handle socket events.
 	///
-	/// SocketEmitters are directly responsible for incrementing and 
+	/// SocketAdapters are directly responsible for incrementing and 
 	/// deincrementing the reference count of the managing SocketBase.
 	/// 
 	/// This class can also be extended to implement custom processing 
 	/// for received socket data before it is dispatched to the application.
-	/// See the PacketSocketEmitter and Transaction classes for ideas.
+	/// See the PacketSocketAdapter and Transaction classes for ideas.
 	///
-	/// TODO: Rename to SocketObserver, and extend as SocketEmitter with signals
+	/// TODO: Rename to SocketAdapter, and extend as SocketAdapter with signals
 	///
+*/
+
+
+// -------------------------------------------------------------------
+//
+class SocketAdapter//: public SocketAdapter
 {
 public:
-	SocketEmitter(Socket* socket = NULL, int priority = 0);
-		/// Creates the SocketEmitter
+	SocketAdapter(Socket* socket = NULL, int priority = 0);
+		/// Creates the SocketAdapter
 		/// The Socket instance can be NULL, but it must be set 
 		/// before any callbacks come back.
 	
-	virtual ~SocketEmitter();
+	virtual ~SocketAdapter();
 
 	virtual void onSocketConnect();
 	virtual void onSocketRecv(Buffer& buf, const Address& peerAddr);
-	virtual void onSocketError(int syserr, const std::string& message);
+	virtual void onSocketError(const Error& error);
 	virtual void onSocketClose();
+		
+	virtual int send(const char* data, int len, int flags = 0);
+	virtual int send(const char* data, int len, const Address& peerAddress, int flags = 0);
+
+	static bool compareProiroty(const SocketAdapter* l, const SocketAdapter* r);
+	
+	int priority;
+		/// A higher priority gives the current observer
+		/// precedence in the socket callback chain.
 	
 	Socket* socket;
 };

@@ -27,7 +27,7 @@ namespace scy {
 namespace smple {
 
 
-Client::Client(Net::IWebSocket& socket, Runner& runner, const Client::Options& options) :
+Client::Client(net::SocketBase* socket, Runner& runner, const Client::Options& options) :
 	sockio::Client(socket, runner),
 	_options(options),
 	_announceStatus(500)
@@ -48,7 +48,7 @@ void Client::connect()
 {
 	log("trace") << "Connecting" << endl;		
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		assert(!_options.user.empty());
 		//assert(!_options.token.empty());
 		_serverAddr = _options.serverAddr;
@@ -81,7 +81,7 @@ int Client::send(Message& m, bool ack)
 	//	throw Exception("Cannot send message from another peer.");
 	//log("trace") << "Sending Message: " 
 	//	<< message.id() << ":\n" 
-	//	<< JSON::stringify(message, true) << endl;
+	//	<< json::stringify(message, true) << endl;
 	return sockio::Client::send(m, false);
 }
 
@@ -103,7 +103,7 @@ int Client::respond(Message& m, bool ack)
 	//assert(m.to().id() != m.from().id());
 	//log("trace") << "Responding Message: " 
 	//	<< m.id() << ":\n" 
-	//	<< JSON::stringify(m, true) << endl;
+	//	<< json::stringify(m, true) << endl;
 	return send(m, ack);
 }
 
@@ -143,7 +143,7 @@ int Client::sendPresence(const Address& to, bool probe)
 
 Roster& Client::roster() 
 { 
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	return _roster; 
 }
 
@@ -151,14 +151,14 @@ Roster& Client::roster()
 /*
 Runner& runner() 
 { 
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	return _runner; 
 }
 
 
 int Client::announceStatus() const
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	return _announceStatus;
 }
 */
@@ -166,28 +166,28 @@ int Client::announceStatus() const
 
 PersistenceT& Client::persistence() 
 { 
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	return _persistence; 
 }
 
 
 Client::Options& Client::options() 
 { 
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	return _options; 
 }
 
 
 string Client::ourID() const
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	return _ourID;
 }
 
 
 Peer& Client::ourPeer()
 {	
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	log("trace") << "Getting Our Peer: " << _ourID << endl;
 	if (_ourID.empty())
 		throw Exception("No active peer session is available.");
@@ -204,9 +204,9 @@ Client& Client::operator >> (Message& message)
 	
 int Client::announce()
 {
-	JSON::Value data;
+	json::Value data;
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		data["token"]	= _options.token;
 		data["group"]	= _options.group;
 		data["user"]	= _options.user;
@@ -220,16 +220,16 @@ int Client::announce()
 }
 
 
-void Client::onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
+void Client::onAnnounce(void* sender, net::TransactionState& state, const net::TransactionState&) 
 {
 	log("trace") << "Announce Response: " << state.toString() << endl;
 	
 	sockio::Transaction* transaction = reinterpret_cast<sockio::Transaction*>(sender);
 	switch (state.id()) {	
-	case TransactionState::Success:
+	case net::TransactionState::Success:
 		try 
 		{
-			JSON::Value data = transaction->response().json()[(size_t)0];
+			json::Value data = transaction->response().json()[(size_t)0];
 			_announceStatus = data["status"].asInt();
 
 			// Notify the outside application of the response 
@@ -259,7 +259,7 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 		}
 		break;		
 
-	case TransactionState::Failed:
+	case net::TransactionState::Failed:
 		Announce.emit(this, _announceStatus);
 		setError(state.message());
 		break;
@@ -285,9 +285,9 @@ void Client::onPacket(sockio::Packet& packet)
 	if (packet.type() == sockio::Packet::Message || 
 		packet.type() == sockio::Packet::JSON) {
 			
-		//JSON::Value data = packet.json();
-		JSON::Value data;
-		JSON::Reader reader;
+		//json::Value data = packet.json();
+		json::Value data;
+		json::Reader reader;
 		if (reader.parse(packet.message(), data)) {
 			string type(data["type"].asString());
 			log("trace") << "Symple Packet Created: " << type << endl;
@@ -356,7 +356,7 @@ void Client::onError()
 
 			
 		//sockio::Packet* p = dynamic_cast<sockio::Packet*>(packet);
-		//JSON::Value data = packet.json();
+		//json::Value data = packet.json();
 		//if (!data.isObject() || data.isNull()) {
 		//	log("warning") << "Packet is not a JSON object" << endl;
 		//	return true; // continue propagation
@@ -364,7 +364,7 @@ void Client::onError()
 			//return false; // stop propagation
 			//return false; // stop propagation
 			//return false; // stop propagation
-//Client::Client(Net::Reactor& reactor, Runner& runner, const Options& options) : 
+//Client::Client(/* Net::Reactor& reactor, */Runner& runner, const Options& options) : 
 //	sockio::Socket(reactor),
 //	_runner(runner),
 //	_options(options),
@@ -418,7 +418,7 @@ void Client::onError()
 //	assert(message.to().id() != message.from().id());
 //	traceL() << "[smple::Client] Sending Message: " 
 //		<< message.id() << ":\n" 
-//		<< JSON::stringify(message, true) << endl;
+//		<< json::stringify(message, true) << endl;
 //	return sockio::Socket::send(message, false);
 //}
 //
@@ -466,7 +466,7 @@ void Client::onError()
 //
 //int Client::announce()
 //{
-//	JSON::Value data;
+//	json::Value data;
 //	{
 //		FastMutex::ScopedLock lock(_mutex);
 //		data["token"]	= _options.token;
@@ -481,16 +481,16 @@ void Client::onError()
 //}
 //
 //
-//void Client::onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
+//void Client::onAnnounce(void* sender, net::TransactionState& state, const net::TransactionState&) 
 //{
 //	traceL() << "[smple::Client] Announce Response: " << state.toString() << endl;
 //	
 //	sockio::Transaction* transaction = reinterpret_cast<sockio::Transaction*>(sender);
 //	switch (state.id()) {	
-//	case TransactionState::Success:
+//	case net::TransactionState::Success:
 //		try 
 //		{
-//			JSON::Value data = transaction->response().json()[(size_t)0];
+//			json::Value data = transaction->response().json()[(size_t)0];
 //			_announceStatus = data["status"].asInt();
 //
 //			// Notify the outside application of the response 
@@ -520,7 +520,7 @@ void Client::onError()
 //		}
 //		break;		
 //
-//	case TransactionState::Failed:
+//	case net::TransactionState::Failed:
 //		Announce.emit(this, _announceStatus);
 //		setError(state.message());
 //		break;
@@ -564,7 +564,7 @@ void Client::onError()
 //		p->type() == sockio::Packet::Message || 
 //		p->type() == sockio::Packet::JSON)) {
 //
-//		JSON::Value data = p->json();
+//		json::Value data = p->json();
 //		if (!data.isObject() || data.isNull()) {
 //			log("warning") << "[smple::Client] Packet is not a JSON object" << endl;
 //			return true; // continue propagation

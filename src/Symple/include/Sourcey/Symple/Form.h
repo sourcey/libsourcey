@@ -36,7 +36,7 @@ class FormElement
 {
 public:
 	FormElement();
-	FormElement(JSON::Value& root, const std::string& type = "", const std::string& id = "", const std::string& label = "");
+	FormElement(json::Value& root, const std::string& type = "", const std::string& id = "", const std::string& label = "");
 	FormElement(const FormElement& r);
 	FormElement& operator = (const FormElement& r);
 	virtual ~FormElement();
@@ -95,10 +95,10 @@ public:
 	bool hasPages();
 		/// Returns true if the form has multiple pages.
 
-	JSON::Value& root() const;
+	json::Value& root() const;
 
 protected:
-	JSON::Value* _root;
+	json::Value* _root;
 		/// The root pointer is just a reference to
 		/// the externally managed JSON value memory.
 };
@@ -108,7 +108,7 @@ class Form: public FormElement
 {
 public:	
 	Form();
-	Form(JSON::Value& root);
+	Form(json::Value& root);
 	Form(Command& root);
 	virtual ~Form();
 	
@@ -135,7 +135,7 @@ class FormField: public FormElement
 {
 public:
 	FormField();
-	FormField(JSON::Value& root, const std::string& type = "", const std::string& id = "", const std::string& label = "");
+	FormField(json::Value& root, const std::string& type = "", const std::string& id = "", const std::string& label = "");
 	virtual ~FormField();
 	
 	void addOption(const std::string& key, const std::string& value);	
@@ -154,7 +154,7 @@ public:
 	void addValue(bool value);
 		/// Appends a value to the value array.		
 
-	JSON::Value& values();
+	json::Value& values();
 		/// Returns a JSON array of all values.
 
 	std::string value() const;

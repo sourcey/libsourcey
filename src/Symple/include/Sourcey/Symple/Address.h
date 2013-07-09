@@ -28,14 +28,14 @@ namespace scy {
 namespace smple {
 
 
-class Address: public JSON::Value
+class Address: public json::Value
 	/// The Address structure contains identity information about
 	/// an entity on the network.
 {
 public:
 	Address();
 	Address(const Address& r);
-	Address(const JSON::Value& root);
+	Address(const json::Value& root);
 		/// The provided JSON value should be an object containing
 		/// the group, user, name and id string properties.
 	virtual ~Address();
@@ -68,13 +68,13 @@ public:
 	//std::string name;
 	//std::string id;
 
-	bool parse(const JSON::Value& root);
+	bool parse(const json::Value& root);
 		id.print(os);
 	std::string toString() const;
 	bool operator == (std::string& r);
 
 protected:
-	JSON::Value* _root;
+	json::Value* _root;
 		/// The root pointer is just a reference
 		/// to an externally managed JSON value,
 		/// generally a Message instance.

@@ -41,29 +41,29 @@ Roster::~Roster()
 }
 
 
-void Roster::update(const JSON::Value& data, bool whiny)
+void Roster::update(const json::Value& data, bool whiny)
 {
 	if (data.isObject() &&
 		data.isMember("id") && 
 		data.isMember("user") && 
 		data.isMember("name") && 
 		data.isMember("type")) {
-		traceL("Roster", this) << "Updating: " << JSON::stringify(data, true) << endl;
+		traceL("Roster", this) << "Updating: " << json::stringify(data, true) << endl;
 		string id = data["id"].asString();
 		Peer* peer = get(id, false);
 		if (!peer) {
 			peer = new Peer(data);
 			add(id, peer);
 		} else
-			static_cast<JSON::Value&>(*peer) = data;
+			static_cast<json::Value&>(*peer) = data;
 	}
 	else if (data.isArray()) {
-		for (JSON::ValueIterator it = data.begin(); it != data.end(); it++) {
+		for (json::ValueIterator it = data.begin(); it != data.end(); it++) {
 			update(*it, whiny);	
 		}
 	}
 	else {
-		string error("Bad presence data: " + JSON::stringify(data));
+		string error("Bad presence data: " + json::stringify(data));
 		errorL("Roster", this) << error << endl;	
 		if (whiny)
 			throw Exception(error);

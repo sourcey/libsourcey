@@ -21,7 +21,7 @@
 #define SOURCEY_SOCKETIO_Client_H
 
 
-//#include "Sourcey/Net/Reactor.h"
+#include "Sourcey/Runner.h"
 #include "Sourcey/HTTP/WebSocket.h"
 #include "Sourcey/SocketIO/Packet.h"
 #include "Sourcey/SocketIO/Transaction.h"
@@ -70,8 +70,8 @@ struct ClientState: public State
 class Client: public StatefulSignal<ClientState>, public PacketEmitter, public IPolymorphic
 {
 public:
-	Client(Net::IWebSocket& socket, Runner& runner);
-	Client(Net::IWebSocket& socket, Runner& runner, const net::Address& serverAddr);
+	Client(net::SocketBase* socket, Runner& runner);
+	Client(net::SocketBase* socket, Runner& runner, const net::Address& serverAddr);
 	virtual ~Client();
 	
 	virtual void connect(const net::Address& serverAddr);
@@ -81,10 +81,10 @@ public:
 	virtual int send(const std::string& data, bool ack = false); 
 		// Sends a Message packet
 
-	virtual int send(const JSON::Value& data, bool ack = false); 
+	virtual int send(const json::Value& data, bool ack = false); 
 		// Sends a JSON packet
 
-	virtual int emit(const std::string& event, const JSON::Value& data, bool ack = false);
+	virtual int emit(const std::string& event, const json::Value& data, bool ack = false);
 		// Sends an Event packet
 
 	virtual int send(sockio::Packet::Type type, const std::string& data, bool ack = false);
@@ -99,11 +99,11 @@ public:
 	virtual Transaction* createTransaction(const sockio::Packet& request, long timeout = 10000);
 		// Creates a packet transaction
 
-	virtual Runner& runner() const;
-	virtual Net::IWebSocket& socket() const;
+	virtual Runner& runner();
+	virtual http::WebSocket& socket();
 	virtual net::Address serverAddr() const;
 	virtual std::string sessionID() const;	
-	virtual std::string error() const;
+	virtual Error error() const;
 		
 	virtual bool isOnline() const;
 
@@ -112,7 +112,7 @@ public:
 protected:
 	virtual int sendHeartbeat();
 	virtual void sendInitialRequest();
-	virtual void setError(const std::string& error);
+	virtual void setError(const Error& error);
 
 	virtual void reset();
 		/// Resets variables and data at the beginning  
@@ -125,22 +125,22 @@ protected:
 	
 	virtual void onHeartBeatTimer(void*);
 	virtual void onSocketConnect(void*);
-	virtual void onSocketOnline(void*);
+	virtual void onSocketError(void*, const Error& error);
 	virtual void onSocketClose(void*);
-	virtual void onSocketData(void*, Buffer& data, const net::Address&);
+	virtual void onSocketRecv(void*, net::SocketPacket& packet);
 
 protected:
-	mutable Poco::FastMutex	_mutex;
+	//mutable Poco::FastMutex	_mutex;
 	
-	Net::IWebSocket& _socket;
-	Runner&			_runner;
-	net::Address	_serverAddr;
-	StringVec		_protocols;
-	std::string		_sessionID;
-	std::string		_error;
-	int				_heartBeatTimeout;
-	int				_connectionClosingTimeout;
-	TimerTask*      _timer;
+	http::WebSocket _socket;
+	Runner&		 _runner;
+	net::Address _serverAddr;
+	StringVec	 _protocols;
+	std::string  _sessionID;
+	int	_heartBeatTimeout;
+	int	_connectionClosingTimeout;
+	Error _error;
+	Timer _timer;
 };
 
 
@@ -150,14 +150,14 @@ template <class WebSocketBaseT>
 class ClientBase: public Client
 {
 public:
-	ClientBase(Net::Reactor& reactor, Runner& runner = Runner::getDefault()) :
-		_socket(reactor),
+	ClientBase(/* Net::Reactor& reactor, */uv_loop_t* loop = NULL) :
+		_socket(runner),
 		Client(_socket, runner)
 	{
 	}
 
-	ClientBase(Net::Reactor& reactor, const net::Address& serverAddr, Runner& runner = Runner::getDefault()) :
-		_socket(reactor),
+	ClientBase(/* Net::Reactor& reactor, */const net::Address& serverAddr, uv_loop_t* loop = NULL) :
+		_socket(runner),
 		Client(_socket, runner, serverAddr)
 	{
 	}
@@ -167,12 +167,16 @@ protected:
 };
 
 
+/*
+	//virtual void onSocketOnline(void*);
+
+
 // ---------------------------------------------------------------------
 //
 typedef sockio::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
-			Net::SocketBase< Poco::Net::StreamSocket, Net::TCP, Net::IWebSocket >
+			Net::SocketBase< Poco::Net::StreamSocket, Net::TCP, http::WebSocket >
 		> 
 	> 
 > TCPClient;
@@ -183,10 +187,11 @@ typedef sockio::ClientBase<
 typedef sockio::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
-			Net::SocketBase< Poco::Net::SecureStreamSocket, Net::SSLTCP, Net::IWebSocket >
+			Net::SocketBase< Poco::Net::SecureStreamSocket, Net::SSLTCP, http::WebSocket >
 		> 
 	> 
 > SSLClient;
+*/
 
 
 } } // namespace scy::sockio
@@ -205,7 +210,7 @@ typedef sockio::ClientBase<
 typedef sockio::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
-			Net::SocketBase< ::TCPContext, Net::IWebSocket >  //sockio::ISocket 
+			Net::SocketBase< ::TCPContext, http::WebSocket >  //sockio::ISocket 
 		> 
 	> 
 > Client;
@@ -226,7 +231,7 @@ typedef sockio::ClientBase<
 	
 	//Signal<sockio::Packet> Packet;
 		/// Signals data received by the socket.
-	//virtual Net::IWebSocket* createSocket() = 0;
+	//virtual http::WebSocket* createSocket() = 0;
 		// Creates the underlying socket instance
 	//Net::Reactor&	_reactor;
 
@@ -243,7 +248,7 @@ typedef sockio::ClientBase<
 //	}
 //
 //
-//	ClientBase(Net::Reactor& reactor, const net::Address& serverAddr) :
+//	ClientBase(/* Net::Reactor& reactor, */const net::Address& serverAddr) :
 //		WebSocketBaseT(reactor),
 //		_serverAddr(serverAddr),
 //		_timer(NULL)
@@ -256,14 +261,14 @@ typedef sockio::ClientBase<
 //		close();		
 //
 //		if (_timer)
-//			_timer->destroy();	
+//			_timer.destroy();	
 //	}
 //
 //
 //	virtual void connect(const net::Address& serverAddr)
 //	{	
 //		{
-//			Poco::FastMutex::ScopedLock lock(_mutex);
+//			//Poco::FastMutex::ScopedLock lock(_mutex);
 //			_serverAddr = serverAddr;
 //		}
 //		/*SocketBase::*/connect();
@@ -274,7 +279,7 @@ typedef sockio::ClientBase<
 //	{
 //		Log("trace", this) << "SocketIO Connecting" << endl;
 //
-//		Poco::FastMutex::ScopedLock lock(_mutex);
+//		//Poco::FastMutex::ScopedLock lock(_mutex);
 //
 //		assert(_serverAddr.valid());
 //
@@ -361,7 +366,7 @@ typedef sockio::ClientBase<
 //		if (!isError()) {
 //			//Timer::getDefault().stop(TimerCallback<SocketBase>(this, &SocketBase::onHeartBeatTimer));
 //			assert(_timer);
-//			_timer->stop();	
+//			_timer.stop();	
 //		}
 //	
 //		_socket->close();
@@ -372,7 +377,7 @@ typedef sockio::ClientBase<
 //
 //	virtual int sendConnect(const std::string& endpoint, const std::string& query)
 //	{
-//		Poco::FastMutex::ScopedLock lock(_mutex);
+//		//Poco::FastMutex::ScopedLock lock(_mutex);
 //		// (1) Connect
 //		// Only used for multiple sockets. Signals a connection to the endpoint. Once the server receives it, it's echoed back to the client.
 //		// 
@@ -405,7 +410,7 @@ typedef sockio::ClientBase<
 //	}
 //
 //
-//	virtual int send(const JSON::Value& data, bool ack)
+//	virtual int send(const json::Value& data, bool ack)
 //	{
 //		Packet packet(data, ack);
 //		return send(packet);
@@ -418,7 +423,7 @@ typedef sockio::ClientBase<
 //	}
 //
 //
-//	virtual int emit(const std::string& event, const JSON::Value& args, bool ack)
+//	virtual int emit(const std::string& event, const json::Value& args, bool ack)
 //	{
 //		Packet packet(event, args, ack);
 //		return send(packet);
@@ -439,7 +444,7 @@ typedef sockio::ClientBase<
 //			try {
 //				connect();
 //			} 
-//			catch (Poco::Exception& exc) {			
+//			catch (Exception& exc) {			
 //				Log("error", this) << "Reconnection attempt failed: " << exc.displayText() << std::endl;
 //			}	
 //		}
@@ -455,7 +460,7 @@ typedef sockio::ClientBase<
 //
 //	virtual std::string sessionID() const 
 //	{
-//		Poco::FastMutex::ScopedLock lock(_mutex);
+//		//Poco::FastMutex::ScopedLock lock(_mutex);
 //		return _sessionID;
 //	}
 //	
@@ -476,10 +481,10 @@ typedef sockio::ClientBase<
 //			_timer = new TimerTask(
 //				(_heartBeatTimeout * .75) * 1000, 
 //				(_heartBeatTimeout * .75) * 1000);
-//			_timer->Timeout += delegate(this, &Socket::onHeartBeatTimer);
+//			_timer.Timeout += delegate(this, &Socket::onHeartBeatTimer);
 //		}
-//		if (!_timer->running())
-//			_timer->start();
+//		if (!_timer.running())
+//			_timer.start();
 //
 //		_socket->onConnect();
 //	}	
@@ -494,7 +499,7 @@ typedef sockio::ClientBase<
 //	int				_heartBeatTimeout;
 //	int				_connectionClosingTimeout;
 //	IWebSocket*     _socket;
-//	TimerTask*      _timer;
+//	Timer      _timer;
 //};
 
 
@@ -525,27 +530,27 @@ typedef sockio::ClientBase<
 	Poco::Net::NameValueCollection _httpHeaders;
 	virtual Poco::Net::NameValueCollection& httpHeaders()
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		return _httpHeaders;
 	}
 
 
-	virtual Net::IWebSocket* socket()
+	virtual http::WebSocket* socket()
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		return _socket;
 	}
 	*/
 //typedef sockio::SocketBase< Net::SocketBase< ::SSLContext, sockio::ISocket> > SSLSocket;
  //Net::SocketBase< ::TCPContext, sockio::ISocket>
 	//bool			_secure;
-	//Net::IWebSocket* _socket;
+	//http::WebSocket* _socket;
 
 
 	/*
 	void setSecure(bool flag)
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		_secure = flag;
 	}
 	*/
@@ -566,7 +571,7 @@ typedef sockio::ClientBase<
 	virtual void setCookie(const std::string& cookie) = 0;
 
 	SocketBase(Net::ISocket& socket, Net::Reactor& reactor);
-	SocketBase(Net::ISocket& socket, Net::Reactor& reactor, const net::Address& serverAddr);
+	SocketBase(Net::ISocket& socket, / Net::Reactor& reactor, const net::Address& serverAddr);
 	*/
 
 
@@ -624,7 +629,7 @@ public:
 
 
 	SocketBase(Net::ISocket& socket, Net::Reactor& reactor);
-	SocketBase(Net::ISocket& socket, Net::Reactor& reactor, const net::Address& serverAddr);
+	SocketBase(Net::ISocket& socket, // Net::Reactor& reactor, /const net::Address& serverAddr);
 	virtual ~SocketBase();
 	
 	void connect(const net::Address& serverAddr);	
@@ -635,15 +640,15 @@ public:
 
 	virtual int send(sockio::Packet::Type type, const std::string& data, bool ack = false);	
 	virtual int send(const std::string& data, bool ack = false); // Message packet
-	virtual int send(const JSON::Value& data, bool ack = false); // JSON packet
+	virtual int send(const json::Value& data, bool ack = false); // JSON packet
 	virtual int send(const sockio::Packet& packet);
-	virtual int emit(const std::string& event, const JSON::Value& data, bool ack = false);
+	virtual int emit(const std::string& event, const json::Value& data, bool ack = false);
 		// Sends an Event packet
 
 	virtual void setSecure(bool flag);
 		// Enables secure wss:// connection when true.
 	
-	//Net::IWebSocket* socket();
+	//http::WebSocket* socket();
 	Poco::Net::NameValueCollection& httpHeaders();
 	std::string sessionID() const;
 

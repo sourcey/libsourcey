@@ -43,7 +43,7 @@ Form::Form(Command& root) :
 }
 
 
-Form::Form(JSON::Value& root) :
+Form::Form(json::Value& root) :
 	FormElement(root)
 {
 	root["type"] = "form";
@@ -102,7 +102,7 @@ FormElement::FormElement() :
 }
 
 
-FormElement::FormElement(JSON::Value& root, const string& type, const string& id, const string& label) :
+FormElement::FormElement(json::Value& root, const string& type, const string& id, const string& label) :
 	_root(&root)
 {
 	if (!type.empty())
@@ -233,7 +233,7 @@ int FormElement::numElements()
 	
 bool FormElement::hasErrors()
 {
-	return JSON::hasNestedKey(root(), "error");
+	return json::hasNestedKey(root(), "error");
 }
 
 
@@ -252,16 +252,16 @@ void FormElement::setLive(bool flag)
 
 bool FormElement::clearElements(const string& id, bool partial)
 {	
-	//JSON::Value& root() = section.root()();
+	//json::Value& root() = section.root()();
 	bool match = false;
-	JSON::Value result;				
-	JSON::Value::Members members = root().getMemberNames();
+	json::Value result;				
+	json::Value::Members members = root().getMemberNames();
 	for (unsigned i = 0; i < members.size(); i++) {
 
 		// Filter elements	
 		if (members[i] == "elements") {
 			for (int i = 0; i < root()["elements"].size(); i++) {
-				JSON::Value& element =  root()["elements"][i];
+				json::Value& element =  root()["elements"][i];
 				string curID = element["id"].asString();
 				if (//element.isObject() && 
 					//element.isMember("id") && 
@@ -283,10 +283,10 @@ bool FormElement::clearElements(const string& id, bool partial)
 			result[members[i]] = root()[members[i]];
 	}
 				
-	traceL() << "Symple Form: Removing Redundant Result: " << JSON::stringify(result, true) << endl;
-	traceL() << "Symple Form: Removing Redundant Before: " << JSON::stringify(root(), true) << endl;
+	traceL() << "Symple Form: Removing Redundant Result: " << json::stringify(result, true) << endl;
+	traceL() << "Symple Form: Removing Redundant Before: " << json::stringify(root(), true) << endl;
 	*_root = result;
-	traceL() << "Symple Form: Removing Redundant After: " << JSON::stringify(root(), true) << endl;
+	traceL() << "Symple Form: Removing Redundant After: " << json::stringify(root(), true) << endl;
 
 	return match;
 }
@@ -294,33 +294,33 @@ bool FormElement::clearElements(const string& id, bool partial)
 
 bool FormElement::getField(const string& id, FormField& field, bool partial)
 {	
-	return JSON::findNestedObjectWithProperty(root(), field._root, "id", id, partial);
+	return json::findNestedObjectWithProperty(root(), field._root, "id", id, partial);
 }
 
 
 FormField FormElement::getField(const string& id, bool partial)
 {
 	FormField field;
-	JSON::findNestedObjectWithProperty(root(), field._root, "id", id, partial);
+	json::findNestedObjectWithProperty(root(), field._root, "id", id, partial);
 	return field;
 }
 
 
 bool FormElement::hasField(const string& id, bool partial)
 {
-	JSON::Value* tmp = NULL;
-	return JSON::findNestedObjectWithProperty(root(), tmp, "id", id, partial);
+	json::Value* tmp = NULL;
+	return json::findNestedObjectWithProperty(root(), tmp, "id", id, partial);
 }
 
 
 bool FormElement::hasPages()
 {
-	JSON::Value* tmp = NULL;
-	return JSON::findNestedObjectWithProperty(root(), tmp, "type", "page");
+	json::Value* tmp = NULL;
+	return json::findNestedObjectWithProperty(root(), tmp, "type", "page");
 }
 
 
-JSON::Value& FormElement::root() const 
+json::Value& FormElement::root() const 
 {
 	if (_root == NULL)
 		throw Exception("Form root is unassigned");
@@ -336,7 +336,7 @@ FormField::FormField()
 }
 
 
-FormField::FormField(JSON::Value& root, const string& type, const string& id, const string& label) :
+FormField::FormField(json::Value& root, const string& type, const string& id, const string& label) :
 	FormElement(root, type, id, label)
 {
 }
@@ -347,7 +347,7 @@ FormField::~FormField()
 }
 
 	
-JSON::Value& FormField::values()
+json::Value& FormField::values()
 {
 	return root()["values"];
 }

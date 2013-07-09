@@ -113,7 +113,7 @@ void Transaction::onPacketReceived(void* sender, Message& message) //, net::Sock
 		update(message);
 		socket.detach(PolymorphicDelegate<Transaction, Message>(this, &Transaction::onPacketReceived));
 		Timer::getDefault().stop(TimerCallback<Transaction>(this, &Transaction::onTransactionTimeout));
-		setState(this, TransactionState::Success);
+		setState(this, net::TransactionState::Success);
 		throw StopPropagation();
 	}
 }
@@ -133,7 +133,7 @@ bool Transaction::receive(const Message& message, const net::Address& localAddre
 		update(message);
 		debugL("STUNTransaction", this) << "Transaction Response Received: " << response.toString() << std::endl;
 		Timer::getDefault().stop(TimerCallback<Transaction>(this, &Transaction::onTransactionTimeout));
-		setState(this, TransactionState::Success);
+		setState(this, net::TransactionState::Success);
 		return true;
 	}
 }

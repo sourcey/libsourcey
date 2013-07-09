@@ -28,7 +28,7 @@ using namespace Poco;
 
 
 namespace scy { 
-namespace JSON {
+namespace json {
 
 
 Configuration::Configuration() :
@@ -62,7 +62,7 @@ void Configuration::load(bool create)
 		File(_path).createFile();
 	
 	try {	
-		JSON::loadFile(*this, _path);
+		json::loadFile(*this, _path);
 	}
     catch (...) {
 		// The config file may be empty,
@@ -83,7 +83,7 @@ void Configuration::save()
 	debugL() << "[JSONConfiguration] Saving: " << _path << endl;
 	
 	// Will throw on error
-	JSON::saveFile(*this, _path);
+	json::saveFile(*this, _path);
 }
 
 
@@ -103,7 +103,7 @@ bool Configuration::loaded()
 
 void Configuration::print(ostream& ost) 
 {
-	JSON::StyledWriter writer;
+	json::StyledWriter writer;
 	ost << writer.write(*this);
 }
 
@@ -134,12 +134,12 @@ void Configuration::replace(const string& from, const string& to)
 	FastMutex::ScopedLock lock(_mutex); 
 
 	stringstream ss;
-	JSON::StyledWriter writer;
+	json::StyledWriter writer;
 	string data = writer.write(*this);
 	Poco::replaceInPlace(data, from, to);
 	ss.str(data);
 
-	JSON::Reader reader;
+	json::Reader reader;
 	reader.parse(data, *this);
 }
 
@@ -178,4 +178,4 @@ void Configuration::keys(StringVec& keys, const std::string& baseKey)
 }
 
 
-} } // namespace scy::JSON
+} } // namespace scy::json

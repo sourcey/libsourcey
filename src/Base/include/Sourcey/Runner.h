@@ -21,8 +21,13 @@
 #define SOURCEY_Runner_H
 
 
+//#include "Sourcey/UV/UVPP.h"
+#include "Sourcey/UV/UVPP.h"
+//#include "uv.h"
+//#include "Sourcey/UV/Base.h"
 #include "Sourcey/Memory.h"
-#include "Sourcey/UV/Base.h"
+
+#include "Poco/SingletonHolder.h"
 
 
 namespace scy {
@@ -30,12 +35,15 @@ namespace scy {
 		
 // -------------------------------------------------------------------
 //
+typedef void (*ShutdownCallback)(void*);
+
+
 class Runner
 {
 public:
 	uv_loop_t* loop;
 
-	Runner(uv_loop_t* loop = uv_default_loop()) : 
+	Runner(uv_loop_t* loop = NULL) : 
 		loop(loop) 
 	{
 	}
@@ -63,25 +71,53 @@ public:
 		}
 	}	
 	
-	void waitForKill() 
+	struct ShutdownCommand 
+	{
+		void* opaque;
+		ShutdownCallback callback;
+	};
+	
+	void waitForKill(ShutdownCallback callback, void* opaque = NULL)
 	{ 
+		ShutdownCommand* cmd = new ShutdownCommand;
+		cmd->opaque = opaque;
+		cmd->callback = callback;
+
 		uv_signal_t sig;
-		sig.data = NULL;
+		sig.data = cmd;
 		uv_signal_init(loop, &sig);
 		uv_signal_start(&sig, Runner::onKillSignal, SIGINT);
+
 		run();
 	}
 			
 	static void onKillSignal(uv_signal_t *req, int signum)
 	{
+		ShutdownCommand* cmd = reinterpret_cast<ShutdownCommand*>(req->data);
+		cmd->callback(cmd->opaque);
 		uv_signal_stop(req);
+		delete cmd;
 	}
 	
 	static void onPrintHandle(uv_handle_t* handle, void* arg) 
 	{
 		debugL("Runner") << "#### Active Handle: " << handle << std::endl;
 	}
+
+	static Runner& getDefault();
+		/// Returns the default Runner singleton, although
+		/// Runner instances may be initialized individually.
+		/// The default runner should be kept for short running
+		/// tasks such as timers in order to maintain performance.
 };
+
+
+inline Runner& Runner::getDefault() 
+{
+	static Poco::SingletonHolder<Runner> sh;
+	return *sh.get();
+}
+
 
 /*
 #include "Sourcey/UV/UVPP.h"

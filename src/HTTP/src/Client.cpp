@@ -17,13 +17,12 @@
 //
 
 
-
-using namespace std;
-
-
 #include "Sourcey/HTTP/Client.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Util.h"
+
+
+using namespace std;
 
 
 namespace scy { 
@@ -33,14 +32,17 @@ namespace http {
 // -------------------------------------------------------------------
 // Client Connection
 //
-ClientConnection::ClientConnection(Client& client, const net::Address& address) : 
-	Connection(net::TCPSocket(new net::TCPBase), HTTP_RESPONSE), _client(client), _address(address)
+ClientConnection::ClientConnection(Client& client, const net::Address& address, const net::Socket& socket) : 
+	Connection(socket),
+	_client(client), 
+	_address(address)
 {	
 	traceL("ClientConnection", this) << "Creating" << endl;
-	client.Shutdown += delegate(this, &ClientConnection::onShutdown);
+
+	setAdapter(new ClientAdapter(*this));
+	client.Shutdown += delegate(this, &ClientConnection::onClientShutdown);
 	client.addConnection(this);
 }
-
 	
 ClientConnection::~ClientConnection() 
 {	
@@ -50,19 +52,40 @@ ClientConnection::~ClientConnection()
 	
 void ClientConnection::close()
 {
-	_client.Shutdown -= delegate(this, &ClientConnection::onShutdown);
+	_client.Shutdown -= delegate(this, &ClientConnection::onClientShutdown);
 	_client.removeConnection(this);
 	Connection::close();
 }
 
 
-void ClientConnection::send(bool whiny)
+void ClientConnection::send()
 {
 	traceL("ClientConnection", this) << "Send Request" << endl;
 
-	// Connect to server
+	// Connect to server, the request will be sent on connect
+	_socket.Connect += delegate(this, &ClientConnection::onSocketConnect);
 	_socket.connect(_address);
 }
+
+
+bool ClientConnection::flush()
+{
+	traceL("ClientConnection", this) << "Flushing" << endl;
+	// TODO: Optimize ... use sendRaw for large packers
+	string body(_request->body.str());
+	if (body.length() == 0)
+		return false;
+
+	return sendRaw(body.data(), body.length());
+}
+
+
+/*
+//return sendMessage();
+bool Connection::sendMessage()
+{	
+}
+*/
 
 			
 Client& ClientConnection::client()
@@ -76,6 +99,7 @@ Poco::Net::HTTPMessage* ClientConnection::incomingHeaders()
 	return static_cast<Poco::Net::HTTPMessage*>(_response);
 }
 
+
 Poco::Net::HTTPMessage* ClientConnection::outgoingHeaders() 
 { 
 	return static_cast<Poco::Net::HTTPMessage*>(_request);
@@ -86,15 +110,61 @@ Poco::Net::HTTPMessage* ClientConnection::outgoingHeaders()
 // Socket callbacks
 //
 
-void ClientConnection::onSocketConnect() 
+void ClientConnection::onSocketConnect(void*) 
 {
 	traceL("ClientConnection", this) << "Connected" << endl;
-	
+	assert(_adapter);
+	_socket.Connect -= delegate(this, &ClientConnection::onSocketConnect);
+
+
+
+	// Send the request
+	// TODO: Can't do this for WS
+	//sendMessage();
+	flush();
+
+	//
 	// KLUDGE: Temp solution for quick sending small requests only.
-	// Use Connection::sendBytes() for nocopy binary stream.
-	sendBytes(
-		_request->body.str().data(),
-		_request->body.str().length());
+	// Use Connection::sendRaw() for nocopy binary stream.
+	//sendRaw(
+	//	_request->body.str().data(),
+	//	_request->body.str().length());
+}
+	
+
+//
+// Connection callbacks
+//
+
+void ClientConnection::onHeaders() 
+{
+	traceL("ClientConnection", this) << "On headers" << endl;	
+
+	Headers.emit(this, *_response);
+}
+
+
+void ClientConnection::onPayload(Buffer& buffer)
+{
+	traceL("ClientConnection", this) << "On payload" << endl;	
+
+	Payload.emit(this, buffer);
+}
+
+
+void ClientConnection::onComplete() 
+{
+	traceL("ClientConnection", this) << "On complete" << endl;	
+
+	Complete.emit(this, *_response);
+}
+
+
+void ClientConnection::onClose() 
+{
+	traceL("ClientConnection", this) << "On close" << endl;	
+
+	Connection::onClose();
 }
 
 
@@ -102,43 +172,9 @@ void ClientConnection::onSocketConnect()
 // Client callbacks
 //
 
-void ClientConnection::onShutdown(void*)
+void ClientConnection::onClientShutdown(void*)
 {
 	close();
-}
-	
-
-//
-// Parser callbacks
-//
-
-void ClientConnection::onParserHeadersDone() 
-{
-	ResponseHeaders.emit(this, *_response);
-}
-
-
-void ClientConnection::onParserChunk(const char* buf, size_t len)
-{
-	traceL("ClientConnection", this) << "On Parser Chunk" << endl;	
-
-	// Just keep appending body chunks to the buffer.
-	// The handler can manage the buffer as required,
-	// including clearing the buffer on each body chunk.
-	//_buffer.write(buf, len);
-	
-	//ResponseBody.emit(this, _buffer);
-	ResponseBody.emit(this, buffer());
-}
-
-
-void ClientConnection::onParserDone() 
-{
-	traceL("ClientConnection", this) << "On Parser Done" << endl;	
-
-	// The entire HTTP message is complete.
-	// Emit the Complete signal.
-	ResponseComplete.emit(this, *_response);
 }
 
 
@@ -217,6 +253,20 @@ void Client::onTimer(void*)
 
 
 } } // namespace scy::http
+
+
+	/*
+ClientConnection::ClientConnection(Client& client, const net::Address& address) : 
+	Connection(net::TCPSocket(), new ClientAdapter(*this)), 
+	_client(client), 
+	_address(address)
+{	
+	traceL("ClientConnection", this) << "Creating" << endl;
+
+	client.Shutdown += delegate(this, &ClientConnection::onClientShutdown);
+	client.addConnection(this);
+}
+*/
 
 
 

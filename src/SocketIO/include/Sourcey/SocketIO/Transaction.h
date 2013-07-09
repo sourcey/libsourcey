@@ -39,11 +39,10 @@ struct Transaction: public net::PacketTransaction<sockio::Packet>
 	virtual ~Transaction();
 	
 	virtual bool send();
-	virtual bool match(const Packet& packet);
+	virtual bool checkResponse(const Packet& packet);
 
 	virtual void onPotentialResponse(void*, Packet& packet);
-	virtual void onResponse();
-	virtual void onComplete();
+	virtual void onSuccess();
 
 	sockio::Client& client;
 };

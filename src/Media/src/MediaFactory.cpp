@@ -144,9 +144,9 @@ VideoCapture* MediaFactory::getVideoCapture(int deviceId, unsigned flags)
 	if (it != _map.end())
 		return it->second;
 
-	/// Initialize a VideoCapture if none exists.
-	/// This may be error prone if not called from the main
-	/// thread, which is why loadVideo() should be called.
+	// Initialize a VideoCapture if none exists.
+	// This may be error prone if not called from the main
+	// thread, which is why loadVideo() should be called.
 	_map[deviceId] = new VideoCapture(deviceId, flags);
 	return _map[deviceId];
 }

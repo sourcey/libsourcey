@@ -68,8 +68,14 @@ public:
 	Poco::Net::HTMLForm* form;
 		/// An optional HTML form.
 
-	std::stringstream body;
+	std::ostringstream body;
 		/// The HTTP request body data.
+	
+    friend std::ostream& operator << (std::ostream& stream, const Request& req) 
+	{
+		req.write(stream);
+		return stream;
+    }
 
 protected:
 	NameValueCollection _params;

@@ -21,6 +21,7 @@
 #define SOURCEY_Symple_Client_H
 
 
+#include "Sourcey/Flaggable.h"
 #include "Sourcey/SocketIO/Client.h"
 #include "Sourcey/Util/TimedManager.h"
 //#include "Sourcey/Net/Reactor.h"
@@ -66,7 +67,7 @@ public:
 	};
 
 public:
-	Client(Net::IWebSocket& socket, Runner& runner, const Options& options = Options());
+	Client(net::SocketBase* socket, Runner& runner, const Options& options = Options());
 	virtual ~Client();
 
 	void connect();
@@ -91,7 +92,7 @@ public:
 
     virtual Peer& ourPeer();
 		/// Returns the peer object that controls the
-		/// current session or throws an exception.
+		/// current session, or throws an exception.
 
 	virtual Roster& roster();
 		/// Returns the roster which stores all online peers.
@@ -137,11 +138,11 @@ protected:
 	virtual void onOnline();
 	virtual void onClose();
 
-	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&);
+	virtual void onAnnounce(void* sender, net::TransactionState& state, const net::TransactionState&);
 	virtual void onPacket(sockio::Packet& packet);
 
 protected:	
-	mutable Poco::FastMutex	_mutex;
+	//mutable Poco::FastMutex	_mutex;
 
 	Roster _roster;
 	std::string _ourID;
@@ -151,14 +152,15 @@ protected:
 };
 
 
+/*
 // ---------------------------------------------------------------------
 //
 template <class WebSocketBaseT>
 class ClientBase: public Client
 {
 public:
-	ClientBase(Net::Reactor& reactor, Runner& runner = Runner::getDefault(), const Client::Options& options = Client::Options()) :
-		_socket(reactor),
+	ClientBase(uv_loop_t* loop = NULL, const Client::Options& options = Client::Options()) :
+		_socket(runner),
 		Client(_socket, runner, options)
 	{
 	}
@@ -173,7 +175,7 @@ protected:
 typedef smple::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
-			Net::SocketBase< Poco::Net::StreamSocket, Net::TCP, Net::IWebSocket >
+			Net::SocketBase< Poco::Net::StreamSocket, Net::TCP, http::WebSocket >
 		> 
 	> 
 > TCPClient;
@@ -184,10 +186,11 @@ typedef smple::ClientBase<
 typedef smple::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
-			Net::SocketBase< Poco::Net::SecureStreamSocket, Net::SSLTCP, Net::IWebSocket >
+			Net::SocketBase< Poco::Net::SecureStreamSocket, Net::SSLTCP, http::WebSocket >
 		> 
 	> 
 > SSLClient;
+*/
 
 
 // ---------------------------------------------------------------------
@@ -350,7 +353,7 @@ class IClient: public sockio::Client
 public:
 
 public:
-	//Client(Net::Reactor& reactor, Runner& runner, const Options& options = Options()); 
+	//Client(Runner& runner, const Options& options = Options()); 
 	virtual ~IClient() {};
 	
 	virtual void connect() = 0;
@@ -406,7 +409,7 @@ protected:
 	virtual void onOnline() = 0;
 	virtual void onClose() = 0;
 	virtual bool onPacketCreated(IPacket* packet) = 0;
-	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&) = 0;
+	virtual void onAnnounce(void* sender, net::TransactionState& state, const net::TransactionState&) = 0;
 };
 
 
@@ -415,7 +418,7 @@ template <class sockio::Client>
 class Client: public sockio::Client
 {
 public:
-	Client(Net::Reactor& reactor, Runner& runner, const Client::Options& options = Client::Options()) : 
+	Client(Runner& runner, const Client::Options& options = Client::Options()) : 
 		sockio::Client(reactor),
 		_runner(runner),
 		_options(options),
@@ -438,7 +441,7 @@ public:
 		traceL() << "[smple::Client:" << this << "] Connecting" << std::endl;
 		
 		{
-			Poco::FastMutex::ScopedLock lock(_mutex);
+			//Poco::FastMutex::ScopedLock lock(_mutex);
 			assert(!_options.user.empty());
 			//assert(!_options.token.empty());
 			_srvAddr = _options.serverAddr;
@@ -471,7 +474,7 @@ public:
 		assert(message.to().id() != message.from().id());
 		traceL() << "[smple::Client:" << this << "] Sending Message: " 
 			<< message.id() << ":\n" 
-			<< JSON::stringify(message, true) << std::endl;
+			<< json::stringify(message, true) << std::endl;
 		return sockio::Client::send(message, false);
 	}
 
@@ -518,49 +521,49 @@ public:
 
 	virtual Roster& roster() 
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		return _roster; 
 	}
 
 
 	virtual Runner& runner() 
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		return _runner; 
 	}
 
 
 	virtual PersistenceT& persistence() 
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		return _persistence; 
 	}
 
 
 	virtual Client::Options& options() 
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		return _options; 
 	}
 
 
 	virtual std::string ourID() const
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		return _ourID;
 	}
 
 
 	virtual int announceStatus() const
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		return _announceStatus;
 	}
 
 
 	virtual Peer& ourPeer()
 	{	
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		traceL() << "[smple::Client:" << this << "] Getting Our Peer: " << _ourID << std::endl;
 		if (_ourID.empty())
 			throw Exception("No active peer session is available.");
@@ -581,9 +584,9 @@ public:
 protected:	
 	virtual int announce()
 	{
-		JSON::Value data;
+		json::Value data;
 		{
-			Poco::FastMutex::ScopedLock lock(_mutex);
+			//Poco::FastMutex::ScopedLock lock(_mutex);
 			data["token"]	= _options.token;
 			data["group"]	= _options.group;
 			data["user"]	= _options.user;
@@ -597,16 +600,16 @@ protected:
 	}
 
 
-	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
+	virtual void onAnnounce(void* sender, net::TransactionState& state, const net::TransactionState&) 
 	{
 		traceL() << "[smple::Client:" << this << "] Announce Response: " << state.toString() << std::endl;
 	
 		sockio::Transaction* transaction = reinterpret_cast<sockio::Transaction*>(sender);
 		switch (state.id()) {	
-		case TransactionState::Success:
+		case net::TransactionState::Success:
 			try 
 			{
-				JSON::Value data = transaction->response().json()[(size_t)0];
+				json::Value data = transaction->response().json()[(size_t)0];
 				_announceStatus = data["status"].asInt();
 
 				// Notify the outside application of the response 
@@ -636,7 +639,7 @@ protected:
 			}
 			break;		
 
-		case TransactionState::Failed:
+		case net::TransactionState::Failed:
 			Announce.emit(this, _announceStatus);
 			setError(state.message());
 			break;
@@ -667,7 +670,7 @@ protected:
 			p->type() == sockio::Packet::Message || 
 			p->type() == sockio::Packet::JSON)) {
 
-			JSON::Value data = p->json();
+			json::Value data = p->json();
 			if (!data.isObject() || data.isNull()) {
 				Log("warning") << "[smple::Client:" << this << "] Packet is not a JSON object" << std::endl;
 				return true; // continue propagation
@@ -723,7 +726,7 @@ protected:
 	
 
 protected:	
-	mutable Poco::FastMutex	_mutex;
+	//mutable Poco::FastMutex	_mutex;
 
 	Roster _roster;
 	Runner& _runner;
@@ -771,7 +774,7 @@ typedef smple::Client<
 
 /*
 
-	Client(Net::Reactor& reactor, Runner& runner, const Options& options = Options()); 
+	Client(Runner& runner, const Options& options = Options()); 
 	virtual ~Client();
 	
 	virtual void connect();
@@ -827,7 +830,7 @@ protected:
 	virtual void onOnline();
 	virtual void onClose();
 	virtual bool onPacketCreated(IPacket* packet);
-	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&);
+	virtual void onAnnounce(void* sender, net::TransactionState& state, const net::TransactionState&);
 	*/
 
 

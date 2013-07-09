@@ -32,67 +32,93 @@
 namespace scy { 
 namespace http {
 
-		
-class Connection: public ParserObserver, public net::SocketObserver
-	/// TODO: 
-	///		- extend SocketObserver
-	///		- attach output IPacketizer
-	///     - 
-	//add timeout
+
+class Connection
 {
 public:
-    Connection(const net::Socket& socket, http_parser_type type);
-					
-	virtual bool sendHeaders(bool whiny = false);
-	virtual bool sendBytes(const char* buf, size_t len, bool whiny = false);
+    Connection(const net::Socket& socket);
+			
+	virtual bool sendRaw(const char* buf, size_t len, int flags = 0);
+	//virtual bool sendMessage();
+	virtual bool sendHeaders();
 
 	virtual void close();
-	virtual void onClose();
+		/// Forcefully closes the connection
+	
+	virtual void onHeaders() = 0;
+	virtual void onPayload(Buffer& buffer) = 0;
+	virtual void onComplete() = 0;
+	virtual void onClose() = 0;
+					
+	bool closed() const;
+	bool expired() const;
 
-	bool closed();
-	bool expired();
+	bool shouldSendHeaders() const;
+	void shouldSendHeaders(bool flag);
 
 	Request& request();	
 	Response& response();
 	net::Socket& socket();
-	Buffer& buffer();
+	Buffer& recvBuffer();
+
+    virtual Poco::Net::HTTPMessage* incomingHeaders() = 0;
+    virtual Poco::Net::HTTPMessage* outgoingHeaders() = 0;
 	
 	NullSignal Close;	
 		/// Close signal fires on connection closure.
+
+protected:	
+    virtual ~Connection();
+
+	void onSocketRecv(void*, net::SocketPacket& packet);
+	void onSocketClose(void*);
+
+	void setAdapter(net::SocketAdapter* adapter);
+
+protected:
+    Request* _request;
+    Response* _response;
+    net::Socket _socket;	
+    net::SocketAdapter* _adapter;
+	Timeout _timeout;
+	bool _shouldSendHeaders;
+	bool _closed;
+	
+	friend class Parser;
+	friend class Deleter<Connection>;
+};
+
+	
+// -------------------------------------------------------------------
+//	
+class ConnectionAdapter: public ParserObserver, public net::SocketAdapter
+	/// Default HTTP socket adapter for reading and writing HTTP messages
+{
+public:
+    ConnectionAdapter(Connection& connection, http_parser_type type);	
+    virtual ~ConnectionAdapter();	
+		
+	virtual int send(const char* data, int len, int flags = 0);
 
 protected:
 
 	//
 	/// Socket emitter callbacks
-	virtual void onSocketConnect() {};
+	//virtual void onSocketConnect() {};
 	virtual void onSocketRecv(Buffer& buf, const net::Address& peerAddr);
-	virtual void onSocketError(int syserr, const std::string& message) {};
-	virtual void onSocketClose();
+	//virtual void onSocketError(const Error& error) {};
+	//virtual void onSocketClose();
 		
 	//
 	/// Parser callbacks
     virtual void onParserHeader(const std::string& name, const std::string& value);
-	virtual void onParserHeadersDone() = 0;
-	virtual void onParserChunk(const char* buf, size_t len) = 0;
+	virtual void onParserHeadersEnd();
+	virtual void onParserChunk(const char* buf, size_t len);
     virtual void onParserError(const ParserError& err);
-    virtual void onParserDone() = 0;
-
-
-protected:
-    virtual ~Connection();
-
-    Request* _request;
-    Response* _response;
-    net::Socket _socket;	
-	Timeout _timeout;
-	//Buffer _buffer;
-    Parser _parser;
-	bool _closed;
-	bool _sentResponseHeaders;
-	IPacketizer* _packetizer;
+	virtual void onParserEnd();	
 	
-	friend class Parser;
-	friend class Deleter<Connection>;
+	Connection& _connection;
+    Parser _parser;
 };
 
 
@@ -108,6 +134,11 @@ inline bool isExplicitKeepAlive(Poco::Net::HTTPMessage* message)
 
 #endif
 
+
+
+	//virtual bool sendRequest(const http::Response& response);
+	//virtual bool sendResponse(const http::Response& response);
+
 //#include "Sourcey/Stateful.h"
 //#include "Sourcey/ISendable.h"
 //#include "Sourcey/Net/ServerConnection.h"
@@ -117,9 +148,10 @@ inline bool isExplicitKeepAlive(Poco::Net::HTTPMessage* message)
 
 		
 /*
- //: public net::SocketEmitter
+	//IPacketizer* _packetizer;
+ //: public net::SocketAdapter
  //Buffer& buf, const net::Address& peerAddr
-class ServerResponser
+class ServerResponder
 	// TODO: Chunked ServerConnection Handler
 {
 public:
@@ -127,7 +159,7 @@ public:
 };
 
 
-class DefaultServerResponser
+class DefaultServerResponder
 	// TODO: Chunked ServerConnection Handler
 {
 public:

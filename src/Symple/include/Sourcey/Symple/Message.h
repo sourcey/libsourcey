@@ -31,11 +31,11 @@ namespace scy {
 namespace smple {
 
 
-class Message: public JSON::Value, public IPacket
+class Message: public json::Value, public IPacket
 {
 public:		
 	Message();
-	Message(const JSON::Value& root);
+	Message(const json::Value& root);
 	Message(const Message& root);
 	virtual ~Message();
 
@@ -60,17 +60,17 @@ public:
 		/// HTTP status codes are used to describe the message response.
 		/// @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
-	JSON::Value& notes();
+	json::Value& notes();
 	void setNote(const std::string& type, const std::string& text);
 	void addNote(const std::string& type, const std::string& text);
 		/// Possible "type" values: info, warn, error
 		
-	JSON::Value data(const std::string& name) const;
-	JSON::Value& data(const std::string& name);
-	JSON::Value& setData(const std::string& name);
+	json::Value data(const std::string& name) const;
+	json::Value& data(const std::string& name);
+	json::Value& setData(const std::string& name);
 	void setData(const std::string& name, const char* data);
 	void setData(const std::string& name, const std::string& data);
-	void setData(const std::string& name, const JSON::Value& data);
+	void setData(const std::string& name, const json::Value& data);
 	void setData(const std::string& name, int data);
 	void removeData(const std::string& name);
 	bool hasData(const std::string& name);

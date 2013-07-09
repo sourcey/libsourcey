@@ -47,8 +47,10 @@ public:
 	virtual int send(const char* data, int len, int flags = 0);
 	virtual int send(const char* data, int len, const net::Address& peerAddress, int flags = 0);
 
+	/*
 	virtual int send(const IPacket& packet, int flags = 0);
 	virtual int send(const IPacket& packet, const net::Address& peerAddress, int flags = 0);
+	*/
 	
 	virtual net::Address address() const;
 	virtual net::Address peerAddress() const;
@@ -76,7 +78,8 @@ protected:
 	static void onRecv(uv_udp_t* handle, ssize_t nread, uv_buf_t buf, struct sockaddr* addr, unsigned flags);
 	static void onSend(uv_udp_send_t* req, int status); 
 	static uv_buf_t allocRecvBuffer(uv_handle_t* handle, size_t suggested_size);
-	virtual void onError(int syserr);
+
+	virtual void onError(const Error& error);
 	virtual void onClose();
 	
 	net::Address _peer;

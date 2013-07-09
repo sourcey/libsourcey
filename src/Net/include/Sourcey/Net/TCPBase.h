@@ -52,8 +52,11 @@ public:
 	virtual void connect(const net::Address& peerAddress);
 	virtual int send(const char* data, int len, int flags = 0);
 	virtual int send(const char* data, int len, const net::Address& peerAddress, int flags = 0);
+
+	/*
 	virtual int send(const IPacket& packet, int flags = 0);
 	virtual int send(const IPacket& packet, const net::Address& peerAddress, int flags = 0);
+	*/
 	
 	virtual void bind(const net::Address& address, unsigned flags = 0);
 	virtual void listen(int backlog = 64);	
@@ -71,9 +74,12 @@ public:
 
 	net::TransportType transport() const;
 		/// Returns the TCP transport protocol.
-
+	
 	bool initialized() const;
 		/// Returns true if the underlying socket is initialized.
+
+	bool connected() const;
+		/// Returns true if the underlying socket is connected.
 
 	SOCKET sockfd() const;
 		/// Returns the socket descriptor for the 
@@ -94,7 +100,7 @@ public:
 	virtual void onAcceptConnection(uv_stream_t* handle, int status);
 	virtual void onRead(const char* data, int len);
 	virtual void onRecv(Buffer& buf);
-	virtual void onError(int syserr);
+	virtual void onError(const Error& error);
 	virtual void onClose();
 		
 protected:
@@ -104,6 +110,7 @@ protected:
 
 protected:
 	uv_connect_t connectReq;
+	bool _connected;
 };
 
 
@@ -136,7 +143,7 @@ public:
 	//typedef Pointer<TCPBase> Ptr;
 	//typedef std::vector<Ptr> PtrList;
 	//virtual void destroy();//, public 
-	//uv_loop_t* loop = uv_default_loop()
+	//uv_loop_t* loop = NULL
 	
 	//virtual void onError(const int errno);
 	//virtual void onClose();

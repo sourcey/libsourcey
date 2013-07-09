@@ -32,7 +32,7 @@ class Event: public Message
 {
 public:	
 	Event();
-	Event(const JSON::Value& root);
+	Event(const json::Value& root);
 	Event(const Event& root);
 	virtual ~Event();
 	

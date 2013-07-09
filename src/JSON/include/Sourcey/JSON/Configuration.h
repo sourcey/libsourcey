@@ -28,10 +28,10 @@
 
 
 namespace scy { 
-namespace JSON {
+namespace json {
 
 
-class Configuration: public IConfiguration, public JSON::Value
+class Configuration: public IConfiguration, public json::Value
 {
 public:
 	Configuration();
@@ -62,7 +62,7 @@ protected:
 };
 
 
-} } // namespace scy::JSON
+} } // namespace scy::json
 
 
 #endif // SOURCEY_JSON_Configuration_H

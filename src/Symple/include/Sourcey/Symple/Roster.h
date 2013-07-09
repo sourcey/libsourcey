@@ -42,7 +42,7 @@ public:
 	Roster();
 	virtual ~Roster();
 
-	virtual void update(const JSON::Value& data, bool whiny = false);
+	virtual void update(const json::Value& data, bool whiny = false);
 		/// Updates the roster from the given client object.
 	
 	Peer* getByHost(const std::string& host);

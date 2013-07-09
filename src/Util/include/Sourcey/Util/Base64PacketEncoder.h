@@ -62,7 +62,7 @@ public:
 
 		encoder.close();		
 		std::string base64(ostr.str());
-		RawPacket opacket((unsigned char*)base64.data(), base64.size());
+		RawPacket opacket(base64.data(), base64.size());
 		emit(this, opacket);
 
 		//traceL() << "[Base64PacketEncoder:" << this << "] Processing: OK: " << base64.size() << std::endl;

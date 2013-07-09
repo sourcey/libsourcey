@@ -32,14 +32,14 @@ namespace sockio {
 
 
 Transaction::Transaction(Client& client, long timeout) : 
-	PacketTransaction<Packet>(client.runner(), timeout, 0), client(client)
+	PacketTransaction<Packet>(timeout, 0, client.runner().loop), client(client)
 {
 	debugL("SocketIOTransaction", this) << "Creating" << endl;
 }
 
 
 Transaction::Transaction(Client& client, const Packet& request, long timeout) : 
-	PacketTransaction<Packet>(client.runner(), request, timeout, 0), client(client)
+	PacketTransaction<Packet>(request, timeout, 0, client.runner().loop), client(client)
 {
 	debugL("SocketIOTransaction", this) << "Creating" << endl;
 }
@@ -64,33 +64,33 @@ bool Transaction::send()
 	
 void Transaction::onPotentialResponse(void*, Packet& packet)
 {
-	//debugL("SocketIOTransaction", this) << "Potential Response: " 
-	//	<< packet.className() << endl;	
-	if (process(packet))
-		throw StopPropagation();
+	debugL("SocketIOTransaction", this) << "Potential Response: " 
+		<< packet.className() << endl;	
+	PacketTransaction<Packet>::onPossibleResponse(packet);
 }
 
 
-bool Transaction::match(const Packet& packet) 
+bool Transaction::checkResponse(const Packet& packet) 
 {
 	return _request.id() == packet.id();
 }
 
 
-void Transaction::onResponse()
-{
-	debugL("SocketIOTransaction", this) << "Response" << endl;
-	client -= packetDelegate(this, &Transaction::onPotentialResponse);	
-	PacketTransaction<Packet>::onResponse();
-}
-
-
-void Transaction::onComplete()
+void Transaction::onSuccess()
 {
 	debugL("SocketIOTransaction", this) << "Complete" << endl;
-	//client -= packetDelegate(this, &Transaction::onPotentialResponse);
-	PacketTransaction<Packet>::onComplete();
+	client -= packetDelegate(this, &Transaction::onPotentialResponse);	
+	PacketTransaction<Packet>::onSuccess();
 }
 
 
 } } // namespace scy::sockio
+
+
+
+/*
+void Transaction::onPossibleResponse(const Packet& packet)
+{
+	debugL("SocketIOTransaction", this) << "Response" << endl;
+}
+*/

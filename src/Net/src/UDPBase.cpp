@@ -137,6 +137,7 @@ int UDPBase::send(const char* data, int len, const Address& peerAddress, int fla
 }
 
 
+/*
 int UDPBase::send(const IPacket& packet, int flags)
 {
 	return net::SocketBase::send(packet, flags);
@@ -147,6 +148,7 @@ int UDPBase::send(const IPacket& packet, const net::Address& peerAddress, int fl
 {
 	return net::SocketBase::send(packet, peerAddress, flags);
 }
+*/
 
 
 bool UDPBase::recvStart() 
@@ -277,10 +279,10 @@ uv_buf_t UDPBase::allocRecvBuffer(uv_handle_t *handle, size_t suggested_size)
 }
 
 
-void UDPBase::onError(int syserr) 
+void UDPBase::onError(const Error& error) 
 {		
-	errorL("UDPBase", this) << "On Error: " << errorMessage() << endl;	
-	emitError(syserr, errorMessage());
+	errorL("UDPBase", this) << "On Error: " << error.message << endl;	
+	emitError(error);
 	close(); // close on error
 }
 

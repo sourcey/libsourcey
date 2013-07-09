@@ -32,7 +32,7 @@ Message::Message() :
 	_type(0), 
 	_state(Request), 
 	_size(0), 
-	_transactionID(CryptoProvider::generateRandomKey(16)) 
+	_transactionID(crypt::randomKey(16)) 
 {
 	assert(_transactionID.size() == 16);
 }

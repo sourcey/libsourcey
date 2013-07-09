@@ -34,7 +34,7 @@ class Presence: public Message
 {
 public:	
 	Presence();
-	Presence(const JSON::Value& root);
+	Presence(const json::Value& root);
 	Presence(const Presence& root);
 	virtual ~Presence();
 	

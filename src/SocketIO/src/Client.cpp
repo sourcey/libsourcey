@@ -27,16 +27,16 @@ namespace scy {
 namespace sockio {
 
 
-Client::Client(Net::IWebSocket& socket, Runner& runner) :
-	_timer(new TimerTask(runner)),
+Client::Client(net::SocketBase* socket, Runner& runner) :
+	//_timer(new TimerTask(runner)),
 	_socket(socket),
 	_runner(runner)
 {
 }
 
 
-Client::Client(Net::IWebSocket& socket, Runner& runner, const net::Address& serverAddr) :
-	_timer(new TimerTask(runner)),
+Client::Client(net::SocketBase* socket, Runner& runner, const net::Address& serverAddr) :
+	//_timer(new TimerTask(runner)),
 	_serverAddr(serverAddr),
 	_socket(socket),
 	_runner(runner)
@@ -47,7 +47,7 @@ Client::Client(Net::IWebSocket& socket, Runner& runner, const net::Address& serv
 
 Client::~Client() 
 {
-	_timer->destroy();
+	_timer.stop();
 	// NOTE: Do not call socket.close() here
 }
 
@@ -55,7 +55,7 @@ Client::~Client()
 void Client::connect(const net::Address& serverAddr)
 {	
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		_serverAddr = serverAddr;
 	}
 	connect();
@@ -71,29 +71,30 @@ void Client::connect()
 	if (!serverAddr().valid())
 		throw Exception("The SocketIO server address is not valid.");
 
-	if (socket().isConnected())
-		throw Exception("The SocketIO client is already connected.");
+	//if (socket().isConnected())
+	//	throw Exception("The SocketIO client is already connected.");
 		
 	setState(this, ClientState::Connecting);
 	
 	sendInitialRequest();
 
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	
 	// Initialize the websocket
-	_socket.Connected += delegate(this, &Client::onSocketConnect);
-	_socket.Online += delegate(this, &Client::onSocketOnline);
-	_socket.Closed += delegate(this, &Client::onSocketClose);
-	_socket.Data += delegate(this, &Client::onSocketData);
+	_socket.Connect += delegate(this, &Client::onSocketConnect);
+	//_socket.Online += delegate(this, &Client::onSocketOnline);
+	_socket.Close += delegate(this, &Client::onSocketClose);
+	_socket.Recv += delegate(this, &Client::onSocketRecv);
 	
 	ostringstream uri;
-	uri << (_socket.transport() == Net::SSLTCP ? "wss://" : "ws://")
+	uri << (_socket.transport() == net::SSLTCP ? "wss://" : "ws://")
 		<< _serverAddr.toString()
 		<< "/socket.io/1/websocket/"
 		<< _sessionID;
 	
 	log("trace") << "Connecting: " << uri.str() << endl;
-	_socket.connect(uri.str());
+	//_socket.connect(uri.str());
+	assert(0);
 }
 
 
@@ -101,16 +102,16 @@ void Client::close()
 {			
 	log("trace") << "Closing" << endl;
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		
 		// Cancel the timer if connection manually closed
-		_timer->Timeout -= delegate(this, &Client::onHeartBeatTimer);
-		_timer->cancel();	
+		_timer.Timeout -= delegate(this, &Client::onHeartBeatTimer);
+		_timer.stop();	
 
-		_socket.Connected -= delegate(this, &Client::onSocketConnect);
-		_socket.Online -= delegate(this, &Client::onSocketOnline);
-		_socket.Closed -= delegate(this, &Client::onSocketClose);
-		_socket.Data -= delegate(this, &Client::onSocketData);
+		_socket.Connect -= delegate(this, &Client::onSocketConnect);
+		//_socket.Online -= delegate(this, &Client::onSocketOnline);
+		_socket.Close -= delegate(this, &Client::onSocketClose);
+		_socket.Recv -= delegate(this, &Client::onSocketRecv);
 		_socket.close();
 	}
 	onClose();
@@ -121,18 +122,22 @@ void Client::close()
 
 void Client::sendInitialRequest()
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	
 	ostringstream uri;
-	uri << (_socket.transport() == Net::SSLTCP ? "https://" : "http://")
+	uri << (_socket.transport() == net::SSLTCP ? "https://" : "http://")
 		<< _serverAddr.toString()
 		<< "/socket.io/1/";
 		
 	log("trace") << "Sending Handshake" << endl;	
 	http::Request* request = new http::Request("POST", uri.str());	
+	http::Response response;
+	assert(0);
+	/*
 	http::Transaction transaction(request);
 	http::Response& response = transaction.response();
 	transaction.send();
+	*/
 
 	log("trace") << "SocketIO Handshake Response:" 
 		<< "\n\tStatus: " << response.getStatus()
@@ -211,7 +216,7 @@ int Client::send(const string& data, bool ack)
 }
 
 
-int Client::send(const JSON::Value& data, bool ack)
+int Client::send(const json::Value& data, bool ack)
 {
 	Packet packet(data, ack);
 	return send(packet);
@@ -224,7 +229,7 @@ int Client::send(const sockio::Packet& packet)
 }
 
 
-int Client::emit(const string& event, const JSON::Value& args, bool ack)
+int Client::emit(const string& event, const json::Value& args, bool ack)
 {
 	Packet packet(event, args, ack);
 	return send(packet);
@@ -244,37 +249,37 @@ int Client::sendHeartbeat()
 }
 
 
-Runner& Client::runner() const
+Runner& Client::runner()
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	return _runner;
 }
 
 
-Net::IWebSocket& Client::socket() const
+http::WebSocket& Client::socket()
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	return _socket;
 }
 
 
 string Client::sessionID() const 
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	return _sessionID;
 }
 
 
 net::Address Client::serverAddr() const 
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	return _serverAddr;
 }
 
 
-string Client::error() const 
+Error Client::error() const 
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	return _error;
 }
 
@@ -287,8 +292,8 @@ bool Client::isOnline() const
 
 void Client::reset()
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);
-	_error = "";	
+	//Poco::FastMutex::ScopedLock lock(_mutex);
+	_error.reset();	
 	_sessionID = "";	
 	_heartBeatTimeout = 0;
 	_connectionClosingTimeout = 0;
@@ -296,11 +301,11 @@ void Client::reset()
 }
 
 
-void Client::setError(const string& error)
+void Client::setError(const Error& error)
 {
-	log("error") << "Error: " << error << std::endl;
+	log("error") << "Error: " << error.message << std::endl;
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		//Poco::FastMutex::ScopedLock lock(_mutex);
 		_error = error;	
 	}
 	onClose();
@@ -315,16 +320,17 @@ void Client::onConnect()
 			
 	setState(this, ClientState::Connected);
 
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	//Poco::FastMutex::ScopedLock lock(_mutex);
 	assert(_heartBeatTimeout);
 
 	// Start the heartbeat timer if cancelled
-	if (_timer->cancelled()) {	
-		_timer->setTimeout((long)(_heartBeatTimeout * .75) * 1000);
-		_timer->setInterval((long)(_heartBeatTimeout * .75) * 1000);
-		_timer->Timeout += delegate(this, &Client::onHeartBeatTimer);
-		_timer->start();
-	}
+	int interval = (_heartBeatTimeout * .75) * 1000;
+	//if (_timer.cancelled()) {	
+	//	_timer.setTimeout((long)(_heartBeatTimeout * .75) * 1000);
+	//	_timer.setInterval((long)(_heartBeatTimeout * .75) * 1000);
+		_timer.Timeout += delegate(this, &Client::onHeartBeatTimer);
+		_timer.start(interval, interval);
+	//}
 }
 
 
@@ -338,7 +344,7 @@ void Client::onOnline()
 void Client::onClose()
 {
 	log("trace") << "Disconnected" << endl;
-	setState(this, ClientState::Disconnected, error());
+	setState(this, ClientState::Disconnected, error().message);
 
 	// Keep trying to reconnect via timer callbacks
 }
@@ -355,16 +361,17 @@ void Client::onHeartBeatTimer(void*)
 {
 	log("trace") << "On Heart Beat Timer" << endl;
 	
-	if (socket().isConnected())
-		sendHeartbeat();
+	//if (socket().isConnected())
+	sendHeartbeat();
 
 	// Try to reconnect if the connection was closed in error
-	else if (socket().isError()) {	
+	//else if (socket().isError()) {	
+	if (error().any()) {	
 		log("info") << "Attempting to reconnect" << endl;	
 		try {
 			connect();
 		} 
-		catch (Poco::Exception& exc) {			
+		catch (Exception& exc) {			
 			log("error") << "Reconnection attempt failed: " << exc.displayText() << endl;
 		}	
 	}
@@ -377,28 +384,36 @@ void Client::onSocketConnect(void*)
 }
 
 
+/*
 void Client::onSocketOnline(void*)
 {
 	onOnline();
+}
+*/
+
+
+void Client::onSocketError(void*, const Error& error)
+{
+	setError(error);
 }
 
 
 void Client::onSocketClose(void*)
 {
-	if (!socket().error().empty())
-		setError(socket().error());
-	else
-		onClose();
+	//if (!socket().error()) //.empty()
+	//	setError(socket().error());
+	//else
+	onClose();
 }
 
 
-void Client::onSocketData(void*, Buffer& data, const net::Address&)
+void Client::onSocketRecv(void*, net::SocketPacket& packet)
 {	
-	sockio::Packet packet;
-	if (packet.read(data))
-		onPacket(packet);
+	sockio::Packet pkt;
+	if (pkt.read(packet.buffer))
+		onPacket(pkt);
 	else
-		log("warn") << "Unable to create SocketIO packet." << endl;	
+		log("warn") << "Failed to parse incoming SocketIO packet." << endl;	
 }
 
 
@@ -412,8 +427,8 @@ void Client::onSocketData(void*, Buffer& data, const net::Address&)
 		/*
 		Timer::getDefault().stop(TimerCallback<Client>(this, &Client::onHeartBeatTimer));
 		if (_timer) {
-			_timer->Timeout -= delegate(this, &Client::onHeartBeatTimer);
-			_timer->destroy();	
+			_timer.Timeout -= delegate(this, &Client::onHeartBeatTimer);
+			_timer.destroy();	
 			_timer = NULL;
 		}
 		*/
@@ -431,7 +446,7 @@ void Client::onHeartBeatTimer(TimerCallback<Socket>&)
 		(_heartBeatTimeout * .75) * 1000);
 	//if (!_timer) {
 	//}
-	//if (_timer->cancelled())
+	//if (_timer.cancelled())
 		*/
 /*
 
@@ -484,7 +499,7 @@ void Client::onError()
 //}
 //
 //
-//SocketBase::SocketBase(Net::Reactor& reactor, const net::Address& serverAddr) :
+//SocketBase::SocketBase(/* Net::Reactor& reactor, */const net::Address& serverAddr) :
 //	WebSocket(reactor),
 //	_serverAddr(serverAddr),
 //	_secure(false)
@@ -649,7 +664,7 @@ void Client::onError()
 //}
 //
 //
-//int SocketBase::send(const JSON::Value& data, bool ack)
+//int SocketBase::send(const json::Value& data, bool ack)
 //{
 //	Packet packet(data, ack);
 //	return send(packet);
@@ -662,7 +677,7 @@ void Client::onError()
 //}
 //
 //
-//int SocketBase::emit(const string& event, const JSON::Value& args, bool ack)
+//int SocketBase::emit(const string& event, const json::Value& args, bool ack)
 //{
 //	Packet packet(event, args, ack);
 //	return send(packet);
@@ -682,7 +697,7 @@ void Client::onError()
 //		try {
 //			connect();
 //		} 
-//		catch (Poco::Exception& exc) {			
+//		catch (Exception& exc) {			
 //			errorL() << "[sockio::Socket] Reconnection attempt failed: " << exc.displayText() << endl;
 //		}	
 //	}
@@ -703,7 +718,7 @@ void Client::onError()
 //}
 //
 //
-//Net::IWebSocket* SocketBase::socket()
+//http::WebSocket* SocketBase::socket()
 //{
 //	FastMutex::ScopedLock lock(_mutex);
 //	return _socket;

@@ -32,55 +32,372 @@ namespace scy {
 namespace http {
 
 
-Parser::Parser(ParserObserver& observer, http_parser_type type) : ///, Poco::Net::HTTPMessage* headers
-	_observer(observer), 
-	//_headers(headers), 
-	_error(NULL),
-	_parsing(false)//, 
-	//_upgrade(true), 
-	//_wasHeaderValue(true)
-{	
-	traceL("Parser", this) << "Creating" << endl;
+Parser::Parser(http::Response* response) : 
+	_observer(NULL),
+	_request(NULL),
+	_response(response),
+	_error(NULL)
+{
+	init(HTTP_RESPONSE);
+}
 
-	::http_parser_init(&_parser, type);
-	_parser.data = this;
-	_settings.on_message_begin = on_message_begin_;
-	_settings.on_url = on_url_;
-	//_settings.on_status_complete = on_status_complete_;
-	_settings.on_header_field = on_header_field_;
-	_settings.on_header_value = on_header_value_;
-	_settings.on_headers_complete = on_headers_complete_;
-	_settings.on_body = on_body_;
-	_settings.on_message_complete = on_message_complete_;
+
+Parser::Parser(http::Request* request) : 
+	_observer(NULL),
+	_request(request),
+	_response(NULL),
+	_error(NULL)
+{
+	init(HTTP_REQUEST);
+}
+
+
+Parser::Parser(http_parser_type type) : 
+	_observer(NULL),
+	_request(NULL),
+	_response(NULL),
+	_error(NULL)
+{
+	init(type);
 }
 
 
 Parser::~Parser() 
 {
-	traceL("Parser", this) << "Destroy" << endl;	
-	if (_error)
-		delete _error;
+	traceL("HTTPParser", this) << "Destroy" << endl;	
+	reset();
 }
 
 
-bool Parser::parse(const char* data, size_t offset, size_t len) 
+void Parser::init(http_parser_type type)
 {
-	traceL("Parser", this) << "Parse Data: " << string(data, len) << endl;	
-	size_t nparsed = ::http_parser_execute(&_parser, &_settings, &data[offset], len);
+	assert(_parser.data != this);
+
+	::http_parser_init(&_parser, type);
+	_parser.data = this;
+	_settings.on_message_begin = on_message_begin;
+	_settings.on_url = on_url;
+	_settings.on_header_field = on_header_field;
+	_settings.on_header_value = on_header_value;
+	_settings.on_headers_complete = on_headers_complete;
+	_settings.on_body = on_body;
+	_settings.on_message_complete = on_message_complete;
+
+	reset();
+}
+
+
+bool Parser::parse(const char* data, size_t len, bool expectComplete) // size_t offset, 
+{
+	traceL("HTTPParser", this) << "Parse Data: " << string(data, len) << endl;	
+	assert(!complete());
+	assert(_parser.data == this);
+
+	size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len); //&data[offset]
 	
-    if (!_parser.upgrade && nparsed != len) {
-		setParserError();
-		/*
-		enum http_errno err = HTTP_PARSER_ERRNO(&_parser);
+	//traceL("HTTPParser", this) << "Parse Errno: " << http_errno_name(HTTP_PARSER_ERRNO(_parser.http_errno)) << endl;	
+	traceL("HTTPParser", this) << "Parse Do Upgrade: " << upgrade() << endl;	
 
-		Local<Value> e = Exception::Error(String::NewSymbol("Parse Error"));
-		Local<Object> obj = e->ToObject();
-		obj->Set(String::NewSymbol("bytesParsed"), nparsed_obj);
-		obj->Set(String::NewSymbol("code"), String::New(http_errno_name(err)));
+	/*
+	// Set error state and throw
+	//if (_parser.http_errno != HPE_OK)
+    if (!_parser.upgrade && nparsed != len)
+		setParserError(true);
+
+	else if (expectComplete && !complete())
+		setParserError(true, "Incomplete HTTP message");
 		*/
-    }
+	
+	return complete();
+}
 
 
+void Parser::reset() 
+{
+	_complete = false;
+	if (_error) {
+		delete _error;
+		_error = NULL;
+	}
+
+	// TODO: Reset parser internal state?
+}
+
+
+void Parser::setParserError(bool throwException, const string& message)
+{
+	assert(_parser.http_errno != HPE_OK);	
+	ParserError err;
+	err.code = HTTP_PARSER_ERRNO(&_parser);
+	err.message = message.empty() ? http_errno_name(err.code) : message;
+	onError(err);
+
+	if (throwException)
+		throw Exception(err.message);
+}
+
+
+void Parser::setRequest(http::Request* request)
+{
+	assert(!_request);
+	assert(!_response);
+	assert(_parser.type == HTTP_REQUEST);
+	_request = request;
+}
+
+
+void Parser::setResponse(http::Response* response)
+{
+	assert(!_request);
+	assert(!_response);
+	assert(_parser.type == HTTP_RESPONSE);
+	_response = response;
+}
+	
+
+void Parser::setObserver(ParserObserver* observer)
+{
+	_observer = observer;
+}
+	
+
+Poco::Net::HTTPMessage* Parser::message()
+{
+	return _request ? static_cast<Poco::Net::HTTPMessage*>(_request) : 
+		_response ? static_cast<Poco::Net::HTTPMessage*>(_response) : NULL;
+}
+
+
+ParserObserver* Parser::observer() const
+{
+	return _observer;
+}
+
+
+bool Parser::complete() const 
+{
+	return _complete;
+}
+
+
+bool Parser::upgrade() const 
+{
+	return _parser.upgrade > 0;
+}
+
+
+bool Parser::shouldKeepAlive() const 
+{
+	return http_should_keep_alive(&_parser) > 0;
+}
+
+
+//
+// Events
+//
+
+void Parser::onURL(const string& value)
+{
+	if (_request)
+		_request->setURI(value);
+}
+
+
+void Parser::onHeader(const string& name, const string& value)
+{
+	if (message())
+		message()->add(name, value);
+	if (_observer)
+		_observer->onParserHeader(name, value);
+}
+
+
+void Parser::onHeadersEnd()
+{			
+	// HTTP version
+	//start_line_.version(parser_.http_major, parser_.http_minor);
+
+	// KeepAlive
+	//headers->setKeepAlive(http_should_keep_alive(parser) > 0);
+
+	// Response
+	if (_response) {
+		
+		// HTTP status
+		_response->setStatus((Poco::Net::HTTPResponse::HTTPStatus)_parser.status_code);
+	}
+	
+	// Request
+	if (_request) {
+		
+		// HTTP method
+		_request->setMethod(http_method_str(static_cast<http_method>(_parser.method))); //)
+	}
+	
+	if (_observer)
+		_observer->onParserHeadersEnd();
+}
+
+
+void Parser::onBody(const char* buf, size_t len) //size_t off, 
+{
+	traceL("HTTPParser", this) << "onBody" << endl;	
+	if (_observer)
+		_observer->onParserChunk(buf, len); //Buffer(buf+off,len) + off
+}
+
+
+void Parser::onMessageEnd() 
+{
+	traceL("HTTPParser", this) << "onMessageEnd" << endl;		
+	_complete = true;
+	if (_observer)
+		_observer->onParserEnd();
+}
+
+
+void Parser::onError(const ParserError& err)
+{
+	traceL("HTTPParser", this) << "On error: " << err.code << ": " << err.message << endl;	
+	_complete = true;
+	_error = new ParserError;
+	_error->code = err.code;
+	_error->message = err.message;
+	if (_observer)
+		_observer->onParserError(err);
+}
+
+
+
+//
+// http_parser callbacks
+//
+
+int Parser::on_message_begin(http_parser* parser) 
+{	
+	auto self = reinterpret_cast<Parser*>(parser->data);
+	assert(self);
+
+	self->reset();
+	return 0;
+}
+
+
+int Parser::on_url(http_parser* parser, const char *at, size_t len) 
+{
+	auto self = reinterpret_cast<Parser*>(parser->data);
+	assert(self);
+	assert(at && len);	
+
+    self->onURL(string(at, len));
+	return 0;
+}
+
+
+int Parser::on_header_field(http_parser* parser, const char* at, size_t len) 
+{	
+	auto self = reinterpret_cast<Parser*>(parser->data);
+	assert(self);
+
+	if (self->_wasHeaderValue) {
+		if (!self->_lastHeaderField.empty()) {
+			self->onHeader(self->_lastHeaderField, self->_lastHeaderValue);
+			self->_lastHeaderValue.clear();
+		}
+		self->_lastHeaderField = string(at, len);
+		self->_wasHeaderValue = false;
+	} 
+	else {
+		self->_lastHeaderField += string(at, len);
+	}
+
+	return 0;
+}
+
+
+int Parser::on_header_value(http_parser* parser, const char* at, size_t len) 
+{
+	auto self = reinterpret_cast<Parser*>(parser->data);
+	assert(self);
+
+	if (!self->_wasHeaderValue) {
+		self->_lastHeaderValue = string(at, len);
+		self->_wasHeaderValue = true;
+	} 
+	else {
+		self->_lastHeaderValue += string(at, len);
+	}
+
+	return 0;
+}
+
+
+int Parser::on_headers_complete(http_parser* parser)
+{
+	auto self = reinterpret_cast<Parser*>(parser->data);
+	assert(self);
+	assert(&self->_parser == parser);
+
+	// Add last entry if any
+	if (!self->_lastHeaderField.empty()) {
+		self->onHeader(self->_lastHeaderField, self->_lastHeaderValue);
+	}
+
+	self->onHeadersEnd();
+	return 0;
+}
+
+
+int Parser::on_body(http_parser* parser, const char* at, size_t len) 
+{		
+	auto self = reinterpret_cast<Parser*>(parser->data);
+	assert(self);
+
+	self->onBody(at, len);
+	return 0;
+}
+
+
+int Parser::on_message_complete(http_parser* parser) 
+{	
+	// When http_parser finished receiving a message, signal message complete
+	auto self = reinterpret_cast<Parser*>(parser->data);
+	assert(self);
+
+	self->onMessageEnd();
+	return 0;
+}
+
+
+
+} } // namespace scy::http
+
+
+
+
+/*
+	_observer = NULL;
+Parser::Parser(http_parser_type type) : ///, Poco::Net::HTTPMessage* headers // ParserObserver& observer, 
+	_observer(NULL), 
+	//_headers(headers), 
+	_error(NULL),
+	_complete(false)//, 
+	//_upgrade(true), 
+	//_wasHeaderValue(true)
+{	
+	traceL("HTTPParser", this) << "Creating" << endl;
+}
+*/
+	/*
+	setParserError();
+	enum http_errno err = HTTP_PARSER_ERRNO(&_parser);
+
+	Local<Value> e = Exception::Error(String::NewSymbol("Parse Error"));
+	Local<Object> obj = e->ToObject();
+	obj->Set(String::NewSymbol("bytesParsed"), nparsed_obj);
+	obj->Set(String::NewSymbol("code"), String::New(http_errno_name(err)));
+	*/
+	
 	/*
     // If there was a parse error in one of the callbacks
     // TODO What if there is an error on EOF?
@@ -105,7 +422,7 @@ bool Parser::parse(const char* data, size_t offset, size_t len)
 		return true;		
 	} 
 
-	// Finished, should have invoked onMessageComplete already
+	// Finished, should have invoked onMessageEnd already
 	else if (!parsing()) {
 		assert(0 && "already complete");
 		return true;		
@@ -114,269 +431,10 @@ bool Parser::parse(const char* data, size_t offset, size_t len)
 	// Need more data...
 	else return false;
 	*/
-	return true;
-}
-
-
-void Parser::reset() 
-{
-	// TODO: How to reset parser state?
-
-	_parsing = true;
-	if (_error) {
-		delete _error;
-		_error = NULL;
-	}
-}
-
-
-void Parser::setParserError()
-{
-	assert(_parser.http_errno != HPE_OK);	
-	ParserError err;
-	err.code = HTTP_PARSER_ERRNO(&_parser);
-	err.message = http_errno_name(err.code);
-	onError(err);
-}
-
-
-bool Parser::parsing() const 
-{
-	return _parsing;
-}
-
-
-bool Parser::upgrade() const 
-{
-	return _parser.upgrade > 0;
-}
-
-
-bool Parser::shouldKeepAlive() const 
-{
-	return http_should_keep_alive(&_parser);
-}
-
-
-//
-// Events
-//
-
-// Add a header to the buffer, flushing if MAX_HEADERS_COUNT reached
-void Parser::onHeader(const string& name, const string& value)
-{
-	// If no Connection created yet
-	//if (!_observer) {
-	//  prepare_incoming();
-	//}	
-	
-	_observer.incomingHeaders()->add(name, value);
-	_observer.onParserHeader(name, value);
-}
-
-
-void Parser::onBody(const char* buf, size_t off, size_t len)
-{
-	traceL("Parser", this) << "onBody" << endl;	
-	_observer.onParserChunk(buf + off, len); //Buffer(buf+off,len)
-}
-
-
-void Parser::onMessageComplete() 
-{
-	traceL("Parser", this) << "onMessageComplete" << endl;	
-	_observer.onParserDone();
-}
-
-
-void Parser::onError(const ParserError& err)
-{
-	traceL("Parser", this) << "On error: " << err.code << ": " << err.message << endl;	
-	_parsing = false;
-	_error = new ParserError;
-	_error->code = err.code;
-	_error->message = err.message;
-	_observer.onParserError(err);
-}
-
-
-
-//
-// http_parser callbacks
-//
-
-int Parser::on_message_begin_(http_parser* parser) 
-{	
-	// When http_parser has started receiving a new message reset the Parser state
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	//traceL("Parser", self) << "on_message_begin" << endl;	
-	assert(self);
-	self->reset();
-	return 0;
-}
-
-
-int Parser::on_url_(http_parser* parser, const char *at, size_t len) 
-{
-	// When http_parser has received an url, set the url on the http_start_line
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	//traceL("Parser", self) << "on_url_" << endl;	
-	assert(self);
-	assert(at && len);
-	
-	// TODO
-	http::Request* request = dynamic_cast<http::Request*>(self->_observer.incomingHeaders());
-	request->setURI(string(at, len));
-
-	/*
-	if (!self->start_line_.url(at, len)) {
-	self->error_ = true; //resval(error::http_parser_url_fail);
-	return 1;
-	}
-	*/
-
-	return 0;
-}
-
-
-int Parser::on_header_field_(http_parser* parser, const char* at, size_t len) 
-{	
-	// When http_parser receives a header field, store it in the headers buffer
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	assert(self);
-
-	if (self->_wasHeaderValue) {
-		// new field started
-		if (!self->_lastHeaderField.empty()) {
-
-			// add new entry and callback
-			self->onHeader(self->_lastHeaderField, self->_lastHeaderValue);
-			self->_lastHeaderValue.clear();
-		}
-		self->_lastHeaderField = string(at, len);
-		self->_wasHeaderValue = false;
-	} 
-	else {
-		// appending
-		self->_lastHeaderField += string(at, len);
-	}
-
-	return 0;
-}
-
-int Parser::on_header_value_(http_parser* parser, const char* at, size_t len) 
-{
-	// When http_parser receives a header value, 
-	// store it in the headers buffer
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	assert(self);
-
-	if (!self->_wasHeaderValue) {
-		self->_lastHeaderValue = string(at, len);
-		self->_wasHeaderValue = true;
-	} 
-	else {
-		// appending
-		self->_lastHeaderValue += string(at, len);
-	}
-
-	return 0;
-}
-
-int Parser::on_headers_complete_(http_parser* parser)
-{
-	// When http_parser finishes receiving headers, 
-	// add last header to buffer and
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	//traceL("Parser", self) << "on_headers_complete_" << endl;	
-	assert(self);
-	assert(&self->_parser == parser);
-
-	// add last entry if any
-	if (!self->_lastHeaderField.empty()) {
-		// add new entry
-		self->onHeader(self->_lastHeaderField, self->_lastHeaderValue);
-	}
-
-	Poco::Net::HTTPMessage* headers = self->_observer.incomingHeaders();
-			
-	// HTTP version
-	//start_line_.version(parser_.http_major, parser_.http_minor);
-
-	// KeepAlive
-	headers->setKeepAlive(http_should_keep_alive(parser));
-
-	//
-	/// Response
-	http::Response* response = dynamic_cast<http::Response*>(headers);
-	if (response) {
-		
-		// HTTP status
-		response->setStatus((Poco::Net::HTTPResponse::HTTPStatus)parser->status_code);
-	}
-	
-	//
-	/// Request
-	http::Request* request = dynamic_cast<http::Request*>(headers);
-	if (request) {
-		
-		// HTTP method
-		request->setMethod(http_method_str(static_cast<http_method>(parser->method))); //)
-	}
-
-
-
-
-	/*
-	if (!self->_observer) {
-	// If we're here without an incoming message then we did not receive any headers
-	self->prepare_incoming(); // Create an incoming message
-	self->validate_incoming(); // Check if required headers missing
-	}
-	*/
-
-	self->_observer.onParserHeadersDone();
-	return 0;
-}
-
-// When http_parser receives a body chunk, signal that body received
-int Parser::on_body_(http_parser* parser, const char* at, size_t len) 
-{		
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	//traceL("Parser", self) << "on_body_" << endl;	
-	assert(self);
-
-	// Call handle_body
-	self->onBody(at, 0, len);
-	return 0;
-}
-
-
-// When http_parser finished receiving a message, signal message complete
-int Parser::on_message_complete_(http_parser* parser) 
-{	
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	assert(self);
-
-	// Call handle_message_complete
-	self->onMessageComplete();
-	self->_parsing = false;
-
-	return 0;
-}
-
-
-
-
-
-
-} } // namespace scy::http
-
-
 
 
 /*
-void Parser::setError(UInt32 code, const std::string& message)
+void Parser::setError(UInt32 code, const string& message)
 {
 	Error err;
 	err.code = code;
@@ -385,7 +443,7 @@ void Parser::setError(UInt32 code, const std::string& message)
 }
 */
 	/*
-	if (_observer) _observer.onParserError(e);
+	if (_observer) _observer->onParserError(e);
 	else onError_(e);
 	*/
 
@@ -486,7 +544,7 @@ void Parser::registerSocketEvents() {
 
     if (_observer) {
       // Created response but message not complete
-      _observer.onParserError(Exception("socket end before message complete"));
+      _observer->onParserError(Exception("socket end before message complete"));
       // socket will next emit close
     } else { // Haven't created response so must emit on request
       // Started parsing headers but not yet complete
@@ -496,7 +554,7 @@ void Parser::registerSocketEvents() {
 
   socket_->on<native::event::error>([=](const scy::Exception& exc){
     if (_observer) {
-      _observer.onParserError(e);
+      _observer->onParserError(e);
     } else {
       onError_(e);
     }
@@ -507,7 +565,7 @@ void Parser::registerSocketEvents() {
     if (_observer && !parsing()) return;
     if (_observer) {
       // TODO: add members to Connection so events are emitted there
-      _observer.emit<native::event::close>();
+      _observer->emit<native::event::close>();
     } else {
       on_close_();
     }

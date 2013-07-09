@@ -34,7 +34,7 @@ namespace smple {
 
 
 Message::Message() :
-	JSON::Value(Json::objectValue)
+	json::Value(Json::objectValue)
 {
 	(*this)["id"] = crypt::randomKey(16);
 	(*this)["type"] = "message";
@@ -42,7 +42,7 @@ Message::Message() :
 
 
 Message::Message(const Message& root) :
-	JSON::Value(root)
+	json::Value(root)
 {
 	if (!isMember("id"))
 		(*this)["id"] = crypt::randomKey(16);
@@ -51,8 +51,8 @@ Message::Message(const Message& root) :
 }
 
 
-Message::Message(const JSON::Value& root) :
-	JSON::Value(root)
+Message::Message(const json::Value& root) :
+	json::Value(root)
 {
 	if (!isMember("id"))
 		(*this)["id"] = crypt::randomKey(16);
@@ -82,27 +82,27 @@ bool Message::read(Buffer& buf)
 
 bool Message::read(const std::string& root)
 {
-	JSON::Reader reader;
+	json::Reader reader;
 	return reader.parse(root, *this);
 }
 
 
 void Message::write(Buffer& buf) const 
 {
-	buf.write(JSON::stringify(*this));
+	buf.write(json::stringify(*this));
 }
 
 
 size_t Message::size() const
 {
 	// KLUDGE: is there a better way?
-	return JSON::stringify(*this).size();
+	return json::stringify(*this).size();
 }
 
 	
 void Message::print(ostream& os) const
 {
-	os << JSON::stringify(*this, true);
+	os << json::stringify(*this, true);
 }
 
 
@@ -116,7 +116,7 @@ bool Message::valid() const
 
 void Message::clear() 
 {
-    JSON::Value::clear();
+    json::Value::clear();
 }
 
 
@@ -169,19 +169,19 @@ bool Message::isRequest() const
 }
 
 
-JSON::Value& Message::notes()
+json::Value& Message::notes()
 {
 	return (*this)["notes"];
 }
 
 
-JSON::Value Message::data(const string& name) const
+json::Value Message::data(const string& name) const
 {
 	return (*this)["data"][name];
 }
 
 
-JSON::Value& Message::data(const string& name) 
+json::Value& Message::data(const string& name) 
 {
 	return (*this)["data"][name];
 }
@@ -242,14 +242,14 @@ void Message::addNote(const string& type, const string& text)
 		type == "error"
 	);
 
-	JSON::Value note;
+	json::Value note;
 	note["type"] = type;
 	note["text"] = text;
 	(*this)["notes"].append(note);
 }
 
 
-JSON::Value& Message::setData(const string& name) 
+json::Value& Message::setData(const string& name) 
 {
 	return (*this)["data"][name] = name;
 }
@@ -267,7 +267,7 @@ void Message::setData(const string& name, const string& data)
 }
 
 
-void Message::setData(const string& name, const JSON::Value& data) 
+void Message::setData(const string& name, const json::Value& data) 
 {
 	(*this)["data"][name] = data;
 }

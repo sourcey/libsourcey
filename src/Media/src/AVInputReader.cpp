@@ -121,7 +121,7 @@ void AVInputReader::openDevice(const string& device, int width, int height, doub
 
 void AVInputReader::openStream(const char* filename, AVInputFormat* inputFormat, AVDictionary** formatParams)
 {
-	traceL("AVInputReader", this) << "Opening Stream: " << *filename << endl;
+	traceL("AVInputReader", this) << "Opening Stream: " << string(filename) << endl;
 
 	av_register_all();
 

@@ -37,14 +37,14 @@ Peer::Peer()
 
 
 Peer::Peer(const Peer& r) :
-	JSON::Value(r)
+	json::Value(r)
 {
 	(*this)["type"] = "Peer";
 }
 
 
-Peer::Peer(const JSON::Value& r) :
-	JSON::Value(r)
+Peer::Peer(const json::Value& r) :
+	json::Value(r)
 {
 	(*this)["type"] = "Peer";
 }
@@ -57,7 +57,7 @@ Peer::~Peer()
 	
 void Peer::print(std::ostream& os) const
 {
-	JSON::StyledWriter writer;
+	json::StyledWriter writer;
 	os << writer.write(*this);
 }
 

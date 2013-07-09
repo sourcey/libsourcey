@@ -36,68 +36,77 @@ namespace http {
 
 
 class Server;
-class ServerResponser;
+class ServerResponder;
 class ServerConnection: public Connection
 {
 public:
     ServerConnection(Server& server, const net::Socket& socket);
 	
-	virtual bool respond(bool whiny = false);
+	virtual bool send();
+		/// Sends the HTTP response
 	
 	virtual void close();
-		/// Close the HTTP connection
+		/// Closes the HTTP connection
 	
 protected:
     virtual ~ServerConnection();
+		
+	virtual void onHeaders();
+	virtual void onPayload(Buffer& buffer);
+	virtual void onComplete();
+	virtual void onClose();
 				
+	Server& server();
+
 	Poco::Net::HTTPMessage* incomingHeaders();
 	Poco::Net::HTTPMessage* outgoingHeaders();
-	Server& server();
-	
-	//
-	/// Socket callbacks
-	virtual void onClose();
-
-	//
-	/// Parser callbacks
-    virtual void onParserHeadersDone();	
-    virtual void onParserChunk(const char* buf, size_t len);
-    virtual void onParserDone();
 
 	//
 	/// Server callbacks
-	void onShutdown(void*);
+	void onServerShutdown(void*);
 	
 protected:
 	Server& _server;
-	ServerResponser* _responder;	
+	ServerResponder* _responder;	
 };
 
 
 typedef std::vector<ServerConnection*> ServerConnectionList;
 
+	
+// -------------------------------------------------------------------
+//
+class ServerAdapter: public ConnectionAdapter
+{
+public:
+    ServerAdapter(ServerConnection& connection) : 
+		ConnectionAdapter(connection, HTTP_REQUEST)
+	{
+	}
+};
+
 
 // -------------------------------------------------------------------
 //
-class ServerResponser
-	/// The abstract base class for HTTP ServerResponsers 
+class ServerResponder
+	/// The abstract base class for HTTP ServerResponders 
 	/// created by HTTP Server.
 	///
 	/// Derived classes must override the handleRequest() method.
 	///
-	/// A new HTTPServerResponser object will be created for
+	/// A new HTTPServerResponder object will be created for
 	/// each new HTTP request that is received by the HTTP Server.
 	///
 {
 public:
-	ServerResponser(ServerConnection& connection) : 
+	ServerResponder(ServerConnection& connection) : 
 		_connection(connection)
 	{
 	}
 
-	virtual void onRequestHeaders(Request& request) {}
-	virtual void onRequestBody(const Buffer& body) {}
-	virtual void onRequestComplete(Request& request, Response& response) {}
+	virtual void onHeaders(Request& request) {}
+	virtual void onPayload(const Buffer& body) {}
+	virtual void onRequest(Request& request, Response& response) {}
 	virtual void onClose() {};
 
 	ServerConnection& connection()
@@ -122,14 +131,14 @@ protected:
 
 // -------------------------------------------------------------------
 //
-class ServerResponserFactory
-	/// This implementation of a ServerResponserFactory
-	/// is used by HTTPServer to create ServerResponser objects.
+class ServerResponderFactory
+	/// This implementation of a ServerResponderFactory
+	/// is used by HTTPServer to create ServerResponder objects.
 {
 public:
-	virtual ServerResponser* createResponser(ServerConnection& conn) = 0;
-		/// Creates an instance of ServerResponser
-		/// using the given ServerConnection.
+	virtual ServerResponder* createResponder(ServerConnection& connection) = 0;
+		/// Factory method for instantiating the ServerResponder
+		/// instance using the given ServerConnection.
 };
 
 
@@ -144,12 +153,12 @@ class Server
 {
 public:
 	ServerConnectionList connections;
-	ServerResponserFactory* factory;
+	ServerResponderFactory* factory;
 	net::TCPSocket socket;
 	net::Address address;
-	//uv::Timer timer;
+	//Timer timer;
 
-	Server(short port, ServerResponserFactory* factory);
+	Server(short port, ServerResponderFactory* factory);
 	virtual ~Server();
 	
 	void start();
@@ -161,7 +170,7 @@ public:
 
 protected:	
 	ServerConnection* createConnection(const net::Socket& sock);
-	ServerResponser* createResponser(ServerConnection& conn);
+	ServerResponder* createResponder(ServerConnection& conn);
 
 	virtual void addConnection(ServerConnection* conn);
 	virtual void removeConnection(ServerConnection* conn);
@@ -173,9 +182,55 @@ protected:
 };
 
 
+// ---------------------------------------------------------------------
+//
+class BadRequestHandler: public ServerResponder
+{
+public:
+	BadRequestHandler(ServerConnection& connection) : 		
+		ServerResponder(connection)
+	{		
+	}
+
+	void onRequest(Request& request, Response& response)
+	{
+		response.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
+		connection().send();
+	}
+};
+
+
+
 } } // namespace scy::http
 
 
+/*
+// ---------------------------------------------------------------------
+//
+class FlashPolicyConnectionHook: public ServerResponder
+{
+public:
+	Poco::Net::TCPServerConnection* createConnection(const Poco::Net::StreamSocket& socket, const std::string& rawRequest)
+	{		
+		try 
+		{			
+			if (rawRequest.find("policy-file-request") != std::string::npos) {
+				LogTrace("HTTPStreamingRequestHandlerFactory") << "Sending Flash Crossdomain XMLSocket Policy" << std::endl;
+				return new Net::FlashPolicyRequestHandler(socket, false);
+			}
+			else if (rawRequest.find("crossdomain.xml") != std::string::npos) {
+				LogTrace("HTTPStreamingRequestHandlerFactory") << "Sending Flash Crossdomain HTTP Policy" << std::endl;
+				return new Net::FlashPolicyRequestHandler(socket, true);
+			}			
+		}
+		catch (Exception& exc)
+		{
+			LogError("ServerConnectionHook") << "Bad Request: " << exc.displayText() << std::endl;
+		}	
+		return NULL;
+	};
+};
+*/
 	
 	/*
 	void onTimer(void*)
@@ -200,16 +255,16 @@ protected:
 
 /*
 
-#include "Poco/Net/HTTPServerResponser.h"
+#include "Poco/Net/HTTPServerResponder.h"
 #include "Sourcey/Net/TCPService.h"
 
 #include "Poco/Mutex.h"
 #include "Poco/Net/Net.h"
 #include "Poco/Net/TCPServer.h"
 #include "Poco/Net/TCPServerConnectionFactory.h"
-#include "Poco/Net/HTTPServerResponserFactory.h"
+#include "Poco/Net/HTTPServerResponderFactory.h"
 #include "Poco/Net/HTTPServerParams.h"
-#include "Poco/Net/HTTPServerResponser.h"
+#include "Poco/Net/HTTPServerResponder.h"
 #include "Poco/Net/HTTPServerRequest.h"
 #include "Poco/Net/HTTPServerResponse.h"
 #include "Poco/Net/HTTPResponse.h"
@@ -227,7 +282,7 @@ class ServerConnectionFactory//: public Poco::Net::TCPServerConnectionFactory
 	/// is used by HTTPServer to create ServerConnection objects.
 {
 public:
-	//ServerConnectionFactory(Server* server); //, Poco::Net::HTTPServerParams::Ptr pParams, Poco::Net::HTTPServerResponserFactory::Ptr pFactory
+	//ServerConnectionFactory(Server* server); //, Poco::Net::HTTPServerParams::Ptr pParams, Poco::Net::HTTPServerResponderFactory::Ptr pFactory
 		/// Creates the ServerConnectionFactory.
 
 	//virtual ~ServerConnectionFactory() {};
@@ -239,23 +294,23 @@ public:
 	
 protected:
 	//Poco::Net::HTTPServerParams::Ptr          _pParams;
-	//Poco::Net::HTTPServerResponserFactory::Ptr _pFactory;
+	//Poco::Net::HTTPServerResponderFactory::Ptr _pFactory;
 	Server& _server;
 };
 */
 
 
 /*
-	//ServerResponserFactory() {}; //, Poco::Net::HTTPServerParams::Ptr pParams, Poco::Net::HTTPServerResponserFactory::Ptr pFactoryServer* server
-		/// Creates the ServerResponserFactory.
+	//ServerResponderFactory() {}; //, Poco::Net::HTTPServerParams::Ptr pParams, Poco::Net::HTTPServerResponderFactory::Ptr pFactoryServer* server
+		/// Creates the ServerResponderFactory.
 
-	virtual ~ServerResponserFactory() {};
-		/// Destroys the ServerResponserFactory.
+	virtual ~ServerResponderFactory() {};
+		/// Destroys the ServerResponderFactory.
 
 	
 //protected:
 	//Poco::Net::HTTPServerParams::Ptr          _pParams;
-	//Poco::Net::HTTPServerResponserFactory::Ptr _pFactory;
+	//Poco::Net::HTTPServerResponderFactory::Ptr _pFactory;
 	//Server& _server;
 
 	*/
@@ -301,13 +356,13 @@ protected:
 
 	
 	/*
-	Server(Poco::Net::HTTPServerResponserFactory::Ptr pFactory, 
+	Server(Poco::Net::HTTPServerResponderFactory::Ptr pFactory, 
 		const Poco::Net::ServerSocket& socket, Poco::Net::HTTPServerParams::Ptr pParams);
 		/// Creates the HTTPServer, using the given ServerSocket.
 		///
 		/// New threads are taken from the default thread pool.
 
-	Server(Poco::Net::HTTPServerResponserFactory::Ptr pFactory, Poco::ThreadPool& threadPool, 
+	Server(Poco::Net::HTTPServerResponderFactory::Ptr pFactory, Poco::ThreadPool& threadPool, 
 			const Poco::Net::ServerSocket& socket, Poco::Net::HTTPServerParams::Ptr pParams);
 		/// Creates the HTTPServer, using the given ServerSocket.
 		///
@@ -324,7 +379,7 @@ protected:
 	
 	ServerConnectionHookVec connectionHooks() const;
 	//mutable Poco::FastMutex _mutex;
-	//Poco::Net::HTTPServerResponserFactory::Ptr _pFactory;
+	//Poco::Net::HTTPServerResponderFactory::Ptr _pFactory;
 	//ServerConnectionHookVec _connectionHooks;
 	*/
 
@@ -340,7 +395,7 @@ class ServerConnectionFactory: public Poco::Net::TCPServerConnectionFactory
 	/// is used by HTTPServer to create ServerConnection objects.
 {
 public:
-	ServerConnectionFactory(Server* server, Poco::Net::HTTPServerParams::Ptr pParams, Poco::Net::HTTPServerResponserFactory::Ptr pFactory);
+	ServerConnectionFactory(Server* server, Poco::Net::HTTPServerParams::Ptr pParams, Poco::Net::HTTPServerResponderFactory::Ptr pFactory);
 		/// Creates the ServerConnectionFactory.
 
 	~ServerConnectionFactory();
@@ -352,7 +407,7 @@ public:
 	
 protected:
 	Poco::Net::HTTPServerParams::Ptr          _pParams;
-	Poco::Net::HTTPServerResponserFactory::Ptr _pFactory;
+	Poco::Net::HTTPServerResponderFactory::Ptr _pFactory;
 	Server* _server;
 };
 
@@ -377,9 +432,9 @@ typedef std::vector<ServerConnectionHook*> ServerConnectionHookVec;
 #include "Poco/Net/Net.h"
 #include "Poco/Net/TCPServer.h"
 #include "Poco/Net/TCPServerConnectionFactory.h"
-#include "Poco/Net/HTTPServerResponserFactory.h"
+#include "Poco/Net/HTTPServerResponderFactory.h"
 #include "Poco/Net/HTTPServerParams.h"
-#include "Poco/Net/HTTPServerResponser.h"
+#include "Poco/Net/HTTPServerResponder.h"
 #include "Poco/Net/HTTPServerRequest.h"
 #include "Poco/Net/HTTPServerResponse.h"
 #include "Poco/Net/HTTPResponse.h"
@@ -395,7 +450,7 @@ class ServerConnectionFactory: public Poco::Net::TCPServerConnectionFactory
 	/// is used by HTTPServer to create ServerConnection objects.
 {
 public:
-	ServerConnectionFactory(Server* server, Poco::Net::HTTPServerParams::Ptr pParams, Poco::Net::HTTPServerResponserFactory::Ptr pFactory);
+	ServerConnectionFactory(Server* server, Poco::Net::HTTPServerParams::Ptr pParams, Poco::Net::HTTPServerResponderFactory::Ptr pFactory);
 		/// Creates the ServerConnectionFactory.
 
 	~ServerConnectionFactory();
@@ -407,7 +462,7 @@ public:
 	
 protected:
 	Poco::Net::HTTPServerParams::Ptr          _pParams;
-	Poco::Net::HTTPServerResponserFactory::Ptr _pFactory;
+	Poco::Net::HTTPServerResponderFactory::Ptr _pFactory;
 	Server* _server;
 };
 
@@ -431,7 +486,7 @@ class Server: public Poco::Net::TCPServer
 	/// A subclass of TCPServer that implements a
 	/// full-featured multithreaded HTTP server.
 	///
-	/// A HTTPServerResponserFactory must be supplied.
+	/// A HTTPServerResponderFactory must be supplied.
 	/// The ServerSocket must be bound and in listening state.
 	///
 	/// To configure various aspects of the server, a HTTPServerParams
@@ -450,20 +505,20 @@ class Server: public Poco::Net::TCPServer
 	/// information about the HTTP protocol.
 {
 public:
-	Server(Poco::Net::HTTPServerResponserFactory::Ptr pFactory, 
+	Server(Poco::Net::HTTPServerResponderFactory::Ptr pFactory, 
 		const Poco::Net::ServerSocket& socket, Poco::Net::HTTPServerParams::Ptr pParams);
 		/// Creates the HTTPServer, using the given ServerSocket.
 		///
 		/// New threads are taken from the default thread pool.
 
-	Server(Poco::Net::HTTPServerResponserFactory::Ptr pFactory, Poco::ThreadPool& threadPool, 
+	Server(Poco::Net::HTTPServerResponderFactory::Ptr pFactory, Poco::ThreadPool& threadPool, 
 			const Poco::Net::ServerSocket& socket, Poco::Net::HTTPServerParams::Ptr pParams);
 		/// Creates the HTTPServer, using the given ServerSocket.
 		///
 		/// New threads are taken from the given thread pool.
 
 	virtual ~Server();
-		/// Destroys the HTTPServer and its HTTPServerResponserFactory.
+		/// Destroys the HTTPServer and its HTTPServerResponderFactory.
 
 	virtual void addConnectionHook(ServerConnectionHook* hook);
 		/// Adds a connection hook to process incoming socket requests
@@ -476,14 +531,14 @@ public:
 
 protected:
 	mutable Poco::FastMutex _mutex;
-	Poco::Net::HTTPServerResponserFactory::Ptr _pFactory;
+	Poco::Net::HTTPServerResponderFactory::Ptr _pFactory;
 	ServerConnectionHookVec _connectionHooks;
 };
 
 
 // ---------------------------------------------------------------------
 //
-class FlashPolicyConnectionHook: public HTTP::ServerConnectionHook
+class FlashPolicyConnectionHook: public http::ServerConnectionHook
 {
 public:
 	Poco::Net::TCPServerConnection* createConnection(const net::Socket& socket, const std::string& rawRequest)
@@ -491,12 +546,12 @@ public:
 		try 
 		{			
 			if (rawRequest.find("policy-file-request") != std::string::npos) {
-				traceL("HTTPStreamingServerResponserFactory") << "Sending Flash Crossdomain XMLSocket Policy" << std::endl;
-				return new Net::FlashPolicyServerResponser(socket, false);
+				traceL("HTTPStreamingServerResponderFactory") << "Sending Flash Crossdomain XMLSocket Policy" << std::endl;
+				return new Net::FlashPolicyServerResponder(socket, false);
 			}
 			else if (rawRequest.find("crossdomain.xml") != std::string::npos) {
-				traceL("HTTPStreamingServerResponserFactory") << "Sending Flash Crossdomain HTTP Policy" << std::endl;
-				return new Net::FlashPolicyServerResponser(socket, true);
+				traceL("HTTPStreamingServerResponderFactory") << "Sending Flash Crossdomain HTTP Policy" << std::endl;
+				return new Net::FlashPolicyServerResponder(socket, true);
 			}			
 		}
 		catch (Exception& exc)
@@ -510,7 +565,7 @@ public:
 
 // ---------------------------------------------------------------------
 //
-class BadServerResponser: public Poco::Net::HTTPServerResponser
+class BadServerResponder: public Poco::Net::HTTPServerResponder
 {
 public:
 	void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
