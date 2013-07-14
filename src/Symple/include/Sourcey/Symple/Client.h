@@ -67,7 +67,7 @@ public:
 	};
 
 public:
-	Client(net::SocketBase* socket, Runner& runner, const Options& options = Options());
+	Client(net::SocketBase* socket, uv::Loop& loop = uv::defaultLoop(), const Options& options = Options());
 	virtual ~Client();
 
 	void connect();
@@ -159,7 +159,7 @@ template <class WebSocketBaseT>
 class ClientBase: public Client
 {
 public:
-	ClientBase(uv_loop_t* loop = NULL, const Client::Options& options = Client::Options()) :
+	ClientBase(uv::Loop& loop = uv::defaultLoop(), const Client::Options& options = Client::Options()) :
 		_socket(runner),
 		Client(_socket, runner, options)
 	{
@@ -344,7 +344,7 @@ typedef smple::Client<
 		/// Returns a reference to the options object.
 
 
-	//Runner& _runner;
+	//uv::Loop& _loop;
 /*
 // ---------------------------------------------------------------------
 class IClient: public sockio::Client
@@ -353,7 +353,7 @@ class IClient: public sockio::Client
 public:
 
 public:
-	//Client(Runner& runner, const Options& options = Options()); 
+	//Client(uv::Loop& loop, const Options& options = Options()); 
 	virtual ~IClient() {};
 	
 	virtual void connect() = 0;
@@ -378,7 +378,7 @@ public:
 	
 	virtual Client::Options& options() = 0;
 	virtual Roster& roster() = 0;
-	virtual Runner& runner() = 0;
+	virtual uv::Loop& loop() = 0;
 	virtual PersistenceT& persistence() = 0;
 	virtual std::string ourID() const = 0;
 	virtual int announceStatus() const = 0;
@@ -418,7 +418,7 @@ template <class sockio::Client>
 class Client: public sockio::Client
 {
 public:
-	Client(Runner& runner, const Client::Options& options = Client::Options()) : 
+	Client(uv::Loop& loop, const Client::Options& options = Client::Options()) : 
 		sockio::Client(reactor),
 		_runner(runner),
 		_options(options),
@@ -526,7 +526,7 @@ public:
 	}
 
 
-	virtual Runner& runner() 
+	virtual uv::Loop& loop() 
 	{ 
 		//Poco::FastMutex::ScopedLock lock(_mutex);
 		return _runner; 
@@ -729,7 +729,7 @@ protected:
 	//mutable Poco::FastMutex	_mutex;
 
 	Roster _roster;
-	Runner& _runner;
+	uv::Loop& _loop;
 	std::string _ourID;
 	PersistenceT _persistence;
 	Client::Options _options;
@@ -774,7 +774,7 @@ typedef smple::Client<
 
 /*
 
-	Client(Runner& runner, const Options& options = Options()); 
+	Client(uv::Loop& loop, const Options& options = Options()); 
 	virtual ~Client();
 	
 	virtual void connect();
@@ -799,7 +799,7 @@ typedef smple::Client<
 	
 	Options& options();
 	Roster& roster();
-	Runner& runner();
+	uv::Loop& loop();
 	PersistenceT& persistence();
 	std::string ourID() const;
 	int announceStatus() const;

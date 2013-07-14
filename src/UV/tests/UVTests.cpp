@@ -1,10 +1,10 @@
 #include "Sourcey/UV/UVPP.h"
-#include "Sourcey/UV/TCPBase.h"
+#include "Sourcey/Net/TCPSocket.h"
 #include "Sourcey/Net/SSLSocket.h"
 #include "Sourcey/Net/UDPSocket.h"
-#include "Sourcey/UV/Timer.h"
 
 #include "Sourcey/Base.h"
+#include "Sourcey/Timer.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Net/Address.h"
 
@@ -139,6 +139,7 @@ public:
 
 
 	
+			/*
 static void onPrintHandle1(uv_handle_t* handle, void* arg) 
 {
 	debugL("onPrintHandle") << ">>>#### Active Handle: " << handle << std::endl;
@@ -165,8 +166,7 @@ public:
 	};
 
 	static Result Benchmark;
-	static Runner Loop; 
-
+	static uv::Loop ourLoop; 
 
 	static void onKillSignal2(uv_signal_t *req, int signum)
 	{
@@ -218,20 +218,18 @@ public:
 #endif
 			
 			tcpConnector.run();
-
+			
 			uv_signal_t sig;
 			sig.data = this;
-			uv_signal_init(Loop.loop, &sig);
+			uv_signal_init(ourLoop.loop, &sig);
 			uv_signal_start(&sig, Tests::onKillSignal2, SIGINT);
 
-			/*
 			runUDPSocketTest();
 			runTimerTest();
 			//runDNSResolverTest();
-			*/
 			
 			traceL("Tests") << "#################### Running" << endl;
-			Loop.run();
+			ourLoop.waitForKill();
 			traceL("Tests") << "#################### Ended" << endl;
 	
 #if TEST_SSL
@@ -241,7 +239,7 @@ public:
 		}
 		
 		traceL("Tests") << "#################### Finalizing" << endl;
-		Loop.cleanup();
+		//ourLoop.cleanup();
 		traceL("Tests") << "#################### Exiting" << endl;
 	}
 	
@@ -254,7 +252,7 @@ public:
 		UVClientSocketTest<net::TCPSocket> test(1337);
 		test.run();
 		traceL("Tests") << "TCP Socket Test: Running" << endl;	
-		Loop.run();
+		ourLoop.run();
 		traceL("Tests") << "TCP Socket Test: Ending" << endl;
 	}		
 
@@ -265,7 +263,7 @@ public:
 	{		
 		UVClientSocketTest<net::SSLSocket> test(1338);
 		test.run();
-		Loop.run();
+		ourLoop.run();
 	}
 	
 	// ============================================================================
@@ -290,7 +288,7 @@ public:
 		for (unsigned i = 0; i < numUDPPacketsWanted; i++)
 			clientSock.send("somedata", 8, serverAddr);
 
-		Loop.run();
+		ourLoop.run();
 		traceL("Tests") << "UDP Socket Test: Ending" << endl;	
 	}
 	
@@ -309,7 +307,7 @@ public:
 			
 			// Unref the loop once should cause the loop to stop and
 			// the destroy the socket instances.
-			Loop.stop();
+			ourLoop.stop();
 			return;
 		}
 	}
@@ -332,27 +330,28 @@ public:
 	void runTimerTest() 
 	{
 		traceL("Tests") << "Timer Test: Starting" << endl;
-		uv::Timer timer;
+		Timer timer;
 		timer.Timeout += delegate(this, &Tests::onOnTimerTimeout);
 		timer.start(100, 100);
 		
 		Benchmark.reset();
-		traceL("Tests") << "Timer Test: Looping" << endl;
-		Loop.run();
+		traceL("Tests") << "Timer Test: ourLooping" << endl;
+		ourLoop.run();
 		traceL("Tests") << "Timer Test: Ending" << endl;
 	}
 
 	void onOnTimerTimeout(void* sender)
 	{
-		uv::Timer* timer = static_cast<uv::Timer*>(sender);
+		Timer* timer = static_cast<Timer*>(sender);
 		traceL("Tests") << "On Timer: " << timer->count() << endl;
 
 		if (timer->count() == numTimerTicks) {
 			timer->stop(); // event loop will be released
-			//Loop.stop();;
+			//ourLoop.stop();;
 		}
 	}
 };
+			*/
 
 
 //} // namespace scy
@@ -362,13 +361,12 @@ int main(int argc, char** argv)
 {	
 	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
 	{
-		//scy::
-		Tests app;
+		//Tests app;
 	}
 	Logger::uninitialize();
 	return 0;
 }
 
 
-Tests::Result Tests::Benchmark;
-Runner Tests::Loop;
+//Tests::Result Tests::Benchmark;
+//uv::Loop Tests::ourLoop;

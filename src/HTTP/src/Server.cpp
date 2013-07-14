@@ -17,14 +17,13 @@
 //
 
 
-
-using namespace std;
-
-
 #include "Sourcey/HTTP/Server.h"
 #include "Sourcey/HTTP/WebSocket.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Util.h"
+
+
+using namespace std;
 
 
 namespace scy { 
@@ -43,13 +42,13 @@ Server::~Server()
 {
 	traceL("Server", this) << "Destroying" << endl;
 	shutdown();
+	if (factory)
+		delete factory;
 }
 
 	
 void Server::start()
 {	
-	assert(socket.base().refCount() == 1);
-
 	// TODO: Register self as an observer
 	socket.base().AcceptConnection += delegate(this, &Server::onAccept);	
 	socket.Close += delegate(this, &Server::onClose);
@@ -75,7 +74,7 @@ void Server::shutdown()
 	if (!connections.empty())
 		Shutdown.emit(this);
 
-	// Connections must remove themselves
+	// Connections are self removing
 	assert(connections.empty());
 	assert(socket.base().refCount() == 1);
 }
@@ -142,11 +141,13 @@ void Server::onClose(void* sender)
 ServerConnection::ServerConnection(Server& server, const net::Socket& socket) : 
 	Connection(socket), 
 	_server(server), 
-	_responder(NULL)
+	_responder(NULL),
+	_upgrade(false),
+	_requestComplete(false)
 {	
 	traceL("ServerConnection", this) << "Creating" << endl;
 
-	setAdapter(new ServerAdapter(*this));
+	replaceAdapter(new ServerAdapter(*this));
 	server.Shutdown += delegate(this, &ServerConnection::onServerShutdown);
 	server.addConnection(this);
 }
@@ -156,17 +157,22 @@ ServerConnection::~ServerConnection()
 {	
 	traceL("ServerConnection", this) << "Destroying" << endl;
 
-	if (_responder)
+	if (_responder) {
+		traceL("ServerConnection", this) << "Destroying: Responder: " << _responder << endl;
 		delete _responder;
+	}
+
 }
 
 	
 void ServerConnection::close()
 {
-	_server.Shutdown -= delegate(this, &ServerConnection::onServerShutdown);
-	_server.removeConnection(this);
+	if (!closed()) {
+		_server.Shutdown -= delegate(this, &ServerConnection::onServerShutdown);
+		_server.removeConnection(this);
 
-	Connection::close(); // close and destroy
+		Connection::close(); // close and destroy
+	}
 }
 
 
@@ -198,7 +204,7 @@ bool ServerConnection::send()
 	// Use Connection::sendRaw() for nocopy binary stream.
 	string body(_response->body.str());
 	_response->setContentLength(body.length());
-	return sendRaw(body.data(), body.length());
+	return sendRaw(body.data(), body.length()) > 0;
 }
 
 			
@@ -216,38 +222,68 @@ void ServerConnection::onHeaders()
 {
 	traceL("ServerConnection", this) << "On headers" << endl;	
 	
+	/*
+	// NOTE: To upgrade the connection we need to upgrade the 
+	// ConnectionAdapter, but we can't do it yet since we are
+	// still inside the default adapter's parser callback scope.
+	// Just set the _upgrade flag for now, and we will do the actual 
+	// upgrade when the parser is complete (on the on next iteration).
+	_upgrade = _request->hasToken("Connection", "upgrade");
+
+	if (_upgrade) {
+	}
+	// Otherwise 
+	else {
+	}
+	*/	
+
+	//replace adapter here since we are 
+	// inside the previous adapter's callback scope.
+
+	//ConnectionAdapter::parser()
+
 	// Upgrade the connection if required
 	if (_request->hasToken("Connection", "upgrade") && 
 		Poco::icompare(_request->get("Upgrade", ""), "websocket") == 0)
 	{			
-		traceL("ServerConnection", this) << "Upgrading to WebSocket" << endl;
+		traceL("ServerConnection", this) << "Upgrading to WebSocket: " << *_request << endl;
+		_upgrade = true;
 
 		WebSocketServerAdapter* wsAdapter = new WebSocketServerAdapter;
-		socket().setAdapter(wsAdapter);
+				
+		// NOTE: To upgrade the connection we need to replace the 
+		// underlying SocketAdapter instance. Since we are currently 
+		// inside the default ConnectionAdapter's HTTP sarser callback 
+		// scope we just swap the SocketAdapter instance pointers and do
+		// a deferred delete on the old adapter. No more callbacks will be 
+		// received from the old adapter after replaceAdapter is called.
+		socket().replaceAdapter(wsAdapter);
 
 		ostringstream oss;
 		_request->write(oss);
 		Buffer buffer(oss.str().data(), oss.str().length());		
 
 		// Send the handshake request to the WS adapter for handling.
-		// If the request fails the connection socket will be closed
-		// resulting in destruction.
-		socket().adapter().onSocketRecv(buffer, socket().peerAddress());
-
-		// TODO: Need to handle error here?
+		// If the request fails the underlying socket will be closed
+		// resulting in the destruction of the current connection.
+		wsAdapter->onSocketRecv(buffer, socket().peerAddress());
 	}
-
-	// When headers have been parsed we instantiate the request handler
+	
+	// Instantiate the responder when request headers have been parsed
 	_responder = _server.createResponder(*this);
 	assert(_responder);
-	_responder->onHeaders(*_request);
+
+	// Upgraded connections don't receive the onHeaders callback
+	if (!_upgrade)
+		_responder->onHeaders(*_request);
 }
 
 
 void ServerConnection::onPayload(Buffer& buffer)
 {
 	traceL("ServerConnection", this) << "On payload: " << buffer.size() << endl;	
-
+	
+	assert(_upgrade); // no payload for upgrade requests
 	assert(_responder);
 	_responder->onPayload(buffer);
 }
@@ -260,6 +296,8 @@ void ServerConnection::onComplete()
 	// The HTTP request is complete.
 	// The request handler can give a response.
 	assert(_responder);
+	assert(!_requestComplete);
+	_requestComplete = true;
 	_responder->onRequest(*_request, *_response);
 }
 
@@ -366,7 +404,7 @@ Server::~Server()
 {
 	{		
 		Poco::FastMutex::ScopedLock lock(_mutex);
-		scy::util::ClearVector(_connectionHooks);
+		scy::util::clearVector(_connectionHooks);
 	}
 }
 

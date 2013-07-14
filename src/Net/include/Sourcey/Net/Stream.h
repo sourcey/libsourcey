@@ -17,63 +17,57 @@
 //
 
 
-#ifndef SOURCEY_UV_Stream_H
-#define SOURCEY_UV_Stream_H
+#ifndef SOURCEY_Net_Stream_H
+#define SOURCEY_Net_Stream_H
 
 
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Memory.h"
-#include "Sourcey/UV/Base.h"
+
 #include "Sourcey/Signal.h"
 #include "Sourcey/Buffer.h"
 
 
 namespace scy {
-namespace uv {
+namespace net {
 
 
-//template <class BaseT>
-class Stream: public uv::Base<CountedObject>
+class Stream: public uv::Base
 {
  public:  
-	Stream(uv_loop_t* loop = NULL, void* stream = NULL) :
-	   uv::Base<CountedObject>(loop, stream)
+	Stream(uv::Loop& loop = uv::defaultLoop(), void* stream = NULL) :
+	   uv::Base(&loop, stream)
 	{
 	}
-	   
-	 //closeOnError(true);//, public CountedObject
-	//Stream(uv_stream_t* stream)
-	//{
-	//	setStream(stream);
-	//}
 	
 	void close()
 		/// Closes and resets the stream handle.
-		/// This will close the active socket/pipe.
-		///
-		/// setStream() will need to be called again 
-		/// before the stream can be reused.
+		/// This will close the active socket/pipe
+		/// and destroy the uv_stream_t handle.
 		///
 		/// If the stream is already closed this call
 		/// will have no side-effects.
 	{
 		traceL("Stream", this) << "Close: " << handle() << std::endl;
-		if (handle())
+		if (!closed()) {
 			readStop();		
-		uv::Base<CountedObject>::close();
+			uv::Base::close();
+		}
 	}
 	
 	bool shutdown()
 		/// Sends a shutdown packet to the connected peer.
 	{
-		traceL("Stream", this) << "Send Shutdown: " << handle() << std::endl;
-		if (!handle())
+		traceL("Stream", this) << "Sending shutdown" << std::endl;
+		if (closed()) {
+			warnL("Stream", this) << "Attempted shutdown on closed stream" << std::endl;
 			return false;
+		}
 
-		// TODO: Sending shutdown causes an eof error to be  
+		// XXX: Sending shutdown causes an eof error to be  
 		// returned via handleRead() which sets the stream 
-		// to error state. Since this is not really an error,
-		// it should be handled differently.
+		// to error state. This is not really an error,
+		// perhaps it should be handled differently?
 		int r = uv_shutdown(new uv_shutdown_t, handle<uv_stream_t>(), uv::afterShutdown);
 
 		// If the stream is not connected this will return false.
@@ -82,52 +76,57 @@ class Stream: public uv::Base<CountedObject>
 
 	bool write(const char* data, int len)
 		/// Writes data to the stream.
-	{
-		uv_stream_t* stream = this->handle<uv_stream_t>();
-		bool ipcPipe = stream->type == UV_NAMED_PIPE && ((uv_pipe_t*)stream)->ipc;
-		int r;  
+	{		
+		//if (len < 300)
+		//	traceL("Stream", this) << "Send: " << std::string(data, len) << std::endl;
+		if (closed()) {
+			warnL("Stream", this) << "Attempted write on closed stream" << std::endl;
+			return false;
+		}
+		
+		int r; 		
+		uv_write_t* req = new uv_write_t;
 		uv_buf_t buf = uv_buf_init((char*)data, len);
+		uv_stream_t* stream = this->handle<uv_stream_t>();
+		bool isIPC = stream->type == UV_NAMED_PIPE && 
+			reinterpret_cast<uv_pipe_t*>(stream)->ipc;
 
-		if (!ipcPipe)
-			r = uv_write(new uv_write_t, stream, &buf, 1, uv::afterWrite);
+		if (!isIPC)
+			r = uv_write(req, stream, &buf, 1, uv::afterWrite);
 		else
-			r = uv_write2(new uv_write_t, stream, &buf, 1, NULL, uv::afterWrite);
-		if (r)
-			setLastError();
+			r = uv_write2(req, stream, &buf, 1, NULL, uv::afterWrite);
+
+		if (r) {
+			delete req;
+			setLastError(); // Should we throw an exception instead?
+		}
 		return r == 0;
 	}
 	
 	Buffer& buffer()
-		/// Return the read buffer.
+		/// Returns the read buffer.
 	{ 
 		return _buffer;
 	}
 
 	Signal2<const char*, int> Read;
-	//Signal2<const char*, int> Write;
+		/// Signals when data can be read from the stream.
 
  protected:	
-	/*
-	void setStream(uv_stream_t* stream)
-	{
-		assert(_handle == NULL);
-		stream->data = instance();
-		_handle = (uv_handle_t*)stream;
-	}
-	*/
-
 	bool readStart()
 	{
 		traceL("Stream", this) << "Read Start: " << handle() << std::endl;
+
 		int r;
 		uv_stream_t* stream = this->handle<uv_stream_t>();
-		bool ipcPipe = stream->type == UV_NAMED_PIPE && reinterpret_cast<uv_pipe_t*>(stream)->ipc;
-		if (ipcPipe)
+		bool isIPC = stream->type == UV_NAMED_PIPE && 
+			reinterpret_cast<uv_pipe_t*>(stream)->ipc;
+
+		if (isIPC)
 			r = uv_read2_start(stream, Stream::allocReadBuffer, handleRead2);
 		else 	
 			r = uv_read_start(stream, Stream::allocReadBuffer, handleRead);
-		if (r) 
-			setLastError();	
+		if (r) setLastError();	
 		return r == 0;
 	}
 
@@ -151,19 +150,20 @@ class Stream: public uv::Base<CountedObject>
 	{	
 		Stream* io = static_cast<Stream*>(handle->data);
 		traceL("Stream", io) << "Handle Read: " << nread << std::endl;
-	
+		//if (nread > 0 && nread < 50)
+		//	traceL("Stream", io) << "Handle Read: " << std::string(buf.base, nread) << std::endl;
+
 		// Handle EOF or error
 		if (nread == -1)  {
 			io->setLastError();
 			return;
 		}
 		else {
-			if (pending == UV_TCP) {
+			// We only support UV_TCP right now
+			if (pending == UV_TCP)
 				assert(0);
-			} else {
-				// We only support sending UV_TCP right now.
+			else
 				assert(pending == UV_UNKNOWN_HANDLE);
-			}		
 			io->onRead(buf.base, nread);
 		}
 	}
@@ -176,10 +176,9 @@ class Stream: public uv::Base<CountedObject>
 	{ 
 		return this;
 	}	
-
-
+	
 	//
-	// UV static callbacks
+	// UV callbacks
 	//
 	
 	static void handleRead(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) 
@@ -195,25 +194,44 @@ class Stream: public uv::Base<CountedObject>
 
 	static uv_buf_t allocReadBuffer(uv_handle_t *handle, size_t suggested_size)
 	{
-		Stream* self = static_cast<Stream*>(handle->data);		
+		Stream* self = static_cast<Stream*>(handle->data);
+
+		// Reserve the recommended buffer size
 		if (suggested_size > self->_buffer.size())
 			self->_buffer.reserve(suggested_size); 
 		assert(self->_buffer.capacity() == suggested_size);
+
+		// Reset the buffer position on each read
 		self->_buffer.position(0);
 		return uv_buf_init(self->_buffer.begin(), suggested_size);
 	}
 
-	scy::Buffer _buffer;
+	Buffer _buffer;
 };
 
 
-} } // namespace scy::uv
+} } // namespace scy::net
 
 
-#endif // SOURCEY_UV_Stream_H
+#endif // SOURCEY_Net_Stream_H
 
 
-	
+	/*
+	//Signal2<const char*, int> Write;
+	void setStream(uv_stream_t* stream)
+	{
+		assert(_handle == NULL);
+		stream->data = instance();
+		_handle = (uv_handle_t*)stream;
+	}
+	*/
+	//template <class BaseT>
+	   
+	 //closeOnError(true);//, public CountedObject
+	//Stream(uv_stream_t* stream)
+	//{
+	//	setStream(stream);
+	//}
 
 	/*
 	void* _instance;
@@ -227,7 +245,7 @@ class Stream: public uv::Base<CountedObject>
 		/*	
 
 	uv::Buffer _readBuffer;
-	scy::Buffer _readBuffer1;
+	Buffer _readBuffer1;
 		}
 		traceL("Stream", ptr) << "allocReadBuffer " << suggested_size << std::endl;
 		//ptr->_readBuffer.data.reserve(suggested_size); 

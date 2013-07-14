@@ -34,7 +34,7 @@ struct PacketStreamState;
 
 
 class PacketEmitter: public PacketSignal
-	/// The packet dispatcher is a generic interface used
+	/// The packet emitter is a generic interface used
 	/// extensively within LibSourcey by classes that emit 
 	/// the IPacket type.
 { 
@@ -59,7 +59,7 @@ typedef std::vector<PacketEmitter*> PacketEmitterList;
 	
 
 	/*
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		//_packetNumber = 0; 
 
 	PacketEmitter() : _packetNumber(0) {};
@@ -100,7 +100,7 @@ typedef std::vector<PacketEmitter*> PacketEmitterList;
 	virtual void emit(void* sender, IPacket& packet) 
 	{
 		{
-			Poco::FastMutex::ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 			_packetNumber++;
 		}
 		PacketSignal::emit(sender, packet); 
@@ -108,7 +108,7 @@ typedef std::vector<PacketEmitter*> PacketEmitterList;
 
 	virtual UInt32 packetNumber() const
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return _packetNumber;
 	}
 
@@ -120,7 +120,7 @@ typedef std::vector<PacketEmitter*> PacketEmitterList;
 protected:	
 	UInt32 _packetNumber;
 
-	//mutable Poco::FastMutex	_mutex;
+	//mutable Mutex	_mutex;
 	*/
 
 

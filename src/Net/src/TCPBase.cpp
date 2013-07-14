@@ -21,27 +21,21 @@
 #include "Sourcey/Net/TCPSocket.h"
 #include "Sourcey/Logger.h"
 
-#include "Poco/Exception.h"
-#include "Poco/Net/Context.h"
-#include "Poco/Net/SSLManager.h"
-
 
 using namespace std;
 
 
 namespace scy {
-namespace uv {
+namespace net {
 
 
-TCPBase::TCPBase(uv_loop_t* loop) :
+TCPBase::TCPBase(uv::Loop& loop) :
 	Stream(loop, new uv_tcp_t)
 {
 	traceL("TCPBase", this) << "Creating: " << _handle << endl;
-	//init();
-	
+	//init();	
 	_handle->data = this;
 	uv_tcp_init(Stream::loop(), handle<uv_tcp_t>());	
-
 	traceL("TCPBase", this) << "Creating: OK" << endl;
 }
 
@@ -52,39 +46,20 @@ TCPBase::~TCPBase()
 }
 
 
-/*
-void TCPBase::init()
-{
-	if (!stream()) {		
-		traceL("TCPBase", this) << "Init" << endl;
-		uv_tcp_t* tcp = new uv_tcp_t;
-		setStream((uv_stream_t*)tcp);
-		tcp->data = this;
-		uv_tcp_init(loop(), tcp);
-		assert(tcp->data == this);		
-		connectReq.data = instance();	
-		traceL("TCPBase", this) << "Init: OK" << endl;
-	}
-}
-*/
-
-
 void TCPBase::connect(const net::Address& peerAddress) 
 {
 	traceL("TCPBase", this) << "Connecting to " << peerAddress.toString() << endl;
-
 	connectReq.data = this;	
 	const sockaddr_in* addr = reinterpret_cast<const sockaddr_in*>(peerAddress.addr());
-	int r = uv_tcp_connect(&connectReq, handle<uv_tcp_t>(), *addr, uv::onConnect);
+	int r = uv_tcp_connect(&connectReq, handle<uv_tcp_t>(), *addr, net::onConnect);
 	if (r)
-		setLastError(true);
+		setLastError("Invalid TCP socket");
 }
 
 
 void TCPBase::bind(const net::Address& address, unsigned flags) 
 {
 	traceL("TCPBase", this) << "Binding on " << address.toString() << endl;
-
 	int r;
 	const sockaddr_in& addr = reinterpret_cast<const sockaddr_in&>(*address.addr());
 	switch (address.af()) {
@@ -97,15 +72,15 @@ void TCPBase::bind(const net::Address& address, unsigned flags)
 	default:
 		throw Exception("Unexpected address family");
 	}
-	if (r) setLastError(true);
+	if (r) setLastError("Invalid TCP socket");
 }
 
 
 void TCPBase::listen(int backlog) 
 {
 	traceL("TCPBase", this) << "Listening" << endl;
-	int r = uv_listen(handle<uv_stream_t>(), backlog, uv::onAcceptConnection);
-	if (r) setLastError(true);
+	int r = uv_listen(handle<uv_stream_t>(), backlog, net::onAcceptConnection);
+	if (r) setLastError("Invalid TCP socket");
 }
 
 
@@ -132,33 +107,23 @@ int TCPBase::send(const char* data, int len, int flags)
 	assert(len <= net::MAX_TCP_PACKET_SIZE);
 	
 	int r = Stream::write(data, len);
+	if (r)
+		setLastError("Invalid TCP socket");
 
 	// R is -1 on error, otherwise return len
-	return r ? r : len;
+	//return r ? r : len;
+	return len;
 }
 
 
 int TCPBase::send(const char* data, int len, const net::Address& peerAddress, int flags) 
 {
 	traceL("TCPBase", this) << "Send: " << len << endl;
+
 	assert(peerAddress == this->peerAddress());
 
 	return Stream::write(data, len);
 }
-
-
-/*
-int TCPBase::send(const IPacket& packet, int flags)
-{
-	return net::SocketBase::send(packet, flags);
-}
-
-
-int TCPBase::send(const IPacket& packet, const net::Address& peerAddress, int flags)
-{
-	return net::SocketBase::send(packet, peerAddress, flags);
-}
-*/
 
 
 void TCPBase::setNoDelay(bool enable) 
@@ -201,14 +166,17 @@ void TCPBase::acceptConnection()
 
 net::Address TCPBase::address() const
 {
+	if (closed())
+		throw Exception("Invalid TCP socket: No address");
+	
 	struct sockaddr_storage address;
 	int addrlen = sizeof(address);
 	int r = uv_tcp_getsockname(handle<uv_tcp_t>(),
 								reinterpret_cast<sockaddr*>(&address),
 								&addrlen);
 	if (r)
-		return net::Address();
-		//throwLastError(loop(), "TCP Socket: Invalid local address: ");
+		throwLastError("Invalid TCP socket: No address");
+
 	return net::Address(reinterpret_cast<const sockaddr*>(&address), addrlen);
 }
 
@@ -217,12 +185,16 @@ net::Address TCPBase::peerAddress() const
 {
 	struct sockaddr_storage address;
 	int addrlen = sizeof(address);
+	if (closed())
+		throw Exception("Invalid TCP socket: No peer address");
+
 	int r = uv_tcp_getpeername(handle<uv_tcp_t>(),
 								reinterpret_cast<sockaddr*>(&address),
 								&addrlen);
 
-	if (r) 
-		throwLastError(loop(), "TCP Socket: Invalid peer address: ");
+	if (r)
+		throwLastError("Invalid TCP socket: No peer address");
+
 	return net::Address(reinterpret_cast<const sockaddr*>(&address), addrlen);
 }
 
@@ -235,33 +207,13 @@ net::TransportType TCPBase::transport() const
 
 SOCKET TCPBase::sockfd() const
 {
-	return handle<uv_tcp_t>()->socket;
+	return closed() ? INVALID_SOCKET : handle<uv_tcp_t>()->socket;
 }
 
 
 bool TCPBase::initialized() const
 {
 	return sockfd() != INVALID_SOCKET;
-}
-
-
-void TCPBase::duplicate() 
-{ 
-	traceL("TCPBase", this) << "Duplicating: " << count << endl;
-	Stream::duplicate(); 
-}
-
-
-void TCPBase::release() 
-{ 
-	traceL("TCPBase", this) << "Releasing: " << count << endl;
-	Stream::release(); 
-}
-
-
-int TCPBase::refCount() const 
-{ 
-	return Stream::refCount();
 }
 
 
@@ -281,9 +233,6 @@ void TCPBase::onRead(const char* data, int len)
 void TCPBase::onRecv(Buffer& buf)
 {
 	traceL("TCPBase", this) << "On recv: " << buf.size() << endl;
-	//net::SocketPacket packet(*this, buf, peerAddress());
-	//assert(instance() == this);
-	//Recv.emit(instance(), packet);
 	emitRecv(buf, peerAddress());
 }
 
@@ -328,9 +277,29 @@ void TCPBase::onClose()
 }
 
 
-} } // namespace scy::uv
+} } // namespace scy::net
 
 
+
+	//net::SocketPacket packet(*this, buf, peerAddress());
+	//assert(instance() == this);
+	//Recv.emit(instance(), packet);
+
+/*
+void TCPBase::init()
+{
+	if (!stream()) {		
+		traceL("TCPBase", this) << "Init" << endl;
+		uv_tcp_t* tcp = new uv_tcp_t;
+		setStream((uv_stream_t*)tcp);
+		tcp->data = this;
+		uv_tcp_init(loop(), tcp);
+		assert(tcp->data == this);		
+		connectReq.data = instance();	
+		traceL("TCPBase", this) << "Init: OK" << endl;
+	}
+}
+*/
 
 	/*
 	uv_buf_t uvbuf;
@@ -420,7 +389,7 @@ static void aafterClose(uv_handle_t* peer)
 
 
 
-//, _sslBuffer(NULL)
+//, _sslAdapter(NULL)
 
 	//_stream = (uv_stream_t*)new uv_tcp_t;
 	//_stream->data = this;	
@@ -432,8 +401,8 @@ static void aafterClose(uv_handle_t* peer)
 		//throw Exception Null(node_isolate);
 
 
-	//_sslBuffer->addIncomingData(data, len);
-	//_sslBuffer->update();
+	//_sslAdapter->addIncomingData(data, len);
+	//_sslAdapter->update();
 	//send("data", 4);
 	//assert(0);
 
@@ -441,8 +410,8 @@ static void aafterClose(uv_handle_t* peer)
 
 	/*
 	// Send unencrypted data to the SSL context
-	_sslBuffer.addOutgoingData(data, len);
-	_sslBuffer.update();
+	_sslAdapter.addOutgoingData(data, len);
+	_sslAdapter.flush();
 	return len;
 	*/
 
@@ -466,14 +435,14 @@ static void aafterClose(uv_handle_t* peer)
 	"Connection: keep-alive\r\n"
 	"\r\n");
  
-	_sslBuffer.addOutgoingData(http_request);
+	_sslAdapter.addOutgoingData(http_request);
 	ssl = SSL_new(_sslCtx);
  
 	SSL_set_connect_state(ssl);
 	SSL_do_handshake(ssl);
  
-	_sslBuffer.init(this, ssl); //write_tosocket_callback, , read_decrypted_callback, this
-	_sslBuffer.update();
+	_sslAdapter.init(this, ssl); //write_tosocket_callback, , read_decrypted_callback, this
+	_sslAdapter.flush();
 	*/
 
 
@@ -493,11 +462,11 @@ static void aafterClose(uv_handle_t* peer)
 	/* WES WORKING		
 	//TCPBase* c = static_cast<TCPBase*>(this);
 		printf("ERROR: write_tosocket error: %s\n", uv_err_name(uv_last_error(loop())));
-	_sslBuffer.addOutgoingData(data, len);
-	//_sslBuffer.addOutgoingData("bbbbbbbbbbbbbbbbbbbbbbbb");
-	_sslBuffer.update();
+	_sslAdapter.addOutgoingData(data, len);
+	//_sslAdapter.addOutgoingData("bbbbbbbbbbbbbbbbbbbbbbbb");
+	_sslAdapter.flush();
 	return len;
-	Log("trace") << "write_tosocket_callback: " << len << endl;
+	traceL("trace") << "write_tosocket_callback: " << len << endl;
 	*/
 	
 	/*
@@ -510,18 +479,18 @@ static void aafterClose(uv_handle_t* peer)
 
  
  /*
-	assert(_sslBuffer);
+	assert(_sslAdapter);
 void on_read_callback(uv_stream_t* tcp, ssize_t nread, uv_buf_t buf) {
   TCPBase* c = static_cast<TCPBase*>(tcp->data);
-  c->_sslBuffer.addIncomingData(buf.base, nread);
-  c->_sslBuffer.update();
+  c->_sslAdapter.addIncomingData(buf.base, nread);
+  c->_sslAdapter.flush();
 }
 */
 
 
 /*
 void write_tosocket_callback(const char* data, size_t len, void* client) {
-	Log("trace") << "write_tosocket_callback: " << len << endl;
+	traceL("trace") << "write_tosocket_callback: " << len << endl;
 	
     TCPBase* c = static_cast<TCPBase*>(client);
 	uv_buf_t buf = uv_buf_init((char *)data, len); // TODO: copy data?
@@ -542,7 +511,7 @@ void write_tosocket_callback(const char* data, size_t len, void* client) {
   uvbuf.len = len;
   int r = uv_write(&c->_writeReq, (uv_stream_t*)&c->socket, &uvbuf, 1, NULL);
   
-	Log("trace") << "write_tosocket_callback: " << len << endl;
+	traceL("trace") << "write_tosocket_callback: " << len << endl;
   if(r < 0) {
     printf("ERROR: write_tosocket error: %s\n", uv_err_name(uv_last_error(c->socket.loop)));
   }
@@ -559,31 +528,31 @@ void write_tosocket_callback(const char* data, size_t len, void* client) {
   //sprintf(client_key_file, "%s/%s", dirname(__FILE__), "client-key.pem");
   sprintf(client_key_file, "./%s", "private-key.pem");
  
-	Log("trace") << "BEFORE RUN" << endl;
+	traceL("trace") << "BEFORE RUN" << endl;
 
   // Initialize SSL
   SSL_library_init();
   SSL_load_error_strings();
  
-	Log("trace") << "BEFORE RUN 2" << endl;
+	traceL("trace") << "BEFORE RUN 2" << endl;
 
   BIO* bio_err = BIO_new_fp(stderr, BIO_NOCLOSE);
-	Log("trace") << "BEFORE RUN 21" << endl;
+	traceL("trace") << "BEFORE RUN 21" << endl;
   this->_sslCtx = SSL_CTX_new(SSLv23_client_method());
-	Log("trace") << "BEFORE RUN 22" << endl;
+	traceL("trace") << "BEFORE RUN 22" << endl;
   int rc = SSL_CTX_use_PrivateKey_file(_sslCtx, client_key_file, SSL_FILETYPE_PEM);
   if(!rc) {
 	  assert(0);
     EXIT("Could not load client key file.\n");
   }
-	Log("trace") << "BEFORE RUN 3" << endl;
+	traceL("trace") << "BEFORE RUN 3" << endl;
  
   SSL_CTX_set_options(_sslCtx, SSL_OP_NO_SSLv2); 
   SSL_CTX_set_verify(_sslCtx, SSL_VERIFY_PEER, dummy_ssl_verify_callback); // our callback always returns true, so no validation
   SSL_CTX_set_info_callback(_sslCtx, dummy_ssl_info_callback);  // for dibugging
   SSL_CTX_set_msg_callback(_sslCtx, dummy_ssl_msg_callback);
  
-	Log("trace") << "BEFORE RUN 4" << endl;
+	traceL("trace") << "BEFORE RUN 4" << endl;
 	*/
 
 /*
@@ -633,8 +602,8 @@ int dummy_ssl_verify_callback(int ok, X509_STORE_CTX* store) {
 
 void on_read_callback(uv_stream_t* tcp, ssize_t nread, uv_buf_t buf) {
   TCPBase* c = static_cast<TCPBase*>(tcp->data);
-  c->_sslBuffer->addIncomingData(buf.base, nread);
-  c->_sslBuffer->update();
+  c->_sslAdapter->addIncomingData(buf.base, nread);
+  c->_sslAdapter->update();
 }
 
 // HANDLE BUFFERS HERE!
@@ -668,18 +637,18 @@ uv_buf_t on_alloc_callback(uv_handle_t* con, size_t size) {
   //sprintf(client_key_file, "%s/%s", dirname(__FILE__), "client-key.pem");
   sprintf(client_key_file, "./%s", "private-key.pem");
  
-	Log("trace") << "BEFORE RUN" << endl;
+	traceL("trace") << "BEFORE RUN" << endl;
 
   // Initialize SSL
   SSL_library_init();
   SSL_load_error_strings();
  
-	Log("trace") << "BEFORE RUN 2" << endl;
+	traceL("trace") << "BEFORE RUN 2" << endl;
 
   BIO* bio_err = BIO_new_fp(stderr, BIO_NOCLOSE);
-	Log("trace") << "BEFORE RUN 21" << endl;
+	traceL("trace") << "BEFORE RUN 21" << endl;
   SSL_CTX* _sslCtx = SSL_CTX_new(SSLv23_client_method());
-	Log("trace") << "BEFORE RUN 22" << endl;
+	traceL("trace") << "BEFORE RUN 22" << endl;
   int rc = SSL_CTX_use_PrivateKey_file(_sslCtx, client_key_file, SSL_FILETYPE_PEM);
   if(!rc) {
 	  assert(0);
@@ -689,11 +658,11 @@ uv_buf_t on_alloc_callback(uv_handle_t* con, size_t size) {
 	
 
 	//if (ssl) {
-		 assert(_sslBuffer == NULL);
+		 assert(_sslAdapter == NULL);
 		 
 		//SecureStreamSocketImpl* pImpl = new SecureStreamSocketImpl(static_cast<StreamSocketImpl*>(streamSocket.impl()), SSLManager::instance().defaultClientContext());
 		//pImpl->connectSSL();	
-		//Poco::Net::Context::Ptr pContext = Poco::Net::SSLManager::instance().defaultClientContext();	 
+		//SSLContext::Ptr pContext = SSLManager::instance().defaultClientContext();	 
 		SSL_CTX* _sslCtx = _sslCtx; //pContext->sslContext();
  
 		  SSL_CTX_set_options(_sslCtx, SSL_OP_NO_SSLv2); 
@@ -702,7 +671,7 @@ uv_buf_t on_alloc_callback(uv_handle_t* con, size_t size) {
 		  SSL_CTX_set_msg_callback(_sslCtx, dummy_ssl_msg_callback);
 
 		SSL* ssl = SSL_new(_sslCtx);
-		_sslBuffer = new SSLContext();
+		_sslAdapter = new SSLAdapter();
 		
 		  const char* http_request_tpl = "" \
 			"GET %s HTTP/1.1\r\n"
@@ -714,10 +683,10 @@ uv_buf_t on_alloc_callback(uv_handle_t* con, size_t size) {
  
 		  char http_request[1024];
 		  sprintf(http_request, http_request_tpl, "/", "1338");
-		  _sslBuffer->addOutgoingData(http_request);
+		  _sslAdapter->addOutgoingData(http_request);
 
-		_sslBuffer->init(ssl, write_tosocket_callback, this, read_decrypted_callback, this);
-		_sslBuffer->update();
+		_sslAdapter->init(ssl, write_tosocket_callback, this, read_decrypted_callback, this);
+		_sslAdapter->update();
 
 		SSL_set_connect_state(ssl);
 		SSL_do_handshake(ssl);

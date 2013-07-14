@@ -23,6 +23,17 @@
 
 #include "Sourcey/Stateful.h"
 
+				
+#if defined(UNIX) && !defined(INVALID_SOCKET)
+#define INVALID_SOCKET -1
+#endif	
+
+#if defined(WIN32)
+typedef int socklen_t;
+#endif
+
+#define LibSourcey_HAVE_IPv6 1 // fixme
+
 
 namespace scy {	
 namespace net {
@@ -38,6 +49,7 @@ enum TransportType
 	TCP,
 	SSLTCP
 };
+
 
 
 } } // namespace scy::net

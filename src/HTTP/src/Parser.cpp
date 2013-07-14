@@ -71,6 +71,8 @@ Parser::~Parser()
 
 void Parser::init(http_parser_type type)
 {
+	traceL("HTTPParser", this) << "Init: " << type << endl;	
+
 	assert(_parser.data != this);
 
 	::http_parser_init(&_parser, type);
@@ -89,24 +91,35 @@ void Parser::init(http_parser_type type)
 
 bool Parser::parse(const char* data, size_t len, bool expectComplete) // size_t offset, 
 {
-	traceL("HTTPParser", this) << "Parse Data: " << string(data, len) << endl;	
+	traceL("HTTPParser", this) << "Parse Data: " << len << endl;	
 	assert(!complete());
 	assert(_parser.data == this);
 
 	size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len); //&data[offset]
-	
-	//traceL("HTTPParser", this) << "Parse Errno: " << http_errno_name(HTTP_PARSER_ERRNO(_parser.http_errno)) << endl;	
-	traceL("HTTPParser", this) << "Parse Do Upgrade: " << upgrade() << endl;	
 
-	/*
 	// Set error state and throw
 	//if (_parser.http_errno != HPE_OK)
-    if (!_parser.upgrade && nparsed != len)
+    if (!_parser.upgrade && nparsed != len) {
+		//enum http_errno err = HTTP_PARSER_ERRNO(&_parser);		
+		//traceL("HTTPParser", this) << "Parse Errno: " << http_errno_name(err) << endl;	
+		warnL("HTTPParser", this) << "########## Parser Error" << endl;	
+		traceL("HTTPParser", this) << "Data: " << string(data, len) << endl;	
+		//traceL("HTTPParser", this) << "Binary: " << util::dumpbin(data, len) << endl;	
+		traceL("HTTPParser", this) << "Is OK: " << (_parser.http_errno == HPE_OK) << endl;	
+		traceL("HTTPParser", this) << "Do Upgrade: " << upgrade() << endl;	
+
+		// HACK: Getting strage issue where parser
+		// is parsing 1 character short.
+		// This happens when attempting to delete from callback scope
+		//if (nparsed == len - 1)
+		//	assert(0);
+			//return true;
+
 		setParserError(true);
+	}
 
 	else if (expectComplete && !complete())
 		setParserError(true, "Incomplete HTTP message");
-		*/
 	
 	return complete();
 }

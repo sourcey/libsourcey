@@ -233,7 +233,7 @@ void AVInputReader::run()
 						(!_options.iFramesOnly || (ipacket.flags & AV_PKT_FLAG_KEY))) {
  						if (_video->decode(ipacket, opacket)) {
 							//traceL("AVInputReader", this) << "Decoded Video: " << _video->pts << endl;
-							VideoPacket video((const char*)opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
+							VideoPacket video((char*)opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
 							video.opaque = &opacket;
 							emit(this, video);
 						}
@@ -247,7 +247,7 @@ void AVInputReader::run()
 						(!_options.processAudioXSecs || !_audio->pts || ((ipacket.pts * av_q2d(_audio->stream->time_base)) - _audio->pts) > _options.processAudioXSecs)) {
 						if (_audio->decode(ipacket, opacket)) {			
 							//traceL("AVInputReader", this) << "Decoded Audio: " << _audio->pts << endl;
-							AudioPacket audio((const char*)opacket.data, opacket.size, _audio->pts);
+							AudioPacket audio((char*)opacket.data, opacket.size, _audio->pts);
 							audio.opaque = &opacket;
 							emit(this, audio);
 						}	
@@ -293,7 +293,7 @@ void AVInputReader::run()
 					AVPacket opacket;
 					gotFrame = _video->flush(opacket);
 					if (gotFrame) {
-						VideoPacket video((const char*)opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
+						VideoPacket video((char*)opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
 						video.opaque = &opacket;
 						emit(this, video);
 					} 					
@@ -307,7 +307,7 @@ void AVInputReader::run()
 					AVPacket opacket;
 					gotFrame = _audio->flush(opacket);
 					if (gotFrame) {
-						AudioPacket audio((const char*)opacket.data, opacket.size, _audio->pts);
+						AudioPacket audio((char*)opacket.data, opacket.size, _audio->pts);
 						audio.opaque = &opacket;
 						emit(this, audio);
 					}					

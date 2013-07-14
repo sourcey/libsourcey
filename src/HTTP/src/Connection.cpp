@@ -27,7 +27,7 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Poco::Net;
+
 
 
 namespace scy { 
@@ -43,10 +43,10 @@ Connection::Connection(const net::Socket& socket) :
 	_shouldSendHeaders(true),
 	_timeout(30 * 60 * 1000) // 30 secs
 {	
-	traceL("Connection", this) << "Creating" << endl;
+	traceL("Connection", this) << "Creating: " << &_socket << endl;
 
-	_socket.Close += delegate(this, &Connection::onSocketClose);
 	_socket.Recv += delegate(this, &Connection::onSocketRecv);
+	_socket.Close += delegate(this, &Connection::onSocketClose);
 }
 
 	
@@ -62,16 +62,15 @@ Connection::~Connection()
 }
 
 
-bool Connection::sendRaw(const char* buf, size_t len, int flags)
+int Connection::sendRaw(const char* buf, size_t len, int flags)
 {
 	traceL("Connection", this) << "Send Raw: " << len << endl;
 
-	assert(len > 0);
-	return _socket.send(buf, len, flags) > 0;
+	return _socket.send(buf, len, flags);
 }
 
 
-bool Connection::sendHeaders()
+int Connection::sendHeaders()
 {
 	assert(_shouldSendHeaders);
 	assert(outgoingHeaders());
@@ -85,7 +84,7 @@ bool Connection::sendHeaders()
 	_timeout.start();
 	_shouldSendHeaders = false;
 
-	return _socket.send(headers.data(), headers.length()) > 0;
+	return _socket.send(headers.data(), headers.length());
 }
 
 
@@ -95,26 +94,30 @@ void Connection::close()
 	assert(!_closed);
 	assert(_socket.base().refCount() == 1);
 	
-	_closed = true;
-	
+	_closed = true;	
+
+	_socket.Recv -= delegate(this, &Connection::onSocketRecv);
 	_socket.Close -= delegate(this, &Connection::onSocketClose);
 	_socket.close();
 
 	onClose();
 		
+	traceL("Connection", this) << "Close: Deleting" << endl;	
 	deleteLater<Connection>(this); // destroy it
 }
 
 
-void Connection::setAdapter(net::SocketAdapter* adapter)
+void Connection::replaceAdapter(net::SocketAdapter* adapter)
 {
 	_adapter = adapter;
-	_socket.setAdapter(adapter);
+	_socket.replaceAdapter(adapter);
 }
 
 
 void Connection::onClose()
 {
+	traceL("Connection", this) << "On close" << endl;	
+
 	Close.emit(this);
 }
 
@@ -192,7 +195,7 @@ ConnectionAdapter::ConnectionAdapter(Connection& connection, http_parser_type ty
 	_connection(connection),
 	_parser(type)
 {	
-	traceL("Connection", this) << "Creating: " << this << endl;
+	traceL("ConnectionAdapter", this) << "Creating: " << &connection << endl;
 
 	// Setup the HTTP Parser
 	_parser.setObserver(this);
@@ -205,6 +208,7 @@ ConnectionAdapter::ConnectionAdapter(Connection& connection, http_parser_type ty
 
 ConnectionAdapter::~ConnectionAdapter()
 {
+	traceL("ConnectionAdapter", this) << "Destroying: " << &_connection << endl;
 }
 
 
@@ -212,12 +216,32 @@ int ConnectionAdapter::send(const char* data, int len, int flags)
 {
 	traceL("ConnectionAdapter", this) << "send: " << len << endl;
 	
-	// Send headers on initial send
-	if (_connection.shouldSendHeaders())
-		_connection.sendHeaders();
+	try {
 
-	// Send body / chunk
-	return socket->base().send(data, len, flags);
+		// Send headers on initial send
+		if (_connection.shouldSendHeaders()) {
+			int res = _connection.sendHeaders();
+
+			// The initial packet may be empty to 
+			// push the headers through
+			if (len == 0)
+				return res;
+		}
+
+		// Other packets should not be empty
+		assert(len > 0);
+
+		// Send body / chunk
+		return socket->base().send(data, len, flags);
+	} 
+	catch(Exception& exc) {
+		errorL("ConnectionAdapter", this) << "Send error: " << exc.displayText() << endl;
+
+		// Just swallow the excpiton, the socket error will 
+		// cause the connection to close on next iteration.
+	}
+	
+	return -1;
 }
 
 
@@ -226,15 +250,38 @@ void ConnectionAdapter::onSocketRecv(Buffer& buf, const net::Address& peerAddr)
 	traceL("ConnectionAdapter", this) << "On socket recv" << endl;	
 	
 	try {
+		// BIG: Parser error calling destructor 
+		// via callback causing stack error.
+
+		// Always crashing at:
+		// 16:20:52 [trace] [WebSocketServerAdapter:02551400] Destroying
+		// 16:20:52 [trace] [WebSocketAdapter:02551400] Destroying
+
 		// Parse incoming HTTP messages
 		_parser.parse(buf.data(), buf.size());
 	} 
 	catch(Exception& exc) {
-		errorL("ConnectionAdapter", this) << "HTTP Parser Error: " << exc.displayText() << endl;
+		errorL("ConnectionAdapter", this) << "HTTP parser error: " << exc.displayText() << endl;
 
 		// TODO: Handle parser exceptions
-		socket->close();
+		assert(socket);
+		if (socket)
+			socket->close();
 	}
+
+	traceL("ConnectionAdapter", this) << "On socket recv: After" << endl;		
+}
+
+
+void ConnectionAdapter::onSocketError(const Error& error)
+{
+	traceL("ConnectionAdapter", this) << "On socket error: " << socket << endl;	
+}
+
+
+void ConnectionAdapter::onSocketClose()
+{
+	traceL("ConnectionAdapter", this) << "On socket close: " << socket << endl;	
 }
 
 
@@ -277,7 +324,19 @@ void ConnectionAdapter::onParserError(const ParserError& err)
 	warnL("Connection", this) << "On parser error: " << err.message << endl;	
 
 	// Close the connection on parser error
-	_connection.close();
+	//_connection.close();
+}
+
+	
+Parser& ConnectionAdapter::parser()
+{
+	return _parser;
+}
+
+
+Connection& ConnectionAdapter::connection()
+{
+	return _connection;
 }
 
 
@@ -285,6 +344,15 @@ void ConnectionAdapter::onParserError(const ParserError& err)
 
 
 
+
+		// Throw an exception on send error.
+		// The connection handler should call 
+		// close() on the connection when caught.
+		//if (socket->closed()) {
+			//throw Exception("Connection send error: Invalid socket");
+			//close();
+			//return -1;
+		//}
 	
 /*
 int ConnectionAdapter::send(const char* data, int len, int flags)
@@ -416,8 +484,8 @@ void DefaultServerResponder::handleRequest(ServerConnection* connection, Request
 	//server.addServerConnection(this);
 	//assert(socket);
 	//SocketAdapter::socket = &this->socket;
-	//this->_socket.base().addAdapter(*this, false);
-	//this->_socket.base().removeAdapter(*this);
+	//this->_socket.base().addAdapter(this, false);
+	//this->_socket.base().removeAdapter(this);
 	//server.removeServerConnection(this);
 
 

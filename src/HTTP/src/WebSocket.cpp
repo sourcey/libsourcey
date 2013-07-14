@@ -206,17 +206,16 @@ void WebSocketClientAdapter::onSocketRecv(Buffer& buffer, const net::Address& pe
 		}
 
 		else {
+			/*
 			http::Response response;
 			http::Parser parser(&response);
 			parser.parse(buffer.data(), buffer.size(), true);
+			*/
 			
-			/*
 			istringstream iss;
 			iss.str(buffer.data());
 			http::Response response;
 			response.read(iss); // TODO: HTTP Parser
-			*/
-
 
 			// Parse and check the response
 			if (framer.checkHandshakeResponse(response)) {
@@ -259,36 +258,36 @@ WebSocketServerAdapter::~WebSocketServerAdapter()
 
 void WebSocketServerAdapter::onSocketRecv(Buffer& buffer, const net::Address& peerAddr)
 {
-	traceL("WebSocketServerAdapter", this) << "On recv: " << buffer << endl;
+	traceL("WebSocketServerAdapter", this) << "On recv: " << buffer << endl; //.size()
 	
 	assert(buffer.position() == 0);
 	assert(buffer.size() > 0);
 
 	if (framer.handshakeComplete()) {
 		framer.readFrame(buffer);
-		traceL("WebSocketServerAdapter", this) << "On frame: " << buffer.size() << ": " << buffer << endl;	
+		traceL("WebSocketServerAdapter", this) << "On frame: " << buffer.size() << endl;	
 		SocketAdapter::onSocketRecv(buffer, peerAddr);
 	}
 
 	else {
 		try {
-			errorL("WebSocketServerAdapter", this) << "Verifying handshake: " << buffer << endl;
-
+			/*
 			http::Request request;
 			http::Parser parser(&request);
-			parser.parse(buffer.data(), buffer.size(), true);
-			
-			
-			/*
+			parser.parse(buffer.data(), buffer.size(), true);			
+			*/
+						
 			istringstream iss;
 			iss.str(buffer.data());
 			http::Request request;
 			request.read(iss); // TODO: HTTP Parser
+			/*
 			*/
-			
-			http::Response response;
+
+			errorL("WebSocketServerAdapter", this) << "Verifying handshake: " << request << endl;
 
 			// Verify the WebSocket handshake request or throw
+			http::Response response;
 			framer.acceptRequest(request, response);
 
 			errorL("WebSocketServerAdapter", this) << "Handshake success" << endl;

@@ -22,6 +22,7 @@
 
 
 #include "Sourcey/ByteOrder.h"
+#include "Sourcey/Memory.h"
 #include "Sourcey/Types.h"
 
 #include <string>
@@ -128,3 +129,22 @@ protected:
 
 
 #endif  // SOURCEY_Buffer_H
+
+
+
+	
+
+/*
+class BufferBase
+{
+};
+	
+
+class RefCountedRawBuffer: public CountedObject
+{
+	RefCountedRawBuffer() {}
+
+	char* data;
+	size_t size;
+};
+*/

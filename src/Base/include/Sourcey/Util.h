@@ -22,6 +22,7 @@
 
 
 #include "Sourcey/Types.h"
+//#include "Sourcey/Memory.h"
 
 #include <string>
 #include <sstream>
@@ -34,10 +35,11 @@
 namespace scy {
 namespace util {
 
+
 //
 /// String Utils
 //
-
+	
 template<typename T>
 std::string toString(const T &t) 
 	/// Converts any interger at string
@@ -103,76 +105,6 @@ bool matchNodes(const StringVec& params, const StringVec& xparams);
 
 
 //
-/// Cantainer Methods
-//
-
-template<typename T>
-inline void ClearList(std::list<T*>& L)
-	/// Delete all elements from a list of pointers.
-	/// @param L List of pointers to delete.
-{	
-	typename std::list<T*>::iterator it = L.begin();
-	while (it != L.end()) {
-		delete *it;
-		it = L.erase(it);
-	}
-}
-
-template<typename T>
-inline void ClearDeque(std::deque<T*>& D)
-	/// Delete all elements from a list of pointers.
-	/// @param D List of pointers to delete.
-{
-	typename std::deque<T*>::iterator it = D.begin();
-	while (it != D.end()) {
-		delete *it;
-		it = D.erase(it);
-	}
-}
-
-template<typename T>
-inline void ClearVector(std::vector<T*>& V)
-	/// Delete all elements from a vector of pointers.
-	/// @param V Vector of pointers to delete.
-{
-	typename std::vector<T*>::iterator it = V.begin();
-	while (it != V.end()) {
-		delete *it;
-		it = V.erase(it);
-	}
-}
-
-template<typename Key, typename T>
-inline void ClearMap(std::map<Key, T*>& M)
-	/// Delete all associated values from a map (not the key elements).
-	/// @param M Map of pointer values to delete.
-{
-	typename std::map<Key, T*>::iterator it = M.begin();
-	typename std::map<Key, T*>::iterator it2;
-	while (it != M.end()) {
-		it2 = it++;
-		delete (*it2).second;
-		M.erase(it2);
-	}
-}
-
-template<typename Key, typename T>
-inline void ClearMap(std::map<const Key, T*>& M)
-	/// Delete all associated values from a map (not the key elements).
-	/// Const key type version.
-	/// @param M Map of pointer values to delete.
-{
-	typename std::map<const Key, T*>::iterator it = M.begin();
-	typename std::map<const Key, T*>::iterator it2;
-	while (it != M.end()) {
-		it2 = it++;
-		delete (*it2).second;
-		M.erase(it2);
-	}
-}
-
-
-//
 /// System Tools
 //
 
@@ -202,6 +134,98 @@ inline bool isWindowsXpOrLater() {
 		(major == kWindows2000 && minor >= 1)));
 }
 #endif
+
+
+//
+/// Container methods
+//
+
+template<typename Val>
+inline void clearList(std::list<Val*>& L)
+	/// Delete all elements from a list of pointers.
+	/// @param L List of pointers to delete.
+{	
+	typename std::list<Val*>::iterator it = L.begin();
+	while (it != L.end()) {
+		delete *it;
+		//Deleter::func(*it);
+		it = L.erase(it);
+	}
+}
+
+template<typename Val>
+inline void clearDeque(std::deque<Val*>& D)
+	/// Delete all elements from a list of pointers.
+	/// @param D List of pointers to delete.
+{
+	typename std::deque<Val*>::iterator it = D.begin();
+	while (it != D.end()) {
+		delete *it;
+		//Deleter::func(*it);
+		it = D.erase(it);
+	}
+}
+
+template<typename Val>
+inline void clearVector(std::vector<Val*>& V)
+	/// Delete all elements from a vector of pointers.
+	/// @param V Vector of pointers to delete.
+{
+	typename std::vector<Val*>::iterator it = V.begin();
+	while (it != V.end()) {
+		delete *it;		
+		//Deleter::func(*it);
+		it = V.erase(it);
+	}
+}
+
+template<typename Key, typename Val>
+inline void clearMap(std::map<Key, Val*>& M)
+	/// Delete all associated values from a map (not the key elements).
+	/// @param M Map of pointer values to delete.
+{
+	typename std::map<Key, Val*>::iterator it = M.begin();
+	typename std::map<Key, Val*>::iterator it2;
+	while (it != M.end()) {
+		it2 = it++;
+		delete (*it2).second;
+		//Deleter::func((*it2).second);
+		M.erase(it2);
+	}
+}
+
+template<class Deleter, typename Key, typename Val>
+inline void clearMap(std::map<Key, Val*>& M)
+	/// Delete all associated values from a map (not the key elements)
+	/// using the given deleter method.
+	/// @param M Map of pointer values to delete.
+{
+	typename std::map<Key, Val*>::iterator it = M.begin();
+	typename std::map<Key, Val*>::iterator it2;
+	while (it != M.end()) {
+		it2 = it++;
+		//delete (*it2).second;
+		Deleter::func((*it2).second);
+		M.erase(it2);
+	}
+}
+
+template<typename Key, typename Val>
+inline void clearMap(std::map<const Key, Val*>& M)
+	/// Delete all associated values from a map (not the key elements).
+	/// Const key type version.
+	/// @param M Map of pointer values to delete.
+{
+	typename std::map<const Key, Val*>::iterator it = M.begin();
+	typename std::map<const Key, Val*>::iterator it2;
+	while (it != M.end()) {
+		it2 = it++;
+		delete (*it2).second;
+		//Deleter::func((*it2).second);
+		M.erase(it2);
+	}
+}
+
 
 
 } // namespace util

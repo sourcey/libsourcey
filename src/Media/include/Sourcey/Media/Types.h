@@ -36,7 +36,7 @@ struct MediaPacket: public RawPacket
 {
 	double time;
 
-	MediaPacket(const char* data = NULL,
+	MediaPacket(char* data = NULL,
 				int size = 0,
 				double time = 0) :
 		RawPacket(data, size),
@@ -63,7 +63,7 @@ struct VideoPacket: public MediaPacket
 	int width;
 	int height;
 
-	VideoPacket(const char* data = NULL,
+	VideoPacket(char* data = NULL,
 				int size = 0,
 				int width = 0,
 				int height = 0,
@@ -91,7 +91,7 @@ struct VideoPacket: public MediaPacket
 
 struct AudioPacket: public MediaPacket 
 {
-	AudioPacket(const char* data = NULL,
+	AudioPacket(char* data = NULL,
 				int size = 0,
 				double time = 0) : //(double)clock() / CLOCKS_PER_SEC
 		MediaPacket(data, size, time) {};
@@ -109,6 +109,16 @@ struct AudioPacket: public MediaPacket
 
 	virtual const char* className() const { return "AudioPacket"; }
 };
+
+
+} } // namespace scy::av
+
+
+#endif // SOURCEY_MEDIA_Types_H
+
+
+
+
 
 
 /*
@@ -268,16 +278,6 @@ struct Format
 		audio(r.audio) {}
 };
 */
-
-
-} } // namespace scy::av
-
-
-#endif // SOURCEY_MEDIA_Types_H
-
-
-
-
 
 
 /*

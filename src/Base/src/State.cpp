@@ -119,17 +119,3 @@ void StateSignal::set(State::ID id)
 
 
 } // namespace scy
-
-
-
-
-/*
-#include "Sourcey/Logger.h"
-#include "Sourcey/Runner.h"
-#include "Sourcey/Crypto.h"
-
-#include <assert.h>
-*/
-		//T& state = this->state();
-		//T oldState = state;
-		//state.setMessage(message);

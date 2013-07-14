@@ -65,7 +65,7 @@ class PacketTransaction: public ISendable, public StatefulSignal<TransactionStat
 	/// the Runner instance, and is destroyed when complete.
 {
 public:
-	PacketTransaction(long timeout = 10000, int retries = 0, uv_loop_t* loop = NULL) :
+	PacketTransaction(long timeout = 10000, int retries = 0, uv::Loop& loop = uv::defaultLoop()) :
 		Timer(loop),
 		_timeout(timeout),
 		_retries(retries), 
@@ -75,7 +75,7 @@ public:
 		traceL("PacketTransaction", this) << "Creating" << std::endl;
 	}		
 
-	PacketTransaction(const PacketT& request, long timeout = 10000, int retries = 0, uv_loop_t* loop = NULL) : 
+	PacketTransaction(const PacketT& request, long timeout = 10000, int retries = 0, uv::Loop& loop = uv::defaultLoop()) : 
 		Timer(loop), //timeout, 0, 
 		_timeout(timeout),
 		_request(request), 
@@ -94,7 +94,7 @@ public:
 		if (!canSend())
 			return false;
 		{
-			//Poco::FastMutex::ScopedLock lock(_mutex);
+			//Mutex::ScopedLock lock(_mutex);
 
 			traceL("PacketTransaction", this) << "Sending: " << _request.toString() << std::endl;
 			_attempts++;
@@ -116,7 +116,7 @@ public:
 		/// This method is not virtual as the Timer cancelled() 
 		/// method is redundant at the transaction scope.
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		_cancelled = true;
 
 		// Do not set the underlying Timer to cancelled as we
@@ -129,43 +129,43 @@ public:
 		/// This method is not virtual as the Timer cancelled() 
 		/// method is redundant at the transaction scope.
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _cancelled;
 	}
 
 	virtual bool canSend()
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return !_cancelled && _attempts <= _retries;
 	}
 	
 	virtual int attempts() const
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _attempts;
 	}
 		
 	PacketT& request() 
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _request;
 	}
 	
 	PacketT request() const
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _request;
 	}
 		
 	PacketT& response() 
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _response;
 	}
 	
 	PacketT response() const
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _response;
 	}
 
@@ -185,7 +185,7 @@ protected:
 		traceL("PacketTransaction", this) << "Process: " << _response.toString() << std::endl;
 		if (stateEquals(TransactionState::Running) && checkResponse(packet)) {
 			{
-				//Poco::FastMutex::ScopedLock lock(_mutex);
+				//Mutex::ScopedLock lock(_mutex);
 				_response = packet;
 				traceL("PacketTransaction", this) << "Transaction Response Received: " 
 					<< _response.toString() << std::endl;
@@ -234,7 +234,7 @@ protected:
 	int _timeout;		// The request timeout in milliseconds.
 
 //private:
-	//mutable Poco::FastMutex	_mutex;
+	//mutable Mutex	_mutex;
 };
 
 
@@ -249,7 +249,7 @@ public:
 				const Address& peerAddress, 
 				int timeout = 10000, 
 				int retries = 1, 
-				uv_loop_t* loop = NULL) : 
+				uv::Loop& loop = uv::defaultLoop()) : 
 		PacketTransaction<PacketT>(timeout, retries, loop), 
 		PacketSocketAdapter(&socket),
 		_peerAddress(peerAddress)
@@ -257,14 +257,14 @@ public:
 		debugL("NetTransaction", this) << "Creating" << std::endl;
 
 		// Default options, can be overridden
-		PacketSocketAdapter::socket->base().addAdapter(*this, true);
+		PacketSocketAdapter::socket->base().addAdapter(this, true);
 		PacketSocketAdapter::priority = 100;
 	}
 
 	virtual ~Transaction()
 	{
 		debugL("NetTransaction", this) << "Destroying" << std::endl;
-		PacketSocketAdapter::socket->base().removeAdapter(*this);
+		PacketSocketAdapter::socket->base().removeAdapter(this);
 	}
 
 	virtual bool send()
@@ -339,7 +339,7 @@ public:
 				const Address& peerAddress, 
 				int timeout = 10000, 
 				int retries = 1, 
-				uv_loop_t* loop = NULL) : 
+				uv::Loop& loop = uv::defaultLoop()) : 
 		PacketTransaction<PacketT>(timeout, retries, loop), 
 		_socket(socket),
 		_localAddress(localAddress), 
@@ -415,7 +415,7 @@ protected:
 	Address _peerAddress;
 
 private:
-	//mutable Poco::FastMutex	_mutex;
+	//mutable Mutex	_mutex;
 };
 */
 
@@ -445,7 +445,7 @@ private:
 	/*void* sender,
 
 //private:
-	//mutable Poco::FastMutex	_mutex;
+	//mutable Mutex	_mutex;
 	virtual void onSuccess()
 	{
 		debugL("NetTransaction", this) << "Response" << std::endl;
@@ -479,14 +479,14 @@ private:
 
 
 	/*
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 	//net::SocketBase* _socket;
 	virtual void onSuccess()
 	{
 		debugL("NetTransaction", this) << "Complete" << std::endl;
 		{
 			// Nullify the socket on completion.
-			//Poco::FastMutex::ScopedLock lock(_mutex);
+			//Mutex::ScopedLock lock(_mutex);
 			//if (_socket) {
 				//_socket.detach(packetDelegate(this, &Transaction::onPotentialResponse));
 				//_socket = NULL;

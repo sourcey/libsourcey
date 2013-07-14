@@ -21,18 +21,23 @@
 #define SOURCEY_StreamManager_H
 
 
-#include "Sourcey/EventfulManager.h"
+#include "Sourcey/Manager.h"
 #include "Sourcey/PacketStream.h"
 
 
 namespace scy { 
+	
+
+typedef EventedManager<
+	std::string, PacketStream, DestroyMethodDeleter<PacketStream>
+> StreamManagerBase;
 
 
-class StreamManager: public EventfulManager<std::string, PacketStream>, public IPolymorphic
+class StreamManager: public StreamManagerBase, public IPolymorphic
 {
 public:
-	typedef EventfulManager<std::string, PacketStream>	Manager;
-	typedef Manager::Map								Map;
+	typedef StreamManagerBase Manager;
+	typedef Manager::Map	  Map;
 
 public:
 	StreamManager(bool freeClosedStreams = true);

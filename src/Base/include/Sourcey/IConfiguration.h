@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/Signal.h"
-#include "Poco/Mutex.h"
+#include "Sourcey/Mutex.h"
 
 
 namespace scy {
@@ -165,7 +165,7 @@ protected:
 	static bool parseBool(const std::string& value);
 
 private:
-	mutable Poco::FastMutex _mutex;
+	mutable Mutex _mutex;
 };
 
 

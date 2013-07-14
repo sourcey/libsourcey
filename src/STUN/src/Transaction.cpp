@@ -40,7 +40,7 @@ Transaction::Transaction(Socket& socket,
 						 const Address& peerAddress,
 						 long timeout, 
 						 int retries, 
-						 uv_loop_t* loop) : 
+						 uv::Loop& loop) : 
 	net::Transaction<Message>(socket, peerAddress, timeout, retries, loop) //localAddress, 
 {
 	debugL("STUNTransaction", this) << "Initializing" << std::endl;

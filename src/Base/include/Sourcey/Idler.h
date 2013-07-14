@@ -22,14 +22,13 @@
 
 
 #include "Sourcey/UV/UVPP.h"
-#include "Sourcey/UV/Base.h"
 
 
 namespace scy {
 namespace uv {
 	
 
-class Idler: public uv::Base<>
+class Idler: public uv::Base
 	/// https://github.com/AlloSphere-Research-Group/alive/blob/master/archived/av/uv_utils.h
 {
 public:

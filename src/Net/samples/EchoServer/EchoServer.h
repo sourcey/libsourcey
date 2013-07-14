@@ -1,49 +1,110 @@
-#ifndef SOURCEY_NET_EchoServer_H
-#define SOURCEY_NET_EchoServer_H
-
-
-//#include "Sourcey/Net/Reactor.h"
-#include "Sourcey/Net/SocketAcceptor.h"
-
-#include "Poco/Util/ServerApplication.h"
-#include "Poco/Util/Option.h"
-#include "Poco/Util/OptionSet.h"
-#include "Poco/Util/HelpFormatter.h"
+#include "Sourcey/Net/TCPSocket.h"
+#include "Sourcey/Net/SSLSocket.h"
 
 
 namespace scy {
-namespace Net {
+namespace net {
 
 
-class EchoServer: public IPolymorphic, public Poco::Util::ServerApplication
+template <typename SocketT>
+class EchoServer: public CountedObject
 {
 public:
-	EchoServer();
-	~EchoServer();
-		
-	void defineOptions(Poco::Util::OptionSet& options);
-	void handleCommand(const std::string& name, const std::string& value);
-	void displayHelp();
+	typename SocketT socket;
+	typename SocketT::List sockets;
+	Address address;
 
-	int main(const std::vector<std::string>& args);
+	EchoServer(short port, bool ghost = false) :
+		address("127.0.0.1", port)
+	{
+		// Unref the socket handle if running in ghost mode.
+		// This way the server won't prevent the main uv_loop 
+		// from exiting when other processed complete.
+		if (ghost)
+			uv_unref(reinterpret_cast<SocketT::Base&>(socket.base()).handle());
+	}
 
-	void onSocketCreated(void* sender, Poco::Net::StreamSocket& socket, Net::Reactor& reactor);	
-	//void onSocketClosed(void* sender);
-	void onRequestReceived(void* sender, RawPacket& packet);
+	~EchoServer()
+	{
+		traceL("EchoServer", this) << "Destroying" << std::endl;
+		assert(socket.base().refCount() == 1);
+
+		// This will close the server socket, and should cause the
+		// main loop to terminate if there are no active processes.
+		sockets.clear();
+	}
 	
-	virtual const char* className() const { return "EchoServer"; }
+	void start()
+	{	
+		traceL("EchoServer", this) << "Serrun " << socket.base().refCount() << endl;
+		assert(socket.base().refCount() == 1);
+		socket.bind(address);
+		socket.listen();
+		socket.base().AcceptConnection += delegate(this, &EchoServer::onAccept);		
+		traceL("EchoServer", this) << "Server listening on " << port() << endl;
+	}
+
+	void shutdown() 
+	{
+		socket.close();
+	}
 	
-private:	
-	mutable Poco::FastMutex _mutex;
-		
-	Net::Reactor* _reactor;
-	Net::TCPSocketAcceptor* _server;
-	short _port;
-	bool _helpRequested;
+	void onAccept(void* sender, const TCPSocket& sock)
+	{	
+		sockets.push_back(sock);
+		SocketT& socket = sockets.back();
+		traceL("EchoServer", this) << "On Accept: " << &socket.base() << std::endl;
+		socket.Recv += delegate(this, &EchoServer::onSocketRecv);
+		socket.Error += delegate(this, &EchoServer::onSocketError);
+		socket.Close += delegate(this, &EchoServer::onSocketClose);
+	}
+	
+	void onSocketRecv(void* sender, SocketPacket& packet) 
+	{
+		SocketT* socket = reinterpret_cast<SocketT*>(sender);
+		traceL("EchoServer", this) << "On Recv: " 
+			<< socket << ": " << packet.buffer << std::endl;
+
+		// Echo it back
+		socket->send(packet);
+	}
+
+	void onSocketError(void* sender, int syserr, const std::string& message) 
+	{
+		traceL("EchoServer", this) << "On Error: " << syserr << ": " << message << std::endl;
+	}
+
+	void onSocketClose(void* sender) 
+	{
+		traceL("EchoServer", this) << "On Close" << std::endl;
+		releaseSocket(reinterpret_cast<SocketT*>(sender));
+	}
+
+	void releaseSocket(typename SocketT* socket) 
+	{		
+		for (SocketT::List::iterator it = sockets.begin(); it != sockets.end(); ++it) {
+			if (socket == &(*it)) {
+				traceL("EchoServer", this) << "Removing: " << socket << std::endl;
+
+				// All we need to do is erase the socket in order to 
+				// deincrement the ref counter and destroy the socket.
+				assert(socket->base().refCount() == 1);
+				sockets.erase(it);
+				return;
+			}
+		}
+	}
+
+	UInt16 port()
+	{
+		return socket.address().port();
+	}
 };
+	
+
+// Some generic server types
+typedef EchoServer<TCPSocket> TCPEchoServer;
+typedef EchoServer<SSLSocket> SSLEchoServer;
 
 
-} } // namespace scy::Net
-
-
-#endif // SOURCEY_NET_EchoServer_H
+} } // namespace scy::net

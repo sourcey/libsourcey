@@ -38,27 +38,27 @@ class PacketSocket;
 class PacketSocketAdapter: public SocketAdapter, public PacketEmitter
 {	
 public:	
-	PacketFactory factory;	
-	//Socket* socket;
+	PacketFactory factory;
 
 	PacketSocketAdapter(Socket* socket = NULL, int priority = 50) :
-		SocketAdapter(socket, priority)//, socket(socket)
+		SocketAdapter(socket, priority)
 		/// Creates the PacketSocketAdapter
 		/// This class should have a higher priority than standard
 		/// sockets so we can parse data packets first.		
 	{
+		traceL("PacketSocketAdapter", this) << "Creating: " << socket << std::endl;
 	}
-
-	virtual void onRecv(Buffer& buf, const Address& peerAddr)
+		
+	virtual void onSocketRecv(Buffer& buf, const Address& peerAddr)
 		/// Creates and dispatches a packet utilizing the available 
 		/// creation strategies. For best performance the most used 
 		/// strategies should have the highest priority.
 	{	
 		traceL("PacketSocketAdapter", this) << "Recv: " << buf.size() << std::endl;
-		//assert(PacketEmitter::refCount() > 0); // ok to remove this
 		assert(buf.position() == 0);
 		buf.position(0);
-		IPacket* pkt = factory.createPacket(buf); //socket->
+
+		IPacket* pkt = factory.createPacket(buf);
 		if (!pkt) {
 			warnL("PacketSocketAdapter", this) << "Cannot create packet." << std::endl;	
 			return;
@@ -71,6 +71,7 @@ public:
 
 	virtual void onPacket(IPacket& pkt) 
 	{		
+		traceL("PacketSocketAdapter", this) << "onPacket: Emitting: " << pkt.size() << std::endl;
 		PacketEmitter::emit(socket, pkt);	
 	}
 };
@@ -192,7 +193,7 @@ protected:
 
 	virtual void onConnect() 
 	{
-		Log("trace", this) << "On Connect" << std::endl;	
+		traceL("trace", this) << "On Connect" << std::endl;	
 		
 		// Register a RawPacket creation strategy for the 
 		// PacketFactory if no strategies have been explicitly

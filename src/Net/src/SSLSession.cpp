@@ -17,19 +17,32 @@
 //
 
 
-#ifndef SOURCEY_EventfulManager_H
-#define SOURCEY_EventfulManager_H
+#include "Sourcey/Net/SSLSession.h"
 
 
-#include "Sourcey/Manager.h"
-#include "Sourcey/Signal.h"
+using namespace std;
 
 
-namespace scy { 
+namespace scy {
+namespace net {
+
+	
+SSLSession::SSLSession(SSL_SESSION* ptr):
+	_ptr(ptr)
+{
+}
 
 
+SSLSession::~SSLSession()
+{
+	SSL_SESSION_free(_ptr);
+}
 
-} // namespace scy
+
+SSL_SESSION* SSLSession::sslSession() const
+{
+	return _ptr;
+}
 
 
-#endif // SOURCEY_EventfulManager_H
+} } // namespace scy::net

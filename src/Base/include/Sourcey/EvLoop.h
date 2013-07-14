@@ -17,14 +17,17 @@
 //
 
 
-#ifndef SOURCEY_IManager_H
-#define SOURCEY_IManager_H
+#ifndef SOURCEY_Application_H
+#define SOURCEY_Application_H
 
 
-namespace scy { 
+#include "Sourcey/UV/UVPP.h"
+
+
+namespace scy {
 
 
 } // namespace scy
 
 
-#endif // SOURCEY_IManager_H
+#endif // SOURCEY_Application_H

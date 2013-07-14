@@ -31,9 +31,6 @@
 namespace scy {
 namespace net {
 
-	
-typedef uv::UDPBase UDPBase;
-
 
 class UDPSocket: public net::Socket
 	/// UDPSocket is a disposable UDP socket wrapper
@@ -63,7 +60,7 @@ public:
 };
 
 
-} } // namespace scy::uv
+} } // namespace scy::net
 
 
 #endif // SOURCEY_Net_UDPSocket_H

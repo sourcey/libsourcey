@@ -44,7 +44,7 @@ IConfiguration::~IConfiguration()
 
 bool IConfiguration::exists(const std::string& key) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	std::string value;
 	return getRaw(key, value);
@@ -53,7 +53,7 @@ bool IConfiguration::exists(const std::string& key) const
 	
 std::string IConfiguration::getString(const std::string& key) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -65,7 +65,7 @@ std::string IConfiguration::getString(const std::string& key) const
 	
 std::string IConfiguration::getString(const std::string& key, const std::string& defaultValue) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -77,7 +77,7 @@ std::string IConfiguration::getString(const std::string& key, const std::string&
 
 std::string IConfiguration::getRawString(const std::string& key) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -89,7 +89,7 @@ std::string IConfiguration::getRawString(const std::string& key) const
 	
 std::string IConfiguration::getRawString(const std::string& key, const std::string& defaultValue) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -101,7 +101,7 @@ std::string IConfiguration::getRawString(const std::string& key, const std::stri
 	
 int IConfiguration::getInt(const std::string& key) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -113,7 +113,7 @@ int IConfiguration::getInt(const std::string& key) const
 	
 int IConfiguration::getInt(const std::string& key, int defaultValue) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -125,7 +125,7 @@ int IConfiguration::getInt(const std::string& key, int defaultValue) const
 
 double IConfiguration::getDouble(const std::string& key) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -137,7 +137,7 @@ double IConfiguration::getDouble(const std::string& key) const
 	
 double IConfiguration::getDouble(const std::string& key, double defaultValue) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -149,7 +149,7 @@ double IConfiguration::getDouble(const std::string& key, double defaultValue) co
 
 bool IConfiguration::getBool(const std::string& key) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -161,7 +161,7 @@ bool IConfiguration::getBool(const std::string& key) const
 
 bool IConfiguration::getBool(const std::string& key, bool defaultValue) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -173,7 +173,7 @@ bool IConfiguration::getBool(const std::string& key, bool defaultValue) const
 
 void IConfiguration::setString(const std::string& key, const std::string& value)
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	setRaw(key, value);
 }
@@ -181,7 +181,7 @@ void IConfiguration::setString(const std::string& key, const std::string& value)
 	
 void IConfiguration::setInt(const std::string& key, int value)
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	setRaw(key, NumberFormatter::format(value));
 }
@@ -189,7 +189,7 @@ void IConfiguration::setInt(const std::string& key, int value)
 
 void IConfiguration::setDouble(const std::string& key, double value)
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	setRaw(key, NumberFormatter::format(value));
 }
@@ -197,7 +197,7 @@ void IConfiguration::setDouble(const std::string& key, double value)
 
 void IConfiguration::setBool(const std::string& key, bool value)
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	setRaw(key, value ? "true" : "false");
 }

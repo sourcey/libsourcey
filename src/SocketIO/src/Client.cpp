@@ -27,19 +27,19 @@ namespace scy {
 namespace sockio {
 
 
-Client::Client(net::SocketBase* socket, Runner& runner) :
-	//_timer(new TimerTask(runner)),
+Client::Client(net::SocketBase* socket, uv::Loop& loop) :
+	_timer(loop),
 	_socket(socket),
-	_runner(runner)
+	_loop(loop)
 {
 }
 
 
-Client::Client(net::SocketBase* socket, Runner& runner, const net::Address& serverAddr) :
-	//_timer(new TimerTask(runner)),
+Client::Client(net::SocketBase* socket, uv::Loop& loop, const net::Address& serverAddr) :
+	_timer(loop),
 	_serverAddr(serverAddr),
 	_socket(socket),
-	_runner(runner)
+	_loop(loop)
 {
 	connect();
 }
@@ -88,8 +88,7 @@ void Client::connect()
 	
 	ostringstream uri;
 	uri << (_socket.transport() == net::SSLTCP ? "wss://" : "ws://")
-		<< _serverAddr.toString()
-		<< "/socket.io/1/websocket/"
+		<< _serverAddr.toString() << "/socket.io/1/websocket/" 
 		<< _sessionID;
 	
 	log("trace") << "Connecting: " << uri.str() << endl;
@@ -249,10 +248,10 @@ int Client::sendHeartbeat()
 }
 
 
-Runner& Client::runner()
+uv::Loop& Client::loop()
 {
 	//Poco::FastMutex::ScopedLock lock(_mutex);
-	return _runner;
+	return _loop;
 }
 
 
@@ -499,7 +498,7 @@ void Client::onError()
 //}
 //
 //
-//SocketBase::SocketBase(/* Net::Reactor& reactor, */const net::Address& serverAddr) :
+//SocketBase::SocketBase(const net::Address& serverAddr) :
 //	WebSocket(reactor),
 //	_serverAddr(serverAddr),
 //	_secure(false)
@@ -725,7 +724,7 @@ void Client::onError()
 //}
 //
 //
-//Poco::Net::NameValueCollection& SocketBase::httpHeaders()
+//Poco::Net::KVStore& SocketBase::httpHeaders()
 //{
 //	FastMutex::ScopedLock lock(_mutex);
 //	return _httpHeaders;
@@ -796,7 +795,7 @@ void Client::onError()
 	
 	// Request
 	HTTPRequest request("POST", "/socket.io/1/");	
-	for (NameValueCollection::ConstIterator it = _httpHeaders.begin(); it != _httpHeaders.end(); it++)
+	for (KVStore::ConstIterator it = _httpHeaders.begin(); it != _httpHeaders.end(); it++)
 		request.set((*it).first, (*it).second);
 	//request.setContentLength(0);
 	request.write(ss);

@@ -191,10 +191,9 @@ void VideoCapture::run()
 				frame = grab();
 				MatPacket packet(&frame);
 				if (hasDelegates && packet.width && packet.height) { //!_stopping && 
-					traceL("VideoCapture", this) << "Emitting: Step: " << frame.step << endl;
-					traceL("VideoCapture", this) << "Emitting: " << _counter.fps << endl;
+					//traceL("VideoCapture", this) << "Emitting: " << _counter.fps << endl;
 					emit(this, packet);					
-					traceL("VideoCapture", this) << "Emitting: OK" << endl;
+					//traceL("VideoCapture", this) << "Emitting: OK" << endl;
 				}
 				
 				// Wait 5ms for the CPU to breathe

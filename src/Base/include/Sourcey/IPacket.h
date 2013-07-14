@@ -46,13 +46,13 @@ struct IPacketInfo
 class IPacket: public IPolymorphic
 	/// The base packet class which can be extended by each
 	/// protocol implementation for polymorphic callbacks
-	/// using the PacketEmitter and friends.
+	/// using the PacketStreamSource and friends.
 { 
 public:
 	void* source;
 		/// Optional packet source pointer reference so delegates
 		/// along the signal chain can determine the packet origin.
-		/// Usually a subclass of PacketEmitter.
+		/// Usually a subclass of PacketStreamSource.
 
 	IPacketInfo* info;
 		/// Optional extra information about the packet.
@@ -107,36 +107,41 @@ public:
 
 
 class RawPacket: public IPacket 
-	/// The default data packet type.
-	/// Data packets consist of an optionally
-	/// managed data pointer, and a size value.
+	/// RawPacket is the default data packet type which consists
+	/// of an optionally managed data pointer and a size value.
+	///
 {	
 public:
 	RawPacket(char* data = NULL, size_t size = 0) : 
-		_data(data), _size(size), freeOnDestroy(false)
+		_data(data), _size(size), managePointer(false)
 	{
 	}
 
 	RawPacket(const char* data, size_t size = 0) : 
-		_data(NULL), _size(size), freeOnDestroy(true)
+		_data(NULL), _size(size), managePointer(true)
 	{
-		setData(data, size);
+		// If data is const we memcpy data
+		cloneData(data, size);
 	}
 
 	RawPacket(void* source, IPacketInfo* info, char* data = NULL, size_t size = 0) : 
-		IPacket(source, info), _data(data), _size(size), freeOnDestroy(false)
+		IPacket(source, info), _data(data), _size(size), managePointer(false)
 	{
 	}
 
 	RawPacket(const RawPacket& that) : 
-		IPacket(that), _data(NULL), _size(0), freeOnDestroy(that.freeOnDestroy)
-	{
-		 setData(that._data, that._size);
+		IPacket(that), _data(NULL), _size(0), managePointer(true) //that.managePointer
+	{		
+		// If data pointer is assigned we memcpy
+		//
+		// TODO: Use some kind of reference counted buffer wrapper
+		// so we don't need to force memcpy of referenced data.
+		cloneData(that._data, that._size);
 	}
 	
 	virtual ~RawPacket() 
 	{
-		if (freeOnDestroy && _data)
+		if (managePointer && _data)
 			delete _data;
 	}
 
@@ -149,10 +154,9 @@ public:
 	{
 		assert(size > 0);
 
-		// If freeOnDestroy is set we memcpy data
-		if (freeOnDestroy) {
-			setData((const char*)data, size);
-		}
+		// If managePointer is true we memcpy data
+		if (managePointer)
+			cloneData(data, size);
 
 		// Otherwise we just reference the ptr
 		else {
@@ -161,13 +165,15 @@ public:
 		}
 	}
 
-	virtual void setData(const char* data, size_t size) 
+	virtual void cloneData(const char* data, size_t size) 
 	{
-		// If data is const we memcpy data
-		assert(freeOnDestroy);
+		traceL("RawPacket", this) << "Cloning: " << size << std::endl;
+
+		assert(managePointer);
 		assert(size > 0);
 		if (_data)
 			delete _data;
+		_size = size;
 		_data = new char[size];
 		std::memcpy(_data, data, size);
 	}	
@@ -198,7 +204,7 @@ public:
 		return "RawPacket"; 
 	}
 
-	bool freeOnDestroy;
+	bool managePointer;
 		/// Set this flag to true to 
 		/// delete packet data on destruction.
 	
@@ -215,7 +221,7 @@ public:
 
 		/*
 		// Clone data if memory is managed
-		if (freeOnDestroy) {
+		if (managePointer) {
 			char* data = new char[size];
 			std::memcpy(data, that._data, that._size);
 			_data = data;
@@ -223,7 +229,7 @@ public:
 		*/
 
 		/*
-		if (freeOnDestroy) {
+		if (managePointer) {
 			char* data = new char[buf.size()];
 			std::memcpy(data, buf.begin(), buf.size());
 			_data = data;

@@ -1,4 +1,4 @@
-#include "Sourcey/UV/UVPP.h"
+#include "Sourcey/Application.h"
 #include "Sourcey/HTTP/Server.h"
 #include "Sourcey/HTTP/Connection.h"
 #include "Sourcey/HTTP/Client.h"
@@ -8,18 +8,9 @@
 
 #include "Sourcey/Base.h"
 #include "Sourcey/Logger.h"
+#include "Sourcey/Net/SSLManager.h"
+#include "Sourcey/Net/SSLContext.h"
 #include "Sourcey/Net/Address.h"
-
-/*
-// TODO: depreciate Poco dependency
-#include "Poco/Stopwatch.h"
-#include "Poco/Net/NetException.h"
-#include "Poco/Net/DNS.h"
-#include "Poco/Net/Session.h"
-*/
-#include "Poco/Net/SSLManager.h"
-#include "Poco/Net/KeyConsoleHandler.h"
-#include "Poco/Net/ConsoleCertificateHandler.h"
 
 #include "assert.h"
 #include <iterator>
@@ -51,41 +42,41 @@ namespace http {
 
 // -------------------------------------------------------------------
 //
-class BasicResponser: public ServerResponser
+class BasicResponder: public ServerResponder
 {
 public:
-	BasicResponser(ServerConnection& conn) : 
-		ServerResponser(conn)
+	BasicResponder(ServerConnection& conn) : 
+		ServerResponder(conn)
 	{
 	}
 
 	void onComplete(Request& request, Response& response) 
 	{
 		response.body << "Hello universe";
-		connection().respond();
+		connection().send();
 	}
 };
 
 
 // -------------------------------------------------------------------
 //
-class ChunkedResponser: public ServerResponser
+class ChunkedResponder: public ServerResponder
 {
 public:
-	uv::Timer timer;
+	Timer timer;
 	bool gotHeaders;
 	bool gotRequest;
 	bool gotClose;
 
-	ChunkedResponser(ServerConnection& conn) : 
-		ServerResponser(conn), 
+	ChunkedResponder(ServerConnection& conn) : 
+		ServerResponder(conn), 
 		gotHeaders(false), 
 		gotRequest(false), 
 		gotClose(false)
 	{
 	}
 
-	~ChunkedResponser()
+	~ChunkedResponder()
 	{
 		assert(gotHeaders);
 		assert(gotRequest);
@@ -105,13 +96,13 @@ public:
 	void onComplete(Request& request, Response& response) 
 	{
 		gotRequest = true;
-		timer.Timeout += delegate(this, &ChunkedResponser::onTimer);
+		timer.Timeout += delegate(this, &ChunkedResponder::onTimer);
 		timer.start(100, 100);
 	}
 
 	void onClose()
 	{
-		debugL("ChunkedResponser") << "On connection close" << endl;
+		debugL("ChunkedResponder") << "On connection close" << endl;
 		gotClose = true;
 		timer.stop();
 	}
@@ -128,30 +119,30 @@ public:
 
 // -------------------------------------------------------------------
 //
-class WebSocketResponser: public ServerResponser
+class WebSocketResponder: public ServerResponder
 {
 public:
 	bool gotPayload;
 	bool gotClose;
 
-	WebSocketResponser(ServerConnection& conn) : 
-		ServerResponser(conn), 
+	WebSocketResponder(ServerConnection& conn) : 
+		ServerResponder(conn), 
 		gotPayload(false), 
 		gotClose(false)
 	{
-		debugL("WebSocketResponser") << "Creating" << endl;
+		debugL("WebSocketResponder") << "Creating" << endl;
 	}
 
-	~WebSocketResponser()
+	~WebSocketResponder()
 	{
-		debugL("WebSocketResponser") << "Destroying" << endl;
+		debugL("WebSocketResponder") << "Destroying" << endl;
 		assert(gotPayload);
 		assert(gotClose);
 	}
 
 	void onPayload(const Buffer& body)
 	{
-		debugL("WebSocketResponser") << "On payload: " << body << endl;
+		debugL("WebSocketResponder") << "On payload: " << body << endl;
 
 		gotPayload = true;
 
@@ -161,7 +152,7 @@ public:
 
 	void onClose()
 	{
-		debugL("WebSocketResponser") << "On connection close" << endl;
+		debugL("WebSocketResponder") << "On connection close" << endl;
 		gotClose = true;
 	}
 };
@@ -169,22 +160,22 @@ public:
 
 // -------------------------------------------------------------------
 //
-class OurServerResponserFactory: public ServerResponserFactory
+class OurServerResponderFactory: public ServerResponderFactory
 {
 public:
-	ServerResponser* createResponser(ServerConnection& conn)
+	ServerResponder* createResponder(ServerConnection& conn)
 	{		
 		ostringstream os;
 		conn.request().write(os);
 		string headers(os.str().data(), os.str().length());
-		debugL("OurServerResponserFactory") << "Incoming Request: " << headers << endl; // remove me
+		debugL("OurServerResponderFactory") << "Incoming Request: " << headers << endl; // remove me
 
 		if (conn.request().getURI() == "/chunked")
-			return new ChunkedResponser(conn);
+			return new ChunkedResponder(conn);
 		else if (conn.request().getURI() == "/websocket")
-			return new WebSocketResponser(conn);
+			return new WebSocketResponder(conn);
 		else
-			return new BasicResponser(conn);
+			return new BasicResponder(conn);
 	}
 };
 
@@ -257,15 +248,15 @@ public:
 			assert(0 && "not echo response"); // fail...
 	}
 
-	void onError(void* sender, int err, const string& message)
+	void onError(void* sender, const Error& err)
 	{
-		errorL("SocketClientEchoTest") << "On Error: " << err << ": " << message << endl;
+		errorL("SocketClientEchoTest") << "On error: " << err.message << endl;
 		assert(sender == &socket);
 	}
 	
 	void onClose(void* sender)
 	{
-		debugL("SocketClientEchoTest") << "On Closed" << endl;
+		debugL("SocketClientEchoTest") << "On close" << endl;
 		assert(sender == &socket);
 	}
 };
@@ -276,7 +267,7 @@ public:
 class Tests
 {
 public:
-	static Runner Loop; 	
+	Application app; 	
 
 	Tests()
 	{	
@@ -286,12 +277,10 @@ public:
 #endif
 #if TEST_SSL
 			// Init SSL Context 
-			// The singleton leaks a little openssl memory on close.
-			// TODO: Refactor SSL stuff into the network manager.
-			Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> ptrCert;
-			Poco::Net::Context::Ptr ptrContext = new Poco::Net::Context(
-				Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");		
-			Poco::Net::SSLManager::instance().initializeClient(0, ptrCert, ptrContext);
+			SSLContext::Ptr ptrContext = new SSLContext(
+				SSLContext::CLIENT_USE, "", "", "", 
+				SSLContext::VERIFY_NONE, 9, false, 
+				"ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");		
 #endif
 		{		
 			/*
@@ -309,17 +298,17 @@ public:
 		}
 #if TEST_SSL
 			// Shutdown SSL
-			Poco::Net::SSLManager::instance().shutdown();
+			SSLManager::instance().shutdown();
 #endif
 		
 		debugL("Tests") << "#################### Finalizing" << endl;
-		Loop.cleanup();
+		app.cleanup();
 		debugL("Tests") << "#################### Exiting" << endl;
 	}
 
 	void runLoop() {
 		debugL("Tests") << "#################### Running" << endl;
-		Loop.run();
+		app.run();
 		debugL("Tests") << "#################### Ended" << endl;
 	}
 
@@ -337,7 +326,7 @@ public:
 		HTTPClientTest() :
 			numSuccess(0),
 			conn(0),
-			server(TEST_HTTP_PORT, new OurServerResponserFactory) 
+			server(TEST_HTTP_PORT, new OurServerResponderFactory) 
 		{
 		}
 		
@@ -442,7 +431,7 @@ public:
 	//
 	void runClientWebSocketTest() 
 	{
-		//http::Server srv(TEST_HTTP_PORT, new OurServerResponserFactory);
+		//http::Server srv(TEST_HTTP_PORT, new OurServerResponderFactory);
 		//srv.start();
 
 		// ws://echo.websocket.org		
@@ -462,7 +451,7 @@ public:
 	//
 	void runWebSocketServerTest() 
 	{
-		http::Server srv(TEST_HTTP_PORT, new OurServerResponserFactory);
+		http::Server srv(TEST_HTTP_PORT, new OurServerResponderFactory);
 		srv.start();
 
 		debugL("Tests") << "TCP Socket Test: Starting" << endl;			
@@ -481,14 +470,14 @@ public:
 	//
 	void runHTTPServerTest() 
 	{
-		http::Server srv(TEST_HTTP_PORT, new OurServerResponserFactory);
+		http::Server srv(TEST_HTTP_PORT, new OurServerResponderFactory);
 		srv.start();
 		
 		// Catch close signal to shutdown the server
 		// This should free the main loop.
 		uv_signal_t* sig = new uv_signal_t;
 		sig->data = &srv;
-		uv_signal_init(Loop.loop, sig);
+		uv_signal_init(&app.loop, sig);
 		uv_signal_start(sig, Tests::onKillHTTPServer, SIGINT);
 
 		runLoop();
@@ -528,16 +517,12 @@ int main(int argc, char** argv)
 }
 
 
-//Tests::Result Tests::Benchmark;
-Runner http::Tests::Loop;
-
-
 
 
 		/*
 		uv_signal_t sig;
 		sig.data = &srv;
-		uv_signal_init(Loop.loop, &sig);
+		uv_signal_init(app.loop, &sig);
 		uv_signal_start(&sig, Tests::onKillHTTPServer, SIGINT);
 		*/
 			
@@ -545,7 +530,7 @@ Runner http::Tests::Loop;
 			// ============================================================================
 			// HTTP Server
 			//
-			http::Server srv(81, new OurServerResponserFactory);
+			http::Server srv(81, new OurServerResponderFactory);
 			srv.start();
 
 			(sock);
@@ -554,7 +539,7 @@ Runner http::Tests::Loop;
 
 			uv_signal_t sig;
 			sig.data = this;
-			uv_signal_init(Loop.loop, &sig);
+			uv_signal_init(app.loop, &sig);
 			uv_signal_start(&sig, Tests::onKillSignal2, SIGINT);
 
 			runUDPSocketTest();
@@ -562,12 +547,12 @@ Runner http::Tests::Loop;
 			//runDNSResolverTest();
 			
 			debugL("Tests") << "#################### Running" << endl;
-			Loop.run();
+			app.run();
 			debugL("Tests") << "#################### Ended" << endl;
 			*/
 
 			/*		
-			http::Server srv(81, new OurServerResponserFactory);
+			http::Server srv(81, new OurServerResponderFactory);
 			srv.start();
 
 			//runHTTPClientTest();	
@@ -577,7 +562,7 @@ Runner http::Tests::Loop;
 
 			uv_signal_t sig;
 			sig.data = this;
-			uv_signal_init(Loop.loop, &sig);
+			uv_signal_init(app.loop, &sig);
 			uv_signal_start(&sig, Tests::onKillSignal2, SIGINT);
 
 			runUDPSocketTest();
@@ -585,7 +570,7 @@ Runner http::Tests::Loop;
 			//runDNSResolverTest();
 			
 			debugL("Tests") << "#################### Running" << endl;
-			Loop.run();
+			app.run();
 			debugL("Tests") << "#################### Ended" << endl;
 			*/
 	
@@ -606,7 +591,7 @@ Runner http::Tests::Loop;
 		txn.send();
 
 		// Run the looop
-		Loop.run();
+		app.run();
 		util::pause();
 
 		debugL("ClientConnectionTest") << "Ending" << endl;

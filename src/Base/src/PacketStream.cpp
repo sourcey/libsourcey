@@ -18,6 +18,7 @@
 
 
 #include "Sourcey/PacketStream.h"
+#include "Sourcey/Memory.h"
 #include "Sourcey/IStartable.h"
 
 //#include "Sourcey/PacketStream.h"
@@ -36,20 +37,32 @@ namespace scy {
 
 PacketStream::PacketStream(const string& name) : 
 	_name(name),
-	_ready(false),
+	//_ready(false),
 	_clientData(NULL)
 {
 	traceL("PacketStream", this) << "Creating" << endl;
-	_ready.set();
+	//_ready.set();
 }
 
 
 PacketStream::~PacketStream()
 {
 	traceL("PacketStream", this) << "Destroying" << endl;
-	close();
+	//close();
+	assert(closed());
 	traceL("PacketStream", this) << "Destroying: OK" << endl;
 }
+
+
+void PacketStream::destroy()
+{
+	traceL("PacketStream", this) << "Destroy later" << endl;
+	// 
+	close();
+	deleteLater<PacketStream>(this);
+}
+/*
+*/
 
 
 void PacketStream::start()
@@ -63,7 +76,9 @@ void PacketStream::start()
 
 	assert(numAdapters() > 0);
 	{	
-		FastMutex::ScopedLock lock(_mutex);
+		enable(true);
+
+		Mutex::ScopedLock lock(_mutex);
 
 		// Setup the processor chain
 		IPacketProcessor* lastProc = NULL;
@@ -77,10 +92,10 @@ void PacketStream::start()
 			lastProc = thisProc;
 		}
 
-		// The last processor will call stream emit the final
+		// The last processor will emit the result
 		// packet to the outside application.
 		if (lastProc)
-			lastProc->attach(packetDelegate(this, &PacketStream::onDispatchPacket));
+			lastProc->attach(packetDelegate(this, &PacketStream::onFinalPacket));
 
 		// Attach and start synchronized runnables
 		for (PacketAdapterList::iterator sit = _sources.begin(); sit != _sources.end(); ++sit) {
@@ -114,8 +129,22 @@ void PacketStream::stop()
 	{
 		// Can't wait here or we deadlock if calling stop() 
 		// from inside stream callback.
-		waitForReady();
-		FastMutex::ScopedLock lock(_mutex);		
+		//waitForReady();
+		enable(false);
+
+		Mutex::ScopedLock lock(_mutex);		
+
+		// Detach the processor chain first
+		IPacketProcessor* lastProc = NULL;
+		IPacketProcessor* thisProc = NULL;
+		for (PacketAdapterList::iterator pit = _processors.begin(); pit != _processors.end(); ++pit) {
+			thisProc = reinterpret_cast<IPacketProcessor*>((*pit).ptr);
+			if (lastProc)
+				lastProc->detach(packetDelegate(thisProc, &IPacketProcessor::process));
+			lastProc = thisProc;
+		}
+		if (lastProc)
+			lastProc->detach(packetDelegate(this, &PacketStream::onFinalPacket));
 
 		// Detach sources, and stop synchronized startables
 		for (PacketAdapterList::iterator sit = _sources.begin(); sit != _sources.end(); ++sit) {
@@ -129,18 +158,6 @@ void PacketStream::stop()
 				}
 			}
 		}
-
-		// Detach the processor chain
-		IPacketProcessor* lastProc = NULL;
-		IPacketProcessor* thisProc = NULL;
-		for (PacketAdapterList::iterator pit = _processors.begin(); pit != _processors.end(); ++pit) {
-			thisProc = reinterpret_cast<IPacketProcessor*>((*pit).ptr);
-			if (lastProc)
-				lastProc->detach(packetDelegate(thisProc, &IPacketProcessor::process));
-			lastProc = thisProc;
-		}
-		if (lastProc)
-			lastProc->detach(packetDelegate(this, &PacketStream::onDispatchPacket));
 	}
 	
 	setState(this, PacketStreamState::Stopped);
@@ -184,9 +201,9 @@ void PacketStream::attach(PacketEmitter* source, bool freePointer, bool syncStat
 	if (stateEquals(PacketStreamState::Running))
 		throw Exception("Cannot attach source to running stream.");
 	
-	waitForReady();
+	//waitForReady();
 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_sources.push_back(PacketAdapterReference(source, 0, freePointer, syncState));
 	sort(_sources.begin(), _sources.end(), PacketAdapterReference::CompareOrder);
 	traceL("PacketStream", this) << "Attaching Source " << source << ": OK" << endl;
@@ -199,9 +216,9 @@ void PacketStream::attach(IPacketProcessor* proc, int order, bool freePointer)
 	if (stateEquals(PacketStreamState::Running))
 		throw Exception("Cannot attach processor to running stream.");
 	
-	waitForReady();
+	//waitForReady();
 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_processors.push_back(PacketAdapterReference(proc, order == 0 ? _processors.size() : order, freePointer));
 	sort(_processors.begin(), _processors.end(), PacketAdapterReference::CompareOrder);
 	traceL("PacketStream", this) << "Attaching Processor " << proc << ": OK" << endl;
@@ -214,9 +231,9 @@ bool PacketStream::detach(PacketEmitter* source)
 	if (stateEquals(PacketStreamState::Running))
 		throw Exception("Cannot detach source from running stream.");
 
-	waitForReady();
+	//waitForReady();
 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (PacketAdapterList::iterator it = _sources.begin(); it != _sources.end(); ++it) {
 		if ((*it).ptr == source) {
 			traceL("PacketStream", this) << "Detaching Source: " << source << ": OK" << endl;
@@ -238,9 +255,9 @@ bool PacketStream::detach(IPacketProcessor* proc)
 	if (stateEquals(PacketStreamState::Running))
 		throw Exception("Cannot detach processor from running stream.");
 	
-	waitForReady();
+	//waitForReady();
 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (PacketAdapterList::iterator it = _processors.begin(); it != _processors.end(); ++it) {
 		if ((*it).ptr == proc) {
 			traceL("PacketStream", this) << "Detaching Processor: " << proc << ": OK" << endl;
@@ -277,10 +294,10 @@ void PacketStream::cleanup()
 		throw Exception("Cannot detach apapters from running stream.");
 	}
 	
-	waitForReady();
+	//waitForReady();
 
 	traceL("PacketStream", this) << "Detaching All: Sources" << endl;		
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	PacketAdapterList::iterator sit = _sources.begin();
 	while (sit != _sources.end()) {
 		traceL("PacketStream", this) << "Detaching Source: " << (*sit).ptr << endl;
@@ -288,6 +305,8 @@ void PacketStream::cleanup()
 
 		// Delete source pointer asynchronously so the stream may be 
 		// closed and/or destroyed from within the source callback scope.
+		if ((*sit).freePointer)
+			deleteLater<PacketEmitter>((*sit).ptr);
 		//if ((*sit).freePointer)
 		//	deleteLater<PacketEmitter>((*sit).ptr);
 			//delete (*sit).ptr;
@@ -300,6 +319,8 @@ void PacketStream::cleanup()
 	PacketAdapterList::iterator pit = _processors.begin();
 	while (pit != _processors.end()) {
 		traceL("PacketStream", this) << "Detaching Processor: " << (*pit).ptr << endl;
+		if ((*pit).freePointer)
+			deleteLater<PacketEmitter>((*pit).ptr);
 		//if ((*pit).freePointer)
 		//	deleteLater<IPacketProcessor>((*pit).ptr);
 			//delete (*pit).ptr;
@@ -318,7 +339,7 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 	
 	try {	
 		do {
-			if (!isRunning() || !enabled()) {
+			if (!running() || !enabled()) {
 				debugL("PacketStream", this) << "Dropping Source Packet: " 
 					<< &packet << ": " << enabled() << ": " << state() << endl;	
 				//_ready.set(); 
@@ -333,7 +354,7 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 			// Obtain the first processor in the queue
 			IPacketProcessor* firstProc = NULL;
 			{
-				FastMutex::ScopedLock lock(_mutex);
+				Mutex::ScopedLock lock(_mutex);
 				PacketAdapterList::iterator it = _processors.begin();
 				if (it != _processors.end()) {
 
@@ -364,7 +385,7 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 			else {
 				traceL("PacketStream", this) << "Proxying: " 
 					<< &packet << ": " << packet.className() << endl;
-				onDispatchPacket(this, packet);
+				onFinalPacket(packet);
 			}
 			
 		} while(0);
@@ -390,19 +411,19 @@ void PacketStream::onSourcePacket(void*, IPacket& packet)
 }
 
 
-void PacketStream::onDispatchPacket(void*, IPacket& packet)
+void PacketStream::onFinalPacket(IPacket& packet)
 {
 	// No more adapters to process, ensure the stream 
 	// is still running before we dispatch the goods.
-	if (!isRunning() || !enabled()) {
-		debugL() << "[PacketStream:" << this << "] Dropping Late Packet: " 
+	if (!running() || !enabled()) {
+		debugL("PacketStream", this) << "Dropping Late Packet: " 
 			<< &packet << ": " << enabled() << ": " << state() << endl;	
 		return;
 	}
 
-	traceL("PacketStream", this) << "Dispatching: " << &packet << ": " << packet.className() << endl;
+	traceL("PacketStream", this) << "Emitting: " << &packet << ": " << packet.className() << endl;
 	emit(this, packet);
-	traceL("PacketStream", this) << "Dispatching: OK: " << &packet << ": " << packet.className() << endl;	
+	traceL("PacketStream", this) << "Emitting: OK: " << &packet << ": " << packet.className() << endl;	
 }
 
 
@@ -421,65 +442,76 @@ void PacketStream::onStateChange(PacketStreamState& state, const PacketStreamSta
 
 bool PacketStream::waitForReady()
 {	
+	/*
 	traceL("PacketStream", this) << "Waiting for ready" << endl;
 	bool res = true; //_ready.tryWait(2000);
 	traceL("PacketStream", this) << "Waiting for ready: " << res << endl;
 	assert(res && "packet stream locked");
 	return res;
+	*/
+	return true;
 }
 
 
 string PacketStream::name() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _name;
 }
 
 
 int PacketStream::numSources() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _sources.size();
 }
 
 
 int PacketStream::numProcessors() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _processors.size();
 }
 
 
 int PacketStream::numAdapters() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _sources.size() + _processors.size();
 }
 	
 	
-bool PacketStream::isRunning() const
+bool PacketStream::running() const
 {
 	return stateEquals(PacketStreamState::Running);
+}
+
+	
+bool PacketStream::closed() const
+{
+	return stateEquals(PacketStreamState::Closing)
+		|| stateEquals(PacketStreamState::Closed)
+		|| stateEquals(PacketStreamState::Error);
 }
 
 
 PacketAdapterList PacketStream::adapters() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _processors;
 }
 	
 
 void PacketStream::setClientData(void* data)
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_clientData = data;
 }
 
 
 void* PacketStream::clientData() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _clientData;
 }
 

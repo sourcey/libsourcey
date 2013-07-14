@@ -155,7 +155,7 @@ struct DelegateCallback<C, 3, true, P, P2, P3>
 }; 
 
 
-template<class C, typename P, typename P2, typename P3> //, typename P4
+template<class C, typename P, typename P2, typename P3>
 struct DelegateCallback<C, 3, false, P, P2, P3> 
 {
 	typedef void (C::*Method)(P, P2, P3);	

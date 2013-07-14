@@ -24,7 +24,7 @@
 #include "Sourcey/Types.h"
 #include "Sourcey/Delegate.h"
 #include "Sourcey/Util.h"
-#include "Poco/Mutex.h"
+#include "Sourcey/Mutex.h"
 #include <vector>
 #include <assert.h>
 
@@ -35,7 +35,7 @@ namespace scy {
 template <class DelegateT, DelegateDefaultParams>
 class SignalBase 
 	/// This class implements a thread-safe signal which
-	/// broadcasts data to multiple delegate listeners.
+	/// broadcasts arbitrary data to multiple receiver delegates.
 {
 public:
 	typedef std::list<DelegateT*>				  DelegateList;
@@ -59,12 +59,11 @@ public:
 	void operator -= (const Void klass) { detach(klass); }
 
 	void attach(const DelegateT& delegate) 
-		/// Attaches a delegate to the signal. If the delegate is
-		/// equal to an already existing one it will simply replace
-		/// the existing delegate.
+		/// Attaches a delegate to the signal. If the delegate 
+		/// already exists it will overwrite the previous delegate.
 	{
 		detach(delegate);
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		_delegates.push_back(delegate.clone());
 		_delegates.sort(DelegateT::ComparePrioroty); 
 		_refCount++;
@@ -74,44 +73,37 @@ public:
 		/// Detaches a delegate from the signal.
 		/// Returns true if the delegate was detached, false otherwise.
 	{
-		bool res = false;
-		{
-			//Poco::FastMutex::ScopedLock lock(_mutex);
-			for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
-				if (delegate.equals(*it) && !(*it)->cancelled()) {	
-					(*it)->cancel();
-					_dirty = true;
-					_refCount--;
-					res = true;
-				}
+		Mutex::ScopedLock lock(_mutex);
+		for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
+			if (delegate.equals(*it) && !(*it)->cancelled()) {	
+				(*it)->cancel();
+				_dirty = true;
+				_refCount--;
+				return true;
 			}
-			res = false;
 		}
-		cleanup();
-		return res;
+		return false;
 	}
 
 	void detach(const Void klass) 
-		/// Detaches all delegates associated with the given instance.
+		/// Detaches all delegates associated with the given class instance.
 	{
-		{
-			//Poco::FastMutex::ScopedLock lock(_mutex);
-			for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
-				if (klass == (*it)->object() && !(*it)->cancelled()) {	
-					(*it)->cancel();
-					_dirty = true;
-					_refCount--;
-				}
+		Mutex::ScopedLock lock(_mutex);
+		for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
+			if (klass == (*it)->object() && !(*it)->cancelled()) {	
+				(*it)->cancel();
+				_dirty = true;
+				_refCount--;
 			}
 		}
-		cleanup();
 	}
 
 	void cleanup() 
 		/// Deletes cancelled delegates.
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		if (_dirty) {
+			_dirty = false;
 			Iterator it = _delegates.begin(); 
 			while (it != _delegates.end()) {
 				DelegateT* delegate = *it;
@@ -123,14 +115,15 @@ public:
 					++it;
 			}
 		}
-		_dirty = false;
 	}
 
 	void obtain(DelegateList& active) 
-		/// Obtains a list of active delegates,
-		/// and deletes any redundant delegates.
+		/// Retreives a list of active delegates while 
+		/// simultaneously deleting any redundant delegates.
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
+		if (!_enabled) // skip if disabled
+			return;
 		Iterator it = _delegates.begin(); 
 		while (it != _delegates.end()) {
 			DelegateT* delegate = *it;
@@ -139,9 +132,8 @@ public:
 				delete delegate;
 				it = _delegates.erase(it);
 			}
-			else {
-				if (_enabled) // skip if disabled
-					active.push_back(delegate);
+			else {  
+				active.push_back(delegate);
 				++it;
 			}
 		}
@@ -151,32 +143,32 @@ public:
 
 	void clear() 
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
-		util::ClearList(_delegates);
+		Mutex::ScopedLock lock(_mutex);
+		util::clearList(_delegates);
 		_refCount = 0;
 	}
 
 	DelegateList delegates() const 
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return _delegates;
 	}
 
 	void enable(bool flag = true) 
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		_enabled = flag;
 	}
 
-	bool enabled() 
+	bool enabled() const
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return _enabled;
 	}
 	
 	int refCount() const 
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return _refCount;
 	}
 
@@ -209,7 +201,7 @@ public:
 		DelegateList toNotify;
 		obtain(toNotify);
 		try {
-			for (Iterator it = toNotify.begin(); it != toNotify.end(); ++it) {
+			for (ConstIterator it = toNotify.begin(); it != toNotify.end(); ++it) {
 				if ((*it)->accepts(sender, arg, arg2, arg3, arg4))
 					(*it)->emit(sender, arg, arg2, arg3, arg4); 
 			}
@@ -224,14 +216,14 @@ protected:
 	bool _dirty;
 	int _refCount;
 
-	//mutable Poco::FastMutex	_mutex;
+	mutable Mutex	_mutex;
 };
 
 
 // -------------------------------------------------------------------
 //
 struct StopPropagation: public std::exception
-	// An exception used to break the current callback scope.
+	/// StopPropagation is used to break out of a Signal callback scope.
 {
 	virtual ~StopPropagation() throw() {};
 };
@@ -239,9 +231,7 @@ struct StopPropagation: public std::exception
 
 // -------------------------------------------------------------------
 //
-class NullSignal: public SignalBase< 
-	DelegateBase<> 
-> {};
+class NullSignal: public SignalBase<DelegateBase<>> {};
 
 
 template <typename P>

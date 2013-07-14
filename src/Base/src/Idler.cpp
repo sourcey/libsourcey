@@ -28,7 +28,7 @@ namespace scy {
 namespace uv {
 
 	
-Idler::Idler() //uv_loop_t* loop) :
+Idler::Idler() //uv::Loop& loop) :
 	//Base<Base>(loop)
 {
 	traceL("Idler", this) << "Creating" << endl;

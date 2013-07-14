@@ -21,10 +21,11 @@
 #define SOURCEY_Manager_H
 
 
-#include "Sourcey/IManager.h"
+//#include "Sourcey/IManager.h"
 #include "Sourcey/Signal.h"
+#include "Sourcey/Memory.h"
 #include "Sourcey/Util.h"
-#include "Poco/Mutex.h"
+//#include "Sourcey/Mutex.h"
 #include <sstream>
 #include <assert.h>
 
@@ -34,8 +35,8 @@ namespace scy {
 
 template <class TKey, class TValue>
 class IManager
-	/// Abstract interface for managing a key-value
-	/// store of indexed pointers.
+	/// IManager is an abstract interface for managing a
+	/// key-value store of indexed pointers.
 {	
 public:
 	IManager() {};
@@ -56,12 +57,13 @@ public:
 
 // ---------------------------------------------------------------------
 //
-template <class TKey, class TValue>
+template <class TKey, class TValue, class TDeleter = DefaultDeleter<TValue>>
 class BasicManager: public IManager<TKey, TValue>
 	/// A reusable map based manager interface for DRY coding.
 {
 public:
 	typedef std::map<TKey, TValue*> Map;
+	typedef TDeleter Deleter;
 
 public:
 	BasicManager() 
@@ -85,7 +87,7 @@ public:
 			return false;
 		}
 		{		
-			Poco::FastMutex::ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 			_store[key] = item;
 		}
 		onAdd(key, item);
@@ -96,7 +98,7 @@ public:
 	{
 		// NOTE: This method will not delete existing values.
 		{
-			Poco::FastMutex::ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 			_store[key] = item;
 		}
 		onAdd(key, item);
@@ -104,7 +106,7 @@ public:
 	
 	virtual TValue* get(const TKey& key, bool whiny = true) const 
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex); 
+		Mutex::ScopedLock lock(_mutex); 
 		typename Map::const_iterator it = _store.find(key);	
 		if (it != _store.end()) {
 			return it->second;	 
@@ -122,7 +124,7 @@ public:
 	{
 		TValue* item = remove(key);
 		if (item) {
-			delete item;
+			TDeleter::func(item);
 			return true;
 		}
 		return false;
@@ -132,7 +134,7 @@ public:
 	{
 		TValue* item = NULL;
 		{
-			Poco::FastMutex::ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 			typename Map::iterator it = _store.find(key);	
 			if (it != _store.end()) {
 				item = it->second;
@@ -149,7 +151,7 @@ public:
 		TKey key;
 		TValue* ptr = NULL;
 		{
-			Poco::FastMutex::ScopedLock lock(_mutex); 	
+			Mutex::ScopedLock lock(_mutex); 	
 			for (typename Map::iterator it = _store.begin(); it != _store.end(); ++it) {
 				if (item == it->second) {
 					key = it->first;
@@ -166,14 +168,14 @@ public:
 
 	virtual bool exists(const TKey& key) const 
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex); 	
+		Mutex::ScopedLock lock(_mutex); 	
 		typename Map::const_iterator it = _store.find(key);	
 		return it != _store.end();	 
 	}
 
 	virtual bool exists(const TValue* item) const 
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex); 	
+		Mutex::ScopedLock lock(_mutex); 	
 		for (typename Map::const_iterator it = _store.begin(); it != _store.end(); ++it) {
 			if (item == it->second)
 				return true;
@@ -183,31 +185,31 @@ public:
 
 	virtual bool empty() const
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex); 	
+		Mutex::ScopedLock lock(_mutex); 	
 		return _store.empty();
 	}
 
 	virtual int size() const
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex); 	
+		Mutex::ScopedLock lock(_mutex); 	
 		return _store.size();
 	}
 
 	virtual void clear()
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex); 	
-		util::ClearMap(_store);
+		Mutex::ScopedLock lock(_mutex); 	
+		util::clearMap<TDeleter>(_store);
 	}
 
 	virtual Map store() const 
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex); 	
+		Mutex::ScopedLock lock(_mutex); 	
 		return _store; 
 	}
 
 	virtual Map& store() 
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex); 	
+		Mutex::ScopedLock lock(_mutex); 	
 		return _store; 
 	}
 
@@ -223,14 +225,14 @@ public:
 
 protected:
 	Map _store;	
-	mutable Poco::FastMutex _mutex;
+	mutable Mutex _mutex;
 };
 
 
 // ---------------------------------------------------------------------
 //
-template <class TKey, class TValue>
-class EventfulManager: public BasicManager<TKey, TValue>
+template <class TKey, class TValue, class TDeleter = DefaultDeleter<TValue>>
+class EventedManager: public BasicManager<TKey, TValue, TDeleter>
 {	
 public:
 	typedef BasicManager<TKey, TValue> Base;
@@ -249,6 +251,98 @@ public:
 	Signal<TValue&>			ItemAdded;
 	Signal<const TValue&>	ItemRemoved;	
 };
+
+
+// ---------------------------------------------------------------------
+//
+template <class TKey, class TValue>
+class KVStore
+	/// A reusable map based manager interface for DRY coding.
+{
+public:
+	typedef std::map<TKey, TValue> Map;
+
+public:
+	KVStore() 
+	{
+	}
+
+	virtual ~KVStore() 
+	{
+		clear();
+	}
+
+	virtual bool add(const TKey& key, const TValue& item, bool whiny = true) 
+	{	
+		if (exists(key)) {
+			if (whiny)
+				throw Poco::ExistsException();
+			return false;
+		}		
+		{
+			//Mutex::ScopedLock lock(_mutex);
+			_map[key] = item;
+		}
+		return true;		
+	}
+
+	virtual TValue& get(const TKey& key) //const //, bool whiny = true
+	{
+		//Mutex::ScopedLock lock(_mutex); 
+		typename Map::iterator it = _map.find(key);	
+		if (it != _map.end())
+			return it->second;	 
+		else
+			throw Poco::NotFoundException();
+	}
+	
+	virtual bool remove(const TKey& key) 
+	{
+		//Mutex::ScopedLock lock(_mutex);
+		typename Map::iterator it = _map.find(key);	
+		if (it != _map.end()) {
+			_map.erase(it);
+			return true;
+		}
+		return false;
+	}
+
+	virtual bool exists(const TKey& key) const 
+	{ 
+		//Mutex::ScopedLock lock(_mutex); 	
+		typename Map::const_iterator it = _map.find(key);	
+		return it != _map.end();	 
+	}
+
+	virtual bool empty() const
+	{
+		//Mutex::ScopedLock lock(_mutex); 	
+		return _map.empty();
+	}
+
+	virtual int size() const
+	{
+		//Mutex::ScopedLock lock(_mutex); 	
+		return _map.size();
+	}
+
+	virtual void clear()
+	{
+		//Mutex::ScopedLock lock(_mutex); 	
+		_map.clear();
+	}
+
+	virtual Map& map() 
+	{ 
+		//Mutex::ScopedLock lock(_mutex); 	
+		return _map; 
+	}
+
+protected:
+	Map _map;	
+	//mutable Mutex _mutex;
+};
+
 
 } // namespace scy
 

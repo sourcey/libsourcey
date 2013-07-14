@@ -24,23 +24,21 @@
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Net/TCPBase.h"
 #include "Sourcey/Net/Socket.h"
+#include "Sourcey/Net/SSLAdapter.h"
 #include "Sourcey/Net/SSLContext.h"
-
-#include "Poco/Net/SSLException.h"
-#include "Poco/Net/Context.h"
-#include "Poco/Net/Session.h"
+#include "Sourcey/Net/SSLSession.h"
 
 
 namespace scy {
 namespace net {
 
 
-class SSLBase: public uv::TCPBase	
+class SSLBase: public TCPBase	
 {
 public:	
 	SSLBase();
-	SSLBase(Poco::Net::Context::Ptr sslContext);
-	SSLBase(Poco::Net::Context::Ptr sslContext, Poco::Net::Session::Ptr session);
+	SSLBase(SSLContext::Ptr sslContext);
+	SSLBase(SSLContext::Ptr sslContext, SSLSession::Ptr session);
 
 	//virtual void connect(const Address& peerAddress);	
 		/// Initializes the socket and establishes a secure connection to 
@@ -67,17 +65,17 @@ public:
 	X509* peerCertificate() const;
 		/// Returns the peer's certificate.
 		
-	Poco::Net::Context::Ptr context() const;
+	SSLContext::Ptr context() const;
 		/// Returns the SSL context used for this socket.
 			
-	Poco::Net::Session::Ptr currentSession();
+	SSLSession::Ptr currentSession();
 		/// Returns the SSL session of the current connection,
 		/// for reuse in a future connection (if session caching
 		/// is enabled).
 		///
 		/// If no connection is established, returns null.
 		
-	void useSession(Poco::Net::Session::Ptr session);
+	void useSession(SSLSession::Ptr session);
 		/// Sets the SSL session to use for the next
 		/// connection. Setting a previously saved Session
 		/// object is necessary to enable session caching.
@@ -101,11 +99,11 @@ protected:
 	virtual ~SSLBase();
 
 protected:
-	net::SSLContext _sslBuffer;
-	Poco::Net::Context::Ptr _context;
-	Poco::Net::Session::Ptr _session;
+	net::SSLAdapter _sslAdapter;
+	SSLContext::Ptr _context;
+	SSLSession::Ptr _session;
 
-	friend class net::SSLContext;
+	friend class net::SSLAdapter;
 };
 
 
@@ -121,8 +119,8 @@ public:
 	SSLSocket();
 		/// Creates an unconnected SSL socket.
 
-	SSLSocket(Poco::Net::Context::Ptr sslContext);
-	SSLSocket(Poco::Net::Context::Ptr sslContext, Poco::Net::Session::Ptr session);
+	SSLSocket(SSLContext::Ptr sslContext);
+	SSLSocket(SSLContext::Ptr sslContext, SSLSession::Ptr session);
 
 	SSLSocket(SSLBase* base, bool shared = false);
 		/// Creates the Socket and attaches the given SocketBase.
@@ -143,7 +141,7 @@ public:
 //typedef SocketHandle<SSLSocket> SSLSocketHandle;
 
 
-} } // namespace scy::uv
+} } // namespace scy::net
 
 
 #endif // SOURCEY_Net_SSLSocket_H 
@@ -168,8 +166,8 @@ public:
 	SSLSocket();
 		/// Creates an unconnected SSL socket.
 
-	SSLSocket(Poco::Net::Context::Ptr sslContext);
-	SSLSocket(Poco::Net::Context::Ptr sslContext, Poco::Net::Session::Ptr session);
+	SSLSocket(SSLContext::Ptr sslContext);
+	SSLSocket(SSLContext::Ptr sslContext, SSLSession::Ptr session);
 
 	SSLSocket(const SocketHandle& socket);
 		/// Creates the SSLSocket with the SocketBase

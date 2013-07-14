@@ -127,7 +127,7 @@ public:
     WSClientConnection(Client& client, const net::Address& address) : 
 		ClientConnection(client, address)
 	{
-		setAdapter(new WebSocketClientAdapter(&socket(), &request()));	
+		replaceAdapter(new WebSocketClientAdapter(&socket(), &request()));	
 	}
 
 	virtual ~WSClientConnection() 
@@ -144,7 +144,7 @@ public:
     WSSClientConnection(Client& client, const net::Address& address) : 
 		ClientConnection(client, address, net::SSLSocket())
 	{
-		setAdapter(new WebSocketClientAdapter(&socket(), &request()));
+		replaceAdapter(new WebSocketClientAdapter(&socket(), &request()));
 	}
 
 	virtual ~WSSClientConnection() 
