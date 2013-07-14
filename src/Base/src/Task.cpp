@@ -19,7 +19,7 @@
 
 #include "Sourcey/Task.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/Runner.h"
+#include "Sourcey/Application.h"
 #include "Sourcey/Crypto.h"
 
 #include <assert.h>
@@ -30,7 +30,8 @@ using namespace std;
 
 namespace scy {
 
-	
+
+/*	
 Task::Task(bool repeating) : 
 	_id(static_cast<UInt32>(crypt::randomNumber(8))),
 	_repeating(repeating),
@@ -89,21 +90,21 @@ void Task::destroy()
 
 bool Task::beforeRun()			
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return !_destroyed && !_cancelled;
 }
 
 
 UInt32 Task::id() const
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _id;
 }
 
 
 bool Task::cancelled() const						 
 { 
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _cancelled;
 }
 
@@ -116,25 +117,26 @@ bool Task::afterRun()
 
 bool Task::destroyed() const						 
 { 
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _destroyed;
 }
 
 
 bool Task::repeating() const						 
 { 
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _repeating;
 }
 
 
 Runner& Task::runner()						 
 { 
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	if (!_runner)
 		throw Exception("Tasks must have a Runner instance.");
 	return *_runner;
 }
+*/
 
 
 } // namespace scy
@@ -146,7 +148,7 @@ Runner& Task::runner()
 
 
 
-	//	Poco::FastMutex::ScopedLock lock(_mutex);
+	//	Mutex::ScopedLock lock(_mutex);
 	//	_!cancelled = true;
 	//else
 
@@ -154,11 +156,11 @@ Runner& Task::runner()
 	//
 	//	throw Exception("The tasks is already !cancelled.");
 
-	//Poco::FastMutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	//assert(_!cancelled);	
 	//if (!cancelled())
 	//	throw Exception("The tasks is not !cancelled.");
-	//Poco::FastMutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	//assert(!_destroyed);
 	//const string& name, //const string& name, //,
 	//_name(name)//,
@@ -168,14 +170,14 @@ Runner& Task::runner()
 /*
 string Task::name() const
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _name;
 }
 
 
 void Task::setName(const string& name) 
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	_name = name;
 }
 */
@@ -190,7 +192,7 @@ void Task::setName(const string& name)
 /*
 void Task::start()
 { 
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	assert(!_!cancelled);
 	_!cancelled = true;
 }	
@@ -198,7 +200,7 @@ void Task::start()
 
 void Task::stop()			
 { 
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	//assert(!_!cancelled);
 	_!cancelled = false;
 }
@@ -220,7 +222,7 @@ void Task::stop()
 
 bool Task::runOnce() const						 
 { 
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _runOnce;
 }
 */

@@ -21,6 +21,7 @@
 #define SOURCEY_PacketStream_H
 
 
+#include "Sourcey/Types.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Memory.h"
 #include "Sourcey/Stateful.h"
@@ -28,8 +29,8 @@
 #include "Sourcey/PacketEmitter.h"
 #include "Sourcey/IPacketProcessor.h"
 
-#include "Poco/Mutex.h"
-#include "Poco/Event.h"
+//#include "Sourcey/Mutex.h"
+//#include "Poco/Event.h"
 
 
 namespace scy {
@@ -88,7 +89,7 @@ struct PacketStreamState: public State
 };
 
 
-class PacketStream: public PacketEmitter, public StatefulSignal<PacketStreamState>, public IStartable
+class PacketStream: public PacketEmitter, public StatefulSignal<PacketStreamState>, public IStartable//, public ManagedObject
 	/// This class provides an interface for processing packets.
 	/// A packet stream consists of a single PacketEmitter,
 	/// one or many IPacketProcessor instances, and one or many 
@@ -96,13 +97,14 @@ class PacketStream: public PacketEmitter, public StatefulSignal<PacketStreamStat
 { 
 public:	
 	PacketStream(const std::string& name = ""); 
-	virtual ~PacketStream();
+
+	virtual void destroy();
 	
 	virtual void start();
 	virtual void stop();
 
 	virtual void reset();
-		/// Resets the internal state of all packet dispatchers
+		/// Resets the internal state of all packet emitters
 		/// in the stream. This is useful for correcting timestamp 
 		/// and metadata generation in some cases.
 
@@ -150,8 +152,12 @@ public:
 	virtual std::string name() const;
 		/// Returns the name of the stream.
 	
-	virtual bool isRunning() const;
+	virtual bool running() const;
 		/// Returns true is the stream is in the Running state.
+	
+	virtual bool closed() const;
+		/// Returns true is the stream is in the Closing, 
+		/// Closed or Error state.
 	
 	virtual bool waitForReady();
 		/// Locks until the internal ready event is signalled.
@@ -195,19 +201,23 @@ public:
 	}
 
 protected:
+	virtual ~PacketStream();
+
 	virtual void cleanup();
 		/// Detaches all stream adapters, and frees 
 		/// pointers if the adapters are managed.
 	
 	virtual void onSourcePacket(void* sender, IPacket& packet);
-	virtual void onDispatchPacket(void* sender, IPacket& packet);
+	virtual void onFinalPacket(IPacket& packet);
 	virtual void onStateChange(PacketStreamState& state, const PacketStreamState& oldState);
 
 protected:
-	mutable Poco::FastMutex	_mutex;
+	friend class GCDeleter<PacketStream>;
+
+	mutable Mutex	_mutex;
 
 	std::string _name;
-	Poco::Event _ready;
+	//Poco::Event _ready;
 	PacketAdapterList _sources;
 	PacketAdapterList _processors;
 	void* _clientData;

@@ -27,8 +27,8 @@ namespace scy {
 namespace smple {
 
 
-Client::Client(net::SocketBase* socket, Runner& runner, const Client::Options& options) :
-	sockio::Client(socket, runner),
+Client::Client(net::SocketBase* socket, uv::Loop& loop, const Client::Options& options) :
+	sockio::Client(socket, loop),
 	_options(options),
 	_announceStatus(500)
 {
@@ -39,8 +39,6 @@ Client::Client(net::SocketBase* socket, Runner& runner, const Client::Options& o
 Client::~Client() 
 {
 	log("trace") << "Destroying" << endl;
-	//close();
-	//log("trace") << "Destroying: OK" << endl;
 }
 
 
@@ -149,7 +147,7 @@ Roster& Client::roster()
 
 
 /*
-Runner& runner() 
+uv::Loop& loop() 
 { 
 	//Poco::FastMutex::ScopedLock lock(_mutex);
 	return _runner; 
@@ -364,7 +362,7 @@ void Client::onError()
 			//return false; // stop propagation
 			//return false; // stop propagation
 			//return false; // stop propagation
-//Client::Client(/* Net::Reactor& reactor, */Runner& runner, const Options& options) : 
+//Client::Client(uv::Loop& loop, const Options& options) : 
 //	sockio::Socket(reactor),
 //	_runner(runner),
 //	_options(options),

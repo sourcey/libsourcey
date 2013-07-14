@@ -99,7 +99,7 @@ public:
 		// Sets the logger instance and deletes the current instance.
 
 	void add(LogChannel* channel);
-	void remove(const std::string& name, bool deletePointer = true);
+	void remove(const std::string& name, bool freePointer = true);
 	LogChannel* get(const std::string& name, bool whiny = true) const;
 		// Returns the specified log channel. 
 		// Throws an exception if the channel doesn't exist.
@@ -136,7 +136,7 @@ protected:
 	LogMap      _map;
 
 	static Logger*         _instance;
-	static Poco::FastMutex _mutex;
+	static Mutex _mutex;
 };
 
 

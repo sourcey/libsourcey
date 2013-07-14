@@ -79,20 +79,20 @@ struct PacketRegistry
 	PacketRegistry(const PacketRegistry& r) : 
 		_types(r._types) {};		
 	virtual ~PacketRegistry() {
-		util::ClearVector(_types);
+		util::clearVector(_types);
 	}
 
 	template <class PacketT>
 	void registerPacketType(int priority) {
 		unregisterPacketType<PacketT>(); // ensure unique values
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		_types.push_back(new PacketCreationStrategy<PacketT>(priority));
 		sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
 	}
 
 	template <class PacketT>
 	void unregisterPacketType() {
-		//Poco::FastMutex::ScopedLock lock(_mutex);		
+		//Mutex::ScopedLock lock(_mutex);		
 		for (typename PacketCreationStrategyList::iterator it = _types.begin(); it != _types.end(); ++it) {
 			if (dynamic_cast<PacketCreationStrategy<PacketT>*>(*it) != 0) {
 				delete *it;
@@ -105,14 +105,14 @@ struct PacketRegistry
 	template <class StrategyT>
 	void registerStrategy(int priority) {
 		unregisterStrategy<StrategyT>(); // ensure unique values
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		_types.push_back(new StrategyT(priority));
 		sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
 	}
 
 	template <class StrategyT>
 	void unregisterStrategy() {
-		//Poco::FastMutex::ScopedLock lock(_mutex);		
+		//Mutex::ScopedLock lock(_mutex);		
 		for (typename PacketCreationStrategyList::iterator it = _types.begin(); it != _types.end(); ++it) {
 			if (dynamic_cast<StrategyT*>(*it) != 0) {
 				delete *it;
@@ -123,18 +123,18 @@ struct PacketRegistry
 	}
 
 	PacketCreationStrategyList& types() {
-		//Poco::FastMutex::ScopedLock lock(_mutex);		
+		//Mutex::ScopedLock lock(_mutex);		
 		return _types;
 	}
 
 	PacketCreationStrategyList types() const {
-		//Poco::FastMutex::ScopedLock lock(_mutex);		
+		//Mutex::ScopedLock lock(_mutex);		
 		return _types;
 	}
 
 protected:
 	PacketCreationStrategyList _types;
-	//mutable Poco::FastMutex	_mutex;
+	//mutable Mutex	_mutex;
 };
 
 
@@ -148,7 +148,7 @@ struct PacketFactory: public PacketRegistry
 	}
 
 	virtual IPacket* createPacket(Buffer& buffer) {
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		assert(!_types.empty() && "no packet types registered");
 		size_t offset = buffer.position();
 		for (unsigned i = 0; i < _types.size(); i++) {

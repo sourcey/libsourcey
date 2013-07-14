@@ -20,7 +20,7 @@
 #ifndef SOURCEY_UserManager_H
 #define SOURCEY_UserManager_H
 
-#include "Sourcey/EventfulManager.h"
+#include "Sourcey/Manager.h"
 #include <map>
 
 
@@ -54,14 +54,14 @@ protected:
 typedef std::map<std::string, IUser*> IUserMap;
 
 
-class UserManager: public EventfulManager<std::string, IUser>
+class UserManager: public EventedManager<std::string, IUser>
 	/// This class contains a list of users that have access
 	/// on the system.
 	///
 	/// NOTE: This class is depreciated.
 {
 public:
-	typedef EventfulManager<std::string, IUser>	Manager;
+	typedef EventedManager<std::string, IUser>	Manager;
 	typedef Manager::Map						Map;
 
 public:

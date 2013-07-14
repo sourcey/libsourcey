@@ -30,7 +30,7 @@
 
 # The default components to find
 if (NOT Poco_FIND_COMPONENTS)
-  set(Poco_FIND_COMPONENTS Foundation Net NetSSL Crypto Util Zip) # XML
+  set(Poco_FIND_COMPONENTS Foundation Crypto Zip) # XML Net NetSSL Util
 endif()
 
 # Link library type

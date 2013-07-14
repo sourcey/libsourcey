@@ -79,13 +79,13 @@ struct MutexState: public State
 	MutexState(ID id = 0);
 	MutexState(const MutexState& r) : State(r) {}
 
-	virtual ID id() const { Poco::FastMutex::ScopedLock lock(_mutex); return _id;	}
-	virtual void set(ID id) { Poco::FastMutex::ScopedLock lock(_mutex); _id = id; }
-	virtual std::string message() const { Poco::FastMutex::ScopedLock lock(_mutex);	return _message; }
-	virtual void setMessage(const std::string& message) { Poco::FastMutex::ScopedLock lock(_mutex);	_message = message; }
+	virtual ID id() const { Mutex::ScopedLock lock(_mutex); return _id;	}
+	virtual void set(ID id) { Mutex::ScopedLock lock(_mutex); _id = id; }
+	virtual std::string message() const { Mutex::ScopedLock lock(_mutex);	return _message; }
+	virtual void setMessage(const std::string& message) { Mutex::ScopedLock lock(_mutex);	_message = message; }
 
 protected:
-	mutable Poco::FastMutex	_mutex;
+	mutable Mutex	_mutex;
 };
 
 
@@ -110,10 +110,10 @@ protected:
 
 
 
-	//virtual ID id() const { Poco::FastMutex::ScopedLock lock(_mutex); return _id;	}
-	//virtual void set(ID id) { Poco::FastMutex::ScopedLock lock(_mutex); _id = id; }
-	//virtual std::string message() const { Poco::FastMutex::ScopedLock lock(_mutex);	return _message; }
-	//virtual void setMessage(const std::string& message) { Poco::FastMutex::ScopedLock lock(_mutex);	_message = message; }
+	//virtual ID id() const { Mutex::ScopedLock lock(_mutex); return _id;	}
+	//virtual void set(ID id) { Mutex::ScopedLock lock(_mutex); _id = id; }
+	//virtual std::string message() const { Mutex::ScopedLock lock(_mutex);	return _message; }
+	//virtual void setMessage(const std::string& message) { Mutex::ScopedLock lock(_mutex);	_message = message; }
 
 /*
 // ---------------------------------------------------------------------
@@ -196,18 +196,18 @@ public:
 
 	virtual T& state() 
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return Stateful<T>::_state; 
 	}
 
 	virtual T state() const 
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return Stateful<T>::_state; 
 	}
 
 protected:
-	mutable Poco::FastMutex	_mutex;
+	mutable Mutex	_mutex;
 };
 
 

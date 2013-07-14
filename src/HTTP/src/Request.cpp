@@ -29,7 +29,7 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Poco::Net;
+
 
 
 namespace scy { 
@@ -99,7 +99,7 @@ void Request::read(istream& istr)
 }
 
 			
-const NameValueCollection& Request::params() const
+const KVStore& Request::params() const
 {	
 	return _params;
 }

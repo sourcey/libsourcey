@@ -21,10 +21,10 @@
 #define SOURCEY_Task_H
 
 
-#include "Sourcey/UV/Base.h"
+
 #include "Sourcey/Types.h"
 
-#include "Poco/Mutex.h"
+#include "Sourcey/Mutex.h"
 
 
 namespace scy {
@@ -32,7 +32,7 @@ namespace scy {
 
 class Runner;
 
-
+/*
 class Task
 	/// This class defines an asynchronous Task
 	/// which is managed by a Runner.
@@ -81,7 +81,7 @@ protected:
 		/// to destroy the task.
 
 protected:	
-	mutable Poco::FastMutex	_mutex;
+	mutable Mutex	_mutex;
 	
 	UInt32 _id;
 	bool _cancelled;
@@ -92,6 +92,7 @@ protected:
 	
 	//friend class Runner;
 };
+*/
 
 
 } // namespace scy
@@ -143,7 +144,7 @@ protected:
 		/// Override this method to implement task logic.
 	
 protected:	
-	mutable Poco::FastMutex	_mutex;
+	mutable Mutex	_mutex;
 	
 	bool _cancelled;
 	bool _destroyed;
@@ -187,7 +188,7 @@ class TaskBase: public SocketBase<StreamSocketT, TransportT, SocketBaseT>
 	virtual bool runOnce() const;
 	*/
 
-	//Runner& _runner;	
+	//EvLoop& _loop;	
 	//bool _runOnce;
 	//template <class DeletableT> 
 	//friend class GarbageCollectorTask;

@@ -39,7 +39,7 @@ class SocketAdapter;
 class SocketAdapter;
 
 
-class SocketBase
+class SocketBase: public CountedObject //<ManagedObject>
 	/// SocketBase is the abstract base interface from      
 	/// which all socket contexts derive.
 {
@@ -79,22 +79,27 @@ public:
 	virtual void emitError(const Error& error);
 	virtual void emitClose();
 
+	/*
 	virtual void duplicate() = 0;
 	virtual void release() = 0;
 	virtual int refCount() const = 0;
+	*/
 	
-	virtual void addAdapter(SocketAdapter& observer, bool shared = false);
-	virtual void removeAdapter(SocketAdapter& observer);
+	virtual void addAdapter(SocketAdapter* adapter, bool shared = false);
+	virtual void removeAdapter(SocketAdapter* adapter);
+	virtual void swapAdapter(SocketAdapter* a, SocketAdapter* b);
 	virtual void sortAdapters();
 
 protected:
-	virtual ~SocketBase() {};
+	virtual ~SocketBase();
 	
 	bool _connected;
+	bool _insideCallback;
 	std::vector<SocketAdapter*> _adapters;
 	
 	friend class Socket;
 	friend class SocketAdapter;
+	friend class GCDeleter<SocketBase>;	
 };
 
 
@@ -185,6 +190,7 @@ public:
 
 	virtual int send(const IPacket& packet, int flags = 0);
 	virtual int send(const IPacket& packet, const Address& peerAddress, int flags = 0);
+	virtual void send(void*, IPacket& packet);
 
 	net::TransportType transport() const;
 		/// The transport protocol: TCP, UDP or SSLTCP.
@@ -221,7 +227,7 @@ public:
 	SocketAdapter& adapter() const;
 		/// Returns the SocketAdapter for this socket.
 		
-	void setAdapter(SocketAdapter* adapter);
+	void replaceAdapter(SocketAdapter* adapter);
 		/// Sets the SocketAdapter instance,
 		/// and deletes the old one.
 		

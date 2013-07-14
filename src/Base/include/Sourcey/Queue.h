@@ -117,9 +117,7 @@ public:
     {
 		Poco::Mutex::ScopedLock lock(_mutex);
         if (_queue.empty())
-        {
             return false;
-        }
         
         popped_value = _queue.front();
         _queue.pop();

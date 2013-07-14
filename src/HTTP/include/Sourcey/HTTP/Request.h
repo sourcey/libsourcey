@@ -22,8 +22,9 @@
 
 
 #include "Sourcey/Base.h"
+#include "Sourcey/Manager.h"
 #include "Poco/Net/HTTPRequest.h"
-#include "Poco/Net/HTMLForm.h"
+//#include "Poco/Net/HTMLForm.h"
 
 #include <sstream>
 
@@ -62,10 +63,10 @@ public:
 	virtual bool matches(const std::string& expression) const;
 		/// Matches the URI against the given expression.
 			
-	virtual const NameValueCollection& params() const;
+	virtual const KVStore& params() const;
 		/// Returns the request URI parameters.
 
-	Poco::Net::HTMLForm* form;
+	//Poco::Net::HTMLForm* form;
 		/// An optional HTML form.
 
 	std::ostringstream body;
@@ -78,7 +79,7 @@ public:
     }
 
 protected:
-	NameValueCollection _params;
+	KVStore _params;
 
 private:
 	Request(const Request&) {}

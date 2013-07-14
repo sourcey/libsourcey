@@ -68,6 +68,8 @@ protected:
 protected:
 	Server& _server;
 	ServerResponder* _responder;	
+	bool _upgrade;
+	bool _requestComplete;
 };
 
 
@@ -103,6 +105,8 @@ public:
 		_connection(connection)
 	{
 	}
+
+	virtual ~ServerResponder() {}
 
 	virtual void onHeaders(Request& request) {}
 	virtual void onPayload(const Buffer& body) {}
@@ -149,7 +153,10 @@ class Server
 	/// compliant. It was created to be a fast (nocopy where possible)
 	/// solution for streaming video to web browsers.
 	///
-	/// TODO: SSL
+	/// TODO: 
+	/// - SSL Server
+	/// - Enable responders (controllers?) to be instantiated via
+	//    registered routes.
 {
 public:
 	ServerConnectionList connections;
@@ -215,11 +222,11 @@ public:
 		try 
 		{			
 			if (rawRequest.find("policy-file-request") != std::string::npos) {
-				LogTrace("HTTPStreamingRequestHandlerFactory") << "Sending Flash Crossdomain XMLSocket Policy" << std::endl;
+				traceL("HTTPStreamingRequestHandlerFactory") << "Sending Flash Crossdomain XMLSocket Policy" << std::endl;
 				return new Net::FlashPolicyRequestHandler(socket, false);
 			}
 			else if (rawRequest.find("crossdomain.xml") != std::string::npos) {
-				LogTrace("HTTPStreamingRequestHandlerFactory") << "Sending Flash Crossdomain HTTP Policy" << std::endl;
+				traceL("HTTPStreamingRequestHandlerFactory") << "Sending Flash Crossdomain HTTP Policy" << std::endl;
 				return new Net::FlashPolicyRequestHandler(socket, true);
 			}			
 		}

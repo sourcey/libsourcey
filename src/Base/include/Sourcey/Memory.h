@@ -21,74 +21,251 @@
 #define SOURCEY_Memory_H
 
 
-#include "Sourcey/Timer.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Types.h"
-#include <vector>
+#include "Sourcey/UV/UVPP.h"
 //#include <atomic>
+
+#include "Sourcey/Singleton.h"
 
 
 namespace scy {
+
+
+class AbstractDeleter;
+class GarbageCollector: public uv::Base
+	/// Simple garbage collector for deferred pointer deletion.
+{
+public:	
+	GarbageCollector();	
+	~GarbageCollector();
+		
+	static GarbageCollector& instance();
+		/// Returns the GarbageCollector singleton.
 	
+	template <class C>
+	void deleteLater(C* ptr);
+		/// Schedules a pointer for deferred deletion.
+
+	static void shutdown();
+		/// Shuts down the garbage collector and deleted 
+		/// the singleton instance.
+
+	void close();
+		/// Closes the internal timer and frees all 
+		/// scheduled pointers now.
+
+protected:	
+	void onTimer();
+		
+	UVEmptyStatusCallback(GarbageCollector, onTimer, uv_timer_t);
 	
-template <class C>
-class Deleter 
-	/// Simple garbage collector for delayed pointer deletion.
+	mutable Mutex	_mutex;
+	std::vector<AbstractDeleter*> _pending;
+	std::vector<AbstractDeleter*> _ready;
+};
+
+
+// -------------------------------------------------------------------
+//
+class AbstractDeleter
+	/// AbstractDeleter provides an interface for 
+	/// deleting pointer memory in various ways.
 {
 public:
-	C* ptr;
-
-	Deleter(C* ptr) : ptr(ptr)
+	void* ptr;
+	
+	AbstractDeleter(void* p) : 
+		ptr(p)
 	{
-		traceL("Deleter", this) << "Queueing: " << ptr << std::endl;
-		uv_idle_t* idler = new uv_idle_t;
-		idler->data = this;
-		uv_idle_init(uv_default_loop(), idler);
-		uv_idle_start(idler, Deleter::onNextIteration);
+	}
+
+	virtual ~AbstractDeleter()
+	{		
+	}
+
+	virtual void invoke() = 0;
+};
+
+
+template <class C>
+class Deleter: public AbstractDeleter
+	/// Deleter is the base template class for 
+	/// deleting a type cast pointer.
+{
+public:
+    typedef void (*Func)(C*);
+	Func func;
+
+	Deleter(C* p, Func f) : 
+		AbstractDeleter(p), func(f)
+	{
 	}
 
 	~Deleter()
 	{
-		traceL("Deleter", this) << "Deleting: " << ptr << std::endl;
-		delete ptr;
+		if (ptr) invoke();
 	}
 
-	static void onNextIteration(uv_idle_t* handle, int status)
+    void invoke()
+    {
+		assert(ptr);
+		C* p = reinterpret_cast<C*>(ptr);
+		ptr = NULL;
+        func(p);
+    }
+};
+
+
+template <class C>
+class DefaultDeleter: public Deleter<C>
+	/// DefaultDeleter calls the standard delete 
+	/// operator to free pointer memory.
+{
+public:
+	DefaultDeleter(C* p = NULL) : 
+		Deleter<C>(p, &DefaultDeleter<C>::func)
 	{
-		traceL("Deleter") << "On next iteration: " << status << std::endl;
-		assert(status == 0);
-		traceL("Deleter") << "On next iteration: Stopping" << std::endl;
-		uv_idle_stop(handle);
-		delete reinterpret_cast<Deleter*>(handle->data);
-		traceL("Deleter") << "On next iteration: Stopping: OK" << std::endl;
-		
-		//delete handle; // FIXME: Causing crash???
+	}
+				
+	static void func(C* p)
+	{
+		traceL("DefaultDeleter") << "Destroying: " << p << std::endl;
+		delete p;
 	}
 };
 
 
 template <class C>
-inline Deleter<C>* deleteLater(C* ptr)
-	/// Inline helper for async garbage deletion.
+class GCDeleter: public Deleter<C>
+	/// GCDeleter is used by the GarbageCollector
+	/// to free managed pointer memory.
 {
-	return new Deleter<C>(ptr);
+public:
+	GCDeleter(C* p = NULL) : 
+		Deleter<C>(p, &GCDeleter<C>::func)
+	{
+	}
+				
+	static void func(C* p)
+	{
+		traceL("GCDeleter") << "Destroying: " << p << std::endl;
+		delete p;
+	}
+};
+
+
+template <class C>
+class DeferredDeleter: public Deleter<C>
+	/// DeferredDeleter schedules a pointer for 
+	/// deferred deletion by the GarbageCollector.
+{
+public:
+	DeferredDeleter(C* p = NULL) : 
+		Deleter<C>(p, &DeferredDeleter<C>::func)
+	{
+	}
+				
+	static void func(C* p)
+	{
+		traceL("DeferredDeleter") << "Destroying later: " << p << std::endl;
+		scy::deleteLater(p);
+	}
+};
+
+
+template <class C>
+class DestroyMethodDeleter: public Deleter<C>
+	/// DestroyMethodDeleter calls the destroy() method 
+	/// on an object to begin the deletion sequence.
+{
+public:
+	DestroyMethodDeleter(C* p = NULL) : 
+		Deleter<C>(p, &DestroyMethodDeleter<C>::func)
+	{
+	}
+				
+	static void func(C* p)
+	{
+		traceL("DestroyMethodDeleter") << "Destroying: " << p << std::endl;
+		p->destroy();
+	}
+};
+
+
+// -------------------------------------------------------------------
+//
+template <class C>
+void GarbageCollector::deleteLater(C* ptr)
+	/// Schedules a pointer for deferred deletion.
+{ 
+	traceL("GarbageCollector", this) << "Scheduling: " << ptr << std::endl;
+		
+	Mutex::ScopedLock lock(_mutex);
+	_pending.push_back(new GCDeleter<C>(ptr));
+}
+
+
+template <class C>
+inline void deleteLater(C* ptr)
+	/// Convenience function for accessing GarbageCollector::deleteLater
+{
+	GCDeleter<C> del(ptr);
+	//GarbageCollector::instance().deleteLater(ptr);
 }
 
 
 // -------------------------------------------------------------------
 //
-class CountedObject
-	/// A base class for objects that employ reference
-	/// counting based garbage collection.
+class ManagedObject
+	/// ManagedObject is the base class for LibSourcey objects
+	/// which employ different memory management strategies.
+{	
+public:
+	ManagedObject(AbstractDeleter* deleter = new DefaultDeleter<ManagedObject>()) : 
+		deleter(deleter)
+	{
+		if (deleter->ptr == NULL)
+			deleter->ptr = this;
+	}
+
+	virtual ~ManagedObject()
+	{
+		traceL("ManagedObject", this) << "Destroying" << std::endl;
+	}
+
+	virtual void freeMemory()
+	{
+		traceL("ManagedObject", this) << "Freeing" << std::endl;
+		deleter->invoke();
+		traceL("ManagedObject", this) << "Freeing: OK" << std::endl;
+	}
+
+protected:
+	ManagedObject(const ManagedObject&) {};
+	ManagedObject& operator = (const ManagedObject&) {};
+	
+	friend class DefaultDeleter<ManagedObject>;	
+
+	std::unique_ptr<AbstractDeleter> deleter;
+};
+
+
+// -------------------------------------------------------------------
+//
+class CountedObject: public ManagedObject
+	/// CountedObject is the base class for objects that employ 
+	/// reference counting based garbage collection.
 	///
-	/// Reference-counted objects inhibit construction
-	/// by copying and assignment.
+	/// Reference-counted objects inhibit construction by
+	/// copying and assignment.
 	///
 	/// TODO: Use atomic integer for MT goodness:
 	/// http://www.jaggersoft.com/pubs/oload25.html
 {
 public:
-	CountedObject() 
+	CountedObject(AbstractDeleter* deleter = new DefaultDeleter<CountedObject>()) :
+		ManagedObject(deleter)
 		/// Creates the CountedObject.
 		/// The initial reference count is one.
 	{
@@ -99,19 +276,16 @@ public:
 		/// Increments the object's reference count.
 	{
 		++count;
-		traceL("CountedObject", this) << "Duplicated: " << count << std::endl;
 	}
 		
 	void release()
-		/// Decrements the object's reference count
-		/// and deletes the object if the count
-		/// reaches zero.
+		/// Decrements the object's reference count and
+		/// calls destroy() if the count reaches zero.
 	{
 		--count;
-		traceL("CountedObject", this) << "Released: " << count << std::endl;
-			
+
 		if (count == 0)
-			destroy();
+			ManagedObject::freeMemory();
 	}
 		
 	int refCount() const
@@ -121,264 +295,21 @@ public:
 	}
 
 protected:
-	virtual void destroy()
-	{
-		traceL("CountedObject", this) << "Destroy: " << count << std::endl;
-		// Destuctor logic may be overridden.
-		// Could also use deleteLater<>
-		delete this; 
-	}
-
 	virtual ~CountedObject()
 		/// Destroys the CountedObject.
+		/// The destructor should never be called directly.
 	{
-		traceL("CountedObject", this) << "Destroying: " << refCount() << std::endl;
-		//assert(refCount() == 0);
+		traceL("CountedObject", this) << "Destroying" << std::endl;
+		assert(refCount() == 0);
 	}
 
-protected:
 	CountedObject(const CountedObject&) {};
 	CountedObject& operator = (const CountedObject&) {};
 	
-	//std::atomic<int> count;
-	int count; // TODO: sync
-};
-
-
-template <class C>
-class Handle	
-	/// Handle is a reference counted pointer similar to
-	/// std::shared_ptr but without the bloat.
-	///
-	/// The template argument must implement duplicate()
-	/// and release() methods. See CountedObject.
-{
-public:
-	Handle() : _ptr(0)
-	{
-	}
-
-	Handle(C* ptr) : _ptr(ptr)
-	{
-	}
-
-	Handle(C* ptr, bool shared) : _ptr(ptr)
-	{
-		if (shared && _ptr) _ptr->duplicate();
-	}
-
-	Handle(const Handle& ptr) : _ptr(ptr._ptr)
-	{
-		if (_ptr) _ptr->duplicate();
-	}
-
-	~Handle()
-	{
-		if (_ptr) _ptr->release();
-	}
+	friend class DefaultDeleter<CountedObject>;	
+	friend class DeferredDeleter<CountedObject>;	
 	
-	Handle& assign(C* ptr)
-	{
-		if (_ptr != ptr)
-		{
-			if (_ptr) _ptr->release();
-			_ptr = ptr;
-		}
-		return *this;
-	}
-
-	Handle& assign(C* ptr, bool shared)
-	{
-		if (_ptr != ptr)
-		{
-			if (_ptr) _ptr->release();
-			_ptr = ptr;
-			if (shared && _ptr) _ptr->duplicate();
-		}
-		return *this;
-	}
-	
-	Handle& assign(const Handle& ptr)
-	{
-		if (&ptr != this)
-		{
-			if (_ptr) _ptr->release();
-			_ptr = ptr._ptr;
-			if (_ptr) _ptr->duplicate();
-		}
-		return *this;
-	}
-
-	Handle& operator = (C* ptr)
-	{
-		return assign(ptr);
-	}
-
-	Handle& operator = (const Handle& ptr)
-	{
-		return assign(ptr);
-	}
-
-	C* operator -> ()
-	{
-		if (_ptr)
-			return _ptr;
-		else
-			throw Poco::NullPointerException();
-	}
-
-	const C* operator -> () const
-	{
-		if (_ptr)
-			return _ptr;
-		else
-			throw Poco::NullPointerException();
-	}
-
-	C& operator * ()
-	{
-		if (_ptr)
-			return *_ptr;
-		else
-			throw Poco::NullPointerException();
-	}
-
-	const C& operator * () const
-	{
-		if (_ptr)
-			return *_ptr;
-		else
-			throw Poco::NullPointerException();
-	}
-
-	C* get()
-	{
-		return _ptr;
-	}
-
-	const C* get() const
-	{
-		return _ptr;
-	}
-
-	operator C* ()
-	{
-		return _ptr;
-	}
-	
-	operator const C* () const
-	{
-		return _ptr;
-	}
-	
-	bool operator ! () const
-	{
-		return _ptr == 0;
-	}
-
-	bool isNull() const
-	{
-		return _ptr == 0;
-	}
-	
-	C* duplicate()
-	{
-		if (_ptr) _ptr->duplicate();
-		return _ptr;
-	}
-
-	bool operator == (const Handle& ptr) const
-	{
-		return _ptr == ptr._ptr;
-	}
-
-	bool operator == (const C* ptr) const
-	{
-		return _ptr == ptr;
-	}
-
-	bool operator == (C* ptr) const
-	{
-		return _ptr == ptr;
-	}
-
-	bool operator != (const Handle& ptr) const
-	{
-		return _ptr != ptr._ptr;
-	}
-
-	bool operator != (const C* ptr) const
-	{
-		return _ptr != ptr;
-	}
-
-	bool operator != (C* ptr) const
-	{
-		return _ptr != ptr;
-	}
-
-	bool operator < (const Handle& ptr) const
-	{
-		return _ptr < ptr._ptr;
-	}
-
-	bool operator < (const C* ptr) const
-	{
-		return _ptr < ptr;
-	}
-
-	bool operator < (C* ptr) const
-	{
-		return _ptr < ptr;
-	}
-
-	bool operator <= (const Handle& ptr) const
-	{
-		return _ptr <= ptr._ptr;
-	}
-
-	bool operator <= (const C* ptr) const
-	{
-		return _ptr <= ptr;
-	}
-
-	bool operator <= (C* ptr) const
-	{
-		return _ptr <= ptr;
-	}
-
-	bool operator > (const Handle& ptr) const
-	{
-		return _ptr > ptr._ptr;
-	}
-
-	bool operator > (const C* ptr) const
-	{
-		return _ptr > ptr;
-	}
-
-	bool operator > (C* ptr) const
-	{
-		return _ptr > ptr;
-	}
-
-	bool operator >= (const Handle& ptr) const
-	{
-		return _ptr >= ptr._ptr;
-	}
-
-	bool operator >= (const C* ptr) const
-	{
-		return _ptr >= ptr;
-	}
-
-	bool operator >= (C* ptr) const
-	{
-		return _ptr >= ptr;
-	}
-
-private:
-	C* _ptr;
+	int /* std::atomic<int> */ count; // TODO: sync
 };
 
 
@@ -386,3 +317,252 @@ private:
 
 
 #endif // SOURCEY_Memory_H
+
+
+
+
+/*
+class IDeletable
+	/// Abstract storage container for deleting
+	/// a type cast pointer.
+{
+public:
+	virtual ~IDeletable() 
+	{
+	}
+};
+
+
+template <class C>
+class Deletable: public IDeletable
+	/// Storage container implementation for deleting
+	/// a type cast pointer.
+{
+public:
+	C* ptr;
+
+	Deletable(C* ptr) : ptr(ptr)
+	{
+	}
+
+	virtual ~Deletable()
+	{
+		delete ptr;
+	}
+};
+*/
+
+	//{ 
+	//	traceL("GarbageCollector", this) << "Scheduling: " << ptr << std::endl;
+	//	
+	//	Mutex::ScopedLock lock(_mutex);
+	//	_pending.push_back(new Deletable<C>(ptr));
+	//}
+	
+	/*
+class ManagedObject;
+	
+	void deleteLater(ManagedObject* ptr);
+class AbstractDeleter;
+*/
+	/*
+	virtual void free() 
+	{
+		delete this; 
+	}
+
+
+	Deleter(Func f = &deleter::Default< C >::func) : 
+		AbstractDeleter(NULL), func(f)
+	{
+	}
+	*/
+/*
+// -------------------------------------------------------------------
+//
+class StandardObject	
+	/// StandardObject is a memory base for objects which employ
+	/// standard memory menagement ie. no special reference counting  
+	/// or garbage colleaction.
+{
+	virtual ~StandardObject()
+	{
+	}
+};
+
+
+// -------------------------------------------------------------------
+//
+class MemBase	
+{
+};
+*/
+
+
+/*    void invoke(C* p)
+    {
+        func(p);
+    }
+
+
+template< class C >
+struct Deleter
+{
+    typedef void (*Func)(C*);
+ 
+    static void invoke(Func f, C const* p)
+    {
+        f(const_cast<C*>(p));
+    }
+};
+	*/
+/*
+
+
+namespace deleter {
+	/// Deleter functors which freeing pointer memory in various ways.
+	///
+	/// These methods are useful for passing to classes or templates
+	/// that are oblivious about the memory handling method of their
+	/// managed pointers.
+ 
+    template< class C >
+    struct Default
+    {
+		static void func(C* p)
+		{
+			delete p;
+		}
+    };
+
+    template< class C >
+    struct Destroy
+    {
+		static void func(C* p)
+		{
+			p->destroy();
+		}
+    };
+
+    template< class C >
+    struct Deferred
+    {
+		static void func(C* p)
+		{
+			scy::deleteLater(C* ptr);
+		}
+    };
+
+    template< class C >
+    struct ViaAutoPtr
+    {		
+		static void func(C* p)
+		{
+			std::auto_ptr<C>(p + 0);
+		}
+    };
+
+    template< class C >
+    struct None
+    {
+		static void func(C* p)
+		{
+		}
+    };
+
+}  // namespace deleter
+
+*/
+/*
+*/
+
+	/*
+	ManagedObject(AbstractDeleter* deleter = new DeferredDeleter<ManagedObject>()) :
+		CountedObject(deleter)
+	{
+	};
+	*/
+
+	/*
+	virtual void destroy()
+		/// Destroys the CountedObject when the count
+		/// reaches zero.
+		///
+		/// This method can be overridden to implement
+		/// destruction logic or garbage collection.
+	{
+		assert(refCount() == 0);
+		delete this; 
+	}
+		Deleter<CountedObject>::invoke(&deleter::Default<CountedObject>::func, this);
+	*/
+
+
+	/* //<deleter::Deferred< C >>
+		/// Creates the CountedObject.
+		/// The initial reference count is one.
+
+	virtual void destroy()
+		/// Destroys the ManagedObject.
+	{
+		deleteLater<ManagedObject>(this); 
+	}
+	*/
+
+
+//typedef ManagedObject
+
+/*
+
+	//Deleter::func(this);
+	//typedef typename Deleter< Type >::Func  DeleterFunc;	
+    //typedef void (*DeleteFunc)(C*);
+	//DeleteFunc fn; 
+//template< class Deleter = DefaultDeleter< CountedObject > >
+
+template< class C = ManagedObject >
+*/
+
+
+	
+/*
+template <class C>
+class AsyncDeleter 
+	/// Simple garbage collector for delayed deletion of pointers.
+{
+public:
+	C* ptr;
+
+	AsyncDeleter(C* ptr) : ptr(ptr)
+	{
+		traceL("AsyncDeleter", this) << "Queueing: " << ptr << std::endl;
+
+		// TODO: Use uv_async_t, or uv_timer_t?
+		uv_idle_t* idler = new uv_idle_t;
+		idler->data = this;
+		uv_idle_init(uv_default_loop(), idler);
+		uv_idle_start(idler, AsyncDeleter::onDestroyObject);
+	}
+
+	~AsyncDeleter()
+	{
+		traceL("AsyncDeleter", this) << "Deleting: " << ptr << std::endl;
+		delete ptr;
+	}
+
+	static void onDestroyObject(uv_idle_t* idler, int status)
+	{
+		AsyncDeleter* self = reinterpret_cast<AsyncDeleter*>(idler->data);
+		traceL("AsyncDeleter", self) << "On destroy" << std::endl;
+		assert(status == 0);
+		//uv_idle_stop(handle);		
+		uv_close((uv_handle_t*)idler, afterClose);
+		delete self;
+	}
+
+	static void afterClose(uv_handle_t* handle) 
+	{	
+		delete handle;
+	}
+};
+*/

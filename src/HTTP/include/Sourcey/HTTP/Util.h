@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/Base.h"
-#include "Poco/Net/NameValueCollection.h"
+#include "Poco/Net/KVStore.h"
 
 
 namespace scy {
@@ -43,7 +43,7 @@ std::string parseCookieItem(const std::string& cookie, const std::string& item);
 
 //bool parseRestfulQuery(const std::string& request, StringVec& out);
 
-bool parseURIQuery(const std::string& uri, Poco::Net::NameValueCollection& out);
+bool parseURIQuery(const std::string& uri, Poco::Net::KVStore& out);
 
 
 } // namespace util

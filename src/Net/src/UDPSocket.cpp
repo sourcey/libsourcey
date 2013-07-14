@@ -58,4 +58,4 @@ UDPBase& UDPSocket::base() const
 }
 
 
-} } // namespace scy::uv
+} } // namespace scy::net

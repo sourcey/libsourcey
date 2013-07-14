@@ -1,14 +1,10 @@
-#include "Sourcey/Logger.h"
-#include "Sourcey/Runner.h"
-#include "Sourcey/PacketStream.h"
-#include "Sourcey/Crypto.h"
-#include "Sourcey/Util.h"
-
-#include "Sourcey/HTTP/Server.h"
-#include "Sourcey/HTTP/WebSocket.h"
+#include "MediaServer.h"
+#include "RelayResponder.h"
+#include "SnapshotResponder.h"
+#include "StreamingResponder.h"
+#include "WebSocketResponder.h"
 
 #include "Sourcey/Media/MediaFactory.h"
-#include "Sourcey/Media/AVEncoder.h"
 #include "Sourcey/Media/AVInputReader.h"
 #include "Sourcey/Media/FLVMetadataInjector.h"
 #include "Sourcey/Media/FormatRegistry.h"
@@ -16,15 +12,10 @@
 #include "Sourcey/HTTP/Util.h"
 #include "Sourcey/HTTP/Packetizers.h"
 #include "Sourcey/Util/Base64PacketEncoder.h"
-#include "Sourcey/Util/StreamManager.h"
+//#include "Sourcey/Util/StreamManager.h"
 
-#include "Sourcey/TURN/client/TCPClient.h"
-#include "Poco/Net/NameValueCollection.h"
-
-#include <string>
-#include <vector>
-#include <assert.h>
-#include <conio.h>
+//#include "Sourcey/TURN/client/TCPClient.h"
+#include "Poco/Net/KVStore.h"
 
 
 /*
@@ -47,25 +38,54 @@ using namespace scy::av;
 
 namespace scy { 
 
-	
-class MediaServer;
 
-
-struct StreamingOptions: public av::RecordingOptions
-{	
-	std::string packetizer;		// HTTP response packetizer [chunked, multipart]
-	std::string encoding;		// The packet content encoding method [Base64, ...]
+// ----------------------------------------------------------------------------
+// HTTP Media Server
+//
+MediaServer::MediaServer(UInt16 port) :
+	http::Server(port, new HTTPStreamingConnectionFactory(this))
+{		
+	debugL("MediaServer") << "Creating" << endl;
 		
-	MediaServer* server;		// Media server instance
-	VideoCapture* videoCapture; // Video capture instance
-	AudioCapture* audioCapture; // Audio capture instance
+	// Pre-initialize video captures in the main thread	
+	MediaFactory::initialize();
+	MediaFactory::instance()->loadVideo();
 
-	StreamingOptions(MediaServer* server = NULL, VideoCapture* videoCapture = NULL, AudioCapture* audioCapture = NULL) : 
-		server(server), videoCapture(videoCapture), audioCapture(audioCapture) {}
-};
+	// Register the media formats we will be using
+	FormatRegistry& formats = MediaFactory::instance()->formats();		
+	formats.registerFormat(Format("MP3", "mp3",
+		AudioCodec("MP3", "libmp3lame", 2, 44100, 128000, "s16p")));	
+		// Adobe Flash Player requires that audio files be 16bit and have a sample rate of 44.1khz.
+		// Flash Player can handle MP3 files encoded at 32kbps, 48kbps, 56kbps, 64kbps, 128kbps, 160kbps or 256kbps.
+		// NOTE: 128000 works fine for 44100, but 64000 is borked!
+ 						
+	formats.registerFormat(Format("FLV", "flv", 
+		VideoCodec("FLV", "flv", 320, 240)));
+
+	formats.registerFormat(Format("FLV-Speex", "flv",
+		VideoCodec("FLV", "flv", 320, 240),
+		AudioCodec("Speex", "libspeex", 1, 16000)));	
+
+	formats.registerFormat(Format("Speex", "flv",
+		AudioCodec("Speex", "libspeex", 1, 16000)));
+
+	formats.registerFormat(Format("MJPEG", "mjpeg", 
+		VideoCodec("MJPEG", "mjpeg", 480, 320, 20)));
+
+	// TODO: Add h264 and newer audio formats when time permits
+}
 
 
-void setupPacketStream(PacketStream& stream, const StreamingOptions& options, bool freeAudio = true) 
+MediaServer::~MediaServer()
+{		
+	debugL("MediaServer") << "Destroying" << endl;
+	
+	MediaFactory::instance()->unloadVideo();
+	MediaFactory::uninitialize();
+}
+
+
+void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions& options, bool freeAudio, bool attachPacketizers) 
 {	
 	debugL() << "Setup Packet Stream" << endl;
 
@@ -80,7 +100,7 @@ void setupPacketStream(PacketStream& stream, const StreamingOptions& options, bo
 	}
 
 	// Create and attach media encoder				
-	AVEncoder* encoder = new AVEncoder(options);
+	av::AVEncoder* encoder = new av::AVEncoder(options);
 	encoder->initialize();
 	stream.attach(encoder, 5, true);		
 				
@@ -99,24 +119,6 @@ void setupPacketStream(PacketStream& stream, const StreamingOptions& options, bo
 		}
 		else
 			throw Exception("Unsupported encoding method: " + options.encoding);
-				
-		// Attach an HTTP output packetizer
-		IPacketizer* packetizer = NULL;
-		if (options.packetizer.empty() ||
-			options.packetizer == "none" ||
-			options.packetizer == "None")
-			packetizer = new http::StreamingPacketizer("image/jpeg");	
-
-		else if (options.packetizer == "chunked")
-			packetizer = new http::ChunkedPacketizer("image/jpeg");
-
-		else if (options.packetizer == "multipart")
-			packetizer = new http::MultipartPacketizer("image/jpeg", false, options.encoding == "Base64");				
-
-		else throw Exception("Unsupported packetizer method: " + options.packetizer);
-
-		if (packetizer)					
-			stream.attach(packetizer, 10, true);	
 	}	
 	else if (options.oformat.name == "FLV") {
 
@@ -124,658 +126,138 @@ void setupPacketStream(PacketStream& stream, const StreamingOptions& options, bo
 		FLVMetadataInjector* injector = new FLVMetadataInjector(options.oformat);
 		stream.attach(injector, 10);
 	}
+					
+	// Attach an HTTP output packetizer
+	IPacketizer* packetizer = NULL;
+	if (options.packetizer.empty() ||
+		options.packetizer == "none" ||
+		options.packetizer == "None")
+		packetizer = new http::StreamingPacketizer("image/jpeg");	
+
+	else if (options.packetizer == "chunked")
+		packetizer = new http::ChunkedPacketizer("image/jpeg");
+
+	else if (options.packetizer == "multipart")
+		packetizer = new http::MultipartPacketizer("image/jpeg", false, options.encoding == "Base64");				
+
+	else throw Exception("Unsupported packetizer method: " + options.packetizer);
+
+	if (packetizer)					
+		stream.attach(packetizer, 10, true);
 	
 	debugL() << "Setup Packet Stream: OK" << endl;
 }
 
 
 // ----------------------------------------------------------------------------
-//
-class StreamingRequestHandler: public http::ServerResponder
-{
-public:
-	StreamingRequestHandler(http::ServerConnection& connection, const StreamingOptions& options) :
-		http::ServerResponder(connection), options(options)
-	{		
-	}
-
-	~StreamingRequestHandler() 
-	{
-	}
-		
-	void onRequest(http::Request& request, http::Response& response) 
-	{
-		debugL("HTTPStreamingConnectionHandler") << "Running: " 
-			<< "\n\tOutput Format: " << options.oformat.name
-			<< "\n\tOutput Encoding: " << options.encoding
-			<< "\n\tOutput Packetizer: " << options.packetizer
-			<< endl;
-
-		// Create the packet stream
-		setupPacketStream(stream, options);
-
-		// Start the stream
-		stream += packetDelegate(this, &StreamingRequestHandler::onVideoEncoded);
-		stream.start();
-	}
-
-	void onClose()
-	{
-		stream -= packetDelegate(this, &StreamingRequestHandler::onVideoEncoded);
-		stream.stop();
-	}
-
-	void onVideoEncoded(void* sender, RawPacket& packet)
-	{
-		debugL("StreamingRequestHandler") << "Sending Packet: " 
-			<< packet.size() << ": " << fpsCounter.fps << endl;
-
-		try {	
-			connection().sendRaw((const char*)packet.data(), packet.size());
-			fpsCounter.tick();		
-		}
-		catch (Exception& exc) {
-			errorL("StreamingRequestHandler") << "Error: " << exc.displayText() << endl;
-			connection().close();
-		}
-	}
-	
-	PacketStream stream;
-	StreamingOptions options;
-	FPSCounter fpsCounter;
-};
-
-
-// ----------------------------------------------------------------------------
-// Releayed Streaming Client Allocation
-//
-/*
-class RelayedMediaStream 
-{
-public:
-	PacketStream    stream;
-};
-*/
-
-/* 
-class RelayedStreamingAllocation: public turn::TCPClientObserver
-{
-public:
-	Runner			runner;
-	// Net::Reactor	reactor;
-
-	net::IP			peerIP;	
-	turn::TCPClient client;
-	
-	StreamManager	streams;
-	StreamingOptions options;	
-	int				frameNumber;
-	bool			connected;
-
-	Signal<turn::Client&> AllocationCreated;
-	Signal2<turn::Client&, const net::Address&> ConnectionCreated;
-
-	RelayedStreamingAllocation(const StreamingOptions& options, const turn::Client::Options& clientOptions, const net::IP& peerIP) : 
-		client(*this, reactor, runner, clientOptions), options(options), peerIP(peerIP), frameNumber(0), connected(false)
-	{
-	}
-
-	virtual ~RelayedStreamingAllocation() 
-	{ 
-		terminate();
-		assert(streams.empty());
-
-		// NOTE: We are responsible for deleting the audioCapture.
-		if (options.audioCapture)
-			delete options.audioCapture;
-	}
-
-	void initiate() 
-	{
-		debugL("RelayedStreamingAllocation", this) << "Initiating" << endl;		
-		//terminate();
-		try	
-		{		
-			// Initiate the TRUN client allocation
-			debugL("RelayedStreamingAllocation", this) << "Adding Persission" << endl;		
-			client.addPermission(peerIP);	
-			debugL("RelayedStreamingAllocation", this) << "Initiating Client" << endl;		
-			client.initiate();
-		} 
-		catch (Exception& exc) {
-			errorL()  << "[RelayedStreamingAllocation: " << this << "] Error: " << exc.displayText() << std::endl;
-			assert(0);
-		}
-		debugL("RelayedStreamingAllocation", this) << "Initiating: OK" << endl;	
-	}
-
-	void terminate() 
-	{
-		debugL("RelayedStreamingAllocation", this) << "Terminating" << endl;	
-		client.terminate();
-
-		// Free all managed packet streams
-		streams.closeAll();
-	}
-
-protected:
-	void onRelayStateChange(turn::Client& client, turn::ClientState& state, const turn::ClientState&) 
-	{
-		debugL("RelayedStreamingAllocation", this) << "Relay State Changed: " << state.toString() << endl;
-
-		switch(state.id()) {
-		case turn::ClientState::Waiting:				
-			break;
-		case turn::ClientState::Allocating:				
-			break;
-		case turn::ClientState::Authorizing:
-			break;
-		case turn::ClientState::Success:
-			AllocationCreated.emit(this, this->client);
-			break;
-		case turn::ClientState::Failed:
-			assert(0 && "Allocation failed");
-			break;
-		case turn::ClientState::Terminated:	
-			break;
-		}
-	}
-	
-	void onClientConnectionCreated(turn::TCPClient& client, net::SocketBase* socket, const net::Address& peerAddr) //UInt32 connectionID, 
-	{
-		debugL("RelayedStreamingAllocation", this) << "################# Connection Created: " << peerAddr << endl;
-		
-		// Just allow one stream for now
-		if (this->streams.size() == 1) {
-			debugL("RelayedStreamingAllocation", this) << "@@@@@@@@@@@@@@@@@@@@@@@@@@ Rejecting Connection" << endl;
-			return;
-		}
-
-		try	
-		{	
-			// Notify the outside application
-			ConnectionCreated.emit(this, client, peerAddr);
-
-			// Create an output media stream for the new connection
-			PacketStream* stream = new PacketStream(peerAddr.toString());
-			
-			// Setup the packet stream ensuring the audio capture isn't
-			// destroyed with the stream, as it may be reused while the
-			// allocation is active.
-			setupPacketStream(*stream, options, false);
-		
-			// Feed the packet stream directly into the connection		
-			stream->attach(packetDelegate(socket, &net::SocketBase::send));
-
-			// Start the stream
-			stream->start();	
-
-			this->streams.addStream(stream);
-		} 
-		catch (Exception& exc) {
-			errorL()  << "[RelayedStreamingAllocation: " << this << "] Stream Error: " << exc.displayText() << std::endl;
-			assert(0);
-		}
-
-		debugL("RelayedStreamingAllocation", this) << "Connection Created: OK: " << peerAddr << endl;
-	}
-		
-	void onClientConnectionClosed(turn::TCPClient& client, net::SocketBase* socket, const net::Address& peerAddress)
-	{
-		debugL("RelayedStreamingAllocation", this) << "!!!!!!!!!!!!!!!!!!!!!!!! Connection Closed: " << peerAddress << endl;
-
-		try	
-		{	
-			// Destroy the media stream for the closed connection (if any).
-			//this->streams.free(peerAddress.toString());
-			PacketStream* stream = streams.remove(peerAddress.toString());
-			if (stream) {
-				// Feed the packet stream directly into the connection		
-				stream->detach(packetDelegate(socket, &net::SocketBase::send));
-				//delete stream;
-			}
-		} 
-		catch (Exception& exc) {
-			errorL()  << "[RelayedStreamingAllocation: " << this << "] Stream Error: " << exc.displayText() << std::endl;
-			assert(0);
-		}
-	}
-
-	void onRelayedData(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
-	{
-		debugL("RelayedStreamingAllocation", this) << "Received data from peer: " << string(data, size) <<  ": " << peerAddr << endl;
-	
-		// The remore peer is a web browser, the HTTP request sent 
-		// to the relayed address will be the first thing we see...
-	}
-
-	void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
-	{
-		debugL("RelayedStreamingAllocation", this) << "Permissions Created" << endl;
-	}
-};
-*/
-
-
-	/*	
-		//client.terminate(); 
-		//stopMedia();
-	//PacketStream    stream;
-
-	void playMedia() 
-	{
-		debugL("RelayedStreamingAllocation", this) << "Play Media" << endl;
-
-		// Create the packet stream
-		//debugL("RelayedStreamingAllocation", this) << "Setup Packet Stream" << endl;	
-		//setupPacketStream(stream, options);
-		//debugL("RelayedStreamingAllocation", this) << "Setup Packet Stream: OK" << endl;	
-
-		// Start the stream
-		stream += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
-		stream.start();		
-
-		debugL("RelayedStreamingAllocation", this) << "Play Media: OK" << endl;
-	}
-
-	void stopMedia()
-	{
-		debugL("RelayedStreamingAllocation", this) << "Stop Media" << endl;
-		stream -= packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
-		stream.close();	
-		debugL("RelayedStreamingAllocation", this) << "Stop Media: OK" << endl;
-	}
-	*/
-
-	/*
-	void onMediaEncoded(void* sender, RawPacket& packet)
-	{
-		debugL("RelayedStreamingAllocation", this) << "$$$$$$$$$$$$$$ Sending Packet: " << packet.size() << string((const char*)packet.data(), 100)  << endl;
-		
-		//assert(currentPeerAddr.valid());
-		try {
-			// Send the media to our peer
-			//client.sendData((const char*)packet.data(), packet.size(), currentPeerAddr);
-			//ostringstream oss;
-			//oss << "Packet: " << frameNumber++ << endl;			
-			//client.sendData(oss.str().data(), oss.str().length(), currentPeerAddr);
-		}
-		catch (Exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "^^^^^^^^^^^^^^^^^^^^^^^^ Send Error: " << exc.displayText() << endl;
-			
-			// TODO: Calling stream.stop() inside stream callback causing deadlock
-			terminate();
-		}
-		debugL("RelayedStreamingAllocation", this) << "!$$$$$$$$$$$$$$ Sending Packet: OK: " << packet.size() << endl;
-	}
-	*/
-
-	
-		/*
-		//stream += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
-		// Start the stream
-		stream += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
-		stream.start();		
-		stream -= packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
-		stream.close();	
-
-		//currentPeerAddr = peerAddr; // Current peer
-		//connected = true;
-		
-		// TODO: Restart packet stream without deleting managed sources
-		//stopMedia();
-		//playMedia();
-		*/
-	/*
-	void onClientConnectionState(turn::TCPClient& client, net::SocketBase*, 
-		Net::SocketState& state, const Net::SocketState& oldState) 
-	{
-		debugL("RelayedStreamingAllocation", this) << "@@@@@@@@@@@@@@@@@@@@@ Connection State: " << state.toString() << endl;
-	}
-
-		//assert(currentPeerAddr.valid());
-		//assert(connected);
-		//playMedia();
-
-
-// ----------------------------------------------------------------------------
-// Releayed Streaming Connection Handler
-//
-class RelayedStreamingRequestHandler: public http::ServerResponder
-{
-public:
-	RelayedStreamingRequestHandler(const StreamingOptions& options) : 		
-		options(options), allocation(allocation), response(response)
-	{		
-	}
-
-	~RelayedStreamingRequestHandler() 
-	{
-	}
-		
-	void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
-	{
-		debugL("RelayedStreamingRequestHandler") << "Running: " 
-			<< "\n\tOutput Format: " << options.oformat.name
-			<< "\n\tOutput Encoding: " << options.encoding
-			<< "\n\tOutput Packetizer: " << options.packetizer
-			<< endl;
-		
-		response.set("Access-Control-Allow-Origin", "*");
-		this->response = &response;
-				
-		//net::IP peerIP("127.0.0.1");
-		turn::Client::Options co;
-		co.serverAddr = net::Address("127.0.0.1", 3478); // "173.230.150.125"
-		co.lifetime  = 120 * 1000;	// 2 minutes
-		co.timeout = 10 * 1000;
-		co.timerInterval = 3 * 1000;
-		co.username = Anionu_API_USERNAME;
-		co.password = Anionu_API_PASSWORD;
-
-		allocation = new RelayedStreamingAllocation(options, co, request.clientAddress().host());
-		allocation->AllocationCreated += delegate(this, &RelayedStreamingRequestHandler::onAllocationCreated);
-		allocation->initiate();
-		
-		debugL("RelayedStreamingRequestHandler", this) << "Waiting" << endl;	
-		stopSignal.wait();
-		debugL("RelayedStreamingRequestHandler", this) << "Stopped" << endl;	
-		
-		allocation->AllocationCreated -= delegate(this, &RelayedStreamingRequestHandler::onAllocationCreated);
-
-		// TODO: The allocation will outlive this handler instance
-		// Manage allocation via MediaService?
-
-		debugL("RelayedStreamingRequestHandler", this) << "Exiting" << endl;
-	}
-	
-	void onAllocationCreated(void* sender, turn::Client& client)
-	{
-		debugL("RelayedStreamingRequestHandler", this) << "Allocation Created" << endl;
-					
-		// Write the relay address	
-		assert(this->response);
-		this->response->send() 
-			<< allocation->client.relayedAddress()
-			<< std::flush;
-
-		debugL("RelayedStreamingRequestHandler", this) << "Allocation Created 1" << endl;		
-		stopSignal.set();
-		debugL("RelayedStreamingRequestHandler", this) << "Allocation Created 2" << endl;
-	}
-	
-	//RelayedStreamingAllocation* allocation;
-	Poco::Net::HTTPServerResponse* response;
-	StreamingOptions options;
-	Poco::Event stopSignal;
-	FPSCounter fpsCounter;
-};
-		//assert(ourMediaProvider);
-		//socket().sendBytes(data.data(), data.size());			
-		//Buffer(data.data(), data.size());
-		//string data = allocation->client.relayedAddress();
-	//Poco::Net::StreamSocket socket;
-	//VideoCapture* videoCapture;
-	//AudioCapture* audioCapture;
-	*/
-
-
-// ---------------------------------------------------------------------
-//
-class SnapshotRequestHandler: public http::ServerResponder
-{
-public:
-	SnapshotRequestHandler(http::ServerConnection& connection, VideoCapture* videoCapture = NULL, int width = 480, int height = 320) : 
-		http::ServerResponder(connection), videoCapture(videoCapture), width(width), height(height)
-	{		
-	}
-
-	~SnapshotRequestHandler() 
-	{
-	}
-			
-	void onRequest(http::Request& request, http::Response& response) 
-	{
-		debugL("SnapshotRequestHandler") << "Running" << endl;
-
-		cv::Mat frame;
-		videoCapture->getFrame(frame, width, height);
-		
-		vector<unsigned char> buffer;
-		vector<int> param = vector<int>(2);
-		param[0] = CV_IMWRITE_JPEG_QUALITY;
-		param[1] = 95; // default(95) 0-100
-		cv::imencode(".jpg", frame, buffer, param);
-
-		debugL("SnapshotRequestHandler") << "Taking Snapshot Image: " 
-			<< "\n\tWidth: " << frame.cols 
-			<< "\n\tHeight: " << frame.rows 
-			<< "\n\tCapture Width: " << videoCapture->width()
-			<< "\n\tCapture Height: " << videoCapture->height()
-			<< "\n\tType: " << frame.type()
-			<< "\n\tInput Size: " << frame.total() 
-			<< "\n\tOutput Size: " << buffer.size()
-			<< endl;
-
-		unsigned char* data = new unsigned char[buffer.size()];
-		copy(buffer.begin(), buffer.end(), data);
-		connection().sendRaw((const char*)data, buffer.size());
-		delete data;
-		connection().close();
-	}
-	
-	int width;
-	int height;
-	VideoCapture* videoCapture;
-};
-
-
-// ----------------------------------------------------------------------------
-//
-class WebSocketRequestHandler: public http::ServerResponder
-{
-public:
-	WebSocketRequestHandler(http::ServerConnection& connection, const StreamingOptions& options) : 		
-		http::ServerResponder(connection), options(options)
-	{	
-		debugL("WebSocketRequestHandler") << "Create" << endl;
-
-		// Create the packet stream
-		setupPacketStream(stream, options);
-
-		// Start the stream
-		stream += packetDelegate(this, &WebSocketRequestHandler::onVideoEncoded);
-		stream.start();	
-	}
-
-	~WebSocketRequestHandler() 
-	{
-		debugL("WebSocketRequestHandler") << "Destroy" << endl;			
-	}
-		
-	void onClose() 
-	{
-		debugL("WebSocketRequestHandler") << "On close" << endl;
-
-		stream.stop();	
-		stream -= packetDelegate(this, &WebSocketRequestHandler::onVideoEncoded);
-	}
-	
-	void onVideoEncoded(void* sender, RawPacket& packet)
-	{
-		debugL("WebSocketRequestHandler") << "Sending Packet: "
-			<< packet.size() << ": " << fpsCounter.fps << endl;
-		try
-		{	
-			connection().sendRaw(packet.data(), packet.size(), http::WebSocket::FRAME_BINARY);
-			fpsCounter.tick();		
-		}
-		catch (Exception& exc)
-		{
-			errorL("StreamingRequestHandler") << "Error: " << exc.displayText() << endl;
-			connection().close();
-		}
-	}
-	
-	PacketStream stream;
-	StreamingOptions options;
-	FPSCounter fpsCounter;
-};
-
-
-// ----------------------------------------------------------------------------
 // HTTP Streaming Connection Factory
 //
-class HTTPStreamingConnectionFactory: public http::ServerResponderFactory
+HTTPStreamingConnectionFactory::HTTPStreamingConnectionFactory(MediaServer* server) : 		
+	_server(server)
+{		
+}		
+	
+http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::ServerConnection& conn)
 {
-public:
-	HTTPStreamingConnectionFactory(MediaServer* server) : 		
-		_server(server)
-	{		
-	}		
-	
-	http::ServerResponder* createResponder(http::ServerConnection& conn)
+	try 
 	{
-		try 
-		{
-			http::Request& request = conn.request();
+		http::Request& request = conn.request();
 
-			// Log incoming requests
-			infoL("HTTPStreamingConnectionFactory")
-				<< "Incoming connection from " << conn.socket().peerAddress() 
-				<< ": Request:\n" << request << endl;
+		// Log incoming requests
+		infoL("HTTPStreamingConnectionFactory")
+			<< "Incoming connection from " << conn.socket().peerAddress() 
+			<< ": Request:\n" << request << endl;
 			
-			// Parse streaming options from query
-			StreamingOptions options(_server);
-			Poco::Net::NameValueCollection params;
-			util::parseURIQuery(request.getURI(), params);
-			FormatRegistry& formats = MediaFactory::instance()->formats();				
+		// Parse streaming options from query
+		StreamingOptions options(_server);
+		Poco::Net::KVStore params;
+		util::parseURIQuery(request.getURI(), params);
+		FormatRegistry& formats = MediaFactory::instance()->formats();				
 
-			// An exception will be thrown if no format was provided, 
-			// or if the request format is not registered.
-			options.oformat = formats.get(params.get("format", "MJPEG"));
-			if (params.has("width"))		
-				options.oformat.video.width = util::fromString<UInt32>(params.get("width"));
-			if (params.has("height"))	
-				options.oformat.video.height = util::fromString<UInt32>(params.get("height"));
-			if (params.has("fps"))		
-				options.oformat.video.fps = util::fromString<UInt32>(params.get("fps"));
-			if (params.has("quality"))	
-				options.oformat.video.quality = util::fromString<UInt32>(params.get("quality"));
+		// An exception will be thrown if no format was provided, 
+		// or if the request format is not registered.
+		options.oformat = formats.get(params.get("format", "MJPEG"));
+		if (params.has("width"))		
+			options.oformat.video.width = util::fromString<UInt32>(params.get("width"));
+		if (params.has("height"))	
+			options.oformat.video.height = util::fromString<UInt32>(params.get("height"));
+		if (params.has("fps"))		
+			options.oformat.video.fps = util::fromString<UInt32>(params.get("fps"));
+		if (params.has("quality"))	
+			options.oformat.video.quality = util::fromString<UInt32>(params.get("quality"));
 
-			// Response encoding and packetizer options
-			options.encoding = params.get("encoding", "");
-			options.packetizer = params.get("packetizer", "");
+		// Response encoding and packetizer options
+		options.encoding = params.get("encoding", "");
+		options.packetizer = params.get("packetizer", "");
 			
-			// Video captures must be initialized in the main thread. 
-			// See MediaFactory::loadVideo			
-			VideoCapture* videoCapture = NULL;
-			AudioCapture* audioCapture = NULL;
-			MediaFactory* mediaFactory = av::MediaFactory::instance();
-			if (options.oformat.video.enabled) {
-				av::Device video;
-				mediaFactory->devices().getDefaultVideoCaptureDevice(video);
-				options.videoCapture = mediaFactory->getVideoCapture(video.id);
-				av::setVideoCaptureInputFormat(options.videoCapture, options.iformat);	
-			}
-			if (options.oformat.audio.enabled) {
-				av::Device audio;
-				mediaFactory->devices().getDefaultAudioInputDevice(audio);
-				options.audioCapture = mediaFactory->createAudioCapture(audio.id, 
-					options.oformat.audio.channels, 
-					options.oformat.audio.sampleRate);
-			}		
-			
-			// Handle websocket connections
-			if (request.has("Sec-WebSocket-Key") ||
-				request.getURI().find("/websocket") == 0) {		
-				return new WebSocketRequestHandler(conn, options);
-			}	
-
-			// Handle HTTP streaming
-			if (request.getURI().find("/streaming") == 0) {			
-				return new StreamingRequestHandler(conn, options);
-			}
-
-			// Handle relayed media requests
-			//if (request.getURI().find("/relay") == 0) {			
-			//	return new RelayedStreamingRequestHandler(conn, options);
-			//}
-
-			// Handle HTTP snapshot requests
-			if (request.getURI().find("/snapshot") == 0) {			
-				return new SnapshotRequestHandler(conn, videoCapture, options.oformat.video.width, options.oformat.video.height);	
-			}	
+		// Video captures must be initialized in the main thread. 
+		// See MediaFactory::loadVideo			
+		MediaFactory* mediaFactory = av::MediaFactory::instance();
+		if (options.oformat.video.enabled) {
+			av::Device video;
+			mediaFactory->devices().getDefaultVideoCaptureDevice(video);
+			options.videoCapture = mediaFactory->getVideoCapture(video.id);
+			av::setVideoCaptureInputFormat(options.videoCapture, options.iformat);	
 		}
-		catch (Exception& exc)
-		{
-			errorL("StreamingRequestHandlerFactory") << "Request Error: " << exc.displayText() << endl;
+		if (options.oformat.audio.enabled) {
+			av::Device audio;
+			mediaFactory->devices().getDefaultAudioInputDevice(audio);
+			options.audioCapture = mediaFactory->createAudioCapture(audio.id, 
+				options.oformat.audio.channels, 
+				options.oformat.audio.sampleRate);
 		}
-		
-		errorL("StreamingRequestHandlerFactory") << "Bad Request" << endl;
-		return new http::BadRequestHandler(conn);	
+			
+		// Handle websocket connections
+		if (request.has("Sec-WebSocket-Key") ||
+			request.getURI().find("/websocket") == 0) {		
+			return new WebSocketRequestHandler(conn, options);
+		}	
+
+		// Handle HTTP streaming
+		if (request.getURI().find("/streaming") == 0) {			
+			return new StreamingRequestHandler(conn, options);
+		}
+
+		// Handle relayed media requests
+		if (request.getURI().find("/relay") == 0) {			
+			return new RelayedStreamingResponder(conn, options);
+		}
+
+		// Handle HTTP snapshot requests
+		if (request.getURI().find("/snapshot") == 0) {			
+			return new SnapshotRequestHandler(conn, options);	
+		}	
 	}
-
-	MediaServer* _server;
-};
-	
+	catch (Exception& exc)
+	{
+		errorL("StreamingRequestHandlerFactory") << "Request Error: " << exc.displayText() << endl;
+	}
+		
+	errorL("StreamingRequestHandlerFactory") << "Bad Request" << endl;
+	return new http::BadRequestHandler(conn);	
+}
 
 // ----------------------------------------------------------------------------
-// HTTP Media Server
+// HTTP Streaming Options
 //
-class MediaServer: public http::Server
+StreamingOptions::StreamingOptions(MediaServer* server, av::VideoCapture* videoCapture, av::AudioCapture* audioCapture) : 
+	server(server), videoCapture(videoCapture), audioCapture(audioCapture) 
 {
-public:
-	MediaServer(UInt16 port) :
-		http::Server(port, new HTTPStreamingConnectionFactory(this))
-	{		
-		debugL("MediaServer") << "Creating" << endl;
-		
-		// Pre-initialize video captures in the main thread	
-		MediaFactory::initialize();
-		MediaFactory::instance()->loadVideo();
+	debugL("StreamingOptions", this) << "Destroy" << endl;	
+}
 
-		// Register the media formats we will be using
-		FormatRegistry& formats = MediaFactory::instance()->formats();		
-		formats.registerFormat(Format("MP3", "mp3",
-			AudioCodec("MP3", "libmp3lame", 2, 44100, 128000, "s16p")));	
-			// Adobe Flash Player requires that audio files be 16bit and have a sample rate of 44.1khz.
-			// Flash Player can handle MP3 files encoded at 32kbps, 48kbps, 56kbps, 64kbps, 128kbps, 160kbps or 256kbps.
-			// NOTE: 128000 works fine for 44100, but 64000 is borked!
- 						
-		formats.registerFormat(Format("FLV", "flv", 
-			VideoCodec("FLV", "flv", 320, 240)));
-
-		formats.registerFormat(Format("FLV-Speex", "flv",
-			VideoCodec("FLV", "flv", 320, 240),
-			AudioCodec("Speex", "libspeex", 1, 16000)));	
-
-		formats.registerFormat(Format("Speex", "flv",
-			AudioCodec("Speex", "libspeex", 1, 16000)));
-
-		formats.registerFormat(Format("MJPEG", "mjpeg", 
-			VideoCodec("MJPEG", "mjpeg", 480, 320, 20)));
-
-		// TODO: Add h264 and newer audio formats when time permits
-	}
-
-	~MediaServer()
-	{		
-		debugL("MediaServer") << "Destroying" << endl;
-	
-		MediaFactory::instance()->unloadVideo();
-		MediaFactory::uninitialize();
-	}
-};
+StreamingOptions::~StreamingOptions() 
+{
+	debugL("StreamingOptions", this) << "Destroy" << endl;			
+}
 
 
 } // namespace scy
 
-			
-static void onKillSignal(void* opaque)
+	
+static void onShutdown(void* opaque)
 {
 	reinterpret_cast<MediaServer*>(opaque)->shutdown();
-	assert(0);
 }
 
 
@@ -783,10 +265,10 @@ int main(int argc, char** argv)
 {
 	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));	
 	{	
-		Runner loop;
+		Application app;	
 		MediaServer server(SERVER_PORT);
 		server.start();
-		loop.waitForKill(onKillSignal, &server);
+		app.waitForShutdown(onShutdown, &server);
 	}
 	Logger::uninitialize();
 	return 0;
@@ -794,8 +276,7 @@ int main(int argc, char** argv)
 
 
 
-/*
-	
+/*	
 		// TODO: Handle input commands..
 		char o = 0;
 		while (o != 'Q') {	
@@ -832,19 +313,19 @@ int main(int argc, char** argv)
 		{	
 
 		// Wait for stop signal
-		debugL("StreamingRequestHandler") << "Waiting" << endl;				
+		debugL("StreamingRequestHandler", this) << "Waiting" << endl;				
 		stopSignal.wait();
-		debugL("StreamingRequestHandler") << "Stopped" << endl;	
+		debugL("StreamingRequestHandler", this) << "Stopped" << endl;	
 			
 
 			socket.close();
 		}
 		catch (Exception& exc)
 		{
-			errorL("StreamingRequestHandler") << "Error: " << exc.displayText() << endl;
+			errorL("StreamingRequestHandler", this) << "Error: " << exc.displayText() << endl;
 		}
 
-		debugL("StreamingRequestHandler") << "Exiting" << endl;
+		debugL("StreamingRequestHandler", this) << "Exiting" << endl;
 		*/
 
 
@@ -871,7 +352,7 @@ int main(int argc, char** argv)
 #endif	
 	void onRequest(http::Request& request, http::Response& response) 
 	{
-		debugL("WebSocketRequestHandler") << "Running" << endl;
+		debugL("WebSocketRequestHandler", this) << "Running" << endl;
 
 		try
 		{			
@@ -881,20 +362,20 @@ int main(int argc, char** argv)
 				webSocket = &ws;
 
 				// Wait for stop signal
-				debugL("WebSocketRequestHandler") << "Waiting" << endl;				
+				debugL("WebSocketRequestHandler", this) << "Waiting" << endl;				
 				stopSignal.wait();
-				debugL("WebSocketRequestHandler") << "Stopped" << endl;	
+				debugL("WebSocketRequestHandler", this) << "Stopped" << endl;	
 			}
 			catch (Exception& exc)
 			{
-				errorL("WebSocketRequestHandler") << "Error: " << exc.displayText() << endl;
+				errorL("WebSocketRequestHandler", this) << "Error: " << exc.displayText() << endl;
 			}
 			
-			debugL("WebSocketRequestHandler") << "Stopped" << endl;
+			debugL("WebSocketRequestHandler", this) << "Stopped" << endl;
 		}
 		catch (http::WebSocketException& exc)
 		{
-			errorL("WebSocketRequestHandler") << "Error: " << exc.code() << ": " << exc.displayText() << endl;			
+			errorL("WebSocketRequestHandler", this) << "Error: " << exc.code() << ": " << exc.displayText() << endl;			
 			switch (exc.code())
 			{
 			case http::WebSocket::WS_ERR_HANDSHAKE_UNSUPPORTED_VERSION:
@@ -910,9 +391,9 @@ int main(int argc, char** argv)
 			}
 		}
 		
-		debugL("WebSocketRequestHandler") << "Exiting" << endl;
+		debugL("WebSocketRequestHandler", this) << "Exiting" << endl;
 	}
-	void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
+	void handleRequest(Poco::Net::HTTPServerRequest& request, http::ServerResponder& response)
 	{
 	//VideoCapture* videoCapture;
 	//AudioCapture* audioCapture;
@@ -981,7 +462,7 @@ public:
 class FlashPolicyRequestHandler1: public http::ServerResponder
 {
 public:
-	void handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response)
+	void handleRequest(Poco::Net::HTTPServerRequest& request, http::ServerResponder& response)
 	{
 		response.set("Content-Type", "text/x-cross-domain-policy");
 		response.set("X-Permitted-Cross-Domain-Policies", "all");	
@@ -1122,10 +603,10 @@ public:
 		//const StreamSocket& sock, const StreamingOptions& options, 
 				
 			/*
-			//StreamingOptions options;
+			StreamingOptions options;
 			// An exception will be thrown if no format was provided, 
 			// or if the request format is not registered.
-			Poco::Net::NameValueCollection params;
+			Poco::Net::KVStore params;
 			util::parseURIQuery(request.getURI(), params);
 			FormatRegistry& formats = MediaFactory::instance()->formats();	
 			options.oformat = formats.get(params.get("format"));
@@ -1324,7 +805,7 @@ public:
 		debugL("MediaServer") << "Creating" << endl;
 	}
 
-	~MediaServer()
+	virtual ~MediaServer()
 	{		
 		debugL("MediaServer") << "Destroying" << endl;
 	}

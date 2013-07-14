@@ -29,7 +29,7 @@ using scy::Exception;
 
 
 namespace scy {
-namespace uv {
+namespace net {
 	
 
 UDPBase::UDPBase()
@@ -50,11 +50,11 @@ void UDPBase::init()
 {
 	if (!handle()) {
 		uv_udp_t* udp = new uv_udp_t;
-		udp->data = instance();
+		udp->data = this; //instance();
 		_handle = (uv_handle_t*)udp;
 		int r = uv_udp_init(loop(), udp);
 		if (r)
-			setLastError(true);
+			setLastError("Invalid UDP socket");
 	}
 }
 
@@ -74,7 +74,7 @@ void UDPBase::close()
 {
 	traceL("UDPBase", this) << "Closing" << endl;	
 	recvStop();
-	uv::Base<CountedObject>::close();
+	uv::Base::close();
 }
 
 
@@ -96,7 +96,7 @@ void UDPBase::bind(const Address& address, unsigned flags)
 		throw Exception("Unexpected address family");
 	}
 	if (r)
-		setLastError();
+		setLastError("Invalid UDP socket");
 	else
 		recvStart();
 }
@@ -122,33 +122,22 @@ int UDPBase::send(const char* data, int len, const Address& peerAddress, int fla
 	switch (peerAddress.af()) {
 	case AF_INET:
 		r = uv_udp_send(&sr->req, handle<uv_udp_t>(), &sr->buf, 1,
-			*reinterpret_cast<const sockaddr_in*>(peerAddress.addr()), UDPBase::onSend); //
+			*reinterpret_cast<const sockaddr_in*>(peerAddress.addr()), UDPBase::afterSend); //
 		break;
 	case AF_INET6:
 		r = uv_udp_send6(&sr->req, handle<uv_udp_t>(), &sr->buf, 1,
-			*reinterpret_cast<const sockaddr_in6*>(peerAddress.addr()), UDPBase::onSend); //
+			*reinterpret_cast<const sockaddr_in6*>(peerAddress.addr()), UDPBase::afterSend); //
 		break;
 	default:
 		throw Exception("Unexpected address family");
 	}
+	if (r)
+		setLastError("Invalid UDP socket");
 
 	// R is -1 on error, otherwise return len
-	return r ? r : len;
+	//return r ? r : len;
+	return len;
 }
-
-
-/*
-int UDPBase::send(const IPacket& packet, int flags)
-{
-	return net::SocketBase::send(packet, flags);
-}
-
-
-int UDPBase::send(const IPacket& packet, const net::Address& peerAddress, int flags)
-{
-	return net::SocketBase::send(packet, peerAddress, flags);
-}
-*/
 
 
 bool UDPBase::recvStart() 
@@ -173,26 +162,26 @@ bool UDPBase::recvStop()
 
 void UDPBase::onRecv(Buffer& buf, const net::Address& address)
 {
-	traceL("UDPBase", this) << "On Recv: " << buf.size() << endl;
-	
+	traceL("UDPBase", this) << "On recv: " << buf.size() << endl;	
 
-	// Set the size of the buffer to send
-	//net::SocketPacket packet(*this, buf, address);
-	//Recv.emit(instance(), packet);
 	emitRecv(buf, address);
 }
 
 
 net::Address UDPBase::address() const
-{
+{	
+	if (closed())
+		throw Exception("Invalid UDP socket: No address");
+
 	if (_peer.valid())
 		return _peer;
+	
 	struct sockaddr address;
 	int addrlen = sizeof(address);
 	int r = uv_udp_getsockname(handle<uv_udp_t>(), &address, &addrlen);
 	if (r)
-		throw Exception("No local address: UDP Socket not bound");
-		//throwLastError(loop(), "No local address: UDP Socket not bound: ");
+		throwLastError("Invalid UDP socket: No address");
+
 	return Address(&address, addrlen);
 }
 
@@ -200,7 +189,7 @@ net::Address UDPBase::address() const
 net::Address UDPBase::peerAddress() const
 {
 	if (!_peer.valid())
-		throw Exception("No peer address: UDP Socket not connected");
+		throw Exception("Invalid UDP socket: No peer address");
 	return _peer;
 }
 
@@ -208,24 +197,6 @@ net::Address UDPBase::peerAddress() const
 net::TransportType UDPBase::transport() const 
 { 
 	return net::UDP; 
-}
-
-
-void UDPBase::duplicate() 
-{ 
-	Base<CountedObject>::duplicate(); 
-}
-
-
-void UDPBase::release() 
-{ 
-	Base<CountedObject>::release(); 
-}
-
-
-int UDPBase::refCount() const 
-{ 
-	return Base<CountedObject>::refCount();
 }
 
 
@@ -237,28 +208,20 @@ void UDPBase::onRecv(uv_udp_t* handle, ssize_t nread, uv_buf_t buf, struct socka
 {	
 	UDPBase* socket = static_cast<UDPBase*>(handle->data);
 	traceL("UDPBase", socket) << "Handle Recv: " << nread << endl;
-	
-	/*	
-	socket->_buffer.size(nread);
-	net::PacketInfo info(*socket, net::Address(addr, sizeof *addr));
-	traceL("TCPBase", this) << "On Recv: " << buf.size() << endl;	
-	*/
 
 	// EOF or Error
 	if (nread == -1)
 		socket->setLastError();
-	//send net::Packet type, cast as RawPacket
 	
 	socket->_buffer.size(nread);
 	socket->onRecv(socket->_buffer, net::Address(addr, sizeof *addr));
 }
 
 
-void UDPBase::onSend(uv_udp_send_t* req, int status) 
+void UDPBase::afterSend(uv_udp_send_t* req, int status) 
 {
 	SendRequest* sr = reinterpret_cast<SendRequest*>(req);
 	UDPBase* socket = reinterpret_cast<UDPBase*>(sr->req.handle->data);	
-	traceL("UDPBase", socket) << "Send Callback: " << status << endl;
 	if (status) 
 		socket->setLastError();
 	delete sr;
@@ -268,20 +231,23 @@ void UDPBase::onSend(uv_udp_send_t* req, int status)
 uv_buf_t UDPBase::allocRecvBuffer(uv_handle_t *handle, size_t suggested_size)
 {
 	UDPBase* self = static_cast<UDPBase*>(handle->data);	
-	traceL("UDPBase", self) << "Allocating Buffer: " << suggested_size << endl;	
-
-	// XXX: libuv wants us to allocate 65536 bytes for UDP .. wha?
+	//traceL("UDPBase", self) << "Allocating Buffer: " << suggested_size << endl;	
+	
+	// Reserve the recommended buffer size
+	// XXX: libuv wants us to allocate 65536 bytes for UDP .. hmmm
 	if (suggested_size > self->_buffer.size())
 		self->_buffer.reserve(suggested_size); 
-	traceL("UDPBase", self) << "Allocating Buffer: (self->_buffer.capacity() " << self->_buffer.capacity()  << endl;	
 	assert(self->_buffer.capacity() == suggested_size);
+
+	// Reset the buffer position on each read
+	self->_buffer.position(0);
 	return uv_buf_init(self->_buffer.begin(), suggested_size);
 }
 
 
 void UDPBase::onError(const Error& error) 
 {		
-	errorL("UDPBase", this) << "On Error: " << error.message << endl;	
+	errorL("UDPBase", this) << "On error: " << error.message << endl;	
 	emitError(error);
 	close(); // close on error
 }
@@ -289,9 +255,9 @@ void UDPBase::onError(const Error& error)
 
 void UDPBase::onClose() 
 {		
-	errorL("UDPBase", this) << "On Close" << endl;	
+	errorL("UDPBase", this) << "On close" << endl;	
 	emitClose();
 }
 
 
-} } // namespace scy::uv
+} } // namespace scy::net

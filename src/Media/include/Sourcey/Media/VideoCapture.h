@@ -182,7 +182,7 @@ struct MatPacket: public VideoPacket
 {
 	cv::Mat* mat;	// For OpenCV generated packets.
 
-	MatPacket(const char* data = NULL,
+	MatPacket(char* data = NULL,
 			  int size = 0,
 			  int width = 0,
 			  int height = 0,
@@ -191,7 +191,7 @@ struct MatPacket: public VideoPacket
 		mat(NULL) {};
 
 	MatPacket(cv::Mat* mat, double time = 0) :
-		VideoPacket((const char*)mat->data, mat->rows*mat->step, mat->cols, mat->rows, time), //mat->total()
+		VideoPacket((char*)mat->data, mat->rows*mat->step, mat->cols, mat->rows, time), //mat->total()
 		mat(mat) {}
 
 	virtual IPacket* clone() const {

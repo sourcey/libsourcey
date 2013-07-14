@@ -18,11 +18,8 @@
 
 
 #include "Sourcey/Net/SSLSocket.h"
+#include "Sourcey/Net/SSLManager.h"
 #include "Sourcey/Logger.h"
-
-#include "Poco/Exception.h"
-#include "Poco/Net/Context.h"
-#include "Poco/Net/SSLManager.h"
 
 
 using namespace std;
@@ -61,9 +58,10 @@ SSLBase& SSLSocket::base() const
 // -------------------------------------------------------------------
 //
 SSLBase::SSLBase() : 
-	_context(Poco::Net::SSLManager::instance().defaultClientContext()), 
+	// TODO: Using client context, should assert no bind()/listen() on this socket
+	_context(SSLManager::instance().defaultClientContext()), 
 	_session(NULL), 
-	_sslBuffer(this)
+	_sslAdapter(this)
 {
 	traceL("SSLBase", this) << "Creating" << endl;
 	assert(_handle);
@@ -72,10 +70,10 @@ SSLBase::SSLBase() :
 }
 
 
-SSLBase::SSLBase(Poco::Net::Context::Ptr context) : 
+SSLBase::SSLBase(SSLContext::Ptr context) : 
 	_context(context), 
 	_session(NULL), 
-	_sslBuffer(this)
+	_sslAdapter(this)
 {
 	traceL("SSLBase", this) << "Creating" << endl;
 	assert(_handle);
@@ -84,10 +82,10 @@ SSLBase::SSLBase(Poco::Net::Context::Ptr context) :
 }
 	
 
-SSLBase::SSLBase(Poco::Net::Context::Ptr context, Poco::Net::Session::Ptr session) : 
+SSLBase::SSLBase(SSLContext::Ptr context, SSLSession::Ptr session) : 
 	_context(context), 
 	_session(session), 
-	_sslBuffer(this)
+	_sslAdapter(this)
 {
 	traceL("SSLBase", this) << "Creating" << endl;
 	assert(_handle);
@@ -105,7 +103,7 @@ SSLBase::~SSLBase()
 int SSLBase::available() const
 {
 	assert(initialized());
-	return _sslBuffer.available();
+	return _sslAdapter.available();
 }
 
 
@@ -121,7 +119,7 @@ bool SSLBase::shutdown()
 	traceL("SSLBase", this) << "Shutdown" << endl;
 	try {
 		// Try to gracefully shutdown the SSL connection
-		_sslBuffer.shutdown();
+		_sslAdapter.shutdown();
 	}
 	catch (...) {}
 	return TCPBase::shutdown();
@@ -141,29 +139,29 @@ int SSLBase::send(const char* data, int len, const net::Address& peerAddress, in
 	traceL("SSLBase", this) << "Send: " << len << endl;
 	
 	// Send unencrypted data to the SSL context
-	_sslBuffer.addOutgoingData(data, len);
-	_sslBuffer.update();
+	_sslAdapter.addOutgoingData(data, len);
+	_sslAdapter.flush();
 	return len;
 }
 
 
-Poco::Net::Session::Ptr SSLBase::currentSession()
+SSLSession::Ptr SSLBase::currentSession()
 {
-	if (_sslBuffer._ssl) {
-		SSL_SESSION* session = SSL_get1_session(_sslBuffer._ssl);
+	if (_sslAdapter._ssl) {
+		SSL_SESSION* session = SSL_get1_session(_sslAdapter._ssl);
 		if (session) {
 			if (_session && session == _session->sslSession()) {
 				SSL_SESSION_free(session);
 				return _session;
 			}
-			else return new Poco::Net::Session(session);
+			else return new SSLSession(session);
 		}
 	}
 	return 0;
 }
 
 	
-void SSLBase::useSession(Poco::Net::Session::Ptr session)
+void SSLBase::useSession(SSLSession::Ptr session)
 {
 	_session = session;
 }
@@ -171,8 +169,8 @@ void SSLBase::useSession(Poco::Net::Session::Ptr session)
 
 bool SSLBase::sessionWasReused()
 {
-	if (_sslBuffer._ssl)
-		return SSL_session_reused(_sslBuffer._ssl) != 0;
+	if (_sslAdapter._ssl)
+		return SSL_session_reused(_sslAdapter._ssl) != 0;
 	else
 		return false;
 }
@@ -184,20 +182,19 @@ bool SSLBase::sessionWasReused()
 
 void SSLBase::onRead(const char* data, int len)
 {
-	traceL("SSLBase", this) << "On SSL Read: " << len << endl;
+	traceL("SSLBase", this) << "On SSL read: " << len << endl;
 
 	// SSL encrypted data is sent to the SSL conetext
-	_sslBuffer.addIncomingData(data, len);
-	_sslBuffer.update();
+	_sslAdapter.addIncomingData(data, len);
+	_sslAdapter.flush();
 }
 
 
 void SSLBase::onConnect(int status)
 {
-	traceL("SSLBase", this) << "On Connected" << endl;
+	traceL("SSLBase", this) << "On connect" << endl;
 	if (status) {
 		setLastError();
-		errorL("SSLBase", this) << "Connect Failed: " << error().message << endl;
 		return;
 	}
 	else
@@ -213,16 +210,15 @@ void SSLBase::onConnect(int status)
 	SSL_set_connect_state(ssl);
 	SSL_do_handshake(ssl);
  
-	_sslBuffer.init(ssl);
-	_sslBuffer.update();
+	_sslAdapter.init(ssl);
+	_sslAdapter.flush();
 
-	//Connect.emit(this);	
 	SocketBase::emitConnect();
-	traceL("SSLBase", this) << "On Connected: OK" << endl;
+	traceL("SSLBase", this) << "On connect: OK" << endl;
 }
 
 
-} } // namespace scy::uv
+} } // namespace scy::net
 
 
 

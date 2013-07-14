@@ -53,7 +53,8 @@ void StreamManager::closeAll()
 		(*it2).second->StateChange -= delegate(this, &StreamManager::onStreamStateChange);
 		(*it2).second->close();
 		if (_freeClosedStreams)
-			delete (*it2).second;
+			StreamManager::Deleter::func((*it2).second);
+			//delete (*it2).second;
 		_store.erase(it2);
 	}
 }

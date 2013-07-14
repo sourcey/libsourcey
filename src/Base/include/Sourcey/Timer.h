@@ -24,18 +24,19 @@
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Types.h"
 #include "Sourcey/Signal.h"
+#include "Sourcey/Memory.h"
 
 
 namespace scy {
 
 
-class Timer: public uv::Base<>
+class Timer: public uv::Base
 	/// Wraps libev's ev_timer watcher. Used to get woken up at a specified time
 	/// in the future.
 {
 public:
-	Timer(Int64 timeout, Int64 interval = 0, uv_loop_t* loop = NULL);
-	Timer(uv_loop_t* loop = NULL);
+	Timer(Int64 timeout, Int64 interval = 0, uv::Loop& loop = uv::defaultLoop());
+	Timer(uv::Loop& loop = uv::defaultLoop());
 	virtual ~Timer();
 	
 	virtual bool start(Int64 interval);

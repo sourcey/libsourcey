@@ -38,9 +38,9 @@ class Connection
 public:
     Connection(const net::Socket& socket);
 			
-	virtual bool sendRaw(const char* buf, size_t len, int flags = 0);
+	virtual int sendRaw(const char* buf, size_t len, int flags = 0);
 	//virtual bool sendMessage();
-	virtual bool sendHeaders();
+	virtual int sendHeaders();
 
 	virtual void close();
 		/// Forcefully closes the connection
@@ -73,7 +73,7 @@ protected:
 	void onSocketRecv(void*, net::SocketPacket& packet);
 	void onSocketClose(void*);
 
-	void setAdapter(net::SocketAdapter* adapter);
+	void replaceAdapter(net::SocketAdapter* adapter);
 
 protected:
     Request* _request;
@@ -85,7 +85,7 @@ protected:
 	bool _closed;
 	
 	friend class Parser;
-	friend class Deleter<Connection>;
+	friend class GCDeleter<Connection>;
 };
 
 	
@@ -99,6 +99,9 @@ public:
     virtual ~ConnectionAdapter();	
 		
 	virtual int send(const char* data, int len, int flags = 0);
+	
+	Parser& parser();
+	Connection& connection();
 
 protected:
 
@@ -106,8 +109,8 @@ protected:
 	/// Socket emitter callbacks
 	//virtual void onSocketConnect() {};
 	virtual void onSocketRecv(Buffer& buf, const net::Address& peerAddr);
-	//virtual void onSocketError(const Error& error) {};
-	//virtual void onSocketClose();
+	virtual void onSocketError(const Error& error);
+	virtual void onSocketClose();
 		
 	//
 	/// Parser callbacks

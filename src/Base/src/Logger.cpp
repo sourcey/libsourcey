@@ -35,14 +35,14 @@ namespace scy {
 // Logger
 //
 Logger*		Logger::_instance;
-FastMutex	Logger::_mutex;
+Mutex		Logger::_mutex;
 
 
 Logger& Logger::instance() 
 {
 	if (_instance == NULL) 
 	{
-		FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		if (_instance == NULL)
 			_instance = new Logger;
 	}
@@ -58,7 +58,7 @@ void Logger::initialize()
 
 void Logger::uninitialize() 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	if (_instance) {
 		delete _instance;
 		_instance = NULL;
@@ -69,7 +69,7 @@ void Logger::uninitialize()
 void Logger::setInstance(Logger* logger)
 {
 	uninitialize();
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_instance = logger;
 }
 
@@ -85,8 +85,8 @@ Logger::~Logger()
 {	
 	debugL("Logger", this) << "Destroying" << endl;
 	{
-		FastMutex::ScopedLock lock(_mutex);
-		util::ClearMap(_map);
+		Mutex::ScopedLock lock(_mutex);
+		util::clearMap(_map);
 		_defaultChannel = NULL;
 	}
 }
@@ -95,7 +95,7 @@ Logger::~Logger()
 void Logger::add(LogChannel* channel) 
 {
 	debugL("Logger", this) << "Adding Channel: " << channel->name() << endl;
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	// The first channel that is added will be our default channel.
 	if (_defaultChannel == NULL)
 		_defaultChannel = channel;
@@ -103,16 +103,16 @@ void Logger::add(LogChannel* channel)
 }
 
 
-void Logger::remove(const string& name, bool deletePointer) 
+void Logger::remove(const string& name, bool freePointer) 
 {
 	debugL("Logger", this) << "Removing Channel: " << name << endl;
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	LogMap::iterator it = _map.find(name);	
 	assert(it != _map.end());
 	if (it != _map.end()) {
 		if (_defaultChannel == it->second)
 			_defaultChannel = NULL;
-		if (deletePointer)
+		if (freePointer)
 			delete it->second;	
 		_map.erase(it);
 	}
@@ -121,7 +121,7 @@ void Logger::remove(const string& name, bool deletePointer)
 
 LogChannel* Logger::get(const string& name, bool whiny) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	LogMap::const_iterator it = _map.find(name);	
 	if (it != _map.end())
 		return it->second;
@@ -140,7 +140,7 @@ void Logger::setDefault(const string& name)
 
 LogChannel* Logger::getDefault() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _defaultChannel;
 }
 
@@ -253,7 +253,7 @@ void ConsoleChannel::write(const LogStream& stream)
 	
 	ostringstream ss;
 	format(stream, ss);
-#if defined(_CONSOLE) && defined(_DEBUG)
+#if defined(_CONSOLE) || defined(_DEBUG)
 	cout << ss.str();
 #endif
 #if defined(_MSC_VER) && defined(_DEBUG) 
@@ -324,7 +324,7 @@ void FileChannel::write(const LogStream& stream)
 	_fstream << ss.str();
 	_fstream.flush();
 
-#if defined(_CONSOLE) && defined(_DEBUG)
+#if defined(_CONSOLE) || defined(_DEBUG)
 	cout << ss.str();
 #endif
 #if defined(_MSC_VER) && defined(_DEBUG) 

@@ -1,8 +1,9 @@
-#include "Sourcey/Runner.h"
+#include "Sourcey/Application.h"
 #include "Sourcey/PacketStream.h"
 #include "Sourcey/Media/VideoCapture.h"
 #include "Sourcey/Media/AVInputReader.h"
 #include "Sourcey/Media/AVEncoder.h"
+#include "Sourcey/Net/Network.h"
 #include "Sourcey/HTTP/Server.h"
 
 
@@ -122,10 +123,9 @@ public:
 } // namespace scy
 
 			
-static void onKillSignal(void* opaque)
+static void onShutdownSignal(void* opaque)
 {
 	reinterpret_cast<http::Server*>(opaque)->shutdown();
-	assert(0);
 }
 
 
@@ -145,10 +145,10 @@ int main(int argc, char** argv)
 #endif
 	
 	{
-		Runner loop; 
+		Application app; 
 		http::Server server(328, new StreamingResponderFactory);
 		server.start();
-		loop.waitForKill(onKillSignal, &server);
+		app.waitForShutdown(onShutdownSignal, &server);
 	}
 	
 	delete gVideoCapture;

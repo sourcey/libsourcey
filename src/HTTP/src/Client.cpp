@@ -39,7 +39,7 @@ ClientConnection::ClientConnection(Client& client, const net::Address& address, 
 {	
 	traceL("ClientConnection", this) << "Creating" << endl;
 
-	setAdapter(new ClientAdapter(*this));
+	replaceAdapter(new ClientAdapter(*this));
 	client.Shutdown += delegate(this, &ClientConnection::onClientShutdown);
 	client.addConnection(this);
 }
@@ -52,9 +52,12 @@ ClientConnection::~ClientConnection()
 	
 void ClientConnection::close()
 {
-	_client.Shutdown -= delegate(this, &ClientConnection::onClientShutdown);
-	_client.removeConnection(this);
-	Connection::close();
+	if (!closed()) {
+		_client.Shutdown -= delegate(this, &ClientConnection::onClientShutdown);
+		_client.removeConnection(this);
+
+		Connection::close();
+	}
 }
 
 
@@ -71,12 +74,13 @@ void ClientConnection::send()
 bool ClientConnection::flush()
 {
 	traceL("ClientConnection", this) << "Flushing" << endl;
+
 	// TODO: Optimize ... use sendRaw for large packers
 	string body(_request->body.str());
 	if (body.length() == 0)
 		return false;
 
-	return sendRaw(body.data(), body.length());
+	return sendRaw(body.data(), body.length()) > 0;
 }
 
 
@@ -257,7 +261,7 @@ void Client::onTimer(void*)
 
 	/*
 ClientConnection::ClientConnection(Client& client, const net::Address& address) : 
-	Connection(net::TCPSocket(), new ClientAdapter(*this)), 
+	Connection(net::TCPSocket(), new ClientAdapter(this)), 
 	_client(client), 
 	_address(address)
 {	

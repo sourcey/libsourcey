@@ -39,7 +39,7 @@ public:
 		/// packet. Resultant packet's will be dispatched.
 		/// NOTE: If packet processing is asynchronous packet 
 		/// data must be copied and the dispatched packet's
-		/// freeOnDestroy flag must be set.
+		/// managePointer flag must be set.
 		/// NOTE: The implementation must re-dispatch the 
 		/// packet even if it was not accepted or processed.
 

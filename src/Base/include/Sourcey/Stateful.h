@@ -110,18 +110,18 @@ public:
 
 	virtual T& state() 
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return Stateful<T>::_state; 
 	}
 
 	virtual T state() const 
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return Stateful<T>::_state; 
 	}
 
 protected:
-	mutable Poco::FastMutex	_mutex;
+	mutable Mutex	_mutex;
 };
 
 

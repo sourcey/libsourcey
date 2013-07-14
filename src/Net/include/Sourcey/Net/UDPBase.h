@@ -17,12 +17,12 @@
 //
 
 
-#ifndef SOURCEY_UV_UDPBase_H
-#define SOURCEY_UV_UDPBase_H
+#ifndef SOURCEY_Net_UDPBase_H
+#define SOURCEY_Net_UDPBase_H
 
 
 #include "Sourcey/UV/UVPP.h"
-#include "Sourcey/UV/Base.h"
+
 #include "Sourcey/Net/Socket.h"
 	
 #include "Sourcey/Net/Types.h"
@@ -30,10 +30,10 @@
 
 
 namespace scy {
-namespace uv {
+namespace net {
 
 
-class UDPBase: public uv::Base<CountedObject>, public net::SocketBase
+class UDPBase: public uv::Base, public net::SocketBase
 {
 public:
 	UDPBase();
@@ -46,21 +46,12 @@ public:
 
 	virtual int send(const char* data, int len, int flags = 0);
 	virtual int send(const char* data, int len, const net::Address& peerAddress, int flags = 0);
-
-	/*
-	virtual int send(const IPacket& packet, int flags = 0);
-	virtual int send(const IPacket& packet, const net::Address& peerAddress, int flags = 0);
-	*/
 	
 	virtual net::Address address() const;
 	virtual net::Address peerAddress() const;
 
 	net::TransportType transport() const;
 		/// Returns the UDP transport protocol.
-
-	virtual void duplicate();	
-	virtual void release();
-	virtual int refCount() const;
 	
 	virtual void onRecv(Buffer& buf, const net::Address& address);
 
@@ -76,22 +67,27 @@ protected:
 	virtual bool recvStop();
 
 	static void onRecv(uv_udp_t* handle, ssize_t nread, uv_buf_t buf, struct sockaddr* addr, unsigned flags);
-	static void onSend(uv_udp_send_t* req, int status); 
+	static void afterSend(uv_udp_send_t* req, int status); 
 	static uv_buf_t allocRecvBuffer(uv_handle_t* handle, size_t suggested_size);
 
 	virtual void onError(const Error& error);
 	virtual void onClose();
 	
 	net::Address _peer;
-	scy::Buffer _buffer;
+	Buffer _buffer;
 };
 
 
-} } // namespace scy::uv
+} } // namespace scy::net
 
 
-#endif // SOURCEY_UV_UDPBase_H
+#endif // SOURCEY_Net_UDPBase_H
 
+
+	/*
+	virtual int send(const IPacket& packet, int flags = 0);
+	virtual int send(const IPacket& packet, const net::Address& peerAddress, int flags = 0);
+	*/
 
 	
 	//Signal3<const char*, int, const net::Address&> Recv;

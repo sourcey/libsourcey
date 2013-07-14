@@ -18,11 +18,11 @@
 
 
 #include "Sourcey/Net/SSLContext.h"
-#include "Sourcey/Net/SSLSocket.h"
-#include "Sourcey/Logger.h"
-#include <vector>
-#include <iterator>
-#include <algorithm>
+#include "Sourcey/Net/SSLManager.h"
+#include "Poco/File.h"
+#include "Poco/Path.h"
+
+#include "Poco/Crypto/OpenSSLInitializer.h"
 
 
 using namespace std;
@@ -31,170 +31,333 @@ using namespace std;
 namespace scy {
 namespace net {
 
- 
-SSLContext::SSLContext(net::SSLBase* socket) :
-	_socket(socket),
-	_ssl(NULL),
-	_readBIO(NULL),
-	_writeBIO(NULL)
+
+SSLContext::SSLContext(
+	Usage usage,
+	const std::string& privateKeyFile, 
+	const std::string& certificateFile,
+	const std::string& caLocation, 
+	VerificationMode verificationMode,
+	int verificationDepth,
+	bool loadDefaultCAs,
+	const std::string& cipherList):
+	_usage(usage),
+	_mode(verificationMode),
+	_sslContext(0),
+	_extendedCertificateVerification(true)
 {
-	traceL("SSLContext", this) << "Creating" << endl;
-}
+	Poco::Crypto::OpenSSLInitializer::initialize();
+	
+	createSSLContext();
 
-
-SSLContext::~SSLContext() 
-{	
-	traceL("SSLContext", this) << "Destroying" << endl;
-	if (_ssl) {
-		SSL_free(_ssl);
-		_ssl = NULL;
-	}
-}
-
-
-void SSLContext::init(SSL* ssl) 
-{
-	traceL("SSLContext", this) << "Init: " << ssl << endl;
-	assert(_socket);
-	//assert(_socket->initialized());
-	_ssl = ssl;
-	_readBIO = BIO_new(BIO_s_mem());
-	_writeBIO = BIO_new(BIO_s_mem());
-	SSL_set_bio(_ssl, _readBIO, _writeBIO);
-}
-
-
-void SSLContext::shutdown()
-{
-	traceL("SSLBase", this) << "Shutdown" << endl;
-	if (_ssl)
-	{        
-		traceL("SSLBase", this) << "Shutdown SSL" << endl;
-
-        // Don't shut down the socket more than once.
-        int shutdownState = SSL_get_shutdown(_ssl);
-        bool shutdownSent = (shutdownState & SSL_SENT_SHUTDOWN) == SSL_SENT_SHUTDOWN;
-        if (!shutdownSent)
-        {
-			// A proper clean shutdown would require us to
-			// retry the shutdown if we get a zero return
-			// value, until SSL_shutdown() returns 1.
-			// However, this will lead to problems with
-			// most web browsers, so we just set the shutdown
-			// flag by calling SSL_shutdown() once and be
-			// done with it.
-			int rc = SSL_shutdown(_ssl);
-			if (rc < 0) handleError(rc);
+	int errCode = 0;
+	if (!caLocation.empty())
+	{
+		Poco::File aFile(caLocation);
+		if (aFile.isDirectory())
+			errCode = SSL_CTX_load_verify_locations(_sslContext, 0, Poco::Path::transcode(caLocation).c_str());
+		else
+			errCode = SSL_CTX_load_verify_locations(_sslContext, Poco::Path::transcode(caLocation).c_str(), 0);
+		if (errCode != 1)
+		{
+			std::string msg = getLastError();
+			SSL_CTX_free(_sslContext);
+			throw Exception(std::string("SSL Error: Cannot load CA file/directory at ") + caLocation, msg);
 		}
 	}
-}
 
-
-int SSLContext::available() const
-{
-	assert(_ssl);
-	return SSL_pending(_ssl);
-}
-
-
-void SSLContext::addIncomingData(const char* data, size_t len) 
-{
-	Log("trace") << "SSLContext: addIncomingData: " << len << endl;
-	BIO_write(_readBIO, data, len);
-	update();
-}
-
-
-void SSLContext::addOutgoingData(const std::string& s)
-{
-	addOutgoingData(s.c_str(), s.size());
-}
-
-
-void SSLContext::addOutgoingData(const char* data, size_t len) 
-{
-	std::copy(data, data+len, std::back_inserter(_bufferOut));
-}
-
-
-void SSLContext::update() 
-{
-	Log("trace") << "SSLContext: update" << endl;
-	if (!SSL_is_init_finished(_ssl)) {
-		int r = SSL_connect(_ssl);
-		if (r < 0) {
-			Log("trace") << "SSLContext: update: handleError" << endl;
-			handleError(r);
+	if (loadDefaultCAs)
+	{
+		errCode = SSL_CTX_set_default_verify_paths(_sslContext);
+		if (errCode != 1)
+		{
+			std::string msg = getLastError();
+			SSL_CTX_free(_sslContext);
+			throw Exception("SSL Error: Cannot load default CA certificates", msg);
 		}
 	}
-	else {
-		Log("trace") << "SSLContext: update: Reading" << endl;
-		// Reuse the unencrypted SSL recv buffer
-		
-		int nread = 0;
-		while ((nread = SSL_read(_ssl, _socket->_buffer.begin(), _socket->_buffer.capacity())) > 0) {
-			_socket->_buffer.size(nread);
-			_socket->onRecv(_socket->_buffer);
-		}
-		/*
-		char in_buf[1024 * 16];
-		int nread = 0;
-		while ((nread = SSL_read(_ssl, in_buf, sizeof(in_buf))) > 0) {
-			_socket->onRead(in_buf, nread);
-		}    
-		*/
-	}
-	checkOutgoingApplicationData();
-}
 
-
-void SSLContext::flushWriteBIO() 
-{
-	// flushes encrypted data 
-	Log("trace") << "SSLContext: flushWriteBIO" << endl;
-	char buffer[1024*16]; // optimize!
-	int nread = 0;
-	while ((nread = BIO_read(_writeBIO, buffer, sizeof(buffer))) > 0) {
-		
-		// Write encrypted data directly to the socket output
-		_socket->write(buffer, nread);
-		/*
-		//uv_write_t* req = new uv_write_t;
-		uv_buf_t buf = uv_buf_init((char *)&buffer, nread);
-		int r = uv_write(&_socket->_writeReq, _socket->handle<uv_stream_t>(), &buf, 1, NULL);
-		if (r == -1) {
-			_socket->setError(uv_last_error(_socket->loop()));
-		}
-		*/
-	}
-}
-
-
-void SSLContext::handleError(int r)
-{
-	// Any of the SSL_* functions can cause a error. 
-	// We need to handle the SSL_ERROR_WANT_READ/WRITE
-	int error = SSL_get_error(_ssl, r);
-	if (error == SSL_ERROR_WANT_READ) {
-
-		Log("trace") << "SSLContext: handleError: SSL_ERROR_WANT_READ" << endl;
-		flushWriteBIO();
-	}
-}
-
-
-void SSLContext::checkOutgoingApplicationData() 
-{
-	// Is there data pending in the out buffer which should send?
-	if (SSL_is_init_finished(_ssl)) { 
-		if (_bufferOut.size() > 0) {
-			int r = SSL_write(_ssl, &_bufferOut[0], _bufferOut.size()); // causes the write_bio to fill up (which we need to flush)
-			_bufferOut.clear();
-			handleError(r);
-			flushWriteBIO();
+	if (!privateKeyFile.empty())
+	{
+		errCode = SSL_CTX_use_PrivateKey_file(_sslContext, Poco::Path::transcode(privateKeyFile).c_str(), SSL_FILETYPE_PEM);
+		if (errCode != 1)
+		{
+			std::string msg = getLastError();
+			SSL_CTX_free(_sslContext);
+			throw Exception(std::string("SSL Error: Error loading private key from file ") + privateKeyFile, msg);
 		}
 	}
+
+	if (!certificateFile.empty())
+	{
+		errCode = SSL_CTX_use_certificate_chain_file(_sslContext, Poco::Path::transcode(certificateFile).c_str());
+		if (errCode != 1)
+		{
+			std::string errMsg = getLastError();
+			SSL_CTX_free(_sslContext);
+			throw Exception(std::string("SSL Error: Error loading certificate from file ") + certificateFile, errMsg);
+		}
+	}
+
+	if (isForServerUse())
+		SSL_CTX_set_verify(_sslContext, verificationMode, &SSLManager::verifyServerCallback);
+	else
+		SSL_CTX_set_verify(_sslContext, verificationMode, &SSLManager::verifyClientCallback);
+
+	SSL_CTX_set_cipher_list(_sslContext, cipherList.c_str());
+	SSL_CTX_set_verify_depth(_sslContext, verificationDepth);
+	SSL_CTX_set_mode(_sslContext, SSL_MODE_AUTO_RETRY);
+	SSL_CTX_set_session_cache_mode(_sslContext, SSL_SESS_CACHE_OFF);
 }
 
 
-} } // namespace scy::uv
+SSLContext::SSLContext(
+	Usage usage,
+	const std::string& caLocation, 
+	VerificationMode verificationMode,
+	int verificationDepth,
+	bool loadDefaultCAs,
+	const std::string& cipherList):
+	_usage(usage),
+	_mode(verificationMode),
+	_sslContext(0),
+	_extendedCertificateVerification(true)
+{
+	Poco::Crypto::OpenSSLInitializer::initialize();
+	
+	createSSLContext();
+
+	int errCode = 0;
+	if (!caLocation.empty())
+	{
+		Poco::File aFile(caLocation);
+		if (aFile.isDirectory())
+			errCode = SSL_CTX_load_verify_locations(_sslContext, 0, Poco::Path::transcode(caLocation).c_str());
+		else
+			errCode = SSL_CTX_load_verify_locations(_sslContext, Poco::Path::transcode(caLocation).c_str(), 0);
+		if (errCode != 1)
+		{
+			std::string msg = getLastError();
+			SSL_CTX_free(_sslContext);
+			throw Exception(std::string("SSL Error: Cannot load CA file/directory at ") + caLocation, msg);
+		}
+	}
+
+	if (loadDefaultCAs)
+	{
+		errCode = SSL_CTX_set_default_verify_paths(_sslContext);
+		if (errCode != 1)
+		{
+			std::string msg = getLastError();
+			SSL_CTX_free(_sslContext);
+			throw Exception("SSL Error: Cannot load default CA certificates", msg);
+		}
+	}
+
+	if (isForServerUse())
+		SSL_CTX_set_verify(_sslContext, verificationMode, &SSLManager::verifyServerCallback);
+	else
+		SSL_CTX_set_verify(_sslContext, verificationMode, &SSLManager::verifyClientCallback);
+
+	SSL_CTX_set_cipher_list(_sslContext, cipherList.c_str());
+	SSL_CTX_set_verify_depth(_sslContext, verificationDepth);
+	SSL_CTX_set_mode(_sslContext, SSL_MODE_AUTO_RETRY);
+	SSL_CTX_set_session_cache_mode(_sslContext, SSL_SESS_CACHE_OFF);
+}
+
+
+SSLContext::~SSLContext()
+{
+	SSL_CTX_free(_sslContext);
+	
+	Poco::Crypto::OpenSSLInitializer::uninitialize();
+}
+
+
+void SSLContext::useCertificate(const Poco::Crypto::X509Certificate& certificate)
+{
+	int errCode = SSL_CTX_use_certificate(_sslContext, const_cast<X509*>(certificate.certificate()));
+	if (errCode != 1)
+	{
+		std::string msg = getLastError();
+		throw Exception("SSL Error: Cannot set certificate for Context", msg);
+	}
+}
+
+	
+void SSLContext::addChainCertificate(const Poco::Crypto::X509Certificate& certificate)
+{
+	int errCode = SSL_CTX_add_extra_chain_cert(_sslContext, certificate.certificate());
+	if (errCode != 1)
+	{
+		std::string msg = getLastError();
+		throw Exception("SSL Error: Cannot add chain certificate to Context", msg);
+	}
+}
+
+	
+void SSLContext::usePrivateKey(const Poco::Crypto::RSAKey& key)
+{
+	int errCode = SSL_CTX_use_RSAPrivateKey(_sslContext, key.impl()->getRSA());
+	if (errCode != 1)
+	{
+		std::string msg = getLastError();
+		throw Exception("SSL Error: Cannot set private key for Context", msg);
+	}
+}
+
+
+void SSLContext::enableSessionCache(bool flag)
+{
+	if (flag)
+	{
+		SSL_CTX_set_session_cache_mode(_sslContext, isForServerUse() ? SSL_SESS_CACHE_SERVER : SSL_SESS_CACHE_CLIENT);
+	}
+	else
+	{
+		SSL_CTX_set_session_cache_mode(_sslContext, SSL_SESS_CACHE_OFF);
+	}
+}
+
+
+void SSLContext::enableSessionCache(bool flag, const std::string& sessionIdContext)
+{
+	assert(isForServerUse());
+
+	if (flag)
+	{
+		SSL_CTX_set_session_cache_mode(_sslContext, SSL_SESS_CACHE_SERVER);
+	}
+	else
+	{
+		SSL_CTX_set_session_cache_mode(_sslContext, SSL_SESS_CACHE_OFF);
+	}
+	
+	unsigned length = static_cast<unsigned>(sessionIdContext.length());
+	if (length > SSL_MAX_SSL_SESSION_ID_LENGTH) length = SSL_MAX_SSL_SESSION_ID_LENGTH;
+	int rc = SSL_CTX_set_session_id_context(_sslContext, reinterpret_cast<const unsigned char*>(sessionIdContext.data()), length);
+	if (rc != 1) throw Exception("SSL Error: cannot set session ID context");
+}
+
+
+bool SSLContext::sessionCacheEnabled() const
+{
+	return SSL_CTX_get_session_cache_mode(_sslContext) != SSL_SESS_CACHE_OFF;
+}
+
+
+void SSLContext::setSessionCacheSize(std::size_t size)
+{
+	assert(isForServerUse());
+	
+	SSL_CTX_sess_set_cache_size(_sslContext, static_cast<long>(size));
+}
+
+	
+std::size_t SSLContext::getSessionCacheSize() const
+{
+	assert(isForServerUse());
+	
+	return static_cast<std::size_t>(SSL_CTX_sess_get_cache_size(_sslContext));
+}
+
+
+void SSLContext::setSessionTimeout(long seconds)
+{
+	assert(isForServerUse());
+
+	SSL_CTX_set_timeout(_sslContext, seconds);
+}
+
+
+long SSLContext::getSessionTimeout() const
+{
+	assert(_usage == SERVER_USE);
+
+	return SSL_CTX_get_timeout(_sslContext);
+}
+
+
+void SSLContext::flushSessionCache() 
+{
+	assert(_usage == SERVER_USE);
+
+	Poco::Timestamp now;
+	SSL_CTX_flush_sessions(_sslContext, static_cast<long>(now.epochTime()));
+}
+
+
+void SSLContext::disableStatelessSessionResumption()
+{
+#if defined(SSL_OP_NO_TICKET)
+	SSL_CTX_set_options(_sslContext, SSL_OP_NO_TICKET);
+#endif
+}
+
+
+void SSLContext::createSSLContext()
+{
+	if (SSLManager::isFIPSEnabled())
+	{
+		_sslContext = SSL_CTX_new(TLSv1_method());
+	}
+	else
+	{
+		switch (_usage)
+		{
+		case CLIENT_USE:
+			_sslContext = SSL_CTX_new(SSLv23_client_method());
+			break;
+		case SERVER_USE:
+			_sslContext = SSL_CTX_new(SSLv23_server_method());
+			break;
+		case TLSV1_CLIENT_USE:
+			_sslContext = SSL_CTX_new(TLSv1_client_method());
+			break;
+		case TLSV1_SERVER_USE:
+			_sslContext = SSL_CTX_new(TLSv1_server_method());
+			break;
+		default:
+			throw Exception("SSL Exception: Invalid usage");
+		}
+	}
+	if (!_sslContext) 
+	{
+		unsigned long err = ERR_get_error();
+		throw Exception("SSL Exception: Cannot create SSL_CTX object", ERR_error_string(err, 0));
+	}
+
+	SSL_CTX_set_default_passwd_cb(_sslContext, &SSLManager::privateKeyPassphraseCallback);
+	clearErrorStack();
+	SSL_CTX_set_options(_sslContext, SSL_OP_ALL);
+}
+
+
+} } // namespace scy::net
+
+
+
+// Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
+// and Contributors.
+//
+// Permission is hereby granted, free of charge, to any person or organization
+// obtaining a copy of the software and accompanying documentation covered by
+// this license (the "Software") to use, reproduce, display, distribute,
+// execute, and transmit the Software, and to prepare derivative works of the
+// Software, and to permit third-parties to whom the Software is furnished to
+// do so, all subject to the following:
+//
+// The copyright notices in the Software and this entire statement, including
+// the above license grant, this restriction and the following disclaimer,
+// must be included in all copies of the Software, in whole or in part, and
+// all derivative works of the Software, unless such copies or derivative
+// works are solely in the form of machine-executable object code generated by
+// a source language processor.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
+// SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
+// FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
+// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+// DEALINGS IN THE SOFTWARE.

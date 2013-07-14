@@ -28,16 +28,16 @@ using namespace std;
 namespace scy {
 	
 
-Timer::Timer(uv_loop_t* loop) : 
-	Base(loop, new uv_timer_t)
+Timer::Timer(uv::Loop& loop) : 
+	Base(&loop, new uv_timer_t)
 {
 	traceL("Timer", this) << "Creating" << endl;
 	init();
 }
 	
 
-Timer::Timer(Int64 timeout, Int64 interval, uv_loop_t* loop) : 
-	Base(loop, new uv_timer_t)
+Timer::Timer(Int64 timeout, Int64 interval, uv::Loop& loop) : 
+	Base(&loop, new uv_timer_t)
 {
 	traceL("Timer", this) << "Creating" << endl;	
 	init();
@@ -49,6 +49,7 @@ Timer::Timer(Int64 timeout, Int64 interval, uv_loop_t* loop) :
 Timer::~Timer()
 {
 	traceL("Timer", this) << "Destroying" << endl;
+	close();
 	//assert(_handle);
 }
 
@@ -63,7 +64,7 @@ void Timer::init()
 	_handle->data = this;
 	int r = uv_timer_init(loop(), handle<uv_timer_t>());
 	if (r)
-		setLastError(true);
+		setAndThrowLastError("Invalid timer");
 
 	// Timers do not reference the main loop.
     uv_unref(handle());
@@ -84,7 +85,7 @@ bool Timer::start(Int64 timeout, Int64 interval)
 	_interval = interval;
     int r = uv_timer_start(handle<uv_timer_t>(), Timer::onTimeout, timeout, interval);
     if (r) 
-		setLastError();
+		setAndThrowLastError("Invalid timer");
 	else {
 		//uv_ref(handle());
 		//assert(active());
@@ -102,7 +103,7 @@ bool Timer::stop()
 
     int r = uv_timer_stop(handle<uv_timer_t>());
     if (r) 
-		setLastError();
+		setAndThrowLastError("Invalid timer");
 	else {
 		//uv_unref(handle());
 		//assert(!active());
@@ -130,7 +131,7 @@ bool Timer::again()
 	traceL("Timer", this) << "Again: " << _handle << endl;
     int r = uv_timer_again(handle<uv_timer_t>());
     if (r) 
-		setLastError();
+		setAndThrowLastError("Invalid timer");
 	else {
 		//if (!active())
 		//	uv_ref(handle());
@@ -176,6 +177,7 @@ void Timer::onTimeout()
 {	
 	traceL("Timer", this) << "On Timeout: " << _count << endl;
 	_count++;
+	assert(Timeout.refCount());
 	Timeout.emit(this);
 }
 

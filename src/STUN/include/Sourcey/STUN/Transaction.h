@@ -37,7 +37,7 @@ public:
 				const net::Address& peerAddress, 
 				long timeout = 10000, 
 				int retries = 1,
-				uv_loop_t* loop = NULL);
+				uv::Loop& loop = uv::defaultLoop());
 	
 	virtual ~Transaction();
 

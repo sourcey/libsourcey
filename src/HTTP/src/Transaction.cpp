@@ -36,7 +36,7 @@
 
 using namespace std;
 using namespace Poco;
-using namespace Poco::Net;
+
 
 
 namespace scy { 

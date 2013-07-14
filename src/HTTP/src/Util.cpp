@@ -89,7 +89,7 @@ std::string parseCookieItem(const std::string& cookie, const std::string& item)
 }
 
 
-bool parseURIQuery(const string& uri, Poco::Net::NameValueCollection& out)
+bool parseURIQuery(const string& uri, Poco::Net::KVStore& out)
 {
 	size_t len = uri.length();
 	size_t i = 0;

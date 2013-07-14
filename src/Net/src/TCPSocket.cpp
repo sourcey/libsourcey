@@ -16,14 +16,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "Sourcey/Net/TCPSocket.h"
 #include "Sourcey/Net/TCPBase.h"
 #include "Sourcey/Logger.h"
-
-#include "Poco/Exception.h"
-#include "Poco/Net/Context.h"
-#include "Poco/Net/SSLManager.h"
 
 
 using namespace std;
@@ -35,13 +30,15 @@ namespace net {
 
 TCPSocket::TCPSocket() : 
 	net::Socket(new TCPBase, false)
-{
+{	
+	traceL("TCPSocket", this) << "Creating" << endl;	
 }
 
 
 TCPSocket::TCPSocket(TCPBase* base, bool shared) : 
 	net::Socket(base, shared) 
 {
+	traceL("TCPSocket", this) << "Destroying" << endl;	
 }
 
 
@@ -59,4 +56,4 @@ TCPBase& TCPSocket::base() const
 }
 
 
-} } // namespace scy::uv
+} } // namespace scy::net

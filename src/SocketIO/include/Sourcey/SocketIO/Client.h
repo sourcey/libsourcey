@@ -21,7 +21,7 @@
 #define SOURCEY_SOCKETIO_Client_H
 
 
-#include "Sourcey/Runner.h"
+#include "Sourcey/Application.h"
 #include "Sourcey/HTTP/WebSocket.h"
 #include "Sourcey/SocketIO/Packet.h"
 #include "Sourcey/SocketIO/Transaction.h"
@@ -30,7 +30,7 @@
 
 #include "Poco/Format.h"
 #include "Poco/URI.h"
-#include "Poco/Net/NameValueCollection.h"
+#include "Poco/Net/KVStore.h"
 
 
 namespace scy {
@@ -70,8 +70,8 @@ struct ClientState: public State
 class Client: public StatefulSignal<ClientState>, public PacketEmitter, public IPolymorphic
 {
 public:
-	Client(net::SocketBase* socket, Runner& runner);
-	Client(net::SocketBase* socket, Runner& runner, const net::Address& serverAddr);
+	Client(net::SocketBase* socket, uv::Loop& loop);
+	Client(net::SocketBase* socket, uv::Loop& loop, const net::Address& serverAddr);
 	virtual ~Client();
 	
 	virtual void connect(const net::Address& serverAddr);
@@ -99,7 +99,7 @@ public:
 	virtual Transaction* createTransaction(const sockio::Packet& request, long timeout = 10000);
 		// Creates a packet transaction
 
-	virtual Runner& runner();
+	virtual uv::Loop& loop();
 	virtual http::WebSocket& socket();
 	virtual net::Address serverAddr() const;
 	virtual std::string sessionID() const;	
@@ -132,11 +132,11 @@ protected:
 protected:
 	//mutable Poco::FastMutex	_mutex;
 	
-	http::WebSocket _socket;
-	Runner&		 _runner;
+	uv::Loop& _loop;
+	StringVec _protocols;
+	std::string _sessionID;
 	net::Address _serverAddr;
-	StringVec	 _protocols;
-	std::string  _sessionID;
+	http::WebSocket _socket;
 	int	_heartBeatTimeout;
 	int	_connectionClosingTimeout;
 	Error _error;
@@ -150,15 +150,15 @@ template <class WebSocketBaseT>
 class ClientBase: public Client
 {
 public:
-	ClientBase(/* Net::Reactor& reactor, */uv_loop_t* loop = NULL) :
-		_socket(runner),
-		Client(_socket, runner)
+	ClientBase(uv::Loop& loop = uv::defaultLoop()) :
+		Client(_socket, loop),
+		_socket(loop)
 	{
 	}
 
-	ClientBase(/* Net::Reactor& reactor, */const net::Address& serverAddr, uv_loop_t* loop = NULL) :
-		_socket(runner),
-		Client(_socket, runner, serverAddr)
+	ClientBase(const net::Address& serverAddr, uv::Loop& loop = uv::defaultLoop()) :
+		Client(_socket, loop, serverAddr),
+		_socket(loop)
 	{
 	}
 
@@ -248,7 +248,7 @@ typedef sockio::ClientBase<
 //	}
 //
 //
-//	ClientBase(/* Net::Reactor& reactor, */const net::Address& serverAddr) :
+//	ClientBase(const net::Address& serverAddr) :
 //		WebSocketBaseT(reactor),
 //		_serverAddr(serverAddr),
 //		_timer(NULL)
@@ -526,9 +526,9 @@ typedef sockio::ClientBase<
 	//virtual void setSecure(bool flag) = 0;
 		// Enables secure wss:// connection when true.
 	
-	virtual Poco::Net::NameValueCollection& httpHeaders() = 0;
-	Poco::Net::NameValueCollection _httpHeaders;
-	virtual Poco::Net::NameValueCollection& httpHeaders()
+	virtual Poco::Net::KVStore& httpHeaders() = 0;
+	Poco::Net::KVStore _httpHeaders;
+	virtual Poco::Net::KVStore& httpHeaders()
 	{
 		//Poco::FastMutex::ScopedLock lock(_mutex);
 		return _httpHeaders;
@@ -649,7 +649,7 @@ public:
 		// Enables secure wss:// connection when true.
 	
 	//http::WebSocket* socket();
-	Poco::Net::NameValueCollection& httpHeaders();
+	Poco::Net::KVStore& httpHeaders();
 	std::string sessionID() const;
 
 protected:

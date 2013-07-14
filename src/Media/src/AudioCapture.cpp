@@ -222,7 +222,7 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 		size = 8;
 	else assert(0 && "unknown audio capture format");
 
-	AudioPacket packet((const char*)inputBuffer, 
+	AudioPacket packet((char*)inputBuffer, 
 		nBufferFrames * klass->numChannels() * size, //sizeof(AUDIO_DATA),
 		(double)streamTime);
 

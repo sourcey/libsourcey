@@ -24,10 +24,9 @@
 //#include "Sourcey/UV/UVPP.h"
 #include "Sourcey/UV/UVPP.h"
 //#include "uv.h"
-//#include "Sourcey/UV/Base.h"
+//
 #include "Sourcey/Memory.h"
-
-#include "Poco/SingletonHolder.h"
+#include "Sourcey/Singleton.h"
 
 
 namespace scy {
@@ -35,15 +34,14 @@ namespace scy {
 		
 // -------------------------------------------------------------------
 //
-typedef void (*ShutdownCallback)(void*);
-
-
+/*
+typedef EvLoop Runner;
 class Runner
 {
 public:
-	uv_loop_t* loop;
+	Loop* loop;
 
-	Runner(uv_loop_t* loop = NULL) : 
+	Runner(uv_loop_t* loop = uv_default_loop()) : 
 		loop(loop) 
 	{
 	}
@@ -70,6 +68,8 @@ public:
 			loop = NULL;
 		}
 	}	
+
+	typedef void (*ShutdownCallback)(void*);
 	
 	struct ShutdownCommand 
 	{
@@ -77,31 +77,37 @@ public:
 		ShutdownCallback callback;
 	};
 	
-	void waitForKill(ShutdownCallback callback, void* opaque = NULL)
+	void waitForShutdown(ShutdownCallback callback, void* opaque = NULL)
 	{ 
 		ShutdownCommand* cmd = new ShutdownCommand;
 		cmd->opaque = opaque;
 		cmd->callback = callback;
 
-		uv_signal_t sig;
-		sig.data = cmd;
-		uv_signal_init(loop, &sig);
-		uv_signal_start(&sig, Runner::onKillSignal, SIGINT);
-
+		uv_signal_t* sig = new uv_signal_t;
+		sig->data = cmd;
+		uv_signal_init(loop, sig);
+		uv_signal_start(sig, Runner::onKillSignal, SIGINT);
+		
+		debugL("Runner") << "Wait For Kill" << std::endl;
 		run();
+		debugL("Runner") << "Wait For Kill: Cleanup" << std::endl;
+		cleanup();
+		debugL("Runner") << "Wait For Kill: Cleanup 2" << std::endl;
+		cleanup();
+		debugL("Runner") << "Wait For Kill: Ending" << std::endl;
 	}
 			
 	static void onKillSignal(uv_signal_t *req, int signum)
 	{
 		ShutdownCommand* cmd = reinterpret_cast<ShutdownCommand*>(req->data);
+		uv_close((uv_handle_t*)req, uv::afterClose);
 		cmd->callback(cmd->opaque);
-		uv_signal_stop(req);
 		delete cmd;
 	}
 	
 	static void onPrintHandle(uv_handle_t* handle, void* arg) 
 	{
-		debugL("Runner") << "#### Active Handle: " << handle << std::endl;
+		debugL("Runner") << "#### Active Handle: " << handle << ": " << handle->type << std::endl;
 	}
 
 	static Runner& getDefault();
@@ -111,12 +117,13 @@ public:
 		/// tasks such as timers in order to maintain performance.
 };
 
-
 inline Runner& Runner::getDefault() 
 {
-	static Poco::SingletonHolder<Runner> sh;
+	static Singleton<Runner> sh;
 	return *sh.get();
 }
+*/
+
 
 
 /*
@@ -205,7 +212,7 @@ protected:
 protected:
 	typedef std::deque<Task*> TaskList;
 	
-	mutable Poco::FastMutex	_mutex;
+	mutable Mutex	_mutex;
 	TaskList		_tasks;
 	Poco::Thread	_thread;
 	Poco::Event		_wakeUp;
