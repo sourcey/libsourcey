@@ -1,16 +1,12 @@
 #include "Sourcey/Symple/Client.h"
+#include "Sourcey/Net/SSLManager.h"
 #include "Sourcey/Util.h"
-
-#include "Poco/Net/SSLManager.h"
-#include "Poco/Net/KeyConsoleHandler.h"
-#include "Poco/Net/ConsoleCertificateHandler.h"
 
 
 using namespace std;
 using namespace scy;
+using namespace scy::net;
 using namespace scy::util;
-using namespace Poco;
-using namespace Poco::Net;
 
 
 /*
@@ -24,81 +20,85 @@ CMemLeakDetect memLeakDetect;
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 	
-#define SERVER_HOST "127.0.0.1"
-#define SERVER_PORT 443
-#define USE_SSL     1
+#define SERVER_HOST "localhost"
+#define SERVER_PORT 4000 //443
+#define USE_SSL     0 //1
 
 	
 // ----------------------------------------------------------------------------
-//
 // SocketIO Client Test
-//-------	
+//
 class Tests
 {
-	Poco::Event ready;
-	
-	Runner runner;
-	Net::Reactor reactor;
+	Application app;
 	
 public:
 	Tests()
 	{	
-		// NOTE: The server should use anonymous 
-		// authentication for this test.
-		smple::Client::Options options;
-		//options.token = ""; used for authentication
+		smpl::Client::Options options;
+		options.host = SERVER_HOST;
+		options.port = SERVER_PORT;
 		options.user = "test";
 		options.group = "global";
 		options.name = "crash";
 		options.type = "testapp";
-		options.serverAddr = net::Address(SERVER_HOST, SERVER_PORT);
+
+		// NOTE: The server should use anonymous 
+		// authentication for this test.
+		//options.token = ""; used for authentication
 	
 #if USE_SSL
-		smple::SSLClient client(reactor, runner, options);
-#else
-		smple::TCPClient client(reactor, runner, options);
-#endif
+		// Init SSL Context
+		SSLContext::Ptr ptrContext = new SSLContext(SSLContext::CLIENT_USE, "", "", "",
+			SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");	
+		SSLManager::instance().initializeClient(ptrContext);
 
-		client.StateChange += delegate(this, &Tests::onConnectionStateChange);
+		smpl::SSLClient client(options); //reactor, runner, 
+#else
+		smpl::TCPClient client(options); //reactor, runner, 
+#endif
+		
+		client.StateChange += delegate(this, &Tests::onClientStateChange);
 		client.UpdatePresenceData += delegate(this, &Tests::onUpdatePresenceData);
 		client.connect();
 
-		ready.wait();	
+		app.run();
 		
-		// TODO: Transaction Test
-		// TODO: Presence Test
-		// TODO: Ack Test
-
-		util::pause();
+		// TODO: Obtain authentication token
+		// TODO: Transaction test
+		// TODO: Presence test
+		// TODO: Ack test
+		// TODO: Benchmarks
+		
+#if USE_SSL
+	SSLManager::instance().shutdown();
+#endif
+		app.cleanup();
 	}
 
 
-	void onConnectionStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState) 
+	void onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState) 
 	{
-		smple::Client* client = reinterpret_cast<smple::Client*>(sender);	
-		Log("debug") << "Connection State Changed: " << state.toString() << ": " << client->socket().address() << endl;
+		smpl::Client* client = reinterpret_cast<smpl::Client*>(sender);	
+		Log("debug") << "Client state changed: " << state.toString() << ": " << client->socket().address() << endl;
 		
 		switch (state.id()) {
 		case sockio::ClientState::Connecting:
 			break;
 		case sockio::ClientState::Connected: 
 			break;
-		//case sockio::ClientState::Handshaking: 
-		//	break;
 		case sockio::ClientState::Online: 
-			ready.set(); // pass
 			break;
 		case sockio::ClientState::Disconnected: 
-			ready.set(); // fail
+			assert(0);
 			break;
 		}
 	}
-
-
-	void onUpdatePresenceData(void*, smple::Peer& peer)
+	
+	void onUpdatePresenceData(void*, smpl::Peer& peer)
 	{
 		Log("debug") << "Updating Client Data" << endl;
 		
@@ -110,7 +110,7 @@ public:
 };
 
 
-} } // namespace scy::smple
+} } // namespace scy::smpl
 
 
 int main(int argc, char** argv) 
@@ -118,14 +118,13 @@ int main(int argc, char** argv)
 	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
 
 	// Init SSL Context
-	SharedPtr<InvalidCertificateHandler> ptrCert;
-	Context::Ptr ptrContext = new Context(Context::CLIENT_USE, "", "", "",
-		Context::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");	
-	SSLManager::instance().initializeClient(0, ptrCert, ptrContext);
+	SSLContext::Ptr ptrContext = new SSLContext(SSLContext::CLIENT_USE, "", "", "",
+		SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");	
+	SSLManager::instance().initializeClient(ptrContext);
 	{
-		scy::smple::Tests run;
+		scy::smpl::Tests run;
 	}		
-	Poco::Net::SSLManager::instance().shutdown();
+	SSLManager::instance().shutdown();
 	Logger::uninitialize();
 	return 0;
 }

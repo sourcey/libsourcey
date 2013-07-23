@@ -26,17 +26,17 @@
 
 
 using namespace std;
-using namespace Poco;
+
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
 Message::Message() :
 	json::Value(Json::objectValue)
 {
-	(*this)["id"] = crypt::randomKey(16);
+	(*this)["id"] = crypto::randomKey(16);
 	(*this)["type"] = "message";
 }
 
@@ -45,7 +45,7 @@ Message::Message(const Message& root) :
 	json::Value(root)
 {
 	if (!isMember("id"))
-		(*this)["id"] = crypt::randomKey(16);
+		(*this)["id"] = crypto::randomKey(16);
 	if (!isMember("type"))
 		(*this)["type"] = "message";
 }
@@ -55,7 +55,7 @@ Message::Message(const json::Value& root) :
 	json::Value(root)
 {
 	if (!isMember("id"))
-		(*this)["id"] = crypt::randomKey(16);
+		(*this)["id"] = crypto::randomKey(16);
 	if (!isMember("type"))
 		(*this)["type"] = "message";
 }
@@ -75,7 +75,7 @@ IPacket* Message::clone() const
 bool Message::read(Buffer& buf) 
 {
 	string root;
-	buf.read(root, buf.remaining());	
+	buf.get(root, buf.available());	
 	return read(root);
 }
 
@@ -89,7 +89,7 @@ bool Message::read(const std::string& root)
 
 void Message::write(Buffer& buf) const 
 {
-	buf.write(json::stringify(*this));
+	buf.put(json::stringify(*this));
 }
 
 
@@ -291,5 +291,5 @@ bool Message::hasData(const string& name)
 }
 
 
-} // namespace smple 
+} // namespace symple 
 } // namespace scy

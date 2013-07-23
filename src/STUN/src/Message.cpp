@@ -32,7 +32,7 @@ Message::Message() :
 	_type(0), 
 	_state(Request), 
 	_size(0), 
-	_transactionID(crypt::randomKey(16)) 
+	_transactionID(crypto::randomKey(16)) 
 {
 	assert(_transactionID.size() == 16);
 }
@@ -192,7 +192,7 @@ Attribute* Message::get(Attribute::Type type, int index) const
 
 bool Message::read(Buffer& buf) 
 {			
-	if (!buf.readU16(_type)) {
+	if (!buf.getU16(_type)) {
 		errorL("STUNMessage") << "Not STUN type: " << _type << endl;
 		return false;
 	}
@@ -204,34 +204,34 @@ bool Message::read(Buffer& buf)
 		return false;
 	}
 
-	if (!buf.readU16(_size)) {
+	if (!buf.getU16(_size)) {
 		//errorL("STUNMessage") << "Packet has no size: " << _size << endl;
 		return false;
 	}
 
 	string transactionID;
-	if (!buf.read(transactionID, 16)) {
+	if (!buf.get(transactionID, 16)) {
 		//errorL("STUNMessage") << "Packet has no Transaction ID: " << transactionID << endl;
 		return false;
 	}
 	assert(transactionID.size() == 16);
 	_transactionID = transactionID;
 
-	if (_size > buf.remaining()) {
-		warnL("STUNMessage") << "Buffer error: " << _size << " > " << buf.remaining() << endl;
+	if (_size > buf.available()) {
+		warnL("STUNMessage") << "Buffer error: " << _size << " > " << buf.available() << endl;
 		//return false;
 	}
 
 	_attrs.resize(0);
 
-	size_t rest = buf.remaining() - _size;
-	while (buf.remaining() > rest) {
+	size_t rest = buf.available() - _size;
+	while (buf.available() > rest) {
 		UInt16 attrType, attrLength;
-		if (!buf.readU16(attrType)) {
+		if (!buf.getU16(attrType)) {
 			errorL("STUNMessage") << "Attribute has no type: " << attrType << endl;
 			return false;
 		}
-		if (!buf.readU16(attrLength)) {
+		if (!buf.getU16(attrLength)) {
 			errorL("STUNMessage") << "Attribute has no size: " << attrLength << endl;
 			return false;
 		}
@@ -247,9 +247,9 @@ bool Message::read(Buffer& buf)
 		}
 	}
 
-	if (buf.remaining() != rest) {
+	if (buf.available() != rest) {
 		// FIXME: Shouldn't be doing this
-		errorL("STUNMessage") << "Wrong message size (" << rest << " != " << buf.remaining() << ")" << endl;
+		errorL("STUNMessage") << "Wrong message size (" << rest << " != " << buf.available() << ")" << endl;
 		return false;
 	}
 
@@ -259,15 +259,15 @@ bool Message::read(Buffer& buf)
 
 void Message::write(Buffer& buf) const 
 {
-	buf.writeU16(_type);
-	buf.writeU16(_size);
-	buf.write(_transactionID);
+	buf.putU16(_type);
+	buf.putU16(_size);
+	buf.put(_transactionID);
 
 	// TODO: Shift Message Integrity to end
 
 	for (unsigned i = 0; i < _attrs.size(); i++) {
-		buf.writeU16(_attrs[i]->type());
-		buf.writeU16(_attrs[i]->size()); 
+		buf.putU16(_attrs[i]->type());
+		buf.putU16(_attrs[i]->size()); 
 		_attrs[i]->write(buf);
 	}
 }

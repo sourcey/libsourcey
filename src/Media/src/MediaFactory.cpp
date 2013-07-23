@@ -23,7 +23,7 @@
 #include "RtAudio.h"
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 using namespace scy;
 
 
@@ -35,14 +35,14 @@ namespace av {
 // Media Factory
 //
 MediaFactory*	MediaFactory::_instance;
-FastMutex		MediaFactory::_mutex;
+Mutex		MediaFactory::_mutex;
 
 
 MediaFactory* MediaFactory::instance() 
 {
 	if (_instance == NULL) 
 	{
-		FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		if (_instance == NULL) {
 			_instance = new MediaFactory;
 		}
@@ -86,24 +86,24 @@ MediaFactory::~MediaFactory()
 
 IDeviceManager& MediaFactory::devices() 
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return *_devices; 
 }
 
 
 FormatRegistry& MediaFactory::formats() 
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _formats; 
 }
 
 
 void MediaFactory::loadVideo(unsigned flags)
 {
-	debugL("MediaFactory") << "Preloading Video Captures" << endl;
+	traceL("MediaFactory") << "Preloading Video Captures" << endl;
 	
 	// Depreciated code used to preload captures on application load.
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	// Initialize a VideoCapture object for each available device.
 	// The video capture object will begin capturing frames when it's
@@ -139,7 +139,7 @@ void MediaFactory::unloadVideo()
 VideoCapture* MediaFactory::getVideoCapture(int deviceId, unsigned flags) 
 {
 	traceL("MediaFactory") << "Get Video Capture: " << deviceId << endl;
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	VideoCaptureMap::iterator it = _map.find(deviceId);
 	if (it != _map.end())
 		return it->second;

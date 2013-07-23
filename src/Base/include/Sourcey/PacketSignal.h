@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/Types.h"
-#include "Sourcey/IPacket.h"
+#include "Sourcey/Packet.h"
 #include "Sourcey/PolymorphicSignal.h"
 
 

@@ -27,7 +27,7 @@
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
 class Command: public Message
@@ -52,7 +52,7 @@ public:
 };
 
 
-} // namespace smple 
+} // namespace symple 
 } // namespace scy
 
 

@@ -19,16 +19,16 @@
 
 #include "Sourcey/Symple/Event.h"
 #include "Sourcey/Util.h"
-//#include "Poco/DateTimeFormatter.h"
-//#include "Poco/DateTimeFormat.h"
+////#include "Poco/DateTimeFormatter.h"
+////#include "Poco/DateTimeFormat.h"
 
 
 using namespace std;
-using namespace Poco;
+//
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
 Event::Event() 
@@ -107,9 +107,9 @@ void Event::setMessage(const string& message)
 void Event::setTime(time_t time) 
 {
 	(*this)["time"] = (double)time;
-	//Poco::DateTimeFormatter::format(
-	//	Poco::Timestamp::fromEpochTime(time), 
-	//	Poco::DateTimeFormat::ISO8601_FORMAT);
+	//DateTimeFormatter::format(
+	//	Timestamp::fromEpochTime(time), 
+	//	DateTimeFormat::ISO8601_FORMAT);
 }
 
 	
@@ -122,5 +122,5 @@ void Event::setTime(const string& time)
 */
 
 
-} // namespace smple 
+} // namespace symple 
 } // namespace scy

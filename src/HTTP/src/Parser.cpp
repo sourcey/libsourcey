@@ -25,7 +25,7 @@
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 
 
 namespace scy { 
@@ -33,30 +33,30 @@ namespace http {
 
 
 Parser::Parser(http::Response* response) : 
-	_observer(NULL),
-	_request(NULL),
+	_observer(nullptr),
+	_request(nullptr),
 	_response(response),
-	_error(NULL)
+	_error(nullptr)
 {
 	init(HTTP_RESPONSE);
 }
 
 
 Parser::Parser(http::Request* request) : 
-	_observer(NULL),
+	_observer(nullptr),
 	_request(request),
-	_response(NULL),
-	_error(NULL)
+	_response(nullptr),
+	_error(nullptr)
 {
 	init(HTTP_REQUEST);
 }
 
 
 Parser::Parser(http_parser_type type) : 
-	_observer(NULL),
-	_request(NULL),
-	_response(NULL),
-	_error(NULL)
+	_observer(nullptr),
+	_request(nullptr),
+	_response(nullptr),
+	_error(nullptr)
 {
 	init(type);
 }
@@ -79,6 +79,7 @@ void Parser::init(http_parser_type type)
 	_parser.data = this;
 	_settings.on_message_begin = on_message_begin;
 	_settings.on_url = on_url;
+	_settings.on_status_complete = on_status_complete;
 	_settings.on_header_field = on_header_field;
 	_settings.on_header_value = on_header_value;
 	_settings.on_headers_complete = on_headers_complete;
@@ -92,8 +93,12 @@ void Parser::init(http_parser_type type)
 bool Parser::parse(const char* data, size_t len, bool expectComplete) // size_t offset, 
 {
 	traceL("HTTPParser", this) << "Parse Data: " << len << endl;	
-	assert(!complete());
+	
+	//assert(!complete());
 	assert(_parser.data == this);
+
+	if (complete())
+		setParserError(true, "Parsing already complete");
 
 	size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len); //&data[offset]
 
@@ -130,7 +135,7 @@ void Parser::reset()
 	_complete = false;
 	if (_error) {
 		delete _error;
-		_error = NULL;
+		_error = nullptr;
 	}
 
 	// TODO: Reset parser internal state?
@@ -174,10 +179,10 @@ void Parser::setObserver(ParserObserver* observer)
 }
 	
 
-Poco::Net::HTTPMessage* Parser::message()
+http::Message* Parser::message()
 {
-	return _request ? static_cast<Poco::Net::HTTPMessage*>(_request) : 
-		_response ? static_cast<Poco::Net::HTTPMessage*>(_response) : NULL;
+	return _request ? static_cast<http::Message*>(_request) : 
+		_response ? static_cast<http::Message*>(_response) : NULL;
 }
 
 
@@ -232,19 +237,10 @@ void Parser::onHeadersEnd()
 
 	// KeepAlive
 	//headers->setKeepAlive(http_should_keep_alive(parser) > 0);
-
-	// Response
-	if (_response) {
-		
-		// HTTP status
-		_response->setStatus((Poco::Net::HTTPResponse::HTTPStatus)_parser.status_code);
-	}
 	
-	// Request
+	// Request HTTP method
 	if (_request) {
-		
-		// HTTP method
-		_request->setMethod(http_method_str(static_cast<http_method>(_parser.method))); //)
+		_request->setMethod(http_method_str(static_cast<http_method>(_parser.method)));
 	}
 	
 	if (_observer)
@@ -303,6 +299,19 @@ int Parser::on_url(http_parser* parser, const char *at, size_t len)
 	assert(at && len);	
 
     self->onURL(string(at, len));
+	return 0;
+}
+
+
+int Parser::on_status_complete(http_parser* parser)
+{
+	auto self = reinterpret_cast<Parser*>(parser->data);
+	assert(self);
+
+	// Handle response status line
+	if (self->_response)
+		self->_response->setStatus((http::Response::HTTPStatus)parser->status_code);
+
 	return 0;
 }
 
@@ -389,11 +398,11 @@ int Parser::on_message_complete(http_parser* parser)
 
 
 /*
-	_observer = NULL;
-Parser::Parser(http_parser_type type) : ///, Poco::Net::HTTPMessage* headers // ParserObserver& observer, 
-	_observer(NULL), 
+	_observer = nullptr;
+Parser::Parser(http_parser_type type) : ///, http::Message* headers // ParserObserver& observer, 
+	_observer(nullptr), 
 	//_headers(headers), 
-	_error(NULL),
+	_error(nullptr),
 	_complete(false)//, 
 	//_upgrade(true), 
 	//_wasHeaderValue(true)
@@ -540,7 +549,7 @@ void Parser::registerSocketEvents() {
 	//heerree
   // Register net::Socket event handlers
   socket_->on<native::event::data>([=](const Buffer& buf) {
-      if(parse(buf.base(), 0, buf.size()))
+      if(parse(buf.base(), 0, buf.available()))
       {
         // parse end
         socket_->pause();
@@ -677,7 +686,7 @@ void Parser::validate_incoming() {
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 
 
 namespace scy { 
@@ -722,7 +731,7 @@ DigestAuthenticator::DigestAuthenticator(const string& realm, const string& vers
 	_realm(realm),
 	_version(version),
 	_usingRFC2617(usingRFC2617),
-	_opaque(crypt::hash("md5", realm))
+	_opaque(crypto::hash("md5", realm))
 {
 	traceL() << "[DigestAuthenticator] Creating" << endl;
 }
@@ -777,17 +786,17 @@ bool DigestAuthenticator::validateRequest(UserManager* authenticator, const stri
 	if (!user) 
 		return false;
 
-	string ha1 = crypt::hash("md5", format("%s:%s:%s", username, _realm, user->password()));
-	string ha2 = crypt::hash("md5", format("%s:%s", httpMethod, uri));
+	string ha1 = crypto::hash("md5", format("%s:%s:%s", username, _realm, user->password()));
+	string ha2 = crypto::hash("md5", format("%s:%s", httpMethod, uri));
 
 	if (_usingRFC2617 && qop.size()) {
 		// Using advanced digest authentication
 		// Hash = md5(HA1:nonce:nc:cnonce:qop:HA2) 
-		hash = crypt::hash("md5", format("%s:%s:%s:%s:%s:%s", ha1, nonce, nc, cnonce, qop, ha2));
+		hash = crypto::hash("md5", format("%s:%s:%s:%s:%s:%s", ha1, nonce, nc, cnonce, qop, ha2));
 	} else {
 		// Using standard digest authentication
 		// Hash = md5(HA1:nonce:HA2) 
-		hash = crypt::hash("md5", format("%s:%s:%s", ha1, nonce, ha2));
+		hash = crypto::hash("md5", format("%s:%s:%s", ha1, nonce, ha2));
 	}
 
 	return hash == response;
@@ -796,7 +805,7 @@ bool DigestAuthenticator::validateRequest(UserManager* authenticator, const stri
 
 string DigestAuthenticator::prepare401Header(const string& extra) 
 {
-	_noonce = crypt::randomKey(32);
+	_noonce = crypto::randomKey(32);
 	if (_usingRFC2617) {
 		return format(
 			"%s 401 Unauthorized\r\n"

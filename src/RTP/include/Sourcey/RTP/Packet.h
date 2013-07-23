@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/RTP/Header.h"
-#include "Sourcey/IPacket.h"
+#include "Sourcey/Packet.h"
 
 
 namespace scy {

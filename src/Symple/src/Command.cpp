@@ -24,11 +24,11 @@
 
 
 using namespace std;
-using namespace Poco;
+
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
 Command::Command() 
@@ -112,5 +112,5 @@ bool Command::matches(const string& xnode) const
 }
 
 
-} // namespace smple 
+} // namespace symple 
 } // namespace scy

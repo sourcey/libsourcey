@@ -23,7 +23,7 @@
 
 #include <time.h>
 
-#include "Sourcey/IPacketProcessor.h"
+#include "Sourcey/PacketStream.h"
 
 
 namespace scy {
@@ -80,7 +80,7 @@ struct FPSCounter
 };
 
 
-class FPSLimiter: public IPacketProcessor
+class FPSLimiter: public PacketProcessor
 	/// This class limits the throughput rate of IPackets
 	/// in a PacketStream.
 	/// If the throughput rate exceeds the max secified FPS
@@ -115,7 +115,7 @@ public:
 	{
 		//traceL() << "[FPSLimiter:" << this <<"] Processing" << std::endl;
 		_counter.tick();
-		emit(this, packet);
+		emit(packet); //this, 
 	};
 	
 	virtual FPSCounter& counter()

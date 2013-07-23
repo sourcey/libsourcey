@@ -21,7 +21,7 @@
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 
 
 namespace scy {
@@ -30,17 +30,17 @@ namespace av {
 
 VideoAnalyzer::VideoAnalyzer(const Options& options) : 
 	_options(options),
-	_video(NULL),
-	_audio(NULL),
-	_videoConv(NULL)
+	_video(nullptr),
+	_audio(nullptr),
+	_videoConv(nullptr)
 {
-	traceL() << "[VideoAnalyzer:" << this <<"] Creating" << endl;
+	traceL("VideoAnalyzer", this) << "Creating" << endl;
 }
 
 
 VideoAnalyzer::~VideoAnalyzer() 
 {
-	traceL() << "[VideoAnalyzer:" << this <<"] Destroying" << endl;
+	traceL("VideoAnalyzer", this) << "Destroying" << endl;
 	uninitialize();
 }
 
@@ -80,7 +80,7 @@ void VideoAnalyzer::uninitialize()
 	//traceL() << "[VideoAnalyzerStream:" << this << ":" << name << "] Uninitializing" << endl;	
 	stop();
 	
-	//FastMutex::ScopedLock lock(_mutex); 
+	//Mutex::ScopedLock lock(_mutex); 
 
 	if (_video)
 		delete _video;
@@ -93,7 +93,7 @@ void VideoAnalyzer::uninitialize()
 
 void VideoAnalyzer::start()
 {
-	FastMutex::ScopedLock lock(_mutex); 
+	Mutex::ScopedLock lock(_mutex); 
 	
 	try 
 	{
@@ -107,7 +107,7 @@ void VideoAnalyzer::start()
 	} 
 	catch (Exception& exc) 
 	{
-		_error = exc.displayText();
+		_error = exc.message();
 		errorL("VideoAnalyzer", this) << "Error: " << _error << endl;
 		exc.rethrow();
 	}
@@ -118,7 +118,7 @@ void VideoAnalyzer::stop()
 {
 	
 	// Can't lock here in case we inside a callback.
-	//FastMutex::ScopedLock lock(_mutex); 
+	//Mutex::ScopedLock lock(_mutex); 
 	
 	_reader.ReadComplete -= delegate(this, &VideoAnalyzer::onReadComplete);
 	_reader.detach(this);
@@ -139,7 +139,7 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 	int frames = 0;
 	//VideoDecoderContext* video = _reader.video();
 	
-	FastMutex::ScopedLock lock(_mutex); 
+	Mutex::ScopedLock lock(_mutex); 
 	
 	// Prepeare FFT input data array
 	//	http://stackoverflow.com/questions/7790877/forward-fft-an-image-and-backward-fft-an-image-to-get-the-same-result
@@ -175,7 +175,7 @@ void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 	//traceL("VideoAnalyzer", this) << "On Audio: " 
 	//  << packet.size() << ": " << packet.time << endl;	
 
-	FastMutex::ScopedLock lock(_mutex);		
+	Mutex::ScopedLock lock(_mutex);		
 	
 	VideoAnalyzer::Packet pkt(packet.time);
 	short const* data = reinterpret_cast<short*>(packet.data());
@@ -214,7 +214,7 @@ void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 
 AVFrame* VideoAnalyzer::getGrayVideoFrame()
 {		
-	FastMutex::ScopedLock lock(_mutex); 
+	Mutex::ScopedLock lock(_mutex); 
 	VideoDecoderContext* video = _reader.video();
 
 	// TODO: Conversion via decoder?
@@ -244,7 +244,7 @@ void VideoAnalyzer::onReadComplete(void* sender)
 
 	AVInputReader* reader = reinterpret_cast<AVInputReader*>(sender);	
 	{
-		FastMutex::ScopedLock lock(_mutex); 
+		Mutex::ScopedLock lock(_mutex); 
 		if (_error.empty())
 			_error = reader->error();
 	}
@@ -255,21 +255,21 @@ void VideoAnalyzer::onReadComplete(void* sender)
 
 AVInputReader& VideoAnalyzer::reader()
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _reader; 
 }
 
 
 VideoAnalyzer::Options& VideoAnalyzer::options()
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _options; 
 }
 
 
 string VideoAnalyzer::error() const
 {
-	FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _error;
 }
 
@@ -291,7 +291,7 @@ const int kMaxFFTPow2Size = 24;
 
 VideoAnalyzer::Stream::Stream(const std::string& name, int rdftSize) : 
 	name(name), rdftSize(rdftSize), rdftBits(static_cast<int>(log2(rdftSize))), 
-	rdft(NULL), rdftData(NULL), frames(0), filled(0)
+	rdft(nullptr), rdftData(nullptr), frames(0), filled(0)
 {	
 	traceL() << "[VideoAnalyzerStream:" << this << ":" << name << "] Creating: " 
 		<< rdftSize << ": " << rdftBits << endl;	
@@ -441,7 +441,7 @@ double log2(double n)
 			for (rdft_bits = 1; 1 << rdft_bits < 2 * _reader.video()->ctx->height; rdft_bits++);
 			win_size = 1 << rdft_bits;
 
-			traceL() << "[VideoAnalyzer:" << this <<"] rdft_bits: " << rdft_bits << ": " << win_size << ": " << (sizeof(*_video->rdftData) *
+			traceL("VideoAnalyzer", this) << "rdft_bits: " << rdft_bits << ": " << win_size << ": " << (sizeof(*_video->rdftData) *
 					(_reader.video()->ctx->width * 
 					 _reader.video()->ctx->height)) << endl;
 					 */

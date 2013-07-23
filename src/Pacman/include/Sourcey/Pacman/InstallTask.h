@@ -25,13 +25,13 @@
 #include "Sourcey/Runner.h"
 #include "Sourcey/Stateful.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/HTTP/Transaction.h"
+#include "Sourcey/HTTP/Client.h"
 
 #include "Poco/Zip/ZipLocalFileHeader.h"
 
 
 namespace scy { 
-namespace pcman {
+namespace pman {
 
 	
 class PackageManager;
@@ -70,7 +70,7 @@ struct PackageInstallState: public State
 class InstallTask: 
 	public Poco::Runnable, 
 	public StatefulSignal<PackageInstallState>, 
-	public IPolymorphic
+	public Polymorphic
 	///
 	/// This class implements actual package 
 	/// installation procedure.
@@ -132,7 +132,7 @@ public:
 	virtual int progress() const;
 
 	virtual void onStateChange(PackageInstallState& state, const PackageInstallState& oldState);
-	virtual void onResponseProgress(void* sender, http::TransferState& state);
+	virtual void onIncomingProgress(void* sender, const http::TransferProgress& state);
 	virtual void onDecompressionError(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const std::string>& info);
 	virtual void onDecompressionOk(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info);
 
@@ -154,7 +154,7 @@ protected:
 	virtual void setProgress(int value);
 
 protected:
-	mutable Poco::FastMutex	_mutex;
+	mutable Mutex	_mutex;
 	
 	Poco::Thread	_thread;
 	PackageManager& _manager;
@@ -162,7 +162,7 @@ protected:
 	RemotePackage*	_remote;
 	Options			_options;
 	int             _progress;
-	http::Transaction _transaction;
+	http::ClientConnection* _transaction;
 	
 	friend class PackageManager;
 	friend class InstallMonitor;	
@@ -172,7 +172,7 @@ protected:
 typedef std::vector<InstallTask*> InstallTaskList;
 
 
-} } // namespace scy::Pacman
+} } // namespace scy::pman
 
 
 #endif // SOURCEY_Pacman_InstallTask_H

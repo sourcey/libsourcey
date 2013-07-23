@@ -21,72 +21,154 @@
 #define SOURCEY_HTTP_ServerConnection_H
 
 
-#include "Sourcey/Timeout.h"
+#include "Sourcey/Timer.h"
 #include "Sourcey/Net/TCPSocket.h"
 #include "Sourcey/HTTP/Request.h"
 #include "Sourcey/HTTP/Response.h"
 #include "Sourcey/HTTP/Parser.h"
-#include "Sourcey/HTTP/Packetizers.h"
+#include "Sourcey/HTTP/URL.h"
+//#include "Sourcey/HTTP/ConnectionAdapters.h"
 
 	
 namespace scy { 
 namespace http {
+	
 
-
+class ConnectionAdapter;
 class Connection
 {
-public:
+public:	
     Connection(const net::Socket& socket);
 			
-	virtual int sendRaw(const char* buf, size_t len, int flags = 0);
-	//virtual bool sendMessage();
+	virtual int write(const char* buf, size_t len, int flags = 0);
+	virtual int write(const std::string& buf, int flags = 0);
+		/// Sends a raw data to the peer.
+		///
+		/// Only available for chunked/streaming connections.
+
 	virtual int sendHeaders();
+		/// Sends the outdoing HTTP headers.
+	
+	//virtual bool flush();
+		/// Flushes any outgoing HTTP data.
+		///
+		/// Outgoing HTTP Headers will be sent on the first call
+		/// to flush(). If you want to prevent headers from being 
+		/// sent set shouldSendHeaders to false.
 
 	virtual void close();
-		/// Forcefully closes the connection
-	
-	virtual void onHeaders() = 0;
-	virtual void onPayload(Buffer& buffer) = 0;
-	virtual void onComplete() = 0;
-	virtual void onClose() = 0;
+		/// Closes the connection and scheduled the object for 
+		/// deferred deletion.
+		///
+		/// The connection pointer should no longer be accessed
+		/// once closed.
 					
 	bool closed() const;
+		/// Returns true if the connection is closed.
+
 	bool expired() const;
+		/// Returns true if the remote service did not give us
+		/// a proper response within the alotted time frame.
+	
+	virtual void onHeaders() = 0;
+	//virtual void onPayload(Buffer& buffer) = 0;
+	virtual void onMessage() = 0;
+	virtual void onClose() = 0;
 
 	bool shouldSendHeaders() const;
 	void shouldSendHeaders(bool flag);
+		/// Provides a means to prevent default sending of HTTP headers.
+
+	net::Socket& socket();
+		/// Return the connection's underlying socket.
+
+	Buffer& incomingBuffer();
+		/// The incoming SocketBase buffer. 
+		///
+		/// The buffer will be overwritten after each socket read,
+		/// so if you want to capture raw headers then you can
+		/// access the incomingBuffer() on onHeaders(), similarly
+		/// if you want raw chunks then access via onPayload().
 
 	Request& request();	
-	Response& response();
-	net::Socket& socket();
-	Buffer& recvBuffer();
+		/// The HTTP request headers.
 
-    virtual Poco::Net::HTTPMessage* incomingHeaders() = 0;
-    virtual Poco::Net::HTTPMessage* outgoingHeaders() = 0;
+	Response& response();
+		/// The HTTP response headers.
+	
+	PacketStream Outgoing; 
+		/// The Outgoing stream is responsible for packetizing  
+		/// raw application data into the agreed upon HTTP   
+		/// format and sending it to the peer.
+		///
+		/// TODO: send() method should pipe though the 
+		/// stream is active (has delegates and procs) 
+
+	PacketStream Incoming; 
+		/// Receiver is responsible for depacketizing
+		/// incoming HTTP chunks emitting the payload to
+		/// delegate listeners.
+		///
+		/// TODO: send() method should pipe though the 
+		/// stream is active (has delegates and procs) 
+
+    virtual http::Message* incomingHeaders() = 0;
+    virtual http::Message* outgoingHeaders() = 0;
 	
 	NullSignal Close;	
-		/// Close signal fires on connection closure.
+		/// Fires when the connection is closed.
 
 protected:	
     virtual ~Connection();
 
 	void onSocketRecv(void*, net::SocketPacket& packet);
+	void onSocketError(void*, const Error& error);
 	void onSocketClose(void*);
-
-	void replaceAdapter(net::SocketAdapter* adapter);
+		
+	virtual void setError(const Error& err);
 
 protected:
-    Request* _request;
-    Response* _response;
+    Request _request;
+    Response _response;
     net::Socket _socket;	
-    net::SocketAdapter* _adapter;
 	Timeout _timeout;
-	bool _shouldSendHeaders;
+	Buffer _outgoing;
+
 	bool _closed;
+	bool _shouldSendHeaders;
 	
 	friend class Parser;
+	friend class ConnectionAdapter;
 	friend class GCDeleter<Connection>;
 };
+
+
+	//Buffer& outgoingBuffer();
+		/// The outgoing body payload buffer.
+		///
+		/// HTTP body/chunked data to send to the peer should be 
+		/// written to this buffer.
+	
+	//ConnectionAdapter* _adapter;
+    //net::SocketAdapter* _adapter;
+	
+	
+	//void setHTTPAdapter(net::SocketAdapter* adapter);
+
+	/*
+	//PacketStream* _inputStream;
+	//PacketStream* _outputStream;
+		*/
+	//Error _error;
+	
+	//PacketStream Incoming; 
+	//PacketStream Incoming; 
+		// Receiver
+		/// The incoming packet stream.
+		/// TODO: Replace Payload with this signal and rename to Inbound/Data/Receiver/Outgoing
+
+	//PacketStream* Outgoing; // Outgoing
+		/// The outgoing packet stream.
 
 	
 // -------------------------------------------------------------------
@@ -109,8 +191,8 @@ protected:
 	/// Socket emitter callbacks
 	//virtual void onSocketConnect() {};
 	virtual void onSocketRecv(Buffer& buf, const net::Address& peerAddr);
-	virtual void onSocketError(const Error& error);
-	virtual void onSocketClose();
+	//virtual void onSocketError(const Error& error);
+	//virtual void onSocketClose();
 		
 	//
 	/// Parser callbacks
@@ -125,10 +207,10 @@ protected:
 };
 
 
-inline bool isExplicitKeepAlive(Poco::Net::HTTPMessage* message) 
+inline bool isExplicitKeepAlive(http::Message* message) 
 {	
-	const std::string& connection = message->get(Poco::Net::HTTPMessage::CONNECTION, Poco::Net::HTTPMessage::EMPTY);
-	return !connection.empty() && Poco::icompare(connection, Poco::Net::HTTPMessage::CONNECTION_KEEP_ALIVE) == 0;
+	const std::string& connection = message->get(http::Message::CONNECTION, http::Message::EMPTY);
+	return !connection.empty() && util::icompare(connection, http::Message::CONNECTION_KEEP_ALIVE) == 0;
 }
 
 
@@ -143,15 +225,15 @@ inline bool isExplicitKeepAlive(Poco::Net::HTTPMessage* message)
 	//virtual bool sendResponse(const http::Response& response);
 
 //#include "Sourcey/Stateful.h"
-//#include "Sourcey/ISendable.h"
+//#include "Sourcey/Interfaces.h"
 //#include "Sourcey/Net/ServerConnection.h"
-//#include "Poco/Net/HTTPSession.h"
+//////#include "Poco/Net/HTTPSession.h"
 //#include "Poco/URI.h"
 //#include "Poco/Thread.h"
 
 		
 /*
-	//IPacketizer* _packetizer;
+	//ConnectionAdapter* _adapter;
  //: public net::SocketAdapter
  //Buffer& buf, const net::Address& peerAddr
 class ServerResponder
@@ -237,12 +319,12 @@ protected:
 
 // ---------------------------------------------------------------------
 //
-class ServerConnection: public StatefulSignal<net::ServerConnectionState>, public ISendable, public IPolymorphic
+class ServerConnection: public StatefulSignal<net::ServerConnectionState>, public abstract::Sendable, public Polymorphic
 	/// Implements a stateful HTTP request/response 
 	/// transaction with progress updates.
 {
 public:
-	ServerConnection(Request* request = NULL);
+	ServerConnection(Request* request = nullptr);
 	virtual ~ServerConnection();
 
 	virtual bool send();
@@ -271,8 +353,8 @@ public:
 		/// Sets an arbitrary pointer to associate with
 		/// this transaction.
 	
-	Signal<TransferProgress&> UploadProgress;
-	Signal<TransferProgress&> DownloadProgress;
+	Signal<TransferProgress&> OutgoingProgress;
+	Signal<TransferProgress&> IncomingProgress;
 	Signal<Response&> Complete;
 	
 	virtual const char* className() const { return "ServerConnection"; }
@@ -288,12 +370,12 @@ protected:
 protected:
 	Request*		_request;
 	Response		_response;
-	Poco::URI		_uri;
-	TransferProgress _requestState;
-	TransferProgress _responseState;
+	http::URL		_uri;
+	TransferProgress _incomingProgress;
+	TransferProgress _outgoingProgress;
 	std::string		_outputPath;
 	void*			_clientData;
 	Poco::Net::HTTPSession*	_session;
-	mutable Poco::FastMutex	_mutex;
+	mutable Mutex	_mutex;
 };
 */

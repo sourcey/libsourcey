@@ -55,7 +55,7 @@ public:
 			fpsCounter.tick();		
 		}
 		catch (Exception& exc) {
-			errorL("StreamingRequestHandler", this) << "Error: " << exc.displayText() << std::endl;
+			errorL("StreamingRequestHandler", this) << "Error: " << exc.message() << std::endl;
 			connection().close();
 		}
 	}

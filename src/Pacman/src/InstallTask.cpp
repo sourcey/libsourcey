@@ -20,6 +20,7 @@
 #include "Sourcey/Pacman/InstallTask.h"
 #include "Sourcey/Pacman/PackageManager.h"
 #include "Sourcey/Pacman/Package.h"
+#include "Sourcey/HTTP/Authenticator.h"
 #include "Sourcey/Logger.h"
 
 #include "Poco/Path.h"
@@ -29,7 +30,7 @@
 #include "Poco/Delegate.h"
 #include "Poco/Zip/Decompress.h"
 #include "Poco/Zip/ZipArchive.h"
-#include "Poco/Net/HTTPBasicCredentials.h"
+////#include "Poco/Net/HTTPBasicCredentials.h"
 
 
 using namespace std;
@@ -37,7 +38,7 @@ using namespace Poco;
 
 
 namespace scy { 
-namespace pcman {
+namespace pman {
 
 
 InstallTask::InstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote, const Options& options) :
@@ -60,7 +61,7 @@ InstallTask::~InstallTask()
 void InstallTask::start()
 {
 	log("trace") << "Starting" << endl;	
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_thread.start(*this);
 }
 
@@ -76,7 +77,7 @@ void InstallTask::run()
 	try {	
 		// Prepare environment and install options
 		{
-			FastMutex::ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 
 			// Check against provided options to make sure that
 			// we can proceed with task creation.
@@ -120,8 +121,8 @@ void InstallTask::run()
 		setState(this, PackageInstallState::Installed);
 	}
 	catch (Exception& exc) {		
-		log("error") << "Install Failed: " << exc.displayText() << endl; 
-		setState(this, PackageInstallState::Failed, exc.displayText());
+		log("error") << "Install Failed: " << exc.message() << endl; 
+		setState(this, PackageInstallState::Failed, exc.message());
 	}
 	
 Complete:
@@ -155,8 +156,8 @@ void InstallTask::onStateChange(PackageInstallState& state, const PackageInstall
 		case PackageInstallState::Cancelled:
 			local->setState("Failed");
 			{
-				FastMutex::ScopedLock lock(_mutex);
-				_transaction.cancel();
+				Mutex::ScopedLock lock(_mutex);
+				_transaction->close();
 			}
 			setProgress(100);
 			break;			
@@ -203,28 +204,34 @@ void InstallTask::doDownload()
 
 	// Initialize a HTTP transaction to download the file.
 	// If the transaction fails an exception will be thrown.
-	http::Request* request = new http::Request("GET", asset.url());	
+	//http::Request* request = new http::Request("GET", asset.url());	
+	
+	_transaction = new http::ClientConnection(asset.url());
 	if (!_manager.options().httpUsername.empty()) {
-		Poco::Net::HTTPBasicCredentials cred(
+		http::BasicAuthenticator cred(
 			_manager.options().httpUsername, 
 			_manager.options().httpPassword);
-		cred.authenticate(*request); 
+		cred.authenticate(_transaction->request()); 
 	}
 
-	_transaction.setRequest(request);
-	_transaction.setOutputPath(_manager.getCacheFilePath(asset.fileName()).toString());
-	_transaction.ResponseProgress += delegate(this, &InstallTask::onResponseProgress);
-	if (!_transaction.send() && 
-		!_transaction.cancelled())
+	string outfile = _manager.getCacheFilePath(asset.fileName()).toString();
+	_transaction->setRecvStream(new std::ofstream(outfile.data(), std::ios_base::out | std::ios_base::binary));
+	_transaction->IncomingProgress += delegate(this, &InstallTask::onIncomingProgress);
+	_transaction->send();
+
+	/*
+	if (!_transaction->send() && 
+		!_transaction->cancelled())
 		throw Exception(format("Cannot download package files: HTTP Error: %d %s", 
-			static_cast<int>(_transaction.response().getStatus()), 
-			_transaction.response().getReason()));
+			static_cast<int>(_transaction->response().getStatus()), 
+			_transaction->response().getReason()));
+			*/
 	
 	log("debug") << "Download Complete" << endl; 
 }
 
 
-void InstallTask::onResponseProgress(void* sender, http::TransferState& state)
+void InstallTask::onIncomingProgress(void* sender, const http::TransferProgress& state)
 {
 	log("debug") << "Download Progress: " << state.progress() << endl;
 
@@ -321,8 +328,8 @@ void InstallTask::doFinalize()
 			// must be called from an external process before the
 			// installation can be completed.
 			errors = true;
-			log("error") << "Error: " << exc.displayText() << endl;
-			_local->addError(exc.displayText());
+			log("error") << "Error: " << exc.message() << endl;
+			_local->addError(exc.message());
 		}
 		
 		++fIt;
@@ -351,7 +358,7 @@ void InstallTask::doFinalize()
 		// While testing on a windows system this fails regularly
 		// with a file sharing error, but since the package is already
 		// installed we can just swallow it.
-		log("warn") << "Cannot remove temp directory: " << exc.displayText() << endl;
+		log("warn") << "Cannot remove temp directory: " << exc.message() << endl;
 	}
 
 	log("debug") << "Finalization Complete" << endl;
@@ -361,7 +368,7 @@ void InstallTask::doFinalize()
 void InstallTask::setComplete()
 {
 	{
-		FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		assert(_progress == 100);
 
 		log("info") << "Package Install Complete:" 
@@ -384,7 +391,7 @@ void InstallTask::setComplete()
 void InstallTask::setProgress(int value) 
 {
 	{
-		FastMutex::ScopedLock lock(_mutex);	
+		Mutex::ScopedLock lock(_mutex);	
 		_progress = value;
 	}
 	Progress.emit(this, value);
@@ -393,7 +400,7 @@ void InstallTask::setProgress(int value)
 
 Package::Asset InstallTask::getRemoteAsset() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return !_options.version.empty() ? 
 		_remote->assetVersion(_options.version) : 
 			!_options.sdkVersion.empty() ?
@@ -404,14 +411,14 @@ Package::Asset InstallTask::getRemoteAsset() const
 
 int InstallTask::progress() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _progress;
 }
 
 
 bool InstallTask::valid() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return !stateEquals(PackageInstallState::Failed) 
 		&& _local->valid() 
 		&& (!_remote || _remote->valid());
@@ -446,26 +453,26 @@ bool InstallTask::complete() const
 
 LocalPackage* InstallTask::local() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _local;
 }
 
 
 RemotePackage* InstallTask::remote() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _remote;
 }
 
 
 InstallTask::Options& InstallTask::options() 
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _options;
 }
 
 
-} } // namespace scy::Pacman
+} } // namespace scy::pman
 
 
 

@@ -21,8 +21,7 @@
 #define SOURCEY_MEDIA_ICapture_H
 
 
-#include "Sourcey/PacketEmitter.h"
-#include "Sourcey/IStartable.h"
+#include "Sourcey/PacketStream.h"
 
 #include <list>
 
@@ -31,7 +30,7 @@ namespace scy {
 namespace av {
 
 
-class ICapture: public PacketEmitter, public IStartable
+class ICapture: public StartablePacketSource
 {
 public:
 	ICapture() {};

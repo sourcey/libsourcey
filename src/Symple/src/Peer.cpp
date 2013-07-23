@@ -23,11 +23,11 @@
 
 
 using namespace std;
-using namespace Poco;
+//
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
 Peer::Peer() 
@@ -151,5 +151,5 @@ void Peer::setHost(const std::string& host)
 }
 
 
-} // namespace smple 
+} // namespace symple 
 } // namespace scy

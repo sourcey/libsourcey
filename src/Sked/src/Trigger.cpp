@@ -46,15 +46,15 @@ Trigger::Trigger(const string& type, const string& name) :
 	
 Int64 Trigger::remaining() 
 {
-	Poco::DateTime now;
-	Poco::Timespan ts = scheduleAt - now;
+	DateTime now;
+	Timespan ts = scheduleAt - now;
 	return ts.totalMilliseconds();
 }
 
 	
 bool Trigger::timeout()
 {
-	Poco::DateTime now;
+	DateTime now;
 	return now >= scheduleAt;
 }
 
@@ -65,7 +65,7 @@ bool Trigger::expired()
 }
 
 
-void Trigger::serialize(JSON::Value& root)
+void Trigger::serialize(json::Value& root)
 {
 	traceL() << "Serializing" << endl;	
 	
@@ -78,16 +78,16 @@ void Trigger::serialize(JSON::Value& root)
 }
 
 
-void Trigger::deserialize(JSON::Value& root)
+void Trigger::deserialize(json::Value& root)
 {
 	traceL() << "Deserializing" << endl;
 	
-	JSON::assertMember(root, "type");
-	JSON::assertMember(root, "name");
-	JSON::assertMember(root, "createdAt");
-	JSON::assertMember(root, "scheduleAt");
-	JSON::assertMember(root, "lastRunAt");
-	JSON::assertMember(root, "timesRun");
+	json::assertMember(root, "type");
+	json::assertMember(root, "name");
+	json::assertMember(root, "createdAt");
+	json::assertMember(root, "scheduleAt");
+	json::assertMember(root, "lastRunAt");
+	json::assertMember(root, "timesRun");
 	
 	int tzd;
 	type = root["type"].asString();
@@ -132,7 +132,7 @@ bool IntervalTrigger::expired()
 }
 
 
-void IntervalTrigger::serialize(JSON::Value& root)
+void IntervalTrigger::serialize(json::Value& root)
 {
 	traceL() << "Serializing" << endl;	
 
@@ -145,15 +145,15 @@ void IntervalTrigger::serialize(JSON::Value& root)
 }
 
 
-void IntervalTrigger::deserialize(JSON::Value& root)
+void IntervalTrigger::deserialize(json::Value& root)
 {
 	traceL() << "[IntervalTrigger] Deserializing" << endl;
 	
-	JSON::assertMember(root, "interval");
-	JSON::assertMember(root["interval"], "days");
-	JSON::assertMember(root["interval"], "hours");
-	JSON::assertMember(root["interval"], "minutes");
-	JSON::assertMember(root["interval"], "seconds");
+	json::assertMember(root, "interval");
+	json::assertMember(root["interval"], "days");
+	json::assertMember(root["interval"], "hours");
+	json::assertMember(root["interval"], "minutes");
+	json::assertMember(root["interval"], "seconds");
 
 	Trigger::deserialize(root);
 
@@ -166,7 +166,7 @@ void IntervalTrigger::deserialize(JSON::Value& root)
 	if (!interval.totalSeconds())
 		throw Exception("Interval trigger must have non zero interval.");
 	
-	Poco::DateTime now;	
+	DateTime now;	
 	scheduleAt = now;
 	scheduleAt += interval;
 }
@@ -182,10 +182,10 @@ DailyTrigger::DailyTrigger() :
 
 void DailyTrigger::update() 
 {
-	Poco::DateTime now;
-	Poco::DateTime next;
-	Poco::DateTime prev(scheduleAt);
-	Poco::Timespan day(1, 0, 0, 0, 0);
+	DateTime now;
+	DateTime next;
+	DateTime prev(scheduleAt);
+	Timespan day(1, 0, 0, 0, 0);
 	bool initial = createdAt == scheduleAt;
 		
 	// Set next date as tomorrow if the schedule 
@@ -223,13 +223,13 @@ void DailyTrigger::update()
 	/*
 	traceL() << "[DailyTrigger] Updating: "
 			<< "\n\tDayOfWeek: " << next.dayOfWeek()
-			<< "\n\tNowTime: " << Poco::DateTimeFormatter::format(now, Poco::sked::DateFormat)
-			<< "\n\tPrevTime: " << Poco::DateTimeFormatter::format(prev, Poco::sked::DateFormat)
-			<< "\n\tNextTime: " << Poco::DateTimeFormatter::format(next, Poco::sked::DateFormat)
-			<< "\n\tScheduleTime: " << Poco::DateTimeFormatter::format(scheduleAt, Poco::sked::DateFormat)
+			<< "\n\tNowTime: " << DateTimeFormatter::format(now, Poco::sked::DateFormat)
+			<< "\n\tPrevTime: " << DateTimeFormatter::format(prev, Poco::sked::DateFormat)
+			<< "\n\tNextTime: " << DateTimeFormatter::format(next, Poco::sked::DateFormat)
+			<< "\n\tScheduleTime: " << DateTimeFormatter::format(scheduleAt, Poco::sked::DateFormat)
 			<< endl;
 			*/
 }
 
 
-} } // namespace scy::Sked
+} } // namespace scy::sked

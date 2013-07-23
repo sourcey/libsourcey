@@ -22,7 +22,7 @@
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 using namespace scy;
 
 
@@ -68,7 +68,7 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 	if (isOpen())
 		close();
 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	traceL("AudioCapture", this) << "Opening: " << _channels << ": " << _sampleRate << endl;
 	
 	//_channels = channels;
@@ -96,7 +96,7 @@ void AudioCapture::close()
 {	
 	traceL("AudioCapture", this) << "Closing" << endl;
 	try {
-		FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		_isOpen = false;
 		if (_audio.isStreamOpen())
 			_audio.closeStream();
@@ -117,7 +117,7 @@ void AudioCapture::start()
 
 	if (!isRunning()) {
 		try {
-			FastMutex::ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 			_audio.startStream();
 			_error = "";
 			traceL("AudioCapture", this) << "Starting: OK" << endl;
@@ -138,7 +138,7 @@ void AudioCapture::stop()
 
 	if (isRunning()) {
 		try {
-			FastMutex::ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 			traceL("AudioCapture", this) << "Stopping: Before" << endl;
 			_audio.stopStream();
 			traceL("AudioCapture", this) << "Stopping: OK" << endl;
@@ -155,8 +155,8 @@ void AudioCapture::stop()
 
 void AudioCapture::attach(const PacketDelegateBase& delegate)
 {
-	PacketEmitter::attach(delegate);
-	debugL("AudioCapture", this) << "Added Delegate: " << refCount() << endl;
+	PacketSignal::attach(delegate);
+	traceL("AudioCapture", this) << "Added Delegate: " << refCount() << endl;
 	if (refCount() == 1)
 		start();
 }
@@ -164,11 +164,11 @@ void AudioCapture::attach(const PacketDelegateBase& delegate)
 
 bool AudioCapture::detach(const PacketDelegateBase& delegate) 
 {
-	if (PacketEmitter::detach(delegate)) {
-		debugL("AudioCapture", this) << "Removed Delegate: " << refCount() << endl;
+	if (PacketSignal::detach(delegate)) {
+		traceL("AudioCapture", this) << "Removed Delegate: " << refCount() << endl;
 		if (refCount() == 0)
 			stop();
-		debugL("AudioCapture", this) << "Removed Delegate: OK" << endl;
+		traceL("AudioCapture", this) << "Removed Delegate: OK" << endl;
 		return true;
 	}
 	return false;
@@ -232,7 +232,7 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 	//	<< "\n\tStream Time: " << packet.time
 	//	<< endl;
 
-	klass->emit(klass, packet);
+	klass->emit(packet); //klass, 
 	//traceL("AudioCapture", klass) << "Callback: OK" << endl;
 	return 0;
 }
@@ -240,42 +240,42 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 
 RtAudioFormat AudioCapture::format() const
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _format;
 }
 
 
 bool AudioCapture::isOpen() const
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _isOpen;
 }
 
 
 bool AudioCapture::isRunning() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _audio.isStreamRunning();
 }
 
 
 int AudioCapture::deviceId() const 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _deviceId;
 }
 
 
 int AudioCapture::sampleRate() const 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _sampleRate;
 }
 
 
 int AudioCapture::numChannels() const 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _channels;
 }
 

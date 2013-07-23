@@ -26,7 +26,7 @@
 
 
 namespace scy {
-namespace crypt {
+namespace crypto {
 
 
 std::string hash(const std::string& algorithm, const std::string& data);
@@ -40,7 +40,7 @@ UInt64 randomNumber(int size);
 std::string computeHMAC(const std::string& input, const std::string& key);
 
 
-} // namespace crypt
+} // namespace crypto
 } // namespace scy
 
 

@@ -34,9 +34,9 @@ namespace net {
  
 SSLAdapter::SSLAdapter(net::SSLBase* socket) :
 	_socket(socket),
-	_ssl(NULL),
-	_readBIO(NULL),
-	_writeBIO(NULL)
+	_ssl(nullptr),
+	_readBIO(nullptr),
+	_writeBIO(nullptr)
 {
 	traceL("SSLAdapter", this) << "Creating" << endl;
 }
@@ -140,7 +140,7 @@ void SSLAdapter::flush()
 	// NOTE: Overwriting the socket's raw SSL recv buffer
 	int nread = 0;
 	while ((nread = SSL_read(_ssl, _socket->_buffer.begin(), _socket->_buffer.capacity())) > 0) {
-		_socket->_buffer.size(nread);
+		_socket->_buffer.limit(nread);
 		_socket->onRecv(_socket->_buffer);
 	}
 	

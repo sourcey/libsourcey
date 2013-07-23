@@ -18,8 +18,10 @@
 
 
 #include "Sourcey/Util.h"
-#include "Poco/String.h"
 
+/*
+
+#include "Poco/String.h"
 #ifdef _WIN32
 #include <time.h>
 #include <stdlib.h>
@@ -30,26 +32,31 @@
 #include <sys/times.h>
 #include <unistd.h>
 #endif
+*/
 
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <algorithm>
 #include <cctype>
-#include <stdio.h>
+#include <assert.h>
 
 
 using namespace std;
-using namespace Poco;
 
 
 namespace scy {
 namespace util {
 
 
-bool isNumber(const string& str)
+//
+/// String utilities
+//
+
+
+bool isNumber(const std::string& str)
 {
-   for (int i = 0; i < str.length(); i++) {
+   for (size_t i = 0; i < str.length(); i++) {
        if (!isdigit(str[i]))
            return false;
    }
@@ -57,20 +64,53 @@ bool isNumber(const string& str)
 }
 
 
-string getPID(const void* ptr)
+/*
+int icompare(const std::string& s1, const char* s2)
+{
+	return strncasecmp(s1, s1)
+}
+*/
+
+
+bool tryParseHex(const std::string& str, unsigned& value)
+{
+	char temp;
+	return std::sscanf(str.c_str(), "%x%c", &value, &temp) == 1;
+}
+
+
+unsigned parseHex(const std::string& str)
+{
+	unsigned result;
+	if (tryParseHex(str, result))
+		return result;
+	else
+		throw SyntaxException("Not a valid hexadecimal integer", str);
+}
+
+
+int icompare(const std::string& s1, const std::string& s2)
+{
+	if (s2.length() > s1.length())
+		return -1;
+	return strncasecmp(s1.c_str(), s2.c_str(), s1.length());
+}
+
+
+std::string getPID(const void* ptr)
 {
 	return toString<const void*>(ptr);
 }
 
 
-void trim(string& str) 
+void trim(std::string& str) 
 {	
 	str.erase(0, str.find_first_not_of(' '));	// prefixing spaces
 	str.erase(str.find_last_not_of(' ') + 1);	// surfixing spaces
 }
 
 
-StringVec &split(const string& s, const string& delim, StringVec &elems, int limit) 
+StringVec &split(const std::string& s, const std::string& delim, StringVec &elems, int limit) 
 {
 	bool final = false;
 	std::string::size_type prev = 0, pos = 0;
@@ -87,17 +127,17 @@ StringVec &split(const string& s, const string& delim, StringVec &elems, int lim
 }
 
 
-StringVec split(const string& s, const string& delim, int limit) 
+StringVec split(const std::string& s, const std::string& delim, int limit) 
 {
     StringVec elems;
     return split(s, delim, elems, limit);
 };
 
 
-StringVec &split(const string& s, char delim, StringVec &elems, int limit) 
+StringVec &split(const std::string& s, char delim, StringVec &elems, int limit) 
 {
-    stringstream ss(s);
-    string item;
+    std::stringstream ss(s);
+    std::string item;
     while (getline(ss, item, delim)) {
         elems.push_back(item);
 		if (static_cast<int>(elems.size() + 1) == limit)
@@ -109,48 +149,80 @@ StringVec &split(const string& s, char delim, StringVec &elems, int limit)
 }
 
 
-StringVec split(const string& s, char delim, int limit) 
+StringVec split(const std::string& s, char delim, int limit) 
 {
     StringVec elems;
     return split(s, (char)delim, elems, limit);
 }
 
 
-void escape(string& str) 
+bool endsWith(const std::string& str, const std::string& suffix)
 {
-	const char escape_chars[] = { '&', '<', '>', '\'', '"' };
-	const string escape_seqs[] = { "amp;", "lt;", "gt;", "apos;", "quot;" };
-	const unsigned escape_size = 5;
-	for (size_t val, i = 0; i < str.length(); ++i) {
-		for (val = 0; val < escape_size; ++val) {
-			if (str[i] == escape_chars[val]) {
-				str[i] = '&';
-				str.insert(i + 1, escape_seqs[val]);
-				i += escape_seqs[val].length();
-				break;
-			}
+	return std::equal(suffix.rbegin(), suffix.rend(), str.rbegin());
+}
+
+
+std::string replace(const std::string& str, const std::string& from, const std::string& to, std::string::size_type start)
+{
+	std::string result(str);
+	replaceInPlace(result, from, to, start);
+	return result;
+}
+
+
+std::string replace(const std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start)
+{
+	std::string result(str);
+	replaceInPlace(result, from, to, start);
+	return result;
+}
+
+	
+std::string& replaceInPlace(std::string& str, const std::string& from, const std::string& to, std::string::size_type start)
+{
+	assert(from.size() > 0);	
+	std::string result;
+	std::string::size_type pos = 0;
+	result.append(str, 0, start);
+	do {
+		pos = str.find(from, start);
+		if (pos != std::string::npos) {
+			result.append(str, start, pos - start);
+			result.append(to);
+			start = pos + from.length();
 		}
+		else result.append(str, start, str.size() - start);
 	}
+	while (pos != std::string::npos);
+	str.swap(result);
+	return str;
+}
+
+std::string& replaceInPlace(std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start)
+{
+	assert(*from);
+	std::string result;
+	std::string::size_type pos = 0;
+	std::string::size_type fromLen = std::strlen(from);
+	result.append(str, 0, start);
+	do {
+		pos = str.find(from, start);
+		if (pos != std::string::npos) {
+			result.append(str, start, pos - start);
+			result.append(to);
+			start = pos + fromLen;
+		}
+		else result.append(str, start, str.size() - start);
+	}
+	while (pos != std::string::npos);
+	str.swap(result);
+	return str;
 }
 
 
-bool endsWith(const string& str, const string& suffix)
+std::string dumpbin(const char* data, size_t len)
 {
-	return equal(suffix.rbegin(), suffix.rend(), str.rbegin());
-}
-
-
-void pause()
-{
-	//cin.ignore(1024, '\n');
-	cout << "Press enter to continue...";
-	cin.get();
-}
-
-
-string dumpbin(const char* data, size_t len)
-{
-	string output;
+	std::string output;
 	for (size_t i = 0; i < len; i++) {
 		char byte = data[i];
 		for (size_t mask = 0x80; mask > 0; mask >>= 1) {
@@ -165,7 +237,7 @@ string dumpbin(const char* data, size_t len)
 }
 
 
-bool compareVersion(const string& l, const string& r) 
+bool compareVersion(const std::string& l, const std::string& r) 
 {
 	if (l.empty())
 		return false;
@@ -189,30 +261,64 @@ bool compareVersion(const string& l, const string& r)
 }
 
 
-void removeSpecialCharacters(string& str, bool allowSpaces) 
+void removeSpecialCharacters(std::string& str, bool allowSpaces) 
 {    
 	for (size_t i = 0; i < str.length(); ++i)
-		if (!isalnum(str[i]) || (!allowSpaces && isspace(str[i])))
+		if (!::isalnum(str[i]) || (!allowSpaces && ::isspace(str[i])))
 			str.erase(i, 1);
 }
 
 
-void replaceSpecialCharacters(string& str, char with, bool allowSpaces) 
+void replaceSpecialCharacters(std::string& str, char with, bool allowSpaces) 
 {    
 	for (size_t i = 0; i < str.length(); ++i)
-		if (!isalnum(str[i]) || (!allowSpaces && isspace(str[i])))
+		if (!::isalnum(str[i]) || (!allowSpaces && ::isspace(str[i])))
 			str[i] = with;
 }
 
 
-void underscore(string& str) 
+void toLower(std::string& str)
 {
-	replaceSpecialCharacters(str, '_', false);	
-	transform(str.begin(), str.end(), str.begin(), ::tolower);
+	std::transform(str.begin(), str.end(), str.begin(), ::tolower);
 }
 
 
-bool matchNodes(const string& node, const string& xnode, const string& delim)
+void toUpper(std::string& str)
+{
+	std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+}
+
+
+void toUnderscore(std::string& str) 
+{
+	replaceSpecialCharacters(str, '_', false);	
+	toLower(str);
+}
+
+/*
+bool replace(std::string& str, const std::string& from, const std::string& to) 
+{
+    size_t start_pos = str.find(from);
+    if (start_pos == std::string::npos)
+        return false;
+    str.replace(start_pos, from.length(), to);
+    return true;
+}
+
+void replaceAll(std::string& str, const std::string& from, const std::string& to)
+{
+    if (from.empty())
+        return;
+    size_t start_pos = 0;
+    while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+    }
+}
+*/
+
+
+bool matchNodes(const std::string& node, const std::string& xnode, const std::string& delim)
 {
 	StringVec params = util::split(node, delim);
 	StringVec xparams = util::split(xnode, delim);
@@ -235,9 +341,6 @@ bool matchNodes(const StringVec& params, const StringVec& xparams)
 		return false;
 
 	for (size_t i = 0; i < xparams.size(); ++i) {
-		
-		//if (xparams.size() == i + 1)
-		//	return false;
 
 		// Wildcard * matches anything.
 		if (xparams[i] == "*") 
@@ -251,6 +354,14 @@ bool matchNodes(const StringVec& params, const StringVec& xparams)
 }
 
 
+} // namespace util
+} // namespace scy
+
+
+
+
+
+/*
 #if WIN32
 UInt64 getTime() {
 	return ::GetTickCount();
@@ -265,20 +376,10 @@ UInt64 getTime() {
 #endif
 
 
-#if WIN32
-bool getOsVersion(int* major, int* minor, int* build) {
-	OSVERSIONINFO info = {0};
-	info.dwOSVersionInfoSize = sizeof(info);
-	if (GetVersionEx(&info)) {
-		if (major) *major = info.dwMajorVersion;
-		if (minor) *minor = info.dwMinorVersion;
-		if (build) *build = info.dwBuildNumber;
-		return true;
-	}
-	return false;
+void pause()
+{
+	//cin.ignore(1024, '\n');
+	cout << "Press enter to continue...";
+	cin.get();
 }
-#endif
-
-
-} // namespace util
-} // namespace scy
+*/

@@ -25,7 +25,7 @@
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 
 
 namespace scy {
@@ -36,7 +36,7 @@ ImageEncoder::ImageEncoder(EncoderOptions& options, vector<int> cvParams) :
 	_options(options),
 	_params(cvParams)
 {	
-	debugL() << "[ImageEncoder" << this << "] Creating" << endl;
+	traceL() << "[ImageEncoder" << this << "] Creating" << endl;
 
 	if (_options.oformat.id == "jpeg" ||
 		_options.oformat.id == "mjpeg")
@@ -53,7 +53,7 @@ ImageEncoder::ImageEncoder(EncoderOptions& options, vector<int> cvParams) :
 
 ImageEncoder::~ImageEncoder()
 {
-	debugL() << "[ImageEncoder" << this << "] Destroy" << endl;
+	traceL() << "[ImageEncoder" << this << "] Destroy" << endl;
 }
 
 	
@@ -105,7 +105,7 @@ void ImageEncoder::process(IPacket& packet)
 	mpacket->_size = buffer.size();
 	
 	//traceL() << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket << endl;
-	emit(this, *mpacket);
+	emit(*mpacket); //this, 
 	//traceL() << "[ImageEncoder:" << this <<"] Broadcasting: OK: " << mpacket << endl;
 }
 

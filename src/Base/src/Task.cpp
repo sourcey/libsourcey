@@ -31,49 +31,55 @@ using namespace std;
 namespace scy {
 
 
-/*	
+/*
 Task::Task(bool repeating) : 
-	_id(static_cast<UInt32>(crypt::randomNumber(8))),
+	_id(static_cast<UInt32>(crypto::randomNumber(8))),
 	_repeating(repeating),
 	_destroyed(false),
-	_cancelled(true),
-	_runner(NULL)
+	_cancelled(true)//,
+	//_runner(nullptr)
 { 
 }
+*/
 
 	
-Task::Task(Runner& runner, bool repeating, bool autoStart) : 
-	_id(static_cast<UInt32>(crypt::randomNumber(8))),
+Task::Task(bool repeating) : //Runner& runner, , bool autoStart
+	_id(static_cast<UInt32>(crypto::randomNumber(8))),
 	_repeating(repeating),
 	_destroyed(false),
-	_cancelled(true),
-	_runner(&runner)
+	_cancelled(true)//,
+	//_runner(&runner)
 { 	
-	if (autoStart)
-		start();
+	//if (autoStart)
+	//	start();
 }
 
 
 Task::~Task()
 {
-	traceL() << "[Task:" << this << "] Destroying" << endl;
+	traceL("Task", this) << "Destroying" << endl;
 	//assert(destroyed());
 }
 
 
+/*
 void Task::start()
 { 
-	traceL() << "[Task:" << this << "] Starting" << endl;
-	assert(0);
+	traceL("Task", this) << "Starting" << endl;
+
+	//assert(0);
 	//if (cancelled())
 	//	runner().start(this);
 }
+*/
 
 
 void Task::cancel()			
 {
-	traceL() << "[Task:" << this << "] Cancelling" << endl;
-	assert(0);
+	traceL("Task", this) << "Cancelling" << endl;
+	_cancelled = true;
+
+	//assert(0);
 	//if (!cancelled())
 	//	runner().cancel(this);
 }
@@ -81,8 +87,10 @@ void Task::cancel()
 
 void Task::destroy()			
 {
-	traceL() << "[Task:" << this << "] Destroying" << endl;
-	assert(0);
+	traceL("Task", this) << "Destroying" << endl;
+	_destroyed = true;
+
+	//assert(0);
 	//if (!destroyed())
 	//	runner().destroy(this);
 }
@@ -111,7 +119,7 @@ bool Task::cancelled() const
 
 bool Task::afterRun()			
 {
-	return repeating();
+	return !!repeating();
 }
 
 
@@ -129,6 +137,7 @@ bool Task::repeating() const
 }
 
 
+/*	
 Runner& Task::runner()						 
 { 
 	Mutex::ScopedLock lock(_mutex);	

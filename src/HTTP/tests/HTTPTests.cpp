@@ -3,8 +3,11 @@
 #include "Sourcey/HTTP/Connection.h"
 #include "Sourcey/HTTP/Client.h"
 #include "Sourcey/HTTP/WebSocket.h"
+#include "Sourcey/HTTP/Packetizers.h"
+#include "Sourcey/HTTP/URL.h"
 #include "Sourcey/Runner.h"
 #include "Sourcey/Timer.h"
+#include "Sourcey/Idler.h"
 
 #include "Sourcey/Base.h"
 #include "Sourcey/Logger.h"
@@ -36,10 +39,10 @@ namespace http {
 
 	
 #define TEST_SSL 1 //0
-#define TEST_HTTP_PORT 1337
+#define TEST_HTTP_PORT 1340
 #define TEST_HTTPS_PORT 1338
 
-
+	
 // -------------------------------------------------------------------
 //
 class BasicResponder: public ServerResponder
@@ -48,22 +51,39 @@ public:
 	BasicResponder(ServerConnection& conn) : 
 		ServerResponder(conn)
 	{
+		debugL("BasicResponder") << "Creating" << endl;
 	}
 
-	void onComplete(Request& request, Response& response) 
+	void onRequest(Request& request, Response& response) 
 	{
-		response.body << "Hello universe";
-		connection().send();
+		debugL("BasicResponder") << "On complete" << endl;
+
+		response.setContentLength(14);
+
+		//connection().sendHeaders(); // headers will be flushed
+		connection().write("Hello universe", 14);
+		connection().close();
 	}
 };
 
 
 // -------------------------------------------------------------------
 //
+struct RandomDataSource: public Idler 
+{
+	PacketSignal signal;
+
+	virtual void onIdle()
+	{
+		signal.emit(this, RawPacket("somedata", 8));
+	}
+};	
+
+
 class ChunkedResponder: public ServerResponder
 {
 public:
-	Timer timer;
+	RandomDataSource dataSource;
 	bool gotHeaders;
 	bool gotRequest;
 	bool gotClose;
@@ -74,6 +94,9 @@ public:
 		gotRequest(false), 
 		gotClose(false)
 	{
+		conn.Outgoing.attach(new http::ChunkedAdapter(conn)); //"text/html"
+		conn.Outgoing.attachSource(&dataSource.signal, false);
+		//dataSource.signal += delegate(&conn.socket(), &Socket::send);
 	}
 
 	~ChunkedResponder()
@@ -88,31 +111,26 @@ public:
 		gotHeaders = true;
 	}
 
-	void onPayload(const Buffer& body)
-	{
-		// may be empty
-	}
-
-	void onComplete(Request& request, Response& response) 
+	void onRequest(Request& request, Response& response) 
 	{
 		gotRequest = true;
-		timer.Timeout += delegate(this, &ChunkedResponder::onTimer);
-		timer.start(100, 100);
+		
+		connection().response().set("Access-Control-Allow-Origin", "*");
+		connection().response().set("Content-Type", "text/html");
+		connection().response().set("Transfer-Encoding", "chunked");
+
+		// headers pushed through automatically
+		//connection().sendHeaders();
+
+		// Start shooting data at the client
+		dataSource.start();
 	}
 
 	void onClose()
 	{
 		debugL("ChunkedResponder") << "On connection close" << endl;
 		gotClose = true;
-		timer.stop();
-	}
-	
-	void onTimer(void*)
-	{
-		connection().sendRaw("bigfatchunk", 11);
-
-		if (timer.count() == 10)
-			connection().close();
+		dataSource.stop();
 	}
 };
 
@@ -147,7 +165,7 @@ public:
 		gotPayload = true;
 
 		// Enco the request back to the client
-		connection().sendRaw(body.data(), body.size());
+		connection().write(body.data(), body.available());
 	}
 
 	void onClose()
@@ -283,14 +301,19 @@ public:
 				"ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");		
 #endif
 		{		
+			
+			runURLTests();
+
 			/*
-			runHTTPClientTest();	
 			runClientConnectionChunkedTest();	
+			runClientConnectionTest();
+			runStandaloneHTTPClientConnectionTest();	
+			runHTTPClientTest();	
 			runWebSocketClientServerTest();
 			runWebSocketSocketTest();
 			runHTTPClientWebSocketTest();	
-			runWSClientConnectionTest();	
-			runWSSClientConnectionTest();
+			runWebSocketSecureClientConnectionTest();
+			runWebSocketClientConnectionTest();	
 			*/
 
 			// NOTE: Must be terminated with Crtl-C
@@ -300,6 +323,12 @@ public:
 			// Shutdown SSL
 			SSLManager::instance().shutdown();
 #endif
+
+		// Shutdown the garbage collector so we can free memory.
+		GarbageCollector::instance().shutdown();
+		
+		// Run the final cleanup
+		//runCleanup();
 		
 		debugL("Tests") << "#################### Finalizing" << endl;
 		app.cleanup();
@@ -311,6 +340,71 @@ public:
 		app.run();
 		debugL("Tests") << "#################### Ended" << endl;
 	}
+	
+	// ============================================================================
+	// HTTP URL Tests
+	//
+	void runURLTests()
+	{	
+		http::URL url;
+		assert (url.scheme().empty());
+		assert (url.authority().empty());
+		assert (url.userInfo().empty());
+		assert (url.host().empty());
+		assert (url.port() == 0);
+		assert (url.path().empty());
+		assert (url.query().empty());
+		assert (url.fragment().empty());
+
+		URL url2("HTTP", "localhost", "/home/sourcey/foo.bar");
+		assert (url2.scheme() == "http");
+		assert (url2.host() == "localhost");
+		assert (url2.path() == "/home/sourcey/foo.bar");
+	
+		URL url3("http", "www.sourcey.com", "/index.html");
+		assert (url3.scheme() == "http");
+		assert (url3.authority() == "www.sourcey.com");
+		assert (url3.host() == "www.sourcey.com");
+		assert (url3.path() == "/index.html");
+	
+		URL url4("http", "www.sourcey.com:8000", "/index.html");
+		assert (url4.scheme() == "http");
+		assert (url4.authority() == "www.sourcey.com:8000");
+		assert (url4.host() == "www.sourcey.com");
+		assert (url4.path() == "/index.html");
+
+		URL url5("http", "user@www.sourcey.com:8000", "/index.html");
+		assert (url5.scheme() == "http");
+		assert (url5.userInfo() == "user");
+		assert (url5.host() == "www.sourcey.com");
+		assert (url5.port() == 8000);
+		assert (url5.authority() == "user@www.sourcey.com:8000");
+		assert (url5.path() == "/index.html");
+
+		URL url6("http", "user@www.sourcey.com:80", "/index.html");
+		assert (url6.scheme() == "http");
+		assert (url6.userInfo() == "user");
+		assert (url6.host() == "www.sourcey.com");
+		assert (url6.port() == 80);
+		assert (url6.authority() == "user@www.sourcey.com:80");
+		assert (url6.path() == "/index.html");
+
+		URL url7("http", "www.sourcey.com", "/index.html", "query=test", "fragment");
+		assert (url7.scheme() == "http");
+		assert (url7.authority() == "www.sourcey.com");
+		assert (url7.path() == "/index.html");
+		assert (url7.pathEtc() == "/index.html?query=test#fragment");
+		assert (url7.query() == "query=test");
+		assert (url7.fragment() == "fragment");
+
+		URL url8("http", "www.sourcey.com", "/index.html?query=test#fragment");
+		assert (url8.scheme() == "http");
+		assert (url8.authority() == "www.sourcey.com");
+		assert (url8.path() == "/index.html");
+		assert (url8.pathEtc() == "/index.html?query=test#fragment");
+		assert (url8.query() == "query=test");
+		assert (url8.fragment() == "fragment");
+	}
 
 	
 	// ============================================================================
@@ -318,10 +412,15 @@ public:
 	//
 	struct HTTPClientTest 
 	{
+
+		//*transaction->Receiver += delegate(this, &Tests::onTransactionComplete);
+
+
 		http::Server server;
 		http::Client client;
 		int numSuccess;
 		ClientConnection* conn;
+		RandomDataSource dataSource;		
 
 		HTTPClientTest() :
 			numSuccess(0),
@@ -331,17 +430,22 @@ public:
 		}
 		
 		template<class ConnectionT>
-		ConnectionT* create(bool raiseServer = true, const net::Address& address = net::Address("127.0.0.1", TEST_HTTP_PORT))
+		ConnectionT* create(bool raiseServer = true, const std::string& host = "127.0.0.1", UInt16 port = TEST_HTTP_PORT)
 		{
 			if (raiseServer)
 				server.start();
 
-			conn = (ClientConnection*)client.createConnectionT<ConnectionT>(address);		
+			/*
+			conn = (ClientConnection*)client.createConnectionT<ConnectionT>(host, port);		
+			conn->Connect += delegate(this, &HTTPClientTest::onConnect);	
 			conn->Headers += delegate(this, &HTTPClientTest::onHeaders);
+			//conn->Receiver += delegate(this, &HTTPClientTest::onInboundStream);
 			conn->Payload += delegate(this, &HTTPClientTest::onPayload);
 			conn->Complete += delegate(this, &HTTPClientTest::onComplete);
 			conn->Close += delegate(this, &HTTPClientTest::onClose);
 			return (ConnectionT*)conn;
+			*/
+			assert(0);
 		}
 
 		void shutdown()
@@ -350,17 +454,31 @@ public:
 			server.shutdown();
 			client.shutdown();
 		}
+			
+		void onConnect(void*)
+		{
+			debugL("ClientConnectionTest") << "On connect" <<  endl;
+			
+			// Bounce backwards and forwards a few times :)
+			//conn->write("BOUNCE", 6);
+
+			// Start the output stream when the socket connects.
+			//dataSource.conn = this->conn;
+			//dataSource.start();
+		}
 
 		void onHeaders(void*, Response& res)
 		{
 			debugL("ClientConnectionTest") << "On headers" <<  endl;
 			
 			// Bounce backwards and forwards a few times :)
-			conn->sendRaw("BOUNCE", 6);
+			//conn->write("BOUNCE", 6);
 		}
-
+		
 		void onPayload(void*, Buffer& buf)
 		{
+			debugL("ClientConnectionTest") << "On response payload: " << buf << endl;
+
 			if (buf.toString() == "BOUNCE")
 				numSuccess++;
 			
@@ -371,7 +489,7 @@ public:
 				conn->close();
 			}
 			else
-				conn->sendRaw("BOUNCE", 6);
+				conn->write("BOUNCE", 6);
 		}
 
 		void onComplete(void*, const Response& res)
@@ -398,32 +516,66 @@ public:
 	void runClientConnectionChunkedTest() 
 	{	
 		HTTPClientTest test;		
-		ClientConnection* conn = test.create<ClientConnection>();
+		ClientConnection* conn = test.create<ClientConnection>(false, "127.0.0.1", TEST_HTTP_PORT);
+		conn->request().setKeepAlive(true);
 		conn->request().setURI("/chunked");
-		conn->request().body << "BOUNCE" << endl;
+		//conn->request().body << "BOUNCE" << endl;
 		conn->send();
 		runLoop();
 	}
 	
-	void runWSClientConnectionTest() 
+	void runWebSocketClientConnectionTest() 
 	{	
 		HTTPClientTest test;
-		ClientConnection* conn = test.create<WSClientConnection>(false);
+		ClientConnection* conn = test.create<WebSocketClientConnection>(false, "127.0.0.1", TEST_HTTP_PORT);
+		conn->shouldSendHeaders(false);
 		conn->request().setURI("/websocket");
-		conn->request().body << "BOUNCE" << endl;
+		//conn->request().body << "BOUNCE" << endl;
 		conn->send();
 		runLoop();
 	}
 
-	void runWSSClientConnectionTest() 
+	void runWebSocketSecureClientConnectionTest() 
 	{	
 		HTTPClientTest test;
-		ClientConnection* conn = test.create<WSSClientConnection>(false, net::Address("127.0.0.1", TEST_HTTPS_PORT));
+		ClientConnection* conn = test.create<WebSocketSecureClientConnection>(false, "127.0.0.1", TEST_HTTPS_PORT);
 		conn->request().setURI("/websocket");
-		conn->request().body << "BOUNCE" << endl;
+		//conn->request().body << "BOUNCE" << endl;
 		conn->send();
 		runLoop();
 	}
+	
+	
+	// ============================================================================
+	// Standalone HTTP Client ConnectionTest
+	//
+	void runStandaloneHTTPClientConnectionTest()
+	{
+		ClientConnection* conn = new ClientConnection("google.com");
+		conn->Headers += delegate(this, &Tests::onStandaloneHTTPClientConnectionHeaders);
+		conn->Payload += delegate(this, &Tests::onStandaloneHTTPClientConnectionPayload);
+		conn->Complete += delegate(this, &Tests::onStandaloneHTTPClientConnectionComplete);
+		conn->send(); // send default GET /
+		runLoop();
+	}	
+	
+	void onStandaloneHTTPClientConnectionHeaders(void*, Response& res)
+	{	
+		debugL("StandaloneClientConnectionTest") << "On response headers: " << res << endl;
+	}
+	
+	void onStandaloneHTTPClientConnectionPayload(void*, Buffer& buf)
+	{	
+		debugL("StandaloneClientConnectionTest") << "On response payload: " << buf << endl;
+	}
+	
+	void onStandaloneHTTPClientConnectionComplete(void* sender, const Response& res)
+	{		
+		debugL("StandaloneClientConnectionTest") << "On response complete" << endl;
+		auto self = reinterpret_cast<ClientConnection*>(sender);
+		self->close();
+	}
+
 	
 	
 	// ============================================================================
@@ -438,11 +590,11 @@ public:
 		//SocketClientEchoTest<http::WebSocket> test(net::Address("174.129.224.73", 1339));
 		//SocketClientEchoTest<http::WebSocket> test(net::Address("174.129.224.73", 80));
 
-		debugL("Tests") << "TCP Socket Test: Starting" << endl;
-		SocketClientEchoTest<http::WebSocket> test(net::Address("127.0.0.1", TEST_HTTP_PORT));
-		test.start();
+		//debugL("Tests") << "TCP Socket Test: Starting" << endl;
+		//SocketClientEchoTest<http::WebSocket> test(net::Address("127.0.0.1", TEST_HTTP_PORT));
+		//test.start();
 
-		runLoop();
+		//runLoop();
 	}	
 
 	/*
@@ -527,11 +679,6 @@ int main(int argc, char** argv)
 		*/
 			
 			/*
-			// ============================================================================
-			// HTTP Server
-			//
-			http::Server srv(81, new OurServerResponderFactory);
-			srv.start();
 
 			(sock);
 			net::TCPSocket sock;	
@@ -587,12 +734,12 @@ int main(int argc, char** argv)
 		http::Response res;
 		http::ClientConnection txn(&req);
 		txn.Complete += delegate(this, &Tests::onComplete);
-		txn.DownloadProgress += delegate(this, &Tests::onResponseProgress);	
+		txn.DownloadProgress += delegate(this, &Tests::onIncomingProgress);	
 		txn.send();
 
 		// Run the looop
 		app.run();
-		util::pause();
+		//util::pause();
 
 		debugL("ClientConnectionTest") << "Ending" << endl;
 	}		
@@ -602,7 +749,7 @@ int main(int argc, char** argv)
 		debugL("ClientConnectionTest") << "On Complete: " << &response << endl;
 	}
 
-	void onResponseProgress(void* sender, http::TransferProgress& progress)
+	void onIncomingProgress(void* sender, http::TransferProgress& progress)
 	{
 		debugL("ClientConnectionTest") << "On Progress: " << progress.progress() << endl;
 	}
@@ -617,7 +764,7 @@ int main(int argc, char** argv)
 struct Result {
 	int numSuccess;
 	string name;
-	Poco::Stopwatch sw;
+	Stopwatch sw;
 
 	void reset() {
 		numSuccess = 0;

@@ -27,9 +27,9 @@
 #include "Sourcey/Sked/Task.h"
 #include "Sourcey/Sked/TaskFactory.h"
 
-#include "Poco/Thread.h"
-#include "Poco/Event.h"
-#include "Poco/SingletonHolder.h"
+//#include "Poco/Thread.h"
+//#include "Poco/Event.h"
+#include "Sourcey/Singleton.h"
 
 #include <vector>
 
@@ -41,7 +41,7 @@ namespace sked {
 static const char* DateFormat = "%Y-%m-%d %H:%M:%S %Z";
 
 
-class Scheduler: public Runner, public JSON::ISerializable
+class Scheduler: public Runner, public json::ISerializable
 	/// The Scheduler manages and runs tasks 
 	/// that need to be executed at specific times.
 {
@@ -53,8 +53,8 @@ public:
 	virtual void cancel(sked::Task* task);
 	virtual void clear();
 		
-	virtual void serialize(JSON::Value& root);
-	virtual void deserialize(JSON::Value& root);
+	virtual void serialize(json::Value& root);
+	virtual void deserialize(json::Value& root);
 	
     virtual void print(std::ostream& ost);
 
@@ -69,12 +69,12 @@ public:
 	virtual const char* className() const { return "Scheduler"; }
 
 protected:
-	virtual void run();	
+	virtual void onIdle();	
 	virtual void update();
 };
 
 
-} } // namespace scy::Sked
+} } // namespace scy::sked
 
 
 #endif // SOURCEY_Sked_Scheduler_H

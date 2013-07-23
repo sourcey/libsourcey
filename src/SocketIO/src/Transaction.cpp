@@ -24,7 +24,6 @@
 
 
 using namespace std;
-using namespace Poco;
 
 
 namespace scy {
@@ -56,7 +55,7 @@ bool Transaction::send()
 	debugL("SocketIOTransaction", this) << "Sending" << endl;	
 	_request.setAck(true);	
 	client += packetDelegate(this, &Transaction::onPotentialResponse, 100);
-	if (client.send(_request)) //, true
+	if (client.send(_request))
 		return PacketTransaction<Packet>::send();
 	return false;
 }
@@ -64,8 +63,6 @@ bool Transaction::send()
 	
 void Transaction::onPotentialResponse(void*, Packet& packet)
 {
-	debugL("SocketIOTransaction", this) << "Potential Response: " 
-		<< packet.className() << endl;	
 	PacketTransaction<Packet>::onPossibleResponse(packet);
 }
 
@@ -76,11 +73,11 @@ bool Transaction::checkResponse(const Packet& packet)
 }
 
 
-void Transaction::onSuccess()
+void Transaction::onResponse()
 {
 	debugL("SocketIOTransaction", this) << "Complete" << endl;
 	client -= packetDelegate(this, &Transaction::onPotentialResponse);	
-	PacketTransaction<Packet>::onSuccess();
+	PacketTransaction<Packet>::onResponse();
 }
 
 

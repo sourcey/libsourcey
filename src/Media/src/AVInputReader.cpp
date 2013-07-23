@@ -4,7 +4,7 @@
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 using namespace scy;
 
 
@@ -15,9 +15,9 @@ namespace av {
 AVInputReader::AVInputReader(const Options& options)  : 
 	_thread("AVInputReader"),
 	_options(options),
-	_formatCtx(NULL),
-	_video(NULL),
-	_audio(NULL),
+	_formatCtx(nullptr),
+	_video(nullptr),
+	_audio(nullptr),
 	_stopping(false)
 {		
 	traceL("AVInputReader", this) << "Creating" << endl;
@@ -181,7 +181,7 @@ void AVInputReader::start()
 {
 	traceL("AVInputReader", this) << "Starting" << endl;
 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	assert(_video || _audio);
 
 	if (_video || _audio &&
@@ -199,7 +199,7 @@ void AVInputReader::stop()
 {
 	traceL("AVInputReader", this) << "Stopping" << endl;
 
-	//FastMutex::ScopedLock lock(_mutex);	
+	//Mutex::ScopedLock lock(_mutex);	
 
 	if (_thread.isRunning()) {
 		traceL("AVInputReader", this) << "Terminating Thread" << endl;		
@@ -317,16 +317,16 @@ void AVInputReader::run()
 				}
 
 				// End of file or error.
-				debugL() << "[AVInputReader:" << this << "] Decoding: EOF" << endl;
+				traceL() << "[AVInputReader:" << this << "] Decoding: EOF" << endl;
 				break;
 			}
 
-			Thread::sleep(10);
+			Poco::Thread::sleep(10);
 		};
 	} 
 	catch (Exception& exc) 
 	{
-		_error = exc.displayText();
+		_error = exc.message();
 		errorL() << "[AVInputReader:" << this << "] Decoder Error: " << _error << endl;
 	}
 	catch (...) 
@@ -342,35 +342,35 @@ void AVInputReader::run()
 
 AVInputReader::Options& AVInputReader::options()
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _options; 
 }
 	
 
 AVFormatContext* AVInputReader::formatCtx() const
 {
-	FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _formatCtx;
 }
 	
 
 VideoDecoderContext* AVInputReader::video() const
 {
-	FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _video;
 }
 	
 
 AudioDecoderContext* AVInputReader::audio() const
 {
-	FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _audio;
 }
 
 
 string AVInputReader::error() const
 {
-	FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _error;
 }
 

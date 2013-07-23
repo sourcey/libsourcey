@@ -34,12 +34,9 @@
 namespace scy {
 namespace http {
 
-	
+
 class WebSocketAdapter;
 class WebSocket: public net::Socket
-	/// WebSocket is a disposable SSL socket wrapper
-	/// for WebSocketAdapter which can be created on the stack.
-	/// See WebSocketAdapter for implementation details.
 {
 public:	
 	typedef WebSocketAdapter Base;
@@ -143,6 +140,13 @@ public:
 		/// Returns the WebSocketAdapter for this socket.
 	
 	virtual bool shutdown(UInt16 statusCode, const std::string& statusMessage);
+
+	http::Request& request();
+	http::Response& response();
+	
+protected:
+	http::Request _request;
+	http::Response _response;
 };
 	
 	
@@ -171,10 +175,12 @@ public:
 	
 	//
 	/// Server side
+
 	void acceptRequest(http::Request& request, http::Response& response);
 	
 	//
 	/// Client side
+
 	void sendHandshakeRequest(); 
 		/// Sends the initial WS handshake HTTP request.
 		
@@ -226,55 +232,123 @@ private:
 class WebSocketAdapter: public net::SocketAdapter
 {
 public:	
-	WebSocketAdapter(net::Socket* socket, WebSocket::Mode mode); 
-	WebSocketAdapter(WebSocket::Mode mode);
+	WebSocketAdapter(net::Socket* socket, WebSocket::Mode mode, http::Request& request, http::Response& response); 
+	WebSocketAdapter(WebSocket::Mode mode, http::Request& request, http::Response& response);
 	
-	virtual int send(const char* data, int len, int flags = WebSocket::FRAME_BINARY);
-	virtual int send(const char* data, int len, const net::Address& peerAddr, int flags = WebSocket::FRAME_BINARY);
+	virtual int send(const char* data, int len, int flags = WebSocket::FRAME_TEXT);
+	virtual int send(const char* data, int len, const net::Address& peerAddr, int flags = WebSocket::FRAME_TEXT);
 	
-	virtual bool shutdown(UInt16 statusCode, const std::string& statusMessage);
+	virtual bool shutdown(UInt16 statusCode, const std::string& statusMessage);		
+	
+	//
+	/// Client side
+
+	virtual void sendClientRequest();
+	virtual void handleClientResponse(Buffer& buffer); 
+	//virtual void prepareClientRequest(http::Request& request);
+	//virtual void verifyClientResponse(http::Response& response);
+	
+	//
+	/// Server side
+
+	virtual void handleServerRequest(Buffer& buffer);
+	//virtual void sendConnectResponse(); 
+	//virtual void verifyServerRequest(http::Request& request);
+	//virtual void prepareClientResponse(http::Response& response);
+
+	virtual void onSocketConnect();
+	virtual void onSocketRecv(Buffer& buffer, const net::Address& peerAddr);
 
 protected:
 	virtual ~WebSocketAdapter();
 
 protected:
 	WebSocketFramer framer;
+	
+	http::Request& _request;
+	http::Response& _response;
 
 	friend class WebSocketFramer;
 };
 
+	
+	
+	//Signal<http::Request&> PrepareClientRequest;
+	//Signal<http::Response&> VerifyClientResponse;
+
+	//Signal<http::Request&> VerifyServerRequest;
+	//Signal<http::Response&> PrepareServerResponse;
+
+	//virtual http::Request createrequest();
+		/// Returns a reference to the externally managed   
+		/// HTTP request object.
+
+	//virtual http::Response& response();
+		/// Returns a reference to  the externally managed   
+		/// HTTP response object.	
+	
+	//virtual void setRequest(http::Request* request);
+		/// Sets the externally managed HTTP request 
+		/// object for client WS connection.
+
+	//virtual void setResponse(http::Response* response);
+		/// Sets the externally managed HTTP response 
+		/// object for server WS connection.
+
 
 // ---------------------------------------------------------------------
 //
+class Connection;
+class WebSocketConnectionAdapter: public WebSocketAdapter
+{
+public:	
+	WebSocketConnectionAdapter(Connection& connection, WebSocket::Mode mode); //socket = nullptr, http::Request* request = nullptr
+
+protected:
+	virtual ~WebSocketConnectionAdapter();
+
+	Connection& _connection;
+};
+
+
+	//http::Request* request;
+
+/*
+// ---------------------------------------------------------------------
+//
+class ClientConnection;
 class WebSocketClientAdapter: public WebSocketAdapter
 {
 public:	
-	WebSocketClientAdapter(net::Socket* socket = NULL, http::Request* request = NULL); 
+	WebSocketClientAdapter(ClientConnection& connection); //socket = nullptr, http::Request* request = nullptr
 	
-	virtual void sendRequest(http::Request& request);
+	virtual void sendClientRequest(http::Request& request);
 
-	virtual void onSocketConnect();
-	virtual void onSocketRecv(Buffer& buffer, const net::Address& peerAddr);
-
-	http::Request* request;
+	//http::Request* request;
 
 protected:
 	virtual ~WebSocketClientAdapter();
+
+	ClientConnection& _connection;
 };
 
 
 // ---------------------------------------------------------------------
 //
+class ServerConnection;
 class WebSocketServerAdapter: public WebSocketAdapter
 {
 public:	
-	WebSocketServerAdapter(net::Socket* socket = NULL); 
+	WebSocketServerAdapter(ServerConnection& connection); //net::Socket* socket = nullptr
 
 	virtual void onSocketRecv(Buffer& buffer, const net::Address& peerAddr);
 
 protected:
 	virtual ~WebSocketServerAdapter();
+
+	ServerConnection& _connection;
 };
+*/
 
 
 
@@ -292,7 +366,7 @@ protected:
 	
 	//SocketBase* socketBase, bool mustMaskPayload
 	//uv::TCPBase	
-	//Buffer& recvBuffer();
+	//Buffer& incomingBuffer();
 
 	//virtual void onConnect(int status);
 	//virtual void onRead(const char* data, int len);
@@ -398,7 +472,7 @@ private:
 	//int readNBytes(char* buffer, int bytes);
 	virtual SocketImpl* acceptConnection(SocketAddress& clientAddr);
 	virtual void connect(const SocketAddress& address);
-	virtual void connect(const SocketAddress& address, const Poco::Timespan& timeout);
+	virtual void connect(const SocketAddress& address, const Timespan& timeout);
 	virtual void connectNB(const SocketAddress& address);
 	virtual void bind(const SocketAddress& address, bool reuseAddress = false);
 	virtual void bind6(const SocketAddress& address, bool reuseAddress = false, bool ipV6Only = false);
@@ -411,10 +485,10 @@ private:
 	virtual int receiveFrom(char* buffer, int length, SocketAddress& address, int flags = 0);
 	virtual void sendUrgent(unsigned char data);
 	virtual bool secure() const;
-	virtual void setSendTimeout(const Poco::Timespan& timeout);	
-	virtual Poco::Timespan getSendTimeout();
-	virtual void setReceiveTimeout(const Poco::Timespan& timeout);
-	virtual Poco::Timespan getReceiveTimeout();
+	virtual void setSendTimeout(const Timespan& timeout);	
+	virtual Timespan getSendTimeout();
+	virtual void setReceiveTimeout(const Timespan& timeout);
+	virtual Timespan getReceiveTimeout();
 	*/
 /*
 class IWebSocket: public ISocket
@@ -512,7 +586,7 @@ public:
 		}
 		catch (Exception& exc) {
 			// Not a fatal error
-			log("warn") << "WebSocket Closing Error: " << exc.displayText() << std::endl;
+			log("warn") << "WebSocket Closing Error: " << exc.message() << std::endl;
 		}
 
 		SocketBaseT::close();
@@ -563,15 +637,15 @@ public:
 	{
 		Buffer buf;
 		packet.write(buf);
-		return send(buf.data(), buf.size());
+		return send(buf.data(), buf.available());
 	}
 
 	virtual void recv(Buffer& buffer) 
 	{
-		log("trace") << "On Data: " << buffer.size() << std::endl;
+		log("trace") << "On Data: " << buffer.available() << std::endl;
 	
-		if (buffer.size() == 0 || (
-			buffer.size() == 2 && buffer.data()[0] == 0xff && buffer.data()[1] == 0x00)) {
+		if (buffer.available() == 0 || (
+			buffer.available() == 2 && buffer.data()[0] == 0xff && buffer.data()[1] == 0x00)) {
 			log("debug") << "Recv Close" << std::endl;
 			close();
 			return;
@@ -579,12 +653,12 @@ public:
 	
 		// Read Messages
 		else if (_headerState == 2) {
-			log("trace") << "Parsing Messages: " << buffer.size() << std::endl;
+			log("trace") << "Parsing Messages: " << buffer.available() << std::endl;
 		
 			while (!buffer.eof()) {
 				std::string message;
 				UInt8 start;
-				buffer.readUInt8(start);
+				buffer.getUInt8(start);
 
 				if (start != 0x00) {
 					log("warn") << "Message contains bad start code" << std::endl;
@@ -592,7 +666,7 @@ public:
 				}
 
 				if (buffer.readToNext(message, static_cast<unsigned char>(0xff)) == 0) {
-					buffer.readString(message, buffer.remaining() - 1);
+					buffer.readString(message, buffer.available() - 1);
 				}
 			
 				log("trace") << "Parsed Message: " << message << std::endl;
@@ -606,7 +680,7 @@ public:
 		// Read Initial HTTP Header
 		else if (_headerState == 0) { //stateEquals(ClientState::Connected)
 
-			std::string request(buffer.data(), buffer.size());
+			std::string request(buffer.data(), buffer.available());
 			log("debug") << "Parsing Header: " << request << std::endl;			
 			if (strncmp(request.data(), "HTTP/1.1 101 ", 13) == 0) {
 				log("debug") << "Received HTTP Response" << std::endl;	
@@ -625,7 +699,7 @@ public:
 		// Read the Digest
 		// NOTE: Occasionally the digest is received after the header
 		// so we need to handle this here.
-		if (_headerState == 1 && buffer.remaining() >= 16) {
+		if (_headerState == 1 && buffer.available() >= 16) {
 			std::string replyDigest;
 			buffer.readString(replyDigest, 16);
 			log("debug") << "Reply Digest: " << replyDigest << std::endl;
@@ -639,19 +713,19 @@ public:
 	
 	virtual void setProtocol(const std::string& proto)
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		_protocol = proto;
 	}
 	
 	virtual void setCookie(const std::string& cookie)
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		_cookie = cookie;
 	}
 		
 	virtual UInt16 port()
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return _uri.getPort() ? _uri.getPort() : (_uri.getScheme() == "wss" ? 443 : 80);
 	}
 
@@ -675,9 +749,9 @@ protected:
 
 
 protected:	
-	mutable Poco::FastMutex _mutex;
+	mutable Mutex _mutex;
 
-	Poco::URI _uri;
+	http::URL _uri;
 	std::string _protocol;
 	std::string _cookie;
 	int _headerState;
@@ -686,8 +760,8 @@ protected:
 
 typedef WebSocketAdapter< Net::SocketBase< ::Poco::Net::StreamSocket, TCP, http::WebSocket > >  WebSocket;
 typedef WebSocketAdapter< Net::SocketBase< ::Poco::Net::SecureStreamSocket, SSLTCP, http::WebSocket > >  SSLWebSocket;
-typedef WebSocketAdapter< Net::PacketSocketBase< ::Poco::Net::StreamSocket, TCP, net::IPacketWebSocket > >  PacketWebSocket;
-typedef WebSocketAdapter< Net::PacketSocketBase< ::Poco::Net::SecureStreamSocket, SSLTCP, net::IPacketWebSocket > >  SSLPacketWebSocket;
+typedef WebSocketAdapter< Net::PacketSocketBase< ::Poco::Net::StreamSocket, TCP, std::stringacketWebSocket > >  PacketWebSocket;
+typedef WebSocketAdapter< Net::PacketSocketBase< ::Poco::Net::SecureStreamSocket, SSLTCP, std::stringacketWebSocket > >  SSLPacketWebSocket;
 */
 
 
@@ -698,10 +772,10 @@ class WebSocket: public SocketT
 {
 public:
 	WebSocket(Reactor& reactor);
-	WebSocket(Reactor& reactor, const Poco::URI& uri);
+	WebSocket(Reactor& reactor, const http::URL& uri);
 	virtual ~WebSocket();
 	
-	void connect(const Poco::URI& uri);
+	void connect(const http::URL& uri);
 	void connect();
 	void close();
 	
@@ -720,7 +794,7 @@ protected:
 	//virtual void onReadable(SocketEvent& event);
 	//virtual void onError(SocketEvent& event);
 	
-	Poco::URI _uri;
+	http::URL _uri;
 	std::string _protocol;
 	std::string _cookie;
 	int _headerState;

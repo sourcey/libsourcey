@@ -17,11 +17,11 @@
 //
 
 
-#ifndef SOURCEY_SOCKETIO_Packet_H
-#define SOURCEY_SOCKETIO_Packet_H
+#ifndef SOURCEY_SocketIO_Packet_H
+#define SOURCEY_SocketIO_Packet_H
 
 
-#include "Sourcey/IPacket.h"
+#include "Sourcey/Packet.h"
 #include "Sourcey/JSON/JSON.h"
 
 
@@ -110,5 +110,5 @@ protected:
 } } // namespace scy::sockio
 
 
-#endif //  SOURCEY_SOCKETIO_Packet_H
+#endif //  SOURCEY_SocketIO_Packet_H
 

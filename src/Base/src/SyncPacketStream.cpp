@@ -41,7 +41,7 @@ SyncPacketStream::~SyncPacketStream()
 		Mutex::ScopedLock lock(_mutex);
 		if (_queue) {
 			_queue->destroy();
-			_queue = NULL;
+			_queue = nullptr;
 		}
 	}
 	traceL("SyncPacketStream", this) << "Destroying: OK" << endl;
@@ -55,7 +55,7 @@ void SyncPacketStream::close()
 		Mutex::ScopedLock lock(_mutex);
 		if (_queue) {
 			_queue->destroy();
-			_queue = NULL;
+			_queue = nullptr;
 		}
 	}
 	PacketStream::close();

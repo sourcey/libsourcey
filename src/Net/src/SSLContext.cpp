@@ -19,6 +19,7 @@
 
 #include "Sourcey/Net/SSLContext.h"
 #include "Sourcey/Net/SSLManager.h"
+#include "Sourcey/DateTime.h"
 #include "Poco/File.h"
 #include "Poco/Path.h"
 
@@ -282,7 +283,7 @@ void SSLContext::flushSessionCache()
 {
 	assert(_usage == SERVER_USE);
 
-	Poco::Timestamp now;
+	Timestamp now;
 	SSL_CTX_flush_sessions(_sslContext, static_cast<long>(now.epochTime()));
 }
 

@@ -25,7 +25,7 @@
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
 class Address: public json::Value
@@ -83,7 +83,7 @@ protected:
 };
 
 
-} // namespace smple 
+} // namespace symple 
 } // namespace scy
 
 

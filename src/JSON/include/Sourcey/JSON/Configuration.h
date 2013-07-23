@@ -24,7 +24,7 @@
 #include "Sourcey/IConfiguration.h"
 #include "Sourcey/JSON/JSON.h"
 
-#include "Poco/Mutex.h"
+#include "Sourcey/Mutex.h"
 
 
 namespace scy { 
@@ -58,7 +58,7 @@ protected:
 
 	bool _loaded;
 	std::string _path;
-	mutable Poco::FastMutex _mutex;
+	mutable Mutex _mutex;
 };
 
 

@@ -47,6 +47,7 @@ public:
 		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 		{			
+
 #if TEST_SSL
 			// Init SSL Context 
 			SSLContext::Ptr ptrContext = new SSLContext(

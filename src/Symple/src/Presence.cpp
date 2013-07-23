@@ -25,11 +25,11 @@
 
 
 using namespace std;
-using namespace Poco;
+
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
 Presence::Presence() 
@@ -72,5 +72,5 @@ void Presence::setProbe(bool flag)
 
 
 
-} // namespace smple 
+} // namespace symple 
 } // namespace scy

@@ -22,46 +22,12 @@
 
 
 #include "Sourcey/Base.h"
-#include "Sourcey/Mutex.h"
-//#include "Poco/Foundation.h"
-#include "Poco/Exception.h"
 
 #include <vector>
 #include <map>
 
 
-//
-/// Cross platform normalization
-//
-#ifdef WIN32
-#define strncasecmp strnicmp
-#define strcasecmp stricmp
-#endif 
-
-
 namespace scy {
-
-
-	
-//
-// Reduce namespace pollution by forwarding some 
-// extensively used basic Poco types to our namespace.
-//
-using Poco::Exception;
-
-/*
-//using Poco::Mutex;
-using Poco::Int8;
-using Poco::UInt8;
-using Poco::Int16;
-using Poco::UInt16;
-using Poco::Int32;
-using Poco::UInt32;
-using Poco::Int32;
-using Poco::UInt32;
-using Poco::Int64;
-using Poco::UInt64;
-*/
 
 
 typedef std::vector<std::string>			StringVec;
@@ -71,6 +37,7 @@ typedef std::map<std::string, std::string>	StringMap;
 //
 // Error type
 //
+
 
 struct Error 
 	/// Simple error type 
@@ -91,6 +58,13 @@ struct Error
 
 	Error(const std::string& msg)
 	{
+		reset();
+		message = msg;
+	}
+
+	Error(const char* msg)
+	{
+		//assert(msg);
 		reset();
 		message = msg;
 	}

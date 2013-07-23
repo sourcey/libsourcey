@@ -21,7 +21,7 @@
 #define SOURCEY_MEDIA_MatrixConverter_H
 
 
-#include "Sourcey/IPacketizer.h"
+#include "Sourcey/PacketStream.h"
 #include "Sourcey/Signal.h"
 
 extern "C" {
@@ -44,8 +44,8 @@ class MatrixConverter: public IPacketizer
 {
 public:
 	MatrixConverter() : 
-		_convCtx(NULL),
-		_oframe(NULL)
+		_convCtx(nullptr),
+		_oframe(nullptr)
 	{
 	}
 

@@ -19,7 +19,7 @@
 #include "Sourcey/HTTP/Packetizers.h"
 #include "Sourcey/Util/Base64PacketEncoder.h"
 
-#include "Poco/Net/KVStore.h"
+#include "Sourcey/Containers.h"
 
 #include <string>
 #include <vector>
@@ -37,7 +37,7 @@ CMemLeakDetect memLeakDetect;
 using namespace std;
 using namespace scy;
 using namespace scy::av;
-	//Runner runner; //runner, 
+	//Application app; //runner, 
 
 */
 
@@ -57,7 +57,7 @@ class RelayedStreamingAllocation: public turn::TCPClientObserver
 {
 public:
 	turn::TCPClient client;
-	net::IP	peerIP;		
+	std::string	peerIP;		
 	StreamManager streams;
 	StreamingOptions options;	
 	int	frameNumber;
@@ -66,7 +66,7 @@ public:
 	Signal<turn::Client&> AllocationCreated;
 	Signal2<turn::Client&, const net::Address&> ConnectionCreated;
 
-	RelayedStreamingAllocation(const StreamingOptions& options, const turn::Client::Options& clientOptions, const net::IP& peerIP) : 
+	RelayedStreamingAllocation(const StreamingOptions& options, const turn::Client::Options& clientOptions, const std::string& peerIP) : 
 		client(*this, clientOptions), options(options), peerIP(peerIP), frameNumber(0), connected(false)
 	{
 	}
@@ -94,7 +94,7 @@ public:
 			client.initiate();
 		} 
 		catch (Exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "Error: " << exc.displayText() << std::endl;
+			errorL("RelayedStreamingAllocation", this) << "Error: " << exc.message() << std::endl;
 			assert(0);
 		}
 		debugL("RelayedStreamingAllocation", this) << "Initiating: OK" << std::endl;	
@@ -165,7 +165,7 @@ protected:
 			this->streams.addStream(stream);
 		} 
 		catch (Exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "Stream Error: " << exc.displayText() << std::endl;
+			errorL("RelayedStreamingAllocation", this) << "Stream Error: " << exc.message() << std::endl;
 			assert(0);
 		}
 
@@ -189,7 +189,7 @@ protected:
 			}
 		} 
 		catch (Exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "Stream Error: " << exc.displayText() << std::endl;
+			errorL("RelayedStreamingAllocation", this) << "Stream Error: " << exc.message() << std::endl;
 			assert(0);
 		}
 	}
@@ -278,7 +278,7 @@ public:
 		
 		//this->response = &response;
 				
-		//net::IP peerIP("127.0.0.1");
+		//std::string peerIP("127.0.0.1");
 		//debugL("RelayedStreamingResponder", this) << "Waiting" << std::endl;	
 		//stopSignal.wait();
 		//debugL("RelayedStreamingResponder", this) << "Stopped" << std::endl;	
@@ -347,7 +347,7 @@ public:
 			//client.sendData(oss.str().data(), oss.str().length(), currentPeerAddr);
 		}
 		catch (Exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "^^^^^^^^^^^^^^^^^^^^^^^^ Send Error: " << exc.displayText() << std::endl;
+			errorL("RelayedStreamingAllocation", this) << "^^^^^^^^^^^^^^^^^^^^^^^^ Send Error: " << exc.message() << std::endl;
 			
 			// TODO: Calling stream.stop() inside stream callback causing deadlock
 			terminate();

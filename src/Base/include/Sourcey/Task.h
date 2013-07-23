@@ -21,9 +21,7 @@
 #define SOURCEY_Task_H
 
 
-
 #include "Sourcey/Types.h"
-
 #include "Sourcey/Mutex.h"
 
 
@@ -32,16 +30,16 @@ namespace scy {
 
 class Runner;
 
-/*
+
 class Task
 	/// This class defines an asynchronous Task
 	/// which is managed by a Runner.
 {
 public:	
-	Task(bool repeat = false);	
-	Task(Runner& runner, bool repeat = false, bool autoStart = false);
+	//Task(bool repeat = false);	
+	Task(bool repeat = false); // Runner& runner, , bool autoStart = false
 		
-	virtual void start();
+	//virtual void start();
 	virtual void cancel();
 	virtual void destroy();
 	
@@ -50,7 +48,7 @@ public:
 	virtual bool destroyed() const;
 	virtual bool repeating() const;
 
-	virtual Runner& runner();
+	//virtual Runner& runner();
 		/// Returns a reference to the associated Runner or 
 		/// throws an exception.
 	
@@ -83,15 +81,17 @@ protected:
 protected:	
 	mutable Mutex	_mutex;
 	
+	friend class Runner;
+	
 	UInt32 _id;
 	bool _cancelled;
 	bool _destroyed;
 	bool _repeating;
-
-	Runner* _runner;
-	
-	//friend class Runner;
 };
+
+
+/*	
+	Runner* _runner;
 */
 
 
@@ -105,8 +105,8 @@ protected:
 
 
 /*
-template <class RunnableT>
-class ITask: public RunnableT
+template <class abstract::RunnableT>
+class ITask: public abstract::RunnableT
 	/// This class defines an asynchronous Task which is
 	/// managed by a Runner.
 {

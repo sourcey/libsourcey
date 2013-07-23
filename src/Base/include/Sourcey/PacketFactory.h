@@ -21,7 +21,7 @@
 #define SOURCEY_PacketFactory_H
 
 
-#include "Sourcey/PacketEmitter.h"
+#include "Sourcey/PacketSignal.h"
 #include "Sourcey/Buffer.h"
 
 //#include "Poco/Thread.h"

@@ -40,7 +40,7 @@ using namespace Poco::Crypto;
 
 
 namespace scy {
-namespace crypt {
+namespace crypto {
 
 
 // Generates a random binary key
@@ -274,16 +274,16 @@ std::string computeHMAC(const std::string& input, const std::string& key) {
 void encryptFile(const string& password, const string& inputFileName, 
                  const string& outputFileName)
 {
-	assert(false);
+	assert(0 && "not implemented");
 }
 
 
 void decryptFile(const string& password, const string& inputFileName, 
                  const string& outputFileName)
 {
-	assert(false);
+	assert(0 && "not implemented");
 }
 
 
-} // namespace crypt
+} // namespace crypto
 } // namespace scy

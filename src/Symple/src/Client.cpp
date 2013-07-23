@@ -24,10 +24,10 @@ using namespace std;
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
-Client::Client(net::SocketBase* socket, uv::Loop& loop, const Client::Options& options) :
+Client::Client(net::SocketBase* socket, const Client::Options& options, uv::Loop& loop) :
 	sockio::Client(socket, loop),
 	_options(options),
 	_announceStatus(500)
@@ -46,10 +46,12 @@ void Client::connect()
 {
 	log("trace") << "Connecting" << endl;		
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		assert(!_options.user.empty());
 		//assert(!_options.token.empty());
-		_serverAddr = _options.serverAddr;
+		//_serverAddr = _options.serverAddr;
+		_host = _options.host;
+		_port = _options.port;
 	}
 	reset();
 	sockio::Client::connect();
@@ -80,7 +82,7 @@ int Client::send(Message& m, bool ack)
 	//log("trace") << "Sending Message: " 
 	//	<< message.id() << ":\n" 
 	//	<< json::stringify(message, true) << endl;
-	return sockio::Client::send(m, false);
+	return sockio::Client::send(m, ack);
 }
 
 
@@ -141,51 +143,35 @@ int Client::sendPresence(const Address& to, bool probe)
 
 Roster& Client::roster() 
 { 
-	//Poco::FastMutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _roster; 
 }
 
 
-/*
-uv::Loop& loop() 
-{ 
-	//Poco::FastMutex::ScopedLock lock(_mutex);
-	return _runner; 
-}
-
-
-int Client::announceStatus() const
-{
-	//Poco::FastMutex::ScopedLock lock(_mutex);
-	return _announceStatus;
-}
-*/
-
-
 PersistenceT& Client::persistence() 
 { 
-	//Poco::FastMutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _persistence; 
 }
 
 
 Client::Options& Client::options() 
 { 
-	//Poco::FastMutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _options; 
 }
 
 
 string Client::ourID() const
 {
-	//Poco::FastMutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _ourID;
 }
 
 
 Peer& Client::ourPeer()
 {	
-	//Poco::FastMutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	log("trace") << "Getting Our Peer: " << _ourID << endl;
 	if (_ourID.empty())
 		throw Exception("No active peer session is available.");
@@ -202,9 +188,11 @@ Client& Client::operator >> (Message& message)
 	
 int Client::announce()
 {
+	log("trace") << "Announcing" << endl;
+
 	json::Value data;
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		data["token"]	= _options.token;
 		data["group"]	= _options.group;
 		data["user"]	= _options.user;
@@ -218,21 +206,27 @@ int Client::announce()
 }
 
 
-void Client::onAnnounce(void* sender, net::TransactionState& state, const net::TransactionState&) 
+void Client::onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
 {
 	log("trace") << "Announce Response: " << state.toString() << endl;
 	
 	sockio::Transaction* transaction = reinterpret_cast<sockio::Transaction*>(sender);
 	switch (state.id()) {	
-	case net::TransactionState::Success:
+	case TransactionState::Success:
 		try 
 		{
+			log("trace") << "Announce Response 1: " << state.toString() << endl;	
+
 			json::Value data = transaction->response().json()[(size_t)0];
 			_announceStatus = data["status"].asInt();
 
+			log("trace") << "Announce Response 2: " << state.toString() << endl;	
+			
 			// Notify the outside application of the response 
 			// status before we transition the client state.
 			Announce.emit(this, _announceStatus);
+			
+			log("trace") << "Announce Response 3: " << state.toString() << endl;	
 
 			if (_announceStatus != 200)
 				throw Exception(data["message"].asString()); //"Announce Error: " + 
@@ -244,7 +238,7 @@ void Client::onAnnounce(void* sender, net::TransactionState& state, const net::T
 			// Set our local peer data from the response or fail.
 			_roster.update(data["data"], true);
 
-			// Transition our state to Online.
+			// Transition to Online state.
 			sockio::Client::onOnline();
 
 			// Broadcast a presence probe to our network.
@@ -253,11 +247,11 @@ void Client::onAnnounce(void* sender, net::TransactionState& state, const net::T
 		catch (Exception& exc)
 		{
 			// Set the error message and close the connection.
-			setError(exc.displayText());
+			setError(exc.message());
 		}
 		break;		
 
-	case net::TransactionState::Failed:
+	case TransactionState::Failed:
 		Announce.emit(this, _announceStatus);
 		setError(state.message());
 		break;
@@ -265,21 +259,32 @@ void Client::onAnnounce(void* sender, net::TransactionState& state, const net::T
 }
 
 
-void Client::onOnline()
+void Client::onSocketConnect(void*)
 {
-	log("trace") << "On Online" << endl;
+	// Start the socket.io timers etc
+	sockio::Client::onConnect();
 
-	// Override this method because we are not quite
-	// ready to transition to Online yet - we still
-	// need to announce our presence on the server.
+	// Authorize the symple connection	
 	announce();
 }
 
 
+/*
+void Client::onOnline()
+{
+	log("trace") << "On connect" << endl;
+
+	// Override this method because we are not quite
+	// ready to transition to online yet state - we 
+	// still need to announce our presence on the server.
+	announce();
+}
+*/
+
+
 void Client::onPacket(sockio::Packet& packet) 
 {
-	log("trace") << "On Packet: " << packet.className() << endl;
-
+	// Parse Symple messages from SocketIO JSON packets
 	if (packet.type() == sockio::Packet::Message || 
 		packet.type() == sockio::Packet::JSON) {
 			
@@ -288,10 +293,10 @@ void Client::onPacket(sockio::Packet& packet)
 		json::Reader reader;
 		if (reader.parse(packet.message(), data)) {
 			string type(data["type"].asString());
-			log("trace") << "Symple Packet Created: " << type << endl;
+			log("trace") << "Symple packet created: " << type << endl;
 			if (type == "message") {
 				Message m(data);
-				PacketEmitter::emit(this, m);
+				PacketSignal::emit(this, m);
 				if (m.isRequest()) {
 					m.setStatus(404);
 					log("info") << "Message not handled: " << m.id() << endl;
@@ -300,7 +305,7 @@ void Client::onPacket(sockio::Packet& packet)
 			}
 			else if (type == "command") {
 				Command c(data);
-				PacketEmitter::emit(this, c);
+				PacketSignal::emit(this, c);
 				if (c.isRequest()) {
 					c.setStatus(404);
 					log("info") << "Command not handled: " << c.id() << ": " << c.node() << endl;
@@ -311,20 +316,25 @@ void Client::onPacket(sockio::Packet& packet)
 				Presence p(data);
 				if (p.isMember("data"))
 					_roster.update(p["data"], false);
-				PacketEmitter::emit(this, p);
+				PacketSignal::emit(this, p);
 				if (p.isProbe())
 					sendPresence(p.from());
 			}
 		}
+		else assert(0 && "invalid packet");
 	}
-	else
-		PacketEmitter::emit(this, packet);
+
+	// Other packet types are proxied directly
+	else {		
+		log("trace") << "^^^^^^^^^^^^^^^^ On packet: EMITTING" << endl;
+		PacketSignal::emit(this, packet);
+	}
 }
 
 
 void Client::onClose()
 {
-	log("trace") << "Symple Closing" << endl;
+	log("trace") << "Symple closing" << endl;
 	sockio::Client::onClose();
 	reset();
 }
@@ -338,10 +348,26 @@ void Client::reset()
 }
 
 
-} } // namespace scy::smple
+} } // namespace scy::smpl
 
 
 
+
+
+/*
+uv::Loop& loop() 
+{ 
+	//Mutex::ScopedLock lock(_mutex);
+	return _runner; 
+}
+
+
+int Client::announceStatus() const
+{
+	//Mutex::ScopedLock lock(_mutex);
+	return _announceStatus;
+}
+*/
 
 
 /*
@@ -368,21 +394,21 @@ void Client::onError()
 //	_options(options),
 //	_announceStatus(500)
 //{
-//	traceL() << "[smple::Client] Creating" << endl;
+//	traceL() << "[smpl::Client] Creating" << endl;
 //}
 //
 //
 //Client::~Client() 
 //{
-//	traceL() << "[smple::Client] Destroying" << endl;
+//	traceL() << "[smpl::Client] Destroying" << endl;
 //	close();
-//	traceL() << "[smple::Client] Destroying: OK" << endl;
+//	traceL() << "[smpl::Client] Destroying: OK" << endl;
 //}
 //
 //
 //void Client::connect()
 //{
-//	traceL() << "[smple::Client] Connecting" << endl;
+//	traceL() << "[smpl::Client] Connecting" << endl;
 //
 //	assert(!_options.user.empty());
 //	assert(!_options.token.empty());
@@ -395,7 +421,7 @@ void Client::onError()
 //
 //void Client::close()
 //{
-//	traceL() << "[smple::Client] Closing" << endl;
+//	traceL() << "[smpl::Client] Closing" << endl;
 //
 //	sockio::Socket::close();
 //}
@@ -414,7 +440,7 @@ void Client::onError()
 //	message.setFrom(ourPeer().address());
 //	assert(message.valid());
 //	assert(message.to().id() != message.from().id());
-//	traceL() << "[smple::Client] Sending Message: " 
+//	traceL() << "[smpl::Client] Sending Message: " 
 //		<< message.id() << ":\n" 
 //		<< json::stringify(message, true) << endl;
 //	return sockio::Socket::send(message, false);
@@ -423,7 +449,7 @@ void Client::onError()
 //
 //void Client::createPresence(Presence& p)
 //{
-//	traceL() << "[smple::Client] Creating Presence" << endl;
+//	traceL() << "[smpl::Client] Creating Presence" << endl;
 //
 //	Peer& peer = /*_roster.*/ourPeer();
 //	UpdatePresenceData.emit(this, peer);
@@ -434,7 +460,7 @@ void Client::onError()
 //
 //int Client::sendPresence(bool probe)
 //{
-//	traceL() << "[smple::Client] Broadcasting Presence" << endl;
+//	traceL() << "[smpl::Client] Broadcasting Presence" << endl;
 //
 //	Presence p;
 //	createPresence(p);
@@ -445,7 +471,7 @@ void Client::onError()
 //
 //int Client::sendPresence(const Address& to, bool probe)
 //{
-//	traceL() << "[smple::Client] Sending Presence" << endl;
+//	traceL() << "[smpl::Client] Sending Presence" << endl;
 //	
 //	Presence p;
 //	createPresence(p);
@@ -466,7 +492,7 @@ void Client::onError()
 //{
 //	json::Value data;
 //	{
-//		FastMutex::ScopedLock lock(_mutex);
+//		Mutex::ScopedLock lock(_mutex);
 //		data["token"]	= _options.token;
 //		data["user"]	= _options.user;
 //		data["name"]	= _options.name;
@@ -479,13 +505,13 @@ void Client::onError()
 //}
 //
 //
-//void Client::onAnnounce(void* sender, net::TransactionState& state, const net::TransactionState&) 
+//void Client::onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
 //{
-//	traceL() << "[smple::Client] Announce Response: " << state.toString() << endl;
+//	traceL() << "[smpl::Client] Announce Response: " << state.toString() << endl;
 //	
 //	sockio::Transaction* transaction = reinterpret_cast<sockio::Transaction*>(sender);
 //	switch (state.id()) {	
-//	case net::TransactionState::Success:
+//	case TransactionState::Success:
 //		try 
 //		{
 //			json::Value data = transaction->response().json()[(size_t)0];
@@ -514,11 +540,11 @@ void Client::onError()
 //		catch (Exception& exc)
 //		{
 //			// Set the error message and close the connection.
-//			setError(exc.displayText());
+//			setError(exc.message());
 //		}
 //		break;		
 //
-//	case net::TransactionState::Failed:
+//	case TransactionState::Failed:
 //		Announce.emit(this, _announceStatus);
 //		setError(state.message());
 //		break;
@@ -552,7 +578,7 @@ void Client::onError()
 //
 //bool Client::onPacketCreated(IPacket* packet) 
 //{
-//	traceL() << "[smple::Client] Packet Created: " << packet->className() << endl;
+//	traceL() << "[smpl::Client] Packet Created: " << packet->className() << endl;
 //
 //	// Catch incoming messages here so we can parse
 //	// messages and handle presence updates.
@@ -564,12 +590,12 @@ void Client::onError()
 //
 //		json::Value data = p->json();
 //		if (!data.isObject() || data.isNull()) {
-//			log("warning") << "[smple::Client] Packet is not a JSON object" << endl;
+//			log("warning") << "[smpl::Client] Packet is not a JSON object" << endl;
 //			return true; // continue propagation
 //		}
 //		
 //		string type(data["type"].asString());
-//		traceL() << "[smple::Client] Packet Created: Symple Type: " << type << endl;
+//		traceL() << "[smpl::Client] Packet Created: Symple Type: " << type << endl;
 //		if (type == "message") {
 //			Message m(data);
 //			emit(this, m);
@@ -596,42 +622,42 @@ void Client::onError()
 //
 //Roster& Client::roster() 
 //{ 
-//	FastMutex::ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	return _roster; 
 //}
 //
 //
 //PersistenceT& Client::persistence() 
 //{ 
-//	FastMutex::ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	return _persistence; 
 //}
 //
 //
 //Client::Options& Client::options() 
 //{ 
-//	FastMutex::ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	return _options; 
 //}
 //
 //
 //string Client::ourID() const
 //{
-//	FastMutex::ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	return _ourID;
 //}
 //
 //
 //int Client::announceStatus() const
 //{
-//	FastMutex::ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	return _announceStatus;
 //}
 //
 //
 //Peer& Client::ourPeer() //bool whiny
 //{	
-//	FastMutex::ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	traceL() << "[Client:" << this << "] Getting Our Peer: " << _ourID << endl;
 //	if (_ourID.empty())
 //		throw Exception("No active peer session is available.");

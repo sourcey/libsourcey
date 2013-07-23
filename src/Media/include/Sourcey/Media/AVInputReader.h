@@ -2,14 +2,14 @@
 #define SOURCEY_MEDIA_AVInputReader_H
 
 
-#include "Sourcey/PacketEmitter.h"
-#include "Sourcey/IStartable.h"
+#include "Sourcey/PacketSignal.h"
+#include "Sourcey/Interfaces.h"
+#include "Sourcey/Interfaces.h"
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/VideoContext.h"
 #include "Sourcey/Media/AudioContext.h"
 
-#include "Poco/Runnable.h"
-#include "Poco/Mutex.h"
+#include "Sourcey/Mutex.h"
 
 
 extern "C" {
@@ -25,7 +25,7 @@ namespace scy {
 namespace av {
 
 
-class AVInputReader: public PacketEmitter, public IStartable, public Poco::Runnable
+class AVInputReader: public PacketSignal, public abstract::Startable, public Poco::Runnable
 	/// Video capture and file input decoder class with reusable
 	/// code that depends on ffmpeg libavcodec/libavformat.
 {
@@ -89,7 +89,7 @@ public:
 	NullSignal ReadComplete;
 
 protected:		
-	mutable Poco::FastMutex	_mutex;
+	mutable Mutex	_mutex;
 	Poco::Thread			_thread;
 	bool					_stopping;
 	//std::string				_ifile;	

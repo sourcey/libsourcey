@@ -339,6 +339,12 @@ int Address::af() const
 }
 
 
+bool Address::valid() const 
+{
+	return host() != "0.0.0.0" && port() != 0;
+}
+
+
 string Address::toString() const
 {
 	string result;
@@ -360,20 +366,6 @@ bool Address::operator < (const Address& addr) const
 }
 
 
-UInt16 Address::resolveService(const string& service)
-{
-	UInt16 port = util::fromString<UInt16>(service);
-	if (port && port > 0) //, port) && port <= 0xFFFF
-		return (UInt16) port;
-
-	struct servent* se = getservbyname(service.c_str(), NULL);
-	if (se)
-		return ntohs(se->s_port);
-	else
-		throw Exception("Service not found: " + service);
-}
-
-
 bool Address::operator == (const Address& addr) const
 {
 	return host() == addr.host() && port() == addr.port();
@@ -386,9 +378,47 @@ bool Address::operator != (const Address& addr) const
 }
 
 
+/*
+void Address::swap(Address& a1, Address& a2)
+{
+	a1.swap(a2);
+}
+*/
+
+
 void Address::swap(Address& addr)
 {
 	std::swap(_base, addr._base);
+}
+
+
+//
+// Static helpers
+//
+
+
+bool Address::validateIP(const std::string& addr)
+{
+	char ia[sizeof(struct in6_addr)];
+	if (uv_inet_pton(AF_INET, addr.c_str(), &ia).code == UV_OK)
+		return true;
+    else if (uv_inet_pton(AF_INET6, addr.c_str(), &ia).code == UV_OK)
+		return true;
+	return false;
+}
+
+
+UInt16 Address::resolveService(const string& service)
+{
+	UInt16 port = util::fromString<UInt16>(service);
+	if (port && port > 0) //, port) && port <= 0xFFFF
+		return (UInt16) port;
+
+	struct servent* se = getservbyname(service.c_str(), NULL);
+	if (se)
+		return ntohs(se->s_port);
+	else
+		throw Exception("Service not found: " + service);
 }
 
 

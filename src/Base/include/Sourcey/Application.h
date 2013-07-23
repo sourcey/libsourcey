@@ -23,7 +23,7 @@
 
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Memory.h"
-
+#include "Sourcey/Exception.h"
 #include "Sourcey/Singleton.h"
 
 
@@ -31,7 +31,7 @@ namespace scy {
 
 		
 class Application
-	/// Defined a simple event based application which runs until
+	/// A simple event based application which runs until
 	/// the event loop stops or is terminated.
 	///
 	/// The Application class also provides shutdown handling (Ctrl-C).
@@ -85,7 +85,7 @@ public:
 		void* opaque;
 	};
 	
-	void waitForShutdown(ShutdownCommand::Fn callback, void* opaque = NULL)
+	void waitForShutdown(ShutdownCommand::Fn callback, void* opaque = nullptr)
 	{ 
 		ShutdownCommand* cmd = new ShutdownCommand;
 		cmd->opaque = opaque;
@@ -129,7 +129,7 @@ inline Application& Application::getDefault()
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Task.h"
 #include "Sourcey/Signal.h"
-#include "Sourcey/IPolymorphic.h"
+#include "Sourcey/Polymorphic.h"
 #include "Poco/Thread.h"
 #include "Poco/Event.h"
 
@@ -137,7 +137,7 @@ inline Application& Application::getDefault()
 */
 
 /*
-class Application: public Poco::Runnable, public IPolymorphic
+class Application: public abstract::Runnable, public Polymorphic
 	/// The Application is an asynchronous event loop in charge
 	/// of one or many tasks. 
 	///
@@ -245,7 +245,7 @@ struct TaskEntry
 	bool destroy;
 	Task* task;
 
-	TaskEntry(Task* task = NULL, bool repeat = true, bool running = false) : 
+	TaskEntry(Task* task = nullptr, bool repeat = true, bool running = false) : 
 		task(task), repeat(repeat), running(running), destroy(false) {}
 
 	virtual bool beforeRun() { return running; }
@@ -254,12 +254,12 @@ struct TaskEntry
 
 struct Scheduler::TaskEntry: public TaskEntry
 {
-	Poco::Timestamp scheduleAt;	
-	//Poco::TimeDiff interval;
+	Timestamp scheduleAt;	
+	//TimeDiff interval;
 
 	Scheduler::TaskEntry() {}
 		
-	//: TaskEntry() : task(NULL), repeat(true), running(false) {}
+	//: TaskEntry() : task(nullptr), repeat(true), running(false) {}
 	//long timeout;
 };
 */
@@ -271,8 +271,8 @@ struct Scheduler::TaskEntry: public TaskEntry
 		/// Tells the runner to wake up and loop internal tasks.
 	
 	 //, bool repeat = true
-	//virtual bool schedule(Task* task, const Poco::DateTime& runAt);
-	//virtual bool scheduleRepeated(Task* task, const Poco::Timespan& interval);
+	//virtual bool schedule(Task* task, const DateTime& runAt);
+	//virtual bool scheduleRepeated(Task* task, const Timespan& interval);
 
 	 //Task*
 	//virtual TaskEntry& get(Task* task) const;

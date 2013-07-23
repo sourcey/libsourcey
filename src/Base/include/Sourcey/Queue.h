@@ -35,54 +35,54 @@ class Queue
 {
 private:
     std::queue<T> _queue;
-	mutable Poco::Mutex	_mutex;
+	mutable Mutex	_mutex;
 
 public:
     void push(const T& data)
     {
-		Poco::Mutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         _queue.push(data);
     }
 
     bool empty() const
     {
-		Poco::Mutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         return _queue.empty();
     }
 
     T& front()
     {
-		Poco::Mutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         return _queue.front();
     }
     
     T const& front() const
     {
-		Poco::Mutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         return _queue.front();
     }
 
     T& back()
     {
-		Poco::Mutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         return _queue.back();
     }
     
     T const& back() const
     {
-		Poco::Mutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         return _queue.back();
     }
 
     void pop()
     {
-		Poco::Mutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         _queue.pop();
     }
 
     void popFront()
     {
-		Poco::Mutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         _queue.pop_front();
     }
 };
@@ -95,13 +95,13 @@ class ConcurrentQueue
 {
 private:
     std::queue<T> _queue;
-	mutable Poco::Mutex	_mutex;
+	mutable Mutex _mutex;
 	Poco::Condition _condition;
 
 public:
     void push(T const& data)
     {
-		Poco::Mutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         _queue.push(data);
         lock.unlock();
         _condition.signal();
@@ -109,13 +109,13 @@ public:
 
     bool empty() const
     {
-		Poco::Mutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         return _queue.empty();
     }
 
     bool tryPop(T& popped_value)
     {
-		Poco::Mutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         if (_queue.empty())
             return false;
         
@@ -126,14 +126,13 @@ public:
 
     void waitAndPpop(T& popped_value)
     {
-		Poco::Mutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         while (_queue.empty())
 			_cond.wait(_mutex);
         
         popped_value = _queue.front();
         _queue.pop();
     }
-
 };
 
 

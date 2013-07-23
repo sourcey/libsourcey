@@ -36,7 +36,8 @@ class Stream: public uv::Base
 {
  public:  
 	Stream(uv::Loop& loop = uv::defaultLoop(), void* stream = NULL) :
-	   uv::Base(&loop, stream)
+		uv::Base(&loop, stream), 
+		_buffer(65536)
 	{
 	}
 	
@@ -76,13 +77,11 @@ class Stream: public uv::Base
 
 	bool write(const char* data, int len)
 		/// Writes data to the stream.
+		///
+		/// Throws an IOException if the socket is closed.
 	{		
-		//if (len < 300)
-		//	traceL("Stream", this) << "Send: " << std::string(data, len) << std::endl;
-		if (closed()) {
-			warnL("Stream", this) << "Attempted write on closed stream" << std::endl;
-			return false;
-		}
+		if (closed())
+			throw IOException("Cannot write to closed stream");
 		
 		int r; 		
 		uv_write_t* req = new uv_write_t;
@@ -98,7 +97,7 @@ class Stream: public uv::Base
 
 		if (r) {
 			delete req;
-			setLastError(); // Should we throw an exception instead?
+			setAndThrowLastError("Stream write error");
 		}
 		return r == 0;
 	}
@@ -150,8 +149,6 @@ class Stream: public uv::Base
 	{	
 		Stream* io = static_cast<Stream*>(handle->data);
 		traceL("Stream", io) << "Handle Read: " << nread << std::endl;
-		//if (nread > 0 && nread < 50)
-		//	traceL("Stream", io) << "Handle Read: " << std::string(buf.base, nread) << std::endl;
 
 		// Handle EOF or error
 		if (nread == -1)  {
@@ -197,7 +194,7 @@ class Stream: public uv::Base
 		Stream* self = static_cast<Stream*>(handle->data);
 
 		// Reserve the recommended buffer size
-		if (suggested_size > self->_buffer.size())
+		if (suggested_size > self->_buffer.capacity())
 			self->_buffer.reserve(suggested_size); 
 		assert(self->_buffer.capacity() == suggested_size);
 
@@ -251,7 +248,7 @@ class Stream: public uv::Base
 		//ptr->_readBuffer.data.reserve(suggested_size); 
 		//if (suggested_size > ptr->_readBuffer1.capacity())
 		//	ptr->_readBuffer1.reserve(suggested_size);
-		traceL("Stream", ptr) << "allocReadBuffer: Before alloc: " << ptr->_buffer.size() << std::endl;
+		traceL("Stream", ptr) << "allocReadBuffer: Before alloc: " << ptr->_buffer.available() << std::endl;
 			traceL("Stream", ptr) << "allocReadBuffer: DO alloc: " << std::endl;
 		conn->data
 		_readBuffer
@@ -259,7 +256,7 @@ class Stream: public uv::Base
 		assert(conn->read_clear); // Ensure that the last _buffer has been read by on_read_cb.
 		conn->read_clear = false;
 		conn->read_buffer.reserve_more(suggested_size); 
-		traceL("Stream", ptr) << "allocReadBuffer: After alloc: " << ptr->_buffer.size() << std::endl;
+		traceL("Stream", ptr) << "allocReadBuffer: After alloc: " << ptr->_buffer.available() << std::endl;
 		 //[0]; //ptr->_readBuffer1.bytes(); //(char*)&ptr->_readBuffer.data[0]; //new char[suggested_size];&*v.begin();
 
 		uv_buf_t buf;

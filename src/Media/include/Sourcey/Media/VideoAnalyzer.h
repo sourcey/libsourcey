@@ -24,8 +24,8 @@
 #include "Sourcey/Stateful.h"
 #include "Sourcey/Signal.h"
 #include "Sourcey/PacketStream.h"
-#include "Sourcey/IStartable.h"
-#include "Sourcey/IPacketProcessor.h"
+#include "Sourcey/Interfaces.h"
+#include "Sourcey/PacketStream.h"
 #include "Sourcey/Media/AVInputReader.h"
 #include "Sourcey/Media/FPSCounter.h"
 #include "Sourcey/Media/Format.h"
@@ -39,7 +39,7 @@ namespace scy {
 namespace av {
 
 
-class VideoAnalyzer //: public IPacketProcessor
+class VideoAnalyzer //: public PacketProcessor
 	/// This class provides basic AV spectrum analysis on a 
 	/// video using the Fourier Transform algorithm.
 	/// Data is outputted in CSV format.
@@ -48,7 +48,7 @@ class VideoAnalyzer //: public IPacketProcessor
 	///		- Pluggable algorithms and processors
 	///		- Normalization (scaling) for output values
 	///		- Process multiple audio channels properly
-	///		- Inherit from IPacketProcessor
+	///		- Inherit from PacketProcessor
 {
 public:
 	struct Options 
@@ -129,7 +129,7 @@ protected:
 	const char* className() const { return "VideoAnalyzer"; }
 
 protected:
-	mutable Poco::FastMutex _mutex;
+	mutable Mutex _mutex;
 	
 	Options _options;
 	std::string	_error;

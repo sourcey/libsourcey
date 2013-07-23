@@ -27,7 +27,7 @@ using namespace std;
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
 Address::Address() :
@@ -169,5 +169,5 @@ bool Address::operator == (string& r)
 */
 
 
-} // namespace smple 
+} // namespace symple 
 } // namespace scy

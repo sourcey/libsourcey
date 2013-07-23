@@ -22,13 +22,13 @@
 
 
 #include "Sourcey/Base.h"
-#include "Sourcey/IPacket.h"
+#include "Sourcey/Packet.h"
 #include "Sourcey/JSON/JSON.h"
 #include "Sourcey/Symple/Address.h"
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
 class Message: public json::Value, public IPacket
@@ -84,11 +84,11 @@ public:
 
 	void print(std::ostream& os) const;
 	
-	virtual const char* className() const { return "smple::Message"; }
+	virtual const char* className() const { return "smpl::Message"; }
 };
 
 
-} // namespace smple 
+} // namespace symple 
 } // namespace scy
 
 

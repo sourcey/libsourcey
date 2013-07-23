@@ -17,13 +17,12 @@
 //
 
 
-#ifndef SOURCEY_HTTP_ChunkedPacketizer_H
-#define SOURCEY_HTTP_ChunkedPacketizer_H
+#ifndef SOURCEY_HTTP_ConnectionAdapter_H
+#define SOURCEY_HTTP_ConnectionAdapter_H
 
 
-#include "Sourcey/IPacketizer.h"
 #include "Sourcey/Signal.h"
-#include "Poco/Net/HTTPResponse.h"
+#include "Sourcey/HTTP/Connection.h"
 #include "Poco/Base64Encoder.h"
 #include "Poco/Format.h"
 #include <sstream>
@@ -31,25 +30,121 @@
 
 namespace scy { 
 namespace http {
-
 	
+//#include "Sourcey/PacketStream.h"
+//////#include "Poco/Net/Response.h"	
+	//net::Socket& socket; //ConnectionAdapter(connection, type)socket(),  //socket(socket), //Socket& socket, 
+
 // ---------------------------------------------------------------------
 //
-class ChunkedPacketizer: public IPacketizer
+class ChunkedAdapter: public IPacketizer
 {
 public:
-	ChunkedPacketizer(const std::string& contentType) :
-		_contentType(contentType), _initial(true)
+	std::string contentType;
+	Connection& connection;
+
+	ChunkedAdapter(Connection& connection) : 
+		connection(connection), 
+		contentType(connection.outgoingHeaders()->getContentType())
 	{
-		traceL("ChunkedPacketizer", this) << "Creating" << std::endl;
+		traceL("ChunkedAdapter", this) << "Creating" << std::endl;
 	}
 	
-	virtual ~ChunkedPacketizer() 
+	virtual ~ChunkedAdapter() 
 	{
-		traceL("ChunkedPacketizer", this) << "Destroying" << std::endl;
+		traceL("ChunkedAdapter", this) << "Destroying" << std::endl;
 	}
 	
-	virtual void writeInitialHTTPHeaders(std::ostringstream& ost)
+	virtual void sendHeader() //std::ostringstream& ost
+		// Sets HTTP headers for the initial response.
+		// This method must not include the final carriage return. 
+	{	
+		connection.shouldSendHeaders(true);
+				
+		connection.response().set("Access-Control-Allow-Origin", "*");
+		connection.response().set("Content-Type", "text/html");
+		connection.response().set("Transfer-Encoding", "chunked");
+
+		// Flushed on initial send ...
+
+		/*
+		std::ostringstream ost;
+		ost << "HTTP/1.1 200 OK\r\n"
+			// NOTE: If Cache-Control: no-store is not used Chrome's (27.0.1453.110) 
+			// memory usage grows exponentially for HTTP streaming:
+			// https://code.google.com/p/chromium/issues/detail?id=28035
+			<< "Cache-Control: no-store, no-cache, max-age=0, must-revalidate\r\n"
+			<< "Cache-Control: post-check=0, pre-check=0, FALSE\r\n"
+			<< "Connection: keep-alive\r\n"
+			<< "Pragma: no-cache\r\n"
+			<< "Expires: 0\r\n"
+			<< "Access-Control-Allow-Origin: *\r\n"
+			<< "Transfer-Encoding: chunked\r\n"
+			<< "Content-Type: " << contentType << "\r\n";
+		emit(this, RawPacket(ost.str().data(), ost.str().length()));
+		*/
+	}
+	
+	virtual void process(IPacket& packet)
+	{
+		traceL("ChunkedAdapter", this) << "Processing: " << packet.className() << std::endl;
+		try {
+			RawPacket& raw = dynamic_cast<RawPacket&>(packet);
+
+			std::ostringstream ss;
+			ss << std::hex << raw.size();
+			emit(ss.str() + "\r\n");
+			emit(raw);
+			emit("\r\n", 2);
+		}
+		catch(const std::bad_cast&) {
+			throw Exception("Incompatible packet type");
+			// Cast failed
+		}
+		//RawPacket* raw = dynamic_cast<RawPacket*>(&packet);
+		//if (raw)
+		//	throw Exception("Incompatible packet type");
+		
+		// TODO: Better send API
+
+		/*
+		emit(this, RawPacket(ss.str().data(), ss.str().length()));
+		emit(this, RawPacket("\r\n", 2));
+		emit(this, RawPacket(raw->data(), raw->size()));
+		emit(this, RawPacket("\r\n", 2)); // straight to Socket::send
+		*/
+	}
+};
+
+
+	/*
+	ChunkedAdapter(const std::string& contentType) : 
+		contentType(contentType)
+	{
+		traceL("ChunkedAdapter", this) << "Creating" << std::endl;
+	}
+	*/
+
+	/*
+	virtual void onSocketRecv(Buffer& buf, const net::Address& peerAddr)
+	{
+		assert(0 && "not implemented");
+	}
+	
+	virtual bool accepts(RawPacket& packet) 
+	{ 
+	}
+	*/
+	
+	/*
+
+	virtual int send(char* data, int len) //const char* data, int len, int flags = 0
+	{			
+		traceL("ChunkedAdapter", this) << "Processing: " << len << std::endl;
+		return len;
+	}
+
+	virtual void sendHeader(std::ostringstream& ost)
 		// Sets HTTP headers for the initial response.
 		// This method must not include the final carriage return. 
 	{	
@@ -64,67 +159,162 @@ public:
 			<< "Expires: 0\r\n"
 			<< "Access-Control-Allow-Origin: *\r\n"
 			<< "Transfer-Encoding: chunked\r\n"
-			<< "Content-Type: " << _contentType << "\r\n";
+			<< "Content-Type: " << _connection << "\r\n";
 	}
+	*/
 
-	virtual void process(IPacket& packet)
-	{			
+		
+		/*		
+	//virtual void process(IPacket& packet)
+
+		// Encode and emit chunked data
+		//int length = packet.size();
+		//Buffer ibuf(len > 0 ? len : 1500);
+		//packet.write(ibuf);
+		//length = ibuf.available();
+
+		obuf.put(ss.str());
+		obuf.put("\r\n");
+		obuf.put(data, len);
+		obuf.put("\r\n");
+
+		Buffer obuf;
+		RawPacket opacket;
+		opacket.read(obuf);
+		socket->send(this, opacket);
 		// Write the initial HTTP response header		
 		if (_initial) {
 			_initial = false;
 			std::ostringstream header;
-			writeInitialHTTPHeaders(header);
+			sendHeader(header);
 			header << "\r\n";
 			std::string httpData(header.str());
 			RawPacket httpHeader(httpData.data(), httpData.size());
-			emit(this, httpHeader);
+			socket->send(this, httpHeader);
 		}
+		// TODO: optimize .. send packet parts as separate packets
 
 		// Encode and emit chunked data
-		int contentLength = packet.size();
-		Buffer ibuf(contentLength > 0 ? contentLength : 1500);
+		int length = packet.size();
+		Buffer ibuf(length > 0 ? length : 1500);
 		packet.write(ibuf);
-		contentLength = ibuf.size();
+		length = ibuf.available();
 		
 		Buffer obuf;
 		std::ostringstream ss;
-		ss << std::hex << contentLength;
-		obuf.write(ss.str()); // content length in hexidecimal
-		obuf.write("\r\n");
-		obuf.write(ibuf.data(), ibuf.size());
-		obuf.write("\r\n");
+		ss << std::hex << length;
+		obuf.put(ss.str());
+		obuf.put("\r\n");
+		obuf.put(ibuf.data(), ibuf.available());
+		obuf.put("\r\n");
 
 		RawPacket opacket;
 		opacket.read(obuf);
-		emit(this, opacket);
-	}
-
-protected:
-	std::string _contentType;
-	bool _initial;
-};
+		socket->send(this, opacket);
+		*/
 
 
 // ---------------------------------------------------------------------
 //
-class MultipartPacketizer: public IPacketizer
+class MultipartAdapter: public IPacketizer
 {
 public:
-	MultipartPacketizer(const std::string& contentType, bool dontFragment = true, bool base64 = false) :
-		_contentType(contentType),
-		_dontFragment(dontFragment),
-		_base64(base64),
-		_initial(true)
+	Connection& connection;
+	std::string contentType;
+
+	MultipartAdapter(Connection& connection, bool base64 = false) :		//const std::string& contentType, http_parser_type type, , bool dontFragment = true
+		connection(connection),
+		contentType(connection.outgoingHeaders()->getContentType()),
+		//contentType(contentType),
+		dontFragment(dontFragment),
+		isBase64(base64)
 	{
-		traceL("MultipartPacketizer", this) << "Creating" << std::endl;
+		traceL("MultipartAdapter", this) << "Creating" << std::endl;
 	}
 	
-	virtual ~MultipartPacketizer() 
+	virtual ~MultipartAdapter() 
 	{
-		traceL("MultipartPacketizer", this) << "Destroying" << std::endl;
+		traceL("MultipartAdapter", this) << "Destroying" << std::endl;
+	}
+		
+	virtual void sendHeader()
+	{	
+		connection.shouldSendHeaders(true);
+				
+		connection.response().set("Content-Type", "text/html");
+		connection.response().set("Transfer-Encoding", "chunked");
+		connection.response().set("Access-Control-Allow-Origin", "*");
+
+		// Flushed on initial send ...
+
+		/*
+		std::ostringstream ost;
+		ost << "HTTP/1.1 200 OK\r\n"
+			<< "Content-Type: multipart/x-mixed-replace; boundary=end\r\n"
+			<< "Cache-Control: no-store, no-cache, max-age=0, must-revalidate\r\n"
+			<< "Cache-Control: post-check=0, pre-check=0, FALSE\r\n"
+			<< "Access-Control-Allow-Origin: *\r\n"
+			<< "Pragma: no-cache\r\n"
+			<< "Expires: 0\r\n";
+		emit(this, RawPacket(ost.str().data(), ost.str().length()));
+		*/
 	}
 	
-	virtual void writeInitialHTTPHeaders(std::ostringstream& ost)
+	virtual void sendChunkHeaders(std::ostringstream& ost)
+		// Sets HTTP headers for the current chunk.
+		// This method must not include the final carriage return. 
+	{	
+		ost << "--end\r\n"
+			<< "Content-Type: " << contentType << "\r\n";
+		if (isBase64)
+			ost << "Content-Transfer-Encoding: base64\r\n";			
+	}
+
+	virtual void process(IPacket& packet)
+	{		
+		/*
+		std::ostringstream headers;
+
+		// Write the chunk header
+		sendChunkHeaders(headers);
+		headers << "\r\n";
+		
+		if (!dontFragment) {
+
+			// Broadcast the HTTP header separately 
+			// so we don't need to copy any data.
+			std::string httpData(headers.str());
+			emit(this, RawPacket(httpData.data(), httpData.size()));
+
+			// Proxy the input packet.
+			emit(this, packet);
+		}
+		else {
+			
+			// Otherwise merge the headers and data packet.
+			int contentLength = packet.size();
+			Buffer ibuf(contentLength > 0 ? contentLength : 1500);
+			packet.write(ibuf);
+			
+			Buffer obuf;
+			obuf.put(headers.str());
+			obuf.put(ibuf.data(), ibuf.available());
+
+			RawPacket opacket;
+			opacket.read(obuf);
+			emit(this, opacket);
+		}
+		*/
+	}
+
+protected:
+	bool dontFragment;
+	bool isBase64;
+};
+		
+	
+	/*
+	virtual void sendHeader(std::ostringstream& ost)
 		// Sets HTTP headers for the initial response.
 		// This method must not include the final carriage return. 
 	{	
@@ -138,99 +328,50 @@ public:
 			<< "Expires: 0\r\n"
 			;
 	}
-	
-	virtual void writeChunkHTTPHeaders(std::ostringstream& ost)
-		// Sets HTTP headers for the current chunk.
-		// This method must not include the final carriage return. 
-	{	
-		ost << "--end\r\n"
-			<< "Content-Type: " << _contentType << "\r\n";
-		if (_base64)
-			ost << "Content-Transfer-Encoding: base64\r\n";			
-	}
+	*/
+/*
+// Write the initial HTTP response header		
+if (_initial) {			
+	_initial = false;	
+	sendHeader(headers);
+	headers << "\r\n";
 
-	virtual void process(IPacket& packet)
-	{		
-		std::ostringstream headers;
-		
-		// Write the initial HTTP response header		
-		if (_initial) {			
-			_initial = false;	
-			writeInitialHTTPHeaders(headers);
-			headers << "\r\n";
-
-			// Send the initial HTTP header.
-			std::string httpData(headers.str());
-			RawPacket httpHeader(httpData.data(), httpData.size());
-			emit(this, httpHeader);
-			headers.str("");
-		}
-
-		// Write the chunk header
-		writeChunkHTTPHeaders(headers);
-		headers << "\r\n";
-		
-		if (!_dontFragment) {
-
-			// Broadcast the HTTP header separately 
-			// so we don't need to copy any data.
-			std::string httpData(headers.str());
-			RawPacket httpHeader(httpData.data(), httpData.size());
-			emit(this, httpHeader);
-
-			// Proxy the input packet.
-			emit(this, packet);
-		}
-		else {
-			
-			// Otherwise merge the headers and data packet.
-			int contentLength = packet.size();
-			Buffer ibuf(contentLength > 0 ? contentLength : 1500);
-			packet.write(ibuf);
-			
-			Buffer obuf;
-			obuf.write(headers.str());
-			obuf.write(ibuf.data(), ibuf.size());
-
-			RawPacket opacket;
-			opacket.read(obuf);
-			emit(this, opacket);
-		}
-	}
-
-protected:
-	std::string _contentType;
-	bool _dontFragment;
-	bool _base64;
-	bool _initial;
-};
+	// Send the initial HTTP header.
+	std::string httpData(headers.str());
+	RawPacket httpHeader(httpData.data(), httpData.size());
+	socket->send(this, httpHeader);
+	headers.str("");
+}
+*/
 
 
+/*
+//bool _initial;
 // ---------------------------------------------------------------------
 //
-class StreamingPacketizer: public IPacketizer
+class StreamingConnectionAdapter: public IPacketizer
 	/// Implements HTTP Streaming for modern web browser clients 
 	/// such as WebKit and Firefox (tested on 15.0.1).
 {
 public:
-	StreamingPacketizer(const std::string& contentType) :
-		_contentType(contentType),
-		_initial(true)
+	StreamingConnectionAdapter(Connection& connection) :
+		_connection(connection)//,
+		//_initial(true)
 	{
-		traceL("StreamingPacketizer", this) << "Creating" << std::endl;
+		traceL("StreamingConnectionAdapter", this) << "Creating" << std::endl;
 	}
 	
-	virtual ~StreamingPacketizer() 
+	virtual ~StreamingConnectionAdapter() 
 	{
-		traceL("StreamingPacketizer", this) << "Destroying" << std::endl;
+		traceL("StreamingConnectionAdapter", this) << "Destroying" << std::endl;
 	}
 	
-	virtual void writeInitialHTTPHeaders(std::ostringstream& ost)
+	virtual void sendHeader(std::ostringstream& ost)
 		// Sets HTTP headers for the initial response.
 		// This method must not include the final carriage return. 
 	{	
 		ost << "HTTP/1.1 200 OK\r\n"
-			<< "Content-Type: " << _contentType << "\r\n"
+			<< "Content-Type: " << _connection << "\r\n"
 			<< "Cache-Control: no-store, no-cache, max-age=0, must-revalidate\r\n"
 			<< "Cache-Control: post-check=0, pre-check=0, FALSE\r\n"
 			<< "Access-Control-Allow-Origin: *\r\n"
@@ -241,26 +382,27 @@ public:
 
 	virtual void process(IPacket& packet)
 	{		
-		//traceL("StreamingPacketizer", this) << "Processing" << std::endl;
+		//traceL("StreamingConnectionAdapter", this) << "Processing" << std::endl;
 		
 		// Write the initial HTTP response header		
 		if (_initial) {
 			_initial = false;
 			std::ostringstream header;
-			writeInitialHTTPHeaders(header);
+			sendHeader(header);
 			header << "\r\n";
 			std::string httpData(header.str());
 			RawPacket httpHeader(httpData.data(), httpData.size());
-			emit(this, httpHeader);
+			socket->send(this, httpHeader);
 		}
 
-		emit(this, packet);
+		socket->send(this, packet);
 	}
 
 protected:
-	std::string _contentType;
-	bool _initial;
+	Connection& _connection;
+	//bool _initial;
 };
+*/
 
 
 } } // namespace scy::http

@@ -27,7 +27,7 @@
 #include "Sourcey/Media/VideoContext.h"
 #include "Sourcey/Media/AudioContext.h"
 
-#include "Poco/Mutex.h"
+#include "Sourcey/Mutex.h"
 #include <fstream>
 
 extern "C" {
@@ -73,7 +73,7 @@ protected:
 	virtual void onStreamStateChange(const PacketStreamState& state);
 	
 protected:
-	static Poco::FastMutex _mutex; // Protects avcodec_open/close()
+	static Mutex _mutex; // Protects avcodec_open/close()
 
 	RecordingOptions	_options;
 	AVFormatContext* _formatCtx;

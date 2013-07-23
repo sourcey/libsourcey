@@ -28,11 +28,11 @@
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 
 
 namespace scy { 
-namespace pcman {
+namespace pman {
 
 
 // ---------------------------------------------------------------------
@@ -43,8 +43,8 @@ Package::Package()
 }
 
 
-Package::Package(const JSON::Value& src) :
-	JSON::Value(src)
+Package::Package(const json::Value& src) :
+	json::Value(src)
 {
 }
 
@@ -94,7 +94,7 @@ string Package::description() const
 
 void Package::print(ostream& ost) const
 {
-	JSON::StyledWriter writer;
+	json::StyledWriter writer;
 	ost << writer.write(*this);
 }
 
@@ -102,7 +102,7 @@ void Package::print(ostream& ost) const
 // ---------------------------------------------------------------------
 // Package Asset
 //	
-Package::Asset::Asset(JSON::Value& src) :
+Package::Asset::Asset(json::Value& src) :
 	root(src)
 {
 }
@@ -153,7 +153,7 @@ bool Package::Asset::valid() const
 
 void Package::Asset::print(ostream& ost) const
 {
-	JSON::StyledWriter writer;
+	json::StyledWriter writer;
 	ost << writer.write(root);
 }
 
@@ -179,7 +179,7 @@ RemotePackage::RemotePackage()
 }
 
 
-RemotePackage::RemotePackage(const JSON::Value& src) :
+RemotePackage::RemotePackage(const json::Value& src) :
 	Package(src)
 {
 }
@@ -190,7 +190,7 @@ RemotePackage::~RemotePackage()
 }
 
 
-JSON::Value& RemotePackage::assets()
+json::Value& RemotePackage::assets()
 {
 	return (*this)["assets"];
 }
@@ -198,7 +198,7 @@ JSON::Value& RemotePackage::assets()
 
 Package::Asset RemotePackage::latestAsset()
 {
-	JSON::Value& assets = this->assets();
+	json::Value& assets = this->assets();
 	if (assets.empty())
 		throw Exception("Package has no assets");
 
@@ -219,7 +219,7 @@ Package::Asset RemotePackage::latestAsset()
 
 Package::Asset RemotePackage::assetVersion(const string& version)
 {
-	JSON::Value& assets = this->assets();
+	json::Value& assets = this->assets();
 	if (assets.empty())
 		throw Exception("Package has no assets");
 
@@ -240,7 +240,7 @@ Package::Asset RemotePackage::assetVersion(const string& version)
 
 Package::Asset RemotePackage::latestSDKAsset(const string& version)
 {
-	JSON::Value& assets = this->assets();
+	json::Value& assets = this->assets();
 	if (assets.empty())
 		throw Exception("Package has no assets");
 	
@@ -268,7 +268,7 @@ LocalPackage::LocalPackage()
 }
 
 
-LocalPackage::LocalPackage(const JSON::Value& src) :
+LocalPackage::LocalPackage(const json::Value& src) :
 	Package(src)
 {
 }
@@ -365,7 +365,7 @@ string LocalPackage::getInstalledFilePath(const string& fileName, bool whiny)
 	string dir = installDir();
 	if (whiny && dir.empty())
 		throw Exception("Package install directory is not set.");
-	Path path(dir);
+	Poco::Path path(dir);
 	path.makeDirectory();
 	path.setFileName(fileName);
 	return path.toString();
@@ -415,11 +415,11 @@ bool LocalPackage::verifyInstallManifest()
 
 	// Check file system for each manifest file
 	LocalPackage::Manifest manifest = this->manifest();
-	for (JSON::ValueIterator it = manifest.root.begin(); it != manifest.root.end(); it++) {		
+	for (json::ValueIterator it = manifest.root.begin(); it != manifest.root.end(); it++) {		
 		string path = this->getInstalledFilePath((*it).asString(), false);
 		debugL("LocalPackage", this) << name() 
 			<< ": Checking: " << path << endl;
-		File file(path);
+		Poco::File file(path);
 		if (!file.exists()) {
 			errorL("PackageManager", this) << name() 
 				<< ": Missing package file: " << path << endl;
@@ -456,7 +456,7 @@ bool LocalPackage::isUpToDate(RemotePackage& remote)
 		return versionLock() == version();
 	}
 	
-	JSON::Value tmp;
+	json::Value tmp;
 	Package::Asset bestAsset(tmp);
 
 	// Get the best asset from the locked SDK version, if any
@@ -515,7 +515,7 @@ void LocalPackage::setInstallDir(const string& dir)
 }
 
 
-JSON::Value& LocalPackage::errors()
+json::Value& LocalPackage::errors()
 {	
 	return (*this)["errors"];
 }
@@ -548,7 +548,7 @@ bool LocalPackage::valid() const
 // ---------------------------------------------------------------------
 // Local Package Manifest
 //	
-LocalPackage::Manifest::Manifest(JSON::Value& src) :
+LocalPackage::Manifest::Manifest(json::Value& src) :
 	root(src)
 {
 }
@@ -565,7 +565,7 @@ void LocalPackage::Manifest::addFile(const string& path)
 	//if (!find_child_by_(*this)["file", "path", path.data()).empty())
 	//	return;
 
-	//JSON::Value node(path);
+	//json::Value node(path);
 	root.append(path);
 }
 	
@@ -619,13 +619,13 @@ bool PackagePair::valid() const
 }
 
 
-} } // namespace scy::Pacman
+} } // namespace scy::pman
 
 
 
 
 
-	//JSON::Value node = append_child();
+	//json::Value node = append_child();
 	//node.set_name("file");
 	//node.append_(*this)["path").set_value(path.data());
 
@@ -646,11 +646,11 @@ void LocalPackage::Manifest::addDir(const string& path)
 	//if (!find_child_by_(*this)["dir", "path", path.data()).empty())
 	//	return;
 
-	//JSON::Value node = append_child();
+	//json::Value node = append_child();
 	//node.set_name("dir");
 	//node.append_(*this)["path").set_value(path.data());
 	
-	JSON::Value node(path);
+	json::Value node(path);
 	root.append(node);
 }
 */

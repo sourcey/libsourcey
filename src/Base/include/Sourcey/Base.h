@@ -64,4 +64,13 @@
 #endif
 
 
+//
+/// Cross platform normalization
+//
+#ifdef WIN32
+#define strncasecmp strnicmp
+#define strcasecmp stricmp
+#endif 
+
+
 #endif // SOURCEY_H

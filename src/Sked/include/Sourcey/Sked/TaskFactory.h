@@ -27,7 +27,7 @@
 
 #include "Poco/Thread.h"
 #include "Poco/Event.h"
-#include "Poco/SingletonHolder.h"
+#include "Sourcey/Singleton.h"
 
 #include <vector>
 
@@ -39,8 +39,8 @@ namespace sked {
 class Scheduler;
 
 
-template<typename T> sked::Task* instantiateTask() //Scheduler& scheduler
-	{ return new T; } //(scheduler)
+template<typename T> sked::Task* instantiateTask()
+	{ return new T; }
 template<typename T> sked::Trigger* instantiateTrigger()
 	{ return new T; }
 
@@ -54,7 +54,7 @@ public:
 	static TaskFactory& getDefault()
 		/// Returns the default TaskFactory singleton.
 	{
-		static Poco::SingletonHolder<TaskFactory> sh;
+		static Singleton<TaskFactory> sh;
 		return *sh.get();
 	}
 
@@ -66,7 +66,7 @@ public:
 
     sked::Task* createTask(const std::string& type/*, Scheduler& scheduler*/) 
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         TaskMap::iterator it = _tasks.find(type);
         if (it == _tasks.end())
 			throw Exception("Failed to create scheduled task: " + type);
@@ -76,13 +76,13 @@ public:
 	template<typename T>
     void registerTask(const std::string& type)	
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         _tasks[type] = &instantiateTask<T>;
     }
 	
     void unregisterTask(const std::string& type)	
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         TaskMap::iterator it = _tasks.find(type);
         if (it == _tasks.end())
             return;
@@ -91,7 +91,7 @@ public:
 	
     TaskMap tasks() const
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return _tasks;
     }
 	
@@ -103,7 +103,7 @@ public:
 
     sked::Trigger* createTrigger(const std::string& type)
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         TriggerMap::iterator it = _triggers.find(type);
         if (it == _triggers.end())
 			throw Exception("Failed to create scheduled trigger: " + type);
@@ -113,13 +113,13 @@ public:
 	template<typename T>
     void registerTrigger(const std::string& type)	
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         _triggers[type] = &instantiateTrigger<T>;
     }
 	
     void unregisterTrigger(const std::string& type)	
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         TriggerMap::iterator it = _triggers.find(type);
         if (it == _triggers.end())
             return;
@@ -128,19 +128,19 @@ public:
 	
     TriggerMap triggers() const
 	{ 
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return _triggers;
     }
 	
 protected:
-	mutable Poco::FastMutex	_mutex;
+	mutable Mutex	_mutex;
 
     TaskMap    _tasks;
     TriggerMap _triggers;
 };
 
 
-} } // namespace scy::Sked
+} } // namespace scy::sked
 
 
 #endif // SOURCEY_Sked_TaskFactory_H

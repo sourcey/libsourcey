@@ -23,73 +23,118 @@
 
 #include "Sourcey/Net/Socket.h"
 #include "Sourcey/Net/SSLSocket.h"
+#include "Sourcey/Net/Network.h"
 #include "Sourcey/HTTP/Connection.h"
 #include "Sourcey/HTTP/WebSocket.h"
 #include "Sourcey/Timer.h"
-/*
-#include "Poco/Net/HTTPResponse.h"
-#include "Poco/Base64Encoder.h"
-#include "Poco/Format.h"
-#include <sstream>
-*/
 
 
 namespace scy { 
 namespace http {
+
 	
+struct TransferProgress 
+{
+	enum Type
+	{
+		None,
+		Running,
+		Complete,
+		Cancelled,	/// cancelled as result of user intervention
+		Failed,
+	};
+	
+	Type state;
+	std::streamsize current;
+	std::streamsize total;
+
+	TransferProgress() :	
+		current(0), total(0), state(None) {}
+
+	double progress() const {
+		return (current / (total * 1.0)) * 100;
+	}
+};
+
 
 class Client;
 class ClientConnection: public Connection
 {
 public:
-    ClientConnection(Client& client, const net::Address& address, 
+    ClientConnection(const URL& url,
 		const net::Socket& socket = net::TCPSocket());
+		/// Create a standalone connection with the given host.
+	
+    ClientConnection(Client* client, const URL& url, 
+		const net::Socket& socket = net::TCPSocket());
+		/// Create a managed connection with the given host.
 
 	virtual void send();
-		/// Sends the HTTP request.
+		/// Sends the internal HTTP request.
 		///
-		/// Calls connect() internally if the socket
-		/// is not already connecting or connected.
-	
-	virtual bool flush();
-		/// Flushes the HTTP request output stream.
+		/// Calls connect() internally if the socket is not
+		/// already connecting or connected. The actual request 
+		/// will be sent when the socket is connected.
+				
+	virtual void send(http::Request& req);
+		/// Sends the given HTTP request.
+		/// The given request will overwrite the internal HTTP
+		/// request object.
+		///
+		/// Calls connect() internally if the socket is not
+		/// already connecting or connected. The actual request 
+		/// will be sent when the socket is connected.
 	
 	virtual void close();
 		/// Forcefully closes the HTTP connection.
+		
+	virtual void setRecvStream(std::ostream* os);
+		/// Sets the receiver stream for writing server response data.
+		///
+		/// This given stream pointer may be a ofstream instance for 
+		/// writing to a file. The pointer is managed internally,
+		/// and will be deleted when the connection is closed.		
 	
 	//
 	/// Internal callbacks
 	virtual void onHeaders();
 	virtual void onPayload(Buffer& buffer);
-	virtual void onComplete();
+	virtual void onMessage();
 	virtual void onClose();
-		
+
 	//
 	/// Status signals
+	NullSignal Connect;
 	Signal<Response&> Headers;
-	Signal<Buffer&> Payload;	
 	Signal<const Response&> Complete;
-		/// May be success or error response		
-	
+		/// May be success or error response
+
+	Signal<const TransferProgress&> OutgoingProgress;
+	Signal<const TransferProgress&> IncomingProgress;
+
 protected:
     virtual ~ClientConnection();
+					
+	http::Client* client();
 
-	Poco::Net::HTTPMessage* incomingHeaders();
-	Poco::Net::HTTPMessage* outgoingHeaders();
-				
-	Client& client();
+	http::Message* incomingHeaders();	
+	http::Message* outgoingHeaders();
 	
+	void onHostResolved(void*, const net::DNSResult& result);
 	void onSocketConnect(void*);
 	void onClientShutdown(void*);
 	
 protected:	
-	Client& _client;
-	net::Address _address;
+	http::Client* _client;
+	URL _url;
+	std::ostream* _recvStream;
+	TransferProgress _incomingProgress;
+	TransferProgress _outgoingProgress;
 };
 
 
 typedef std::vector<ClientConnection*> ClientConnectionList;
-	
+
 
 // -------------------------------------------------------------------
 //
@@ -103,13 +148,14 @@ public:
 };
 	
 
+/*
 // -------------------------------------------------------------------
 //
 class SecureClientConnection: public ClientConnection
 {
 public:
-    SecureClientConnection(Client& client, const net::Address& address)
-		: ClientConnection(client, address, net::SSLSocket())
+    SecureClientConnection(Client* client, const URL& url) : //, const net::Address& address
+		ClientConnection(client, url, net::SSLSocket()) //, address
 	{
 	}
 
@@ -121,16 +167,16 @@ public:
 
 // -------------------------------------------------------------------
 //
-class WSClientConnection: public ClientConnection
+class WebSocketClientConnection: public ClientConnection
 {
 public:
-    WSClientConnection(Client& client, const net::Address& address) : 
-		ClientConnection(client, address)
+    WebSocketClientConnection(Client* client, const URL& url) : //, const net::Address& address
+		ClientConnection(client, url) //, address
 	{
-		replaceAdapter(new WebSocketClientAdapter(&socket(), &request()));	
+		socket().replaceAdapter(new WebSocketConnectionAdapter(*this, WebSocket::WS_CLIENT));	//&socket(), &request(), request(), request()
 	}
 
-	virtual ~WSClientConnection() 
+	virtual ~WebSocketClientConnection() 
 	{
 	}
 };
@@ -138,25 +184,51 @@ public:
 
 // -------------------------------------------------------------------
 //
-class WSSClientConnection: public ClientConnection
+class WebSocketSecureClientConnection: public ClientConnection
 {
 public:
-    WSSClientConnection(Client& client, const net::Address& address) : 
-		ClientConnection(client, address, net::SSLSocket())
+    WebSocketSecureClientConnection(Client* client, const URL& url) : //, const net::Address& address
+		ClientConnection(client, url, net::SSLSocket()) //, address
 	{
-		replaceAdapter(new WebSocketClientAdapter(&socket(), &request()));
+		socket().replaceAdapter(new WebSocketConnectionAdapter(*this, WebSocket::WS_CLIENT)); //(&socket(), &request()
 	}
 
-	virtual ~WSSClientConnection() 
+	virtual ~WebSocketSecureClientConnection() 
 	{
 	}
 };
+*/
+
+	
+inline ClientConnection* createConnection(const URL& url)
+	/// Creates different connection types based on the URL scheme.
+{
+	ClientConnection* conn = 0;
+
+	if (url.scheme() == "http") {
+		conn = new ClientConnection(url);
+	}
+	else if (url.scheme() == "https") {
+		conn = new ClientConnection(url, net::SSLSocket());
+	}
+	else if (url.scheme() == "ws") {
+		conn = new ClientConnection(url);
+		conn->socket().replaceAdapter(new WebSocketConnectionAdapter(*conn, WebSocket::WS_CLIENT));
+	}
+	else if (url.scheme() == "wss") {
+		conn = new ClientConnection(url, net::SSLSocket());
+		conn->socket().replaceAdapter(new WebSocketConnectionAdapter(*conn, WebSocket::WS_CLIENT));
+	}
+	else
+		throw Exception("Unknown connection type for URL: " + url.str());
+
+	return conn;
+}
 
 
 // -------------------------------------------------------------------
 //
-class Client
-	/// TODO: SSL: makeSSL via TCPSocket
+class Client: public Module
 {
 public:
 	Client();
@@ -164,23 +236,25 @@ public:
 
 	void shutdown();
 	
-	ClientConnection* createConnection(const net::Address& address)
+	ClientConnection* createConnection(const URL& url)
 	{
-		return createConnectionT<ClientConnection>(address);
+		return createConnectionT<ClientConnection>(url);
 	}
 	
 	template<class ConnectionT>
-	ConnectionT* createConnectionT(const net::Address& address)
+	ConnectionT* createConnectionT(const URL& url)
 	{
-		return new ConnectionT(*this, address);
+		return new ConnectionT(this, url);
 	}
-	
-	void onTimer(void*);
 
 	virtual void addConnection(ClientConnection* conn);
 	virtual void removeConnection(ClientConnection* conn);
+	
+	void onTimer(void*);
 
 	NullSignal Shutdown;
+	
+	virtual const char* className() const { return "HTTPClient"; }
 
 protected:	
 	friend class ClientConnection;
@@ -195,8 +269,8 @@ protected:
 
 #endif
 
-		//conn->Complete += delegate(this, &Client::onConnectionComplete);	
-	//void onConnectionComplete(void* sender, const Response& response);
+		//conn->Complete += delegate(this, &Client::onConnectionMessage);	
+	//void onConnectionMessage(void* sender, const Response& response);
 		//addConnection(conn);
 
 
@@ -217,13 +291,13 @@ struct OutputStream//: public std::ostream
 	
 	OutputStream& operator << (const string& data)
 	{
-		sendBuffer.write(data);
+		sendBuffer.put(data);
 		return *this;
 	}
 	
 	OutputStream& operator << (const char* data)
 	{
-		sendBuffer.write(data);
+		sendBuffer.put(data);
 		return *this;
 	}
 
@@ -235,7 +309,7 @@ struct OutputStream//: public std::ostream
 
 	OutputStream& operator << (std::ostream&(*f)(std::ostream&)) 
 	{
-		connection.sendRaw(sendBuffer.data(), sendBuffer.size());
+		connection.write(sendBuffer.data(), sendBuffer.available());
 		return *this;
 	}
 };

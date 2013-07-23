@@ -21,7 +21,7 @@
 #define SOURCEY_StreamManager_H
 
 
-#include "Sourcey/Manager.h"
+#include "Sourcey/Containers.h"
 #include "Sourcey/PacketStream.h"
 
 
@@ -29,11 +29,14 @@ namespace scy {
 	
 
 typedef EventedManager<
-	std::string, PacketStream, DestroyMethodDeleter<PacketStream>
+	std::string, PacketStream, 
+		DefaultDeleter<PacketStream>
+		//DeferredDeleter<PacketStream>
+		//DestroyMethodDeleter<PacketStream>
 > StreamManagerBase;
 
 
-class StreamManager: public StreamManagerBase, public IPolymorphic
+class StreamManager: public StreamManagerBase, public Polymorphic
 {
 public:
 	typedef StreamManagerBase Manager;

@@ -30,8 +30,8 @@ namespace scy {
 
 template <class C>
 class Handle	
-	/// Handle manages a reference counted pointer similar 
-	/// to std::shared_ptr, but without all the bloat.
+	/// Handle manages a reference counted smart pointer similar 
+	/// to std::shared_ptr but without the bloat.
 	///
 	/// The template argument must implement duplicate() and
 	/// release() methods. See CountedObject and friends.

@@ -68,7 +68,7 @@ void Device::print(ostream& os)
 // ----------------------------------------------------------------------------
 //
 DeviceManager::DeviceManager() : 
-	_watcher(NULL), 
+	_watcher(nullptr), 
 	_initialized(false) 
 {
 }

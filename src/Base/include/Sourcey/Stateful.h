@@ -103,7 +103,7 @@ public:
 
 	virtual bool stateBetween(unsigned int lid, unsigned int rid) const
 	{ 	
-		int id = state().id();
+		State::ID id = state().id();
 		return id >= lid 
 			&& id <= rid;
 	}

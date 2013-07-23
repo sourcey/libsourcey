@@ -162,16 +162,29 @@ bool UDPBase::recvStop()
 
 void UDPBase::onRecv(Buffer& buf, const net::Address& address)
 {
-	traceL("UDPBase", this) << "On recv: " << buf.size() << endl;	
+	traceL("UDPBase", this) << "On recv: " << buf.available() << endl;	
 
 	emitRecv(buf, address);
+}
+
+
+void UDPBase::setError(const Error& err)
+{
+	uv::Base::setError(err);
+}
+
+		
+const Error& UDPBase::error() const
+{
+	return uv::Base::error();
 }
 
 
 net::Address UDPBase::address() const
 {	
 	if (closed())
-		throw Exception("Invalid UDP socket: No address");
+		return net::Address();
+		//throw Exception("Invalid UDP socket: No address");
 
 	if (_peer.valid())
 		return _peer;
@@ -180,7 +193,8 @@ net::Address UDPBase::address() const
 	int addrlen = sizeof(address);
 	int r = uv_udp_getsockname(handle<uv_udp_t>(), &address, &addrlen);
 	if (r)
-		throwLastError("Invalid UDP socket: No address");
+		return net::Address();
+		//throwLastError("Invalid UDP socket: No address");
 
 	return Address(&address, addrlen);
 }
@@ -189,7 +203,8 @@ net::Address UDPBase::address() const
 net::Address UDPBase::peerAddress() const
 {
 	if (!_peer.valid())
-		throw Exception("Invalid UDP socket: No peer address");
+		return net::Address();
+		//throw Exception("Invalid UDP socket: No peer address");
 	return _peer;
 }
 
@@ -197,6 +212,12 @@ net::Address UDPBase::peerAddress() const
 net::TransportType UDPBase::transport() const 
 { 
 	return net::UDP; 
+}
+	
+
+bool UDPBase::closed() const
+{
+	return uv::Base::closed();
 }
 
 
@@ -213,7 +234,7 @@ void UDPBase::onRecv(uv_udp_t* handle, ssize_t nread, uv_buf_t buf, struct socka
 	if (nread == -1)
 		socket->setLastError();
 	
-	socket->_buffer.size(nread);
+	socket->_buffer.limit(nread);
 	socket->onRecv(socket->_buffer, net::Address(addr, sizeof *addr));
 }
 
@@ -235,7 +256,7 @@ uv_buf_t UDPBase::allocRecvBuffer(uv_handle_t *handle, size_t suggested_size)
 	
 	// Reserve the recommended buffer size
 	// XXX: libuv wants us to allocate 65536 bytes for UDP .. hmmm
-	if (suggested_size > self->_buffer.size())
+	if (suggested_size > self->_buffer.available())
 		self->_buffer.reserve(suggested_size); 
 	assert(self->_buffer.capacity() == suggested_size);
 

@@ -22,7 +22,7 @@
 
 
 namespace scy { 
-namespace pcman {
+namespace pman {
 
 	
 #define DEFAULT_API_ENDPOINT "http://localhost:3000"
@@ -33,7 +33,7 @@ namespace pcman {
 #define DEFAULT_PLATFORM "win32"
 
 
-} } // namespace scy::Pacman
+} } // namespace scy::pman
 
 
 #endif // SOURCEY_Pacman_Config_H

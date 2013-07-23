@@ -52,6 +52,13 @@ public:
 
 	net::TransportType transport() const;
 		/// Returns the UDP transport protocol.
+			
+	virtual void setError(const Error& err);		
+	const Error& error() const;
+
+	virtual bool closed() const;
+		/// Returns true if the native socket 
+		/// handle is closed.
 	
 	virtual void onRecv(Buffer& buf, const net::Address& address);
 

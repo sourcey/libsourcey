@@ -1,15 +1,18 @@
 #include "Sourcey/Base.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Runner.h"
+#include "Sourcey/Application.h"
+#include "Sourcey/DateTime.h"
+#include "Sourcey/Platform.h"
 #include "Sourcey/Sked/Scheduler.h"
 
-#include "Poco/NamedEvent.h"
+//#include "Poco/NamedEvent.h"
 
 #include <assert.h>
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 using namespace scy;
 
 
@@ -26,12 +29,12 @@ namespace scy {
 namespace sked {
 	
 
-static NamedEvent ready("TestEvent");
+//static NamedEvent ready("TestEvent");
+Application app;
 	
 
 class Tests
 {
-	//Runner runner;
 	Scheduler scheduler;
 
 public:
@@ -43,10 +46,12 @@ public:
 		scheduler.factory().registerTrigger<DailyTrigger>("DailyTrigger");
 		scheduler.factory().registerTrigger<IntervalTrigger>("IntervalTrigger");
 
-		runSkedTaskTest();
+		runOnceOnlyTest();
+		//runSkedTaskIntervalTest();
+		//runSkedTaskTest();
 		//runTimerTest();
-		
-		util::pause();
+				
+		app.cleanup();
 	}
 	
 
@@ -57,70 +62,71 @@ public:
 	// ---------------------------------------------------------------------	
 	struct ScheduledTask: public sked::Task
 	{
-		ScheduledTask() : //Scheduler& scheduler
-			sked::Task("ScheduledTask") //scheduler, 
+		ScheduledTask() : 
+			sked::Task("ScheduledTask")
 		{
-			Log("debug") << "[ScheduledTask] Creating ################################" << endl;				
+			debugL("ScheduledTask") << "Creating ################################" << endl;				
 		}
 
 		virtual ~ScheduledTask()
 		{
-			Log("debug") << "[ScheduledTask] Destroying ################################" << endl;			
+			debugL("ScheduledTask") << "Destroying ################################" << endl;	
+
+			// Dereference the main application 
+			// loop to move on to the next test.
+			app.stop();		
 		}
 
 		void run() 
 		{
-			Log("debug") << "[ScheduledTask] Running ################################" << endl;
-			ready.set();	
+			debugL("ScheduledTask") << "Running ################################" << endl;
 		}
 		
-		void serialize(JSON::Value& root)
+		void serialize(json::Value& root)
 		{
 			sked::Task::serialize(root);
 
 			root["RequiredField"] = "blah";
 		}
 
-		void deserialize(JSON::Value& root)
+		void deserialize(json::Value& root)
 		{
-			JSON::assertMember(root, "RequiredField");
+			json::assertMember(root, "RequiredField");
 
 			sked::Task::deserialize(root);
 		}
 	};
 
-	void runSkedTaskTest() 
+	void runOnceOnlyTest() 
 	{
-		Log("trace") << "Running Scheduled Task Test" << endl;
+		json::Value json;
 
-		JSON::Value json;
-
-		/*
-		// Schedule a once only task to run in 2 seconds time.
+		// Schedule a once only task to run in 5 seconds time.
 		{
-			ScheduledTask* task = new ScheduledTask(scheduler);
+			ScheduledTask* task = new ScheduledTask(); //scheduler
 			OnceOnlyTrigger* trigger = task->createTrigger<OnceOnlyTrigger>();
-
-			Poco::DateTime dt;
-			Poco::Timespan ts(1, 0);
+			
+			DateTime dt;
+			Timespan ts(2, 0);
 			dt += ts;
 			trigger->scheduleAt = dt;
+			assert(ts.seconds() == 2);
 			
-			task->start();
+			scheduler.start(task);
 			
 			// Serialize the task
 			scheduler.serialize(json);
 
-			// Wait for the task to run
-			ready.wait();
+			// Wait for the task to complete
+			app.run();
 		}	
-		
+			
 		// Deserialize the previous task from JSON and run it again
 		{	
 			// Set the task to run in 1 secs time
 			{				
-				Poco::DateTime dt;
-				Poco::Timespan ts(1, 0);
+				DateTime dt;
+				Timespan ts(1, 0);
 				dt += ts;
 				json[(size_t)0]["trigger"]["scheduleAt"] = 
 					DateTimeFormatter::format(dt, DateTimeFormat::ISO8601_FORMAT);
@@ -128,7 +134,7 @@ public:
 
 			// Dynamically create the task from JSON
 			Log("debug") << "Sked Input JSON:\n" 
-				<< JSON::stringify(json, true) << endl;
+				<< json::stringify(json, true) << endl;
 			scheduler.deserialize(json);
 
 			// Print to cout
@@ -137,21 +143,25 @@ public:
 			Log("debug") << "##### Sked Print Output END" << endl;
 			
 			// Output scheduler tasks as JSON before run
-			JSON::Value before;
+			json::Value before;
 			scheduler.serialize(before);
 			Log("debug") << "Sked Output JSON Before Run:\n" 
-				<< JSON::stringify(before, true) << endl;
-
-			// Wait for the task to be run
-			ready.wait();
+				<< json::stringify(before, true) << endl;
+			
+			// Wait for the task to complete
+			app.run();
 			
 			// Output scheduler tasks as JSON after run
-			JSON::Value after;
+			json::Value after;
 			scheduler.serialize(after);
 			Log("debug") << "Sked Output JSON After Run:\n" 
-				<< JSON::stringify(after, true) << endl;
+				<< json::stringify(after, true) << endl;
 		}
-				*/
+	}
+
+	void runSkedTaskIntervalTest() 
+	{
+		Log("trace") << "Running Scheduled Task Test" << endl;
 
 		// Schedule an interval task to run 3 times at 1 second intervals
 		{
@@ -161,29 +171,33 @@ public:
 			trigger->interval = Timespan(1, 0);
 			trigger->maxTimes = 3;
 
-			scheduler.schedule(task);
+			scheduler.start(task);
 			//task->start();
 
 			// Print to cout
 			Log("debug") << "##### Sked Print Output:" << endl;
 			scheduler.print(cout);
 			Log("debug") << "##### Sked Print Output END" << endl;
-
-			ready.wait();
-			ready.wait();
-			ready.wait();
+			
+			// Wait for the task to complete
+			app.run();
 		}
 
 		
 		/*
+
+			//ready.wait();
+			//ready.wait();
+			//ready.wait();
+
 		// Schedule to fire once now, and in two days time.	
 		{
 			ScheduledTask* task = new ScheduledTask();			
 			DailyTrigger* trigger = task->createTrigger<DailyTrigger>();
 
 			// 2 secs from now
-			Poco::DateTime dt;
-			Poco::Timespan ts(2, 0);
+			DateTime dt;
+			Timespan ts(2, 0);
 			dt += ts;
 			trigger->timeOfDay = dt;
 
@@ -197,14 +211,14 @@ public:
 			ready.wait();
 		}
 		*/
-		
+				
+		app.run();
 		Log("trace") << "Running Scheduled Task Test: END" << endl;
-		util::pause();
 	}
 };
 
 
-} } // namespace scy::Sked
+} } // namespace scy::sked
 
 
 int main(int argc, char** argv) 
@@ -214,6 +228,6 @@ int main(int argc, char** argv)
 		sked::Tests app;
 	}	
 	Logger::uninitialize();
-	util::pause();
+	//util::pause();
 	return 0;
 }

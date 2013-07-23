@@ -22,21 +22,22 @@
 #include "Sourcey/JSON/JSON.h"
 
 #include "Sourcey/Util.h"
+#include "Sourcey/HTTP/Authenticator.h"
 
 #include "Poco/Format.h"
 #include "Poco/StreamCopier.h"
 #include "Poco/DirectoryIterator.h"
 
-#include "Poco/Net/HTTPBasicCredentials.h"
+////#include "Poco/Net/HTTPBasicCredentials.h"
 
 
 using namespace std;
 using namespace Poco;
-using namespace Poco::Net;
+
 
 
 namespace scy { 
-namespace pcman {
+namespace pman {
 
 
 //
@@ -74,7 +75,7 @@ void PackageManager::initialize()
 
 bool PackageManager::initialized() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return !_remotePackages.empty()
 		|| !_localPackages.empty();
 }
@@ -84,7 +85,7 @@ void PackageManager::uninitialize()
 {	
 	cancelAllTasks();
 	
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_remotePackages.clear();
 	_localPackages.clear();
 }
@@ -92,7 +93,7 @@ void PackageManager::uninitialize()
 
 void PackageManager::cancelAllTasks()
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	InstallTaskList::iterator it = _tasks.begin();
 	while (it != _tasks.end()) {
 		(*it)->cancel();
@@ -103,7 +104,7 @@ void PackageManager::cancelAllTasks()
 
 void PackageManager::createDirectories()
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	File(_options.cacheDir).createDirectories();
 	File(_options.interDir).createDirectories();
 	File(_options.installDir).createDirectories();
@@ -112,7 +113,7 @@ void PackageManager::createDirectories()
 
 void PackageManager::queryRemotePackages()
 {	
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	
 	debugL("PackageManager", this) << "Querying Packages: " 
 		<< _options.endpoint << _options.indexURI << endl;
@@ -122,10 +123,11 @@ void PackageManager::queryRemotePackages()
 
 	try {
 
+		/*
 		// Make the API call to retrieve the remote manifest
 		http::Request* request = new http::Request("GET", _options.endpoint + _options.indexURI);	
 		if (!_options.httpUsername.empty()) {
-			Poco::Net::HTTPBasicCredentials cred(_options.httpUsername, _options.httpPassword);
+			http::BasicAuthenticator cred(_options.httpUsername, _options.httpPassword);
 			cred.authenticate(*request); 
 		}
 
@@ -133,37 +135,64 @@ void PackageManager::queryRemotePackages()
 		http::Response& response = transaction.response();
 		if (!transaction.send())
 			throw Exception(format("Failed to query packages from server: HTTP Error: %d %s", 
-				static_cast<int>(response.getStatus()), response.getReason()));			
+				static_cast<int>(response.getStatus()), response.getReason()));
+				*/
 
+		http::ClientConnection* conn = new http::ClientConnection(_options.endpoint + _options.indexURI);
+		conn->Complete += delegate(this, &PackageManager::onPackagesResponse);
+		conn->request().setMethod("GET");
+		conn->request().setKeepAlive(false);
+
+		if (!_options.httpUsername.empty()) {
+			http::BasicAuthenticator cred(_options.httpUsername, _options.httpPassword);
+			cred.authenticate(conn->request()); 
+		}
+
+		conn->send();
+		
+		/*
 		debugL("PackageManager", this) << "Package Query Response:" 
 			<< "\n\tStatus: " << response.getStatus()
 			<< "\n\tReason: " << response.getReason()
-			<< "\n\tResponse: " << response.body.str()
+			//<< "\n\tResponse: " << response.body.str()
 			<< endl;
-		
-		JSON::Value root;
-		JSON::Reader reader;
-		bool res = reader.parse(response.body.str(), root);
-		if (!res)
-			throw Exception("Invalid Server Response: " + reader.getFormatedErrorMessages());
-
-		_remotePackages.clear();
-		
-		for (JSON::ValueIterator it = root.begin(); it != root.end(); it++) {		
-			RemotePackage* package = new RemotePackage(*it);
-			if (!package->valid()) {
-				errorL("PackageManager", this) << "Invalid package: " << package->id() << endl;
-				delete package;
-				continue;
-			}
-			_remotePackages.add(package->id(), package);
-		}
+		*/
 
 		debugL("PackageManager", this) << "Querying Packages: Success" << endl;
 	}
 	catch (Exception& exc) {
-		errorL("PackageManager", this) << "Package Query Error: " << exc.displayText() << endl;
+		errorL("PackageManager", this) << "Package Query Error: " << exc.message() << endl;
 		exc.rethrow();
+	}
+}
+
+
+void PackageManager::onPackagesResponse(void* sender, const http::Response& response)
+{
+	http::ClientConnection* conn = reinterpret_cast<http::ClientConnection*>(sender);
+	assert(conn->incomingBuffer().available() == response.getContentLength());
+
+	debugL() << "Anionu API Response:" 
+		<< "\n\tHeaders: " << response
+		<< "\n\tPayload Size: " << response.getContentLength()
+		<< endl;
+			
+	json::Value root;
+	json::Reader reader;
+	bool res = reader.parse(conn->incomingBuffer().toString(), root);
+	if (!res)
+		throw Exception("Invalid server JSON response: " + reader.getFormatedErrorMessages());
+
+	_remotePackages.clear();
+		
+	for (json::ValueIterator it = root.begin(); it != root.end(); it++) {		
+		RemotePackage* package = new RemotePackage(*it);
+		if (!package->valid()) {
+			errorL("PackageManager", this) << "Invalid package: " << package->id() << endl;
+			delete package;
+			continue;
+		}
+		_remotePackages.add(package->id(), package);
 	}
 }
 
@@ -172,7 +201,7 @@ void PackageManager::loadLocalPackages()
 {
 	string dir;
 	{
-		FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 
 		if (!_tasks.empty())
 			throw Exception("Cannot load packages while tasks are active.");	
@@ -195,8 +224,8 @@ void PackageManager::loadLocalPackages(const string& dir)
 			debugL("PackageManager", this) << "Local package found: " << fIt.name() << endl;
 			LocalPackage* package = NULL;
 			try {
-				JSON::Value root;
-				JSON::loadFile(root, fIt.path().toString());
+				json::Value root;
+				json::loadFile(root, fIt.path().toString());
 				package = new LocalPackage(root);
 				if (!package->valid()) {
 					throw Exception("The local package is invalid");
@@ -206,7 +235,7 @@ void PackageManager::loadLocalPackages(const string& dir)
 				localPackages().add(package->id(), package);
 			}
 			catch (Exception& exc) {
-				errorL("PackageManager", this) << "Load Error: " << exc.displayText() << endl;
+				errorL("PackageManager", this) << "Load Error: " << exc.message() << endl;
 				if (package)
 					delete package;
 			}
@@ -245,11 +274,11 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 	try {
 		string path(format("%s/%s.json", options().interDir, package.id()));
 		debugL("PackageManager", this) << "Saving Local Package: " << package.id() << endl;
-		JSON::saveFile(package, path);
+		json::saveFile(package, path);
 		res = true;
 	}
 	catch (Exception& exc) {
-		errorL("PackageManager", this) << "Save Error: " << exc.displayText() << endl;
+		errorL("PackageManager", this) << "Save Error: " << exc.message() << endl;
 		if (whiny)
 			exc.rethrow();
 	}
@@ -285,7 +314,7 @@ InstallTask* PackageManager::installPackage(const string& name, const InstallTas
 	}
 	catch (Exception& exc) 
 	{
-		errorL("PackageManager", this) << "Error: " << exc.displayText() << endl;
+		errorL("PackageManager", this) << "Error: " << exc.message() << endl;
 		if (whiny)
 			exc.rethrow();
 	}
@@ -446,14 +475,14 @@ bool PackageManager::uninstallPackage(const string& id, bool whiny)
 			// NOTE: If some files fail to delete we still consider the uninstall a success.	
 			LocalPackage::Manifest manifest = package->manifest();
 			if (!manifest.empty()) {
-				for (JSON::ValueIterator it = manifest.root.begin(); it != manifest.root.end(); it++) {
+				for (json::ValueIterator it = manifest.root.begin(); it != manifest.root.end(); it++) {
 					debugL("PackageManager", this) << "Uninstalling file: " << (*it).asString() << endl;	
 					try {							
 						File file(package->getInstalledFilePath((*it).asString()));
 						file.remove();
 					}
 					catch (Exception& exc) {
-						errorL("PackageManager", this) << "Uninstall File Error: " << exc.displayText() << endl;
+						errorL("PackageManager", this) << "Uninstall File Error: " << exc.message() << endl;
 					}
 				}
 				manifest.root.clear();
@@ -464,7 +493,7 @@ bool PackageManager::uninstallPackage(const string& id, bool whiny)
 			file.remove();	
 		}
 		catch (Exception& exc) {
-			errorL("PackageManager", this) << "Uninstall Error: " << exc.displayText() << endl;
+			errorL("PackageManager", this) << "Uninstall Error: " << exc.message() << endl;
 			// Swallow and continue...
 		}
 
@@ -480,7 +509,7 @@ bool PackageManager::uninstallPackage(const string& id, bool whiny)
 	}
 	catch (Exception& exc) 
 	{
-		errorL("PackageManager", this) << "Uninstall Error: " << exc.displayText() << endl;
+		errorL("PackageManager", this) << "Uninstall Error: " << exc.message() << endl;
 		if (whiny)
 			exc.rethrow();
 		else 
@@ -511,7 +540,7 @@ InstallTask* PackageManager::createInstallTask(PackagePair& pair, const InstallT
 	InstallTask* task = new InstallTask(*this, pair.local, pair.remote, options);
 	task->Complete += delegate(this, &PackageManager::onPackageInstallComplete, -1); // lowest priority to remove task
 	{
-		FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		_tasks.push_back(task);
 	}
 	TaskAdded.emit(this, *task);
@@ -521,12 +550,12 @@ InstallTask* PackageManager::createInstallTask(PackagePair& pair, const InstallT
 
 bool PackageManager::hasUnfinalizedPackages()
 {	
-	//FastMutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 
 	debugL("PackageManager", this) << "Checking if Finalization Required" << endl;
 	
 	bool res = false;	
-	//LocalPackageMap toCheck(_localPackages.items());
+	//LocalPackageMap toCheck(_localPackages.map());
 	LocalPackageMap& packages = localPackages().map();
 	for (LocalPackageMap::const_iterator it = packages.begin(); it != packages.end(); ++it) {
 		if (it->second->state() == "Installing" && 
@@ -544,7 +573,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 {
 	debugL("PackageManager", this) << "Finalizing Installations" << endl;
 	
-	//FastMutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	
 	bool res = true;
 	
@@ -575,7 +604,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 			}
 		}
 		catch (Exception& exc) {
-			errorL("PackageManager", this) << "Finalize Error: " << exc.displayText() << endl;
+			errorL("PackageManager", this) << "Finalize Error: " << exc.message() << endl;
 			res = false;
 			if (whiny)
 				exc.rethrow();
@@ -594,7 +623,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 //
 InstallTask* PackageManager::getInstallTask(const string& id) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (InstallTaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); it++) {
 		if ((*it)->remote()->id() == id)
 			return *it;
@@ -605,7 +634,7 @@ InstallTask* PackageManager::getInstallTask(const string& id) const
 
 InstallTaskList PackageManager::tasks() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _tasks;
 }
 
@@ -615,7 +644,7 @@ InstallTaskList PackageManager::tasks() const
 //
 PackagePair PackageManager::getPackagePair(const string& id, bool whiny) const
 {		
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	LocalPackage* local = _localPackages.get(id, false);
 	RemotePackage* remote = _remotePackages.get(id, false);
 
@@ -632,9 +661,9 @@ PackagePair PackageManager::getPackagePair(const string& id, bool whiny) const
 PackagePairList PackageManager::getPackagePairs() const
 {	
 	PackagePairList pairs;
-	FastMutex::ScopedLock lock(_mutex);
-	LocalPackageMap lpackages = _localPackages.items();
-	RemotePackageMap rpackages = _remotePackages.items();
+	Mutex::ScopedLock lock(_mutex);
+	LocalPackageMap lpackages = _localPackages.map();
+	RemotePackageMap rpackages = _remotePackages.map();
 	for (LocalPackageMap::const_iterator lit = lpackages.begin(); lit != lpackages.end(); ++lit) {
 		pairs.push_back(PackagePair(lit->second));
 	}
@@ -656,7 +685,7 @@ PackagePairList PackageManager::getPackagePairs() const
 
 PackagePair PackageManager::getOrCreatePackagePair(const string& id)
 {	
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	RemotePackage* remote = _remotePackages.get(id, true);
 	if (remote->assets().empty())
 		throw Exception("The remote package has no file assets.");
@@ -683,7 +712,7 @@ PackagePair PackageManager::getOrCreatePackagePair(const string& id)
 
 string PackageManager::installedPackageVersion(const string& id) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	LocalPackage* local = _localPackages.get(id, true);
 	
 	if (!local->valid())
@@ -711,7 +740,7 @@ bool PackageManager::verifyInstallManifest(LocalPackage& package)
 
 	// Check file system for each manifest file
 	LocalPackage::Manifest manifest = package.manifest();
-	for (JSON::ValueIterator it = manifest.root.begin(); it != manifest.root.end(); it++) {		
+	for (json::ValueIterator it = manifest.root.begin(); it != manifest.root.end(); it++) {		
 		string path = package.getInstalledFilePath((*it).asString(), false);
 		debugL("PackageManager", this) << package.name() 
 			<< ": Checking: " << path << endl;
@@ -742,7 +771,7 @@ void PackageManager::clearCache()
 bool PackageManager::clearPackageCache(LocalPackage& package)
 {
 	bool res = true;
-	JSON::Value& assets = package["assets"];
+	json::Value& assets = package["assets"];
 	for (unsigned i = 0; i < assets.size(); i++) {
 		Package::Asset asset(assets[i]);
 		if (!clearCacheFile(asset.fileName(), false))
@@ -763,7 +792,7 @@ bool PackageManager::clearCacheFile(const string& fileName, bool whiny)
 	}
 	catch (Exception& exc) {
 		errorL("PackageManager", this) << "Clear Cache Error: " 
-			<< fileName << ": " << exc.displayText() << endl;
+			<< fileName << ": " << exc.message() << endl;
 		if (whiny)
 			exc.rethrow();
 	}
@@ -791,7 +820,7 @@ bool PackageManager::isSupportedFileType(const string& fileName)
 
 Path PackageManager::getCacheFilePath(const string& fileName)
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	Path path(options().cacheDir);
 	path.makeDirectory();
@@ -814,21 +843,21 @@ Path PackageManager::getIntermediatePackageDir(const string& id)
 
 PackageManager::Options& PackageManager::options() 
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _options;
 }
 
 
 RemotePackageStore& PackageManager::remotePackages() 
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _remotePackages; 
 }
 
 
 LocalPackageStore& PackageManager::localPackages()
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _localPackages; 
 }
 
@@ -849,7 +878,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 
 	// Remove the task reference
 	{
-		FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		for (InstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++) {
 			if (*it == task) {
 				_tasks.erase(it);
@@ -862,7 +891,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 }
 
 
-} } // namespace scy::Pacman
+} } // namespace scy::pman
 
 
 
@@ -979,7 +1008,7 @@ bool PackageManager::installPackage(const string& name, InstallMonitor* monitor,
 	}
 	catch (Exception& exc) 
 	{
-		errorL("PackageManager", this) << "Error: " << exc.displayText() << endl;
+		errorL("PackageManager", this) << "Error: " << exc.message() << endl;
 		if (whiny)
 			exc.rethrow();
 		else 
@@ -1178,7 +1207,7 @@ bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* moni
 				// must be called from an external process before the
 				// installation can be completed.
 				errors = true;
-				errorL() << "[InstallTask] Finalizing Error: " << exc.displayText() << endl;
+				errorL() << "[InstallTask] Finalizing Error: " << exc.message() << endl;
 			}
 		}
 
@@ -1198,7 +1227,7 @@ bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* moni
 				errorL("PackageManager", this) << "Finalizing: Delete Error: " << fIt.path().toString() << endl;
 				*/
 	/* 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	//const string& name
 	//if (util::compareVersion(remote->latestAsset().version(), local->version()))
 	//	return false;
@@ -1220,7 +1249,7 @@ PackagePair PackageManager::getPackagePair(const string& name, bool whiny)
 
 bool PackageManager::isUpToDate(const string& name)
 {	
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	
 	LocalPackage* local = _localPackages.get(name, true);
 	RemotePackage* remote = _remotePackages.get(name, true);
@@ -1258,7 +1287,7 @@ bool PackageManager::isUpToDate(const string& name)
 	}
 	catch (Exception& exc) 
 	{
-		errorL("PackageManager", this) << "Error: " << exc.displayText() << endl;
+		errorL("PackageManager", this) << "Error: " << exc.message() << endl;
 		if (whiny)
 			exc.rethrow();
 		else 

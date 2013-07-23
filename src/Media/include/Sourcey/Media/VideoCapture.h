@@ -22,7 +22,9 @@
 
 
 #include "Sourcey/Base.h"
+#include "Sourcey/Mutex.h"
 #include "Sourcey/Flaggable.h"
+#include "Sourcey/Interfaces.h"
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/Format.h"
 #include "Sourcey/Media/ICapture.h"
@@ -60,7 +62,7 @@ struct VideoDelegate: public PacketDelegateBase
 		if (_fps) {
 			_counter.tick();
 			if (_counter.fps > _fps) {
-				debugL() << "skipping frame" << std::endl;
+				traceL() << "skipping frame" << std::endl;
 				return false;
 			}
 		}		
@@ -140,7 +142,7 @@ protected:
 	virtual void setError(const std::string& error);
 
 private:   
-	mutable Poco::FastMutex _mutex;
+	mutable Mutex _mutex;
 
 	cv::VideoCapture _capture;
 	cv::Mat		_frame;		// Current video image
@@ -188,7 +190,7 @@ struct MatPacket: public VideoPacket
 			  int height = 0,
 			  double time = 0) :
 		VideoPacket(data, size, width, height, time),
-		mat(NULL) {};
+		mat(nullptr) {};
 
 	MatPacket(cv::Mat* mat, double time = 0) :
 		VideoPacket((char*)mat->data, mat->rows*mat->step, mat->cols, mat->rows, time), //mat->total()

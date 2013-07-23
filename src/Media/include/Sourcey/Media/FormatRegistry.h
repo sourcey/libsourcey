@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/Media/Format.h"
-#include "Poco/Mutex.h"
+#include "Sourcey/Mutex.h"
 
 #include <vector>
 
@@ -70,7 +70,7 @@ private:
 	
     FormatList _formats;
     std::string _default;
-	mutable Poco::FastMutex _mutex;
+	mutable Mutex _mutex;
 };
 
 

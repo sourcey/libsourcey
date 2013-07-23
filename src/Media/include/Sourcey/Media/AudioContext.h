@@ -26,7 +26,7 @@
 #include "Sourcey/Media/FPSCounter.h"
 //#include "Sourcey/Media/IEncoder.h"
 
-//#include "Poco/Mutex.h"
+//#include "Sourcey/Mutex.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>

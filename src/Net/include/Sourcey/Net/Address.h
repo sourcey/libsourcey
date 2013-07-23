@@ -108,13 +108,14 @@ public:
 
 	Address::Family family() const;
 		/// Returns the address family of the host's address.
-	
-	UInt16 resolveService(const std::string& service);
 
-	bool valid() const 
-	{
-		return port() != 0;
-	}
+	bool valid() const;
+		/// Returns true when the port is set and the address is valid
+		/// ie. not wildcard.
+		
+	static UInt16 resolveService(const std::string& service);
+
+	static bool validateIP(const std::string& address);
 
 	bool operator < (const Address& addr) const;
 	bool operator == (const Address& addr) const;
@@ -143,16 +144,6 @@ protected:
 private:
 	AddressBase* _base;
 };
-
-
-//
-// inlines
-//
-
-inline void swap(Address& a1, Address& a2)
-{
-	a1.swap(a2);
-}
 
 
 } } // namespace scy::net
@@ -323,7 +314,7 @@ public:
 
 
 /*
-typedef Poco::Net::IPAddress IP;
+typedef Poco::std::stringAddress IP;
 
 
 class Address: public Poco::Net::Address

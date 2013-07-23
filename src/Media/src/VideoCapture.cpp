@@ -23,7 +23,7 @@
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 
 // TODO: Inner loop timeout recovery procedure
 
@@ -90,7 +90,7 @@ void VideoCapture::start()
 {
 	traceL("VideoCapture", this) << "Starting" << endl;
 	{
-		FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 
 		if (!_thread.isRunning()) {
 			traceL("VideoCapture", this) << "Initializing Thread" << endl;
@@ -129,7 +129,7 @@ void VideoCapture::stop()
 bool VideoCapture::open()
 {
 	traceL("VideoCapture", this) << "Open" << endl;
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	_isOpened = _capture.isOpened() ? true : 
 		_filename.empty() ? 
@@ -150,7 +150,7 @@ bool VideoCapture::open()
 void VideoCapture::release()
 {
 	traceL("VideoCapture", this) << "Release" << endl;
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	if (_capture.isOpened())
 		_capture.release();
 	_isOpened = false;
@@ -192,17 +192,17 @@ void VideoCapture::run()
 				MatPacket packet(&frame);
 				if (hasDelegates && packet.width && packet.height) { //!_stopping && 
 					//traceL("VideoCapture", this) << "Emitting: " << _counter.fps << endl;
-					emit(this, packet);					
+					emit(packet);					
 					//traceL("VideoCapture", this) << "Emitting: OK" << endl;
 				}
 				
 				// Wait 5ms for the CPU to breathe
-				Thread::sleep(5);
+				Poco::Thread::sleep(5);
 			}
 
 			// Wait 50ms each iter while in limbo
 			else
-				Thread::sleep(50);
+				Poco::Thread::sleep(50);
 		}	
 	}
 	catch (cv::Exception& exc) 
@@ -215,7 +215,7 @@ void VideoCapture::run()
 		// handled inside the signal callback scope which
 		// represents a serious application error.
 		assert(0);
-		setError(exc.displayText());
+		setError(exc.message());
 	}
 	catch (...) 
 	{
@@ -231,7 +231,7 @@ void VideoCapture::run()
 void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 {
 	traceL("VideoCapture", this) << "Get Frame: " << width << "x" << height << endl;
-	FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 
 	// Don't actually grab a frame here, just copy the current frame.
 	// NOTE: If the WaitForDelegates flag is set, and no delegates are 
@@ -252,7 +252,7 @@ void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 
 void VideoCapture::attach(const PacketDelegateBase& delegate)
 {
-	PacketEmitter::attach(delegate);
+	PacketSignal::attach(delegate);
 	traceL("VideoCapture", this) << "Added Delegate: " << refCount() << endl;
 	if (!isRunning() && flags().has(SyncWithDelegates)) //refCount == 1
 		start();
@@ -261,7 +261,7 @@ void VideoCapture::attach(const PacketDelegateBase& delegate)
 
 bool VideoCapture::detach(const PacketDelegateBase& delegate) 
 {
-	if (PacketEmitter::detach(delegate)) {
+	if (PacketSignal::detach(delegate)) {
 		traceL("VideoCapture", this) << "Removed Delegate: " << refCount() << endl;
 		if (refCount() == 0 && flags().has(SyncWithDelegates)) //isRunning() && 
 			stop();
@@ -274,7 +274,7 @@ bool VideoCapture::detach(const PacketDelegateBase& delegate)
 cv::Mat VideoCapture::grab()
 {	
 	//traceL("VideoCapture", this) << "Grabing" << endl;
-	FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 
 	// Grab a frame from the capture source
 	_capture >> _frame;
@@ -304,42 +304,42 @@ cv::Mat VideoCapture::grab()
 void VideoCapture::setError(const string& error)
 {
 	errorL("VideoCapture", this) << error << endl;
-	FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	_error = error;
 }
 
 
 bool VideoCapture::isOpened() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _isOpened;
 }
 
 
 bool VideoCapture::isRunning() const 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _thread.isRunning();
 }
 
 
 int VideoCapture::deviceId() const 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _deviceId; 
 }
 
 
 string	VideoCapture::filename() const 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _filename; 
 }
 
 
 string VideoCapture::name() const 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	stringstream ss;
 	_filename.empty() ? (ss << _deviceId) : (ss << _filename);
 	return ss.str();
@@ -348,42 +348,42 @@ string VideoCapture::name() const
 
 string VideoCapture::error() const 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _error;
 }
 
 
 int VideoCapture::width() const 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _width; 
 }
 
 
 int VideoCapture::height() const 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _height; 
 }
 
 
 double VideoCapture::fps() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _counter.fps; 
 }
 
 
 Flags VideoCapture::flags() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _flags;
 }
 
 
 cv::VideoCapture& VideoCapture::capture()
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _capture; 
 }
 
@@ -399,7 +399,7 @@ bool VideoCapture::check()
 {	
 	grab();	
 
-	FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 
 	// TODO: Check COM is multithreaded when using dshow highgui.
 

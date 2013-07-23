@@ -48,7 +48,7 @@ class SSLManager
 	///
 	/// SSLManager can be initialized manually, by calling initializeServer()
 	/// and/or initializeClient(), or intialization can be automatic. In the latter
-	/// case, a Poco::Util::Application instance must be available and the required
+	/// case, a Poco::util::Application instance must be available and the required
 	/// configuration properties must be set (see below).
 	///
 	/// Note that manual intialization must happen very early in the application,
@@ -281,7 +281,7 @@ inline bool VerificationErrorArgs::getIgnoreError() const
 	//static const std::string CFG_CLIENT_PREFIX;
 
 		
-	//static Poco::Util::AbstractConfiguration& appConfig();
+	//static Poco::util::AbstractConfiguration& appConfig();
 		/// Returns the application configuration.
 		///
 		/// Throws a 

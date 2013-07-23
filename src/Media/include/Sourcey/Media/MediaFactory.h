@@ -27,7 +27,7 @@
 #include "Sourcey/Media/FormatRegistry.h"
 
 #include "Poco/Foundation.h"
-#include "Poco/Mutex.h"
+#include "Sourcey/Mutex.h"
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
@@ -104,7 +104,7 @@ protected:
 	std::map<int, VideoCapture*> _map;
 
 	static MediaFactory*	_instance;
-	static Poco::FastMutex	_mutex;
+	static Mutex	_mutex;
 };
 
 

@@ -31,32 +31,43 @@ namespace scy {
 namespace net {
 	
 
-Socket::Socket(SocketAdapter* adapter) :
-	_base(NULL), 
-	_adapter(adapter ? 
-		adapter : new SocketAdapter(this))
+Socket::Socket() : //SocketAdapter* adapter
+	_base(nullptr), 
+	_adapter(nullptr)//, 
+	//_adapter(adapter)
 {
+	//if (!_adapter) 
+	//	_adapter = new SocketAdapter(this);	
+	//if (!_adapter->socket) 
+	//	_adapter->socket = this;	
 }
 
 
-Socket::Socket(SocketBase* base, bool shared, SocketAdapter* adapter) :
+Socket::Socket(SocketBase* base, bool shared) : //, SocketAdapter* adapter
 	_base(base), 
-	_adapter(adapter ? 
-		adapter : new SocketAdapter(this))
+	_adapter(nullptr)
 {
+	//if (!_adapter) 
+	//	_adapter = new SocketAdapter(this);	
+	//if (!_adapter->socket) 
+	//	_adapter->socket = this;	
 	if (_base) {
-		_base->addAdapter(_adapter, shared);
+		_base->addObserver(this, shared);
 	}
 }
 
 
-Socket::Socket(const Socket& socket, SocketAdapter* adapter) :
+Socket::Socket(const Socket& socket) : //, SocketAdapter* adapter
 	_base(socket._base), 
-	_adapter(adapter ? 
-		adapter : new SocketAdapter(this))
+	_adapter(nullptr)//, 
+	//_adapter(adapter)
 {	
+	//if (!_adapter) 
+	//	_adapter = new SocketAdapter(this);	
+	//if (!_adapter->socket) 
+	//	_adapter->socket = this;	
 	if (_base) {
-		_base->addAdapter(_adapter, true);
+		_base->addObserver(this, true);
 	}
 }
 
@@ -70,9 +81,9 @@ Socket& Socket::operator = (const Socket& socket)
 Socket& Socket::assign(SocketBase* base, bool shared)
 {	
 	if (_base != base) {
-		if (_base) _base->removeAdapter(_adapter);
+		if (_base) _base->removeObserver(this);
 		_base = base;
-		if (_base) _base->addAdapter(_adapter, shared);
+		if (_base) _base->addObserver(this, shared);
 	}
 	return *this;
 }
@@ -81,7 +92,7 @@ Socket& Socket::assign(SocketBase* base, bool shared)
 Socket::~Socket()
 {
 	if (_base)
-		_base->removeAdapter(_adapter);
+		_base->removeObserver(this);
 	if (_adapter)
 		delete _adapter;
 }
@@ -96,6 +107,12 @@ bool Socket::shutdown()
 void Socket::close()
 {
 	_base->close();
+}
+	
+
+bool Socket::closed() const
+{
+	return _base->closed();
 }
 
 
@@ -113,13 +130,32 @@ void Socket::bind(const Address& address)
 
 int Socket::send(const char* data, int len, int flags)
 {
-	return _adapter->send(data, len, flags);
+	/*
+	if (Sender.numProcessors() > 0) {
+		Sender.write(RawPacket(data, len));
+		return len;
+	}
+	*/
+	if (_adapter) {
+		assert(_adapter->socket == this);
+		return _adapter->send(data, len, flags);
+	}
+	return _base->send(data, len, flags);
 }
 
 
 int Socket::send(const char* data, int len, const Address& peerAddress, int flags)
 {
-	return _adapter->send(data, len, peerAddress, flags);
+	// TODO: Make SocketPacket for address
+	//if (Sender.numProcessors() > 0) {
+	//	Sender.write(RawPacket(data, len));
+	//	return len;
+	//}
+	if (_adapter) {
+		assert(_adapter->socket == this);
+		return _adapter->send(data, len, flags);
+	}
+	return _base->send(data, len, peerAddress, flags);
 }
 
 
@@ -143,15 +179,18 @@ int Socket::send(const IPacket& packet, const Address& peerAddress, int flags)
 	else {
 		Buffer buf;
 		packet.write(buf);
-		//traceL("Socket", this) << "Send IPacket: " << buf.size() << endl;	
-		return send(buf.begin(), buf.size(), peerAddress, flags);
+		traceL("Socket", this) << "Send IPacket: " << buf.available() << endl;	
+		return send(buf.begin(), buf.available(), peerAddress, flags);
 	}
 }
 
 
 void Socket::send(void*, IPacket& packet)
 {
-	send(packet);
+	int res = send(packet);
+	traceL("Socket", this) << "################## Send IPacket: " << res << endl;	
+	if (res < 0)
+		throw Exception("Invalid socket operation");
 }
 
 
@@ -178,11 +217,81 @@ net::TransportType Socket::transport() const
 	return _base->transport();
 }
 	
+		
+void Socket::setError(const scy::Error& err) 
+{ 
+	return _base->setError(err);
+}
+	
+	
+void Socket::connect(const std::string& host, UInt16 port) 
+{
+	return _base->connect(host, port);
+}
 
+
+void Socket::onSocketConnect()
+{
+	//traceL("SocketAdapter", this) << "On Connect: " << socket->Connect.refCount() << endl;	
+	if (_adapter) {
+		_adapter->onSocketConnect();
+	}
+	else {
+		Connect.emit(socket);
+	}
+}
+
+
+void Socket::onSocketRecv(Buffer& buf, const Address& peerAddr)
+{
+	//traceL("SocketAdapter", this) << "On Recv: " << socket->Recv.refCount() << endl;	
+	if (_adapter) {
+		_adapter->onSocketRecv(buf, peerAddr);
+	}
+	else {
+		SocketPacket packet(*this, buf, peerAddr);
+		Recv.emit(socket, packet);
+	}
+}
+
+
+void Socket::onSocketError(const scy::Error& error) //const Error& error
+{
+	//traceL("SocketAdapter", this) << "On Error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
+	if (_adapter) {
+		_adapter->onSocketError(error);
+	}
+	else {
+		Error.emit(socket, error);
+	}
+}
+
+
+void Socket::onSocketClose()
+{
+	//traceL("SocketAdapter", this) << "On Close: " << socket->Close.refCount() << endl;	
+	if (_adapter) {
+		_adapter->onSocketClose();
+	}
+	else {
+		Close.emit(socket);
+	}
+}
+
+
+	
+const Error& Socket::error() const 
+{ 
+	return _base->error();
+}
+
+
+/*
 bool Socket::connected() const 
 { 
 	return _base->connected();
 }
+*/
 	
 
 SocketBase& Socket::base() const
@@ -192,31 +301,36 @@ SocketBase& Socket::base() const
 }
 	
 
-SocketAdapter& Socket::adapter() const
+SocketAdapter* Socket::adapter() const
 {
-	assert(_adapter);
-	return *_adapter;
+	return _adapter;
+}
+
+
+void Socket::setAdapter(SocketAdapter* adapter)
+{	
+	traceL("Socket", this) << "Replacing adapter: " 
+		<< _adapter << ": " << adapter << endl;
+
+	// Assign the new adapter pointer
+	_adapter = adapter;
+	_adapter->socket = this;
 }
 
 
 void Socket::replaceAdapter(SocketAdapter* adapter)
 {
-	traceL("Socket", this) << "Replacing adapter: " 
-		<< _adapter << ": " << adapter << endl;
-	assert(_adapter);
-
 	// NOTE: Just swap the SocketAdapter pointers as
 	// we don't want to modify the container since we
 	// may be inside the old adapter's callback scope.
-	_base->swapAdapter(_adapter, adapter);
+	//_base->swapObserver(_adapter, adapter);
 
 	// Defer deletion to the next iteration.
 	// The old adapter will receive no more callbacks.	
-	deleteLater<SocketAdapter>(_adapter);
+	if (_adapter)
+		deleteLater<SocketAdapter>(_adapter);
 	
-	// Assign the new adapter pointer
-	_adapter = adapter;
-	_adapter->socket = this;
+	setAdapter(adapter);
 }
 
 
@@ -226,12 +340,20 @@ int Socket::isNull() const
 }
 
 
+/*
+bool SocketAdapter::compareProiroty(const SocketAdapter* l, const SocketAdapter* r) 
+{
+	return l->priority > r->priority;
+}
+*/
+
+
 //
 // SocketAdapter methods
 //
 
-SocketAdapter::SocketAdapter(Socket* socket, int priority) : 
-	socket(socket), priority(priority)
+SocketAdapter::SocketAdapter(Socket* socket) : //, int priority
+	socket(socket)//, priority(priority)
 {
 	//traceL("SocketAdapter", this) << "Creating" << endl;	
 }
@@ -284,12 +406,6 @@ int SocketAdapter::send(const char* data, int len, const Address& peerAddress, i
 }
 
 
-bool SocketAdapter::compareProiroty(const SocketAdapter* l, const SocketAdapter* r) 
-{
-	return l->priority > r->priority;
-}
-
-
 //
 // SocketBase
 //
@@ -297,7 +413,7 @@ bool SocketAdapter::compareProiroty(const SocketAdapter* l, const SocketAdapter*
 
 SocketBase::SocketBase() : 
 	CountedObject(new DeferredDeleter<SocketBase>()),
-	_connected(false),
+	//_connected(false),
 	_insideCallback(false)
 {
 	//traceL("SocketAdapter", this) << "Creating" << endl;	
@@ -316,25 +432,25 @@ SocketBase::~SocketBase()
 }
 	
 
-void SocketBase::addAdapter(SocketAdapter* adapter, bool shared) 
+void SocketBase::addObserver(Socket* socket, bool shared) 
 {
 	//traceL("SocketBase", this) << "Duplicating socket: " << &adapter << endl;
-	_adapters.push_back(adapter);		
-	sortAdapters();
+	_observers.push_back(socket);		
+	//sortObservers();
 	if (shared)
 		duplicate();
 	//traceL("SocketBase", this) << "Duplicated socket: " << &adapter << endl;
 }
 
 
-void SocketBase::removeAdapter(SocketAdapter* adapter)  
+void SocketBase::removeObserver(Socket* socket)  
 {	
 	// TODO: Ensure socket destruction when released?
-	for (vector<SocketAdapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
-		if (*it == adapter) {
+	for (vector<Socket*>::iterator it = _observers.begin(); it != _observers.end(); ++it) {
+		if (*it == socket) {
 			//traceL("SocketBase", this) << "Releasing socket: " << &adapter << endl;
-			_adapters.erase(it);
-			sortAdapters();
+			_observers.erase(it);
+			//sortObservers();
 			release();
 			return;
 		}
@@ -343,9 +459,10 @@ void SocketBase::removeAdapter(SocketAdapter* adapter)
 }
 
 
-void SocketBase::swapAdapter(SocketAdapter* a, SocketAdapter* b)
+/*
+void SocketBase::swapObserver(SocketAdapter* a, SocketAdapter* b)
 {
-	for (vector<SocketAdapter*>::iterator it = _adapters.begin(); it != _adapters.end(); ++it) {
+	for (vector<Socket*>::iterator it = _observers.begin(); it != _observers.end(); ++it) {
 		if ((*it) == a) {
 			*it = b;
 			traceL("SocketBase", this) << "swapAdapter: " << a << ": " << b << endl;
@@ -354,11 +471,13 @@ void SocketBase::swapAdapter(SocketAdapter* a, SocketAdapter* b)
 	}
 	assert(0 && "unknown socket adapter");
 }
+*/
 
 
-void SocketBase::sortAdapters()  
+/*
+void SocketBase::sortObservers()  
 {	
-	sort(_adapters.begin(), _adapters.end(), SocketAdapter::compareProiroty);
+	sort(_observers.begin(), _observers.end(), SocketAdapter::compareProiroty);
 }
 	
 
@@ -366,14 +485,43 @@ bool SocketBase::connected() const
 { 
 	return _connected;
 }
+*/
+
+namespace internal {
+
+	void onHostResolved(const net::DNSResult& dns, void* opaque)
+	{	
+		auto* sock = reinterpret_cast<SocketBase*>(opaque);
+
+		traceL("SocketBase", sock) << "DNS Resolved: " << dns.success() << endl;
+
+		// Connect to resolved host
+		if (dns.success())
+			sock->connect(dns.addr);
+
+		// Set the connection error if DNS failed
+		else sock->setError("Failed to resolve host DNS for " + dns.host);
+	}
+
+}
+
+	
+void SocketBase::connect(const std::string& host, UInt16 port) 
+{
+	traceL("SocketBase", this) << "Connect to host: " << host << ":" << port << endl;
+	if (Address::validateIP(host))
+		connect(Address(host, port));
+	else
+		net::resolveDNS(host, port, internal::onHostResolved, this); 
+}
 
 
 void SocketBase::emitConnect() 
 {
 	_insideCallback = true;
-	_connected = true;
-	for (int i = 0; i < _adapters.size(); i++) 
-		_adapters[i]->onSocketConnect();
+	//_connected = true;
+	for (size_t i = 0; i < _observers.size(); i++) 
+		_observers[i]->onSocketConnect();
 	_insideCallback = false;
 }
 
@@ -381,8 +529,8 @@ void SocketBase::emitConnect()
 void SocketBase::emitRecv(Buffer& buf, const Address& peerAddr)
 {
 	_insideCallback = true;
-	for (int i = 0; i < _adapters.size(); i++)
-		_adapters[i]->onSocketRecv(buf, peerAddr);
+	for (size_t i = 0; i < _observers.size(); i++)
+		_observers[i]->onSocketRecv(buf, peerAddr);
 	_insideCallback = false;
 }
 
@@ -390,9 +538,9 @@ void SocketBase::emitRecv(Buffer& buf, const Address& peerAddr)
 void SocketBase::emitError(const Error& error)
 {
 	_insideCallback = true;
-	_connected = false;
-	for (int i = 0; i < _adapters.size(); i++) 
-		_adapters[i]->onSocketError(error);
+	//_connected = false;
+	for (size_t i = 0; i < _observers.size(); i++) 
+		_observers[i]->onSocketError(error);
 	_insideCallback = false;
 }
 
@@ -400,9 +548,9 @@ void SocketBase::emitError(const Error& error)
 void SocketBase::emitClose()
 {
 	_insideCallback = true;
-	_connected = false;
-	for (int i = 0; i < _adapters.size(); i++) 
-		_adapters[i]->onSocketClose();
+	//_connected = false;
+	for (size_t i = 0; i < _observers.size(); i++) 
+		_observers[i]->onSocketClose();
 	_insideCallback = false;
 }
 
@@ -414,11 +562,20 @@ void SocketBase::emitClose()
 
 
 
+
+
+/*
+void SocketBase::setError(const Error& err) 
+{ 
+	traceL("SocketBase", this) << "Set error: " << err.message << endl;	
+	_error = err;
+}
+*/
 		
 	//SocketAdapter* oldAdapter = _adapter;
-	//_base->addAdapter(adapter, true);
+	//_base->addObserver(adapter, true);
 	//if (_adapter) {
-	//_base->removeAdapter(_adapter);
+	//_base->removeObserver(_adapter);
 	//delete _adapter;
 	//}
 //
