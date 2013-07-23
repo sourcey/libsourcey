@@ -46,7 +46,7 @@ struct State
 
 	virtual bool between(ID lid, ID rid) const
 	{ 	
-		int id = this->id();
+		ID id = this->id();
 		return id >= lid 
 			&& id <= rid;
 	}

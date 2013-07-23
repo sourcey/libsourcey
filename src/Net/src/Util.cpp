@@ -159,7 +159,7 @@ string getPublicIPAddress(bool whiny)
 		}
 		catch (Exception& exc)
 		{
-			errorL() << exc.displayText() << endl;
+			errorL() << exc.message() << endl;
 		}
 	}
 

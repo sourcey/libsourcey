@@ -22,20 +22,20 @@
 
 
 #include "Sourcey/Base.h"
-#include "Sourcey/Manager.h"
-//#include "Sourcey/Util/Timer.h"
+#include "Sourcey/Containers.h"
+#include "Sourcey/Timer.h"
 
 
 namespace scy {
 
 
 template <class TKey, class TValue>
-class TimedManager: public BasicManager<TKey, TValue>
+class TimedManager: public PointerManager<TKey, TValue>
 	/// Provides timed persistent data storage for class instances.
 	/// TValue must implement the clone() method.
 {
 public:
-	typedef BasicManager<TKey, TValue> Base;
+	typedef PointerManager<TKey, TValue> Base;
 
 public:
 	TimedManager() {		
@@ -99,7 +99,7 @@ public:
 		//timer.stopAll(this);
 		Base::clear();
 	}
-
+	
 	/*
 	virtual void onItemTimeout(TimerCallback<TimedManager>& timer)
 	{
@@ -108,10 +108,19 @@ public:
 			delete item;
 	}
 	*/
+
+	virtual void onItemTimeout(TValue* item)
+	{
+		//TValue* item = reinterpret_cast<TValue*>(timer.opaque());
+		if (Base::remove(item))
+			delete item;
+	}
 	
 	void onTimer(void*)
 	{
 		// loop items and destroy
+		// TODO: Call onItemTimeout
+
 		/*
 		for (ClientConnectionList::iterator it = connections.begin(); it != connections.end();) {
 			if ((*it)->deleted()) {

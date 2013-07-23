@@ -23,19 +23,19 @@
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 
 
 namespace scy {
 namespace util {
-
+	
 
 string parseURI(const string& request) 
 {
-	string req = request;
-	string value = "";
-	string::size_type start, end = 0;
-	toUpper(req);
+	std::string req = request;
+	std::string value = "";
+	std::string::size_type start, end = 0;
+	util::toUpper(req);
 	start = req.find(" ");
 	if (start != string::npos) {
 		start++;
@@ -48,13 +48,14 @@ string parseURI(const string& request)
 }
 
 
-bool matchURI(const std::string& uri, const std::string& expression) 
+bool matchURL(const std::string& uri, const std::string& expression) 
 {
 	string::size_type index = uri.find("?");
 	return util::matchNodes(uri.substr(0, index), expression, "/");
 }
 
 
+/*
 string parseHeader(const string& request, const string& name) 
 {
 	string req = request;
@@ -74,6 +75,7 @@ string parseHeader(const string& request, const string& name)
 	}
 	return value;
 }
+*/
 
 
 std::string parseCookieItem(const std::string& cookie, const std::string& item)
@@ -89,7 +91,7 @@ std::string parseCookieItem(const std::string& cookie, const std::string& item)
 }
 
 
-bool parseURIQuery(const string& uri, Poco::Net::KVStore& out)
+bool splitURIParameters(const string& uri, NVCollection& out)
 {
 	size_t len = uri.length();
 	size_t i = 0;
@@ -105,7 +107,7 @@ bool parseURIQuery(const string& uri, Poco::Net::KVStore& out)
 
 		// REST parameters are referenced by index
 		if (!value.empty())
-			out.set(toString(out.size()), value);		
+			out.set(util::toString(out.size()), value);		
 	}
 	
 	// Parse query parameters
@@ -126,6 +128,66 @@ bool parseURIQuery(const string& uri, Poco::Net::KVStore& out)
 	}
 
 	return out.size() > 0;
+}
+
+
+void splitParameters(const std::string& s, std::string& value, NVCollection& parameters)
+{
+	value.clear();
+	parameters.clear();
+	std::string::const_iterator it  = s.begin();
+	std::string::const_iterator end = s.end();
+	while (it != end && ::isspace(*it)) ++it;
+	while (it != end && *it != ';') value += *it++;
+	Poco::trimRightInPlace(value);
+	if (it != end) ++it;
+	splitParameters(it, end, parameters);
+}
+
+
+void splitParameters(const std::string::const_iterator& begin, const std::string::const_iterator& end, NVCollection& parameters)
+{
+	std::string pname;
+	std::string pvalue;
+	pname.reserve(32);
+	pvalue.reserve(64);
+	std::string::const_iterator it = begin;
+	while (it != end)
+	{
+		pname.clear();
+		pvalue.clear();
+		while (it != end && ::isspace(*it)) ++it;
+		while (it != end && *it != '=' && *it != ';') pname += *it++;
+		Poco::trimRightInPlace(pname);
+		if (it != end && *it != ';') ++it;
+		while (it != end && ::isspace(*it)) ++it;
+		while (it != end && *it != ';')
+		{
+			if (*it == '"')
+			{
+				++it;
+				while (it != end && *it != '"')
+				{
+					if (*it == '\\')
+					{
+						++it;
+						if (it != end) pvalue += *it++;
+					}
+					else pvalue += *it++;
+				}
+				if (it != end) ++it;
+			}
+			else if (*it == '\\')
+			{
+				++it;
+				if (it != end) pvalue += *it++;
+			}
+			else pvalue += *it++;
+		}
+		Poco::trimRightInPlace(pvalue);
+		if (!pname.empty()) parameters.add(pname, pvalue);
+		if (it != end) ++it;
+	}
 }
 
 

@@ -17,7 +17,7 @@
 //
 
 
-#include "Sourcey/Timeout.h"
+#include "Sourcey/Timer.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Util.h"
 
@@ -25,72 +25,6 @@
 namespace scy {
 
 
-Timeout::Timeout(long delay, bool autoStart) :
-	_startAt(0), _delay(delay) 
-{
-	if (autoStart)
-		start();
-}
-
-
-Timeout::Timeout(const Timeout& src) :
-	_startAt(src._startAt), _delay(src._delay) 
-{
-}
-
-
-Timeout& Timeout::operator = (const Timeout& src) 
-{
-	_startAt = src._startAt;
-	_delay = src._delay;
-	return *this;
-}
-
-
-Timeout::~Timeout() 
-{
-}
-
-
-bool Timeout::running() const 
-{
-	return _startAt != 0;
-}
-
-
-void Timeout::start() 
-{
-	_startAt = util::getTime();
-}
-
-
-void Timeout::stop() 
-{
-	_startAt = 0;
-}
-
-
-void Timeout::reset() 
-{
-	_startAt = util::getTime();
-}
-
-
-long Timeout::remaining() const 
-{
-	time_t current = util::getTime();
-	long remaining = static_cast<long>(_delay - (current - _startAt));
-	return remaining > 0 ? remaining : 0;
-}
-
-
-bool Timeout::expired() const 
-{
-	if (_delay == 0) //_startAt == 0 || 
-		return false;
-
-	return remaining() == 0;
-}
 
 
 } // namespace scy

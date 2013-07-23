@@ -21,8 +21,9 @@
 #define SOURCEY_DiagnosticManager_H
 
 
-#include "Sourcey/Manager.h"
+#include "Sourcey/Containers.h"
 #include "Sourcey/Stateful.h"
+#include "Poco/Thread.h"
 
 
 namespace scy {
@@ -108,7 +109,7 @@ protected:
 
 // ---------------------------------------------------------------------
 //
-typedef BasicManager<std::string, IDiagnostic> DiagnosticStore;	
+typedef PointerManager<std::string, IDiagnostic> DiagnosticStore;	
 
 	
 class DiagnosticManager: public DiagnosticStore

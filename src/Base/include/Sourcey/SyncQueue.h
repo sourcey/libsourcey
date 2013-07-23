@@ -24,7 +24,7 @@
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Memory.h"
 #include "Sourcey/Logger.h"
-#include "Poco/Stopwatch.h"
+#include "Sourcey/Timer.h"
 
 #include <deque>
 
@@ -102,15 +102,15 @@ protected:
 //
 class AsyncCallback: public SyncContext 
 {
-public:
+public:		
+	typedef void (*CallbackT)(void*);	
+	CallbackT callback;
+		/// Synchronized callback method
+
 	AsyncCallback(uv::Loop& loop) : 
-		SyncContext(loop), opaque(NULL)
+		SyncContext(loop), opaque(nullptr)
 	{
 	}
-		
-	typedef void (*Callback)(void*);	
-	Callback callback;
-		/// Synchronized callback method
 
 	void* opaque;
 		/// Client data pointer (unmanaged)
@@ -125,7 +125,7 @@ protected:
 		/// method from the uv::Loop thread.
 	{		
 		assert(opaque);
-		callback(opaque);
+		CallbackT(opaque);
 	}	
 };
 
@@ -227,8 +227,8 @@ protected:
 	Queue _queue;
 	int _maxSize;
 	int	_timeout;
-	Poco::Stopwatch	_stopwatch;	
-	mutable Mutex	_mutex;
+	Stopwatch _stopwatch;	
+	mutable Mutex _mutex;
 };
 
 

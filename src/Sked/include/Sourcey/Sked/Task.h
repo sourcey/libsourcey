@@ -33,7 +33,7 @@ namespace sked {
 class Scheduler;
 
 
-class Task: public scy::Task, public JSON::ISerializable
+class Task: public scy::Task, public json::ISerializable
 	/// This class extends the Task class to implement
 	/// scheduling capabilities.
 {
@@ -41,12 +41,12 @@ public:
 	Task(const std::string& type = "", const std::string& name = "");
 	Task(Scheduler& scheduler, const std::string& type, const std::string& name = "");
 	
-	virtual void start();
+	//virtual void start();
 		
-	virtual void serialize(JSON::Value& root);
+	virtual void serialize(json::Value& root);
 		/// Serializes the task to JSON.
 
-	virtual void deserialize(JSON::Value& root);
+	virtual void deserialize(json::Value& root);
 		/// Deserializes the task from JSON.
 
 	template<typename T>
@@ -93,20 +93,21 @@ protected:
 			reinterpret_cast<const Task*>(l)->remaining() <
 			reinterpret_cast<const Task*>(r)->remaining();
 	}
-	
-	sked::Scheduler* _scheduler;
-	sked::Trigger*   _trigger;
-	std::string      _type;
-	std::string      _name;
 
 	friend class Scheduler;
+	
+	std::string      _name;
+	std::string      _type;
+	sked::Trigger*   _trigger;
+	sked::Scheduler* _scheduler;
+	//std::unique_ptr<abstract::Runnable> _runnable;
 };
 
 
 typedef std::vector<sked::Task*> TaskList;
 	
 
-} } // namespace scy::Sked
+} } // namespace scy::sked
 
 
 #endif // SOURCEY_Sked_Task_H
@@ -116,16 +117,16 @@ typedef std::vector<sked::Task*> TaskList;
 
 	//Flags daysExcluded;
 	
-		//Poco::Timespan ts = now - scheduleAt;
+		//Timespan ts = now - scheduleAt;
 	/*
-	virtual void setTimeout(Poco::DateTime& time) {
-		Poco::DateTime now;
-		Poco::Timespan ts = now - time;
+	virtual void setTimeout(DateTime& time) {
+		DateTime now;
+		Timespan ts = now - time;
 		timeout.setDelay(ts.totalMilliseconds());
 	}
 	
-	Poco::DateTime createdAt;
-	Poco::DateTime scheduleAt;
+	DateTime createdAt;
+	DateTime scheduleAt;
 	*/
 		
 		//int nextDay;
@@ -133,9 +134,9 @@ typedef std::vector<sked::Task*> TaskList;
 		//setTimeout(timeOfDay);
 	//Timeout timeout;
 
-	//virtual void setTimeout(Poco::DateTime& time) {
+	//virtual void setTimeout(DateTime& time) {
 	//{
-	//	Poco::Timestamp now;
+	//	Timestamp now;
 	//	return scheduleAt > now;
 	//}
 		
@@ -143,7 +144,7 @@ typedef std::vector<sked::Task*> TaskList;
 		//Timespan ts = now - scheduleAt;
 		//timeout.setDelay(ts / 1000);
 		
-		//Poco::DateTime now;
+		//DateTime now;
 			
 		//while (true) {	
 		//}
@@ -151,20 +152,20 @@ typedef std::vector<sked::Task*> TaskList;
 
 
 		//if ()
-		//Poco::DateTime scheduleAt;
+		//DateTime scheduleAt;
 
 
 
-		//Poco::DateTime now;
-		//Poco::Timespan ts = now - scheduleAt;
+		//DateTime now;
+		//Timespan ts = now - scheduleAt;
 		//timeout.setDelay(ts / 1000);
 	
 	//now;
 	
 		//scheduleAt.timestamp();
-		//Poco::Timestamp now;
+		//Timestamp now;
 		//return scheduleAt > now;
-		//Poco::Timestamp now
+		//Timestamp now
 	//Timeout timeout;
 
 
@@ -174,7 +175,7 @@ typedef std::vector<sked::Task*> TaskList;
 	//Task(Scheduler& runner, long timeout = 0, long interval = 0);	
 //long timeout = 0, long interval = 0
 //protected:
-	//Poco::Timestamp time();
+	//Timestamp time();
 		/// Returns the time the task will be run.
 
 	//virtual const char* className() const { return "Task"; }
@@ -186,9 +187,9 @@ protected:
 	virtual void onTimeout() = 0;
 		/// Performs task processing when the timer fires.
 */
-	//mutable Poco::FastMutex	_mutex;	
-	//Poco::Timestamp _time;
-	//Poco::Timestamp _scheduleAt;
+	//mutable Mutex	_mutex;	
+	//Timestamp _time;
+	//Timestamp _scheduleAt;
 	//bool _repeat;
 
 	
@@ -197,8 +198,8 @@ protected:
 
 	
 	
-	//virtual void serialize(JSON::Value& root);
-	//virtual void deserialize(JSON::Value& root);
+	//virtual void serialize(json::Value& root);
+	//virtual void deserialize(json::Value& root);
 	//void schedule(std::time_t time);
-	//void schedule(const std::string& time, const std::string& fmt = Poco::TimestampFormat::ISO8601_FORMAT);
+	//void schedule(const std::string& time, const std::string& fmt = TimestampFormat::ISO8601_FORMAT);
 		/// Sets the time the task will be run.

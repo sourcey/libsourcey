@@ -23,9 +23,11 @@
 
 #include "uv.h"
 #include "Sourcey/Types.h"
-#include "Sourcey/Logger.h"
+#include "Sourcey/Exception.h"
+//#include "Sourcey/Logger.h"
 //#include "Sourcey/Memory.h"
 //#include <string>
+#include <assert.h>
 
 
 #define UVCallback(ClassName, Function, Handle)						 \
@@ -139,7 +141,7 @@ public:
 		_loop(loop ? loop : uv_default_loop()),
 		_handle((uv_handle_t*)handle) // must be NULL or uv_handle_t
 	{
-		//traceL("UVBase", this) << "Creating: " << _handle << std::endl;	
+		////traceL("UVBase", this) << "Creating: " << _handle << std::endl;	
 		if (_handle)
 			_handle->data = this;
 	}
@@ -183,7 +185,7 @@ public:
 		return _handle && uv_is_active(_handle) == 1;
 	}
 		
-	virtual scy::Error& error() 
+	const scy::Error& error() const
 		/// Returns the error context if any.
 	{ 
 		return _error;
@@ -221,7 +223,7 @@ public:
 	virtual void setError(const Error& err) 
 		/// Sets the error content and triggers callbacks.
 	{ 
-		errorL("UVBase", this) << "Setting error: " << err.message << std::endl;
+		//errorL("UVBase", this) << "Setting error: " << err.message << std::endl;
 		if (_error.uverr != err.uverr) {
 			_error = err; 
 			onError(err);
@@ -234,11 +236,11 @@ protected:
 		/// Protected destructor since some livub classes  
 		/// use reference counting memory management.
 	{
-		traceL("UVBase", this) << "Destroying: " << _handle << std::endl;	
+		//traceL("UVBase", this) << "Destroying: " << _handle << std::endl;	
 
 		// If the handle has not been deleted yet we free it now.
 		if (_handle) {
-			//traceL("UVBase", this) << "Destroying: Closing" << std::endl;	
+			////traceL("UVBase", this) << "Destroying: Closing" << std::endl;	
 			close();
 		}
 
@@ -248,7 +250,7 @@ protected:
 	virtual void close()
 		/// Closes and destroys the associated libuv handle.
 	{
-		traceL("UVBase", this) << "Closing: " << _handle << std::endl;	
+		//traceL("UVBase", this) << "Closing: " << _handle << std::endl;	
 		if (_handle) {
 			uv_close(_handle, uv::afterClose);
 
@@ -260,15 +262,15 @@ protected:
 			/// destroyed.
 			onClose();
 		}
-		else
-			warnL("UVBase", this) << "Already closing: " << _handle << std::endl;	
+		//else
+		//	warnL("UVBase", this) << "Already closing: " << _handle << std::endl;	
 	}
 
 	virtual void onError(const Error& error) 
 		/// Override to handle errors.
 		/// The error may be a UV error, or a custom error.
 	{		
-		errorL("UVBase", this) << "On Error: " << error.message << std::endl;	
+		//errorL("UVBase", this) << "On Error: " << error.message << std::endl;	
 	}
 
 	virtual std::string formatError(const std::string& prefix = "") const
@@ -285,7 +287,7 @@ protected:
 	virtual void onClose()
 		/// Override to handle closure.
 	{
-		traceL("UVBase", this) << "On Close" << std::endl;
+		//traceL("UVBase", this) << "On Close" << std::endl;
 	}
 
  protected:
@@ -467,18 +469,18 @@ struct AsyncDeleter
 		
 	static void afterClose(uv_handle_t* handle)
 	{
-		traceL("UVAsyncDeleter") << "After Close: " << handle << std::endl;		
+		//traceL("UVAsyncDeleter") << "After Close: " << handle << std::endl;		
 		AsyncDeleter* self = reinterpret_cast<AsyncDeleter*>(handle->data);
-		//traceL("UVAsyncDeleter", self) << "After Close: " << handle << std::endl;		
+		////traceL("UVAsyncDeleter", self) << "After Close: " << handle << std::endl;		
 		assert(self->handle);
 		assert(self->handle == handle);	
 		assert(self->handle->data == self);	
 		assert(uv_is_closing(self->handle));
 		
 		// print active handles
-		traceL("UVAsyncDeleter") << "After Close: Printing Handles" << std::endl;	
+		//traceL("UVAsyncDeleter") << "After Close: Printing Handles" << std::endl;	
 		uv_walk(self->handle->loop, AsyncDeleter::onPrintHandle, NULL);
-		traceL("UVAsyncDeleter") << "After Close: Printing Handles: OK" << std::endl;	
+		//traceL("UVAsyncDeleter") << "After Close: Printing Handles: OK" << std::endl;	
 
 		//delete self->handle; // TODO: Fixme
 		self->handle = NULL;

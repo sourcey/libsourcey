@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/STUN/Attributes.h"
-#include "Sourcey/IPacket.h"
+#include "Sourcey/Packet.h"
 
 
 namespace scy {

@@ -25,13 +25,13 @@ using namespace std;
 
 
 namespace scy {
-namespace uv {
 
 	
-Idler::Idler() //uv::Loop& loop) :
-	//Base<Base>(loop)
+Idler::Idler(uv::Loop& loop) :
+	uv::Base(&loop, new uv_idle_t)
 {
 	traceL("Idler", this) << "Creating" << endl;
+	init();
 }
 
 	
@@ -43,27 +43,36 @@ Idler::~Idler()
 
 void Idler::init()
 {
-	_handle.data = this;
-    uv_idle_init(loop(), &_handle);
+    uv_idle_init(loop(), handle<uv_idle_t>());
+
+	// Idlers do not reference the main loop.
+    uv_unref(handle());
+}
+
+
+namespace internal {
+
+	UVEmptyStatusCallback(Idler, onIdle, uv_idle_t);
+
 }
 	
 
 void Idler::start() 
 {		
-    uv_idle_start(&_handle, uv::onIdle);
+    uv_idle_start(handle<uv_idle_t>(), internal::onIdle);
 }
 
 
 void Idler::stop() 
 {
-	uv_idle_stop(&_handle);
+	uv_idle_stop(handle<uv_idle_t>());
 }
 
 
-void Idler::onIdle(int status) 
+void Idler::onIdle() 
 {
-	traceL("Idler", this) << "On Idle: " << status << endl;
+	traceL("Idler", this) << "On idle" << endl;
 }
 
 
-} } // namespace scy::uv
+} // namespace scy

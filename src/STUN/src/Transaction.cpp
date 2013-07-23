@@ -36,14 +36,13 @@ namespace stun {
 
 
 Transaction::Transaction(Socket& socket, 
-						 //const Address& localAddress, 
 						 const Address& peerAddress,
 						 long timeout, 
 						 int retries, 
 						 uv::Loop& loop) : 
-	net::Transaction<Message>(socket, peerAddress, timeout, retries, loop) //localAddress, 
+	net::Transaction<Message>(socket, peerAddress, timeout, retries, loop) 
 {
-	debugL("STUNTransaction", this) << "Initializing" << std::endl;
+	debugL("STUNTransaction", this) << "Creating" << std::endl;
 
 	// Register STUN message creation strategy
 	net::Transaction<Message>::factory.registerPacketType<stun::Message>(0);
@@ -63,9 +62,10 @@ bool Transaction::checkResponse(const Message& message)
 }
 
 
-void Transaction::onSuccess()
+void Transaction::onResponse()
 {
-	debugL("STUNTransaction", this) << "On Response" << std::endl;	
+	debugL("STUNTransaction", this) << "On response" << std::endl;	
+
 	_response.setType(_request.type());
 	_response.setState(Message::SuccessResponse);
 	if (_response.get<stun::ErrorCode>())
@@ -74,7 +74,7 @@ void Transaction::onSuccess()
 		_response.type() == Message::DataIndication)
 		_response.setState(Message::Indication);
 
-	net::Transaction<Message>::onSuccess();
+	net::Transaction<Message>::onResponse();
 }
 
 
@@ -113,7 +113,7 @@ void Transaction::onPacketReceived(void* sender, Message& message) //, net::Sock
 		update(message);
 		socket.detach(PolymorphicDelegate<Transaction, Message>(this, &Transaction::onPacketReceived));
 		Timer::getDefault().stop(TimerCallback<Transaction>(this, &Transaction::onTransactionTimeout));
-		setState(this, net::TransactionState::Success);
+		setState(this, TransactionState::Success);
 		throw StopPropagation();
 	}
 }
@@ -133,7 +133,7 @@ bool Transaction::receive(const Message& message, const net::Address& localAddre
 		update(message);
 		debugL("STUNTransaction", this) << "Transaction Response Received: " << response.toString() << std::endl;
 		Timer::getDefault().stop(TimerCallback<Transaction>(this, &Transaction::onTransactionTimeout));
-		setState(this, net::TransactionState::Success);
+		setState(this, TransactionState::Success);
 		return true;
 	}
 }

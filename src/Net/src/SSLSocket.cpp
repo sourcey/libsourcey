@@ -60,7 +60,7 @@ SSLBase& SSLSocket::base() const
 SSLBase::SSLBase() : 
 	// TODO: Using client context, should assert no bind()/listen() on this socket
 	_context(SSLManager::instance().defaultClientContext()), 
-	_session(NULL), 
+	_session(nullptr), 
 	_sslAdapter(this)
 {
 	traceL("SSLBase", this) << "Creating" << endl;
@@ -72,7 +72,7 @@ SSLBase::SSLBase() :
 
 SSLBase::SSLBase(SSLContext::Ptr context) : 
 	_context(context), 
-	_session(NULL), 
+	_session(nullptr), 
 	_sslAdapter(this)
 {
 	traceL("SSLBase", this) << "Creating" << endl;
@@ -238,7 +238,7 @@ void SSLBase::connect(const Address& peerAddress)
 	if (r) {
 		uv_err_t err = uv_last_error(loop());
 		setError(err);
-		throw Poco::Exception(uv_strerror(err)); // TODO: make exception setError option
+		throw Exception(uv_strerror(err)); // TODO: make exception setError option
 	}
 }
 */

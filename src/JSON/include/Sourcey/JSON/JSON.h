@@ -22,12 +22,16 @@
 
 
 #include "Sourcey/Types.h"
+#include "Sourcey/Exception.h"
 #include "json/json.h"
 #include <fstream>
 
 
 namespace scy {
 namespace json {
+
+
+// check https://code.google.com/p/rapidjson/
 
 	
 typedef Json::Value Value;
@@ -42,13 +46,13 @@ inline void loadFile(json::Value& root, const std::string& path)
 	std::ifstream infile;
 	infile.open(path.data(), std::ifstream::in);
 	if (!infile.is_open())		
-		throw Poco::OpenFileException("Cannot open input file: " + path);
+		throw OpenFileException("Cannot open input file: " + path);
 
 	json::Reader reader;
 	bool res = reader.parse(infile, root);
 	infile.close();
 	if (!res)
-		throw Poco::DataFormatException(reader.getFormatedErrorMessages());
+		throw Exception("Invalid JSON format: " + reader.getFormatedErrorMessages());
 }
 
 
@@ -58,7 +62,7 @@ inline void saveFile(const json::Value& root, const std::string& path)
 	std::ofstream outfile;
 	outfile.open(path.data());
 	if (!outfile.is_open())
-		throw Poco::FileException("Cannot open output file: " + path);
+		throw OpenFileException("Cannot open output file: " + path);
 
 	outfile << writer.write(root);
 	outfile.close();
@@ -94,7 +98,7 @@ inline std::string stringify(const json::Value& root, bool pretty = false)
 inline void assertMember(const json::Value& root,  const std::string& name) 
 {
 	if (!root.isMember(name))
-		throw Poco::Exception("A '" + name + "' member is required.");
+		throw Exception("A '" + name + "' member is required.");
 }
 
 
@@ -128,16 +132,16 @@ inline bool findNestedObjectWithProperty(json::Value& root, json::Value*& result
 	const std::string& key, const std::string& value, 
 	bool partial = true, int index = 0, int depth = 0) 
 	/// Only works for objects with string values.
-	/// Key or value may be empty for seleceting wildcard values.
+	/// Key or value may be empty for selecting wildcard values.
 	/// If partial is false substring matches will be accepted.
 	/// Result must be a reference to a pointer or the root value's
 	/// internal reference will also be changed when the result is 
-	/// assigned. Firther investigation into jsoncpp is required.
+	/// assigned. Further investigation into jsoncpp is required.
 {
 	depth++;
 	if (root.isObject()) {
 		json::Value::Members members = root.getMemberNames();
-		for (int i = 0; i < members.size(); i++) {		
+		for (size_t i = 0; i < members.size(); i++) {		
 			json::Value& test = root[members[i]];
 			if (test.isNull())
 				continue;
@@ -158,7 +162,7 @@ inline bool findNestedObjectWithProperty(json::Value& root, json::Value*& result
 		}
 	}
 	else if (root.isArray()) {		
-		for (int i = 0; i < root.size(); i++) {		
+		for (size_t i = 0; i < root.size(); i++) {		
 			json::Value& test = root[i];
 			if (!test.isNull() && (test.isObject() || test.isArray()) &&
 				findNestedObjectWithProperty(root[i], result, key, value, partial, index, depth))
@@ -169,8 +173,7 @@ inline bool findNestedObjectWithProperty(json::Value& root, json::Value*& result
 }
 
 
-} // namespace json
-} // namespace scy
+} } // namespace scy::json
 
 
 #endif // SOURCEY_JSON_H

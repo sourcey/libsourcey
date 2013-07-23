@@ -22,7 +22,7 @@
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 using namespace scy;
 
 namespace scy {
@@ -33,9 +33,9 @@ namespace av {
 //	Base Audio Context
 //
 AudioContext::AudioContext() :
-	stream(NULL),
-	codec(NULL),
-	frame(NULL),
+	stream(nullptr),
+	codec(nullptr),
+	frame(nullptr),
 	pts(0.0)
 {
 }
@@ -92,10 +92,10 @@ void AudioContext::close()
 //
 AudioEncoderContext::AudioEncoderContext(AVFormatContext* format) :
 	format(format),
-	resampler(NULL),
+	resampler(nullptr),
 	inputFrameSize(0),
 	outputFrameSize(0)//,
-	//buffer(NULL),
+	//buffer(nullptr),
 	//bufferSize(0)
 {
 }
@@ -180,7 +180,7 @@ void AudioEncoderContext::create()
 
 void AudioEncoderContext::close()
 {
-	debugL("AudioEncoderContext", this) << "Closing" << endl;
+	traceL("AudioEncoderContext", this) << "Closing" << endl;
 
 	AudioContext::close();	
 	
@@ -342,7 +342,7 @@ void AudioDecoderContext::create(AVFormatContext *ic, int streamID)
 {
 	AudioContext::create();
 	
-	debugL() << "[AudioDecoderContext:" << this << "] Creating: " << streamID << endl;
+	traceL() << "[AudioDecoderContext:" << this << "] Creating: " << streamID << endl;
 
 	assert(ic);
 	assert(streamID >= 0);
@@ -493,7 +493,7 @@ bool AudioDecoderContext::flush(AVPacket& opacket)
 
 	if (frameDecoded) {
 		InitDecodedAudioPacket(stream, ctx, frame, &opacket, &pts);
-		debugL() << "[AudioDecoderContext:" << this << "] Flushed Audio Frame: " << opacket.pts << endl;
+		traceL() << "[AudioDecoderContext:" << this << "] Flushed Audio Frame: " << opacket.pts << endl;
 		return true;
 	}
 	return false;
@@ -504,8 +504,8 @@ bool AudioDecoderContext::flush(AVPacket& opacket)
 // Audio Conversion Context
 //
 AudioResampler::AudioResampler() :
-	ctx(NULL),
-	outBuffer(NULL),
+	ctx(nullptr),
+	outBuffer(nullptr),
 	outNbSamples(0)
 {
 }
@@ -710,7 +710,7 @@ void InitDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, c
 /*
 void AudioEncoderContext::open()
 {
-	debugL("AudioEncoderContext", this) << "Opening: " << oparams.toString() << endl;
+	traceL("AudioEncoderContext", this) << "Opening: " << oparams.toString() << endl;
 	
 	assert(codec);
 	assert(frame);
@@ -730,7 +730,7 @@ void AudioEncoderContext::open()
 /*
 void AudioDecoderContext::open()
 {
-	debugL("AudioEncoderContext", this) << "Opening" << endl;
+	traceL("AudioEncoderContext", this) << "Opening" << endl;
 	
 	assert(codec);
 	assert(frame);
@@ -1021,7 +1021,7 @@ double AudioContext::pts()
 00635     ost->sync_opts = frame->pts + frame->nb_samples;
 00636 
 00637     av_assert0(pkt.size || !pkt.data);
-00638     update_benchmark(NULL);
+00638     update_benchmark(nullptr);
 00639     if (avcodec_encode_audio2(enc, &pkt, frame, &got_packet) < 0) {
 00640         av_log(NULL, AV_LOG_FATAL, "Audio encoding failed (avcodec_encode_audio2)\n");
 00641         exit(1);
@@ -1397,7 +1397,7 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 	} 
 	catch (Exception& exc) 
 	{
-		error = exc.displayText();
+		error = exc.message();
 		errorL() << "[AudioDecoderContext:" << this << "] Decoder Error: " << error << endl;
 		exc.rethrow();
 	}
@@ -1517,7 +1517,7 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 		throw Exception("Audio frame too big.");
 	
 	// Lock the mutex while encoding
-	//FastMutex::ScopedLock lock(_mutex);	
+	//Mutex::ScopedLock lock(_mutex);	
 
 	//if (!isReady())
 	//	throw Exception("The encoder is not initialized.");
@@ -1526,7 +1526,7 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 	assert(bufferSize);
 	assert(stream);
 
-	debugL("AudioEncoderContext", this) << "Input audio frame:\n" 
+	traceL("AudioEncoderContext", this) << "Input audio frame:\n" 
 		<< "Frame Size: " << bufferSize << "\n"
 		<< "Buffer Size: " << this->bufferSize << "\n"
 		//<< "Duration: " << frameDuration << "\n" 
@@ -1534,7 +1534,7 @@ void get_audio_frame(Int16 *samples, int frame_size, int nb_channels)
 		*/
 
 	/*
-	debugL("AudioEncoderContext", this) << "Encoded audio frame:" 
+	traceL("AudioEncoderContext", this) << "Encoded audio frame:" 
 		<< "\n\tFrame Size: " << size << "\n"
 		<< "\n\tCoded Frame: " << ctx->coded_frame << "\n"
 		<< "\n\tKey Frame: " << (packet->flags & AV_PKT_FLAG_KEY) << "\n"

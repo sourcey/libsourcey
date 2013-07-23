@@ -26,7 +26,7 @@
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 	
 class Form;
@@ -167,7 +167,7 @@ public:
 };
 
 
-} // namespace smple 
+} // namespace symple 
 } // namespace scy
 
 

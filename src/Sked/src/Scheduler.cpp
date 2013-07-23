@@ -19,14 +19,14 @@
 
 #include "Sourcey/Sked/Scheduler.h"
 #include "Sourcey/Logger.h"
-#include "Poco/SingletonHolder.h"
+#include "Sourcey/Platform.h"
+#include "Sourcey/Singleton.h"
 
 #include <algorithm>
 #include "assert.h"
 
 
 using namespace std;
-using namespace Poco;
 
 
 namespace scy {
@@ -46,42 +46,47 @@ Scheduler::~Scheduler()
 void Scheduler::schedule(sked::Task* task)
 {
 	Runner::start(task);
-	_wakeUp.set();
+	//_wakeUp.set();
 }
 
 
 void Scheduler::cancel(sked::Task* task) 
 {
 	Runner::cancel(task);
-	_wakeUp.set();
+	//_wakeUp.set();
 }
 
 
 void Scheduler::clear() 
 {
 	Runner::clear();
-	_wakeUp.set();
+	//_wakeUp.set();
 }
 
 
-void Scheduler::run() 
+void Scheduler::onIdle() 
 {
-	log("trace") << "Running" << endl;
+	//log("trace") << "Running" << endl;
+	//while (!_stopped) 
+	//{	
 
-	while (!_stopped) 
-	{	
 		// Update and sort the task list bringing the
 		// next scheduled task to the front of the list.
+		// TODO: Call only after task run, and when the
+		// initial task is NULL.
 		update();
 		
+		// TODO: Create a nextTask member so we don't 
+		// need to call next() on each iteration
 		sked::Task* task = reinterpret_cast<sked::Task*>(next());
 		
 		// Run the task
-		if (task) {	
+		if (task && 
+			task->trigger().timeout()) {	
 #if _DEBUG
 			{
-				Poco::DateTime now;
-				Poco::Timespan remaining = task->trigger().scheduleAt - now;
+				DateTime now;
+				Timespan remaining = task->trigger().scheduleAt - now;
 				log("trace") << "Waiting: "
 					<< "\n\tPID: " << task
 					<< "\n\tDays: " << remaining.days()
@@ -96,19 +101,19 @@ void Scheduler::run()
 #endif
 			
 			// Wait for the scheduled timeout
-			if (!task->trigger().timeout())
-				_wakeUp.tryWait(static_cast<long>(task->trigger().remaining()));
+			//if (!task->trigger().timeout())
+			//	_wakeUp.tryWait(static_cast<long>(task->trigger().remaining()));
 
 			// The task list may have changed during the timeout
 			// duration, or the current task deleted, so we need
 			// to ensure that the next pending task matches the
 			// current pending task.
-			if (task == next() && 
-				task->trigger().timeout() &&
+			if (//task == next() &&
+				//task->trigger().timeout() &&				
 				task->beforeRun()) {	
 #if _DEBUG						
 				{
-					Poco::DateTime now;
+					DateTime now;
 					log("trace") << "Running: "
 						<< "\n\tPID: " << task
 						<< "\n\tCurrentTime: " << DateTimeFormatter::format(now, sked::DateFormat)
@@ -129,60 +134,56 @@ void Scheduler::run()
 			else
 				log("trace") << "Skipping Task: " << task << endl;
 			
-			/*
 			// Destroy the task if needed
 			if (task->destroyed()) {
 				log("trace") << "Destroying Task: " << task << endl;	
 				assert(remove(task));
 				delete task;
 			}
-
-			log("trace") << "Running: OK: " << task << endl;
-			*/
+			
+			//log("trace") << "Running: OK: " << task << endl;
 		}
 
 		// Go to sleep if we have no tasks
-		else {
-			log("trace") << "Sleeping" << endl;
-			_wakeUp.wait();
-			log("trace") << "Waking up" << endl;
-		}
+		//else {
+		//	log("trace") << "Sleeping" << endl;
+		//	_wakeUp.wait();
+		//	log("trace") << "Waking up" << endl;
+		//}
 
 		// Gulp
-		Thread::sleep(10);		
+		//Thread::sleep(10);		
 
 		// Dispatch the Idle signal
 		// TODO: Send Idle complete iteration of all tasks, 
 		// rather than after each task.
-		Idle.emit(this);
-	}
+		//Idle.emit(this);
+	//}
 			
-	log("trace") << "Shutdown" << endl;		
-	Shutdown.emit(this);
-	log("trace") << "Exiting" << endl;
+	//log("trace") << "Shutdown" << endl;		
+	//Shutdown.emit(this);
+	//log("trace") << "Exiting" << endl;
 }
 
 
 void Scheduler::update()
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	
-	log("trace") << "Updating: " << _tasks.size() << endl;
+	//log("trace") << "Updating: " << _tasks.size() << endl;
 
 	// Update and clean the task list
 	TaskList::iterator it = _tasks.begin();
 	while (it != _tasks.end()) {
 		sked::Task* task = reinterpret_cast<sked::Task*>(*it);
-		//assert(task);
 		if (task->destroyed()) {
 			it = _tasks.erase(it);
 			onRemove(task);
 			log("trace") << "Destroying: " << task << endl;
 			delete task;
 		}
-		else {
+		else
 			++it;
-		}
 	}
 	
 	// Sort the task list to the next task to 
@@ -191,30 +192,30 @@ void Scheduler::update()
 }
 
 
-void Scheduler::serialize(JSON::Value& root)
+void Scheduler::serialize(json::Value& root)
 {
 	log("trace") << "Serializing" << endl;
 	
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		sked::Task* task = reinterpret_cast<sked::Task*>(*it);
 		log("trace") << "Serializing: " << task << endl;
-		JSON::Value& entry = root[root.size()];
+		json::Value& entry = root[root.size()];
 		task->serialize(entry);
 		task->trigger().serialize(entry["trigger"]);
 	}
 }
 
 
-void Scheduler::deserialize(JSON::Value& root)
+void Scheduler::deserialize(json::Value& root)
 {
 	log("trace") << "Deserializing" << endl;
 	
-	for (JSON::ValueIterator it = root.begin(); it != root.end(); it++) {
+	for (json::ValueIterator it = root.begin(); it != root.end(); it++) {
 		sked::Task* task = NULL;
 		sked::Trigger* trigger = NULL;
 		try {
-			JSON::assertMember(*it, "trigger");
+			json::assertMember(*it, "trigger");
 			task = factory().createTask((*it)["type"].asString());
 			task->deserialize((*it));
 			trigger = factory().createTrigger((*it)["trigger"]["type"].asString());
@@ -227,7 +228,7 @@ void Scheduler::deserialize(JSON::Value& root)
 				delete task;
 			if (trigger)
 				delete trigger;
-			log("error") << "Deserialization Error: " << exc.displayText() << endl;
+			log("error") << "Deserialization Error: " << exc.message() << endl;
 		}
 	}
 }
@@ -235,8 +236,8 @@ void Scheduler::deserialize(JSON::Value& root)
 
 void Scheduler::print(ostream& ost)
 {
-	JSON::StyledWriter writer;
-	JSON::Value data;
+	json::StyledWriter writer;
+	json::Value data;
 	serialize(data);
 	ost << writer.write(data);
 }
@@ -244,7 +245,7 @@ void Scheduler::print(ostream& ost)
 
 Scheduler& Scheduler::getDefault() 
 {
-	static SingletonHolder<Scheduler> sh;
+	static Singleton<Scheduler> sh;
 	return *sh.get();
 }
 
@@ -255,7 +256,7 @@ sked::TaskFactory& Scheduler::factory()
 }
 
 
-} } // namespace scy::Sked
+} } // namespace scy::sked
 
 
 
@@ -266,7 +267,7 @@ sked::TaskFactory& Scheduler::factory()
 			// Push the task back onto the end of the queue
 			//else {
 			//	log("trace") << "Replacing Task: " << task << endl;	
-			//	FastMutex::ScopedLock lock(_mutex);
+			//	Mutex::ScopedLock lock(_mutex);
 			//	_tasks.push_back(task);
 			//}	
 			//sked::Trigger& trigger = reinterpret_cast<sked::Task*>(task)->trigger();
@@ -276,7 +277,7 @@ sked::TaskFactory& Scheduler::factory()
 	//	return;
 	//}
 	
-	//JSON::Value& entry = root[(size_t)0];
+	//json::Value& entry = root[(size_t)0];
 		//entry = root[root.size()];
 
 	
@@ -287,7 +288,7 @@ sked::TaskFactory& Scheduler::factory()
 	//countNestedKeys(*it, key, count, depth);
 
 	/*
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		log("trace") << "Serializing: " << it->second << endl;
 		reinterpret_cast<sked::Task*>(it->second)->serialize(root[root.size()]);
@@ -315,13 +316,13 @@ sked::TaskFactory& Scheduler::factory()
 
 sked::TaskList Scheduler::tasks() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _tasks;
 }
 
 void Scheduler::clear()
 {
-	FastMutex::ScopedLock lock(_mutex);			
+	Mutex::ScopedLock lock(_mutex);			
 
 	sked::TaskList::iterator it = _tasks.begin();
 	while (it != _tasks.end()) {
@@ -351,7 +352,7 @@ void Scheduler::clear()
 	// Attempt to stop any matching tasks
 	//cancel(task);
 	//{
-	//	FastMutex::ScopedLock lock(_mutex);
+	//	Mutex::ScopedLock lock(_mutex);
 	//	_tasks.push_back(task);	//.clone()
 	//}
 	//sort(_tasks.begin(), _tasks.end(), CompareTimeout);
@@ -367,7 +368,7 @@ void Scheduler::clear()
 	
 	bool success = false;
 	{
-		FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		for (sked::TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 			if (*it == task) {
 				log("trace") << "Stopped: " << *it << endl;
@@ -388,7 +389,7 @@ void Scheduler::clear()
 /*
 Timeout Scheduler::scheduleAt() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _scheduleAt;
 }
 */
@@ -408,7 +409,7 @@ Timeout Scheduler::scheduleAt() const
 
 		// Obtain the next scheduled task
 		{
-			FastMutex::ScopedLock lock(_mutex);			
+			Mutex::ScopedLock lock(_mutex);			
 			task = _tasks.empty() ? NULL : _tasks.front();
 		}
 
@@ -424,7 +425,7 @@ Timeout Scheduler::scheduleAt() const
 			task->run();				
 			//}
 			//catch (Exception& exc) {
-			//	log("error") << "Swallowing Exception: " << exc.displayText() << endl;
+			//	log("error") << "Swallowing Exception: " << exc.message() << endl;
 			//}
 		}
 
@@ -453,7 +454,7 @@ Timeout Scheduler::scheduleAt() const
 				*/
 
 				/*
-				FastMutex::ScopedLock l(_mutex);			
+				Mutex::ScopedLock l(_mutex);			
 
 				// Update and clean the task list
 				sked::TaskList::iterator it = _tasks.begin();
@@ -517,7 +518,7 @@ Timeout Scheduler::scheduleAt() const
 
 void Scheduler::stopAll(const void* klass)
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (sked::TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if ((*it)->object() == klass) {
 			log("trace") << "Stopped: " << (*it)->object() << endl;
@@ -529,7 +530,7 @@ void Scheduler::stopAll(const void* klass)
 
 void Scheduler::reset(sked::Task* task) 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	bool success = false;
 	for (sked::TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (**it == task) {

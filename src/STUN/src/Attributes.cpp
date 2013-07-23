@@ -308,13 +308,13 @@ void AddressAttribute::setIP(const string& ip)
 bool AddressAttribute::read(Buffer& buf) 
 {
 	UInt8 dummy;
-	if (!buf.readU8(dummy))
+	if (!buf.getU8(dummy))
 		return false;
-	if (!buf.readU8(_family))
+	if (!buf.getU8(_family))
 		return false;
-	if (!buf.readU16(_port))
+	if (!buf.getU16(_port))
 		return false;
-	if (!buf.readU32(_ip))
+	if (!buf.getU32(_ip))
 		return false;
 	return true;
 }
@@ -322,10 +322,10 @@ bool AddressAttribute::read(Buffer& buf)
 
 void AddressAttribute::write(Buffer& buf) const 
 {
-	buf.writeU8(0);
-	buf.writeU8(_family);
-	buf.writeU16(_port);
-	buf.writeU32(_ip);
+	buf.putU8(0);
+	buf.putU8(_family);
+	buf.putU16(_port);
+	buf.putU32(_ip);
 }
 
 
@@ -367,7 +367,7 @@ void UInt8Attribute::setBit(int index, bool value)
 
 bool UInt8Attribute::read(Buffer& buf) 
 {
-	if (!buf.readU8(_bits)) {		
+	if (!buf.getU8(_bits)) {		
 		return false;
 	}
 	return true;
@@ -376,7 +376,7 @@ bool UInt8Attribute::read(Buffer& buf)
 
 void UInt8Attribute::write(Buffer& buf) const 
 {
-	buf.writeU8(_bits);
+	buf.putU8(_bits);
 }
 
 
@@ -418,7 +418,7 @@ void UInt32Attribute::setBit(int index, bool value)
 
 bool UInt32Attribute::read(Buffer& buf) 
 {
-	if (!buf.readU32(_bits)) {		
+	if (!buf.getU32(_bits)) {		
 		return false;
 	}
 	return true;
@@ -426,7 +426,7 @@ bool UInt32Attribute::read(Buffer& buf)
 
 void UInt32Attribute::write(Buffer& buf) const 
 {
-	buf.writeU32(_bits);
+	buf.putU32(_bits);
 }
 
 
@@ -468,7 +468,7 @@ void UInt64Attribute::setBit(int index, bool value)
 
 bool UInt64Attribute::read(Buffer& buf) 
 {
-	if (!buf.readU64(_bits))	
+	if (!buf.getU64(_bits))	
 		return false;
 	return true;
 }
@@ -476,7 +476,7 @@ bool UInt64Attribute::read(Buffer& buf)
 
 void UInt64Attribute::write(Buffer& buf) const 
 {
-	buf.writeU64(_bits);
+	buf.putU64(_bits);
 }
 
 
@@ -576,7 +576,7 @@ bool StringAttribute::read(Buffer& buf)
 	//if (_bytes)
 		delete [] _bytes;
 	_bytes = new char[size()];	
-	if (!buf.read(_bytes, size()))
+	if (!buf.get(_bytes, size()))
 		return false;
 	return true;
 }
@@ -585,7 +585,7 @@ bool StringAttribute::read(Buffer& buf)
 void StringAttribute::write(Buffer& buf) const 
 {
 	if (_bytes) {
-		buf.write(_bytes, size());
+		buf.put(_bytes, size());
 	}
 }
 
@@ -616,13 +616,13 @@ Fingerprint::Fingerprint() :
 
 	/*
 void Fingerprint::write(Buffer& buf) const {
-	buf.writeU32(_crc32);
+	buf.putU32(_crc32);
 }
 
 
 bool Fingerprint::read(Buffer& buf) {
 	try {
-		buf.readU32(_crc32);
+		buf.getU32(_crc32);
 	}
 	catch(...) {
 		return false;
@@ -672,7 +672,7 @@ bool MessageIntegrity::verifyHmac(const string& key) const
 	//debugL() << "Message: Packet integrity input (" << _input << ")" << endl;
 	//debugL() << "Message: Packet integrity key (" << key << ")" << endl;
 
-	string hmac = crypt::computeHMAC(_input, key);
+	string hmac = crypto::computeHMAC(_input, key);
 	assert(hmac.size() == Size);
 
 	//debugL() << "Message: Verifying message integrity (" << hmac << ":" << _hmac << ")" << endl;
@@ -686,7 +686,7 @@ bool MessageIntegrity::read(Buffer& buf)
 	//debugL() << "Message: Read HMAC" << endl;
 
 	// Read the HMAC value.
-	if (!buf.read(_hmac, MessageIntegrity::Size))
+	if (!buf.get(_hmac, MessageIntegrity::Size))
 		return false;
 
 	//debugL() << "Message: Parsed message integrity (" << _hmac << ")" << endl;
@@ -698,16 +698,16 @@ bool MessageIntegrity::read(Buffer& buf)
 
 	// Get the message prior to the current attribute and
 	// fill the attribute with dummy content.
-	//Buffer hmacBuf(buf.data(), buf.size() - MessageIntegrity::Size);
+	//Buffer hmacBuf(buf.data(), buf.available() - MessageIntegrity::Size);
 	Buffer hmacBuf;
-	hmacBuf.write(buf.data(), buf.size() - MessageIntegrity::Size);
-	hmacBuf.write("00000000000000000000");
+	hmacBuf.put(buf.data(), buf.available() - MessageIntegrity::Size);
+	hmacBuf.put("00000000000000000000");
 
 	// Ensure the STUN message size value represents the real 
 	// size of the buffered message.
-	//hmacBuf.updateU32((UInt32)buf.size(), 2);
-	hmacBuf.updateU32((UInt32)buf.size(), 2);
-	_input.assign(hmacBuf.data(), hmacBuf.size());
+	//hmacBuf.updateU32((UInt32)buf.available(), 2);
+	hmacBuf.updateU32((UInt32)buf.available(), 2);
+	_input.assign(hmacBuf.data(), hmacBuf.available());
 	  
 	// Reset the original position of the buffer.
 	buf.position(originalPos);
@@ -727,25 +727,25 @@ void MessageIntegrity::write(Buffer& buf) const
 
 		// Get the message prior to the current attribute and
 		// fill the attribute with dummy content.
-		//Buffer hmacBuf(buf.data(), buf.size());		
+		//Buffer hmacBuf(buf.data(), buf.available());		
 		Buffer hmacBuf;
-		hmacBuf.write(buf.data(), buf.size());
-		hmacBuf.write("00000000000000000000");
+		hmacBuf.put(buf.data(), buf.available());
+		hmacBuf.put("00000000000000000000");
 
 		// Ensure the STUN message size value represents the real 
 		// size of the buffered message.
-		hmacBuf.updateU32((UInt32)buf.size() + MessageIntegrity::Size, 2);
+		hmacBuf.updateU32((UInt32)buf.available() + MessageIntegrity::Size, 2);
 
-		string input(hmacBuf.data(), hmacBuf.size());
-		string hmac(crypt::computeHMAC(input, _key));
+		string input(hmacBuf.data(), hmacBuf.available());
+		string hmac(crypto::computeHMAC(input, _key));
 		assert(hmac.size() == MessageIntegrity::Size);
 
 		// Append the real HAMC to the buffer.
-		buf.write(hmac.data(), MessageIntegrity::Size);
+		buf.put(hmac.data(), MessageIntegrity::Size);
 	}
 	else {
 		assert(!_hmac.empty());
-		buf.write(_hmac.data(), MessageIntegrity::Size);
+		buf.put(_hmac.data(), MessageIntegrity::Size);
 	}
 }
 
@@ -801,7 +801,7 @@ void ErrorCode::setReason(const string& reason)
 bool ErrorCode::read(Buffer& buf) 
 {
 	UInt32 val;
-	if (!buf.readU32(val))
+	if (!buf.getU32(val))
 		return false;
 
 	if ((val >> 11) != 0)
@@ -809,7 +809,7 @@ bool ErrorCode::read(Buffer& buf)
 
 	setErrorCode(val);
 
-	if (!buf.read(_reason, size() - 4))
+	if (!buf.get(_reason, size() - 4))
 		return false;
 
 	return true;
@@ -817,8 +817,8 @@ bool ErrorCode::read(Buffer& buf)
 
 void ErrorCode::write(Buffer& buf) const 
 {
-	buf.writeU32(errorCode());
-	buf.write(_reason);
+	buf.putU32(errorCode());
+	buf.put(_reason);
 }
 
 
@@ -883,7 +883,7 @@ bool UInt16ListAttribute::read(Buffer& buf)
 {
 	for (int i = 0; i < size() / 2; i++) {
 		UInt16 attr;
-		if (!buf.readU16(attr))
+		if (!buf.getU16(attr))
 			return false;
 		_attrTypes.push_back(attr);
 	}
@@ -893,7 +893,7 @@ bool UInt16ListAttribute::read(Buffer& buf)
 void UInt16ListAttribute::write(Buffer& buf) const 
 {
 	for (unsigned i = 0; i < _attrTypes.size(); i++)
-		buf.writeU16(_attrTypes[i]);
+		buf.putU16(_attrTypes[i]);
 }
 
 

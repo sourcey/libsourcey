@@ -26,10 +26,10 @@
 #include "Sourcey/Pacman/Package.h"
 #include "Sourcey/Pacman/InstallTask.h"
 #include "Sourcey/Pacman/InstallMonitor.h"
-#include "Sourcey/EventfulManager.h"
+#include "Sourcey/Containers.h"
 #include "Sourcey/Stateful.h"
 #include "Sourcey/Runner.h"
-#include "Sourcey/HTTP/Transaction.h"
+#include "Sourcey/HTTP/Client.h"
 #include "Sourcey/JSON/JSON.h"
 
 #include "Poco/Zip/ZipLocalFileHeader.h"
@@ -40,12 +40,12 @@
 
 
 namespace scy { 
-namespace pcman {
+namespace pman {
 
 
-typedef EventfulManager<std::string, LocalPackage>	LocalPackageStore;
+typedef EventedManager<std::string, LocalPackage>	LocalPackageStore;
 typedef LocalPackageStore::Map						LocalPackageMap;
-typedef EventfulManager<std::string, RemotePackage>	RemotePackageStore;
+typedef EventedManager<std::string, RemotePackage>	RemotePackageStore;
 typedef RemotePackageStore::Map						RemotePackageMap;
 
 
@@ -224,25 +224,25 @@ public:
 	//
 	/// File Helper Methods
 	//
-	virtual void clearCache();
+	void clearCache();
 		/// Clears all files in the cache directory.
 
-	virtual bool clearPackageCache(LocalPackage& package);
+	bool clearPackageCache(LocalPackage& package);
 		/// Clears a package archive from the local cache.
 
-	virtual bool clearCacheFile(const std::string& fileName, bool whiny = false);
+	bool clearCacheFile(const std::string& fileName, bool whiny = false);
 		/// Clears a file from the local cache.
 
-	virtual bool hasCachedFile(Package::Asset& asset);
+	bool hasCachedFile(Package::Asset& asset);
 		/// Checks if a package archive exists in the local cache.
 	
-	virtual bool isSupportedFileType(const std::string& fileName);
+	bool isSupportedFileType(const std::string& fileName);
 		/// Checks if the file type is a supported package archive.
 	
-	virtual Poco::Path getCacheFilePath(const std::string& fileName);
+	Poco::Path getCacheFilePath(const std::string& fileName);
 		/// Returns the full path of the cached file if it exists,
 		/// or an empty path if the file doesn't exist.
-	virtual Poco::Path getIntermediatePackageDir(const std::string& id);
+	Poco::Path getIntermediatePackageDir(const std::string& id);
 		/// Returns the the intermediate package directory for the
 		/// given package ID.
 	
@@ -267,10 +267,12 @@ protected:
 	//
 	/// Callbacks
 	//
-	virtual void onPackageInstallComplete(void* sender);
+	void onPackageInstallComplete(void* sender);
+
+	void onPackagesResponse(void* sender, const http::Response& response);
 	
 protected:	
-	mutable Poco::FastMutex _mutex;
+	mutable Mutex _mutex;
 	Options				_options;
 	LocalPackageStore	_localPackages;
 	RemotePackageStore	_remotePackages;
@@ -279,7 +281,7 @@ protected:
 
 
 
-} } // namespace scy::Pacman
+} } // namespace scy::pman
 
 
 #endif // SOURCEY_Pacman_PackageManager_H

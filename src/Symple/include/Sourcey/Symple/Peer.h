@@ -26,7 +26,7 @@
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
 class Peer: public json::Value
@@ -67,11 +67,11 @@ public:
 		return os;
 	}
 	
-	virtual const char* className() const { return "smple::Peer"; }
+	virtual const char* className() const { return "smpl::Peer"; }
 };
 
 
-} // namespace smple 
+} // namespace symple 
 } // namespace scy
 
 

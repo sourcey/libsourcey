@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SOURCEY_IRunnable_H
-#define SOURCEY_IRunnable_H
+#ifndef SOURCEY_Interfaces1_H
+#define SOURCEY_Interfaces1_H
 
 
 #include "Poco/Thread.h"
@@ -26,18 +26,7 @@
 
 namespace scy {
 
-		
-class IRunnable: public Poco::Runnable
-	/// Defines a generic interface for class
-	/// that can be run and cancelled.
-{
-public:
-	virtual void run() = 0;
-	virtual void cancel() = 0;
-};
-
-
 } // namespace scy
 
 
-#endif // SOURCEY_IRunnable_H
+#endif // SOURCEY_Interfaces1_H

@@ -19,14 +19,11 @@
 
 #include "Sourcey/Media/FormatRegistry.h"
 
-#include "Poco/SingletonHolder.h"
+#include "Sourcey/Singleton.h"
 #include "Poco/Format.h"
 
 
 using namespace std;
-using Poco::SingletonHolder;
-using Poco::FastMutex;
-using Poco::format;
 
 
 namespace scy {
@@ -47,14 +44,14 @@ FormatRegistry::~FormatRegistry()
 
 FormatRegistry& FormatRegistry::instance() 
 {
-	static SingletonHolder<FormatRegistry> sh;
+	static Singleton<FormatRegistry> sh;
 	return *sh.get();
 }
 
 
 Format& FormatRegistry::get(const string& name) 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (unsigned int i = 0; i < _formats.size(); i++) {
 		if (_formats[i].name == name) {
 			return _formats[i];
@@ -67,7 +64,7 @@ Format& FormatRegistry::get(const string& name)
 
 Format& FormatRegistry::getByID(const string& id) 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (unsigned int i = 0; i < _formats.size(); i++) {
 		if (_formats[i].id == id) {
 			return _formats[i];
@@ -81,7 +78,7 @@ Format& FormatRegistry::getByID(const string& id)
 Format& FormatRegistry::getOrDefault(const string& name) 
 {
 	{
-		FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		for (unsigned int i = 0; i < _formats.size(); i++) {
 			if (_formats[i].name == name) {
 				return _formats[i];
@@ -95,7 +92,7 @@ Format& FormatRegistry::getOrDefault(const string& name)
 
 Format& FormatRegistry::getDefault() 
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	if (!_default.empty()) {
 		return get(_default);
 	}
@@ -109,7 +106,7 @@ Format& FormatRegistry::getDefault()
 
 bool FormatRegistry::exists(const string& name)
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (unsigned int i = 0; i < _formats.size(); i++) {
 		if (_formats[i].name == name) {
 			return true;
@@ -122,14 +119,14 @@ bool FormatRegistry::exists(const string& name)
 
 void FormatRegistry::clear()
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_formats.clear();
 }
 
 
 FormatList FormatRegistry::formats() const
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _formats; 
 }
 
@@ -137,14 +134,14 @@ FormatList FormatRegistry::formats() const
 void FormatRegistry::registerFormat(const Format& format)	
 { 
 	unregisterFormat(format.name);
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
     _formats.push_back(format);
 }
 
 
 bool FormatRegistry::unregisterFormat(const string& name)	
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (FormatList::iterator it = _formats.begin(); it != _formats.end(); ++it) {
 		if ((*it).name == name) {
 			_formats.erase(it);
@@ -159,7 +156,7 @@ bool FormatRegistry::unregisterFormat(const string& name)
 
 void FormatRegistry::setDefault(const string& name)
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_default = name;
 }
 

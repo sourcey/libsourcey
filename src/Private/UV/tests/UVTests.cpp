@@ -1,742 +1,352 @@
-
-
-//#include "Sourcey/UVPP.h"
-#include "Sourcey/Base.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Net/Address.h"
-#include "Sourcey/Net/TCPSocket.h"
-#include "Sourcey/Timer.h"
-#include "Sourcey/Net/Reactor.h"
-
-#include "Poco/Stopwatch.h"
-#include "Poco/Net/NetException.h"
-#include "Poco/Net/DNS.h"
-#include "Poco/Mutex.h"
-
-#include "SourceyReactorEchoServer.h"
-//#include "SourceyAsyncReactorEchoServer.h"
-#include "PocoReactorEchoServer.h"
-#include "PocoEchoServer.h"
-//#include "UVEchoServer.h"
-
-
-//#include "bak/AsyncLoop.h"
-
+#include "Sourcey/UV/UVPP.h"
 #include "assert.h"
+#include <iterator>
 
-/*
-#include "Timer.h"
-#include "IP.h"
-#include "Poco/RefCountedObject.h"
-#include "Poco/Exception.h"
-#include "Net/NetException.h"
-#include "Net/SocketAddress.h"
-#include "Timer.h"
-#include "UDPSocket.h"
-#include "NetException.h"
-
-#include "Sourcey/Net/Address.h"
-
-
-#include "Sourcey/Timer.h"
-#include "IOStream.h"
-#include "AsyncLoop.h"
-#include "uv.h"
-#include "Sourcey/Timer.h"
-
-#include "Sourcey/Net/UDPPacketSocket.h"
-#include "Sourcey/Net/TCPPacketSocket.h"
-#include "Sourcey/Net/TCPServer.h"
-*/
-
-
-#include <Windows.h>
-#include <Iphlpapi.h>
 
 using namespace std;
-using namespace Sourcey;
-using namespace Sourcey::Net;
-
-using Poco::InvalidArgumentException;
+using namespace scy;
+using namespace scy::net;
 
 
 /*
-using namespace Sourcey;
-using namespace Sourcey::Net;
-//using namespace Sourcey;
-
-// Detect Memory Leaks
-#ifdef _DEBUG
+// Detect memory leaks on winders
+#if defined(_DEBUG) && defined(_WIN32)
 #include "MemLeakDetect/MemLeakDetect.h"
+#include "MemLeakDetect/MemLeakDetect.cpp"
 CMemLeakDetect memLeakDetect;
 #endif
 */
 
 
-namespace Sourcey {
+using namespace scy;// {
 	
 
-struct BenchmarkResult {
-	int numSuccess;
-	std::string name;
-	Poco::Stopwatch sw;
+using uv::TCPEchoServer;
+//using uv::TCPServerPtr;
+//using uv::SSLEchoServer;
+//using uv::SSLServerPtr;
+
+
+template <typename SocketT>
+class UVClientSocketTest
+{
+public:
+	typename SocketT socket;
+	net::Address address;
+
+	UVClientSocketTest(short port, bool ghost = false) :
+		address("127.0.0.1", port)
+	{		
+		traceL("UVClientSocketTest") << "Creating: " << port << std::endl;
+	}
+
+	~UVClientSocketTest()
+	{
+		traceL("UVClientSocketTest") << "Destroying" << std::endl;
+		assert(socket.base().refCount() == 1);
+	}
+
+	void run() 
+	{
+		// Create the socket instance on the stack.
+		// When the socket is closed it will unref the main loop
+		// causing the test to complete successfully.
+		socket.Recv += delegate(this, &UVClientSocketTest::onRecv);
+		socket.Connect += delegate(this, &UVClientSocketTest::onConnected);
+		socket.Error += delegate(this, &UVClientSocketTest::onError);
+		socket.Close += delegate(this, &UVClientSocketTest::onClosed);
+		socket.connect(address);
+		assert(socket.base().refCount() == 1);
+	}
+
+	void stop() 
+	{
+		//socket.close();
+		socket.shutdown();
+	}
+	
+	void onConnected(void* sender)
+	{
+		traceL("UVClientSocketTest") << "Connected" << endl;
+		assert(sender == &socket);
+		socket.send("client > server", 15);
+		socket.send("client > server", 15);
+		socket.send("client > server", 15);
+	}
+	
+	void onRecv(void* sender, net::SocketPacket& packet)
+	{
+		assert(sender == &socket);
+		string data(packet.data(), 15);
+		traceL("UVClientSocketTest") << "Recv: " << data << endl;	
+
+		// Check for return packet echoing sent data
+		if (data == "client > server") {
+			traceL("UVClientSocketTest") << "Recv: Got Return Packet!" << endl;
+			
+			// Send the shutdown command to close the connection gracefully.
+			// The peer disconnection will trigger an eof error callback
+			// which notifies us that the connection is dead.
+			//socket.shutdown();
+			//socket.close();
+		}
+		else 
+			assert(false); // fail...
+	}
+
+	void onError(void* sender, int err, const std::string& message)
+	{
+		//uv::SocketT::Base* socket = reinterpret_cast<uv::SocketT::Base*>(sender);	
+		errorL("UVClientSocketTest") << "On Error: " << err << ": " << message << endl;
+		assert(sender == &socket);
+
+		// Close the socket handle to dereference the main loop.
+		//socket.close();
+	}
+	
+	void onClosed(void* sender)
+	{
+		traceL("UVClientSocketTest") << "On Closed" << endl;
+		// The last callback to fire is the Closed signal  
+		// which notifies us the underlying libuv socket 
+		// handle is closed. Das is gut!
+	}
 };
-	
-static int numRequests;
-static int numIterations;
-static int numInstances;
-static Poco::Event ready;
-static BenchmarkResult* benchmark;
+
+
+#define TEST_SSL 0// 1
+
+
 
 	
+			/*
+static void onPrintHandle1(uv_handle_t* handle, void* arg) 
+{
+	debugL("onPrintHandle") << ">>>#### Active Handle: " << handle << std::endl;
+	uv_tcp_t* tcp = (uv_tcp_t*)handle;
+	if (handle->type == UV_TCP) {
+		debugL("onPrintHandle") << ">>>#### Active TCP Handle: " << tcp << std::endl;
+		tcp;
+	}
+}
+
+
 class Tests
 {
 public:
+	struct Result {
+		int numSuccess;
+		string name;
+		Poco::Stopwatch sw;
 
-
-
-	Tests()
-	{	
-
-		//testThread();
-		//testAddress();
-		//runTimerTest();
-		//runUDPSocketTest();
-		runSocketConenctionTest();
-	}
-	
-	// ============================================================================
-	//
-	// Thread Test
-	//
-	// ============================================================================	
-	
-	/*
-class BasicReactorSignal: public SignalBase<Reactor&, const Poco::Net::Socket&, void*, void*, ReactorDelegate>
-{
-public:	
-	BasicReactorSignal() {};
-	virtual ~BasicReactorSignal() {}
-
-	unsigned events; // pending events
-};void*,
-	//
-	//ReactorSignal ReactorEventSignal;	
-	//ReactorSignal BasicReactorSignal;
-	
-
-	void onClientSocketConnected(ReactorEvent&)
-	{
-		Log("trace") << "[Tests:" << this << "] onClientSocketConnected" << std::endl;
-	}
-
-	void onBasicReactorSignal() //void*
-	{
-		Log("trace") << "[Tests:" << this << "] onBasicReactorSignal" << std::endl;
-	}
-
-	void testThread()
-	{	
-		//assert(reactorCallback(this, &Tests::onClientSocketConnected) == reactorCallback(this, &Tests::onClientSocketConnected));
-		//Reactor reactor; //(333);
-		//reactor.attach();
-		//ReactorEventSignal += reactorCallback(this, &Tests::onClientSocketConnected);
-		//BasicReactorSignal += reactorCallback(this, &Tests::onBasicReactorSignal);
-		//BasicReactorSignal += delegate(this, &Tests::onBasicReactorSignal);
-	}
-*/
-	
-
-	/*
-	// ============================================================================
-	//
-	// Thread Test
-	//
-	// ============================================================================	
-	// A simple thread with 1s sleep
-	class BTestThread : public Thread{
-	public:
-		void run(){
-			std::cout<<"\t\t [T]I am going to Sleep"<<std::endl;
-			Thread::sleep(2000);
-			std::cout<<"\t\t [T]Okay I quit now"<<std::endl;
+		void reset() {
+			numSuccess = 0;
+			sw.reset();
 		}
 	};
 
-	// A simple thread which waits a mutex
-	class MutexThread : public Thread{
-	public:
-		Mutex *tex;
-	
-		MutexThread(Mutex* in_tex){
-			tex = in_tex;
-		}
-	
-		void run(){
-			std::cout<<"\t\t [T]Lock Mutex"<<std::endl;
-			tex->lock();
-			std::cout<<"\t\t [T]Mutex Unlocked -> exit"<<std::endl;
-		}
-	};
+	static Result Benchmark;
+	static uv::Loop ourLoop; 
 
-	void testThread()
+	static void onKillSignal2(uv_signal_t *req, int signum)
+	{
+		debugL("Application") << "Kill Signal: " << req << endl;
+	
+		((Tests*)req->data)->tcpServer->stop();
+		((Tests*)req->data)->tcpConnector.stop();
+		//(*((Handle<TCPEchoServer>*)req->data))->stop(); //->server.stop();delete
+		uv_signal_stop(req);
+	
+		// print active handles
+		uv_walk(req->loop, onPrintHandle1, NULL);
+	}
+
+	Handle<TCPEchoServer> tcpServer;
+
+	UVClientSocketTest<net::TCPSocket> tcpConnector;
+
+	Tests() :
+		tcpServer(new TCPEchoServer(1337, true), false),
+		tcpConnector(1337)
 	{	
-		BTestThread th;	
-		std::cout<<"Execute sleep-thread"<<std::endl;
-		th.start();
-		//std::cout<<"Wait thread to finish"<<std::endl;
-		//Thread::sleep(50); // To be sure that the thread has started before I wait!
-		th.wait();
-		std::cout<<"Thread has Finished"<<std::endl;
-	
-		std::cout<<"-----------------------------------------"<<std::endl;
-	
-		std::cout<<"Create and lock mutex"<<std::endl;
-		Mutex tex;
-		tex.lock();
-		MutexThread mth(&tex);
-		std::cout<<"Start the second thread"<<std::endl;
-		mth.start();
-		std::cout<<"Sleep (the thread is wainting the mutex :)"<<std::endl;
-		Thread::sleep(1000);
-		std::cout<<"Release the mutex"<<std::endl;
-		tex.unlock();
-	}
-	*/
+		traceL("Tests") << "#################### Starting" << endl;
+#ifdef _MSC_VER
+		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+		{			
+#if TEST_SSL
+			// Init SSL Context 
+			// The singleton leaks a little openssl memory on close.
+			// TODO: Refactor SSL stuff into the network manager.
+			Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> ptrCert;
+			Poco::Net::Base::Ptr ptrContext = new Poco::Net::Base(
+				Poco::Net::Base::CLIENT_USE, "", "", "", Poco::Net::Base::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");		
+			Poco::Net::SSLManager::instance().initializeClient(0, ptrCert, ptrContext);
 
-	/*
+			// Raise a SSL echo server
+			Handle<SSLEchoServer> sslServer(new SSLEchoServer(1338, true), false);
+			sslServer->run();
+#endif
+
+			// Raise a TCP echo server
+			//Handle<TCPEchoServer> tcpServer(new TCPEchoServer(1337, true), false); //true
+			tcpServer->run();
+			
+			//runTCPSocketTest();
+#if TEST_SSL
+			runSSLSocketTest();
+#endif
+			
+			tcpConnector.run();
+			
+			uv_signal_t sig;
+			sig.data = this;
+			uv_signal_init(ourLoop.loop, &sig);
+			uv_signal_start(&sig, Tests::onKillSignal2, SIGINT);
+
+			runUDPSocketTest();
+			runTimerTest();
+			//runDNSResolverTest();
+			
+			traceL("Tests") << "#################### Running" << endl;
+			ourLoop.waitForKill();
+			traceL("Tests") << "#################### Ended" << endl;
+	
+#if TEST_SSL
+			// Shutdown SSL
+			//Poco::Net::SSLManager::instance().shutdown();
+#endif
+		}
+		
+		traceL("Tests") << "#################### Finalizing" << endl;
+		//ourLoop.cleanup();
+		traceL("Tests") << "#################### Exiting" << endl;
+	}
+	
 	// ============================================================================
+	// TCP Socket Test
 	//
-	// Timer Test
-	//
-	// ============================================================================
-	int numTimerTicks;
-	void runTimerTest() 
+	void runTCPSocketTest() 
 	{
-		numTimerTicks = 5;
+		traceL("Tests") << "TCP Socket Test: Starting" << endl;			
+		UVClientSocketTest<net::TCPSocket> test(1337);
+		test.run();
+		traceL("Tests") << "TCP Socket Test: Running" << endl;	
+		ourLoop.run();
+		traceL("Tests") << "TCP Socket Test: Ending" << endl;
+	}		
 
-		Timer timer;
-		timer.OnTimeout += delegate(this, &Tests::onOnTimerTimeout);
-		timer.start(100, 100);
-
-		RunDefaultLoop;
-	}
-
-	void onOnTimerTimeout(void* sender, Int64 count)
-	{
-		Timer* timer = static_cast<Timer*>(sender);
-
-		Log("trace") << "[Tests:" << this << "] Timer: " << count << std::endl;
-
-		if (count == numTimerTicks)
-			timer->stop(); // event loop will be released
-	}
-	*/
-	
-	
-	/*
 	// ============================================================================
+	// SSL Socket Test
 	//
+	void runSSLSocketTest() 
+	{		
+		UVClientSocketTest<net::SSLSocket> test(1338);
+		test.run();
+		ourLoop.run();
+	}
+	
+	// ============================================================================
 	// UDP Socket Test
 	//
-	// ============================================================================
+	const static int numUDPPacketsWanted = 10;
+	
 	void runUDPSocketTest() 
 	{
-		Log("trace") << "[Tests:" << this << "] runSocketConenctionTest" << std::endl;
+		traceL("Tests") << "UDP Socket Test: Starting" << endl;
+		net::Address serverAddr("127.0.0.1", 1337);	
+		Benchmark.reset();
+
+		net::UDPSocket serverSock;
+		serverSock.Recv += delegate(this, &Tests::onUDPSocketServerRecv);
+		serverSock.bind(serverAddr);
+		
+		net::Address clientAddr("127.0.0.1", 1338);	
+		net::UDPSocket clientSock;
+		clientSock.Recv += delegate(this, &Tests::onUDPSocketRecv);		
+		clientSock.bind(clientAddr);	
+		for (unsigned i = 0; i < numUDPPacketsWanted; i++)
+			clientSock.send("somedata", 8, serverAddr);
+
+		ourLoop.run();
+		traceL("Tests") << "UDP Socket Test: Ending" << endl;	
+	}
+	
+	// ----------------------------------------------------------------------------
+	//		
+	void onUDPSocketRecv(void* sender, net::SocketPacket& packet)
+	{
+		//traceL("Tests") << "UDPSocket Recv: " << packet << ": " << packet.buffer
+		//	<< "\n\tPacket " << Benchmark.numSuccess << " of " << numUDPPacketsWanted << endl;
+		uv::UDPBase* socket = reinterpret_cast<uv::UDPBase*>(sender);	
+		Benchmark.numSuccess++;
+		if (Benchmark.numSuccess == numUDPPacketsWanted) {
+
+			// Close the client socket dereferencing the main loop.
+			socket->close();
 			
-		Net::Address addr("127.0.0.1", 1337);
-
-		Net::UDPSocket serverSock;
-		serverSock.OnSend += delegate(this, &Tests::onUDPSocketServerSend);
-		serverSock.OnRecv += delegate(this, &Tests::onUDPSocketServerRecv);
-		serverSock.bind(addr);
-
-		Net::UDPSocket clientSock;
-		clientSock.OnSend += delegate(this, &Tests::onUDPSocketClientSend);
-		clientSock.OnRecv += delegate(this, &Tests::onUDPSocketClientRecv);
-		
-		clientSock.send("somedata", 8, addr);
-		clientSock.send("somedata", 8, addr);
-		clientSock.send("somedata", 8, addr);
-		
-		RunDefaultLoop;
+			// Unref the loop once should cause the loop to stop and
+			// the destroy the socket instances.
+			ourLoop.stop();
+			return;
+		}
 	}
 	
-
 	// ----------------------------------------------------------------------------
-	//	
-	void onUDPSocketClientSend(void* sender, const char* data, int size, const Net::Address& peerAddr)
+	//		
+	void onUDPSocketServerRecv(void* sender, net::SocketPacket& packet)
 	{
-		Log("trace") << "[Tests:" << this << "] UDPSocket Client Send: " << string(data, size) << ": " << peerAddr << std::endl;
+		traceL("Tests") << "UDPSocket Server Recv: " << (IPacket&)packet << ": " << packet.buffer << endl;
+		//traceL("Tests") << "UDPSocket Server Recv: " << packet << ": " << packet.buffer << endl;		
+		uv::UDPBase* socket = reinterpret_cast<uv::UDPBase*>(sender);	
+		socket->send(packet, packet.info->peerAddress);
 	}
-	
-	void onUDPSocketClientRecv(void* sender, const char* data, int size, const Net::Address& peerAddr)
-	{
-		Log("trace") << "[Tests:" << this << "] UDPSocket Client Recv: " << string(data, size) << ": " << peerAddr << std::endl;
-	}
-	
-
-	// ----------------------------------------------------------------------------
-	//	
-	void onUDPSocketServerSend(void* sender, const char* data, int size, const Net::Address& peerAddr)
-	{
-		Log("trace") << "[Tests:" << this << "] UDPSocket Server Send: " << string(data, size) << ": " << peerAddr << std::endl;
-	}
-	
-	void onUDPSocketServerRecv(void* sender, const char* data, int size, const Net::Address& peerAddr)
-	{
-		Log("trace") << "[Tests:" << this << "] UDPSocket Server Recv: " << string(data, size) << ": " << peerAddr << std::endl;
-	}
-	*/
 	
 	// ============================================================================
+	// Timer Test
 	//
-	// Socket Conenction Test
-	//
-	// ============================================================================
-	
-	//static int numRequestsSent;
-	//static int numRequestsReceived;
+	const static int numTimerTicks = 5;
 
-	//ReactorSignal ReactorEventSignal;	
-	//ReactorSignal BasicReactorSignal;
-	
-	//AsyncReactor areactor;
-	Reactor reactor;
-	Poco::Net::StreamSocket sock;
-
-	void onClientSocketConnected()
+	void runTimerTest() 
 	{
-		reactor.detach(sock, reactorCallback(this, &Tests::onClientSocketConnected, SocketWritable));
+		traceL("Tests") << "Timer Test: Starting" << endl;
+		Timer timer;
+		timer.Timeout += delegate(this, &Tests::onOnTimerTimeout);
+		timer.start(100, 100);
+		
+		Benchmark.reset();
+		traceL("Tests") << "Timer Test: ourLooping" << endl;
+		ourLoop.run();
+		traceL("Tests") << "Timer Test: Ending" << endl;
 	}
 
-
-	void runSocketConenctionTest() 
+	void onOnTimerTimeout(void* sender)
 	{
-		Log("trace") << "[Tests:" << this << "] runPacketSignalReceivers" << std::endl;
+		Timer* timer = static_cast<Timer*>(sender);
+		traceL("Tests") << "On Timer: " << timer->count() << endl;
 
-
-		numInstances = 60;
-		numIterations = 1;
-		
-		short port = 1333;
-		Net::TCPSocket* socket = NULL;
-		Poco::Runnable* server = NULL;
-		vector<BenchmarkResult*> results;
-		
-			
-		/*		
-		reactor.attach(sock, reactorCallback(this, &Tests::onClientSocketConnected, SocketWritable));
-		//reactor.attach(sock, reactorCallback(this, &Tests::onClientSocketConnected, SocketWritable));
-		//reactor.attach(sock, reactorCallback(this, &Tests::onClientSocketConnected, SocketWritable));
-			
-		sock.connect(Poco::Net::SocketAddress("google.com", 80));
-		
-
-		reactor.attach();
-		_reactor.attach(_impl, Poco::Observer<TCPSocket, ReadableNotification>(*this, &TCPSocket::onReadable));
-		_reactor.attach(_impl, Poco::Observer<TCPSocket, WritableNotification>(*this, &TCPSocket::onWritable));
-		_reactor.attach(_impl, Poco::Observer<TCPSocket, ErrorNotification>(*this, &TCPSocket::onError));	
-
-		system("pause");
-		return;
-		*/
-
-		for (unsigned n = 0; n < 1; n++)
-		{	
-
-			if (socket)
-				delete socket;
-			if (server)
-				delete server;
-		
-			benchmark = new BenchmarkResult;
-			benchmark->numSuccess = 0;
-			results.push_back(benchmark);
-
-			Timer::getDefault().start(TimerCallback<Tests>(this, &Tests::onTimeout, 8000));
-			
-			//server = new SourceyAsyncReactorEchoServer(port, areactor);
-			//benchmark->name = "SourceyReactorEchoServer";
-			
-			server = new SourceyReactorEchoServer(port, reactor);
-			benchmark->name = "SourceyReactorEchoServer";
-			// raise server
-			//if (n == 0) {
-			//server = new PocoReactorEchoServer(port);
-			//benchmark->name = "PocoReactorEchoServer";
-			//} else if (n == 1) {
-			//server = new PocoEchoServer(port);
-			//benchmark->name = "PocoEchoServer";
-			//} else if (n == 2) {
-			//server = new UVEchoServer(port); // 1562500 microsecs
-			//benchmark->name = "UVEchoServer";
-			//}			
-			//
-				
-			//AsyncLoop run;
-
-			Log("debug") << "[Tests:" << this << "] connecting... " << endl;	
-		
-			for (unsigned n = 0; n < numInstances; n++)
-			{	
-				//numRequests
-				socket = new Net::TCPSocket(reactor);
-				socket->StateChanged += delegate(this, &Tests::onClientSocketStateChanged);				
-				socket->DataReceived += delegate(this, &Tests::onClientSocketResponseReceived);
-				//socket->StateChanged += delegate(this, &Tests::onClientSocketStateChanged);
-				//reactor.attach(socket->impl(), reactorCallback(this, &Tests::onClientSocketConnected, SocketWritable));
-				//socket->OnConnected += delegate(this, &Tests::onClientSocketConnected);
-				//socket->OnRead += delegate(this, &Tests::onClientSocketResponseReceived);
-				try 
-				{
-					socket->connect(Poco::Net::SocketAddress("127.0.0.1", port));
-					//socket->connect(Poco::Net::SocketAddress("google.com", 80));	
-				}
-				catch (Poco::Net::NetException& exc)
-				{
-					Log("error") << "[Tests:" << this << "] Net Error: " << exc.displayText() << endl;
-					benchmark->numSuccess++;
-					//delete socket;
-					//throw exc;
-				}
-				//Sleep(100);
-			}
-
-			ready.wait();
-
-			//assert(false);
-			
-			// wait for success or timeout
-			//benchmark->sw.start();
-
-			benchmark->sw.start();
-			//RunDefaultLoop;
-			//delete socket;
-			delete server;
-
-			Timer::getDefault().stop(TimerCallback<Tests>(this, &Tests::onTimeout, 3000));
-
-			// print stats
-		}
-		
-		for (unsigned i = 0; i < results.size(); i++) {
-			Log("info") << "[Tests:" << this << "] Benchamer Result:" 
-					<< "\n\tName: " << benchmark->name
-					//<< "\n\tnumEchoServiceHandler: " << numEchoServiceHandler
-					//<< "\n\tnumReadableNotification: " << numReadableNotification
-					<< "\n\tSuccessful: " << benchmark->numSuccess
-					<< "\n\tElapsed: " << benchmark->sw.elapsed()
-					<< endl;
-		}
-		
-		/*
-			socket->send("hitme", 5);
-			
-		// raise server
-
-		socket->connect(Net::Address("127.0.0.1", 1337));		
-		for (unsigned i = 0; i < numIterations; i++) {
-			socket->send("hitme", 5);
-		}
-
-		system("pause");
-		socket->close();
-
-		// print stats
-		
-		system("pause");
-		
-		// raise server
-
-		socket->connect(Net::Address("127.0.0.1", 1337));		
-		for (unsigned i = 0; i < numIterations; i++) {
-			socket->send("hitme", 5);
-		}		
-		
-		system("pause");
-		socket->close();
-
-		// print stats
-		
-		system("pause");
-		*/
-	}
-
-
-	void onTimeout(TimerCallback<Tests>& timer)
-	{
-		// took too long...
-		ready.set();
-	}		
-	
-	
-	void onClientSocketStateChanged(void* sender, Net::ConnectionState& state, const Net::ConnectionState&)
-	{
-		Log("debug") << "[Tests:" << this << "] Server Connection State Changed: " << state.toString() << endl;	
-		Net::TCPSocket* socket = reinterpret_cast<Net::TCPSocket*>(sender);	
-	
-		switch (state.id()) {
-		case Net::ConnectionState::Connected:
-			socket->send("hey", 3);
-			break;
-		
-		case Net::ConnectionState::Disconnected: 
-		case Net::ConnectionState::Error:
-			//socket->unbindEvents();
-			//assert(false);
-			delete socket;
-			break;
+		if (timer->count() == numTimerTicks) {
+			timer->stop(); // event loop will be released
+			//ourLoop.stop();;
 		}
 	}
-	
-	void onClientSocketResponseReceived(void* sender, Buffer&) 
-	{		
-		Net::TCPSocket* socket = reinterpret_cast<Net::TCPSocket*>(sender);	
-		
-		//throw;
-
-		benchmark->numSuccess++;
-		Log("debug") << "[Tests:" << socket << "] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Response Received: " << benchmark->numSuccess << "/" << numInstances << endl;	//: " << " << string(data, size)
-		if (benchmark->numSuccess == numInstances) {
-			//uv_unref(DefaultLoop);
-			//delete socket;			
-			ready.set();
-		}
-	}
-	
-	
-		/*
-		if (status != 0)
-			return;
-
-		Net::TCPSocket* socket = reinterpret_cast<Net::TCPSocket*>(sender);	
-		for (unsigned i = 0; i < numIterations; i++) {
-			socket->send("hitme", 5);
-		}	
-
-	void onClientSocketConnected(ReactorEvent& event)
-	{
-		Log("trace") << "[Tests:" << this << "] onClientSocketConnected" << std::endl;
-		//throw;
-		//reactor.detach(event.socket, reactorCallback(this, &Tests::onClientSocketConnected, SocketWritable));
-		//reactor.attach(event.socket, reactorCallback(this, &Tests::onClientSocketResponseReceived, SocketReadable));
-		//event.socket.impl()->sendBytes("hitme", 5);
-	}
-
-
-	void onClientSocketResponseReceived(ReactorEvent& event)
-	{
-		//Log("trace") << "[Tests:" << this << "] onClientSocketResponseReceived" << std::endl;
-		//assert(0);
-		reactor.detach(event.socket, reactorCallback(this, &Tests::onClientSocketResponseReceived, SocketReadable));
-		
-		benchmark->numSuccess++;
-		Log("debug") << "[Tests:" << socket << "] Response Received: " << benchmark->numSuccess << "/" << numInstances << endl;	//: " << " << string(data, size)
-		if (benchmark->numSuccess == numInstances) {
-			//uv_unref(DefaultLoop);
-			//delete socket;			
-			ready.set();
-		}
-	}
-
-	void onClientSocketConnected(void* sender, int status) 
-	{
-		if (status != 0)
-			return;
-
-		Net::TCPSocket* socket = reinterpret_cast<Net::TCPSocket*>(sender);	
-		for (unsigned i = 0; i < numIterations; i++) {
-			socket->send("hitme", 5);
-		}	
-	}
-		*/
-
-	
-		/*
-	void onClientSocketResponseReceived(void* sender, char* data, int size) 
-	{
-		Net::TCPSocket* socket = reinterpret_cast<Net::TCPSocket*>(sender);	
-
-		benchmark->numSuccess++;
-		Log("debug") << "[Tests:" << socket << "] Response Received: " << benchmark->numSuccess << "/" << numInstances << ": " << string(data, size) << endl;	
-		if (benchmark->numSuccess == numInstances) {
-			//uv_unref(DefaultLoop);
-			//delete socket;			
-			ready.set();
-		}
-	}
-		*/
-	
-		//uv_unref(DefaultLoop);
-		//RunDefaultLoop;
-
-		/*
-		Log("info") << "[Tests:" << this << "] On Completion Timer:" 
-				<< "\n\tSent: " << numRequestsSent
-				<< "\n\tRequests: " << numRequestsReceived
-				<< "\n\tResponses: " << numResponsesReceived
-				<< endl;
-		
-		//assert(numRequestsSent == numRequestsReceived);
-		//assert(numRequestsSent == numResponsesReceived);
-		*/
-	/*	
-	
-	void onTimer(TimerCallback<Tests>& timer)
-	{
-		socket->send("grr", 3);
-	}
-
-	// ----------------------------------------------------------------------------
-	//
-
-	void onClientSocketResponseReceived(void* sender, DataPacket& packet) 
-	{
-		Net::TCPPacketSocket* socket = reinterpret_cast<Net::TCPPacketSocket*>(sender);	
-
-		Log("debug") << "[Tests:" << this << "] Response Received: " << packet.size << ": " << socket->peerAddr() << endl;	
-		socket->removeReceiver(packetDelegate<Tests, DataPacket>(this, &Tests::onClientSocketResponseReceived));
-		numSuccess++;
-		if (numSuccess == numIterations) 
-
-	}
-
-	void onClientSocketStateChanged(void* sender, Net::ConnectionState& state, const Net::ConnectionState&)
-	{
-		Log("debug") << "[Tests:" << this << "] Client Connection State Changed: " << state.toString() << endl;	
-
-		Net::TCPPacketSocket* socket = reinterpret_cast<Net::TCPPacketSocket*>(sender);	
-	
-		switch (state.id()) {
-		case Net::ConnectionState::Connected:
-
-			// send some data when we are writable
-			socket->send("hey", 3);
-			break;
-		
-		case Net::ConnectionState::Disconnected: 
-		case Net::ConnectionState::Error:
-			assert(false);
-			break;
-		}
-	}
-
-	void onClientSocketResponseReceived(void* sender, DataPacket& packet) 
-	{
-		Net::TCPPacketSocket* socket = reinterpret_cast<Net::TCPPacketSocket*>(sender);	
-
-		Log("debug") << "[Tests:" << this << "] Response Received: " << packet.size << ": " << socket->peerAddr() << endl;	
-		socket->removeReceiver(packetDelegate<Tests, DataPacket>(this, &Tests::onClientSocketResponseReceived));
-		numResponsesReceived++;
-	}
-	
-	// ----------------------------------------------------------------------------
-	//
-	void onServerSocketallocated(void* sender, Net::TCPPacketSocket* socket)
-	{
-		Log("debug") << "[Tests:" << this << "] TCP Socket allocated: " << socket->peerAddr() << endl;
-		socket->StateChanged += delegate(this, &Tests::onServerSocketStateChanged);
-		socket->addReceiver(packetDelegate<Tests, DataPacket>(this, &Tests::onServerSocketRequestReceived));	
-	}
-	
-	void onServerSocketStateChanged(void* sender, Net::ConnectionState& state, const Net::ConnectionState&)
-	{
-		Log("debug") << "[Tests:" << this << "] Server Connection State Changed: " << state.toString() << endl;	
-
-		Net::TCPPacketSocket* socket = reinterpret_cast<Net::TCPPacketSocket*>(sender);	
-	
-		switch (state.id()) {
-		case Net::ConnectionState::Connected:
-			//socket->send("hey", 3);
-			break;
-		
-		case Net::ConnectionState::Disconnected: 
-		case Net::ConnectionState::Error:
-			assert(false);
-			break;
-		}
-	}
-
-	void onServerSocketRequestReceived(void* sender, DataPacket& packet) 
-	{
-		Net::TCPPacketSocket* socket = reinterpret_cast<Net::TCPPacketSocket*>(sender);	
-
-		Log("debug") << "[Tests:" << this << "] Packet Received: " << packet.size << ": " << socket->peerAddr() << endl;	
-		socket->removeReceiver(packetDelegate<Tests, DataPacket>(this, &Tests::onServerSocketRequestReceived));
-		numRequestsReceived++;
-
-		// echo it back
-		socket->send(packet);
-	}
-	*/
-
 };
-		
-		/*
-		Net::Reactor reactor;
-		Net::TCPPacketServer server(reactor);
-		server.bind(Net::Address("127.0.0.1", 1337));
-		server.Socketallocated += delegate(this, &Tests::onServerSocketallocated);
-		//EchoServerThread s;
-		//EchoServer s(4000);		
-		//system("pause");		
-
-		Timer::getDefault().start(TimerCallback<Tests>(this, &Tests::onTimeout, 5000));
-		
-		numRequestsSent = 1;
-		numRequestsReceived = 0;
-		numResponsesReceived = 0;
-		for (unsigned i = 0; i < numRequestsSent; i++) {	
-			Net::TCPClientSocket* socket = new Net::TCPClientSocket();
-			socket->connect(Net::Address("127.0.0.1", 1337));
-			//socket->connect(Net::Address("127.0.0.1", 9977)); //
-			Net::TCPPacketSocket* socket = new Net::TCPPacketSocket();
-			socket->connect(Net::Address("127.0.0.1", 1337)); //99774000
-			//socket->connect(Net::Address("127.0.0.1", 9977)); //
-			socket->addReceiver(packetDelegate<Tests, DataPacket>(this, &Tests::onClientSocketResponseReceived));		
-			socket->StateChanged += delegate(this, &Tests::onClientSocketStateChanged);
-			//socket->close();
-			//delete socket;
-			Sleep(10);
-		}	
-		Net::TCPClientSocket* socket = new Net::TCPClientSocket();
-		socket->connect(Net::Address("127.0.0.1", 1337));
-		for (unsigned i = 0; i < 100; i++) {	
-			socket->send("grr", 3);
-		}
-		
-		system("pause");		
-
-		//Net::AsyncLoop reactor;
-
-		//for (unsigned i = 0; i < 100; i++) {	
-		//	socket->send("grr", 3);
-		//}
-		
-		Net::TCPSocket server;
-		server.bind(Net::Address("127.0.0.1", 1337));
-		server.listen();
-		*/
+			*/
 
 
-} // namespace Sourcey
+//} // namespace scy
 
 
 int main(int argc, char** argv) 
 {	
-	//uv_tcp_t handle_;
-	//Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
-	Logger::instance().add(new FileChannel("debug", "", "log", NULL, 12 * 3600, TraceLevel)); //d:/"%H:%M:%S"
+	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
 	{
-
-		Sourcey::Tests app;
-		//app.run(argc, argv);
-		//Sourcey::TURN::RelayServer app;
-		//app.run(); //argc, argv
+		//Tests app;
 	}
-	
-	system("pause");
-	Sourcey::Logger::uninitialize();
+	Logger::uninitialize();
 	return 0;
 }
+
+
+//Tests::Result Tests::Benchmark;
+//uv::Loop Tests::ourLoop;

@@ -30,24 +30,24 @@
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 
 
 namespace scy {
 namespace av {
 
 
-FastMutex AVEncoder::_mutex;
+Mutex AVEncoder::_mutex;
 
 
 AVEncoder::AVEncoder(const RecordingOptions& options) :
 	_options(options),	
-	_formatCtx(NULL),
-	_video(NULL),
-	_audio(NULL),
-	_audioFifo(NULL),
-	_audioBuffer(NULL),
-	_ioBuffer(NULL),
+	_formatCtx(nullptr),
+	_video(nullptr),
+	_audio(nullptr),
+	_audioFifo(nullptr),
+	_audioBuffer(nullptr),
+	_ioBuffer(nullptr),
 	_ioBufferSize(MAX_VIDEO_PACKET_SIZE),
 	_startTime(0)
 {
@@ -55,22 +55,22 @@ AVEncoder::AVEncoder(const RecordingOptions& options) :
 
 
 AVEncoder::AVEncoder() : 	
-	_formatCtx(NULL),
-	_video(NULL),
-	_audio(NULL),
-	_audioFifo(NULL),
-	_audioBuffer(NULL),
-	_ioBuffer(NULL),
+	_formatCtx(nullptr),
+	_video(nullptr),
+	_audio(nullptr),
+	_audioFifo(nullptr),
+	_audioBuffer(nullptr),
+	_ioBuffer(nullptr),
 	_ioBufferSize(MAX_VIDEO_PACKET_SIZE),
 	_startTime(0)
 {
-	debugL("AVEncoder", this) << "Initializing" << endl;
+	traceL("AVEncoder", this) << "Initializing" << endl;
 }
 
 
 AVEncoder::~AVEncoder()
 {
-	debugL("AVEncoder", this) << "Destroying" << endl;
+	traceL("AVEncoder", this) << "Destroying" << endl;
 	uninitialize();
 }
 
@@ -85,7 +85,7 @@ int DispatchOutputPacket(void* opaque, UInt8* buffer, int bufferSize)
 			return bufferSize;
 		assert(klass->isActive());
 		MediaPacket packet((char*)buffer, bufferSize);
-		klass->emit(klass, packet);
+		klass->emit(packet); //klass, 
 		traceL("AVEncoder", klass) << "Dispatching Packet: OK: " << bufferSize << endl;
 	}   
 
@@ -97,7 +97,7 @@ void AVEncoder::initialize()
 {
 	assert(!isActive());
 
-	debugL("AVEncoder", this) << "Initializing:"
+	traceL("AVEncoder", this) << "Initializing:"
 		<< "\n\tInput Format: " << _options.iformat.toString()
 		<< "\n\tOutput Format: " << _options.oformat.toString()
 		<< "\n\tDuration: " << _options.duration
@@ -105,12 +105,12 @@ void AVEncoder::initialize()
 
 	try {
 		{
-			debugL("AVEncoder", this) << "Initializing: 1" << endl;
+			traceL("AVEncoder", this) << "Initializing: 1" << endl;
 
 			// Lock our mutex during initialization
-			FastMutex::ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 			
-			debugL("AVEncoder", this) << "Initializing: 2" << endl;
+			traceL("AVEncoder", this) << "Initializing: 2" << endl;
 
 			if (!_options.oformat.video.enabled && 
 				!_options.oformat.audio.enabled)
@@ -119,14 +119,14 @@ void AVEncoder::initialize()
 			if (_options.oformat.id.empty())
 				throw Exception("An output container format must be specified.");		
 			
-			debugL("AVEncoder", this) << "Initializing: 3" << endl;
+			traceL("AVEncoder", this) << "Initializing: 3" << endl;
 
 			// TODO: Only need to call this once, but it does not leak memory.
 			// Also consoder using av_lockmgr_register to protect avcodec_open/avcodec_close
 			// See http://src.chromium.org/svn/branches/1229_12/src/media/filters/ffmpeg_glue.cc
 			// http://cloudobserver.googlecode.com/svn/trunk/CloudClient/src/filters/multiplexer/multiplexer.cpp
 			av_register_all(); 			
-			debugL("AVEncoder", this) << "Initializing: 4" << endl;
+			traceL("AVEncoder", this) << "Initializing: 4" << endl;
 
 			// Allocate the output media context
 			assert(!_formatCtx);
@@ -143,14 +143,14 @@ void AVEncoder::initialize()
 			if (!_formatCtx->oformat)
 				throw Exception("Cannot find suitable encoding format for " + _options.oformat.name);			
 		}
-		debugL("AVEncoder", this) << "Initializing: 5" << endl;
+		traceL("AVEncoder", this) << "Initializing: 5" << endl;
 
 		// Initialize encoder contexts
 		createVideo();
 		createAudio();		
 		{
 			// Lock our mutex during initialization
-			FastMutex::ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 
 			if (_options.ofile.empty()) {
 
@@ -186,14 +186,14 @@ void AVEncoder::initialize()
 			_startTime = clock();
 		}
 		
-		debugL("AVEncoder", this) << "Initializing: 9" << endl;
+		traceL("AVEncoder", this) << "Initializing: 9" << endl;
 		setState(this, EncoderState::Ready);
-		debugL("AVEncoder", this) << "Initializing: 10" << endl;
+		traceL("AVEncoder", this) << "Initializing: 10" << endl;
 	} 
 	catch (Exception& exc) {
-		errorL("AVEncoder", this) << "Error: " << exc.displayText() << endl;		
+		errorL("AVEncoder", this) << "Error: " << exc.message() << endl;		
 		cleanup();
-		setState(this, EncoderState::Error, exc.displayText());
+		setState(this, EncoderState::Error, exc.message());
 		exc.rethrow();
 	}
 }
@@ -201,7 +201,7 @@ void AVEncoder::initialize()
 
 void AVEncoder::uninitialize()
 {
-	debugL("AVEncoder", this) << "Uninitializing" << endl;
+	traceL("AVEncoder", this) << "Uninitializing" << endl;
 	cleanup();	
 	setState(this, EncoderState::Stopped);
 }
@@ -209,10 +209,10 @@ void AVEncoder::uninitialize()
 
 void AVEncoder::cleanup()
 {
-	debugL("AVEncoder", this) << "Cleanup" << endl;
+	traceL("AVEncoder", this) << "Cleanup" << endl;
 	{
  		// Lock our mutex during closure
-		FastMutex::ScopedLock lock(_mutex);	
+		Mutex::ScopedLock lock(_mutex);	
 
  		// Write the trailer
 		if (_formatCtx &&
@@ -225,7 +225,7 @@ void AVEncoder::cleanup()
 	freeAudio();
 	{
  		// Lock our mutex during closure
-		FastMutex::ScopedLock lock(_mutex);	
+		Mutex::ScopedLock lock(_mutex);	
 
 		// Close the format
 		if (_formatCtx) {
@@ -254,7 +254,7 @@ void AVEncoder::cleanup()
 		}
 	}
 
-	debugL("AVEncoder", this) << "Cleanup: OK" << endl;
+	traceL("AVEncoder", this) << "Cleanup: OK" << endl;
 }
 
 
@@ -280,14 +280,14 @@ void AVEncoder::process(IPacket& packet)
 	}
 	
 	warnL("AVEncoder", this) << "Cannot encode source packet" << endl;
-	emit(this, packet);
+	emit(packet);
 }
 
 					
 void AVEncoder::onStreamStateChange(const PacketStreamState& state) 
 { 
 	// TODO: Move to AVPacketEncoder class
-	debugL("AVEncoder", this) << "Stream State Changed: " << state << endl;
+	traceL("AVEncoder", this) << "Stream State Changed: " << state << endl;
 
 	switch (state.id()) {
 	case PacketStreamState::Running:
@@ -306,27 +306,27 @@ void AVEncoder::onStreamStateChange(const PacketStreamState& state)
 	//case PacketStreamState::Closed:
 	}
 
-	PacketEmitter::onStreamStateChange(state);
+	IPacketEncoder::onStreamStateChange(state);
 }
 
 
 RecordingOptions& AVEncoder::options()
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _options;
 }
 
 
 VideoEncoderContext* AVEncoder::video()
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _video;
 }
 
 
 AudioEncoderContext* AVEncoder::audio()
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _audio;
 }
 
@@ -337,7 +337,7 @@ AudioEncoderContext* AVEncoder::audio()
 
 void AVEncoder::createVideo()
 {
-	FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	assert(!_video);
 
 	// Initialize the video encoder (if required)
@@ -354,7 +354,7 @@ void AVEncoder::createVideo()
 
 void AVEncoder::freeVideo()
 {
-	FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 
 	if (_video) {
 		delete _video;
@@ -374,7 +374,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 	VideoEncoderContext* video = NULL;	
 	{	
 		// Lock the mutex while encoding
-		FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		options = &_options;
 		formatCtx = _formatCtx;
 		video = _video;
@@ -404,7 +404,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 		options->iformat.video.height = height;
 		video->iparams.width = width;
 		video->iparams.height = height;
-		debugL("AVEncoder", this) << "Recreating video conversion context" << endl;
+		traceL("AVEncoder", this) << "Recreating video conversion context" << endl;
 		video->freeConverter();
 		video->createConverter();
 	}
@@ -464,7 +464,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 
 void AVEncoder::createAudio()
 {
-	FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	assert(!_audio);
 
 	// Initialize the audio encoder (if required)
@@ -492,7 +492,7 @@ void AVEncoder::createAudio()
 
 void AVEncoder::freeAudio()
 {
-	FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 
 	if (_audio) {
 		delete _audio;
@@ -523,7 +523,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 	AVFifoBuffer* audioFifo = NULL;	
 	UInt8* audioBuffer = NULL;	
 	{	
-		FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		options = &_options;
 		formatCtx = _formatCtx;
 		audio = _audio;
@@ -656,8 +656,8 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 		//AV_NOPTS_VALUE
 
 		//opacket.duration = 5; //frameDuration * 2; //_frameDuration ? (clock() - _frameDuration) : 1;
-		//debugL("AVEncoder", this) << "_videoTime: " << _videoTime << endl;
-		//debugL("AVEncoder", this) << "opacket.duration: " << opacket.duration << endl;
+		//traceL("AVEncoder", this) << "_videoTime: " << _videoTime << endl;
+		//traceL("AVEncoder", this) << "opacket.duration: " << opacket.duration << endl;
 		
 			
 		// PTS value will increment by 1 for input each frame at defined FPS value.
@@ -715,7 +715,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 		//double frameDuration = _videoTime ? ((clock() - _videoTime)) : 1;	// / CLOCKS_PER_SEC
 		//_videoPTS = _videoPTS + ((_video->ctx->time_base.den * 1.0) / frameDuration);
 		//_videoTime = clock();
-		//debugL("AVEncoder", this) << "### Frame Duration: " << frameDuration << endl;
+		//traceL("AVEncoder", this) << "### Frame Duration: " << frameDuration << endl;
 		//_videoPTS + 
 		//_videoPTS = _videoPTS + frameDuration; //(frameDuration * ((_video->ctx->time_base.den * 1.0) / (_videoFPS.fps  * 1.0)));
 			//_video->stream->time_base.den / (1000000.0 * _video->stream->time_base.num));
@@ -728,8 +728,8 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 			//opacket.pts = _videoPTS;
 			//opacket.dts = _videoPTS;
 
-		//debugL("AVEncoder", this) << "_video->stream->start_time: " << _video->stream->start_time << endl;
-		//debugL("AVEncoder", this) << "opacket.pts: " << opacket.pts << endl;
+		//traceL("AVEncoder", this) << "_video->stream->start_time: " << _video->stream->start_time << endl;
+		//traceL("AVEncoder", this) << "opacket.pts: " << opacket.pts << endl;
        //fPacket.pts = int64_t((double)encodeInfo->start_time
        //        * fStream->time_base.den / (1000000.0 * fStream->time_base.num)
        //        + 0.5);
@@ -743,7 +743,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize)
 		//fPacket.pts = (encodeInfo->start_time * fStream->time_base.den / fStream->time_base.num) / 1000000;
 
 		//opacket.pts /= 1000; //av_rescale_q(_videoPTS, _video->ctx->time_base, _video->stream->time_base); //_videoPTS; //av_rescale_q(_videoPTS, _video->ctx->time_base, _video->stream->time_base);
-		//debugL("AVEncoder", this) << "opacket.pts: " << opacket.pts << endl;
+		//traceL("AVEncoder", this) << "opacket.pts: " << opacket.pts << endl;
 
 		//_videoTime = clock();	
 		//_frameDuration = clock();	

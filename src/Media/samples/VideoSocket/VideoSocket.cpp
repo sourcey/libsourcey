@@ -1,5 +1,5 @@
 #include "Sourcey/Application.h"
-#include "Sourcey/PacketStream.h"
+#include "Sourcey/SyncPacketStream.h"
 #include "Sourcey/Media/VideoCapture.h"
 #include "Sourcey/Media/AVInputReader.h"
 #include "Sourcey/Media/AVEncoder.h"
@@ -37,7 +37,7 @@ namespace scy {
 class MPEGResponder: public http::ServerResponder
 {	
 	av::FPSCounter fpsCounter;
-	PacketStream stream;
+	SyncPacketStream* stream;
 
 public:
 	MPEGResponder(http::ServerConnection& conn) : 
@@ -49,7 +49,7 @@ public:
 		conn.shouldSendHeaders(false);
 
 		// Attach the video capture
-		stream.attach(gVideoCapture, false);
+		stream->attach(gVideoCapture, false);
 		
 		// Setup the encoder options
 		av::RecordingOptions options;	
@@ -60,20 +60,21 @@ public:
 		// Create and attach the encoder
 		av::AVEncoder* encoder = new av::AVEncoder(options);
 		encoder->initialize();
-		stream.attach(encoder, 5, true);		
+		stream->attach(encoder, 5, true);		
 				
 		// Create and attach the HTTP multipart packetizer
 		http::MultipartPacketizer* packetizer = new http::MultipartPacketizer("image/jpeg", false);
-		stream.attach(packetizer, 10);	
+		stream->attach(packetizer, 10, true);	
 			
 		// Start the stream
-		stream += packetDelegate(this, &MPEGResponder::onVideoEncoded);
-		stream.start();
+		stream->attach(packetDelegate(this, &MPEGResponder::onVideoEncoded));
+		stream->start();
 	}
 
 	~MPEGResponder()
 	{
 		debugL("MPEGResponder") << "Destroying" << endl;
+		stream->destroy();
 	}
 
 	void onPayload(const Buffer& body)
@@ -87,8 +88,8 @@ public:
 	{
 		debugL("MPEGResponder") << "On close" << endl;
 			
-		stream -= packetDelegate(this, &MPEGResponder::onVideoEncoded);
-		stream.stop();
+		stream->detach(packetDelegate(this, &MPEGResponder::onVideoEncoded));
+		stream->stop();
 	}
 
 	void onVideoEncoded(void* sender, RawPacket& packet)
@@ -101,7 +102,7 @@ public:
 			fpsCounter.tick();		
 		}
 		catch (Exception& exc) {
-			errorL("MPEGResponder") << "Error: " << exc.displayText() << endl;
+			errorL("MPEGResponder") << "Error: " << exc.message() << endl;
 			connection().close();
 		}
 	}

@@ -21,221 +21,16 @@
 #define SOURCEY_NET_PacketTransaction_H
 
 
+#include "Sourcey/PacketTransaction.h"
 #include "Sourcey/Net/PacketSocket.h"
 #include "Sourcey/Timer.h"
 #include "Sourcey/Stateful.h"
-#include "Sourcey/ISendable.h"
-#include "Sourcey/IPacket.h"
+#include "Sourcey/Interfaces.h"
+#include "Sourcey/Packet.h"
 
 
 namespace scy {
 namespace net {
-
-	
-struct TransactionState: public State 
-{	
-	enum Type 
-	{
-		Waiting = 0,
-		Running,
-		Success,
-		Cancelled,
-		Failed
-	};
-
-	std::string str(unsigned int id) const 
-	{ 
-		switch(id) {
-		case Waiting:		return "Waiting";
-		case Running:		return "Running";
-		case Success:		return "Success";
-		case Cancelled:		return "Cancelled";
-		case Failed:		return "Failed";
-		}
-		return "undefined"; 
-	};
-};
-
-
-template <class PacketT>
-class PacketTransaction: public ISendable, public StatefulSignal<TransactionState>, public Timer
-	/// Provides request/response functionality for IPacket types.
-	///
-	/// This class is fire and forget. The pointer is managed by 
-	/// the Runner instance, and is destroyed when complete.
-{
-public:
-	PacketTransaction(long timeout = 10000, int retries = 0, uv::Loop& loop = uv::defaultLoop()) :
-		Timer(loop),
-		_timeout(timeout),
-		_retries(retries), 
-		_cancelled(false), 
-		_attempts(0)
-	{
-		traceL("PacketTransaction", this) << "Creating" << std::endl;
-	}		
-
-	PacketTransaction(const PacketT& request, long timeout = 10000, int retries = 0, uv::Loop& loop = uv::defaultLoop()) : 
-		Timer(loop), //timeout, 0, 
-		_timeout(timeout),
-		_request(request), 
-		_retries(retries), 
-		_cancelled(false), 
-		_attempts(0)
-	{
-		traceL("PacketTransaction", this) << "Creating" << std::endl;
-	}
-
-	virtual bool send()
-		/// Starts the transaction timer.
-		/// Overriding classes implement sending here.
-		/// This method must be called by derived classes.
-	{
-		if (!canSend())
-			return false;
-		{
-			//Mutex::ScopedLock lock(_mutex);
-
-			traceL("PacketTransaction", this) << "Sending: " << _request.toString() << std::endl;
-			_attempts++;
-		}
-		setState(this, net::TransactionState::Running);
-		if (Timer::active())
-			Timer::stop();
-		Timer::start(_timeout, 0);
-		//Timer::restart();
-		return true;
-	}	
-
-	void cancel()
-		/// Cancellation means that the agent will not retransmit 
-        /// the request, will not treat the lack of response to be
-        /// a failure, but will wait the duration of the transaction
-		/// timeout for a response.
-		///
-		/// This method is not virtual as the Timer cancelled() 
-		/// method is redundant at the transaction scope.
-	{
-		//Mutex::ScopedLock lock(_mutex);
-		_cancelled = true;
-
-		// Do not set the underlying Timer to cancelled as we
-		// still need to receive the need timeout event.
-	}
-	
-	bool cancelled() const
-		/// Returns the transaction cancelled status.
-		///
-		/// This method is not virtual as the Timer cancelled() 
-		/// method is redundant at the transaction scope.
-	{
-		//Mutex::ScopedLock lock(_mutex);
-		return _cancelled;
-	}
-
-	virtual bool canSend()
-	{
-		//Mutex::ScopedLock lock(_mutex);
-		return !_cancelled && _attempts <= _retries;
-	}
-	
-	virtual int attempts() const
-	{
-		//Mutex::ScopedLock lock(_mutex);
-		return _attempts;
-	}
-		
-	PacketT& request() 
-	{
-		//Mutex::ScopedLock lock(_mutex);
-		return _request;
-	}
-	
-	PacketT request() const
-	{
-		//Mutex::ScopedLock lock(_mutex);
-		return _request;
-	}
-		
-	PacketT& response() 
-	{
-		//Mutex::ScopedLock lock(_mutex);
-		return _response;
-	}
-	
-	PacketT response() const
-	{
-		//Mutex::ScopedLock lock(_mutex);
-		return _response;
-	}
-
-
-protected:
-	virtual ~PacketTransaction()
-	{
-		traceL("PacketTransaction", this) << "Destroying" << std::endl;
-		//assert(!stateEquals(TransactionState::Running)); no more mt :)
-		Timer::stop();
-	}
-	
-	virtual bool onPossibleResponse(const PacketT& packet)
-		/// Processes a potential response candidates
-		/// and updates state on match.
-	{	
-		traceL("PacketTransaction", this) << "Process: " << _response.toString() << std::endl;
-		if (stateEquals(TransactionState::Running) && checkResponse(packet)) {
-			{
-				//Mutex::ScopedLock lock(_mutex);
-				_response = packet;
-				traceL("PacketTransaction", this) << "Transaction Response Received: " 
-					<< _response.toString() << std::endl;
-			}
-			onSuccess();			
-			setState(this, cancelled() ? 
-				TransactionState::Cancelled : net::TransactionState::Success);		
-			return true;
-		}
-		return false;
-	}
-
-	virtual bool checkResponse(const PacketT& packet) = 0;
-		/// Checks potential response candidates.
-		/// Returns true on successful match.
-	
-	virtual void onSuccess() 
-		/// Call when a successful response is received.
-	{
-		traceL("PacketTransaction", this) << "onSuccess: " << _response.toString() << std::endl;
-	}
-
-	virtual void onTimeout()
-	{	
-		traceL("PacketTransaction", this) << "Timeout" << std::endl;	
-		{		
-			if (cancelled()) {
-				//onSuccess();
-				setState(this, net::TransactionState::Cancelled);
-			} 
-			else if (!canSend()) {
-				//onSuccess();
-				setState(this, net::TransactionState::Failed, "Transaction timeout");
-			} 
-			else send();
-		}		
-	}
-	
-
-protected:
-	PacketT _request;
-	PacketT _response;
-	bool _cancelled;
-	int _retries;		// The maximum number of attempts before the transaction is considered failed.
-	int _attempts;		// The number of times the transaction has been sent.	
-	int _timeout;		// The request timeout in milliseconds.
-
-//private:
-	//mutable Mutex	_mutex;
-};
 
 
 template <class PacketT> //, class EmitterT
@@ -257,14 +52,14 @@ public:
 		debugL("NetTransaction", this) << "Creating" << std::endl;
 
 		// Default options, can be overridden
-		PacketSocketAdapter::socket->base().addAdapter(this, true);
-		PacketSocketAdapter::priority = 100;
+		PacketSocketAdapter::socket->setAdapter(this);
+		//PacketSocketAdapter::priority = 100;
 	}
 
 	virtual ~Transaction()
 	{
 		debugL("NetTransaction", this) << "Destroying" << std::endl;
-		PacketSocketAdapter::socket->base().removeAdapter(this);
+		PacketSocketAdapter::socket->setAdapter(0);
 	}
 
 	virtual bool send()
@@ -273,7 +68,7 @@ public:
 		assert(socket);
 		if (socket->send(PacketTransaction<PacketT>::_request, _peerAddress) > 0)
 			return PacketTransaction<PacketT>::send();
-		setState(this, net::TransactionState::Failed);
+		setState(this, TransactionState::Failed);
 		return false;
 	}
 	
@@ -302,17 +97,17 @@ protected:
 		}
 	}
 	
-	virtual void onSuccess() 
+	virtual void onResponse() 
 		/// Called when a successful response match is received.
 	{
 		traceL("Transaction", this) << "On Success: " << _response.toString() << std::endl;
-		PacketEmitter::emit(socket, _response);
+		PacketSignal::emit(socket, _response);
 	}
 
 	virtual bool checkResponse(const PacketT& packet) 
 		/// Sub classes should derive this method to implement 
 		/// response checking logic.
-		/// The base implementation only preforms address matching.
+		/// The base implementation only performs address matching.
 	{
 		assert(packet.info && "socket must provide packet info");
 		if (!packet.info)
@@ -324,6 +119,12 @@ protected:
 	
 	Address _peerAddress;
 };
+
+
+} } // namespace scy::net
+
+
+#endif // SOURCEY_NET_PacketTransaction_H
 
 
 /*
@@ -354,7 +155,7 @@ public:
 		_socket.adapter() += packetDelegate(this, &Transaction::onPotentialResponse, 100);
 		if (_socket.base().send(PacketTransaction<PacketT>::_request, _peerAddress))
 			return PacketTransaction<PacketT>::send();
-		setState(this, net::TransactionState::Failed);
+		setState(this, TransactionState::Failed);
 		return false;
 	}
 	
@@ -371,11 +172,11 @@ public:
 			throw StopPropagation();
 	}	
 
-	virtual void onSuccess()
+	virtual void onResponse()
 	{
 		debugL("NetTransaction", this) << "Response" << std::endl;
 		_socket.adapter() -= packetDelegate(this, &Transaction::onPotentialResponse);
-		PacketTransaction<PacketT>::onSuccess();
+		PacketTransaction<PacketT>::onResponse();
 	}
 	
 	Address localAddress() const
@@ -420,12 +221,6 @@ private:
 */
 
 
-} } // namespace scy::net
-
-
-#endif // SOURCEY_NET_PacketTransaction_H
-
-
 		//_socket(socket),
 		//_localAddress(localAddress), 
 		//,
@@ -446,19 +241,19 @@ private:
 
 //private:
 	//mutable Mutex	_mutex;
-	virtual void onSuccess()
+	virtual void onResponse()
 	{
 		debugL("NetTransaction", this) << "Response" << std::endl;
 		//_socket.adapter() -= packetDelegate(this, &Transaction::onPotentialResponse);
-		PacketTransaction<PacketT>::onSuccess();
+		PacketTransaction<PacketT>::onResponse();
 	}
 	*/
 	
 	/*
-	virtual void onSuccess() 
+	virtual void onResponse() 
 	{
 		traceL("PacketTransaction", this) << "Complete" << std::endl;
-		Timer::close();
+		_timer.close();
 	}
 	*/
 	
@@ -481,7 +276,7 @@ private:
 	/*
 		//Mutex::ScopedLock lock(_mutex);
 	//net::SocketBase* _socket;
-	virtual void onSuccess()
+	virtual void onResponse()
 	{
 		debugL("NetTransaction", this) << "Complete" << std::endl;
 		{
@@ -492,6 +287,6 @@ private:
 				//_socket = NULL;
 			//}
 		}
-		PacketTransaction<PacketT>::onSuccess();
+		PacketTransaction<PacketT>::onResponse();
 	}
 	*/

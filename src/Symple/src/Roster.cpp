@@ -22,11 +22,11 @@
 
 
 using namespace std;
-using namespace Poco;
+
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
 Roster::Roster()
@@ -73,8 +73,8 @@ void Roster::update(const json::Value& data, bool whiny)
 
 Peer* Roster::getByHost(const string& host)
 {
-	FastMutex::ScopedLock lock(_mutex);
-	for (PeerMap::const_iterator it = _store.begin(); it != _store.end(); ++it) {	
+	Mutex::ScopedLock lock(_mutex);
+	for (PeerMap::const_iterator it = _map.begin(); it != _map.end(); ++it) {	
 		if (it->second->host() == host)
 			return it->second;
 	}
@@ -84,21 +84,21 @@ Peer* Roster::getByHost(const string& host)
 
 Roster::PeerMap Roster::peers() const 
 { 
-	FastMutex::ScopedLock lock(_mutex);
-	return _store; 
+	Mutex::ScopedLock lock(_mutex);
+	return _map; 
 }
 
 
 void Roster::print(ostream& os) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	os << "Roster[";
-	for (PeerMap::const_iterator it = _store.begin(); it != _store.end(); ++it) {	
+	for (PeerMap::const_iterator it = _map.begin(); it != _map.end(); ++it) {	
 		os << "\n\t" << it->second << ": " << it->first;
 	}
 	os << "\n]";
 }
 
 
-} } // namespace scy::smple
+} } // namespace scy::smpl

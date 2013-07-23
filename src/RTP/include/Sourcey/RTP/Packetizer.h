@@ -21,8 +21,9 @@
 #define SOURCEY_RTP_PACKETIZER_H
 
 
-#include "Sourcey/IPacketizer.h"
+#include "Sourcey/PacketStream.h"
 #include "Sourcey/Signal.h"
+#include "Sourcey/Platform.h"
 #include "Sourcey/RTP/Packet.h"
 
 
@@ -35,14 +36,14 @@ class Packetizer: public IPacketizer
 	/// into RTP packets.
 {
 public:
-	Packetizer(int mtu = RTP_MAX_PACKET_LEN) :
+	Packetizer(UInt32 mtu = RTP_MAX_PACKET_LEN) :
 		_sequenceNumber(0),
 		_headerLength(12),
 		_payloadType(0),
 		_timestamp(0),
-		_ssrc(0)
+		_ssrc(0),
+		_mtu(mtu)
 	{
-		setMTU(mtu);
 	}
 
 	virtual void process(IPacket& packet)
@@ -53,13 +54,13 @@ public:
 		packet.write(buf);
 
 		int size = 0;
-		while (!buf.eof()) {		
-			size = std::min<int>((int)buf.size() - buf.position(), (int)_mtu - _headerLength);			
-			_timestamp = util::getTime();
+		while (buf.available()) {		
+			size = std::min<int>((int)buf.available(), (int)_mtu - _headerLength);			
+			_timestamp = scy::getTime();
 			rtp::Packet rtpPacket(buf.data(), size, _sequenceNumber++, _timestamp, _ssrc);
 			buf.consume(size);
 			rtpPacket.header().payloadType = _payloadType;
-			rtpPacket.header().marker = buf.eof();
+			rtpPacket.header().marker = !buf.available(); // eof
 			emit(this, rtpPacket);
 		}
 	};
@@ -70,10 +71,11 @@ public:
 	void setSSRC(UInt32 s)			{ _ssrc =  s; }
 
 protected:
+	UInt32 _mtu;
 	UInt32 _sequenceNumber;
 	UInt8  _headerLength;
 	UInt8  _payloadType;
-	UInt32 _timestamp;
+	UInt64 _timestamp;
 	UInt32 _ssrc;
 };
 

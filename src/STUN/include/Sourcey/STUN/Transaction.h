@@ -42,7 +42,7 @@ public:
 	virtual ~Transaction();
 
 	virtual bool checkResponse(const Message& message);
-	virtual void onSuccess();
+	virtual void onResponse();
 };
 
 

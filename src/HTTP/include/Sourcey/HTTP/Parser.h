@@ -30,39 +30,7 @@
 namespace scy { 
 namespace http {
 
-
-class URL 
-{
-public:
-	URL();
-	URL(const std::string& url);
-	~URL();
-
-	bool parse(const char* buffer, std::size_t length, bool is_connect = false);
-	void reset();
-
-public:
-	std::string schema() const;
-	std::string host() const;
-	int port() const;
-	std::string path() const;
-	std::string query() const;
-	std::string fragment() const;
-	std::string pathQueryFragment() const;
-
-	bool hasSchema() const;
-	bool hasHost() const;
-	bool hasPort() const;
-	bool hasPath() const;
-	bool hasQuery() const;
-	bool hasFragment() const;
-
-private:
-	http_parser_url handle_;
-	std::string buf_;
-};
-
-
+	
 // -------------------------------------------------------------------
 //
 struct ParserError
@@ -121,7 +89,7 @@ public:
     void setResponse(http::Response* response);
     void setObserver(ParserObserver* observer);
 	
-    Poco::Net::HTTPMessage* message();
+    http::Message* message();
     ParserObserver* observer() const;
 
     bool upgrade() const;
@@ -142,6 +110,7 @@ public:
     /// http_parser callbacks
     static int on_message_begin(http_parser* parser);
     static int on_url(http_parser* parser, const char *at, size_t len);
+    static int on_status_complete(http_parser* parser);
     static int on_header_field(http_parser* parser, const char* at, size_t len);
     static int on_header_value(http_parser* parser, const char* at, size_t len);
     static int on_headers_complete(http_parser* parser);
@@ -149,15 +118,13 @@ public:
     static int on_message_complete(http_parser* parser);
 	
 public:
-    ParserObserver* _observer;
-	
+    ParserObserver* _observer;	
 	http::Response* _response;
 	http::Request* _request;
+	http::Message* _message;
 	
     http_parser _parser;
     http_parser_settings _settings;
-
-	Poco::Net::HTTPMessage* _message;
 
     bool _wasHeaderValue;
     std::string _lastHeaderField;
@@ -189,7 +156,7 @@ public:
 
 	/*	// std::size_t offset, 
     //bool parsing() const;
-    Poco::Net::HTTPMessage* headers()
+    http::Message* headers()
 	{
 		return _headers;
 	};
@@ -278,8 +245,8 @@ public:
   bool version(unsigned short major, unsigned short minor);
 
   const URL& url() const;
-  bool url(const std::string& u, bool is_connect=false);
-  bool url(const char* at, std::size_t len, bool is_connect=false);
+  bool url(const std::string& u, bool isConnect=false);
+  bool url(const char* at, std::size_t len, bool isConnect=false);
   void url(const URL& u);
 
   const http_method& method() const;
@@ -351,7 +318,7 @@ public:
 /*
 
 
-#include "Sourcey/Util/UserManager.h"
+#include "Sourcey/Util/UserContainers.h"
 #include <string>
 
 

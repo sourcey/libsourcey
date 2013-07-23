@@ -2,24 +2,17 @@
 #include "Sourcey/Logger.h"
 #include "Sourcey/Runner.h"
 #include "Sourcey/Signal.h"
+#include "Sourcey/Platform.h"
+#include "Sourcey/Application.h"
 #include "Sourcey/PacketStream.h"
-#include "Sourcey/TimerTask.h"
+#include "Sourcey/Timer.h"
 #include "Sourcey/Util.h"
 
-#include "Poco/NamedEvent.h"
-
-/*
-#include <string>
-#include <vector>
-#include <iostream>
-#include <sstream>
-*/
 #include <assert.h>
 
 
 using namespace std;
-using namespace Poco;
-using namespace Sourcey;
+using namespace scy;
 
 
 /*
@@ -31,21 +24,19 @@ CMemLeakDetect memLeakDetect;
 */
 
 
-namespace Sourcey {
-	
-
-static NamedEvent ready("TestEvent");
+namespace scy {
 	
 
 class Tests
 {
-	//Poco::Event ready;
-	Runner runner;
+	Application app;
 
 public:
 	Tests()
 	{	
-		//runTimerTaskTest();
+		runPlatformTests();
+		runExceptionTest();
+		runTimerTest();
 		//runScheduler::TaskTest();
 		//runTimerTest();
 		//runPacketStreamTests();
@@ -54,40 +45,91 @@ public:
 		//runGarbageCollectorTests();
 		//runSignalReceivers();
 		
-		Util::pause();
-	}
-	
-	// ---------------------------------------------------------------------
-	//
-	// Timer Task Tests
-	//
-	// ---------------------------------------------------------------------	
-	void onTimerTask(void* sender)
-	{
-		Log("trace") << "Timer Task Timout" << endl;
-		ready.set();
+		//util::pause();
 	}
 
-	void runTimerTaskTest() 
+	// ============================================================================
+	// Platform Test
+	//
+	void runPlatformTests() 
 	{
-		Log("trace") << "Running Timer Task Test" << endl;
-		TimerTask* task = new TimerTask(runner, 1000, 1000);
-		task->Timeout += delegate(this, &Tests::onTimerTask);
-		task->start();
-		ready.wait();
-		ready.wait();
-		task->destroy();
-		//Util::pause();
-		Log("trace") << "Running Timer Task Test: END" << endl;
+		debugL("PlatformTests") << "Executable Path: " << scy::getExePath() << endl;
+		debugL("PlatformTests") << "Current Working Directory: " << scy::getCWD() << endl;
+	}
+		
+	// ============================================================================
+	// Exception Test
+	//
+	void runExceptionTest() 
+	{
+		try
+		{
+			throw OpenFileException("That's not a file!");
+			assert(0 && "must throw");
+		}
+		catch (OpenFileException& exc)
+		{
+			debugL("ExceptionTests") << "Message: " << exc << endl;
+		}
+		catch (Exception&)
+		{
+			assert(0 && "bad cast");
+		}
+
+		try
+		{
+			throw IOException();
+			assert(0 && "must throw");
+		}
+		catch (IOException& exc)
+		{
+			debugL("ExceptionTests") << "Message: " << exc << endl;
+			assert(exc.message() == "IO error");
+		}
+		catch (Exception&)
+		{
+			assert(0 && "bad cast");
+		}
 	}
 	
+	// ============================================================================
+	// Timer Test
+	//
+	const static int numTimerTicks = 5;
+	bool timerRestarted;
+
+	void runTimerTest() 
+	{
+		traceL("TimerTest") << "Starting" << endl;
+		Timer timer;
+		timer.Timeout += delegate(this, &Tests::onOnTimerTimeout);
+		timer.start(10, 10);
+
+		timerRestarted = false;
+		
+		uv_ref(timer.handle()); // timers do not reference the loop
+		runLoop();
+		traceL("TimerTest") << "Ending" << endl;
+	}
+
+	void onOnTimerTimeout(void* sender)
+	{
+		Timer* timer = reinterpret_cast<Timer*>(sender);
+		traceL("TimerTest") << "On timeout: " << timer->count() << endl;
+		if (timer->count() == numTimerTicks) {
+			if (!timerRestarted) {
+				timerRestarted = true;
+				timer->restart(); // restart once, count returns to 0
+			}
+			else
+				timer->stop(); // event loop will be released
+		}
+	}
 
 	/*
-	// ---------------------------------------------------------------------
-	//
+	// ============================================================================
 	// Scheduled Task Tests
 	//
-	// ---------------------------------------------------------------------	
 	struct TestScheduler::Task: public Scheduler::Task
 	{
 		TestScheduler::Task(Runner& runner) : 
@@ -129,17 +171,13 @@ public:
 		}
 		
 		Log("trace") << "Running Scheduled Task Test: END" << endl;
-		Util::pause();
+		//util::pause();
 	}
-	*/
 
 
-	// ---------------------------------------------------------------------
-	//
+	// ============================================================================
 	// Packet Signal Tests
 	//
-	// ---------------------------------------------------------------------	
-	/*
 	PacketSignal BroadcastPacket;
 
 	void onBroadcastPacket(void* sender, DataPacket& packet)
@@ -153,18 +191,14 @@ public:
 		BroadcastPacket += packetDelegate(this, &Tests::onBroadcastPacket, 0);
 		DataPacket packet;
 		BroadcastPacket.emit(this, packet);
-		Util::pause();
+		//util::pause();
 		Log("trace") << "Running Packet Signal Test: END" << endl;
 	}
-	*/
 
 	
-	// ---------------------------------------------------------------------
-	//
+	// ============================================================================
 	// Packet Stream Tests
 	//
-	// ---------------------------------------------------------------------	
-	/*
 	class SimplePacketProcessor: public IPacketProcessor
 	{
 		void process(IPacket& packet) 
@@ -195,18 +229,14 @@ public:
 
 		// run!		
 		//cap.start();
-		Util::pause();
+		//util::pause();
 		//cap.stop();
 	}
-	*/
 	
 
-	// ---------------------------------------------------------------------
-	//
+	// ============================================================================
 	// Garbage Collector Tests
 	//
-	// ---------------------------------------------------------------------	
-	/*
 	void runGarbageCollectorTests() {
 		Log("trace") << "Running Garbage Collector Test" << endl;
 		
@@ -219,18 +249,38 @@ public:
 			//TaskRunner::getDefault().deleteLater<Poco::Thread>(ptr1);
 		//}
 
-		Util::pause();
+		//util::pause();
 		Log("trace") << "Running Garbage Collector Test: END" << endl;
+	}
+	
+	// ============================================================================
+	// Timer Task Tests
+	//
+	void onTimerTask(void* sender)
+	{
+		Log("trace") << "Timer Task Timout" << endl;
+		ready.set();
+	}
+
+	void runTimerTaskTest() 
+	{
+		Log("trace") << "Running Timer Task Test" << endl;
+		TimerTask* task = new TimerTask(runner, 1000, 1000);
+		task->Timeout += delegate(this, &Tests::onTimerTask);
+		task->start();
+		ready.wait();
+		ready.wait();
+		task->destroy();
+		//util::pause();
+		Log("trace") << "Running Timer Task Test: END" << endl;
 	}
 	*/
 	
 
 	
-	// ---------------------------------------------------------------------
-	//
+	// ============================================================================
 	// Signal Tests
 	//
-	// ---------------------------------------------------------------------		
 	struct SignalBroadcaster
 	{
 		SignalBroadcaster() {}
@@ -267,36 +317,49 @@ public:
 				SignalReceiver receiver(broadcaster);
 			}
 		}
-		Util::pause();
+		//util::pause();
 	}
 
 
 	/*
-	// ---------------------------------------------------------------------
+	// ============================================================================
 	//
 	// Version String Comparison
 	//
-	// ---------------------------------------------------------------------		
+	// ============================================================================		
 	void runVersionStringComparison() 
 	{
-		//assert(Util::CompareVersion("3.7.8.0", "3.7.8") == false);
-		//assert(Util::CompareVersion("3.7.9", "3.7.8") == true);
-		//assert(Util::CompareVersion("1.7.9", "3.7.8") == false);
+		//assert(util::CompareVersion("3.7.8.0", "3.7.8") == false);
+		//assert(util::CompareVersion("3.7.9", "3.7.8") == true);
+		//assert(util::CompareVersion("1.7.9", "3.7.8") == false);
 	}
 	*/
+
+	void runLoop() {
+		debugL("Tests") << "#################### Running" << endl;
+		app.run();
+		debugL("Tests") << "#################### Ended" << endl;
+	}
+
+	void runCleanup() {
+		debugL("Tests") << "#################### Finalizing" << endl;
+		app.cleanup();
+		debugL("Tests") << "#################### Exiting" << endl;
+	}
+	
 };
 
 
-} // namespace Sourcey
+} // namespace scy
 
 
 int main(int argc, char** argv) 
 {	
 	Logger::instance().add(new ConsoleChannel("Test", TraceLevel));
 	{
-		Sourcey::Tests app;
+		scy::Tests app;
 	}	
-	Sourcey::Logger::uninitialize();
-	Util::pause();
+	Logger::uninitialize();
+	//util::pause();
 	return 0;
 }

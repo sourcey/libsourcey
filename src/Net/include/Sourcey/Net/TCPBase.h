@@ -47,11 +47,18 @@ public:
 	
 	virtual void bind(const net::Address& address, unsigned flags = 0);
 	virtual void listen(int backlog = 64);	
+	
+	virtual void acceptConnection();
 
 	virtual void setNoDelay(bool enable);
 	virtual void setKeepAlive(int enable, unsigned int delay);
-	
-	virtual void acceptConnection();
+			
+	void setError(const Error& err);
+	const Error& error() const;
+
+	virtual bool closed() const;
+		/// Returns true if the native socket 
+		/// handle is closed.
 	
 	net::Address address() const;
 		/// Returns the IP address and port number of the socket.

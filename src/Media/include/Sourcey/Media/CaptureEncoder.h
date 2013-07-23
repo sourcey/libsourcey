@@ -26,11 +26,11 @@
 #include "Sourcey/Media/IEncoder.h"
 #include "Sourcey/Media/AudioEncoder.h"
 #include "Sourcey/Media/VideoEncoder.h"
-#include "Sourcey/IStartable.h"
+#include "Sourcey/Interfaces.h"
 #include "Sourcey/Logger.h"
+#include "Sourcey/DateTime.h"
 
-#include "Poco/DateTimeFormatter.h"
-#include "Poco/Timestamp.h"
+//#include "Poco/Timestamp.h"
 
 
 namespace scy {
@@ -38,7 +38,7 @@ namespace av {
 
 
 template <class EncoderT>
-class CaptureEncoder: public IStartable, public EncoderT
+class CaptureEncoder: public abstract::Startable, public EncoderT
 	/// This class extends a Encoder object for encoding the output
 	/// of an ICapture object.
 	///
@@ -52,13 +52,13 @@ public:
 		_capture(capture),
 		_destroyOnStop(destroyOnStop)
 	{
-		debugL() << "[CaptureEncoder] Creating" << std::endl;
+		traceL() << "[CaptureEncoder] Creating" << std::endl;
 		assert(_capture);	
 	}
 
 	virtual ~CaptureEncoder() 
 	{
-		debugL() << "[CaptureEncoder] Destroying" << std::endl;
+		traceL() << "[CaptureEncoder] Destroying" << std::endl;
 
 		// A call to stop() is required before destruction.
 		assert(EncoderT::state().id() == EncoderState::None);
@@ -66,7 +66,7 @@ public:
 
 	virtual void start(/*const ParamT& params*/) 
 	{
-		debugL() << "[CaptureEncoder] Starting..." << std::endl;
+		traceL() << "[CaptureEncoder] Starting..." << std::endl;
 		if (!EncoderT::isReady())
 			EncoderT::initialize();
 
@@ -80,7 +80,7 @@ public:
 			
 		} 
 		catch (Exception& exc) {
-			errorL() << "Encoder Error: " << exc.displayText() << std::endl;
+			errorL() << "Encoder Error: " << exc.message() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
 			exc.rethrow();
@@ -89,7 +89,7 @@ public:
 
 	virtual void stop() 
 	{
-		debugL() << "[CaptureEncoder] Stopping..." << std::endl;
+		traceL() << "[CaptureEncoder] Stopping..." << std::endl;
 		try {
 			assert(_capture);
 			//assert(EncoderT::isReady());
@@ -100,7 +100,7 @@ public:
 			EncoderT::setState(this, EncoderState::None);
 		} 
 		catch (Exception& exc) {
-			errorL() << "Encoder Error: " << exc.displayText() << std::endl;
+			errorL() << "Encoder Error: " << exc.message() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 		}
 
@@ -117,7 +117,7 @@ public:
 			int size = EncoderT::encode((unsigned char*)packet.data, packet.size);
 		} 
 		catch (Exception& exc) {
-			errorL() << "Encoder Error: " << exc.displayText() << std::endl;
+			errorL() << "Encoder Error: " << exc.message() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
 		}
@@ -145,7 +145,7 @@ public:
 		_capture(capture),
 		_destroyOnStop(destroyOnStop)
 	{
-		debugL() << "[RawCaptureEncoder] Creating" << std::endl;
+		traceL() << "[RawCaptureEncoder] Creating" << std::endl;
 		assert(_capture);	
 		EncoderT::setState(this, EncoderState::None);
 	}
@@ -153,7 +153,7 @@ public:
 
 	virtual ~RawCaptureEncoder() 
 	{
-		debugL() << "[RawCaptureEncoder] Destroying" << std::endl;
+		traceL() << "[RawCaptureEncoder] Destroying" << std::endl;
 
 		// A call to stop() is required before destruction.
 		assert(state().id() == EncoderState::None);
@@ -161,7 +161,7 @@ public:
 
 	virtual void start() 
 	{
-		debugL() << "[RawCaptureEncoder] Starting..." << std::endl;
+		traceL() << "[RawCaptureEncoder] Starting..." << std::endl;
 		try {
 			assert(_capture);
 			//assert(isInitialized());
@@ -171,7 +171,7 @@ public:
 			EncoderT::setState(this, EncoderState::Encoding);
 		} 
 		catch (Exception& exc) {
-			errorL() << "Encoder Error: " << exc.displayText() << std::endl;
+			errorL() << "Encoder Error: " << exc.message() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
 			exc.rethrow();
@@ -180,7 +180,7 @@ public:
 
 	virtual void stop() 
 	{
-		debugL() << "[RawCaptureEncoder] Stopping..." << std::endl;
+		traceL() << "[RawCaptureEncoder] Stopping..." << std::endl;
 		try {
 			assert(_capture);
 			//assert(isInitialized());
@@ -190,7 +190,7 @@ public:
 			EncoderT::setState(this, EncoderState::None);
 		} 
 		catch (Exception& exc) {
-			errorL() << "Encoder Error: " << exc.displayText() << std::endl;
+			errorL() << "Encoder Error: " << exc.message() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 		}
 
@@ -206,7 +206,7 @@ public:
 		// No encoding takes place, just relay the packet.
 		//PacketEncoded.emit(this, static_cast<Packet&>(packet));
 
-		PacketEncoded.emit(this, packet);
+		PacketEncoded.emit(packet);
 	}
 
 	// Connect to PacketEncoded signal to receive encoded packets.

@@ -55,7 +55,7 @@ private:
 	virtual bool getDefaultAudioDevice(bool input, Device& device);
 
 	bool _needCoUninitialize;
-	static Poco::FastMutex _mutex;
+	static Mutex _mutex;
 };
 
 

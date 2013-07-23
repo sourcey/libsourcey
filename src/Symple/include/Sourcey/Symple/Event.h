@@ -22,10 +22,11 @@
 
 
 #include "Sourcey/Symple/Message.h"
+#include <ctime>
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
 class Event: public Message
@@ -50,7 +51,7 @@ public:
 };
 
 
-} // namespace smple 
+} // namespace symple 
 } // namespace scy
 
 

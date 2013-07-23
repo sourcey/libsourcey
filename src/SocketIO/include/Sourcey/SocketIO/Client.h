@@ -17,20 +17,19 @@
 //
 
 
-#ifndef SOURCEY_SOCKETIO_Client_H
-#define SOURCEY_SOCKETIO_Client_H
+#ifndef SOURCEY_SocketIO_Client_H
+#define SOURCEY_SocketIO_Client_H
 
 
 #include "Sourcey/Application.h"
-#include "Sourcey/HTTP/WebSocket.h"
 #include "Sourcey/SocketIO/Packet.h"
 #include "Sourcey/SocketIO/Transaction.h"
-#include "Sourcey/HTTP/Transaction.h"
+#include "Sourcey/HTTP/WebSocket.h"
 #include "Sourcey/JSON/JSON.h"
 
 #include "Poco/Format.h"
 #include "Poco/URI.h"
-#include "Poco/Net/KVStore.h"
+#include "Sourcey/Containers.h"
 
 
 namespace scy {
@@ -44,7 +43,6 @@ struct ClientState: public State
 		None				= 0x00,
 		Connecting			= 0x01,
 		Connected			= 0x04,
-		//Handshaking			= 0x08,
 		Online				= 0x10,
 		Disconnected		= 0x20
 	};
@@ -55,7 +53,6 @@ struct ClientState: public State
 		case None:			return "None";
 		case Connecting:	return "Connecting";
 		case Connected:		return "Connected";
-		//case Handshaking:	return "Handshaking";
 		case Online:		return "Online";
 		case Disconnected:	return "Disconnected";
 		default: assert(false);
@@ -67,14 +64,14 @@ struct ClientState: public State
 	
 // ---------------------------------------------------------------------
 //
-class Client: public StatefulSignal<ClientState>, public PacketEmitter, public IPolymorphic
+class Client: public StatefulSignal<ClientState>, public PacketSignal, public Polymorphic
 {
 public:
-	Client(net::SocketBase* socket, uv::Loop& loop);
-	Client(net::SocketBase* socket, uv::Loop& loop, const net::Address& serverAddr);
+	Client(net::SocketBase* socket, uv::Loop& loop = uv::defaultLoop());
+	Client(net::SocketBase* socket, const std::string& host, UInt16 port, uv::Loop& loop = uv::defaultLoop());
 	virtual ~Client();
 	
-	virtual void connect(const net::Address& serverAddr);
+	virtual void connect(const std::string& host, UInt16 port);
 	virtual void connect();
 	virtual void close();
 
@@ -101,7 +98,6 @@ public:
 
 	virtual uv::Loop& loop();
 	virtual http::WebSocket& socket();
-	virtual net::Address serverAddr() const;
 	virtual std::string sessionID() const;	
 	virtual Error error() const;
 		
@@ -110,39 +106,70 @@ public:
 	const char* className() const { return "SocketIOClient"; }
 
 protected:
-	virtual int sendHeartbeat();
-	virtual void sendInitialRequest();
 	virtual void setError(const Error& error);
 
 	virtual void reset();
 		/// Resets variables and data at the beginning  
 		/// and end of each session.
 
+	virtual int sendHeartbeat();
+	
+	virtual void sendHandshakeRequest();
+	virtual void onHandshakeResponse(void*, const http::Response& response);
+
 	virtual void onConnect();
 	virtual void onOnline();
 	virtual void onClose();
 	virtual void onPacket(sockio::Packet& packet);
 	
-	virtual void onHeartBeatTimer(void*);
 	virtual void onSocketConnect(void*);
+	virtual void onSocketRecv(void*, net::SocketPacket& packet);
 	virtual void onSocketError(void*, const Error& error);
 	virtual void onSocketClose(void*);
-	virtual void onSocketRecv(void*, net::SocketPacket& packet);
+
+	virtual void onHeartBeatTimer(void*);
 
 protected:
-	//mutable Poco::FastMutex	_mutex;
+	//mutable Mutex	_mutex;
 	
 	uv::Loop& _loop;
 	StringVec _protocols;
 	std::string _sessionID;
-	net::Address _serverAddr;
+	std::string _host;
+	UInt16 _port;
 	http::WebSocket _socket;
 	int	_heartBeatTimeout;
 	int	_connectionClosingTimeout;
-	Error _error;
 	Timer _timer;
 };
+	
+//virtual std::string& endpoint();
 
+
+// ---------------------------------------------------------------------
+//
+class TCPClient: public Client
+{
+public:
+	TCPClient(uv::Loop& loop = uv::defaultLoop()) :
+		Client(new net::TCPBase, loop)
+	{
+	}
+};
+
+
+/*
+	//net::Address _serverAddr;
+	//net::Socket _socket;
+	//virtual net::Socket& socket();
+	//virtual net::Address serverAddr() const;
+	
+	//Error _error;
+	TCPClient(const std::string& host, UInt16 port, uv::Loop& loop = uv::defaultLoop()) :
+		Client(new net::TCPBase, const std::string& host, UInt16 port, loop)//,
+		//_socket(loop)
+	{
+	}
 
 // ---------------------------------------------------------------------
 //
@@ -151,14 +178,14 @@ class ClientBase: public Client
 {
 public:
 	ClientBase(uv::Loop& loop = uv::defaultLoop()) :
-		Client(_socket, loop),
-		_socket(loop)
+		Client(_socket, loop)//,
+		//_socket(loop)
 	{
 	}
 
 	ClientBase(const net::Address& serverAddr, uv::Loop& loop = uv::defaultLoop()) :
-		Client(_socket, loop, serverAddr),
-		_socket(loop)
+		Client(_socket, serverAddr, loop)//,
+		//_socket(loop)
 	{
 	}
 
@@ -167,8 +194,11 @@ protected:
 };
 
 
-/*
-	//virtual void onSocketOnline(void*);
+// ---------------------------------------------------------------------
+//
+typedef sockio::ClientBase<http::WebSocket> TCPClient;
+
+	//virtual void onSocketConnect(void*);
 
 
 // ---------------------------------------------------------------------
@@ -197,7 +227,7 @@ typedef sockio::ClientBase<
 } } // namespace scy::sockio
 
 
-#endif //  SOURCEY_SOCKETIO_Client_H
+#endif //  SOURCEY_SocketIO_Client_H
 
 
 
@@ -243,7 +273,7 @@ typedef sockio::ClientBase<
 //public:
 //	ClientBase(Net::Reactor& reactor) :
 //		WebSocketBaseT(reactor),
-//		_timer(NULL)
+//		_timer(nullptr)
 //	{
 //	}
 //
@@ -251,7 +281,7 @@ typedef sockio::ClientBase<
 //	ClientBase(const net::Address& serverAddr) :
 //		WebSocketBaseT(reactor),
 //		_serverAddr(serverAddr),
-//		_timer(NULL)
+//		_timer(nullptr)
 //	{
 //	}
 //
@@ -268,7 +298,7 @@ typedef sockio::ClientBase<
 //	virtual void connect(const net::Address& serverAddr)
 //	{	
 //		{
-//			//Poco::FastMutex::ScopedLock lock(_mutex);
+//			//Mutex::ScopedLock lock(_mutex);
 //			_serverAddr = serverAddr;
 //		}
 //		/*SocketBase::*/connect();
@@ -279,7 +309,7 @@ typedef sockio::ClientBase<
 //	{
 //		Log("trace", this) << "SocketIO Connecting" << endl;
 //
-//		//Poco::FastMutex::ScopedLock lock(_mutex);
+//		//Mutex::ScopedLock lock(_mutex);
 //
 //		assert(_serverAddr.valid());
 //
@@ -288,7 +318,7 @@ typedef sockio::ClientBase<
 //
 //		Log("debug", this) << "Connecting to " << _uri.toString() << std::endl;
 //
-//		sendInitialRequest();
+//		sendHandshakeRequest();
 //
 //		// Initialize the websocket
 //
@@ -301,7 +331,7 @@ typedef sockio::ClientBase<
 //	}
 //
 //
-//	virtual void sendInitialRequest()
+//	virtual void sendHandshakeRequest()
 //	{
 //		// NOTE: No need for mutex lock because this method is called from connect()
 //	
@@ -377,7 +407,7 @@ typedef sockio::ClientBase<
 //
 //	virtual int sendConnect(const std::string& endpoint, const std::string& query)
 //	{
-//		//Poco::FastMutex::ScopedLock lock(_mutex);
+//		//Mutex::ScopedLock lock(_mutex);
 //		// (1) Connect
 //		// Only used for multiple sockets. Signals a connection to the endpoint. Once the server receives it, it's echoed back to the client.
 //		// 
@@ -445,7 +475,7 @@ typedef sockio::ClientBase<
 //				connect();
 //			} 
 //			catch (Exception& exc) {			
-//				Log("error", this) << "Reconnection attempt failed: " << exc.displayText() << std::endl;
+//				Log("error", this) << "Reconnection attempt failed: " << exc.message() << std::endl;
 //			}	
 //		}
 //	}
@@ -460,7 +490,7 @@ typedef sockio::ClientBase<
 //
 //	virtual std::string sessionID() const 
 //	{
-//		//Poco::FastMutex::ScopedLock lock(_mutex);
+//		//Mutex::ScopedLock lock(_mutex);
 //		return _sessionID;
 //	}
 //	
@@ -491,7 +521,7 @@ typedef sockio::ClientBase<
 //	
 //
 //protected:
-//	mutable Poco::FastMutex	_mutex;
+//	mutable Mutex	_mutex;
 //	
 //	net::Address	_serverAddr;
 //	StringVec		_protocols;
@@ -526,18 +556,18 @@ typedef sockio::ClientBase<
 	//virtual void setSecure(bool flag) = 0;
 		// Enables secure wss:// connection when true.
 	
-	virtual Poco::Net::KVStore& httpHeaders() = 0;
-	Poco::Net::KVStore _httpHeaders;
-	virtual Poco::Net::KVStore& httpHeaders()
+	virtual KVCollection& httpHeaders() = 0;
+	KVCollection _httpHeaders;
+	virtual KVCollection& httpHeaders()
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _httpHeaders;
 	}
 
 
 	virtual http::WebSocket* socket()
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _socket;
 	}
 	*/
@@ -550,7 +580,7 @@ typedef sockio::ClientBase<
 	/*
 	void setSecure(bool flag)
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		_secure = flag;
 	}
 	*/
@@ -649,13 +679,13 @@ public:
 		// Enables secure wss:// connection when true.
 	
 	//http::WebSocket* socket();
-	Poco::Net::KVStore& httpHeaders();
+	KVCollection& httpHeaders();
 	std::string sessionID() const;
 
 protected:
 	virtual int sendHeartbeat();
 	virtual void onHeartBeatTimer(TimerCallback<Socket>& timer);
-	virtual bool sendInitialRequest();
+	virtual bool sendHandshakeRequest();
 	*/
 
 

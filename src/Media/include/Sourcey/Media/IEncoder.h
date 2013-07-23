@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/Signal.h"
-#include "Sourcey/IPacketProcessor.h"
+#include "Sourcey/PacketStream.h"
 #include "Sourcey/Stateful.h"
 #include "Sourcey/Media/Format.h"
 
@@ -124,7 +124,7 @@ public:
 };
 
 
-class IPacketEncoder: public IEncoder, public IPacketProcessor
+class IPacketEncoder: public IEncoder, public PacketProcessor
 	/// This class extends the IEncoder interface to add
 	/// PacketStream compatibility.
 {

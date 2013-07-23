@@ -24,11 +24,11 @@
 
 
 using namespace std;
-using namespace Poco;
+
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
 Form::Form()
@@ -97,7 +97,7 @@ bool Form::valid()
 // Form Element
 //
 FormElement::FormElement() :
-	_root(NULL)
+	_root(nullptr)
 {
 }
 
@@ -439,5 +439,5 @@ void FormField::addValue(bool value)
 }
 
 
-} // namespace smple 
+} // namespace symple 
 } // namespace scy

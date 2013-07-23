@@ -46,10 +46,11 @@ Task::Task(const string& type, const string& name) :
 
 	
 Task::Task(sked::Scheduler& scheduler, const string& type, const string& name) : 
-	scy::Task(reinterpret_cast<Scheduler&>(scheduler), true, false),
+	scy::Task(true),	
+	//scy::Task(reinterpret_cast<Scheduler&>(scheduler), true, false),
 	_type(type),
 	_name(name),
-	_scheduler(NULL),
+	_scheduler(&scheduler),
 	_trigger(NULL)
 {
 	traceL() << "Creating" << endl;
@@ -62,18 +63,20 @@ Task::~Task()
 }
 
 
+/*
 void Task::start()
 {
 	trigger(); // throw if trigger is NULL
 	scy::Task::start();
 }
+*/
 
 
-void Task::serialize(JSON::Value& root)
+void Task::serialize(json::Value& root)
 {
 	traceL() << "Serializing" << endl;	
 	
-	Poco::FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	
 	root["id"] = _id;
 	root["type"] = _type;
@@ -81,15 +84,15 @@ void Task::serialize(JSON::Value& root)
 }
 
 
-void Task::deserialize(JSON::Value& root)
+void Task::deserialize(json::Value& root)
 {
 	traceL() << "Deserializing" << endl;
 	
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	
-	JSON::assertMember(root, "id");
-	JSON::assertMember(root, "type");
-	JSON::assertMember(root, "name");
+	json::assertMember(root, "id");
+	json::assertMember(root, "type");
+	json::assertMember(root, "name");
 	
 	_id = root["id"].asUInt();
 	_type = root["type"].asString();
@@ -99,15 +102,15 @@ void Task::deserialize(JSON::Value& root)
 
 bool Task::beforeRun()
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _trigger && _trigger->timeout() && !_destroyed && !_cancelled;
 }
 
 
 bool Task::afterRun()
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);
-	Poco::DateTime now;
+	Mutex::ScopedLock lock(_mutex);
+	DateTime now;
 	_trigger->update();
 	_trigger->timesRun++;
 	_trigger->lastRunAt = now;
@@ -117,7 +120,7 @@ bool Task::afterRun()
 
 void Task::setTrigger(sked::Trigger* trigger)
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	if (_trigger)
 		delete _trigger;
 	_trigger = trigger;
@@ -126,46 +129,46 @@ void Task::setTrigger(sked::Trigger* trigger)
 
 string Task::name() const
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _name;
 }
 
 
 string Task::type() const
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _type;
 }
 
 
 Int64 Task::remaining() const
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	if (!_trigger)
-		throw Exception("Tasks must be associated with a sked::Trigger instance.");
+		throw Exception("Tasks must be have a Trigger instance.");
 	return _trigger->remaining();
 }
 
 
 sked::Trigger& Task::trigger()
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	if (!_trigger)
-		throw Exception("Tasks must be associated with a sked::Trigger instance.");
+		throw Exception("Tasks must have a Trigger instance.");
 	return *_trigger;
 }
 
 
 sked::Scheduler& Task::scheduler()						 
 { 
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	if (!_scheduler)
 		throw Exception("Tasks must be started with a sked::Scheduler instance.");
 	return *_scheduler;
 }
 
 
-} } // namespace scy::Sked
+} } // namespace scy::sked
 
 
 
@@ -173,7 +176,7 @@ sked::Scheduler& Task::scheduler()
 /*
 void Task::setName(const string& name) 
 {
-	Poco::FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	_name = name;
 }
 */
@@ -222,7 +225,7 @@ void Task::scheduleRepeated(const DateTime& time, const Timespan& interval)
 
 DateTime Task::time() const
 {
-	FastMutex::ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _time;
 }
 
@@ -251,7 +254,7 @@ bool Task::run()
 	bool doTimeout = false;
 	bool doDestroy = false;
 	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		if (_scheduleAt.timeout()) {
 			doTimeout = true;
 			if (_interval > 0) {
@@ -286,7 +289,7 @@ void Task::schedule(const string& time, const string& fmt)
 }
 */
 /*
-void Task::serialize(JSON::Value& root)
+void Task::serialize(json::Value& root)
 {
 	traceL() << "Serializing" << endl;	
 	
@@ -295,7 +298,7 @@ void Task::serialize(JSON::Value& root)
 }
 
 
-void Task::deserialize(JSON::Value& root)
+void Task::deserialize(json::Value& root)
 {
 	traceL() << "Deserializing" << endl;
 

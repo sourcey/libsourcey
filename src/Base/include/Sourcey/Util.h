@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/Types.h"
-//#include "Sourcey/Memory.h"
+#include "Sourcey/Exception.h"
 
 #include <string>
 #include <sstream>
@@ -37,22 +37,24 @@ namespace util {
 
 
 //
-/// String Utils
+/// String utilities
 //
 	
 template<typename T>
 std::string toString(const T &t) 
-	/// Converts any interger at string
+	/// Converts interger to string representation.
 {
     std::ostringstream oss;
     oss << t;
     return oss.str();
 }
+	
 
 template<typename T>
 T fromString(const std::string& s) 
-	/// Converts any string to interger.
-	/// Ensure the interger type has sufficient storage capacity.
+	/// Converts string to given interger T.
+	/// Ensure the interger type has sufficient 
+	/// storage capacity.
 {
     std::istringstream iss(s);
     T x;
@@ -61,83 +63,97 @@ T fromString(const std::string& s)
     return x;
 }
 
-UInt64 getTime();
-	/// Returns the current time
 
-std::string getPID(const void* ptr);
-	/// Returns the object PID and a string
+bool tryParseHex(const std::string& s, unsigned& value);
+unsigned parseHex(const std::string& s);	
+	/// String to hex value.
 
-void removeSpecialCharacters(std::string& str, bool allowSpaces = false);
-void replaceSpecialCharacters(std::string& str, char with = '_', bool allowSpaces = false);
-void underscore(std::string& str);
+int icompare(const std::string& s1, const std::string& s2);
+	/// Case insensative string comparison.
 
-std::string dumpbin(const char* data, size_t len);
+std::string replace(const std::string& str, const std::string& from, const std::string& to, std::string::size_type start = 0);
+std::string replace(const std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start = 0);
+std::string& replaceInPlace(std::string& str, const std::string& from, const std::string& to, std::string::size_type start = 0);
+std::string& replaceInPlace(std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start = 0);
+	/// Functions for replacing string content.
 
-int icompare(const char* s1, const char* s2);
-int icompare(const char* s1, const std::string& s2);
+void toLower(std::string& str);
+	/// Transforms the string to lowercase.
+
+void toUpper(std::string& str);
+	/// Transforms the string to uppercase.
+
+void toUnderscore(std::string& str);
+	/// Replaces special characters in the given string with 
+	/// underscores and transform to lowercase.
 
 bool isNumber(const std::string& str);
 	/// Checks if the string is a number
 
 bool endsWith(const std::string& str, const std::string& suffix);
+	/// Returns true if the string ends with the given substring.
 
-StringVec &split(const std::string& s, const std::string& delim, StringVec &elems, int limit = -1);
-StringVec split(const std::string& s, const std::string& delim, int limit = -1);
+void removeSpecialCharacters(std::string& str, bool allowSpaces = false);
+void replaceSpecialCharacters(std::string& str, char with = '_', bool allowSpaces = false);
+	/// Replaces non-alphanumeric characters.
 
-StringVec &split(const std::string& s, char delim, StringVec &elems, int limit = -1);
-StringVec split(const std::string& s, char delim, int limit = -1);
+std::string dumpbin(const char* data, size_t len);
+	/// Dumps the binary representation of the 
+	/// given buffer to the output string.
+
+StringVec &split(const std::string& str, const std::string& delim, StringVec &elems, int limit = -1);
+StringVec split(const std::string& str, const std::string& delim, int limit = -1);
+	/// Splits the given string at the delimiter string
+
+StringVec &split(const std::string& str, char delim, StringVec &elems, int limit = -1);
+StringVec split(const std::string& str, char delim, int limit = -1);
+	/// Splits the given string at the delimiter character
 
 void trim(std::string& str);
-	/// Removes whitespace from beginning and end of Strings.
-	/// @param str String from which to remove whitespace
-
-void escape(std::string& str);
-	/// Does some fancy escaping. (& --> &amp;amp;, etc).
-	/// @param str A string to escape.
+	/// Removes whitespace from beginning and end of the given string.
 
 bool compareVersion(const std::string& l, const std::string& r);
-	/// This function compares two version strings ie. 3.7.8.0 > 3.2.1.0
+	/// Compares two version strings ie. 3.7.8.0 > 3.2.1.0
 	/// If L is greater than R the function returns true.
 	/// If L is equal or less than R the function returns false.
 
 bool matchNodes(const std::string& node, const std::string& xnode, const std::string& delim = "\r\n");
 bool matchNodes(const StringVec& params, const StringVec& xparams);
+	/// Matches two node lists against eachother.
+
+std::string getPID(const void* ptr);
+	/// Returns the object PID as a string.
 
 
 //
-/// System Tools
+/// Integer conversions
 //
 
-void pause();
-	/// Pause the current thread until a key is pressed.
-
-
-/// Windows Helpers
-
-#if WIN32
-enum WindowsMajorVersions {
-	kWindows2000 = 5,
-	kWindowsVista = 6,
-};
-
-bool getOsVersion(int* major, int* minor, int* build);
-
-inline bool isWindowsVistaOrLater() {
-	int major;
-	return (getOsVersion(&major, NULL, NULL) && major >= kWindowsVista);
+inline double intToDouble(Int64 v) {
+	if (v+v > 0xFFEULL<<52)
+		return 0;
+	return ldexp((double)((v&((1LL<<52)-1)) + (1LL<<52)) * (v>>63|1), (int)(v>>52&0x7FF)-1075);
 }
 
-inline bool isWindowsXpOrLater() {
-	int major, minor;
-	return (getOsVersion(&major, &minor, NULL) &&
-		(major >= kWindowsVista ||
-		(major == kWindows2000 && minor >= 1)));
+
+inline float intToFloat(Int32 v) {
+	if (v+v > 0xFF000000U)
+		return 0;
+	return ldexp((float)((v&0x7FFFFF) + (1<<23)) * (v>>31|1), (int)(v>>23&0xFF)-150);
 }
-#endif
+
+
+inline Int64 doubleToInt(double d) {
+	int e;
+	if     ( !d) return 0;
+	else if(d-d) return 0x7FF0000000000000LL + ((Int64)(d<0)<<63) + (d!=d);
+	d = frexp(d, &e);
+	return (Int64)(d<0)<<63 | (e+1022LL)<<52 | (Int64)((fabs(d)-0.5)*(1LL<<53));
+}
 
 
 //
-/// Container methods
+/// Container helpers
 //
 
 template<typename Val>
@@ -148,7 +164,6 @@ inline void clearList(std::list<Val*>& L)
 	typename std::list<Val*>::iterator it = L.begin();
 	while (it != L.end()) {
 		delete *it;
-		//Deleter::func(*it);
 		it = L.erase(it);
 	}
 }
@@ -161,7 +176,6 @@ inline void clearDeque(std::deque<Val*>& D)
 	typename std::deque<Val*>::iterator it = D.begin();
 	while (it != D.end()) {
 		delete *it;
-		//Deleter::func(*it);
 		it = D.erase(it);
 	}
 }
@@ -189,7 +203,6 @@ inline void clearMap(std::map<Key, Val*>& M)
 	while (it != M.end()) {
 		it2 = it++;
 		delete (*it2).second;
-		//Deleter::func((*it2).second);
 		M.erase(it2);
 	}
 }
@@ -204,7 +217,6 @@ inline void clearMap(std::map<Key, Val*>& M)
 	typename std::map<Key, Val*>::iterator it2;
 	while (it != M.end()) {
 		it2 = it++;
-		//delete (*it2).second;
 		Deleter::func((*it2).second);
 		M.erase(it2);
 	}
@@ -221,11 +233,9 @@ inline void clearMap(std::map<const Key, Val*>& M)
 	while (it != M.end()) {
 		it2 = it++;
 		delete (*it2).second;
-		//Deleter::func((*it2).second);
 		M.erase(it2);
 	}
 }
-
 
 
 } // namespace util
@@ -233,3 +243,11 @@ inline void clearMap(std::map<const Key, Val*>& M)
 
 
 #endif // SOURCEY_Util_H
+
+
+//
+/// System Utils
+//
+
+//void pause();
+	/// Pause the current thread until a key is pressed.

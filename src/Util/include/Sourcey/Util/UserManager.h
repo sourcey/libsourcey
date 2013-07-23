@@ -20,7 +20,7 @@
 #ifndef SOURCEY_UserManager_H
 #define SOURCEY_UserManager_H
 
-#include "Sourcey/Manager.h"
+#include "Sourcey/Containers.h"
 #include <map>
 
 

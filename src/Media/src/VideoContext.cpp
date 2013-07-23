@@ -22,7 +22,7 @@
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 using namespace scy;
 
 
@@ -31,9 +31,9 @@ namespace av {
 
 
 VideoContext::VideoContext() :
-	stream(NULL),
-	codec(NULL),
-	frame(NULL),
+	stream(nullptr),
+	codec(nullptr),
+	frame(nullptr),
 	pts(0.0)
 {
 	traceL("VideoContext", this) << "Creating" << endl;
@@ -100,8 +100,8 @@ void VideoContext::close()
 //
 VideoEncoderContext::VideoEncoderContext(AVFormatContext* format) :
 	format(format),
-	conv(NULL),
-	buffer(NULL),
+	conv(nullptr),
+	buffer(nullptr),
 	bufferSize(0)
 {
 }
@@ -115,7 +115,7 @@ VideoEncoderContext::~VideoEncoderContext()
 
 void VideoEncoderContext::create() //, const VideoCodec& params
 {
-	debugL("VideoEncoderContext", this) << "Creating: " 
+	traceL("VideoEncoderContext", this) << "Creating: " 
 		<< "\n\tInput: " << iparams.toString() 
 		<< "\n\tOutput: " << oparams.toString() 
 		<< endl;
@@ -192,7 +192,7 @@ void VideoEncoderContext::freeConverter()
 
 void VideoEncoderContext::close()
 {
-	debugL("VideoEncoderContext", this) << "Closing" << endl;
+	traceL("VideoEncoderContext", this) << "Closing" << endl;
 
 	VideoContext::close();
 	
@@ -311,8 +311,8 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 // Video Codec Encoder Context
 //
 VideoCodecEncoderContext::VideoCodecEncoderContext() :
-	conv(NULL),
-	buffer(NULL),
+	conv(nullptr),
+	buffer(nullptr),
 	bufferSize(0)
 {
 }
@@ -326,7 +326,7 @@ VideoCodecEncoderContext::~VideoCodecEncoderContext()
 
 void VideoCodecEncoderContext::create() //, const VideoCodec& paramsconst VideoCodec& params
 {
-	debugL() << "[VideoCodecEncoderContext:" << this << "] Creating: " 
+	traceL() << "[VideoCodecEncoderContext:" << this << "] Creating: " 
 		<< "\n\tInput: " << iparams.toString() 
 		<< "\n\tOutput: " << oparams.toString() 
 		<< endl;
@@ -368,7 +368,7 @@ void VideoCodecEncoderContext::create() //, const VideoCodec& paramsconst VideoC
 
 void VideoCodecEncoderContext::close()
 {
-	debugL() << "[VideoCodecEncoderContext:" << this << "] Closing" << endl;
+	traceL() << "[VideoCodecEncoderContext:" << this << "] Closing" << endl;
 
 	VideoContext::close();
 	
@@ -484,7 +484,7 @@ VideoDecoderContext::~VideoDecoderContext()
 
 void VideoDecoderContext::create(AVFormatContext *ic, int streamID)
 {	
-	debugL() << "[VideoDecoderContext:" << this << "] Creating: " << streamID << endl;
+	traceL() << "[VideoDecoderContext:" << this << "] Creating: " << streamID << endl;
 	VideoContext::create();
 
 	assert(ic);
@@ -555,7 +555,7 @@ bool VideoDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 
 	/*
 	while (bytesRemaining) { // && !frameDecoded
-		//debugL() << "[VideoDecoderContext:" << this << "] Decoding: " << ipacket.pts << endl;
+		//traceL() << "[VideoDecoderContext:" << this << "] Decoding: " << ipacket.pts << endl;
 		bytesRemaining -= bytesDecoded;
 	}
 	*/
@@ -596,7 +596,7 @@ bool VideoDecoderContext::flush(AVPacket& opacket)
 	avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
 	if (frameDecoded) {
 		InitDecodedVideoPacket(stream, ctx, frame, &opacket, &pts);
-		debugL() << "[VideoDecoderContext:" << this << "] Flushed Video Frame: " << opacket.pts << endl;
+		traceL() << "[VideoDecoderContext:" << this << "] Flushed Video Frame: " << opacket.pts << endl;
 		return true;
 	}
 	return false;
@@ -607,8 +607,8 @@ bool VideoDecoderContext::flush(AVPacket& opacket)
 // Video Conversion Context
 //
 VideoConversionContext::VideoConversionContext() :
-	oframe(NULL),
-	ctx(NULL)
+	oframe(nullptr),
+	ctx(nullptr)
 {
 }
 	

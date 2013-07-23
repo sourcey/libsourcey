@@ -51,7 +51,8 @@ void GarbageCollector::close()
 	traceL("GarbageCollector", this) << "Closing" << std::endl;
 
 	util::clearVector(_ready);
-	util::clearVector(_pending);
+	// Pending items will not be freed
+	// util::clearVector(_pending);
 	uv::Base::close();
 }
 

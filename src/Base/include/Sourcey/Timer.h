@@ -17,11 +17,12 @@
 //
 
 
-#ifndef SOURCEY_UV_Timer_H
-#define SOURCEY_UV_Timer_H
+#ifndef SOURCEY_Timer_H
+#define SOURCEY_Timer_H
 
 
 #include "Sourcey/UV/UVPP.h"
+#include "Sourcey/DateTime.h"
 #include "Sourcey/Types.h"
 #include "Sourcey/Signal.h"
 #include "Sourcey/Memory.h"
@@ -69,7 +70,7 @@ public:
 	
 	Int64 count();
 
-	void onTimeout();
+	virtual void onTimeout();
 	
 	NullSignal Timeout;
 
@@ -87,9 +88,114 @@ protected:
 };
 
 
+// ---------------------------------------------------------------------
+//
+class Timeout 
+	/// Simple timeout counter which expires
+	/// after a given delay.
+{
+public:
+	Timeout(long delay = 0, bool autoStart = false);
+	Timeout(const Timeout& src);
+	~Timeout();
+	
+	bool running() const;
+	void start();
+	void stop();
+	void reset();
+	long available() const;
+	bool expired() const;
+
+	void setDelay(long delay) { _delay = delay; };
+
+	time_t startAt() const { return _startAt; };
+	long delay() const { return _delay; };
+
+	Timeout& operator = (const Timeout& src);
+
+protected:
+	time_t	_startAt;
+	long	_delay;
+};
+
+
+// ---------------------------------------------------------------------
+//
+class Stopwatch
+	/// A simple facility to measure time intervals
+	/// with microsecond resolution.
+	///
+	/// Note that Stopwatch is based on the Timestamp
+	/// class. Therefore, if during a Stopwatch run,
+	/// the system time is changed, the measured time
+	/// will not be correct.
+{
+public:
+	Stopwatch();
+	~Stopwatch();
+
+	void start();
+		/// Starts (or restarts) the stopwatch.
+		
+	void stop();
+		/// Stops or pauses the stopwatch.
+	
+	void reset();
+		/// Resets the stopwatch.
+		
+	void restart();
+		/// Resets and starts the stopwatch.
+		
+	Timestamp::TimeDiff elapsed() const;
+		/// Returns the elapsed time in microseconds
+		/// since the stopwatch started.
+		
+	int elapsedSeconds() const;
+		/// Returns the number of seconds elapsed
+		/// since the stopwatch started.
+
+	static Timestamp::TimeVal resolution();
+		/// Returns the resolution of the stopwatch.
+
+private:
+	Stopwatch(const Stopwatch&);
+	Stopwatch& operator = (const Stopwatch&);
+
+	Timestamp           _start;
+	Timestamp::TimeDiff _elapsed;
+	bool                _running;
+};
+
+
+// ---------------------------------------------------------------------
+//
+class TimedToken: public Timeout
+	/// A token that expires after the specified duration.
+{
+public:
+	TimedToken(long duration);
+	TimedToken(const std::string& id, long duration);
+	
+	std::string id() const { return _id; }
+	
+	bool operator == (const TimedToken& r) const 
+	{
+		return id()  == r.id();
+	}
+	
+	bool operator == (const std::string& r) const
+	{
+		return id() == r;
+	}
+
+protected:
+	std::string _id;
+};
+
+
 } // namespace scy
 
 
-#endif // SOURCEY_UV_Timer_H
+#endif // SOURCEY_Timer_H
 
 

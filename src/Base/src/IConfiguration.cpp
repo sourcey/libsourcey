@@ -18,15 +18,17 @@
 
 
 #include "Sourcey/IConfiguration.h"
+#include "Sourcey/Util.h"
+#include "Sourcey/Exception.h"
 
-#include "Poco/Exception.h"
-#include "Poco/NumberParser.h"
-#include "Poco/NumberFormatter.h"
-#include "Poco/String.h"
+//#include "Poco/Exception.h"
+//#include "Poco/NumberParser.h"
+//#include "Poco/NumberFormatter.h"
+//#include "Poco/String.h"
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 
 
 namespace scy {
@@ -129,7 +131,7 @@ double IConfiguration::getDouble(const std::string& key) const
 
 	std::string value;
 	if (getRaw(key, value))
-		return NumberParser::parseFloat(value);
+		return util::fromString<double>(value); // NumberParser::parseFloat(value);
 	else
 		throw NotFoundException(key);
 }
@@ -141,7 +143,7 @@ double IConfiguration::getDouble(const std::string& key, double defaultValue) co
 
 	std::string value;
 	if (getRaw(key, value))
-		return NumberParser::parseFloat(value);
+		return util::fromString<double>(value); // NumberParser::parseFloat(value);
 	else
 		return defaultValue;
 }
@@ -183,7 +185,7 @@ void IConfiguration::setInt(const std::string& key, int value)
 {
 	Mutex::ScopedLock lock(_mutex);
 
-	setRaw(key, NumberFormatter::format(value));
+	setRaw(key, util::toString<int>(value));
 }
 
 
@@ -191,7 +193,7 @@ void IConfiguration::setDouble(const std::string& key, double value)
 {
 	Mutex::ScopedLock lock(_mutex);
 
-	setRaw(key, NumberFormatter::format(value));
+	setRaw(key, util::toString<int>(value));
 }
 
 
@@ -206,28 +208,33 @@ void IConfiguration::setBool(const std::string& key, bool value)
 int IConfiguration::parseInt(const std::string& value)
 {
 	if (value.compare(0, 2, "0x") == 0)
-		return NumberParser::parseHex(value.substr(2));
+		return util::parseHex(value.substr(2));
+		//return NumberParser::parseHex(value.substr(2));
 	else
-		return NumberParser::parse(value);
+		return util::fromString<int>(value);
 }
 
 
 bool IConfiguration::parseBool(const std::string& value)
 {
 	int n;
-	if (NumberParser::tryParse(value, n))
-		return n != 0;
-	else if (icompare(value, "true") == 0)
-		return true;
-	else if (icompare(value, "yes") == 0)
-		return true;
-	else if (icompare(value, "on") == 0)
-		return true;
-	else if (icompare(value, "false") == 0)
+	//if (NumberParser::tryParse(value, n))
+	//	return n != 0;
+	if (value == "0")
 		return false;
-	else if (icompare(value, "no") == 0)
+	else if (value == "1")
+		return true;
+	else if (util::icompare(value, "true") == 0)
+		return true;
+	else if (util::icompare(value, "yes") == 0)
+		return true;
+	else if (util::icompare(value, "on") == 0)
+		return true;
+	else if (util::icompare(value, "false") == 0)
 		return false;
-	else if (icompare(value, "off") == 0)
+	else if (util::icompare(value, "no") == 0)
+		return false;
+	else if (util::icompare(value, "off") == 0)
 		return false;
 	else 
 		throw SyntaxException("Cannot convert to boolean", value);

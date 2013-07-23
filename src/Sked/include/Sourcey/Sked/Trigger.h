@@ -21,11 +21,8 @@
 #define SOURCEY_Sked_Trigger_H
 
 
-//#include "Sourcey/Task.h"
+#include "Sourcey/DateTime.h"
 #include "Sourcey/JSON/ISerializable.h"
-
-#include "Poco/DateTime.h"
-#include "Poco/Timespan.h"
 
 	
 namespace scy {
@@ -64,7 +61,7 @@ enum MonthOfTheYeay
           
 
 // ---------------------------------------------------------------------
-struct Trigger: public JSON::ISerializable
+struct Trigger: public json::ISerializable
 {
 	Trigger(const std::string& type = "", const std::string& name = "");
 
@@ -86,8 +83,8 @@ struct Trigger: public JSON::ISerializable
 		/// and should be destroyed.
 		/// Returns false by default.
 	
-	virtual void serialize(JSON::Value& root);
-	virtual void deserialize(JSON::Value& root);
+	virtual void serialize(json::Value& root);
+	virtual void deserialize(json::Value& root);
 
 	std::string type;
 		/// The type of this trigger class.
@@ -99,13 +96,13 @@ struct Trigger: public JSON::ISerializable
 		/// The number of times the task has run
 		/// since creation;
 	
-	Poco::DateTime createdAt;
+	DateTime createdAt;
 		/// The time the task was created.
 
-	Poco::DateTime scheduleAt;
+	DateTime scheduleAt;
 		/// The time the task is scheduled to run.
 
-	Poco::DateTime lastRunAt;
+	DateTime lastRunAt;
 		/// The time the task was last run.
 };
 
@@ -132,10 +129,10 @@ struct IntervalTrigger: public Trigger
 	virtual void update();
 	virtual bool expired();
 	
-	virtual void serialize(JSON::Value& root);
-	virtual void deserialize(JSON::Value& root);
+	virtual void serialize(json::Value& root);
+	virtual void deserialize(json::Value& root);
 
-	Poco::Timespan interval;
+	Timespan interval;
 		/// This value represents the interval to wait
 		/// before running the task.
 
@@ -153,7 +150,7 @@ struct DailyTrigger: public Trigger
 
 	virtual void update();
 
-	Poco::DateTime timeOfDay;
+	DateTime timeOfDay;
 		/// This value represents the time of day the
 		/// task will trigger.
 		/// The date part of the timestamp is redundant.
@@ -164,7 +161,7 @@ struct DailyTrigger: public Trigger
 };
 	
 
-} } // namespace scy::Sked
+} } // namespace scy::sked
 
 
 #endif // SOURCEY_Sked_Trigger_H

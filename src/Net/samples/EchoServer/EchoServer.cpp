@@ -1,4 +1,5 @@
 #include "Sourcey/Application.h"
+#include "Sourcey/Logger.h"
 #include "EchoServer.h"
 
 
@@ -11,11 +12,8 @@ CMemLeakDetect memLeakDetect;
 
 
 using namespace std;
+using namespace scy;
 using namespace scy::net;
-
-
-namespace scy {
-namespace net {
 
 	
 #define SERVER_PORT 1337
@@ -40,6 +38,3 @@ int main(int argc, char** argv)
 	Logger::uninitialize();
 	return 0;
 }
-
-
-} } // namespace scy::Net

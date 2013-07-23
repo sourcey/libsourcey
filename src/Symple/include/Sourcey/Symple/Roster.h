@@ -21,13 +21,13 @@
 #define SOURCEY_Symple_Router_H
 
 
-#include "Sourcey/Manager.h"
+#include "Sourcey/Containers.h"
 #include "Sourcey/Symple/Peer.h"
 #include "Sourcey/Symple/Address.h"
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 
 class Roster: public EventedManager<std::string, Peer>
@@ -53,11 +53,11 @@ public:
 	
 	virtual void print(std::ostream& os) const;
 
-	virtual const char* className() const { return "smple::Roster"; }
+	virtual const char* className() const { return "smpl::Roster"; }
 };
 	
 
-} } // namespace scy::smple
+} } // namespace scy::smpl
 
 
 #endif //  SOURCEY_Symple_Router_H

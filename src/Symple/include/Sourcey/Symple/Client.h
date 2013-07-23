@@ -23,9 +23,10 @@
 
 #include "Sourcey/Flaggable.h"
 #include "Sourcey/SocketIO/Client.h"
-#include "Sourcey/Util/TimedManager.h"
-//#include "Sourcey/Net/Reactor.h"
+#include "Sourcey/Net/TCPSocket.h"
+#include "Sourcey/Net/SSLSocket.h"
 #include "Sourcey/HTTP/WebSocket.h"
+#include "Sourcey/Util/TimedManager.h"
 #include "Sourcey/Symple/Roster.h"
 #include "Sourcey/Symple/Message.h"
 #include "Sourcey/Symple/Presence.h"
@@ -36,7 +37,7 @@
 
 
 namespace scy {
-namespace smple {
+namespace smpl {
 
 	
 typedef TimedManager<std::string, Message> PersistenceT;
@@ -48,26 +49,32 @@ class Client: public sockio::Client
 {
 public:
 	struct Options 
-	{		
+	{				
+		std::string host;
+		UInt16 port;
+
 		std::string token;
 		std::string user;
 		std::string group;
 		std::string name;
 		std::string type;
-		net::Address serverAddr;
+		//net::Address serverAddr;
 
 		Options() {
+			host = "127.0.0.1";
+			port = 4000;
+
 			token		= "";
 			user		= "";
 			group		= "global";
 			name		= "";
 			type		= "peer";
-			serverAddr	= net::Address("127.0.0.1", 4000);
+			//serverAddr	= net::Address("127.0.0.1", 4000);
 		}
 	};
 
 public:
-	Client(net::SocketBase* socket, uv::Loop& loop = uv::defaultLoop(), const Options& options = Options());
+	Client(net::SocketBase* socket, const Options& options = Options(), uv::Loop& loop = uv::defaultLoop());
 	virtual ~Client();
 
 	void connect();
@@ -120,7 +127,7 @@ public:
 		/// Called by createPresence() so outside classes
 		/// can modify the outgoing Peer object.
 
-	virtual const char* className() const { return "smple::Client"; }
+	virtual const char* className() const { return "SympleClient"; }
 	
 protected:	
 	virtual int announce();
@@ -135,14 +142,15 @@ protected:
 	virtual void createPresence(Presence& p);
 		/// Creates a Presence object.
 	
-	virtual void onOnline();
+	//virtual void onOnline();
 	virtual void onClose();
-
-	virtual void onAnnounce(void* sender, net::TransactionState& state, const net::TransactionState&);
+	
+	virtual void onSocketConnect(void*);
+	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&);
 	virtual void onPacket(sockio::Packet& packet);
 
 protected:	
-	//mutable Poco::FastMutex	_mutex;
+	//mutable Mutex	_mutex;
 
 	Roster _roster;
 	std::string _ourID;
@@ -152,45 +160,44 @@ protected:
 };
 
 
-/*
 // ---------------------------------------------------------------------
 //
-template <class WebSocketBaseT>
-class ClientBase: public Client
+class TCPClient: public Client
 {
 public:
-	ClientBase(uv::Loop& loop = uv::defaultLoop(), const Client::Options& options = Client::Options()) :
-		_socket(runner),
-		Client(_socket, runner, options)
+	TCPClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop()) :
+		Client(new net::TCPBase, options, loop)
 	{
 	}
-
-protected:
-	WebSocketBaseT _socket;
 };
 
 
 // ---------------------------------------------------------------------
 //
-typedef smple::ClientBase< 
-	Net::WebSocketBase< 
-		Net::StatefulSocketBase< 
-			Net::SocketBase< Poco::Net::StreamSocket, Net::TCP, http::WebSocket >
-		> 
-	> 
-> TCPClient;
+class SSLClient: public Client
+{
+public:
+	SSLClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop()) :
+		Client(new net::TCPBase, options, loop)
+	{
+	}
+};
 
 
 // ---------------------------------------------------------------------
 //
-typedef smple::ClientBase< 
-	Net::WebSocketBase< 
-		Net::StatefulSocketBase< 
-			Net::SocketBase< Poco::Net::SecureStreamSocket, Net::SSLTCP, http::WebSocket >
-		> 
-	> 
-> SSLClient;
-*/
+inline Client* createTCPClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop())
+{
+	return new Client(new net::TCPBase, options, loop);
+}
+
+
+// ---------------------------------------------------------------------
+//
+inline Client* createSSLClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop())
+{
+	return new Client(new net::SSLBase, options, loop);
+}
 
 
 // ---------------------------------------------------------------------
@@ -306,34 +313,77 @@ struct EventDelegate: public MessageDelegate
 DefinePolymorphicDelegate(eventDelegate, IPacket, EventDelegate)
 
 
-} } // namespace scy::smple
+} } // namespace scy::smpl
 
 
 #endif //  SOURCEY_Symple_Client_H
 
 
 
+
+
+/*
+
+
+// ---------------------------------------------------------------------
+//
+template <class WebSocketBaseT>
+class ClientBase: public Client
+{
+public:
+	ClientBase(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop(),) :
+		_socket(runner),
+		Client(_socket, runner, options)
+	{
+	}
+
+protected:
+	WebSocketBaseT _socket;
+};
+
+
+// ---------------------------------------------------------------------
+//
+typedef smpl::ClientBase< 
+	Net::WebSocketBase< 
+		Net::StatefulSocketBase< 
+			Net::SocketBase< Poco::Net::StreamSocket, Net::TCP, http::WebSocket >
+		> 
+	> 
+> TCPClient;
+
+
+// ---------------------------------------------------------------------
+//
+typedef smpl::ClientBase< 
+	Net::WebSocketBase< 
+		Net::StatefulSocketBase< 
+			Net::SocketBase< Poco::Net::SecureStreamSocket, Net::SSLTCP, http::WebSocket >
+		> 
+	> 
+> SSLClient;
+*/
 	
 
 
 /*
 // ---------------------------------------------------------------------
-typedef smple::Client< 
+typedef smpl::Client< 
 	sockio::SocketBase< 
 		Net::WebSocketBase< 
 			Net::StatefulSocketBase< 
-				Net::SocketBase< ::TCPContext, smple::IClient > 
+				Net::SocketBase< ::TCPContext, smpl::IClient > 
 			> 
 		> 
 	> 
 > Client;
 
 
-typedef smple::Client< 
+typedef smpl::Client< 
 	sockio::SocketBase< 
 		Net::WebSocketBase< 
 			Net::StatefulSocketBase< 
-				Net::SocketBase< ::SSLContext, smple::IClient > 
+				Net::SocketBase< ::SSLContext, smpl::IClient > 
 			> 
 		> 
 	> 
@@ -409,7 +459,7 @@ protected:
 	virtual void onOnline() = 0;
 	virtual void onClose() = 0;
 	virtual bool onPacketCreated(IPacket* packet) = 0;
-	virtual void onAnnounce(void* sender, net::TransactionState& state, const net::TransactionState&) = 0;
+	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&) = 0;
 };
 
 
@@ -424,24 +474,24 @@ public:
 		_options(options),
 		_announceStatus(500)
 	{
-		traceL() << "[smple::Client:" << this << "] Creating" << std::endl;
+		traceL() << "[smpl::Client:" << this << "] Creating" << std::endl;
 	}
 
 
 	virtual ~Client() 
 	{
-		traceL() << "[smple::Client:" << this << "] Destroying" << std::endl;
+		traceL() << "[smpl::Client:" << this << "] Destroying" << std::endl;
 		close();
-		traceL() << "[smple::Client:" << this << "] Destroying: OK" << std::endl;
+		traceL() << "[smpl::Client:" << this << "] Destroying: OK" << std::endl;
 	}
 
 
 	void connect()
 	{
-		traceL() << "[smple::Client:" << this << "] Connecting" << std::endl;
+		traceL() << "[smpl::Client:" << this << "] Connecting" << std::endl;
 		
 		{
-			//Poco::FastMutex::ScopedLock lock(_mutex);
+			//Mutex::ScopedLock lock(_mutex);
 			assert(!_options.user.empty());
 			//assert(!_options.token.empty());
 			_srvAddr = _options.serverAddr;
@@ -453,7 +503,7 @@ public:
 
 	void close()
 	{
-		traceL() << "[smple::Client:" << this << "] Closing" << std::endl;
+		traceL() << "[smpl::Client:" << this << "] Closing" << std::endl;
 
 		sockio::Client::close();
 	}
@@ -472,7 +522,7 @@ public:
 		message.setFrom(ourPeer().address());
 		assert(message.valid());
 		assert(message.to().id() != message.from().id());
-		traceL() << "[smple::Client:" << this << "] Sending Message: " 
+		traceL() << "[smpl::Client:" << this << "] Sending Message: " 
 			<< message.id() << ":\n" 
 			<< json::stringify(message, true) << std::endl;
 		return sockio::Client::send(message, false);
@@ -481,7 +531,7 @@ public:
 
 	virtual void createPresence(Presence& p)
 	{
-		traceL() << "[smple::Client:" << this << "] Creating Presence" << std::endl;
+		traceL() << "[smpl::Client:" << this << "] Creating Presence" << std::endl;
 
 		Peer& peer = ourPeer();
 		UpdatePresenceData.emit(this, peer);
@@ -491,7 +541,7 @@ public:
 
 	virtual int sendPresence(bool probe = false)
 	{
-		traceL() << "[smple::Client:" << this << "] Broadcasting Presence" << std::endl;
+		traceL() << "[smpl::Client:" << this << "] Broadcasting Presence" << std::endl;
 
 		Presence p;
 		createPresence(p);
@@ -502,7 +552,7 @@ public:
 
 	virtual int sendPresence(const Address& to, bool probe = false)
 	{
-		traceL() << "[smple::Client:" << this << "] Sending Presence" << std::endl;
+		traceL() << "[smpl::Client:" << this << "] Sending Presence" << std::endl;
 	
 		Presence p;
 		createPresence(p);
@@ -521,50 +571,50 @@ public:
 
 	virtual Roster& roster() 
 	{ 
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _roster; 
 	}
 
 
 	virtual uv::Loop& loop() 
 	{ 
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _runner; 
 	}
 
 
 	virtual PersistenceT& persistence() 
 	{ 
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _persistence; 
 	}
 
 
 	virtual Client::Options& options() 
 	{ 
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _options; 
 	}
 
 
 	virtual std::string ourID() const
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _ourID;
 	}
 
 
 	virtual int announceStatus() const
 	{
-		//Poco::FastMutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _announceStatus;
 	}
 
 
 	virtual Peer& ourPeer()
 	{	
-		//Poco::FastMutex::ScopedLock lock(_mutex);
-		traceL() << "[smple::Client:" << this << "] Getting Our Peer: " << _ourID << std::endl;
+		//Mutex::ScopedLock lock(_mutex);
+		traceL() << "[smpl::Client:" << this << "] Getting Our Peer: " << _ourID << std::endl;
 		if (_ourID.empty())
 			throw Exception("No active peer session is available.");
 		return *_roster.get(_ourID, true);
@@ -578,7 +628,7 @@ public:
 	}
 	
 
-	virtual const char* className() const { return "smple::Client"; }
+	virtual const char* className() const { return "smpl::Client"; }
 
 	
 protected:	
@@ -586,7 +636,7 @@ protected:
 	{
 		json::Value data;
 		{
-			//Poco::FastMutex::ScopedLock lock(_mutex);
+			//Mutex::ScopedLock lock(_mutex);
 			data["token"]	= _options.token;
 			data["group"]	= _options.group;
 			data["user"]	= _options.user;
@@ -600,13 +650,13 @@ protected:
 	}
 
 
-	virtual void onAnnounce(void* sender, net::TransactionState& state, const net::TransactionState&) 
+	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
 	{
-		traceL() << "[smple::Client:" << this << "] Announce Response: " << state.toString() << std::endl;
+		traceL() << "[smpl::Client:" << this << "] Announce Response: " << state.toString() << std::endl;
 	
 		sockio::Transaction* transaction = reinterpret_cast<sockio::Transaction*>(sender);
 		switch (state.id()) {	
-		case net::TransactionState::Success:
+		case TransactionState::Success:
 			try 
 			{
 				json::Value data = transaction->response().json()[(size_t)0];
@@ -635,11 +685,11 @@ protected:
 			catch (Exception& exc)
 			{
 				// Set the error message and close the connection.
-				setError(exc.displayText());
+				setError(exc.message());
 			}
 			break;		
 
-		case net::TransactionState::Failed:
+		case TransactionState::Failed:
 			Announce.emit(this, _announceStatus);
 			setError(state.message());
 			break;
@@ -649,7 +699,7 @@ protected:
 
 	virtual void onOnline()
 	{
-		traceL() << "[smple::Client:" << this << "] On Online" << std::endl;
+		traceL() << "[smpl::Client:" << this << "] On Online" << std::endl;
 
 		// Override this method because we are not quite
 		// ready to transition to Online yet - we still
@@ -660,7 +710,7 @@ protected:
 
 	virtual bool onPacketCreated(IPacket* packet) 
 	{
-		traceL() << "[smple::Client:" << this << "] Packet Created: " << packet->className() << std::endl;
+		traceL() << "[smpl::Client:" << this << "] Packet Created: " << packet->className() << std::endl;
 
 		// Catch incoming messages here so we can parse
 		// messages and handle presence updates.
@@ -672,12 +722,12 @@ protected:
 
 			json::Value data = p->json();
 			if (!data.isObject() || data.isNull()) {
-				Log("warning") << "[smple::Client:" << this << "] Packet is not a JSON object" << std::endl;
+				Log("warning") << "[smpl::Client:" << this << "] Packet is not a JSON object" << std::endl;
 				return true; // continue propagation
 			}
 		
 			string type(data["type"].asString());
-			traceL() << "[smple::Client:" << this << "] Packet Created: Symple Type: " << type << std::endl;
+			traceL() << "[smpl::Client:" << this << "] Packet Created: Symple Type: " << type << std::endl;
 			if (type == "message") {
 				Message m(data);
 				emit(this, m);
@@ -704,7 +754,7 @@ protected:
 
 	virtual void onClose()
 	{
-		traceL() << "[[smple::Client:" << this << "] Closing" << std::endl;
+		traceL() << "[[smpl::Client:" << this << "] Closing" << std::endl;
 		sockio::Client::onClose();
 		reset();
 	}
@@ -726,7 +776,7 @@ protected:
 	
 
 protected:	
-	//mutable Poco::FastMutex	_mutex;
+	//mutable Mutex	_mutex;
 
 	Roster _roster;
 	uv::Loop& _loop;
@@ -738,22 +788,22 @@ protected:
 
 
 // ---------------------------------------------------------------------
-typedef smple::Client< 
+typedef smpl::Client< 
 	sockio::SocketBase< 
 		Net::WebSocketBase< 
 			Net::StatefulSocketBase< 
-				Net::SocketBase< ::TCPContext, smple::IClient > 
+				Net::SocketBase< ::TCPContext, smpl::IClient > 
 			> 
 		> 
 	> 
 > Client;
 
 
-typedef smple::Client< 
+typedef smpl::Client< 
 	sockio::SocketBase< 
 		Net::WebSocketBase< 
 			Net::StatefulSocketBase< 
-				Net::SocketBase< ::SSLContext, smple::IClient > 
+				Net::SocketBase< ::SSLContext, smpl::IClient > 
 			> 
 		> 
 	> 
@@ -763,12 +813,12 @@ typedef smple::Client<
 
 
 
-//typedef smple::Client<  > Client; //, smple::IClient //smple::SocketBase< ::TCPContext>
-//typedef smple::Client< sockio::SocketBase< Net::StatefulSocketBase< Net::SocketBase< ::SSLContext, smple::IClient> > > > SSLClient; //, smple::IClient //smple::SocketBase< ::SSLContext>
+//typedef smpl::Client<  > Client; //, smpl::IClient //smpl::SocketBase< ::TCPContext>
+//typedef smpl::Client< sockio::SocketBase< Net::StatefulSocketBase< Net::SocketBase< ::SSLContext, smpl::IClient> > > > SSLClient; //, smpl::IClient //smpl::SocketBase< ::SSLContext>
 //sockio::SSLSocket
 // Net::SocketBase< ::SSLContext, sockio::Client>
 
- //, public smple::IClient
+ //, public smpl::IClient
 //class Client: public sockio::Client
 	/// Maximum simplicity. Maximum scope.//BaseT
 
@@ -830,7 +880,7 @@ protected:
 	virtual void onOnline();
 	virtual void onClose();
 	virtual bool onPacketCreated(IPacket* packet);
-	virtual void onAnnounce(void* sender, net::TransactionState& state, const net::TransactionState&);
+	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&);
 	*/
 
 

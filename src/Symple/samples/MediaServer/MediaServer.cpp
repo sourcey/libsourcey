@@ -12,10 +12,10 @@
 #include "Sourcey/HTTP/Util.h"
 #include "Sourcey/HTTP/Packetizers.h"
 #include "Sourcey/Util/Base64PacketEncoder.h"
-//#include "Sourcey/Util/StreamManager.h"
+//#include "Sourcey/Util/StreamContainers.h"
 
 //#include "Sourcey/TURN/client/TCPClient.h"
-#include "Poco/Net/KVStore.h"
+#include "Sourcey/Containers.h"
 
 
 /*
@@ -170,8 +170,8 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 			
 		// Parse streaming options from query
 		StreamingOptions options(_server);
-		Poco::Net::KVStore params;
-		util::parseURIQuery(request.getURI(), params);
+		NVCollection params;
+		util::splitURIParameters(request.getURI(), params);
 		FormatRegistry& formats = MediaFactory::instance()->formats();				
 
 		// An exception will be thrown if no format was provided, 
@@ -230,7 +230,7 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 	}
 	catch (Exception& exc)
 	{
-		errorL("StreamingRequestHandlerFactory") << "Request Error: " << exc.displayText() << endl;
+		errorL("StreamingRequestHandlerFactory") << "Request Error: " << exc.message() << endl;
 	}
 		
 	errorL("StreamingRequestHandlerFactory") << "Bad Request" << endl;
@@ -291,20 +291,6 @@ int main(int argc, char** argv)
 #include "Sourcey/HTTP/StreamingPacketizer.h"
 #include "Sourcey/HTTP/ChunkedPacketizer.h"
 */
-/*
-//#include "Poco/HTTP/WebSocket.h"
-//#include "Poco/Net/WebSocketImpl.h"
-#include "Poco/Net/HTTPClientSession.h"
-#include "Poco/Net/HTTPServer.h"
-#include "Poco/Net/HTTPServerParams.h"
-#include "Poco/Net/HTTPRequestHandler.h"
-#include "Poco/Net/HTTPRequestHandlerFactory.h"
-#include "Poco/Net/HTTPServerRequestImpl.h"
-#include "Poco/Net/HTTPServerRequest.h"
-#include "Poco/Net/HTTPServerResponse.h"
-#include "Poco/Net/ServerSocket.h"
-#include "Poco/Net/NetException.h"
-*/
 
 		/*
 		// Detach the socket for direct access
@@ -322,7 +308,7 @@ int main(int argc, char** argv)
 		}
 		catch (Exception& exc)
 		{
-			errorL("StreamingRequestHandler", this) << "Error: " << exc.displayText() << endl;
+			errorL("StreamingRequestHandler", this) << "Error: " << exc.message() << endl;
 		}
 
 		debugL("StreamingRequestHandler", this) << "Exiting" << endl;
@@ -368,14 +354,14 @@ int main(int argc, char** argv)
 			}
 			catch (Exception& exc)
 			{
-				errorL("WebSocketRequestHandler", this) << "Error: " << exc.displayText() << endl;
+				errorL("WebSocketRequestHandler", this) << "Error: " << exc.message() << endl;
 			}
 			
 			debugL("WebSocketRequestHandler", this) << "Stopped" << endl;
 		}
 		catch (http::WebSocketException& exc)
 		{
-			errorL("WebSocketRequestHandler", this) << "Error: " << exc.code() << ": " << exc.displayText() << endl;			
+			errorL("WebSocketRequestHandler", this) << "Error: " << exc.code() << ": " << exc.message() << endl;			
 			switch (exc.code())
 			{
 			case http::WebSocket::WS_ERR_HANDSHAKE_UNSUPPORTED_VERSION:
@@ -442,7 +428,7 @@ public:
 		}
 		catch (Exception& exc)
 		{
-			errorL("ServerConnectionHook") << "Bad Request: " << exc.displayText() << endl;
+			errorL("ServerConnectionHook") << "Bad Request: " << exc.message() << endl;
 		}	
 		return NULL;
 	};
@@ -539,7 +525,7 @@ public:
 		}
 		catch (Exception& exc)
 		{
-			errorL("StreamingRequestHandlerFactory") << "Bad Request: " << exc.displayText() << endl;
+			errorL("StreamingRequestHandlerFactory") << "Bad Request: " << exc.message() << endl;
 		}
 
 		return new Net::NullRequestHandler(sock);
@@ -606,8 +592,8 @@ public:
 			StreamingOptions options;
 			// An exception will be thrown if no format was provided, 
 			// or if the request format is not registered.
-			Poco::Net::KVStore params;
-			util::parseURIQuery(request.getURI(), params);
+			NVCollection params;
+			util::splitURIParameters(request.getURI(), params);
 			FormatRegistry& formats = MediaFactory::instance()->formats();	
 			options.oformat = formats.get(params.get("format"));
 			if (params.has("width"))		
@@ -785,7 +771,7 @@ public:
 		}
 		catch (Exception& exc)
 		{
-			errorL("StreamingRequestHandlerFactory") << "Bad Request: " << exc.displayText() << endl;
+			errorL("StreamingRequestHandlerFactory") << "Bad Request: " << exc.message() << endl;
 		}
 
 		return new NullRequestHandler(sock);

@@ -22,7 +22,7 @@
 
 
 using namespace std; 
-using namespace Poco;
+//using namespace Poco;
 
 
 namespace scy {
@@ -43,19 +43,19 @@ StreamManager::~StreamManager()
 
 void StreamManager::closeAll()
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	
-	log("debug") << "Closing All Streams: " << _store.size() << endl;	
-	StreamManager::Map::iterator it = _store.begin();
+	log("debug") << "Closing all streams: " << _map.size() << endl;	
+	StreamManager::Map::iterator it = _map.begin();
 	StreamManager::Map::iterator it2;
-	while (it != _store.end()) {
+	while (it != _map.end()) {
 		it2 = it++;
 		(*it2).second->StateChange -= delegate(this, &StreamManager::onStreamStateChange);
 		(*it2).second->close();
 		if (_freeClosedStreams)
 			StreamManager::Deleter::func((*it2).second);
 			//delete (*it2).second;
-		_store.erase(it2);
+		_map.erase(it2);
 	}
 }
 
@@ -90,11 +90,11 @@ bool StreamManager::closeStream(const string& name, bool whiny)
 
 PacketStream* StreamManager::getDafaultStream()
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	// Returns the first stream or NULL.
-	if (!_store.empty()) {
-		StreamManager::Map::const_iterator it = _store.begin();
+	if (!_map.empty()) {
+		StreamManager::Map::const_iterator it = _map.begin();
 		return it->second;
 	}
 
@@ -144,17 +144,17 @@ void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state, 
 
 StreamManager::Map StreamManager::streams() const 
 { 
-	FastMutex::ScopedLock lock(_mutex);
-	return _store; 
+	Mutex::ScopedLock lock(_mutex);
+	return _map; 
 }
 
 
 void StreamManager::print(std::ostream& os) const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	os << "StreamManager[";
-	for (StreamManager::Map::const_iterator it = _store.begin(); it != _store.end(); ++it) {	
+	for (StreamManager::Map::const_iterator it = _map.begin(); it != _map.end(); ++it) {	
 		os << "\n\t" << it->second << ": " << it->first;
 	}
 	os << "\n]";

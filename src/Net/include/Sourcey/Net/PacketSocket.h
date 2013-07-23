@@ -23,7 +23,7 @@
 
 #include "Sourcey/Base.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/PacketEmitter.h"
+#include "Sourcey/PacketSignal.h"
 #include "Sourcey/PacketFactory.h"
 #include "Sourcey/Net/Socket.h"
 
@@ -35,13 +35,13 @@ namespace net {
 struct PacketInfo;
 class PacketSocket;
 
-class PacketSocketAdapter: public SocketAdapter, public PacketEmitter
+class PacketSocketAdapter: public SocketAdapter, public PacketSignal
 {	
 public:	
 	PacketFactory factory;
 
-	PacketSocketAdapter(Socket* socket = NULL, int priority = 50) :
-		SocketAdapter(socket, priority)
+	PacketSocketAdapter(Socket* socket = NULL) : //, int priority = 50
+		SocketAdapter(socket) //, priority
 		/// Creates the PacketSocketAdapter
 		/// This class should have a higher priority than standard
 		/// sockets so we can parse data packets first.		
@@ -54,7 +54,7 @@ public:
 		/// creation strategies. For best performance the most used 
 		/// strategies should have the highest priority.
 	{	
-		traceL("PacketSocketAdapter", this) << "Recv: " << buf.size() << std::endl;
+		traceL("PacketSocketAdapter", this) << "Recv: " << buf.available() << std::endl;
 		assert(buf.position() == 0);
 		buf.position(0);
 
@@ -72,7 +72,7 @@ public:
 	virtual void onPacket(IPacket& pkt) 
 	{		
 		traceL("PacketSocketAdapter", this) << "onPacket: Emitting: " << pkt.size() << std::endl;
-		PacketEmitter::emit(socket, pkt);	
+		PacketSignal::emit(socket, pkt);	
 	}
 };
 
@@ -81,14 +81,16 @@ class PacketSocket: public Socket
 {
 public:	
 	PacketSocket(const Socket& socket) : 
-		Socket(socket, new PacketSocketAdapter(this))
+		Socket(socket) //(this)
 	{
+		replaceAdapter(new PacketSocketAdapter);
 		assert(Socket::base().refCount() >= 2);
 	}
 
 	PacketSocket(SocketBase* base, bool shared = false) : 
-		Socket(base, shared, new PacketSocketAdapter(this))
+		Socket(base, shared) //(this), new PacketSocketAdapter
 	{		
+		replaceAdapter(new PacketSocketAdapter);
 		assert(!shared || Socket::base().refCount() >= 2);
 	}
 
@@ -150,8 +152,8 @@ public:
 		// called twice; once on Buffer::create(), and once on Buffer::reserve().
 		Buffer buf(packet.size() > 0 ? packet.size() : 1500);
 		packet.write(buf);
-		traceL("PacketSocket", this) << "Send IPacket: " << buf.size() << std::endl;	
-		return base().send(buf.begin(), buf.size(), flags);
+		traceL("PacketSocket", this) << "Send IPacket: " << buf.available() << std::endl;	
+		return base().send(buf.begin(), buf.available(), flags);
 	}
 	
 	virtual int send(const IPacket& packet, const Address& peerAddress, int flags = 0)
@@ -229,7 +231,7 @@ protected:
 		/// Override this method to resolve conflict with 
 		/// attach() in Poco::Net::SecureStreamSocket.
 	{
-		PacketEmitter::attach(delegate);
+		PacketSignal::attach(delegate);
 	}
 	*/
 
@@ -259,7 +261,7 @@ protected:
 		/// Connects to the given peer address.
 		///
 		/// A Poco::Net::ConnectionRefusedException or a
-		/// Poco::TimeoutException is thrown on failure.
+		/// TimeoutException is thrown on failure.
 	
 	virtual void close();
 		/// Closes the underlying socket.

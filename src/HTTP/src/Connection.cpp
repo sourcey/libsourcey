@@ -26,8 +26,6 @@
 
 
 using namespace std;
-using namespace Poco;
-
 
 
 namespace scy { 
@@ -35,10 +33,7 @@ namespace http {
 
 
 Connection::Connection(const net::Socket& socket) : 
-	_request(new Request),
-	_response(new Response),
 	_socket(socket), 
-	_adapter(NULL),
 	_closed(false),
 	_shouldSendHeaders(true),
 	_timeout(30 * 60 * 1000) // 30 secs
@@ -46,7 +41,11 @@ Connection::Connection(const net::Socket& socket) :
 	traceL("Connection", this) << "Creating: " << &_socket << endl;
 
 	_socket.Recv += delegate(this, &Connection::onSocketRecv);
+	_socket.Error += delegate(this, &Connection::onSocketError);
 	_socket.Close += delegate(this, &Connection::onSocketClose);
+
+	// Attach the send stream to the outgoing socket
+	Connection::Outgoing += delegate(&_socket, &net::Socket::send);
 }
 
 	
@@ -54,25 +53,31 @@ Connection::~Connection()
 {	
 	traceL("Connection", this) << "Destroying" << endl;
 
-	// Must be close()'d
+	// Connections must be close()d
 	assert(_closed);
-		
-	delete _request;
-	delete _response;
 }
 
 
-int Connection::sendRaw(const char* buf, size_t len, int flags)
+int Connection::write(const char* buf, size_t len, int flags)
 {
-	traceL("Connection", this) << "Send Raw: " << len << endl;
+	traceL("Connection", this) << "Writing: " << len << endl;
 
 	return _socket.send(buf, len, flags);
 }
 
 
+int Connection::write(const std::string& buf, int flags)
+{
+	traceL("Connection", this) << "Writing: " << buf.length() << endl;
+
+	return _socket.send(buf.data(), buf.length(), flags);
+}
+
+
 int Connection::sendHeaders()
 {
-	assert(_shouldSendHeaders);
+	if (!_shouldSendHeaders)
+		return 0;
 	assert(outgoingHeaders());
 	
 	ostringstream os;
@@ -84,7 +89,7 @@ int Connection::sendHeaders()
 	_timeout.start();
 	_shouldSendHeaders = false;
 
-	return _socket.send(headers.data(), headers.length());
+	return _socket.base().send(headers.data(), headers.length());
 }
 
 
@@ -96,7 +101,12 @@ void Connection::close()
 	
 	_closed = true;	
 
+	Outgoing -= delegate(&_socket, &net::Socket::send);	
+	Outgoing.close();
+	Incoming.close();
+
 	_socket.Recv -= delegate(this, &Connection::onSocketRecv);
+	_socket.Error -= delegate(this, &Connection::onSocketError);
 	_socket.Close -= delegate(this, &Connection::onSocketClose);
 	_socket.close();
 
@@ -107,10 +117,11 @@ void Connection::close()
 }
 
 
-void Connection::replaceAdapter(net::SocketAdapter* adapter)
-{
-	_adapter = adapter;
-	_socket.replaceAdapter(adapter);
+void Connection::setError(const Error& err) 
+{ 
+	traceL("Connection", this) << "Set error: " << err.message << endl;	
+	_socket.setError(err);
+	//_error = err;
 }
 
 
@@ -124,32 +135,45 @@ void Connection::onClose()
 
 void Connection::onSocketRecv(void*, net::SocketPacket& packet)
 {		
-	assert(_adapter);
 	_timeout.stop();
+			
+	if (Incoming.refCount()) {
+		Incoming.write(RawPacket(packet.data(), packet.size()));
+	}
 
 	// Handle payload data
-	onPayload(packet.buffer);
+	//onPayload(packet.buffer);
 }
+
+
+void Connection::onSocketError(void* sender, const Error& error) 
+{
+	traceL("Connection", this) << "On socket error" << endl;
+
+	// Handle the socket error locally
+	setError(error);
+}
+
 
 
 void Connection::onSocketClose(void* sender) 
 {
 	traceL("Connection", this) << "On socket close" << endl;
 
-	// Close if the socket is desconnected
+	// Close the connection if the socket is closed
 	close();
 }
 
 
 Request& Connection::request()
 {
-	return *_request;
+	return _request;
 }
 
 	
 Response& Connection::response()
 {
-	return *_response;
+	return _response;
 }
 
 	
@@ -159,7 +183,7 @@ net::Socket& Connection::socket()
 }
 	
 
-Buffer& Connection::recvBuffer()
+Buffer& Connection::incomingBuffer()
 {
 	return static_cast<net::TCPBase&>(_socket.base()).buffer();
 }
@@ -189,6 +213,63 @@ bool Connection::expired() const
 }
 
 
+
+
+/*
+bool Connection::flush()
+{
+	traceL("Connection", this) << "Flushing" << endl;
+	
+	// NOTE: The outgoing buffer may be empty.
+	// An empty buffer will push the response headers  
+	// through on the initial call so Socket::send()
+	if (!outgoingBuffer().available() && !shouldSendHeaders())
+		return false;
+
+	return write(outgoingBuffer().data(), outgoingBuffer().available()) > 0;
+}
+
+
+void Connection::setHTTPAdapter(net::SocketAdapter* adapter)
+{
+	//if (_adapter)
+	//	delete _adapter;
+	_adapter = adapter;
+}
+
+	
+void Connection::replaceAdapter(net::SocketAdapter* adapter)
+{
+	_adapter = adapter;
+	_socket.replaceAdapter(adapter);
+}
+
+
+PacketStream* Connection::Receiver
+{
+	if (!_inputStream) {
+		_inputStream = new PacketStream;
+	}
+	return _inputStream;
+}
+
+
+PacketStream* Connection::Outgoing
+{
+	if (!_outputStream) {
+		_outputStream = new PacketStream;
+		_outputStream->attach(delegate(&socket(), &net::Socket::send));
+	}
+	return _outputStream;
+}
+
+Buffer& Connection::outgoingBuffer()
+{
+	return _outgoing;
+}
+*/
+
+
 // -------------------------------------------------------------------
 //
 ConnectionAdapter::ConnectionAdapter(Connection& connection, http_parser_type type) : 
@@ -214,7 +295,7 @@ ConnectionAdapter::~ConnectionAdapter()
 
 int ConnectionAdapter::send(const char* data, int len, int flags)
 {
-	traceL("ConnectionAdapter", this) << "send: " << len << endl;
+	traceL("ConnectionAdapter", this) << "Sending: " << len << endl;
 	
 	try {
 
@@ -232,12 +313,16 @@ int ConnectionAdapter::send(const char* data, int len, int flags)
 		assert(len > 0);
 
 		// Send body / chunk
+#ifdef _DEBUG
+		if (len < 300)
+			traceL("ConnectionAdapter", this) << "Sending data: " << string(data, len) << endl;
+#endif
 		return socket->base().send(data, len, flags);
 	} 
 	catch(Exception& exc) {
-		errorL("ConnectionAdapter", this) << "Send error: " << exc.displayText() << endl;
+		errorL("ConnectionAdapter", this) << "Send error: " << exc.message() << endl;
 
-		// Just swallow the excpiton, the socket error will 
+		// Just swallow the exception, the socket error will 
 		// cause the connection to close on next iteration.
 	}
 	
@@ -247,24 +332,15 @@ int ConnectionAdapter::send(const char* data, int len, int flags)
 
 void ConnectionAdapter::onSocketRecv(Buffer& buf, const net::Address& peerAddr)
 {
-	traceL("ConnectionAdapter", this) << "On socket recv" << endl;	
+	traceL("ConnectionAdapter", this) << "On socket recv: " << buf << endl;	
 	
 	try {
-		// BIG: Parser error calling destructor 
-		// via callback causing stack error.
-
-		// Always crashing at:
-		// 16:20:52 [trace] [WebSocketServerAdapter:02551400] Destroying
-		// 16:20:52 [trace] [WebSocketAdapter:02551400] Destroying
-
 		// Parse incoming HTTP messages
-		_parser.parse(buf.data(), buf.size());
+		_parser.parse(buf.data(), buf.available());
 	} 
 	catch(Exception& exc) {
-		errorL("ConnectionAdapter", this) << "HTTP parser error: " << exc.displayText() << endl;
+		errorL("ConnectionAdapter", this) << "HTTP parser error: " << exc.message() << endl;
 
-		// TODO: Handle parser exceptions
-		assert(socket);
 		if (socket)
 			socket->close();
 	}
@@ -273,16 +349,21 @@ void ConnectionAdapter::onSocketRecv(Buffer& buf, const net::Address& peerAddr)
 }
 
 
+/*
 void ConnectionAdapter::onSocketError(const Error& error)
 {
 	traceL("ConnectionAdapter", this) << "On socket error: " << socket << endl;	
+	//_connection.setError(error);
+	SocketAdapter::onSocketError(error);
 }
 
 
 void ConnectionAdapter::onSocketClose()
 {
-	traceL("ConnectionAdapter", this) << "On socket close: " << socket << endl;	
+	traceL("ConnectionAdapter", this) << "On socket close: " << socket << endl;		
+	SocketAdapter::onSocketClose();
 }
+*/
 
 
 //
@@ -298,24 +379,32 @@ void ConnectionAdapter::onParserHeadersEnd()
 {
 	traceL("ConnectionAdapter", this) << "On headers end" << endl;	
 
-	_connection.onHeaders();
+	_connection.onHeaders();	
+
+	// Set the position to the end of the headers once
+	// they have been handled. Subsequent body chunks will
+	// now start at the correct position.
+	_connection.incomingBuffer().position(_parser._parser.nread);
 }
 
 
 void ConnectionAdapter::onParserChunk(const char* buf, size_t len)
 {
-	traceL("ClientConnection", this) << "On parser chunk" << endl;	
+	traceL("ClientConnection", this) << "On parser chunk: " << len << endl;	
+	
+	//assert(_connection.incomingBuffer().available() == len);
+	
+	//size_t startPos = _connection.incomingBuffer().position();
+	//traceL("ClientConnection", this) << "On parser chunk: startPos: " << startPos << endl;	
 
-	assert(_connection.recvBuffer().size() == len);
-	net::SocketAdapter::onSocketRecv(_connection.recvBuffer(), socket->peerAddress());
-}
+	// Set the buffer position to the chunk offset
+	//_connection.incomingBuffer().position(_parser._parser.nread);
 
-
-void ConnectionAdapter::onParserEnd()
-{
-	traceL("ConnectionAdapter", this) << "On parser end" << endl;	
-
-	_connection.onComplete();
+	// Dispatch the payload
+	net::SocketAdapter::onSocketRecv(_connection.incomingBuffer(), socket->peerAddress());
+	
+	//traceL("ClientConnection", this) << "On parser chunk: endPos: " << (startPos + len) << endl;	
+	//_connection.incomingBuffer().position(_connection.incomingBuffer().position() + len);
 }
 
 
@@ -324,7 +413,16 @@ void ConnectionAdapter::onParserError(const ParserError& err)
 	warnL("Connection", this) << "On parser error: " << err.message << endl;	
 
 	// Close the connection on parser error
+	_connection.setError(err.message);
 	//_connection.close();
+}
+
+
+void ConnectionAdapter::onParserEnd()
+{
+	traceL("ConnectionAdapter", this) << "On parser end" << endl;	
+
+	_connection.onMessage();
 }
 
 	
@@ -398,7 +496,7 @@ void ConnectionAdapter::onSocketClose()
 
 
 /*
-bool Connection::sendRaw(const char* buf, size_t len)
+bool Connection::write(const char* buf, size_t len)
 {
 	ostringstream oss;
 	request.write(oss);
@@ -411,7 +509,7 @@ bool Connection::sendRaw(const char* buf, size_t len)
 	bool res = _socket.send(buf, len) > 0;
 
 	// Close unless keepalive
-	if (!_response->getKeepAlive()) {
+	if (!_response.getKeepAlive()) {
 		traceL("Client", this) << "Closing: No keepalive" << endl; 
 		_socket.close();
 	}
@@ -424,7 +522,7 @@ bool Connection::sendRaw(const char* buf, size_t len)
 
 	// TODO: Write to request body for now, but we should
 	// enable partial reads in future for large files etc.
-	//_request->body.write(body.data(), body.size());
+	//_request.body.write(body.data(), body.size());
 	/*
 	
 	//assert(0);
@@ -456,24 +554,6 @@ void DefaultServerResponder::handleRequest(ServerConnection* connection, Request
 		//emit<native::event::data>(body);
 	}
 	*/
-/*
-
-
-
-	// TODO: Might close while still parsing
-	//delete this;
-#include "Poco/Net/HTTPClientSession.h"
-#include "Poco/Net/HTTPSClientSession.h"
-#include "Poco/Net/SSLManager.h"
-#include "Poco/Net/KeyConsoleHandler.h"
-#include "Poco/Net/ConsoleCertificateHandler.h"
-#include "Poco/FileStream.h"
-#include "Poco/StreamCopier.h"
-#include "Poco/Path.h"
-#include "Poco/File.h"
-#include "Poco/Format.h"
-*/
-
 
 
 
@@ -666,9 +746,9 @@ const string& ServerConnection::get_trailer(const string& name) {
 	/*
 ServerConnection::ServerConnection(Request* request) : 
 	_request(request),
-	_session(NULL),
-	_response(HTTPResponse::HTTP_SERVICE_UNAVAILABLE),
-	_clientData(NULL)
+	_session(nullptr),
+	_response(Response::HTTP_SERVICE_UNAVAILABLE),
+	_clientData(nullptr)
 {
 	log("trace") << "Creating" << endl;
 }
@@ -697,15 +777,15 @@ bool ServerConnection::send()
 	{
 		setState(this, net::ServerConnectionState::Running);
 	
-		_request->prepare();
-		_uri = URI(_request->getURI());
-		_request->setURI(_uri.getPathAndQuery()); // ensure URI only in request
+		_request.prepare();
+		_uri = URI(_request.getURI());
+		_request.setURI(_uri.getPathAndQuery()); // ensure URI only in request
 
 		log("trace") << "Sending:" 
-			<< "\n\tMethod: " << _request->getMethod()
+			<< "\n\tMethod: " << _request.getMethod()
 			<< "\n\tURL: " << _uri.toString()
-			<< "\n\tIsAuthenticated: " << _request->hasCredentials()
-			//<< "\n\tURI: " << _request->getURI()
+			<< "\n\tIsAuthenticated: " << _request.hasCredentials()
+			//<< "\n\tURI: " << _request.getURI()
 			//<< "\n\tHost: " << _uri.getHost()
 			//<< "\n\tPort: " << _uri.getPort()
 			//<< "\n\tOutput Path: " << _outputPath
@@ -740,16 +820,16 @@ bool ServerConnection::send()
 		log("trace") << "Cancelled" << endl;
 
 		// In the transaction was cancelled we return
-		// false here. onComplete() will not be called.
+		// false here. onMessage() will not be called.
 		return false;
 	}
 	catch (Exception& exc) {
-		log("error") << "Failed: " << exc.displayText() << endl;
-		_response.error = exc.displayText();
+		log("error") << "Failed: " << exc.message() << endl;
+		_response.error = exc.message();
 		setState(this, net::ServerConnectionState::Failed, _response.error);
 	}
 
-	onComplete();
+	onMessage();
 	return _response.success();
 }
 
@@ -766,12 +846,12 @@ void ServerConnection::processRequest(ostream& ostr)
 {
 	try 
 	{
-		TransferProgress& st = _requestState;
-		st.total = _request->getContentLength();
+		TransferProgress& st = _incomingProgress;
+		st.total = _request.getContentLength();
 		setRequestState(TransferProgress::Running);
-		if (_request->form) {	
+		if (_request.form) {	
 			char c;
-			streambuf* pbuf = _request->body.rdbuf(); 
+			streambuf* pbuf = _request.body.rdbuf(); 
 			while (pbuf->sgetc() != EOF) {				
 				c = pbuf->sbumpc();
 				ostr << c;
@@ -791,7 +871,7 @@ void ServerConnection::processRequest(ostream& ostr)
 	}
 	catch (Exception& exc) 
 	{
-		log("error") << "Request Error: " << exc.displayText() << endl;
+		log("error") << "Request Error: " << exc.message() << endl;
 		setRequestState(TransferProgress::Failed);
 		exc.rethrow();
 	}	
@@ -800,8 +880,8 @@ void ServerConnection::processRequest(ostream& ostr)
 
 void ServerConnection::setRequestState(TransferProgress::Type state)
 {
-	_requestState.state = state;
-	UploadProgress.emit(this, _requestState);
+	_incomingProgress.state = state;
+	OutgoingProgress.emit(this, _incomingProgress);
 }
 
 
@@ -815,7 +895,7 @@ void ServerConnection::processResponse(istream& istr)
 		ostream& ostr = fstr ? 
 			static_cast<ostream&>(*fstr) : 
 			static_cast<ostream&>(_response.body);
-		TransferProgress& st = _responseState;
+		TransferProgress& st = _outgoingProgress;
 		st.total = _response.getContentLength();
 		setResponseState(TransferProgress::Running);
 		istr.get(c);
@@ -841,7 +921,7 @@ void ServerConnection::processResponse(istream& istr)
 	}
 	catch (Exception& exc) 
 	{
-		log("error") << "Response Error: " << exc.displayText() << endl;
+		log("error") << "Response Error: " << exc.message() << endl;
 		setResponseState(TransferProgress::Failed);
 		exc.rethrow();
 	}
@@ -849,12 +929,12 @@ void ServerConnection::processResponse(istream& istr)
 
 void ServerConnection::setResponseState(TransferProgress::Type state)
 {
-	_responseState.state = state;
-	DownloadProgress.emit(this, _responseState);
+	_outgoingProgress.state = state;
+	IncomingProgress.emit(this, _outgoingProgress);
 }
 
 
-void ServerConnection::onComplete()
+void ServerConnection::onMessage()
 {	
 	assert(!cancelled());
 	Complete.emit(this, _response);
@@ -869,63 +949,63 @@ bool ServerConnection::cancelled()
 
 Request& ServerConnection::request() 
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return *_request;
 }
 
 
 Response& ServerConnection::response() 
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _response; 
 }
 
 
 TransferProgress& ServerConnection::requestState() 
 {
-	FastMutex::ScopedLock lock(_mutex);
-	return _requestState; 
+	Mutex::ScopedLock lock(_mutex);
+	return _incomingProgress; 
 }
 
 
 TransferProgress& ServerConnection::responseState() 
 { 
-	FastMutex::ScopedLock lock(_mutex);
-	return _requestState; 
+	Mutex::ScopedLock lock(_mutex);
+	return _incomingProgress; 
 }	
 
 
 void ServerConnection::setRequest(Request* request)
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_request = request;
 }
 
 
 void ServerConnection::setOutputPath(const string& path)
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_outputPath = path;
 }
 
 
 string& ServerConnection::outputPath() 
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _outputPath; 
 }
 
 
 void ServerConnection::setClientData(void* clientData)
 { 
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_clientData = clientData;
 }
 
 
 void* ServerConnection::clientData() const
 {
-	FastMutex::ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _clientData;
 }
 */

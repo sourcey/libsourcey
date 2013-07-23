@@ -28,33 +28,65 @@ using namespace std;
 namespace scy { 
 namespace http {
 
-	
+
 // -------------------------------------------------------------------
 // Client Connection
 //
-ClientConnection::ClientConnection(Client& client, const net::Address& address, const net::Socket& socket) : 
+ClientConnection::ClientConnection(http::Client* client, const URL& url, const net::Socket& socket) : 
 	Connection(socket),
 	_client(client), 
-	_address(address)
+	_url(url), 
+	_recvStream(nullptr)
 {	
-	traceL("ClientConnection", this) << "Creating" << endl;
+	traceL("ClientConnection", this) << "Creating: " << url << endl;
+		
+	_request.setURI(url.str());
 
-	replaceAdapter(new ClientAdapter(*this));
-	client.Shutdown += delegate(this, &ClientConnection::onClientShutdown);
-	client.addConnection(this);
+	_socket.replaceAdapter(new ClientAdapter(*this));
+
+	if (_client) {
+		_client->Shutdown += delegate(this, &ClientConnection::onClientShutdown);
+		_client->addConnection(this);
+	}
 }
+
+
+ClientConnection::ClientConnection(const URL& url, const net::Socket& socket) :
+	Connection(socket),
+	_client(nullptr), 
+	_url(url), 
+	_recvStream(nullptr)
+{	
+	traceL("ClientConnection", this) << "Creating: " << url << endl;
 	
+	_request.setURI(url.str());
+
+	_socket.replaceAdapter(new ClientAdapter(*this));
+}
+
+
 ClientConnection::~ClientConnection() 
 {	
 	traceL("ClientConnection", this) << "Destroying" << endl;
+
+	//if (!_recvStream)
+	//	_recvStream->destroy();
+	//if (!_recvStreamStream)
+	//	_recvStreamStream->destroy();
 }
 
 	
 void ClientConnection::close()
 {
 	if (!closed()) {
-		_client.Shutdown -= delegate(this, &ClientConnection::onClientShutdown);
-		_client.removeConnection(this);
+		if (_client) {
+			_client->Shutdown -= delegate(this, &ClientConnection::onClientShutdown);
+			_client->removeConnection(this);
+		}
+		if (_recvStream) {
+			delete _recvStream;
+			_recvStream = nullptr;
+		}
 
 		Connection::close();
 	}
@@ -63,50 +95,44 @@ void ClientConnection::close()
 
 void ClientConnection::send()
 {
-	traceL("ClientConnection", this) << "Send Request" << endl;
-
-	// Connect to server, the request will be sent on connect
+	traceL("ClientConnection", this) << "Sending request" << endl;	
 	_socket.Connect += delegate(this, &ClientConnection::onSocketConnect);
-	_socket.connect(_address);
+	_socket.connect(_url.host(), _url.port());
 }
 
 
-bool ClientConnection::flush()
+void ClientConnection::send(http::Request& req)
 {
-	traceL("ClientConnection", this) << "Flushing" << endl;
-
-	// TODO: Optimize ... use sendRaw for large packers
-	string body(_request->body.str());
-	if (body.length() == 0)
-		return false;
-
-	return sendRaw(body.data(), body.length()) > 0;
+	_request = req;
+	send();
 }
 
 
-/*
-//return sendMessage();
-bool Connection::sendMessage()
-{	
+void ClientConnection::setRecvStream(std::ostream* os)
+{
+	// TODO: assert not running
+	if (_recvStream)
+		delete _recvStream;
+
+	_recvStream = os;
 }
-*/
 
 			
-Client& ClientConnection::client()
+http::Client* ClientConnection::client()
 {
 	return _client;
 }
 
 
-Poco::Net::HTTPMessage* ClientConnection::incomingHeaders() 
+http::Message* ClientConnection::incomingHeaders() 
 { 
-	return static_cast<Poco::Net::HTTPMessage*>(_response);
+	return static_cast<http::Message*>(&_response);
 }
 
 
-Poco::Net::HTTPMessage* ClientConnection::outgoingHeaders() 
+http::Message* ClientConnection::outgoingHeaders() 
 { 
-	return static_cast<Poco::Net::HTTPMessage*>(_request);
+	return static_cast<http::Message*>(&_request);
 }
 
 
@@ -117,22 +143,20 @@ Poco::Net::HTTPMessage* ClientConnection::outgoingHeaders()
 void ClientConnection::onSocketConnect(void*) 
 {
 	traceL("ClientConnection", this) << "Connected" << endl;
-	assert(_adapter);
 	_socket.Connect -= delegate(this, &ClientConnection::onSocketConnect);
 
-
-
-	// Send the request
-	// TODO: Can't do this for WS
-	//sendMessage();
-	flush();
-
-	//
-	// KLUDGE: Temp solution for quick sending small requests only.
-	// Use Connection::sendRaw() for nocopy binary stream.
-	//sendRaw(
-	//	_request->body.str().data(),
-	//	_request->body.str().length());
+	// Start the outgoing send stream if there  
+	// are any adapters attached.
+	if (Outgoing.numAdapters())
+		Outgoing.start();
+	
+	// Send the outgoing HTTP request if they 
+	// weren't pushed through by the stream.
+	sendHeaders();
+	
+	// Emit the connect signal so raw connections ie. 
+	// websockets can kick off the data flow
+	Connect.emit(this);
 }
 	
 
@@ -144,7 +168,7 @@ void ClientConnection::onHeaders()
 {
 	traceL("ClientConnection", this) << "On headers" << endl;	
 
-	Headers.emit(this, *_response);
+	Headers.emit(this, _response);
 }
 
 
@@ -152,15 +176,23 @@ void ClientConnection::onPayload(Buffer& buffer)
 {
 	traceL("ClientConnection", this) << "On payload" << endl;	
 
-	Payload.emit(this, buffer);
+	_incomingProgress.total = response().getContentLength();
+	_incomingProgress.current += buffer.available();
+	assert(_incomingProgress.current <= _incomingProgress.total);
+	IncomingProgress.emit(this, _incomingProgress);
+
+	if (_recvStream)
+		_recvStream->write(buffer.data(), buffer.available());
+
+	//Payload.emit(this, buffer);
 }
 
 
-void ClientConnection::onComplete() 
+void ClientConnection::onMessage() 
 {
-	traceL("ClientConnection", this) << "On complete" << endl;	
+	traceL("ClientConnection", this) << "On complete" << endl;
 
-	Complete.emit(this, *_response);
+	Complete.emit(this, _response);
 }
 
 
@@ -172,10 +204,6 @@ void ClientConnection::onClose()
 }
 
 
-//
-// Client callbacks
-//
-
 void ClientConnection::onClientShutdown(void*)
 {
 	close();
@@ -184,7 +212,6 @@ void ClientConnection::onClientShutdown(void*)
 
 // ---------------------------------------------------------------------
 //
-
 Client::Client()
 {
 	traceL("Client", this) << "Creating" << endl;
@@ -259,6 +286,32 @@ void Client::onTimer(void*)
 } } // namespace scy::http
 
 
+
+
+/*
+	//if (_address.valid()) {
+		// Connect to server, the request will be sent on connect
+		//_sendOnResolved = false;
+		//return;
+	//}
+	//else if (_dns.resolving()) {
+	//	_sendOnResolved = true;
+	//}
+	//else {
+		// Must be a DNS failure
+		// The connection should be in error state.
+		//assert(_dns.failed());
+		//assert(_error.any());
+		//assert(0);
+	//}
+
+
+int ClientConnection::write(const char* buf, size_t len, int flags)
+{
+	if (!_recvStreamStream)
+		_recvStreamStream = new PacketStream;
+}
+*/
 	/*
 ClientConnection::ClientConnection(Client& client, const net::Address& address) : 
 	Connection(net::TCPSocket(), new ClientAdapter(this)), 
@@ -267,8 +320,8 @@ ClientConnection::ClientConnection(Client& client, const net::Address& address) 
 {	
 	traceL("ClientConnection", this) << "Creating" << endl;
 
-	client.Shutdown += delegate(this, &ClientConnection::onClientShutdown);
-	client.addConnection(this);
+	client->Shutdown += delegate(this, &ClientConnection::onClientShutdown);
+	client->addConnection(this);
 }
 */
 
@@ -300,7 +353,7 @@ ClientConnection::ClientConnection(Client& client, const net::Address& address) 
 
 
 /*
-void Client::onConnectionComplete(void* sender, const Response&) 
+void Client::onConnectionMessage(void* sender, const Response&) 
 {
 	traceL("Client", this) << "#### On connection close: " << sender << endl;
 	//removeConnection(static_cast<ClientConnection*>(sender));

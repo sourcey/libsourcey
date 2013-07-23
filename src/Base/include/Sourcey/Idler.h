@@ -17,43 +17,61 @@
 //
 
 
-#ifndef SOURCEY_UV_Idler_H
-#define SOURCEY_UV_Idler_H
+#ifndef SOURCEY_Idler_H
+#define SOURCEY_Idler_H
 
 
 #include "Sourcey/UV/UVPP.h"
 
 
 namespace scy {
-namespace uv {
 	
+
 
 class Idler: public uv::Base
 	/// https://github.com/AlloSphere-Research-Group/alive/blob/master/archived/av/uv_utils.h
 {
 public:
-	Idler();
+	Idler(uv::Loop& loop = uv::defaultLoop());
 	virtual ~Idler();	
 	
 	virtual void init();	
 	virtual void start();	
 	virtual void stop();
 
-	void onIdle(int status);
-
-protected:
-	uv_idle_t _handle;
+	virtual void onIdle();
 };
 
 
-//
-// UV Callbacks
-//
-
-UVStatusCallback(Idler, onIdle, uv_idle_t);
+} // namespace scy
 
 
-} } // namespace scy::uv
+#endif // SOURCEY_Idler_H
 
 
-#endif // SOURCEY_UV_Idler_H
+/*
+struct Idler {
+	uv_idle_t handle;
+	idle_callback cb;
+
+	Idler(uv_loop_t * loop, idle_callback cb) {
+		handle.data = this;
+		this->cb = cb;
+
+		uv_idle_init(loop, &handle);
+		uv_idle_start(&handle, static_idle);
+	}
+
+	void idle(uv_idle_t& handle, int status) {
+		if (cb(status) == 0) {
+			uv_idle_stop(&handle);
+			delete this;
+		}
+	}
+
+	static void static_idle(uv_idle_t* handle, int status) {
+		//printf("idle static notify\n");
+		((Idler *)(handle->data))->idle(*handle, status); 
+	}
+};
+*/

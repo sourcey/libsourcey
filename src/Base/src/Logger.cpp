@@ -18,13 +18,15 @@
 
 
 #include "Sourcey/Logger.h"
+#include "Sourcey/DateTime.h"
+//#include "Poco/Thread.h"
 #include "Poco/Format.h"
 #include "Poco/Path.h"
 #include "Poco/File.h"
 #include <assert.h>
 
 
-using namespace Poco;
+//using namespace Poco;
 using namespace std;
 
 
@@ -61,7 +63,7 @@ void Logger::uninitialize()
 	Mutex::ScopedLock lock(_mutex);
 	if (_instance) {
 		delete _instance;
-		_instance = NULL;
+		_instance = nullptr;
 	}
 }
 
@@ -75,7 +77,7 @@ void Logger::setInstance(Logger* logger)
 
 
 Logger::Logger() :
-	_defaultChannel(NULL)
+	_defaultChannel(nullptr)
 {
 	//cout << "[Logger:" << this << "] Creating" << endl;
 }
@@ -87,7 +89,7 @@ Logger::~Logger()
 	{
 		Mutex::ScopedLock lock(_mutex);
 		util::clearMap(_map);
-		_defaultChannel = NULL;
+		_defaultChannel = nullptr;
 	}
 }
 
@@ -111,7 +113,7 @@ void Logger::remove(const string& name, bool freePointer)
 	assert(it != _map.end());
 	if (it != _map.end()) {
 		if (_defaultChannel == it->second)
-			_defaultChannel = NULL;
+			_defaultChannel = nullptr;
 		if (freePointer)
 			delete it->second;	
 		_map.erase(it);
@@ -222,7 +224,7 @@ void LogChannel::write(const LogStream& stream)
 void LogChannel::format(const LogStream& stream, ostream& ost)
 { 
 	if (_dateFormat)
-		ost << Poco::DateTimeFormatter::format(Poco::Timestamp(), _dateFormat);
+		ost << DateTimeFormatter::format(Timestamp(), _dateFormat);
 	ost << " [" << getStringFromLogLevel(stream.level) << "] ";
 	if (!stream.realm.empty() || !stream.pid.empty()) {		
 		ost << "[";		
@@ -291,9 +293,9 @@ void FileChannel::open()
 		throw Exception("Log file path must be set.");
 	
 	// Create directories if needed
-	Path dir(_path);
+	Poco::Path dir(_path);
 	dir.setFileName("");
-	File(dir).createDirectories();
+	Poco::File(dir).createDirectories();
 	
 	// Open the file stream
 	_fstream.close();
@@ -359,7 +361,7 @@ RotatingFileChannel::RotatingFileChannel(const string& name,
 										 int rotationInterval, 
 										 const char* dateFormat) : 
 	LogChannel(name, level, dateFormat),
-	_fstream(NULL),
+	_fstream(nullptr),
 	_dir(dir),
 	_extension(extension),
 	_rotationInterval(rotationInterval),
@@ -412,8 +414,8 @@ void RotatingFileChannel::rotate()
 
 	// Open the next log file
 	_filename = Poco::format("%s_%ld.%s", _name, static_cast<long>(Timestamp().epochTime()), _extension);
-	Path path(_dir);	
-	File(path).createDirectories();
+	Poco::Path path(_dir);	
+	Poco::File(path).createDirectories();
 	path.setFileName(_filename);
 	_fstream = new ofstream(path.toString().data());	
 	_rotatedAt = time(0);

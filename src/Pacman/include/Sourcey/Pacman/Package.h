@@ -26,10 +26,10 @@
 
 
 namespace scy { 
-namespace pcman {
+namespace pman {
 	
 
-struct Package: public JSON::Value
+struct Package: public json::Value
 	/// This class is a JSON representation of an
 	/// package belonging to the PackageManager.
 {	
@@ -38,7 +38,7 @@ struct Package: public JSON::Value
 		/// asset containing files belonging to
 		/// the parent package.
 	{
-		Asset(JSON::Value& src);
+		Asset(json::Value& src);
 		virtual ~Asset();
 		
 		virtual std::string fileName() const;
@@ -54,11 +54,11 @@ struct Package: public JSON::Value
 		virtual Asset& operator = (const Asset& r);
 		virtual bool operator == (const Asset& r) const;
 		
-		JSON::Value& root;
+		json::Value& root;
 	};
 
 	Package();
-	Package(const JSON::Value& src);
+	Package(const json::Value& src);
 	virtual ~Package();
 
 	virtual std::string id() const;
@@ -81,10 +81,10 @@ struct RemotePackage: public Package
 	/// may be downloaded and installed.
 {
 	RemotePackage();
-	RemotePackage(const JSON::Value& src);
+	RemotePackage(const json::Value& src);
 	virtual ~RemotePackage();
 
-	virtual JSON::Value& assets();	
+	virtual json::Value& assets();	
 
 	virtual Asset latestAsset();
 		/// Returns the latest asset for this package.
@@ -117,7 +117,7 @@ struct LocalPackage: public Package
 		/// This class provides a list of all package
 		/// files and their location on the file system.
 	{
-		Manifest(JSON::Value& src);
+		Manifest(json::Value& src);
 		virtual ~Manifest();
 		
 		virtual bool empty() const;
@@ -125,14 +125,14 @@ struct LocalPackage: public Package
 		virtual void addFile(const std::string& path);
 		//virtual void addDir(const std::string& path);
 		
-		JSON::Value& root;
+		json::Value& root;
 
 	private:
 		Manifest& operator = (const Manifest&) {}
 	};
 
 	LocalPackage();
-	LocalPackage(const JSON::Value& src);
+	LocalPackage(const json::Value& src);
 	LocalPackage(const RemotePackage& src);
 		/// Create the local package from the remote package
 		/// reference with the following manipulations.
@@ -209,7 +209,7 @@ struct LocalPackage: public Package
 		/// Returns the full full path of the installed file.
 		/// Thrown an exception if the install directory is unset.
 	
-	virtual JSON::Value& errors();
+	virtual json::Value& errors();
 	virtual void addError(const std::string& message);
 	virtual std::string lastError();
 	virtual void clearErrors();
@@ -245,7 +245,7 @@ struct PackagePair
 typedef std::vector<PackagePair> PackagePairList;
 
 
-} } // namespace scy::Pacman
+} } // namespace scy::pman
 
 
 #endif // SOURCEY_Pacman_Package_JSON_H

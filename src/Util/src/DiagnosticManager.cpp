@@ -104,7 +104,7 @@ DiagnosticManager::~DiagnosticManager()
 
 void DiagnosticManager::resetAll()
 {
-	Map tests = store();
+	Map tests = map();
 	for (Map::const_iterator it = tests.begin(); it != tests.end(); ++it) {	
 		it->second->reset();
 	}
@@ -113,7 +113,7 @@ void DiagnosticManager::resetAll()
 
 void DiagnosticManager::checkAll()
 {
-	Map tests = store();
+	Map tests = map();
 	for (Map::const_iterator it = tests.begin(); it != tests.end(); ++it) {	
 		it->second->check();
 	}
@@ -122,7 +122,7 @@ void DiagnosticManager::checkAll()
 
 bool DiagnosticManager::allComplete()
 {
-	Map tests = store();
+	Map tests = map();
 	for (Map::const_iterator it = tests.begin(); it != tests.end(); ++it) {	
 		if (!it->second->complete())
 			return false;

@@ -21,7 +21,7 @@
 #define SOURCEY_SocketIO_Transaction_H
 
 
-#include "Sourcey/Net/Transaction.h"
+#include "Sourcey/PacketTransaction.h"
 #include "Sourcey/SocketIO/Packet.h"
 
 
@@ -32,7 +32,7 @@ namespace sockio {
 class Client;
 
 
-struct Transaction: public net::PacketTransaction<sockio::Packet>
+struct Transaction: public PacketTransaction<sockio::Packet>
 {
 	Transaction(sockio::Client& client, long timeout = 10000);
 	Transaction(sockio::Client& client, const sockio::Packet& request, long timeout = 10000);
@@ -42,7 +42,7 @@ struct Transaction: public net::PacketTransaction<sockio::Packet>
 	virtual bool checkResponse(const Packet& packet);
 
 	virtual void onPotentialResponse(void*, Packet& packet);
-	virtual void onSuccess();
+	virtual void onResponse();
 
 	sockio::Client& client;
 };

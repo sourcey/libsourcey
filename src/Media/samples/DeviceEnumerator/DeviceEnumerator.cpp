@@ -9,7 +9,7 @@
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 using namespace scy;
 using namespace scy::av;
 

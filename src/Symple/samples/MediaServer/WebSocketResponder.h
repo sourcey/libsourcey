@@ -18,10 +18,10 @@
 #include "Sourcey/HTTP/Util.h"
 #include "Sourcey/HTTP/Packetizers.h"
 #include "Sourcey/Util/Base64PacketEncoder.h"
-#include "Sourcey/Util/StreamManager.h"
+#include "Sourcey/Util/StreamContainers.h"
 
 #include "Sourcey/TURN/client/TCPClient.h"
-#include "Poco/Net/KVStore.h"
+#include "Sourcey/Containers.h"
 
 #include <string>
 #include <vector>
@@ -92,7 +92,7 @@ public:
 		}
 		catch (Exception& exc)
 		{
-			errorL("StreamingRequestHandler", this) << "Error: " << exc.displayText() << std::endl;
+			errorL("StreamingRequestHandler", this) << "Error: " << exc.message() << std::endl;
 			connection().close();
 		}
 	}

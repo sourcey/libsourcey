@@ -13,7 +13,7 @@
 # ----------------------------------------------------------------------
 FIND_PATH(HttpParser_INCLUDE_DIR     
   NAMES 
-  	uv.h   
+  	http_parser.h   
   PATHS
   	${LibSourcey_DEPENDENCIES_SOURCE_DIR}/http_parser
   	/usr/local/include
@@ -77,8 +77,6 @@ else()
     )
 
 endif()
-
-message("${HttpParser_INCLUDE_DIR}")
 
 if(HttpParser_LIBRARY AND HttpParser_INCLUDE_DIR)
   set(HttpParser_FOUND 1)

@@ -48,9 +48,12 @@ TCPBase::~TCPBase()
 
 void TCPBase::connect(const net::Address& peerAddress) 
 {
-	traceL("TCPBase", this) << "Connecting to " << peerAddress.toString() << endl;
+	traceL("TCPBase", this) << "Connecting to " << peerAddress << endl;
 	connectReq.data = this;	
+	uv_tcp_t* tcp =  handle<uv_tcp_t>();
 	const sockaddr_in* addr = reinterpret_cast<const sockaddr_in*>(peerAddress.addr());
+	Address addres(reinterpret_cast<const sockaddr*>(addr), 16);
+	traceL("TCPBase", this) << "Connecting to 1 " << addres << endl;
 	int r = uv_tcp_connect(&connectReq, handle<uv_tcp_t>(), *addr, net::onConnect);
 	if (r)
 		setLastError("Invalid TCP socket");
@@ -103,16 +106,21 @@ int TCPBase::send(const char* data, int len, int flags)
 {	
 	traceL("TCPBase", this) << "Send: " << len << endl;	
 
+	/*
 	assert(initialized());
 	assert(len <= net::MAX_TCP_PACKET_SIZE);
 	
-	int r = Stream::write(data, len);
-	if (r)
-		setLastError("Invalid TCP socket");
+	if (!Stream::write(data, len)) {
+		warnL("TCPBase", this) << "Send error" << endl;	
+		return -1;
+	}
+		//setLastError("Invalid TCP socket");
 
 	// R is -1 on error, otherwise return len
 	//return r ? r : len;
 	return len;
+	*/
+	return send(data, len, peerAddress(), flags);
 }
 
 
@@ -120,9 +128,17 @@ int TCPBase::send(const char* data, int len, const net::Address& peerAddress, in
 {
 	traceL("TCPBase", this) << "Send: " << len << endl;
 
-	assert(peerAddress == this->peerAddress());
+	//assert(peerAddress == this->peerAddress());
+	//assert(initialized());
+	assert(len <= net::MAX_TCP_PACKET_SIZE);
+	
+	if (!Stream::write(data, len)) {
+		warnL("TCPBase", this) << "Send error" << endl;	
+		return -1;
+	}
 
-	return Stream::write(data, len);
+	// R is -1 on error, otherwise return len
+	return len;
 }
 
 
@@ -166,8 +182,11 @@ void TCPBase::acceptConnection()
 
 net::Address TCPBase::address() const
 {
+	traceL("TCPBase", this) << "Get address: " << closed() << endl;
+
 	if (closed())
-		throw Exception("Invalid TCP socket: No address");
+		return net::Address();
+		//throw Exception("Invalid TCP socket: No address");
 	
 	struct sockaddr_storage address;
 	int addrlen = sizeof(address);
@@ -175,7 +194,8 @@ net::Address TCPBase::address() const
 								reinterpret_cast<sockaddr*>(&address),
 								&addrlen);
 	if (r)
-		throwLastError("Invalid TCP socket: No address");
+		return net::Address();
+		//throwLastError("Invalid TCP socket: No address");
 
 	return net::Address(reinterpret_cast<const sockaddr*>(&address), addrlen);
 }
@@ -183,25 +203,47 @@ net::Address TCPBase::address() const
 
 net::Address TCPBase::peerAddress() const
 {
+	traceL("TCPBase", this) << "Get peer address: " << closed() << endl;
+
 	struct sockaddr_storage address;
 	int addrlen = sizeof(address);
 	if (closed())
-		throw Exception("Invalid TCP socket: No peer address");
+		return net::Address();
+		//throw Exception("Invalid TCP socket: No peer address");
 
 	int r = uv_tcp_getpeername(handle<uv_tcp_t>(),
 								reinterpret_cast<sockaddr*>(&address),
 								&addrlen);
 
 	if (r)
-		throwLastError("Invalid TCP socket: No peer address");
+		return net::Address();
+		//throwLastError("Invalid TCP socket: No peer address");
 
 	return net::Address(reinterpret_cast<const sockaddr*>(&address), addrlen);
+}
+
+
+void TCPBase::setError(const Error& err)
+{
+	Stream::setError(err);
+}
+
+		
+const Error& TCPBase::error() const
+{
+	return Stream::error();
 }
 
 
 net::TransportType TCPBase::transport() const 
 { 
 	return net::TCP; 
+}
+	
+
+bool TCPBase::closed() const
+{
+	return uv::Base::closed();
 }
 
 
@@ -225,14 +267,14 @@ void TCPBase::onRead(const char* data, int len)
 {
 	traceL("TCPBase", this) << "On read: " << len << endl;
 	_buffer.position(0);
-	_buffer.size(len);
+	_buffer.limit(len);
 	onRecv(_buffer);
 }
 
 
 void TCPBase::onRecv(Buffer& buf)
 {
-	traceL("TCPBase", this) << "On recv: " << buf.size() << endl;
+	traceL("TCPBase", this) << "On recv: " << buf.available() << endl;
 	emitRecv(buf, peerAddress());
 }
 
@@ -266,7 +308,7 @@ void TCPBase::onError(const Error& error)
 {		
 	errorL("TCPBase", this) << "On error: " << error.message << endl;	
 	emitError(error);
-	close(); // close on error
+	close(); // close in error
 }
 
 
@@ -321,7 +363,7 @@ void TCPBase::bind6(const net::Address& address, unsigned flags)
 	if (r) {
 		uv_err_t err = uv_last_error(loop());
 		setLastError();
-		throw Poco::Exception(uv_strerror(err)); // TODO: make exception setError option
+		throw Exception(uv_strerror(err)); // TODO: make exception setError option
 	}
 	//return r == 0;
 }
@@ -389,7 +431,7 @@ static void aafterClose(uv_handle_t* peer)
 
 
 
-//, _sslAdapter(NULL)
+//, _sslAdapter(nullptr)
 
 	//_stream = (uv_stream_t*)new uv_tcp_t;
 	//_stream->data = this;	

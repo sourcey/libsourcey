@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/Media/Config.h"
-#include "Sourcey/IPacket.h"
+#include "Sourcey/Packet.h"
 
 //#include <opencv/cv.h>
 //#include <opencv/highgui.h>

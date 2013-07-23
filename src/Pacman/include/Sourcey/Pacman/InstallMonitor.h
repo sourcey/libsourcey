@@ -25,7 +25,7 @@
 
 
 namespace scy { 
-namespace pcman {
+namespace pman {
 
 
 typedef std::vector<LocalPackage*> LocalPackageList;
@@ -76,7 +76,7 @@ protected:
 	virtual void setProgress(int value);
 
 protected:
-	mutable Poco::FastMutex	_mutex;
+	mutable Mutex	_mutex;
 
 	InstallTaskList _tasks;
 	LocalPackageList _packages;
@@ -98,7 +98,7 @@ inline std::string getInstallTaskNamesString(LocalPackageList& packages)
 }
 
 
-} } // namespace scy::Pacman
+} } // namespace scy::pman
 
 
 #endif // SOURCEY_Pacman_InstallMonitor_H

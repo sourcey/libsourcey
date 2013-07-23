@@ -103,7 +103,7 @@ bool Win32DeviceManager::initialize()
 	traceL("DeviceManager") << "Initializing" << endl;
 	if (!initialized()) {
 		HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
-		//HRESULT hr = CoInitialize(NULL);
+		//HRESULT hr = CoInitialize(nullptr);
 		_needCoUninitialize = SUCCEEDED(hr);
 		if (FAILED(hr)) {
 			if (hr != RPC_E_CHANGED_MODE) {
@@ -145,7 +145,7 @@ bool Win32DeviceManager::getAudioDevices(bool input, vector<Device>& devs)
 {
 	devs.clear();
 	
-	static Poco::FastMutex _mutex;
+	static Mutex _mutex;
 
 	// Since we are using RtAudio for device capture, we should
 	// use RtAudio to enumerate devices to ensure indexes match.	
@@ -472,8 +472,8 @@ bool getWaveDevices(bool input, vector<Device>& devs)
 Win32DeviceWatcher::Win32DeviceWatcher(Win32DeviceManager* manager)
 	: DeviceWatcher(manager),
 	manager_(manager),
-	audio_notify_(NULL),
-	video_notify_(NULL) {
+	audio_notify_(nullptr),
+	video_notify_(nullptr) {
 }
 
 Win32DeviceWatcher::~Win32DeviceWatcher() {

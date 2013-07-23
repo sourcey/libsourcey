@@ -44,7 +44,7 @@ Packet::Packet(Type type, int id, const string& endpoint, const string& message,
 	
 Packet::Packet(Type type, const string& message, bool ack) : 
 	_type(type), 
-	_id(crypt::randomNumber(4)),
+	_id(crypto::randomNumber(4)),
 	_message(message),
 	_ack(ack),
 	_size(0)
@@ -54,7 +54,7 @@ Packet::Packet(Type type, const string& message, bool ack) :
 	
 Packet::Packet(const string& message, bool ack) : 
 	_type(Packet::Message), 
-	_id(crypt::randomNumber(4)),
+	_id(crypto::randomNumber(4)),
 	_message(message),
 	_ack(ack),
 	_size(0)
@@ -64,7 +64,7 @@ Packet::Packet(const string& message, bool ack) :
 	
 Packet::Packet(const json::Value& data, bool ack) : 
 	_type(Packet::JSON), 
-	_id(crypt::randomNumber(4)),
+	_id(crypto::randomNumber(4)),
 	_message(json::stringify(data)),
 	_ack(ack),
 	_size(0)
@@ -74,7 +74,7 @@ Packet::Packet(const json::Value& data, bool ack) :
 	
 Packet::Packet(const string& event, const json::Value& data, bool ack) : 
 	_type(Packet::Event), 
-	_id(crypt::randomNumber(4)),
+	_id(crypto::randomNumber(4)),
 	_ack(ack),
 	_size(0)
 {	
@@ -131,13 +131,13 @@ IPacket* Packet::clone() const
 bool Packet::read(Buffer& buf) 
 {	
 	//https://github.com/LearnBoost/socket.io-spec#Encoding
-	if (buf.size() < 3)
+	if (buf.available() < 3)
 		return false;
 	
-	//debugL() << "[sockio::Packet:" << this << "] Reading: " << (string(buf.data(), buf.size())) << endl;
+	//debugL() << "[sockio::Packet:" << this << "] Reading: " << (string(buf.data(), buf.available())) << endl;
 
 	string data;
-	buf.read(data, buf.size());
+	buf.get(data, buf.available());
 	StringVec content = util::split(data, ':', 4);
 	if (content.size() < 1) {
 		//debugL() << "[sockio::Packet:" << this << "] Reading: Invalid Data: " << content.size() << endl;
@@ -190,7 +190,7 @@ void Packet::write(Buffer& buf) const
 {
 	ostringstream ss;
 	print(ss);
-	buf.write(ss.str());
+	buf.put(ss.str());
 }
 
 

@@ -21,7 +21,7 @@
 #define SOURCEY_HTTP_Base64PacketEncoder_H
 
 
-#include "Sourcey/IPacketProcessor.h"
+#include "Sourcey/PacketStream.h"
 #include "Sourcey/Signal.h"
 #include "Poco/Base64Encoder.h"
 #include <sstream>
@@ -30,7 +30,7 @@
 namespace scy { 
 
 
-class Base64PacketEncoder: public IPacketProcessor
+class Base64PacketEncoder: public PacketProcessor
 {
 public:
 	Base64PacketEncoder()
@@ -57,7 +57,7 @@ public:
 			int contentLength = packet.size();
 			Buffer buf(contentLength > 0 ? contentLength : 1500);
 			packet.write(buf);
-			encoder.write((const char*)buf.data(), buf.size());
+			encoder.write((const char*)buf.data(), buf.available());
 		}
 
 		encoder.close();		
