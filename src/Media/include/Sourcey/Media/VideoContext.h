@@ -21,6 +21,7 @@
 #define SOURCEY_MEDIA_VideoContext_H
 
 
+#include "Sourcey/Timer.h"
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/Format.h"
 #include "Sourcey/Media/FPSCounter.h"
@@ -44,14 +45,18 @@ namespace av {
 struct VideoConversionContext;
 
 	
-inline AVFrame* CreateVideoFrame(::PixelFormat pixelFmt, int width, int height);
-inline void InitVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& oparams);
-inline void InitDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts);
-inline void InitVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params);
-inline AVRational GetCodecTimeBase(AVCodec* c, double fps);
+AVFrame* createVideoFrame(::PixelFormat pixelFmt, int width, int height);
+void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& oparams);
+void initDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts);
+void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params);
+AVRational getCodecTimeBase(AVCodec* c, double fps);
 
 
-// ---------------------------------------------------------------------
+//
+// Video Context
+//
+
+
 struct VideoContext
 	/// Base video context which all encoders and decoders extend
 {
@@ -59,25 +64,32 @@ struct VideoContext
 	virtual ~VideoContext();
 		
 	virtual void create();
-		/// Create the AVCodecContext using default values
+		// Create the AVCodecContext using default values
 
 	virtual void open();
-		/// Open the AVCodecContext
+		// Open the AVCodecContext
 
 	virtual void close();	
-		/// Close the AVCodecContext
+		// Close the AVCodecContext
 
 	AVStream* stream;		// encoder or decoder stream
 	AVCodecContext* ctx;	// encoder or decoder context
 	AVCodec* codec;			// encoder or decoder codec
 	AVFrame* frame;			// encoded or decoded frame
 	FPSCounter fps;			// encoder or decoder fps rate
+	//FPSCounter1 fps1;
     double pts;				// pts in decimal seconds
+	
+	Stopwatch frameDuration;
     std::string error;		// error message
 };
 
 
-// ---------------------------------------------------------------------
+//
+// Video Encoder Context
+//
+
+
 struct VideoEncoderContext: public VideoContext
 {
 	VideoEncoderContext(AVFormatContext* format);
@@ -87,9 +99,10 @@ struct VideoEncoderContext: public VideoContext
 	//virtual void open();
 	virtual void close();
 	
-	virtual bool encode(unsigned char* data, int size, AVPacket& opacket);
+	virtual bool encode(unsigned char* data, int size, Int64 pts, AVPacket& opacket);
 	virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
 	virtual bool encode(AVFrame* iframe, AVPacket& opacket);
+	virtual bool flush(AVPacket& opacket);
 	
 	virtual void createConverter();
 	virtual void freeConverter();
@@ -105,7 +118,11 @@ struct VideoEncoderContext: public VideoContext
 };
 
 
-// ---------------------------------------------------------------------
+//
+// Video Codec Encoder Context
+//
+
+
 struct VideoCodecEncoderContext: public VideoContext
 {
 	VideoCodecEncoderContext();
@@ -129,7 +146,11 @@ struct VideoCodecEncoderContext: public VideoContext
 };
 
 
-// ---------------------------------------------------------------------
+//
+// Video Decode Context
+//
+
+
 struct VideoDecoderContext: public VideoContext
 {
 	VideoDecoderContext();
@@ -141,14 +162,14 @@ struct VideoDecoderContext: public VideoContext
 	
 	virtual bool decode(UInt8* data, int size, AVPacket& opacket);
 	virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
-		/// Decodes a the given input packet.
-		/// Returns true an output packet was returned, 
-		/// false otherwise.
+		// Decodes a the given input packet.
+		// Returns true an output packet was returned, 
+		// false otherwise.
     
 	virtual bool flush(AVPacket& opacket);
-		/// Flushes buffered frames.
-		/// This method should be called after decoding
-		/// until false is returned.
+		// Flushes buffered frames.
+		// This method should be called after decoding
+		// until false is returned.
 
 	//double maxFPS; 
 		// Maximum decoding FPS. 
@@ -157,7 +178,11 @@ struct VideoDecoderContext: public VideoContext
 };
 
 
-// ---------------------------------------------------------------------
+//
+// Video Conversion Context
+//
+
+
 struct VideoConversionContext
 {
 	VideoConversionContext();
@@ -175,26 +200,12 @@ struct VideoConversionContext
 };
 
 
-// ---------------------------------------------------------------------
-void InitVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
-{
-	params.encoder = avcodec_get_name(ctx->codec_id);
-	params.pixelFmt = av_get_pix_fmt_name(ctx->pix_fmt);
-	params.width = ctx->width;
-	params.height = ctx->height;
-	params.sampleRate = ctx->sample_rate;
-	params.bitRate = ctx->bit_rate;
-	params.fps = 
-		ctx->time_base.den / 
-		ctx->time_base.num;
-}
-
-
-
 } } // namespace scy::av
 
 
 #endif	// SOURCEY_MEDIA_VideoContext_H
+
+
 
 
 	//virtual void reset();
@@ -213,7 +224,7 @@ void VideoDecoderContext::reset()
 
 
 	//virtual int encode(unsigned char* buffer, int bufferSize, AVPacket& opacket/*, unsigned pts = AV_NOPTS_VALUE*/);
-		/// Encodes a video frame from given data buffer and
-		/// stores it in the opacket.
-		/// If a pts value is given it will be applied to the
-		/// encoded video packet.
+		// Encodes a video frame from given data buffer and
+		// stores it in the opacket.
+		// If a pts value is given it will be applied to the
+		// encoded video packet.

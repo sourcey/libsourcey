@@ -35,14 +35,14 @@ namespace scy {
 
 
 class Buffer 
-	/// A buffer for reading/writing binary streams.
+	// A buffer for reading/writing binary streams.
 {
 public:
 	static const int DEFAULT_SIZE = 2048;
 	static const int MAX_SIZE = 65536;
 
 	enum ByteOrder
-		/// Defines order of bytes in the buffer.
+		// Defines order of bytes in the buffer.
 	{
 		ORDER_NETWORK = 0,  // Default, use network byte order (big endian).
 		ORDER_HOST,         // Use the native order of the host.
@@ -54,7 +54,7 @@ public:
 	Buffer(const char* bytes, size_t len, ByteOrder order);
 
 	explicit Buffer(const char* bytes);
-		/// Initializes buffer from a zero-terminated char array.
+		// Initializes buffer from a zero-terminated char array.
 
 	~Buffer();
 
@@ -65,49 +65,49 @@ public:
 		// are still valid after this call.
 		
 	void limit(size_t val);
-		/// Sets this buffer's limit. If the position is larger
-		/// than the new limit then it is set to the new limit. 
-		/// If the mark is defined and larger than the new
-		/// limit then it is discarded.
+		// Sets this buffer's limit. If the position is larger
+		// than the new limit then it is set to the new limit. 
+		// If the mark is defined and larger than the new
+		// limit then it is discarded.
 
 	size_t limit() const; // { return _limit; } // - _position
-		/// Returns the read limit of this buffer.
-		/// This of the limit as an alias for buffer.available()
+		// Returns the read limit of this buffer.
+		// This of the limit as an alias for buffer.available()
 			
 	void position(size_t val);
-		/// Sets this buffer's read position. 
-		/// If the mark is defined and larger than the
+		// Sets this buffer's read position. 
+		// If the mark is defined and larger than the
 	    /// new position then it is discarded.
 
 	size_t position() const { return _position; }
-		/// Returns the current position in the buffer
+		// Returns the current position in the buffer
 	
 	void mark();
-		/// Sets this buffer's mark at the current position.		
+		// Sets this buffer's mark at the current position.		
 
 	bool reset();
-		/// Resets this buffer's position to the previously-marked position.
-		/// Returns false if no mark is set.
+		// Resets this buffer's position to the previously-marked position.
+		// Returns false if no mark is set.
 	
 	void rewind();
-		/// Rewinds this buffer. The position is set to zero and the mark is discarded.
+		// Rewinds this buffer. The position is set to zero and the mark is discarded.
 
 	void clear();
-		/// Clears the contents of the buffer. 
-		/// The position is set to zero, the limit is set to the
-		/// capacity, and the mark is discarded.
+		// Clears the contents of the buffer. 
+		// The position is set to zero, the limit is set to the
+		// capacity, and the mark is discarded.
 
 	void reserve(size_t len);
-		/// Reserves the given number of bytes in the buffer.
-		///
-		/// An exception is thrown if the given size is greater 
-		/// than Buffer::MAX_SIZE.
+		// Reserves the given number of bytes in the buffer.
+		//
+		// An exception is thrown if the given size is greater 
+		// than Buffer::MAX_SIZE.
 
 	size_t capacity() const;
-		/// Returns the total storage capaciry of this buffer.
+		// Returns the total storage capaciry of this buffer.
 
 	size_t available() const;
-		/// Returns the number of elements between the current position and the limit.
+		// Returns the number of elements between the current position and the limit.
 
 	//void resize(size_t size);
 		// Resizes the buffer to the specified size.
@@ -131,8 +131,8 @@ public:
 	bool getU24(UInt32& val);
 	bool getU32(UInt32& val);
 	bool getU64(UInt64& val);
-		/// Reads a value from the buffer. 
-		/// Returns false if there isn't enough data left for the specified type.
+		// Reads a value from the buffer. 
+		// Returns false if there isn't enough data left for the specified type.
 	
 	void put(const char* val, size_t len);
 	void put(const std::string& val);
@@ -141,8 +141,8 @@ public:
 	void putU24(UInt32 val);
 	void putU32(UInt32 val);
 	void putU64(UInt64 val);
-		/// Write value to the buffer. 
-		/// Resizes the buffer when neccessary.
+		// Write value to the buffer. 
+		// Resizes the buffer when neccessary.
 		
 	const char peek();
 	const UInt8 peekU8();
@@ -150,8 +150,8 @@ public:
 	const UInt32 peekU24();
 	const UInt32 peekU32();
 	const UInt64 peekU64();
-		/// Peeks data from the buffer. 
-		/// Zero is returned if read past boundary.
+		// Peeks data from the buffer. 
+		// Zero is returned if read past boundary.
 	
 	bool update(const char* val, size_t len, size_t pos);
 	bool update(const std::string& val, size_t pos);

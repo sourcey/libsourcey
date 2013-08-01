@@ -83,7 +83,7 @@ protected:
 	virtual ~Task();
 	
 	virtual bool beforeRun();
-	virtual void run() = 0;
+	virtual bool run() = 0;
 	virtual bool afterRun();
 
 	static bool CompareTimeout(const scy::Task* l, const scy::Task* r)

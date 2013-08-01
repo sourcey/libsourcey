@@ -19,86 +19,89 @@
 
 #include "Sourcey/Logger.h"
 #include "Sourcey/DateTime.h"
-//#include "Poco/Thread.h"
+#include "Sourcey/Platform.h"
+#include "Sourcey/Util.h"
 #include "Poco/Format.h"
 #include "Poco/Path.h"
 #include "Poco/File.h"
 #include <assert.h>
 
 
-//using namespace Poco;
 using namespace std;
 
 
 namespace scy {
 
-
-// ---------------------------------------------------------------------
-// Logger
-//
-Logger*		Logger::_instance;
-Mutex		Logger::_mutex;
-
-
-Logger& Logger::instance() 
-{
-	if (_instance == NULL) 
-	{
-		Mutex::ScopedLock lock(_mutex);
-		if (_instance == NULL)
-			_instance = new Logger;
-	}
-	return *_instance;
-} 
-
-
-void Logger::initialize() 
-{
-	instance();
-}
-
-
-void Logger::uninitialize() 
-{
-	Mutex::ScopedLock lock(_mutex);
-	if (_instance) {
-		delete _instance;
-		_instance = nullptr;
-	}
-}
-
-
-void Logger::setInstance(Logger* logger)
-{
-	uninitialize();
-	Mutex::ScopedLock lock(_mutex);
-	_instance = logger;
-}
+	
+static Singleton<Logger> singleton;
 
 
 Logger::Logger() :
-	_defaultChannel(nullptr)
+	_defaultChannel(NULL), 
+	_cancelled(false)
 {
-	//cout << "[Logger:" << this << "] Creating" << endl;
+	_thread.start(*this);
 }
 
 
 Logger::~Logger()
 {	
-	debugL("Logger", this) << "Destroying" << endl;
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		util::clearMap(_map);
-		_defaultChannel = nullptr;
+		_defaultChannel = NULL;
+		_cancelled = true;
 	}
+	_thread.join();
+}
+
+
+Logger& Logger::instance() 
+{
+	return *singleton.get();
+}
+
+	
+void Logger::shutdown()
+{
+	singleton.destroy();
+}
+
+
+bool Logger::run()
+{
+	QueuedWrite* wr = nil;
+	bool empty = false;
+	bool cancelled = false;
+	for(;;) 
+	{
+		wr = nil;
+		{
+			ScopedLock lock(_mutex);
+			empty = _pending.empty();
+			cancelled = _cancelled;
+			if (empty || cancelled)
+				break;
+
+			wr = _pending.front();
+			_pending.pop_front();
+		}
+		if (wr) {
+			wr->channel->write(*wr->stream);
+			delete wr->stream;
+			delete wr;
+			sleep(1);
+		}
+	}
+	if (empty) scy::sleep(50);
+	return !cancelled;
 }
 
 
 void Logger::add(LogChannel* channel) 
 {
-	debugL("Logger", this) << "Adding Channel: " << channel->name() << endl;
-	Mutex::ScopedLock lock(_mutex);
-	// The first channel that is added will be our default channel.
+	ScopedLock lock(_mutex);
+	// The first channel added will be the default channel.
 	if (_defaultChannel == NULL)
 		_defaultChannel = channel;
 	_map[channel->name()] = channel;
@@ -107,13 +110,12 @@ void Logger::add(LogChannel* channel)
 
 void Logger::remove(const string& name, bool freePointer) 
 {
-	debugL("Logger", this) << "Removing Channel: " << name << endl;
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	LogMap::iterator it = _map.find(name);	
 	assert(it != _map.end());
 	if (it != _map.end()) {
 		if (_defaultChannel == it->second)
-			_defaultChannel = nullptr;
+			_defaultChannel = NULL;
 		if (freePointer)
 			delete it->second;	
 		_map.erase(it);
@@ -123,52 +125,68 @@ void Logger::remove(const string& name, bool freePointer)
 
 LogChannel* Logger::get(const string& name, bool whiny) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	LogMap::const_iterator it = _map.find(name);	
 	if (it != _map.end())
 		return it->second;
 	if (whiny)
-		throw Poco::NotFoundException("No log channel named: " + name);
+		throw NotFoundException("No log channel named: " + name);
 	return NULL;
 }
 
 
 void Logger::setDefault(const string& name)
 {
-	debugL("Logger", this) << "Set Default Channel: " << name << endl;
 	_defaultChannel = get(name, true);
 }
 
 
 LogChannel* Logger::getDefault() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _defaultChannel;
 }
 
 
 void Logger::write(const LogStream& stream)
 {	
-	// will write to the null channel if no default channel exists
-	LogChannel* c = getDefault();
-	if (c)
-		c->write(stream);
+	assert(0); // can remove, but shouldn't be using this method in internal code
+	write(new LogStream(stream));
 }
 
 
+void Logger::write(LogStream* stream)
+{	
+	QueuedWrite* work = new QueuedWrite;
+	work->logger = this;
+	work->stream = stream;
+	ScopedLock lock(_mutex);
+	work->channel = _defaultChannel;
+	_pending.push_back(work);	
+}
+
+
+/*
 void Logger::write(const char* channel, const LogStream& stream)
 {	
+	LogChannel* ch = get(channel, true);
+	QueuedWrite* work = new QueuedWrite;
+	work->logger = this;
+	work->stream = stream;
+	work->channel = ch;
+	ScopedLock lock(_mutex);
+	_pending.push_back(work);	
 	// will throw if the specified channel doesn't exist
-	LogChannel* c = get(channel);
-	if (c)
-		c->write(stream);
+	//LogChannel* c = get(channel);
+	//if (c)
+	//	c->write(stream);
 }
 
 
 void Logger::write(const string& message, const char* level, 
 		const string& realm, const void* ptr) const
 {
-	// will write to the null channel if no default channel exists
+	// will write to the NULL channel if no default channel exists
 	LogChannel* c = getDefault();
 	if (c)
 		c->write(message, getLogLevelFromString(level), realm, ptr);
@@ -179,26 +197,40 @@ LogStream Logger::send(const char* level, const string& realm, const void* ptr) 
 {
 	return LogStream(getLogLevelFromString(level), realm, ptr);
 }
+*/
 
 
-// ---------------------------------------------------------------------
+//
 // Log Stream
 //
+
+
 LogStream::LogStream(LogLevel level, const string& realm, const void* ptr) : 
-	level(level), realm(realm), pid(ptr ? util::getPID(ptr) : "") , message()
+	level(level), realm(realm), address(ptr ? util::memAddress(ptr) : "")
 {
 }
 
 
-LogStream::LogStream(LogLevel level, const string& realm, const string& pid) :
-	level(level), realm(realm), pid(pid)
+LogStream::LogStream(LogLevel level, const string& realm, const string& address) :
+	level(level), realm(realm), address(address)
 {
 }
 
 	
-// ---------------------------------------------------------------------
+LogStream::LogStream(const LogStream& that) :
+	level(that.level), realm(that.realm), address(that.address)
+{
+	// try to avoid copy assign
+	message.str(that.message.str());
+}
+
+
+	
+//
 // Log Channel
 //
+
+
 LogChannel::LogChannel(const string& name, LogLevel level, const char* dateFormat) : 
 	_name(name), 
 	_level(level), 
@@ -226,12 +258,12 @@ void LogChannel::format(const LogStream& stream, ostream& ost)
 	if (_dateFormat)
 		ost << DateTimeFormatter::format(Timestamp(), _dateFormat);
 	ost << " [" << getStringFromLogLevel(stream.level) << "] ";
-	if (!stream.realm.empty() || !stream.pid.empty()) {		
+	if (!stream.realm.empty() || !stream.address.empty()) {		
 		ost << "[";		
 		if (!stream.realm.empty())
 			ost << stream.realm;
-		if (!stream.pid.empty())
-			ost << ":" << stream.pid;
+		if (!stream.address.empty())
+			ost << ":" << stream.address;
 		ost << "] ";
 	}
 	ost << stream.message.str();
@@ -239,9 +271,11 @@ void LogChannel::format(const LogStream& stream, ostream& ost)
 }
 
 
-// ---------------------------------------------------------------------
+//
 // Console Channel
 //
+
+
 ConsoleChannel::ConsoleChannel(const string& name, LogLevel level, const char* dateFormat) : 
 	LogChannel(name, level, dateFormat) 
 {
@@ -256,20 +290,22 @@ void ConsoleChannel::write(const LogStream& stream)
 	ostringstream ss;
 	format(stream, ss);
 #if defined(_CONSOLE) || defined(_DEBUG)
-	cout << ss.str();
+	//cout << ss.str();
 #endif
 #if defined(_MSC_VER) && defined(_DEBUG) 
 	string s(ss.str());
 	wstring temp(s.length(), L' ');
 	copy(s.begin(), s.end(), temp.begin());
-	OutputDebugString(temp.data());
+	OutputDebugString(temp.c_str());
 #endif
 }
 
 
-// ---------------------------------------------------------------------
+//
 // File Channel
 //
+
+
 FileChannel::FileChannel(const string& name,
 						 const string& path, 
 						 LogLevel level, 
@@ -299,7 +335,7 @@ void FileChannel::open()
 	
 	// Open the file stream
 	_fstream.close();
-	_fstream.open(_path.data(), ios::out | ios::app);	
+	_fstream.open(_path.c_str(), ios::out | ios::app);	
 
 	// Throw on failure
 	if (!_fstream.is_open())
@@ -333,7 +369,7 @@ void FileChannel::write(const LogStream& stream)
 	string s(ss.str());
 	wstring temp(s.length(), L' ');
 	copy(s.begin(), s.end(), temp.begin());
-	OutputDebugString(temp.data());
+	OutputDebugString(temp.c_str());
 #endif
 }
 
@@ -351,9 +387,11 @@ string FileChannel::path() const
 }
 
 
-// ---------------------------------------------------------------------
+//
 // Rotating File Channel
 //
+
+
 RotatingFileChannel::RotatingFileChannel(const string& name,
 	                                     const string& dir, 
 										 LogLevel level, 
@@ -361,7 +399,7 @@ RotatingFileChannel::RotatingFileChannel(const string& name,
 										 int rotationInterval, 
 										 const char* dateFormat) : 
 	LogChannel(name, level, dateFormat),
-	_fstream(nullptr),
+	_fstream(NULL),
 	_dir(dir),
 	_extension(extension),
 	_rotationInterval(rotationInterval),
@@ -400,7 +438,7 @@ void RotatingFileChannel::write(const LogStream& stream)
 	string s(ss.str());
 	wstring temp(s.length(), L' ');
 	copy(s.begin(), s.end(), temp.begin());
-	OutputDebugString(temp.data());
+	OutputDebugString(temp.c_str());
 #endif
 }
 
@@ -417,7 +455,7 @@ void RotatingFileChannel::rotate()
 	Poco::Path path(_dir);	
 	Poco::File(path).createDirectories();
 	path.setFileName(_filename);
-	_fstream = new ofstream(path.toString().data());	
+	_fstream = new ofstream(path.toString().c_str());	
 	_rotatedAt = time(0);
 }
 

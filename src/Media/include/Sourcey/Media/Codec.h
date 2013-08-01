@@ -169,8 +169,8 @@ typedef std::list<Codec*> CodecPList;
 
 	/*
 	enum ID 
-		/// The codec ID values match their constituent
-		/// AV_CODEC_ID_XXX values in the FFmpeg library.
+		// The codec ID values match their constituent
+		// AV_CODEC_ID_XXX values in the FFmpeg library.
 	{		
 		Unknown		= 0,
 		

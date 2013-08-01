@@ -28,20 +28,23 @@
 
 namespace scy {
 namespace av {
+	struct Format;
 
 
-class ICapture: public StartablePacketSource
+class ICapture: public PacketSource, public abstract::Startable
 {
 public:
-	ICapture() {};
+	ICapture() : PacketSource(Emitter) {};
 	virtual ~ICapture() {};
 
 	virtual void start() = 0;
 	virtual void stop() = 0;
+	
+	virtual void getEncoderFormat(Format& iformat) = 0;
+		// Sets the input format for encoding with this capture device.
+			
+	PacketSignal Emitter;
 };
-
-
-typedef std::list<ICapture*> ICaptureList;
 
 
 } // namespace av 

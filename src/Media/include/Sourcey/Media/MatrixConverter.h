@@ -44,8 +44,8 @@ class MatrixConverter: public IPacketizer
 {
 public:
 	MatrixConverter() : 
-		_convCtx(nullptr),
-		_oframe(nullptr)
+		_convCtx(nil),
+		_oframe(nil)
 	{
 	}
 
@@ -70,13 +70,13 @@ public:
 	{
 		VideoPacket& vpacket = reinterpret_cast<VideoPacket&>(packet);
 		VideoDecoderContext* video = reinterpret_cast<VideoDecoderContext*>(packet.opaque);	
-		if (video == NULL)
+		if (video == nil)
 			throw Exception("Matrix Converter: Video packets must contain a VideoDecoderContext pointer.");	
 		
 		// Create and allocate the conversion frame.
-		if (_oframe == NULL) {
+		if (_oframe == nil) {
 			_oframe = avcodec_alloc_frame();	
-			if (_oframe == NULL)
+			if (_oframe == nil)
 				throw Exception("Matrix Converter: Could not allocate the output frame.");
 
 			avpicture_alloc(reinterpret_cast<AVPicture*>(_oframe), 
@@ -84,14 +84,14 @@ public:
 		}
 	
 		// Convert the image from its native format to BGR.
-		if (_convCtx == NULL) {
+		if (_convCtx == nil) {
 			_convCtx = sws_getContext(
 				video->ctx->width, video->ctx->height, video->ctx->pix_fmt, 
 				video->ctx->width, video->ctx->height, PIX_FMT_BGR24, 
-				SWS_BICUBIC, NULL, NULL, NULL);
+				SWS_BICUBIC, nil, nil, nil);
 			_mat.create(video->ctx->height, video->ctx->width, CV_8UC(3));
 		}
-		if (_convCtx == NULL)
+		if (_convCtx == nil)
 			throw Exception("Matrix Converter: Unable to initialize the conversion context.");	
 			
 		// Scales the source data according to our SwsContext settings.

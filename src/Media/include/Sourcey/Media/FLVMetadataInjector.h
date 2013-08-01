@@ -48,7 +48,7 @@ public:
 		AMF_DATA_TYPE_BOOL        = 0x01,
 		AMF_DATA_TYPE_STRING      = 0x02,
 		AMF_DATA_TYPE_OBJECT      = 0x03,
-		AMF_DATA_TYPE_NULL        = 0x05,
+		AMF_DATA_TYPE_nil        = 0x05,
 		AMF_DATA_TYPE_UNDEFINED   = 0x06,
 		AMF_DATA_TYPE_REFERENCE   = 0x07,
 		AMF_DATA_TYPE_MIXEDARRAY  = 0x08,
@@ -71,7 +71,8 @@ public:
 		FLV_FRAME_DISP_INTER = 3 << 4,
 	};
 
-	FLVMetadataInjector(const Format& format) :
+	FLVMetadataInjector(const Format& format)  : 
+		IPacketizer(Emitter),
 		_format(format),
 		_initial(true),
 		_modifyingStream(false),
@@ -82,8 +83,8 @@ public:
 	}
 					
 	virtual void onStreamStateChange(const PacketStreamState& state) 
-		/// This method is called by the Packet Stream
-		/// whenever the stream is restarted.
+		// This method is called by the Packet Stream
+		// whenever the stream is restarted.
 	{ 
 		traceL("FLVMetadataInjector", this) << "Stream state change: " << state << std::endl;
 
@@ -166,8 +167,8 @@ public:
 	}
 	
 	virtual void fastUpdateTimestamp(char* buf, UInt32 timestamp)
-		/// Updates the timestamp in the given FLV tag buffer.
-		/// No more need to copy data with this method.
+		// Updates the timestamp in the given FLV tag buffer.
+		// No more need to copy data with this method.
 	{
 		UInt32 val = htonl(timestamp); // HostToNetwork32
 		/*
@@ -182,7 +183,7 @@ public:
 
 	virtual void updateTimestamp(Buffer& buf, UInt32 timestamp)
 	{
-		// NOTE: The buffer must be positioned at
+		// Note: The buffer must be positioned at
 		// the start of the tag.
 		int offset = buf.position();
 		if (buf.available() < offset + 4) {
@@ -444,6 +445,8 @@ public:
 		buf.putU8(AMF_DATA_TYPE_BOOL); // AMF_DATA_TYPE_NUMBER
 		buf.putU8(val ? 1 : 0);
 	}
+	
+	PacketSignal Emitter;
 		
 protected:
 	Format _format;

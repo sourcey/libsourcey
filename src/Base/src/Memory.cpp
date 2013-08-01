@@ -18,6 +18,7 @@
 
 
 #include "Sourcey/Memory.h"
+#include "Sourcey/Util.h"
 
 
 using namespace std;
@@ -51,8 +52,11 @@ void GarbageCollector::close()
 	traceL("GarbageCollector", this) << "Closing" << std::endl;
 
 	util::clearVector(_ready);
-	// Pending items will not be freed
-	// util::clearVector(_pending);
+#ifdef _DEBUG
+	// Pending items will not be freed in release 
+	// mode since it may result in a crash
+	util::clearVector(_pending);
+#endif
 	uv::Base::close();
 }
 
@@ -68,7 +72,7 @@ void GarbageCollector::shutdown()
 
 void GarbageCollector::onTimer()
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	if (_ready.empty() && 
 		_pending.empty())

@@ -40,7 +40,9 @@
 
 #ifdef _WIN32
     // Windows (x64 and x86)
-    #define WIN32 1
+	#ifndef WIN32
+    #define WIN32 //1
+	#endif
 #endif
 #if __unix__ // all unices
     // Unix    

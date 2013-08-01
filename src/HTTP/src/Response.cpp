@@ -19,29 +19,15 @@
 
 #include "Sourcey/HTTP/Response.h"
 #include "Sourcey/HTTP/Util.h"
+#include "Sourcey/DateTime.h"
 
 #include "Poco/NumberFormatter.h"
 #include "Poco/NumberParser.h"
-#include "Sourcey/DateTime.h"
-////#include "Poco/DateTimeFormatter.h"
-////#include "Poco/DateTimeFormat.h"
-//#include "Poco/DateTimeParser.h"
 #include "Poco/Ascii.h"
 #include "Poco/String.h"
 
 
-//using DateTime;
-using Poco::NumberFormatter;
-using Poco::NumberParser;
-//using DateTimeFormatter;
-//using DateTimeFormat;
-//using DateTimeParser;
-
-
-
 using namespace std;
-////using namespace Poco;
-
 
 
 namespace scy { 
@@ -144,7 +130,7 @@ void Response::setStatus(HTTPStatus status)
 
 void Response::setStatus(const std::string& status)
 {
-	setStatus((HTTPStatus) NumberParser::parse(status));
+	setStatus((HTTPStatus) Poco::NumberParser::parse(status));
 }
 	
 	
@@ -190,10 +176,10 @@ void Response::addCookie(const Cookie& cookie)
 void Response::getCookies(std::vector<Cookie>& cookies) const
 {
 	cookies.clear();
-	NVCollection::ConstIterator it = find(SET_COOKIE);
+	NVHash::ConstIterator it = find(SET_COOKIE);
 	while (it != end() && util::icompare(it->first, SET_COOKIE) == 0)
 	{
-		NVCollection nvc;
+		NVHash nvc;
 		util::splitParameters(it->second.begin(), it->second.end(), nvc);
 		cookies.push_back(Cookie(nvc));
 		++it;

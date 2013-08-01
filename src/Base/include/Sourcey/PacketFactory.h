@@ -24,7 +24,7 @@
 #include "Sourcey/PacketSignal.h"
 #include "Sourcey/Buffer.h"
 
-//#include "Poco/Thread.h"
+//
 
 
 namespace scy {
@@ -48,8 +48,8 @@ typedef std::vector<IPacketCreationStrategy*> PacketCreationStrategyList;
 //
 template <class PacketT>
 struct PacketCreationStrategy: public IPacketCreationStrategy
-	/// This template class implements an adapter that sits between
-	/// an SignalBase and an object receiving notifications from it.
+	// This template class implements an adapter that sits between
+	// an SignalBase and an object receiving notifications from it.
 {
 	PacketCreationStrategy(int priority = 0) : 
 		_priority(priority) {
@@ -85,14 +85,14 @@ struct PacketRegistry
 	template <class PacketT>
 	void registerPacketType(int priority) {
 		unregisterPacketType<PacketT>(); // ensure unique values
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		_types.push_back(new PacketCreationStrategy<PacketT>(priority));
 		sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
 	}
 
 	template <class PacketT>
 	void unregisterPacketType() {
-		//Mutex::ScopedLock lock(_mutex);		
+		//ScopedLock lock(_mutex);		
 		for (typename PacketCreationStrategyList::iterator it = _types.begin(); it != _types.end(); ++it) {
 			if (dynamic_cast<PacketCreationStrategy<PacketT>*>(*it) != 0) {
 				delete *it;
@@ -105,14 +105,14 @@ struct PacketRegistry
 	template <class StrategyT>
 	void registerStrategy(int priority) {
 		unregisterStrategy<StrategyT>(); // ensure unique values
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		_types.push_back(new StrategyT(priority));
 		sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
 	}
 
 	template <class StrategyT>
 	void unregisterStrategy() {
-		//Mutex::ScopedLock lock(_mutex);		
+		//ScopedLock lock(_mutex);		
 		for (typename PacketCreationStrategyList::iterator it = _types.begin(); it != _types.end(); ++it) {
 			if (dynamic_cast<StrategyT*>(*it) != 0) {
 				delete *it;
@@ -123,12 +123,12 @@ struct PacketRegistry
 	}
 
 	PacketCreationStrategyList& types() {
-		//Mutex::ScopedLock lock(_mutex);		
+		//ScopedLock lock(_mutex);		
 		return _types;
 	}
 
 	PacketCreationStrategyList types() const {
-		//Mutex::ScopedLock lock(_mutex);		
+		//ScopedLock lock(_mutex);		
 		return _types;
 	}
 
@@ -148,7 +148,7 @@ struct PacketFactory: public PacketRegistry
 	}
 
 	virtual IPacket* createPacket(Buffer& buffer) {
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		assert(!_types.empty() && "no packet types registered");
 		size_t offset = buffer.position();
 		for (unsigned i = 0; i < _types.size(); i++) {

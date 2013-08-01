@@ -25,8 +25,6 @@
 #include "Sourcey/Media/VideoCapture.h"
 #include "Sourcey/Media/AudioCapture.h"
 #include "Sourcey/Media/FormatRegistry.h"
-
-#include "Poco/Foundation.h"
 #include "Sourcey/Mutex.h"
 
 #include <opencv/cv.h>
@@ -52,59 +50,69 @@ namespace av {
 
 
 class MediaFactory
-	/// The MediaFactory class is a singleton for device
-	/// enumeration and instantiating audio/video captures. 
+	/// The MediaFactory class is a singleton manager for audio/video
+	/// captures, device enumeration and encoder media formats. 
 {
 public:
-	static MediaFactory* instance();
-	static void initialize();	
-	static void uninitialize();
-		
-	void loadVideo(unsigned flags = 0);
-		/// Preload a VideoCapture instance for each camera.
-		/// This method should be called on application initialization,
-		/// from the main thread.
-		/// This will ensure captures are always available to the
-		/// application using getVideoCapture(), from any thread.
-	
-	void unloadVideo();
-		/// Destroy all managed VideoCapture instances.
+	VideoCapture* createVideoCapture(int deviceId);
+		// Creates a VideoCapture instance for given device ID.
+		//
+		// If the VideoCaptureBase already exists for this camera then this method
+		// can be used to create VideoCaptures in any thread.
+		//
+		// If the VideoCaptureBase has not been created for this camera yet it will
+		// be created now, but take case since VideoCaptureBase instances should
+		// only be initialized from the main thread (OpenCV limitation).
+		// You can also lazy load video cameras using loadVideo()
 
-	virtual VideoCapture* getVideoCapture(int deviceId, unsigned flags = 0);
-		/// Gets or creates a VideoCapture from given device ID.
-		/// Camera captures are managed internally, and must 
-		/// NOT be destroyed after use.
-
-	virtual VideoCapture* createFileCapture(const std::string& file, unsigned flags = 0);
-		/// Creates a VideoCapture from given source file.
-		/// Unline camera captures, file captures must be destroyed after use.
-		/// Setting destroyOnStop to true will automatically delete the
-		/// instance when it is stopped, or packet delegate count reaches 0.
+	VideoCapture* createFileCapture(const std::string& file);
+		// Creates a VideoCapture from given source file.
+		// File captures can be created in any thread.
 
 	virtual AudioCapture* createAudioCapture(int deviceId, 
 		int channels = DEFAULT_AUDIO_CHANNELS, 
 		int sampleRate = DEFAULT_AUDIO_SAMPLE_RATE, 
-		RtAudioFormat format = RTAUDIO_SINT16); //bool destroyOnStop = false
-		/// Creates an AudioCapture from given params.
-		/// The instance must be destroyed after use.
-		/// Setting destroyOnStop to true will automatically delete the
-		/// instance when it is stopped, or packet delegate count reaches 0.
+		RtAudioFormat format = RTAUDIO_SINT16);
+		// Creates an AudioCapture from given options.
+		
+	void loadVideo();
+		// Preloads a VideoCapture instance for each available camera.
+		// This method can be called from the main thread to lazy load 
+		// video device captures. Alternatively you can call createVideoCapture()
+		// This will ensure captures are always available to the
+		// application using createVideoCapture(), from any thread.
+	
+	void unloadVideo();
+		// Destroys all managed VideoCaptureBase instances.
 	
 	IDeviceManager& devices();	
+		// Returns the device manager instance.
+
 	FormatRegistry& formats();	
+		// Returns all registered media formats.
+
+	static MediaFactory& instance();
+		// Returns the default MediaFactory singleton.
+
+	static void shutdown();
+		// Shuts down the MediaFactory and deletes the singleton instance.
 
 protected:
 	MediaFactory();
 	MediaFactory(MediaFactory const&){};
 	MediaFactory& operator=(MediaFactory const&){};
 	~MediaFactory();
-	
-	IDeviceManager*			_devices;
-	FormatRegistry			_formats;	
-	std::map<int, VideoCapture*> _map;
 
-	static MediaFactory*	_instance;
-	static Mutex	_mutex;
+	VideoCaptureBase* getVideoCaptureBase(int deviceId);
+	
+	friend class Singleton<MediaFactory>;
+	friend class VideoCapture;
+	
+	mutable Mutex _mutex;
+
+	IDeviceManager* _devices;
+	FormatRegistry	_formats;	
+	std::map<int, VideoCaptureBase*> _videoBases;
 };
 
 

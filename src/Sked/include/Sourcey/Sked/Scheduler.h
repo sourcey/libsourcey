@@ -27,7 +27,7 @@
 #include "Sourcey/Sked/Task.h"
 #include "Sourcey/Sked/TaskFactory.h"
 
-//#include "Poco/Thread.h"
+//
 //#include "Poco/Event.h"
 #include "Sourcey/Singleton.h"
 

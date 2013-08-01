@@ -25,7 +25,7 @@ namespace scy {
 namespace av {
 
 
-class AVInputReader: public PacketSignal, public abstract::Startable, public Poco::Runnable
+class AVInputReader: public PacketSignal, public abstract::Startable, public abstract::Runnable
 	/// Video capture and file input decoder class with reusable
 	/// code that depends on ffmpeg libavcodec/libavformat.
 {
@@ -78,7 +78,7 @@ public:
 	virtual void start();
 	virtual void stop();
 
-	virtual void run();
+	virtual bool run();
 		
 	virtual Options& options();
 	virtual AVFormatContext* formatCtx() const;
@@ -90,7 +90,7 @@ public:
 
 protected:		
 	mutable Mutex	_mutex;
-	Poco::Thread			_thread;
+	Thread			_thread;
 	bool					_stopping;
 	//std::string				_ifile;	
 	std::string				_error;

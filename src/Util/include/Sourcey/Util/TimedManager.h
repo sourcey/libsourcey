@@ -124,7 +124,7 @@ public:
 		/*
 		for (ClientConnectionList::iterator it = connections.begin(); it != connections.end();) {
 			if ((*it)->deleted()) {
-				traceL("Client", this) << "Deleting Connection: " << (*it) << std::endl;
+				traceL("Client", this) << "Deleting connection: " << (*it) << std::endl;
 				delete *it;
 				it = connections.erase(it);
 			}

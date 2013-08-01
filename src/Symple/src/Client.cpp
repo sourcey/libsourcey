@@ -46,7 +46,7 @@ void Client::connect()
 {
 	log("trace") << "Connecting" << endl;		
 	{
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		assert(!_options.user.empty());
 		//assert(!_options.token.empty());
 		//_serverAddr = _options.serverAddr;
@@ -143,35 +143,35 @@ int Client::sendPresence(const Address& to, bool probe)
 
 Roster& Client::roster() 
 { 
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	return _roster; 
 }
 
 
 PersistenceT& Client::persistence() 
 { 
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	return _persistence; 
 }
 
 
 Client::Options& Client::options() 
 { 
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	return _options; 
 }
 
 
 string Client::ourID() const
 {
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	return _ourID;
 }
 
 
 Peer& Client::ourPeer()
 {	
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	log("trace") << "Getting Our Peer: " << _ourID << endl;
 	if (_ourID.empty())
 		throw Exception("No active peer session is available.");
@@ -192,7 +192,7 @@ int Client::announce()
 
 	json::Value data;
 	{
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		data["token"]	= _options.token;
 		data["group"]	= _options.group;
 		data["user"]	= _options.user;
@@ -286,9 +286,8 @@ void Client::onPacket(sockio::Packet& packet)
 {
 	// Parse Symple messages from SocketIO JSON packets
 	if (packet.type() == sockio::Packet::Message || 
-		packet.type() == sockio::Packet::JSON) {
-			
-		//json::Value data = packet.json();
+		packet.type() == sockio::Packet::JSON) {	
+
 		json::Value data;
 		json::Reader reader;
 		if (reader.parse(packet.message(), data)) {
@@ -326,7 +325,6 @@ void Client::onPacket(sockio::Packet& packet)
 
 	// Other packet types are proxied directly
 	else {		
-		log("trace") << "^^^^^^^^^^^^^^^^ On packet: EMITTING" << endl;
 		PacketSignal::emit(this, packet);
 	}
 }
@@ -357,14 +355,14 @@ void Client::reset()
 /*
 uv::Loop& loop() 
 { 
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	return _runner; 
 }
 
 
 int Client::announceStatus() const
 {
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	return _announceStatus;
 }
 */
@@ -492,7 +490,7 @@ void Client::onError()
 //{
 //	json::Value data;
 //	{
-//		Mutex::ScopedLock lock(_mutex);
+//		ScopedLock lock(_mutex);
 //		data["token"]	= _options.token;
 //		data["user"]	= _options.user;
 //		data["name"]	= _options.name;
@@ -622,42 +620,42 @@ void Client::onError()
 //
 //Roster& Client::roster() 
 //{ 
-//	Mutex::ScopedLock lock(_mutex);
+//	ScopedLock lock(_mutex);
 //	return _roster; 
 //}
 //
 //
 //PersistenceT& Client::persistence() 
 //{ 
-//	Mutex::ScopedLock lock(_mutex);
+//	ScopedLock lock(_mutex);
 //	return _persistence; 
 //}
 //
 //
 //Client::Options& Client::options() 
 //{ 
-//	Mutex::ScopedLock lock(_mutex);
+//	ScopedLock lock(_mutex);
 //	return _options; 
 //}
 //
 //
 //string Client::ourID() const
 //{
-//	Mutex::ScopedLock lock(_mutex);
+//	ScopedLock lock(_mutex);
 //	return _ourID;
 //}
 //
 //
 //int Client::announceStatus() const
 //{
-//	Mutex::ScopedLock lock(_mutex);
+//	ScopedLock lock(_mutex);
 //	return _announceStatus;
 //}
 //
 //
 //Peer& Client::ourPeer() //bool whiny
 //{	
-//	Mutex::ScopedLock lock(_mutex);
+//	ScopedLock lock(_mutex);
 //	traceL() << "[Client:" << this << "] Getting Our Peer: " << _ourID << endl;
 //	if (_ourID.empty())
 //		throw Exception("No active peer session is available.");

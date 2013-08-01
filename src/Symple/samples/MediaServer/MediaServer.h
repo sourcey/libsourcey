@@ -4,7 +4,7 @@
 #include "Sourcey/Logger.h"
 #include "Sourcey/Application.h"
 #include "Sourcey/Util.h"
-#include "Sourcey/SyncPacketStream.h"
+#include "Sourcey/PacketStream.h"
 #include "Sourcey/Media/AVEncoder.h"
 #include "Sourcey/Media/MediaFactory.h"
 #include "Sourcey/HTTP/Server.h"
@@ -54,9 +54,9 @@ struct StreamingOptions: public av::RecordingOptions
 	av::VideoCapture* videoCapture; // Video capture instance
 	av::AudioCapture* audioCapture; // Audio capture instance
 
-	StreamingOptions(MediaServer* server = NULL, 
-		av::VideoCapture* videoCapture = NULL,
-		av::AudioCapture* audioCapture = NULL);
+	StreamingOptions(MediaServer* server = nil, 
+		av::VideoCapture* videoCapture = nil,
+		av::AudioCapture* audioCapture = nil);
 
 	virtual ~StreamingOptions();
 };
@@ -71,7 +71,7 @@ public:
 	MediaServer(UInt16 port);
 	virtual ~MediaServer();
 
-	static void setupPacketStream(PacketStream& stream, const StreamingOptions& options, bool freeAudio = true, bool attachPacketizers = false);
+	static void setupPacketStream(PacketStream& stream, const StreamingOptions& options, bool freeCaptures = true, bool attachPacketizers = false);
 };
 
 

@@ -39,7 +39,7 @@ namespace scy {
 	
 
 	/*
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		//_packetNumber = 0; 
 
 	Writable() : _packetNumber(0) {};
@@ -80,7 +80,7 @@ namespace scy {
 	virtual void emit(void* sender, IPacket& packet) 
 	{
 		{
-			Mutex::ScopedLock lock(_mutex);
+			ScopedLock lock(_mutex);
 			_packetNumber++;
 		}
 		PacketSignal::emit(sender, packet); 
@@ -88,7 +88,7 @@ namespace scy {
 
 	virtual UInt32 packetNumber() const
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		return _packetNumber;
 	}
 

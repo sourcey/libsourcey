@@ -37,44 +37,74 @@ namespace net {
 class Socket;
 class SocketPacket;
 class SocketAdapter;
-class SocketAdapter;
 
 
-class SocketBase: public CountedObject //<ManagedObject>
-	/// SocketBase is the abstract base interface from      
-	/// which all socket contexts derive.
+class SocketBase: public CountedObject
+	/// SocketBase is the base socket 
+	/// implementation which all sockets derive.
 {
 public:
 	SocketBase();
 	
 	virtual void connect(const Address& address) = 0;
+		/// Connects to the given peer IP address.
+		///
+		/// Throws an exception if the address is malformed.
+		/// Connection errors can be handled via the Error signal.
+
 	virtual void connect(const std::string& host, UInt16 port);
+		/// Resolves and connects to the given host address.
+		///
+		/// Throws an Exception if the host is malformed.
+		/// Since the DNS callback is asynchronous implementations need 
+		/// to listen for the Error signal for handling connection errors.		
+
 	virtual bool shutdown() { throw Exception("Not implemented by protocol"); };
+		/// Sends the shutdown packet which should result is socket 
+		/// closure via callback.
+
 	virtual void close() = 0;
+		/// Closes the underlying socket.
+
+	virtual void reset() { throw Exception("Not implemented by protocol"); };
+		/// Resets the closed socket for reuse.
 
 	virtual void bind(const Address& address, unsigned flags = 0) = 0;
+		/// Bind a local address to the socket.
+		/// The address may be IPv4 or IPv6 (if supported).
+		///
+		/// Throws an Exception on error.
+
 	virtual void listen(int backlog = 64) { };
+		/// Listens the socket on the given address.
+		///
+		/// Throws an Exception on error.
 		
 	virtual int send(const char* data, int len, int flags = 0) = 0;
+		/// Sends the given data buffer to the connected peer.
+
 	virtual int send(const char* data, int len, const Address& peerAddress, int flags = 0) = 0;
+		/// Sends the given data buffer to the given peer address.
+		///
+		/// For TCP sockets the given peer address must match the
+		/// connected peer address.
 	
-	virtual Address address() const throw() = 0;
+	virtual Address address() const = 0;
 		/// The locally bound address.
 		///
+		/// This function will not throw.
 		/// A Wildcard 0.0.0.0:0 address is returned if 
 		/// the socket is closed or invalid.
-		/// This function will not throw.
 
-	virtual Address peerAddress() const throw() = 0;
+	virtual Address peerAddress() const = 0;
 		/// The connected peer address.
 		///
+		/// This function will not throw.
 		/// A Wildcard 0.0.0.0:0 address is returned if 
 		/// the socket is closed or invalid.
-		/// This function will not throw.
 
 	virtual net::TransportType transport() const = 0;
 		/// The transport protocol: TCP, UDP or SSLTCP.
-		/// See TransportType definition.
 		
 	virtual void setError(const Error& err) = 0;
 		/// Sets the socket error.
@@ -90,6 +120,7 @@ public:
 	
 	void* opaque;
 		/// Optional client data pointer.
+		///
 		/// The pointer is not initialized or managed
 		/// by the socket base.
 	
@@ -107,7 +138,7 @@ protected:
 	virtual ~SocketBase();
 	
 	std::vector<Socket*> _observers;
-	bool _insideCallback;
+	volatile bool _insideCallback;	
 	
 	friend class Socket;
 	friend class SocketAdapter;
@@ -115,48 +146,14 @@ protected:
 };
 
 
-	
-	//void onHostResolved(void*, const net::DNSResult& result);
-	//bool connected() const;
-		/// Returns true when the socket is connected 
-		/// to the peer.
-	//bool _connected;
-
-
 typedef std::vector<SocketBase*> SocketBaseList;
 
 
-// -------------------------------------------------------------------
 //
-struct PacketInfo: public IPacketInfo
-	/// An abstract interface for packet sources to
-	/// provide extra information about packets.
-{ 
-	Socket& socket;
-		/// The source socket
-
-	Address peerAddress;	
-		/// The peerAddress is for UDP compatibility.
-		/// For TCP it will match the connected address.
-
-	PacketInfo(Socket& socket, const Address& peerAddress) :
-		socket(socket), 
-		peerAddress(peerAddress) {}		
-
-	PacketInfo(const PacketInfo& r) : 
-		socket(r.socket), 
-		peerAddress(r.peerAddress) {}
-
-	virtual ~PacketInfo() {}; 
-	
-	virtual IPacketInfo* clone() const {
-		return new PacketInfo(*this);
-	}
-};
-
-
-// -------------------------------------------------------------------
+// Socket
 //
+
+
 class Socket
 	/// Socket is a wrapper class for accessing the underlying 
 	/// reference counted SocketBase instance.
@@ -168,11 +165,11 @@ class Socket
 	/// be extended as necessary for different protocols.
 {
 public:
-	Socket(const Socket& socket); //, SocketAdapter* adapter = 0
+	Socket(const Socket& socket);
 		/// Attaches the SocketBase from the given socket and
 		/// increments the SocketBase reference count.
 		
-	Socket(SocketBase* base, bool shared); //, SocketAdapter* adapter = 0
+	Socket(SocketBase* base, bool shared);
 		/// Creates the Socket from the given SocketBase and attaches
 		/// the given or default SocketAdapter.
 		///
@@ -269,17 +266,9 @@ public:
 	virtual void onSocketClose();
 		
 	int isNull() const;
-	
-	/*
-	int priority;
-		/// A higher priority gives the current observer
-		/// precedence in the socket callback chain.
-
-	static bool compareProiroty(const SocketAdapter* l, const SocketAdapter* r);
-	*/
 
 protected:		
-	Socket(); //SocketAdapter* adapter = 0
+	Socket();
 		/// Creates a NULL socket.
 
 	friend class SocketBase;
@@ -291,11 +280,18 @@ protected:
 
 // -------------------------------------------------------------------
 //
-class SocketAdapter//: public SocketAdapter
+class SocketAdapter
+	/// SocketAdapter is an proxy layer which is attached to a
+	/// Socket instance to handle socket events in various ways.
+	/// 
+	/// This class also be extended to implement custom processing 
+	/// for received socket data before it is dispatched to the application.
+	/// See the PacketSocketAdapter and Transaction classes for ideas.
 {
 public:
 	SocketAdapter(Socket* socket = NULL);
-		/// Creates the SocketAdapter
+		/// Creates the SocketAdapter.
+		///
 		/// The Socket instance can be NULL, but it must be set 
 		/// before any callbacks come back.
 	
@@ -315,32 +311,68 @@ public:
 };
 
 
-// -------------------------------------------------------------------
+
 //
+// Packet Info
+//
+
+
+struct PacketInfo: public IPacketInfo
+	/// Provide information about packets emitted from a socket.
+	/// See SocketPacket.
+{ 
+	Socket& socket;
+		/// The source socket
+
+	Address peerAddress;	
+		/// The peerAddress is for UDP compatibility.
+		/// For TCP it will match the connected address.
+
+	PacketInfo(Socket& socket, const Address& peerAddress) :
+		socket(socket), 
+		peerAddress(peerAddress) {}		
+
+	PacketInfo(const PacketInfo& r) : 
+		socket(r.socket), 
+		peerAddress(r.peerAddress) {}
+
+	virtual ~PacketInfo() {}; 
+	
+	virtual IPacketInfo* clone() const {
+		return new PacketInfo(*this);
+	}
+};
+
+
+//
+// Socket Packet
+//
+
+
 class SocketPacket: public RawPacket 
-	/// SocketPacket is the  default packet type emitted by sockets.
+	/// SocketPacket is the default packet type emitted by sockets.
 	/// SocketPacket provides peer address information and a buffer
 	/// reference for nocopy binary operations.
 	///
-	/// The referenced packet buffer and data are only guaranteed 
-	/// for the duration of the receive callback.
+	/// The referenced packet buffer lifetime is only guaranteed 
+	/// for the duration of the receiver callback.
 {	
 public:
 	Buffer& buffer;
-		/// The received data
+		/// The received data buffer
 
 	PacketInfo* info;
 		/// PacketInfo pointer
 
 	SocketPacket(Socket& socket, Buffer& buffer, const Address& peerAddress) : 
-		RawPacket(nullptr, new PacketInfo(socket, peerAddress), nullptr, buffer.data(), buffer.available()),
+		RawPacket(&socket, buffer.data(), buffer.available(), 0, new PacketInfo(socket, peerAddress)),
 		buffer(buffer)
 	{
 		info = (PacketInfo*)RawPacket::info;
 	}
 
 	SocketPacket(const SocketPacket& that) : 
-		RawPacket(that), info(that.info), buffer(that.buffer)
+		RawPacket(that), buffer(that.buffer), info(that.info)
 	{
 	}
 	
@@ -355,7 +387,6 @@ public:
 
 	virtual IPacket* clone() const 
 	{
-		// make babies!
 		return new SocketPacket(*this);
 	}	
 
@@ -367,7 +398,7 @@ public:
 
 	virtual void write(Buffer& buf) const 
 	{	
-		buf.put(_data, _size); 
+		buf.put(array(), size()); 
 	}
 	
 	virtual const char* className() const 
@@ -384,6 +415,14 @@ public:
 
 
 
+	
+	/*
+	int priority;
+		/// A higher priority gives the current observer
+		/// precedence in the socket callback chain.
+
+	static bool compareProiroty(const SocketAdapter* l, const SocketAdapter* r);
+	*/
 
 /*
 	//void duplicate();

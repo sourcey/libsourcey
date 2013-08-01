@@ -20,55 +20,32 @@
 #include "Sourcey/Media/MediaFactory.h"
 #include "Sourcey/Logger.h"
 
-#include "RtAudio.h"
 
 using namespace std;
-//using namespace Poco;
 using namespace scy;
 
 
 namespace scy {
 namespace av {
 
+	
+static Singleton<MediaFactory> singleton;
+	
 
-// ---------------------------------------------------------------------
-// Media Factory
-//
-MediaFactory*	MediaFactory::_instance;
-Mutex		MediaFactory::_mutex;
-
-
-MediaFactory* MediaFactory::instance() 
+MediaFactory& MediaFactory::instance() 
 {
-	if (_instance == NULL) 
-	{
-		Mutex::ScopedLock lock(_mutex);
-		if (_instance == NULL) {
-			_instance = new MediaFactory;
-		}
-	}
-	return _instance;
+	return *singleton.get();
 }
 
-
-void MediaFactory::initialize() 
+	
+void MediaFactory::shutdown()
 {
-	instance();
-}
-
-
-void MediaFactory::uninitialize() 
-{
-	if (_instance) {
-		delete _instance;
-		_instance = NULL;
-	}
+	singleton.destroy();
 }
 
 
 MediaFactory::MediaFactory()
 {	
-	//cout << "MediaFactory::MediaFactory" << endl;	
 	_devices = DeviceManagerFactory::create();
 	_devices->initialize();
 }
@@ -76,7 +53,6 @@ MediaFactory::MediaFactory()
 
 MediaFactory::~MediaFactory()
 {	
-	//cout << "MediaFactory::~MediaFactory" << endl;	
 	if (_devices) {
 		_devices->uninitialize();
 		delete _devices;
@@ -86,43 +62,42 @@ MediaFactory::~MediaFactory()
 
 IDeviceManager& MediaFactory::devices() 
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return *_devices; 
 }
 
 
 FormatRegistry& MediaFactory::formats() 
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _formats; 
 }
 
 
-void MediaFactory::loadVideo(unsigned flags)
+void MediaFactory::loadVideo()
 {
-	traceL("MediaFactory") << "Preloading Video Captures" << endl;
+	traceL("MediaFactory") << "Preloading video captures" << endl;
 	
 	// Depreciated code used to preload captures on application load.
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	// Initialize a VideoCapture object for each available device.
 	// The video capture object will begin capturing frames when it's
 	// reference count becomes positive.
-	vector<Device> devs;
+	std::vector<Device> devs;
 	_devices->getVideoCaptureDevices(devs);
 	for (size_t i = 0; i < devs.size(); ++i) {
 		try 
 		{
-			traceL("MediaFactory") << "Loading Video: " << devs[0].id << endl;
+			traceL("MediaFactory") << "Loading video: " << devs[0].id << endl;
 
 			// TODO: Receive callback on capture error or closure.
-			VideoCapture* capture = new VideoCapture(devs[0].id, flags);
-			_map[devs[0].id] = capture;
+			VideoCaptureBase* base = new VideoCaptureBase(devs[0].id); 
+			_videoBases[devs[0].id] = base; 
 		} 
 		catch (...) 
 		{
-			errorL("MediaFactory") << "Cannot load video capture." << endl;
-			_map[devs[0].id] = NULL;
+			errorL("MediaFactory") << "Cannot load video capture" << endl;
 		}
 	}
 }
@@ -130,41 +105,74 @@ void MediaFactory::loadVideo(unsigned flags)
 
 void MediaFactory::unloadVideo()
 {
-	for (VideoCaptureMap::iterator it = _map.begin(); it != _map.end(); ++it) 
-		delete it->second;
-	_map.clear();
+	for (VideoCaptureBaseMap::iterator it = _videoBases.begin(); it != _videoBases.end(); ++it) {
+		assert(it->second->refCount() == 1);
+		it->second->release();
+	}
+	_videoBases.clear();
 }
 
 
-VideoCapture* MediaFactory::getVideoCapture(int deviceId, unsigned flags) 
+VideoCaptureBase* MediaFactory::getVideoCaptureBase(int deviceId) 
 {
-	traceL("MediaFactory") << "Get Video Capture: " << deviceId << endl;
-	Mutex::ScopedLock lock(_mutex);
-	VideoCaptureMap::iterator it = _map.find(deviceId);
-	if (it != _map.end())
-		return it->second;
+	traceL("MediaFactory") << "Get video capture base: " << deviceId << endl;
+	VideoCaptureBase* base;
+	VideoCaptureBaseMap::iterator it = _videoBases.find(deviceId);
+	if (it != _videoBases.end())
+		base = it->second;
+	else {	
+		// TODO: unique_ptr for exception safe instantiation
+		base = new VideoCaptureBase(deviceId);
+		_videoBases[deviceId] = base;
+	}
+	return base;
+}
+
+
+VideoCapture* MediaFactory::createVideoCapture(int deviceId) //, unsigned flags
+{
+	traceL("MediaFactory") << "Get video capture: " << deviceId << endl;
+	return new VideoCapture(getVideoCaptureBase(deviceId));
+		
+	/*
+	ScopedLock lock(_mutex);
+	VideoCaptureBase* base;
+	VideoCaptureBaseMap::iterator it = _videoBases.find(deviceId);
+	if (it != _videoBases.end())
+		base = it->second;
+	else {	
+		// TODO: unique_ptr for exception safe instantiation
+		base = new VideoCaptureBase(deviceId, flags);
+		_videoBases[deviceId] = base;
+	}
+	
 
 	// Initialize a VideoCapture if none exists.
 	// This may be error prone if not called from the main
 	// thread, which is why loadVideo() should be called.
-	_map[deviceId] = new VideoCapture(deviceId, flags);
-	return _map[deviceId];
+	//_videoBases[deviceId] = new VideoCapture(deviceId, flags);
+	//return _videoBases[deviceId];
+	*/
 }
 
 
-VideoCapture* MediaFactory::createFileCapture(const string& file, unsigned flags) 
+VideoCapture* MediaFactory::createFileCapture(const string& file)
 {
-	traceL("MediaFactory") << "Get Video Capture: " << file << endl;
-	VideoCapture* capture = new VideoCapture(file, flags);
+	traceL("MediaFactory") << "Get video capture: " << file << endl;
+	
+	// TODO: unique_ptr for exception safe instantiation
+	VideoCapture* capture = new VideoCapture(file);
 	return capture;
 }
 
 
-AudioCapture* MediaFactory::createAudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format) //, bool destroyOnStop
+AudioCapture* MediaFactory::createAudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format)
 {
-	traceL("MediaFactory") << "Create Audio Capture: " << deviceId << endl;
+	traceL("MediaFactory") << "Create audio capture: " << deviceId << endl;
 	if (deviceId < 0)
 		throw Exception("Invalid audio device ID");
+
+	// TODO: unique_ptr for exception safe instantiation
 	AudioCapture* capture = new AudioCapture(deviceId, channels, sampleRate, format);
 	return capture;
 }

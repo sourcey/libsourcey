@@ -1,8 +1,8 @@
 #include "Sourcey/Application.h"
-#include "Sourcey/SyncPacketStream.h"
+#include "Sourcey/PacketStream.h"
 #include "Sourcey/Media/VideoCapture.h"
 #include "Sourcey/Media/AVInputReader.h"
-#include "Sourcey/Media/AVEncoder.h"
+#include "Sourcey/Media/AVPacketEncoder.h"
 #include "Sourcey/Net/Network.h"
 #include "Sourcey/HTTP/Server.h"
 
@@ -37,7 +37,7 @@ namespace scy {
 class MPEGResponder: public http::ServerResponder
 {	
 	av::FPSCounter fpsCounter;
-	SyncPacketStream* stream;
+	PacketStream* stream;
 
 public:
 	MPEGResponder(http::ServerConnection& conn) : 
@@ -46,10 +46,10 @@ public:
 		debugL("MPEGResponder") << "Creating" << endl;
 
 		// We will be sending our own headers
-		conn.shouldSendHeaders(false);
+		conn.shouldSendHeader(false);
 
 		// Attach the video capture
-		stream->attach(gVideoCapture, false);
+		stream->attachSource(gVideoCapture, false);
 		
 		// Setup the encoder options
 		av::RecordingOptions options;	
@@ -58,23 +58,25 @@ public:
 		av::setVideoCaptureInputFormat(gVideoCapture, options.iformat);
 
 		// Create and attach the encoder
-		av::AVEncoder* encoder = new av::AVEncoder(options);
+		av::AVPacketEncoder* encoder = new av::AVPacketEncoder(options);
 		encoder->initialize();
 		stream->attach(encoder, 5, true);		
 				
 		// Create and attach the HTTP multipart packetizer
-		http::MultipartPacketizer* packetizer = new http::MultipartPacketizer("image/jpeg", false);
-		stream->attach(packetizer, 10, true);	
+		//http::MultipartPacketizer* packetizer = new http::MultipartPacketizer("image/jpeg", false);
+		//stream->attach(packetizer, 10, true);	
+		assert(0);
 			
 		// Start the stream
-		stream->attach(packetDelegate(this, &MPEGResponder::onVideoEncoded));
+		stream->Emitter += packetDelegate(this, &MPEGResponder::onVideoEncoded);
 		stream->start();
 	}
 
 	~MPEGResponder()
 	{
 		debugL("MPEGResponder") << "Destroying" << endl;
-		stream->destroy();
+		//stream->destroy();
+		delete stream;
 	}
 
 	void onPayload(const Buffer& body)
@@ -88,7 +90,7 @@ public:
 	{
 		debugL("MPEGResponder") << "On close" << endl;
 			
-		stream->detach(packetDelegate(this, &MPEGResponder::onVideoEncoded));
+		stream->Emitter += packetDelegate(this, &MPEGResponder::onVideoEncoded);
 		stream->stop();
 	}
 
@@ -98,7 +100,7 @@ public:
 			<< packet.size() << ": " << fpsCounter.fps << endl;
 
 		try {		
-			connection().sendRaw(packet.data(), packet.size());
+			connection().send(packet.data(), packet.size());
 			fpsCounter.tick();		
 		}
 		catch (Exception& exc) {
@@ -132,7 +134,7 @@ static void onShutdownSignal(void* opaque)
 
 int main(int argc, char** argv)
 {
-	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
+	Logger::instance().add(new ConsoleChannel("debug", LTrace));
 
 #if USE_AVDEVICE_CAPTURE
 	gVideoCapture = new av::AVInputReader();
@@ -153,6 +155,6 @@ int main(int argc, char** argv)
 	}
 	
 	delete gVideoCapture;
-	Logger::uninitialize();
+	Logger::shutdown();
 	return 0;
 }

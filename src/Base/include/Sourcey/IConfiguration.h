@@ -29,133 +29,133 @@ namespace scy {
 
 
 class IConfiguration
-	/// IConfiguration is an abstract base class for managing 
-	/// different kinds of configuration back ends such as JSON, XML,
-	/// or database storage.
-	///
-	/// All public methods are synchronized making this class is 
-	/// safe for multithreaded use.
-	///
-	/// Subclasses must override the getRaw() and setRaw() and methods.
+	// IConfiguration is an abstract base class for managing 
+	// different kinds of configuration back ends such as JSON, XML,
+	// or database storage.
+	//
+	// All public methods are synchronized making this class is 
+	// safe for multithreaded use.
+	//
+	// Subclasses must override the getRaw() and setRaw() and methods.
 {
 public:
 	IConfiguration();	
-		/// Creates the IConfiguration.
+		// Creates the IConfiguration.
 
 	virtual ~IConfiguration();
-		/// Destroys the IConfiguration.
+		// Destroys the IConfiguration.
 
 	bool exists(const std::string& key) const;
-		/// Returns true if the property with the given key exists.
+		// Returns true if the property with the given key exists.
 		
 	std::string getString(const std::string& key) const;
-		/// Returns the string value of the property with the given name.
-		/// Throws a NotFoundException if the key does not exist.
-		/// If the value contains references to other properties (${<property>}), these
-		/// are expanded.
+		// Returns the string value of the property with the given name.
+		// Throws a NotFoundException if the key does not exist.
+		// If the value contains references to other properties (${<property>}), these
+		// are expanded.
 		
 	std::string getString(const std::string& key, const std::string& defaultValue) const;
-		/// If a property with the given key exists, returns the property's string value,
-		/// otherwise returns the given default value.
-		/// If the value contains references to other properties (${<property>}), these
-		/// are expanded.
+		// If a property with the given key exists, returns the property's string value,
+		// otherwise returns the given default value.
+		// If the value contains references to other properties (${<property>}), these
+		// are expanded.
 
 	std::string getRawString(const std::string& key) const;
-		/// Returns the raw string value of the property with the given name.
-		/// Throws a NotFoundException if the key does not exist.
-		/// References to other properties are not expanded.
+		// Returns the raw string value of the property with the given name.
+		// Throws a NotFoundException if the key does not exist.
+		// References to other properties are not expanded.
 		
 	std::string getRawString(const std::string& key, const std::string& defaultValue) const;
-		/// If a property with the given key exists, returns the property's raw string value,
-		/// otherwise returns the given default value.
-		/// References to other properties are not expanded.
+		// If a property with the given key exists, returns the property's raw string value,
+		// otherwise returns the given default value.
+		// References to other properties are not expanded.
 		
 	int getInt(const std::string& key) const;
-		/// Returns the int value of the property with the given name.
-		/// Throws a NotFoundException if the key does not exist.
-		/// Throws a SyntaxException if the property can not be converted
-		/// to an int.
-		/// Numbers starting with 0x are treated as hexadecimal.
-		/// If the value contains references to other properties (${<property>}), these
-		/// are expanded.
+		// Returns the int value of the property with the given name.
+		// Throws a NotFoundException if the key does not exist.
+		// Throws a SyntaxException if the property can not be converted
+		// to an int.
+		// Numbers starting with 0x are treated as hexadecimal.
+		// If the value contains references to other properties (${<property>}), these
+		// are expanded.
 		
 	int getInt(const std::string& key, int defaultValue) const;
-		/// If a property with the given key exists, returns the property's int value,
-		/// otherwise returns the given default value.
-		/// Throws a SyntaxException if the property can not be converted
-		/// to an int.
-		/// Numbers starting with 0x are treated as hexadecimal.
-		/// If the value contains references to other properties (${<property>}), these
-		/// are expanded.
+		// If a property with the given key exists, returns the property's int value,
+		// otherwise returns the given default value.
+		// Throws a SyntaxException if the property can not be converted
+		// to an int.
+		// Numbers starting with 0x are treated as hexadecimal.
+		// If the value contains references to other properties (${<property>}), these
+		// are expanded.
 
 	double getDouble(const std::string& key) const;
-		/// Returns the double value of the property with the given name.
-		/// Throws a NotFoundException if the key does not exist.
-		/// Throws a SyntaxException if the property can not be converted
-		/// to a double.
-		/// If the value contains references to other properties (${<property>}), these
-		/// are expanded.
+		// Returns the double value of the property with the given name.
+		// Throws a NotFoundException if the key does not exist.
+		// Throws a SyntaxException if the property can not be converted
+		// to a double.
+		// If the value contains references to other properties (${<property>}), these
+		// are expanded.
 		
 	double getDouble(const std::string& key, double defaultValue) const;
-		/// If a property with the given key exists, returns the property's double value,
-		/// otherwise returns the given default value.
-		/// Throws a SyntaxException if the property can not be converted
-		/// to an double.
-		/// If the value contains references to other properties (${<property>}), these
-		/// are expanded.
+		// If a property with the given key exists, returns the property's double value,
+		// otherwise returns the given default value.
+		// Throws a SyntaxException if the property can not be converted
+		// to an double.
+		// If the value contains references to other properties (${<property>}), these
+		// are expanded.
 
 	bool getBool(const std::string& key) const;
-		/// Returns the double value of the property with the given name.
-		/// Throws a NotFoundException if the key does not exist.
-		/// Throws a SyntaxException if the property can not be converted
-		/// to a double.
-		/// If the value contains references to other properties (${<property>}), these
-		/// are expanded.
+		// Returns the double value of the property with the given name.
+		// Throws a NotFoundException if the key does not exist.
+		// Throws a SyntaxException if the property can not be converted
+		// to a double.
+		// If the value contains references to other properties (${<property>}), these
+		// are expanded.
 		
 	bool getBool(const std::string& key, bool defaultValue) const;
-		/// If a property with the given key exists, returns the property's bool value,
-		/// otherwise returns the given default value.
-		/// Throws a SyntaxException if the property can not be converted
-		/// to a boolean.
-		/// The following string values can be converted into a boolean:
-		///   - numerical values: non zero becomes true, zero becomes false
-		///   - strings: true, yes, on become true, false, no, off become false
-		/// Case does not matter.
-		/// If the value contains references to other properties (${<property>}), these
-		/// are expanded.
+		// If a property with the given key exists, returns the property's bool value,
+		// otherwise returns the given default value.
+		// Throws a SyntaxException if the property can not be converted
+		// to a boolean.
+		// The following string values can be converted into a boolean:
+		//   - numerical values: non zero becomes true, zero becomes false
+		//   - strings: true, yes, on become true, false, no, off become false
+		// Case does not matter.
+		// If the value contains references to other properties (${<property>}), these
+		// are expanded.
 		
 	void setString(const std::string& key, const std::string& value);
-		/// Sets the property with the given key to the given value.
-		/// An already existing value for the key is overwritten.
+		// Sets the property with the given key to the given value.
+		// An already existing value for the key is overwritten.
 		
 	void setInt(const std::string& key, int value);
-		/// Sets the property with the given key to the given value.
-		/// An already existing value for the key is overwritten.
+		// Sets the property with the given key to the given value.
+		// An already existing value for the key is overwritten.
 
 	void setDouble(const std::string& key, double value);
-		/// Sets the property with the given key to the given value.
-		/// An already existing value for the key is overwritten.
+		// Sets the property with the given key to the given value.
+		// An already existing value for the key is overwritten.
 
 	void setBool(const std::string& key, bool value);
-		/// Sets the property with the given key to the given value.
-		/// An already existing value for the key is overwritten.
+		// Sets the property with the given key to the given value.
+		// An already existing value for the key is overwritten.
 
 	Signal2<const std::string&, const std::string&> PropertyChanged;
-		/// The Key and Value of the changed configuration property.
+		// The Key and Value of the changed configuration property.
 
 protected:
 	virtual bool getRaw(const std::string& key, std::string& value) const = 0;
-		/// If the property with the given key exists, stores the property's value
-		/// in value and returns true. Otherwise, returns false.
-		///
-		/// Must be overridden by subclasses.
+		// If the property with the given key exists, stores the property's value
+		// in value and returns true. Otherwise, returns false.
+		//
+		// Must be overridden by subclasses.
 
 	virtual void setRaw(const std::string& key, const std::string& value) = 0;
-		/// Sets the property with the given key to the given value.
-		/// An already existing value for the key is overwritten.
-		///
-		/// The implementation is responsible for emitting the 
-		/// PropertyChanged signal.
+		// Sets the property with the given key to the given value.
+		// An already existing value for the key is overwritten.
+		//
+		// The implementation is responsible for emitting the 
+		// PropertyChanged signal.
 
 	static int parseInt(const std::string& value);
 	static bool parseBool(const std::string& value);

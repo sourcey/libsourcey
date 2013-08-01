@@ -21,6 +21,7 @@
 #define SOURCEY_Net_Network_H
 
 
+#include "Sourcey/Types.h"
 #include "Sourcey/UV/UVPP.h"
 
 #include "Sourcey/Net/Address.h"
@@ -65,29 +66,13 @@ inline void getNetworkInterfaces(std::vector<net::Address>& hosts)
 // net::resolveDNS("google.com", 80, onDNSResult);
 
 
-	
-
-
 struct DNSResult
 {
-	enum Status {
-		None,
-		Resolving,
-		Success,
-		Failed
-	} status;
-
-	bool resolving() const { return status == Resolving; }
-	bool success() const { return status == Success; }
-	bool failed() const { return status == Failed; }
-	bool complete() const { return status == Success 
-		                        || status == Failed; }
-
 	std::string host;
-		/// The host to reolve
+		/// The host to resolve
 
 	UInt16 port;
-		/// The host port to reolve
+		/// The host port to resolve
 
 	net::Address addr;
 		/// The resolved address
@@ -105,8 +90,21 @@ struct DNSResult
 	void* opaque;
 		/// Client data pointer
 
+	enum Status {
+		None,
+		Resolving,
+		Success,
+		Failed
+	} status;
+
+	bool resolving() const { return status == Resolving; }
+	bool success() const { return status == Success; }
+	bool failed() const { return status == Failed; }
+	bool complete() const { return status == Success 
+		                        || status == Failed; }
+
 	DNSResult() : status(None), callback(0), 
-		info(0), opaque(0), hints(nullptr)
+		info(0), opaque(0), hints(nil)
 	{
 	}
 };

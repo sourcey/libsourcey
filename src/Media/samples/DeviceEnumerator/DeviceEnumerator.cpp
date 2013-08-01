@@ -28,7 +28,7 @@ CMemLeakDetect memLeakDetect;
 
 int main(int argc, char** argv)
 {
-	scy::Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
+	scy::Logger::instance().add(new ConsoleChannel("debug", LTrace));
 
 	devices = DeviceManagerFactory::create();
 	devices->initialize();
@@ -48,6 +48,7 @@ int main(int argc, char** argv)
 			reinterpret_cast<DeviceManager*>(devices)->print(cout);
 		}
 	}
-
+	
+	scy::Logger::shutdown();
 	return 0;
 }

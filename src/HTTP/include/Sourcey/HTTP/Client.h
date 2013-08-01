@@ -33,26 +33,24 @@ namespace scy {
 namespace http {
 
 	
-struct TransferProgress 
+class TransferSignal : public Signal<const double&>
 {
-	enum Type
-	{
-		None,
-		Running,
-		Complete,
-		Cancelled,	/// cancelled as result of user intervention
-		Failed,
-	};
-	
-	Type state;
-	std::streamsize current;
-	std::streamsize total;
+public:
+	UInt64 current;
+	UInt64 total;
+	void* sender;
 
-	TransferProgress() :	
-		current(0), total(0), state(None) {}
+	TransferSignal() :	
+		sender(nil), current(0), total(0) {}
 
 	double progress() const {
 		return (current / (total * 1.0)) * 100;
+	}
+
+	void update(int nread) {
+		current += nread;
+		assert(current <= total);
+		emit(sender ? sender : this, progress());
 	}
 };
 
@@ -63,37 +61,50 @@ class ClientConnection: public Connection
 public:
     ClientConnection(const URL& url,
 		const net::Socket& socket = net::TCPSocket());
-		/// Create a standalone connection with the given host.
+		// Create a standalone connection with the given host.
 	
     ClientConnection(Client* client, const URL& url, 
 		const net::Socket& socket = net::TCPSocket());
-		/// Create a managed connection with the given host.
+		// Create a managed connection with the given host.
 
 	virtual void send();
-		/// Sends the internal HTTP request.
-		///
-		/// Calls connect() internally if the socket is not
-		/// already connecting or connected. The actual request 
-		/// will be sent when the socket is connected.
+		// Sends the internal HTTP request.
+		//
+		// Calls connect() internally if the socket is not
+		// already connecting or connected. The actual request 
+		// will be sent when the socket is connected.
 				
 	virtual void send(http::Request& req);
-		/// Sends the given HTTP request.
-		/// The given request will overwrite the internal HTTP
-		/// request object.
-		///
-		/// Calls connect() internally if the socket is not
-		/// already connecting or connected. The actual request 
-		/// will be sent when the socket is connected.
+		// Sends the given HTTP request.
+		// The given request will overwrite the internal HTTP
+		// request object.
+		//
+		// Calls connect() internally if the socket is not
+		// already connecting or connected. The actual request 
+		// will be sent when the socket is connected.
 	
 	virtual void close();
-		/// Forcefully closes the HTTP connection.
+		// Forcefully closes the HTTP connection.
 		
-	virtual void setRecvStream(std::ostream* os);
-		/// Sets the receiver stream for writing server response data.
-		///
-		/// This given stream pointer may be a ofstream instance for 
-		/// writing to a file. The pointer is managed internally,
-		/// and will be deleted when the connection is closed.		
+	virtual void setReadStream(std::ostream* os);
+		// Sets the receiver stream for writing server response data.
+		//
+		// This given stream pointer may be a ofstream instance for 
+		// writing to a file. The pointer is managed internally,
+		// and will be deleted when the connection is closed.		
+		
+	template<class T>
+	T* readStream()
+		// Returns the cast read stream pointer or nil.
+	{
+		return dynamic_cast<T*>(_readStream);
+	}
+		
+	void* opaque;
+		// Optional client data pointer.
+		//
+		// The pointer is not initialized or managed
+		// by the connection.
 	
 	//
 	/// Internal callbacks
@@ -105,20 +116,29 @@ public:
 	//
 	/// Status signals
 	NullSignal Connect;
-	Signal<Response&> Headers;
-	Signal<const Response&> Complete;
-		/// May be success or error response
+		// Fires when the client socket is connected
 
-	Signal<const TransferProgress&> OutgoingProgress;
-	Signal<const TransferProgress&> IncomingProgress;
+	Signal<Response&> Headers;
+		// Fires when the response HTTP header has been received
+
+	Signal<const Response&> Complete;
+		// Fires on success or error response
+	
+	TransferSignal IncomingProgress;
+		// Notifies on download progress
+
+	TransferSignal OutgoingProgress;
+		// Notifies on upload progress
 
 protected:
     virtual ~ClientConnection();
 					
 	http::Client* client();
 
-	http::Message* incomingHeaders();	
-	http::Message* outgoingHeaders();
+	http::Message* incomingHeader();	
+	http::Message* outgoingHeader();
+		
+	//virtual void setError(const Error& err);
 	
 	void onHostResolved(void*, const net::DNSResult& result);
 	void onSocketConnect(void*);
@@ -127,9 +147,9 @@ protected:
 protected:	
 	http::Client* _client;
 	URL _url;
-	std::ostream* _recvStream;
-	TransferProgress _incomingProgress;
-	TransferProgress _outgoingProgress;
+	std::ostream* _readStream;
+	TransferSignal _incomingProgress;
+	TransferSignal _outgoingProgress;
 };
 
 
@@ -331,7 +351,7 @@ struct OutputStream//: public std::ostream
 	{
 		for (ClientConnectionList::iterator it = connections.begin(); it != connections.end();) {
 			if ((*it)->deleted()) {
-				traceL("Client", this) << "Deleting Connection: " << (*it) << std::endl;
+				traceL("Client", this) << "Deleting connection: " << (*it) << std::endl;
 				delete *it;
 				it = connections.erase(it);
 			}
@@ -342,7 +362,7 @@ struct OutputStream//: public std::ostream
 	
 	void onClose(void* sender) 
 	{
-		traceL("Client", this) << "On Close" << std::endl;
+		traceL("Client", this) << "On close" << std::endl;
 		//assert(0 && "server socket closed");
 	}
 	*/

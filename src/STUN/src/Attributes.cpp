@@ -727,7 +727,7 @@ void MessageIntegrity::write(Buffer& buf) const
 
 		// Get the message prior to the current attribute and
 		// fill the attribute with dummy content.
-		//Buffer hmacBuf(buf.data(), buf.available());		
+		//Buffer hmacBuf(buf.c_str(), buf.available());		
 		Buffer hmacBuf;
 		hmacBuf.put(buf.data(), buf.available());
 		hmacBuf.put("00000000000000000000");
@@ -741,11 +741,11 @@ void MessageIntegrity::write(Buffer& buf) const
 		assert(hmac.size() == MessageIntegrity::Size);
 
 		// Append the real HAMC to the buffer.
-		buf.put(hmac.data(), MessageIntegrity::Size);
+		buf.put(hmac.c_str(), MessageIntegrity::Size);
 	}
 	else {
 		assert(!_hmac.empty());
-		buf.put(_hmac.data(), MessageIntegrity::Size);
+		buf.put(_hmac.c_str(), MessageIntegrity::Size);
 	}
 }
 

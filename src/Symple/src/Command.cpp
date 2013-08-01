@@ -95,7 +95,7 @@ string Command::param(int n) const
 	assert(params.size() >= n);
 	if (params.size() < n)
 		return "";
-	return params[n-1].data();
+	return params[n-1].c_str();
 }
 
 

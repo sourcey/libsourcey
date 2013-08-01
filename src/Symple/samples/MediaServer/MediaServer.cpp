@@ -8,7 +8,9 @@
 #include "Sourcey/Media/AVInputReader.h"
 #include "Sourcey/Media/FLVMetadataInjector.h"
 #include "Sourcey/Media/FormatRegistry.h"
+#include "Sourcey/Media/AVPacketEncoder.h"
 
+#include "Sourcey/HTTP/Packetizers.h"
 #include "Sourcey/HTTP/Util.h"
 #include "Sourcey/HTTP/Packetizers.h"
 #include "Sourcey/Util/Base64PacketEncoder.h"
@@ -39,20 +41,18 @@ using namespace scy::av;
 namespace scy { 
 
 
-// ----------------------------------------------------------------------------
+//
 // HTTP Media Server
 //
+
+
 MediaServer::MediaServer(UInt16 port) :
 	http::Server(port, new HTTPStreamingConnectionFactory(this))
 {		
 	debugL("MediaServer") << "Creating" << endl;
-		
-	// Pre-initialize video captures in the main thread	
-	MediaFactory::initialize();
-	MediaFactory::instance()->loadVideo();
-
+	
 	// Register the media formats we will be using
-	FormatRegistry& formats = MediaFactory::instance()->formats();		
+	FormatRegistry& formats = MediaFactory::instance().formats();		
 	formats.registerFormat(Format("MP3", "mp3",
 		AudioCodec("MP3", "libmp3lame", 2, 44100, 128000, "s16p")));	
 		// Adobe Flash Player requires that audio files be 16bit and have a sample rate of 44.1khz.
@@ -79,28 +79,30 @@ MediaServer::MediaServer(UInt16 port) :
 MediaServer::~MediaServer()
 {		
 	debugL("MediaServer") << "Destroying" << endl;
-	
-	MediaFactory::instance()->unloadVideo();
-	MediaFactory::uninitialize();
 }
 
 
-void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions& options, bool freeAudio, bool attachPacketizers) 
+void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions& options, bool freeCaptures, bool attachPacketizers) 
 {	
-	debugL() << "Setup Packet Stream" << endl;
+	debugL("MediaServer") << "Setup Packet Stream" << endl;
 
 	// Attach media captures
 	if (options.oformat.video.enabled) {
 		assert(options.videoCapture);
-		stream.attach(options.videoCapture, 0, false);
+		stream.attachSource(options.videoCapture, freeCaptures, true);
 	}
 	if (options.oformat.audio.enabled) {
 		assert(options.audioCapture);
-		stream.attach(options.audioCapture, 0, freeAudio);	
+		stream.attachSource(options.audioCapture, freeCaptures, true);	
 	}
+								
+	// Attach an async queue so we don't choke
+	// the video capture thread while encoding.
+	AsyncPacketQueue* async = new AsyncPacketQueue(10, 1000000 / 2);
+	stream.attach(async, 3, true);
 
 	// Create and attach media encoder				
-	av::AVEncoder* encoder = new av::AVEncoder(options);
+	av::AVPacketEncoder* encoder = new av::AVPacketEncoder(options);
 	encoder->initialize();
 	stream.attach(encoder, 5, true);		
 				
@@ -126,32 +128,39 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 		FLVMetadataInjector* injector = new FLVMetadataInjector(options.oformat);
 		stream.attach(injector, 10);
 	}
-					
+		
 	// Attach an HTTP output packetizer
-	IPacketizer* packetizer = NULL;
+	IPacketizer* packetizer = nil;
 	if (options.packetizer.empty() ||
 		options.packetizer == "none" ||
 		options.packetizer == "None")
-		packetizer = new http::StreamingPacketizer("image/jpeg");	
+		;
+		//packetizer = new http::StreamingAdapter("image/jpeg");	
 
 	else if (options.packetizer == "chunked")
-		packetizer = new http::ChunkedPacketizer("image/jpeg");
+		packetizer = new http::ChunkedAdapter("image/jpeg");
 
 	else if (options.packetizer == "multipart")
-		packetizer = new http::MultipartPacketizer("image/jpeg", false, options.encoding == "Base64");				
+		packetizer = new http::MultipartAdapter("image/jpeg", options.encoding == "Base64");	// false, 			
 
 	else throw Exception("Unsupported packetizer method: " + options.packetizer);
 
 	if (packetizer)					
 		stream.attach(packetizer, 10, true);
+					
+	// Init an sync queue to sync socket output
+	SyncPacketQueue* sync = new SyncPacketQueue;
+	stream.attach(sync, 15, true);		
 	
 	debugL() << "Setup Packet Stream: OK" << endl;
 }
 
 
-// ----------------------------------------------------------------------------
+//
 // HTTP Streaming Connection Factory
 //
+
+
 HTTPStreamingConnectionFactory::HTTPStreamingConnectionFactory(MediaServer* server) : 		
 	_server(server)
 {		
@@ -170,9 +179,10 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 			
 		// Parse streaming options from query
 		StreamingOptions options(_server);
-		NVCollection params;
-		util::splitURIParameters(request.getURI(), params);
-		FormatRegistry& formats = MediaFactory::instance()->formats();				
+		NVHash params;
+		request.getURIParameters(params);
+		//util::splitURIParameters(request.getURI(), params);
+		FormatRegistry& formats = MediaFactory::instance().formats();				
 
 		// An exception will be thrown if no format was provided, 
 		// or if the request format is not registered.
@@ -188,23 +198,23 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 
 		// Response encoding and packetizer options
 		options.encoding = params.get("encoding", "");
-		options.packetizer = params.get("packetizer", "");
+		options.packetizer = params.get("packetizer", "");			
 			
 		// Video captures must be initialized in the main thread. 
-		// See MediaFactory::loadVideo			
-		MediaFactory* mediaFactory = av::MediaFactory::instance();
+		// See MediaFactory::loadVideo		
+		av::Device dev;	
+		MediaFactory& media = av::MediaFactory::instance();
 		if (options.oformat.video.enabled) {
-			av::Device video;
-			mediaFactory->devices().getDefaultVideoCaptureDevice(video);
-			options.videoCapture = mediaFactory->getVideoCapture(video.id);
-			av::setVideoCaptureInputFormat(options.videoCapture, options.iformat);	
+			media.devices().getDefaultVideoCaptureDevice(dev);
+			options.videoCapture = media.createVideoCapture(dev.id);
+			options.videoCapture->getEncoderFormat(options.iformat);	
 		}
 		if (options.oformat.audio.enabled) {
-			av::Device audio;
-			mediaFactory->devices().getDefaultAudioInputDevice(audio);
-			options.audioCapture = mediaFactory->createAudioCapture(audio.id, 
+			media.devices().getDefaultAudioInputDevice(dev);
+			options.audioCapture = media.createAudioCapture(dev.id, 
 				options.oformat.audio.channels, 
 				options.oformat.audio.sampleRate);
+			options.audioCapture->getEncoderFormat(options.iformat);	
 		}
 			
 		// Handle websocket connections
@@ -214,7 +224,7 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 		}	
 
 		// Handle HTTP streaming
-		if (request.getURI().find("/streaming") == 0) {			
+		if (request.getURI().find("/streaming") == 0) {	
 			return new StreamingRequestHandler(conn, options);
 		}
 
@@ -230,16 +240,19 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 	}
 	catch (Exception& exc)
 	{
-		errorL("StreamingRequestHandlerFactory") << "Request Error: " << exc.message() << endl;
+		errorL("StreamingRequestHandlerFactory") << "Request error: " << exc.message() << endl;
 	}
 		
 	errorL("StreamingRequestHandlerFactory") << "Bad Request" << endl;
 	return new http::BadRequestHandler(conn);	
 }
 
-// ----------------------------------------------------------------------------
+
+//
 // HTTP Streaming Options
 //
+
+
 StreamingOptions::StreamingOptions(MediaServer* server, av::VideoCapture* videoCapture, av::AudioCapture* audioCapture) : 
 	server(server), videoCapture(videoCapture), audioCapture(audioCapture) 
 {
@@ -263,14 +276,21 @@ static void onShutdown(void* opaque)
 
 int main(int argc, char** argv)
 {
-	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));	
+	Logger::instance().add(new ConsoleChannel("debug", LTrace));	
+		
+	// Pre-initialize video captures in the main thread	
+	MediaFactory::instance().loadVideo();	
+
 	{	
 		Application app;	
 		MediaServer server(SERVER_PORT);
 		server.start();
 		app.waitForShutdown(onShutdown, &server);
 	}
-	Logger::uninitialize();
+
+	MediaFactory::instance().unloadVideo();
+	MediaFactory::shutdown();
+	Logger::shutdown();
 	return 0;
 }
 
@@ -319,8 +339,8 @@ int main(int argc, char** argv)
 	
 	//av::Device video;
 	//av::Device audio;
-	//MediaFactory::instance()->devices().getDefaultVideoCaptureDevice(video);
-	//MediaFactory::instance()->devices().getDefaultAudioInputDevice(audio);
+	//MediaFactory::instance().devices().getDefaultVideoCaptureDevice(video);
+	//MediaFactory::instance().devices().getDefaultAudioInputDevice(audio);
 		//Poco::Net::ServerSocket socket(328);
 		//server.addConnectionHook(new http::FlashPolicyConnectionHook);	
 
@@ -430,7 +450,7 @@ public:
 		{
 			errorL("ServerConnectionHook") << "Bad Request: " << exc.message() << endl;
 		}	
-		return NULL;
+		return nil;
 	};
 };
 */
@@ -585,16 +605,16 @@ public:
 
 
 //inline createMediaStream() 
-		//http::ServerResponder(sock), options(options), encoder(NULL), 
+		//http::ServerResponder(sock), options(options), encoder(nil), 
 		//const StreamSocket& sock, const StreamingOptions& options, 
 				
 			/*
 			StreamingOptions options;
 			// An exception will be thrown if no format was provided, 
 			// or if the request format is not registered.
-			NVCollection params;
+			NVHash params;
 			util::splitURIParameters(request.getURI(), params);
-			FormatRegistry& formats = MediaFactory::instance()->formats();	
+			FormatRegistry& formats = MediaFactory::instance().formats();	
 			options.oformat = formats.get(params.get("format"));
 			if (params.has("width"))		
 				options.oformat.video.width = util::fromString<UInt32>(params.get("width"));
@@ -650,26 +670,26 @@ public:
 				StreamingOptions options;
 				// An exception will be thrown if no format was provided, 
 				// or if the request format is not registered.
-				FormatRegistry& formats = MediaFactory::instance()->formats();	
+				FormatRegistry& formats = MediaFactory::instance().formats();	
 				options.oformat = formats.get("mjpeg");
 
 				// Video captures should always be instantiated
 				// in the main thread. See MediaFactory::loadVideo
-				VideoCapture* videoCapture = NULL;
-				AudioCapture* audioCapture = NULL;
+				VideoCapture* videoCapture = nil;
+				AudioCapture* audioCapture = nil;
 				if (options.oformat.video.enabled) {
-					videoCapture = MediaFactory::instance()->getVideoCapture(0);
+					videoCapture = MediaFactory::instance().getVideoCapture(0);
 					av::setVideoCaptureInputForma(videoCapture, options.iformat);	
 				}
 				if (options.oformat.audio.enabled)
-					audioCapture = MediaFactory::instance()->createAudioCapture(0, 
+					audioCapture = MediaFactory::instance().createAudioCapture(0, 
 						options.oformat.audio.channels, 
 						options.oformat.audio.sampleRate);
 						*/
 
 
 	/*
-				//VideoCapture* videoCapture = MediaFactory::instance()->getVideoCapture(0);
+				//VideoCapture* videoCapture = MediaFactory::instance().getVideoCapture(0);
 				//int width = scy::util::fromString<int>(request.params().get("width", scy::util::toString(videoCapture->width() ? videoCapture->width() : 480)));
 				//int height = scy::util::fromString<int>(request.params().get("height", scy::util::toString(videoCapture->height() ? videoCapture->height() : 320)));
 
@@ -720,7 +740,7 @@ public:
 						
 				// An exception will be thrown if no format was provided, 
 				// or if the request format is not registered.
-				FormatRegistry& formats = MediaFactory::instance()->formats();	
+				FormatRegistry& formats = MediaFactory::instance().formats();	
 				options.oformat = formats.get(request.params().get("format"));
 
 				if (request.params().has("width"))		
@@ -734,14 +754,14 @@ public:
 
 				// Video captures should always be instantiated
 				// in the main thread. See MediaFactory::loadVideo
-				VideoCapture* videoCapture = NULL;
-				AudioCapture* audioCapture = NULL;
+				VideoCapture* videoCapture = nil;
+				AudioCapture* audioCapture = nil;
 				if (options.oformat.video.enabled) {
-					videoCapture = MediaFactory::instance()->getVideoCapture(0);
+					videoCapture = MediaFactory::instance().getVideoCapture(0);
 					av::setVideoCaptureInputForma(videoCapture, options.iformat);	
 				}
 				if (options.oformat.audio.enabled)
-					audioCapture = MediaFactory::instance()->createAudioCapture(0, 
+					audioCapture = MediaFactory::instance().createAudioCapture(0, 
 						options.oformat.audio.channels, 
 						options.oformat.audio.sampleRate);
 
@@ -763,7 +783,7 @@ public:
 				return new StreamingRequestHandler(socket, options, videoCapture, audioCapture);	
 			}
 			else if ((request.matches("/snapshot"))) {				
-				VideoCapture* videoCapture = MediaFactory::instance()->getVideoCapture(0);
+				VideoCapture* videoCapture = MediaFactory::instance().getVideoCapture(0);
 				int width = scy::util::fromString<int>(request.params().get("width", scy::util::toString(videoCapture->width() ? videoCapture->width() : 480)));
 				int height = scy::util::fromString<int>(request.params().get("height", scy::util::toString(videoCapture->height() ? videoCapture->height() : 320)));
 				return new SnapshotRequestHandler(socket, videoCapture, width, height);	
@@ -850,9 +870,9 @@ Format MP4 = Format("MP4", "mp4",
 // Global for now
  //MJPEG; //FLVNoAudio; //FLVSpeex16000; //Speex16000; //MJPEG; //H264AAC; //MP38000; //MP38000; //MP38000; //MP344100; //MP344100; //AAC44100; //FLVNoAudio; //FLVNellyMoser11025NoVideo; //Speex16000; //FLVNellyMoser11025NoVideo; //FLVH264NoAudio; //MP344100; //FLVNellyMoser11025NoVideo; //FLVH264NoAudio; //FLVNellyMoser11025NoVideo; //FLVNellyMoser11025NoVideo; //FLVNellyMoser11025NoVideo; FLVNellyMoser11025NoVideo; //MP344100; 
 //Format gCurrentFormat = FLVNoAudio;
-//AVInputReader* gAVVideoCapture = NULL;
-//VideoCapture* gVideoCapture = NULL;
-//AudioCapture* gAudioCapture = NULL;
+//AVInputReader* gAVVideoCapture = nil;
+//VideoCapture* gVideoCapture = nil;
+//AudioCapture* gAudioCapture = nil;
 
 
 			//options.oformat = gCurrentFormat;

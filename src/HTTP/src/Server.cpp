@@ -34,13 +34,13 @@ Server::Server(short port, ServerResponderFactory* factory) :
 	address("0.0.0.0", port),
 	factory(factory)
 {
-	traceL("Server", this) << "Creating" << endl;
+	traceL("http::Server", this) << "Creating" << endl;
 }
 
 
 Server::~Server()
 {
-	traceL("Server", this) << "Destroying" << endl;
+	traceL("http::Server", this) << "Destroying" << endl;
 	shutdown();
 	if (factory)
 		delete factory;
@@ -55,7 +55,7 @@ void Server::start()
 	socket.bind(address);
 	socket.listen();
 
-	traceL("Server", this) << "Server listening on " << port() << endl;		
+	traceL("http::Server", this) << "Server listening on " << port() << endl;		
 
 	//timer.Timeout += delegate(this, &Server::onTimer);
 	//timer.start(5000, 5000);
@@ -64,7 +64,7 @@ void Server::start()
 
 void Server::shutdown() 
 {		
-	traceL("Server", this) << "Shutdown" << endl;
+	traceL("http::Server", this) << "Shutdown" << endl;
 
 	socket.base().AcceptConnection -= delegate(this, &Server::onAccept);	
 	socket.Close -= delegate(this, &Server::onClose);
@@ -104,14 +104,14 @@ ServerResponder* Server::createResponder(ServerConnection& conn)
 
 void Server::addConnection(ServerConnection* conn) 
 {		
-	traceL("Server", this) << "Adding Connection: " << conn << endl;
+	traceL("http::Server", this) << "Adding connection: " << conn << endl;
 	connections.push_back(conn);
 }
 
 
 void Server::removeConnection(ServerConnection* conn) 
 {		
-	traceL("Server", this) << "Removing Connection: " << conn << endl;
+	traceL("http::Server", this) << "Removing connection: " << conn << endl;
 	for (ServerConnectionList::iterator it = connections.begin(); it != connections.end(); ++it) {
 		if (conn == *it) {
 			connections.erase(it);
@@ -124,7 +124,7 @@ void Server::removeConnection(ServerConnection* conn)
 
 void Server::onAccept(void* sender, const net::TCPSocket& sock)
 {	
-	traceL("Server", this) << "On server accept" << endl;
+	traceL("http::Server", this) << "On server accept" << endl;
 	ServerConnection* conn = createConnection(sock);
 	assert(conn);
 }
@@ -132,7 +132,7 @@ void Server::onAccept(void* sender, const net::TCPSocket& sock)
 
 void Server::onClose(void* sender) 
 {
-	traceL("Server", this) << "On server socket close" << endl;
+	traceL("http::Server", this) << "On server socket close" << endl;
 }
 
 
@@ -142,7 +142,7 @@ void Server::onClose(void* sender)
 ServerConnection::ServerConnection(Server& server, const net::Socket& socket) : 
 	Connection(socket), 
 	_server(server), 
-	_responder(nullptr),
+	_responder(nil),
 	_upgrade(false),
 	_requestComplete(false)
 {	
@@ -163,7 +163,6 @@ ServerConnection::~ServerConnection()
 		traceL("ServerConnection", this) << "Destroying: Responder: " << _responder << endl;
 		delete _responder;
 	}
-
 }
 
 	
@@ -242,7 +241,7 @@ void ServerConnection::onHeaders()
 
 		ostringstream oss;
 		_request.write(oss);
-		Buffer buffer(oss.str().data(), oss.str().length());		
+		Buffer buffer(oss.str().c_str(), oss.str().length());		
 
 		// Send the handshake request to the WS adapter for handling.
 		// If the request fails the underlying socket will be closed
@@ -302,13 +301,13 @@ void ServerConnection::onServerShutdown(void*)
 }
 
 
-http::Message* ServerConnection::incomingHeaders() 
+http::Message* ServerConnection::incomingHeader() 
 { 
 	return static_cast<http::Message*>(&_request);
 }
 
 
-http::Message* ServerConnection::outgoingHeaders() 
+http::Message* ServerConnection::outgoingHeader() 
 { 
 	return static_cast<http::Message*>(&_response);
 }
@@ -359,7 +358,7 @@ void ServerConnection::onParserEnd()
 	/*
 	
 
-	bool res = write(body.data(), body.length());
+	bool res = write(body.c_str(), body.length());
 
 	// Set Connection: Close unless otherwise stated
 	if (!isExplicitKeepAlive(_request) || 
@@ -372,7 +371,7 @@ void ServerConnection::onParserEnd()
 	// KLUDGE: Temp solution for quick sending small requests only.
 	// Use Connection::write() for nocopy binary stream.
 	bool res = write(
-		_response.body.str().data(),
+		_response.body.str().c_str(),
 		_response.body.str().length());
 	
 	// Close unless keepalive is set

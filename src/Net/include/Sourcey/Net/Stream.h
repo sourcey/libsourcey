@@ -114,7 +114,7 @@ class Stream: public uv::Base
  protected:	
 	bool readStart()
 	{
-		traceL("Stream", this) << "Read Start: " << handle() << std::endl;
+		traceL("Stream", this) << "Read start: " << handle() << std::endl;
 
 		int r;
 		uv_stream_t* stream = this->handle<uv_stream_t>();
@@ -131,7 +131,7 @@ class Stream: public uv::Base
 
 	bool readStop()
 	{		
-		traceL("Stream", this) << "Read Stop: " << handle() << std::endl;
+		traceL("Stream", this) << "Read stop: " << handle() << std::endl;
 		int r = uv_read_stop(handle<uv_stream_t>());
 		if (r) setLastError();
 		return r == 0;
@@ -139,7 +139,7 @@ class Stream: public uv::Base
 
 	virtual void onRead(const char* data, int len)
 	{
-		traceL("Stream", this) << "On Read: " << len << std::endl;
+		traceL("Stream", this) << "On read: " << len << std::endl;
 
 		// can be overridden
 		Read.emit(instance(), data, len);
@@ -148,7 +148,7 @@ class Stream: public uv::Base
 	static void handleReadCommon(uv_stream_t* handle, ssize_t nread, uv_buf_t buf, uv_handle_type pending) 
 	{	
 		Stream* io = static_cast<Stream*>(handle->data);
-		traceL("Stream", io) << "Handle Read: " << nread << std::endl;
+		traceL("Stream", io) << "Handle read: " << nread << std::endl;
 
 		// Handle EOF or error
 		if (nread == -1)  {

@@ -248,7 +248,7 @@ int DateTime::week(int firstDayOfWeek) const
 {
 	poco_assert (firstDayOfWeek >= 0 && firstDayOfWeek <= 6);
 
-	/// find the first firstDayOfWeek.
+	// find the first firstDayOfWeek.
 	int baseDay = 1;
 	while (DateTime(_year, 1, baseDay).dayOfWeek() != firstDayOfWeek) ++baseDay;
 
@@ -817,7 +817,7 @@ public:
 	int timeZone()
 	{
 	#if defined(__APPLE__)  || defined(__FreeBSD__) || defined(POCO_ANDROID) // no timezone global var
-		std::time_t now = std::time(nullptr);
+		std::time_t now = std::time(NULL);
 		struct std::tm t;
 		gmtime_r(&now, &t);
 		std::time_t utc = std::mktime(&t);
@@ -847,7 +847,7 @@ int Timezone::utcOffset()
 	
 int Timezone::dst()
 {
-	std::time_t now = std::time(nullptr);
+	std::time_t now = std::time(NULL);
 	struct std::tm t;
 	if (!localtime_r(&now, &t))
 		throw Exception("System error: cannot get local time DST offset");
@@ -883,7 +883,6 @@ std::string Timezone::dstName()
 
 
 #endif
-
 
 
 //
@@ -1502,9 +1501,6 @@ Timestamp Timestamp::fromUtcTime(UtcTimeVal val)
 
 void Timestamp::update()
 {
-	// uv_hrtime is inconstant :(
-	//_ts = uv_hrtime();
-	
 #if defined(WIN32)
 
 	FILETIME ft;
@@ -1528,7 +1524,7 @@ void Timestamp::update()
 
 	struct timeval tv;
 	if (gettimeofday(&tv, NULL))
-		throw SystemException("cannot get time of day");
+		throw SystemException("Cannot get time of day");
 	_ts = TimeVal(tv.tv_sec)*resolution() + tv.tv_usec;
 	
 #endif

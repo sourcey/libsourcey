@@ -28,140 +28,140 @@ class Cookie
 {
 public:
 	Cookie();
-		/// Creates an empty Cookie.
+		// Creates an empty Cookie.
 		
 	explicit Cookie(const std::string& name);
-		/// Creates a cookie with the given name.	
-		/// The cookie never expires.
+		// Creates a cookie with the given name.	
+		// The cookie never expires.
 		
-	explicit Cookie(const NVCollection& nvc);
-		/// Creates a cookie from the given NVCollection.
+	explicit Cookie(const NVHash& nvc);
+		// Creates a cookie from the given NVHash.
 		
 	Cookie(const std::string& name, const std::string& value);
-		/// Creates a cookie with the given name and value.
-		/// The cookie never expires.
-		///
-		/// Note: If value contains whitespace or non-alphanumeric
-		/// characters, the value should be escaped by calling escape()
-		/// before passing it to the constructor.
+		// Creates a cookie with the given name and value.
+		// The cookie never expires.
+		//
+		// Note: If value contains whitespace or non-alphanumeric
+		// characters, the value should be escaped by calling escape()
+		// before passing it to the constructor.
 		
 	Cookie(const Cookie& cookie);
-		/// Creates the Cookie by copying another one.
+		// Creates the Cookie by copying another one.
 
 	~Cookie();
-		/// Destroys the Cookie.
+		// Destroys the Cookie.
 		
 	Cookie& operator = (const Cookie& cookie);
-		/// Assigns a cookie.
+		// Assigns a cookie.
 		
 	void setVersion(int version);
-		/// Sets the version of the cookie.
-		///
-		/// Version must be either 0 (denoting a Netscape cookie)
-		/// or 1 (denoting a RFC 2109 cookie).
+		// Sets the version of the cookie.
+		//
+		// Version must be either 0 (denoting a Netscape cookie)
+		// or 1 (denoting a RFC 2109 cookie).
 		
 	int getVersion() const;
-		/// Returns the version of the cookie, which is
-		/// either 0 or 1.	
+		// Returns the version of the cookie, which is
+		// either 0 or 1.	
 		
 	void setName(const std::string& name);
-		/// Sets the name of the cookie.
+		// Sets the name of the cookie.
 		
 	const std::string& getName() const;
-		/// Returns the name of the cookie.
+		// Returns the name of the cookie.
 		
 	void setValue(const std::string& value);
-		/// Sets the value of the cookie.
-		///
-		/// According to the cookie specification, the
-		/// size of the value should not exceed 4 Kbytes.
-		///
-		/// Note: If value contains whitespace or non-alphanumeric
-		/// characters, the value should be escaped by calling escape()
-		/// prior to passing it to setName().
+		// Sets the value of the cookie.
+		//
+		// According to the cookie specification, the
+		// size of the value should not exceed 4 Kbytes.
+		//
+		// Note: If value contains whitespace or non-alphanumeric
+		// characters, the value should be escaped by calling escape()
+		// prior to passing it to setName().
 		
 	const std::string& getValue() const;
-		/// Returns the value of the cookie.
+		// Returns the value of the cookie.
 		
 	void setComment(const std::string& comment);
-		/// Sets the comment for the cookie.
-		///
-		/// Comments are only supported for version 1 cookies.
+		// Sets the comment for the cookie.
+		//
+		// Comments are only supported for version 1 cookies.
 
 	const std::string& getComment() const;
-		/// Returns the comment for the cookie.
+		// Returns the comment for the cookie.
 
 	void setDomain(const std::string& domain);
-		/// Sets the domain for the cookie.
+		// Sets the domain for the cookie.
 		
 	const std::string& getDomain() const;
-		/// Returns the domain for the cookie.
+		// Returns the domain for the cookie.
 
 	void setPath(const std::string& path);
-		/// Sets the path for the cookie.
+		// Sets the path for the cookie.
 		
 	const std::string& getPath() const;
-		/// Returns the path for the cookie.
+		// Returns the path for the cookie.
 
 	void setSecure(bool secure);
-		/// Sets the value of the secure flag for
-		/// the cookie.
+		// Sets the value of the secure flag for
+		// the cookie.
 		
 	bool getSecure() const;
-		/// Returns the value of the secure flag
-		/// for the cookie.
+		// Returns the value of the secure flag
+		// for the cookie.
 
 	void setMaxAge(int maxAge);
-		/// Sets the maximum age in seconds for
-		/// the cookie.
-		///
-		/// A value of -1 causes the cookie to
-		/// never expire on the client.
-		///
-		/// A value of 0 deletes the cookie on
-		/// the client.
+		// Sets the maximum age in seconds for
+		// the cookie.
+		//
+		// A value of -1 causes the cookie to
+		// never expire on the client.
+		//
+		// A value of 0 deletes the cookie on
+		// the client.
 
 	int getMaxAge() const;
-		/// Returns the maximum age in seconds for
-		/// the cookie.
+		// Returns the maximum age in seconds for
+		// the cookie.
 		
 	void setHttpOnly(bool flag = true);
-		/// Sets the HttpOnly flag for the cookie.
+		// Sets the HttpOnly flag for the cookie.
 		
 	bool getHttpOnly() const;
-		/// Returns true if the cookie's HttpOnly flag is set.
+		// Returns true if the cookie's HttpOnly flag is set.
 		
 	std::string toString() const;
-		/// Returns a string representation of the cookie,
-		/// suitable for use in a Set-Cookie header.
+		// Returns a string representation of the cookie,
+		// suitable for use in a Set-Cookie header.
 		
 	static std::string escape(const std::string& str);
-		/// Escapes the given string by replacing all 
-		/// non-alphanumeric characters with escape
-		/// sequences in the form %xx, where xx is the
-		/// hexadecimal character code.
-		///
-		/// The following characters will be replaced
-		/// with escape sequences:
-		///   - percent sign %
-		///   - less-than and greater-than < and >
-		///   - curly brackets { and }
-		///   - square brackets [ and ]
-		///   - parenthesis ( and )
-		///   - solidus /
-		///   - vertical line |
-		///   - reverse solidus (backslash /)
-		///   - quotation mark "
-		///   - apostrophe '
-		///   - circumflex accent ^
-		///   - grave accent `
-		///   - comma and semicolon , and ;
-		///   - whitespace and control characters
+		// Escapes the given string by replacing all 
+		// non-alphanumeric characters with escape
+		// sequences in the form %xx, where xx is the
+		// hexadecimal character code.
+		//
+		// The following characters will be replaced
+		// with escape sequences:
+		//   - percent sign %
+		//   - less-than and greater-than < and >
+		//   - curly brackets { and }
+		//   - square brackets [ and ]
+		//   - parenthesis ( and )
+		//   - solidus /
+		//   - vertical line |
+		//   - reverse solidus (backslash /)
+		//   - quotation mark "
+		//   - apostrophe '
+		//   - circumflex accent ^
+		//   - grave accent `
+		//   - comma and semicolon , and ;
+		//   - whitespace and control characters
 		
 	static std::string unescape(const std::string& str);
-		/// Unescapes the given string by replacing all
-		/// escape sequences in the form %xx with the
-		/// respective characters.
+		// Unescapes the given string by replacing all
+		// escape sequences in the form %xx with the
+		// respective characters.
 
 private:
 	int         _version;

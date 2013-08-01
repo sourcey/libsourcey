@@ -24,13 +24,13 @@ Cookie::Cookie(const std::string& name):
 }
 
 
-Cookie::Cookie(const NVCollection& nvc):
+Cookie::Cookie(const NVHash& nvc):
 	_version(0),
 	_secure(false),
 	_maxAge(-1),
 	_httpOnly(false)
 {
-	for (NVCollection::ConstIterator it = nvc.begin(); it != nvc.end(); ++it)
+	for (NVHash::ConstIterator it = nvc.begin(); it != nvc.end(); ++it)
 	{
 		const std::string& name  = it->first;
 		const std::string& value = it->second;

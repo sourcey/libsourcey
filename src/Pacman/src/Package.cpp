@@ -562,7 +562,7 @@ LocalPackage::Manifest::~Manifest()
 void LocalPackage::Manifest::addFile(const string& path)
 {
 	// Do not allow duplicates
-	//if (!find_child_by_(*this)["file", "path", path.data()).empty())
+	//if (!find_child_by_(*this)["file", "path", path.c_str()).empty())
 	//	return;
 
 	//json::Value node(path);
@@ -627,7 +627,7 @@ bool PackagePair::valid() const
 
 	//json::Value node = append_child();
 	//node.set_name("file");
-	//node.append_(*this)["path").set_value(path.data());
+	//node.append_(*this)["path").set_value(path.c_str());
 
 
 /*
@@ -636,19 +636,19 @@ Package::Asset LocalPackage::getMatchingAsset(const Package::Asset& asset) const
 	assert(asset.valid());
 	return Asset(select_single_node(
 		format("//asset[@file-name='%s' and @version='%s']", 
-			asset.fileName(), asset.version()).data()).node());
+			asset.fileName(), asset.version()).c_str()).node());
 }
 */
 /*
 void LocalPackage::Manifest::addDir(const string& path)
 {
 	// Do not allow duplicates
-	//if (!find_child_by_(*this)["dir", "path", path.data()).empty())
+	//if (!find_child_by_(*this)["dir", "path", path.c_str()).empty())
 	//	return;
 
 	//json::Value node = append_child();
 	//node.set_name("dir");
-	//node.append_(*this)["path").set_value(path.data());
+	//node.append_(*this)["path").set_value(path.c_str());
 	
 	json::Value node(path);
 	root.append(node);

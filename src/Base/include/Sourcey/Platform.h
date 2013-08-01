@@ -33,27 +33,41 @@ namespace scy {
 //
 
 std::string getExePath();
-	/// Returns the current executable path.
+	// Returns the current executable path.
 
 std::string getCWD();
-	/// Return the current working directory.
+	// Return the current working directory.
 
-UInt64 getTime();
-	/// Returns the current system time.
+UInt64 getTimeHR();
+	// Returns the current high-resolution real time in nanoseconds.
+
+UInt64 getTimeMS();
+	// Returns the current high-resolution real time in milliseconds.
+
+UInt64 getTicks();
+	// Returns the number of millisecond ticks since epoch.
+
+double getProcessTime();
+	// Returns the current process time in decimal seconds.
 
 UInt64 getFreeMemory();
-	/// Returns the current amount of free memory.
+	// Returns the current amount of free memory.
 
 UInt64 getTotalMemory();
-	/// Returns the current amount of used memory.
+	// Returns the current amount of used memory.
 
+void sleep(int ms);
+	// Pause the current thread for the given ms duration.
+
+void pause();
+	// Pause the current thread until enter is pressed.
 
 //
 /// Windows helpers
 //
 
 
-#if WIN32
+#ifdef WIN32
 
 bool getOsVersion(int* major, int* minor, int* build);
 bool isWindowsVistaOrLater();

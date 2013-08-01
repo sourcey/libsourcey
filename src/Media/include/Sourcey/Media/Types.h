@@ -23,9 +23,7 @@
 
 #include "Sourcey/Media/Config.h"
 #include "Sourcey/Packet.h"
-
-//#include <opencv/cv.h>
-//#include <opencv/highgui.h>
+#include "Sourcey/Platform.h"
 
 
 namespace scy {
@@ -36,17 +34,15 @@ struct MediaPacket: public RawPacket
 {
 	double time;
 
-	MediaPacket(char* data = NULL,
+	MediaPacket(char* data = nil,
 				int size = 0,
-				double time = 0) :
+				double time = scy::getProcessTime()) :
 		RawPacket(data, size),
 		time(time) {};
 
 	MediaPacket(const MediaPacket& r) : 
 		RawPacket(r), 
-		time(r.time)
-	{
-	}
+		time(r.time) {}
 		
 	virtual ~MediaPacket() {};
 
@@ -63,11 +59,11 @@ struct VideoPacket: public MediaPacket
 	int width;
 	int height;
 
-	VideoPacket(char* data = NULL,
+	VideoPacket(char* data = nil,
 				int size = 0,
 				int width = 0,
 				int height = 0,
-				double time = 0) : //(double)clock() / CLOCKS_PER_SEC
+				double time = scy::getProcessTime()) : 
 		MediaPacket(data, size, time),
 		width(width),
 		height(height) {};
@@ -75,9 +71,7 @@ struct VideoPacket: public MediaPacket
 	VideoPacket(const VideoPacket& r) : 
 		MediaPacket(r), 
 		width(r.width), 
-		height(r.height)
-	{
-	}
+		height(r.height) {}
 
 	virtual ~VideoPacket() {};
 
@@ -91,15 +85,13 @@ struct VideoPacket: public MediaPacket
 
 struct AudioPacket: public MediaPacket 
 {
-	AudioPacket(char* data = NULL,
+	AudioPacket(char* data = nil,
 				int size = 0,
-				double time = 0) : //(double)clock() / CLOCKS_PER_SEC
+				double time = scy::getProcessTime()) : //(UInt64)clock() / CLOCKS_PER_SEC
 		MediaPacket(data, size, time) {};
 
 	AudioPacket(const AudioPacket& r) : 
-		MediaPacket(r)
-	{
-	}
+		MediaPacket(r) {}
 
 	virtual ~AudioPacket() {};
 
@@ -142,14 +134,14 @@ struct VideoCodec
 	Codec::ID codec;
 	int width;
 	int height;
-	double fps;	
+	UInt64 fps;	
 	PIX_FMT_ID pixelFmt;		// The input pixel format 
 	int bitRate;
 	int quality;				// For JPEG creation
 	VideoCodec(Codec::ID codec,
 				int width = 400,
 				int height = 300,
-				double fps = 25,
+				UInt64 fps = 25,
 				PIX_FMT_ID pixelFmt = PIX_FMT_BGR24,
 				int bitRate = 200 * 1024,
 				int quality = 80) : 

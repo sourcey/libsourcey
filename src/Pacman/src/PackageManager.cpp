@@ -16,7 +16,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "Sourcey/Pacman/PackageManager.h"
 #include "Sourcey/Pacman/Package.h"
 #include "Sourcey/JSON/JSON.h"
@@ -28,12 +27,9 @@
 #include "Poco/StreamCopier.h"
 #include "Poco/DirectoryIterator.h"
 
-////#include "Poco/Net/HTTPBasicCredentials.h"
-
 
 using namespace std;
 using namespace Poco;
-
 
 
 namespace scy { 
@@ -75,7 +71,7 @@ void PackageManager::initialize()
 
 bool PackageManager::initialized() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return !_remotePackages.empty()
 		|| !_localPackages.empty();
 }
@@ -85,7 +81,7 @@ void PackageManager::uninitialize()
 {	
 	cancelAllTasks();
 	
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	_remotePackages.clear();
 	_localPackages.clear();
 }
@@ -93,7 +89,7 @@ void PackageManager::uninitialize()
 
 void PackageManager::cancelAllTasks()
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	InstallTaskList::iterator it = _tasks.begin();
 	while (it != _tasks.end()) {
 		(*it)->cancel();
@@ -104,7 +100,7 @@ void PackageManager::cancelAllTasks()
 
 void PackageManager::createDirectories()
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	File(_options.cacheDir).createDirectories();
 	File(_options.interDir).createDirectories();
 	File(_options.installDir).createDirectories();
@@ -113,7 +109,7 @@ void PackageManager::createDirectories()
 
 void PackageManager::queryRemotePackages()
 {	
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	
 	debugL("PackageManager", this) << "Querying Packages: " 
 		<< _options.endpoint << _options.indexURI << endl;
@@ -122,26 +118,11 @@ void PackageManager::queryRemotePackages()
 		throw Exception("Cannot load packages while tasks are active.");	
 
 	try {
-
-		/*
-		// Make the API call to retrieve the remote manifest
-		http::Request* request = new http::Request("GET", _options.endpoint + _options.indexURI);	
-		if (!_options.httpUsername.empty()) {
-			http::BasicAuthenticator cred(_options.httpUsername, _options.httpPassword);
-			cred.authenticate(*request); 
-		}
-
-		http::Transaction transaction(request);
-		http::Response& response = transaction.response();
-		if (!transaction.send())
-			throw Exception(format("Failed to query packages from server: HTTP Error: %d %s", 
-				static_cast<int>(response.getStatus()), response.getReason()));
-				*/
-
 		http::ClientConnection* conn = new http::ClientConnection(_options.endpoint + _options.indexURI);
-		conn->Complete += delegate(this, &PackageManager::onPackagesResponse);
+		conn->Complete += delegate(this, &PackageManager::onPackagesResponse);		
 		conn->request().setMethod("GET");
 		conn->request().setKeepAlive(false);
+		conn->setReadStream(new std::stringstream);
 
 		if (!_options.httpUsername.empty()) {
 			http::BasicAuthenticator cred(_options.httpUsername, _options.httpPassword);
@@ -170,18 +151,19 @@ void PackageManager::queryRemotePackages()
 void PackageManager::onPackagesResponse(void* sender, const http::Response& response)
 {
 	http::ClientConnection* conn = reinterpret_cast<http::ClientConnection*>(sender);
-	assert(conn->incomingBuffer().available() == response.getContentLength());
 
-	debugL() << "Anionu API Response:" 
-		<< "\n\tHeaders: " << response
-		<< "\n\tPayload Size: " << response.getContentLength()
-		<< endl;
+	traceL("PackageManager", this) << "Server response:" << response << endl;
 			
 	json::Value root;
 	json::Reader reader;
-	bool res = reader.parse(conn->incomingBuffer().toString(), root);
-	if (!res)
-		throw Exception("Invalid server JSON response: " + reader.getFormatedErrorMessages());
+
+	bool res = reader.parse(conn->readStream<std::stringstream>()->str(), root);
+	if (!res) {
+		
+		// TODO: Set error state
+		errorL("PackageManager", this) << "Invalid server JSON response: " << reader.getFormatedErrorMessages() << endl;
+		return;
+	}
 
 	_remotePackages.clear();
 		
@@ -201,7 +183,7 @@ void PackageManager::loadLocalPackages()
 {
 	string dir;
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 
 		if (!_tasks.empty())
 			throw Exception("Cannot load packages while tasks are active.");	
@@ -540,7 +522,7 @@ InstallTask* PackageManager::createInstallTask(PackagePair& pair, const InstallT
 	InstallTask* task = new InstallTask(*this, pair.local, pair.remote, options);
 	task->Complete += delegate(this, &PackageManager::onPackageInstallComplete, -1); // lowest priority to remove task
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		_tasks.push_back(task);
 	}
 	TaskAdded.emit(this, *task);
@@ -550,7 +532,7 @@ InstallTask* PackageManager::createInstallTask(PackagePair& pair, const InstallT
 
 bool PackageManager::hasUnfinalizedPackages()
 {	
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 
 	debugL("PackageManager", this) << "Checking if Finalization Required" << endl;
 	
@@ -573,7 +555,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 {
 	debugL("PackageManager", this) << "Finalizing Installations" << endl;
 	
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	
 	bool res = true;
 	
@@ -623,7 +605,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 //
 InstallTask* PackageManager::getInstallTask(const string& id) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (InstallTaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); it++) {
 		if ((*it)->remote()->id() == id)
 			return *it;
@@ -634,7 +616,7 @@ InstallTask* PackageManager::getInstallTask(const string& id) const
 
 InstallTaskList PackageManager::tasks() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _tasks;
 }
 
@@ -644,7 +626,7 @@ InstallTaskList PackageManager::tasks() const
 //
 PackagePair PackageManager::getPackagePair(const string& id, bool whiny) const
 {		
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	LocalPackage* local = _localPackages.get(id, false);
 	RemotePackage* remote = _remotePackages.get(id, false);
 
@@ -661,7 +643,7 @@ PackagePair PackageManager::getPackagePair(const string& id, bool whiny) const
 PackagePairList PackageManager::getPackagePairs() const
 {	
 	PackagePairList pairs;
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	LocalPackageMap lpackages = _localPackages.map();
 	RemotePackageMap rpackages = _remotePackages.map();
 	for (LocalPackageMap::const_iterator lit = lpackages.begin(); lit != lpackages.end(); ++lit) {
@@ -685,7 +667,7 @@ PackagePairList PackageManager::getPackagePairs() const
 
 PackagePair PackageManager::getOrCreatePackagePair(const string& id)
 {	
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	RemotePackage* remote = _remotePackages.get(id, true);
 	if (remote->assets().empty())
 		throw Exception("The remote package has no file assets.");
@@ -712,7 +694,7 @@ PackagePair PackageManager::getOrCreatePackagePair(const string& id)
 
 string PackageManager::installedPackageVersion(const string& id) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	LocalPackage* local = _localPackages.get(id, true);
 	
 	if (!local->valid())
@@ -820,7 +802,7 @@ bool PackageManager::isSupportedFileType(const string& fileName)
 
 Path PackageManager::getCacheFilePath(const string& fileName)
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	Path path(options().cacheDir);
 	path.makeDirectory();
@@ -843,21 +825,21 @@ Path PackageManager::getIntermediatePackageDir(const string& id)
 
 PackageManager::Options& PackageManager::options() 
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _options;
 }
 
 
 RemotePackageStore& PackageManager::remotePackages() 
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _remotePackages; 
 }
 
 
 LocalPackageStore& PackageManager::localPackages()
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _localPackages; 
 }
 
@@ -878,7 +860,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 
 	// Remove the task reference
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		for (InstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++) {
 			if (*it == task) {
 				_tasks.erase(it);
@@ -1082,12 +1064,12 @@ bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* moni
 		/*
 
 	package.print(cout);
-		//package.print(cout); //.data());
+		//package.print(cout); //.c_str());
 		parseRemotePackageRequest(_remotePackages, data);
 
 		// Parse the response JSON
 		pugi::json_document doc;
-		pugi::json_parse_result result = doc.load(data.data());
+		pugi::json_parse_result result = doc.load(data.c_str());
 		if (!result)
 			throw Exception(result.description());	
 	
@@ -1107,7 +1089,7 @@ bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* moni
 		*/
 			/*
 			LocalPackage* package = new LocalPackage();
-			pugi::json_parse_result result = package->load_file(fIt.path().toString().data());
+			pugi::json_parse_result result = package->load_file(fIt.path().toString().c_str());
 			if (!package->valid()) {				
 				if (!result)
 					errorL("PackageManager", this) << "Package Load Error: " << result.description() << endl;
@@ -1221,13 +1203,13 @@ bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* moni
 	
 
 			/*
-			if (remove(_options.interDir.data()) == 0)
+			if (remove(_options.interDir.c_str()) == 0)
 				debugL("PackageManager", this) << "Finalizing: Deleted: " << fIt.path().toString() << endl;
 			else
 				errorL("PackageManager", this) << "Finalizing: Delete Error: " << fIt.path().toString() << endl;
 				*/
 	/* 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	//const string& name
 	//if (util::compareVersion(remote->latestAsset().version(), local->version()))
 	//	return false;
@@ -1249,7 +1231,7 @@ PackagePair PackageManager::getPackagePair(const string& name, bool whiny)
 
 bool PackageManager::isUpToDate(const string& name)
 {	
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	
 	LocalPackage* local = _localPackages.get(name, true);
 	RemotePackage* remote = _remotePackages.get(name, true);

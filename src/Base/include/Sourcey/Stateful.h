@@ -34,10 +34,10 @@ namespace scy {
 // ---------------------------------------------------------------------
 template<typename T>
 class Stateful
-	/// This class implements a simple state machine.
-	/// T should be a derived State.
-	///
-	/// Use MutexStateful for thread safe implementation. 
+	// This class implements a simple state machine.
+	// T should be a derived State.
+	//
+	// Use MutexStateful for thread safe implementation. 
 {
 public:
 	virtual bool stateEquals(unsigned int id) const
@@ -92,8 +92,8 @@ protected:
 // ---------------------------------------------------------------------
 template<typename T>
 class MutexStateful: public Stateful<T>
-	/// This class adds thread safety the base
-	/// Stateful implementation.
+	// This class adds thread safety the base
+	// Stateful implementation.
 {
 public:
 	virtual bool stateEquals(unsigned int id) const
@@ -110,13 +110,13 @@ public:
 
 	virtual T& state() 
 	{ 
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		return Stateful<T>::_state; 
 	}
 
 	virtual T state() const 
 	{ 
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		return Stateful<T>::_state; 
 	}
 
@@ -128,18 +128,18 @@ protected:
 // ---------------------------------------------------------------------
 template<typename T>
 class StatefulSignal: public MutexStateful<T>
-	/// This class adds a StateChange signal
-	/// to the thread safe implementation.
+	// This class adds a StateChange signal
+	// to the thread safe implementation.
 {
 public:
 	Signal2<T&, const T&> StateChange;
-		/// Fired when the state changes to signal the
-		/// new and old states.
+		// Fired when the state changes to signal the
+		// new and old states.
 
 protected:
 	virtual bool setState(void* sender, unsigned int id, const std::string& message = "") 
-		/// This method is used to send the state signal
-		/// after a successful state change.
+		// This method is used to send the state signal
+		// after a successful state change.
 	{ 
 		T oldState = MutexStateful<T>::state();
 		if (Stateful<T>::setState(id, message)) {

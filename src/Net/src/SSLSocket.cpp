@@ -60,25 +60,25 @@ SSLBase& SSLSocket::base() const
 SSLBase::SSLBase() : 
 	// TODO: Using client context, should assert no bind()/listen() on this socket
 	_context(SSLManager::instance().defaultClientContext()), 
-	_session(nullptr), 
+	_session(nil), 
 	_sslAdapter(this)
 {
 	traceL("SSLBase", this) << "Creating" << endl;
 	assert(_handle);
 	_handle->data = this;
-	connectReq.data = this;
+	_connectReq.data = this;
 }
 
 
 SSLBase::SSLBase(SSLContext::Ptr context) : 
 	_context(context), 
-	_session(nullptr), 
+	_session(nil), 
 	_sslAdapter(this)
 {
 	traceL("SSLBase", this) << "Creating" << endl;
 	assert(_handle);
 	_handle->data = this;
-	connectReq.data = this;
+	_connectReq.data = this;
 }
 	
 
@@ -90,7 +90,7 @@ SSLBase::SSLBase(SSLContext::Ptr context, SSLSession::Ptr session) :
 	traceL("SSLBase", this) << "Creating" << endl;
 	assert(_handle);
 	_handle->data = this;
-	connectReq.data = this;
+	_connectReq.data = this;
 }
 
 	
@@ -233,8 +233,8 @@ void SSLBase::connect(const Address& peerAddress)
 	traceL("SSLBase", this) << "Connecting to " << peerAddress << endl;
 	init();
 	const sockaddr_in* addr = reinterpret_cast<const sockaddr_in*>(peerAddress.addr());
-	assert(connectReq.data == this);
-	int r = uv_tcp_connect(&connectReq, (uv_tcp_t*)stream(), *addr, uv::onConnected);
+	assert(_connectReq.data == this);
+	int r = uv_tcp_connect(&_connectReq, (uv_tcp_t*)stream(), *addr, uv::onConnected);
 	if (r) {
 		uv_err_t err = uv_last_error(loop());
 		setError(err);

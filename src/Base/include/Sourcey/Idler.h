@@ -22,24 +22,24 @@
 
 
 #include "Sourcey/UV/UVPP.h"
+#include "Sourcey/Interfaces.h"
 
 
 namespace scy {
 	
 
-
-class Idler: public uv::Base
-	/// https://github.com/AlloSphere-Research-Group/alive/blob/master/archived/av/uv_utils.h
+class Idler: public uv::Base, public abstract::Startable
 {
 public:
 	Idler(uv::Loop& loop = uv::defaultLoop());
 	virtual ~Idler();	
-	
-	virtual void init();	
+		
 	virtual void start();	
 	virtual void stop();
 
 	virtual void onIdle();
+		// Called by the event loop thread  
+		// to do asynchronous processing.
 };
 
 

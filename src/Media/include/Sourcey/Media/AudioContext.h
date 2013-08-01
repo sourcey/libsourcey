@@ -40,9 +40,6 @@ extern "C" {
 namespace scy {
 namespace av {
 
-	
-inline void InitDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts);
-
 
 struct AudioContext
 {
@@ -50,13 +47,13 @@ struct AudioContext
 	virtual ~AudioContext();
 			
 	virtual void create();
-		/// Initialize the AVCodecContext with default values
+		// Initialize the AVCodecContext with default values
 
 	virtual void open();
-		/// Open the AVCodecContext
+		// Open the AVCodecContext
 
 	virtual void close();	
-		/// Close the AVCodecContext
+		// Close the AVCodecContext
 
 	AVStream* stream;		// encoder or decoder stream
 	AVCodecContext* ctx;	// encoder or decoder context
@@ -80,7 +77,7 @@ struct AudioEncoderContext: public AudioContext
 	//virtual void open();
 	virtual void close();
 	
-	virtual bool encode(unsigned char* data, int size, AVPacket& opacket);
+	virtual bool encode(unsigned char* data, int size, Int64 pts, AVPacket& opacket);
 	virtual bool encode(AVPacket& ipacket, AVPacket& opacket);	
 	
 	AVFormatContext* format;
@@ -113,14 +110,14 @@ struct AudioDecoderContext: public AudioContext
 	
 	virtual bool decode(UInt8* data, int size, AVPacket& opacket);
 	virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
-		/// Decodes a the given input packet.
-		/// Returns true an output packet was returned, 
-		/// false otherwise.
+		// Decodes a the given input packet.
+		// Returns true an output packet was returned, 
+		// false otherwise.
     
 	virtual bool flush(AVPacket& opacket);
-		/// Flushes buffered frames.
-		/// This method should be called after decoding
-		/// until false is returned.
+		// Flushes buffered frames.
+		// This method should be called after decoding
+		// until false is returned.
 
     double duration;
     int width;	// Number of bits used to store a sample
@@ -146,6 +143,9 @@ struct AudioResampler
 	AudioCodec iparams;
 	AudioCodec oparams;
 };
+
+	
+void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts);
 
 
 } } // namespace scy::av

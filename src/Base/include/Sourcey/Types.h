@@ -33,54 +33,11 @@ namespace scy {
 typedef std::vector<std::string>			StringVec;
 typedef std::map<std::string, std::string>	StringMap;
 
-
-//
-// Error type
-//
+typedef void (*Callable)(void*);
 
 
-struct Error 
-	/// Simple error type 
-{
-	std::string message;
-		/// Error message (set by application)
-
-	int syserr;
-		/// System error code
-
-	int uverr;
-		/// Libuv error code
-
-	Error()
-	{
-		reset();
-	}
-
-	Error(const std::string& msg)
-	{
-		reset();
-		message = msg;
-	}
-
-	Error(const char* msg)
-	{
-		//assert(msg);
-		reset();
-		message = msg;
-	}
-
-	bool any() 
-	{
-		return uverr != 0 || syserr != 0 || !message.empty();
-	}
-
-	void reset() 
-	{
-		uverr = 0;
-		syserr = 0;
-		message.clear();
-	}
-};
+// Define our own alias for NULL
+#define nil 0
 
 
 //

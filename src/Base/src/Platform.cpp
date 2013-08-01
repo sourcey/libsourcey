@@ -18,8 +18,15 @@
 
 
 #include "Sourcey/Platform.h"
-#include "Sourcey/Exception.h"
 #include "Sourcey/UV/UVPP.h"
+#include "Sourcey/Exception.h"
+
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+#include <time.h>
 
 
 using namespace std;
@@ -31,9 +38,33 @@ using namespace std;
 namespace scy {
 	
 
-UInt64 getTime() 
+UInt64 getTimeHR() 
 {
 	return uv_hrtime();
+}
+	
+
+UInt64 getTimeMS() 
+{
+	return uv_hrtime() / 1000000;
+}
+
+
+UInt64 getTicks()
+{
+#ifdef WIN32
+	return ::GetTickCount();
+#else
+	struct timespec tval;
+	clock_gettime(CLOCK_MONOTONIC, &tval);
+	return tval.tv_sec * 1000 + tval.tv_nsec / 1000000;
+#endif
+}
+
+
+double getProcessTime()
+{
+	return clock() / CLOCKS_PER_SEC;
 }
 
 	
@@ -69,7 +100,25 @@ UInt64 getTotalMemory()
 }
 
 
-#if WIN32
+void sleep(int ms)
+{
+#ifdef WIN32
+	Sleep(ms);
+#else
+	sleep(ms);
+#endif
+}
+
+
+void pause()
+{
+	std::puts("Press enter to continue...");
+	std::getchar();
+}
+
+
+
+#ifdef WIN32
 
 enum WindowsMajorVersions 
 {

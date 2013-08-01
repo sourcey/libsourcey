@@ -104,7 +104,7 @@ WebSocketAdapter::WebSocketAdapter(net::Socket* socket, WebSocket::Mode mode, ht
 
 	
 WebSocketAdapter::WebSocketAdapter(WebSocket::Mode mode, http::Request& request, http::Response& response) : 
-	net::SocketAdapter(nullptr), //, 100
+	net::SocketAdapter(nil), //, 100
 	framer(mode), _request(request), _response(response)
 {
 	traceL("WebSocketAdapter", this) << "Creating" << endl;
@@ -164,8 +164,8 @@ void WebSocketAdapter::sendClientRequest()
 
 	ostringstream oss;
 	_request.write(oss);
-	traceL("WebSocketClientAdapter", this) << "Send client request: After: " << string(oss.str().data(), oss.str().length()) << endl;
-	socket->base().send(oss.str().data(), oss.str().length());
+	traceL("WebSocketClientAdapter", this) << "Send client request: After: " << string(oss.str().c_str(), oss.str().length()) << endl;
+	socket->base().send(oss.str().c_str(), oss.str().length());
 }
 
 
@@ -239,7 +239,7 @@ void WebSocketAdapter::handleServerRequest(Buffer& buffer)
 	// Send response
 	ostringstream oss;
 	_response.write(oss);
-	socket->base().send(oss.str().data(), oss.str().length());
+	socket->base().send(oss.str().c_str(), oss.str().length());
 }
 
 
@@ -724,7 +724,7 @@ void WebSocketClientAdapter::sendClientRequest(http::Request& request)
 
 	ostringstream oss;
 	request.write(oss);
-	socket->base().send(oss.str().data(), oss.str().length());
+	socket->base().send(oss.str().c_str(), oss.str().length());
 }
 
 
@@ -827,7 +827,7 @@ void WebSocketServerAdapter::onSocketRecv(Buffer& buffer, const net::Address& pe
 			// Send response
 			ostringstream oss;
 			_connection.response().write(oss);
-			socket->base().send(oss.str().data(), oss.str().length());
+			socket->base().send(oss.str().c_str(), oss.str().length());
 		} 
 		catch(Exception& exc) {
 			errorL("WebSocketServerAdapter", this) << "Handshake failed: " << exc.message() << endl;
@@ -877,7 +877,7 @@ void WebSocketAdapter::setResponse(http::Response* response)
 
 	ostringstream oss;
 	request.write(oss);
-	socket->base().send(oss.str().data(), oss.str().length());
+	socket->base().send(oss.str().c_str(), oss.str().length());
 	*/
 
 /*
@@ -1183,7 +1183,7 @@ void WebSocketAdapter::connect(const Address& peerAddress)
 	if (r) {
 		uv_err_t err = uv_last_error(loop());
 		setError(err);
-		throw Poco::Exception(uv_strerror(err)); // TODO: make exception setError option
+		throw Exception(uv_strerror(err)); // TODO: make exception setError option
 	}
 }
 

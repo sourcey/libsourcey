@@ -33,30 +33,30 @@ namespace http {
 
 
 Parser::Parser(http::Response* response) : 
-	_observer(nullptr),
-	_request(nullptr),
+	_observer(nil),
+	_request(nil),
 	_response(response),
-	_error(nullptr)
+	_error(nil)
 {
 	init(HTTP_RESPONSE);
 }
 
 
 Parser::Parser(http::Request* request) : 
-	_observer(nullptr),
+	_observer(nil),
 	_request(request),
-	_response(nullptr),
-	_error(nullptr)
+	_response(nil),
+	_error(nil)
 {
 	init(HTTP_REQUEST);
 }
 
 
 Parser::Parser(http_parser_type type) : 
-	_observer(nullptr),
-	_request(nullptr),
-	_response(nullptr),
-	_error(nullptr)
+	_observer(nil),
+	_request(nil),
+	_response(nil),
+	_error(nil)
 {
 	init(type);
 }
@@ -135,7 +135,7 @@ void Parser::reset()
 	_complete = false;
 	if (_error) {
 		delete _error;
-		_error = nullptr;
+		_error = nil;
 	}
 
 	// TODO: Reset parser internal state?
@@ -182,7 +182,7 @@ void Parser::setObserver(ParserObserver* observer)
 http::Message* Parser::message()
 {
 	return _request ? static_cast<http::Message*>(_request) : 
-		_response ? static_cast<http::Message*>(_response) : NULL;
+		_response ? static_cast<http::Message*>(_response) : nil;
 }
 
 
@@ -398,11 +398,11 @@ int Parser::on_message_complete(http_parser* parser)
 
 
 /*
-	_observer = nullptr;
+	_observer = nil;
 Parser::Parser(http_parser_type type) : ///, http::Message* headers // ParserObserver& observer, 
-	_observer(nullptr), 
+	_observer(nil), 
 	//_headers(headers), 
-	_error(nullptr),
+	_error(nil),
 	_complete(false)//, 
 	//_upgrade(true), 
 	//_wasHeaderValue(true)
@@ -805,7 +805,7 @@ bool DigestAuthenticator::validateRequest(UserManager* authenticator, const stri
 
 string DigestAuthenticator::prepare401Header(const string& extra) 
 {
-	_noonce = crypto::randomKey(32);
+	_noonce = crypto::randomString(32);
 	if (_usingRFC2617) {
 		return format(
 			"%s 401 Unauthorized\r\n"

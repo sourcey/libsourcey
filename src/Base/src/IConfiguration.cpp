@@ -46,7 +46,7 @@ IConfiguration::~IConfiguration()
 
 bool IConfiguration::exists(const std::string& key) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	std::string value;
 	return getRaw(key, value);
@@ -55,7 +55,7 @@ bool IConfiguration::exists(const std::string& key) const
 	
 std::string IConfiguration::getString(const std::string& key) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -67,7 +67,7 @@ std::string IConfiguration::getString(const std::string& key) const
 	
 std::string IConfiguration::getString(const std::string& key, const std::string& defaultValue) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -79,7 +79,7 @@ std::string IConfiguration::getString(const std::string& key, const std::string&
 
 std::string IConfiguration::getRawString(const std::string& key) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -91,7 +91,7 @@ std::string IConfiguration::getRawString(const std::string& key) const
 	
 std::string IConfiguration::getRawString(const std::string& key, const std::string& defaultValue) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -103,7 +103,7 @@ std::string IConfiguration::getRawString(const std::string& key, const std::stri
 	
 int IConfiguration::getInt(const std::string& key) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -115,7 +115,7 @@ int IConfiguration::getInt(const std::string& key) const
 	
 int IConfiguration::getInt(const std::string& key, int defaultValue) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -127,7 +127,7 @@ int IConfiguration::getInt(const std::string& key, int defaultValue) const
 
 double IConfiguration::getDouble(const std::string& key) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -139,7 +139,7 @@ double IConfiguration::getDouble(const std::string& key) const
 	
 double IConfiguration::getDouble(const std::string& key, double defaultValue) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -151,7 +151,7 @@ double IConfiguration::getDouble(const std::string& key, double defaultValue) co
 
 bool IConfiguration::getBool(const std::string& key) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -163,7 +163,7 @@ bool IConfiguration::getBool(const std::string& key) const
 
 bool IConfiguration::getBool(const std::string& key, bool defaultValue) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	std::string value;
 	if (getRaw(key, value))
@@ -175,7 +175,7 @@ bool IConfiguration::getBool(const std::string& key, bool defaultValue) const
 
 void IConfiguration::setString(const std::string& key, const std::string& value)
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	setRaw(key, value);
 }
@@ -183,7 +183,7 @@ void IConfiguration::setString(const std::string& key, const std::string& value)
 	
 void IConfiguration::setInt(const std::string& key, int value)
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	setRaw(key, util::toString<int>(value));
 }
@@ -191,7 +191,7 @@ void IConfiguration::setInt(const std::string& key, int value)
 
 void IConfiguration::setDouble(const std::string& key, double value)
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	setRaw(key, util::toString<int>(value));
 }
@@ -199,7 +199,7 @@ void IConfiguration::setDouble(const std::string& key, double value)
 
 void IConfiguration::setBool(const std::string& key, bool value)
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 
 	setRaw(key, value ? "true" : "false");
 }

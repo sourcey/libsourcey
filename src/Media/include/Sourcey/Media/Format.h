@@ -42,19 +42,19 @@ struct Format
 		None		= 0,
 		Video		= 1,	/// video only
 		Audio		= 2,	/// audio only
-		Multiplex	= 3		/// both video & audio
+		Multiplex	= 3		// both video & audio
 	};
 
 	//
 	// Base Format Variables
 	//
-	std::string name;		/// The display name of this format.
-	std::string id;			/// The short name of this format.
+	std::string name;		// The display name of this format.
+	std::string id;			// The short name of this format.
 	
-	VideoCodec video;		/// The video codec.
-	AudioCodec audio;		/// The audio codec.
+	VideoCodec video;		// The video codec.
+	AudioCodec audio;		// The audio codec.
 
-	int priority;			/// The priority this format will be displayed on the list.
+	int priority;			// The priority this format will be displayed on the list.
 
 	//
 	// Ctors/Dtors
@@ -63,20 +63,20 @@ struct Format
 
 	Format(const std::string& name, const char* id, 
 		const VideoCodec& video, const AudioCodec& audio, int priority = 0);
-		/// Multiplex format constructor
+		// Multiplex format constructor
 	
 	Format(const std::string& name, const char* id, 
 		const VideoCodec& video, int priority = 0);
-		/// Video only format constructor
+		// Video only format constructor
 	
 	Format(const std::string& name, const char* id, 
 		const AudioCodec& audio, int priority = 0);
-		/// Audio only format constructor
+		// Audio only format constructor
 
 	Format(const Format& r);
 		
 	Type type() const;
-		/// The format type.
+		// The format type.
 
 	virtual std::string toString() const;
 	virtual void print(std::ostream& ost);
@@ -106,7 +106,7 @@ typedef std::vector<Format*> FormatPList;
 		Unknown		= 0,
 		Raw			= 1,
 
-		/// Video
+		// Video
 		MP4			= 2,
 		FLV			= 3,
 		OGG			= 4,
@@ -114,7 +114,7 @@ typedef std::vector<Format*> FormatPList;
 		MJPEG		= 6,
 		MPNG		= 7,
 
-		/// Audio
+		// Audio
 		M4A			= 20,
 		MP3			= 21
 	};
@@ -123,21 +123,21 @@ typedef std::vector<Format*> FormatPList;
 	/// Methods
 	//	
 	//virtual std::string extension() const;
-		/// Returns the file extension for this format.
-		/// The default implementation just transforms the 
-		/// id string to lowercase.
-		/// TODO: Consider removing or making a member variable
+		// Returns the file extension for this format.
+		// The default implementation just transforms the 
+		// id string to lowercase.
+		// TODO: Consider removing or making a member variable
 
 	//virtual std::string name() const;
-		/// Returns a string representation of the Codec name.
-		/// The default implementation uses idToName.
+		// Returns a string representation of the Codec name.
+		// The default implementation uses idToName.
 	
 
 	//virtual std::string encoderName() const;
-		/// Returns the encoder name for this format.
-		/// The default implementation uses idToEncoderName.
-		/// This function should return the short name
-		/// for use with av_guess_format.
+		// Returns the encoder name for this format.
+		// The default implementation uses idToEncoderName.
+		// This function should return the short name
+		// for use with av_guess_format.
 	//static ID toID(const std::string& name);	
 	//static std::string idString(const char* id);
 	//static std::string encoderName(const char* id);

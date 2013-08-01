@@ -24,7 +24,7 @@
 namespace scy { 
 
 
-// ----------------------------------------------------------------------------
+//
 //
 class Worker 
 {
@@ -40,6 +40,7 @@ public:
 	
 	void start()
 	{		
+		uv_work_t req;
 		req.data = this;
         uv_queue_work(&loop, &req, _run, _afterRun);
 	}
@@ -50,7 +51,7 @@ public:
 		// need a synced boolean on windows
 	}
 
-	virtual void run() = 0;
+	virtual bool run() = 0;
 	
 	virtual void afterRun()
 	{	

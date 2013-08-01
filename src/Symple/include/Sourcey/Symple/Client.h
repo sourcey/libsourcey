@@ -209,13 +209,13 @@ enum FilterFlags
 };
 
 
-struct Filter: public Flags
+struct Filter: public Flaggable
 {	
 	Filter(const std::string& path, unsigned flags = 0) : 
-		Flags(flags), path(path) {}
+		Flaggable(flags), path(path) {}
 	
 	Filter(unsigned flags = 0) : 
-		Flags(flags), path("*") {}
+		Flaggable(flags), path("*") {}
 
 	std::string path;
 };
@@ -491,7 +491,7 @@ public:
 		traceL() << "[smpl::Client:" << this << "] Connecting" << std::endl;
 		
 		{
-			//Mutex::ScopedLock lock(_mutex);
+			//ScopedLock lock(_mutex);
 			assert(!_options.user.empty());
 			//assert(!_options.token.empty());
 			_srvAddr = _options.serverAddr;
@@ -571,49 +571,49 @@ public:
 
 	virtual Roster& roster() 
 	{ 
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		return _roster; 
 	}
 
 
 	virtual uv::Loop& loop() 
 	{ 
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		return _runner; 
 	}
 
 
 	virtual PersistenceT& persistence() 
 	{ 
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		return _persistence; 
 	}
 
 
 	virtual Client::Options& options() 
 	{ 
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		return _options; 
 	}
 
 
 	virtual std::string ourID() const
 	{
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		return _ourID;
 	}
 
 
 	virtual int announceStatus() const
 	{
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		return _announceStatus;
 	}
 
 
 	virtual Peer& ourPeer()
 	{	
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		traceL() << "[smpl::Client:" << this << "] Getting Our Peer: " << _ourID << std::endl;
 		if (_ourID.empty())
 			throw Exception("No active peer session is available.");
@@ -636,7 +636,7 @@ protected:
 	{
 		json::Value data;
 		{
-			//Mutex::ScopedLock lock(_mutex);
+			//ScopedLock lock(_mutex);
 			data["token"]	= _options.token;
 			data["group"]	= _options.group;
 			data["user"]	= _options.user;

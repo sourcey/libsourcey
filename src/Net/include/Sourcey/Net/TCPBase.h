@@ -95,23 +95,20 @@ public:
 		
 protected:
 	virtual ~TCPBase();
-	virtual void* instance() { return this; }
+	virtual void init();
 
 protected:
-	uv_connect_t connectReq;
-	bool _connected;
+	uv_connect_t _connectReq;
+	//std::string _debugOutput;
 };
-
-
-//
-// UV Callbacks
-//
-
-UVStatusCallback(TCPBase, onConnect, uv_connect_t);
-UVStatusCallbackWithType(TCPBase, onAcceptConnection, uv_stream_t);
 
 
 } } // namespace scy::net
 
 
 #endif // SOURCEY_Net_TCPBase_H
+
+
+
+	//virtual void* instance() { return this; }
+	//bool _connected;

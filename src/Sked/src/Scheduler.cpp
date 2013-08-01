@@ -168,7 +168,7 @@ void Scheduler::onIdle()
 
 void Scheduler::update()
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	
 	//log("trace") << "Updating: " << _tasks.size() << endl;
 
@@ -196,7 +196,7 @@ void Scheduler::serialize(json::Value& root)
 {
 	log("trace") << "Serializing" << endl;
 	
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		sked::Task* task = reinterpret_cast<sked::Task*>(*it);
 		log("trace") << "Serializing: " << task << endl;
@@ -267,7 +267,7 @@ sked::TaskFactory& Scheduler::factory()
 			// Push the task back onto the end of the queue
 			//else {
 			//	log("trace") << "Replacing Task: " << task << endl;	
-			//	Mutex::ScopedLock lock(_mutex);
+			//	ScopedLock lock(_mutex);
 			//	_tasks.push_back(task);
 			//}	
 			//sked::Trigger& trigger = reinterpret_cast<sked::Task*>(task)->trigger();
@@ -288,7 +288,7 @@ sked::TaskFactory& Scheduler::factory()
 	//countNestedKeys(*it, key, count, depth);
 
 	/*
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		log("trace") << "Serializing: " << it->second << endl;
 		reinterpret_cast<sked::Task*>(it->second)->serialize(root[root.size()]);
@@ -316,13 +316,13 @@ sked::TaskFactory& Scheduler::factory()
 
 sked::TaskList Scheduler::tasks() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _tasks;
 }
 
 void Scheduler::clear()
 {
-	Mutex::ScopedLock lock(_mutex);			
+	ScopedLock lock(_mutex);			
 
 	sked::TaskList::iterator it = _tasks.begin();
 	while (it != _tasks.end()) {
@@ -352,7 +352,7 @@ void Scheduler::clear()
 	// Attempt to stop any matching tasks
 	//cancel(task);
 	//{
-	//	Mutex::ScopedLock lock(_mutex);
+	//	ScopedLock lock(_mutex);
 	//	_tasks.push_back(task);	//.clone()
 	//}
 	//sort(_tasks.begin(), _tasks.end(), CompareTimeout);
@@ -368,7 +368,7 @@ void Scheduler::clear()
 	
 	bool success = false;
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		for (sked::TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 			if (*it == task) {
 				log("trace") << "Stopped: " << *it << endl;
@@ -389,7 +389,7 @@ void Scheduler::clear()
 /*
 Timeout Scheduler::scheduleAt() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _scheduleAt;
 }
 */
@@ -409,7 +409,7 @@ Timeout Scheduler::scheduleAt() const
 
 		// Obtain the next scheduled task
 		{
-			Mutex::ScopedLock lock(_mutex);			
+			ScopedLock lock(_mutex);			
 			task = _tasks.empty() ? NULL : _tasks.front();
 		}
 
@@ -518,7 +518,7 @@ Timeout Scheduler::scheduleAt() const
 
 void Scheduler::stopAll(const void* klass)
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (sked::TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if ((*it)->object() == klass) {
 			log("trace") << "Stopped: " << (*it)->object() << endl;
@@ -530,7 +530,7 @@ void Scheduler::stopAll(const void* klass)
 
 void Scheduler::reset(sked::Task* task) 
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	bool success = false;
 	for (sked::TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (**it == task) {

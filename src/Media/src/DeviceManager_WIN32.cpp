@@ -64,13 +64,13 @@ IDeviceManager* DeviceManagerFactory::create()
 
 
 static const char* kFilteredAudioDevicesName[] = {
-	NULL,
+	nil,
 };
 static const char* const kFilteredVideoDevicesName[] =  {
 	"Google Camera Adapter",   // Google magiccams
 	"Asus virtual Camera",     // Bad Asus desktop virtual cam
 	"Bluetooth Video",         // Bad Sony viao bluetooth sharing driver
-	NULL,
+	nil,
 };
 static const char kUsbDevicePathPrefix[] = "\\\\?\\usb";
 static bool getDevices(const CLSID& catid, vector<Device>& out);
@@ -102,8 +102,8 @@ bool Win32DeviceManager::initialize()
 {
 	traceL("DeviceManager") << "Initializing" << endl;
 	if (!initialized()) {
-		HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
-		//HRESULT hr = CoInitialize(nullptr);
+		HRESULT hr = CoInitializeEx(nil, COINIT_MULTITHREADED);
+		//HRESULT hr = CoInitialize(nil);
 		_needCoUninitialize = SUCCEEDED(hr);
 		if (FAILED(hr)) {
 			if (hr != RPC_E_CHANGED_MODE) {
@@ -186,7 +186,7 @@ bool Win32DeviceManager::getAudioDevices(bool input, vector<Device>& devs)
 bool Win32DeviceManager::getDefaultAudioDevice(bool input, Device& device) 
 {
 	bool ret = false;
-	vector<Device> devices;
+	std::vector<Device> devices;
 	ret = (getAudioDevices(input, devices) && !devices.empty());
 	if (ret) {
 		// Use the first device by default
@@ -231,7 +231,7 @@ bool Win32DeviceManager::getDefaultVideoCaptureDevice(Device& device)
 	bool ret = false;
 	// If there are multiple capture devices, we want the first USB device.
 	// This avoids issues with defaulting to virtual cameras or grabber cards.
-	vector<Device> devices;
+	std::vector<Device> devices;
 	ret = (getVideoCaptureDevices(devices) && !devices.empty());
 	if (ret) {
 		device = devices[0];
@@ -264,12 +264,12 @@ bool getDevices(const CLSID& catid, vector<Device>& devices)
 	}
 
 	// Only enum devices if CreateClassEnumerator returns S_OK. If there are no
-	// devices available, S_FALSE will be returned, but enumMk will be NULL.
+	// devices available, S_FALSE will be returned, but enumMk will be nil.
 	if (hr == S_OK) {
 		CComPtr<IMoniker> mk;
-		while (cam_enum->Next(1, &mk, NULL) == S_OK) {
+		while (cam_enum->Next(1, &mk, nil) == S_OK) {
 			CComPtr<IPropertyBag> bag;
-			if (SUCCEEDED(mk->BindToStorage(NULL, NULL,
+			if (SUCCEEDED(mk->BindToStorage(nil, nil,
 				__uuidof(bag), reinterpret_cast<void**>(&bag)))) {
 					CComVariant name, path;
 					string type_str, name_str, path_str;
@@ -290,7 +290,7 @@ bool getDevices(const CLSID& catid, vector<Device>& devices)
 							devices.push_back(Device(type_str, (int)devices.size(), name_str, path_str));
 					}
 			}
-			mk = NULL;
+			mk = nil;
 		}
 	}
 
@@ -369,7 +369,7 @@ bool getCoreAudioDevices(bool input, vector<Device>& devs)
 	HRESULT hr = S_OK;
 	CComPtr<IMMDeviceEnumerator> enumerator;
 
-	hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL,
+	hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), nil, CLSCTX_ALL,
 		__uuidof(IMMDeviceEnumerator), reinterpret_cast<void**>(&enumerator));
 	if (SUCCEEDED(hr)) {
 		CComPtr<IMMDeviceCollection> devices;
@@ -391,7 +391,7 @@ bool getCoreAudioDevices(bool input, vector<Device>& devs)
 						break;
 					
 					// Get an endpoint interface for the current device
-					IMMEndpoint* endpoint = NULL;
+					IMMEndpoint* endpoint = nil;
 					hr = device->QueryInterface(__uuidof(IMMEndpoint), (void**)&endpoint);
 					if (FAILED(hr))
 						break;
@@ -472,15 +472,15 @@ bool getWaveDevices(bool input, vector<Device>& devs)
 Win32DeviceWatcher::Win32DeviceWatcher(Win32DeviceManager* manager)
 	: DeviceWatcher(manager),
 	manager_(manager),
-	audio_notify_(nullptr),
-	video_notify_(nullptr) {
+	audio_notify_(nil),
+	video_notify_(nil) {
 }
 
 Win32DeviceWatcher::~Win32DeviceWatcher() {
 }
 
 bool Win32DeviceWatcher::start() {
-	if (!Create(NULL, _T("libjingle Win32DeviceWatcher Window"),
+	if (!Create(nil, _T("libjingle Win32DeviceWatcher Window"),
 		0, 0, 0, 0, 0, 0)) {
 			return false;
 	}
@@ -502,9 +502,9 @@ bool Win32DeviceWatcher::start() {
 
 void Win32DeviceWatcher::stop() {
 	UnregisterDeviceNotification(video_notify_);
-	video_notify_ = NULL;
+	video_notify_ = nil;
 	UnregisterDeviceNotification(audio_notify_);
-	audio_notify_ = NULL;
+	audio_notify_ = nil;
 	Destroy();
 }
 

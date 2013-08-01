@@ -44,7 +44,7 @@ class CaptureEncoder: public abstract::Startable, public EncoderT
 	///
 	/// EncoderT should be a VideoEncoder or AudioEncoder.
 	///
-	/// NOTE: This class is depreciated.
+	/// Note: This class is depreciated.
 {
 public:
 	CaptureEncoder(ICapture* capture, const EncoderOptions& options, bool destroyOnStop = false) : 

@@ -17,11 +17,11 @@
 //
 
 
-#ifndef SOURCEY_MEDIA_VideoCapture_H
-#define SOURCEY_MEDIA_VideoCapture_H
+#ifndef SOURCEY_MEDIA_VideoCaptureBase_H
+#define SOURCEY_MEDIA_VideoCaptureBase_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 #include "Sourcey/Mutex.h"
 #include "Sourcey/Flaggable.h"
 #include "Sourcey/Interfaces.h"
@@ -29,9 +29,6 @@
 #include "Sourcey/Media/Format.h"
 #include "Sourcey/Media/ICapture.h"
 #include "Sourcey/Media/FPSCounter.h"
-
-#include "Poco/Thread.h"
-#include "Poco/Event.h"
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
@@ -42,10 +39,186 @@
 
 namespace scy {
 namespace av {
+	
+
+class VideoCaptureBase;
+	/// The reference counted video capture implementation.
+	/// Helps us overcome the multithread capture limitation with OpenCV.
 
 
-// ---------------------------------------------------------------------
 //
+// Video Capture
+//
+
+
+class VideoCapture: public ICapture
+	/// Class for capturing video from cameras and files using OpenCV.
+{
+public:
+	VideoCapture(int deviceId);
+		// Creates and opens the given device
+		// Captures can be instantiated from thread, providing the  
+		// VideoCaptureBase for the given deviceId was already initialized
+		// in the main thread.
+
+	VideoCapture(const std::string& filename);
+		// Creates and opens the given video file
+		// Can be created in any thread
+
+	VideoCapture(VideoCaptureBase* base);
+		// Creates the video capture using the given base instance.
+
+	virtual ~VideoCapture();
+	
+	virtual void start();
+	virtual void stop();
+
+	int width();
+	int height();
+				
+	void getFrame(cv::Mat& frame, int width = 0, int height = 0);
+
+	virtual void getEncoderFormat(Format& iformat);
+
+protected:
+	mutable Mutex _mutex;
+
+	VideoCaptureBase* _base;
+};
+	
+
+//
+// Video Capture Base
+//
+
+
+class VideoCaptureBase: public CountedObject, public abstract::Runnable
+	/// Class for capturing video from cameras and files using OpenCV.
+	/// Do not use this class directly, use VideoCapture instead.
+	///
+	/// Limitations:
+	/// OpenCV doesn't support multi-thread capturing so VideoCaptureBase
+	/// instances should be created in the main thread.
+	/// File captures do not have this limitation.
+	/// Also avoid creating multiple instances using the same device.
+	/// Instead reuse the same instance, preferably using the 
+	/// MediaFactory interface.
+	/// 
+	/// Windows:
+	/// OpenCV HighGUI DirectShow must be compiled with VI_COM_MULTI_THREADED
+	/// defined otherwise capture there will be CoInitialize conflicts
+	/// with the DeviceManager.
+{
+public:
+	VideoCaptureBase(int deviceId); 
+		// Creates and opens the given device
+		// Should be created in the main thread
+
+	VideoCaptureBase(const std::string& filename);
+		// Creates and opens the given video file
+		// Can be created in any thread
+	
+	virtual void start();
+	virtual void stop();
+	
+	bool opened() const;
+		// True when the system device is open.
+
+	bool running() const;
+		// True when the internal 
+	
+	int deviceId() const;
+	std::string	filename() const;
+	std::string	name() const;
+	std::string	error() const;
+	double fps() const;
+	int width();
+	int height();
+	cv::Mat lastFrame() const;
+	cv::VideoCapture& capture();
+
+protected:	
+	virtual ~VideoCaptureBase();
+
+	bool open();
+	cv::Mat grab();
+	virtual bool run();
+
+	void setError(const std::string& error);
+	
+	virtual void addOutputSignal(PacketSignal* emitter);
+	virtual void removeOutputSignal(PacketSignal* emitter);
+	
+	friend class VideoCapture;
+	friend class MediaFactory;
+	friend class GCDeleter<VideoCaptureBase>;	
+
+private:   
+	mutable Mutex _mutex;
+	mutable Mutex _emitMutex;
+
+	cv::VideoCapture _capture;
+	cv::Mat _frame;			// Current video image
+	int _deviceId;			// Source device to capture from
+	bool _opened;
+	bool _stopping;
+	bool _capturing;
+	bool _isImageSource;	// Source file is an image or not
+	FPSCounter _counter;
+	std::string	_error;		// Error message if any
+	std::string	_filename;	// Source file to capture from if any
+	Thread _thread;
+	PacketSignalVec _emitters;
+};
+
+
+typedef std::map<int, VideoCaptureBase*> VideoCaptureBaseMap;
+	
+
+//
+// Matrix Packet
+//
+
+
+struct MatrixPacket: public VideoPacket 
+{
+	cv::Mat* mat; // For OpenCV generated packets.
+				  // TODO: Use stream offset time instead of process time 
+				  // for consistency with AudioCapture for realtime pts calculation
+	
+	MatrixPacket(cv::Mat* mat, double time = scy::getProcessTime()) :
+		VideoPacket((char*)mat->data, mat->rows*mat->step, mat->cols, mat->rows, time),
+		mat(mat) {}
+
+	MatrixPacket(char* data = nil,
+			  int size = 0,
+			  int width = 0,
+			  int height = 0,
+			  double time = scy::getProcessTime()) :
+		VideoPacket(data, size, width, height, time),
+		mat(nil) {};
+
+	virtual IPacket* clone() const {
+		return new MatrixPacket(*this);
+	}	
+
+	virtual const char* className() const { return "MatrixPacket"; }
+}; 
+
+
+} } // namespace scy::av
+
+
+#endif // SOURCEY_MEDIA_VideoCaptureBase_H
+
+
+
+/*
+//
+// Video Delegate
+//
+
+
 struct VideoDelegate: public PacketDelegateBase
 	/// Polymorphic packet delegate for the VideoPacket type.
 {
@@ -76,136 +249,77 @@ protected:
 
 
 DefinePolymorphicDelegateWithArg(videoDelegate, IPacket, VideoDelegate, double, 0)
+*/
 
 
-class VideoCapture: public ICapture, public Poco::Runnable 
-	/// Class for capturing video from files or cameras using OpenCV.
-	///
-	/// Usage:
-	/// VideoCapture instances should be created in the main
-	/// thread to eliminate unexpected behaviour inherent in OpenCV.
-	/// Also avoid creating multiple instances using the same device.
-	/// Instead reuse the same instance, preferrably using the 
-	/// MediaFactory interface.
-	/// 
-	/// Windows:
-	/// OpenCV HighGUI DirectShow must be compiled with
-	/// VI_COM_MULTI_THREADED defined otherwise capture 
-	/// there will be CoInitialize conflicts.
-{
-public:
+	/* //, unsigned flags = 0 //, unsigned flags = 0//, public abstract::Runnable 
 	enum Flag 
-		/// Settings flags for different operational modes
+		// Settings for different operational modes
 	{
 		DestroyOnStop		= 0x01, 
 		SyncWithDelegates	= 0x02,
-		WaitForDelegates	= 0x04,
-		ErrorState			= 0x10
+		WaitForDelegates	= 0x04
 	};
+	*/
 
-	VideoCapture(int deviceId, unsigned flags = 0); 
-		/// Creates and opens the given device
-		/// Should be created in the main thread
 
-	VideoCapture(const std::string& filename, unsigned flags = 0);
-		/// Creates and opens the given video file
-		/// Can be created in any thread
+	/*
+	bool opened() const;
+	bool running() const;
+	
+	int deviceId() const;
+	std::string	filename() const;
+	std::string	name() const;
+	std::string	error() const;
+	int width();
+	int height();
+	double fps() const;
+	Flaggable flags() const;
+	cv::VideoCapture& capture();
+			
+	void getFrame(cv::Mat& frame, int width = 0, int height = 0);
 
-	virtual ~VideoCapture();
-	
-	virtual void start();
-	virtual void stop();
-	
-	virtual void attach(const PacketDelegateBase& delegate);
-	virtual bool detach(const PacketDelegateBase& delegate);
-	
-	virtual void getFrame(cv::Mat& frame, int width = 0, int height = 0);
-	
-	virtual bool isOpened() const;
-	virtual bool isRunning() const;
-	
-	virtual int deviceId() const;
-	virtual std::string	filename() const;
-	virtual std::string	name() const;
-	virtual std::string	error() const;
-	virtual int width() const;
-	virtual int height() const;
-	virtual double fps() const;
-	virtual Flags flags() const;
-	virtual cv::VideoCapture& capture();
+	virtual void getEncoderFormat(Format& iformat);
 
 protected:	
-	virtual bool open();
-	virtual void release();
-	virtual cv::Mat grab();
-	virtual void run();
-	virtual void setError(const std::string& error);
+	bool open();
+	void release();
+	cv::Mat grab();
+	virtual bool run();
+
+	void setError(const std::string& error);
 
 private:   
 	mutable Mutex _mutex;
 
 	cv::VideoCapture _capture;
-	cv::Mat		_frame;		// Current video image
-	int		_deviceId;		// Source device to capture from
-	int		_width;			// Capture width
-	int		_height;		// Capture height
-	bool	_isImage;		// Source file is an image or not
-	bool	_isOpened;
-	bool	_stopping;
-	Flags	_flags;	
+	cv::Mat _frame;			// Current video image
+	int _deviceId;			// Source device to capture from
+	int _width;				// Capture width
+	int _height;			// Capture height
+	bool _isImageSource;			// Source file is an image or not
+	bool _opened;
+	bool _stopping;
+	bool _capturing;
+	Flaggable _flags;	
+	FPSCounter _counter;
 	std::string	_error;		// Error message if any
 	std::string	_filename;	// Source file to capture from if any
-	FPSCounter	_counter;
-	Poco::Event	_capturing;
-	Poco::Thread _thread;
-};
+	Thread _thread;
+	*/
 
 
-inline void setVideoCaptureInputFormat(const VideoCapture* capture, Format& format) 
-	/// Allocates an OpenCV compatible input format for
-	/// our encoders.
-{
-	assert(capture);
-	//format.type = Format::Video;
-	format.name = "OpenCV";
-	format.id = "mjpeg";
-	format.video.encoder = "mjpeg";
-	format.video.pixelFmt = "bgr24";
-	format.video.width = capture ? capture->width() : 0;
-	format.video.height = capture ? capture->height(): 0;
-	format.video.enabled = true;
-}
-
-
-typedef std::map<int, VideoCapture*> VideoCaptureMap;
-
-
-struct MatPacket: public VideoPacket 
-{
-	cv::Mat* mat;	// For OpenCV generated packets.
-
-	MatPacket(char* data = NULL,
-			  int size = 0,
-			  int width = 0,
-			  int height = 0,
-			  double time = 0) :
-		VideoPacket(data, size, width, height, time),
-		mat(nullptr) {};
-
-	MatPacket(cv::Mat* mat, double time = 0) :
-		VideoPacket((char*)mat->data, mat->rows*mat->step, mat->cols, mat->rows, time), //mat->total()
-		mat(mat) {}
-
-	virtual IPacket* clone() const {
-		return new MatPacket(*this);
-	}	
-
-	virtual const char* className() const { return "MatPacket"; }
-}; 
-
-
-} // namespace av
-} // namespace scy
-
-
-#endif // SOURCEY_MEDIA_VideoCapture_H
+	//void release();
+	/*, unsigned flags = 0
+	//int _width;				// Capture width
+	//int _height;			// Capture height
+	//Flaggable _flags;	
+	//Flaggable flags() const;
+	enum Flag 
+		// Settings for different operational modes
+	{
+		DestroyOnStop		= 0x01, 
+		SyncWithDelegates	= 0x02,
+		WaitForDelegates	= 0x04
+	};
+	*/

@@ -31,22 +31,17 @@ Idler::Idler(uv::Loop& loop) :
 	uv::Base(&loop, new uv_idle_t)
 {
 	traceL("Idler", this) << "Creating" << endl;
-	init();
+
+    uv_idle_init(&loop, handle<uv_idle_t>());
+
+	// Idlers do not reference the main loop.
+    uv_unref(handle());
 }
 
 	
 Idler::~Idler() 
 {	
 	traceL("Idler", this) << "Destroying" << endl;
-}
-
-
-void Idler::init()
-{
-    uv_idle_init(loop(), handle<uv_idle_t>());
-
-	// Idlers do not reference the main loop.
-    uv_unref(handle());
 }
 
 
@@ -59,6 +54,7 @@ namespace internal {
 
 void Idler::start() 
 {		
+	assert(!active());
     uv_idle_start(handle<uv_idle_t>(), internal::onIdle);
 }
 

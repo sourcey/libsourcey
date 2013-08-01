@@ -32,9 +32,9 @@ namespace scy {
 namespace av {
 
 
-class ImageEncoder: public IPacketEncoder
-	// This calss is an image stream encoder that uses OpenCV conversion
-	// methods to encode images.
+class ImageEncoder: public PacketProcessor //IPacketEncoder
+	// This class is a PacketStreamAdapter which uses OpenCV 
+	// to encode images from raw data packets.
 	//
 	// See OpenCV documentation for cvParams information.
 	// JPEG:
@@ -57,6 +57,8 @@ public:
 	virtual void process(IPacket& packet);
 	
 	virtual EncoderOptions& options();
+			
+	PacketSignal Emitter;
 
 private:
 	std::string _extension;

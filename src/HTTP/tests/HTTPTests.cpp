@@ -60,7 +60,7 @@ public:
 
 		response.setContentLength(14);
 
-		//connection().sendHeaders(); // headers will be flushed
+		//connection().sendHeader(); // headers will be flushed
 		connection().write("Hello universe", 14);
 		connection().close();
 	}
@@ -120,7 +120,7 @@ public:
 		connection().response().set("Transfer-Encoding", "chunked");
 
 		// headers pushed through automatically
-		//connection().sendHeaders();
+		//connection().sendHeader();
 
 		// Start shooting data at the client
 		dataSource.start();
@@ -528,7 +528,7 @@ public:
 	{	
 		HTTPClientTest test;
 		ClientConnection* conn = test.create<WebSocketClientConnection>(false, "127.0.0.1", TEST_HTTP_PORT);
-		conn->shouldSendHeaders(false);
+		conn->shouldSendHead(false);
 		conn->request().setURI("/websocket");
 		//conn->request().body << "BOUNCE" << endl;
 		conn->send();

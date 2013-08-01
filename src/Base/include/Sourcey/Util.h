@@ -41,20 +41,19 @@ namespace util {
 //
 	
 template<typename T>
-std::string toString(const T &t) 
-	/// Converts interger to string representation.
+std::string toString(const T& t) 
+	// Converts integer T to string.
 {
     std::ostringstream oss;
     oss << t;
     return oss.str();
 }
 	
-
 template<typename T>
 T fromString(const std::string& s) 
-	/// Converts string to given interger T.
-	/// Ensure the interger type has sufficient 
-	/// storage capacity.
+	// Converts string to integer T.
+	// Ensure the integer type has  
+	// sufficient storage capacity.
 {
     std::istringstream iss(s);
     T x;
@@ -63,66 +62,68 @@ T fromString(const std::string& s)
     return x;
 }
 
-
+std::string format(const char* fmt, ...);
+	// Printf style string formatting for POD types.
+	
 bool tryParseHex(const std::string& s, unsigned& value);
 unsigned parseHex(const std::string& s);	
-	/// String to hex value.
+	// String to hex value.
 
 int icompare(const std::string& s1, const std::string& s2);
-	/// Case insensative string comparison.
+	// Case insensitive string comparison.
 
 std::string replace(const std::string& str, const std::string& from, const std::string& to, std::string::size_type start = 0);
 std::string replace(const std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start = 0);
 std::string& replaceInPlace(std::string& str, const std::string& from, const std::string& to, std::string::size_type start = 0);
 std::string& replaceInPlace(std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start = 0);
-	/// Functions for replacing string content.
+	// Functions for replacing string content.
 
 void toLower(std::string& str);
-	/// Transforms the string to lowercase.
+	// Transforms the string to lowercase.
 
 void toUpper(std::string& str);
-	/// Transforms the string to uppercase.
+	// Transforms the string to uppercase.
 
 void toUnderscore(std::string& str);
-	/// Replaces special characters in the given string with 
-	/// underscores and transform to lowercase.
+	// Replaces special characters in the given string with 
+	// underscores and transform to lowercase.
 
 bool isNumber(const std::string& str);
-	/// Checks if the string is a number
+	// Checks if the string is a number
 
 bool endsWith(const std::string& str, const std::string& suffix);
-	/// Returns true if the string ends with the given substring.
+	// Returns true if the string ends with the given substring.
 
 void removeSpecialCharacters(std::string& str, bool allowSpaces = false);
 void replaceSpecialCharacters(std::string& str, char with = '_', bool allowSpaces = false);
-	/// Replaces non-alphanumeric characters.
+	// Replaces non-alphanumeric characters.
 
 std::string dumpbin(const char* data, size_t len);
-	/// Dumps the binary representation of the 
-	/// given buffer to the output string.
+	// Dumps the binary representation of the 
+	// given buffer to the output string.
 
 StringVec &split(const std::string& str, const std::string& delim, StringVec &elems, int limit = -1);
 StringVec split(const std::string& str, const std::string& delim, int limit = -1);
-	/// Splits the given string at the delimiter string
+	// Splits the given string at the delimiter string
 
 StringVec &split(const std::string& str, char delim, StringVec &elems, int limit = -1);
 StringVec split(const std::string& str, char delim, int limit = -1);
-	/// Splits the given string at the delimiter character
+	// Splits the given string at the delimiter character
 
 void trim(std::string& str);
-	/// Removes whitespace from beginning and end of the given string.
+	// Removes whitespace from beginning and end of the given string.
 
 bool compareVersion(const std::string& l, const std::string& r);
-	/// Compares two version strings ie. 3.7.8.0 > 3.2.1.0
-	/// If L is greater than R the function returns true.
-	/// If L is equal or less than R the function returns false.
+	// Compares two version strings ie. 3.7.8.0 > 3.2.1.0
+	// If L is greater than R the function returns true.
+	// If L is equal or less than R the function returns false.
 
 bool matchNodes(const std::string& node, const std::string& xnode, const std::string& delim = "\r\n");
 bool matchNodes(const StringVec& params, const StringVec& xparams);
-	/// Matches two node lists against eachother.
+	// Matches two node lists against each other.
 
-std::string getPID(const void* ptr);
-	/// Returns the object PID as a string.
+std::string memAddress(const void* ptr);
+	// Returns the object PID as a string.
 
 
 //
@@ -158,8 +159,8 @@ inline Int64 doubleToInt(double d) {
 
 template<typename Val>
 inline void clearList(std::list<Val*>& L)
-	/// Delete all elements from a list of pointers.
-	/// @param L List of pointers to delete.
+	// Delete all elements from a list of pointers.
+	// @param L List of pointers to delete.
 {	
 	typename std::list<Val*>::iterator it = L.begin();
 	while (it != L.end()) {
@@ -170,8 +171,8 @@ inline void clearList(std::list<Val*>& L)
 
 template<typename Val>
 inline void clearDeque(std::deque<Val*>& D)
-	/// Delete all elements from a list of pointers.
-	/// @param D List of pointers to delete.
+	// Delete all elements from a list of pointers.
+	// @param D List of pointers to delete.
 {
 	typename std::deque<Val*>::iterator it = D.begin();
 	while (it != D.end()) {
@@ -182,8 +183,8 @@ inline void clearDeque(std::deque<Val*>& D)
 
 template<typename Val>
 inline void clearVector(std::vector<Val*>& V)
-	/// Delete all elements from a vector of pointers.
-	/// @param V Vector of pointers to delete.
+	// Delete all elements from a vector of pointers.
+	// @param V Vector of pointers to delete.
 {
 	typename std::vector<Val*>::iterator it = V.begin();
 	while (it != V.end()) {
@@ -195,8 +196,8 @@ inline void clearVector(std::vector<Val*>& V)
 
 template<typename Key, typename Val>
 inline void clearMap(std::map<Key, Val*>& M)
-	/// Delete all associated values from a map (not the key elements).
-	/// @param M Map of pointer values to delete.
+	// Delete all associated values from a map (not the key elements).
+	// @param M Map of pointer values to delete.
 {
 	typename std::map<Key, Val*>::iterator it = M.begin();
 	typename std::map<Key, Val*>::iterator it2;
@@ -209,9 +210,9 @@ inline void clearMap(std::map<Key, Val*>& M)
 
 template<class Deleter, typename Key, typename Val>
 inline void clearMap(std::map<Key, Val*>& M)
-	/// Delete all associated values from a map (not the key elements)
-	/// using the given deleter method.
-	/// @param M Map of pointer values to delete.
+	// Delete all associated values from a map (not the key elements)
+	// using the given deleter method.
+	// @param M Map of pointer values to delete.
 {
 	typename std::map<Key, Val*>::iterator it = M.begin();
 	typename std::map<Key, Val*>::iterator it2;
@@ -224,9 +225,9 @@ inline void clearMap(std::map<Key, Val*>& M)
 
 template<typename Key, typename Val>
 inline void clearMap(std::map<const Key, Val*>& M)
-	/// Delete all associated values from a map (not the key elements).
-	/// Const key type version.
-	/// @param M Map of pointer values to delete.
+	// Delete all associated values from a map (not the key elements).
+	// Const key type version.
+	// @param M Map of pointer values to delete.
 {
 	typename std::map<const Key, Val*>::iterator it = M.begin();
 	typename std::map<const Key, Val*>::iterator it2;
@@ -250,4 +251,4 @@ inline void clearMap(std::map<const Key, Val*>& M)
 //
 
 //void pause();
-	/// Pause the current thread until a key is pressed.
+	// Pause the current thread until a key is pressed.

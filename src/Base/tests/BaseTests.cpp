@@ -25,6 +25,18 @@ CMemLeakDetect memLeakDetect;
 
 
 namespace scy {
+
+
+/*
+class Logger1 {
+public:
+	Logger1() 
+	{
+	}
+
+	AsyncQueue queue;
+}
+*/
 	
 
 class Tests
@@ -34,9 +46,10 @@ class Tests
 public:
 	Tests()
 	{	
-		runPlatformTests();
-		runExceptionTest();
-		runTimerTest();
+		runLoggerTest();
+		//runPlatformTests();
+		//runExceptionTest();
+		//runTimerTest();
 		//runScheduler::TaskTest();
 		//runTimerTest();
 		//runPacketStreamTests();
@@ -45,7 +58,7 @@ public:
 		//runGarbageCollectorTests();
 		//runSignalReceivers();
 		
-		//util::pause();
+		scy::pause();
 	}
 
 	// ============================================================================
@@ -56,7 +69,25 @@ public:
 		debugL("PlatformTests") << "Executable Path: " << scy::getExePath() << endl;
 		debugL("PlatformTests") << "Current Working Directory: " << scy::getCWD() << endl;
 	}
-		
+
+	// ============================================================================
+	// Logger Test
+	//
+	void runLoggerTest() 
+	{
+		clock_t start = clock();
+		for (unsigned i = 0; i < 1000; i++) { 
+			debugL("LoggerTest") << "Test message: " << i << endl;
+		}
+
+		runLoop();
+
+		debugL("LoggerTest") << "#################### Completed after: " << (clock() - start) << endl;
+	}
+
+	
+
+
 	// ============================================================================
 	// Exception Test
 	//
@@ -64,10 +95,10 @@ public:
 	{
 		try
 		{
-			throw OpenFileException("That's not a file!");
+			throw FileException("That's not a file!");
 			assert(0 && "must throw");
 		}
-		catch (OpenFileException& exc)
+		catch (FileException& exc)
 		{
 			debugL("ExceptionTests") << "Message: " << exc << endl;
 		}
@@ -355,11 +386,11 @@ public:
 
 int main(int argc, char** argv) 
 {	
-	Logger::instance().add(new ConsoleChannel("Test", TraceLevel));
+	Logger::instance().add(new ConsoleChannel("Test", LTrace));
 	{
 		scy::Tests app;
 	}	
-	Logger::uninitialize();
+	Logger::shutdown();
 	//util::pause();
 	return 0;
 }

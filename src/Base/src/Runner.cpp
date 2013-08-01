@@ -104,7 +104,7 @@ bool Runner::add(Task* task)
 {
 	log("trace") << "Adding Task: " << task << endl;
 	if (!exists(task)) {
-		Mutex::ScopedLock lock(_mutex);	
+		ScopedLock lock(_mutex);	
 		_tasks.push_back(task);
 		log("trace") << "Added Task: " << task << endl;		
 		uv_ref(Idler::handle());
@@ -119,7 +119,7 @@ bool Runner::remove(Task* task)
 {	
 	log("trace") << "Removing Task: " << task << endl;
 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (*it == task) {					
 			_tasks.erase(it);
@@ -137,7 +137,7 @@ bool Runner::exists(Task* task) const
 {	
 	log("trace") << "Check Exists: " << task << endl;
 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (*it == task)
 			return true;
@@ -148,7 +148,7 @@ bool Runner::exists(Task* task) const
 
 Task* Runner::get(UInt32 id) const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if ((*it)->id() == id)
 			return *it;
@@ -159,7 +159,7 @@ Task* Runner::get(UInt32 id) const
 
 Task* Runner::next() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (!(*it)->cancelled())
 			return *it;
@@ -170,7 +170,7 @@ Task* Runner::next() const
 
 void Runner::clear()
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {	
 		log("trace") << "Clear: Destroying Task: " << *it << endl;
 		delete *it;
@@ -184,21 +184,19 @@ void Runner::onIdle()
 	Task* task = next();
 		
 	// Run the task
-	if (task) {
-		log("trace") << "Before Run Task: " << task << endl;
-		if (task->beforeRun()) {
-			log("trace") << "Run Task: " << task << endl;
-			task->run();	
-			log("trace") << "After Task: " << task << endl;
-			if (task->afterRun())			
-				onRun(task);
-			else
-				task->_destroyed = true; //destroy();	
+	if (task) 
+	{
+		log("trace") << "Run task: " << task << endl;
+		if (!task->run()) {
+			task->_destroyed = true;
+			log("trace") << "Task destroying: " << task << endl;	
 		}
 
+		onRun(task);
+
 		// Advance the task queue
-		else {
-			Mutex::ScopedLock lock(_mutex);
+		{
+			ScopedLock lock(_mutex);
 			Task* t = _tasks.front();
 			_tasks.pop_front();
 			_tasks.push_back(t);
@@ -214,8 +212,6 @@ void Runner::onIdle()
 
 	// Dispatch the Idle signal
 	Idle.emit(this);
-
-	//log("trace") << "Exiting" << endl;
 }
 
 

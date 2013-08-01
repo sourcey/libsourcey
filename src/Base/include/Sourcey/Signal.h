@@ -34,8 +34,8 @@ namespace scy {
 
 template <class DelegateT, DelegateDefaultParams>
 class SignalBase 
-	/// This class implements a thread-safe signal which
-	/// broadcasts arbitrary data to multiple receiver delegates.
+	// This class implements a thread-safe signal which
+	// broadcasts arbitrary data to multiple receiver delegates.
 {
 public:
 	typedef std::list<DelegateT*>				  DelegateList;
@@ -59,21 +59,21 @@ public:
 	void operator -= (const Void klass) { detach(klass); }
 
 	void attach(const DelegateT& delegate) 
-		/// Attaches a delegate to the signal. If the delegate 
-		/// already exists it will overwrite the previous delegate.
+		// Attaches a delegate to the signal. If the delegate 
+		// already exists it will overwrite the previous delegate.
 	{
 		detach(delegate);
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		_delegates.push_back(delegate.clone());
 		_delegates.sort(DelegateT::ComparePrioroty); 
 		_refCount++;
 	}
 
 	bool detach(const DelegateT& delegate) 
-		/// Detaches a delegate from the signal.
-		/// Returns true if the delegate was detached, false otherwise.
+		// Detaches a delegate from the signal.
+		// Returns true if the delegate was detached, false otherwise.
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
 			if (delegate.equals(*it) && !(*it)->cancelled()) {	
 				(*it)->cancel();
@@ -86,9 +86,9 @@ public:
 	}
 
 	void detach(const Void klass) 
-		/// Detaches all delegates associated with the given class instance.
+		// Detaches all delegates associated with the given class instance.
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
 			if (klass == (*it)->object() && !(*it)->cancelled()) {	
 				(*it)->cancel();
@@ -99,9 +99,9 @@ public:
 	}
 
 	void cleanup() 
-		/// Deletes cancelled delegates.
+		// Deletes cancelled delegates.
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		if (_dirty) {
 			_dirty = false;
 			Iterator it = _delegates.begin(); 
@@ -118,10 +118,10 @@ public:
 	}
 
 	void obtain(DelegateList& active) 
-		/// Retreives a list of active delegates while 
-		/// simultaneously deleting any redundant delegates.
+		// Retrieves a list of active delegates while 
+		// simultaneously deleting any redundant delegates.
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		if (!_enabled) // skip if disabled
 			return;
 		Iterator it = _delegates.begin(); 
@@ -143,32 +143,32 @@ public:
 
 	void clear() 
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		util::clearList(_delegates);
 		_refCount = 0;
 	}
 
 	DelegateList delegates() const 
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		return _delegates;
 	}
 
 	void enable(bool flag = true) 
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		_enabled = flag;
 	}
 
 	bool enabled() const
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		return _enabled;
 	}
 	
 	int refCount() const 
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		return _refCount;
 	}
 
@@ -223,7 +223,7 @@ protected:
 // -------------------------------------------------------------------
 //
 struct StopPropagation: public std::exception
-	/// StopPropagation is used to break out of a Signal callback scope.
+	// StopPropagation is used to break out of a Signal callback scope.
 {
 	virtual ~StopPropagation() throw() {};
 };

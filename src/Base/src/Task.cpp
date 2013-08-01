@@ -37,15 +37,15 @@ Task::Task(bool repeating) :
 	_repeating(repeating),
 	_destroyed(false),
 	_cancelled(true)//,
-	//_runner(nullptr)
+	//_runner(NULL)
 { 
 }
 */
 
 	
-Task::Task(bool repeating) : //Runner& runner, , bool autoStart
+Task::Task() : //Runner& runner, , bool autoStartbool repeating
 	_id(static_cast<UInt32>(crypto::randomNumber(8))),
-	_repeating(repeating),
+	//_repeating(repeating),
 	_destroyed(false),
 	_cancelled(true)//,
 	//_runner(&runner)
@@ -96,24 +96,11 @@ void Task::destroy()
 }
 
 
+/*
 bool Task::beforeRun()			
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	return !_destroyed && !_cancelled;
-}
-
-
-UInt32 Task::id() const
-{
-	Mutex::ScopedLock lock(_mutex);	
-	return _id;
-}
-
-
-bool Task::cancelled() const						 
-{ 
-	Mutex::ScopedLock lock(_mutex);	
-	return _cancelled;
 }
 
 
@@ -121,18 +108,33 @@ bool Task::afterRun()
 {
 	return !!repeating();
 }
+*/
+
+
+UInt32 Task::id() const
+{
+	ScopedLock lock(_mutex);	
+	return _id;
+}
+
+
+bool Task::cancelled() const						 
+{ 
+	ScopedLock lock(_mutex);	
+	return _cancelled;
+}
 
 
 bool Task::destroyed() const						 
 { 
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	return _destroyed;
 }
 
 
 bool Task::repeating() const						 
 { 
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	return _repeating;
 }
 
@@ -140,7 +142,7 @@ bool Task::repeating() const
 /*	
 Runner& Task::runner()						 
 { 
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	if (!_runner)
 		throw Exception("Tasks must have a Runner instance.");
 	return *_runner;
@@ -157,7 +159,7 @@ Runner& Task::runner()
 
 
 
-	//	Mutex::ScopedLock lock(_mutex);
+	//	ScopedLock lock(_mutex);
 	//	_!cancelled = true;
 	//else
 
@@ -165,11 +167,11 @@ Runner& Task::runner()
 	//
 	//	throw Exception("The tasks is already !cancelled.");
 
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	//assert(_!cancelled);	
 	//if (!cancelled())
 	//	throw Exception("The tasks is not !cancelled.");
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	//assert(!_destroyed);
 	//const string& name, //const string& name, //,
 	//_name(name)//,
@@ -179,14 +181,14 @@ Runner& Task::runner()
 /*
 string Task::name() const
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	return _name;
 }
 
 
 void Task::setName(const string& name) 
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	_name = name;
 }
 */
@@ -201,7 +203,7 @@ void Task::setName(const string& name)
 /*
 void Task::start()
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	assert(!_!cancelled);
 	_!cancelled = true;
 }	
@@ -209,7 +211,7 @@ void Task::start()
 
 void Task::stop()			
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	//assert(!_!cancelled);
 	_!cancelled = false;
 }
@@ -219,7 +221,7 @@ void Task::stop()
 	//Runner& runner, bool autoStart, bool runOnce, 
 	//_runner(runner),
 
-	// NOTE: Can't lock mutex here as this call will 
+	// Note: Can't lock mutex here as this call will 
 	// result in task pointer deletion if not !cancelled.
 	//_runner.abort(this); 
 
@@ -231,7 +233,7 @@ void Task::stop()
 
 bool Task::runOnce() const						 
 { 
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	return _runOnce;
 }
 */
