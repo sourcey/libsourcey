@@ -36,11 +36,66 @@
 namespace scy {
 namespace av {
 
-	
 
+DefinePolymorphicDelegateWithArg(audioDelegate, IPacket, PacketDelegateBase, Void, nil)
+
+
+class AudioCapture: public ICapture
+{
+public:	
+	AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format = RTAUDIO_SINT16);
+	virtual ~AudioCapture();
+	
+  	virtual void open();
+  	virtual void close();
+
+  	virtual void start();
+  	virtual void stop();
+
+	int deviceId() const;
+	int sampleRate() const;
+	int numChannels() const;
+	bool running() const;
+	bool isOpen() const;
+	RtAudioFormat format() const;
+
+	void getEncoderFormat(Format& iformat);
+
+protected:
+	virtual void setError(const std::string& message);
+		// Sets the error message and throws an exception.
+
+	static int callback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
+					    double streamTime, RtAudioStreamStatus status, void *data);
+
+private:
+	mutable Mutex _mutex;
+	int _deviceId; 
+	int _channels;
+	int _sampleRate;
+	bool _opened;
+	RtAudio _audio;
+	RtAudioFormat _format;
+	RtAudio::StreamParameters _iParams;
+	std::string _error;
+};
+
+
+typedef std::map<int, AudioCapture*> AudioCaptureMap;
+
+
+} } // namespace scy::av
+
+
+#endif
+
+
+
+	
+/*
 typedef signed short AUDIO_DATA;
 #define AUDIO_FORMAT RTAUDIO_SINT16
-/*
+
 typedef char AUDIO_DATA;
 #define AUDIO_FORMAT RTAUDIO_SINT8
 
@@ -58,75 +113,12 @@ typedef double AUDIO_DATA;
 */
 
 
-DefinePolymorphicDelegateWithArg(audioDelegate, IPacket, PacketDelegateBase, Void, NULL)
-
-
-class AudioCapture: public ICapture
-{
-public:	
-	AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format = RTAUDIO_SINT16);
-	virtual ~AudioCapture();
+/* //int channels, int sampleRate, RtAudioFormat format = RTAUDIO_SINT16)
 	
-  	virtual void open(); //int channels, int sampleRate, RtAudioFormat format = RTAUDIO_SINT16)
-  	virtual void close();
-
-  	virtual void start();
-  	virtual void stop();
+	// virtual void onStreamStateChange(const PacketStreamState&) {};
 	
-	virtual void attach(const PacketDelegateBase& delegate);
-	virtual bool detach(const PacketDelegateBase& delegate);
-
-	virtual int deviceId() const;
-	virtual int sampleRate() const;
-	virtual int numChannels() const;
-	virtual bool isRunning() const;
-	virtual bool isOpen() const;
-	virtual RtAudioFormat format() const;
-
-protected:
-	virtual void setError(const std::string& message);
-		/// Sets the error message and throws and exception.
-
-	static int callback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
-					    double streamTime, RtAudioStreamStatus status, void *data);
-
-private:
-	mutable Mutex		_mutex;
-	RtAudio::StreamParameters	_iParams;
-	RtAudioFormat _format;
-	RtAudio		_audio;
-	int			_deviceId; 
-	int			_channels;
-	int			_sampleRate;
-	bool		_isOpen;
-	std::string _error;
-};
-
-
-typedef std::map<int, AudioCapture*> AudioCaptureMap;
-
-
-inline void AllocateRtAudioInputFormat(const AudioCapture* capture, Format& format) 
-	/// Allocates an OpenCV compatible input format for
-	/// our encoders.
-{
-	assert(capture);
-	format.audio.sampleFmt = "s16"; //RTAUDIO_SINT16; // TODO: Convert from RtAudioFormat to SampleFormat
-	format.audio.channels = capture->numChannels();
-	format.audio.sampleRate = capture->sampleRate();
-	format.audio.enabled = true;
-}
-
-
-} } // namespace scy::av
-
-
-#endif
-
-
-
-
-/*
+	//virtual void attach(const PacketDelegateBase& delegate);
+	//virtual bool detach(const PacketDelegateBase& delegate);
 struct Samples 
 {
 	unsigned char* data; 

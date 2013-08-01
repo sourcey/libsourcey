@@ -23,9 +23,9 @@
 
 #include "Sourcey/Logger.h"
 #include "Sourcey/Types.h"
+#include "Sourcey/Mutex.h"
+#include "Sourcey/AtomicOps.h"
 #include "Sourcey/UV/UVPP.h"
-//#include <atomic>
-
 #include "Sourcey/Singleton.h"
 
 
@@ -34,26 +34,26 @@ namespace scy {
 
 class AbstractDeleter;
 class GarbageCollector: public uv::Base
-	/// Simple garbage collector for deferred pointer deletion.
+	// Simple garbage collector for deferred pointer deletion.
 {
 public:	
 	GarbageCollector();	
 	~GarbageCollector();
 		
 	static GarbageCollector& instance();
-		/// Returns the GarbageCollector singleton.
+		// Returns the GarbageCollector singleton.
 	
 	template <class C>
 	void deleteLater(C* ptr);
-		/// Schedules a pointer for deferred deletion.
+		// Schedules a pointer for deferred deletion.
 
 	static void shutdown();
-		/// Shuts down the garbage collector and deleted 
-		/// the singleton instance.
+		// Shuts down the garbage collector and deletes 
+		// the singleton instance.
 
 	void close();
-		/// Closes the internal timer and frees all 
-		/// scheduled pointers now.
+		// Closes the internal timer and frees all 
+		// scheduled pointers now.
 
 protected:	
 	void onTimer();
@@ -69,8 +69,8 @@ protected:
 // -------------------------------------------------------------------
 //
 class AbstractDeleter
-	/// AbstractDeleter provides an interface for 
-	/// deleting pointer memory in various ways.
+	// AbstractDeleter provides an interface for 
+	// deleting pointer memory in various ways.
 {
 public:
 	void* ptr;
@@ -90,8 +90,8 @@ public:
 
 template <class C>
 class Deleter: public AbstractDeleter
-	/// Deleter is the base template class for 
-	/// deleting a type cast pointer.
+	// Deleter is the base template class for 
+	// deleting a type cast pointer.
 {
 public:
     typedef void (*Func)(C*);
@@ -110,8 +110,9 @@ public:
     void invoke()
     {
 		assert(ptr);
-		C* p = reinterpret_cast<C*>(ptr);
-		ptr = nullptr;
+		//C* p = reinterpret_cast<C*>(ptr);
+		C* p = (C*)ptr;
+		ptr = NULL;
         func(p);
     }
 };
@@ -119,11 +120,11 @@ public:
 
 template <class C>
 class DefaultDeleter: public Deleter<C>
-	/// DefaultDeleter calls the standard delete 
-	/// operator to free pointer memory.
+	// DefaultDeleter calls the standard delete 
+	// operator to free pointer memory.
 {
 public:
-	DefaultDeleter(C* p = nullptr) : 
+	DefaultDeleter(C* p = NULL) : 
 		Deleter<C>(p, &DefaultDeleter<C>::func)
 	{
 	}
@@ -138,11 +139,11 @@ public:
 
 template <class C>
 class GCDeleter: public Deleter<C>
-	/// GCDeleter is used by the GarbageCollector
-	/// to free managed pointer memory.
+	// GCDeleter is used by the GarbageCollector
+	// to free managed pointer memory.
 {
 public:
-	GCDeleter(C* p = nullptr) : 
+	GCDeleter(C* p = NULL) : 
 		Deleter<C>(p, &GCDeleter<C>::func)
 	{
 	}
@@ -157,11 +158,11 @@ public:
 
 template <class C>
 class DeferredDeleter: public Deleter<C>
-	/// DeferredDeleter schedules a pointer for 
-	/// deferred deletion by the GarbageCollector.
+	// DeferredDeleter schedules a pointer for 
+	// deferred deletion by the GarbageCollector.
 {
 public:
-	DeferredDeleter(C* p = nullptr) : 
+	DeferredDeleter(C* p = NULL) : 
 		Deleter<C>(p, &DeferredDeleter<C>::func)
 	{
 	}
@@ -176,11 +177,11 @@ public:
 
 template <class C>
 class DestroyMethodDeleter: public Deleter<C>
-	/// DestroyMethodDeleter calls the destroy() method 
-	/// on an object to begin the deletion sequence.
+	// DestroyMethodDeleter calls the destroy() method 
+	// on an object to begin the deletion sequence.
 {
 public:
-	DestroyMethodDeleter(C* p = nullptr) : 
+	DestroyMethodDeleter(C* p = NULL) : 
 		Deleter<C>(p, &DestroyMethodDeleter<C>::func)
 	{
 	}
@@ -197,18 +198,18 @@ public:
 //
 template <class C>
 void GarbageCollector::deleteLater(C* ptr)
-	/// Schedules a pointer for deferred deletion.
+	// Schedules a pointer for deferred deletion.
 { 
 	//traceL("GarbageCollector", this) << "Scheduling: " << ptr << std::endl;
 		
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	_pending.push_back(new GCDeleter<C>(ptr));
 }
 
 
 template <class C>
 inline void deleteLater(C* ptr)
-	/// Convenience function for accessing GarbageCollector::deleteLater
+	// Convenience function for accessing GarbageCollector::deleteLater
 {
 	GarbageCollector::instance().deleteLater(ptr);
 }
@@ -217,8 +218,8 @@ inline void deleteLater(C* ptr)
 // -------------------------------------------------------------------
 //
 class ManagedObject
-	/// ManagedObject is the base class for LibSourcey objects
-	/// which employ different memory management strategies.
+	// ManagedObject is the base class for LibSourcey objects
+	// which employ different memory management strategies.
 {	
 public:
 	ManagedObject(AbstractDeleter* deleter = new DefaultDeleter<ManagedObject>()) : 
@@ -251,52 +252,46 @@ protected:
 // -------------------------------------------------------------------
 //
 class CountedObject: public ManagedObject
-	/// CountedObject is the base class for objects that  
-	/// employ reference counting based garbage collection.
-	///
-	/// Reference-counted objects inhibit construction by
-	/// copying and assignment.
-	///
-	/// TODO: Use atomic integer for MT goodness:
-	/// http://www.jaggersoft.com/pubs/oload25.html
+	// CountedObject is the base class for objects that  
+	// employ reference counting based garbage collection.
+	//
+	// Reference-counted objects inhibit construction by
+	// copying and assignment.
 {
 public:
 	CountedObject(AbstractDeleter* deleter = new DefaultDeleter<CountedObject>()) :
 		ManagedObject(deleter)
-		/// Creates the CountedObject.
-		/// The initial reference count is one.
+		// Creates the CountedObject.
+		// The initial reference count is one.
 	{
 		count = 1;
-	};
+	}
 	
 	void duplicate()
-		/// Increments the object's reference count.
+		// Increments the object's reference count.
 	{
-		++count;
+		atomicIncrement(&count);
 	}
 		
 	void release()
-		/// Decrements the object's reference count and
-		/// calls destroy() if the count reaches zero.
+		// Decrements the object's reference count and
+		// calls destroy() if the count reaches zero.
 	{
-		--count;
-
-		if (count == 0)
+		if (atomicDecrement(&count) == 0)
 			ManagedObject::freeMemory();
 	}
 		
 	int refCount() const
-		/// Returns the reference count.
+		// Returns the reference count.
 	{
 		return count;
 	}
 
 protected:
 	virtual ~CountedObject()
-		/// Destroys the CountedObject.
-		/// The destructor should never be called directly.
+		// Destroys the CountedObject.
+		// The destructor should never be called directly.
 	{
-		//traceL("CountedObject", this) << "Destroying" << std::endl;
 		assert(refCount() == 0);
 	}
 
@@ -306,7 +301,7 @@ protected:
 	friend class DefaultDeleter<CountedObject>;	
 	friend class DeferredDeleter<CountedObject>;	
 	
-	int /* std::atomic<int> */ count; // TODO: sync
+	volatile long count;
 };
 
 

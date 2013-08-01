@@ -21,26 +21,30 @@
 #define SOURCEY_Interfaces_H
 
 
-#include "Poco/Thread.h" // depreciate
+ // depreciate
 
 
 namespace scy {
 namespace abstract {
 
 		
-class Runnable: public Poco::Runnable
-	/// A generic interface for classes
-	/// that can be run and cancelled.
+class Runnable
+	// A generic interface for classes
+	// that can be run and cancelled.
 {
 public:
-	virtual void run() = 0;
+	virtual bool run() = 0;
+		// The run method will be called repeatedly by the  
+		// managing context until this method return false.
+
 	virtual void cancel() {};
+		// Cancels the current task.
 };
 
 		
 class Startable
-	/// A generic interface for a classes
-	/// that can be started and stopped.
+	// A generic interface for a classes
+	// that can be started and stopped.
 {
 public:
 	virtual void start() = 0;
@@ -49,8 +53,8 @@ public:
 
 		
 class Sendable
-	/// A generic interface for classes
-	/// that can be sent and cancelled.
+	// A generic interface for classes
+	// that can be sent and cancelled.
 {
 public:
 	virtual bool send() = 0;
@@ -60,9 +64,9 @@ public:
 	
 /*	
 class Emitter
-	/// A generic interface for a classes
-	/// that emit data packets.
-	/// Generally associated with a PacketStream.
+	// A generic interface for a classes
+	// that emit data packets.
+	// Generally associated with a PacketStream.
 {
 public:	
 	void emit(char* data, size_t len, void* opaque);
@@ -93,47 +97,14 @@ public:
 	}
 	
 protected:
-	virtual void run()
+	virtual bool run()
 	{	
 		TSendable::send(); // must block
 		delete this;
 	}
 
 protected:
-	Poco::Thread _thread;
-};
-*/
-
-
-/*
-template <class TStartable>
-class AsyncStartable: public TStartable, public abstract::Runnable
-{
-public:
-	AsyncStartable() {};
-	virtual ~AsyncStartable() {};
-
-	virtual bool start() 
-	{
-		_thread.start(*this);
-		return true;
-	}
-	
-	virtual void stop()
-	{
-		TStartable::stop();
-		_thread.join();
-	}
-	
-protected:
-	virtual void run()
-	{	
-		TStartable::start(); // must block
-		delete this;
-	}
-
-protected:
-	Poco::Thread _thread;
+	Thread _thread;
 };
 */
 	 

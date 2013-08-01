@@ -76,14 +76,14 @@ void SSLManager::initializeClient(SSLContext::Ptr ptrContext)
 
 SSLContext::Ptr SSLManager::defaultServerContext()
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _ptrDefaultServerContext;
 }
 
 
 SSLContext::Ptr SSLManager::defaultClientContext()
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _ptrDefaultClientContext;
 }
 

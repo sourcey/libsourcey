@@ -79,10 +79,10 @@ struct MutexState: public State
 	MutexState(ID id = 0);
 	MutexState(const MutexState& r) : State(r) {}
 
-	virtual ID id() const { Mutex::ScopedLock lock(_mutex); return _id;	}
-	virtual void set(ID id) { Mutex::ScopedLock lock(_mutex); _id = id; }
-	virtual std::string message() const { Mutex::ScopedLock lock(_mutex);	return _message; }
-	virtual void setMessage(const std::string& message) { Mutex::ScopedLock lock(_mutex);	_message = message; }
+	virtual ID id() const { ScopedLock lock(_mutex); return _id;	}
+	virtual void set(ID id) { ScopedLock lock(_mutex); _id = id; }
+	virtual std::string message() const { ScopedLock lock(_mutex);	return _message; }
+	virtual void setMessage(const std::string& message) { ScopedLock lock(_mutex);	_message = message; }
 
 protected:
 	mutable Mutex	_mutex;
@@ -100,8 +100,8 @@ struct StateSignal: public MutexState
 	virtual void onChange(ID id, ID prev);
 
 	Signal2<const ID&, const ID&> Change;
-		/// Fired when the state changes to signal 
-		/// the new and previous states.
+		// Fired when the state changes to signal 
+		// the new and previous states.
 
 protected:	
 	virtual void set(ID id);
@@ -110,20 +110,20 @@ protected:
 
 
 
-	//virtual ID id() const { Mutex::ScopedLock lock(_mutex); return _id;	}
-	//virtual void set(ID id) { Mutex::ScopedLock lock(_mutex); _id = id; }
-	//virtual std::string message() const { Mutex::ScopedLock lock(_mutex);	return _message; }
-	//virtual void setMessage(const std::string& message) { Mutex::ScopedLock lock(_mutex);	_message = message; }
+	//virtual ID id() const { ScopedLock lock(_mutex); return _id;	}
+	//virtual void set(ID id) { ScopedLock lock(_mutex); _id = id; }
+	//virtual std::string message() const { ScopedLock lock(_mutex);	return _message; }
+	//virtual void setMessage(const std::string& message) { ScopedLock lock(_mutex);	_message = message; }
 
 /*
 // ---------------------------------------------------------------------
 template<typename T>
 class Stateful
-	/// This class implements a simple state machine.
-	/// T should be a derived State.
-	///
-	/// This class is not inherently thread safe. 
-	/// Synchronization is left to the implementation.
+	// This class implements a simple state machine.
+	// T should be a derived State.
+	//
+	// This class is not inherently thread safe. 
+	// Synchronization is left to the implementation.
 {
 public:
 	virtual bool stateEquals(ID id) const
@@ -178,8 +178,8 @@ protected:
 // ---------------------------------------------------------------------
 template<typename T>
 class MutexStateful: public Stateful<T>
-	/// This class adds thread safety the base
-	/// Stateful implementation.
+	// This class adds thread safety the base
+	// Stateful implementation.
 {
 public:
 	virtual bool stateEquals(ID id) const
@@ -196,13 +196,13 @@ public:
 
 	virtual T& state() 
 	{ 
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		return Stateful<T>::_state; 
 	}
 
 	virtual T state() const 
 	{ 
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		return Stateful<T>::_state; 
 	}
 
@@ -214,18 +214,18 @@ protected:
 // ---------------------------------------------------------------------
 template<typename T>
 class StatefulSignal: public MutexStateful<T>
-	/// This class adds a StateChange signal
-	/// to the base implementation.
+	// This class adds a StateChange signal
+	// to the base implementation.
 {
 public:
 	Signal2<T&, const T&> StateChange;
-		/// Fired when the state changes to signal the
-		/// new and old states.
+		// Fired when the state changes to signal the
+		// new and old states.
 
 protected:
 	virtual bool setState(void* sender, ID id, const std::string& message = "") 
-		/// This method is used to send the state signal
-		/// after a successful state change.
+		// This method is used to send the state signal
+		// after a successful state change.
 	{ 
 		T oldState = MutexStateful<T>::state();
 		if (Stateful<T>::setState(id, message)) {

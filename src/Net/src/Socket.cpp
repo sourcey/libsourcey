@@ -32,8 +32,8 @@ namespace net {
 	
 
 Socket::Socket() : //SocketAdapter* adapter
-	_base(nullptr), 
-	_adapter(nullptr)//, 
+	_base(nil), 
+	_adapter(nil)//, 
 	//_adapter(adapter)
 {
 	//if (!_adapter) 
@@ -45,7 +45,7 @@ Socket::Socket() : //SocketAdapter* adapter
 
 Socket::Socket(SocketBase* base, bool shared) : //, SocketAdapter* adapter
 	_base(base), 
-	_adapter(nullptr)
+	_adapter(nil)
 {
 	//if (!_adapter) 
 	//	_adapter = new SocketAdapter(this);	
@@ -59,7 +59,7 @@ Socket::Socket(SocketBase* base, bool shared) : //, SocketAdapter* adapter
 
 Socket::Socket(const Socket& socket) : //, SocketAdapter* adapter
 	_base(socket._base), 
-	_adapter(nullptr)//, 
+	_adapter(nil)//, 
 	//_adapter(adapter)
 {	
 	//if (!_adapter) 
@@ -155,6 +155,7 @@ int Socket::send(const char* data, int len, const Address& peerAddress, int flag
 		assert(_adapter->socket == this);
 		return _adapter->send(data, len, flags);
 	}
+		
 	return _base->send(data, len, peerAddress, flags);
 }
 
@@ -188,7 +189,6 @@ int Socket::send(const IPacket& packet, const Address& peerAddress, int flags)
 void Socket::send(void*, IPacket& packet)
 {
 	int res = send(packet);
-	traceL("Socket", this) << "################## Send IPacket: " << res << endl;	
 	if (res < 0)
 		throw Exception("Invalid socket operation");
 }
@@ -232,49 +232,49 @@ void Socket::connect(const std::string& host, UInt16 port)
 
 void Socket::onSocketConnect()
 {
-	//traceL("SocketAdapter", this) << "On Connect: " << socket->Connect.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "On connect: " << socket->Connect.refCount() << endl;	
 	if (_adapter) {
 		_adapter->onSocketConnect();
 	}
 	else {
-		Connect.emit(socket);
+		Connect.emit(this);
 	}
 }
 
 
 void Socket::onSocketRecv(Buffer& buf, const Address& peerAddr)
 {
-	//traceL("SocketAdapter", this) << "On Recv: " << socket->Recv.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "On recv: " << socket->Recv.refCount() << endl;	
 	if (_adapter) {
 		_adapter->onSocketRecv(buf, peerAddr);
 	}
 	else {
 		SocketPacket packet(*this, buf, peerAddr);
-		Recv.emit(socket, packet);
+		Recv.emit(this, packet);
 	}
 }
 
 
 void Socket::onSocketError(const scy::Error& error) //const Error& error
 {
-	//traceL("SocketAdapter", this) << "On Error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
+	//traceL("SocketAdapter", this) << "On error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
 	if (_adapter) {
 		_adapter->onSocketError(error);
 	}
 	else {
-		Error.emit(socket, error);
+		Error.emit(this, error);
 	}
 }
 
 
 void Socket::onSocketClose()
 {
-	//traceL("SocketAdapter", this) << "On Close: " << socket->Close.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "On close: " << socket->Close.refCount() << endl;	
 	if (_adapter) {
 		_adapter->onSocketClose();
 	}
 	else {
-		Close.emit(socket);
+		Close.emit(this);
 	}
 }
 
@@ -284,14 +284,6 @@ const Error& Socket::error() const
 { 
 	return _base->error();
 }
-
-
-/*
-bool Socket::connected() const 
-{ 
-	return _base->connected();
-}
-*/
 	
 
 SocketBase& Socket::base() const
@@ -367,14 +359,14 @@ SocketAdapter::~SocketAdapter()
 
 void SocketAdapter::onSocketConnect()
 {
-	//traceL("SocketAdapter", this) << "On Connect: " << socket->Connect.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "On connect: " << socket->Connect.refCount() << endl;	
 	socket->Connect.emit(socket);
 }
 
 
 void SocketAdapter::onSocketRecv(Buffer& buf, const Address& peerAddr)
 {
-	//traceL("SocketAdapter", this) << "On Recv: " << socket->Recv.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "On recv: " << socket->Recv.refCount() << endl;	
 	SocketPacket packet(*socket, buf, peerAddr);
 	socket->Recv.emit(socket, packet);
 }
@@ -382,14 +374,14 @@ void SocketAdapter::onSocketRecv(Buffer& buf, const Address& peerAddr)
 
 void SocketAdapter::onSocketError(const Error& error) //const Error& error
 {
-	//traceL("SocketAdapter", this) << "On Error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
+	//traceL("SocketAdapter", this) << "On error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
 	socket->Error.emit(socket, error);
 }
 
 
 void SocketAdapter::onSocketClose()
 {
-	//traceL("SocketAdapter", this) << "On Close: " << socket->Close.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "On close: " << socket->Close.refCount() << endl;	
 	socket->Close.emit(socket);
 }
 
@@ -413,7 +405,6 @@ int SocketAdapter::send(const char* data, int len, const Address& peerAddress, i
 
 SocketBase::SocketBase() : 
 	CountedObject(new DeferredDeleter<SocketBase>()),
-	//_connected(false),
 	_insideCallback(false)
 {
 	//traceL("SocketAdapter", this) << "Creating" << endl;	
@@ -424,10 +415,8 @@ SocketBase::~SocketBase()
 {
 	//traceL("SocketAdapter", this) << "Destroying" << endl;	
 
-	// The socket base destructor never be called
-	// from inside a callback.
-	// The grabage collector implementation should
-	// ensure this never occurs.
+	// The destructor never be called from inside a callback.
+	// Deferred destruction ensures this never occurs.
 	assert(!_insideCallback && "destructor scope error");
 }
 	
@@ -459,6 +448,89 @@ void SocketBase::removeObserver(Socket* socket)
 }
 
 
+namespace internal {
+
+	void onHostResolved(const net::DNSResult& dns, void* opaque)
+	{	
+		auto* sock = reinterpret_cast<SocketBase*>(opaque);
+		traceL("SocketBase", sock) << "DNS resolved: " << dns.success() << endl;
+
+		// Return if the socket was closed while resolving
+		if (sock->closed()) {			
+			warnL("SocketBase", sock) << "DNS resolved but socket closed" << endl;
+			return;
+		}
+
+		// Set the connection error if DNS failed
+		if (!dns.success()) {
+			sock->setError("Failed to resolve host DNS for " + dns.host);
+			return;
+		}
+
+		try {	
+			// Connect to resolved host
+			sock->connect(dns.addr);
+		}
+		catch (...) {
+			// Swallow errors
+			// Can be handled by Socket::Error signal
+		}	
+	}
+
+}
+
+	
+void SocketBase::connect(const std::string& host, UInt16 port) 
+{
+	traceL("SocketBase", this) << "Connect to host: " << host << ":" << port << endl;
+	if (Address::validateIP(host))
+		connect(Address(host, port));
+	else
+		net::resolveDNS(host, port, internal::onHostResolved, this); 
+}
+
+
+void SocketBase::emitConnect() 
+{
+	_insideCallback = true;
+	for (size_t i = 0; i < _observers.size(); i++) 
+		_observers[i]->onSocketConnect();
+	_insideCallback = false;
+}
+
+
+void SocketBase::emitRecv(Buffer& buf, const Address& peerAddr)
+{
+	_insideCallback = true;
+	for (size_t i = 0; i < _observers.size(); i++)
+		_observers[i]->onSocketRecv(buf, peerAddr);
+	_insideCallback = false;
+}
+
+
+void SocketBase::emitError(const Error& error)
+{
+	_insideCallback = true;
+	for (size_t i = 0; i < _observers.size(); i++) 
+		_observers[i]->onSocketError(error);
+	_insideCallback = false;
+}
+
+
+void SocketBase::emitClose()
+{
+	_insideCallback = true;
+	for (size_t i = 0; i < _observers.size(); i++) 
+		_observers[i]->onSocketClose();
+	_insideCallback = false;
+}
+
+
+} } // namespace scy::net
+
+
+
+
 /*
 void SocketBase::swapObserver(SocketAdapter* a, SocketAdapter* b)
 {
@@ -486,78 +558,6 @@ bool SocketBase::connected() const
 	return _connected;
 }
 */
-
-namespace internal {
-
-	void onHostResolved(const net::DNSResult& dns, void* opaque)
-	{	
-		auto* sock = reinterpret_cast<SocketBase*>(opaque);
-
-		traceL("SocketBase", sock) << "DNS Resolved: " << dns.success() << endl;
-
-		// Connect to resolved host
-		if (dns.success())
-			sock->connect(dns.addr);
-
-		// Set the connection error if DNS failed
-		else sock->setError("Failed to resolve host DNS for " + dns.host);
-	}
-
-}
-
-	
-void SocketBase::connect(const std::string& host, UInt16 port) 
-{
-	traceL("SocketBase", this) << "Connect to host: " << host << ":" << port << endl;
-	if (Address::validateIP(host))
-		connect(Address(host, port));
-	else
-		net::resolveDNS(host, port, internal::onHostResolved, this); 
-}
-
-
-void SocketBase::emitConnect() 
-{
-	_insideCallback = true;
-	//_connected = true;
-	for (size_t i = 0; i < _observers.size(); i++) 
-		_observers[i]->onSocketConnect();
-	_insideCallback = false;
-}
-
-
-void SocketBase::emitRecv(Buffer& buf, const Address& peerAddr)
-{
-	_insideCallback = true;
-	for (size_t i = 0; i < _observers.size(); i++)
-		_observers[i]->onSocketRecv(buf, peerAddr);
-	_insideCallback = false;
-}
-
-
-void SocketBase::emitError(const Error& error)
-{
-	_insideCallback = true;
-	//_connected = false;
-	for (size_t i = 0; i < _observers.size(); i++) 
-		_observers[i]->onSocketError(error);
-	_insideCallback = false;
-}
-
-
-void SocketBase::emitClose()
-{
-	_insideCallback = true;
-	//_connected = false;
-	for (size_t i = 0; i < _observers.size(); i++) 
-		_observers[i]->onSocketClose();
-	_insideCallback = false;
-}
-
-
-} } // namespace scy::net
-
-
 
 
 

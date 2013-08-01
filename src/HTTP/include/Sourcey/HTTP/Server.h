@@ -43,10 +43,10 @@ public:
     ServerConnection(Server& server, const net::Socket& socket);
 	
 	//virtual bool send();
-		/// Sends the HTTP response
+		// Sends the HTTP response
 	
 	virtual void close();
-		/// Closes the HTTP connection
+		// Closes the HTTP connection
 	
 protected:
     virtual ~ServerConnection();
@@ -58,8 +58,8 @@ protected:
 				
 	Server& server();
 
-	http::Message* incomingHeaders();
-	http::Message* outgoingHeaders();
+	http::Message* incomingHeader();
+	http::Message* outgoingHeader();
 
 	//
 	/// Server callbacks
@@ -141,8 +141,8 @@ class ServerResponderFactory
 {
 public:
 	virtual ServerResponder* createResponder(ServerConnection& connection) = 0;
-		/// Factory method for instantiating the ServerResponder
-		/// instance using the given ServerConnection.
+		// Factory method for instantiating the ServerResponder
+		// instance using the given ServerConnection.
 };
 
 
@@ -202,7 +202,7 @@ public:
 	void onRequest(Request& request, Response& response)
 	{
 		response.setStatusAndReason(http::Response::HTTP_BAD_REQUEST);
-		connection().sendHeaders();
+		connection().sendHeader();
 		connection().close();
 	}
 };
@@ -234,7 +234,7 @@ public:
 		{
 			LogError("ServerConnectionHook") << "Bad Request: " << exc.message() << std::endl;
 		}	
-		return NULL;
+		return nil;
 	};
 };
 */
@@ -245,7 +245,7 @@ public:
 		ServerConnectionList conns = ServerConnectionList(connections);
 		for (ServerConnectionList::iterator it = conns.begin(); it != conns.end();) {
 			if ((*it)->closed()) {
-				traceL("Server", this) << "Deleting Connection: " << (*it) << std::endl;
+				traceL("Server", this) << "Deleting connection: " << (*it) << std::endl;
 				//delete *it;
 				it = connections.erase(it);
 			}

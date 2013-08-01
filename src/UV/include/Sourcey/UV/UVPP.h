@@ -270,7 +270,7 @@ protected:
 		/// Override to handle errors.
 		/// The error may be a UV error, or a custom error.
 	{		
-		//errorL("UVBase", this) << "On Error: " << error.message << std::endl;	
+		//errorL("UVBase", this) << "On error: " << error.message << std::endl;	
 	}
 
 	virtual std::string formatError(const std::string& prefix = "") const
@@ -287,7 +287,7 @@ protected:
 	virtual void onClose()
 		/// Override to handle closure.
 	{
-		//traceL("UVBase", this) << "On Close" << std::endl;
+		//traceL("UVBase", this) << "On close" << std::endl;
 	}
 
  protected:

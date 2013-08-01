@@ -73,14 +73,14 @@ public:
 		/// for reuse in a future connection (if session caching
 		/// is enabled).
 		///
-		/// If no connection is established, returns null.
+		/// If no connection is established, returns nil.
 		
 	void useSession(SSLSession::Ptr session);
 		/// Sets the SSL session to use for the next
 		/// connection. Setting a previously saved Session
 		/// object is necessary to enable session caching.
 		///
-		/// To remove the currently set session, a null pointer
+		/// To remove the currently set session, a nil pointer
 		/// can be given.
 		///
 		/// Must be called before connect() to be effective.

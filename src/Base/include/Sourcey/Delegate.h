@@ -198,8 +198,8 @@ struct DelegateCallback<C, 4, false, P, P2, P3, P4>
 //
 template <DelegateDefaultParams>
 struct DelegateBase
-	/// The abstract class for all instantiations of the Delegate
-	/// template classes.
+	// The abstract class for all instantiations of the Delegate
+	// template classes.
 {
 	typedef /*typename*/ Void DataT;
 	Void data;
@@ -216,8 +216,8 @@ struct DelegateBase
 //
 template <class C, class BaseT, class CallbackT, DelegateDefaultParams>
 class Delegate: public BaseT, public CallbackT
-	/// This template class implements an adapter that sits between
-	/// an DelegateBase and an object receiving notifications from it.
+	// This template class implements an adapter that sits between
+	// an DelegateBase and an object receiving notifications from it.
 {
 public:
 	typedef DelegateBase<P, P2, P3, P4> DerivedT;

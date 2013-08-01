@@ -55,7 +55,7 @@ Client::~Client()
 void Client::connect(const std::string& host, UInt16 port)
 {	
 	{
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		_host = host;
 		_port = port;
 	}
@@ -78,7 +78,6 @@ void Client::connect()
 	setState(this, ClientState::Connecting);
 
 	_socket.Connect += delegate(this, &Client::onSocketConnect);
-	//_socket.Online += delegate(this, &Client::onSocketConnect);
 	_socket.Recv += delegate(this, &Client::onSocketRecv);
 	_socket.Error += delegate(this, &Client::onSocketError);
 	_socket.Close += delegate(this, &Client::onSocketClose);
@@ -91,14 +90,13 @@ void Client::close()
 {			
 	log("trace") << "Closing" << endl;
 	{
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		
 		// Cancel the timer if connection manually closed
 		_timer.Timeout -= delegate(this, &Client::onHeartBeatTimer);
 		_timer.stop();	
 
 		_socket.Connect -= delegate(this, &Client::onSocketConnect);
-		//_socket.Online -= delegate(this, &Client::onSocketConnect);
 		_socket.Recv -= delegate(this, &Client::onSocketRecv);
 		_socket.Error -= delegate(this, &Client::onSocketError);
 		_socket.Close -= delegate(this, &Client::onSocketClose);
@@ -112,7 +110,7 @@ void Client::close()
 
 void Client::sendHandshakeRequest()
 {
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 		
 	log("trace") << "Sending handshake request" << endl;	
 	
@@ -190,7 +188,7 @@ void Client::onHandshakeResponse(void* sender, const http::Response& response)
 		return;
 	}
 	
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	
 	// Initialize the WebSocket
 	log("trace") << "Websocket connecting: " << _sessionID << endl;	
@@ -228,7 +226,7 @@ int Client::sendConnect(const string& endpoint, const string& query)
 		out += "/" + endpoint;
 	if (!query.empty())
 		out += "?" + query;
-	return socket().send(out.data(), out.size());
+	return socket().send(out.c_str(), out.size());
 }
 
 
@@ -281,7 +279,7 @@ int Client::sendHeartbeat()
 
 uv::Loop& Client::loop()
 {
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	return _loop;
 }
 
@@ -289,7 +287,7 @@ uv::Loop& Client::loop()
 /*
 std::string& Client::endpoint()
 {
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	return _endpoint;
 }
 */
@@ -297,21 +295,21 @@ std::string& Client::endpoint()
 
 http::WebSocket& Client::socket()
 {
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	return _socket;
 }
 
 
 string Client::sessionID() const 
 {
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	return _sessionID;
 }
 
 
 Error Client::error() const 
 {
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	//return _error;
 	return _socket.error();
 }
@@ -325,7 +323,7 @@ bool Client::isOnline() const
 
 void Client::reset()
 {
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	//_error.reset();	
 	_sessionID = "";	
 	_heartBeatTimeout = 0;
@@ -349,7 +347,7 @@ void Client::onConnect()
 			
 	setState(this, ClientState::Connected);
 
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 
 	// Start the heartbeat timer
 	assert(_heartBeatTimeout);
@@ -504,7 +502,7 @@ void Client::onHeartBeatTimer(void*)
 	//else
 net::Address Client::serverAddr() const 
 {
-	//Mutex::ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	return _serverAddr;
 }
 */
@@ -540,7 +538,7 @@ void Client::onHeartBeatTimer(TimerCallback<Socket>&)
 
 void Client::onError() 
 {
-	log("warn") << "On Error" << endl;
+	log("warn") << "On error" << endl;
 }
 */
 
@@ -601,7 +599,7 @@ void Client::onError()
 //void SocketBase::connect(const net::Address& serverAddr)
 //{	
 //	{
-//		Mutex::ScopedLock lock(_mutex);
+//		ScopedLock lock(_mutex);
 //		_serverAddr = serverAddr;
 //	}
 //	connect();
@@ -610,7 +608,7 @@ void Client::onError()
 //
 //void SocketBase::connect()
 //{
-//	Mutex::ScopedLock lock(_mutex);
+//	ScopedLock lock(_mutex);
 //
 //	assert(_serverAddr.valid());
 //
@@ -716,7 +714,7 @@ void Client::onError()
 //
 //int SocketBase::sendConnect(const string& endpoint, const string& query)
 //{
-//	Mutex::ScopedLock lock(_mutex);
+//	ScopedLock lock(_mutex);
 //	// (1) Connect
 //	// Only used for multiple sockets. Signals a connection to the endpoint. Once the server receives it, it's echoed back to the client.
 //	// 
@@ -731,7 +729,7 @@ void Client::onError()
 //		out += "/" + endpoint;
 //	if (!query.empty())
 //		out += "?" + query;
-//	return WebSocketBase::send(out.data(), out.size());
+//	return WebSocketBase::send(out.c_str(), out.size());
 //}
 //
 //
@@ -798,28 +796,28 @@ void Client::onError()
 //
 //void SocketBase::setSecure(bool flag)
 //{
-//	Mutex::ScopedLock lock(_mutex);
+//	ScopedLock lock(_mutex);
 //	_secure = flag;
 //}
 //
 //
 //http::WebSocket* SocketBase::socket()
 //{
-//	Mutex::ScopedLock lock(_mutex);
+//	ScopedLock lock(_mutex);
 //	return _socket;
 //}
 //
 //
 //KVCollection& SocketBase::httpHeaders()
 //{
-//	Mutex::ScopedLock lock(_mutex);
+//	ScopedLock lock(_mutex);
 //	return _httpHeaders;
 //}
 //
 //
 //string SocketBase::sessionID() const 
 //{
-//	Mutex::ScopedLock lock(_mutex);
+//	ScopedLock lock(_mutex);
 //	return _sessionID;
 //}
 

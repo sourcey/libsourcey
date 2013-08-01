@@ -35,7 +35,7 @@ namespace sked {
 	
 
 Task::Task(const string& type, const string& name) : 
-	scy::Task(true),		
+	//scy::Task(true),		
 	_type(type),
 	_name(name),
 	_scheduler(NULL),
@@ -46,7 +46,7 @@ Task::Task(const string& type, const string& name) :
 
 	
 Task::Task(sked::Scheduler& scheduler, const string& type, const string& name) : 
-	scy::Task(true),	
+	//scy::Task(true),	
 	//scy::Task(reinterpret_cast<Scheduler&>(scheduler), true, false),
 	_type(type),
 	_name(name),
@@ -76,7 +76,7 @@ void Task::serialize(json::Value& root)
 {
 	traceL() << "Serializing" << endl;	
 	
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	
 	root["id"] = _id;
 	root["type"] = _type;
@@ -88,7 +88,7 @@ void Task::deserialize(json::Value& root)
 {
 	traceL() << "Deserializing" << endl;
 	
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	
 	json::assertMember(root, "id");
 	json::assertMember(root, "type");
@@ -102,14 +102,14 @@ void Task::deserialize(json::Value& root)
 
 bool Task::beforeRun()
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	return _trigger && _trigger->timeout() && !_destroyed && !_cancelled;
 }
 
 
 bool Task::afterRun()
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	DateTime now;
 	_trigger->update();
 	_trigger->timesRun++;
@@ -120,7 +120,7 @@ bool Task::afterRun()
 
 void Task::setTrigger(sked::Trigger* trigger)
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	if (_trigger)
 		delete _trigger;
 	_trigger = trigger;
@@ -129,21 +129,21 @@ void Task::setTrigger(sked::Trigger* trigger)
 
 string Task::name() const
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	return _name;
 }
 
 
 string Task::type() const
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	return _type;
 }
 
 
 Int64 Task::remaining() const
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	if (!_trigger)
 		throw Exception("Tasks must be have a Trigger instance.");
 	return _trigger->remaining();
@@ -152,7 +152,7 @@ Int64 Task::remaining() const
 
 sked::Trigger& Task::trigger()
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	if (!_trigger)
 		throw Exception("Tasks must have a Trigger instance.");
 	return *_trigger;
@@ -161,7 +161,7 @@ sked::Trigger& Task::trigger()
 
 sked::Scheduler& Task::scheduler()						 
 { 
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	if (!_scheduler)
 		throw Exception("Tasks must be started with a sked::Scheduler instance.");
 	return *_scheduler;
@@ -176,7 +176,7 @@ sked::Scheduler& Task::scheduler()
 /*
 void Task::setName(const string& name) 
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	_name = name;
 }
 */
@@ -225,7 +225,7 @@ void Task::scheduleRepeated(const DateTime& time, const Timespan& interval)
 
 DateTime Task::time() const
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	return _time;
 }
 
@@ -254,7 +254,7 @@ bool Task::run()
 	bool doTimeout = false;
 	bool doDestroy = false;
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		if (_scheduleAt.timeout()) {
 			doTimeout = true;
 			if (_interval > 0) {

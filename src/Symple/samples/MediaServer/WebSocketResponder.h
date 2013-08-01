@@ -3,7 +3,7 @@
 #include "Sourcey/Logger.h"
 #include "Sourcey/Application.h"
 #include "Sourcey/PacketStream.h"
-#include "Sourcey/SyncPacketStream.h"
+#include "Sourcey/PacketStream.h"
 #include "Sourcey/Crypto.h"
 #include "Sourcey/Util.h"
 
@@ -62,7 +62,7 @@ public:
 		MediaServer::setupPacketStream(stream, options);
 
 		// Start the stream
-		stream += packetDelegate(this, &WebSocketRequestHandler::onVideoEncoded);
+		stream.Emitter += packetDelegate(this, &WebSocketRequestHandler::onVideoEncoded);
 		stream.start();
 	}
 
@@ -75,7 +75,7 @@ public:
 	{
 		debugL("WebSocketRequestHandler", this) << "On close" << std::endl;
 		
-		stream -= packetDelegate(this, &WebSocketRequestHandler::onVideoEncoded);
+		stream.Emitter -= packetDelegate(this, &WebSocketRequestHandler::onVideoEncoded);
 		stream.stop();	
 	}
 	
@@ -87,7 +87,7 @@ public:
 
 		try
 		{	
-			connection().sendRaw(packet.data(), packet.size(), http::WebSocket::FRAME_BINARY);
+			connection().send(packet.data(), packet.size(), http::WebSocket::FRAME_BINARY);
 			fpsCounter.tick();		
 		}
 		catch (Exception& exc)
@@ -97,7 +97,7 @@ public:
 		}
 	}
 	
-	SyncPacketStream stream;
+	PacketStream stream;
 	StreamingOptions options;
 	av::FPSCounter fpsCounter;
 };

@@ -97,7 +97,7 @@ bool Form::valid()
 // Form Element
 //
 FormElement::FormElement() :
-	_root(nullptr)
+	_root(nil)
 {
 }
 

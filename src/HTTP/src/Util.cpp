@@ -91,7 +91,7 @@ std::string parseCookieItem(const std::string& cookie, const std::string& item)
 }
 
 
-bool splitURIParameters(const string& uri, NVCollection& out)
+bool splitURIParameters(const string& uri, NVHash& out)
 {
 	size_t len = uri.length();
 	size_t i = 0;
@@ -131,7 +131,7 @@ bool splitURIParameters(const string& uri, NVCollection& out)
 }
 
 
-void splitParameters(const std::string& s, std::string& value, NVCollection& parameters)
+void splitParameters(const std::string& s, std::string& value, NVHash& parameters)
 {
 	value.clear();
 	parameters.clear();
@@ -145,7 +145,7 @@ void splitParameters(const std::string& s, std::string& value, NVCollection& par
 }
 
 
-void splitParameters(const std::string::const_iterator& begin, const std::string::const_iterator& end, NVCollection& parameters)
+void splitParameters(const std::string::const_iterator& begin, const std::string::const_iterator& end, NVHash& parameters)
 {
 	std::string pname;
 	std::string pvalue;

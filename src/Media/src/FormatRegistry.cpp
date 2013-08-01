@@ -20,7 +20,7 @@
 #include "Sourcey/Media/FormatRegistry.h"
 
 #include "Sourcey/Singleton.h"
-#include "Poco/Format.h"
+//#include "Poco/Format.h"
 
 
 using namespace std;
@@ -32,13 +32,11 @@ namespace av {
 
 FormatRegistry::FormatRegistry()
 {
-	cout << "[FormatRegistry:" << this << "] Creating" << endl;
 }
 
 
 FormatRegistry::~FormatRegistry()
 {
-	cout << "[FormatRegistry:" << this << "] Destroying" << endl;
 }
 
 
@@ -51,34 +49,34 @@ FormatRegistry& FormatRegistry::instance()
 
 Format& FormatRegistry::get(const string& name) 
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (unsigned int i = 0; i < _formats.size(); i++) {
 		if (_formats[i].name == name) {
 			return _formats[i];
 		}
 	}
            
-	throw Poco::NotFoundException("No media format for: " + name);
+	throw NotFoundException("No media format for: " + name);
 }
 
 
 Format& FormatRegistry::getByID(const string& id) 
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (unsigned int i = 0; i < _formats.size(); i++) {
 		if (_formats[i].id == id) {
 			return _formats[i];
 		}
 	}
            
-	throw Poco::NotFoundException("No media format type: " + id);
+	throw NotFoundException("No media format type: " + id);
 }
 
 
 Format& FormatRegistry::getOrDefault(const string& name) 
 {
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		for (unsigned int i = 0; i < _formats.size(); i++) {
 			if (_formats[i].name == name) {
 				return _formats[i];
@@ -92,7 +90,7 @@ Format& FormatRegistry::getOrDefault(const string& name)
 
 Format& FormatRegistry::getDefault() 
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	if (!_default.empty()) {
 		return get(_default);
 	}
@@ -100,13 +98,13 @@ Format& FormatRegistry::getDefault()
 		return *_formats.begin();
 	}
          
-	throw Poco::NotFoundException("No default media format.");
+	throw NotFoundException("No default media format.");
 }
 
 
 bool FormatRegistry::exists(const string& name)
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (unsigned int i = 0; i < _formats.size(); i++) {
 		if (_formats[i].name == name) {
 			return true;
@@ -119,14 +117,14 @@ bool FormatRegistry::exists(const string& name)
 
 void FormatRegistry::clear()
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	_formats.clear();
 }
 
 
 FormatList FormatRegistry::formats() const
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _formats; 
 }
 
@@ -134,14 +132,14 @@ FormatList FormatRegistry::formats() const
 void FormatRegistry::registerFormat(const Format& format)	
 { 
 	unregisterFormat(format.name);
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
     _formats.push_back(format);
 }
 
 
 bool FormatRegistry::unregisterFormat(const string& name)	
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (FormatList::iterator it = _formats.begin(); it != _formats.end(); ++it) {
 		if ((*it).name == name) {
 			_formats.erase(it);
@@ -156,7 +154,7 @@ bool FormatRegistry::unregisterFormat(const string& name)
 
 void FormatRegistry::setDefault(const string& name)
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	_default = name;
 }
 

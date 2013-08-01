@@ -29,7 +29,7 @@ namespace scy {
 	
 struct LogStream;
 struct Polymorphic
-	/// A base calss for logging and callback polymorphism.
+	// A base calss for logging and callback polymorphism.
 {
 	virtual ~Polymorphic() {};
 		
@@ -53,8 +53,8 @@ struct Polymorphic
 
 
 typedef Polymorphic Module;
-	/// The LibSourcey base module type.
-	/// May become a class type in the future.
+	// The LibSourcey base module type.
+	// May become a class type in the future.
 
 
 } // namespace scy

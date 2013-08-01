@@ -22,8 +22,9 @@
 
 
 #include "Sourcey/Containers.h"
+#include "Sourcey/Thread.h"
 #include "Sourcey/Stateful.h"
-#include "Poco/Thread.h"
+
 
 
 namespace scy {
@@ -92,10 +93,10 @@ protected:
 
 // ---------------------------------------------------------------------
 //
-class IAsyncDiagnostic: public IDiagnostic, public Poco::Runnable
+class AsyncDiagnostic: public IDiagnostic, public abstract::Runnable
 {
 public:
-	virtual ~IAsyncDiagnostic() {};
+	virtual ~AsyncDiagnostic() {};
 
 	virtual void check() {
 		reset();
@@ -103,7 +104,7 @@ public:
 	};
 
 protected:
-	Poco::Thread _thread;
+	Thread _thread;
 };
 
 

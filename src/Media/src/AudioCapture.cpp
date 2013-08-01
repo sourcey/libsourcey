@@ -35,7 +35,7 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFo
 	_channels(channels),
 	_sampleRate(sampleRate),
 	_format(format),
-	_isOpen(false)
+	_opened(false)
 {
 	traceL("AudioCapture", this) << "Creating" << endl;
 
@@ -68,19 +68,19 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 	if (isOpen())
 		close();
 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	traceL("AudioCapture", this) << "Opening: " << _channels << ": " << _sampleRate << endl;
 	
 	//_channels = channels;
 	//_sampleRate = sampleRate;
 	//_format = format;
 	//_iParams.nChannels = _channels;
-	unsigned int nBufferFrames = 256; //512;
+	unsigned int nBufferFrames = 1536; //256; //512; / 2
 
 	try {
-		_audio.openStream(NULL, &_iParams, _format, _sampleRate, &nBufferFrames, &AudioCapture::callback, (void*)this);
+		_audio.openStream(nil, &_iParams, _format, _sampleRate, &nBufferFrames, &AudioCapture::callback, (void*)this);
 		_error = "";
-		_isOpen = true;
+		_opened = true;
 		traceL("AudioCapture", this) << "Opening: OK" << endl;
 	}
 	catch (RtError& e) {
@@ -96,8 +96,8 @@ void AudioCapture::close()
 {	
 	traceL("AudioCapture", this) << "Closing" << endl;
 	try {
-		Mutex::ScopedLock lock(_mutex);
-		_isOpen = false;
+		ScopedLock lock(_mutex);
+		_opened = false;
 		if (_audio.isStreamOpen())
 			_audio.closeStream();
 		traceL("AudioCapture", this) << "Closing: OK" << endl;
@@ -115,9 +115,9 @@ void AudioCapture::start()
 {	
 	traceL("AudioCapture", this) << "Starting" << endl;
 
-	if (!isRunning()) {
+	if (!running()) {
 		try {
-			Mutex::ScopedLock lock(_mutex);
+			ScopedLock lock(_mutex);
 			_audio.startStream();
 			_error = "";
 			traceL("AudioCapture", this) << "Starting: OK" << endl;
@@ -136,9 +136,9 @@ void AudioCapture::stop()
 {	
 	traceL("AudioCapture", this) << "Stopping" << endl;
 
-	if (isRunning()) {
+	if (running()) {
 		try {
-			Mutex::ScopedLock lock(_mutex);
+			ScopedLock lock(_mutex);
 			traceL("AudioCapture", this) << "Stopping: Before" << endl;
 			_audio.stopStream();
 			traceL("AudioCapture", this) << "Stopping: OK" << endl;
@@ -153,6 +153,7 @@ void AudioCapture::stop()
 }
 
 
+/*
 void AudioCapture::attach(const PacketDelegateBase& delegate)
 {
 	PacketSignal::attach(delegate);
@@ -173,6 +174,7 @@ bool AudioCapture::detach(const PacketDelegateBase& delegate)
 	}
 	return false;
 }
+*/
 
 
 void AudioCapture::setError(const string& message)
@@ -187,44 +189,53 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 	double streamTime, RtAudioStreamStatus status, void* data)
 {
 	AudioCapture* klass = (AudioCapture*)data;
+	AudioPacket packet;
 	
 	if (status) 
 		errorL("AudioCapture", klass) << "Stream over/underflow detected" << endl;
 
-	assert(inputBuffer != NULL);
-	if (inputBuffer == NULL) {
-		errorL("AudioCapture", klass) << "Input buffer is NULL." << endl;
+	assert(inputBuffer);
+	if (!inputBuffer == nil) {
+		errorL("AudioCapture", klass) << "Input buffer is nil." << endl;
 		return 2;
 	} 
 
-	//if (!klass->isOpen())
-	//	return 2;
+	{
+		ScopedLock lock(klass->_mutex);
 
-	int size = 2;
-	RtAudioFormat format = klass->format();
-	// - \e RTAUDIO_SINT8:   8-bit signed integer.
-	if (format == RTAUDIO_SINT8)
-		size = 1;
-    // - \e RTAUDIO_SINT16:  16-bit signed integer.
-	else if (format == RTAUDIO_SINT16)
-		size = 2;
-    // - \e RTAUDIO_SINT24:  Lower 3 bytes of 32-bit signed integer.
-	else if (format == RTAUDIO_SINT24)
-		size = 4;
-    // - \e RTAUDIO_SINT32:  32-bit signed integer.
-	else if (format == RTAUDIO_SINT32)
-		size = 4;
-    // - \e RTAUDIO_FLOAT32: Normalized between plus/minus 1.0.
-	else if (format == RTAUDIO_FLOAT32)
-		size = 4;
-    // - \e RTAUDIO_FLOAT64: Normalized between plus/minus 1.0.
-	else if (format == RTAUDIO_FLOAT64)
-		size = 8;
-	else assert(0 && "unknown audio capture format");
+		int size = 2;
+		RtAudioFormat format = klass->_format;
+		//  8-bit signed integer.
+		if (format == RTAUDIO_SINT8)
+			size = 1;
+		// 16-bit signed integer.
+		else if (format == RTAUDIO_SINT16)
+			size = 2;
+		// Lower 3 bytes of 32-bit signed integer.
+		else if (format == RTAUDIO_SINT24)
+			size = 4;
+		// 32-bit signed integer.
+		else if (format == RTAUDIO_SINT32)
+			size = 4;
+		// Normalized between plus/minus 1.0.
+		else if (format == RTAUDIO_FLOAT32)
+			size = 4;
+		// Normalized between plus/minus 1.0.
+		else if (format == RTAUDIO_FLOAT64)
+			size = 8;
+		else assert(0 && "unknown audio capture format");
 
+		packet.setArray((char*)inputBuffer, nBufferFrames * klass->_channels * size);
+	}
+
+	/*
 	AudioPacket packet((char*)inputBuffer, 
-		nBufferFrames * klass->numChannels() * size, //sizeof(AUDIO_DATA),
+		nBufferFrames * klass->_numChannels * size, //sizeof(AUDIO_DATA),
+
+		// TODO: Add the process time to this value for 
+		// consistency with the time value of other packets.
 		(double)streamTime);
+		*/
 
 	//traceL() << "[AudioCapture] AudioPacket: " 
 	//	<< "\n\tPacket Ptr: " << inputBuffer
@@ -232,51 +243,60 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 	//	<< "\n\tStream Time: " << packet.time
 	//	<< endl;
 
-	klass->emit(packet); //klass, 
-	//traceL("AudioCapture", klass) << "Callback: OK" << endl;
+	klass->emit(packet);
 	return 0;
 }
 
 
 RtAudioFormat AudioCapture::format() const
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _format;
 }
 
 
 bool AudioCapture::isOpen() const
 { 
-	Mutex::ScopedLock lock(_mutex);
-	return _isOpen;
+	ScopedLock lock(_mutex);
+	return _opened;
 }
 
 
-bool AudioCapture::isRunning() const
+bool AudioCapture::running() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _audio.isStreamRunning();
 }
 
 
 int AudioCapture::deviceId() const 
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _deviceId;
 }
 
 
 int AudioCapture::sampleRate() const 
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _sampleRate;
 }
 
 
 int AudioCapture::numChannels() const 
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _channels;
+}
+
+		
+void AudioCapture::getEncoderFormat(Format& iformat) 
+{
+	ScopedLock lock(_mutex);
+	iformat.audio.sampleFmt = "s16"; // TODO: Convert from RtAudioFormat to SampleFormat
+	iformat.audio.channels = _channels;
+	iformat.audio.sampleRate = _sampleRate;
+	iformat.audio.enabled = true;
 }
 
 

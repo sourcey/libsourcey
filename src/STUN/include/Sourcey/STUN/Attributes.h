@@ -165,7 +165,7 @@ private:
 // ---------------------------------------------------------------------------
 //
 class UInt8Attribute: public Attribute 
-	/// Implements STUN/TURN attributs that reflects a 32-bit integer.
+	/// Implements STUN/TURN attribute that reflects a 32-bit integer.
 {
 public:
 	UInt8Attribute(UInt16 type);
@@ -192,7 +192,7 @@ private:
 // ---------------------------------------------------------------------------
 //
 class UInt32Attribute: public Attribute 
-	/// Implements STUN/TURN attributs that reflects a 32-bit integer.
+	/// Implements STUN/TURN attribute that reflects a 32-bit integer.
 {
 public:
 	UInt32Attribute(UInt16 type);
@@ -219,7 +219,7 @@ private:
 // ---------------------------------------------------------------------------
 //
 class UInt64Attribute: public Attribute 
-	/// Implements STUN/TURN attributs that reflects a 64-bit integer.
+	/// Implements STUN/TURN attribute that reflects a 64-bit integer.
 {
 public:
 	UInt64Attribute(UInt16 type);
@@ -244,7 +244,7 @@ private:
 
 
 class FlagAttribute: public Attribute 
-	/// Implements STUN/TURN attributs representing a 0 size flag.
+	/// Implements STUN/TURN attribute representing a 0 size flag.
 {
 public:
 	FlagAttribute(UInt16 type);
@@ -261,7 +261,7 @@ public:
 // ---------------------------------------------------------------------------
 //
 class StringAttribute: public Attribute 
-	/// Implements STUN/TURN attributs that reflects an arbitrary byte string
+	/// Implements STUN/TURN attribute that reflects an arbitrary byte string
 {
 public:
 	StringAttribute(UInt16 type, UInt16 size = 0);
@@ -291,7 +291,7 @@ private:
 // ---------------------------------------------------------------------------
 //
 class UInt16ListAttribute: public Attribute 
-	/// Implements STUN/TURN attributs that reflects a list of attribute names.
+	/// Implements STUN/TURN attribute that reflects a list of attribute names.
 {
 public:
 	UInt16ListAttribute(UInt16 type, UInt16 size);
@@ -350,7 +350,7 @@ private:
 // ---------------------------------------------------------------------------
 //
 class ErrorCode: public Attribute 
-	/// Implements STUN/TURN attributs that reflects an error code.
+	/// Implements STUN/TURN attribute that reflects an error code.
 {
 public:	
 	ErrorCode(UInt16 size = MinSize);

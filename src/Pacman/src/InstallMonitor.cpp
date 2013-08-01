@@ -61,7 +61,7 @@ void InstallMonitor::onInstallComplete(void* sender)
 	
 	int progress = 0;
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 
 		// Remove the package task reference.
 		for (InstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++) {
@@ -89,7 +89,7 @@ void InstallMonitor::onInstallComplete(void* sender)
 
 void InstallMonitor::addTask(InstallTask* task)
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	if (!task->valid())
 		throw Exception("Invalid package task");
 	_tasks.push_back(task);
@@ -101,7 +101,7 @@ void InstallMonitor::addTask(InstallTask* task)
 
 void InstallMonitor::startAll()
 {	
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (InstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++)
 		(*it)->start();
 }
@@ -109,7 +109,7 @@ void InstallMonitor::startAll()
 
 void InstallMonitor::cancelAll()
 {	
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	for (InstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++)
 		(*it)->cancel();
 }
@@ -118,7 +118,7 @@ void InstallMonitor::cancelAll()
 void InstallMonitor::setProgress(int value)
 {
 	{
-		Mutex::ScopedLock lock(_mutex);	
+		ScopedLock lock(_mutex);	
 		_progress = value;
 	}
 	Progress.emit(this, value);
@@ -127,21 +127,21 @@ void InstallMonitor::setProgress(int value)
 
 InstallTaskList InstallMonitor::tasks() const 
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _tasks; 
 }
 
 
 LocalPackageList InstallMonitor::packages() const 
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _packages; 
 }
 
 
 bool InstallMonitor::isComplete() const 
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _tasks.empty(); 
 }
 
@@ -229,7 +229,7 @@ InstallTask* InstallMonitor::getTask(const std::string& name) const
 		}
 			*/
 			/*
-			debugL() << "[PacketStream:" << this << "] Detaching Processor: " << (*it).ptr << endl;
+			debugL() << "[PacketStream:" << this << "] Detaching processor: " << (*it).ptr << endl;
 			(*it).ptr->detach(polymorphicDelegate(this, &PacketStream::onProcessedPacket));
 			if ((*it).freePointer)
 				delete (*it).ptr;

@@ -68,7 +68,7 @@ struct PackageInstallState: public State
 
 
 class InstallTask: 
-	public Poco::Runnable, 
+	public abstract::Runnable, 
 	public StatefulSignal<PackageInstallState>, 
 	public Polymorphic
 	///
@@ -132,7 +132,7 @@ public:
 	virtual int progress() const;
 
 	virtual void onStateChange(PackageInstallState& state, const PackageInstallState& oldState);
-	virtual void onIncomingProgress(void* sender, const http::TransferProgress& state);
+	virtual void onIncomingProgress(void* sender, const double& progress);
 	virtual void onDecompressionError(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const std::string>& info);
 	virtual void onDecompressionOk(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info);
 
@@ -147,7 +147,7 @@ public:
 		/// success and failure cases.
 	
 protected:
-	virtual void run();
+	virtual bool run();
 		/// Called asynchronously by the thread to
 		/// do the work.
 
@@ -156,7 +156,7 @@ protected:
 protected:
 	mutable Mutex	_mutex;
 	
-	Poco::Thread	_thread;
+	Thread	_thread;
 	PackageManager& _manager;
 	LocalPackage*	_local;
 	RemotePackage*	_remote;

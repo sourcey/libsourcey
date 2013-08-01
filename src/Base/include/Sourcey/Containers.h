@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SOURCEY_Manager_H
-#define SOURCEY_Manager_H
+#ifndef SOURCEY_Containers_H
+#define SOURCEY_Containers_H
 
 
 #include "Sourcey/Signal.h"
@@ -34,8 +34,8 @@ namespace scy {
 
 template <class TKey, class TValue>
 class IManager
-	/// IManager is an abstract interface for managing a
-	/// key-value store of indexed pointers.
+	// IManager is an abstract interface for managing a
+	// key-value store of indexed pointers.
 {	
 public:
 	IManager() {};
@@ -58,9 +58,9 @@ public:
 //
 template <class TKey, class TValue, class TDeleter = DefaultDeleter<TValue>>
 class PointerManager: public IManager<TKey, TValue>
-	/// This class is useful for maintaining an indexed map of pointers. 
-	///
-	/// All members are thread-safe.
+	// This class is useful for maintaining an indexed map of pointers. 
+	//
+	// All members are thread-safe.
 {
 public:
 	typedef std::map<TKey, TValue*> Map;
@@ -88,7 +88,7 @@ public:
 			return false;
 		}
 		{		
-			Mutex::ScopedLock lock(_mutex);
+			ScopedLock lock(_mutex);
 			_map[key] = item;
 		}
 		onAdd(key, item);
@@ -97,9 +97,9 @@ public:
 
 	virtual void update(const TKey& key, TValue* item) 
 	{
-		// NOTE: This method will not delete existing values.
+		// Note: This method will not delete existing values.
 		{
-			Mutex::ScopedLock lock(_mutex);
+			ScopedLock lock(_mutex);
 			_map[key] = item;
 		}
 		onAdd(key, item);
@@ -107,7 +107,7 @@ public:
 	
 	virtual TValue* get(const TKey& key, bool whiny = true) const 
 	{
-		Mutex::ScopedLock lock(_mutex); 
+		ScopedLock lock(_mutex); 
 		typename Map::const_iterator it = _map.find(key);	
 		if (it != _map.end()) {
 			return it->second;	 
@@ -134,9 +134,9 @@ public:
 
 	virtual TValue* remove(const TKey& key) 
 	{
-		TValue* item = nullptr;
+		TValue* item = NULL;
 		{
-			Mutex::ScopedLock lock(_mutex);
+			ScopedLock lock(_mutex);
 			typename Map::iterator it = _map.find(key);	
 			if (it != _map.end()) {
 				item = it->second;
@@ -151,9 +151,9 @@ public:
 	virtual bool remove(const TValue* item) 
 	{	
 		TKey key;
-		TValue* ptr = nullptr;
+		TValue* ptr = NULL;
 		{
-			Mutex::ScopedLock lock(_mutex); 	
+			ScopedLock lock(_mutex); 	
 			for (typename Map::iterator it = _map.begin(); it != _map.end(); ++it) {
 				if (item == it->second) {
 					key = it->first;
@@ -170,14 +170,14 @@ public:
 
 	virtual bool exists(const TKey& key) const 
 	{ 
-		Mutex::ScopedLock lock(_mutex); 	
+		ScopedLock lock(_mutex); 	
 		typename Map::const_iterator it = _map.find(key);	
 		return it != _map.end();	 
 	}
 
 	virtual bool exists(const TValue* item) const 
 	{ 
-		Mutex::ScopedLock lock(_mutex); 	
+		ScopedLock lock(_mutex); 	
 		for (typename Map::const_iterator it = _map.begin(); it != _map.end(); ++it) {
 			if (item == it->second)
 				return true;
@@ -187,31 +187,31 @@ public:
 
 	virtual bool empty() const
 	{
-		Mutex::ScopedLock lock(_mutex); 	
+		ScopedLock lock(_mutex); 	
 		return _map.empty();
 	}
 
 	virtual int size() const
 	{
-		Mutex::ScopedLock lock(_mutex); 	
+		ScopedLock lock(_mutex); 	
 		return _map.size();
 	}
 
 	virtual void clear()
 	{
-		Mutex::ScopedLock lock(_mutex); 	
+		ScopedLock lock(_mutex); 	
 		util::clearMap<TDeleter>(_map);
 	}
 
 	virtual Map map() const 
 	{ 
-		Mutex::ScopedLock lock(_mutex); 	
+		ScopedLock lock(_mutex); 	
 		return _map; 
 	}
 
 	virtual Map& map() 
 	{ 
-		Mutex::ScopedLock lock(_mutex); 	
+		ScopedLock lock(_mutex); 	
 		return _map; 
 	}
 
@@ -259,7 +259,7 @@ public:
 //
 template <class TKey, class TValue>
 class KVStore
-	/// A reusable stack based key-value store for DRY coding.
+	// A reusable stack based key-value store for DRY coding.
 {
 public:
 	typedef std::map<TKey, TValue> Map;
@@ -281,14 +281,14 @@ public:
 				throw Exception("Item already exists");
 			return false;
 		}		
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		_map[key] = item;
 		return true;		
 	}
 
 	virtual TValue& get(const TKey& key)
 	{
-		//Mutex::ScopedLock lock(_mutex); 
+		//ScopedLock lock(_mutex); 
 		typename Map::iterator it = _map.find(key);	
 		if (it != _map.end())
 			return it->second;	 
@@ -298,7 +298,7 @@ public:
 
 	virtual const TValue& get(const TKey& key, const TValue& defaultValue) const
 	{
-		//Mutex::ScopedLock lock(_mutex); 
+		//ScopedLock lock(_mutex); 
 		typename Map::const_iterator it = _map.find(key);	
 		if (it != _map.end())
 			return it->second;	 
@@ -307,7 +307,7 @@ public:
 	
 	virtual bool erase(const TKey& key) 
 	{
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		typename Map::iterator it = _map.find(key);	
 		if (it != _map.end()) {
 			_map.erase(it);
@@ -318,31 +318,31 @@ public:
 
 	virtual bool has(const TKey& key) const 
 	{ 
-		//Mutex::ScopedLock lock(_mutex); 	
+		//ScopedLock lock(_mutex); 	
 		return _map.find(key) != _map.end();	 
 	}
 
 	virtual bool empty() const
 	{
-		//Mutex::ScopedLock lock(_mutex); 	
+		//ScopedLock lock(_mutex); 	
 		return _map.empty();
 	}
 
 	virtual int size() const
 	{
-		//Mutex::ScopedLock lock(_mutex); 	
+		//ScopedLock lock(_mutex); 	
 		return _map.size();
 	}
 
 	virtual void clear()
 	{
-		//Mutex::ScopedLock lock(_mutex); 	
+		//ScopedLock lock(_mutex); 	
 		_map.clear();
 	}
 
 	virtual Map& map() 
 	{ 
-		//Mutex::ScopedLock lock(_mutex); 	
+		//ScopedLock lock(_mutex); 	
 		return _map; 
 	}
 
@@ -354,10 +354,10 @@ protected:
 
 // ---------------------------------------------------------------------
 //
-class NVCollection
-	/// A collection of name-value string pairs.
-	/// The name is case-insensitive and there can be more than 
-	/// one name-value pair with the same name.
+class NVHash
+	// A collection of name-value string pairs.
+	// The name is case-insensitive and there can be more than 
+	// one name-value pair with the same name.
 {
 public:
 	struct ILT
@@ -372,87 +372,86 @@ public:
 	typedef Map::iterator Iterator;
 	typedef Map::const_iterator ConstIterator;
 	
-	NVCollection()
+	NVHash()
 	{
 	}
 
-	NVCollection(const NVCollection& nvc) :
+	NVHash(const NVHash& nvc) :
 		_map(nvc._map)
 	{
 	}
 
-	virtual ~NVCollection()
+	virtual ~NVHash()
 	{
 	}
 
-	NVCollection& operator = (const NVCollection& nvc);
-		/// Assigns the name-value pairs of another NVCollection to this one.
+	NVHash& operator = (const NVHash& nvc);
+		// Assigns the name-value pairs of another NVHash to this one.
 		
 	const std::string& operator [] (const std::string& name) const;
-		/// Returns the value of the (first) name-value pair with the given name.
-		///
-		/// Throws a NotFoundException if the name-value pair does not exist.
+		// Returns the value of the (first) name-value pair with the given name.
+		//
+		// Throws a NotFoundException if the name-value pair does not exist.
 		
 	void set(const std::string& name, const std::string& value);	
-		/// Sets the value of the (first) name-value pair with the given name.
+		// Sets the value of the (first) name-value pair with the given name.
 		
 	void add(const std::string& name, const std::string& value);
-		/// Adds a new name-value pair with the given name and value.
+		// Adds a new name-value pair with the given name and value.
 		
 	const std::string& get(const std::string& name) const;
-		/// Returns the value of the first name-value pair with the given name.
-		///
-		/// Throws a NotFoundException if the name-value pair does not exist.
+		// Returns the value of the first name-value pair with the given name.
+		//
+		// Throws a NotFoundException if the name-value pair does not exist.
 
 	const std::string& get(const std::string& name, const std::string& defaultValue) const;
-		/// Returns the value of the first name-value pair with the given name.
-		/// If no value with the given name has been found, the defaultValue is returned.
+		// Returns the value of the first name-value pair with the given name.
+		// If no value with the given name has been found, the defaultValue is returned.
 
 	bool has(const std::string& name) const;
-		/// Returns true if there is at least one name-value pair
-		/// with the given name.
+		// Returns true if there is at least one name-value pair
+		// with the given name.
 
 	ConstIterator find(const std::string& name) const;
-		/// Returns an iterator pointing to the first name-value pair
-		/// with the given name.
+		// Returns an iterator pointing to the first name-value pair
+		// with the given name.
 		
 	ConstIterator begin() const;
-		/// Returns an iterator pointing to the begin of
-		/// the name-value pair collection.
+		// Returns an iterator pointing to the begin of
+		// the name-value pair collection.
 		
 	ConstIterator end() const;
-		/// Returns an iterator pointing to the end of 
-		/// the name-value pair collection.
+		// Returns an iterator pointing to the end of 
+		// the name-value pair collection.
 		
 	bool empty() const;
-		/// Returns true iff the header does not have any content.
+		// Returns true iff the header does not have any content.
 
 	int size() const;
-		/// Returns the number of name-value pairs in the
-		/// collection.
+		// Returns the number of name-value pairs in the
+		// collection.
 
 	void erase(const std::string& name);
-		/// Removes all name-value pairs with the given name.
+		// Removes all name-value pairs with the given name.
 
 	void clear();
-		/// Removes all name-value pairs and their values.
+		// Removes all name-value pairs and their values.
 
 private:
 	Map _map;
 };
 
 
-inline NVCollection& NVCollection::operator = (const NVCollection& nvc)
+inline NVHash& NVHash::operator = (const NVHash& nvc)
 {
-	if (&nvc != this)
-	{
+	if (&nvc != this) {
 		_map = nvc._map;
 	}
 	return *this;
 }
 
 	
-inline const std::string& NVCollection::operator [] (const std::string& name) const
+inline const std::string& NVHash::operator [] (const std::string& name) const
 {
 	ConstIterator it = _map.find(name);
 	if (it != _map.end())
@@ -462,7 +461,7 @@ inline const std::string& NVCollection::operator [] (const std::string& name) co
 }
 
 	
-inline void NVCollection::set(const std::string& name, const std::string& value)	
+inline void NVHash::set(const std::string& name, const std::string& value)	
 {
 	Iterator it = _map.find(name);
 	if (it != _map.end())
@@ -472,13 +471,13 @@ inline void NVCollection::set(const std::string& name, const std::string& value)
 }
 
 	
-inline void NVCollection::add(const std::string& name, const std::string& value)
+inline void NVHash::add(const std::string& name, const std::string& value)
 {
 	_map.insert(Map::value_type(name, value));
 }
 
 	
-inline const std::string& NVCollection::get(const std::string& name) const
+inline const std::string& NVHash::get(const std::string& name) const
 {
 	ConstIterator it = _map.find(name);
 	if (it != _map.end())
@@ -488,7 +487,7 @@ inline const std::string& NVCollection::get(const std::string& name) const
 }
 
 
-inline const std::string& NVCollection::get(const std::string& name, const std::string& defaultValue) const
+inline const std::string& NVHash::get(const std::string& name, const std::string& defaultValue) const
 {
 	ConstIterator it = _map.find(name);
 	if (it != _map.end())
@@ -498,49 +497,49 @@ inline const std::string& NVCollection::get(const std::string& name, const std::
 }
 
 
-inline bool NVCollection::has(const std::string& name) const
+inline bool NVHash::has(const std::string& name) const
 {
 	return _map.find(name) != _map.end();
 }
 
 
-inline NVCollection::ConstIterator NVCollection::find(const std::string& name) const
+inline NVHash::ConstIterator NVHash::find(const std::string& name) const
 {
 	return _map.find(name);
 }
 
 	
-inline NVCollection::ConstIterator NVCollection::begin() const
+inline NVHash::ConstIterator NVHash::begin() const
 {
 	return _map.begin();
 }
 
 	
-inline NVCollection::ConstIterator NVCollection::end() const
+inline NVHash::ConstIterator NVHash::end() const
 {
 	return _map.end();
 }
 
 	
-inline bool NVCollection::empty() const
+inline bool NVHash::empty() const
 {
 	return _map.empty();
 }
 
 
-inline int NVCollection::size() const
+inline int NVHash::size() const
 {
-	return (int) _map.size();
+	return (int)_map.size();
 }
 
 
-inline void NVCollection::erase(const std::string& name)
+inline void NVHash::erase(const std::string& name)
 {
 	_map.erase(name);
 }
 
 
-inline void NVCollection::clear()
+inline void NVHash::clear()
 {
 	_map.clear();
 }
@@ -549,4 +548,4 @@ inline void NVCollection::clear()
 } // namespace scy
 
 
-#endif // SOURCEY_Manager_H
+#endif // SOURCEY_Containers_H

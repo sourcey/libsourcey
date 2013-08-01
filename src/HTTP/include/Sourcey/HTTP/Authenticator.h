@@ -31,7 +31,7 @@
 
 #include "Sourcey/HTTP/URL.h"
 ////#include "Poco/Net/Net.h"
-////#include "Poco/Net/NVCollection.h"
+////#include "Poco/Net/NVHash.h"
 //#include <ostream>
 //#include <istream>
 //#include <vector>
@@ -83,85 +83,85 @@ class Authenticator //Net_API
 {
 public:
 	Authenticator();
-		/// Creates an empty Authenticator object.
+		// Creates an empty Authenticator object.
 
 	Authenticator(const std::string& username, const std::string& password);
-		/// Creates an Authenticator object with the given username and password.
+		// Creates an Authenticator object with the given username and password.
 
 	~Authenticator();
-		/// Destroys the Authenticator.
+		// Destroys the Authenticator.
 
 	void fromUserInfo(const std::string& userInfo);
-		/// Parses username:password string and sets username and password of
-		/// the credentials object.
-		/// Throws SyntaxException on invalid user information.
+		// Parses username:password string and sets username and password of
+		// the credentials object.
+		// Throws SyntaxException on invalid user information.
 
 	void fromURI(const http::URL& uri);
-		/// Extracts username and password from the given URI and sets username
-		/// and password of the credentials object.
-		/// Does nothing if URI has no user info part.
+		// Extracts username and password from the given URI and sets username
+		// and password of the credentials object.
+		// Does nothing if URI has no user info part.
 
 	/*
 	void setUsername(const std::string& username);
-		/// Sets the username.
+		// Sets the username.
 
 	const std::string& getUsername() const;
-		/// Returns the username.
+		// Returns the username.
 
 	void setPassword(const std::string& password);
-		/// Sets the password.
+		// Sets the password.
 
 	const std::string& getPassword() const;
-		/// Returns the password.
+		// Returns the password.
 		*/
 
 	void authenticate(http::Request& request, const http::Response& response);
-		/// Inspects WWW-Authenticate header of the response, initializes
-		/// the internal state (in case of digest authentication) and
-		/// adds required information to the given http::Request.
-		///
-		/// Does nothing if there is no WWW-Authenticate header in the
-		/// http::Response.
+		// Inspects WWW-Authenticate header of the response, initializes
+		// the internal state (in case of digest authentication) and
+		// adds required information to the given http::Request.
+		//
+		// Does nothing if there is no WWW-Authenticate header in the
+		// http::Response.
 
 	void updateAuthInfo(http::Request& request);
-		/// Updates internal state (in case of digest authentication) and
-		/// replaces authentication information in the request accordingly.
+		// Updates internal state (in case of digest authentication) and
+		// replaces authentication information in the request accordingly.
 
 	void proxyAuthenticate(http::Request& request, const http::Response& response);
-		/// Inspects Proxy-Authenticate header of the response, initializes
-		/// the internal state (in case of digest authentication) and
-		/// adds required information to the given http::Request.
-		///
-		/// Does nothing if there is no Proxy-Authenticate header in the
-		/// http::Response.
+		// Inspects Proxy-Authenticate header of the response, initializes
+		// the internal state (in case of digest authentication) and
+		// adds required information to the given http::Request.
+		//
+		// Does nothing if there is no Proxy-Authenticate header in the
+		// http::Response.
 
 	void updateProxyAuthInfo(http::Request& request);
-		/// Updates internal state (in case of digest authentication) and
-		/// replaces proxy authentication information in the request accordingly.
+		// Updates internal state (in case of digest authentication) and
+		// replaces proxy authentication information in the request accordingly.
 
 	static bool isBasicCredentials(const std::string& header);
-		/// Returns true if authentication header is for Basic authentication.
+		// Returns true if authentication header is for Basic authentication.
 
 	static bool isDigestCredentials(const std::string& header);
-		/// Returns true if authentication header is for Digest authentication.
+		// Returns true if authentication header is for Digest authentication.
 
 	static bool hasBasicCredentials(const http::Request& request);
-		/// Returns true if Authorization with Basic credentials header is present in the request.
+		// Returns true if Authorization with Basic credentials header is present in the request.
 
 	static bool hasDigestCredentials(const http::Request& request);
-		/// Returns true if Authorization with Digest credentials header is present in the request.
+		// Returns true if Authorization with Digest credentials header is present in the request.
 
 	static bool hasProxyBasicCredentials(const http::Request& request);
-		/// Returns true if Authorization with Basic credentials header is present in the request.
+		// Returns true if Authorization with Basic credentials header is present in the request.
 
 	static bool hasProxyDigestCredentials(const http::Request& request);
-		/// Returns true if Authorization with Digest credentials header is present in the request.
+		// Returns true if Authorization with Digest credentials header is present in the request.
 
 	static void extractCredentials(const std::string& userInfo, std::string& username, std::string& password);
-		/// Extracts username and password from user:password information string.
+		// Extracts username and password from user:password information string.
 
 	static void extractCredentials(const http::URL& uri, std::string& username, std::string& password);
-		/// Extracts username and password from the given URI (e.g.: "http://user:pass@sample.com/secret").
+		// Extracts username and password from the given URI (e.g.: "http://user:pass@sample.com/secret").
 
 private:
 	Authenticator(const Authenticator&);
@@ -206,51 +206,51 @@ class BasicAuthenticator //Net_API
 {
 public:
 	BasicAuthenticator();
-		/// Creates an empty BasicAuthenticator object.
+		// Creates an empty BasicAuthenticator object.
 		
 	BasicAuthenticator(const std::string& username, const std::string& password);
-		/// Creates a BasicAuthenticator object with the given username and password.
+		// Creates a BasicAuthenticator object with the given username and password.
 
 	explicit BasicAuthenticator(const http::Request& request);
-		/// Creates a BasicAuthenticator object with the authentication information
-		/// from the given request.
-		///
-		/// Throws a NotAuthenticatedException if the request does
-		/// not contain basic authentication information.
+		// Creates a BasicAuthenticator object with the authentication information
+		// from the given request.
+		//
+		// Throws a NotAuthenticatedException if the request does
+		// not contain basic authentication information.
 
 	explicit BasicAuthenticator(const std::string& authInfo);
-		/// Creates a BasicAuthenticator object with the authentication information
-		/// in the given string. The authentication information can be extracted
-		/// from a http::Request object by calling http::Request::getCredentials().
+		// Creates a BasicAuthenticator object with the authentication information
+		// in the given string. The authentication information can be extracted
+		// from a http::Request object by calling http::Request::getCredentials().
 
 	~BasicAuthenticator();
-		/// Destroys the BasicAuthenticator.
+		// Destroys the BasicAuthenticator.
 
 	void setUsername(const std::string& username);
-		/// Sets the username.
+		// Sets the username.
 		
 	const std::string& getUsername() const;
-		/// Returns the username.
+		// Returns the username.
 		
 	void setPassword(const std::string& password);
-		/// Sets the password.
+		// Sets the password.
 		
 	const std::string& getPassword() const;
-		/// Returns the password.
+		// Returns the password.
 		
 	void authenticate(http::Request& request) const;
-		/// Adds authentication information to the given http::Request.
+		// Adds authentication information to the given http::Request.
 
 	void proxyAuthenticate(http::Request& request) const;
-		/// Adds proxy authentication information to the given http::Request.
+		// Adds proxy authentication information to the given http::Request.
 
 	static const std::string SCHEME;
 
 protected:
 	void parseAuthInfo(const std::string& authInfo);
-		/// Extracts username and password from Basic authentication info
-		/// by base64-decoding authInfo and splitting the resulting
-		/// string at the ':' delimiter.
+		// Extracts username and password from Basic authentication info
+		// by base64-decoding authInfo and splitting the resulting
+		// string at the ':' delimiter.
 
 private:
 	BasicAuthenticator(const BasicAuthenticator&);
@@ -288,76 +288,76 @@ class HTTPDigestCredentials //Net_API
 {
 public:
 	HTTPDigestCredentials();
-		/// Creates an empty HTTPDigestCredentials object.
+		// Creates an empty HTTPDigestCredentials object.
 
 	HTTPDigestCredentials(const std::string& username, const std::string& password);
-		/// Creates a HTTPDigestCredentials object with the given username and password.
+		// Creates a HTTPDigestCredentials object with the given username and password.
 
 	~HTTPDigestCredentials();
-		/// Destroys the HTTPDigestCredentials.
+		// Destroys the HTTPDigestCredentials.
 
 	void setUsername(const std::string& username);
-		/// Sets the username.
+		// Sets the username.
 
 	const std::string& getUsername() const;
-		/// Returns the username.
+		// Returns the username.
 
 	void setPassword(const std::string& password);
-		/// Sets the password.
+		// Sets the password.
 
 	const std::string& getPassword() const;
-		/// Returns the password.
+		// Returns the password.
 
 	void authenticate(http::Request& request, const http::Response& response);
-		/// Parses WWW-Authenticate header of the http::Response, initializes
-		/// internal state, and adds authentication information to the given http::Request.
+		// Parses WWW-Authenticate header of the http::Response, initializes
+		// internal state, and adds authentication information to the given http::Request.
 
 	void authenticate(http::Request& request, const HTTPAuthenticationParams& responseAuthParams);
-		/// Initializes internal state according to information from the
-		/// HTTPAuthenticationParams of the response, and adds authentication
-		/// information to the given http::Request.
-		///
-		/// Throws InvalidArgumentException if HTTPAuthenticationParams is
-		/// invalid or some required parameter is missing.
-		/// Throws NotImplementedException in case of unsupported digest
-		/// algorithm or quality of protection method.
+		// Initializes internal state according to information from the
+		// HTTPAuthenticationParams of the response, and adds authentication
+		// information to the given http::Request.
+		//
+		// Throws ArgumentException if HTTPAuthenticationParams is
+		// invalid or some required parameter is missing.
+		// Throws NotImplementedException in case of unsupported digest
+		// algorithm or quality of protection method.
 
 	void updateAuthInfo(http::Request& request);
-		/// Updates internal state and adds authentication information to
-		/// the given http::Request.
+		// Updates internal state and adds authentication information to
+		// the given http::Request.
 
 	void proxyAuthenticate(http::Request& request, const http::Response& response);
-		/// Parses Proxy-Authenticate header of the http::Response, initializes
-		/// internal state, and adds proxy authentication information to the given http::Request.
+		// Parses Proxy-Authenticate header of the http::Response, initializes
+		// internal state, and adds proxy authentication information to the given http::Request.
 
 	void proxyAuthenticate(http::Request& request, const HTTPAuthenticationParams& responseAuthParams);
-		/// Initializes internal state according to information from the
-		/// HTTPAuthenticationParams of the response, and adds proxy authentication
-		/// information to the given http::Request.
-		///
-		/// Throws InvalidArgumentException if HTTPAuthenticationParams is
-		/// invalid or some required parameter is missing.
-		/// Throws NotImplementedException in case of unsupported digest
-		/// algorithm or quality of protection method.
+		// Initializes internal state according to information from the
+		// HTTPAuthenticationParams of the response, and adds proxy authentication
+		// information to the given http::Request.
+		//
+		// Throws ArgumentException if HTTPAuthenticationParams is
+		// invalid or some required parameter is missing.
+		// Throws NotImplementedException in case of unsupported digest
+		// algorithm or quality of protection method.
 
 	void updateProxyAuthInfo(http::Request& request);
-		/// Updates internal state and adds proxy authentication information to
-		/// the given http::Request.
+		// Updates internal state and adds proxy authentication information to
+		// the given http::Request.
 
 	bool verifyAuthInfo(const http::Request& request) const;
-		/// Verifies the digest authentication information in the given http::Request
-		/// by recomputing the response and comparing it with what's in the request.
-		///
-		/// Note: This method creates a HTTPAuthenticationParams object from the request
-		/// and calls verifyAuthParams() with request and params.
+		// Verifies the digest authentication information in the given http::Request
+		// by recomputing the response and comparing it with what's in the request.
+		//
+		// Note: This method creates a HTTPAuthenticationParams object from the request
+		// and calls verifyAuthParams() with request and params.
 
 	bool verifyAuthParams(const http::Request& request, const HTTPAuthenticationParams& params) const;
-		/// Verifies the digest authentication information in the given http::Request
-		/// and HTTPAuthenticationParams by recomputing the response and comparing 
-		/// it with what's in the request.
+		// Verifies the digest authentication information in the given http::Request
+		// and HTTPAuthenticationParams by recomputing the response and comparing 
+		// it with what's in the request.
 
 	static std::string createNonce();
-		/// Creates a random nonce string.
+		// Creates a random nonce string.
 
 	static const std::string SCHEME;
 

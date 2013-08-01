@@ -44,7 +44,7 @@ public:
 		unsigned char* data = new unsigned char[buffer.size()];
 		std::copy(buffer.begin(), buffer.end(), data);
 		connection().response().set("Access-Control-Allow-Origin", "*");
-		connection().sendRaw((const char*)data, buffer.size());
+		connection().send((const char*)data, buffer.size());
 		delete data;
 		connection().close();
 	}

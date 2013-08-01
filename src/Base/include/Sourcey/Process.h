@@ -17,14 +17,15 @@
 //
 
 
-#include "Sourcey/Timer.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Util.h"
+#ifndef SOURCEY_Process_H
+#define SOURCEY_Process_H
 
 
 namespace scy {
 
-
-
+	// TODO: uv_process_t
 
 } // namespace scy
+
+
+#endif // SOURCEY_Process_H

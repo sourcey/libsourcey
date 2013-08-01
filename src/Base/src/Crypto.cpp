@@ -44,7 +44,7 @@ namespace crypto {
 
 
 // Generates a random binary key
-string randomBinaryKey(int size, bool doBase64)
+string randomBinaryString(int size, bool doBase64)
 {
 	string res;
 	ostringstream ostr;
@@ -71,12 +71,12 @@ string randomBinaryKey(int size, bool doBase64)
 
 
 // Generates a random key
-string randomKey(int size)
+string randomString(int size)
 {
 	string res;
 	try
 	{	
-		res = hash("md5", randomBinaryKey(size)).substr(0, size);
+		res = hash("md5", randomBinaryString(size)).substr(0, size);
 	}
 	catch (...)
 	{
@@ -100,7 +100,7 @@ UInt64 randomNumber(int size)
 			strm << rnd.next();
 		}
 		str = strm.str().substr(0, size);
-		res = util::fromString<UInt64>(str.data());
+		res = util::fromString<UInt64>(str.c_str());
 	}
 	catch (...)
 	{
@@ -261,8 +261,8 @@ std::string computeHMAC(const std::string& input, const std::string& key) {
 	unsigned int resultSize=0;
 	char* buffer = new char[20];
 	HMAC(EVP_sha1(), 
-		key.data(), key.length(), 
-        reinterpret_cast<const unsigned char*>(input.data()), input.length(), 
+		key.c_str(), key.length(), 
+        reinterpret_cast<const unsigned char*>(input.c_str()), input.length(), 
         reinterpret_cast<unsigned char*>(buffer), &resultSize);
 	assert(resultSize == 20);
 	std::string hmac(buffer, resultSize);

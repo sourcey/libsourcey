@@ -67,21 +67,21 @@ public:
     void init(http_parser_type type);
 	
     bool parse(const char* data, std::size_t length, bool expectComplete = false);
-		/// Feed data read from socket into the http_parser.
-		///
-		/// Returns true of the message is complete, false if
-		/// incomplete, or throws an exception on error.
-		///
-		/// The expectComplete flag can be set for parsing headers only. 
-		/// If the message is not complete after calling the parser
-		/// an exception will be thrown.
+		// Feed data read from socket into the http_parser.
+		//
+		// Returns true of the message is complete, false if
+		// incomplete, or throws an exception on error.
+		//
+		// The expectComplete flag can be set for parsing headers only. 
+		// If the message is not complete after calling the parser
+		// an exception will be thrown.
 
     void reset();
-		/// Reset the parser state for a new message
+		// Reset the parser state for a new message
 	
     bool complete() const;
-		/// Returns true if parsing is complete, either  
-		/// in success or error.
+		// Returns true if parsing is complete, either  
+		// in success or error.
 
 	void setParserError(bool throwException = true, const std::string& message = "");
 
@@ -286,7 +286,7 @@ public:
     static Parser* create(
         http_parser_type type,
         net::Socket* socket,
-        on__observertype _observercb = nullptr);
+        on__observertype _observercb = nil);
 
     * Callback that must be registered to allow construction of classes
     * derived from Connection. This is necessary because we want to

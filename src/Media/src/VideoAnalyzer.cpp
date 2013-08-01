@@ -30,9 +30,9 @@ namespace av {
 
 VideoAnalyzer::VideoAnalyzer(const Options& options) : 
 	_options(options),
-	_video(nullptr),
-	_audio(nullptr),
-	_videoConv(nullptr)
+	_video(nil),
+	_audio(nil),
+	_videoConv(nil)
 {
 	traceL("VideoAnalyzer", this) << "Creating" << endl;
 }
@@ -48,7 +48,7 @@ VideoAnalyzer::~VideoAnalyzer()
 void VideoAnalyzer::initialize()
 {
 	if (_options.ifile.empty())
-		throw Poco::FileException("Please specify an input file.");
+		throw Exception("Please specify an input file.");
 
 	traceL("VideoAnalyzer", this) << "Loading: " << _options.ifile << endl;
 
@@ -58,7 +58,7 @@ void VideoAnalyzer::initialize()
 	_reader.openFile(_options.ifile);
 		
 	if (_reader.video()) {
-		_videoConv = NULL;
+		_videoConv = nil;
 		_video = new VideoAnalyzer::Stream("Video", _options.rdftSize);
 		_video->initialize();	
 	}
@@ -80,7 +80,7 @@ void VideoAnalyzer::uninitialize()
 	//traceL() << "[VideoAnalyzerStream:" << this << ":" << name << "] Uninitializing" << endl;	
 	stop();
 	
-	//Mutex::ScopedLock lock(_mutex); 
+	//ScopedLock lock(_mutex); 
 
 	if (_video)
 		delete _video;
@@ -93,7 +93,7 @@ void VideoAnalyzer::uninitialize()
 
 void VideoAnalyzer::start()
 {
-	Mutex::ScopedLock lock(_mutex); 
+	ScopedLock lock(_mutex); 
 	
 	try 
 	{
@@ -118,7 +118,7 @@ void VideoAnalyzer::stop()
 {
 	
 	// Can't lock here in case we inside a callback.
-	//Mutex::ScopedLock lock(_mutex); 
+	//ScopedLock lock(_mutex); 
 	
 	_reader.ReadComplete -= delegate(this, &VideoAnalyzer::onReadComplete);
 	_reader.detach(this);
@@ -128,7 +128,7 @@ void VideoAnalyzer::stop()
 
 void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 {
-	//traceL("VideoAnalyzer", this) << "On Video: " 
+	//traceL("VideoAnalyzer", this) << "On video: " 
 	//	<< packet.size() << ": " << packet.time << endl;
 	
 	VideoAnalyzer::Packet pkt(packet.time);
@@ -139,7 +139,7 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 	int frames = 0;
 	//VideoDecoderContext* video = _reader.video();
 	
-	Mutex::ScopedLock lock(_mutex); 
+	ScopedLock lock(_mutex); 
 	
 	// Prepeare FFT input data array
 	//	http://stackoverflow.com/questions/7790877/forward-fft-an-image-and-backward-fft-an-image-to-get-the-same-result
@@ -175,10 +175,10 @@ void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 	//traceL("VideoAnalyzer", this) << "On Audio: " 
 	//  << packet.size() << ": " << packet.time << endl;	
 
-	Mutex::ScopedLock lock(_mutex);		
+	ScopedLock lock(_mutex);		
 	
 	VideoAnalyzer::Packet pkt(packet.time);
-	short const* data = reinterpret_cast<short*>(packet.data());
+	short const* data = reinterpret_cast<short*>(packet.array());
 	int channels = _reader.audio()->stream->codec->channels;
 	int size = packet.size();
 	int frames = 0;
@@ -214,11 +214,11 @@ void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 
 AVFrame* VideoAnalyzer::getGrayVideoFrame()
 {		
-	Mutex::ScopedLock lock(_mutex); 
+	ScopedLock lock(_mutex); 
 	VideoDecoderContext* video = _reader.video();
 
 	// TODO: Conversion via decoder?
-	if (_videoConv == NULL) {		
+	if (_videoConv == nil) {		
 		VideoCodec iparams;
 		iparams.width = video->ctx->width;
 		iparams.height = video->ctx->height;
@@ -230,7 +230,7 @@ AVFrame* VideoAnalyzer::getGrayVideoFrame()
 		_videoConv = new VideoConversionContext();
 		_videoConv->create(iparams, oparams);
 	}
-	if (_videoConv == NULL)
+	if (_videoConv == nil)
 		throw Exception("Video Analyzer: Unable to initialize the video conversion context.");	
 		
 	// Convert the source image to grayscale
@@ -244,7 +244,7 @@ void VideoAnalyzer::onReadComplete(void* sender)
 
 	AVInputReader* reader = reinterpret_cast<AVInputReader*>(sender);	
 	{
-		Mutex::ScopedLock lock(_mutex); 
+		ScopedLock lock(_mutex); 
 		if (_error.empty())
 			_error = reader->error();
 	}
@@ -255,21 +255,21 @@ void VideoAnalyzer::onReadComplete(void* sender)
 
 AVInputReader& VideoAnalyzer::reader()
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _reader; 
 }
 
 
 VideoAnalyzer::Options& VideoAnalyzer::options()
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _options; 
 }
 
 
 string VideoAnalyzer::error() const
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	return _error;
 }
 
@@ -291,7 +291,7 @@ const int kMaxFFTPow2Size = 24;
 
 VideoAnalyzer::Stream::Stream(const std::string& name, int rdftSize) : 
 	name(name), rdftSize(rdftSize), rdftBits(static_cast<int>(log2(rdftSize))), 
-	rdft(nullptr), rdftData(nullptr), frames(0), filled(0)
+	rdft(nil), rdftData(nil), frames(0), filled(0)
 {	
 	traceL() << "[VideoAnalyzerStream:" << this << ":" << name << "] Creating: " 
 		<< rdftSize << ": " << rdftBits << endl;	
@@ -315,14 +315,14 @@ void VideoAnalyzer::Stream::initialize()
 	frames		= 0;
 	filled		= 0;
 
-	assert(rdft == NULL);
+	assert(rdft == nil);
 	rdft = av_rdft_init(rdftBits, DFT_R2C);
-	if (rdft == NULL)
+	if (rdft == nil)
 		throw Exception("Cannot allocate FFT context");
 	
-	assert(rdftData == NULL);
+	assert(rdftData == nil);
 	rdftData = (FFTSample*)av_malloc(rdftSize * sizeof(*rdftData));	
-	if (rdftData == NULL)
+	if (rdftData == nil)
 		throw Exception("Cannot allocate FFT buffer");
 }
 
@@ -544,7 +544,7 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 	/*video->frame
 	VideoDecoderContext* video = _reader.video();
 	// TODO: Conversion via decoder?
-	if (_videoConv == NULL) {		
+	if (_videoConv == nil) {		
 		VideoCodec iparams;
 		iparams.width = video->ctx->width;
 		iparams.height = video->ctx->height;
@@ -556,7 +556,7 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 		_videoConv = new VideoConversionContext();
 		_videoConv->create(iparams, oparams);
 	}
-	if (_videoConv == NULL)
+	if (_videoConv == nil)
 		throw Exception("Video Analyzer: Unable to initialize the video conversion context.");	
 		
 	// Convert the source image to grayscale
@@ -575,7 +575,7 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
             k++;
         }
     }
-	traceL("VideoAnalyzer", this) << "^^^^^^^^^^^^^^^^^^ Video: " 
+	traceL("VideoAnalyzer", this) << "^^^^^^^^^^^^^^^^^^ video: " 
 		<< greyFrame->fr << endl;
 
 
@@ -623,9 +623,9 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 		
 	/*
 	// Create and allocate the conversion frame.
-	if (oframe == NULL) {
+	if (oframe == nil) {
 		oframe = avcodec_alloc_frame();	
-		if (oframe == NULL)
+		if (oframe == nil)
 			throw Exception("Video Analyzer: Unable to allocate the output video frame.");
 
 		avpicture_alloc(reinterpret_cast<AVPicture*>(oframe), 
@@ -633,10 +633,10 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 	}
 	
 	// Convert the image from its native format to GREY8.
-	if (_videoConv == NULL) {
+	if (_videoConv == nil) {
 		_videoConv = sws_getContext(
 			video->ctx->width, video->ctx->height, video->ctx->pix_fmt, 
 			video->ctx->width, video->ctx->height, PIX_FMT_GRAY8, 
-			SWS_BICUBIC, NULL, NULL, NULL);
+			SWS_BICUBIC, nil, nil, nil);
 	}
 	*/

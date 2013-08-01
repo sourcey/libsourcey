@@ -32,8 +32,8 @@ namespace scy {
 
 
 class Timer: public uv::Base
-	/// Wraps libev's ev_timer watcher. Used to get woken up at a specified time
-	/// in the future.
+	// Wraps libev's ev_timer watcher. Used to get woken up at a specified time
+	// in the future.
 {
 public:
 	Timer(Int64 timeout, Int64 interval = 0, uv::Loop& loop = uv::defaultLoop());
@@ -42,15 +42,15 @@ public:
 	
 	virtual bool start(Int64 interval);
 	virtual bool start(Int64 timeout, Int64 interval);
-		/// Start the timer, an interval value of zero will only trigger
-		/// once after timeout.
+		// Start the timer, an interval value of zero will only trigger
+		// once after timeout.
 
 	virtual bool stop();
-		/// Stops the timer.
+		// Stops the timer.
 	
 	virtual bool restart();
-		/// Restarts the timer, even if it hasn't been started yet.
-		/// An interval or interval must be set or an exception will be thrown.
+		// Restarts the timer, even if it hasn't been started yet.
+		// An interval or interval must be set or an exception will be thrown.
 	
 	virtual bool again();
 		// Stop the timer, and if it is repeating restart it using the
@@ -58,10 +58,10 @@ public:
 		// before it returns -1 and sets the error to UV_EINVAL.
 
 	virtual void setInterval(Int64 interval);
-		/// Set the repeat value. Note that if the repeat value is set from
-		/// a timer callback it does not immediately take effect. If the timer
-		/// was non-repeating before, it will have been stopped. If it was repeating,
-		/// then the old repeat value will have been used to schedule the next timeout.
+		// Set the repeat value. Note that if the repeat value is set from
+		// a timer callback it does not immediately take effect. If the timer
+		// was non-repeating before, it will have been stopped. If it was repeating,
+		// then the old repeat value will have been used to schedule the next timeout.
 
 	virtual bool active() const;
 	
@@ -91,8 +91,8 @@ protected:
 // ---------------------------------------------------------------------
 //
 class Timeout 
-	/// Simple timeout counter which expires
-	/// after a given delay.
+	// Simple timeout counter which expires
+	// after a given delay.
 {
 public:
 	Timeout(long delay = 0, bool autoStart = false);
@@ -122,40 +122,40 @@ protected:
 // ---------------------------------------------------------------------
 //
 class Stopwatch
-	/// A simple facility to measure time intervals
-	/// with microsecond resolution.
-	///
-	/// Note that Stopwatch is based on the Timestamp
-	/// class. Therefore, if during a Stopwatch run,
-	/// the system time is changed, the measured time
-	/// will not be correct.
+	// A simple facility to measure time intervals
+	// with microsecond resolution.
+	//
+	// Note that Stopwatch is based on the Timestamp
+	// class. Therefore, if during a Stopwatch run,
+	// the system time is changed, the measured time
+	// will not be correct.
 {
 public:
 	Stopwatch();
 	~Stopwatch();
 
 	void start();
-		/// Starts (or restarts) the stopwatch.
+		// Starts (or restarts) the stopwatch.
 		
 	void stop();
-		/// Stops or pauses the stopwatch.
+		// Stops or pauses the stopwatch.
 	
 	void reset();
-		/// Resets the stopwatch.
+		// Resets the stopwatch.
 		
 	void restart();
-		/// Resets and starts the stopwatch.
+		// Resets and starts the stopwatch.
 		
 	Timestamp::TimeDiff elapsed() const;
-		/// Returns the elapsed time in microseconds
-		/// since the stopwatch started.
+		// Returns the elapsed time in microseconds
+		// since the stopwatch started.
 		
 	int elapsedSeconds() const;
-		/// Returns the number of seconds elapsed
-		/// since the stopwatch started.
+		// Returns the number of seconds elapsed
+		// since the stopwatch started.
 
 	static Timestamp::TimeVal resolution();
-		/// Returns the resolution of the stopwatch.
+		// Returns the resolution of the stopwatch.
 
 private:
 	Stopwatch(const Stopwatch&);
@@ -170,7 +170,7 @@ private:
 // ---------------------------------------------------------------------
 //
 class TimedToken: public Timeout
-	/// A token that expires after the specified duration.
+	// A token that expires after the specified duration.
 {
 public:
 	TimedToken(long duration);

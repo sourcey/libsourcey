@@ -36,7 +36,7 @@ namespace smpl {
 Message::Message() :
 	json::Value(Json::objectValue)
 {
-	(*this)["id"] = crypto::randomKey(16);
+	(*this)["id"] = crypto::randomString(16);
 	(*this)["type"] = "message";
 }
 
@@ -45,7 +45,7 @@ Message::Message(const Message& root) :
 	json::Value(root)
 {
 	if (!isMember("id"))
-		(*this)["id"] = crypto::randomKey(16);
+		(*this)["id"] = crypto::randomString(16);
 	if (!isMember("type"))
 		(*this)["type"] = "message";
 }
@@ -55,7 +55,7 @@ Message::Message(const json::Value& root) :
 	json::Value(root)
 {
 	if (!isMember("id"))
-		(*this)["id"] = crypto::randomKey(16);
+		(*this)["id"] = crypto::randomString(16);
 	if (!isMember("type"))
 		(*this)["type"] = "message";
 }

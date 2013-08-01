@@ -404,7 +404,7 @@ void HTTPDigestCredentials::updateProxyAuthInfo(http::Request& request)
 
 std::string HTTPDigestCredentials::createNonce()
 {
-	Mutex::ScopedLock lock(_nonceMutex);
+	ScopedLock lock(_nonceMutex);
 
 	MD5Engine md5;
 	Timestamp::TimeVal now = Timestamp().epochMicroseconds();
@@ -423,7 +423,7 @@ void HTTPDigestCredentials::createAuthParams(const http::Request& request, const
 	// Not implemented: "domain" auth parameter and integrity protection.
 
 	if (!responseAuthParams.has(NONCE_PARAM) || !responseAuthParams.has(REALM_PARAM))
-		throw InvalidArgumentException("Invalid HTTP authentication parameters");
+		throw ArgumentException("Invalid HTTP authentication parameters");
 
 	const std::string& algorithm = responseAuthParams.get(ALGORITHM_PARAM, DEFAULT_ALGORITHM);
 

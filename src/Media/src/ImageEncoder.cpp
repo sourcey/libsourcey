@@ -33,6 +33,7 @@ namespace av {
 
 
 ImageEncoder::ImageEncoder(EncoderOptions& options, vector<int> cvParams) : 
+	PacketProcessor(Emitter),
 	_options(options),
 	_params(cvParams)
 {	
@@ -77,7 +78,9 @@ void ImageEncoder::process(IPacket& packet)
 { 
 	//traceL() << "[ImageEncoder:" << this <<"] Processing" << endl;
 
-	MatPacket* mpacket = reinterpret_cast<MatPacket*>(&packet);	
+	MatrixPacket* mpacket = dynamic_cast<MatrixPacket*>(&packet);	
+	if (!mpacket)
+		throw Exception("Unknown video packet type.");
 	if (!mpacket->mat)
 		throw Exception("Video packets must contain an OpenCV image.");
 	
@@ -86,11 +89,6 @@ void ImageEncoder::process(IPacket& packet)
 	// FIXME: If the video capture is stopped before
 	// this callback completes our Mat is corrupted.
 	cv::Mat& source = *mpacket->mat;
-	traceL() << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket->mat << endl;
-	traceL() << "[ImageEncoder:" << this <<"] Broadcasting: " << source.cols << endl;
-	traceL() << "[ImageEncoder:" << this <<"] Broadcasting: " << source.rows << endl;
-	traceL() << "[ImageEncoder:" << this <<"] Broadcasting: " << _options.oformat.video.width << endl;
-	traceL() << "[ImageEncoder:" << this <<"] Broadcasting: " << _options.oformat.video.height << endl;
 	if (source.cols != _options.oformat.video.width &&
 		source.rows != _options.oformat.video.height) {
 		cv::Mat resized;
@@ -101,7 +99,7 @@ void ImageEncoder::process(IPacket& packet)
 		cv::imencode(_extension, source, buffer, _params);
 	
 	// Temp reference on the stack only
-	mpacket->_data = (char*)&buffer[0];
+	mpacket->_array = (char*)&buffer[0];
 	mpacket->_size = buffer.size();
 	
 	//traceL() << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket << endl;

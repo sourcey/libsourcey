@@ -27,9 +27,9 @@
 namespace scy {
 
 
-struct Flags 
+struct Flaggable 
 {
-	Flags(unsigned flags = 0) : _data(flags) {}
+	Flaggable(unsigned flags = 0) : _data(flags) {}
 	virtual void reset() { _data = 0; };
 	virtual void set(unsigned flag) { if (!has(flag)) _data |= flag; };
 	virtual void add(unsigned flag) { _data |= flag; };
@@ -38,11 +38,12 @@ struct Flags
 	virtual bool has(unsigned flag) const { return (_data & flag) == flag; };
 	virtual unsigned data() const { return _data; };
 
-private:
+protected:
 	unsigned _data;
 };
 
 
+/*
 class Flaggable 
 {
 public:
@@ -73,6 +74,7 @@ public:
 protected:
 	Flags _flags;
 };
+*/
 
 
 } // namespace scy

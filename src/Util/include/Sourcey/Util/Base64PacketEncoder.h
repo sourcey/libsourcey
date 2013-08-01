@@ -33,14 +33,14 @@ namespace scy {
 class Base64PacketEncoder: public PacketProcessor
 {
 public:
-	Base64PacketEncoder()
+	Base64PacketEncoder() :
+		PacketProcessor(Emitter)
 	{
 	}
 
 	virtual void process(IPacket& packet)
 	{		
-		//traceL() << "[Base64PacketEncoder:" << this << "] Processing" << std::endl;
-
+		// TODO: Use own non stream based Base64 encoder
 		std::ostringstream ostr;
 		Poco::Base64Encoder encoder(ostr);
 		const char* data = NULL;
@@ -48,25 +48,25 @@ public:
 
 		// If the packet is a RawPacket we can access
 		// the data pointer directly.
+		// TODO: Reference cast and catch bad_cast to copy data
 		RawPacket* p = dynamic_cast<RawPacket*>(&packet);
 		if (p)
 			encoder.write((const char*)p->data(), p->size());
 		
 		// Otherwise we need to copy the packet data.
 		else {
-			int contentLength = packet.size();
+			size_t contentLength = packet.size();
 			Buffer buf(contentLength > 0 ? contentLength : 1500);
 			packet.write(buf);
 			encoder.write((const char*)buf.data(), buf.available());
 		}
 
-		encoder.close();		
-		std::string base64(ostr.str());
-		RawPacket opacket(base64.data(), base64.size());
-		emit(this, opacket);
+		encoder.close();
 
-		//traceL() << "[Base64PacketEncoder:" << this << "] Processing: OK: " << base64.size() << std::endl;
+		emit(ostr.str());
 	}
+
+	PacketSignal Emitter;
 };
 
 

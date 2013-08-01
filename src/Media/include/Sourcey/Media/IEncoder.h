@@ -124,6 +124,7 @@ public:
 };
 
 
+/*
 class IPacketEncoder: public IEncoder, public PacketProcessor
 	/// This class extends the IEncoder interface to add
 	/// PacketStream compatibility.
@@ -132,6 +133,7 @@ public:
 	virtual void process(IPacket& packet) = 0;
 		// Encodes the packet, and pushes it downstream.
 };
+*/
 
 
 } // namespace av

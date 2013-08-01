@@ -91,82 +91,82 @@ public:
 	};
 
 	Response();
-		/// Creates the Response with OK status.
+		// Creates the Response with OK status.
 		
 	Response(HTTPStatus status, const std::string& reason);
-		/// Creates the Response with the given status
-		/// and reason phrase.
+		// Creates the Response with the given status
+		// and reason phrase.
 
 	Response(const std::string& version, HTTPStatus status, const std::string& reason);
-		/// Creates the Response with the given version, status
-		/// and reason phrase.
+		// Creates the Response with the given version, status
+		// and reason phrase.
 		
 	Response(HTTPStatus status);
-		/// Creates the Response with the given status
-		/// an an appropriate reason phrase.
+		// Creates the Response with the given status
+		// an an appropriate reason phrase.
 
 	Response(const std::string& version, HTTPStatus status);
-		/// Creates the Response with the given version, status
-		/// an an appropriate reason phrase.
+		// Creates the Response with the given version, status
+		// an an appropriate reason phrase.
 
 	virtual ~Response();
-		/// Destroys the Response.
+		// Destroys the Response.
 
 	void setStatus(HTTPStatus status);
-		/// Sets the HTTP status code.
-		///
-		/// Does not change the reason phrase.
+		// Sets the HTTP status code.
+		//
+		// Does not change the reason phrase.
 		
 	HTTPStatus getStatus() const;
-		/// Returns the HTTP status code.
+		// Returns the HTTP status code.
 		
 	void setStatus(const std::string& status);
-		/// Sets the HTTP status code.
-		///
-		/// The string must contain a valid
-		/// HTTP numerical status code.
+		// Sets the HTTP status code.
+		//
+		// The string must contain a valid
+		// HTTP numerical status code.
 		
 	void setReason(const std::string& reason);
-		/// Sets the HTTP reason phrase.
+		// Sets the HTTP reason phrase.
 		
 	const std::string& getReason() const;
-		/// Returns the HTTP reason phrase.
+		// Returns the HTTP reason phrase.
 
 	void setStatusAndReason(HTTPStatus status, const std::string& reason);
-		/// Sets the HTTP status code and reason phrase.
+		// Sets the HTTP status code and reason phrase.
 		
 	void setStatusAndReason(HTTPStatus status);
-		/// Sets the HTTP status code and reason phrase.
-		///
-		/// The reason phrase is set according to the status code.
+		// Sets the HTTP status code and reason phrase.
+		//
+		// The reason phrase is set according to the status code.
 
 	void setDate(const Timestamp& dateTime);
-		/// Sets the Date header to the given date/time value.
+		// Sets the Date header to the given date/time value.
 		
 	Timestamp getDate() const;
-		/// Returns the value of the Date header.
+		// Returns the value of the Date header.
 
 	void addCookie(const Cookie& cookie);
-		/// Adds the cookie to the response by
-		/// adding a Set-Cookie header.
+		// Adds the cookie to the response by
+		// adding a Set-Cookie header.
 
 	void getCookies(std::vector<Cookie>& cookies) const;
-		/// Returns a vector with all the cookies
-		/// set in the response header.
-		///
-		/// May throw an exception in case of a malformed
-		/// Set-Cookie header.
+		// Returns a vector with all the cookies
+		// set in the response header.
+		//
+		// May throw an exception in case of a malformed
+		// Set-Cookie header.
 
 	void write(std::ostream& ostr) const;
-		/// Writes the HTTP response to the given
-		/// output stream.
+		// Writes the HTTP response to the given
+		// output stream.
 
 	virtual bool success() const;
-		/// Returns true if the HTTP response code was successful.
+		// Returns true if the HTTP response code was successful.
 	
 	static const std::string& getReasonForStatus(HTTPStatus status);
-		/// Returns an appropriate reason phrase
-		/// for the given status code.
+		// Returns an appropriate reason phrase
+		// for the given status code.
 	
     friend std::ostream& operator << (std::ostream& stream, const Response& res) 
 	{
@@ -241,29 +241,29 @@ class Response: public http::Message
 {	
 public:
 	Response();
-		/// Creates the Response with OK status.
+		// Creates the Response with OK status.
 		
 	Response(HTTPStatus status, const std::string& reason);
-		/// Creates the Response with the given status
-		/// and reason phrase.
+		// Creates the Response with the given status
+		// and reason phrase.
 
 	Response(const std::string& version, HTTPStatus status, const std::string& reason);
-		/// Creates the Response with the given version, status
-		/// and reason phrase.
+		// Creates the Response with the given version, status
+		// and reason phrase.
 		
 	Response(HTTPStatus status);
-		/// Creates the Response with the given status
-		/// an an appropriate reason phrase.
+		// Creates the Response with the given status
+		// an an appropriate reason phrase.
 
 	Response(const std::string& version, HTTPStatus status);
-		/// Creates the Response with the given version, status
-		/// an an appropriate reason phrase.
+		// Creates the Response with the given version, status
+		// an an appropriate reason phrase.
 
 	virtual ~Response();
-		/// Destroys the Request.	
+		// Destroys the Request.	
 
 	std::string error;
-		/// Contains an error message if the response failed.
+		// Contains an error message if the response failed.
 };
 */
 

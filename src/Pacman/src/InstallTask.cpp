@@ -61,7 +61,7 @@ InstallTask::~InstallTask()
 void InstallTask::start()
 {
 	log("trace") << "Starting" << endl;	
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	_thread.start(*this);
 }
 
@@ -72,12 +72,12 @@ void InstallTask::cancel()
 }
 
 
-void InstallTask::run()
+bool InstallTask::run()
 {
 	try {	
 		// Prepare environment and install options
 		{
-			Mutex::ScopedLock lock(_mutex);
+			ScopedLock lock(_mutex);
 
 			// Check against provided options to make sure that
 			// we can proceed with task creation.
@@ -128,6 +128,7 @@ void InstallTask::run()
 Complete:
 	setComplete();
 	delete this;
+	return false;
 }
 
 
@@ -156,7 +157,7 @@ void InstallTask::onStateChange(PackageInstallState& state, const PackageInstall
 		case PackageInstallState::Cancelled:
 			local->setState("Failed");
 			{
-				Mutex::ScopedLock lock(_mutex);
+				ScopedLock lock(_mutex);
 				_transaction->close();
 			}
 			setProgress(100);
@@ -215,7 +216,7 @@ void InstallTask::doDownload()
 	}
 
 	string outfile = _manager.getCacheFilePath(asset.fileName()).toString();
-	_transaction->setRecvStream(new std::ofstream(outfile.data(), std::ios_base::out | std::ios_base::binary));
+	_transaction->setReadStream(new std::ofstream(outfile.c_str(), std::ios_base::out | std::ios_base::binary));
 	_transaction->IncomingProgress += delegate(this, &InstallTask::onIncomingProgress);
 	_transaction->send();
 
@@ -231,14 +232,14 @@ void InstallTask::doDownload()
 }
 
 
-void InstallTask::onIncomingProgress(void* sender, const http::TransferProgress& state)
+void InstallTask::onIncomingProgress(void* sender, const double& progress)
 {
-	log("debug") << "Download Progress: " << state.progress() << endl;
+	log("debug") << "Download Progress: " << progress << endl;
 
 	// Progress 1 - 75 covers download
 	// Increments of 10 or greater
-	int prog = static_cast<int>(state.progress() * 0.75);
-	if (prog > 0 && prog > progress() + 10)
+	int prog = static_cast<int>(progress * 0.75);
+	if (prog > 0 && prog > this->progress() + 10)
 		setProgress(prog);
 }
 
@@ -368,7 +369,7 @@ void InstallTask::doFinalize()
 void InstallTask::setComplete()
 {
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 		assert(_progress == 100);
 
 		log("info") << "Package Install Complete:" 
@@ -391,7 +392,7 @@ void InstallTask::setComplete()
 void InstallTask::setProgress(int value) 
 {
 	{
-		Mutex::ScopedLock lock(_mutex);	
+		ScopedLock lock(_mutex);	
 		_progress = value;
 	}
 	Progress.emit(this, value);
@@ -400,7 +401,7 @@ void InstallTask::setProgress(int value)
 
 Package::Asset InstallTask::getRemoteAsset() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return !_options.version.empty() ? 
 		_remote->assetVersion(_options.version) : 
 			!_options.sdkVersion.empty() ?
@@ -411,14 +412,14 @@ Package::Asset InstallTask::getRemoteAsset() const
 
 int InstallTask::progress() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _progress;
 }
 
 
 bool InstallTask::valid() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return !stateEquals(PackageInstallState::Failed) 
 		&& _local->valid() 
 		&& (!_remote || _remote->valid());
@@ -453,21 +454,21 @@ bool InstallTask::complete() const
 
 LocalPackage* InstallTask::local() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _local;
 }
 
 
 RemotePackage* InstallTask::remote() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _remote;
 }
 
 
 InstallTask::Options& InstallTask::options() 
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _options;
 }
 

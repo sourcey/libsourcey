@@ -51,7 +51,7 @@ void Configuration::load(const std::string& path, bool create)
 
 void Configuration::load(bool create)
 {
-	Mutex::ScopedLock lock(_mutex); 
+	ScopedLock lock(_mutex); 
 
 	if (_path.empty())
 		throw Exception("Cannot load: Configuration file path must be set.");
@@ -75,7 +75,7 @@ void Configuration::load(bool create)
 
 void Configuration::save()
 {
-	Mutex::ScopedLock lock(_mutex); 
+	ScopedLock lock(_mutex); 
 	
 	if (_path.empty())
 		throw Exception("Cannot save: Configuration file path must be set.");
@@ -89,14 +89,14 @@ void Configuration::save()
 
 std::string Configuration::path()
 {
-	Mutex::ScopedLock lock(_mutex); 
+	ScopedLock lock(_mutex); 
 	return _path;
 }
 
 
 bool Configuration::loaded()
 {
-	Mutex::ScopedLock lock(_mutex); 
+	ScopedLock lock(_mutex); 
 	return _loaded;
 }
 
@@ -110,7 +110,7 @@ void Configuration::print(ostream& ost)
 
 bool Configuration::remove(const string& key)
 {
-	Mutex::ScopedLock lock(_mutex); 
+	ScopedLock lock(_mutex); 
 	
 	return removeMember(key) != Json::nullValue;
 }
@@ -119,7 +119,7 @@ bool Configuration::remove(const string& key)
 void Configuration::removeAll(const std::string& baseKey)
 {
 	traceL() << "Removing All: " << baseKey << endl;
-	Mutex::ScopedLock lock(_mutex); 	
+	ScopedLock lock(_mutex); 	
 	
     Members members = this->getMemberNames();
 	for (unsigned i = 0; i < members.size(); i++) {
@@ -131,7 +131,7 @@ void Configuration::removeAll(const std::string& baseKey)
 
 void Configuration::replace(const string& from, const string& to)
 {
-	Mutex::ScopedLock lock(_mutex); 
+	ScopedLock lock(_mutex); 
 
 	stringstream ss;
 	json::StyledWriter writer;
@@ -146,7 +146,7 @@ void Configuration::replace(const string& from, const string& to)
 
 bool Configuration::getRaw(const string& key, string& value) const
 {	
-	Mutex::ScopedLock lock(_mutex); 
+	ScopedLock lock(_mutex); 
 	
 	if (!isMember(key))
 		return false;
@@ -159,7 +159,7 @@ bool Configuration::getRaw(const string& key, string& value) const
 void Configuration::setRaw(const string& key, const string& value)
 {	
 	{
-		Mutex::ScopedLock lock(_mutex); 
+		ScopedLock lock(_mutex); 
 		(*this)[key] = value;
 	}
 	PropertyChanged.emit(this, key, value);
@@ -168,7 +168,7 @@ void Configuration::setRaw(const string& key, const string& value)
 
 void Configuration::keys(StringVec& keys, const std::string& baseKey)
 {
-	Mutex::ScopedLock lock(_mutex); 
+	ScopedLock lock(_mutex); 
 		
     Members members = this->getMemberNames();
 	for (unsigned i = 0; i < members.size(); i++) {

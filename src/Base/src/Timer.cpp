@@ -56,6 +56,8 @@ Timer::~Timer()
 
 void Timer::init()
 {
+	traceL("Timer", this) << "Init" << endl;	
+
 	_count = 0;
 	_timeout = 0;
 	_interval = 0;
@@ -64,9 +66,8 @@ void Timer::init()
 	_handle->data = this;
 			
 	int r = uv_timer_init(loop(), handle<uv_timer_t>());
-	if (r) {
+	if (r)
 		setAndThrowLastError("Cannot initialize timer");
-	}
 
 	// Timers do not reference the main loop
     uv_unref(handle());
@@ -83,40 +84,34 @@ bool Timer::start(Int64 timeout, Int64 interval)
 {
 	traceL("Timer", this) << "Starting: " << _handle << ": " << timeout << ": " << interval << endl;
 	assert(_handle);
-	assert(_count == 0);
 	assert(timeout > 0);
+
 	_timeout = timeout;
 	_interval = interval;
+	_count = 0;
+
     int r = uv_timer_start(handle<uv_timer_t>(), Timer::onTimeout, timeout, interval);
     if (r) 
 		setAndThrowLastError("Invalid timer");
-	else {
-		//uv_ref(handle());
-		//assert(active());
-	}
+	//uv_ref(handle());
+	assert(active());
     return r == 0;
 }
 
 
 bool Timer::stop() 
 {
-	traceL("Timer", this) << "Stoping: " << _handle << endl;
+	traceL("Timer", this) << "Stopping: " << _handle << endl;
 	
 	if (!active())
 		return false;
-
+	
+	_count = 0;
     int r = uv_timer_stop(handle<uv_timer_t>());
     if (r) 
 		setAndThrowLastError("Invalid timer");
-	else {
-		//uv_unref(handle());
-		//assert(!active());
-	}
-	_count = 0;
-	
-	// Closed on exit
-	//close(); // Needs to be closed to deref loop
-
+	//uv_unref(handle());
+	assert(!active());	
     return r == 0;
 }
 
@@ -138,11 +133,8 @@ bool Timer::again()
     int r = uv_timer_again(handle<uv_timer_t>());
     if (r) 
 		setAndThrowLastError("Invalid timer");
-	else {
-		//if (!active())
-		//	uv_ref(handle());
-		//assert(active());
-	}
+	assert(active());
+	//uv_ref(handle());
 	_count = 0;
     return r == 0;
 }
@@ -159,7 +151,7 @@ void Timer::setInterval(Int64 interval)
 
 bool Timer::active() const
 {
-	return handle() && uv_is_active((uv_handle_t*)handle<uv_timer_t>()) == 1;
+	return handle() && uv_is_active(handle()) == 1;
 }
 
 
@@ -184,9 +176,8 @@ Int64 Timer::count()
 
 void Timer::onTimeout()
 {	
-	traceL("Timer", this) << "On Timeout: " << _count << endl;
+	//traceL("Timer", this) << "On timeout: " << _count << endl;
 	_count++;
-	assert(Timeout.refCount());
 	Timeout.emit(this);
 }
 
@@ -231,7 +222,7 @@ bool Timeout::running() const
 
 void Timeout::start() 
 {
-	_startAt = scy::getTime();
+	_startAt = scy::getTimeHR();
 }
 
 
@@ -243,13 +234,13 @@ void Timeout::stop()
 
 void Timeout::reset() 
 {
-	_startAt = scy::getTime();
+	_startAt = scy::getTimeHR();
 }
 
 
 long Timeout::available() const 
 {
-	time_t current = scy::getTime();
+	time_t current = scy::getTimeHR();
 	long remaining = static_cast<long>(_delay - (current - _startAt));
 	return remaining > 0 ? remaining : 0;
 }
@@ -315,13 +306,11 @@ Timestamp::TimeVal Stopwatch::resolution()
 
 Timestamp::TimeDiff Stopwatch::elapsed() const
 {
-	if (_running)
-	{
+	if (_running) {
 		Timestamp current;
 		return _elapsed + (current - _start);
 	}
-	else
-	{
+	else {
 		return _elapsed;
 	}
 }
@@ -343,17 +332,17 @@ void Stopwatch::restart()
 
 
 //
-// Timed TimedToken
+// Timed Token
 //
 
 
 TimedToken::TimedToken(long duration) : 
-	Timeout(duration), _id(crypto::randomKey(32)) 
+	Timeout(duration), _id(crypto::randomString(32)) 
 {
 }
 
 
-TimedToken::TimedToken(const std::string& id = crypto::randomKey(32), long duration = 10000) : 
+TimedToken::TimedToken(const std::string& id = crypto::randomString(32), long duration = 10000) : 
 	Timeout(duration), _id(id) 
 {
 }

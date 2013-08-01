@@ -18,59 +18,152 @@
 
 
 #include "Sourcey/Media/VideoCapture.h"
+#include "Sourcey/Media/MediaFactory.h"
 #include "Sourcey/Logger.h"
-#include "Poco/Format.h"
+#include "Sourcey/Platform.h"
+#include "Sourcey/Util.h"
 
-
-using namespace std;
-//using namespace Poco;
-
-// TODO: Inner loop timeout recovery procedure
 
 namespace scy {
 namespace av {
 
-
-VideoCapture::VideoCapture(int deviceId, unsigned flags) : 
-	_thread("VideoCapture"),
-	_deviceId(deviceId),
-	_width(0),
-	_height(0),
-	_flags(flags),
-	_capturing(false),
-	_isOpened(false),
-	_stopping(false)
+	
+VideoCapture::VideoCapture(int deviceId) : 
+	_base(MediaFactory::instance().getVideoCaptureBase(deviceId))
 {
-	traceL("VideoCapture", this) << "Creating: " << deviceId << endl;
-	open();
-	start();
+	traceL("VideoCapture", this) << "Creating: " << deviceId << std::endl;
+
+	_base->addOutputSignal(&Emitter);
+	_base->duplicate();
 }
 
 
-VideoCapture::VideoCapture(const string& filename, unsigned flags) : 
-	_thread("VideoCapture"),
-	_filename(filename),
-	_deviceId(-1),
-	_width(0),
-	_height(0),
-	_flags(flags),
-	_capturing(false),
-	_isOpened(false),
-	_stopping(false) 
+VideoCapture::VideoCapture(const std::string& filename)
 {
-	traceL("VideoCapture", this) << "Creating: " << filename << endl;
-	open();
-	start();
+	traceL("VideoCapture", this) << "Creating: " << filename << std::endl;
+
+	// The file capture is owned by this instance
+	_base = new VideoCaptureBase(filename);
+	_base->addOutputSignal(&Emitter);
+}
+
+
+VideoCapture::VideoCapture(VideoCaptureBase* base) : 
+	_base(base) 
+{
+	traceL("VideoCapture", this) << "Creating: " << base << std::endl;
+
+	_base->addOutputSignal(&Emitter);
+	_base->duplicate();
 }
 
 
 VideoCapture::~VideoCapture() 
-{	
-	traceL("VideoCapture", this) << "Destroying" << endl;
+{
+	traceL("VideoCapture", this) << "Destroying: " << _base << std::endl;
+	
+	_base->removeOutputSignal(&Emitter);
+	_base->release();
+}
 
-	if (_thread.isRunning()) {
+
+void VideoCapture::start() 
+{
+	traceL("VideoCapture", this) << "Starting" << std::endl;	
+	Emitter.enable(true);
+}
+
+
+void VideoCapture::stop() 
+{
+	traceL("VideoCapture", this) << "Stopping" << std::endl;
+	Emitter.enable(false);
+}
+
+
+void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
+{
+	traceL("VideoCapture", this) << "Get frame: " << width << "x" << height << std::endl;
+	ScopedLock lock(_mutex);	
+	
+	// Don't actually grab a frame here, just copy the current frame.
+	cv::Mat lastFrame = _base->lastFrame();
+	if ((width && lastFrame.cols != width) || 
+		(height && lastFrame.rows != height))
+		cv::resize(lastFrame, frame, cv::Size(width, height));
+	else
+		lastFrame.copyTo(frame);
+}
+
+		
+void VideoCapture::getEncoderFormat(Format& iformat) 
+{
+	iformat.name = "OpenCV";
+	//iformat.id = "rawvideo";
+	iformat.video.encoder = "rawvideo";
+	iformat.video.pixelFmt = "bgr24";
+	iformat.video.width = width();
+	iformat.video.height = height();
+	iformat.video.enabled = true;
+}
+
+
+int VideoCapture::width() 
+{
+	ScopedLock lock(_mutex);
+	return _base->width(); 
+}
+
+
+int VideoCapture::height() 
+{
+	ScopedLock lock(_mutex);
+	return _base->height(); 
+}
+
+
+//
+// Video Capture Base
+//
+
+
+VideoCaptureBase::VideoCaptureBase(int deviceId) : 
+	CountedObject(new DeferredDeleter<VideoCaptureBase>()),
+	_thread("VideoCaptureBase"),
+	_deviceId(deviceId),
+	_capturing(false),
+	_opened(false),
+	_stopping(false),
+	_insideCallback(false)
+{
+	traceL("VideoCaptureBase", this) << "Creating: " << deviceId << std::endl;
+	open();
+	start();
+}
+
+
+VideoCaptureBase::VideoCaptureBase(const std::string& filename) : 
+	CountedObject(new DeferredDeleter<VideoCaptureBase>()),
+	_thread("VideoCaptureBase"),
+	_filename(filename),
+	_deviceId(-1),
+	_capturing(false),
+	_opened(false),
+	_stopping(false),
+	_insideCallback(false)
+{
+	traceL("VideoCaptureBase", this) << "Creating: " << filename << std::endl;
+	open();
+	start();
+}
+
+
+VideoCaptureBase::~VideoCaptureBase() 
+{	
+	traceL("VideoCaptureBase", this) << "Destroying" << std::endl;
+
+	if (_thread.running()) {
 		_stopping = true;
-		//_wakeUp.set();
 
 		// Because we are calling join on the thread
 		// this destructor must never be called from
@@ -79,22 +172,22 @@ VideoCapture::~VideoCapture()
 		_thread.join();
 	}
 
-	// Try to release the capture.
+	// Try to release the capture
 	//try { release(); } catch (...) {}
 
-	traceL("VideoCapture", this) << "Destroying: OK" << endl;
+	traceL("VideoCaptureBase", this) << "Destroying: OK" << std::endl;
 }
 
 
-void VideoCapture::start() 
+void VideoCaptureBase::start() 
 {
-	traceL("VideoCapture", this) << "Starting" << endl;
+	traceL("VideoCaptureBase", this) << "Starting" << std::endl;
 	{
-		Mutex::ScopedLock lock(_mutex);
+		ScopedLock lock(_mutex);
 
-		if (!_thread.isRunning()) {
-			traceL("VideoCapture", this) << "Initializing Thread" << endl;
-			if (!_isOpened)
+		if (!_thread.running()) {
+			traceL("VideoCaptureBase", this) << "Initializing thread" << std::endl;
+			if (!_opened)
 				throw Exception("The capture must be opened before starting the thread.");
 
 			_stopping = false;
@@ -102,179 +195,110 @@ void VideoCapture::start()
 			_thread.start(*this);
 		}
 	}
-		
-	// Wait for up to 1 second for initialization.
-	// Since the actual capture is already open,
-	// all we need to do is wait for the thread.	
-	traceL("VideoCapture", this) << "Starting: Wait" << endl;
-	_capturing.tryWait(1000);
-	traceL("VideoCapture", this) << "Starting: OK" << endl;
+	while (!_capturing && error().empty()) {
+		traceL("VideoCaptureBase", this) << "Starting: Waiting" << std::endl;
+		scy::sleep(20);
+	}
+
+	traceL("VideoCaptureBase", this) << "Starting: OK" << std::endl;
 }
 
 
-void VideoCapture::stop() 
+void VideoCaptureBase::stop() 
 {
-	traceL("VideoCapture", this) << "Stopping" << endl;
-	if (_thread.isRunning()) {
-		traceL("VideoCapture", this) << "Terminating Thread" << endl;		
+	traceL("VideoCaptureBase", this) << "Stopping" << std::endl;
+	if (_thread.running()) {
+		traceL("VideoCaptureBase", this) << "Terminating thread" << std::endl;		
 		_stopping = true;
 		_thread.join();
 	}
-
-	if (flags().has(DestroyOnStop))
-		delete this;
 }
 
 
-bool VideoCapture::open()
+bool VideoCaptureBase::open()
 {
-	traceL("VideoCapture", this) << "Open" << endl;
-	Mutex::ScopedLock lock(_mutex);
+	traceL("VideoCaptureBase", this) << "Open" << std::endl;
+	ScopedLock lock(_mutex);
 
-	_isOpened = _capture.isOpened() ? true : 
+	_opened = _capture.isOpened() ? true : 
 		_filename.empty() ? 
 			_capture.open(_deviceId) : 
 			_capture.open(_filename);
 
-	if (!_isOpened) {
-		stringstream ss;
-		ss << "Cannot open video capture, please check device: "; 
+	if (!_opened) {
+		std::stringstream ss;
+		ss << "Cannot open the video capture device: "; 
 		_filename.empty() ? (ss << _deviceId) : (ss << _filename);
 		throw Exception(ss.str());
 	}
 
-	return _isOpened;
+	return _opened;
 }
 
 
-void VideoCapture::release()
-{
-	traceL("VideoCapture", this) << "Release" << endl;
-	Mutex::ScopedLock lock(_mutex);
-	if (_capture.isOpened())
-		_capture.release();
-	_isOpened = false;
-	traceL("VideoCapture", this) << "Release: OK" << endl;
-}
-
-
-void VideoCapture::run() 
+bool VideoCaptureBase::run() 
 {
 	try 
 	{	
-		bool hasDelegates = false;
-		bool syncWithDelegates = flags().has(SyncWithDelegates);
-		traceL("VideoCapture", this) << "Running:"		
+		// Grab an initial frame
+		cv::Mat frame = grab();
+		_capturing = true;
+		bool empty = true;
+		PacketSignal* next = nil;
+
+		traceL("VideoCaptureBase", this) << "Running:"		
 			<< "\n\tDevice ID: " << _deviceId
 			<< "\n\tFilename: " << _filename
-			<< "\n\tWidth: " << _width
-			<< "\n\tHeight: " << _height
-			<< "\n\tSyncWithDelegates: " << syncWithDelegates
-			<< endl;
-	
-		cv::Mat frame = grab();
+			<< "\n\tWidth: " << width()
+			<< "\n\tHeight: " << height()
+			<< std::endl;
+		
 		while (!_stopping) 
 		{	
-			// NOTE: Failing to call waitKey inside the capture 
-			// loop causes strange issues and slowdowns with windows 
-			// system calls such as ShellExecuteEx and friends.
-			cv::waitKey(5);
-
-			// Grab a frame if we have delegates or aren't syncing with them
-			hasDelegates = refCount() > 0;
-			if (hasDelegates || (!hasDelegates && !syncWithDelegates)) {
-
-				//cv::Mat resized;
-				//cv::resize(frame, resized, cv::Size(300, 200));				
-				//MatPacket packet(&resized);
-				
-				frame = grab();
-				MatPacket packet(&frame);
-				if (hasDelegates && packet.width && packet.height) { //!_stopping && 
-					//traceL("VideoCapture", this) << "Emitting: " << _counter.fps << endl;
-					emit(packet);					
-					//traceL("VideoCapture", this) << "Emitting: OK" << endl;
+			{
+				int size = 1; // dummy
+				for (int idx = 0; idx < size; idx++) {
+					ScopedLock lock(_emitMutex); 
+					size = _emitters.size(); 
+					if ((empty = !!size) || idx >= size) break;
+					next = _emitters[idx];
+					next->emit(next, MatrixPacket(&frame));
 				}
-				
-				// Wait 5ms for the CPU to breathe
-				Poco::Thread::sleep(5);
+			}
+			
+			// Update last frame less while in limbo
+			if (empty) {
+				frame = grab();
+				scy::sleep(50);
 			}
 
-			// Wait 50ms each iter while in limbo
-			else
-				Poco::Thread::sleep(50);
+			// Always call waitKey otherwise all hell breaks loose
+			cv::waitKey(10);
 		}	
 	}
 	catch (cv::Exception& exc) 
 	{
 		setError("OpenCV Error: " + exc.err);
-	}
-	catch (Exception& exc) 
-	{
-		// If we make it here an exception was not properly 
-		// handled inside the signal callback scope which
-		// represents a serious application error.
 		assert(0);
+	}
+	catch (std::exception& exc) 
+	{
+		// The exception was not properly handled inside the signal
+		// callback scope which represents a serious application error.
+		// Time to get out the ol debugger!!!
 		setError(exc.message());
-	}
-	catch (...) 
-	{
 		assert(0);
-		setError("Unknown error.");
 	}
 	
-	_capturing.reset();
-	traceL("VideoCapture", this) << "Exiting" << endl;
-}
-
-
-void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
-{
-	traceL("VideoCapture", this) << "Get Frame: " << width << "x" << height << endl;
-	Mutex::ScopedLock lock(_mutex);	
-
-	// Don't actually grab a frame here, just copy the current frame.
-	// NOTE: If the WaitForDelegates flag is set, and no delegates are 
-	// listening the current frame will not update, consider removing the flag.
-	if (!_isOpened)
-		throw Exception("Video capture failed: " + (error().length() ? error() : string("Video device not open.")));
-
-	if (!_frame.cols && !_frame.rows)
-		throw Exception("Video capture failed: Empty video frame.");
-
-	if ((width && _frame.cols != width) || 
-		(height && _frame.rows != height))
-		cv::resize(_frame, frame, cv::Size(width, height));
-	else
-		_frame.copyTo(frame);
-}
-
-
-void VideoCapture::attach(const PacketDelegateBase& delegate)
-{
-	PacketSignal::attach(delegate);
-	traceL("VideoCapture", this) << "Added Delegate: " << refCount() << endl;
-	if (!isRunning() && flags().has(SyncWithDelegates)) //refCount == 1
-		start();
-}
-
-
-bool VideoCapture::detach(const PacketDelegateBase& delegate) 
-{
-	if (PacketSignal::detach(delegate)) {
-		traceL("VideoCapture", this) << "Removed Delegate: " << refCount() << endl;
-		if (refCount() == 0 && flags().has(SyncWithDelegates)) //isRunning() && 
-			stop();
-		return true;
-	}
+	traceL("VideoCaptureBase", this) << "Exiting" << std::endl;
+	_capturing = false;
 	return false;
 }
 
 
-cv::Mat VideoCapture::grab()
+cv::Mat VideoCaptureBase::grab()
 {	
-	//traceL("VideoCapture", this) << "Grabing" << endl;
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 
 	// Grab a frame from the capture source
 	_capture >> _frame;
@@ -288,102 +312,129 @@ cv::Mat VideoCapture::grab()
 	}
 		
 	if (!_capture.isOpened())
-		throw Exception("The capture is closed.");
+		throw Exception("Cannot grab video frame", "Your video device is closed");
 
-	_width = _frame.cols;
-	_height = _frame.rows;
-
-	// Send the capturing event to notify the main thread
-	_capturing.set();
 	_counter.tick();
+	//_width = _frame.cols;
+	//_height = _frame.rows;
 
 	return _frame;
 }
+	
 
-
-void VideoCapture::setError(const string& error)
+cv::Mat VideoCaptureBase::lastFrame() const
 {
-	errorL("VideoCapture", this) << error << endl;
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);
+
+	if (!_opened)
+		throw Exception("Cannot grab last video frame", (error().length() ? error() : 
+			std::string("Your video device is closed")));
+
+	if (!_frame.cols && !_frame.rows)
+		throw Exception("Cannot grab last video frame");
+
+	return _frame; // no data is copied
+}
+
+
+void VideoCaptureBase::addOutputSignal(PacketSignal* emitter)
+{
+	ScopedLock lock(_emitMutex);	
+	assert(!_insideCallback);
+	_emitters.push_back(emitter);	
+}
+
+
+void VideoCaptureBase::removeOutputSignal(PacketSignal* emitter)  
+{	
+	ScopedLock lock(_emitMutex);	
+	assert(!_insideCallback);
+	for (PacketSignalVec::iterator it = _emitters.begin(); it != _emitters.end(); ++it) {
+		if (*it == emitter) {
+			_emitters.erase(it);
+			return;
+		}
+	}
+	assert(0 && "unknown emitter");
+}
+
+
+void VideoCaptureBase::setError(const std::string& error)
+{
+	errorL("VideoCaptureBase", this) << "Setting error: " << error << std::endl;
+	ScopedLock lock(_mutex);	
 	_error = error;
 }
 
 
-bool VideoCapture::isOpened() const
+int VideoCaptureBase::width() 
 {
-	Mutex::ScopedLock lock(_mutex);
-	return _isOpened;
+	ScopedLock lock(_mutex);	
+	return _capture.get(CV_CAP_PROP_FRAME_WIDTH); // not const
 }
 
 
-bool VideoCapture::isRunning() const 
+int VideoCaptureBase::height() 
 {
-	Mutex::ScopedLock lock(_mutex);
-	return _thread.isRunning();
+	ScopedLock lock(_mutex);	
+	return _capture.get(CV_CAP_PROP_FRAME_HEIGHT); // not const
 }
 
 
-int VideoCapture::deviceId() const 
+bool VideoCaptureBase::opened() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
+	return _opened;
+}
+
+
+bool VideoCaptureBase::running() const 
+{
+	ScopedLock lock(_mutex);
+	return _thread.running();
+}
+
+
+int VideoCaptureBase::deviceId() const 
+{
+	ScopedLock lock(_mutex);
 	return _deviceId; 
 }
 
 
-string	VideoCapture::filename() const 
+std::string	VideoCaptureBase::filename() const 
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _filename; 
 }
 
 
-string VideoCapture::name() const 
+std::string VideoCaptureBase::name() const 
 {
-	Mutex::ScopedLock lock(_mutex);
-	stringstream ss;
+	ScopedLock lock(_mutex);
+	std::stringstream ss;
 	_filename.empty() ? (ss << _deviceId) : (ss << _filename);
 	return ss.str();
 }
 
 
-string VideoCapture::error() const 
+std::string VideoCaptureBase::error() const 
 {
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _error;
 }
 
 
-int VideoCapture::width() const 
+double VideoCaptureBase::fps() const
 {
-	Mutex::ScopedLock lock(_mutex);
-	return _width; 
-}
-
-
-int VideoCapture::height() const 
-{
-	Mutex::ScopedLock lock(_mutex);
-	return _height; 
-}
-
-
-double VideoCapture::fps() const
-{
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _counter.fps; 
 }
 
 
-Flags VideoCapture::flags() const
+cv::VideoCapture& VideoCaptureBase::capture()
 {
-	Mutex::ScopedLock lock(_mutex);
-	return _flags;
-}
-
-
-cv::VideoCapture& VideoCapture::capture()
-{
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _capture; 
 }
 
@@ -392,20 +443,97 @@ cv::VideoCapture& VideoCapture::capture()
 
 
 
+				/*
+					//empty = !!size;
+				//while (idx < size) {
+					//idx++;
+				//ScopedLock lock(_emitMutex); 
+				if (!_emitters.empty()) {
+					frame = grab();
+					MatrixPacket packet(&frame);
+			
+					_insideCallback = true;
+					for (unsigned idx = 0; i < _emitters.size(); i++) {
+						traceL("VideoCaptureBase", this) << "Emitting: " << _counter.fps << std::endl;
+						_emitters[i]->emit(_emitters[i], packet);
+					}
+					_insideCallback = false;
+					continue;
+				}
+				*/
 
 
 /*
-bool VideoCapture::check()
+void VideoCaptureBase::release()
+{
+	traceL("VideoCaptureBase", this) << "Release" << std::endl;
+	ScopedLock lock(_mutex);
+	if (_capture.opened())
+		_capture.release();
+	_opened = false;
+	traceL("VideoCaptureBase", this) << "Release: OK" << std::endl;
+}
+*/
+
+			/*
+			// Grab a frame if we have delegates or aren't syncing with them
+			hasDelegates = emitter().refCount() > 0;
+			if (hasDelegates || (!hasDelegates && !syncWithDelegates)) {
+				frame = grab();
+				MatrixPacket packet(&frame);
+				if (hasDelegates && packet.width && packet.height && !_stopping) {
+					traceL("VideoCaptureBase", this) << "Emitting: " << _counter.fps << std::endl;
+					emit(packet);
+				}				
+				continue;
+			}
+			*/
+
+
+/*
+void VideoCaptureBase::attach(const PacketDelegateBase& delegate)
+{
+	PacketSignal::attach(delegate);
+	traceL("VideoCaptureBase", this) << "Added Delegate: " << refCount() << std::endl;
+	if (!running() && flags().has(SyncWithDelegates)) //refCount == 1
+		start();
+}
+
+
+bool VideoCaptureBase::detach(const PacketDelegateBase& delegate) 
+{
+	if (PacketSignal::detach(delegate)) {
+		traceL("VideoCaptureBase", this) << "Removed Delegate: " << refCount() << std::endl;
+		if (refCount() == 0 && flags().has(SyncWithDelegates)) //running() && 
+			stop();
+		return true;
+	}
+	return false;
+}
+*/
+
+
+/*
+Flaggable VideoCaptureBase::flags() const
+{
+	ScopedLock lock(_mutex);
+	return _flags;
+}
+*/
+
+
+/*
+bool VideoCaptureBase::check()
 {	
 	grab();	
 
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 
 	// TODO: Check COM is multithreaded when using dshow highgui.
 
 	// Ensure the captured frame is not empty.
 	if (!frame.cols ||!frame.rows ) {
-		stringstream ss;
+		std::stringstream ss;
 		ss << "Cannot open video capture, please check device: "; 
 		_filename.empty() ? (ss << _deviceId) : (ss << _filename);
 		throw Exception(ss.str());

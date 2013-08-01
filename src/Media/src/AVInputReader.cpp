@@ -1,10 +1,10 @@
 #include "Sourcey/Media/AVInputReader.h"
+#include "Sourcey/Platform.h"
 #include "Sourcey/Logger.h"
 #include "Poco/Format.h"
 
 
 using namespace std;
-//using namespace Poco;
 using namespace scy;
 
 
@@ -15,9 +15,9 @@ namespace av {
 AVInputReader::AVInputReader(const Options& options)  : 
 	_thread("AVInputReader"),
 	_options(options),
-	_formatCtx(nullptr),
-	_video(nullptr),
-	_audio(nullptr),
+	_formatCtx(nil),
+	_video(nil),
+	_audio(nil),
 	_stopping(false)
 {		
 	traceL("AVInputReader", this) << "Creating" << endl;
@@ -35,7 +35,7 @@ AVInputReader::~AVInputReader()
 void AVInputReader::openFile(const string& file)
 {
 	traceL("AVInputReader", this) << "Opening: " << file << endl;	
-	openStream(file.data(), NULL, NULL);
+	openStream(file.c_str(), nil, nil);
 }
 
 
@@ -75,10 +75,10 @@ void AVInputReader::openDevice(const string& device, int width, int height, doub
 	avdevice_register_all();
 
 	AVInputFormat* iformat;
-	AVDictionary*  iparams = NULL;
+	AVDictionary*  iparams = nil;
         
 #ifdef WIN32
-    iformat = av_find_input_format(_options.deviceEngine.data());
+    iformat = av_find_input_format(_options.deviceEngine.c_str());
 #else
 	if (_options.deviceEngine == "dv1394") {
         iformat = av_find_input_format("dv1394");
@@ -99,17 +99,17 @@ void AVInputReader::openDevice(const string& device, int width, int height, doub
 	
 	// frame rate
 	if (framerate)
-		av_dict_set(&iparams, "framerate", Poco::format("%f", framerate).data(), 0);
+		av_dict_set(&iparams, "framerate", Poco::format("%f", framerate).c_str(), 0);
 	
 	// video size
 	if (width && height)
-		av_dict_set(&iparams, "video_size", Poco::format("%dx%d", width, height).data(), 0);
+		av_dict_set(&iparams, "video_size", Poco::format("%dx%d", width, height).c_str(), 0);
 	
 	// video standard
 	if (!_options.deviceStandard.empty())
-		av_dict_set(&iparams, "standard", _options.deviceStandard.data(), 0);
+		av_dict_set(&iparams, "standard", _options.deviceStandard.c_str(), 0);
 
-	openStream(device.data(), iformat, &iparams);
+	openStream(device.c_str(), iformat, &iparams);
 	
 	// for video capture it is important to do non blocking read
 	//_formatCtx->flags |= AVFMT_FLAG_NONBLOCK;
@@ -135,21 +135,21 @@ void AVInputReader::openStream(const char* filename, AVInputFormat* inputFormat,
 	
 	for (int i = 0; i < _formatCtx->nb_streams; i++) {
 		if (_formatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO && 
-			_video == NULL && !_options.disableVideo) {
+			_video == nil && !_options.disableVideo) {
 			_video = new VideoDecoderContext();
 			_video->create(_formatCtx, i);
 			_video->open();
 		}
 		else if (_formatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO &&
-			_audio == NULL && !_options.disableAudio) {
+			_audio == nil && !_options.disableAudio) {
 			_audio = new AudioDecoderContext();
 			_audio->create(_formatCtx, i);
 			_audio->open();
 		}
 	}
 
-	if (_video == NULL && 
-		_audio == NULL)
+	if (_video == nil && 
+		_audio == nil)
 		throw Exception("Could not find a valid media stream.");
 }
 
@@ -160,17 +160,17 @@ void AVInputReader::close()
 
 	if (_video) {
 		delete _video;
-		_video = NULL;
+		_video = nil;
 	}
 
 	if (_audio) {
 		delete _audio;
-		_audio = NULL;
+		_audio = nil;
 	}
 
 	if (_formatCtx) {
   		av_close_input_file(_formatCtx);
-		_formatCtx = NULL;
+		_formatCtx = nil;
   	}
 
 	traceL("AVInputReader", this) << "Closing: OK" << endl;
@@ -181,11 +181,11 @@ void AVInputReader::start()
 {
 	traceL("AVInputReader", this) << "Starting" << endl;
 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	assert(_video || _audio);
 
 	if (_video || _audio &&
-		!_thread.isRunning()) {
+		!_thread.running()) {
 		traceL("AVInputReader", this) << "Initializing Thread" << endl;
 		_stopping = false;
 		_thread.start(*this);
@@ -199,9 +199,9 @@ void AVInputReader::stop()
 {
 	traceL("AVInputReader", this) << "Stopping" << endl;
 
-	//Mutex::ScopedLock lock(_mutex);	
+	//ScopedLock lock(_mutex);	
 
-	if (_thread.isRunning()) {
+	if (_thread.running()) {
 		traceL("AVInputReader", this) << "Terminating Thread" << endl;		
 		_stopping = true;
 		_thread.join();
@@ -211,7 +211,7 @@ void AVInputReader::stop()
 }
 
 
-void AVInputReader::run() 
+bool AVInputReader::run() 
 {
 	traceL("AVInputReader", this) << "Running" << endl;
 	
@@ -232,7 +232,7 @@ void AVInputReader::run()
 						(!_options.processVideoXSecs || !_video->pts || ((ipacket.pts * av_q2d(_video->stream->time_base)) - _video->pts) > _options.processVideoXSecs) &&
 						(!_options.iFramesOnly || (ipacket.flags & AV_PKT_FLAG_KEY))) {
  						if (_video->decode(ipacket, opacket)) {
-							//traceL("AVInputReader", this) << "Decoded Video: " << _video->pts << endl;
+							//traceL("AVInputReader", this) << "Decoded video: " << _video->pts << endl;
 							VideoPacket video((char*)opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
 							video.opaque = &opacket;
 							emit(this, video);
@@ -321,7 +321,7 @@ void AVInputReader::run()
 				break;
 			}
 
-			Poco::Thread::sleep(10);
+			scy::sleep(10);
 		};
 	} 
 	catch (Exception& exc) 
@@ -337,40 +337,41 @@ void AVInputReader::run()
 
 	traceL("AVInputReader", this) << "Exiting" << endl;
 	ReadComplete.emit(this);
+	return false;
 }
 
 
 AVInputReader::Options& AVInputReader::options()
 { 
-	Mutex::ScopedLock lock(_mutex);
+	ScopedLock lock(_mutex);
 	return _options; 
 }
 	
 
 AVFormatContext* AVInputReader::formatCtx() const
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	return _formatCtx;
 }
 	
 
 VideoDecoderContext* AVInputReader::video() const
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	return _video;
 }
 	
 
 AudioDecoderContext* AVInputReader::audio() const
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	return _audio;
 }
 
 
 string AVInputReader::error() const
 {
-	Mutex::ScopedLock lock(_mutex);	
+	ScopedLock lock(_mutex);	
 	return _error;
 }
 

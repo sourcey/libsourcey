@@ -34,9 +34,9 @@ namespace net {
  
 SSLAdapter::SSLAdapter(net::SSLBase* socket) :
 	_socket(socket),
-	_ssl(nullptr),
-	_readBIO(nullptr),
-	_writeBIO(nullptr)
+	_ssl(nil),
+	_readBIO(nil),
+	_writeBIO(nil)
 {
 	traceL("SSLAdapter", this) << "Creating" << endl;
 }

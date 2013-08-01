@@ -42,23 +42,23 @@ bool matchURL(const std::string& uri, const std::string& expression);
 std::string parseCookieItem(const std::string& cookie, const std::string& item);
 	/// Parses an item from a HTTP cookie.
 
-bool splitURIParameters(const std::string& uri, NVCollection& out);
+bool splitURIParameters(const std::string& uri, NVHash& out);
 	/// Splits and adds the URI query parameters into the given collection.
 
-void splitParameters(const std::string& s, std::string& value, NVCollection& parameters);
+void splitParameters(const std::string& s, std::string& value, NVHash& parameters);
 	/// Splits the given string into a value and a collection of parameters.
 	/// Parameters are expected to be separated by semicolons.
 	///
 	/// Enclosing quotes of parameter values are removed.
 	///
 	/// For example, the string
-	///   multipart/mixed; boundary="MIME_boundary_01234567"
+	///   multipart/mixed; boundary="boundary-01234567"
 	/// is split into the value
 	///   multipart/mixed
 	/// and the parameter
-	///   boundary -> MIME_boundary_01234567
+	///   boundary -> boundary-01234567
 
-void splitParameters(const std::string::const_iterator& begin, const std::string::const_iterator& end, NVCollection& parameters);
+void splitParameters(const std::string::const_iterator& begin, const std::string::const_iterator& end, NVHash& parameters);
 	/// Splits the given string into a collection of parameters.
 	/// Parameters are expected to be separated by semicolons.
 	///

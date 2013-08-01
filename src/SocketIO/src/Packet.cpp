@@ -20,6 +20,7 @@
 #include "Sourcey/SocketIO/Packet.h"
 #include "Sourcey/Crypto.h"
 #include "Sourcey/Logger.h"
+#include "Sourcey/Util.h"
 #include "Poco/Format.h"
 
 
@@ -134,24 +135,24 @@ bool Packet::read(Buffer& buf)
 	if (buf.available() < 3)
 		return false;
 	
-	//debugL() << "[sockio::Packet:" << this << "] Reading: " << (string(buf.data(), buf.available())) << endl;
+	//debugL("sockio::Packet", this) << "Reading: " << (string(buf.data(), buf.available())) << endl;
 
 	string data;
 	buf.get(data, buf.available());
 	StringVec content = util::split(data, ':', 4);
 	if (content.size() < 1) {
-		//debugL() << "[sockio::Packet:" << this << "] Reading: Invalid Data: " << content.size() << endl;
+		//debugL("sockio::Packet", this) << "Reading: Invalid Data: " << content.size() << endl;
 		return false;
 	}
 		
 	if (!content[0].empty()) {
 		_type = util::fromString<UInt32>(content[0]);
-		//debugL() << "[sockio::Packet:" << this << "] Reading: Type: " << typeString() << endl;
+		//debugL("sockio::Packet", this) << "Reading: Type: " << typeString() << endl;
 	}
 
 	if (_type < 0 || 
 		_type > 7) {
-		//debugL() << "[sockio::Packet:" << this << "] Reading: Invalid Type: " << _type << endl;
+		//debugL("sockio::Packet", this) << "Reading: Invalid Type: " << _type << endl;
 		return false;
 	}
 	if (content.size() >= 2 && !content[1].empty()) {
@@ -180,7 +181,7 @@ bool Packet::read(Buffer& buf)
 	}
 
 	_size = data.length();
-	//debugL() << "[sockio::Packet:" << this << "] Parse Success: " << toString() << endl;
+	//debugL("sockio::Packet", this) << "Parse Success: " << toString() << endl;
 
 	return true;
 }
@@ -264,8 +265,7 @@ string Packet::typeString() const
 	case JSON: return "JSON";
 	case Event: return "Event";
 	case Ack: return "Ack";
-	case Error: return "Error";
-		
+	case Error: return "Error";		
 	default: return "Unknown";
 	}
 }

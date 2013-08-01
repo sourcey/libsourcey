@@ -17,11 +17,12 @@
 //
 
 
-#ifndef SOURCEY_PACKET_H
-#define SOURCEY_PACKET_H
+#ifndef SOURCEY_Packet_H
+#define SOURCEY_Packet_H
 
 
 #include "Sourcey/Types.h"
+#include "Sourcey/Flaggable.h"
 #include "Sourcey/Polymorphic.h"
 #include "Sourcey/Buffer.h"
 #include "Sourcey/Logger.h"
@@ -33,8 +34,8 @@ namespace scy {
 	
 	
 struct IPacketInfo
-	/// An abstract interface for packet sources to
-	/// provide extra information about packets.
+	// An abstract interface for packet sources to
+	// provide extra information about packets.
 { 
 	IPacketInfo() {}; 
 	virtual ~IPacketInfo() {}; 
@@ -44,29 +45,43 @@ struct IPacketInfo
 
 
 class IPacket: public Polymorphic
-	/// The base packet class which can be extended by each
-	/// protocol implementation for polymorphic callbacks
-	/// using the PacketStreamSource and friends.
+	// The base packet type which is passed around the LibSourcey system.
+	// IPacket can be extended for each protocol to enable polymorphic
+	// processing and callbacks using PacketStream and friends.
 { 
 public:
 	void* source;
-		/// Optional packet source pointer reference so delegates
-		/// along the signal chain can determine the packet origin.
-		/// Usually a subclass of PacketStreamSource.
+		// Optional packet source pointer reference so delegates
+		// along the signal chain can determine the packet origin.
+		// Usually a subclass of PacketStreamSource.
 
 	IPacketInfo* info;
-		/// Optional extra information about the packet.
-		/// This pointer is managed by the packet.
+		// Optional extra information about the packet.
+		// This pointer is managed by the packet.
 
 	void* opaque;
-		/// Optional client data pointer.
-		/// This pointer is not managed by the packet.
+		// Optional client array pointer.
+		// This pointer is not managed by the packet.
+
+	Flaggable flags;
+		// Packet flags are used to provide basic information
+		// about the packet.	
+
+	enum ProcessorFlags
+		// Packet processor flags tell processors how to handle
+		// the packet.
+	{
+		Fixed = 0x00,  // This packet should not be modified by downstream processors.
+		Final = 0x01,  // This is that last packet.
+		Managed = 0x02, // This packet will take ownership of any referenced memory.
+	};
 	
-	IPacket(void* source = nullptr, IPacketInfo* info = nullptr, void* opaque = nullptr) :
-		source(source), info(info), opaque(opaque) {}
+	IPacket(void* source = NULL, unsigned flags = 0, IPacketInfo* info = NULL, void* opaque = NULL) :
+		source(source), flags(flags), info(info), opaque(opaque){}
 	
 	IPacket(const IPacket& r) : 
 		source(r.source),
+		flags(r.flags),
 		info(r.info ? r.info->clone() : NULL),
 		opaque(r.opaque)
 	{
@@ -75,6 +90,7 @@ public:
 	IPacket& operator = (const IPacket& r) 
 	{
 		source = r.source;
+		flags = r.flags;
 		info = (r.info ? r.info->clone() : NULL);
 		opaque = r.opaque;
 		return *this;
@@ -87,10 +103,21 @@ public:
 	}
 	
 	virtual IPacket* clone() const = 0;	
+
 	virtual bool read(Buffer&) = 0;
 	virtual void write(Buffer&) const = 0;
-
+	
 	virtual size_t size() const = 0;
+
+	virtual char* array() const 
+	{ 
+		return 0;
+	}
+
+	virtual bool hasArray() const
+	{
+		return array() != 0;
+	}
 
 	virtual const char* className() const = 0;
 	virtual void print(std::ostream& os) const 
@@ -107,42 +134,49 @@ public:
 
 
 class RawPacket: public IPacket 
-	/// RawPacket is the default data packet type which consists
-	/// of an optionally managed data pointer and a size value.
-	///
+	// RawPacket is the default data packet type which consists
+	// of an optionally managed char pointer and a size value.
+	//
 {	
 public:
-	RawPacket(char* data = nullptr, size_t size = 0, void* opaque = nullptr) : 
-		IPacket(nullptr, nullptr, opaque), _data(data), _size(size), managePointer(false)
+	RawPacket(char* array = NULL, size_t size = 0, unsigned flags = 0) : 
+		IPacket(NULL, flags), _array(array), _size(size)
 	{
 	}
 
-	RawPacket(const char* data, size_t size = 0, void* opaque = nullptr) : 
-		IPacket(nullptr, nullptr, opaque), _data(nullptr), _size(size), managePointer(true)
+	RawPacket(const char* array, size_t size = 0, unsigned flags = 0) : 
+		IPacket(NULL, flags |= IPacket::Managed), _array(NULL), _size(size)
 	{
-		// Copy const data
-		cloneData(data, size);
+		// Copy const array
+		copyArray(array, size);
 	}
 
-	RawPacket(void* source, IPacketInfo* info, void* opaque = nullptr, char* data = nullptr, size_t size = 0) : 
-		IPacket(source, info, opaque), _data(data), _size(size), managePointer(false)
+	RawPacket(void* source, char* array = NULL, size_t size = 0, unsigned flags = 0, IPacketInfo* info = NULL, void* opaque = NULL) : 
+		IPacket(source, flags, info, opaque), _array(array), _size(size)
 	{
+	}
+
+	RawPacket(void* source, const char* array = NULL, size_t size = 0, unsigned flags = 0, IPacketInfo* info = NULL, void* opaque = NULL) : 
+		IPacket(source, flags |= IPacket::Managed, info, opaque), _array(NULL), _size(size)
+	{
+		// Copy const array
+		copyArray(array, size);
 	}
 
 	RawPacket(const RawPacket& that) : 
-		IPacket(that), _data(nullptr), _size(0), managePointer(true) //that.managePointer
+		IPacket(that), _array(NULL), _size(0)
 	{		
-		// If data pointer is assigned we memcpy
-		//
-		// TODO: Use some kind of reference counted buffer wrapper
-		// so we don't need to force memcpy of referenced data.
-		cloneData(that._data, that._size);
+		// Copy assigned data and set the Managed flag
+		// TODO: Use a simple reference counted buffer wrapper
+		// so we don't need to force memcpy here.
+		setManaged();
+		copyArray(that._array, that._size);
 	}
 	
 	virtual ~RawPacket() 
 	{
-		if (managePointer && _data)
-			delete [] _data;
+		if (isManaged() && _array)
+			delete [] _array;
 	}
 
 	virtual IPacket* clone() const 
@@ -150,48 +184,54 @@ public:
 		return new RawPacket(*this);
 	}
 
-	virtual void setData(char* data, size_t size) 
+	virtual void setArray(char* array, size_t size) 
 	{
 		assert(size > 0);
 
-		// If managePointer is true we memcpy data
-		if (managePointer)
-			cloneData(data, size);
+		// Copy data if the Managed flag is set
+		if (isManaged())
+			copyArray(array, size);
 
-		// Otherwise we just reference the ptr
+		// Otherwise just reference it
 		else {
-			_data = data;
+			_array = array;
 			_size = size; 
 		}
 	}
 
-	virtual void cloneData(const char* data, size_t size) 
+	virtual void copyArray(const char* array, size_t size) 
 	{
-		traceL("RawPacket", this) << "Cloning: " << size << std::endl;
+		//traceL("RawPacket", this) << "Cloning: " << size << std::endl;
 
-		assert(managePointer);
+		assert(isManaged());
 		assert(size > 0);
-		if (_data)
-			delete [] _data;
+		if (_array)
+			delete [] _array;
 		_size = size;
-		_data = new char[size];
-		std::memcpy(_data, data, size);
+		_array = new char[size];
+		std::memcpy(_array, array, size);
 	}	
 
 	virtual bool read(Buffer& buf) 
 	{ 
-		setData(buf.data(), buf.available());
+		setArray(buf.data(), buf.available());
 		return true;
 	}
 
 	virtual void write(Buffer& buf) const 
 	{	
-		buf.put(_data, _size); 
+		buf.put(_array, _size); 
+	}
+
+	virtual char* array() const 
+	{ 
+		return _array; 
 	}
 
 	virtual char* data() const 
+		// legacy compatibility
 	{ 
-		return _data; 
+		return _array; 
 	}
 
 	virtual size_t size() const 
@@ -204,11 +244,17 @@ public:
 		return "RawPacket"; 
 	}
 
-	bool managePointer;
-		/// Set this flag to true to 
-		/// delete packet data on destruction.
+	virtual bool isManaged() const
+	{
+		return flags.has(IPacket::Managed);
+	}
+
+	virtual void setManaged()
+	{
+		flags.set(IPacket::Managed);
+	}
 	
-	char* _data;
+	char* _array;
 	size_t _size;
 };
 
@@ -216,37 +262,4 @@ public:
 } // namespace scy
 
 
-#endif // SOURCEY_PACKET_H
-
-
-		/*
-		// Clone data if memory is managed
-		if (managePointer) {
-			char* data = new char[size];
-			std::memcpy(data, that._data, that._size);
-			_data = data;
-		}
-		*/
-
-		/*
-		if (managePointer) {
-			char* data = new char[buf.available()];
-			std::memcpy(data, buf.begin(), buf.available());
-			_data = data;
-		}
-		else {
-			_data = buf.begin();
-			_size = buf.available(); 
-		}
-		*/
-
-			/*
-			// Delete old buffer
-			if (_data)
-				delete _data;			
-			_data = new char[size];
-			std::memcpy(_data, data, size);
-			//char* data = new char[buf.available()];
-			//std::memcpy(data, buf.begin(), buf.available());
-			//_data = data;
-			*/
+#endif // SOURCEY_Packet_H

@@ -42,9 +42,9 @@ namespace scy {
 namespace av {
 
 
-class AVEncoder: public IPacketEncoder
-	/// This class implements an Audio/Video encoder and writer
-	/// which  depends on libavcodec/libavformat.
+class AVEncoder: public IEncoder
+	/// This class implements an multiplex audio/video   
+	/// encoder which depends on libavcodec/libavformat.
 {
 public:
 	AVEncoder(const RecordingOptions& options);
@@ -55,29 +55,26 @@ public:
 	virtual void uninitialize();
 	virtual void cleanup();
 
-	virtual void process(IPacket& packet);
-
 	virtual void createVideo();
 	virtual void freeVideo();
-	virtual bool encodeVideo(unsigned char* buffer, int bufferSize, int width, int height);
+	virtual bool encodeVideo(unsigned char* buffer, int bufferSize, int width, int height, UInt64 time = 0);
 	
 	virtual void createAudio();
 	virtual void freeAudio();
-	virtual bool encodeAudio(unsigned char* buffer, int bufferSize);
+	virtual bool encodeAudio(unsigned char* buffer, int bufferSize, UInt64 time = 0);
 		
 	RecordingOptions& options();
 	VideoEncoderContext* video();
 	AudioEncoderContext* audio();
-
-protected:			
-	virtual void onStreamStateChange(const PacketStreamState& state);
+			
+	PacketSignal Emitter;
 	
 protected:
 	static Mutex _mutex; // Protects avcodec_open/close()
 
-	RecordingOptions	_options;
+	RecordingOptions _options;
 	AVFormatContext* _formatCtx;
-	clock_t			_startTime;
+	//clock_t			_startTime;
 	AVIOContext*	_ioCtx;
 	unsigned char*  _ioBuffer; 
 	int				_ioBufferSize; 
@@ -86,6 +83,12 @@ protected:
  	// Video
 	//
 	VideoEncoderContext* _video;
+	//LivePTSCalculator* _videoPtsCalc;
+	//bool _realtime;
+	//Int64 _videoPts;
+	//Int64 _lastVideoPTS;
+	//UInt64 _lastVideoTime;
+	//double _videoPtsRemainder;
 	//FPSCounter		_videoFPS;
 	//clock_t			_videoTime;
 
@@ -95,6 +98,8 @@ protected:
 	AudioEncoderContext* _audio;
 	AVFifoBuffer*	_audioFifo;		
 	UInt8*			_audioBuffer;
+	//LivePTSCalculator* _audioPtsCalc;
+	//Int64 _audioPts;
 	//FPSCounter		_audioFPS;
 	//clock_t			_audioTime;	
 };
@@ -105,6 +110,77 @@ protected:
 
 #endif	// SOURCEY_MEDIA_AVEncoder_H
 
+
+
+/*
+//
+// Live PTS Calculator
+//
+
+
+struct LivePTSCalculator
+	/// Helper class which calculates PTS values for a live source
+{
+	AVRational timeBase;
+	clock_t frameTime;
+	double frameDuration;
+	double frameDiff;
+
+	Int64 currentPTS;
+	Int64 lastPTS;
+
+	LivePTSCalculator()
+	{
+		reset();
+	}
+
+	void reset()
+	{		
+		lastPTS = 0;
+		currentPTS = 0;
+		frameTime = 0;
+		frameDuration = 0;
+		frameDiff = 0;
+	}
+	
+	void log()
+	{			
+		Timestamp ts;
+		debugL("LivePTSCalculator", this) << "Values:" 
+			<< "\n\tCurrent PTS: " << currentPTS
+			<< "\n\tLast PTS: " << lastPTS	
+			<< "\n\tFrame Duration: " << frameDuration
+			<< "\n\tFrame Diff: " << frameDiff
+			<< "\n\tFrame Time: " << frameTime
+			<< "\n\tTime Base: " << timeBase.den << ":" << timeBase.num
+			<< std::endl;
+	}
+
+	Int64 tick()
+	{
+		// Initializing
+		if (frameTime == 0) {
+			assert(!frameDuration);
+			frameTime = clock();
+			currentPTS = 1;
+		}
+
+		// Updating
+		else {
+			frameDuration = (double)(clock() - frameTime) / CLOCKS_PER_SEC;
+			frameTime = clock();
+			frameDiff = timeBase.den/(timeBase.num/(frameDuration));
+			currentPTS = lastPTS + frameDiff;
+		}	
+
+		log();
+
+		assert(currentPTS > lastPTS);
+		lastPTS = currentPTS;
+		return currentPTS;
+	}
+};
+*/
 
 
 	//UInt32			_frameDuration;
@@ -127,11 +203,11 @@ inline std::string GetEncoderFromCodecName(const std::string& name)
 	std::transform(value.begin(), value.end(), value.begin(), ::tolower);
 	
 	// try it
-	if (c = avcodec_find_encoder_by_name(value.data())) 
+	if (c = avcodec_find_encoder_by_name(value.c_str())) 
 		goto success;
 
 	// try splitting first word
-	//if (c = avcodec_find_encoder_by_name(value.data())) 
+	//if (c = avcodec_find_encoder_by_name(value.c_str())) 
 	//	goto success;
 	
     return "";

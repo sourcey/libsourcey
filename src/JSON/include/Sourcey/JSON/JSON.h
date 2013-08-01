@@ -44,9 +44,9 @@ typedef Json::Reader Reader;
 inline void loadFile(json::Value& root, const std::string& path) 
 {
 	std::ifstream infile;
-	infile.open(path.data(), std::ifstream::in);
+	infile.open(path.c_str(), std::ifstream::in);
 	if (!infile.is_open())		
-		throw OpenFileException("Cannot open input file: " + path);
+		throw FileException("Cannot open input file: " + path);
 
 	json::Reader reader;
 	bool res = reader.parse(infile, root);
@@ -60,9 +60,9 @@ inline void saveFile(const json::Value& root, const std::string& path)
 {
 	json::StyledWriter writer;
 	std::ofstream outfile;
-	outfile.open(path.data());
+	outfile.open(path.c_str());
 	if (!outfile.is_open())
-		throw OpenFileException("Cannot open output file: " + path);
+		throw FileException("Cannot open output file: " + path);
 
 	outfile << writer.write(root);
 	outfile.close();

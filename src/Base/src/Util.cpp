@@ -19,27 +19,14 @@
 
 #include "Sourcey/Util.h"
 
-/*
-
-#include "Poco/String.h"
-#ifdef _WIN32
-#include <time.h>
-#include <stdlib.h>
-#include <windows.h>
-#else
-#include <time.h>
-#include <stdlib.h>
-#include <sys/times.h>
-#include <unistd.h>
-#endif
-*/
 
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-#include <cctype>
+//#include <cctype>
 #include <assert.h>
+#include <cstdarg>
 
 
 using namespace std;
@@ -54,6 +41,44 @@ namespace util {
 //
 
 
+std::string string_vprintf(const char* fmt, va_list args) 
+{
+	size_t size = 500;
+	char* buf = (char*)malloc(size);
+	// Grow the buffer size until the output is no longer truncated
+	while (1) {
+		va_list args_copy;
+#if defined(_WIN32)
+		args_copy = args;
+		size_t nwritten = _vsnprintf(buf, size-1, fmt, args_copy);
+#else
+		va_copy(args_copy, args);
+		size_t nwritten = vsnprintf(buf, size-1, fmt, args_copy);
+#endif
+		// Some c libraries return -1 for overflow, 
+		// some return a number larger than size-1
+		if (nwritten < size-2) {
+			buf[nwritten+1] = 0;
+			std::string ret(buf);
+			free(buf);
+			return ret;
+		}
+		size *= 2;
+		buf = (char* )realloc(buf, size);
+	}
+}
+
+
+std::string format(const char* fmt, ...) 
+{
+	va_list args;
+	va_start(args, fmt);
+	std::string ret = string_vprintf(fmt, args);
+	va_end(args);
+	return ret;
+}
+
+
 bool isNumber(const std::string& str)
 {
    for (size_t i = 0; i < str.length(); i++) {
@@ -62,14 +87,6 @@ bool isNumber(const std::string& str)
    }
    return true;
 }
-
-
-/*
-int icompare(const std::string& s1, const char* s2)
-{
-	return strncasecmp(s1, s1)
-}
-*/
 
 
 bool tryParseHex(const std::string& str, unsigned& value)
@@ -97,7 +114,7 @@ int icompare(const std::string& s1, const std::string& s2)
 }
 
 
-std::string getPID(const void* ptr)
+std::string memAddress(const void* ptr)
 {
 	return toString<const void*>(ptr);
 }
@@ -362,13 +379,13 @@ bool matchNodes(const StringVec& params, const StringVec& xparams)
 
 
 /*
-#if WIN32
-UInt64 getTime() {
+#ifdef WIN32
+UInt64 getTimeHR() {
 	return ::GetTickCount();
 }
 #else
 static int ClocksPerSec = sysconf(_SC_CLK_TCK);
-UInt64 getTime() {
+UInt64 getTimeHR() {
 	tms t;
 	clock_t result = times(&t);
 	return (UInt64)result;

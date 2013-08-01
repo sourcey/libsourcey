@@ -21,15 +21,10 @@
 //#include "Sourcey/HTTP/Authenticator.h"
 #include "Sourcey/HTTP/Util.h"
 
-//#include "Poco/DateTimeFormat.h"
-//#include "Poco/DateTimeFormatter.h"
-
 #include <assert.h>
 
 
 using namespace std;
-//using namespace Poco;
-
 
 
 namespace scy { 
@@ -121,11 +116,22 @@ const std::string& Request::getHost() const
 }
 
 
-void Request::setCookies(const NVCollection& cookies)
+const std::string& Request::getMethod() const
+{
+	return _method;
+}
+
+
+const std::string& Request::getURI() const
+{
+	return _uri;
+}
+
+void Request::setCookies(const NVHash& cookies)
 {
 	std::string cookie;
 	cookie.reserve(64);
-	for (NVCollection::ConstIterator it = cookies.begin(); it != cookies.end(); ++it)
+	for (NVHash::ConstIterator it = cookies.begin(); it != cookies.end(); ++it)
 	{
 		if (it != cookies.begin())
 			cookie.append("; ");
@@ -137,9 +143,9 @@ void Request::setCookies(const NVCollection& cookies)
 }
 
 	
-void Request::getCookies(NVCollection& cookies) const
+void Request::getCookies(NVHash& cookies) const
 {
-	NVCollection::ConstIterator it = find(COOKIE);
+	NVHash::ConstIterator it = find(COOKIE);
 	while (it != end() && util::icompare(it->first, COOKIE) == 0)
 	{
 		util::splitParameters(it->second.begin(), it->second.end(), cookies);
@@ -148,7 +154,7 @@ void Request::getCookies(NVCollection& cookies) const
 }
 
 	
-void Request::getURIParameters(NVCollection& params) const
+void Request::getURIParameters(NVHash& params) const
 {	
 	util::splitURIParameters(getURI(), params);
 }
@@ -267,25 +273,25 @@ void Request::setCredentials(const std::string& header, const std::string& schem
 
 /*
 Request::Request() : 
-	http::Message(Message::HTTP_1_1)//, form(nullptr)
+	http::Message(Message::HTTP_1_1)//, form(nil)
 {
 }
 
 
 Request::Request(const string& version) : 
-	http::Message(version)//, form(nullptr)
+	http::Message(version)//, form(nil)
 {
 }
 
 
 Request::Request(const string& method, const string& uri) : 
-	http::Message(method, uri, Message::HTTP_1_1)//, form(nullptr)
+	http::Message(method, uri, Message::HTTP_1_1)//, form(nil)
 {
 }
 
 
 Request::Request(const string& method, const string& uri, const string& version) : 
-	http::Message(method, uri, version)//, form(nullptr)
+	http::Message(method, uri, version)//, form(nil)
 {
 }
 
@@ -329,7 +335,7 @@ void Request::read(istream& istr)
 }
 
 			
-const NVCollection& Request::params() const
+const NVHash& Request::params() const
 {	
 	return _params;
 }

@@ -22,7 +22,6 @@
 
 
 using namespace std;
-//using namespace Poco;
 using namespace scy;
 
 
@@ -31,9 +30,9 @@ namespace av {
 
 
 VideoContext::VideoContext() :
-	stream(nullptr),
-	codec(nullptr),
-	frame(nullptr),
+	stream(nil),
+	codec(nil),
+	frame(nil),
 	pts(0.0)
 {
 	traceL("VideoContext", this) << "Creating" << endl;
@@ -62,7 +61,7 @@ void VideoContext::open()
 	assert(codec);
 
 	// Open the video codec
-	if (avcodec_open2(ctx, codec, NULL) < 0)
+	if (avcodec_open2(ctx, codec, nil) < 0)
    		throw Exception("Cannot open the video codec.");
 }
 
@@ -73,18 +72,18 @@ void VideoContext::close()
 
 	if (frame) {
 		av_free(frame);
-		frame = NULL;
+		frame = nil;
 	}
 
 	if (ctx) {
 		avcodec_close(ctx);
-		ctx = NULL;
+		ctx = nil;
 	}
 
 	// Streams are managed differently by each impl
 	//if (stream)	{
-		//stream = NULL;
-		// NOTE: The stream is managed by the AVFormatContext
+		//stream = nil;
+		// Note: The stream is managed by the AVFormatContext
 		//av_freep(stream);
 	//}
 	
@@ -100,8 +99,8 @@ void VideoContext::close()
 //
 VideoEncoderContext::VideoEncoderContext(AVFormatContext* format) :
 	format(format),
-	conv(nullptr),
-	buffer(nullptr),
+	conv(nil),
+	buffer(nil),
 	bufferSize(0)
 {
 }
@@ -123,7 +122,7 @@ void VideoEncoderContext::create() //, const VideoCodec& params
 	VideoContext::create();
 	
 	// Find the video encoder
-	codec = avcodec_find_encoder_by_name(oparams.encoder.data());
+	codec = avcodec_find_encoder_by_name(oparams.encoder.c_str());
 	if (!codec) {
 		codec = avcodec_find_encoder(format->oformat->video_codec);
 		if (!codec)
@@ -138,9 +137,21 @@ void VideoEncoderContext::create() //, const VideoCodec& params
 	if (!stream)
 		throw Exception("Cannot create video stream.");	
 	
+	/*
+	// fixme: testing realtime streams
+	// http://stackoverflow.com/questions/16768794/muxing-from-audio-and-video-files-with-ffmpeg
+	stream->time_base.den = 1000; //realtime_ ? 1000 : fps_.num;
+	stream->time_base.num = 1; //realtime_ ? 1: fps_.den;
+	
+    stream->r_frame_rate.num = oparams.fps;
+    stream->r_frame_rate.den = 1;
+    stream->avg_frame_rate.den = 1;
+    stream->avg_frame_rate.num = oparams.fps;
+	*/
+
 	ctx = stream->codec;
 
-	InitVideoEncoderContext(ctx, codec, oparams);
+	initVideoEncoderContext(ctx, codec, oparams);
 	
 	// Create the video conversion context if needed
 	createConverter();
@@ -150,12 +161,12 @@ void VideoEncoderContext::create() //, const VideoCodec& params
 		ctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
 
 	// Allocate the input frame
-	frame = CreateVideoFrame(av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
+	frame = createVideoFrame(av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
 	if (!frame)
 		throw Exception("Cannot allocate input frame.");
 	
 	// Allocate the encode buffer
-	// XXX: Disabling in favour of encoder manged buffer
+	// XXX: Disabling in favor of encoder manged buffer
     //bufferSize = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
     //buffer = (UInt8*)av_malloc(bufferSize);
 }
@@ -180,12 +191,12 @@ void VideoEncoderContext::freeConverter()
 {
 	if (conv) {
 		delete conv;
-		conv = NULL;
+		conv = nil;
 	}
 
 	//if (frame) {
 	//	av_free(frame);
-	//	frame = NULL;
+	//	frame = nil;
 	//}
 }
  
@@ -201,7 +212,7 @@ void VideoEncoderContext::close()
 	/*
 	if (buffer) {
 		av_free(buffer);
-		buffer = NULL;
+		buffer = nil;
 	}
 	
 	// Free the stream
@@ -211,7 +222,7 @@ void VideoEncoderContext::close()
 				traceL("VideoContext", this) << "Closing: Removing Stream: " << stream << endl;
 				av_freep(&format->streams[i]->codec);
 				av_freep(&format->streams[i]);
-				stream = NULL;
+				stream = nil;
 				format->nb_streams--;
 			}
 		}
@@ -220,7 +231,7 @@ void VideoEncoderContext::close()
 }
 
 
-bool VideoEncoderContext::encode(unsigned char* data, int size, AVPacket& opacket)
+bool VideoEncoderContext::encode(unsigned char* data, int size, Int64 pts, AVPacket& opacket)
 {
 	assert(data);
 	assert(size);
@@ -229,6 +240,7 @@ bool VideoEncoderContext::encode(unsigned char* data, int size, AVPacket& opacke
     ipacket.stream_index = stream->index;
     ipacket.data = data;
     ipacket.size = size;
+    ipacket.pts = pts;
 	return encode(ipacket, opacket);
 }
 
@@ -240,16 +252,11 @@ bool VideoEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 	assert(frame);
 	assert(codec);
 	
+	frame->pts = ipacket.pts;
 	frame->data[0] = (UInt8*)ipacket.data;
 	//avpicture_fill((AVPicture *)frame, (UInt8*)ipacket.data, 
-	//	av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
-
-	// TODO: Correctly set the input frame PTS
-	// http://thompsonng.blogspot.com.au/2011/09/ffmpeg-avinterleavedwriteframe-return.html
-	// http://stackoverflow.com/questions/6603979/ffmpegavcodec-encode-video-setting-pts-h264
-	// (1 / oparams.fps) * sample rate * frame number
-	frame->pts = ctx->frame_number;
-
+	//	av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);	
+	
 	return encode(frame, opacket);
 }
 
@@ -261,17 +268,22 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 	assert(codec);
 
 	AVFrame* oframe = conv ? conv->convert(iframe) : iframe;
-	oframe->pts = iframe->pts;
+
+	// Set the input PTS or a monotonic value to keep the encoder happy.
+	// The actual setting of the PTS is outside the scope of the encoder.
+	oframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : ctx->frame_number;
 
     av_init_packet(&opacket);	
     opacket.stream_index = stream->index;
-	opacket.data = NULL; // use encoder assigned buffer
+	opacket.data = nil; // using encoder assigned buffer
 	opacket.size = 0;
-	//opacket.data = this->buffer; // use our buffer, not ffmpeg assigned
+	//opacket.data = this->buffer;
 	//opacket.size = this->bufferSize;
 
 	int frameEncoded = 0;
+
 	if (avcodec_encode_video2(ctx, &opacket, oframe, &frameEncoded) < 0) {
+		// TODO: Use av_strerror
 		error = "Fatal Encoder Error";
 		errorL("VideoEncoderContext", this) << error << endl;
 		throw Exception(error);
@@ -280,25 +292,19 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 	if (frameEncoded) {
 		fps.tick();
 		if (ctx->coded_frame->key_frame) 
-		    opacket.flags |= AV_PKT_FLAG_KEY; 
+		    opacket.flags |= AV_PKT_FLAG_KEY; 		
         if (opacket.pts != AV_NOPTS_VALUE)
             opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
         if (opacket.dts != AV_NOPTS_VALUE)
             opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
-				
+        if (opacket.duration > 0)
+            opacket.duration = av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
+		
 		/*
-		traceL() << "[VideoCodecEncoderContext:" << this << "] Encoded PTS:" 
-			//<< "\n\tPTS: " << av_ts2str(opacket.pts)
-			//<< "\n\tDTS: " << av_ts2str(opacket.dts)
-			//<< "\n\tPTS Time: " << av_ts2timestr(opacket.pts, &stream->time_base)
-			//<< "\n\tDTS Time: " << av_ts2timestr(opacket.dts, &stream->time_base)
-			<< "\n\tPTS: " << opacket.pts
-			<< "\n\tDTS: " << opacket.dts
-			<< "\n\tFrame PTS: " << oframe->pts
-			//<< "\n\tCodec Time Den: " << ctx->time_base.den
-			//<< "\n\tCodec Time Num: " << ctx->time_base.num
-			//<< "\n\tStream Time Den: " << stream->time_base.den
-			//<< "\n\tStream Time Num: " << stream->time_base.num
+		traceL("VideoEncoderContext", this) << "Encoded Frame:" 
+			<< "\n\tScaled PTS: " << opacket.pts
+			<< "\n\tScaled DTS: " << opacket.dts
+			<< "\n\tScaled Duration: " << opacket.duration
 			<< endl;
 			*/
     }
@@ -307,12 +313,44 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 }
 
 
-// ---------------------------------------------------------------------
+bool VideoEncoderContext::flush(AVPacket& opacket)
+{	
+	av_init_packet(&opacket);
+	opacket.data = nil;
+	opacket.size = 0;
+	
+	int frameEncoded = 0;
+	if (avcodec_encode_video2(ctx, &opacket, nil, &frameEncoded) < 0) {
+		// TODO: Use av_strerror
+		error = "Fatal Encoder Error";
+		errorL("VideoEncoderContext", this) << error << endl;
+		throw Exception(error);
+    }
+	
+	if (frameEncoded) {
+		if (ctx->coded_frame->key_frame) 
+		    opacket.flags |= AV_PKT_FLAG_KEY; 		
+        if (opacket.pts != AV_NOPTS_VALUE)
+            opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
+        if (opacket.dts != AV_NOPTS_VALUE)
+            opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
+        if (opacket.duration > 0)
+            opacket.duration = av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
+		traceL("VideoEncoderContext", this) << "Flushed Video Frame: " << opacket.pts << endl;
+		return true;
+	}
+	return false;
+}
+
+
+//
 // Video Codec Encoder Context
 //
+
+
 VideoCodecEncoderContext::VideoCodecEncoderContext() :
-	conv(nullptr),
-	buffer(nullptr),
+	conv(nil),
+	buffer(nil),
 	bufferSize(0)
 {
 }
@@ -324,9 +362,9 @@ VideoCodecEncoderContext::~VideoCodecEncoderContext()
 }
 
 
-void VideoCodecEncoderContext::create() //, const VideoCodec& paramsconst VideoCodec& params
+void VideoCodecEncoderContext::create()
 {
-	traceL() << "[VideoCodecEncoderContext:" << this << "] Creating: " 
+	traceL("VideoCodecEncoderContext", this) << "Creating: " 
 		<< "\n\tInput: " << iparams.toString() 
 		<< "\n\tOutput: " << oparams.toString() 
 		<< endl;
@@ -336,7 +374,7 @@ void VideoCodecEncoderContext::create() //, const VideoCodec& paramsconst VideoC
 	avcodec_register_all();
 
 	// Find the video encoder
-	codec = avcodec_find_encoder_by_name(oparams.encoder.data());
+	codec = avcodec_find_encoder_by_name(oparams.encoder.c_str());
 	if (!codec)
    		throw Exception("Video encoder not found.");
 
@@ -344,7 +382,7 @@ void VideoCodecEncoderContext::create() //, const VideoCodec& paramsconst VideoC
     if (!ctx)
         throw Exception("Cannot allocate encoder context.");	
 
-	InitVideoEncoderContext(ctx, codec, oparams);
+	initVideoEncoderContext(ctx, codec, oparams);
 		
 	// Allocate the conversion context
 	if (iparams.width != oparams.width ||
@@ -355,12 +393,12 @@ void VideoCodecEncoderContext::create() //, const VideoCodec& paramsconst VideoC
 	}
 
 	// Allocate the input frame
-	frame = CreateVideoFrame(ctx->pix_fmt, iparams.width, iparams.height);
+	frame = createVideoFrame(ctx->pix_fmt, iparams.width, iparams.height);
 	if (!frame)
 		throw Exception("Cannot allocate input frame.");
 	
 	// Allocate the encode buffer
-	// XXX: Disabling in favour of encoder manged buffer
+	// XXX: Disabling in favor of encoder manged buffer
     //bufferSize = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
     //buffer = (UInt8*)av_malloc(bufferSize);
 }
@@ -368,18 +406,18 @@ void VideoCodecEncoderContext::create() //, const VideoCodec& paramsconst VideoC
 
 void VideoCodecEncoderContext::close()
 {
-	traceL() << "[VideoCodecEncoderContext:" << this << "] Closing" << endl;
+	traceL("VideoCodecEncoderContext", this) << "Closing" << endl;
 
 	VideoContext::close();
 	
 	if (conv) {
 		delete conv;
-		conv = NULL;
+		conv = nil;
 	}
 
 	if (buffer) {
 		av_free(buffer);
-		buffer = NULL;
+		buffer = nil;
 	}
 }
 
@@ -398,7 +436,7 @@ bool VideoCodecEncoderContext::encode(unsigned char* data, int size, AVPacket& o
 
 bool VideoCodecEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 {	
-	assert(stream == NULL);
+	assert(stream == nil);
 	assert(ipacket.data);
 	assert(frame);
 	assert(conv);
@@ -417,13 +455,13 @@ bool VideoCodecEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 
 bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 {	
-	traceL() << "[VideoCodecEncoderContext:" << this << "] Encoding Video Packet" << endl;
+	traceL("VideoCodecEncoderContext", this) << "Encoding Video Packet" << endl;
 
 	AVFrame* oframe = conv ? conv->convert(iframe) : iframe;
 	oframe->pts = iframe->pts;
 
     av_init_packet(&opacket);	
-	opacket.data = NULL;
+	opacket.data = nil;
 	opacket.size = 0;
 	//opacket.data = this->buffer; // use our buffer, not ffmpeg assigned
 	//opacket.size = this->bufferSize;
@@ -431,7 +469,7 @@ bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 	int frameEncoded = 0;
 	if (avcodec_encode_video2(ctx, &opacket, oframe, &frameEncoded) < 0) {
 		error = "Fatal Encoder Error";
-		errorL() << "[VideoCodecEncoderContext:" << this << "] Fatal Encoder Error" << endl;
+		errorL("VideoCodecEncoderContext", this) << "Fatal Encoder Error" << endl;
 		throw Exception(error);
     }
 
@@ -439,27 +477,11 @@ bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 		fps.tick();
 		if (ctx->coded_frame->key_frame) 
 		    opacket.flags |= AV_PKT_FLAG_KEY;
-		// No stream pointer
-		//opacket.stream_index = stream->index;
-        //if (opacket.pts != AV_NOPTS_VALUE)
-        //    opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
-        //if (opacket.dts != AV_NOPTS_VALUE)
-        //    opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
 
 		/*	
-
-		traceL() << "[VideoCodecEncoderContext:" << this << "] Encoded PTS:\n" 
-			//<< "\n\tPTS: " << av_ts2str(opacket.pts)
-			//<< "\n\tDTS: " << av_ts2str(opacket.dts)
-			//<< "\n\tPTS Time: " << av_ts2timestr(opacket.pts, &stream->time_base)
-			//<< "\n\tDTS Time: " << av_ts2timestr(opacket.dts, &stream->time_base)
+		traceL("VideoCodecEncoderContext", this) << "Encoded PTS:\n" 
 			<< "\n\tPTS: " << opacket.pts
 			<< "\n\tDTS: " << opacket.dts
-			<< "\n\tFrame PTS: " << oframe->pts
-			//<< "\n\tCodec Time Den: " << ctx->time_base.den
-			//<< "\n\tCodec Time Num: " << ctx->time_base.num
-			//<< "\n\tStream Time Den: " << stream->time_base.den
-			//<< "\n\tStream Time Num: " << stream->time_base.num
 			<< endl; 
 		*/
     }
@@ -468,9 +490,11 @@ bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 }
 
 
-// ---------------------------------------------------------------------
+//
 // Video Decoder Context
 //
+
+
 VideoDecoderContext::VideoDecoderContext()
 {
 }
@@ -484,7 +508,7 @@ VideoDecoderContext::~VideoDecoderContext()
 
 void VideoDecoderContext::create(AVFormatContext *ic, int streamID)
 {	
-	traceL() << "[VideoDecoderContext:" << this << "] Creating: " << streamID << endl;
+	traceL("VideoDecoderContext", this) << "Creating: " << streamID << endl;
 	VideoContext::create();
 
 	assert(ic);
@@ -498,7 +522,7 @@ void VideoDecoderContext::create(AVFormatContext *ic, int streamID)
 		throw Exception("Video codec missing or unsupported.");
 	
 	this->frame = avcodec_alloc_frame();
-	if (this->frame == NULL)
+	if (this->frame == nil)
 		throw Exception("Could not allocate video input frame.");
 }
 
@@ -529,13 +553,13 @@ bool VideoDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 	int bytesRemaining = ipacket.size;
 	
 	av_init_packet(&opacket);
-	opacket.data = NULL;
+	opacket.data = nil;
 	opacket.size = 0;
 	
 	bytesDecoded = avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
 	if (bytesDecoded < 0) {
 		error = "Decoder error";
-		errorL() << "[VideoDecoderContext:" << this << "] " << error << endl;
+		errorL("VideoDecoderContext", this) << "" << error << endl;
 		throw Exception(error);
 	}
 
@@ -555,16 +579,16 @@ bool VideoDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 
 	/*
 	while (bytesRemaining) { // && !frameDecoded
-		//traceL() << "[VideoDecoderContext:" << this << "] Decoding: " << ipacket.pts << endl;
+		//traceL("VideoDecoderContext", this) << "Decoding: " << ipacket.pts << endl;
 		bytesRemaining -= bytesDecoded;
 	}
 	*/
 
 	if (frameDecoded) {	
 		fps.tick();
-		InitDecodedVideoPacket(stream, ctx, frame, &opacket, &pts);
+		initDecodedVideoPacket(stream, ctx, frame, &opacket, &pts);
 		/*
-		traceL() << "[VideoDecoderContext:" << this << "] Decoded Frame:" 		
+		traceL("VideoDecoderContext", this) << "Decoded Frame:" 		
 			<< "\n\tPTS: " << pts	
 			<< "\n\tPacket Size: " << opacket.size
 			<< "\n\tPacket PTS: " << opacket.pts
@@ -585,30 +609,32 @@ bool VideoDecoderContext::flush(AVPacket& opacket)
 {	
 	AVPacket ipacket;
 	av_init_packet(&ipacket);
-	ipacket.data = NULL;
+	ipacket.data = nil;
 	ipacket.size = 0;
 
 	av_init_packet(&opacket);
-	opacket.data = NULL;
+	opacket.data = nil;
 	opacket.size = 0;
 	
 	int frameDecoded = 0;
 	avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
 	if (frameDecoded) {
-		InitDecodedVideoPacket(stream, ctx, frame, &opacket, &pts);
-		traceL() << "[VideoDecoderContext:" << this << "] Flushed Video Frame: " << opacket.pts << endl;
+		initDecodedVideoPacket(stream, ctx, frame, &opacket, &pts);
+		traceL("VideoDecoderContext", this) << "Flushed Video Frame: " << opacket.pts << endl;
 		return true;
 	}
 	return false;
 }
 
 
-// ---------------------------------------------------------------------
+//
 // Video Conversion Context
 //
+
+
 VideoConversionContext::VideoConversionContext() :
-	oframe(nullptr),
-	ctx(nullptr)
+	oframe(nil),
+	ctx(nil)
 {
 }
 	
@@ -643,7 +669,7 @@ void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec&
 	ctx = sws_getContext(
 		iparams.width, iparams.height, av_get_pix_fmt(iparams.pixelFmt),
         oparams.width, oparams.height, av_get_pix_fmt(oparams.pixelFmt), 
-		/* SWS_FAST_BILINEAR */SWS_BICUBIC, NULL, NULL, NULL);
+		/* SWS_FAST_BILINEAR */SWS_BICUBIC, nil, nil, nil);
     if (!ctx) 
         throw Exception("Invalid conversion context.");
 
@@ -660,12 +686,12 @@ void VideoConversionContext::free()
 
 	if (oframe) {
 		av_free(oframe);
-		oframe = NULL;
+		oframe = nil;
 	}
 	
 	if (ctx) {
 		sws_freeContext(ctx);
-		ctx = NULL;
+		ctx = nil;
 	}
 
 	traceL("VideoConversionContext", this) << "Closing: OK" << endl;
@@ -689,20 +715,22 @@ AVFrame* VideoConversionContext::convert(AVFrame* iframe)
 }
 
 
-// ---------------------------------------------------------------------
-// Inlines & Helpers
-//		
-AVFrame* CreateVideoFrame(::PixelFormat pixelFmt, int width, int height)
+//
+// Helper functions
+//	
+
+
+AVFrame* createVideoFrame(::PixelFormat pixelFmt, int width, int height)
 {
     AVFrame* picture = avcodec_alloc_frame();
     if (!picture)
-        return NULL;
+        return nil;
 	
     int size = avpicture_get_size(pixelFmt, width, height);
     UInt8* buffer = (UInt8*)av_malloc(size);
     if (!buffer) {
         av_free(picture);
-        return NULL;
+        return nil;
 	}
 		
 	avpicture_fill(reinterpret_cast<AVPicture*>(picture), buffer, pixelFmt, width, height);
@@ -711,7 +739,7 @@ AVFrame* CreateVideoFrame(::PixelFormat pixelFmt, int width, int height)
 }
 
 
-void InitVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& oparams) 
+void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& oparams) 
 {
 	assert(oparams.enabled);	
 
@@ -719,23 +747,20 @@ void InitVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
 	ctx->codec_id = codec->id;
 	ctx->codec_type = AVMEDIA_TYPE_VIDEO;
 	ctx->pix_fmt = av_get_pix_fmt(oparams.pixelFmt);
+	ctx->frame_number = 0;
 	
 	// Resolution must be a multiple of two
 	ctx->width = oparams.width;
 	ctx->height = oparams.height;
+
+	// For fixed-fps content timebase should be 1/framerate
+	// and timestamp increments should be identically 1.
+	ctx->time_base.den = (int)oparams.fps;
+	ctx->time_base.num = 1;
 	
 	// Define encoding parameters
 	ctx->bit_rate = oparams.bitRate;
-	//ctx->bit_rate_tolerance = oparams.bitRate * 100;
-
-	ctx->frame_number = 0;
-
-	// Time base: this is the fundamental unit of time (in seconds) in terms
-	// of which frame timestamps are represented. For fixed-fps content,
-	// timebase should be 1/framerate and timestamp increments should be
-	// identically 1.
-	ctx->time_base.den = (int)oparams.fps;
-	ctx->time_base.num = 1; //000; //; //
+	ctx->bit_rate_tolerance = oparams.bitRate * 1000; // needed when time_base.num > 1
 
 	// Emit one intra frame every twelve frames at most
 	ctx->gop_size = 12; // oparams.fps;
@@ -755,8 +780,8 @@ void InitVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
 		
 		// Use high quality JPEG
 		// TODO: Use oparams.quality to determine values		
-		ctx->mb_lmin			= ctx->lmin = ctx->qmin * FF_QP2LAMBDA; 
-		ctx->mb_lmax			= ctx->lmax = ctx->qmax * FF_QP2LAMBDA; 
+		ctx->mb_lmin		= ctx->lmin = ctx->qmin * FF_QP2LAMBDA; 
+		ctx->mb_lmax		= ctx->lmax = ctx->qmax * FF_QP2LAMBDA; 
 		ctx->flags          = CODEC_FLAG_QSCALE; 
 		ctx->global_quality = ctx->qmin * FF_QP2LAMBDA; 
 		break;
@@ -787,7 +812,7 @@ void InitVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
 }
     
 
-void InitDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts)
+void initDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts)
 {		
 	opacket->data = frame->data[0];
 	opacket->size = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
@@ -813,70 +838,22 @@ void InitDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, c
 		<< "\n\tPacket DTS: " << opacket->dts
 		<< "\n\tPacket PTS: " << opacket->pts
 		<< endl;
-
-	// ffplay.c
-	if (decoder_reorder_pts == -1) {
-        *pts = av_frame_get_best_effort_timestamp(frame);
-    } else if (decoder_reorder_pts) {
-        *pts = frame->pkt_pts;
-    } else {
-        *pts = frame->pkt_dts;
-    }
-
-    if (*pts == AV_NOPTS_VALUE) {
-        *pts = 0;
-    }
 	*/
 }
 
 
-// http://code.mythtv.org/cgit/mythtv/tree/mythtv/libs/libmythtv/avformatwriter.cpp
-AVRational GetCodecTimeBase(AVCodec* codec, double fps)
+void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
 {
-    AVRational result;
-
-    result.den = (int)floor(fps * 100);
-    result.num = 100;
-
-    if (codec && codec->supported_framerates) {
-        const AVRational *p= codec->supported_framerates;
-        AVRational req;
-		req.den = result.den;
-		req.num = result.num;// =
-            //(AVRational){result.den, result.num};
-        const AVRational *best = NULL;
-        //AVRational best_error= (AVRational){INT_MAX, 1};
-        AVRational best_error; //= (AVRational){INT_MAX, 1};
-		best_error.den = INT_MAX;
-		best_error.num = 1;
-        for(; p->den!=0; p++) {
-            AVRational error = av_sub_q(req, *p);
-            if (error.num <0)
-                error.num *= -1;
-            if (av_cmp_q(error, best_error) < 0) {
-                best_error = error;
-                best = p;
-            }
-        }
-
-        if (best && best->num && best->den) {
-            result.den = best->num;
-            result.num = best->den;
-        }
-    }
-
-    if (result.den == 2997) {
-         result.den = 30000;
-         result.num = 1001;
-    }
-    else if (result.den == 5994) {
-         result.den = 60000;
-         result.num = 1001;
-    }
-
-    return result;
+	params.encoder = avcodec_get_name(ctx->codec_id);
+	params.pixelFmt = av_get_pix_fmt_name(ctx->pix_fmt);
+	params.width = ctx->width;
+	params.height = ctx->height;
+	params.sampleRate = ctx->sample_rate;
+	params.bitRate = ctx->bit_rate;
+	params.fps = 
+		ctx->time_base.den / 
+		ctx->time_base.num;
 }
-
 
 	
 } } // namespace scy::av
@@ -889,10 +866,10 @@ AVRational GetCodecTimeBase(AVCodec* codec, double fps)
 	if (maxFPS && ipacket.dts != AV_NOPTS_VALUE) {
 		double fps = ctx->frame_number / (ipacket.dts * av_q2d(stream->time_base));
 		if (fps > maxFPS) {
-			traceL() << "[VideoDecoderContext:" << this << "] Skipping video frame at fps: " << fps << endl;
+			traceL("VideoDecoderContext", this) << "Skipping video frame at fps: " << fps << endl;
 			return false;
 		}
-		traceL() << "[VideoDecoderContext:" << this << "] Decoding at fps: " << fps << ": " << ctx->frame_number << endl;
+		traceL("VideoDecoderContext", this) << "Decoding at fps: " << fps << ": " << ctx->frame_number << endl;
 	}
 	*/
 
@@ -971,7 +948,7 @@ AVRational GetCodecTimeBase(AVCodec* codec, double fps)
         av_opt_set(ctx->priv_data, "preset", "veryfast", 0); // slow // baseline
 
 	// Open the video codec
-	if (avcodec_open2(ctx, codec, NULL) < 0)
+	if (avcodec_open2(ctx, codec, nil) < 0)
    		throw Exception("Cannot open the video codec.");
 	*/
 	
@@ -1026,7 +1003,7 @@ AVRational GetCodecTimeBase(AVCodec* codec, double fps)
 		//frame->format = ctx->pix_fmt;
 		
 			/*
-		traceL() << "[VideoDecoderContext:" << this << "] Decoded Frame:" 			
+		traceL("VideoDecoderContext", this) << "Decoded Frame:" 			
 			<< "\n\tFrame Size: " << opacket.size
 			<< "\n\tFrame PTS: " << opacket.pts
 			<< "\n\tDecoder PTS: " << pts
@@ -1059,12 +1036,12 @@ void VideoEncoderContext::reset()
 	//	sws_freeContext(convCtx);
     //if (buffer)
     //    av_free(buffer);
-	//packet = NULL;
-	//convCtx = NULL;
-	//oframe = NULL;
+	//packet = nil;
+	//convCtx = nil;
+	//oframe = nil;
 		
 	//bufferSize = 0;
-	//buffer = NULL;
+	//buffer = nil;
 
 	// Allocate the output frame
 	//oframe = createVideoFrame(ctx->pix_fmt, ctx->width, ctx->height);
@@ -1075,11 +1052,11 @@ void VideoEncoderContext::reset()
 	/*
 	// Initialize scale conversion context if uninitialized or if the
 	// video input size has changed.
-	if (convCtx == NULL) {
+	if (convCtx == nil) {
 		convCtx = sws_getContext(
 			iparams.width, iparams.height, (::PixelFormat)iparams.pixelFmt, 
 			ctx->width, ctx->height, ctx->pix_fmt,
-			SWS_BICUBIC, NULL, NULL, NULL);
+			SWS_BICUBIC, nil, nil, nil);
 
 		traceL("VideoEncoderContext", this) << "Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << iparams.width
@@ -1144,9 +1121,9 @@ void VideoEncoderContext::reset()
 /*
 void VideoContext::reset()
 {
-	stream = NULL;
-	codec = NULL;
-	frame = NULL;
+	stream = nil;
+	codec = nil;
+	frame = nil;
 
 	pts = 0.0;
 
@@ -1183,16 +1160,16 @@ void VideoContext::reset()
 			*/
 
 		/*
-		traceL() << "[VideoDecoderContext:" << this << "] bytesTotal: " << ipacket.size << endl;
-		traceL() << "[VideoDecoderContext:" << this << "] frameDecoded: " << opacket.size << endl;
-		traceL() << "[VideoDecoderContext:" << this << "] bytesRemaining: " << bytesRemaining << endl;
-		traceL() << "[VideoDecoderContext:" << this << "] bytesDecoded: " << bytesDecoded << endl;
+		traceL("VideoDecoderContext", this) << "bytesTotal: " << ipacket.size << endl;
+		traceL("VideoDecoderContext", this) << "frameDecoded: " << opacket.size << endl;
+		traceL("VideoDecoderContext", this) << "bytesRemaining: " << bytesRemaining << endl;
+		traceL("VideoDecoderContext", this) << "bytesDecoded: " << bytesDecoded << endl;
 		*/
 
 	/*		
 	// If frameDecoded == 0, then no frame was produced.
 	if (frameDecoded == 0) {
-		warnL() << "[VideoDecoderContext:" << this << "] Decoding Video: No frame was decoded." << endl;
+		warnL("VideoDecoderContext", this) << "Decoding video: No frame was decoded." << endl;
 		return 0;
 	}
 	
@@ -1203,11 +1180,11 @@ void VideoContext::reset()
 	/*
 	// Initialize scale conversion context if uninitialized or if the
 	// video input size has changed.
-	if (convCtx == NULL) {
+	if (convCtx == nil) {
 		convCtx = sws_getContext(
 			iparams.width, iparams.height, (::PixelFormat)iparams.pixelFmt, 
 			ctx->width, ctx->height, ctx->pix_fmt,
-			SWS_BICUBIC, NULL, NULL, NULL);
+			SWS_BICUBIC, nil, nil, nil);
 
 		traceL("VideoEncoderContext", this) << "Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << iparams.width
@@ -1272,7 +1249,7 @@ void VideoContext::reset()
 02033                 pkt.dts = av_rescale_q(pkt.dts, enc->time_base, ost->st->time_base);
 02034 
 02035             if (debug_ts) {
-02036                 av_log(NULL, AV_LOG_INFO, "encoder -> type:video "
+02036                 av_log(nil, AV_LOG_INFO, "encoder -> type:video "
 02037                     "pkt_pts:%s pkt_pts_time:%s pkt_dts:%s pkt_dts_time:%s\n",
 02038                     av_ts2str(pkt.pts), av_ts2timestr(pkt.pts, &ost->st->time_base),
 02039                     av_ts2str(pkt.dts), av_ts2timestr(pkt.dts, &ost->st->time_base));
@@ -1364,11 +1341,11 @@ double VideoContext::pts()
 	/*
 	// Initialize scale conversion context if uninitialized or if the
 	// video input size has changed.
-	if (convCtx == NULL) {
+	if (convCtx == nil) {
 		convCtx = sws_getContext(
 			width, height, (::PixelFormat)iparams.pixelFmt, //static_cast<::PixelFormat>()
 			ctx->width, ctx->height, ctx->pix_fmt,
-			SWS_BICUBIC, NULL, NULL, NULL);
+			SWS_BICUBIC, nil, nil, nil);
 
 		traceL() << "[AVEncoder" << this << "] Initializing Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << width
@@ -1421,7 +1398,7 @@ double VideoContext::pts()
 	int len = avcodec_encode_video2(ctx, this->buffer, this->bufferSize, (short*)buffer);
     if (len < 0) {
 		error = "Encoder error";
-		errorL("VideoEncoderContext", this) << "Decoding Video: Error: " << error << endl;
+		errorL("VideoEncoderContext", this) << "Decoding video: Error: " << error << endl;
 		return -1;
     }
 
@@ -1441,7 +1418,7 @@ double VideoContext::pts()
 	*/
 
 	//this->oframe = avcodec_alloc_frame();	
-	//if (this->oframe == NULL)
+	//if (this->oframe == nil)
 	//	throw Exception("Could not allocate the output frame");
 	
     //this->packet = (AVPacket*)av_mallocz(sizeof(AVPacket));
@@ -1455,7 +1432,7 @@ double VideoContext::pts()
     codec = stream->codec;
 
     AVCodec* c = avcodec_find_decoder (ctx->codec_id);
-    if (c == NULL)
+    if (c == nil)
 		throw Exception("The video codec is missing or unsupported");
 
     if (avcodec_open(ctx, c) < 0)
@@ -1490,23 +1467,23 @@ double VideoContext::pts()
     //return codec;
 	*/
 
-	//traceL() << "[VideoDecoderContext:" << this << "] Decoder Size: " << frameDecoded << endl;
-	//traceL() << "[VideoDecoderContext:" << this << "] Decoder DTS: " << packet.dts << endl;
-	//traceL() << "[VideoDecoderContext:" << this << "] Decoder Time Base: " << stream->time_base.den << endl;
+	//traceL("VideoDecoderContext", this) << "Decoder Size: " << frameDecoded << endl;
+	//traceL("VideoDecoderContext", this) << "Decoder DTS: " << packet.dts << endl;
+	//traceL("VideoDecoderContext", this) << "Decoder Time Base: " << stream->time_base.den << endl;
 
 
 	
-	//traceL() << "[VideoDecoderContext:" << this << "] Decoder PTS: " << packet.pts << endl;
-	//traceL() << "[VideoDecoderContext:" << this << "] Decoder PTS 1: " << pts << endl;
+	//traceL("VideoDecoderContext", this) << "Decoder PTS: " << packet.pts << endl;
+	//traceL("VideoDecoderContext", this) << "Decoder PTS 1: " << pts << endl;
 
 	/*
 	// Initialize scale conversion context if uninitialized or if the
 	// video input size has changed.
-	if (convCtx == NULL) {
+	if (convCtx == nil) {
 		convCtx = sws_getContext(
 			width, height, (::PixelFormat)iparams.pixelFmt, //static_cast<::PixelFormat>()
 			ctx->width, ctx->height, ctx->pix_fmt,
-			SWS_BICUBIC, NULL, NULL, NULL);
+			SWS_BICUBIC, nil, nil, nil);
 
 		traceL() << "[AVEncoder" << this << "] Initializing Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << width
@@ -1524,12 +1501,12 @@ double VideoContext::pts()
 		throw Exception("Pixel format conversion not supported");
 
 	// Convert the image from its native format to BGR.
-	if (convCtx == NULL)
+	if (convCtx == nil)
 		convCtx = sws_getContext(
 			ctx->width, ctx->height, ctx->pix_fmt, 
 			ctx->width, ctx->height, PIX_FMT_BGR24, 
-			SWS_BICUBIC, NULL, NULL, NULL);
-	if (convCtx == NULL)
+			SWS_BICUBIC, nil, nil, nil);
+	if (convCtx == nil)
 		throw Exception("Cannot initialize the video conversion context");	
 			
 	// Scales the data in src according to our settings in our SwsContext.

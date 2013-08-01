@@ -80,7 +80,7 @@ public:
 		void uninitialize();
 
 		void fft();
-			/// Preforms FFT on internal rdftData
+			// Preforms FFT on internal rdftData
 	};
 
 	struct Packet 
@@ -97,23 +97,23 @@ public:
 	virtual ~VideoAnalyzer();
 				
 	virtual void initialize();
-		/// Set everything up, and open the input file.
+		// Set everything up, and open the input file.
 
 	virtual void uninitialize();
-		/// Stop processing and free everything.
+		// Stop processing and free everything.
 
 	virtual void start();
-		/// Begin processing.
+		// Begin processing.
 
 	virtual void stop();
-		/// Stop processing.
+		// Stop processing.
 	
 	Signal2<const VideoAnalyzer::Stream&, const VideoAnalyzer::Packet&> PacketOut;
-		/// Signals on VideoAnalyzer::Packet output
-		/// Raw FFT data is available via VideoAnalyzer::Stream->rdftData
+		// Signals on VideoAnalyzer::Packet output
+		// Raw FFT data is available via VideoAnalyzer::Stream->rdftData
 
 	NullSignal Complete;
-		/// Signals on analysis complete
+		// Signals on analysis complete
 		
 	virtual AVInputReader& reader();
 	virtual Options& options();

@@ -42,28 +42,28 @@ public:
     ~URL();
 
 	URL& operator = (const URL& uri);
-		/// Assignment operator.
+		// Assignment operator.
 
 	URL& operator = (const std::string& uri);
-		/// Parses and assigns an URI from the given string.
-		/// Throws a SyntaxException if the uri is not valid.
+		// Parses and assigns an URI from the given string.
+		// Throws a SyntaxException if the uri is not valid.
 
 	URL& operator = (const char* uri);
-		/// Parses and assigns an URI from the given string.
-		/// Throws a SyntaxException if the uri is not valid.
+		// Parses and assigns an URI from the given string.
+		// Throws a SyntaxException if the uri is not valid.
 
     bool parse(const std::string& url, bool whiny = true);
-		/// Parses and assigns an URI from the given string.
-		/// Throws a SyntaxException if whiny is set and the
-		/// given url is invalid.
+		// Parses and assigns an URI from the given string.
+		// Throws a SyntaxException if whiny is set and the
+		// given url is invalid.
 
 	static std::string URL::encode(const std::string &str);
-		/// RFC 3986 based URL encoding based on JavaScript's 
-		/// encodeURIComponent()
+		// RFC 3986 based URL encoding based on JavaScript's 
+		// encodeURIComponent()
 
 	static std::string URL::decode(const std::string& str);
-		/// RFC 3986 based URL decoding based on JavaScript's 
-		/// decodeURIComponent()
+		// RFC 3986 based URL decoding based on JavaScript's 
+		// decodeURIComponent()
 
 public:
     std::string scheme() const;

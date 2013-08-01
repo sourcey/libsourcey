@@ -1,46 +1,3 @@
-/*
-#include "Sourcey/Logger.h"
-#include "Sourcey/Application.h"
-#include "Sourcey/PacketStream.h"
-#include "Sourcey/SyncPacketStream.h"
-#include "Sourcey/Crypto.h"
-#include "Sourcey/Util.h"
-
-#include "Sourcey/HTTP/Server.h"
-#include "Sourcey/HTTP/WebSocket.h"
-
-#include "Sourcey/Media/MediaFactory.h"
-#include "Sourcey/Media/AVEncoder.h"
-#include "Sourcey/Media/AVInputReader.h"
-#include "Sourcey/Media/FLVMetadataInjector.h"
-#include "Sourcey/Media/FormatRegistry.h"
-
-#include "Sourcey/HTTP/Util.h"
-#include "Sourcey/HTTP/Packetizers.h"
-#include "Sourcey/Util/Base64PacketEncoder.h"
-
-#include "Sourcey/Containers.h"
-
-#include <string>
-#include <vector>
-#include <assert.h>
-#include <conio.h>
-
-// Detect Win32 memory Leaks - leak free!
-#ifdef _DEBUG
-#include "MemLeakDetect/MemLeakDetect.h"
-#include "MemLeakDetect/MemLeakDetect.cpp"
-CMemLeakDetect memLeakDetect;
-#endif
-	
-
-using namespace std;
-using namespace scy;
-using namespace scy::av;
-	//Application app; //runner, 
-
-*/
-
 #include "MediaServer.h"
 
 #include "Sourcey/Util/StreamManager.h"
@@ -50,9 +7,11 @@ using namespace scy::av;
 namespace scy { 
 
 
-// ----------------------------------------------------------------------------
-// Releayed Streaming Client Allocation
 //
+// Relayed Streaming Client Allocation
+//
+
+
 class RelayedStreamingAllocation: public turn::TCPClientObserver
 {
 public:
@@ -84,20 +43,16 @@ public:
 	void initiate() 
 	{
 		debugL("RelayedStreamingAllocation", this) << "Initiating" << std::endl;		
-		//terminate();
 		try	
 		{		
 			// Initiate the TRUN client allocation
-			debugL("RelayedStreamingAllocation", this) << "Adding Persission" << std::endl;		
 			client.addPermission(peerIP);	
-			debugL("RelayedStreamingAllocation", this) << "Initiating Client" << std::endl;		
 			client.initiate();
 		} 
 		catch (Exception& exc) {
 			errorL("RelayedStreamingAllocation", this) << "Error: " << exc.message() << std::endl;
 			assert(0);
-		}
-		debugL("RelayedStreamingAllocation", this) << "Initiating: OK" << std::endl;	
+		}	
 	}
 
 	void terminate() 
@@ -112,7 +67,7 @@ public:
 protected:
 	void onClientStateChange(turn::Client& client, turn::ClientState& state, const turn::ClientState&) 
 	{
-		debugL("RelayedStreamingAllocation", this) << "Relay State Changed: " << state.toString() << std::endl;
+		debugL("RelayedStreamingAllocation", this) << "Relay state changed: " << state.toString() << std::endl;
 
 		switch(state.id()) {
 		case turn::ClientState::Waiting:				
@@ -134,7 +89,7 @@ protected:
 	
 	void onRelayConnectionCreated(turn::TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddr) //UInt32 connectionID, 
 	{
-		debugL("RelayedStreamingAllocation", this) << "################# Connection created: " << peerAddr << std::endl;
+		debugL("RelayedStreamingAllocation", this) << "Connection created: " << peerAddr << std::endl;
 		
 		// Just allow one stream for now
 		if (this->streams.size() == 1) {
@@ -148,7 +103,7 @@ protected:
 			ConnectionCreated.emit(this, client, peerAddr);
 
 			// Create an output media stream for the new connection
-			SyncPacketStream* stream = new SyncPacketStream(peerAddr.toString());
+			PacketStream* stream = new PacketStream(peerAddr.toString());
 			
 			// Setup the packet stream ensuring the audio capture isn't
 			// destroyed with the stream, as it may be reused while the
@@ -156,8 +111,8 @@ protected:
 			MediaServer::setupPacketStream(*stream, options, false, true);
 		
 			// Feed the packet stream directly into the connection		
-			stream->attach(packetDelegate(reinterpret_cast<net::Socket*>(
-				const_cast<net::TCPSocket*>(&socket)), &net::Socket::send));
+			stream->Emitter += packetDelegate(reinterpret_cast<net::Socket*>(
+				const_cast<net::TCPSocket*>(&socket)), &net::Socket::send);
 
 			// Start the stream
 			stream->start();	
@@ -165,16 +120,14 @@ protected:
 			this->streams.addStream(stream);
 		} 
 		catch (Exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "Stream Error: " << exc.message() << std::endl;
+			errorL("RelayedStreamingAllocation", this) << "Stream error: " << exc.message() << std::endl;
 			assert(0);
 		}
-
-		debugL("RelayedStreamingAllocation", this) << "Connection Created: OK: " << peerAddr << std::endl;
 	}
 		
 	void onRelayConnectionClosed(turn::TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddress)
 	{
-		debugL("RelayedStreamingAllocation", this) << "!!!!!!!!!!!!!!!!!!!!!!!! Connection Closed: " << peerAddress << std::endl;
+		debugL("RelayedStreamingAllocation", this) << " Connection closed: " << peerAddress << std::endl;
 
 		try	
 		{	
@@ -182,14 +135,14 @@ protected:
 			//this->streams.free(peerAddress.toString());
 			PacketStream* stream = streams.remove(peerAddress.toString());
 			if (stream) {	
-				stream->detach(packetDelegate(reinterpret_cast<net::Socket*>(
-					const_cast<net::TCPSocket*>(&socket)), &net::Socket::send));
-				//delete stream;
-				stream->destroy();
+				stream->Emitter += packetDelegate(reinterpret_cast<net::Socket*>(
+					const_cast<net::TCPSocket*>(&socket)), &net::Socket::send);
+				delete stream;
+				//stream->destroy();
 			}
 		} 
 		catch (Exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "Stream Error: " << exc.message() << std::endl;
+			errorL("RelayedStreamingAllocation", this) << "Stream error: " << exc.message() << std::endl;
 			assert(0);
 		}
 	}
@@ -198,25 +151,27 @@ protected:
 	{
 		debugL("RelayedStreamingAllocation", this) << "Received data from peer: " << std::string(data, size) <<  ": " << peerAddr << std::endl;
 	
-		// If the remore peer is a web browser then the HTTP request sent 
+		// If the remove peer is a web browser then the HTTP request sent 
 		// to the relayed address will be the first thing we see here...
 	}
 
 	void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
 	{
-		debugL("RelayedStreamingAllocation", this) << "Permissions Created" << std::endl;
+		debugL("RelayedStreamingAllocation", this) << "Permissions created" << std::endl;
 	}
 };
 
 
-// ----------------------------------------------------------------------------
-// Releayed Streaming Connection Handler
 //
+// Relayed Streaming Connection Handler
+//
+
+
 class RelayedStreamingResponder: public http::ServerResponder
 {
 public:
 	RelayedStreamingResponder(http::ServerConnection& connection, const StreamingOptions& options) : 		
-		http::ServerResponder(connection), options(options), allocation(NULL)//, allocation(allocation)//, response(response)
+		http::ServerResponder(connection), options(options), allocation(nil)
 	{		
 	}
 
@@ -253,8 +208,8 @@ public:
 					
 		// Send the relay address response to the initiator		
 		connection().response().set("Access-Control-Allow-Origin", "*");
-		connection().response().body << allocation->client.relayedAddress();
-		connection().send();
+		connection().send(allocation->client.relayedAddress().toString());
+		connection().close();
 	}
 	
 	RelayedStreamingAllocation* allocation;
@@ -295,7 +250,7 @@ public:
 class RelayedMediaStream 
 {
 public:
-	SyncPacketStream    stream;
+	PacketStream    stream;
 };
 */
 
@@ -318,7 +273,7 @@ public:
 		//debugL("RelayedStreamingAllocation", this) << "Setup Packet Stream: OK" << std::endl;	
 
 		// Start the stream
-		stream += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
+		stream.Emitter += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
 		stream.start();		
 
 		debugL("RelayedStreamingAllocation", this) << "Play Media: OK" << std::endl;
@@ -327,7 +282,7 @@ public:
 	void stopMedia()
 	{
 		debugL("RelayedStreamingAllocation", this) << "Stop Media" << std::endl;
-		stream -= packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
+		stream.Emitter -= packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
 		stream.close();	
 		debugL("RelayedStreamingAllocation", this) << "Stop Media: OK" << std::endl;
 	}
@@ -347,7 +302,7 @@ public:
 			//client.sendData(oss.str().data(), oss.str().length(), currentPeerAddr);
 		}
 		catch (Exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "^^^^^^^^^^^^^^^^^^^^^^^^ Send Error: " << exc.message() << std::endl;
+			errorL("RelayedStreamingAllocation", this) << "^^^^^^^^^^^^^^^^^^^^^^^^ Send error: " << exc.message() << std::endl;
 			
 			// TODO: Calling stream.stop() inside stream callback causing deadlock
 			terminate();
@@ -358,11 +313,11 @@ public:
 
 	
 		/*
-		//stream += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
+		//stream.Emitter += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
 		// Start the stream
-		stream += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
+		stream.Emitter += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
 		stream.start();		
-		stream -= packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
+		stream.Emitter -= packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
 		stream.close();	
 
 		//currentPeerAddr = peerAddr; // Current peer

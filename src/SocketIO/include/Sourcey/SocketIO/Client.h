@@ -273,7 +273,7 @@ typedef sockio::ClientBase<
 //public:
 //	ClientBase(Net::Reactor& reactor) :
 //		WebSocketBaseT(reactor),
-//		_timer(nullptr)
+//		_timer(null)
 //	{
 //	}
 //
@@ -281,7 +281,7 @@ typedef sockio::ClientBase<
 //	ClientBase(const net::Address& serverAddr) :
 //		WebSocketBaseT(reactor),
 //		_serverAddr(serverAddr),
-//		_timer(nullptr)
+//		_timer(null)
 //	{
 //	}
 //
@@ -298,7 +298,7 @@ typedef sockio::ClientBase<
 //	virtual void connect(const net::Address& serverAddr)
 //	{	
 //		{
-//			//Mutex::ScopedLock lock(_mutex);
+//			//ScopedLock lock(_mutex);
 //			_serverAddr = serverAddr;
 //		}
 //		/*SocketBase::*/connect();
@@ -309,7 +309,7 @@ typedef sockio::ClientBase<
 //	{
 //		Log("trace", this) << "SocketIO Connecting" << endl;
 //
-//		//Mutex::ScopedLock lock(_mutex);
+//		//ScopedLock lock(_mutex);
 //
 //		assert(_serverAddr.valid());
 //
@@ -407,7 +407,7 @@ typedef sockio::ClientBase<
 //
 //	virtual int sendConnect(const std::string& endpoint, const std::string& query)
 //	{
-//		//Mutex::ScopedLock lock(_mutex);
+//		//ScopedLock lock(_mutex);
 //		// (1) Connect
 //		// Only used for multiple sockets. Signals a connection to the endpoint. Once the server receives it, it's echoed back to the client.
 //		// 
@@ -422,7 +422,7 @@ typedef sockio::ClientBase<
 //			out += "/" + endpoint;
 //		if (!query.empty())
 //			out += "?" + query;
-//		return _socket->send(out.data(), out.size());
+//		return _socket->send(out.c_str(), out.size());
 //	}
 //
 //
@@ -490,7 +490,7 @@ typedef sockio::ClientBase<
 //
 //	virtual std::string sessionID() const 
 //	{
-//		//Mutex::ScopedLock lock(_mutex);
+//		//ScopedLock lock(_mutex);
 //		return _sessionID;
 //	}
 //	
@@ -560,14 +560,14 @@ typedef sockio::ClientBase<
 	KVCollection _httpHeaders;
 	virtual KVCollection& httpHeaders()
 	{
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		return _httpHeaders;
 	}
 
 
 	virtual http::WebSocket* socket()
 	{
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		return _socket;
 	}
 	*/
@@ -580,7 +580,7 @@ typedef sockio::ClientBase<
 	/*
 	void setSecure(bool flag)
 	{
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 		_secure = flag;
 	}
 	*/

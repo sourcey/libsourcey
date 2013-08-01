@@ -274,14 +274,14 @@ private:
 
 
 	/*
-		//Mutex::ScopedLock lock(_mutex);
+		//ScopedLock lock(_mutex);
 	//net::SocketBase* _socket;
 	virtual void onResponse()
 	{
 		debugL("NetTransaction", this) << "Complete" << std::endl;
 		{
 			// Nullify the socket on completion.
-			//Mutex::ScopedLock lock(_mutex);
+			//ScopedLock lock(_mutex);
 			//if (_socket) {
 				//_socket.detach(packetDelegate(this, &Transaction::onPotentialResponse));
 				//_socket = NULL;
