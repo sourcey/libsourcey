@@ -47,36 +47,36 @@ CompoundPacket::CompoundPacket()
 
 CompoundPacket::~CompoundPacket() 
 {
-	util::ClearVector(_packets);
+	util::clearVector(_packets);
 }
 
 
 bool CompoundPacket::read(Buffer& buffer) 
 {
-	if (buffer.size() < 4) {
+	if (buffer.available() < 4) {
 		errorL() << "RTCP: Received empty packet." << endl;
 		return false;
 	}
-
-
+	
 	// For all RTCP packets in the UDP packet
 	// TODO: Specify error sources so we don't get stuck in infinite loop.
 	int errorCount = 0;
 	int maxErrors = 6;
-	while (!buffer.eof()) {
+	while (buffer.available() > 0) {
 
 		//UInt8* data = reinterpret_cast<UInt8*>(buffer.data());	
 		int startPos = buffer.position();
-		buffer++;
+		buffer.consume(1);
+		//buffer++;
 		UInt8 type;
 		UInt16 length;
-		buffer.readU8(type);
-		buffer.readU16(length);
+		buffer.getU8(type);
+		buffer.getU16(length);
 		buffer.position(startPos);
 		
 		debugL() << "RTCP: Parsing packet with type " 
 			<< (int)type << " and length: " << (int)length << ". " 
-			<< "Remaining in buffer " << buffer.remaining() << "."
+			<< "Remaining in buffer " << buffer.available() << "."
 			<< endl;
 
 		Packet* packet = NULL;

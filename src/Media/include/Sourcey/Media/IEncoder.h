@@ -97,7 +97,7 @@ struct RecordingOptions: public EncoderOptions
 };
 
 
-class IEncoder: public StatefulSignal<EncoderState>
+class IEncoder: public Stateful<EncoderState>
 	/// This is the abstract class for all instantiations
 	/// of the IEncoder template.
 {
@@ -123,6 +123,9 @@ public:
 	virtual bool isError() const	{ return stateEquals(EncoderState::Error); };
 };
 
+
+typedef IEncoder IPacketEncoder;
+	/// 0.8.x compatibility
 
 /*
 class IPacketEncoder: public IEncoder, public PacketProcessor

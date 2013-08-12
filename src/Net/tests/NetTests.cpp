@@ -284,7 +284,7 @@ int main(int argc, char** argv)
 	{
 		net::Tests run;
 	}
-	Logger::uninitialize();
+	Logger::shutdown();
 	return 0;
 }
 

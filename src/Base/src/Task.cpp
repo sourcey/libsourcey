@@ -20,7 +20,7 @@
 #include "Sourcey/Task.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Application.h"
-#include "Sourcey/Crypto.h"
+#include "Sourcey/Util.h"
 
 #include <assert.h>
 
@@ -33,7 +33,7 @@ namespace scy {
 
 /*
 Task::Task(bool repeating) : 
-	_id(static_cast<UInt32>(crypto::randomNumber(8))),
+	_id(static_cast<UInt32>(util::randomNumber(8))),
 	_repeating(repeating),
 	_destroyed(false),
 	_cancelled(true)//,
@@ -44,10 +44,10 @@ Task::Task(bool repeating) :
 
 	
 Task::Task() : //Runner& runner, , bool autoStartbool repeating
-	_id(static_cast<UInt32>(crypto::randomNumber(8))),
+	_id(static_cast<UInt32>(util::randomNumber(8))),
 	//_repeating(repeating),
-	_destroyed(false),
-	_cancelled(true)//,
+	_destroyed(false)//,
+	//_cancelled(true)//,
 	//_runner(&runner)
 { 	
 	//if (autoStart)
@@ -71,7 +71,6 @@ void Task::start()
 	//if (cancelled())
 	//	runner().start(this);
 }
-*/
 
 
 void Task::cancel()			
@@ -83,6 +82,7 @@ void Task::cancel()
 	//if (!cancelled())
 	//	runner().cancel(this);
 }
+*/
 
 
 void Task::destroy()			
@@ -99,7 +99,7 @@ void Task::destroy()
 /*
 bool Task::beforeRun()			
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return !_destroyed && !_cancelled;
 }
 
@@ -108,33 +108,33 @@ bool Task::afterRun()
 {
 	return !!repeating();
 }
+
+
+bool Task::cancelled() const						 
+{ 
+	Mutex::ScopedLock lock(_mutex);	
+	return _cancelled;
+}
 */
 
 
 UInt32 Task::id() const
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _id;
-}
-
-
-bool Task::cancelled() const						 
-{ 
-	ScopedLock lock(_mutex);	
-	return _cancelled;
 }
 
 
 bool Task::destroyed() const						 
 { 
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _destroyed;
 }
 
 
 bool Task::repeating() const						 
 { 
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _repeating;
 }
 
@@ -142,7 +142,7 @@ bool Task::repeating() const
 /*	
 Runner& Task::runner()						 
 { 
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	if (!_runner)
 		throw Exception("Tasks must have a Runner instance.");
 	return *_runner;
@@ -159,7 +159,7 @@ Runner& Task::runner()
 
 
 
-	//	ScopedLock lock(_mutex);
+	//	Mutex::ScopedLock lock(_mutex);
 	//	_!cancelled = true;
 	//else
 
@@ -181,14 +181,14 @@ Runner& Task::runner()
 /*
 string Task::name() const
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _name;
 }
 
 
 void Task::setName(const string& name) 
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	_name = name;
 }
 */
@@ -203,7 +203,7 @@ void Task::setName(const string& name)
 /*
 void Task::start()
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	assert(!_!cancelled);
 	_!cancelled = true;
 }	
@@ -211,14 +211,14 @@ void Task::start()
 
 void Task::stop()			
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	//assert(!_!cancelled);
 	_!cancelled = false;
 }
 */
 
 
-	//Runner& runner, bool autoStart, bool runOnce, 
+	//Runner& runner, bool autoStart, void runOnce, 
 	//_runner(runner),
 
 	// Note: Can't lock mutex here as this call will 
@@ -233,7 +233,7 @@ void Task::stop()
 
 bool Task::runOnce() const						 
 { 
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _runOnce;
 }
 */

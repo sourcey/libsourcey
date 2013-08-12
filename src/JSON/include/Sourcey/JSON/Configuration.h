@@ -21,7 +21,7 @@
 #define SOURCEY_JSON_Configuration_H
 
 
-#include "Sourcey/IConfiguration.h"
+#include "Sourcey/Configuration.h"
 #include "Sourcey/JSON/JSON.h"
 
 #include "Sourcey/Mutex.h"
@@ -31,7 +31,7 @@ namespace scy {
 namespace json {
 
 
-class Configuration: public IConfiguration, public json::Value
+class Configuration: public scy::Configuration, public json::Value
 {
 public:
 	Configuration();

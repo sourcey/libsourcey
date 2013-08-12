@@ -47,7 +47,7 @@ public:
 	//void setMessage(const std::string& message);
 	void setTime(std::time_t time);
 	//void setTime(const std::string& time);
-		/// Sets the time from a UTC time string.
+		// Sets the time from a UTC time string.
 };
 
 

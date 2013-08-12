@@ -55,14 +55,14 @@ bool AppPacket::read(Buffer& buffer)
 {
 	if (RTCP::Packet::read(buffer)) {
 		
-		if (buffer.size() < 4) {
+		if (buffer.available() < 4) {
 			errorL() << "Buffer too short to parse APP packet." << endl;
 			return false;
 		}
 		
-		buffer.readU32(ssrc);		
-		buffer.read(name, 4);
-		buffer.read(data, length - 12);
+		buffer.getU32(ssrc);		
+		buffer.get(name, 4);
+		buffer.get(data, length - 12);
 		return true;
 	}
 
@@ -75,9 +75,9 @@ void AppPacket::write(Buffer& buffer) const
 	assert(name.length() <= 4); // name is one octet in length
 
 	RTCP::Packet::write(buffer);	
-	buffer.writeU32(ssrc);	
-	buffer.write(name.data(), 4);
-	buffer.write(data);
+	buffer.putU32(ssrc);	
+	buffer.put(name.data(), 4);
+	buffer.put(data);
 }
 
 

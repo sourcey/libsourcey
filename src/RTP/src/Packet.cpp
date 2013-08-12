@@ -133,12 +133,12 @@ bool Packet::read(Buffer& buf)
 {
 	//assert(buf.size() < RTP_MAX_PACKET_LEN);
 
-	if (buf.size() == 0) {
+	if (buf.available() == 0) {
 		errorL() << "RTP: Received empty packet." << endl;
 		return false;
 	}
 
-	if (buf.size() < 12) {
+	if (buf.available() < 12) {
 		// Too small to contain an RTP header 
 		errorL() << "RTP: Packet too small to contain an RTP header." << endl;
 		return false;
@@ -149,7 +149,7 @@ bool Packet::read(Buffer& buf)
 		return false;
 	}
 	
-	int payloadLength = buf.remaining();
+	int payloadLength = buf.available();
 
 	// Check if packet contains an extension header. If yes
 	//	* set pointer to extension header, compute buf.size() and
@@ -160,7 +160,7 @@ bool Packet::read(Buffer& buf)
 		payloadLength -= 4;	// Minimum size of extension header
 		
 		short tmp = *((short *)(buf.data() + 2));
-		tmp = ntohs(tmp); // NetworkToHost16
+		tmp = networkToHost16(tmp); // NetworkToHost16
 		tmp *= 4;		// ext. header length is in words (4 bytes)
 		_extensionLength += tmp;
 		payloadLength -= tmp;
@@ -188,20 +188,20 @@ void Packet::write(Buffer& buf) const
 	/*
 	char* hdr = _header.getBytes();
 	int hdrSize = _header.size();
-	buf.write(hdr, hdrSize);
+	buf.put(hdr, hdrSize);
 	delete [] hdr;
 	*/
 	_header.write(buf);
 
 	if (_extensionLength > 0) {
-		buf.write(_extensionHeader, _extensionLength);
+		buf.put(_extensionHeader, _extensionLength);
 	}
 
-	buf.write(_payload, _payloadLength);
+	buf.put(_payload, _payloadLength);
 
 	if (_zrtpChecksum) {
-		UInt16 chkSum = computeChecksum((UInt16*)buf.begin(), buf.size()-20);
-		buf.writeU16(chkSum);
+		UInt16 chkSum = computeChecksum((UInt16*)buf.data(), buf.available()-20);
+		buf.putU16(chkSum);
 	}
 }
 

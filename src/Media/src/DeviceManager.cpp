@@ -344,10 +344,9 @@ bool DeviceManager::shouldDeviceBeIgnored(const string& deviceName, const char* 
 
 	int i = 0;
 	while (exclusionList[i]) {
-		if (strncasecmp(deviceName.c_str(), exclusionList[i],
-			strlen(exclusionList[i])) == 0) {
-				traceL() << "Ignoring device " << deviceName << endl;
-				return true;
+		if (util::icompare(deviceName, exclusionList[i]) == 0) {
+			traceL() << "Ignoring device " << deviceName << endl;
+			return true;
 		}
 		++i;
 	}

@@ -8,30 +8,57 @@
 namespace scy {
 
 
-class Mutex
-	// A Mutex (mutual exclusion) is a synchronization 
-	// mechanism used to control access to a shared resource
-	// in a concurrent (multithreaded) scenario.
-	// Mutexes are recursive, that is, the same mutex can be 
-	// locked multiple times by the same thread (but, of course,
-	// not by other threads).
-	// Using the ScopedLock class is the preferred way to automatically
-	// lock and unlock a mutex.
+template <class T>
+class ScopedLock
+	// ScopedLock simplifies thread synchronization 
+	// with a Mutex or similar lockable object.
+	// The given Mutex is locked in the constructor,
+	// and unlocked it in the destructor.
+	// T can be any class with lock() and unlock() functions.
 {
 public:
+	explicit ScopedLock(T& m) : _m(m)
+	{
+		_m.lock();
+	}
+	
+	~ScopedLock()
+	{
+		_m.unlock();
+	}
+
+private:
+	ScopedLock();
+	ScopedLock(const ScopedLock&);
+	ScopedLock& operator = (const ScopedLock&);
+
+	T& _m;
+};
+
+
+class Mutex
+	// This class is a wrapper around uv_mutex_t.
+	//
+	// A Mutex (mutual exclusion) is a synchronization mechanism
+	// used to control access to a shared resource in a concurrent
+	// (multithreaded) scenario.
+	//
+	// The ScopedLock class is usually used to obtain a Mutex lock, 
+	// since it makes locking exception-safe.
+{
+public:
+	typedef ScopedLock<Mutex> ScopedLock;
+
 	Mutex();
-		// Creates the Mutex.
-		
 	~Mutex();
-		// Destroys the Mutex.
 
 	void lock();
-		// Locks the mutex. Blocks if the mutex
-		// is held by another thread.
+		// Locks the mutex.
+		// Blocks if the mutex is held by another thread.
 
 	bool tryLock();
-		// Tries to lock the mutex. Returns false immediately
-		// if the mutex is already held by another thread.
+		// Tries to lock the mutex. Returns false if the 
+		// mutex is already held by another thread.
 		// Returns true if the mutex was successfully locked.
 
 	void unlock();
@@ -46,33 +73,8 @@ private:
 };
 
 
-class ScopedLock
-	// ScopedLock is a scoped mutex locker that is 
-	// initialized on the stack.
-	// The referenced mutex is locked in the constructor, 
-	// and unlocked in the destructor.
-{
-public:
-	explicit ScopedLock(Mutex& m) : _mutex(m)
-	{
-		_mutex.lock();
-	}
-	
-	~ScopedLock()
-	{
-		_mutex.unlock();
-	}
-
-private:
-	Mutex& _mutex;
-
-	ScopedLock();
-	ScopedLock(const ScopedLock&);
-	ScopedLock& operator = (const ScopedLock&);
-};
-
-
 // TODO: RwLock
+// TODO: Condition
 
 
 } // namespace scy

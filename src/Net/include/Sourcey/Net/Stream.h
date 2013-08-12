@@ -32,11 +32,11 @@ namespace scy {
 namespace net {
 
 
-class Stream: public uv::Base
+class Stream: public uv::Handle
 {
  public:  
 	Stream(uv::Loop& loop = uv::defaultLoop(), void* stream = NULL) :
-		uv::Base(&loop, stream), 
+		uv::Handle(&loop, stream), 
 		_buffer(65536)
 	{
 	}
@@ -52,7 +52,7 @@ class Stream: public uv::Base
 		traceL("Stream", this) << "Close: " << handle() << std::endl;
 		if (!closed()) {
 			readStop();		
-			uv::Base::close();
+			uv::Handle::close();
 		}
 	}
 	
@@ -65,13 +65,13 @@ class Stream: public uv::Base
 			return false;
 		}
 
-		// XXX: Sending shutdown causes an eof error to be  
-		// returned via handleRead() which sets the stream 
-		// to error state. This is not really an error,
-		// perhaps it should be handled differently?
+		/// XXX: Sending shutdown causes an eof error to be  
+		/// returned via handleRead() which sets the stream 
+		/// to error state. This is not really an error,
+		/// perhaps it should be handled differently?
 		int r = uv_shutdown(new uv_shutdown_t, handle<uv_stream_t>(), uv::afterShutdown);
 
-		// If the stream is not connected this will return false.
+		/// If the stream is not connected this will return false.
 		return r == 0;
 	}
 
@@ -141,7 +141,7 @@ class Stream: public uv::Base
 	{
 		traceL("Stream", this) << "On read: " << len << std::endl;
 
-		// can be overridden
+		/// can be overridden
 		Read.emit(instance(), data, len);
 	}
 
@@ -150,13 +150,13 @@ class Stream: public uv::Base
 		Stream* io = static_cast<Stream*>(handle->data);
 		traceL("Stream", io) << "Handle read: " << nread << std::endl;
 
-		// Handle EOF or error
+		/// Handle EOF or error
 		if (nread == -1)  {
 			io->setLastError();
 			return;
 		}
 		else {
-			// We only support UV_TCP right now
+			/// We only support UV_TCP right now
 			if (pending == UV_TCP)
 				assert(0);
 			else
@@ -193,12 +193,12 @@ class Stream: public uv::Base
 	{
 		Stream* self = static_cast<Stream*>(handle->data);
 
-		// Reserve the recommended buffer size
+		/// Reserve the recommended buffer size
 		if (suggested_size > self->_buffer.capacity())
 			self->_buffer.reserve(suggested_size); 
 		assert(self->_buffer.capacity() == suggested_size);
 
-		// Reset the buffer position on each read
+		/// Reset the buffer position on each read
 		self->_buffer.position(0);
 		return uv_buf_init(self->_buffer.begin(), suggested_size);
 	}

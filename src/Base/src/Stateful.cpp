@@ -17,7 +17,7 @@
 //
 
 
-#include "Sourcey/State.h"
+#include "Sourcey/Stateful.h"
 
 
 using namespace std;
@@ -70,14 +70,22 @@ string State::toString() const
 }
 
 
-// ---------------------------------------------------------------------
+//
+// Mutex State
+//
+
+
 MutexState::MutexState(State::ID id) : 
 	State(id)
 { 
 }
 
 
-// ---------------------------------------------------------------------
+//
+// State Signal
+//
+
+
 StateSignal::StateSignal(State::ID id) : 
 	MutexState(id)
 { 

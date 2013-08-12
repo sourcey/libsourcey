@@ -46,7 +46,7 @@ public:
 	std::string label() const;
 	
 	void setType(const std::string& type);
-		/// Possible "type" values
+		// Possible "type" values
 		///	  page, section, text, text-multi,
 		///	  list, list-multi, checkbox, media, custom
 	
@@ -54,7 +54,7 @@ public:
 	void setLabel(const std::string& text);
 	void setHint(const std::string& text);
 	void setError(const std::string& error);
-		/// Sets and optional validation error message.
+		// Sets and optional validation error message.
 
 	FormElement addPage(const std::string& id = "", const std::string& label = "");
 	FormElement addSection(const std::string& id = "", const std::string& label = "");
@@ -63,44 +63,44 @@ public:
 	FormField getField(const std::string& id, bool partial = false);
 	bool getField(const std::string& id, FormField& field, bool partial = false);
 	bool hasField(const std::string& id, bool partial = false);
-		/// Returns true if the given Address matches any of the
-		/// internal form element IDs.
-		/// If the partial flag is set then substring matches
-		/// will be counted.
+		// Returns true if the given Address matches any of the
+		// internal form element IDs.
+		// If the partial flag is set then substring matches
+		// will be counted.
 
 	void setLive(bool flag);
-		/// Live fields or elements are used to submit partial
-		/// sections a form, without sending the entire form.
+		// Live fields or elements are used to submit partial
+		// sections a form, without sending the entire form.
 
 	bool live() const;
-		/// Returns true if this field is live, meaning the
-		/// form-processing entity should auto-update this
-		/// field's value whenever it changes.		
+		// Returns true if this field is live, meaning the
+		// form-processing entity should auto-update this
+		// field's value whenever it changes.		
 
 	bool clearElements(const std::string& id, bool partial = false);
-		/// Clears child elements matching the given ID.
+		// Clears child elements matching the given ID.
 	
 	void clear();
-		/// Clear the entire form.
+		// Clear the entire form.
 
 	bool valid() const;
-		/// Returns true if the form element is valid.
+		// Returns true if the form element is valid.
 		
 	int numElements();
-		/// Returns the number of child elements.
+		// Returns the number of child elements.
 
 	bool hasErrors();
-		/// Returns true if any fields have errors.
+		// Returns true if any fields have errors.
 
 	bool hasPages();
-		/// Returns true if the form has multiple pages.
+		// Returns true if the form has multiple pages.
 
 	json::Value& root() const;
 
 protected:
 	json::Value* _root;
-		/// The root pointer is just a reference to
-		/// the externally managed JSON value memory.
+		// The root pointer is just a reference to
+		// the externally managed JSON value memory.
 };
 
 
@@ -118,16 +118,16 @@ public:
 	bool partial() const;
 
 	void setAction(const std::string& action);
-		/// Possible "action" values
-		/// form 		The form-processing entity is asking the form-submitting entity to complete a form.
-		/// submit 		The form-submitting entity is submitting data to the form-processing entity.
-		/// cancel 		The form-submitting entity has cancelled submission of data to the form-processing entity.
-		/// result 		The form-processing entity is returning data to the form-submitting entity.
+		// Possible "action" values
+		// form 		The form-processing entity is asking the form-submitting entity to complete a form.
+		// submit 		The form-submitting entity is submitting data to the form-processing entity.
+		// cancel 		The form-submitting entity has cancelled submission of data to the form-processing entity.
+		// result 		The form-processing entity is returning data to the form-submitting entity.
 
 	void setPartial(bool flag);
-		/// Notifies the form is a partial section of the form.
-		/// This is used for transmitting and updating live
-		/// fields such as for auto-complete.
+		// Notifies the form is a partial section of the form.
+		// This is used for transmitting and updating live
+		// fields such as for auto-complete.
 };
 
 
@@ -140,30 +140,30 @@ public:
 	
 	void addOption(const std::string& key, const std::string& value);	
 	void addOption(const std::string& value);
-		/// Adds an option for list based fields.
+		// Adds an option for list based fields.
 
 	void setValue(const std::string& value);
 	void setValue(int value);
 	void setValue(double value);
 	void setValue(bool value);
-		/// Sets the value clearing all other values.	
+		// Sets the value clearing all other values.	
 
 	void addValue(const std::string& value);
 	void addValue(int value);
 	void addValue(double value);
 	void addValue(bool value);
-		/// Appends a value to the value array.		
+		// Appends a value to the value array.		
 
 	json::Value& values();
-		/// Returns a JSON array of all values.
+		// Returns a JSON array of all values.
 
 	std::string value() const;
 	int intValue() const;
 	double doubleValue() const;
 	bool boolValue() const;
-		/// Returns the first value.
-		/// Most formats (except multi) only
-		/// require single value.
+		// Returns the first value.
+		// Most formats (except multi) only
+		// require single value.
 };
 
 

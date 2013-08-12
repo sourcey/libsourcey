@@ -62,14 +62,14 @@ MediaFactory::~MediaFactory()
 
 IDeviceManager& MediaFactory::devices() 
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return *_devices; 
 }
 
 
 FormatRegistry& MediaFactory::formats() 
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _formats; 
 }
 
@@ -79,7 +79,7 @@ void MediaFactory::loadVideo()
 	traceL("MediaFactory") << "Preloading video captures" << endl;
 	
 	// Depreciated code used to preload captures on application load.
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	// Initialize a VideoCapture object for each available device.
 	// The video capture object will begin capturing frames when it's
@@ -115,7 +115,7 @@ void MediaFactory::unloadVideo()
 
 VideoCaptureBase* MediaFactory::getVideoCaptureBase(int deviceId) 
 {
-	traceL("MediaFactory") << "Get video capture base: " << deviceId << endl;
+	//traceL("MediaFactory") << "Get video capture base: " << deviceId << endl;
 	VideoCaptureBase* base;
 	VideoCaptureBaseMap::iterator it = _videoBases.find(deviceId);
 	if (it != _videoBases.end())
@@ -131,28 +131,8 @@ VideoCaptureBase* MediaFactory::getVideoCaptureBase(int deviceId)
 
 VideoCapture* MediaFactory::createVideoCapture(int deviceId) //, unsigned flags
 {
-	traceL("MediaFactory") << "Get video capture: " << deviceId << endl;
+	//traceL("MediaFactory") << "Get video capture: " << deviceId << endl;
 	return new VideoCapture(getVideoCaptureBase(deviceId));
-		
-	/*
-	ScopedLock lock(_mutex);
-	VideoCaptureBase* base;
-	VideoCaptureBaseMap::iterator it = _videoBases.find(deviceId);
-	if (it != _videoBases.end())
-		base = it->second;
-	else {	
-		// TODO: unique_ptr for exception safe instantiation
-		base = new VideoCaptureBase(deviceId, flags);
-		_videoBases[deviceId] = base;
-	}
-	
-
-	// Initialize a VideoCapture if none exists.
-	// This may be error prone if not called from the main
-	// thread, which is why loadVideo() should be called.
-	//_videoBases[deviceId] = new VideoCapture(deviceId, flags);
-	//return _videoBases[deviceId];
-	*/
 }
 
 

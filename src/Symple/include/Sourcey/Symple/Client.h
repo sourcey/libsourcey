@@ -23,8 +23,7 @@
 
 #include "Sourcey/Flaggable.h"
 #include "Sourcey/SocketIO/Client.h"
-#include "Sourcey/Net/TCPSocket.h"
-#include "Sourcey/Net/SSLSocket.h"
+#include "Sourcey/Net/Socket.h"
 #include "Sourcey/HTTP/WebSocket.h"
 #include "Sourcey/Util/TimedManager.h"
 #include "Sourcey/Symple/Roster.h"
@@ -43,8 +42,11 @@ namespace smpl {
 typedef TimedManager<std::string, Message> PersistenceT;
 
 
-// ---------------------------------------------------------------------
 //
+// Symple Client
+//
+
+
 class Client: public sockio::Client
 {
 public:
@@ -82,65 +84,65 @@ public:
 
 	virtual int send(const std::string data, bool ack = false);
 	virtual int send(Message& message, bool ack = false);
-		/// Sends a message.
+		// Sends a message.
 
 	virtual int respond(Message& message, bool ack = false);
-		/// Responds to the given message.
-		/// The 'to' and 'from' fields will be swapped.
+		// Responds to the given message.
+		// The 'to' and 'from' fields will be swapped.
 
 	virtual int sendPresence(bool probe = false);
-		/// Broadcasts presence to the user group scope.
+		// Broadcasts presence to the user group scope.
 
 	virtual int sendPresence(const Address& to, bool probe = false);
-		/// Sends directed presence to the given peer.
+		// Sends directed presence to the given peer.
 	
 	virtual std::string ourID() const;
-		/// Returns the session ID of our peer object.
+		// Returns the session ID of our peer object.
 
     virtual Peer& ourPeer();
-		/// Returns the peer object that controls the
-		/// current session, or throws an exception.
+		// Returns the peer object that controls the
+		// current session, or throws an exception.
 
 	virtual Roster& roster();
-		/// Returns the roster which stores all online peers.
+		// Returns the roster which stores all online peers.
 
 	virtual PersistenceT& persistence();
-		/// Returns the persistence manager which stores
-		/// long lived messages.
+		// Returns the persistence manager which stores
+		// long lived messages.
 
 	virtual Client::Options& options();
-		/// Returns a reference to the options object.
+		// Returns a reference to the options object.
 
 	virtual Client& operator >> (Message& message);	
-		/// Stream operator alias for send().
+		// Stream operator alias for send().
 
 	Signal<const int&> Announce;
-		/// Notifies the outside application about the 
-		/// response status code of our announce() call.
-		/// Possible status codes are:
+		// Notifies the outside application about the 
+		// response status code of our announce() call.
+		// Possible status codes are:
 		///		- 200: Authentication success
 		///		- 401: Authentication failed
 		///		- 400: Bad request data
 		///		- 500: Server not found
 
 	Signal<Peer&> UpdatePresenceData;
-		/// Called by createPresence() so outside classes
-		/// can modify the outgoing Peer object.
+		// Called by createPresence() so outside classes
+		// can modify the outgoing Peer object.
 
 	virtual const char* className() const { return "SympleClient"; }
 	
 protected:	
 	virtual int announce();
-		/// Called when a new connection is established
-		/// to announce and authenticate the peer on the
-		/// server.
+		// Called when a new connection is established
+		// to announce and authenticate the peer on the
+		// server.
 
 	virtual void reset();
-		/// Resets variables and data at the beginning  
-		/// and end of each session.
+		// Resets variables and data at the beginning  
+		// and end of each session.
 
 	virtual void createPresence(Presence& p);
-		/// Creates a Presence object.
+		// Creates a Presence object.
 	
 	//virtual void onOnline();
 	virtual void onClose();
@@ -160,44 +162,34 @@ protected:
 };
 
 
-// ---------------------------------------------------------------------
 //
+// TCP Client
+//
+
+
+Client* createTCPClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop());
+
+
 class TCPClient: public Client
 {
 public:
-	TCPClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop()) :
-		Client(new net::TCPBase, options, loop)
-	{
-	}
+	TCPClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop());
 };
 
 
-// ---------------------------------------------------------------------
 //
+// SSL Client
+//
+
+
+Client* createSSLClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop());
+
+
 class SSLClient: public Client
 {
 public:
-	SSLClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop()) :
-		Client(new net::TCPBase, options, loop)
-	{
-	}
+	SSLClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop());
 };
-
-
-// ---------------------------------------------------------------------
-//
-inline Client* createTCPClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop())
-{
-	return new Client(new net::TCPBase, options, loop);
-}
-
-
-// ---------------------------------------------------------------------
-//
-inline Client* createSSLClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop())
-{
-	return new Client(new net::SSLBase, options, loop);
-}
 
 
 // ---------------------------------------------------------------------
@@ -391,7 +383,7 @@ typedef smpl::Client<
 */
 	//virtual void onError();
 	//virtual int announceStatus() const;
-		/// Returns a reference to the options object.
+		// Returns a reference to the options object.
 
 
 	//uv::Loop& _loop;
@@ -416,15 +408,15 @@ public:
 	virtual void createPresence(Presence& presence) = 0;
 
 	virtual int respond(Message& message) = 0;
-		/// Responds to an incoming message and sends it.
-		/// NOTE: Internal message data is modified.
+		// Responds to an incoming message and sends it.
+		// NOTE: Internal message data is modified.
 	
 	virtual IClient& operator >> (Message& message) = 0;
-		/// Stream operator alias for send()
+		// Stream operator alias for send()
 
     virtual Peer& ourPeer() = 0;
-		/// Returns the peer object that controls the
-		/// current session or throws an exception.
+		// Returns the peer object that controls the
+		// current session or throws an exception.
 	
 	virtual Client::Options& options() = 0;
 	virtual Roster& roster() = 0;
@@ -434,27 +426,27 @@ public:
 	virtual int announceStatus() const = 0;
 
 	Signal<int&> Announce;
-		/// Notifies the outside application about the 
-		/// response status code of our announce() call.
-		/// Possible status codes are:
+		// Notifies the outside application about the 
+		// response status code of our announce() call.
+		// Possible status codes are:
 		///		- 200: Authentication success
 		///		- 401: Authentication failed
 		///		- 400: Bad request data
 		///		- 500: Server not found
 
 	Signal<Peer&> UpdatePresenceData;
-		/// Called by createPresence() so outside classes
-		/// can modify the outgoing Peer object.
+		// Called by createPresence() so outside classes
+		// can modify the outgoing Peer object.
 
 protected:	
 	virtual int announce() = 0;
-		/// Called when a new connection is established
-		/// to announce and authenticate the peer on the
-		/// server.
+		// Called when a new connection is established
+		// to announce and authenticate the peer on the
+		// server.
 
 	virtual void reset() = 0;
-		/// Resets variables and data at the beginning  
-		/// and end of each session.
+		// Resets variables and data at the beginning  
+		// and end of each session.
 
 	virtual void onOnline() = 0;
 	virtual void onClose() = 0;
@@ -837,15 +829,15 @@ typedef smpl::Client<
 	virtual void createPresence(Presence& presence);
 
 	virtual int respond(Message& message);
-		/// Responds to an incoming message and sends it.
-		/// NOTE: Internal message data is modified.
+		// Responds to an incoming message and sends it.
+		// NOTE: Internal message data is modified.
 	
 	Client& operator >> (Message& message);
-		/// Stream operator alias for send()
+		// Stream operator alias for send()
 
     virtual Peer& ourPeer();
-		/// Returns the peer object that controls the
-		/// current session or throws an exception.
+		// Returns the peer object that controls the
+		// current session or throws an exception.
 	
 	Options& options();
 	Roster& roster();
@@ -855,27 +847,27 @@ typedef smpl::Client<
 	int announceStatus() const;
 
 	Signal<int&> Announce;
-		/// Notifies the outside application about the 
-		/// response status code of our announce() call.
-		/// Possible status codes are:
+		// Notifies the outside application about the 
+		// response status code of our announce() call.
+		// Possible status codes are:
 		///		- 200: Authentication success
 		///		- 401: Authentication failed
 		///		- 400: Bad request data
 		///		- 500: Server not found
 
 	Signal<Peer&> UpdatePresenceData;
-		/// Called by createPresence() so outside classes
-		/// can modify the outgoing Peer object.
+		// Called by createPresence() so outside classes
+		// can modify the outgoing Peer object.
 	
 protected:	
 	virtual int announce();
-		/// Called when a new connection is established
-		/// to announce and authenticate the peer on the
-		/// server.
+		// Called when a new connection is established
+		// to announce and authenticate the peer on the
+		// server.
 
 	virtual void reset();
-		/// Resets variables and data at the beginning  
-		/// and end of each session.
+		// Resets variables and data at the beginning  
+		// and end of each session.
 
 	virtual void onOnline();
 	virtual void onClose();

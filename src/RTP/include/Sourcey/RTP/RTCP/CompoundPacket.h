@@ -28,7 +28,7 @@
 #include "Sourcey/RTP/RTCP/AppPacket.h"
 #include "Sourcey/RTP/RTCP/ByePacket.h"
 #include "Sourcey/RTP/Types.h"
-#include "Sourcey/IPacket.h"
+#include "Sourcey/Packet.h"
 
 #include <vector>
 

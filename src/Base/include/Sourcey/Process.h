@@ -21,9 +21,62 @@
 #define SOURCEY_Process_H
 
 
+#include "Sourcey/UV/UVPP.h"
+
+
 namespace scy {
 
-	// TODO: uv_process_t
+
+class Process: public uv::Handle
+{
+public:
+	Process::Process(uv::Loop& loop = uv::defaultLoop()) :
+		uv::Handle(&loop, new uv_process_t)
+	{	
+	}
+
+	/*
+	bool spawn(const std::string& file, const std::string& args, unsigned int flags = 0)
+		// Spawns the process using basic options.
+	{	
+		options.file = file.c_str();
+		options.args = args.c_str();
+		options.flags = flags;
+		return spawn();
+	}
+	*/
+
+	bool spawn()
+		// Spawns the process.
+		// Options must be properly set.
+	{	
+		if (uv_spawn(loop(), handle<uv_process_t>(), options)) {
+			setLastError("Cannot spawn process");
+			return false;
+		}
+		return true;
+	}
+
+	bool kill(int signum = 0)
+		// Kills the process
+	{	
+		assert(pid() > 0);
+		return uv_kill(pid(), signum).code == UV_OK;
+	}
+
+	int pid() const
+		// Returns the process PID
+	{	
+		return handle<uv_process_t>()->pid;
+	}
+
+	typedef uv_process_options_t Options;
+	Options options;
+
+protected:
+	uv_process_t _proc;
+};
+
 
 } // namespace scy
 

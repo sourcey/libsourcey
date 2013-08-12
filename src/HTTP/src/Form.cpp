@@ -30,7 +30,7 @@
 #include "Sourcey/HTTP/Packetizers.h"
 #include "Sourcey/HTTP/URL.h"
 #include "Sourcey/FileSystem.h"
-#include "Sourcey/Crypto.h"
+#include "Sourcey/Crypto/Crypto.h"
 
 
 namespace scy {
@@ -114,9 +114,9 @@ void FormWriter::prepareSubmit()
 			ct.append("\"");
 			request.setContentType(ct);
 					
-			// Set the total file size for upload progress updates.
-			// This is not the HTTP content length as it does not 
-			// factor chunk headers.
+			/// Set the total file size for upload progress updates.
+			/// This is not the HTTP content length as it does not 
+			/// factor chunk headers.
 			if (!_parts.empty()) {
 				assert(_filesSize);
 				_connection.OutgoingProgress.total = _filesSize;
@@ -219,9 +219,9 @@ void FormWriter::writeMultipart()
 	writeEnd(ostr);
 	emit(ostr.str());
 		
-	// HACK: Write chunked end code directly to the connection.
-	// TODO: Send final packet flag down packet stream, or use 
-	// stream state change to trigger via chunked packetizer.
+	/// HACK: Write chunked end code directly to the connection.
+	/// TODO: Send final packet flag down packet stream, or use 
+	/// stream state change to trigger via chunked packetizer.
 	reinterpret_cast<Connection&>(_connection).send("0\r\n\r\n", 5, 0);
 }
 
@@ -266,7 +266,7 @@ void FormWriter::updateProgress(int nread)
 
 std::string FormWriter::createBoundary()
 {
-	return "boundary-" + crypto::randomString(8);
+	return "boundary-" + util::randomString(8);
 }
 
 
@@ -315,7 +315,7 @@ FilePart::FilePart(const std::string& path) :
 	_contentType("application/octet-stream"),
 	_fileSize(0)
 {
-	_filename = fs::getFileName(path);
+	_filename = fs::filename(path);
 	open(path);
 }
 
@@ -324,7 +324,7 @@ FilePart::FilePart(const std::string& path, const std::string& contentType) :
 	_contentType(contentType),
 	_fileSize(0)
 {
-	_filename = fs::getFileName(path); 
+	_filename = fs::filename(path); 
 	open(path);
 }
 
@@ -351,7 +351,7 @@ void FilePart::open(const std::string& path)
 	if (!_istr.is_open())
 		throw FileException(path);
 
-	// Get file size
+	/// Get file size
 	_istr.seekg(0, std::ios::end); 
 	_fileSize = _istr.tellg();
 	_istr.seekg(0, 0); 
@@ -362,7 +362,7 @@ void FilePart::write(FormWriter& writer)
 {
 	traceL("FilePart", this) << "Write" << std::endl;
 
-	// Send file chunks to the peer
+	/// Send file chunks to the peer
 	char buffer[FILE_CHUNK_SIZE];
 	while (_istr.read(buffer, FILE_CHUNK_SIZE) && !writer.stopped()) {
 		writer.emit(buffer, (size_t)_istr.gcount());
@@ -370,7 +370,7 @@ void FilePart::write(FormWriter& writer)
 	}
 
 	if (_istr.eof()) {
-		// Still a few bytes left to write?
+		/// Still a few bytes left to write?
 		if (_istr.gcount() > 0 && !writer.stopped()) {
 			writer.emit(buffer, (size_t)_istr.gcount());
 			writer.updateProgress((int)_istr.gcount());
@@ -385,13 +385,13 @@ void FilePart::write(std::ostream& ostr)
 {
 	traceL("FilePart", this) << "Write" << std::endl;
 	
-	// Send file chunks to the peer
+	/// Send file chunks to the peer
 	char buffer[FILE_CHUNK_SIZE];
 	while (_istr.read(buffer, FILE_CHUNK_SIZE))
 		ostr.write(buffer, (size_t)_istr.gcount());
 
 	if (_istr.eof()) {
-		// Still a few bytes left to write?
+		/// Still a few bytes left to write?
 		if (_istr.gcount() > 0)
 			ostr.write(buffer, (size_t)_istr.gcount());
 	}

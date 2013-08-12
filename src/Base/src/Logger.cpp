@@ -21,9 +21,6 @@
 #include "Sourcey/DateTime.h"
 #include "Sourcey/Platform.h"
 #include "Sourcey/Util.h"
-#include "Poco/Format.h"
-#include "Poco/Path.h"
-#include "Poco/File.h"
 #include <assert.h>
 
 
@@ -37,28 +34,30 @@ static Singleton<Logger> singleton;
 
 
 Logger::Logger() :
-	_defaultChannel(NULL), 
-	_cancelled(false)
+	_defaultChannel(nil),
+	_writer(new LogWriter)
 {
-	_thread.start(*this);
 }
 
 
 Logger::~Logger()
-{	
-	{
-		ScopedLock lock(_mutex);
-		util::clearMap(_map);
-		_defaultChannel = NULL;
-		_cancelled = true;
-	}
-	_thread.join();
+{
+	delete _writer;
+	util::clearMap(_channels);
+	_defaultChannel = nil;
 }
 
 
 Logger& Logger::instance() 
 {
 	return *singleton.get();
+}
+
+
+void Logger::setInstance(Logger* logger) 
+{
+	// Should be done before the logger is initialized
+	assert(singleton.swap(logger) == nil);
 }
 
 	
@@ -68,83 +67,63 @@ void Logger::shutdown()
 }
 
 
-bool Logger::run()
-{
-	QueuedWrite* wr = nil;
-	bool empty = false;
-	bool cancelled = false;
-	for(;;) 
-	{
-		wr = nil;
-		{
-			ScopedLock lock(_mutex);
-			empty = _pending.empty();
-			cancelled = _cancelled;
-			if (empty || cancelled)
-				break;
-
-			wr = _pending.front();
-			_pending.pop_front();
-		}
-		if (wr) {
-			wr->channel->write(*wr->stream);
-			delete wr->stream;
-			delete wr;
-			sleep(1);
-		}
-	}
-	if (empty) scy::sleep(50);
-	return !cancelled;
-}
-
-
 void Logger::add(LogChannel* channel) 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	// The first channel added will be the default channel.
-	if (_defaultChannel == NULL)
+	if (_defaultChannel == nil)
 		_defaultChannel = channel;
-	_map[channel->name()] = channel;
+	_channels[channel->name()] = channel;
 }
 
 
 void Logger::remove(const string& name, bool freePointer) 
 {
-	ScopedLock lock(_mutex);
-	LogMap::iterator it = _map.find(name);	
-	assert(it != _map.end());
-	if (it != _map.end()) {
+	Mutex::ScopedLock lock(_mutex);
+	LogChannelMap::iterator it = _channels.find(name);	
+	assert(it != _channels.end());
+	if (it != _channels.end()) {
 		if (_defaultChannel == it->second)
-			_defaultChannel = NULL;
+			_defaultChannel = nil;
 		if (freePointer)
 			delete it->second;	
-		_map.erase(it);
+		_channels.erase(it);
 	}
 }
 
 
 LogChannel* Logger::get(const string& name, bool whiny) const
 {
-	ScopedLock lock(_mutex);
-	LogMap::const_iterator it = _map.find(name);	
-	if (it != _map.end())
+	Mutex::ScopedLock lock(_mutex);
+	LogChannelMap::const_iterator it = _channels.find(name);	
+	if (it != _channels.end())
 		return it->second;
 	if (whiny)
 		throw NotFoundException("No log channel named: " + name);
-	return NULL;
+	return nil;
 }
 
 
 void Logger::setDefault(const string& name)
 {
+	Mutex::ScopedLock lock(_mutex);
 	_defaultChannel = get(name, true);
 }
 
 
 LogChannel* Logger::getDefault() const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _defaultChannel;
+}
+
+
+void Logger::setWriter(LogWriter* writer)
+{
+	Mutex::ScopedLock lock(_mutex);
+	if (_writer)
+		delete _writer;
+	_writer = writer;
 }
 
 
@@ -157,47 +136,125 @@ void Logger::write(const LogStream& stream)
 
 void Logger::write(LogStream* stream)
 {	
-	QueuedWrite* work = new QueuedWrite;
-	work->logger = this;
-	work->stream = stream;
-	ScopedLock lock(_mutex);
-	work->channel = _defaultChannel;
-	_pending.push_back(work);	
-}
+	Mutex::ScopedLock lock(_mutex);	
+	if (stream->channel == nil)
+		stream->channel = _defaultChannel;
 
-
-/*
-void Logger::write(const char* channel, const LogStream& stream)
-{	
-	LogChannel* ch = get(channel, true);
-	QueuedWrite* work = new QueuedWrite;
-	work->logger = this;
-	work->stream = stream;
-	work->channel = ch;
-	ScopedLock lock(_mutex);
-	_pending.push_back(work);	
-	// will throw if the specified channel doesn't exist
-	//LogChannel* c = get(channel);
-	//if (c)
-	//	c->write(stream);
-}
-
-
-void Logger::write(const string& message, const char* level, 
-		const string& realm, const void* ptr) const
-{
-	// will write to the NULL channel if no default channel exists
-	LogChannel* c = getDefault();
-	if (c)
-		c->write(message, getLogLevelFromString(level), realm, ptr);
+	// Drop messages if there is no output channel
+	if (stream->channel == nil) {
+		delete stream;
+		return;
+	}
+	_writer->write(stream);
 }
 
 	
-LogStream Logger::send(const char* level, const string& realm, const void* ptr) const
+LogStream& Logger::send(const char* level, const string& realm, const void* ptr, const char* channel) const
 {
-	return LogStream(getLogLevelFromString(level), realm, ptr);
+	return *new LogStream(getLogLevelFromString(level), realm, ptr, channel);
 }
-*/
+
+
+//
+// Log Writer
+//
+
+
+LogWriter::LogWriter()
+{
+}
+
+
+LogWriter::~LogWriter()
+{
+}
+
+
+void LogWriter::write(LogStream* stream)
+{
+	stream->channel->write(*stream);	
+	delete stream;
+}
+
+
+//
+// Asynchronous Log Writer
+//
+
+
+AsyncLogWriter::AsyncLogWriter()
+{
+	_thread.start(*this);
+}
+
+
+AsyncLogWriter::~AsyncLogWriter()
+{
+	// Cancel and wait for the thread
+	cancel();
+
+	// Note: Not using join here as it is causing a deadlock
+	// when unloading shared libraries when the logger is not
+	// explicitly shutdown().
+	//while (_thread.running())
+	//	scy::sleep(10);
+	_thread.join();	
+
+	// Flush remaining items synchronously
+	flush();
+	
+	assert(_pending.empty());
+}
+
+
+void AsyncLogWriter::write(LogStream* stream)
+{
+	Mutex::ScopedLock lock(_mutex);
+	_pending.push_back(stream);
+}
+
+
+void AsyncLogWriter::clear()
+{
+	Mutex::ScopedLock lock(_mutex);
+	LogStream* next = nil;
+	while (!_pending.empty()) {
+		next = _pending.front();
+		delete next;
+		_pending.pop_front();
+	}
+}
+
+
+void AsyncLogWriter::flush()
+{
+	while (writeNext()) 
+		scy::sleep(1);
+}
+
+
+void AsyncLogWriter::run()
+{
+	while (!cancelled()) 
+		scy::sleep(writeNext() ? 1 : 50);
+}
+
+
+bool AsyncLogWriter::writeNext()
+{	
+	LogStream* next;
+	{
+		Mutex::ScopedLock lock(_mutex);
+		if (_pending.empty())
+			return false;
+
+		next = _pending.front();
+		_pending.pop_front();
+	}		
+	next->channel->write(*next);
+	delete next;
+	return true;
+}
 
 
 //
@@ -205,27 +262,30 @@ LogStream Logger::send(const char* level, const string& realm, const void* ptr) 
 //
 
 
-LogStream::LogStream(LogLevel level, const string& realm, const void* ptr) : 
-	level(level), realm(realm), address(ptr ? util::memAddress(ptr) : "")
+LogStream::LogStream(LogLevel level, const string& realm, const void* ptr, const char* channel) : 
+	level(level), realm(realm), address(ptr ? util::memAddress(ptr) : ""), channel(nil)
 {
+#ifndef DISABLE_LOGGING
+	if (channel)
+		this->channel = Logger::instance().get(channel, false);
+#endif
 }
 
 
 LogStream::LogStream(LogLevel level, const string& realm, const string& address) :
-	level(level), realm(realm), address(address)
+	level(level), realm(realm), address(address), channel(nil)
 {
 }
 
 	
 LogStream::LogStream(const LogStream& that) :
-	level(that.level), realm(that.realm), address(that.address)
+	level(that.level), realm(that.realm), address(that.address), channel(nil)
 {
 	// try to avoid copy assign
 	message.str(that.message.str());
 }
 
-
-	
+		
 //
 // Log Channel
 //
@@ -329,9 +389,9 @@ void FileChannel::open()
 		throw Exception("Log file path must be set.");
 	
 	// Create directories if needed
-	Poco::Path dir(_path);
-	dir.setFileName("");
-	Poco::File(dir).createDirectories();
+	//Poco::Path dir(_path);
+	//dir.setFileName("");
+	//Poco::File(dir).createDirectories();
 	
 	// Open the file stream
 	_fstream.close();
@@ -399,7 +459,7 @@ RotatingFileChannel::RotatingFileChannel(const string& name,
 										 int rotationInterval, 
 										 const char* dateFormat) : 
 	LogChannel(name, level, dateFormat),
-	_fstream(NULL),
+	_fstream(nil),
 	_dir(dir),
 	_extension(extension),
 	_rotationInterval(rotationInterval),
@@ -423,7 +483,7 @@ void RotatingFileChannel::write(const LogStream& stream)
 	if (this->level() > stream.level)
 		return;
 
-	if (_fstream == NULL || time(0) - _rotatedAt > _rotationInterval)	
+	if (_fstream == nil || time(0) - _rotatedAt > _rotationInterval)	
 		rotate();
 	
 	ostringstream ss;
@@ -451,17 +511,45 @@ void RotatingFileChannel::rotate()
 	}
 
 	// Open the next log file
-	_filename = Poco::format("%s_%ld.%s", _name, static_cast<long>(Timestamp().epochTime()), _extension);
-	Poco::Path path(_dir);	
-	Poco::File(path).createDirectories();
-	path.setFileName(_filename);
-	_fstream = new ofstream(path.toString().c_str());	
+	_filename = util::format("%s_%ld.%s", _name.c_str(), static_cast<long>(Timestamp().epochTime()), _extension.c_str());
+	//Poco::Path path(_dir);	
+	//Poco::File(path).createDirectories();
+	//path.setFileName(_filename);
+	std::string path(_dir + _filename);
+	_fstream = new ofstream(path.c_str());	
 	_rotatedAt = time(0);
 }
 
 
 } // namespace scy
 
+
+/*
+void Logger::write(const char* channel, const LogStream& stream)
+{	
+	LogChannel* ch = get(channel, true);
+	QueuedWrite* work = new QueuedWrite;
+	work->logger = this;
+	work->stream = stream;
+	work->channel = ch;
+	Mutex::ScopedLock lock(_mutex);
+	_pending.push_back(work);	
+	// will throw if the specified channel doesn't exist
+	//LogChannel* c = get(channel);
+	//if (c)
+	//	c->write(stream);
+}
+
+
+void Logger::write(const string& message, const char* level, 
+		const string& realm, const void* ptr) const
+{
+	// will write to the nil channel if no default channel exists
+	LogChannel* c = getDefault();
+	if (c)
+		c->write(message, getLogLevelFromString(level), realm, ptr);
+}
+*/
 
 /*
 // ---------------------------------------------------------------------

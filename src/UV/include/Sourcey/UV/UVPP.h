@@ -30,6 +30,30 @@
 #include <assert.h>
 
 
+namespace scy {
+namespace uv {
+
+
+//
+// Helpers
+//
+	
+inline void throwLastError(
+	uv_loop_t* loop = NULL,
+	const std::string& prefix = "",
+	const std::string& suffix = "") 
+{
+	throw Exception(
+		prefix + uv_strerror(
+			uv_last_error(loop)) + suffix);
+}
+
+
+//
+// Default callbacks
+//
+
+
 #define UVCallback(ClassName, Function, Handle)						 \
 															         \
 	static void _Function(Handle* handle) {						     \
@@ -75,30 +99,6 @@
 			self->setLastError();	                                \
 		self->Function(handle, status);							    \
     }														        \
-
-
-namespace scy {
-namespace uv {
-
-
-//
-// Helpers
-//
-	
-inline void throwLastError(
-	uv_loop_t* loop = NULL,
-	const std::string& prefix = "",
-	const std::string& suffix = "") 
-{
-	throw Exception(
-		prefix + uv_strerror(
-			uv_last_error(loop)) + suffix);
-}
-
-
-//
-// Default callbacks
-//
 	
 static void afterWrite(uv_write_t* req, int status) 
 {
@@ -116,8 +116,10 @@ static void afterClose(uv_handle_t* handle)
 }
 
 
-// -------------------------------------------------------------------
 //
+// Default Event Loop
+//
+
 typedef uv_loop_t Loop;
 
 inline Loop& defaultLoop()
@@ -126,74 +128,81 @@ inline Loop& defaultLoop()
 }
 
 
-// -------------------------------------------------------------------
 //
-//template <class MemoryT = StandardObject>
-class Base//: public MemoryT
-	/// A base class for extending libuv and handling the
-	/// asynchronous destruction of libuv handle pointers in C++. 
-	///
-	/// The MemoryT can be a CountedObject or StandardObject
-	/// depending on implementation memory requirements.
+// UV Handle
+//
+
+class Handle
+	/// A base class for managing libuv handles including their
+	/// inherent asynchronous destruction mechanism.
 {
 public:
-	Base(uv_loop_t* loop = NULL, void* handle = NULL) : 
+	Handle(uv_loop_t* loop = NULL, void* handle = NULL) : 
 		_loop(loop ? loop : uv_default_loop()),
 		_handle((uv_handle_t*)handle) // must be NULL or uv_handle_t
 	{
-		////traceL("UVBase", this) << "Creating: " << _handle << std::endl;	
+		//traceL("UVHandle", this) << "Creating: " << _handle << std::endl;	
 		if (_handle)
 			_handle->data = this;
 	}
+		
+	virtual ~Handle()
+		// Destroys the Handle.
+	{
+		//traceL("UVHandle", this) << "Destroying: " << _handle << std::endl;	
+		if (_handle) 
+			close();
+		assert(_handle == NULL);
+	}
 
 	virtual void setLoop(uv_loop_t* loop)
-		/// Sets the libuv loop.
-		/// Must be set before the handle is initialized. 
+		// Sets the libuv loop.
+		// Must be set before the handle is initialized. 
 	{
 		assert(_handle == NULL);
 		_loop = loop;
 	}
 
 	virtual uv_loop_t* loop() const
-		/// Returns a pointer to the current libuv event loop.
+		// Returns a pointer to the associated libuv event loop.
 	{
 		return _loop;
 	}
 	
 	template <class T>
 	T* handle() const
-		/// Returns a cast pointer to the managed libuv handle.
+		// Returns a cast pointer to the managed libuv handle.
 	{ 		
 		return reinterpret_cast<T*>(_handle);
 	}
 	
 	virtual uv_handle_t* handle() const
-		/// Returns a pointer to the managed libuv handle.
+		// Returns a pointer to the managed libuv handle.
 	{ 
 		return _handle; 
 	}
 	
 	virtual bool closed() const
-		/// Returns true when the handle is NULL.
+		// Returns true when the handle is NULL.
 	{ 
 		return _handle == NULL; 
 	}
 	
 	virtual bool active() const
-		/// Returns true when the handle is active.
+		// Returns true when the handle is active.
 	{ 
 		return _handle && uv_is_active(_handle) == 1;
 	}
 		
 	const scy::Error& error() const
-		/// Returns the error context if any.
+		// Returns the error context if any.
 	{ 
 		return _error;
 	}
 
 	virtual void setLastError(const std::string& prefix = "UV Error")
-		/// Sets the last error and sends relevent callbacks.
-		/// This method can be called inside libuv callbacks.
+		// Sets the last error and sends relevant callbacks.
+		// This method can be called inside libuv callbacks.
 	{
 		uv_err_t uv = uv_last_error(loop());
 		Error err;
@@ -204,73 +213,53 @@ public:
 	}
 	
 	virtual void setAndThrowLastError(const std::string& prefix = "UV Error")
-		/// Sets and throws the last error.
-		/// Should never be called inside libuv callbacks.
+		// Sets and throws the last error.
+		// Should never be called inside libuv callbacks.
 	{
 		setLastError(prefix);
 		throwLastError(prefix);
 	}
 
 	virtual void throwLastError(const std::string& prefix = "UV Error") const
-		/// Throws the last error.
-		/// This function is const so it can be used for
-		/// invalid getter operations on closed handles.
-		/// The actual error would be set on the next iteraton.
+		// Throws the last error.
+		// This function is const so it can be used for
+		// invalid getter operations on closed handles.
+		// The actual error would be set on the next iteraton.
 	{
 		throw Exception(formatError(prefix));
 	}
 		
 	virtual void setError(const Error& err) 
-		/// Sets the error content and triggers callbacks.
+		// Sets the error content and triggers callbacks.
 	{ 
-		//errorL("UVBase", this) << "Setting error: " << err.message << std::endl;
+		//errorL("UVHandle", this) << "Setting error: " << err.message << std::endl;
 		if (_error.uverr != err.uverr) {
 			_error = err; 
 			onError(err);
 		}
 	}
 
-protected:
-	virtual ~Base()
-		/// Destroys the Handle.
-		/// Protected destructor since some livub classes  
-		/// use reference counting memory management.
-	{
-		//traceL("UVBase", this) << "Destroying: " << _handle << std::endl;	
-
-		// If the handle has not been deleted yet we free it now.
-		if (_handle) {
-			////traceL("UVBase", this) << "Destroying: Closing" << std::endl;	
-			close();
-		}
-
-		assert(_handle == NULL);
-	}
-	
+protected:	
 	virtual void close()
-		/// Closes and destroys the associated libuv handle.
+		// Closes and destroys the associated libuv handle.
 	{
-		//traceL("UVBase", this) << "Closing: " << _handle << std::endl;	
 		if (_handle) {
 			uv_close(_handle, uv::afterClose);
 
-			/// We no longer know about the handle.
-			/// The handle pointer will be deleved by afterClose.
+			// We no longer know about the handle.
+			// The handle pointer will be deleted on afterClose.
 			_handle = NULL;
 
-			/// onClose is only called when the handle is being
-			/// destroyed.
+			// Send the local onClose to run final callbacks.
 			onClose();
 		}
-		//else
-		//	warnL("UVBase", this) << "Already closing: " << _handle << std::endl;	
 	}
 
 	virtual void onError(const Error& error) 
-		/// Override to handle errors.
-		/// The error may be a UV error, or a custom error.
+		// Override to handle errors.
+		// The error may be a UV error, or a custom error.
 	{		
-		//errorL("UVBase", this) << "On error: " << error.message << std::endl;	
+		//errorL("UVHandle", this) << "On error: " << error.message << std::endl;	
 	}
 
 	virtual std::string formatError(const std::string& prefix = "") const
@@ -285,9 +274,9 @@ protected:
 	}
 
 	virtual void onClose()
-		/// Override to handle closure.
+		// Override to handle closure.
 	{
-		//traceL("UVBase", this) << "On close" << std::endl;
+		//traceL("UVHandle", this) << "On close" << std::endl;
 	}
 
  protected:
@@ -305,18 +294,18 @@ protected:
 	
 	/*
 	virtual void tryThrowException(const std::string& reason) const
-		/// Throws the last error depending on weather 
-		/// or not if the whiny flag is set.
-		/// This function is const so it can be used for
-		/// invalid getter operations on closed handles.
-		/// The actual error would be set on the next iteraton.
+		// Throws the last error depending on weather 
+		// or not if the whiny flag is set.
+		// This function is const so it can be used for
+		// invalid getter operations on closed handles.
+		// The actual error would be set on the next iteraton.
 	{
 		if (_whiny)
 			throw Exception(reason);
 	}
 		
 	virtual void setWhiny(bool whiny) 
-		/// Sets the error content and triggers callbacks.
+		// Sets the error content and triggers callbacks.
 	{ 
 		_whiny = whiny;
 	}
@@ -355,8 +344,8 @@ protected:
 			//AsyncDeleter* async = new AsyncDeleter(_handle);
 			//async->run();
 	virtual void* instance()
-		/// Returns the derived instance pointer for signal callbacks.
-		/// This method must be derived to be effective.
+		// Returns the derived instance pointer for signal callbacks.
+		// This method must be derived to be effective.
 	{ 
 		return this; 
 	}
@@ -471,7 +460,7 @@ struct AsyncDeleter
 	{
 		//traceL("UVAsyncDeleter") << "After Close: " << handle << std::endl;		
 		AsyncDeleter* self = reinterpret_cast<AsyncDeleter*>(handle->data);
-		////traceL("UVAsyncDeleter", self) << "After Close: " << handle << std::endl;		
+		//traceL("UVAsyncDeleter", self) << "After Close: " << handle << std::endl;		
 		assert(self->handle);
 		assert(self->handle == handle);	
 		assert(self->handle->data == self);	

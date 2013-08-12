@@ -38,11 +38,11 @@ class Task: public abstract::Runnable
 {
 public:	
 	Task();
-	virtual void cancel();
+	//virtual void cancel();
 	virtual void destroy();
 	
 	virtual UInt32 id() const;
-	virtual bool cancelled() const;
+	//virtual bool cancelled() const;
 	virtual bool destroyed() const;
 	virtual bool repeating() const;
 	
@@ -50,7 +50,7 @@ protected:
 	Task& operator=(Task const&) {}
 	virtual ~Task();
 
-	virtual bool run() = 0;	
+	virtual void run() = 0;	
 		// Called by the Runner to run the task.
 		// Override this method to implement task action.
 		// Returning true means the true should be called again,
@@ -61,8 +61,7 @@ protected:
 protected:		
 	friend class Runner;
 
-	mutable Mutex _mutex;	
-	bool _cancelled;
+	mutable Mutex _mutex;
 	bool _destroyed;
 	bool _repeating;
 	UInt32 _id;
@@ -133,7 +132,7 @@ protected:
 		// inside this method.
 		// This method returns true by default.
 
-	virtual bool run() = 0;	
+	virtual void run() = 0;	
 		// Called by the Runner to run the task.
 		// Override this method to implement task logic.
 	
@@ -179,7 +178,7 @@ class TaskBase: public SocketBase<StreamSocketT, TransportT, SocketBaseT>
 //Runner& runner,
 		  
 	/*
-	virtual bool runOnce() const;
+	virtual void runOnce() const;
 	*/
 
 	//EvLoop& _loop;	

@@ -15,21 +15,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
+// This file uses functions from POCO C++ Libraries (license below)
+//
 
 
 #include "Sourcey/DateTime.h"
-#include "Poco/NumberFormatter.h"
-//#include "Poco/Ascii.h"
-#include <cctype>
+#include "Sourcey/Numeric.h"
 
+#include <cctype>
 #include <ctime>
 #if defined(_WIN32_WCE)
 #include "wce_time.h"
 #endif
 
+
 using namespace std;
-using Poco::NumberFormatter;
-//using Poco::Ascii;
 
 
 namespace scy {
@@ -80,14 +80,14 @@ DateTime::DateTime(int year, int month, int day, int hour, int minute, int secon
 	_millisecond(millisecond),
 	_microsecond(microsecond)
 {
-	poco_assert (year >= 0 && year <= 9999);
-	poco_assert (month >= 1 && month <= 12);
-	poco_assert (day >= 1 && day <= daysOfMonth(year, month));
-	poco_assert (hour >= 0 && hour <= 23);
-	poco_assert (minute >= 0 && minute <= 59);
-	poco_assert (second >= 0 && second <= 59);
-	poco_assert (millisecond >= 0 && millisecond <= 999);
-	poco_assert (microsecond >= 0 && microsecond <= 999);
+	assert(year >= 0 && year <= 9999);
+	assert(month >= 1 && month <= 12);
+	assert(day >= 1 && day <= daysOfMonth(year, month));
+	assert(hour >= 0 && hour <= 23);
+	assert(minute >= 0 && minute <= 59);
+	assert(second >= 0 && second <= 59);
+	assert(millisecond >= 0 && millisecond <= 999);
+	assert(microsecond >= 0 && microsecond <= 999);
 	
 	_utcTime = toUtcTime(toJulianDay(year, month, day)) + 10*(hour*Timespan::HOURS + minute*Timespan::MINUTES + second*Timespan::SECONDS + millisecond*Timespan::MILLISECONDS + microsecond);
 }
@@ -164,14 +164,14 @@ DateTime& DateTime::operator = (double julianDay)
 
 DateTime& DateTime::assign(int year, int month, int day, int hour, int minute, int second, int millisecond, int microsecond)
 {
-	poco_assert (year >= 0 && year <= 9999);
-	poco_assert (month >= 1 && month <= 12);
-	poco_assert (day >= 1 && day <= daysOfMonth(year, month));
-	poco_assert (hour >= 0 && hour <= 23);
-	poco_assert (minute >= 0 && minute <= 59);
-	poco_assert (second >= 0 && second <= 59);
-	poco_assert (millisecond >= 0 && millisecond <= 999);
-	poco_assert (microsecond >= 0 && microsecond <= 999);
+	assert(year >= 0 && year <= 9999);
+	assert(month >= 1 && month <= 12);
+	assert(day >= 1 && day <= daysOfMonth(year, month));
+	assert(hour >= 0 && hour <= 23);
+	assert(minute >= 0 && minute <= 59);
+	assert(second >= 0 && second <= 59);
+	assert(millisecond >= 0 && millisecond <= 999);
+	assert(microsecond >= 0 && microsecond <= 999);
 
 	_utcTime     = toUtcTime(toJulianDay(year, month, day)) + 10*(hour*Timespan::HOURS + minute*Timespan::MINUTES + second*Timespan::SECONDS + millisecond*Timespan::MILLISECONDS + microsecond);
 	_year        = year;
@@ -219,7 +219,7 @@ int DateTime::dayOfYear() const
 
 int DateTime::daysOfMonth(int year, int month)
 {
-	poco_assert (month >= 1 && month <= 12);
+	assert(month >= 1 && month <= 12);
 
 	static int daysOfMonthTable[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 	
@@ -246,7 +246,7 @@ bool DateTime::isValid(int year, int month, int day, int hour, int minute, int s
 
 int DateTime::week(int firstDayOfWeek) const
 {
-	poco_assert (firstDayOfWeek >= 0 && firstDayOfWeek <= 6);
+	assert(firstDayOfWeek >= 0 && firstDayOfWeek <= 6);
 
 	// find the first firstDayOfWeek.
 	int baseDay = 1;
@@ -396,13 +396,13 @@ void DateTime::computeGregorian(double julianDay)
 
 	normalize();
 
-	poco_assert_dbg (_month >= 1 && _month <= 12);
-	poco_assert_dbg (_day >= 1 && _day <= daysOfMonth(_year, _month));
-	poco_assert_dbg (_hour >= 0 && _hour <= 23);
-	poco_assert_dbg (_minute >= 0 && _minute <= 59);
-	poco_assert_dbg (_second >= 0 && _second <= 59);
-	poco_assert_dbg (_millisecond >= 0 && _millisecond <= 999);
-	poco_assert_dbg (_microsecond >= 0 && _microsecond <= 999);
+	assert(_month >= 1 && _month <= 12);
+	assert(_day >= 1 && _day <= daysOfMonth(_year, _month));
+	assert(_hour >= 0 && _hour <= 23);
+	assert(_minute >= 0 && _minute <= 59);
+	assert(_second >= 0 && _second <= 59);
+	assert(_millisecond >= 0 && _millisecond <= 999);
+	assert(_microsecond >= 0 && _microsecond <= 999);
 }
 
 
@@ -957,27 +957,27 @@ void DateTimeFormatter::append(std::string& str, const DateTime& dateTime, const
 				case 'W': str.append(DateTimeFormat::WEEKDAY_NAMES[dateTime.dayOfWeek()]); break;
 				case 'b': str.append(DateTimeFormat::MONTH_NAMES[dateTime.month() - 1], 0, 3); break;
 				case 'B': str.append(DateTimeFormat::MONTH_NAMES[dateTime.month() - 1]); break;
-				case 'd': NumberFormatter::append0(str, dateTime.day(), 2); break;
-				case 'e': NumberFormatter::append(str, dateTime.day()); break;
-				case 'f': NumberFormatter::append(str, dateTime.day(), 2); break;
-				case 'm': NumberFormatter::append0(str, dateTime.month(), 2); break;
-				case 'n': NumberFormatter::append(str, dateTime.month()); break;
-				case 'o': NumberFormatter::append(str, dateTime.month(), 2); break;
-				case 'y': NumberFormatter::append0(str, dateTime.year() % 100, 2); break;
-				case 'Y': NumberFormatter::append0(str, dateTime.year(), 4); break;
-				case 'H': NumberFormatter::append0(str, dateTime.hour(), 2); break;
-				case 'h': NumberFormatter::append0(str, dateTime.hourAMPM(), 2); break;
+				case 'd': scy::numeric::format0(str, dateTime.day(), 2); break;
+				case 'e': scy::numeric::format(str, dateTime.day()); break;
+				case 'f': scy::numeric::format(str, dateTime.day(), 2); break;
+				case 'm': scy::numeric::format0(str, dateTime.month(), 2); break;
+				case 'n': scy::numeric::format(str, dateTime.month()); break;
+				case 'o': scy::numeric::format(str, dateTime.month(), 2); break;
+				case 'y': scy::numeric::format0(str, dateTime.year() % 100, 2); break;
+				case 'Y': scy::numeric::format0(str, dateTime.year(), 4); break;
+				case 'H': scy::numeric::format0(str, dateTime.hour(), 2); break;
+				case 'h': scy::numeric::format0(str, dateTime.hourAMPM(), 2); break;
 				case 'a': str.append(dateTime.isAM() ? "am" : "pm"); break;
 				case 'A': str.append(dateTime.isAM() ? "AM" : "PM"); break;
-				case 'M': NumberFormatter::append0(str, dateTime.minute(), 2); break;
-				case 'S': NumberFormatter::append0(str, dateTime.second(), 2); break;
-				case 's': NumberFormatter::append0(str, dateTime.second(), 2); 
+				case 'M': scy::numeric::format0(str, dateTime.minute(), 2); break;
+				case 'S': scy::numeric::format0(str, dateTime.second(), 2); break;
+				case 's': scy::numeric::format0(str, dateTime.second(), 2); 
 				          str += '.'; 
-				          NumberFormatter::append0(str, dateTime.millisecond()*1000 + dateTime.microsecond(), 6); 
+				          scy::numeric::format0(str, dateTime.millisecond()*1000 + dateTime.microsecond(), 6); 
 				          break;
-				case 'i': NumberFormatter::append0(str, dateTime.millisecond(), 3); break;
-				case 'c': NumberFormatter::append(str, dateTime.millisecond()/100); break;
-				case 'F': NumberFormatter::append0(str, dateTime.millisecond()*1000 + dateTime.microsecond(), 6); break;
+				case 'i': scy::numeric::format0(str, dateTime.millisecond(), 3); break;
+				case 'c': scy::numeric::format(str, dateTime.millisecond()/100); break;
+				case 'F': scy::numeric::format0(str, dateTime.millisecond()*1000 + dateTime.microsecond(), 6); break;
 				case 'z': tzdISO(str, timeZoneDifferential); break;
 				case 'Z': tzdRFC(str, timeZoneDifferential); break;
 				default:  str += *it;
@@ -1002,16 +1002,16 @@ void DateTimeFormatter::append(std::string& str, const Timespan& timespan, const
 			{
 				switch (*it)
 				{
-				case 'd': NumberFormatter::append(str, timespan.days()); break;
-				case 'H': NumberFormatter::append0(str, timespan.hours(), 2); break;
-				case 'h': NumberFormatter::append(str, timespan.totalHours()); break;
-				case 'M': NumberFormatter::append0(str, timespan.minutes(), 2); break;
-				case 'm': NumberFormatter::append(str, timespan.totalMinutes()); break;
-				case 'S': NumberFormatter::append0(str, timespan.seconds(), 2); break;
-				case 's': NumberFormatter::append(str, timespan.totalSeconds()); break;
-				case 'i': NumberFormatter::append0(str, timespan.milliseconds(), 3); break;
-				case 'c': NumberFormatter::append(str, timespan.milliseconds()/100); break;
-				case 'F': NumberFormatter::append0(str, timespan.milliseconds()*1000 + timespan.microseconds(), 6); break;
+				case 'd': scy::numeric::format(str, timespan.days()); break;
+				case 'H': scy::numeric::format0(str, timespan.hours(), 2); break;
+				case 'h': scy::numeric::format(str, timespan.totalHours()); break;
+				case 'M': scy::numeric::format0(str, timespan.minutes(), 2); break;
+				case 'm': scy::numeric::format(str, timespan.totalMinutes()); break;
+				case 'S': scy::numeric::format0(str, timespan.seconds(), 2); break;
+				case 's': scy::numeric::format(str, timespan.totalSeconds()); break;
+				case 'i': scy::numeric::format0(str, timespan.milliseconds(), 3); break;
+				case 'c': scy::numeric::format(str, timespan.milliseconds()/100); break;
+				case 'F': scy::numeric::format0(str, timespan.milliseconds()*1000 + timespan.microseconds(), 6); break;
 				default:  str += *it;
 				}
 				++it;
@@ -1029,16 +1029,16 @@ void DateTimeFormatter::tzdISO(std::string& str, int timeZoneDifferential)
 		if (timeZoneDifferential >= 0)
 		{
 			str += '+';
-			NumberFormatter::append0(str, timeZoneDifferential/3600, 2);
+			scy::numeric::format0(str, timeZoneDifferential/3600, 2);
 			str += ':';
-			NumberFormatter::append0(str, (timeZoneDifferential%3600)/60, 2);
+			scy::numeric::format0(str, (timeZoneDifferential%3600)/60, 2);
 		}
 		else
 		{
 			str += '-';
-			NumberFormatter::append0(str, -timeZoneDifferential/3600, 2);
+			scy::numeric::format0(str, -timeZoneDifferential/3600, 2);
 			str += ':';
-			NumberFormatter::append0(str, (-timeZoneDifferential%3600)/60, 2);
+			scy::numeric::format0(str, (-timeZoneDifferential%3600)/60, 2);
 		}
 	}
 	else str += 'Z';
@@ -1052,14 +1052,14 @@ void DateTimeFormatter::tzdRFC(std::string& str, int timeZoneDifferential)
 		if (timeZoneDifferential >= 0)
 		{
 			str += '+';
-			NumberFormatter::append0(str, timeZoneDifferential/3600, 2);
-			NumberFormatter::append0(str, (timeZoneDifferential%3600)/60, 2);
+			scy::numeric::format0(str, timeZoneDifferential/3600, 2);
+			scy::numeric::format0(str, (timeZoneDifferential%3600)/60, 2);
 		}
 		else
 		{
 			str += '-';
-			NumberFormatter::append0(str, -timeZoneDifferential/3600, 2);
-			NumberFormatter::append0(str, (-timeZoneDifferential%3600)/60, 2);
+			scy::numeric::format0(str, -timeZoneDifferential/3600, 2);
+			scy::numeric::format0(str, (-timeZoneDifferential%3600)/60, 2);
 		}		
 	}
 	else str += "GMT";

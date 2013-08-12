@@ -17,13 +17,14 @@
 //
 
 
-#ifndef SOURCEY_Timeout_H
-#define SOURCEY_Timeout_H
+#ifndef SOURCEY_FileSystem_H
+#define SOURCEY_FileSystem_H
 
 
 #include "Sourcey/Types.h"
 
 
+/*
 #ifdef _WIN32
   #define ALLOWABLE_DIRECTORY_DELIMITERS "/\\"
   #define DIRECTORY_DELIMITER '\\'
@@ -33,28 +34,63 @@
   #define DIRECTORY_DELIMITER '/'
   #define DIRECTORY_DELIMITER_STRING "/"
 #endif
+  */
 
 
 namespace scy {
 namespace fs {
 
+	
+extern char separator;
+	// The path separator used by the current platform:
+	// '/' on unix and '\\' on windows.
 
-// TODO: Implement libuv fs_* types
-
-std::string getFileName(const std::string& path);
+std::string filename(const std::string& path);
 	// Returns the file name and extension part of the given path.
 
-std::string getFileBaseName(std::string path);
+std::string basename(const std::string& path);
 	// Returns the file name sans extension.
 
-std::string getPathName(const std::string& path);
-	// Returns the directory part of the given path.
+std::string dirname(const std::string& path);
+	// Returns the directory part of the path.
 
-std::string getExtension(const std::string& path, bool includeDot = false);
-	// Returns the file extension part of the given path.
+std::string extname(const std::string& path, bool includeDot = false);
+	// Returns the file extension part of the path.
 
-bool fileExists(const std::string& path);
+bool exists(const std::string& path);
 	// Returns true if the file exists.
+
+bool readdir(const std::string& dir, std::vector<std::string>& res);
+	// Returns a list of all files and folders in the directory. 
+
+bool isdir(const std::string& path);
+	// Returns true if the path is a directory.
+		
+std::string transcode(const std::string& path);
+	/// If LibSourcey was compiled with Unicode support (UNICODE) this 
+	/// function converts a UTF-8 encoded file path into windows native format,
+	/// otherwise the path string is returned unchanged.
+
+// TODO: Implement more libuv fs_* types
+
+/*
+class StatWatcher: public uv::Handle 
+{
+public:
+	StatWatcher();
+	virtual ~StatWatcher();
+
+	void start(const std::string& path, uint32_t interval, bool persistent = true);
+	void stop();
+
+private:
+	static void onCallback(uv_fs_poll_t* handle,
+						int status,
+						const uv_stat_t* prev,
+						const uv_stat_t* curr);
+	void stop();
+};
+*/
 
 
 } } // namespace scy::fs

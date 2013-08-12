@@ -49,7 +49,7 @@ FormatRegistry& FormatRegistry::instance()
 
 Format& FormatRegistry::get(const string& name) 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (unsigned int i = 0; i < _formats.size(); i++) {
 		if (_formats[i].name == name) {
 			return _formats[i];
@@ -62,7 +62,7 @@ Format& FormatRegistry::get(const string& name)
 
 Format& FormatRegistry::getByID(const string& id) 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (unsigned int i = 0; i < _formats.size(); i++) {
 		if (_formats[i].id == id) {
 			return _formats[i];
@@ -76,7 +76,7 @@ Format& FormatRegistry::getByID(const string& id)
 Format& FormatRegistry::getOrDefault(const string& name) 
 {
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		for (unsigned int i = 0; i < _formats.size(); i++) {
 			if (_formats[i].name == name) {
 				return _formats[i];
@@ -90,7 +90,7 @@ Format& FormatRegistry::getOrDefault(const string& name)
 
 Format& FormatRegistry::getDefault() 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	if (!_default.empty()) {
 		return get(_default);
 	}
@@ -104,7 +104,7 @@ Format& FormatRegistry::getDefault()
 
 bool FormatRegistry::exists(const string& name)
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (unsigned int i = 0; i < _formats.size(); i++) {
 		if (_formats[i].name == name) {
 			return true;
@@ -117,14 +117,14 @@ bool FormatRegistry::exists(const string& name)
 
 void FormatRegistry::clear()
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_formats.clear();
 }
 
 
 FormatList FormatRegistry::formats() const
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _formats; 
 }
 
@@ -132,14 +132,14 @@ FormatList FormatRegistry::formats() const
 void FormatRegistry::registerFormat(const Format& format)	
 { 
 	unregisterFormat(format.name);
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
     _formats.push_back(format);
 }
 
 
 bool FormatRegistry::unregisterFormat(const string& name)	
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (FormatList::iterator it = _formats.begin(); it != _formats.end(); ++it) {
 		if ((*it).name == name) {
 			_formats.erase(it);
@@ -154,7 +154,7 @@ bool FormatRegistry::unregisterFormat(const string& name)
 
 void FormatRegistry::setDefault(const string& name)
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_default = name;
 }
 

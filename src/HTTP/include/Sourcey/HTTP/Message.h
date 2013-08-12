@@ -30,7 +30,7 @@
 
 
 #include "Sourcey/Containers.h"
-#include "Poco/String.h"
+//#include "Poco/String.h"
 
 
 namespace scy {
@@ -46,79 +46,79 @@ class Message: public NVHash
 {
 public:
 	void setVersion(const std::string& version);
-		// Sets the HTTP version for this message.
+		/// Sets the HTTP version for this message.
 		
 	const std::string& getVersion() const;
-		// Returns the HTTP version for this message.
+		/// Returns the HTTP version for this message.
 		
 	void setContentLength(UInt64 length);
-		// Sets the Content-Length header.
+		/// Sets the Content-Length header.
 		//
-		// If length is UNKNOWN_CONTENT_LENGTH, removes
-		// the Content-Length header.
+		/// If length is UNKNOWN_CONTENT_LENGTH, removes
+		/// the Content-Length header.
 		
 	UInt64 getContentLength() const;
-		// Returns the content length for this message,
-		// which may be UNKNOWN_CONTENT_LENGTH if
-		// no Content-Length header is present.
+		/// Returns the content length for this message,
+		/// which may be UNKNOWN_CONTENT_LENGTH if
+		/// no Content-Length header is present.
 
 	bool hasContentLength() const;
-		// Returns true if a Content-Length header is present.
+		/// Returns true if a Content-Length header is present.
 
 	void setTransferEncoding(const std::string& transferEncoding);
-		// Sets the transfer encoding for this message.
+		/// Sets the transfer encoding for this message.
 		//
-		// The value should be either IDENTITY_TRANSFER_CODING
-		// or CHUNKED_TRANSFER_CODING.
+		/// The value should be either IDENTITY_TRANSFER_CODING
+		/// or CHUNKED_TRANSFER_CODING.
 
 	const std::string& getTransferEncoding() const;
-		// Returns the transfer encoding used for this
-		// message.
+		/// Returns the transfer encoding used for this
+		/// message.
 		//
-		// Normally, this is the value of the Transfer-Encoding
-		// header field. If no such field is present,
-		// returns IDENTITY_TRANSFER_CODING.
+		/// Normally, this is the value of the Transfer-Encoding
+		/// header field. If no such field is present,
+		/// returns IDENTITY_TRANSFER_CODING.
 		
 	void setChunkedTransferEncoding(bool flag);
-		// If flag is true, sets the Transfer-Encoding header to
-		// chunked. Otherwise, removes the Transfer-Encoding
-		// header.
+		/// If flag is true, sets the Transfer-Encoding header to
+		/// chunked. Otherwise, removes the Transfer-Encoding
+		/// header.
 		
 	bool isChunkedTransferEncoding() const;
-		// Returns true if the Transfer-Encoding header is set
-		// and its value is chunked.
+		/// Returns true if the Transfer-Encoding header is set
+		/// and its value is chunked.
 		
 	void setContentType(const std::string& contentType);
-		// Sets the content type for this message.
+		/// Sets the content type for this message.
 		//
-		// Specify NO_CONTENT_TYPE to remove the
-		// Content-Type header.
+		/// Specify NO_CONTENT_TYPE to remove the
+		/// Content-Type header.
 		
 	const std::string& getContentType() const;
-		// Returns the content type for this message.
+		/// Returns the content type for this message.
 		//
-		// If no Content-Type header is present, 
-		// returns UNKNOWN_CONTENT_TYPE.	
+		/// If no Content-Type header is present, 
+		/// returns UNKNOWN_CONTENT_TYPE.	
 
 	void setKeepAlive(bool keepAlive);
-		// Sets the value of the Connection header field.
+		/// Sets the value of the Connection header field.
 		//
-		// The value is set to "Keep-Alive" if keepAlive is
-		// true, or to "Close" otherwise.
+		/// The value is set to "Keep-Alive" if keepAlive is
+		/// true, or to "Close" otherwise.
 
 	bool getKeepAlive() const;
-		// Returns true if
-		//   * the message has a Connection header field and its value is "Keep-Alive"
-		//   * the message is a HTTP/1.1 message and not Connection header is set
-		// Returns false otherwise.
+		/// Returns true if
+		///   * the message has a Connection header field and its value is "Keep-Alive"
+		///   * the message is a HTTP/1.1 message and not Connection header is set
+		/// Returns false otherwise.
 
 	virtual void write(std::ostream& ostr) const;
-		// Writes the message header to the given output stream.
+		/// Writes the message header to the given output stream.
 		//
-		// The format is one name-value pair per line, with
-		// name and value separated by a colon and lines
-		// delimited by a carriage return and a linefeed 
-		// character. See RFC 2822 for details.
+		/// The format is one name-value pair per line, with
+		/// name and value separated by a colon and lines
+		/// delimited by a carriage return and a linefeed 
+		/// character. See RFC 2822 for details.
 
 	static const std::string HTTP_1_0;
 	static const std::string HTTP_1_1;
@@ -141,14 +141,14 @@ public:
 
 protected:
 	Message();
-		// Creates the Message with version HTTP/1.0.
+		/// Creates the Message with version HTTP/1.0.
 
 	Message(const std::string& version);
-		// Creates the Message and sets
-		// the version.
+		/// Creates the Message and sets
+		/// the version.
 
 	virtual ~Message();
-		// Destroys the Message.
+		/// Destroys the Message.
 	
 private:
 	std::string _version;

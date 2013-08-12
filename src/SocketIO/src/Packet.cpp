@@ -18,7 +18,7 @@
 
 
 #include "Sourcey/SocketIO/Packet.h"
-#include "Sourcey/Crypto.h"
+//#include "Sourcey/Crypto/Crypto.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Util.h"
 #include "Poco/Format.h"
@@ -45,7 +45,7 @@ Packet::Packet(Type type, int id, const string& endpoint, const string& message,
 	
 Packet::Packet(Type type, const string& message, bool ack) : 
 	_type(type), 
-	_id(crypto::randomNumber(4)),
+	_id(util::randomNumber(4)),
 	_message(message),
 	_ack(ack),
 	_size(0)
@@ -55,7 +55,7 @@ Packet::Packet(Type type, const string& message, bool ack) :
 	
 Packet::Packet(const string& message, bool ack) : 
 	_type(Packet::Message), 
-	_id(crypto::randomNumber(4)),
+	_id(util::randomNumber(4)),
 	_message(message),
 	_ack(ack),
 	_size(0)
@@ -65,7 +65,7 @@ Packet::Packet(const string& message, bool ack) :
 	
 Packet::Packet(const json::Value& data, bool ack) : 
 	_type(Packet::JSON), 
-	_id(crypto::randomNumber(4)),
+	_id(util::randomNumber(4)),
 	_message(json::stringify(data)),
 	_ack(ack),
 	_size(0)
@@ -75,7 +75,7 @@ Packet::Packet(const json::Value& data, bool ack) :
 	
 Packet::Packet(const string& event, const json::Value& data, bool ack) : 
 	_type(Packet::Event), 
-	_id(crypto::randomNumber(4)),
+	_id(util::randomNumber(4)),
 	_ack(ack),
 	_size(0)
 {	
@@ -146,7 +146,7 @@ bool Packet::read(Buffer& buf)
 	}
 		
 	if (!content[0].empty()) {
-		_type = util::fromString<UInt32>(content[0]);
+		_type = util::strtoi<UInt32>(content[0]);
 		//debugL("sockio::Packet", this) << "Reading: Type: " << typeString() << endl;
 	}
 
@@ -157,7 +157,7 @@ bool Packet::read(Buffer& buf)
 	}
 	if (content.size() >= 2 && !content[1].empty()) {
 		_ack = (content[1].find('+') != string::npos);
-		_id = util::fromString<UInt32>(content[1]);
+		_id = util::strtoi<UInt32>(content[1]);
 	}	
 	if (content.size() >= 3 && !content[2].empty()) {
 		_endpoint = content[2];
@@ -176,7 +176,7 @@ bool Packet::read(Buffer& buf)
 		}
 
 		_ack = true; // This is mostly for requests, but we'll set it anyway
-		_id = util::fromString<UInt32>(content[0]);
+		_id = util::strtoi<UInt32>(content[0]);
 		_message = content[1];
 	}
 

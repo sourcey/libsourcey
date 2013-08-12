@@ -59,18 +59,16 @@ namespace internal {
 
 void Thread::runAsync(void* arg)
 {
-	traceL("Thread") << "Running" << endl;
+	cout << "Thread running" << endl;
 	internal::ThreadReq* req = reinterpret_cast<internal::ThreadReq*>(arg);
 	try {
 		req->thread->_id = uv_thread_self();
 		req->thread->_running = true;
-		
-		while (req->target->run()) {	
-			scy::sleep(5);
-		}
+		req->target->run();
+		cout << "Thread ended" << endl;
 	}
 	catch (std::exception& exc) {
-		traceL("Thread") << "Error:" << exc.what() << endl;
+		cerr << "Error:" << exc.what() << endl;
 #ifdef _DEBUG
 		throw exc;
 #endif
@@ -78,13 +76,13 @@ void Thread::runAsync(void* arg)
 	req->thread->_id = 0;
 	req->thread->_running = false;
 	delete req;
-	traceL("Thread") << "Ending" << endl;
+	cout << "Thread exit" << endl;
 }
 
 
 void Thread::start(abstract::Runnable& target)
 {
-	ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	internal::ThreadReq* req = new internal::ThreadReq;
 	req->thread = this;
 	req->target = &target;
@@ -94,33 +92,35 @@ void Thread::start(abstract::Runnable& target)
 
 void Thread::start(Callable target, void* opaque)
 {
-	ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	uv_thread_create(&_handle, target, opaque);
 }
 
 
 void Thread::join()
 {
-	ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
+	cout << "Thread join" << endl;
 	uv_thread_join(&_handle);
+	cout << "Thread join: OK" << endl;
 }
 
 
 unsigned long Thread::id() const
 {
-	ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	return _id;
 }
 
 
 std::string Thread::name() const
 {
-	ScopedLock lock(_mutex);	
+	//ScopedLock lock(_mutex);	
 	return _name;
 }
 
 
-unsigned long Thread::currentID() const
+unsigned long Thread::currentID()
 {
 	return uv_thread_self();
 }
@@ -128,7 +128,7 @@ unsigned long Thread::currentID() const
 
 bool Thread::running() const
 {
-	ScopedLock lock(_mutex);
+	//ScopedLock lock(_mutex);
 	return _running;
 }
 

@@ -21,10 +21,6 @@
 #define SOURCEY_STUN_ATTRIBUTES_H
 
 
-#ifdef WIN32
-#include <winsock2.h>
-#endif
-
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -33,7 +29,7 @@
 
 #include "Sourcey/Base.h"
 #include "Sourcey/Buffer.h"
-#include "Sourcey/Crypto.h"
+#include "Sourcey/Crypto/Crypto.h"
 #include "Sourcey/Net/Address.h"
 
 
@@ -71,23 +67,23 @@ public:
 		AlternateServer			= 0x000e,
 		Fingerprint				= 0x8028,
 
-		// TURN
+		/// TURN
 		ChannelNumber			= 0x000c,
 		Lifetime				= 0x000d,
-		// 0x0010: Reserved (was BANDWIDTH)
+		/// 0x0010: Reserved (was BANDWIDTH)
 		XorPeerAddress			= 0x0012,
 		Data					= 0x0013,
 		XorRelayedAddress		= 0x0016,
 		EventPort				= 0x0018, // Not implemented
 		RequestedTransport		= 0x0019,
 		DontFragment			= 0x001A, // Not implemented
-		// 0x0021: Reserved (was TIMER-VAL)
+		/// 0x0021: Reserved (was TIMER-VAL)
 		ReservationToken			= 0x0022, // 8 bytes token value
 		
-		// TURN TCP
+		/// TURN TCP
 		ConnectionID			= 0x002a,
 
-		// ICE
+		/// ICE
 		ICEControlled			= 0x8029,
 		ICEControlling			= 0x802A,
 		ICEPriority				= 0x0024,
@@ -98,17 +94,17 @@ public:
 	virtual Attribute* clone() = 0;
 
 	virtual bool read(Buffer& buf) = 0;
-		// Reads the body (not the type or size) for this
-		// type  of attribute from  the given buffer. Return
-		// value is true if successful.
+		/// Reads the body (not the type or size) for this
+		/// type  of attribute from  the given buffer. Return
+		/// value is true if successful.
 
 	virtual void write(Buffer& buf) const = 0;
-		// Writes the body (not the type or size) to the
-		// given buffer. Return value is true if successful.
+		/// Writes the body (not the type or size) to the
+		/// given buffer. Return value is true if successful.
 
 	static Attribute* create(UInt16 type, UInt16 size = 0);
-		// Creates an attribute object with the given type 
-		// and size.
+		/// Creates an attribute object with the given type 
+		/// and size.
 	
 	Type type() const;
 	UInt16 size() const;
@@ -456,7 +452,7 @@ DECLARE_FIXLEN_STUN_ATTRIBUTE(ICEUseCandidate, 0x0025, FlagAttribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(DontFragment, 0x001A, FlagAttribute)
 
 
-} } // namespace scy::STUN
+} } // namespace scy:stun
 
 
 #endif // SOURCEY_STUN_ATTRIBUTES_H

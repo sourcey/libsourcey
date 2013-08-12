@@ -56,7 +56,7 @@ struct TransactionState: public State
 
 
 template <class PacketT>
-class PacketTransaction: public abstract::Sendable, public StatefulSignal<TransactionState>
+class PacketTransaction: public abstract::Sendable, public Stateful<TransactionState>
 	// This class provides request/response functionality for IPacket types.
 	//
 	// PacketTransactions are fire and forget. The object will be deleted

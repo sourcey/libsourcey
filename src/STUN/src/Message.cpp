@@ -32,7 +32,7 @@ Message::Message() :
 	_type(0), 
 	_state(Request), 
 	_size(0), 
-	_transactionID(crypto::randomString(16)) 
+	_transactionID(util::randomString(16)) 
 {
 	assert(_transactionID.size() == 16);
 }
@@ -273,4 +273,4 @@ void Message::write(Buffer& buf) const
 }
 
 
-} } // namespace scy::STUN
+} } // namespace scy:stun

@@ -43,10 +43,10 @@ public:
     ServerConnection(Server& server, const net::Socket& socket);
 	
 	//virtual bool send();
-		// Sends the HTTP response
+		/// Sends the HTTP response
 	
 	virtual void close();
-		// Closes the HTTP connection
+		/// Closes the HTTP connection
 	
 protected:
     virtual ~ServerConnection();
@@ -141,8 +141,8 @@ class ServerResponderFactory
 {
 public:
 	virtual ServerResponder* createResponder(ServerConnection& connection) = 0;
-		// Factory method for instantiating the ServerResponder
-		// instance using the given ServerConnection.
+		/// Factory method for instantiating the ServerResponder
+		/// instance using the given ServerConnection.
 };
 
 
@@ -156,7 +156,7 @@ class Server
 	/// TODO: 
 	/// - SSL Server
 	/// - Enable responders (controllers?) to be instantiated via
-	//    registered routes.
+	///    registered routes.
 {
 public:
 	ServerConnectionList connections;

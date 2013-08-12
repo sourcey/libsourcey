@@ -33,7 +33,7 @@ VideoCapture::VideoCapture(int deviceId) :
 {
 	traceL("VideoCapture", this) << "Creating: " << deviceId << std::endl;
 
-	_base->addOutputSignal(&Emitter);
+	_base->addEmitter(&Emitter);
 	_base->duplicate();
 }
 
@@ -44,7 +44,7 @@ VideoCapture::VideoCapture(const std::string& filename)
 
 	// The file capture is owned by this instance
 	_base = new VideoCaptureBase(filename);
-	_base->addOutputSignal(&Emitter);
+	_base->addEmitter(&Emitter);
 }
 
 
@@ -52,17 +52,15 @@ VideoCapture::VideoCapture(VideoCaptureBase* base) :
 	_base(base) 
 {
 	traceL("VideoCapture", this) << "Creating: " << base << std::endl;
-
-	_base->addOutputSignal(&Emitter);
+	_base->addEmitter(&Emitter);
 	_base->duplicate();
 }
 
 
 VideoCapture::~VideoCapture() 
 {
-	traceL("VideoCapture", this) << "Destroying: " << _base << std::endl;
-	
-	_base->removeOutputSignal(&Emitter);
+	traceL("VideoCapture", this) << "Destroying" << std::endl;	
+	_base->removeEmitter(&Emitter);
 	_base->release();
 }
 
@@ -83,8 +81,8 @@ void VideoCapture::stop()
 
 void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 {
-	traceL("VideoCapture", this) << "Get frame: " << width << "x" << height << std::endl;
-	ScopedLock lock(_mutex);	
+	//traceL("VideoCapture", this) << "Get frame: " << width << "x" << height << std::endl;
+	Mutex::ScopedLock lock(_mutex);	
 	
 	// Don't actually grab a frame here, just copy the current frame.
 	cv::Mat lastFrame = _base->lastFrame();
@@ -110,16 +108,38 @@ void VideoCapture::getEncoderFormat(Format& iformat)
 
 int VideoCapture::width() 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _base->width(); 
 }
 
 
 int VideoCapture::height() 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _base->height(); 
 }
+
+
+bool VideoCapture::opened() const
+{
+	Mutex::ScopedLock lock(_mutex);
+	return _base->opened();
+}
+
+
+bool VideoCapture::running() const 
+{
+	Mutex::ScopedLock lock(_mutex);
+	return _base->running();
+}
+
+
+VideoCaptureBase& VideoCapture::base() 
+{
+	Mutex::ScopedLock lock(_mutex);
+	return *_base;
+}
+
 
 
 //
@@ -133,8 +153,7 @@ VideoCaptureBase::VideoCaptureBase(int deviceId) :
 	_deviceId(deviceId),
 	_capturing(false),
 	_opened(false),
-	_stopping(false),
-	_insideCallback(false)
+	_stopping(false)
 {
 	traceL("VideoCaptureBase", this) << "Creating: " << deviceId << std::endl;
 	open();
@@ -149,8 +168,7 @@ VideoCaptureBase::VideoCaptureBase(const std::string& filename) :
 	_deviceId(-1),
 	_capturing(false),
 	_opened(false),
-	_stopping(false),
-	_insideCallback(false)
+	_stopping(false)
 {
 	traceL("VideoCaptureBase", this) << "Creating: " << filename << std::endl;
 	open();
@@ -172,7 +190,7 @@ VideoCaptureBase::~VideoCaptureBase()
 		_thread.join();
 	}
 
-	// Try to release the capture
+	// Try to release the capture (automatic once unrefed)
 	//try { release(); } catch (...) {}
 
 	traceL("VideoCaptureBase", this) << "Destroying: OK" << std::endl;
@@ -183,7 +201,7 @@ void VideoCaptureBase::start()
 {
 	traceL("VideoCaptureBase", this) << "Starting" << std::endl;
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 
 		if (!_thread.running()) {
 			traceL("VideoCaptureBase", this) << "Initializing thread" << std::endl;
@@ -218,7 +236,7 @@ void VideoCaptureBase::stop()
 bool VideoCaptureBase::open()
 {
 	traceL("VideoCaptureBase", this) << "Open" << std::endl;
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	_opened = _capture.isOpened() ? true : 
 		_filename.empty() ? 
@@ -236,7 +254,7 @@ bool VideoCaptureBase::open()
 }
 
 
-bool VideoCaptureBase::run() 
+void VideoCaptureBase::run() 
 {
 	try 
 	{	
@@ -249,25 +267,27 @@ bool VideoCaptureBase::run()
 		traceL("VideoCaptureBase", this) << "Running:"		
 			<< "\n\tDevice ID: " << _deviceId
 			<< "\n\tFilename: " << _filename
-			<< "\n\tWidth: " << width()
-			<< "\n\tHeight: " << height()
-			<< std::endl;
-		
+			<< "\n\tWidth: " << width() 
+			<< "\n\tHeight: " << height() << std::endl;		
+
 		while (!_stopping) 
 		{	
 			{
 				int size = 1; // dummy
 				for (int idx = 0; idx < size; idx++) {
-					ScopedLock lock(_emitMutex); 
+					Mutex::ScopedLock lock(_emitMutex); 
 					size = _emitters.size(); 
-					if ((empty = !!size) || idx >= size) break;
+					if ((empty = size == 0) || idx >= size)
+						break;
 					next = _emitters[idx];
+	
+					//traceL("VideoCaptureBase", this) << "Emitting: " << idx << ": " << _counter.fps << std::endl;
 					next->emit(next, MatrixPacket(&frame));
 				}
 			}
 			
-			// Update last frame less while in limbo
-			if (empty) {
+			// Update last frame less often while in limbo
+			if (empty || !_stopping) {
 				frame = grab();
 				scy::sleep(50);
 			}
@@ -286,33 +306,31 @@ bool VideoCaptureBase::run()
 		// The exception was not properly handled inside the signal
 		// callback scope which represents a serious application error.
 		// Time to get out the ol debugger!!!
-		setError(exc.message());
+		setError(exc.what());
 		assert(0);
 	}
 	
 	traceL("VideoCaptureBase", this) << "Exiting" << std::endl;
 	_capturing = false;
-	return false;
 }
 
 
 cv::Mat VideoCaptureBase::grab()
 {	
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 
 	// Grab a frame from the capture source
 	_capture >> _frame;
 
-	// If we are using a file input and we read to the
-	// end of the file subsequent frames will be empty.
-	// Just keep looping the input video.
+	// If using file input and we reach eof the set
+	// behavior is to loop the input video.
 	if (!_filename.empty() && (!_frame.cols || !_frame.rows)) {
 		_capture.open(_filename);
 		_capture >> _frame;
 	}
 		
 	if (!_capture.isOpened())
-		throw Exception("Cannot grab video frame", "Your video device is closed");
+		throw Exception("Cannot grab video from closed device", "Check video device: " + name());
 
 	_counter.tick();
 	//_width = _frame.cols;
@@ -324,31 +342,29 @@ cv::Mat VideoCaptureBase::grab()
 
 cv::Mat VideoCaptureBase::lastFrame() const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	if (!_opened)
-		throw Exception("Cannot grab last video frame", (error().length() ? error() : 
-			std::string("Your video device is closed")));
+		throw Exception("Cannot grab last video from closed device", (error().length() ? error() : 
+			std::string("Check video device: " + name())));
 
 	if (!_frame.cols && !_frame.rows)
-		throw Exception("Cannot grab last video frame");
+		throw Exception("Cannot grab last video from closed device", "Check video device: " + name());
 
 	return _frame; // no data is copied
 }
 
 
-void VideoCaptureBase::addOutputSignal(PacketSignal* emitter)
+void VideoCaptureBase::addEmitter(PacketSignal* emitter)
 {
-	ScopedLock lock(_emitMutex);	
-	assert(!_insideCallback);
+	Mutex::ScopedLock lock(_emitMutex);	
 	_emitters.push_back(emitter);	
 }
 
 
-void VideoCaptureBase::removeOutputSignal(PacketSignal* emitter)  
+void VideoCaptureBase::removeEmitter(PacketSignal* emitter)  
 {	
-	ScopedLock lock(_emitMutex);	
-	assert(!_insideCallback);
+	Mutex::ScopedLock lock(_emitMutex);	
 	for (PacketSignalVec::iterator it = _emitters.begin(); it != _emitters.end(); ++it) {
 		if (*it == emitter) {
 			_emitters.erase(it);
@@ -362,56 +378,56 @@ void VideoCaptureBase::removeOutputSignal(PacketSignal* emitter)
 void VideoCaptureBase::setError(const std::string& error)
 {
 	errorL("VideoCaptureBase", this) << "Setting error: " << error << std::endl;
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	_error = error;
 }
 
 
 int VideoCaptureBase::width() 
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _capture.get(CV_CAP_PROP_FRAME_WIDTH); // not const
 }
 
 
 int VideoCaptureBase::height() 
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _capture.get(CV_CAP_PROP_FRAME_HEIGHT); // not const
 }
 
 
 bool VideoCaptureBase::opened() const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _opened;
 }
 
 
 bool VideoCaptureBase::running() const 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _thread.running();
 }
 
 
 int VideoCaptureBase::deviceId() const 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _deviceId; 
 }
 
 
 std::string	VideoCaptureBase::filename() const 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _filename; 
 }
 
 
 std::string VideoCaptureBase::name() const 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	std::stringstream ss;
 	_filename.empty() ? (ss << _deviceId) : (ss << _filename);
 	return ss.str();
@@ -420,21 +436,21 @@ std::string VideoCaptureBase::name() const
 
 std::string VideoCaptureBase::error() const 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _error;
 }
 
 
 double VideoCaptureBase::fps() const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _counter.fps; 
 }
 
 
 cv::VideoCapture& VideoCaptureBase::capture()
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _capture; 
 }
 
@@ -467,7 +483,7 @@ cv::VideoCapture& VideoCaptureBase::capture()
 void VideoCaptureBase::release()
 {
 	traceL("VideoCaptureBase", this) << "Release" << std::endl;
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	if (_capture.opened())
 		_capture.release();
 	_opened = false;
@@ -516,7 +532,7 @@ bool VideoCaptureBase::detach(const PacketDelegateBase& delegate)
 /*
 Flaggable VideoCaptureBase::flags() const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _flags;
 }
 */
@@ -527,7 +543,7 @@ bool VideoCaptureBase::check()
 {	
 	grab();	
 
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 
 	// TODO: Check COM is multithreaded when using dshow highgui.
 

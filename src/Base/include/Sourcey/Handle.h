@@ -107,7 +107,7 @@ public:
 		if (_ptr)
 			return _ptr;
 		else
-			throw Poco::NullPointerException();
+			throw Exception("Null pointer");
 	}
 
 	const C* operator -> () const
@@ -115,7 +115,7 @@ public:
 		if (_ptr)
 			return _ptr;
 		else
-			throw Poco::NullPointerException();
+			throw Exception("Null pointer");
 	}
 
 	C& operator * ()
@@ -123,7 +123,7 @@ public:
 		if (_ptr)
 			return *_ptr;
 		else
-			throw Poco::NullPointerException();
+			throw Exception("Null pointer");
 	}
 
 	const C& operator * () const
@@ -131,7 +131,7 @@ public:
 		if (_ptr)
 			return *_ptr;
 		else
-			throw Poco::NullPointerException();
+			throw Exception("Null pointer");
 	}
 
 	C* get()

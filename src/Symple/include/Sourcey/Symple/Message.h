@@ -57,13 +57,13 @@ public:
 	void setFrom(const Address& from);
 
 	void setStatus(int code);
-		/// HTTP status codes are used to describe the message response.
-		/// @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+		// HTTP status codes are used to describe the message response.
+		// @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
 	json::Value& notes();
 	void setNote(const std::string& type, const std::string& text);
 	void addNote(const std::string& type, const std::string& text);
-		/// Possible "type" values: info, warn, error
+		// Possible "type" values: info, warn, error
 		
 	json::Value data(const std::string& name) const;
 	json::Value& data(const std::string& name);

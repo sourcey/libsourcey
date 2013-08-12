@@ -183,7 +183,7 @@ void SSLAdapter::handleError(int rc)
 	case SSL_ERROR_WANT_CONNECT: 
 	case SSL_ERROR_WANT_ACCEPT:
 	case SSL_ERROR_WANT_X509_LOOKUP:
-		// should not occur
+		/// should not occur
 		assert(0);
 	default:
 		char buffer[256];

@@ -44,9 +44,9 @@ macro(define_sourcey_module name)
 
   add_library(${name} ${lib_srcs} ${lib_hdrs})
       
-  # Set HAVE_LIBSOURCEY_XXX at parent scope for inclusion
+  # Set HAVE_SOURCEY_XXX at parent scope for inclusion
   # into our Config.h
-  set(HAVE_LIBSOURCEY_${name} ON PARENT_SCOPE)
+  set(HAVE_SOURCEY_${name} ON PARENT_SCOPE)
     
   # Include dependent modules
   foreach(module ${ARGN})
@@ -175,7 +175,8 @@ macro(define_libsourcey_test name)
 
   # Add source files
   file(GLOB lib_hdrs "*.h*")
-  file(GLOB lib_srcs "*.cpp")
+  #file(GLOB lib_srcs "*.cpp")
+  set(lib_srcs "${name}.cpp")
   
   source_group("Src" FILES ${lib_srcs})
   source_group("Include" FILES ${lib_hdrs})
@@ -211,77 +212,51 @@ macro(define_libsourcey_test name)
 endmacro()
 
 
-            
-    #project(${name})    
+#
+### Macro: define_libsourcey_library
+#
+# Defines a generic LibSourcey shared library.
+#
+macro(define_libsourcey_library name)
+                  
+  project(${name})    
 
-    # Add example source files
-    #file(GLOB lib_hdrs "*.h*")
-    #file(GLOB lib_srcs "*.cpp")
+  # Add source files
+  file(GLOB lib_hdrs "*.h*")
+  file(GLOB lib_srcs "*.cpp")
     
-    #source_group("Src" FILES ${lib_srcs})
-    #source_group("Include" FILES ${lib_hdrs})
+  add_definitions(-DSOURCEY_BUILD_SHARED)
+  
+  source_group("Src" FILES ${lib_srcs})
+  source_group("Include" FILES ${lib_hdrs})
 
-    #add_executable(${name} ${lib_srcs} ${lib_hdrs})
-     
-    #set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
+  #add_executable(${name} ${lib_srcs} ${lib_hdrs})
+  add_library(${name} MODULE ${lib_srcs} ${lib_hdrs})
+
+  # Include dependent modules
+  foreach(module ${ARGN})
+    include_sourcey_modules(${module})  
+    #add_dependencies(${name} ${module})
+  endforeach()  
+
+  # Include external dependencies
+  target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
+  add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES})
         
-    #foreach(lib ${ARGN})
-    #    target_link_libraries(${name} debug "Sourcey${lib}${LibSourcey_DLLVERSION}d")
-    #    target_link_libraries(${name} optimized "Sourcey${lib}${LibSourcey_DLLVERSION}")
-    #endforeach()
-    #foreach(lib IN LISTS LibSourcey_DEBUG_LIBS)
-    #    target_link_libraries(${name} debug ${lib})
-    #endforeach()
-    #foreach(lib IN LISTS LibSourcey_RELEASE_LIBS)
-    #    target_link_libraries(${name} optimized ${lib})
-    #endforeach()
+  #message(STATUS "Defining module library ${name}:")  
+  #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")  
+  #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")  
+  #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
+  
+  # Include library and header directories
+  include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
+  include_directories(${LibSourcey_INCLUDE_DIRS})
+  link_directories(${LibSourcey_LIBRARY_DIRS})  
+      
+  if(ENABLE_SOLUTION_FOLDERS)
+    set_target_properties(${name} PROPERTIES FOLDER "libs")
+  endif()
+  set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
 
-    #install(TARGETS ${name} RUNTIME DESTINATION "tests/${name}" COMPONENT main) 
-
-
-
-
-        
-    
-      #if(IS_DIRECTORY "${LibSourcey_SOURCE_DIR}/Anionu/${name}/include")        
-      #message(STATUS "Including Module: ${module}")
-      #if (EXISTS "${LibSourcey_SOURCE_DIR}/${module}/CMakeLists.txt")      
-      #  add_subdirectory("${LibSourcey_SOURCE_DIR}/${module}")
-      #endif()
-    #list(APPEND LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_${name}})
-    #if(MSVC) 
-    #  if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)  
-    #    list(APPEND LibSourcey_INCLUDE_LIBRARIES "debug" "${lib_name}d.lib")
-    #    list(APPEND LibSourcey_INCLUDE_LIBRARIES "optimized" "${lib_name}.lib")      
-    #  else()  
-    #    list(APPEND LibSourcey_INCLUDE_LIBRARIES "${lib_name}.lib")          
-    #  endif()     
-    #else()           
-    #endif()   
-          
-    #if(EXISTS "${LibSourcey_INSTALL_DIR}/lib/${lib_name}d.lib")
-    #  list(APPEND LibSourcey_DEBUG_LIBS "${lib_name}d.lib")  
-    #elseif(EXISTS "${LibSourcey_INSTALL_DIR}/lib/${lib_name}.lib")
-    #  list(APPEND LibSourcey_RELEASE_LIBS "${lib_name}.lib")  
-    #else()
-    #   message("Unable to include ${name} library: ${lib_name}")
-    #endif()
-  #list(REMOVE_DUPLICATES LibSourcey_DEBUG_LIBS)
-  #list(REMOVE_DUPLICATES LibSourcey_RELEASE_LIBS)
-  #foreach(lib IN LISTS LibSourcey_DEBUG_LIBS)
-  #  target_link_libraries(${name} debug ${lib})
-  #endforeach()
-  #foreach(lib IN LISTS LibSourcey_RELEASE_LIBS)
-  #  target_link_libraries(${name} optimized ${lib})
-  #endforeach()
-    
-  #foreach(module ${ARGN})
-  #  set(lib_name "Sourcey${module}${LibSourcey_DLLVERSION}")
-  #  if (IS_DIRECTORY "${CMAKE_SOURCE_DIR}/modules/${module}/include")
-  #    include_directories("${CMAKE_SOURCE_DIR}/modules/${module}/include")
-  #  elseif(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/projects/${module}/include")
-  #    include_directories("${CMAKE_SOURCE_DIR}/projects/${module}/include")
-  #  else()
-  #     message("Unable to include ${module} in ${name}")
-  #  endif()
-  #endforeach()
+  install(TARGETS ${name} DESTINATION "libs/${name}" COMPONENT main)    
+endmacro()

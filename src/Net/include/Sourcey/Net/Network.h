@@ -141,7 +141,7 @@ inline bool resolveDNS(DNSResult* dns)
 	
 	uv_getaddrinfo_t* handle = new uv_getaddrinfo_t;
 	handle->data = dns;
-	return uv_getaddrinfo(uv_default_loop(), handle, onDNSResolved, dns->host.c_str(), util::toString<UInt16>(dns->port).c_str(), dns->hints) == 0;
+	return uv_getaddrinfo(uv_default_loop(), handle, onDNSResolved, dns->host.c_str(), util::itostr<UInt16>(dns->port).c_str(), dns->hints) == 0;
 }
 
 
@@ -166,9 +166,9 @@ inline bool resolveDNS(const std::string& host, UInt16 port, DNSResult::func cal
 	
 	//uv_getaddrinfo_t* handle = new uv_getaddrinfo_t;
 	//handle->data = dns;
-	//return uv_getaddrinfo(uv_default_loop(), handle, onDNSResolved, host.c_str(), util::toString<UInt16>(port).c_str(), hints) == 0;
+	//return uv_getaddrinfo(uv_default_loop(), handle, onDNSResolved, host.c_str(), util::itostr<UInt16>(port).c_str(), hints) == 0;
 /*
-class Network: public uv::Base
+class Network: public uv::Handle
 {
 public:
 	Network(uv::Loop& loop = uv_default_loop());

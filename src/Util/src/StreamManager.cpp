@@ -42,7 +42,7 @@ StreamManager::~StreamManager()
 
 void StreamManager::closeAll()
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	
 	log("debug") << "Closing all streams: " << _map.size() << endl;	
 	StreamManager::Map::iterator it = _map.begin();
@@ -89,7 +89,7 @@ bool StreamManager::closeStream(const string& name, bool whiny)
 
 PacketStream* StreamManager::getDafaultStream()
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	// Returns the first stream or NULL.
 	if (!_map.empty()) {
@@ -143,14 +143,14 @@ void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state, 
 
 StreamManager::Map StreamManager::streams() const 
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _map; 
 }
 
 
 void StreamManager::print(std::ostream& os) const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	os << "StreamManager[";
 	for (StreamManager::Map::const_iterator it = _map.begin(); it != _map.end(); ++it) {	

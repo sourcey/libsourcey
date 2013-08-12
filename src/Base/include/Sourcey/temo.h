@@ -30,16 +30,14 @@ namespace crypto {
 
 
 /// Wrapper for some Poco::Crypto objects which will soon become obsolete.
-
+	/*
 std::string hash(const std::string& algorithm, const std::string& data);
 std::string encrypt(const std::string& algorithm, const std::string& data, const std::string& key, const std::string& iv = "", bool doBase64 = false, bool doPrependIV = false);
 std::string decrypt(const std::string& algorithm, const std::string& data, const std::string& key, const std::string& iv = "", bool isBase64 = false, bool isPrependIV = false);
 void encryptFile(const std::string& password, const std::string& inputFileName, const std::string& outputFileName);
 void decryptFile(const std::string& password, const std::string& inputFileName, const std::string& outputFileName);
-std::string randomBinaryString(int size, bool doBase64 = false);
-std::string randomString(int size);
-UInt64 randomNumber(int size);
 std::string computeHMAC(const std::string& input, const std::string& key);
+*/
 
 
 } // namespace crypto

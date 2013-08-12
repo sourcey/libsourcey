@@ -19,7 +19,7 @@
 
 #include "Sourcey/Symple/Message.h"
 #include "Sourcey/Util.h"
-#include "Sourcey/Crypto.h"
+//#include "Sourcey/Crypto/Crypto.h"
 #include "Sourcey/Logger.h"
 #include "Poco/Format.h"
 #include "assert.h"
@@ -36,7 +36,7 @@ namespace smpl {
 Message::Message() :
 	json::Value(Json::objectValue)
 {
-	(*this)["id"] = crypto::randomString(16);
+	(*this)["id"] = util::randomString(16);
 	(*this)["type"] = "message";
 }
 
@@ -45,7 +45,7 @@ Message::Message(const Message& root) :
 	json::Value(root)
 {
 	if (!isMember("id"))
-		(*this)["id"] = crypto::randomString(16);
+		(*this)["id"] = util::randomString(16);
 	if (!isMember("type"))
 		(*this)["type"] = "message";
 }
@@ -55,7 +55,7 @@ Message::Message(const json::Value& root) :
 	json::Value(root)
 {
 	if (!isMember("id"))
-		(*this)["id"] = crypto::randomString(16);
+		(*this)["id"] = util::randomString(16);
 	if (!isMember("type"))
 		(*this)["type"] = "message";
 }

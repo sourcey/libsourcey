@@ -5,5 +5,5 @@ if(BUILD_MODULES AND BUILD_MODULE_HTTP)
   include_dependency(LibUV REQUIRED)
   include_dependency(HttpParser REQUIRED)
 
-  define_sourcey_module(HTTP Base Net UV Util)
+  define_sourcey_module(HTTP Base Net UV Crypto Util)
 endif()

@@ -21,7 +21,6 @@
 
 
 using namespace std;
-using namespace Poco;
 
 
 namespace scy {

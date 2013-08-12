@@ -39,7 +39,7 @@ namespace scy {
 //
 
 
-class SyncContext: public uv::Base
+class SyncContext: public uv::Handle
 	// SyncContext enables any thread to  
 	// communicate with the associated event
 	// loop via synchronized callbacks.
@@ -48,7 +48,7 @@ class SyncContext: public uv::Base
 {
 public:
 	SyncContext(uv::Loop& loop) : 
-		uv::Base(&loop, new uv_async_t),
+		uv::Handle(&loop, new uv_async_t),
 		_loop(loop)
 	{
 		traceL("SyncContext", this) << "Creating" << std::endl;
@@ -80,8 +80,9 @@ protected:
 		assert(closed());
 	}
 
-	virtual bool run() = 0;
+	virtual void run() = 0;
 		// Performs synchronized actions.
+		// This method will block the event loop.
 	 
 	static void _callback(uv_async_t* req, int)
 	{
@@ -110,10 +111,8 @@ template<class T>
 class RunnableQueue: public abstract::Runnable
 {
 public:
-	RunnableQueue(int maxSize = 2048, int dispatchTimeout = DEFAULT_TIMEOUT) :
-		_maxSize(maxSize),
-		_timeout(dispatchTimeout),
-		_cancelled(false)
+	RunnableQueue(int limit = 2048) :
+		_limit(limit)
 	{
 	}	
 	
@@ -121,27 +120,16 @@ public:
 		// Pushes an item onto the queue.
 		// Item pointers are now managed by the RunnableQueue.		
 	{
-		{
-			ScopedLock lock(_mutex);	
+		Mutex::ScopedLock lock(_mutex);	
 				
-			while (static_cast<int>(_queue.size()) >= (_maxSize)) {
-				traceL("RunnableQueue", this) << "Purging" << std::endl;
-				delete _queue.front();
-				_queue.pop_front();
-				//assert(0 && "queue overflow"); // remove me
-			}
-			
-			//traceL("RunnableQueue", this) << "Pushing: " << item << ": " << _queue.size() << std::endl;
-			_queue.push_back(item);
+		while (static_cast<int>(_queue.size()) >= (_limit)) {
+			traceL("RunnableQueue", this) << "Purging: " << _queue.size() << std::endl;
+			delete _queue.front();
+			_queue.pop_front();
 		}
-	}
-	
-	virtual void cancel()
-		// Cancels the queue.
-		// No more items will be emitted after the current item.
-	{
-		ScopedLock lock(_mutex);
-		_cancelled = true;
+			
+		//traceL("RunnableQueue", this) << "Pushing: " << item << ": " << _queue.size() << std::endl;
+		_queue.push_back(item);
 	}
 	
 	virtual void flush()
@@ -149,29 +137,61 @@ public:
 	{
 		//traceL("RunnableQueue", this) << "Flushing" << std::endl;
 		
-		T* item = nil;
-		for(;;) 
-		{
-			{
-				ScopedLock lock(_mutex);
-				if (_queue.empty())
-					break;
-
-				item = _queue.front();
-				_queue.pop_front();
-			
-				// traceL("RunnableQueue", this) << "Flushing: " << item << ": " << _queue.size() << std::endl;
-			}
-			
-			emit(*item);
-			delete item;
-		}
+		while (emitNext()) 
+			scy::sleep(1);
 	}
 	
 	virtual std::deque<T*> queue()
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return _queue;
+	}
+	
+	virtual void emit(T& item) = 0;
+		// Override this method to emit the item.
+	
+	virtual void run()
+		// Called asynchronously to flush outgoing items.
+		// This method blocks until cancel() is called.
+	{
+		while (!cancelled())
+			scy::sleep(emitNext() ? 1 : 50);
+	}
+	
+	virtual void run(int timeout)
+		// Called asynchronously to flush outgoing items.
+		// This methods blocks until the queue is empty or
+		// the timeout expires.
+	{
+		Stopwatch sw;
+		sw.start();
+		while (!cancelled() && sw.elapsedMilliseconds() < timeout && emitNext())
+			scy::sleep(1);
+	}
+	
+	bool emitNext()
+		// Pops and emits the next waiting item.
+	{
+		T* next;
+		{
+			Mutex::ScopedLock lock(_mutex);
+			if (_queue.empty())
+				return false;
+
+			next = _queue.front();
+			_queue.pop_front();
+			//traceL("RunnableQueue", this) << "Emitting: " << next << ": " << _queue.size() << std::endl;
+		}		
+		emit(*next);
+		delete next;
+		return true;
+	}
+	
+	void clear()
+		// Clears all queued items.
+	{
+		Mutex::ScopedLock lock(_mutex);	
+		util::clearDeque(_queue);
 	}
 
 protected:
@@ -179,53 +199,11 @@ protected:
 	{
 		clear();
 	}
-	
-	virtual void clear()
-		// Clears all currently queued items.
-	{
-		ScopedLock lock(_mutex);	
-		traceL("RunnableQueue", this) << "Clearing: " << _queue.size() << std::endl;
-		util::clearDeque(_queue);
-	}
-	
-	virtual void emit(T& item) = 0;
-		// Override this method to emit the outgoing item.
-	
-	virtual bool run()
-		// Called asynchronously to flush and emit outgoing items.	
-	{
-		T* item = nil;
-		_sw.start();
-		for(;;) 
-		{
-			{
-				ScopedLock lock(_mutex);
-				if (_cancelled || _queue.empty() || _sw.elapsed() > _timeout) 			
-					break;
-
-				item = _queue.front();
-				_queue.pop_front();
-			}
-
-			emit(*item);
-			delete item;
-		}
-		_sw.reset();
-		return !_cancelled;
-	}
 		
 	typedef std::deque<T*> Queue;
-
-	enum
-	{
-		DEFAULT_TIMEOUT = 250000 // 250ms
-	};
 	
+	int _limit;
 	Queue _queue;
-	Stopwatch _sw;
-	int _maxSize;
-	int	_timeout;
-	bool _cancelled;	
 	mutable Mutex _mutex;
 };
 
@@ -242,8 +220,8 @@ class SyncQueue: public RunnableQueue<T>, public SyncContext
 	// them for safe consumption by the associated event loop.
 {
 public:
-	SyncQueue(uv::Loop& loop, int maxSize = 2048, int dispatchTimeout = DEFAULT_TIMEOUT) :
-		RunnableQueue<T>(maxSize, dispatchTimeout), SyncContext(loop)
+	SyncQueue(uv::Loop& loop, int limit = 2048, int timeout = 250) :
+		RunnableQueue<T>(limit), SyncContext(loop), _timeout(timeout)
 	{
 	}	
 	
@@ -254,6 +232,12 @@ public:
 		RunnableQueue::push(item);
 		SyncContext::send();
 	}
+	
+	virtual void cancel()
+	{
+		RunnableQueue::cancel();
+		SyncContext::close();
+	}
 
 protected:
 	virtual ~SyncQueue() 
@@ -263,10 +247,13 @@ protected:
 	virtual void emit(T& item) = 0;
 		// Override this method to emit the synchronized item.
 
-	virtual bool run()
+	virtual void run()
 	{
-		return RunnableQueue::run();
+		// Run until timeout
+		RunnableQueue::run(_timeout);
 	}
+
+	int _timeout;
 };
 
 
@@ -283,8 +270,8 @@ class AsyncQueue: public RunnableQueue<T>
 	// system devices from the burden of CPU intensive or long running tasks.
 {
 public:
-	AsyncQueue(int maxSize = 2048, int dispatchTimeout = DEFAULT_TIMEOUT) :
-		RunnableQueue<T>(maxSize, dispatchTimeout)
+	AsyncQueue(int limit = 2048) :
+		RunnableQueue<T>(limit)
 	{
 		// The thread will call the RunnableQueue's run 
 		// method constantly to flush outgoing packets 
@@ -328,7 +315,7 @@ protected:
 	{
 	}
 
-	virtual bool run()
+	virtual void run()
 		// Calls the synchronized callback 
 		// method from the event loop thread.
 	{		
@@ -344,6 +331,24 @@ protected:
 #endif // SOURCEY_SyncQueue_H
 
 
+	
+	/*
+	virtual void cancel()
+		// Cancels the queue.
+		// No more items will be emitted after the current item.
+	{
+		Mutex::ScopedLock lock(_mutex);
+		_cancelled = true;
+	}
+	
+	virtual void cancelled() const
+		// Return true when cancelled.
+		// TODO:
+	{
+		Mutex::ScopedLock lock(_mutex);
+		return _cancelled;
+	}
+	*/
 		
 	/*
 	virtual void stop()

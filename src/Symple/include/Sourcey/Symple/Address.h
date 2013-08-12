@@ -36,8 +36,8 @@ public:
 	Address();
 	Address(const Address& r);
 	Address(const json::Value& root);
-		/// The provided JSON value should be an object containing
-		/// the group, user, name and id string properties.
+		// The provided JSON value should be an object containing
+		// the group, user, name and id string properties.
 	virtual ~Address();
 	
 	std::string id() const;
@@ -75,9 +75,9 @@ public:
 
 protected:
 	json::Value* _root;
-		/// The root pointer is just a reference
-		/// to an externally managed JSON value,
-		/// generally a Message instance.
+		// The root pointer is just a reference
+		// to an externally managed JSON value,
+		// generally a Message instance.
 	*/
 
 };

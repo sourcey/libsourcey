@@ -262,7 +262,7 @@ public:
 		
 		Buffer buf;
 		for (PacketQueue::iterator it = first; it <= last; ++it) {			
-			buf.write(it->packet->payload(), it->packet->payloadLength());
+			buf.put(it->packet->payload(), it->packet->payloadLength());
 
 			//debugL() << "[RTP Depacketizer] Rebuilding packet with fragment " 
 			//	<< it->packet->header().sequenceNumber << std::endl;

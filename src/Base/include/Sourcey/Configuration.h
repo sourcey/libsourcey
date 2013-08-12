@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SOURCEY_IConfiguration_H
-#define SOURCEY_IConfiguration_H
+#ifndef SOURCEY_Configuration_H
+#define SOURCEY_Configuration_H
 
 
 #include "Sourcey/Signal.h"
@@ -28,8 +28,8 @@
 namespace scy {
 
 
-class IConfiguration
-	// IConfiguration is an abstract base class for managing 
+class Configuration
+	// Configuration is an abstract base class for managing 
 	// different kinds of configuration back ends such as JSON, XML,
 	// or database storage.
 	//
@@ -39,11 +39,11 @@ class IConfiguration
 	// Subclasses must override the getRaw() and setRaw() and methods.
 {
 public:
-	IConfiguration();	
-		// Creates the IConfiguration.
+	Configuration();	
+		// Creates the Configuration.
 
-	virtual ~IConfiguration();
-		// Destroys the IConfiguration.
+	virtual ~Configuration();
+		// Destroys the Configuration.
 
 	bool exists(const std::string& key) const;
 		// Returns true if the property with the given key exists.
@@ -165,10 +165,53 @@ private:
 };
 
 
+//
+// Scoped Configuration
+//
+	
+
+class ScopedConfiguration 
+	/// ScopedConfiguration provides multiple levels of configuration for a module.
+	/// Multiple levels means that there is a module level scope, and a default scope.
+	/// When a property is accessed, the module scope value will be used if available,
+	/// otherwise the default scope value will be used.
+	///
+	/// Example scoping:
+	///		Module: channels.[name].modes.[name].[value]
+	///		Default: modes.[name].[value]
+{	
+public:
+	ScopedConfiguration(Configuration& config, const std::string& currentScope, const std::string& defaultScope);
+	ScopedConfiguration(const ScopedConfiguration& r);
+
+	std::string getString(const std::string& key, const std::string& defaultValue, bool forceDefaultScope = false) const;
+	int getInt(const std::string& key, int defaultValue, bool forceDefaultScope = false) const;
+	double getDouble(const std::string& key, double defaultValue, bool forceDefaultScope = false) const;
+	bool getBool(const std::string& key, bool defaultValue, bool forceDefaultScope = false) const;
+
+	void setString(const std::string& key, const std::string& value, bool defaultScope = false);
+	void setInt(const std::string& key, int value, bool defaultScope = false);
+	void setDouble(const std::string& key, double value, bool defaultScope = false);
+	void setBool(const std::string& key, bool value, bool defaultScope = false);
+	
+	std::string getCurrentScope(const std::string& key) const;
+	std::string getDafaultKey(const std::string& key) const;
+	std::string getScopedKey(const std::string& key, bool defaultScope = false) const;
+
+	Configuration& config;
+	std::string currentScope;
+	std::string defaultScope;
+
+private:	
+	ScopedConfiguration& operator=(const ScopedConfiguration&) {};
+};
+
+
+
 } // namespace scy
 
 
-#endif // SOURCEY_IConfiguration_H
+#endif // SOURCEY_Configuration_H
 
 
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.

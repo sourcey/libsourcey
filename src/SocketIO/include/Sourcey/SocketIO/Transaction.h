@@ -44,6 +44,8 @@ struct Transaction: public PacketTransaction<sockio::Packet>
 	virtual void onPotentialResponse(void*, Packet& packet);
 	virtual void onResponse();
 
+	//virtual void* self();
+
 	sockio::Client& client;
 };
 

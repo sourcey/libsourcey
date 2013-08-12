@@ -21,8 +21,6 @@
 #define SOURCEY_Queue_H
 
 
-
-#include "Poco/Condition.h"
 #include <queue>
 
 
@@ -31,7 +29,7 @@ namespace scy {
 
 template<typename T>
 class Queue
-	// Implements a thread-safe concurrent queue.
+	// Implements a thread-safe queue container.
 {
 private:
     std::queue<T> _queue;
@@ -40,53 +38,55 @@ private:
 public:
     void push(const T& data)
     {
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         _queue.push(data);
     }
 
     bool empty() const
     {
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         return _queue.empty();
     }
 
     T& front()
     {
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         return _queue.front();
     }
     
     T const& front() const
     {
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         return _queue.front();
     }
 
     T& back()
     {
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         return _queue.back();
     }
     
     T const& back() const
     {
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         return _queue.back();
     }
 
     void pop()
     {
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         _queue.pop();
     }
 
     void popFront()
     {
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         _queue.pop_front();
     }
 };
 
+
+/* TODO: Re-implement Condition class from libuv primitives
 
 template<typename T>
 class ConcurrentQueue
@@ -101,7 +101,7 @@ private:
 public:
     void push(T const& data)
     {
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         _queue.push(data);
         lock.unlock();
         _condition.signal();
@@ -109,31 +109,32 @@ public:
 
     bool empty() const
     {
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         return _queue.empty();
     }
 
-    bool tryPop(T& popped_value)
+    bool tryPop(T& out)
     {
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         if (_queue.empty())
             return false;
         
-        popped_value = _queue.front();
+        out = _queue.front();
         _queue.pop();
         return true;
     }
 
-    void waitAndPpop(T& popped_value)
+    void waitAndPop(T& out)
     {
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
         while (_queue.empty())
 			_cond.wait(_mutex);
         
-        popped_value = _queue.front();
+        out = _queue.front();
         _queue.pop();
     }
 };
+*/
 
 
 } // namespace scy

@@ -46,10 +46,10 @@ public:
 	};
 	
 	virtual void add(const TKey& name, TValue* item, long timeout = 0)
-		/// Add the item with a timeout specified by the timeout value.
-		/// If the timeout is 0 the item will be stored indefinitely.
-		/// The item pointer MUST be destroyed by the manager or the 
-		/// application will crash.
+		// Add the item with a timeout specified by the timeout value.
+		// If the timeout is 0 the item will be stored indefinitely.
+		// The item pointer MUST be destroyed by the manager or the 
+		// application will crash.
 	{
 		// Remove existing items for the
 		// given key and store the item.
@@ -77,7 +77,7 @@ public:
 	virtual void expires(TValue* item, long timeout) 
 	{
 		if (!exists(item))
-			throw Poco::NotFoundException("Item not found");
+			throw NotFoundException("Item not found");
 		
 		
 		assert(0);

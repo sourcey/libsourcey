@@ -17,6 +17,12 @@
 //
 
 
+#ifdef WIN32
+#include <winsock2.h>
+#endif
+
+
+#include "Sourcey/Crypto/HMAC.h"
 #include "Sourcey/STUN/Attributes.h"
 #include "Sourcey/Logger.h"
 
@@ -897,4 +903,4 @@ void UInt16ListAttribute::write(Buffer& buf) const
 }
 
 
-} } // namespace scy::STUN
+} } // namespace scy:stun

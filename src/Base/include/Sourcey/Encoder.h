@@ -15,66 +15,31 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
-
-
-#ifndef SOURCEY_Worker_H
-#define SOURCEY_Worker_H
-
-
-namespace scy { 
-
-
+// This file uses the public domain libb64 library: http://libb64.sourceforge.net/
 //
-//
-class Worker 
-{
+
+
+#ifndef SOURCEY_Encoder_H
+#define SOURCEY_Encoder_H
+
+
+#include "Sourcey/Types.h"
+
+
+namespace scy {
+	
+
+class Encoder 
+{	
 public:
-	Worker(uv::Loop& loop) : 
-		loop(loop)
-	{
-	}
-
-	virtual ~Worker()
-	{
-	}
-	
-	void start()
-	{		
-		uv_work_t req;
-		req.data = this;
-        uv_queue_work(&loop, &req, _run, _afterRun);
-	}
-	
-	void stop()
-	{	
-		// TODO: Can use uv_cancel on linux, 
-		// need a synced boolean on windows
-	}
-
-	virtual bool run() = 0;
-	
-	virtual void afterRun()
-	{	
-	}
-
-	static void _run(uv_work_t *req)
-	{			
-		reinterpret_cast<Worker*>(req->data)->run();
-	}
-
-	static void _afterRun(uv_work_t *req, int status)
-	{		
-		// TODO: Do something with status?
-		reinterpret_cast<Worker*>(req->data)->afterRun();
-	}
-
-protected:
-	uv::Loop& loop;
-	uv_work_t req;
+	Encoder() {}
+	virtual ~Encoder() {}
+	virtual std::size_t encode(const char* inbuf, std::size_t nread, char* outbuf) = 0;
+	virtual std::size_t finalize(char* outbuf) { return 0; }
 };
-
+	
 
 } // namespace scy
 
 
-#endif // SOURCEY_Worker_H
+#endif // SOURCEY_Encoder_H

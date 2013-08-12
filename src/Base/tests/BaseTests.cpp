@@ -3,10 +3,15 @@
 #include "Sourcey/Runner.h"
 #include "Sourcey/Signal.h"
 #include "Sourcey/Platform.h"
+#include "Sourcey/Containers.h"
 #include "Sourcey/Application.h"
 #include "Sourcey/PacketStream.h"
+#include "Sourcey/SharedLibrary.h"
+#include "Sourcey/FileSystem.h"
 #include "Sourcey/Timer.h"
 #include "Sourcey/Util.h"
+
+#include "plugin/TestPlugin.h"
 
 #include <assert.h>
 
@@ -25,18 +30,6 @@ CMemLeakDetect memLeakDetect;
 
 
 namespace scy {
-
-
-/*
-class Logger1 {
-public:
-	Logger1() 
-	{
-	}
-
-	AsyncQueue queue;
-}
-*/
 	
 
 class Tests
@@ -46,7 +39,10 @@ class Tests
 public:
 	Tests()
 	{	
-		runLoggerTest();
+		runNVHashTest();
+		//runFSTest();
+		//runPluginTest();
+		//runLoggerTest();
 		//runPlatformTests();
 		//runExceptionTest();
 		//runTimerTest();
@@ -59,6 +55,183 @@ public:
 		//runSignalReceivers();
 		
 		scy::pause();
+	}
+
+	void runNVHashTest()
+	{
+		NVHash nvc;
+	
+		nvc.add("Connection", "value31");
+		nvc.add("Authorization", "value31");
+		nvc.add("Content-Type", "value31");
+		nvc.add("Connection", "value31");
+		nvc.add("Authorization", "value31");
+		nvc.add("Content-Type", "value31");
+		/*
+		assert (nvc.empty());
+		assert (nvc.size() == 0);
+	
+		nvc.set("name", "value");
+		assert (!nvc.empty());
+		assert (nvc["name"] == "value");
+		assert (nvc["Name"] == "value");
+	
+		nvc.set("name2", "value2");
+		assert (nvc.get("name2") == "value2");
+		assert (nvc.get("NAME2") == "value2");
+	
+		assert (nvc.size() == 2);
+	
+		try
+		{
+			std::string value = nvc.get("name3");
+			assert(0 && "not found - must throw");
+		}
+		catch (NotFoundException&)
+		{
+		}
+
+		try
+		{
+			std::string value = nvc["name3"];
+			assert(0 && "not found - must throw");
+		}
+		catch (NotFoundException&)
+		{
+		}
+	
+		assert (nvc.get("name", "default") == "value");
+		assert (nvc.get("name3", "default") == "default");
+
+		assert (nvc.has("name"));
+		assert (nvc.has("name2"));
+		assert (!nvc.has("name3"));	
+	
+		nvc.add("name3", "value3");
+		assert (nvc.get("name3") == "value3");
+	
+		nvc.add("name3", "value31");
+		
+		nvc.add("Connection", "value31");
+	
+		NVHash::ConstIterator it = nvc.find("Name3");
+		assert (it != nvc.end());
+		std::string v1 = it->second;
+		assert (it->first == "name3");
+		++it;
+		assert (it != nvc.end());
+		std::string v2 = it->second;
+		assert (it->first == "name3");
+	
+		assert ((v1 == "value3" && v2 == "value31") || (v1 == "value31" && v2 == "value3"));
+	
+		nvc.erase("name3");
+		assert (!nvc.has("name3"));
+		assert (nvc.find("name3") == nvc.end());
+	
+		it = nvc.begin();
+		assert (it != nvc.end());
+		++it;
+		assert (it != nvc.end());
+		++it;
+		assert (it == nvc.end());
+	
+		nvc.clear();
+		assert (nvc.empty());
+	
+		assert (nvc.size() == 0);
+		*/
+	}
+
+
+	// ============================================================================
+	// FileSystem Test
+	//
+	void runFSTest() 
+	{
+		std::string path(scy::getExePath());
+		debugL("FileSystemTest") << "Executable path: " << path << endl;
+
+		//std::string junkPath(path + "junkname.huh");
+		//debugL("FileSystemTest") << "Junk path: " << junkPath << endl;
+
+		std::string dir(fs::dirname(path));
+		debugL("FileSystemTest") << "Dir name: " << dir << endl;
+
+		std::vector<std::string> res;
+		assert(fs::readdir(dir, res));
+		for (unsigned i = 0; i < res.size(); i++) 
+			debugL("FileSystemTest") << "Enumerating file: " << res[i] << endl;
+
+		
+	}
+
+	// ============================================================================
+	// Plugin Test
+	//
+	typedef int (*GimmeFiveFunc)();
+
+	void runPluginTest() 
+	{
+		debugL("PluginTest") << "Starting" << endl;
+		// TODO: Use getExePath
+		string path("D:/dev/projects/Sourcey/LibSourcey/build/install/libs/TestPlugin/TestPlugind.dll");
+		
+		try
+		{
+			//
+			// Load the shared library
+			SharedLibrary lib;
+			lib.open(path, true);
+			
+			// 
+			// Get plugin descriptor and exports
+			PluginDetails* info;
+			lib.sym("exports", reinterpret_cast<void**>(&info));
+			cout << "Plugin Info: " 
+				<< "\n\tAPIVersion: " << info->abiVersion 
+				<< "\n\tFileName: " << info->fileName 
+				<< "\n\tClassName: " << info->className 
+				<< "\n\tPluginName: " << info->pluginName 
+				<< "\n\tPluginVersion: " << info->pluginVersion
+				<< endl;
+			
+			//
+			// Version checking 
+			if (info->abiVersion != SOURCEY_PLUGIN_ABI_VERSION)
+				throw Exception(util::format("Module version mismatch. Expected %s, got %s.", SOURCEY_PLUGIN_ABI_VERSION, info->abiVersion));
+			
+			//
+			// Instantiate the plugin
+			TestPlugin* plugin = reinterpret_cast<TestPlugin*>(info->initializeFunc());
+
+			//
+			// Run test methods
+			//plugin->setValue("abracadabra");
+			//assert(plugin->sValue() == "abracadabra");
+		
+			//
+			// Call a C function 
+			GimmeFiveFunc gimmeFive;
+			lib.sym("gimmeFive", reinterpret_cast<void**>(&gimmeFive));
+			assert(gimmeFive() == 5);	
+
+			//
+			// Cleanup and close the library
+			cout << "Cleanup" << endl;
+			//delete plugin;
+			cout << "Cleanup 1" << endl;
+			lib.close();
+			cout << "Cleanup 2" << endl;
+		}
+		catch (Exception& exc)
+		{
+			errorL("PluginTest") << "Error: " << exc << endl;
+			assert(0);
+		}
+		
+		cout << "Ending" << endl;
+		debugL("PluginTest") << "Ending" << endl;
 	}
 
 	// ============================================================================
@@ -75,19 +248,22 @@ public:
 	//
 	void runLoggerTest() 
 	{
+		// Test default synchronous writer
+		Logger::instance().setWriter(new LogWriter);		
 		clock_t start = clock();
-		for (unsigned i = 0; i < 1000; i++) { 
+		for (unsigned i = 0; i < 1000; i++) 
 			debugL("LoggerTest") << "Test message: " << i << endl;
-		}
-
-		runLoop();
-
-		debugL("LoggerTest") << "#################### Completed after: " << (clock() - start) << endl;
+		debugL("LoggerTest") << "#################### Synchronous test completed after: " << (clock() - start) << endl;
+		
+		// Test asynchronous writer (10x faster)
+		Logger::instance().setWriter(new AsyncLogWriter);		
+		start = clock();
+		for (unsigned i = 0; i < 1000; i++) 
+			debugL("LoggerTest") << "Test message: " << i << endl;
+		debugL("LoggerTest") << "#################### Asynchronous test completed after: " << (clock() - start) << endl;
 	}
-
 	
-
-
+	
 	// ============================================================================
 	// Exception Test
 	//
@@ -168,7 +344,7 @@ public:
 
 		void run() 
 		{
-			Log("debug") << "TestScheduler::Task: Running" << endl;
+			debugL() << "TestScheduler::Task: Running" << endl;
 			ready.set();	
 		}
 	};
@@ -234,7 +410,7 @@ public:
 	{
 		void process(IPacket& packet) 
 		{
-			Log("debug") << "SimplePacketProcessor: Processing: " << packet.className() << endl;
+			debugL() << "SimplePacketProcessor: Processing: " << packet.className() << endl;
 			
 			BroadcastPacket.send(this, packet);
 		}
@@ -305,7 +481,6 @@ public:
 		//util::pause();
 		Log("trace") << "Running Timer Task Test: END" << endl;
 	}
-	*/
 	
 
 	
@@ -325,19 +500,19 @@ public:
 		SignalBroadcaster& klass;
 		SignalReceiver(SignalBroadcaster& klass) : klass(klass)
 		{
-			Log("debug") << "SignalReceiver: Starting" << endl;
+			debugL() << "SignalReceiver: Starting" << endl;
 			klass.TestSignal += delegate(this, &SignalReceiver::onSignal);
 		}
 
 		~SignalReceiver()
 		{
-			Log("debug") << "SignalReceiver: Destroying" << endl;	
+			debugL() << "SignalReceiver: Destroying" << endl;	
 			klass.TestSignal -= delegate(this, &SignalReceiver::onSignal);
 		}
 
 		void onSignal(void*, int& value)
 		{
-			Log("debug") << "SignalReceiver: Callback: " << value << endl;	
+			debugL() << "SignalReceiver: Callback: " << value << endl;	
 		}
 	};
 	 
@@ -350,6 +525,7 @@ public:
 		}
 		//util::pause();
 	}
+	*/
 
 
 	/*
@@ -374,7 +550,7 @@ public:
 
 	void runCleanup() {
 		debugL("Tests") << "#################### Finalizing" << endl;
-		app.cleanup();
+		app.finalize();
 		debugL("Tests") << "#################### Exiting" << endl;
 	}
 	

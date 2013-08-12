@@ -65,8 +65,8 @@ public:
 	bool running() const;
 		// Returns true if the thread is currently running.
 	
-	unsigned long currentID() const;
- 		// Returns the native thread ID of the currently active thread.
+	static unsigned long currentID();
+ 		// Returns the native thread ID of the current thread.
 		
 protected:
 	Thread(const Thread&);

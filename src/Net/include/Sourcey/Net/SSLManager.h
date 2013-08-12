@@ -119,7 +119,7 @@ public:
 		/// in the event parameter will result in a failure to load the certificate.
 
 	static bool isFIPSEnabled();
-		// Returns true if FIPS mode is enabled, false otherwise.
+		/// Returns true if FIPS mode is enabled, false otherwise.
 		
 	void shutdown();
 		/// Shuts down the SSLManager and releases the default Context
@@ -198,13 +198,13 @@ class VerificationErrorArgs
 	/// A utility class for certificate error handling.
 {
 public:
-	VerificationErrorArgs(const Poco::Crypto::X509Certificate& cert, int errDepth, int errNum, const std::string& errMsg);
+	VerificationErrorArgs(const crypto::X509Certificate& cert, int errDepth, int errNum, const std::string& errMsg);
 		/// Creates the VerificationErrorArgs. _ignoreError is per default set to false.
 
 	~VerificationErrorArgs();
 		/// Destroys the VerificationErrorArgs.
 
-	const Poco::Crypto::X509Certificate& certificate() const;
+	const crypto::X509Certificate& certificate() const;
 		/// Returns the certificate that caused the error.
 
 	int errorDepth() const;
@@ -223,7 +223,7 @@ public:
 		/// returns the value of _ignoreError
 
 private:
-	Poco::Crypto::X509Certificate	_cert;
+	crypto::X509Certificate	_cert;
 	int             _errorDepth;
 	int             _errorNumber;
 	std::string     _errorMessage; /// Textual representation of the _errorNumber
@@ -231,7 +231,7 @@ private:
 };
 
 
-inline const Poco::Crypto::X509Certificate& VerificationErrorArgs::certificate() const
+inline const crypto::X509Certificate& VerificationErrorArgs::certificate() const
 {
 	return _cert;
 }

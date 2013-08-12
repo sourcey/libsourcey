@@ -152,8 +152,8 @@ void Client::onHandshakeResponse(void* sender, const http::Response& response)
 	// 503 Service Unavailable: If the server refuses the connection for any reason (eg: overload).
 	// 200 OK: The handshake was successful.
 	if (conn->response().getStatus() != 200) {
-		setError(Poco::format("SocketIO handshake failed: HTTP Error: %d %s", 
-			static_cast<int>(conn->response().getStatus()), conn->response().getReason()));
+		setError(util::format("SocketIO handshake failed: HTTP Error: %d %s", 
+			static_cast<int>(conn->response().getStatus()), conn->response().getReason().c_str()));
 		return;
 	}
 
@@ -163,14 +163,14 @@ void Client::onHandshakeResponse(void* sender, const http::Response& response)
 	StringVec respData = util::split(body, ':', 4);
 	if (respData.size() < 4) {
 		setError(body.empty() ? 
-			"Invalid SocketIO handshake response." : Poco::format(
-			"Invalid SocketIO handshake response: %s", body));
+			"Invalid SocketIO handshake response." : util::format(
+			"Invalid SocketIO handshake response: %s", body.c_str()));
 		return;
 	}
 	
 	_sessionID = respData[0];
-	_heartBeatTimeout = util::fromString<UInt32>(respData[1]);
-	_connectionClosingTimeout = util::fromString<UInt32>(respData[2]);
+	_heartBeatTimeout = util::strtoi<UInt32>(respData[1]);
+	_connectionClosingTimeout = util::strtoi<UInt32>(respData[2]);
 	_protocols = util::split(respData[3], ',');
 
 	// Check websockets are supported
@@ -474,8 +474,8 @@ void Client::onHeartBeatTimer(void*)
 			"Invalid SocketIO handshake response: %s", response.body.str()));
 	
 	_sessionID = respData[0];
-	_heartBeatTimeout = util::fromString<UInt32>(respData[1]);
-	_connectionClosingTimeout = util::fromString<UInt32>(respData[2]);
+	_heartBeatTimeout = util::strtoi<UInt32>(respData[1]);
+	_connectionClosingTimeout = util::strtoi<UInt32>(respData[2]);
 	_protocols = util::split(respData[3], ',');
 
 	// Check websockets are supported
@@ -599,7 +599,7 @@ void Client::onError()
 //void SocketBase::connect(const net::Address& serverAddr)
 //{	
 //	{
-//		ScopedLock lock(_mutex);
+//		Mutex::ScopedLock lock(_mutex);
 //		_serverAddr = serverAddr;
 //	}
 //	connect();
@@ -608,7 +608,7 @@ void Client::onError()
 //
 //void SocketBase::connect()
 //{
-//	ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //
 //	assert(_serverAddr.valid());
 //
@@ -678,8 +678,8 @@ void Client::onError()
 //			"Invalid SocketIO handshake response: %s", response.body.str()));
 //	
 //	_sessionID = respData[0];
-//	_heartBeatTimeout = util::fromString<UInt32>(respData[1]);
-//	_connectionClosingTimeout = util::fromString<UInt32>(respData[2]);
+//	_heartBeatTimeout = util::strtoi<UInt32>(respData[1]);
+//	_connectionClosingTimeout = util::strtoi<UInt32>(respData[2]);
 //	_protocols = util::split(respData[3], ',');
 //
 //	// Check websockets are supported
@@ -714,7 +714,7 @@ void Client::onError()
 //
 //int SocketBase::sendConnect(const string& endpoint, const string& query)
 //{
-//	ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	// (1) Connect
 //	// Only used for multiple sockets. Signals a connection to the endpoint. Once the server receives it, it's echoed back to the client.
 //	// 
@@ -796,28 +796,28 @@ void Client::onError()
 //
 //void SocketBase::setSecure(bool flag)
 //{
-//	ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	_secure = flag;
 //}
 //
 //
 //http::WebSocket* SocketBase::socket()
 //{
-//	ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	return _socket;
 //}
 //
 //
 //KVCollection& SocketBase::httpHeaders()
 //{
-//	ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	return _httpHeaders;
 //}
 //
 //
 //string SocketBase::sessionID() const 
 //{
-//	ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	return _sessionID;
 //}
 
@@ -891,7 +891,7 @@ void Client::onError()
 	int size = socket.receiveBytes(buffer, sizeof(buffer));	
 	string response(buffer, size);
 	size_t pos = response.find(" "); pos++;
-	int status = util::fromString<UInt32>(response.substr(pos, response.find(" ", pos) + 1));
+	int status = util::strtoi<UInt32>(response.substr(pos, response.find(" ", pos) + 1));
 	pos = response.find("\r\n\r\n", pos); pos += 4;
 	string body(response.substr(pos, response.length()));
 	socket.shutdownSend();

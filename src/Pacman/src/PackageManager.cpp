@@ -71,7 +71,7 @@ void PackageManager::initialize()
 
 bool PackageManager::initialized() const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return !_remotePackages.empty()
 		|| !_localPackages.empty();
 }
@@ -81,7 +81,7 @@ void PackageManager::uninitialize()
 {	
 	cancelAllTasks();
 	
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_remotePackages.clear();
 	_localPackages.clear();
 }
@@ -89,7 +89,7 @@ void PackageManager::uninitialize()
 
 void PackageManager::cancelAllTasks()
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	InstallTaskList::iterator it = _tasks.begin();
 	while (it != _tasks.end()) {
 		(*it)->cancel();
@@ -100,7 +100,7 @@ void PackageManager::cancelAllTasks()
 
 void PackageManager::createDirectories()
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	File(_options.cacheDir).createDirectories();
 	File(_options.interDir).createDirectories();
 	File(_options.installDir).createDirectories();
@@ -109,7 +109,7 @@ void PackageManager::createDirectories()
 
 void PackageManager::queryRemotePackages()
 {	
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	
 	debugL("PackageManager", this) << "Querying Packages: " 
 		<< _options.endpoint << _options.indexURI << endl;
@@ -152,7 +152,8 @@ void PackageManager::onPackagesResponse(void* sender, const http::Response& resp
 {
 	http::ClientConnection* conn = reinterpret_cast<http::ClientConnection*>(sender);
 
-	traceL("PackageManager", this) << "Server response:" << response << endl;
+	//traceL("PackageManager", this) << "Server response:" << response << 
+	//	conn->readStream<std::stringstream>()->str() << endl;
 			
 	json::Value root;
 	json::Reader reader;
@@ -183,7 +184,7 @@ void PackageManager::loadLocalPackages()
 {
 	string dir;
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 
 		if (!_tasks.empty())
 			throw Exception("Cannot load packages while tasks are active.");	
@@ -522,7 +523,7 @@ InstallTask* PackageManager::createInstallTask(PackagePair& pair, const InstallT
 	InstallTask* task = new InstallTask(*this, pair.local, pair.remote, options);
 	task->Complete += delegate(this, &PackageManager::onPackageInstallComplete, -1); // lowest priority to remove task
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		_tasks.push_back(task);
 	}
 	TaskAdded.emit(this, *task);
@@ -605,7 +606,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 //
 InstallTask* PackageManager::getInstallTask(const string& id) const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (InstallTaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); it++) {
 		if ((*it)->remote()->id() == id)
 			return *it;
@@ -616,7 +617,7 @@ InstallTask* PackageManager::getInstallTask(const string& id) const
 
 InstallTaskList PackageManager::tasks() const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _tasks;
 }
 
@@ -626,7 +627,7 @@ InstallTaskList PackageManager::tasks() const
 //
 PackagePair PackageManager::getPackagePair(const string& id, bool whiny) const
 {		
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	LocalPackage* local = _localPackages.get(id, false);
 	RemotePackage* remote = _remotePackages.get(id, false);
 
@@ -643,7 +644,7 @@ PackagePair PackageManager::getPackagePair(const string& id, bool whiny) const
 PackagePairList PackageManager::getPackagePairs() const
 {	
 	PackagePairList pairs;
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	LocalPackageMap lpackages = _localPackages.map();
 	RemotePackageMap rpackages = _remotePackages.map();
 	for (LocalPackageMap::const_iterator lit = lpackages.begin(); lit != lpackages.end(); ++lit) {
@@ -667,7 +668,7 @@ PackagePairList PackageManager::getPackagePairs() const
 
 PackagePair PackageManager::getOrCreatePackagePair(const string& id)
 {	
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	RemotePackage* remote = _remotePackages.get(id, true);
 	if (remote->assets().empty())
 		throw Exception("The remote package has no file assets.");
@@ -694,7 +695,7 @@ PackagePair PackageManager::getOrCreatePackagePair(const string& id)
 
 string PackageManager::installedPackageVersion(const string& id) const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	LocalPackage* local = _localPackages.get(id, true);
 	
 	if (!local->valid())
@@ -802,7 +803,7 @@ bool PackageManager::isSupportedFileType(const string& fileName)
 
 Path PackageManager::getCacheFilePath(const string& fileName)
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	Path path(options().cacheDir);
 	path.makeDirectory();
@@ -825,21 +826,21 @@ Path PackageManager::getIntermediatePackageDir(const string& id)
 
 PackageManager::Options& PackageManager::options() 
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _options;
 }
 
 
 RemotePackageStore& PackageManager::remotePackages() 
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _remotePackages; 
 }
 
 
 LocalPackageStore& PackageManager::localPackages()
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _localPackages; 
 }
 
@@ -860,7 +861,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 
 	// Remove the task reference
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		for (InstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++) {
 			if (*it == task) {
 				_tasks.erase(it);
@@ -1209,7 +1210,7 @@ bool PackageManager::updatePackages(const StringVec& names, InstallMonitor* moni
 				errorL("PackageManager", this) << "Finalizing: Delete Error: " << fIt.path().toString() << endl;
 				*/
 	/* 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	//const string& name
 	//if (util::compareVersion(remote->latestAsset().version(), local->version()))
 	//	return false;
@@ -1231,7 +1232,7 @@ PackagePair PackageManager::getPackagePair(const string& name, bool whiny)
 
 bool PackageManager::isUpToDate(const string& name)
 {	
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	
 	LocalPackage* local = _localPackages.get(name, true);
 	RemotePackage* remote = _remotePackages.get(name, true);

@@ -58,7 +58,7 @@ Codec::Codec(const std::string& sdp) //:
 	// codec id
 	end = value.find(" ");
 	if (end != string::npos) {
-		id = util::fromString<UInt32>(value.substr(start, end).c_str());
+		id = util::strtoi<UInt32>(value.substr(start, end).c_str());
 	}
 
 	// codec name
@@ -71,7 +71,7 @@ Codec::Codec(const std::string& sdp) //:
 	// clockrate
 	start = end+1;
 	end = value.length(); 
-	sampleRate = util::fromString<UInt32>(value.substr(start, end-start).c_str());
+	sampleRate = util::strtoi<UInt32>(value.substr(start, end-start).c_str());
 }
 
 

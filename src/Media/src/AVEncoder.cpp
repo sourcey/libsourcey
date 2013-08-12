@@ -105,7 +105,7 @@ void AVEncoder::initialize()
 	try {
 		{
 			// Lock mutex during initialization
-			ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 
 			if (!_options.oformat.video.enabled && 
 				!_options.oformat.audio.enabled)
@@ -141,7 +141,7 @@ void AVEncoder::initialize()
 		createAudio();		
 		{
 			// Lock our mutex during initialization
-			ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 
 			if (_options.ofile.empty()) {
 
@@ -229,7 +229,7 @@ void AVEncoder::cleanup()
 	traceL("AVEncoder", this) << "Cleanup" << endl;
 	{
  		// Lock our mutex during closure
-		ScopedLock lock(_mutex);	
+		Mutex::ScopedLock lock(_mutex);	
 
  		// Write the trailer
 		if (_formatCtx &&
@@ -242,7 +242,7 @@ void AVEncoder::cleanup()
 	freeAudio();
 	{
  		// Lock our mutex during closure
-		ScopedLock lock(_mutex);	
+		Mutex::ScopedLock lock(_mutex);	
 
 		// Close the format
 		if (_formatCtx) {
@@ -282,21 +282,21 @@ void AVEncoder::cleanup()
 
 RecordingOptions& AVEncoder::options()
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _options;
 }
 
 
 VideoEncoderContext* AVEncoder::video()
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _video;
 }
 
 
 AudioEncoderContext* AVEncoder::audio()
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _audio;
 }
 
@@ -308,7 +308,7 @@ AudioEncoderContext* AVEncoder::audio()
 
 void AVEncoder::createVideo()
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	assert(!_video);
 
 	// Initialize the video encoder (if required)
@@ -325,7 +325,7 @@ void AVEncoder::createVideo()
 
 void AVEncoder::freeVideo()
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 
 	if (_video) {
 		delete _video;
@@ -343,7 +343,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 	VideoEncoderContext* video = nil;	
 	{	
 		// Lock the mutex while encoding
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		options = &_options;
 		formatCtx = _formatCtx;
 		video = _video;
@@ -437,7 +437,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 
 void AVEncoder::createAudio()
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	assert(!_audio);
 
 	// Initialize the audio encoder (if required)
@@ -465,7 +465,7 @@ void AVEncoder::createAudio()
 
 void AVEncoder::freeAudio()
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 
 	if (_audio) {
 		delete _audio;
@@ -496,7 +496,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 time)
 	AVFifoBuffer* audioFifo = nil;	
 	UInt8* audioBuffer = nil;	
 	{	
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		options = &_options;
 		formatCtx = _formatCtx;
 		audio = _audio;

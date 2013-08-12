@@ -73,7 +73,7 @@ void Roster::update(const json::Value& data, bool whiny)
 
 Peer* Roster::getByHost(const string& host)
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	for (PeerMap::const_iterator it = _map.begin(); it != _map.end(); ++it) {	
 		if (it->second->host() == host)
 			return it->second;
@@ -84,14 +84,14 @@ Peer* Roster::getByHost(const string& host)
 
 Roster::PeerMap Roster::peers() const 
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _map; 
 }
 
 
 void Roster::print(ostream& os) const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	os << "Roster[";
 	for (PeerMap::const_iterator it = _map.begin(); it != _map.end(); ++it) {	

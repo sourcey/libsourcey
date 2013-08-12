@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SOURCEY_HTTP_Utilities_h
-#define SOURCEY_HTTP_Utilities_h
+#ifndef SOURCEY_HTTP_URL_H
+#define SOURCEY_HTTP_URL_H
 
 
 #include "Sourcey/Base.h"
@@ -31,6 +31,10 @@ namespace http {
 
 
 class URL
+	/// An RFC 3986 based URL which uses an external c 
+	/// library to do the heavy lifting.
+	/// Constructors and assignment operators will throw
+	/// a SyntaxException if the URL is invalid.
 {
 public:
     URL();
@@ -40,30 +44,23 @@ public:
     URL(const std::string& scheme, const std::string& authority, const std::string& pathEtc);
     URL(const std::string& scheme, const std::string& authority, const std::string& path, const std::string& query, const std::string& fragment = "");
     ~URL();
-
+	
 	URL& operator = (const URL& uri);
-		// Assignment operator.
-
 	URL& operator = (const std::string& uri);
-		// Parses and assigns an URI from the given string.
-		// Throws a SyntaxException if the uri is not valid.
-
 	URL& operator = (const char* uri);
-		// Parses and assigns an URI from the given string.
-		// Throws a SyntaxException if the uri is not valid.
-
+	
+	/// Parses and assigns an URI from the given string.
+	/// Throws a SyntaxException if whiny is set and the
+	/// given url is invalid.
     bool parse(const std::string& url, bool whiny = true);
-		// Parses and assigns an URI from the given string.
-		// Throws a SyntaxException if whiny is set and the
-		// given url is invalid.
-
+	
+	/// RFC 3986 based URL encoding based on JavaScript's 
+	/// encodeURIComponent()
 	static std::string URL::encode(const std::string &str);
-		// RFC 3986 based URL encoding based on JavaScript's 
-		// encodeURIComponent()
-
+	
+	/// RFC 3986 based URL decoding based on JavaScript's 
+	/// decodeURIComponent()
 	static std::string URL::decode(const std::string& str);
-		// RFC 3986 based URL decoding based on JavaScript's 
-		// decodeURIComponent()
 
 public:
     std::string scheme() const;
@@ -104,7 +101,7 @@ protected:
 } // namespace scy
 
 
-#endif // SOURCEY_HTTP_Utilities_h
+#endif // SOURCEY_HTTP_URL_H
 
 
 

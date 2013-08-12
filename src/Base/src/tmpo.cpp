@@ -17,119 +17,61 @@
 //
 
 
+/*
 #include "Sourcey/Crypto.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Util.h"
+#include "Sourcey/Random.h"
+#include "Sourcey/Base64.h"
 
+#include "Poco/Base64Decoder.h"
+#include "Poco/Base64Encoder.h"
 #include "Poco/DigestEngine.h"
 #include "Poco/SHA1Engine.h"
 #include "Poco/MD5Engine.h"	
-#include "Poco/Random.h"
-#include "Poco/Base64Decoder.h"
-#include "Poco/Base64Encoder.h"
 #include "Poco/Crypto/CipherFactory.h"
 #include "Poco/Crypto/Cipher.h"
 #include "Poco/Crypto/CipherKey.h"
+using namespace Poco::Crypto;
 
 #include <iostream>
 #include <sstream>
+#include <assert.h>
 
 
 using namespace std;
-using namespace Poco::Crypto;
+*/
 
 
 namespace scy {
+	/*
 namespace crypto {
 
 
-// Generates a random binary key
-string randomBinaryString(int size, bool doBase64)
+std::string hash(const std::string& algorithm, const std::string& data)
 {
-	string res;
-	ostringstream ostr;
-	try
-	{
-		Poco::Random rnd;
-		rnd.seed();
-		for (int i = 0; i < size; ++i)
-			res.push_back(rnd.nextChar());
-
-		if (doBase64) {
-			Poco::Base64Encoder encoder(ostr);
-			encoder << res;
-			encoder.close();
-			res = ostr.str();
-		}
-	} 
-	catch (...) 
-	{
-		errorL() << "crypt: Unknown Error" << endl;
-	}
-	return res;
-}
-
-
-// Generates a random key
-string randomString(int size)
-{
-	string res;
-	try
-	{	
-		res = hash("md5", randomBinaryString(size)).substr(0, size);
-	}
-	catch (...)
-	{
-		errorL() << "crypt: Unknown Error" << endl;
-	}
-	return res;
-}
-
-
-UInt64 randomNumber(int size)
-{
-	UInt64 res = 0;
-	stringstream strm;
-	string str;
-	try
-	{	
-		Poco::Random rnd;
-		rnd.seed();
-		while (strm.str().length() < size)
-		{
-			strm << rnd.next();
-		}
-		str = strm.str().substr(0, size);
-		res = util::fromString<UInt64>(str.c_str());
-	}
-	catch (...)
-	{
-		errorL() << "crypt: Unknown Error" << endl;
-	}
-	return res;
-}
-
-
-string hash(const string& algorithm, const string& data)
-{
-	string hash;
+	std::string hash;
 	if (algorithm == "md5") {
 		Poco::MD5Engine engine;
 		engine.update(data);
-		hash = Poco::DigestEngine::digestToHex(engine.digest());
-	} else if (algorithm == "sha1") {
+		hash = Poco::crypto::digestToHex(engine.digest());
+	} 
+	else if (algorithm == "sha1") {
 		Poco::SHA1Engine engine;
 		engine.update(data);
-		hash = Poco::DigestEngine::digestToHex(engine.digest());
+		hash = Poco::crypto::digestToHex(engine.digest());
 	}
+	else assert(0 && "not implemented");
 	return hash;
 }
+	*/
 
 
-string encrypt(const string& algorithm, const string& data, const string& key, const string& iv, bool doBase64, bool doPrependIV)
+	/*
+std::string encrypt(const std::string& algorithm, const std::string& data, const std::string& key, const std::string& iv, bool doBase64, bool doPrependIV)
 {
+	std::string out;
 	CipherKey cipherKey(algorithm);
-	string out;
 	
 	CipherKey::ByteVec keyVec;	
 	keyVec.reserve(key.length());
@@ -150,9 +92,9 @@ string encrypt(const string& algorithm, const string& data, const string& key, c
 
 	if (doPrependIV)
 	{
-		out = pCipher1->encryptString(data, Cipher::ENC_NONE);
+		out = pCipher1->encryptString(data, Cipher::Binary);
 		if (doBase64) {
-			ostringstream str;
+			std::ostringstream str;
 			Poco::Base64Encoder encoder(str);
 			encoder << iv;
 			encoder << out;
@@ -164,23 +106,22 @@ string encrypt(const string& algorithm, const string& data, const string& key, c
 	{
 		out = pCipher1->encryptString(
 			data, 
-			doBase64 ? Cipher::ENC_BASE64 : Cipher::ENC_NONE
+			doBase64 ? Cipher::Base64 : Cipher::Binary
 		);
 	}
-
-	//Logger::send("debug") << "Encrypt: " << algorithm << ": Output: " << out << endl;
-
 	return out;
 }
 
-
-string decrypt(const string& algorithm, const string& data, const string& key, const string& iv, bool isBase64, bool isPrependIV)
+	*/
+	
+	/*
+std::string decrypt(const std::string& algorithm, const std::string& data, const std::string& key, const std::string& iv, bool isBase64, bool isPrependIV)
 {
+	std::string out;
 	CipherKey cipherKey(algorithm);
-	string ivFinal = iv;
-	istringstream source(data);
-	ostringstream sink;
-	string out;
+	std::string ivFinal = iv;
+	std::istringstream source(data);
+	std::ostringstream sink;
 	
 	CipherKey::ByteVec keyVec;	
 	keyVec.reserve(key.length());
@@ -193,7 +134,7 @@ string decrypt(const string& algorithm, const string& data, const string& key, c
 		ivFinal = "";
 		if (isBase64)
 		{
-			istringstream b64strm(data);
+			std::istringstream b64strm(data);
 			Poco::Base64Decoder decoder(b64strm);
 			while (decoder.rdbuf()->sgetc() != EOF && 
 				ivFinal.size() < cipherKey.ivSize()) {
@@ -203,7 +144,7 @@ string decrypt(const string& algorithm, const string& data, const string& key, c
 		}
 		else
 		{	
-			string::const_iterator it = data.begin();
+			std::string::const_iterator it = data.begin();
 			while (it != data.end() && 
 				ivFinal.size() < cipherKey.ivSize()) {
 				ivFinal.push_back(*it);
@@ -219,12 +160,13 @@ string decrypt(const string& algorithm, const string& data, const string& key, c
 	cipherKey.setIV(ivVec);	
 
 	Cipher::Ptr pCipher1 = CipherFactory::defaultFactory().createCipher(cipherKey);
-	pCipher1->decrypt(source, sink, isBase64 ? Cipher::ENC_BASE64 : Cipher::ENC_NONE);
+	pCipher1->decrypt(source, sink, isBase64 ? Cipher::Base64 : Cipher::Binary);
 	
 	// If the IV was prepended remove cipherKey.ivSize() characters from the front of the output.
 	out = sink.str();
 	if (isPrependIV)
 		out.erase(0, cipherKey.ivSize());
+		*/
 
 	/*
 	Logger::send("debug") << "Decrypt:\n" 
@@ -233,57 +175,33 @@ string decrypt(const string& algorithm, const string& data, const string& key, c
 		<< "Data: " << data << "\n" 
 		<< "IV Size: " << cipherKey.ivSize() << "\n" 
 		<< endl;
-		*/
 
 	return out;
 
 }
 
 
-#ifdef WIN32
-//hack for name collision of OCSP_RESPONSE and winCrypto.h in latest openssl release 0.9.8h
-//http://www.google.com/search?q=OCSP%5fRESPONSE+wincrypt%2eh
-//continue to watch this issue for a real fix.
-#undef OCSP_RESPONSE
-#endif
-#include <openssl/hmac.h>
-#include <assert.h>
-
-std::string computeHMAC(const std::string& input, const std::string& key) {	
-	/*
-	debugL() << "crypt: Computing HMAC:\n"
-		<< "\tInput: " << input << "\n"
-		<< "\tInput Length: " << input.length() << "\n"
-		<< "\tKey: " << key << "\n"
-		<< "\tKey Length: " << key.length() << "\n"
-		<< std::endl;
-		*/
-	unsigned int resultSize=0;
-	char* buffer = new char[20];
-	HMAC(EVP_sha1(), 
-		key.c_str(), key.length(), 
-        reinterpret_cast<const unsigned char*>(input.c_str()), input.length(), 
-        reinterpret_cast<unsigned char*>(buffer), &resultSize);
-	assert(resultSize == 20);
-	std::string hmac(buffer, resultSize);
-	delete buffer;
-	return hmac;
+std::string computeHMAC(const std::string& input, const std::string& key) 
+{	
+	assert(0 && "use crypto module");
+	return "";
 }
 
 
-void encryptFile(const string& password, const string& inputFileName, 
-                 const string& outputFileName)
+void encryptFile(const std::string& password, const std::string& inputFileName, 
+                 const std::string& outputFileName)
 {
 	assert(0 && "not implemented");
 }
 
 
-void decryptFile(const string& password, const string& inputFileName, 
-                 const string& outputFileName)
+void decryptFile(const std::string& password, const std::string& inputFileName, 
+                 const std::string& outputFileName)
 {
 	assert(0 && "not implemented");
 }
 
 
 } // namespace crypto
+		*/
 } // namespace scy

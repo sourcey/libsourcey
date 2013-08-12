@@ -19,7 +19,7 @@
 
 #include "Sourcey/Symple/Command.h"
 #include "Sourcey/Util.h"
-#include "Sourcey/Crypto.h"
+////#include "Sourcey/Crypto/Crypto.h"
 #include "assert.h"
 
 

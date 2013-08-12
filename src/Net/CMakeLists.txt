@@ -4,5 +4,5 @@ if(BUILD_MODULES AND BUILD_MODULE_Net)
   include_dependency(OpenSSL REQUIRED)
   include_dependency(LibUV REQUIRED)
 
-  define_sourcey_module(Net Base UV)
+  define_sourcey_module(Net Base Crypto UV)
 endif()

@@ -488,7 +488,7 @@ public:
 	typedef std::vector<SocketHandle<SocketT>> List;
 
 	SocketHandle() :
-		// NOTE: Only compiles for derived SocketBase implementations
+		/// NOTE: Only compiles for derived SocketBase implementations
 		Handle<SocketT>(new SocketT)
 	{
 	}
@@ -584,7 +584,7 @@ public:
 protected:
 	SocketHandle() 
 		//:
-		// NOTE: Only compiles for derived SocketBase implementations
+		/// NOTE: Only compiles for derived SocketBase implementations
 		//Handle<SocketT>(new SocketT)
 	{
 	}

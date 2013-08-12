@@ -60,18 +60,18 @@ bool ReceiverReportPacket::read(Buffer& buffer)
 
 	if (RTCP::Packet::read(buffer)) {
 		
-		buffer.readU32(ssrc);
+		buffer.getU32(ssrc);
 		
 		int remaining = length - 4 - 4;
 		while (remaining >= 24) {			
 			ReceiverReportBlock* report = new ReceiverReportBlock;
-			buffer.readU32(report->ssrc);
-			buffer.readU8(report->fractionLost);
-			buffer.readU16(report->totalLost);
-			buffer.readU32(report->highestSeqNum);
-			buffer.readU32(report->jitter);
-			buffer.readU32(report->lsr);
-			buffer.readU32(report->dlsr);
+			buffer.getU32(report->ssrc);
+			buffer.getU8(report->fractionLost);
+			buffer.getU16(report->totalLost);
+			buffer.getU32(report->highestSeqNum);
+			buffer.getU32(report->jitter);
+			buffer.getU32(report->lsr);
+			buffer.getU32(report->dlsr);
 			addReport(report);
 			remaining -= 24;
 		}
@@ -87,17 +87,17 @@ void ReceiverReportPacket::write(Buffer& buffer) const
 {
 	RTCP::Packet::write(buffer);
 	
-	buffer.writeU32(ssrc);
+	buffer.putU32(ssrc);
 		
 	for (std::vector<ReceiverReportBlock*>::const_iterator it = _reports.begin(); it != _reports.end(); ++it) {
 		ReceiverReportBlock* report = *it;
-		buffer.writeU32(report->ssrc);
-		buffer.writeU8(report->fractionLost);
-		buffer.writeU16(report->totalLost);
-		buffer.writeU32(report->highestSeqNum);
-		buffer.writeU32(report->jitter);
-		buffer.writeU32(report->lsr);
-		buffer.writeU32(report->dlsr);
+		buffer.putU32(report->ssrc);
+		buffer.putU8(report->fractionLost);
+		buffer.putU16(report->totalLost);
+		buffer.putU32(report->highestSeqNum);
+		buffer.putU32(report->jitter);
+		buffer.putU32(report->lsr);
+		buffer.putU32(report->dlsr);
 	}
 }
 

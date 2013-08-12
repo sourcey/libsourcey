@@ -43,11 +43,11 @@ public:
 	virtual ~Roster();
 
 	virtual void update(const json::Value& data, bool whiny = false);
-		/// Updates the roster from the given client object.
+		// Updates the roster from the given client object.
 	
 	Peer* getByHost(const std::string& host);
-		/// Returns the peer who's host matches the 
-		/// given IP address.
+		// Returns the peer who's host matches the 
+		// given IP address.
 	
 	virtual PeerMap peers() const;
 	
@@ -70,5 +70,5 @@ public:
 
     //virtual Address ourAddress() const;
     //virtual Peer* ourPeer(bool whiny = true);
-		/// Returns the peer object that
-		/// controls the current session.
+		// Returns the peer object that
+		// controls the current session.

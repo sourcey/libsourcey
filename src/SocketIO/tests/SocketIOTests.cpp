@@ -94,7 +94,7 @@ int main(int argc, char** argv)
 	{
 		scy::sockio::Tests run;
 	}		
-	Logger::uninitialize();
+	Logger::shutdown();
 	return 0;
 }
 

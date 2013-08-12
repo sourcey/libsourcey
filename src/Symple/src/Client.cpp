@@ -18,6 +18,8 @@
 
 
 #include "Sourcey/Symple/Client.h"
+#include "Sourcey/Net/TCPSocket.h"
+#include "Sourcey/Net/SSLSocket.h"
 
 
 using namespace std;
@@ -25,6 +27,45 @@ using namespace std;
 
 namespace scy {
 namespace smpl {
+
+
+//
+// TCP Client
+//
+
+
+Client* createTCPClient(const Client::Options& options, uv::Loop& loop)
+{
+	return new Client(new net::TCPBase, options, loop);
+}
+
+
+TCPClient::TCPClient(const Client::Options& options, uv::Loop& loop) :
+	Client(new net::TCPBase, options, loop)
+{
+}
+
+
+//
+// SSL Client
+//
+	
+
+Client* createSSLClient(const Client::Options& options, uv::Loop& loop)
+{
+	return new Client(new net::SSLBase, options, loop);
+}
+
+
+SSLClient::SSLClient(const Client::Options& options, uv::Loop& loop) :
+	Client(new net::SSLBase, options, loop)
+{
+}
+
+
+//
+// Client Implementation
+//
 
 
 Client::Client(net::SocketBase* socket, const Client::Options& options, uv::Loop& loop) :
@@ -210,23 +251,18 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 {
 	log("trace") << "Announce Response: " << state.toString() << endl;
 	
-	sockio::Transaction* transaction = reinterpret_cast<sockio::Transaction*>(sender);
+	sockio::Transaction* transaction1 = reinterpret_cast<sockio::Transaction*>(sender);
+	sockio::Transaction* transaction = static_cast<sockio::Transaction*>(sender);
 	switch (state.id()) {	
 	case TransactionState::Success:
 		try 
 		{
-			log("trace") << "Announce Response 1: " << state.toString() << endl;	
-
 			json::Value data = transaction->response().json()[(size_t)0];
 			_announceStatus = data["status"].asInt();
-
-			log("trace") << "Announce Response 2: " << state.toString() << endl;	
 			
 			// Notify the outside application of the response 
 			// status before we transition the client state.
 			Announce.emit(this, _announceStatus);
-			
-			log("trace") << "Announce Response 3: " << state.toString() << endl;	
 
 			if (_announceStatus != 200)
 				throw Exception(data["message"].asString()); //"Announce Error: " + 
@@ -490,7 +526,7 @@ void Client::onError()
 //{
 //	json::Value data;
 //	{
-//		ScopedLock lock(_mutex);
+//		Mutex::ScopedLock lock(_mutex);
 //		data["token"]	= _options.token;
 //		data["user"]	= _options.user;
 //		data["name"]	= _options.name;
@@ -620,42 +656,42 @@ void Client::onError()
 //
 //Roster& Client::roster() 
 //{ 
-//	ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	return _roster; 
 //}
 //
 //
 //PersistenceT& Client::persistence() 
 //{ 
-//	ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	return _persistence; 
 //}
 //
 //
 //Client::Options& Client::options() 
 //{ 
-//	ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	return _options; 
 //}
 //
 //
 //string Client::ourID() const
 //{
-//	ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	return _ourID;
 //}
 //
 //
 //int Client::announceStatus() const
 //{
-//	ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	return _announceStatus;
 //}
 //
 //
 //Peer& Client::ourPeer() //bool whiny
 //{	
-//	ScopedLock lock(_mutex);
+//	Mutex::ScopedLock lock(_mutex);
 //	traceL() << "[Client:" << this << "] Getting Our Peer: " << _ourID << endl;
 //	if (_ourID.empty())
 //		throw Exception("No active peer session is available.");

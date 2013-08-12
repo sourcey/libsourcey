@@ -59,110 +59,110 @@ class FormWriter: public NVHash, public PacketSource, public abstract::Startable
 {
 public:
 	static FormWriter* create(ClientConnection& conn, const std::string& encoding = FormWriter::ENCODING_URL);
-		// Creates the FormWriter that uses the given connection and
-		// encoding type.
+		/// Creates the FormWriter that uses the given connection and
+		/// encoding type.
 		//
-		// Encoding must be either "application/x-www-form-urlencoded"
-		// (which is the default) or "multipart/form-data".
+		/// Encoding must be either "application/x-www-form-urlencoded"
+		/// (which is the default) or "multipart/form-data".
 		
 	~FormWriter();
-		// Destroys the FormWriter.
+		/// Destroys the FormWriter.
 
 	void addFile(const std::string& name, FilePart* part);
-		// Adds an part/attachment (file upload) to the form.
+		/// Adds an part/attachment (file upload) to the form.
 		//
-		// The form takes ownership of the FilePart and deletes it when it
-		// is no longer needed. The part will only be sent if the encoding
-		// set for the form is "multipart/form-data"
+		/// The form takes ownership of the FilePart and deletes it when it
+		/// is no longer needed. The part will only be sent if the encoding
+		/// set for the form is "multipart/form-data"
 		
 	void start();
-		// Starts the sending thread.
+		/// Starts the sending thread.
 		
 	void stop();
-		// Stops the sending thread.
+		/// Stops the sending thread.
 
 	bool stopped() const;
-		// Returns true if the writer thread has been stopped.
+		/// Returns true if the writer thread has been stopped.
 		
 	void prepareSubmit();
-		// Prepares the outgoing HTTP request object for submitting the form.
+		/// Prepares the outgoing HTTP request object for submitting the form.
 		//
-		// If the request method is GET, the encoded form is appended to the
-		// request URI as query string. Otherwise (the method is
-		// POST), the form's content type is set to the form's encoding.
-		// The form's parameters must be written to the
-		// request body separately, with a call to write.
-		// If the request's HTTP version is HTTP/1.0:
-		//    - persistent connections are disabled
-		//    - the content transfer encoding is set to identity encoding
-		// Otherwise, if the request's HTTP version is HTTP/1.1:
-		//    - the request's persistent connection state is left unchanged
-		//    - the content transfer encoding is set to chunked
+		/// If the request method is GET, the encoded form is appended to the
+		/// request URI as query string. Otherwise (the method is
+		/// POST), the form's content type is set to the form's encoding.
+		/// The form's parameters must be written to the
+		/// request body separately, with a call to write.
+		/// If the request's HTTP version is HTTP/1.0:
+		///    - persistent connections are disabled
+		///    - the content transfer encoding is set to identity encoding
+		/// Otherwise, if the request's HTTP version is HTTP/1.1:
+		///    - the request's persistent connection state is left unchanged
+		///    - the content transfer encoding is set to chunked
 	
 	void writeMultipart();
-		// Writes "multipart/form-data" encoded data 
-		// to the given client connection.
+		/// Writes "multipart/form-data" encoded data 
+		/// to the given client connection.
 
 	void writeUrl(std::ostream& ostr);
-		// Writes "application/x-www-form-urlencoded" 
-		// encoded data to the given output stream.
+		/// Writes "application/x-www-form-urlencoded" 
+		/// encoded data to the given output stream.
 
 	void setEncoding(const std::string& encoding);
-		// Sets the encoding used for posting the form.
+		/// Sets the encoding used for posting the form.
 		//
-		// Encoding must be either "application/x-www-form-urlencoded"
-		// (which is the default) or "multipart/form-data".
+		/// Encoding must be either "application/x-www-form-urlencoded"
+		/// (which is the default) or "multipart/form-data".
 		
 	const std::string& encoding() const;
-		// Returns the encoding used for posting the form.
+		/// Returns the encoding used for posting the form.
 
 	void setBoundary(const std::string& boundary);
-		// Sets the boundary to use for separating form parts.
+		/// Sets the boundary to use for separating form parts.
 
 	const std::string& boundary() const;
-		// Returns the MIME boundary used for writing multipart form data.
+		/// Returns the MIME boundary used for writing multipart form data.
 
 	ClientConnection& connection();
-		// The associated HTTP client connection.
+		/// The associated HTTP client connection.
 			
 	PacketSignal Emitter;
-		// Outgoing packet emitter
+		/// Outgoing packet emitter
 
 	static const char* ENCODING_URL;       /// "application/x-www-form-urlencoded"
 	static const char* ENCODING_MULTIPART; /// "multipart/form-data"
 	
 protected:
 	FormWriter(ClientConnection& conn, const std::string& encoding = FormWriter::ENCODING_URL);
-		// Creates the FormWriter that uses the given encoding.
+		/// Creates the FormWriter that uses the given encoding.
 		//
-		// Encoding must be either "application/x-www-form-urlencoded"
-		// (which is the default) or "multipart/form-data".
+		/// Encoding must be either "application/x-www-form-urlencoded"
+		/// (which is the default) or "multipart/form-data".
 
 	FormWriter(const FormWriter&);
 	FormWriter& operator = (const FormWriter&);
 
 	static void runThread(void* arg);
-		// Called asynchronously by the thread to send form data
-		// over the HTTP client connection.
+		/// Called asynchronously by the thread to send form data
+		/// over the HTTP client connection.
 		
 	void writePartHeader(const NVHash& header, std::ostream& ostr);
-		// Writes the message boundary string, followed
-		// by the message header to the output stream.
+		/// Writes the message boundary string, followed
+		/// by the message header to the output stream.
 		
 	void writeEnd(std::ostream& ostr);
-		// Writes the final boundary string to the output stream.
+		/// Writes the final boundary string to the output stream.
 
 	static std::string createBoundary();
-		// Creates a random boundary string.
+		/// Creates a random boundary string.
 		//
-		// The string always has the form boundary-XXXXXXXXXXXX, 
-		// where XXXXXXXXXXXX is a randomly generate number.
+		/// The string always has the form boundary-XXXXXXXXXXXX, 
+		/// where XXXXXXXXXXXX is a randomly generate number.
 
 	virtual void updateProgress(int nread);
-		// Updates the upload progress via the associated 
-		// ClientConnection object.
+		/// Updates the upload progress via the associated 
+		/// ClientConnection object.
 		
-	// virtual void onStreamStateChange(const PacketStreamState&) {};
+	/// virtual void onStreamStateChange(const PacketStreamState&) {};
 
 	friend class FilePart;
 
@@ -195,51 +195,51 @@ class FilePart
 {
 public:
 	FilePart(const std::string& path);
-		// Creates the FilePart for the given path.
+		/// Creates the FilePart for the given path.
 		//
-		// The MIME type is set to application/octet-stream.
+		/// The MIME type is set to application/octet-stream.
 		//
-		// Throws an FileException if the file cannot be opened.
+		/// Throws an FileException if the file cannot be opened.
 	
 	FilePart(const std::string& path, const std::string& contentType);
-		// Creates the FilePart for the given
-		// path and MIME type.
+		/// Creates the FilePart for the given
+		/// path and MIME type.
 		//
-		// Throws an FileException if the file cannot be opened.
+		/// Throws an FileException if the file cannot be opened.
 
 	FilePart(const std::string& path, const std::string& filename, const std::string& contentType);
-		// Creates the FilePart for the given
-		// path and MIME type. The given filename is 
-		// used as part filename (see filename()) only.
+		/// Creates the FilePart for the given
+		/// path and MIME type. The given filename is 
+		/// used as part filename (see filename()) only.
 		//
-		// Throws an FileException if the file cannot be opened.
+		/// Throws an FileException if the file cannot be opened.
 
 	~FilePart();
-		// Destroys the FilePart.
+		/// Destroys the FilePart.
 
 	virtual void open(const std::string& path);
-		// Opens the file.
+		/// Opens the file.
 		//
-		// Throws an FileException if the file cannot be opened.
+		/// Throws an FileException if the file cannot be opened.
 
 	virtual void write(FormWriter& writer);
-		// Writes the form data to the given HTTP client connection.
+		/// Writes the form data to the given HTTP client connection.
 
 	virtual void write(std::ostream& ostr);
-		// Writes the form data to the given output stream.	
+		/// Writes the form data to the given output stream.	
 				
 	NVHash& headers();
-		// Returns a NVHash containing additional header 
-		// fields for the part.	
+		/// Returns a NVHash containing additional header 
+		/// fields for the part.	
 	
 	const std::string& contentType() const;
-		// Returns the MIME type for this part or attachment.
+		/// Returns the MIME type for this part or attachment.
 		
 	const std::string& filename() const;
-		// Returns the filename portion of the path.
+		/// Returns the filename portion of the path.
 		
 	UInt64 fileSize() const;
-		// Returns the file size.
+		/// Returns the file size.
 
 protected:
 	std::string _contentType;
