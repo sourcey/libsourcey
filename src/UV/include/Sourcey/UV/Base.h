@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SOURCEY_UV_Base_H
-#define SOURCEY_UV_Base_H
+#ifndef SOURCEY_UV_Handle_H
+#define SOURCEY_UV_Handle_H
 
 
 #include "Sourcey/UV/UVPP.h"
@@ -42,13 +42,13 @@ namespace uv {
 	/*
 
 	virtual void reset()
-		/// Reinitializes the libuv handle after closure.
+		// Reinitializes the libuv handle after closure.
 	{
 	}
 	virtual void closeOnError(bool flag)
-		/// Sets the closeOnError option.
-		/// When true close() will be called directly after
-		/// setting the error context. 
+		// Sets the closeOnError option.
+		// When true close() will be called directly after
+		// setting the error context. 
 	{
 		_closeOnError = flag;
 	}
@@ -57,7 +57,7 @@ namespace uv {
 	/*
 		//_destroying(false), 
 	virtual bool destroying() const
-		/// Returns the destroying boolean value.
+		// Returns the destroying boolean value.
 	{ 
 		return _destroying; 
 	}
@@ -70,20 +70,20 @@ namespace uv {
 		
 		/*
 		if (_handle && !uv_is_closing(_handle)) { // && !_destroying
-			traceL("Base", this) << "Closing Handle" << std::endl;	
-			//uv_close(_handle, Base::afterClose);
+			traceL("Handle", this) << "Closing Handle" << std::endl;	
+			//uv_close(_handle, Handle::afterClose);
 		}
 		else
-			warnL("Base", this) << "Handle already closing: " << _handle << std::endl;	
+			warnL("Handle", this) << "Handle already closing: " << _handle << std::endl;	
 			*/
 
 	
 	/*
 	virtual void destroy()
-		/// Closes and destroys the libuv handle
-		/// and then destroys the current instance.
+		// Closes and destroys the libuv handle
+		// and then destroys the current instance.
 	{
-		traceL("Base", this) << "Destroy" << std::endl;		
+		traceL("Handle", this) << "Destroy" << std::endl;		
 		assert(!_destroying);
 		_destroying = true;
 		
@@ -104,7 +104,7 @@ namespace uv {
 			// The current instance will be deleted via afterClose()
 			if (needCleanup) {
 
-				debugL("Base", this) << "Destroy: Running cleanup loop" << std::endl;
+				debugL("Handle", this) << "Destroy: Running cleanup loop" << std::endl;
 				uv_run(loop(), UV_RUN_DEFAULT); // UV_RUN_ONCE doesn't seem to work?
 			}
 			return;
@@ -119,8 +119,8 @@ namespace uv {
 	/*
 	static void afterClose(uv_handle_t* handle)
 	{
-		Base* self = static_cast<Base*>(handle->data);
-		traceL("Base", self) << "After Close: " << handle << std::endl;		
+		Handle* self = static_cast<Handle*>(handle->data);
+		traceL("Handle", self) << "After Close: " << handle << std::endl;		
 		assert(self->_handle);
 		assert(self->_handle == handle);	
 		assert(uv_is_closing(self->_handle));
@@ -135,8 +135,8 @@ namespace uv {
 
 /*		
 	Signal<int> Error;
-		/// Signals on handle error state
+		// Signals on handle error state
 
 	NullSignal Closed;
-		/// Signals on handle closed state
+		// Signals on handle closed state
 		*/

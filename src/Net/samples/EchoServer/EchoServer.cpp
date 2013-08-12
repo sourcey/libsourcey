@@ -35,6 +35,6 @@ int main(int argc, char** argv)
 		srv.shutdown();
 		app.waitForShutdown(onShutdown, &srv);
 	}
-	Logger::uninitialize();
+	Logger::shutdown();
 	return 0;
 }

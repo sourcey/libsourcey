@@ -46,7 +46,7 @@ public:
 };
 
 
-} } // namespace scy::STUN
+} } // namespace scy:stun
 
 
 #endif // SOURCEY_STUN_Transaction_H

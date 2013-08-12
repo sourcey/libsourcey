@@ -28,9 +28,10 @@ namespace scy {
 	
 	
 struct LogStream;
-struct Polymorphic
-	// A base calss for logging and callback polymorphism.
+class Polymorphic
+	// A base class for C++ callback polymorphism.
 {
+public:
 	virtual ~Polymorphic() {};
 		
 	template<class T>
@@ -46,7 +47,7 @@ struct Polymorphic
 		return self;
 	};
 
-	virtual LogStream log(const char* level = "debug") const;
+	virtual LogStream& log(const char* level = "debug") const;
 
 	virtual const char* className() const = 0;
 };

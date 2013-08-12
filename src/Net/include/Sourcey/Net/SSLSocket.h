@@ -92,7 +92,7 @@ public:
 	virtual void onConnect(int status);
 
 	virtual void onRead(const char* data, int len);
-		/// Reads raw encrypred SSL data
+		/// Reads raw encrypted SSL data
 
 protected:
 	virtual void* instance() { return this; }

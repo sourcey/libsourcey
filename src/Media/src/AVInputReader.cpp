@@ -181,7 +181,7 @@ void AVInputReader::start()
 {
 	traceL("AVInputReader", this) << "Starting" << endl;
 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	assert(_video || _audio);
 
 	if (_video || _audio &&
@@ -211,7 +211,7 @@ void AVInputReader::stop()
 }
 
 
-bool AVInputReader::run() 
+void AVInputReader::run() 
 {
 	traceL("AVInputReader", this) << "Running" << endl;
 	
@@ -337,41 +337,40 @@ bool AVInputReader::run()
 
 	traceL("AVInputReader", this) << "Exiting" << endl;
 	ReadComplete.emit(this);
-	return false;
 }
 
 
 AVInputReader::Options& AVInputReader::options()
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _options; 
 }
 	
 
 AVFormatContext* AVInputReader::formatCtx() const
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _formatCtx;
 }
 	
 
 VideoDecoderContext* AVInputReader::video() const
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _video;
 }
 	
 
 AudioDecoderContext* AVInputReader::audio() const
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _audio;
 }
 
 
 string AVInputReader::error() const
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _error;
 }
 

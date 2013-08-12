@@ -51,7 +51,7 @@ AVPacketEncoder::~AVPacketEncoder()
 
 void AVPacketEncoder::process(IPacket& packet)
 {	
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	// We may be receiving either audio or video packets	
 	VideoPacket* vPacket = nil;
@@ -140,7 +140,7 @@ void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state)
 { 
 	traceL("AVPacketEncoder", this) << "Stream state change: " << state << endl;
 	
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	switch (state.id()) {
 	case PacketStreamState::Running:

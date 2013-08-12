@@ -60,7 +60,7 @@ Message::Message(const Message& r)
 
 Message::~Message() 
 {
-	util::ClearVector(_lines);
+	util::clearVector(_lines);
 	//for (vector<Line*>::iterator it = _lines.begin(); it != _lines.end(); ++it)
 	//	delete *it;
 }
@@ -75,7 +75,7 @@ IPacket* Message::clone() const
 bool Message::read(Buffer& buf)
 {
 	// TODO: Use buffer instead of string for more efficient read methods. 
-	return read(string(buf.begin(), buf.size()));
+	return read(buf.toString());
 }
 
 
@@ -171,7 +171,7 @@ bool Message::read(const std::string& src)
 
 void Message::write(Buffer& buf) const 
 {
-	buf.write(toString());
+	buf.put(toString());
 }
 
 
@@ -250,7 +250,7 @@ bool Message::isICESupported() const
 
 		if ((*it)->type() == Line::M) {
 			M* lineM = reinterpret_cast<M*>(*it);
-			mPort = util::toString(lineM->port());
+			mPort = util::itostr(lineM->port());
 			vector<Candidate*> attrs = lineM->lines<Candidate>();
 			for (vector<Candidate*>::const_iterator it1 = attrs.begin(); it1 != attrs.end(); ++it1) {
 

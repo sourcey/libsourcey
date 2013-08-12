@@ -24,6 +24,7 @@
 //
 /// Version number  
 //
+
 #define SOURCEY_MAJOR_VERSION    0
 #define SOURCEY_MINOR_VERSION    9
 #define SOURCEY_PATCH_VERSION    0
@@ -36,6 +37,7 @@
 //
 /// Cross platform configuration
 //
+
 #include "LibSourceyConfig.h"
 
 #ifdef _WIN32
@@ -64,15 +66,17 @@
     // Mac OS
     #define APPLE
 #endif
+	
 
-
-//
-/// Cross platform normalization
-//
 #ifdef WIN32
-#define strncasecmp strnicmp
-#define strcasecmp stricmp
-#endif 
+# ifndef SOURCEY_SHARED_LIBRARY
+#   define SOURCEY_EXTERN __declspec(dllexport)
+# else
+#   define SOURCEY_EXTERN __declspec(dllimport)
+# endif
+#else
+# define SOURCEY_EXTERN // nothing
+#endif
 
 
 #endif // SOURCEY_H

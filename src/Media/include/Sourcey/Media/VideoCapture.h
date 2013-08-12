@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SOURCEY_MEDIA_VideoCaptureBase_H
-#define SOURCEY_MEDIA_VideoCaptureBase_H
+#ifndef SOURCEY_MEDIA_VideoCapture_H
+#define SOURCEY_MEDIA_VideoCapture_H
 
 
 #include "Sourcey/Types.h"
@@ -72,9 +72,17 @@ public:
 	
 	virtual void start();
 	virtual void stop();
+	
+	bool opened() const;
+		// True when the system device is open.
+
+	bool running() const;
+		// True when the thread is running. 
 
 	int width();
 	int height();
+
+	VideoCaptureBase& base();
 				
 	void getFrame(cv::Mat& frame, int width = 0, int height = 0);
 
@@ -125,7 +133,7 @@ public:
 		// True when the system device is open.
 
 	bool running() const;
-		// True when the internal 
+		// True when the internal thread is running. 
 	
 	int deviceId() const;
 	std::string	filename() const;
@@ -142,12 +150,12 @@ protected:
 
 	bool open();
 	cv::Mat grab();
-	virtual bool run();
+	virtual void run();
 
 	void setError(const std::string& error);
 	
-	virtual void addOutputSignal(PacketSignal* emitter);
-	virtual void removeOutputSignal(PacketSignal* emitter);
+	virtual void addEmitter(PacketSignal* emitter);
+	virtual void removeEmitter(PacketSignal* emitter);
 	
 	friend class VideoCapture;
 	friend class MediaFactory;
@@ -157,18 +165,17 @@ private:
 	mutable Mutex _mutex;
 	mutable Mutex _emitMutex;
 
-	cv::VideoCapture _capture;
-	cv::Mat _frame;			// Current video image
-	int _deviceId;			// Source device to capture from
 	bool _opened;
 	bool _stopping;
 	bool _capturing;
-	bool _isImageSource;	// Source file is an image or not
-	FPSCounter _counter;
+	int _deviceId;			// Source device to capture from
+	cv::Mat _frame;			// Current video image
 	std::string	_error;		// Error message if any
 	std::string	_filename;	// Source file to capture from if any
-	Thread _thread;
+	FPSCounter _counter;
+	cv::VideoCapture _capture;
 	PacketSignalVec _emitters;
+	Thread _thread;
 };
 
 
@@ -209,7 +216,7 @@ struct MatrixPacket: public VideoPacket
 } } // namespace scy::av
 
 
-#endif // SOURCEY_MEDIA_VideoCaptureBase_H
+#endif // SOURCEY_MEDIA_VideoCapture_H
 
 
 
@@ -285,7 +292,7 @@ protected:
 	bool open();
 	void release();
 	cv::Mat grab();
-	virtual bool run();
+	virtual void run();
 
 	void setError(const std::string& error);
 

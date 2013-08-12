@@ -47,7 +47,7 @@ RemoteCandidate::RemoteCandidate(const string& src) :
 		while (src[i] != ' ' && i < len) {
 			componentIDstr += src[i++];
 		}
-		c->componentID = util::fromString<UInt32>(componentIDstr.c_str());
+		c->componentID = util::strtoi<UInt32>(componentIDstr.c_str());
 
 		while (src[i] == ' ' && i < len)
 			i++;	
@@ -63,7 +63,7 @@ RemoteCandidate::RemoteCandidate(const string& src) :
 		string portstr = "";
 		while (src[i] != ' ' && i < len)
 			portstr += src[i++];
-		c->port = util::fromString<UInt32>(portstr.c_str());
+		c->port = util::strtoi<UInt32>(portstr.c_str());
 		while (src[i] == ' ' && i < len)
 			i++;
 
@@ -74,7 +74,7 @@ RemoteCandidate::RemoteCandidate(const string& src) :
 
 RemoteCandidate::~RemoteCandidate() 
 {	
-	util::ClearVector(_candidates);
+	util::clearVector(_candidates);
 }
 
 
@@ -91,7 +91,7 @@ string RemoteCandidate::toString()
 		if (!(*it)->componentID)
 			ret += "0";
 		else
-			ret += util::toString((*it)->componentID);
+			ret += util::itostr((*it)->componentID);
 
 		ret += " ";
 		if ((*it)->address.empty())
@@ -103,7 +103,7 @@ string RemoteCandidate::toString()
 		if (!(*it)->port)
 			ret += "0";
 		else
-			ret += util::toString((*it)->port);
+			ret += util::itostr((*it)->port);
 
 		count++;
 	}

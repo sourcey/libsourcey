@@ -34,9 +34,9 @@ struct Package: public json::Value
 	/// package belonging to the PackageManager.
 {	
 	struct Asset
-		/// This class represents a archived file
-		/// asset containing files belonging to
-		/// the parent package.
+		// This class represents a archived file
+		// asset containing files belonging to
+		// the parent package.
 	{
 		Asset(json::Value& src);
 		virtual ~Asset();
@@ -87,22 +87,22 @@ struct RemotePackage: public Package
 	virtual json::Value& assets();	
 
 	virtual Asset latestAsset();
-		/// Returns the latest asset for this package.
-		/// For local packages this is the currently installed version.
-		/// For remote packages this is the latest available version.
-		/// Throws an exception if no asset exists.
+		// Returns the latest asset for this package.
+		// For local packages this is the currently installed version.
+		// For remote packages this is the latest available version.
+		// Throws an exception if no asset exists.
 
 	virtual Asset assetVersion(const std::string& version);
-		/// Returns the latest asset for the given package version.
-		/// Throws an exception if no asset exists.
+		// Returns the latest asset for the given package version.
+		// Throws an exception if no asset exists.
 	
 	virtual Asset latestSDKAsset(const std::string& version);
-		/// Returns the latest asset for the given SDK version.
-		/// This method is for safely installing plug-ins which
-		/// must be compiled against a specific SDK version.
-		/// The package JSON must have a "sdk-version" member
-		/// for this function to work as intended.
-		/// Throws an exception if no asset exists.
+		// Returns the latest asset for the given SDK version.
+		// This method is for safely installing plug-ins which
+		// must be compiled against a specific SDK version.
+		// The package JSON must have a "sdk-version" member
+		// for this function to work as intended.
+		// Throws an exception if no asset exists.
 };
 
 
@@ -114,8 +114,8 @@ struct LocalPackage: public Package
 	/// file system.
 {	
 	struct Manifest
-		/// This class provides a list of all package
-		/// files and their location on the file system.
+		// This class provides a list of all package
+		// files and their location on the file system.
 	{
 		Manifest(json::Value& src);
 		virtual ~Manifest();
@@ -134,80 +134,80 @@ struct LocalPackage: public Package
 	LocalPackage();
 	LocalPackage(const json::Value& src);
 	LocalPackage(const RemotePackage& src);
-		/// Create the local package from the remote package
-		/// reference with the following manipulations.
+		// Create the local package from the remote package
+		// reference with the following manipulations.
 		//	1) Add a local manifest element.
 		//	2) Remove asset mirror elements.
 
 	virtual ~LocalPackage();
 	
 	virtual void setState(const std::string& state);
-		/// Set's the overall package state. Possible values are:
-		/// Installing, Installed, Failed, Uninstalled.
-		/// If the packages completes while still Installing, 
-		/// this means the package has yet to be finalized.
+		// Set's the overall package state. Possible values are:
+		// Installing, Installed, Failed, Uninstalled.
+		// If the packages completes while still Installing, 
+		// this means the package has yet to be finalized.
 
 	virtual void setInstallState(const std::string& state);
-		/// Set's the package installation state.
-		/// See PackageInstallState for possible values.
+		// Set's the package installation state.
+		// See PackageInstallState for possible values.
 
 	virtual void setInstallDir(const std::string& dir);
-		/// Set's the installation directory for this package.
+		// Set's the installation directory for this package.
 	
 	virtual void setInstalledAsset(const Package::Asset& installedRemoteAsset);
-		/// Sets the installed asset, once installed.
-		/// This method also sets the version.
+		// Sets the installed asset, once installed.
+		// This method also sets the version.
 
 	virtual void setVersion(const std::string& version);
-		/// Sets the current version of the local package.
-		/// Installation must be complete.
+		// Sets the current version of the local package.
+		// Installation must be complete.
 
 	virtual void setVersionLock(const std::string& version);
-		/// Locks the package at the given version.
-		/// Once set this package will not be updated past
-		/// the given version.
-		/// Pass an empty string to remove the lock.
+		// Locks the package at the given version.
+		// Once set this package will not be updated past
+		// the given version.
+		// Pass an empty string to remove the lock.
 
 	virtual void setSDKVersionLock(const std::string& version);
-		/// Locks the package at the given SDK version.
-		/// Once set this package will only update to the most
-		/// recent version with given SDK version.
-		/// Pass an empty string to remove the lock.
+		// Locks the package at the given SDK version.
+		// Once set this package will only update to the most
+		// recent version with given SDK version.
+		// Pass an empty string to remove the lock.
 
 	virtual std::string version() const;
-		/// Returns the installed package version.
+		// Returns the installed package version.
 	
 	virtual std::string state() const;
-		/// Returns the current state of this package.	
+		// Returns the current state of this package.	
 		
 	virtual std::string installState() const;
-		/// Returns the installation state of this package.
+		// Returns the installation state of this package.
 
 	virtual std::string installDir() const;
-		/// Returns the installation directory for this package.
+		// Returns the installation directory for this package.
 	
 	virtual std::string versionLock() const;
 	virtual std::string sdkVersionLock() const;
 
 	virtual Asset asset();
-		/// Returns the currently installed asset, if any.
-		/// If none, the returned asset will be empty().
+		// Returns the currently installed asset, if any.
+		// If none, the returned asset will be empty().
 
 	virtual bool isInstalled() const;
-		/// Returns true or false depending on weather or
-		/// not the package is installed successfully.
-		/// False if package is in Failed state.
+		// Returns true or false depending on weather or
+		// not the package is installed successfully.
+		// False if package is in Failed state.
 
 	virtual bool isFailed() const;
 
 	virtual Manifest manifest();
-		/// Returns the installation manifest.
+		// Returns the installation manifest.
 	
 	virtual bool verifyInstallManifest();
 	
 	virtual std::string getInstalledFilePath(const std::string& fileName, bool whiny = false);
-		/// Returns the full full path of the installed file.
-		/// Thrown an exception if the install directory is unset.
+		// Returns the full full path of the installed file.
+		// Thrown an exception if the install directory is unset.
 	
 	virtual json::Value& errors();
 	virtual void addError(const std::string& message);
@@ -234,8 +234,8 @@ struct PackagePair
 	std::string author() const;
 	
 	//virtual bool isUpToDate();
-		/// Returns true if there are no possible updates for
-		/// this package, false otherwise.
+		// Returns true if there are no possible updates for
+		// this package, false otherwise.
 	
 	LocalPackage* local;
 	RemotePackage* remote;
@@ -257,7 +257,7 @@ typedef std::vector<PackagePair> PackagePairList;
 
 
 	//virtual void setComplete(bool flag);
-		/// This method is called when package installation
-		/// completes in a successful or failed capacity. 
-		/// The package version will be set from the asset,
-		/// and the installed attribute will be updated.
+		// This method is called when package installation
+		// completes in a successful or failed capacity. 
+		// The package version will be set from the asset,
+		// and the installed attribute will be updated.

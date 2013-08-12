@@ -19,7 +19,7 @@
 
 #include "Sourcey/Symple/Form.h"
 #include "Sourcey/Util.h"
-#include "Sourcey/Crypto.h"
+//#include "Sourcey/Crypto/Crypto.h"
 #include "assert.h"
 
 
@@ -361,13 +361,13 @@ string FormField::value() const
 	
 int FormField::intValue() const
 {
-	return util::fromString<UInt32>(value());
+	return util::strtoi<UInt32>(value());
 }
 
 	
 double FormField::doubleValue() const
 {
-	return util::fromString<double>(value());
+	return util::strtoi<double>(value());
 }
 
 	
@@ -399,13 +399,13 @@ void FormField::setValue(const string& value)
 
 void FormField::setValue(int value)
 {
-	setValue(util::toString<int>(value));
+	setValue(util::itostr<int>(value));
 }
 
 
 void FormField::setValue(double value)
 {
-	setValue(util::toString<double>(value));
+	setValue(util::itostr<double>(value));
 }
 
 
@@ -423,13 +423,13 @@ void FormField::addValue(const string& value)
 
 void FormField::addValue(int value)
 {
-	addValue(util::toString<int>(value));
+	addValue(util::itostr<int>(value));
 }
 
 
 void FormField::addValue(double value)
 {
-	addValue(util::toString<double>(value));
+	addValue(util::itostr<double>(value));
 }
 
 

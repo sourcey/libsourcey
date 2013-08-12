@@ -69,7 +69,7 @@ struct PackageInstallState: public State
 
 class InstallTask: 
 	public abstract::Runnable, 
-	public StatefulSignal<PackageInstallState>, 
+	public Stateful<PackageInstallState>, 
 	public Polymorphic
 	///
 	/// This class implements actual package 
@@ -77,7 +77,7 @@ class InstallTask:
 {
 public:
 	struct Options 
-		/// Package installation options.
+		// Package installation options.
 	{
 		std::string version;			// If set then the given package version will be installed.
 		std::string sdkVersion;			// If set then the latest package version for given SDK
@@ -103,20 +103,20 @@ public:
 	virtual void cancel();
 
 	virtual void doDownload();
-		/// Downloads the package archive from the
-		/// server.
+		// Downloads the package archive from the
+		// server.
 
 	virtual void doUnpack();
-		/// Unpacks downloaded package files to the
-		/// intermediate directory.
+		// Unpacks downloaded package files to the
+		// intermediate directory.
 
 	virtual void doFinalize();
-		/// Moves extracted files from the intermediate
-		/// directory to the installation directory.
+		// Moves extracted files from the intermediate
+		// directory to the installation directory.
 	
 	virtual void setComplete();
-		/// Called when the task completes either
-		/// successfully or in error.
+		// Called when the task completes either
+		// successfully or in error.
 
 	virtual Package::Asset getRemoteAsset() const;
 
@@ -140,16 +140,16 @@ public:
 	virtual const char* className() const { return "InstallTask"; }
 	
 	Signal<int&> Progress;
-		/// Signals on progress update [0-100].
+		// Signals on progress update [0-100].
 	
 	NullSignal Complete;
-		/// Signals on task completion for both
-		/// success and failure cases.
+		// Signals on task completion for both
+		// success and failure cases.
 	
 protected:
-	virtual bool run();
-		/// Called asynchronously by the thread to
-		/// do the work.
+	virtual void run();
+		// Called asynchronously by the thread to
+		// do the work.
 
 	virtual void setProgress(int value);
 

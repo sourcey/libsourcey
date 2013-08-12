@@ -12,5 +12,5 @@ if(BUILD_MODULES AND BUILD_MODULE_Symple)
   # dependency libraries properly.
   include_dependency(OpenCV REQUIRED)
 
-  define_sourcey_module(Symple Base UV Net HTTP SocketIO JSON Util)
+  define_sourcey_module(Symple Base UV Net Crypto HTTP SocketIO JSON Util)
 endif()

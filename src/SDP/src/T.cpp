@@ -51,8 +51,8 @@ T::T(const string& src) : Line(Line::T, 5)
 	while (src[i] != ' ' && i < len)
 		stopstr += src[i++];
 
-	_startTime = util::fromString<UInt32>(startstr.c_str());
-	_stopTime  = util::fromString<UInt32>(stopstr.c_str());
+	_startTime = util::strtoi<UInt32>(startstr.c_str());
+	_stopTime  = util::strtoi<UInt32>(stopstr.c_str());
 }
 
 
@@ -95,7 +95,7 @@ void T::setStopTime(unsigned int stop)
 
 string T::toString() 
 {
-	return "t=" + util::toString(_startTime) + " " + util::toString(_stopTime);
+	return "t=" + util::itostr(_startTime) + " " + util::itostr(_stopTime);
 }
 
 

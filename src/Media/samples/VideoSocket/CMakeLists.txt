@@ -7,4 +7,4 @@ include_dependency(JsonCpp REQUIRED)
 include_dependency(LibUV REQUIRED)
 include_dependency(HttpParser REQUIRED)
   
-define_sourcey_module_sample(VideoSocket Base UV Net HTTP Media Util)
+define_sourcey_module_sample(VideoSocket Base UV Net Crypto HTTP Media Util)

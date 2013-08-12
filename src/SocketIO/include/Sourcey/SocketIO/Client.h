@@ -21,14 +21,14 @@
 #define SOURCEY_SocketIO_Client_H
 
 
-#include "Sourcey/Application.h"
 #include "Sourcey/SocketIO/Packet.h"
 #include "Sourcey/SocketIO/Transaction.h"
 #include "Sourcey/HTTP/WebSocket.h"
 #include "Sourcey/JSON/JSON.h"
 
-#include "Poco/Format.h"
-#include "Poco/URI.h"
+//#include "Sourcey/Application.h"
+//#include "Poco/Format.h"
+//#include "Poco/URI.h"
 #include "Sourcey/Containers.h"
 
 
@@ -64,7 +64,7 @@ struct ClientState: public State
 	
 // ---------------------------------------------------------------------
 //
-class Client: public StatefulSignal<ClientState>, public PacketSignal, public Polymorphic
+class Client: public Stateful<ClientState>, public PacketSignal, public Polymorphic
 {
 public:
 	Client(net::SocketBase* socket, uv::Loop& loop = uv::defaultLoop());
@@ -109,8 +109,8 @@ protected:
 	virtual void setError(const Error& error);
 
 	virtual void reset();
-		/// Resets variables and data at the beginning  
-		/// and end of each session.
+		// Resets variables and data at the beginning  
+		// and end of each session.
 
 	virtual int sendHeartbeat();
 	
@@ -142,8 +142,6 @@ protected:
 	int	_connectionClosingTimeout;
 	Timer _timer;
 };
-	
-//virtual std::string& endpoint();
 
 
 // ---------------------------------------------------------------------
@@ -156,6 +154,15 @@ public:
 	{
 	}
 };
+
+
+} } // namespace scy::sockio
+
+
+#endif //  SOURCEY_SocketIO_Client_H
+
+
+
 
 
 /*
@@ -224,15 +231,6 @@ typedef sockio::ClientBase<
 */
 
 
-} } // namespace scy::sockio
-
-
-#endif //  SOURCEY_SocketIO_Client_H
-
-
-
-
-
 	//virtual void onError();//void*);
 
 /*
@@ -260,7 +258,7 @@ typedef sockio::ClientBase<
 
 	
 	//Signal<sockio::Packet> Packet;
-		/// Signals data received by the socket.
+		// Signals data received by the socket.
 	//virtual http::WebSocket* createSocket() = 0;
 		// Creates the underlying socket instance
 	//Net::Reactor&	_reactor;
@@ -369,8 +367,8 @@ typedef sockio::ClientBase<
 //				"Invalid SocketIO handshake response: %s", response.body.str()));
 //	
 //		_sessionID = respData[0];
-//		_heartBeatTimeout = util::fromString<UInt32>(respData[1]);
-//		_connectionClosingTimeout = util::fromString<UInt32>(respData[2]);
+//		_heartBeatTimeout = util::strtoi<UInt32>(respData[1]);
+//		_connectionClosingTimeout = util::strtoi<UInt32>(respData[2]);
 //		_protocols = util::split(respData[3], ',');
 //
 //		// Check websockets are supported

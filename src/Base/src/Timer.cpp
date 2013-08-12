@@ -20,7 +20,7 @@
 #include "Sourcey/Timer.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Platform.h"
-#include "Sourcey/Crypto.h"
+//#include "Sourcey/Crypto/Crypto.h"
 #include "assert.h"
 
 
@@ -30,16 +30,16 @@ using namespace std;
 namespace scy {
 	
 
-Timer::Timer(uv::Loop& loop) : 
-	Base(&loop, new uv_timer_t)
+Timer::Timer(uv::Loop& loop, bool ghost) : 
+	uv::Handle(&loop, new uv_timer_t), _ghost(ghost)
 {
 	traceL("Timer", this) << "Creating" << endl;
 	init();
 }
 	
 
-Timer::Timer(Int64 timeout, Int64 interval, uv::Loop& loop) : 
-	Base(&loop, new uv_timer_t)
+Timer::Timer(Int64 timeout, Int64 interval, uv::Loop& loop, bool ghost) : 
+	uv::Handle(&loop, new uv_timer_t), _ghost(ghost)
 {
 	traceL("Timer", this) << "Creating" << endl;	
 	init();
@@ -69,8 +69,11 @@ void Timer::init()
 	if (r)
 		setAndThrowLastError("Cannot initialize timer");
 
-	// Timers do not reference the main loop
-    uv_unref(handle());
+	handle();
+
+	// Ghost timers do not reference the main loop
+	if (_ghost)
+		uv_unref(handle());
 }
 
 
@@ -176,7 +179,7 @@ Int64 Timer::count()
 
 void Timer::onTimeout()
 {	
-	//traceL("Timer", this) << "On timeout: " << _count << endl;
+	traceL("Timer", this) << "On timeout: " << _count << endl;
 	_count++;
 	Timeout.emit(this);
 }
@@ -238,7 +241,7 @@ void Timeout::reset()
 }
 
 
-long Timeout::available() const 
+long Timeout::remaining() const 
 {
 	time_t current = scy::getTimeHR();
 	long remaining = static_cast<long>(_delay - (current - _startAt));
@@ -251,7 +254,7 @@ bool Timeout::expired() const
 	if (_delay == 0) //_startAt == 0 || 
 		return false;
 
-	return available() == 0;
+	return remaining() == 0;
 }
 
 
@@ -273,8 +276,7 @@ Stopwatch::~Stopwatch()
 
 void Stopwatch::start()
 {
-	if (!_running)
-	{
+	if (!_running) {
 		_start.update();
 		_running = true;
 	}
@@ -283,8 +285,7 @@ void Stopwatch::start()
 
 void Stopwatch::stop()
 {
-	if (_running)
-	{
+	if (_running) {
 		Timestamp current;
 		_elapsed += current - _start;
 		_running = false;
@@ -295,6 +296,12 @@ void Stopwatch::stop()
 int Stopwatch::elapsedSeconds() const
 {
 	return int(elapsed()/resolution());
+}
+
+
+int Stopwatch::elapsedMilliseconds() const
+{
+	return int(elapsed()/(resolution()/1000));
 }
 
 
@@ -337,12 +344,12 @@ void Stopwatch::restart()
 
 
 TimedToken::TimedToken(long duration) : 
-	Timeout(duration), _id(crypto::randomString(32)) 
+	Timeout(duration), _id(util::randomString(32)) 
 {
 }
 
 
-TimedToken::TimedToken(const std::string& id = crypto::randomString(32), long duration = 10000) : 
+TimedToken::TimedToken(const std::string& id = util::randomString(32), long duration = 10000) : 
 	Timeout(duration), _id(id) 
 {
 }

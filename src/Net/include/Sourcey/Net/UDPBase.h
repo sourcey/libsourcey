@@ -33,7 +33,7 @@ namespace scy {
 namespace net {
 
 
-class UDPBase: public uv::Base, public net::SocketBase
+class UDPBase: public uv::Handle, public net::SocketBase
 {
 public:
 	UDPBase();

@@ -31,7 +31,7 @@ static Singleton<GarbageCollector> singleton;
 	
 
 GarbageCollector::GarbageCollector() : 
-	uv::Base(&uv::defaultLoop(), new uv_timer_t)
+	uv::Handle(&uv::defaultLoop(), new uv_timer_t)
 {
 	traceL("GarbageCollector", this) << "Creating" << std::endl;
 
@@ -46,18 +46,23 @@ GarbageCollector::~GarbageCollector()
 	close();
 }
 
-	
-void GarbageCollector::close()
-{
-	traceL("GarbageCollector", this) << "Closing" << std::endl;
 
+void GarbageCollector::finalize()
+{
+	Mutex::ScopedLock lock(_mutex);
 	util::clearVector(_ready);
 #ifdef _DEBUG
 	// Pending items will not be freed in release 
 	// mode since it may result in a crash
 	util::clearVector(_pending);
 #endif
-	uv::Base::close();
+}
+
+	
+void GarbageCollector::close()
+{
+	finalize();
+	uv::Handle::close();
 }
 
 	
@@ -72,7 +77,7 @@ void GarbageCollector::shutdown()
 
 void GarbageCollector::onTimer()
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	if (_ready.empty() && 
 		_pending.empty())

@@ -19,7 +19,7 @@
 
 #include "Sourcey/Symple/Presence.h"
 #include "Sourcey/Util.h"
-#include "Sourcey/Crypto.h"
+//#include "Sourcey/Crypto/Crypto.h"
 //#include "Poco/Format.h"
 #include "assert.h"
 

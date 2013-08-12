@@ -22,7 +22,7 @@
 
 
 using namespace std;
-//using namespace Poco;
+
 using namespace scy;
 
 
@@ -68,7 +68,7 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 	if (isOpen())
 		close();
 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	traceL("AudioCapture", this) << "Opening: " << _channels << ": " << _sampleRate << endl;
 	
 	//_channels = channels;
@@ -96,7 +96,7 @@ void AudioCapture::close()
 {	
 	traceL("AudioCapture", this) << "Closing" << endl;
 	try {
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		_opened = false;
 		if (_audio.isStreamOpen())
 			_audio.closeStream();
@@ -117,7 +117,7 @@ void AudioCapture::start()
 
 	if (!running()) {
 		try {
-			ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 			_audio.startStream();
 			_error = "";
 			traceL("AudioCapture", this) << "Starting: OK" << endl;
@@ -138,7 +138,7 @@ void AudioCapture::stop()
 
 	if (running()) {
 		try {
-			ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 			traceL("AudioCapture", this) << "Stopping: Before" << endl;
 			_audio.stopStream();
 			traceL("AudioCapture", this) << "Stopping: OK" << endl;
@@ -201,7 +201,7 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 	} 
 
 	{
-		ScopedLock lock(klass->_mutex);
+		Mutex::ScopedLock lock(klass->_mutex);
 
 		int size = 2;
 		RtAudioFormat format = klass->_format;
@@ -250,49 +250,49 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 
 RtAudioFormat AudioCapture::format() const
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _format;
 }
 
 
 bool AudioCapture::isOpen() const
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _opened;
 }
 
 
 bool AudioCapture::running() const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _audio.isStreamRunning();
 }
 
 
 int AudioCapture::deviceId() const 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _deviceId;
 }
 
 
 int AudioCapture::sampleRate() const 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _sampleRate;
 }
 
 
 int AudioCapture::numChannels() const 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _channels;
 }
 
 		
 void AudioCapture::getEncoderFormat(Format& iformat) 
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	iformat.audio.sampleFmt = "s16"; // TODO: Convert from RtAudioFormat to SampleFormat
 	iformat.audio.channels = _channels;
 	iformat.audio.sampleRate = _sampleRate;

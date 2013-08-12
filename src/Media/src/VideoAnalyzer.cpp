@@ -21,7 +21,7 @@
 
 
 using namespace std;
-//using namespace Poco;
+
 
 
 namespace scy {
@@ -93,7 +93,7 @@ void VideoAnalyzer::uninitialize()
 
 void VideoAnalyzer::start()
 {
-	ScopedLock lock(_mutex); 
+	Mutex::ScopedLock lock(_mutex); 
 	
 	try 
 	{
@@ -139,7 +139,7 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 	int frames = 0;
 	//VideoDecoderContext* video = _reader.video();
 	
-	ScopedLock lock(_mutex); 
+	Mutex::ScopedLock lock(_mutex); 
 	
 	// Prepeare FFT input data array
 	//	http://stackoverflow.com/questions/7790877/forward-fft-an-image-and-backward-fft-an-image-to-get-the-same-result
@@ -175,7 +175,7 @@ void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 	//traceL("VideoAnalyzer", this) << "On Audio: " 
 	//  << packet.size() << ": " << packet.time << endl;	
 
-	ScopedLock lock(_mutex);		
+	Mutex::ScopedLock lock(_mutex);		
 	
 	VideoAnalyzer::Packet pkt(packet.time);
 	short const* data = reinterpret_cast<short*>(packet.array());
@@ -214,7 +214,7 @@ void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 
 AVFrame* VideoAnalyzer::getGrayVideoFrame()
 {		
-	ScopedLock lock(_mutex); 
+	Mutex::ScopedLock lock(_mutex); 
 	VideoDecoderContext* video = _reader.video();
 
 	// TODO: Conversion via decoder?
@@ -244,7 +244,7 @@ void VideoAnalyzer::onReadComplete(void* sender)
 
 	AVInputReader* reader = reinterpret_cast<AVInputReader*>(sender);	
 	{
-		ScopedLock lock(_mutex); 
+		Mutex::ScopedLock lock(_mutex); 
 		if (_error.empty())
 			_error = reader->error();
 	}
@@ -255,21 +255,21 @@ void VideoAnalyzer::onReadComplete(void* sender)
 
 AVInputReader& VideoAnalyzer::reader()
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _reader; 
 }
 
 
 VideoAnalyzer::Options& VideoAnalyzer::options()
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _options; 
 }
 
 
 string VideoAnalyzer::error() const
 {
-	ScopedLock lock(_mutex);	
+	Mutex::ScopedLock lock(_mutex);	
 	return _error;
 }
 

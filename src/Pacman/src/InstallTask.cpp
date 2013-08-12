@@ -61,7 +61,7 @@ InstallTask::~InstallTask()
 void InstallTask::start()
 {
 	log("trace") << "Starting" << endl;	
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_thread.start(*this);
 }
 
@@ -72,12 +72,12 @@ void InstallTask::cancel()
 }
 
 
-bool InstallTask::run()
+void InstallTask::run()
 {
 	try {	
 		// Prepare environment and install options
 		{
-			ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 
 			// Check against provided options to make sure that
 			// we can proceed with task creation.
@@ -128,7 +128,6 @@ bool InstallTask::run()
 Complete:
 	setComplete();
 	delete this;
-	return false;
 }
 
 
@@ -157,7 +156,7 @@ void InstallTask::onStateChange(PackageInstallState& state, const PackageInstall
 		case PackageInstallState::Cancelled:
 			local->setState("Failed");
 			{
-				ScopedLock lock(_mutex);
+				Mutex::ScopedLock lock(_mutex);
 				_transaction->close();
 			}
 			setProgress(100);
@@ -178,7 +177,7 @@ void InstallTask::onStateChange(PackageInstallState& state, const PackageInstall
 		local->setInstallState(state.toString());
 	}
 
-	StatefulSignal<PackageInstallState>::onStateChange(state, oldState);
+	Stateful<PackageInstallState>::onStateChange(state, oldState);
 }
 
 
@@ -337,7 +336,7 @@ void InstallTask::doFinalize()
 	}
 
 	// The package requires finalizing at a later date. 
-	// The current task will be canceled, and the package
+	// The current task will be cancelled, and the package
 	// saved with the Installing state.
 	if (errors) {
 		log("debug") << "Finalization failed, cancelling task" << endl;
@@ -369,7 +368,7 @@ void InstallTask::doFinalize()
 void InstallTask::setComplete()
 {
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		assert(_progress == 100);
 
 		log("info") << "Package Install Complete:" 
@@ -392,7 +391,7 @@ void InstallTask::setComplete()
 void InstallTask::setProgress(int value) 
 {
 	{
-		ScopedLock lock(_mutex);	
+		Mutex::ScopedLock lock(_mutex);	
 		_progress = value;
 	}
 	Progress.emit(this, value);
@@ -401,7 +400,7 @@ void InstallTask::setProgress(int value)
 
 Package::Asset InstallTask::getRemoteAsset() const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return !_options.version.empty() ? 
 		_remote->assetVersion(_options.version) : 
 			!_options.sdkVersion.empty() ?
@@ -412,14 +411,14 @@ Package::Asset InstallTask::getRemoteAsset() const
 
 int InstallTask::progress() const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _progress;
 }
 
 
 bool InstallTask::valid() const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return !stateEquals(PackageInstallState::Failed) 
 		&& _local->valid() 
 		&& (!_remote || _remote->valid());
@@ -454,52 +453,23 @@ bool InstallTask::complete() const
 
 LocalPackage* InstallTask::local() const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _local;
 }
 
 
 RemotePackage* InstallTask::remote() const
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _remote;
 }
 
 
 InstallTask::Options& InstallTask::options() 
 { 
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _options;
 }
 
 
 } } // namespace scy::pman
-
-
-
-
-	//if (_local->isUpToDate(_remote->latestAsset()))
-	//	throw Exception("This local package is is up to date");	
-	//Package::Asset localAsset = _local->latestAsset();
-
-	// If the local package manifest already has a listing of
-	// the latest remote asset, and the file already exists in
-	// the cache we can skip the download.
-
-	//string uri = asset.url();
-	//string filename = asset.fileName();
-
-	/* //.fileName()
-	if (!_local->assets().empty() &&
-		_manager.hasCachedFile(_local->latestAsset().fileName()) && 
-		_local->latestAsset() == asset) {
-		log("debug") << "File exists, skipping download" << endl;		
-		setState(this, PackageInstallState::Unpacking);
-		return;
-	}
-	
-	// Copy the new remote asset to our local manifest.
-	// TODO: Remove current listing if any - we end up with multiple entries.
-	// NOTE: localAsset only gets set when installed
-	//Package::Asset localAsset = _local->copyAsset(asset);
-	*/

@@ -1,3 +1,4 @@
+#include "Sourcey/Application.h"
 #include "Sourcey/Symple/Client.h"
 #include "Sourcey/Net/SSLManager.h"
 #include "Sourcey/Util.h"
@@ -76,14 +77,14 @@ public:
 #if USE_SSL
 	SSLManager::instance().shutdown();
 #endif
-		app.cleanup();
+		app.finalize();
 	}
 
 
 	void onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState) 
 	{
 		smpl::Client* client = reinterpret_cast<smpl::Client*>(sender);	
-		Log("debug") << "Client state changed: " << state.toString() << ": " << client->socket().address() << endl;
+		debugL() << "Client state changed: " << state.toString() << ": " << client->socket().address() << endl;
 		
 		switch (state.id()) {
 		case sockio::ClientState::Connecting:
@@ -100,7 +101,7 @@ public:
 	
 	void onUpdatePresenceData(void*, smpl::Peer& peer)
 	{
-		Log("debug") << "Updating Client Data" << endl;
+		debugL() << "Updating Client Data" << endl;
 		
 		// Update the peer object to be broadcast with presence.
 		// Any arbitrary data can be broadcast with presence.
@@ -115,16 +116,16 @@ public:
 
 int main(int argc, char** argv) 
 {	
-	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
+	Logger::instance().add(new ConsoleChannel("debug", LTrace));
 
 	// Init SSL Context
-	SSLContext::Ptr ptrContext = new SSLContext(SSLContext::CLIENT_USE, "", "", "",
-		SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");	
-	SSLManager::instance().initializeClient(ptrContext);
+	//SSLManager::instance().initializeClient(
+	//	new SSLContext(SSLContext::CLIENT_USE, "", "", "",
+	//		SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"));
 	{
 		scy::smpl::Tests run;
 	}		
-	SSLManager::instance().shutdown();
-	Logger::uninitialize();
+	//SSLManager::instance().shutdown();
+	Logger::shutdown();
 	return 0;
 }

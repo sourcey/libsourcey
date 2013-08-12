@@ -89,7 +89,7 @@ SDESChunk::SDESChunk(UInt32 ssrc)
 
 SDESChunk::~SDESChunk() 
 {
-	util::ClearVector(_sdesItems);
+	util::clearVector(_sdesItems);
 }
 
 
@@ -144,7 +144,7 @@ SDESPacket::SDESPacket() :
 
 SDESPacket::~SDESPacket() 
 {
-	util::ClearVector(_sdesChunks);
+	util::clearVector(_sdesChunks);
 }
 
 
@@ -167,14 +167,14 @@ bool SDESPacket::read(Buffer& buffer)
 		int remaining = length - 4;
 		while (remaining >= 4) {
 			SDESChunk* chunk = new SDESChunk();
-			buffer.readU32(chunk->ssrc);
+			buffer.getU32(chunk->ssrc);
 			traceL() << "RTCP: SDESPacket: Read Chunk SSRC: " << chunk->ssrc << endl;
 
 			// TODO: Support multiple items per chunk
 			SDESItem* item = new SDESItem();
-			buffer.readU8(item->type);
-			buffer.readU8(item->length);
-			buffer.read(item->content, item->length - 2);
+			buffer.getU8(item->type);
+			buffer.getU8(item->length);
+			buffer.get(item->content, item->length - 2);
 
 			chunk->addSDESItem(item);
 			addSDESChunk(chunk);
@@ -198,13 +198,13 @@ void SDESPacket::write(Buffer& buffer) const
 		
 		debugL() << "RTCP: SDESPacket: Writing Chunk SSRC: " << chunk->ssrc << endl;
 
-		buffer.writeU32(chunk->ssrc);
+		buffer.putU32(chunk->ssrc);
 
 		for (unsigned ia = 0; ia < chunk->items().size(); ia++) {
 			SDESItem* item = chunk->items()[ia];
-			buffer.writeU8(item->type);
-			buffer.writeU8(item->length);
-			buffer.write(item->content);
+			buffer.putU8(item->type);
+			buffer.putU8(item->length);
+			buffer.put(item->content);
 		}
 	}
 }

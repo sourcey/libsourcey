@@ -29,22 +29,25 @@ namespace SDP {
 
 
 B::B(const string& src) : 
-	Line(Line::B, 9) {
+	Line(Line::B, 9) 
+{
 	assert(src.substr(0, 2) == "b=");
 	string::size_type index = src.find(":");
 	if (index != string::npos) {
 		_type = src.substr(0, index);
-		_bandwidth = util::fromString<UInt32>(src.substr(index+1, src.length()));
+		_bandwidth = util::strtoi<UInt32>(src.substr(index+1, src.length()));
 	}
 }
 
 
-B::~B() {
+B::~B()
+{
 }
 
 
-string B::toString() {
-	return "b=" + _type + ":" + util::toString(_bandwidth);
+string B::toString()
+{
+	return "b=" + _type + ":" + util::itostr(_bandwidth);
 }
 
 

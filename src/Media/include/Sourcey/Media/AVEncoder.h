@@ -66,6 +66,8 @@ public:
 	RecordingOptions& options();
 	VideoEncoderContext* video();
 	AudioEncoderContext* audio();
+
+	//virtual void* self() { return this;	}
 			
 	PacketSignal Emitter;
 	

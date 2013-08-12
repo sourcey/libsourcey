@@ -63,10 +63,10 @@ M::M(const string& src) :
 		if (portstr[j] == '/')
 			np = j;
 	if (np > 0) {
-		_port = util::fromString<UInt32>(portstr.substr(0, np).c_str());
-		_nPorts =  util::fromString<UInt32>(portstr.substr(np+1, portstr.length()-(np+1)-1).c_str());
+		_port = util::strtoi<UInt32>(portstr.substr(0, np).c_str());
+		_nPorts =  util::strtoi<UInt32>(portstr.substr(np+1, portstr.length()-(np+1)-1).c_str());
 	} else {
-		_port = util::fromString<UInt32>(portstr.c_str());
+		_port = util::strtoi<UInt32>(portstr.c_str());
 		_nPorts = 1;
 	}
 	
@@ -123,7 +123,7 @@ M &M::operator = (const M &src)
 	_transport = src._transport;
 	_payloadTypes = src._payloadTypes;
 	
-	util::ClearVector(_lines);
+	util::clearVector(_lines);
 	for (vector<Line*>::const_iterator it = src._lines.begin(); it != src._lines.end(); it++) {
 		addLine(*it);
 	}
@@ -138,7 +138,7 @@ M::~M()
 	//	delete _connection;
 	//if (_information)
 	//	delete _information;
-	//util::ClearVector(_lines);
+	//util::clearVector(_lines);
 
 	for (vector<Line*>::iterator it = _lines.begin(); it != _lines.end(); ++it)
 		delete *it;
@@ -210,9 +210,9 @@ string M::toString()
 	string ret = "m=" + _mediaType + " ";
 	
 	if (_nPorts > 1)
-		ret += _port + "/" + util::toString(_nPorts);
+		ret += _port + "/" + util::itostr(_nPorts);
 	else
-		ret += util::toString(_port);
+		ret += util::itostr(_port);
 
 	ret += " " + _transport;
 

@@ -62,10 +62,10 @@ bool ByePacket::read(Buffer& buffer)
 {
 	if (RTCP::Packet::read(buffer)) {
 		
-		buffer.readU32(ssrc);
+		buffer.getU32(ssrc);
 
 		if (this->computedLength() > 8) {
-			buffer.read(reason, this->computedLength() - 8 - 1);
+			buffer.get(reason, this->computedLength() - 8 - 1);
 		}
 		return true;
 	}
@@ -78,11 +78,11 @@ void ByePacket::write(Buffer& buffer) const
 {
 	RTCP::Packet::write(buffer);
 	
-	buffer.writeU32(ssrc);
+	buffer.putU32(ssrc);
 	
 	if (!reason.empty()) {
-		buffer.writeU8(static_cast<UInt8>(reason.length()));
-		buffer.write(reason);
+		buffer.putU8(static_cast<UInt8>(reason.length()));
+		buffer.put(reason);
 	}
 }
 

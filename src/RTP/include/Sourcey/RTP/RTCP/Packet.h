@@ -23,7 +23,7 @@
 
 #include "Sourcey/RTP/Types.h"
 #include "Sourcey/RTP/RTCP/Packet.h"
-#include "Sourcey/IPacket.h"
+#include "Sourcey/Packet.h"
 
 #include <vector>
 

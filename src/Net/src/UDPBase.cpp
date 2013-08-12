@@ -74,7 +74,7 @@ void UDPBase::close()
 {
 	traceL("UDPBase", this) << "Closing" << endl;	
 	recvStop();
-	uv::Base::close();
+	uv::Handle::close();
 }
 
 
@@ -170,13 +170,13 @@ void UDPBase::onRecv(Buffer& buf, const net::Address& address)
 
 void UDPBase::setError(const Error& err)
 {
-	uv::Base::setError(err);
+	uv::Handle::setError(err);
 }
 
 		
 const Error& UDPBase::error() const
 {
-	return uv::Base::error();
+	return uv::Handle::error();
 }
 
 
@@ -217,7 +217,7 @@ net::TransportType UDPBase::transport() const
 
 bool UDPBase::closed() const
 {
-	return uv::Base::closed();
+	return uv::Handle::closed();
 }
 
 

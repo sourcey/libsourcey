@@ -37,7 +37,7 @@ V::V(const string& src) :
 		errorL() << "ERROR: SDP line does not start with <v=>" << std::endl;
 	}
 
-	_version = util::fromString<UInt32>(src.substr(2, src.length()).c_str());
+	_version = util::strtoi<UInt32>(src.substr(2, src.length()).c_str());
 }
 
 
@@ -62,7 +62,7 @@ void V::setVersion(unsigned int ver)
 
 string V::toString() 
 {
-	return "v=" + util::toString(_version);
+	return "v=" + util::itostr(_version);
 }
 
 

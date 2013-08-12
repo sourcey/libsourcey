@@ -87,26 +87,26 @@ bool Packet::read(Buffer& buffer)
 {
 	// TODO: Proper checking...
 
-	if (buffer.remaining() < 4) {
+	if (buffer.available() < 4) {
 		errorL() << "RTCP: Buffer too small to parse RTCP header. " 
-			<< "Needed 4 but got " << buffer.remaining() << "."
+			<< "Needed 4 but got " << buffer.available() << "."
 			<< endl;
 		return false;
 	}
 	
 	UInt8 info;
-	buffer.readU8(info);
+	buffer.getU8(info);
 	this->version = info >> 6;
 	this->padding = info >> 5 & 0x1;
 	this->sources = info & 0x1F;
 	
-	buffer.readU8(this->packetType);
-	buffer.readU16(this->length);
+	buffer.getU8(this->packetType);
+	buffer.getU16(this->length);
 
-	if (buffer.remaining() < this->length - 4) {
+	if (buffer.available() < this->length - 4) {
 		errorL() 
 			<< "RTCP: Buffer too small to parse RTCP packet: " << (int)this->packetType << ". " 
-			<< "Needed " << (this->length - 4) << " but got " << buffer.remaining() << "."
+			<< "Needed " << (this->length - 4) << " but got " << buffer.available() << "."
 			<< endl;
 		return false;
 	}
@@ -121,9 +121,9 @@ void Packet::write(Buffer& buffer) const
 		((UInt8)this->padding << 5) |
 		this->sources;
 
-	buffer.writeU8(info);
-	buffer.writeU8(this->packetType);
-	buffer.writeU16(this->computedLength());
+	buffer.putU8(info);
+	buffer.putU8(this->packetType);
+	buffer.putU16(this->computedLength());
 }
 
 

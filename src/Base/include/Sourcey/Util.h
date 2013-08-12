@@ -41,7 +41,7 @@ namespace util {
 //
 	
 template<typename T>
-std::string toString(const T& t) 
+std::string itostr(const T& t) 
 	// Converts integer T to string.
 {
     std::ostringstream oss;
@@ -50,7 +50,7 @@ std::string toString(const T& t)
 }
 	
 template<typename T>
-T fromString(const std::string& s) 
+T strtoi(const std::string& s) 
 	// Converts string to integer T.
 	// Ensure the integer type has  
 	// sufficient storage capacity.
@@ -64,24 +64,29 @@ T fromString(const std::string& s)
 
 std::string format(const char* fmt, ...);
 	// Printf style string formatting for POD types.
-	
-bool tryParseHex(const std::string& s, unsigned& value);
-unsigned parseHex(const std::string& s);	
-	// String to hex value.
 
-int icompare(const std::string& s1, const std::string& s2);
+std::string randomBinaryString(int size, bool doBase64 = false);
+	// Generates a random (optionally base64 encoded) binary key
+
+std::string randomString(int size);
+	// Generates a random string
+
+UInt64 randomNumber(int size);
+	// Generates a random number
+
+int icompare(const std::string& str1, const std::string& str2);
 	// Case insensitive string comparison.
 
 std::string replace(const std::string& str, const std::string& from, const std::string& to, std::string::size_type start = 0);
-std::string replace(const std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start = 0);
 std::string& replaceInPlace(std::string& str, const std::string& from, const std::string& to, std::string::size_type start = 0);
-std::string& replaceInPlace(std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start = 0);
 	// Functions for replacing string content.
 
-void toLower(std::string& str);
+std::string toLower(const std::string& str);
+void toLowerInPlace(std::string& str);
 	// Transforms the string to lowercase.
 
-void toUpper(std::string& str);
+std::string toUpper(const std::string& str);
+void toUpperInPlace(std::string& str);
 	// Transforms the string to uppercase.
 
 void toUnderscore(std::string& str);
@@ -97,6 +102,10 @@ bool endsWith(const std::string& str, const std::string& suffix);
 void removeSpecialCharacters(std::string& str, bool allowSpaces = false);
 void replaceSpecialCharacters(std::string& str, char with = '_', bool allowSpaces = false);
 	// Replaces non-alphanumeric characters.
+	
+bool tryParseHex(const std::string& s, unsigned& value);
+unsigned parseHex(const std::string& s);	
+	// String to hex value.
 
 std::string dumpbin(const char* data, size_t len);
 	// Dumps the binary representation of the 
@@ -124,6 +133,15 @@ bool matchNodes(const StringVec& params, const StringVec& xparams);
 
 std::string memAddress(const void* ptr);
 	// Returns the object PID as a string.
+
+
+//
+/// Stream copiers
+//
+
+std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr);
+std::streamsize copyStream(std::istream& istr, std::ostream& ostr, std::size_t bufferSize = 8192);
+std::streamsize copyToString(std::istream& istr, std::string& str, std::size_t bufferSize = 8192);
 
 
 //

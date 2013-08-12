@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SOURCEY_NET_PacketTransaction_H
-#define SOURCEY_NET_PacketTransaction_H
+#ifndef SOURCEY_NET_Transaction_H
+#define SOURCEY_NET_Transaction_H
 
 
 #include "Sourcey/PacketTransaction.h"
@@ -33,7 +33,7 @@ namespace scy {
 namespace net {
 
 
-template <class PacketT> //, class EmitterT
+template <class PacketT>
 class Transaction: public PacketTransaction<PacketT>, public PacketSocketAdapter
 	/// This class provides request/response functionality for IPacket
 	/// types emitted from a SocketBase.
@@ -51,9 +51,8 @@ public:
 	{
 		debugL("NetTransaction", this) << "Creating" << std::endl;
 
-		// Default options, can be overridden
+		/// Default options, can be overridden
 		PacketSocketAdapter::socket->setAdapter(this);
-		//PacketSocketAdapter::priority = 100;
 	}
 
 	virtual ~Transaction()
@@ -91,8 +90,8 @@ protected:
 		debugL("NetTransaction", this) << "On Packet: " << packet.size() << std::endl;
 		if (onPossibleResponse(static_cast<PacketT&>(packet))) {
 
-			// Stop socket data propagation since
-			// we have handled the packet
+			/// Stop socket data propagation since
+			/// we have handled the packet
 			//throw StopPropagation();
 		}
 	}
@@ -124,169 +123,4 @@ protected:
 } } // namespace scy::net
 
 
-#endif // SOURCEY_NET_PacketTransaction_H
-
-
-/*
-template <class PacketT>
-class Transaction: public PacketTransaction<PacketT>
-	/// This class provides request/response functionality for IPacket
-	/// types emitted from a SocketBase.
-	/// This class is designed to be derived on a per protocol basis.
-{
-public:
-	Transaction(const net::Socket& socket, 
-				const Address& localAddress, 
-				const Address& peerAddress, 
-				int timeout = 10000, 
-				int retries = 1, 
-				uv::Loop& loop = uv::defaultLoop()) : 
-		PacketTransaction<PacketT>(timeout, retries, loop), 
-		_socket(socket),
-		_localAddress(localAddress), 
-		_peerAddress(peerAddress)
-	{
-		debugL("NetTransaction", this) << "Creating" << std::endl;
-	}
-
-	virtual bool send()
-	{
-		debugL("NetTransaction", this) << "Sending" << std::endl;
-		_socket.adapter() += packetDelegate(this, &Transaction::onPotentialResponse, 100);
-		if (_socket.base().send(PacketTransaction<PacketT>::_request, _peerAddress))
-			return PacketTransaction<PacketT>::send();
-		setState(this, TransactionState::Failed);
-		return false;
-	}
-	
-	virtual void cancel()
-	{
-		debugL("NetTransaction", this) << "Canceling" << std::endl;
-		_socket.adapter() -= packetDelegate(this, &Transaction::onPotentialResponse);
-		PacketTransaction<PacketT>::cancel();
-	}
-	
-	virtual void onPotentialResponse(void*, PacketT& packet)
-	{
-		if (onPossibleResponse(packet))
-			throw StopPropagation();
-	}	
-
-	virtual void onResponse()
-	{
-		debugL("NetTransaction", this) << "Response" << std::endl;
-		_socket.adapter() -= packetDelegate(this, &Transaction::onPotentialResponse);
-		PacketTransaction<PacketT>::onResponse();
-	}
-	
-	Address localAddress() const
-	{
-		return _localAddress;
-	}
-	
-	Address peerAddress() const
-	{
-		return _peerAddress;
-	}
-	
-	PacketSocket& socket() 
-	{
-		return _socket;
-	}
-
-protected:
-	virtual ~Transaction()
-	{
-		debugL("NetTransaction", this) << "Destroying" << std::endl;
-	}
-
-	virtual bool checkResponse(const PacketT& packet) 
-	{
-		assert(packet.info && "socket must provide packet onfo");
-		if (!packet.info)
-			return false;
-		net::PacketInfo* info = reinterpret_cast<net::PacketInfo*>(packet.info);
-		
-		return _localAddress == info->socket.address() 
-			&& _peerAddress == info->peerAddress;
-	};
-	
-	PacketSocket _socket;
-	Address _localAddress;
-	Address _peerAddress;
-
-private:
-	//mutable Mutex	_mutex;
-};
-*/
-
-
-		//_socket(socket),
-		//_localAddress(localAddress), 
-		//,
-		//_registered(false)
-		//if (!_registered)
-	
-		//_socket.adapter() += packetDelegate(this, &Transaction::onPotentialResponse, 100);
-		//_socket.adapter() -= packetDelegate(this, &Transaction::onPotentialResponse);
-	/*
-	//Socket& _socket;
-	Socket& socket() 
-	{
-		return _socket;
-	}
-	*/
-
-	/*void* sender,
-
-//private:
-	//mutable Mutex	_mutex;
-	virtual void onResponse()
-	{
-		debugL("NetTransaction", this) << "Response" << std::endl;
-		//_socket.adapter() -= packetDelegate(this, &Transaction::onPotentialResponse);
-		PacketTransaction<PacketT>::onResponse();
-	}
-	*/
-	
-	/*
-	virtual void onResponse() 
-	{
-		traceL("PacketTransaction", this) << "Complete" << std::endl;
-		_timer.close();
-	}
-	*/
-	
-	/*
-	//PacketSocket _socket;
-
-
-	Address& localAddress() 
-	{
-		return _localAddress;
-	}
-	
-	Address& peerAddress() 
-	{
-		return _peerAddress;
-	}
-	*/
-
-
-	/*
-		//ScopedLock lock(_mutex);
-	//net::SocketBase* _socket;
-	virtual void onResponse()
-	{
-		debugL("NetTransaction", this) << "Complete" << std::endl;
-		{
-			// Nullify the socket on completion.
-			//ScopedLock lock(_mutex);
-			//if (_socket) {
-				//_socket.detach(packetDelegate(this, &Transaction::onPotentialResponse));
-				//_socket = NULL;
-			//}
-		}
-		PacketTransaction<PacketT>::onResponse();
-	}
-	*/
+#endif // SOURCEY_NET_Transaction_H

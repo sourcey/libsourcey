@@ -51,7 +51,7 @@ public:
 	virtual void closeAll();	
 	virtual PacketStream* getStream(const std::string& name, bool whiny = true);
     virtual PacketStream* getDafaultStream();
-		/// Returns the first stream in the list, or NULL.
+		// Returns the first stream in the list, or NULL.
 
 	virtual Map streams() const;
 
@@ -61,10 +61,10 @@ public:
 
 protected:	
 	virtual void onAdd(PacketStream* task);
-		/// Called after a stream is added.
+		// Called after a stream is added.
 
 	virtual void onRemove(PacketStream* task);
-		/// Called after a stream is removed.
+		// Called after a stream is removed.
 
 	virtual void onStreamStateChange(void* sender, PacketStreamState& state, const PacketStreamState&);	
 	

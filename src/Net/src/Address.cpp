@@ -354,7 +354,7 @@ string Address::toString() const
 	if (family() == Address::IPv6)
 		result.append("]");
 	result.append(":");
-	result.append(util::toString<UInt16>(port()));
+	result.append(util::itostr<UInt16>(port()));
 	return result;
 }
 
@@ -410,7 +410,7 @@ bool Address::validateIP(const std::string& addr)
 
 UInt16 Address::resolveService(const string& service)
 {
-	UInt16 port = util::fromString<UInt16>(service);
+	UInt16 port = util::strtoi<UInt16>(service);
 	if (port && port > 0) //, port) && port <= 0xFFFF
 		return (UInt16) port;
 

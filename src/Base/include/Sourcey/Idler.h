@@ -28,7 +28,7 @@
 namespace scy {
 	
 
-class Idler: public uv::Base, public abstract::Startable
+class Idler: public uv::Handle, public abstract::Startable
 {
 public:
 	Idler(uv::Loop& loop = uv::defaultLoop());

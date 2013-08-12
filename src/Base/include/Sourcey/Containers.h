@@ -24,7 +24,7 @@
 #include "Sourcey/Signal.h"
 #include "Sourcey/Memory.h"
 #include "Sourcey/Util.h"
-#include "Poco/String.h"
+#include "Sourcey/Logger.h"
 #include <sstream>
 #include <assert.h>
 
@@ -88,7 +88,7 @@ public:
 			return false;
 		}
 		{		
-			ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 			_map[key] = item;
 		}
 		onAdd(key, item);
@@ -99,7 +99,7 @@ public:
 	{
 		// Note: This method will not delete existing values.
 		{
-			ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 			_map[key] = item;
 		}
 		onAdd(key, item);
@@ -107,7 +107,7 @@ public:
 	
 	virtual TValue* get(const TKey& key, bool whiny = true) const 
 	{
-		ScopedLock lock(_mutex); 
+		Mutex::ScopedLock lock(_mutex); 
 		typename Map::const_iterator it = _map.find(key);	
 		if (it != _map.end()) {
 			return it->second;	 
@@ -136,7 +136,7 @@ public:
 	{
 		TValue* item = NULL;
 		{
-			ScopedLock lock(_mutex);
+			Mutex::ScopedLock lock(_mutex);
 			typename Map::iterator it = _map.find(key);	
 			if (it != _map.end()) {
 				item = it->second;
@@ -153,7 +153,7 @@ public:
 		TKey key;
 		TValue* ptr = NULL;
 		{
-			ScopedLock lock(_mutex); 	
+			Mutex::ScopedLock lock(_mutex); 	
 			for (typename Map::iterator it = _map.begin(); it != _map.end(); ++it) {
 				if (item == it->second) {
 					key = it->first;
@@ -170,14 +170,14 @@ public:
 
 	virtual bool exists(const TKey& key) const 
 	{ 
-		ScopedLock lock(_mutex); 	
+		Mutex::ScopedLock lock(_mutex); 	
 		typename Map::const_iterator it = _map.find(key);	
 		return it != _map.end();	 
 	}
 
 	virtual bool exists(const TValue* item) const 
 	{ 
-		ScopedLock lock(_mutex); 	
+		Mutex::ScopedLock lock(_mutex); 	
 		for (typename Map::const_iterator it = _map.begin(); it != _map.end(); ++it) {
 			if (item == it->second)
 				return true;
@@ -187,31 +187,31 @@ public:
 
 	virtual bool empty() const
 	{
-		ScopedLock lock(_mutex); 	
+		Mutex::ScopedLock lock(_mutex); 	
 		return _map.empty();
 	}
 
 	virtual int size() const
 	{
-		ScopedLock lock(_mutex); 	
+		Mutex::ScopedLock lock(_mutex); 	
 		return _map.size();
 	}
 
 	virtual void clear()
 	{
-		ScopedLock lock(_mutex); 	
+		Mutex::ScopedLock lock(_mutex); 	
 		util::clearMap<TDeleter>(_map);
 	}
 
 	virtual Map map() const 
 	{ 
-		ScopedLock lock(_mutex); 	
+		Mutex::ScopedLock lock(_mutex); 	
 		return _map; 
 	}
 
 	virtual Map& map() 
 	{ 
-		ScopedLock lock(_mutex); 	
+		Mutex::ScopedLock lock(_mutex); 	
 		return _map; 
 	}
 
@@ -364,7 +364,7 @@ public:
 	{
 		bool operator() (const std::string& s1, const std::string& s2) const
 		{
-			return Poco::icompare(s1, s2) < 0;
+			return util::icompare(s1, s2) < 0;
 		}
 	};
 	
@@ -457,7 +457,7 @@ inline const std::string& NVHash::operator [] (const std::string& name) const
 	if (it != _map.end())
 		return it->second;
 	else
-		throw Exception("Item not found: " + name);
+		throw NotFoundException(name);
 }
 
 	
@@ -483,7 +483,7 @@ inline const std::string& NVHash::get(const std::string& name) const
 	if (it != _map.end())
 		return it->second;
 	else
-		throw Exception("Item not found: " + name);
+		throw NotFoundException(name);
 }
 
 

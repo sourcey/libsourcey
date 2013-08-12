@@ -84,7 +84,54 @@ inline const char* getStringFromLogLevel(LogLevel level)
 
 struct LogStream;
 class LogChannel;
-typedef std::map<std::string, LogChannel*> LogMap;
+
+
+//
+// Default Log Writer
+//
+
+
+class LogWriter
+{
+public:	
+	LogWriter();
+	virtual ~LogWriter();
+
+	virtual void write(LogStream* stream);
+		// Writes the given log message stream.
+};
+
+
+//
+// Asynchronous Log Writer
+//
+
+
+class AsyncLogWriter: public LogWriter, public abstract::Runnable
+{
+public:	
+	AsyncLogWriter();
+	virtual ~AsyncLogWriter();
+
+	virtual void write(LogStream* stream);
+		// Queues the given log message stream.
+	
+	void flush();
+		// Flushes queued messages.
+
+	void run();
+		// Writes queued messages asynchronously.
+
+	void clear();
+		// Clears all queued messages.
+	
+protected:	
+	bool writeNext();
+
+	Thread _thread;
+	std::deque<LogStream*> _pending;
+	mutable Mutex _mutex;
+};
 
 
 //
@@ -92,7 +139,7 @@ typedef std::map<std::string, LogChannel*> LogMap;
 //
 
 
-class Logger: public abstract::Runnable
+class Logger
 {
 public:
 	Logger();
@@ -105,8 +152,16 @@ public:
 	static void shutdown();
 		// Shuts down the logger and deletes the singleton instance.
 
+	static void setInstance(Logger* logger);
+		// Sets the default logger singleton instance.
+
 	void add(LogChannel* channel);
+		// Adds the given log channel.
+
 	void remove(const std::string& name, bool freePointer = true);
+		// Removes the given log channel by name, 
+		// and optionally frees the pointer.
+
 	LogChannel* get(const std::string& name, bool whiny = true) const;
 		// Returns the specified log channel. 
 		// Throws an exception if the channel doesn't exist.
@@ -114,8 +169,11 @@ public:
 	void setDefault(const std::string& name);
 		// Sets the default log to the specified log channel.
 
+	void setWriter(LogWriter* writer);
+		// Sets the log writer instance.
+
 	LogChannel* getDefault() const;
-		// Returns the default log channel, or the NULL channel
+		// Returns the default log channel, or the nil channel
 		// if no default channel has been set.
 	
 	void write(const LogStream& stream);
@@ -125,42 +183,24 @@ public:
 	void write(LogStream* stream);
 		// Writes the given message to the default log channel.
 		// The stream pointer will be deleted when appropriate.
-
-	//void write(const char* channel, const LogStream& stream);
-		// Writes the given message to the given log channel.
-
-	//void write(const std::string& message, const char* level = "debug", 
-		//const std::string& realm = "", const void* ptr = NULL) const;
-		// Writes the given message to the default log channel.
 	
-	//LogStream send(const char* level = "debug", 
-		//const std::string& realm = "", const void* ptr = NULL) const;
+	LogStream& send(const char* level = "debug", const std::string& realm = "", 
+		const void* ptr = nil, const char* channel = nil) const;
 		// Sends to the default log using the given class instance.
 		// Recommend using write(LogStream&) to avoid copying data.
-
-	bool run();
-		// Flushes queued messages asynchronously.
-	
 
 protected:
 	Logger(Logger const&) {};				// Copy constructor is protected
 	Logger& operator=(Logger const&) {};	// Assignment operator is protected
+
+	typedef std::map<std::string, LogChannel*> LogChannelMap;
 	
 	friend class Singleton<Logger>;
 	friend class Thread;
-	
-	struct QueuedWrite
-	{
-		Logger* logger;
-		LogStream* stream;
-		LogChannel* channel;
-	};
 		
+	LogWriter* _writer;
 	LogChannel*	_defaultChannel;
-	LogMap _map;
-	Thread _thread;
-	bool _cancelled;
-	std::deque<QueuedWrite*> _pending;
+	LogChannelMap _channels;
 	mutable Mutex _mutex;
 };
 
@@ -173,11 +213,12 @@ protected:
 struct LogStream
 {
 	LogLevel level;
+	LogChannel* channel;
 	std::ostringstream message;
 	std::string realm;		// depreciate - encode in message
 	std::string address;	// depreciate - encode in message
 
-	LogStream(LogLevel level = LDebug, const std::string& realm = "", const void* ptr = NULL);
+	LogStream(LogLevel level = LDebug, const std::string& realm = "", const void* ptr = nil, const char* channel = nil);
 	LogStream(LogLevel level, const std::string& realm = "", const std::string& address = "");
 	LogStream(const LogStream& that); 
 
@@ -214,29 +255,52 @@ struct LogStream
 //
 
 
-inline LogStream& traceL(const char* realm = "", const void* ptr = NULL) 
+// Default output
+inline LogStream& traceL(const char* realm = "", const void* ptr = nil) 
 	{ return *new LogStream(LTrace, realm, ptr); }
 
-inline LogStream& debugL(const char* realm = "", const void* ptr = NULL) 
+inline LogStream& debugL(const char* realm = "", const void* ptr = nil) 
 	{ return *new LogStream(LDebug, realm, ptr); }
 
-inline LogStream& infoL(const char* realm = "", const void* ptr = NULL) 
+inline LogStream& infoL(const char* realm = "", const void* ptr = nil) 
 	{ return *new LogStream(LInfo, realm, ptr); }
 
-inline LogStream& warnL(const char* realm = "", const void* ptr = NULL) 
+inline LogStream& warnL(const char* realm = "", const void* ptr = nil) 
 	{ return *new LogStream(LWarn, realm, ptr); }
 
-inline LogStream& errorL(const char* realm = "", const void* ptr = NULL) 
+inline LogStream& errorL(const char* realm = "", const void* ptr = nil) 
 	{ return *new LogStream(LError, realm, ptr); }
 
-inline LogStream& fatalL(const char* realm = "", const void* ptr = NULL) 
+inline LogStream& fatalL(const char* realm = "", const void* ptr = nil) 
 	{ return *new LogStream(LFatal, realm, ptr); }
 
-inline LogStream& Log(const char* level = "debug", const char* realm = "", const void* ptr = NULL) 
-	{ return *new LogStream(getLogLevelFromString(level), realm, ptr); }
 
-inline LogStream& Log(const char* level, const void* ptr, const char* realm = "") 
-	{ return *new LogStream(getLogLevelFromString(level), realm, ptr); }
+// Channel output
+inline LogStream& traceC(const char* channel, const char* realm = "", const void* ptr = nil) 
+	{ return *new LogStream(LTrace, realm, ptr, channel); }
+
+inline LogStream& debugC(const char* channel, const char* realm = "", const void* ptr = nil) 
+	{ return *new LogStream(LDebug, realm, ptr, channel); }
+
+inline LogStream& infoC(const char* channel, const char* realm = "", const void* ptr = nil) 
+	{ return *new LogStream(LInfo, realm, ptr, channel); }
+
+inline LogStream& warnC(const char* channel, const char* realm = "", const void* ptr = nil) 
+	{ return *new LogStream(LWarn, realm, ptr, channel); }
+
+inline LogStream& errorC(const char* channel, const char* realm = "", const void* ptr = nil) 
+	{ return *new LogStream(LError, realm, ptr, channel); }
+
+inline LogStream& fatalC(const char* channel, const char* realm = "", const void* ptr = nil) 
+	{ return *new LogStream(LFatal, realm, ptr, channel); }
+
+
+// Level output
+inline LogStream& printL(const char* level = "debug", const char* realm = "", const void* ptr = nil, const char* channel = nil) 
+	{ return *new LogStream(getLogLevelFromString(level), realm, ptr, channel); }
+
+inline LogStream& printL(const char* level, const void* ptr, const char* realm = "", const char* channel = nil) 
+	{ return *new LogStream(getLogLevelFromString(level), realm, ptr, channel); }
 
 
 //
@@ -251,7 +315,7 @@ public:
 	
 	virtual void write(const LogStream& stream);
 	virtual void write(const std::string& message, LogLevel level = LDebug, 
-		const std::string& realm = "", const void* ptr = NULL);
+		const std::string& realm = "", const void* ptr = nil);
 	virtual void format(const LogStream& stream, std::ostream& ost);
 
 	std::string	name() const { return _name; };
@@ -365,7 +429,7 @@ public:
 	virtual ~EventedFileChannel();
 	
 	virtual void write(const std::string& message, LogLevel level = LDebug, 
-		const std::string& realm = "", const void* ptr = NULL);
+		const std::string& realm = "", const void* ptr = nil);
 	virtual void write(const LogStream& stream);
 
 	Signal3<const std::string&, LogLevel&, const Polymorphic*&> OnLogStream;
@@ -377,3 +441,13 @@ public:
 
 
 #endif
+
+
+
+
+	//void write(const char* channel, const LogStream& stream);
+		// Writes the given message to the given log channel.
+
+	//void write(const std::string& message, const char* level = "debug", 
+		//const std::string& realm = "", const void* ptr = nil) const;
+		// Writes the given message to the default log channel.

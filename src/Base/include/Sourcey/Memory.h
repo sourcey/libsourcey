@@ -24,7 +24,7 @@
 #include "Sourcey/Logger.h"
 #include "Sourcey/Types.h"
 #include "Sourcey/Mutex.h"
-#include "Sourcey/AtomicOps.h"
+#include "Sourcey/Atomic.h"
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Singleton.h"
 
@@ -33,7 +33,7 @@ namespace scy {
 
 
 class AbstractDeleter;
-class GarbageCollector: public uv::Base
+class GarbageCollector: public uv::Handle
 	// Simple garbage collector for deferred pointer deletion.
 {
 public:	
@@ -51,6 +51,9 @@ public:
 		// Shuts down the garbage collector and deletes 
 		// the singleton instance.
 
+	void finalize();
+		// Frees all scheduled pointers now.
+
 	void close();
 		// Closes the internal timer and frees all 
 		// scheduled pointers now.
@@ -60,14 +63,17 @@ protected:
 		
 	UVEmptyStatusCallback(GarbageCollector, onTimer, uv_timer_t);
 	
-	mutable Mutex	_mutex;
+	mutable Mutex _mutex;
 	std::vector<AbstractDeleter*> _pending;
 	std::vector<AbstractDeleter*> _ready;
 };
 
 
-// -------------------------------------------------------------------
 //
+// Deleter Methods
+//
+
+
 class AbstractDeleter
 	// AbstractDeleter provides an interface for 
 	// deleting pointer memory in various ways.
@@ -194,15 +200,18 @@ public:
 };
 
 
-// -------------------------------------------------------------------
 //
+// Garbage Collector Inlines
+//
+
+
 template <class C>
 void GarbageCollector::deleteLater(C* ptr)
 	// Schedules a pointer for deferred deletion.
 { 
 	//traceL("GarbageCollector", this) << "Scheduling: " << ptr << std::endl;
 		
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	_pending.push_back(new GCDeleter<C>(ptr));
 }
 
@@ -215,43 +224,49 @@ inline void deleteLater(C* ptr)
 }
 
 
-// -------------------------------------------------------------------
 //
-class ManagedObject
-	// ManagedObject is the base class for LibSourcey objects
+// Memory Object
+//
+
+
+class MemoryObject
+	// MemoryObject is the base class for LibSourcey objects
 	// which employ different memory management strategies.
 {	
 public:
-	ManagedObject(AbstractDeleter* deleter = new DefaultDeleter<ManagedObject>()) : 
+	MemoryObject(AbstractDeleter* deleter = new DefaultDeleter<MemoryObject>()) : 
 		deleter(deleter)
 	{
 		if (deleter->ptr == NULL)
 			deleter->ptr = this;
 	}
 
-	virtual ~ManagedObject()
+	virtual ~MemoryObject()
 	{
 	}
 
 	virtual void freeMemory()
 	{
-		//traceL("ManagedObject", this) << "Freeing" << std::endl;
+		//traceL("MemoryObject", this) << "Freeing" << std::endl;
 		deleter->invoke();
 	}
 
 protected:
-	ManagedObject(const ManagedObject&) {};
-	ManagedObject& operator = (const ManagedObject&) {};
+	MemoryObject(const MemoryObject&) {};
+	MemoryObject& operator = (const MemoryObject&) {};
 	
-	friend class DefaultDeleter<ManagedObject>;	
+	friend class DefaultDeleter<MemoryObject>;	
 
 	std::unique_ptr<AbstractDeleter> deleter;
 };
 
 
-// -------------------------------------------------------------------
 //
-class CountedObject: public ManagedObject
+// Counted Object
+//
+
+
+class CountedObject: public MemoryObject
 	// CountedObject is the base class for objects that  
 	// employ reference counting based garbage collection.
 	//
@@ -260,7 +275,7 @@ class CountedObject: public ManagedObject
 {
 public:
 	CountedObject(AbstractDeleter* deleter = new DefaultDeleter<CountedObject>()) :
-		ManagedObject(deleter)
+		MemoryObject(deleter)
 		// Creates the CountedObject.
 		// The initial reference count is one.
 	{
@@ -270,15 +285,15 @@ public:
 	void duplicate()
 		// Increments the object's reference count.
 	{
-		atomicIncrement(&count);
+		atomic::increment(&count);
 	}
 		
 	void release()
 		// Decrements the object's reference count and
 		// calls destroy() if the count reaches zero.
 	{
-		if (atomicDecrement(&count) == 0)
-			ManagedObject::freeMemory();
+		if (atomic::decrement(&count) == 0)
+			MemoryObject::freeMemory();
 	}
 		
 	int refCount() const

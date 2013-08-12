@@ -34,7 +34,7 @@
 #include "Sourcey/SDP/B.h"
 #include "Sourcey/SDP/Candidate.h"
 #include "Sourcey/SDP/RemoteCandidate.h"
-#include "Sourcey/IPacket.h"
+#include "Sourcey/Packet.h"
 
 #include <vector>
 

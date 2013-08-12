@@ -78,7 +78,7 @@ public:
 	virtual void start();
 	virtual void stop();
 
-	virtual bool run();
+	virtual void run();
 		
 	virtual Options& options();
 	virtual AVFormatContext* formatCtx() const;

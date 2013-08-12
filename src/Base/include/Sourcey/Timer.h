@@ -31,13 +31,11 @@
 namespace scy {
 
 
-class Timer: public uv::Base
-	// Wraps libev's ev_timer watcher. Used to get woken up at a specified time
-	// in the future.
+class Timer: public uv::Handle
 {
 public:
-	Timer(Int64 timeout, Int64 interval = 0, uv::Loop& loop = uv::defaultLoop());
-	Timer(uv::Loop& loop = uv::defaultLoop());
+	Timer(Int64 timeout, Int64 interval = 0, uv::Loop& loop = uv::defaultLoop(), bool ghost = true);
+	Timer(uv::Loop& loop = uv::defaultLoop(), bool ghost = true);
 	virtual ~Timer();
 	
 	virtual bool start(Int64 interval);
@@ -81,18 +79,21 @@ protected:
 	//
 	// UV Callbacks
 	UVEmptyStatusCallback(Timer, onTimeout, uv_timer_t);
-
+	
+	bool _ghost;
 	Int64 _count;
 	Int64 _timeout;
 	Int64 _interval;
 };
 
 
-// ---------------------------------------------------------------------
 //
+//
+//
+
+
 class Timeout 
-	// Simple timeout counter which expires
-	// after a given delay.
+	// Simple timeout counter which expires after a given delay.
 {
 public:
 	Timeout(long delay = 0, bool autoStart = false);
@@ -103,7 +104,7 @@ public:
 	void start();
 	void stop();
 	void reset();
-	long available() const;
+	long remaining() const;
 	bool expired() const;
 
 	void setDelay(long delay) { _delay = delay; };
@@ -119,16 +120,17 @@ protected:
 };
 
 
-// ---------------------------------------------------------------------
 //
+// Stopwatch
+//
+
+
 class Stopwatch
-	// A simple facility to measure time intervals
-	// with microsecond resolution.
-	//
-	// Note that Stopwatch is based on the Timestamp
-	// class. Therefore, if during a Stopwatch run,
-	// the system time is changed, the measured time
-	// will not be correct.
+	/// A simple facility to measure time intervals 
+	/// with microsecond resolution.
+	///
+	/// The Stopwatch uses the current system time, so if the
+	/// system time changes the measured time will be incorrect.
 {
 public:
 	Stopwatch();
@@ -153,6 +155,10 @@ public:
 	int elapsedSeconds() const;
 		// Returns the number of seconds elapsed
 		// since the stopwatch started.
+		
+	int elapsedMilliseconds() const;
+		// Returns the number of milliseconds elapsed
+		// since the stopwatch started.
 
 	static Timestamp::TimeVal resolution();
 		// Returns the resolution of the stopwatch.
@@ -167,8 +173,11 @@ private:
 };
 
 
-// ---------------------------------------------------------------------
 //
+// Timed Token
+//
+
+
 class TimedToken: public Timeout
 	// A token that expires after the specified duration.
 {

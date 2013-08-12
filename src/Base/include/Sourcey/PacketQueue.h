@@ -36,11 +36,9 @@ namespace scy {
 class SyncPacketQueue: public PacketProcessor, public SyncQueue<IPacket>
 {
 public:
-	SyncPacketQueue(uv::Loop& loop, int maxSize = 1024, int dispatchTimeout = DEFAULT_TIMEOUT);
-	SyncPacketQueue(int maxSize = 1024, int dispatchTimeout = DEFAULT_TIMEOUT);
+	SyncPacketQueue(uv::Loop& loop, int maxSize = 1024);
+	SyncPacketQueue(int maxSize = 1024);
 	virtual ~SyncPacketQueue();
-	
-	//virtual void close();
 
 	virtual void process(IPacket& packet);
 
@@ -61,7 +59,7 @@ protected:
 class AsyncPacketQueue: public PacketProcessor, public AsyncQueue<IPacket>
 {
 public:
-	AsyncPacketQueue(int maxSize = 1024, int dispatchTimeout = DEFAULT_TIMEOUT);
+	AsyncPacketQueue(int maxSize = 1024);
 	virtual ~AsyncPacketQueue();
 
 	virtual void process(IPacket& packet);

@@ -76,14 +76,14 @@ void SSLManager::initializeClient(SSLContext::Ptr ptrContext)
 
 SSLContext::Ptr SSLManager::defaultServerContext()
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _ptrDefaultServerContext;
 }
 
 
 SSLContext::Ptr SSLManager::defaultClientContext()
 {
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _ptrDefaultClientContext;
 }
 
@@ -93,7 +93,7 @@ int SSLManager::verifyCallback(bool server, int ok, X509_STORE_CTX* pStore)
 	if (!ok)
 	{
 		X509* pCert = X509_STORE_CTX_get_current_cert(pStore);
-		Poco::Crypto::X509Certificate x509(pCert, true);
+		crypto::X509Certificate x509(pCert, true);
 		int depth = X509_STORE_CTX_get_error_depth(pStore);
 		int err = X509_STORE_CTX_get_error(pStore);
 		std::string error(X509_verify_cert_error_string(err));
@@ -125,14 +125,14 @@ int SSLManager::privateKeyPassphraseCallback(char* pBuf, int size, int flag, voi
 
 void initializeSSL()
 {
-	Poco::Crypto::initializeCrypto();
+	crypto::initializeEngine();
 }
 
 
 void uninitializeSSL()
 {
 	SSLManager::instance().shutdown();
-	Poco::Crypto::uninitializeCrypto();
+	crypto::uninitializeEngine();
 }
 
 
@@ -141,7 +141,7 @@ void uninitializeSSL()
 //
 
 
-VerificationErrorArgs::VerificationErrorArgs(const Poco::Crypto::X509Certificate& cert, int errDepth, int errNum, const std::string& errMsg):
+VerificationErrorArgs::VerificationErrorArgs(const crypto::X509Certificate& cert, int errDepth, int errNum, const std::string& errMsg):
 	_cert(cert),
 	_errorDepth(errDepth),
 	_errorNumber(errNum),

@@ -57,7 +57,7 @@ RTPMap::RTPMap(const string& src) :
 	string clockratestr = "";
 	while (src[i] != ' ' && src[i] != '/' && i < len)
 		clockratestr += src[i++];
-	_clockRate = util::fromString<UInt32>(clockratestr.c_str());
+	_clockRate = util::strtoi<UInt32>(clockratestr.c_str());
 
 	if (src[i] == '/' && i < len) {
 		// encoding parameters
@@ -93,7 +93,7 @@ string RTPMap::toString()
 	if (!_clockRate)
 		ret += "0";
 	else
-		ret += util::toString(_clockRate);
+		ret += util::itostr(_clockRate);
 
 	if (!_encodingParameters.empty()) {
 		ret += "/";

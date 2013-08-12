@@ -18,6 +18,7 @@
 
 
 #include "Sourcey/HTTP/Client.h"
+#include "Sourcey/Net/SSLSocket.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Util.h"
 
@@ -106,7 +107,7 @@ void ClientConnection::send()
 {
 	traceL("ClientConnection", this) << "Sending request" << endl;	
 	
-	// Set HTTP_BAD_GATEWAY as default 
+	/// Set HTTP_BAD_GATEWAY as default 
 	_response.setStatus(http::Response::HTTP_BAD_GATEWAY);
 
 	_socket.Connect += delegate(this, &ClientConnection::onSocketConnect);
@@ -123,7 +124,7 @@ void ClientConnection::send(http::Request& req)
 
 void ClientConnection::setReadStream(std::ostream* os)
 {
-	// TODO: assert not running
+	/// TODO: assert not running
 	if (_readStream)
 		delete _readStream;
 
@@ -158,17 +159,17 @@ void ClientConnection::onSocketConnect(void*)
 	traceL("ClientConnection", this) << "Connected" << endl;
 	_socket.Connect -= delegate(this, &ClientConnection::onSocketConnect);
 	
-	// Emit the connect signal so raw connections ie. 
-	// websockets can kick off the data flow
+	/// Emit the connect signal so raw connections ie. 
+	/// websockets can kick off the data flow
 	Connect.emit(this);
 
-	// Start the outgoing send stream if there  
-	// are any adapters attached.
+	/// Start the outgoing send stream if there  
+	/// are any adapters attached.
 	if (Outgoing.numAdapters())
 		Outgoing.start();
 	
-	// Send the outgoing HTTP header if there 
-	// is no output stream.
+	/// Send the outgoing HTTP header if there 
+	/// is no output stream.
 	else
 		sendHeader();
 }
@@ -191,7 +192,7 @@ void ClientConnection::onPayload(Buffer& buffer)
 {
 	traceL("ClientConnection", this) << "On payload" << endl;	
 	
-	// Update download progress
+	/// Update download progress
 	_incomingProgress.update(buffer.available());
 
 	if (_readStream)
@@ -205,8 +206,8 @@ void ClientConnection::onMessage()
 {
 	traceL("ClientConnection", this) << "On complete" << endl;
 	
-	// Fire Complete and clear delegates so it
-	// won't fire again on close or error
+	/// Fire Complete and clear delegates so it
+	/// won't fire again on close or error
 	Complete.emit(this, _response);
 	Complete.clear(); 
 }
@@ -223,6 +224,33 @@ void ClientConnection::onClose()
 void ClientConnection::onClientShutdown(void*)
 {
 	close();
+}
+
+// ---------------------------------------------------------------------
+//
+
+ClientConnection* createConnection(const URL& url)
+{
+	ClientConnection* conn = 0;
+
+	if (url.scheme() == "http") {
+		conn = new ClientConnection(url);
+	}
+	else if (url.scheme() == "https") {
+		conn = new ClientConnection(url, net::SSLSocket());
+	}
+	else if (url.scheme() == "ws") {
+		conn = new ClientConnection(url);
+		conn->socket().replaceAdapter(new WebSocketConnectionAdapter(*conn, WebSocket::ClientSide));
+	}
+	else if (url.scheme() == "wss") {
+		conn = new ClientConnection(url, net::SSLSocket());
+		conn->socket().replaceAdapter(new WebSocketConnectionAdapter(*conn, WebSocket::ClientSide));
+	}
+	else
+		throw Exception("Unknown connection type for URL: " + url.str());
+
+	return conn;
 }
 
 
@@ -252,7 +280,7 @@ void Client::shutdown()
 	if (!connections.empty())
 		Shutdown.emit(this);
 
-	// Connections must remove themselves
+	/// Connections must remove themselves
 	assert(connections.empty());
 }
 
@@ -282,8 +310,8 @@ void Client::onTimer(void*)
 {
 	//traceL("http::Client", this) << "On timer" << endl;
 
-	// Close connections that have timed out while receiving
-	// the server response, maybe due to a faulty server.
+	/// Close connections that have timed out while receiving
+	/// the server response, maybe due to a faulty server.
 	ClientConnectionList conns = ClientConnectionList(connections);
 	for (ClientConnectionList::iterator it = conns.begin(); it != conns.end(); ++it) {
 		if ((*it)->expired()) {

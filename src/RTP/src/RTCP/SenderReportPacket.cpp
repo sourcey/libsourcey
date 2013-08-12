@@ -54,12 +54,12 @@ bool SenderReportPacket::read(Buffer& buffer)
 {
 	if (RTCP::Packet::read(buffer)) {
 		
-		buffer.readU32(ssrc);
-		buffer.readU32(ntpMsw);
-		buffer.readU32(ntpLsw);
-		buffer.readU32(rtpTimestamp);
-		buffer.readU32(senderPacketCount);
-		buffer.readU32(senderOctetCount);
+		buffer.getU32(ssrc);
+		buffer.getU32(ntpMsw);
+		buffer.getU32(ntpLsw);
+		buffer.getU32(rtpTimestamp);
+		buffer.getU32(senderPacketCount);
+		buffer.getU32(senderOctetCount);
 		return true;
 	}
 
@@ -71,12 +71,12 @@ void SenderReportPacket::write(Buffer& buffer) const
 {
 	RTCP::Packet::write(buffer);
 	
-	buffer.writeU32(ssrc);
-	buffer.writeU32(ntpMsw);
-	buffer.writeU32(ntpLsw);
-	buffer.writeU32(rtpTimestamp);
-	buffer.writeU32(senderPacketCount);
-	buffer.writeU32(senderOctetCount);
+	buffer.putU32(ssrc);
+	buffer.putU32(ntpMsw);
+	buffer.putU32(ntpLsw);
+	buffer.putU32(rtpTimestamp);
+	buffer.putU32(senderPacketCount);
+	buffer.putU32(senderOctetCount);
 }
 
 

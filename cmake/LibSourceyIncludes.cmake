@@ -76,22 +76,22 @@ macro(include_sourcey_modules)
     # Include the module headers. 
     # These may be located in the "src/" root directory,
     # or in a sub directory.
-    set(HAVE_LIBSOURCEY_${name} 0)
+    set(HAVE_SOURCEY_${name} 0)
     if(IS_DIRECTORY "${LibSourcey_SOURCE_DIR}/${name}/include")
       include_directories("${LibSourcey_SOURCE_DIR}/${name}/include")   
-      set(HAVE_LIBSOURCEY_${name} 1)
+      set(HAVE_SOURCEY_${name} 1)
     else()       
       subdirlist(subdirs "${LibSourcey_SOURCE_DIR}")
       foreach(dir ${subdirs})
         set(dir "${LibSourcey_SOURCE_DIR}/${dir}/${name}/include")
         if(IS_DIRECTORY ${dir})
           include_directories(${dir})
-          set(HAVE_LIBSOURCEY_${name} 1)
+          set(HAVE_SOURCEY_${name} 1)
         endif()
       endforeach()       
     endif()
     
-    if (NOT HAVE_LIBSOURCEY_${name})
+    if (NOT HAVE_SOURCEY_${name})
        message(ERROR "Unable to include dependent LibSourcey module ${name}. The build may fail.")
     endif()
         

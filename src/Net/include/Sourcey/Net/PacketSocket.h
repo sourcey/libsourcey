@@ -125,9 +125,9 @@ public:
 	/*
 	virtual int send(const RawPacket& packet, int flags = 0) 
 	{
-		// Most large packets, ie. MediaPackets derive 
-		// from RawPacket, so they can be sent directly 
-		// without buffering any data.
+		/// Most large packets, ie. MediaPackets derive 
+		/// from RawPacket, so they can be sent directly 
+		/// without buffering any data.
 		traceL("PacketSocket", this) << "RawPacket" << packet.size() << std::endl;	
 		return base().send((const char*)packet.array(), packet.size(), flags);
 	}
@@ -141,15 +141,15 @@ public:
 
 	virtual int send(const IPacket& packet, int flags = 0) 
 	{
-		// N nocopy solution for sending IPackets is not currently
-		// possible since some packets are only generated when
-		// IPacket::write() is called, such as for STUN and RTP packets.
-		// For sending data packets the send(RawPacket&) should be used.
+		/// N nocopy solution for sending IPackets is not currently
+		/// possible since some packets are only generated when
+		/// IPacket::write() is called, such as for STUN and RTP packets.
+		/// For sending data packets the send(RawPacket&) should be used.
 		//
-		// Furthermore, some dynamically generated packets may return
-		// a size of 0, in which case a smaller buffer of 1500 bytes is 
-		// allocated, but if packet data exceeds this size memcpy will be 
-		// called twice; once on Buffer::create(), and once on Buffer::reserve().
+		/// Furthermore, some dynamically generated packets may return
+		/// a size of 0, in which case a smaller buffer of 1500 bytes is 
+		/// allocated, but if packet data exceeds this size memcpy will be 
+		/// called twice; once on Buffer::create(), and once on Buffer::reserve().
 		Buffer buf(packet.size() > 0 ? packet.size() : 1500);
 		packet.write(buf);
 		traceL("PacketSocket", this) << "Send IPacket: " << buf.available() << std::endl;	
@@ -162,8 +162,8 @@ public:
 	}
 	*/
 		/*
-		// Always try to cast packets as RawPacket types
-		// so we can avoid copying data.
+		/// Always try to cast packets as RawPacket types
+		/// so we can avoid copying data.
 		RawPacket* rawPacket = packet.as<RawPacket>();
 		if (rawPacket)
 			send(*rawPacket);
@@ -197,9 +197,9 @@ protected:
 	{
 		traceL("trace", this) << "On connect" << std::endl;	
 		
-		// Register a RawPacket creation strategy for the 
-		// PacketFactory if no strategies have been explicitly
-		// registered.
+		/// Register a RawPacket creation strategy for the 
+		/// PacketFactory if no strategies have been explicitly
+		/// registered.
 		if (types().empty())
 			PacketFactory::registerPacketType<RawPacket>(100);
 
@@ -238,8 +238,8 @@ protected:
 	/*
 	virtual void send(IPacket& packet)
 	{
-		// Always try to cast packets as RawPacket types
-		// so we can avoid copying data.
+		/// Always try to cast packets as RawPacket types
+		/// so we can avoid copying data.
 		RawPacket* rawPacket = packet.as<RawPacket>();
 		if (rawPacket)
 			send(*rawPacket);

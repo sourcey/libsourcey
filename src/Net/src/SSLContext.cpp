@@ -20,10 +20,14 @@
 #include "Sourcey/Net/SSLContext.h"
 #include "Sourcey/Net/SSLManager.h"
 #include "Sourcey/DateTime.h"
-#include "Poco/File.h"
-#include "Poco/Path.h"
+#include "Sourcey/FileSystem.h"
 
-#include "Poco/Crypto/OpenSSLInitializer.h"
+#include "Sourcey/Crypto/OpenSSL.h"
+
+//#include "Poco/File.h"
+//#include "Poco/Path.h"
+
+//#include "Poco/Crypto/OpenSSLInitializer.h"
 
 
 using namespace std;
@@ -47,18 +51,17 @@ SSLContext::SSLContext(
 	_sslContext(0),
 	_extendedCertificateVerification(true)
 {
-	Poco::Crypto::OpenSSLInitializer::initialize();
+	crypto::initializeEngine();
 	
 	createSSLContext();
 
 	int errCode = 0;
 	if (!caLocation.empty())
 	{
-		Poco::File aFile(caLocation);
-		if (aFile.isDirectory())
-			errCode = SSL_CTX_load_verify_locations(_sslContext, 0, Poco::Path::transcode(caLocation).c_str());
+		if (fs::isdir(caLocation))
+			errCode = SSL_CTX_load_verify_locations(_sslContext, 0, fs::transcode(caLocation).c_str());
 		else
-			errCode = SSL_CTX_load_verify_locations(_sslContext, Poco::Path::transcode(caLocation).c_str(), 0);
+			errCode = SSL_CTX_load_verify_locations(_sslContext, fs::transcode(caLocation).c_str(), 0);
 		if (errCode != 1)
 		{
 			std::string msg = getLastError();
@@ -80,7 +83,7 @@ SSLContext::SSLContext(
 
 	if (!privateKeyFile.empty())
 	{
-		errCode = SSL_CTX_use_PrivateKey_file(_sslContext, Poco::Path::transcode(privateKeyFile).c_str(), SSL_FILETYPE_PEM);
+		errCode = SSL_CTX_use_PrivateKey_file(_sslContext, fs::transcode(privateKeyFile).c_str(), SSL_FILETYPE_PEM);
 		if (errCode != 1)
 		{
 			std::string msg = getLastError();
@@ -91,7 +94,7 @@ SSLContext::SSLContext(
 
 	if (!certificateFile.empty())
 	{
-		errCode = SSL_CTX_use_certificate_chain_file(_sslContext, Poco::Path::transcode(certificateFile).c_str());
+		errCode = SSL_CTX_use_certificate_chain_file(_sslContext, fs::transcode(certificateFile).c_str());
 		if (errCode != 1)
 		{
 			std::string errMsg = getLastError();
@@ -124,18 +127,17 @@ SSLContext::SSLContext(
 	_sslContext(0),
 	_extendedCertificateVerification(true)
 {
-	Poco::Crypto::OpenSSLInitializer::initialize();
+	crypto::initializeEngine();
 	
 	createSSLContext();
 
 	int errCode = 0;
 	if (!caLocation.empty())
 	{
-		Poco::File aFile(caLocation);
-		if (aFile.isDirectory())
-			errCode = SSL_CTX_load_verify_locations(_sslContext, 0, Poco::Path::transcode(caLocation).c_str());
+		if (fs::isdir(caLocation))
+			errCode = SSL_CTX_load_verify_locations(_sslContext, 0, fs::transcode(caLocation).c_str());
 		else
-			errCode = SSL_CTX_load_verify_locations(_sslContext, Poco::Path::transcode(caLocation).c_str(), 0);
+			errCode = SSL_CTX_load_verify_locations(_sslContext, fs::transcode(caLocation).c_str(), 0);
 		if (errCode != 1)
 		{
 			std::string msg = getLastError();
@@ -171,11 +173,11 @@ SSLContext::~SSLContext()
 {
 	SSL_CTX_free(_sslContext);
 	
-	Poco::Crypto::OpenSSLInitializer::uninitialize();
+	crypto::uninitializeEngine();
 }
 
 
-void SSLContext::useCertificate(const Poco::Crypto::X509Certificate& certificate)
+void SSLContext::useCertificate(const crypto::X509Certificate& certificate)
 {
 	int errCode = SSL_CTX_use_certificate(_sslContext, const_cast<X509*>(certificate.certificate()));
 	if (errCode != 1)
@@ -186,7 +188,7 @@ void SSLContext::useCertificate(const Poco::Crypto::X509Certificate& certificate
 }
 
 	
-void SSLContext::addChainCertificate(const Poco::Crypto::X509Certificate& certificate)
+void SSLContext::addChainCertificate(const crypto::X509Certificate& certificate)
 {
 	int errCode = SSL_CTX_add_extra_chain_cert(_sslContext, certificate.certificate());
 	if (errCode != 1)
@@ -197,9 +199,9 @@ void SSLContext::addChainCertificate(const Poco::Crypto::X509Certificate& certif
 }
 
 	
-void SSLContext::usePrivateKey(const Poco::Crypto::RSAKey& key)
+void SSLContext::usePrivateKey(const crypto::RSAKey& key)
 {
-	int errCode = SSL_CTX_use_RSAPrivateKey(_sslContext, key.impl()->getRSA());
+	int errCode = SSL_CTX_use_RSAPrivateKey(_sslContext, const_cast<RSA*>(&key));
 	if (errCode != 1)
 	{
 		std::string msg = getLastError();

@@ -63,7 +63,7 @@ public:
 		// already exists it will overwrite the previous delegate.
 	{
 		detach(delegate);
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		_delegates.push_back(delegate.clone());
 		_delegates.sort(DelegateT::ComparePrioroty); 
 		_refCount++;
@@ -73,7 +73,7 @@ public:
 		// Detaches a delegate from the signal.
 		// Returns true if the delegate was detached, false otherwise.
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
 			if (delegate.equals(*it) && !(*it)->cancelled()) {	
 				(*it)->cancel();
@@ -88,20 +88,25 @@ public:
 	void detach(const Void klass) 
 		// Detaches all delegates associated with the given class instance.
 	{
-		ScopedLock lock(_mutex);
-		for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
-			if (klass == (*it)->object() && !(*it)->cancelled()) {	
-				(*it)->cancel();
-				_dirty = true;
-				_refCount--;
+		{
+			Mutex::ScopedLock lock(_mutex);
+			for (Iterator it = _delegates.begin(); it != _delegates.end(); ++it) {
+				if (klass == (*it)->object() && !(*it)->cancelled()) {	
+					(*it)->cancel();
+					_dirty = true;
+					_refCount--;
+				}
 			}
 		}
+
+		// Call cleanup after detaching a class
+		cleanup();
 	}
 
 	void cleanup() 
 		// Deletes cancelled delegates.
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		if (_dirty) {
 			_dirty = false;
 			Iterator it = _delegates.begin(); 
@@ -121,7 +126,7 @@ public:
 		// Retrieves a list of active delegates while 
 		// simultaneously deleting any redundant delegates.
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		if (!_enabled) // skip if disabled
 			return;
 		Iterator it = _delegates.begin(); 
@@ -143,32 +148,32 @@ public:
 
 	void clear() 
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		util::clearList(_delegates);
 		_refCount = 0;
 	}
 
 	DelegateList delegates() const 
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return _delegates;
 	}
 
 	void enable(bool flag = true) 
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		_enabled = flag;
 	}
 
 	bool enabled() const
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return _enabled;
 	}
 	
 	int refCount() const 
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return _refCount;
 	}
 

@@ -455,25 +455,25 @@ namespace internal {
 		auto* sock = reinterpret_cast<SocketBase*>(opaque);
 		traceL("SocketBase", sock) << "DNS resolved: " << dns.success() << endl;
 
-		// Return if the socket was closed while resolving
+		/// Return if the socket was closed while resolving
 		if (sock->closed()) {			
 			warnL("SocketBase", sock) << "DNS resolved but socket closed" << endl;
 			return;
 		}
 
-		// Set the connection error if DNS failed
+		/// Set the connection error if DNS failed
 		if (!dns.success()) {
 			sock->setError("Failed to resolve host DNS for " + dns.host);
 			return;
 		}
 
 		try {	
-			// Connect to resolved host
+			/// Connect to resolved host
 			sock->connect(dns.addr);
 		}
 		catch (...) {
-			// Swallow errors
-			// Can be handled by Socket::Error signal
+			/// Swallow errors
+			/// Can be handled by Socket::Error signal
 		}	
 	}
 

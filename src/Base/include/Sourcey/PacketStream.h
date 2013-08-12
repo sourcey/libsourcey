@@ -184,7 +184,7 @@ struct PacketStreamState: public State
 //
 
 
-class PacketStream: public PacketStreamAdapter, public StatefulSignal<PacketStreamState>, public abstract::Startable
+class PacketStream: public PacketStreamAdapter, public Stateful<PacketStreamState>, public abstract::Startable
 	// This class implements a flexible and lightweight packet processing stream.
 	// A PacketStream consists of one or many PacketSources, one or many
 	// PacketProcessors, and one or many delegate receivers.
@@ -312,7 +312,7 @@ public:
 	AdapterT* getSource(int index = 0)
 	{
 		int x = 0;
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		for (unsigned i = 0; i < _sources.size(); i++) {
 			AdapterT* source = dynamic_cast<AdapterT*>(_sources[i].ptr);
 			if (source) {
@@ -328,7 +328,7 @@ public:
 	AdapterT* getProcessor(int index = 0)
 	{
 		int x = 0;
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		for (unsigned i = 0; i < _processors.size(); i++) {
 			AdapterT* processor = dynamic_cast<AdapterT*>(_processors[i].ptr);
 			if (processor) {

@@ -24,9 +24,9 @@
 namespace scy {
 	
 
-LogStream Polymorphic::log(const char* level) const 
+LogStream& Polymorphic::log(const char* level) const 
 { 
-	return Log(level, className(), this);
+	return printL(level, className(), this);
 }
 
 	

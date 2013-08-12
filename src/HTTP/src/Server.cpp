@@ -49,7 +49,7 @@ Server::~Server()
 	
 void Server::start()
 {	
-	// TODO: Register self as an observer
+	/// TODO: Register self as an observer
 	socket.base().AcceptConnection += delegate(this, &Server::onAccept);	
 	socket.Close += delegate(this, &Server::onClose);
 	socket.bind(address);
@@ -74,7 +74,7 @@ void Server::shutdown()
 	if (!connections.empty())
 		Shutdown.emit(this);
 
-	// Connections are self removing
+	/// Connections are self removing
 	assert(connections.empty());
 	assert(socket.base().refCount() == 1);
 }
@@ -95,9 +95,9 @@ ServerConnection* Server::createConnection(const net::Socket& sock)
 
 ServerResponder* Server::createResponder(ServerConnection& conn)
 {
-	// The initial HTTP request headers have already
-	// been parsed by now, but the request body may 
-	// be incomplete (especially if chunked).
+	/// The initial HTTP request headers have already
+	/// been parsed by now, but the request body may 
+	/// be incomplete (especially if chunked).
 	return factory->createResponder(conn);
 }
 
@@ -136,9 +136,11 @@ void Server::onClose(void* sender)
 }
 
 
-// -------------------------------------------------------------------
+//
 // Server Connection
 //
+
+
 ServerConnection::ServerConnection(Server& server, const net::Socket& socket) : 
 	Connection(socket), 
 	_server(server), 
@@ -182,17 +184,17 @@ bool ServerConnection::send()
 {
 	traceL("ServerConnection", this) << "Respond" << endl;
 
-	// TODO: Detect end of message and close()
+	/// TODO: Detect end of message and close()
 
-	// KLUDGE: Temp solution for quick sending small requests only.
-	// Use Connection::write() for nocopy binary stream.
+	/// KLUDGE: Temp solution for quick sending small requests only.
+	/// Use Connection::write() for nocopy binary stream.
 	//string body(_response.body.str());
 	//_response.setContentLength(body.length());
 	//return write(body.data(), body.length()) > 0;
 
-	// NOTE: Buffer may be empty.
-	// Zero length call will push the response headers  
-	// through on the initial call so Socket::send()
+	/// NOTE: Buffer may be empty.
+	/// Zero length call will push the response headers  
+	/// through on the initial call so Socket::send()
 	//_response.setContentLength(outgoingBuffer().available());
 	//return write(outgoingBuffer().data(), outgoingBuffer().available()) > 0;
 }
@@ -214,46 +216,46 @@ void ServerConnection::onHeaders()
 	traceL("ServerConnection", this) << "On headers" << endl;	
 	
 	/*
-	// NOTE: To upgrade the connection we need to upgrade the 
-	// ConnectionAdapter, but we can't do it yet since we are
-	// still inside the default adapter's parser callback scope.
-	// Just set the _upgrade flag for now, and we will do the actual 
-	// upgrade when the parser is complete (on the on next iteration).
+	/// NOTE: To upgrade the connection we need to upgrade the 
+	/// ConnectionAdapter, but we can't do it yet since we are
+	/// still inside the default adapter's parser callback scope.
+	/// Just set the _upgrade flag for now, and we will do the actual 
+	/// upgrade when the parser is complete (on the on next iteration).
 	_upgrade = _request.hasToken("Connection", "upgrade");
 	*/	
 
-	// Upgrade the connection if required
+	/// Upgrade the connection if required
 	if (util::icompare(_request.get("Connection", ""), "upgrade") == 0 && 
 		util::icompare(_request.get("Upgrade", ""), "websocket") == 0)
 	{			
 		traceL("ServerConnection", this) << "Upgrading to WebSocket: " << _request << endl;
 		_upgrade = true;
 
-		WebSocketConnectionAdapter* wsAdapter = new WebSocketConnectionAdapter(*this, WebSocket::WS_SERVER);
+		WebSocketConnectionAdapter* wsAdapter = new WebSocketConnectionAdapter(*this, WebSocket::ServerSide);
 				
-		// NOTE: To upgrade the connection we need to replace the 
-		// underlying SocketAdapter instance. Since we are currently 
-		// inside the default ConnectionAdapter's HTTP sarser callback 
-		// scope we just swap the SocketAdapter instance pointers and do
-		// a deferred delete on the old adapter. No more callbacks will be 
-		// received from the old adapter after replaceAdapter is called.
+		/// NOTE: To upgrade the connection we need to replace the 
+		/// underlying SocketAdapter instance. Since we are currently 
+		/// inside the default ConnectionAdapter's HTTP sarser callback 
+		/// scope we just swap the SocketAdapter instance pointers and do
+		/// a deferred delete on the old adapter. No more callbacks will be 
+		/// received from the old adapter after replaceAdapter is called.
 		socket().replaceAdapter(wsAdapter);
 
 		ostringstream oss;
 		_request.write(oss);
 		Buffer buffer(oss.str().c_str(), oss.str().length());		
 
-		// Send the handshake request to the WS adapter for handling.
-		// If the request fails the underlying socket will be closed
-		// resulting in the destruction of the current connection.
+		/// Send the handshake request to the WS adapter for handling.
+		/// If the request fails the underlying socket will be closed
+		/// resulting in the destruction of the current connection.
 		wsAdapter->onSocketRecv(buffer, socket().peerAddress());
 	}
 	
-	// Instantiate the responder when request headers have been parsed
+	/// Instantiate the responder when request headers have been parsed
 	_responder = _server.createResponder(*this);
 	assert(_responder);
 
-	// Upgraded connections don't receive the onHeaders callback
+	/// Upgraded connections don't receive the onHeaders callback
 	if (!_upgrade)
 		_responder->onHeaders(_request);
 }
@@ -273,8 +275,8 @@ void ServerConnection::onMessage()
 {
 	traceL("ServerConnection", this) << "On complete" << endl;	
 
-	// The HTTP request is complete.
-	// The request handler can give a response.
+	/// The HTTP request is complete.
+	/// The request handler can give a response.
 	assert(_responder);
 	assert(!_requestComplete);
 	_requestComplete = true;
@@ -327,7 +329,7 @@ http::Message* ServerConnection::outgoingHeader()
 
 void ServerConnection::onParserHeadersEnd() 
 {
-	// When headers have been parsed we instantiate the request handler
+	/// When headers have been parsed we instantiate the request handler
 	_responder = _server.createResponder(*this);
 	assert(_responder);
 	_responder->onHeaders(*_request);
@@ -360,7 +362,7 @@ void ServerConnection::onParserEnd()
 
 	bool res = write(body.c_str(), body.length());
 
-	// Set Connection: Close unless otherwise stated
+	/// Set Connection: Close unless otherwise stated
 	if (!isExplicitKeepAlive(_request) || 
 		_response.hasContentLength()) {
 		traceL("ServerConnection", this) << "Respond: No keepalive" << endl;	
@@ -368,13 +370,13 @@ void ServerConnection::onParserEnd()
 	}
 	*/
 	/* 	
-	// KLUDGE: Temp solution for quick sending small requests only.
-	// Use Connection::write() for nocopy binary stream.
+	/// KLUDGE: Temp solution for quick sending small requests only.
+	/// Use Connection::write() for nocopy binary stream.
 	bool res = write(
 		_response.body.str().c_str(),
 		_response.body.str().length());
 	
-	// Close unless keepalive is set
+	/// Close unless keepalive is set
 	if (!_response.getKeepAlive()) {
 		traceL("Client", this) << "Closing: No keepalive" << endl; 
 		close();

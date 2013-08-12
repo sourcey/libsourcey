@@ -24,7 +24,7 @@
 
 
 using namespace std;
-//using namespace Poco;
+
 
 
 namespace scy { 
@@ -51,17 +51,17 @@ void Configuration::load(const std::string& path, bool create)
 
 void Configuration::load(bool create)
 {
-	ScopedLock lock(_mutex); 
+	Mutex::ScopedLock lock(_mutex); 
 
 	if (_path.empty())
-		throw Exception("Cannot load: Configuration file path must be set.");
+		throw Exception("Cannot load configuration: File path not set.");
 
-	debugL() << "[JSONConfiguration] Loading: " << _path << endl;
-	
-	if (create && !Poco::File(_path).exists())
-		Poco::File(_path).createFile();
+	debugL("JSONConfiguration") << " Loading: " << _path << endl;
 	
 	try {	
+		if (create && !Poco::File(_path).exists())
+			Poco::File(_path).createFile();
+
 		json::loadFile(*this, _path);
 	}
     catch (...) {
@@ -75,12 +75,12 @@ void Configuration::load(bool create)
 
 void Configuration::save()
 {
-	ScopedLock lock(_mutex); 
+	Mutex::ScopedLock lock(_mutex); 
 	
 	if (_path.empty())
 		throw Exception("Cannot save: Configuration file path must be set.");
 
-	debugL() << "[JSONConfiguration] Saving: " << _path << endl;
+	debugL("JSONConfiguration") << " Saving: " << _path << endl;
 	
 	// Will throw on error
 	json::saveFile(*this, _path);
@@ -89,14 +89,14 @@ void Configuration::save()
 
 std::string Configuration::path()
 {
-	ScopedLock lock(_mutex); 
+	Mutex::ScopedLock lock(_mutex); 
 	return _path;
 }
 
 
 bool Configuration::loaded()
 {
-	ScopedLock lock(_mutex); 
+	Mutex::ScopedLock lock(_mutex); 
 	return _loaded;
 }
 
@@ -108,9 +108,9 @@ void Configuration::print(ostream& ost)
 }
 
 
-bool Configuration::remove(const string& key)
+bool Configuration::remove(const std::string& key)
 {
-	ScopedLock lock(_mutex); 
+	Mutex::ScopedLock lock(_mutex); 
 	
 	return removeMember(key) != Json::nullValue;
 }
@@ -119,7 +119,7 @@ bool Configuration::remove(const string& key)
 void Configuration::removeAll(const std::string& baseKey)
 {
 	traceL() << "Removing All: " << baseKey << endl;
-	ScopedLock lock(_mutex); 	
+	Mutex::ScopedLock lock(_mutex); 	
 	
     Members members = this->getMemberNames();
 	for (unsigned i = 0; i < members.size(); i++) {
@@ -129,14 +129,14 @@ void Configuration::removeAll(const std::string& baseKey)
 }
 
 
-void Configuration::replace(const string& from, const string& to)
+void Configuration::replace(const std::string& from, const std::string& to)
 {
-	ScopedLock lock(_mutex); 
+	Mutex::ScopedLock lock(_mutex); 
 
-	stringstream ss;
+	std::stringstream ss;
 	json::StyledWriter writer;
-	string data = writer.write(*this);
-	Poco::replaceInPlace(data, from, to);
+	std::string data = writer.write(*this);
+	util::replaceInPlace(data, from, to);
 	ss.str(data);
 
 	json::Reader reader;
@@ -144,9 +144,9 @@ void Configuration::replace(const string& from, const string& to)
 }
 
 
-bool Configuration::getRaw(const string& key, string& value) const
+bool Configuration::getRaw(const std::string& key, std::string& value) const
 {	
-	ScopedLock lock(_mutex); 
+	Mutex::ScopedLock lock(_mutex); 
 	
 	if (!isMember(key))
 		return false;
@@ -156,10 +156,10 @@ bool Configuration::getRaw(const string& key, string& value) const
 }
 
 
-void Configuration::setRaw(const string& key, const string& value)
+void Configuration::setRaw(const std::string& key, const std::string& value)
 {	
 	{
-		ScopedLock lock(_mutex); 
+		Mutex::ScopedLock lock(_mutex); 
 		(*this)[key] = value;
 	}
 	PropertyChanged.emit(this, key, value);
@@ -168,7 +168,7 @@ void Configuration::setRaw(const string& key, const string& value)
 
 void Configuration::keys(StringVec& keys, const std::string& baseKey)
 {
-	ScopedLock lock(_mutex); 
+	Mutex::ScopedLock lock(_mutex); 
 		
     Members members = this->getMemberNames();
 	for (unsigned i = 0; i < members.size(); i++) {

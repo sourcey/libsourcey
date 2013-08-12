@@ -23,7 +23,7 @@
 
 
 using namespace std;
-//using namespace Poco;
+
 
 
 namespace scy {
@@ -55,29 +55,6 @@ bool matchURL(const std::string& uri, const std::string& expression)
 }
 
 
-/*
-string parseHeader(const string& request, const string& name) 
-{
-	string req = request;
-	toLower(req);
-	toLower(name);
-	string value = "";
-	string::size_type start, end = 0;
-	start = req.find(name+": ");
-	if (start != string::npos) {
-		start += name.length() + 2;
-		end = req.find("\r\n", start);
-		if (end == string::npos) return "";
-		value = request.substr(start, end-start);
-		replaceInPlace(value,"\"","");
-		replaceInPlace(value,"\r","");
-		replaceInPlace(value,"\n","");
-	}
-	return value;
-}
-*/
-
-
 std::string parseCookieItem(const std::string& cookie, const std::string& item)
 {
 	string::size_type start, end = 0;
@@ -96,8 +73,7 @@ bool splitURIParameters(const string& uri, NVHash& out)
 	size_t len = uri.length();
 	size_t i = 0;
 
-	// Parse REST parameters
-	//i++;
+	/// Parse REST parameters
 	while (i < len && uri[i] != '?') {	
 		i++; 
 
@@ -105,23 +81,21 @@ bool splitURIParameters(const string& uri, NVHash& out)
 		while (uri[i] != '/' && uri[i] != '?' && i < len)
 			value += uri[i++];
 
-		// REST parameters are referenced by index
+		/// REST parameters are referenced by index
 		if (!value.empty())
-			out.set(util::toString(out.size()), value);		
+			out.set(util::itostr(out.size()), value);		
 	}
 	
-	// Parse query parameters
+	/// Parse query parameters
 	if (uri[i] == '?') i++;
 	while (i < len)
 	{
 		string name = "";
 		while (uri[i] != '=' && i < len)
-			name += uri[i++];
-		i++;
+			name += uri[i++]; i++;
 		string value = "";
 		while (uri[i] != '&' && i < len)
-			value += uri[i++];
-		i++;
+			value += uri[i++]; i++;
 		
 		if (!name.empty() && !value.empty())
 			out.set(name, value);
@@ -135,12 +109,14 @@ void splitParameters(const std::string& s, std::string& value, NVHash& parameter
 {
 	value.clear();
 	parameters.clear();
+
 	std::string::const_iterator it  = s.begin();
 	std::string::const_iterator end = s.end();
 	while (it != end && ::isspace(*it)) ++it;
 	while (it != end && *it != ';') value += *it++;
 	Poco::trimRightInPlace(value);
 	if (it != end) ++it;
+
 	splitParameters(it, end, parameters);
 }
 
@@ -189,6 +165,29 @@ void splitParameters(const std::string::const_iterator& begin, const std::string
 		if (it != end) ++it;
 	}
 }
+
+
+/*
+string parseHeader(const string& request, const string& name) 
+{
+	string req = request;
+	toLower(req);
+	toLower(name);
+	string value = "";
+	string::size_type start, end = 0;
+	start = req.find(name+": ");
+	if (start != string::npos) {
+		start += name.length() + 2;
+		end = req.find("\r\n", start);
+		if (end == string::npos) return "";
+		value = request.substr(start, end-start);
+		replaceInPlace(value,"\"","");
+		replaceInPlace(value,"\r","");
+		replaceInPlace(value,"\n","");
+	}
+	return value;
+}
+*/
 
 
 } // namespace util

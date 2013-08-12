@@ -21,7 +21,7 @@
 #define SOURCEY_Interfaces_H
 
 
- // depreciate
+#include "Sourcey/Atomic.h"
 
 
 namespace scy {
@@ -29,16 +29,29 @@ namespace abstract {
 
 		
 class Runnable
-	// A generic interface for classes
-	// that can be run and cancelled.
+	// A generic interface for classes that can
+	// be run and cancelled.
 {
 public:
-	virtual bool run() = 0;
+	Runnable() : _cancelled(0) {}
+	virtual ~Runnable() {}
+
+	virtual void run() = 0;
 		// The run method will be called repeatedly by the  
 		// managing context until this method return false.
 
-	virtual void cancel() {};
+	virtual void cancel()
 		// Cancels the current task.
+	{
+		atomic::increment(&_cancelled);
+	}
+
+	virtual bool cancelled() const { return _cancelled > 0; };
+		// True when the task has been cancelled.
+		// The run() method should return ASAP.7
+
+protected:
+	volatile atomic::type_t _cancelled;
 };
 
 		
@@ -97,7 +110,7 @@ public:
 	}
 	
 protected:
-	virtual bool run()
+	virtual void run()
 	{	
 		TSendable::send(); // must block
 		delete this;

@@ -15,7 +15,7 @@ class Singleton
 {
 public:
 	Singleton() :
-		ptr(0)
+		_ptr(0)
 		// Creates the Singleton wrapper.
 	{
 	}
@@ -24,8 +24,8 @@ public:
 		// Destroys the Singleton wrapper and the 
 		// managed singleton instance it holds.
 	{
-		if (ptr)
-			delete ptr;
+		if (_ptr)
+			delete _ptr;
 	}
 	
 	S* get()
@@ -34,24 +34,33 @@ public:
 		// to get on a NULL singleton will instantiate
 		// the singleton.
 	{
-		ScopedLock lock(_m);
-		if (!ptr) 
-			ptr = new S;
-		return ptr;
+		Mutex::ScopedLock lock(_m);
+		if (!_ptr) 
+			_ptr = new S;
+		return _ptr;
+	}
+	
+	S* swap(S* newPtr)
+		// Swaps the old pointer with the new one and 
+		// returns the old instance.
+	{
+		Mutex::ScopedLock lock(_m);
+		S* oldPtr = _ptr;
+		_ptr = newPtr;
+		return oldPtr;
 	}
 
 	void destroy()
 		// Destroys the managed singleton instance.
 	{
-		ScopedLock lock(_m);
-		if (ptr) {
-			delete ptr;
-		}
-		ptr = 0;
+		Mutex::ScopedLock lock(_m);
+		if (_ptr)
+			delete _ptr;
+		_ptr = nil;
 	}
 	
 private:
-	S* ptr;
+	S* _ptr;
 	Mutex _m;
 };
 

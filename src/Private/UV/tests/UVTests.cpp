@@ -343,7 +343,7 @@ int main(int argc, char** argv)
 	{
 		//Tests app;
 	}
-	Logger::uninitialize();
+	Logger::shutdown();
 	return 0;
 }
 

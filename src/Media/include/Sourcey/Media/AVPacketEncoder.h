@@ -47,6 +47,8 @@ protected:
 	virtual void process(IPacket& packet);	
 	virtual void onStreamStateChange(const PacketStreamState& state);
 
+	//virtual void* self() { return this;	}
+
 	friend class PacketStream;
 			
 	mutable Mutex _mutex;

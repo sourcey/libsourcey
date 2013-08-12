@@ -30,16 +30,16 @@ namespace scy {
 //
 
 
-SyncPacketQueue::SyncPacketQueue(uv::Loop& loop, int maxSize, int dispatchTimeout) : 
-	SyncQueue<IPacket>(loop, maxSize, dispatchTimeout), 
+SyncPacketQueue::SyncPacketQueue(uv::Loop& loop, int maxSize) : 
+	SyncQueue<IPacket>(loop, maxSize), 
 	PacketProcessor(Emitter)
 {	
 	traceL("SyncPacketQueue", this) << "Creating" << endl;
 }
 
 
-SyncPacketQueue::SyncPacketQueue(int maxSize, int dispatchTimeout) : 
-	SyncQueue<IPacket>(uv::defaultLoop(), maxSize, dispatchTimeout), 
+SyncPacketQueue::SyncPacketQueue(int maxSize) : 
+	SyncQueue<IPacket>(uv::defaultLoop(), maxSize), 
 	PacketProcessor(Emitter)
 {	
 	traceL("SyncPacketQueue", this) << "Creating" << endl;
@@ -54,22 +54,29 @@ SyncPacketQueue::~SyncPacketQueue()
 
 void SyncPacketQueue::process(IPacket& packet)
 {
-	if (!closed())
+	traceL("SyncPacketQueue", this) << "Processing: " << &packet << endl;
+
+	if (!cancelled())
 		push(packet.clone());
-	else
-		warnL("SyncPacketQueue", this) << "Dropping late packet" << endl;
+	else {
+		warnL("SyncPacketQueue", this) << "Dropping late incoming packet" << endl;
+		assert(closed());
+		assert(0);
+	}
 }
 
 
 void SyncPacketQueue::emit(IPacket& packet)
-{
-	traceL("SyncPacketQueue", this) << "Emitting: " << &packet << endl;
-	
+{	
 	// Emit should never be called after closure.
 	// Any late packets should have been dealt with  
 	// and dropped by the run() function.
-	assert(!closed());
-
+	if (cancelled()) {
+		assert(closed());
+		warnL("SyncPacketQueue", this) << "Dropping late outgoing packet" << endl;
+	}
+	
+	traceL("SyncPacketQueue", this) << "Emitting: " << &packet << endl;
 	PacketStreamAdapter::emit(packet);
 }
 
@@ -97,8 +104,8 @@ void SyncPacketQueue::onStreamStateChange(const PacketStreamState& state)
 //
 
 
-AsyncPacketQueue::AsyncPacketQueue(int maxSize, int dispatchTimeout) : 
-	AsyncQueue<IPacket>(maxSize, dispatchTimeout), 
+AsyncPacketQueue::AsyncPacketQueue(int maxSize) : 
+	AsyncQueue<IPacket>(maxSize), 
 	PacketProcessor(Emitter)
 {	
 	traceL("AsyncPacketQueue", this) << "Creating" << endl;
@@ -168,7 +175,7 @@ PacketStream::~PacketStream()
 {
 	traceL("PacketStream", this) << "Destroying" << endl;
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		if (_queue) {
 			_queue->destroy();
 			_queue = NULL;
@@ -182,7 +189,7 @@ void PacketStream::close()
 {
 	traceL("PacketStream", this) << "Closing" << endl;
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		if (_queue) {
 			_queue->destroy();
 			_queue = NULL;
@@ -196,7 +203,7 @@ void PacketStream::close()
 void PacketStream::onFinalPacket(IPacket& packet)
 {
 	//traceL("PacketStream", this) << "On final packet: " << &packet << ": " << packet.className() << endl;
-	ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 
 	if (_queue) {
 		// Ensure the stream is running and enabled 

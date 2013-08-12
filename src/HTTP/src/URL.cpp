@@ -146,7 +146,7 @@ std::string URL::authority() const
 	res.append(host());
     if (hasPort()) {
 		res.append(":");
-		res.append(util::toString<UInt16>(port()));
+		res.append(util::itostr<UInt16>(port()));
 	}
 	return res;
 }
@@ -230,8 +230,8 @@ void URL::updatePort(UInt16 port)
 
 	std::string tmp(str());
 	util::replaceInPlace(tmp, 
-		util::toString<UInt16>(this->port()), 
-		util::toString<UInt16>(port));
+		util::itostr<UInt16>(this->port()), 
+		util::itostr<UInt16>(port));
 	parse(tmp);
 }
 

@@ -59,12 +59,12 @@ public:
     virtual void print(std::ostream& ost);
 
 	static Scheduler& getDefault();
-		/// Returns the default Scheduler singleton,  
-		/// although Scheduler instances may also be
-		/// initialized individually.
+		// Returns the default Scheduler singleton,  
+		// although Scheduler instances may also be
+		// initialized individually.
 	
 	static sked::TaskFactory& factory();
-		/// Returns the TaskFactory singleton.
+		// Returns the TaskFactory singleton.
 	
 	virtual const char* className() const { return "Scheduler"; }
 

@@ -44,10 +44,10 @@ public:
 	//virtual void start();
 		
 	virtual void serialize(json::Value& root);
-		/// Serializes the task to JSON.
+		// Serializes the task to JSON.
 
 	virtual void deserialize(json::Value& root);
-		/// Deserializes the task from JSON.
+		// Deserializes the task from JSON.
 
 	template<typename T>
 	T* createTrigger() 
@@ -59,18 +59,18 @@ public:
 	void setTrigger(sked::Trigger* trigger);
 
 	sked::Trigger& trigger();
-		/// Returns a reference to the associated 
-		/// sked::Trigger or throws an exception.
+		// Returns a reference to the associated 
+		// sked::Trigger or throws an exception.
 	
 	Scheduler& scheduler();
-		/// Returns a reference to the associated 
-		/// Scheduler or throws an exception.
+		// Returns a reference to the associated 
+		// Scheduler or throws an exception.
 	
 	Int64 remaining() const;
-		/// Returns the milliseconds remaining 
-		/// until the next scheduled timeout.
-		/// An sked::Trigger must be associated
-		/// or an exception will be thrown.
+		// Returns the milliseconds remaining 
+		// until the next scheduled timeout.
+		// An sked::Trigger must be associated
+		// or an exception will be thrown.
 	
 	std::string type() const;
 	std::string name() const;
@@ -83,11 +83,11 @@ protected:
 	virtual ~Task();
 	
 	virtual bool beforeRun();
-	virtual bool run() = 0;
+	virtual void run() = 0;
 	virtual bool afterRun();
 
 	static bool CompareTimeout(const scy::Task* l, const scy::Task* r)
-		/// For stl::sort operations
+		// For stl::sort operations
 	{
 		return 
 			reinterpret_cast<const Task*>(l)->remaining() <
@@ -176,7 +176,7 @@ typedef std::vector<sked::Task*> TaskList;
 //long timeout = 0, long interval = 0
 //protected:
 	//Timestamp time();
-		/// Returns the time the task will be run.
+		// Returns the time the task will be run.
 
 	//virtual const char* className() const { return "Task"; }
 
@@ -185,7 +185,7 @@ typedef std::vector<sked::Task*> TaskList;
 	/// Override onTimeout
 protected:	
 	virtual void onTimeout() = 0;
-		/// Performs task processing when the timer fires.
+		// Performs task processing when the timer fires.
 */
 	//mutable Mutex	_mutex;	
 	//Timestamp _time;
@@ -202,4 +202,4 @@ protected:
 	//virtual void deserialize(json::Value& root);
 	//void schedule(std::time_t time);
 	//void schedule(const std::string& time, const std::string& fmt = TimestampFormat::ISO8601_FORMAT);
-		/// Sets the time the task will be run.
+		// Sets the time the task will be run.

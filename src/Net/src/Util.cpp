@@ -18,7 +18,6 @@
 
 
 #include "Sourcey/Net/Util.h"
-#include "Poco/String.h"
 
 
 using namespace std;

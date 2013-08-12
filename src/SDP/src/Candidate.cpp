@@ -66,7 +66,7 @@ Candidate::Candidate(const string& src) :
 	string componentIDstr = "";
 	while (src[i] != ' ' && i < len)
 		componentIDstr += src[i++];
-	_componentID = util::fromString<UInt32>(componentIDstr.c_str());
+	_componentID = util::strtoi<UInt32>(componentIDstr.c_str());
 	while (src[i] == ' ' && i < len)
 		i++;
 
@@ -80,7 +80,7 @@ Candidate::Candidate(const string& src) :
 	string prioritystr = "";
 	while (src[i] != ' ' && i < len)
 		prioritystr += src[i++];
-	_priority = util::fromString<UInt32>(prioritystr.c_str());
+	_priority = util::strtoi<UInt32>(prioritystr.c_str());
 	while (src[i] == ' ' && i < len)
 		i++;
 
@@ -94,7 +94,7 @@ Candidate::Candidate(const string& src) :
 	string portstr = "";
 	while (src[i] != ' ' && i < len)
 		portstr += src[i++];
-	_port = util::fromString<UInt32>(portstr.c_str());
+	_port = util::strtoi<UInt32>(portstr.c_str());
 	while (src[i] == ' ' && i < len)
 		i++;
 
@@ -136,7 +136,7 @@ Candidate::Candidate(const string& src) :
 		string relportstr = "";
 		while (src[i] != ' ' && i < len)
 			relportstr += src[i++];
-		_relPort = util::fromString<UInt32>(relportstr.c_str());
+		_relPort = util::strtoi<UInt32>(relportstr.c_str());
 		while (src[i] == ' ' && i < len)
 			i++;
 	}
@@ -265,10 +265,10 @@ string Candidate::toString()
 		ret += _foundation;
 
 	ret += " ";
-	if (util::toString(_componentID).empty())
+	if (util::itostr(_componentID).empty())
 		ret += "0";
 	else
-		ret += util::toString(_componentID);
+		ret += util::itostr(_componentID);
 
 	ret += " ";
 	if (_transport.empty())
@@ -277,10 +277,10 @@ string Candidate::toString()
 		ret += _transport;
 
 	ret += " ";
-	if (util::toString(_priority).empty())
+	if (util::itostr(_priority).empty())
 		ret += "0";
 	else
-		ret += util::toString(_priority);
+		ret += util::itostr(_priority);
 
 	ret += " ";
 	if (_address.empty())
@@ -289,10 +289,10 @@ string Candidate::toString()
 		ret += _address;
 
 	ret += " ";
-	//if (util::toString(_port).empty())
+	//if (util::itostr(_port).empty())
 	//	ret += "0";
 	//else
-	ret += util::toString(_port);
+	ret += util::itostr(_port);
 
 	
 	ret += " typ ";
@@ -313,10 +313,10 @@ string Candidate::toString()
 
 		// rel-port
 		ret += " rport ";
-		//if (util::toString(_relPort).empty())
+		//if (util::itostr(_relPort).empty())
 		//	ret += "0";
 		//else
-			ret += util::toString(_relPort);
+			ret += util::itostr(_relPort);
 	}
 	
 	return ret;

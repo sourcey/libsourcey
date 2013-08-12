@@ -66,44 +66,44 @@ struct Trigger: public json::ISerializable
 	Trigger(const std::string& type = "", const std::string& name = "");
 
 	virtual void update() = 0;
-		/// Updates the scheduleAt value to the
-		/// next scheduled time.
-		/// Return false here to destroy the task.
+		// Updates the scheduleAt value to the
+		// next scheduled time.
+		// Return false here to destroy the task.
 	
 	virtual Int64 remaining();
-		/// Returns the milliseconds remaining 
-		/// until the next scheduled timeout.
+		// Returns the milliseconds remaining 
+		// until the next scheduled timeout.
 	
 	virtual bool timeout();
-		/// Returns true if the task is ready to
-		/// be run, false otherwise.
+		// Returns true if the task is ready to
+		// be run, false otherwise.
 	
 	virtual bool expired();
-		/// Returns true if the task is expired
-		/// and should be destroyed.
-		/// Returns false by default.
+		// Returns true if the task is expired
+		// and should be destroyed.
+		// Returns false by default.
 	
 	virtual void serialize(json::Value& root);
 	virtual void deserialize(json::Value& root);
 
 	std::string type;
-		/// The type of this trigger class.
+		// The type of this trigger class.
 
 	std::string name;
-		/// The display name of this trigger class.
+		// The display name of this trigger class.
 	
 	int timesRun;
-		/// The number of times the task has run
-		/// since creation;
+		// The number of times the task has run
+		// since creation;
 	
 	DateTime createdAt;
-		/// The time the task was created.
+		// The time the task was created.
 
 	DateTime scheduleAt;
-		/// The time the task is scheduled to run.
+		// The time the task is scheduled to run.
 
 	DateTime lastRunAt;
-		/// The time the task was last run.
+		// The time the task was last run.
 };
 
 
@@ -133,13 +133,13 @@ struct IntervalTrigger: public Trigger
 	virtual void deserialize(json::Value& root);
 
 	Timespan interval;
-		/// This value represents the interval to wait
-		/// before running the task.
+		// This value represents the interval to wait
+		// before running the task.
 
 	int maxTimes;
-		/// The maximum number of times the task will
-		/// be run before it is destroyed.
-		/// 0 for no effect.
+		// The maximum number of times the task will
+		// be run before it is destroyed.
+		// 0 for no effect.
 };
 
 
@@ -151,13 +151,13 @@ struct DailyTrigger: public Trigger
 	virtual void update();
 
 	DateTime timeOfDay;
-		/// This value represents the time of day the
-		/// task will trigger.
-		/// The date part of the timestamp is redundant.
+		// This value represents the time of day the
+		// task will trigger.
+		// The date part of the timestamp is redundant.
 
 	std::vector<DaysOfTheWeek> daysExcluded;
-		/// Days of the week can be excluded by adding
-		/// the appropriate bit flag here. 
+		// Days of the week can be excluded by adding
+		// the appropriate bit flag here. 
 };
 	
 

@@ -100,11 +100,9 @@ void Request::setHost(const std::string& host)
 void Request::setHost(const std::string& host, UInt16 port)
 {
 	std::string value(host);
-	if (port != 80 && port != 443)
-	{
+	if (port != 80 && port != 443) {
 		value.append(":");
-		value.append(util::toString<UInt16>(port));
-		//NumberFormatter::append(value, port);
+		value.append(util::itostr<UInt16>(port));
 	}
 	setHost(value);
 }
@@ -130,9 +128,7 @@ const std::string& Request::getURI() const
 void Request::setCookies(const NVHash& cookies)
 {
 	std::string cookie;
-	cookie.reserve(64);
-	for (NVHash::ConstIterator it = cookies.begin(); it != cookies.end(); ++it)
-	{
+	for (NVHash::ConstIterator it = cookies.begin(); it != cookies.end(); ++it) {
 		if (it != cookies.begin())
 			cookie.append("; ");
 		cookie.append(it->first);
@@ -146,8 +142,7 @@ void Request::setCookies(const NVHash& cookies)
 void Request::getCookies(NVHash& cookies) const
 {
 	NVHash::ConstIterator it = find(COOKIE);
-	while (it != end() && util::icompare(it->first, COOKIE) == 0)
-	{
+	while (it != end() && util::icompare(it->first, COOKIE) == 0) {
 		util::splitParameters(it->second.begin(), it->second.end(), cookies);
 		++it;
 	}
@@ -204,40 +199,6 @@ void Request::write(std::ostream& ostr) const
 }
 
 
-/*
-void Request::read(std::istream& istr)
-{
-	static const int eof = std::char_traits<char>::eof();
-
-	std::string method;
-	std::string uri;
-	std::string version;
-	method.reserve(16);
-	uri.reserve(64);
-	version.reserve(16);
-	int ch = istr.get();
-	if (ch == eof) throw Exception("Message error: Cannot read empty message");
-	while (::isspace(ch)) ch = istr.get();
-	if (ch == eof) throw Exception("Message error: No HTTP request header");
-	while (!::isspace(ch) && ch != eof && method.length() < MAX_METHOD_LENGTH) { method += (char) ch; ch = istr.get(); }
-	if (!::isspace(ch)) throw Exception("Message error: HTTP request method invalid or too long");
-	while (::isspace(ch)) ch = istr.get();
-	while (!::isspace(ch) && ch != eof && uri.length() < MAX_URI_LENGTH) { uri += (char) ch; ch = istr.get(); }
-	if (!::isspace(ch)) throw Exception("Message error: HTTP request URI invalid or too long");
-	while (::isspace(ch)) ch = istr.get();
-	while (!::isspace(ch) && ch != eof && version.length() < MAX_VERSION_LENGTH) { version += (char) ch; ch = istr.get(); }
-	if (!::isspace(ch)) throw Exception("Message error: Invalid HTTP version string");
-	while (ch != '\n' && ch != eof) { ch = istr.get(); }
-	http::Message::read(istr);
-	ch = istr.get();
-	while (ch != '\n' && ch != eof) { ch = istr.get(); }
-	setMethod(method);
-	setURI(uri);
-	setVersion(version);
-}
-*/
-
-
 void Request::getCredentials(const std::string& header, std::string& scheme, std::string& authInfo) const
 {
 	scheme.clear();
@@ -266,83 +227,3 @@ void Request::setCredentials(const std::string& header, const std::string& schem
 
 
 } } // namespace scy::http
-
-
-
-
-
-/*
-Request::Request() : 
-	http::Message(Message::HTTP_1_1)//, form(nil)
-{
-}
-
-
-Request::Request(const string& version) : 
-	http::Message(version)//, form(nil)
-{
-}
-
-
-Request::Request(const string& method, const string& uri) : 
-	http::Message(method, uri, Message::HTTP_1_1)//, form(nil)
-{
-}
-
-
-Request::Request(const string& method, const string& uri, const string& version) : 
-	http::Message(method, uri, version)//, form(nil)
-{
-}
-
-
-Request::~Request()
-{
-	//if (form) delete form;
-}
-
-
-void Request::prepare()
-{
-	assert(!getMethod().empty());
-	assert(!getURI().empty());
-
-	string date = DateTimeFormatter::format(Timestamp(), DateTimeFormat::RFC822_FORMAT);
-	set("Date", date);	
-	set("User-Agent", "Sourcey C++ API");
-	if (getMethod() == "POST" || 
-		getMethod() == "PUT") {
-		if (form) {
-			form->prepareSubmit(*this);	
-			form->write(body);
-			streambuf* pbuf = body.rdbuf();
-			long contentLength = (long)pbuf->pubseekoff(0, ios_base::end);
-			assert(contentLength > 0);
-			setContentLength(contentLength);
-			setChunkedTransferEncoding(false);
-			pbuf->pubseekpos(0);
-		}
-		else
-			setContentLength(body.str().length());
-	}
-}
-
-
-void Request::read(istream& istr)
-{
-	http::Message::read(istr);
-	util::splitURIParameters(getURI(), _params);
-}
-
-			
-const NVHash& Request::params() const
-{	
-	return _params;
-}
-
-
-bool Request::matches(const string& expression) const
-{
-	return util::matchURL(getURI(), expression);
-}
-*/

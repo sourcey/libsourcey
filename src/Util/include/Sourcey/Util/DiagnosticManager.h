@@ -26,7 +26,6 @@
 #include "Sourcey/Stateful.h"
 
 
-
 namespace scy {
 	
 	
@@ -54,9 +53,12 @@ struct DiagnosticState: public State
 };
 
 
-// ---------------------------------------------------------------------
 //
-class IDiagnostic: public StatefulSignal<DiagnosticState>
+// Diagnostic Interface
+//
+
+
+class IDiagnostic: public Stateful<DiagnosticState>
 {
 public:
 	IDiagnostic();
@@ -75,24 +77,32 @@ public:
 	virtual bool failed() const;
 
 	Signal<const std::string&> SummaryUpdated;
-		/// Fires when a new text item is added 
-		/// to the summary.
+		// Fires when a new text item is added 
+		// to the summary.
 
 	/// The StateChange signal will dispatch
 	/// diagnostic test results to delegates.
 
 protected:
 	virtual void run() = 0;	
-		/// Override to implement diagnostic logic.
+		// Override to implement diagnostic logic.
 	
 	virtual bool pass();
 	virtual bool fail();
 	virtual void addSummary(const std::string& text);
+
+	//virtual void* self() { return this;	}
 };
 
 
-// ---------------------------------------------------------------------
+typedef PointerManager<std::string, IDiagnostic> DiagnosticStore;	
+
+
 //
+// Asynchronous Diagnostic Base
+//
+
+
 class AsyncDiagnostic: public IDiagnostic, public abstract::Runnable
 {
 public:
@@ -108,9 +118,9 @@ protected:
 };
 
 
-// ---------------------------------------------------------------------
 //
-typedef PointerManager<std::string, IDiagnostic> DiagnosticStore;	
+// Diagnostic Manager
+//
 
 	
 class DiagnosticManager: public DiagnosticStore
@@ -142,6 +152,7 @@ public:
 	virtual void onDiagnosticStateChange(void*, DiagnosticState& state, const DiagnosticState&);
 	
 	virtual const char* className() const { return "DiagnosticManager"; }
+	//virtual void* self() { return this;	}
 };
 
 

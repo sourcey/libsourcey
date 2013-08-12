@@ -84,9 +84,9 @@ int Header::read(const UInt8* buffer, int bufferSize)
 	this->marker = ExtractBits(buffer[1], 1, 7) != 0;
 	this->payloadType = ExtractBits(buffer[1], 7, 0);
 
-	this->sequenceNumber = GetBE16(buffer + 2);
-	this->timestamp = GetBE32(buffer + 4);
-	this->ssrc = GetBE32(buffer + 8);
+	this->sequenceNumber = getBE16(buffer + 2);
+	this->timestamp = getBE32(buffer + 4);
+	this->ssrc = getBE32(buffer + 8);
 
 	assert(this->csrcCount < 16);
 
@@ -96,7 +96,7 @@ int Header::read(const UInt8* buffer, int bufferSize)
 		return -1;
 	}
 	for (int i = 0; i < this->csrcCount; i++) {
-		this->csrcList.push_back(GetBE32(buffer + i * 4 + 12));
+		this->csrcList.push_back(getBE32(buffer + i * 4 + 12));
 	}
 	return size();
 }
@@ -115,12 +115,12 @@ void Header::write(UInt8* buffer, int bufferSize) const
       this->csrcCount;
 	buffer[1] = ((UInt8)this->marker << 7) |
       this->payloadType;
-	SetBE16(buffer + 2, this->sequenceNumber);
-	SetBE32(buffer + 4, this->timestamp);
-	SetBE32(buffer + 8, this->ssrc);
+	setBE16(buffer + 2, this->sequenceNumber);
+	setBE32(buffer + 4, this->timestamp);
+	setBE32(buffer + 8, this->ssrc);
 
 	for (int i = 0; i < csrcList.size(); i++) {
-		SetBE32(buffer + i * 4 + 12, this->csrcList[i]);
+		setBE32(buffer + i * 4 + 12, this->csrcList[i]);
 	}
 }
 
@@ -128,7 +128,7 @@ void Header::write(UInt8* buffer, int bufferSize) const
 bool Header::read(Buffer& buffer)
 {
 	assert(buffer.position() == 0);
-	int sz = read(reinterpret_cast<const UInt8*>(buffer.data()), static_cast<int>(buffer.size()));
+	int sz = read(reinterpret_cast<const UInt8*>(buffer.data()), static_cast<int>(buffer.available()));
 	buffer.consume(sz);
 	return sz > 0;
 }
@@ -137,9 +137,9 @@ bool Header::read(Buffer& buffer)
 void Header::write(Buffer& buffer) const
 {	
 	assert(buffer.position() == 0);
-	assert(buffer.capacity() > this->size());
-	write(reinterpret_cast<UInt8*>(buffer.data()), static_cast<int>(buffer.capacity()));
-	buffer.size(this->size());
+	assert(buffer.available() > this->size());
+	write(reinterpret_cast<UInt8*>(buffer.data()), static_cast<int>(buffer.available()));
+	buffer.limit(this->size());
 }
 
 

@@ -28,7 +28,7 @@
 #include "Sourcey/HTTP/Request.h"
 #include "Sourcey/HTTP/Response.h"
 #include "Sourcey/HTTP/Parser.h"
-#include "Poco/Random.h"
+#include "Sourcey/Random.h"
 
 
 namespace scy {
@@ -44,105 +44,114 @@ public:
 	
 	enum Mode
 	{
-		WS_SERVER, /// Server-side WebSocket.
-		WS_CLIENT  /// Client-side WebSocket.
+		ServerSide, /// Server-side WebSocket.
+		ClientSide  /// Client-side WebSocket.
 	};
 	
-	enum FrameFlags
-		// Frame header flags.
-	{
-		FRAME_FLAG_FIN  = 0x80, /// FIN bit: final fragment of a multi-fragment message.
-		FRAME_FLAG_RSV1 = 0x40, /// Reserved for future use. Must be zero.
-		FRAME_FLAG_RSV2 = 0x20, /// Reserved for future use. Must be zero.
-		FRAME_FLAG_RSV3 = 0x10, /// Reserved for future use. Must be zero.
-	};
-
-	enum FrameOpcodes
-		// Frame header opcodes.
-	{
-		FRAME_OP_CONT    = 0x00, /// Continuation frame.
-		FRAME_OP_TEXT    = 0x01, /// Text frame.
-		FRAME_OP_BINARY  = 0x02, /// Binary frame.
-		FRAME_OP_CLOSE   = 0x08, /// Close connection.
-		FRAME_OP_PING    = 0x09, /// Ping frame.
-		FRAME_OP_PONG    = 0x0a, /// Pong frame.
-		FRAME_OP_BITMASK = 0x0f  /// Bit mask for opcodes. 
+	/// Frame header flags.
+	struct FrameFlags {
+		enum Value
+		{
+			Fin  = 0x80, /// FIN bit: final fragment of a multi-fragment message.
+			Rsv1 = 0x40, /// Reserved for future use. Must be zero.
+			Rsv2 = 0x20, /// Reserved for future use. Must be zero.
+			Rsv3 = 0x10, /// Reserved for future use. Must be zero.
+		};
 	};
 	
-	enum SendFlags
-		// Combined header flags and opcodes for use with writeFrame().
-	{
-		FRAME_TEXT   = FRAME_FLAG_FIN | FRAME_OP_TEXT,
-			// Use this for sending a single text (UTF-8) payload frame.
-		FRAME_BINARY = FRAME_FLAG_FIN | FRAME_OP_BINARY
-			// Use this for sending a single binary payload frame.
+	/// Frame header opcodes.
+	struct Opcode {
+		enum Value
+		{
+			Continuation	= 0x00, /// Continuation frame.
+			Text			= 0x01, /// Text frame.
+			Binary			= 0x02, /// Binary frame.
+			Close			= 0x08, /// Close connection.
+			Ping			= 0x09, /// Ping frame.
+			Pong			= 0x0a, /// Pong frame.
+			Bitmask			= 0x0f  /// Bit mask for opcodes. 
+		};
 	};
 	
-	enum StatusCodes
-		// StatusCodes for CLOSE frames sent with shutdown().
-	{
-		WS_NORMAL_CLOSE            = 1000,
-		WS_ENDPOINT_GOING_AWAY     = 1001,
-		WS_PROTOCOL_ERROR          = 1002,
-		WS_PAYLOAD_NOT_ACCEPTABLE  = 1003,
-		WS_RESERVED                = 1004,
-		WS_RESERVED_NO_STATUS_CODE = 1005,
-		WS_RESERVED_ABNORMAL_CLOSE = 1006,
-		WS_MALFORMED_PAYLOAD       = 1007,
-		WS_POLICY_VIOLATION        = 1008,
-		WS_PAYLOAD_TOO_BIG         = 1009,
-		WS_EXTENSION_REQUIRED      = 1010,
-		WS_UNEXPECTED_CONDITION    = 1011,
-		WS_RESERVED_TLS_FAILURE    = 1015
+	/// Combined header flags and opcodes for identifying 
+	/// the payload type of sent frames.
+	struct SendFlags {
+		enum Value
+		{
+			Text   = FrameFlags::Fin | Opcode::Text,			
+			Binary = FrameFlags::Fin | Opcode::Binary
+		};
 	};
 	
-	enum ErrorCodes
-		// These error codes can be obtained from a WebSocketException
-		// to determine the exact cause of the error.
-	{
-		WS_ERR_NO_HANDSHAKE                   = 1,
-			// No Connection: Upgrade or Upgrade: websocket header in handshake request.
-		WS_ERR_HANDSHAKE_NO_VERSION           = 2,
-			// No Sec-WebSocket-Version header in handshake request.
-		WS_ERR_HANDSHAKE_UNSUPPORTED_VERSION  = 3,
-			// Unsupported WebSocket version requested by client.
-		WS_ERR_HANDSHAKE_NO_KEY               = 4,
-			// No Sec-WebSocket-Key header in handshake request.
-		WS_ERR_HANDSHAKE_ACCEPT               = 5,
-			// No Sec-WebSocket-Accept header or wrong value.
-		WS_ERR_UNAUTHORIZED                   = 6,
-			// The server rejected the username or password for authentication.
-		WS_ERR_PAYLOAD_TOO_BIG                = 10,
-			// Payload too big for supplied buffer.
-		WS_ERR_INCOMPLETE_FRAME               = 11
-			// Incomplete frame received.
+	/// StatusCodes for CLOSE frames sent with shutdown().
+	struct StatusCodes {
+		enum Value
+		{
+			NormalClose				= 1000,
+			EndpointGoingAway		= 1001,
+			ProtocolError			= 1002,
+			PayloadNotAcceptable	= 1003,
+			Reserved                = 1004,
+			ReservedNoStatusCode	= 1005,
+			ReservedAbnormalClose	= 1006,
+			MalformedPayload		= 1007,
+			PolicyViolation			= 1008,
+			PayloadTooBig			= 1009,
+			ExtensionRequired		= 1010,
+			UnexpectedCondition		= 1011,
+			ReservedTLSFailure		= 1015
+		};
 	};
 	
-	static const std::string WEBSOCKET_GUID;
-	static const std::string WEBSOCKET_VERSION;
-		// The WebSocket protocol version supported (13).
+	/// These error codes can be obtained from WebSocket exceptions
+	/// to determine the exact cause of the error.
+	struct ErrorCodes {
+		enum Value
+		{
+			NoHandshake                   = 1,
+				/// No Connection: Upgrade or Upgrade: websocket header in handshake request.
+			HandshakeNoVersion           = 2,
+				/// No Sec-WebSocket-Version header in handshake request.
+			HandshakeUnsupportedVersion  = 3,
+				/// Unsupported WebSocket version requested by client.
+			HandshakeNoKey               = 4,
+				/// No Sec-WebSocket-Key header in handshake request.
+			HandshakeAccept               = 5,
+				/// No Sec-WebSocket-Accept header or wrong value.
+			Unauthorized                   = 6,
+				/// The server rejected the username or password for authentication.
+			PayloadTooBig                = 10,
+				/// Payload too big for supplied buffer.
+			IncompleteFrame               = 11
+				/// Incomplete frame received.
+		};
+	};
 	
 	WebSocket();
-		// Creates an unconnected WebSocket.
+		/// Creates an unconnected WebSocket.
 
 	WebSocket(net::SocketBase* base, bool shared = false);
-		// Creates the Socket and attaches the given SocketBase.
+		/// Creates the Socket and attaches the given SocketBase.
 		//
-		// The SocketBase must be a WebSocketAdapter, otherwise an
-		// exception will be thrown.
+		/// The SocketBase must be a WebSocketAdapter, otherwise an
+		/// exception will be thrown.
 
 	WebSocket(const net::Socket& socket);
-		// Creates the WebSocket with the SocketBase
-		// from another socket. The SocketBase must be
-		// a WebSocketAdapter, otherwise an exception will be thrown.
+		/// Creates the WebSocket with the SocketBase
+		/// from another socket. The SocketBase must be
+		/// a WebSocketAdapter, otherwise an exception will be thrown.
 
 	WebSocketAdapter& adapter() const;
-		// Returns the WebSocketAdapter for this socket.
+		/// Returns the WebSocketAdapter for this socket.
 	
 	virtual bool shutdown(UInt16 statusCode, const std::string& statusMessage);
 
 	http::Request& request();
 	http::Response& response();
+	
+	static const char* ProtocolGuid;
+	static const char* ProtocolVersion;
+		/// The WebSocket protocol version supported (13).
 	
 protected:
 	http::Request _request;
@@ -158,20 +167,20 @@ class WebSocketFramer
 {
 public:
 	WebSocketFramer(WebSocket::Mode mode);
-		// Creates a SocketBase using the given SocketBase.
+		/// Creates a SocketBase using the given SocketBase.
 
 	virtual ~WebSocketFramer();
 
 	virtual int writeFrame(const char* buffer, int length, int flags, Buffer& frame);
-		// Writes a WebSocket protocol frame from the given data.
+		/// Writes a WebSocket protocol frame from the given data.
 		
 	virtual int readFrame(Buffer& buffer);
-		// Receives a WebSocket protocol frame.
+		/// Receives a WebSocket protocol frame.
 		//
-		// The buffer's read position and size will be set to match
-		// the actual beginning and end of the contained payload.
-		// This enables us to work with the socket buffer directly
-		// without copying any data.
+		/// The buffer's read position and size will be set to match
+		/// the actual beginning and end of the contained payload.
+		/// This enables us to work with the socket buffer directly
+		/// without copying any data.
 	
 	//
 	/// Server side
@@ -182,30 +191,30 @@ public:
 	/// Client side
 
 	void sendHandshakeRequest(); 
-		// Sends the initial WS handshake HTTP request.
+		/// Sends the initial WS handshake HTTP request.
 		
 	void createHandshakeRequest(http::Request& request); 
-		// Appends the WS hanshake HTTP request hearers.
+		/// Appends the WS hanshake HTTP request hearers.
 	
 	bool checkHandshakeResponse(http::Response& response);
-		// Checks the veracity the HTTP handshake response.
-		// Returns true on success, false if the request should 
-		// be resent (in case of authentication), or throws on error.
+		/// Checks the veracity the HTTP handshake response.
+		/// Returns true on success, false if the request should 
+		/// be resent (in case of authentication), or throws on error.
 
 	void completeHandshake(http::Response& response);
-		// Verifies the handshake response or thrown and exception.
+		/// Verifies the handshake response or thrown and exception.
 
 	bool handshakeComplete() const;
-		// Return true when the handshake has completed successfully.
+		/// Return true when the handshake has completed successfully.
 
 protected:
 	int frameFlags() const;
-		// Returns the frame flags of the most recently received frame.
-		// Set by readFrame()
+		/// Returns the frame flags of the most recently received frame.
+		/// Set by readFrame()
 		
 	bool mustMaskPayload() const;
-		// Returns true if the payload must be masked.	
-		// Used by writeFrame()
+		/// Returns true if the payload must be masked.	
+		/// Used by writeFrame()
 		
 	WebSocket::Mode mode() const;
 	
@@ -218,9 +227,9 @@ protected:
 private:
 	WebSocket::Mode _mode;
 	int _frameFlags;
-	bool _mustMaskPayload;
+	bool _maskPayload;
 	int _headerState;
-	Poco::Random _rnd;
+	Random _rnd;
 	std::string _key; // client handshake key
 
 	friend class WebSocketAdapter;
@@ -235,8 +244,8 @@ public:
 	WebSocketAdapter(net::Socket* socket, WebSocket::Mode mode, http::Request& request, http::Response& response); 
 	WebSocketAdapter(WebSocket::Mode mode, http::Request& request, http::Response& response);
 	
-	virtual int send(const char* data, int len, int flags = WebSocket::FRAME_TEXT);
-	virtual int send(const char* data, int len, const net::Address& peerAddr, int flags = WebSocket::FRAME_TEXT);
+	virtual int send(const char* data, int len, int flags = WebSocket::SendFlags::Text);
+	virtual int send(const char* data, int len, const net::Address& peerAddr, int flags = WebSocket::SendFlags::Text);
 	
 	virtual bool shutdown(UInt16 statusCode, const std::string& statusMessage);		
 	
@@ -280,20 +289,20 @@ protected:
 	//Signal<http::Response&> PrepareServerResponse;
 
 	//virtual http::Request createrequest();
-		// Returns a reference to the externally managed   
-		// HTTP request object.
+		/// Returns a reference to the externally managed   
+		/// HTTP request object.
 
 	//virtual http::Response& response();
-		// Returns a reference to  the externally managed   
-		// HTTP response object.	
+		/// Returns a reference to  the externally managed   
+		/// HTTP response object.	
 	
 	//virtual void setRequest(http::Request* request);
-		// Sets the externally managed HTTP request 
-		// object for client WS connection.
+		/// Sets the externally managed HTTP request 
+		/// object for client WS connection.
 
 	//virtual void setResponse(http::Response* response);
-		// Sets the externally managed HTTP response 
-		// object for server WS connection.
+		/// Sets the externally managed HTTP response 
+		/// object for server WS connection.
 
 
 // ---------------------------------------------------------------------
@@ -375,19 +384,19 @@ protected:
 
 	//virtual void* instance() { return this; }	
 
-		// Reads the raw WS payload
-		// Receives and emits the framed payload
+		/// Reads the raw WS payload
+		/// Receives and emits the framed payload
 
 	//virtual void close();
-		// Closes the socket.
+		/// Closes the socket.
 		//
-		// Shuts down the connection by attempting
-		// an orderly SSL shutdown, then actually
-		// shutting down the TCP connection.
+		/// Shuts down the connection by attempting
+		/// an orderly SSL shutdown, then actually
+		/// shutting down the TCP connection.
 		
 	//int available() const;
-		// Returns the number of bytes available from the
-		// SSL buffer for immediate reading.
+		/// Returns the number of bytes available from the
+		/// SSL buffer for immediate reading.
 
 // ---------------------------------------------------------------------
 //
@@ -397,20 +406,20 @@ class WebSocketReceiver
 {
 public:
 	WebSocketFramer(WebSocketAdapter* socketBase, bool mustMaskPayload);
-		// Creates a SocketBase using the given native socket.
+		/// Creates a SocketBase using the given native socket.
 
 	virtual ~WebSocketFramer();
 
 	virtual int writeFrame(const char* buffer, int length, int flags, Buffer& frame);
-		// Writes a WebSocket protocol frame from the given data.
+		/// Writes a WebSocket protocol frame from the given data.
 		
 	virtual int readFrame(Buffer& buffer);
-		// Receives a WebSocket protocol frame.
+		/// Receives a WebSocket protocol frame.
 		//
-		// The buffer's read position and size will be set to match
-		// the actual beginning and end of the contained payload.
-		// This enables us to work with the socket buffer directly
-		// without copying any data.
+		/// The buffer's read position and size will be set to match
+		/// the actual beginning and end of the contained payload.
+		/// This enables us to work with the socket buffer directly
+		/// without copying any data.
 
 	
 	//WebSocket::Mode mode() const;
@@ -423,15 +432,15 @@ public:
 
 
 	bool connected() const;
-		// Return true when the socket is connected 
-		// and the handshake is complete.
+		/// Return true when the socket is connected 
+		/// and the handshake is complete.
 
 protected:
 	int frameFlags() const;
-		// Returns the frame flags of the most recently received frame.
+		/// Returns the frame flags of the most recently received frame.
 		
 	bool mustMaskPayload() const;
-		// Returns true if the payload must be masked.	
+		/// Returns true if the payload must be masked.	
 	
 	enum
 	{
@@ -443,7 +452,7 @@ private:
 	WebSocketAdapter* _socketBase;
 	WebSocketFramer framer;
 	int _frameFlags;
-	bool _mustMaskPayload;
+	bool _maskPayload;
 	int _headerState;
 	Poco::Random _rnd;
 	std::string _key; // client handshake key
@@ -458,9 +467,9 @@ private:
 	/*
 	
 	//WebSocketAdapter& base() const;
-		// Returns the SocketBase for this socket.
-	virtual int send(const char* data, int len, int flags = WebSocket::FRAME_BINARY);
-	virtual int send(const char* data, int len, const net::Address& peerAddr, int flags = WebSocket::FRAME_BINARY);
+		/// Returns the SocketBase for this socket.
+	virtual int send(const char* data, int len, int flags = WebSocket::SendFlags::Binary);
+	virtual int send(const char* data, int len, const net::Address& peerAddr, int flags = WebSocket::SendFlags::Binary);
 	*/
 
 
@@ -506,8 +515,8 @@ public:
 	virtual UInt16 port() = 0;
 
 	NullSignal Online;
-		// Signals that the socket is validated
-		// and ready to send data.
+		/// Signals that the socket is validated
+		/// and ready to send data.
 };
 	
 
@@ -528,8 +537,8 @@ public:
 	virtual UInt16 port() = 0;
 
 	NullSignal Online;
-		// Signals that the socket is validated
-		// and ready to send data.
+		/// Signals that the socket is validated
+		/// and ready to send data.
 };
 
 
@@ -567,7 +576,7 @@ public:
 	
 		log("debug") << "Web Socket Connecting to " << _uri.toString() << std::endl;	
 
-		// Will throw on error
+		/// Will throw on error
 		SocketBaseT::connect(Address(_uri.getHost(), port()));
 	}
 
@@ -585,7 +594,7 @@ public:
 			}
 		}
 		catch (Exception& exc) {
-			// Not a fatal error
+			/// Not a fatal error
 			log("warn") << "WebSocket Closing Error: " << exc.message() << std::endl;
 		}
 
@@ -651,7 +660,7 @@ public:
 			return;
 		}
 	
-		// Read Messages
+		/// Read Messages
 		else if (_headerState == 2) {
 			log("trace") << "Parsing Messages: " << buffer.available() << std::endl;
 		
@@ -677,7 +686,7 @@ public:
 			return;
 		}
 
-		// Read Initial HTTP Header
+		/// Read Initial HTTP Header
 		else if (_headerState == 0) { //stateEquals(ClientState::Connected)
 
 			std::string request(buffer.c_str(), buffer.available());
@@ -696,16 +705,16 @@ public:
 			}
 		}
 
-		// Read the Digest
-		// NOTE: Occasionally the digest is received after the header
-		// so we need to handle this here.
+		/// Read the Digest
+		/// NOTE: Occasionally the digest is received after the header
+		/// so we need to handle this here.
 		if (_headerState == 1 && buffer.available() >= 16) {
 			std::string replyDigest;
 			buffer.readString(replyDigest, 16);
 			log("debug") << "Reply Digest: " << replyDigest << std::endl;
 			_headerState = 2;
 
-			// TODO: Validate Digest
+			/// TODO: Validate Digest
 
 			onOnline();
 		}
@@ -713,19 +722,19 @@ public:
 	
 	virtual void setProtocol(const std::string& proto)
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		_protocol = proto;
 	}
 	
 	virtual void setCookie(const std::string& cookie)
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		_cookie = cookie;
 	}
 		
 	virtual UInt16 port()
 	{
-		ScopedLock lock(_mutex);
+		Mutex::ScopedLock lock(_mutex);
 		return _uri.getPort() ? _uri.getPort() : (_uri.getScheme() == "wss" ? 443 : 80);
 	}
 

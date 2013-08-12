@@ -20,12 +20,11 @@
 #include "Sourcey/HTTP/Parser.h"
 #include "Sourcey/HTTP/Connection.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/Crypto.h"
+#include "Sourcey/Crypto/Crypto.h"
 #include "Sourcey/HTTP/Util.h"
 
 
 using namespace std;
-//using namespace Poco;
 
 
 namespace scy { 
@@ -102,7 +101,7 @@ bool Parser::parse(const char* data, size_t len, bool expectComplete) // size_t 
 
 	size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len); //&data[offset]
 
-	// Set error state and throw
+	/// Set error state and throw
 	//if (_parser.http_errno != HPE_OK)
     if (!_parser.upgrade && nparsed != len) {
 		//enum http_errno err = HTTP_PARSER_ERRNO(&_parser);		
@@ -113,9 +112,9 @@ bool Parser::parse(const char* data, size_t len, bool expectComplete) // size_t 
 		traceL("HTTPParser", this) << "Is OK: " << (_parser.http_errno == HPE_OK) << endl;	
 		traceL("HTTPParser", this) << "Do Upgrade: " << upgrade() << endl;	
 
-		// HACK: Getting strage issue where parser
-		// is parsing 1 character short.
-		// This happens when attempting to delete from callback scope
+		/// HACK: Getting strage issue where parser
+		/// is parsing 1 character short.
+		/// This happens when attempting to delete from callback scope
 		//if (nparsed == len - 1)
 		//	assert(0);
 			//return true;
@@ -138,7 +137,7 @@ void Parser::reset()
 		_error = nil;
 	}
 
-	// TODO: Reset parser internal state?
+	/// TODO: Reset parser internal state?
 }
 
 
@@ -232,13 +231,13 @@ void Parser::onHeader(const string& name, const string& value)
 
 void Parser::onHeadersEnd()
 {			
-	// HTTP version
+	/// HTTP version
 	//start_line_.version(parser_.http_major, parser_.http_minor);
 
-	// KeepAlive
+	/// KeepAlive
 	//headers->setKeepAlive(http_should_keep_alive(parser) > 0);
 	
-	// Request HTTP method
+	/// Request HTTP method
 	if (_request) {
 		_request->setMethod(http_method_str(static_cast<http_method>(_parser.method)));
 	}
@@ -308,9 +307,9 @@ int Parser::on_status_complete(http_parser* parser)
 	auto self = reinterpret_cast<Parser*>(parser->data);
 	assert(self);
 
-	// Handle response status line
+	/// Handle response status line
 	if (self->_response)
-		self->_response->setStatus((http::Response::HTTPStatus)parser->status_code);
+		self->_response->setStatus((http::Response::StatusCode)parser->status_code);
 
 	return 0;
 }
@@ -360,7 +359,7 @@ int Parser::on_headers_complete(http_parser* parser)
 	assert(self);
 	assert(&self->_parser == parser);
 
-	// Add last entry if any
+	/// Add last entry if any
 	if (!self->_lastHeaderField.empty()) {
 		self->onHeader(self->_lastHeaderField, self->_lastHeaderValue);
 	}
@@ -382,7 +381,7 @@ int Parser::on_body(http_parser* parser, const char* at, size_t len)
 
 int Parser::on_message_complete(http_parser* parser) 
 {	
-	// When http_parser finished receiving a message, signal message complete
+	/// When http_parser finished receiving a message, signal message complete
 	auto self = reinterpret_cast<Parser*>(parser->data);
 	assert(self);
 
@@ -438,19 +437,19 @@ Parser::Parser(http_parser_type type) : ///, http::Message* headers // ParserObs
 
 
 	/*
-	// Handle parser error
+	/// Handle parser error
 	if (_parser.http_errno != HPE_OK) {
 		setParserError(); //resval(_parser.http_errno)"HTTP parser error"
 		return true;		
 	} 
 
-	// Finished, should have invoked onMessageEnd already
+	/// Finished, should have invoked onMessageEnd already
 	else if (!parsing()) {
 		assert(0 && "already complete");
 		return true;		
 	}
 
-	// Need more data...
+	/// Need more data...
 	else return false;
 	*/
 
@@ -610,7 +609,7 @@ void Parser::registerSocketEvents() {
 	/*
 void Parser::prepare_incoming() {
 
-	// TODO: Write to request
+	/// TODO: Write to request
 
   assert(!_observer); // Shouldn't be called if already have incoming message
 
@@ -676,7 +675,7 @@ void Parser::validate_incoming() {
 /*
 #include "Sourcey/HTTP/Authenticator.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/Crypto.h"
+#include "Sourcey/Crypto/Crypto.h"
 #include "Sourcey/HTTP/Util.h"
 
 #include "Poco/Base64Decoder.h"
@@ -686,7 +685,7 @@ void Parser::validate_incoming() {
 
 
 using namespace std;
-//using namespace Poco;
+
 
 
 namespace scy { 
@@ -781,7 +780,7 @@ bool DigestAuthenticator::validateRequest(UserManager* authenticator, const stri
 	if (!httpMethod.size() || !username.size() || !uri.size() || !response.size())
 		return false;
 
-	// Get the user details for the supplied username from our session object
+	/// Get the user details for the supplied username from our session object
 	const IUser* user = authenticator->get(username);
 	if (!user) 
 		return false;
@@ -790,12 +789,12 @@ bool DigestAuthenticator::validateRequest(UserManager* authenticator, const stri
 	string ha2 = crypto::hash("md5", format("%s:%s", httpMethod, uri));
 
 	if (_usingRFC2617 && qop.size()) {
-		// Using advanced digest authentication
-		// Hash = md5(HA1:nonce:nc:cnonce:qop:HA2) 
+		/// Using advanced digest authentication
+		/// Hash = md5(HA1:nonce:nc:cnonce:qop:HA2) 
 		hash = crypto::hash("md5", format("%s:%s:%s:%s:%s:%s", ha1, nonce, nc, cnonce, qop, ha2));
 	} else {
-		// Using standard digest authentication
-		// Hash = md5(HA1:nonce:HA2) 
+		/// Using standard digest authentication
+		/// Hash = md5(HA1:nonce:HA2) 
 		hash = crypto::hash("md5", format("%s:%s:%s", ha1, nonce, ha2));
 	}
 
@@ -805,7 +804,7 @@ bool DigestAuthenticator::validateRequest(UserManager* authenticator, const stri
 
 string DigestAuthenticator::prepare401Header(const string& extra) 
 {
-	_noonce = crypto::randomString(32);
+	_noonce = util::randomString(32);
 	if (_usingRFC2617) {
 		return format(
 			"%s 401 Unauthorized\r\n"

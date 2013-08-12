@@ -18,13 +18,14 @@
 
 
 #include "Sourcey/Util.h"
+#include "Sourcey/Random.h"
+#include "Sourcey/Base64.h"
 
 
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-//#include <cctype>
 #include <assert.h>
 #include <cstdarg>
 
@@ -106,28 +107,55 @@ unsigned parseHex(const std::string& str)
 }
 
 
-int icompare(const std::string& s1, const std::string& s2)
+std::string memAddress(const void* ptr)
 {
-	if (s2.length() > s1.length())
-		return -1;
-	return strncasecmp(s1.c_str(), s2.c_str(), s1.length());
+	return itostr<const void*>(ptr);
 }
 
 
-std::string memAddress(const void* ptr)
+std::string randomBinaryString(int size, bool doBase64)
 {
-	return toString<const void*>(ptr);
+	std::string res;
+	Random rnd;
+	rnd.seed();
+	for (int i = 0; i < size; ++i)
+		res.push_back(rnd.nextChar());
+
+	if (doBase64) {
+		std::string out;
+		base64::Encoder enc;
+		enc.encode(res, out);
+		res = out;
+	}
+	return res;
+}
+
+
+std::string randomString(int size)
+{
+	return randomBinaryString(size, true).substr(0, size);
+}
+
+
+UInt64 randomNumber(int size)
+{
+	std::string res;
+	Random rnd;
+	rnd.seed();
+	for (int i = 0; i < size; ++i)
+		res.push_back(rnd.nextChar());
+	return util::strtoi<UInt64>(res);
 }
 
 
 void trim(std::string& str) 
 {	
-	str.erase(0, str.find_first_not_of(' '));	// prefixing spaces
-	str.erase(str.find_last_not_of(' ') + 1);	// surfixing spaces
+	str.erase(0, str.find_first_not_of(' '));
+	str.erase(str.find_last_not_of(' ') + 1);
 }
 
 
-StringVec &split(const std::string& s, const std::string& delim, StringVec &elems, int limit) 
+StringVec& split(const std::string& s, const std::string& delim, StringVec& elems, int limit) 
 {
 	bool final = false;
 	std::string::size_type prev = 0, pos = 0;
@@ -148,10 +176,10 @@ StringVec split(const std::string& s, const std::string& delim, int limit)
 {
     StringVec elems;
     return split(s, delim, elems, limit);
-};
+}
 
 
-StringVec &split(const std::string& s, char delim, StringVec &elems, int limit) 
+StringVec& split(const std::string& s, char delim, StringVec& elems, int limit) 
 {
     std::stringstream ss(s);
     std::string item;
@@ -181,61 +209,66 @@ bool endsWith(const std::string& str, const std::string& suffix)
 
 std::string replace(const std::string& str, const std::string& from, const std::string& to, std::string::size_type start)
 {
-	std::string result(str);
-	replaceInPlace(result, from, to, start);
-	return result;
-}
-
-
-std::string replace(const std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start)
-{
-	std::string result(str);
-	replaceInPlace(result, from, to, start);
-	return result;
+	std::string res(str);
+	replaceInPlace(res, from, to, start);
+	return res;
 }
 
 	
 std::string& replaceInPlace(std::string& str, const std::string& from, const std::string& to, std::string::size_type start)
 {
 	assert(from.size() > 0);	
-	std::string result;
+	std::string res;
 	std::string::size_type pos = 0;
-	result.append(str, 0, start);
+	res.append(str, 0, start);
 	do {
 		pos = str.find(from, start);
 		if (pos != std::string::npos) {
-			result.append(str, start, pos - start);
-			result.append(to);
+			res.append(str, start, pos - start);
+			res.append(to);
 			start = pos + from.length();
 		}
-		else result.append(str, start, str.size() - start);
+		else res.append(str, start, str.size() - start);
 	}
 	while (pos != std::string::npos);
-	str.swap(result);
+	str.swap(res);
 	return str;
 }
+
+
+/*
+//std::string& replaceInPlace(std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start = 0);
+//std::string replace(const std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start = 0);
+
+std::string replace(const std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start)
+{
+	std::string res(str);
+	replaceInPlace(res, from, to, start);
+	return res;
+}
+
 
 std::string& replaceInPlace(std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start)
 {
 	assert(*from);
-	std::string result;
+	std::string res;
 	std::string::size_type pos = 0;
 	std::string::size_type fromLen = std::strlen(from);
-	result.append(str, 0, start);
+	res.append(str, 0, start);
 	do {
 		pos = str.find(from, start);
 		if (pos != std::string::npos) {
-			result.append(str, start, pos - start);
-			result.append(to);
+			res.append(str, start, pos - start);
+			res.append(to);
 			start = pos + fromLen;
 		}
-		else result.append(str, start, str.size() - start);
+		else res.append(str, start, str.size() - start);
 	}
 	while (pos != std::string::npos);
-	str.swap(result);
+	str.swap(res);
 	return str;
 }
-
+*/
 
 std::string dumpbin(const char* data, size_t len)
 {
@@ -267,8 +300,8 @@ bool compareVersion(const std::string& l, const std::string& r)
 	for (unsigned i = 0; i < lnums.size(); i++) {			
 		if (rnums.size() < i + 1)
 			break;		
-		int ln = util::fromString<UInt32>(lnums[i]);
-		int rn = util::fromString<UInt32>(rnums[i]);
+		int ln = util::strtoi<UInt32>(lnums[i]);
+		int rn = util::strtoi<UInt32>(rnums[i]);
 		if (ln < rn)
 			return false;
 		else if (ln > rn)
@@ -294,23 +327,95 @@ void replaceSpecialCharacters(std::string& str, char with, bool allowSpaces)
 }
 
 
-void toLower(std::string& str)
-{
-	std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-}
-
-
-void toUpper(std::string& str)
-{
-	std::transform(str.begin(), str.end(), str.begin(), ::toupper);
-}
-
-
 void toUnderscore(std::string& str) 
 {
 	replaceSpecialCharacters(str, '_', false);	
 	toLower(str);
 }
+
+
+void toLowerInPlace(std::string& str)
+{
+	std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+}
+
+
+std::string toLower(const std::string& str)
+{
+	std::string res(str);
+	toLowerInPlace(res);
+	return res;
+}
+
+
+void toUpperInPlace(std::string& str)
+{
+	std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+}
+
+
+std::string toUpper(const std::string& str)
+{
+	std::string res(str);
+	toUpperInPlace(res);
+	return res;
+}
+
+
+inline int toLower(int ch)
+{
+	if (::isupper(ch))
+		return ch + 32;
+	else
+		return ch;
+}
+
+
+inline int toUpper(int ch)
+{
+	if (::islower(ch))
+		return ch - 32;
+	else
+		return ch;
+}
+
+
+int icompare(const std::string& str, std::string::size_type pos, std::string::size_type n, std::string::const_iterator it2, std::string::const_iterator end2)
+{
+	std::string::size_type sz = str.size();
+	if (pos > sz) pos = sz;
+	if (pos + n > sz) n = sz - pos;
+	std::string::const_iterator it1  = str.begin() + pos; 
+	std::string::const_iterator end1 = str.begin() + pos + n;
+	while (it1 != end1 && it2 != end2) {
+        std::string::value_type c1 = util::toLower(*it1);
+        std::string::value_type c2 = util::toLower(*it2);
+        if (c1 < c2)
+            return -1;
+        else if (c1 > c2)
+            return 1;
+        ++it1; ++it2;
+	}
+    
+    if (it1 == end1)
+		return it2 == end2 ? 0 : -1;
+    else
+        return 1;
+}
+
+
+int icompare(const std::string& str1, const std::string& str2)
+{
+	return icompare(str1, 0, str1.size(), str2.begin(), str2.end());
+	/*
+#ifdef WIN32
+	return strnicmp(s1.c_str(), s2.c_str(), s1.length());
+#else 
+	return stricmp(s1.c_str(), s2.c_str(), s1.length());
+#endif 
+	*/
+}
+
 
 /*
 bool replace(std::string& str, const std::string& from, const std::string& to) 
@@ -321,6 +426,7 @@ bool replace(std::string& str, const std::string& from, const std::string& to)
     str.replace(start_pos, from.length(), to);
     return true;
 }
+
 
 void replaceAll(std::string& str, const std::string& from, const std::string& to)
 {
@@ -346,7 +452,7 @@ bool matchNodes(const std::string& node, const std::string& xnode, const std::st
 bool matchNodes(const StringVec& params, const StringVec& xparams)
 {
 	// xparams is a simple matcher pattern with nodes and
-	// * as windcard.
+	// * as wildcard.
 	// No match if xparams are greater than the params.
 	if (xparams.size() > params.size())
 		return false;
@@ -368,6 +474,67 @@ bool matchNodes(const StringVec& params, const StringVec& xparams)
 	}
 
 	return true;
+}
+
+
+std::streamsize copyStream(std::istream& istr, std::ostream& ostr, std::size_t bufferSize)
+{
+	assert(bufferSize > 0);
+	
+	std::unique_ptr<char[]> buffer(new char[bufferSize]);
+	std::streamsize len = 0;
+	istr.read(buffer.get(), bufferSize);
+	std::streamsize n = istr.gcount();
+	while (n > 0)
+	{
+		len += n;
+		ostr.write(buffer.get(), n);
+		if (istr && ostr)
+		{
+			istr.read(buffer.get(), bufferSize);
+			n = istr.gcount();
+		}
+		else n = 0;
+	}
+	return len;
+}
+
+
+std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr)
+{
+    char c;
+    std::streamsize len = 0;
+    istr.get(c);
+    while (istr && ostr)
+    {
+        ++len;
+        ostr.put(c);
+        istr.get(c);
+    }
+    return len;
+}
+
+
+std::streamsize copyToString(std::istream& istr, std::string& str, std::size_t bufferSize)
+{
+	assert(bufferSize > 0);
+	
+	std::unique_ptr<char[]> buffer(new char[bufferSize]);
+	std::streamsize len = 0;
+	istr.read(buffer.get(), bufferSize);
+	std::streamsize n = istr.gcount();
+	while (n > 0)
+	{
+		len += n;
+		str.append(buffer.get(), static_cast<std::string::size_type>(n));
+		if (istr)
+		{
+			istr.read(buffer.get(), bufferSize);
+			n = istr.gcount();
+		}
+		else n = 0;
+	}
+	return len;
 }
 
 

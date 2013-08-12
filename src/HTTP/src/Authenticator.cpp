@@ -61,7 +61,7 @@ void Authenticator::fromUserInfo(const std::string& userInfo)
 	extractCredentials(userInfo, username, password);
 	setUsername(username);
 	setPassword(password);
-	// TODO: Reset digest state?
+	/// TODO: Reset digest state?
 }
 
 
@@ -73,7 +73,7 @@ void Authenticator::fromURI(const http::URL& uri)
 	extractCredentials(uri, username, password);
 	setUsername(username);
 	setPassword(password);
-	// TODO: Reset digest state?
+	/// TODO: Reset digest state?
 }
 
 
@@ -404,7 +404,7 @@ void HTTPDigestCredentials::updateProxyAuthInfo(http::Request& request)
 
 std::string HTTPDigestCredentials::createNonce()
 {
-	ScopedLock lock(_nonceMutex);
+	Mutex::ScopedLock lock(_nonceMutex);
 
 	MD5Engine md5;
 	Timestamp::TimeVal now = Timestamp().epochMicroseconds();
@@ -420,7 +420,7 @@ std::string HTTPDigestCredentials::createNonce()
 
 void HTTPDigestCredentials::createAuthParams(const http::Request& request, const HTTPAuthenticationParams& responseAuthParams)
 {
-	// Not implemented: "domain" auth parameter and integrity protection.
+	/// Not implemented: "domain" auth parameter and integrity protection.
 
 	if (!responseAuthParams.has(NONCE_PARAM) || !responseAuthParams.has(REALM_PARAM))
 		throw ArgumentException("Invalid HTTP authentication parameters");

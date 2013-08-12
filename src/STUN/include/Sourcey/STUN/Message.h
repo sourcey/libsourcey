@@ -37,10 +37,10 @@ class Message: public IPacket
 public:
 	enum Type 
 	{
-		// STUN
+		/// STUN
 		Binding					= 0x001, 
 
-		// TURN
+		/// TURN
 		Allocate				= 0x003,	// (only request/response semantics defined)
 		Refresh					= 0x004,
 		SendIndication			= 0x006,	// (only indication semantics defined)
@@ -48,7 +48,7 @@ public:
 		CreatePermission		= 0x008,	// (only request/response semantics defined)
 		ChannelBind				= 0x009,	// (only request/response semantics defined)
 
-		// TURN TCP
+		/// TURN TCP
 		Connect					= 0x000A, 
 		ConnectionBind			= 0x000B, 
 		ConnectionAttempt		= 0x000C
@@ -75,7 +75,7 @@ public:
 		ServerError				= 500, 
 		GlobalFailure			= 600, 
 
-		// TURN TCP
+		/// TURN TCP
 		ConnectionAlreadyExists		= 446, 
 		ConnectionTimeoutOrFailure	= 447
 	};
@@ -112,11 +112,11 @@ public:
 	}
 
 	bool read(Buffer& buf);
-		// Parses the STUN/TURN packet from the given buffer.
-		// The return value indicates whether this was successful.
+		/// Parses the STUN/TURN packet from the given buffer.
+		/// The return value indicates whether this was successful.
 
 	void write(Buffer& buf) const;
-		// Writes this object into a STUN/TURN packet.
+		/// Writes this object into a STUN/TURN packet.
 
 	std::string toString() const;
 	void print(std::ostream& os) const;
@@ -132,7 +132,7 @@ private:
 };
 
 
-} } // namespace scy::STUN
+} } // namespace scy:stun
 
 
 #endif //  SOURCEY_STUN_MESSAGE_H

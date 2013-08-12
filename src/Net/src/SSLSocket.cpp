@@ -118,7 +118,7 @@ bool SSLBase::shutdown()
 {
 	traceL("SSLBase", this) << "Shutdown" << endl;
 	try {
-		// Try to gracefully shutdown the SSL connection
+		/// Try to gracefully shutdown the SSL connection
 		_sslAdapter.shutdown();
 	}
 	catch (...) {}

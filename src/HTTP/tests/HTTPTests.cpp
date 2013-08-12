@@ -38,8 +38,8 @@ namespace scy {
 namespace http {
 
 	
-#define TEST_SSL 1 //0
-#define TEST_HTTP_PORT 1340
+#define TEST_SSL 0 //1 //
+#define TEST_HTTP_PORT 1337
 #define TEST_HTTPS_PORT 1338
 
 	
@@ -61,7 +61,7 @@ public:
 		response.setContentLength(14);
 
 		//connection().sendHeader(); // headers will be flushed
-		connection().write("Hello universe", 14);
+		connection().send(string("Hello universe"), 14);
 		connection().close();
 	}
 };
@@ -94,8 +94,8 @@ public:
 		gotRequest(false), 
 		gotClose(false)
 	{
-		conn.Outgoing.attach(new http::ChunkedAdapter(conn)); //"text/html"
-		conn.Outgoing.attachSource(&dataSource.signal, false);
+		//conn.Outgoing.attach(new http::ChunkedAdapter(conn)); //"text/html"
+		//conn.Outgoing.attachSource(&dataSource.signal, false);
 		//dataSource.signal += delegate(&conn.socket(), &Socket::send);
 	}
 
@@ -165,7 +165,7 @@ public:
 		gotPayload = true;
 
 		// Enco the request back to the client
-		connection().write(body.data(), body.available());
+		connection().send(body.data(), body.available());
 	}
 
 	void onClose()
@@ -244,7 +244,7 @@ public:
 	{
 		debugL("SocketClientEchoTest") << "Connected" << endl;
 		assert(sender == &socket);
-		socket.send("client > server", 15, WebSocket::FRAME_TEXT);
+		socket.send("client > server", 15, WebSocket::SendFlags::Text);
 	}
 	
 	void onRecv(void* sender, net::SocketPacket& packet)
@@ -302,9 +302,8 @@ public:
 #endif
 		{		
 			
-			runURLTests();
-
 			/*
+			runURLTests();
 			runClientConnectionChunkedTest();	
 			runClientConnectionTest();
 			runStandaloneHTTPClientConnectionTest();	
@@ -313,11 +312,12 @@ public:
 			runWebSocketSocketTest();
 			runHTTPClientWebSocketTest();	
 			runWebSocketSecureClientConnectionTest();
-			runWebSocketClientConnectionTest();	
-			*/
 
 			// NOTE: Must be terminated with Crtl-C
 			//runHTTPServerTest();
+			*/
+			
+			runClientWebSocketTest();
 		}
 #if TEST_SSL
 			// Shutdown SSL
@@ -325,13 +325,13 @@ public:
 #endif
 
 		// Shutdown the garbage collector so we can free memory.
-		GarbageCollector::instance().shutdown();
+		//GarbageCollector::instance().shutdown();
 		
 		// Run the final cleanup
 		//runCleanup();
 		
 		debugL("Tests") << "#################### Finalizing" << endl;
-		app.cleanup();
+		app.finalize();
 		debugL("Tests") << "#################### Exiting" << endl;
 	}
 
@@ -430,22 +430,23 @@ public:
 		}
 		
 		template<class ConnectionT>
-		ConnectionT* create(bool raiseServer = true, const std::string& host = "127.0.0.1", UInt16 port = TEST_HTTP_PORT)
+		ConnectionT* create(const http::URL& url, bool raiseServer = true) //, const std::string& host = "127.0.0.1", UInt16 port = TEST_HTTP_PORT
 		{
 			if (raiseServer)
 				server.start();
 
-			/*
-			conn = (ClientConnection*)client.createConnectionT<ConnectionT>(host, port);		
+			conn = (ClientConnection*)client.createConnectionT<ConnectionT>(url);		
 			conn->Connect += delegate(this, &HTTPClientTest::onConnect);	
 			conn->Headers += delegate(this, &HTTPClientTest::onHeaders);
+			conn->Incoming.Emitter += delegate(this, &HTTPClientTest::onPayload);
 			//conn->Receiver += delegate(this, &HTTPClientTest::onInboundStream);
-			conn->Payload += delegate(this, &HTTPClientTest::onPayload);
+			//conn->Payload += delegate(this, &HTTPClientTest::onPayload);
 			conn->Complete += delegate(this, &HTTPClientTest::onComplete);
 			conn->Close += delegate(this, &HTTPClientTest::onClose);
 			return (ConnectionT*)conn;
-			*/
+			/*
 			assert(0);
+			*/
 		}
 
 		void shutdown()
@@ -475,6 +476,12 @@ public:
 			//conn->write("BOUNCE", 6);
 		}
 		
+		void onPayload(void*, scy::IPacket& packet)
+		{	
+			debugL("ClientConnectionTest") << "On payload: " << packet.size() << endl;
+		}
+
+		/*
 		void onPayload(void*, Buffer& buf)
 		{
 			debugL("ClientConnectionTest") << "On response payload: " << buf << endl;
@@ -489,8 +496,9 @@ public:
 				conn->close();
 			}
 			else
-				conn->write("BOUNCE", 6);
+				conn->send(string("BOUNCE"), 6);
 		}
+		*/
 
 		void onComplete(void*, const Response& res)
 		{		
@@ -505,7 +513,8 @@ public:
 			shutdown();
 		}
 	};
-
+	
+	/*
 	void runClientConnectionTest() 
 	{	
 		HTTPClientTest test;
@@ -523,17 +532,6 @@ public:
 		conn->send();
 		runLoop();
 	}
-	
-	void runWebSocketClientConnectionTest() 
-	{	
-		HTTPClientTest test;
-		ClientConnection* conn = test.create<WebSocketClientConnection>(false, "127.0.0.1", TEST_HTTP_PORT);
-		conn->shouldSendHead(false);
-		conn->request().setURI("/websocket");
-		//conn->request().body << "BOUNCE" << endl;
-		conn->send();
-		runLoop();
-	}
 
 	void runWebSocketSecureClientConnectionTest() 
 	{	
@@ -545,6 +543,18 @@ public:
 		runLoop();
 	}
 	
+	void runWebSocketClientConnectionTest() 
+	{	
+		HTTPClientTest test;
+		ClientConnection* conn = test.create<WebSocketClientConnection>(http::URL("127.0.0.1", TEST_HTTP_PORT), false);
+		conn->shouldSendHead(false);
+		conn->request().setURI("/websocket");
+		//conn->request().body << "BOUNCE" << endl;
+		conn->send();
+		runLoop();
+	}
+	*/
+	
 	
 	// ============================================================================
 	// Standalone HTTP Client ConnectionTest
@@ -553,7 +563,7 @@ public:
 	{
 		ClientConnection* conn = new ClientConnection("google.com");
 		conn->Headers += delegate(this, &Tests::onStandaloneHTTPClientConnectionHeaders);
-		conn->Payload += delegate(this, &Tests::onStandaloneHTTPClientConnectionPayload);
+		//conn->Payload += delegate(this, &Tests::onStandaloneHTTPClientConnectionPayload);
 		conn->Complete += delegate(this, &Tests::onStandaloneHTTPClientConnectionComplete);
 		conn->send(); // send default GET /
 		runLoop();
@@ -591,10 +601,10 @@ public:
 		//SocketClientEchoTest<http::WebSocket> test(net::Address("174.129.224.73", 80));
 
 		//debugL("Tests") << "TCP Socket Test: Starting" << endl;
-		//SocketClientEchoTest<http::WebSocket> test(net::Address("127.0.0.1", TEST_HTTP_PORT));
-		//test.start();
+		SocketClientEchoTest<http::WebSocket> test(net::Address("127.0.0.1", TEST_HTTP_PORT));
+		test.start();
 
-		//runLoop();
+		runLoop();
 	}	
 
 	/*
@@ -625,31 +635,23 @@ public:
 		http::Server srv(TEST_HTTP_PORT, new OurServerResponderFactory);
 		srv.start();
 		
-		// Catch close signal to shutdown the server
-		// This should free the main loop.
-		uv_signal_t* sig = new uv_signal_t;
-		sig->data = &srv;
-		uv_signal_init(&app.loop, sig);
-		uv_signal_start(sig, Tests::onKillHTTPServer, SIGINT);
-
-		runLoop();
+		app.waitForShutdown(Tests::onKillHTTPServer, &srv);
 	}
 	
 	static void onPrintHTTPServerHandle(uv_handle_t* handle, void* arg) 
 	{
-		debugL("HTTPServerTest") << "#### Active HTTPServer Handle: " << handle << endl;
+		//debugL("HTTPServerTest") << "#### Active HTTPServer Handle: " << handle << endl;
+		cout << "#### Active HTTPServer Handle: " << handle << endl;
 	}
 
-	static void onKillHTTPServer(uv_signal_t *req, int signum)
+	static void onKillHTTPServer(void* opaque)
 	{
-		debugL("HTTPServerTest") << "Kill Signal: " << req << endl;
+		cout << "Kill Signal: " << opaque << endl;
 	
 		// print active handles
-		uv_walk(req->loop, Tests::onPrintHTTPServerHandle, NULL);
-	
-		((http::Server*)req->data)->shutdown();
-
-		uv_signal_stop(req);
+		uv_walk(&uv::defaultLoop(), Tests::onPrintHTTPServerHandle, NULL);
+			
+		reinterpret_cast<http::Server*>(opaque)->shutdown();
 	}
 
 };
@@ -660,11 +662,11 @@ public:
 
 int main(int argc, char** argv) 
 {	
-	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
+	Logger::instance().add(new ConsoleChannel("debug", LTrace));
 	{
 		http::Tests app;
 	}
-	Logger::uninitialize();
+	Logger::shutdown();
 	return 0;
 }
 

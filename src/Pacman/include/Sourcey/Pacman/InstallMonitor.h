@@ -38,40 +38,40 @@ public:
 	virtual ~InstallMonitor();
 	
 	virtual void addTask(InstallTask* task);
-		/// Adds a task to monitor.
+		// Adds a task to monitor.
 
 	virtual void startAll();
-		/// Starts all monitored tasks.
+		// Starts all monitored tasks.
 
 	virtual void cancelAll();
-		/// Cancels all monitored tasks.
+		// Cancels all monitored tasks.
 
 	virtual bool isComplete() const;
-		/// Returns true if all install tasks have completed,
-		/// either successfully or unsuccessfully.
+		// Returns true if all install tasks have completed,
+		// either successfully or unsuccessfully.
 
 	virtual InstallTaskList tasks() const;
-		/// Returns the list of monitored package tasks.
+		// Returns the list of monitored package tasks.
 	
 	virtual LocalPackageList packages() const;
-		/// Returns the list of monitored packages.
+		// Returns the list of monitored packages.
 		
 	Signal3<InstallTask&, PackageInstallState&, const PackageInstallState&> InstallStateChange;
-		/// Proxies state change events from managed packages
+		// Proxies state change events from managed packages
 
 	Signal<LocalPackage&> InstallComplete;
-		/// Signals when a managed install task completes.
+		// Signals when a managed install task completes.
 	
 	Signal<int&> Progress;
-		/// Signals on overall progress update [0-100].
+		// Signals on overall progress update [0-100].
 
 	Signal<LocalPackageList&> Complete;
-		/// Signals on all tasks complete.
+		// Signals on all tasks complete.
 	
 protected:
 	virtual void onInstallStateChange(void* sender, PackageInstallState& state, const PackageInstallState& oldState);
 	virtual void onInstallComplete(void* sender);
-		/// Called when a monitored install task completes.
+		// Called when a monitored install task completes.
 	
 	virtual void setProgress(int value);
 
