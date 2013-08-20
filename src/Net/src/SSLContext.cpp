@@ -15,19 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
-
+// This file uses functions from POCO C++ Libraries (license below)
+//
 
 #include "Sourcey/Net/SSLContext.h"
 #include "Sourcey/Net/SSLManager.h"
 #include "Sourcey/DateTime.h"
-#include "Sourcey/FileSystem.h"
-
+#include "Sourcey/Filesystem.h"
 #include "Sourcey/Crypto/OpenSSL.h"
-
-//#include "Poco/File.h"
-//#include "Poco/Path.h"
-
-//#include "Poco/Crypto/OpenSSLInitializer.h"
 
 
 using namespace std;
@@ -49,7 +44,7 @@ SSLContext::SSLContext(
 	_usage(usage),
 	_mode(verificationMode),
 	_sslContext(0),
-	_extendedCertificateVerification(true)
+	_extendedVerificationErrorDetails(true)
 {
 	crypto::initializeEngine();
 	
@@ -125,7 +120,7 @@ SSLContext::SSLContext(
 	_usage(usage),
 	_mode(verificationMode),
 	_sslContext(0),
-	_extendedCertificateVerification(true)
+	_extendedVerificationErrorDetails(true)
 {
 	crypto::initializeEngine();
 	
@@ -300,32 +295,24 @@ void SSLContext::disableStatelessSessionResumption()
 
 void SSLContext::createSSLContext()
 {
-	if (SSLManager::isFIPSEnabled())
+	switch (_usage)
 	{
-		_sslContext = SSL_CTX_new(TLSv1_method());
+	case CLIENT_USE:
+		_sslContext = SSL_CTX_new(SSLv23_client_method());
+		break;
+	case SERVER_USE:
+		_sslContext = SSL_CTX_new(SSLv23_server_method());
+		break;
+	case TLSV1_CLIENT_USE:
+		_sslContext = SSL_CTX_new(TLSv1_client_method());
+		break;
+	case TLSV1_SERVER_USE:
+		_sslContext = SSL_CTX_new(TLSv1_server_method());
+		break;
+	default:
+		throw Exception("SSL Exception: Invalid usage");
 	}
-	else
-	{
-		switch (_usage)
-		{
-		case CLIENT_USE:
-			_sslContext = SSL_CTX_new(SSLv23_client_method());
-			break;
-		case SERVER_USE:
-			_sslContext = SSL_CTX_new(SSLv23_server_method());
-			break;
-		case TLSV1_CLIENT_USE:
-			_sslContext = SSL_CTX_new(TLSv1_client_method());
-			break;
-		case TLSV1_SERVER_USE:
-			_sslContext = SSL_CTX_new(TLSv1_server_method());
-			break;
-		default:
-			throw Exception("SSL Exception: Invalid usage");
-		}
-	}
-	if (!_sslContext) 
-	{
+	if (!_sslContext)  {
 		unsigned long err = ERR_get_error();
 		throw Exception("SSL Exception: Cannot create SSL_CTX object", ERR_error_string(err, 0));
 	}

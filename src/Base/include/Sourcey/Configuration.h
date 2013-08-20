@@ -29,14 +29,13 @@ namespace scy {
 
 
 class Configuration
-	// Configuration is an abstract base class for managing 
-	// different kinds of configuration back ends such as JSON, XML,
-	// or database storage.
-	//
-	// All public methods are synchronized making this class is 
-	// safe for multithreaded use.
-	//
-	// Subclasses must override the getRaw() and setRaw() and methods.
+	/// Configuration is an abstract base class for managing 
+	/// different kinds of configuration storage back ends such as 
+	/// JSON, XML, or database.
+	///
+	/// Subclasses must override the getRaw() and setRaw() and methods.
+	///
+	/// This class is safe for multithreaded use.
 {
 public:
 	Configuration();	
@@ -51,14 +50,10 @@ public:
 	std::string getString(const std::string& key) const;
 		// Returns the string value of the property with the given name.
 		// Throws a NotFoundException if the key does not exist.
-		// If the value contains references to other properties (${<property>}), these
-		// are expanded.
 		
 	std::string getString(const std::string& key, const std::string& defaultValue) const;
 		// If a property with the given key exists, returns the property's string value,
 		// otherwise returns the given default value.
-		// If the value contains references to other properties (${<property>}), these
-		// are expanded.
 
 	std::string getRawString(const std::string& key) const;
 		// Returns the raw string value of the property with the given name.
@@ -76,8 +71,6 @@ public:
 		// Throws a SyntaxException if the property can not be converted
 		// to an int.
 		// Numbers starting with 0x are treated as hexadecimal.
-		// If the value contains references to other properties (${<property>}), these
-		// are expanded.
 		
 	int getInt(const std::string& key, int defaultValue) const;
 		// If a property with the given key exists, returns the property's int value,
@@ -85,32 +78,24 @@ public:
 		// Throws a SyntaxException if the property can not be converted
 		// to an int.
 		// Numbers starting with 0x are treated as hexadecimal.
-		// If the value contains references to other properties (${<property>}), these
-		// are expanded.
 
 	double getDouble(const std::string& key) const;
 		// Returns the double value of the property with the given name.
 		// Throws a NotFoundException if the key does not exist.
 		// Throws a SyntaxException if the property can not be converted
 		// to a double.
-		// If the value contains references to other properties (${<property>}), these
-		// are expanded.
 		
 	double getDouble(const std::string& key, double defaultValue) const;
 		// If a property with the given key exists, returns the property's double value,
 		// otherwise returns the given default value.
 		// Throws a SyntaxException if the property can not be converted
 		// to an double.
-		// If the value contains references to other properties (${<property>}), these
-		// are expanded.
 
 	bool getBool(const std::string& key) const;
 		// Returns the double value of the property with the given name.
 		// Throws a NotFoundException if the key does not exist.
 		// Throws a SyntaxException if the property can not be converted
 		// to a double.
-		// If the value contains references to other properties (${<property>}), these
-		// are expanded.
 		
 	bool getBool(const std::string& key, bool defaultValue) const;
 		// If a property with the given key exists, returns the property's bool value,
@@ -121,8 +106,6 @@ public:
 		//   - numerical values: non zero becomes true, zero becomes false
 		//   - strings: true, yes, on become true, false, no, off become false
 		// Case does not matter.
-		// If the value contains references to other properties (${<property>}), these
-		// are expanded.
 		
 	void setString(const std::string& key, const std::string& value);
 		// Sets the property with the given key to the given value.

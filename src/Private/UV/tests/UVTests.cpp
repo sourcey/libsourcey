@@ -77,7 +77,7 @@ public:
 	void onRecv(void* sender, net::SocketPacket& packet)
 	{
 		assert(sender == &socket);
-		string data(packet.data(), 15);
+		std::string data(packet.data(), 15);
 		traceL("UVClientSocketTest") << "Recv: " << data << endl;	
 
 		// Check for return packet echoing sent data
@@ -136,7 +136,7 @@ class Tests
 public:
 	struct Result {
 		int numSuccess;
-		string name;
+		std::string name;
 		Poco::Stopwatch sw;
 
 		void reset() {

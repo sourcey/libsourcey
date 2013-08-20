@@ -1,9 +1,11 @@
 #include "Sourcey/Base.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Runner.h"
+#include "Sourcey/Idler.h"
 #include "Sourcey/Signal.h"
+#include "Sourcey/Buffer.h"
 #include "Sourcey/Platform.h"
-#include "Sourcey/Containers.h"
+#include "Sourcey/Collection.h"
 #include "Sourcey/Application.h"
 #include "Sourcey/PacketStream.h"
 #include "Sourcey/SharedLibrary.h"
@@ -12,6 +14,7 @@
 #include "Sourcey/Util.h"
 
 #include "plugin/TestPlugin.h"
+
 
 #include <assert.h>
 
@@ -29,6 +32,52 @@ CMemLeakDetect memLeakDetect;
 */
 
 
+namespace
+{
+	class TestObj
+	{
+	public:
+		TestObj(): _rc(1)
+		{
+			++_count;
+		}
+				
+		void duplicate()
+		{
+			++_rc;
+		}
+		
+		void release()
+		{
+			if (--_rc == 0)
+				delete this;
+		}
+		
+		int rc() const
+		{
+			return _rc;
+		}
+		
+		static int count()
+		{
+			return _count;
+		}
+		
+	protected:
+		~TestObj()
+		{
+			--_count;
+		}
+		
+	private:
+		int _rc;
+		static int _count;
+	};
+	
+	int TestObj::_count = 0;
+}
+
+
 namespace scy {
 	
 
@@ -39,15 +88,18 @@ class Tests
 public:
 	Tests()
 	{	
-		runNVHashTest();
+		//testBuffer();
+		//testHandle();
+		//testNVCollection();
 		//runFSTest();
 		//runPluginTest();
 		//runLoggerTest();
 		//runPlatformTests();
 		//runExceptionTest();
-		//runTimerTest();
 		//runScheduler::TaskTest();
-		//runTimerTest();
+		//testTimer();
+		//testIdler();
+		
 		//runPacketStreamTests();
 		//runPacketSignalTest();
 		//runSocketTests();
@@ -56,18 +108,181 @@ public:
 		
 		scy::pause();
 	}
-
-	void runNVHashTest()
-	{
-		NVHash nvc;
 	
-		nvc.add("Connection", "value31");
-		nvc.add("Authorization", "value31");
-		nvc.add("Content-Type", "value31");
-		nvc.add("Connection", "value31");
-		nvc.add("Authorization", "value31");
-		nvc.add("Content-Type", "value31");
-		/*
+	/*
+	/*
+	void testGZStream()
+	{	
+
+		std::string path("gzstream.tgz");
+		std::string dest("gzstream");
+
+		assert(fs::exists("gzstream.tgz"));
+
+		// check alternate way of opening file
+		igzstream in2;
+		in2.open(path.c_str());
+		if (!in2.good()) {
+			std::cerr << "ERROR: Opening file `" << path << "' failed.\n";
+			assert(0);
+		}
+		in2.close();
+		if (!in2.good()) {
+			std::cerr << "ERROR: Closing file `" << path << "' failed.\n";
+			assert(0);
+		}
+
+		// now use the shorter way with the constructor to open the same file
+		igzstream in(path.c_str());
+		if (!in.good()) {
+			std::cerr << "ERROR: Opening file `" << path << "' failed.\n";
+			assert(0);
+		}
+		std::ofstream out(dest.c_str());
+		if (!out.good()) {
+			std::cerr << "ERROR: Opening file `" << dest << "' failed.\n";
+			assert(0);
+		}
+
+		char c;
+		while (in.get(c))
+			out << c;
+		in.close();
+		out.close();
+		if (!in.eof()) {
+			std::cerr << "ERROR: Reading file `" << path << "' failed.\n";
+			assert(0);
+		}
+		if (!out.good()) {
+			std::cerr << "ERROR: Writing file `" << dest << "' failed.\n";
+			assert(0);
+		}
+	}
+	*/
+	
+	void testBuffer()
+	{
+		ByteOrder orders[2] = { ByteOrder::Host,
+								ByteOrder::Network };
+		for (size_t i = 0; i < 2; i++) {
+			Buffer buffer(1024);
+			BitReader reader(buffer, orders[i]);
+			BitWriter writer(buffer, orders[i]);
+			assert(orders[i] == reader.order());
+			assert(orders[i] == writer.order());
+
+			// Write and read UInt8.
+			UInt8 wu8 = 1;
+			writer.putU8(wu8);
+			UInt8 ru8;
+			reader.getU8(ru8);
+			assert(wu8 == ru8);
+			assert(writer.position() == 1);
+			assert(reader.position() == 1);		
+
+			// Write and read UInt16.
+			UInt16 wu16 = (1 << 8) + 1;
+			writer.putU16(wu16);
+			UInt16 ru16;
+			reader.getU16(ru16);
+			assert(wu16 == ru16);
+			assert(writer.position() == 3);
+			assert(reader.position() == 3);
+		
+			// Write and read UInt24.
+			UInt32 wu24 = (3 << 16) + (2 << 8) + 1;
+			writer.putU24(wu24);
+			UInt32 ru24;
+			reader.getU24(ru24);
+			assert(wu24 == ru24);
+			assert(writer.position() == 6);
+			assert(reader.position() == 6);
+		
+			// Write and read UInt32.
+			UInt32 wu32 = (4 << 24) + (3 << 16) + (2 << 8) + 1;
+			writer.putU32(wu32);
+			UInt32 ru32;
+			reader.getU32(ru32);
+			assert(wu32 == ru32);
+			assert(writer.position() == 10);
+			assert(reader.position() == 10);
+		
+			// Write and read UInt64.
+			UInt32 another32 = (8 << 24) + (7 << 16) + (6 << 8) + 5;
+			UInt64 wu64 = (static_cast<UInt64>(another32) << 32) + wu32;
+			writer.putU64(wu64);
+			UInt64 ru64;
+			reader.getU64(ru64);
+			assert(wu64 == ru64);
+			assert(writer.position() == 18);
+			assert(reader.position() == 18);
+
+			// Write and read string.
+			std::string write_string("hello");
+			writer.put(write_string);
+			std::string read_string;
+			reader.get(read_string, write_string.size());
+			assert(write_string == read_string);
+			assert(writer.position() == 23);
+			assert(reader.position() == 23);
+
+			// Write and read bytes
+			char write_bytes[] = "foo";
+			writer.put(write_bytes, 3);
+			char read_bytes[3];
+			reader.get(read_bytes, 3);
+			for (int i = 0; i < 3; ++i) {
+			  assert(write_bytes[i] == read_bytes[i]);
+			}
+			assert(writer.position() == 26);
+			assert(reader.position() == 26);
+
+			// TODO: Test overflow
+		
+			/*
+			try {
+				reader.getU8(ru8);
+				assert(0 && "must throw");
+			}
+			catch (std::out_of_range& exc) {
+			}		
+			*/
+
+		}
+	}
+		
+	
+	// ============================================================================
+	// Handle Test
+	//
+	void testHandle()
+	{
+		{
+			Handle<TestObj> ptr = new TestObj;
+			assert (ptr->rc() == 1);
+			Handle<TestObj> ptr2 = ptr;
+			assert (ptr->rc() == 2);
+			ptr2 = new TestObj;
+			assert (ptr->rc() == 1);
+			Handle<TestObj> ptr3;
+			ptr3 = ptr2;
+			assert (ptr2->rc() == 2);
+			ptr3 = new TestObj;
+			assert (ptr2->rc() == 1);
+			ptr3 = ptr2;
+			assert (ptr2->rc() == 2);
+			assert (TestObj::count() > 0);
+		}
+		assert (TestObj::count() == 0);
+	}
+
+
+	// ============================================================================
+	// Collection Test
+	//
+	void testNVCollection()
+	{
+		NVCollection nvc;
 		assert (nvc.empty());
 		assert (nvc.size() == 0);
 	
@@ -114,7 +329,7 @@ public:
 		
 		nvc.add("Connection", "value31");
 	
-		NVHash::ConstIterator it = nvc.find("Name3");
+		NVCollection::ConstIterator it = nvc.find("Name3");
 		assert (it != nvc.end());
 		std::string v1 = it->second;
 		assert (it->first == "name3");
@@ -140,7 +355,6 @@ public:
 		assert (nvc.empty());
 	
 		assert (nvc.size() == 0);
-		*/
 	}
 
 
@@ -156,14 +370,7 @@ public:
 		//debugL("FileSystemTest") << "Junk path: " << junkPath << endl;
 
 		std::string dir(fs::dirname(path));
-		debugL("FileSystemTest") << "Dir name: " << dir << endl;
-
-		std::vector<std::string> res;
-		assert(fs::readdir(dir, res));
-		for (unsigned i = 0; i < res.size(); i++) 
-			debugL("FileSystemTest") << "Enumerating file: " << res[i] << endl;
-
-		
+		debugL("FileSystemTest") << "Dir name: " << dir << endl;		
 	}
 
 	// ============================================================================
@@ -175,14 +382,14 @@ public:
 	{
 		debugL("PluginTest") << "Starting" << endl;
 		// TODO: Use getExePath
-		string path("D:/dev/projects/Sourcey/LibSourcey/build/install/libs/TestPlugin/TestPlugind.dll");
+		std::string path("D:/dev/projects/Sourcey/LibSourcey/build/install/libs/TestPlugin/TestPlugind.dll");
 		
 		try
 		{
 			//
 			// Load the shared library
 			SharedLibrary lib;
-			lib.open(path, true);
+			lib.open(path);
 			
 			// 
 			// Get plugin descriptor and exports
@@ -224,14 +431,13 @@ public:
 			lib.close();
 			cout << "Cleanup 2" << endl;
 		}
-		catch (Exception& exc)
+		catch (std::exception/*Exception*/& exc)
 		{
 			errorL("PluginTest") << "Error: " << exc << endl;
 			assert(0);
 		}
 		
 		cout << "Ending" << endl;
-		debugL("PluginTest") << "Ending" << endl;
 	}
 
 	// ============================================================================
@@ -239,8 +445,8 @@ public:
 	//
 	void runPlatformTests() 
 	{
-		debugL("PlatformTests") << "Executable Path: " << scy::getExePath() << endl;
-		debugL("PlatformTests") << "Current Working Directory: " << scy::getCWD() << endl;
+		cout << "executable path: " << scy::getExePath() << endl;
+		cout << "current working directory: " << scy::getCwd() << endl;
 	}
 
 	// ============================================================================
@@ -252,15 +458,15 @@ public:
 		Logger::instance().setWriter(new LogWriter);		
 		clock_t start = clock();
 		for (unsigned i = 0; i < 1000; i++) 
-			debugL("LoggerTest") << "Test message: " << i << endl;
-		debugL("LoggerTest") << "#################### Synchronous test completed after: " << (clock() - start) << endl;
+			cout << "Test message: " << i << endl;
+		cout << "#### synchronous test completed after: " << (clock() - start) << endl;
 		
-		// Test asynchronous writer (10x faster)
+		// Test asynchronous writer (approx 10x faster)
 		Logger::instance().setWriter(new AsyncLogWriter);		
 		start = clock();
 		for (unsigned i = 0; i < 1000; i++) 
-			debugL("LoggerTest") << "Test message: " << i << endl;
-		debugL("LoggerTest") << "#################### Asynchronous test completed after: " << (clock() - start) << endl;
+			cout << "Test message: " << i << endl;
+		cout << "#### asynchronous test completed after: " << (clock() - start) << endl;
 	}
 	
 	
@@ -276,7 +482,7 @@ public:
 		}
 		catch (FileException& exc)
 		{
-			debugL("ExceptionTests") << "Message: " << exc << endl;
+			cout << "Message: " << exc << endl;
 		}
 		catch (Exception&)
 		{
@@ -290,8 +496,8 @@ public:
 		}
 		catch (IOException& exc)
 		{
-			debugL("ExceptionTests") << "Message: " << exc << endl;
-			assert(exc.message() == "IO error");
+			cout << "Message: " << exc << endl;
+			assert(std::string(exc.what())/*message()*/ == "IO error");
 		}
 		catch (Exception&)
 		{
@@ -304,25 +510,25 @@ public:
 	//
 	const static int numTimerTicks = 5;
 	bool timerRestarted;
-
-	void runTimerTest() 
+	
+	void testTimer() 
 	{
-		traceL("TimerTest") << "Starting" << endl;
+		cout << "Starting" << endl;
 		Timer timer;
-		timer.Timeout += delegate(this, &Tests::onOnTimerTimeout);
+		timer.Timeout += delegate(this, &Tests::timerCallback);
 		timer.start(10, 10);
 
 		timerRestarted = false;
 		
 		uv_ref(timer.handle()); // timers do not reference the loop
 		runLoop();
-		traceL("TimerTest") << "Ending" << endl;
+		cout << "Ending" << endl;
 	}
 
-	void onOnTimerTimeout(void* sender)
+	void timerCallback(void* sender)
 	{
-		Timer* timer = reinterpret_cast<Timer*>(sender);
-		traceL("TimerTest") << "On timeout: " << timer->count() << endl;
+		auto timer = reinterpret_cast<Timer*>(sender);
+		cout << "On timeout: " << timer->count() << endl;
 		if (timer->count() == numTimerTicks) {
 			if (!timerRestarted) {
 				timerRestarted = true;
@@ -332,6 +538,31 @@ public:
 				timer->stop(); // event loop will be released
 		}
 	}
+	
+	// ============================================================================
+	// Idler Test
+	//
+	const static int wantIdlerTicks = 5;
+	int idlerTicks;
+	Idler idler;
+	
+	void testIdler() 
+	{
+		idler.start(std::bind(&Tests::idlerCallback, this));
+
+		idlerTicks = 0;
+		uv_ref(idler.ptr.handle()); // idlers do not reference the loop
+		runLoop();
+	}
+
+	void idlerCallback()
+	{
+		cout << "On idle" << endl;
+		if (++idlerTicks == numTimerTicks) {
+			idler.stop(); // event loop will be released
+		}
+	}
+	
 
 	/*
 	// ============================================================================
@@ -530,10 +761,8 @@ public:
 
 	/*
 	// ============================================================================
-	//
 	// Version String Comparison
-	//
-	// ============================================================================		
+	//	
 	void runVersionStringComparison() 
 	{
 		//assert(util::CompareVersion("3.7.8.0", "3.7.8") == false);

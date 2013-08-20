@@ -286,7 +286,7 @@ public:
     static Parser* create(
         http_parser_type type,
         net::Socket* socket,
-        on__observertype _observercb = nil);
+        on__observertype _observercb = nullptr);
 
     * Callback that must be registered to allow construction of classes
     * derived from Connection. This is necessary because we want to
@@ -318,7 +318,7 @@ public:
 /*
 
 
-#include "Sourcey/Util/UserContainers.h"
+#include "Sourcey/Util/UserCollection.h"
 #include <string>
 
 

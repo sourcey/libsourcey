@@ -89,7 +89,7 @@ void MediaFactory::loadVideo()
 	for (size_t i = 0; i < devs.size(); ++i) {
 		try 
 		{
-			traceL("MediaFactory") << "Loading video: " << devs[0].id << endl;
+			traceL("MediaFactory") << "loading video: " << devs[0].id << endl;
 
 			// TODO: Receive callback on capture error or closure.
 			VideoCaptureBase* base = new VideoCaptureBase(devs[0].id); 
@@ -136,7 +136,7 @@ VideoCapture* MediaFactory::createVideoCapture(int deviceId) //, unsigned flags
 }
 
 
-VideoCapture* MediaFactory::createFileCapture(const string& file)
+VideoCapture* MediaFactory::createFileCapture(const std::string& file)
 {
 	traceL("MediaFactory") << "Get video capture: " << file << endl;
 	
@@ -150,7 +150,7 @@ AudioCapture* MediaFactory::createAudioCapture(int deviceId, int channels, int s
 {
 	traceL("MediaFactory") << "Create audio capture: " << deviceId << endl;
 	if (deviceId < 0)
-		throw Exception("Invalid audio device ID");
+		throw std::runtime_error("Invalid audio device ID");
 
 	// TODO: unique_ptr for exception safe instantiation
 	AudioCapture* capture = new AudioCapture(deviceId, channels, sampleRate, format);

@@ -20,32 +20,36 @@
 #include "Sourcey/Pacman/InstallTask.h"
 #include "Sourcey/Pacman/PackageManager.h"
 #include "Sourcey/Pacman/Package.h"
+#include "Sourcey/Archo/Zip.h"
 #include "Sourcey/HTTP/Authenticator.h"
+#include "Sourcey/HTTP/Client.h"
 #include "Sourcey/Logger.h"
+#include "Sourcey/Filesystem.h"
 
-#include "Poco/Path.h"
-#include "Poco/File.h"
-#include "Poco/Format.h"
-#include "Poco/DirectoryIterator.h"
-#include "Poco/Delegate.h"
-#include "Poco/Zip/Decompress.h"
-#include "Poco/Zip/ZipArchive.h"
-////#include "Poco/Net/HTTPBasicCredentials.h"
+////#include "Poco/Path.h" // depreciated
+////#include "Poco/File.h" // depreciated
+////#include "Poco/Format.h" // depreciated
+////#include "Poco/DirectoryIterator.h" // depreciated
+////#include "Poco/Delegate.h" // depreciated
+////#include "Poco/Zip/Decompress.h" // depreciated
+////#include "Poco/Zip/ZipArchive.h" // depreciated
 
 
 using namespace std;
-using namespace Poco;
+//using namespace Poco;
 
 
 namespace scy { 
 namespace pman {
 
 
-InstallTask::InstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote, const Options& options) :
+InstallTask::InstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote, const InstallOptions& options) :
 	_manager(manager),
 	_local(local),
 	_remote(remote),
 	_options(options),
+	_dlconn(nullptr),
+	_downloading(false),
 	_progress(0)
 {
 	assert(valid());
@@ -54,13 +58,15 @@ InstallTask::InstallTask(PackageManager& manager, LocalPackage* local, RemotePac
 
 InstallTask::~InstallTask()
 {
+	log("debug") << "destroy" << endl;
+
 	// :)
 }
 
 
 void InstallTask::start()
 {
-	log("trace") << "Starting" << endl;	
+	log("trace") << "start" << endl;	
 	Mutex::ScopedLock lock(_mutex);
 	_thread.start(*this);
 }
@@ -68,7 +74,7 @@ void InstallTask::start()
 
 void InstallTask::cancel()
 {
-	setState(this, PackageInstallState::Cancelled, "Cancelled by user.");
+	setState(this, InstallationState::Cancelled, "Cancelled by user.");
 }
 
 
@@ -81,87 +87,91 @@ void InstallTask::run()
 
 			// Check against provided options to make sure that
 			// we can proceed with task creation.
-			if (!_options.version.empty())
-				_remote->assetVersion(_options.version); // throw if none
-			if (!_options.sdkVersion.empty())
-				_remote->latestSDKAsset(_options.sdkVersion); // throw if none
+			if (!_options.version.empty())    { _remote->assetVersion(_options.version); } // throw if none
+			if (!_options.sdkVersion.empty()) { _remote->latestSDKAsset(_options.sdkVersion); }// throw if none
 
 			// Set default install directory if none was given
 			if (_options.installDir.empty()) {
 				
 				// Use the current install dir if the local package already exists
 				if (!_local->installDir().empty()) {
-					_options.installDir = _local->installDir();
-				}
+					_options.installDir = _local->installDir(); }
 
 				// Or use the manager default
-				else
-					_options.installDir = _manager.options().installDir;
+				else {
+					_options.installDir = _manager.options().installDir; }
 			}
-			_local->setInstallDir(_options.installDir);
-			log("debug") << "Installing To: " << _local->installDir() << endl;
 
-			// If the package failed previously we might need
+			// Normalize lazy windows paths
+			_options.installDir = fs::normalize(_options.installDir);
+			_local->setInstallDir(_options.installDir);
+			log("debug") << "install to: " << _local->installDir() << endl;
+
+			// If the package failed previously we might need 
 			// to clear the file cache.
 			if (_manager.options().clearFailedCache)
 				_manager.clearPackageCache(*_local);
-		}
-		
-		// Kick off the state machine. If any errors are
-		// encountered an exception will be thrown and the
-		// task will fail.
+		}		
+
+		// Kick off the state machine. If any errors are encountered
+		// an exception will be thrown and the task will fail.
 		doDownload();
-		if (cancelled()) goto Complete;
+		while(_downloading) {
+			scy::sleep(50);
+			if (cancelled()) goto Complete;
+		}
+
 		doUnpack();
 		if (cancelled()) goto Complete;
 		doFinalize();
 			
 		// Transition the internal state if finalization was a success.
 		// This will complete the installation process.
-		setState(this, PackageInstallState::Installed);
+		setState(this, InstallationState::Installed);
 	}
-	catch (Exception& exc) {		
-		log("error") << "Install Failed: " << exc.message() << endl; 
-		setState(this, PackageInstallState::Failed, exc.message());
+	catch (std::exception& exc) {		
+		log("error") << "Installation failed: " << exc.what() << endl; 
+		setState(this, InstallationState::Failed, exc.what());
 	}
 	
 Complete:
 	setComplete();
-	delete this;
+	//delete this; // test safe
 }
 
 
-void InstallTask::onStateChange(PackageInstallState& state, const PackageInstallState& oldState)
+void InstallTask::onStateChange(InstallationState& state, const InstallationState& oldState)
 {
-	log("debug") << "State Changed to " << state.toString() << endl; 	
+	log("debug") << "state changed to " << state.toString() << endl; 	
 	{
-		LocalPackage* local = this->local();
+		auto local = this->local();
 		switch (state.id()) 
 		{			
-		case PackageInstallState::Downloading:
+		case InstallationState::Downloading:
 			setProgress(0);
 			break;
-		case PackageInstallState::Unpacking:
+		case InstallationState::Unpacking:
 			setProgress(75);
 			break;
-		case PackageInstallState::Finalizing:
+		case InstallationState::Finalizing:
 			setProgress(90);
 			break;
-		case PackageInstallState::Installed:
+		case InstallationState::Installed:
 			local->setState("Installed");
 			local->clearErrors();
 			local->setInstalledAsset(getRemoteAsset());
 			setProgress(100);
 			break;
-		case PackageInstallState::Cancelled:
+		case InstallationState::Cancelled:
 			local->setState("Failed");
 			{
 				Mutex::ScopedLock lock(_mutex);
-				_transaction->close();
+				if (_dlconn)
+					_dlconn->close();
 			}
 			setProgress(100);
 			break;			
-		case PackageInstallState::Failed:
+		case InstallationState::Failed:
 			local->setState("Failed");
 			if (!state.message().empty())
 				local->addError(state.message());
@@ -177,63 +187,67 @@ void InstallTask::onStateChange(PackageInstallState& state, const PackageInstall
 		local->setInstallState(state.toString());
 	}
 
-	Stateful<PackageInstallState>::onStateChange(state, oldState);
+	Stateful<InstallationState>::onStateChange(state, oldState);
 }
 
 
 void InstallTask::doDownload()
 {
-	setState(this, PackageInstallState::Downloading);
+	setState(this, InstallationState::Downloading);
 
 	Package::Asset asset = getRemoteAsset();
 	if (!asset.valid())
-		throw Exception("Package download failed: The remote asset is invalid.");
+		throw std::runtime_error("Package download failed: The remote asset is invalid.");
 
 	// If the remote asset already exists in the cache, we can 
 	// skip the download. 
+	/* // force file re-download until os get file size is fixed and we can match crc
 	if (_manager.hasCachedFile(asset)) {
-		log("debug") << "File exists, skipping download" << endl;		
-		setState(this, PackageInstallState::Unpacking);
+		log("debug") << "file exists, skipping download" << endl;		
+		setState(this, InstallationState::Unpacking);
 		return;
 	}
-	
-	log("debug") << "Initializing Download:" 
-		<< "\n\tURI: " << asset.url()
-		<< "\n\tFilename: " << asset.fileName()
-		<< endl;
+	*/
 
 	// Initialize a HTTP transaction to download the file.
 	// If the transaction fails an exception will be thrown.
 	//http::Request* request = new http::Request("GET", asset.url());	
 	
-	_transaction = new http::ClientConnection(asset.url());
+	std::string outfile = _manager.getCacheFilePath(asset.fileName());
+	_dlconn = new http::ClientConnection(asset.url());
 	if (!_manager.options().httpUsername.empty()) {
 		http::BasicAuthenticator cred(
 			_manager.options().httpUsername, 
 			_manager.options().httpPassword);
-		cred.authenticate(_transaction->request()); 
+		cred.authenticate(_dlconn->request()); 
 	}
-
-	string outfile = _manager.getCacheFilePath(asset.fileName()).toString();
-	_transaction->setReadStream(new std::ofstream(outfile.c_str(), std::ios_base::out | std::ios_base::binary));
-	_transaction->IncomingProgress += delegate(this, &InstallTask::onIncomingProgress);
-	_transaction->send();
-
-	/*
-	if (!_transaction->send() && 
-		!_transaction->cancelled())
-		throw Exception(format("Cannot download package files: HTTP Error: %d %s", 
-			static_cast<int>(_transaction->response().getStatus()), 
-			_transaction->response().getReason()));
-			*/
 	
-	log("debug") << "Download Complete" << endl; 
+	log("debug") << "initializing download:" 
+		<< "\n\tURI: " << asset.url()
+		<< "\n\tFile path: " << outfile
+		<< endl;
+
+	_dlconn->setReadStream(new std::ofstream(outfile, std::ios_base::out | std::ios_base::binary));
+	_dlconn->IncomingProgress += delegate(this, &InstallTask::onDownloadProgress);
+	_dlconn->Complete += delegate(this, &InstallTask::onDownloadComplete);
+	_dlconn->send();
+
+	_downloading = true;
+	/*
+	if (!_dlconn->send() && 
+		!_dlconn->cancelled())
+		throw std::runtime_error(format("Cannot download package files: HTTP Error: %d %s", 
+			static_cast<int>(_dlconn->response().getStatus()), 
+			_dlconn->response().getReason()));
+	
+	log("debug") << "download complete" << endl; 
+			*/
 }
 
 
-void InstallTask::onIncomingProgress(void* sender, const double& progress)
+void InstallTask::onDownloadProgress(void*, const double& progress)
 {
-	log("debug") << "Download Progress: " << progress << endl;
+	log("debug") << "download progress: " << progress << endl;
 
 	// Progress 1 - 75 covers download
 	// Increments of 10 or greater
@@ -243,50 +257,69 @@ void InstallTask::onIncomingProgress(void* sender, const double& progress)
 }
 
 
+void InstallTask::onDownloadComplete(void*, const http::Response& response)
+{
+	log("debug") << "download complete: " << response << endl;
+	_dlconn->readStream<std::ofstream>()->close();
+	_dlconn = nullptr;
+	_downloading = false;
+}
+
+
 void InstallTask::doUnpack()
 {
-	setState(this, PackageInstallState::Unpacking);
+	setState(this, InstallationState::Unpacking);
 		
 	Package::Asset asset = getRemoteAsset();
 	if (!asset.valid())
-		throw Exception("The package can't be extracted");
+		throw std::runtime_error("The package can't be extracted");
 	
 	// Get the input file and check veracity
-	Path filePath(_manager.getCacheFilePath(asset.fileName()));
-	if (!File(filePath).exists())
-		throw Exception("The local package file does not exist: " + filePath.toString());	
+	std::string archivePath(_manager.getCacheFilePath(asset.fileName()));
+	if (!fs::exists(archivePath))
+		throw std::runtime_error("The local package file does not exist: " + archivePath);	
 	if (!_manager.isSupportedFileType(asset.fileName()))
-		throw Exception("The local package has an unsupported file extension: " + filePath.getExtension());
+		throw std::runtime_error("The local package has an unsupported file extension: " + fs::extname(archivePath));
 	
 	// Create the output directory
-	Path outputDir(_manager.getIntermediatePackageDir(_local->id()));
+	std::string tempDir(_manager.getIntermediatePackageDir(_local->id()));
 	
-	log("debug") << "Unpacking: " 
-		<< filePath.toString() << " to "
-		<< outputDir.toString() << endl;
+	log("debug") << "unpacking archive: " << archivePath << " to " << tempDir << endl;
 
-	// Clear the local installation manifest before extraction
+	// Reset the local installation manifest before extraction
 	_local->manifest().root.clear();
 	
+	// Decompress the archive
+	arc::ZipFile zip(archivePath);	
+		
+	// Print contents to the log file
+	//for (size_t i = 0; i < zip.info.size(); i++)
+	//	log("debug") << "Zip file contains: " << zip.info[i].path << endl;
+
+	zip.extractTo(tempDir);
+
+	/*
 	// Extract the archive filed. An exception will be thrown
 	// if any errors are encountered and the task will fail.
-	ifstream in(filePath.toString().c_str(), ios::binary);
-	Poco::Zip::Decompress c(in, outputDir);
+	ifstream in(archivePath.toString().c_str(), ios::binary);
+	Poco::Zip::Decompress c(in, tempDir);
 	c.EError += Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const string> >(this, &InstallTask::onDecompressionError);
 	c.EOk +=Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path> >(this, &InstallTask::onDecompressionOk);
 
 	c.decompressAllFiles();
 	c.EError -= Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const string> >(this, &InstallTask::onDecompressionError);
 	c.EOk -=Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path> >(this, &InstallTask::onDecompressionOk);
+	*/
 }
 
 
+/*
 void InstallTask::onDecompressionError(const void*, pair<const Poco::Zip::ZipLocalFileHeader, const string>& info)
 {
 	log("error") << "Decompression Error: " << info.second << endl;
 
 	// Extraction failed, throw an exception
-	throw Exception("Archive Error: Extraction failed: " + info.second);
+	throw std::runtime_error("Archive Error: Extraction failed: " + info.second);
 }
 
 
@@ -298,41 +331,45 @@ void InstallTask::onDecompressionOk(const void*, pair<const Poco::Zip::ZipLocalF
 	// Add the extracted file to out package manifest
 	_local->manifest().addFile(info.second.toString()); 
 }
+*/
 
 
 void InstallTask::doFinalize() 
 {
-	setState(this, PackageInstallState::Finalizing);
+	setState(this, InstallationState::Finalizing);
 
 	bool errors = false;
-	Path outputDir(_manager.getIntermediatePackageDir(_local->id()));
-	string installDir = options().installDir;
+	std::string tempDir(_manager.getIntermediatePackageDir(_local->id()));
+	std::string installDir = options().installDir;
 
 	// Ensure the install directory exists
-	File(installDir).createDirectories();
-
+	fs::mkdirr(installDir);
+	
 	// Move all extracted files to the installation path
-	DirectoryIterator fIt(outputDir);
-	DirectoryIterator fEnd;
-	while (fIt != fEnd)
-	{
+	StringVec nodes;
+	fs::readdir(tempDir, nodes);
+	for (unsigned i = 0; i < nodes.size(); i++) {
 		try
 		{
-			log("debug") << "Moving: " << fIt.path().toString() << " <<=>> " << installDir  << endl;
-			File(fIt.path()).moveTo(options().installDir);
+			std::string source(tempDir);
+			fs::addnode(source, nodes[i]);
+
+			std::string target(installDir);
+			fs::addnode(target, nodes[i]);
+
+			log("debug") << "moving file: " << source << " => " << target << endl;
+			fs::rename(source, target);
 		}
-		catch (Exception& exc)
+		catch (std::exception& exc)
 		{
 			// The previous version files may be currently in use,
 			// in which case PackageManager::finalizeInstallations()
 			// must be called from an external process before the
 			// installation can be completed.
 			errors = true;
-			log("error") << "Error: " << exc.message() << endl;
-			_local->addError(exc.message());
+			log("error") << "finalize error: " << exc.what() << endl;
+			_local->addError(exc.what());
 		}
-		
-		++fIt;
 	}
 
 	// The package requires finalizing at a later date. 
@@ -348,20 +385,21 @@ void InstallTask::doFinalize()
 	// was successfully finalized.
 	try
 	{		
-		log("debug") << "Removing temp directory: " << outputDir.toString() << endl;
+		log("debug") << "Removing temp directory: " << tempDir << endl;
 
 		// FIXME: How to remove a folder properly?
-		File(outputDir).remove(true);
+		fs::unlink(tempDir);
+		assert(fs::exists(tempDir));
 	}
-	catch (Exception& exc)
+	catch (std::exception& exc)
 	{
 		// While testing on a windows system this fails regularly
 		// with a file sharing error, but since the package is already
 		// installed we can just swallow it.
-		log("warn") << "Cannot remove temp directory: " << exc.message() << endl;
+		log("warn") << "cannot remove temp directory: " << exc.what() << endl;
 	}
 
-	log("debug") << "Finalization Complete" << endl;
+	log("debug") << "finalization complete" << endl;
 }
 
 
@@ -371,7 +409,7 @@ void InstallTask::setComplete()
 		Mutex::ScopedLock lock(_mutex);
 		assert(_progress == 100);
 
-		log("info") << "Package Install Complete:" 
+		log("info") << "package installed:" 
 			<< "\n\tName: " << _local->name()
 			<< "\n\tVersion: " << _local->version()
 			<< "\n\tPackage State: " << _local->state()
@@ -419,7 +457,7 @@ int InstallTask::progress() const
 bool InstallTask::valid() const
 {
 	Mutex::ScopedLock lock(_mutex);
-	return !stateEquals(PackageInstallState::Failed) 
+	return !stateEquals(InstallationState::Failed) 
 		&& _local->valid() 
 		&& (!_remote || _remote->valid());
 }
@@ -427,27 +465,27 @@ bool InstallTask::valid() const
 
 bool InstallTask::cancelled() const
 {
-	return stateEquals(PackageInstallState::Cancelled);
+	return stateEquals(InstallationState::Cancelled);
 }
 
 
 bool InstallTask::failed() const
 {
-	return stateEquals(PackageInstallState::Failed);
+	return stateEquals(InstallationState::Failed);
 }
 
 
 bool InstallTask::success() const
 {
-	return stateEquals(PackageInstallState::Installed);
+	return stateEquals(InstallationState::Installed);
 }
 
 
 bool InstallTask::complete() const
 {
-	return stateEquals(PackageInstallState::Installed) 
-		|| stateEquals(PackageInstallState::Cancelled) 
-		|| stateEquals(PackageInstallState::Failed);
+	return stateEquals(InstallationState::Installed) 
+		|| stateEquals(InstallationState::Cancelled) 
+		|| stateEquals(InstallationState::Failed);
 }
 
 
@@ -465,7 +503,7 @@ RemotePackage* InstallTask::remote() const
 }
 
 
-InstallTask::Options& InstallTask::options() 
+InstallOptions& InstallTask::options() 
 { 
 	Mutex::ScopedLock lock(_mutex);
 	return _options;

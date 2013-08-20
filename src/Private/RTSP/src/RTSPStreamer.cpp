@@ -123,8 +123,8 @@ string RTSPStreamer::addChannel(ChannelData& channel)
 	// Live555 will return our local IP url which is not much 
 	// good to us if we will be connecting from remote devices!
 	// Let's replace that with our remote/public IP...
-	string url = _rtspServer->rtspURL(serverMediaSession);
-	string ip;
+	std::string url = _rtspServer->rtspURL(serverMediaSession);
+	std::string ip;
 	string::size_type start = 0;
 	string::size_type end = 0;
 	start = url.find("//");

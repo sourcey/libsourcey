@@ -56,7 +56,7 @@ public:
 
 	void operator += (const DelegateT& delegate) { attach(delegate); }	
 	void operator -= (const DelegateT& delegate) { detach(delegate); }	
-	void operator -= (const Void klass) { detach(klass); }
+	void operator -= (const void* klass) { detach(klass); }
 
 	void attach(const DelegateT& delegate) 
 		// Attaches a delegate to the signal. If the delegate 
@@ -85,7 +85,7 @@ public:
 		return false;
 	}
 
-	void detach(const Void klass) 
+	void detach(const void* klass) 
 		// Detaches all delegates associated with the given class instance.
 	{
 		{
@@ -177,31 +177,31 @@ public:
 		return _refCount;
 	}
 
-	void emit(Void sender) 
+	void emit(void* sender) 
 	{
-		Void empty = 0;
+		void* empty = 0;
 		emit(sender, (P)empty, (P2)empty, (P3)empty, (P4)empty);
 	}
 
-	void emit(Void sender, P arg) 
+	void emit(void* sender, P arg) 
 	{
-		Void empty = 0;
+		void* empty = 0;
 		emit(sender, arg, (P2)empty, (P3)empty, (P4)empty);
 	}
 
-	void emit(Void sender, P arg, P2 arg2) 
+	void emit(void* sender, P arg, P2 arg2) 
 	{
-		Void empty = 0;
+		void* empty = 0;
 		emit(sender, arg, arg2, (P3)empty, (P4)empty);
 	}	
 
-	void emit(Void sender, P arg, P2 arg2, P3 arg3) 
+	void emit(void* sender, P arg, P2 arg2, P3 arg3) 
 	{
-		Void empty = 0;
+		void* empty = 0;
 		emit(sender, arg, arg2, arg3, (P4)empty);
 	}
 
-	void emit(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) 
+	void emit(void* sender, P arg, P2 arg2, P3 arg3, P4 arg4) 
 	{
 		DelegateList toNotify;
 		obtain(toNotify);

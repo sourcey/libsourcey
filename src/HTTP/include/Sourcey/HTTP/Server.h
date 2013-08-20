@@ -52,7 +52,7 @@ protected:
     virtual ~ServerConnection();
 		
 	virtual void onHeaders();
-	virtual void onPayload(Buffer& buffer);
+	virtual void onPayload(const MutableBuffer& buffer);
 	virtual void onMessage();
 	virtual void onClose();
 				
@@ -108,9 +108,9 @@ public:
 
 	virtual ~ServerResponder() {}
 
-	virtual void onHeaders(Request& request) {}
-	virtual void onPayload(const Buffer& body) {}
-	virtual void onRequest(Request& request, Response& response) {}
+	virtual void onHeaders(Request& /* request */) {}
+	virtual void onPayload(const MutableBuffer& /* body */) {}
+	virtual void onRequest(Request& /* request */, Response& /* response */) {}
 	virtual void onClose() {};
 
 	ServerConnection& connection()
@@ -130,6 +130,12 @@ public:
 
 protected:
 	ServerConnection& _connection;
+
+private:
+	ServerResponder(const ServerResponder&); // = delete;
+	ServerResponder(ServerResponder&&); // = delete;
+	ServerResponder& operator=(const ServerResponder&); // = delete;
+	ServerResponder& operator=(ServerResponder&&); // = delete;
 };
 
 
@@ -199,9 +205,9 @@ public:
 	{		
 	}
 
-	void onRequest(Request& request, Response& response)
+	void onRequest(Request&, Response& response)
 	{
-		response.setStatusAndReason(http::Response::HTTP_BAD_REQUEST);
+		response.setStatusAndReason(http::StatusCode::BadRequest);
 		connection().sendHeader();
 		connection().close();
 	}
@@ -209,6 +215,11 @@ public:
 
 
 } } // namespace scy::http
+
+
+#endif
+
+
 
 
 /*
@@ -222,19 +233,19 @@ public:
 		try 
 		{			
 			if (rawRequest.find("policy-file-request") != std::string::npos) {
-				traceL("HTTPStreamingRequestHandlerFactory") << "Sending Flash Crossdomain XMLSocket Policy" << std::endl;
+				traceL("HTTPStreamingRequestHandlerFactory") << "send Flash Crossdomain XMLSocket Policy" << std::endl;
 				return new Net::FlashPolicyRequestHandler(socket, false);
 			}
 			else if (rawRequest.find("crossdomain.xml") != std::string::npos) {
-				traceL("HTTPStreamingRequestHandlerFactory") << "Sending Flash Crossdomain HTTP Policy" << std::endl;
+				traceL("HTTPStreamingRequestHandlerFactory") << "send Flash Crossdomain HTTP Policy" << std::endl;
 				return new Net::FlashPolicyRequestHandler(socket, true);
 			}			
 		}
-		catch (Exception& exc)
+		catch (std::exception&Exception& exc)
 		{
-			LogError("ServerConnectionHook") << "Bad Request: " << exc.message() << std::endl;
+			LogError("ServerConnectionHook") << "Bad Request: " << exc.what()/message()/ << std::endl;
 		}	
-		return nil;
+		return nullptr;
 	};
 };
 */
@@ -254,6 +265,3 @@ public:
 		}
 	}
 	*/
-
-
-#endif

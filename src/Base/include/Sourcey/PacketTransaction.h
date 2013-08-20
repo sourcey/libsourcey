@@ -23,7 +23,7 @@
 
 #include "Sourcey/Timer.h"
 #include "Sourcey/Stateful.h"
-#include "Sourcey/Interfaces.h"
+#include "Sourcey/Interface.h"
 #include "Sourcey/Packet.h"
 
 
@@ -56,20 +56,19 @@ struct TransactionState: public State
 
 
 template <class PacketT>
-class PacketTransaction: public abstract::Sendable, public Stateful<TransactionState>
-	// This class provides request/response functionality for IPacket types.
-	//
-	// PacketTransactions are fire and forget. The object will be deleted
-	// after a successful response or a timeout.
+class PacketTransaction: public basic::Sendable, public Stateful<TransactionState>
+	/// This class provides request/response functionality for IPacket types.
+	///
+	/// PacketTransactions are fire and forget. The object will be deleted
+	/// after a successful response or a timeout.
 {
 public:
 	PacketTransaction(long timeout = 10000, int retries = 0, uv::Loop& loop = uv::defaultLoop()) :
-		_timer(loop),
-		_timeout(timeout),
+		_timer(loop), 
+		_timeout(timeout), 
 		_retries(retries), 
 		_attempts(0)
 	{		
-		traceL("PacketTransaction", this) << "Creating" << std::endl;
 	}		
 
 	PacketTransaction(const PacketT& request, long timeout = 10000, int retries = 0, uv::Loop& loop = uv::defaultLoop()) : 
@@ -79,101 +78,56 @@ public:
 		_retries(retries), 
 		_attempts(0)
 	{
-		traceL("PacketTransaction", this) << "Creating" << std::endl;
 	}
-
+	
 	virtual bool send()
-		// Starts the transaction timer.
-		// Overriding classes implement sending here.
-		// This method must be called by derived classes.
+		// Starts the transaction timer and sends the request.
+		// Overriding classes should implement send logic here.
 	{
 		if (!canResend())
 			return false;
-		{
-			//ScopedLock lock(_mutex);
-			traceL("PacketTransaction", this) << "Sending" << std::endl;
-			_attempts++;
-		}
-		setState(this, TransactionState::Running);
+
+		_attempts++;
 		if (_timer.active())
 			_timer.stop();
 		_timer.Timeout += delegate(this, &PacketTransaction::onTimeout);
 		_timer.start(_timeout, 0);
-		//_timer.restart();
-		return true;
+
+		return setState(this, TransactionState::Running);
 	}	
-
-	void cancel()
+	
+	void cancel();
+	bool cancelled() const;	
 		// Cancellation means that the agent will not retransmit 
-        /// the request, will not treat the lack of response to be
-        /// a failure, but will wait the duration of the transaction
+		// the request, will not treat the lack of response to be
+		// a failure, but will wait the duration of the transaction
 		// timeout for a response.
-	{
-		//ScopedLock lock(_mutex);
-		
-		//_cancelled = true;
-		setState(this, TransactionState::Cancelled);
-	}
-	
-	bool cancelled() const
-		// Returns the transaction cancelled status.
-	{
-		//ScopedLock lock(_mutex);
 
-		//_cancelled;
-		return stateEquals(TransactionState::Cancelled);
-	}
-
-	virtual bool canResend()
-	{
-		//ScopedLock lock(_mutex);
-		return !cancelled() && _attempts <= _retries;
-	}
-	
-	virtual int attempts() const
-	{
-		//ScopedLock lock(_mutex);
-		return _attempts;
-	}
+	virtual bool canResend();	
+	int attempts() const;
+	int retries() const;
 		
-	PacketT& request() 
-	{
-		//ScopedLock lock(_mutex);
-		return _request;
-	}
-	
-	PacketT request() const
-	{
-		//ScopedLock lock(_mutex);
-		return _request;
-	}
+	PacketT& request();
+	PacketT request() const;
 		
-	PacketT& response() 
-	{
-		//ScopedLock lock(_mutex);
-		return _response;
-	}
-	
-	PacketT response() const
-	{
-		//ScopedLock lock(_mutex);
-		return _response;
-	}
-
+	PacketT& response();
+	PacketT response() const;	
 
 protected:
 	virtual ~PacketTransaction()
 	{
-		traceL("PacketTransaction", this) << "Destroying" << std::endl;
 		assert(!stateEquals(TransactionState::Running));
 	}
-
+	
 	virtual void destroy()
 		// Schedules the transaction for deferred deletion.
 		//
 		// It is safe to call this function while the transaction
 		// is still active, providing the call is made from the same 
 		// loop thread which the timer is running on.
+		//
+		// Protected by the base implementation as this is called
+		// by the internal state machine.
 	{
 		_timer.Timeout -= delegate(this, &PacketTransaction::onTimeout);
 		_timer.stop();
@@ -182,15 +136,11 @@ protected:
 	}
 	
 	virtual bool onPossibleResponse(const PacketT& packet)
-		// Processes a potential response candidates
-		// and updates state on match.
+		// Processes a potential response candidate
+		// and updates the state accordingly.
 	{	
-		traceL("PacketTransaction", this) << "Process" << std::endl;
 		if (stateEquals(TransactionState::Running) && checkResponse(packet)) {
-			{
-				//ScopedLock lock(_mutex);
-				_response = packet;
-			}
+			_response = packet;
 			onResponse();
 			setState(this, TransactionState::Success);
 			destroy();
@@ -198,34 +148,32 @@ protected:
 		}
 		return false;
 	}
-
+	
 	virtual bool checkResponse(const PacketT& packet) = 0;
-		// Checks potential response candidates.
-		// Returns true on successful match.
+		// Checks a potential response candidate and
+		// returns true on successful match.
 	
 	virtual void onResponse() 
 		// Called when a successful response is received.
 	{
-		traceL("PacketTransaction", this) << "Response received: " 
+		traceL("PacketTransaction", this) << "success: " 
 			<< _response.toString() << std::endl;
 	}
 
 	virtual void onTimeout(void*)
 	{	
-		traceL("PacketTransaction", this) << "Timeout" << std::endl;	
-		{		
-			if (!canResend()) {
-				if (!cancelled())
-					setState(this, TransactionState::Failed, "Transaction timeout");				
-				destroy();
-			} 
-			else send();
-		}		
-	}
-	
+		debugL("PacketTransaction", this) << "timeout" << std::endl;	
+
+		if (!canResend()) {
+			if (!cancelled())
+				setState(this, TransactionState::Failed, "Transaction timeout");				
+			destroy();
+		} 
+		else send();
+	}	
 
 protected:
-	friend class GCDeleter<PacketTransaction>;
+	friend struct std::default_delete/*friend class AsyncDeleter*/<PacketTransaction>;
 
 	Timer _timer;
 	PacketT _request;
@@ -233,10 +181,20 @@ protected:
 	int _retries;		// The maximum number of attempts before the transaction is considered failed.
 	int _attempts;		// The number of times the transaction has been sent.	
 	int _timeout;		// The request timeout in milliseconds.
-
-//private:
-	//mutable Mutex	_mutex;
 };
+
+	
+template <class T> inline void PacketTransaction<T>::cancel() { setState(this, TransactionState::Cancelled); }
+template <class T> inline bool PacketTransaction<T>::cancelled() const { return stateEquals(TransactionState::Cancelled); }
+
+template <class T> inline bool PacketTransaction<T>::canResend() { return !cancelled() && attempts() <= retries(); }	
+template <class T> inline int PacketTransaction<T>::attempts() const { return _attempts; }
+template <class T> inline int PacketTransaction<T>::retries() const { return _retries; }
+		
+template <class T> inline T& PacketTransaction<T>::request() { return _request; }	
+template <class T> inline T PacketTransaction<T>::request() const { return _request; }		
+template <class T> inline T& PacketTransaction<T>::response() { return _response;	}	
+template <class T> inline T PacketTransaction<T>::response() const { return _response; }
 
 
 

@@ -16,6 +16,164 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifndef SOURCEY_HTTP_Response_H
+#define SOURCEY_HTTP_Response_H
+
+
+#include "Sourcey/HTTP/Message.h"
+#include "Sourcey/HTTP/Cookie.h"
+#include "Sourcey/DateTime.h"
+
+#include <sstream>
+
+	
+namespace scy { 
+namespace http {
+
+
+enum class StatusCode
+	/// HTTP Response Status Codes
+{
+	Continue = 100,
+	SwitchingProtocols = 101,
+
+	OK = 200,
+	Created = 201,
+	Accepted = 202,
+	NonAuthoritative = 203,
+	NoContent = 204,
+	ResetContent = 205,
+	PartialContent = 206,
+
+	MultipleChoices = 300,
+	MovedPermanently = 301,
+	Found = 302,
+	SeeOther = 303,
+	NotModified = 304,
+	UseProxy = 305,
+	// SwitchProxy = 306, not used
+	TemporaryRedirect = 307,
+
+	BadRequest = 400,
+	NotAuthorized = 401,
+	PaymentRequired = 402,
+	Forbidden = 403,
+	NotFound = 404,
+	MethodNotAllowed = 405,
+	NotAcceptable = 406,
+	ProxyAuthRequired = 407,
+	RequestTimeout = 408,
+	Conflict = 409,
+	Gone = 410,
+	LengthRequired = 411,
+	PreconditionFailed = 412,
+	EntityTooLarge = 413,
+	UriTooLong = 414,
+	UnsupportedMediaType = 415,
+	RangeNotSatisfiable = 416,
+	ExpectationFailed = 417,
+	ImATeapot = 418,
+
+	InternalServerError = 500,
+	NotImplemented = 501,
+	BadGateway = 502,
+	Unavailable = 503,
+	GatewayTimeout          = 504,
+	VersionNotSupported = 505
+};
+
+
+class Response: public http::Message
+	/// This class encapsulates an HTTP response message.
+{
+public:
+	Response();
+		// Creates the Response with OK status.
+		
+	Response(StatusCode status, const std::string& reason);
+		// Creates the Response with the given status  and reason phrase.
+
+	Response(const std::string& version, StatusCode status, const std::string& reason);
+		// Creates the Response with the given version, status and reason phrase.
+		
+	Response(StatusCode status);
+		// Creates the Response with the given status
+		// an an appropriate reason phrase.
+
+	Response(const std::string& version, StatusCode status);
+		// Creates the Response with the given version, status
+		// an an appropriate reason phrase.
+
+	virtual ~Response();
+		// Destroys the Response.
+
+	void setStatus(StatusCode status);
+		// Sets the HTTP status code.
+		//
+		// Does not change the reason phrase.
+		
+	StatusCode getStatus() const;
+		// Returns the HTTP status code.
+		
+	void setReason(const std::string& reason);
+		// Sets the HTTP reason phrase.
+		
+	const std::string& getReason() const;
+		// Returns the HTTP reason phrase.
+
+	void setStatusAndReason(StatusCode status, const std::string& reason);
+		// Sets the HTTP status code and reason phrase.
+		
+	void setStatusAndReason(StatusCode status);
+		// Sets the HTTP status code and reason phrase.
+		//
+		// The reason phrase is set according to the status code.
+
+	void setDate(const Timestamp& dateTime);
+		// Sets the Date header to the given date/time value.
+		
+	Timestamp getDate() const;
+		// Returns the value of the Date header.
+
+	void addCookie(const Cookie& cookie);
+		// Adds the cookie to the response by
+		// adding a Set-Cookie header.
+
+	void getCookies(std::vector<Cookie>& cookies) const;
+		// Returns a vector with all the cookies set in the response header.
+		//
+		// May throw an exception in case of a malformed Set-Cookie header.
+
+	void write(std::ostream& ostr) const;
+		/// Writes the HTTP response headers to the given output stream.
+
+	virtual bool success() const;
+		/// Returns true if the HTTP response code was successful (>= 400).
+	
+    friend std::ostream& operator << (std::ostream& stream, const Response& res) 
+	{
+		res.write(stream);
+		return stream;
+    }
+
+private:	
+	Response(const Response&);
+	Response& operator = (const Response&);
+
+	StatusCode  _status;
+	std::string _reason;
+};
+
+
+const char* getStatusCodeReason(StatusCode status);
+
+
+} } // namespace scy::http
+
+
+#endif
+
+
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
@@ -43,32 +201,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-#ifndef SOURCEY_HTTP_Response_H
-#define SOURCEY_HTTP_Response_H
 
-
-#include "Sourcey/HTTP/Message.h"
-#include "Sourcey/DateTime.h"
-
-#include <sstream>
 
 	
-namespace scy { 
-namespace http {
-
-
-class Cookie;
-
-
-class Response: public http::Message
-	/// This class encapsulates an HTTP response
-	/// message.
-	///
-	/// In addition to the properties common to
-	/// all HTTP messages, a HTTP response has
-	/// status code and a reason phrase.
-{
-public:
+	/*
 	enum StatusCode
 	{
 		HTTP_CONTINUE                        = 100,
@@ -114,89 +250,6 @@ public:
 		HTTP_VERSION_NOT_SUPPORTED           = 505
 	};
 
-	Response();
-		/// Creates the Response with OK status.
-		
-	Response(StatusCode status, const std::string& reason);
-		/// Creates the Response with the given status
-		/// and reason phrase.
-
-	Response(const std::string& version, StatusCode status, const std::string& reason);
-		/// Creates the Response with the given version, status
-		/// and reason phrase.
-		
-	Response(StatusCode status);
-		/// Creates the Response with the given status
-		/// an an appropriate reason phrase.
-
-	Response(const std::string& version, StatusCode status);
-		/// Creates the Response with the given version, status
-		/// an an appropriate reason phrase.
-
-	virtual ~Response();
-		/// Destroys the Response.
-
-	void setStatus(StatusCode status);
-		/// Sets the HTTP status code.
-		//
-		/// Does not change the reason phrase.
-		
-	StatusCode getStatus() const;
-		/// Returns the HTTP status code.
-		
-	void setStatus(const std::string& status);
-		/// Sets the HTTP status code.
-		//
-		/// The string must contain a valid
-		/// HTTP numerical status code.
-		
-	void setReason(const std::string& reason);
-		/// Sets the HTTP reason phrase.
-		
-	const std::string& getReason() const;
-		/// Returns the HTTP reason phrase.
-
-	void setStatusAndReason(StatusCode status, const std::string& reason);
-		/// Sets the HTTP status code and reason phrase.
-		
-	void setStatusAndReason(StatusCode status);
-		/// Sets the HTTP status code and reason phrase.
-		//
-		/// The reason phrase is set according to the status code.
-
-	void setDate(const Timestamp& dateTime);
-		/// Sets the Date header to the given date/time value.
-		
-	Timestamp getDate() const;
-		/// Returns the value of the Date header.
-
-	void addCookie(const Cookie& cookie);
-		/// Adds the cookie to the response by
-		/// adding a Set-Cookie header.
-
-	void getCookies(std::vector<Cookie>& cookies) const;
-		/// Returns a vector with all the cookies
-		/// set in the response header.
-		//
-		/// May throw an exception in case of a malformed
-		/// Set-Cookie header.
-
-	void write(std::ostream& ostr) const;
-		/// Writes the HTTP response to the given
-		/// output stream.
-
-	virtual bool success() const;
-		/// Returns true if the HTTP response code was successful.
-	
-	static const std::string& getReasonForStatus(StatusCode status);
-		/// Returns an appropriate reason phrase
-		/// for the given status code.
-	
-    friend std::ostream& operator << (std::ostream& stream, const Response& res) 
-	{
-		res.write(stream);
-		return stream;
-    }
 
 	static const std::string HTTP_REASON_CONTINUE;
 	static const std::string HTTP_REASON_SWITCHING_PROTOCOLS;
@@ -240,19 +293,6 @@ public:
 	static const std::string HTTP_REASON_VERSION_NOT_SUPPORTED;
 	static const std::string HTTP_REASON_UNKNOWN;
 	
-	static const std::string DATE;
-	static const std::string SET_COOKIE;
-
-private:
-	StatusCode  _status;
-	std::string _reason;
-	
-	Response(const Response&);
-	Response& operator = (const Response&);
-};
-
-
-} } // namespace scy::http
-
-
-#endif
+	static const std::string "Date";
+	static const std::string "Set-Cookie";
+	*/

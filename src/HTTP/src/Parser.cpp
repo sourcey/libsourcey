@@ -32,30 +32,30 @@ namespace http {
 
 
 Parser::Parser(http::Response* response) : 
-	_observer(nil),
-	_request(nil),
+	_observer(nullptr),
+	_request(nullptr),
 	_response(response),
-	_error(nil)
+	_error(nullptr)
 {
 	init(HTTP_RESPONSE);
 }
 
 
 Parser::Parser(http::Request* request) : 
-	_observer(nil),
+	_observer(nullptr),
 	_request(request),
-	_response(nil),
-	_error(nil)
+	_response(nullptr),
+	_error(nullptr)
 {
 	init(HTTP_REQUEST);
 }
 
 
 Parser::Parser(http_parser_type type) : 
-	_observer(nil),
-	_request(nil),
-	_response(nil),
-	_error(nil)
+	_observer(nullptr),
+	_request(nullptr),
+	_response(nullptr),
+	_error(nullptr)
 {
 	init(type);
 }
@@ -63,7 +63,7 @@ Parser::Parser(http_parser_type type) :
 
 Parser::~Parser() 
 {
-	traceL("HTTPParser", this) << "Destroy" << endl;	
+	traceL("HTTPParser", this) << "destroy" << endl;	
 	reset();
 }
 
@@ -107,7 +107,7 @@ bool Parser::parse(const char* data, size_t len, bool expectComplete) // size_t 
 		//enum http_errno err = HTTP_PARSER_ERRNO(&_parser);		
 		//traceL("HTTPParser", this) << "Parse Errno: " << http_errno_name(err) << endl;	
 		warnL("HTTPParser", this) << "########## Parser Error" << endl;	
-		traceL("HTTPParser", this) << "Data: " << string(data, len) << endl;	
+		traceL("HTTPParser", this) << "Data: " << std::string(data, len) << endl;	
 		//traceL("HTTPParser", this) << "Binary: " << util::dumpbin(data, len) << endl;	
 		traceL("HTTPParser", this) << "Is OK: " << (_parser.http_errno == HPE_OK) << endl;	
 		traceL("HTTPParser", this) << "Do Upgrade: " << upgrade() << endl;	
@@ -134,14 +134,14 @@ void Parser::reset()
 	_complete = false;
 	if (_error) {
 		delete _error;
-		_error = nil;
+		_error = nullptr;
 	}
 
 	/// TODO: Reset parser internal state?
 }
 
 
-void Parser::setParserError(bool throwException, const string& message)
+void Parser::setParserError(bool throwException, const std::string& message)
 {
 	assert(_parser.http_errno != HPE_OK);	
 	ParserError err;
@@ -150,7 +150,7 @@ void Parser::setParserError(bool throwException, const string& message)
 	onError(err);
 
 	if (throwException)
-		throw Exception(err.message);
+		throw std::runtime_error(err.message);
 }
 
 
@@ -181,7 +181,7 @@ void Parser::setObserver(ParserObserver* observer)
 http::Message* Parser::message()
 {
 	return _request ? static_cast<http::Message*>(_request) : 
-		_response ? static_cast<http::Message*>(_response) : nil;
+		_response ? static_cast<http::Message*>(_response) : nullptr;
 }
 
 
@@ -213,14 +213,14 @@ bool Parser::shouldKeepAlive() const
 // Events
 //
 
-void Parser::onURL(const string& value)
+void Parser::onURL(const std::string& value)
 {
 	if (_request)
 		_request->setURI(value);
 }
 
 
-void Parser::onHeader(const string& name, const string& value)
+void Parser::onHeader(const std::string& name, const std::string& value)
 {
 	if (message())
 		message()->add(name, value);
@@ -266,7 +266,7 @@ void Parser::onMessageEnd()
 
 void Parser::onError(const ParserError& err)
 {
-	traceL("HTTPParser", this) << "On error: " << err.code << ": " << err.message << endl;	
+	traceL("HTTPParser", this) << "on error: " << err.code << ": " << err.message << endl;	
 	_complete = true;
 	_error = new ParserError;
 	_error->code = err.code;
@@ -309,7 +309,7 @@ int Parser::on_status_complete(http_parser* parser)
 
 	/// Handle response status line
 	if (self->_response)
-		self->_response->setStatus((http::Response::StatusCode)parser->status_code);
+		self->_response->setStatus((http::StatusCode)parser->status_code);
 
 	return 0;
 }
@@ -325,11 +325,11 @@ int Parser::on_header_field(http_parser* parser, const char* at, size_t len)
 			self->onHeader(self->_lastHeaderField, self->_lastHeaderValue);
 			self->_lastHeaderValue.clear();
 		}
-		self->_lastHeaderField = string(at, len);
+		self->_lastHeaderField = std::string(at, len);
 		self->_wasHeaderValue = false;
 	} 
 	else {
-		self->_lastHeaderField += string(at, len);
+		self->_lastHeaderField += std::string(at, len);
 	}
 
 	return 0;
@@ -342,11 +342,11 @@ int Parser::on_header_value(http_parser* parser, const char* at, size_t len)
 	assert(self);
 
 	if (!self->_wasHeaderValue) {
-		self->_lastHeaderValue = string(at, len);
+		self->_lastHeaderValue = std::string(at, len);
 		self->_wasHeaderValue = true;
 	} 
 	else {
-		self->_lastHeaderValue += string(at, len);
+		self->_lastHeaderValue += std::string(at, len);
 	}
 
 	return 0;
@@ -397,16 +397,16 @@ int Parser::on_message_complete(http_parser* parser)
 
 
 /*
-	_observer = nil;
+	_observer = nullptr;
 Parser::Parser(http_parser_type type) : ///, http::Message* headers // ParserObserver& observer, 
-	_observer(nil), 
+	_observer(nullptr), 
 	//_headers(headers), 
-	_error(nil),
+	_error(nullptr),
 	_complete(false)//, 
 	//_upgrade(true), 
 	//_wasHeaderValue(true)
 {	
-	traceL("HTTPParser", this) << "Creating" << endl;
+	traceL("HTTPParser", this) << "create" << endl;
 }
 */
 	/*
@@ -455,7 +455,7 @@ Parser::Parser(http_parser_type type) : ///, http::Message* headers // ParserObs
 
 
 /*
-void Parser::setError(UInt32 code, const string& message)
+void Parser::setError(UInt32 code, const std::string& message)
 {
 	Error err;
 	err.code = code;
@@ -627,7 +627,7 @@ void Parser::prepare_incoming() {
   // Request
 
   // TODO: validate host header for incoming HTTP 1.1 requests
-  //  string host("");
+  //  std::string host("");
   //  int port = 80; // default port
   //  // HTTP 1.1 requires "Host" header
   //  if (start_line_.version() == detail::HTTP_1_1) {
@@ -705,7 +705,7 @@ namespace http {
 //	Server requires authentication:
 //	-------------------------------------
 //
-//	HTTP/1.1 401 Unauthorized
+//	HTTP/1.1 401 NotAuthorized
 //	WWW-Authenticate: Digest realm = "The batcave",
 //		qop = "auth",
 //		nonce = "4993927ba6279",
@@ -725,7 +725,7 @@ namespace http {
 //		qop=auth, nc=00000001, 
 //		cnonce = "8d1b34edb475994b" 
 //
-DigestAuthenticator::DigestAuthenticator(const string& realm, const string& version, bool usingRFC2617) : 
+DigestAuthenticator::DigestAuthenticator(const std::string& realm, const std::string& version, bool usingRFC2617) : 
 	Authenticator(),
 	_realm(realm),
 	_version(version),
@@ -742,17 +742,17 @@ DigestAuthenticator::~DigestAuthenticator()
 }
 
 
-string DigestAuthenticator::parseHeaderSegment(const string& key) 
+string DigestAuthenticator::parseHeaderSegment(const std::string& key) 
 {
-	string value = "";
+	std::string value = "";
 	string::size_type start, end = 0;
 	start = _lastRequest.find(" "+key+" = ",0);
-	if (start != string::npos) {
+	if (start != std::string::npos) {
 		start += key.length()+2;
 		end = _lastRequest.find(",", start);
-		if (end == string::npos) end = _lastRequest.find("\r", start);
-		if (end == string::npos) end = _lastRequest.find("\n", start);
-		if (end == string::npos) 
+		if (end == std::string::npos) end = _lastRequest.find("\r", start);
+		if (end == std::string::npos) end = _lastRequest.find("\n", start);
+		if (end == std::string::npos) 
 			return "";
 		value = _lastRequest.substr(start, end-start);
 		replaceInPlace(value,"\"", "");
@@ -762,20 +762,20 @@ string DigestAuthenticator::parseHeaderSegment(const string& key)
 }
 
 
-bool DigestAuthenticator::validateRequest(UserManager* authenticator, const string& request) 
+bool DigestAuthenticator::validateRequest(UserManager* authenticator, const std::string& request) 
 {
 	traceL() << "[DigestAuthenticator] Validating Request: " + request << endl;
 
 	_lastRequest = request;
-	string hash;
-	string httpMethod = request.substr(0, request.find_first_of(' '));
-	string username = parseHeaderSegment("username");
-	string uri = parseHeaderSegment("uri");
-	string nonce = parseHeaderSegment("nonce");
-	string nc = parseHeaderSegment("nc");
-	string cnonce = parseHeaderSegment("cnonce");
-	string qop = parseHeaderSegment("qop");
-	string response = parseHeaderSegment("response");
+	std::string hash;
+	std::string httpMethod = request.substr(0, request.find_first_of(' '));
+	std::string username = parseHeaderSegment("username");
+	std::string uri = parseHeaderSegment("uri");
+	std::string nonce = parseHeaderSegment("nonce");
+	std::string nc = parseHeaderSegment("nc");
+	std::string cnonce = parseHeaderSegment("cnonce");
+	std::string qop = parseHeaderSegment("qop");
+	std::string response = parseHeaderSegment("response");
 
 	if (!httpMethod.size() || !username.size() || !uri.size() || !response.size())
 		return false;
@@ -785,8 +785,8 @@ bool DigestAuthenticator::validateRequest(UserManager* authenticator, const stri
 	if (!user) 
 		return false;
 
-	string ha1 = crypto::hash("md5", format("%s:%s:%s", username, _realm, user->password()));
-	string ha2 = crypto::hash("md5", format("%s:%s", httpMethod, uri));
+	std::string ha1 = crypto::hash("md5", format("%s:%s:%s", username, _realm, user->password()));
+	std::string ha2 = crypto::hash("md5", format("%s:%s", httpMethod, uri));
 
 	if (_usingRFC2617 && qop.size()) {
 		/// Using advanced digest authentication
@@ -802,19 +802,19 @@ bool DigestAuthenticator::validateRequest(UserManager* authenticator, const stri
 }
 
 
-string DigestAuthenticator::prepare401Header(const string& extra) 
+string DigestAuthenticator::prepare401Header(const std::string& extra) 
 {
 	_noonce = util::randomString(32);
 	if (_usingRFC2617) {
 		return format(
-			"%s 401 Unauthorized\r\n"
+			"%s 401 NotAuthorized\r\n"
 			"%s"
 			"WWW-Authenticate: Digest realm=\"%s\", qop=\"auth\", nonce=\"%s\", opaque=\"%s\"\r\n\r\n",
 			_version, extra, _realm, _noonce, _opaque
 		);
 	} else {
 		return format(
-			"%s 401 Unauthorized\r\n"
+			"%s 401 NotAuthorized\r\n"
 			"%s"
 			"WWW-Authenticate: Digest realm=\"%s\", nonce=\"%s\"\r\n\r\n",
 			_version, extra, _realm, _noonce

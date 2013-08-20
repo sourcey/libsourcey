@@ -23,16 +23,13 @@
 
 #include "Sourcey/Crypto/Crypto.h"
 #include "Sourcey/Types.h"
+#include "Sourcey/Hex.h"
 
 #include <openssl/evp.h>
 
 
 namespace scy {
 namespace crypto {
-	
-
-//typedef std::vector<unsigned char> Digest;
-	/// The storage container for reading the digest result.
 
 
 class Hash
@@ -72,7 +69,7 @@ inline std::string computeHash(const std::string& algorithm, const std::string& 
 {
 	Hash engine(algorithm);
 	engine.update(data);
-	return toHex(engine.digest());
+	return hex::encode(engine.digest());
 }
 	
 
@@ -82,6 +79,10 @@ inline std::string computeHash(const std::string& algorithm, const std::string& 
 #endif // SOURCEY_Crypto_Hash_H
 
 
+	
+
+//typedef std::vector<unsigned char> Digest;
+	/// The storage container for reading the digest result.
 	//void finalize();
 		 // Finish up the Digest operation.
 	

@@ -39,8 +39,8 @@ MediaStream* MediaStream::createFromSDP(Agent& agent, const SDP::Message& sdp, c
 	size_t nComponents = m.numComponents();
 	bool hasCodecs = !m.getAttribute("rtpmap").empty();
 	bool hasCandidates = !m.getAttribute("candidate").empty();
-	string mediaType = m.mediaType();
-	string mediaProfile = m.transport();
+	std::string mediaType = m.mediaType();
+	std::string mediaProfile = m.transport();
 	//string ufrag = sdp.getMediaOrSessionLevelAttribute(m, "ice-ufrag");
 	//string password = sdp.getMediaOrSessionLevelAttribute(m, "ice-pwd");
 	//SDP::C* connection = sdp.getMediaOrSessionLevelLine<SDP::C>(m, "c=");
@@ -51,7 +51,7 @@ MediaStream* MediaStream::createFromSDP(Agent& agent, const SDP::Message& sdp, c
 	// A media session name will be set from the i= line of the media
 	// stream. In canses where this in unavailable it will be set from
 	// the session-level i= attribute.
-	string name;
+	std::string name;
 	SDP::I* information = sdp.getMediaOrSessionLevelLine<SDP::I>(m, "i=");
 	if (information)
 		name = information->sessionInformation();
@@ -83,8 +83,8 @@ MediaStream* MediaStream::createFromSDP(Agent& agent, const SDP::Message& sdp, c
 }
 
 
-MediaStream::MediaStream(Agent& agent, int index, const string& name, int nComponents, 
-						 const string& mediaType, const string& mediaProfile) : 
+MediaStream::MediaStream(Agent& agent, int index, const std::string& name, int nComponents, 
+						 const std::string& mediaType, const std::string& mediaProfile) : 
 	_agent(agent), 
 	_queue(*this), 
 	_index(index), 
@@ -314,10 +314,10 @@ bool MediaStream::processOfferSDP(const SDP::Message& sdp, const SDP::M& m)
 
 	bool hasCodecs = !m.getAttribute("rtpmap").empty();
 	bool hasCandidates = !m.getAttribute("candidate").empty();
-	string ufrag = m.getAttribute("ice-ufrag");
+	std::string ufrag = m.getAttribute("ice-ufrag");
 	if (ufrag.empty())
 		ufrag = sdp.getSessionLevelAttribute("ice-ufrag");
-	string password = m.getAttribute("ice-pwd");
+	std::string password = m.getAttribute("ice-pwd");
 	if (password.empty())
 		password = sdp.getSessionLevelAttribute("ice-pwd");		
 	SDP::C* connection = sdp.getMediaOrSessionLevelLine<SDP::C>(m, "c=");
@@ -377,10 +377,10 @@ bool MediaStream::processAnswerSDP(const SDP::Message& sdp, const SDP::M& m)
 
 	bool hasCodecs = !m.getAttribute("rtpmap").empty();
 	bool hasCandidates = !m.getAttribute("candidate").empty();
-	string ufrag = m.getAttribute("ice-ufrag");
+	std::string ufrag = m.getAttribute("ice-ufrag");
 	if (ufrag.empty())
 		ufrag = sdp.getSessionLevelAttribute("ice-ufrag");
-	string password = m.getAttribute("ice-pwd");
+	std::string password = m.getAttribute("ice-pwd");
 	if (password.empty())
 		password = sdp.getSessionLevelAttribute("ice-pwd");		
 	SDP::C* connection = sdp.getMediaOrSessionLevelLine<SDP::C>(m, "c=");
@@ -956,7 +956,7 @@ void MediaStream::processLocalCandidates() {
 
 
 	// Loop through each local candidate
-	string foundation = CryptoProvider::generateRandomKey(9);
+	std::string foundation = CryptoProvider::generateRandomKey(9);
 	Candidate* currCandidate;
 	Candidate* compCandidate;
 	for (int idx = 0; idx < _localCandidates.size(); idx++) {

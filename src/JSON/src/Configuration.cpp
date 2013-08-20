@@ -19,8 +19,8 @@
 
 #include "Sourcey/JSON/Configuration.h"
 #include "Sourcey/Logger.h"
-#include "Poco/String.h"
-#include "Poco/File.h"
+//#include "Poco/String.h"
+//#include "Poco/File.h"
 
 
 using namespace std;
@@ -49,18 +49,18 @@ void Configuration::load(const std::string& path, bool create)
 }
 
 
-void Configuration::load(bool create)
+void Configuration::load(bool /* create */)
 {
 	Mutex::ScopedLock lock(_mutex); 
 
 	if (_path.empty())
-		throw Exception("Cannot load configuration: File path not set.");
+		throw std::runtime_error("Cannot load configuration: File path not set.");
 
 	debugL("JSONConfiguration") << " Loading: " << _path << endl;
 	
 	try {	
-		if (create && !Poco::File(_path).exists())
-			Poco::File(_path).createFile();
+		//if (create && !fs::exists(_path))
+		//	fs::createFile(_path);
 
 		json::loadFile(*this, _path);
 	}
@@ -78,7 +78,7 @@ void Configuration::save()
 	Mutex::ScopedLock lock(_mutex); 
 	
 	if (_path.empty())
-		throw Exception("Cannot save: Configuration file path must be set.");
+		throw std::runtime_error("Cannot save: Configuration file path must be set.");
 
 	debugL("JSONConfiguration") << " Saving: " << _path << endl;
 	
@@ -166,7 +166,7 @@ void Configuration::setRaw(const std::string& key, const std::string& value)
 }
 
 
-void Configuration::keys(StringVec& keys, const std::string& baseKey)
+void Configuration::keys(std::vector<std::string>& keys, const std::string& baseKey)
 {
 	Mutex::ScopedLock lock(_mutex); 
 		

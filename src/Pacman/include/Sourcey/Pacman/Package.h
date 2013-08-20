@@ -17,12 +17,11 @@
 //
 
 
-#ifndef SOURCEY_Pacman_Package_JSON_H
-#define SOURCEY_Pacman_Package_JSON_H
+#ifndef SOURCEY_Pacman_Package_H
+#define SOURCEY_Pacman_Package_H
 
 
 #include "Sourcey/JSON/JSON.h"
-#include "Poco/Path.h"
 
 
 namespace scy { 
@@ -149,7 +148,7 @@ struct LocalPackage: public Package
 
 	virtual void setInstallState(const std::string& state);
 		// Set's the package installation state.
-		// See PackageInstallState for possible values.
+		// See InstallationState for possible values.
 
 	virtual void setInstallDir(const std::string& dir);
 		// Set's the installation directory for this package.
@@ -224,7 +223,7 @@ struct PackagePair
 	/// This class provides pairing of a local and a
 	/// remote package.
 {
-	PackagePair(LocalPackage* local = NULL, RemotePackage* remote = NULL);
+	PackagePair(LocalPackage* local = nullptr, RemotePackage* remote = nullptr);
 	
 	virtual bool valid() const;
 
@@ -248,7 +247,7 @@ typedef std::vector<PackagePair> PackagePairList;
 } } // namespace scy::pman
 
 
-#endif // SOURCEY_Pacman_Package_JSON_H
+#endif // SOURCEY_Pacman_Package_H
 
 
 	

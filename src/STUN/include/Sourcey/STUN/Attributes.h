@@ -93,12 +93,12 @@ public:
 	virtual ~Attribute() {}
 	virtual Attribute* clone() = 0;
 
-	virtual bool read(Buffer& buf) = 0;
+	virtual void read(BitReader& reader) = 0;
 		/// Reads the body (not the type or size) for this
-		/// type  of attribute from  the given buffer. Return
+		/// type of attribute from  the given buffer. Return
 		/// value is true if successful.
 
-	virtual void write(Buffer& buf) const = 0;
+	virtual void write(BitWriter& writer) const = 0;
 		/// Writes the body (not the type or size) to the
 		/// given buffer. Return value is true if successful.
 
@@ -148,8 +148,8 @@ public:
 	virtual void setIP(const std::string& ip);
 	virtual void setPort(UInt16 port) { _port = port; }
 
-	virtual bool read(Buffer& buf);
-	virtual void write(Buffer& buf) const;
+	virtual void read(BitReader& reader);
+	virtual void write(BitWriter& writer) const;
 
 private:
 	UInt8 _family;
@@ -177,8 +177,8 @@ public:
 	bool getBit(int index) const;
 	void setBit(int index, bool value);
 
-	bool read(Buffer& buf);
-	void write(Buffer& buf) const;
+	void read(BitReader& reader);
+	void write(BitWriter& writer) const;
 
 private:
 	UInt8 _bits;
@@ -204,8 +204,8 @@ public:
 	bool getBit(int index) const;
 	void setBit(int index, bool value);
 
-	bool read(Buffer& buf);
-	void write(Buffer& buf) const;
+	void read(BitReader& reader);
+	void write(BitWriter& writer) const;
 
 private:
 	UInt32 _bits;
@@ -231,8 +231,8 @@ public:
 	bool getBit(int index) const;
 	void setBit(int index, bool value);
 
-	bool read(Buffer& buf);
-	void write(Buffer& buf) const;
+	void read(BitReader& reader);
+	void write(BitWriter& writer) const;
 
 private:
 	UInt64 _bits;
@@ -249,8 +249,8 @@ public:
 
 	static const UInt16 Size = 0;
 
-	bool read(Buffer&) { return true; }
-	void write(Buffer&) const { }
+	void read(BitReader&) { assert(0 && "not implemented"); }
+	void write(BitWriter&) const { assert(0 && "not implemented"); }
 };
 
 
@@ -267,17 +267,17 @@ public:
 	virtual Attribute* clone();
 
 	const char* bytes() const { return _bytes; }
-	void setBytes(char* bytes, UInt16 size);
+	void setBytes(char* bytes, unsigned size);
 
 	std::string asString() const;
 	void copyBytes(const char* bytes); //  uses strlen
-	void copyBytes(const void* bytes, UInt16 size);
+	void copyBytes(const void* bytes, unsigned size);
 
 	UInt8 getByte(int index) const;
 	void setByte(int index, UInt8 value);
 
-	bool read(Buffer& buf);
-	void write(Buffer& buf) const;
+	void read(BitReader& reader);
+	void write(BitWriter& writer) const;
 
 private:
 	char* _bytes;
@@ -301,8 +301,8 @@ public:
 	void setType(int index, UInt16 value);
 	void addType(UInt16 value);
 
-	bool read(Buffer& buf);
-	void write(Buffer& buf) const;
+	void read(BitReader& reader);
+	void write(BitWriter& writer) const;
 
 private:
 	std::vector<UInt16> _attrTypes;
@@ -333,8 +333,8 @@ public:
 	void setHmac(const std::string& hmac) { _hmac = hmac; }
 	void setKey(const std::string& key) { _key = key; }
 
-	bool read(Buffer& buf);
-	void write(Buffer& buf) const;
+	void read(BitReader& reader);
+	void write(BitWriter& writer) const;
 
 private:
 	std::string _input;
@@ -368,8 +368,8 @@ public:
 	void setErrorNumber(UInt8 eNumber) { _number = eNumber; }
 	void setReason(const std::string& reason);
 
-	bool read(Buffer& buf);
-	void write(Buffer& buf) const;
+	void read(BitReader& reader);
+	void write(BitWriter& writer) const;
 
 private:
 	UInt8 _class;

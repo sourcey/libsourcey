@@ -38,26 +38,28 @@ namespace net {
  
 class SSLBase;
 class SSLAdapter 
+	/// A wrapper for the OpenSSL SSL connection context
+	/// TODO: Decouple from SSLBase implementation
 {
 public:
 	SSLAdapter(net::SSLBase* socket);
 	~SSLAdapter();
 
 	void init(SSL* ssl = NULL);
-		/// Initializes the BIO buffers from the given SSL pointer.
+		// Initializes the BIO buffers from the given SSL pointer.
 
 	bool initialized() const;
-		/// Returns true when the handshake is complete.
+		// Returns true when the handshake is complete.
 		
 	int available() const;
-		/// Returns the number of bytes available in 
-		/// the SSL buffer for immediate reading.
+		// Returns the number of bytes available in 
+		// the SSL buffer for immediate reading.
 	
 	void shutdown();
-		/// Issues an orderly SSL shutdown.
+		// Issues an orderly SSL shutdown.
 
 	void flush();
-		/// Flushes the SSL read/write buffers.
+		// Flushes the SSL read/write buffers.
 
 	void addIncomingData(const char* data, size_t len);
 	void addOutgoingData(const std::string& data);
@@ -69,13 +71,13 @@ protected:
 	void flushWriteBIO();
 
 protected:
+	friend class net::SSLBase;
+
 	SSL* _ssl; // OpenSSL SSL connection context
 	BIO* _readBIO; // The incoming buffer we write encrypted SSL data into
 	BIO* _writeBIO; // The outgoing buffer we write to the socket
 	std::vector<char> _bufferOut; // The outgoing payload to be encrypted and sent
 	net::SSLBase* _socket;
-
-	friend class net::SSLBase;
 };
 
 

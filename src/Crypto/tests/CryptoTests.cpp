@@ -7,7 +7,6 @@
 #include "Sourcey/Crypto/Hash.h"
 #include "Sourcey/Crypto/Cipher.h"
 #include "Sourcey/Crypto/RSA.h"
-#include "Sourcey/Atomic.h"
 #include "Sourcey/Memory.h"
 
 

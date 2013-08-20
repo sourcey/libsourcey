@@ -21,7 +21,7 @@
 #define SOURCEY_Symple_Client_H
 
 
-#include "Sourcey/Flaggable.h"
+#include "Sourcey/Bitwise.h"
 #include "Sourcey/SocketIO/Client.h"
 #include "Sourcey/Net/Socket.h"
 #include "Sourcey/HTTP/WebSocket.h"
@@ -82,7 +82,7 @@ public:
 	void connect();
 	void close();
 
-	virtual int send(const std::string data, bool ack = false);
+	virtual int send(const std::string& data, bool ack = false);
 	virtual int send(Message& message, bool ack = false);
 		// Sends a message.
 
@@ -201,14 +201,15 @@ enum FilterFlags
 };
 
 
-struct Filter: public Flaggable
+struct Filter//: public Flaggable
 {	
 	Filter(const std::string& path, unsigned flags = 0) : 
-		Flaggable(flags), path(path) {}
+		flags(flags), path(path) {}
 	
 	Filter(unsigned flags = 0) : 
-		Flaggable(flags), path("*") {}
+		flags(flags), path("*") {}
 
+	Bitwise flags;
 	std::string path;
 };
 
@@ -223,14 +224,14 @@ struct MessageDelegate: public PacketDelegateBase
 	MessageDelegate(const Filter& filter = Filter()) : filter(filter) {};
 	MessageDelegate(const MessageDelegate& r) : filter(r.filter) {};
 	
-	virtual bool accepts(void* sender, IPacket& data, Void, Void, Void) 
+	virtual bool accepts(void* /* sender */, IPacket& data, void*, void*, void*) 
 	{
 		Message* packet = dynamic_cast<Message*>(&data);
 		if (packet &&
-			(!filter.has(AcceptRequests) || 
-				(filter.has(AcceptRequests) && packet->isRequest())) &&
-			(!filter.has(AcceptResponses) || 
-				(filter.has(AcceptResponses) && !packet->isRequest()))) {
+			(!filter.flags.has(AcceptRequests) || 
+				(filter.flags.has(AcceptRequests) && packet->isRequest())) &&
+			(!filter.flags.has(AcceptResponses) || 
+				(filter.flags.has(AcceptResponses) && !packet->isRequest()))) {
 			return true;
 		}	
 		return false;
@@ -248,7 +249,7 @@ struct CommandDelegate: public MessageDelegate
 	CommandDelegate(const Filter& filter = Filter()) : MessageDelegate(filter) {};
 	CommandDelegate(const CommandDelegate& r) : MessageDelegate(r) {};
 
-	virtual bool accepts(void* sender, IPacket& data, Void empty2, Void empty3, Void empty4) 
+	virtual bool accepts(void* sender, IPacket& data, void* empty2, void* empty3, void* empty4) 
 	{
 		if (MessageDelegate::accepts(sender, data, empty2, empty3, empty4)) {
 			Command* c = dynamic_cast<Command*>(&data);
@@ -269,7 +270,7 @@ struct PresenceDelegate: public MessageDelegate
 	PresenceDelegate() : MessageDelegate(AcceptRequests) {};
 	PresenceDelegate(const PresenceDelegate& r) : MessageDelegate(r) {};
 
-	virtual bool accepts(void* sender, IPacket& data, Void empty2, Void empty3, Void empty4) 
+	virtual bool accepts(void* sender, IPacket& data, void* empty2, void* empty3, void* empty4) 
 	{
 		if (MessageDelegate::accepts(sender, data, empty2, empty3, empty4)) {
 			Presence* p = dynamic_cast<Presence*>(&data);
@@ -290,7 +291,7 @@ struct EventDelegate: public MessageDelegate
 	EventDelegate() : MessageDelegate(AcceptRequests) {};
 	EventDelegate(const EventDelegate& r) : MessageDelegate(r) {};
 
-	virtual bool accepts(void* sender, IPacket& data, Void empty2, Void empty3, Void empty4) 
+	virtual bool accepts(void* sender, IPacket& data, void* empty2, void* empty3, void* empty4) 
 	{
 		if (MessageDelegate::accepts(sender, data, empty2, empty3, empty4)) {
 			Event* e = dynamic_cast<Event*>(&data);
@@ -466,21 +467,21 @@ public:
 		_options(options),
 		_announceStatus(500)
 	{
-		traceL() << "[smpl::Client:" << this << "] Creating" << std::endl;
+		traceL() << "[smpl::Client: " << this << "] Creating" << std::endl;
 	}
 
 
 	virtual ~Client() 
 	{
-		traceL() << "[smpl::Client:" << this << "] Destroying" << std::endl;
+		traceL() << "[smpl::Client: " << this << "] Destroying" << std::endl;
 		close();
-		traceL() << "[smpl::Client:" << this << "] Destroying: OK" << std::endl;
+		traceL() << "[smpl::Client: " << this << "] Destroying: OK" << std::endl;
 	}
 
 
 	void connect()
 	{
-		traceL() << "[smpl::Client:" << this << "] Connecting" << std::endl;
+		traceL() << "[smpl::Client: " << this << "] Connecting" << std::endl;
 		
 		{
 			//ScopedLock lock(_mutex);
@@ -495,7 +496,7 @@ public:
 
 	void close()
 	{
-		traceL() << "[smpl::Client:" << this << "] Closing" << std::endl;
+		traceL() << "[smpl::Client: " << this << "] Closing" << std::endl;
 
 		sockio::Client::close();
 	}
@@ -514,7 +515,7 @@ public:
 		message.setFrom(ourPeer().address());
 		assert(message.valid());
 		assert(message.to().id() != message.from().id());
-		traceL() << "[smpl::Client:" << this << "] Sending Message: " 
+		traceL() << "[smpl::Client: " << this << "] Sending Message: " 
 			<< message.id() << ":\n" 
 			<< json::stringify(message, true) << std::endl;
 		return sockio::Client::send(message, false);
@@ -523,7 +524,7 @@ public:
 
 	virtual void createPresence(Presence& p)
 	{
-		traceL() << "[smpl::Client:" << this << "] Creating Presence" << std::endl;
+		traceL() << "[smpl::Client: " << this << "] Creating Presence" << std::endl;
 
 		Peer& peer = ourPeer();
 		UpdatePresenceData.emit(this, peer);
@@ -533,7 +534,7 @@ public:
 
 	virtual int sendPresence(bool probe = false)
 	{
-		traceL() << "[smpl::Client:" << this << "] Broadcasting Presence" << std::endl;
+		traceL() << "[smpl::Client: " << this << "] Broadcasting Presence" << std::endl;
 
 		Presence p;
 		createPresence(p);
@@ -544,7 +545,7 @@ public:
 
 	virtual int sendPresence(const Address& to, bool probe = false)
 	{
-		traceL() << "[smpl::Client:" << this << "] Sending Presence" << std::endl;
+		traceL() << "[smpl::Client: " << this << "] Sending Presence" << std::endl;
 	
 		Presence p;
 		createPresence(p);
@@ -606,9 +607,9 @@ public:
 	virtual Peer& ourPeer()
 	{	
 		//ScopedLock lock(_mutex);
-		traceL() << "[smpl::Client:" << this << "] Getting Our Peer: " << _ourID << std::endl;
+		traceL() << "[smpl::Client: " << this << "] Getting Our Peer: " << _ourID << std::endl;
 		if (_ourID.empty())
-			throw Exception("No active peer session is available.");
+			throw std::runtime_error("No active peer session is available.");
 		return *_roster.get(_ourID, true);
 	}
 
@@ -636,7 +637,7 @@ protected:
 			data["type"]	= _options.type;
 		}	
 		sockio::Packet p("announce", data, true);
-		sockio::Transaction* txn = new sockio::Transaction(_runner, *this, p, 1, 5000);
+		auto txn = new sockio::Transaction(_runner, *this, p, 1, 5000);
 		txn->StateChange += delegate(this, &Client::onAnnounce);
 		return txn->send();
 	}
@@ -644,9 +645,9 @@ protected:
 
 	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
 	{
-		traceL() << "[smpl::Client:" << this << "] Announce Response: " << state.toString() << std::endl;
+		traceL() << "[smpl::Client: " << this << "] Announce Response: " << state.toString() << std::endl;
 	
-		sockio::Transaction* transaction = reinterpret_cast<sockio::Transaction*>(sender);
+		auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
 		switch (state.id()) {	
 		case TransactionState::Success:
 			try 
@@ -659,11 +660,11 @@ protected:
 				Announce.emit(this, _announceStatus);
 
 				if (_announceStatus != 200)
-					throw Exception(data["message"].asString()); //"Announce Error: " + 
+					throw std::runtime_error(data["message"].asString()); //"Announce Error: " + 
 
 				_ourID = data["data"]["id"].asString(); //Address();
 				if (_ourID.empty())
-					throw Exception("Invalid server response.");
+					throw std::runtime_error("Invalid server response.");
 
 				// Set our local peer data from the response or fail.
 				_roster.update(data["data"], true);
@@ -674,10 +675,10 @@ protected:
 				// Broadcast a presence probe to our network.
 				sendPresence(true);
 			}
-			catch (Exception& exc)
+			catch (std::exception&/Exception&/ exc)
 			{
 				// Set the error message and close the connection.
-				setError(exc.message());
+				setError(exc.what()/message()/);
 			}
 			break;		
 
@@ -691,7 +692,7 @@ protected:
 
 	virtual void onOnline()
 	{
-		traceL() << "[smpl::Client:" << this << "] On Online" << std::endl;
+		traceL() << "[smpl::Client: " << this << "] On Online" << std::endl;
 
 		// Override this method because we are not quite
 		// ready to transition to Online yet - we still
@@ -702,7 +703,7 @@ protected:
 
 	virtual bool onPacketCreated(IPacket* packet) 
 	{
-		traceL() << "[smpl::Client:" << this << "] Packet Created: " << packet->className() << std::endl;
+		traceL() << "[smpl::Client: " << this << "] Packet Created: " << packet->className() << std::endl;
 
 		// Catch incoming messages here so we can parse
 		// messages and handle presence updates.
@@ -714,12 +715,12 @@ protected:
 
 			json::Value data = p->json();
 			if (!data.isObject() || data.isNull()) {
-				Log("warning") << "[smpl::Client:" << this << "] Packet is not a JSON object" << std::endl;
+				Log("warning") << "[smpl::Client: " << this << "] Packet is not a JSON object" << std::endl;
 				return true; // continue propagation
 			}
 		
 			string type(data["type"].asString());
-			traceL() << "[smpl::Client:" << this << "] Packet Created: Symple Type: " << type << std::endl;
+			traceL() << "[smpl::Client: " << this << "] Packet Created: Symple Type: " << type << std::endl;
 			if (type == "message") {
 				Message m(data);
 				emit(this, m);
@@ -746,7 +747,7 @@ protected:
 
 	virtual void onClose()
 	{
-		traceL() << "[[smpl::Client:" << this << "] Closing" << std::endl;
+		traceL() << "[[smpl::Client: " << this << "] Closing" << std::endl;
 		sockio::Client::onClose();
 		reset();
 	}

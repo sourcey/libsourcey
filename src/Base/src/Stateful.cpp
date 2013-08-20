@@ -50,7 +50,7 @@ string State::message() const
 }
 
 
-void State::setMessage(const string& message) 
+void State::setMessage(const std::string& message) 
 {
 	_message = message; 
 }

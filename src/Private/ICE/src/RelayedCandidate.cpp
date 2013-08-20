@@ -105,7 +105,7 @@ int RelayedCandidate::send(const char* data, int size, const Net::Address& peerA
 	{
 		_client.sendData(data, size, peerAddress);
 	}
-	catch (Exception& exc)
+	catch (std::exception/*Exception*/& exc)
 	{
 		Log("error", this) << "SEND ERROR: " << exc.displayText() << endl;
 		// Handle?
@@ -156,7 +156,7 @@ void RelayedCandidate::onRelayStateChange(TURN::Client&, TURN::ClientState& stat
 				{
 					_client.sendCreatePermission(peerIPs);
 				}
-				catch (Exception& exc)
+				catch (std::exception/*Exception*/& exc)
 				{
 					Log("error", this) << "Permission Request ERROR: " << exc.displayText() << endl;
 					// Handle?
@@ -255,7 +255,7 @@ void RelayedCandidate::onAllocationCreated(TURN::Client* client, TURN::ClientAll
 			{
 				_client.sendCreatePermission(peerIPs);
 			}
-			catch (Exception& exc)
+			catch (std::exception/*Exception*/& exc)
 			{
 				Log("error", this) << "Permission Request ERROR: " << exc.displayText() << endl;
 				// Handle?
@@ -358,7 +358,7 @@ void RelayedCandidate::onRelayedData(TURN::Client* client, const char* data, int
 				try
 				{
 				}
-				catch (Exception& exc)
+				catch (std::exception/*Exception*/& exc)
 				{
 					Log("error", this) << "Permission Request ERROR: " << exc.displayText() << endl;
 					// Handle?

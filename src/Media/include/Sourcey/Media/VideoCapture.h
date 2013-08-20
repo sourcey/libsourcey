@@ -23,8 +23,8 @@
 
 #include "Sourcey/Types.h"
 #include "Sourcey/Mutex.h"
-#include "Sourcey/Flaggable.h"
-#include "Sourcey/Interfaces.h"
+#include "Sourcey/Bitwise.h"
+#include "Sourcey/Interface.h"
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/Format.h"
 #include "Sourcey/Media/ICapture.h"
@@ -100,7 +100,7 @@ protected:
 //
 
 
-class VideoCaptureBase: public CountedObject, public abstract::Runnable
+class VideoCaptureBase: public SharedObject, public basic::Runnable
 	/// Class for capturing video from cameras and files using OpenCV.
 	/// Do not use this class directly, use VideoCapture instead.
 	///
@@ -159,7 +159,7 @@ protected:
 	
 	friend class VideoCapture;
 	friend class MediaFactory;
-	friend class GCDeleter<VideoCaptureBase>;	
+	friend struct std::default_delete<VideoCaptureBase>;	
 
 private:   
 	mutable Mutex _mutex;
@@ -197,13 +197,13 @@ struct MatrixPacket: public VideoPacket
 		VideoPacket((char*)mat->data, mat->rows*mat->step, mat->cols, mat->rows, time),
 		mat(mat) {}
 
-	MatrixPacket(char* data = nil,
+	MatrixPacket(char* data = nullptr,
 			  int size = 0,
 			  int width = 0,
 			  int height = 0,
 			  double time = scy::getProcessTime()) :
 		VideoPacket(data, size, width, height, time),
-		mat(nil) {};
+		mat(nullptr) {};
 
 	virtual IPacket* clone() const {
 		return new MatrixPacket(*this);
@@ -236,7 +236,7 @@ struct VideoDelegate: public PacketDelegateBase
 		_counter(r._counter), 
 		_fps(r._fps) {};	
 	
-	virtual bool accepts(void*, IPacket&, Void, Void, Void)
+	virtual bool accepts(void*, IPacket&, void*, Void, Void)
 	{
 		// Skip frames if we exceed the maximum FPS
 		if (_fps) {
@@ -259,7 +259,7 @@ DefinePolymorphicDelegateWithArg(videoDelegate, IPacket, VideoDelegate, double, 
 */
 
 
-	/* //, unsigned flags = 0 //, unsigned flags = 0//, public abstract::Runnable 
+	/* //, unsigned flags = 0 //, unsigned flags = 0//, public basic::Runnable 
 	enum Flag 
 		// Settings for different operational modes
 	{

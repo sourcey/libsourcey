@@ -75,7 +75,7 @@ public:
 	void removeData(const std::string& name);
 	bool hasData(const std::string& name);
 	
-	virtual bool read(Buffer& buf);
+	virtual bool read(const ConstBuffer& buf);
 	virtual bool read(const std::string& root);
 	virtual void write(Buffer& buf) const;
 	

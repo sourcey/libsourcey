@@ -22,24 +22,47 @@
 
 
 #include "Sourcey/UV/UVPP.h"
-#include "Sourcey/Interfaces.h"
+#include "Sourcey/Interface.h"
 
+#include <functional>
+//#include <condition_variable>
 
 namespace scy {
 	
 
-class Idler: public uv::Handle, public abstract::Startable
+struct Idler
 {
-public:
-	Idler(uv::Loop& loop = uv::defaultLoop());
-	virtual ~Idler();	
-		
-	virtual void start();	
-	virtual void stop();
+	Idler(uv::Loop& loop = uv::defaultLoop()) :
+		ptr(&loop, new uv_idle_t)
+	{
+		uv_idle_init(&loop, ptr.handle<uv_idle_t>());
+		uv_unref(ptr.handle()); // don't increment main loop
+	}
 
-	virtual void onIdle();
-		// Called by the event loop thread  
-		// to do asynchronous processing.
+	struct CallbackRef
+	{
+		std::function<void()> func;
+		Idler* self;
+	} callback;
+			
+	void start(std::function<void()> target)
+	{		
+		assert(!ptr.active());	
+		callback.func = target;
+		callback.self = this;
+		ptr.handle()->data = &callback;
+		if (uv_idle_start(ptr.handle<uv_idle_t>(), [](uv_idle_t* req, int) {
+			auto callback = reinterpret_cast<CallbackRef*>(req->data);
+			callback->func(); // (callback->self);
+		})) ptr.setAndThrowLastError("Cannot initialize idler");
+	}
+
+	void stop()
+	{
+		uv_idle_stop(ptr.handle<uv_idle_t>());
+	}
+
+	uv::Handle ptr;
 };
 
 
@@ -50,6 +73,13 @@ public:
 
 
 /*
+public:
+	
+	//virtual void start();	
+	//virtual void onIdle();
+		// Called by the event loop thread  
+		// to do asynchronous processing.
+
 struct Idler {
 	uv_idle_t handle;
 	idle_callback cb;

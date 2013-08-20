@@ -1,3 +1,4 @@
+#include "Sourcey/Application.h"
 #include "Sourcey/Pacman/PackageManager.h"
 #include "Sourcey/Util.h"
 
@@ -8,10 +9,8 @@
 
 
 using namespace std;
-using namespace Poco;
-using namespace Sourcey;
-using namespace Sourcey::Util;
-using namespace Sourcey::Pacman;
+using namespace scy;
+using namespace pman;
 
 
 // Detect Memory Leaks
@@ -23,129 +22,125 @@ CMemLeakDetect memLeakDetect;
 */
 
 
-class PackageManagerConsole: public PackageManager
+class PackageManagerApplication: public scy::Application	
 {
 public:
-	PackageManagerConsole(const PackageManager::Options& options) :
-		PackageManager(options)
+	PackageManagerApplication(const pman::PackageManager::Options& options) :
+		manager(options)
 	{
 	}
 
-	~PackageManagerConsole()
+	~PackageManagerApplication()
 	{
 	}
+
+	pman::PackageManager manager;
 };
 
 
 int main(int argc, char** argv)
 {
-	Sourcey::Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
-	
-	PackageManager::Options options;
-	options.httpUsername = Anionu_API_USERNAME;
-	options.httpPassword = Anionu_API_PASSWORD;
-	PackageManagerConsole app(options);	
-	app.initialize();
-	
-	/*	
-	// Initialize the HTTP download transaction.
-	HTTP::Request* request = new HTTP::Request("GET", "http://localhost:3000/assets/122/RecordingModePlugin-1.3.12-Spot-1.0-win32-bin.zip?1320559835");
-	HTTP::Transaction* transaction = new HTTP::Transaction(request);
-	transaction->setOutputPath(app.options().cacheDir + "/RecordingModePlugin-1.3.12-Spot-1.0-win32-bin.zip");
-	//transaction->TransactionComplete += delegate(this, &PackageTask::onTransactionComplete);
-	transaction->start();
+	scy::Logger::instance().add(new ConsoleChannel("debug", LTrace));
 
-	
-	HTTP::TransactionState transfer;
-	transfer.uri = "http://localhost:3000/assets/122/RecordingModePlugin-1.3.12-Spot-1.0-win32-bin.zip?1320559835";
-	string filename = transfer.uri.getPath();
-	size_t start = (filename.find_last_of("/") + 1);
-	filename = filename.substr(start, filename.length() - start);
-	transfer.path = app.options().cacheDir + filename;
+	PackageManager::Options opts;
+	opts.endpoint = "http://127.0.0.1:3000";	
+	opts.indexURI = "/packages.json";
+	opts.httpUsername = Anionu_API_USERNAME;
+	opts.httpPassword = Anionu_API_PASSWORD;
 
-	Anionu::APIDownloadTransaction* transaction = new Anionu::APIDownloadTransaction(transfer);
-	//transaction->UploadProgress += delegate(this, &PackageTask::onUploadProgress);
-	transaction->start();	
-	*/
+	PackageManagerApplication app(opts);	
+	app.manager.initialize();
+	app.manager.queryRemotePackages();
+	app.run(); // run event loop until we have queried server packages
 
-	StringList packages;
-	packages.push_back("SurveillanceMode");
+	Thread console([](void* arg) 
+	{
+		auto app = reinterpret_cast<PackageManagerApplication*>(arg);		
+
+		StringVec packages;
+		packages.push_back("SurveillanceModePlugin");
+		packages.push_back("RecordingModePlugin");
 	
-	char o = 0;
-	while (o != 'Q') 
-	{	
-		cout << 
-			"COMMANDS:\n\n"
-			"  A	Set Active Packages.\n"
-			"  L	List Local Packages.\n"
-			"  K	List Remote Packages.\n"
-			"  J	Display Latest Remote Package Asset.\n"
-			"  R	Reload Package List.\n"
-			"  I	Install Packages.\n"
-			"  U	Uninstall Packages.\n"
-			"  D	Update All Packages.\n"
-			"  Q	Quit.\n\n";
+		char o = 0;
+		while (o != 'Q') 
+		{	
+			cout << 
+				"COMMANDS:\n\n"
+				"  A	Set Active Packages.\n"
+				"  L	List Local Packages.\n"
+				"  K	List Remote Packages.\n"
+				"  J	Display Latest Remote Package Asset.\n"
+				"  R	Reload Package List.\n"
+				"  I	Install Packages.\n"
+				"  U	Uninstall Packages.\n"
+				"  D	Update All Packages.\n"
+				"  Q	Quit.\n\n";
 		
-		o = toupper(getch());
-		
-		// Set Active Packages
-		if (o == 'A') {	
-			cout << "Enter packages names separated by commas: " << endl;
-			string s;
-			getline(cin,s);
-			packages = split(s, ",");
+			o = toupper(getch());		
+
+			// Set Active Packages
+			if (o == 'A') {	
+				cout << "Enter packages names separated by commas: " << endl;
+				string s;
+				getline(cin,s);
+				packages = util::split(s, ",");
+			}
+
+			// List Local Packages
+			else if (o == 'L') {
+				cout << "Listing local packages: " << app->manager.localPackages().size() << endl;
+				auto items = app->manager.localPackages().map();
+				for (auto it = items.begin(); it != items.end(); ++it) {				
+					cout << "Package: " << it->first << endl;
+				}
+			} 
+
+			// List Remote Packages
+			else if (o == 'K') {
+				cout << "Listing remote packages: " << app->manager.remotePackages().size() << endl;
+				auto items = app->manager.remotePackages().map();
+				for (auto it = items.begin(); it != items.end(); ++it) {				
+					cout << "Package: " << it->first << endl;
+				}
+			} 
+
+			// Display Latest Remote Package Asset
+			else if (o == 'J') {
+				auto  items = app->manager.remotePackages().map();
+				for (auto it = items.begin(); it != items.end(); ++it) {			
+					it->second->latestAsset().print(cout);	
+				}
+			} 
+
+			// Reload Package List
+			else if (o == 'R') {
+				app->manager.uninitialize();
+				app->manager.initialize();
+			} 
+
+			// Install Packages
+			else if (o == 'I') {
+				assert(!packages.empty());
+				app->manager.installPackages(packages);
+			} 
+
+			// Uninstall Packages
+			else if (o == 'U') {
+				assert(!packages.empty());
+				app->manager.uninstallPackages(packages);
+			} 
+
+			// Update All Packages
+			else if (o == 'D') {
+				app->manager.updateAllPackages();
+			}
 		}
+	}, &app);
 
-		// List Local Packages
-		else if (o == 'L') {
-			LocalPackageMapT items = app.localPackages().items();
-			for (LocalPackageMapT::const_iterator it = items.begin(); it != items.end(); ++it) {				
-				cout << "Package: " << it->first << endl;
-			}
-		} 
+	app.waitForShutdown([](void* arg) {			
+		reinterpret_cast<PackageManagerApplication*>(arg)->stop();
+	}, &app);
 
-		// List Remote Packages
-		else if (o == 'K') {
-			RemotePackageMapT items = app.remotePackages().items();
-			for (RemotePackageMapT::const_iterator it = items.begin(); it != items.end(); ++it) {				
-				cout << "Package: " << it->first << endl;
-			}
-		} 
-
-		// Display Latest Remote Package Asset
-		else if (o == 'J') {
-			RemotePackageMapT items = app.remotePackages().items();
-			for (RemotePackageMapT::const_iterator it = items.begin(); it != items.end(); ++it) {			
-				it->second->latestAsset().print(cout);	
-			}
-		} 
-
-		// Reload Package List
-		else if (o == 'R') {
-			app.uninitialize();
-			app.initialize();
-		} 
-
-		// Install Packages
-		else if (o == 'I') {
-			assert(!packages.empty());
-			app.installPackages(packages);
-		} 
-
-		// Uninstall Packages
-		else if (o == 'U') {
-			assert(!packages.empty());
-			//assert(false);
-			app.uninstallPackages(packages);
-		} 
-
-		// Update All Packages
-		else if (o == 'D') {
-			app.updateAllPackages();
-		}
-	}
-
-	system("pause");
-
+	scy::pause();
 	return 0;
 }

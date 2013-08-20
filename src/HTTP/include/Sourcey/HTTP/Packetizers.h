@@ -23,8 +23,6 @@
 
 #include "Sourcey/Signal.h"
 #include "Sourcey/HTTP/Connection.h"
-#include "Poco/Base64Encoder.h"
-#include "Poco/Format.h"
 #include <sstream>
 
 
@@ -45,7 +43,7 @@ public:
 	bool initial;
 	bool nocopy;
 
-	ChunkedAdapter(Connection* connection = nil) : 
+	ChunkedAdapter(Connection* connection = nullptr) : 
 		PacketProcessor(Emitter),
 		connection(connection), 
 		contentType(connection->outgoingHeader()->getContentType()),
@@ -55,7 +53,7 @@ public:
 
 	ChunkedAdapter(const std::string& contentType, bool nocopy = true) : 
 		PacketProcessor(Emitter),
-		connection(nil), 
+		connection(nullptr), 
 		contentType(contentType),
 		initial(true),
 		nocopy(nocopy)
@@ -89,7 +87,7 @@ public:
 		else {
 			std::ostringstream hst;
 			hst << "HTTP/1.1 200 OK\r\n"
-				/// NOTE: If Cache-Control: no-store is not used Chrome's (27.0.1453.110) 
+				/// Note: If Cache-Control: no-store is not used Chrome's (27.0.1453.110) 
 				/// memory usage grows exponentially for HTTP streaming:
 				/// https://code.google.com/p/chromium/issues/detail?id=28035
 				<< "Cache-Control: no-store, no-cache, max-age=0, must-revalidate\r\n"
@@ -109,7 +107,7 @@ public:
 	{
 		/// traceL("ChunkedAdapter", this) << "Processing: " << packet.className() << ": " << packet.size() << std::endl;
 		
-		if (!packet.hasArray())
+		if (!packet.hasData())
 			throw ArgumentException("Incompatible packet type");
 		
 		/// Emit HTTP response header		
@@ -126,14 +124,14 @@ public:
 		if (nocopy) {
 			emit(ost.str());
 			emit("\r\n", 2);
-			emit(packet.array(), packet.size());
+			emit(packet.data(), packet.size());
 			emit("\r\n", 2);
 		}
 		
 		/// Concat pieces for non fragmented
 		else {
 			ost << "\r\n";
-			ost.write(packet.array(), packet.size());
+			ost.write(packet.data(), packet.size());
 			ost << "\r\n";
 			emit(ost.str());
 		}
@@ -167,7 +165,7 @@ public:
 
 	MultipartAdapter(const std::string& contentType, bool base64 = false) :	
 		IPacketizer(Emitter),
-		connection(nil),
+		connection(nullptr),
 		contentType(contentType),
 		isBase64(base64),
 		initial(true)

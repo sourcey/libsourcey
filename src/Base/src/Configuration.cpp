@@ -184,7 +184,7 @@ void Configuration::setDouble(const std::string& key, double value)
 {
 	Mutex::ScopedLock lock(_mutex);
 
-	setRaw(key, util::itostr<int>(value));
+	setRaw(key, util::itostr<double>(value));
 }
 
 
@@ -207,7 +207,6 @@ int Configuration::parseInt(const std::string& value)
 
 bool Configuration::parseBool(const std::string& value)
 {
-	int n;
 	if (value == "0")
 		return false;
 	else if (value == "1")
@@ -225,7 +224,7 @@ bool Configuration::parseBool(const std::string& value)
 	else if (util::icompare(value, "off") == 0)
 		return false;
 	else 
-		throw SyntaxException("Cannot convert to boolean", value);
+		throw std::runtime_error("Syntax error: Cannot convert to boolean: " + value);
 }
 
 

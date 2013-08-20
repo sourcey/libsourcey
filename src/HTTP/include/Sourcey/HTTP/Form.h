@@ -29,7 +29,7 @@
 #define SOURCEY_HTTP_Form_H
 
 
-#include "Sourcey/Containers.h"
+#include "Sourcey/Collection.h"
 #include "Sourcey/PacketStream.h"
 #include "Sourcey/Thread.h"
 #include "Sourcey/Net/Types.h"
@@ -49,7 +49,7 @@ class FilePart;
 //
 
 
-class FormWriter: public NVHash, public PacketSource, public abstract::Startable
+class FormWriter: public NVCollection, public PacketSource, public basic::Startable
 	/// FormWriter is a HTTP client connection adapter for writing HTML forms.
 	///
 	/// This class runs in its own thread so as not to block the event loop
@@ -88,7 +88,7 @@ public:
 		/// Prepares the outgoing HTTP request object for submitting the form.
 		//
 		/// If the request method is GET, the encoded form is appended to the
-		/// request URI as query string. Otherwise (the method is
+		/// request URI as query std::string. Otherwise (the method is
 		/// POST), the form's content type is set to the form's encoding.
 		/// The form's parameters must be written to the
 		/// request body separately, with a call to write.
@@ -145,17 +145,17 @@ protected:
 		/// Called asynchronously by the thread to send form data
 		/// over the HTTP client connection.
 		
-	void writePartHeader(const NVHash& header, std::ostream& ostr);
-		/// Writes the message boundary string, followed
+	void writePartHeader(const NVCollection& header, std::ostream& ostr);
+		/// Writes the message boundary std::string, followed
 		/// by the message header to the output stream.
 		
 	void writeEnd(std::ostream& ostr);
-		/// Writes the final boundary string to the output stream.
+		/// Writes the final boundary std::string to the output stream.
 
 	static std::string createBoundary();
-		/// Creates a random boundary string.
+		/// Creates a random boundary std::string.
 		//
-		/// The string always has the form boundary-XXXXXXXXXXXX, 
+		/// The std::string always has the form boundary-XXXXXXXXXXXX, 
 		/// where XXXXXXXXXXXX is a randomly generate number.
 
 	virtual void updateProgress(int nread);
@@ -228,8 +228,8 @@ public:
 	virtual void write(std::ostream& ostr);
 		/// Writes the form data to the given output stream.	
 				
-	NVHash& headers();
-		/// Returns a NVHash containing additional header 
+	NVCollection& headers();
+		/// Returns a NVCollection containing additional header 
 		/// fields for the part.	
 	
 	const std::string& contentType() const;
@@ -246,7 +246,7 @@ protected:
 	std::string _filename;
 	std::ifstream _istr;
 	UInt64 _fileSize;
-	NVHash _headers;	
+	NVCollection _headers;	
 };
 
 

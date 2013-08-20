@@ -49,8 +49,8 @@ public:
 			client.addPermission(peerIP);	
 			client.initiate();
 		} 
-		catch (Exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "Error: " << exc.message() << std::endl;
+		catch (std::exception&/*Exception&*/ exc) {
+			errorL("RelayedStreamingAllocation", this) << "Error: " << exc.what()/*message()*/ << std::endl;
 			assert(0);
 		}	
 	}
@@ -119,8 +119,8 @@ protected:
 
 			this->streams.addStream(stream);
 		} 
-		catch (Exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "Stream error: " << exc.message() << std::endl;
+		catch (std::exception&/*Exception&*/ exc) {
+			errorL("RelayedStreamingAllocation", this) << "Stream error: " << exc.what()/*message()*/ << std::endl;
 			assert(0);
 		}
 	}
@@ -141,8 +141,8 @@ protected:
 				//stream->destroy();
 			}
 		} 
-		catch (Exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "Stream error: " << exc.message() << std::endl;
+		catch (std::exception&/*Exception&*/ exc) {
+			errorL("RelayedStreamingAllocation", this) << "Stream error: " << exc.what()/*message()*/ << std::endl;
 			assert(0);
 		}
 	}
@@ -171,7 +171,7 @@ class RelayedStreamingResponder: public http::ServerResponder
 {
 public:
 	RelayedStreamingResponder(http::ServerConnection& connection, const StreamingOptions& options) : 		
-		http::ServerResponder(connection), options(options), allocation(nil)
+		http::ServerResponder(connection), options(options), allocation(nullptr)
 	{		
 	}
 
@@ -301,8 +301,8 @@ public:
 			//oss << "Packet: " << frameNumber++ << std::endl;			
 			//client.sendData(oss.str().data(), oss.str().length(), currentPeerAddr);
 		}
-		catch (Exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "^^^^^^^^^^^^^^^^^^^^^^^^ Send error: " << exc.message() << std::endl;
+		catch (std::exception&/Exception&/ exc) {
+			errorL("RelayedStreamingAllocation", this) << "^^^^^^^^^^^^^^^^^^^^^^^^ Send error: " << exc.what()/message()/ << std::endl;
 			
 			// TODO: Calling stream.stop() inside stream callback causing deadlock
 			terminate();

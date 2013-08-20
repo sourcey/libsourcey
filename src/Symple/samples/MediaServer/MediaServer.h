@@ -54,9 +54,9 @@ struct StreamingOptions: public av::RecordingOptions
 	av::VideoCapture* videoCapture; // Video capture instance
 	av::AudioCapture* audioCapture; // Audio capture instance
 
-	StreamingOptions(MediaServer* server = nil, 
-		av::VideoCapture* videoCapture = nil,
-		av::AudioCapture* audioCapture = nil);
+	StreamingOptions(MediaServer* server = nullptr, 
+		av::VideoCapture* videoCapture = nullptr,
+		av::AudioCapture* audioCapture = nullptr);
 
 	virtual ~StreamingOptions();
 };

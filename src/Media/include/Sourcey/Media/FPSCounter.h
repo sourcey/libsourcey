@@ -135,9 +135,9 @@ struct FPSCounter
 		total += (double)(end - start) / CLOCKS_PER_SEC;
 		frames++;
 		fps = (1.0 * frames) / total; //
-		//traceL() << "[FPSCounter:" << this <<"] total: " << total << std::endl;
-		//traceL() << "[FPSCounter:" << this <<"] fps: " << fps << std::endl;
-		//traceL() << "[FPSCounter:" << this <<"] frames: " << frames << std::endl;
+		//traceL() << "[FPSCounter: " << this <<"] total: " << total << std::endl;
+		//traceL() << "[FPSCounter: " << this <<"] fps: " << fps << std::endl;
+		//traceL() << "[FPSCounter: " << this <<"] frames: " << frames << std::endl;
 		return fps;
 	}
 };
@@ -292,8 +292,8 @@ struct FPSCounter
 		totalMS += lastMS; //(double)(end - start) / CLOCKS_PER_SEC;
 		frames++;
 		fps = (1.0 * frames) / (totalMS / CLOCKS_PER_SEC); //
-		traceL() << "[FPSLimiter:" << this <<"] FPS MS: " << std::endl;
-		traceL() << "[FPSLimiter:" << this <<"] Processing" << std::endl;
+		traceL() << "[FPSLimiter: " << this <<"] FPS MS: " << std::endl;
+		traceL() << "[FPSLimiter: " << this <<"] Processing" << std::endl;
 		return fps;
 	}
 };
@@ -311,7 +311,7 @@ struct FPSCounter
 	virtual bool accepts(IPacket&)
 		// Reject the packet if we have exceeded the maximum FPS.
 	{ 
-		traceL() << "[FPSLimiter:" << this <<"] Accepting: \n" 
+		traceL() << "[FPSLimiter: " << this <<"] Accepting: \n" 
 			<< "\n\tFPS Limit: " << _max
 			<< "\n\tCurrent FPS: " << _counter.fps
 			<< "\n\tAcceptable: " << (static_cast<int>(_counter.fps) <= _max)

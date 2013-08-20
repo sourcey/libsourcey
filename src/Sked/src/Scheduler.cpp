@@ -73,7 +73,7 @@ void Scheduler::onIdle()
 		// Update and sort the task list bringing the
 		// next scheduled task to the front of the list.
 		// TODO: Call only after task run, and when the
-		// initial task is NULL.
+		// initial task is nullptr.
 		update();
 		
 		// TODO: Create a nextTask member so we don't 
@@ -127,7 +127,7 @@ void Scheduler::onIdle()
 				if (task->afterRun())
 					onRun(task);
 				else {
-					log("trace") << "Destroying After Run: " << task << endl;
+					log("trace") << "Destroy After Run: " << task << endl;
 					task->_destroyed = true; //destroy();
 				}
 			}
@@ -136,7 +136,7 @@ void Scheduler::onIdle()
 			
 			// Destroy the task if needed
 			if (task->destroyed()) {
-				log("trace") << "Destroying Task: " << task << endl;	
+				log("trace") << "Destroy Task: " << task << endl;	
 				assert(remove(task));
 				delete task;
 			}
@@ -179,7 +179,7 @@ void Scheduler::update()
 		if (task->destroyed()) {
 			it = _tasks.erase(it);
 			onRemove(task);
-			log("trace") << "Destroying: " << task << endl;
+			log("trace") << "Destroy: " << task << endl;
 			delete task;
 		}
 		else
@@ -194,12 +194,12 @@ void Scheduler::update()
 
 void Scheduler::serialize(json::Value& root)
 {
-	log("trace") << "Serializing" << endl;
+	log("trace") << "serializing" << endl;
 	
 	Mutex::ScopedLock lock(_mutex);
 	for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		sked::Task* task = reinterpret_cast<sked::Task*>(*it);
-		log("trace") << "Serializing: " << task << endl;
+		log("trace") << "serializing: " << task << endl;
 		json::Value& entry = root[root.size()];
 		task->serialize(entry);
 		task->trigger().serialize(entry["trigger"]);
@@ -209,11 +209,11 @@ void Scheduler::serialize(json::Value& root)
 
 void Scheduler::deserialize(json::Value& root)
 {
-	log("trace") << "Deserializing" << endl;
+	log("trace") << "deserializing" << endl;
 	
-	for (json::ValueIterator it = root.begin(); it != root.end(); it++) {
-		sked::Task* task = NULL;
-		sked::Trigger* trigger = NULL;
+	for (auto it = root.begin(); it != root.end(); it++) {
+		sked::Task* task = nullptr;
+		sked::Trigger* trigger = nullptr;
 		try {
 			json::assertMember(*it, "trigger");
 			task = factory().createTask((*it)["type"].asString());
@@ -223,12 +223,12 @@ void Scheduler::deserialize(json::Value& root)
 			task->setTrigger(trigger);
 			schedule(task);
 		}
-		catch (Exception& exc) {
+		catch (std::exception& exc/*Exception& exc*/) {
 			if (task)
 				delete task;
 			if (trigger)
 				delete trigger;
-			log("error") << "Deserialization Error: " << exc.message() << endl;
+			log("error") << "Deserialization Error: " << exc.what()/*message()*/ << endl;
 		}
 	}
 }
@@ -290,7 +290,7 @@ sked::TaskFactory& Scheduler::factory()
 	/*
 	Mutex::ScopedLock lock(_mutex);
 	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
-		log("trace") << "Serializing: " << it->second << endl;
+		log("trace") << "serializing: " << it->second << endl;
 		reinterpret_cast<sked::Task*>(it->second)->serialize(root[root.size()]);
 	}
 	*/
@@ -410,7 +410,7 @@ Timeout Scheduler::scheduleAt() const
 		// Obtain the next scheduled task
 		{
 			Mutex::ScopedLock lock(_mutex);			
-			task = _tasks.empty() ? NULL : _tasks.front();
+			task = _tasks.empty() ? nullptr : _tasks.front();
 		}
 
 		// Wait for the scheduled timeout interval
@@ -424,8 +424,8 @@ Timeout Scheduler::scheduleAt() const
 			//try {
 			task->run();				
 			//}
-			//catch (Exception& exc) {
-			//	log("error") << "Swallowing Exception: " << exc.message() << endl;
+			//catch (std::except) {
+			//	log("error") << "Swallowing Exception: " << exc.what()/message() << endl;
 			//}
 		}
 

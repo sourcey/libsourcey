@@ -34,7 +34,6 @@ SyncPacketQueue::SyncPacketQueue(uv::Loop& loop, int maxSize) :
 	SyncQueue<IPacket>(loop, maxSize), 
 	PacketProcessor(Emitter)
 {	
-	traceL("SyncPacketQueue", this) << "Creating" << endl;
 }
 
 
@@ -42,24 +41,20 @@ SyncPacketQueue::SyncPacketQueue(int maxSize) :
 	SyncQueue<IPacket>(uv::defaultLoop(), maxSize), 
 	PacketProcessor(Emitter)
 {	
-	traceL("SyncPacketQueue", this) << "Creating" << endl;
 }
 	
 
 SyncPacketQueue::~SyncPacketQueue()
 {
-	traceL("SyncPacketQueue", this) << "Destroying" << endl;
 }
 
 
 void SyncPacketQueue::process(IPacket& packet)
 {
-	traceL("SyncPacketQueue", this) << "Processing: " << &packet << endl;
-
 	if (!cancelled())
 		push(packet.clone());
 	else {
-		warnL("SyncPacketQueue", this) << "Dropping late incoming packet" << endl;
+		warnL("SyncPacketQueue", this) << "late packet" << endl;
 		assert(closed());
 		assert(0);
 	}
@@ -73,17 +68,16 @@ void SyncPacketQueue::emit(IPacket& packet)
 	// and dropped by the run() function.
 	if (cancelled()) {
 		assert(closed());
-		warnL("SyncPacketQueue", this) << "Dropping late outgoing packet" << endl;
+		warnL("SyncPacketQueue", this) << "late packet" << endl;
 	}
 	
-	traceL("SyncPacketQueue", this) << "Emitting: " << &packet << endl;
 	PacketStreamAdapter::emit(packet);
 }
 
 
 void SyncPacketQueue::onStreamStateChange(const PacketStreamState& state)
 {
-	traceL("SyncPacketQueue", this) << "Stream state change: " << state << endl;
+	traceL("SyncPacketQueue", this) << "state change: " << state << endl;
 	
 	switch (state.id()) {
 	//case PacketStreamState::Running:
@@ -108,13 +102,11 @@ AsyncPacketQueue::AsyncPacketQueue(int maxSize) :
 	AsyncQueue<IPacket>(maxSize), 
 	PacketProcessor(Emitter)
 {	
-	traceL("AsyncPacketQueue", this) << "Creating" << endl;
 }
 	
 
 AsyncPacketQueue::~AsyncPacketQueue()
 {
-	traceL("AsyncPacketQueue", this) << "Destroying" << endl;
 }
 
 
@@ -126,18 +118,17 @@ void AsyncPacketQueue::process(IPacket& packet)
 
 void AsyncPacketQueue::emit(IPacket& packet)
 {
-	traceL("AsyncPacketQueue", this) << "Emitting: " << &packet << endl;
 	PacketStreamAdapter::emit(packet);
 }
 
 
 void AsyncPacketQueue::onStreamStateChange(const PacketStreamState& state)
 {
-	traceL("AsyncPacketQueue", this) << "Stream state change: " << state << endl;
+	traceL("AsyncPacketQueue", this) << "stream state: " << state << endl;
 	
 	switch (state.id()) {
 	case PacketStreamState::Running:
-		_cancelled = false;
+		//_cancelled = false;
 		break;
 		
 	case PacketStreamState::Stopped:
@@ -145,7 +136,8 @@ void AsyncPacketQueue::onStreamStateChange(const PacketStreamState& state)
 		// Flush all queued items on stop()
 		flush();	
 		assert(queue().empty());
-		_cancelled = true;
+		//_cancelled = true;
+		AsyncQueue<IPacket>::cancel();
 		break;
 
 	//case PacketStreamState::Error:
@@ -163,25 +155,25 @@ void AsyncPacketQueue::onStreamStateChange(const PacketStreamState& state)
 
 
 /*
-PacketStream::PacketStream(const string& name) : 
+PacketStream::PacketStream(const std::string& name) : 
 	PacketStream(name)
 {
 	_queue = new SyncPacketQueue(*this);
-	traceL("PacketStream", this) << "Creating" << endl;
+	traceL("PacketStream", this) << "create" << endl;
 }
 
 
 PacketStream::~PacketStream()
 {
-	traceL("PacketStream", this) << "Destroying" << endl;
+	traceL("PacketStream", this) << "destroy" << endl;
 	{
 		Mutex::ScopedLock lock(_mutex);
 		if (_queue) {
 			_queue->destroy();
-			_queue = NULL;
+			_queue = nullptr;
 		}
 	}
-	traceL("PacketStream", this) << "Destroying: OK" << endl;
+	traceL("PacketStream", this) << "Destroy: OK" << endl;
 }
 
 
@@ -192,7 +184,7 @@ void PacketStream::close()
 		Mutex::ScopedLock lock(_mutex);
 		if (_queue) {
 			_queue->destroy();
-			_queue = NULL;
+			_queue = nullptr;
 		}
 	}
 	PacketStream::close();

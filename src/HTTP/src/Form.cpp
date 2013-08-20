@@ -29,7 +29,7 @@
 #include "Sourcey/HTTP/Client.h"
 #include "Sourcey/HTTP/Packetizers.h"
 #include "Sourcey/HTTP/URL.h"
-#include "Sourcey/FileSystem.h"
+#include "Sourcey/Filesystem.h"
 #include "Sourcey/Crypto/Crypto.h"
 
 
@@ -95,8 +95,8 @@ void FormWriter::addFile(const std::string& name, FilePart* part)
 void FormWriter::prepareSubmit()
 {	
 	http::Request& request = _connection.request();
-	if (request.getMethod() == http::Request::HTTP_POST || 
-		request.getMethod() == http::Request::HTTP_PUT) {
+	if (request.getMethod() == http::Method::Post || 
+		request.getMethod() == http::Method::Put) {
 		if (_encoding == ENCODING_URL) {
 			request.setContentType(_encoding);
 			request.setChunkedTransferEncoding(false);
@@ -114,9 +114,9 @@ void FormWriter::prepareSubmit()
 			ct.append("\"");
 			request.setContentType(ct);
 					
-			/// Set the total file size for upload progress updates.
-			/// This is not the HTTP content length as it does not 
-			/// factor chunk headers.
+			// Set the total file size for upload progress updates.
+			// This is not the HTTP content length as it does not 
+			// factor chunk headers.
 			if (!_parts.empty()) {
 				assert(_filesSize);
 				_connection.OutgoingProgress.total = _filesSize;
@@ -155,7 +155,7 @@ void FormWriter::runThread(void* arg)
 			wr->writeMultipart();
 	}
 	catch (std::exception& exc) {
-		traceL("FormWriter", wr) << "Error:" << exc.what() << std::endl;
+		traceL("FormWriter", wr) << "Error: " << exc.what() << std::endl;
 //#ifdef _DEBUG
 //		throw exc;
 //#endif
@@ -184,9 +184,9 @@ void FormWriter::stop()
 
 void FormWriter::writeMultipart()
 {
-	for (NVHash::ConstIterator it = begin(); it != end(); ++it) {
+	for (NVCollection::ConstIterator it = begin(); it != end(); ++it) {
 		std::ostringstream ostr;
-		NVHash header;
+		NVCollection header;
 		std::string disp("form-data; name=\"");
 		disp.append(it->first);
 		disp.append("\"");
@@ -198,7 +198,7 @@ void FormWriter::writeMultipart()
 
 	for (PartVec::const_iterator pit = _parts.begin(); pit != _parts.end(); ++pit) {
 		std::ostringstream ostr;
-		NVHash header(pit->part->headers());
+		NVCollection header(pit->part->headers());
 		std::string disp("form-data; name=\"");
 		disp.append(pit->name);
 		disp.append("\"");
@@ -219,23 +219,23 @@ void FormWriter::writeMultipart()
 	writeEnd(ostr);
 	emit(ostr.str());
 		
-	/// HACK: Write chunked end code directly to the connection.
-	/// TODO: Send final packet flag down packet stream, or use 
-	/// stream state change to trigger via chunked packetizer.
-	reinterpret_cast<Connection&>(_connection).send("0\r\n\r\n", 5, 0);
+	// HACK: Write chunked end code directly to the connection.
+	// TODO: Send final packet flag down packet stream, or use 
+	// stream state change to trigger via chunked packetizer.
+	reinterpret_cast<Connection&>(_connection).sendData("0\r\n\r\n", 5, 0);
 }
 
 
 void FormWriter::writeUrl(std::ostream& ostr)
 {
-	for (NVHash::ConstIterator it = begin(); it != end(); ++it) {
+	for (NVCollection::ConstIterator it = begin(); it != end(); ++it) {
 		if (it != begin()) ostr << "&";
 		ostr << URL::encode(it->first) << "=" << URL::encode(it->second);
 	}
 }
 
 
-void FormWriter::writePartHeader(const NVHash& header, std::ostream& ostr)
+void FormWriter::writePartHeader(const NVCollection& header, std::ostream& ostr)
 {
 	if (_initial) 
 		_initial = false;
@@ -243,7 +243,7 @@ void FormWriter::writePartHeader(const NVHash& header, std::ostream& ostr)
 		ostr << "\r\n";
 	ostr << "--" << _boundary << "\r\n";
 
-	NVHash::ConstIterator it = header.begin();
+	NVCollection::ConstIterator it = header.begin();
 	while (it != header.end()) {
 		ostr << it->first << ": " << it->second << "\r\n";
 		++it;
@@ -351,7 +351,7 @@ void FilePart::open(const std::string& path)
 	if (!_istr.is_open())
 		throw FileException(path);
 
-	/// Get file size
+	// Get file size
 	_istr.seekg(0, std::ios::end); 
 	_fileSize = _istr.tellg();
 	_istr.seekg(0, 0); 
@@ -362,7 +362,7 @@ void FilePart::write(FormWriter& writer)
 {
 	traceL("FilePart", this) << "Write" << std::endl;
 
-	/// Send file chunks to the peer
+	// Send file chunks to the peer
 	char buffer[FILE_CHUNK_SIZE];
 	while (_istr.read(buffer, FILE_CHUNK_SIZE) && !writer.stopped()) {
 		writer.emit(buffer, (size_t)_istr.gcount());
@@ -370,7 +370,7 @@ void FilePart::write(FormWriter& writer)
 	}
 
 	if (_istr.eof()) {
-		/// Still a few bytes left to write?
+		// Still a few bytes left to write?
 		if (_istr.gcount() > 0 && !writer.stopped()) {
 			writer.emit(buffer, (size_t)_istr.gcount());
 			writer.updateProgress((int)_istr.gcount());
@@ -385,13 +385,13 @@ void FilePart::write(std::ostream& ostr)
 {
 	traceL("FilePart", this) << "Write" << std::endl;
 	
-	/// Send file chunks to the peer
+	// Send file chunks to the peer
 	char buffer[FILE_CHUNK_SIZE];
 	while (_istr.read(buffer, FILE_CHUNK_SIZE))
 		ostr.write(buffer, (size_t)_istr.gcount());
 
 	if (_istr.eof()) {
-		/// Still a few bytes left to write?
+		// Still a few bytes left to write?
 		if (_istr.gcount() > 0)
 			ostr.write(buffer, (size_t)_istr.gcount());
 	}
@@ -406,7 +406,7 @@ const std::string& FilePart::filename() const
 }
 
 
-NVHash& FilePart::headers()
+NVCollection& FilePart::headers()
 {
 	return _headers;
 }
@@ -447,7 +447,7 @@ void FormWriter::run()
 /*
 void FormWriter::onIdle()
 {
-	traceL("FormWriter", this) << "On idle" << std::endl;
+	traceL("FormWriter", this) << "on idle" << std::endl;
 
 	if (_initial)
 		prepareSubmit(_connection.request());

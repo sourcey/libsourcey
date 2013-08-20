@@ -24,7 +24,7 @@
 #include "Sourcey/Stateful.h"
 #include "Sourcey/Signal.h"
 #include "Sourcey/PacketStream.h"
-#include "Sourcey/Interfaces.h"
+#include "Sourcey/Interface.h"
 #include "Sourcey/PacketStream.h"
 #include "Sourcey/Media/AVInputReader.h"
 #include "Sourcey/Media/FPSCounter.h"

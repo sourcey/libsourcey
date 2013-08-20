@@ -83,7 +83,7 @@ void Command::setNode(const std::string& node)
 }
 
 	
-void Command::setAction(const string& action) 
+void Command::setAction(const std::string& action) 
 {
 	(*this)["action"] = action;
 }
@@ -91,7 +91,7 @@ void Command::setAction(const string& action)
 
 string Command::param(int n) const 
 {
-	StringVec params = util::split(node(), ':');
+	std::vector<std::string> params = util::split(node(), ':');
 	assert(params.size() >= n);
 	if (params.size() < n)
 		return "";
@@ -99,14 +99,14 @@ string Command::param(int n) const
 }
 
 
-StringVec Command::params() 
+std::vector<std::string> Command::params() 
 {
-	StringVec params = util::split(node(), ':');
+	std::vector<std::string> params = util::split(node(), ':');
 	return params;
 }
 
 
-bool Command::matches(const string& xnode) const 
+bool Command::matches(const std::string& xnode) const 
 {
 	return util::matchNodes(node(), xnode, ":");
 }

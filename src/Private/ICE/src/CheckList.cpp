@@ -223,7 +223,7 @@ void CheckList::startConnectivityChecks()
 			// with the lowest component ID.
 			if (matches.size()) {
 				int lowest = 100;
-				string selectedID;
+				std::string selectedID;
 				for (map<string, CandidatePair*>::const_iterator it = matches.begin(); it != matches.end(); ++it) {
 					if (lowest > it->second->local()->componentID()) {
 						lowest = it->second->local()->componentID();
@@ -1203,9 +1203,9 @@ void CheckList::onConnectivityCheckRequest(LocalCandidate* local, const STUN::Me
 	//    *  If the message is an indication, the agent MUST silently
 	//       discard the indication.
 	//
-	string ufrag = usernameAttr->asString();
-	string ourUFrag;
-	string peerUFrag;			
+	std::string ufrag = usernameAttr->asString();
+	std::string ourUFrag;
+	std::string peerUFrag;			
 	string::size_type index = ufrag.find(":");
 	if (index != string::npos) {
 		ourUFrag = ufrag.substr(0, index);
@@ -1824,7 +1824,7 @@ void CheckList::sendError(LocalCandidate* local, const STUN::Message& request, c
 
 	// NONCE
 	STUN::Nonce* noonceAttr = new STUN::Nonce;
-	string noonce = CryptoProvider::generateRandomKey(32);
+	std::string noonce = CryptoProvider::generateRandomKey(32);
 	noonceAttr->copyBytes(noonce.c_str(), noonce.size());
 	errMsg.add(noonceAttr);
 

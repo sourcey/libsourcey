@@ -41,11 +41,9 @@ class Connection
 public:	
     Connection(const net::Socket& socket);
 			
-	virtual int send(const char* buf, size_t len, int flags = 0);
-	virtual int send(const std::string& buf, int flags = 0);
+	virtual int sendData(const char* buf, size_t len, int flags = 0);
+	virtual int sendData(const std::string& buf, int flags = 0);
 		/// Sends a raw data to the peer.
-		//
-		/// Only available for chunked/streaming connections.
 
 	virtual int sendHeader();
 		/// Sends the outdoing HTTP header.
@@ -65,7 +63,7 @@ public:
 		/// a proper response within the allotted time frame.
 	
 	virtual void onHeaders() = 0;
-	virtual void onPayload(Buffer& buffer) {};
+	virtual void onPayload(const MutableBuffer&) {};
 	virtual void onMessage() = 0;
 	virtual void onClose() = 0;
 
@@ -135,11 +133,12 @@ protected:
 	
 	friend class Parser;
 	friend class ConnectionAdapter;
-	friend class GCDeleter<Connection>;
+	//friend class DefaultDeleter<Connection>;
+	friend struct std::default_delete<Connection>;	
 };
 
 
-	//virtual void onPayload(Buffer& buffer) = 0;
+	//virtual void onPayload(const MutableBuffer& buffer) = 0;
 	
 	//virtual bool flush();
 		/// Flushes any outgoing HTTP data.
@@ -194,8 +193,8 @@ protected:
 	//
 	/// Socket emitter callbacks
 	//virtual void onSocketConnect() {};
-	virtual void onSocketRecv(Buffer& buf, const net::Address& peerAddr);
-	//virtual void onSocketError(const Error& error);
+	virtual void onSocketRecv(const MutableBuffer& buf, const net::Address& peerAddr);
+	//virtual void onSocketError(const Error& error) override;
 	//virtual void onSocketClose();
 		
 	//
@@ -222,164 +221,3 @@ inline bool isExplicitKeepAlive(http::Message* message)
 
 
 #endif
-
-
-
-	//virtual bool sendRequest(const http::Response& response);
-	//virtual bool sendResponse(const http::Response& response);
-
-//#include "Sourcey/Stateful.h"
-//#include "Sourcey/Interfaces.h"
-//#include "Sourcey/Net/ServerConnection.h"
-//////#include "Poco/Net/HTTPSession.h"
-//#include "Poco/URI.h"
-//
-
-		
-/*
-	//ConnectionAdapter* _adapter;
- //: public net::SocketAdapter
- //Buffer& buf, const net::Address& peerAddr
-class ServerResponder
-	/// TODO: Chunked ServerConnection Handler
-{
-public:
-	virtual void handleRequest(ServerConnection* connection, Request& request, Response& response) = 0;
-};
-
-
-class DefaultServerResponder
-	/// TODO: Chunked ServerConnection Handler
-{
-public:
-	virtual void handleRequest(ServerConnection* connection, Request& request, Response& response);
-};
-*/
-
-
-
-
-
-    /**
-	//virtual void onConnect();
-    * 
-    */
-	/*, Parser* parser)
-	
-protected:
-    Parser* parser();
-
-    net::Socket* socket();
-
-    // Read-only HTTP message
-    int statusCode();
-    const http_method& method();
-    const http_version& httpVersion();
-    std::string httpVersionString();
-    int httpVersionMajor();
-    int httpVersionMinor();
-    const URL& url();
-
-    bool shouldKeepAlive();
-    bool upgrade();
-
-    void _emitPending(std::function<void()> callback);
-    void _emitData(const Buffer& buf);
-    void _emitEnd();
-    void _addHeaderLine(const std::string& field, const std::string& value);
-	
-    // TODO: handle encoding
-    //void setEncoding();
-
-    const headers_type& headers();
-    bool has_header(const std::string& name);
-    const std::string& get_header(const std::string& name);
-
-    const headers_type& trailers() const;
-    bool has_trailer(const std::string& name);
-    const std::string& get_trailer(const std::string& name);
-	*/
-	
-	/*
-    bool complete_;
-    bool readable_;
-    bool paused_;
-    std::vector<Buffer> pendings_;
-    bool endEmitted_;
-    http_start_line message_;
-    headers_type headers_;
-    headers_type trailers_;
-    bool body_;
-
-
-    bool readable();
-    void pause();
-    void resume();
-
-    void destroy(const ParserError& err);
-	*/
-
-/*
-
-// ---------------------------------------------------------------------
-//
-class ServerConnection: public Stateful<net::ServerConnectionState>, public abstract::Sendable, public Polymorphic
-	/// Implements a stateful HTTP request/response 
-	/// transaction with progress updates.
-{
-public:
-	ServerConnection(Request* request = nil);
-	virtual ~ServerConnection();
-
-	virtual bool send();
-	virtual void cancel();
-		/// Cancels the transaction.
-		/// onComplete() will never be called.
-	
-	virtual Request& request();
-	virtual Response& response();
-	virtual TransferSignal& requestState();
-	virtual TransferSignal& responseState();
-	virtual bool cancelled();
-
-	virtual void setRequest(Request* request);
-		/// Sets the Request pointer if it wasn't set
-		/// via the constructor.
-		/// The transaction takes ownership of the pointer.
-		
-	virtual std::string& outputPath();
-	virtual void setOutputPath(const std::string& path);
-		/// If the path is set the response data will be
-		/// saved to this location on the file system.
-	
-	virtual void* clientData() const;
-	virtual void setClientData(void* clientData);
-		/// Sets an arbitrary pointer to associate with
-		/// this transaction.
-	
-	Signal<TransferSignal&> OutgoingProgress;
-	Signal<TransferSignal&> IncomingProgress;
-	Signal<Response&> Complete;
-	
-	virtual const char* className() const { return "ServerConnection"; }
-	
-protected:
-	virtual void processRequest(std::ostream &ost);
-	virtual void processResponse(std::istream &ist);
-	virtual void onComplete();
-	
-	virtual void setRequestState(TransferSignal::Type state);
-	virtual void setResponseState(TransferSignal::Type state);
-
-protected:
-	Request*		_request;
-	Response		_response;
-	http::URL		_uri;
-	TransferSignal _incomingProgress;
-	TransferSignal _outgoingProgress;
-	std::string		_outputPath;
-	void*			_clientData;
-	Poco::Net::HTTPSession*	_session;
-	mutable Mutex	_mutex;
-};
-*/

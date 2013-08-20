@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/UV/UVPP.h"
-#include "Sourcey/Net/TCPBase.h"
+#include "Sourcey/Net/TCPSocket.h"
 #include "Sourcey/Net/Socket.h"
 #include "Sourcey/Net/SSLAdapter.h"
 #include "Sourcey/Net/SSLContext.h"
@@ -73,14 +73,14 @@ public:
 		/// for reuse in a future connection (if session caching
 		/// is enabled).
 		///
-		/// If no connection is established, returns nil.
+		/// If no connection is established, returns nullptr.
 		
 	void useSession(SSLSession::Ptr session);
 		/// Sets the SSL session to use for the next
 		/// connection. Setting a previously saved Session
 		/// object is necessary to enable session caching.
 		///
-		/// To remove the currently set session, a nil pointer
+		/// To remove the currently set session, a nullptr pointer
 		/// can be given.
 		///
 		/// Must be called before connect() to be effective.

@@ -67,7 +67,7 @@ Sdp::Sdp()
 /*
 Sdp::Sdp(const std::string& src) 
 {
-vector<string> lines = Util::tokenize(src, "\r\n", true); 
+std::vector<std::string> lines = Util::tokenize(src, "\r\n", true); 
 for (int i = 0; i < lines.size(); i++) {
 switch (lines[i][0]) {
 case 'v':

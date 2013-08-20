@@ -23,47 +23,46 @@
 
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Mutex.h"
-#include "Sourcey/Interfaces.h"
+#include "Sourcey/Interface.h"
+
+#include <functional>
 
 
 namespace scy {
-
+	
 
 class Thread
-	// This class implements a platform-independent
-	// wrapper to an operating system thread.
-	//
-	// Every Thread object gets a unique (within
-	// its process) numeric thread ID.
-	// Furthermore, a thread can be assigned a name.
-	// The name of a thread can be changed at any time.
+	/// This class implements a platform-independent
+	/// wrapper around an operating system thread.
 {
 public:	
-	Thread();		
-	Thread(const std::string& name);		
+	Thread();
+	Thread(basic::Runnable& target);	
+	Thread(std::function<void()> target);	
+	Thread(std::function<void(void*)> target, void* opaque = nullptr);
 	~Thread();
-
-	void start(abstract::Runnable& target);
+	
+	void start(basic::Runnable& target);
 		// Starts the thread with the given target.
 		//
-		// The given Runnable object must be valid
-		// for the entire lifetime of the thread.
-
-	void start(Callable target, void* opaque = 0);
-		// Starts the thread with the given target and 
-		// opaque pointer.
-
+		// The given Runnable object must be valid for the entire 
+		// lifetime of the thread.
+	
+	void start(std::function<void()> target);	
+	void start(std::function<void(void*)> target, void* opaque = nullptr);
+		// Starts the thread with the given target.
+	
+	void startC(basic::Callable target, void* opaque = nullptr);
+		// Starts the thread with the given target and opaque pointer.
+	
 	void join();
 		// Waits until the thread exits.
-
-	unsigned long id() const;
-		// Returns the unique thread ID of the thread.
-
-	std::string name() const;
-		// Returns the name of the thread.
-
+	
 	bool running() const;
-		// Returns true if the thread is currently running.
+		// Returns true if the thread is running.
+	
+	unsigned long id() const;
+		// Returns the native thread ID.
 	
 	static unsigned long currentID();
  		// Returns the native thread ID of the current thread.
@@ -71,14 +70,48 @@ public:
 protected:
 	Thread(const Thread&);
 	Thread& operator = (const Thread&);
-
-	static void runAsync(void* arg);
+	
+	static void runAsync(void* arg, bool hasArg);
 	
 	bool _running;
-	std::string _name;
-	uv_thread_t _handle;
 	unsigned long _id;
+	uv_thread_t _handle;
 	mutable Mutex _mutex;
+};
+
+
+//
+// Cancellation Flag
+//
+
+	
+class CancellationFlag 
+	/// A concurrent flag which can be    
+	/// used to request task cancellation.
+{
+	std::atomic<bool> state;
+	
+	// Non-copyable and non-movable
+	CancellationFlag(const CancellationFlag&); // = delete;
+	CancellationFlag(CancellationFlag&&); // = delete;
+	CancellationFlag& operator=(const CancellationFlag&); // = delete;
+	CancellationFlag& operator=(CancellationFlag&&); // = delete;
+
+public:
+	CancellationFlag() : state(false) {};
+
+	bool cancelled() const
+	{
+		bool s = state.load(std::memory_order_relaxed);
+		if (s)
+			std::atomic_thread_fence(std::memory_order_acquire);
+		return s;
+	}
+
+	void cancel()
+	{
+		state.store(true, std::memory_order_release);
+	}
 };
 
 
@@ -91,7 +124,7 @@ template <class TStartable>
 class AsyncStartable: public TStartable
 	// This class is an invisible wrapper around a TStartable instance
 	// which provides asynchronous access to the TStartable start() and
-	// stop() methods. TStartable is an instance of abstract::Startable.
+	// stop() methods. TStartable is an instance of basic::Startable.
 {
 public:
 	AsyncStartable() {};
@@ -99,8 +132,7 @@ public:
 
 	static void runAsync(void* arg) {
 		try {
-			// Start the TStartable base once only, 
-			// so this call must block.
+			// Call the blocking start() function once only
 			static_cast<TStartable*>(arg)->start();
 		}
 		catch (std::exception& exc) {

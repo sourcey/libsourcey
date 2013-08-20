@@ -30,7 +30,7 @@ namespace av {
 AVPacketEncoder::AVPacketEncoder(const RecordingOptions& options, bool muxLiveStreams) :
 	AVEncoder(options), 
 	PacketProcessor(AVEncoder::Emitter), 
-	_lastVideoPacket(nil), 
+	_lastVideoPacket(nullptr), 
 	_muxLiveStreams(muxLiveStreams)
 {
 }
@@ -54,11 +54,10 @@ void AVPacketEncoder::process(IPacket& packet)
 	Mutex::ScopedLock lock(_mutex);
 
 	// We may be receiving either audio or video packets	
-	VideoPacket* vPacket = nil;
-	AudioPacket* aPacket = nil;
-	if (vPacket = dynamic_cast<VideoPacket*>(&packet)) ;
-	else if (aPacket = dynamic_cast<AudioPacket*>(&packet)) ;
-	else throw ArgumentException("Unknown packet type");
+	VideoPacket* vPacket = dynamic_cast<VideoPacket*>(&packet);
+	AudioPacket* aPacket = vPacket ? nullptr : dynamic_cast<AudioPacket*>(&packet);
+	if (!vPacket && aPacket)
+		throw ArgumentException("Unknown packet type");
 
 	// Do some special synchronizing for muxing live variable framerate streams
 	if (_muxLiveStreams) {	

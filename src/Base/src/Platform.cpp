@@ -26,7 +26,15 @@
 #else
 #include <unistd.h>
 #endif
+#include <chrono>
+#include <ctime>
 #include <time.h>
+
+#include <sstream>
+#include <ctime>
+//#include <thread>
+#include <locale>
+#include <iomanip>
 
 
 using namespace std;
@@ -78,7 +86,7 @@ std::string getExePath()
 }
 
 
-std::string getCWD() 
+std::string getCwd() 
 {	
 	char buf[PATHMAX];
 	size_t size = PATHMAX;
@@ -117,6 +125,68 @@ void pause()
 }
 
 
+//
+/// STL Time
+// 
+
+//typedef std::chrono::time_point<std::chrono::system_clock> systemTimePoint;
+ 
+std::tm toLocalTime(const std::time_t& time)
+{
+  std::tm tm_snapshot;
+#if defined(WIN32)
+  localtime_s(&tm_snapshot, &time); 
+#else
+  localtime_r(&time, &tm_snapshot); // POSIX  
+#endif
+  return tm_snapshot;
+}
+ 
+ 
+std::string formatTime(const std::tm* dt, const char* fmt)
+{
+#if defined(WIN32)     
+  // BOGUS hack done for VS2012: C++11 non-conformant since it SHOULD take a "const struct tm*  "
+  // ref. C++11 standard: ISO/IEC 14882:2011, § 27.7.1, 
+  std::ostringstream oss;
+  oss << std::put_time(const_cast<std::tm*>(dt), fmt); 
+  return oss.str();
+ 
+#else    // LINUX
+  const size_t size = 1024;
+  char buffer[size]; 
+  auto success = std::strftime(buffer, size, fmt, dt); 
+ 
+  if (0 == success)
+    return fmt; 
+   
+  return buffer; 
+#endif
+}
+ 
+ 
+std::time_t systemTime()
+{
+	std::chrono::time_point<std::chrono::system_clock> system_now = std::chrono::system_clock::now();
+	return std::chrono::system_clock::to_time_t(system_now);
+}
+
+
+std::string formatTime(const std::time_t& time, const char* fmt)
+{
+   return formatTime(&toLocalTime(time), fmt);
+}
+
+
+std::string formatLocalTime(const char* fmt)
+{
+   return formatTime(systemTime(), fmt);
+}
+
+
+//
+/// Windows helpers
+//
 
 #ifdef WIN32
 
@@ -143,15 +213,45 @@ bool getOsVersion(int* major, int* minor, int* build)
 bool isWindowsVistaOrLater() 
 {
 	int major;
-	return (getOsVersion(&major, NULL, NULL) && major >= kWindowsVista);
+	return (getOsVersion(&major, nullptr, nullptr) && major >= kWindowsVista);
 }
 
 bool isWindowsXpOrLater() 
 {
 	int major, minor;
-	return (getOsVersion(&major, &minor, NULL) &&
+	return (getOsVersion(&major, &minor, nullptr) &&
 		(major >= kWindowsVista ||
 		(major == kWindows2000 && minor >= 1)));
+}
+
+
+#define STACK_ARRAY(TYPE, LEN) static_cast<TYPE*>(::alloca((LEN)*sizeof(TYPE)))
+
+
+std::wstring toUtf16(const char* utf8, size_t len)
+{
+	int len16 = ::MultiByteToWideChar(CP_UTF8, 0, utf8, len, NULL, 0);
+	wchar_t* ws = STACK_ARRAY(wchar_t, len16);
+	::MultiByteToWideChar(CP_UTF8, 0, utf8, len, ws, len16);
+	return std::wstring(ws, len16);
+}
+
+std::wstring toUtf16(const std::string& str) 
+{
+	return toUtf16(str.data(), str.length());
+}
+
+std::string toUtf8(const wchar_t* wide, size_t len) 
+{
+	int len8 = ::WideCharToMultiByte(CP_UTF8, 0, wide, len, NULL, 0, NULL, NULL);
+	char* ns = STACK_ARRAY(char, len8);
+	::WideCharToMultiByte(CP_UTF8, 0, wide, len, ns, len8, NULL, NULL);
+	return std::string(ns, len8);
+}
+
+std::string toUtf8(const std::wstring& wstr) 
+{
+	return toUtf8(wstr.data(), wstr.length());
 }
 
 #endif

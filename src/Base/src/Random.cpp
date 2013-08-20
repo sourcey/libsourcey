@@ -140,9 +140,9 @@ Random::Random(int stateSize)
 
 	_buffer = new char[stateSize];
 #if defined(_WIN32_WCE)
-	initState((UInt32) wceex_time(NULL), _buffer, stateSize);
+	initState((UInt32) wceex_time(nullptr), _buffer, stateSize);
 #else
-	initState((UInt32) std::time(NULL), _buffer, stateSize);
+	initState((UInt32) std::time(nullptr), _buffer, stateSize);
 #endif
 }
 
@@ -249,7 +249,7 @@ void Random::getSeed(char* seed, unsigned length)
 	// but we don't want Base to depend on OpenSSL 
 
 	if (n == 0)
-		throw Exception("Cannot generate random number seed");
+		throw std::runtime_error("Cannot generate random number seed");
 }
 
 

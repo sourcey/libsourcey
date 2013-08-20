@@ -20,32 +20,40 @@
 #include "Sourcey/Application.h"
 #include "Sourcey/Memory.h"
 #include "Sourcey/Logger.h"
-
-
-using namespace std;
+#include "Sourcey/Exception.h"
+#include "Sourcey/Singleton.h"
 
 
 namespace scy {
 	
+	
+namespace internal {
+	static Singleton<Application> singleton;
+
+	struct ShutdownCmd 
+	{
+		std::function<void(void*)> callback;
+		void* opaque;
+	};
+}
 
 
 Application& Application::getDefault() 
 {
-	static Singleton<Application> sh;
-	return *sh.get();
+	return *internal::singleton.get();
 }
 
 
 Application::Application(uv::Loop& loop) :
 	loop(loop)
 {
-	traceL("Application", this) << "Creating" << endl;
+	traceL("Application", this) << "ctor" << std::endl;
 }
 
 	
 Application::~Application() 
 {	
-	traceL("Application", this) << "Destroying" << endl;
+	traceL("Application", this) << "dtor" << std::endl;
 }
 
 	
@@ -63,11 +71,11 @@ void Application::stop()
 
 void Application::finalize() 
 { 
-	debugL("Application") << "Finalizing" << std::endl;
+	debugL("Application") << "finalizing" << std::endl;
 
 #ifdef _DEBUG
 	// Print active handles
-	uv_walk(&loop, Application::onPrintHandle, nil);
+	uv_walk(&loop, Application::onPrintHandle, nullptr);
 #endif
 
 	// Run until handles are closed 
@@ -79,13 +87,13 @@ void Application::finalize()
 	// Run once more to clear garbage collector handle
 	//run(); 
 
-	debugL("Application") << "Finalized" << std::endl;
+	debugL("Application") << "finalization complete" << std::endl;
 }		
-
 	
-void Application::waitForShutdown(ShutdownCommand::Fn callback, void* opaque)
+	
+void Application::waitForShutdown(std::function<void(void*)> callback, void* opaque)
 { 
-	ShutdownCommand* cmd = new ShutdownCommand;
+	internal::ShutdownCmd* cmd = new internal::ShutdownCmd;
 	cmd->opaque = opaque;
 	cmd->callback = callback;
 
@@ -94,24 +102,48 @@ void Application::waitForShutdown(ShutdownCommand::Fn callback, void* opaque)
 	uv_signal_init(&loop, sig);
 	uv_signal_start(sig, Application::onShutdownSignal, SIGINT);
 		
-	debugL("Application") << "Wait for kill" << std::endl;
+	debugL("Application") << "waiting for shutdown" << std::endl;
 	run();
 }
 
 			
-void Application::onShutdownSignal(uv_signal_t *req, int signum)
+void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 {
-	debugL("Application") << "On shutdown signal" << std::endl;
-	ShutdownCommand* cmd = reinterpret_cast<ShutdownCommand*>(req->data);
+	debugL("Application") << "got shutdown signal" << std::endl;
+	internal::ShutdownCmd* cmd = reinterpret_cast<internal::ShutdownCmd*>(req->data);
 	uv_close((uv_handle_t*)req, uv::afterClose);
 	cmd->callback(cmd->opaque);
 	delete cmd;
 }
 		
 
-void Application::onPrintHandle(uv_handle_t* handle, void* arg) 
+void Application::onPrintHandle(uv_handle_t* handle, void* /* arg */) 
 {
-	debugL("Application") << "#### Active handle: " << handle << ": " << handle->type << std::endl;
+	debugL("Application") << "#### active handle: " << handle << ": " << handle->type << std::endl;
+}
+
+//
+// Command-line option parser
+//
+	
+OptionParser::OptionParser(int argc, char* argv[], char delim)
+{
+	char* lastkey = 0;		
+	for (int i = 0; i < argc; i++) {
+		if (i == 0) {
+			exepath.assign(argv[i]);
+			continue;
+		}
+		if (argv[i][0] == delim) {
+			args[&argv[i][1]] = ""; // create empty entry
+			lastkey = argv[i];
+		}
+		else if (lastkey) {
+			lastkey = 0;
+			args[argv[i - 1]] = argv[i];
+		}
+		else assert(0);
+	}
 }
 
 

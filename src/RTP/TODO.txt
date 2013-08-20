@@ -1,2 +1,0 @@
-
-	- Clean up Packet read from Buffer utilizing buffer capabilities.

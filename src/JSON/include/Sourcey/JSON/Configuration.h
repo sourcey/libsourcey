@@ -44,7 +44,7 @@ public:
 	virtual bool remove(const std::string& key);
 	virtual void removeAll(const std::string& baseKey);
 	virtual void replace(const std::string& from, const std::string& to);
-	virtual void keys(StringVec& keys, const std::string& baseKey = "");
+	virtual void keys(std::vector<std::string>& keys, const std::string& baseKey = "");
 	virtual void print(std::ostream& ost);
 	
 	virtual std::string path();

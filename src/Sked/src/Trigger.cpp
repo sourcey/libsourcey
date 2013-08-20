@@ -20,23 +20,26 @@
 #include "Sourcey/Sked/Trigger.h"
 #include "Sourcey/Sked/Scheduler.h"
 #include "Sourcey/Logger.h"
+#include "Sourcey/DateTime.h"
 
+/*
 #include "Poco/DateTimeFormatter.h"
 #include "Poco/DateTimeParser.h"
 #include "Poco/DateTime.h"
 #include "Poco/Timespan.h"
 #include "Poco/Format.h"
+*/
 
 
 using namespace std; 
-using namespace Poco; 
+//using namespace Poco; 
 
 
 namespace scy {
 namespace sked {
 
 
-Trigger::Trigger(const string& type, const string& name) :
+Trigger::Trigger(const std::string& type, const std::string& name) :
 	type(type),
 	name(name),
 	timesRun(0)
@@ -67,7 +70,7 @@ bool Trigger::expired()
 
 void Trigger::serialize(json::Value& root)
 {
-	traceL() << "Serializing" << endl;	
+	traceL() << "serializing" << endl;	
 	
 	root["type"] = type;
 	root["name"] = name;
@@ -80,7 +83,7 @@ void Trigger::serialize(json::Value& root)
 
 void Trigger::deserialize(json::Value& root)
 {
-	traceL() << "Deserializing" << endl;
+	traceL() << "deserializing" << endl;
 	
 	json::assertMember(root, "type");
 	json::assertMember(root, "name");
@@ -134,7 +137,7 @@ bool IntervalTrigger::expired()
 
 void IntervalTrigger::serialize(json::Value& root)
 {
-	traceL() << "Serializing" << endl;	
+	traceL() << "serializing" << endl;	
 
 	Trigger::serialize(root);
 	
@@ -164,7 +167,7 @@ void IntervalTrigger::deserialize(json::Value& root)
 		root["interval"]["seconds"].asInt(), 0);
 	
 	if (!interval.totalSeconds())
-		throw Exception("Interval trigger must have non zero interval.");
+		throw std::runtime_error("Interval trigger must have non zero interval.");
 	
 	DateTime now;	
 	scheduleAt = now;

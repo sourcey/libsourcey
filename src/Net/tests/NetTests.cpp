@@ -213,7 +213,7 @@ public:
 	//		
 	void onUDPClientSocketRecv(void* sender, net::SocketPacket& packet)
 	{
-		assert(packet.buffer.toString() == "bounce");
+		assert(std::string(packet.data(), packet.size()) == "bounce");
 		numUDPPacketsReceived++;
 		if (numUDPPacketsReceived == numUDPPacketsWanted) {
 
@@ -230,7 +230,7 @@ public:
 	//		
 	void onUDPSocketServerRecv(void* sender, net::SocketPacket& packet)
 	{
-		traceL("Tests") << "UDPSocket Server Recv: " << (IPacket&)packet << ": " << packet.buffer << endl;
+		traceL("Tests") << "UDPSocket Server Recv: " << (IPacket&)packet << ": " << std::string(packet.data(), packet.size()) << endl;
 
 		// Relay back to the client
 		packet.info->socket.send(packet, packet.info->peerAddress);
@@ -269,7 +269,7 @@ public:
 
 	void runCleanup() {
 		debugL("Tests") << "#################### Finalizing" << endl;
-		app.cleanup();
+		app.finalize();
 		debugL("Tests") << "#################### Exiting" << endl;
 	}
 };
@@ -280,7 +280,7 @@ public:
 
 int main(int argc, char** argv) 
 {	
-	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
+	Logger::instance().add(new ConsoleChannel("debug", LTrace));
 	{
 		net::Tests run;
 	}

@@ -96,11 +96,11 @@ protected:
 
 	friend class Scheduler;
 	
-	std::string      _name;
-	std::string      _type;
-	sked::Trigger*   _trigger;
+	std::string _name;
+	std::string _type;
+	sked::Trigger* _trigger;
 	sked::Scheduler* _scheduler;
-	//std::unique_ptr<abstract::Runnable> _runnable;
+	mutable Mutex _mutex;
 };
 
 

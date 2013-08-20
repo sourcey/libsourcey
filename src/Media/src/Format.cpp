@@ -35,19 +35,19 @@ Format::Format() :
 }
 
 
-Format::Format(const string& name, const char* id, const VideoCodec& video, const AudioCodec& audio, int priority) : 
+Format::Format(const std::string& name, const char* id, const VideoCodec& video, const AudioCodec& audio, int priority) : 
 	name(name), id(id), video(video), audio(audio), priority(priority)
 {
 }
 
 
-Format::Format(const string& name, const char* id, const VideoCodec& video, int priority) : 
+Format::Format(const std::string& name, const char* id, const VideoCodec& video, int priority) : 
 	name(name), id(id), video(video), priority(priority)
 {
 }
 
 
-Format::Format(const string& name, const char* id, const AudioCodec& audio, int priority) : 
+Format::Format(const std::string& name, const char* id, const AudioCodec& audio, int priority) : 
 	name(name), id(id), audio(audio), priority(priority)
 {
 }
@@ -122,7 +122,7 @@ string Format::name() const
 
 string Format::extension() const
 {
-	string extension(this->id);
+	std::string extension(this->id);
 	std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 	return extension;
 }

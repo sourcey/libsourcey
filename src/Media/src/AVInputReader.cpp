@@ -1,7 +1,7 @@
 #include "Sourcey/Media/AVInputReader.h"
 #include "Sourcey/Platform.h"
 #include "Sourcey/Logger.h"
-#include "Poco/Format.h"
+//#include "Poco/Format.h"
 
 
 using namespace std;
@@ -13,36 +13,36 @@ namespace av {
 
 
 AVInputReader::AVInputReader(const Options& options)  : 
-	_thread("AVInputReader"),
+	_thread(),
 	_options(options),
-	_formatCtx(nil),
-	_video(nil),
-	_audio(nil),
+	_formatCtx(nullptr),
+	_video(nullptr),
+	_audio(nullptr),
 	_stopping(false)
 {		
-	traceL("AVInputReader", this) << "Creating" << endl;
+	traceL("AVInputReader", this) << "create" << endl;
 }
 
 
 AVInputReader::~AVInputReader() 
 {
-	traceL("AVInputReader", this) << "Destroying" << endl;
+	traceL("AVInputReader", this) << "destroy" << endl;
 
 	close();
 }
 
 
-void AVInputReader::openFile(const string& file)
+void AVInputReader::openFile(const std::string& file)
 {
 	traceL("AVInputReader", this) << "Opening: " << file << endl;	
-	openStream(file.c_str(), nil, nil);
+	openStream(file.c_str(), nullptr, nullptr);
 }
 
 
 #ifdef LIBAVDEVICE_VERSION
 void AVInputReader::openDevice(int deviceID, int width, int height, double framerate)
 {
-	string device;
+	std::string device;
 
 #ifdef WIN32
 	// Only vfwcap supports index based input, 
@@ -68,14 +68,14 @@ void AVInputReader::openDevice(int deviceID, int width, int height, double frame
 }
 
 
-void AVInputReader::openDevice(const string& device, int width, int height, double framerate) //int deviceID, 
+void AVInputReader::openDevice(const std::string& device, int width, int height, double framerate) //int deviceID, 
 {        
 	traceL("AVInputReader", this) << "Opening Device: " << device << endl;	
 
 	avdevice_register_all();
 
 	AVInputFormat* iformat;
-	AVDictionary*  iparams = nil;
+	AVDictionary*  iparams = nullptr;
         
 #ifdef WIN32
     iformat = av_find_input_format(_options.deviceEngine.c_str());
@@ -95,7 +95,7 @@ void AVInputReader::openDevice(const string& device, int width, int height, doub
 #endif
 	
     if (!iformat)
-		throw Exception("Couldn't find input format.");
+		throw std::runtime_error("Couldn't find input format.");
 	
 	// frame rate
 	if (framerate)
@@ -126,31 +126,31 @@ void AVInputReader::openStream(const char* filename, AVInputFormat* inputFormat,
 	av_register_all();
 
 	if (avformat_open_input(&_formatCtx, filename, inputFormat, formatParams) != 0)
-		throw Exception("Could not open the media source.");
+		throw std::runtime_error("Could not open the media source.");
 
 	if (av_find_stream_info(_formatCtx) < 0)
-		throw Exception("Could not find stream information.");
+		throw std::runtime_error("Could not find stream information.");
 	
   	av_dump_format(_formatCtx, 0, filename, 0);
 	
-	for (int i = 0; i < _formatCtx->nb_streams; i++) {
+	for (unsigned i = 0; i < _formatCtx->nb_streams; i++) {
 		if (_formatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO && 
-			_video == nil && !_options.disableVideo) {
+			_video == nullptr && !_options.disableVideo) {
 			_video = new VideoDecoderContext();
 			_video->create(_formatCtx, i);
 			_video->open();
 		}
 		else if (_formatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO &&
-			_audio == nil && !_options.disableAudio) {
+			_audio == nullptr && !_options.disableAudio) {
 			_audio = new AudioDecoderContext();
 			_audio->create(_formatCtx, i);
 			_audio->open();
 		}
 	}
 
-	if (_video == nil && 
-		_audio == nil)
-		throw Exception("Could not find a valid media stream.");
+	if (_video == nullptr && 
+		_audio == nullptr)
+		throw std::runtime_error("Could not find a valid media stream.");
 }
 
 
@@ -160,17 +160,17 @@ void AVInputReader::close()
 
 	if (_video) {
 		delete _video;
-		_video = nil;
+		_video = nullptr;
 	}
 
 	if (_audio) {
 		delete _audio;
-		_audio = nil;
+		_audio = nullptr;
 	}
 
 	if (_formatCtx) {
   		av_close_input_file(_formatCtx);
-		_formatCtx = nil;
+		_formatCtx = nullptr;
   	}
 
 	traceL("AVInputReader", this) << "Closing: OK" << endl;
@@ -186,7 +186,7 @@ void AVInputReader::start()
 
 	if (_video || _audio &&
 		!_thread.running()) {
-		traceL("AVInputReader", this) << "Initializing Thread" << endl;
+		traceL("AVInputReader", this) << "initializing Thread" << endl;
 		_stopping = false;
 		_thread.start(*this);
 	}
@@ -234,7 +234,7 @@ void AVInputReader::run()
  						if (_video->decode(ipacket, opacket)) {
 							//traceL("AVInputReader", this) << "Decoded video: " << _video->pts << endl;
 							VideoPacket video((char*)opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
-							video.opaque = &opacket;
+							video.source = &opacket;
 							emit(this, video);
 						}
 					}
@@ -248,7 +248,7 @@ void AVInputReader::run()
 						if (_audio->decode(ipacket, opacket)) {			
 							//traceL("AVInputReader", this) << "Decoded Audio: " << _audio->pts << endl;
 							AudioPacket audio((char*)opacket.data, opacket.size, _audio->pts);
-							audio.opaque = &opacket;
+							audio.source = &opacket;
 							emit(this, audio);
 						}	
 					}
@@ -274,7 +274,7 @@ void AVInputReader::run()
 				} 
 				/*
 				else {
-					warnL() << "[AVInputReader:" << this << "] Dropping frame from unknown stream:"		
+					warnL() << "[AVInputReader: " << this << "] Dropping frame from unknown stream:"		
 						<< "\n\tStream ID: " << ipacket.stream_index
 						<< "\n\tVideo ID: " << _video->stream->index
 						<< "\n\tAudio ID: " << _audio->stream->index
@@ -294,7 +294,7 @@ void AVInputReader::run()
 					gotFrame = _video->flush(opacket);
 					if (gotFrame) {
 						VideoPacket video((char*)opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
-						video.opaque = &opacket;
+						video.source = &opacket;
 						emit(this, video);
 					} 					
 					av_free_packet(&opacket);
@@ -308,7 +308,7 @@ void AVInputReader::run()
 					gotFrame = _audio->flush(opacket);
 					if (gotFrame) {
 						AudioPacket audio((char*)opacket.data, opacket.size, _audio->pts);
-						audio.opaque = &opacket;
+						audio.source = &opacket;
 						emit(this, audio);
 					}					
 					av_free_packet(&opacket);
@@ -317,22 +317,22 @@ void AVInputReader::run()
 				}
 
 				// End of file or error.
-				traceL() << "[AVInputReader:" << this << "] Decoding: EOF" << endl;
+				traceL() << "[AVInputReader: " << this << "] Decoding: EOF" << endl;
 				break;
 			}
 
 			scy::sleep(10);
 		};
 	} 
-	catch (Exception& exc) 
+	catch (std::exception&/*Exception&*/ exc) 
 	{
-		_error = exc.message();
-		errorL() << "[AVInputReader:" << this << "] Decoder Error: " << _error << endl;
+		_error = exc.what()/*message()*/;
+		errorL() << "[AVInputReader: " << this << "] Decoder Error: " << _error << endl;
 	}
 	catch (...) 
 	{
 		_error = "Unknown Error";
-		errorL() << "[AVInputReader:" << this << "] Unknown Error" << endl;
+		errorL() << "[AVInputReader: " << this << "] Unknown Error" << endl;
 	}
 
 	traceL("AVInputReader", this) << "Exiting" << endl;

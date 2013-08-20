@@ -21,9 +21,11 @@
 #include "Sourcey/Exception.h"
 #include "Sourcey/Base64.h"
 #include "Sourcey/Hex.h"
-#include <assert.h>
+
+#include <memory>
 #include <iostream>
 #include <sstream>
+#include <assert.h>
 
 
 using namespace std; 
@@ -39,7 +41,7 @@ Cipher::Cipher(const std::string& name,
 	int iterationCount) :
 	_initialized(false),
 	_encrypt(false),
-	_cipher(nil),
+	_cipher(nullptr),
 	_name(name),
 	_key(),
 	_iv()
@@ -61,7 +63,7 @@ Cipher::Cipher(const std::string& name,
 	const ByteVec& iv) :
 	_initialized(false),
 	_encrypt(false),
-	_cipher(nil),
+	_cipher(nullptr),
 	_name(name),
 	_key(key),
 	_iv(iv)
@@ -77,7 +79,7 @@ Cipher::Cipher(const std::string& name,
 Cipher::Cipher(const std::string& name) :
 	_initialized(false),
 	_encrypt(false),
-	_cipher(nil),
+	_cipher(nullptr),
 	_name(name),
 	_key(),
 	_iv()
@@ -148,12 +150,12 @@ int Cipher::final(unsigned char* output, int length)
 }
 
 
-inline scy::Encoder* createEncoder(Cipher::Encoding encoding)
+inline basic::Encoder* createEncoder(Cipher::Encoding encoding)
 {		
 	switch (encoding)
 	{
 	case Cipher::Binary:
-		return nil;
+		return nullptr;
 
 	case Cipher::Base64: 
 		return new base64::Encoder();
@@ -188,8 +190,8 @@ int Cipher::encrypt(
 
 	int reslen = 0;
 	int nwrite = 0;
-	std::unique_ptr<scy::Encoder> encoder(createEncoder(encoding));
-	std::unique_ptr<unsigned char[]> cryptbuf(encoder ? new unsigned char[outlen] : nil);
+	std::unique_ptr<basic::Encoder> encoder(createEncoder(encoding));
+	std::unique_ptr<unsigned char[]> cryptbuf(encoder ? new unsigned char[outlen] : nullptr);
 		
 	// Encrypt and then encode to outbuf
 	if (encoder) {
@@ -261,10 +263,10 @@ void Cipher::encryptStream(std::istream& source, std::ostream& sink, Encoding en
 	int reslen = 0;
 	int enclen = 0;	
 	
-	std::unique_ptr<scy::Encoder> encoder(createEncoder(encoding));
+	std::unique_ptr<basic::Encoder> encoder(createEncoder(encoding));
 	std::unique_ptr<unsigned char[]> readbuf(new unsigned char[N]);
 	std::unique_ptr<unsigned char[]> cryptbuf(new unsigned char[cryptsize]);
-	std::unique_ptr<char[]> encbuf(encoder ? new char[cryptsize * 2] : nil);
+	std::unique_ptr<char[]> encbuf(encoder ? new char[cryptsize * 2] : nullptr);
 
 	do
 	{
@@ -295,12 +297,12 @@ void Cipher::encryptStream(std::istream& source, std::ostream& sink, Encoding en
 }
 
 
-inline scy::Decoder* createDecoder(Cipher::Encoding encoding)
+inline basic::Decoder* createDecoder(Cipher::Encoding encoding)
 {		
 	switch (encoding)
 	{
 	case Cipher::Binary:
-		return nil;
+		return nullptr;
 
 	case Cipher::Base64: 
 	case Cipher::Base64_NoLF:
@@ -326,10 +328,10 @@ void Cipher::decryptStream(std::istream& source, std::ostream& sink, Encoding en
 	int cryptsize = N * 2; // must be bigger than N, see update()
 	int declen = 0;
 	
-	std::unique_ptr<scy::Decoder> decoder(createDecoder(encoding));
+	std::unique_ptr<basic::Decoder> decoder(createDecoder(encoding));
 	std::unique_ptr<unsigned char[]> readbuf(new unsigned char[N]);
 	std::unique_ptr<unsigned char[]> cryptbuf(new unsigned char[cryptsize]);
-	std::unique_ptr<char[]> decbuf(decoder ? new char[cryptsize * 2] : nil);
+	std::unique_ptr<char[]> decbuf(decoder ? new char[cryptsize * 2] : nullptr);
 		
 	do
 	{		
@@ -409,7 +411,7 @@ inline void getRandomBytes(ByteVec& vec, std::size_t count)
 	vec.clear();
 	vec.reserve(count);
 
-	for (int i = 0; i < count; ++i)
+	for (unsigned i = 0; i < count; ++i)
 		vec.push_back(rnd.nextChar());
 }
 

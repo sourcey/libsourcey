@@ -26,14 +26,14 @@ using namespace std;
 
 namespace scy {
 
-
+/*
 static Singleton<GarbageCollector> singleton;
 	
 
 GarbageCollector::GarbageCollector() : 
 	uv::Handle(&uv::defaultLoop(), new uv_timer_t)
 {
-	traceL("GarbageCollector", this) << "Creating" << std::endl;
+	traceL("GarbageCollector", this) << "create" << std::endl;
 
 	uv_timer_init(loop(), handle<uv_timer_t>());		
 	uv_timer_start(handle<uv_timer_t>(), GarbageCollector::onTimer, 2400, 2400);
@@ -54,7 +54,7 @@ void GarbageCollector::finalize()
 #ifdef _DEBUG
 	// Pending items will not be freed in release 
 	// mode since it may result in a crash
-	util::clearVector(_pending);
+	//util::clearVector(_pending);
 #endif
 }
 
@@ -68,7 +68,7 @@ void GarbageCollector::close()
 	
 void GarbageCollector::shutdown()
 {
-	traceL("GarbageCollector") << "Shutdown" << std::endl;
+	traceL("GarbageCollector") << "shutdown" << std::endl;
 
 	singleton.get()->close();
 	singleton.destroy();
@@ -83,7 +83,84 @@ void GarbageCollector::onTimer()
 		_pending.empty())
 		return;
 
-	traceL("GarbageCollector", this) << "Delete queue: "
+	traceL("GarbageCollector", this) << "delete queue: "
+		<< "\n\tReady: " << _ready.size() 
+		<< "\n\tPending: " << _pending.size()
+		<< std::endl;
+
+	// Delete waiting pointers
+	util::clearVector(_ready);
+
+	// Swap pending pointers to the ready queue
+	_ready.swap(_pending);
+	assert(_pending.empty());
+}
+
+
+GarbageCollector& GarbageCollector::instance() 
+{
+	return *singleton.get();
+}
+*/
+
+
+static Singleton<GarbageCollector> singleton;
+	
+
+GarbageCollector::GarbageCollector() : 
+	uv::Handle(&uv::defaultLoop(), new uv_timer_t)
+{
+	traceL("GarbageCollector", this) << "create" << std::endl;
+
+	uv_timer_init(loop(), handle<uv_timer_t>());		
+	uv_timer_start(handle<uv_timer_t>(), GarbageCollector::onTimer, 2400, 2400);
+	uv_unref(handle());
+}
+
+	
+GarbageCollector::~GarbageCollector()
+{
+	close();
+}
+
+
+void GarbageCollector::finalize()
+{
+	Mutex::ScopedLock lock(_mutex);
+	util::clearVector(_ready);
+#ifdef _DEBUG
+	// Pending items will not be freed in release 
+	// mode since it may result in a crash
+	//util::clearVector(_pending);
+#endif
+}
+
+	
+void GarbageCollector::close()
+{
+	finalize();
+	uv::Handle::close();
+}
+
+	
+void GarbageCollector::shutdown()
+{
+	traceL("GarbageCollector") << "shutdown" << std::endl;
+
+	singleton.get()->close();
+	singleton.destroy();
+}
+
+
+void GarbageCollector::onTimer()
+{
+	Mutex::ScopedLock lock(_mutex);
+
+	if (_ready.empty() && 
+		_pending.empty())
+		return;
+
+	traceL("GarbageCollector", this) << "delete queue: "
 		<< "\n\tReady: " << _ready.size() 
 		<< "\n\tPending: " << _pending.size()
 		<< std::endl;

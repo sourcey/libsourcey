@@ -26,7 +26,7 @@
 #include "Sourcey/Media/IEncoder.h"
 #include "Sourcey/Media/AudioEncoder.h"
 #include "Sourcey/Media/VideoEncoder.h"
-#include "Sourcey/Interfaces.h"
+#include "Sourcey/Interface.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/DateTime.h"
 
@@ -38,7 +38,7 @@ namespace av {
 
 
 template <class EncoderT>
-class CaptureEncoder: public abstract::Startable, public EncoderT
+class CaptureEncoder: public basic::Startable, public EncoderT
 	/// This class extends a Encoder object for encoding the output
 	/// of an ICapture object.
 	///
@@ -79,11 +79,11 @@ public:
 			//_capture->start(Callback<CaptureEncoder, const MediaPacket, false>(this, &CaptureEncoder::onCapture));
 			
 		} 
-		catch (Exception& exc) {
-			errorL() << "Encoder Error: " << exc.message() << std::endl;
+		catch (std::exception&/*Exception&*/ exc) {
+			errorL() << "Encoder Error: " << exc.what()/*message()*/ << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
-			exc.rethrow();
+			throw exc;/*exc.rethrow();*/
 		}
 	}
 
@@ -99,8 +99,8 @@ public:
 			
 			EncoderT::setState(this, EncoderState::None);
 		} 
-		catch (Exception& exc) {
-			errorL() << "Encoder Error: " << exc.message() << std::endl;
+		catch (std::exception&/*Exception&*/ exc) {
+			errorL() << "Encoder Error: " << exc.what()/*message()*/ << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 		}
 
@@ -112,12 +112,12 @@ public:
 	{
 		try {
 			if (!EncoderT::isEncoding())
-				throw Exception("The encoder is not initialized.");
+				throw std::runtime_error("The encoder is not initialized.");
 
 			int size = EncoderT::encode((unsigned char*)packet.data, packet.size);
 		} 
-		catch (Exception& exc) {
-			errorL() << "Encoder Error: " << exc.message() << std::endl;
+		catch (std::exception&/*Exception&*/ exc) {
+			errorL() << "Encoder Error: " << exc.what()/*message()*/ << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
 		}
@@ -170,11 +170,11 @@ public:
 			
 			EncoderT::setState(this, EncoderState::Encoding);
 		} 
-		catch (Exception& exc) {
-			errorL() << "Encoder Error: " << exc.message() << std::endl;
+		catch (std::exception&/*Exception&*/ exc) {
+			errorL() << "Encoder Error: " << exc.what()/*message()*/ << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
-			exc.rethrow();
+			throw exc;/*exc.rethrow();*/
 		}
 	}
 
@@ -189,8 +189,8 @@ public:
 
 			EncoderT::setState(this, EncoderState::None);
 		} 
-		catch (Exception& exc) {
-			errorL() << "Encoder Error: " << exc.message() << std::endl;
+		catch (std::exception&/*Exception&*/ exc) {
+			errorL() << "Encoder Error: " << exc.what()/*message()*/ << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 		}
 
@@ -201,7 +201,7 @@ public:
 	virtual void onCapture(const MediaPacket& packet)
 	{		
 		if (!isEncoding())
-			throw Exception("The encoder is not initilaized.");
+			throw std::runtime_error("The encoder is not initilaized.");
 
 		// No encoding takes place, just relay the packet.
 		//PacketEncoded.emit(this, static_cast<Packet&>(packet));

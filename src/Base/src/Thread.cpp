@@ -21,6 +21,7 @@
 #include "Sourcey/Logger.h"
 #include "Sourcey/Platform.h"
 #include "assert.h"
+#include <memory>
 
 
 using namespace std;
@@ -35,11 +36,28 @@ Thread::Thread() :
 {
 }
 
-Thread::Thread(const std::string& name) :
+
+Thread::Thread(basic::Runnable& target) :
 	_running(false),
-	_name(name),
 	_id(0)
 {
+	start(target);
+}
+
+
+Thread::Thread(std::function<void()> target) :
+	_running(false),
+	_id(0)
+{
+	start(target);
+}
+
+
+Thread::Thread(std::function<void(void*)> target, void* opaque) :
+	_running(false),
+	_id(0)
+{
+	start(target, opaque);
 }
 
 
@@ -49,74 +67,109 @@ Thread::~Thread()
 
 
 namespace internal {
-	struct ThreadReq
+	struct AsyncMethod
 	{
 		Thread* thread;
-		abstract::Runnable* target;
+		std::function<void()> target;
+	};
+
+	struct AsyncMethodArg
+	{
+		Thread* thread;
+		std::function<void(void*)> target;
+		void* opaque;
 	};
 }
 
 
-void Thread::runAsync(void* arg)
+void Thread::runAsync(void* arg, bool hasArg)
 {
-	cout << "Thread running" << endl;
-	internal::ThreadReq* req = reinterpret_cast<internal::ThreadReq*>(arg);
+	Thread* self = nullptr;
 	try {
-		req->thread->_id = uv_thread_self();
-		req->thread->_running = true;
-		req->target->run();
-		cout << "Thread ended" << endl;
+		if (hasArg) {
+			std::unique_ptr<internal::AsyncMethodArg> req(reinterpret_cast<internal::AsyncMethodArg*>(arg));
+			self = req.get()->thread;
+			self->_id = uv_thread_self();
+			self->_running = true;
+			req.get()->target(req.get()->opaque);
+		}
+		else {
+			std::unique_ptr<internal::AsyncMethod> req(reinterpret_cast<internal::AsyncMethod*>(arg));
+			self = req.get()->thread;
+			self->_id = uv_thread_self();
+			self->_running = true;
+			req.get()->target();
+		}
 	}
 	catch (std::exception& exc) {
-		cerr << "Error:" << exc.what() << endl;
+		cerr << "thread error: " << exc.what() << endl;
 #ifdef _DEBUG
 		throw exc;
 #endif
 	}
-	req->thread->_id = 0;
-	req->thread->_running = false;
-	delete req;
-	cout << "Thread exit" << endl;
+	assert(self);
+	if (self) {
+		self->_id = 0;
+		self->_running = false;
+	}
 }
 
 
-void Thread::start(abstract::Runnable& target)
+void Thread::start(std::function<void()> target)
 {
-	//ScopedLock lock(_mutex);
-	internal::ThreadReq* req = new internal::ThreadReq;
+	Mutex::ScopedLock lock(_mutex);
+	auto req = new internal::AsyncMethod;
 	req->thread = this;
-	req->target = &target;
-	uv_thread_create(&_handle, runAsync, req);
+	req->target = target;	
+	startC([](void* arg) {
+		runAsync(arg, false);
+	}, req);
 }
 
 
-void Thread::start(Callable target, void* opaque)
+void Thread::start(std::function<void(void*)> target, void* opaque)
 {
-	//ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
+	auto req = new internal::AsyncMethodArg;
+	req->thread = this;
+	req->target = target;	
+	req->opaque = opaque;
+	startC([](void* arg) {
+		runAsync(arg, true);
+	}, req);
+}
+
+
+void Thread::start(basic::Runnable& target)
+{
+	Mutex::ScopedLock lock(_mutex);
+	auto req = new internal::AsyncMethod;
+	req->thread = this;
+	req->target = std::bind(&basic::Runnable::run, &target);
+	startC([](void* arg) {
+		runAsync(arg, false);
+	}, req);
+}
+
+
+
+void Thread::startC(basic::Callable target, void* opaque)
+{
+	Mutex::ScopedLock lock(_mutex);
 	uv_thread_create(&_handle, target, opaque);
 }
 
 
 void Thread::join()
 {
-	//ScopedLock lock(_mutex);
-	cout << "Thread join" << endl;
 	uv_thread_join(&_handle);
-	cout << "Thread join: OK" << endl;
 }
 
 
 unsigned long Thread::id() const
 {
-	//ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _id;
-}
-
-
-std::string Thread::name() const
-{
-	//ScopedLock lock(_mutex);	
-	return _name;
 }
 
 
@@ -128,10 +181,30 @@ unsigned long Thread::currentID()
 
 bool Thread::running() const
 {
-	//ScopedLock lock(_mutex);
+	Mutex::ScopedLock lock(_mutex);
 	return _running;
 }
 
 
-
 } // namespace scy
+
+
+
+
+
+
+/*
+void Thread::start(basic::Runnable& target)
+{
+	Mutex::ScopedLock lock(_mutex);
+	auto req = new internal::AsyncMethod;
+	req->thread = this;
+	req->target = std::bind(&basic::Runnable::run, &target);
+	uv_thread_create(&_handle, runAsync, req);
+}
+std::string Thread::name() const
+{
+	Mutex::ScopedLock lock(_mutex);	
+	return _name;
+}
+*/

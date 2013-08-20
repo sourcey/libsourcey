@@ -82,8 +82,8 @@ int main(int argc, char** argv)
 	Messenger app(srvAddr);
 	app.connect();
 	
-	string network = "4";
-	string event;
+	std::string network = "4";
+	std::string event;
 	char o = 0;
 	while (o != 'Q') 
 	{	

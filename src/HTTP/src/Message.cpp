@@ -27,10 +27,6 @@
 
 #include "Sourcey/HTTP/Message.h"
 
-#include "Poco/NumberFormatter.h"
-#include "Poco/NumberParser.h"
-#include "Poco/String.h"
-
 
 namespace scy {
 namespace http {
@@ -51,13 +47,13 @@ const std::string Message::CONNECTION_CLOSE           = "Close";
 const std::string Message::EMPTY;
 
 
-Message::Message():
+Message::Message() :
 	_version(HTTP_1_1)
 {
 }
 
 
-Message::Message(const std::string& version):
+Message::Message(const std::string& version) :
 	_version(version)
 {
 }
@@ -172,9 +168,8 @@ bool Message::hasContentLength() const
 
 void Message::write(std::ostream& ostr) const
 {
-	NVHash::ConstIterator it = begin();
-	while (it != end())
-	{
+	NVCollection::ConstIterator it = begin();
+	while (it != end()) {
 		ostr << it->first << ": " << it->second << "\r\n";
 		++it;
 	}

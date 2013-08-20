@@ -72,7 +72,7 @@ public:
 	}
 	*/
 
-	int main(const vector<string>& args)
+	int main(const std::vector<std::string>& args)
 	{		
 		Logger::instance().add(new ConsoleChannel("debug"));
 
@@ -132,7 +132,7 @@ public:
 	}
 
 
-	const IUser* authenticateBindingRequest(ICE::Agent& agent, const string& username) 
+	const IUser* authenticateBindingRequest(ICE::Agent& agent, const std::string& username) 
 	{
 		Log("debug") << "Authenticate ICE Connectivity Check: " << username << endl; //Spot::env().account().get(username);
 		return _user; //Spot::env().account().get(username);
@@ -143,7 +143,7 @@ public:
 		// The request username must equal the Jingle peer's JID node.
 		const IUser* user = NULL;
 	
-		string peerUsername = _ice->isControlling() ? _responder : _initiator;
+		std::string peerUsername = _ice->isControlling() ? _responder : _initiator;
 		string::size_type index = peerUsername.find("@");
 		peerUsername = peerUsername.substr(0, index);
 		if (username == peerUsername) {
@@ -265,7 +265,7 @@ public:
 				setState(SessionState::InProgress);
 				*/	
 			}
-			catch (Exception& exc) {
+			catch (std::exception/*Exception*/& exc) {
 				// Set ICE processing to Failed, in turn terminating the Session.
 				agent.setFailed();
 			}

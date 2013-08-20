@@ -7,15 +7,14 @@
 
 namespace scy {
 
-
+	
 template <class S>
 class Singleton
-	// This is a helper template class for managing
-	// singleton objects allocated on the heap.
+	/// This is a helper template class for managing
+	/// singleton objects allocated on the heap.
 {
 public:
-	Singleton() :
-		_ptr(0)
+	Singleton() : _ptr(0)
 		// Creates the Singleton wrapper.
 	{
 	}
@@ -31,7 +30,7 @@ public:
 	S* get()
 		// Returns a pointer to the singleton object
 		// hold by the Singleton. The first call
-		// to get on a NULL singleton will instantiate
+		// to get on a nullptr singleton will instantiate
 		// the singleton.
 	{
 		Mutex::ScopedLock lock(_m);
@@ -49,14 +48,14 @@ public:
 		_ptr = newPtr;
 		return oldPtr;
 	}
-
+	
 	void destroy()
 		// Destroys the managed singleton instance.
 	{
 		Mutex::ScopedLock lock(_m);
 		if (_ptr)
 			delete _ptr;
-		_ptr = nil;
+		_ptr = nullptr;
 	}
 	
 private:

@@ -34,17 +34,17 @@ namespace net {
  
 SSLAdapter::SSLAdapter(net::SSLBase* socket) :
 	_socket(socket),
-	_ssl(nil),
-	_readBIO(nil),
-	_writeBIO(nil)
+	_ssl(nullptr),
+	_readBIO(nullptr),
+	_writeBIO(nullptr)
 {
-	traceL("SSLAdapter", this) << "Creating" << endl;
+	traceL("SSLAdapter", this) << "create" << endl;
 }
 
 
 SSLAdapter::~SSLAdapter() 
 {	
-	traceL("SSLAdapter", this) << "Destroying" << endl;
+	traceL("SSLAdapter", this) << "destroy" << endl;
 	if (_ssl) {
 		SSL_free(_ssl);
 		_ssl = NULL;
@@ -139,9 +139,9 @@ void SSLAdapter::flush()
 	// Read any decrypted SSL data from the read BIO
 	// NOTE: Overwriting the socket's raw SSL recv buffer
 	int nread = 0;
-	while ((nread = SSL_read(_ssl, _socket->_buffer.begin(), _socket->_buffer.capacity())) > 0) {
-		_socket->_buffer.limit(nread);
-		_socket->onRecv(_socket->_buffer);
+	while ((nread = SSL_read(_ssl, _socket->_buffer.data(), _socket->_buffer.capacity())) > 0) {
+		//_socket->_buffer.limit(nread);
+		_socket->onRecv(mutableBuffer(_socket->_buffer.data(), nread));
 	}
 	
 	// Flush any pending outgoing data
@@ -189,7 +189,7 @@ void SSLAdapter::handleError(int rc)
 		char buffer[256];
 		ERR_error_string_n(ERR_get_error(), buffer, sizeof(buffer));
 		std::string msg(buffer);
-		throw Exception("SSL connection error: " + msg);
+		throw std::runtime_error("SSL connection error: " + msg);
  		break;
 	}
 }

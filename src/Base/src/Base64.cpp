@@ -24,6 +24,7 @@
 
 namespace scy {
 namespace base64 {
+namespace internal {
 	
 	
 //
@@ -37,7 +38,7 @@ void init_encodestate(encodestate* state_in)
 	state_in->result = 0;
 	state_in->stepcount = 0;
 	state_in->linelength = LINE_LENGTH; // added: set 0 for no line feeds
-	state_in->nullterminate = 0;  // added: set 1 for null terminated output string
+	state_in->nullptrlterminate = 0;  // added: set 1 for nullptrl terminated output string
 }
 
 
@@ -131,7 +132,7 @@ int encode_blockend(char* code_out, encodestate* state_in)
 	case step_A:
 		break;
 	}
-	if (state_in->nullterminate)
+	if (state_in->nullptrlterminate)
 		*codechar++ = '\n';
 
 	return codechar - code_out;
@@ -225,4 +226,4 @@ int decode_block(const char* code_in, const int length_in, char* plaintext_out, 
 }
 
 
-} } // namespace scy::base64
+} } } // namespace scy::base64::internal

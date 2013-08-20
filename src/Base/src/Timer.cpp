@@ -20,7 +20,6 @@
 #include "Sourcey/Timer.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Platform.h"
-//#include "Sourcey/Crypto/Crypto.h"
 #include "assert.h"
 
 
@@ -33,30 +32,20 @@ namespace scy {
 Timer::Timer(uv::Loop& loop, bool ghost) : 
 	uv::Handle(&loop, new uv_timer_t), _ghost(ghost)
 {
-	traceL("Timer", this) << "Creating" << endl;
+	//traceL("Timer", this) << "create" << endl;
 	init();
-}
-	
-
-Timer::Timer(Int64 timeout, Int64 interval, uv::Loop& loop, bool ghost) : 
-	uv::Handle(&loop, new uv_timer_t), _ghost(ghost)
-{
-	traceL("Timer", this) << "Creating" << endl;	
-	init();
-	if (timeout || interval)
-		start(timeout, interval);
 }
 
 
 Timer::~Timer()
 {
-	traceL("Timer", this) << "Destroying" << endl;
+	//traceL("Timer", this) << "destroy" << endl;
 }
 
 
 void Timer::init()
 {
-	traceL("Timer", this) << "Init" << endl;	
+	//traceL("Timer", this) << "Init" << endl;	
 
 	_count = 0;
 	_timeout = 0;
@@ -65,11 +54,8 @@ void Timer::init()
 	assert(_handle);
 	_handle->data = this;
 			
-	int r = uv_timer_init(loop(), handle<uv_timer_t>());
-	if (r)
+	if (uv_timer_init(loop(), handle<uv_timer_t>()))
 		setAndThrowLastError("Cannot initialize timer");
-
-	handle();
 
 	// Ghost timers do not reference the main loop
 	if (_ghost)
@@ -77,15 +63,15 @@ void Timer::init()
 }
 
 
-bool Timer::start(Int64 interval)
+void Timer::start(Int64 interval)
 {
-	return start(interval, interval);
+	start(interval, interval);
 }
 
 
-bool Timer::start(Int64 timeout, Int64 interval) 
+void Timer::start(Int64 timeout, Int64 interval) 
 {
-	traceL("Timer", this) << "Starting: " << _handle << ": " << timeout << ": " << interval << endl;
+	//traceL("Timer", this) << "Starting: " << << timeout << ": " << interval << endl;
 	assert(_handle);
 	assert(timeout > 0);
 
@@ -93,61 +79,56 @@ bool Timer::start(Int64 timeout, Int64 interval)
 	_interval = interval;
 	_count = 0;
 
-    int r = uv_timer_start(handle<uv_timer_t>(), Timer::onTimeout, timeout, interval);
-    if (r) 
+    if (uv_timer_start(handle<uv_timer_t>(), [](uv_timer_t* req, int) {
+		auto self = reinterpret_cast<Timer*>(req->data);
+		self->_count++;
+		self->Timeout.emit(self);
+	}, timeout, interval))
 		setAndThrowLastError("Invalid timer");
-	//uv_ref(handle());
 	assert(active());
-    return r == 0;
 }
 
 
-bool Timer::stop() 
+void Timer::stop() 
 {
-	traceL("Timer", this) << "Stopping: " << _handle << endl;
+	//traceL("Timer", this) << "Stopping: " << _handle << endl;
 	
 	if (!active())
-		return false;
+		return; // do nothing
 	
 	_count = 0;
-    int r = uv_timer_stop(handle<uv_timer_t>());
-    if (r) 
+    if (uv_timer_stop(handle<uv_timer_t>())) 
 		setAndThrowLastError("Invalid timer");
-	//uv_unref(handle());
 	assert(!active());	
-    return r == 0;
 }
 
 
-bool Timer::restart()
+void Timer::restart()
 {
-	traceL("Timer", this) << "Restarting: " << _handle << endl;
+	//traceL("Timer", this) << "Restarting: " << _handle << endl;
 	if (!active())
 		return start(_timeout, _interval);
 	return again();
 }
 
 
-bool Timer::again() 
+void Timer::again() 
 {
-	traceL("Timer", this) << "Again: " << _handle << endl;
+	//traceL("Timer", this) << "Again: " << _handle << endl;
 
-	assert(_handle);
-    int r = uv_timer_again(handle<uv_timer_t>());
-    if (r) 
+	assert(handle());
+    if (uv_timer_again(handle<uv_timer_t>())) 
 		setAndThrowLastError("Invalid timer");
 	assert(active());
-	//uv_ref(handle());
 	_count = 0;
-    return r == 0;
 }
 
 
 void Timer::setInterval(Int64 interval)
 {
-	traceL("Timer", this) << "Set interval: " << interval << endl;
-
-	assert(_handle);
+	//traceL("Timer", this) << "Set interval: " << interval << endl;
+	
+	assert(handle());
     uv_timer_set_repeat(handle<uv_timer_t>(), interval);
 }
 
@@ -166,7 +147,7 @@ Int64 Timer::timeout() const
 
 Int64 Timer::interval() const
 {	
-	assert(_handle);
+	assert(handle());
 	return std::min<Int64>(uv_timer_get_repeat(handle<uv_timer_t>()), 0);
 }
 
@@ -177,192 +158,34 @@ Int64 Timer::count()
 }
 
 
+} // namespace scy
+
+
+
+
+
+	
+
+/*
+Timer::Timer(Int64 timeout, Int64 interval, uv::Loop& loop, bool ghost) : 
+	uv::Handle(&loop, new uv_timer_t), _ghost(ghost)
+{
+	//traceL("Timer", this) << "create" << endl;	
+	init();
+	//if (timeout || interval)
+	//	start(timeout, interval);
+}
+*/
+/*
 void Timer::onTimeout()
 {	
-	traceL("Timer", this) << "On timeout: " << _count << endl;
-	_count++;
-	Timeout.emit(this);
+	//traceL("Timer", this) << "On timeout: " << _count << endl;
 }
-
-
-//
-// Timeout
-//
-
-
-Timeout::Timeout(long delay, bool autoStart) :
-	_startAt(0), _delay(delay) 
-{
-	if (autoStart)
-		start();
-}
-
-
-Timeout::Timeout(const Timeout& src) :
-	_startAt(src._startAt), _delay(src._delay) 
-{
-}
-
-
-Timeout& Timeout::operator = (const Timeout& src) 
-{
-	_startAt = src._startAt;
-	_delay = src._delay;
-	return *this;
-}
-
-
-Timeout::~Timeout() 
-{
-}
-
-
-bool Timeout::running() const 
-{
-	return _startAt != 0;
-}
-
-
-void Timeout::start() 
-{
-	_startAt = scy::getTimeHR();
-}
-
-
-void Timeout::stop() 
-{
-	_startAt = 0;
-}
-
-
-void Timeout::reset() 
-{
-	_startAt = scy::getTimeHR();
-}
-
-
-long Timeout::remaining() const 
-{
-	time_t current = scy::getTimeHR();
-	long remaining = static_cast<long>(_delay - (current - _startAt));
-	return remaining > 0 ? remaining : 0;
-}
-
-
-bool Timeout::expired() const 
-{
-	if (_delay == 0) //_startAt == 0 || 
-		return false;
-
-	return remaining() == 0;
-}
-
-
-//
-// Stopwatch
-//
-
-
-Stopwatch::Stopwatch() : 
-	_elapsed(0), _running(false)
-{
-}
-
-
-Stopwatch::~Stopwatch()
-{
-}
-
-
-void Stopwatch::start()
-{
-	if (!_running) {
-		_start.update();
-		_running = true;
-	}
-}
-
-
-void Stopwatch::stop()
-{
-	if (_running) {
-		Timestamp current;
-		_elapsed += current - _start;
-		_running = false;
-	}
-}
-
-
-int Stopwatch::elapsedSeconds() const
-{
-	return int(elapsed()/resolution());
-}
-
-
-int Stopwatch::elapsedMilliseconds() const
-{
-	return int(elapsed()/(resolution()/1000));
-}
-
-
-Timestamp::TimeVal Stopwatch::resolution()
-{
-	return Timestamp::resolution();
-}
-
-
-Timestamp::TimeDiff Stopwatch::elapsed() const
-{
-	if (_running) {
-		Timestamp current;
-		return _elapsed + (current - _start);
-	}
-	else {
-		return _elapsed;
-	}
-}
-
-
-void Stopwatch::reset()
-{
-	_elapsed = 0;
-	_running = false;
-}
-
-
-void Stopwatch::restart()
-{
-	_elapsed = 0;
-	_start.update();
-	_running = true;
-}
-
-
-//
-// Timed Token
-//
-
-
-TimedToken::TimedToken(long duration) : 
-	Timeout(duration), _id(util::randomString(32)) 
-{
-}
-
-
-TimedToken::TimedToken(const std::string& id = util::randomString(32), long duration = 10000) : 
-	Timeout(duration), _id(id) 
-{
-}
-
-
-} // namespace scy::uv
-
-
-
+*/
 /*
 void Timer::close()
 {
-	traceL("Timer", this) << "Closing: " << _handle << endl;
+	//traceL("Timer", this) << "Closing: " << _handle << endl;
 	Base::close();
 }
 */
@@ -375,7 +198,7 @@ void Timer::updateState()
 	bool wasActive = _active;
 	_active = !!uv_is_active((uv_handle_t*) handle<uv_timer_t>());
 		
-	traceL("Timer", this) << "Update State: " << _active << endl;
+	//traceL("Timer", this) << "Update State: " << _active << endl;
 	if (!wasActive && _active) {
 		// If our state is changing from inactive to active, we
 		// increase the loop's reference count.

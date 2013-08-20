@@ -4,7 +4,7 @@
 #include "StreamingResponder.h"
 #include "WebSocketResponder.h"
 
-#include "Sourcey/Containers.h"
+#include "Sourcey/Collection.h"
 #include "Sourcey/Media/MediaFactory.h"
 #include "Sourcey/Media/AVInputReader.h"
 #include "Sourcey/Media/FLVMetadataInjector.h"
@@ -95,11 +95,11 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 								
 	// Attach an async queue so we don't choke
 	// the video capture while encoding.
-	AsyncPacketQueue* async = new AsyncPacketQueue(options.oformat.name == "MJPEG" ? 10 : 2048);
+	auto async = new AsyncPacketQueue(options.oformat.name == "MJPEG" ? 10 : 2048);
 	stream.attach(async, 3, true);
 
 	// Attach the video encoder				
-	av::AVPacketEncoder* encoder = new av::AVPacketEncoder(options);
+	auto encoder = new av::AVPacketEncoder(options);
 	encoder->initialize();
 	stream.attach(encoder, 5, true);		
 				
@@ -113,7 +113,7 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 			// no default encoding
 		}
 		else if (options.encoding == "Base64") {
-			Base64PacketEncoder* base64 = new Base64PacketEncoder();
+			auto base64 = new Base64PacketEncoder();
 			stream.attach(base64, 9, true);
 		}
 		else
@@ -122,12 +122,12 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 	else if (options.oformat.name == "FLV") {
 
 		// Allow mid-stream flash client connection
-		FLVMetadataInjector* injector = new FLVMetadataInjector(options.oformat);
+		auto injector = new FLVMetadataInjector(options.oformat);
 		stream.attach(injector, 10);
 	}
 		
 	// Attach the HTTP output packetizer
-	IPacketizer* packetizer = nil;
+	IPacketizer* packetizer = nullptr;
 	if (options.packetizer.empty() ||
 		options.packetizer == "none" ||
 		options.packetizer == "None")
@@ -146,7 +146,7 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 		stream.attach(packetizer, 10, true);
 					
 	// Attach a sync queue to synchronize output with the event loop
-	SyncPacketQueue* sync = new SyncPacketQueue;
+	auto sync = new SyncPacketQueue;
 	stream.attach(sync, 15, true);
 }
 
@@ -165,7 +165,7 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 {
 	try 
 	{
-		http::Request& request = conn.request();
+		auto& request = conn.request();
 
 		// Log incoming requests
 		infoL("HTTPStreamingConnectionFactory")
@@ -174,9 +174,9 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 			
 		// Parse streaming options from query
 		StreamingOptions options(_server);
-		NVHash params;
+		NVCollection params;
 		request.getURIParameters(params);
-		FormatRegistry& formats = MediaFactory::instance().formats();				
+		FormatRegistry& formats = MediaFactory::instance().formats();
 
 		// An exception will be thrown if no format was provided, 
 		// or if the request format is not registered.
@@ -197,7 +197,7 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 		// Video captures must be initialized in the main thread. 
 		// See MediaFactory::loadVideo		
 		av::Device dev;	
-		MediaFactory& media = av::MediaFactory::instance();
+		auto& media = av::MediaFactory::instance();
 		if (options.oformat.video.enabled) {
 			media.devices().getDefaultVideoCaptureDevice(dev);
 			options.videoCapture = media.createVideoCapture(dev.id);
@@ -232,9 +232,9 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 			return new SnapshotRequestHandler(conn, options);	
 		}	
 	}
-	catch (Exception& exc)
+	catch (std::exception&/*Exception&*/ exc)
 	{
-		errorL("StreamingRequestHandlerFactory") << "Request error: " << exc.message() << endl;
+		errorL("StreamingRequestHandlerFactory") << "Request error: " << exc.what()/*message()*/ << endl;
 	}
 		
 	errorL("StreamingRequestHandlerFactory") << "Bad Request" << endl;

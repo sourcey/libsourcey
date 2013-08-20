@@ -109,7 +109,7 @@ public:
 class DeviceWatcher 
 {
 public:
-	explicit DeviceWatcher(IDeviceManager* dm) {}
+	explicit DeviceWatcher(IDeviceManager*) {}
 	virtual ~DeviceWatcher() {}
 	virtual bool start() { return true; }
 	virtual void stop() {}
@@ -162,7 +162,7 @@ public:
 	virtual bool getDefaultVideoCaptureDevice(Device& device);
 
 	static bool filterDevices(std::vector<Device>& devices, const char* const exclusionList[]);
-		// The exclusionList MUST be a nil terminated list.
+		// The exclusionList MUST be a nullptr terminated list.
 	
 	static bool matchID(std::vector<Device>& devices, Device& out, int id);
 		// Returns a device matching the given ID.
@@ -188,7 +188,7 @@ protected:
 	DeviceWatcher* watcher();
 
 private:
-	// The exclusionList MUST be a nil terminated list.
+	// The exclusionList MUST be a nullptr terminated list.
 	static bool shouldDeviceBeIgnored(const std::string& deviceName, 
 		const char* const exclusionList[]);
 

@@ -18,8 +18,8 @@
 
 
 #include "Sourcey/Task.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Application.h"
+//#include "Sourcey/Logger.h"
+//#include "Sourcey/Application.h"
 #include "Sourcey/Util.h"
 
 #include <assert.h>
@@ -30,6 +30,48 @@ using namespace std;
 
 namespace scy {
 
+	
+Task::Task(bool repeat) : 
+	_id(util::randomNumber()),
+	_repeating(repeat),
+	_destroyed(false)
+{ 	
+}
+
+
+Task::~Task()
+{
+	assert(destroyed());
+}
+
+
+void Task::destroy()			
+{
+	_destroyed = true;
+}
+
+
+UInt32 Task::id() const
+{
+	return _id;
+}
+
+
+bool Task::destroyed() const						 
+{ 
+	return _destroyed;
+}
+
+
+bool Task::repeating() const						 
+{ 
+	return _repeating;
+}
+
+
+} // namespace scy
+
+
 
 /*
 Task::Task(bool repeating) : 
@@ -37,29 +79,20 @@ Task::Task(bool repeating) :
 	_repeating(repeating),
 	_destroyed(false),
 	_cancelled(true)//,
-	//_runner(NULL)
+	//_runner(nullptr)
 { 
 }
-*/
-
-	
-Task::Task() : //Runner& runner, , bool autoStartbool repeating
-	_id(static_cast<UInt32>(util::randomNumber(8))),
-	//_repeating(repeating),
-	_destroyed(false)//,
+	//,//Runner& runner, , bool autoStartbool repeating
 	//_cancelled(true)//,
 	//_runner(&runner)
-{ 	
 	//if (autoStart)
 	//	start();
-}
 
+	//assert(0);
+	//if (!destroyed())
+	//	runner().destroy(this);
+*/
 
-Task::~Task()
-{
-	traceL("Task", this) << "Destroying" << endl;
-	//assert(destroyed());
-}
 
 
 /*
@@ -82,21 +115,8 @@ void Task::cancel()
 	//if (!cancelled())
 	//	runner().cancel(this);
 }
-*/
 
 
-void Task::destroy()			
-{
-	traceL("Task", this) << "Destroying" << endl;
-	_destroyed = true;
-
-	//assert(0);
-	//if (!destroyed())
-	//	runner().destroy(this);
-}
-
-
-/*
 bool Task::beforeRun()			
 {
 	Mutex::ScopedLock lock(_mutex);	
@@ -115,42 +135,16 @@ bool Task::cancelled() const
 	Mutex::ScopedLock lock(_mutex);	
 	return _cancelled;
 }
-*/
 
 
-UInt32 Task::id() const
-{
-	Mutex::ScopedLock lock(_mutex);	
-	return _id;
-}
-
-
-bool Task::destroyed() const						 
-{ 
-	Mutex::ScopedLock lock(_mutex);	
-	return _destroyed;
-}
-
-
-bool Task::repeating() const						 
-{ 
-	Mutex::ScopedLock lock(_mutex);	
-	return _repeating;
-}
-
-
-/*	
 Runner& Task::runner()						 
 { 
 	Mutex::ScopedLock lock(_mutex);	
 	if (!_runner)
-		throw Exception("Tasks must have a Runner instance.");
+		throw std::runtime_error("Tasks must have a Runner instance.");
 	return *_runner;
 }
 */
-
-
-} // namespace scy
 
 
 
@@ -165,15 +159,15 @@ Runner& Task::runner()
 
 	//assert(!_!cancelled);
 	//
-	//	throw Exception("The tasks is already !cancelled.");
+	//	throw std::runtime_error("The tasks is already !cancelled.");
 
 	//ScopedLock lock(_mutex);
 	//assert(_!cancelled);	
 	//if (!cancelled())
-	//	throw Exception("The tasks is not !cancelled.");
+	//	throw std::runtime_error("The tasks is not !cancelled.");
 	//ScopedLock lock(_mutex);
 	//assert(!_destroyed);
-	//const string& name, //const string& name, //,
+	//const std::string& name, //const std::string& name, //,
 	//_name(name)//,
 	//_name(name)
 	
@@ -186,7 +180,7 @@ string Task::name() const
 }
 
 
-void Task::setName(const string& name) 
+void Task::setName(const std::string& name) 
 {
 	Mutex::ScopedLock lock(_mutex);	
 	_name = name;

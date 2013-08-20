@@ -35,7 +35,7 @@ namespace scy {
 namespace http {
 
 
-Cookie::Cookie():
+Cookie::Cookie() :
 	_version(0),
 	_secure(false),
 	_maxAge(-1),
@@ -44,7 +44,7 @@ Cookie::Cookie():
 }
 
 	
-Cookie::Cookie(const std::string& name):
+Cookie::Cookie(const std::string& name) :
 	_version(0),
 	_name(name),
 	_secure(false),
@@ -54,13 +54,13 @@ Cookie::Cookie(const std::string& name):
 }
 
 
-Cookie::Cookie(const NVHash& nvc):
+Cookie::Cookie(const NVCollection& nvc) :
 	_version(0),
 	_secure(false),
 	_maxAge(-1),
 	_httpOnly(false)
 {
-	for (NVHash::ConstIterator it = nvc.begin(); it != nvc.end(); ++it)
+	for (NVCollection::ConstIterator it = nvc.begin(); it != nvc.end(); ++it)
 	{
 		const std::string& name  = it->first;
 		const std::string& value = it->second;
@@ -99,7 +99,7 @@ Cookie::Cookie(const NVHash& nvc):
 }
 
 	
-Cookie::Cookie(const std::string& name, const std::string& value):
+Cookie::Cookie(const std::string& name, const std::string& value) :
 	_version(0),
 	_name(name),
 	_value(value),
@@ -110,7 +110,7 @@ Cookie::Cookie(const std::string& name, const std::string& value):
 }
 
 	
-Cookie::Cookie(const Cookie& cookie):
+Cookie::Cookie(const Cookie& cookie) :
 	_version(cookie._version),
 	_name(cookie._name),
 	_value(cookie._value),

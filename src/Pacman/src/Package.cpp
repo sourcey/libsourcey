@@ -20,9 +20,10 @@
 #include "Sourcey/Pacman/Package.h"
 #include "Sourcey/Util.h"
 #include "Sourcey/Logger.h"
+#include "Sourcey/Filesystem.h"
 
-#include "Poco/Format.h"
-#include "Poco/File.h"
+//#include "Poco/Format.h" // depreciated
+////#include "Poco/File.h" // depreciated
 
 #include "assert.h"
 
@@ -200,7 +201,7 @@ Package::Asset RemotePackage::latestAsset()
 {
 	json::Value& assets = this->assets();
 	if (assets.empty())
-		throw Exception("Package has no assets");
+		throw std::runtime_error("Package has no assets");
 
 	// The latest asset may not be in order, so
 	// make sure we always return the latest one.
@@ -217,11 +218,11 @@ Package::Asset RemotePackage::latestAsset()
 }
 
 
-Package::Asset RemotePackage::assetVersion(const string& version)
+Package::Asset RemotePackage::assetVersion(const std::string& version)
 {
 	json::Value& assets = this->assets();
 	if (assets.empty())
-		throw Exception("Package has no assets");
+		throw std::runtime_error("Package has no assets");
 
 	size_t index = -1;
 	for (unsigned i = 0; i < assets.size(); i++) {
@@ -232,17 +233,17 @@ Package::Asset RemotePackage::assetVersion(const string& version)
 	}
 
 	if (index == -1)
-		throw Exception("No package asset with version " + version);
+		throw std::runtime_error("No package asset with version " + version);
 	
 	return Asset(assets[index]);
 }
 
 
-Package::Asset RemotePackage::latestSDKAsset(const string& version)
+Package::Asset RemotePackage::latestSDKAsset(const std::string& version)
 {
 	json::Value& assets = this->assets();
 	if (assets.empty())
-		throw Exception("Package has no assets");
+		throw std::runtime_error("Package has no assets");
 	
 	size_t index = -1;
 	for (unsigned i = 0; i < assets.size(); i++) {		
@@ -254,7 +255,7 @@ Package::Asset RemotePackage::latestSDKAsset(const string& version)
 	}
 	
 	if (index == -1)
-		throw Exception("No package asset with SDK version " + version);
+		throw std::runtime_error("No package asset with SDK version " + version);
 
 	return Asset(assets[index]);
 }
@@ -302,7 +303,7 @@ LocalPackage::Manifest LocalPackage::manifest()
 }
 
 
-void LocalPackage::setState(const string& state)
+void LocalPackage::setState(const std::string& state)
 {
 	assert(
 		state == "Installing" || 
@@ -315,16 +316,16 @@ void LocalPackage::setState(const string& state)
 }
 
 
-void LocalPackage::setInstallState(const string& state)
+void LocalPackage::setInstallState(const std::string& state)
 {
 	(*this)["install-state"] = state;
 }
 
 
-void LocalPackage::setVersion(const string& version)
+void LocalPackage::setVersion(const std::string& version)
 {
 	if (state() != "Installed")
-		throw Exception("Package must be installed before the version is set.");
+		throw std::runtime_error("Package must be installed before the version is set.");
 	
 	(*this)["version"] = version;
 }
@@ -360,19 +361,23 @@ string LocalPackage::installDir() const
 }
 
 
-string LocalPackage::getInstalledFilePath(const string& fileName, bool whiny)
+string LocalPackage::getInstalledFilePath(const std::string& fileName, bool whiny)
 {
-	string dir = installDir();
+	std::string dir = installDir();
 	if (whiny && dir.empty())
-		throw Exception("Package install directory is not set.");
-	Poco::Path path(dir);
-	path.makeDirectory();
-	path.setFileName(fileName);
-	return path.toString();
+		throw std::runtime_error("Package install directory is not set.");
+	
+	dir += fs::separator;
+	dir += fileName;
+	return dir;
+	//Poco::Path path(dir);
+	//path.makeDirectory();
+	//path.setFileName(fileName);
+	//return path;
 }
 
 
-void LocalPackage::setVersionLock(const string& version)
+void LocalPackage::setVersionLock(const std::string& version)
 {
 	if (version.empty())
 		(*this).removeMember("version-lock");
@@ -381,7 +386,7 @@ void LocalPackage::setVersionLock(const string& version)
 }
 
 
-void LocalPackage::setSDKVersionLock(const string& version)
+void LocalPackage::setSDKVersionLock(const std::string& version)
 {
 	if (version.empty())
 		(*this).removeMember("sdk-version-lock");
@@ -415,14 +420,15 @@ bool LocalPackage::verifyInstallManifest()
 
 	// Check file system for each manifest file
 	LocalPackage::Manifest manifest = this->manifest();
-	for (json::ValueIterator it = manifest.root.begin(); it != manifest.root.end(); it++) {		
-		string path = this->getInstalledFilePath((*it).asString(), false);
+	for (auto it = manifest.root.begin(); it != manifest.root.end(); it++) {		
+		std::string path = this->getInstalledFilePath((*it).asString(), false);
 		debugL("LocalPackage", this) << name() 
 			<< ": Checking: " << path << endl;
-		Poco::File file(path);
-		if (!file.exists()) {
-			errorL("PackageManager", this) << name() 
-				<< ": Missing package file: " << path << endl;
+		
+		//Poco::File file(path);
+		//if (!file.exists()) {
+		if (!fs::exists(path)) {
+			errorL("PackageManager", this) << name() << ": Missing package file: " << path << endl;
 			return false;
 		}
 	}
@@ -443,7 +449,7 @@ bool LocalPackage::verifyInstallManifest()
 			if (asset().sdkVersion() != sdkVersionLock())
 				return false;
 		}
-		catch (Exception& exc) {
+		catch (std::exception& exc/Exception& exc/) {
 			// Return false, although we won't be able to update
 			// at all, since there are no available SDK assets :(
 			return false;
@@ -469,7 +475,7 @@ bool LocalPackage::isUpToDate(RemotePackage& remote)
 			if (asset().sdkVersion() != sdkVersionLock())
 				return false;
 		}
-		catch (Exception& exc) {
+		catch (std::exception& exc/Exception& exc/) {
 			// Return false, although we won't be able to update
 			// at all, since there are no available SDK assets :(
 			return false;
@@ -481,7 +487,7 @@ bool LocalPackage::isUpToDate(RemotePackage& remote)
 		try {
 			bestAsset = remote.latestAsset();
 		}
-		catch (Exception& exc) {
+		catch (std::exception& exc/Exception& exc/) {
 			// Return false, there are no available SDK assets.
 			// The remote package is not valid!
 			assert(0 && "invalid remote package");
@@ -499,17 +505,17 @@ bool LocalPackage::isUpToDate(RemotePackage& remote)
 void LocalPackage::setInstalledAsset(const Package::Asset& installedRemoteAsset)
 {
 	if (state() != "Installed")
-		throw Exception("Package must be installed before asset can be set.");
+		throw std::runtime_error("Package must be installed before asset can be set.");
 
 	if (!installedRemoteAsset.valid())
-		throw Exception("Remote asset is invalid.");
+		throw std::runtime_error("Remote asset is invalid.");
 
 	(*this)["asset"] = installedRemoteAsset.root;
 	setVersion(installedRemoteAsset.version());
 }
 
 
-void LocalPackage::setInstallDir(const string& dir)
+void LocalPackage::setInstallDir(const std::string& dir)
 {
 	(*this)["install-dir"] = dir;
 }
@@ -521,7 +527,7 @@ json::Value& LocalPackage::errors()
 }
 
 
-void LocalPackage::addError(const string& message)
+void LocalPackage::addError(const std::string& message)
 {
 	errors().append(message);
 }
@@ -559,7 +565,7 @@ LocalPackage::Manifest::~Manifest()
 }
 
 	
-void LocalPackage::Manifest::addFile(const string& path)
+void LocalPackage::Manifest::addFile(const std::string& path)
 {
 	// Do not allow duplicates
 	//if (!find_child_by_(*this)["file", "path", path.c_str()).empty())
@@ -576,9 +582,10 @@ bool LocalPackage::Manifest::empty() const
 }
 
 
-// ---------------------------------------------------------------------
+//
 // Package Pair
 //	
+
 PackagePair::PackagePair(LocalPackage* local, RemotePackage* remote) :
 	local(local), remote(remote)
 {
@@ -640,7 +647,7 @@ Package::Asset LocalPackage::getMatchingAsset(const Package::Asset& asset) const
 }
 */
 /*
-void LocalPackage::Manifest::addDir(const string& path)
+void LocalPackage::Manifest::addDir(const std::string& path)
 {
 	// Do not allow duplicates
 	//if (!find_child_by_(*this)["dir", "path", path.c_str()).empty())

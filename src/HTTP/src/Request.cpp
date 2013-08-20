@@ -18,7 +18,6 @@
 
 
 #include "Sourcey/HTTP/Request.h"
-//#include "Sourcey/HTTP/Authenticator.h"
 #include "Sourcey/HTTP/Util.h"
 
 #include <assert.h>
@@ -30,43 +29,40 @@ using namespace std;
 namespace scy { 
 namespace http {
 
-const std::string Request::HTTP_GET            = "GET";
-const std::string Request::HTTP_HEAD           = "HEAD";
-const std::string Request::HTTP_PUT            = "PUT";
-const std::string Request::HTTP_POST           = "POST";
-const std::string Request::HTTP_OPTIONS        = "OPTIONS";
-const std::string Request::HTTP_DELETE         = "DELETE";
-const std::string Request::HTTP_TRACE          = "TRACE";
-const std::string Request::HTTP_CONNECT        = "CONNECT";
-const std::string Request::HOST                = "Host";
-const std::string Request::COOKIE              = "Cookie";
-const std::string Request::AUTHORIZATION       = "Authorization";
-const std::string Request::PROXY_AUTHORIZATION = "Proxy-Authorization";
+
+const std::string Method::Get       = "GET";
+const std::string Method::Head      = "HEAD";
+const std::string Method::Put       = "PUT";
+const std::string Method::Post      = "POST";
+const std::string Method::Options   = "OPTIONS";
+const std::string Method::Delete    = "DELETE";
+const std::string Method::Trace     = "TRACE";
+const std::string Method::Connect   = "CONNECT";
 
 
-Request::Request():
-	_method(HTTP_GET),
+Request::Request() :
+	_method(Method::Get),
 	_uri("/")
 {
 }
 
 	
-Request::Request(const std::string& version):
+Request::Request(const std::string& version) :
 	http::Message(version),
-	_method(HTTP_GET),
+	_method(Method::Get),
 	_uri("/")
 {
 }
 
 	
-Request::Request(const std::string& method, const std::string& uri):
+Request::Request(const std::string& method, const std::string& uri) :
 	_method(method),
 	_uri(uri)
 {
 }
 
 
-Request::Request(const std::string& method, const std::string& uri, const std::string& version):
+Request::Request(const std::string& method, const std::string& uri, const std::string& version) :
 	http::Message(version),
 	_method(method),
 	_uri(uri)
@@ -93,7 +89,7 @@ void Request::setURI(const std::string& uri)
 
 void Request::setHost(const std::string& host)
 {
-	set(HOST, host);
+	set("Host", host);
 }
 
 	
@@ -110,7 +106,7 @@ void Request::setHost(const std::string& host, UInt16 port)
 	
 const std::string& Request::getHost() const
 {
-	return get(HOST);
+	return get("Host");
 }
 
 
@@ -125,69 +121,69 @@ const std::string& Request::getURI() const
 	return _uri;
 }
 
-void Request::setCookies(const NVHash& cookies)
+void Request::setCookies(const NVCollection& cookies)
 {
 	std::string cookie;
-	for (NVHash::ConstIterator it = cookies.begin(); it != cookies.end(); ++it) {
+	for (NVCollection::ConstIterator it = cookies.begin(); it != cookies.end(); ++it) {
 		if (it != cookies.begin())
 			cookie.append("; ");
 		cookie.append(it->first);
 		cookie.append("=");
 		cookie.append(it->second);
 	}
-	add(COOKIE, cookie);
+	add("Cookie", cookie);
 }
 
 	
-void Request::getCookies(NVHash& cookies) const
+void Request::getCookies(NVCollection& cookies) const
 {
-	NVHash::ConstIterator it = find(COOKIE);
-	while (it != end() && util::icompare(it->first, COOKIE) == 0) {
-		util::splitParameters(it->second.begin(), it->second.end(), cookies);
+	NVCollection::ConstIterator it = find("Cookie");
+	while (it != end() && util::icompare(it->first, "Cookie") == 0) {
+		http::splitParameters(it->second.begin(), it->second.end(), cookies);
 		++it;
 	}
 }
 
 	
-void Request::getURIParameters(NVHash& params) const
+void Request::getURIParameters(NVCollection& params) const
 {	
-	util::splitURIParameters(getURI(), params);
+	http::splitURIParameters(getURI(), params);
 }
 
 
 bool Request::hasCredentials() const
 {
-	return has(AUTHORIZATION);
+	return has("Authorization");
 }
 
 	
 void Request::getCredentials(std::string& scheme, std::string& authInfo) const
 {
-	getCredentials(AUTHORIZATION, scheme, authInfo);
+	getCredentials("Authorization", scheme, authInfo);
 }
 
 	
 void Request::setCredentials(const std::string& scheme, const std::string& authInfo)
 {
-	setCredentials(AUTHORIZATION, scheme, authInfo);
+	setCredentials("Authorization", scheme, authInfo);
 }
 
 
 bool Request::hasProxyCredentials() const
 {
-	return has(PROXY_AUTHORIZATION);
+	return has("Proxy-Authorization");
 }
 
 	
 void Request::getProxyCredentials(std::string& scheme, std::string& authInfo) const
 {
-	getCredentials(PROXY_AUTHORIZATION, scheme, authInfo);
+	getCredentials("Proxy-Authorization", scheme, authInfo);
 }
 
 	
 void Request::setProxyCredentials(const std::string& scheme, const std::string& authInfo)
 {
-	setCredentials(PROXY_AUTHORIZATION, scheme, authInfo);
+	setCredentials("Proxy-Authorization", scheme, authInfo);
 }
 
 
@@ -203,8 +199,7 @@ void Request::getCredentials(const std::string& header, std::string& scheme, std
 {
 	scheme.clear();
 	authInfo.clear();
-	if (has(header))
-	{
+	if (has(header)) {
 		const std::string& auth = get(header);
 		std::string::const_iterator it  = auth.begin();
 		std::string::const_iterator end = auth.end();
@@ -213,7 +208,7 @@ void Request::getCredentials(const std::string& header, std::string& scheme, std
 		while (it != end && ::isspace(*it)) ++it;
 		while (it != end) authInfo += *it++;
 	}
-	else throw Exception("Request is not authenticated");
+	else throw std::runtime_error("Request is not authenticated");
 }
 
 	

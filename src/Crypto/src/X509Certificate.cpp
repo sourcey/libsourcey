@@ -35,9 +35,6 @@
 
 
 #include "Sourcey/Crypto/X509Certificate.h"
-//#include "Poco/StreamCopier.h"
-//#include "Poco/String.h"
-//#include "Sourcey/DateTimeParser.h"
 #include <sstream>
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>

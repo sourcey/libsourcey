@@ -37,7 +37,7 @@ namespace scy {
 namespace av {
 
 
-DefinePolymorphicDelegateWithArg(audioDelegate, IPacket, PacketDelegateBase, Void, nil)
+DefinePolymorphicDelegateWithArg(audioDelegate, IPacket, PacketDelegateBase, void*, nullptr)
 
 
 class AudioCapture: public ICapture

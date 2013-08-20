@@ -30,16 +30,6 @@
 namespace scy {
 
 
-typedef std::vector<std::string>			StringVec;
-typedef std::map<std::string, std::string>	StringMap;
-
-typedef void (*Callable)(void*);
-
-
-// Define our own alias for NULL
-#define nil 0
-
-
 //
 // Integer types
 //

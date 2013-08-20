@@ -21,12 +21,18 @@
 #define SOURCEY_UV_UVPP_H
 
 
+// Disable unnecessary warnings
+#if defined(_MSC_VER)
+	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+	#pragma warning(disable:4505) // unreferenced local function has been removed 
+                                  // Todo: depreciate once we replace static functions with lambdas
+#endif
+
 #include "uv.h"
 #include "Sourcey/Types.h"
 #include "Sourcey/Exception.h"
-//#include "Sourcey/Logger.h"
-//#include "Sourcey/Memory.h"
-//#include <string>
+#include <exception>
+#include <stdexcept>
 #include <assert.h>
 
 
@@ -38,21 +44,35 @@ namespace uv {
 // Helpers
 //
 	
-inline void throwLastError(
-	uv_loop_t* loop = NULL,
-	const std::string& prefix = "",
-	const std::string& suffix = "") 
+inline std::string formatError(const std::string& message, int errorno = UV_UNKNOWN)
+{	
+	std::string m(message); // prefix the message, since libuv errors are very brisk
+	if (errorno != UV_UNKNOWN && 
+		errorno != UV_OK) {
+		uv_err_s err;
+		err.code = (uv_err_code)errorno;
+		if (!m.empty())
+			m.append(": ");
+		m.append(uv_strerror(err));
+	}
+	return m;
+}
+	
+
+inline void throwError(const std::string& message, int errorno = UV_UNKNOWN) 
 {
-	throw Exception(
-		prefix + uv_strerror(
-			uv_last_error(loop)) + suffix);
+	throw std::runtime_error(formatError(message, errorno));
+}
+	
+inline void throwLastError(uv_loop_t* loop, const std::string& message = "") 
+{
+	throwError(message, uv_last_error(loop).code);
 }
 
 
 //
-// Default callbacks
+// Default callbacks - depreciated!
 //
-
 
 #define UVCallback(ClassName, Function, Handle)						 \
 															         \
@@ -99,13 +119,14 @@ inline void throwLastError(
 			self->setLastError();	                                \
 		self->Function(handle, status);							    \
     }														        \
-	
-static void afterWrite(uv_write_t* req, int status) 
+
+
+static void afterWrite(uv_write_t* req, int /* status */) 
 {
 	delete req;
 }
 
-static void afterShutdown(uv_shutdown_t* req, int status) 
+static void afterShutdown(uv_shutdown_t* req, int /* status */) 
 {	
 	delete req;
 }
@@ -133,38 +154,33 @@ inline Loop& defaultLoop()
 //
 
 class Handle
-	/// A base class for managing libuv handles including their
-	/// inherent asynchronous destruction mechanism.
+	/// A base class for managing the lifecycle of a libuv handle,  
+	/// including its asynchronous destruction mechanism.
 {
 public:
-	Handle(uv_loop_t* loop = NULL, void* handle = NULL) : 
+	Handle(uv_loop_t* loop = nullptr, void* handle = nullptr) : 
 		_loop(loop ? loop : uv_default_loop()),
-		_handle((uv_handle_t*)handle) // must be NULL or uv_handle_t
+		_handle((uv_handle_t*)handle) // must be nullptr or uv_handle_t
 	{
-		//traceL("UVHandle", this) << "Creating: " << _handle << std::endl;	
 		if (_handle)
 			_handle->data = this;
 	}
 		
 	virtual ~Handle()
-		// Destroys the Handle.
 	{
-		//traceL("UVHandle", this) << "Destroying: " << _handle << std::endl;	
 		if (_handle) 
 			close();
-		assert(_handle == NULL);
+		assert(_handle == nullptr);
 	}
 
 	virtual void setLoop(uv_loop_t* loop)
-		// Sets the libuv loop.
-		// Must be set before the handle is initialized. 
+		// The event loop may be set before the handle is initialized. 
 	{
-		assert(_handle == NULL);
+		assert(_handle == nullptr);
 		_loop = loop;
 	}
 
 	virtual uv_loop_t* loop() const
-		// Returns a pointer to the associated libuv event loop.
 	{
 		return _loop;
 	}
@@ -183,9 +199,9 @@ public:
 	}
 	
 	virtual bool closed() const
-		// Returns true when the handle is NULL.
+		// Returns true when the handle is nullptr.
 	{ 
-		return _handle == NULL; 
+		return _handle == nullptr; 
 	}
 	
 	virtual bool active() const
@@ -206,9 +222,9 @@ public:
 	{
 		uv_err_t uv = uv_last_error(loop());
 		Error err;
-		err.message = formatError(prefix); //uv_strerror(uv);
-		err.syserr = uv.sys_errno_;
 		err.uverr = uv.code;
+		err.syserr = uv.sys_errno_;
+		err.message = formatError(prefix, uv.code);
 		setError(err);
 	}
 	
@@ -226,13 +242,12 @@ public:
 		// invalid getter operations on closed handles.
 		// The actual error would be set on the next iteraton.
 	{
-		throw Exception(formatError(prefix));
+		throw std::runtime_error(formatError(prefix));
 	}
 		
 	virtual void setError(const Error& err) 
 		// Sets the error content and triggers callbacks.
 	{ 
-		//errorL("UVHandle", this) << "Setting error: " << err.message << std::endl;
 		if (_error.uverr != err.uverr) {
 			_error = err; 
 			onError(err);
@@ -248,38 +263,30 @@ protected:
 
 			// We no longer know about the handle.
 			// The handle pointer will be deleted on afterClose.
-			_handle = NULL;
+			_handle = nullptr;
 
 			// Send the local onClose to run final callbacks.
 			onClose();
 		}
 	}
 
-	virtual void onError(const Error& error) 
+	virtual void onError(const Error& /* error */) 
 		// Override to handle errors.
 		// The error may be a UV error, or a custom error.
-	{		
-		//errorL("UVHandle", this) << "On error: " << error.message << std::endl;	
-	}
-
-	virtual std::string formatError(const std::string& prefix = "") const
-	{	
-		std::string err;
-		if (!prefix.empty()) {
-			err += prefix;
-			err += ": ";
-		}
-		err += uv_strerror(uv_last_error(loop()));
-		return err;
+	{
 	}
 
 	virtual void onClose()
 		// Override to handle closure.
 	{
-		//traceL("UVHandle", this) << "On close" << std::endl;
 	}
 
  protected:
+	Handle(const Handle&); // = delete;
+	Handle(Handle&&); // = delete;
+	Handle& operator=(const Handle&); // = delete;
+	Handle& operator=(Handle&&); // = delete;
+
 	uv_handle_t* _handle;
 	uv_loop_t* _loop;
 	Error _error;
@@ -291,194 +298,14 @@ protected:
 
 #endif // SOURCEY_UV_UVPP_H
 
-	
-	/*
-	virtual void tryThrowException(const std::string& reason) const
-		// Throws the last error depending on weather 
-		// or not if the whiny flag is set.
-		// This function is const so it can be used for
-		// invalid getter operations on closed handles.
-		// The actual error would be set on the next iteraton.
-	{
-		if (_whiny)
-			throw Exception(reason);
-	}
-		
-	virtual void setWhiny(bool whiny) 
-		// Sets the error content and triggers callbacks.
-	{ 
-		_whiny = whiny;
-	}
-	*/
-		
-		//if (throwException)
-			//throw Exception(formatError(prefix, suffix);
-			//throw Exception("UV Error" + err.message);
-		/*
-		inline void throwLastError(
-			uv_loop_t* loop = NULL,
-			const std::string& prefix = "",
-			const std::string& suffix = "") 
-		{
-			throw Exception(
-				prefix + uv_strerror(
-					uv_last_error(loop)) + suffix);
-		}
-		*/
-
-		/*
-		uv_err_t uv = uv_last_error(loop());
-		Error err;
-		err.message = uv_strerror(uv);
-		err.syserr = uv.sys_errno_;
-		err.uverr = uv.code;
-		setError(err);
-		if (throwException)
-			throw Exception("UV Error" + err.message);
-			*/
-
-
-	/*
-			assert(!uv_is_closing(_handle));
-			assert(uv_is_closing(_handle));
-			//AsyncDeleter* async = new AsyncDeleter(_handle);
-			//async->run();
-	virtual void* instance()
-		// Returns the derived instance pointer for signal callbacks.
-		// This method must be derived to be effective.
-	{ 
-		return this; 
-	}
-	*/
-
-
-
-//
-// Handle Types
-//
-/*
-typedef struct uv_loop_s			uv_loop_t;
-typedef struct uv_ares_task_s		AresTaskHandle;
-typedef struct uv_err_s				uv_err_t;
-typedef struct uv_handle_s			Handle;
-typedef struct uv_stream_s			uv_stream_t;
-typedef struct uv_tcp_s				TCPHandle;
-typedef struct uv_udp_s				UDPHandle;
-typedef struct uv_pipe_s			PipeHandle;
-typedef struct uv_tty_s				TTYHandle;
-typedef struct uv_timer_s			uv_timer_t;
-typedef struct uv_prepare_s			PrepareHandle;
-typedef struct uv_check_s			CheckHandle;
-typedef struct uv_idle_s			IdleHandle;
-typedef struct uv_async_s			AsyncHandle;
-typedef struct uv_getaddrinfo_s		GetaddrinfoHandle;
-typedef struct uv_process_s			ProcessHandle;
-typedef struct uv_counters_s		CountersHandle;
-*/
-
-//
-// Req Types
-//
-//typedef struct uv_connect_t			ConnectReq;
-
-//
-// Other Types
-//
-//typedef struct uv_buf_t				Buffer;
-	
-	
-
-
-/*
-
-	//void* _instance;
-	//bool _closeOnError;
-
-inline uv_buf_t defaultAlloc(uv_handle_t* handle, size_t size)
-	// NOTE: All data allocated via this function must be freed!
-{
-	uv_buf_t buf;
-	buf.base = new char[size];
-	buf.len = size;
-	return buf;
-}
-
-	
-inline void defaultClose(uv_handle_t* handle)
-{
-	delete handle;
-}
-*/
-
-
-		/*
-struct AsyncDeleter
-{
-	uv_handle_t* handle;
-
-	AsyncDeleter(uv_handle_t* handle) : 
-		handle(handle) 
-	{
-		debugL("UVAsyncDeleter", this) << "Creating: " << handle << std::endl;
-		assert(handle->loop);
-		handle->data = this;
-	}
-
-	~AsyncDeleter()
-	{
-		debugL("UVAsyncDeleter", this) << "Destroying" << std::endl;
-		assert(handle == NULL);
-	}
-	
-	void run() 
-	{ 				
-		debugL("UVAsyncDeleter", this) << "Running: " << handle << std::endl;
-		// handle->reqs_pending = 0
-
-		// Call uv_close resulting in the async destruction of  
-		// the handle and the current instance.
-		uv_close(handle, AsyncDeleter::afterClose);
-
-		assert(uv_is_closing(handle));
-			
-		// NOTE: We don't run the loop for cleanup here anymore.
-		// It is now the responsibility of the application to call
-		// uv_run on the loop before it is destroyed.
-		// See Runner::cleanup()
-		
-		// Determine weather the event loop is currently active.
-		// If not we need to run a single iteration so we can free
-		// memory associated with the handle.
-		if (handle->loop->active_handles == 1) {
-			debugL("UVAsyncDeleter", this) << "Running cleanup loop" << std::endl;
-			uv_run(handle->loop, UV_RUN_DEFAULT); // UV_RUN_ONCE doesn't seem to work?
-			debugL("UVAsyncDeleter", this) << "Running cleanup loop: OK" << std::endl;
-		}
-	}
-		
-	static void afterClose(uv_handle_t* handle)
-	{
-		//traceL("UVAsyncDeleter") << "After Close: " << handle << std::endl;		
-		AsyncDeleter* self = reinterpret_cast<AsyncDeleter*>(handle->data);
-		//traceL("UVAsyncDeleter", self) << "After Close: " << handle << std::endl;		
-		assert(self->handle);
-		assert(self->handle == handle);	
-		assert(self->handle->data == self);	
-		assert(uv_is_closing(self->handle));
-		
-		// print active handles
-		//traceL("UVAsyncDeleter") << "After Close: Printing Handles" << std::endl;	
-		uv_walk(self->handle->loop, AsyncDeleter::onPrintHandle, NULL);
-		//traceL("UVAsyncDeleter") << "After Close: Printing Handles: OK" << std::endl;	
-
-		//delete self->handle; // TODO: Fixme
-		self->handle = NULL;
-		delete self;
-	}
-	
-	static void onPrintHandle(uv_handle_t* handle, void* arg) 
-	{
-		debugL("UVAsyncDeleter") << "#### Active Handle: " << handle << std::endl;
-	}
-};
-		*/
+	//std::string err;
+	//if (!prefix.empty()) {
+	//	err += prefix;
+	//	err += ": ";
+	//}
+	//err += uv_strerror(uv_last_error(loop()));
+	//std::string m(uv_strerror());
+	//if (!message.empty()) {
+	//	m.append(": ");
+	//	m.append(message);
+	//}

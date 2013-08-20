@@ -32,8 +32,8 @@ namespace net {
 	
 
 Socket::Socket() : //SocketAdapter* adapter
-	_base(nil), 
-	_adapter(nil)//, 
+	_base(nullptr), 
+	_adapter(nullptr)//, 
 	//_adapter(adapter)
 {
 	//if (!_adapter) 
@@ -45,7 +45,7 @@ Socket::Socket() : //SocketAdapter* adapter
 
 Socket::Socket(SocketBase* base, bool shared) : //, SocketAdapter* adapter
 	_base(base), 
-	_adapter(nil)
+	_adapter(nullptr)
 {
 	//if (!_adapter) 
 	//	_adapter = new SocketAdapter(this);	
@@ -59,7 +59,7 @@ Socket::Socket(SocketBase* base, bool shared) : //, SocketAdapter* adapter
 
 Socket::Socket(const Socket& socket) : //, SocketAdapter* adapter
 	_base(socket._base), 
-	_adapter(nil)//, 
+	_adapter(nullptr)//, 
 	//_adapter(adapter)
 {	
 	//if (!_adapter) 
@@ -171,17 +171,17 @@ int Socket::send(const IPacket& packet, const Address& peerAddress, int flags)
 	// Try to cast as RawPacket so we can avoid copying anything.
 	// All large packet types, such as video and audio inherit from
 	// RawPacket for this reason.
-	const RawPacket* rawPacket = dynamic_cast<const RawPacket*>(&packet);
+	auto rawPacket = dynamic_cast<const RawPacket*>(&packet);
 	if (rawPacket)
 		return send((const char*)rawPacket->data(), rawPacket->size(), peerAddress, flags);
 	
 	// Other smaller dynamically generated packets need to be
 	// written to a buffer before sending. 
 	else {
-		Buffer buf;
+		Buffer buf(0); // 0 size, alloc as necessary
 		packet.write(buf);
-		traceL("Socket", this) << "Send IPacket: " << buf.available() << endl;	
-		return send(buf.begin(), buf.available(), peerAddress, flags);
+		traceL("Socket", this) << "Send IPacket: " << buf.size() << endl;	
+		return send(buf.data(), buf.size(), peerAddress, flags);
 	}
 }
 
@@ -190,7 +190,7 @@ void Socket::send(void*, IPacket& packet)
 {
 	int res = send(packet);
 	if (res < 0)
-		throw Exception("Invalid socket operation");
+		throw std::runtime_error("Invalid socket operation");
 }
 
 
@@ -242,14 +242,14 @@ void Socket::onSocketConnect()
 }
 
 
-void Socket::onSocketRecv(Buffer& buf, const Address& peerAddr)
+void Socket::onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
 {
-	//traceL("SocketAdapter", this) << "On recv: " << socket->Recv.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "recv: " << socket->Recv.refCount() << endl;	
 	if (_adapter) {
 		_adapter->onSocketRecv(buf, peerAddr);
 	}
 	else {
-		SocketPacket packet(*this, buf, peerAddr);
+		SocketPacket packet(this, buf, peerAddr);
 		Recv.emit(this, packet);
 	}
 }
@@ -257,7 +257,7 @@ void Socket::onSocketRecv(Buffer& buf, const Address& peerAddr)
 
 void Socket::onSocketError(const scy::Error& error) //const Error& error
 {
-	//traceL("SocketAdapter", this) << "On error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
+	//traceL("SocketAdapter", this) << "error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
 	if (_adapter) {
 		_adapter->onSocketError(error);
 	}
@@ -269,7 +269,7 @@ void Socket::onSocketError(const scy::Error& error) //const Error& error
 
 void Socket::onSocketClose()
 {
-	//traceL("SocketAdapter", this) << "On close: " << socket->Close.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "on close: " << socket->Close.refCount() << endl;	
 	if (_adapter) {
 		_adapter->onSocketClose();
 	}
@@ -301,7 +301,7 @@ SocketAdapter* Socket::adapter() const
 
 void Socket::setAdapter(SocketAdapter* adapter)
 {	
-	traceL("Socket", this) << "Replacing adapter: " 
+	traceL("Socket", this) << "replace adapter: " 
 		<< _adapter << ": " << adapter << endl;
 
 	// Assign the new adapter pointer
@@ -347,13 +347,13 @@ bool SocketAdapter::compareProiroty(const SocketAdapter* l, const SocketAdapter*
 SocketAdapter::SocketAdapter(Socket* socket) : //, int priority
 	socket(socket)//, priority(priority)
 {
-	//traceL("SocketAdapter", this) << "Creating" << endl;	
+	//traceL("SocketAdapter", this) << "create" << endl;	
 }
 	
 
 SocketAdapter::~SocketAdapter()
 {
-	//traceL("SocketAdapter", this) << "Destroying" << endl;	
+	//traceL("SocketAdapter", this) << "destroy" << endl;	
 }
 
 
@@ -364,24 +364,24 @@ void SocketAdapter::onSocketConnect()
 }
 
 
-void SocketAdapter::onSocketRecv(Buffer& buf, const Address& peerAddr)
+void SocketAdapter::onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
 {
-	//traceL("SocketAdapter", this) << "On recv: " << socket->Recv.refCount() << endl;	
-	SocketPacket packet(*socket, buf, peerAddr);
+	//traceL("SocketAdapter", this) << "recv: " << socket->Recv.refCount() << endl;	
+	SocketPacket packet(socket, buf, peerAddr);
 	socket->Recv.emit(socket, packet);
 }
 
 
 void SocketAdapter::onSocketError(const Error& error) //const Error& error
 {
-	//traceL("SocketAdapter", this) << "On error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
+	//traceL("SocketAdapter", this) << "error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
 	socket->Error.emit(socket, error);
 }
 
 
 void SocketAdapter::onSocketClose()
 {
-	//traceL("SocketAdapter", this) << "On close: " << socket->Close.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "on close: " << socket->Close.refCount() << endl;	
 	socket->Close.emit(socket);
 }
 
@@ -404,22 +404,22 @@ int SocketAdapter::send(const char* data, int len, const Address& peerAddress, i
 
 
 SocketBase::SocketBase() : 
-	CountedObject(new DeferredDeleter<SocketBase>()),
+	SharedObject(true), //new DeferredDeleter<SocketBase>()),
 	_insideCallback(false)
 {
-	//traceL("SocketAdapter", this) << "Creating" << endl;	
+	//traceL("SocketAdapter", this) << "create" << endl;	
 }
 
 
 SocketBase::~SocketBase()
 {
-	//traceL("SocketAdapter", this) << "Destroying" << endl;	
+	//traceL("SocketAdapter", this) << "destroy" << endl;	
 
 	// The destructor never be called from inside a callback.
 	// Deferred destruction ensures this never occurs.
 	assert(!_insideCallback && "destructor scope error");
 }
-	
+
 
 void SocketBase::addObserver(Socket* socket, bool shared) 
 {
@@ -435,7 +435,7 @@ void SocketBase::addObserver(Socket* socket, bool shared)
 void SocketBase::removeObserver(Socket* socket)  
 {	
 	// TODO: Ensure socket destruction when released?
-	for (vector<Socket*>::iterator it = _observers.begin(); it != _observers.end(); ++it) {
+	for (auto it = _observers.begin(); it != _observers.end(); ++it) {
 		if (*it == socket) {
 			//traceL("SocketBase", this) << "Releasing socket: " << &adapter << endl;
 			_observers.erase(it);
@@ -450,30 +450,30 @@ void SocketBase::removeObserver(Socket* socket)
 
 namespace internal {
 
-	void onHostResolved(const net::DNSResult& dns, void* opaque)
+	void onHostResolved(const net::DNSResult& dns)
 	{	
-		auto* sock = reinterpret_cast<SocketBase*>(opaque);
+		auto* sock = reinterpret_cast<SocketBase*>(dns.opaque);
 		traceL("SocketBase", sock) << "DNS resolved: " << dns.success() << endl;
 
-		/// Return if the socket was closed while resolving
+		// Return if the socket was closed while resolving
 		if (sock->closed()) {			
 			warnL("SocketBase", sock) << "DNS resolved but socket closed" << endl;
 			return;
 		}
 
-		/// Set the connection error if DNS failed
+		// Set the connection error if DNS failed
 		if (!dns.success()) {
-			sock->setError("Failed to resolve host DNS for " + dns.host);
+			sock->setError("Failed to resolve DNS for " + dns.host);
 			return;
 		}
 
 		try {	
-			/// Connect to resolved host
+			// Connect to resolved host
 			sock->connect(dns.addr);
 		}
 		catch (...) {
-			/// Swallow errors
-			/// Can be handled by Socket::Error signal
+			// Swallow errors
+			// Can be handled by Socket::Error signal
 		}	
 	}
 
@@ -493,15 +493,19 @@ void SocketBase::connect(const std::string& host, UInt16 port)
 void SocketBase::emitConnect() 
 {
 	_insideCallback = true;
+	//for (auto observer : _observers) //for (auto& observer : _observers)
+	//	observer->onSocketConnect();
 	for (size_t i = 0; i < _observers.size(); i++) 
 		_observers[i]->onSocketConnect();
 	_insideCallback = false;
 }
 
 
-void SocketBase::emitRecv(Buffer& buf, const Address& peerAddr)
+void SocketBase::emitRecv(const MutableBuffer& buf, const Address& peerAddr)
 {
 	_insideCallback = true;
+	//for (auto observer : _observers) //for (auto& observer : _observers)
+	//	observer->onSocketRecv(buf, peerAddr);
 	for (size_t i = 0; i < _observers.size(); i++)
 		_observers[i]->onSocketRecv(buf, peerAddr);
 	_insideCallback = false;
@@ -511,6 +515,8 @@ void SocketBase::emitRecv(Buffer& buf, const Address& peerAddr)
 void SocketBase::emitError(const Error& error)
 {
 	_insideCallback = true;
+	//for (auto observer : _observers) //for (auto& observer : _observers)
+	//	observer->onSocketError(error);
 	for (size_t i = 0; i < _observers.size(); i++) 
 		_observers[i]->onSocketError(error);
 	_insideCallback = false;
@@ -520,6 +526,8 @@ void SocketBase::emitError(const Error& error)
 void SocketBase::emitClose()
 {
 	_insideCallback = true;
+	//for (auto observer : _observers) //for (auto& observer : _observers)
+	//	observer->onSocketClose();
 	for (size_t i = 0; i < _observers.size(); i++) 
 		_observers[i]->onSocketClose();
 	_insideCallback = false;
@@ -534,7 +542,7 @@ void SocketBase::emitClose()
 /*
 void SocketBase::swapObserver(SocketAdapter* a, SocketAdapter* b)
 {
-	for (vector<Socket*>::iterator it = _observers.begin(); it != _observers.end(); ++it) {
+	for (std::vector<Socket*>::iterator it = _observers.begin(); it != _observers.end(); ++it) {
 		if ((*it) == a) {
 			*it = b;
 			traceL("SocketBase", this) << "swapAdapter: " << a << ": " << b << endl;
@@ -567,7 +575,7 @@ bool SocketBase::connected() const
 /*
 void SocketBase::setError(const Error& err) 
 { 
-	traceL("SocketBase", this) << "Set error: " << err.message << endl;	
+	traceL("SocketBase", this) << "set error: " << err.message << endl;	
 	_error = err;
 }
 */
@@ -615,13 +623,13 @@ int base().refCount() const
 SocketAdapter::SocketAdapter(int priority) : 
 	priority(priority)
 {
-	//traceL("SocketAdapter", this) << "Creating" << endl;	
+	//traceL("SocketAdapter", this) << "create" << endl;	
 }
 	
 
 SocketAdapter::~SocketAdapter()
 {
-	//traceL("SocketAdapter", this) << "Destroying" << endl;	
+	//traceL("SocketAdapter", this) << "destroy" << endl;	
 }
 */
 
@@ -633,36 +641,36 @@ SocketAdapter::~SocketAdapter()
 // -------------------------------------------------------------------
 //
 class Socket: public Handle<SocketBase>
-	/// Socket is the base class for accessing socket contexts.
-	/// It provides a disposible layer which referencing the 
-	/// internal socket context.
-	///
-	/// The common interface provides basic socket operations
-	/// can be extended as necessary for different protocols.
+	// Socket is the base class for accessing socket contexts.
+	// It provides a disposible layer which referencing the 
+	// internal socket context.
+	//
+	// The common interface provides basic socket operations
+	// can be extended as necessary for different protocols.
 {
 public:
 	Socket() {};
 
 	Socket(const Socket& socket);
-		/// Attaches the socket context from the other socket and
-		/// increments the reference count of the socket context.
+		// Attaches the socket context from the other socket and
+		// increments the reference count of the socket context.
 		
 	Socket(SocketBase* context);
-		/// Creates the Socket and attaches the given SocketBase.
-		/// The socket takes owership of the SocketBase.
+		// Creates the Socket and attaches the given SocketBase.
+		// The socket takes owership of the SocketBase.
 
 	Socket& operator = (const Socket& socket);
-		/// Assignment operator.
-		///
-		/// Releases the socket's socket context and
-		/// attaches the socket context from the other socket and
-		/// increments the reference count of the socket context.
+		// Assignment operator.
+		//
+		// Releases the socket's socket context and
+		// attaches the socket context from the other socket and
+		// increments the reference count of the socket context.
 		
 	~Socket();
-		/// Destroys the Socket and releases the socket context.
+		// Destroys the Socket and releases the socket context.
 
 	SocketBase* base() const;
-		/// Returns the SocketBase for this socket.
+		// Returns the SocketBase for this socket.
 		
 	void connect(const Address& address);
 	bool shutdown();
@@ -677,14 +685,14 @@ public:
 	//int send(const IPacket& packet, const Address& peerAddress, int flags = 0);
 	
 	Address address() const;
-		/// The locally bound address.
+		// The locally bound address.
 
 	Address peerAddress() const;
-		/// The connected peer address.
+		// The connected peer address.
 
 	net::TransportType transport() const;
-		/// The transport protocol: TCP, UDP or SSLTCP.
-		/// See TransportType definition.
+		// The transport protocol: TCP, UDP or SSLTCP.
+		// See TransportType definition.
 		
 	void duplicate();
 	void release();
@@ -718,7 +726,7 @@ void Stream::onClose()
 	//_stream->data = this;
 
 	// TODO: Close if needed.	
-	//traceL("Stream", this) << "Destroying: Send Close" << endl;
+	//traceL("Stream", this) << "Destroy: Send Close" << endl;
 	// afterClose not always getting called
 	//uv_close((uv_handle_t*)stream(), Stream::afterClose);
 	//shutdown();
@@ -733,11 +741,11 @@ int Stream::writeQueueSize() const
 	return stream()->write_queue_size;
 }
 	if (_handle) {		
-		//traceL("Stream", this) << "Destroying: Handle" << endl;
+		//traceL("Stream", this) << "Destroy: Handle" << endl;
 		delete _handle;
 		_handle = NULL;
 	}
-	//traceL("Stream", this) << "Destroying: OK" << endl;
+	//traceL("Stream", this) << "Destroy: OK" << endl;
 	*/
 	/*
 	

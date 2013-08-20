@@ -29,7 +29,7 @@
 #define SOURCEY_HTTP_Cookie_H
 
 
-#include "Sourcey/Containers.h"
+#include "Sourcey/Collection.h"
 #include "Sourcey/Net/Types.h"
 
 
@@ -61,8 +61,8 @@ public:
 		/// Creates a cookie with the given name.	
 		/// The cookie never expires.
 		
-	explicit Cookie(const NVHash& nvc);
-		/// Creates a cookie from the given NVHash.
+	explicit Cookie(const NVCollection& nvc);
+		/// Creates a cookie from the given NVCollection.
 		
 	Cookie(const std::string& name, const std::string& value);
 		/// Creates a cookie with the given name and value.
@@ -159,11 +159,11 @@ public:
 		/// Returns true if the cookie's HttpOnly flag is set.
 		
 	std::string toString() const;
-		/// Returns a string representation of the cookie,
+		/// Returns a std::string representation of the cookie,
 		/// suitable for use in a Set-Cookie header.
 		
 	static std::string escape(const std::string& str);
-		/// Escapes the given string by replacing all 
+		/// Escapes the given std::string by replacing all 
 		/// non-alphanumeric characters with escape
 		/// sequences in the form %xx, where xx is the
 		/// hexadecimal character code.
@@ -186,7 +186,7 @@ public:
 		///   - whitespace and control characters
 		
 	static std::string unescape(const std::string& str);
-		/// Unescapes the given string by replacing all
+		/// Unescapes the given std::string by replacing all
 		/// escape sequences in the form %xx with the
 		/// respective characters.
 
