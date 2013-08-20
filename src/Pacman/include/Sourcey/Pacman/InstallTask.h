@@ -25,19 +25,19 @@
 #include "Sourcey/Runner.h"
 #include "Sourcey/Stateful.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/HTTP/Client.h"
-
-#include "Poco/Zip/ZipLocalFileHeader.h"
 
 
 namespace scy { 
+namespace http { 
+	class Response;
+	class ClientConnection; }
 namespace pman {
 
 	
 class PackageManager;
 
 
-struct PackageInstallState: public State 
+struct InstallationState: public State 
 {
 	enum Type 
 	{
@@ -67,36 +67,38 @@ struct PackageInstallState: public State
 };
 
 
+struct InstallOptions 
+	// Package installation options.
+{
+	std::string version;			// If set then the given package version will be installed.
+	std::string sdkVersion;			// If set then the latest package version for given SDK
+									// version will be installed.
+	std::string installDir;			// Install to the given location, otherwise the manager default
+									// installDir will be used.
+	//bool copyManifestToInstallDir;  // Copys the local package.json file to the install directory.
+
+	InstallOptions() {
+		version = "";
+		sdkVersion = "";
+		installDir = "";
+	}
+};
+
+
 class InstallTask: 
-	public abstract::Runnable, 
-	public Stateful<PackageInstallState>, 
-	public Polymorphic
+	public basic::Runnable, 
+	public basic::Polymorphic, 
+	public Stateful<InstallationState>
 	///
 	/// This class implements actual package 
 	/// installation procedure.
 {
 public:
-	struct Options 
-		// Package installation options.
-	{
-		std::string version;			// If set then the given package version will be installed.
-		std::string sdkVersion;			// If set then the latest package version for given SDK
-										// version will be installed.
-		std::string installDir;			// Install to the given location, otherwise the manager default
-										// installDir will be used.
-		//bool copyManifestToInstallDir;  // Copys the local package.json file to the install directory.
-
-		Options() {
-			version = "";
-			sdkVersion = "";
-			installDir = "";
-		}
-	};
 
 public:
 	InstallTask(PackageManager& manager, 
 				LocalPackage* local, RemotePackage* remote, 
-				const Options& options = Options());
+				const InstallOptions& options = InstallOptions());
 	virtual ~InstallTask();	
 
 	virtual void start();
@@ -122,7 +124,7 @@ public:
 
 	virtual LocalPackage* local() const;
 	virtual RemotePackage* remote() const;
-	virtual Options& options();
+	virtual InstallOptions& options();
 	
 	virtual bool valid() const;
 	virtual bool cancelled() const;
@@ -130,11 +132,6 @@ public:
 	virtual bool success() const;
 	virtual bool complete() const;
 	virtual int progress() const;
-
-	virtual void onStateChange(PackageInstallState& state, const PackageInstallState& oldState);
-	virtual void onIncomingProgress(void* sender, const double& progress);
-	virtual void onDecompressionError(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const std::string>& info);
-	virtual void onDecompressionOk(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info);
 
 	//virtual void printLog(std::ostream& ost) const;	
 	virtual const char* className() const { return "InstallTask"; }
@@ -151,18 +148,26 @@ protected:
 		// Called asynchronously by the thread to
 		// do the work.
 
+	virtual void onStateChange(InstallationState& state, const InstallationState& oldState);
+	virtual void onDownloadProgress(void* sender, const double& progress);
+	virtual void onDownloadComplete(void* sender, const http::Response& response);
+	
+	//virtual void onDecompressionError(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const std::string>& info);
+	//virtual void onDecompressionOk(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info);
+
 	virtual void setProgress(int value);
 
 protected:
 	mutable Mutex	_mutex;
 	
-	Thread	_thread;
+	Thread          _thread;
 	PackageManager& _manager;
 	LocalPackage*	_local;
 	RemotePackage*	_remote;
-	Options			_options;
+	InstallOptions	_options;
 	int             _progress;
-	http::ClientConnection* _transaction;
+	bool			_downloading;
+	http::ClientConnection* _dlconn;
 	
 	friend class PackageManager;
 	friend class InstallMonitor;	

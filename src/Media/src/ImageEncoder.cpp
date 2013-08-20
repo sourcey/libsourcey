@@ -76,13 +76,13 @@ bool ImageEncoder::accepts(IPacket& packet)
 
 void ImageEncoder::process(IPacket& packet)
 { 
-	//traceL() << "[ImageEncoder:" << this <<"] Processing" << endl;
+	//traceL() << "[ImageEncoder: " << this <<"] Processing" << endl;
 
 	MatrixPacket* mpacket = dynamic_cast<MatrixPacket*>(&packet);	
 	if (!mpacket)
-		throw Exception("Unknown video packet type.");
+		throw std::runtime_error("Unknown video packet type.");
 	if (!mpacket->mat)
-		throw Exception("Video packets must contain an OpenCV image.");
+		throw std::runtime_error("Video packets must contain an OpenCV image.");
 	
     vector<unsigned char> buffer;
 	
@@ -99,12 +99,12 @@ void ImageEncoder::process(IPacket& packet)
 		cv::imencode(_extension, source, buffer, _params);
 	
 	// Temp reference on the stack only
-	mpacket->_array = (char*)&buffer[0];
+	mpacket->_data = (char*)&buffer[0];
 	mpacket->_size = buffer.size();
 	
-	//traceL() << "[ImageEncoder:" << this <<"] Broadcasting: " << mpacket << endl;
+	//traceL() << "[ImageEncoder: " << this <<"] Broadcasting: " << mpacket << endl;
 	emit(*mpacket); //this, 
-	//traceL() << "[ImageEncoder:" << this <<"] Broadcasting: OK: " << mpacket << endl;
+	//traceL() << "[ImageEncoder: " << this <<"] Broadcasting: OK: " << mpacket << endl;
 }
 
 	

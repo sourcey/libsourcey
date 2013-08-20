@@ -97,7 +97,7 @@ void Event::setName(const std::string& name)
 
 
 /*
-void Event::setMessage(const string& message) 
+void Event::setMessage(const std::string& message) 
 {
 	(*this)["message"] = message;
 }
@@ -114,7 +114,7 @@ void Event::setTime(time_t time)
 
 	
 /*
-void Event::setTime(const string& time) 
+void Event::setTime(const std::string& time) 
 {
 	// no checking done
 	(*this)["time"] = time;

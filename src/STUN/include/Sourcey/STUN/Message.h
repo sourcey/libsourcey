@@ -65,7 +65,7 @@ public:
 	enum ErrorCodes 
 	{
 		BadRequest				= 400, 
-		Unauthorized			= 401, 
+		NotAuthorized			= 401, 
 		UnknownAttribute		= 420, 
 		StaleCredentials		= 430, 
 		IntegrityCheckFailure	= 431, 
@@ -111,7 +111,7 @@ public:
 			get(static_cast<Attribute::Type>(T::TypeID), index));
 	}
 
-	bool read(Buffer& buf);
+	bool read(const ConstBuffer& buf);
 		/// Parses the STUN/TURN packet from the given buffer.
 		/// The return value indicates whether this was successful.
 

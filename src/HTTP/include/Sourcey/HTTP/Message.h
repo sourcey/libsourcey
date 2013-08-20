@@ -29,15 +29,14 @@
 #define SOURCEY_HTTP_Message_H
 
 
-#include "Sourcey/Containers.h"
-//#include "Poco/String.h"
+#include "Sourcey/Collection.h"
 
 
 namespace scy {
 namespace http {
 
 
-class Message: public NVHash
+class Message: public NVCollection
 	/// The base class for Request and Response.
 	///
 	/// Defines the common properties of all HTTP messages.

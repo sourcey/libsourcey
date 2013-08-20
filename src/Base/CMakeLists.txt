@@ -1,6 +1,6 @@
 ask_build_sourcey_module(Base)
 if(BUILD_MODULES AND BUILD_MODULE_Base) 
-  include_dependency(Poco REQUIRED)
+  #include_dependency(Poco REQUIRED)
   include_dependency(OpenSSL REQUIRED)
   include_dependency(LibUV REQUIRED)
   

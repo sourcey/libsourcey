@@ -40,7 +40,7 @@ public:
 	void* sender;
 
 	TransferSignal() :	
-		sender(nil), current(0), total(0) {}
+		sender(nullptr), current(0), total(0) {}
 
 	double progress() const {
 		return (current / (total * 1.0)) * 100;
@@ -60,103 +60,98 @@ class ClientConnection: public Connection
 public:
     ClientConnection(const URL& url,
 		const net::Socket& socket = net::TCPSocket());
-		/// Create a standalone connection with the given host.
+		// Create a standalone connection with the given host.
 	
     ClientConnection(Client* client, const URL& url, 
 		const net::Socket& socket = net::TCPSocket());
-		/// Create a managed connection with the given host.
+		// Create a managed connection with the given host.
 
 	virtual void send();
-		/// Sends the internal HTTP request.
+		// Sends the HTTP request.
 		//
-		/// Calls connect() internally if the socket is not
-		/// already connecting or connected. The actual request 
-		/// will be sent when the socket is connected.
+		// Calls connect() internally if the socket is not
+		// already connecting or connected. The actual request 
+		// will be sent when the socket is connected.
 				
 	virtual void send(http::Request& req);
-		/// Sends the given HTTP request.
-		/// The given request will overwrite the internal HTTP
-		/// request object.
+		// Sends the given HTTP request.
+		// The given request will overwrite the internal HTTP
+		// request object.
 		//
-		/// Calls connect() internally if the socket is not
-		/// already connecting or connected. The actual request 
-		/// will be sent when the socket is connected.
+		// Calls connect() internally if the socket is not
+		// already connecting or connected. The actual request 
+		// will be sent when the socket is connected.
 	
 	virtual void close();
-		/// Forcefully closes the HTTP connection.
+		// Forcefully closes the HTTP connection.
 		
 	virtual void setReadStream(std::ostream* os);
-		/// Sets the receiver stream for writing server response data.
-		//
-		/// This given stream pointer may be a ofstream instance for 
-		/// writing to a file. The pointer is managed internally,
-		/// and will be deleted when the connection is closed.		
+		// Set the output stream for writing response data to.
+		// The stream pointer is managed internally,
+		// and will be freed along with the connection.		
 		
 	template<class T>
 	T* readStream()
-		/// Returns the cast read stream pointer or nil.
+		// Returns the cast read stream pointer or nullptr.
 	{
 		return dynamic_cast<T*>(_readStream);
 	}
 		
 	void* opaque;
-		/// Optional client data pointer.
-		//
-		/// The pointer is not initialized or managed
-		/// by the connection.
+		// Optional unmanaged client data pointer.
 	
 	//
 	/// Internal callbacks
+
 	virtual void onHeaders();
-	virtual void onPayload(Buffer& buffer);
+	virtual void onPayload(const MutableBuffer& buffer);
 	virtual void onMessage();
 	virtual void onClose();
 
 	//
 	/// Status signals
-	NullSignal Connect;
-		/// Fires when the client socket is connected
 
-	Signal<Response&> Headers;
-		/// Fires when the response HTTP header has been received
-
-	Signal<const Response&> Complete;
-		/// Fires on success or error response
-	
-	TransferSignal IncomingProgress;
-		/// Notifies on download progress
-
-	TransferSignal OutgoingProgress;
-		/// Notifies on upload progress
+	NullSignal Connect;						// Fires when the client socket is connected
+	Signal<Response&> Headers;				// Fires when the response HTTP header has been received
+	Signal<const Response&> Complete;		// Fires on success or error response	
+	TransferSignal IncomingProgress;		// Notifies on download progress
+	TransferSignal OutgoingProgress;		// Notifies on upload progress
 
 protected:
     virtual ~ClientConnection();
 					
 	http::Client* client();
-
 	http::Message* incomingHeader();	
 	http::Message* outgoingHeader();
-		
-	//virtual void setError(const Error& err);
 	
 	void onHostResolved(void*, const net::DNSResult& result);
 	void onSocketConnect(void*);
 	void onClientShutdown(void*);
 	
 protected:	
-	http::Client* _client;
 	URL _url;
+	http::Client* _client;
 	std::ostream* _readStream;
 	TransferSignal _incomingProgress;
 	TransferSignal _outgoingProgress;
+	bool _complete;
 };
 
 
 typedef std::vector<ClientConnection*> ClientConnectionList;
+	
+
+ClientConnection* createConnection(const URL& url);
+	// Create a ClientConnection object.
+	// The underlying ConnectionAdapter will be guessed
+	// based on the URL scheme.
 
 
-// -------------------------------------------------------------------
 //
+// Client Connection Adapter
+//
+
+
 class ClientAdapter: public ConnectionAdapter
 {
 public:
@@ -165,9 +160,15 @@ public:
 	{
 	}
 };
-	
+
 
 /*
+		
+	//virtual void setError(const Error& err);
+	
+	void complete();
+		// The transaction has ended, either is success or in error,
+		// and Complete signal has been sent.
 // -------------------------------------------------------------------
 //
 class SecureClientConnection: public ClientConnection
@@ -218,17 +219,13 @@ public:
 };
 */
 
-	
-// -------------------------------------------------------------------
+
+//
+// HTTP Client
 //
 
-/// Creates different connection types based on the URL scheme.
-ClientConnection* createConnection(const URL& url);
 
-
-// -------------------------------------------------------------------
-//
-class Client: public Module
+class Client: public basic::Module
 {
 public:
 	Client();
@@ -289,7 +286,7 @@ struct OutputStream//: public std::ostream
 	{
 	};
 	
-	OutputStream& operator << (const string& data)
+	OutputStream& operator << (const std::string& data)
 	{
 		sendBuffer.put(data);
 		return *this;
@@ -321,7 +318,7 @@ struct OutputStream//: public std::ostream
 	/*
 	void onAccept(void* sender, const net::TCPSocket& sock)
 	{	
-		traceL("Client", this) << "On Accept" << std::endl;
+		traceL("Client", this) << "on Accept" << std::endl;
 		ClientConnection* conn = createConnection(sock);
 		if (conn)
 			connections.push_back(conn);
@@ -342,7 +339,7 @@ struct OutputStream//: public std::ostream
 	
 	void onClose(void* sender) 
 	{
-		traceL("Client", this) << "On close" << std::endl;
+		traceL("Client", this) << "on close" << std::endl;
 		//assert(0 && "server socket closed");
 	}
 	*/
@@ -376,23 +373,23 @@ struct OutputStream//: public std::ostream
 
 	ClientResponder* createResponder(ClientConnection& conn)
 	{
-		/// The initial HTTP request headers have already
-		/// been parsed by now, but the request body may 
-		/// be incomplete (especially if chunked).
+		// The initial HTTP request headers have already
+		// been parsed by now, but the request body may 
+		// be incomplete (especially if chunked).
 		return factory->createResponder(conn);
 	}
 	*/
 
 /*
 class ClientRequester
-	/// The abstract base class for HTTP ClientRequesters 
-	/// created by HTTP Client.
-	///
-	/// Derived classes must override the handleRequest() method.
-	///
-	/// A new HTTPClientRequester object will be created for
-	/// each new HTTP request that is received by the HTTP Client.
-	///
+	// The abstract base class for HTTP ClientRequesters 
+	// created by HTTP Client.
+	//
+	// Derived classes must override the handleRequest() method.
+	//
+	// A new HTTPClientRequester object will be created for
+	// each new HTTP request that is received by the HTTP Client.
+	//
 {
 public:
 	ClientRequester(ClientConnection& connection) : 

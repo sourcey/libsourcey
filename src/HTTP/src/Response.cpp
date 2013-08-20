@@ -16,6 +16,205 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
+
+#include "Sourcey/HTTP/Response.h"
+#include "Sourcey/HTTP/Util.h"
+#include "Sourcey/DateTime.h"
+
+
+using namespace std;
+
+
+namespace scy { 
+namespace http {
+
+
+Response::Response() :
+	_status(StatusCode::OK),
+	_reason(getStatusCodeReason(StatusCode::OK))
+{
+}
+
+	
+Response::Response(StatusCode status, const std::string& reason) :
+	_status(status),
+	_reason(reason)
+{
+}
+
+
+	
+Response::Response(const std::string& version, StatusCode status, const std::string& reason) :
+	http::Message(version),
+	_status(status),
+	_reason(reason)
+{
+}
+
+	
+Response::Response(StatusCode status) :
+	_status(status),
+	_reason(getStatusCodeReason(status))
+{
+}
+
+
+Response::Response(const std::string& version, StatusCode status) :
+	http::Message(version),
+	_status(status),
+	_reason(getStatusCodeReason(status))
+{
+}
+
+
+Response::~Response()
+{
+}
+
+
+void Response::setStatus(StatusCode status)
+{
+	_status = status;
+}
+
+	
+void Response::setReason(const std::string& reason)
+{
+	_reason = reason;
+}
+
+
+void Response::setStatusAndReason(StatusCode status, const std::string& reason)
+{
+	_status = status;
+	_reason = reason;
+}
+
+	
+void Response::setStatusAndReason(StatusCode status)
+{
+	setStatusAndReason(status, getStatusCodeReason(status));
+}
+
+
+void Response::setDate(const Timestamp& dateTime)
+{
+	set("Date", DateTimeFormatter::format(dateTime, DateTimeFormat::HTTP_FORMAT));
+}
+
+	
+Timestamp Response::getDate() const
+{
+	const std::string& dateTime = get("Date");
+	int tzd;
+	return DateTimeParser::parse(dateTime, tzd).timestamp();
+}
+
+
+void Response::addCookie(const Cookie& cookie)
+{
+	add("Set-Cookie", cookie.toString());
+}
+
+
+void Response::getCookies(std::vector<Cookie>& cookies) const
+{
+	cookies.clear();
+	NVCollection::ConstIterator it = find("Set-Cookie");
+	while (it != end() && util::icompare(it->first, "Set-Cookie") == 0)
+	{
+		NVCollection nvc;
+		http::splitParameters(it->second.begin(), it->second.end(), nvc);
+		cookies.push_back(Cookie(nvc));
+		++it;
+	}
+}
+
+
+void Response::write(std::ostream& ostr) const
+{
+	ostr << getVersion() << " " << static_cast<int>(_status) << " " << _reason << "\r\n";
+	http::Message::write(ostr);
+	ostr << "\r\n";
+}
+	
+
+bool Response::success()  const
+{
+	return getStatus() < StatusCode::BadRequest; // < 400
+}
+
+
+StatusCode Response::getStatus() const
+{
+	return _status;
+}
+
+
+const std::string& Response::getReason() const
+{
+	return _reason;
+}
+
+
+const char* getStatusCodeReason(StatusCode status) 
+{
+	switch (status) {
+		case StatusCode::Continue                : return "Continue";
+		case StatusCode::SwitchingProtocols      : return "Switching Protocols";
+
+		case StatusCode::OK                      : return "OK";
+		case StatusCode::Created                 : return "Created";
+		case StatusCode::Accepted                : return "Accepted";
+		case StatusCode::NonAuthoritative        : return "Non-Authoritative Information";
+		case StatusCode::NoContent               : return "No Content";
+		case StatusCode::ResetContent            : return "Reset Content";
+		case StatusCode::PartialContent          : return "Partial Content";
+
+		// 300 range: redirects
+		case StatusCode::MultipleChoices         : return "Multiple Choices";
+		case StatusCode::MovedPermanently        : return "Moved Permanently";
+		case StatusCode::Found                   : return "Found";
+		case StatusCode::SeeOther                : return "See Other";
+		case StatusCode::NotModified             : return "Not Modified";
+		case StatusCode::UseProxy                : return "Use Proxy";
+		case StatusCode::TemporaryRedirect       : return "OK";
+
+		// 400 range: client errors
+		case StatusCode::BadRequest              : return "Bad Request";
+		case StatusCode::NotAuthorized            : return "NotAuthorized";
+		case StatusCode::PaymentRequired         : return "Payment Required";
+		case StatusCode::Forbidden               : return "Forbidden";
+		case StatusCode::NotFound                : return "Not Found";
+		case StatusCode::MethodNotAllowed        : return "Method Not Allowed";
+		case StatusCode::NotAcceptable           : return "Not Acceptable";
+		case StatusCode::ProxyAuthRequired       : return "Proxy Authentication Required";
+		case StatusCode::RequestTimeout          : return "Request Time-out";
+		case StatusCode::Conflict                : return "Conflict";
+		case StatusCode::Gone                    : return "Gone";
+		case StatusCode::LengthRequired          : return "Length Required";
+		case StatusCode::PreconditionFailed      : return "Precondition Failed";
+		case StatusCode::EntityTooLarge          : return "Request Entity Too Large";
+		case StatusCode::UriTooLong              : return "Request-URI Too Large";
+		case StatusCode::UnsupportedMediaType    : return "Unsupported Media Type";
+		case StatusCode::RangeNotSatisfiable     : return "Requested range not satisfiable";
+		case StatusCode::ExpectationFailed       : return "Expectation Failed";
+
+		// 500 range: server errors
+		case StatusCode::InternalServerError     : return "Internal Server Error";
+		case StatusCode::NotImplemented          : return "Not Implemented";
+		case StatusCode::BadGateway              : return "Bad Gateway";
+		case StatusCode::Unavailable             : return "Service Unavailable";
+		case StatusCode::GatewayTimeout          : return "Gateway Time-out";
+	}
+	assert(0);
+	return "Unknown";
+}
+
+
+} } // namespace scy::http
+
+
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
@@ -42,293 +241,3 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 //
-
-
-#include "Sourcey/HTTP/Response.h"
-#include "Sourcey/HTTP/Util.h"
-#include "Sourcey/HTTP/Cookie.h"
-#include "Sourcey/DateTime.h"
-
-#include "Poco/NumberFormatter.h"
-#include "Poco/NumberParser.h"
-#include "Poco/Ascii.h"
-#include "Poco/String.h"
-
-
-using namespace std;
-
-
-namespace scy { 
-namespace http {
-
-
-const std::string Response::HTTP_REASON_CONTINUE                        = "Continue";
-const std::string Response::HTTP_REASON_SWITCHING_PROTOCOLS             = "Switching Protocols";
-const std::string Response::HTTP_REASON_OK                              = "OK";
-const std::string Response::HTTP_REASON_CREATED                         = "Created";
-const std::string Response::HTTP_REASON_ACCEPTED                        = "Accepted";
-const std::string Response::HTTP_REASON_NONAUTHORITATIVE                = "Non-Authoritative Information";
-const std::string Response::HTTP_REASON_NO_CONTENT                      = "No Content";
-const std::string Response::HTTP_REASON_RESET_CONTENT                   = "Reset Content";
-const std::string Response::HTTP_REASON_PARTIAL_CONTENT                 = "Partial Content";
-const std::string Response::HTTP_REASON_MULTIPLE_CHOICES                = "Multiple Choices";
-const std::string Response::HTTP_REASON_MOVED_PERMANENTLY               = "Moved Permanently";
-const std::string Response::HTTP_REASON_FOUND                           = "Found";
-const std::string Response::HTTP_REASON_SEE_OTHER                       = "See Other";
-const std::string Response::HTTP_REASON_NOT_MODIFIED                    = "Not Modified";
-const std::string Response::HTTP_REASON_USEPROXY                        = "Use Proxy";
-const std::string Response::HTTP_REASON_TEMPORARY_REDIRECT              = "Temporary Redirect";
-const std::string Response::HTTP_REASON_BAD_REQUEST                     = "Bad Request";
-const std::string Response::HTTP_REASON_UNAUTHORIZED                    = "Unauthorized";
-const std::string Response::HTTP_REASON_PAYMENT_REQUIRED                = "Payment Required";
-const std::string Response::HTTP_REASON_FORBIDDEN                       = "Forbidden";
-const std::string Response::HTTP_REASON_NOT_FOUND                       = "Not Found";
-const std::string Response::HTTP_REASON_METHOD_NOT_ALLOWED              = "Method Not Allowed";
-const std::string Response::HTTP_REASON_NOT_ACCEPTABLE                  = "Not Acceptable";
-const std::string Response::HTTP_REASON_PROXY_AUTHENTICATION_REQUIRED   = "Proxy Authentication Required";
-const std::string Response::HTTP_REASON_REQUEST_TIMEOUT                 = "Request Time-out";
-const std::string Response::HTTP_REASON_CONFLICT                        = "Conflict";
-const std::string Response::HTTP_REASON_GONE                            = "Gone";
-const std::string Response::HTTP_REASON_LENGTH_REQUIRED                 = "Length Required";
-const std::string Response::HTTP_REASON_PRECONDITION_FAILED             = "Precondition Failed";
-const std::string Response::HTTP_REASON_REQUESTENTITYTOOLARGE           = "Request Entity Too Large";
-const std::string Response::HTTP_REASON_REQUESTURITOOLONG               = "Request-URI Too Large";
-const std::string Response::HTTP_REASON_UNSUPPORTEDMEDIATYPE            = "Unsupported Media Type";
-const std::string Response::HTTP_REASON_REQUESTED_RANGE_NOT_SATISFIABLE = "Requested Range Not Satisfiable";
-const std::string Response::HTTP_REASON_EXPECTATION_FAILED              = "Expectation Failed";
-const std::string Response::HTTP_REASON_INTERNAL_SERVER_ERROR           = "Internal Server Error";
-const std::string Response::HTTP_REASON_NOT_IMPLEMENTED                 = "Not Implemented";
-const std::string Response::HTTP_REASON_BAD_GATEWAY                     = "Bad Gateway";
-const std::string Response::HTTP_REASON_SERVICE_UNAVAILABLE             = "Service Unavailable";
-const std::string Response::HTTP_REASON_GATEWAY_TIMEOUT                 = "Gateway Time-out";
-const std::string Response::HTTP_REASON_VERSION_NOT_SUPPORTED           = "HTTP Version not supported";
-const std::string Response::HTTP_REASON_UNKNOWN                         = "???";
-const std::string Response::DATE       = "Date";
-const std::string Response::SET_COOKIE = "Set-Cookie";
-
-
-Response::Response():
-	_status(HTTP_OK),
-	_reason(getReasonForStatus(HTTP_OK))
-{
-}
-
-	
-Response::Response(StatusCode status, const std::string& reason):
-	_status(status),
-	_reason(reason)
-{
-}
-
-
-	
-Response::Response(const std::string& version, StatusCode status, const std::string& reason):
-	http::Message(version),
-	_status(status),
-	_reason(reason)
-{
-}
-
-	
-Response::Response(StatusCode status):
-	_status(status),
-	_reason(getReasonForStatus(status))
-{
-}
-
-
-Response::Response(const std::string& version, StatusCode status):
-	http::Message(version),
-	_status(status),
-	_reason(getReasonForStatus(status))
-{
-}
-
-
-Response::~Response()
-{
-}
-
-
-void Response::setStatus(StatusCode status)
-{
-	_status = status;
-}
-
-
-void Response::setStatus(const std::string& status)
-{
-	setStatus((StatusCode) Poco::NumberParser::parse(status));
-}
-	
-	
-void Response::setReason(const std::string& reason)
-{
-	_reason = reason;
-}
-
-
-void Response::setStatusAndReason(StatusCode status, const std::string& reason)
-{
-	_status = status;
-	_reason = reason;
-}
-
-	
-void Response::setStatusAndReason(StatusCode status)
-{
-	setStatusAndReason(status, getReasonForStatus(status));
-}
-
-
-void Response::setDate(const Timestamp& dateTime)
-{
-	set(DATE, DateTimeFormatter::format(dateTime, DateTimeFormat::HTTP_FORMAT));
-}
-
-	
-Timestamp Response::getDate() const
-{
-	const std::string& dateTime = get(DATE);
-	int tzd;
-	return DateTimeParser::parse(dateTime, tzd).timestamp();
-}
-
-
-void Response::addCookie(const Cookie& cookie)
-{
-	add(SET_COOKIE, cookie.toString());
-}
-
-
-void Response::getCookies(std::vector<Cookie>& cookies) const
-{
-	cookies.clear();
-	NVHash::ConstIterator it = find(SET_COOKIE);
-	while (it != end() && util::icompare(it->first, SET_COOKIE) == 0)
-	{
-		NVHash nvc;
-		util::splitParameters(it->second.begin(), it->second.end(), nvc);
-		cookies.push_back(Cookie(nvc));
-		++it;
-	}
-}
-
-
-void Response::write(std::ostream& ostr) const
-{
-	ostr << getVersion() << " " << static_cast<int>(_status) << " " << _reason << "\r\n";
-	http::Message::write(ostr);
-	ostr << "\r\n";
-}
-	
-
-bool Response::success()  const
-{
-	return getStatus() < 400;
-}
-
-
-Response::StatusCode Response::getStatus() const
-{
-	return _status;
-}
-
-
-const std::string& Response::getReason() const
-{
-	return _reason;
-}
-
-
-const std::string& Response::getReasonForStatus(StatusCode status)
-{
-	switch (status)
-	{
-	case HTTP_CONTINUE: 
-		return HTTP_REASON_CONTINUE;
-	case HTTP_SWITCHING_PROTOCOLS: 
-		return HTTP_REASON_SWITCHING_PROTOCOLS;
-	case HTTP_OK: 
-		return HTTP_REASON_OK;
-	case HTTP_CREATED: 
-		return HTTP_REASON_CREATED;
-	case HTTP_ACCEPTED: 
-		return HTTP_REASON_ACCEPTED;
-	case HTTP_NONAUTHORITATIVE:	
-		return HTTP_REASON_NONAUTHORITATIVE;
-	case HTTP_NO_CONTENT: 
-		return HTTP_REASON_NO_CONTENT;
-	case HTTP_RESET_CONTENT: 
-		return HTTP_REASON_RESET_CONTENT;
-	case HTTP_PARTIAL_CONTENT: 
-		return HTTP_REASON_PARTIAL_CONTENT;
-	case HTTP_MULTIPLE_CHOICES: 
-		return HTTP_REASON_MULTIPLE_CHOICES;
-	case HTTP_MOVED_PERMANENTLY: 
-		return HTTP_REASON_MOVED_PERMANENTLY;
-	case HTTP_FOUND: 
-		return HTTP_REASON_FOUND;
-	case HTTP_SEE_OTHER: 
-		return HTTP_REASON_SEE_OTHER;
-	case HTTP_NOT_MODIFIED: 
-		return HTTP_REASON_NOT_MODIFIED;
-	case HTTP_USEPROXY: 
-		return HTTP_REASON_USEPROXY;
-	case HTTP_TEMPORARY_REDIRECT: 
-		return HTTP_REASON_TEMPORARY_REDIRECT;
-	case HTTP_BAD_REQUEST: 
-		return HTTP_REASON_BAD_REQUEST;
-	case HTTP_UNAUTHORIZED: 
-		return HTTP_REASON_UNAUTHORIZED;
-	case HTTP_PAYMENT_REQUIRED: 
-		return HTTP_REASON_PAYMENT_REQUIRED;
-	case HTTP_FORBIDDEN: 
-		return HTTP_REASON_FORBIDDEN;
-	case HTTP_NOT_FOUND: 
-		return HTTP_REASON_NOT_FOUND;
-	case HTTP_METHOD_NOT_ALLOWED:
-		return HTTP_REASON_METHOD_NOT_ALLOWED;
-	case HTTP_NOT_ACCEPTABLE: 
-		return HTTP_REASON_NOT_ACCEPTABLE;
-	case HTTP_PROXY_AUTHENTICATION_REQUIRED: 
-		return HTTP_REASON_PROXY_AUTHENTICATION_REQUIRED;
-	case HTTP_REQUEST_TIMEOUT: 
-		return HTTP_REASON_REQUEST_TIMEOUT;
-	case HTTP_CONFLICT: 
-		return HTTP_REASON_CONFLICT;
-	case HTTP_GONE: 
-		return HTTP_REASON_GONE;
-	case HTTP_LENGTH_REQUIRED: 
-		return HTTP_REASON_LENGTH_REQUIRED;
-	case HTTP_PRECONDITION_FAILED: 
-		return HTTP_REASON_PRECONDITION_FAILED;
-	case HTTP_REQUESTENTITYTOOLARGE: 
-		return HTTP_REASON_REQUESTENTITYTOOLARGE;
-	case HTTP_REQUESTURITOOLONG: 
-		return HTTP_REASON_REQUESTURITOOLONG;
-	case HTTP_UNSUPPORTEDMEDIATYPE: 
-		return HTTP_REASON_UNSUPPORTEDMEDIATYPE;
-	case HTTP_REQUESTED_RANGE_NOT_SATISFIABLE: 
-		return HTTP_REASON_REQUESTED_RANGE_NOT_SATISFIABLE;
-	case HTTP_EXPECTATION_FAILED: 
-		return HTTP_REASON_EXPECTATION_FAILED;
-	case HTTP_INTERNAL_SERVER_ERROR: 
-		return HTTP_REASON_INTERNAL_SERVER_ERROR;
-	case HTTP_NOT_IMPLEMENTED: 
-		return HTTP_REASON_NOT_IMPLEMENTED;
-	case HTTP_BAD_GATEWAY: 
-		return HTTP_REASON_BAD_GATEWAY;
-	case HTTP_SERVICE_UNAVAILABLE:
-		return HTTP_REASON_SERVICE_UNAVAILABLE;
-	case HTTP_GATEWAY_TIMEOUT: 
-		return HTTP_REASON_GATEWAY_TIMEOUT;
-	case HTTP_VERSION_NOT_SUPPORTED: 
-		return HTTP_REASON_VERSION_NOT_SUPPORTED;
-	default: 
-		return HTTP_REASON_UNKNOWN;
-	}
-}
-
-
-} } // namespace scy::http

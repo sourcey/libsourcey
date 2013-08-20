@@ -43,33 +43,33 @@ Mutex AVEncoder::_mutex;
 
 AVEncoder::AVEncoder(const RecordingOptions& options) :
 	_options(options),	
-	_formatCtx(nil),
-	_video(nil),
-	_audio(nil),
-	_audioFifo(nil),
-	_audioBuffer(nil),
-	_ioBuffer(nil),
+	_formatCtx(nullptr),
+	_video(nullptr),
+	_audio(nullptr),
+	_audioFifo(nullptr),
+	_audioBuffer(nullptr),
+	_ioBuffer(nullptr),
 	_ioBufferSize(MAX_VIDEO_PACKET_SIZE)
 {
 }
 
 
 AVEncoder::AVEncoder() : 	
-	_formatCtx(nil),
-	_video(nil),
-	_audio(nil),
-	_audioFifo(nil),
-	_audioBuffer(nil),
-	_ioBuffer(nil),
+	_formatCtx(nullptr),
+	_video(nullptr),
+	_audio(nullptr),
+	_audioFifo(nullptr),
+	_audioBuffer(nullptr),
+	_ioBuffer(nullptr),
 	_ioBufferSize(MAX_VIDEO_PACKET_SIZE)
 {
-	traceL("AVEncoder", this) << "Initializing" << endl;
+	traceL("AVEncoder", this) << "initializing" << endl;
 }
 
 
 AVEncoder::~AVEncoder()
 {
-	traceL("AVEncoder", this) << "Destroying" << endl;
+	traceL("AVEncoder", this) << "destroy" << endl;
 	uninitialize();
 }
 
@@ -96,7 +96,7 @@ void AVEncoder::initialize()
 {
 	assert(!isActive());
 
-	traceL("AVEncoder", this) << "Initializing:"
+	traceL("AVEncoder", this) << "initializing:"
 		<< "\n\tInput Format: " << _options.iformat.toString()
 		<< "\n\tOutput Format: " << _options.oformat.toString()
 		<< "\n\tDuration: " << _options.duration
@@ -109,10 +109,10 @@ void AVEncoder::initialize()
 
 			if (!_options.oformat.video.enabled && 
 				!_options.oformat.audio.enabled)
-				throw Exception("Either video or audio parameters must be specified.");
+				throw std::runtime_error("Either video or audio parameters must be specified.");
 
 			if (_options.oformat.id.empty())
-				throw Exception("An output container format must be specified.");	
+				throw std::runtime_error("An output container format must be specified.");	
 
 			// TODO: Only need to call this once, but it does not leak memory.
 			// Also consider using av_lockmgr_register to protect avcodec_open/avcodec_close
@@ -124,16 +124,16 @@ void AVEncoder::initialize()
 			assert(!_formatCtx);
 			_formatCtx = avformat_alloc_context();
 			if (!_formatCtx) 
-				throw Exception("Cannot allocate format context.");
+				throw std::runtime_error("Cannot allocate format context.");
 
 			if (!_options.ofile.empty())
 				snprintf(_formatCtx->filename, sizeof(_formatCtx->filename), "%s", _options.ofile.c_str());
 		
 			// Set the container codec
-			string ofmt = _options.ofile.empty() ? ("." + string(_options.oformat.id)) : _options.ofile;		
-			_formatCtx->oformat = av_guess_format(_options.oformat.id.c_str(), ofmt.c_str(), nil);	
+			std::string ofmt = _options.ofile.empty() ? ("." + string(_options.oformat.id)) : _options.ofile;		
+			_formatCtx->oformat = av_guess_format(_options.oformat.id.c_str(), ofmt.c_str(), nullptr);	
 			if (!_formatCtx->oformat)
-				throw Exception("Cannot find suitable encoding format for " + _options.oformat.name);			
+				throw std::runtime_error("Cannot find suitable encoding format for " + _options.oformat.name);			
 		}
 
 		// Initialize encoder contexts
@@ -160,13 +160,13 @@ void AVEncoder::initialize()
 				if (!(_formatCtx->oformat->flags & AVFMT_NOFILE)) {
 					//if (url_fopen(&_formatCtx->pb, _options.ofile.c_str(), URL_WRONLY) < 0) {
 					if (avio_open(&_formatCtx->pb, _options.ofile.c_str(), AVIO_FLAG_WRITE) < 0) {
-						throw Exception("AVWriter: Unable to open the output file");
+						throw std::runtime_error("AVWriter: Unable to open the output file");
 					}
 				}
 			}
 
 			// Write the stream header (if any)
-			avformat_write_header(_formatCtx, nil);
+			avformat_write_header(_formatCtx, nullptr);
 
 			// Send the format information to sdout
 			av_dump_format(_formatCtx, 0, _options.ofile.c_str(), 1);
@@ -207,18 +207,18 @@ void AVEncoder::initialize()
 		
 		setState(this, EncoderState::Ready);
 	} 
-	catch (Exception& exc) {
-		errorL("AVEncoder", this) << "Error: " << exc.message() << endl;		
+	catch (std::exception&/*Exception&*/ exc) {
+		errorL("AVEncoder", this) << "Error: " << exc.what()/*message()*/ << endl;		
 		cleanup();
-		setState(this, EncoderState::Error, exc.message());
-		exc.rethrow();
+		setState(this, EncoderState::Error, exc.what()/*message()*/);
+		throw exc; //.rethrow()
 	}
 }
 
 
 void AVEncoder::uninitialize()
 {
-	traceL("AVEncoder", this) << "Uninitializing" << endl;
+	traceL("AVEncoder", this) << "uninitializing" << endl;
 	cleanup();	
 	setState(this, EncoderState::Stopped);
 }
@@ -262,17 +262,17 @@ void AVEncoder::cleanup()
 		
 	 		// Free the format context
 			av_free(_formatCtx);
-			_formatCtx = nil;
+			_formatCtx = nullptr;
 		}
 	
 		//if (_videoPtsCalc) {
 		//	delete _videoPtsCalc;
-		//	_videoPtsCalc = nil;
+		//	_videoPtsCalc = nullptr;
 		//}
 	
 		if (_ioBuffer) {
 			delete _ioBuffer;
-			_ioBuffer = nil;
+			_ioBuffer = nullptr;
 		}
 	}
 
@@ -329,18 +329,18 @@ void AVEncoder::freeVideo()
 
 	if (_video) {
 		delete _video;
-		_video = nil;
+		_video = nullptr;
 	}
 }
 
 
-bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, int height, UInt64 time)
+bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, int height, UInt64 /* time */)
 {
 	traceL("AVEncoder", this) << "Encoding video: " << bufferSize << endl;	
 	
-	RecordingOptions* options = nil;		
-	AVFormatContext* formatCtx = nil;
-	VideoEncoderContext* video = nil;	
+	RecordingOptions* options = nullptr;		
+	AVFormatContext* formatCtx = nullptr;
+	VideoEncoderContext* video = nullptr;	
 	{	
 		// Lock the mutex while encoding
 		Mutex::ScopedLock lock(_mutex);
@@ -353,13 +353,13 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 	assert(video && video->frame);
 
 	if (!isActive())
-		throw Exception("The encoder is not initialized");
+		throw std::runtime_error("The encoder is not initialized");
 	
 	if (!video) 
-		throw Exception("No video context");
+		throw std::runtime_error("No video context");
 
 	if (!buffer || !bufferSize || !width || !height)
-		throw Exception("Invalid video frame");
+		throw std::runtime_error("Invalid video frame");
 	
 	// Recreate the video conversion context if the
 	// input resolution changes.
@@ -442,7 +442,7 @@ void AVEncoder::createAudio()
 
 	// Initialize the audio encoder (if required)
 	if (_options.oformat.audio.enabled) { //&& _formatCtx->oformat->audio_codec != CODEC_ID_NONE		
-		traceL("AVEncoder", this) << "Creating Audio" << endl;
+		traceL("AVEncoder", this) << "create Audio" << endl;
 		_audio = new AudioEncoderContext(_formatCtx);
 		_audio->iparams = _options.iformat.audio;
 		_audio->oparams = _options.oformat.audio;
@@ -469,32 +469,32 @@ void AVEncoder::freeAudio()
 
 	if (_audio) {
 		delete _audio;
-		_audio = nil;
+		_audio = nullptr;
 	}
 	
 	if (_audioFifo) {
 		av_fifo_free(_audioFifo);
-		_audioFifo = nil;
+		_audioFifo = nullptr;
 	}
 	
 	if (_audioBuffer) {
 		av_free(_audioBuffer);
-		_audioBuffer = nil;
+		_audioBuffer = nullptr;
 	}
 }
 
 
-bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 time)
+bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 /* time */)
 {
 	//traceL("AVEncoder", this) << "Encoding Audio Packet: " << bufferSize << endl;	
 	assert(buffer);
 	assert(bufferSize);
 
-	RecordingOptions* options = nil;		
-	AVFormatContext* formatCtx = nil;
-	AudioEncoderContext* audio = nil;	
-	AVFifoBuffer* audioFifo = nil;	
-	UInt8* audioBuffer = nil;	
+	RecordingOptions* options = nullptr;		
+	AVFormatContext* formatCtx = nullptr;
+	AudioEncoderContext* audio = nullptr;	
+	AVFifoBuffer* audioFifo = nullptr;	
+	UInt8* audioBuffer = nullptr;	
 	{	
 		Mutex::ScopedLock lock(_mutex);
 		options = &_options;
@@ -505,19 +505,19 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 time)
 	}
 
 	if (!isActive())
-		throw Exception("The encoder is not initialized");
+		throw std::runtime_error("The encoder is not initialized");
 	
 	if (!audio) 
-		throw Exception("No audio context");
+		throw std::runtime_error("No audio context");
 	
 	if (!buffer || !bufferSize) 
-		throw Exception("Invalid audio input");
+		throw std::runtime_error("Invalid audio input");
 		
 	// TODO: Move FIFO to the encoder context.
 	bool res = false;
-	av_fifo_generic_write(audioFifo, (UInt8*)buffer, bufferSize, nil);
+	av_fifo_generic_write(audioFifo, (UInt8*)buffer, bufferSize, nullptr);
 	while (av_fifo_size(audioFifo) >= _audio->outputFrameSize) {
-		av_fifo_generic_read(audioFifo, audioBuffer, audio->outputFrameSize, nil);
+		av_fifo_generic_read(audioFifo, audioBuffer, audio->outputFrameSize, nullptr);
 		
 		AVPacket opacket;
 			
@@ -573,7 +573,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 time)
 	// {
 	// 	 int ret = avcodec_decode_video2(..., ipacket);
 	// 	 if(ret < -1)
-	//		throw std::exception("error");
+	//		throw std::runtime_error("error");
 	//
 	//	 ipacket->size -= ret;
 	//	 ipacket->data += ret;
@@ -588,9 +588,9 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 time)
 		avcodec_get_frame_defaults(frame);
 		bytesDecoded = avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);		
 		if (bytesDecoded < 0) {
-			errorL() << "[AudioDecoderContext:" << this << "] Decoder Error" << endl;
+			errorL() << "[AudioDecoderContext: " << this << "] Decoder Error" << endl;
 			error = "Decoder error";
-			throw Exception(error);
+			throw std::runtime_error(error);
 		}
 		*/
 	//}
@@ -720,7 +720,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 time)
 		//_videoTime = clock();	
 		//_frameDuration = clock();	
 		
-		//traceL() << "@@@@@@@@@@@@@@@@@@@@ [AVEncoder:" << this << "] Video PTS:" << opacket.pts++ << endl;
+		//traceL() << "@@@@@@@@@@@@@@@@@@@@ [AVEncoder: " << this << "] Video PTS: " << opacket.pts++ << endl;
 
 		/*
 		_videoPTS += _video->ctx->time_base.den / (_videoFPS.fps + 3);
@@ -779,19 +779,19 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 time)
 
 		for (int i=0; i< _formatCtx->nb_streams; i++) {
 			if (_formatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO && 
-				_video == nil) {
+				_video == nullptr) {
 				_video = new VideoDecoderContext();
 				_video->open(_formatCtx, i);
 			}
 			else if (_formatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO &&
-				_audio == nil) {
+				_audio == nullptr) {
 				_audio = new AudioDecoderContext();
 				_audio->open(_formatCtx, i);
 			}
 		}
-		if (_video == nil && 
-			_audio == nil)
-			throw Exception("Could not find a valid media stream");
+		if (_video == nullptr && 
+			_audio == nullptr)
+			throw std::runtime_error("Could not find a valid media stream");
 		*/
 
 

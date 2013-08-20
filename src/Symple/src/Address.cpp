@@ -54,15 +54,15 @@ Address::~Address()
 
 
 /*
-Address::Address(const string& id)
+Address::Address(const std::string& id)
 {
 	parse(id);
 }
 	
 
-bool Address::parse(const string& id)
+bool Address::parse(const std::string& id)
 {
-	StringVec elems;
+	std::vector<std::string> elems;
 	util::split(id, ':', elems);
 	if (elems.size() >= 1)
 		group = elems[0];

@@ -31,7 +31,7 @@ namespace av {
 	struct Format;
 
 
-class ICapture: public PacketSource, public abstract::Startable
+class ICapture: public PacketSource, public basic::Startable
 {
 public:
 	ICapture() : PacketSource(Emitter) {};

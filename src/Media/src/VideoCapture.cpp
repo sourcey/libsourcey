@@ -31,7 +31,7 @@ namespace av {
 VideoCapture::VideoCapture(int deviceId) : 
 	_base(MediaFactory::instance().getVideoCaptureBase(deviceId))
 {
-	traceL("VideoCapture", this) << "Creating: " << deviceId << std::endl;
+	traceL("VideoCapture", this) << "create: " << deviceId << std::endl;
 
 	_base->addEmitter(&Emitter);
 	_base->duplicate();
@@ -40,7 +40,7 @@ VideoCapture::VideoCapture(int deviceId) :
 
 VideoCapture::VideoCapture(const std::string& filename)
 {
-	traceL("VideoCapture", this) << "Creating: " << filename << std::endl;
+	traceL("VideoCapture", this) << "create: " << filename << std::endl;
 
 	// The file capture is owned by this instance
 	_base = new VideoCaptureBase(filename);
@@ -51,7 +51,7 @@ VideoCapture::VideoCapture(const std::string& filename)
 VideoCapture::VideoCapture(VideoCaptureBase* base) : 
 	_base(base) 
 {
-	traceL("VideoCapture", this) << "Creating: " << base << std::endl;
+	traceL("VideoCapture", this) << "create: " << base << std::endl;
 	_base->addEmitter(&Emitter);
 	_base->duplicate();
 }
@@ -59,7 +59,7 @@ VideoCapture::VideoCapture(VideoCaptureBase* base) :
 
 VideoCapture::~VideoCapture() 
 {
-	traceL("VideoCapture", this) << "Destroying" << std::endl;	
+	traceL("VideoCapture", this) << "destroy" << std::endl;	
 	_base->removeEmitter(&Emitter);
 	_base->release();
 }
@@ -141,36 +141,33 @@ VideoCaptureBase& VideoCapture::base()
 }
 
 
-
 //
 // Video Capture Base
 //
 
 
 VideoCaptureBase::VideoCaptureBase(int deviceId) : 
-	CountedObject(new DeferredDeleter<VideoCaptureBase>()),
-	_thread("VideoCaptureBase"),
+	SharedObject(true), //SharedObject(new DeferredDeleter<VideoCaptureBase>()),
 	_deviceId(deviceId),
 	_capturing(false),
 	_opened(false),
 	_stopping(false)
 {
-	traceL("VideoCaptureBase", this) << "Creating: " << deviceId << std::endl;
+	traceL("VideoCaptureBase", this) << "create: " << deviceId << std::endl;
 	open();
 	start();
 }
 
 
 VideoCaptureBase::VideoCaptureBase(const std::string& filename) : 
-	CountedObject(new DeferredDeleter<VideoCaptureBase>()),
-	_thread("VideoCaptureBase"),
+	SharedObject(true), //SharedObject(new DeferredDeleter<VideoCaptureBase>()),
 	_filename(filename),
 	_deviceId(-1),
 	_capturing(false),
 	_opened(false),
 	_stopping(false)
 {
-	traceL("VideoCaptureBase", this) << "Creating: " << filename << std::endl;
+	traceL("VideoCaptureBase", this) << "create: " << filename << std::endl;
 	open();
 	start();
 }
@@ -178,7 +175,7 @@ VideoCaptureBase::VideoCaptureBase(const std::string& filename) :
 
 VideoCaptureBase::~VideoCaptureBase() 
 {	
-	traceL("VideoCaptureBase", this) << "Destroying" << std::endl;
+	traceL("VideoCaptureBase", this) << "destroy" << std::endl;
 
 	if (_thread.running()) {
 		_stopping = true;
@@ -193,7 +190,7 @@ VideoCaptureBase::~VideoCaptureBase()
 	// Try to release the capture (automatic once unrefed)
 	//try { release(); } catch (...) {}
 
-	traceL("VideoCaptureBase", this) << "Destroying: OK" << std::endl;
+	traceL("VideoCaptureBase", this) << "destroy: OK" << std::endl;
 }
 
 
@@ -204,9 +201,9 @@ void VideoCaptureBase::start()
 		Mutex::ScopedLock lock(_mutex);
 
 		if (!_thread.running()) {
-			traceL("VideoCaptureBase", this) << "Initializing thread" << std::endl;
+			traceL("VideoCaptureBase", this) << "initializing thread" << std::endl;
 			if (!_opened)
-				throw Exception("The capture must be opened before starting the thread.");
+				throw std::runtime_error("The capture must be opened before starting the thread.");
 
 			_stopping = false;
 			_counter.reset();	
@@ -247,7 +244,7 @@ bool VideoCaptureBase::open()
 		std::stringstream ss;
 		ss << "Cannot open the video capture device: "; 
 		_filename.empty() ? (ss << _deviceId) : (ss << _filename);
-		throw Exception(ss.str());
+		throw std::runtime_error(ss.str());
 	}
 
 	return _opened;
@@ -262,7 +259,7 @@ void VideoCaptureBase::run()
 		cv::Mat frame = grab();
 		_capturing = true;
 		bool empty = true;
-		PacketSignal* next = nil;
+		PacketSignal* next = nullptr;
 
 		traceL("VideoCaptureBase", this) << "Running:"		
 			<< "\n\tDevice ID: " << _deviceId
@@ -277,12 +274,14 @@ void VideoCaptureBase::run()
 				for (int idx = 0; idx < size; idx++) {
 					Mutex::ScopedLock lock(_emitMutex); 
 					size = _emitters.size(); 
-					if ((empty = size == 0) || idx >= size)
+					empty = size == 0;
+					if (empty || idx >= size)
 						break;
 					next = _emitters[idx];
 	
 					//traceL("VideoCaptureBase", this) << "Emitting: " << idx << ": " << _counter.fps << std::endl;
-					next->emit(next, MatrixPacket(&frame));
+					MatrixPacket out(&frame);
+					next->emit(next, out);
 				}
 			}
 			
@@ -330,7 +329,7 @@ cv::Mat VideoCaptureBase::grab()
 	}
 		
 	if (!_capture.isOpened())
-		throw Exception("Cannot grab video from closed device", "Check video device: " + name());
+		throw std::runtime_error("Cannot grab video frame: Device is closed: " + name());
 
 	_counter.tick();
 	//_width = _frame.cols;
@@ -345,11 +344,11 @@ cv::Mat VideoCaptureBase::lastFrame() const
 	Mutex::ScopedLock lock(_mutex);
 
 	if (!_opened)
-		throw Exception("Cannot grab last video from closed device", (error().length() ? error() : 
+		throw std::runtime_error("Cannot grab video frame: Device is closed: " + (error().length() ? error() : 
 			std::string("Check video device: " + name())));
 
 	if (!_frame.cols && !_frame.rows)
-		throw Exception("Cannot grab last video from closed device", "Check video device: " + name());
+		throw std::runtime_error("Cannot grab video frame: Device is closed: " + name());
 
 	return _frame; // no data is copied
 }
@@ -377,7 +376,7 @@ void VideoCaptureBase::removeEmitter(PacketSignal* emitter)
 
 void VideoCaptureBase::setError(const std::string& error)
 {
-	errorL("VideoCaptureBase", this) << "Setting error: " << error << std::endl;
+	errorL("VideoCaptureBase", this) << "set error: " << error << std::endl;
 	Mutex::ScopedLock lock(_mutex);	
 	_error = error;
 }
@@ -386,14 +385,14 @@ void VideoCaptureBase::setError(const std::string& error)
 int VideoCaptureBase::width() 
 {
 	Mutex::ScopedLock lock(_mutex);	
-	return _capture.get(CV_CAP_PROP_FRAME_WIDTH); // not const
+	return int(_capture.get(CV_CAP_PROP_FRAME_WIDTH)); // not const
 }
 
 
 int VideoCaptureBase::height() 
 {
 	Mutex::ScopedLock lock(_mutex);	
-	return _capture.get(CV_CAP_PROP_FRAME_HEIGHT); // not const
+	return int(_capture.get(CV_CAP_PROP_FRAME_HEIGHT)); // not const
 }
 
 
@@ -552,7 +551,7 @@ bool VideoCaptureBase::check()
 		std::stringstream ss;
 		ss << "Cannot open video capture, please check device: "; 
 		_filename.empty() ? (ss << _deviceId) : (ss << _filename);
-		throw Exception(ss.str());
+		throw std::runtime_error(ss.str());
 	}
 
 	return true;

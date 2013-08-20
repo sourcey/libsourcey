@@ -55,7 +55,7 @@ public:
 		av::RecordingOptions options;	
 		options.oformat = av::Format("MJPEG", "mjpeg", av::VideoCodec(
 			"MJPEG", "mjpeg", 400, 300, 25, 48000, 128000, "yuvj420p"));
-		av::setVideoCaptureInputFormat(gVideoCapture, options.iformat);
+		gVideoCapture->getEncoderFormat(options.iformat);
 
 		// Create and attach the encoder
 		av::AVPacketEncoder* encoder = new av::AVPacketEncoder(options);
@@ -81,7 +81,7 @@ public:
 
 	void onPayload(const Buffer& body)
 	{
-		debugL("MPEGResponder") << "On recv payload: " << body << endl;
+		debugL("MPEGResponder") << "On recv payload: " << body.size() << endl;
 
 		// do something with data from peer
 	}
@@ -103,8 +103,8 @@ public:
 			connection().send(packet.data(), packet.size());
 			fpsCounter.tick();		
 		}
-		catch (Exception& exc) {
-			errorL("MPEGResponder") << "Error: " << exc.message() << endl;
+		catch (std::exception/*Exception*/& exc) {
+			errorL("MPEGResponder") << "Error: " << std::string(exc.what())/*message()*/ << endl;
 			connection().close();
 		}
 	}

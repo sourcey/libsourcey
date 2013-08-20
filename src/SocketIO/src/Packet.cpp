@@ -21,18 +21,18 @@
 //#include "Sourcey/Crypto/Crypto.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Util.h"
-#include "Poco/Format.h"
+//#include "Poco/Format.h"
 
 
 using namespace std;
-using Poco::format;
+//using Poco::format;
 
 
 namespace scy {
 namespace sockio {
 
 
-Packet::Packet(Type type, int id, const string& endpoint, const string& message, bool ack) : 
+Packet::Packet(Type type, int id, const std::string& endpoint, const std::string& message, bool ack) : 
 	_type(type), 
 	_id(id),
 	_endpoint(endpoint),
@@ -43,23 +43,25 @@ Packet::Packet(Type type, int id, const string& endpoint, const string& message,
 }
 
 	
-Packet::Packet(Type type, const string& message, bool ack) : 
+Packet::Packet(Type type, const std::string& message, bool ack) : 
 	_type(type), 
 	_id(util::randomNumber(4)),
 	_message(message),
 	_ack(ack),
 	_size(0)
 {
+	assert(_id);
 }
 
 	
-Packet::Packet(const string& message, bool ack) : 
+Packet::Packet(const std::string& message, bool ack) : 
 	_type(Packet::Message), 
 	_id(util::randomNumber(4)),
 	_message(message),
 	_ack(ack),
 	_size(0)
 {
+	assert(_id);
 }
 
 	
@@ -70,15 +72,18 @@ Packet::Packet(const json::Value& data, bool ack) :
 	_ack(ack),
 	_size(0)
 {
+	assert(_id);
 }
 
 	
-Packet::Packet(const string& event, const json::Value& data, bool ack) : 
+Packet::Packet(const std::string& event, const json::Value& data, bool ack) : 
 	_type(Packet::Event), 
 	_id(util::randomNumber(4)),
 	_ack(ack),
 	_size(0)
 {	
+	assert(_id);
+
 	json::Value root;
 	root["name"] = event;
 
@@ -129,55 +134,67 @@ IPacket* Packet::clone() const
 }
 
 
-bool Packet::read(Buffer& buf) 
-{	
+bool Packet::read(const ConstBuffer& buf) 
+{		
 	//https://github.com/LearnBoost/socket.io-spec#Encoding
-	if (buf.available() < 3)
+	if (buf.size() < 3)
 		return false;
-	
-	//debugL("sockio::Packet", this) << "Reading: " << (string(buf.data(), buf.available())) << endl;
 
-	string data;
-	buf.get(data, buf.available());
-	StringVec content = util::split(data, ':', 4);
-	if (content.size() < 1) {
-		//debugL("sockio::Packet", this) << "Reading: Invalid Data: " << content.size() << endl;
+	std::string data(bufferCast<const char*>(buf), buf.size());	
+	std::vector<std::string> frags = util::split(data, ':', 4);
+	if (frags.size() < 1) {
+		//debugL("sockio::Packet", this) << "Reading: Invalid Data: " << frags.size() << endl;
 		return false;
 	}
 		
-	if (!content[0].empty()) {
-		_type = util::strtoi<UInt32>(content[0]);
+	if (!frags[0].empty()) {
+		_type = util::strtoi<UInt32>(frags[0]);
 		//debugL("sockio::Packet", this) << "Reading: Type: " << typeString() << endl;
 	}
 
-	if (_type < 0 || 
-		_type > 7) {
+	if (_type < 0 || _type > 7) {
 		//debugL("sockio::Packet", this) << "Reading: Invalid Type: " << _type << endl;
 		return false;
 	}
-	if (content.size() >= 2 && !content[1].empty()) {
-		_ack = (content[1].find('+') != string::npos);
-		_id = util::strtoi<UInt32>(content[1]);
+	if (frags.size() >= 2 && !frags[1].empty()) {
+		_ack = (frags[1].find('+') != string::npos);
+		_id = util::strtoi<UInt32>(frags[1]);
 	}	
-	if (content.size() >= 3 && !content[2].empty()) {
-		_endpoint = content[2];
+	if (frags.size() >= 3 && !frags[2].empty()) {
+		_endpoint = frags[2];
 	}
-	if (content.size() >= 4 && !content[3].empty()) {
-		_message = content[3];
+	if (frags.size() >= 4 && !frags[3].empty()) {
+		_message = frags[3];
 	}
 
 	// For Ack packets the ID is at the start of the message
 	if (_type == 6) {
-		content.clear();
-		util::split(_message, '+', content, 2);
-		if (content.size() != 2) {
-			assert(content.size() == 2 && "invalid ack response");
+		_ack = true; // This is mostly for requests, but we'll set it anyway
+
+		std::string data(frags[frags.size() - 1]);
+		std::string::size_type pos = data.find('+');
+		if (pos != std::string::npos) 
+		{	// complex ack
+			_id = util::strtoi<UInt32>(data.substr(0, pos));
+			_message = data.substr(pos + 1, data.length());
+		}
+		else
+		{	// simple ack
+			_message = data;
+		}
+
+		/*
+		frags.clear();
+		util::split(_message, '+', frags, 2);
+		if (frags.size() != 2) {
+			assert(frags.size() == 2 && "invalid ack response");
 			return false;
 		}
 
 		_ack = true; // This is mostly for requests, but we'll set it anyway
-		_id = util::strtoi<UInt32>(content[0]);
-		_message = content[1];
+		_id = util::strtoi<UInt32>(frags[0]);
+		_message = frags[1];
+		*/
 	}
 
 	_size = data.length();
@@ -189,9 +206,11 @@ bool Packet::read(Buffer& buf)
 
 void Packet::write(Buffer& buf) const 
 {
-	ostringstream ss;
+	assert(valid());
+	std::ostringstream ss;
 	print(ss);
-	buf.put(ss.str());
+	debugL("sockio::Packet", this) << "write: " << ss.tellp() << ": " << ss.str() << endl;
+	buf.append(ss.str().c_str(), ss.tellp());
 }
 
 
@@ -280,6 +299,13 @@ string Packet::toString() const
 }
 
 
+bool Packet::valid() const
+{
+	// Check that ID and correct type have been set
+	return _type >= 0 && _type <= 8 && _id > 0;
+}
+
+
 size_t Packet::size() const
 {
 	ostringstream ss;
@@ -296,11 +322,11 @@ void Packet::print(ostream& os) const
 		os << "::";
 	}
 	else if (_id == -1 && _endpoint.empty()){
-		os << ":::" << _message;
+		os << "::: " << _message;
 	}  
 	else if (_id > -1 && _type != 6) {
-		os << ":" << _id << (_ack ? "+" : "") 
-			<< ":" << _endpoint << ":" << _message;
+		os << ":" << _id << (_ack ? "+":"") 
+			<< ":" << _endpoint << ": " << _message;
 	}
 	else {
 		os << "::" << _endpoint << ":" << _message;

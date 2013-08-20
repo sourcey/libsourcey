@@ -37,7 +37,7 @@ Hash::Hash(const std::string& algorithm) :
 
 	_md = EVP_get_digestbyname(algorithm.data());
 	if (!_md)
-		throw Exception("Algorithm not supported", algorithm);
+		throw std::runtime_error("Algorithm not supported: " + algorithm);
 
 	EVP_DigestInit(&_ctx, _md);
 }

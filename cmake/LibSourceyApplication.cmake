@@ -44,6 +44,18 @@ macro(define_sourcey_application name)
     add_dependencies(${name} ${module})
   endforeach()
   
+  if(MSVC)
+    # Temporary workaround for "error LNK2026: module unsafe for SAFESEH image"
+    # when compiling with certain externally compiled libraries with VS2012, 
+    # such as http://ffmpeg.zeranoe.com/builds/
+    # This disables safe exception handling by default.
+    IF(${_MACHINE_ARCH_FLAG} MATCHES X86)
+      SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
+      SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+      SET (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
+    ENDIF()
+  endif()
+
   # KLUDGE: Adding all thrid party dependencies for now.
   if (LibSourcey_BUILD_DEPENDENCIES)
     add_dependencies(${name} ${LibSourcey_BUILD_DEPENDENCIES})

@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/Memory.h"
-#include "Sourcey/Handle.h"
+
 #include "Sourcey/Net/Types.h"
 
 #include <openssl/ssl.h>
@@ -32,7 +32,7 @@ namespace scy {
 namespace net {
 
 	
-class SSLSession : public CountedObject
+class SSLSession : public SharedObject
 	/// This class encapsulates a SSL session object
 	/// used with session caching on the client side.
 	///
@@ -41,7 +41,7 @@ class SSLSession : public CountedObject
 	/// if it wants to reuse it with a future connection.
 {
 public:
-	typedef Handle<SSLSession> Ptr;
+	typedef SharedPtr<SSLSession> Ptr;
 
 	SSL_SESSION* sslSession() const;
 		/// Returns the stored OpenSSL SSL_SESSION object.

@@ -48,7 +48,7 @@ public:
 		AMF_DATA_TYPE_BOOL        = 0x01,
 		AMF_DATA_TYPE_STRING      = 0x02,
 		AMF_DATA_TYPE_OBJECT      = 0x03,
-		AMF_DATA_TYPE_nil        = 0x05,
+		AMF_DATA_TYPE_nullptr        = 0x05,
 		AMF_DATA_TYPE_UNDEFINED   = 0x06,
 		AMF_DATA_TYPE_REFERENCE   = 0x07,
 		AMF_DATA_TYPE_MIXEDARRAY  = 0x08,
@@ -79,7 +79,7 @@ public:
 		_waitingForKeyframe(false),
 		_timestampOffset(0)
 	{
-		traceL("FLVMetadataInjector", this) << "Creating" << std::endl;
+		traceL("FLVMetadataInjector", this) << "create" << std::endl;
 	}
 					
 	virtual void onStreamStateChange(const PacketStreamState& state) 
@@ -108,8 +108,8 @@ public:
 			// Read the first packet to determine weather or not
 			// we need to generate and inject custom metadata. 
 			if (_initial && !_modifyingStream) {
-				Buffer buf;
-				packet.write(buf);
+				//Buffer buf;
+				//packet.write(buf);
 				_modifyingStream = true; //!isFLVHeader(buf);
 				_waitingForKeyframe = _modifyingStream;
 				_timestampOffset = 0;
@@ -135,9 +135,10 @@ public:
 					_waitingForKeyframe = false;				
 					traceL("FLVMetadataInjector", this) << "Got keyframe, prepending headers" << std::endl;
 					Buffer flvHeader(512);
-					writeFLVHeader(flvHeader);
+					BitWriter writer(flvHeader);
+					writeFLVHeader(writer);
 
-					MediaPacket opacket(flvHeader.data(), flvHeader.available());
+					MediaPacket opacket(flvHeader.data(), flvHeader.size());
 					emit(opacket);
 				}
 
@@ -170,7 +171,7 @@ public:
 		// Updates the timestamp in the given FLV tag buffer.
 		// No more need to copy data with this method.
 	{
-		UInt32 val = htonl(timestamp); // HostToNetwork32
+		UInt32 val = hostToNetwork32(timestamp);
 		/*
 		traceL("FLVMetadataInjector", this) << "Updating timestamp: "
 			<< "\n\tTimestamp: " << timestamp
@@ -181,6 +182,12 @@ public:
 		std::memcpy(buf + 4, reinterpret_cast<const char*>(&val) + 1, 3);
 	}
 
+	virtual bool fastIsFLVHeader(char* buf)
+	{		
+		return strncmp(buf, "FLV", 3) == 0;
+	}
+	
+	/*
 	virtual void updateTimestamp(Buffer& buf, UInt32 timestamp)
 	{
 		// Note: The buffer must be positioned at
@@ -191,30 +198,23 @@ public:
 			return;
 		}
 		
-		/*
 		traceL("FLVMetadataInjector", this) << "Updating timestamp: "
 			<< "\n\tTimestamp: " << timestamp
 			<< "\n\tFrame Number: " << _fpsCounter.frames
 			<< "\n\tFrame Rate: " << _fpsCounter.fps
 			<< std::endl;
-			*/
 
 		buf.updateU24(timestamp, offset + 4);
 	}
 
-	virtual bool fastIsFLVHeader(char* buf)
-	{		
-		return strncmp(buf, "FLV", 3) == 0;
-	}
-
-	virtual bool isFLVHeader(Buffer& buf)
+	virtual bool isFLVHeader(BitWriter& writer)
 	{		
 		std::string signature; 
 		buf.get(signature, 3);
 		return signature == "FLV";
 	}
 
-	virtual bool isFLVKeyFrame(Buffer& buf)
+	virtual bool isFLVKeyFrame(BitWriter& writer)
 	{	
 		if (buf.available() < 100)
 			return false;
@@ -233,6 +233,7 @@ public:
 		buf.position(offset);
 		return (flags & FLV_FRAME_KEY) == FLV_FRAME_KEY;
 	}
+	*/
 
 	virtual bool fastIsFLVKeyFrame(char* buf)
 	{		
@@ -240,90 +241,90 @@ public:
 		return (flags & FLV_FRAME_KEY) == FLV_FRAME_KEY;
 	}
 
-	virtual void writeFLVHeader(Buffer& buf)
+	virtual void writeFLVHeader(BitWriter& writer)
 	{			
-		int offset = buf.available();
+		int start = writer.available(); // Todo: reverse logic, use offset
 
 		//
 		// FLV Header
-		buf.put("FLV", 3);
-		buf.putU8(0x01);
-		buf.putU8(
+		writer.put("FLV", 3);
+		writer.putU8(0x01);
+		writer.putU8(
 			((_format.video.enabled) ? 1 : 0) | 
 			((_format.audio.enabled) ? 4 : 0));
-		buf.putU32(0x09);
+		writer.putU32(0x09);
 			
-		buf.putU32(0);	 // previous tag size 
+		writer.putU32(0);	 // previous tag size 
 
 		//
 		// FLV Metadata Object
-		buf.putU8(FLV_TAG_TYPE_SCRIPT);
-		int dataSizePos = buf.available() - offset;
-		buf.putU24(0);	// size of data part (sum of all parts below)			
-		buf.putU24(0);	// time stamp
-		buf.putU32(0);	// reserved			
+		writer.putU8(FLV_TAG_TYPE_SCRIPT);
+		int dataSizePos = writer.available() - start;
+		writer.putU24(0);	// size of data part (sum of all parts below)			
+		writer.putU24(0);	// time stamp
+		writer.putU32(0);	// reserved			
 
-		int dataStartPos = buf.available() - offset; 
+		int dataStartPos = writer.available() - start; 
 
-		buf.putU8(AMF_DATA_TYPE_STRING);	// AMF_DATA_TYPE_STRING
-		writeAMFSring(buf, "onMetaData");
+		writer.putU8(AMF_DATA_TYPE_STRING);	// AMF_DATA_TYPE_STRING
+		writeAMFSring(writer, "onMetaData");
 	
-		buf.putU8(AMF_DATA_TYPE_MIXEDARRAY);
-		buf.putU32(2 + // number of elements in array			
+		writer.putU8(AMF_DATA_TYPE_MIXEDARRAY);
+		writer.putU32(2 + // number of elements in array			
 			(_format.video.enabled ? 5 : 0) + 
 			(_format.audio.enabled ? 5 : 0));
 
-		writeAMFSring(buf, "duration");
-		writeAMFDouble(buf, 0);
+		writeAMFSring(writer, "duration");
+		writeAMFDouble(writer, 0);
 			
 		if (_format.video.enabled){
-			writeAMFSring(buf, "width");
-			writeAMFDouble(buf, _format.video.width);
+			writeAMFSring(writer, "width");
+			writeAMFDouble(writer, _format.video.width);
 
-			writeAMFSring(buf, "height");
-			writeAMFDouble(buf, _format.video.height);
+			writeAMFSring(writer, "height");
+			writeAMFDouble(writer, _format.video.height);
 
-			//writeAMFSring(buf, "videodatarate");
-			//writeAMFDouble(buf, _format.video.bitRate / 1024.0);
+			//writeAMFSring(writer, "videodatarate");
+			//writeAMFDouble(writer, _format.video.bitRate / 1024.0);
 
-			//writeAMFSring(buf, "framerate");
-			//writeAMFDouble(buf, _format.video.fps);
+			//writeAMFSring(writer, "framerate");
+			//writeAMFDouble(writer, _format.video.fps);
 
 			// Not necessary for playback..
-			//writeAMFSring(buf, "videocodecid");
-			//writeAMFDouble(buf, 2); // FIXME: get FLV Codec ID from FFMpeg ID
+			//writeAMFSring(writer, "videocodecid");
+			//writeAMFDouble(writer, 2); // FIXME: get FLV Codec ID from FFMpeg ID
 		}
 			
 		if (_format.audio.enabled){
-			writeAMFSring(buf, "audiodatarate");
-			writeAMFDouble(buf, _format.audio.bitRate / 1024.0);
+			writeAMFSring(writer, "audiodatarate");
+			writeAMFDouble(writer, _format.audio.bitRate / 1024.0);
 
-			writeAMFSring(buf, "audiosamplerate");
-			writeAMFDouble(buf, _format.audio.sampleRate);
+			writeAMFSring(writer, "audiosamplerate");
+			writeAMFDouble(writer, _format.audio.sampleRate);
 
-			writeAMFSring(buf, "audiosamplesize");
-			writeAMFDouble(buf, 16); //FIXME: audio_enc->codec_id == CODEC_ID_PCM_U8 ? 8 : 16
+			writeAMFSring(writer, "audiosamplesize");
+			writeAMFDouble(writer, 16); //FIXME: audio_enc->codec_id == CODEC_ID_PCM_U8 ? 8 : 16
 
-			writeAMFSring(buf, "stereo");
-			writeAMFBool(buf, _format.audio.channels == 2);
+			writeAMFSring(writer, "stereo");
+			writeAMFBool(writer, _format.audio.channels == 2);
 			
 			// Not necessary for playback..
 			//writeAMFSring(buf, "audiocodecid");
 			//writeAMFDouble(buf, 0/* audio_enc->codec_tag*/); // FIXME: get FLV Codec ID from FFMpeg ID
 		}
 
-		writeAMFSring(buf, "filesize");
-		writeAMFDouble(buf, 0);	// delayed write
+		writeAMFSring(writer, "filesize");
+		writeAMFDouble(writer, 0);	// delayed write
 			
-		buf.put("", 1);
-		buf.putU8(AMF_DATA_TYPE_OBJECT_END);
+		writer.put("", 1);
+		writer.putU8(AMF_DATA_TYPE_OBJECT_END);
 	
 		// Write data size
-		int dataSize = buf.available() - dataStartPos;
-		buf.updateU24(dataSize, dataSizePos);
+		int dataSize = writer.position() - dataStartPos;
+		writer.updateU24(dataSize, dataSizePos);
 			
 		// Write tag size
-		buf.putU32(dataSize + 11);
+		writer.putU32(dataSize + 11);
 			
 		//traceL() << "FLV Header:" 
 		//	<< "\n\tType: " << (int)tagType
@@ -333,7 +334,7 @@ public:
 		//	<< std::endl;
 	}	
 
-	static bool dumpFLVTags(Buffer& buf)
+	static bool dumpFLVTags(BitReader& reader)
 	{	
 		bool result = false; 
 
@@ -346,33 +347,33 @@ public:
 		UInt32 previousTagSize;		
 
 		do {
-			if (buf.available() < 12)
+			if (reader.available() < 12)
 				break;
 
-			buf.getU8(tagType);
+			reader.getU8(tagType);
 			if (tagType != FLV_TAG_TYPE_AUDIO &&	// audio
 				tagType != FLV_TAG_TYPE_VIDEO &&	// video
 				tagType != FLV_TAG_TYPE_SCRIPT)		// script
 				break;
 
-			buf.getU24(dataSize);
+			reader.getU24(dataSize);
 			if (dataSize < 100)
 				break;
 				
-			buf.getU24(timestamp);
+			reader.getU24(timestamp);
 			if (timestamp < 0)
 				break;
 				
-			buf.getU8(timestampExtended);	
+			reader.getU8(timestampExtended);	
 				
-			buf.getU24(streamId);
+			reader.getU24(streamId);
 			if (streamId != 0)
 				break;	
 				
 			// Start of data size bytes
-			int dataStartPos = buf.position();
+			int dataStartPos = reader.position();
 			
-			buf.getU8(flags);	
+			reader.getU8(flags);	
 				
 			bool isKeyFrame = false;
 			bool isInterFrame = false;
@@ -396,8 +397,8 @@ public:
             }
 				
 			// Read to the end of the current tag.
-			buf.position(dataStartPos + dataSize);
-			buf.getU32(previousTagSize);
+			reader.seek(dataStartPos + dataSize);
+			reader.getU32(previousTagSize);
 			if (previousTagSize == 0) {
 				assert(false);
 				break;	
@@ -427,23 +428,23 @@ public:
 	//
 	// AMF Helpers
 	//
-	virtual void writeAMFSring(Buffer& buf, const char* val)
+	virtual void writeAMFSring(BitWriter& writer, const char* val)
 	{
-		size_t len = strlen(val);
-		buf.putU16(len);
-		buf.put(val, len);
+		UInt16 len = strlen(val);
+		writer.putU16(len);
+		writer.put(val, len);
 	}
 	
-	virtual void writeAMFDouble(Buffer& buf, double val)
+	virtual void writeAMFDouble(BitWriter& writer, double val)
 	{
-		buf.putU8(AMF_DATA_TYPE_NUMBER); // AMF_DATA_TYPE_NUMBER
-		buf.putU64(util::doubleToInt(val));
+		writer.putU8(AMF_DATA_TYPE_NUMBER); // AMF_DATA_TYPE_NUMBER
+		writer.putU64(util::doubleToInt(val));
 	}
 	
-	virtual void writeAMFBool(Buffer& buf, bool val)
+	virtual void writeAMFBool(BitWriter& writer, bool val)
 	{
-		buf.putU8(AMF_DATA_TYPE_BOOL); // AMF_DATA_TYPE_NUMBER
-		buf.putU8(val ? 1 : 0);
+		writer.putU8(AMF_DATA_TYPE_BOOL); // AMF_DATA_TYPE_NUMBER
+		writer.putU8(val ? 1 : 0);
 	}
 	
 	PacketSignal Emitter;

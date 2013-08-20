@@ -46,25 +46,25 @@ public:
 		/// This class should have a higher priority than standard
 		/// sockets so we can parse data packets first.		
 	{
-		traceL("PacketSocketAdapter", this) << "Creating: " << socket << std::endl;
+		traceL("PacketSocketAdapter", this) << "create: " << socket << std::endl;
 	}
 		
-	virtual void onSocketRecv(Buffer& buf, const Address& peerAddr)
+	virtual void onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
 		/// Creates and dispatches a packet utilizing the available 
 		/// creation strategies. For best performance the most used 
 		/// strategies should have the highest priority.
 	{	
-		traceL("PacketSocketAdapter", this) << "Recv: " << buf.available() << std::endl;
-		assert(buf.position() == 0);
-		buf.position(0);
+		traceL("PacketSocketAdapter", this) << "recv: " << buf.size() << std::endl;
+		//assert(buf.position() == 0);
+		//buf.position(0);
 
-		IPacket* pkt = factory.createPacket(buf);
+		IPacket* pkt = factory.createPacket(constBuffer(buf));
 		if (!pkt) {
 			warnL("PacketSocketAdapter", this) << "Cannot create packet." << std::endl;	
 			return;
 		}
 
-		pkt->info = new PacketInfo(*socket, peerAddr);
+		pkt->info = new PacketInfo(socket, peerAddr);
 		onPacket(*pkt);
 		delete pkt;
 	}
@@ -129,7 +129,7 @@ public:
 		/// from RawPacket, so they can be sent directly 
 		/// without buffering any data.
 		traceL("PacketSocket", this) << "RawPacket" << packet.size() << std::endl;	
-		return base().send((const char*)packet.array(), packet.size(), flags);
+		return base().send((const char*)packet.data(), packet.size(), flags);
 	}
 
 	virtual int send(const RawPacket& packet, const Address& peerAddress, int flags = 0)

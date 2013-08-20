@@ -21,7 +21,7 @@
 #define SOURCEY_DiagnosticManager_H
 
 
-#include "Sourcey/Containers.h"
+#include "Sourcey/Collection.h"
 #include "Sourcey/Thread.h"
 #include "Sourcey/Stateful.h"
 
@@ -66,7 +66,7 @@ public:
 
 	std::string name;        /// The name of the diagnostic.
 	std::string description; /// The diagnostic description.
-	StringVec summary;		 /// The diagnostic summary, maybe including 
+	std::vector<std::string> summary;		 /// The diagnostic summary, maybe including 
 							 /// troubleshooting information on failure.
 	
 	virtual void check();
@@ -95,7 +95,7 @@ protected:
 };
 
 
-typedef PointerManager<std::string, IDiagnostic> DiagnosticStore;	
+typedef PointerCollection<std::string, IDiagnostic> DiagnosticStore;	
 
 
 //
@@ -103,7 +103,7 @@ typedef PointerManager<std::string, IDiagnostic> DiagnosticStore;
 //
 
 
-class AsyncDiagnostic: public IDiagnostic, public abstract::Runnable
+class AsyncDiagnostic: public IDiagnostic, public basic::Runnable
 {
 public:
 	virtual ~AsyncDiagnostic() {};

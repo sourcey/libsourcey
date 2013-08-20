@@ -47,7 +47,7 @@ public:
 	bool valid() const;
 
 	std::string param(int n) const;
-	StringVec params();
+	std::vector<std::string> params();
 	bool matches(const std::string& xnode) const;
 };
 

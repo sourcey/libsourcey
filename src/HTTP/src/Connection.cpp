@@ -38,64 +38,61 @@ Connection::Connection(const net::Socket& socket) :
 	_shouldSendHeader(true),
 	_timeout(30 * 60 * 1000) // 30 secs
 {	
-	traceL("Connection", this) << "Creating: " << &_socket << endl;
+	traceL("Connection", this) << "create: " << &_socket << endl;
 
 	_socket.Recv += delegate(this, &Connection::onSocketRecv);
 	_socket.Error += delegate(this, &Connection::onSocketError);
 	_socket.Close += delegate(this, &Connection::onSocketClose);
 
-	/// Attach the outgoing stream to the socket
+	// Attach the outgoing stream to the socket
 	Outgoing.emitter() += delegate(&_socket, &net::Socket::send);
 }
 
 	
 Connection::~Connection() 
 {	
-	traceL("Connection", this) << "Destroying" << endl;
+	traceL("Connection", this) << "destroy" << endl;
 
-	/// Connections must be close()d
+	// Connections must be close()d
 	assert(_closed);
 }
 
 
-int Connection::send(const char* buf, size_t len, int flags)
+int Connection::sendData(const char* buf, size_t len, int flags)
 {
-	traceL("Connection", this) << "Sending: " << len << endl;
-
+	traceL("Connection", this) << "send: " << len << endl;
 	return _socket.send(buf, len, flags);
 }
 
 
-int Connection::send(const std::string& buf, int flags)
+int Connection::sendData(const std::string& buf, int flags)
 {
-	traceL("Connection", this) << "Sending: " << buf.length() << endl;
-
+	traceL("Connection", this) << "send: " << buf.length() << endl;
 	return _socket.send(buf.c_str(), buf.length(), flags);
 }
 
 
 int Connection::sendHeader()
 {
-	traceL("Connection", this) << "Try send headers: " << _shouldSendHeader << endl;
 	if (!_shouldSendHeader)
 		return 0;
 	assert(outgoingHeader());
 	
 	ostringstream os;
 	outgoingHeader()->write(os);
-	string headers(os.str().c_str(), os.str().length());
+	std::string head(os.str().c_str(), os.str().length());
 
 	_timeout.start();
 	_shouldSendHeader = false;
 	
-	traceL("Connection", this) << "Sending header: " << headers << endl; // remove me
-	return _socket.base().send(headers.c_str(), headers.length());
+	traceL("Connection", this) << "send header: " << head << endl; // remove me
+	return _socket.base().send(head.c_str(), head.length());
 }
 
 
 void Connection::close()
 {
-	traceL("Connection", this) << "Close" << endl;	
+	traceL("Connection", this) << "close" << endl;	
 	assert(!_closed);
 	assert(_socket.base().refCount() == 1);
 	
@@ -112,7 +109,7 @@ void Connection::close()
 
 	onClose();
 		
-	traceL("Connection", this) << "Close: Deleting" << endl;	
+	traceL("Connection", this) << "close: Deleting" << endl;	
 	//delete this;
 	deleteLater<Connection>(this); // destroy it
 }
@@ -120,7 +117,7 @@ void Connection::close()
 
 void Connection::setError(const Error& err) 
 { 
-	traceL("Connection", this) << "Set error: " << err.message << endl;	
+	traceL("Connection", this) << "set error: " << err.message << endl;	
 	_socket.setError(err);
 	//_error = err;
 }
@@ -128,7 +125,7 @@ void Connection::setError(const Error& err)
 
 void Connection::onClose()
 {
-	traceL("Connection", this) << "On close" << endl;	
+	traceL("Connection", this) << "on close" << endl;	
 
 	Close.emit(this);
 }
@@ -138,28 +135,31 @@ void Connection::onSocketRecv(void*, net::SocketPacket& packet)
 {		
 	_timeout.stop();
 			
-	if (Incoming.emitter().refCount())
-		Incoming.write(RawPacket(packet.array(), packet.size()));
+	if (Incoming.emitter().refCount()) {
+		//RawPacket p(packet.data(), packet.size());
+		//Incoming.write(p);
+		Incoming.write(packet.data(), packet.size());
+	}
 
-	/// Handle payload data
-	onPayload(packet.buffer);
+	// Handle payload data
+	onPayload(mutableBuffer(packet.data(), packet.size()));
 }
 
 
-void Connection::onSocketError(void* sender, const Error& error) 
+void Connection::onSocketError(void*, const Error& error) 
 {
-	traceL("Connection", this) << "On socket error" << endl;
+	traceL("Connection", this) << "on socket error" << endl;
 
-	/// Handle the socket error locally
+	// Handle the socket error locally
 	setError(error);
 }
 
 
-void Connection::onSocketClose(void* sender) 
+void Connection::onSocketClose(void*) 
 {
-	traceL("Connection", this) << "On socket close" << endl;
+	traceL("Connection", this) << "on socket close" << endl;
 
-	/// Close the connection if the socket is closed
+	// Close the connection if the socket is closed
 	close();
 }
 
@@ -221,7 +221,7 @@ ConnectionAdapter::ConnectionAdapter(Connection& connection, http_parser_type ty
 	_connection(connection),
 	_parser(type)
 {	
-	traceL("ConnectionAdapter", this) << "Creating: " << &connection << endl;
+	traceL("ConnectionAdapter", this) << "create: " << &connection << endl;
 	_parser.setObserver(this);
 	if (type == HTTP_REQUEST)
 		_parser.setRequest(&connection.request());
@@ -232,58 +232,58 @@ ConnectionAdapter::ConnectionAdapter(Connection& connection, http_parser_type ty
 
 ConnectionAdapter::~ConnectionAdapter()
 {
-	traceL("ConnectionAdapter", this) << "Destroying: " << &_connection << endl;
+	traceL("ConnectionAdapter", this) << "destroy: " << &_connection << endl;
 }
 
 
 int ConnectionAdapter::send(const char* data, int len, int flags)
 {
-	traceL("ConnectionAdapter", this) << "Sending: " << len << endl;
+	traceL("ConnectionAdapter", this) << "send: " << len << endl;
 	
 	try
 	{
-		/// Send headers on initial send
+		// Send headers on initial send
 		if (_connection.shouldSendHeader()) {
 			int res = _connection.sendHeader();
 
-			/// The initial packet may be empty to 
-			/// push the headers through
+			// The initial packet may be empty to 
+			// push the headers through
 			if (len == 0)
 				return res;
 		}
 
-		/// Other packets should not be empty
+		// Other packets should not be empty
 		assert(len > 0);
 
-		/// Send body / chunk
-		if (len < 300)
-			traceL("ConnectionAdapter", this) << "Sending data: " << string(data, len) << endl;
-		if (len > 300)
-			traceL("ConnectionAdapter", this) << "Sending long data: " << string(data, 300) << endl;
+		// Send body / chunk
+		//if (len < 300)
+		//	traceL("ConnectionAdapter", this) << "send data: " << std::string(data, len) << endl;
+		//if (len > 300)
+		//	traceL("ConnectionAdapter", this) << "send long data: " << std::string(data, 300) << endl;
 		return socket->base().send(data, len, flags);
 	} 
-	catch(Exception& exc) 
+	catch (std::exception&/*Exception&*/ exc) 
 	{
-		errorL("ConnectionAdapter", this) << "Send error: " << exc.message() << endl;
+		errorL("ConnectionAdapter", this) << "Send error: " << exc.what()/*message()*/ << endl;
 
-		/// Swallow the exception, the socket error will 
-		/// cause the connection to close on next iteration.
+		// Swallow the exception, the socket error will 
+		// cause the connection to close on next iteration.
 	}
 	
 	return -1;
 }
 
 
-void ConnectionAdapter::onSocketRecv(Buffer& buf, const net::Address& peerAddr)
+void ConnectionAdapter::onSocketRecv(const MutableBuffer& buf, const net::Address& /* peerAddr */)
 {
-	traceL("ConnectionAdapter", this) << "On socket recv: " << buf.available() << endl;	
+	traceL("ConnectionAdapter", this) << "on socket recv: " << buf.size() << endl;	
 	
 	try {
-		/// Parse incoming HTTP messages
-		_parser.parse(buf.data(), buf.available());
+		// Parse incoming HTTP messages
+		_parser.parse(bufferCast<const char *>(buf), buf.size());
 	} 
-	catch(Exception& exc) {
-		errorL("ConnectionAdapter", this) << "HTTP parser error: " << exc.message() << endl;
+	catch (std::exception&/*Exception&*/ exc) {
+		errorL("ConnectionAdapter", this) << "HTTP parser error: " << exc.what()/*message()*/ << endl;
 
 		if (socket)
 			socket->close();
@@ -295,38 +295,38 @@ void ConnectionAdapter::onSocketRecv(Buffer& buf, const net::Address& peerAddr)
 // Parser callbacks
 //
 
-void ConnectionAdapter::onParserHeader(const string& name, const string& value) 
+void ConnectionAdapter::onParserHeader(const std::string& /* name */, const std::string& /* value */) 
 {
 }
 
 
 void ConnectionAdapter::onParserHeadersEnd() 
 {
-	traceL("ConnectionAdapter", this) << "On headers end" << endl;	
+	traceL("ConnectionAdapter", this) << "on headers end" << endl;	
 
 	_connection.onHeaders();	
 
-	/// Set the position to the end of the headers once
-	/// they have been handled. Subsequent body chunks will
-	/// now start at the correct position.
-	_connection.incomingBuffer().position(_parser._parser.nread);
+	// Set the position to the end of the headers once
+	// they have been handled. Subsequent body chunks will
+	// now start at the correct position.
+	//_connection.incomingBuffer().position(_parser._parser.nread); // should be redundant
 }
 
 
 void ConnectionAdapter::onParserChunk(const char* buf, size_t len)
 {
-	traceL("ClientConnection", this) << "On parser chunk: " << len << endl;	
+	traceL("ClientConnection", this) << "on parser chunk: " << len << endl;	
 
-	/// Dispatch the payload
-	net::SocketAdapter::onSocketRecv(_connection.incomingBuffer(), socket->peerAddress());
+	// Dispatch the payload
+	net::SocketAdapter::onSocketRecv(mutableBuffer(const_cast<char*>(buf), len), socket->peerAddress());
 }
 
 
 void ConnectionAdapter::onParserError(const ParserError& err)
 {
-	warnL("ConnectionAdapter", this) << "On parser error: " << err.message << endl;	
+	warnL("ConnectionAdapter", this) << "on parser error: " << err.message << endl;	
 
-	/// Close the connection on parser error
+	// Close the connection on parser error
 	_connection.setError(err.message);
 	//_connection.close();
 }
@@ -334,7 +334,7 @@ void ConnectionAdapter::onParserError(const ParserError& err)
 
 void ConnectionAdapter::onParserEnd()
 {
-	traceL("ConnectionAdapter", this) << "On parser end" << endl;	
+	traceL("ConnectionAdapter", this) << "on parser end" << endl;	
 
 	_connection.onMessage();
 }

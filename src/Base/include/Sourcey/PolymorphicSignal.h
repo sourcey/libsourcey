@@ -21,15 +21,15 @@
 #define SOURCEY_PolymorphicSignal_H
 
 
-#include "Sourcey/Types.h"
+#include "Sourcey/Interface.h"
 #include "Sourcey/Signal.h"
 
 
 namespace scy {
 	
 
-typedef DelegateBase<Polymorphic&> PolymorphicDelegateBase;
-typedef SignalBase<PolymorphicDelegateBase, Polymorphic&> PolymorphicSignal;
+typedef DelegateBase<basic::Polymorphic&> PolymorphicDelegateBase;
+typedef SignalBase<PolymorphicDelegateBase, basic::Polymorphic&> PolymorphicSignal;
 
 
 template<class C, typename PolymorphicT>
@@ -37,7 +37,7 @@ struct DelegateCallback<C, 8, false, PolymorphicT>
 {
 	typedef void (C::*Method)(PolymorphicT&); 
 	DefineCallbackFields
-	virtual void emit(Void /* sender */, Polymorphic& data, Void, Void, Void) const {
+	virtual void emit(void* /* sender */, basic::Polymorphic& data, void*, void*, void*) const {
 		PolymorphicT* castData = dynamic_cast<PolymorphicT*>(&data);
 		if (castData) {
 			(_object->*_method)(*castData);
@@ -49,9 +49,9 @@ struct DelegateCallback<C, 8, false, PolymorphicT>
 template<class C, typename PolymorphicT>
 struct DelegateCallback<C, 8, true, PolymorphicT> 
 {
-	typedef void (C::*Method)(Void, PolymorphicT&);
+	typedef void (C::*Method)(void*, PolymorphicT&);
 	DefineCallbackFields
-	virtual void emit(Void sender, Polymorphic& data, Void, Void, Void) const {
+	virtual void emit(void* sender, basic::Polymorphic& data, void*, void*, void*) const {
 		PolymorphicT* castData = dynamic_cast<PolymorphicT*>(&data);
 		if (castData) {
 			(_object->*_method)(sender, *castData);
@@ -60,8 +60,6 @@ struct DelegateCallback<C, 8, true, PolymorphicT>
 };
 
 
-// -------------------------------------------------------------------
-//
 #define DefinePolymorphicDelegate(Name, PolymorphicBaseT, DelegateBaseT)\
 																		\
 	template <class C, typename PolymorphicT>							\
@@ -84,7 +82,7 @@ struct DelegateCallback<C, 8, true, PolymorphicT>
 		DelegateBaseT,													\
 		DelegateCallback<C, 8, true, PolymorphicT>,						\
 		PolymorphicBaseT&												\
-	> Name(C* pObj, void (C::*Method)(Void, PolymorphicT&),				\
+	> Name(C* pObj, void (C::*Method)(void*, PolymorphicT&),			\
 		int priority = 0)												\
 	{																	\
 		return Delegate<C,												\
@@ -118,7 +116,7 @@ struct DelegateCallback<C, 8, true, PolymorphicT>
 	static Delegate<C,													\
 		DelegateBaseT,													\
 		DelegateCallback<C, 8, true, PolymorphicT>, PolymorphicBaseT&	\
-	> Name(C* pObj, void (C::*Method)(Void, PolymorphicT&),				\
+	> Name(C* pObj, void (C::*Method)(void*, PolymorphicT&),			\
 		ArgType data = ArgDefault, int priority = 0)					\
 	{																	\
 		return Delegate<C,												\
@@ -129,7 +127,7 @@ struct DelegateCallback<C, 8, true, PolymorphicT>
 	}																	\
 
 
-DefinePolymorphicDelegate(PolymorphicDelegate, Polymorphic, PolymorphicDelegateBase)
+DefinePolymorphicDelegate(PolymorphicDelegate, basic::Polymorphic, PolymorphicDelegateBase)
 
 
 } // namespace scy

@@ -37,7 +37,7 @@ namespace net {
 //
 
 
-class AddressBase: public CountedObject
+class AddressBase: public SharedObject
 {
 public:
 	virtual string host() const = 0;	
@@ -89,11 +89,11 @@ public:
 		_addr.sin_port = port;
 	}
 
-	string host() const
+	std::string host() const
 	{
 		char dest[16];
 		if (uv_ip4_name(const_cast<sockaddr_in*>(&_addr), dest, 16) != 0)
-			throw Exception("Cannot parse IPv4 hostname");
+			throw std::runtime_error("Cannot parse IPv4 hostname");
 		return dest;
 	}
 
@@ -159,11 +159,11 @@ public:
 		_addr.sin6_scope_id = scope;
 	}
 	
-	string host() const
+	std::string host() const
 	{
 		char dest[46];
 		if (uv_ip6_name(const_cast<sockaddr_in6*>(&_addr), dest, 46) != 0)
-			throw Exception("Cannot parse IPv6 hostname");
+			throw std::runtime_error("Cannot parse IPv6 hostname");
 		return dest;
 	}
 
@@ -211,31 +211,31 @@ Address::Address()
 }
 
 
-Address::Address(const string& addr, UInt16 port)
+Address::Address(const std::string& addr, UInt16 port)
 {
 	init(addr, port);
 }
 
 
-Address::Address(const string& addr, const string& port)
+Address::Address(const std::string& addr, const std::string& port)
 {
 	init(addr, resolveService(port));
 }
 
 
-Address::Address(const string& hostAndPort)
+Address::Address(const std::string& hostAndPort)
 {
 	assert(!hostAndPort.empty());
 
-	string host;
-	string port;
+	std::string host;
+	std::string port;
 	string::const_iterator it  = hostAndPort.begin();
 	string::const_iterator end = hostAndPort.end();
 	if (*it == '[')
 	{
 		++it;
 		while (it != end && *it != ']') host += *it++;
-		if (it == end) throw Exception("Invalid address: Malformed IPv6 address");
+		if (it == end) throw std::runtime_error("Invalid address: Malformed IPv6 address");
 		++it;
 	}
 	else
@@ -247,7 +247,7 @@ Address::Address(const string& hostAndPort)
 		++it;
 		while (it != end) port += *it++;
 	}
-	else throw Exception("Invalid address: Missing port number");
+	else throw std::runtime_error("Invalid address: Missing port number");
 	init(host, resolveService(port));
 }
 
@@ -260,7 +260,7 @@ Address::Address(const struct sockaddr* addr, socklen_t length)
 	else if (length == sizeof(struct sockaddr_in6))
 		_base = new IPv6AddressBase(reinterpret_cast<const struct sockaddr_in6*>(addr));
 #endif
-	else throw Exception("Invalid address length passed to Address()");
+	else throw std::runtime_error("Invalid address length passed to Address()");
 }
 
 
@@ -289,7 +289,7 @@ Address& Address::operator = (const Address& addr)
 }
 
 
-void Address::init(const string& host, UInt16 port)
+void Address::init(const std::string& host, UInt16 port)
 {
 	traceL("Address", this) << "Parse: " << host << ":" << port << endl;
 
@@ -299,7 +299,7 @@ void Address::init(const string& host, UInt16 port)
     else if (uv_inet_pton(AF_INET6, host.c_str(), &ia).code == UV_OK)
 		_base = new IPv6AddressBase(&ia, htons(port));
     else
-		throw Exception("Invalid address: Bad host argument: " + host);
+		throw std::runtime_error("Invalid address: Bad host argument: " + host);
 }
 
 
@@ -347,7 +347,7 @@ bool Address::valid() const
 
 string Address::toString() const
 {
-	string result;
+	std::string result;
 	if (family() == Address::IPv6)
 		result.append("[");
 	result.append(host());
@@ -408,7 +408,7 @@ bool Address::validateIP(const std::string& addr)
 }
 
 
-UInt16 Address::resolveService(const string& service)
+UInt16 Address::resolveService(const std::string& service)
 {
 	UInt16 port = util::strtoi<UInt16>(service);
 	if (port && port > 0) //, port) && port <= 0xFFFF
@@ -418,7 +418,7 @@ UInt16 Address::resolveService(const string& service)
 	if (se)
 		return ntohs(se->s_port);
 	else
-		throw Exception("Service not found: " + service);
+		throw std::runtime_error("Service not found: " + service);
 }
 
 

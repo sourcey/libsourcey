@@ -23,10 +23,10 @@
 
 #include "Sourcey/PacketTransaction.h"
 #include "Sourcey/Net/PacketSocket.h"
-#include "Sourcey/Timer.h"
-#include "Sourcey/Stateful.h"
-#include "Sourcey/Interfaces.h"
-#include "Sourcey/Packet.h"
+//#include "Sourcey/Timer.h"
+//#include "Sourcey/Stateful.h"
+//#include "Sourcey/Interface.h"
+//#include "Sourcey/Packet.h"
 
 
 namespace scy {
@@ -36,8 +36,7 @@ namespace net {
 template <class PacketT>
 class Transaction: public PacketTransaction<PacketT>, public PacketSocketAdapter
 	/// This class provides request/response functionality for IPacket
-	/// types emitted from a SocketBase.
-	/// This class is designed to be derived on a per protocol basis.
+	/// types emitted from a Socket.
 {
 public:
 	Transaction(net::Socket& socket, 
@@ -49,21 +48,21 @@ public:
 		PacketSocketAdapter(&socket),
 		_peerAddress(peerAddress)
 	{
-		debugL("NetTransaction", this) << "Creating" << std::endl;
+		debugL("NetTransaction", this) << "create" << std::endl;
 
-		/// Default options, can be overridden
+		// Default options, can be overridden
 		PacketSocketAdapter::socket->setAdapter(this);
 	}
 
 	virtual ~Transaction()
 	{
-		debugL("NetTransaction", this) << "Destroying" << std::endl;
+		debugL("NetTransaction", this) << "destroy" << std::endl;
 		PacketSocketAdapter::socket->setAdapter(0);
 	}
 
 	virtual bool send()
 	{
-		debugL("NetTransaction", this) << "Sending" << std::endl;
+		debugL("NetTransaction", this) << "send" << std::endl;
 		assert(socket);
 		if (socket->send(PacketTransaction<PacketT>::_request, _peerAddress) > 0)
 			return PacketTransaction<PacketT>::send();
@@ -90,8 +89,8 @@ protected:
 		debugL("NetTransaction", this) << "On Packet: " << packet.size() << std::endl;
 		if (onPossibleResponse(static_cast<PacketT&>(packet))) {
 
-			/// Stop socket data propagation since
-			/// we have handled the packet
+			// Stop socket data propagation since
+			// we have handled the packet
 			//throw StopPropagation();
 		}
 	}
@@ -111,8 +110,8 @@ protected:
 		assert(packet.info && "socket must provide packet info");
 		if (!packet.info)
 			return false;
-		net::PacketInfo* info = reinterpret_cast<net::PacketInfo*>(packet.info);		
-		return socket->address()  == info->socket.address() 
+		auto info = reinterpret_cast<net::PacketInfo*>(packet.info);		
+		return socket->address()  == info->socket->address() 
 			&& _peerAddress == info->peerAddress;
 	}
 	

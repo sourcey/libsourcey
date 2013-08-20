@@ -23,7 +23,7 @@
 
 #include "Sourcey/PacketStream.h"
 #include "Sourcey/Signal.h"
-#include "Poco/Base64Encoder.h"
+#include "Sourcey/Base64.h"
 #include <sstream>
 
 
@@ -40,8 +40,37 @@ public:
 
 	virtual void process(IPacket& packet)
 	{		
+		RawPacket& p = dynamic_cast<RawPacket&>(packet); // cast or throw
+
+		base64::Encoder enc;
+		std::vector<char> result(packet.size() * 2);
+		size_t size = enc.encode((const char*)p.data(), p.size(), &result[0]);		
+
+		emit(&result[0], size);
+	}
+
+	PacketSignal Emitter;
+};
+
+
+} // namespace scy
+
+
+#endif
+
+
+
+
+		//std::string res;
+		//res.reserve(bytes.size() * 2);
+		// //<char[]> encbuf(new char[packet.size() * 2]);
+	
+		/*
+//#include "Poco/Base64Encoder.h"
+		std::unique_ptr<char[]> encbuf(new char[packet.size() * 2]);
 		// TODO: Use own non stream based Base64 encoder
 		std::ostringstream ostr;
+
 		Poco::Base64Encoder encoder(ostr);
 		const char* data = NULL;
 		size_t size = 0;
@@ -58,19 +87,10 @@ public:
 			size_t contentLength = packet.size();
 			Buffer buf(contentLength > 0 ? contentLength : 1500);
 			packet.write(buf);
-			encoder.write((const char*)buf.data(), buf.available());
+			encoder.write((const char*)buf.data(), buf.size());
 		}
 
 		encoder.close();
 
 		emit(ostr.str());
-	}
-
-	PacketSignal Emitter;
-};
-
-
-} // namespace scy
-
-
-#endif
+		*/

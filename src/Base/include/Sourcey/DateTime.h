@@ -1644,6 +1644,121 @@ inline std::string DateTimeFormatter::tzdRFC(int timeZoneDifferential)
 }
 
 
+//
+// Stopwatch
+//
+
+
+class Stopwatch
+	/// A simple facility to measure time intervals 
+	/// with microsecond resolution.
+	///
+	/// The Stopwatch uses the current system time, so if the
+	/// system time changes the measured time will be incorrect.
+{
+public:
+	Stopwatch();
+	~Stopwatch();
+
+	void start();
+		// Starts (or restarts) the stopwatch.
+		
+	void stop();
+		// Stops or pauses the stopwatch.
+	
+	void reset();
+		// Resets the stopwatch.
+		
+	void restart();
+		// Resets and starts the stopwatch.
+		
+	Timestamp::TimeDiff elapsed() const;
+		// Returns the elapsed time in microseconds
+		// since the stopwatch started.
+		
+	int elapsedSeconds() const;
+		// Returns the number of seconds elapsed
+		// since the stopwatch started.
+		
+	int elapsedMilliseconds() const;
+		// Returns the number of milliseconds elapsed
+		// since the stopwatch started.
+
+	static Timestamp::TimeVal resolution();
+		// Returns the resolution of the stopwatch.
+
+private:
+	Stopwatch(const Stopwatch&);
+	Stopwatch& operator = (const Stopwatch&);
+
+	Timestamp           _start;
+	Timestamp::TimeDiff _elapsed;
+	bool                _running;
+};
+
+
+//
+// Timeout
+//
+
+
+/// Simple timeout counter which expires after a given delay.
+class Timeout 
+{
+public:
+	Timeout(long delay = 0, bool autoStart = false);
+	Timeout(const Timeout& src);
+	~Timeout();
+	
+	bool running() const;
+	void start();
+	void stop();
+	void reset();
+	long remaining() const;
+	bool expired() const;
+
+	void setDelay(long delay) { _delay = delay; };
+
+	time_t startAt() const { return _startAt; };
+	long delay() const { return _delay; };
+
+	Timeout& operator = (const Timeout& src);
+
+protected:
+	time_t	_startAt;
+	long	_delay;
+};
+
+
+//
+// Timed Token
+//
+
+
+class TimedToken: public Timeout
+	// A token that expires after the specified duration.
+{
+public:
+	TimedToken(long duration);
+	TimedToken(const std::string& id, long duration);
+	
+	std::string id() const { return _id; }
+	
+	bool operator == (const TimedToken& r) const 
+	{
+		return id()  == r.id();
+	}
+	
+	bool operator == (const std::string& r) const
+	{
+		return id() == r;
+	}
+
+protected:
+	std::string _id;
+};
+
+
 } // namespace scy
 
 

@@ -31,13 +31,13 @@ namespace smpl {
 
 Roster::Roster()
 {	
-	//traceL("Roster", this) << "Creating" << endl;
+	//traceL("Roster", this) << "create" << endl;
 }
 	
 
 Roster::~Roster() 
 {
-	//traceL("Roster", this) << "Destroying" << endl;
+	//traceL("Roster", this) << "destroy" << endl;
 }
 
 
@@ -49,7 +49,7 @@ void Roster::update(const json::Value& data, bool whiny)
 		data.isMember("name") && 
 		data.isMember("type")) {
 		traceL("Roster", this) << "Updating: " << json::stringify(data, true) << endl;
-		string id = data["id"].asString();
+		std::string id = data["id"].asString();
 		Peer* peer = get(id, false);
 		if (!peer) {
 			peer = new Peer(data);
@@ -58,20 +58,20 @@ void Roster::update(const json::Value& data, bool whiny)
 			static_cast<json::Value&>(*peer) = data;
 	}
 	else if (data.isArray()) {
-		for (json::ValueIterator it = data.begin(); it != data.end(); it++) {
+		for (auto it = data.begin(); it != data.end(); it++) {
 			update(*it, whiny);	
 		}
 	}
 	else {
-		string error("Bad presence data: " + json::stringify(data));
+		std::string error("Bad presence data: " + json::stringify(data));
 		errorL("Roster", this) << error << endl;	
 		if (whiny)
-			throw Exception(error);
+			throw std::runtime_error(error);
 	}
 }
 
 
-Peer* Roster::getByHost(const string& host)
+Peer* Roster::getByHost(const std::string& host)
 {
 	Mutex::ScopedLock lock(_mutex);
 	for (PeerMap::const_iterator it = _map.begin(); it != _map.end(); ++it) {	

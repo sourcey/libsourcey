@@ -23,8 +23,7 @@
 
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Memory.h"
-#include "Sourcey/Interfaces.h"
-#include "Sourcey/Polymorphic.h"
+#include "Sourcey/Interface.h"
 #include "Sourcey/Signal.h"
 #include "Sourcey/Task.h"
 #include "Sourcey/Idler.h"
@@ -33,7 +32,7 @@
 namespace scy {
 
 	
-class Runner: public Idler, public Polymorphic
+class Runner: public Idler, public basic::Polymorphic
 	// The Runner is an asynchronous event loop in 
 	// charge of running one or many tasks. 
 	//
@@ -64,7 +63,7 @@ public:
 
 	virtual Task* get(UInt32 id) const;
 		// Returns the task pointer matching the given ID, 
-		// or NULL if no task exists.
+		// or nullptr if no task exists.
 
 	static Runner& getDefault();
 		// Returns the default Runner singleton, although

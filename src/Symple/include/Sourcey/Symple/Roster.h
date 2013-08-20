@@ -21,7 +21,7 @@
 #define SOURCEY_Symple_Router_H
 
 
-#include "Sourcey/Containers.h"
+#include "Sourcey/Collection.h"
 #include "Sourcey/Symple/Peer.h"
 #include "Sourcey/Symple/Address.h"
 
@@ -30,12 +30,12 @@ namespace scy {
 namespace smpl {
 
 
-class Roster: public EventedManager<std::string, Peer>
+class Roster: public LiveCollection<std::string, Peer>
 	/// The Roster provided a registry for active network peers
 	/// indexed by their current session ID.
 {
 public:
-	typedef EventedManager<std::string, Peer>	Manager;
+	typedef LiveCollection<std::string, Peer>	Manager;
 	typedef Manager::Map						PeerMap;	
 	
 public:

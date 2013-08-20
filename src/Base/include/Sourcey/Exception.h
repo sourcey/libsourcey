@@ -65,7 +65,7 @@ public:
 	
     friend std::ostream& operator << (std::ostream& stream, const Exception& exc) 
 	{
-		stream << exc.message();
+		stream << exc.what()/*message()*/;
 		return stream;
     }
 

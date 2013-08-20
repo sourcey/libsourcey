@@ -476,7 +476,7 @@ bool SdpMediaLine::parse(ByteBuffer& buf) {
 				{
 					// "a=rtpmap:140 vp71/144000\r\n"
 					unsigned int payloadType;
-					string codecName;	
+					std::string codecName;	
 					unsigned int codecRate;
 
 					assert(value.size());
@@ -565,15 +565,15 @@ bool SdpMediaLine::parse(ByteBuffer& buf) {
 				if (type == "candidate") 
 				{
 					// "a=candidate:foundation1 1 udp 100000 127.0.0.1 21234 typ host raddr 127.0.0.8 rport 6667 name value name2 value2\r\n"	
-					string foundation;
+					std::string foundation;
 					unsigned int componentId;
-					string transport;
+					std::string transport;
 					unsigned int priority;
-					string address;
+					std::string address;
 					unsigned int port;
 					// skipping <tpe>
-					string candidateType;
-					string relatedAddress;
+					std::string candidateType;
+					std::string relatedAddress;
 					unsigned int relatedPort;
 
 					assert(value.size());
@@ -616,7 +616,7 @@ bool SdpMediaLine::parse(ByteBuffer& buf) {
 				{					
 					// "a=remote-candidates:1 192.168.0.1 5060 2 192.168.0.1 5061\r\n"				
 					unsigned int componentId;
-					string address;
+					std::string address;
 					unsigned int port;
 
 					assert(value.size());

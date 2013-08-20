@@ -21,6 +21,7 @@
 #include "Sourcey/Random.h"
 #include "Sourcey/Base64.h"
 
+#include <memory>
 
 #include <string>
 #include <iostream>
@@ -37,17 +38,12 @@ namespace scy {
 namespace util {
 
 
-//
-/// String utilities
-//
-
-
 std::string string_vprintf(const char* fmt, va_list args) 
 {
 	size_t size = 500;
 	char* buf = (char*)malloc(size);
 	// Grow the buffer size until the output is no longer truncated
-	while (1) {
+	while (true) {
 		va_list args_copy;
 #if defined(_WIN32)
 		args_copy = args;
@@ -83,7 +79,7 @@ std::string format(const char* fmt, ...)
 bool isNumber(const std::string& str)
 {
    for (size_t i = 0; i < str.length(); i++) {
-       if (!isdigit(str[i]))
+       if (!::isdigit(str[i]))
            return false;
    }
    return true;
@@ -103,7 +99,7 @@ unsigned parseHex(const std::string& str)
 	if (tryParseHex(str, result))
 		return result;
 	else
-		throw SyntaxException("Not a valid hexadecimal integer", str);
+		throw std::runtime_error("Syntax error: Not a valid hexadecimal integer: " + str);
 }
 
 
@@ -137,29 +133,20 @@ std::string randomString(int size)
 }
 
 
-UInt64 randomNumber(int size)
+UInt32 randomNumber(int size)
 {
-	std::string res;
 	Random rnd;
-	rnd.seed();
-	for (int i = 0; i < size; ++i)
-		res.push_back(rnd.nextChar());
-	return util::strtoi<UInt64>(res);
+	rnd.seed(size);
+	return rnd.next();
 }
 
 
-void trim(std::string& str) 
-{	
-	str.erase(0, str.find_first_not_of(' '));
-	str.erase(str.find_last_not_of(' ') + 1);
-}
-
-
-StringVec& split(const std::string& s, const std::string& delim, StringVec& elems, int limit) 
+void split(const std::string& s, const std::string& delim, std::vector<std::string>& elems, int limit) 
 {
 	bool final = false;
 	std::string::size_type prev = 0, pos = 0;
-    while((pos = s.find(delim, pos)) != std::string::npos) {
+    while ((pos = s.find(delim, pos)) != std::string::npos) 
+	{
 		final = static_cast<int>(elems.size() + 1) == limit;
 		elems.push_back(s.substr(prev, final ? (s.size() - prev) : (pos - prev)));
         prev = ++pos;
@@ -168,18 +155,18 @@ StringVec& split(const std::string& s, const std::string& delim, StringVec& elem
     }
 	if (prev != std::string::npos)
 		elems.push_back(s.substr(prev, pos-prev));
+}
+
+
+std::vector<std::string> split(const std::string& s, const std::string& delim, int limit) 
+{
+    std::vector<std::string> elems;
+    split(s, delim, elems, limit);
 	return elems;
 }
 
 
-StringVec split(const std::string& s, const std::string& delim, int limit) 
-{
-    StringVec elems;
-    return split(s, delim, elems, limit);
-}
-
-
-StringVec& split(const std::string& s, char delim, StringVec& elems, int limit) 
+void split(const std::string& s, char delim, std::vector<std::string>& elems, int limit) 
 {
     std::stringstream ss(s);
     std::string item;
@@ -189,15 +176,17 @@ StringVec& split(const std::string& s, char delim, StringVec& elems, int limit)
 			break;
     }
 	if (ss.tellg() > 0)
-		elems.push_back(ss.str().substr(ss.tellg(), s.size() - ss.tellg()));
-    return elems;
+		elems.push_back(ss.str().substr(
+		static_cast<unsigned int>(ss.tellg()), 
+		static_cast<unsigned int>(s.size() - ss.tellg())));
 }
 
 
-StringVec split(const std::string& s, char delim, int limit) 
+std::vector<std::string> split(const std::string& s, char delim, int limit) 
 {
-    StringVec elems;
-    return split(s, (char)delim, elems, limit);
+    std::vector<std::string> elems;
+    split(s, (char)delim, elems, limit);
+    return elems;
 }
 
 
@@ -207,70 +196,30 @@ bool endsWith(const std::string& str, const std::string& suffix)
 }
 
 
-std::string replace(const std::string& str, const std::string& from, const std::string& to, std::string::size_type start)
-{
-	std::string res(str);
-	replaceInPlace(res, from, to, start);
-	return res;
-}
-
-	
-std::string& replaceInPlace(std::string& str, const std::string& from, const std::string& to, std::string::size_type start)
-{
-	assert(from.size() > 0);	
-	std::string res;
-	std::string::size_type pos = 0;
-	res.append(str, 0, start);
-	do {
-		pos = str.find(from, start);
-		if (pos != std::string::npos) {
-			res.append(str, start, pos - start);
-			res.append(to);
-			start = pos + from.length();
-		}
-		else res.append(str, start, str.size() - start);
-	}
-	while (pos != std::string::npos);
-	str.swap(res);
-	return str;
+double intToDouble(Int64 v) {
+	if (v+v > 0xFFEULL<<52)
+		return 0;
+	return ldexp((double)((v&((1LL<<52)-1)) + (1LL<<52)) * (v>>63|1), (int)(v>>52&0x7FF)-1075);
 }
 
 
-/*
-//std::string& replaceInPlace(std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start = 0);
-//std::string replace(const std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start = 0);
-
-std::string replace(const std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start)
-{
-	std::string res(str);
-	replaceInPlace(res, from, to, start);
-	return res;
+float intToFloat(Int32 v) {
+	if (v+v > 0xFF000000U)
+		return 0;
+	return ldexp((float)((v&0x7FFFFF) + (1<<23)) * (v>>31|1), (int)(v>>23&0xFF)-150);
 }
 
 
-std::string& replaceInPlace(std::string& str, const std::string::value_type* from, const std::string::value_type* to, std::string::size_type start)
-{
-	assert(*from);
-	std::string res;
-	std::string::size_type pos = 0;
-	std::string::size_type fromLen = std::strlen(from);
-	res.append(str, 0, start);
-	do {
-		pos = str.find(from, start);
-		if (pos != std::string::npos) {
-			res.append(str, start, pos - start);
-			res.append(to);
-			start = pos + fromLen;
-		}
-		else res.append(str, start, str.size() - start);
-	}
-	while (pos != std::string::npos);
-	str.swap(res);
-	return str;
+Int64 doubleToInt(double d) {
+	int e;
+	if     ( !d) return 0;
+	else if(d-d) return 0x7FF0000000000000LL + ((Int64)(d<0)<<63) + (d!=d);
+	d = frexp(d, &e);
+	return (Int64)(d<0)<<63 | (e+1022LL)<<52 | (Int64)((fabs(d)-0.5)*(1LL<<53));
 }
-*/
 
-std::string dumpbin(const char* data, size_t len)
+
+std::string dumpbin(const char* data, std::size_t len)
 {
 	std::string output;
 	for (size_t i = 0; i < len; i++) {
@@ -295,8 +244,8 @@ bool compareVersion(const std::string& l, const std::string& r)
 		return true;
 
 	bool isEqual = true;
-	StringVec lnums = split(l, ".");
-	StringVec rnums = split(r, ".");
+	std::vector<std::string> lnums = split(l, ".");
+	std::vector<std::string> rnums = split(r, ".");
 	for (unsigned i = 0; i < lnums.size(); i++) {			
 		if (rnums.size() < i + 1)
 			break;		
@@ -334,122 +283,15 @@ void toUnderscore(std::string& str)
 }
 
 
-void toLowerInPlace(std::string& str)
-{
-	std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-}
-
-
-std::string toLower(const std::string& str)
-{
-	std::string res(str);
-	toLowerInPlace(res);
-	return res;
-}
-
-
-void toUpperInPlace(std::string& str)
-{
-	std::transform(str.begin(), str.end(), str.begin(), ::toupper);
-}
-
-
-std::string toUpper(const std::string& str)
-{
-	std::string res(str);
-	toUpperInPlace(res);
-	return res;
-}
-
-
-inline int toLower(int ch)
-{
-	if (::isupper(ch))
-		return ch + 32;
-	else
-		return ch;
-}
-
-
-inline int toUpper(int ch)
-{
-	if (::islower(ch))
-		return ch - 32;
-	else
-		return ch;
-}
-
-
-int icompare(const std::string& str, std::string::size_type pos, std::string::size_type n, std::string::const_iterator it2, std::string::const_iterator end2)
-{
-	std::string::size_type sz = str.size();
-	if (pos > sz) pos = sz;
-	if (pos + n > sz) n = sz - pos;
-	std::string::const_iterator it1  = str.begin() + pos; 
-	std::string::const_iterator end1 = str.begin() + pos + n;
-	while (it1 != end1 && it2 != end2) {
-        std::string::value_type c1 = util::toLower(*it1);
-        std::string::value_type c2 = util::toLower(*it2);
-        if (c1 < c2)
-            return -1;
-        else if (c1 > c2)
-            return 1;
-        ++it1; ++it2;
-	}
-    
-    if (it1 == end1)
-		return it2 == end2 ? 0 : -1;
-    else
-        return 1;
-}
-
-
-int icompare(const std::string& str1, const std::string& str2)
-{
-	return icompare(str1, 0, str1.size(), str2.begin(), str2.end());
-	/*
-#ifdef WIN32
-	return strnicmp(s1.c_str(), s2.c_str(), s1.length());
-#else 
-	return stricmp(s1.c_str(), s2.c_str(), s1.length());
-#endif 
-	*/
-}
-
-
-/*
-bool replace(std::string& str, const std::string& from, const std::string& to) 
-{
-    size_t start_pos = str.find(from);
-    if (start_pos == std::string::npos)
-        return false;
-    str.replace(start_pos, from.length(), to);
-    return true;
-}
-
-
-void replaceAll(std::string& str, const std::string& from, const std::string& to)
-{
-    if (from.empty())
-        return;
-    size_t start_pos = 0;
-    while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
-    }
-}
-*/
-
-
 bool matchNodes(const std::string& node, const std::string& xnode, const std::string& delim)
 {
-	StringVec params = util::split(node, delim);
-	StringVec xparams = util::split(xnode, delim);
+	std::vector<std::string> params = util::split(node, delim);
+	std::vector<std::string> xparams = util::split(xnode, delim);
 	return matchNodes(params, xparams);
 }
 
 
-bool matchNodes(const StringVec& params, const StringVec& xparams)
+bool matchNodes(const std::vector<std::string>& params, const std::vector<std::string>& xparams)
 {
 	// xparams is a simple matcher pattern with nodes and
 	// * as wildcard.
@@ -542,6 +384,155 @@ std::streamsize copyToString(std::istream& istr, std::string& str, std::size_t b
 } // namespace scy
 
 
+
+
+/*
+void trim(std::string& str) 
+{	
+	str.erase(0, str.find_first_not_of(' '));
+	str.erase(str.find_last_not_of(' ') + 1);
+}
+*/
+
+/*
+void toLowerInPlace(std::string& str)
+{
+	std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+}
+
+
+std::string toLower(const std::string& str)
+{
+	std::string res(str);
+	toLowerInPlace(res);
+	return res;
+}
+
+
+void toUpperInPlace(std::string& str)
+{
+	std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+}
+
+
+std::string toUpper(const std::string& str)
+{
+	std::string res(str);
+	toUpperInPlace(res);
+	return res;
+}
+
+
+inline int toLower(int ch)
+{
+	if (::isupper(ch))
+		return ch + 32;
+	else
+		return ch;
+}
+
+
+inline int toUpper(int ch)
+{
+	if (::islower(ch))
+		return ch - 32;
+	else
+		return ch;
+}
+*/
+
+
+	/*
+int icompare(const std::string& str, std::string::size_type pos, std::string::size_type n, std::string::const_iterator it2, std::string::const_iterator end2)
+{
+	std::string::size_type sz = str.size();
+	if (pos > sz) pos = sz;
+	if (pos + n > sz) n = sz - pos;
+	std::string::const_iterator it1  = str.begin() + pos; 
+	std::string::const_iterator end1 = str.begin() + pos + n;
+	while (it1 != end1 && it2 != end2) {
+        std::string::value_type c1 = static_cast<char>(::tolower(*it1)); //util::toLower(*it1);
+        std::string::value_type c2 = static_cast<char>(::tolower(*it1)); //util::toLower(*it2);
+        if (c1 < c2)
+            return -1;
+        else if (c1 > c2)
+            return 1;
+        ++it1; ++it2;
+	}
+    
+    if (it1 == end1)
+		return it2 == end2 ? 0 : -1;
+    else
+        return 1;
+}
+
+
+int icompare(const std::string& str1, const std::string& str2)
+{
+	return icompare(str1, 0, str1.size(), str2.begin(), str2.end());
+#ifdef WIN32
+	return strnicmp(s1.c_str(), s2.c_str(), s1.length());
+#else 
+	return stricmp(s1.c_str(), s2.c_str(), s1.length());
+#endif 
+}
+	*/
+
+
+/*
+bool replace(std::string& str, const std::string& from, const std::string& to) 
+{
+    std::size_t start_pos = str.find(from);
+    if (start_pos == std::string::npos)
+        return false;
+    str.replace(start_pos, from.length(), to);
+    return true;
+}
+
+
+void replaceAll(std::string& str, const std::string& from, const std::string& to)
+{
+    if (from.empty())
+        return;
+    std::size_t start_pos = 0;
+    while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+    }
+}
+*/
+
+
+
+/*
+std::string replace(const std::string& str, const std::string& from, const std::string& to, std::string::size_type start)
+{
+	std::string res(str);
+	replaceInPlace(res, from, to, start);
+	return res;
+}
+
+	
+std::string& replaceInPlace(std::string& str, const std::string& from, const std::string& to, std::string::size_type start)
+{
+	assert(from.size() > 0);	
+	std::string res;
+	std::string::size_type pos = 0;
+	res.append(str, 0, start);
+	do {
+		pos = str.find(from, start);
+		if (pos != std::string::npos) {
+			res.append(str, start, pos - start);
+			res.append(to);
+			start = pos + from.length();
+		}
+		else res.append(str, start, str.size() - start);
+	}
+	while (pos != std::string::npos);
+	str.swap(res);
+	return str;
+}
+*/
 
 
 

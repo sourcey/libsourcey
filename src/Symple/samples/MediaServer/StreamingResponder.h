@@ -54,8 +54,8 @@ public:
 			connection().send((const char*)packet.data(), packet.size());
 			fpsCounter.tick();		
 		}
-		catch (Exception& exc) {
-			errorL("StreamingRequestHandler", this) << "Error: " << exc.message() << std::endl;
+		catch (std::exception&/*Exception&*/ exc) {
+			errorL("StreamingRequestHandler", this) << "Error: " << exc.what()/*message()*/ << std::endl;
 			connection().close();
 		}
 	}

@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/Base.h"
-#include "Sourcey/Containers.h"
+#include "Sourcey/Collection.h"
 #include <http_parser.h>
 
 
@@ -49,7 +49,7 @@ public:
 	URL& operator = (const std::string& uri);
 	URL& operator = (const char* uri);
 	
-	/// Parses and assigns an URI from the given string.
+	/// Parses and assigns an URI from the given std::string.
 	/// Throws a SyntaxException if whiny is set and the
 	/// given url is invalid.
     bool parse(const std::string& url, bool whiny = true);
@@ -121,4 +121,4 @@ protected:
 
 //std::string parseHeader(const std::string& request, const std::string& name);
 	/// Parses a Header from a HTTP request.
-//bool parseRestfulQuery(const std::string& request, StringVec& out);
+//bool parseRestfulQuery(const std::string& request, std::vector<std::string>& out);

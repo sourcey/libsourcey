@@ -30,17 +30,17 @@ namespace av {
 
 VideoAnalyzer::VideoAnalyzer(const Options& options) : 
 	_options(options),
-	_video(nil),
-	_audio(nil),
-	_videoConv(nil)
+	_video(nullptr),
+	_audio(nullptr),
+	_videoConv(nullptr)
 {
-	traceL("VideoAnalyzer", this) << "Creating" << endl;
+	traceL("VideoAnalyzer", this) << "create" << endl;
 }
 
 
 VideoAnalyzer::~VideoAnalyzer() 
 {
-	traceL("VideoAnalyzer", this) << "Destroying" << endl;
+	traceL("VideoAnalyzer", this) << "destroy" << endl;
 	uninitialize();
 }
 
@@ -48,9 +48,9 @@ VideoAnalyzer::~VideoAnalyzer()
 void VideoAnalyzer::initialize()
 {
 	if (_options.ifile.empty())
-		throw Exception("Please specify an input file.");
+		throw std::runtime_error("Please specify an input file.");
 
-	traceL("VideoAnalyzer", this) << "Loading: " << _options.ifile << endl;
+	traceL("VideoAnalyzer", this) << "loading: " << _options.ifile << endl;
 
 	_error = "";
 
@@ -58,7 +58,7 @@ void VideoAnalyzer::initialize()
 	_reader.openFile(_options.ifile);
 		
 	if (_reader.video()) {
-		_videoConv = nil;
+		_videoConv = nullptr;
 		_video = new VideoAnalyzer::Stream("Video", _options.rdftSize);
 		_video->initialize();	
 	}
@@ -77,7 +77,7 @@ void VideoAnalyzer::initialize()
 	
 void VideoAnalyzer::uninitialize()
 {
-	//traceL() << "[VideoAnalyzerStream:" << this << ":" << name << "] Uninitializing" << endl;	
+	//traceL() << "[VideoAnalyzerStream: " << this << ": " << name << "] Uninitializing" << endl;	
 	stop();
 	
 	//ScopedLock lock(_mutex); 
@@ -98,18 +98,18 @@ void VideoAnalyzer::start()
 	try 
 	{
 		if (!_reader.audio() && !_reader.video())
-			throw Exception("Video reader not initialized");
+			throw std::runtime_error("Video reader not initialized");
 
 		//if (_options.blocking)
 		//	_reader.run();
 		//else
 		_reader.start();
 	} 
-	catch (Exception& exc) 
+	catch (std::exception&/*Exception&*/ exc) 
 	{
-		_error = exc.message();
+		_error = exc.what()/*message()*/;
 		errorL("VideoAnalyzer", this) << "Error: " << _error << endl;
-		exc.rethrow();
+		throw exc; //.rethrow()
 	}
 }
 
@@ -126,7 +126,7 @@ void VideoAnalyzer::stop()
 }
 
 
-void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
+void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
 {
 	//traceL("VideoAnalyzer", this) << "On video: " 
 	//	<< packet.size() << ": " << packet.time << endl;
@@ -170,7 +170,7 @@ void VideoAnalyzer::onVideo(void* sender, VideoPacket& packet)
 	}
 }
 
-void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
+void VideoAnalyzer::onAudio(void*, AudioPacket& packet)
 {
 	//traceL("VideoAnalyzer", this) << "On Audio: " 
 	//  << packet.size() << ": " << packet.time << endl;	
@@ -178,7 +178,7 @@ void VideoAnalyzer::onAudio(void* sender, AudioPacket& packet)
 	Mutex::ScopedLock lock(_mutex);		
 	
 	VideoAnalyzer::Packet pkt(packet.time);
-	short const* data = reinterpret_cast<short*>(packet.array());
+	short const* data = reinterpret_cast<short*>(packet.data());
 	int channels = _reader.audio()->stream->codec->channels;
 	int size = packet.size();
 	int frames = 0;
@@ -218,7 +218,7 @@ AVFrame* VideoAnalyzer::getGrayVideoFrame()
 	VideoDecoderContext* video = _reader.video();
 
 	// TODO: Conversion via decoder?
-	if (_videoConv == nil) {		
+	if (_videoConv == nullptr) {		
 		VideoCodec iparams;
 		iparams.width = video->ctx->width;
 		iparams.height = video->ctx->height;
@@ -230,8 +230,8 @@ AVFrame* VideoAnalyzer::getGrayVideoFrame()
 		_videoConv = new VideoConversionContext();
 		_videoConv->create(iparams, oparams);
 	}
-	if (_videoConv == nil)
-		throw Exception("Video Analyzer: Unable to initialize the video conversion context.");	
+	if (_videoConv == nullptr)
+		throw std::runtime_error("Video Analyzer: Unable to initialize the video conversion context.");	
 		
 	// Convert the source image to grayscale
 	return _videoConv->convert(video->frame);
@@ -291,16 +291,16 @@ const int kMaxFFTPow2Size = 24;
 
 VideoAnalyzer::Stream::Stream(const std::string& name, int rdftSize) : 
 	name(name), rdftSize(rdftSize), rdftBits(static_cast<int>(log2(rdftSize))), 
-	rdft(nil), rdftData(nil), frames(0), filled(0)
+	rdft(nullptr), rdftData(nullptr), frames(0), filled(0)
 {	
-	traceL() << "[VideoAnalyzerStream:" << this << ":" << name << "] Creating: " 
+	traceL() << "[VideoAnalyzerStream: " << this << ": " << name << "] Creating: " 
 		<< rdftSize << ": " << rdftBits << endl;	
 
     assert(rdftSize);
     assert(rdftBits < kMaxFFTPow2Size);
 
 	// We only allow power of two.
-    assert(1UL << rdftBits == rdftSize);
+    assert(int(1UL << rdftBits) == rdftSize);
 }
 	
 
@@ -315,21 +315,21 @@ void VideoAnalyzer::Stream::initialize()
 	frames		= 0;
 	filled		= 0;
 
-	assert(rdft == nil);
+	assert(rdft == nullptr);
 	rdft = av_rdft_init(rdftBits, DFT_R2C);
-	if (rdft == nil)
-		throw Exception("Cannot allocate FFT context");
+	if (rdft == nullptr)
+		throw std::runtime_error("Cannot allocate FFT context");
 	
-	assert(rdftData == nil);
+	assert(rdftData == nullptr);
 	rdftData = (FFTSample*)av_malloc(rdftSize * sizeof(*rdftData));	
-	if (rdftData == nil)
-		throw Exception("Cannot allocate FFT buffer");
+	if (rdftData == nullptr)
+		throw std::runtime_error("Cannot allocate FFT buffer");
 }
 
 	
 void VideoAnalyzer::Stream::uninitialize()
 {
-	//traceL() << "[VideoAnalyzerStream:" << this << ":" << name << "] Uninitializing" << endl;	
+	//traceL() << "[VideoAnalyzerStream: " << this << ": " << name << "] Uninitializing" << endl;	
 	
 	if (rdft)
 		av_rdft_end(rdft);
@@ -412,7 +412,7 @@ double log2(double n)
 	//FFMIN(_reader.audio()->frameSize, packet.size());
 	//_audio->filled = 0;
 	//if (_audio->filled != _audio->rdftSize)
-	//	warnL() << "################# [VideoAnalyzer:" << this << "] Audio FFT Wrong Size: " 
+	//	warnL() << "################# [VideoAnalyzer: " << this << "] Audio FFT Wrong Size: " 
 	//		<< _audio->filled << " != " << _audio->rdftSize << endl;	
 
 	//calculateFrequencyIntensity(*_audio, packet.time);
@@ -544,7 +544,7 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 	/*video->frame
 	VideoDecoderContext* video = _reader.video();
 	// TODO: Conversion via decoder?
-	if (_videoConv == nil) {		
+	if (_videoConv == nullptr) {		
 		VideoCodec iparams;
 		iparams.width = video->ctx->width;
 		iparams.height = video->ctx->height;
@@ -556,8 +556,8 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 		_videoConv = new VideoConversionContext();
 		_videoConv->create(iparams, oparams);
 	}
-	if (_videoConv == nil)
-		throw Exception("Video Analyzer: Unable to initialize the video conversion context.");	
+	if (_videoConv == nullptr)
+		throw std::runtime_error("Video Analyzer: Unable to initialize the video conversion context.");	
 		
 	// Convert the source image to grayscale
 	greyFrame = _videoConv->convert(video->frame);
@@ -595,12 +595,12 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
             z.filled = 0;
         }
     }
-	warnL() << "@@@@ [VideoAnalyzer:" << this << "] Filled: " << _video->filled << endl;	
+	warnL() << "@@@@ [VideoAnalyzer: " << this << "] Filled: " << _video->filled << endl;	
 	*/
 
 	
 	//if (_video->filled != _video->rdftSize)
-	//	warnL() << "################# [VideoAnalyzer:" << this << "] Video FFT Wrong Size: " 
+	//	warnL() << "################# [VideoAnalyzer: " << this << "] Video FFT Wrong Size: " 
 	//		<< _video->filled << " != " << _video->rdftSize << endl;	
 	/*
 	// Skip frames if we exceed the maximum processing framerate.
@@ -623,20 +623,20 @@ void VideoAnalyzer::writeCSV(const VideoAnalyzer::Packet& packet) //, double avg
 		
 	/*
 	// Create and allocate the conversion frame.
-	if (oframe == nil) {
+	if (oframe == nullptr) {
 		oframe = avcodec_alloc_frame();	
-		if (oframe == nil)
-			throw Exception("Video Analyzer: Unable to allocate the output video frame.");
+		if (oframe == nullptr)
+			throw std::runtime_error("Video Analyzer: Unable to allocate the output video frame.");
 
 		avpicture_alloc(reinterpret_cast<AVPicture*>(oframe), 
 			PIX_FMT_GRAY8, video->ctx->width, video->ctx->height);
 	}
 	
 	// Convert the image from its native format to GREY8.
-	if (_videoConv == nil) {
+	if (_videoConv == nullptr) {
 		_videoConv = sws_getContext(
 			video->ctx->width, video->ctx->height, video->ctx->pix_fmt, 
 			video->ctx->width, video->ctx->height, PIX_FMT_GRAY8, 
-			SWS_BICUBIC, nil, nil, nil);
+			SWS_BICUBIC, nullptr, nullptr, nullptr);
 	}
 	*/

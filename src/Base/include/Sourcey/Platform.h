@@ -23,19 +23,20 @@
 
 #include "Sourcey/Types.h"
 #include <string>
+#include <ctime>
 
 
 namespace scy {
 	
 		
 //
-/// System Tools
+/// Cross-platform utilities
 //
-
+	
 std::string getExePath();
 	// Returns the current executable path.
 
-std::string getCWD();
+std::string getCwd();
 	// Return the current working directory.
 
 UInt64 getTimeHR();
@@ -62,16 +63,34 @@ void sleep(int ms);
 void pause();
 	// Pause the current thread until enter is pressed.
 
+
+//
+/// STL Time
+// 
+   
+std::time_t systemTime();
+
+std::tm toLocalTime(const std::time_t& time);
+
+std::string formatLocalTime(const char* fmt);
+std::string formatTime(const std::time_t& time, const char* fmt);
+std::string formatTime(const std::tm* dt, const char* fmt);
+
+
 //
 /// Windows helpers
 //
-
 
 #ifdef WIN32
 
 bool getOsVersion(int* major, int* minor, int* build);
 bool isWindowsVistaOrLater();
 bool isWindowsXpOrLater();
+
+std::wstring toUtf16(const char* utf8, size_t len);
+std::wstring toUtf16(const std::string& str);
+std::string toUtf8(const wchar_t* wide, size_t len);
+std::string toUtf8(const std::wstring& wstr);
 
 #endif
 

@@ -27,6 +27,8 @@
 #include "Sourcey/Signal.h"
 #include "Sourcey/Memory.h"
 
+#include <functional>
+
 
 namespace scy {
 
@@ -34,32 +36,31 @@ namespace scy {
 class Timer: public uv::Handle
 {
 public:
-	Timer(Int64 timeout, Int64 interval = 0, uv::Loop& loop = uv::defaultLoop(), bool ghost = true);
 	Timer(uv::Loop& loop = uv::defaultLoop(), bool ghost = true);
 	virtual ~Timer();
 	
-	virtual bool start(Int64 interval);
-	virtual bool start(Int64 timeout, Int64 interval);
-		// Start the timer, an interval value of zero will only trigger
-		// once after timeout.
-
-	virtual bool stop();
-		// Stops the timer.
+	// Starts the timer, an interval value of zero will only trigger
+	// once after timeout.
+	virtual void start(Int64 interval);
+	virtual void start(Int64 timeout, Int64 interval);
 	
-	virtual bool restart();
-		// Restarts the timer, even if it hasn't been started yet.
-		// An interval or interval must be set or an exception will be thrown.
+	// Stops the timer.
+	virtual void stop();
 	
-	virtual bool again();
-		// Stop the timer, and if it is repeating restart it using the
-		// repeat value as the timeout. If the timer has never been started
-		// before it returns -1 and sets the error to UV_EINVAL.
-
+	// Restarts the timer, even if it hasn't been started yet.
+	// An interval or interval must be set or an exception will be thrown.
+	virtual void restart();
+	
+	// Stop the timer, and if it is repeating restart it using the
+	// repeat value as the timeout. If the timer has never been started
+	// before it returns -1 and sets the error to UV_EINVAL.
+	virtual void again();
+	
+	// Set the repeat value. Note that if the repeat value is set from
+	// a timer callback it does not immediately take effect. If the timer
+	// was non-repeating before, it will have been stopped. If it was repeating,
+	// then the old repeat value will have been used to schedule the next timeout.
 	virtual void setInterval(Int64 interval);
-		// Set the repeat value. Note that if the repeat value is set from
-		// a timer callback it does not immediately take effect. If the timer
-		// was non-repeating before, it will have been stopped. If it was repeating,
-		// then the old repeat value will have been used to schedule the next timeout.
 
 	virtual bool active() const;
 	
@@ -67,139 +68,30 @@ public:
 	virtual Int64 interval() const;
 	
 	Int64 count();
-
-	virtual void onTimeout();
 	
 	NullSignal Timeout;
 
 protected:	
 	virtual void init();
-	//virtual void close();
 	
-	//
-	// UV Callbacks
-	UVEmptyStatusCallback(Timer, onTimeout, uv_timer_t);
-	
-	bool _ghost;
-	Int64 _count;
 	Int64 _timeout;
 	Int64 _interval;
+	Int64 _count;
+	bool _ghost;
 };
 
 
-//
-//
-//
+	//typedef std::function<void()> Callback;
 
 
-class Timeout 
-	// Simple timeout counter which expires after a given delay.
-{
-public:
-	Timeout(long delay = 0, bool autoStart = false);
-	Timeout(const Timeout& src);
-	~Timeout();
+	//Timer(Int64 timeout, Int64 interval = 0, uv::Loop& loop = uv::defaultLoop(), bool ghost = true);
+	//virtual void close();
 	
-	bool running() const;
-	void start();
-	void stop();
-	void reset();
-	long remaining() const;
-	bool expired() const;
 
-	void setDelay(long delay) { _delay = delay; };
-
-	time_t startAt() const { return _startAt; };
-	long delay() const { return _delay; };
-
-	Timeout& operator = (const Timeout& src);
-
-protected:
-	time_t	_startAt;
-	long	_delay;
-};
-
-
-//
-// Stopwatch
-//
-
-
-class Stopwatch
-	/// A simple facility to measure time intervals 
-	/// with microsecond resolution.
-	///
-	/// The Stopwatch uses the current system time, so if the
-	/// system time changes the measured time will be incorrect.
-{
-public:
-	Stopwatch();
-	~Stopwatch();
-
-	void start();
-		// Starts (or restarts) the stopwatch.
-		
-	void stop();
-		// Stops or pauses the stopwatch.
-	
-	void reset();
-		// Resets the stopwatch.
-		
-	void restart();
-		// Resets and starts the stopwatch.
-		
-	Timestamp::TimeDiff elapsed() const;
-		// Returns the elapsed time in microseconds
-		// since the stopwatch started.
-		
-	int elapsedSeconds() const;
-		// Returns the number of seconds elapsed
-		// since the stopwatch started.
-		
-	int elapsedMilliseconds() const;
-		// Returns the number of milliseconds elapsed
-		// since the stopwatch started.
-
-	static Timestamp::TimeVal resolution();
-		// Returns the resolution of the stopwatch.
-
-private:
-	Stopwatch(const Stopwatch&);
-	Stopwatch& operator = (const Stopwatch&);
-
-	Timestamp           _start;
-	Timestamp::TimeDiff _elapsed;
-	bool                _running;
-};
-
-
-//
-// Timed Token
-//
-
-
-class TimedToken: public Timeout
-	// A token that expires after the specified duration.
-{
-public:
-	TimedToken(long duration);
-	TimedToken(const std::string& id, long duration);
-	
-	std::string id() const { return _id; }
-	
-	bool operator == (const TimedToken& r) const 
-	{
-		return id()  == r.id();
-	}
-	
-	bool operator == (const std::string& r) const
-	{
-		return id() == r;
-	}
-
-protected:
-	std::string _id;
-};
+	//virtual void onTimeout();
+	//
+	// UV Callbacks
+	//UVEmptyStatusCallback(Timer, onTimeout, uv_timer_t);
 
 
 } // namespace scy

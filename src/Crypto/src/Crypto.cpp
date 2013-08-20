@@ -82,7 +82,7 @@ static Mutex _mutex;
 static int _refCount(0);
 
 
-void lock(int mode, int n, const char* file, int line)
+void lock(int mode, int n, const char* /* file */, int /* line */)
 {
 	if (mode & CRYPTO_LOCK)
 		_mutexes[n].lock();
@@ -97,13 +97,13 @@ unsigned long id()
 }
 
 
-struct CRYPTO_dynlock_value* dynlockCreate(const char* file, int line)
+struct CRYPTO_dynlock_value* dynlockCreate(const char* /* file */, int /* line */)
 {
 	return new CRYPTO_dynlock_value;
 }
 
 
-void dynlock(int mode, struct CRYPTO_dynlock_value* lock, const char* file, int line)
+void dynlock(int mode, struct CRYPTO_dynlock_value* lock, const char* /* file */, int /* line */)
 {
 	assert(lock);
 
@@ -114,7 +114,7 @@ void dynlock(int mode, struct CRYPTO_dynlock_value* lock, const char* file, int 
 }
 
 
-void dynlockDestroy(struct CRYPTO_dynlock_value* lock, const char* file, int line)
+void dynlockDestroy(struct CRYPTO_dynlock_value* lock, const char* /* file */, int /* line */)
 {
 	delete lock;
 }

@@ -21,7 +21,6 @@
 #include "Sourcey/Util.h"
 
 
-
 namespace scy {
 namespace http {
 	
@@ -99,7 +98,7 @@ bool URL::parse(const std::string& url, bool whiny)
 		return true;
 	_buf.clear();
 	if (whiny)
-		throw SyntaxException("Cannot parse invalid URL: " + url);
+		throw std::runtime_error("Syntax error: Cannot parse invalid URL: " + url);
 	return false;
 }
 
@@ -204,7 +203,7 @@ std::string URL::userInfo() const
 void URL::updateSchema(const std::string& scheme)
 {
 	if (!hasSchema())
-		throw Exception("Cannot update invalid URL");		
+		throw std::runtime_error("Cannot update invalid URL");		
 	
 	std::string tmp(str());
 	util::replaceInPlace(tmp, this->scheme(), scheme);
@@ -215,7 +214,7 @@ void URL::updateSchema(const std::string& scheme)
 void URL::updateHost(const std::string& host)
 {
 	if (!hasHost())
-		throw Exception("Cannot update invalid URL");		
+		throw std::runtime_error("Cannot update invalid URL");		
 
 	std::string tmp(str());
 	util::replaceInPlace(tmp, this->host(), host);
@@ -226,7 +225,7 @@ void URL::updateHost(const std::string& host)
 void URL::updatePort(UInt16 port)
 {	
 	if (!hasPort())
-		throw Exception("Cannot update invalid URL");		
+		throw std::runtime_error("Cannot update invalid URL");		
 
 	std::string tmp(str());
 	util::replaceInPlace(tmp, 
@@ -239,7 +238,7 @@ void URL::updatePort(UInt16 port)
 void URL::updatePath(const std::string& path)
 {
 	if (!hasPath())
-		throw Exception("Cannot update invalid URL");		
+		throw std::runtime_error("Cannot update invalid URL");		
 
 	std::string tmp(str());
 	util::replaceInPlace(tmp, this->path(), path);
@@ -250,7 +249,7 @@ void URL::updatePath(const std::string& path)
 void URL::updateQuery(const std::string& query)
 {
 	if (!hasQuery())
-		throw Exception("Cannot update invalid URL");		
+		throw std::runtime_error("Cannot update invalid URL");		
 
 	std::string tmp(str());
 	util::replaceInPlace(tmp, this->query(), query);
@@ -261,7 +260,7 @@ void URL::updateQuery(const std::string& query)
 void URL::updateFragment(const std::string& fragment)
 {
 	if (!hasFragment())
-		throw Exception("Cannot update invalid URL");		
+		throw std::runtime_error("Cannot update invalid URL");		
 
 	std::string tmp(str());
 	util::replaceInPlace(tmp, this->fragment(), fragment);
@@ -272,7 +271,7 @@ void URL::updateFragment(const std::string& fragment)
 void URL::updateUserInfo(const std::string& info)
 {
 	if (!hasUserInfo())
-		throw Exception("Cannot update invalid URL");		
+		throw std::runtime_error("Cannot update invalid URL");		
 
 	std::string tmp(str());
 	util::replaceInPlace(tmp, this->userInfo(), info);

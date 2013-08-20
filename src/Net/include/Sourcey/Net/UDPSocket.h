@@ -22,7 +22,6 @@
 
 
 #include "Sourcey/UV/UVPP.h"
-#include "Sourcey/Net/UDPBase.h"
 #include "Sourcey/Net/Socket.h"	
 #include "Sourcey/Net/Types.h"
 #include "Sourcey/Net/Address.h"
@@ -30,6 +29,9 @@
 
 namespace scy {
 namespace net {
+
+
+class UDPBase;
 
 
 class UDPSocket: public net::Socket
@@ -57,6 +59,57 @@ public:
 	
 	UDPBase& base() const;
 		/// Returns the socket's SocketBase instance.
+};
+
+
+//
+// UDP Base
+//
+
+	
+class UDPBase: public uv::Handle, public net::SocketBase
+{
+public:
+	UDPBase();
+	virtual ~UDPBase();
+	
+	virtual void connect(const net::Address& peerAddress);
+	virtual void close();	
+
+	virtual void bind(const net::Address& address, unsigned flags = 0);
+
+	virtual int send(const char* data, int len, int flags = 0);
+	virtual int send(const char* data, int len, const net::Address& peerAddress, int flags = 0);
+	
+	virtual net::Address address() const;
+	virtual net::Address peerAddress() const;
+
+	net::TransportType transport() const;
+		/// Returns the UDP transport protocol.
+			
+	virtual void setError(const Error& err);		
+	const Error& error() const;
+
+	virtual bool closed() const;
+		/// Returns true if the native socket 
+		/// handle is closed.
+	
+	virtual void onRecv(const MutableBuffer& buf, const net::Address& address);
+
+protected:	
+	virtual void init();	
+	virtual bool recvStart();
+	virtual bool recvStop();
+
+	static void onRecv(uv_udp_t* handle, ssize_t nread, uv_buf_t buf, struct sockaddr* addr, unsigned flags);
+	static void afterSend(uv_udp_send_t* req, int status); 
+	static uv_buf_t allocRecvBuffer(uv_handle_t* handle, size_t suggested_size);
+
+	virtual void onError(const Error& error);
+	virtual void onClose();
+	
+	net::Address _peer;
+	Buffer _buffer;
 };
 
 

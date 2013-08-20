@@ -154,7 +154,7 @@ struct LivePTSCalculator
 			<< "\n\tFrame Duration: " << frameDuration
 			<< "\n\tFrame Diff: " << frameDiff
 			<< "\n\tFrame Time: " << frameTime
-			<< "\n\tTime Base: " << timeBase.den << ":" << timeBase.num
+			<< "\n\tTime Base: " << timeBase.den << ": " << timeBase.num
 			<< std::endl;
 	}
 

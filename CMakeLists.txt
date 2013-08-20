@@ -95,7 +95,8 @@ if(WIN32)
     D:/dev/lib/wxWidgets-2.9.4/lib/vc_lib
     #D:/dev/lib/OpenCV2.4.1/build/install/lib
     #D:/dev/lib/OpenSSL-Win32/lib/VC/static
-    D:/dev/lib/poco-1.4.6p1-all/lib 
+    #D:/dev/lib/poco-1.4.6p1-all/lib 
+    D:/dev/lib/poco-1.5.1/lib 
     D:/dev/lib/ffmpeg-1.0.1-gpl/lib
     #${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib
     ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/vc10
@@ -127,7 +128,8 @@ if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     D:/dev/lib/wxWidgets-2.9.4
     #D:/dev/lib/OpenSSL-Win32/include
-    D:/dev/lib/poco-1.4.6p1-all    
+    #D:/dev/lib/poco-1.4.6p1-all    
+    D:/dev/lib/poco-1.5.1
     D:/dev/lib/ffmpeg-1.0.1-gpl/include
     #${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/include
     ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/include
@@ -209,15 +211,23 @@ elseif(LINUX)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -llibc -lglibc")
 endif()
 
+if(MSVC)
+  # Temporary workaround for "error LNK2026: module unsafe for SAFESEH image"
+  # when compiling with certain externally compiled libraries with VS2012, 
+  # such as http://ffmpeg.zeranoe.com/builds/
+  # This disables safe exception handling by default.
+  SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
+  SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+  SET (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
+endif()
+
 # ----------------------------------------------------------------------------
 # Include and third party dependencies
 # ----------------------------------------------------------------------------
 
 # Define known dependencies for our LibSourceyConfig.h
 # These variables will be modified by include_dependency()
-set(HAVE_PUGIXML 0)
 set(HAVE_RTAUDIO 0)
-set(HAVE_LIBSTROPHE 0)
 set(HAVE_JSONCPP 0)
 set(HAVE_OPENSSL 0)
 set(HAVE_POCO 0)
@@ -226,21 +236,24 @@ set(HAVE_OPENCV 0)
 set(HAVE_WXWIDGETS 0)
 set(HAVE_LIBUV 0)
 set(HAVE_HTTP_PARSER 0)
+set(HAVE_ZLIB 0)
+#set(HAVE_LIBSTROPHE 0)
+#set(HAVE_PUGIXML 0)
   
 if(BUILD_DEPENDENCIES)
   # TODO: Search for library and conditional build
   # depending on XXX_FOUND or HAVE_XXX variable  
-  set(WITH_PUGIXML ON CACHE BOOL "Build with PugiXML")
   set(WITH_RTAUDIO ON CACHE BOOL "Build with RtAudio")
-  set(WITH_LIBSTROPHE ON CACHE BOOL "Build with LibStrophe")
   set(WITH_JSONCPP ON CACHE BOOL "Build with JsonCpp")
+  #set(WITH_PUGIXML ON CACHE BOOL "Build with PugiXML")
+  #set(WITH_LIBSTROPHE ON CACHE BOOL "Build with LibStrophe")
   set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} "${LibSourcey_DEPENDENCIES_SOURCE_DIR}/MemLeakDetect")
   add_subdirectory(${LibSourcey_DEPENDENCIES_SOURCE_DIR})
 else()
-  unset(WITH_PUGIXML CACHE)
   unset(WITH_RTAUDIO CACHE)
-  unset(WITH_LIBSTROPHE CACHE)
   unset(WITH_JSONCPP CACHE)
+  #unset(WITH_PUGIXML CACHE)
+  #unset(WITH_LIBSTROPHE CACHE)
 endif()
 
 # Include our dependencies source directory

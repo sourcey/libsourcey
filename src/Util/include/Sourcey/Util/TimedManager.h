@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/Base.h"
-#include "Sourcey/Containers.h"
+#include "Sourcey/Collection.h"
 #include "Sourcey/Timer.h"
 
 
@@ -30,99 +30,121 @@ namespace scy {
 
 
 template <class TKey, class TValue>
-class TimedManager: public PointerManager<TKey, TValue>
+class TimedManager: public PointerCollection<TKey, TValue>
 	/// Provides timed persistent data storage for class instances.
 	/// TValue must implement the clone() method.
 {
 public:
-	typedef PointerManager<TKey, TValue> Base;
+	typedef PointerCollection<TKey, TValue> Base;
+	typedef std::map<TValue*, Timeout> TimeoutMap;
 
-public:
-	TimedManager() {		
-		timer.Timeout += delegate(this, &TimedManager::onTimer);
-	};
-	virtual ~TimedManager() {
-		timer.Timeout -= delegate(this, &TimedManager::onTimer);
-	};
-	
-	virtual void add(const TKey& name, TValue* item, long timeout = 0)
-		// Add the item with a timeout specified by the timeout value.
-		// If the timeout is 0 the item will be stored indefinitely.
-		// The item pointer MUST be destroyed by the manager or the 
-		// application will crash.
+	TimedManager(uv::Loop& loop = uv::defaultLoop()) :
+		_timer(loop)
+	{		
+		_timer.Timeout += delegate(this, &TimedManager::onTimer);
+		_timer.start(100); // check every 100ms
+	}
+
+	virtual ~TimedManager() 
 	{
-		// Remove existing items for the
-		// given key and store the item.
-		Base::free(name);
-		Base::add(name, item);
-		//if (timeout)
-		//	timer.start(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, timeout, 0, item));
+		_timer.Timeout -= delegate(this, &TimedManager::onTimer);
 	}
 	
-	virtual void expires(const TKey& name, long timeout) 
+	virtual void add(const TKey& key, TValue* item, long timeout = 0)
+		// Adds an item which will expire (and be deleted) after the 
+		// specified timeout value.
+		// If the timeout is 0 the item will be stored indefinitely.
+		// The TimedManager assumes ownership of the given pointer.
 	{
-		TValue* item = get(name);
-		if (item) {			
-			assert(0);
-			// need to sort entiries by timeout
-			// and set nearest timeout value
-			//timer.start(5000, 5000);
-
-			//timeout ? 
-			//	timer.start(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, timeout, 0, item)) :
-			//	timer.stop(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, 0, 0, item));
+		Base::free(key); // Free existing item and timeout (if any)
+		Base::add(key, item); // Add new entry
+		
+		if (timeout > 0) {
+			Mutex::ScopedLock lock(_tmutex);
+			Timeout& timeout = _timeouts[item];
+			timeout.start();
 		}
 	}
 	
-	virtual void expires(TValue* item, long timeout) 
+	virtual bool expires(const TKey& key, long timeout) 
+		/// Updates the item expiry timeout
 	{
-		if (!exists(item))
-			throw NotFoundException("Item not found");
-		
-		
-		assert(0);
-
-
-		//timeout ? 
-		//	timer.start(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, timeout, 0, item)) :
-		//	timer.stop(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, 0, 0, item));
+		return expires(get(key, false), timeout);
+	}
+	
+	virtual bool expires(TValue* item, long timeout) 
+		/// Updates the item expiry timeout
+	{
+		if (item) {
+			Mutex::ScopedLock lock(_tmutex);	
+			TimeoutMap::iterator it = _timeouts.find(item);	
+			if (it != _timeouts.end()) {
+				if (timeout > 0) {
+					it->second.setDelay(timeout);
+					it->second.reset();
+				}
+				else
+					_timeouts.erase(it);
+				return true;
+			}
+		}
+		assert(0 && "unknown item");
+		return false;
 	}
 
 	virtual void onRemove(const TKey& key, TValue* item) 
 	{ 
-		//timer.stop(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, 0, 0, item));
+		// Remove timeout entry
+		Mutex::ScopedLock lock(_tmutex);	
+		TimeoutMap::iterator it = _timeouts.find(item);	
+		if (it != _timeouts.end())
+			_timeouts.erase(it);
+		
+		// Remove pointer entry
 		Base::onRemove(key, item);
 	}
 
 	virtual void clear()
 	{
-		//timer.stopAll(this);
 		Base::clear();
-	}
-	
-	/*
-	virtual void onItemTimeout(TimerCallback<TimedManager>& timer)
-	{
-		TValue* item = reinterpret_cast<TValue*>(timer.opaque());
-		if (Base::remove(item))
-			delete item;
-	}
-	*/
-
-	virtual void onItemTimeout(TValue* item)
-	{
-		//TValue* item = reinterpret_cast<TValue*>(timer.opaque());
-		if (Base::remove(item))
-			delete item;
 	}
 	
 	void onTimer(void*)
 	{
+		Mutex::ScopedLock lock(_tmutex);
+		for (TimeoutMap::iterator it = _timeouts.begin(); it != _timeouts.end();) {
+			if (it->second.expired()) {	
+				traceL("TimedManager", this) << "item expired: " << it->first << std::endl;				
+				if (Base::remove(it->first))
+					delete it->first;
+				it = _timeouts.erase(it);
+			}
+			else ++it;
+		}
+	}
+
+protected:
+	mutable Mutex _tmutex;
+	TimeoutMap _timeouts;
+	Timer _timer;
+};
+
+
+} // namespace scy:
+
+
+#endif // SOURCEY_TimedManager_H
+
+
+
+		/*
+			//(timeout, true);
+			//_timeouts.insert(TimeoutMap::value_type(item, ));
+		//_timer.stopAll(this);
 		// loop items and destroy
 		// TODO: Call onItemTimeout
 
-		/*
-		for (ClientConnectionList::iterator it = connections.begin(); it != connections.end();) {
+		for (Base::Map::iterator it = connections.begin(); it != connections.end();) {
 			if ((*it)->deleted()) {
 				traceL("Client", this) << "Deleting connection: " << (*it) << std::endl;
 				delete *it;
@@ -132,13 +154,54 @@ public:
 				++it;
 		}
 		*/
+		
+		/*;
+		TValue* item = get(key, false);
+		if (item) {		
+			
+		}
+		assert(0 && "unknown item");
+			Mutex::ScopedLock lock(_tmutex);	
+			TimeoutMap::iterator it = _timeouts.find(key);	
+			if (it != _timeouts.end()) {
+				_map.erase(it);
+				return true;
+			}
+
+		//throw Not
+
+		//if (exists(item)) {
+		//}FoundException("Item not found");	
+			*/
+		//throw NotFoundException("Item not found");
+		//throw NotFoundException("Timeout entry not found");
+
+		//TimeoutMap::iterator it = _timeouts.find(key);	
+		//if (it != _timeouts.end())
+		//	return it->second;	 
+
+
+			//assert(0);
+			// need to sort entiries by timeout
+			// and set nearest timeout value
+			//_timer.start(5000, 5000);
+
+			//timeout ? 
+			//	_timer.start(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, timeout, 0, item)) :
+			//	_timer.stop(TimerCallback<TimedManager>(this, &TimedManager::onItemTimeout, 0, 0, item));
+	
+	/*
+	virtual void onItemTimeout(TimerCallback<TimedManager>& _timer)
+	{
+		TValue* item = reinterpret_cast<TValue*>(_timer.opaque());
+		if (Base::remove(item))
+			delete item;
 	}
 
-	Timer timer;
-};
-
-
-} // namespace scy:
-
-
-#endif // SOURCEY_TimedManager_H
+	virtual void onItemTimeout(TValue* item)
+	{
+		//TValue* item = reinterpret_cast<TValue*>(_timer.opaque());
+		if (Base::remove(item))
+			delete item;
+	}
+	*/

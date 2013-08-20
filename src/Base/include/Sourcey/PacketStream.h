@@ -26,9 +26,9 @@
 #include "Sourcey/Memory.h"
 #include "Sourcey/Exception.h"
 #include "Sourcey/Stateful.h"
-#include "Sourcey/InterProcess.h"
+#include "Sourcey/InterProc.h"
 #include "Sourcey/PacketSignal.h"
-#include "Sourcey/Interfaces.h"
+#include "Sourcey/Interface.h"
 
 
 namespace scy {
@@ -43,16 +43,16 @@ struct PacketStreamState;
 
 
 class PacketStreamAdapter
-	// This class is a wrapper for integrating external
-	// classes with the a PacketStream's data flow and
-	// state machine.
+	/// This class is a wrapper for integrating external
+	/// classes with the a PacketStream's data flow and
+	/// state machine.
 { 
 public:
 	PacketStreamAdapter(PacketSignal& emitter);
 	virtual ~PacketStreamAdapter() {};
 
-	virtual void emit(char* data, size_t len, unsigned flags = 0);
-	virtual void emit(const char* data, size_t len, unsigned flags = 0);
+	virtual void emit(char* data, std::size_t len, unsigned flags = 0);
+	virtual void emit(const char* data, std::size_t len, unsigned flags = 0);
 	virtual void emit(const std::string& str, unsigned flags = 0);
 	virtual void emit(IPacket& packet);
 
@@ -67,12 +67,17 @@ public:
 		// especially in multi-thread scenarios.
 
 protected:
+	PacketStreamAdapter(const PacketStreamAdapter&); // = delete;
+	PacketStreamAdapter(PacketStreamAdapter&&); // = delete;
+	PacketStreamAdapter& operator=(const PacketStreamAdapter&); // = delete;
+	PacketStreamAdapter& operator=(PacketStreamAdapter&&); // = delete;
+
 	PacketSignal& _emitter;
 };
 
 
 typedef PacketStreamAdapter PacketSource;
-	// For 0.8.x compatibility
+	/// For 0.8.x compatibility
 
 
 //
@@ -81,9 +86,9 @@ typedef PacketStreamAdapter PacketSource;
 
 
 class PacketProcessor: public PacketStreamAdapter
-	// This class is a virtual interface for creating 
-	// PacketStreamAdapters which process that and emit
-	// the IPacket type. 
+	/// This class is a virtual interface for creating 
+	/// PacketStreamAdapters which process that and emit
+	/// the IPacket type. 
 { 
 public:
 	PacketProcessor(PacketSignal& emitter) :
@@ -120,14 +125,14 @@ typedef PacketProcessor IDepacketizer;
 
 
 struct PacketAdapterReference
-	// Provides a reference to a PacketSignal instance.
+	/// Provides a reference to a PacketSignal instance.
 {
 	PacketStreamAdapter* ptr;
 	int order;
 	bool freePointer;	
 	bool syncState;
 
-	PacketAdapterReference(PacketStreamAdapter* ptr = NULL, int order = 0, 
+	PacketAdapterReference(PacketStreamAdapter* ptr = nullptr, int order = 0, 
 		bool freePointer = true, bool syncState = false) : 
 		ptr(ptr), order(order), freePointer(freePointer), 
 		syncState(syncState) {}
@@ -184,26 +189,26 @@ struct PacketStreamState: public State
 //
 
 
-class PacketStream: public PacketStreamAdapter, public Stateful<PacketStreamState>, public abstract::Startable
-	// This class implements a flexible and lightweight packet processing stream.
-	// A PacketStream consists of one or many PacketSources, one or many
-	// PacketProcessors, and one or many delegate receivers.
-	//
-	// This class enables the developer to setup a processor chain in order
-	// to perform arbitrary processing on data packets using interchangeable 
-	// packet adapters, and pump the output to any delegate function, 
-	// or even another PacketStream.
-	//
-	// Note that PacketStream itself inherits from PacketStreamAdapter, 
-	// so a PacketStream be the source of another PacketStream.
-	//
-	// All PacketStream methods are thread-safe, but once the stream is 
-	// running you will not be able to attach or detach stream adapters.
-	//
-	// In order to synchronize output packets with the application event
-	// loop take a look at the SyncPacketQueue class.
-	// For lengthy operations you add an AsyncPacketQueue instance to the 
-	// stream so as not to block the source thread while processing completes.
+class PacketStream: public PacketStreamAdapter, public Stateful<PacketStreamState>, public basic::Startable
+	/// This class implements a flexible and lightweight packet processing stream.
+	/// A PacketStream consists of one or many PacketSources, one or many
+	/// PacketProcessors, and one or many delegate receivers.
+	///
+	/// This class enables the developer to setup a processor chain in order
+	/// to perform arbitrary processing on data packets using interchangeable 
+	/// packet adapters, and pump the output to any delegate function, 
+	/// or even another PacketStream.
+	///
+	/// Note that PacketStream itself inherits from PacketStreamAdapter, 
+	/// so a PacketStream be the source of another PacketStream.
+	///
+	/// All PacketStream methods are thread-safe, but once the stream is 
+	/// running you will not be able to attach or detach stream adapters.
+	///
+	/// In order to synchronize output packets with the application event
+	/// loop take a look at the SyncPacketQueue class.
+	/// For lengthy operations you add an AsyncPacketQueue instance to the 
+	/// stream so as not to block the source thread while processing completes.
 { 
 public:	
 	PacketStream(const std::string& name = ""); 
@@ -223,10 +228,10 @@ public:
 	virtual void close();
 		// Closes the stream and transitions the internal state to Closed.
 
-	virtual void write(char* data, size_t len);
+	virtual void write(char* data, std::size_t len);
 		// Writes data to the stream (nocopy).
 	
-	virtual void write(const char* data, size_t len);
+	virtual void write(const char* data, std::size_t len);
 		// Writes data to the stream (copied).
 
 	virtual void write(IPacket& packet);
@@ -245,7 +250,7 @@ public:
 		// If freePointer is true, the pointer will be deleted when
 		// the stream is closed.
 		// If syncState and the PacketSignal is castable to a 
-		// abstract::Stratable the source's start() and stop() methods
+		// basic::Stratable the source's start() and stop() methods
 		// will be synchronized with the internal stream state.
 	
 	virtual bool detachSource(PacketSignal& source);
@@ -321,7 +326,7 @@ public:
 				else x++;
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	template <class AdapterT>
@@ -337,7 +342,7 @@ public:
 				else x++;
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 protected:
@@ -347,7 +352,7 @@ protected:
 	virtual void onStateChange(PacketStreamState& state, const PacketStreamState& oldState);
 
 protected:
-	friend class GCDeleter<PacketStream>;
+	friend struct std::default_delete/*friend class AsyncDeleter*/<PacketStream>;
 
 	mutable Mutex	_mutex;
 
@@ -380,9 +385,9 @@ class PacketSource: public PacketStreamAdapter//, public InterfaceT
 	// synchronized with the PacketStream state.
 { 
 public:
-	virtual void operator >> (char* data) { emit(RawPacket(data, sizeof(data))); };
-	virtual void operator >> (const char* data) { emit(RawPacket(data, sizeof(data))); };
-	virtual void operator >> (const std::string& str) { emit(RawPacket(str.c_str(), str.length())); };
+	virtual void operator >> (char* data) { emit(rawPacket(data, sizeof(data))); };
+	virtual void operator >> (const char* data) { emit(rawPacket(data, sizeof(data))); };
+	virtual void operator >> (const std::string& str) { emit(rawPacket(str.c_str(), str.length())); };
 	virtual void operator >> (IPacket& packet) { emit(packet); };
 		// Stream operator aliases for emit()
 };
@@ -411,11 +416,11 @@ public:
 		// packet even if it was not compatible.
 		// Stream operator alias for process()
 
-//typedef PacketSource<abstract::Startable> StartablePacketSource;
+//typedef PacketSource<basic::Startable> StartablePacketSource;
 	// A PacketSource which may be started and stopped.
 
 
-//typedef PacketSource<abstract::Runnable> RunnablePacketSource;
+//typedef PacketSource<basic::Runnable> RunnablePacketSource;
 	// A PacketSource which may be run and cancelled.
 	//virtual void parse(IPacket& packet) = 0;
 		// This method performs processing on the given
@@ -425,8 +430,8 @@ public:
 		// packet data must be copied. Copied data can be 
 		// freed directly after the call to emit() when 
 		// dispatching the packet.
-	//write(RawPacket(data, len));, size_t len
-	//write(RawPacket(data, len));
+	//write(rawPacket(data, len));, std::size_t len
+	//write(rawPacket(data, len));
 class PacketParser: public PacketStreamAdapter
 { 
 public:

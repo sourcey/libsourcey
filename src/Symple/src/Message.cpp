@@ -21,7 +21,7 @@
 #include "Sourcey/Util.h"
 //#include "Sourcey/Crypto/Crypto.h"
 #include "Sourcey/Logger.h"
-#include "Poco/Format.h"
+//#include "Poco/Format.h"
 #include "assert.h"
 
 
@@ -72,11 +72,9 @@ IPacket* Message::clone() const
 }
 
 
-bool Message::read(Buffer& buf) 
+bool Message::read(const ConstBuffer& buf) 
 {
-	string root;
-	buf.get(root, buf.available());	
-	return read(root);
+	return read(std::string(bufferCast<const char*>(buf), buf.size())); // refactor
 }
 
 
@@ -89,7 +87,8 @@ bool Message::read(const std::string& root)
 
 void Message::write(Buffer& buf) const 
 {
-	buf.put(json::stringify(*this));
+	std::string data(json::stringify(*this));
+	buf.append(data.c_str(), data.size());
 }
 
 
@@ -175,19 +174,19 @@ json::Value& Message::notes()
 }
 
 
-json::Value Message::data(const string& name) const
+json::Value Message::data(const std::string& name) const
 {
 	return (*this)["data"][name];
 }
 
 
-json::Value& Message::data(const string& name) 
+json::Value& Message::data(const std::string& name) 
 {
 	return (*this)["data"][name];
 }
 
 
-void Message::setType(const string& type) 
+void Message::setType(const std::string& type) 
 {
 	(*this)["type"] = type;
 }
@@ -200,7 +199,7 @@ void Message::setTo(const Address& to)
 	
 
 /*
-void Message::setTo(const string& to) 
+void Message::setTo(const std::string& to) 
 {
 	(*this)["to"] = to;
 }
@@ -214,7 +213,7 @@ void Message::setFrom(const Address& from)
 
 
 /*
-void Message::setFrom(const string& from) 
+void Message::setFrom(const std::string& from) 
 {
 	(*this)["from"] = from;
 }
@@ -228,13 +227,13 @@ void Message::setStatus(int code)
 }
 
 
-void Message::setNote(const string& type, const string& text)
+void Message::setNote(const std::string& type, const std::string& text)
 {
 	clearNotes();
 	addNote(type, text);
 }
 
-void Message::addNote(const string& type, const string& text) 
+void Message::addNote(const std::string& type, const std::string& text) 
 {
 	assert(
 		type == "info" ||
@@ -249,43 +248,43 @@ void Message::addNote(const string& type, const string& text)
 }
 
 
-json::Value& Message::setData(const string& name) 
+json::Value& Message::setData(const std::string& name) 
 {
 	return (*this)["data"][name] = name;
 }
 
 
-void Message::setData(const string& name, const char* data) 
+void Message::setData(const std::string& name, const char* data) 
 {
 	(*this)["data"][name] = data;
 }
 
 
-void Message::setData(const string& name, const string& data) 
+void Message::setData(const std::string& name, const std::string& data) 
 {
 	(*this)["data"][name] = data;
 }
 
 
-void Message::setData(const string& name, const json::Value& data) 
+void Message::setData(const std::string& name, const json::Value& data) 
 {
 	(*this)["data"][name] = data;
 }
 
 
-void Message::setData(const string& name, int data) 
+void Message::setData(const std::string& name, int data) 
 {
 	(*this)["data"][name] = data;
 }
 
 
-void Message::removeData(const string& name) 
+void Message::removeData(const std::string& name) 
 {
 	(*this)["data"].removeMember(name);
 }
 
 
-bool Message::hasData(const string& name)
+bool Message::hasData(const std::string& name)
 {
 	return (*this)["data"].isMember(name);
 }

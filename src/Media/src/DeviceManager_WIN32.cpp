@@ -19,36 +19,12 @@
 
 
 #include "Sourcey/Media/DeviceManager_WIN32.h"
-
-#include "Poco/UnicodeConverter.h"
+#include "Sourcey/Platform.h"
 
 #include "RtAudio.h"
 
-#include <atlbase.h>
-#include <dbt.h>
-#include <strmif.h>  // must come before ks.h
-#include <ks.h>
-#include <ksmedia.h>
-#define INITGUID  // For PKEY_AudioEndpoint_GUID
-#include <mmdeviceapi.h>
-#include <mmsystem.h>
-#include <functiondiscoverykeys_devpkey.h>
-#include <uuids.h>
-
-/*
-#include "talk/base/win32.h"  // ToUtf8
-#include "talk/base/win32window.h"
-#include "talk/base/logging.h"
-#include "talk/base/stringutils.h"
-#include "talk/base/thread.h"
-#include "Sourcey/Media/mediacommon.h"
-#ifdef HAVE_LOGITECH_HEADERS
-#include "third_party/logitech/files/logitechquickcam.h"
-#endif
-*/
-
-#define ARRAY_SIZE(x) (static_cast<int>((sizeof(x)/sizeof(x[0]))))
-
+#include <windows.h>
+#include <dshow.h>
 
 using namespace std; 
 
@@ -64,16 +40,16 @@ IDeviceManager* DeviceManagerFactory::create()
 
 
 static const char* kFilteredAudioDevicesName[] = {
-	nil,
+	NULL,
 };
 static const char* const kFilteredVideoDevicesName[] =  {
 	"Google Camera Adapter",   // Google magiccams
 	"Asus virtual Camera",     // Bad Asus desktop virtual cam
 	"Bluetooth Video",         // Bad Sony viao bluetooth sharing driver
-	nil,
+	NULL,
 };
 static const char kUsbDevicePathPrefix[] = "\\\\?\\usb";
-static bool getDevices(const CLSID& catid, vector<Device>& out);
+static bool getDevicesWin32(const CLSID& catid, vector<Device>& out);
 
 
 // ---------------------------------------------------------------------
@@ -83,14 +59,14 @@ Win32DeviceManager::Win32DeviceManager() :
 	_needCoUninitialize(false) 
 {
 	RtDeviceManager::initialize();
-	traceL("DeviceManager") << "Creating" << endl;
+	traceL("DeviceManager") << "create" << endl;
 	//setWatcher(new Win32DeviceWatcher(this));
 }
 
 
 Win32DeviceManager::~Win32DeviceManager() 
 {
-	traceL("DeviceManager") << "Destroying" << endl;
+	traceL("DeviceManager") << "destroy" << endl;
 	RtDeviceManager::uninitialize();
 	if (initialized()) {
 		uninitialize();
@@ -100,10 +76,10 @@ Win32DeviceManager::~Win32DeviceManager()
 
 bool Win32DeviceManager::initialize() 
 {
-	traceL("DeviceManager") << "Initializing" << endl;
+	traceL("DeviceManager") << "initializing" << endl;
 	if (!initialized()) {
-		HRESULT hr = CoInitializeEx(nil, COINIT_MULTITHREADED);
-		//HRESULT hr = CoInitialize(nil);
+		HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+		//HRESULT hr = CoInitialize(nullptr);
 		_needCoUninitialize = SUCCEEDED(hr);
 		if (FAILED(hr)) {
 			if (hr != RPC_E_CHANGED_MODE) {
@@ -119,14 +95,14 @@ bool Win32DeviceManager::initialize()
 		}
 		setInitialized(true);
 	}
-	traceL("DeviceManager") << "Initializing: OK" << endl;
+	traceL("DeviceManager") << "initializing: OK" << endl;
 	return true;
 }
 
 
 void Win32DeviceManager::uninitialize() 
 {
-	traceL("DeviceManager") << "Uninitializing" << endl;
+	traceL("DeviceManager") << "uninitializing" << endl;
 
 	if (initialized()) {
 		if (watcher())
@@ -137,7 +113,7 @@ void Win32DeviceManager::uninitialize()
 		}
 		setInitialized(false);
 	}
-	traceL("DeviceManager") << "Uninitializing: OK" << endl;
+	traceL("DeviceManager") << "uninitializing: OK" << endl;
 }
 
 
@@ -219,11 +195,12 @@ bool Win32DeviceManager::getDefaultAudioOutputDevice(Device& device)
 bool Win32DeviceManager::getVideoCaptureDevices(vector<Device>& devices) 
 {
 	devices.clear();
-	if (!getDevices(CLSID_VideoInputDeviceCategory, devices)) {
+	if (!getDevicesWin32(CLSID_VideoInputDeviceCategory, devices)) 
 		return false;
-	}
 	return filterDevices(devices, kFilteredVideoDevicesName);
 }
+
+#define ARRAY_SIZE(x) (static_cast<int>((sizeof(x)/sizeof(x[0]))))
 
 
 bool Win32DeviceManager::getDefaultVideoCaptureDevice(Device& device) 
@@ -248,9 +225,141 @@ bool Win32DeviceManager::getDefaultVideoCaptureDevice(Device& device)
 }
 
 
+namespace internal { // Windows API stuff
+
+	#pragma comment(lib, "strmiids")
+
+
+	HRESULT enumerateDevices(REFGUID category, IEnumMoniker **ppEnum)
+	{
+		// Create the System Device Enumerator.
+		ICreateDevEnum *pDevEnum;
+		HRESULT hr = CoCreateInstance(CLSID_SystemDeviceEnum, NULL,  
+			CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pDevEnum));
+
+		if (SUCCEEDED(hr))
+		{
+			// Create an enumerator for the category.
+			hr = pDevEnum->CreateClassEnumerator(category, ppEnum, 0);
+			if (hr == S_FALSE)
+			{
+				hr = VFW_E_NOT_FOUND;  // The category is empty. Treat as an error.
+			}
+			pDevEnum->Release();
+		}
+		return hr;
+	}
+
+
+	void getDeviceInformation(IEnumMoniker *pEnum, REFGUID catid, vector<Device>& devices)
+	{
+		IMoniker *pMoniker = NULL;
+
+		while (pEnum->Next(1, &pMoniker, NULL) == S_OK)
+		{
+			IPropertyBag *pPropBag;
+			HRESULT hr = pMoniker->BindToStorage(0, 0, IID_PPV_ARGS(&pPropBag));
+			if (FAILED(hr))
+			{
+				pMoniker->Release();
+				continue;  
+			} 
+
+			VARIANT var;
+			VariantInit(&var);
+			std::string name_str, path_str;
+
+			// Get description or friendly name.
+			hr = pPropBag->Read(L"FriendlyName", &var, 0);
+			if (FAILED(hr))
+			{
+				hr = pPropBag->Read(L"Description", &var, 0);
+			}
+			if (SUCCEEDED(hr))
+			{
+				//printf("%S\n", var.bstrVal);
+				name_str = scy::toUtf8(var.bstrVal);
+				VariantClear(&var); 
+			}
+
+			hr = pPropBag->Read(L"DevicePath", &var, 0);
+			if (SUCCEEDED(hr))
+			{
+				// The device path is not intended for display.
+				//printf("Device path: %S\n", var.bstrVal);
+				path_str = scy::toUtf8(var.bstrVal);
+				VariantClear(&var); 
+			}
+		
+			devices.push_back(
+				Device(catid == CLSID_VideoInputDeviceCategory ? "video" : "audio",
+				(int)devices.size(), name_str, path_str));
+
+			pPropBag->Release();
+			pMoniker->Release();
+		}
+	}
+
+} // namespace internal
+
+
+bool getDevicesWin32(REFGUID catid, vector<Device>& devices) 
+{	
+	// Selecting a Capture Device
+	// http://msdn.microsoft.com/en-us/library/windows/desktop/dd377566(v=vs.85).aspx
+
+	IEnumMoniker *pEnum;
+    HRESULT hr = internal::enumerateDevices(catid, &pEnum);
+    if (SUCCEEDED(hr))
+    {
+        internal::getDeviceInformation(pEnum, catid, devices);
+        pEnum->Release();
+		return true;
+    }
+	return false;
+}
+
+
+} } // namespace scy::av
+
+
+/*
+ * libjingle
+ * Copyright 2004 Google Inc.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *  1. Redistributions of source code must retain the above copyright notice,
+ *     this list of conditions and the following disclaimer.
+ *  2. Redistributions in binary form must reproduce the above copyright notice,
+ *     this list of conditions and the following disclaimer in the documentation
+ *     and/or other materials provided with the distribution.
+ *  3. The name of the author may not be used to endorse or promote products
+ *     derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+ * EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+
+/*
 bool getDevices(const CLSID& catid, vector<Device>& devices) 
-{
+{	
+	assert(0 && "fixme"); // http://cboard.cprogramming.com/windows-programming/114294-getting-list-usb-devices-listed-system.html
+	return false;
+
+
 	HRESULT hr;
+
 
 	// CComPtr is a scoped pointer that will be auto released when going
 	// out of scope. CoUninitialize must not be called before the
@@ -264,24 +373,22 @@ bool getDevices(const CLSID& catid, vector<Device>& devices)
 	}
 
 	// Only enum devices if CreateClassEnumerator returns S_OK. If there are no
-	// devices available, S_FALSE will be returned, but enumMk will be nil.
+	// devices available, S_FALSE will be returned, but enumMk will be nullptr.
 	if (hr == S_OK) {
 		CComPtr<IMoniker> mk;
-		while (cam_enum->Next(1, &mk, nil) == S_OK) {
+		while (cam_enum->Next(1, &mk, nullptr) == S_OK) {
 			CComPtr<IPropertyBag> bag;
-			if (SUCCEEDED(mk->BindToStorage(nil, nil,
+			if (SUCCEEDED(mk->BindToStorage(nullptr, nullptr,
 				__uuidof(bag), reinterpret_cast<void**>(&bag)))) {
 					CComVariant name, path;
-					string type_str, name_str, path_str;
+					std::string type_str, name_str, path_str;
 					if (SUCCEEDED(bag->Read(L"FriendlyName", &name, 0)) &&
 						name.vt == VT_BSTR) {
-							Poco::UnicodeConverter::toUTF8(name.bstrVal, name_str);
-							//name_str = talk_base::ToUtf8(name.bstrVal);
+							name = scy::toUtf8(name.bstrVal);
 							// Get the device id if one exists.
 							if (SUCCEEDED(bag->Read(L"DevicePath", &path, 0)) &&
 								path.vt == VT_BSTR) {
-									Poco::UnicodeConverter::toUTF8(path.bstrVal, path_str);
-									//path_str = talk_base::ToUtf8(path.bstrVal);
+									path = scy::toUtf8(path.bstrVal);
 							}
 							if (catid == CLSID_VideoInputDeviceCategory)
 								type_str = "video";
@@ -290,12 +397,13 @@ bool getDevices(const CLSID& catid, vector<Device>& devices)
 							devices.push_back(Device(type_str, (int)devices.size(), name_str, path_str));
 					}
 			}
-			mk = nil;
+			mk = nullptr;
 		}
 	}
 
 	return true;
 }
+*/
 
 
 /*
@@ -309,7 +417,7 @@ bool Win32DeviceManager::getAudioDevices(bool input, vector<Device>& devs)
 {
 	devs.clear();
 
-	//if (talk_base::IsWindowsVistaOrLater()) {
+	//if (scy::IsWindowsVistaOrLater()) {
 	if (util::isWindowsVistaOrLater()) {
 		if (!getCoreAudioDevices(input, devs))
 			return false;
@@ -329,8 +437,8 @@ HRESULT getStringProp(IPropertyStore* bag, PROPERTYKEY key, string* out) {
 	HRESULT hr = bag->GetValue(key, &var);
 	if (SUCCEEDED(hr)) {
 		if (var.pwszVal)
-			Poco::UnicodeConverter::toUTF8(var.pwszVal, *out);
-			//*out = talk_base::ToUtf8(var.pwszVal);
+			Poco::toUtf::toUTF8(var.pwszVal, *out);
+			//*out = scy::toUtf8(var.pwszVal);
 		else
 			hr = E_FAIL;
 	}
@@ -350,7 +458,7 @@ HRESULT getDeviceFromImmDevice(IMMDevice* device, Device& out) {
 	}
 
 	// Get the endpoint's name and guid.
-	string name, guid;
+	std::string name, guid;
 	hr = getStringProp(props, PKEY_Device_FriendlyName, &name);
 	if (SUCCEEDED(hr)) {
 		hr = getStringProp(props, PKEY_AudioEndpoint_GUID, &guid);
@@ -369,7 +477,7 @@ bool getCoreAudioDevices(bool input, vector<Device>& devs)
 	HRESULT hr = S_OK;
 	CComPtr<IMMDeviceEnumerator> enumerator;
 
-	hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), nil, CLSCTX_ALL,
+	hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_ALL,
 		__uuidof(IMMDeviceEnumerator), reinterpret_cast<void**>(&enumerator));
 	if (SUCCEEDED(hr)) {
 		CComPtr<IMMDeviceCollection> devices;
@@ -391,7 +499,7 @@ bool getCoreAudioDevices(bool input, vector<Device>& devs)
 						break;
 					
 					// Get an endpoint interface for the current device
-					IMMEndpoint* endpoint = nil;
+					IMMEndpoint* endpoint = nullptr;
 					hr = device->QueryInterface(__uuidof(IMMEndpoint), (void**)&endpoint);
 					if (FAILED(hr))
 						break;
@@ -445,8 +553,8 @@ bool getWaveDevices(bool input, vector<Device>& devs)
 			WAVEINCAPS caps;
 			if (waveInGetDevCaps(i, &caps, sizeof(caps)) == MMSYSERR_NOERROR &&
 				caps.wChannels > 0) {					
-					string name;
-					Poco::UnicodeConverter::toUTF8(caps.szPname, name);
+					std::string name;
+					Poco::toUtf::toUTF8(caps.szPname, name);
 					devs.push_back(Device("audioin", name, i));
 			}
 		}
@@ -457,9 +565,9 @@ bool getWaveDevices(bool input, vector<Device>& devs)
 			WAVEOUTCAPS caps;
 			if (waveOutGetDevCaps(i, &caps, sizeof(caps)) == MMSYSERR_NOERROR &&
 				caps.wChannels > 0) {			
-					string name;
+					std::string name;
 					devs.push_back(Device("audioout", name, i));
-					//devs.push_back(Device(talk_base::ToUtf8(caps.szPname), i));
+					//devs.push_back(Device(scy::toUtf8(caps.szPname), i));
 			}
 		}
 	}
@@ -472,15 +580,15 @@ bool getWaveDevices(bool input, vector<Device>& devs)
 Win32DeviceWatcher::Win32DeviceWatcher(Win32DeviceManager* manager)
 	: DeviceWatcher(manager),
 	manager_(manager),
-	audio_notify_(nil),
-	video_notify_(nil) {
+	audio_notify_(nullptr),
+	video_notify_(nullptr) {
 }
 
 Win32DeviceWatcher::~Win32DeviceWatcher() {
 }
 
 bool Win32DeviceWatcher::start() {
-	if (!Create(nil, _T("libjingle Win32DeviceWatcher Window"),
+	if (!Create(nullptr, _T("libjingle Win32DeviceWatcher Window"),
 		0, 0, 0, 0, 0, 0)) {
 			return false;
 	}
@@ -502,9 +610,9 @@ bool Win32DeviceWatcher::start() {
 
 void Win32DeviceWatcher::stop() {
 	UnregisterDeviceNotification(video_notify_);
-	video_notify_ = nil;
+	video_notify_ = nullptr;
 	UnregisterDeviceNotification(audio_notify_);
-	audio_notify_ = nil;
+	audio_notify_ = nullptr;
 	Destroy();
 }
 
@@ -541,34 +649,3 @@ bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 		return false;
 }
 */
-
-
-} } // namespace scy::av
-
-
-/*
- * libjingle
- * Copyright 2004 Google Inc.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  1. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above copyright notice,
- *     this list of conditions and the following disclaimer in the documentation
- *     and/or other materials provided with the distribution.
- *  3. The name of the author may not be used to endorse or promote products
- *     derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */

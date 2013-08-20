@@ -18,10 +18,10 @@
 #include "Sourcey/HTTP/Util.h"
 #include "Sourcey/HTTP/Packetizers.h"
 #include "Sourcey/Util/Base64PacketEncoder.h"
-#include "Sourcey/Util/StreamContainers.h"
+#include "Sourcey/Util/StreamCollection.h"
 
 #include "Sourcey/TURN/client/TCPClient.h"
-#include "Sourcey/Containers.h"
+#include "Sourcey/Collection.h"
 
 #include <string>
 #include <vector>
@@ -87,12 +87,12 @@ public:
 
 		try
 		{	
-			connection().send(packet.data(), packet.size(), http::WebSocket::FRAME_BINARY);
+			connection().send(packet.data(), packet.size(), http::WebSocket::Binary);
 			fpsCounter.tick();		
 		}
-		catch (Exception& exc)
+		catch (std::exception&/*Exception&*/ exc)
 		{
-			errorL("StreamingRequestHandler", this) << "Error: " << exc.message() << std::endl;
+			errorL("StreamingRequestHandler", this) << "Error: " << exc.what()/*message()*/ << std::endl;
 			connection().close();
 		}
 	}

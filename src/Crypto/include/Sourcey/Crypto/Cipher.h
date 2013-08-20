@@ -133,7 +133,7 @@ public:
 	template<typename T>
 	void setKey(const T& key) 
 	{
-		assert(key.size() == keySize());
+		assert(int(key.size()) == keySize());
 		_key.clear();
 		for (T::const_iterator it = key.begin(); it != key.end(); ++it)
 			_key.push_back(static_cast<unsigned char>(*it));
@@ -143,7 +143,7 @@ public:
 	template<typename T>
 	void setIV(const T& iv) 
 	{
-		assert(iv.size() == ivSize());
+		assert(int(iv.size()) == ivSize());
 		_iv.clear();
 		for (T::const_iterator it = iv.begin(); it != iv.end(); ++it)
 			_iv.push_back(static_cast<unsigned char>(*it));

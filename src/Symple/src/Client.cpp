@@ -73,19 +73,19 @@ Client::Client(net::SocketBase* socket, const Client::Options& options, uv::Loop
 	_options(options),
 	_announceStatus(500)
 {
-	log("trace") << "Creating" << endl;
+	log("trace") << "creating" << endl;
 }
 
 
 Client::~Client() 
 {
-	log("trace") << "Destroying" << endl;
+	log("trace") << "destroying" << endl;
 }
 
 
 void Client::connect()
 {
-	log("trace") << "Connecting" << endl;		
+	log("trace") << "connecting" << endl;		
 	{
 		//ScopedLock lock(_mutex);
 		assert(!_options.user.empty());
@@ -101,36 +101,37 @@ void Client::connect()
 
 void Client::close()
 {
-	log("trace") << "Closing" << endl;
+	log("trace") << "closing" << endl;
 	sockio::Client::close();
 }
 
 
 int Client::send(Message& m, bool ack)
 {	
-	assert(isOnline());
+	//assert(isOnline()); // may be announcing
 	m.setFrom(ourPeer().address());
 
 	if (m.to().id() == m.from().id())
-		throw Exception("Cannot send message with matching sender and recipient.");
+		throw std::runtime_error("Cannot send message with matching sender and recipient.");
 
 	if (!m.valid())
-		throw Exception("Cannot send invalid message.");	
+		throw std::runtime_error("Cannot send invalid message.");	
 	
 	//Message m(message);
 	//if (m.from() != ourPeer().address())
-	//	throw Exception("Cannot send message from another peer.");
-	//log("trace") << "Sending Message: " 
-	//	<< message.id() << ":\n" 
-	//	<< json::stringify(message, true) << endl;
+	//	throw std::runtime_error("Cannot send message from another peer.");
+	log("trace") << "sending message: " 
+		<< m.id() << ":\n" 
+		<< json::stringify(m, true) << endl;
 	return sockio::Client::send(m, ack);
 }
 
 
-int Client::send(const string data, bool ack)
+int Client::send(const std::string& data, bool ack)
 {
 	Message m;
-	m.read(data);
+	if (!m.read(data))
+		throw std::runtime_error("Cannot send malformed message.");
 	return send(data, ack);
 }
 
@@ -151,7 +152,7 @@ int Client::respond(Message& m, bool ack)
 
 void Client::createPresence(Presence& p)
 {
-	log("trace") << "Creating Presence" << endl;
+	log("trace") << "creating presence" << endl;
 
 	Peer& peer = ourPeer();
 	UpdatePresenceData.emit(this, peer);
@@ -161,7 +162,7 @@ void Client::createPresence(Presence& p)
 
 int Client::sendPresence(bool probe)
 {
-	log("trace") << "Broadcasting Presence" << endl;
+	log("trace") << "broadcasting presence" << endl;
 
 	Presence p;
 	createPresence(p);
@@ -172,7 +173,7 @@ int Client::sendPresence(bool probe)
 
 int Client::sendPresence(const Address& to, bool probe)
 {
-	log("trace") << "Sending Presence" << endl;
+	log("trace") << "sending presence" << endl;
 	
 	Presence p;
 	createPresence(p);
@@ -213,9 +214,8 @@ string Client::ourID() const
 Peer& Client::ourPeer()
 {	
 	//ScopedLock lock(_mutex);
-	log("trace") << "Getting Our Peer: " << _ourID << endl;
 	if (_ourID.empty())
-		throw Exception("No active peer session is available.");
+		throw std::runtime_error("No active peer session is available.");
 	return *_roster.get(_ourID, true);
 }
 
@@ -229,7 +229,7 @@ Client& Client::operator >> (Message& message)
 	
 int Client::announce()
 {
-	log("trace") << "Announcing" << endl;
+	log("trace") << "announcing" << endl;
 
 	json::Value data;
 	{
@@ -241,7 +241,7 @@ int Client::announce()
 		data["type"]	= _options.type;
 	}	
 	sockio::Packet p("announce", data, true);
-	sockio::Transaction* txn = createTransaction(p);
+	auto txn = createTransaction(p);
 	txn->StateChange += delegate(this, &Client::onAnnounce);
 	return txn->send();
 }
@@ -251,8 +251,7 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 {
 	log("trace") << "Announce Response: " << state.toString() << endl;
 	
-	sockio::Transaction* transaction1 = reinterpret_cast<sockio::Transaction*>(sender);
-	sockio::Transaction* transaction = static_cast<sockio::Transaction*>(sender);
+	auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
 	switch (state.id()) {	
 	case TransactionState::Success:
 		try 
@@ -265,11 +264,11 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 			Announce.emit(this, _announceStatus);
 
 			if (_announceStatus != 200)
-				throw Exception(data["message"].asString()); //"Announce Error: " + 
+				throw std::runtime_error(data["message"].asString()); //"Announce Error: " + 
 
 			_ourID = data["data"]["id"].asString(); //Address();
 			if (_ourID.empty())
-				throw Exception("Invalid server response.");
+				throw std::runtime_error("Invalid server response.");
 
 			// Set our local peer data from the response or fail.
 			_roster.update(data["data"], true);
@@ -280,10 +279,10 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 			// Broadcast a presence probe to our network.
 			sendPresence(true);
 		}
-		catch (Exception& exc)
+		catch (std::exception&/*Exception&*/ exc)
 		{
 			// Set the error message and close the connection.
-			setError(exc.message());
+			setError(exc.what()/*message()*/);
 		}
 		break;		
 
@@ -327,7 +326,7 @@ void Client::onPacket(sockio::Packet& packet)
 		json::Value data;
 		json::Reader reader;
 		if (reader.parse(packet.message(), data)) {
-			string type(data["type"].asString());
+			std::string type(data["type"].asString());
 			log("trace") << "Symple packet created: " << type << endl;
 			if (type == "message") {
 				Message m(data);
@@ -461,7 +460,7 @@ void Client::onError()
 //}
 //
 //
-//int Client::send(const string data)
+//int Client::send(const std::string& data)
 //{
 //	assert(isOnline());
 //	return sockio::Socket::send(sockio::Packet::Message, data, false);
@@ -533,7 +532,7 @@ void Client::onError()
 //		data["type"]	= _options.type;
 //	}	
 //	sockio::Packet p("announce", data, true);
-//	sockio::Transaction* txn = new sockio::Transaction(_runner, *this, p, 1, 5000);
+//	auto txn = new sockio::Transaction(_runner, *this, p, 1, 5000);
 //	txn->StateChange += delegate(this, &Client::onAnnounce);
 //	return txn->send();
 //}
@@ -543,7 +542,7 @@ void Client::onError()
 //{
 //	traceL() << "[smpl::Client] Announce Response: " << state.toString() << endl;
 //	
-//	sockio::Transaction* transaction = reinterpret_cast<sockio::Transaction*>(sender);
+//	auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
 //	switch (state.id()) {	
 //	case TransactionState::Success:
 //		try 
@@ -556,11 +555,11 @@ void Client::onError()
 //			Announce.emit(this, _announceStatus);
 //
 //			if (_announceStatus != 200)
-//				throw Exception(data["message"].asString()); //"Announce Error: " + 
+//				throw std::runtime_error(data["message"].asString()); //"Announce Error: " + 
 //
 //			_ourID = data["data"]["id"].asString(); //Address();
 //			if (_ourID.empty())
-//				throw Exception("Invalid server response.");
+//				throw std::runtime_error("Invalid server response.");
 //
 //			// Set our local peer data from the response or fail.
 //			_roster.update(data["data"], true);
@@ -571,10 +570,10 @@ void Client::onError()
 //			// Broadcast a presence probe to our network.
 //			sendPresence(true);
 //		}
-//		catch (Exception& exc)
+//		catch (std::exception&/*Exception&*/ exc)
 //		{
 //			// Set the error message and close the connection.
-//			setError(exc.message());
+//			setError(exc.what()/*message()*/);
 //		}
 //		break;		
 //
@@ -628,7 +627,7 @@ void Client::onError()
 //			return true; // continue propagation
 //		}
 //		
-//		string type(data["type"].asString());
+//		std::string type(data["type"].asString());
 //		traceL() << "[smpl::Client] Packet Created: Symple Type: " << type << endl;
 //		if (type == "message") {
 //			Message m(data);
@@ -692,9 +691,9 @@ void Client::onError()
 //Peer& Client::ourPeer() //bool whiny
 //{	
 //	Mutex::ScopedLock lock(_mutex);
-//	traceL() << "[Client:" << this << "] Getting Our Peer: " << _ourID << endl;
+//	traceL() << "[Client: " << this << "] Getting Our Peer: " << _ourID << endl;
 //	if (_ourID.empty())
-//		throw Exception("No active peer session is available.");
+//		throw std::runtime_error("No active peer session is available.");
 //	return *_roster.get(_ourID, true);
 //}
 //

@@ -22,14 +22,18 @@
 
 
 #include "Sourcey/UV/UVPP.h"
-#include "Sourcey/Net/TCPBase.h"
+#include "Sourcey/Net/TCPSocket.h"
 #include "Sourcey/Net/Socket.h"
+#include "Sourcey/Net/Stream.h"
 #include "Sourcey/Net/Address.h"
 #include "Sourcey/Net/Types.h"
 
 
 namespace scy {
 namespace net {
+
+	
+class TCPBase; 
 
 
 class TCPSocket: public net::Socket
@@ -57,6 +61,81 @@ public:
 	
 	TCPBase& base() const;
 		/// Returns the SocketBase for this socket.
+};
+
+
+//
+// TCP Base
+//
+
+
+class TCPBase: public Stream, public net::SocketBase
+{
+public:	
+	TCPBase(uv::Loop& loop = uv::defaultLoop()); 
+	
+	virtual bool shutdown();
+	virtual void close();
+	
+	virtual void connect(const net::Address& peerAddress);
+	virtual int send(const char* data, int len, int flags = 0);
+	virtual int send(const char* data, int len, const net::Address& peerAddress, int flags = 0);
+	
+	virtual void bind(const net::Address& address, unsigned flags = 0);
+	virtual void listen(int backlog = 64);	
+	
+	virtual void acceptConnection();
+
+	virtual void setNoDelay(bool enable);
+	virtual void setKeepAlive(int enable, unsigned int delay);
+			
+	void setError(const Error& err);
+	const Error& error() const;
+
+	virtual bool closed() const;
+		/// Returns true if the native socket 
+		/// handle is closed.
+	
+	net::Address address() const;
+		/// Returns the IP address and port number of the socket.
+		
+	net::Address peerAddress() const;
+		/// Returns the IP address and port number of the peer socket.
+
+	net::TransportType transport() const;
+		/// Returns the TCP transport protocol.
+	
+	bool initialized() const;
+		/// Returns true if the underlying socket is initialized.
+
+	bool connected() const;
+		/// Returns true if the underlying socket is connected.
+
+	SOCKET sockfd() const;
+		/// Returns the socket descriptor for the 
+		/// underlying native socket.
+	
+#ifdef _WIN32
+	void setSimultaneousAccepts(bool enable);
+#endif
+	
+	Signal<const net::TCPSocket&> AcceptConnection;
+	
+public:
+	virtual void onConnect(int status);
+	virtual void onAcceptConnection(uv_stream_t* handle, int status);
+	virtual void onRead(const char* data, int len);
+	virtual void onRecv(const MutableBuffer& buf);
+	virtual void onError(const Error& error);
+	virtual void onClose();
+		
+protected:
+	virtual ~TCPBase();
+	virtual void init();
+
+protected:
+	uv_connect_t _connectReq;
+	//std::string _debugOutput;
 };
 
 

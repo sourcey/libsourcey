@@ -33,26 +33,26 @@ namespace sockio {
 Transaction::Transaction(Client& client, long timeout) : 
 	PacketTransaction<Packet>(timeout, 0, client.loop()), client(client)
 {
-	debugL("SocketIOTransaction", this) << "Creating" << endl;
+	debugL("SocketIOTransaction", this) << "create" << endl;
 }
 
 
 Transaction::Transaction(Client& client, const Packet& request, long timeout) : 
 	PacketTransaction<Packet>(request, timeout, 0, client.loop()), client(client)
 {
-	debugL("SocketIOTransaction", this) << "Creating" << endl;
+	debugL("SocketIOTransaction", this) << "creating" << endl;
 }
 
 
 Transaction::~Transaction() 
 {
-	debugL("SocketIOTransaction", this) << "Destroying" << endl;	
+	debugL("SocketIOTransaction", this) << "destroying" << endl;	
 }
 
 
 bool Transaction::send()
 {
-	debugL("SocketIOTransaction", this) << "Sending" << endl;	
+	debugL("SocketIOTransaction", this) << "sending: " << _request.toString() << endl;	
 	_request.setAck(true);	
 	client += packetDelegate(this, &Transaction::onPotentialResponse, 100);
 	if (client.send(_request))
@@ -75,7 +75,7 @@ bool Transaction::checkResponse(const Packet& packet)
 
 void Transaction::onResponse()
 {
-	debugL("SocketIOTransaction", this) << "Complete" << endl;
+	debugL("SocketIOTransaction", this) << "success" << endl;
 	client -= packetDelegate(this, &Transaction::onPotentialResponse);	
 	PacketTransaction<Packet>::onResponse();
 }

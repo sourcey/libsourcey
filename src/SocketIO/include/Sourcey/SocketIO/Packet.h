@@ -16,7 +16,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef SOURCEY_SocketIO_Packet_H
 #define SOURCEY_SocketIO_Packet_H
 
@@ -86,10 +85,12 @@ public:
 	void setMessage(const std::string& message);
 	void setAck(bool flag);
 
-	bool read(Buffer& buf);
+	bool read(const ConstBuffer& buf);
 	void write(Buffer& buf) const;
-
+	
 	virtual size_t size() const;
+
+	bool valid() const;
 
 	std::string typeString() const;
 	std::string toString() const;

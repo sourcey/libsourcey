@@ -27,8 +27,8 @@ int main(int argc, char** argv)
 
 		VideoAnalyzer analyzer;
 
-		string ifile = "d:/Harold Kumar 3 Christmas tablet.mp4";
-		string ofile = "output.csv";
+		std::string ifile = "d:/Harold Kumar 3 Christmas tablet.mp4";
+		std::string ofile = "output.csv";
 
 		char o = 0;
 		while (o != 'Q') 
@@ -112,7 +112,7 @@ int bitsPerSample = 16;
 int numChannels = 2;
 struct WaveformInfo
 {
-	string channel;
+	std::string channel;
 	double time;
 	double min;
 	double max;
@@ -338,7 +338,7 @@ public:
 		/*	
 		WaveformOutput app;
 		//string input = "d:/test.wav"; //("GetAccount");test.mp4
-		string input = "d:/Harold Kumar 3 Christmas tablet.mp4"; //("GetAccount");test.mp4
+		std::string input = "d:/Harold Kumar 3 Christmas tablet.mp4"; //("GetAccount");test.mp4
 		//string input = "C:/movies/Fear And Loathing In Las Vegas 1998 720p x264 BRRip GokU61[Z Warriors Release]/Fear And Loathing In Las Vegas 1998 720p x264 BRRip GokU61[Z Warriors Release].mp4"; //("GetAccount");test.mp4
 		
 		app.start(input, "data.csv");

@@ -70,10 +70,10 @@ void Client::connect()
 	reset();
 
 	if (_host.empty() || !_port)
-		throw Exception("The SocketIO server address is not set.");
+		throw std::runtime_error("The SocketIO server address is not set.");
 
 	if (_socket.base().closed())
-		throw Exception("The SocketIO client is already connected.");
+		throw std::runtime_error("The SocketIO client is already connected.");
 		
 	setState(this, ClientState::Connecting);
 
@@ -112,7 +112,7 @@ void Client::sendHandshakeRequest()
 {
 	//ScopedLock lock(_mutex);
 		
-	log("trace") << "Sending handshake request" << endl;	
+	log("trace") << "send handshake request" << endl;	
 	
 	ostringstream url;
 	url << (_socket.transport() == net::SSLTCP ? "https://" : "http://")
@@ -126,6 +126,7 @@ void Client::sendHandshakeRequest()
 	
 	http::ClientConnection* conn = http::createConnection(url.str());
 	conn->Complete += delegate(this, &Client::onHandshakeResponse);
+	conn->setReadStream(new std::stringstream);
 	conn->request().setMethod("POST");
 	conn->request().setKeepAlive(false);
 	conn->request().setContentLength(0);
@@ -137,30 +138,27 @@ void Client::sendHandshakeRequest()
 void Client::onHandshakeResponse(void* sender, const http::Response& response)
 {
 	auto conn = reinterpret_cast<http::ClientConnection*>(sender);
-	Buffer& buf = conn->incomingBuffer();
-	//assert(buf.available() == response.getContentLength());
-		
+
+	std::string body = conn->readStream<std::stringstream>()->str();		
 	log("trace") << "SocketIO handshake response:" 
-		<< "\n\tStatus: " << conn->response().getStatus()
-		<< "\n\tReason: " << conn->response().getReason()
-		<< "\n\tResponse: " << buf
+		<< "\n\tStatus: " << response.getStatus()
+		<< "\n\tReason: " << response.getReason()
+		<< "\n\tResponse: " << body
 		<< endl;
 		
 	// The server can respond in three different ways:
-	// 401 Unauthorized: If the server refuses to authorize the client to connect, 
+	// 401 NotAuthorized: If the server refuses to authorize the client to connect, 
 	//		based on the supplied information (eg: Cookie header or custom query components).
 	// 503 Service Unavailable: If the server refuses the connection for any reason (eg: overload).
 	// 200 OK: The handshake was successful.
-	if (conn->response().getStatus() != 200) {
-		setError(util::format("SocketIO handshake failed: HTTP Error: %d %s", 
-			static_cast<int>(conn->response().getStatus()), conn->response().getReason().c_str()));
+	if (response.getStatus() != http::StatusCode::OK) {
+		setError(util::format("SocketIO handshake failed: HTTP error: %d %s", 
+			static_cast<int>(response.getStatus()), response.getReason().c_str()));
 		return;
 	}
 
 	// Parse the response
-	buf.skipToNextLine(); // skip to chunk payload
-	string body = buf.toString();
-	StringVec respData = util::split(body, ':', 4);
+	std::vector<std::string> respData = util::split(body, ':', 4);
 	if (respData.size() < 4) {
 		setError(body.empty() ? 
 			"Invalid SocketIO handshake response." : util::format(
@@ -209,7 +207,7 @@ void Client::onHandshakeResponse(void* sender, const http::Response& response)
 	//_socket.request().setHost("localhost");
 
 
-int Client::sendConnect(const string& endpoint, const string& query)
+int Client::sendConnect(const std::string& endpoint, const std::string& query)
 {
 	// (1) Connect
 	// Only used for multiple sockets. Signals a connection to the endpoint. 
@@ -221,7 +219,7 @@ int Client::sendConnect(const string& endpoint, const string& query)
 	// Example:
 	// 
 	// 1::/test?my=param
-	string out = "1::";
+	std::string out = "1::";
 	if (!endpoint.empty())
 		out += "/" + endpoint;
 	if (!query.empty())
@@ -230,14 +228,14 @@ int Client::sendConnect(const string& endpoint, const string& query)
 }
 
 
-int Client::send(sockio::Packet::Type type, const string& data, bool ack)
+int Client::send(sockio::Packet::Type type, const std::string& data, bool ack)
 {
 	Packet packet(type, data, ack);
 	return send(packet);
 }
 
 
-int Client::send(const string& data, bool ack)
+int Client::send(const std::string& data, bool ack)
 {
 	Packet packet(data, ack);
 	return send(packet);
@@ -247,6 +245,8 @@ int Client::send(const string& data, bool ack)
 int Client::send(const json::Value& data, bool ack)
 {
 	Packet packet(data, ack);
+
+	log("trace") << "sending message: " << packet.toString() << endl;
 	return send(packet);
 }
 
@@ -257,7 +257,7 @@ int Client::send(const sockio::Packet& packet)
 }
 
 
-int Client::emit(const string& event, const json::Value& args, bool ack)
+int Client::emit(const std::string& event, const json::Value& args, bool ack)
 {
 	Packet packet(event, args, ack);
 	return send(packet);
@@ -272,7 +272,7 @@ Transaction* Client::createTransaction(const sockio::Packet& request, long timeo
 
 int Client::sendHeartbeat()
 {
-	log("trace") << "Sending heartbeat" << endl;
+	log("trace") << "sending heartbeat" << endl;
 	return socket().send("2::", 3);
 }
 
@@ -400,7 +400,7 @@ void Client::onSocketRecv(void*, net::SocketPacket& packet)
 	log("trace") << "On socket recv: " << packet.size() << endl;
 
 	sockio::Packet pkt;
-	if (pkt.read(packet.buffer))
+	if (pkt.read(constBuffer(packet.data(), packet.size())))
 		onPacket(pkt);
 	else
 		log("warn") << "Failed to parse incoming SocketIO packet." << endl;	
@@ -426,8 +426,8 @@ void Client::onHeartBeatTimer(void*)
 		try {
 			connect();
 		} 
-		catch (Exception& exc) {			
-			log("error") << "Reconnection attempt failed: " << exc.message() << endl;
+		catch (std::exception& exc/*Exception& exc*/) {			
+			log("error") << "Reconnection attempt failed: " << exc.what()/*message()*/ << endl;
 		}	
 	}
 }
@@ -458,18 +458,18 @@ void Client::onHeartBeatTimer(void*)
 		<< endl;
 		
 	// The server can respond in three different ways:
-	// 401 Unauthorized: If the server refuses to authorize the client to connect, 
+	// 401 NotAuthorized: If the server refuses to authorize the client to connect, 
 	//		based on the supplied information (eg: Cookie header or custom query components).
 	// 503 Service Unavailable: If the server refuses the connection for any reason (eg: overload).
 	// 200 OK: The handshake was successful.
 	if (response.getStatus() != 200)
-		throw Exception(Poco::format("SocketIO handshake failed: HTTP Error: %d %s", 
+		throw std::runtime_error(Poco::format("SocketIO handshake failed: HTTP Error: %d %s", 
 			static_cast<int>(response.getStatus()), response.getReason()));
 
 	// Parse the response response
-	StringVec respData = util::split(response.body.str(), ':', 4);
+	std::vector<std::string> respData = util::split(response.body.str(), ':', 4);
 	if (respData.size() < 4)
-		throw Exception(response.empty() ? 
+		throw std::runtime_error(response.empty() ? 
 			"Invalid SocketIO handshake response." : Poco::format(
 			"Invalid SocketIO handshake response: %s", response.body.str()));
 	
@@ -489,7 +489,7 @@ void Client::onHeartBeatTimer(void*)
 	}
 
 	if (!wsSupported)
-		throw Exception("The SocketIO server does not support WebSockets.");
+		throw std::runtime_error("The SocketIO server does not support WebSockets.");
 	*/
 
 
@@ -558,7 +558,7 @@ void Client::onError()
 	//}
 
 	//if (!_socket)
-	//	throw Exception("The SocketIO WebSocket pointer is NULL.");
+	//	throw std::runtime_error("The SocketIO WebSocket pointer is NULL.");
 
 	//std::string uri("http://" + _serverAddr.toString() + "/socket.io/1/");	
 	//if (_socket.transport() == Net::SSLTCP)
@@ -613,7 +613,7 @@ void Client::onError()
 //	assert(_serverAddr.valid());
 //
 //	if (isActive())
-//		throw Exception("The SocketIO Socket is already active.");
+//		throw std::runtime_error("The SocketIO Socket is already active.");
 //
 //	_uri = "ws://" + _serverAddr.toString() + "/socket.io/1/";	
 //	if (_secure)
@@ -653,12 +653,12 @@ void Client::onError()
 //	http::Response& response = transaction.response();
 //
 //	// The server can respond in three different ways:
-//    // 401 Unauthorized: If the server refuses to authorize the client to connect, 
+//    // 401 NotAuthorized: If the server refuses to authorize the client to connect, 
 //	//		based on the supplied information (eg: Cookie header or custom query components).
 //    // 503 Service Unavailable: If the server refuses the connection for any reason (eg: overload).
 //	// 200 OK: The handshake was successful.
 //	if (!transaction.send())
-//		throw Exception(format("SocketIO handshake failed: HTTP Error: %d %s", 
+//		throw std::runtime_error(format("SocketIO handshake failed: HTTP Error: %d %s", 
 //			static_cast<int>(response.getStatus()), response.getReason()));		
 //
 //	traceL() << "[sockio::Socket] Handshake Response:" 
@@ -668,12 +668,12 @@ void Client::onError()
 //		<< endl;
 //
 //	//if (status != 200)
-//	//	throw Exception(format("SocketIO handshake failed with %d", status));	
+//	//	throw std::runtime_error(format("SocketIO handshake failed with %d", status));	
 //
 //	// Parse the response response
-//	StringVec respData = util::split(response.body.str(), ':', 4);
+//	std::vector<std::string> respData = util::split(response.body.str(), ':', 4);
 //	if (respData.size() < 4)
-//		throw Exception(response.empty() ? 
+//		throw std::runtime_error(response.empty() ? 
 //			"Invalid SocketIO handshake response." : format(
 //			"Invalid SocketIO handshake response: %s", response.body.str()));
 //	
@@ -693,7 +693,7 @@ void Client::onError()
 //	}
 //
 //	if (!wsSupported)
-//		throw Exception("The SocketIO server does not support WebSockets");
+//		throw std::runtime_error("The SocketIO server does not support WebSockets");
 //
 //	return true;
 //}
@@ -712,7 +712,7 @@ void Client::onError()
 //}
 //
 //
-//int SocketBase::sendConnect(const string& endpoint, const string& query)
+//int SocketBase::sendConnect(const std::string& endpoint, const std::string& query)
 //{
 //	Mutex::ScopedLock lock(_mutex);
 //	// (1) Connect
@@ -724,7 +724,7 @@ void Client::onError()
 //	// Example:
 //	// 
 //	// 1::/test?my=param
-//	string out = "1::";
+//	std::string out = "1::";
 //	if (!endpoint.empty())
 //		out += "/" + endpoint;
 //	if (!query.empty())
@@ -733,14 +733,14 @@ void Client::onError()
 //}
 //
 //
-//int SocketBase::send(sockio::Packet::Type type, const string& data, bool ack)
+//int SocketBase::send(sockio::Packet::Type type, const std::string& data, bool ack)
 //{
 //	Packet packet(type, data, ack);
 //	return send(packet);
 //}
 //
 //
-//int SocketBase::send(const string& data, bool ack)
+//int SocketBase::send(const std::string& data, bool ack)
 //{
 //	Packet packet(data, ack);
 //	return send(packet);
@@ -760,7 +760,7 @@ void Client::onError()
 //}
 //
 //
-//int SocketBase::emit(const string& event, const json::Value& args, bool ack)
+//int SocketBase::emit(const std::string& event, const json::Value& args, bool ack)
 //{
 //	Packet packet(event, args, ack);
 //	return send(packet);
@@ -780,8 +780,8 @@ void Client::onError()
 //		try {
 //			connect();
 //		} 
-//		catch (Exception& exc) {			
-//			errorL() << "[sockio::Socket] Reconnection attempt failed: " << exc.message() << endl;
+//		catch (std::exception& exc/*Exception& exc*/) {			
+//			errorL() << "[sockio::Socket] Reconnection attempt failed: " << exc.what()/*message()*/ << endl;
 //		}	
 //	}
 //}
@@ -825,8 +825,11 @@ void Client::onError()
 
 
 	/*
+	//BitReader reader(body.c_str(), body.length());
+	//reader.skipToNextLine(); // skip to chunk payload
+	//string body(reader.current(), reader.available()); // = writer.toString();
 	int status = 503;
-	string response;
+	std::string response;
 	
 	// HTTPS
 	if (_secure) {
@@ -889,11 +892,11 @@ void Client::onError()
 	// Response
 	char buffer[1024];
 	int size = socket.receiveBytes(buffer, sizeof(buffer));	
-	string response(buffer, size);
+	std::string response(buffer, size);
 	size_t pos = response.find(" "); pos++;
 	int status = util::strtoi<UInt32>(response.substr(pos, response.find(" ", pos) + 1));
 	pos = response.find("\r\n\r\n", pos); pos += 4;
-	string body(response.substr(pos, response.length()));
+	std::string body(response.substr(pos, response.length()));
 	socket.shutdownSend();
 
 	debugL() << "[sockio::Socket] Handshake:" 
@@ -904,5 +907,5 @@ void Client::onError()
 		<< "\n\tBody: " << body
 		<< endl;
 
-	string response = transaction.response().body.str();
+	std::string response = transaction.response().body.str();
 		*/

@@ -26,10 +26,10 @@
 
 namespace scy {
 
-
+	
+// Implements a thread-safe queue container.
 template<typename T>
 class Queue
-	// Implements a thread-safe queue container.
 {
 private:
     std::queue<T> _queue;

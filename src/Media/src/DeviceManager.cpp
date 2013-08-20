@@ -49,7 +49,7 @@ Device::Device() :
 }
 
 
-Device::Device(const string& type, int id, const string& name, const string& guid, bool isDefault) : 
+Device::Device(const std::string& type, int id, const std::string& name, const std::string& guid, bool isDefault) : 
 	type(type), id(id), name(name), guid(guid), isDefault(isDefault)
 {
 }
@@ -68,7 +68,7 @@ void Device::print(ostream& os)
 // ----------------------------------------------------------------------------
 //
 DeviceManager::DeviceManager() : 
-	_watcher(nil), 
+	_watcher(nullptr), 
 	_initialized(false) 
 {
 }
@@ -131,7 +131,7 @@ bool DeviceManager::getAudioOutputDevices(vector<Device>& devices)
 }
 
 
-bool DeviceManager::getAudioInputDevice(Device& out, const string& name, int id) 
+bool DeviceManager::getAudioInputDevice(Device& out, const std::string& name, int id) 
 {
 	return getAudioDevice(true, out, name, id);
 }
@@ -143,7 +143,7 @@ bool DeviceManager::getAudioInputDevice(Device& out, int id)
 }
 
 
-bool DeviceManager::getAudioOutputDevice(Device& out, const string& name, int id) 
+bool DeviceManager::getAudioOutputDevice(Device& out, const std::string& name, int id) 
 {
 	return getAudioDevice(false, out, name, id);
 }
@@ -172,7 +172,7 @@ bool DeviceManager::getVideoCaptureDevices(vector<Device>& devices)
 
 
 /*
-bool DeviceManager::getAudioInputDevice(Device& out, const string& name, int id) 
+bool DeviceManager::getAudioInputDevice(Device& out, const std::string& name, int id) 
 {
 	// If the name is empty, return the default device.
 	if (name.empty())
@@ -184,7 +184,7 @@ bool DeviceManager::getAudioInputDevice(Device& out, const string& name, int id)
 }
 
 
-bool DeviceManager::getAudioOutputDevice(Device& out, const string& name, int id) 
+bool DeviceManager::getAudioOutputDevice(Device& out, const std::string& name, int id) 
 {
 	// If the name is empty, return the default device.
 	if (name.empty())
@@ -205,11 +205,11 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, int id)
 }
 
 
-bool DeviceManager::getVideoCaptureDevice(Device& out, const string& name, int id) 
+bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name, int id) 
 {
 	// If the name is empty, return the default device.
 	if (name.empty() || name == kDefaultDeviceName) {
-		//infoL() << "Creating default VideoCapturer" << endl;
+		//infoL() << "create default VideoCapturer" << endl;
 		return getDefaultVideoCaptureDevice(out);
 	}
 
@@ -218,9 +218,9 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const string& name, int i
 		matchNameAndID(devices, out, name, id);
 	
 	/*
-	for (vector<Device>::const_iterator it = devices.begin(); it != devices.end(); ++it) {
+	for (std::vector<Device>::const_iterator it = devices.begin(); it != devices.end(); ++it) {
 		if (name == it->name) {
-			infoL() << "Creating VideoCapturer for " << name << endl;
+			infoL() << "create VideoCapturer for " << name << endl;
 			out = *it;
 			return true;
 		}
@@ -230,7 +230,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const string& name, int i
 	// with the filename. The LmiMediaEngine will know to use a FileVideoCapturer
 	// for these devices.
 	if (talk_base::Filesystem::IsFile(name)) {
-		infoL() << "Creating FileVideoCapturer" << endl;
+		infoL() << "create FileVideoCapturer" << endl;
 		*out = FileVideoCapturer::CreateFileVideoCapturerDevice(name);
 		return true;
 	}
@@ -254,6 +254,7 @@ bool DeviceManager::getAudioDevices(bool input, vector<Device>& devs)
 	}
 	return true;
 #else
+	(void)input;
 	return false;
 #endif
 }
@@ -272,7 +273,7 @@ bool DeviceManager::getDefaultVideoCaptureDevice(Device& device)
 }
 
 
-bool DeviceManager::getAudioDevice(bool input, Device& out, const string& name, int id) 
+bool DeviceManager::getAudioDevice(bool input, Device& out, const std::string& name, int id) 
 {
 	// If the name is empty, return the default device id.
 	if (name.empty() || name == kDefaultDeviceName) {
@@ -336,7 +337,7 @@ bool DeviceManager::getDefaultAudioOutputDevice(Device& device)
 }
 
 
-bool DeviceManager::shouldDeviceBeIgnored(const string& deviceName, const char* const exclusionList[]) 
+bool DeviceManager::shouldDeviceBeIgnored(const std::string& deviceName, const char* const exclusionList[]) 
 {
 	// If exclusionList is empty return directly.
 	if (!exclusionList)
@@ -360,7 +361,7 @@ bool DeviceManager::filterDevices(vector<Device>& devices, const char* const exc
 	//	return false;
 	//}
 
-	for (vector<Device>::iterator it = devices.begin();
+	for (std::vector<Device>::iterator it = devices.begin();
 		it != devices.end(); ) {
 			if (shouldDeviceBeIgnored(it->name, exclusionList)) {
 				it = devices.erase(it);
@@ -382,10 +383,10 @@ bool DeviceManager::matchID(vector<Device>& devices, Device& out, int id)
 }
 
 
-bool DeviceManager::matchNameAndID(vector<Device>& devices, Device& out, const string& name, int id)
+bool DeviceManager::matchNameAndID(vector<Device>& devices, Device& out, const std::string& name, int id)
 {
 	bool ret = false;
-	for (size_t i = 0; i < devices.size(); ++i) {
+	for (int i = 0; i < static_cast<int>(devices.size()); ++i) {
 		if (devices[i].name == name) {
 			// The first device matching the given name will be returned,
 			// but we will try and match the given ID as well.
@@ -426,17 +427,17 @@ void DeviceManager::print(ostream& ost)
 {
 	std::vector<Device> devs;
 	getAudioInputDevices(devs);
-	ost << "Audio input devices:" << endl;
+	ost << "Audio input devices: " << endl;
 	for (size_t i = 0; i < devs.size(); ++i)
 		devs[i].print(ost);
 
 	getAudioOutputDevices(devs);
-	ost << "Audio output devices:" << endl;
+	ost << "Audio output devices: " << endl;
 	for (size_t i = 0; i < devs.size(); ++i)
 		devs[i].print(ost);
 
 	getVideoCaptureDevices(devs);
-	ost << "Video capture devices:" << endl;
+	ost << "Video capture devices: " << endl;
 	for (size_t i = 0; i < devs.size(); ++i)
 		devs[i].print(ost);
 }

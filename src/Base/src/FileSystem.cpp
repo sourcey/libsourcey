@@ -17,39 +17,40 @@
 //
 
 
-#include "Sourcey/FileSystem.h"
+#include "Sourcey/Filesystem.h"
+#include "Sourcey/Logger.h"
+#include "Sourcey/Util.h"
 #include "Sourcey/UV/UVPP.h"
+#include <sstream>
 #include <fstream>
-
-#if defined(WIN32) && defined(UNICODE)
+#include <memory>
+#include <algorithm> 
+#if defined(WIN32) && defined(SOURCEY_UNICODE)
 #include <locale>
 #include <codecvt>
 #endif
-
-//#define ALLOWABLE_DIRECTORY_DELIMITERS "/\\"
-//#define DIRECTORY_DELIMITER '\\'
-//#define DIRECTORY_DELIMITER_STRING "\\"
-//#define ALLOWABLE_DIRECTORY_DELIMITERS "/"
-//#define DIRECTORY_DELIMITER '/'
-//#define DIRECTORY_DELIMITER_STRING "/"
 
 
 namespace scy {
 namespace fs {
 
-
+	
+static char* separatorWin = "\\";
+static char* separatorUnix = "/";
 #ifdef WIN32
-	char fs::separator = '\\';
-	static const char* delimiters = "/\\";
+	char fs::delimiter = '\\';
+	char* fs::separator = separatorWin;
+	static const char* sepPattern = "/\\";
 #else
-	char* fs::separator = '/';
-	static const char* delimiters = "/";
+	char fs::delimiter = '/';
+	char* fs::separator = separatorUnix;
+	static const char* sepPattern = "/";
 #endif
 
 
 std::string filename(const std::string& path)
 {
-	size_t dirp = path.find_last_of(fs::delimiters /*ALLOWABLE_DIRECTORY_DELIMITERS*/);
+	size_t dirp = path.find_last_of(fs::sepPattern);
 	if (dirp == std::string::npos) return path;
 	return path.substr(dirp + 1);
 }
@@ -57,7 +58,7 @@ std::string filename(const std::string& path)
 
 std::string dirname(const std::string& path)
 {
-	size_t dirp = path.find_last_of(fs::delimiters /*ALLOWABLE_DIRECTORY_DELIMITERS*/);
+	size_t dirp = path.find_last_of(fs::sepPattern);
 	if (dirp == std::string::npos) return "";
 	return path.substr(0, dirp);
 }
@@ -69,7 +70,7 @@ std::string basename(const std::string& path)
 	if (dotp == std::string::npos) 
 		return path;
 
-	size_t dirp = path.find_last_of(fs::delimiters /*ALLOWABLE_DIRECTORY_DELIMITERS*/);
+	size_t dirp = path.find_last_of(fs::sepPattern);
 	if (dirp != std::string::npos && dotp < dirp)
 		return path;
 
@@ -84,7 +85,7 @@ std::string extname(const std::string& path, bool includeDot)
 		return "";
 
 	// Ensure the dot was not part of the pathname
-	size_t dirp = path.find_last_of(fs::delimiters /*ALLOWABLE_DIRECTORY_DELIMITERS*/);
+	size_t dirp = path.find_last_of(fs::sepPattern);
 	if (dirp != std::string::npos && dotp < dirp)
 		return "";
 
@@ -94,54 +95,146 @@ std::string extname(const std::string& path, bool includeDot)
 
 bool exists(const std::string& path)
 {
-	std::ifstream ifs;
-	ifs.open(path.c_str(), std::ios::in);
-	bool res = ifs.is_open();
-	ifs.close();
-	return res;
-}
-
-
-bool readdir(const std::string& dir, std::vector<std::string>& res)
-{	
-	uv_fs_t req;
-    if (uv_fs_readdir(uv_default_loop(), &req, dir.c_str(), 0, nil)) {
-        char *namebuf = static_cast<char*>(req.ptr);
-        int nnames = req.result;                       
-        for (int i = 0; i < nnames; i++) {
-            std::string name(namebuf);
-            res.push_back(name);                            
-#ifdef _DEBUG
-            namebuf += name.length();
-            assert(*namebuf == '\0');
-            namebuf += 1;
+#ifdef WIN32
+	struct _stat s;
+	if (_stat(path.c_str(), &s) == 0)
 #else
-            namebuf += name.length() + 1;
+	struct stat s;
+	if (stat(path.c_str(), &s) == 0)
 #endif
-        }
-    }
-    uv_fs_req_cleanup(&req);
-    return !res.empty();
+		return true;
+	return false;
 }
 
 
 bool isdir(const std::string& path)
 {
-	size_t dirp = path.find_last_of(fs::delimiters);
-	return (dirp != std::string::npos && dirp == path.length() - 1);
+#ifdef WIN32
+	struct _stat s;
+	_stat(path.c_str(), &s);
+#else
+	struct stat s;
+	stat(path.c_str(), &s);
+#endif
+	// s.st_mode & S_IFDIR == directory
+	// s.st_mode & S_IFREG == file
+	return (s.st_mode & S_IFDIR) == S_IFDIR;
+}
+
+
+namespace internal {
+		
+	struct FSReq
+	{
+		FSReq() {}
+		~FSReq() { uv_fs_req_cleanup(&req); }
+		FSReq(const FSReq& req);
+		FSReq& operator=(const FSReq& req);
+		uv_fs_t req;
+	};
+
+#define FSapi(func, ...)										\
+	FSReq wrap;													\
+	int err = uv_fs_ ## func(uv_default_loop(),					\
+		&wrap.req, __VA_ARGS__, nullptr);						\
+	if (err < 0) 												\
+		uv::throwError(std::string("Filesystem error: ") +		\
+			#func + std::string(" failed"), err);				\
+	
+} // namespace internal
+
+
+void readdir(const std::string& path, std::vector<std::string>& res)
+{	
+	internal::FSapi(readdir, path.c_str(), 0)
+		
+    char *namebuf = static_cast<char*>(wrap.req.ptr);
+    int nnames = wrap.req.result;                       
+    for (int i = 0; i < nnames; i++) 
+	{
+        std::string name(namebuf);
+        res.push_back(name);                            
+#ifdef _DEBUG
+        namebuf += name.length();
+        assert(*namebuf == '\0');
+        namebuf += 1;
+#else
+        namebuf += name.length() + 1;
+#endif
+    }
+}
+
+
+void mkdir(const std::string& path, int mode)
+{
+	internal::FSapi(mkdir, path.c_str(), mode)
+}
+
+
+void mkdirr(const std::string& path, int mode)
+{
+	std::string current;
+	std::string level;
+	std::istringstream istr(fs::normalize(path));
+
+	while (std::getline(istr, level, fs::delimiter))
+	{
+		if (level.empty()) continue;
+		current += level;
+		
+#ifdef WIN32		
+		if (level.at(level.length() - 1) == ':') {
+			current += fs::separator;
+			continue; // skip drive letter
+		}
+#endif
+		// create current level
+		if (!fs::exists(current))
+			mkdir(current.c_str(), mode); // create or throw
+				
+		current += fs::separator;
+	}
+}
+
+
+void rmdir(const std::string& path)
+{
+	internal::FSapi(rmdir, path.c_str())
+}
+
+
+void unlink(const std::string& path)
+{
+	internal::FSapi(unlink, path.c_str())
+}
+
+
+void rename(const std::string& path, const std::string& target)
+{
+	internal::FSapi(rename, path.c_str(), target.c_str())
+}
+
+
+std::string normalize(const std::string& path)
+{	
+#ifdef WIN32	
+	return util::replace(path, separatorUnix, separatorWin);
+#else
+	return util::replace(path, separatorWin, separatorUnix);  // probably redundant...
+#endif
 }
 
 
 std::string transcode(const std::string& path)
 {	
-#if defined(WIN32) && defined(UNICODE)
+#if defined(WIN32) && defined(SOURCEY_UNICODE)
 	std::wstring_convert<std::codecvt<char16_t,char,std::mbstate_t>,char16_t> convert;
 	std::u16string u16s = convert.from_bytes(path);
 	std::wstring uniPath(u16s.begin(), u16s.end()); // copy data across, w_char is 16 bit on windows so this should be OK
-	DWORD len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, uniPath.c_str(), static_cast<int>(uniPath.length()), NULL, 0, NULL, NULL);
+	DWORD len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, uniPath.c_str(), static_cast<int>(uniPath.length()), nullptr, 0, nullptr, nullptr);
 	if (len > 0) {
 		std::unique_ptr<char[]> buffer(new char[len]);
-		DWORD rc = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, uniPath.c_str(), static_cast<int>(uniPath.length()), buffer.get(), static_cast<int>(len), NULL, NULL);
+		DWORD rc = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, uniPath.c_str(), static_cast<int>(uniPath.length()), buffer.get(), static_cast<int>(len), nullptr, nullptr);
 		if (rc) {
 			return std::string(buffer.get(), len);
 		}
@@ -149,6 +242,23 @@ std::string transcode(const std::string& path)
 #endif
 	return path;
 }
+
+
+void addsep(std::string& path)
+{
+	if (!path.empty() && path.at(path.length() - 1) != fs::separator[0])
+		path.append(fs::separator, 1);
+}
+
+
+void addnode(std::string& path, const std::string& node)
+{
+	fs::addsep(path);
+	path += node;
+}
+
+
+} } // namespace scy::fs
 
 
 //
@@ -205,7 +315,7 @@ void StatWatcher::stop(const FunctionCallbackInfo<Value>& args) {
   if (onstop_sym.IsEmpty()) {
     onstop_sym = String::New("onstop");
   }
-  MakeCallback(wrap->handle(node_isolate), onstop_sym, 0, NULL);
+  MakeCallback(wrap->handle(node_isolate), onstop_sym, 0, nullptr);
   wrap->stop();
 }
 
@@ -226,9 +336,9 @@ static void ReadDir(const FunctionCallbackInfo<Value>& args) {
   String::Utf8Value path(args[0]);
 
   if (args[1]->IsFunction()) {
-    ASYNC_CALL(readdir, args[1], *path, 0 //flags/)
+    AFSapi(readdir, args[1], *path, 0 //flags/)
   } else {
-    SYNC_CALL(readdir, *path, *path, 0 /flags/)
+    FSapi(readdir, *path, *path, 0 /flags/)
 
     char *namebuf = static_cast<char*>(SYNC_REQ.ptr);
     int nnames = req_wrap.req.result;
@@ -252,4 +362,43 @@ static void ReadDir(const FunctionCallbackInfo<Value>& args) {
 */
 
 
-} } // namespace scy::fs
+	//int err = uv_fs_readdir(uv_default_loop(), &req, path.c_str(), 0, nullptr);
+    //if (err == 0) uv::throwError(err, "Cannot create directory: " + path);
+    //uv_fs_req_cleanup(&req);
+
+    //}
+    //uv_fs_req_cleanup(&req);
+    //return !res.empty();
+
+	//uv_fs_t req;
+	//int err = uv_fs_mkdir(uv_default_loop(), &req, path.c_str(), mode, nullptr);
+    //uv_fs_req_cleanup(&req);
+    //if (err != 0) uv::throwError(err, "Cannot create directory: " + path);
+
+	//uv_fs_t req;
+	//int err = uv_fs_rmdir(uv_default_loop(), &req, path.c_str(), nullptr);
+   // uv_fs_req_cleanup(&req);
+    //if (err != 0) uv::throwError(err, "Cannot remove directory: " + path);
+	
+
+		/*
+		if (s.st_mode & S_IFDIR)
+		{
+			//it's a directory
+		}
+		else if(s.st_mode & S_IFREG)
+		{
+			//it's a file
+		}
+		else
+		{
+			//something else
+		}
+		*/
+	/*
+	std::ifstream ifs;
+	ifs.open(path.c_str(), std::ios::in);
+	bool res = ifs.is_open();
+	ifs.close();
+	return res;
+	*/

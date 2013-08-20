@@ -15,7 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
-
+// This file uses functions from POCO C++ Libraries (license below)
+//
 
 #include "Sourcey/Net/SSLManager.h"
 #include "Sourcey/Net/SSLContext.h"
@@ -45,8 +46,8 @@ void SSLManager::shutdown()
 	PrivateKeyPassphraseRequired.clear();
 	ClientVerificationError.clear();
 	ServerVerificationError.clear();
-	_ptrDefaultServerContext = 0;
-	_ptrDefaultClientContext = 0;
+	_defaultServerContext = nullptr;
+	_defaultClientContext = nullptr;
 }
 
 
@@ -64,40 +65,39 @@ SSLManager& SSLManager::instance()
 
 void SSLManager::initializeServer(SSLContext::Ptr ptrContext)
 {
-	_ptrDefaultServerContext     = ptrContext;
+	_defaultServerContext = ptrContext;
 }
 
 
 void SSLManager::initializeClient(SSLContext::Ptr ptrContext)
 {
-	_ptrDefaultClientContext     = ptrContext;
+	_defaultClientContext = ptrContext;
 }
 
 
 SSLContext::Ptr SSLManager::defaultServerContext()
 {
 	Mutex::ScopedLock lock(_mutex);
-	return _ptrDefaultServerContext;
+	return _defaultServerContext;
 }
 
 
 SSLContext::Ptr SSLManager::defaultClientContext()
 {
 	Mutex::ScopedLock lock(_mutex);
-	return _ptrDefaultClientContext;
+	return _defaultClientContext;
 }
 
 
 int SSLManager::verifyCallback(bool server, int ok, X509_STORE_CTX* pStore)
 {
-	if (!ok)
-	{
+	if (!ok) {
 		X509* pCert = X509_STORE_CTX_get_current_cert(pStore);
 		crypto::X509Certificate x509(pCert, true);
 		int depth = X509_STORE_CTX_get_error_depth(pStore);
 		int err = X509_STORE_CTX_get_error(pStore);
 		std::string error(X509_verify_cert_error_string(err));
-		VerificationErrorArgs args(x509, depth, err, error);
+		VerificationErrorDetails args(x509, depth, err, error);
 		if (server)
 			SSLManager::instance().ServerVerificationError.emit(&SSLManager::instance(), args);
 		else
@@ -137,11 +137,11 @@ void uninitializeSSL()
 
 
 //
-// VerificationErrorArgs
+// Verification Error Details
 //
 
 
-VerificationErrorArgs::VerificationErrorArgs(const crypto::X509Certificate& cert, int errDepth, int errNum, const std::string& errMsg):
+VerificationErrorDetails::VerificationErrorDetails(const crypto::X509Certificate& cert, int errDepth, int errNum, const std::string& errMsg):
 	_cert(cert),
 	_errorDepth(errDepth),
 	_errorNumber(errNum),
@@ -151,14 +151,13 @@ VerificationErrorArgs::VerificationErrorArgs(const crypto::X509Certificate& cert
 }
 
 
-VerificationErrorArgs::~VerificationErrorArgs()
+VerificationErrorDetails::~VerificationErrorDetails()
 {
 }
 
 
 
 } } // namespace scy::net
-
 
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

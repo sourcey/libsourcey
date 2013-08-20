@@ -34,7 +34,7 @@ struct MediaPacket: public RawPacket
 {
 	double time;
 
-	MediaPacket(char* data = nil,
+	MediaPacket(char* data = nullptr,
 				int size = 0,
 				double time = scy::getProcessTime()) :
 		RawPacket(data, size),
@@ -59,7 +59,7 @@ struct VideoPacket: public MediaPacket
 	int width;
 	int height;
 
-	VideoPacket(char* data = nil,
+	VideoPacket(char* data = nullptr,
 				int size = 0,
 				int width = 0,
 				int height = 0,
@@ -85,7 +85,7 @@ struct VideoPacket: public MediaPacket
 
 struct AudioPacket: public MediaPacket 
 {
-	AudioPacket(char* data = nil,
+	AudioPacket(char* data = nullptr,
 				int size = 0,
 				double time = scy::getProcessTime()) : //(UInt64)clock() / CLOCKS_PER_SEC
 		MediaPacket(data, size, time) {};
@@ -188,14 +188,14 @@ struct VideoCodec
 	std::string toString() const {			
 		std::ostringstream ss;
 		ss  << "VideoCodec["
-			<< " Codec:" << codec
-			<< " Width:" << width
-			<< " Height:" << height
-			<< " FPS:" << fps
-			<< " Quality:" << quality
-			<< " Pixel Format:" << pixelFmt
-			<< " Bit Rate:" << bitRate
-			<< " Enabled:" << enabled
+			<< " Codec: " << codec
+			<< " Width: " << width
+			<< " Height: " << height
+			<< " FPS: " << fps
+			<< " Quality: " << quality
+			<< " Pixel Format: " << pixelFmt
+			<< " Bit Rate: " << bitRate
+			<< " Enabled: " << enabled
 			<< "]";
 		return ss.str();
 	}
@@ -244,11 +244,11 @@ struct AudioCodec
 	std::string toString() const {			
 		std::ostringstream ss;
 		ss  << "AudioCodec["
-			<< " Codec:" << codec
-			<< " Bit Rate:" << bitRate
-			<< " Channels:" << channels
-			<< " Sample Rate:" << sampleRate
-			<< " Enabled:" << enabled
+			<< " Codec: " << codec
+			<< " Bit Rate: " << bitRate
+			<< " Channels: " << channels
+			<< " Sample Rate: " << sampleRate
+			<< " Enabled: " << enabled
 			<< "]";
 		return ss.str();
 	}

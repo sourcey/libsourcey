@@ -80,8 +80,8 @@ protected:
 //
 
 
+/// TODO: Use atomics
 class MutexState: public State
-	/// TODO: Use atomics
 { 
 public:
 	MutexState(ID id = 0);
@@ -113,10 +113,10 @@ public:
 	virtual bool change(ID id);
 	virtual bool canChange(ID id);	
 	virtual void onChange(ID id, ID prev);
-
+	
+	/// Fired when the state changes to signal 
+	/// the new and previous states.
 	Signal2<const ID&, const ID&> Change;
-		// Fired when the state changes to signal 
-		// the new and previous states.
 
 protected:	
 	virtual void set(ID id);
@@ -128,10 +128,10 @@ protected:
 //
 
 
+/// This class implements a simple state machine.
+/// T should be a derived State type.
 template<typename T>
 class Stateful
-	// This class implements a simple state machine.
-	// T should be a derived State type.
 {
 public:	
 	Stateful()
@@ -141,9 +141,9 @@ public:
 	virtual ~Stateful()
 	{ 	
 	}
-
+	
+	/// Fires when the state changes.
 	Signal2<T&, const T&> StateChange;
-		// Fires when the state changes.
 	
 	virtual bool stateEquals(unsigned int id) const
 	{ 	
@@ -160,23 +160,23 @@ public:
 	virtual const T state() const { return _state; }
 
 protected:
+	/// Override to handle pre state change logic.
+	/// Return false to prevent state change.
 	virtual bool canChangeState(unsigned int id) 
-		// Override to handle pre state change logic.
-		// Return false to prevent state change.
 	{
 		if (_state.id() != id) 
 			return true;
 		return false;
 	}
 	
-	virtual void onStateChange(T& state, const T& oldState) 
-		// Override to handle post state change logic.
+	/// Override to handle post state change logic.
+	virtual void onStateChange(T& /* state */, const T& /* oldState */) 
 	{
 	}
-
+	
+	/// Sets the state and sends the state signal if
+	/// the state change was successful.
 	virtual bool setState(void* sender, unsigned int id, const std::string& message = "") 
-		// Sets the state and sends the state signal if
-		// the state change was successful.
 	{ 
 		if (canChangeState(id)) {
 			T oldState = _state;

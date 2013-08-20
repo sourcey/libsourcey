@@ -35,7 +35,7 @@ StreamManager::StreamManager(bool freeClosedStreams) :
 
 StreamManager::~StreamManager() 
 {
-	log("debug") << "Destroying" << endl;
+	log("debug") << "destroy" << endl;
 	closeAll();
 }
 
@@ -44,16 +44,17 @@ void StreamManager::closeAll()
 {
 	Mutex::ScopedLock lock(_mutex);
 	
-	log("debug") << "Closing all streams: " << _map.size() << endl;	
+	log("debug") << "close all streams: " << _map.size() << endl;	
 	StreamManager::Map::iterator it = _map.begin();
 	StreamManager::Map::iterator it2;
 	while (it != _map.end()) {
 		it2 = it++;
 		(*it2).second->StateChange -= delegate(this, &StreamManager::onStreamStateChange);
 		(*it2).second->close();
-		if (_freeClosedStreams)
-			StreamManager::Deleter::func((*it2).second);
-			//delete (*it2).second;
+		if (_freeClosedStreams) {
+			StreamManager::Deleter func;
+			func((*it2).second);
+		}
 		_map.erase(it2);
 	}
 }
@@ -67,17 +68,17 @@ bool StreamManager::addStream(PacketStream* stream, bool whiny)
 }
 
 
-PacketStream* StreamManager::getStream(const string& name, bool whiny) 
+PacketStream* StreamManager::getStream(const std::string& name, bool whiny) 
 {
 	return Manager::get(name, whiny);
 }
 
 
-bool StreamManager::closeStream(const string& name, bool whiny) 
+bool StreamManager::closeStream(const std::string& name, bool whiny) 
 {
 	assert(!name.empty());
 
-	log("debug") << "Closing Stream: " << name << endl;
+	log("debug") << "close stream: " << name << endl;
 	PacketStream* stream = get(name, whiny);
 	if (stream) {
 		stream->close();
@@ -108,21 +109,21 @@ void StreamManager::onAdd(PacketStream* stream)
 
 	// Receive callbacks after all other listeners 
 	// so we can delete the stream when it closes.
-	log("debug") << "Stream Added: " << stream->name() << endl;
+	log("debug") << "stream added: " << stream->name() << endl;
 	stream->StateChange += delegate(this, &StreamManager::onStreamStateChange, -1);
 }
 
 
 void StreamManager::onRemove(PacketStream* stream)
 {
-	log("debug") << "Stream Removed: " << stream->name() << endl;
+	log("debug") << "stream removed: " << stream->name() << endl;
 	stream->StateChange -= delegate(this, &StreamManager::onStreamStateChange);
 }
 
 
 void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state, const PacketStreamState&)
 {
-	log("debug") << "Stream State Changed: " << state << endl;
+	log("debug") << "stream state change: " << state << endl;
 	
 	// Cantch stream closed state and free it if necessary
 	if (state.equals(PacketStreamState::Closed)) {
@@ -130,10 +131,10 @@ void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state, 
 		stream->StateChange -= delegate(this, &StreamManager::onStreamStateChange);
 		bool success = false;
 		if (_freeClosedStreams) {
-			log("debug") << "On Stream Closed: Freeing: " << stream->name() << endl;
+			log("debug") << "on stream close: freeing: " << stream->name() << endl;
 			success = Manager::free(stream->name());
 		} else {
-			log("debug") << "On Stream Closed: Removing: " << stream->name() << endl;
+			log("debug") << "on stream close: removing: " << stream->name() << endl;
 			success = !!Manager::remove(stream->name());
 		}
 		assert(success);
@@ -167,7 +168,7 @@ void StreamManager::print(std::ostream& os) const
 
 
 /*
-bool StreamManager::removeStream(const string& name) 
+bool StreamManager::removeStream(const std::string& name) 
 {
 	assert(!name.empty());
 

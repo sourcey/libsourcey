@@ -22,14 +22,9 @@
 
 
 #include "Sourcey/Memory.h"
-#include "Sourcey/Handle.h"
 #include "Sourcey/Util.h" // remove me
-
 #include "Sourcey/Crypto/X509Certificate.h"
 #include "Sourcey/Crypto/RSA.h"
-//#include "Poco/Crypto/X509Certificate.h"
-//#include "Poco/Crypto/RSAKey.h"
-//#include "Poco/String.h"
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -48,10 +43,10 @@ namespace net {
 ///
 /// The Context class is also used to control
 /// SSL session caching on the server and client side.
-class SSLContext: public CountedObject
+class SSLContext: public SharedObject
 {
 public:
-	typedef Handle<SSLContext> Ptr;
+	typedef SharedPtr<SSLContext> Ptr;
 	
 	enum Usage
 	{
@@ -265,7 +260,7 @@ private:
 	Usage _usage;
 	VerificationMode _mode;
 	SSL_CTX* _sslContext;
-	bool _extendedCertificateVerification;
+	bool _extendedVerificationErrorDetails;
 };
 
 

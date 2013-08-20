@@ -93,13 +93,13 @@ bool IDiagnostic::failed() const
 //	
 DiagnosticManager::DiagnosticManager()
 {	
-	traceL() << "Creating" << endl;
+	traceL() << "create" << endl;
 }
 
 
 DiagnosticManager::~DiagnosticManager() 
 {
-	traceL() << "Destroying" << endl;
+	traceL() << "destroy" << endl;
 }
 
 void DiagnosticManager::resetAll()
@@ -142,7 +142,7 @@ bool DiagnosticManager::addDiagnostic(IDiagnostic* test)
 }
 
 
-bool DiagnosticManager::freeDiagnostic(const string& name) 
+bool DiagnosticManager::freeDiagnostic(const std::string& name) 
 {
 	assert(!name.empty());
 
@@ -158,7 +158,7 @@ bool DiagnosticManager::freeDiagnostic(const string& name)
 }
 
 
-IDiagnostic* DiagnosticManager::getDiagnostic(const string& name) 
+IDiagnostic* DiagnosticManager::getDiagnostic(const std::string& name) 
 {
 	return DiagnosticStore::get(name);
 }

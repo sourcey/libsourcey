@@ -37,7 +37,7 @@ Runner::Runner(uv::Loop& loop) :
 	//_thread("Runner"),
 	Idler(loop)
 {	
-	Idler::start();
+	Idler::start(std::bind(&Runner::onIdle, this));
 	//_thread.start(*this);
 }
 
@@ -53,22 +53,30 @@ Runner::~Runner()
 bool Runner::start(Task* task)
 {
 	add(task);
-	if (task->_cancelled) {
-		task->_cancelled = false;
+	//if (task->_cancelled) {
+		//task->_cancelled = false;
 		//task->start();
 		log("trace") << "Started Task: " << task << endl;
 		onStart(task);
 		//_wakeUp.set();
 		return true;
-	}
-	return false;
+	//}
+	//return false;
 }
 
 
 bool Runner::cancel(Task* task)
 {		
-	if (!task->_cancelled) {
-		task->_cancelled = true;
+	//if (!task->_cancelled) {
+		//task->_cancelled = true;
+		//task->cancel();
+		//log("trace") << "Cancelled Task: " << task << endl;
+		//onCancel(task);
+		//_wakeUp.set();
+		//return true;
+	//}
+	
+	if (!task->cancelled()) {
 		task->cancel();
 		log("trace") << "Cancelled Task: " << task << endl;
 		onCancel(task);
@@ -107,7 +115,7 @@ bool Runner::add(Task* task)
 		Mutex::ScopedLock lock(_mutex);	
 		_tasks.push_back(task);
 		log("trace") << "Added Task: " << task << endl;		
-		uv_ref(Idler::handle());
+		uv_ref(Idler::ptr.handle());
 		onAdd(task);
 		return true;
 	}
@@ -124,7 +132,7 @@ bool Runner::remove(Task* task)
 		if (*it == task) {					
 			_tasks.erase(it);
 			log("trace") << "Removed Task: " << task << endl;
-			uv_unref(Idler::handle());
+			uv_unref(Idler::ptr.handle());
 			onRemove(task);
 			return true;
 		}
@@ -153,7 +161,7 @@ Task* Runner::get(UInt32 id) const
 		if ((*it)->id() == id)
 			return *it;
 	}			
-	return NULL;
+	return nullptr;
 }
 
 
@@ -164,7 +172,7 @@ Task* Runner::next() const
 		if (!(*it)->cancelled())
 			return *it;
 	}			
-	return NULL;
+	return nullptr;
 }
 
 
@@ -206,7 +214,7 @@ void Runner::onIdle()
 						
 		// Destroy the task if required
 		if (task->destroyed()) {
-			log("trace") << "Destroying Task: " << task << endl;
+			log("trace") << "Destroy Task: " << task << endl;
 			remove(task);
 			delete task;
 		}

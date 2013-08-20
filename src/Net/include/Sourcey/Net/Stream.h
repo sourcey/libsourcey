@@ -49,7 +49,7 @@ class Stream: public uv::Handle
 		/// If the stream is already closed this call
 		/// will have no side-effects.
 	{
-		traceL("Stream", this) << "Close: " << handle() << std::endl;
+		traceL("Stream", this) << "close: " << handle() << std::endl;
 		if (!closed()) {
 			readStop();		
 			uv::Handle::close();
@@ -59,7 +59,7 @@ class Stream: public uv::Handle
 	bool shutdown()
 		/// Sends a shutdown packet to the connected peer.
 	{
-		traceL("Stream", this) << "Sending shutdown" << std::endl;
+		traceL("Stream", this) << "send shutdown" << std::endl;
 		if (closed()) {
 			warnL("Stream", this) << "Attempted shutdown on closed stream" << std::endl;
 			return false;
@@ -194,13 +194,13 @@ class Stream: public uv::Handle
 		Stream* self = static_cast<Stream*>(handle->data);
 
 		/// Reserve the recommended buffer size
-		if (suggested_size > self->_buffer.capacity())
-			self->_buffer.reserve(suggested_size); 
-		assert(self->_buffer.capacity() == suggested_size);
+		//if (suggested_size > self->_buffer.capacity())
+		//	self->_buffer.capacity(suggested_size); 
+		assert(self->_buffer.capacity() >= suggested_size);
 
 		/// Reset the buffer position on each read
-		self->_buffer.position(0);
-		return uv_buf_init(self->_buffer.begin(), suggested_size);
+		//self->_buffer.position(0);
+		return uv_buf_init(self->_buffer.data(), suggested_size);
 	}
 
 	Buffer _buffer;
@@ -224,7 +224,7 @@ class Stream: public uv::Handle
 	*/
 	//template <class BaseT>
 	   
-	 //closeOnError(true);//, public CountedObject
+	 //closeOnError(true);//, public SharedObject
 	//Stream(uv_stream_t* stream)
 	//{
 	//	setStream(stream);
@@ -278,7 +278,7 @@ class Stream: public uv::Handle
 //template <class HandleT>
 	//int writeQueueSize() const;
 //	bool _closing;
-//<HandleT> //CountedObject
+//<HandleT> //SharedObject
 
 	//static void afterClose(uv_handle_t* peer);
 	//std::unique_ptr<uv_stream_t> _stream;

@@ -118,32 +118,32 @@ Attribute* Attribute::create(UInt16 type, UInt16 size)
 	{
 	case Attribute::MappedAddress:
 		if (size != AddressAttribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::MappedAddress();
 
 	case Attribute::XorMappedAddress:
 		if (size != AddressAttribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::XorMappedAddress();
 
 	case Attribute::XorRelayedAddress:
 		if (size != AddressAttribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::XorRelayedAddress();
 
 	case Attribute::XorPeerAddress:
 		if (size != AddressAttribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::XorPeerAddress();
 
 	case Attribute::AlternateServer:
 		if (size != AddressAttribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::AlternateServer();
 
 	case Attribute::ErrorCode:
 		if (size < ErrorCode::MinSize)
-			return NULL;
+			return nullptr;
 		return new stun::ErrorCode(size);
 
 	case Attribute::UnknownAttributes:
@@ -151,101 +151,101 @@ Attribute* Attribute::create(UInt16 type, UInt16 size)
 
 	case Attribute::Fingerprint:
 		if (size != UInt32Attribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::Fingerprint();
 
 	case Attribute::RequestedTransport:
 		if (size != UInt32Attribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::RequestedTransport();	
 
 	case Attribute::Lifetime:
 		if (size != UInt32Attribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::Lifetime();	
 
 	case Attribute::Bandwidth:
 		if (size != UInt32Attribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::Bandwidth();	
 
 	case Attribute::ChannelNumber:
 		if (size != UInt32Attribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::ICEUseCandidate();
 		
 	case Attribute::ConnectionID:
 		if (size != UInt32Attribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::ConnectionID();
 
 	case Attribute::MessageIntegrity:
-		return (size == 20) ? new stun::MessageIntegrity() : NULL;
+		return (size == 20) ? new stun::MessageIntegrity() : nullptr;
 
 	case Attribute::Nonce:
-		return (size <= 128) ? new stun::Nonce(size) : NULL;
+		return (size <= 128) ? new stun::Nonce(size) : nullptr;
 
 	case Attribute::Realm:
-		return (size <= 128) ? new stun::Realm(size) : NULL;
+		return (size <= 128) ? new stun::Realm(size) : nullptr;
 
 	case Attribute::Software:
-		return (size <= 128) ? new stun::Software(size) : NULL;
+		return (size <= 128) ? new stun::Software(size) : nullptr;
 
 	case Attribute::ReservationToken:
-		return (size == 8) ? new stun::ReservationToken() : NULL;		
+		return (size == 8) ? new stun::ReservationToken() : nullptr;		
 
 	case Attribute::MagicCookie:
-		return (size == 4) ? new stun::MagicCookie() : NULL;		
+		return (size == 4) ? new stun::MagicCookie() : nullptr;		
 
 	case Attribute::Data:
 		return new stun::Data(size);
 
 	case Attribute::Username:
-		return (size <= 128) ? new stun::Username(size) : NULL;
+		return (size <= 128) ? new stun::Username(size) : nullptr;
 
 	case Attribute::Password:
-		return (size <= 128) ? new stun::Password(size) : NULL;
+		return (size <= 128) ? new stun::Password(size) : nullptr;
 
 	case Attribute::ICEPriority:
 		if (size != UInt32Attribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::ICEPriority();
 
 	case Attribute::ICEControlled:
 		if (size != UInt64Attribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::ICEControlled();
 
 	case Attribute::ICEControlling:
 		if (size != UInt64Attribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::ICEControlling();
 
 	case Attribute::ICEUseCandidate:
-		return (size == 0) ? new stun::ICEUseCandidate() : NULL;
+		return (size == 0) ? new stun::ICEUseCandidate() : nullptr;
 		
 	case Attribute::DontFragment:
 		if (size != FlagAttribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::DontFragment();
 		
 	case Attribute::EventPort:
 		if (size != UInt8Attribute::Size)
-			return NULL;
+			return nullptr;
 		return new stun::EventPort();
 
 	//case Attribute::UnknownAttributes:
-	//	return (size % 2 == 0) ? new stun::UnknownAttributes(size) : NULL;
+	//	return (size % 2 == 0) ? new stun::UnknownAttributes(size) : nullptr;
 	//	break;
 
 	//case Attribute::TransportPrefs:
 	//	if ((size != TransportPrefs::Size1) &&
 	//		(size != TransportPrefs::Size2))
-	//		return NULL;
+	//		return nullptr;
 	//	return new stun::TransportPrefs(size);
 
 	//case Attribute::MagicCookie:
-	//	return (size == 4) ? new stun::MagicCookie() : NULL;
+	//	return (size == 4) ? new stun::MagicCookie() : nullptr;
 	//	break;
 
 	default:
@@ -256,7 +256,7 @@ Attribute* Attribute::create(UInt16 type, UInt16 size)
 	//_attrs.push_back(attr);
 	//return attr;
 	//assert(false);
-	return NULL;
+	return nullptr;
 }
 
 
@@ -303,7 +303,7 @@ net::Address AddressAttribute::address() const
 }
 
 
-void AddressAttribute::setIP(const string& ip) 
+void AddressAttribute::setIP(const std::string& ip) 
 { 
 	in_addr address;
 	address.s_addr = inet_addr(ip.c_str());
@@ -311,27 +311,22 @@ void AddressAttribute::setIP(const string& ip)
 }
 
 
-bool AddressAttribute::read(Buffer& buf) 
+void AddressAttribute::read(BitReader& reader) 
 {
 	UInt8 dummy;
-	if (!buf.getU8(dummy))
-		return false;
-	if (!buf.getU8(_family))
-		return false;
-	if (!buf.getU16(_port))
-		return false;
-	if (!buf.getU32(_ip))
-		return false;
-	return true;
+	reader.getU8(dummy);
+	reader.getU8(_family);
+	reader.getU16(_port);
+	reader.getU32(_ip);
 }
 
 
-void AddressAttribute::write(Buffer& buf) const 
+void AddressAttribute::write(BitWriter& writer) const 
 {
-	buf.putU8(0);
-	buf.putU8(_family);
-	buf.putU16(_port);
-	buf.putU32(_ip);
+	writer.putU8(0);
+	writer.putU8(_family);
+	writer.putU16(_port);
+	writer.putU32(_ip);
 }
 
 
@@ -371,18 +366,15 @@ void UInt8Attribute::setBit(int index, bool value)
 }
 
 
-bool UInt8Attribute::read(Buffer& buf) 
+void UInt8Attribute::read(BitReader& reader) 
 {
-	if (!buf.getU8(_bits)) {		
-		return false;
-	}
-	return true;
+	reader.getU8(_bits);
 }
 
 
-void UInt8Attribute::write(Buffer& buf) const 
+void UInt8Attribute::write(BitWriter& writer) const 
 {
-	buf.putU8(_bits);
+	writer.putU8(_bits);
 }
 
 
@@ -422,17 +414,14 @@ void UInt32Attribute::setBit(int index, bool value)
 }
 
 
-bool UInt32Attribute::read(Buffer& buf) 
+void UInt32Attribute::read(BitReader& reader) 
 {
-	if (!buf.getU32(_bits)) {		
-		return false;
-	}
-	return true;
+	reader.getU32(_bits);
 }
 
-void UInt32Attribute::write(Buffer& buf) const 
+void UInt32Attribute::write(BitWriter& writer) const 
 {
-	buf.putU32(_bits);
+	writer.putU32(_bits);
 }
 
 
@@ -472,17 +461,15 @@ void UInt64Attribute::setBit(int index, bool value)
 }
 
 
-bool UInt64Attribute::read(Buffer& buf) 
+void UInt64Attribute::read(BitReader& reader) 
 {
-	if (!buf.getU64(_bits))	
-		return false;
-	return true;
+	reader.getU64(_bits);
 }
 
 
-void UInt64Attribute::write(Buffer& buf) const 
+void UInt64Attribute::write(BitWriter& writer) const 
 {
-	buf.putU64(_bits);
+	writer.putU64(_bits);
 }
 
 
@@ -517,7 +504,7 @@ StringAttribute::StringAttribute(const StringAttribute& r) :
 
 StringAttribute::~StringAttribute() 
 {
-	//if (_bytes)
+	if (_bytes)
 		delete [] _bytes;
 }
 
@@ -528,19 +515,9 @@ Attribute* StringAttribute::clone()
 }
 
 
-/*
-Attribute* StringAttribute::clone() 
+void StringAttribute::setBytes(char* bytes, unsigned size) 
 {
-	//StringAttribute* attr = new StringAttribute(type(), size());
-	//attr->copyBytes(bytes(), size());
-	//return attr;
-}
-*/
-
-
-void StringAttribute::setBytes(char* bytes, UInt16 size) 
-{
-	//if (_bytes)
+	if (_bytes)
 		delete [] _bytes;
 	_bytes = bytes;
 	setLength(size);
@@ -553,7 +530,7 @@ void StringAttribute::copyBytes(const char* bytes)
 }
 
 
-void StringAttribute::copyBytes(const void* bytes, UInt16 size) 
+void StringAttribute::copyBytes(const void* bytes, unsigned size) 
 {
 	char* newBytes = new char[size];
 	memcpy(newBytes, bytes, size);
@@ -563,7 +540,7 @@ void StringAttribute::copyBytes(const void* bytes, UInt16 size)
 
 UInt8 StringAttribute::getByte(int index) const 
 {
-	assert(_bytes != NULL);
+	assert(_bytes != nullptr);
 	assert((0 <= index) && (index < size()));
 	return static_cast<UInt8>(_bytes[index]);
 }
@@ -571,34 +548,31 @@ UInt8 StringAttribute::getByte(int index) const
 
 void StringAttribute::setByte(int index, UInt8 value) 
 {
-	assert(_bytes != NULL);
+	assert(_bytes != nullptr);
 	assert((0 <= index) && (index < size()));
 	_bytes[index] = value;
 }
 
 
-bool StringAttribute::read(Buffer& buf) 
+void StringAttribute::read(BitReader& reader) 
 {
-	//if (_bytes)
+	if (_bytes)
 		delete [] _bytes;
 	_bytes = new char[size()];	
-	if (!buf.get(_bytes, size()))
-		return false;
-	return true;
+	reader.get(_bytes, size());
 }
 
 
-void StringAttribute::write(Buffer& buf) const 
+void StringAttribute::write(BitWriter& writer) const 
 {
-	if (_bytes) {
-		buf.put(_bytes, size());
-	}
+	if (_bytes)
+		writer.put(_bytes, size());
 }
 
 
 string StringAttribute::asString() const 
 {
-	return string(_bytes, size());
+	return std::string(_bytes, size());
 }
 
 
@@ -621,14 +595,14 @@ Fingerprint::Fingerprint() :
 
 
 	/*
-void Fingerprint::write(Buffer& buf) const {
-	buf.putU32(_crc32);
+void Fingerprint::write(BitWriter& writer) const {
+	writer.putU32(_crc32);
 }
 
 
-bool Fingerprint::read(Buffer& buf) {
+bool Fingerprint::read(BitReader& reader) {
 	try {
-		buf.getU32(_crc32);
+		reader.getU32(_crc32);
 	}
 	catch(...) {
 		return false;
@@ -667,7 +641,7 @@ Attribute* MessageIntegrity::clone()
 }
 
 	
-bool MessageIntegrity::verifyHmac(const string& key) const 
+bool MessageIntegrity::verifyHmac(const std::string& key) const 
 {
 	//debugL() << "Message: Verify HMAC: " << key << endl;
 
@@ -678,51 +652,48 @@ bool MessageIntegrity::verifyHmac(const string& key) const
 	//debugL() << "Message: Packet integrity input (" << _input << ")" << endl;
 	//debugL() << "Message: Packet integrity key (" << key << ")" << endl;
 
-	string hmac = crypto::computeHMAC(_input, key);
+	std::string hmac = crypto::computeHMAC(_input, key);
 	assert(hmac.size() == Size);
 
-	//debugL() << "Message: Verifying message integrity (" << hmac << ":" << _hmac << ")" << endl;
+	//debugL() << "Message: Verifying message integrity (" << hmac << ": " << _hmac << ")" << endl;
 
 	return _hmac == hmac;
 }
 
 
-bool MessageIntegrity::read(Buffer& buf) 
+void MessageIntegrity::read(BitReader& reader) 
 {
 	//debugL() << "Message: Read HMAC" << endl;
 
 	// Read the HMAC value.
-	if (!buf.get(_hmac, MessageIntegrity::Size))
-		return false;
+	reader.get(_hmac, MessageIntegrity::Size);
 
 	//debugL() << "Message: Parsed message integrity (" << _hmac << ")" << endl;
 
-	// Remember the original position ans reset the buffer 
-	// position to 0.	
-	int originalPos = buf.position();
-	buf.position(0);
+	// Remember the original position and set the buffer position back to 0.	
+	int originalPos = reader.position();
+	reader.seek(0);
 
-	// Get the message prior to the current attribute and
-	// fill the attribute with dummy content.
-	//Buffer hmacBuf(buf.data(), buf.available() - MessageIntegrity::Size);
+	// Get the message prior to the current attribute and fill the
+	// attribute with dummy content.
 	Buffer hmacBuf;
-	hmacBuf.put(buf.data(), buf.available() - MessageIntegrity::Size);
-	hmacBuf.put("00000000000000000000");
+	BitWriter hmacWriter(hmacBuf);
+	//Buffer hmacBuf(buf.data(), buf.available() - MessageIntegrity::Size);
+	hmacWriter.put(reader.begin(), originalPos); //reader.available() - MessageIntegrity::Size
+	hmacWriter.put("00000000000000000000");
 
 	// Ensure the STUN message size value represents the real 
 	// size of the buffered message.
-	//hmacBuf.updateU32((UInt32)buf.available(), 2);
-	hmacBuf.updateU32((UInt32)buf.available(), 2);
-	_input.assign(hmacBuf.data(), hmacBuf.available());
+	//hmacBuf.updateU32((UInt32)reader.available(), 2);
+	hmacWriter.updateU32((UInt32)hmacWriter.position(), 2);
+	_input.assign(hmacWriter.begin(), hmacWriter.position());
 	  
-	// Reset the original position of the buffer.
-	buf.position(originalPos);
-
-	return true;
+	// Reset the original buffer position.
+	reader.seek(originalPos);
 }
 
 
-void MessageIntegrity::write(Buffer& buf) const 
+void MessageIntegrity::write(BitWriter& writer) const 
 {
 	//debugL() << "Message: Write HMAC" << endl;
 
@@ -733,25 +704,28 @@ void MessageIntegrity::write(Buffer& buf) const
 
 		// Get the message prior to the current attribute and
 		// fill the attribute with dummy content.
-		//Buffer hmacBuf(buf.c_str(), buf.available());		
+		//Buffer hmacBuf(buf.c_str(), reader.available());		
 		Buffer hmacBuf;
-		hmacBuf.put(buf.data(), buf.available());
-		hmacBuf.put("00000000000000000000");
+		BitWriter hmacWriter(hmacBuf);
+		//hmacBuf.put(buf.data(), buf.available());
+		hmacWriter.put(writer.begin(), writer.position());
+		hmacWriter.put("00000000000000000000");
 
 		// Ensure the STUN message size value represents the real 
 		// size of the buffered message.
-		hmacBuf.updateU32((UInt32)buf.available() + MessageIntegrity::Size, 2);
-
-		string input(hmacBuf.data(), hmacBuf.available());
-		string hmac(crypto::computeHMAC(input, _key));
+		hmacWriter.updateU32((UInt32)hmacWriter.position() + MessageIntegrity::Size, 2);
+		
+		//string input(hmacBuf.data(), hmacBuf.available());
+		std::string input(hmacWriter.begin(), hmacWriter.position());
+		std::string hmac(crypto::computeHMAC(input, _key));
 		assert(hmac.size() == MessageIntegrity::Size);
 
 		// Append the real HAMC to the buffer.
-		buf.put(hmac.c_str(), MessageIntegrity::Size);
+		writer.put(hmac.c_str(), MessageIntegrity::Size);
 	}
 	else {
 		assert(!_hmac.empty());
-		buf.put(_hmac.c_str(), MessageIntegrity::Size);
+		writer.put(_hmac.c_str(), MessageIntegrity::Size);
 	}
 }
 
@@ -791,40 +765,36 @@ UInt32 ErrorCode::errorCode() const
 }
 
 
-void ErrorCode::setErrorCode(UInt32 eCode) 
+void ErrorCode::setErrorCode(UInt32 code) 
 {
-	_class = (UInt8)((eCode >> 8) & 0x7);
-	_number = (UInt8)(eCode & 0xff);
+	if ((code >> 11) != 0)
+		throw std::runtime_error("error-code bits not zero");
+
+	_class = (UInt8)((code >> 8) & 0x7);
+	_number = (UInt8)(code & 0xff);
 }
 
 
-void ErrorCode::setReason(const string& reason) 
+void ErrorCode::setReason(const std::string& reason) 
 {
 	setLength(MinSize + static_cast<UInt16>(reason.size()));
 	_reason = reason;
 }
 
-bool ErrorCode::read(Buffer& buf) 
+void ErrorCode::read(BitReader& reader) 
 {
 	UInt32 val;
-	if (!buf.getU32(val))
-		return false;
-
-	if ((val >> 11) != 0)
-		errorL() << "error-code bits not zero";
+	reader.getU32(val);
 
 	setErrorCode(val);
 
-	if (!buf.get(_reason, size() - 4))
-		return false;
-
-	return true;
+	reader.get(_reason, size() - 4);
 }
 
-void ErrorCode::write(Buffer& buf) const 
+void ErrorCode::write(BitWriter& writer) const 
 {
-	buf.putU32(errorCode());
-	buf.put(_reason);
+	writer.putU32(errorCode());
+	writer.put(_reason);
 }
 
 
@@ -885,21 +855,19 @@ void UInt16ListAttribute::addType(UInt16 value)
 }
 
 
-bool UInt16ListAttribute::read(Buffer& buf) 
+void UInt16ListAttribute::read(BitReader& reader) 
 {
-	for (int i = 0; i < size() / 2; i++) {
+	for (unsigned i = 0; i < size() / 2; i++) {
 		UInt16 attr;
-		if (!buf.getU16(attr))
-			return false;
+		reader.getU16(attr);
 		_attrTypes.push_back(attr);
 	}
-	return true;
 }
 
-void UInt16ListAttribute::write(Buffer& buf) const 
+void UInt16ListAttribute::write(BitWriter& writer) const 
 {
 	for (unsigned i = 0; i < _attrTypes.size(); i++)
-		buf.putU16(_attrTypes[i]);
+		writer.putU16(_attrTypes[i]);
 }
 
 

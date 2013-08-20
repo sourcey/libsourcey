@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/Types.h"
-#include "Sourcey/Interfaces.h"
+#include "Sourcey/Interface.h"
 #include "Sourcey/Mutex.h"
 
 
@@ -32,23 +32,37 @@ namespace scy {
 class Runner;
 
 
-class Task: public abstract::Runnable
-	// This class can be extended to implement a
-	// long-running asynchronous task using a Runner.
+class Task: public basic::Runnable
+	/// This class is for implementing any kind 
+	/// async task that is compatible with a Runner.
 {
 public:	
-	Task();
-	//virtual void cancel();
-	virtual void destroy();
+	Task(bool repeat = false);
 	
-	virtual UInt32 id() const;
-	//virtual bool cancelled() const;
+	virtual void destroy();
+		// Sets the task to destroyed state.
+
 	virtual bool destroyed() const;
+		// Signals that the task should be disposed of.
+
 	virtual bool repeating() const;
+		// Signals that the task's should be called
+		// repeatedly by the Runner.
+		// If this returns false the task will be cancelled()
+
+	virtual UInt32 id() const;
+		// Unique task ID.
+	
+	// basic::Runnable:
+	//
+	// virtual void run();
+	// virtual void cancel();
+	// virtual bool cancelled() const;
 	
 protected:
 	Task& operator=(Task const&) {}
 	virtual ~Task();
+		// Should remain protected.
 
 	virtual void run() = 0;	
 		// Called by the Runner to run the task.
@@ -58,10 +72,9 @@ protected:
 		// The task will similarly be destroyed id destroy()
 		// was called during the current task iteration.
 
-protected:		
 	friend class Runner;
+		// Tasks belong to a Runner instance.
 
-	mutable Mutex _mutex;
 	bool _destroyed;
 	bool _repeating;
 	UInt32 _id;
@@ -98,8 +111,8 @@ protected:
 		
 	//virtual void start();
 	//Task(bool repeat = false);	
-template <class abstract::RunnableT>
-class ITask: public abstract::RunnableT
+template <class basic::RunnableT>
+class ITask: public basic::RunnableT
 	// This class defines an asynchronous Task which is
 	// managed by a Runner.
 {
@@ -171,7 +184,7 @@ class TaskBase: public SocketBase<StreamSocketT, TransportT, SocketBaseT>
 
 //#include <string>
 
-//template <class DeletableT>
+//template <class AsyncDeleterT>
 //class GarbageCollectorTask;
 	//virtual Runner& runner() { return _runner; }
 
@@ -183,5 +196,5 @@ class TaskBase: public SocketBase<StreamSocketT, TransportT, SocketBaseT>
 
 	//EvLoop& _loop;	
 	//bool _runOnce;
-	//template <class DeletableT> 
+	//template <class AsyncDeleterT> 
 	//friend class GarbageCollectorTask;

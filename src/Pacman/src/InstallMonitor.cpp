@@ -23,7 +23,6 @@
 
 
 using namespace std;
-using namespace Poco;
 
 
 namespace scy { 
@@ -40,9 +39,9 @@ InstallMonitor::~InstallMonitor()
 }
 
 
-void InstallMonitor::onInstallStateChange(void* sender, PackageInstallState& state, const PackageInstallState& oldState)
+void InstallMonitor::onInstallStateChange(void* sender, InstallationState& state, const InstallationState& oldState)
 {
-	InstallTask* task = reinterpret_cast<InstallTask*>(sender);
+	auto task = reinterpret_cast<InstallTask*>(sender);
 
 	debugL() << "[InstallMonitor] onInstallStateChange: " << task << ": " << state.toString() << endl;
 
@@ -52,7 +51,7 @@ void InstallMonitor::onInstallStateChange(void* sender, PackageInstallState& sta
 
 void InstallMonitor::onInstallComplete(void* sender) 
 {
-	InstallTask* task = reinterpret_cast<InstallTask*>(sender);
+	auto task = reinterpret_cast<InstallTask*>(sender);
 
 	debugL() << "[InstallMonitor] Package Install Complete: " << task->state().toString() << endl;
 
@@ -64,7 +63,7 @@ void InstallMonitor::onInstallComplete(void* sender)
 		Mutex::ScopedLock lock(_mutex);
 
 		// Remove the package task reference.
-		for (InstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++) {
+		for (auto it = _tasks.begin(); it != _tasks.end(); it++) {
 			if (task == *it) {
 				task->StateChange -= delegate(this, &InstallMonitor::onInstallStateChange); 
 				task->Complete -= delegate(this, &InstallMonitor::onInstallComplete);
@@ -91,7 +90,7 @@ void InstallMonitor::addTask(InstallTask* task)
 {
 	Mutex::ScopedLock lock(_mutex);
 	if (!task->valid())
-		throw Exception("Invalid package task");
+		throw std::runtime_error("Invalid package task");
 	_tasks.push_back(task);
 	_packages.push_back(task->_local);
 	task->StateChange += delegate(this, &InstallMonitor::onInstallStateChange);
@@ -102,7 +101,7 @@ void InstallMonitor::addTask(InstallTask* task)
 void InstallMonitor::startAll()
 {	
 	Mutex::ScopedLock lock(_mutex);
-	for (InstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++)
+	for (auto it = _tasks.begin(); it != _tasks.end(); it++)
 		(*it)->start();
 }
 
@@ -110,7 +109,7 @@ void InstallMonitor::startAll()
 void InstallMonitor::cancelAll()
 {	
 	Mutex::ScopedLock lock(_mutex);
-	for (InstallTaskList::iterator it = _tasks.begin(); it != _tasks.end(); it++)
+	for (auto it = _tasks.begin(); it != _tasks.end(); it++)
 		(*it)->cancel();
 }
 

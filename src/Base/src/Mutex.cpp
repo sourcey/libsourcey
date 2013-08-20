@@ -64,7 +64,7 @@ namespace scy {
 Mutex::Mutex()
 {
 	if (uv_mutex_init(&_mx) != 0)
-		throw Exception("Mutex failed to initialize");
+		throw std::runtime_error("Mutex failed to initialize");
 }
 
 

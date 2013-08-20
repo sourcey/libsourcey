@@ -20,6 +20,7 @@
 
 
 #include "Sourcey/DateTime.h"
+#include "Sourcey/Platform.h"
 #include "Sourcey/Numeric.h"
 
 #include <cctype>
@@ -36,7 +37,7 @@ namespace scy {
 
 
 //
-// DateTime
+// Poco DateTime
 //
 
 	
@@ -662,12 +663,12 @@ void LocalDateTime::determineTzd(bool adjust)
 #else
 		std::tm* broken = std::localtime(&epochTime);
 #endif
-		if (!broken) throw Exception("System error: Cannot get local time");
+		if (!broken) throw std::runtime_error("System error: Cannot get local time");
 		_tzd = (Timezone::utcOffset() + ((broken->tm_isdst == 1) ? 3600 : 0));
 #else
 		std::tm broken;
 		if (!localtime_r(&epochTime, &broken))
-			throw Exception("System error: Cannot get local time");
+			throw std::runtime_error("System error: Cannot get local time");
 		_tzd = (Timezone::utcOffset() + ((broken.tm_isdst == 1) ? 3600 : 0));
 #endif
 		adjustForTzd();
@@ -743,7 +744,7 @@ bool Timezone::isDst(const Timestamp& timestamp)
 {
 	std::time_t time = timestamp.epochTime();
 	struct std::tm* tms = std::localtime(&time);
-	if (!tms) throw Exception("System error: cannot get local time DST flag");
+	if (!tms) throw std::runtime_error("System error: cannot get local time DST flag");
 	return tms->tm_isdst > 0;
 }
 
@@ -754,11 +755,11 @@ std::string Timezone::name()
 	TIME_ZONE_INFORMATION tzInfo;
 	DWORD dstFlag = GetTimeZoneInformation(&tzInfo);
 	WCHAR* ptr = dstFlag == TIME_ZONE_ID_DAYLIGHT ? tzInfo.DaylightName : tzInfo.StandardName;
-//#if defined(POCO_WIN32_UTF8)
+//#if defined(UNICODE)
 //	UnicodeConverter::toUTF8(ptr, result);
 //#else
 	char buffer[256];
-	DWORD rc = WideCharToMultiByte(CP_ACP, 0, ptr, -1, buffer, sizeof(buffer), NULL, NULL);
+	DWORD rc = WideCharToMultiByte(CP_ACP, 0, ptr, -1, buffer, sizeof(buffer), nullptr, nullptr);
 	if (rc) result = buffer;
 //#endif
 	return result;
@@ -771,11 +772,11 @@ std::string Timezone::standardName()
 	TIME_ZONE_INFORMATION tzInfo;
 	DWORD dstFlag = GetTimeZoneInformation(&tzInfo);
 	WCHAR* ptr = tzInfo.StandardName;
-//#if defined(POCO_WIN32_UTF8)
+//#if defined(UNICODE)
 //	UnicodeConverter::toUTF8(ptr, result);
 //#else
 	char buffer[256];
-	DWORD rc = WideCharToMultiByte(CP_ACP, 0, ptr, -1, buffer, sizeof(buffer), NULL, NULL);
+	DWORD rc = WideCharToMultiByte(CP_ACP, 0, ptr, -1, buffer, sizeof(buffer), nullptr, nullptr);
 	if (rc) result = buffer;
 //#endif
 	return result;
@@ -788,11 +789,11 @@ std::string Timezone::dstName()
 	TIME_ZONE_INFORMATION tzInfo;
 	DWORD dstFlag = GetTimeZoneInformation(&tzInfo);
 	WCHAR* ptr = tzInfo.DaylightName;
-//#if defined(POCO_WIN32_UTF8)
+//#if defined(UNICODE)
 //	UnicodeConverter::toUTF8(ptr, result);
 //#else
 	char buffer[256];
-	DWORD rc = WideCharToMultiByte(CP_ACP, 0, ptr, -1, buffer, sizeof(buffer), NULL, NULL);
+	DWORD rc = WideCharToMultiByte(CP_ACP, 0, ptr, -1, buffer, sizeof(buffer), nullptr, nullptr);
 	if (rc) result = buffer;
 //#endif
 	return result;
@@ -817,7 +818,7 @@ public:
 	int timeZone()
 	{
 	#if defined(__APPLE__)  || defined(__FreeBSD__) || defined(POCO_ANDROID) // no timezone global var
-		std::time_t now = std::time(NULL);
+		std::time_t now = std::time(nullptr);
 		struct std::tm t;
 		gmtime_r(&now, &t);
 		std::time_t utc = std::mktime(&t);
@@ -847,10 +848,10 @@ int Timezone::utcOffset()
 	
 int Timezone::dst()
 {
-	std::time_t now = std::time(NULL);
+	std::time_t now = std::time(nullptr);
 	struct std::tm t;
 	if (!localtime_r(&now, &t))
-		throw Exception("System error: cannot get local time DST offset");
+		throw std::runtime_error("System error: cannot get local time DST offset");
 	return t.tm_isdst == 1 ? 3600 : 0;
 }
 
@@ -859,7 +860,7 @@ bool Timezone::isDst(const Timestamp& timestamp)
 {
 	std::time_t time = timestamp.epochTime();
 	struct std::tm* tms = std::localtime(&time);
-	if (!tms) throw Exception("System error: cannot get local time DST flag");
+	if (!tms) throw std::runtime_error("System error: cannot get local time DST flag");
 	return tms->tm_isdst > 0;
 }
 
@@ -1218,7 +1219,7 @@ void DateTimeParser::parse(const std::string& fmt, const std::string& str, DateT
 	if (DateTime::isValid(year, month, day, hour, minute, second, millis, micros))
 		dateTime.assign(year, month, day, hour, minute, second, millis, micros);
 	else 
-		throw SyntaxException("date/time component out of range");
+		throw std::runtime_error("Syntax error: date/time component out of range");
 	timeZoneDifferential = tzd;
 }
 
@@ -1248,7 +1249,7 @@ bool DateTimeParser::tryParse(const std::string& fmt, const std::string& str, Da
 void DateTimeParser::parse(const std::string& str, DateTime& dateTime, int& timeZoneDifferential)
 {
 	if (!tryParse(str, dateTime, timeZoneDifferential))
-		throw SyntaxException("Unsupported or invalid date/time format");
+		throw std::runtime_error("Syntax error: Unsupported or invalid date/time format");
 }
 
 	
@@ -1258,7 +1259,7 @@ DateTime DateTimeParser::parse(const std::string& str, int& timeZoneDifferential
 	if (tryParse(str, result, timeZoneDifferential))
 		return result;
 	else
-		throw SyntaxException("Unsupported or invalid date/time format");
+		throw std::runtime_error("Syntax error: Unsupported or invalid date/time format");
 }
 
 	
@@ -1375,16 +1376,16 @@ int DateTimeParser::parseMonth(std::string::const_iterator& it, const std::strin
 	while (it != end && ::isalpha(*it)) 
 	{
 		char ch = (*it++);
-		if (isFirst) { month += ::toupper(ch); isFirst = false; }
-		else month += ::tolower(ch);
+		if (isFirst) { month += static_cast<char>(::toupper(ch)); isFirst = false; }
+		else month += static_cast<char>(::tolower(ch));
 	}
-	if (month.length() < 3) throw SyntaxException("Month name must be at least three characters long", month);
+	if (month.length() < 3) throw std::runtime_error("Syntax error: Month name must be at least three characters long: " + month);
 	for (int i = 0; i < 12; ++i) 
 	{
 		if (DateTimeFormat::MONTH_NAMES[i].find(month) == 0)
 			return i + 1;
 	}
-	throw SyntaxException("Not a valid month name", month);
+	throw std::runtime_error("Syntax error: Not a valid month name: " + month);
 }
 
 
@@ -1396,16 +1397,16 @@ int DateTimeParser::parseDayOfWeek(std::string::const_iterator& it, const std::s
 	while (it != end && ::isalpha(*it)) 
 	{
 		char ch = (*it++);
-		if (isFirst) { dow += ::toupper(ch); isFirst = false; }
-		else dow += ::tolower(ch);
+		if (isFirst) { dow += static_cast<char>(::toupper(ch)); isFirst = false; }
+		else dow += static_cast<char>(::tolower(ch));
 	}
-	if (dow.length() < 3) throw SyntaxException("Weekday name must be at least three characters long", dow);
+	if (dow.length() < 3) throw std::runtime_error("Syntax error: Weekday name must be at least three characters long: " + dow);
 	for (int i = 0; i < 7; ++i) 
 	{
 		if (DateTimeFormat::WEEKDAY_NAMES[i].find(dow) == 0)
 			return i;
 	}
-	throw SyntaxException("Not a valid weekday name", dow);
+	throw std::runtime_error("Syntax error: Not a valid weekday name: " + dow);
 }
 
 
@@ -1416,7 +1417,7 @@ int DateTimeParser::parseAMPM(std::string::const_iterator& it, const std::string
 	while (it != end && ::isalpha(*it)) 
 	{
 		char ch = (*it++);
-		ampm += ::toupper(ch);
+		ampm += static_cast<char>(::toupper(ch));
 	}
 	if (ampm == "AM")
 	{
@@ -1432,7 +1433,7 @@ int DateTimeParser::parseAMPM(std::string::const_iterator& it, const std::string
 		else
 			return hour;
 	}
-	else throw SyntaxException("Not a valid AM/PM designator", ampm);
+	else throw std::runtime_error("Syntax error: Not a valid AM/PM designator: " + ampm);
 }
 
 
@@ -1523,7 +1524,7 @@ void Timestamp::update()
 #else
 
 	struct timeval tv;
-	if (gettimeofday(&tv, NULL))
+	if (gettimeofday(&tv, nullptr))
 		throw SystemException("Cannot get time of day");
 	_ts = TimeVal(tv.tv_sec)*resolution() + tv.tv_usec;
 	
@@ -1661,6 +1662,178 @@ Timespan& Timespan::operator -= (TimeDiff microseconds)
 {
 	_span -= microseconds;
 	return *this;
+}
+
+
+
+
+//
+// Timeout
+//
+
+
+Timeout::Timeout(long delay, bool autoStart) :
+	_startAt(0), _delay(delay) 
+{
+	if (autoStart)
+		start();
+}
+
+
+Timeout::Timeout(const Timeout& src) :
+	_startAt(src._startAt), _delay(src._delay) 
+{
+}
+
+
+Timeout& Timeout::operator = (const Timeout& src) 
+{
+	_startAt = src._startAt;
+	_delay = src._delay;
+	return *this;
+}
+
+
+Timeout::~Timeout() 
+{
+}
+
+
+bool Timeout::running() const 
+{
+	return _startAt != 0;
+}
+
+
+void Timeout::start() 
+{
+	_startAt = scy::getTimeHR();
+}
+
+
+void Timeout::stop() 
+{
+	_startAt = 0;
+}
+
+
+void Timeout::reset() 
+{
+	_startAt = scy::getTimeHR();
+}
+
+
+long Timeout::remaining() const 
+{
+	time_t current = scy::getTimeHR();
+	long remaining = static_cast<long>(_delay - (current - _startAt));
+	return remaining > 0 ? remaining : 0;
+}
+
+
+bool Timeout::expired() const 
+{
+	if (_delay == 0) //_startAt == 0 || 
+		return false;
+
+	return remaining() == 0;
+}
+
+
+//
+// Stopwatch
+//
+
+
+Stopwatch::Stopwatch() : 
+	_elapsed(0), _running(false)
+{
+}
+
+
+Stopwatch::~Stopwatch()
+{
+}
+
+
+void Stopwatch::start()
+{
+	if (!_running) {
+		_start.update();
+		_running = true;
+	}
+}
+
+
+void Stopwatch::stop()
+{
+	if (_running) {
+		Timestamp current;
+		_elapsed += current - _start;
+		_running = false;
+	}
+}
+
+
+int Stopwatch::elapsedSeconds() const
+{
+	return int(elapsed()/resolution());
+}
+
+
+int Stopwatch::elapsedMilliseconds() const
+{
+	return int(elapsed()/(resolution()/1000));
+}
+
+
+Timestamp::TimeVal Stopwatch::resolution()
+{
+	return Timestamp::resolution();
+}
+
+
+Timestamp::TimeDiff Stopwatch::elapsed() const
+{
+	if (_running) {
+		Timestamp current;
+		return _elapsed + (current - _start);
+	}
+	else {
+		return _elapsed;
+	}
+}
+
+
+void Stopwatch::reset()
+{
+	_elapsed = 0;
+	_running = false;
+}
+
+
+void Stopwatch::restart()
+{
+	_elapsed = 0;
+	_start.update();
+	_running = true;
+}
+
+
+//
+// Timed Token
+//
+
+
+TimedToken::TimedToken(long duration) : 
+	Timeout(duration), _id(util::randomString(32)) 
+{
+}
+
+
+TimedToken::TimedToken(const std::string& id = util::randomString(32), long duration = 10000) : 
+	Timeout(duration), _id(id) 
+{
 }
 
 

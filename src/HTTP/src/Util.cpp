@@ -19,7 +19,6 @@
 
 #include "Sourcey/HTTP/Util.h"
 #include "Sourcey/Util.h"
-#include "Poco/String.h"
 
 
 using namespace std;
@@ -27,21 +26,22 @@ using namespace std;
 
 
 namespace scy {
-namespace util {
+namespace http {
 	
 
-string parseURI(const string& request) 
+std::string parseURI(const std::string& request) 
 {
 	std::string req = request;
 	std::string value = "";
 	std::string::size_type start, end = 0;
 	util::toUpper(req);
 	start = req.find(" ");
-	if (start != string::npos) {
+	if (start != std::string::npos) {
 		start++;
-		end = req.find(" HTTP", start);
-		if (end == string::npos) end = req.find(" RTSP", start);
-		if (end == string::npos) return "";
+		end = req.find(" HTTPS", start);
+		if (end == std::string::npos) end = req.find(" HTTP", start);
+		if (end == std::string::npos) end = req.find(" RTSP", start);
+		if (end == std::string::npos) return "";
 		value = request.substr(start, end-start);
 	}
 	return value;
@@ -59,7 +59,7 @@ std::string parseCookieItem(const std::string& cookie, const std::string& item)
 {
 	string::size_type start, end = 0;
 	start = cookie.find(item + "=");
-	if (start != string::npos) {
+	if (start != std::string::npos) {
 		start += item.size() + 1;
 		end = cookie.find(";", start);
 		return cookie.substr(start, end-start);
@@ -68,35 +68,35 @@ std::string parseCookieItem(const std::string& cookie, const std::string& item)
 }
 
 
-bool splitURIParameters(const string& uri, NVHash& out)
+bool splitURIParameters(const std::string& uri, NVCollection& out)
 {
 	size_t len = uri.length();
 	size_t i = 0;
 
-	/// Parse REST parameters
+	// Parse REST parameters
 	while (i < len && uri[i] != '?') {	
 		i++; 
 
-		string value = "";	
+		std::string value = "";	
 		while (uri[i] != '/' && uri[i] != '?' && i < len)
 			value += uri[i++];
 
-		/// REST parameters are referenced by index
+		// REST parameters are referenced by index
 		if (!value.empty())
 			out.set(util::itostr(out.size()), value);		
 	}
 	
-	/// Parse query parameters
+	// Parse query parameters
 	if (uri[i] == '?') i++;
 	while (i < len)
 	{
-		string name = "";
+		std::string name = "";
 		while (uri[i] != '=' && i < len)
 			name += uri[i++]; i++;
-		string value = "";
+		std::string value = "";
 		while (uri[i] != '&' && i < len)
 			value += uri[i++]; i++;
-		
+
 		if (!name.empty() && !value.empty())
 			out.set(name, value);
 	}
@@ -105,7 +105,7 @@ bool splitURIParameters(const string& uri, NVHash& out)
 }
 
 
-void splitParameters(const std::string& s, std::string& value, NVHash& parameters)
+void splitParameters(const std::string& s, std::string& value, NVCollection& parameters)
 {
 	value.clear();
 	parameters.clear();
@@ -114,14 +114,14 @@ void splitParameters(const std::string& s, std::string& value, NVHash& parameter
 	std::string::const_iterator end = s.end();
 	while (it != end && ::isspace(*it)) ++it;
 	while (it != end && *it != ';') value += *it++;
-	Poco::trimRightInPlace(value);
+	util::trimRightInPlace(value);
 	if (it != end) ++it;
 
 	splitParameters(it, end, parameters);
 }
 
 
-void splitParameters(const std::string::const_iterator& begin, const std::string::const_iterator& end, NVHash& parameters)
+void splitParameters(const std::string::const_iterator& begin, const std::string::const_iterator& end, NVCollection& parameters)
 {
 	std::string pname;
 	std::string pvalue;
@@ -134,7 +134,7 @@ void splitParameters(const std::string::const_iterator& begin, const std::string
 		pvalue.clear();
 		while (it != end && ::isspace(*it)) ++it;
 		while (it != end && *it != '=' && *it != ';') pname += *it++;
-		Poco::trimRightInPlace(pname);
+		util::trimRightInPlace(pname);
 		if (it != end && *it != ';') ++it;
 		while (it != end && ::isspace(*it)) ++it;
 		while (it != end && *it != ';')
@@ -160,7 +160,7 @@ void splitParameters(const std::string::const_iterator& begin, const std::string
 			}
 			else pvalue += *it++;
 		}
-		Poco::trimRightInPlace(pvalue);
+		util::trimRightInPlace(pvalue);
 		if (!pname.empty()) parameters.add(pname, pvalue);
 		if (it != end) ++it;
 	}
@@ -168,18 +168,18 @@ void splitParameters(const std::string::const_iterator& begin, const std::string
 
 
 /*
-string parseHeader(const string& request, const string& name) 
+string parseHeader(const std::string& request, const std::string& name) 
 {
-	string req = request;
+	std::string req = request;
 	toLower(req);
 	toLower(name);
-	string value = "";
+	std::string value = "";
 	string::size_type start, end = 0;
 	start = req.find(name+": ");
-	if (start != string::npos) {
+	if (start != std::string::npos) {
 		start += name.length() + 2;
 		end = req.find("\r\n", start);
-		if (end == string::npos) return "";
+		if (end == std::string::npos) return "";
 		value = request.substr(start, end-start);
 		replaceInPlace(value,"\"","");
 		replaceInPlace(value,"\r","");
@@ -190,5 +190,5 @@ string parseHeader(const string& request, const string& name)
 */
 
 
-} // namespace util
+} // namespace http
 } // namespace scy

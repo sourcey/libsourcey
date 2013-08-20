@@ -39,7 +39,7 @@ class SocketPacket;
 class SocketAdapter;
 
 
-class SocketBase: public CountedObject
+class SocketBase: public SharedObject
 	/// SocketBase is the base socket 
 	/// implementation which all sockets derive.
 {
@@ -59,14 +59,14 @@ public:
 		/// Since the DNS callback is asynchronous implementations need 
 		/// to listen for the Error signal for handling connection errors.		
 
-	virtual bool shutdown() { throw Exception("Not implemented by protocol"); };
+	virtual bool shutdown() { throw std::runtime_error("Not implemented by protocol"); };
 		/// Sends the shutdown packet which should result is socket 
 		/// closure via callback.
 
 	virtual void close() = 0;
 		/// Closes the underlying socket.
 
-	virtual void reset() { throw Exception("Not implemented by protocol"); };
+	virtual void reset() { throw std::runtime_error("Not implemented by protocol"); };
 		/// Resets the closed socket for reuse.
 
 	virtual void bind(const Address& address, unsigned flags = 0) = 0;
@@ -75,7 +75,7 @@ public:
 		///
 		/// Throws an Exception on error.
 
-	virtual void listen(int backlog = 64) { };
+	virtual void listen(int backlog = 64) { (void)backlog; };
 		/// Listens the socket on the given address.
 		///
 		/// Throws an Exception on error.
@@ -125,7 +125,7 @@ public:
 		/// by the socket base.
 	
 	virtual void emitConnect();
-	virtual void emitRecv(Buffer& buf, const Address& peerAddr);
+	virtual void emitRecv(const MutableBuffer& buf, const Address& peerAddr);
 	virtual void emitError(const Error& error);
 	virtual void emitClose();
 	
@@ -136,13 +136,13 @@ public:
 
 protected:
 	virtual ~SocketBase();
+	friend struct std::default_delete<SocketBase>;	
 	
 	std::vector<Socket*> _observers;
 	volatile bool _insideCallback;	
 	
 	friend class Socket;
 	friend class SocketAdapter;
-	friend class GCDeleter<SocketBase>;	
 };
 
 
@@ -261,7 +261,7 @@ public:
 		/// and deletes the old one.
 
 	virtual void onSocketConnect();
-	virtual void onSocketRecv(Buffer& buf, const Address& peerAddr);
+	virtual void onSocketRecv(const MutableBuffer& buf, const Address& peerAddr);
 	virtual void onSocketError(const scy::Error& error);
 	virtual void onSocketClose();
 		
@@ -278,8 +278,11 @@ protected:
 };
 
 
-// -------------------------------------------------------------------
 //
+// Socket Adapter
+//
+
+
 class SocketAdapter
 	/// SocketAdapter is an proxy layer which is attached to a
 	/// Socket instance to handle socket events in various ways.
@@ -298,7 +301,7 @@ public:
 	virtual ~SocketAdapter();
 
 	virtual void onSocketConnect();
-	virtual void onSocketRecv(Buffer& buf, const Address& peerAddr);
+	virtual void onSocketRecv(const MutableBuffer& buf, const Address& peerAddr);
 	virtual void onSocketError(const Error& error);
 	virtual void onSocketClose();
 		/// These virtual methods can be overridden as necessary
@@ -308,8 +311,13 @@ public:
 	virtual int send(const char* data, int len, const Address& peerAddress, int flags = 0);
 	
 	Socket* socket;
-};
 
+private:
+	SocketAdapter(const SocketAdapter&); // = delete;
+	SocketAdapter(SocketAdapter&&); // = delete;
+	SocketAdapter& operator=(const SocketAdapter&); // = delete;
+	SocketAdapter& operator=(SocketAdapter&&); // = delete;
+};
 
 
 //
@@ -318,29 +326,27 @@ public:
 
 
 struct PacketInfo: public IPacketInfo
-	/// Provide information about packets emitted from a socket.
+	/// Provides information about packets emitted from a socket.
 	/// See SocketPacket.
 { 
-	Socket& socket;
-		/// The source socket
+	Socket* socket;
+		// The source socket
 
 	Address peerAddress;	
-		/// The peerAddress is for UDP compatibility.
-		/// For TCP it will match the connected address.
+		// The originating peer address.
+		// For TCP this will always be connected address.
 
-	PacketInfo(Socket& socket, const Address& peerAddress) :
-		socket(socket), 
-		peerAddress(peerAddress) {}		
+	PacketInfo(Socket* socket, const Address& peerAddress) :
+		socket(socket), peerAddress(peerAddress) {}		
 
 	PacketInfo(const PacketInfo& r) : 
-		socket(r.socket), 
-		peerAddress(r.peerAddress) {}
-
-	virtual ~PacketInfo() {}; 
+		socket(r.socket), peerAddress(r.peerAddress) {}
 	
 	virtual IPacketInfo* clone() const {
 		return new PacketInfo(*this);
 	}
+
+	virtual ~PacketInfo() {}; 
 };
 
 
@@ -358,21 +364,18 @@ class SocketPacket: public RawPacket
 	/// for the duration of the receiver callback.
 {	
 public:
-	Buffer& buffer;
-		/// The received data buffer
-
 	PacketInfo* info;
 		/// PacketInfo pointer
 
-	SocketPacket(Socket& socket, Buffer& buffer, const Address& peerAddress) : 
-		RawPacket(&socket, buffer.data(), buffer.available(), 0, new PacketInfo(socket, peerAddress)),
-		buffer(buffer)
+	SocketPacket(Socket* socket, const MutableBuffer& buffer, const Address& peerAddress) : 
+		RawPacket(bufferCast<char*>(buffer), buffer.size(), 0, &socket, nullptr, 
+			new PacketInfo(socket, peerAddress))
 	{
 		info = (PacketInfo*)RawPacket::info;
 	}
 
 	SocketPacket(const SocketPacket& that) : 
-		RawPacket(that), buffer(that.buffer), info(that.info)
+		RawPacket(that), info(that.info)
 	{
 	}
 	
@@ -390,7 +393,7 @@ public:
 		return new SocketPacket(*this);
 	}	
 
-	virtual bool read(Buffer& buf) 
+	virtual bool read(const ConstBuffer&) 
 	{ 
 		assert(0 && "write only"); 
 		return false;
@@ -398,7 +401,7 @@ public:
 
 	virtual void write(Buffer& buf) const 
 	{	
-		buf.put(array(), size()); 
+		buf.append(data(), size()); 
 	}
 	
 	virtual const char* className() const 
@@ -449,7 +452,7 @@ public:
 	virtual ~SocketAdapter();
 
 	virtual void onSocketConnect() = 0;
-	virtual void onSocketRecv(Buffer& buf, const Address& peerAddr) = 0;
+	virtual void onSocketRecv(const MutableBuffer& buf, const Address& peerAddr) = 0;
 	virtual void onSocketError(const Error& error) = 0;
 	virtual void onSocketClose() = 0;
 };
@@ -473,7 +476,7 @@ public:
 	//virtual Socket& assign(const Socket& ptr);
 
 
- // { throw Exception("Not implemented by protocol"); }; // { throw Exception("Not implemented by protocol"); };
+ // { throw std::runtime_error("Not implemented by protocol"); }; // { throw std::runtime_error("Not implemented by protocol"); };
 
 /*
 template<class SocketT = SocketBase>
@@ -526,7 +529,7 @@ public:
 	void assertInstance(const SocketBase* ptr) 
 	{	
 		if (!dynamic_cast<const SocketT*>(ptr))
-			throw Exception("Cannot assign incompatible socket");
+			throw std::runtime_error("Cannot assign incompatible socket");
 	}
 };
 */
@@ -578,7 +581,7 @@ public:
 	virtual void assertInstance(const SocketBase* ptr) 
 	{	
 		if (!dynamic_cast<const SocketBase*>(ptr))
-			throw Exception("Cannot assign incompatible socket");
+			throw std::runtime_error("Cannot assign incompatible socket");
 	}
 
 protected:
@@ -623,12 +626,12 @@ protected:
 		/// For TCP it will always return the peerAddress.
 
 /* //CountedBase
-	typedef Handle<SocketBase> SocketHandle;
-class SocketHandle: public CountedBase //CountedObject
+	typedef SharedPtr<SocketBase> SocketHandle;
+class SocketHandle: public CountedBase //SharedObject
 	/// SocketBase is the abstract base interface from      
 	/// which all socket contexts derive.
 {
-	typedef Handle<SocketBase> SocketHandle;
+	typedef SharedPtr<SocketBase> SocketHandle;
 public:
 }
 
@@ -636,7 +639,7 @@ SSLSocket::SSLSocket(const SocketHandle& socket) :
 	net::Socket(socket)
 {
 	if (!dynamic_cast<SSLBase*>(get()))
-		throw Exception("Cannot assign incompatible socket");
+		throw std::runtime_error("Cannot assign incompatible socket");
 }
 */
-	//virtual void bind6(const Address& address, unsigned flags = 0) { throw Exception("Not implemented by protocol"); };
+	//virtual void bind6(const Address& address, unsigned flags = 0) { throw std::runtime_error("Not implemented by protocol"); };

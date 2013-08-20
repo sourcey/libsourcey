@@ -44,8 +44,8 @@ class MatrixConverter: public IPacketizer
 {
 public:
 	MatrixConverter() : 
-		_convCtx(nil),
-		_oframe(nil)
+		_convCtx(nullptr),
+		_oframe(nullptr)
 	{
 	}
 
@@ -70,35 +70,35 @@ public:
 	{
 		VideoPacket& vpacket = reinterpret_cast<VideoPacket&>(packet);
 		VideoDecoderContext* video = reinterpret_cast<VideoDecoderContext*>(packet.opaque);	
-		if (video == nil)
-			throw Exception("Matrix Converter: Video packets must contain a VideoDecoderContext pointer.");	
+		if (video == nullptr)
+			throw std::runtime_error("Matrix Converter: Video packets must contain a VideoDecoderContext pointer.");	
 		
 		// Create and allocate the conversion frame.
-		if (_oframe == nil) {
+		if (_oframe == nullptr) {
 			_oframe = avcodec_alloc_frame();	
-			if (_oframe == nil)
-				throw Exception("Matrix Converter: Could not allocate the output frame.");
+			if (_oframe == nullptr)
+				throw std::runtime_error("Matrix Converter: Could not allocate the output frame.");
 
 			avpicture_alloc(reinterpret_cast<AVPicture*>(_oframe), 
 				PIX_FMT_BGR24, video->ctx->width, video->ctx->height);
 		}
 	
 		// Convert the image from its native format to BGR.
-		if (_convCtx == nil) {
+		if (_convCtx == nullptr) {
 			_convCtx = sws_getContext(
 				video->ctx->width, video->ctx->height, video->ctx->pix_fmt, 
 				video->ctx->width, video->ctx->height, PIX_FMT_BGR24, 
-				SWS_BICUBIC, nil, nil, nil);
+				SWS_BICUBIC, nullptr, nullptr, nullptr);
 			_mat.create(video->ctx->height, video->ctx->width, CV_8UC(3));
 		}
-		if (_convCtx == nil)
-			throw Exception("Matrix Converter: Unable to initialize the conversion context.");	
+		if (_convCtx == nullptr)
+			throw std::runtime_error("Matrix Converter: Unable to initialize the conversion context.");	
 			
 		// Scales the source data according to our SwsContext settings.
 		if (sws_scale(_convCtx,
 			video->frame->data, video->frame->linesize, 0, video->ctx->height,
 			_oframe->data, _oframe->linesize) < 0)
-			throw Exception("Matrix Converter: Pixel format conversion not supported.");
+			throw std::runtime_error("Matrix Converter: Pixel format conversion not supported.");
 
 		// Populate the OpenCV Matrix.
 		for (int y = 0; y < video->ctx->height; y++) {

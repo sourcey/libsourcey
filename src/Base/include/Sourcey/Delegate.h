@@ -28,8 +28,7 @@
 namespace scy {
 	
 
-#define Void void*
-#define DelegateDefaultParams typename P = Void, typename P2 = Void, typename P3 = Void, typename P4 = Void
+#define DelegateDefaultParams typename P = void*, typename P2 = void*, typename P3 = void*, typename P4 = void*
 #define DefineCallbackFields										\
 																	\
 	DelegateCallback(C* object, Method method) :					\
@@ -47,20 +46,23 @@ namespace scy {
 #define DelegateVirtualFields(Class)								\
 																	\
 	virtual Class* clone() const = 0;								\
-	virtual Void object() const = 0;								\
+	virtual void* object() const = 0;								\
 	virtual void cancel() = 0;										\
 	virtual bool cancelled() const = 0;								\
 	virtual int priority() const = 0;								\
 	virtual bool equals(const Class*) const = 0;					\
-	virtual void emit(Void, P, P2, P3, P4) const = 0;			\
-	virtual bool accepts(Void, P, P2, P3, P4) { return true; }		\
+	virtual void emit(void*, P, P2, P3, P4) const = 0;			    \
+	virtual bool accepts(void*, P, P2, P3, P4) { return true; }		\
 	static bool ComparePrioroty(const Class* l, const Class* r) {	\
 		return l->priority() > r->priority();						\
 	}																\
 
 
-// -------------------------------------------------------------------
 //
+// Delegate callback functions
+//
+
+
 template<class C, int N, bool withSender = true, DelegateDefaultParams> 
 struct DelegateCallback 
 {
@@ -70,8 +72,8 @@ struct DelegateCallback
 template<class C>
 struct DelegateCallback<C, 0, true>
 {
-	typedef void (C::*Method)(Void);	
-	virtual void emit(Void sender, Void, Void, Void, Void) const {
+	typedef void (C::*Method)(void*);	
+	virtual void emit(void* sender, void*, void*, void*, void*) const {
 		(_object->*_method)(sender);
 	}
 
@@ -83,7 +85,7 @@ template<class C>
 struct DelegateCallback<C, 0, false>
 {
 	typedef void (C::*Method)();	
-	virtual void emit(Void sender, Void, Void, Void, Void) const {
+	virtual void emit(void* sender, void*, void*, void*, void*) const {
 		(_object->*_method)();
 	}
 
@@ -94,8 +96,8 @@ struct DelegateCallback<C, 0, false>
 template<class C, typename P>
 struct DelegateCallback<C, 1, true, P> 
 {
-	typedef void (C::*Method)(Void, P);	
-	virtual void emit(Void sender, P arg, Void, Void, Void) const {
+	typedef void (C::*Method)(void*, P);	
+	virtual void emit(void* sender, P arg, void*, void*, void*) const {
 		(_object->*_method)(sender, arg);
 	}
 
@@ -107,7 +109,7 @@ template<class C, typename P>
 struct DelegateCallback<C, 1, false, P> 
 {
 	typedef void (C::*Method)(P);	
-	virtual void emit(Void, P arg, Void, Void, Void) const 
+	virtual void emit(void*, P arg, void*, void*, void*) const 
 	{
 		(_object->*_method)(arg);
 	}
@@ -119,8 +121,8 @@ struct DelegateCallback<C, 1, false, P>
 template<class C, typename P, typename P2> 
 struct DelegateCallback<C, 2, true, P, P2> 
 {
-	typedef void (C::*Method)(Void, P, P2);	
-	virtual void emit(Void sender, P arg, P2 arg2, Void, Void) const 
+	typedef void (C::*Method)(void*, P, P2);	
+	virtual void emit(void* sender, P arg, P2 arg2, void*, void*) const 
 	{
 		(_object->*_method)(sender, arg, arg2);
 	}
@@ -133,7 +135,7 @@ template<class C, typename P, typename P2>
 struct DelegateCallback<C, 2, false, P, P2> 
 {
 	typedef void (C::*Method)(P, P2);	
-	virtual void emit(Void, P arg, P2 arg2, Void, Void) const 
+	virtual void emit(void*, P arg, P2 arg2, void*, void*) const 
 	{
 		(_object->*_method)(arg, arg2);
 	}
@@ -145,8 +147,8 @@ struct DelegateCallback<C, 2, false, P, P2>
 template<class C, typename P, typename P2, typename P3>
 struct DelegateCallback<C, 3, true, P, P2, P3> 
 {
-	typedef void (C::*Method)(Void, P, P2, P3);	
-	virtual void emit(Void sender, P arg, P2 arg2, P3 arg3, Void) const
+	typedef void (C::*Method)(void*, P, P2, P3);	
+	virtual void emit(void* sender, P arg, P2 arg2, P3 arg3, void*) const
 	{
 		(_object->*_method)(sender, arg, arg2, arg3);
 	}
@@ -159,7 +161,7 @@ template<class C, typename P, typename P2, typename P3>
 struct DelegateCallback<C, 3, false, P, P2, P3> 
 {
 	typedef void (C::*Method)(P, P2, P3);	
-	virtual void emit(Void, P arg, P2 arg2, P3 arg3, Void) const 
+	virtual void emit(void*, P arg, P2 arg2, P3 arg3, void*) const 
 	{
 		(_object->*_method)(arg, arg2, arg3);
 	}
@@ -171,8 +173,8 @@ struct DelegateCallback<C, 3, false, P, P2, P3>
 template<class C, typename P, typename P2, typename P3, typename P4> 
 struct DelegateCallback<C, 4, true, P, P2, P3, P4> 
 {
-	typedef void (C::*Method)(Void, P, P2, P3, P4);	
-	virtual void emit(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) const 
+	typedef void (C::*Method)(void*, P, P2, P3, P4);	
+	virtual void emit(void* sender, P arg, P2 arg2, P3 arg3, P4 arg4) const 
 	{
 		(_object->*_method)(sender, arg, arg2, arg3, arg4);
 	}
@@ -185,7 +187,7 @@ template<class C, typename P, typename P2, typename P3, typename P4>
 struct DelegateCallback<C, 4, false, P, P2, P3, P4> 
 {
 	typedef void (C::*Method)(P, P2, P3, P4);	
-	virtual void emit(Void, P arg, P2 arg2, P3 arg3, P4 arg4) const 
+	virtual void emit(void*, P arg, P2 arg2, P3 arg3, P4 arg4) const 
 	{
 		(_object->*_method)(arg, arg2, arg3, arg4);
 	}
@@ -194,26 +196,32 @@ struct DelegateCallback<C, 4, false, P, P2, P3, P4>
 };
 
 
-// -------------------------------------------------------------------
 //
+// Delegate virtual base
+//
+
+
 template <DelegateDefaultParams>
 struct DelegateBase
-	// The abstract class for all instantiations of the Delegate
-	// template classes.
+	// The abstract base for all instantiations of the
+	// Delegate template classes.
 {
-	typedef /*typename*/ Void DataT;
-	Void data;
+	typedef void* DataT;
+	void* data;
 
 	DelegateBase(DataT data = 0) : data(data) {};
 	DelegateBase(const DelegateBase& r) : data(r.data) {};
 	DelegateVirtualFields(DelegateBase)
 
-	//virtual bool accepts(Void, P, P2, P3, P4) const { return true; };
+	//virtual bool accepts(void*, P, P2, P3, P4) const { return true; };
 };
 
 
-// -------------------------------------------------------------------
 //
+// Delegate implementation
+//
+
+
 template <class C, class BaseT, class CallbackT, DelegateDefaultParams>
 class Delegate: public BaseT, public CallbackT
 	// This template class implements an adapter that sits between
@@ -254,7 +262,7 @@ public:
 		return new Delegate(*this);
 	}
 	
-	void emit(Void sender, P arg, P2 arg2, P3 arg3, P4 arg4) const 
+	void emit(void* sender, P arg, P2 arg2, P3 arg3, P4 arg4) const 
 	{
 		if (!_cancelled)
 			CallbackT::emit(sender, arg, arg2, arg3, arg4);
@@ -271,7 +279,7 @@ public:
 	void cancel() { _cancelled = true; };
 	bool cancelled() const { return _cancelled; };
 	int priority() const { return _priority; };
-	Void object() const { return CallbackT::_object; };	
+	void* object() const { return CallbackT::_object; };	
 
 protected:
 	Delegate();
@@ -281,13 +289,16 @@ protected:
 };
 
 
-// -------------------------------------------------------------------
 //
+// Delegate inline specializations
+//
+
+
 template <class C>
 static Delegate<C, 
 	DelegateBase<>, 
 	DelegateCallback<C, 0, true>
-> delegate(C* pObj, void (C::*Method)(Void), int priority = 0) 
+> delegate(C* pObj, void (C::*Method)(void*), int priority = 0) 
 {
 	return Delegate<C,
 		DelegateBase<>,
@@ -300,7 +311,7 @@ template <class C, typename P>
 static Delegate<C, 
 	DelegateBase<P>, 
 	DelegateCallback<C, 1, true, P>, P
-> delegate(C* pObj, void (C::*Method)(Void,P), int priority = 0) 
+> delegate(C* pObj, void (C::*Method)(void*,P), int priority = 0) 
 {
 	return Delegate<C, 
 		DelegateBase<P>, 
@@ -313,7 +324,7 @@ template <class C, typename P, typename P2>
 static Delegate<C, 
 	DelegateBase<P, P2>,
 	DelegateCallback<C, 2, true, P, P2>, P, P2
-> delegate(C* pObj, void (C::*Method)(Void, P, P2), int priority = 0) 
+> delegate(C* pObj, void (C::*Method)(void*, P, P2), int priority = 0) 
 {
 	return Delegate<C, 
 		DelegateBase<P, P2>, 
@@ -326,7 +337,7 @@ template <class C, typename P, typename P2, typename P3>
 static Delegate<C, 
 	DelegateBase<P, P2, P3>, 
 	DelegateCallback<C, 3, true, P, P2, P3>, P, P2, P3
-> delegate(C* pObj, void (C::*Method)(Void, P, P2, P3), int priority = 0) 
+> delegate(C* pObj, void (C::*Method)(void*, P, P2, P3), int priority = 0) 
 {
 	return Delegate<C, 
 		DelegateBase<P, P2, P3>,
@@ -339,7 +350,7 @@ template <class C, typename P, typename P2, typename P3, typename P4>
 static Delegate<C, 
 	DelegateBase<P, P2, P3, P4>, 
 	DelegateCallback<C, 4, true, P, P2, P3, P4>, P, P2, P3, P4
-> delegate(C* pObj, void (C::*Method)(Void, P, P2, P3, P4), int priority = 0) 
+> delegate(C* pObj, void (C::*Method)(void*, P, P2, P3, P4), int priority = 0) 
 {
 	return Delegate<C, 
 		DelegateBase<P, P2, P3, P4>, 

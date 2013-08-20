@@ -30,19 +30,19 @@ namespace av {
 
 
 VideoContext::VideoContext() :
-	stream(nil),
-	codec(nil),
-	frame(nil),
+	stream(nullptr),
+	codec(nullptr),
+	frame(nullptr),
 	pts(0.0)
 {
-	traceL("VideoContext", this) << "Creating" << endl;
+	traceL("VideoContext", this) << "create" << endl;
 	//reset();
 }
 	
 
 VideoContext::~VideoContext()
 {	
-	traceL("VideoContext", this) << "Destroying" << endl;
+	traceL("VideoContext", this) << "destroy" << endl;
 	
 	//assert((!frame && !codec && !stream) && "video context must be closed");
 	close();
@@ -61,8 +61,8 @@ void VideoContext::open()
 	assert(codec);
 
 	// Open the video codec
-	if (avcodec_open2(ctx, codec, nil) < 0)
-   		throw Exception("Cannot open the video codec.");
+	if (avcodec_open2(ctx, codec, nullptr) < 0)
+   		throw std::runtime_error("Cannot open the video codec.");
 }
 
 
@@ -72,17 +72,17 @@ void VideoContext::close()
 
 	if (frame) {
 		av_free(frame);
-		frame = nil;
+		frame = nullptr;
 	}
 
 	if (ctx) {
 		avcodec_close(ctx);
-		ctx = nil;
+		ctx = nullptr;
 	}
 
 	// Streams are managed differently by each impl
 	//if (stream)	{
-		//stream = nil;
+		//stream = nullptr;
 		// Note: The stream is managed by the AVFormatContext
 		//av_freep(stream);
 	//}
@@ -99,8 +99,8 @@ void VideoContext::close()
 //
 VideoEncoderContext::VideoEncoderContext(AVFormatContext* format) :
 	format(format),
-	conv(nil),
-	buffer(nil),
+	conv(nullptr),
+	buffer(nullptr),
 	bufferSize(0)
 {
 }
@@ -114,7 +114,7 @@ VideoEncoderContext::~VideoEncoderContext()
 
 void VideoEncoderContext::create() //, const VideoCodec& params
 {
-	traceL("VideoEncoderContext", this) << "Creating: " 
+	traceL("VideoEncoderContext", this) << "create: " 
 		<< "\n\tInput: " << iparams.toString() 
 		<< "\n\tOutput: " << oparams.toString() 
 		<< endl;
@@ -126,7 +126,7 @@ void VideoEncoderContext::create() //, const VideoCodec& params
 	if (!codec) {
 		codec = avcodec_find_encoder(format->oformat->video_codec);
 		if (!codec)
-   			throw Exception("Video encoder not found.");
+   			throw std::runtime_error("Video encoder not found.");
 	}
 
 	format->oformat->video_codec = codec->id;
@@ -135,7 +135,7 @@ void VideoEncoderContext::create() //, const VideoCodec& params
 	// codec to the format context's streams[] array.
 	stream = avformat_new_stream(format, codec);
 	if (!stream)
-		throw Exception("Cannot create video stream.");	
+		throw std::runtime_error("Cannot create video stream.");	
 	
 	/*
 	// fixme: testing realtime streams
@@ -163,7 +163,7 @@ void VideoEncoderContext::create() //, const VideoCodec& params
 	// Allocate the input frame
 	frame = createVideoFrame(av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
 	if (!frame)
-		throw Exception("Cannot allocate input frame.");
+		throw std::runtime_error("Cannot allocate input frame.");
 	
 	// Allocate the encode buffer
 	// XXX: Disabling in favor of encoder manged buffer
@@ -175,7 +175,7 @@ void VideoEncoderContext::create() //, const VideoCodec& params
 void VideoEncoderContext::createConverter()
 {
 	if (conv)
-		throw Exception("A conversion context already exists.");
+		throw std::runtime_error("A conversion context already exists.");
 		
 	// Create the conversion context
 	if (iparams.width != oparams.width ||
@@ -191,12 +191,12 @@ void VideoEncoderContext::freeConverter()
 {
 	if (conv) {
 		delete conv;
-		conv = nil;
+		conv = nullptr;
 	}
 
 	//if (frame) {
 	//	av_free(frame);
-	//	frame = nil;
+	//	frame = nullptr;
 	//}
 }
  
@@ -212,7 +212,7 @@ void VideoEncoderContext::close()
 	/*
 	if (buffer) {
 		av_free(buffer);
-		buffer = nil;
+		buffer = nullptr;
 	}
 	
 	// Free the stream
@@ -222,7 +222,7 @@ void VideoEncoderContext::close()
 				traceL("VideoContext", this) << "Closing: Removing Stream: " << stream << endl;
 				av_freep(&format->streams[i]->codec);
 				av_freep(&format->streams[i]);
-				stream = nil;
+				stream = nullptr;
 				format->nb_streams--;
 			}
 		}
@@ -275,7 +275,7 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 
     av_init_packet(&opacket);	
     opacket.stream_index = stream->index;
-	opacket.data = nil; // using encoder assigned buffer
+	opacket.data = nullptr; // using encoder assigned buffer
 	opacket.size = 0;
 	//opacket.data = this->buffer;
 	//opacket.size = this->bufferSize;
@@ -286,7 +286,7 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 		// TODO: Use av_strerror
 		error = "Fatal Encoder Error";
 		errorL("VideoEncoderContext", this) << error << endl;
-		throw Exception(error);
+		throw std::runtime_error(error);
     }
 	
 	if (frameEncoded) {
@@ -316,15 +316,15 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 bool VideoEncoderContext::flush(AVPacket& opacket)
 {	
 	av_init_packet(&opacket);
-	opacket.data = nil;
+	opacket.data = nullptr;
 	opacket.size = 0;
 	
 	int frameEncoded = 0;
-	if (avcodec_encode_video2(ctx, &opacket, nil, &frameEncoded) < 0) {
+	if (avcodec_encode_video2(ctx, &opacket, nullptr, &frameEncoded) < 0) {
 		// TODO: Use av_strerror
 		error = "Fatal Encoder Error";
 		errorL("VideoEncoderContext", this) << error << endl;
-		throw Exception(error);
+		throw std::runtime_error(error);
     }
 	
 	if (frameEncoded) {
@@ -349,8 +349,8 @@ bool VideoEncoderContext::flush(AVPacket& opacket)
 
 
 VideoCodecEncoderContext::VideoCodecEncoderContext() :
-	conv(nil),
-	buffer(nil),
+	conv(nullptr),
+	buffer(nullptr),
 	bufferSize(0)
 {
 }
@@ -364,7 +364,7 @@ VideoCodecEncoderContext::~VideoCodecEncoderContext()
 
 void VideoCodecEncoderContext::create()
 {
-	traceL("VideoCodecEncoderContext", this) << "Creating: " 
+	traceL("VideoCodecEncoderContext", this) << "create: " 
 		<< "\n\tInput: " << iparams.toString() 
 		<< "\n\tOutput: " << oparams.toString() 
 		<< endl;
@@ -376,11 +376,11 @@ void VideoCodecEncoderContext::create()
 	// Find the video encoder
 	codec = avcodec_find_encoder_by_name(oparams.encoder.c_str());
 	if (!codec)
-   		throw Exception("Video encoder not found.");
+   		throw std::runtime_error("Video encoder not found.");
 
     ctx = avcodec_alloc_context();
     if (!ctx)
-        throw Exception("Cannot allocate encoder context.");	
+        throw std::runtime_error("Cannot allocate encoder context.");	
 
 	initVideoEncoderContext(ctx, codec, oparams);
 		
@@ -395,7 +395,7 @@ void VideoCodecEncoderContext::create()
 	// Allocate the input frame
 	frame = createVideoFrame(ctx->pix_fmt, iparams.width, iparams.height);
 	if (!frame)
-		throw Exception("Cannot allocate input frame.");
+		throw std::runtime_error("Cannot allocate input frame.");
 	
 	// Allocate the encode buffer
 	// XXX: Disabling in favor of encoder manged buffer
@@ -412,12 +412,12 @@ void VideoCodecEncoderContext::close()
 	
 	if (conv) {
 		delete conv;
-		conv = nil;
+		conv = nullptr;
 	}
 
 	if (buffer) {
 		av_free(buffer);
-		buffer = nil;
+		buffer = nullptr;
 	}
 }
 
@@ -436,7 +436,7 @@ bool VideoCodecEncoderContext::encode(unsigned char* data, int size, AVPacket& o
 
 bool VideoCodecEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 {	
-	assert(stream == nil);
+	assert(stream == nullptr);
 	assert(ipacket.data);
 	assert(frame);
 	assert(conv);
@@ -461,7 +461,7 @@ bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 	oframe->pts = iframe->pts;
 
     av_init_packet(&opacket);	
-	opacket.data = nil;
+	opacket.data = nullptr;
 	opacket.size = 0;
 	//opacket.data = this->buffer; // use our buffer, not ffmpeg assigned
 	//opacket.size = this->bufferSize;
@@ -470,7 +470,7 @@ bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 	if (avcodec_encode_video2(ctx, &opacket, oframe, &frameEncoded) < 0) {
 		error = "Fatal Encoder Error";
 		errorL("VideoCodecEncoderContext", this) << "Fatal Encoder Error" << endl;
-		throw Exception(error);
+		throw std::runtime_error(error);
     }
 
 	if (frameEncoded) {		
@@ -508,7 +508,7 @@ VideoDecoderContext::~VideoDecoderContext()
 
 void VideoDecoderContext::create(AVFormatContext *ic, int streamID)
 {	
-	traceL("VideoDecoderContext", this) << "Creating: " << streamID << endl;
+	traceL("VideoDecoderContext", this) << "create: " << streamID << endl;
 	VideoContext::create();
 
 	assert(ic);
@@ -519,11 +519,11 @@ void VideoDecoderContext::create(AVFormatContext *ic, int streamID)
 
 	codec = avcodec_find_decoder(this->ctx->codec_id);	
 	if (!codec)
-		throw Exception("Video codec missing or unsupported.");
+		throw std::runtime_error("Video codec missing or unsupported.");
 	
 	this->frame = avcodec_alloc_frame();
-	if (this->frame == nil)
-		throw Exception("Could not allocate video input frame.");
+	if (this->frame == nullptr)
+		throw std::runtime_error("Could not allocate video input frame.");
 }
 
 
@@ -553,14 +553,14 @@ bool VideoDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 	int bytesRemaining = ipacket.size;
 	
 	av_init_packet(&opacket);
-	opacket.data = nil;
+	opacket.data = nullptr;
 	opacket.size = 0;
 	
 	bytesDecoded = avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
 	if (bytesDecoded < 0) {
 		error = "Decoder error";
 		errorL("VideoDecoderContext", this) << "" << error << endl;
-		throw Exception(error);
+		throw std::runtime_error(error);
 	}
 
 	// XXX: Asserting here to make sure below looping 
@@ -570,7 +570,7 @@ bool VideoDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 	// {
 	// 	 int ret = avcodec_decode_video2(..., ipacket);
 	// 	 if(ret < -1)
-	//		throw std::exception("error");
+	//		throw std::runtime_error("error");
 	//
 	//	 ipacket->size -= ret;
 	//	 ipacket->data += ret;
@@ -609,11 +609,11 @@ bool VideoDecoderContext::flush(AVPacket& opacket)
 {	
 	AVPacket ipacket;
 	av_init_packet(&ipacket);
-	ipacket.data = nil;
+	ipacket.data = nullptr;
 	ipacket.size = 0;
 
 	av_init_packet(&opacket);
-	opacket.data = nil;
+	opacket.data = nullptr;
 	opacket.size = 0;
 	
 	int frameDecoded = 0;
@@ -633,8 +633,8 @@ bool VideoDecoderContext::flush(AVPacket& opacket)
 
 
 VideoConversionContext::VideoConversionContext() :
-	oframe(nil),
-	ctx(nil)
+	oframe(nullptr),
+	ctx(nullptr)
 {
 }
 	
@@ -647,7 +647,7 @@ VideoConversionContext::~VideoConversionContext()
 
 void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec& oparams)
 {
-	traceL("VideoConversionContext", this) << "Creating:" 
+	traceL("VideoConversionContext", this) << "create:" 
 		<< "\n\tInput Width: " << iparams.width
 		<< "\n\tInput Height: " << iparams.height
 		<< "\n\tInput Pixel Format: " << iparams.pixelFmt
@@ -657,7 +657,7 @@ void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec&
 		<< endl;
 
     if (ctx)
-        throw Exception("Conversion context already initialized.");
+        throw std::runtime_error("Conversion context already initialized.");
 
 	//assert(av_get_pix_fmt(oparams.pixelFmt) == );
 
@@ -669,14 +669,14 @@ void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec&
 	ctx = sws_getContext(
 		iparams.width, iparams.height, av_get_pix_fmt(iparams.pixelFmt),
         oparams.width, oparams.height, av_get_pix_fmt(oparams.pixelFmt), 
-		/* SWS_FAST_BILINEAR */SWS_BICUBIC, nil, nil, nil);
+		/* SWS_FAST_BILINEAR */SWS_BICUBIC, nullptr, nullptr, nullptr);
     if (!ctx) 
-        throw Exception("Invalid conversion context.");
+        throw std::runtime_error("Invalid conversion context.");
 
 	this->iparams = iparams;
 	this->oparams = oparams;
 	
-	traceL("VideoConversionContext", this) << "Creating: OK" << endl;
+	traceL("VideoConversionContext", this) << "create: OK" << endl;
 }
 	
 
@@ -686,12 +686,12 @@ void VideoConversionContext::free()
 
 	if (oframe) {
 		av_free(oframe);
-		oframe = nil;
+		oframe = nullptr;
 	}
 	
 	if (ctx) {
 		sws_freeContext(ctx);
-		ctx = nil;
+		ctx = nullptr;
 	}
 
 	traceL("VideoConversionContext", this) << "Closing: OK" << endl;
@@ -704,12 +704,12 @@ AVFrame* VideoConversionContext::convert(AVFrame* iframe)
 	assert(iframe->data[0]);
 
     if (!ctx)
-        throw Exception("Conversion context must be initialized.");
+        throw std::runtime_error("Conversion context must be initialized.");
 
 	if (sws_scale(ctx,
 		iframe->data, iframe->linesize, 0, iparams.height,
 		oframe->data, oframe->linesize) < 0)
-		throw Exception("Pixel format conversion not supported.");
+		throw std::runtime_error("Pixel format conversion not supported.");
 
 	return oframe;
 }
@@ -724,13 +724,13 @@ AVFrame* createVideoFrame(::PixelFormat pixelFmt, int width, int height)
 {
     AVFrame* picture = avcodec_alloc_frame();
     if (!picture)
-        return nil;
+        return nullptr;
 	
     int size = avpicture_get_size(pixelFmt, width, height);
     UInt8* buffer = (UInt8*)av_malloc(size);
     if (!buffer) {
         av_free(picture);
-        return nil;
+        return nullptr;
 	}
 		
 	avpicture_fill(reinterpret_cast<AVPicture*>(picture), buffer, pixelFmt, width, height);
@@ -948,8 +948,8 @@ void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
         av_opt_set(ctx->priv_data, "preset", "veryfast", 0); // slow // baseline
 
 	// Open the video codec
-	if (avcodec_open2(ctx, codec, nil) < 0)
-   		throw Exception("Cannot open the video codec.");
+	if (avcodec_open2(ctx, codec, nullptr) < 0)
+   		throw std::runtime_error("Cannot open the video codec.");
 	*/
 	
 
@@ -1036,27 +1036,27 @@ void VideoEncoderContext::reset()
 	//	sws_freeContext(convCtx);
     //if (buffer)
     //    av_free(buffer);
-	//packet = nil;
-	//convCtx = nil;
-	//oframe = nil;
+	//packet = nullptr;
+	//convCtx = nullptr;
+	//oframe = nullptr;
 		
 	//bufferSize = 0;
-	//buffer = nil;
+	//buffer = nullptr;
 
 	// Allocate the output frame
 	//oframe = createVideoFrame(ctx->pix_fmt, ctx->width, ctx->height);
 	//if (!oframe)
-	//	throw Exception("Cannot allocate output frame.");
+	//	throw std::runtime_error("Cannot allocate output frame.");
 	
 	
 	/*
 	// Initialize scale conversion context if uninitialized or if the
 	// video input size has changed.
-	if (convCtx == nil) {
+	if (convCtx == nullptr) {
 		convCtx = sws_getContext(
 			iparams.width, iparams.height, (::PixelFormat)iparams.pixelFmt, 
 			ctx->width, ctx->height, ctx->pix_fmt,
-			SWS_BICUBIC, nil, nil, nil);
+			SWS_BICUBIC, nullptr, nullptr, nullptr);
 
 		traceL("VideoEncoderContext", this) << "Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << iparams.width
@@ -1070,7 +1070,7 @@ void VideoEncoderContext::reset()
 	if (sws_scale(convCtx,
 		frame->data, frame->linesize, 0, iparams.height,
 		oframe->data, oframe->linesize) < 0)
-		throw Exception("Pixel format conversion not supported.");
+		throw std::runtime_error("Pixel format conversion not supported.");
 		*/
 	/*
 	int len = avcodec_encode_video(ctx, this->buffer, this->bufferSize, oframe);
@@ -1121,9 +1121,9 @@ void VideoEncoderContext::reset()
 /*
 void VideoContext::reset()
 {
-	stream = nil;
-	codec = nil;
-	frame = nil;
+	stream = nullptr;
+	codec = nullptr;
+	frame = nullptr;
 
 	pts = 0.0;
 
@@ -1180,11 +1180,11 @@ void VideoContext::reset()
 	/*
 	// Initialize scale conversion context if uninitialized or if the
 	// video input size has changed.
-	if (convCtx == nil) {
+	if (convCtx == nullptr) {
 		convCtx = sws_getContext(
 			iparams.width, iparams.height, (::PixelFormat)iparams.pixelFmt, 
 			ctx->width, ctx->height, ctx->pix_fmt,
-			SWS_BICUBIC, nil, nil, nil);
+			SWS_BICUBIC, nullptr, nullptr, nullptr);
 
 		traceL("VideoEncoderContext", this) << "Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << iparams.width
@@ -1198,7 +1198,7 @@ void VideoContext::reset()
 	if (sws_scale(convCtx,
 		frame->data, frame->linesize, 0, iparams.height,
 		oframe->data, oframe->linesize) < 0)
-		throw Exception("Pixel format conversion not supported.");
+		throw std::runtime_error("Pixel format conversion not supported.");
 		*/
 	
 	/*
@@ -1249,7 +1249,7 @@ void VideoContext::reset()
 02033                 pkt.dts = av_rescale_q(pkt.dts, enc->time_base, ost->st->time_base);
 02034 
 02035             if (debug_ts) {
-02036                 av_log(nil, AV_LOG_INFO, "encoder -> type:video "
+02036                 av_log(nullptr, AV_LOG_INFO, "encoder -> type:video "
 02037                     "pkt_pts:%s pkt_pts_time:%s pkt_dts:%s pkt_dts_time:%s\n",
 02038                     av_ts2str(pkt.pts), av_ts2timestr(pkt.pts, &ost->st->time_base),
 02039                     av_ts2str(pkt.dts), av_ts2timestr(pkt.dts, &ost->st->time_base));
@@ -1341,11 +1341,11 @@ double VideoContext::pts()
 	/*
 	// Initialize scale conversion context if uninitialized or if the
 	// video input size has changed.
-	if (convCtx == nil) {
+	if (convCtx == nullptr) {
 		convCtx = sws_getContext(
 			width, height, (::PixelFormat)iparams.pixelFmt, //static_cast<::PixelFormat>()
 			ctx->width, ctx->height, ctx->pix_fmt,
-			SWS_BICUBIC, nil, nil, nil);
+			SWS_BICUBIC, nullptr, nullptr, nullptr);
 
 		traceL() << "[AVEncoder" << this << "] Initializing Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << width
@@ -1360,7 +1360,7 @@ double VideoContext::pts()
 	if (sws_scale(convCtx,
 		frame->data, frame->linesize, 0, height,
 		oframe->data, oframe->linesize) < 0)
-		throw Exception("Pixel format conversion not supported");
+		throw std::runtime_error("Pixel format conversion not supported");
 
 	if (oc->oformat->flags & AVFMT_RAWPICTURE) {
 		AVPacket opacket;
@@ -1373,7 +1373,7 @@ double VideoContext::pts()
 		int result = av_interleaved_write_frame(oc, &opacket);
 		if (result < 0) {
 			errorL() << "[AVEncoder" << this << "] Cannot write video frame." << endl;
-			//throw Exception("Cannot write video frame");
+			//throw std::runtime_error("Cannot write video frame");
 			return false;
 		}
 	} 
@@ -1418,8 +1418,8 @@ double VideoContext::pts()
 	*/
 
 	//this->oframe = avcodec_alloc_frame();	
-	//if (this->oframe == nil)
-	//	throw Exception("Could not allocate the output frame");
+	//if (this->oframe == nullptr)
+	//	throw std::runtime_error("Could not allocate the output frame");
 	
     //this->packet = (AVPacket*)av_mallocz(sizeof(AVPacket));
     //av_init_packet(this->packet);
@@ -1432,11 +1432,11 @@ double VideoContext::pts()
     codec = stream->codec;
 
     AVCodec* c = avcodec_find_decoder (ctx->codec_id);
-    if (c == nil)
-		throw Exception("The video codec is missing or unsupported");
+    if (c == nullptr)
+		throw std::runtime_error("The video codec is missing or unsupported");
 
     if (avcodec_open(ctx, c) < 0)
-		throw Exception("Could not open the video codec");
+		throw std::runtime_error("Could not open the video codec");
 
     switch (ctx->sample_fmt) {
     case SAMPLE_FMT_S16:
@@ -1456,7 +1456,7 @@ double VideoContext::pts()
         fp = true;
         break;
     default:
-		throw Exception("Unsupported video sample format");
+		throw std::runtime_error("Unsupported video sample format");
     }
 
     bufferSize = MAX_AUDIO_PACKET_SIZE;
@@ -1479,11 +1479,11 @@ double VideoContext::pts()
 	/*
 	// Initialize scale conversion context if uninitialized or if the
 	// video input size has changed.
-	if (convCtx == nil) {
+	if (convCtx == nullptr) {
 		convCtx = sws_getContext(
 			width, height, (::PixelFormat)iparams.pixelFmt, //static_cast<::PixelFormat>()
 			ctx->width, ctx->height, ctx->pix_fmt,
-			SWS_BICUBIC, nil, nil, nil);
+			SWS_BICUBIC, nullptr, nullptr, nullptr);
 
 		traceL() << "[AVEncoder" << this << "] Initializing Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << width
@@ -1498,16 +1498,16 @@ double VideoContext::pts()
 	if (sws_scale(convCtx,
 		frame->data, frame->linesize, 0, height,
 		oframe->data, oframe->linesize) < 0)
-		throw Exception("Pixel format conversion not supported");
+		throw std::runtime_error("Pixel format conversion not supported");
 
 	// Convert the image from its native format to BGR.
-	if (convCtx == nil)
+	if (convCtx == nullptr)
 		convCtx = sws_getContext(
 			ctx->width, ctx->height, ctx->pix_fmt, 
 			ctx->width, ctx->height, PIX_FMT_BGR24, 
-			SWS_BICUBIC, nil, nil, nil);
-	if (convCtx == nil)
-		throw Exception("Cannot initialize the video conversion context");	
+			SWS_BICUBIC, nullptr, nullptr, nullptr);
+	if (convCtx == nullptr)
+		throw std::runtime_error("Cannot initialize the video conversion context");	
 			
 	// Scales the data in src according to our settings in our SwsContext.
 	sws_scale(

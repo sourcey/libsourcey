@@ -29,7 +29,7 @@
 //#include "Sourcey/Application.h"
 //#include "Poco/Format.h"
 //#include "Poco/URI.h"
-#include "Sourcey/Containers.h"
+#include "Sourcey/Collection.h"
 
 
 namespace scy {
@@ -64,7 +64,7 @@ struct ClientState: public State
 	
 // ---------------------------------------------------------------------
 //
-class Client: public Stateful<ClientState>, public PacketSignal, public Polymorphic
+class Client: public Stateful<ClientState>, public PacketSignal, public basic::Polymorphic
 {
 public:
 	Client(net::SocketBase* socket, uv::Loop& loop = uv::defaultLoop());
@@ -133,7 +133,7 @@ protected:
 	//mutable Mutex	_mutex;
 	
 	uv::Loop& _loop;
-	StringVec _protocols;
+	std::vector<std::string> _protocols;
 	std::string _sessionID;
 	std::string _host;
 	UInt16 _port;
@@ -312,7 +312,7 @@ typedef sockio::ClientBase<
 //		assert(_serverAddr.valid());
 //
 //		if (isActive())
-//			throw Exception("The SocketIO Socket is already active.");
+//			throw std::runtime_error("The SocketIO Socket is already active.");
 //
 //		Log("debug", this) << "Connecting to " << _uri.toString() << std::endl;
 //
@@ -333,7 +333,7 @@ typedef sockio::ClientBase<
 //	{
 //		// NOTE: No need for mutex lock because this method is called from connect()
 //	
-//		Log("trace", this) << "Sending Handshake" << std::endl;	
+//		Log("trace", this) << "send Handshake" << std::endl;	
 //	
 //		Poco::URI uri("http://" + _serverAddr.toString() + "/socket.io/1/");	
 //		if (_socket->transport() == Net::SSLTCP)
@@ -351,18 +351,18 @@ typedef sockio::ClientBase<
 //			<< std::endl;
 //		
 //		// The server can respond in three different ways:
-//		// 401 Unauthorized: If the server refuses to authorize the client to connect, 
+//		// 401 NotAuthorized: If the server refuses to authorize the client to connect, 
 //		//		based on the supplied information (eg: Cookie header or custom query components).
 //		// 503 Service Unavailable: If the server refuses the connection for any reason (eg: overload).
 //		// 200 OK: The handshake was successful.
 //		if (response.getStatus() != 200)
-//			throw Exception(Poco::format("SocketIO handshake failed: HTTP Error: %d %s", 
+//			throw std::runtime_error(Poco::format("SocketIO handshake failed: HTTP Error: %d %s", 
 //				static_cast<int>(response.getStatus()), response.getReason()));
 //
 //		// Parse the response response
-//		StringVec respData = util::split(response.body.str(), ':', 4);
+//		std::vector<std::string> respData = util::split(response.body.str(), ':', 4);
 //		if (respData.size() < 4)
-//			throw Exception(response.empty() ? 
+//			throw std::runtime_error(response.empty() ? 
 //				"Invalid SocketIO handshake response." : Poco::format(
 //				"Invalid SocketIO handshake response: %s", response.body.str()));
 //	
@@ -382,7 +382,7 @@ typedef sockio::ClientBase<
 //		}
 //
 //		if (!wsSupported)
-//			throw Exception("The SocketIO server does not support WebSockets.");
+//			throw std::runtime_error("The SocketIO server does not support WebSockets.");
 //	}
 //
 //
@@ -472,8 +472,8 @@ typedef sockio::ClientBase<
 //			try {
 //				connect();
 //			} 
-//			catch (Exception& exc) {			
-//				Log("error", this) << "Reconnection attempt failed: " << exc.message() << std::endl;
+//			catch (std::exception& exc/*Exception& exc*/) {			
+//				Log("error", this) << "Reconnection attempt failed: " << exc.what()/*message()*/ << std::endl;
 //			}	
 //		}
 //	}
@@ -522,7 +522,7 @@ typedef sockio::ClientBase<
 //	mutable Mutex	_mutex;
 //	
 //	net::Address	_serverAddr;
-//	StringVec		_protocols;
+//	std::vector<std::string>		_protocols;
 //	std::string		_sessionID;
 //	int				_heartBeatTimeout;
 //	int				_connectionClosingTimeout;

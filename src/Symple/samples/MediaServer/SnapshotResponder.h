@@ -40,12 +40,14 @@ public:
 			<< "\n\tInput Size: " << frame.total() 
 			<< "\n\tOutput Size: " << buffer.size()
 			<< std::endl;
+		
+		//unsigned char* data = new unsigned char[buffer.size()];
+		//std::copy(buffer.begin(), buffer.end(), data);
+		//connection().send((const char*)data, buffer.size());
+		//delete data;
 
-		unsigned char* data = new unsigned char[buffer.size()];
-		std::copy(buffer.begin(), buffer.end(), data);
 		connection().response().set("Access-Control-Allow-Origin", "*");
-		connection().send((const char*)data, buffer.size());
-		delete data;
+		connection().send((const char*)&buffer[0], buffer.size());
 		connection().close();
 	}
 	

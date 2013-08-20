@@ -52,7 +52,7 @@ inline void loadFile(json::Value& root, const std::string& path)
 	bool res = reader.parse(infile, root);
 	infile.close();
 	if (!res)
-		throw Exception("Invalid JSON format: " + reader.getFormatedErrorMessages());
+		throw std::runtime_error("Invalid JSON format: " + reader.getFormatedErrorMessages());
 }
 
 
@@ -98,14 +98,14 @@ inline std::string stringify(const json::Value& root, bool pretty = false)
 inline void assertMember(const json::Value& root,  const std::string& name) 
 {
 	if (!root.isMember(name))
-		throw Exception("A '" + name + "' member is required.");
+		throw std::runtime_error("A '" + name + "' member is required.");
 }
 
 
 inline void countNestedKeys(json::Value& root, const std::string& key, int& count, int depth = 0) 
 {
 	depth++;
-	for (json::ValueIterator it = root.begin(); it != root.end(); it++) {
+	for (auto it = root.begin(); it != root.end(); it++) {
 		if ((*it).isObject() && 
 			(*it).isMember(key))
 			count++;
@@ -117,7 +117,7 @@ inline void countNestedKeys(json::Value& root, const std::string& key, int& coun
 inline bool hasNestedKey(json::Value& root, const std::string& key, int depth = 0) 
 {
 	depth++;
-	for (json::ValueIterator it = root.begin(); it != root.end(); it++) {
+	for (auto it = root.begin(); it != root.end(); it++) {
 		if ((*it).isObject() && 
 			(*it).isMember(key))
 			return true;

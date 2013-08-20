@@ -518,7 +518,7 @@ bool Agent::generateSDP(SDP::Message& sdp)
 // ---------------------------------------------------------------------
 // Media Stream Functions
 //
-MediaStream* Agent::createMediaStream(const string& title, int nComponents, const string& mediaType, const string& mediaProfile) 
+MediaStream* Agent::createMediaStream(const std::string& title, int nComponents, const std::string& mediaType, const std::string& mediaProfile) 
 {	
 	MediaStream* stream = new MediaStream(*this, _streams.size() + 1, title, nComponents, mediaType, mediaProfile);
 	tryAddMediaStream(stream);

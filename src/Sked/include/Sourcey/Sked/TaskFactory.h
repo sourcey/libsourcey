@@ -26,7 +26,7 @@
 #include "Sourcey/Sked/Trigger.h"
 
 
-#include "Poco/Event.h"
+//#include "Poco/Event.h"
 #include "Sourcey/Singleton.h"
 
 #include <vector>
@@ -69,7 +69,7 @@ public:
 		Mutex::ScopedLock lock(_mutex);
         TaskMap::iterator it = _tasks.find(type);
         if (it == _tasks.end())
-			throw Exception("Failed to create scheduled task: " + type);
+			throw std::runtime_error("Failed to create scheduled task: " + type);
         return it->second();
     }
 	
@@ -106,7 +106,7 @@ public:
 		Mutex::ScopedLock lock(_mutex);
         TriggerMap::iterator it = _triggers.find(type);
         if (it == _triggers.end())
-			throw Exception("Failed to create scheduled trigger: " + type);
+			throw std::runtime_error("Failed to create scheduled trigger: " + type);
         return it->second();
     }
 	

@@ -35,12 +35,19 @@
 
 namespace scy {
 	
+	
+enum class ByteOrder
+{
+	Network = 0,  // Default, use network byte order (big endian).
+	Host,         // Use the native order of the host.
+};
 
-inline void set8(void* memory, size_t offset, UInt8 v) {
+
+inline void set8(void* memory, std::size_t offset, UInt8 v) {
 	static_cast<UInt8*>(memory)[offset] = v;
 }
 
-inline UInt8 get8(const void* memory, size_t offset) {
+inline UInt8 get8(const void* memory, std::size_t offset) {
 	return static_cast<const UInt8*>(memory)[offset];
 }
 
@@ -137,7 +144,7 @@ inline UInt64 getLE64(const void* memory) {
 }
 
 // Check if the current host is big endian.
-inline bool isHostBigEndian() {
+inline bool isBigEndian() {
 	static const int number = 1;
 	return 0 == *reinterpret_cast<const char*>(&number);
 }
@@ -171,8 +178,6 @@ inline UInt32 networkToHost32(UInt32 n) {
 inline UInt64 networkToHost64(UInt64 n) {
 	return getBE64(&n);
 }
-
-
 
 
 } // namespace scy

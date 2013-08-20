@@ -22,8 +22,8 @@
 
 
 #include "Sourcey/Types.h"
-#include "Sourcey/Flaggable.h"
-#include "Sourcey/Polymorphic.h"
+#include "Sourcey/Bitwise.h"
+#include "Sourcey/Interface.h"
 #include "Sourcey/Buffer.h"
 #include "Sourcey/Logger.h"
 
@@ -44,139 +44,109 @@ struct IPacketInfo
 };
 
 
-class IPacket: public Polymorphic
-	// The base packet type which is passed around the LibSourcey system.
+class IPacket: public basic::Polymorphic
+	// The basic packet type which is passed around the LibSourcey system.
 	// IPacket can be extended for each protocol to enable polymorphic
 	// processing and callbacks using PacketStream and friends.
 { 
 public:
 	void* source;
-		// Optional packet source pointer reference so delegates
+		// Packet source pointer reference which enables processors
 		// along the signal chain can determine the packet origin.
-		// Usually a subclass of PacketStreamSource.
+		// Often a subclass of PacketStreamSource.
 
 	IPacketInfo* info;
 		// Optional extra information about the packet.
 		// This pointer is managed by the packet.
 
+	Bitwise flags;
+		// Provides basic information about the packet.	
+
 	void* opaque;
-		// Optional client array pointer.
+		// Optional client data pointer.
 		// This pointer is not managed by the packet.
-
-	Flaggable flags;
-		// Packet flags are used to provide basic information
-		// about the packet.	
-
-	enum ProcessorFlags
-		// Packet processor flags tell processors how to handle
-		// the packet.
-	{
-		Fixed = 0x00,  // This packet should not be modified by downstream processors.
-		Final = 0x01,  // This is that last packet.
-		Managed = 0x02, // This packet will take ownership of any referenced memory.
-	};
 	
-	IPacket(void* source = NULL, unsigned flags = 0, IPacketInfo* info = NULL, void* opaque = NULL) :
-		source(source), flags(flags), info(info), opaque(opaque){}
+	IPacket(void* source = nullptr, void* opaque = nullptr, IPacketInfo* info = nullptr, unsigned flags = 0) : 
+		source(source), opaque(opaque), info(info), flags(flags) {}
 	
 	IPacket(const IPacket& r) : 
 		source(r.source),
+		opaque(r.opaque),
 		flags(r.flags),
-		info(r.info ? r.info->clone() : NULL),
-		opaque(r.opaque)
+		info(r.info ? r.info->clone() : nullptr)
 	{
 	}
 		
 	IPacket& operator = (const IPacket& r) 
 	{
 		source = r.source;
-		flags = r.flags;
-		info = (r.info ? r.info->clone() : NULL);
 		opaque = r.opaque;
+		flags = r.flags;
+		info = (r.info ? r.info->clone() : nullptr);
 		return *this;
-	}
-
-	virtual ~IPacket() 
-	{
-		if (info)
-			delete info;
 	}
 	
 	virtual IPacket* clone() const = 0;	
 
-	virtual bool read(Buffer&) = 0;
-	virtual void write(Buffer&) const = 0;
+	virtual ~IPacket() {
+		if (info) delete info;
+	}
 	
-	virtual size_t size() const = 0;
+	virtual bool read(const ConstBuffer&) = 0;
+	virtual void write(Buffer&) const = 0;
 
-	virtual char* array() const 
-	{ 
-		return 0;
-	}
+	// Todo: It would be prefferable to use our pod types here
+	// instead of buffer input, but the current codebase requires
+	// that the buffer be dynamically resizable for some protocols... 
+	//
+	// virtual void write(MutableBuffer&) const = 0;
+	
+	virtual std::size_t size() const = 0;
 
-	virtual bool hasArray() const
-	{
-		return array() != 0;
-	}
+	virtual char* data() const { return nullptr; }
+	virtual bool hasData() const { return data() != nullptr; }
 
 	virtual const char* className() const = 0;
-	virtual void print(std::ostream& os) const 
-	{ 
-		os << className() << std::endl; 
-	}
+	virtual void print(std::ostream& os) const { os << className() << std::endl; }
 	
-    friend std::ostream& operator << (std::ostream& stream, const IPacket& pkt) 
+    friend std::ostream& operator << (std::ostream& stream, const IPacket& p) 
 	{
-		pkt.print(stream);
+		p.print(stream);
 		return stream;
     }
 };
 
 
 class RawPacket: public IPacket 
-	// RawPacket is the default data packet type which consists
-	// of an optionally managed char pointer and a size value.
-	//
+	/// RawPacket is the default data packet type which consists
+	/// of an optionally managed char pointer and a size value.
 {	
 public:
-	RawPacket(char* array = NULL, size_t size = 0, unsigned flags = 0) : 
-		IPacket(NULL, flags), _array(array), _size(size)
+	RawPacket(char* data = nullptr, std::size_t size = 0, unsigned flags = 0, void* source = nullptr, void* opaque = nullptr, IPacketInfo* info = nullptr) : 
+		IPacket(source, opaque, info, flags), _data(data), _size(size), _free(false)
 	{
 	}
 
-	RawPacket(const char* array, size_t size = 0, unsigned flags = 0) : 
-		IPacket(NULL, flags |= IPacket::Managed), _array(NULL), _size(size)
+	RawPacket(const char* data, std::size_t size = 0, unsigned flags = 0, void* source = nullptr, void* opaque = nullptr, IPacketInfo* info = nullptr) : 
+		IPacket(source, opaque, info, flags), _data(nullptr), _size(size), _free(true)
 	{
-		// Copy const array
-		copyArray(array, size);
-	}
-
-	RawPacket(void* source, char* array = NULL, size_t size = 0, unsigned flags = 0, IPacketInfo* info = NULL, void* opaque = NULL) : 
-		IPacket(source, flags, info, opaque), _array(array), _size(size)
-	{
-	}
-
-	RawPacket(void* source, const char* array = NULL, size_t size = 0, unsigned flags = 0, IPacketInfo* info = NULL, void* opaque = NULL) : 
-		IPacket(source, flags |= IPacket::Managed, info, opaque), _array(NULL), _size(size)
-	{
-		// Copy const array
-		copyArray(array, size);
+		copyData(data, size); // copy const data
 	}
 
 	RawPacket(const RawPacket& that) : 
-		IPacket(that), _array(NULL), _size(0)
+		IPacket(that), _data(nullptr), _size(0), _free(false)
 	{		
-		// Copy assigned data and set the Managed flag
-		// TODO: Use a simple reference counted buffer wrapper
+		// Copy assigned data and set the MemManaged flag
+		// Todo: Use a simple reference counted buffer wrapper
 		// so we don't need to force memcpy here.
-		setManaged();
-		copyArray(that._array, that._size);
+		assignDataOwnership();
+		copyData(that._data, that._size);
 	}
 	
 	virtual ~RawPacket() 
 	{
-		if (isManaged() && _array)
-			delete [] _array;
+		if (_data && _free)
+			delete [] _data;
 	}
 
 	virtual IPacket* clone() const 
@@ -184,57 +154,67 @@ public:
 		return new RawPacket(*this);
 	}
 
-	virtual void setArray(char* array, size_t size) 
+	virtual void setData(char* data, std::size_t size) 
 	{
 		assert(size > 0);
 
-		// Copy data if the Managed flag is set
-		if (isManaged())
-			copyArray(array, size);
+		// Copy data if reuqests
+		if (_free)
+			copyData(data, size);
 
-		// Otherwise just reference it
+		// Otherwise just assign the pointer
 		else {
-			_array = array;
+			_data = data;
 			_size = size; 
 		}
 	}
 
-	virtual void copyArray(const char* array, size_t size) 
+	virtual void copyData(const char* data, std::size_t size) 
 	{
 		//traceL("RawPacket", this) << "Cloning: " << size << std::endl;
 
-		assert(isManaged());
+		//assert(_free);
 		assert(size > 0);
-		if (_array)
-			delete [] _array;
+		if (_data && _free)
+			delete [] _data;
 		_size = size;
-		_array = new char[size];
-		std::memcpy(_array, array, size);
+		_data = new char[size];
+		_free = true;
+		std::memcpy(_data, data, size);
 	}	
-
-	virtual bool read(Buffer& buf) 
+	
+	virtual bool read(const ConstBuffer& buf) 
 	{ 
-		setArray(buf.data(), buf.available());
+		copyData(bufferCast<const char*>(buf), buf.size());
 		return true;
 	}
 
+	// Old Read API
+	//
+	// virtual bool read(const ConstBuffer& buf) 
+	// { 
+	//	 return true;
+	// }
+	
 	virtual void write(Buffer& buf) const 
 	{	
-		buf.put(_array, _size); 
+		buf.append(_data, _size); 
 	}
-
-	virtual char* array() const 
-	{ 
-		return _array; 
-	}
+	
+	// Future Write API
+	//
+	// virtual void write(MutableBuffer& buf) const 
+	// {	
+	//	 assert(buf.size() >= _size);
+	//	 std::memcpy(buf.data(), _data, _size);
+	// }
 
 	virtual char* data() const 
-		// legacy compatibility
 	{ 
-		return _array; 
+		return _data; 
 	}
 
-	virtual size_t size() const 
+	virtual std::size_t size() const 
 	{ 
 		return _size; 
 	}
@@ -244,22 +224,57 @@ public:
 		return "RawPacket"; 
 	}
 
-	virtual bool isManaged() const
+	virtual bool ownsBuffer() const
 	{
-		return flags.has(IPacket::Managed);
-	}
-
-	virtual void setManaged()
-	{
-		flags.set(IPacket::Managed);
+		return _free;
 	}
 	
-	char* _array;
+	virtual void assignDataOwnership()
+	{
+		_free = true;
+	}
+	
+	char* _data;
 	size_t _size;
+	bool _free;
 };
+
+
+inline RawPacket rawPacket(const MutableBuffer& buf, unsigned flags = 0, void* source = nullptr, void* opaque = nullptr, IPacketInfo* info = nullptr)
+{
+	return RawPacket(bufferCast<char*>(buf), buf.size(), flags, source, opaque, info);
+}
+
+inline RawPacket rawPacket(const ConstBuffer& buf, unsigned flags = 0, void* source = nullptr, void* opaque = nullptr, IPacketInfo* info = nullptr)
+{		
+	return RawPacket(bufferCast<const char*>(buf), buf.size(), flags, source, opaque, info);  // copy const data
+}
+
+inline RawPacket rawPacket(char* data = nullptr, std::size_t size = 0, unsigned flags = 0, void* source = nullptr, void* opaque = nullptr, IPacketInfo* info = nullptr)
+{	
+	return RawPacket(data, size, flags, source, opaque, info);
+}
+
+inline RawPacket rawPacket(const char* data = nullptr, std::size_t size = 0, unsigned flags = 0, void* source = nullptr, void* opaque = nullptr, IPacketInfo* info = nullptr)
+{	
+	return RawPacket(data, size, flags, source, opaque, info);  // copy const data
+}
 
 
 } // namespace scy
 
 
 #endif // SOURCEY_Packet_H
+
+
+
+	/*
+	enum ProcessorFlags
+		// Packet processor flags tell processors how to handle
+		// the packet. depreciated
+	{
+		NoModify = 0x00,   // This packet should not be modified by processors.
+		StreamEnd = 0x01,  // This is that last packet in the stream.
+		MemManaged = 0x02  // This packet will assume ownership of the data buffer.
+	};, 
+	*/

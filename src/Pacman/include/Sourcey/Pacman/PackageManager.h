@@ -26,13 +26,13 @@
 #include "Sourcey/Pacman/Package.h"
 #include "Sourcey/Pacman/InstallTask.h"
 #include "Sourcey/Pacman/InstallMonitor.h"
-#include "Sourcey/Containers.h"
+#include "Sourcey/Collection.h"
+#include "Sourcey/Filesystem.h"
+#include "Sourcey/Platform.h"
 #include "Sourcey/Stateful.h"
 #include "Sourcey/Runner.h"
-#include "Sourcey/HTTP/Client.h"
 #include "Sourcey/JSON/JSON.h"
 
-#include "Poco/Zip/ZipLocalFileHeader.h"
 
 #include <iostream>
 #include <fstream>
@@ -40,12 +40,15 @@
 
 
 namespace scy { 
+namespace http { 
+	class Response;
+	class ClientConnection; }
 namespace pman {
 
 
-typedef EventedManager<std::string, LocalPackage>	LocalPackageStore;
+typedef LiveCollection<std::string, LocalPackage>	LocalPackageStore;
 typedef LocalPackageStore::Map						LocalPackageMap;
-typedef EventedManager<std::string, RemotePackage>	RemotePackageStore;
+typedef LiveCollection<std::string, RemotePackage>	RemotePackageStore;
 typedef RemotePackageStore::Map						RemotePackageMap;
 
 
@@ -75,16 +78,13 @@ public:
 		// to clear the package cache if installation fails.
 		bool clearFailedCache;
 
-		Options() {
+		Options() {	
+			std::string root(getCwd());
+			cacheDir				= root + fs::separator + DEFAULT_PACKAGE_CACHE_DIR;
+			interDir				= root + fs::separator + DEFAULT_PACKAGE_INTERMEDIATE_DIR;
+			installDir				= root + fs::separator + DEFAULT_PACKAGE_INSTALL_DIR;
 			endpoint				= DEFAULT_API_ENDPOINT;
 			indexURI				= DEFAULT_API_INDEX_URI;
-
-			Poco::Path root(Poco::Path::current());
-			root.makeDirectory();
-			cacheDir				= root.toString() + DEFAULT_PACKAGE_CACHE_DIR;
-			interDir				= root.toString() + DEFAULT_PACKAGE_INTERMEDIATE_DIR;
-			installDir				= root.toString() + DEFAULT_PACKAGE_INSTALL_DIR;
-
 			platform				= DEFAULT_PLATFORM; // TODO: Set for current system
 			clearFailedCache		= true;
 		}
@@ -96,7 +96,7 @@ public:
 	
 	//
 	/// Initialization Methods
-	//
+
 	virtual void initialize();
 	virtual void uninitialize();
 
@@ -125,34 +125,35 @@ public:
 	
 	//
 	/// Package Installation Methods
-	//
+
 	virtual InstallTask* installPackage(const std::string& name,
-		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
+		const InstallOptions& options = InstallOptions(), bool whiny = false);
 		// Installs a single package.
 		// The returned InstallTask must be started.
 
 	virtual bool installPackages(const StringVec& ids, 
-		const InstallTask::Options& options = InstallTask::Options(),
-		InstallMonitor* monitor = NULL, bool whiny = false);
+		const InstallOptions& options = InstallOptions(),
+		InstallMonitor* monitor = nullptr, bool whiny = false);
 		// Installs multiple packages.
 		// The same options will be passed to each task.
-		// The returned InstallTask(s) must be started.	
-		// The returned InstallMonitor will be NULL no tasks were created.	
-		// The returned InstallMonitor must be freed by the outside application.	
+		// If a InstallMonitor instance was passed in the tasks will need to
+		// be started, otherwise they will be auto-started.
+		// The PackageManager does not take ownership of the InstallMonitor.	
 
 	virtual InstallTask* updatePackage(const std::string& name, 
-		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
+		const InstallOptions& options = InstallOptions(), bool whiny = false);
 		// Updates a single package.
-		// Throws an exception if the package does exist.
+		// Throws an exception if the package does not exist.
 		// The returned InstallTask must be started.
 
 	virtual bool updatePackages(const StringVec& ids, 
-		const InstallTask::Options& options = InstallTask::Options(), 
-		InstallMonitor* monitor = NULL, bool whiny = false);
+		const InstallOptions& options = InstallOptions(), 
+		InstallMonitor* monitor = nullptr, bool whiny = false);
 		// Updates multiple packages.
-		// Throws an exception if the package does exist.
-		// The returned InstallTask(s) must be started.	
-		// The InstallMonitor must be freed by the outside application.	
+		// Throws an exception if the package does not exist.
+		// If a InstallMonitor instance was passed in the tasks will need to
+		// be started, otherwise they will be auto-started.
+		// The PackageManager does not take ownership of the InstallMonitor.	
 
 	virtual bool updateAllPackages(bool whiny = false);
 		// Updates all installed packages.
@@ -171,12 +172,12 @@ public:
 	virtual bool finalizeInstallations(bool whiny = false);
 		// Finalizes active installations by moving all package
 		// files to their target destination. If files are to be
-		// overwritten they must not be in use of finalization
+		// overwritten they must not be in use or finalization
 		// will fail.	
 		
 	//
 	/// Task Helper Methods
-	//	
+
 	virtual InstallTask* getInstallTask(const std::string& id) const;
 		// Gets the install task for the given package ID.
 
@@ -189,7 +190,7 @@ public:
 
 	//
 	/// Package Helper Methods
-	//	
+
 	virtual PackagePairList getPackagePairs() const;
 		// Returns all package pairs, valid or invalid.
 		// Some pairs may not have both local and remote pointers.
@@ -207,7 +208,7 @@ public:
 		// will be thrown.	
 	
 	virtual InstallTask* createInstallTask(PackagePair& pair, 
-		const InstallTask::Options& options = InstallTask::Options());
+		const InstallOptions& options = InstallOptions());
 		// Creates a package installation task for the given pair.
 	
 	virtual std::string installedPackageVersion(const std::string& id) const;
@@ -215,15 +216,14 @@ public:
 		// Exceptions will be thrown if the package does not exist,
 		// or is not fully installed.
 		
-	virtual Package::Asset getAssetToInstall(PackagePair& pair, const InstallTask::Options& options);
-		// Returns the best asset to install, or throws a descriptive 
-		// exception if no updates are available, or the package is 
-		// is up to date.
+	virtual Package::Asset getAssetToInstall(PackagePair& pair, const InstallOptions& options);
+		// Returns the best asset to install, or throws a descriptive exception
+		// if no updates are available, or the package is is up to date.
 		// This method takes version and SDK locks into consideration.
 		
 	//
 	/// File Helper Methods
-	//
+
 	void clearCache();
 		// Clears all files in the cache directory.
 
@@ -239,34 +239,37 @@ public:
 	bool isSupportedFileType(const std::string& fileName);
 		// Checks if the file type is a supported package archive.
 	
-	Poco::Path getCacheFilePath(const std::string& fileName);
+	std::string getCacheFilePath(const std::string& fileName);
 		// Returns the full path of the cached file if it exists,
 		// or an empty path if the file doesn't exist.
-	Poco::Path getIntermediatePackageDir(const std::string& id);
+
+	std::string getIntermediatePackageDir(const std::string& id);
 		// Returns the the intermediate package directory for the
 		// given package ID.
 	
 	// 
 	/// Accessors
-	//
+
 	virtual Options& options();
 	virtual RemotePackageStore& remotePackages();
 	virtual LocalPackageStore& localPackages();
 		
 	//
 	/// Events
-	//
+
 	Signal<LocalPackage&> PackageComplete;
 	Signal<LocalPackage&> PackageUninstalled;
 	
 	Signal<InstallTask&> TaskAdded;
 	Signal<InstallTask&> TaskRemoved;
 
+	Signal<const http::Response&> RemotePackageResponse;
+
 protected:
 
 	//
 	/// Callbacks
-	//
+
 	void onPackageInstallComplete(void* sender);
 
 	void onPackagesResponse(void* sender, const http::Response& response);
@@ -306,17 +309,17 @@ protected:
 		// Returns the full path of the installed file if it exists,
 		// or an empty path if the file doesn't exist.
 	
-	virtual bool installPackage(const std::string& name, InstallMonitor* monitor = NULL, 
-		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
+	virtual bool installPackage(const std::string& name, InstallMonitor* monitor = nullptr, 
+		const InstallOptions& options = InstallOptions(), bool whiny = false);
 		// Installs a single package.
 
-	virtual bool updatePackages(const StringVec& ids, InstallMonitor* monitor = NULL, 
-		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
+	virtual bool updatePackages(const StringVec& ids, InstallMonitor* monitor = nullptr, 
+		const InstallOptions& options = InstallOptions(), bool whiny = false);
 		// Updates multiple packages.
 		// The package will be installed if it does not exist.
 
-	virtual bool updatePackage(const std::string& name, InstallMonitor* monitor = NULL, 
-		const InstallTask::Options& options = InstallTask::Options(), bool whiny = false);
+	virtual bool updatePackage(const std::string& name, InstallMonitor* monitor = nullptr, 
+		const InstallOptions& options = InstallOptions(), bool whiny = false);
 		// Updates a single package.
 		// The package will be installed if it does not exist.
 		*/

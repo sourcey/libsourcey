@@ -23,8 +23,7 @@
 #define SOURCEY_Hex_H
 
 
-#include "Sourcey/Encoder.h"
-#include "Sourcey/Decoder.h"
+#include "Sourcey/Interface.h"
 #include "Sourcey/Exception.h"
 #include "Sourcey/Logger.h"
 #include <iostream>
@@ -36,11 +35,11 @@ namespace hex {
 	
 
 //
-// Encoder
+// Hex Encoder
 //
 
 
-struct Encoder: public scy::Encoder
+struct Encoder: public basic::Encoder
 {	
 	Encoder() : 
 		_linePos(0),
@@ -56,7 +55,7 @@ struct Encoder: public scy::Encoder
 	
 		char c;
 		std::size_t nwrite = 0;
-		for (int i = 0; i < nread; i++) 
+		for (unsigned i = 0; i < nread; i++) 
 		{	
 			c = inbuf[i];
 			std::memcpy(outbuf + nwrite++, &digits[_uppercase + ((c >> 4) & 0xF)], 1);
@@ -70,7 +69,7 @@ struct Encoder: public scy::Encoder
 		return nwrite;
 	}
 
-	virtual std::size_t finalize(char* outbuf)
+	virtual std::size_t finalize(char* /* outbuf */)
 	{
 		return 0;
 	}
@@ -89,14 +88,30 @@ struct Encoder: public scy::Encoder
 	int _linePos;
 	int _lineLength;
 };
+
+
+template<typename T>
+inline std::string encode(const T& bytes)
+	// Converts the STL container to Hex.
+{
+	static const char digits[] = "0123456789abcdef";
+	std::string res;
+	res.reserve(bytes.size() * 2);
+	for (T::const_iterator it = bytes.begin(); it != bytes.end(); ++it) {
+		const unsigned char c = static_cast<const unsigned char>(*it);
+		res += digits[(c >> 4) & 0xF];
+		res += digits[c & 0xF];
+	}
+	return res;
+}
 	
 
 //
-// Decoder
+// Hex Decoder
 //
 
 
-struct Decoder: public scy::Decoder
+struct Decoder: public basic::Decoder
 {		
 	Decoder() : lastbyte('\0') {}
 	virtual ~Decoder() {} 
@@ -127,7 +142,7 @@ struct Decoder: public scy::Decoder
 		return nwrite;
 	}
 
-	virtual std::size_t finalize(char* outbuf)
+	virtual std::size_t finalize(char* /* outbuf */)
 	{
 		return 0;
 	}
@@ -152,7 +167,7 @@ struct Decoder: public scy::Decoder
 		if      (n >= '0' && n <= '9') return n - '0';
 		else if (n >= 'A' && n <= 'F') return n - ('A' - 10);
 		else if (n >= 'a' && n <= 'f') return n - ('a' - 10);
-		else throw Exception("Invalid hex format");
+		else throw std::runtime_error("Invalid hex format");
 	}
 
 	bool iswspace(const char c)
@@ -175,13 +190,13 @@ struct Decoder: public scy::Decoder
 
 
 /*
-struct Decoder: public scy::Decoder
+struct Decoder: public basic::Decoder
 {		
 	char lastbyte;
 	char* remaining;
 	int nremaining;
 
-	Decoder() : remaining(nil), nremaining(0), lastbyte('\0') {} //
+	Decoder() : remaining(nullptr), nremaining(0), lastbyte('\0') {} //
 
 	~Decoder() 
 	{
@@ -254,7 +269,7 @@ struct Decoder: public scy::Decoder
 		if      (n >= '0' && n <= '9') return n - '0';
 		else if (n >= 'A' && n <= 'F') return n - ('A' - 10);
 		else if (n >= 'a' && n <= 'f') return n - ('a' - 10);
-		else throw Exception("Invalid Hex format"); //0; //return
+		else throw std::runtime_error("Invalid Hex format"); //0; //return
 	}
 };
 

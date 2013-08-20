@@ -34,13 +34,13 @@ Codec::Codec() :
 {
 }
 
-Codec::Codec(const string& name, int sampleRate, int bitRate, bool enabled) :
+Codec::Codec(const std::string& name, int sampleRate, int bitRate, bool enabled) :
 	name(name), sampleRate(sampleRate), bitRate(bitRate), quality(0), enabled(enabled) 
 {
 }
 
 
-Codec::Codec(const string& name, const string& encoder, int sampleRate, int bitRate, bool enabled) :
+Codec::Codec(const std::string& name, const std::string& encoder, int sampleRate, int bitRate, bool enabled) :
 	name(name), encoder(encoder), sampleRate(sampleRate), bitRate(bitRate), enabled(enabled) 
 {
 }
@@ -59,7 +59,7 @@ Codec::Codec(const Codec& r) :
 string Codec::toString() const 
 {
 	ostringstream os;
-	os << "Codec[" << name << ":" << encoder << ":" << sampleRate << ":" << enabled << "]";
+	os << "Codec[" << name << ": " << encoder << ": " << sampleRate << ": " << enabled << "]";
 	return os.str();
 }
 
@@ -86,13 +86,13 @@ AudioCodec::AudioCodec() :
 }
 
 
-AudioCodec::AudioCodec(const string& name, int channels, int sampleRate, int bitRate, const char* sampleFmt) : 
+AudioCodec::AudioCodec(const std::string& name, int channels, int sampleRate, int bitRate, const char* sampleFmt) : 
 	Codec(name, encoder, sampleRate, bitRate, true), channels(channels), sampleFmt(sampleFmt) 
 {
 }
 
 
-AudioCodec::AudioCodec(const string& name, const string& encoder, int channels, int sampleRate, int bitRate, const char* sampleFmt) : 
+AudioCodec::AudioCodec(const std::string& name, const std::string& encoder, int channels, int sampleRate, int bitRate, const char* sampleFmt) : 
 	Codec(name, encoder, sampleRate, bitRate, true), channels(channels), sampleFmt(sampleFmt) 
 {
 }
@@ -108,8 +108,8 @@ AudioCodec::AudioCodec(const AudioCodec& r) :
 string AudioCodec::toString() const 
 {
 	ostringstream os;
-	os << "AudioCodec[" << name << ":" << encoder << ":" << sampleRate << ":" << bitRate
-		<< ":" << channels << ":" << sampleFmt << ":" << enabled << "]";
+	os << "AudioCodec[" << name << ": " << encoder << ": " << sampleRate << ": " << bitRate
+		<< ": " << channels << ": " << sampleFmt << ": " << enabled << "]";
 	return os.str();
 }
 
@@ -137,14 +137,14 @@ VideoCodec::VideoCodec() :
 }
 
 
-VideoCodec::VideoCodec(const string& name, int width, int height, double fps, int sampleRate, int bitRate, const char* pixelFmt) : 
+VideoCodec::VideoCodec(const std::string& name, int width, int height, double fps, int sampleRate, int bitRate, const char* pixelFmt) : 
 	Codec(name, sampleRate, bitRate, true), 
 	width(width), height(height), fps(fps), pixelFmt(pixelFmt) 
 {
 }
 
 
-VideoCodec::VideoCodec(const string& name, const string& encoder, int width, int height, double fps, int sampleRate, int bitRate, const char* pixelFmt) : 
+VideoCodec::VideoCodec(const std::string& name, const std::string& encoder, int width, int height, double fps, int sampleRate, int bitRate, const char* pixelFmt) : 
 	Codec(name, encoder, sampleRate, bitRate, true), 
 	width(width), height(height), fps(fps), pixelFmt(pixelFmt) 
 {
@@ -161,8 +161,8 @@ VideoCodec::VideoCodec(const VideoCodec& r) :
 string VideoCodec::toString() const 
 {
 	ostringstream os;
-	os << "VideoCodec[" << name << ":" << encoder << ":" << width << ":" << height
-		<< ":" << fps << ":" << pixelFmt << ":" << enabled << "]";
+	os << "VideoCodec[" << name << ": " << encoder << ": " << width << ": " << height
+		<< ": " << fps << ": " << pixelFmt << ": " << enabled << "]";
 	return os.str();
 }
 
@@ -200,7 +200,7 @@ void VideoCodec::print(ostream& ost)
 	//id(r.id),
 	
 	/*
-UInt32 Codec::toID(const string& type) 
+UInt32 Codec::toID(const std::string& type) 
 {
 	// TODO: Use FFmpeg is available?
 
@@ -290,7 +290,7 @@ string Codec::name() const
 }
 
 
-bool Codec::matches(UInt32 id, const string& name) const 
+bool Codec::matches(UInt32 id, const std::string& name) const 
 {
 	return this->id == id && this->name == name;
 }

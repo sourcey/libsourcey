@@ -37,7 +37,7 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFo
 	_format(format),
 	_opened(false)
 {
-	traceL("AudioCapture", this) << "Creating" << endl;
+	traceL("AudioCapture", this) << "create" << endl;
 
 	_iParams.deviceId = _deviceId;
 	_iParams.nChannels = _channels;
@@ -53,13 +53,13 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFo
 		
 	// Open the audio stream or throw an exception.
 	open(); //channels, sampleRate
-	traceL("AudioCapture", this) << "Creating: OK" << endl;
+	traceL("AudioCapture", this) << "create: OK" << endl;
 }
 
 
 AudioCapture::~AudioCapture()
 {
-	traceL("AudioCapture", this) << "Destroying" << endl;
+	traceL("AudioCapture", this) << "destroy" << endl;
 }
 
 
@@ -78,7 +78,7 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 	unsigned int nBufferFrames = 1536; //256; //512; / 2
 
 	try {
-		_audio.openStream(nil, &_iParams, _format, _sampleRate, &nBufferFrames, &AudioCapture::callback, (void*)this);
+		_audio.openStream(nullptr, &_iParams, _format, _sampleRate, &nBufferFrames, &AudioCapture::callback, (void*)this);
 		_error = "";
 		_opened = true;
 		traceL("AudioCapture", this) << "Opening: OK" << endl;
@@ -177,16 +177,16 @@ bool AudioCapture::detach(const PacketDelegateBase& delegate)
 */
 
 
-void AudioCapture::setError(const string& message)
+void AudioCapture::setError(const std::string& message)
 {
 	_error = message;
 	errorL("AudioCapture", this) << "Error: " << message << endl;
-	throw Exception(message);
+	throw std::runtime_error(message);
 }
 
 
-int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int nBufferFrames,
-	double streamTime, RtAudioStreamStatus status, void* data)
+int AudioCapture::callback(void* /* outputBuffer */, void* inputBuffer, unsigned int nBufferFrames,
+	double /* streamTime */, RtAudioStreamStatus status, void* data)
 {
 	AudioCapture* klass = (AudioCapture*)data;
 	AudioPacket packet;
@@ -195,8 +195,8 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 		errorL("AudioCapture", klass) << "Stream over/underflow detected" << endl;
 
 	assert(inputBuffer);
-	if (!inputBuffer == nil) {
-		errorL("AudioCapture", klass) << "Input buffer is nil." << endl;
+	if (inputBuffer == nullptr) {
+		errorL("AudioCapture", klass) << "Input buffer is nullptr." << endl;
 		return 2;
 	} 
 
@@ -225,7 +225,7 @@ int AudioCapture::callback(void* outputBuffer, void* inputBuffer, unsigned int n
 			size = 8;
 		else assert(0 && "unknown audio capture format");
 
-		packet.setArray((char*)inputBuffer, nBufferFrames * klass->_channels * size);
+		packet.setData((char*)inputBuffer, nBufferFrames * klass->_channels * size);
 	}
 
 	/*

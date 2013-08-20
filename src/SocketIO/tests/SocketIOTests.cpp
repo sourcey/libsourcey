@@ -1,6 +1,7 @@
 #include "Sourcey/SocketIO/Client.h"
 #include "Sourcey/SocketIO/Transaction.h"
 #include "Sourcey/Net/SSLManager.h"
+#include "Sourcey/Application.h"
 #include "Sourcey/Util.h"
 
 
@@ -61,19 +62,19 @@ public:
 #if USE_SSL
 	SSLManager::instance().shutdown();
 #endif
-		app.cleanup();
+		app.finalize();
 	}		
 
 	void onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState) 
 	{
 		sockio::Client* client = reinterpret_cast<sockio::Client*>(sender);	
-		Log("debug") << "Connection state changed: " << state.toString() << ": " << client->socket().address() << endl;
+		debugL() << "Connection state changed: " << state.toString() << ": " << client->socket().address() << endl;
 		
 		switch (state.id()) {
 		case sockio::ClientState::Connecting:
 			break;
 		case sockio::ClientState::Connected: 
-			Log("debug") << "Connected on " << client->socket().address() << endl;
+			debugL() << "Connected on " << client->socket().address() << endl;
 			break;
 		case sockio::ClientState::Online: 
 			// TODO: Send message
@@ -90,7 +91,7 @@ public:
 
 int main(int argc, char** argv) 
 {	
-	Logger::instance().add(new ConsoleChannel("debug", TraceLevel));
+	Logger::instance().add(new ConsoleChannel("debug", LTrace));
 	{
 		scy::sockio::Tests run;
 	}		

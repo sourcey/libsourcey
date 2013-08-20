@@ -48,11 +48,11 @@ bool portIsAvailable(int port) {
 
 
 // Checks if a network address is accessible from this device.
-bool addressIsOK(const string& str, bool whiny)
+bool addressIsOK(const std::string& str, bool whiny)
 {
 	try 
 	{
-		string response;
+		std::string response;
 		URI str(str);
 		HTTPClientSession session(str.getHost(), str.getPort());
 		session.setTimeout(2000000);
@@ -63,7 +63,7 @@ bool addressIsOK(const string& str, bool whiny)
 		StreamCopier::copyToString(rs,response);
 		return response.empty() == false;
 	}
-	catch (Exception& exc)
+	catch (std::exception& exc)
 	{
 		if (whiny)
 			throw exc;
@@ -82,7 +82,7 @@ bool internetIsOK(bool whiny)
 	catch (Exception&)
 	{
 		if (whiny)
-			throw Exception("No internet connection available.");
+			throw std::runtime_error("No internet connection available.");
 	}
 	return res;
 }
@@ -100,8 +100,8 @@ bool internetIsOK(bool whiny)
 string getPublicIPAddress(bool whiny)
 {
 	IPAddress addr;
-	string response;
-	string strs[3] = { 
+	std::string response;
+	std::string strs[3] = { 
 		"http://checkip.dyndns.org/", 
 		"http://ip-address.domaintools.com/myip.xml", 
 		"http://www.whatismyip.com/automation/n09230945.asp"
@@ -156,14 +156,14 @@ string getPublicIPAddress(bool whiny)
 					break;
 			}
 		}
-		catch (Exception& exc)
+		catch (std::exception&/Exception& exc)
 		{
-			errorL() << exc.message() << endl;
+			errorL() << exc.what()/message()/ << endl;
 		}
 	}
 
 	if (whiny)
-		throw Exception("Cannot determine the public IP address of this computer.");
+		throw std::runtime_error("Cannot determine the public IP address of this computer.");
 	else 
 		return "";
 

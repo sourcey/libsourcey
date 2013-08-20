@@ -232,7 +232,7 @@ bool CandidatePair::sendConnectivityCheck()
 	// USERNAME
 	assert(!_queue.stream().remoteUFrag().empty());
 	assert(!_queue.stream().agent().options().localUFrag.empty());
-	string username(_queue.stream().remoteUFrag() + ":" + _queue.stream().agent().options().localUFrag);
+	std::string username(_queue.stream().remoteUFrag() + ":" + _queue.stream().agent().options().localUFrag);
 	STUN::Username* usernameAttr = new STUN::Username;
 	usernameAttr->copyBytes(username.c_str(), username.size());
 	_transaction->request().add(usernameAttr);		
@@ -259,7 +259,7 @@ bool CandidatePair::sendConnectivityCheckResponse(const STUN::Message& request,
 	response.setTransactionID(request.transactionID());	
 
 	// USERNAME
-	string username(_queue.stream().remoteUFrag() + ":" + _queue.stream().agent().options().localUFrag);
+	std::string username(_queue.stream().remoteUFrag() + ":" + _queue.stream().agent().options().localUFrag);
 	STUN::Username* usernameAttr = new STUN::Username;
 	usernameAttr->copyBytes(username.c_str(), username.size());
 	response.add(usernameAttr);			

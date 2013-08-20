@@ -109,7 +109,7 @@ string Message::errorString(UInt16 errorCode) const
 {
 	switch (errorCode) {
 	case BadRequest:				return "BAD REQUEST";
-	case Unauthorized:				return "UNAUTHORIZED";
+	case NotAuthorized:				return "UNAUTHORIZED";
 	case UnknownAttribute:			return "UNKNOWN ATTRIBUTE";
 	case StaleCredentials:			return "STALE CREDENTIALS";
 	case IntegrityCheckFailure:		return "INTEGRITY CHECK FAILURE";
@@ -146,9 +146,9 @@ string Message::typeString() const
 string Message::toString() const 
 {
 	ostringstream os;
-	os << "STUN[" << transactionID() << ":" << typeString();
+	os << "STUN[" << transactionID() << ": " << typeString();
 	for (unsigned i = 0; i < _attrs.size(); i++)
-		os << ":" << _attrs[i]->typeString();
+		os << ": " << _attrs[i]->typeString();
 	os << "]";
 	return os.str();
 }
@@ -156,14 +156,14 @@ string Message::toString() const
 
 void Message::print(std::ostream& os) const
 {
-	os << "STUN[" << typeString() << ":" << transactionID();
+	os << "STUN[" << typeString() << ": " << transactionID();
 	for (unsigned i = 0; i < _attrs.size(); i++)
-		os << ":" << _attrs[i]->typeString();
+		os << ": " << _attrs[i]->typeString();
 	os << "]";
 }
 
 
-void Message::setTransactionID(const string& id) 
+void Message::setTransactionID(const std::string& id) 
 {
 	assert(id.size() == 16);
 	_transactionID = id;
@@ -186,89 +186,83 @@ Attribute* Message::get(Attribute::Type type, int index) const
 			else index--;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 
-bool Message::read(Buffer& buf) 
-{			
-	if (!buf.getU16(_type)) {
-		errorL("STUNMessage") << "Not STUN type: " << _type << endl;
-		return false;
-	}
+bool Message::read(const ConstBuffer& buf) //BitReader& reader
+{	
+	try 
+	{
+		BitReader reader(buf);
+		reader.getU16(_type);
 
-	if (_type & 0x8000) {
-		// RTP and RTCP set MSB of first byte, since first two bits are version, 
-		// and version is always 2 (10). If set, this is not a STUN packet.
-		//errorL("STUNMessage") << "Not STUN packet" << endl;
-		return false;
-	}
-
-	if (!buf.getU16(_size)) {
-		//errorL("STUNMessage") << "Packet has no size: " << _size << endl;
-		return false;
-	}
-
-	string transactionID;
-	if (!buf.get(transactionID, 16)) {
-		//errorL("STUNMessage") << "Packet has no Transaction ID: " << transactionID << endl;
-		return false;
-	}
-	assert(transactionID.size() == 16);
-	_transactionID = transactionID;
-
-	if (_size > buf.available()) {
-		warnL("STUNMessage") << "Buffer error: " << _size << " > " << buf.available() << endl;
-		//return false;
-	}
-
-	_attrs.resize(0);
-
-	size_t rest = buf.available() - _size;
-	while (buf.available() > rest) {
-		UInt16 attrType, attrLength;
-		if (!buf.getU16(attrType)) {
-			errorL("STUNMessage") << "Attribute has no type: " << attrType << endl;
-			return false;
-		}
-		if (!buf.getU16(attrLength)) {
-			errorL("STUNMessage") << "Attribute has no size: " << attrLength << endl;
+		if (_type & 0x8000) {
+			// RTP and RTCP set MSB of first byte, since first two bits are version, 
+			// and version is always 2 (10). If set, this is not a STUN packet.
+			//errorL("STUNMessage") << "Not STUN packet" << endl;
 			return false;
 		}
 
-		Attribute* attr = Attribute::create(attrType, attrLength);
-		if (attr && attr->read(buf)) {
-			//debugL("STUNMessage") << "Parsed attribute: " << attrType << ": " << Attribute::typeString(attrType) << ": " << attrLength << endl;
+		reader.getU16(_size);
+
+		std::string transactionID;
+		reader.get(transactionID, 16);
+		assert(transactionID.size() == 16);
+		_transactionID = transactionID;
+
+		if (_size > reader.available()) {
+			warnL("STUNMessage") << "Buffer error: " << _size << " > " << reader.available() << endl;
+			//return false;
+		}
+
+		_attrs.resize(0);
+
+		size_t rest = reader.available() - _size;
+		while (reader.available() > rest) {
+			UInt16 attrType, attrLength;
+			reader.getU16(attrType);
+			reader.getU16(attrLength);
+
+			Attribute* attr = Attribute::create(attrType, attrLength);
+			if (!attr) {
+				// Allow for unrecognised attributes.
+				warnL("STUNMessage") << "Failed to parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
+				continue;
+			}
+			attr->read(reader); // parse or throw
 			_attrs.push_back(attr);
-		} else {
-			// Allow for unrecognised attributes.
-			//return false;	
-			errorL("STUNMessage") << "Failed to parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
 		}
-	}
 
-	if (buf.available() != rest) {
-		// FIXME: Shouldn't be doing this
-		errorL("STUNMessage") << "Wrong message size (" << rest << " != " << buf.available() << ")" << endl;
-		return false;
+		if (reader.available() != rest) {
+			warnL("STUNMessage") << "Wrong message size (" << rest << " != " << reader.available() << ")" << endl;
+			assert(0); // remove me
+			return false;
+		}
+	
+		return true; // ok
 	}
-
-	return true;
+	catch (std::exception& exc) {
+		debugL("STUNMessage") << "Parse error: " << exc.what() << endl;
+	}
+	
+	return false;
 }
 
 
 void Message::write(Buffer& buf) const 
 {
-	buf.putU16(_type);
-	buf.putU16(_size);
-	buf.put(_transactionID);
+	BitWriter writer(buf);
+	writer.putU16(_type);
+	writer.putU16(_size);
+	writer.put(_transactionID);
 
 	// TODO: Shift Message Integrity to end
 
 	for (unsigned i = 0; i < _attrs.size(); i++) {
-		buf.putU16(_attrs[i]->type());
-		buf.putU16(_attrs[i]->size()); 
-		_attrs[i]->write(buf);
+		writer.putU16(_attrs[i]->type());
+		writer.putU16(_attrs[i]->size()); 
+		_attrs[i]->write(writer);
 	}
 }
 
