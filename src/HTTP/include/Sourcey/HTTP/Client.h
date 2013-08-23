@@ -318,7 +318,7 @@ struct OutputStream//: public std::ostream
 	/*
 	void onAccept(void* sender, const net::TCPSocket& sock)
 	{	
-		traceL("Client", this) << "on Accept" << std::endl;
+		traceL("Client", this) << "On Accept" << std::endl;
 		ClientConnection* conn = createConnection(sock);
 		if (conn)
 			connections.push_back(conn);
@@ -339,7 +339,7 @@ struct OutputStream//: public std::ostream
 	
 	void onClose(void* sender) 
 	{
-		traceL("Client", this) << "on close" << std::endl;
+		traceL("Client", this) << "On close" << std::endl;
 		//assert(0 && "server socket closed");
 	}
 	*/

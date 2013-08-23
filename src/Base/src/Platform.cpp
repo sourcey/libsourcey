@@ -26,15 +26,6 @@
 #else
 #include <unistd.h>
 #endif
-#include <chrono>
-#include <ctime>
-#include <time.h>
-
-#include <sstream>
-#include <ctime>
-//#include <thread>
-#include <locale>
-#include <iomanip>
 
 
 using namespace std;
@@ -44,36 +35,6 @@ using namespace std;
 
 
 namespace scy {
-	
-
-UInt64 getTimeHR() 
-{
-	return uv_hrtime();
-}
-	
-
-UInt64 getTimeMS() 
-{
-	return uv_hrtime() / 1000000;
-}
-
-
-UInt64 getTicks()
-{
-#ifdef WIN32
-	return ::GetTickCount();
-#else
-	struct timespec tval;
-	clock_gettime(CLOCK_MONOTONIC, &tval);
-	return tval.tv_sec * 1000 + tval.tv_nsec / 1000000;
-#endif
-}
-
-
-double getProcessTime()
-{
-	return clock() / CLOCKS_PER_SEC;
-}
 
 	
 std::string getExePath() 
@@ -124,64 +85,6 @@ void pause()
 	std::getchar();
 }
 
-
-//
-/// STL Time
-// 
-
-//typedef std::chrono::time_point<std::chrono::system_clock> systemTimePoint;
- 
-std::tm toLocalTime(const std::time_t& time)
-{
-  std::tm tm_snapshot;
-#if defined(WIN32)
-  localtime_s(&tm_snapshot, &time); 
-#else
-  localtime_r(&time, &tm_snapshot); // POSIX  
-#endif
-  return tm_snapshot;
-}
- 
- 
-std::string formatTime(const std::tm* dt, const char* fmt)
-{
-#if defined(WIN32)     
-  // BOGUS hack done for VS2012: C++11 non-conformant since it SHOULD take a "const struct tm*  "
-  // ref. C++11 standard: ISO/IEC 14882:2011, § 27.7.1, 
-  std::ostringstream oss;
-  oss << std::put_time(const_cast<std::tm*>(dt), fmt); 
-  return oss.str();
- 
-#else    // LINUX
-  const size_t size = 1024;
-  char buffer[size]; 
-  auto success = std::strftime(buffer, size, fmt, dt); 
- 
-  if (0 == success)
-    return fmt; 
-   
-  return buffer; 
-#endif
-}
- 
- 
-std::time_t systemTime()
-{
-	std::chrono::time_point<std::chrono::system_clock> system_now = std::chrono::system_clock::now();
-	return std::chrono::system_clock::to_time_t(system_now);
-}
-
-
-std::string formatTime(const std::time_t& time, const char* fmt)
-{
-   return formatTime(&toLocalTime(time), fmt);
-}
-
-
-std::string formatLocalTime(const char* fmt)
-{
-   return formatTime(systemTime(), fmt);
-}
 
 
 //

@@ -447,7 +447,7 @@ void FormWriter::run()
 /*
 void FormWriter::onIdle()
 {
-	traceL("FormWriter", this) << "on idle" << std::endl;
+	traceL("FormWriter", this) << "On idle" << std::endl;
 
 	if (_initial)
 		prepareSubmit(_connection.request());

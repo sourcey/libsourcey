@@ -21,7 +21,8 @@
 #define SOURCEY_Crypto_HMAC_H
 
 
-#include "Sourcey/Crypto/OpenSSL.h"
+#include "Sourcey/Crypto/Crypto.h"
+#include <string>
 
 
 namespace scy {

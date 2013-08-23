@@ -38,7 +38,7 @@ Connection::Connection(const net::Socket& socket) :
 	_shouldSendHeader(true),
 	_timeout(30 * 60 * 1000) // 30 secs
 {	
-	traceL("Connection", this) << "create: " << &_socket << endl;
+	traceL("Connection", this) << "Create: " << &_socket << endl;
 
 	_socket.Recv += delegate(this, &Connection::onSocketRecv);
 	_socket.Error += delegate(this, &Connection::onSocketError);
@@ -51,7 +51,7 @@ Connection::Connection(const net::Socket& socket) :
 	
 Connection::~Connection() 
 {	
-	traceL("Connection", this) << "destroy" << endl;
+	traceL("Connection", this) << "Destroy" << endl;
 
 	// Connections must be close()d
 	assert(_closed);
@@ -117,7 +117,7 @@ void Connection::close()
 
 void Connection::setError(const Error& err) 
 { 
-	traceL("Connection", this) << "set error: " << err.message << endl;	
+	traceL("Connection", this) << "Set error: " << err.message << endl;	
 	_socket.setError(err);
 	//_error = err;
 }
@@ -125,7 +125,7 @@ void Connection::setError(const Error& err)
 
 void Connection::onClose()
 {
-	traceL("Connection", this) << "on close" << endl;	
+	traceL("Connection", this) << "On close" << endl;	
 
 	Close.emit(this);
 }
@@ -148,7 +148,7 @@ void Connection::onSocketRecv(void*, net::SocketPacket& packet)
 
 void Connection::onSocketError(void*, const Error& error) 
 {
-	traceL("Connection", this) << "on socket error" << endl;
+	traceL("Connection", this) << "On socket error" << endl;
 
 	// Handle the socket error locally
 	setError(error);
@@ -157,7 +157,7 @@ void Connection::onSocketError(void*, const Error& error)
 
 void Connection::onSocketClose(void*) 
 {
-	traceL("Connection", this) << "on socket close" << endl;
+	traceL("Connection", this) << "On socket close" << endl;
 
 	// Close the connection if the socket is closed
 	close();
@@ -221,7 +221,7 @@ ConnectionAdapter::ConnectionAdapter(Connection& connection, http_parser_type ty
 	_connection(connection),
 	_parser(type)
 {	
-	traceL("ConnectionAdapter", this) << "create: " << &connection << endl;
+	traceL("ConnectionAdapter", this) << "Create: " << &connection << endl;
 	_parser.setObserver(this);
 	if (type == HTTP_REQUEST)
 		_parser.setRequest(&connection.request());
@@ -232,7 +232,7 @@ ConnectionAdapter::ConnectionAdapter(Connection& connection, http_parser_type ty
 
 ConnectionAdapter::~ConnectionAdapter()
 {
-	traceL("ConnectionAdapter", this) << "destroy: " << &_connection << endl;
+	traceL("ConnectionAdapter", this) << "Destroy: " << &_connection << endl;
 }
 
 
@@ -276,7 +276,7 @@ int ConnectionAdapter::send(const char* data, int len, int flags)
 
 void ConnectionAdapter::onSocketRecv(const MutableBuffer& buf, const net::Address& /* peerAddr */)
 {
-	traceL("ConnectionAdapter", this) << "on socket recv: " << buf.size() << endl;	
+	traceL("ConnectionAdapter", this) << "On socket recv: " << buf.size() << endl;	
 	
 	try {
 		// Parse incoming HTTP messages
@@ -302,7 +302,7 @@ void ConnectionAdapter::onParserHeader(const std::string& /* name */, const std:
 
 void ConnectionAdapter::onParserHeadersEnd() 
 {
-	traceL("ConnectionAdapter", this) << "on headers end" << endl;	
+	traceL("ConnectionAdapter", this) << "On headers end" << endl;	
 
 	_connection.onHeaders();	
 
@@ -315,7 +315,7 @@ void ConnectionAdapter::onParserHeadersEnd()
 
 void ConnectionAdapter::onParserChunk(const char* buf, size_t len)
 {
-	traceL("ClientConnection", this) << "on parser chunk: " << len << endl;	
+	traceL("ClientConnection", this) << "On parser chunk: " << len << endl;	
 
 	// Dispatch the payload
 	net::SocketAdapter::onSocketRecv(mutableBuffer(const_cast<char*>(buf), len), socket->peerAddress());
@@ -324,7 +324,7 @@ void ConnectionAdapter::onParserChunk(const char* buf, size_t len)
 
 void ConnectionAdapter::onParserError(const ParserError& err)
 {
-	warnL("ConnectionAdapter", this) << "on parser error: " << err.message << endl;	
+	warnL("ConnectionAdapter", this) << "On parser error: " << err.message << endl;	
 
 	// Close the connection on parser error
 	_connection.setError(err.message);
@@ -334,7 +334,7 @@ void ConnectionAdapter::onParserError(const ParserError& err)
 
 void ConnectionAdapter::onParserEnd()
 {
-	traceL("ConnectionAdapter", this) << "on parser end" << endl;	
+	traceL("ConnectionAdapter", this) << "On parser end" << endl;	
 
 	_connection.onMessage();
 }

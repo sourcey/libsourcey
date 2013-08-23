@@ -41,31 +41,28 @@ typedef Json::FastWriter FastWriter;
 typedef Json::Reader Reader;
 
 	
-inline void loadFile(json::Value& root, const std::string& path) 
+inline void loadFile(const std::string& path, json::Value& root) 
 {
-	std::ifstream infile;
-	infile.open(path.c_str(), std::ifstream::in);
-	if (!infile.is_open())		
-		throw FileException("Cannot open input file: " + path);
+	std::ifstream ifs;
+	ifs.open(path.c_str(), std::ifstream::in);
+	if (!ifs.is_open())
+		throw std::runtime_error("Cannot open input file: " + path);
 
 	json::Reader reader;
-	bool res = reader.parse(infile, root);
-	infile.close();
-	if (!res)
-		throw std::runtime_error("Invalid JSON format: " + reader.getFormatedErrorMessages());
+	if (!reader.parse(ifs, root))
+		throw std::runtime_error("Cannot write to file: Invalid JSON format: " + reader.getFormatedErrorMessages());
 }
 
 
-inline void saveFile(const json::Value& root, const std::string& path) 
+inline void saveFile(const std::string& path, const json::Value& root) 
 {
 	json::StyledWriter writer;
-	std::ofstream outfile;
-	outfile.open(path.c_str());
-	if (!outfile.is_open())
-		throw FileException("Cannot open output file: " + path);
+	std::ofstream ofs(path, std::ios::binary | std::ios::out);
+	if (!ofs.is_open())
+		throw std::runtime_error("Cannot open output file: " + path);
 
-	outfile << writer.write(root);
-	outfile.close();
+	ofs << writer.write(root);
+	ofs.close();
 }
 
 

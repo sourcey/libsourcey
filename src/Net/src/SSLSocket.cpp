@@ -63,7 +63,7 @@ SSLBase::SSLBase() :
 	_session(nullptr), 
 	_sslAdapter(this)
 {
-	traceL("SSLBase", this) << "create" << endl;
+	traceL("SSLBase", this) << "Create" << endl;
 	assert(_handle);
 	_handle->data = this;
 	_connectReq.data = this;
@@ -75,7 +75,7 @@ SSLBase::SSLBase(SSLContext::Ptr context) :
 	_session(nullptr), 
 	_sslAdapter(this)
 {
-	traceL("SSLBase", this) << "create" << endl;
+	traceL("SSLBase", this) << "Create" << endl;
 	assert(_handle);
 	_handle->data = this;
 	_connectReq.data = this;
@@ -87,7 +87,7 @@ SSLBase::SSLBase(SSLContext::Ptr context, SSLSession::Ptr session) :
 	_session(session), 
 	_sslAdapter(this)
 {
-	traceL("SSLBase", this) << "create" << endl;
+	traceL("SSLBase", this) << "Create" << endl;
 	assert(_handle);
 	_handle->data = this;
 	_connectReq.data = this;
@@ -96,7 +96,7 @@ SSLBase::SSLBase(SSLContext::Ptr context, SSLSession::Ptr session) :
 	
 SSLBase::~SSLBase() 
 {	
-	traceL("SSLBase", this) << "destroy" << endl;
+	traceL("SSLBase", this) << "Destroy" << endl;
 }
 
 

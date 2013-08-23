@@ -20,13 +20,13 @@ AVInputReader::AVInputReader(const Options& options)  :
 	_audio(nullptr),
 	_stopping(false)
 {		
-	traceL("AVInputReader", this) << "create" << endl;
+	traceL("AVInputReader", this) << "Create" << endl;
 }
 
 
 AVInputReader::~AVInputReader() 
 {
-	traceL("AVInputReader", this) << "destroy" << endl;
+	traceL("AVInputReader", this) << "Destroy" << endl;
 
 	close();
 }

@@ -44,7 +44,7 @@ Task::Task(const std::string& type, const std::string& name) :
 	_scheduler(nullptr),
 	_trigger(nullptr)
 {
-	traceL() << "create" << endl;
+	traceL() << "Create" << endl;
 }
 
 	
@@ -56,13 +56,13 @@ Task::Task(sked::Scheduler& scheduler, const std::string& type, const std::strin
 	_scheduler(&scheduler),
 	_trigger(nullptr)
 {
-	traceL() << "create" << endl;
+	traceL() << "Create" << endl;
 }
 
 
 Task::~Task()
 {
-	traceL() << "destroy" << endl;
+	traceL() << "Destroy" << endl;
 }
 
 
@@ -191,18 +191,18 @@ void Task::setName(const std::string& name)
 		throw std::runtime_error("A time member is required.");
 	
 	int tzd;
-	DateTime time(DateTimeParser::parse(sked::DateFormat, root["time"].asString(), tzd));
+	DateTime time(DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT, root["time"].asString(), tzd));
 	schedule(time);
 	*/
 
 		//root["time"] = DateTimeFormatter::format(time(), 
-		//	sked::DateFormat);
+		//	DateTimeFormat::ISO8601_FORMAT);
 
 		//if (!root.isMember("time"))
 		//	throw std::runtime_error("A time member is required.");
 	
 		//int tzd;
-		//DateTime time(DateTimeParser::parse(sked::DateFormat, root["time"].asString(), tzd));
+		//DateTime time(DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT, root["time"].asString(), tzd));
 		//schedule(time);
 
 
@@ -241,8 +241,8 @@ DateTime Task::time() const
     //DateTime now;
     //Timespan s = now += time;
     //Timespan s = time - now;	
-	//traceL() << "[Task: " << this << "] Time Now: " << DateTimeFormatter::format(now, sked::DateFormat) << endl;
-	//traceL() << "[Task: " << this << "] Time Trigger: " << DateTimeFormatter::format(time, sked::DateFormat) << endl;
+	//traceL() << "[Task: " << this << "] Time Now: " << DateTimeFormatter::format(now, DateTimeFormat::ISO8601_FORMAT) << endl;
+	//traceL() << "[Task: " << this << "] Time Trigger: " << DateTimeFormatter::format(time, DateTimeFormat::ISO8601_FORMAT) << endl;
 	//traceL() << "[Task: " << this << "] Timeout in " << (diff / 1000) << endl;
 	//start();
 
@@ -297,7 +297,7 @@ void Task::serialize(json::Value& root)
 	traceL() << "serializing" << endl;	
 	
 	root["time"] = DateTimeFormatter::format(time(), 
-		sked::DateFormat);
+		DateTimeFormat::ISO8601_FORMAT);
 }
 
 

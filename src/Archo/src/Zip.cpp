@@ -140,7 +140,7 @@ void ZipFile::extractTo(const std::string& path)
 		// Check directory
 		if (info.external_fa & FILE_ATTRIBUTE_DIRECTORY || 
 			fname[strlen(fname) - 1] == fs::delimiter) {
-			traceL("ZipFile") << "create directory: " << outPath << endl;
+			traceL("ZipFile") << "Create directory: " << outPath << endl;
 			fs::mkdirr(outPath);
 		}
 

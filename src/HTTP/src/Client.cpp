@@ -39,7 +39,7 @@ ClientConnection::ClientConnection(http::Client* client, const URL& url, const n
 	_url(url), 
 	_readStream(nullptr)
 {	
-	traceL("ClientConnection", this) << "create: " << url << endl;
+	traceL("ClientConnection", this) << "Create: " << url << endl;
 
 	IncomingProgress.sender = this;
 	OutgoingProgress.sender = this;
@@ -62,7 +62,7 @@ ClientConnection::ClientConnection(const URL& url, const net::Socket& socket) :
 	_complete(false),
 	_readStream(nullptr)
 {	
-	traceL("ClientConnection", this) << "create: " << url << endl;
+	traceL("ClientConnection", this) << "Create: " << url << endl;
 
 	IncomingProgress.sender = this;
 	OutgoingProgress.sender = this;
@@ -75,7 +75,7 @@ ClientConnection::ClientConnection(const URL& url, const net::Socket& socket) :
 
 ClientConnection::~ClientConnection() 
 {	
-	traceL("ClientConnection", this) << "destroy" << endl;
+	traceL("ClientConnection", this) << "Destroy" << endl;
 
 	if (_readStream) {
 		delete _readStream;
@@ -182,7 +182,7 @@ void ClientConnection::onSocketConnect(void*)
 
 void ClientConnection::onHeaders() 
 {
-	traceL("ClientConnection", this) << "on headers" << endl;	
+	traceL("ClientConnection", this) << "On headers" << endl;	
 	_incomingProgress.total = _response.getContentLength();
 
 	Headers.emit(this, _response);
@@ -191,7 +191,7 @@ void ClientConnection::onHeaders()
 
 void ClientConnection::onPayload(const MutableBuffer& buffer)
 {
-	//traceL("ClientConnection", this) << "on payload: " << std::string(bufferCast<const char*>(buffer), buffer.size()) << endl;	
+	//traceL("ClientConnection", this) << "On payload: " << std::string(bufferCast<const char*>(buffer), buffer.size()) << endl;	
 	
 	// Update download progress
 	_incomingProgress.update(buffer.size());
@@ -208,7 +208,7 @@ void ClientConnection::onPayload(const MutableBuffer& buffer)
 
 void ClientConnection::onMessage() 
 {
-	traceL("ClientConnection", this) << "on complete" << endl;
+	traceL("ClientConnection", this) << "On complete" << endl;
 	
 	// Fire Complete and clear delegates so it
 	// won't fire again on close or error
@@ -219,7 +219,7 @@ void ClientConnection::onMessage()
 
 void ClientConnection::onClose() 
 {
-	traceL("ClientConnection", this) << "on close" << endl;	
+	traceL("ClientConnection", this) << "On close" << endl;	
 
 	Connection::onClose();
 }
@@ -262,7 +262,7 @@ ClientConnection* createConnection(const URL& url)
 //
 Client::Client()
 {
-	traceL("http::Client", this) << "create" << endl;
+	traceL("http::Client", this) << "Create" << endl;
 
 	timer.Timeout += delegate(this, &Client::onTimer);
 	timer.start(5000);
@@ -271,7 +271,7 @@ Client::Client()
 
 Client::~Client()
 {
-	traceL("http::Client", this) << "destroy" << endl;
+	traceL("http::Client", this) << "Destroy" << endl;
 	shutdown();
 }
 
@@ -312,7 +312,7 @@ void Client::removeConnection(ClientConnection* conn)
 
 void Client::onTimer(void*)
 {
-	//traceL("http::Client", this) << "on timer" << endl;
+	//traceL("http::Client", this) << "On timer" << endl;
 
 	/// Close connections that have timed out while receiving
 	/// the server response, maybe due to a faulty server.

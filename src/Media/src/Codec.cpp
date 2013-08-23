@@ -64,7 +64,7 @@ string Codec::toString() const
 }
 
 
-void Codec::print(ostream& ost)
+void Codec::print(std::ostream& ost)
 {
 	ost << "Codec["		
 		//<< "\n\tID: " << id
@@ -114,7 +114,7 @@ string AudioCodec::toString() const
 }
 
 
-void AudioCodec::print(ostream& ost)
+void AudioCodec::print(std::ostream& ost)
 {
 	ost << "AudioCodec["
 		<< "\n\tName: " << name
@@ -167,7 +167,7 @@ string VideoCodec::toString() const
 }
 
 
-void VideoCodec::print(ostream& ost)
+void VideoCodec::print(std::ostream& ost)
 {
 	ost << "VideoCodec["
 		<< "\n\tName: " << name

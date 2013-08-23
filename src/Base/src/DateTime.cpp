@@ -21,6 +21,7 @@
 
 #include "Sourcey/DateTime.h"
 #include "Sourcey/Platform.h"
+#include "Sourcey/Time.h"
 #include "Sourcey/Numeric.h"
 
 #include <cctype>
@@ -1238,7 +1239,7 @@ bool DateTimeParser::tryParse(const std::string& fmt, const std::string& str, Da
 	{
 		parse(fmt, str, dateTime, timeZoneDifferential);
 	}
-	catch (Exception&)
+	catch (std::exception&)
 	{
 		return false;
 	}
@@ -1707,7 +1708,7 @@ bool Timeout::running() const
 
 void Timeout::start() 
 {
-	_startAt = scy::getTimeHR();
+	_startAt = time::now();
 }
 
 
@@ -1719,13 +1720,13 @@ void Timeout::stop()
 
 void Timeout::reset() 
 {
-	_startAt = scy::getTimeHR();
+	_startAt = time::now();
 }
 
 
 long Timeout::remaining() const 
 {
-	time_t current = scy::getTimeHR();
+	time_t current = time::now();
 	long remaining = static_cast<long>(_delay - (current - _startAt));
 	return remaining > 0 ? remaining : 0;
 }

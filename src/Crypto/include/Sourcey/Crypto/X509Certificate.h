@@ -40,7 +40,7 @@
 #define SOURCEY_Crypto_X509Certificate_H
 
 
-#include "Sourcey/Crypto/OpenSSL.h"
+#include "Sourcey/Crypto/Crypto.h"
 #include "Sourcey/DateTime.h"
 #include "Sourcey/Memory.h"
 #include <set>

@@ -69,7 +69,7 @@ AVEncoder::AVEncoder() :
 
 AVEncoder::~AVEncoder()
 {
-	traceL("AVEncoder", this) << "destroy" << endl;
+	traceL("AVEncoder", this) << "Destroy" << endl;
 	uninitialize();
 }
 
@@ -442,7 +442,7 @@ void AVEncoder::createAudio()
 
 	// Initialize the audio encoder (if required)
 	if (_options.oformat.audio.enabled) { //&& _formatCtx->oformat->audio_codec != CODEC_ID_NONE		
-		traceL("AVEncoder", this) << "create Audio" << endl;
+		traceL("AVEncoder", this) << "Create Audio" << endl;
 		_audio = new AudioEncoderContext(_formatCtx);
 		_audio->iparams = _options.iformat.audio;
 		_audio->oparams = _options.oformat.audio;

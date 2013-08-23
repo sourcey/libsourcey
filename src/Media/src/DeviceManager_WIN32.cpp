@@ -59,14 +59,14 @@ Win32DeviceManager::Win32DeviceManager() :
 	_needCoUninitialize(false) 
 {
 	RtDeviceManager::initialize();
-	traceL("DeviceManager") << "create" << endl;
+	traceL("DeviceManager") << "Create" << endl;
 	//setWatcher(new Win32DeviceWatcher(this));
 }
 
 
 Win32DeviceManager::~Win32DeviceManager() 
 {
-	traceL("DeviceManager") << "destroy" << endl;
+	traceL("DeviceManager") << "Destroy" << endl;
 	RtDeviceManager::uninitialize();
 	if (initialized()) {
 		uninitialize();

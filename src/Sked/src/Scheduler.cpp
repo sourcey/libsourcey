@@ -20,6 +20,7 @@
 #include "Sourcey/Sked/Scheduler.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Platform.h"
+#include "Sourcey/DateTime.h"
 #include "Sourcey/Singleton.h"
 
 #include <algorithm>
@@ -94,8 +95,8 @@ void Scheduler::onIdle()
 					<< "\n\tMinutes: " << remaining.totalMinutes()
 					<< "\n\tSeconds: " << remaining.totalSeconds()
 					<< "\n\tMilliseconds: " << remaining.totalMilliseconds()
-					<< "\n\tCurrentTime: " << DateTimeFormatter::format(now, sked::DateFormat)
-					<< "\n\tScheduledAt: " << DateTimeFormatter::format(task->trigger().scheduleAt, sked::DateFormat)
+					<< "\n\tCurrentTime: " << DateTimeFormatter::format(now, DateTimeFormat::ISO8601_FORMAT)
+					<< "\n\tScheduledAt: " << DateTimeFormatter::format(task->trigger().scheduleAt, DateTimeFormat::ISO8601_FORMAT)
 					<< endl;
 			}
 #endif
@@ -116,8 +117,8 @@ void Scheduler::onIdle()
 					DateTime now;
 					log("trace") << "Running: "
 						<< "\n\tPID: " << task
-						<< "\n\tCurrentTime: " << DateTimeFormatter::format(now, sked::DateFormat)
-						<< "\n\tScheduledTime: " << DateTimeFormatter::format(task->trigger().scheduleAt, sked::DateFormat)
+						<< "\n\tCurrentTime: " << DateTimeFormatter::format(now, DateTimeFormat::ISO8601_FORMAT)
+						<< "\n\tScheduledTime: " << DateTimeFormatter::format(task->trigger().scheduleAt, DateTimeFormat::ISO8601_FORMAT)
 						<< endl;
 				}
 #else
@@ -234,7 +235,7 @@ void Scheduler::deserialize(json::Value& root)
 }
 
 
-void Scheduler::print(ostream& ost)
+void Scheduler::print(std::ostream& ost)
 {
 	json::StyledWriter writer;
 	json::Value data;

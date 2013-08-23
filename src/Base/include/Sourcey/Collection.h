@@ -25,6 +25,9 @@
 #include "Sourcey/Memory.h"
 #include "Sourcey/Util.h"
 #include "Sourcey/Logger.h"
+
+#include <vector>
+#include <map>
 #include <sstream>
 #include <assert.h>
 

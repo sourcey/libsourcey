@@ -23,6 +23,8 @@
 
 #include "Sourcey/UV/UVPP.h"
 #include <functional>
+#include <vector>
+#include <map>
 
 
 namespace scy {

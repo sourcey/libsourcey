@@ -115,7 +115,7 @@ void AudioEncoderContext::create()
 {
 	AudioContext::create();
 
-	traceL("AudioEncoderContext", this) << "create" << endl;	
+	traceL("AudioEncoderContext", this) << "Create" << endl;	
 	
 	// Find the audio encoder
 	codec = avcodec_find_encoder_by_name(oparams.encoder.c_str());
@@ -341,7 +341,7 @@ void AudioDecoderContext::create(AVFormatContext *ic, int streamID)
 {
 	AudioContext::create();
 	
-	traceL("AudioDecoderContext", this) << "create: " << streamID << endl;
+	traceL("AudioDecoderContext", this) << "Create: " << streamID << endl;
 
 	assert(ic);
 	assert(streamID >= 0);
@@ -499,7 +499,7 @@ AudioResampler::~AudioResampler()
 
 void AudioResampler::create(const AudioCodec& iparams, const AudioCodec& oparams)
 {
-	traceL("AudioResampler", this) << "create:" 
+	traceL("AudioResampler", this) << "Create:" 
 		<< "\n\tInput Sample Rate: " << iparams.sampleRate
 		<< "\n\tOutput Sample Rate:: " << oparams.sampleRate
 		<< endl;
@@ -546,7 +546,7 @@ void AudioResampler::create(const AudioCodec& iparams, const AudioCodec& oparams
 	this->iparams = iparams;
 	this->oparams = oparams;
 	
-	traceL("AudioResampler", this) << "create: OK" << endl;
+	traceL("AudioResampler", this) << "Create: OK" << endl;
 }
 	
 

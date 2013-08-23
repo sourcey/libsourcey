@@ -61,7 +61,7 @@ public:
 		
 		if (timeout > 0) {
 			Mutex::ScopedLock lock(_tmutex);
-			Timeout& timeout = _timeouts[item];
+			auto& timeout = _timeouts[item];
 			timeout.start();
 		}
 	}
@@ -77,7 +77,7 @@ public:
 	{
 		if (item) {
 			Mutex::ScopedLock lock(_tmutex);	
-			TimeoutMap::iterator it = _timeouts.find(item);	
+			auto it = _timeouts.find(item);	
 			if (it != _timeouts.end()) {
 				if (timeout > 0) {
 					it->second.setDelay(timeout);
@@ -96,7 +96,7 @@ public:
 	{ 
 		// Remove timeout entry
 		Mutex::ScopedLock lock(_tmutex);	
-		TimeoutMap::iterator it = _timeouts.find(item);	
+		auto it = _timeouts.find(item);	
 		if (it != _timeouts.end())
 			_timeouts.erase(it);
 		
@@ -112,7 +112,7 @@ public:
 	void onTimer(void*)
 	{
 		Mutex::ScopedLock lock(_tmutex);
-		for (TimeoutMap::iterator it = _timeouts.begin(); it != _timeouts.end();) {
+		for (auto it = _timeouts.begin(); it != _timeouts.end();) {
 			if (it->second.expired()) {	
 				traceL("TimedManager", this) << "item expired: " << it->first << std::endl;				
 				if (Base::remove(it->first))

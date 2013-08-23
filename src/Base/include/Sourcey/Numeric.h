@@ -24,6 +24,7 @@
 
 
 #include "Sourcey/Types.h"
+#include <string>
 
 
 #if defined(_MSC_VER) || defined(__MINGW32__)

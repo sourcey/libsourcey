@@ -63,7 +63,7 @@ Parser::Parser(http_parser_type type) :
 
 Parser::~Parser() 
 {
-	traceL("HTTPParser", this) << "destroy" << endl;	
+	traceL("HTTPParser", this) << "Destroy" << endl;	
 	reset();
 }
 
@@ -266,7 +266,7 @@ void Parser::onMessageEnd()
 
 void Parser::onError(const ParserError& err)
 {
-	traceL("HTTPParser", this) << "on error: " << err.code << ": " << err.message << endl;	
+	traceL("HTTPParser", this) << "On error: " << err.code << ": " << err.message << endl;	
 	_complete = true;
 	_error = new ParserError;
 	_error->code = err.code;
@@ -406,7 +406,7 @@ Parser::Parser(http_parser_type type) : ///, http::Message* headers // ParserObs
 	//_upgrade(true), 
 	//_wasHeaderValue(true)
 {	
-	traceL("HTTPParser", this) << "create" << endl;
+	traceL("HTTPParser", this) << "Create" << endl;
 }
 */
 	/*

@@ -79,7 +79,7 @@ public:
 		_waitingForKeyframe(false),
 		_timestampOffset(0)
 	{
-		traceL("FLVMetadataInjector", this) << "create" << std::endl;
+		traceL("FLVMetadataInjector", this) << "Create" << std::endl;
 	}
 					
 	virtual void onStreamStateChange(const PacketStreamState& state) 

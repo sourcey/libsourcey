@@ -74,9 +74,9 @@ void Trigger::serialize(json::Value& root)
 	
 	root["type"] = type;
 	root["name"] = name;
-	root["createdAt"] = DateTimeFormatter::format(createdAt, sked::DateFormat);
-	root["scheduleAt"] = DateTimeFormatter::format(scheduleAt, sked::DateFormat);
-	root["lastRunAt"] = DateTimeFormatter::format(lastRunAt, sked::DateFormat);
+	root["createdAt"] = DateTimeFormatter::format(createdAt, DateTimeFormat::ISO8601_FORMAT);
+	root["scheduleAt"] = DateTimeFormatter::format(scheduleAt, DateTimeFormat::ISO8601_FORMAT);
+	root["lastRunAt"] = DateTimeFormatter::format(lastRunAt, DateTimeFormat::ISO8601_FORMAT);
 	root["timesRun"] = timesRun;
 }
 
@@ -95,9 +95,9 @@ void Trigger::deserialize(json::Value& root)
 	int tzd;
 	type = root["type"].asString();
 	name = root["name"].asString();
-	createdAt = DateTimeParser::parse(sked::DateFormat, root["createdAt"].asString(), tzd);
-	scheduleAt = DateTimeParser::parse(sked::DateFormat, root["scheduleAt"].asString(), tzd);
-	lastRunAt = DateTimeParser::parse(sked::DateFormat, root["lastRunAt"].asString(), tzd);
+	createdAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT, root["createdAt"].asString(), tzd);
+	scheduleAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT, root["scheduleAt"].asString(), tzd);
+	lastRunAt = DateTimeParser::parse(DateTimeFormat::ISO8601_FORMAT, root["lastRunAt"].asString(), tzd);
 	timesRun = root["timesRun"].asInt();
 }
 
@@ -226,10 +226,10 @@ void DailyTrigger::update()
 	/*
 	traceL() << "[DailyTrigger] Updating: "
 			<< "\n\tDayOfWeek: " << next.dayOfWeek()
-			<< "\n\tNowTime: " << DateTimeFormatter::format(now, Poco::sked::DateFormat)
-			<< "\n\tPrevTime: " << DateTimeFormatter::format(prev, Poco::sked::DateFormat)
-			<< "\n\tNextTime: " << DateTimeFormatter::format(next, Poco::sked::DateFormat)
-			<< "\n\tScheduleTime: " << DateTimeFormatter::format(scheduleAt, Poco::sked::DateFormat)
+			<< "\n\tNowTime: " << DateTimeFormatter::format(now, Poco::DateTimeFormat::ISO8601_FORMAT)
+			<< "\n\tPrevTime: " << DateTimeFormatter::format(prev, Poco::DateTimeFormat::ISO8601_FORMAT)
+			<< "\n\tNextTime: " << DateTimeFormatter::format(next, Poco::DateTimeFormat::ISO8601_FORMAT)
+			<< "\n\tScheduleTime: " << DateTimeFormatter::format(scheduleAt, Poco::DateTimeFormat::ISO8601_FORMAT)
 			<< endl;
 			*/
 }

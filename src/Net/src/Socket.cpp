@@ -257,7 +257,7 @@ void Socket::onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
 
 void Socket::onSocketError(const scy::Error& error) //const Error& error
 {
-	//traceL("SocketAdapter", this) << "error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
+	//traceL("SocketAdapter", this) << "Error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
 	if (_adapter) {
 		_adapter->onSocketError(error);
 	}
@@ -269,7 +269,7 @@ void Socket::onSocketError(const scy::Error& error) //const Error& error
 
 void Socket::onSocketClose()
 {
-	//traceL("SocketAdapter", this) << "on close: " << socket->Close.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "On close: " << socket->Close.refCount() << endl;	
 	if (_adapter) {
 		_adapter->onSocketClose();
 	}
@@ -347,13 +347,13 @@ bool SocketAdapter::compareProiroty(const SocketAdapter* l, const SocketAdapter*
 SocketAdapter::SocketAdapter(Socket* socket) : //, int priority
 	socket(socket)//, priority(priority)
 {
-	//traceL("SocketAdapter", this) << "create" << endl;	
+	//traceL("SocketAdapter", this) << "Create" << endl;	
 }
 	
 
 SocketAdapter::~SocketAdapter()
 {
-	//traceL("SocketAdapter", this) << "destroy" << endl;	
+	//traceL("SocketAdapter", this) << "Destroy" << endl;	
 }
 
 
@@ -374,14 +374,14 @@ void SocketAdapter::onSocketRecv(const MutableBuffer& buf, const Address& peerAd
 
 void SocketAdapter::onSocketError(const Error& error) //const Error& error
 {
-	//traceL("SocketAdapter", this) << "error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
+	//traceL("SocketAdapter", this) << "Error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
 	socket->Error.emit(socket, error);
 }
 
 
 void SocketAdapter::onSocketClose()
 {
-	//traceL("SocketAdapter", this) << "on close: " << socket->Close.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "On close: " << socket->Close.refCount() << endl;	
 	socket->Close.emit(socket);
 }
 
@@ -407,13 +407,13 @@ SocketBase::SocketBase() :
 	SharedObject(true), //new DeferredDeleter<SocketBase>()),
 	_insideCallback(false)
 {
-	//traceL("SocketAdapter", this) << "create" << endl;	
+	//traceL("SocketAdapter", this) << "Create" << endl;	
 }
 
 
 SocketBase::~SocketBase()
 {
-	//traceL("SocketAdapter", this) << "destroy" << endl;	
+	//traceL("SocketAdapter", this) << "Destroy" << endl;	
 
 	// The destructor never be called from inside a callback.
 	// Deferred destruction ensures this never occurs.
@@ -575,7 +575,7 @@ bool SocketBase::connected() const
 /*
 void SocketBase::setError(const Error& err) 
 { 
-	traceL("SocketBase", this) << "set error: " << err.message << endl;	
+	traceL("SocketBase", this) << "Set error: " << err.message << endl;	
 	_error = err;
 }
 */
@@ -623,13 +623,13 @@ int base().refCount() const
 SocketAdapter::SocketAdapter(int priority) : 
 	priority(priority)
 {
-	//traceL("SocketAdapter", this) << "create" << endl;	
+	//traceL("SocketAdapter", this) << "Create" << endl;	
 }
 	
 
 SocketAdapter::~SocketAdapter()
 {
-	//traceL("SocketAdapter", this) << "destroy" << endl;	
+	//traceL("SocketAdapter", this) << "Destroy" << endl;	
 }
 */
 

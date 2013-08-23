@@ -38,13 +38,13 @@ SSLAdapter::SSLAdapter(net::SSLBase* socket) :
 	_readBIO(nullptr),
 	_writeBIO(nullptr)
 {
-	traceL("SSLAdapter", this) << "create" << endl;
+	traceL("SSLAdapter", this) << "Create" << endl;
 }
 
 
 SSLAdapter::~SSLAdapter() 
 {	
-	traceL("SSLAdapter", this) << "destroy" << endl;
+	traceL("SSLAdapter", this) << "Destroy" << endl;
 	if (_ssl) {
 		SSL_free(_ssl);
 		_ssl = NULL;

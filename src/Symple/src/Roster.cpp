@@ -31,13 +31,13 @@ namespace smpl {
 
 Roster::Roster()
 {	
-	//traceL("Roster", this) << "create" << endl;
+	//traceL("Roster", this) << "Create" << endl;
 }
 	
 
 Roster::~Roster() 
 {
-	//traceL("Roster", this) << "destroy" << endl;
+	//traceL("Roster", this) << "Destroy" << endl;
 }
 
 
@@ -89,7 +89,7 @@ Roster::PeerMap Roster::peers() const
 }
 
 
-void Roster::print(ostream& os) const
+void Roster::print(std::ostream& os) const
 {
 	Mutex::ScopedLock lock(_mutex);
 

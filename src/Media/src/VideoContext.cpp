@@ -35,14 +35,14 @@ VideoContext::VideoContext() :
 	frame(nullptr),
 	pts(0.0)
 {
-	traceL("VideoContext", this) << "create" << endl;
+	traceL("VideoContext", this) << "Create" << endl;
 	//reset();
 }
 	
 
 VideoContext::~VideoContext()
 {	
-	traceL("VideoContext", this) << "destroy" << endl;
+	traceL("VideoContext", this) << "Destroy" << endl;
 	
 	//assert((!frame && !codec && !stream) && "video context must be closed");
 	close();
@@ -114,7 +114,7 @@ VideoEncoderContext::~VideoEncoderContext()
 
 void VideoEncoderContext::create() //, const VideoCodec& params
 {
-	traceL("VideoEncoderContext", this) << "create: " 
+	traceL("VideoEncoderContext", this) << "Create: " 
 		<< "\n\tInput: " << iparams.toString() 
 		<< "\n\tOutput: " << oparams.toString() 
 		<< endl;
@@ -364,7 +364,7 @@ VideoCodecEncoderContext::~VideoCodecEncoderContext()
 
 void VideoCodecEncoderContext::create()
 {
-	traceL("VideoCodecEncoderContext", this) << "create: " 
+	traceL("VideoCodecEncoderContext", this) << "Create: " 
 		<< "\n\tInput: " << iparams.toString() 
 		<< "\n\tOutput: " << oparams.toString() 
 		<< endl;
@@ -508,7 +508,7 @@ VideoDecoderContext::~VideoDecoderContext()
 
 void VideoDecoderContext::create(AVFormatContext *ic, int streamID)
 {	
-	traceL("VideoDecoderContext", this) << "create: " << streamID << endl;
+	traceL("VideoDecoderContext", this) << "Create: " << streamID << endl;
 	VideoContext::create();
 
 	assert(ic);
@@ -647,7 +647,7 @@ VideoConversionContext::~VideoConversionContext()
 
 void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec& oparams)
 {
-	traceL("VideoConversionContext", this) << "create:" 
+	traceL("VideoConversionContext", this) << "Create:" 
 		<< "\n\tInput Width: " << iparams.width
 		<< "\n\tInput Height: " << iparams.height
 		<< "\n\tInput Pixel Format: " << iparams.pixelFmt
@@ -676,7 +676,7 @@ void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec&
 	this->iparams = iparams;
 	this->oparams = oparams;
 	
-	traceL("VideoConversionContext", this) << "create: OK" << endl;
+	traceL("VideoConversionContext", this) << "Create: OK" << endl;
 }
 	
 

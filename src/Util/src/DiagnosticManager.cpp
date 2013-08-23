@@ -93,13 +93,13 @@ bool IDiagnostic::failed() const
 //	
 DiagnosticManager::DiagnosticManager()
 {	
-	traceL() << "create" << endl;
+	traceL() << "Create" << endl;
 }
 
 
 DiagnosticManager::~DiagnosticManager() 
 {
-	traceL() << "destroy" << endl;
+	traceL() << "Destroy" << endl;
 }
 
 void DiagnosticManager::resetAll()
@@ -160,14 +160,14 @@ bool DiagnosticManager::freeDiagnostic(const std::string& name)
 
 IDiagnostic* DiagnosticManager::getDiagnostic(const std::string& name) 
 {
-	return DiagnosticStore::get(name);
+	return DiagnosticStore::get(name, true);
 }
 
 
 void DiagnosticManager::onDiagnosticStateChange(void* sender, DiagnosticState& state, const DiagnosticState&)
 {
 	IDiagnostic* test = reinterpret_cast<IDiagnostic*>(sender);
-	traceL() << "Diagnostic State Change: " << test->name << ": " << state.toString() << endl;
+	traceL() << "Diagnostic state change: " << test->name << ": " << state.toString() << endl;
 
 	if (test->complete() && allComplete())
 		DiagnosticsComplete.emit(this);

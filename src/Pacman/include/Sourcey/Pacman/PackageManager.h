@@ -127,9 +127,11 @@ public:
 	/// Package Installation Methods
 
 	virtual InstallTask* installPackage(const std::string& name,
-		const InstallOptions& options = InstallOptions(), bool whiny = false);
+		const InstallOptions& options = InstallOptions()); //, bool whiny = false
 		// Installs a single package.
 		// The returned InstallTask must be started.
+		// If the package is already up to date, a nullptr will be returned.
+		// Any other error will throw a std::runtime_error.
 
 	virtual bool installPackages(const StringVec& ids, 
 		const InstallOptions& options = InstallOptions(),
@@ -141,7 +143,7 @@ public:
 		// The PackageManager does not take ownership of the InstallMonitor.	
 
 	virtual InstallTask* updatePackage(const std::string& name, 
-		const InstallOptions& options = InstallOptions(), bool whiny = false);
+		const InstallOptions& options = InstallOptions()); //, bool whiny = false
 		// Updates a single package.
 		// Throws an exception if the package does not exist.
 		// The returned InstallTask must be started.
@@ -191,9 +193,14 @@ public:
 	//
 	/// Package Helper Methods
 
-	virtual PackagePairList getPackagePairs() const;
+	virtual PackagePairVec getPackagePairs() const;
 		// Returns all package pairs, valid or invalid.
-		// Some pairs may not have both local and remote pointers.
+		// Some pairs may not have both local and remote package pointers.
+	
+	virtual PackagePairVec getUpdatablePackagePairs() const;
+		// Returns a list of package pairs which may be updated.
+		// All pairs will have both local and remote package pointers,
+		// and the remote version will be newer than the local version.	
 
 	virtual PackagePair getPackagePair(const std::string& id, bool whiny = false) const;
 		// Returns a local and remote package pair.
@@ -216,10 +223,14 @@ public:
 		// Exceptions will be thrown if the package does not exist,
 		// or is not fully installed.
 		
-	virtual Package::Asset getAssetToInstall(PackagePair& pair, const InstallOptions& options);
+	virtual Package::Asset getLatestInstallableAsset(const PackagePair& pair, 
+		const InstallOptions& options = InstallOptions()) const;
 		// Returns the best asset to install, or throws a descriptive exception
-		// if no updates are available, or the package is is up to date.
+		// if no updates are available, or if the package is already up to date.
 		// This method takes version and SDK locks into consideration.
+		
+	virtual bool hasAvailableUpdates(const PackagePair& pair) const;
+		// Returns true if there are updates available for this package, false otherwise.
 		
 	//
 	/// File Helper Methods
@@ -257,13 +268,20 @@ public:
 	//
 	/// Events
 
-	Signal<LocalPackage&> PackageComplete;
-	Signal<LocalPackage&> PackageUninstalled;
-	
-	Signal<InstallTask&> TaskAdded;
-	Signal<InstallTask&> TaskRemoved;
-
 	Signal<const http::Response&> RemotePackageResponse;
+		// Fires when the remote package list have been 
+		// downloaded from the server.
+
+	Signal<LocalPackage&> PackageUninstalled;
+		// Fires when a package is uninstalled.
+	
+	Signal<InstallTask&> InstallTaskCreated;
+		// Fires when an installation task is created, 
+		// before it is started.
+
+	Signal<const InstallTask&> InstallTaskComplete;
+		// fires when a package installation tasks completes, 
+		// either successfully or in error.
 
 protected:
 
@@ -272,14 +290,14 @@ protected:
 
 	void onPackageInstallComplete(void* sender);
 
-	void onPackagesResponse(void* sender, const http::Response& response);
+	void onPackageQueryResponse(void* sender, const http::Response& response);
 	
 protected:	
-	mutable Mutex _mutex;
-	Options				_options;
+	mutable Mutex       _mutex;
 	LocalPackageStore	_localPackages;
 	RemotePackageStore	_remotePackages;
 	InstallTaskList		_tasks;
+	Options				_options;
 };
 
 
@@ -296,7 +314,7 @@ protected:
 		// TaskState notifies the PackageState of each running task.
 		// Installing is used when a bew task is created.
 
-	//virtual bool isUpToDate(PackagePair& pair);
+	//virtual bool hasAvailableUpdates(PackagePair& pair);
 		// Checks if a newer version is available for the given
 		// package pair.
 	

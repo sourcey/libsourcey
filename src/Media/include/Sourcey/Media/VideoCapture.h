@@ -193,7 +193,7 @@ struct MatrixPacket: public VideoPacket
 				  // TODO: Use stream offset time instead of process time 
 				  // for consistency with AudioCapture for realtime pts calculation
 	
-	MatrixPacket(cv::Mat* mat, double time = scy::getProcessTime()) :
+	MatrixPacket(cv::Mat* mat, double time = time::clockSecs()) :
 		VideoPacket((char*)mat->data, mat->rows*mat->step, mat->cols, mat->rows, time),
 		mat(mat) {}
 
@@ -201,7 +201,7 @@ struct MatrixPacket: public VideoPacket
 			  int size = 0,
 			  int width = 0,
 			  int height = 0,
-			  double time = scy::getProcessTime()) :
+			  double time = time::clockSecs()) :
 		VideoPacket(data, size, width, height, time),
 		mat(nullptr) {};
 

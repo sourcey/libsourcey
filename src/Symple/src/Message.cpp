@@ -99,7 +99,7 @@ size_t Message::size() const
 }
 
 	
-void Message::print(ostream& os) const
+void Message::print(std::ostream& os) const
 {
 	os << json::stringify(*this, true);
 }

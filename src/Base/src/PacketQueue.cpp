@@ -159,13 +159,13 @@ PacketStream::PacketStream(const std::string& name) :
 	PacketStream(name)
 {
 	_queue = new SyncPacketQueue(*this);
-	traceL("PacketStream", this) << "create" << endl;
+	traceL("PacketStream", this) << "Create" << endl;
 }
 
 
 PacketStream::~PacketStream()
 {
-	traceL("PacketStream", this) << "destroy" << endl;
+	traceL("PacketStream", this) << "Destroy" << endl;
 	{
 		Mutex::ScopedLock lock(_mutex);
 		if (_queue) {

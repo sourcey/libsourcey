@@ -26,17 +26,8 @@
 #include "Sourcey/Logger.h"
 #include "Sourcey/Filesystem.h"
 
-////#include "Poco/Path.h" // depreciated
-////#include "Poco/File.h" // depreciated
-////#include "Poco/Format.h" // depreciated
-////#include "Poco/DirectoryIterator.h" // depreciated
-////#include "Poco/Delegate.h" // depreciated
-////#include "Poco/Zip/Decompress.h" // depreciated
-////#include "Poco/Zip/ZipArchive.h" // depreciated
-
 
 using namespace std;
-//using namespace Poco;
 
 
 namespace scy { 
@@ -58,8 +49,6 @@ InstallTask::InstallTask(PackageManager& manager, LocalPackage* local, RemotePac
 
 InstallTask::~InstallTask()
 {
-	log("debug") << "destroy" << endl;
-
 	// :)
 }
 
@@ -92,20 +81,24 @@ void InstallTask::run()
 
 			// Set default install directory if none was given
 			if (_options.installDir.empty()) {
-				
+
 				// Use the current install dir if the local package already exists
 				if (!_local->installDir().empty()) {
-					_options.installDir = _local->installDir(); }
+					_options.installDir = _local->installDir();
+				}
 
 				// Or use the manager default
 				else {
-					_options.installDir = _manager.options().installDir; }
+					_options.installDir = _manager.options().installDir;
+				}
 			}
 
 			// Normalize lazy windows paths
 			_options.installDir = fs::normalize(_options.installDir);
 			_local->setInstallDir(_options.installDir);
-			log("debug") << "install to: " << _local->installDir() << endl;
+
+			// Create the directory
+			fs::mkdirr(_options.installDir);
 
 			// If the package failed previously we might need 
 			// to clear the file cache.
@@ -116,12 +109,12 @@ void InstallTask::run()
 		// Kick off the state machine. If any errors are encountered
 		// an exception will be thrown and the task will fail.
 		doDownload();
-		while(_downloading) {
+		do {
 			scy::sleep(50);
 			if (cancelled()) goto Complete;
-		}
+		} while(_downloading);
 
-		doUnpack();
+		doExtract();
 		if (cancelled()) goto Complete;
 		doFinalize();
 			
@@ -136,7 +129,7 @@ void InstallTask::run()
 	
 Complete:
 	setComplete();
-	//delete this; // test safe
+	deleteLater<InstallTask>(this);
 }
 
 
@@ -150,7 +143,7 @@ void InstallTask::onStateChange(InstallationState& state, const InstallationStat
 		case InstallationState::Downloading:
 			setProgress(0);
 			break;
-		case InstallationState::Unpacking:
+		case InstallationState::Extracting:
 			setProgress(75);
 			break;
 		case InstallationState::Finalizing:
@@ -204,7 +197,7 @@ void InstallTask::doDownload()
 	/* // force file re-download until os get file size is fixed and we can match crc
 	if (_manager.hasCachedFile(asset)) {
 		log("debug") << "file exists, skipping download" << endl;		
-		setState(this, InstallationState::Unpacking);
+		setState(this, InstallationState::Extracting);
 		return;
 	}
 	*/
@@ -266,9 +259,9 @@ void InstallTask::onDownloadComplete(void*, const http::Response& response)
 }
 
 
-void InstallTask::doUnpack()
+void InstallTask::doExtract()
 {
-	setState(this, InstallationState::Unpacking);
+	setState(this, InstallationState::Extracting);
 		
 	Package::Asset asset = getRemoteAsset();
 	if (!asset.valid())
@@ -409,7 +402,7 @@ void InstallTask::setComplete()
 		Mutex::ScopedLock lock(_mutex);
 		assert(_progress == 100);
 
-		log("info") << "package installed:" 
+		log("info") << "Package installed:" 
 			<< "\n\tName: " << _local->name()
 			<< "\n\tVersion: " << _local->version()
 			<< "\n\tPackage State: " << _local->state()

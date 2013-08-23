@@ -34,13 +34,13 @@ VideoAnalyzer::VideoAnalyzer(const Options& options) :
 	_audio(nullptr),
 	_videoConv(nullptr)
 {
-	traceL("VideoAnalyzer", this) << "create" << endl;
+	traceL("VideoAnalyzer", this) << "Create" << endl;
 }
 
 
 VideoAnalyzer::~VideoAnalyzer() 
 {
-	traceL("VideoAnalyzer", this) << "destroy" << endl;
+	traceL("VideoAnalyzer", this) << "Destroy" << endl;
 	uninitialize();
 }
 
@@ -50,7 +50,7 @@ void VideoAnalyzer::initialize()
 	if (_options.ifile.empty())
 		throw std::runtime_error("Please specify an input file.");
 
-	traceL("VideoAnalyzer", this) << "loading: " << _options.ifile << endl;
+	traceL("VideoAnalyzer", this) << "Loading: " << _options.ifile << endl;
 
 	_error = "";
 
