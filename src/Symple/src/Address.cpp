@@ -130,7 +130,7 @@ bool Address::valid() const
 }
 
 
-void Address::print(ostream& os) const
+void Address::print(std::ostream& os) const
 {
 	os << group();
 	os << ":";

@@ -35,7 +35,7 @@ StreamManager::StreamManager(bool freeClosedStreams) :
 
 StreamManager::~StreamManager() 
 {
-	log("debug") << "destroy" << endl;
+	log("debug") << "Destroy" << endl;
 	closeAll();
 }
 
@@ -131,10 +131,10 @@ void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state, 
 		stream->StateChange -= delegate(this, &StreamManager::onStreamStateChange);
 		bool success = false;
 		if (_freeClosedStreams) {
-			log("debug") << "on stream close: freeing: " << stream->name() << endl;
+			log("debug") << "On stream close: freeing: " << stream->name() << endl;
 			success = Manager::free(stream->name());
 		} else {
-			log("debug") << "on stream close: removing: " << stream->name() << endl;
+			log("debug") << "On stream close: removing: " << stream->name() << endl;
 			success = !!Manager::remove(stream->name());
 		}
 		assert(success);

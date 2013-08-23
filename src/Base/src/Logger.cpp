@@ -18,6 +18,7 @@
 
 
 #include "Sourcey/Logger.h"
+#include "Sourcey/Time.h"
 #include "Sourcey/DateTime.h"
 #include "Sourcey/Platform.h"
 #include "Sourcey/Filesystem.h"
@@ -264,7 +265,7 @@ bool AsyncLogWriter::writeNext()
 
 
 LogStream::LogStream(LogLevel level, const std::string& realm, const void* ptr, const char* channel) : 
-	level(level), realm(realm), address(ptr ? util::memAddress(ptr) : ""), ts(time(0)), channel(nullptr)
+	level(level), realm(realm), address(ptr ? util::memAddress(ptr) : ""), ts(time::now()), channel(nullptr)
 {
 #ifndef DISABLE_LOGGING
 	if (channel)
@@ -274,7 +275,7 @@ LogStream::LogStream(LogLevel level, const std::string& realm, const void* ptr, 
 
 
 LogStream::LogStream(LogLevel level, const std::string& realm, const std::string& address) :
-	level(level), realm(realm), address(address), ts(time(0)), channel(nullptr)
+	level(level), realm(realm), address(address), ts(time::now()), channel(nullptr)
 {
 }
 
@@ -318,7 +319,7 @@ void LogChannel::write(const LogStream& stream)
 void LogChannel::format(const LogStream& stream, std::ostream& ost)
 { 
 	if (_dateFormat)
-		ost << scy::formatTime(stream.ts, _dateFormat); //DateTimeFormatter::format(Timestamp(stream.ts), _dateFormat);Local
+		ost << time::print(time::toLocal(stream.ts), _dateFormat); //DateTimeFormatter::format(Timestamp(stream.ts), _dateFormat);Local
 	ost << " [" << getStringFromLogLevel(stream.level) << "] ";
 	if (!stream.realm.empty() || !stream.address.empty()) {		
 		ost << "[";		
@@ -522,7 +523,7 @@ void RotatingFileChannel::rotate()
 	std::string path(_dir);
 	fs::addnode(path, _filename);
 	_fstream = new std::ofstream(path);	
-	_rotatedAt = time(0);
+	_rotatedAt = time::now();
 }
 
 

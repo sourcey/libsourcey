@@ -23,7 +23,7 @@
 
 #include "Sourcey/Media/Config.h"
 #include "Sourcey/Packet.h"
-#include "Sourcey/Platform.h"
+#include "Sourcey/Time.h"
 
 
 namespace scy {
@@ -36,7 +36,7 @@ struct MediaPacket: public RawPacket
 
 	MediaPacket(char* data = nullptr,
 				int size = 0,
-				double time = scy::getProcessTime()) :
+				double time = time::clockSecs()) :
 		RawPacket(data, size),
 		time(time) {};
 
@@ -63,7 +63,7 @@ struct VideoPacket: public MediaPacket
 				int size = 0,
 				int width = 0,
 				int height = 0,
-				double time = scy::getProcessTime()) : 
+				double time = time::clockSecs()) : 
 		MediaPacket(data, size, time),
 		width(width),
 		height(height) {};
@@ -87,7 +87,7 @@ struct AudioPacket: public MediaPacket
 {
 	AudioPacket(char* data = nullptr,
 				int size = 0,
-				double time = scy::getProcessTime()) : //(UInt64)clock() / CLOCKS_PER_SEC
+				double time = time::clockSecs()) : //(UInt64)clock() / CLOCKS_PER_SEC
 		MediaPacket(data, size, time) {};
 
 	AudioPacket(const AudioPacket& r) : 

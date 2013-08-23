@@ -102,7 +102,7 @@ void Thread::runAsync(void* arg, bool hasArg)
 		}
 	}
 	catch (std::exception& exc) {
-		cerr << "thread error: " << exc.what() << endl;
+		cerr << "Thread error: " << exc.what() << endl;
 #ifdef _DEBUG
 		throw exc;
 #endif

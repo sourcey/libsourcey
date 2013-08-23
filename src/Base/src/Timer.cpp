@@ -32,14 +32,14 @@ namespace scy {
 Timer::Timer(uv::Loop& loop, bool ghost) : 
 	uv::Handle(&loop, new uv_timer_t), _ghost(ghost)
 {
-	//traceL("Timer", this) << "create" << endl;
+	//traceL("Timer", this) << "Create" << endl;
 	init();
 }
 
 
 Timer::~Timer()
 {
-	//traceL("Timer", this) << "destroy" << endl;
+	//traceL("Timer", this) << "Destroy" << endl;
 }
 
 
@@ -170,7 +170,7 @@ Int64 Timer::count()
 Timer::Timer(Int64 timeout, Int64 interval, uv::Loop& loop, bool ghost) : 
 	uv::Handle(&loop, new uv_timer_t), _ghost(ghost)
 {
-	//traceL("Timer", this) << "create" << endl;	
+	//traceL("Timer", this) << "Create" << endl;	
 	init();
 	//if (timeout || interval)
 	//	start(timeout, interval);

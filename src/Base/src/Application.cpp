@@ -71,7 +71,7 @@ void Application::stop()
 
 void Application::finalize() 
 { 
-	debugL("Application") << "finalizing" << std::endl;
+	debugL("Application", this) << "finalizing" << std::endl;
 
 #ifdef _DEBUG
 	// Print active handles
@@ -87,7 +87,7 @@ void Application::finalize()
 	// Run once more to clear garbage collector handle
 	//run(); 
 
-	debugL("Application") << "finalization complete" << std::endl;
+	debugL("Application", this) << "finalization complete" << std::endl;
 }		
 	
 	
@@ -102,7 +102,7 @@ void Application::waitForShutdown(std::function<void(void*)> callback, void* opa
 	uv_signal_init(&loop, sig);
 	uv_signal_start(sig, Application::onShutdownSignal, SIGINT);
 		
-	debugL("Application") << "waiting for shutdown" << std::endl;
+	debugL("Application", this) << "waiting for shutdown" << std::endl;
 	run();
 }
 

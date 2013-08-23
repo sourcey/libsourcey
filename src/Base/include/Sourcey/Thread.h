@@ -39,7 +39,7 @@ public:
 	Thread();
 	Thread(basic::Runnable& target);	
 	Thread(std::function<void()> target);	
-	Thread(std::function<void(void*)> target, void* opaque = nullptr);
+	Thread(std::function<void(void*)> target, void* opaque);
 	~Thread();
 	
 	void start(basic::Runnable& target);
@@ -49,10 +49,10 @@ public:
 		// lifetime of the thread.
 	
 	void start(std::function<void()> target);	
-	void start(std::function<void(void*)> target, void* opaque = nullptr);
+	void start(std::function<void(void*)> target, void* opaque);
 		// Starts the thread with the given target.
 	
-	void startC(basic::Callable target, void* opaque = nullptr);
+	void startC(basic::Callable target, void* opaque);
 		// Starts the thread with the given target and opaque pointer.
 	
 	void join();

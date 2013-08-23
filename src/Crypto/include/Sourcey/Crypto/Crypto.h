@@ -21,8 +21,8 @@
 #define SOURCEY_Crypto_Crypto_H
 
 
-#include "Sourcey/Crypto/OpenSSL.h"
 #include "Sourcey/Base64.h"
+#include <vector>
 
 
 namespace scy {
@@ -30,42 +30,42 @@ namespace crypto {
 
 	
 void initializeEngine();
-	/// Initialize the Crypto library, as well as the underlying OpenSSL
-	/// libraries.
-	///
-	/// OpenSSL must be initialized before using any classes from the
-	/// Crypto library. OpenSSL will be initialized automatically
-	/// through OpenSSL instances held by various Crypto classes
-	/// (Cipher, Hash, X509Certificate), however it is recommended to
-	/// call initializeEngine() in any case at application startup.
-	///
-	/// The Crypto library can be called multiple times; however,
-	/// for every call to initializeEngine(), a matching call to 
-	/// uninitializeEngine() must be performed.
+	// Initialize the Crypto library, as well as the underlying OpenSSL
+	// libraries.
+	//
+	// OpenSSL must be initialized before using any classes from the
+	// Crypto library. OpenSSL will be initialized automatically
+	// through OpenSSL instances held by various Crypto classes
+	// (Cipher, Hash, X509Certificate), however it is recommended to
+	// call initializeEngine() in any case at application startup.
+	//
+	// The Crypto library can be called multiple times; however,
+	// for every call to initializeEngine(), a matching call to 
+	// uninitializeEngine() must be performed.
 	
 
 void uninitializeEngine();
-	/// Uninitializes the Crypto library.
+	// Uninitializes the Crypto library.
 
 
 typedef std::vector<unsigned char> ByteVec;	
-	/// Generic storage container for storing cryptographic binary data.
+	// Generic storage container for storing cryptographic binary data.
 
 
 namespace internal {
 	
 	void api(int ret, const char* error = nullptr);
-		/// Check return values from OpenSSL and throw an exception if it failed.
+		// Check return values from OpenSSL and throw an exception if it failed.
 	
 	void throwError();
-		/// Throws the last OpenSSL error.
+		// Throws the last OpenSSL error.
 	
 	template<typename T> struct Raw
-		/// Allows template functions to accept a wide range of buffer types.
-		/// See constructor definitions below for all compatible types.
-		/// The class uses const_cast for maximum flexibility, so use with care.
-		/// Also ensure that std::string is contiguous on your platform
-		/// before using the std::string constructors (C++11 guarantees it).
+		// Allows template functions to accept a wide range of buffer types.
+		// See constructor definitions below for all compatible types.
+		// The class uses const_cast for maximum flexibility, so use with care.
+		// Also ensure that std::string is contiguous on your platform
+		// before using the std::string constructors (C++11 guarantees it).
 	{
 		T ptr;
 		std::size_t len;

@@ -23,7 +23,6 @@
 
 #include "Sourcey/Types.h"
 #include <string>
-#include <ctime>
 
 
 namespace scy {
@@ -39,18 +38,6 @@ std::string getExePath();
 std::string getCwd();
 	// Return the current working directory.
 
-UInt64 getTimeHR();
-	// Returns the current high-resolution real time in nanoseconds.
-
-UInt64 getTimeMS();
-	// Returns the current high-resolution real time in milliseconds.
-
-UInt64 getTicks();
-	// Returns the number of millisecond ticks since epoch.
-
-double getProcessTime();
-	// Returns the current process time in decimal seconds.
-
 UInt64 getFreeMemory();
 	// Returns the current amount of free memory.
 
@@ -63,18 +50,6 @@ void sleep(int ms);
 void pause();
 	// Pause the current thread until enter is pressed.
 
-
-//
-/// STL Time
-// 
-   
-std::time_t systemTime();
-
-std::tm toLocalTime(const std::time_t& time);
-
-std::string formatLocalTime(const char* fmt);
-std::string formatTime(const std::time_t& time, const char* fmt);
-std::string formatTime(const std::tm* dt, const char* fmt);
 
 
 //

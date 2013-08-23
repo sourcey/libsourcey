@@ -16,7 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Sourcey/Crypto/OpenSSL.h"
+#include "Sourcey/Crypto/Crypto.h"
 #include "Sourcey/Random.h"
 #include "Sourcey/Mutex.h"
 #include "Sourcey/Thread.h"

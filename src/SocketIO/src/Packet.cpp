@@ -315,18 +315,18 @@ size_t Packet::size() const
 }
 
 
-void Packet::print(ostream& os) const
+void Packet::print(std::ostream& os) const
 {
 	os << _type;
 	if (_id == -1 && _endpoint.empty() && _message.empty()) {
 		os << "::";
 	}
 	else if (_id == -1 && _endpoint.empty()){
-		os << "::: " << _message;
+		os << ":::" << _message;
 	}  
 	else if (_id > -1 && _type != 6) {
 		os << ":" << _id << (_ack ? "+":"") 
-			<< ":" << _endpoint << ": " << _message;
+			<< ":" << _endpoint << ":" << _message;
 	}
 	else {
 		os << "::" << _endpoint << ":" << _message;

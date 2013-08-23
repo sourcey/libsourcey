@@ -23,9 +23,6 @@
 
 #include "Sourcey/Base.h"
 
-#include <vector>
-#include <map>
-
 
 namespace scy {
 

@@ -37,7 +37,7 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFo
 	_format(format),
 	_opened(false)
 {
-	traceL("AudioCapture", this) << "create" << endl;
+	traceL("AudioCapture", this) << "Create" << endl;
 
 	_iParams.deviceId = _deviceId;
 	_iParams.nChannels = _channels;
@@ -53,13 +53,13 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFo
 		
 	// Open the audio stream or throw an exception.
 	open(); //channels, sampleRate
-	traceL("AudioCapture", this) << "create: OK" << endl;
+	traceL("AudioCapture", this) << "Create: OK" << endl;
 }
 
 
 AudioCapture::~AudioCapture()
 {
-	traceL("AudioCapture", this) << "destroy" << endl;
+	traceL("AudioCapture", this) << "Destroy" << endl;
 }
 
 

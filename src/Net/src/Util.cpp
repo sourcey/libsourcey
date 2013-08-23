@@ -79,7 +79,7 @@ bool internetIsOK(bool whiny)
 	{
 		res = scy::addressIsOK("http://www.google.com");
 	}
-	catch (Exception&)
+	catch (std::exception&)
 	{
 		if (whiny)
 			throw std::runtime_error("No internet connection available.");

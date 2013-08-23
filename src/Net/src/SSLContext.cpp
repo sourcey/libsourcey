@@ -18,11 +18,11 @@
 // This file uses functions from POCO C++ Libraries (license below)
 //
 
+#include "Sourcey/Filesystem.h"
+#include "Sourcey/DateTime.h"
 #include "Sourcey/Net/SSLContext.h"
 #include "Sourcey/Net/SSLManager.h"
-#include "Sourcey/DateTime.h"
-#include "Sourcey/Filesystem.h"
-#include "Sourcey/Crypto/OpenSSL.h"
+#include "Sourcey/Crypto/Crypto.h"
 
 
 using namespace std;
@@ -72,7 +72,7 @@ SSLContext::SSLContext(
 		{
 			std::string msg = getLastError();
 			SSL_CTX_free(_sslContext);
-			throw Exception("SSL Error: Cannot load default CA certificates", msg);
+			throw std::runtime_error("SSL Error: Cannot load default CA certificates: " + msg);
 		}
 	}
 
@@ -83,7 +83,7 @@ SSLContext::SSLContext(
 		{
 			std::string msg = getLastError();
 			SSL_CTX_free(_sslContext);
-			throw Exception(std::string("SSL Error: Error loading private key from file ") + privateKeyFile, msg);
+			throw Exception(std::string("SSL Error: Error loading private key from file ") + privateKeyFile + ": " + msg);
 		}
 	}
 
@@ -94,7 +94,7 @@ SSLContext::SSLContext(
 		{
 			std::string errMsg = getLastError();
 			SSL_CTX_free(_sslContext);
-			throw Exception(std::string("SSL Error: Error loading certificate from file ") + certificateFile, errMsg);
+			throw Exception(std::string("SSL Error: Error loading certificate from file ") + certificateFile + ": " + errMsg); //, errMsg);
 		}
 	}
 
@@ -148,7 +148,7 @@ SSLContext::SSLContext(
 		{
 			std::string msg = getLastError();
 			SSL_CTX_free(_sslContext);
-			throw Exception("SSL Error: Cannot load default CA certificates", msg);
+			throw std::runtime_error("SSL Error: Cannot load default CA certificates: " + msg);
 		}
 	}
 
@@ -178,7 +178,7 @@ void SSLContext::useCertificate(const crypto::X509Certificate& certificate)
 	if (errCode != 1)
 	{
 		std::string msg = getLastError();
-		throw Exception("SSL Error: Cannot set certificate for Context", msg);
+		throw std::runtime_error("SSL Error: Cannot set certificate for Context: " + msg);
 	}
 }
 
@@ -189,7 +189,7 @@ void SSLContext::addChainCertificate(const crypto::X509Certificate& certificate)
 	if (errCode != 1)
 	{
 		std::string msg = getLastError();
-		throw Exception("SSL Error: Cannot add chain certificate to Context", msg);
+		throw std::runtime_error("SSL Error: Cannot add chain certificate to Context: " + msg);
 	}
 }
 
@@ -200,7 +200,7 @@ void SSLContext::usePrivateKey(const crypto::RSAKey& key)
 	if (errCode != 1)
 	{
 		std::string msg = getLastError();
-		throw Exception("SSL Error: Cannot set private key for Context", msg);
+		throw std::runtime_error("SSL Error: Cannot set private key for Context: " + msg);
 	}
 }
 
@@ -234,7 +234,7 @@ void SSLContext::enableSessionCache(bool flag, const std::string& sessionIdConte
 	unsigned length = static_cast<unsigned>(sessionIdContext.length());
 	if (length > SSL_MAX_SSL_SESSION_ID_LENGTH) length = SSL_MAX_SSL_SESSION_ID_LENGTH;
 	int rc = SSL_CTX_set_session_id_context(_sslContext, reinterpret_cast<const unsigned char*>(sessionIdContext.data()), length);
-	if (rc != 1) throw Exception("SSL Error: cannot set session ID context");
+	if (rc != 1) throw std::runtime_error("SSL Error: cannot set session ID context");
 }
 
 
@@ -310,11 +310,11 @@ void SSLContext::createSSLContext()
 		_sslContext = SSL_CTX_new(TLSv1_server_method());
 		break;
 	default:
-		throw Exception("SSL Exception: Invalid usage");
+		throw std::runtime_error("SSL Exception: Invalid usage");
 	}
 	if (!_sslContext)  {
 		unsigned long err = ERR_get_error();
-		throw Exception("SSL Exception: Cannot create SSL_CTX object", ERR_error_string(err, 0));
+		throw std::runtime_error("SSL Exception: Cannot create SSL_CTX object: " + std::string(ERR_error_string(err, 0)));
 	}
 
 	SSL_CTX_set_default_passwd_cb(_sslContext, &SSLManager::privateKeyPassphraseCallback);

@@ -55,7 +55,7 @@ Device::Device(const std::string& type, int id, const std::string& name, const s
 }
 
 	
-void Device::print(ostream& os) 
+void Device::print(std::ostream& os) 
 {		
 	os << "Device[" 
 		<< type << ": " 
@@ -209,7 +209,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name, 
 {
 	// If the name is empty, return the default device.
 	if (name.empty() || name == kDefaultDeviceName) {
-		//infoL() << "create default VideoCapturer" << endl;
+		//infoL() << "Create default VideoCapturer" << endl;
 		return getDefaultVideoCaptureDevice(out);
 	}
 
@@ -220,7 +220,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name, 
 	/*
 	for (std::vector<Device>::const_iterator it = devices.begin(); it != devices.end(); ++it) {
 		if (name == it->name) {
-			infoL() << "create VideoCapturer for " << name << endl;
+			infoL() << "Create VideoCapturer for " << name << endl;
 			out = *it;
 			return true;
 		}
@@ -230,7 +230,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name, 
 	// with the filename. The LmiMediaEngine will know to use a FileVideoCapturer
 	// for these devices.
 	if (talk_base::Filesystem::IsFile(name)) {
-		infoL() << "create FileVideoCapturer" << endl;
+		infoL() << "Create FileVideoCapturer" << endl;
 		*out = FileVideoCapturer::CreateFileVideoCapturerDevice(name);
 		return true;
 	}
@@ -423,7 +423,7 @@ void DeviceManager::setInitialized(bool initialized)
 }
 
 
-void DeviceManager::print(ostream& ost) 
+void DeviceManager::print(std::ostream& ost) 
 {
 	std::vector<Device> devs;
 	getAudioInputDevices(devs);

@@ -72,8 +72,10 @@ struct Package: public json::Value
 };
 
 
-// ---------------------------------------------------------------------
 //
+// Remote Package
+//
+
 struct RemotePackage: public Package
 	/// This class is a JSON representation of an
 	/// package existing on the remote server that
@@ -105,8 +107,10 @@ struct RemotePackage: public Package
 };
 
 
-// ---------------------------------------------------------------------
 //
+// Local Package
+//
+
 struct LocalPackage: public Package
 	/// This class is a JSON representation of an
 	/// installed local package that exists on the
@@ -186,7 +190,7 @@ struct LocalPackage: public Package
 		// Returns the installation directory for this package.
 	
 	virtual std::string versionLock() const;
-	virtual std::string sdkVersionLock() const;
+	virtual std::string sdkLockedVersion() const;
 
 	virtual Asset asset();
 		// Returns the currently installed asset, if any.
@@ -210,15 +214,17 @@ struct LocalPackage: public Package
 	
 	virtual json::Value& errors();
 	virtual void addError(const std::string& message);
-	virtual std::string lastError();
+	virtual std::string lastError() const;
 	virtual void clearErrors();
 
 	virtual bool valid() const;
 };
 
 
-// ---------------------------------------------------------------------
 //
+// Package Pair
+//
+
 struct PackagePair
 	/// This class provides pairing of a local and a
 	/// remote package.
@@ -232,7 +238,7 @@ struct PackagePair
 	std::string type() const;
 	std::string author() const;
 	
-	//virtual bool isUpToDate();
+	//virtual bool hasAvailableUpdates();
 		// Returns true if there are no possible updates for
 		// this package, false otherwise.
 	
@@ -241,7 +247,7 @@ struct PackagePair
 };
 
 
-typedef std::vector<PackagePair> PackagePairList;
+typedef std::vector<PackagePair> PackagePairVec;
 
 
 } } // namespace scy::pman

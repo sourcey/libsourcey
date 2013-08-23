@@ -22,23 +22,20 @@
 #include "Sourcey/Logger.h"
 #include "Sourcey/Filesystem.h"
 
-//#include "Poco/Format.h" // depreciated
-////#include "Poco/File.h" // depreciated
-
 #include "assert.h"
 
 
-using namespace std;
-
+//using namespace std;
 
 
 namespace scy { 
 namespace pman {
 
 
-// ---------------------------------------------------------------------
+//
 // Base Package
 //	
+
 Package::Package()
 {
 }
@@ -63,46 +60,47 @@ bool Package::valid() const
 }
 
 
-string Package::id() const
+std::string Package::id() const
 {
 	return (*this)["id"].asString();
 }
 
 
-string Package::type() const
+std::string Package::type() const
 {
 	return (*this)["type"].asString();
 }
 
 
-string Package::name() const
+std::string Package::name() const
 {
 	return (*this)["name"].asString();
 }
 
 
-string Package::author() const
+std::string Package::author() const
 {
 	return (*this)["author"].asString();
 }
 
 
-string Package::description() const
+std::string Package::description() const
 {
 	return (*this)["description"].asString();
 }
 
 
-void Package::print(ostream& ost) const
+void Package::print(std::ostream& ost) const
 {
 	json::StyledWriter writer;
 	ost << writer.write(*this);
 }
 
 
-// ---------------------------------------------------------------------
+//
 // Package Asset
 //	
+
 Package::Asset::Asset(json::Value& src) :
 	root(src)
 {
@@ -114,25 +112,25 @@ Package::Asset::~Asset()
 }
 
 
-string Package::Asset::fileName() const
+std::string Package::Asset::fileName() const
 {
 	return root["file-name"].asString();
 }
 
 
-string Package::Asset::version() const
+std::string Package::Asset::version() const
 {
 	return root.get("version", "0.0.0").asString();
 }
 
 
-string Package::Asset::sdkVersion() const
+std::string Package::Asset::sdkVersion() const
 {
 	return root.get("sdk-version", "0.0.0").asString();
 }
 
 
-string Package::Asset::url(int index) const
+std::string Package::Asset::url(int index) const
 {
 	return root["mirrors"][(size_t)index]["url"].asString();
 }
@@ -152,7 +150,7 @@ bool Package::Asset::valid() const
 }
 
 
-void Package::Asset::print(ostream& ost) const
+void Package::Asset::print(std::ostream& ost) const
 {
 	json::StyledWriter writer;
 	ost << writer.write(root);
@@ -172,9 +170,10 @@ bool Package::Asset::operator == (const Asset& r) const
 }
 
 
-// ---------------------------------------------------------------------
+//
 // Remote Package
 //	
+
 RemotePackage::RemotePackage()
 {
 }
@@ -261,9 +260,10 @@ Package::Asset RemotePackage::latestSDKAsset(const std::string& version)
 }
 
 
-// ---------------------------------------------------------------------
+//
 // Local Package
 //	
+
 LocalPackage::LocalPackage()
 {
 }
@@ -343,37 +343,33 @@ bool LocalPackage::isFailed() const
 }
 
 
-string LocalPackage::state() const
+std::string LocalPackage::state() const
 {
 	return get("state", "Installing").asString();
 }
 
 
-string LocalPackage::installState() const
+std::string LocalPackage::installState() const
 {
 	return get("install-state", "None").asString();
 }
 
 
-string LocalPackage::installDir() const
+std::string LocalPackage::installDir() const
 {
 	return get("install-dir", "").asString();
 }
 
 
-string LocalPackage::getInstalledFilePath(const std::string& fileName, bool whiny)
+std::string LocalPackage::getInstalledFilePath(const std::string& fileName, bool whiny)
 {
 	std::string dir = installDir();
 	if (whiny && dir.empty())
 		throw std::runtime_error("Package install directory is not set.");
 	
-	dir += fs::separator;
-	dir += fileName;
+	// TODO: What about sub directories?
+	fs::addnode(dir, fileName);
 	return dir;
-	//Poco::Path path(dir);
-	//path.makeDirectory();
-	//path.setFileName(fileName);
-	//return path;
 }
 
 
@@ -395,19 +391,19 @@ void LocalPackage::setSDKVersionLock(const std::string& version)
 }
 
 
-string LocalPackage::version() const
+std::string LocalPackage::version() const
 {
 	return get("version", "0.0.0").asString();
 }
 
 
-string LocalPackage::versionLock() const
+std::string LocalPackage::versionLock() const
 {
 	return get("version-lock", "").asString();
 }
 
 
-string LocalPackage::sdkVersionLock() const
+std::string LocalPackage::sdkLockedVersion() const
 {
 	return get("sdk-version-lock", "").asString();
 }
@@ -415,91 +411,22 @@ string LocalPackage::sdkVersionLock() const
 
 bool LocalPackage::verifyInstallManifest()
 {	
-	debugL("LocalPackage", this) << name() 
-		<< ": Verifying install manifest" << endl;
+	debugL("LocalPackage", this) << name() << ": Verifying install manifest" << std::endl;
 
 	// Check file system for each manifest file
 	LocalPackage::Manifest manifest = this->manifest();
 	for (auto it = manifest.root.begin(); it != manifest.root.end(); it++) {		
 		std::string path = this->getInstalledFilePath((*it).asString(), false);
-		debugL("LocalPackage", this) << name() 
-			<< ": Checking: " << path << endl;
+		debugL("LocalPackage", this) << name() << ": Checking exists: " << path << std::endl;
 		
-		//Poco::File file(path);
-		//if (!file.exists()) {
 		if (!fs::exists(path)) {
-			errorL("PackageManager", this) << name() << ": Missing package file: " << path << endl;
+			errorL("PackageManager", this) << name() << ": Missing file: " << path << std::endl;
 			return false;
 		}
 	}
 	
 	return true;
 }
-
-
-		/*
-
-		Asset bestAsset = 
-		if (bestAsset)
-
-		try {
-
-			// The best SDK version only needs to be newer if the
-			// installed asset matches the locked SDK version.
-			if (asset().sdkVersion() != sdkVersionLock())
-				return false;
-		}
-		catch (std::exception& exc/Exception& exc/) {
-			// Return false, although we won't be able to update
-			// at all, since there are no available SDK assets :(
-			return false;
-		}
-
-bool LocalPackage::isUpToDate(RemotePackage& remote)
-{
-	// Return true if the locked version is already installed
-	if (!versionLock().empty()) {
-		return versionLock() == version();
-	}
-	
-	json::Value tmp;
-	Package::Asset bestAsset(tmp);
-
-	// Get the best asset from the locked SDK version, if any
-	if (!sdkVersionLock().empty()) {
-		try {
-			bestAsset = remote.latestSDKAsset(sdkVersionLock());
-
-			// The best SDK version only needs to be newer if the
-			// installed asset matches the locked SDK version.
-			if (asset().sdkVersion() != sdkVersionLock())
-				return false;
-		}
-		catch (std::exception& exc/Exception& exc/) {
-			// Return false, although we won't be able to update
-			// at all, since there are no available SDK assets :(
-			return false;
-		}
-	}
-
-	// Otherwise get the latest available asset
-	else {
-		try {
-			bestAsset = remote.latestAsset();
-		}
-		catch (std::exception& exc/Exception& exc/) {
-			// Return false, there are no available SDK assets.
-			// The remote package is not valid!
-			assert(0 && "invalid remote package");
-			return false;
-		}
-	}
-	
-	// If L is greater than R the function returns true.
-	// If L is equal or less than R the function returns false.
-	return !util::compareVersion(bestAsset.version(), version());
-}
-		*/
 
 
 void LocalPackage::setInstalledAsset(const Package::Asset& installedRemoteAsset)
@@ -533,9 +460,10 @@ void LocalPackage::addError(const std::string& message)
 }
 
 
-string LocalPackage::lastError()
-{
-	return errors()[errors().size() - 1].asString();
+std::string LocalPackage::lastError() const
+{	
+	json::Value errors = get("errors", Json::arrayValue);
+	return errors.empty() ? "" : errors[errors.size() - 1].asString();
 }
 
 
@@ -551,9 +479,10 @@ bool LocalPackage::valid() const
 }
 
 
-// ---------------------------------------------------------------------
+//
 // Local Package Manifest
 //	
+
 LocalPackage::Manifest::Manifest(json::Value& src) :
 	root(src)
 {
@@ -592,25 +521,25 @@ PackagePair::PackagePair(LocalPackage* local, RemotePackage* remote) :
 }
 	
 
-string PackagePair::id() const
+std::string PackagePair::id() const
 {
 	return local ? local->id() : remote ? remote->id() : "";
 }
 
 
-string PackagePair::name() const
+std::string PackagePair::name() const
 {
 	return local ? local->name() : remote ? remote->name() : "";
 }
 
 
-string PackagePair::type() const
+std::string PackagePair::type() const
 {
 	return local ? local->type() : remote ? remote->type() : "";
 }
 
 
-string PackagePair::author() const
+std::string PackagePair::author() const
 {
 	return local ? local->author() : remote ? remote->author() : "";
 }
@@ -631,6 +560,71 @@ bool PackagePair::valid() const
 
 
 
+
+
+		/*
+
+		Asset bestAsset = 
+		if (bestAsset)
+
+		try {
+
+			// The best SDK version only needs to be newer if the
+			// installed asset matches the locked SDK version.
+			if (asset().sdkVersion() != sdkLockedVersion())
+				return false;
+		}
+		catch (std::exception& exc/Exception& exc/) {
+			// Return false, although we won't be able to update
+			// at all, since there are no available SDK assets :(
+			return false;
+		}
+
+bool LocalPackage::hasAvailableUpdates(RemotePackage& remote)
+{
+	// Return true if the locked version is already installed
+	if (!versionLock().empty()) {
+		return versionLock() == version();
+	}
+	
+	json::Value tmp;
+	Package::Asset bestAsset(tmp);
+
+	// Get the best asset from the locked SDK version, if any
+	if (!sdkLockedVersion().empty()) {
+		try {
+			bestAsset = remote.latestSDKAsset(sdkLockedVersion());
+
+			// The best SDK version only needs to be newer if the
+			// installed asset matches the locked SDK version.
+			if (asset().sdkVersion() != sdkLockedVersion())
+				return false;
+		}
+		catch (std::exception& exc/Exception& exc/) {
+			// Return false, although we won't be able to update
+			// at all, since there are no available SDK assets :(
+			return false;
+		}
+	}
+
+	// Otherwise get the latest available asset
+	else {
+		try {
+			bestAsset = remote.latestAsset();
+		}
+		catch (std::exception& exc/Exception& exc/) {
+			// Return false, there are no available SDK assets.
+			// The remote package is not valid!
+			assert(0 && "invalid remote package");
+			return false;
+		}
+	}
+	
+	// If L is greater than R the function returns true.
+	// If L is equal or less than R the function returns false.
+	return !util::compareVersion(bestAsset.version(), version());
+}
+		*/
 
 	//json::Value node = append_child();
 	//node.set_name("file");

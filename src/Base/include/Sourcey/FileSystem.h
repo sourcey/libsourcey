@@ -21,7 +21,7 @@
 #define SOURCEY_FileSystem_H
 
 
-#include "Sourcey/Base.h"
+#include "Sourcey/Types.h"
 #include <string>
 #include <vector>
 
@@ -54,6 +54,9 @@ bool exists(const std::string& path);
 
 bool isdir(const std::string& path);
 	// Returns true if the directory exists on the system.
+
+Int64 filesize(const std::string& path);
+	// Returns the size in bytes of the given file, or -1 if file doesn't exist.
 
 void readdir(const std::string& path, std::vector<std::string>& res);
 	// Returns a list of all files and folders in the directory. 

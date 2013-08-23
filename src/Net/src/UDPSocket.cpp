@@ -70,7 +70,7 @@ struct SendRequest
 
 UDPBase::UDPBase()
 {
-	traceL("UDPBase", this) << "create" << endl;
+	traceL("UDPBase", this) << "Create" << endl;
 	//closeOnError(true);
 	init();
 }
@@ -78,7 +78,7 @@ UDPBase::UDPBase()
 
 UDPBase::~UDPBase()
 {
-	traceL("UDPBase", this) << "destroy" << endl;
+	traceL("UDPBase", this) << "Destroy" << endl;
 }
 
 
@@ -304,7 +304,7 @@ uv_buf_t UDPBase::allocRecvBuffer(uv_handle_t *handle, size_t suggested_size)
 
 void UDPBase::onError(const Error& error) 
 {		
-	errorL("UDPBase", this) << "error: " << error.message << endl;	
+	errorL("UDPBase", this) << "Error: " << error.message << endl;	
 	emitError(error);
 	close(); // close on error
 }
@@ -312,7 +312,7 @@ void UDPBase::onError(const Error& error)
 
 void UDPBase::onClose() 
 {		
-	errorL("UDPBase", this) << "on close" << endl;	
+	errorL("UDPBase", this) << "On close" << endl;	
 	emitClose();
 }
 

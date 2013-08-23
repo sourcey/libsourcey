@@ -89,7 +89,7 @@ void MediaFactory::loadVideo()
 	for (size_t i = 0; i < devs.size(); ++i) {
 		try 
 		{
-			traceL("MediaFactory") << "loading video: " << devs[0].id << endl;
+			traceL("MediaFactory") << "Loading video: " << devs[0].id << endl;
 
 			// TODO: Receive callback on capture error or closure.
 			VideoCaptureBase* base = new VideoCaptureBase(devs[0].id); 

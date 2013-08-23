@@ -46,7 +46,7 @@ public:
 		/// This class should have a higher priority than standard
 		/// sockets so we can parse data packets first.		
 	{
-		traceL("PacketSocketAdapter", this) << "create: " << socket << std::endl;
+		traceL("PacketSocketAdapter", this) << "Create: " << socket << std::endl;
 	}
 		
 	virtual void onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)

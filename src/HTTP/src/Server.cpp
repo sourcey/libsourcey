@@ -34,13 +34,13 @@ Server::Server(short port, ServerResponderFactory* factory) :
 	address("0.0.0.0", port),
 	factory(factory)
 {
-	traceL("http::Server", this) << "create" << endl;
+	traceL("http::Server", this) << "Create" << endl;
 }
 
 
 Server::~Server()
 {
-	traceL("http::Server", this) << "destroy" << endl;
+	traceL("http::Server", this) << "Destroy" << endl;
 	shutdown();
 	if (factory)
 		delete factory;
@@ -124,7 +124,7 @@ void Server::removeConnection(ServerConnection* conn)
 
 void Server::onAccept(void*, const net::TCPSocket& sock)
 {	
-	traceL("http::Server", this) << "on server accept" << endl;
+	traceL("http::Server", this) << "On server accept" << endl;
 	ServerConnection* conn = createConnection(sock);
 	assert(conn);
 }
@@ -132,7 +132,7 @@ void Server::onAccept(void*, const net::TCPSocket& sock)
 
 void Server::onClose(void*) 
 {
-	traceL("http::Server", this) << "on server socket close" << endl;
+	traceL("http::Server", this) << "On server socket close" << endl;
 }
 
 
@@ -148,7 +148,7 @@ ServerConnection::ServerConnection(Server& server, const net::Socket& socket) :
 	_upgrade(false),
 	_requestComplete(false)
 {	
-	traceL("ServerConnection", this) << "create" << endl;
+	traceL("ServerConnection", this) << "Create" << endl;
 
 	_socket.replaceAdapter(new ServerAdapter(*this));
 
@@ -159,7 +159,7 @@ ServerConnection::ServerConnection(Server& server, const net::Socket& socket) :
 	
 ServerConnection::~ServerConnection() 
 {	
-	traceL("ServerConnection", this) << "destroy" << endl;
+	traceL("ServerConnection", this) << "Destroy" << endl;
 
 	if (_responder) {
 		traceL("ServerConnection", this) << "Destroy: Responder: " << _responder << endl;
@@ -213,7 +213,7 @@ Server& ServerConnection::server()
 
 void ServerConnection::onHeaders() 
 {
-	traceL("ServerConnection", this) << "on headers" << endl;	
+	traceL("ServerConnection", this) << "On headers" << endl;	
 	
 	/*
 	/// Note: To upgrade the connection we need to upgrade the 
@@ -263,7 +263,7 @@ void ServerConnection::onHeaders()
 
 void ServerConnection::onPayload(const MutableBuffer& buffer)
 {
-	traceL("ServerConnection", this) << "on payload: " << buffer.size() << endl;	
+	traceL("ServerConnection", this) << "On payload: " << buffer.size() << endl;	
 	
 	//assert(_upgrade); // no payload for upgrade requests
 	assert(_responder);
@@ -273,7 +273,7 @@ void ServerConnection::onPayload(const MutableBuffer& buffer)
 
 void ServerConnection::onMessage() 
 {
-	traceL("ServerConnection", this) << "on complete" << endl;	
+	traceL("ServerConnection", this) << "On complete" << endl;	
 
 	/// The HTTP request is complete.
 	/// The request handler can give a response.
@@ -286,7 +286,7 @@ void ServerConnection::onMessage()
 
 void ServerConnection::onClose() 
 {
-	traceL("ServerConnection", this) << "on close" << endl;	
+	traceL("ServerConnection", this) << "On close" << endl;	
 
 	if (_responder)
 		_responder->onClose();
@@ -297,7 +297,7 @@ void ServerConnection::onClose()
 
 void ServerConnection::onServerShutdown(void*)
 {
-	traceL("ServerConnection", this) << "on server shutdown" << endl;	
+	traceL("ServerConnection", this) << "On server shutdown" << endl;	
 
 	close();
 }
@@ -338,18 +338,18 @@ void ServerConnection::onParserHeadersEnd()
 
 void ServerConnection::onParserChunk(const char* buf, size_t len)
 {
-	traceL("ServerConnection", this) << "on Parser Chunk" << endl;	
+	traceL("ServerConnection", this) << "On Parser Chunk" << endl;	
 }
 
 
 void ServerConnection::onParserEnd() 
 {
-	traceL("ServerConnection", this) << "on Request Complete" << endl;	
+	traceL("ServerConnection", this) << "On Request Complete" << endl;	
 
-	//traceL("ServerConnection", this) << "on Message Complete 1" << endl;	
-	//traceL("ServerConnection", this) << "on Message Complete 2" << endl;
-	//traceL("ServerConnection", this) << "on Message Complete 2: " << _request.getKeepAlive() << endl;	
-	//traceL("ServerConnection", this) << "on Message Complete 2: " << _response.getKeepAlive() << endl;
+	//traceL("ServerConnection", this) << "On Message Complete 1" << endl;	
+	//traceL("ServerConnection", this) << "On Message Complete 2" << endl;
+	//traceL("ServerConnection", this) << "On Message Complete 2: " << _request.getKeepAlive() << endl;	
+	//traceL("ServerConnection", this) << "On Message Complete 2: " << _response.getKeepAlive() << endl;
 }
 */
 

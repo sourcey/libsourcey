@@ -212,7 +212,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer)
 
 void WebSocketAdapter::onSocketConnect()
 {
-	traceL("WebSocketAdapter", this) << "on connect" << endl;
+	traceL("WebSocketAdapter", this) << "On connect" << endl;
 	
 	// Send the WS handshake request
 	sendClientRequest();
@@ -221,7 +221,7 @@ void WebSocketAdapter::onSocketConnect()
 
 void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddr)
 {
-	traceL("WebSocketAdapter", this) << "on recv: " << buffer.size() << endl; // << ": " << buffer
+	traceL("WebSocketAdapter", this) << "On recv: " << buffer.size() << endl; // << ": " << buffer
 
 	//assert(buffer.position() == 0);
 	//assert(buffer.available() > 0);
@@ -282,7 +282,7 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
 			}
 			
 			// Emit the result packet
-			//traceL("WebSocketAdapter", this) << "on recv: emit: " << buffer << endl;
+			//traceL("WebSocketAdapter", this) << "On recv: emit: " << buffer << endl;
 			assert(payload);
 			assert(payloadLength);
 			SocketAdapter::onSocketRecv(mutableBuffer(payload, payloadLength), peerAddr);

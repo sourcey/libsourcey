@@ -43,7 +43,7 @@ struct InstallationState: public State
 	{
 		None = 0,
 		Downloading,
-		Unpacking,
+		Extracting,
 		Finalizing,
 		Installed,
 		Cancelled,
@@ -55,7 +55,7 @@ struct InstallationState: public State
 		switch(id) {
 		case None:					return "None";
 		case Downloading:			return "Downloading";
-		case Unpacking:				return "Unpacking";
+		case Extracting:			return "Extracting";
 		case Finalizing:			return "Finalizing";
 		case Installed:				return "Installed";
 		case Cancelled:				return "Cancelled";
@@ -105,12 +105,11 @@ public:
 	virtual void cancel();
 
 	virtual void doDownload();
-		// Downloads the package archive from the
-		// server.
+		// Downloads the package archive from the server.
 
-	virtual void doUnpack();
-		// Unpacks downloaded package files to the
-		// intermediate directory.
+	virtual void doExtract();
+		// Extracts the downloaded package archive files
+		// to the intermediate directory.
 
 	virtual void doFinalize();
 		// Moves extracted files from the intermediate
@@ -138,6 +137,11 @@ public:
 	
 	Signal<int&> Progress;
 		// Signals on progress update [0-100].
+	
+	//NullSignal Finalizing;
+		// Signals that the task is about to begin finalization.
+		// The outside application should ensure that no pre-existing 
+		// files are in use, and can be overwritten.
 	
 	NullSignal Complete;
 		// Signals on task completion for both

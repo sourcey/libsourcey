@@ -31,7 +31,7 @@ namespace av {
 VideoCapture::VideoCapture(int deviceId) : 
 	_base(MediaFactory::instance().getVideoCaptureBase(deviceId))
 {
-	traceL("VideoCapture", this) << "create: " << deviceId << std::endl;
+	traceL("VideoCapture", this) << "Create: " << deviceId << std::endl;
 
 	_base->addEmitter(&Emitter);
 	_base->duplicate();
@@ -40,7 +40,7 @@ VideoCapture::VideoCapture(int deviceId) :
 
 VideoCapture::VideoCapture(const std::string& filename)
 {
-	traceL("VideoCapture", this) << "create: " << filename << std::endl;
+	traceL("VideoCapture", this) << "Create: " << filename << std::endl;
 
 	// The file capture is owned by this instance
 	_base = new VideoCaptureBase(filename);
@@ -51,7 +51,7 @@ VideoCapture::VideoCapture(const std::string& filename)
 VideoCapture::VideoCapture(VideoCaptureBase* base) : 
 	_base(base) 
 {
-	traceL("VideoCapture", this) << "create: " << base << std::endl;
+	traceL("VideoCapture", this) << "Create: " << base << std::endl;
 	_base->addEmitter(&Emitter);
 	_base->duplicate();
 }
@@ -59,7 +59,7 @@ VideoCapture::VideoCapture(VideoCaptureBase* base) :
 
 VideoCapture::~VideoCapture() 
 {
-	traceL("VideoCapture", this) << "destroy" << std::endl;	
+	traceL("VideoCapture", this) << "Destroy" << std::endl;	
 	_base->removeEmitter(&Emitter);
 	_base->release();
 }
@@ -153,7 +153,7 @@ VideoCaptureBase::VideoCaptureBase(int deviceId) :
 	_opened(false),
 	_stopping(false)
 {
-	traceL("VideoCaptureBase", this) << "create: " << deviceId << std::endl;
+	traceL("VideoCaptureBase", this) << "Create: " << deviceId << std::endl;
 	open();
 	start();
 }
@@ -167,7 +167,7 @@ VideoCaptureBase::VideoCaptureBase(const std::string& filename) :
 	_opened(false),
 	_stopping(false)
 {
-	traceL("VideoCaptureBase", this) << "create: " << filename << std::endl;
+	traceL("VideoCaptureBase", this) << "Create: " << filename << std::endl;
 	open();
 	start();
 }
@@ -175,7 +175,7 @@ VideoCaptureBase::VideoCaptureBase(const std::string& filename) :
 
 VideoCaptureBase::~VideoCaptureBase() 
 {	
-	traceL("VideoCaptureBase", this) << "destroy" << std::endl;
+	traceL("VideoCaptureBase", this) << "Destroy" << std::endl;
 
 	if (_thread.running()) {
 		_stopping = true;
@@ -190,7 +190,7 @@ VideoCaptureBase::~VideoCaptureBase()
 	// Try to release the capture (automatic once unrefed)
 	//try { release(); } catch (...) {}
 
-	traceL("VideoCaptureBase", this) << "destroy: OK" << std::endl;
+	traceL("VideoCaptureBase", this) << "Destroy: OK" << std::endl;
 }
 
 
@@ -376,7 +376,7 @@ void VideoCaptureBase::removeEmitter(PacketSignal* emitter)
 
 void VideoCaptureBase::setError(const std::string& error)
 {
-	errorL("VideoCaptureBase", this) << "set error: " << error << std::endl;
+	errorL("VideoCaptureBase", this) << "Set error: " << error << std::endl;
 	Mutex::ScopedLock lock(_mutex);	
 	_error = error;
 }

@@ -38,7 +38,7 @@ namespace scy {
 namespace sked {
 
 
-static const char* DateFormat = "%Y-%m-%d %H:%M:%S %Z";
+static const char* DeprecitatedDateFormat = "%Y-%m-%d %H:%M:%S %Z";
 
 
 class Scheduler: public Runner, public json::ISerializable

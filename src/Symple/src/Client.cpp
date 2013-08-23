@@ -79,7 +79,7 @@ Client::Client(net::SocketBase* socket, const Client::Options& options, uv::Loop
 
 Client::~Client() 
 {
-	log("trace") << "destroying" << endl;
+	log("trace") << "Destroy" << endl;
 }
 
 

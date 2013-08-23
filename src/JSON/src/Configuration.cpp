@@ -56,13 +56,13 @@ void Configuration::load(bool /* create */)
 	if (_path.empty())
 		throw std::runtime_error("Cannot load configuration: File path not set.");
 
-	debugL("JSONConfiguration") << " Loading: " << _path << endl;
+	debugL("JSONConfiguration") << "Load: " << _path << endl;
 	
 	try {	
 		//if (create && !fs::exists(_path))
 		//	fs::createFile(_path);
 
-		json::loadFile(*this, _path);
+		json::loadFile(_path, *this);
 	}
     catch (...) {
 		// The config file may be empty,
@@ -80,10 +80,10 @@ void Configuration::save()
 	if (_path.empty())
 		throw std::runtime_error("Cannot save: Configuration file path must be set.");
 
-	debugL("JSONConfiguration") << " Saving: " << _path << endl;
+	debugL("JSONConfiguration") << "save: " << _path << endl;
 	
 	// Will throw on error
-	json::saveFile(*this, _path);
+	json::saveFile(_path, *this);
 }
 
 
@@ -101,7 +101,7 @@ bool Configuration::loaded()
 }
 
 
-void Configuration::print(ostream& ost) 
+void Configuration::print(std::ostream& ost) 
 {
 	json::StyledWriter writer;
 	ost << writer.write(*this);
@@ -118,7 +118,7 @@ bool Configuration::remove(const std::string& key)
 
 void Configuration::removeAll(const std::string& baseKey)
 {
-	traceL() << "Removing All: " << baseKey << endl;
+	traceL() << "remove all: " << baseKey << endl;
 	Mutex::ScopedLock lock(_mutex); 	
 	
     Members members = this->getMemberNames();

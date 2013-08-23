@@ -26,10 +26,10 @@
 #include "Sourcey/Mutex.h"
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Singleton.h"
-
+#include <exception>
 #include <memory>
 #include <atomic>
-#include <exception>
+#include <vector>
 
 
 namespace scy {

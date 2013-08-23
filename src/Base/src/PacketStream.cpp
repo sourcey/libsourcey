@@ -33,13 +33,13 @@ PacketStream::PacketStream(const std::string& name) :
 	_name(name),
 	_clientData(nullptr)
 {
-	//traceL("PacketStream", this) << "create" << endl;
+	//traceL("PacketStream", this) << "Create" << endl;
 }
 
 
 PacketStream::~PacketStream()
 {
-	//traceL("PacketStream", this) << "destroy" << endl;
+	//traceL("PacketStream", this) << "Destroy" << endl;
 	close();
 }
 

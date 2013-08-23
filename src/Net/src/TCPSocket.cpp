@@ -31,14 +31,14 @@ namespace net {
 TCPSocket::TCPSocket() : 
 	net::Socket(new TCPBase, false)
 {	
-	traceL("TCPSocket", this) << "create" << endl;	
+	traceL("TCPSocket", this) << "Create" << endl;	
 }
 
 
 TCPSocket::TCPSocket(TCPBase* base, bool shared) : 
 	net::Socket(base, shared) 
 {
-	traceL("TCPSocket", this) << "destroy" << endl;	
+	traceL("TCPSocket", this) << "Destroy" << endl;	
 }
 
 
@@ -64,17 +64,17 @@ TCPBase& TCPSocket::base() const
 TCPBase::TCPBase(uv::Loop& loop) :
 	Stream(loop) //, new uv_tcp_t
 {
-	traceL("TCPBase", this) << "create" << endl;
+	traceL("TCPBase", this) << "Create" << endl;
 	init();	
 	//_handle->data = this;
 	//uv_tcp_init(&loop, handle<uv_tcp_t>());	
-	//traceL("TCPBase", this) << "create: OK" << endl;
+	//traceL("TCPBase", this) << "Create: OK" << endl;
 }
 
 	
 TCPBase::~TCPBase() 
 {	
-	traceL("TCPBase", this) << "destroy" << endl;	
+	traceL("TCPBase", this) << "Destroy" << endl;	
 }
 
 
@@ -347,7 +347,7 @@ void TCPBase::onAcceptConnection(uv_stream_t*, int status)
 
 void TCPBase::onError(const Error& error) 
 {		
-	errorL("TCPBase", this) << "error: " << error.message << endl;	
+	errorL("TCPBase", this) << "Error: " << error.message << endl;	
 	emitError(error);
 	close(); // close on error
 }
@@ -355,7 +355,7 @@ void TCPBase::onError(const Error& error)
 
 void TCPBase::onClose() 
 {		
-	errorL("TCPBase", this) << "on close" << endl;	
+	errorL("TCPBase", this) << "On close" << endl;	
 	emitClose();
 }
 

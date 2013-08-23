@@ -122,6 +122,20 @@ bool isdir(const std::string& path)
 }
 
 
+Int64 filesize(const std::string& path)
+{
+#ifdef WIN32
+	struct _stat s;
+	if (_stat(path.c_str(), &s) == 0)
+#else
+	struct stat s;
+	if (stat(path.c_str(), &s) == 0)
+#endif
+		return s.st_size;
+	return -1;
+}
+
+
 namespace internal {
 		
 	struct FSReq

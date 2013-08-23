@@ -33,7 +33,7 @@ static Singleton<GarbageCollector> singleton;
 GarbageCollector::GarbageCollector() : 
 	uv::Handle(&uv::defaultLoop(), new uv_timer_t)
 {
-	traceL("GarbageCollector", this) << "create" << std::endl;
+	traceL("GarbageCollector", this) << "Create" << std::endl;
 
 	uv_timer_init(loop(), handle<uv_timer_t>());		
 	uv_timer_start(handle<uv_timer_t>(), GarbageCollector::onTimer, 2400, 2400);
@@ -110,7 +110,7 @@ static Singleton<GarbageCollector> singleton;
 GarbageCollector::GarbageCollector() : 
 	uv::Handle(&uv::defaultLoop(), new uv_timer_t)
 {
-	traceL("GarbageCollector", this) << "create" << std::endl;
+	traceL("GarbageCollector", this) << "Create" << std::endl;
 
 	uv_timer_init(loop(), handle<uv_timer_t>());		
 	uv_timer_start(handle<uv_timer_t>(), GarbageCollector::onTimer, 2400, 2400);

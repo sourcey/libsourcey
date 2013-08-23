@@ -22,8 +22,8 @@
 
 
 #include "Sourcey/Base64.h"
-//#include <zlib.h>
-#include <unzip.h>
+#include <vector>
+#include <unzip.h> // zlib
 
 
 namespace scy {

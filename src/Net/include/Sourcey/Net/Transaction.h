@@ -48,7 +48,7 @@ public:
 		PacketSocketAdapter(&socket),
 		_peerAddress(peerAddress)
 	{
-		debugL("NetTransaction", this) << "create" << std::endl;
+		debugL("NetTransaction", this) << "Create" << std::endl;
 
 		// Default options, can be overridden
 		PacketSocketAdapter::socket->setAdapter(this);
@@ -56,7 +56,7 @@ public:
 
 	virtual ~Transaction()
 	{
-		debugL("NetTransaction", this) << "destroy" << std::endl;
+		debugL("NetTransaction", this) << "Destroy" << std::endl;
 		PacketSocketAdapter::socket->setAdapter(0);
 	}
 
