@@ -76,7 +76,7 @@ Win32DeviceManager::~Win32DeviceManager()
 
 bool Win32DeviceManager::initialize() 
 {
-	traceL("DeviceManager") << "initializing" << endl;
+	traceL("DeviceManager") << "Initializing" << endl;
 	if (!initialized()) {
 		HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 		//HRESULT hr = CoInitialize(nullptr);
@@ -95,14 +95,14 @@ bool Win32DeviceManager::initialize()
 		}
 		setInitialized(true);
 	}
-	traceL("DeviceManager") << "initializing: OK" << endl;
+	traceL("DeviceManager") << "Initializing: OK" << endl;
 	return true;
 }
 
 
 void Win32DeviceManager::uninitialize() 
 {
-	traceL("DeviceManager") << "uninitializing" << endl;
+	traceL("DeviceManager") << "Uninitializing" << endl;
 
 	if (initialized()) {
 		if (watcher())
@@ -113,7 +113,7 @@ void Win32DeviceManager::uninitialize()
 		}
 		setInitialized(false);
 	}
-	traceL("DeviceManager") << "uninitializing: OK" << endl;
+	traceL("DeviceManager") << "Uninitializing: OK" << endl;
 }
 
 

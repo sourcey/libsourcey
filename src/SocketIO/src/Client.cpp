@@ -112,7 +112,7 @@ void Client::sendHandshakeRequest()
 {
 	//ScopedLock lock(_mutex);
 		
-	log("trace") << "send handshake request" << endl;	
+	log("trace") << "Send handshake request" << endl;	
 	
 	ostringstream url;
 	url << (_socket.transport() == net::SSLTCP ? "https://" : "http://")
@@ -246,7 +246,7 @@ int Client::send(const json::Value& data, bool ack)
 {
 	Packet packet(data, ack);
 
-	log("trace") << "sending message: " << packet.toString() << endl;
+	log("trace") << "Sending message: " << packet.toString() << endl;
 	return send(packet);
 }
 
@@ -272,7 +272,7 @@ Transaction* Client::createTransaction(const sockio::Packet& request, long timeo
 
 int Client::sendHeartbeat()
 {
-	log("trace") << "sending heartbeat" << endl;
+	log("trace") << "Sending heartbeat" << endl;
 	return socket().send("2::", 3);
 }
 
@@ -426,7 +426,7 @@ void Client::onHeartBeatTimer(void*)
 		try {
 			connect();
 		} 
-		catch (std::exception& exc/*Exception& exc*/) {			
+		catch (std::exception& exc) {			
 			log("error") << "Reconnection attempt failed: " << exc.what()/*message()*/ << endl;
 		}	
 	}
@@ -780,7 +780,7 @@ void Client::onError()
 //		try {
 //			connect();
 //		} 
-//		catch (std::exception& exc/*Exception& exc*/) {			
+//		catch (std::exception& exc) {			
 //			errorL() << "[sockio::Socket] Reconnection attempt failed: " << exc.what()/*message()*/ << endl;
 //		}	
 //	}

@@ -186,7 +186,7 @@ void AVInputReader::start()
 
 	if (_video || _audio &&
 		!_thread.running()) {
-		traceL("AVInputReader", this) << "initializing Thread" << endl;
+		traceL("AVInputReader", this) << "Initializing Thread" << endl;
 		_stopping = false;
 		_thread.start(*this);
 	}
@@ -324,9 +324,9 @@ void AVInputReader::run()
 			scy::sleep(10);
 		};
 	} 
-	catch (std::exception&/*Exception&*/ exc) 
+	catch (std::exception& exc) 
 	{
-		_error = exc.what()/*message()*/;
+		_error = exc.what();
 		errorL() << "[AVInputReader: " << this << "] Decoder Error: " << _error << endl;
 	}
 	catch (...) 

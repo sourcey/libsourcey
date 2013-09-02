@@ -41,7 +41,7 @@ class Connection
 public:	
     Connection(const net::Socket& socket);
 			
-	virtual int sendData(const char* buf, size_t len, int flags = 0);
+	virtual int sendData(const char* buf, std::size_t len, int flags = 0);
 	virtual int sendData(const std::string& buf, int flags = 0);
 		/// Sends a raw data to the peer.
 
@@ -201,7 +201,7 @@ protected:
 	/// Parser callbacks
     virtual void onParserHeader(const std::string& name, const std::string& value);
 	virtual void onParserHeadersEnd();
-	virtual void onParserChunk(const char* buf, size_t len);
+	virtual void onParserChunk(const char* buf, std::size_t len);
     virtual void onParserError(const ParserError& err);
 	virtual void onParserEnd();	
 	

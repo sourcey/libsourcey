@@ -705,7 +705,7 @@ void MessageIntegrity::write(BitWriter& writer) const
 		// Get the message prior to the current attribute and
 		// fill the attribute with dummy content.
 		//Buffer hmacBuf(buf.c_str(), reader.available());		
-		Buffer hmacBuf;
+		Buffer hmacBuf(1024); // TODO: alloc exact size
 		BitWriter hmacWriter(hmacBuf);
 		//hmacBuf.put(buf.data(), buf.available());
 		hmacWriter.put(writer.begin(), writer.position());

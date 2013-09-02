@@ -73,7 +73,7 @@ Client::Client(net::SocketBase* socket, const Client::Options& options, uv::Loop
 	_options(options),
 	_announceStatus(500)
 {
-	log("trace") << "creating" << endl;
+	log("trace") << "Create" << endl;
 }
 
 
@@ -120,7 +120,7 @@ int Client::send(Message& m, bool ack)
 	//Message m(message);
 	//if (m.from() != ourPeer().address())
 	//	throw std::runtime_error("Cannot send message from another peer.");
-	log("trace") << "sending message: " 
+	log("trace") << "Sending message: " 
 		<< m.id() << ":\n" 
 		<< json::stringify(m, true) << endl;
 	return sockio::Client::send(m, ack);
@@ -152,7 +152,7 @@ int Client::respond(Message& m, bool ack)
 
 void Client::createPresence(Presence& p)
 {
-	log("trace") << "creating presence" << endl;
+	log("trace") << "Create presence" << endl;
 
 	Peer& peer = ourPeer();
 	UpdatePresenceData.emit(this, peer);
@@ -173,7 +173,7 @@ int Client::sendPresence(bool probe)
 
 int Client::sendPresence(const Address& to, bool probe)
 {
-	log("trace") << "sending presence" << endl;
+	log("trace") << "Sending presence" << endl;
 	
 	Presence p;
 	createPresence(p);
@@ -229,7 +229,7 @@ Client& Client::operator >> (Message& message)
 	
 int Client::announce()
 {
-	log("trace") << "announcing" << endl;
+	log("trace") << "Announcing" << endl;
 
 	json::Value data;
 	{
@@ -249,7 +249,7 @@ int Client::announce()
 
 void Client::onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
 {
-	log("trace") << "Announce Response: " << state.toString() << endl;
+	log("trace") << "On announce response: " << state.toString() << endl;
 	
 	auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
 	switch (state.id()) {	
@@ -279,10 +279,10 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 			// Broadcast a presence probe to our network.
 			sendPresence(true);
 		}
-		catch (std::exception&/*Exception&*/ exc)
+		catch (std::exception& exc)
 		{
 			// Set the error message and close the connection.
-			setError(exc.what()/*message()*/);
+			setError(exc.what());
 		}
 		break;		
 
@@ -322,6 +322,7 @@ void Client::onPacket(sockio::Packet& packet)
 	// Parse Symple messages from SocketIO JSON packets
 	if (packet.type() == sockio::Packet::Message || 
 		packet.type() == sockio::Packet::JSON) {	
+		log("trace") << "JSON packet: " << packet.toString() << endl;		
 
 		json::Value data;
 		json::Reader reader;
@@ -360,6 +361,7 @@ void Client::onPacket(sockio::Packet& packet)
 
 	// Other packet types are proxied directly
 	else {		
+		log("trace") << "Proxy packet: " << PacketSignal::refCount() << ": " << packet.toString() << endl;		
 		PacketSignal::emit(this, packet);
 	}
 }
@@ -367,7 +369,7 @@ void Client::onPacket(sockio::Packet& packet)
 
 void Client::onClose()
 {
-	log("trace") << "Symple closing" << endl;
+	log("trace") << "On close" << endl;
 	sockio::Client::onClose();
 	reset();
 }
@@ -570,10 +572,10 @@ void Client::onError()
 //			// Broadcast a presence probe to our network.
 //			sendPresence(true);
 //		}
-//		catch (std::exception&/*Exception&*/ exc)
+//		catch (std::exception& exc)
 //		{
 //			// Set the error message and close the connection.
-//			setError(exc.what()/*message()*/);
+//			setError(exc.what());
 //		}
 //		break;		
 //

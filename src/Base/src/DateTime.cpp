@@ -1666,8 +1666,6 @@ Timespan& Timespan::operator -= (TimeDiff microseconds)
 }
 
 
-
-
 //
 // Timeout
 //
@@ -1727,7 +1725,12 @@ void Timeout::reset()
 long Timeout::remaining() const 
 {
 	time_t current = time::now();
+	
 	long remaining = static_cast<long>(_delay - (current - _startAt));
+
+	traceL("Timeout", this) << "Remaining: " 
+		<< current << ": " << _delay << ": " << _startAt << ": " << remaining << std::endl;	
+
 	return remaining > 0 ? remaining : 0;
 }
 

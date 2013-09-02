@@ -58,16 +58,16 @@ Connection::~Connection()
 }
 
 
-int Connection::sendData(const char* buf, size_t len, int flags)
+int Connection::sendData(const char* buf, std::size_t len, int flags)
 {
-	traceL("Connection", this) << "send: " << len << endl;
+	traceL("Connection", this) << "Send: " << len << endl;
 	return _socket.send(buf, len, flags);
 }
 
 
 int Connection::sendData(const std::string& buf, int flags)
 {
-	traceL("Connection", this) << "send: " << buf.length() << endl;
+	traceL("Connection", this) << "Send: " << buf.length() << endl;
 	return _socket.send(buf.c_str(), buf.length(), flags);
 }
 
@@ -85,14 +85,14 @@ int Connection::sendHeader()
 	_timeout.start();
 	_shouldSendHeader = false;
 	
-	traceL("Connection", this) << "send header: " << head << endl; // remove me
+	traceL("Connection", this) << "Send header: " << head << endl; // remove me
 	return _socket.base().send(head.c_str(), head.length());
 }
 
 
 void Connection::close()
 {
-	traceL("Connection", this) << "close" << endl;	
+	traceL("Connection", this) << "Close" << endl;	
 	assert(!_closed);
 	assert(_socket.base().refCount() == 1);
 	
@@ -109,7 +109,6 @@ void Connection::close()
 
 	onClose();
 		
-	traceL("Connection", this) << "close: Deleting" << endl;	
 	//delete this;
 	deleteLater<Connection>(this); // destroy it
 }
@@ -238,7 +237,7 @@ ConnectionAdapter::~ConnectionAdapter()
 
 int ConnectionAdapter::send(const char* data, int len, int flags)
 {
-	traceL("ConnectionAdapter", this) << "send: " << len << endl;
+	traceL("ConnectionAdapter", this) << "Send: " << len << endl;
 	
 	try
 	{
@@ -257,14 +256,14 @@ int ConnectionAdapter::send(const char* data, int len, int flags)
 
 		// Send body / chunk
 		//if (len < 300)
-		//	traceL("ConnectionAdapter", this) << "send data: " << std::string(data, len) << endl;
+		//	traceL("ConnectionAdapter", this) << "Send data: " << std::string(data, len) << endl;
 		//if (len > 300)
-		//	traceL("ConnectionAdapter", this) << "send long data: " << std::string(data, 300) << endl;
+		//	traceL("ConnectionAdapter", this) << "Send long data: " << std::string(data, 300) << endl;
 		return socket->base().send(data, len, flags);
 	} 
-	catch (std::exception&/*Exception&*/ exc) 
+	catch (std::exception& exc) 
 	{
-		errorL("ConnectionAdapter", this) << "Send error: " << exc.what()/*message()*/ << endl;
+		errorL("ConnectionAdapter", this) << "Send error: " << exc.what() << endl;
 
 		// Swallow the exception, the socket error will 
 		// cause the connection to close on next iteration.
@@ -278,16 +277,19 @@ void ConnectionAdapter::onSocketRecv(const MutableBuffer& buf, const net::Addres
 {
 	traceL("ConnectionAdapter", this) << "On socket recv: " << buf.size() << endl;	
 	
+	// Parse incoming HTTP messages
+	_parser.parse(bufferCast<const char *>(buf), buf.size());
+	
+	/*
 	try {
-		// Parse incoming HTTP messages
-		_parser.parse(bufferCast<const char *>(buf), buf.size());
 	} 
-	catch (std::exception&/*Exception&*/ exc) {
-		errorL("ConnectionAdapter", this) << "HTTP parser error: " << exc.what()/*message()*/ << endl;
+	catch (std::exception& exc) {
+		errorL("ConnectionAdapter", this) << "HTTP parser error: " << exc.what() << endl;
 
 		if (socket)
 			socket->close();
 	}	
+	*/
 }
 
 
@@ -313,7 +315,7 @@ void ConnectionAdapter::onParserHeadersEnd()
 }
 
 
-void ConnectionAdapter::onParserChunk(const char* buf, size_t len)
+void ConnectionAdapter::onParserChunk(const char* buf, std::size_t len)
 {
 	traceL("ClientConnection", this) << "On parser chunk: " << len << endl;	
 
@@ -326,9 +328,24 @@ void ConnectionAdapter::onParserError(const ParserError& err)
 {
 	warnL("ConnectionAdapter", this) << "On parser error: " << err.message << endl;	
 
-	// Close the connection on parser error
+	// HACK: Handle those peski flash policy requests here
+	if (std::string(_connection.incomingBuffer().data(), 22) == "<policy-file-request/>") {
+		
+		// Send an all access policy file by default
+		// TODO: User specified flash policy
+		std::string policy;
+
+		// Add the following headers for HTTP policy response
+		// policy += "HTTP/1.1 200 OK\r\nContent-Type: text/x-cross-domain-policy\r\nX-Permitted-Cross-Domain-Policies: all\r\n\r\n";
+		policy += "<?xml version=\"1.0\"?><cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
+
+		traceL("ConnectionAdapter", this) << "Send flash policy: " << policy << endl;
+		socket->base().send(policy.c_str(), policy.length() + 1);
+	}
+
+	// Set error and close the connection on parser error
 	_connection.setError(err.message);
-	//_connection.close();
+	_connection.close(); // do we want to force this?
 }
 
 

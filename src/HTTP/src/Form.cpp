@@ -221,7 +221,7 @@ void FormWriter::writeMultipart()
 		
 	// HACK: Write chunked end code directly to the connection.
 	// TODO: Send final packet flag down packet stream, or use 
-	// stream state change to trigger via chunked packetizer.
+	// Stream state change to trigger via chunked packetizer.
 	reinterpret_cast<Connection&>(_connection).sendData("0\r\n\r\n", 5, 0);
 }
 

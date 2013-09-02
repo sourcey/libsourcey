@@ -401,7 +401,8 @@ public:
 
 	virtual void write(Buffer& buf) const 
 	{	
-		buf.append(data(), size()); 
+		buf.insert(buf.end(), data(), data() + size()); 
+		//buf.append(data(), size()); 
 	}
 	
 	virtual const char* className() const 

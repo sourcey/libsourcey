@@ -40,21 +40,21 @@ class PacketSocketAdapter: public SocketAdapter, public PacketSignal
 public:	
 	PacketFactory factory;
 
-	PacketSocketAdapter(Socket* socket = NULL) : //, int priority = 50
-		SocketAdapter(socket) //, priority
-		/// Creates the PacketSocketAdapter
-		/// This class should have a higher priority than standard
-		/// sockets so we can parse data packets first.		
+	PacketSocketAdapter(Socket* socket = NULL) : 
+		SocketAdapter(socket)
+		// Creates the PacketSocketAdapter
+		// This class should have a higher priority than standard
+		// sockets so we can parse data packets first.		
 	{
 		traceL("PacketSocketAdapter", this) << "Create: " << socket << std::endl;
 	}
 		
 	virtual void onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
-		/// Creates and dispatches a packet utilizing the available 
-		/// creation strategies. For best performance the most used 
-		/// strategies should have the highest priority.
+		// Creates and dispatches a packet utilizing the available 
+		// creation strategies. For best performance the most used 
+		// strategies should have the highest priority.
 	{	
-		traceL("PacketSocketAdapter", this) << "recv: " << buf.size() << std::endl;
+		traceL("PacketSocketAdapter", this) << "Recv: " << buf.size() << std::endl;
 		//assert(buf.position() == 0);
 		//buf.position(0);
 
@@ -99,14 +99,14 @@ public:
 	}
 
 	PacketSocketAdapter& adapter() const
-		/// Returns the PacketSocketAdapter for this socket.
+		// Returns the PacketSocketAdapter for this socket.
 	{
 		return (PacketSocketAdapter&)*_adapter;
 	}
 		
 	
 	virtual void send(IPacket& packet)
-		/// Compatibility method for PacketSignal delegates.
+		// Compatibility method for PacketSignal delegates.
 	{
 		traceL("PacketSocket", this) << "IPacket Delegate" << std::endl;	
 		Socket::send(packet);

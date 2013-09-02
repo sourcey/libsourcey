@@ -198,7 +198,9 @@ public:
 	
 	virtual void write(Buffer& buf) const 
 	{	
-		buf.append(_data, _size); 
+		buf.insert(buf.end(), _data, _data + _size); 
+		//buf.insert(a.end(), b.begin(), b.end());
+		//buf.append(_data, _size); 
 	}
 	
 	// Future Write API

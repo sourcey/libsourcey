@@ -109,7 +109,7 @@ int SSLBase::available() const
 
 void SSLBase::close()
 {
-	traceL("SSLBase", this) << "close" << endl;
+	traceL("SSLBase", this) << "Close" << endl;
 	TCPBase::close();
 }
 
@@ -136,7 +136,7 @@ int SSLBase::send(const char* data, int len, const net::Address& /* peerAddress 
 {	
 	assert(len <= net::MAX_TCP_PACKET_SIZE);	
 	assert(initialized());
-	traceL("SSLBase", this) << "send: " << len << endl;
+	traceL("SSLBase", this) << "Send: " << len << endl;
 	
 	// Send unencrypted data to the SSL context
 	_sslAdapter.addOutgoingData(data, len);

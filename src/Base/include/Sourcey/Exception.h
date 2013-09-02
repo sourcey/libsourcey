@@ -65,7 +65,7 @@ public:
 	
     friend std::ostream& operator << (std::ostream& stream, const Exception& exc) 
 	{
-		stream << exc.what()/*message()*/;
+		stream << exc.what();
 		return stream;
     }
 
@@ -149,7 +149,7 @@ struct Error
 		message = msg;
 	}
 
-	bool any() 
+	bool any() const
 	{
 		return uverr != 0 || syserr != 0 || !message.empty();
 	}

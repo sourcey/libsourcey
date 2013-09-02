@@ -40,7 +40,7 @@ Transaction::Transaction(Client& client, long timeout) :
 Transaction::Transaction(Client& client, const Packet& request, long timeout) : 
 	PacketTransaction<Packet>(request, timeout, 0, client.loop()), client(client)
 {
-	debugL("SocketIOTransaction", this) << "creating" << endl;
+	debugL("SocketIOTransaction", this) << "Create" << endl;
 }
 
 
@@ -52,7 +52,7 @@ Transaction::~Transaction()
 
 bool Transaction::send()
 {
-	debugL("SocketIOTransaction", this) << "sending: " << _request.toString() << endl;	
+	debugL("SocketIOTransaction", this) << "Send: " << _request.id() << endl;	
 	_request.setAck(true);	
 	client += packetDelegate(this, &Transaction::onPotentialResponse, 100);
 	if (client.send(_request))
@@ -63,7 +63,7 @@ bool Transaction::send()
 	
 void Transaction::onPotentialResponse(void*, Packet& packet)
 {
-	PacketTransaction<Packet>::onPossibleResponse(packet);
+	PacketTransaction<Packet>::handlePotentialResponse(packet);
 }
 
 
@@ -75,7 +75,7 @@ bool Transaction::checkResponse(const Packet& packet)
 
 void Transaction::onResponse()
 {
-	debugL("SocketIOTransaction", this) << "success" << endl;
+	debugL("SocketIOTransaction", this) << "On success" << endl;
 	client -= packetDelegate(this, &Transaction::onPotentialResponse);	
 	PacketTransaction<Packet>::onResponse();
 }
@@ -86,7 +86,7 @@ void Transaction::onResponse()
 
 
 /*
-void Transaction::onPossibleResponse(const Packet& packet)
+void Transaction::handlePotentialResponse(const Packet& packet)
 {
 	debugL("SocketIOTransaction", this) << "Response" << endl;
 }

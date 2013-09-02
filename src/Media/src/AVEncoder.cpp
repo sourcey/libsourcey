@@ -63,7 +63,7 @@ AVEncoder::AVEncoder() :
 	_ioBuffer(nullptr),
 	_ioBufferSize(MAX_VIDEO_PACKET_SIZE)
 {
-	traceL("AVEncoder", this) << "initializing" << endl;
+	traceL("AVEncoder", this) << "Initializing" << endl;
 }
 
 
@@ -96,7 +96,7 @@ void AVEncoder::initialize()
 {
 	assert(!isActive());
 
-	traceL("AVEncoder", this) << "initializing:"
+	traceL("AVEncoder", this) << "Initializing:"
 		<< "\n\tInput Format: " << _options.iformat.toString()
 		<< "\n\tOutput Format: " << _options.oformat.toString()
 		<< "\n\tDuration: " << _options.duration
@@ -207,10 +207,10 @@ void AVEncoder::initialize()
 		
 		setState(this, EncoderState::Ready);
 	} 
-	catch (std::exception&/*Exception&*/ exc) {
-		errorL("AVEncoder", this) << "Error: " << exc.what()/*message()*/ << endl;		
+	catch (std::exception& exc) {
+		errorL("AVEncoder", this) << "Error: " << exc.what() << endl;		
 		cleanup();
-		setState(this, EncoderState::Error, exc.what()/*message()*/);
+		setState(this, EncoderState::Error, exc.what());
 		throw exc; //.rethrow()
 	}
 }
@@ -218,7 +218,7 @@ void AVEncoder::initialize()
 
 void AVEncoder::uninitialize()
 {
-	traceL("AVEncoder", this) << "uninitializing" << endl;
+	traceL("AVEncoder", this) << "Uninitializing" << endl;
 	cleanup();	
 	setState(this, EncoderState::Stopped);
 }

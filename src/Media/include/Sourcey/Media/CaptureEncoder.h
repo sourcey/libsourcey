@@ -79,8 +79,8 @@ public:
 			//_capture->start(Callback<CaptureEncoder, const MediaPacket, false>(this, &CaptureEncoder::onCapture));
 			
 		} 
-		catch (std::exception&/*Exception&*/ exc) {
-			errorL() << "Encoder Error: " << exc.what()/*message()*/ << std::endl;
+		catch (std::exception& exc) {
+			errorL() << "Encoder Error: " << exc.what() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
 			throw exc;/*exc.rethrow();*/
@@ -99,8 +99,8 @@ public:
 			
 			EncoderT::setState(this, EncoderState::None);
 		} 
-		catch (std::exception&/*Exception&*/ exc) {
-			errorL() << "Encoder Error: " << exc.what()/*message()*/ << std::endl;
+		catch (std::exception& exc) {
+			errorL() << "Encoder Error: " << exc.what() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 		}
 
@@ -116,8 +116,8 @@ public:
 
 			int size = EncoderT::encode((unsigned char*)packet.data, packet.size);
 		} 
-		catch (std::exception&/*Exception&*/ exc) {
-			errorL() << "Encoder Error: " << exc.what()/*message()*/ << std::endl;
+		catch (std::exception& exc) {
+			errorL() << "Encoder Error: " << exc.what() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
 		}
@@ -170,8 +170,8 @@ public:
 			
 			EncoderT::setState(this, EncoderState::Encoding);
 		} 
-		catch (std::exception&/*Exception&*/ exc) {
-			errorL() << "Encoder Error: " << exc.what()/*message()*/ << std::endl;
+		catch (std::exception& exc) {
+			errorL() << "Encoder Error: " << exc.what() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 			stop();
 			throw exc;/*exc.rethrow();*/
@@ -189,8 +189,8 @@ public:
 
 			EncoderT::setState(this, EncoderState::None);
 		} 
-		catch (std::exception&/*Exception&*/ exc) {
-			errorL() << "Encoder Error: " << exc.what()/*message()*/ << std::endl;
+		catch (std::exception& exc) {
+			errorL() << "Encoder Error: " << exc.what() << std::endl;
 			EncoderT::setState(this, EncoderState::Error);
 		}
 

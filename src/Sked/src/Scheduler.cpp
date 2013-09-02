@@ -195,12 +195,12 @@ void Scheduler::update()
 
 void Scheduler::serialize(json::Value& root)
 {
-	log("trace") << "serializing" << endl;
+	log("trace") << "Serializing" << endl;
 	
 	Mutex::ScopedLock lock(_mutex);
 	for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		sked::Task* task = reinterpret_cast<sked::Task*>(*it);
-		log("trace") << "serializing: " << task << endl;
+		log("trace") << "Serializing: " << task << endl;
 		json::Value& entry = root[root.size()];
 		task->serialize(entry);
 		task->trigger().serialize(entry["trigger"]);
@@ -210,7 +210,7 @@ void Scheduler::serialize(json::Value& root)
 
 void Scheduler::deserialize(json::Value& root)
 {
-	log("trace") << "deserializing" << endl;
+	log("trace") << "Deserializing" << endl;
 	
 	for (auto it = root.begin(); it != root.end(); it++) {
 		sked::Task* task = nullptr;
@@ -224,7 +224,7 @@ void Scheduler::deserialize(json::Value& root)
 			task->setTrigger(trigger);
 			schedule(task);
 		}
-		catch (std::exception& exc/*Exception& exc*/) {
+		catch (std::exception& exc) {
 			if (task)
 				delete task;
 			if (trigger)
@@ -291,7 +291,7 @@ sked::TaskFactory& Scheduler::factory()
 	/*
 	Mutex::ScopedLock lock(_mutex);
 	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
-		log("trace") << "serializing: " << it->second << endl;
+		log("trace") << "Serializing: " << it->second << endl;
 		reinterpret_cast<sked::Task*>(it->second)->serialize(root[root.size()]);
 	}
 	*/

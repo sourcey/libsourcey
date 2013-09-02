@@ -105,7 +105,7 @@ void ClientConnection::close()
 
 void ClientConnection::send()
 {
-	traceL("ClientConnection", this) << "send request" << endl;	
+	traceL("ClientConnection", this) << "Send request" << endl;	
 	
 	// Set default error status
 	_response.setStatus(http::StatusCode::BadGateway);

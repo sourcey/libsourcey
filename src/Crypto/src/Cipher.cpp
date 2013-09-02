@@ -50,7 +50,7 @@ Cipher::Cipher(const std::string& name,
 
 	_cipher = EVP_get_cipherbyname(name.c_str());
 	if (!_cipher)
-		throw NotFoundException("Cipher " + name + " is unavailable");
+		throw std::runtime_error("Not found: Cipher " + name + " is unavailable");
 
 	_key = ByteVec(keySize());
 	_iv = ByteVec(ivSize());
@@ -72,7 +72,7 @@ Cipher::Cipher(const std::string& name,
 
 	_cipher = EVP_get_cipherbyname(name.c_str());
 	if (!_cipher)
-		throw NotFoundException("Cipher " + name + " is unavailable");
+		throw std::runtime_error("Not found: Cipher " + name + " is unavailable");
 }
 
 	
@@ -88,7 +88,7 @@ Cipher::Cipher(const std::string& name) :
 
 	_cipher = EVP_get_cipherbyname(name.c_str());
 	if (!_cipher)
-		throw NotFoundException("Cipher " + name + " is unavailable");
+		throw std::runtime_error("Not found: Cipher " + name + " is unavailable");
 
 	_key = ByteVec(keySize());
 	_iv = ByteVec(ivSize());

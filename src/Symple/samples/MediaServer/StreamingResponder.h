@@ -10,17 +10,17 @@ public:
 	StreamingRequestHandler(http::ServerConnection& connection, const StreamingOptions& options) :
 		http::ServerResponder(connection), options(options)
 	{	
-		debugL("StreamingRequestHandler", this) << "Creating" << std::endl;
+		debugL("StreamingRequestHandler", this) << "Create" << std::endl;
 	}
 
 	virtual ~StreamingRequestHandler() 
 	{
-		debugL("StreamingRequestHandler", this) << "Destroying" << std::endl;
+		debugL("StreamingRequestHandler", this) << "Destroy" << std::endl;
 	}
 		
 	virtual void onRequest(http::Request& request, http::Response& response) 
 	{
-		debugL("StreamingRequestHandler", this) << "Running: " 
+		debugL("StreamingRequestHandler", this) << "Handle request: " 
 			//<< "\n\tOutput Format: " << options.oformat.name
 			<< "\n\tOutput Encoding: " << options.encoding
 			<< "\n\tOutput Packetizer: " << options.packetizer
@@ -46,16 +46,16 @@ public:
 
 	void onVideoEncoded(void* sender, RawPacket& packet)
 	{
-		debugL("StreamingRequestHandler", this) << "Sending Packet: " 
+		debugL("StreamingRequestHandler", this) << "Send packet: " 
 			<< packet.size() << ": " << fpsCounter.fps << std::endl;
 		//assert(!connection().socket().closed());
 
 		try {	
-			connection().send((const char*)packet.data(), packet.size());
+			connection().sendData((const char*)packet.data(), packet.size());
 			fpsCounter.tick();		
 		}
-		catch (std::exception&/*Exception&*/ exc) {
-			errorL("StreamingRequestHandler", this) << "Error: " << exc.what()/*message()*/ << std::endl;
+		catch (std::exception& exc) {
+			errorL("StreamingRequestHandler", this) << exc.what() << std::endl;
 			connection().close();
 		}
 	}

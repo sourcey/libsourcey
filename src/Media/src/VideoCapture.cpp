@@ -201,7 +201,7 @@ void VideoCaptureBase::start()
 		Mutex::ScopedLock lock(_mutex);
 
 		if (!_thread.running()) {
-			traceL("VideoCaptureBase", this) << "initializing thread" << std::endl;
+			traceL("VideoCaptureBase", this) << "Initializing thread" << std::endl;
 			if (!_opened)
 				throw std::runtime_error("The capture must be opened before starting the thread.");
 

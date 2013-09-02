@@ -87,12 +87,12 @@ public:
 
 		try
 		{	
-			connection().send(packet.data(), packet.size(), http::WebSocket::Binary);
+			connection().sendData(packet.data(), packet.size(), http::WebSocket::Binary);
 			fpsCounter.tick();		
 		}
-		catch (std::exception&/*Exception&*/ exc)
+		catch (std::exception& exc)
 		{
-			errorL("StreamingRequestHandler", this) << "Error: " << exc.what()/*message()*/ << std::endl;
+			errorL("StreamingRequestHandler", this) << "Error: " << exc.what() << std::endl;
 			connection().close();
 		}
 	}

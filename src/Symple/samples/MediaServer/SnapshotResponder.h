@@ -43,11 +43,11 @@ public:
 		
 		//unsigned char* data = new unsigned char[buffer.size()];
 		//std::copy(buffer.begin(), buffer.end(), data);
-		//connection().send((const char*)data, buffer.size());
+		//connection().sendData((const char*)data, buffer.size());
 		//delete data;
 
 		connection().response().set("Access-Control-Allow-Origin", "*");
-		connection().send((const char*)&buffer[0], buffer.size());
+		connection().sendData((const char*)&buffer[0], buffer.size());
 		connection().close();
 	}
 	

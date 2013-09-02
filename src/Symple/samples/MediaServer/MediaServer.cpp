@@ -46,7 +46,7 @@ namespace scy {
 MediaServer::MediaServer(UInt16 port) :
 	http::Server(port, new HTTPStreamingConnectionFactory(this))
 {		
-	debugL("MediaServer") << "Creating" << endl;
+	debugL("MediaServer") << "Create" << endl;
 	
 	// Register the media formats we will be using
 	FormatRegistry& formats = MediaFactory::instance().formats();		
@@ -75,7 +75,7 @@ MediaServer::MediaServer(UInt16 port) :
 
 MediaServer::~MediaServer()
 {		
-	debugL("MediaServer") << "Destroying" << endl;
+	debugL("MediaServer") << "Destroy" << endl;
 }
 
 
@@ -117,7 +117,7 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 			stream.attach(base64, 9, true);
 		}
 		else
-			throw Exception("Unsupported encoding method: " + options.encoding);
+			throw std::runtime_error("Unsupported encoding method: " + options.encoding);
 	}	
 	else if (options.oformat.name == "FLV") {
 
@@ -140,7 +140,7 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 	else if (options.packetizer == "multipart")
 		packetizer = new http::MultipartAdapter("image/jpeg", options.encoding == "Base64");	// false, 			
 
-	else throw Exception("Unsupported packetizer method: " + options.packetizer);
+	else throw std::runtime_error("Unsupported packetizer method: " + options.packetizer);
 
 	if (packetizer)					
 		stream.attach(packetizer, 10, true);
@@ -232,9 +232,9 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 			return new SnapshotRequestHandler(conn, options);	
 		}	
 	}
-	catch (std::exception&/*Exception&*/ exc)
+	catch (std::exception& exc)
 	{
-		errorL("StreamingRequestHandlerFactory") << "Request error: " << exc.what()/*message()*/ << endl;
+		errorL("StreamingRequestHandlerFactory") << "Request error: " << exc.what() << endl;
 	}
 		
 	errorL("StreamingRequestHandlerFactory") << "Bad Request" << endl;

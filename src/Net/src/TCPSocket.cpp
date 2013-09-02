@@ -150,7 +150,7 @@ bool TCPBase::shutdown()
 
 void TCPBase::close()
 {
-	traceL("TCPBase", this) << "close" << endl;
+	traceL("TCPBase", this) << "Close" << endl;
 	Stream::close();
 }
 
@@ -191,8 +191,8 @@ int TCPBase::send(const char* data, int len, const net::Address& /* peerAddress 
 {
 	assert(len <= net::MAX_TCP_PACKET_SIZE);
 	
-	//if (len < 300)
-	//	traceL("TCPBase", this) << "send: " << string(data, len) << endl;
+	if (len < 300)
+		traceL("TCPBase", this) << "Send: " << string(data, len) << endl;
 
 	if (!Stream::write(data, len)) {
 		warnL("TCPBase", this) << "Send error" << endl;	
@@ -305,8 +305,8 @@ void TCPBase::onRead(const char* data, int len)
 {
 	traceL("TCPBase", this) << "On read: " << len << endl;
 	
-	if (len < 300)
-		traceL("TCPBase", this) << "received: " << string(data, len) << endl;
+	//if (len < 300)
+	//	traceL("TCPBase", this) << "Received: " << string(data, len) << endl;
 	//_buffer.position(0);
 	//_buffer.limit(len);
 	onRecv(mutableBuffer(_buffer.data(), len));
@@ -315,7 +315,7 @@ void TCPBase::onRead(const char* data, int len)
 
 void TCPBase::onRecv(const MutableBuffer& buf)
 {
-	traceL("TCPBase", this) << "recv: " << buf.size() << endl;
+	traceL("TCPBase", this) << "Recv: " << buf.size() << endl;
 	emitRecv(MutableBuffer(buf), peerAddress());
 }
 

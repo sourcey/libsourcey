@@ -70,7 +70,7 @@ bool Trigger::expired()
 
 void Trigger::serialize(json::Value& root)
 {
-	traceL() << "serializing" << endl;	
+	traceL() << "Serializing" << endl;	
 	
 	root["type"] = type;
 	root["name"] = name;
@@ -83,7 +83,7 @@ void Trigger::serialize(json::Value& root)
 
 void Trigger::deserialize(json::Value& root)
 {
-	traceL() << "deserializing" << endl;
+	traceL() << "Deserializing" << endl;
 	
 	json::assertMember(root, "type");
 	json::assertMember(root, "name");
@@ -137,7 +137,7 @@ bool IntervalTrigger::expired()
 
 void IntervalTrigger::serialize(json::Value& root)
 {
-	traceL() << "serializing" << endl;	
+	traceL() << "Serializing" << endl;	
 
 	Trigger::serialize(root);
 	

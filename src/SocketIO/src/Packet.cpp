@@ -169,7 +169,7 @@ bool Packet::read(const ConstBuffer& buf)
 
 	// For Ack packets the ID is at the start of the message
 	if (_type == 6) {
-		_ack = true; // This is mostly for requests, but we'll set it anyway
+		_ack = true; // This flag is mostly for requests, but we'll set it anyway
 
 		std::string data(frags[frags.size() - 1]);
 		std::string::size_type pos = data.find('+');
@@ -209,8 +209,10 @@ void Packet::write(Buffer& buf) const
 	assert(valid());
 	std::ostringstream ss;
 	print(ss);
-	debugL("sockio::Packet", this) << "write: " << ss.tellp() << ": " << ss.str() << endl;
-	buf.append(ss.str().c_str(), ss.tellp());
+	
+	std::string str(ss.str()); // TODO: avoid copy
+	buf.insert(buf.end(), str.begin(), str.end()); 
+	//buf.append(ss.str().c_str(), ss.tellp());
 }
 
 

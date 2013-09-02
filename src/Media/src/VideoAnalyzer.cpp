@@ -105,9 +105,9 @@ void VideoAnalyzer::start()
 		//else
 		_reader.start();
 	} 
-	catch (std::exception&/*Exception&*/ exc) 
+	catch (std::exception& exc) 
 	{
-		_error = exc.what()/*message()*/;
+		_error = exc.what();
 		errorL("VideoAnalyzer", this) << "Error: " << _error << endl;
 		throw exc; //.rethrow()
 	}

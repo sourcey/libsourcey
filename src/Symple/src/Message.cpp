@@ -88,7 +88,9 @@ bool Message::read(const std::string& root)
 void Message::write(Buffer& buf) const 
 {
 	std::string data(json::stringify(*this));
-	buf.append(data.c_str(), data.size());
+	
+	//buf.append(data.c_str(), data.size());
+	buf.insert(buf.end(), data.begin(), data.end());
 }
 
 

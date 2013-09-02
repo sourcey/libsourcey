@@ -38,11 +38,12 @@ public:
 				long timeout = 10000, 
 				int retries = 1,
 				uv::Loop& loop = uv::defaultLoop());
-	
-	virtual ~Transaction();
 
 	virtual bool checkResponse(const Message& message);
 	virtual void onResponse();
+	
+protected:
+	virtual ~Transaction();
 };
 
 

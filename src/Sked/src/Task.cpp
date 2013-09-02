@@ -77,7 +77,7 @@ void Task::start()
 
 void Task::serialize(json::Value& root)
 {
-	traceL() << "serializing" << endl;	
+	traceL() << "Serializing" << endl;	
 	
 	Mutex::ScopedLock lock(_mutex);
 	
@@ -89,7 +89,7 @@ void Task::serialize(json::Value& root)
 
 void Task::deserialize(json::Value& root)
 {
-	traceL() << "deserializing" << endl;
+	traceL() << "Deserializing" << endl;
 	
 	Mutex::ScopedLock lock(_mutex);	
 	
@@ -294,7 +294,7 @@ void Task::schedule(const std::string& time, const std::string& fmt)
 /*
 void Task::serialize(json::Value& root)
 {
-	traceL() << "serializing" << endl;	
+	traceL() << "Serializing" << endl;	
 	
 	root["time"] = DateTimeFormatter::format(time(), 
 		DateTimeFormat::ISO8601_FORMAT);
@@ -303,7 +303,7 @@ void Task::serialize(json::Value& root)
 
 void Task::deserialize(json::Value& root)
 {
-	traceL() << "deserializing" << endl;
+	traceL() << "Deserializing" << endl;
 
 	if (!root.isMember("time"))
 		throw std::runtime_error("A time member is required.");

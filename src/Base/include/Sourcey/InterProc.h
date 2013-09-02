@@ -23,7 +23,6 @@
 
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Platform.h"
-#include "Sourcey/GC.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Timer.h"
 #include "Sourcey/Thread.h"
