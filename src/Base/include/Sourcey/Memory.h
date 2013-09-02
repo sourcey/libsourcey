@@ -76,8 +76,7 @@ protected:
 //
 /// Deleter Methods
 //
-// Provides compatability with std deleter methods
-//
+
 
 #if 0 // use std::default_delete instead
 template<class T> struct default_delete
@@ -105,14 +104,27 @@ template<class T> struct deferred_delete
 };
 
 
+template<class T> struct dispose_method
+{
+	void operator()(T *ptr)
+	{
+		assert(ptr);		
+		static_assert(0 < sizeof(T), 
+			"can't delete an incomplete type");
+		ptr->dispose();
+	}
+};
+
+
 //
 /// Deleter classes
 //
 
+
 class AbstractDeleter
 	/// AbstractDeleter provides an interface for 
 	/// holding and deleting a pointer in various ways. 
-	/// Do not use this class directly, see AsyncDeleter.
+	/// Do not use this class directly, use AsyncDeleter.
 {
 public:
 	void* ptr;
@@ -132,8 +144,8 @@ public:
 
 template <class T, typename D = std::default_delete<T>>
 class AsyncDeleter: public AbstractDeleter
-	/// AsyncDeleter implements AbstractDeleter to 
-	/// provide different methods of deleting a pointer.
+	/// AsyncDeleter implements the AbstractDeleter interface  
+	/// to provide different methods of deleting a pointer.
 {
 public:
 	AsyncDeleter(T* p) : 
@@ -159,6 +171,7 @@ public:
 // Garbage Collector inlines
 //
 
+
 template <class C> inline void GarbageCollector::deleteLater(C* ptr)
 	/// Schedules a pointer for deferred deletion.
 { 
@@ -178,6 +191,7 @@ template <class C> inline void deleteLater(C* ptr)
 // Memory and Reference Counted Objects
 //
 
+
 class SharedObject
 	/// SharedObject is the base class for objects that  
 	/// employ reference counting based garbage collection.
@@ -196,7 +210,7 @@ public:
 	void duplicate()
 		// Increment the object's reference count.
 	{
-		std::atomic_fetch_add_explicit (&count, 1u, std::memory_order_relaxed);
+		std::atomic_fetch_add_explicit(&count, 1u, std::memory_order_relaxed);
 	}
 		
 	void release()

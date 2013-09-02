@@ -155,7 +155,6 @@ int Socket::send(const char* data, int len, const Address& peerAddress, int flag
 		assert(_adapter->socket == this);
 		return _adapter->send(data, len, flags);
 	}
-		
 	return _base->send(data, len, peerAddress, flags);
 }
 
@@ -168,19 +167,19 @@ int Socket::send(const IPacket& packet, int flags)
 
 int Socket::send(const IPacket& packet, const Address& peerAddress, int flags)
 {	
-	// Try to cast as RawPacket so we can avoid copying anything.
-	// All large packet types, such as video and audio inherit from
-	// RawPacket for this reason.
+	// Try to cast as RawPacket so as to avoid copying anything.
+	// All large packet types, such as video and audio inherit 
+	// from RawPacket for this reason.
 	auto rawPacket = dynamic_cast<const RawPacket*>(&packet);
 	if (rawPacket)
 		return send((const char*)rawPacket->data(), rawPacket->size(), peerAddress, flags);
 	
-	// Other smaller dynamically generated packets need to be
-	// written to a buffer before sending. 
+	// Other smaller dynamically generated packets need
+	// to be written to a temp buffer for sending. 
 	else {
-		Buffer buf(0); // 0 size, alloc as necessary
+		Buffer buf; //(1024);
+		buf.reserve(2048);
 		packet.write(buf);
-		traceL("Socket", this) << "Send IPacket: " << buf.size() << endl;	
 		return send(buf.data(), buf.size(), peerAddress, flags);
 	}
 }
@@ -244,7 +243,7 @@ void Socket::onSocketConnect()
 
 void Socket::onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
 {
-	//traceL("SocketAdapter", this) << "recv: " << socket->Recv.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "Recv: " << socket->Recv.refCount() << endl;	
 	if (_adapter) {
 		_adapter->onSocketRecv(buf, peerAddr);
 	}
@@ -301,12 +300,10 @@ SocketAdapter* Socket::adapter() const
 
 void Socket::setAdapter(SocketAdapter* adapter)
 {	
-	traceL("Socket", this) << "replace adapter: " 
-		<< _adapter << ": " << adapter << endl;
-
 	// Assign the new adapter pointer
 	_adapter = adapter;
-	_adapter->socket = this;
+	if (_adapter)
+		_adapter->socket = this;
 }
 
 
@@ -366,7 +363,7 @@ void SocketAdapter::onSocketConnect()
 
 void SocketAdapter::onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
 {
-	//traceL("SocketAdapter", this) << "recv: " << socket->Recv.refCount() << endl;	
+	//traceL("SocketAdapter", this) << "Recv: " << socket->Recv.refCount() << endl;	
 	SocketPacket packet(socket, buf, peerAddr);
 	socket->Recv.emit(socket, packet);
 }

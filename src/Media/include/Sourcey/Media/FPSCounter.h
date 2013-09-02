@@ -84,14 +84,14 @@ public:
 };
 
 	
-/*
+namespace legacy {
+
 struct FPSCounter 
 {
 	clock_t start;
 	clock_t end;
-	//int lastMS;
-	double total;
 	Int64 frames;
+	double total;
 	double fps;
 
 	FPSCounter()
@@ -110,8 +110,6 @@ struct FPSCounter
 	{
 		start = 0;
 		end = 0;
-		//lastMS = 0;
-		//totalMS = 0;
 		total = 0;
 		fps = 0;
 		frames = 0;
@@ -130,18 +128,14 @@ struct FPSCounter
 	double endFrame() 
 	{
 		end = clock();
-		//lastMS = (end - start); //(double)
-		//totalMS += (double)(end - start) / CLOCKS_PER_SEC;
 		total += (double)(end - start) / CLOCKS_PER_SEC;
 		frames++;
-		fps = (1.0 * frames) / total; //
-		//traceL() << "[FPSCounter: " << this <<"] total: " << total << std::endl;
-		//traceL() << "[FPSCounter: " << this <<"] fps: " << fps << std::endl;
-		//traceL() << "[FPSCounter: " << this <<"] frames: " << frames << std::endl;
+		fps = (1.0 * frames) / total;
 		return fps;
 	}
 };
-*/
+
+} // legacy
 
 
 class FPSLimiter: public PacketProcessor

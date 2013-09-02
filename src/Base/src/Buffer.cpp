@@ -1,11 +1,11 @@
 //
 // LibSourcey
-// Copyright (C) 2005, Sourcey <http://sourcey.com>
+// Copyright(C) 2005, Sourcey <http://sourcey.com>
 //
 // LibSourcey is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
 // License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
+// version 2.1 of the License, or(at your option) any later version.
 //
 // LibSourcey is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,25 +29,35 @@
 
 namespace scy {
 	
+
+/*
+const int MaxBufferSize = 65536;
+
 	
 //
 // Buffer
 //
 
 
-Buffer::Buffer(std::size_t s)
-	: _free (true)
+Buffer::Buffer(std::size_t s) : 
+	_free(true)
 {
+	if (s > MaxBufferSize)
+		throw std::invalid_argument("size greater than maximum capacity");	
+
 	_data = (s != 0 ? new char[s] : 0);
 	_size = _capacity = s;
 }
 
 
-Buffer::Buffer(std::size_t s, std::size_t c)
-	: _free (true)
+Buffer::Buffer(std::size_t s, std::size_t c) : 
+	_free(true)
 {
+	if (s > MaxBufferSize)
+		throw std::invalid_argument("size greater than maximum capacity");	
+
 	if (s > c)
-		throw std::invalid_argument ("size greater than capacity");
+		throw std::invalid_argument("size greater than capacity");
 
 	_data = (c != 0 ? new char[c] : 0);
 	_size = s;
@@ -55,13 +65,15 @@ Buffer::Buffer(std::size_t s, std::size_t c)
 }
 
 
-Buffer::Buffer(const void* d, std::size_t s)
-	: _free (true)
+Buffer::Buffer(const void* d, std::size_t s) : 
+	_free(true)
 {
-	if (s != 0)
-	{
+	if (s > MaxBufferSize)
+		throw std::invalid_argument("size greater than maximum capacity");	
+
+	if (s != 0) {
 		_data = new char[s];
-		std::memcpy (_data, d, s);
+		std::memcpy(_data, d, s);
 	}
 	else
 		_data = 0;
@@ -70,18 +82,20 @@ Buffer::Buffer(const void* d, std::size_t s)
 }
 
 
-Buffer::Buffer(const void* d, std::size_t s, std::size_t c)
-	: _free (true)
+Buffer::Buffer(const void* d, std::size_t s, std::size_t c) : 
+	_free(true)
 {
-	if (s > c)
-		throw std::invalid_argument ("size greater than capacity");
+	if (s > MaxBufferSize)
+		throw std::invalid_argument("size greater than maximum capacity");	
 
-	if (c != 0)
-	{
+	if (s > c)
+		throw std::invalid_argument("size greater than capacity");
+
+	if (c != 0) {
 		_data = new char[c];
 
 		if (s != 0)
-			std::memcpy (_data, d, s);
+			std::memcpy(_data, d, s);
 	}
 	else
 		_data = 0;
@@ -91,23 +105,25 @@ Buffer::Buffer(const void* d, std::size_t s, std::size_t c)
 }
 
 
-Buffer::Buffer(void* d, std::size_t s, std::size_t c, bool own)
-	: _data (static_cast<char*> (d)), _size (s), _capacity (c), _free (own)
+Buffer::Buffer(void* d, std::size_t s, std::size_t c, bool own) : 
+	_data(static_cast<char*>(d)), _size(s), _capacity(c), _free(own)
 {
+	if (s > MaxBufferSize)
+		throw std::invalid_argument("size greater than maximum capacity");	
+
 	if (s > c)
-		throw std::invalid_argument ("size greater than capacity");
+		throw std::invalid_argument("size greater than capacity");
 }
 
 
-Buffer::Buffer(const Buffer& x)
-	: _free (true)
+Buffer::Buffer(const Buffer& x) : 
+	_free(true)
 {
-	if (x._capacity != 0)
-	{
+	if (x._capacity != 0) {
 		_data = new char[x._capacity];
 
 		if (x._size != 0)
-			std::memcpy (_data, x._data, x._size);
+			std::memcpy(_data, x._data, x._size);
 	}
 	else
 		_data = 0;
@@ -119,17 +135,15 @@ Buffer::Buffer(const Buffer& x)
 
 Buffer::~Buffer()
 {
-	//if (_free)
-	//	delete[] _data;
+	if (_free && _data)
+		delete[] _data;
 }
 
 
 Buffer& Buffer::operator = (const Buffer& x)
 {
-	if (&x != this)
-	{
-		if (x._size > _capacity)
-		{
+	if (&x != this) {
+		if (x._size > _capacity) {
 			if (_free)
 				delete[] _data;
 
@@ -139,7 +153,7 @@ Buffer& Buffer::operator = (const Buffer& x)
 		}
 
 		if (x._size != 0)
-			std::memcpy (_data, x._data, x._size);
+			std::memcpy(_data, x._data, x._size);
 
 		_size = x._size;
 	}
@@ -150,10 +164,10 @@ Buffer& Buffer::operator = (const Buffer& x)
 
 void Buffer::swap(Buffer& x)
 {
-	char* d (x._data);
-	std::size_t s (x._size);
-	std::size_t c (x._capacity);
-	bool f (x._free);
+	char* d(x._data);
+	std::size_t s(x._size);
+	std::size_t c(x._capacity);
+	bool f(x._free);
 
 	x._data = _data;
 	x._size = _size;
@@ -169,7 +183,7 @@ void Buffer::swap(Buffer& x)
 
 char* Buffer::detach()
 {
-	char* r (_data);
+	char* r(_data);
 
 	_data = nullptr;
 	_size = 0;
@@ -181,8 +195,10 @@ char* Buffer::detach()
 
 void Buffer::assign(const void* d, std::size_t s)
 {
-	if (s > _capacity)
-	{
+	if (_capacity + s > MaxBufferSize)
+		throw std::invalid_argument("size greater than maximum capacity");	
+
+	if (s > _capacity) {
 		if (_free)
 			delete[] _data;
 
@@ -192,7 +208,7 @@ void Buffer::assign(const void* d, std::size_t s)
 	}
 
 	if (s != 0)
-		std::memcpy (_data, d, s);
+		std::memcpy(_data, d, s);
 
 	_size = s;
 }
@@ -200,10 +216,13 @@ void Buffer::assign(const void* d, std::size_t s)
 
 void Buffer::assign(void* d, std::size_t s, std::size_t c, bool own)
 {
+	if (_capacity + s > MaxBufferSize)
+		throw std::invalid_argument("size greater than maximum capacity");	
+
 	if (_free)
 		delete[] _data;
 
-	_data = static_cast<char*> (d);
+	_data = static_cast<char*>(d);
 	_size = s;
 	_capacity = c;
 	_free = own;
@@ -212,20 +231,19 @@ void Buffer::assign(void* d, std::size_t s, std::size_t c, bool own)
 
 void Buffer::append(const Buffer& b)
 {
-	append (b.data (), b.size ());
+	append(b.data(), b.size());
 }
 
 
 void Buffer::append(const void* d, std::size_t s)
 {
-	if (s != 0)
-	{
-		std::size_t ns (_size + s);
+	if (s != 0) {
+		std::size_t ns(_size + s);
 
 		if (_capacity < ns)
-			capacity (ns);
+			capacity(ns);
 
-		std::memcpy (_data + _size, d, s);
+		std::memcpy(_data + _size, d, s);
 		_size = ns;
 	}
 }
@@ -234,7 +252,7 @@ void Buffer::append(const void* d, std::size_t s)
 void Buffer::fill(char v)
 {
 	if (_size > 0)
-		std::memset (_data, v, _size);
+		std::memset(_data, v, _size);
 }
 
 
@@ -246,10 +264,10 @@ std::size_t Buffer::size() const
 
 bool Buffer::size(std::size_t s)
 {
-	bool r (false);
+	bool r(false);
 
 	if (_capacity < s)
-		r = capacity (s);
+		r = capacity(s);
 
 	_size = s;
 	return r;
@@ -264,13 +282,16 @@ std::size_t Buffer::capacity() const
 
 bool Buffer::capacity(std::size_t c)
 {	
+	if (c > MaxBufferSize)
+		throw std::invalid_argument("size greater than maximum capacity");	
+
 	if (_capacity >= c)
 		return false; // cannot be downsized
 
-	char* d (new char[c]);
+	char* d(new char[c]);
 
 	if (_size != 0)
-		std::memcpy (d, _data, _size);
+		std::memcpy(d, _data, _size);
 
 	if (_free)
 		delete[] _data;
@@ -307,13 +328,13 @@ const char* Buffer::data() const
 }
 
 
-char& Buffer::operator [] (std::size_t i)
+char& Buffer::operator [](std::size_t i)
 {
 	return _data[i];
 }
 
 
-char Buffer::operator [] (std::size_t i) const
+char Buffer::operator [](std::size_t i) const
 {
 	return _data[i];
 }
@@ -342,8 +363,8 @@ std::size_t Buffer::find(char v, std::size_t pos) const
 	if (_size == 0 || pos >= _size)
 		return npos;
 
-	char* p (static_cast<char*> (std::memchr (_data + pos, v, _size - pos)));
-	return p != 0 ? static_cast<std::size_t> (p - _data) : npos;
+	char* p(static_cast<char*>(std::memchr(_data + pos, v, _size - pos)));
+	return p != 0 ? static_cast<std::size_t>(p - _data) : npos;
 }
 
 
@@ -351,7 +372,7 @@ std::size_t Buffer::rfind(char v, std::size_t pos) const
 {
 	if (_size != 0)
 	{
-		std::size_t n (_size);
+		std::size_t n(_size);
 
 		if (--n > pos)
 			n = pos;
@@ -367,8 +388,8 @@ std::size_t Buffer::rfind(char v, std::size_t pos) const
 
 bool operator == (const Buffer& a, const Buffer& b)
 {
-	return a.size () == b.size () &&
-		std::memcmp (a.data (), b.data (), a.size ()) == 0;
+	return a.size() == b.size() &&
+		std::memcmp(a.data(), b.data(), a.size()) == 0;
 }
 
 
@@ -376,6 +397,7 @@ bool operator != (const Buffer& a, const Buffer& b)
 {
 	return !(a == b);
 }
+*/
 
 
 //
@@ -730,8 +752,6 @@ int BitReader::readLine(std::string& val)
 }
 
 
-
-
 //
 // Bit Writer
 //
@@ -772,11 +792,24 @@ BitWriter::BitWriter(char* bytes, std::size_t size, ByteOrder order)
 BitWriter::BitWriter(Buffer& buf, ByteOrder order)
 {
 	init(buf.data(), buf.size(), order);
+	_buffer = &buf;
 }
+
+
+/*
+BitWriter::BitWriter(std::vector<char>& buf, ByteOrder order)
+{
+	init(&buf[0], buf.size(), order);
+	_vector = &buf;
+}
+*/
 
 
 void BitWriter::init(char* bytes, std::size_t size, ByteOrder order) 
 {
+
+	//_vector = nullptr;
+	_buffer = nullptr;
 	_position = 0;
 	_limit = size;
 	//_capacity = size;
@@ -848,8 +881,6 @@ bool BitWriter::reset()
 	return true;
 }
 
-
-
 void BitWriter::limit(std::size_t val) 
 { 
 	if (val > capacity())
@@ -918,7 +949,6 @@ size_t BitWriter::limit() const
 // Write functions
 //
 
-
 void BitWriter::putU8(UInt8 val)
 {
 	put(reinterpret_cast<const char*>(&val), 1);
@@ -964,12 +994,43 @@ void BitWriter::put(const std::string& val)
 
 
 void BitWriter::put(const char* val, std::size_t len) 
-{
-	if ((_position + len) > _limit)
-		throw std::out_of_range("insufficient buffer capacity");
+{		
+	// Write to dynamic buffer
+	if (_buffer) {
+		//_buffer->resize(std::max<std::size_t>(3 * len / 2, 2048));	
+		_buffer->insert(_buffer->end(), val, val + len); 
+		_bytes = _buffer->data();		
+		_limit = _buffer->size();	
+		_position += len;	
+	}
+	
+	// Write to fixed size buffer
+	else {
+		if ((_position + len) > _limit)
+			throw std::out_of_range("insufficient buffer capacity");
+
+		memcpy(_bytes + _position, val, len);
+		_position += len;
+	}
+
+
+	/*
+	if ((_position + len) > _limit) {
+
+		// Expand the buffer if able
+		if (_buffer) {
+			_buffer->resize(std::max<std::size_t>(3 * len / 2, 2048));	
+			_bytes = _buffer->data();		
+			_limit = _buffer->size();
+		}
+
+		// Otherwise throw
+		else throw std::out_of_range("insufficient buffer capacity");
+	}
 
 	memcpy(_bytes + _position, val, len);
 	_position += len;
+	*/
 }
 
 

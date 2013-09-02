@@ -101,7 +101,7 @@ LogChannel* Logger::get(const std::string& name, bool whiny) const
 	if (it != _channels.end())
 		return it->second;
 	if (whiny)
-		throw NotFoundException("No log channel named: " + name);
+		throw std::runtime_error("Not found: No log channel named: " + name);
 	return nullptr;
 }
 

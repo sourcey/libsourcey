@@ -44,7 +44,7 @@ void StreamManager::closeAll()
 {
 	Mutex::ScopedLock lock(_mutex);
 	
-	log("debug") << "close all streams: " << _map.size() << endl;	
+	log("debug") << "Close all streams: " << _map.size() << endl;	
 	StreamManager::Map::iterator it = _map.begin();
 	StreamManager::Map::iterator it2;
 	while (it != _map.end()) {
@@ -78,7 +78,7 @@ bool StreamManager::closeStream(const std::string& name, bool whiny)
 {
 	assert(!name.empty());
 
-	log("debug") << "close stream: " << name << endl;
+	log("debug") << "Close stream: " << name << endl;
 	PacketStream* stream = get(name, whiny);
 	if (stream) {
 		stream->close();
@@ -123,7 +123,7 @@ void StreamManager::onRemove(PacketStream* stream)
 
 void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state, const PacketStreamState&)
 {
-	log("debug") << "stream state change: " << state << endl;
+	log("debug") << "Stream state change: " << state << endl;
 	
 	// Cantch stream closed state and free it if necessary
 	if (state.equals(PacketStreamState::Closed)) {

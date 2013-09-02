@@ -23,10 +23,6 @@
 
 #include "Sourcey/PacketTransaction.h"
 #include "Sourcey/Net/PacketSocket.h"
-//#include "Sourcey/Timer.h"
-//#include "Sourcey/Stateful.h"
-//#include "Sourcey/Interface.h"
-//#include "Sourcey/Packet.h"
 
 
 namespace scy {
@@ -54,17 +50,11 @@ public:
 		PacketSocketAdapter::socket->setAdapter(this);
 	}
 
-	virtual ~Transaction()
-	{
-		debugL("NetTransaction", this) << "Destroy" << std::endl;
-		PacketSocketAdapter::socket->setAdapter(0);
-	}
-
 	virtual bool send()
 	{
-		debugL("NetTransaction", this) << "send" << std::endl;
+		debugL("NetTransaction", this) << "Send" << std::endl;
 		assert(socket);
-		if (socket->send(PacketTransaction<PacketT>::_request, _peerAddress) > 0)
+		if (socket->send(_request, _peerAddress) > 0)
 			return PacketTransaction<PacketT>::send();
 		setState(this, TransactionState::Failed);
 		return false;
@@ -81,13 +71,26 @@ public:
 		return _peerAddress;
 	}
 
-protected:	
-	virtual void onPacket(IPacket& packet)
-		/// Overrides the PacketSocketAdapter onPacket 
-		/// callback for checking potential response candidates.
+	virtual void dispose()
 	{
-		debugL("NetTransaction", this) << "On Packet: " << packet.size() << std::endl;
-		if (onPossibleResponse(static_cast<PacketT&>(packet))) {
+		debugL("NetTransaction", this) << "Dispose" << std::endl;
+		if (!_destroyed) {
+			PacketSocketAdapter::socket->setAdapter(nullptr);
+		}
+		PacketTransaction<PacketT>::dispose(); // gc
+	}
+
+protected:	
+	virtual ~Transaction()
+	{
+	}
+
+	virtual void onPacket(IPacket& packet)
+		// Overrides the PacketSocketAdapter onPacket 
+		// callback for checking potential response candidates.
+	{
+		debugL("NetTransaction", this) << "On packet: " << packet.size() << std::endl;
+		if (handlePotentialResponse(static_cast<PacketT&>(packet))) {
 
 			// Stop socket data propagation since
 			// we have handled the packet
@@ -96,16 +99,16 @@ protected:
 	}
 	
 	virtual void onResponse() 
-		/// Called when a successful response match is received.
+		// Called when a successful response match is received.
 	{
-		traceL("Transaction", this) << "On Success: " << _response.toString() << std::endl;
+		traceL("NetTransaction", this) << "On success: " << _response.toString() << std::endl;
 		PacketSignal::emit(socket, _response);
 	}
 
 	virtual bool checkResponse(const PacketT& packet) 
-		/// Sub classes should derive this method to implement 
-		/// response checking logic.
-		/// The base implementation only performs address matching.
+		// Sub classes should derive this method to implement 
+		// response checking logic.
+		// The base implementation only performs address matching.
 	{
 		assert(packet.info && "socket must provide packet info");
 		if (!packet.info)

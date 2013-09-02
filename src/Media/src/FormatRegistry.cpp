@@ -56,7 +56,7 @@ Format& FormatRegistry::get(const std::string& name)
 		}
 	}
            
-	throw NotFoundException("No media format for: " + name);
+	throw std::runtime_error("Not found: No media format for: " + name);
 }
 
 
@@ -69,7 +69,7 @@ Format& FormatRegistry::getByID(const std::string& id)
 		}
 	}
            
-	throw NotFoundException("No media format type: " + id);
+	throw std::runtime_error("Not found: No media format type: " + id);
 }
 
 
@@ -98,7 +98,7 @@ Format& FormatRegistry::getDefault()
 		return *_formats.begin();
 	}
          
-	throw NotFoundException("No default media format.");
+	throw std::runtime_error("Not found: No default media format.");
 }
 
 

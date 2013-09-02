@@ -143,7 +143,8 @@ void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state)
 
 	switch (state.id()) {
 	case PacketStreamState::Running:
-		if (stateEquals(EncoderState::None))
+		//if (stateEquals(EncoderState::None))
+		if (!isActive())
 			AVEncoder::initialize();
 		break;
 		

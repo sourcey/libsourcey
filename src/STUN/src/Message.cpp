@@ -146,9 +146,9 @@ string Message::typeString() const
 string Message::toString() const 
 {
 	ostringstream os;
-	os << "STUN[" << transactionID() << ": " << typeString();
+	os << "STUN[" << transactionID() << ":" << typeString();
 	for (unsigned i = 0; i < _attrs.size(); i++)
-		os << ": " << _attrs[i]->typeString();
+		os << ":" << _attrs[i]->typeString();
 	os << "]";
 	return os.str();
 }
@@ -156,9 +156,9 @@ string Message::toString() const
 
 void Message::print(std::ostream& os) const
 {
-	os << "STUN[" << typeString() << ": " << transactionID();
+	os << "STUN[" << typeString() << ":" << transactionID();
 	for (unsigned i = 0; i < _attrs.size(); i++)
-		os << ": " << _attrs[i]->typeString();
+		os << ":" << _attrs[i]->typeString();
 	os << "]";
 }
 

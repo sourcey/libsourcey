@@ -333,7 +333,7 @@ typedef sockio::ClientBase<
 //	{
 //		// NOTE: No need for mutex lock because this method is called from connect()
 //	
-//		Log("trace", this) << "send Handshake" << std::endl;	
+//		Log("trace", this) << "Send Handshake" << std::endl;	
 //	
 //		Poco::URI uri("http://" + _serverAddr.toString() + "/socket.io/1/");	
 //		if (_socket->transport() == Net::SSLTCP)
@@ -472,7 +472,7 @@ typedef sockio::ClientBase<
 //			try {
 //				connect();
 //			} 
-//			catch (std::exception& exc/*Exception& exc*/) {			
+//			catch (std::exception& exc) {			
 //				Log("error", this) << "Reconnection attempt failed: " << exc.what()/*message()*/ << std::endl;
 //			}	
 //		}

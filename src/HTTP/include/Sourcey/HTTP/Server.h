@@ -233,11 +233,11 @@ public:
 		try 
 		{			
 			if (rawRequest.find("policy-file-request") != std::string::npos) {
-				traceL("HTTPStreamingRequestHandlerFactory") << "send Flash Crossdomain XMLSocket Policy" << std::endl;
+				traceL("HTTPStreamingRequestHandlerFactory") << "Send Flash Crossdomain XMLSocket Policy" << std::endl;
 				return new Net::FlashPolicyRequestHandler(socket, false);
 			}
 			else if (rawRequest.find("crossdomain.xml") != std::string::npos) {
-				traceL("HTTPStreamingRequestHandlerFactory") << "send Flash Crossdomain HTTP Policy" << std::endl;
+				traceL("HTTPStreamingRequestHandlerFactory") << "Send Flash Crossdomain HTTP Policy" << std::endl;
 				return new Net::FlashPolicyRequestHandler(socket, true);
 			}			
 		}

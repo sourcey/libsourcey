@@ -49,8 +49,8 @@ public:
 			client.addPermission(peerIP);	
 			client.initiate();
 		} 
-		catch (std::exception&/*Exception&*/ exc) {
-			errorL("RelayedStreamingAllocation", this) << "Error: " << exc.what()/*message()*/ << std::endl;
+		catch (std::exception& exc) {
+			errorL("RelayedStreamingAllocation", this) << "Error: " << exc.what() << std::endl;
 			assert(0);
 		}	
 	}
@@ -58,7 +58,7 @@ public:
 	void terminate() 
 	{
 		debugL("RelayedStreamingAllocation", this) << "Terminating" << std::endl;	
-		client.terminate();
+		client.shutdown();
 
 		// Free all managed packet streams
 		streams.closeAll();
@@ -70,7 +70,7 @@ protected:
 		debugL("RelayedStreamingAllocation", this) << "Relay state changed: " << state.toString() << std::endl;
 
 		switch(state.id()) {
-		case turn::ClientState::Waiting:				
+		case turn::ClientState::None:				
 			break;
 		case turn::ClientState::Allocating:				
 			break;
@@ -82,8 +82,8 @@ protected:
 		case turn::ClientState::Failed:
 			assert(0 && "Allocation failed");
 			break;
-		case turn::ClientState::Terminated:	
-			break;
+		//case turn::ClientState::Terminated:	
+		//	break;
 		}
 	}
 	
@@ -119,8 +119,8 @@ protected:
 
 			this->streams.addStream(stream);
 		} 
-		catch (std::exception&/*Exception&*/ exc) {
-			errorL("RelayedStreamingAllocation", this) << "Stream error: " << exc.what()/*message()*/ << std::endl;
+		catch (std::exception& exc) {
+			errorL("RelayedStreamingAllocation", this) << "Stream error: " << exc.what() << std::endl;
 			assert(0);
 		}
 	}
@@ -141,8 +141,8 @@ protected:
 				//stream->destroy();
 			}
 		} 
-		catch (std::exception&/*Exception&*/ exc) {
-			errorL("RelayedStreamingAllocation", this) << "Stream error: " << exc.what()/*message()*/ << std::endl;
+		catch (std::exception& exc) {
+			errorL("RelayedStreamingAllocation", this) << "Stream error: " << exc.what() << std::endl;
 			assert(0);
 		}
 	}
@@ -208,7 +208,7 @@ public:
 					
 		// Send the relay address response to the initiator		
 		connection().response().set("Access-Control-Allow-Origin", "*");
-		connection().send(allocation->client.relayedAddress().toString());
+		connection().sendData(allocation->client.relayedAddress().toString());
 		connection().close();
 	}
 	

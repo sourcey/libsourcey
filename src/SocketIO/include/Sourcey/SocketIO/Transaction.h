@@ -36,7 +36,6 @@ struct Transaction: public PacketTransaction<sockio::Packet>
 {
 	Transaction(sockio::Client& client, long timeout = 10000);
 	Transaction(sockio::Client& client, const sockio::Packet& request, long timeout = 10000);
-	virtual ~Transaction();
 	
 	virtual bool send();
 	virtual bool checkResponse(const Packet& packet);
@@ -44,9 +43,10 @@ struct Transaction: public PacketTransaction<sockio::Packet>
 	virtual void onPotentialResponse(void*, Packet& packet);
 	virtual void onResponse();
 
-	//virtual void* self();
-
 	sockio::Client& client;
+
+protected:
+	virtual ~Transaction();
 };
 
 

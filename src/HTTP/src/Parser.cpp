@@ -89,41 +89,42 @@ void Parser::init(http_parser_type type)
 }
 
 
-bool Parser::parse(const char* data, size_t len, bool expectComplete) // size_t offset, 
+bool Parser::parse(const char* data, std::size_t len) // std::size_t offset, , bool expectComplete
 {
-	traceL("HTTPParser", this) << "Parse Data: " << len << endl;	
+	traceL("HTTPParser", this) << "Parse: " << len << endl;	
 	
 	//assert(!complete());
 	assert(_parser.data == this);
 
 	if (complete())
-		setParserError(true, "Parsing already complete");
+		setParserError("Parsing already complete"); //true, 
 
-	size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len); //&data[offset]
+	std::size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len); //&data[offset]
 
-	/// Set error state and throw
-	//if (_parser.http_errno != HPE_OK)
-    if (!_parser.upgrade && nparsed != len) {
+	// Set error state and throw
+    if (!_parser.upgrade && nparsed != len) { //_parser.http_errno != HPE_OK
+		
+		//if ()
 		//enum http_errno err = HTTP_PARSER_ERRNO(&_parser);		
 		//traceL("HTTPParser", this) << "Parse Errno: " << http_errno_name(err) << endl;	
-		warnL("HTTPParser", this) << "########## Parser Error" << endl;	
-		traceL("HTTPParser", this) << "Data: " << std::string(data, len) << endl;	
+		//warnL("HTTPParser", this) << "########## Parser Error" << endl;	
+		//traceL("HTTPParser", this) << "Data: " << std::string(data, len) << endl;	
 		//traceL("HTTPParser", this) << "Binary: " << util::dumpbin(data, len) << endl;	
-		traceL("HTTPParser", this) << "Is OK: " << (_parser.http_errno == HPE_OK) << endl;	
-		traceL("HTTPParser", this) << "Do Upgrade: " << upgrade() << endl;	
+		//traceL("HTTPParser", this) << "Is OK: " << (_parser.http_errno == HPE_OK) << endl;	
+		//traceL("HTTPParser", this) << "Do Upgrade: " << upgrade() << endl;	
 
 		/// HACK: Getting strage issue where parser
 		/// is parsing 1 character short.
 		/// This happens when attempting to delete from callback scope
 		//if (nparsed == len - 1)
 		//	assert(0);
-			//return true;
+			//return true;true
 
-		setParserError(true);
+		setParserError();
 	}
 
-	else if (expectComplete && !complete())
-		setParserError(true, "Incomplete HTTP message");
+	//else if (expectComplete && !complete())
+	//	setParserError(true, "Incomplete HTTP message");
 	
 	return complete();
 }
@@ -137,11 +138,11 @@ void Parser::reset()
 		_error = nullptr;
 	}
 
-	/// TODO: Reset parser internal state?
+	// TODO: Reset parser internal state?
 }
 
 
-void Parser::setParserError(bool throwException, const std::string& message)
+void Parser::setParserError(const std::string& message) //bool throwException, 
 {
 	assert(_parser.http_errno != HPE_OK);	
 	ParserError err;
@@ -149,8 +150,8 @@ void Parser::setParserError(bool throwException, const std::string& message)
 	err.message = message.empty() ? http_errno_name(err.code) : message;
 	onError(err);
 
-	if (throwException)
-		throw std::runtime_error(err.message);
+	//if (throwException)
+	//	throw std::runtime_error(err.message);
 }
 
 
@@ -247,7 +248,7 @@ void Parser::onHeadersEnd()
 }
 
 
-void Parser::onBody(const char* buf, size_t len) //size_t off, 
+void Parser::onBody(const char* buf, std::size_t len) //size_t off, 
 {
 	traceL("HTTPParser", this) << "onBody" << endl;	
 	if (_observer)
@@ -291,7 +292,7 @@ int Parser::on_message_begin(http_parser* parser)
 }
 
 
-int Parser::on_url(http_parser* parser, const char *at, size_t len) 
+int Parser::on_url(http_parser* parser, const char *at, std::size_t len) 
 {
 	auto self = reinterpret_cast<Parser*>(parser->data);
 	assert(self);
@@ -315,7 +316,7 @@ int Parser::on_status_complete(http_parser* parser)
 }
 
 
-int Parser::on_header_field(http_parser* parser, const char* at, size_t len) 
+int Parser::on_header_field(http_parser* parser, const char* at, std::size_t len) 
 {	
 	auto self = reinterpret_cast<Parser*>(parser->data);
 	assert(self);
@@ -336,7 +337,7 @@ int Parser::on_header_field(http_parser* parser, const char* at, size_t len)
 }
 
 
-int Parser::on_header_value(http_parser* parser, const char* at, size_t len) 
+int Parser::on_header_value(http_parser* parser, const char* at, std::size_t len) 
 {
 	auto self = reinterpret_cast<Parser*>(parser->data);
 	assert(self);
@@ -369,7 +370,7 @@ int Parser::on_headers_complete(http_parser* parser)
 }
 
 
-int Parser::on_body(http_parser* parser, const char* at, size_t len) 
+int Parser::on_body(http_parser* parser, const char* at, std::size_t len) 
 {		
 	auto self = reinterpret_cast<Parser*>(parser->data);
 	assert(self);

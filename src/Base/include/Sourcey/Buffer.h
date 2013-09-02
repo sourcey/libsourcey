@@ -33,6 +33,8 @@
 namespace scy {
 
 
+
+/*
 class Buffer
 	/// A dynamically expanding buffer type which can either own it's 
 	/// own memory, or reference external memory.
@@ -91,6 +93,8 @@ protected:
 
 bool operator== (const Buffer&, const Buffer&);
 bool operator!= (const Buffer&, const Buffer&);
+*/
+typedef std::vector<char> Buffer;
 
 
 //
@@ -359,10 +363,17 @@ private:
 
 class BitWriter 
 	/// A BitWriter for reading/writing binary streams.
+	///
+	/// Note that when using the constructor with the Buffer reference
+	/// as an argument, the writer will dynamically expand the given buffer
+	/// when writing passed the buffer capacity.
+	/// All other cases will throw a std::out_of_range error when writing
+	/// past the buffer capacity.
 {
 public:	
 	BitWriter(char* bytes, std::size_t size, ByteOrder order = ByteOrder::Network);
 	BitWriter(Buffer& buf, ByteOrder order = ByteOrder::Network);
+	//BitWriter(std::vector<char>& buf, ByteOrder order = ByteOrder::Network);
 	BitWriter(MutableBuffer& pod, ByteOrder order = ByteOrder::Network);
 	~BitWriter();
 
@@ -425,6 +436,8 @@ private:
 	std::size_t _position;
 	std::size_t _limit;
 	ByteOrder _order;
+	//std::vector<char>* _vector;
+	Buffer* _buffer;
 	char* _bytes;
 };
 

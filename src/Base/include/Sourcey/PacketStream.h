@@ -61,7 +61,7 @@ public:
 
 	virtual void onStreamStateChange(const PacketStreamState&) {};
 		// Called by the PacketStream to notify when the internal
-		// stream state changes.	
+		// Stream state changes.	
 		// On receiving the Stopped state, it is the responsibility
 		// of the adapter to have ceased all outgoing packet transmission,
 		// especially in multi-thread scenarios.
@@ -159,6 +159,7 @@ struct PacketStreamState: public State
 		None = 0,
 		Locked,
 		Running,
+		Paused,
 		Resetting,
 		Stopping,
 		Stopped,
@@ -172,6 +173,7 @@ struct PacketStreamState: public State
 		case None:			return "None";
 		case Locked:		return "Locked";
 		case Running:		return "Running";
+		case Paused:		return "Paused";
 		case Resetting:		return "Resetting";
 		case Stopping:		return "Stopping";
 		case Stopped:		return "Stopped";
@@ -219,6 +221,12 @@ public:
 
 	virtual void stop();
 		// Stops the stream and any synchronized sources.
+
+	virtual void pause();
+		// Pauses the stream.
+
+	virtual void resume();
+		// Resumes the stream.
 
 	virtual void reset();
 		// Resets the internal state of all packet adapters in the
@@ -300,6 +308,12 @@ public:
 	virtual void* clientData() const;
 		// Client data pointer.
 
+	virtual bool waitForReady();
+		// Locks until the internal ready event is signalled.
+		// This enables safe stream adapter access after calling
+		// stop() by waiting until the current adapter queue
+		// iteration is complete.
+
 	PacketAdapterVec adapters() const;
 		// Returns a combined list of all stream sources and processors.
 
@@ -359,6 +373,7 @@ protected:
 	std::string _name;
 	PacketAdapterVec _sources;
 	PacketAdapterVec _processors;
+	std::atomic<int> _scopeRef;
 	void* _clientData;
 };
 
@@ -455,11 +470,6 @@ public:
 
 	
 	//Poco::Event _ready;
-	//virtual bool waitForReady();
-		// Locks until the internal ready event is signalled.
-		// This enables safe stream adapter access after calling
-		// stop() by waiting until the current adapter queue
-		// iteration is complete.
 
 
 /*

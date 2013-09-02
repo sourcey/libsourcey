@@ -154,7 +154,7 @@ int UDPBase::send(const char* data, int len, const Address& peerAddress, int /* 
 	if (_peer.valid() && _peer != peerAddress)
 		throw std::runtime_error("NotAuthorized peer: " + peerAddress.toString());
 	
-	traceL("UDPBase", this) << "send: " << len << ": " << peerAddress << endl;
+	traceL("UDPBase", this) << "Send: " << len << ": " << peerAddress << endl;
 	switch (peerAddress.af()) {
 	case AF_INET:
 		r = uv_udp_send(&sr->req, handle<uv_udp_t>(), &sr->buf, 1,
@@ -198,7 +198,7 @@ bool UDPBase::recvStop()
 
 void UDPBase::onRecv(const MutableBuffer& buf, const net::Address& address)
 {
-	traceL("UDPBase", this) << "recv: " << buf.size() << endl;	
+	traceL("UDPBase", this) << "Recv: " << buf.size() << endl;	
 
 	emitRecv(buf, address);
 }

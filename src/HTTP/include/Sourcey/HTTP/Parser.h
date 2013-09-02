@@ -31,8 +31,6 @@ namespace scy {
 namespace http {
 
 	
-// -------------------------------------------------------------------
-//
 struct ParserError
 {
 	http_errno code;
@@ -40,22 +38,18 @@ struct ParserError
 };
 
 
-// -------------------------------------------------------------------
-//
 class ParserObserver
 {
 public:
     virtual void onParserHeader(const std::string& name, const std::string& value) = 0;
     virtual void onParserHeadersEnd() = 0;
-    virtual void onParserChunk(const char* data, size_t len) = 0;
+    virtual void onParserChunk(const char* data, std::size_t len) = 0;
     virtual void onParserEnd() = 0;
 
     virtual void onParserError(const ParserError& err) = 0;
 };
 
 
-// -------------------------------------------------------------------
-//
 class Parser
 {
 public:
@@ -66,24 +60,19 @@ public:
 
     void init(http_parser_type type);
 	
-    bool parse(const char* data, std::size_t length, bool expectComplete = false);
-		/// Feed data read from socket into the http_parser.
+    bool parse(const char* data, std::size_t length); //, bool expectComplete = false
+		// Feed data read from socket into the http_parser.
 		//
-		/// Returns true of the message is complete, false if
-		/// incomplete, or throws an exception on error.
-		//
-		/// The expectComplete flag can be set for parsing headers only. 
-		/// If the message is not complete after calling the parser
-		/// an exception will be thrown.
+		// Returns true of the message is complete, false if incomplete.
 
     void reset();
-		/// Reset the parser state for a new message
+		// Reset the parser state for a new message
 	
     bool complete() const;
-		/// Returns true if parsing is complete, either  
-		/// in success or error.
+		// Returns true if parsing is complete, either  
+		// in success or error.
 
-	void setParserError(bool throwException = true, const std::string& message = "");
+	void setParserError(const std::string& message = ""); //bool throwException = true, 
 
     void setRequest(http::Request* request);
     void setResponse(http::Response* response);
@@ -100,7 +89,7 @@ public:
     void onURL(const std::string& value);
     void onHeader(const std::string& name, const std::string& value);
     void onHeadersEnd();
-    void onBody(const char* buf, size_t len);
+    void onBody(const char* buf, std::size_t len);
     void onMessageEnd();
     void onError(const ParserError& err);
 
@@ -109,12 +98,12 @@ public:
 	//
     /// http_parser callbacks
     static int on_message_begin(http_parser* parser);
-    static int on_url(http_parser* parser, const char *at, size_t len);
+    static int on_url(http_parser* parser, const char *at, std::size_t len);
     static int on_status_complete(http_parser* parser);
-    static int on_header_field(http_parser* parser, const char* at, size_t len);
-    static int on_header_value(http_parser* parser, const char* at, size_t len);
+    static int on_header_field(http_parser* parser, const char* at, std::size_t len);
+    static int on_header_value(http_parser* parser, const char* at, std::size_t len);
     static int on_headers_complete(http_parser* parser);
-    static int on_body(http_parser* parser, const char* at, size_t len);
+    static int on_body(http_parser* parser, const char* at, std::size_t len);
     static int on_message_complete(http_parser* parser);
 	
 public:
@@ -143,6 +132,12 @@ public:
 
 
 
+	
+		//, or throws an exception on error.
+		//
+		// The expectComplete flag can be set for parsing headers only. 
+		// If the message is not complete after calling the parser
+		// an exception will be thrown.
 	//bool _failed;
     //bool _parsing;
     //bool _upgrade;
@@ -199,11 +194,11 @@ inline const char* get_method_name(method m)
 
 
 #define HTTP_DATA_CB(name)                                                    \
-  static int name(http_parser* p_, const char* at, size_t length) {           \
+  static int name(http_parser* p_, const char* at, std::size_t length) {           \
     Parser* self = container_of(p_, Parser, parser_);                         \
     return self->name##_(at, length);                                         \
   }                                                                           \
-  int name##_(const char* at, size_t length)
+  int name##_(const char* at, std::size_t length)
   */
 /**
     //detail::resval error_;

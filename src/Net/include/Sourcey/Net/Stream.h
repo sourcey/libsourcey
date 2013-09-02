@@ -49,7 +49,7 @@ class Stream: public uv::Handle
 		/// If the stream is already closed this call
 		/// will have no side-effects.
 	{
-		traceL("Stream", this) << "close: " << handle() << std::endl;
+		traceL("Stream", this) << "Close: " << handle() << std::endl;
 		if (!closed()) {
 			readStop();		
 			uv::Handle::close();
@@ -59,7 +59,7 @@ class Stream: public uv::Handle
 	bool shutdown()
 		/// Sends a shutdown packet to the connected peer.
 	{
-		traceL("Stream", this) << "send shutdown" << std::endl;
+		traceL("Stream", this) << "Send shutdown" << std::endl;
 		if (closed()) {
 			warnL("Stream", this) << "Attempted shutdown on closed stream" << std::endl;
 			return false;

@@ -59,34 +59,77 @@ public:
 		Base::free(key); // Free existing item and timeout (if any)
 		Base::add(key, item); // Add new entry
 		
-		if (timeout > 0) {
+		if (timeout > 0) {			
+			setTimeout(item, timeout);
+			/*
+			traceL("TimedManager", this) << "Set timeout: " 
+				<< key << ": " << item << ": " << timeout << std::endl;	
 			Mutex::ScopedLock lock(_tmutex);
-			auto& timeout = _timeouts[item];
-			timeout.start();
+			auto& t = _timeouts[item];
+			t.setDelay(timeout);
+			t.start();
+			*/
 		}
 	}
 	
 	virtual bool expires(const TKey& key, long timeout) 
-		/// Updates the item expiry timeout
+		// Updates the item expiry timeout
 	{
+		traceL("TimedManager", this) << "Set expires: " << key << ": " << timeout << std::endl;	
 		return expires(get(key, false), timeout);
 	}
 	
 	virtual bool expires(TValue* item, long timeout) 
-		/// Updates the item expiry timeout
+		// Updates the item expiry timeout
 	{
+		traceL("TimedManager", this) << "Set expires: " << item << ": " << timeout << std::endl;	
+		/*	
 		if (item) {
-			Mutex::ScopedLock lock(_tmutex);	
+			Mutex::ScopedLock lock(_tmutex);
+
+			// Update the existing entry
 			auto it = _timeouts.find(item);	
 			if (it != _timeouts.end()) {
 				if (timeout > 0) {
-					it->second.setDelay(timeout);
 					it->second.reset();
+					it->second.setDelay(timeout);
 				}
 				else
 					_timeouts.erase(it);
 				return true;
 			}
+
+			// Add a new entry
+			else {
+			}		
+		}
+		*/
+		return setTimeout(item, timeout);
+	}
+
+	virtual void clear()
+	{
+		Base::clear();
+	}
+
+protected:
+	virtual bool setTimeout(TValue* item, long timeout) 
+	{ 
+		if (item) {
+			Mutex::ScopedLock lock(_tmutex);
+			if (timeout > 0) {
+				traceL("TimedManager", this) << "Set timeout: " << item << ": " << timeout << std::endl;	
+				auto& t = _timeouts[item];
+				t.setDelay(timeout);
+				t.start();
+			}
+			else {			
+				auto it = _timeouts.find(item);	
+				if (it != _timeouts.end()) {
+					_timeouts.erase(it);
+				}
+			}
+			return true;
 		}
 		assert(0 && "unknown item");
 		return false;
@@ -103,18 +146,13 @@ public:
 		// Remove pointer entry
 		Base::onRemove(key, item);
 	}
-
-	virtual void clear()
-	{
-		Base::clear();
-	}
 	
 	void onTimer(void*)
 	{
 		Mutex::ScopedLock lock(_tmutex);
 		for (auto it = _timeouts.begin(); it != _timeouts.end();) {
 			if (it->second.expired()) {	
-				traceL("TimedManager", this) << "item expired: " << it->first << std::endl;				
+				traceL("TimedManager", this) << "Item expired: " << it->first << std::endl;				
 				if (Base::remove(it->first))
 					delete it->first;
 				it = _timeouts.erase(it);
@@ -123,7 +161,6 @@ public:
 		}
 	}
 
-protected:
 	mutable Mutex _tmutex;
 	TimeoutMap _timeouts;
 	Timer _timer;
@@ -173,8 +210,8 @@ protected:
 		//if (exists(item)) {
 		//}FoundException("Item not found");	
 			*/
-		//throw NotFoundException("Item not found");
-		//throw NotFoundException("Timeout entry not found");
+		//throw std::runtime_error("Not found: Item not found");
+		//throw std::runtime_error("Not found: Timeout entry not found");
 
 		//TimeoutMap::iterator it = _timeouts.find(key);	
 		//if (it != _timeouts.end())

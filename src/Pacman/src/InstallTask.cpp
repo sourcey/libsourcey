@@ -215,7 +215,7 @@ void InstallTask::doDownload()
 		cred.authenticate(_dlconn->request()); 
 	}
 	
-	log("debug") << "initializing download:" 
+	log("debug") << "Initializing download:" 
 		<< "\n\tURI: " << asset.url()
 		<< "\n\tFile path: " << outfile
 		<< endl;
