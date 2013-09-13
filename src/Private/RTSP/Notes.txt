@@ -1,8 +1,0 @@
-Support
-
-				Quicktime		VLC			Real Player		MPlayer
-	- h264		NO				YES			NO
-	- h263+		NO				YES			NO
-	- h263		YES (3gp)		YES			YES
-	- amr_nb	YES (3gp)		NO			YES
-	- mp3		NO				YES			YES
