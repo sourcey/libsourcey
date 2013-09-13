@@ -192,7 +192,7 @@ struct PacketStreamState: public State
 
 
 class PacketStream: public PacketStreamAdapter, public Stateful<PacketStreamState>, public basic::Startable
-	/// This class implements a flexible and lightweight packet processing stream.
+	/// This class is used for processing and boradcasting IPackets in a flexible way.
 	/// A PacketStream consists of one or many PacketSources, one or many
 	/// PacketProcessors, and one or many delegate receivers.
 	///
@@ -209,38 +209,38 @@ class PacketStream: public PacketStreamAdapter, public Stateful<PacketStreamStat
 	///
 	/// In order to synchronize output packets with the application event
 	/// loop take a look at the SyncPacketQueue class.
-	/// For lengthy operations you add an AsyncPacketQueue instance to the 
-	/// stream so as not to block the source thread while processing completes.
+	/// For lengthy operations you can add an AsyncPacketQueue to the start
+	/// of the stream to defer processing from the PacketSource thread.
 { 
 public:	
 	PacketStream(const std::string& name = ""); 
 	~PacketStream();
 	
 	virtual void start();
-		// Starts the stream and any synchronized sources.
+		// Start the stream and any synchronized sources.
 
 	virtual void stop();
-		// Stops the stream and any synchronized sources.
+		// Stop the stream and any synchronized sources.
 
 	virtual void pause();
-		// Pauses the stream.
+		// Pause the stream.
 
 	virtual void resume();
-		// Resumes the stream.
+		// Resume the stream.
 
 	virtual void reset();
-		// Resets the internal state of all packet adapters in the
+		// Reset the internal state of all packet adapters in the
 		// stream. Useful for correcting metadata generation when
 		// new receivers connect to the stream.
 
 	virtual void close();
-		// Closes the stream and transitions the internal state to Closed.
+		// Close the stream and transition the internal state to Closed.
 
 	virtual void write(char* data, std::size_t len);
-		// Writes data to the stream (nocopy).
+		// Write data to the stream (nocopy).
 	
 	virtual void write(const char* data, std::size_t len);
-		// Writes data to the stream (copied).
+		// Write data to the stream (copied).
 
 	virtual void write(IPacket& packet);
 		// Writes an incoming packet to the stream.
@@ -250,16 +250,15 @@ public:
 		// Exposed publicly for flexible use.
 
 	virtual void attachSource(PacketSignal& source);
-		// Attaches a source packet emitter to the stream.
+		// Attach a source packet emitter to the stream.
+		// The source packet adapter can be another PacketStream::Emitter.
 	
 	virtual void attachSource(PacketStreamAdapter* source, bool freePointer = true, bool syncState = false);
-		// Attaches a source packet emitter to the stream.
-		// The source packet adapter can be another PacketStream.
-		// If freePointer is true, the pointer will be deleted when
-		// the stream is closed.
-		// If syncState and the PacketSignal is castable to a 
-		// basic::Stratable the source's start() and stop() methods
-		// will be synchronized with the internal stream state.
+		// Attach a source packet emitter to the stream.
+		// If freePointer is true, the pointer will be deleted when the stream is closed.
+		// If syncState and the PacketSignal is castable to a  basic::Stratable
+		// the source's start() and stop() methods will be synchronized with 
+		// the internal stream state.
 	
 	virtual bool detachSource(PacketSignal& source);
 		// Detaches the given source packet signal from the stream.
@@ -267,20 +266,18 @@ public:
 	virtual bool detachSource(PacketStreamAdapter* source);
 		// Detaches the given source packet adapter from the stream.
 		//
-		// Note: The pointer will be forgotten about, and the freePointer
-		// flag set when calling attach() will have no more effect.
+		// Note: The pointer will be forgotten about, so if the freePointer
+		// flag set when calling attachSource() will have no effect.
 
 	virtual void attach(PacketProcessor* proc, int order = 0, bool freePointer = true);
-		// Attaches a source packet emitter to the stream.
-		// Order determines the position of the processor  in the
-		// stream queue.
-		// If freePointer is true, the pointer will be deleted when
-		// the stream closes.
+		// Attach a packet processor to the stream.
+		// Order determines the position of the processor in the stream queue.
+		// If freePointer is true, the pointer will be deleted when the stream closes.
 
 	virtual bool detach(PacketProcessor* proc);
-		// Detaches a source packet processor to the stream.
+		// Detaches a packet processor from the stream.
 		//
-		// Note: The pointer will be forgotten about, and the freePointer
+		// Note: The pointer will be forgotten about, so if the freePointer
 		// flag set when calling attach() will have no effect.
 
 	PacketSignal Emitter;
@@ -299,10 +296,10 @@ public:
 		// Sets the stream to locked state.
 		//
 		// In a locked state no new adapters can be added or removed
-		// from the stream until the stream is stopped or restarted.
+		// from the stream until the stream is stopped.
 	
 	virtual bool locked() const;
-		// Returns true is the stream is in the locked.
+		// Returns true is the stream is currently locked.
 	
 	virtual void setClientData(void* data);
 	virtual void* clientData() const;
@@ -310,9 +307,8 @@ public:
 
 	virtual bool waitForReady();
 		// Locks until the internal ready event is signalled.
-		// This enables safe stream adapter access after calling
-		// stop() by waiting until the current adapter queue
-		// iteration is complete.
+		// This blocks the active thread until the current precessor iteration
+		// is complete, as such is it only useful after calling stop() or pause().
 
 	PacketAdapterVec adapters() const;
 		// Returns a combined list of all stream sources and processors.
@@ -359,6 +355,19 @@ public:
 		return nullptr;
 	}
 
+	PacketProcessor* getProcessor(int order = 0)
+		// Returns the PacketProcessor at the given position.
+	{
+		Mutex::ScopedLock lock(_mutex);
+		for (unsigned i = 0; i < _processors.size(); i++) {
+			PacketProcessor* processor = dynamic_cast<PacketProcessor*>(_processors[i].ptr);
+			if (processor && _processors[i].order == order) {
+				return processor;
+			}
+		}
+		return nullptr;
+	}
+
 protected:
 	virtual void cleanup();
 		// Detaches all stream adapters and deletes managed adapters.
@@ -366,9 +375,9 @@ protected:
 	virtual void onStateChange(PacketStreamState& state, const PacketStreamState& oldState);
 
 protected:
-	friend struct std::default_delete/*friend class AsyncDeleter*/<PacketStream>;
+	friend struct std::default_delete<PacketStream>;
 
-	mutable Mutex	_mutex;
+	mutable Mutex _mutex;
 
 	std::string _name;
 	PacketAdapterVec _sources;
@@ -385,143 +394,3 @@ typedef std::vector<PacketStream*> PacketStreamVec;
 
 
 #endif // SOURCEY_PacketStream_H
-
-
-
-
-	/*
-//template<class InterfaceT>
-class PacketSource: public PacketStreamAdapter//, public InterfaceT
-	// PacketSource is the original source for packets
-	// processed by a PacketStream.
-	//
-	// This class can be used in conjunction with various 
-	// interfaces such as Startable and Runnable to be 
-	// synchronized with the PacketStream state.
-{ 
-public:
-	virtual void operator >> (char* data) { emit(rawPacket(data, sizeof(data))); };
-	virtual void operator >> (const char* data) { emit(rawPacket(data, sizeof(data))); };
-	virtual void operator >> (const std::string& str) { emit(rawPacket(str.c_str(), str.length())); };
-	virtual void operator >> (IPacket& packet) { emit(packet); };
-		// Stream operator aliases for emit()
-};
-		*/
-	
-	/*
-	
-	//virtual void write(const std::string& str);
-		// Writes data to the stream (copied).
-	//virtual ~PacketStream();
-
-	//virtual void onFinalPacket(IPacket& packet);
-	virtual void attach(const PacketDelegateBase& delegate);
-		// Attaches an output delegate to the stream.
-		// Resulting packets will be emitted to output delegates.
-
-	virtual bool detach(const PacketDelegateBase& delegate);
-		// Detaches an output delegate from the stream.
-		*/
-
-/*	
-
-	virtual void process(IPacket& packet) = 0; { process(packet); };
-		//
-		// Note: The implementation should re-dispatch the 
-		// packet even if it was not compatible.
-		// Stream operator alias for process()
-
-//typedef PacketSource<basic::Startable> StartablePacketSource;
-	// A PacketSource which may be started and stopped.
-
-
-//typedef PacketSource<basic::Runnable> RunnablePacketSource;
-	// A PacketSource which may be run and cancelled.
-	//virtual void parse(IPacket& packet) = 0;
-		// This method performs processing on the given
-		// packet and emits the resulting packet.
-		//
-		// If packet processing is asynchronous the 
-		// packet data must be copied. Copied data can be 
-		// freed directly after the call to emit() when 
-		// dispatching the packet.
-	//write(rawPacket(data, len));, std::size_t len
-	//write(rawPacket(data, len));
-class PacketParser: public PacketStreamAdapter
-{ 
-public:
-	virtual void parse(IPacket& packet) = 0;
-		// This method performs processing on the given
-		// packet and emits the resulting packet.
-		//
-		// If packet processing is asynchronous the  
-		// packet data must be copied. Copied data can be 
-		// freed directly aFter the call to emit() when
-		// the packet is dispatched.
-
-	virtual bool accepts(IPacket&) { return true; };
-		// This method ensures compatibility with the given 
-		// packet type. Return false to reject the packet.
-
-	virtual void operator << (IPacket& packet) { parse(packet); };
-		// Stream operator alias for parse()
-};
-*/
-
-	
-	//Poco::Event _ready;
-
-
-/*
-//template <class T>
-class IDepacketizer: public PacketProcessor
-	// This class is a virtual interface for implementing depacketization
-	// of IPacket types.
-{
-public:
-	IDepacketizer() :
-		_sequenceNumber(0) {}
-
-	virtual void process(IPacket& packet) = 0;
-		// Processes incoming packets.
-
-	virtual void emit(IPacket& packet)
-		// Sends a packet to the handler and increments
-		// the sequence counter.
-	{
-		_sequenceNumber++;	
-		PacketProcessor::emit(this, packet);
-	}
-
-	void setSequenceNumber(int n) { _sequenceNumber =  n; }
-
-protected:
-	int _sequenceNumber;
-};
-*/
-
-
-/*
-class IPacketizer: public PacketProcessor
-	// This class is a virtual interface for implementing packetization
-	// of IPacket types.
-{
-public:
-	IPacketizer(int mtu = 1450) :
-		_mtu(mtu) {}
-
-	virtual void process(IPacket& packet) = 0;
-		// Processes incoming packets and outputs packetized packets.
-
-	virtual void setMTU(int n)
-		// MTU defines the maximum transmission unit, which is the size 
-		// of the largest packet that a network protocol can transmit. 
-		// For UDP the maximum Ethernet frame size is 1500. In is the
-		// responsibility of subclasses to ensure this is implemented. 
-		// Emitted packets by the packetizer must not exceed the MTU.
-	{ _mtu =  n; }
-
-protected:
-	int _mtu;
-};
-*/

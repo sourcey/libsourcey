@@ -579,7 +579,7 @@ public:
 		//deleter(this);
 		//Deleter::();
 		//deleter->invoke();
-	//friend struct std::default_delete/*friend class AsyncDeleter*/<SharedObject>;	
+	//friend struct std::default_delete<SharedObject>;	
 	//friend class DeferredDeleter<SharedObject>;
 
 /*

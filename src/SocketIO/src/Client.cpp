@@ -427,7 +427,7 @@ void Client::onHeartBeatTimer(void*)
 			connect();
 		} 
 		catch (std::exception& exc) {			
-			log("error") << "Reconnection attempt failed: " << exc.what()/*message()*/ << endl;
+			log("error") << "Reconnection attempt failed: " << exc.what() << endl;
 		}	
 	}
 }
@@ -781,7 +781,7 @@ void Client::onError()
 //			connect();
 //		} 
 //		catch (std::exception& exc) {			
-//			errorL() << "[sockio::Socket] Reconnection attempt failed: " << exc.what()/*message()*/ << endl;
+//			errorL() << "[sockio::Socket] Reconnection attempt failed: " << exc.what() << endl;
 //		}	
 //	}
 //}

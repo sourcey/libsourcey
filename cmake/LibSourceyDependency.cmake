@@ -41,22 +41,28 @@ macro(define_sourcey_dependency name)
     add_dependencies(${name} ${${name}_DEPENDENCIES})
   endif()
   
-  #message(STATUS "- Linking dependency ${name} with libraries: ${LibSourcey_INCLUDE_LIBRARIES}")    
-  #message("${name}: Library Dirs: ${LibSourcey_LIBRARY_DIRS}")    
-  #message("${name}: Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
+  message(STATUS "- Linking dependency ${name} with libraries: ${LibSourcey_INCLUDE_LIBRARIES}")    
+  message("${name}: Library Dirs: ${LibSourcey_LIBRARY_DIRS}")    
+  message("${name}: Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
 
-  if (NOT ${name}_OUTPUT_NAME)
-    set(${name}_OUTPUT_NAME ${name})
+  if (${name}_OUTPUT_NAME)  	
+    set_target_properties(${name} OUTPUT_NAME ${${name}_OUTPUT_NAME})
   endif()
-  if (NOT ${name}_DEBUG_POSTFIX)
-    set(${name}_DEBUG_POSTFIX ${LibSourcey_DEBUG_POSTFIX})
+  if (${name}_DEBUG_POSTFIX)
+    set_target_properties(${name} DEBUG_POSTFIX ${${name}_DEBUG_POSTFIX})
+  elseif(LibSourcey_DEBUG_POSTFIX)    
+    set_target_properties(${name} DEBUG_POSTFIX ${LibSourcey_DEBUG_POSTFIX})
   endif()
   if(ENABLE_SOLUTION_FOLDERS)
     set_target_properties(${name} PROPERTIES FOLDER "dependencies")
   endif()
-  set_target_properties(${name} PROPERTIES
-    OUTPUT_NAME ${${name}_OUTPUT_NAME}
-    DEBUG_POSTFIX ${${name}_DEBUG_POSTFIX})
+
+  #message("${name}: OUTPUT_NAME: ${name}_OUTPUT_NAME")
+  #message("${name}: DEBUG_POSTFIX: ${name}_DEBUG_POSTFIX")
+
+  #set_target_properties(${name} PROPERTIES
+  #  OUTPUT_NAME ${${name}_OUTPUT_NAME}
+  #  DEBUG_POSTFIX ${${name}_DEBUG_POSTFIX})
   
   if (NOT INSTALL_DESTINATION)
     set(INSTALL_DESTINATION ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib) 

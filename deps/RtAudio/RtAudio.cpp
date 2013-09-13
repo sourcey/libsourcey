@@ -275,14 +275,21 @@ void RtApi :: openStream( RtAudio::StreamParameters *oParams,
   bool result;
 
   if ( oChannels > 0 ) {
+	  
+
+	std::cout << "Probe Input:" << std::endl;
     result = probeDeviceOpen( oParams->deviceId, OUTPUT, oChannels, oParams->firstChannel,
                               sampleRate, format, bufferFrames, options );
+	std::cout << "Probe Input: END" << std::endl;
     if ( result == false ) error( RtError::SYSTEM_ERROR );
   }
 
   if ( iChannels > 0 ) {
+	  
+	std::cout << "Probe Output:" << std::endl;
     result = probeDeviceOpen( iParams->deviceId, INPUT, iChannels, iParams->firstChannel,
                               sampleRate, format, bufferFrames, options );
+	std::cout << "Probe Output: END" << std::endl;
     if ( result == false ) {
       if ( oChannels > 0 ) closeStream();
       error( RtError::SYSTEM_ERROR );
@@ -604,7 +611,7 @@ RtAudio::DeviceInfo RtApiCore :: getDeviceInfo( unsigned int device )
   free(name);
 
   // Get the output stream "configuration".
-  AudioBufferList	*bufferList = nullptr;
+  AudioBufferList	*bufferList = nil;
   property.mSelector = kAudioDevicePropertyStreamConfiguration;
   property.mScope = kAudioDevicePropertyScopeOutput;
   //  property.mElement = kAudioObjectPropertyElementWildcard;
@@ -828,7 +835,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
     property.mScope = kAudioDevicePropertyScopeOutput;
 
   // Get the stream "configuration".
-  AudioBufferList	*bufferList = nullptr;
+  AudioBufferList	*bufferList = nil;
   dataSize = 0;
   property.mSelector = kAudioDevicePropertyStreamConfiguration;
   result = AudioObjectGetPropertyDataSize( id, &property, 0, NULL, &dataSize );
@@ -1078,7 +1085,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
     return FAILURE;
   }
 
-  //std::cout << "Current physical stream format: " << std::endl;
+  //std::cout << "Current physical stream format:" << std::endl;
   //std::cout << "   mBitsPerChan = " << description.mBitsPerChannel << std::endl;
   //std::cout << "   aligned high = " << (description.mFormatFlags & kAudioFormatFlagIsAlignedHigh) << ", isPacked = " << (description.mFormatFlags & kAudioFormatFlagIsPacked) << std::endl;
   //std::cout << "   bytesPerFrame = " << description.mBytesPerFrame << std::endl;
@@ -1118,7 +1125,7 @@ bool RtApiCore :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
       result = AudioObjectSetPropertyData( id, &property, 0, NULL, dataSize, &testDescription );
       if ( result == noErr ) {
         setPhysicalFormat = true;
-        //std::cout << "Updated physical stream format: " << std::endl;
+        //std::cout << "Updated physical stream format:" << std::endl;
         //std::cout << "   mBitsPerChan = " << testDescription.mBitsPerChannel << std::endl;
         //std::cout << "   aligned high = " << (testDescription.mFormatFlags & kAudioFormatFlagIsAlignedHigh) << ", isPacked = " << (testDescription.mFormatFlags & kAudioFormatFlagIsPacked) << std::endl;
         //std::cout << "   bytesPerFrame = " << testDescription.mBytesPerFrame << std::endl;
@@ -2076,7 +2083,7 @@ bool RtApiJack :: probeDeviceOpen( unsigned int device, StreamMode mode, unsigne
 
   // Compare the jack ports for specified client to the requested number of channels.
   if ( nChannels < (channels + firstChannel) ) {
-    errorStream_ << "RtApiJack::probeDeviceOpen: requested number of channels (" << channels << ") + offset (" << firstChannel << ") not found for specified device (" << device << ": " << deviceName << ").";
+    errorStream_ << "RtApiJack::probeDeviceOpen: requested number of channels (" << channels << ") + offset (" << firstChannel << ") not found for specified device (" << device << ":" << deviceName << ").";
     errorText_ = errorStream_.str();
     return FAILURE;
   }
@@ -3577,6 +3584,7 @@ extern "C" unsigned __stdcall callbackHandler( void *ptr );
 // LibSourcey changed:
 //std::vector< DsDevice > dsDevices;
 
+
 CRITICAL_SECTION RtDeviceManager::_initLock;
 RtDeviceManager* RtDeviceManager::_instance = NULL;
 
@@ -4448,12 +4456,15 @@ void RtApiDs :: startStream()
 
 void RtApiDs :: stopStream()
 {
+	std::cout << "RtApiDs :: stopStream()" << std::endl;
   verifyStream();
+	//std::cout << "RtApiDs :: stopStream() 1" << std::endl;
   if ( stream_.state == STREAM_STOPPED ) {
     errorText_ = "RtApiDs::stopStream(): the stream is already stopped!";
     error( RtError::WARNING );
     return;
   }
+	//std::cout << "RtApiDs :: stopStream() 2" << std::endl;
 
   HRESULT result = 0;
   LPVOID audioPtr;
@@ -4484,6 +4495,7 @@ void RtApiDs :: stopStream()
       errorText_ = errorStream_.str();
       goto unlock;
     }
+	//std::cout << "RtApiDs :: stopStream() 3" << std::endl;
 
     // Zero the DS buffer
     ZeroMemory( audioPtr, dataLen );
@@ -4500,6 +4512,7 @@ void RtApiDs :: stopStream()
     handle->bufferPointer[0] = 0;
   }
   
+	//std::cout << "RtApiDs :: stopStream() 4" << std::endl;
   if ( stream_.mode == INPUT || stream_.mode == DUPLEX ) {
     LPDIRECTSOUNDCAPTUREBUFFER buffer = (LPDIRECTSOUNDCAPTUREBUFFER) handle->buffer[1];
     audioPtr = NULL;
@@ -4507,6 +4520,7 @@ void RtApiDs :: stopStream()
 
     stream_.state = STREAM_STOPPED;
 	
+	//std::cout << "RtApiDs :: stopStream() 41" << std::endl;
     result = buffer->Stop();
     if ( FAILED( result ) ) {
       errorStream_ << "RtApiDs::stopStream: error (" << getErrorString( result ) << ") stopping input buffer!";
@@ -4514,6 +4528,7 @@ void RtApiDs :: stopStream()
       goto unlock;
     }
 	
+	//std::cout << "RtApiDs :: stopStream() 42" << std::endl;
     // Lock the buffer and clear it so that if we start to play again,
     // we won't have old data playing.
     result = buffer->Lock( 0, handle->dsBufferSize[1], &audioPtr, &dataLen, NULL, NULL, 0 );
@@ -4523,6 +4538,7 @@ void RtApiDs :: stopStream()
       goto unlock;
     }
 	
+	//std::cout << "RtApiDs :: stopStream() 5" << std::endl;
     // Zero the DS buffer
     ZeroMemory( audioPtr, dataLen );
 
@@ -4537,8 +4553,10 @@ void RtApiDs :: stopStream()
     // If we start recording again, we must begin at beginning of buffer.
     handle->bufferPointer[1] = 0;
   }
+	std::cout << "RtApiDs :: stopStream() END" << std::endl;
 
  unlock:
+	std::cout << "RtApiDs :: stopStream() UNLOCK" << std::endl;
   timeEndPeriod( 1 ); // revert to normal scheduler frequency on lesser windows.
   if ( FAILED( result ) ) error( RtError::SYSTEM_ERROR );
 }
@@ -4565,12 +4583,16 @@ void RtApiDs :: callbackEvent()
 		/// the application when stop() called. Not cool!!!
 		/// Catch and swallow thrown exceptions
 
+	//std::cout << "RtApiDs :: callbackEvent()" << std::endl;
 	  if ( stream_.state == STREAM_STOPPED || stream_.state == STREAM_STOPPING ) {
+		//std::cout << "RtApiDs :: callbackEvent() Sleeping" << std::endl;
 		Sleep( 50 ); // sleep 50 milliseconds
+		//std::cout << "RtApiDs :: callbackEvent() Sleeping 1" << std::endl;
 		return;
 	  }
 
 	  if ( stream_.state == STREAM_CLOSED ) {
+		//std::cout << "RtApiDs :: callbackEvent() Sleeping" << std::endl;
 		errorText_ = "RtApiDs::callbackEvent(): the stream is closed ... this shouldn't happen!";
 		error( RtError::WARNING );
 		return;
@@ -4904,7 +4926,9 @@ void RtApiDs :: callbackEvent()
 		// Lock free space in the buffer
 		result = dsBuffer->Lock( nextReadPointer, bufferBytes, &buffer1,
 								 &bufferSize1, &buffer2, &bufferSize2, 0 );
-		if ( FAILED( result ) ) {		
+		if ( FAILED( result ) ) {
+		
+			std::cout << "RtApiDs :: callbackEvent() dsBuffer" << std::endl;
 		  errorStream_ << "RtApiDs::callbackEvent: error (" << getErrorString( result ) << ") locking capture buffer!";
 		  errorText_ = errorStream_.str();
 		  error( RtError::SYSTEM_ERROR );
@@ -8409,7 +8433,7 @@ void RtApi :: byteSwapBuffer( char *buffer, unsigned int samples, RtAudioFormat 
   //
   // Local Variables:
   // c-basic-offset: 2
-  // indent-tabs-mode: nullptr
+  // indent-tabs-mode: nil
   // End:
   //
   // vim: et sts=2 sw=2

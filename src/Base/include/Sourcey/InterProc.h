@@ -100,7 +100,7 @@ protected:
 
 	uv::Loop& _loop;
 
-	friend struct std::default_delete/*friend class AsyncDeleter*/<SyncContext>;
+	friend struct std::default_delete<SyncContext>;
 };
 
 

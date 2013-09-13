@@ -98,7 +98,8 @@ public:
 		//runExceptionTest();
 		//runScheduler::TaskTest();
 		//testTimer();
-		//testIdler();
+		testIdler();
+		//testRunner();
 		
 		//runPacketStreamTests();
 		//runPacketSignalTest();
@@ -108,57 +109,6 @@ public:
 		
 		scy::pause();
 	}
-	
-	/*
-	/*
-	void testGZStream()
-	{	
-
-		std::string path("gzstream.tgz");
-		std::string dest("gzstream");
-
-		assert(fs::exists("gzstream.tgz"));
-
-		// check alternate way of opening file
-		igzstream in2;
-		in2.open(path.c_str());
-		if (!in2.good()) {
-			std::cerr << "ERROR: Opening file `" << path << "' failed.\n";
-			assert(0);
-		}
-		in2.close();
-		if (!in2.good()) {
-			std::cerr << "ERROR: Closing file `" << path << "' failed.\n";
-			assert(0);
-		}
-
-		// now use the shorter way with the constructor to open the same file
-		igzstream in(path.c_str());
-		if (!in.good()) {
-			std::cerr << "ERROR: Opening file `" << path << "' failed.\n";
-			assert(0);
-		}
-		std::ofstream out(dest.c_str());
-		if (!out.good()) {
-			std::cerr << "ERROR: Opening file `" << dest << "' failed.\n";
-			assert(0);
-		}
-
-		char c;
-		while (in.get(c))
-			out << c;
-		in.close();
-		out.close();
-		if (!in.eof()) {
-			std::cerr << "ERROR: Reading file `" << path << "' failed.\n";
-			assert(0);
-		}
-		if (!out.good()) {
-			std::cerr << "ERROR: Writing file `" << dest << "' failed.\n";
-			assert(0);
-		}
-	}
-	*/
 	
 	void testBuffer()
 	{
@@ -258,13 +208,13 @@ public:
 	void testHandle()
 	{
 		{
-			Handle<TestObj> ptr = new TestObj;
+			SharedPtr<TestObj> ptr = new TestObj;
 			assert (ptr->rc() == 1);
-			Handle<TestObj> ptr2 = ptr;
+			SharedPtr<TestObj> ptr2 = ptr;
 			assert (ptr->rc() == 2);
 			ptr2 = new TestObj;
 			assert (ptr->rc() == 1);
-			Handle<TestObj> ptr3;
+			SharedPtr<TestObj> ptr3;
 			ptr3 = ptr2;
 			assert (ptr2->rc() == 2);
 			ptr3 = new TestObj;
@@ -431,9 +381,9 @@ public:
 			lib.close();
 			cout << "Cleanup 2" << endl;
 		}
-		catch (std::exception/*Exception*/& exc)
+		catch (std::exception& exc)
 		{
-			errorL("PluginTest") << "Error: " << exc << endl;
+			errorL("PluginTest") << "Error: " << exc.what() << endl;
 			assert(0);
 		}
 		
@@ -497,7 +447,7 @@ public:
 		catch (IOException& exc)
 		{
 			cout << "Message: " << exc << endl;
-			assert(std::string(exc.what())/*message()*/ == "IO error");
+			assert(std::string(exc.what()) == "IO error");
 		}
 		catch (Exception&)
 		{
@@ -527,6 +477,7 @@ public:
 
 	void timerCallback(void* sender)
 	{
+		/*
 		auto timer = reinterpret_cast<Timer*>(sender);
 		cout << "On timeout: " << timer->count() << endl;
 		if (timer->count() == numTimerTicks) {
@@ -537,6 +488,7 @@ public:
 			else
 				timer->stop(); // event loop will be released
 		}
+		*/
 	}
 	
 	// ============================================================================
@@ -562,7 +514,30 @@ public:
 			idler.stop(); // event loop will be released
 		}
 	}
+
+	/*	
+	Idler::start(std::bind(&Runner::onIdle, this));
+	void Runner::onIdle()
+	{
+	}
+	*/
 	
+	// ============================================================================
+	// Runner Test
+	//
+	Runner runner;
+	
+	void testRunner() 
+	{
+		/*
+		idler.start(std::bind(&Tests::idlerCallback, this));
+
+		idlerTicks = 0;
+		uv_ref(idler.ptr.handle()); // idlers do not reference the loop
+		*/
+		uv_ref(runner.ptr.handle()); // runners do not reference the loop
+		runLoop();
+	}
 
 	/*
 	// ============================================================================

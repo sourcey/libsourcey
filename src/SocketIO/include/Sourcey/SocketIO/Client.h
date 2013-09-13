@@ -473,7 +473,7 @@ typedef sockio::ClientBase<
 //				connect();
 //			} 
 //			catch (std::exception& exc) {			
-//				Log("error", this) << "Reconnection attempt failed: " << exc.what()/*message()*/ << std::endl;
+//				Log("error", this) << "Reconnection attempt failed: " << exc.what() << std::endl;
 //			}	
 //		}
 //	}

@@ -56,7 +56,7 @@ bool Runner::start(Task* task)
 	//if (task->_cancelled) {
 		//task->_cancelled = false;
 		//task->start();
-		log("trace") << "Started Task: " << task << endl;
+		log("trace") << "Started task: " << task << endl;
 		onStart(task);
 		//_wakeUp.set();
 		return true;
@@ -70,7 +70,7 @@ bool Runner::cancel(Task* task)
 	//if (!task->_cancelled) {
 		//task->_cancelled = true;
 		//task->cancel();
-		//log("trace") << "Cancelled Task: " << task << endl;
+		//log("trace") << "Cancelled task: " << task << endl;
 		//onCancel(task);
 		//_wakeUp.set();
 		//return true;
@@ -78,7 +78,7 @@ bool Runner::cancel(Task* task)
 	
 	if (!task->cancelled()) {
 		task->cancel();
-		log("trace") << "Cancelled Task: " << task << endl;
+		log("trace") << "Cancelled task: " << task << endl;
 		onCancel(task);
 		//_wakeUp.set();
 		return true;
@@ -90,17 +90,17 @@ bool Runner::cancel(Task* task)
 
 bool Runner::destroy(Task* task)
 {
-	log("trace") << "Aborting Task: " << task << endl;
+	log("trace") << "Aborting task: " << task << endl;
 	
 	// If the task exists then set the destroyed flag.
 	if (exists(task)) {
-		log("trace") << "Aborting Managed Task: " << task << endl;
+		log("trace") << "Aborting Managed task: " << task << endl;
 		task->_destroyed = true;
 	}
 		
 	// Otherwise destroy the pointer.
 	else {
-		log("trace") << "Aborting Unmanaged Task: " << task << endl;
+		log("trace") << "Aborting Unmanaged task: " << task << endl;
 		delete task;
 	}
 
@@ -110,12 +110,12 @@ bool Runner::destroy(Task* task)
 
 bool Runner::add(Task* task)
 {
-	log("trace") << "Adding Task: " << task << endl;
+	log("trace") << "Adding task: " << task << endl;
 	if (!exists(task)) {
 		Mutex::ScopedLock lock(_mutex);	
 		_tasks.push_back(task);
-		log("trace") << "Added Task: " << task << endl;		
-		uv_ref(Idler::ptr.handle());
+		log("trace") << "Added task: " << task << endl;		
+		uv_ref(Idler::ptr.handle()); // reference the idler handle when a task is added
 		onAdd(task);
 		return true;
 	}
@@ -125,14 +125,14 @@ bool Runner::add(Task* task)
 
 bool Runner::remove(Task* task)
 {	
-	log("trace") << "Removing Task: " << task << endl;
+	log("trace") << "Removing task: " << task << endl;
 
 	Mutex::ScopedLock lock(_mutex);
 	for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (*it == task) {					
 			_tasks.erase(it);
-			log("trace") << "Removed Task: " << task << endl;
-			uv_unref(Idler::ptr.handle());
+			log("trace") << "Removed task: " << task << endl;
+			uv_unref(Idler::ptr.handle()); // dereference the idler handle when a task is removed
 			onRemove(task);
 			return true;
 		}
@@ -180,7 +180,7 @@ void Runner::clear()
 {
 	Mutex::ScopedLock lock(_mutex);
 	for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {	
-		log("trace") << "Clear: Destroying Task: " << *it << endl;
+		log("trace") << "Clear: Destroying task: " << *it << endl;
 		delete *it;
 	}
 	_tasks.clear();
@@ -214,7 +214,7 @@ void Runner::onIdle()
 						
 		// Destroy the task if required
 		if (task->destroyed()) {
-			log("trace") << "Destroy Task: " << task << endl;
+			log("trace") << "Destroy task: " << task << endl;
 			remove(task);
 			delete task;
 		}

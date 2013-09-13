@@ -49,7 +49,7 @@ void PacketStream::start()
 {	
 	//traceL("PacketStream", this) << "Starting" << endl;
 
-	if (stateEquals(PacketStreamState::Running)) {
+	if (running()) {
 		//traceL("PacketStream", this) << "Already running" << endl;
 		return;
 	}
@@ -131,7 +131,7 @@ void PacketStream::stop()
 	setState(this, PacketStreamState::Stopping);
 	Emitter.enable(false);
 
-	waitForReady();
+	//waitForReady();
 	traceL("PacketStream", this) << "Stop: Detaching" << endl;
 
 	{		
@@ -197,7 +197,7 @@ void PacketStream::resume()
 		return;
 	}
 	
-	Emitter.enable(false);
+	Emitter.enable(true);
 	setState(this, PacketStreamState::Running);
 	traceL("PacketStream", this) << "Resume: OK" << endl;
 }
@@ -236,10 +236,10 @@ void PacketStream::close()
 void PacketStream::attachSource(PacketStreamAdapter* source, bool freePointer, bool syncState) 
 {
 	//traceL("PacketStream", this) << "Attaching source: " << source << endl;
-	if (stateEquals(PacketStreamState::Running))
+	if (running())
 		throw std::runtime_error("Cannot attach source to running stream.");
 
-	waitForReady();
+	//waitForReady();
 
 	Mutex::ScopedLock lock(_mutex);
 	_sources.push_back(PacketAdapterReference(source, 0, freePointer, syncState));
@@ -251,7 +251,7 @@ void PacketStream::attachSource(PacketSignal& source)
 {
 	//traceL("PacketStream", this) << "Attaching source signal: " << &source << endl;
 		
-	if (stateEquals(PacketStreamState::Running))
+	if (running())
 		throw std::runtime_error("Cannot attach source to running stream.");
 	
 	// TODO: unique_ptr for exception safe pointer creation
@@ -264,10 +264,10 @@ void PacketStream::attachSource(PacketSignal& source)
 bool PacketStream::detachSource(PacketStreamAdapter* source) 
 {
 	//traceL("PacketStream", this) << "Detaching source adapter: " << source << endl;
-	if (stateEquals(PacketStreamState::Running))
+	if (running())
 		throw std::runtime_error("Cannot detach source from a running stream.");
 
-	waitForReady();
+	//waitForReady();
 
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _sources.begin(); it != _sources.end(); ++it) {
@@ -288,10 +288,10 @@ bool PacketStream::detachSource(PacketStreamAdapter* source)
 bool PacketStream::detachSource(PacketSignal& source) 
 {
 	//traceL("PacketStream", this) << "Detaching source signal: " << &source << endl;
-	if (stateEquals(PacketStreamState::Running))
+	if (running())
 		throw std::runtime_error("Cannot detach source from a running stream.");
 
-	waitForReady();
+	//waitForReady();
 
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _sources.begin(); it != _sources.end(); ++it) {
@@ -314,10 +314,10 @@ bool PacketStream::detachSource(PacketSignal& source)
 void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer) 
 {
 	//traceL("PacketStream", this) << "Attaching processor: " << proc << endl;
-	if (stateEquals(PacketStreamState::Running))
+	if (running())
 		throw std::runtime_error("Cannot attach processor to running stream.");
 
-	waitForReady();
+	//waitForReady();
 
 	Mutex::ScopedLock lock(_mutex);
 	_processors.push_back(PacketAdapterReference(proc, order == 0 ? _processors.size() : order, freePointer));
@@ -328,10 +328,10 @@ void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer)
 bool PacketStream::detach(PacketProcessor* proc) 
 {
 	//traceL("PacketStream", this) << "Detaching processor: " << proc << endl;
-	if (stateEquals(PacketStreamState::Running))
+	if (running())
 		throw std::runtime_error("Cannot detach processor from a running stream.");
 	
-	waitForReady();
+	//waitForReady();
 
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _processors.begin(); it != _processors.end(); ++it) {
@@ -351,12 +351,10 @@ bool PacketStream::detach(PacketProcessor* proc)
 void PacketStream::cleanup()
 {
 	//traceL("PacketStream", this) << "Cleanup" << endl;		
-	if (stateEquals(PacketStreamState::Running)) {
-		assert(0);
+	if (running())
 		throw std::runtime_error("Cannot cleanup a running stream.");
-	}
 	
-	waitForReady();
+	//waitForReady();
 	
 	Mutex::ScopedLock lock(_mutex);
 	auto sit = _sources.begin();
@@ -402,9 +400,9 @@ void PacketStream::write(IPacket& packet)
 	traceL("PacketStream", this) << "Processing packet: " << state() << ": " << packet.className() << endl;	
 
 	// TODO: Single call to check that stream is enabled
-	if (!running() || !Emitter.enabled()) {
+	if (!running()) { // || !Emitter.enabled()
 		debugL("PacketStream", this) << "Dropping packet: " 
-			<< &packet << ": " << Emitter.enabled() << ": " << state() << endl;	
+			<< &packet << ": " << state() << endl;	//Emitter.enabled() << ": " 
 		//_ready.set(); 
 		return;
 	}	
@@ -483,8 +481,8 @@ bool PacketStream::waitForReady()
 	while(_scopeRef.load() > 0) {
 		traceL("PacketStream", this) << "Waiting for ready: " << _scopeRef.load() << endl;
 		scy::sleep(50);
-		if (times++ > 50) {
-			assert(0 && "deadlock?");
+		if (times++ > 100) {
+			assert(0 && "deadlock; calling inside stream scope?");
 		}
 	}
 	return true;

@@ -41,7 +41,7 @@ Task::Task(bool repeat) :
 
 Task::~Task()
 {
-	assert(destroyed());
+	//assert(destroyed());
 }
 
 

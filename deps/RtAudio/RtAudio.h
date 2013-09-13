@@ -875,7 +875,7 @@ public:
 };
 
 #endif
-#define __WINDOWS_DS__
+
 #if defined(__WINDOWS_DS__)
 
 // LibSourcey
@@ -971,7 +971,7 @@ public:
 		RtScopeMutex lock(_instanceLock);
 		DsDevice dev;
 		if (index > dsDevices.size())
-			throw std::runtime_error("out of range");
+			throw std::exception("out of range");
 		dev = dsDevices[index];
         return dev;
 	}
@@ -1163,7 +1163,7 @@ public:
 //
 // Local Variables:
 // c-basic-offset: 2
-// indent-tabs-mode: nullptr
+// indent-tabs-mode: nil
 // End:
 //
 // vim: et sts=2 sw=2

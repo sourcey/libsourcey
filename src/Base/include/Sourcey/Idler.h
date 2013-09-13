@@ -22,10 +22,11 @@
 
 
 #include "Sourcey/UV/UVPP.h"
+#include "Sourcey/Platform.h"
 #include "Sourcey/Interface.h"
 
 #include <functional>
-//#include <condition_variable>
+
 
 namespace scy {
 	
@@ -54,7 +55,10 @@ struct Idler
 		if (uv_idle_start(ptr.handle<uv_idle_t>(), [](uv_idle_t* req, int) {
 			auto callback = reinterpret_cast<CallbackRef*>(req->data);
 			callback->func(); // (callback->self);
-		})) ptr.setAndThrowLastError("Cannot initialize idler");
+			scy::sleep(1); // required or 100% CPU
+		}) != 0) {
+			ptr.setAndThrowLastError("Cannot initialize idler");
+		}
 	}
 
 	void stop()
