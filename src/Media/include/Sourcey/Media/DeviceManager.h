@@ -51,6 +51,14 @@ struct Device
 	std::string name;
 	std::string guid;
 	bool isDefault;
+	
+	bool operator == (const Device& that) const
+	{
+		return id == that.id
+			&& type == that.type
+			&& name == that.name
+			&& guid == that.guid;
+	}
 };
 
 	

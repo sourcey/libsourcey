@@ -61,7 +61,8 @@ void Device::print(std::ostream& os)
 		<< type << ": " 
 		<< id << ": " 
 		<< name << ": " 
-		<< isDefault << "]" << endl;
+		<< isDefault 
+		<< "]";
 }
 
 
@@ -119,13 +120,13 @@ int DeviceManager::getCapabilities()
 }
 
 
-bool DeviceManager::getAudioInputDevices(vector<Device>& devices) 
+bool DeviceManager::getAudioInputDevices(std::vector<Device>& devices) 
 {
 	return getAudioDevices(true, devices);
 }
 
 
-bool DeviceManager::getAudioOutputDevices(vector<Device>& devices) 
+bool DeviceManager::getAudioOutputDevices(std::vector<Device>& devices) 
 {
 	return getAudioDevices(false, devices);
 }
@@ -155,12 +156,11 @@ bool DeviceManager::getAudioOutputDevice(Device& out, int id)
 }
 
 
-bool DeviceManager::getVideoCaptureDevices(vector<Device>& devices) 
+bool DeviceManager::getVideoCaptureDevices(std::vector<Device>& devices) 
 {
 	devices.clear();
 #if defined(ANDROID) || defined(IOS)
-	// TODO: Incomplete. Use ANDROID implementation for IOS
-	// to quiet compiler.
+	// TODO: Incomplete. Use ANDROID implementation for IOS to quiet compiler.
 	// On Android, we treat the camera(s) as a single device. Even if there are
 	// multiple cameras, that's abstracted away at a higher level.
 	Device dev("camera", "1");    // name and ID
@@ -209,7 +209,6 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name, 
 {
 	// If the name is empty, return the default device.
 	if (name.empty() || name == kDefaultDeviceName) {
-		//infoL() << "Create default VideoCapturer" << endl;
 		return getDefaultVideoCaptureDevice(out);
 	}
 
@@ -238,7 +237,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name, 
 }
 
 
-bool DeviceManager::getAudioDevices(bool input, vector<Device>& devs) 
+bool DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs) 
 {
 	devs.clear();
 
@@ -255,6 +254,7 @@ bool DeviceManager::getAudioDevices(bool input, vector<Device>& devs)
 	return true;
 #else
 	(void)input;
+	assert(0 && "virtual method");
 	return false;
 #endif
 }
@@ -275,14 +275,19 @@ bool DeviceManager::getDefaultVideoCaptureDevice(Device& device)
 
 bool DeviceManager::getAudioDevice(bool input, Device& out, const std::string& name, int id) 
 {
+	traceL("DeviceManager") << "Get audio device: " << id << ": " << name << endl;
+
 	// If the name is empty, return the default device id.
 	if (name.empty() || name == kDefaultDeviceName) {
-		out = Device(input ? "audioin" : "audioout", -1, name);
-		return true;
+		//out = Device(input ? "audioin" : "audioout", -1, name);
+		//return true;
+		//input ? getDefaultAudioInputDevice(out) : getDefaultAudioOutputDevice(out);
+		return getAudioDevice(input, out, id);
 	}
 
 	std::vector<Device> devices;
 	input ? getAudioInputDevices(devices) : getAudioOutputDevices(devices);
+	traceL("DeviceManager") << "Get audio devices: " << devices.size() << endl;
 	return matchNameAndID(devices, out, name, id);
 }
 
@@ -291,6 +296,7 @@ bool DeviceManager::getAudioDevice(bool input, Device& out, int id)
 {
 	std::vector<Device> devices;
 	input ? getAudioInputDevices(devices) : getAudioOutputDevices(devices);	
+	traceL("DeviceManager") << "Get audio devices: " << devices.size() << endl;
 	return matchID(devices, out, id);
 }
 
@@ -346,7 +352,7 @@ bool DeviceManager::shouldDeviceBeIgnored(const std::string& deviceName, const c
 	int i = 0;
 	while (exclusionList[i]) {
 		if (util::icompare(deviceName, exclusionList[i]) == 0) {
-			traceL() << "Ignoring device " << deviceName << endl;
+			traceL("DeviceManager") << "Ignoring device " << deviceName << endl;
 			return true;
 		}
 		++i;
@@ -355,14 +361,13 @@ bool DeviceManager::shouldDeviceBeIgnored(const std::string& deviceName, const c
 }
 
 
-bool DeviceManager::filterDevices(vector<Device>& devices, const char* const exclusionList[]) 
+bool DeviceManager::filterDevices(std::vector<Device>& devices, const char* const exclusionList[]) 
 {
 	//if (!devices) {
 	//	return false;
 	//}
 
-	for (std::vector<Device>::iterator it = devices.begin();
-		it != devices.end(); ) {
+	for (auto it = devices.begin(); it != devices.end(); ) {
 			if (shouldDeviceBeIgnored(it->name, exclusionList)) {
 				it = devices.erase(it);
 			} else {
@@ -373,28 +378,43 @@ bool DeviceManager::filterDevices(vector<Device>& devices, const char* const exc
 }
 
 
-bool DeviceManager::matchID(vector<Device>& devices, Device& out, int id)
+bool DeviceManager::matchID(std::vector<Device>& devices, Device& out, int id)
 {
-	if (id >= 0 && !devices.empty() && devices.size() >= (id + 1)) {
-		out = devices[id];
-		return true;
+	for (auto i = 0; i < devices.size(); ++i) {
+		if (devices[i].id == id) {
+			out = devices[i];
+			return true;
+		}
 	}
+
+	//if (id >= 0 && !devices.empty() && devices.size() >= (id + 1)) {
+	//	out = devices[id];
+	//	return true;
+	//}
 	return false;
 }
 
 
-bool DeviceManager::matchNameAndID(vector<Device>& devices, Device& out, const std::string& name, int id)
+bool DeviceManager::matchNameAndID(std::vector<Device>& devices, Device& out, const std::string& name, int id)
 {
+	traceL("DeviceManager") << "Match name and ID: " << name << ": " << id << endl;
+
 	bool ret = false;
-	for (int i = 0; i < static_cast<int>(devices.size()); ++i) {
+	for (auto i = 0; i < devices.size(); ++i) {
+		traceL("DeviceManager") << "Match name and ID: Checking: " << devices[i].name << endl;
 		if (devices[i].name == name) {
 			// The first device matching the given name will be returned,
 			// but we will try and match the given ID as well.
 			//if (out.id == -1)
 			out = devices[i];
+			traceL("DeviceManager") << "Match name and ID: Match: " << out.name << endl;
+
 			ret = true;
-			if (id == -1 || id == i)
+			if (id == -1 || id == i) {
+				
+				traceL("DeviceManager") << "Match name and ID: Match ID: " << out.name << endl;
 				break;
+			}
 		}
 	}
 

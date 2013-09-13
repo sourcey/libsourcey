@@ -229,7 +229,7 @@ void Scheduler::deserialize(json::Value& root)
 				delete task;
 			if (trigger)
 				delete trigger;
-			log("error") << "Deserialization Error: " << exc.what()/*message()*/ << endl;
+			log("error") << "Deserialization Error: " << exc.what() << endl;
 		}
 	}
 }

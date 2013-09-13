@@ -186,7 +186,7 @@ protected:
 	}	
 
 protected:
-	friend struct std::default_delete/*friend class AsyncDeleter*/<PacketTransaction>;
+	friend struct std::default_delete<PacketTransaction>;
 
 	Timer _timer;
 	PacketT _request;

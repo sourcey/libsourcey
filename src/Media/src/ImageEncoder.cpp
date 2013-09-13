@@ -32,7 +32,7 @@ namespace scy {
 namespace av {
 
 
-ImageEncoder::ImageEncoder(EncoderOptions& options, vector<int> cvParams) : 
+ImageEncoder::ImageEncoder(EncoderOptions& options, std::vector<int> cvParams) : 
 	PacketProcessor(Emitter),
 	_options(options),
 	_params(cvParams)

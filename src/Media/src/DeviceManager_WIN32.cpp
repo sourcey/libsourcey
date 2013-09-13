@@ -26,6 +26,7 @@
 #include <windows.h>
 #include <dshow.h>
 
+
 using namespace std; 
 
 
@@ -49,12 +50,14 @@ static const char* const kFilteredVideoDevicesName[] =  {
 	NULL,
 };
 static const char kUsbDevicePathPrefix[] = "\\\\?\\usb";
-static bool getDevicesWin32(const CLSID& catid, vector<Device>& out);
+static bool getDevicesWin32(const CLSID& catid, std::vector<Device>& out);
 
 
-// ---------------------------------------------------------------------
+//
 // Win32 Device Manager
 //
+
+
 Win32DeviceManager::Win32DeviceManager() : 
 	_needCoUninitialize(false) 
 {
@@ -117,43 +120,49 @@ void Win32DeviceManager::uninitialize()
 }
 
 
-bool Win32DeviceManager::getAudioDevices(bool input, vector<Device>& devs) 
+bool Win32DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs) 
 {
+	traceL("Win32DeviceManager", this) << "Get audio devices" << endl;
 	devs.clear();
-	
-	static Mutex _mutex;
 
-	// Since we are using RtAudio for device capture, we should
+	// Since we are using RtAudio for audio capture, we should
 	// use RtAudio to enumerate devices to ensure indexes match.	
 	RtAudio audio;
-	try 
-	{
-		// Determine the number of devices available
-		unsigned int devices = audio.getDeviceCount();
 
-		// Scan through devices for various capabilities
-		RtAudio::DeviceInfo info;
-		for (unsigned int i = 0; i <= devices; i++) {
-			info = audio.getDeviceInfo(i);
+	// Determine the number of devices available
+	auto ndevices = audio.getDeviceCount();
+	traceL("Win32DeviceManager", this) << "Number of device: " << ndevices << endl;
+
+	// Scan through devices for various capabilities
+	RtAudio::DeviceInfo info;
+	for (auto i = 0; i <= ndevices; i++) {
+		try {
+			info = audio.getDeviceInfo(i);	// may throw RtError
+
+			traceL("Win32DeviceManager", this) << "Device:" 
+				<< "\n\tName: " << info.name
+				<< "\n\tOutput Channels: " << info.outputChannels
+				<< "\n\tInput Channels: " << info.inputChannels
+				<< "\n\tDuplex Channels: " << info.duplexChannels
+				<< "\n\tDefault Output: " << info.isDefaultOutput
+				<< "\n\tDefault Input: " << info.isDefaultInput
+				<< "\n\tProbed: " << info.probed
+				<< endl;
+
 			if (info.probed == true &&
 				(input && info.inputChannels > 0) || 
 				(!input && info.outputChannels > 0)) {	
-				traceL("Win32DeviceManager", this) << "Device:" 
-					<< "\n\tName: " << info.name
-					<< "\n\tOutput Channels: " << info.outputChannels
-					<< "\n\tInput Channels: " << info.inputChannels
-					<< "\n\tDuplex Channels: " << info.duplexChannels
-					<< "\n\tDefault Output: " << info.isDefaultOutput
-					<< "\n\tDefault Input: " << info.isDefaultInput
-					<< endl;
-				
+
+				traceL("Win32DeviceManager", this) << "Adding device: " << info.name << endl;
 				Device dev((input ? "audioin" : "audioout"), i, info.name, "", 
 					(input ? info.isDefaultInput : info.isDefaultOutput));
 				devs.push_back(dev);
 			}
+		} 
+		catch (RtError& e) {
+			errorL("Win32DeviceManager", this) << "Cannot probe audio device: " << e.getMessage() << endl;
 		}
-	} 
-	catch(...) {}
+	}
 
 	return filterDevices(devs, kFilteredAudioDevicesName);
 }
@@ -192,7 +201,7 @@ bool Win32DeviceManager::getDefaultAudioOutputDevice(Device& device)
 }
 
 
-bool Win32DeviceManager::getVideoCaptureDevices(vector<Device>& devices) 
+bool Win32DeviceManager::getVideoCaptureDevices(std::vector<Device>& devices) 
 {
 	devices.clear();
 	if (!getDevicesWin32(CLSID_VideoInputDeviceCategory, devices)) 
@@ -251,7 +260,7 @@ namespace internal { // Windows API stuff
 	}
 
 
-	void getDeviceInformation(IEnumMoniker *pEnum, REFGUID catid, vector<Device>& devices)
+	void getDeviceInformation(IEnumMoniker *pEnum, REFGUID catid, std::vector<Device>& devices)
 	{
 		IMoniker *pMoniker = NULL;
 
@@ -303,7 +312,7 @@ namespace internal { // Windows API stuff
 } // namespace internal
 
 
-bool getDevicesWin32(REFGUID catid, vector<Device>& devices) 
+bool getDevicesWin32(REFGUID catid, std::vector<Device>& devices) 
 {	
 	// Selecting a Capture Device
 	// http://msdn.microsoft.com/en-us/library/windows/desktop/dd377566(v=vs.85).aspx
@@ -352,7 +361,7 @@ bool getDevicesWin32(REFGUID catid, vector<Device>& devices)
 
 
 /*
-bool getDevices(const CLSID& catid, vector<Device>& devices) 
+bool getDevices(const CLSID& catid, std::vector<Device>& devices) 
 {	
 	assert(0 && "fixme"); // http://cboard.cprogramming.com/windows-programming/114294-getting-list-usb-devices-listed-system.html
 	return false;
@@ -409,11 +418,11 @@ bool getDevices(const CLSID& catid, vector<Device>& devices)
 /*
 static const wchar_t kFriendlyName[] = L"FriendlyName";
 static const wchar_t kDevicePath[] = L"DevicePath";
-static bool getCoreAudioDevices(bool input, vector<Device>& devs);
-static bool getWaveDevices(bool input, vector<Device>& devs);
+static bool getCoreAudioDevices(bool input, std::vector<Device>& devs);
+static bool getWaveDevices(bool input, std::vector<Device>& devs);
 
 
-bool Win32DeviceManager::getAudioDevices(bool input, vector<Device>& devs) 
+bool Win32DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs) 
 {
 	devs.clear();
 
@@ -472,7 +481,7 @@ HRESULT getDeviceFromImmDevice(IMMDevice* device, Device& out) {
 }
 
 
-bool getCoreAudioDevices(bool input, vector<Device>& devs) 
+bool getCoreAudioDevices(bool input, std::vector<Device>& devs) 
 {
 	HRESULT hr = S_OK;
 	CComPtr<IMMDeviceEnumerator> enumerator;
@@ -542,7 +551,7 @@ bool getCoreAudioDevices(bool input, vector<Device>& devs)
 }
 
 
-bool getWaveDevices(bool input, vector<Device>& devs) 
+bool getWaveDevices(bool input, std::vector<Device>& devs) 
 {
 	// Note, we don't use the System Device Enumerator interface here since it
 	// adds lots of pseudo-devices to the list, such as DirectSound and Wave
