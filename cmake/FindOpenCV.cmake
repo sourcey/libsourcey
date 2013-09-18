@@ -50,20 +50,24 @@ if(OpenCV_INCLUDE_DIR AND NOT OpenCV_VERSION_FILE)
   set(OpenCV_VERSION_FILE "${OpenCV_INCLUDE_DIR}/opencv2/core/version.hpp")
   if(EXISTS "${OpenCV_VERSION_FILE}")
 
-    FILE(STRINGS "${OpenCV_VERSION_FILE}" OpenCV_VERSION_PARTS REGEX "#define CV_.+OR_VERSION[ ]+[0-9]+" )
+    FILE(STRINGS "${OpenCV_VERSION_FILE}" OpenCV_VERSION_PARTS REGEX "#define CV_VERSION_[A-Z]+[ ]+[0-9]+" )
 
-    string(REGEX REPLACE ".+CV_MAJOR_VERSION[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_MAJOR "${OpenCV_VERSION_PARTS}")
-    string(REGEX REPLACE ".+CV_MINOR_VERSION[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_MINOR "${OpenCV_VERSION_PARTS}")
-    string(REGEX REPLACE ".+CV_SUBMINOR_VERSION[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_PATCH "${OpenCV_VERSION_PARTS}")
+    string(REGEX REPLACE ".+CV_VERSION_EPOCH[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_MAJOR "${OpenCV_VERSION_PARTS}")
+    string(REGEX REPLACE ".+CV_VERSION_MAJOR[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_MINOR "${OpenCV_VERSION_PARTS}")
+    string(REGEX REPLACE ".+CV_VERSION_MINOR[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_PATCH "${OpenCV_VERSION_PARTS}")
+    string(REGEX REPLACE ".+CV_VERSION_REVISION[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_TWEAK "${OpenCV_VERSION_PARTS}")
 
     set(OpenCV_VERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}")
+    if(OpenCV_VERSION_TWEAK GREATER 0)
+      set(OpenCV_VERSION "${OpenCV_VERSION}.${OpenCV_VERSION_TWEAK}")
+    endif()
+
     set(OpenCV_SOVERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}")
-    
+    set(OpenCV_LIBVERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}")
   else()
-    set(OpenCV_VERSION "2.4.1" CACHE STRING "OpenCV library version.")    
+    set(OpenCV_VERSION "2.4.5" CACHE STRING "OpenCV library version.")    
   endif()
 endif()
-
 
 #message("OpenCV_INCLUDE_DIR=${OpenCV_INCLUDE_DIR}")
 #message("OpenCV_VERSION_FILE=${OpenCV_VERSION_FILE}")
@@ -83,7 +87,7 @@ if (NOT OpenCV_FOUND)
   find_path(OpenCV_LIBRARY_DIRS 
     NAMES       
       libopencv_core.a.${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}      
-      libopencv_core.so.${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}
+      libopencv_core.so.${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}     
       opencv_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}.lib
       opencv_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}d.lib
     DOC 
@@ -96,8 +100,7 @@ if (NOT OpenCV_FOUND)
       /usr/local/lib
     )
 
-  #message("OpenCV_LIBRARY_NAME=${OpenCV_LIBRARY_DIRS}")  
-  #message("OpenCV_LIBRARY_DIRS=libopencv_core.so.${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}")
+  message("OpenCV_LIBRARY_DIRS=${OpenCV_LIBRARY_DIRS}")  
     
   if(OpenCV_LIBRARY_DIRS)
     set(OpenCV_FOUND 1)    
@@ -171,7 +174,7 @@ if (NOT OpenCV_FOUND)
   if(NOT OpenCV_FOUND)
      if (OpenCV_FIND_REQUIRED)
         message(FATAL_ERROR 
-          "OpenCV was not found; please specify the path manually. Version >= 2.3 is supported.")
+          "OpenCV was not found; please specify the path manually. Version >= 2.4 is supported.")
      endif()
   endif()
 endif()

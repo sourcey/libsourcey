@@ -20,9 +20,9 @@ macro(define_sourcey_dependency name)
       set(${name}_SOURCE_PATH "src/*.c*")
     endif() 
     file(GLOB_RECURSE ${name}_SOURCE_FILES ${${name}_SOURCE_PATH})
-    #message("${name}: Globbing Sourcey Files: ${${name}_SOURCE_FILES}")  
+    #message("${name}: Globbing source files: ${${name}_SOURCE_FILES}")  
   endif() 
-  #message("${name}: Sourcey Files: ${${name}_SOURCE_FILES}")  
+  #message("${name}: Sourcey files: ${${name}_SOURCE_FILES}")  
   
   # Add library header files
   if (NOT ${name}_HEADER_FILES)
@@ -35,7 +35,7 @@ macro(define_sourcey_dependency name)
   source_group("Source" FILES ${${name}_SOURCE_FILES})
   source_group("Include" FILES ${${name}_HEADER_FILES})
       
-  add_library(${name} STATIC ${${name}_SOURCE_FILES} ${${name}_HEADER_FILES})
+  add_library(${name} ${LibSourcey_LIB_TYPE} ${${name}_SOURCE_FILES} ${${name}_HEADER_FILES})
   
   if (${name}_DEPENDENCIES)
     add_dependencies(${name} ${${name}_DEPENDENCIES})
@@ -56,9 +56,13 @@ macro(define_sourcey_dependency name)
   if(ENABLE_SOLUTION_FOLDERS)
     set_target_properties(${name} PROPERTIES FOLDER "dependencies")
   endif()
+  #if(CMAKE_C_FLAGS)
+  #  set_target_properties(${name} PROPERTIES COMPILE_FLAGS ${CMAKE_C_FLAGS})
+  #endif()
 
-  #message("${name}: OUTPUT_NAME: ${name}_OUTPUT_NAME")
-  #message("${name}: DEBUG_POSTFIX: ${name}_DEBUG_POSTFIX")
+  # message("${name}: OUTPUT_NAME: ${name}_OUTPUT_NAME")
+  # message("${name}: DEBUG_POSTFIX: ${name}_DEBUG_POSTFIX")  
+  # message("${name}: CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
   #set_target_properties(${name} PROPERTIES
   #  OUTPUT_NAME ${${name}_OUTPUT_NAME}
@@ -68,7 +72,9 @@ macro(define_sourcey_dependency name)
     set(INSTALL_DESTINATION ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib) 
   endif()
   install(TARGETS ${name}
-    ARCHIVE DESTINATION ${INSTALL_DESTINATION} COMPONENT main) 
+    RUNTIME DESTINATION ${INSTALL_DESTINATION} COMPONENT main   
+    ARCHIVE DESTINATION ${INSTALL_DESTINATION} COMPONENT main
+    LIBRARY DESTINATION ${INSTALL_DESTINATION} COMPONENT main) 
         
 endmacro()
 

@@ -343,9 +343,12 @@ endmacro()
 #
 macro(find_component_paths module component library header)  
   # message(STATUS "Find Component Paths=${module}:${component}:${library}:${header}")
+  
+  # Reset alias namespace (force recheck)
+  #set_component_alias(${module} ${component})  
 
-  set_component_alias(${module} ${component})  
-  set_component_notfound(${module} ${component})
+  # Reset search paths (force recheck)
+  #set_component_notfound(${module} ${component})
 
   find_path(${ALIAS_INCLUDE_DIRS} ${header}
     #HINTS
@@ -364,7 +367,6 @@ macro(find_component_paths module component library header)
         #lib${library}.so
         #${library}.lib
         #${library}
-      #  ${LibSourcey_SOURCE_DIR}/anionu-abi/poco
       #HINTS
       PATHS
         ${${ALIAS_LIBRARY_DIRS}}
@@ -399,7 +401,6 @@ macro(find_component_paths module component library header)
   endif()  
 
   set_component_found(${module} ${component})
-
 endmacro()
 
 
@@ -409,32 +410,37 @@ endmacro()
 # Checks for the given component by invoking pkgconfig and then looking up the libraries and
 # include directories.
 #
-macro(find_component module component pkgconfig library header)
-	 
+macro(find_component module component pkgconfig library header)	 
   # message("Find Component=${module}:${component}:${pkgconfig}:${library}:${header}")
 
+  # Reset component alias values (force recheck)
   set_component_alias(${module} ${component})
 
   # Use pkg-config to obtain directories for
   # the FIND_PATH() and find_library() calls.
   find_package(PkgConfig)
   if (PKG_CONFIG_FOUND)
-    set(PKG_ALIAS                   PKG_${component})
-    pkg_check_modules(${PKG_ALIAS}  ${pkgconfig})
-    set(${ALIAS}_FOUND              ${${PKG_ALIAS}_FOUND})
-    set(${ALIAS}_LIBRARIES          ${${PKG_ALIAS}_LIBRARIES})
-    set(${ALIAS}_INCLUDE_DIRS       ${${PKG_ALIAS}_INCLUDE_DIRS})
-    set(${ALIAS}_LIBRARY_DIRS       ${${PKG_ALIAS}_LIBRARY_DIRS})
-    set(${ALIAS}_DEFINITIONS        ${${PKG_ALIAS}_CFLAGS_OTHER})        
-    set(${ALIAS}_VERSION            ${${PKG_ALIAS}_VERSION})
+    #set(PKG_ALIAS                   PKG_${component})
+    #pkg_check_modules(${PKG_ALIAS}  ${pkgconfig})
+    #set(${ALIAS}_FOUND              ${${PKG_ALIAS}_FOUND})
+    #set(${ALIAS}_LIBRARIES          ${${PKG_ALIAS}_LIBRARIES})
+    #set(${ALIAS}_INCLUDE_DIRS       ${${PKG_ALIAS}_INCLUDE_DIRS})
+    #set(${ALIAS}_LIBRARY_DIRS       ${${PKG_ALIAS}_LIBRARY_DIRS})
+    #set(${ALIAS}_DEFINITIONS        ${${PKG_ALIAS}_CFLAGS_OTHER})        
+    #set(${ALIAS}_VERSION            ${${PKG_ALIAS}_VERSION})
+
+    pkg_search_module(${ALIAS} ${pkgconfig})
+    message(STATUS "Find Component PkgConfig=${ALIAS}:${${ALIAS}_FOUND}:${${ALIAS}_LIBRARIES}:${${ALIAS}_INCLUDE_DIRS}:${${ALIAS}_LIBRARY_DIRS}:${${ALIAS}_LIBDIR}:${${ALIAS}_INCLUDEDIR}")
   endif()  
    
-  #message("${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")  
-  #message("${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")  
+  #message(STATUS "${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")  
+  #message(STATUS "${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")  
 
   if(NOT ${ALIAS_FOUND})
+    message("${module} ${component} package not found, searching...")
     find_component_paths(${module} ${component} ${library} ${header})    
-  else()   
+  else()      
+    message("${module} ${component} package found.")
     set_component_found(${module} ${component})
   endif()
 
@@ -451,7 +457,7 @@ endmacro()
 #
 macro(find_multi_component module component pkgconfig library header)
 
-  # FIXME
+  # FIXME: currently broken, need to update API
 
   if (NOT WIN32)
      # use pkg-config to get the directories and then use these values
@@ -552,6 +558,10 @@ macro(find_multi_component module component pkgconfig library header)
     ${component}_VERSION)
 
 endmacro()
+
+
+
+
 
          #   if(${ALIAS_FOUND})
 
