@@ -16,8 +16,8 @@ FIND_PATH(JsonCpp_INCLUDE_DIR
   	json/json.h   
   PATHS
   	${LibSourcey_DEPENDENCIES_SOURCE_DIR}/jsoncpp/include
-  	/usr/local/include
-  	/usr/include
+  	#/usr/local/include
+  	#/usr/include
 )
 
 # ----------------------------------------------------------------------
@@ -31,8 +31,8 @@ if(WIN32 AND MSVC)
     PATHS 
       ${LibSourcey_DEPENDENCIES_BUILD_DIR}/jsoncpp
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
-      /usr/lib 
-      /usr/local/lib
+      #/usr/lib 
+      #/usr/local/lib
     )
     
   find_library(JsonCpp_RELEASE_LIBRARY 
@@ -41,8 +41,8 @@ if(WIN32 AND MSVC)
     PATHS 
       ${LibSourcey_DEPENDENCIES_BUILD_DIR}/jsoncpp
       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
-      /usr/lib 
-      /usr/local/lib
+      #/usr/lib 
+      #/usr/local/lib
     )
     
   if(JsonCpp_DEBUG_LIBRARY OR JsonCpp_RELEASE_LIBRARY)  
@@ -85,8 +85,8 @@ else()
     PATHS 
        ${LibSourcey_DEPENDENCIES_BUILD_DIR}/jsoncpp
        ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
-       /usr/lib 
-       /usr/local/lib
+       #/usr/lib 
+       #/usr/local/lib
     )
 
 endif()

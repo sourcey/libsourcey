@@ -13,7 +13,7 @@ endif()
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configs" FORCE)
 if(DEFINED CMAKE_BUILD_TYPE AND CMAKE_VERSION VERSION_GREATER "2.8")
-  set_property(7 CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${CMAKE_CONFIGURATION_TYPES}7 )
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${CMAKE_CONFIGURATION_TYPES})
 endif()
 
 project(LibSourcey)
@@ -118,8 +118,8 @@ else()
   SET(CMAKE_FIND_LIBRARY_PREFIXES "lib")
   SET(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
   set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
-    /lib 
-    /usr/lib)
+    /usr/lib
+    /usr/local/lib)
 endif()
 
 # Append some common search paths for find_path
@@ -174,6 +174,11 @@ include(LibSourceyCompilerOptions REQUIRED)
 set(LibSourcey_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant LibSourceyConfig.h")
 include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 
+# Set the LibSourcey_LIB_TYPE variable for add_library
+set(LibSourcey_LIB_TYPE STATIC)
+if(BUILD_SHARED_LIBS)
+  set(LibSourcey_LIB_TYPE SHARED)
+endif()
 
 # ============================================================================
 # Include Dependencies, Modules and Applications
@@ -211,15 +216,6 @@ elseif(LINUX)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -llibc -lglibc")
 endif()
 
-if(MSVC)
-  # Temporary workaround for "error LNK2026: module unsafe for SAFESEH image"
-  # when compiling with certain externally compiled libraries with VS2012, 
-  # such as http://ffmpeg.zeranoe.com/builds/
-  # This disables safe exception handling by default.
-  SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
-  SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
-  SET (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
-endif()
 
 # ----------------------------------------------------------------------------
 # Include and third party dependencies

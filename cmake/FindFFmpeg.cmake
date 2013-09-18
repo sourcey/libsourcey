@@ -32,16 +32,26 @@ endif()
 # Check for cached results. If there are skip the costly part.
 set_module_notfound(FFmpeg)
 if (NOT FFmpeg_FOUND)
-      
+  
+  set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
+    /home/deploy/ffmpeg_build)
+
+  # Temporary build paths (remove later)
+  set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} 
+    /home/deploy/ffmpeg_build
+    /home/deploy/ffmpeg_build/lib    
+    /home/deploy/ffmpeg_build/include)
+
+
   # Check for all components
   find_component(FFmpeg AVCODEC    libavcodec    avcodec    libavcodec/avcodec.h)
   find_component(FFmpeg AVFORMAT   libavformat   avformat   libavformat/avformat.h)
-  find_component(FFmpeg AVFILTER   libavfilter   avfilter   libavfilter/avfilter.h)
+  #find_component(FFmpeg AVFILTER   libavfilter   avfilter   libavfilter/avfilter.h)
   find_component(FFmpeg AVUTIL     libavutil     avutil     libavutil/avutil.h)
-  find_component(FFmpeg AVDEVICE   libavdevice   avdevice   libavdevice/avdevice.h)
+  #find_component(FFmpeg AVDEVICE   libavdevice   avdevice   libavdevice/avdevice.h)
   find_component(FFmpeg SWSCALE    libswscale    swscale    libswscale/swscale.h)
   find_component(FFmpeg SWRESAMPLE libswresample swresample libswresample/swresample.h)
-  find_component(FFmpeg POSTPROC   libpostproc   postproc   libpostproc/postprocess.h)
+  #find_component(FFmpeg POSTPROC   libpostproc   postproc   libpostproc/postprocess.h)
   
   # Set FFmpeg as found or not
   set_module_found(FFmpeg)

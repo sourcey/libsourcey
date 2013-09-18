@@ -10,6 +10,7 @@ if(MSVC)
   endif()
 endif()
 
+
 set(LibSourcey_EXTRA_C_FLAGS "")
 set(LibSourcey_EXTRA_C_FLAGS_RELEASE "")
 set(LibSourcey_EXTRA_C_FLAGS_DEBUG "")
@@ -26,10 +27,19 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -Wno-long-long")
   endif()
 
+  # Using c++11
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")	
+
   # We need pthread's
   if(UNIX AND NOT ANDROID)
     set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -pthread")
   endif()
+
+  #if(BUILD_SHARED_LIBS)
+  #  set(LibSourcey_EXTRA_C_FLAGS "-shared ${LibSourcey_EXTRA_C_FLAGS}")
+  #else()    
+  #  set(LibSourcey_EXTRA_C_FLAGS "-static ${LibSourcey_EXTRA_C_FLAGS}")
+  #endif()${LIB_TYPE}
 
   if(LibSourcey_WARNINGS_ARE_ERRORS)
     set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -Werror")
@@ -114,7 +124,14 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   if(BUILD_WITH_DEBUG_INFO)
     set(LibSourcey_EXTRA_C_FLAGS_DEBUG "${LibSourcey_EXTRA_C_FLAGS_DEBUG} -ggdb3")
   endif()
+
+  if(NOT BUILD_SHARED_LIBS AND NOT ANDROID)
+    # Android does not need these settings because they are already set by toolchain file
+    set(LibSourcey_LINKER_LIBS ${LibSourcey_LINKER_LIBS} stdc++)
+    set(LibSourcey_EXTRA_C_FLAGS "-fPIC ${LibSourcey_EXTRA_C_FLAGS}")
+  endif()
 endif()
+
 
 if(MSVC)
   set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D _SCL_SECURE_NO_WARNINGS")
@@ -162,14 +179,22 @@ if(MSVC)
       set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} /fp:fast")# !! important - be on the same wave with x64 compilers
     endif()
   endif()
+
+  # Temporary workaround for "error LNK2026: module unsafe for SAFESEH image"
+  # when compiling with certain externally compiled libraries with VS2012, 
+  # such as http://ffmpeg.zeranoe.com/builds/
+  # This disables safe exception handling by default.
+  SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
+  SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+  SET (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
 endif()
 
 # Extra link libs if the user selects building static libs:
-if(NOT BUILD_SHARED_LIBS AND CMAKE_COMPILER_IS_GNUCXX AND NOT ANDROID)
+#if(NOT BUILD_SHARED_LIBS AND CMAKE_COMPILER_IS_GNUCXX AND NOT ANDROID)
   # Android does not need these settings because they are already set by toolchain file
-  set(LibSourcey_LINKER_LIBS ${LibSourcey_LINKER_LIBS} stdc++)
-  set(LibSourcey_EXTRA_C_FLAGS "-fPIC ${LibSourcey_EXTRA_C_FLAGS}")
-endif()
+  #set(LibSourcey_LINKER_LIBS ${LibSourcey_LINKER_LIBS} stdc++)
+  #set(LibSourcey_EXTRA_C_FLAGS "-fPIC ${LibSourcey_EXTRA_C_FLAGS}")
+#endif()
 
 # Add user supplied extra options (optimization, etc...)
 # ==========================================================
