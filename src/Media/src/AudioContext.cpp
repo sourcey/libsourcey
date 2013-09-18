@@ -353,7 +353,7 @@ void AudioDecoderContext::create(AVFormatContext *ic, int streamID)
 	if (!codec)
    		throw std::runtime_error("Audio decoder not found.");
 
-    if (avcodec_open(ctx, codec) < 0)
+    if (avcodec_open2(ctx, codec, NULL) < 0)
 		throw std::runtime_error("Could not open the audio codec.");
 	
 	frame = avcodec_alloc_frame();

@@ -29,6 +29,7 @@
 namespace scy { 
 
 
+#if 0
 class Exception: public std::exception
 	// This class extends the standard library exception object
 	// with features relevent to the LibSourcey debug context.
@@ -65,7 +66,7 @@ public:
 	
     friend std::ostream& operator << (std::ostream& stream, const Exception& exc) 
 	{
-		stream << exc.what();
+		//stream << exc.what();
 		return stream;
     }
 
@@ -73,6 +74,7 @@ protected:
 	std::string _msg;
 	int _code;
 };
+
 
 
 //
@@ -118,7 +120,7 @@ DECLARE_EXCEPTION(ExistsException, Exception, "Already exists")
 DECLARE_EXCEPTION(ArgumentException, Exception, "Invalid argument")
 DECLARE_EXCEPTION(IOException, Exception, "IO error")
 DECLARE_EXCEPTION(FileException, IOException, "File error")
-
+#endif
 
 //
 // Error type

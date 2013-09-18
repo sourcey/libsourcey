@@ -256,7 +256,7 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 	case TransactionState::Success:
 		try 
 		{
-			json::Value data = transaction->response().json()[(size_t)0];
+			json::Value data = transaction->response().json()[(unsigned)0];
 			_announceStatus = data["status"].asInt();
 			
 			// Notify the outside application of the response 
@@ -549,7 +549,7 @@ void Client::onError()
 //	case TransactionState::Success:
 //		try 
 //		{
-//			json::Value data = transaction->response().json()[(size_t)0];
+//			json::Value data = transaction->response().json()[(unsigned)0];
 //			_announceStatus = data["status"].asInt();
 //
 //			// Notify the outside application of the response 

@@ -191,8 +191,11 @@ public:
 		// Recommend using write(LogStream&) to avoid copying data.
 
 protected:
-	Logger(Logger const&) {};				// Copy constructor is protected
-	Logger& operator=(Logger const&) {};	// Assignment operator is protected
+	// Non-copyable and non-movable
+	Logger(const Logger&); // = delete;
+	Logger(Logger&&); // = delete;
+	Logger& operator=(const Logger&); // = delete;
+	Logger& operator=(Logger&&); // = delete;
 
 	typedef std::map<std::string, LogChannel*> LogChannelMap;
 	

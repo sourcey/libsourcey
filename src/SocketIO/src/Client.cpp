@@ -19,7 +19,7 @@
 
 #include "Sourcey/SocketIO/Client.h"
 #include "Sourcey/HTTP/Client.h"
-
+#include <stdexcept>
 
 using namespace std;
 
@@ -140,11 +140,10 @@ void Client::onHandshakeResponse(void* sender, const http::Response& response)
 	auto conn = reinterpret_cast<http::ClientConnection*>(sender);
 
 	std::string body = conn->readStream<std::stringstream>()->str();		
-	log("trace") << "SocketIO handshake response:" 
-		<< "\n\tStatus: " << response.getStatus()
-		<< "\n\tReason: " << response.getReason()
-		<< "\n\tResponse: " << body
-		<< endl;
+	//log("trace") << "SocketIO handshake response:" 
+	//	<< "\n\tStatus: " << response.getStatus()
+	//	<< "\n\tReason: " << response.getReason()
+	//	<< "\n\tResponse: " << body << endl;
 		
 	// The server can respond in three different ways:
 	// 401 NotAuthorized: If the server refuses to authorize the client to connect, 

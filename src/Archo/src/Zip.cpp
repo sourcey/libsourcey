@@ -18,7 +18,7 @@
 
 
 #include "Sourcey/Archo/Zip.h"
-#include "Sourcey/Filesystem.h"
+#include "Sourcey/FileSystem.h"
 
 /*
 #include "Sourcey/Exception.h"
@@ -134,10 +134,13 @@ void ZipFile::extractTo(const std::string& path)
 		char fname[1024];
 		internal::api("unzGetCurrentFileInfo", unzGetCurrentFileInfo(this->fp, &info, fname, 1024, nullptr, 0, nullptr, 0));
 		
-		traceL("ZipFile") << "zip contains: " << fname << endl;		
+		traceL("ZipFile") << "zip contains: " << fname << endl;
 		std::string outPath = std::string(path) + fs::delimiter + fname;
 
 		// Check directory
+#if !WIN32
+		const int FILE_ATTRIBUTE_DIRECTORY = 0x10;
+#endif
 		if (info.external_fa & FILE_ATTRIBUTE_DIRECTORY || 
 			fname[strlen(fname) - 1] == fs::delimiter) {
 			traceL("ZipFile") << "Create directory: " << outPath << endl;

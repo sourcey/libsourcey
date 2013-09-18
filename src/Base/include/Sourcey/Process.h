@@ -30,7 +30,7 @@ namespace scy {
 class Process: public uv::Handle
 {
 public:
-	Process::Process(uv::Loop& loop = uv::defaultLoop()) :
+	Process(uv::Loop& loop = uv::defaultLoop()) :
 		uv::Handle(&loop, new uv_process_t)
 	{	
 	}

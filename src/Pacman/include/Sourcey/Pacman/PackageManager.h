@@ -27,7 +27,7 @@
 #include "Sourcey/Pacman/InstallTask.h"
 #include "Sourcey/Pacman/InstallMonitor.h"
 #include "Sourcey/Collection.h"
-#include "Sourcey/Filesystem.h"
+#include "Sourcey/FileSystem.h"
 #include "Sourcey/Platform.h"
 #include "Sourcey/Stateful.h"
 #include "Sourcey/Runner.h"

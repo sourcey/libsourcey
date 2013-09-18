@@ -47,7 +47,7 @@ class Mutex
 	// since it makes locking exception-safe.
 {
 public:
-	typedef ScopedLock<Mutex> ScopedLock;
+	typedef scy::ScopedLock<Mutex> ScopedLock;
 
 	Mutex();
 	~Mutex();

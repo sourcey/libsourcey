@@ -309,7 +309,7 @@ inline SSLContext::VerificationMode convertVerificationMode(const std::string& v
 	else if (mode == "once")
 		verMode = SSLContext::VERIFY_ONCE;
 	else
-		throw ArgumentException("Invalid verification mode", vMode);
+		throw std::invalid_argument("Invalid verification mode: " + vMode);
 
 	return verMode;
 }

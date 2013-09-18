@@ -28,6 +28,7 @@
 #include "Sourcey/Logger.h"
 
 #include <list>
+#include <cstring> // memcpy
 
 
 namespace scy {

@@ -22,6 +22,7 @@
 
 
 #include "Sourcey/UV/UVPP.h"
+#include "Sourcey/Util.h"
 #include <functional>
 #include <vector>
 #include <map>

@@ -25,6 +25,7 @@
 #include <memory>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <assert.h>
 
 
@@ -50,7 +51,7 @@ Cipher::Cipher(const std::string& name,
 
 	_cipher = EVP_get_cipherbyname(name.c_str());
 	if (!_cipher)
-		throw std::runtime_error("Not found: Cipher " + name + " is unavailable");
+		throw std::invalid_argument("Not found: Cipher " + name + " is unavailable");
 
 	_key = ByteVec(keySize());
 	_iv = ByteVec(ivSize());
@@ -72,7 +73,7 @@ Cipher::Cipher(const std::string& name,
 
 	_cipher = EVP_get_cipherbyname(name.c_str());
 	if (!_cipher)
-		throw std::runtime_error("Not found: Cipher " + name + " is unavailable");
+		throw std::invalid_argument("Not found: Cipher " + name + " is unavailable");
 }
 
 	
@@ -88,7 +89,7 @@ Cipher::Cipher(const std::string& name) :
 
 	_cipher = EVP_get_cipherbyname(name.c_str());
 	if (!_cipher)
-		throw std::runtime_error("Not found: Cipher " + name + " is unavailable");
+		throw std::invalid_argument("Not found: Cipher " + name + " is unavailable");
 
 	_key = ByteVec(keySize());
 	_iv = ByteVec(ivSize());
@@ -176,7 +177,7 @@ inline basic::Encoder* createEncoder(Cipher::Encoding encoding)
 			return henc;
 		}
 	default:
-		throw ArgumentException("Invalid argument", "encoding");
+		throw std::invalid_argument("Invalid cypher encoding method");
 	}
 }
 
@@ -313,7 +314,7 @@ inline basic::Decoder* createDecoder(Cipher::Encoding encoding)
 		return new hex::Decoder();
 
 	default:
-		throw ArgumentException("Invalid argument", "encoding");
+		throw std::invalid_argument("Invalid cypher decoding method");
 	}
 }
 
@@ -438,7 +439,7 @@ void Cipher::generateKey(const std::string& password, const std::string& salt, i
 
 	if (!salt.empty()) {
 		int len = static_cast<int>(salt.size());
-		/// Create the salt array from the salt string
+		// Create the salt array from the salt string
 		for (int i = 0; i < 8; ++i)
 			saltBytes[i] = salt.at(i % len);
 		for (int i = 8; i < len; ++i)

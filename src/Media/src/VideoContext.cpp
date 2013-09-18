@@ -378,7 +378,7 @@ void VideoCodecEncoderContext::create()
 	if (!codec)
    		throw std::runtime_error("Video encoder not found.");
 
-    ctx = avcodec_alloc_context();
+    ctx = avcodec_alloc_context3(codec);
     if (!ctx)
         throw std::runtime_error("Cannot allocate encoder context.");	
 
@@ -647,14 +647,14 @@ VideoConversionContext::~VideoConversionContext()
 
 void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec& oparams)
 {
-	traceL("VideoConversionContext", this) << "Create:" 
-		<< "\n\tInput Width: " << iparams.width
-		<< "\n\tInput Height: " << iparams.height
-		<< "\n\tInput Pixel Format: " << iparams.pixelFmt
-		<< "\n\tOutput Width: " << oparams.width
-		<< "\n\tOutput Height: " << oparams.height
-		<< "\n\tOutput Pixel Format: " << oparams.pixelFmt
-		<< endl;
+	//traceL("VideoConversionContext", this) << "Create:" 
+	//	<< "\n\tInput Width: " << iparams.width
+	//	<< "\n\tInput Height: " << iparams.height
+	//	<< "\n\tInput Pixel Format: " << iparams.pixelFmt
+	//	<< "\n\tOutput Width: " << oparams.width
+	//	<< "\n\tOutput Height: " << oparams.height
+	//	<< "\n\tOutput Pixel Format: " << oparams.pixelFmt
+	//	<< endl;
 
     if (ctx)
         throw std::runtime_error("Conversion context already initialized.");

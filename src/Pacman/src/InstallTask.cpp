@@ -24,7 +24,7 @@
 #include "Sourcey/HTTP/Authenticator.h"
 #include "Sourcey/HTTP/Client.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/Filesystem.h"
+#include "Sourcey/FileSystem.h"
 
 
 using namespace std;

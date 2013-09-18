@@ -108,7 +108,7 @@ public:
 		/// traceL("ChunkedAdapter", this) << "Processing: " << packet.className() << ": " << packet.size() << std::endl;
 		
 		if (!packet.hasData())
-			throw ArgumentException("Incompatible packet type");
+			throw std::invalid_argument("Incompatible packet type");
 		
 		/// Emit HTTP response header		
 		if (initial) {			

@@ -20,7 +20,7 @@
 #include "Sourcey/Pacman/Package.h"
 #include "Sourcey/Util.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/Filesystem.h"
+#include "Sourcey/FileSystem.h"
 
 #include "assert.h"
 

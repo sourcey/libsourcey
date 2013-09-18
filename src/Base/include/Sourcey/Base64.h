@@ -27,6 +27,7 @@
 #include "Sourcey/Logger.h" 
 #include "Sourcey/Types.h"
 #include <iostream>
+#include <memory>
 
 
 namespace scy {

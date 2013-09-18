@@ -23,6 +23,7 @@
 #include "Sourcey/Exception.h"
 
 #include <assert.h>
+#include <stdexcept>
 
 
 #include <ctime>

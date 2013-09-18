@@ -52,7 +52,7 @@ std::string Configuration::getString(const std::string& key) const
 	if (getRaw(key, value))
 		return value;
 	else
-		throw NotFoundException(key);
+		throw std::invalid_argument("Not found: " + key);
 }
 
 	
@@ -76,7 +76,7 @@ std::string Configuration::getRawString(const std::string& key) const
 	if (getRaw(key, value))
 		return value;
 	else
-		throw NotFoundException(key);
+		throw std::invalid_argument("Not found: " + key);
 }
 
 	
@@ -100,7 +100,7 @@ int Configuration::getInt(const std::string& key) const
 	if (getRaw(key, value))
 		return parseInt(value);
 	else
-		throw NotFoundException(key);
+		throw std::invalid_argument("Not found: " + key);
 }
 
 	
@@ -124,7 +124,7 @@ double Configuration::getDouble(const std::string& key) const
 	if (getRaw(key, value))
 		return util::strtoi<double>(value);
 	else
-		throw NotFoundException(key);
+		throw std::invalid_argument("Not found: " + key);
 }
 
 	
@@ -148,7 +148,7 @@ bool Configuration::getBool(const std::string& key) const
 	if (getRaw(key, value))
 		return parseBool(value);
 	else
-		throw NotFoundException(key);
+		throw std::invalid_argument("Not found: " + key);
 }
 
 

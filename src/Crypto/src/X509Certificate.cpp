@@ -118,11 +118,11 @@ void X509Certificate::load(const char* data, int length)
 		
 	std::string cert(data, length);		
 	BIO *pBIO = BIO_new_mem_buf(const_cast<char*>(cert.data()), static_cast<int>(cert.length()));
-	if (!pBIO) throw IOException("Cannot create BIO for reading certificate");
+	if (!pBIO) throw std::runtime_error("SSL IO error: Cannot create BIO for reading certificate");
 	_certificate = PEM_read_bio_X509(pBIO, 0, 0, 0);
 	BIO_free(pBIO);
 	
-	if (!_certificate) throw IOException("Faild to load certificate from stream");
+	if (!_certificate) throw std::runtime_error("SSL IO error: Faild to load X509 certificate from stream");
 
 	init();
 }
@@ -133,16 +133,16 @@ void X509Certificate::load(const std::string& path)
 	assert(!_certificate);
 
 	BIO *pBIO = BIO_new(BIO_s_file());
-	if (!pBIO) throw IOException("Cannot create BIO for reading certificate file", path);
+	if (!pBIO) throw std::runtime_error("SSL error: Cannot create BIO for reading certificate file: " + path);
 	if (!BIO_read_filename(pBIO, path.c_str())) {
 		BIO_free(pBIO);
-		throw FileException("Cannot open certificate file for reading", path);
+		throw std::runtime_error("SSL file error: Cannot open certificate file for reading: " + path);
 	}
 	
 	_certificate = PEM_read_bio_X509(pBIO, 0, 0, 0);
 	BIO_free(pBIO);
 	
-	if (!_certificate) throw FileException("Faild to load certificate from", path);
+	if (!_certificate) throw std::runtime_error("SSL file error: Faild to load certificate from: " + path);
 
 	init();
 }
@@ -151,11 +151,11 @@ void X509Certificate::load(const std::string& path)
 void X509Certificate::save(std::ostream& stream) const
 {
 	BIO *pBIO = BIO_new(BIO_s_mem());
-	if (!pBIO) throw IOException("Cannot create BIO for writing certificate");
+	if (!pBIO) throw std::runtime_error("SSL IO error: Cannot create BIO for writing certificate");
 	try
 	{
 		if (!PEM_write_bio_X509(pBIO, _certificate)) 
-			throw IOException("Failed to write certificate to stream");
+			throw std::runtime_error("SSL IO error: Failed to write certificate to stream");
 
 		char *pData;
 		long size;
@@ -174,16 +174,16 @@ void X509Certificate::save(std::ostream& stream) const
 void X509Certificate::save(const std::string& path) const
 {
 	BIO *pBIO = BIO_new(BIO_s_file());
-	if (!pBIO) throw IOException("Cannot create BIO for reading certificate file", path);
+	if (!pBIO) std::runtime_error("SSL IO error: Cannot create BIO for reading certificate file: " + path);
 	if (!BIO_write_filename(pBIO, const_cast<char*>(path.c_str()))) {
 		BIO_free(pBIO);
-		throw FileException("Cannot create certificate file", path);
+		throw std::runtime_error("SSL file error: Cannot create certificate file: " + path);
 	}
 
 	try
 	{
 		if (!PEM_write_bio_X509(pBIO, _certificate)) 
-			throw FileException("Failed to write certificate to file", path);
+			throw std::runtime_error("SSL file error: Failed to write certificate to file: " + path);
 	}
 	catch (...)
 	{
@@ -278,7 +278,7 @@ bool X509Certificate::issuedBy(const X509Certificate& issuerCertificate) const
 	X509* pCert = const_cast<X509*>(_certificate);
 	X509* pIssuerCert = const_cast<X509*>(issuerCertificate.certificate());
 	EVP_PKEY* pIssuerPublicKey = X509_get_pubkey(pIssuerCert);
-	if (!pIssuerPublicKey) throw ArgumentException("Issuer certificate has no public key");
+	if (!pIssuerPublicKey) throw std::invalid_argument("Issuer certificate has no public key");
 	int rc = X509_verify(pCert, pIssuerPublicKey);
 	EVP_PKEY_free(pIssuerPublicKey);
 	return rc != 0;

@@ -76,7 +76,7 @@ public:
 		// Updates the item expiry timeout
 	{
 		traceL("TimedManager", this) << "Set expires: " << key << ": " << timeout << std::endl;	
-		return expires(get(key, false), timeout);
+		return expires(Base::get(key, false), timeout);
 	}
 	
 	virtual bool expires(TValue* item, long timeout) 

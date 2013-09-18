@@ -23,7 +23,7 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
-
+#include <stdexcept>
 
 using namespace std;
 
