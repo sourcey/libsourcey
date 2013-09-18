@@ -54,9 +54,9 @@ public:
 	{
 		debugL("NetTransaction", this) << "Send" << std::endl;
 		assert(socket);
-		if (socket->send(_request, _peerAddress) > 0)
+		if (socket->send(PacketTransaction<PacketT>::_request, _peerAddress) > 0)
 			return PacketTransaction<PacketT>::send();
-		setState(this, TransactionState::Failed);
+		PacketTransaction<PacketT>::setState(this, TransactionState::Failed);
 		return false;
 	}
 	
@@ -74,7 +74,7 @@ public:
 	virtual void dispose()
 	{
 		debugL("NetTransaction", this) << "Dispose" << std::endl;
-		if (!_destroyed) {
+		if (!PacketTransaction<PacketT>::_destroyed) {
 			PacketSocketAdapter::socket->setAdapter(nullptr);
 		}
 		PacketTransaction<PacketT>::dispose(); // gc
@@ -90,7 +90,7 @@ protected:
 		// callback for checking potential response candidates.
 	{
 		debugL("NetTransaction", this) << "On packet: " << packet.size() << std::endl;
-		if (handlePotentialResponse(static_cast<PacketT&>(packet))) {
+		if (PacketTransaction<PacketT>::handlePotentialResponse(static_cast<PacketT&>(packet))) {
 
 			// Stop socket data propagation since
 			// we have handled the packet
@@ -101,8 +101,8 @@ protected:
 	virtual void onResponse() 
 		// Called when a successful response match is received.
 	{
-		traceL("NetTransaction", this) << "On success: " << _response.toString() << std::endl;
-		PacketSignal::emit(socket, _response);
+		traceL("NetTransaction", this) << "On success: " << PacketTransaction<PacketT>::_response.toString() << std::endl;
+		PacketSignal::emit(socket, PacketTransaction<PacketT>::_response);
 	}
 
 	virtual bool checkResponse(const PacketT& packet) 

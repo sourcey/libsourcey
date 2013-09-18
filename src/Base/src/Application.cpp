@@ -119,8 +119,9 @@ void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 
 void Application::onPrintHandle(uv_handle_t* handle, void* /* arg */) 
 {
-	debugL("Application") << "#### active handle: " << handle << ": " << handle->type << std::endl;
+	debugL("Application") << "#### Active handle: " << handle << ": " << handle->type << std::endl;
 }
+
 
 //
 // Command-line option parser

@@ -28,6 +28,7 @@
 #include "Sourcey/Logger.h"
 #include <iostream>
 #include <assert.h>
+#include <cstring>
 
 
 namespace scy {
@@ -97,7 +98,7 @@ inline std::string encode(const T& bytes)
 	static const char digits[] = "0123456789abcdef";
 	std::string res;
 	res.reserve(bytes.size() * 2);
-	for (T::const_iterator it = bytes.begin(); it != bytes.end(); ++it) {
+	for (typename  T::const_iterator it = bytes.begin(); it != bytes.end(); ++it) {
 		const unsigned char c = static_cast<const unsigned char>(*it);
 		res += digits[(c >> 4) & 0xF];
 		res += digits[c & 0xF];

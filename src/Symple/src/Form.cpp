@@ -256,7 +256,7 @@ bool FormElement::clearElements(const std::string& id, bool partial)
 	bool match = false;
 	json::Value result;				
 	json::Value::Members members = root().getMemberNames();
-	for (unsigned i = 0; i < members.size(); i++) {
+	for (auto i = 0; i < members.size(); i++) {
 
 		// Filter elements	
 		if (members[i] == "elements") {
@@ -268,11 +268,11 @@ bool FormElement::clearElements(const std::string& id, bool partial)
 					partial ? 
 						curID.find(id) != string::npos : 
 						curID == id) {
-					traceL() << "Symple Form: Removing Redundant: " << curID << endl;
+					traceL() << "Symple form: Removing redundant: " << curID << endl;
 					match = true;
 				}
 				else {
-					traceL() << "Symple Form: Keeping: " << curID << endl;
+					traceL() << "Symple form: Keeping: " << curID << endl;
 					result["elements"].append(element);
 				}
 			}
@@ -283,11 +283,7 @@ bool FormElement::clearElements(const std::string& id, bool partial)
 			result[members[i]] = root()[members[i]];
 	}
 				
-	traceL() << "Symple Form: Removing Redundant Result: " << json::stringify(result, true) << endl;
-	traceL() << "Symple Form: Removing Redundant Before: " << json::stringify(root(), true) << endl;
 	*_root = result;
-	traceL() << "Symple Form: Removing Redundant After: " << json::stringify(root(), true) << endl;
-
 	return match;
 }
 
@@ -355,7 +351,7 @@ json::Value& FormField::values()
 	
 string FormField::value() const
 {
-	return root()["values"][(size_t)0].asString();
+	return root()["values"][(unsigned)0].asString();
 }
 
 	

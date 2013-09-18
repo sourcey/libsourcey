@@ -42,7 +42,7 @@ std::string getExePath()
 	char buf[PATHMAX];
 	size_t size = PATHMAX;
 	if (uv_exepath(buf, &size) != 0)
-		throw SystemException("Cannot resolve executable path");
+		throw std::runtime_error("System error: Cannot resolve executable path");
 	return std::string(buf, size);
 }
 
@@ -52,7 +52,7 @@ std::string getCwd()
 	char buf[PATHMAX];
 	size_t size = PATHMAX;
 	if (uv_cwd(buf, size).code != UV_OK)
-		throw SystemException("Cannot resolve working directory");
+		throw std::runtime_error("System error: Cannot resolve working directory");
 	return std::string(buf);
 }
 

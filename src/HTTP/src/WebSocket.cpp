@@ -25,6 +25,7 @@
 #include "Sourcey/Logger.h"
 #include "Sourcey/Numeric.h"
 #include "Sourcey/Random.h"
+#include <stdexcept>
 
 
 using namespace std;
@@ -56,7 +57,7 @@ WebSocket::WebSocket(const net::Socket& socket) :
 	net::Socket(socket)
 {
 	if (!dynamic_cast<WebSocketAdapter*>(_adapter))
-		throw Exception("Cannot assign incompatible socket adapter");
+		throw std::runtime_error("WebSocket error: Cannot assign incompatible socket adapter");
 }
 
 	
@@ -165,7 +166,7 @@ void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer)
 	traceL("WebSocketClientAdapter", this) << "Client response: " << buffer.size() << endl;
 	http::Parser parser(&_response);
 	if (!parser.parse(bufferCast<char *>(buffer), buffer.size())) {
-		throw std::runtime_error("Cannot parse response: Incomplete HTTP message");
+		throw std::runtime_error("WebSocket error: Cannot parse response: Incomplete HTTP message");
 	}
 	
 	// TODO: Handle resending request for authentication
@@ -186,7 +187,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer)
 	//http::Request request;
 	http::Parser parser(&_request);
 	if (parser.parse(bufferCast<char *>(buffer), buffer.size())) {
-		throw std::runtime_error("Cannot parse request: Incomplete HTTP message");
+		throw std::runtime_error("WebSocket error: Cannot parse request: Incomplete HTTP message");
 	}
 	
 	traceL("WebSocketServerAdapter", this) << "Verifying handshake: " << _request << endl;
@@ -280,7 +281,7 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
 				}
 			} 
 			catch (std::exception& exc) {
-				warnL("WebSocketAdapter", this) << "parser error: " << exc.what() << endl;		
+				warnL("WebSocketAdapter", this) << "Parser error: " << exc.what() << endl;		
 				socket->setError(exc.what());	
 				return;
 			}
@@ -301,7 +302,7 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
 				handleServerRequest(buffer);
 		} 
 		catch (std::exception& exc) {
-			warnL("WebSocketAdapter", this) << "read error: " << exc.what() << endl;		
+			warnL("WebSocketAdapter", this) << "Read error: " << exc.what() << endl;		
 			socket->setError(exc.what());	
 		}
 		//traceL("WebSocketAdapter", this) << "After handshaking: " << buffer << endl;
@@ -376,8 +377,8 @@ void WebSocketFramer::createHandshakeRequest(http::Request& request)
 	assert(request.has("Sec-WebSocket-Version"));
 	request.set("Sec-WebSocket-Key", _key);
 	assert(request.has("Sec-WebSocket-Key"));
-	traceL("WebSocketFramer", this) << "Sec-WebSocket-Version: " << request.get("Sec-WebSocket-Version") << endl;
-	traceL("WebSocketFramer", this) << "Sec-WebSocket-Key: " << request.get("Sec-WebSocket-Key") << endl;
+	//traceL("WebSocketFramer", this) << "Sec-WebSocket-Version: " << request.get("Sec-WebSocket-Version") << endl;
+	//traceL("WebSocketFramer", this) << "Sec-WebSocket-Key: " << request.get("Sec-WebSocket-Key") << endl;
 	_headerState++;
 }
 
@@ -399,7 +400,7 @@ bool WebSocketFramer::checkHandshakeResponse(http::Response& response)
 	else if (response.getStatus() == http::StatusCode::NotAuthorized)
 		assert(0 && "authentication not implemented");
 	else
-		throw Exception("WebSocket error: Cannot upgrade to WebSocket connection", response.getReason(), WebSocket::ErrorNoHandshake);
+		throw std::runtime_error("WebSocket error: Cannot upgrade to WebSocket connection: " + response.getReason()); //, WebSocket::ErrorNoHandshake
 
 	// Need to resend request
 	return false;
@@ -411,10 +412,10 @@ void WebSocketFramer::acceptRequest(http::Request& request, http::Response& resp
 	if (util::icompare(request.get("Connection", ""), "upgrade") == 0 && 
 		util::icompare(request.get("Upgrade", ""), "websocket") == 0) {
 		std::string version = request.get("Sec-WebSocket-Version", "");
-		if (version.empty()) throw Exception("WebSocket error: Missing Sec-WebSocket-Version in handshake request", WebSocket::ErrorHandshakeNoVersion);
-		if (version != WebSocket::ProtocolVersion) throw Exception("WebSocket error: Unsupported WebSocket version requested", version, WebSocket::ErrorHandshakeUnsupportedVersion);
+		if (version.empty()) throw std::runtime_error("WebSocket error: Missing Sec-WebSocket-Version in handshake request"); //, WebSocket::ErrorHandshakeNoVersion
+		if (version != WebSocket::ProtocolVersion) throw std::runtime_error("WebSocket error: Unsupported WebSocket version requested: " + version); //, WebSocket::ErrorHandshakeUnsupportedVersion
 		std::string key = util::trim(request.get("Sec-WebSocket-Key", ""));
-		if (key.empty()) throw Exception("WebSocket error: Missing Sec-WebSocket-Key in handshake request", WebSocket::ErrorHandshakeNoKey);
+		if (key.empty()) throw std::runtime_error("WebSocket error: Missing Sec-WebSocket-Key in handshake request"); //, WebSocket::ErrorHandshakeNoKey
 		
 		response.setStatusAndReason(http::StatusCode::SwitchingProtocols);
 		response.set("Upgrade", "websocket");
@@ -424,7 +425,7 @@ void WebSocketFramer::acceptRequest(http::Request& request, http::Response& resp
 		// Set headerState 2 since the handshake was accepted.
 		_headerState = 2;
 	}
-	else throw Exception("WebSocket error: No WebSocket handshake", WebSocket::ErrorNoHandshake);
+	else throw std::runtime_error("WebSocket error: No WebSocket handshake"); //, WebSocket::ErrorNoHandshake
 }
 
 	
@@ -521,7 +522,7 @@ int WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 		UInt64 l;
 		headerReader.getU64(l);
 		if (l > limit)
-			throw Exception(util::format("WebSocket error: Insufficient buffer for payload size %"I64_FMT"u", l), WebSocket::ErrorPayloadTooBig);
+			throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %"I64_FMT"u", l)); //, WebSocket::ErrorPayloadTooBig
 		payloadLength = static_cast<int>(l);
 		payloadOffset += 8;
 	}
@@ -529,14 +530,14 @@ int WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 		UInt16 l;
 		headerReader.getU16(l);
 		if (l > limit)
-			throw Exception(util::format("WebSocket error: Insufficient buffer for payload size %u", unsigned(l)), WebSocket::ErrorPayloadTooBig);
+			throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %u", unsigned(l))); //, WebSocket::ErrorPayloadTooBig
 		payloadLength = static_cast<int>(l);
 		payloadOffset += 2;
 	}
 	else {
 		UInt8 l = lengthByte & 0x7f;
 		if (l > limit)
-			throw Exception(util::format("WebSocket error: Insufficient buffer for payload size %u", unsigned(l)), WebSocket::ErrorPayloadTooBig);
+			throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %u", unsigned(l))); //, WebSocket::ErrorPayloadTooBig
 		payloadLength = static_cast<int>(l);
 	}
 	if (lengthByte & FRAME_FLAG_MASK) {	
@@ -545,7 +546,7 @@ int WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 	}
 
 	if (payloadLength > limit) //length)
-		throw Exception("WebSocket error: Incomplete frame received", WebSocket::ErrorIncompleteFrame);		
+		throw std::runtime_error("WebSocket error: Incomplete frame received"); //, WebSocket::ErrorIncompleteFrame		
 
 	// Get a reference to the start of the payload
 	payload = reinterpret_cast<char*>(const_cast<char*>(frame.begin() + (offset + payloadOffset)));
@@ -572,13 +573,13 @@ void WebSocketFramer::completeHandshake(http::Response& response)
 {
 	std::string connection = response.get("Connection", "");
 	if (util::icompare(connection, "Upgrade") != 0) 
-		throw Exception("WebSocket error: No Connection: Upgrade header in handshake response", WebSocket::ErrorNoHandshake);
+		throw std::runtime_error("WebSocket error: No Connection: Upgrade header in handshake response"); //, WebSocket::ErrorNoHandshake
 	std::string upgrade = response.get("Upgrade", "");
 	if (util::icompare(upgrade, "websocket") != 0)
-		throw Exception("WebSocket error: No Upgrade: websocket header in handshake response", WebSocket::ErrorNoHandshake);
+		throw std::runtime_error("WebSocket error: No Upgrade: websocket header in handshake response"); //, WebSocket::ErrorNoHandshake
 	std::string accept = response.get("Sec-WebSocket-Accept", "");
 	if (accept != computeAccept(_key))
-		throw Exception("WebSocket error: Invalid or missing Sec-WebSocket-Accept header in handshake response", WebSocket::ErrorNoHandshake);
+		throw std::runtime_error("WebSocket error: Invalid or missing Sec-WebSocket-Accept header in handshake response"); //, WebSocket::ErrorNoHandshake
 }
 
 

@@ -74,7 +74,7 @@ public:
 	{
 		internal::Raw<const unsigned char*> in(input);
 		internal::Raw<unsigned char*> out(output);
-		return update(in.ptr, in.len, out.data, out.len);
+		return update(in.ptr, in.len, out.ptr, out.len);
 	}
 		
 	/// Returns the remaining data held in the cipher object. 
@@ -88,7 +88,7 @@ public:
 	int final(O &output)
 	{
 		internal::Raw<unsigned char*> out(output);
-		return final(out.data, out.len);
+		return final(out.ptr, out.len);
 	}
 
 	/// Transport encoding to use for encrypt() and decrypt().
@@ -135,7 +135,7 @@ public:
 	{
 		assert(int(key.size()) == keySize());
 		_key.clear();
-		for (T::const_iterator it = key.begin(); it != key.end(); ++it)
+		for (typename T::const_iterator it = key.begin(); it != key.end(); ++it)
 			_key.push_back(static_cast<unsigned char>(*it));
 	}
 	
@@ -145,7 +145,7 @@ public:
 	{
 		assert(int(iv.size()) == ivSize());
 		_iv.clear();
-		for (T::const_iterator it = iv.begin(); it != iv.end(); ++it)
+		for (typename T::const_iterator it = iv.begin(); it != iv.end(); ++it)
 			_iv.push_back(static_cast<unsigned char>(*it));
 	}
 

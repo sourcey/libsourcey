@@ -47,86 +47,86 @@ public:
 	SocketBase();
 	
 	virtual void connect(const Address& address) = 0;
-		/// Connects to the given peer IP address.
+		// Connects to the given peer IP address.
 		///
-		/// Throws an exception if the address is malformed.
-		/// Connection errors can be handled via the Error signal.
+		// Throws an exception if the address is malformed.
+		// Connection errors can be handled via the Error signal.
 
 	virtual void connect(const std::string& host, UInt16 port);
-		/// Resolves and connects to the given host address.
+		// Resolves and connects to the given host address.
 		///
-		/// Throws an Exception if the host is malformed.
-		/// Since the DNS callback is asynchronous implementations need 
-		/// to listen for the Error signal for handling connection errors.		
+		// Throws an Exception if the host is malformed.
+		// Since the DNS callback is asynchronous implementations need 
+		// to listen for the Error signal for handling connection errors.		
 
 	virtual bool shutdown() { throw std::runtime_error("Not implemented by protocol"); };
-		/// Sends the shutdown packet which should result is socket 
-		/// closure via callback.
+		// Sends the shutdown packet which should result is socket 
+		// closure via callback.
 
 	virtual void close() = 0;
-		/// Closes the underlying socket.
+		// Closes the underlying socket.
 
 	virtual void reset() { throw std::runtime_error("Not implemented by protocol"); };
-		/// Resets the closed socket for reuse.
+		// Resets the closed socket for reuse.
 
 	virtual void bind(const Address& address, unsigned flags = 0) = 0;
-		/// Bind a local address to the socket.
-		/// The address may be IPv4 or IPv6 (if supported).
+		// Bind a local address to the socket.
+		// The address may be IPv4 or IPv6 (if supported).
 		///
-		/// Throws an Exception on error.
+		// Throws an Exception on error.
 
 	virtual void listen(int backlog = 64) { (void)backlog; };
-		/// Listens the socket on the given address.
+		// Listens the socket on the given address.
 		///
-		/// Throws an Exception on error.
+		// Throws an Exception on error.
 		
 	virtual int send(const char* data, int len, int flags = 0) = 0;
-		/// Sends the given data buffer to the connected peer.
+		// Sends the given data buffer to the connected peer.
 
 	virtual int send(const char* data, int len, const Address& peerAddress, int flags = 0) = 0;
-		/// Sends the given data buffer to the given peer address.
+		// Sends the given data buffer to the given peer address.
 		///
-		/// For TCP sockets the given peer address must match the
-		/// connected peer address.
+		// For TCP sockets the given peer address must match the
+		// connected peer address.
 	
 	virtual Address address() const = 0;
-		/// The locally bound address.
+		// The locally bound address.
 		///
-		/// This function will not throw.
-		/// A Wildcard 0.0.0.0:0 address is returned if 
-		/// the socket is closed or invalid.
+		// This function will not throw.
+		// A Wildcard 0.0.0.0:0 address is returned if 
+		// the socket is closed or invalid.
 
 	virtual Address peerAddress() const = 0;
-		/// The connected peer address.
+		// The connected peer address.
 		///
-		/// This function will not throw.
-		/// A Wildcard 0.0.0.0:0 address is returned if 
-		/// the socket is closed or invalid.
+		// This function will not throw.
+		// A Wildcard 0.0.0.0:0 address is returned if 
+		// the socket is closed or invalid.
 
 	virtual net::TransportType transport() const = 0;
-		/// The transport protocol: TCP, UDP or SSLTCP.
+		// The transport protocol: TCP, UDP or SSLTCP.
 		
-	virtual void setError(const Error& err) = 0;
-		/// Sets the socket error.
+	virtual void setError(const scy::Error& err) = 0;
+		// Sets the socket error.
 		///
-		/// Setting the error will result in socket closure.
+		// Setting the error will result in socket closure.
 
-	virtual const Error& error() const = 0;
-		/// Return the socket error if any.
+	virtual const scy::Error& error() const = 0;
+		// Return the socket error if any.
 
 	virtual bool closed() const = 0;
-		/// Returns true if the native socket 
-		/// handle is closed.
+		// Returns true if the native socket 
+		// handle is closed.
 	
 	void* opaque;
-		/// Optional client data pointer.
+		// Optional client data pointer.
 		///
-		/// The pointer is not initialized or managed
-		/// by the socket base.
+		// The pointer is not initialized or managed
+		// by the socket base.
 	
 	virtual void emitConnect();
 	virtual void emitRecv(const MutableBuffer& buf, const Address& peerAddr);
-	virtual void emitError(const Error& error);
+	virtual void emitError(const scy::Error& error);
 	virtual void emitClose();
 	
 	virtual void addObserver(Socket* socket, bool shared = false);
@@ -166,34 +166,34 @@ class Socket
 {
 public:
 	Socket(const Socket& socket);
-		/// Attaches the SocketBase from the given socket and
-		/// increments the SocketBase reference count.
+		// Attaches the SocketBase from the given socket and
+		// increments the SocketBase reference count.
 		
 	Socket(SocketBase* base, bool shared);
-		/// Creates the Socket from the given SocketBase and attaches
-		/// the given or default SocketAdapter.
+		// Creates the Socket from the given SocketBase and attaches
+		// the given or default SocketAdapter.
 		///
-		/// If shared is true the SocketBase reference count will be
-		/// incremented. If not we do not increment the reference count.
-		/// This effectively means are taking ownership of the SocketBase, 
-		/// as the destruction of this Socket object will be directly 
-		/// responsible for the destruction of the SocketBase.
+		// If shared is true the SocketBase reference count will be
+		// incremented. If not we do not increment the reference count.
+		// This effectively means are taking ownership of the SocketBase, 
+		// as the destruction of this Socket object will be directly 
+		// responsible for the destruction of the SocketBase.
 
 	Socket& operator = (const Socket& socket);
-		/// Assignment operator.
+		// Assignment operator.
 		///
-		/// Releases the socket's socket context and
-		/// attaches the socket context from the other socket and
-		/// increments the reference count of the SocketBase.
+		// Releases the socket's socket context and
+		// attaches the socket context from the other socket and
+		// increments the reference count of the SocketBase.
 
 	virtual Socket& assign(SocketBase* base, bool shared);
-		/// Assigns the SocketBase instance for this socket.
-		/// Any methods that assigns the base instance should 
-		/// assign() so that subclasses can manage instance
-		/// pointer changes.
+		// Assigns the SocketBase instance for this socket.
+		// Any methods that assigns the base instance should 
+		// assign() so that subclasses can manage instance
+		// pointer changes.
 		
 	virtual ~Socket();
-		/// Destroys the Socket and releases the socket context.
+		// Destroys the Socket and releases the socket context.
 				
 	virtual void connect(const std::string& host, UInt16 port);
 	virtual void connect(const Address& address);
@@ -210,55 +210,55 @@ public:
 	virtual int send(const IPacket& packet, const Address& peerAddress, int flags = 0);
 	virtual void send(void*, IPacket& packet);
 
-	virtual void setError(const Error& err);
-		/// Sets the socket error.
+	virtual void setError(const scy::Error& err);
+		// Sets the socket error.
 		///
-		/// Setting the error will result in socket closure.
+		// Setting the error will result in socket closure.
 
 	bool closed() const;
-		/// Returns true if the native socket handle is closed.
+		// Returns true if the native socket handle is closed.
 	
-	const Error& error() const;
-		/// Return the socket error if any.
+	const scy::Error& error() const;
+		// Return the socket error if any.
 
 	net::TransportType transport() const;
-		/// The transport protocol: TCP, UDP or SSLTCP.
-		/// See TransportType definition.
+		// The transport protocol: TCP, UDP or SSLTCP.
+		// See TransportType definition.
 	
 	Address address() const;
-		/// The locally bound address.
+		// The locally bound address.
 
 	Address peerAddress() const;
-		/// The connected peer address.
+		// The connected peer address.
 	
 	NullSignal Connect;
-		/// Signals that the socket is connected.
+		// Signals that the socket is connected.
 
 	Signal<SocketPacket&> Recv;
-		/// Signals when data is received by the socket.
+		// Signals when data is received by the socket.
 
-	Signal<const Error&> Error;
-		/// Signals that the socket is closed in error.
-		/// This signal will be sent just before the 
-		/// Closed signal.
+	Signal<const scy::Error&> Error;
+		// Signals that the socket is closed in error.
+		// This signal will be sent just before the 
+		// Closed signal.
 
 	NullSignal Close;
-		/// Signals that the underlying socket is closed,
-		/// maybe in error.
+		// Signals that the underlying socket is closed,
+		// maybe in error.
 
 	SocketBase& base() const;
-		/// Returns the SocketBase for this socket.
+		// Returns the SocketBase for this socket.
 
 	SocketAdapter* adapter() const;
-		/// Returns the SocketAdapter for this socket.
+		// Returns the SocketAdapter for this socket.
 		
 	void setAdapter(SocketAdapter* adapter);
-		/// Sets the new SocketAdapter.
-		/// The old instance will not be destroyed.
+		// Sets the new SocketAdapter.
+		// The old instance will not be destroyed.
 
 	void replaceAdapter(SocketAdapter* adapter);
-		/// Sets the SocketAdapter instance,
-		/// and deletes the old one.
+		// Sets the SocketAdapter instance,
+		// and deletes the old one.
 
 	virtual void onSocketConnect();
 	virtual void onSocketRecv(const MutableBuffer& buf, const Address& peerAddr);
@@ -269,7 +269,7 @@ public:
 
 protected:		
 	Socket();
-		/// Creates a NULL socket.
+		// Creates a NULL socket.
 
 	friend class SocketBase;
 
@@ -293,10 +293,10 @@ class SocketAdapter
 {
 public:
 	SocketAdapter(Socket* socket = NULL);
-		/// Creates the SocketAdapter.
+		// Creates the SocketAdapter.
 		///
-		/// The Socket instance can be NULL, but it must be set 
-		/// before any callbacks come back.
+		// The Socket instance can be NULL, but it must be set 
+		// before any callbacks come back.
 	
 	virtual ~SocketAdapter();
 
@@ -304,8 +304,8 @@ public:
 	virtual void onSocketRecv(const MutableBuffer& buf, const Address& peerAddr);
 	virtual void onSocketError(const Error& error);
 	virtual void onSocketClose();
-		/// These virtual methods can be overridden as necessary
-		/// to intercept socket events before they hit the application.
+		// These virtual methods can be overridden as necessary
+		// to intercept socket events before they hit the application.
 		
 	virtual int send(const char* data, int len, int flags = 0);
 	virtual int send(const char* data, int len, const Address& peerAddress, int flags = 0);
@@ -365,7 +365,7 @@ class SocketPacket: public RawPacket
 {	
 public:
 	PacketInfo* info;
-		/// PacketInfo pointer
+		// PacketInfo pointer
 
 	SocketPacket(Socket* socket, const MutableBuffer& buffer, const Address& peerAddress) : 
 		RawPacket(bufferCast<char*>(buffer), buffer.size(), 0, &socket, nullptr, 
@@ -422,8 +422,8 @@ public:
 	
 	/*
 	int priority;
-		/// A higher priority gives the current observer
-		/// precedence in the socket callback chain.
+		// A higher priority gives the current observer
+		// precedence in the socket callback chain.
 
 	static bool compareProiroty(const SocketAdapter* l, const SocketAdapter* r);
 	*/
@@ -492,7 +492,7 @@ public:
 	typedef std::vector<SocketHandle<SocketT>> List;
 
 	SocketHandle() :
-		/// NOTE: Only compiles for derived SocketBase implementations
+		// NOTE: Only compiles for derived SocketBase implementations
 		Handle<SocketT>(new SocketT)
 	{
 	}
@@ -588,7 +588,7 @@ public:
 protected:
 	SocketHandle() 
 		//:
-		/// NOTE: Only compiles for derived SocketBase implementations
+		// NOTE: Only compiles for derived SocketBase implementations
 		//Handle<SocketT>(new SocketT)
 	{
 	}
@@ -596,7 +596,7 @@ protected:
 
 	template<class T>
 	SocketT* as()
-		/// Attempt to cast and return the internal socket 
+		// Attempt to cast and return the internal socket 
 	{
 		return dynamic_cast<T*>(get());
 	}
@@ -606,7 +606,7 @@ protected:
 
 	template<class T>
 	SocketT* as()
-		/// Attempt to cast and return the internal socket 
+		// Attempt to cast and return the internal socket 
 	{
 		return dynamic_cast<T*>(get());
 	}
@@ -622,9 +622,9 @@ protected:
 
 
 	//Signal2<Buffer&, const net::PacketInfo&> MulticastRecv;
-		/// Signals data received by the socket.
-		/// The address argument is for UDP compatibility.
-		/// For TCP it will always return the peerAddress.
+		// Signals data received by the socket.
+		// The address argument is for UDP compatibility.
+		// For TCP it will always return the peerAddress.
 
 /* //CountedBase
 	typedef SharedPtr<SocketBase> SocketHandle;

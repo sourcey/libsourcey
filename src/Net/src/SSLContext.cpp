@@ -18,7 +18,7 @@
 // This file uses functions from POCO C++ Libraries (license below)
 //
 
-#include "Sourcey/Filesystem.h"
+#include "Sourcey/FileSystem.h"
 #include "Sourcey/DateTime.h"
 #include "Sourcey/Net/SSLContext.h"
 #include "Sourcey/Net/SSLManager.h"
@@ -61,7 +61,7 @@ SSLContext::SSLContext(
 		{
 			std::string msg = getLastError();
 			SSL_CTX_free(_sslContext);
-			throw Exception(std::string("SSL Error: Cannot load CA file/directory at ") + caLocation, msg);
+			throw std::runtime_error(std::string("SSL Error: Cannot load CA file/directory at ") + caLocation + ": " + msg);
 		}
 	}
 
@@ -83,7 +83,7 @@ SSLContext::SSLContext(
 		{
 			std::string msg = getLastError();
 			SSL_CTX_free(_sslContext);
-			throw Exception(std::string("SSL Error: Error loading private key from file ") + privateKeyFile + ": " + msg);
+			throw std::runtime_error(std::string("SSL Error: Error loading private key from file ") + privateKeyFile + ": " + msg);
 		}
 	}
 
@@ -94,7 +94,7 @@ SSLContext::SSLContext(
 		{
 			std::string errMsg = getLastError();
 			SSL_CTX_free(_sslContext);
-			throw Exception(std::string("SSL Error: Error loading certificate from file ") + certificateFile + ": " + errMsg); //, errMsg);
+			throw std::runtime_error(std::string("SSL Error: Error loading certificate from file ") + certificateFile + ": " + errMsg); //, errMsg);
 		}
 	}
 
@@ -137,7 +137,7 @@ SSLContext::SSLContext(
 		{
 			std::string msg = getLastError();
 			SSL_CTX_free(_sslContext);
-			throw Exception(std::string("SSL Error: Cannot load CA file/directory at ") + caLocation, msg);
+			throw std::runtime_error(std::string("SSL Error: Cannot load CA file/directory at ") + caLocation + ": " + msg);
 		}
 	}
 

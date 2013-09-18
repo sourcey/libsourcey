@@ -27,6 +27,7 @@
 #include "Sourcey/Exception.h"
 
 #include <string>
+#include <cstring>
 #include <sstream>
 #include <vector>
 #include <list>

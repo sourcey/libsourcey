@@ -22,6 +22,7 @@
 
 
 #include "Sourcey/Types.h"
+#include <stdexcept>
 #include <atomic>
 
 

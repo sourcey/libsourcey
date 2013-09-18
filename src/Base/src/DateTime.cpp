@@ -29,6 +29,9 @@
 #if defined(_WIN32_WCE)
 #include "wce_time.h"
 #endif
+#if !defined(WIN32)
+#include <sys/time.h>
+#endif
 
 
 using namespace std;
@@ -1526,7 +1529,7 @@ void Timestamp::update()
 
 	struct timeval tv;
 	if (gettimeofday(&tv, nullptr))
-		throw SystemException("Cannot get time of day");
+		throw std::runtime_error("System error: Cannot get time of day");
 	_ts = TimeVal(tv.tv_sec)*resolution() + tv.tv_usec;
 	
 #endif

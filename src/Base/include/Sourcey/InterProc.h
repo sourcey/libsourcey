@@ -226,13 +226,13 @@ public:
 		// Pushes an item onto the queue.
 		// Pointers are now managed by the SyncQueue.		
 	{
-		RunnableQueue::push(item);
+		RunnableQueue<T>::push(item);
 		SyncContext::send();
 	}
 	
 	virtual void cancel()
 	{
-		RunnableQueue::cancel();
+		RunnableQueue<T>::cancel();
 		SyncContext::close();
 	}
 
@@ -247,7 +247,7 @@ protected:
 	virtual void run()
 	{
 		// Run for x timeout
-		RunnableQueue::runFor(_timeout);
+		RunnableQueue<T>::runFor(_timeout);
 	}
 
 	int _timeout;

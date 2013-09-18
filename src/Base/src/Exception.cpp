@@ -26,6 +26,7 @@ using namespace std;
 namespace scy {
 
 
+#if 0
 Exception::Exception(int code): 
 	_code(code)
 {
@@ -87,6 +88,7 @@ void Exception::rethrow() const
 {
 	throw *this;
 }
+#endif
 
 
 } // namespace scy

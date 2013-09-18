@@ -99,7 +99,7 @@ template<class T> struct deferred_delete
 		assert(ptr);		
 		static_assert(0 < sizeof(T), 
 			"can't delete an incomplete type");
-		scy::deleteLater(ptr);
+		GarbageCollector::instance().deleteLater(ptr);
 	}
 };
 

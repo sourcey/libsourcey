@@ -29,8 +29,9 @@
 #include "Sourcey/HTTP/Client.h"
 #include "Sourcey/HTTP/Packetizers.h"
 #include "Sourcey/HTTP/URL.h"
-#include "Sourcey/Filesystem.h"
+#include "Sourcey/FileSystem.h"
 #include "Sourcey/Crypto/Crypto.h"
+#include <stdexcept>
 
 
 namespace scy {
@@ -349,12 +350,12 @@ void FilePart::open(const std::string& path)
 
 	_istr.open(path.c_str(), std::ios::in | std::ios::binary);
 	if (!_istr.is_open())
-		throw FileException(path);
+		throw std::runtime_error("Cannot open file: " + path);
 
 	// Get file size
 	_istr.seekg(0, std::ios::end); 
 	_fileSize = _istr.tellg();
-	_istr.seekg(0, 0); 
+	_istr.seekg(0, std::ios::beg); 
 }
 
 
@@ -377,7 +378,7 @@ void FilePart::write(FormWriter& writer)
 		}
 	}
 	else if (_istr.bad())
-		throw IOException("Cannot read multipart source file", _filename);
+		throw std::runtime_error("Cannot read multipart source file: " + _filename);
 }
 
 
@@ -396,7 +397,7 @@ void FilePart::write(std::ostream& ostr)
 			ostr.write(buffer, (size_t)_istr.gcount());
 	}
 	else if (_istr.bad())
-		throw IOException("Cannot read multipart source file", _filename);
+		throw std::runtime_error("Cannot read multipart source file: " + _filename);
 }
 
 

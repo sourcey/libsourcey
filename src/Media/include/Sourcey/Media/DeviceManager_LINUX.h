@@ -32,8 +32,8 @@
 //#include "talk/sound/soundsystemfactory.h"
 
 
-namespace Sourcey {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 class LinuxDeviceManager : public DeviceManager 
@@ -50,7 +50,7 @@ private:
 };
 
 
-} } // namespace Sourcey::Media
+} } // namespace scy::av 
 
 
 #endif  // SOURCEY_MEDIA_DeviceManager_LINUX_H

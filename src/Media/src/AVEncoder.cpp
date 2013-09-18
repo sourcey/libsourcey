@@ -172,7 +172,7 @@ void AVEncoder::initialize()
 			av_dump_format(_formatCtx, 0, _options.ofile.c_str(), 1);
 				
 			// Get realtime presentation timestamp
-			_formatCtx->start_time_realtime = av_gettime();
+			//_formatCtx->start_time_realtime = av_gettime();
 
 			/*		
 			// Open the output file

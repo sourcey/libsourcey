@@ -19,7 +19,7 @@
 
 #include "Sourcey/Runner.h"
 #include "Sourcey/Logger.h"
-
+#include "Sourcey/Memory.h"
 #include "Sourcey/Singleton.h"
 
 #include <iostream>

@@ -57,7 +57,7 @@ void AVPacketEncoder::process(IPacket& packet)
 	VideoPacket* vPacket = dynamic_cast<VideoPacket*>(&packet);
 	AudioPacket* aPacket = vPacket ? nullptr : dynamic_cast<AudioPacket*>(&packet);
 	if (!vPacket && aPacket)
-		throw ArgumentException("Unknown packet type");
+		throw std::invalid_argument("Unknown packet type");
 
 	// Do some special synchronizing for muxing live variable framerate streams
 	if (_muxLiveStreams) {	

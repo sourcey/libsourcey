@@ -20,6 +20,7 @@
 #include "Sourcey/Random.h"
 #include "Sourcey/Mutex.h"
 #include "Sourcey/Thread.h"
+#include <stdexcept>
 
 #include <openssl/ssl.h>
 #include <openssl/rand.h>
@@ -56,7 +57,7 @@ void throwError()
 		msg.append(ERR_error_string(err, 0));
 	}
 
-	throw IOException(msg);
+	throw std::runtime_error(msg);
 }
 
 	
@@ -64,7 +65,7 @@ void api(int ret, const char* error)
 {
 	if (ret == 0) {
 		if (error)
-			throw IOException(error);
+			throw std::runtime_error(error);
 		else
 			throwError();
 	}

@@ -29,11 +29,11 @@
 namespace scy {
 namespace fs {
 
-extern char* separator;
+extern const char* separator;
 	// The platform specific path split separator:
 	// "/" on unix and '\\' on windows.
 	
-extern char delimiter;
+extern const char delimiter;
 	// The platform specific path split delimiter:
 	// '/' on unix and '\\' on windows.
 

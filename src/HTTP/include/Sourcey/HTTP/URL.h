@@ -49,18 +49,18 @@ public:
 	URL& operator = (const std::string& uri);
 	URL& operator = (const char* uri);
 	
-	/// Parses and assigns an URI from the given std::string.
-	/// Throws a SyntaxException if whiny is set and the
-	/// given url is invalid.
-    bool parse(const std::string& url, bool whiny = true);
+	// Parses and assigns an URI from the given std::string.
+	// Throws a SyntaxException if whiny is set and the
+	// given url is invalid.
+	bool parse(const std::string& url, bool whiny = true);
 	
-	/// RFC 3986 based URL encoding based on JavaScript's 
-	/// encodeURIComponent()
-	static std::string URL::encode(const std::string &str);
+	// RFC 3986 based URL encoding based on JavaScript's 
+	// encodeURIComponent()
+	static std::string encode(const std::string &str);
 	
-	/// RFC 3986 based URL decoding based on JavaScript's 
-	/// decodeURIComponent()
-	static std::string URL::decode(const std::string& str);
+	// RFC 3986 based URL decoding based on JavaScript's 
+	// decodeURIComponent()
+	static std::string decode(const std::string& str);
 
 public:
     std::string scheme() const;

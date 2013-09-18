@@ -27,6 +27,9 @@
 #include "Sourcey/Net/Stream.h"
 #include "Sourcey/Net/Address.h"
 #include "Sourcey/Net/Types.h"
+#if POSIX
+#include <sys/socket.h>
+#endif
 
 
 namespace scy {
@@ -111,7 +114,7 @@ public:
 	bool connected() const;
 		/// Returns true if the underlying socket is connected.
 
-	SOCKET sockfd() const;
+	//SOCKET sockfd() const;
 		/// Returns the socket descriptor for the 
 		/// underlying native socket.
 	

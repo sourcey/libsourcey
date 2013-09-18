@@ -21,7 +21,7 @@
 #include "Sourcey/Time.h"
 #include "Sourcey/DateTime.h"
 #include "Sourcey/Platform.h"
-#include "Sourcey/Filesystem.h"
+#include "Sourcey/FileSystem.h"
 #include "Sourcey/Util.h"
 #include <assert.h>
 

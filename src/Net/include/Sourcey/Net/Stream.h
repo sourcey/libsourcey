@@ -26,6 +26,7 @@
 
 #include "Sourcey/Signal.h"
 #include "Sourcey/Buffer.h"
+#include <stdexcept>
 
 
 namespace scy {
@@ -42,12 +43,12 @@ class Stream: public uv::Handle
 	}
 	
 	void close()
-		/// Closes and resets the stream handle.
-		/// This will close the active socket/pipe
-		/// and destroy the uv_stream_t handle.
-		///
-		/// If the stream is already closed this call
-		/// will have no side-effects.
+		// Closes and resets the stream handle.
+		// This will close the active socket/pipe
+		// and destroy the uv_stream_t handle.
+		//
+		// If the stream is already closed this call
+		// will have no side-effects.
 	{
 		traceL("Stream", this) << "Close: " << handle() << std::endl;
 		if (!closed()) {
@@ -57,7 +58,7 @@ class Stream: public uv::Handle
 	}
 	
 	bool shutdown()
-		/// Sends a shutdown packet to the connected peer.
+		// Sends a shutdown packet to the connected peer.
 	{
 		traceL("Stream", this) << "Send shutdown" << std::endl;
 		if (closed()) {
@@ -65,23 +66,23 @@ class Stream: public uv::Handle
 			return false;
 		}
 
-		/// XXX: Sending shutdown causes an eof error to be  
-		/// returned via handleRead() which sets the stream 
-		/// to error state. This is not really an error,
-		/// perhaps it should be handled differently?
+		// XXX: Sending shutdown causes an eof error to be  
+		// returned via handleRead() which sets the stream 
+		// to error state. This is not really an error,
+		// perhaps it should be handled differently?
 		int r = uv_shutdown(new uv_shutdown_t, handle<uv_stream_t>(), uv::afterShutdown);
 
-		/// If the stream is not connected this will return false.
+		// If the stream is not connected this will return false.
 		return r == 0;
 	}
 
 	bool write(const char* data, int len)
-		/// Writes data to the stream.
-		///
-		/// Throws an IOException if the socket is closed.
+		// Writes data to the stream.
+		//
+		// Throws a std::runtime_errorif the socket is closed.
 	{		
 		if (closed())
-			throw IOException("Cannot write to closed stream");
+			throw std::runtime_error("IO error: Cannot write to closed stream");
 		
 		int r; 		
 		uv_write_t* req = new uv_write_t;
@@ -103,13 +104,13 @@ class Stream: public uv::Handle
 	}
 	
 	Buffer& buffer()
-		/// Returns the read buffer.
+		// Returns the read buffer.
 	{ 
 		return _buffer;
 	}
 
 	Signal2<const char*, int> Read;
-		/// Signals when data can be read from the stream.
+		// Signals when data can be read from the stream.
 
  protected:	
 	bool readStart()
@@ -141,7 +142,7 @@ class Stream: public uv::Handle
 	{
 		traceL("Stream", this) << "On read: " << len << std::endl;
 
-		/// can be overridden
+		// can be overridden
 		Read.emit(instance(), data, len);
 	}
 
@@ -150,13 +151,13 @@ class Stream: public uv::Handle
 		Stream* io = static_cast<Stream*>(handle->data);
 		traceL("Stream", io) << "Handle read: " << nread << std::endl;
 
-		/// Handle EOF or error
+		// Handle EOF or error
 		if (nread == -1)  {
 			io->setLastError();
 			return;
 		}
 		else {
-			/// We only support UV_TCP right now
+			// We only support UV_TCP right now
 			if (pending == UV_TCP)
 				assert(0);
 			else
@@ -193,12 +194,12 @@ class Stream: public uv::Handle
 	{
 		Stream* self = static_cast<Stream*>(handle->data);
 
-		/// Reserve the recommended buffer size
+		// Reserve the recommended buffer size
 		//if (suggested_size > self->_buffer.capacity())
 		//	self->_buffer.capacity(suggested_size); 
 		assert(self->_buffer.capacity() >= suggested_size);
 
-		/// Reset the buffer position on each read
+		// Reset the buffer position on each read
 		//self->_buffer.position(0);
 		return uv_buf_init(self->_buffer.data(), suggested_size);
 	}

@@ -22,6 +22,7 @@
 #include "Sourcey/Logger.h"
 #include "Sourcey/Crypto/Crypto.h"
 #include "Sourcey/HTTP/Util.h"
+#include <stdexcept>
 
 
 using namespace std;
@@ -566,11 +567,11 @@ void Parser::registerSocketEvents() {
 
     if (_observer) {
       // Created response but message not complete
-      _observer->onParserError(Exception("socket end before message complete"));
+      _observer->onParserError(std::runtime_error("socket end before message complete"));
       // socket will next emit close
     } else { // Haven't created response so must emit on request
       // Started parsing headers but not yet complete
-      onError_(Exception("socket end before headers complete"));
+      onError_(std::runtime_error("socket end before headers complete"));
     }
   });
 

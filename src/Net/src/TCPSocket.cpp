@@ -285,15 +285,18 @@ bool TCPBase::closed() const
 }
 
 
+/*
 SOCKET TCPBase::sockfd() const
 {
 	return closed() ? INVALID_SOCKET : handle<uv_tcp_t>()->socket;
 }
+*/
 
 
 bool TCPBase::initialized() const
 {
-	return sockfd() != INVALID_SOCKET;
+	return !closed();
+	//return sockfd() != INVALID_SOCKET;
 }
 
 

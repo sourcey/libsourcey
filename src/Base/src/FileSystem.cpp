@@ -17,7 +17,7 @@
 //
 
 
-#include "Sourcey/Filesystem.h"
+#include "Sourcey/FileSystem.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Util.h"
 #include "Sourcey/UV/UVPP.h"
@@ -35,15 +35,15 @@ namespace scy {
 namespace fs {
 
 	
-static char* separatorWin = "\\";
-static char* separatorUnix = "/";
+static const char* separatorWin = "\\";
+static const char* separatorUnix = "/";
 #ifdef WIN32
-	char fs::delimiter = '\\';
-	char* fs::separator = separatorWin;
+	const char delimiter = '\\';
+	const char* separator = separatorWin;
 	static const char* sepPattern = "/\\";
 #else
-	char fs::delimiter = '/';
-	char* fs::separator = separatorUnix;
+	const char delimiter = '/';
+	const char* separator = separatorUnix;
 	static const char* sepPattern = "/";
 #endif
 

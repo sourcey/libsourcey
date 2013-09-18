@@ -29,6 +29,7 @@
 #include <vector>
 #include <map>
 #include <sstream>
+#include <stdexcept>
 #include <assert.h>
 
 
@@ -37,8 +38,8 @@ namespace scy {
 
 template <class TKey, class TValue>
 class AbstractCollection
-	// AbstractCollection is an abstract interface for managing a
-	// key-value store of indexed pointers.
+	/// AbstractCollection is an abstract interface for managing a
+	/// key-value store of indexed pointers.
 {	
 public:
 	AbstractCollection() {};
@@ -90,7 +91,7 @@ public:
 			if (whiny) {
 				//std::ostringstream ss;
 				//ss << "An item already exists: " << key << std::endl;
-				throw ExistsException();
+				throw std::runtime_error("Item already exists");
 			}
 			return false;
 		}
@@ -122,7 +123,7 @@ public:
 		else if (whiny) {
 			//std::ostringstream ss;
 			//ss << "Invalid item requested: " << key << std::endl;
-			throw NotFoundException();
+			throw std::runtime_error("Item not found");
 		}
 
 		return nullptr;
@@ -306,7 +307,7 @@ public:
 		if (it != _map.end())
 			return it->second;	 
 		else
-			throw NotFoundException();
+			throw std::runtime_error("Item not found");
 	}
 
 	virtual const TValue& get(const TKey& key, const TValue& defaultValue) const
@@ -473,7 +474,7 @@ inline const std::string& NVCollection::operator [] (const std::string& name) co
 	if (it != _map.end())
 		return it->second;
 	else
-		throw NotFoundException(name);
+		throw std::runtime_error("Item not found: " + name);
 }
 
 	
@@ -499,7 +500,7 @@ inline const std::string& NVCollection::get(const std::string& name) const
 	if (it != _map.end())
 		return it->second;
 	else
-		throw NotFoundException(name);
+		throw std::runtime_error("Item not found: " + name);
 }
 
 
