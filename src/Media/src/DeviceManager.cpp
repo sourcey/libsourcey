@@ -228,7 +228,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name, 
 	// If the name is a valid path to a file, then we'll create a simulated device
 	// with the filename. The LmiMediaEngine will know to use a FileVideoCapturer
 	// for these devices.
-	if (talk_base::Filesystem::IsFile(name)) {
+	if (talk_base::FileSystem::IsFile(name)) {
 		infoL() << "Create FileVideoCapturer" << endl;
 		*out = FileVideoCapturer::CreateFileVideoCapturerDevice(name);
 		return true;

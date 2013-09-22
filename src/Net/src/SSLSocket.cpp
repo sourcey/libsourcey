@@ -64,9 +64,9 @@ SSLBase::SSLBase() :
 	_sslAdapter(this)
 {
 	traceL("SSLBase", this) << "Create" << endl;
-	assert(_handle);
-	_handle->data = this;
-	_connectReq.data = this;
+	//assert(_handle);
+	//_handle->data = this;
+	//_connectReq.data = this;
 }
 
 
@@ -76,9 +76,9 @@ SSLBase::SSLBase(SSLContext::Ptr context) :
 	_sslAdapter(this)
 {
 	traceL("SSLBase", this) << "Create" << endl;
-	assert(_handle);
-	_handle->data = this;
-	_connectReq.data = this;
+	//assert(_handle);
+	//_handle->data = this;
+	//_connectReq.data = this;
 }
 	
 
@@ -88,9 +88,9 @@ SSLBase::SSLBase(SSLContext::Ptr context, SSLSession::Ptr session) :
 	_sslAdapter(this)
 {
 	traceL("SSLBase", this) << "Create" << endl;
-	assert(_handle);
-	_handle->data = this;
-	_connectReq.data = this;
+	//assert(_handle);
+	//_handle->data = this;
+	//_connectReq.data = this;
 }
 
 	
@@ -102,7 +102,7 @@ SSLBase::~SSLBase()
 
 int SSLBase::available() const
 {
-	assert(initialized());
+	//assert(initialized());
 	return _sslAdapter.available();
 }
 
@@ -118,7 +118,7 @@ bool SSLBase::shutdown()
 {
 	traceL("SSLBase", this) << "Shutdown" << endl;
 	try {
-		/// Try to gracefully shutdown the SSL connection
+		// Try to gracefully shutdown the SSL connection
 		_sslAdapter.shutdown();
 	}
 	catch (...) {}
@@ -134,9 +134,15 @@ int SSLBase::send(const char* data, int len, int flags)
 
 int SSLBase::send(const char* data, int len, const net::Address& /* peerAddress */, int /* flags */) 
 {	
-	assert(len <= net::MAX_TCP_PACKET_SIZE);	
-	assert(initialized());
 	traceL("SSLBase", this) << "Send: " << len << endl;
+
+	assert(len <= net::MAX_TCP_PACKET_SIZE);
+	if (closed()) {
+		warnL("SSLBase", this) << "Send error" << endl;	
+		return -1;
+	}
+
+	//assert(initialized());
 	
 	// Send unencrypted data to the SSL context
 	_sslAdapter.addOutgoingData(data, len);
@@ -173,6 +179,12 @@ bool SSLBase::sessionWasReused()
 		return SSL_session_reused(_sslAdapter._ssl) != 0;
 	else
 		return false;
+}
+
+
+net::TransportType SSLBase::transport() const
+{ 
+	return net::SSLTCP; 
 }
 
 

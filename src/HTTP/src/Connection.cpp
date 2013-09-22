@@ -117,8 +117,9 @@ void Connection::close()
 void Connection::setError(const Error& err) 
 { 
 	traceL("Connection", this) << "Set error: " << err.message << endl;	
-	_socket.setError(err);
-	//_error = err;
+	
+	//_socket.setError(err);
+	_error = err;
 }
 
 

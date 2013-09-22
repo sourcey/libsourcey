@@ -143,7 +143,7 @@ inline bool resolveDNS(DNSResult* dns)
 }
 
 
-inline bool resolveDNS(const std::string& host, UInt16 port, std::function<void(const DNSResult&)> callback/*DNSResult::func callback*/, void* opaque = NULL, struct addrinfo* hints = NULL)
+inline bool resolveDNS(const std::string& host, UInt16 port, std::function<void(const DNSResult&)> callback/*DNSResult::func callback*/, void* opaque = nullptr, struct addrinfo* hints = nullptr)
 {		
 	DNSResult* dns = new DNSResult();
 	dns->host = host;

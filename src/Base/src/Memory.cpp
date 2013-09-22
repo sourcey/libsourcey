@@ -83,7 +83,7 @@ void GarbageCollector::onTimer()
 		_pending.empty())
 		return;
 
-	traceL("GarbageCollector", this) << "delete queue: "
+	traceL("GarbageCollector", this) << "Delete queue: "
 		<< "\n\tReady: " << _ready.size() 
 		<< "\n\tPending: " << _pending.size()
 		<< std::endl;
@@ -160,7 +160,7 @@ void GarbageCollector::onTimer()
 		_pending.empty())
 		return;
 
-	traceL("GarbageCollector", this) << "delete queue: "
+	traceL("GarbageCollector", this) << "Delete queue: "
 		<< "\n\tReady: " << _ready.size() 
 		<< "\n\tPending: " << _pending.size()
 		<< std::endl;

@@ -137,7 +137,7 @@ public:
 protected:
 	virtual ~PacketTransaction()
 	{
-		assert(!stateEquals(TransactionState::Running));
+		//assert(!stateEquals(TransactionState::Running));
 	}
 
 	virtual void onStateChange(TransactionState& state, const TransactionState&) 

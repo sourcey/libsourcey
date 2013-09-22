@@ -32,14 +32,14 @@ namespace scy {
 
 SyncPacketQueue::SyncPacketQueue(uv::Loop& loop, int maxSize) : 
 	SyncQueue<IPacket>(loop, maxSize), 
-	PacketProcessor(Emitter)
+	PacketProcessor(this->emitter)
 {	
 }
 
 
 SyncPacketQueue::SyncPacketQueue(int maxSize) : 
 	SyncQueue<IPacket>(uv::defaultLoop(), maxSize), 
-	PacketProcessor(Emitter)
+	PacketProcessor(this->emitter)
 {	
 }
 	
@@ -100,7 +100,7 @@ void SyncPacketQueue::onStreamStateChange(const PacketStreamState& state)
 
 AsyncPacketQueue::AsyncPacketQueue(int maxSize) : 
 	AsyncQueue<IPacket>(maxSize), 
-	PacketProcessor(Emitter)
+	PacketProcessor(this->emitter)
 {	
 }
 	

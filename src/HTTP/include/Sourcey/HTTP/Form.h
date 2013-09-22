@@ -125,7 +125,7 @@ public:
 	ClientConnection& connection();
 		/// The associated HTTP client connection.
 			
-	PacketSignal Emitter;
+	PacketSignal emitter;
 		/// Outgoing packet emitter
 
 	static const char* ENCODING_URL;       /// "application/x-www-form-urlencoded"

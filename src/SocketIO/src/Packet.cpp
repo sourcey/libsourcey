@@ -45,7 +45,7 @@ Packet::Packet(Type type, int id, const std::string& endpoint, const std::string
 	
 Packet::Packet(Type type, const std::string& message, bool ack) : 
 	_type(type), 
-	_id(util::randomNumber(4)),
+	_id(util::randomNumber()),
 	_message(message),
 	_ack(ack),
 	_size(0)
@@ -56,7 +56,7 @@ Packet::Packet(Type type, const std::string& message, bool ack) :
 	
 Packet::Packet(const std::string& message, bool ack) : 
 	_type(Packet::Message), 
-	_id(util::randomNumber(4)),
+	_id(util::randomNumber()),
 	_message(message),
 	_ack(ack),
 	_size(0)
@@ -67,7 +67,7 @@ Packet::Packet(const std::string& message, bool ack) :
 	
 Packet::Packet(const json::Value& data, bool ack) : 
 	_type(Packet::JSON), 
-	_id(util::randomNumber(4)),
+	_id(util::randomNumber()),
 	_message(json::stringify(data)),
 	_ack(ack),
 	_size(0)
@@ -78,7 +78,7 @@ Packet::Packet(const json::Value& data, bool ack) :
 	
 Packet::Packet(const std::string& event, const json::Value& data, bool ack) : 
 	_type(Packet::Event), 
-	_id(util::randomNumber(4)),
+	_id(util::randomNumber()),
 	_ack(ack),
 	_size(0)
 {	
@@ -157,7 +157,7 @@ bool Packet::read(const ConstBuffer& buf)
 		return false;
 	}
 	if (frags.size() >= 2 && !frags[1].empty()) {
-		_ack = (frags[1].find('+') != string::npos);
+		_ack = (frags[1].find('+') != std::string::npos);
 		_id = util::strtoi<UInt32>(frags[1]);
 	}	
 	if (frags.size() >= 3 && !frags[2].empty()) {

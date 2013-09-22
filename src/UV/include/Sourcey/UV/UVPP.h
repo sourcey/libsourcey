@@ -248,10 +248,10 @@ public:
 	virtual void setError(const Error& err) 
 		// Sets the error content and triggers callbacks.
 	{ 
-		if (_error.uverr != err.uverr) {
-			_error = err; 
+		//if (_error.uverr != err.uverr) {
+		//	_error = err; 
 			onError(err);
-		}
+		//}
 	}
 
 protected:	

@@ -71,7 +71,7 @@ std::string getUTC();
 
 
 #if 0
-UInt64 getTimeHR();
+UInt64 hrtime();
 	// Returns the current high-resolution real time in nanoseconds.
 
 UInt64 getTimeMS();

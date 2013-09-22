@@ -1709,7 +1709,7 @@ bool Timeout::running() const
 
 void Timeout::start() 
 {
-	_startAt = time::now();
+	_startAt = time::ticks();
 }
 
 
@@ -1721,13 +1721,13 @@ void Timeout::stop()
 
 void Timeout::reset() 
 {
-	_startAt = time::now();
+	_startAt = time::ticks();
 }
 
 
 long Timeout::remaining() const 
 {
-	time_t current = time::now();	
+	time_t current = time::ticks();	
 	long remaining = static_cast<long>(_delay - (current - _startAt));
 	return remaining > 0 ? remaining : 0;
 }

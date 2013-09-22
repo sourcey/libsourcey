@@ -48,13 +48,13 @@ public:
 	
 	virtual void connect(const Address& address) = 0;
 		// Connects to the given peer IP address.
-		///
+		//
 		// Throws an exception if the address is malformed.
 		// Connection errors can be handled via the Error signal.
 
 	virtual void connect(const std::string& host, UInt16 port);
 		// Resolves and connects to the given host address.
-		///
+		//
 		// Throws an Exception if the host is malformed.
 		// Since the DNS callback is asynchronous implementations need 
 		// to listen for the Error signal for handling connection errors.		
@@ -72,12 +72,12 @@ public:
 	virtual void bind(const Address& address, unsigned flags = 0) = 0;
 		// Bind a local address to the socket.
 		// The address may be IPv4 or IPv6 (if supported).
-		///
+		//
 		// Throws an Exception on error.
 
 	virtual void listen(int backlog = 64) { (void)backlog; };
 		// Listens the socket on the given address.
-		///
+		//
 		// Throws an Exception on error.
 		
 	virtual int send(const char* data, int len, int flags = 0) = 0;
@@ -85,20 +85,20 @@ public:
 
 	virtual int send(const char* data, int len, const Address& peerAddress, int flags = 0) = 0;
 		// Sends the given data buffer to the given peer address.
-		///
+		//
 		// For TCP sockets the given peer address must match the
 		// connected peer address.
 	
 	virtual Address address() const = 0;
 		// The locally bound address.
-		///
+		//
 		// This function will not throw.
 		// A Wildcard 0.0.0.0:0 address is returned if 
 		// the socket is closed or invalid.
 
 	virtual Address peerAddress() const = 0;
 		// The connected peer address.
-		///
+		//
 		// This function will not throw.
 		// A Wildcard 0.0.0.0:0 address is returned if 
 		// the socket is closed or invalid.
@@ -108,19 +108,21 @@ public:
 		
 	virtual void setError(const scy::Error& err) = 0;
 		// Sets the socket error.
-		///
+		//
 		// Setting the error will result in socket closure.
 
 	virtual const scy::Error& error() const = 0;
 		// Return the socket error if any.
 
+	//virtual bool initialized() const = 0;
+		// Returns true if the native socket handle is initialized.
+
 	virtual bool closed() const = 0;
-		// Returns true if the native socket 
-		// handle is closed.
+		// Returns true if the native socket handle is closed.
 	
 	void* opaque;
 		// Optional client data pointer.
-		///
+		//
 		// The pointer is not initialized or managed
 		// by the socket base.
 	
@@ -172,7 +174,7 @@ public:
 	Socket(SocketBase* base, bool shared);
 		// Creates the Socket from the given SocketBase and attaches
 		// the given or default SocketAdapter.
-		///
+		//
 		// If shared is true the SocketBase reference count will be
 		// incremented. If not we do not increment the reference count.
 		// This effectively means are taking ownership of the SocketBase, 
@@ -181,7 +183,7 @@ public:
 
 	Socket& operator = (const Socket& socket);
 		// Assignment operator.
-		///
+		//
 		// Releases the socket's socket context and
 		// attaches the socket context from the other socket and
 		// increments the reference count of the SocketBase.
@@ -205,14 +207,24 @@ public:
 		
 	virtual int send(const char* data, int len, int flags = 0);
 	virtual int send(const char* data, int len, const Address& peerAddress, int flags = 0);
+		// Sends the given data pointer to the connected peer.
+		// Returns the number of bytes sent or -1 on error.
+		// No exception will be thrown.
 
 	virtual int send(const IPacket& packet, int flags = 0);
 	virtual int send(const IPacket& packet, const Address& peerAddress, int flags = 0);
+		// Sends the given packet to the connected peer.
+		// Returns the number of bytes sent or -1 on error.
+		// No exception will be thrown.
+
 	virtual void send(void*, IPacket& packet);
+		// Sends the given packet to the connected peer.
+		// This method provides delegate compatability, and unlike
+		// other send methods throws an exception if the underlying 
+		// socket is closed.
 
 	virtual void setError(const scy::Error& err);
 		// Sets the socket error.
-		///
 		// Setting the error will result in socket closure.
 
 	bool closed() const;
@@ -269,7 +281,7 @@ public:
 
 protected:		
 	Socket();
-		// Creates a NULL socket.
+		// Creates a nullptr socket.
 
 	friend class SocketBase;
 
@@ -292,10 +304,10 @@ class SocketAdapter
 	/// See the PacketSocketAdapter and Transaction classes for ideas.
 {
 public:
-	SocketAdapter(Socket* socket = NULL);
+	SocketAdapter(Socket* socket = nullptr);
 		// Creates the SocketAdapter.
-		///
-		// The Socket instance can be NULL, but it must be set 
+		//
+		// The Socket instance can be nullptr, but it must be set 
 		// before any callbacks come back.
 	
 	virtual ~SocketAdapter();
@@ -616,7 +628,7 @@ protected:
 	template<class T>
 	bool is()
 	{
-		return as<T>() != NULL;
+		return as<T>() != nullptr;
 	}
 	*/
 

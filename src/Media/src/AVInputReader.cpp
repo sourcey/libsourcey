@@ -199,7 +199,7 @@ void AVInputReader::stop()
 {
 	traceL("AVInputReader", this) << "Stopping" << endl;
 
-	//ScopedLock lock(_mutex);	
+	//Mutex::ScopedLock lock(_mutex);	
 
 	if (_thread.running()) {
 		traceL("AVInputReader", this) << "Terminating Thread" << endl;		

@@ -10,7 +10,7 @@
 #  OpenCV_INCLUDE_DIR
 #  OpenCV_LIBRARIES
 #  OpenCV_LIBRARY_DIRS
-# --------------------------------
+# ----------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
 # Default OpenCV components to include if COMPONENTS is undefined
@@ -46,7 +46,7 @@ endif()
 # Set the version of the OpenCV library we are linking against.
 # This is important for windows as the opencv libraries names include the vesion.
 
-if(OpenCV_INCLUDE_DIR AND NOT OpenCV_VERSION_FILE)
+if(NOT OpenCV_VERSION AND OpenCV_INCLUDE_DIR) # AND NOT OpenCV_VERSION_FILE
   set(OpenCV_VERSION_FILE "${OpenCV_INCLUDE_DIR}/opencv2/core/version.hpp")
   if(EXISTS "${OpenCV_VERSION_FILE}")
 
@@ -57,15 +57,17 @@ if(OpenCV_INCLUDE_DIR AND NOT OpenCV_VERSION_FILE)
     string(REGEX REPLACE ".+CV_VERSION_MINOR[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_PATCH "${OpenCV_VERSION_PARTS}")
     string(REGEX REPLACE ".+CV_VERSION_REVISION[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_TWEAK "${OpenCV_VERSION_PARTS}")
 
-    set(OpenCV_VERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}")
-    if(OpenCV_VERSION_TWEAK GREATER 0)
-      set(OpenCV_VERSION "${OpenCV_VERSION}.${OpenCV_VERSION_TWEAK}")
-    endif()
+    if(OpenCV_VERSION_MAJOR AND OpenCV_VERSION_MINOR)
+      set(OpenCV_VERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}")
+      if(OpenCV_VERSION_TWEAK GREATER 0)
+        set(OpenCV_VERSION "${OpenCV_VERSION}.${OpenCV_VERSION_TWEAK}")
+      endif()
 
-    set(OpenCV_SOVERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}")
-    set(OpenCV_LIBVERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}")
-  else()
-    set(OpenCV_VERSION "2.4.5" CACHE STRING "OpenCV library version.")    
+      set(OpenCV_SOVERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}")
+      set(OpenCV_LIBVERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}")
+    endif()
+  #else()
+  #  set(OpenCV_VERSION "2.4.5" CACHE STRING "OpenCV library version.")    
   endif()
 endif()
 
@@ -73,13 +75,18 @@ endif()
 #message("OpenCV_VERSION_FILE=${OpenCV_VERSION_FILE}")
 #message("OpenCV_VERSION=${OpenCV_VERSION}")
 
+if(NOT OpenCV_VERSION)
+  message(FATAL_ERROR "Cannot determine installed OpenCV version; please specify it manually. Version >= 2.4.5 supported.")
+endif()
+
+
 # ----------------------------------------------------------------------
 # Find component libraries
 # ---------------------------------------------------------------------- 
 # The reason for including via iteration rather than find_library
 # is so we can remain version agnostic.
 #set_module_notfound(OpenCV)
-set(OpenCV_FOUND 0)
+#set(OpenCV_FOUND 0)
 if (NOT OpenCV_FOUND)
   set(OpenCV_FOUND 0)
   
@@ -174,7 +181,7 @@ if (NOT OpenCV_FOUND)
   if(NOT OpenCV_FOUND)
      if (OpenCV_FIND_REQUIRED)
         message(FATAL_ERROR 
-          "OpenCV was not found; please specify the path manually. Version >= 2.4 is supported.")
+          "OpenCV was not found; please specify the path manually. Version >= 2.4.5 supported.")
      endif()
   endif()
 endif()

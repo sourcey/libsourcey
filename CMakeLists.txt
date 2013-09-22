@@ -93,13 +93,13 @@ if(WIN32)
   SET(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a") # ".dll"
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     D:/dev/lib/wxWidgets-2.9.4/lib/vc_lib
-    #D:/dev/lib/OpenCV2.4.1/build/install/lib
+    D:/dev/lib/opencv-2.4.6.0/build/install/lib
     #D:/dev/lib/OpenSSL-Win32/lib/VC/static
     #D:/dev/lib/poco-1.4.6p1-all/lib 
-    D:/dev/lib/poco-1.5.1/lib 
+    #D:/dev/lib/poco-1.5.1/lib 
     D:/dev/lib/ffmpeg-1.0.1-gpl/lib
     #${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/vc10
+    #${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/vc10
     ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/lib/vc10
     #${LibSourcey_SOURCE_DIR}/anionu-abi/poco/lib/vc10
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
@@ -126,18 +126,19 @@ endif()
 # to search these locations first
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    D:/dev/lib/wxWidgets-2.9.4
-    #D:/dev/lib/OpenSSL-Win32/include
-    #D:/dev/lib/poco-1.4.6p1-all    
-    D:/dev/lib/poco-1.5.1
+    D:/dev/lib/wxWidgets-2.9.4  
+    #D:/dev/lib/poco-1.5.1
     D:/dev/lib/ffmpeg-1.0.1-gpl/include
+    D:/dev/lib/opencv-2.4.6.0/build/install/include
     #${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/include
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/include
+    #${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/include
     ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/include
-    #${LibSourcey_SOURCE_DIR}/anionu-abi/poco/include
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
     )
     
+    #D:/dev/lib/OpenSSL-Win32/include
+    #D:/dev/lib/poco-1.4.6p1-all  
+    #${LibSourcey_SOURCE_DIR}/anionu-abi/poco/include
     #D:/dev/lib/OpenCV2.3/build/include
     #D:/dev/lib/OpenCV2.4/build/install/include
     #D:/dev/lib/OpenCV2.4.1/build/include
@@ -226,13 +227,13 @@ endif()
 set(HAVE_RTAUDIO 0)
 set(HAVE_JSONCPP 0)
 set(HAVE_OPENSSL 0)
-set(HAVE_POCO 0)
 set(HAVE_FFMPEG 0)
 set(HAVE_OPENCV 0)
 set(HAVE_WXWIDGETS 0)
 set(HAVE_LIBUV 0)
 set(HAVE_HTTP_PARSER 0)
 set(HAVE_ZLIB 0)
+#set(HAVE_POCO 0)
 #set(HAVE_LIBSTROPHE 0)
 #set(HAVE_PUGIXML 0)
   

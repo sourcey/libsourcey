@@ -117,8 +117,8 @@ Int64 doubleToInt(double d);
 // Random generators
 //
 
-UInt32 randomNumber(int size = 8);
-	// Generates a 31-bit pseudo random number of modulo size.
+UInt32 randomNumber();
+	// Generates a 31-bit pseudo random number.
 
 std::string randomString(int size);
 	// Generates a random string.

@@ -43,7 +43,7 @@ void InstallMonitor::onInstallStateChange(void* sender, InstallationState& state
 {
 	auto task = reinterpret_cast<InstallTask*>(sender);
 
-	debugL() << "[InstallMonitor] onInstallStateChange: " << task << ": " << state.toString() << endl;
+	debugL() << "[InstallMonitor] onInstallStateChange: " << task << ": " << state << endl;
 
 	InstallStateChange.emit(this, *task, state, oldState);
 }

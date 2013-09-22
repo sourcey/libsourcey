@@ -48,12 +48,12 @@ Message::Message(const Message& r) :
 	assert(_transactionID.size() == 16);	
 
 	// Clear our current attributes
-	for (unsigned i = 0; i < _attrs.size(); i++)
+	for (auto i = 0; i < _attrs.size(); i++)
 		delete _attrs[i];
 	_attrs.clear();
 
 	// Copy attributes from source object
-	for (unsigned i = 0; i < r.attrs().size(); i++)
+	for (auto i = 0; i < r.attrs().size(); i++)
 		_attrs.push_back(r.attrs()[i]->clone());
 }
 
@@ -68,12 +68,12 @@ Message& Message::operator = (const Message& r)
 	assert(_transactionID.size() == 16);	
 
 	// Clear current attributes
-	for (unsigned i = 0; i < _attrs.size(); i++)
+	for (auto i = 0; i < _attrs.size(); i++)
 		delete _attrs[i];
 	_attrs.clear();
 
 	// Copy attributes from source object
-	for (unsigned i = 0; i < r.attrs().size(); i++)
+	for (auto i = 0; i < r.attrs().size(); i++)
 		_attrs.push_back(r.attrs()[i]->clone());
 
 	return *this;
@@ -82,7 +82,7 @@ Message& Message::operator = (const Message& r)
 
 Message::~Message() 
 {
-	for (unsigned i = 0; i < _attrs.size(); i++)
+	for (auto i = 0; i < _attrs.size(); i++)
 		delete _attrs[i];
 }
 
@@ -147,7 +147,7 @@ string Message::toString() const
 {
 	ostringstream os;
 	os << "STUN[" << transactionID() << ":" << typeString();
-	for (unsigned i = 0; i < _attrs.size(); i++)
+	for (auto i = 0; i < _attrs.size(); i++)
 		os << ":" << _attrs[i]->typeString();
 	os << "]";
 	return os.str();
@@ -157,7 +157,7 @@ string Message::toString() const
 void Message::print(std::ostream& os) const
 {
 	os << "STUN[" << typeString() << ":" << transactionID();
-	for (unsigned i = 0; i < _attrs.size(); i++)
+	for (auto i = 0; i < _attrs.size(); i++)
 		os << ":" << _attrs[i]->typeString();
 	os << "]";
 }
@@ -179,7 +179,7 @@ void Message::add(Attribute* attr)
 
 Attribute* Message::get(Attribute::Type type, int index) const 
 {
-	for (unsigned i = 0; i < _attrs.size(); i++) {
+	for (auto i = 0; i < _attrs.size(); i++) {
 		if (_attrs[i]->type() == type) {			
 			if (index == 0)
 				return _attrs[i];
@@ -259,7 +259,7 @@ void Message::write(Buffer& buf) const
 
 	// TODO: Shift Message Integrity to end
 
-	for (unsigned i = 0; i < _attrs.size(); i++) {
+	for (auto i = 0; i < _attrs.size(); i++) {
 		writer.putU16(_attrs[i]->type());
 		writer.putU16(_attrs[i]->size()); 
 		_attrs[i]->write(writer);

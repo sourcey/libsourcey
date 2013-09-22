@@ -33,7 +33,7 @@ namespace av {
 
 
 ImageEncoder::ImageEncoder(EncoderOptions& options, std::vector<int> cvParams) : 
-	PacketProcessor(Emitter),
+	PacketProcessor(this->emitter),
 	_options(options),
 	_params(cvParams)
 {	

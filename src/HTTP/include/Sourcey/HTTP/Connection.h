@@ -127,6 +127,7 @@ protected:
     net::Socket _socket;	
 	Timeout _timeout;
 	Buffer _outgoing;
+	Error _error;
 
 	bool _closed;
 	bool _shouldSendHeader;

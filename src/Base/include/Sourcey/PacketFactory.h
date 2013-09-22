@@ -83,14 +83,14 @@ public:
 	template <class PacketT>
 	void registerPacketType(int priority) {
 		unregisterPacketType<PacketT>(); // ensure unique values
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		_types.push_back(new PacketCreationStrategy<PacketT>(priority));
 		sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
 	}
 
 	template <class PacketT>
 	void unregisterPacketType() {
-		//ScopedLock lock(_mutex);		
+		//Mutex::ScopedLock lock(_mutex);		
 		for (typename PacketCreationStrategyList::iterator it = _types.begin(); it != _types.end(); ++it) {
 			if (dynamic_cast<PacketCreationStrategy<PacketT>*>(*it) != 0) {
 				delete *it;
@@ -103,14 +103,14 @@ public:
 	template <class StrategyT>
 	void registerStrategy(int priority) {
 		unregisterStrategy<StrategyT>(); // ensure unique values
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		_types.push_back(new StrategyT(priority));
 		sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
 	}
 
 	template <class StrategyT>
 	void unregisterStrategy() {
-		//ScopedLock lock(_mutex);		
+		//Mutex::ScopedLock lock(_mutex);		
 		for (typename PacketCreationStrategyList::iterator it = _types.begin(); it != _types.end(); ++it) {
 			if (dynamic_cast<StrategyT*>(*it) != 0) {
 				delete *it;
@@ -121,12 +121,12 @@ public:
 	}
 
 	PacketCreationStrategyList& types() {
-		//ScopedLock lock(_mutex);		
+		//Mutex::ScopedLock lock(_mutex);		
 		return _types;
 	}
 
 	PacketCreationStrategyList types() const {
-		//ScopedLock lock(_mutex);		
+		//Mutex::ScopedLock lock(_mutex);		
 		return _types;
 	}
 
@@ -136,7 +136,7 @@ public:
 	}
 
 	virtual IPacket* createPacket(const ConstBuffer& buffer) {
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		assert(!_types.empty() && "no packet types registered");
 		//size_t offset = reader.position();
 		for (unsigned i = 0; i < _types.size(); i++) {

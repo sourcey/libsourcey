@@ -33,16 +33,17 @@ namespace scy {
 
 
 class StopPropagation: public std::exception
-	// This exception is used to break out of a Signal callback scope.
+	/// This exception is used to break out of a Signal callback scope.
 {
+public:
 	virtual ~StopPropagation() throw() {};
 };
 
 
 template <class DelegateT, DelegateDefaultParams>
 class SignalBase 
-	// This class implements a thread-safe signal which
-	// broadcasts arbitrary data to multiple receiver delegates.
+	/// This class implements a thread-safe signal which
+	/// broadcasts arbitrary data to multiple receiver delegates.
 {
 public:
 	typedef std::list<DelegateT*>				  DelegateList;

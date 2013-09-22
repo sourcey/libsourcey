@@ -29,13 +29,13 @@
 namespace scy {
 
 
-template <class TKey, class TValue>
-class TimedManager: public PointerCollection<TKey, TValue>
+template <class TKey, class TValue, class TDeleter = std::default_delete<TValue>>
+class TimedManager: public PointerCollection<TKey, TValue, TDeleter>
 	/// Provides timed persistent data storage for class instances.
 	/// TValue must implement the clone() method.
 {
 public:
-	typedef PointerCollection<TKey, TValue> Base;
+	typedef PointerCollection<TKey, TValue, TDeleter> Base;
 	typedef std::map<TValue*, Timeout> TimeoutMap;
 
 	TimedManager(uv::Loop& loop = uv::defaultLoop()) :
@@ -51,65 +51,36 @@ public:
 	}
 	
 	virtual void add(const TKey& key, TValue* item, long timeout = 0)
-		// Adds an item which will expire (and be deleted) after the 
+		// Add an item which will expire (and be deleted) after the 
 		// specified timeout value.
 		// If the timeout is 0 the item will be stored indefinitely.
 		// The TimedManager assumes ownership of the given pointer.
 	{
 		Base::free(key); // Free existing item and timeout (if any)
-		Base::add(key, item); // Add new entry
-		
-		if (timeout > 0) {			
+		Base::add(key, item); // Add new entry		
+		if (timeout > 0)
 			setTimeout(item, timeout);
-			/*
-			traceL("TimedManager", this) << "Set timeout: " 
-				<< key << ": " << item << ": " << timeout << std::endl;	
-			Mutex::ScopedLock lock(_tmutex);
-			auto& t = _timeouts[item];
-			t.setDelay(timeout);
-			t.start();
-			*/
-		}
 	}
 	
 	virtual bool expires(const TKey& key, long timeout) 
-		// Updates the item expiry timeout
+		// Update the item expiry timeout
 	{
 		traceL("TimedManager", this) << "Set expires: " << key << ": " << timeout << std::endl;	
 		return expires(Base::get(key, false), timeout);
 	}
 	
 	virtual bool expires(TValue* item, long timeout) 
-		// Updates the item expiry timeout
+		// Update the item expiry timeout
 	{
 		traceL("TimedManager", this) << "Set expires: " << item << ": " << timeout << std::endl;	
-		/*	
-		if (item) {
-			Mutex::ScopedLock lock(_tmutex);
-
-			// Update the existing entry
-			auto it = _timeouts.find(item);	
-			if (it != _timeouts.end()) {
-				if (timeout > 0) {
-					it->second.reset();
-					it->second.setDelay(timeout);
-				}
-				else
-					_timeouts.erase(it);
-				return true;
-			}
-
-			// Add a new entry
-			else {
-			}		
-		}
-		*/
 		return setTimeout(item, timeout);
 	}
 
 	virtual void clear()
 	{
 		Base::clear();
+		Mutex::ScopedLock lock(_tmutex);
+		_timeouts.clear();
 	}
 
 protected:
@@ -143,7 +114,6 @@ protected:
 		if (it != _timeouts.end())
 			_timeouts.erase(it);
 		
-		// Remove pointer entry
 		Base::onRemove(key, item);
 	}
 	
@@ -151,10 +121,15 @@ protected:
 	{
 		Mutex::ScopedLock lock(_tmutex);
 		for (auto it = _timeouts.begin(); it != _timeouts.end();) {
+			//traceL("TimedManager", this) << "Check item: " 
+			//	<< it->first << ": " 
+			//	<< it->second.delay() << ": " 
+			//	<< it->second.remaining() << std::endl;	
 			if (it->second.expired()) {	
-				traceL("TimedManager", this) << "Item expired: " << it->first << std::endl;				
-				if (Base::remove(it->first))
-					delete it->first;
+				traceL("TimedManager", this) << "Item expired: " << it->first << std::endl;
+				auto item = it->first;
+				if (Base::remove(item))
+					delete item;
 				it = _timeouts.erase(it);
 			}
 			else ++it;
@@ -172,7 +147,36 @@ protected:
 
 #endif // SOURCEY_TimedManager_H
 
+			/*
+			traceL("TimedManager", this) << "Set timeout: " 
+				<< key << ": " << item << ": " << timeout << std::endl;	
+			Mutex::ScopedLock lock(_tmutex);
+			auto& t = _timeouts[item];
+			t.setDelay(timeout);
+			t.start();
+			*/
 
+		/*	
+		if (item) {
+			Mutex::ScopedLock lock(_tmutex);
+
+			// Update the existing entry
+			auto it = _timeouts.find(item);	
+			if (it != _timeouts.end()) {
+				if (timeout > 0) {
+					it->second.reset();
+					it->second.setDelay(timeout);
+				}
+				else
+					_timeouts.erase(it);
+				return true;
+			}
+
+			// Add a new entry
+			else {
+			}		
+		}
+		*/
 
 		/*
 			//(timeout, true);
