@@ -29,7 +29,7 @@ namespace scy {
 
 
 PacketStream::PacketStream(const std::string& name) : 
-	PacketStreamAdapter(*this),
+	PacketStreamAdapter(reinterpret_cast<PacketSignal&>(*this)),
 	_name(name),
 	_clientData(nullptr),
 	_scopeRef(0)
@@ -610,21 +610,6 @@ PacketAdapterVec PacketStream::processors() const
 PacketStreamAdapter::PacketStreamAdapter(PacketSignal& emitter) :
 	_emitter(&emitter)
 {
-}
-
-
-PacketStreamAdapter::PacketStreamAdapter(const PacketStreamAdapter& that) :
-	_emitter(that._emitter)
-{
-}
-
-	
-PacketStreamAdapter& PacketStreamAdapter::operator = (const PacketStreamAdapter& that)
-{
-	if (this != &that) {
-		_emitter = that._emitter;
-	}
-	return *this;
 }
 
 
