@@ -414,7 +414,7 @@ UInt16 Address::resolveService(const std::string& service)
 	if (port && port > 0) //, port) && port <= 0xFFFF
 		return (UInt16) port;
 
-	struct servent* se = getservbyname(service.c_str(), NULL);
+	struct servent* se = getservbyname(service.c_str(), nullptr);
 	if (se)
 		return ntohs(se->s_port);
 	else

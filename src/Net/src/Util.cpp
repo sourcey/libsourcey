@@ -132,7 +132,7 @@ string getPublicIPAddress(bool whiny)
 			{
 				case 0:
 					start = response.find("Address:");
-					if (start != string::npos) {
+					if (start != std::string::npos) {
 						start += 8;
 						end = response.find("</body>", start);
 						response = response.substr(start, end-start);
@@ -142,7 +142,7 @@ string getPublicIPAddress(bool whiny)
 					break;
 				case 1:
 					start = response.find("<ip_address>");
-					if (start != string::npos) {
+					if (start != std::string::npos) {
 						start += 12;
 						end = response.find("</ip_address>", start);
 						response = response.substr(start, end-start);

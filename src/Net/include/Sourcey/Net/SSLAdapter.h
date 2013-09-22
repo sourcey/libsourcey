@@ -45,7 +45,7 @@ public:
 	SSLAdapter(net::SSLBase* socket);
 	~SSLAdapter();
 
-	void init(SSL* ssl = NULL);
+	void init(SSL* ssl = nullptr);
 		// Initializes the BIO buffers from the given SSL pointer.
 
 	bool initialized() const;

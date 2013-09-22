@@ -72,7 +72,7 @@ protected:
 	PacketStreamAdapter& operator=(const PacketStreamAdapter&); // = delete;
 	PacketStreamAdapter& operator=(PacketStreamAdapter&&); // = delete;
 
-	PacketSignal& _emitter;
+	PacketSignal* _emitter;
 };
 
 
@@ -191,7 +191,11 @@ struct PacketStreamState: public State
 //
 
 
-class PacketStream: public PacketStreamAdapter, public Stateful<PacketStreamState>, public basic::Startable
+class PacketStream: 
+	public PacketStreamAdapter, 
+	public PacketSignal, 
+	public Stateful<PacketStreamState>, 
+	public basic::Startable
 	/// This class is used for processing and boradcasting IPackets in a flexible way.
 	/// A PacketStream consists of one or many PacketSources, one or many
 	/// PacketProcessors, and one or many delegate receivers.
@@ -251,7 +255,7 @@ public:
 
 	virtual void attachSource(PacketSignal& source);
 		// Attach a source packet emitter to the stream.
-		// The source packet adapter can be another PacketStream::Emitter.
+		// The source packet adapter can be another PacketStream::emitter.
 	
 	virtual void attachSource(PacketStreamAdapter* source, bool freePointer = true, bool syncState = false);
 		// Attach a source packet emitter to the stream.
@@ -280,7 +284,7 @@ public:
 		// Note: The pointer will be forgotten about, so if the freePointer
 		// flag set when calling attach() will have no effect.
 
-	PacketSignal Emitter;
+	//PacketSignal emitter;
 		// Signals to delegates on outgoing packets.
 	
 	virtual std::string name() const;

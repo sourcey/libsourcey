@@ -104,21 +104,28 @@ macro(include_sourcey_modules)
       # This way we don't have to install updated modules before building applications
       # simplifying the build process. 
     
-      # Always reset the module folders since.
+      # Always reset the module folders.
       set(LibSourcey_${name}_RELEASE LibSourcey_${name}_RELEASE-NOTFOUND)
       set(LibSourcey_${name}_RELEASE LibSourcey_${name}_RELEASE-NOTFOUND PARENT_SCOPE)
       set(LibSourcey_${name}_DEBUG LibSourcey_${name}_DEBUG-NOTFOUND)
       set(LibSourcey_${name}_DEBUG LibSourcey_${name}_DEBUG-NOTFOUND PARENT_SCOPE)  
-      
-    
+          
       # Since CMake doesn't give priority to the PATHS parameter, we need to search twice:
-      # once using NO_DEFAULT_PATH, and once using default values.         
+      # once using NO_DEFAULT_PATH, and once using default values.   
+      # TODO: Better handle nested module build dirs, or have all modules build to 
+      # intermediate directory for easy searching.
       find_library(LibSourcey_${name}_RELEASE "${lib_name}" 
-        PATHS ${LibSourcey_BUILD_DIR}/src/${name}
+        PATHS 
+          ${LibSourcey_BUILD_DIR}/src/${name}
+          ${LibSourcey_BUILD_DIR}/src/anionu-sdk/${name}
+          ${LibSourcey_BUILD_DIR}/src/anionu-private/${name}
         PATH_SUFFIXES Release
         NO_DEFAULT_PATH)
       find_library(LibSourcey_${name}_DEBUG "${lib_name}d" 
-        PATHS ${LibSourcey_BUILD_DIR}/src/${name}
+        PATHS 
+          ${LibSourcey_BUILD_DIR}/src/${name}
+          ${LibSourcey_BUILD_DIR}/src/anionu-sdk/${name}
+          ${LibSourcey_BUILD_DIR}/src/anionu-private/${name}
         PATH_SUFFIXES Debug
         NO_DEFAULT_PATH)        
       
@@ -164,7 +171,7 @@ endmacro()
 #
 ### Macro: set_component_alias
 #
-# Sets the current alias variables.
+# Sets the current module component alias variables.
 #
 macro(set_component_alias module component)
   set(ALIAS                    ${module}_${component})
@@ -182,34 +189,35 @@ endmacro()
 #
 ### Macro: set_module_found
 #
-# Marks the given module as found all component are present.
+# Marks the given module as found if all required components are present.
 #
 macro(set_module_found module) 
   
   set(${module}_FOUND FALSE)
-  set(${module}_FOUND FALSE PARENT_SCOPE)
+  #set(${module}_FOUND FALSE PARENT_SCOPE)
 
   # Compile the list of required vars
   set(_${module}_REQUIRED_VARS ${module}_LIBRARIES ${module}_INCLUDE_DIRS)
   foreach (component ${${module}_FIND_COMPONENTS})
     list(APPEND _${module}_REQUIRED_VARS ${module}_${component}_LIBRARIES ${module}_${component}_INCLUDE_DIRS)
     #if (${module}_${component}_FOUND)
-    #  message(STATUS "Required ${module} component ${component} present.")
-    #else ()
-    #  message(STATUS "Required ${module} component ${component} missing.")
-    #endif ()
-  endforeach ()
+    #  message(STATUS "  - Required ${module} component ${component} found.")
+    #else()
+    #  message(STATUS "  - Required ${module} component ${component} missing.")
+    #endif()
+  endforeach()
 
   # Cache the vars.
   set(${module}_INCLUDE_DIRS ${${module}_INCLUDE_DIRS} CACHE STRING   "The ${module} include directories." FORCE)
   set(${module}_LIBRARY_DIRS ${${module}_LIBRARY_DIRS} CACHE STRING   "The ${module} library directories." FORCE)
   set(${module}_LIBRARIES    ${${module}_LIBRARIES}    CACHE STRING   "The ${module} libraries." FORCE)
   set(${module}_FOUND        ${${module}_FOUND}        CACHE BOOLEAN  "The ${module} found status." FORCE)  
-  set(${module}_INCLUDE_DIRS ${${module}_INCLUDE_DIRS} PARENT_SCOPE)
-  set(${module}_LIBRARY_DIRS ${${module}_LIBRARY_DIRS} PARENT_SCOPE)
-  set(${module}_LIBRARIES    ${${module}_LIBRARIES}    PARENT_SCOPE)
-  set(${module}_FOUND        ${${module}_FOUND}        PARENT_SCOPE)
+  #set(${module}_INCLUDE_DIRS ${${module}_INCLUDE_DIRS} PARENT_SCOPE)
+  #set(${module}_LIBRARY_DIRS ${${module}_LIBRARY_DIRS} PARENT_SCOPE)
+  #set(${module}_LIBRARIES    ${${module}_LIBRARIES}    PARENT_SCOPE)
+  #set(${module}_FOUND        ${${module}_FOUND}        PARENT_SCOPE)
 
+  # Ensure required variables have been set, or fail in error.
   if (${module}_FIND_REQUIRED)
     # Give a nice error message if some of the required vars are missing.
     include(FindPackageHandleStandardArgs)
@@ -217,9 +225,10 @@ macro(set_module_found module)
   else() 
     message("Failed to locate ${module}. Please specify paths manually.")  
   endif() 
-
+  
+  # Set the module as found.
   set(${module}_FOUND TRUE)
-  set(${module}_FOUND TRUE PARENT_SCOPE)
+  #set(${module}_FOUND TRUE PARENT_SCOPE)
 
   mark_as_advanced(${module}_INCLUDE_DIRS
                    ${module}_LIBRARY_DIRS
@@ -241,9 +250,11 @@ macro(set_component_found module component)
 
   set_component_alias(${module} ${component})
 
-  if (${module}_${component}_LIBRARIES AND ${module}_${component}_INCLUDE_DIRS)
-    # message(STATUS "  - ${module} ${component} found.")
-    set(${ALIAS_FOUND} TRUE PARENT_SCOPE)
+  #if (${module}_${component}_LIBRARIES AND ${module}_${component}_INCLUDE_DIRS)
+  if (${ALIAS_LIBRARIES} AND ${ALIAS_INCLUDE_DIRS})
+    #message(STATUS "  - ${module} ${component} found.")
+    set(${ALIAS_FOUND} TRUE)
+    #set(${ALIAS_FOUND} TRUE PARENT_SCOPE)
   
     # Add component vars to the perant module lists
     append_unique_list(${module}_INCLUDE_DIRS ${ALIAS_INCLUDE_DIRS})    
@@ -251,10 +262,10 @@ macro(set_component_found module component)
     append_unique_list(${module}_LIBRARIES    ${ALIAS_LIBRARIES})    
     append_unique_list(${module}_DEFINITIONS  ${ALIAS_DEFINITIONS})
 
-    set(${module}_INCLUDE_DIRS ${${module}_INCLUDE_DIRS} PARENT_SCOPE)      
-    set(${module}_LIBRARY_DIRS ${${module}_LIBRARY_DIRS} PARENT_SCOPE)  
-    set(${module}_LIBRARIES    ${${module}_LIBRARIES}    PARENT_SCOPE)           
-    set(${module}_DEFINITIONS  ${${module}_DEFINITIONS}  PARENT_SCOPE)   
+    #set(${module}_INCLUDE_DIRS ${${module}_INCLUDE_DIRS} PARENT_SCOPE)      
+    #set(${module}_LIBRARY_DIRS ${${module}_LIBRARY_DIRS} PARENT_SCOPE)  
+    #set(${module}_LIBRARIES    ${${module}_LIBRARIES}    PARENT_SCOPE)           
+    #set(${module}_DEFINITIONS  ${${module}_DEFINITIONS}  PARENT_SCOPE)   
     
     #message("Find Component Paths=${module}:${component}:${library}:${header}")
     #message("${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")  
@@ -264,15 +275,17 @@ macro(set_component_found module component)
     #message("${module}_INCLUDE_DIRS=${${module}_INCLUDE_DIRS}") 
     #message("${module}_LIBRARIES=${${module}_LIBRARIES}")     
 
+    # Only mark as advanced when found
     mark_as_advanced(
       ${ALIAS_INCLUDE_DIRS}
       ${ALIAS_LIBRARY_DIRS})
 
-  else ()
-     #message(STATUS "  - ${module} ${component} not found.")
-  endif ()
+  else()
+     message(STATUS "  - ${module} ${component} not found.")
+  endif()
 
   mark_as_advanced(
+    ${ALIAS_FOUND}
     ${ALIAS_DEBUG_LIBRARIES}
     ${ALIAS_RELEASE_LIBRARIES}
     ${ALIAS_LIBRARIES}
@@ -289,17 +302,17 @@ endmacro()
 #
 macro(set_module_notfound module)
 
-  # message(STATUS "  - ${module} ${component} setting not found.")
+  #message(STATUS "  - Setting ${module} not found.")
   set(${module}_FOUND FALSE)
-  set(${module}_FOUND FALSE PARENT_SCOPE)
+  #set(${module}_FOUND FALSE PARENT_SCOPE)
   
   if (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)  
     set(${module}_RELEASE_LIBRARIES "")
     set(${module}_DEBUG_LIBRARIES "")
     set(${module}_LIBRARIES "")
-    set(${module}_RELEASE_LIBRARIES "" PARENT_SCOPE)
-    set(${module}_DEBUG_LIBRARIES "" PARENT_SCOPE)
-    set(${module}_LIBRARIES "" PARENT_SCOPE)
+    #set(${module}_RELEASE_LIBRARIES "" PARENT_SCOPE)
+    #set(${module}_DEBUG_LIBRARIES "" PARENT_SCOPE)
+    #set(${module}_LIBRARIES "" PARENT_SCOPE)
   else()    
     set(${module}_LIBRARIES ${ALIAS_LIBRARIES}-NOTFOUND)
     #set(${module}_LIBRARIES ${ALIAS_LIBRARIES}-NOTFOUND PARENT_SCOPE)
@@ -317,9 +330,9 @@ macro(set_component_notfound module component)
 
   set_component_alias(${module} ${component})
 
-  # message(STATUS "  - ${module} ${component} setting not found.")
+  #message(STATUS "  - Setting ${module} ${component} not found.")
   set(${ALIAS_FOUND} FALSE)
-  set(${ALIAS_FOUND} FALSE PARENT_SCOPE)
+  #set(${ALIAS_FOUND} FALSE PARENT_SCOPE)
   
   if (${module}_MULTI_CONFIGURATION AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
     set(${ALIAS_RELEASE_LIBRARIES} ${ALIAS_RELEASE_LIBRARIES}-NOTFOUND)
@@ -342,13 +355,13 @@ endmacro()
 # Finds the given component library and include paths.
 #
 macro(find_component_paths module component library header)  
-  # message(STATUS "Find Component Paths=${module}:${component}:${library}:${header}")
+  #message(STATUS "Find Component Paths=${module}:${component}:${library}:${header}")
   
   # Reset alias namespace (force recheck)
-  #set_component_alias(${module} ${component})  
+  set_component_alias(${module} ${component})  
 
   # Reset search paths (force recheck)
-  #set_component_notfound(${module} ${component})
+  set_component_notfound(${module} ${component})
 
   find_path(${ALIAS_INCLUDE_DIRS} ${header}
     #HINTS
@@ -418,7 +431,7 @@ macro(find_component module component pkgconfig library header)
 
   # Use pkg-config to obtain directories for
   # the FIND_PATH() and find_library() calls.
-  find_package(PkgConfig)
+  find_package(PkgConfig QUIET)
   if (PKG_CONFIG_FOUND)
     #set(PKG_ALIAS                   PKG_${component})
     #pkg_check_modules(${PKG_ALIAS}  ${pkgconfig})
@@ -430,20 +443,21 @@ macro(find_component module component pkgconfig library header)
     #set(${ALIAS}_VERSION            ${${PKG_ALIAS}_VERSION})
 
     pkg_search_module(${ALIAS} ${pkgconfig})
-    message(STATUS "Find Component PkgConfig=${ALIAS}:${${ALIAS}_FOUND}:${${ALIAS}_LIBRARIES}:${${ALIAS}_INCLUDE_DIRS}:${${ALIAS}_LIBRARY_DIRS}:${${ALIAS}_LIBDIR}:${${ALIAS}_INCLUDEDIR}")
+    #message(STATUS "Find Component PkgConfig=${ALIAS}:${${ALIAS}_FOUND}:${${ALIAS}_LIBRARIES}:${${ALIAS}_INCLUDE_DIRS}:${${ALIAS}_LIBRARY_DIRS}:${${ALIAS}_LIBDIR}:${${ALIAS}_INCLUDEDIR}")
   endif()  
-   
-  #message(STATUS "${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")  
-  #message(STATUS "${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")  
 
   if(NOT ${ALIAS_FOUND})
-    message("${module} ${component} package not found, searching...")
+    # message(STATUS "  - ${module} ${component} pkg-config not found, searching...")
     find_component_paths(${module} ${component} ${library} ${header})    
   else()      
-    message("${module} ${component} package found.")
+    # message(STATUS "  - ${module} ${component} pkg-config found.")
     set_component_found(${module} ${component})
   endif()
-
+   
+  #message(STATUS "${ALIAS_FOUND}=${${ALIAS_FOUND}}")  
+  #message(STATUS "${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")  
+  #message(STATUS "${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")  
+  
 endmacro()
 
 

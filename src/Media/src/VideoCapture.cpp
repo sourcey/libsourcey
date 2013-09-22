@@ -33,7 +33,7 @@ VideoCapture::VideoCapture(int deviceId) :
 {
 	traceL("VideoCapture", this) << "Create: " << deviceId << std::endl;
 
-	_base->addEmitter(&Emitter);
+	_base->addEmitter(&this->emitter);
 	_base->duplicate();
 }
 
@@ -44,7 +44,7 @@ VideoCapture::VideoCapture(const std::string& filename)
 
 	// The file capture is owned by this instance
 	_base = new VideoCaptureBase(filename);
-	_base->addEmitter(&Emitter);
+	_base->addEmitter(&this->emitter);
 }
 
 
@@ -52,7 +52,7 @@ VideoCapture::VideoCapture(VideoCaptureBase* base) :
 	_base(base) 
 {
 	traceL("VideoCapture", this) << "Create: " << base << std::endl;
-	_base->addEmitter(&Emitter);
+	_base->addEmitter(&this->emitter);
 	_base->duplicate();
 }
 
@@ -60,7 +60,7 @@ VideoCapture::VideoCapture(VideoCaptureBase* base) :
 VideoCapture::~VideoCapture() 
 {
 	traceL("VideoCapture", this) << "Destroy" << std::endl;	
-	_base->removeEmitter(&Emitter);
+	_base->removeEmitter(&this->emitter);
 	_base->release();
 }
 
@@ -68,14 +68,14 @@ VideoCapture::~VideoCapture()
 void VideoCapture::start() 
 {
 	traceL("VideoCapture", this) << "Starting" << std::endl;	
-	Emitter.enable(true);
+	emitter.enable(true);
 }
 
 
 void VideoCapture::stop() 
 {
 	traceL("VideoCapture", this) << "Stopping" << std::endl;
-	Emitter.enable(false);
+	emitter.enable(false);
 }
 
 
@@ -462,7 +462,7 @@ cv::VideoCapture& VideoCaptureBase::capture()
 					//empty = !!size;
 				//while (idx < size) {
 					//idx++;
-				//ScopedLock lock(_emitMutex); 
+				//Mutex::ScopedLock lock(_emitMutex); 
 				if (!_emitters.empty()) {
 					frame = grab();
 					MatrixPacket packet(&frame);

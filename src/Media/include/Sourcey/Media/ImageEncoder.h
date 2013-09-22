@@ -58,7 +58,7 @@ public:
 	
 	virtual EncoderOptions& options();
 			
-	PacketSignal Emitter;
+	PacketSignal emitter;
 
 private:
 	std::string _extension;

@@ -67,11 +67,12 @@ struct SendRequest
 };
 
 
-
 UDPBase::UDPBase()
 {
 	traceL("UDPBase", this) << "Create" << endl;
 	//closeOnError(true);
+
+	// TODO: Do not init() until required - same as TCPBase.
 	init();
 }
 

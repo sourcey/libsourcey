@@ -40,11 +40,11 @@ struct ClientState: public State
 {
 	enum Type 
 	{
-		None				= 0x00,
-		Connecting			= 0x01,
-		Connected			= 0x04,
-		Online				= 0x10,
-		Disconnected		= 0x20
+		None		= 0x00,
+		Connecting	= 0x01,
+		Connected	= 0x02,
+		Online		= 0x04,
+		Error		= 0x08
 	};
 
 	std::string str(unsigned int id) const 
@@ -54,7 +54,7 @@ struct ClientState: public State
 		case Connecting:	return "Connecting";
 		case Connected:		return "Connected";
 		case Online:		return "Online";
-		case Disconnected:	return "Disconnected";
+		case Error:			return "Error";
 		default: assert(false);
 		}
 		return "undefined"; 
@@ -96,14 +96,18 @@ public:
 	virtual Transaction* createTransaction(const sockio::Packet& request, long timeout = 10000);
 		// Creates a packet transaction
 
-	virtual uv::Loop& loop();
-	virtual http::WebSocket& socket();
-	virtual std::string sessionID() const;	
-	virtual Error error() const;
+	uv::Loop& loop();
+	http::WebSocket& socket();
+	std::string sessionID() const;	
+	Error error() const;
 		
-	virtual bool isOnline() const;
+	bool isOnline() const;
 
-	const char* className() const { return "SocketIOClient"; }
+	bool wasOnline() const;
+		// Returns true if the client was in the Online state.
+		// Useful for delegates handling the Closed state.
+
+	virtual const char* className() const { return "SocketIOClient"; }
 
 protected:
 	virtual void setError(const Error& error);
@@ -133,6 +137,7 @@ protected:
 	//mutable Mutex	_mutex;
 	
 	uv::Loop& _loop;
+	Error _error;
 	std::vector<std::string> _protocols;
 	std::string _sessionID;
 	std::string _host;
@@ -140,6 +145,7 @@ protected:
 	http::WebSocket _socket;
 	int	_heartBeatTimeout;
 	int	_connectionClosingTimeout;
+	bool _wasOnline;
 	Timer _timer;
 };
 
@@ -296,7 +302,7 @@ typedef sockio::ClientBase<
 //	virtual void connect(const net::Address& serverAddr)
 //	{	
 //		{
-//			//ScopedLock lock(_mutex);
+//			//Mutex::ScopedLock lock(_mutex);
 //			_serverAddr = serverAddr;
 //		}
 //		/*SocketBase::*/connect();
@@ -307,7 +313,7 @@ typedef sockio::ClientBase<
 //	{
 //		Log("trace", this) << "SocketIO Connecting" << endl;
 //
-//		//ScopedLock lock(_mutex);
+//		//Mutex::ScopedLock lock(_mutex);
 //
 //		assert(_serverAddr.valid());
 //
@@ -405,7 +411,7 @@ typedef sockio::ClientBase<
 //
 //	virtual int sendConnect(const std::string& endpoint, const std::string& query)
 //	{
-//		//ScopedLock lock(_mutex);
+//		//Mutex::ScopedLock lock(_mutex);
 //		// (1) Connect
 //		// Only used for multiple sockets. Signals a connection to the endpoint. Once the server receives it, it's echoed back to the client.
 //		// 
@@ -488,7 +494,7 @@ typedef sockio::ClientBase<
 //
 //	virtual std::string sessionID() const 
 //	{
-//		//ScopedLock lock(_mutex);
+//		//Mutex::ScopedLock lock(_mutex);
 //		return _sessionID;
 //	}
 //	
@@ -558,14 +564,14 @@ typedef sockio::ClientBase<
 	KVCollection _httpHeaders;
 	virtual KVCollection& httpHeaders()
 	{
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _httpHeaders;
 	}
 
 
 	virtual http::WebSocket* socket()
 	{
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _socket;
 	}
 	*/
@@ -578,7 +584,7 @@ typedef sockio::ClientBase<
 	/*
 	void setSecure(bool flag)
 	{
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		_secure = flag;
 	}
 	*/

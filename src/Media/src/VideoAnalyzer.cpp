@@ -80,7 +80,7 @@ void VideoAnalyzer::uninitialize()
 	//traceL() << "[VideoAnalyzerStream: " << this << ": " << name << "] Uninitializing" << endl;	
 	stop();
 	
-	//ScopedLock lock(_mutex); 
+	//Mutex::ScopedLock lock(_mutex); 
 
 	if (_video)
 		delete _video;
@@ -118,7 +118,7 @@ void VideoAnalyzer::stop()
 {
 	
 	// Can't lock here in case we inside a callback.
-	//ScopedLock lock(_mutex); 
+	//Mutex::ScopedLock lock(_mutex); 
 	
 	_reader.ReadComplete -= delegate(this, &VideoAnalyzer::onReadComplete);
 	_reader.detach(this);

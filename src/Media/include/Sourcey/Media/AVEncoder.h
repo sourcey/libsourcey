@@ -69,7 +69,7 @@ public:
 
 	//virtual void* self() { return this;	}
 			
-	PacketSignal Emitter;
+	PacketSignal emitter;
 	
 protected:
 	static Mutex _mutex; // Protects avcodec_open/close()

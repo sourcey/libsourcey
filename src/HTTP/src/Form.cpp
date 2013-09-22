@@ -62,7 +62,7 @@ FormWriter* FormWriter::create(ClientConnection& conn, const std::string& encodi
 
 
 FormWriter::FormWriter(ClientConnection& conn, const std::string& encoding) :
-	PacketSource(Emitter),
+	PacketSource(this->emitter),
 	_encoding(encoding),
 	_connection(conn),
 	_filesSize(0),

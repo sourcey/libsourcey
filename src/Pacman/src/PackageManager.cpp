@@ -189,7 +189,7 @@ void PackageManager::loadLocalPackages(const std::string& dir)
 	StringVec nodes;
 	fs::readdir(dir, nodes);
 	for (unsigned i = 0; i < nodes.size(); i++) {	
-		if (nodes[i].find(".json") != string::npos) {		
+		if (nodes[i].find(".json") != std::string::npos) {		
 			LocalPackage* package = nullptr;
 			try {
 				std::string path(dir);
@@ -537,7 +537,7 @@ InstallTask* PackageManager::createInstallTask(PackagePair& pair, const InstallO
 
 bool PackageManager::hasUnfinalizedPackages()
 {	
-	//ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 
 	debugL("PackageManager", this) << "checking for unfinalized packages" << endl;
 	
@@ -839,8 +839,8 @@ bool PackageManager::hasCachedFile(Package::Asset& asset)
 
 bool PackageManager::isSupportedFileType(const std::string& fileName)
 {
-	return fileName.find(".zip") != string::npos  
-		|| fileName.find(".tar.gz") != string::npos;
+	return fileName.find(".zip") != std::string::npos  
+		|| fileName.find(".tar.gz") != std::string::npos;
 }
 
 

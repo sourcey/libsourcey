@@ -64,7 +64,7 @@ SSLClient::SSLClient(const Client::Options& options, uv::Loop& loop) :
 
 
 //
-// Client Implementation
+// Client implementation
 //
 
 
@@ -85,23 +85,22 @@ Client::~Client()
 
 void Client::connect()
 {
-	log("trace") << "connecting" << endl;		
+	log("trace") << "Connecting" << endl;		
 	{
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		assert(!_options.user.empty());
 		//assert(!_options.token.empty());
 		//_serverAddr = _options.serverAddr;
 		_host = _options.host;
 		_port = _options.port;
 	}
-	reset();
 	sockio::Client::connect();
 }
 
 
 void Client::close()
 {
-	log("trace") << "closing" << endl;
+	log("trace") << "Closing" << endl;
 	sockio::Client::close();
 }
 
@@ -162,7 +161,7 @@ void Client::createPresence(Presence& p)
 
 int Client::sendPresence(bool probe)
 {
-	log("trace") << "broadcasting presence" << endl;
+	log("trace") << "Broadcasting presence" << endl;
 
 	Presence p;
 	createPresence(p);
@@ -185,35 +184,35 @@ int Client::sendPresence(const Address& to, bool probe)
 
 Roster& Client::roster() 
 { 
-	//ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _roster; 
 }
 
 
 PersistenceT& Client::persistence() 
 { 
-	//ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _persistence; 
 }
 
 
 Client::Options& Client::options() 
 { 
-	//ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _options; 
 }
 
 
 string Client::ourID() const
 {
-	//ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _ourID;
 }
 
 
 Peer& Client::ourPeer()
 {	
-	//ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	if (_ourID.empty())
 		throw std::runtime_error("No active peer session is available.");
 	return *_roster.get(_ourID, true);
@@ -233,7 +232,7 @@ int Client::announce()
 
 	json::Value data;
 	{
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		data["token"]	= _options.token;
 		data["group"]	= _options.group;
 		data["user"]	= _options.user;
@@ -249,7 +248,7 @@ int Client::announce()
 
 void Client::onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
 {
-	log("trace") << "On announce response: " << state.toString() << endl;
+	log("trace") << "On announce response: " << state << endl;
 	
 	auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
 	switch (state.id()) {	
@@ -367,19 +366,26 @@ void Client::onPacket(sockio::Packet& packet)
 }
 
 
+/*
 void Client::onClose()
 {
 	log("trace") << "On close" << endl;
 	sockio::Client::onClose();
-	reset();
+	//reset();
 }
+*/
 
 
 void Client::reset()
 {
+	// Note: Not clearing persisted messages just in case
+	// they are still in use by the outside application
+	//_persistence.clear();
+
 	_roster.clear();
 	_announceStatus = 500;
 	_ourID = "";
+	sockio::Client::reset();
 }
 
 
@@ -392,14 +398,14 @@ void Client::reset()
 /*
 uv::Loop& loop() 
 { 
-	//ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _runner; 
 }
 
 
 int Client::announceStatus() const
 {
-	//ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _announceStatus;
 }
 */
@@ -542,7 +548,7 @@ void Client::onError()
 //
 //void Client::onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
 //{
-//	traceL() << "[smpl::Client] Announce Response: " << state.toString() << endl;
+//	traceL() << "[smpl::Client] Announce Response: " << state << endl;
 //	
 //	auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
 //	switch (state.id()) {	

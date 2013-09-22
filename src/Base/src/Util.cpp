@@ -133,10 +133,10 @@ std::string randomString(int size)
 }
 
 
-UInt32 randomNumber(int size)
+UInt32 randomNumber()
 {
 	Random rnd;
-	rnd.seed(size);
+	rnd.seed();
 	return rnd.next();
 }
 
@@ -196,21 +196,24 @@ bool endsWith(const std::string& str, const std::string& suffix)
 }
 
 
-double intToDouble(Int64 v) {
+double intToDouble(Int64 v) 
+{
 	if (v+v > 0xFFEULL<<52)
 		return 0;
 	return ldexp((double)((v&((1LL<<52)-1)) + (1LL<<52)) * (v>>63|1), (int)(v>>52&0x7FF)-1075);
 }
 
 
-float intToFloat(Int32 v) {
+float intToFloat(Int32 v)
+{
 	if (v+v > 0xFF000000U)
 		return 0;
 	return ldexp((float)((v&0x7FFFFF) + (1<<23)) * (v>>31|1), (int)(v>>23&0xFF)-150);
 }
 
 
-Int64 doubleToInt(double d) {
+Int64 doubleToInt(double d) 
+{
 	int e;
 	if     ( !d) return 0;
 	else if(d-d) return 0x7FF0000000000000LL + ((Int64)(d<0)<<63) + (d!=d);

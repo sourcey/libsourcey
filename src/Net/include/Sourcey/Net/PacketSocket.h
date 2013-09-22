@@ -35,83 +35,76 @@ namespace net {
 struct PacketInfo;
 class PacketSocket;
 
+
+//
+// Packet Socket Adapter
+//
+
+
 class PacketSocketAdapter: public SocketAdapter, public PacketSignal
 {	
 public:	
 	PacketFactory factory;
 
-	PacketSocketAdapter(Socket* socket = NULL) : 
-		SocketAdapter(socket)
+	PacketSocketAdapter(Socket* socket = nullptr);
 		// Creates the PacketSocketAdapter
 		// This class should have a higher priority than standard
-		// sockets so we can parse data packets first.		
-	{
-		traceL("PacketSocketAdapter", this) << "Create: " << socket << std::endl;
-	}
+		// sockets so we can parse data packets first.
 		
-	virtual void onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
+	virtual void onSocketRecv(const MutableBuffer& buf, const Address& peerAddr);
 		// Creates and dispatches a packet utilizing the available 
 		// creation strategies. For best performance the most used 
 		// strategies should have the highest priority.
-	{	
-		traceL("PacketSocketAdapter", this) << "Recv: " << buf.size() << std::endl;
-		//assert(buf.position() == 0);
-		//buf.position(0);
 
-		IPacket* pkt = factory.createPacket(constBuffer(buf));
-		if (!pkt) {
-			warnL("PacketSocketAdapter", this) << "Cannot create packet." << std::endl;	
-			return;
-		}
-
-		pkt->info = new PacketInfo(socket, peerAddr);
-		onPacket(*pkt);
-		delete pkt;
-	}
-
-	virtual void onPacket(IPacket& pkt) 
-	{		
-		traceL("PacketSocketAdapter", this) << "onPacket: Emitting: " << pkt.size() << std::endl;
-		PacketSignal::emit(socket, pkt);	
-	}
+	virtual void onPacket(IPacket& pkt);
 };
+
+
+//
+// Packet Socket
+//
 
 
 class PacketSocket: public Socket
 {
 public:	
-	PacketSocket(const Socket& socket) : 
-		Socket(socket) //(this)
-	{
-		replaceAdapter(new PacketSocketAdapter);
-		assert(Socket::base().refCount() >= 2);
-	}
+	PacketSocket(const Socket& socket);
+	PacketSocket(SocketBase* base, bool shared = false);
+	virtual ~PacketSocket();
 
-	PacketSocket(SocketBase* base, bool shared = false) : 
-		Socket(base, shared) //(this), new PacketSocketAdapter
-	{		
-		replaceAdapter(new PacketSocketAdapter);
-		assert(!shared || Socket::base().refCount() >= 2);
-	}
-
-	virtual ~PacketSocket() 
-	{
-	}
-
-	PacketSocketAdapter& adapter() const
-		// Returns the PacketSocketAdapter for this socket.
-	{
-		return (PacketSocketAdapter&)*_adapter;
-	}
-		
+	PacketSocketAdapter& adapter() const;
+		// Returns the PacketSocketAdapter for this socket.		
 	
-	virtual void send(IPacket& packet)
+	virtual void send(IPacket& packet);
 		// Compatibility method for PacketSignal delegates.
-	{
-		traceL("PacketSocket", this) << "IPacket Delegate" << std::endl;	
-		Socket::send(packet);
-	}
 };
+
+
+#if 0
+//
+// Packet Stream Socket Adapter
+//
+
+
+class PacketStreamSocketAdapter: public PacketProcessor, public PacketSignal
+	/// Proxies arbitrary PacketStream packets to an output Socket,
+	/// ensuring the Socket MTU is not exceeded.
+	/// Oversize packets will be split before sending.
+{
+public:
+	PacketStreamSocketAdapter(Socket& socket);
+	virtual ~PacketStreamSocketAdapter();
+
+protected:		
+	virtual bool accepts(IPacket& packet);
+	virtual void process(IPacket& packet);	
+	virtual void onStreamStateChange(const PacketStreamState& state);
+
+	friend class PacketStream;
+			
+	Socket _socket;
+};
+#endif
 
 
 } } // namespace scy::Net

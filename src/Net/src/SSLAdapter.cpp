@@ -47,7 +47,7 @@ SSLAdapter::~SSLAdapter()
 	traceL("SSLAdapter", this) << "Destroy" << endl;
 	if (_ssl) {
 		SSL_free(_ssl);
-		_ssl = NULL;
+		_ssl = nullptr;
 	}
 }
 
@@ -56,7 +56,7 @@ void SSLAdapter::init(SSL* ssl)
 {
 	traceL("SSLAdapter", this) << "Init: " << ssl << endl;
 	assert(_socket);
-	assert(_socket->initialized());
+	//assert(_socket->initialized());
 	_ssl = ssl;
 	_readBIO = BIO_new(BIO_s_mem());
 	_writeBIO = BIO_new(BIO_s_mem());
@@ -148,8 +148,10 @@ void SSLAdapter::flush()
 	if (SSL_is_init_finished(_ssl)) { 
 		if (_bufferOut.size() > 0) {
 			int r = SSL_write(_ssl, &_bufferOut[0], _bufferOut.size()); // causes the write_bio to fill up (which we need to flush)
+			if (r < 0) {
+				handleError(r);
+			}
 			_bufferOut.clear();
-			handleError(r);
 			flushWriteBIO();
 		}
 	}
@@ -171,6 +173,7 @@ void SSLAdapter::flushWriteBIO()
 
 void SSLAdapter::handleError(int rc)
 {
+	if (rc >= 0) return;
 	int error = SSL_get_error(_ssl, rc);	
 	switch (error)
 	{
@@ -178,13 +181,17 @@ void SSLAdapter::handleError(int rc)
 		return;
 	case SSL_ERROR_WANT_READ:
 		flushWriteBIO();
+ 		break;
 	case SSL_ERROR_WANT_WRITE:
 		// TODO
+		assert(0);
+ 		break;
 	case SSL_ERROR_WANT_CONNECT: 
 	case SSL_ERROR_WANT_ACCEPT:
 	case SSL_ERROR_WANT_X509_LOOKUP:
-		/// should not occur
+		// should not occur
 		assert(0);
+ 		break;
 	default:
 		char buffer[256];
 		ERR_error_string_n(ERR_get_error(), buffer, sizeof(buffer));

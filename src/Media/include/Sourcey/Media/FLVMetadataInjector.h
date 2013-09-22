@@ -72,7 +72,7 @@ public:
 	};
 
 	FLVMetadataInjector(const Format& format)  : 
-		IPacketizer(Emitter),
+		IPacketizer(this->emitter),
 		_format(format),
 		_initial(true),
 		_modifyingStream(false),
@@ -406,7 +406,7 @@ public:
 		writer.putU8(val ? 1 : 0);
 	}
 	
-	PacketSignal Emitter;
+	PacketSignal emitter;
 		
 protected:
 	Format _format;

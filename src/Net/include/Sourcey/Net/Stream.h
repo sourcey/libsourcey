@@ -36,7 +36,7 @@ namespace net {
 class Stream: public uv::Handle
 {
  public:  
-	Stream(uv::Loop& loop = uv::defaultLoop(), void* stream = NULL) :
+	Stream(uv::Loop& loop = uv::defaultLoop(), void* stream = nullptr) :
 		uv::Handle(&loop, stream), 
 		_buffer(65536)
 	{
@@ -79,10 +79,13 @@ class Stream: public uv::Handle
 	bool write(const char* data, int len)
 		// Writes data to the stream.
 		//
-		// Throws a std::runtime_errorif the socket is closed.
+		// Returns false if the underlying socket is closed.
+		// This method does not throw an exception.
 	{		
+		//if (closed())
+		//	throw std::runtime_error("IO error: Cannot write to closed stream");
 		if (closed())
-			throw std::runtime_error("IO error: Cannot write to closed stream");
+			return false;
 		
 		int r; 		
 		uv_write_t* req = new uv_write_t;
@@ -94,11 +97,11 @@ class Stream: public uv::Handle
 		if (!isIPC)
 			r = uv_write(req, stream, &buf, 1, uv::afterWrite);
 		else
-			r = uv_write2(req, stream, &buf, 1, NULL, uv::afterWrite);
+			r = uv_write2(req, stream, &buf, 1, nullptr, uv::afterWrite);
 
 		if (r) {
 			delete req;
-			setAndThrowLastError("Stream write error");
+			//setAndThrowLastError("Stream write error");
 		}
 		return r == 0;
 	}
@@ -107,6 +110,18 @@ class Stream: public uv::Handle
 		// Returns the read buffer.
 	{ 
 		return _buffer;
+	}
+
+	//virtual bool initialized() const
+		// Returns true if the native socket handle is initialized.
+	//{
+	//	return uv::Handle::active();
+	//}
+
+	virtual bool closed() const
+		// Returns true if the native socket handle is closed.
+	{
+		return uv::Handle::closed();
 	}
 
 	Signal2<const char*, int> Read;
@@ -218,7 +233,7 @@ class Stream: public uv::Handle
 	//Signal2<const char*, int> Write;
 	void setStream(uv_stream_t* stream)
 	{
-		assert(_handle == NULL);
+		assert(_handle == nullptr);
 		stream->data = instance();
 		_handle = (uv_handle_t*)stream;
 	}
@@ -245,19 +260,19 @@ class Stream: public uv::Handle
 	uv::Buffer _readBuffer;
 	Buffer _readBuffer1;
 		}
-		traceL("Stream", ptr) << "allocReadBuffer " << suggested_size << std::endl;
+		traceL("Stream", ptr) << "AllocReadBuffer " << suggested_size << std::endl;
 		//ptr->_readBuffer.data.reserve(suggested_size); 
 		//if (suggested_size > ptr->_readBuffer1.capacity())
 		//	ptr->_readBuffer1.reserve(suggested_size);
-		traceL("Stream", ptr) << "allocReadBuffer: Before alloc: " << ptr->_buffer.available() << std::endl;
-			traceL("Stream", ptr) << "allocReadBuffer: DO alloc: " << std::endl;
+		traceL("Stream", ptr) << "AllocReadBuffer: Before alloc: " << ptr->_buffer.available() << std::endl;
+			traceL("Stream", ptr) << "AllocReadBuffer: DO alloc: " << std::endl;
 		conn->data
 		_readBuffer
 		Connection *conn = (Connection*) handle;
 		assert(conn->read_clear); // Ensure that the last _buffer has been read by on_read_cb.
 		conn->read_clear = false;
 		conn->read_buffer.reserve_more(suggested_size); 
-		traceL("Stream", ptr) << "allocReadBuffer: After alloc: " << ptr->_buffer.available() << std::endl;
+		traceL("Stream", ptr) << "AllocReadBuffer: After alloc: " << ptr->_buffer.available() << std::endl;
 		 //[0]; //ptr->_readBuffer1.bytes(); //(char*)&ptr->_readBuffer.data[0]; //new char[suggested_size];&*v.begin();
 
 		uv_buf_t buf;

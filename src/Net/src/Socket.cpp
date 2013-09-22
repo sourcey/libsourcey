@@ -273,6 +273,7 @@ void Socket::onSocketClose()
 		_adapter->onSocketClose();
 	}
 	else {
+		assert(closed());
 		Close.emit(this);
 	}
 }
@@ -718,7 +719,7 @@ void Stream::onClose()
 	
 	//if ()ptr ? ptr : 
 	//stream->data = ptr;
-	//assert(_stream->data == NULL ||
+	//assert(_stream->data == nullptr ||
 	//	static_cast<Stream*>(_stream->data) == this);
 	//_stream->data = this;
 
@@ -740,7 +741,7 @@ int Stream::writeQueueSize() const
 	if (_handle) {		
 		//traceL("Stream", this) << "Destroy: Handle" << endl;
 		delete _handle;
-		_handle = NULL;
+		_handle = nullptr;
 	}
 	//traceL("Stream", this) << "Destroy: OK" << endl;
 	*/
@@ -753,7 +754,7 @@ void Stream::close()
 	//traceL("Stream", this) << "Send Close" << endl;
 	assert(0);
 	// afterClose not always getting called
-    //uv_close((uv_handle_t*)stream(), NULL); //Stream::afterClose
+    //uv_close((uv_handle_t*)stream(), nullptr); //Stream::afterClose
 	//delete this;
 	//onClose();
 }

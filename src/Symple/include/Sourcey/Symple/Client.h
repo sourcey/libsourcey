@@ -120,10 +120,10 @@ public:
 		// Notifies the outside application about the 
 		// response status code of our announce() call.
 		// Possible status codes are:
-		///		- 200: Authentication success
-		///		- 401: Authentication failed
-		///		- 400: Bad request data
-		///		- 500: Server not found
+		//		- 200: Authentication success
+		//		- 401: Authentication failed
+		//		- 400: Bad request data
+		//		- 500: Server not found
 
 	Signal<Peer&> UpdatePresenceData;
 		// Called by createPresence() so outside classes
@@ -145,7 +145,7 @@ protected:
 		// Creates a Presence object.
 	
 	//virtual void onOnline();
-	virtual void onClose();
+	//virtual void onClose();
 	
 	virtual void onSocketConnect(void*);
 	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&);
@@ -484,7 +484,7 @@ public:
 		traceL() << "[smpl::Client: " << this << "] Connecting" << std::endl;
 		
 		{
-			//ScopedLock lock(_mutex);
+			//Mutex::ScopedLock lock(_mutex);
 			assert(!_options.user.empty());
 			//assert(!_options.token.empty());
 			_srvAddr = _options.serverAddr;
@@ -564,49 +564,49 @@ public:
 
 	virtual Roster& roster() 
 	{ 
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _roster; 
 	}
 
 
 	virtual uv::Loop& loop() 
 	{ 
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _runner; 
 	}
 
 
 	virtual PersistenceT& persistence() 
 	{ 
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _persistence; 
 	}
 
 
 	virtual Client::Options& options() 
 	{ 
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _options; 
 	}
 
 
 	virtual std::string ourID() const
 	{
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _ourID;
 	}
 
 
 	virtual int announceStatus() const
 	{
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		return _announceStatus;
 	}
 
 
 	virtual Peer& ourPeer()
 	{	
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		traceL() << "[smpl::Client: " << this << "] Getting Our Peer: " << _ourID << std::endl;
 		if (_ourID.empty())
 			throw std::runtime_error("No active peer session is available.");
@@ -629,7 +629,7 @@ protected:
 	{
 		json::Value data;
 		{
-			//ScopedLock lock(_mutex);
+			//Mutex::ScopedLock lock(_mutex);
 			data["token"]	= _options.token;
 			data["group"]	= _options.group;
 			data["user"]	= _options.user;
@@ -645,7 +645,7 @@ protected:
 
 	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&) 
 	{
-		traceL() << "[smpl::Client: " << this << "] Announce Response: " << state.toString() << std::endl;
+		traceL() << "[smpl::Client: " << this << "] Announce Response: " << state << std::endl;
 	
 		auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
 		switch (state.id()) {	

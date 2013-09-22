@@ -149,7 +149,7 @@ class FPSLimiter: public PacketProcessor
 {
 public:
 	FPSLimiter(int max) : 
-		PacketProcessor(Emitter), _max(max)
+		PacketProcessor(this->emitter), _max(max)
 	{
 	}
 
@@ -165,7 +165,7 @@ public:
 		emit(packet);
 	};
 		
-	PacketSignal Emitter;
+	PacketSignal emitter;
 
 	// virtual void onStreamStateChange(const PacketStreamState&) {};
 

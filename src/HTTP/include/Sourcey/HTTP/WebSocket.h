@@ -264,6 +264,7 @@ public:
 
 	virtual void onSocketConnect();
 	virtual void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddr);
+	virtual void onSocketClose();
 
 protected:
 	virtual ~WebSocketAdapter();

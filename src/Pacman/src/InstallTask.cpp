@@ -135,7 +135,7 @@ Complete:
 
 void InstallTask::onStateChange(InstallationState& state, const InstallationState& oldState)
 {
-	log("debug") << "state changed to " << state.toString() << endl; 	
+	log("debug") << "state changed to " << state << endl; 	
 	{
 		auto local = this->local();
 		switch (state.id()) 

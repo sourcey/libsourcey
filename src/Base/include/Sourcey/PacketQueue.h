@@ -42,7 +42,7 @@ public:
 
 	virtual void process(IPacket& packet);
 
-	PacketSignal Emitter;
+	PacketSignal emitter;
 
 protected:	
 	virtual void emit(IPacket& packet);
@@ -64,7 +64,7 @@ public:
 
 	virtual void process(IPacket& packet);
 	
-	PacketSignal Emitter;
+	PacketSignal emitter;
 
 protected:	
 	virtual void emit(IPacket& packet);

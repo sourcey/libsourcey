@@ -42,7 +42,7 @@ std::time_t now()
 }
 
 
-UInt64 getTicks()
+UInt64 ticks()
 {
 #ifdef WIN32
 	return ::GetTickCount();

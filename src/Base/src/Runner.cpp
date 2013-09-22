@@ -128,7 +128,7 @@ bool Runner::remove(Task* task)
 	log("trace") << "Removing task: " << task << endl;
 
 	Mutex::ScopedLock lock(_mutex);
-	for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
+	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (*it == task) {					
 			_tasks.erase(it);
 			log("trace") << "Removed task: " << task << endl;
@@ -143,10 +143,10 @@ bool Runner::remove(Task* task)
 
 bool Runner::exists(Task* task) const
 {	
-	log("trace") << "Check Exists: " << task << endl;
+	log("trace") << "Check exists: " << task << endl;
 
 	Mutex::ScopedLock lock(_mutex);
-	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
+	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (*it == task)
 			return true;
 	}
@@ -157,7 +157,7 @@ bool Runner::exists(Task* task) const
 Task* Runner::get(UInt32 id) const
 {
 	Mutex::ScopedLock lock(_mutex);
-	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
+	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if ((*it)->id() == id)
 			return *it;
 	}			
@@ -168,7 +168,7 @@ Task* Runner::get(UInt32 id) const
 Task* Runner::next() const
 {
 	Mutex::ScopedLock lock(_mutex);
-	for (TaskList::const_iterator it = _tasks.begin(); it != _tasks.end(); ++it) {
+	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (!(*it)->cancelled())
 			return *it;
 	}			
@@ -179,7 +179,7 @@ Task* Runner::next() const
 void Runner::clear()
 {
 	Mutex::ScopedLock lock(_mutex);
-	for (TaskList::iterator it = _tasks.begin(); it != _tasks.end(); ++it) {	
+	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {	
 		log("trace") << "Clear: Destroying task: " << *it << endl;
 		delete *it;
 	}
@@ -194,15 +194,20 @@ void Runner::onIdle()
 	// Run the task
 	if (task) 
 	{
-		log("trace") << "Run task: " << task << endl;
+		// Check once more that the task has not been cancelled
 		if (!task->cancelled()) {
+			log("trace") << "Run task: " << task << endl;
 			task->run();
-			log("trace") << "Task destroying: " << task << endl;	
-		}
-		if (task->cancelled())
-			task->_destroyed = true;
 
-		onRun(task);
+			onRun(task);
+
+			// Cancel the task if not repeating
+			if (!task->repeating())
+				task->cancel();
+
+			//if (task->cancelled())
+			//	task->_destroyed = true;
+		}
 
 		// Advance the task queue
 		{

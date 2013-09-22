@@ -25,8 +25,12 @@ namespace smpl {
 
 	
 #define SERVER_HOST "localhost"
-#define SERVER_PORT 4000 //443
-#define USE_SSL     0 //1
+#define USE_SSL     1
+#if USE_SSL
+#define SERVER_PORT 443
+#else
+#define SERVER_PORT 4000 
+#endif
 
 	
 // ----------------------------------------------------------------------------

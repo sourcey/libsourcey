@@ -34,7 +34,7 @@ class Base64PacketEncoder: public PacketProcessor
 {
 public:
 	Base64PacketEncoder() :
-		PacketProcessor(Emitter)
+		PacketProcessor(this->emitter)
 	{
 	}
 
@@ -49,7 +49,7 @@ public:
 		emit(&result[0], size);
 	}
 
-	PacketSignal Emitter;
+	PacketSignal emitter;
 };
 
 

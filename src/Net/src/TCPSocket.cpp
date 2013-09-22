@@ -62,13 +62,10 @@ TCPBase& TCPSocket::base() const
 
 
 TCPBase::TCPBase(uv::Loop& loop) :
-	Stream(loop) //, new uv_tcp_t
+	Stream(loop)
 {
 	traceL("TCPBase", this) << "Create" << endl;
 	init();	
-	//_handle->data = this;
-	//uv_tcp_init(&loop, handle<uv_tcp_t>());	
-	//traceL("TCPBase", this) << "Create: OK" << endl;
 }
 
 	
@@ -82,13 +79,12 @@ void TCPBase::init()
 {
 	if (closed()) {		
 		traceL("TCPBase", this) << "Init" << endl;
-		uv_tcp_t* tcp = new uv_tcp_t;
+		auto tcp = new uv_tcp_t;
 		tcp->data = this;
 		_handle = reinterpret_cast<uv_handle_t*>(tcp);
 		uv_tcp_init(loop(), tcp);
 		//assert(tcp->data == this);		
 		//_connectReq.data = instance();	
-		traceL("TCPBase", this) << "Init: OK" << endl;
 	}
 }
 
@@ -105,10 +101,12 @@ void TCPBase::connect(const net::Address& peerAddress)
 {
 	traceL("TCPBase", this) << "Connecting to " << peerAddress << endl;
 	init();
-	assert(_connectReq.data != this);
-	_connectReq.data = this;	
-	const sockaddr_in* addr = reinterpret_cast<const sockaddr_in*>(peerAddress.addr());
-	int r = uv_tcp_connect(&_connectReq, handle<uv_tcp_t>(), *addr, internal::onConnect);
+	_connectReq.reset(new uv_connect_t);
+	_connectReq.get()->data = this;
+	//assert(_connectReq.data != this);
+	//_connectReq.data = this;	
+	auto addr = reinterpret_cast<const sockaddr_in*>(peerAddress.addr());
+	int r = uv_tcp_connect(_connectReq.get(), handle<uv_tcp_t>(), *addr, internal::onConnect);
 	if (r) setAndThrowLastError("TCP connect failed");
 }
 
@@ -191,8 +189,8 @@ int TCPBase::send(const char* data, int len, const net::Address& /* peerAddress 
 {
 	assert(len <= net::MAX_TCP_PACKET_SIZE);
 	
-	if (len < 300)
-		traceL("TCPBase", this) << "Send: " << string(data, len) << endl;
+	//if (len < 300)
+	//	traceL("TCPBase", this) << "Send: " << string(data, len) << endl;
 
 	if (!Stream::write(data, len)) {
 		warnL("TCPBase", this) << "Send error" << endl;	
@@ -200,6 +198,7 @@ int TCPBase::send(const char* data, int len, const net::Address& /* peerAddress 
 	}
 
 	// R is -1 on error, otherwise return len
+	// TODO: Return native error code?
 	return len;
 }
 
@@ -279,9 +278,15 @@ net::TransportType TCPBase::transport() const
 }
 	
 
+//bool TCPBase::initialized() const
+//{
+//	return Stream::initialized(); //uv::Handle::closed();
+//}
+	
+
 bool TCPBase::closed() const
 {
-	return uv::Handle::closed();
+	return Stream::closed(); //uv::Handle::closed();
 }
 
 
@@ -290,7 +295,6 @@ SOCKET TCPBase::sockfd() const
 {
 	return closed() ? INVALID_SOCKET : handle<uv_tcp_t>()->socket;
 }
-*/
 
 
 bool TCPBase::initialized() const
@@ -298,6 +302,7 @@ bool TCPBase::initialized() const
 	return !closed();
 	//return sockfd() != INVALID_SOCKET;
 }
+*/
 
 
 //
@@ -312,14 +317,19 @@ void TCPBase::onRead(const char* data, int len)
 	//	traceL("TCPBase", this) << "Received: " << string(data, len) << endl;
 	//_buffer.position(0);
 	//_buffer.limit(len);
-	onRecv(mutableBuffer(_buffer.data(), len));
+	//onRecv(mutableBuffer(_buffer.data(), len));
+
+	// Note: The const_cast here is relatively safe since the given 
+	// data pointer is the underlying _buffer.data() pointer, but
+	// a better way should be devised.
+	onRecv(mutableBuffer(const_cast<char*>(data), len));
 }
 
 
 void TCPBase::onRecv(const MutableBuffer& buf)
 {
 	traceL("TCPBase", this) << "Recv: " << buf.size() << endl;
-	emitRecv(MutableBuffer(buf), peerAddress());
+	emitRecv(buf, peerAddress()); //MutableBuffer(buf)
 }
 
 

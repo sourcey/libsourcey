@@ -266,7 +266,7 @@ bool FormElement::clearElements(const std::string& id, bool partial)
 				if (//element.isObject() && 
 					//element.isMember("id") && 
 					partial ? 
-						curID.find(id) != string::npos : 
+						curID.find(id) != std::string::npos : 
 						curID == id) {
 					traceL() << "Symple form: Removing redundant: " << curID << endl;
 					match = true;

@@ -84,7 +84,7 @@ static int dispatchOutputPacket(void* opaque, UInt8* buffer, int bufferSize)
 			return bufferSize;
 		assert(klass->isActive());
 		MediaPacket packet((char*)buffer, bufferSize);
-		klass->Emitter.emit(klass, packet); //
+		klass->emitter.emit(klass, packet); //
 		traceL("AVEncoder", klass) << "Dispatching packet: OK: " << bufferSize << endl;
 	}   
 

@@ -59,7 +59,7 @@ Codec::Codec(const Codec& r) :
 string Codec::toString() const 
 {
 	ostringstream os;
-	os << "Codec[" << name << ": " << encoder << ": " << sampleRate << ": " << enabled << "]";
+	os << "Codec[" << name << ":" << encoder << ":" << sampleRate << ":" << enabled << "]";
 	return os.str();
 }
 

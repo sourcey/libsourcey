@@ -167,7 +167,7 @@ IDiagnostic* DiagnosticManager::getDiagnostic(const std::string& name)
 void DiagnosticManager::onDiagnosticStateChange(void* sender, DiagnosticState& state, const DiagnosticState&)
 {
 	IDiagnostic* test = reinterpret_cast<IDiagnostic*>(sender);
-	traceL() << "Diagnostic state change: " << test->name << ": " << state.toString() << endl;
+	traceL() << "Diagnostic state change: " << test->name << ": " << state << endl;
 
 	if (test->complete() && allComplete())
 		DiagnosticsComplete.emit(this);

@@ -161,11 +161,11 @@ Runner& Task::runner()
 	//
 	//	throw std::runtime_error("The tasks is already !cancelled.");
 
-	//ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	//assert(_!cancelled);	
 	//if (!cancelled())
 	//	throw std::runtime_error("The tasks is not !cancelled.");
-	//ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	//assert(!_destroyed);
 	//const std::string& name, //const std::string& name, //,
 	//_name(name)//,

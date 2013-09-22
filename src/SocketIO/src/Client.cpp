@@ -31,7 +31,8 @@ namespace sockio {
 Client::Client(net::SocketBase* socket, uv::Loop& loop) :
 	_timer(loop),
 	_socket(socket),
-	_loop(loop)
+	_loop(loop),
+	_wasOnline(false)
 {
 }
 
@@ -41,21 +42,23 @@ Client::Client(net::SocketBase* socket, const std::string& host, UInt16 port, uv
 	_host(host),
 	_port(port),
 	_socket(socket),
-	_loop(loop)
+	_loop(loop),
+	_wasOnline(false)
 {
 }
 
 
 Client::~Client() 
 {
-	_timer.stop();
+	//close();
+	//reset();
 }
 
 
 void Client::connect(const std::string& host, UInt16 port)
 {	
 	{
-		//ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		_host = host;
 		_port = port;
 	}
@@ -67,13 +70,10 @@ void Client::connect()
 {
 	log("trace") << "SocketIO Connecting" << endl;
 
-	reset();
-
 	if (_host.empty() || !_port)
 		throw std::runtime_error("The SocketIO server address is not set.");
 
-	if (_socket.base().closed())
-		throw std::runtime_error("The SocketIO client is already connected.");
+	reset();
 		
 	setState(this, ClientState::Connecting);
 
@@ -89,19 +89,7 @@ void Client::connect()
 void Client::close()
 {			
 	log("trace") << "Closing" << endl;
-	{
-		//ScopedLock lock(_mutex);
-		
-		// Cancel the timer if connection manually closed
-		_timer.Timeout -= delegate(this, &Client::onHeartBeatTimer);
-		_timer.stop();	
-
-		_socket.Connect -= delegate(this, &Client::onSocketConnect);
-		_socket.Recv -= delegate(this, &Client::onSocketRecv);
-		_socket.Error -= delegate(this, &Client::onSocketError);
-		_socket.Close -= delegate(this, &Client::onSocketClose);
-		_socket.close();
-	}
+	reset();
 	onClose();
 
 	log("trace") << "Closing: OK" << endl;	
@@ -110,7 +98,7 @@ void Client::close()
 
 void Client::sendHandshakeRequest()
 {
-	//ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 		
 	log("trace") << "Send handshake request" << endl;	
 	
@@ -124,7 +112,7 @@ void Client::sendHandshakeRequest()
 	//	_endpoint, "/socket.io/1/websocket/");
 	//assert(url.valid());
 	
-	http::ClientConnection* conn = http::createConnection(url.str());
+	auto conn = http::createConnection(url.str());
 	conn->Complete += delegate(this, &Client::onHandshakeResponse);
 	conn->setReadStream(new std::stringstream);
 	conn->request().setMethod("POST");
@@ -185,7 +173,7 @@ void Client::onHandshakeResponse(void* sender, const http::Response& response)
 		return;
 	}
 	
-	//ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	
 	// Initialize the WebSocket
 	log("trace") << "Websocket connecting: " << _sessionID << endl;	
@@ -276,67 +264,39 @@ int Client::sendHeartbeat()
 }
 
 
-uv::Loop& Client::loop()
-{
-	//ScopedLock lock(_mutex);
-	return _loop;
-}
-
-
-/*
-std::string& Client::endpoint()
-{
-	//ScopedLock lock(_mutex);
-	return _endpoint;
-}
-*/
-
-
-http::WebSocket& Client::socket()
-{
-	//ScopedLock lock(_mutex);
-	return _socket;
-}
-
-
-string Client::sessionID() const 
-{
-	//ScopedLock lock(_mutex);
-	return _sessionID;
-}
-
-
-Error Client::error() const 
-{
-	//ScopedLock lock(_mutex);
-	//return _error;
-	return _socket.error();
-}
-
-
-bool Client::isOnline() const
-{
-	return stateEquals(ClientState::Online);
-}
-
-
 void Client::reset()
 {
-	//ScopedLock lock(_mutex);
-	//_error.reset();	
+	//Mutex::ScopedLock lock(_mutex);
+
+	// Note: Only reset session related variables here.
+	// Do not reset host and port variables.
+
+	_timer.Timeout -= delegate(this, &Client::onHeartBeatTimer);
+	_timer.stop();	
+
+	_socket.Connect -= delegate(this, &Client::onSocketConnect);
+	_socket.Recv -= delegate(this, &Client::onSocketRecv);
+	_socket.Error -= delegate(this, &Client::onSocketError);
+	_socket.Close -= delegate(this, &Client::onSocketClose);
+	_socket.close();	
+		
 	_sessionID = "";	
 	_heartBeatTimeout = 0;
 	_connectionClosingTimeout = 0;
 	_protocols.clear();
+	_error.reset();
+	_wasOnline = false;
 }
 
 
 void Client::setError(const Error& error)
 {
-	log("error") << "Error: " << error.message << std::endl;
+	log("error") << "Set error: " << error.message << std::endl;
 
-	// Set the socket error resulting in closure via callbacks
-	socket().setError(error);
+	_error = error;	
+	setState(this, ClientState::Error, error.message);
+
+	// Note: Do not call close() here, since we will be trying to reconnect...
 }
 
 
@@ -346,7 +306,7 @@ void Client::onConnect()
 			
 	setState(this, ClientState::Connected);
 
-	//ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 
 	// Start the heartbeat timer
 	assert(_heartBeatTimeout);
@@ -359,6 +319,7 @@ void Client::onConnect()
 void Client::onOnline()
 {
 	log("trace") << "On online" << endl;	
+	_wasOnline = true;
 	setState(this, ClientState::Online);
 }
 
@@ -366,9 +327,9 @@ void Client::onOnline()
 void Client::onClose()
 {
 	log("trace") << "On close" << endl;
-	setState(this, ClientState::Disconnected, error().message);
 
-	// Keep trying to reconnect via timer callbacks
+	// Back to initial state
+	setState(this, ClientState::None);
 }
 
 
@@ -384,13 +345,17 @@ void Client::onSocketConnect(void*)
 
 void Client::onSocketError(void*, const Error& error)
 {
+	log("trace") << "On socket error: " << error.message << endl;
+		
 	setError(error);
 }
 
 
 void Client::onSocketClose(void*)
 {
-	onClose();
+	log("trace") << "On socket close" << endl;
+
+	// Nothing to do since the error was set via onSocketError
 }
 
 
@@ -417,10 +382,11 @@ void Client::onHeartBeatTimer(void*)
 {
 	log("trace") << "On heartbeat" << endl;
 	
-	sendHeartbeat();
+	if (isOnline())
+		sendHeartbeat();
 
-	// Try to reconnect if the connection was closed in error
-	if (error().any()) {	
+	// Try to reconnect if disconnected in error
+	else if (error().any()) {	
 		log("info") << "Attempting to reconnect" << endl;	
 		try {
 			connect();
@@ -432,10 +398,65 @@ void Client::onHeartBeatTimer(void*)
 }
 
 
+uv::Loop& Client::loop()
+{
+	//Mutex::ScopedLock lock(_mutex);
+	return _loop;
+}
+
+
+http::WebSocket& Client::socket()
+{
+	//Mutex::ScopedLock lock(_mutex);
+	return _socket;
+}
+
+
+std::string Client::sessionID() const 
+{
+	//Mutex::ScopedLock lock(_mutex);
+	return _sessionID;
+}
+
+
+Error Client::error() const 
+{
+	//Mutex::ScopedLock lock(_mutex);
+	return _error;
+	//return _socket.error();
+}
+
+
+bool Client::isOnline() const
+{
+	return stateEquals(ClientState::Online);
+}
+
+bool Client::wasOnline() const
+{
+	//Mutex::ScopedLock lock(_mutex);
+	return _wasOnline; 
+}
+
+
 
 } } // namespace scy::sockio
 
 
+
+
+
+/*
+std::string& Client::endpoint()
+{
+	//Mutex::ScopedLock lock(_mutex);
+	return _endpoint;
+}
+*/
+
+	// Set the socket error resulting in closure via callbacks
+	//socket().setError(error);
+	//close();
 
 	
 	/*
@@ -501,7 +522,7 @@ void Client::onHeartBeatTimer(void*)
 	//else
 net::Address Client::serverAddr() const 
 {
-	//ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _serverAddr;
 }
 */

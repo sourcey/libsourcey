@@ -49,21 +49,21 @@ public:
 	typedef std::vector<TCPSocket> List;
 	
 	TCPSocket();
-		/// Creates an unconnected TCP socket.
+		// Creates an unconnected TCP socket.
 
 	TCPSocket(TCPBase* base, bool shared = false);
-		/// Creates the Socket and attaches the given SocketBase.
-		///
-		/// The SocketBase must be a TCPBase, otherwise an
-		/// exception will be thrown.
+		// Creates the Socket and attaches the given SocketBase.
+		//
+		// The SocketBase must be a TCPBase, otherwise an
+		// exception will be thrown.
 
 	TCPSocket(const Socket& socket);
-		/// Creates the UDPSocket with the SocketBase
-		/// from another socket. The SocketBase must be
-		/// a UDPBase, otherwise an exception will be thrown.
+		// Creates the UDPSocket with the SocketBase
+		// from another socket. The SocketBase must be
+		// a UDPBase, otherwise an exception will be thrown.
 	
 	TCPBase& base() const;
-		/// Returns the SocketBase for this socket.
+		// Returns the SocketBase for this socket.
 };
 
 
@@ -81,6 +81,7 @@ public:
 	virtual void close();
 	
 	virtual void connect(const net::Address& peerAddress);
+
 	virtual int send(const char* data, int len, int flags = 0);
 	virtual int send(const char* data, int len, const net::Address& peerAddress, int flags = 0);
 	
@@ -94,29 +95,30 @@ public:
 			
 	void setError(const Error& err);
 	const Error& error() const;
-
+	
 	virtual bool closed() const;
-		/// Returns true if the native socket 
-		/// handle is closed.
+		// Returns true if the native socket handle is closed.
 	
 	net::Address address() const;
-		/// Returns the IP address and port number of the socket.
+		// Returns the IP address and port number of the socket.
+		// A wildcard address is returned if the socket is not connected.
 		
 	net::Address peerAddress() const;
-		/// Returns the IP address and port number of the peer socket.
+		// Returns the IP address and port number of the peer socket.
+		// A wildcard address is returned if the socket is not connected.
 
 	net::TransportType transport() const;
-		/// Returns the TCP transport protocol.
-	
-	bool initialized() const;
-		/// Returns true if the underlying socket is initialized.
+		// Returns the TCP transport protocol.
 
-	bool connected() const;
-		/// Returns true if the underlying socket is connected.
+	//bool connected() const;
+		// Returns true if the underlying socket is connected.
+	
+	//bool initialized() const;
+		// Returns true if the underlying socket is initialized.
 
 	//SOCKET sockfd() const;
-		/// Returns the socket descriptor for the 
-		/// underlying native socket.
+		// Returns the socket descriptor for the 
+		// underlying native socket.
 	
 #ifdef _WIN32
 	void setSimultaneousAccepts(bool enable);
@@ -137,7 +139,8 @@ protected:
 	virtual void init();
 
 protected:
-	uv_connect_t _connectReq;
+	std::unique_ptr<uv_connect_t> _connectReq;
+	//uv_connect_t _connectReq;
 	//std::string _debugOutput;
 };
 

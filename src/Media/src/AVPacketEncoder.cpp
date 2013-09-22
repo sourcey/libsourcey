@@ -29,7 +29,7 @@ namespace av {
 
 AVPacketEncoder::AVPacketEncoder(const RecordingOptions& options, bool muxLiveStreams) :
 	AVEncoder(options), 
-	PacketProcessor(AVEncoder::Emitter), 
+	PacketProcessor(AVEncoder::emitter), 
 	_lastVideoPacket(nullptr), 
 	_muxLiveStreams(muxLiveStreams)
 {
@@ -38,7 +38,7 @@ AVPacketEncoder::AVPacketEncoder(const RecordingOptions& options, bool muxLiveSt
 
 AVPacketEncoder::AVPacketEncoder(bool muxLiveStreams) :
 	AVEncoder(), 
-	PacketProcessor(AVEncoder::Emitter), 
+	PacketProcessor(AVEncoder::emitter), 
 	_muxLiveStreams(muxLiveStreams)
 {
 }

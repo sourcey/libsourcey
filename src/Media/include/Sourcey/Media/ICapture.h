@@ -34,7 +34,7 @@ namespace av {
 class ICapture: public PacketSource, public basic::Startable
 {
 public:
-	ICapture() : PacketSource(Emitter) {};
+	ICapture() : PacketSource(this->emitter) {};
 	virtual ~ICapture() {};
 
 	virtual void start() = 0;
@@ -43,7 +43,7 @@ public:
 	virtual void getEncoderFormat(Format& iformat) = 0;
 		// Sets the input format for encoding with this capture device.
 			
-	PacketSignal Emitter;
+	PacketSignal emitter;
 };
 
 

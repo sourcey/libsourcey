@@ -307,8 +307,17 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
 		}
 		//traceL("WebSocketAdapter", this) << "After handshaking: " << buffer << endl;
 		return;
-	}
-	
+	}	
+}
+
+
+void WebSocketAdapter::onSocketClose()
+{
+	// Reset state incase the connection is reused	
+	_request.clear();
+	_response.clear();
+	framer._headerState = 0;
+	framer._frameFlags = 0;
 }
 
 

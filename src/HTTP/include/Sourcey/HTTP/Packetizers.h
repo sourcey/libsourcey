@@ -44,7 +44,7 @@ public:
 	bool nocopy;
 
 	ChunkedAdapter(Connection* connection = nullptr) : 
-		PacketProcessor(Emitter),
+		PacketProcessor(this->emitter),
 		connection(connection), 
 		contentType(connection->outgoingHeader()->getContentType()),
 		initial(true)
@@ -52,7 +52,7 @@ public:
 	}
 
 	ChunkedAdapter(const std::string& contentType, bool nocopy = true) : 
-		PacketProcessor(Emitter),
+		PacketProcessor(this->emitter),
 		connection(nullptr), 
 		contentType(contentType),
 		initial(true),
@@ -137,7 +137,7 @@ public:
 		}
 	}
 		
-	PacketSignal Emitter;
+	PacketSignal emitter;
 };
 
 
@@ -155,7 +155,7 @@ public:
 	bool initial;
 
 	MultipartAdapter(Connection* connection, bool base64 = false) :	
-		IPacketizer(Emitter),
+		IPacketizer(this->emitter),
 		connection(connection),
 		contentType(connection->outgoingHeader()->getContentType()),
 		isBase64(base64),
@@ -164,7 +164,7 @@ public:
 	}
 
 	MultipartAdapter(const std::string& contentType, bool base64 = false) :	
-		IPacketizer(Emitter),
+		IPacketizer(this->emitter),
 		connection(nullptr),
 		contentType(contentType),
 		isBase64(base64),
@@ -238,7 +238,7 @@ public:
 		emit(packet);
 	}
 			
-	PacketSignal Emitter;
+	PacketSignal emitter;
 };
 
 

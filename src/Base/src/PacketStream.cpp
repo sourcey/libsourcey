@@ -29,7 +29,7 @@ namespace scy {
 
 
 PacketStream::PacketStream(const std::string& name) : 
-	PacketStreamAdapter(Emitter),
+	PacketStreamAdapter(*this),
 	_name(name),
 	_clientData(nullptr),
 	_scopeRef(0)
@@ -58,7 +58,7 @@ void PacketStream::start()
 	PacketAdapterVec processors(this->processors());
 	PacketAdapterVec sources(this->sources());
 	{	
-		Emitter.enable(true);
+		PacketSignal::enable(true);
 
 		// Setup the processor chain
 		PacketProcessor* lastProc = nullptr;
@@ -129,7 +129,7 @@ void PacketStream::stop()
 	}
 	
 	setState(this, PacketStreamState::Stopping);
-	Emitter.enable(false);
+	PacketSignal::enable(false);
 
 	//waitForReady();
 	traceL("PacketStream", this) << "Stop: Detaching" << endl;
@@ -183,7 +183,7 @@ void PacketStream::stop()
 void PacketStream::pause()
 {
 	traceL("PacketStream", this) << "Pause" << endl;
-	Emitter.enable(false);
+	PacketSignal::enable(false);
 	setState(this, PacketStreamState::Paused);
 	traceL("PacketStream", this) << "Pause: OK" << endl;
 }
@@ -197,7 +197,7 @@ void PacketStream::resume()
 		return;
 	}
 	
-	Emitter.enable(true);
+	PacketSignal::enable(true);
 	setState(this, PacketStreamState::Running);
 	traceL("PacketStream", this) << "Resume: OK" << endl;
 }
@@ -400,9 +400,9 @@ void PacketStream::write(IPacket& packet)
 	traceL("PacketStream", this) << "Processing packet: " << state() << ": " << packet.className() << endl;	
 
 	// TODO: Single call to check that stream is enabled
-	if (!running()) { // || !Emitter.enabled()
+	if (!running()) { // || !PacketSignal::enabled()
 		debugL("PacketStream", this) << "Dropping packet: " 
-			<< &packet << ": " << state() << endl;	//Emitter.enabled() << ": " 
+			<< &packet << ": " << state() << endl;	//PacketSignal::enabled() << ": " 
 		//_ready.set(); 
 		return;
 	}	
@@ -465,13 +465,13 @@ void PacketStream::emit(IPacket& packet)
 {
 	// No more adapters to process, ensure the stream 
 	// is still running before we dispatch the goods.
-	if (!running() || !Emitter.enabled()) {
+	if (!running() || !PacketSignal::enabled()) {
 		debugL("PacketStream", this) << "Dropping late packet: " 
-			<< Emitter.enabled() << ": " << state() << endl;	
+			<< PacketSignal::enabled() << ": " << state() << endl;	
 		return;
 	}
 
-	Emitter.emit(this, packet);	
+	PacketSignal::emit(this, packet);	
 }
 
 
@@ -487,6 +487,7 @@ bool PacketStream::waitForReady()
 	}
 	return true;
 }
+
 
 void PacketStream::onStateChange(PacketStreamState& state, const PacketStreamState& oldState)
 {
@@ -607,8 +608,23 @@ PacketAdapterVec PacketStream::processors() const
 
 
 PacketStreamAdapter::PacketStreamAdapter(PacketSignal& emitter) :
-	_emitter(emitter)
+	_emitter(&emitter)
 {
+}
+
+
+PacketStreamAdapter::PacketStreamAdapter(const PacketStreamAdapter& that) :
+	_emitter(that._emitter)
+{
+}
+
+	
+PacketStreamAdapter& PacketStreamAdapter::operator = (const PacketStreamAdapter& that)
+{
+	if (this != &that) {
+		_emitter = that._emitter;
+	}
+	return *this;
 }
 
 
@@ -641,7 +657,7 @@ void PacketStreamAdapter::emit(IPacket& packet)
 
 PacketSignal& PacketStreamAdapter::emitter()
 {
-	return _emitter;
+	return *_emitter;
 }
 
 
