@@ -53,7 +53,7 @@ set_option(BUILD_WITH_STATIC_CRT      "Enables staticaly linked CRT for statical
 set_option(BUILD_ALPHA                "Build alpha devlopment modules"                           OFF)
 
 # ----------------------------------------------------------------------------
-# OpenCV build options
+# LibSourcey build options
 # ----------------------------------------------------------------------------
 set_option(ENABLE_SOLUTION_FOLDERS    "Solution folder in Visual Studio or in other IDEs"        MSVC_IDE IF (CMAKE_VERSION VERSION_GREATER "2.8.0") )
 set_option(ENABLE_PROFILING           "Enable profiling in the GCC compiler (Add flags: -g -pg)" OFF  IF CMAKE_COMPILER_IS_GNUCXX )
@@ -70,7 +70,21 @@ set_option(ENABLE_NOISY_WARNINGS      "Show all warnings even if they are too no
 set_option(LibSourcey_WARNINGS_ARE_ERRORS "Treat warnings as errors"                             OFF )
 
 # ----------------------------------------------------------------------------
-# Build paths
+# LibSourcey internal options
+# ----------------------------------------------------------------------------
+set(LibSourcey_INCLUDE_DIRS           "" CACHE INTERNAL "Global include dirs" FORCE)
+set(LibSourcey_LIBRARY_DIRS           "" CACHE INTERNAL "Global include library dirs" FORCE)
+set(LibSourcey_INCLUDE_LIBRARIES      "" CACHE INTERNAL "Global include libraries" FORCE)
+
+set(LibSourcey_BUILD_DEPENDENCIES     "" CACHE INTERNAL "Dependencies to build" FORCE)
+set(LibSourcey_BUILD_MODULES          "" CACHE INTERNAL "Modules to build" FORCE)
+set(LibSourcey_BUILD_SAMPLES          "" CACHE INTERNAL "Samples to build" FORCE)
+set(LibSourcey_BUILD_TESTS            "" CACHE INTERNAL "Tests to build" FORCE)
+set(LibSourcey_BUILD_APPLICATIONS     "" CACHE INTERNAL "Applications to build" FORCE)
+
+
+# ----------------------------------------------------------------------------
+# LibSourcey Build paths
 # ----------------------------------------------------------------------------
 set(LibSourcey_DIR ${CMAKE_SOURCE_DIR})
 set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
@@ -79,12 +93,6 @@ set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_INSTALL_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/LibSourcey/deps")
-set(LibSourcey_INCLUDE_DIRS "")         # Contains all include dirs
-set(LibSourcey_LIBRARY_DIRS "")         # Contains all include library dirs
-set(LibSourcey_INCLUDE_LIBRARIES "")    # Contains all include libraries
-set(LibSourcey_BUILD_DEPENDENCIES "")   # List of all dependencies to build
-set(LibSourcey_BUILD_MODULES "")        # List of all modules to build
-set(LibSourcey_BUILD_APPLICATIONS "")   # List of all apps to build
 
 # Append some common search paths for find_library
 # to find libraries from these locations first
@@ -119,7 +127,11 @@ else()
   SET(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
   set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
     /usr/lib
-    /usr/local/lib)
+    /usr/local/lib   
+    /home/deploy/ffmpeg_build/lib)
+
+  # Temp fix for "/usr/bin/ld: cannot find -lavcodec"
+  link_directories(/home/deploy/ffmpeg_build/lib)
 endif()
 
 # Append some common search paths for find_path
@@ -207,14 +219,14 @@ endif()
 # ============================================================================
 
 # ----------------------------------------------------------------------------
-# Include standard Libraries
+# Include standard and defult libraries
 # ----------------------------------------------------------------------------
 if(MSVC)
-  set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} ws2_32.lib dsound.lib winmm.lib strmiids.lib  advapi32.lib iphlpapi.lib psapi.lib ws2_32.lib shell32.lib)  
+  set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} ws2_32.lib dsound.lib winmm.lib strmiids.lib ${LibSourcey_INCLUDE_LIBRARIES}) 
 elseif(MSYS)
-  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lws2_32 -liphlpapi")
+  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lws2_32 -liphlpapi ${LibSourcey_INCLUDE_LIBRARIES}")
 elseif(LINUX)
-  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -llibc -lglibc")
+  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -llibc -lglibc ${LibSourcey_INCLUDE_LIBRARIES}")
 endif()
 
 
@@ -269,6 +281,7 @@ if(BUILD_MODULES OR BUILD_APPLICATIONS)
   foreach(name ${subdirs})
     # This variable is so modules can set HAVE_LibSourcey_XXX for our
     # LibSourceyConfig.h inside the child scope. See include_sourcey_modules()
+    # TODO: Need to refactor since modules may be nested.
     set(HAVE_LibSourcey_${name} 0)
     set(dir "${CMAKE_SOURCE_DIR}/src/${name}")
     if (EXISTS "${dir}/CMakeLists.txt")

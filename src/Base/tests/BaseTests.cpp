@@ -252,16 +252,16 @@ public:
 			std::string value = nvc.get("name3");
 			assert(0 && "not found - must throw");
 		}
-		catch (NotFoundException&)
+		catch (std::exception&)
 		{
 		}
-
+ 
 		try
 		{
 			std::string value = nvc["name3"];
 			assert(0 && "not found - must throw");
 		}
-		catch (NotFoundException&)
+		catch (std::exception&)
 		{
 		}
 	
@@ -356,7 +356,7 @@ public:
 			//
 			// Version checking 
 			if (info->abiVersion != SOURCEY_PLUGIN_ABI_VERSION)
-				throw Exception(util::format("Module version mismatch. Expected %s, got %s.", SOURCEY_PLUGIN_ABI_VERSION, info->abiVersion));
+				throw std::runtime_error(util::format("Module version mismatch. Expected %s, got %s.", SOURCEY_PLUGIN_ABI_VERSION, info->abiVersion));
 			
 			//
 			// Instantiate the plugin
@@ -423,6 +423,7 @@ public:
 	// ============================================================================
 	// Exception Test
 	//
+       /*
 	void runExceptionTest() 
 	{
 		try
@@ -454,6 +455,7 @@ public:
 			assert(0 && "bad cast");
 		}
 	}
+       */
 	
 	// ============================================================================
 	// Timer Test
