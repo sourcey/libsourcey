@@ -29,9 +29,6 @@
 #include <openssl/hmac.h>
 
 
-using namespace std; 
-
-
 namespace scy {
 namespace crypto {
 

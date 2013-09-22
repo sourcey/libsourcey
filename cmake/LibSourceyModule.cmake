@@ -221,7 +221,7 @@ macro(define_libsourcey_test name)
   #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")  
   #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")  
   #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")  
-  
+
   # Include library and header directories
   include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")  
   include_directories(${LibSourcey_INCLUDE_DIRS})
