@@ -23,6 +23,7 @@
 
 #include "Sourcey/PacketStream.h"
 #include "Sourcey/Media/Types.h"
+#include "Sourcey/Media/FFmpeg.h"
 #include "Sourcey/Media/IEncoder.h"
 #include "Sourcey/Media/VideoContext.h"
 #include "Sourcey/Media/AudioContext.h"
@@ -72,7 +73,7 @@ public:
 	PacketSignal emitter;
 	
 protected:
-	static Mutex _mutex; // Protects avcodec_open/close()
+	//static Mutex _mutex; // Protects avcodec_open/close()
 
 	RecordingOptions _options;
 	AVFormatContext* _formatCtx;

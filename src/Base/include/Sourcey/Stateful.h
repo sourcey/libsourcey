@@ -80,8 +80,8 @@ protected:
 //
 
 
-/// TODO: Use atomics
 class MutexState: public State
+	/// TODO: Use atomics
 { 
 public:
 	MutexState(ID id = 0);
@@ -114,9 +114,9 @@ public:
 	virtual bool canChange(ID id);	
 	virtual void onChange(ID id, ID prev);
 	
-	/// Fired when the state changes to signal 
-	/// the new and previous states.
 	Signal2<const ID&, const ID&> Change;
+		// Fired when the state changes to signal 
+		// the new and previous states.
 
 protected:	
 	virtual void set(ID id);
@@ -142,8 +142,8 @@ public:
 	{ 	
 	}
 	
-	/// Fires when the state changes.
 	Signal2<T&, const T&> StateChange;
+		// Fires when the state changes.
 	
 	virtual bool stateEquals(unsigned int id) const
 	{ 	
@@ -160,30 +160,31 @@ public:
 	virtual const T state() const { return _state; }
 
 protected:
-	/// Override to handle pre state change logic.
-	/// Return false to prevent state change.
 	virtual bool canChangeState(unsigned int id) 
+		// Override to handle pre state change logic.
+		// Return false to prevent state change.
 	{
 		if (_state.id() != id) 
 			return true;
 		return false;
 	}
 	
-	/// Override to handle post state change logic.
-	virtual void onStateChange(T& /* state */, const T& /* oldState */) 
+	virtual void onStateChange(T& /*state*/, const T& /*oldState*/) 
+		// Override to handle post state change logic.
 	{
 	}
 	
-	/// Sets the state and sends the state signal if
-	/// the state change was successful.
 	virtual bool setState(void* sender, unsigned int id, const std::string& message = "") 
+		// Sets the state and sends the state signal if
+		// the state change was successful.
 	{ 
 		if (canChangeState(id)) {
 			T oldState = _state;
 			_state.set(id);	
 			_state.setMessage(message);	
+			if (sender)
+				StateChange.emit(sender, _state, oldState); //self(), 
 			onStateChange(_state, oldState);
-			StateChange.emit(sender, _state, oldState);
 			return true;
 		}
 		return false;
@@ -193,6 +194,11 @@ protected:
 	{ 
 		_state.setMessage(message);	
 	}
+
+	//virtual void* self()
+	//{ 
+	//	return this;
+	//}
 
 protected:
 	T _state;

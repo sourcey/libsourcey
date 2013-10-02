@@ -36,7 +36,7 @@ namespace scy {
 class SyncPacketQueue: public PacketProcessor, public SyncQueue<IPacket>
 {
 public:
-	SyncPacketQueue(uv::Loop& loop, int maxSize = 1024);
+	SyncPacketQueue(uv::Loop* loop, int maxSize = 1024);
 	SyncPacketQueue(int maxSize = 1024);
 	virtual ~SyncPacketQueue();
 
@@ -45,7 +45,7 @@ public:
 	PacketSignal emitter;
 
 protected:	
-	virtual void emit(IPacket& packet);
+	virtual void dispatch(IPacket& packet);
 
 	virtual void onStreamStateChange(const PacketStreamState&);
 };
@@ -67,7 +67,7 @@ public:
 	PacketSignal emitter;
 
 protected:	
-	virtual void emit(IPacket& packet);
+	virtual void dispatch(IPacket& packet);
 
 	virtual void onStreamStateChange(const PacketStreamState&);
 };
@@ -91,7 +91,7 @@ protected:
 class PacketStream: public PacketStream
 {
 public:
-	PacketStream(uv::Loop& loop, const std::string& name = "");
+	PacketStream(uv::Loop* loop, const std::string& name = "");
 	PacketStream(const std::string& name = "");
 
 	virtual ~PacketStream(); // make ref count and protected?

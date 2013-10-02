@@ -24,76 +24,111 @@
 using namespace std;
 
 
+
 namespace scy {
 
-/*
+
 static Singleton<GarbageCollector> singleton;
+static const int GCTimerDelay = 2400;
 	
 
 GarbageCollector::GarbageCollector() : 
-	uv::Handle(&uv::defaultLoop(), new uv_timer_t)
+	_ptr(uv::defaultLoop(), new uv_timer_t), 
+	_finalize(false), 
+	_tid(0)
 {
 	traceL("GarbageCollector", this) << "Create" << std::endl;
 
-	uv_timer_init(loop(), handle<uv_timer_t>());		
-	uv_timer_start(handle<uv_timer_t>(), GarbageCollector::onTimer, 2400, 2400);
-	uv_unref(handle());
+	_ptr.handle()->data = this;
+	uv_timer_init(_ptr.loop(), _ptr.handle<uv_timer_t>());		
+	uv_timer_start(_ptr.handle<uv_timer_t>(), GarbageCollector::onTimer, GCTimerDelay, GCTimerDelay);
+	uv_unref(_ptr.handle());
 }
 
 	
 GarbageCollector::~GarbageCollector()
 {
-	close();
+	traceL("GarbageCollector", this) << "Destroy: "
+			<< "\n\tReady: " << _ready.size() 
+			<< "\n\tPending: " << _pending.size()
+			<< "\n\tFinalize: " << _finalize
+			<< std::endl;
+
+	// The queue should be empty on shutdown if finalized correctly.
+	assert(_ready.empty() && _pending.empty());
 }
 
 
 void GarbageCollector::finalize()
 {
-	Mutex::ScopedLock lock(_mutex);
-	util::clearVector(_ready);
-#ifdef _DEBUG
-	// Pending items will not be freed in release 
-	// mode since it may result in a crash
-	//util::clearVector(_pending);
-#endif
+	traceL("GarbageCollector", this) << "Finalize" << std::endl;	
+	
+	// Ensure the loop is not running and that the 
+	// calling thread is the main thread.
+	_ptr.assertTID();
+	//assert(_ptr.loop()->active_handles <= 1); 
+	assert(!_ptr.closed());
+	assert(!_finalize);
+	_finalize = true;
+	
+	// Run the loop until managed pointers have been deleted,
+	// and the internal timer has also been deleted.
+	uv_timer_set_repeat(_ptr.handle<uv_timer_t>(), 1);
+	uv_ref(_ptr.handle());
+	uv_run(_ptr.loop(), UV_RUN_DEFAULT);
+
+	traceL("GarbageCollector", this) << "Finalize: OK" << std::endl;
 }
 
-	
-void GarbageCollector::close()
+
+void GarbageCollector::runAsync()
 {
-	finalize();
-	uv::Handle::close();
+	Mutex::ScopedLock lock(_mutex);
+
+	if (!_ready.empty() || !_pending.empty()) {
+		traceL("GarbageCollector", this) << "Deleting: "
+			<< "\n\tReady: " << _ready.size() 
+			<< "\n\tPending: " << _pending.size()
+			<< "\n\tFinalize: " << _finalize
+			<< std::endl;
+
+		// Delete waiting pointers
+		util::clearVector(_ready);
+
+		// Swap pending pointers to the ready queue
+		_ready.swap(_pending);
+		assert(_pending.empty());
+	}
+
+	if (_finalize && _ready.empty() && _pending.empty()) {
+		// Stop and close the timer handle.
+		// This should cause the loop to return after 
+		// uv_close has been called on the timer handle.
+		uv_timer_stop(_ptr.handle<uv_timer_t>());
+		_ptr.close();
+
+		traceL("GarbageCollector") << "Finalization complete" << std::endl;
+	}
+
+	if (!_tid) { _tid = uv_thread_self(); }	
 }
 
+
+void GarbageCollector::onTimer(uv_timer_t* handle, int)
+{
+	static_cast<GarbageCollector*>(handle->data)->runAsync();
+}
 	
+
+unsigned long GarbageCollector::tid()
+{
+	return _tid;
+}
+	
+
 void GarbageCollector::shutdown()
 {
-	traceL("GarbageCollector") << "shutdown" << std::endl;
-
-	singleton.get()->close();
 	singleton.destroy();
-}
-
-
-void GarbageCollector::onTimer()
-{
-	Mutex::ScopedLock lock(_mutex);
-
-	if (_ready.empty() && 
-		_pending.empty())
-		return;
-
-	traceL("GarbageCollector", this) << "Delete queue: "
-		<< "\n\tReady: " << _ready.size() 
-		<< "\n\tPending: " << _pending.size()
-		<< std::endl;
-
-	// Delete waiting pointers
-	util::clearVector(_ready);
-
-	// Swap pending pointers to the ready queue
-	_ready.swap(_pending);
-	assert(_pending.empty());
 }
 
 
@@ -101,119 +136,6 @@ GarbageCollector& GarbageCollector::instance()
 {
 	return *singleton.get();
 }
-*/
-
-
-static Singleton<GarbageCollector> singleton;
-	
-
-GarbageCollector::GarbageCollector() : 
-	uv::Handle(&uv::defaultLoop(), new uv_timer_t)
-{
-	traceL("GarbageCollector", this) << "Create" << std::endl;
-
-	uv_timer_init(loop(), handle<uv_timer_t>());		
-	uv_timer_start(handle<uv_timer_t>(), GarbageCollector::onTimer, 2400, 2400);
-	uv_unref(handle());
-}
-
-	
-GarbageCollector::~GarbageCollector()
-{
-	close();
-}
-
-
-void GarbageCollector::finalize()
-{
-	Mutex::ScopedLock lock(_mutex);
-	util::clearVector(_ready);
-#ifdef _DEBUG
-	// Pending items will not be freed in release 
-	// mode since it may result in a crash
-	//util::clearVector(_pending);
-#endif
-}
-
-	
-void GarbageCollector::close()
-{
-	finalize();
-	uv::Handle::close();
-}
-
-	
-void GarbageCollector::shutdown()
-{
-	traceL("GarbageCollector") << "shutdown" << std::endl;
-
-	singleton.get()->close();
-	singleton.destroy();
-}
-
-
-void GarbageCollector::onTimer()
-{
-	Mutex::ScopedLock lock(_mutex);
-
-	if (_ready.empty() && 
-		_pending.empty())
-		return;
-
-	traceL("GarbageCollector", this) << "Delete queue: "
-		<< "\n\tReady: " << _ready.size() 
-		<< "\n\tPending: " << _pending.size()
-		<< std::endl;
-
-	// Delete waiting pointers
-	util::clearVector(_ready);
-
-	// Swap pending pointers to the ready queue
-	_ready.swap(_pending);
-	assert(_pending.empty());
-}
-
-
-GarbageCollector& GarbageCollector::instance() 
-{
-	return *singleton.get();
-}
-
 
 
 } // namespace scy::uv
-
-
-
-/*
-void Timer::close()
-{
-	traceL("Timer", this) << "Closing: " << _handle << endl;
-	Base::close();
-}
-*/
-
-
-/*
-void Timer::updateState()
-{
-	_count = 0;
-	bool wasActive = _active;
-	_active = !!uv_is_active((uv_handle_t*) handle<uv_timer_t>());
-		
-	traceL("Timer", this) << "Update State: " << _active << endl;
-	if (!wasActive && _active) {
-		// If our state is changing from inactive to active, we
-		// increase the loop's reference count.
-		// TODO: reenable
-		uv_ref(handle());
-		uv_unref(handle());
-	} 
-	else if (wasActive && !_active) {
-		// If our state is changing from active to inactive, we
-		// decrease the loop's reference count.
-		// TODO: reenable
-		uv_unref(handle());
-	}
-}
-*/

@@ -46,12 +46,12 @@ public:
 		// The default runner should be kept for short running
 		// tasks such as timers in order to maintain performance.
 
-	uv::Loop& loop;
+	uv::Loop* loop;
 		// The active event loop.
 		// May be assigned at construction, otherwise the default
-		// event loop is used. Should only be accessed 
+		// event loop is used.
 	
-	Application(uv::Loop& loop = uv::defaultLoop());
+	Application(uv::Loop* loop = uv::defaultLoop());
 	~Application();
 	
 	void run();

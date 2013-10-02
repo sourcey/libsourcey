@@ -17,7 +17,7 @@
 //
 
 
-#include "Sourcey/Runner.h"
+#include "Sourcey/TaskRunner.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Memory.h"
 #include "Sourcey/Singleton.h"
@@ -29,34 +29,77 @@
 using namespace std;
 
 
-
 namespace scy {
 
-
-Runner::Runner(uv::Loop& loop) : 
-	//_thread("Runner"),
-	Idler(loop)
-{	
-	Idler::start(std::bind(&Runner::onIdle, this));
-	//_thread.start(*this);
+	
+Task::Task(bool repeat) : 
+	_id(util::randomNumber()),
+	_repeating(repeat),
+	_destroyed(false)
+{ 	
 }
 
 
-Runner::~Runner()
+Task::~Task()
+{
+	//assert(destroyed());
+}
+
+
+void Task::destroy()			
+{
+	_destroyed = true;
+}
+
+
+UInt32 Task::id() const
+{
+	return _id;
+}
+
+
+bool Task::destroyed() const						 
+{ 
+	return _destroyed;
+}
+
+
+bool Task::repeating() const						 
+{ 
+	return _repeating;
+}
+
+
+//
+// Task Async
+//
+
+
+TaskRunner::TaskRunner(async::Runner* runner)
+{	
+	//Idler::start(std::bind(&TaskRunner::runAsync, this));
+	//_thread.start(*this);uv::Loop* loop = uv::defaultLoop()
+
+	if (runner)
+		setAsyncContext(runner);
+}
+
+
+TaskRunner::~TaskRunner()
 {	
 	Shutdown.emit(this);
-	Idler::stop();
+	//Idler::stop();
 	clear();
 }
 
 
-bool Runner::start(Task* task)
+bool TaskRunner::start(Task* task)
 {
 	add(task);
 	//if (task->_cancelled) {
 		//task->_cancelled = false;
 		//task->start();
-		log("trace") << "Started task: " << task << endl;
+		traceL("TaskRunner", this) << "Start task: " << task << endl;
 		onStart(task);
 		//_wakeUp.set();
 		return true;
@@ -65,12 +108,12 @@ bool Runner::start(Task* task)
 }
 
 
-bool Runner::cancel(Task* task)
+bool TaskRunner::cancel(Task* task)
 {		
 	//if (!task->_cancelled) {
 		//task->_cancelled = true;
 		//task->cancel();
-		//log("trace") << "Cancelled task: " << task << endl;
+		//traceL("TaskRunner", this) << "Cancelled task: " << task << endl;
 		//onCancel(task);
 		//_wakeUp.set();
 		//return true;
@@ -78,7 +121,7 @@ bool Runner::cancel(Task* task)
 	
 	if (!task->cancelled()) {
 		task->cancel();
-		log("trace") << "Cancelled task: " << task << endl;
+		traceL("TaskRunner", this) << "Cancel task: " << task << endl;
 		onCancel(task);
 		//_wakeUp.set();
 		return true;
@@ -88,19 +131,19 @@ bool Runner::cancel(Task* task)
 }
 
 
-bool Runner::destroy(Task* task)
+bool TaskRunner::destroy(Task* task)
 {
-	log("trace") << "Aborting task: " << task << endl;
+	traceL("TaskRunner", this) << "Abort task: " << task << endl;
 	
 	// If the task exists then set the destroyed flag.
 	if (exists(task)) {
-		log("trace") << "Aborting Managed task: " << task << endl;
+		traceL("TaskRunner", this) << "Abort managed task: " << task << endl;
 		task->_destroyed = true;
 	}
 		
 	// Otherwise destroy the pointer.
 	else {
-		log("trace") << "Aborting Unmanaged task: " << task << endl;
+		traceL("TaskRunner", this) << "Delete unmanaged task: " << task << endl;
 		delete task;
 	}
 
@@ -108,14 +151,13 @@ bool Runner::destroy(Task* task)
 }
 	
 
-bool Runner::add(Task* task)
+bool TaskRunner::add(Task* task)
 {
-	log("trace") << "Adding task: " << task << endl;
+	traceL("TaskRunner", this) << "Add task: " << task << endl;
 	if (!exists(task)) {
 		Mutex::ScopedLock lock(_mutex);	
 		_tasks.push_back(task);
-		log("trace") << "Added task: " << task << endl;		
-		uv_ref(Idler::ptr.handle()); // reference the idler handle when a task is added
+		//uv_ref(Idler::ptr.handle()); // reference the idler handle when a task is added
 		onAdd(task);
 		return true;
 	}
@@ -123,16 +165,15 @@ bool Runner::add(Task* task)
 }
 
 
-bool Runner::remove(Task* task)
+bool TaskRunner::remove(Task* task)
 {	
-	log("trace") << "Removing task: " << task << endl;
+	traceL("TaskRunner", this) << "Remove task: " << task << endl;
 
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (*it == task) {					
 			_tasks.erase(it);
-			log("trace") << "Removed task: " << task << endl;
-			uv_unref(Idler::ptr.handle()); // dereference the idler handle when a task is removed
+			//uv_unref(Idler::ptr.handle()); // dereference the idler handle when a task is removed
 			onRemove(task);
 			return true;
 		}
@@ -141,10 +182,8 @@ bool Runner::remove(Task* task)
 }
 
 
-bool Runner::exists(Task* task) const
+bool TaskRunner::exists(Task* task) const
 {	
-	log("trace") << "Check exists: " << task << endl;
-
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (*it == task)
@@ -154,7 +193,7 @@ bool Runner::exists(Task* task) const
 }
 
 
-Task* Runner::get(UInt32 id) const
+Task* TaskRunner::get(UInt32 id) const
 {
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
@@ -165,7 +204,7 @@ Task* Runner::get(UInt32 id) const
 }
 
 
-Task* Runner::next() const
+Task* TaskRunner::next() const
 {
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
@@ -176,27 +215,39 @@ Task* Runner::next() const
 }
 
 
-void Runner::clear()
+void TaskRunner::clear()
 {
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {	
-		log("trace") << "Clear: Destroying task: " << *it << endl;
+		traceL("TaskRunner", this) << "Clear: Destroying task: " << *it << endl;
 		delete *it;
 	}
 	_tasks.clear();
 }
 
 
-void Runner::onIdle()
+void TaskRunner::setAsyncContext(async::Runner* runner)
+{
+	traceL("TaskRunner", this) << "Set async: " << runner << endl;
+
+	assert(!_runner);
+	_runner.reset(runner);
+	assert(0);
+	//_runner->start(std::bind(&TaskRunner::runAsync, this));
+}
+
+
+void TaskRunner::runAsync()
 {
 	Task* task = next();
+	traceL("TaskRunner", this) << "Next task: " << task << endl;
 		
 	// Run the task
 	if (task) 
 	{
 		// Check once more that the task has not been cancelled
 		if (!task->cancelled()) {
-			log("trace") << "Run task: " << task << endl;
+			traceL("TaskRunner", this) << "Run task: " << task << endl;
 			task->run();
 
 			onRun(task);
@@ -219,7 +270,7 @@ void Runner::onIdle()
 						
 		// Destroy the task if required
 		if (task->destroyed()) {
-			log("trace") << "Destroy task: " << task << endl;
+			traceL("TaskRunner", this) << "Destroy task: " << task << endl;
 			remove(task);
 			delete task;
 		}
@@ -230,34 +281,34 @@ void Runner::onIdle()
 }
 
 
-void Runner::onAdd(Task*) 
+void TaskRunner::onAdd(Task*) 
 {
 }
 
 
-void Runner::onStart(Task*) 
+void TaskRunner::onStart(Task*) 
 {
 }
 
 
-void Runner::onCancel(Task*) 
+void TaskRunner::onCancel(Task*) 
 {
 }
 
 
-void Runner::onRemove(Task*) 
+void TaskRunner::onRemove(Task*) 
 {
 }
 
 
-void Runner::onRun(Task*) 
+void TaskRunner::onRun(Task*) 
 {
 }
 
 
-Runner& Runner::getDefault() 
+TaskRunner& TaskRunner::getDefault() 
 {
-	static Singleton<Runner> sh;
+	static Singleton<TaskRunner> sh;
 	return *sh.get();
 }
 

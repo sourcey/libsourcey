@@ -44,50 +44,49 @@ Application& Application::getDefault()
 }
 
 
-Application::Application(uv::Loop& loop) :
+Application::Application(uv::Loop* loop) :
 	loop(loop)
 {
-	traceL("Application", this) << "ctor" << std::endl;
+	debugL("Application", this) << "Create" << std::endl;
 }
 
 	
 Application::~Application() 
 {	
-	traceL("Application", this) << "dtor" << std::endl;
+	debugL("Application", this) << "Destroy" << std::endl;
 }
 
 	
 void Application::run() 
 { 
-	uv_run(&loop, UV_RUN_DEFAULT);
+	uv_run(loop, UV_RUN_DEFAULT);
 }
 
 
 void Application::stop() 
 { 
-	uv_stop(&loop); 
+	uv_stop(loop); 
 }
 
 
 void Application::finalize() 
 { 
-	debugL("Application", this) << "finalizing" << std::endl;
+	traceL("Application", this) << "Finalizing" << std::endl;
 
 #ifdef _DEBUG
 	// Print active handles
-	uv_walk(&loop, Application::onPrintHandle, nullptr);
+	uv_walk(loop, Application::onPrintHandle, nullptr);
 #endif
-
-	// Run until handles are closed 
-	run(); 
 			
 	// Shutdown the garbage collector to free memory
-	//GarbageCollector::instance().shutdown();
+	GarbageCollector::instance().finalize();
 
-	// Run once more to clear garbage collector handle
-	//run(); 
+	// Run until handles are closed
+	run(); 	
+	assert(loop->active_handles == 0);
+	//assert(loop->active_reqs == 0);
 
-	debugL("Application", this) << "finalization complete" << std::endl;
+	traceL("Application", this) << "Finalization complete" << std::endl;
 }		
 	
 	
@@ -99,19 +98,21 @@ void Application::waitForShutdown(std::function<void(void*)> callback, void* opa
 
 	uv_signal_t* sig = new uv_signal_t;
 	sig->data = cmd;
-	uv_signal_init(&loop, sig);
+	uv_signal_init(loop, sig);
 	uv_signal_start(sig, Application::onShutdownSignal, SIGINT);
 		
-	debugL("Application", this) << "waiting for shutdown" << std::endl;
+	debugL("Application", this) << "Wait for shutdown" << std::endl;
 	run();
 }
 
 			
 void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 {
-	debugL("Application") << "got shutdown signal" << std::endl;
+	debugL("Application") << "Got shutdown signal" << std::endl;
 	internal::ShutdownCmd* cmd = reinterpret_cast<internal::ShutdownCmd*>(req->data);
-	uv_close((uv_handle_t*)req, uv::afterClose);
+	uv_close((uv_handle_t*)req, [](uv_handle_t* handle) {
+		delete handle;
+	});
 	cmd->callback(cmd->opaque);
 	delete cmd;
 }

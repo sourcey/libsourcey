@@ -26,9 +26,9 @@
 #include "Sourcey/Memory.h"
 #include "Sourcey/Exception.h"
 #include "Sourcey/Stateful.h"
-#include "Sourcey/InterProc.h"
-#include "Sourcey/PacketSignal.h"
 #include "Sourcey/Interface.h"
+#include "Sourcey/Queue.h"
+#include "Sourcey/PacketSignal.h"
 
 
 namespace scy {
@@ -48,7 +48,7 @@ class PacketStreamAdapter
 	/// state machine.
 { 
 public:
-	PacketStreamAdapter(PacketSignal& emitter);
+	PacketStreamAdapter(PacketSignal& emitter); // = nullptr
 	virtual ~PacketStreamAdapter() {};
 
 	virtual void emit(char* data, std::size_t len, unsigned flags = 0);
@@ -56,7 +56,7 @@ public:
 	virtual void emit(const std::string& str, unsigned flags = 0);
 	virtual void emit(IPacket& packet);
 
-	PacketSignal& emitter();
+	PacketSignal& getEmitter();
 		// Returns a reference to the outgoing packet signal.
 
 	virtual void onStreamStateChange(const PacketStreamState&) {};
@@ -72,7 +72,7 @@ protected:
 	PacketStreamAdapter& operator=(const PacketStreamAdapter&); // = delete;
 	PacketStreamAdapter& operator=(PacketStreamAdapter&&); // = delete;
 
-	PacketSignal* _emitter;
+	PacketSignal& _emitter;
 };
 
 
@@ -91,8 +91,8 @@ class PacketProcessor: public PacketStreamAdapter
 	/// the IPacket type. 
 { 
 public:
-	PacketProcessor(PacketSignal& emitter) :
-	  PacketStreamAdapter(emitter)
+	PacketProcessor(PacketSignal& emitter) : // = nullptr
+		PacketStreamAdapter(emitter)
 	{
 	}
 	
@@ -158,7 +158,7 @@ struct PacketStreamState: public State
 	{
 		None = 0,
 		Locked,
-		Running,
+		Active,
 		Paused,
 		Resetting,
 		Stopping,
@@ -172,7 +172,7 @@ struct PacketStreamState: public State
 		switch(id) {
 		case None:			return "None";
 		case Locked:		return "Locked";
-		case Running:		return "Running";
+		case Active:		return "Active";
 		case Paused:		return "Paused";
 		case Resetting:		return "Resetting";
 		case Stopping:		return "Stopping";
@@ -187,133 +187,21 @@ struct PacketStreamState: public State
 
 
 //
-// Packet Stream
+// Packet Stream Context
 //
 
 
-class PacketStream: 
-	public PacketStreamAdapter, 
-	public PacketSignal, 
-	public Stateful<PacketStreamState>, 
-	public basic::Startable
-	/// This class is used for processing and boradcasting IPackets in a flexible way.
-	/// A PacketStream consists of one or many PacketSources, one or many
-	/// PacketProcessors, and one or many delegate receivers.
-	///
-	/// This class enables the developer to setup a processor chain in order
-	/// to perform arbitrary processing on data packets using interchangeable 
-	/// packet adapters, and pump the output to any delegate function, 
-	/// or even another PacketStream.
-	///
-	/// Note that PacketStream itself inherits from PacketStreamAdapter, 
-	/// so a PacketStream be the source of another PacketStream.
-	///
-	/// All PacketStream methods are thread-safe, but once the stream is 
-	/// running you will not be able to attach or detach stream adapters.
-	///
-	/// In order to synchronize output packets with the application event
-	/// loop take a look at the SyncPacketQueue class.
-	/// For lengthy operations you can add an AsyncPacketQueue to the start
-	/// of the stream to defer processing from the PacketSource thread.
-{ 
+class PacketStream;
+class PacketStreamBase: public Stateful<PacketStreamState>, public RunnableQueue<IPacket>
+	/// PacketStreamBase contains methods relevent to the internal stream API.
+{	
+	PacketStreamBase(PacketStream* stream);
+	virtual ~PacketStreamBase();
+
 public:	
-	PacketStream(const std::string& name = ""); 
-	~PacketStream();
+	PacketStream* stream() const;
+		// Returns a pointer to the parent stream wrapper.
 	
-	virtual void start();
-		// Start the stream and any synchronized sources.
-
-	virtual void stop();
-		// Stop the stream and any synchronized sources.
-
-	virtual void pause();
-		// Pause the stream.
-
-	virtual void resume();
-		// Resume the stream.
-
-	virtual void reset();
-		// Reset the internal state of all packet adapters in the
-		// stream. Useful for correcting metadata generation when
-		// new receivers connect to the stream.
-
-	virtual void close();
-		// Close the stream and transition the internal state to Closed.
-
-	virtual void write(char* data, std::size_t len);
-		// Write data to the stream (nocopy).
-	
-	virtual void write(const char* data, std::size_t len);
-		// Write data to the stream (copied).
-
-	virtual void write(IPacket& packet);
-		// Writes an incoming packet to the stream.
-
-	virtual void emit(IPacket& packet);
-		// Called internally to emits the final packet.
-		// Exposed publicly for flexible use.
-
-	virtual void attachSource(PacketSignal& source);
-		// Attach a source packet emitter to the stream.
-		// The source packet adapter can be another PacketStream::emitter.
-	
-	virtual void attachSource(PacketStreamAdapter* source, bool freePointer = true, bool syncState = false);
-		// Attach a source packet emitter to the stream.
-		// If freePointer is true, the pointer will be deleted when the stream is closed.
-		// If syncState and the PacketSignal is castable to a  basic::Stratable
-		// the source's start() and stop() methods will be synchronized with 
-		// the internal stream state.
-	
-	virtual bool detachSource(PacketSignal& source);
-		// Detaches the given source packet signal from the stream.
-
-	virtual bool detachSource(PacketStreamAdapter* source);
-		// Detaches the given source packet adapter from the stream.
-		//
-		// Note: The pointer will be forgotten about, so if the freePointer
-		// flag set when calling attachSource() will have no effect.
-
-	virtual void attach(PacketProcessor* proc, int order = 0, bool freePointer = true);
-		// Attach a packet processor to the stream.
-		// Order determines the position of the processor in the stream queue.
-		// If freePointer is true, the pointer will be deleted when the stream closes.
-
-	virtual bool detach(PacketProcessor* proc);
-		// Detaches a packet processor from the stream.
-		//
-		// Note: The pointer will be forgotten about, so if the freePointer
-		// flag set when calling attach() will have no effect.
-
-	//PacketSignal emitter;
-		// Signals to delegates on outgoing packets.
-	
-	virtual std::string name() const;
-		// Returns the name of the stream.
-	
-	virtual bool running() const;
-		// Returns true when the stream is in the Running state.
-	
-	virtual bool closed() const;
-		// Returns true when the stream is in the Closing, Closed or Error state.
-	
-	virtual bool lock();
-		// Sets the stream to locked state.
-		//
-		// In a locked state no new adapters can be added or removed
-		// from the stream until the stream is stopped.
-	
-	virtual bool locked() const;
-		// Returns true is the stream is currently locked.
-	
-	virtual void setClientData(void* data);
-	virtual void* clientData() const;
-		// Client data pointer.
-
-	virtual bool waitForReady();
-		// Locks until the internal ready event is signalled.
-		// This blocks the active thread until the current precessor iteration
-		// is complete, as such is it only useful after calling stop() or pause().
-
 	PacketAdapterVec adapters() const;
 		// Returns a combined list of all stream sources and processors.
 
@@ -323,10 +211,15 @@ public:
 	PacketAdapterVec processors() const;
 		// Returns a list of all stream processors.
 
-	virtual int numSources() const;
-	virtual int numProcessors() const;
-	virtual int numAdapters() const;
-	
+	bool waitForSync();
+		// Block the calling thread until all packets have been flushed,
+		// and internal states have been synchronized.
+		// This function is only useful after calling stop() or pause().
+
+	int numSources() const;
+	int numProcessors() const;
+	int numAdapters() const;
+
 	template <class AdapterT>
 	AdapterT* getSource(int index = 0)
 	{
@@ -372,21 +265,251 @@ public:
 		return nullptr;
 	}
 
-protected:
-	virtual void cleanup();
-		// Detaches all stream adapters and deletes managed adapters.
+protected:		
+	void setup();
+		// Attach the source and processor delegate chain.
+
+	void teardown();
+		// Detach the source and processor delegate chain.
+
+	void cleanup();
+		// Remove all stream adapters and delete managed adapters.
+
+	void dispose();
+		// Schedule the pointer for deletion.
+	
+	void write(IPacket& packet);
+		// Write an incoming packet onto the stream.
+
+	void emit(IPacket& packet);
+		// Emit the final packet to listeners.
+	
+	void attachSource(PacketSignal& source);
+		// Attach a source packet emitter to the stream.
+		// The source packet adapter can be another PacketStream::emitter.
+	
+	void attachSource(PacketStreamAdapter* source, bool freePointer = true, bool syncState = false);
+		// Attach a source packet emitter to the stream.
+		// If freePointer is true, the pointer will be deleted when the stream is closed.
+		// If syncState is true and the source is a basic::Stratable, then
+		// the source's start()/stop() methods will be synchronized when
+		// calling startSources()/stopSources().
+	
+	bool detachSource(PacketSignal& source);
+		// Detaches the given source packet signal from the stream.
+
+	bool detachSource(PacketStreamAdapter* source);
+		// Detaches the given source packet adapter from the stream.
+		//
+		// Note: The pointer will be forgotten about, so if the freePointer
+		// flag set when calling attachSource() will have no effect.
+
+	void attach(PacketProcessor* proc, int order = 0, bool freePointer = true);
+		// Attach a packet processor to the stream.
+		// Order determines the position of the processor in the stream queue.
+		// If freePointer is true, the pointer will be deleted when the stream closes.
+
+	bool detach(PacketProcessor* proc);
+		// Detaches a packet processor from the stream.
+		//
+		// Note: The pointer will be forgotten about, so if the freePointer
+		// flag set when calling attach() will have no effect.
+
+	void synchronizeOutput(uv::Loop* loop);
+		// Synchronize stream output and events with the given event loop.
+
+	const std::exception_ptr& error();
+		// Returns the stream error (if any).
+	
+	virtual void dispatch(IPacket& packet);
+		// Overrides RunnableQueue::dispatch to process an incoming packet.
+
+	virtual bool dispatchNext();
+		// Overrides RunnableQueue::dispatchNext to ensure that stream 
+		// states are correctly synchronized with the async context.
 	
 	virtual void onStateChange(PacketStreamState& state, const PacketStreamState& oldState);
+	
+	void queueState(PacketStreamState::ID state);
+	bool statePendingOrEquals(PacketStreamState::ID state) const;
+	
+	void assertNotActive();
+		// Asserts that the stream is not in or pending the Active state.
+	
+	void setStream(PacketStream* stream);
+		// Sets the stream wrapper instance.
 
-protected:
-	friend struct std::default_delete<PacketStream>;
-
+	friend class PacketStream;
+	friend struct std::default_delete<PacketStreamBase>;
+	
 	mutable Mutex _mutex;
-
-	std::string _name;
+	PacketStream* _stream;
 	PacketAdapterVec _sources;
 	PacketAdapterVec _processors;
-	std::atomic<int> _scopeRef;
+	std::deque<PacketStreamState::ID> _states;
+	async::Runner::ptr _runner;
+	std::exception_ptr _error;
+	bool _closeOnError;
+	bool _syncError;
+	bool _deleted;
+};
+
+
+//
+// Packet Stream
+//
+
+
+class PacketStream
+	/// This class is used for processing and boradcasting IPackets in a flexible way.
+	/// A PacketStream consists of one or many PacketSources, one or many
+	/// PacketProcessors, and one or many delegate receivers.
+	///
+	/// This class enables the developer to setup a processor chain in order
+	/// to perform arbitrary processing on data packets using interchangeable 
+	/// packet adapters, and pump the output to any delegate function, 
+	/// or even another PacketStream.
+	///
+	/// Note that PacketStream itself inherits from PacketStreamAdapter, 
+	/// so a PacketStream be the source of another PacketStream.
+	///
+	/// All PacketStream methods are thread-safe, but once the stream is 
+	/// running you will not be able to attach or detach stream adapters.
+	///
+	/// In order to synchronize output packets with the application event
+	/// loop take a look at the SyncPacketQueue class.
+	/// For lengthy operations you can add an AsyncPacketQueue to the start
+	/// of the stream to defer processing from the PacketSource thread.
+{ 
+public:	
+	PacketStream(const std::string& name = "");
+	virtual ~PacketStream();
+	
+	virtual void start();
+		// Start the stream and synchronized sources.
+
+	virtual void stop();
+		// Stop the stream and synchronized sources.
+
+	virtual void pause();
+		// Pause the stream.
+
+	virtual void resume();
+		// Resume the stream.
+
+	virtual void reset();
+		// Reset the internal state of all packet adapters in the stream. 
+		// Useful for correcting metadata generation when new receivers
+		// connect to the stream.
+
+	virtual void close();
+		// Close the stream and transition the internal state to Closed.
+	
+	virtual bool active() const;
+		// Returns true when the stream is in the Active state.
+	
+	virtual bool stopped() const;
+		// Returns true when the stream is in the Stopping or Stopped state.
+	
+	virtual bool closed() const;
+		// Returns true when the stream is in the Closed or Error state.
+	
+	virtual bool lock();
+		// Sets the stream to locked state.
+		// In a locked state no new adapters can be added or removed
+		// from the stream until the stream is stopped.
+	
+	virtual bool locked() const;
+		// Returns true is the stream is currently locked.
+
+	virtual void write(char* data, std::size_t len);
+		// Write data to the stream (nocopy).
+	
+	virtual void write(const char* data, std::size_t len);
+		// Write data to the stream (copied).
+
+	virtual void write(IPacket& packet);
+		// Write an incoming packet onto the stream.
+
+	virtual void attachSource(PacketSignal& source);
+		// Attach a source packet emitter to the stream.
+		// The source packet adapter can be another PacketStream::emitter.
+	
+	virtual void attachSource(PacketStreamAdapter* source, bool freePointer = true, bool syncState = false);
+		// Attach a source packet emitter to the stream.
+		// If freePointer is true, the pointer will be deleted when the stream is closed.
+		// If syncState is true and the source is a basic::Stratable, then
+		// the source's start()/stop() methods will be synchronized when
+		// calling startSources()/stopSources().
+	
+	virtual bool detachSource(PacketSignal& source);
+		// Detaches the given source packet signal from the stream.
+
+	virtual bool detachSource(PacketStreamAdapter* source);
+		// Detaches the given source packet adapter from the stream.
+		// Note: The pointer will be forgotten about, so if the freePointer
+		// flag set when calling attachSource() will have no effect.
+
+	virtual void attach(PacketProcessor* proc, int order = 0, bool freePointer = true);
+		// Attach a packet processor to the stream.
+		// Order determines the position of the processor in the stream queue.
+		// If freePointer is true, the pointer will be deleted when the stream closes.
+
+	virtual bool detach(PacketProcessor* proc);
+		// Detaches a packet processor from the stream.
+		// Note: The pointer will be forgotten about, so if the freePointer
+		// flag set when calling attach() will have no effect.
+
+	virtual void setAsyncContext(async::Runner::ptr runner);
+		// Set the asynchronous context for packet processing.
+		// This may be a Thread or another derivative of Async.
+		// Must be set before the stream is activated.
+
+	virtual void synchronizeOutput(uv::Loop* loop);
+		// Synchronize stream output packets with the given event loop.
+	
+	void startSources();
+		// Start synchronized sources.
+
+	void stopSources();
+		// Stop synchronized sources.
+	
+	virtual void closeOnError(bool flag);
+		// Set the stream to be closed on error.
+	
+	virtual void setClientData(void* data);
+	virtual void* clientData() const;
+		// Unmanaged client data pointer.
+
+	PacketStreamBase& base() const;
+		// Returns a reference to the base implementation.
+	
+	const std::exception_ptr& error();
+		// Returns the stream error (if any).
+	
+	std::string name() const;
+		// Returns the name of the packet stream.
+
+	PacketSignal emitter;
+		// Signals to delegates on outgoing packets.
+	
+	Signal<const std::exception_ptr&> Error;
+		// Signals that the PacketStream is in Error state.
+		// If stream output is synchronized then the Error signal will be
+		// sent from the synchronization context, otherwise it will be sent from 
+		// the async processor context. See synchronizeOutput()
+
+	NullSignal Close;
+		// Signals that the PacketStream is in Close state.
+		// This signal is sent immediately via the close() method, 
+		// and as such will be sent from the calling thread context.
+
+protected:
+	friend class PacketStreamBase;
+
+	mutable Mutex _mutex;
+	std::string _name;
+	std::shared_ptr<PacketStreamBase> _base;
 	void* _clientData;
 };
 
@@ -398,3 +521,25 @@ typedef std::vector<PacketStream*> PacketStreamVec;
 
 
 #endif // SOURCEY_PacketStream_H
+
+
+	
+	
+	
+	//void setEmitter(PacketSignal* emitter);
+		// Sets the emitter instance.
+		// Once the emitter instance is set it cannot be changed.
+	//std::shared_ptr<PacketStreamBase> _self;
+	//virtual void run();
+	//void processSyncStates();
+
+	//void processPendingStates();
+
+	//scy::Error _error;
+	// _queue; // thread-safe
+	//std::deque<std::pair<PacketStreamState, PacketStreamState>> _syncStates;
+
+	//void assertCmdThread();
+
+	//virtual void sync(IPacket& packet);
+		// Synchronize the final packet with the main thread before emitting.

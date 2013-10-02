@@ -821,7 +821,7 @@ public:
 	
 	int timeZone()
 	{
-	#if defined(__APPLE__)  || defined(__FreeBSD__) || defined(POCO_ANDROID) // no timezone global var
+	#if defined(__APPLE__)  || defined(__FreeBSD__) || defined(POCO_ANDROID) no timezone global var
 		std::time_t now = std::time(nullptr);
 		struct std::tm t;
 		gmtime_r(&now, &t);
@@ -1735,7 +1735,7 @@ long Timeout::remaining() const
 
 bool Timeout::expired() const 
 {
-	if (_delay == 0) //_startAt == 0 || 
+	if (_delay == 0) // _startAt == 0 || 
 		return false;
 
 	return remaining() == 0;

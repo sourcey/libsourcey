@@ -34,13 +34,13 @@ namespace smpl {
 //
 
 
-Client* createTCPClient(const Client::Options& options, uv::Loop& loop)
+Client* createTCPClient(const Client::Options& options, uv::Loop* loop)
 {
 	return new Client(new net::TCPBase, options, loop);
 }
 
 
-TCPClient::TCPClient(const Client::Options& options, uv::Loop& loop) :
+TCPClient::TCPClient(const Client::Options& options, uv::Loop* loop) :
 	Client(new net::TCPBase, options, loop)
 {
 }
@@ -51,13 +51,13 @@ TCPClient::TCPClient(const Client::Options& options, uv::Loop& loop) :
 //
 	
 
-Client* createSSLClient(const Client::Options& options, uv::Loop& loop)
+Client* createSSLClient(const Client::Options& options, uv::Loop* loop)
 {
 	return new Client(new net::SSLBase, options, loop);
 }
 
 
-SSLClient::SSLClient(const Client::Options& options, uv::Loop& loop) :
+SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop) :
 	Client(new net::SSLBase, options, loop)
 {
 }
@@ -68,7 +68,7 @@ SSLClient::SSLClient(const Client::Options& options, uv::Loop& loop) :
 //
 
 
-Client::Client(net::SocketBase* socket, const Client::Options& options, uv::Loop& loop) :
+Client::Client(net::SocketBase* socket, const Client::Options& options, uv::Loop* loop) :
 	sockio::Client(socket, loop),
 	_options(options),
 	_announceStatus(500)
@@ -396,7 +396,7 @@ void Client::reset()
 
 
 /*
-uv::Loop& loop() 
+uv::Loop* loop() 
 { 
 	//Mutex::ScopedLock lock(_mutex);
 	return _runner; 
@@ -429,7 +429,7 @@ void Client::onError()
 			//return false; // stop propagation
 			//return false; // stop propagation
 			//return false; // stop propagation
-//Client::Client(uv::Loop& loop, const Options& options) : 
+//Client::Client(uv::Loop* loop, const Options& options) : 
 //	sockio::Socket(reactor),
 //	_runner(runner),
 //	_options(options),

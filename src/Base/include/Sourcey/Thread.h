@@ -23,43 +23,27 @@
 
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Mutex.h"
-#include "Sourcey/Interface.h"
-
-#include <functional>
+#include "Sourcey/Async.h"
 
 
 namespace scy {
 	
 
-class Thread
+class Thread: public async::Runner
 	/// This class implements a platform-independent
 	/// wrapper around an operating system thread.
 {
 public:	
+	typedef std::shared_ptr<Thread> ptr;
+
 	Thread();
-	Thread(basic::Runnable& target);	
+	Thread(async::Runnable& target);	
 	Thread(std::function<void()> target);	
-	Thread(std::function<void(void*)> target, void* opaque);
-	~Thread();
-	
-	void start(basic::Runnable& target);
-		// Starts the thread with the given target.
-		//
-		// The given Runnable object must be valid for the entire 
-		// lifetime of the thread.
-	
-	void start(std::function<void()> target);	
-	void start(std::function<void(void*)> target, void* opaque);
-		// Starts the thread with the given target.
-	
-	void startC(basic::Callable target, void* opaque);
-		// Starts the thread with the given target and opaque pointer.
+	Thread(std::function<void(void*)> target, void* arg);
+	virtual ~Thread();
 	
 	void join();
 		// Waits until the thread exits.
-	
-	bool running() const;
-		// Returns true if the thread is running.
 	
 	unsigned long id() const;
 		// Returns the native thread ID.
@@ -71,60 +55,24 @@ protected:
 	Thread(const Thread&);
 	Thread& operator = (const Thread&);
 	
-	static void runAsync(void* arg, bool hasArg);
-	
-	bool _running;
-	unsigned long _id;
+	virtual bool synced() const;
+	virtual void startAsync(); 
+
+	unsigned long _id;	
 	uv_thread_t _handle;
-	mutable Mutex _mutex;
 };
 
 
 //
-// Cancellation Flag
-//
-
-	
-class CancellationFlag 
-	/// A concurrent flag which can be    
-	/// used to request task cancellation.
-{
-	std::atomic<bool> state;
-	
-	// Non-copyable and non-movable
-	CancellationFlag(const CancellationFlag&); // = delete;
-	CancellationFlag(CancellationFlag&&); // = delete;
-	CancellationFlag& operator=(const CancellationFlag&); // = delete;
-	CancellationFlag& operator=(CancellationFlag&&); // = delete;
-
-public:
-	CancellationFlag() : state(false) {};
-
-	bool cancelled() const
-	{
-		bool s = state.load(std::memory_order_relaxed);
-		if (s)
-			std::atomic_thread_fence(std::memory_order_acquire);
-		return s;
-	}
-
-	void cancel()
-	{
-		state.store(true, std::memory_order_release);
-	}
-};
-
-
-//
-// Async Startable
+// Runner Startable
 //
 
 
 template <class TStartable>
 class AsyncStartable: public TStartable
-	// This class is an invisible wrapper around a TStartable instance
+	// Depreciated: This class is an invisible wrapper around a TStartable instance,
 	// which provides asynchronous access to the TStartable start() and
-	// stop() methods. TStartable is an instance of basic::Startable.
+	// stop() methods. TStartable is an instance of async::Startable.
 {
 public:
 	AsyncStartable() {};
@@ -164,3 +112,134 @@ protected:
 
 
 #endif
+
+
+
+	
+		// Starts the thread with the given target.
+		// The given Runnable object must be valid for the entire 
+		// lifetime of the thread.
+	
+	
+	/*
+	
+	//bool _started;
+	//bool _running;
+	
+	//bool started() const;
+		// Returns true if the thread has been started.
+	
+	//bool running() const;
+		// Returns true if the thread is running.
+	//virtual void reset();
+	virtual void start(async::Runnable& target);
+		// Starts the thread with the given target.
+		//
+		// The given Runnable object must be valid for the entire 
+		// lifetime of the thread.
+	
+	virtual void start(std::function<void()> target);	
+	virtual void start(std::function<void(void*)> target, void* arg);
+		// Starts the thread with the given target.
+		*/
+	/*
+	virtual void startAsync(std::function<void(void*)> target, void* arg)
+	{
+		int err = uv_thread_create(&_handle, target.target(), arg);
+		if (err < 0) throw runtime_error("System error: Cannot initialize thread");	
+	}
+	*/
+	
+
+		// Starts the thread with the given target.
+		//
+		// The given Runnable object must be valid for the entire 
+		// lifetime of the thread.
+	
+		// Starts the thread with the given target.
+
+	//async::Runner(async::Runnable& target);
+	//async::Runner(std::function<void()> target);	
+	//async::Runner(std::function<void(void*)> target, void* arg);
+	/*
+class async::Runner
+{
+public:	
+	async::Runner() {};
+	virtual ~async::Runner() {};
+	virtual void startAsync(std::function<void(void*)> target, void* arg) = 0;
+		
+protected:
+	async::Runner(const async::Runner&);
+	async::Runner& operator = (const async::Runner&);
+};
+*/
+
+
+/*
+class Thread: public async::Runner
+	/// This class implements a platform-independent
+	/// wrapper around an operating system thread.
+{
+public:	
+	Thread() {};
+	virtual ~Thread() {};
+
+	//Thread(async::Runnable& target);	
+	//Thread(std::function<void()> target);	
+	//Thread(std::function<void(void*)> target, void* arg)
+	//{
+		//assert(!_started);
+		//_started = true;
+	
+		//context.self = this;
+		//context.target1 = target;	
+		//context.arg = arg;
+		//startAsync([](void* arg) {
+		//}, arg);
+	//}
+
+	//virtual ~Thread();
+	
+	//void join();
+		// Waits until the thread exits.
+	
+	//unsigned long id() const;
+		// Returns the native thread ID.
+	
+	//static unsigned long currentID();
+ 		// Returns the native thread ID of the current thread.
+		
+protected:		
+	virtual void startAsync(std::function<void(void*)> target, void* arg)
+	{
+		int err = uv_thread_create(&_handle, target.target, arg);
+		if (err < 0) throw runtime_error("System error: Cannot initialize thread");	
+	}
+
+	unsigned long _id;
+	uv_thread_t _handle;
+};
+*/
+	
+	//void startAsync(basic::Callable target, void* arg);
+		// Starts the thread with the given target and arg pointer.
+	//static void runAsync(void* arg, bool hasArg);
+	
+	//bool _started;
+	//bool _running;
+	//mutable Mutex _mutex;
+	//bool started() const;
+		// Returns true if the thread has been started.
+	
+	//bool running() const;
+		// Returns true if the thread is running.
+	//void start(async::Runnable& target);
+		// Starts the thread with the given target.
+		//
+		// The given Runnable object must be valid for the entire 
+		// lifetime of the thread.
+	
+	//void start(std::function<void()> target);	
+	//void start(std::function<void(void*)> target, void* arg);
+		// Starts the thread with the given target.

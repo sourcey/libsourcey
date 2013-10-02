@@ -21,6 +21,7 @@
 #include "Sourcey/HTTP/Server.h"
 #include "Sourcey/HTTP/Client.h"
 #include "Sourcey/Logger.h"
+#include "Sourcey/Memory.h"
 
 #include <assert.h>
 
@@ -44,8 +45,14 @@ Connection::Connection(const net::Socket& socket) :
 	_socket.Error += delegate(this, &Connection::onSocketError);
 	_socket.Close += delegate(this, &Connection::onSocketClose);
 
+	// Use an event loop Idler as the PacketStream async source
+	//auto idler = std::make_shared<Idler>(*socket.base().loop());
+	//, scy::deleter::Dispose<Idler>()
+	Incoming.setAsyncContext(std::make_shared<Idler>(socket.base().loop()));
+	Outgoing.setAsyncContext(std::make_shared<Idler>(socket.base().loop()));
+
 	// Attach the outgoing stream to the socket
-	Outgoing.emitter() += delegate(&_socket, &net::Socket::send);
+	Outgoing.emitter += delegate(&_socket, &net::Socket::send);
 }
 
 	
@@ -98,7 +105,7 @@ void Connection::close()
 	
 	_closed = true;	
 
-	Outgoing.emitter() -= delegate(&_socket, &net::Socket::send);	
+	Outgoing.emitter -= delegate(&_socket, &net::Socket::send);	
 	Outgoing.close();
 	Incoming.close();
 
@@ -120,6 +127,8 @@ void Connection::setError(const Error& err)
 	
 	//_socket.setError(err);
 	_error = err;
+	
+	// Note: Setting the error does not call close()
 }
 
 
@@ -135,7 +144,7 @@ void Connection::onSocketRecv(void*, net::SocketPacket& packet)
 {		
 	_timeout.stop();
 			
-	if (Incoming.emitter().refCount()) {
+	if (Incoming.emitter.refCount()) {
 		//RawPacket p(packet.data(), packet.size());
 		//Incoming.write(p);
 		Incoming.write(packet.data(), packet.size());
@@ -159,7 +168,7 @@ void Connection::onSocketClose(void*)
 {
 	traceL("Connection", this) << "On socket close" << endl;
 
-	// Close the connection if the socket is closed
+	// Close the connection when the socket closes
 	close();
 }
 

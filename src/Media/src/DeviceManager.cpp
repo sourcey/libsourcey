@@ -41,8 +41,11 @@ namespace av {
 const char IDeviceManager::kDefaultDeviceName[] = "";
 
 
-// ----------------------------------------------------------------------------
 //
+// Device
+//
+
+
 Device::Device() : 
 	id(-1) 
 {
@@ -66,8 +69,11 @@ void Device::print(std::ostream& os)
 }
 
 
-// ----------------------------------------------------------------------------
 //
+// Device Manager
+//
+
+
 DeviceManager::DeviceManager() : 
 	_watcher(nullptr), 
 	_initialized(false) 

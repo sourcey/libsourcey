@@ -137,28 +137,32 @@ bool AVPacketEncoder::accepts(IPacket& packet)
 					
 void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state) 
 { 
-	traceL("AVPacketEncoder", this) << "Stream state change: " << state << endl;
+	traceL("AVPacketEncoder", this) << "On stream state change: " << state << endl;
 	
 	Mutex::ScopedLock lock(_mutex);
 
 	switch (state.id()) {
-	case PacketStreamState::Running:
-		//if (stateEquals(EncoderState::None))
-		if (!isActive())
+	case PacketStreamState::Active:
+		if (!isActive()) {
+			traceL("AVPacketEncoder", this) << "Initializing" << endl;
 			AVEncoder::initialize();
+		}
 		break;
 		
-	case PacketStreamState::Stopped:
-	case PacketStreamState::Error:
 	case PacketStreamState::Resetting:
-		//if (stateEquals(EncoderState::Encoding))
-		if (isActive())
+	case PacketStreamState::Stopping:
+		if (isActive()) {
+			traceL("AVPacketEncoder", this) << "Uninitializing" << endl;
 			AVEncoder::uninitialize();
+		}
 		break;
+	//case PacketStreamState::Stopped:
+	//case PacketStreamState::Error:
 	//case PacketStreamState::None:
-	//case PacketStreamState::Stopping:
 	//case PacketStreamState::Closed:
 	}
+
+	traceL("AVPacketEncoder", this) << "Stream state change: OK: " << state << endl;
 }
 
 

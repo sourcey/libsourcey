@@ -40,7 +40,7 @@ struct Bitwise
 };
 
 
-/*
+#if 0
 class Flaggable 
 {
 public:
@@ -71,7 +71,7 @@ public:
 protected:
 	Flags _flags;
 };
-*/
+#endif
 
 
 } // namespace scy

@@ -30,44 +30,24 @@
 
 namespace scy {
 	
-
+	
+/*
 struct Idler
 {
-	Idler(uv::Loop& loop = uv::defaultLoop()) :
-		ptr(&loop, new uv_idle_t)
-	{
-		uv_idle_init(&loop, ptr.handle<uv_idle_t>());
-		uv_unref(ptr.handle()); // don't increment main loop
-	}
+	Idler(uv::Loop* loop = uv::defaultLoop());
+			
+	void start(std::function<void()> target);
+	void stop();
+
+	uv::Handle ptr;
 
 	struct CallbackRef
 	{
 		std::function<void()> func;
 		Idler* self;
 	} callback;
-			
-	void start(std::function<void()> target)
-	{		
-		assert(!ptr.active());	
-		callback.func = target;
-		callback.self = this;
-		ptr.handle()->data = &callback;
-		if (uv_idle_start(ptr.handle<uv_idle_t>(), [](uv_idle_t* req, int) {
-			auto callback = reinterpret_cast<CallbackRef*>(req->data);
-			callback->func(); // (callback->self);
-			scy::sleep(1); // required or 100% CPU
-		}) != 0) {
-			ptr.setAndThrowLastError("Cannot initialize idler");
-		}
-	}
-
-	void stop()
-	{
-		uv_idle_stop(ptr.handle<uv_idle_t>());
-	}
-
-	uv::Handle ptr;
 };
+*/
 
 
 } // namespace scy

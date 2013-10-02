@@ -65,7 +65,7 @@ public:
 		// Creates and opens the given video file
 		// Can be created in any thread
 
-	VideoCapture(VideoCaptureBase* base);
+	VideoCapture(std::shared_ptr<VideoCaptureBase> base);
 		// Creates the video capture using the given base instance.
 
 	virtual ~VideoCapture();
@@ -91,7 +91,8 @@ public:
 protected:
 	mutable Mutex _mutex;
 
-	VideoCaptureBase* _base;
+	std::shared_ptr<VideoCaptureBase> _base;
+	//VideoCaptureBase* _base;
 };
 	
 
@@ -100,7 +101,7 @@ protected:
 //
 
 
-class VideoCaptureBase: public SharedObject, public basic::Runnable
+class VideoCaptureBase: public async::Runnable //public SharedObject, 
 	/// Class for capturing video from cameras and files using OpenCV.
 	/// Do not use this class directly, use VideoCapture instead.
 	///
@@ -145,9 +146,12 @@ public:
 	cv::Mat lastFrame() const;
 	cv::VideoCapture& capture();
 
-protected:	
 	virtual ~VideoCaptureBase();
+		// Destroy the VideoCaptureBase
+		// Never call directly; only public for compatibility
+		// with std::make_shared.
 
+protected:	
 	bool open();
 	cv::Mat grab();
 	virtual void run();
@@ -159,7 +163,7 @@ protected:
 	
 	friend class VideoCapture;
 	friend class MediaFactory;
-	friend struct std::default_delete<VideoCaptureBase>;	
+	//friend struct std::default_delete<VideoCaptureBase>;	
 
 private:   
 	mutable Mutex _mutex;
@@ -179,7 +183,7 @@ private:
 };
 
 
-typedef std::map<int, VideoCaptureBase*> VideoCaptureBaseMap;
+typedef std::map<int, std::shared_ptr<VideoCaptureBase>> VideoCaptureBaseMap;
 	
 
 //
@@ -259,7 +263,7 @@ DefinePolymorphicDelegateWithArg(videoDelegate, IPacket, VideoDelegate, double, 
 */
 
 
-	/* //, unsigned flags = 0 //, unsigned flags = 0//, public basic::Runnable 
+	/* //, unsigned flags = 0 //, unsigned flags = 0//, public async::Runnable 
 	enum Flag 
 		// Settings for different operational modes
 	{

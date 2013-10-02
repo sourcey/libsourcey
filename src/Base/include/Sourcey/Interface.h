@@ -24,6 +24,8 @@
 #include "Sourcey/Types.h"
 #include <stdexcept>
 #include <atomic>
+#include <functional>
+#include <memory>
 
 
 namespace scy {
@@ -35,62 +37,7 @@ struct LogStream;
 	
 namespace basic { // interface pieces
 
-		
-class Runnable
-	// A generic interface for classes that 
-	// can be run and cancelled.
-{
-	std::atomic<bool> flag;
-
-public:
-	Runnable() : flag(false) {}
-	virtual ~Runnable() {}
-	
-	virtual void run() = 0;
-		// The run method will be called repeatedly by the  
-		// managing context until this method return false.
-	
-	virtual void cancel()
-		// Cancels the current task.
-	{
-		flag.store(true, std::memory_order_release);
-	}
-	
-	virtual bool cancelled() const
-		// True when the task has been cancelled.
-		// The run() method should return ASAP.
-	{
-		bool s = flag.load(std::memory_order_relaxed);
-		if (s) std::atomic_thread_fence(std::memory_order_acquire);
-		return s;
-	};
-};
-
-
-typedef void (*Callable)(void*);
-	// For C client data callbacks.
-
-		
-class Startable
-	// A generic interface for a classes
-	// that can be started and stopped.
-{
-public:
-	virtual void start() = 0;
-	virtual void stop() = 0;
-};
-
-		
-class Sendable
-	// A generic interface for classes
-	// that can be sent and cancelled.
-{
-public:
-	virtual bool send() = 0;
-	virtual void cancel() {};
-};
-	
-	
+			
 class Decoder 
 {	
 public:
@@ -146,3 +93,13 @@ typedef Polymorphic Module;
 
 
 #endif // SOURCEY_Interfaces_H
+
+
+ //Callback
+	 //basic::Callable target, void* context
+	//Async(async::Runnable& target);	
+	//virtual void start(async::Runnable& target);
+		// Starts the thread with the given target.
+		//
+		// The Runnable object must remain valid for the  
+		// entire lifetime of the async object.

@@ -21,6 +21,7 @@ AVInputReader::AVInputReader(const Options& options)  :
 	_stopping(false)
 {		
 	traceL("AVInputReader", this) << "Create" << endl;
+	initializeFFmpeg();
 }
 
 
@@ -29,6 +30,7 @@ AVInputReader::~AVInputReader()
 	traceL("AVInputReader", this) << "Destroy" << endl;
 
 	close();
+	uninitializeFFmpeg();
 }
 
 

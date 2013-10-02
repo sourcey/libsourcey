@@ -49,7 +49,7 @@ void StreamManager::closeAll()
 	StreamManager::Map::iterator it2;
 	while (it != _map.end()) {
 		it2 = it++;
-		(*it2).second->StateChange -= delegate(this, &StreamManager::onStreamStateChange);
+		(*it2).second->base().StateChange -= delegate(this, &StreamManager::onStreamStateChange);
 		(*it2).second->close();
 		if (_freeClosedStreams) {
 			StreamManager::Deleter func;
@@ -110,14 +110,14 @@ void StreamManager::onAdd(PacketStream* stream)
 	// Receive callbacks after all other listeners 
 	// so we can delete the stream when it closes.
 	log("debug") << "stream added: " << stream->name() << endl;
-	stream->StateChange += delegate(this, &StreamManager::onStreamStateChange, -1);
+	stream->base().StateChange += delegate(this, &StreamManager::onStreamStateChange, -1);
 }
 
 
 void StreamManager::onRemove(PacketStream* stream)
 {
 	log("debug") << "stream removed: " << stream->name() << endl;
-	stream->StateChange -= delegate(this, &StreamManager::onStreamStateChange);
+	stream->base().StateChange -= delegate(this, &StreamManager::onStreamStateChange);
 }
 
 
@@ -128,7 +128,7 @@ void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state, 
 	// Cantch stream closed state and free it if necessary
 	if (state.equals(PacketStreamState::Closed)) {
 		PacketStream* stream = reinterpret_cast<PacketStream*>(sender);
-		stream->StateChange -= delegate(this, &StreamManager::onStreamStateChange);
+		stream->base().StateChange -= delegate(this, &StreamManager::onStreamStateChange);
 		bool success = false;
 		if (_freeClosedStreams) {
 			log("debug") << "On stream close: freeing: " << stream->name() << endl;

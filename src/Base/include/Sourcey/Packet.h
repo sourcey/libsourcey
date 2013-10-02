@@ -102,10 +102,10 @@ public:
 	//
 	// virtual void write(MutableBuffer&) const = 0;
 	
-	virtual std::size_t size() const = 0;
-
 	virtual char* data() const { return nullptr; }
 	virtual bool hasData() const { return data() != nullptr; }
+
+	virtual std::size_t size() const { return 0; };
 
 	virtual const char* className() const = 0;
 	virtual void print(std::ostream& os) const { os << className() << std::endl; }

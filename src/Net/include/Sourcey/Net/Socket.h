@@ -119,6 +119,9 @@ public:
 
 	virtual bool closed() const = 0;
 		// Returns true if the native socket handle is closed.
+
+	virtual uv::Loop* loop() const = 0;
+		// Returns the socket event loop.
 	
 	void* opaque;
 		// Optional client data pointer.

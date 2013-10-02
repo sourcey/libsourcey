@@ -38,26 +38,6 @@
 #include "Sourcey/Types.h"
 
 
-/*
-#if defined(POCO_OS_FAMILY_WINDOWS)
-#if defined(_WIN32_WCE)
-#include "Mutex_WINCE.cpp"
-#else
-#include "Mutex_WIN32.cpp"
-#endif
-#elif defined(POCO_VXWORKS)
-#include "Mutex_VX.cpp"
-#else
-#include "Mutex_POSIX.cpp"
-#endif
-
-UV_EXTERN void uv_mutex_destroy(uv_mutex_t* handle);
-UV_EXTERN void uv_mutex_lock(uv_mutex_t* handle);
-UV_EXTERN int uv_mutex_trylock(uv_mutex_t* handle);
-UV_EXTERN void uv_mutex_unlock(uv_mutex_t* handle);
-*/
-
-
 namespace scy {
 
 

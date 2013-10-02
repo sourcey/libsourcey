@@ -34,7 +34,7 @@ VideoCapture::VideoCapture(int deviceId) :
 	traceL("VideoCapture", this) << "Create: " << deviceId << std::endl;
 
 	_base->addEmitter(&this->emitter);
-	_base->duplicate();
+	//_base->duplicate();
 }
 
 
@@ -43,38 +43,40 @@ VideoCapture::VideoCapture(const std::string& filename)
 	traceL("VideoCapture", this) << "Create: " << filename << std::endl;
 
 	// The file capture is owned by this instance
-	_base = new VideoCaptureBase(filename);
+	_base = std::make_shared<VideoCaptureBase>(filename);
 	_base->addEmitter(&this->emitter);
+
+	//assert(_base->refCount() == 1);
 }
 
 
-VideoCapture::VideoCapture(VideoCaptureBase* base) : 
+VideoCapture::VideoCapture(std::shared_ptr<VideoCaptureBase> base) :  //VideoCaptureBase*
 	_base(base) 
 {
 	traceL("VideoCapture", this) << "Create: " << base << std::endl;
 	_base->addEmitter(&this->emitter);
-	_base->duplicate();
+	//_base->duplicate();
 }
 
 
 VideoCapture::~VideoCapture() 
 {
-	traceL("VideoCapture", this) << "Destroy" << std::endl;	
+	traceL("VideoCapture", this) << "Destroy: " << _base << std::endl;	// << ": " << _base->refCount()
 	_base->removeEmitter(&this->emitter);
-	_base->release();
+	//_base->release();
 }
 
 
 void VideoCapture::start() 
 {
-	traceL("VideoCapture", this) << "Starting" << std::endl;	
+	traceL("VideoCapture", this) << "Start" << std::endl;	
 	emitter.enable(true);
 }
 
 
 void VideoCapture::stop() 
 {
-	traceL("VideoCapture", this) << "Stopping" << std::endl;
+	traceL("VideoCapture", this) << "Stop" << std::endl;
 	emitter.enable(false);
 }
 
@@ -147,7 +149,7 @@ VideoCaptureBase& VideoCapture::base()
 
 
 VideoCaptureBase::VideoCaptureBase(int deviceId) : 
-	SharedObject(true), //SharedObject(new DeferredDeleter<VideoCaptureBase>()),
+	//SharedObject(true), // no longer deferred
 	_deviceId(deviceId),
 	_capturing(false),
 	_opened(false),
@@ -160,7 +162,7 @@ VideoCaptureBase::VideoCaptureBase(int deviceId) :
 
 
 VideoCaptureBase::VideoCaptureBase(const std::string& filename) : 
-	SharedObject(true), //SharedObject(new DeferredDeleter<VideoCaptureBase>()),
+	//SharedObject(true), // no longer deferred
 	_filename(filename),
 	_deviceId(-1),
 	_capturing(false),
@@ -176,14 +178,14 @@ VideoCaptureBase::VideoCaptureBase(const std::string& filename) :
 VideoCaptureBase::~VideoCaptureBase() 
 {	
 	traceL("VideoCaptureBase", this) << "Destroy" << std::endl;
+	assert(Thread::currentID() != _thread.id());
 
 	if (_thread.running()) {
 		_stopping = true;
 
-		// Because we are calling join on the thread
-		// this destructor must never be called from
-		// within a capture callback or we will result
-		// in deadlock.
+		// Because we are calling join on the thread this
+		// destructor must never be called from within a
+		// capture callback or we will result in deadlock.		
 		_thread.join();
 	}
 
@@ -222,6 +224,7 @@ void VideoCaptureBase::start()
 void VideoCaptureBase::stop() 
 {
 	traceL("VideoCaptureBase", this) << "Stopping" << std::endl;
+	assert(Thread::currentID() != _thread.id());
 	if (_thread.running()) {
 		traceL("VideoCaptureBase", this) << "Terminating thread" << std::endl;		
 		_stopping = true;
@@ -279,7 +282,7 @@ void VideoCaptureBase::run()
 						break;
 					next = _emitters[idx];
 	
-					//traceL("VideoCaptureBase", this) << "Emitting: " << idx << ": " << _counter.fps << std::endl;
+					traceL("VideoCaptureBase", this) << "Emitting: " << idx << ": " << _counter.fps << std::endl;
 					MatrixPacket out(&frame);
 					next->emit(next, out);
 				}
@@ -298,7 +301,7 @@ void VideoCaptureBase::run()
 	catch (cv::Exception& exc) 
 	{
 		setError("OpenCV Error: " + exc.err);
-		assert(0);
+		//assert(0);
 	}
 	catch (std::exception& exc) 
 	{
@@ -306,7 +309,7 @@ void VideoCaptureBase::run()
 		// callback scope which represents a serious application error.
 		// Time to get out the ol debugger!!!
 		setError(exc.what());
-		assert(0);
+		//assert(0);
 	}
 	
 	traceL("VideoCaptureBase", this) << "Exiting" << std::endl;
@@ -324,12 +327,20 @@ cv::Mat VideoCaptureBase::grab()
 	// If using file input and we reach eof the set
 	// behavior is to loop the input video.
 	if (!_filename.empty() && (!_frame.cols || !_frame.rows)) {
+		_capture.release();
 		_capture.open(_filename);
+		if (!_capture.isOpened()) {
+			assert(0 && "invalid frame");
+			throw std::runtime_error("Cannot grab video frame: Cannot loop video source: " + name());
+		}
 		_capture >> _frame;
 	}
 		
 	if (!_capture.isOpened())
 		throw std::runtime_error("Cannot grab video frame: Device is closed: " + name());
+
+	if (!_frame.cols || !_frame.rows)
+		throw std::runtime_error("Cannot grab video frame: Got an invalid frame from device: " + name());
 
 	_counter.tick();
 	//_width = _frame.cols;

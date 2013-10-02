@@ -17,42 +17,90 @@
 //
 
 
-#ifndef SOURCEY_Runner_H
-#define SOURCEY_Runner_H
+#ifndef SOURCEY_TaskRunner_H
+#define SOURCEY_TaskRunner_H
 
 
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Memory.h"
 #include "Sourcey/Interface.h"
 #include "Sourcey/Signal.h"
-#include "Sourcey/Task.h"
+#include "Sourcey/TaskRunner.h"
 #include "Sourcey/Idler.h"
 
 
 namespace scy {
 
 	
-class Runner: public Idler, public basic::Polymorphic
-	// The Runner is an asynchronous event loop in 
+class TaskRunner;
+
+
+class Task: public async::Runnable
+	/// This class is for implementing any kind 
+	/// async task that is compatible with a TaskRunner.
+{
+public:	
+	Task(bool repeat = false);
+	
+	virtual void destroy();
+		// Sets the task to destroyed state.
+
+	virtual bool destroyed() const;
+		// Signals that the task should be disposed of.
+
+	virtual bool repeating() const;
+		// Signals that the task's should be called
+		// repeatedly by the TaskRunner.
+		// If this returns false the task will be cancelled()
+
+	virtual UInt32 id() const;
+		// Unique task ID.
+	
+	// Inherits async::Runnable:
+	//
+	// virtual void run();
+	// virtual void cancel();
+	// virtual bool cancelled() const;
+	
+protected:
+	Task& operator=(Task const&) {}
+	virtual ~Task();
+		// Should remain protected.
+
+	virtual void run() = 0;	
+		// Called by the TaskRunner to run the task.
+		// Override this method to implement task action.
+		// Returning true means the true should be called again,
+		// and false will cause the task to be destroyed.
+		// The task will similarly be destroyed id destroy()
+		// was called during the current task iteration.
+
+	friend class TaskRunner;
+		// Tasks belong to a TaskRunner instance.
+
+	bool _destroyed;
+	bool _repeating;
+	UInt32 _id;
+};
+
+	
+class TaskRunner
+	// The TaskRunner is an asynchronous event loop in 
 	// charge of running one or many tasks. 
 	//
-	// The Runner continually loops through each task in
+	// The TaskRunner continually loops through each task in
 	// the task list calling the task's run() method.
-	//
-	// TODO: 
-	//	- Different async sources ie. TimedRunner, 
-	//   IdleRunner, ThreadedRunner
 {
 public:
-	Runner(uv::Loop& loop = uv::defaultLoop());
-	virtual ~Runner();
+	TaskRunner(async::Runner* runner = nullptr);
+	virtual ~TaskRunner();
 	
 	virtual bool start(Task* task);
 		// Starts a task, adding it if it doesn't exist.
 
 	virtual bool cancel(Task* task);
 		// Cancels a task.
-		// The task reference will be managed the Runner
+		// The task reference will be managed the TaskRunner
 		// until the task is destroyed.
 
 	virtual bool destroy(Task* task);
@@ -65,9 +113,14 @@ public:
 		// Returns the task pointer matching the given ID, 
 		// or nullptr if no task exists.
 
-	static Runner& getDefault();
-		// Returns the default Runner singleton, although
-		// Runner instances may be initialized individually.
+	virtual void setAsyncContext(async::Runner* runner);
+		// Set the asynchronous context for packet processing.
+		// This may be a Thread or another derivative of Async.
+		// Must be set before the stream is activated.
+
+	static TaskRunner& getDefault();
+		// Returns the default TaskRunner singleton, although
+		// TaskRunner instances may be initialized individually.
 		// The default runner should be kept for short running
 		// tasks such as timers in order to maintain performance.
 	
@@ -75,13 +128,13 @@ public:
 		// Fires after completing an iteration of all tasks.
 
 	NullSignal Shutdown;
-		// Fires when the Runner is shutting down.
+		// Fires when the TaskRunner is shutting down.
 	
-	virtual const char* className() const { return "Runner"; }
+	virtual const char* className() const { return "TaskRunner"; }
 		
 protected:
-	virtual void onIdle();
-		// Called by the thread to run managed tasks.
+	virtual void runAsync();
+		// Called by the async context to run managed tasks.
 	
 	virtual bool add(Task* task);
 		// Adds a task to the runner.
@@ -115,11 +168,11 @@ protected:
 	
 	mutable Mutex	_mutex;
 	TaskList		_tasks;
-	Idler			_idler;
+	std::unique_ptr<async::Runner> _runner;
 };
 
 
 } // namespace scy
 
 
-#endif // SOURCEY_Runner_H
+#endif // SOURCEY_TaskRunner_H

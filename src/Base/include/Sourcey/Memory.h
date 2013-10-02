@@ -35,10 +35,10 @@
 namespace scy {
 
 	
-class AbstractDeleter;
+class DeferredDeleter;
 
 
-class GarbageCollector: public uv::Handle
+class GarbageCollector
 	/// Simple garbage collector for deferred pointer deletion.
 {
 public:	
@@ -51,35 +51,46 @@ public:
 	template <class C> void deleteLater(C* ptr);
 		// Schedules a pointer for deferred deletion.
 	
+	template <class C> void deleteLater(std::shared_ptr<C> ptr);
+		// Schedules a shared pointer for deferred deletion.
+
+	void finalize();
+		// Frees all scheduled pointers now.
+		// This method must be called from the main thread
+		// while the event loop is inactive.
+	
 	static void shutdown();
 		// Shuts down the garbage collector and deletes 
 		// the singleton instance.
-	
-	void finalize();
-		// Frees all scheduled pointers now.
-	
-	void close();
-		// Closes the internal timer and frees all 
-		// scheduled pointers now.
+		// This method must be called from the main thread
+		// while the event loop is inactive.
+
+	unsigned long tid();
+		// Returns the TID of the garbage collector event loop thread.
+		// The garbage collector must be running.
 
 protected:	
-	void onTimer();
+	static void onTimer(uv_timer_t* handle, int status);
+	void runAsync();
 		
-	UVEmptyStatusCallback(GarbageCollector, onTimer, uv_timer_t);
-	
 	mutable Mutex _mutex;
-	std::vector<AbstractDeleter*> _pending;
-	std::vector<AbstractDeleter*> _ready;
+	unsigned long _tid;
+	std::vector<DeferredDeleter*> _pending;
+	std::vector<DeferredDeleter*> _ready;
+	uv::Handle _ptr;
+	bool _finalize;
 };
 
 
 //
-/// Deleter Methods
+/// Deleter Functors
 //
+
+namespace deleter {
 
 
 #if 0 // use std::default_delete instead
-template<class T> struct default_delete
+template<class T> struct Default
 {
 	void operator()(T *ptr)
 	{
@@ -92,11 +103,11 @@ template<class T> struct default_delete
 #endif
 
 
-template<class T> struct deferred_delete
+template<class T> struct Deferred
 {
 	void operator()(T *ptr)
 	{
-		assert(ptr);		
+		assert(ptr);
 		static_assert(0 < sizeof(T), 
 			"can't delete an incomplete type");
 		GarbageCollector::instance().deleteLater(ptr);
@@ -104,7 +115,7 @@ template<class T> struct deferred_delete
 };
 
 
-template<class T> struct dispose_method
+template<class T> struct Dispose
 {
 	void operator()(T *ptr)
 	{
@@ -116,54 +127,80 @@ template<class T> struct dispose_method
 };
 
 
+template<class T> struct Array
+{
+	void operator()(T *ptr)
+	{
+		assert(ptr);		
+		static_assert(0 < sizeof(T), 
+			"can't delete an incomplete type");
+		delete [] ptr;
+		ptr->dispose();
+	}
+};
+
+
+} // namespace deleter
+
+
 //
-/// Deleter classes
+/// Deleter Storage Classes
 //
 
 
-class AbstractDeleter
-	/// AbstractDeleter provides an interface for 
-	/// holding and deleting a pointer in various ways. 
-	/// Do not use this class directly, use AsyncDeleter.
+class DeferredDeleter
+	/// DeferredDeleter provides an interface for holding 
+	/// and ansynchronously deleting a pointer in various ways. 
 {
 public:
-	void* ptr;
-	
-	AbstractDeleter(void* p) : 
-		ptr(p)
-	{
-	}
-
-	virtual ~AbstractDeleter()
-	{		
-	}
-
-	virtual void invoke() = 0;
+	DeferredDeleter() {}
+	virtual ~DeferredDeleter() {}
 };
 
 
 template <class T, typename D = std::default_delete<T>>
-class AsyncDeleter: public AbstractDeleter
-	/// AsyncDeleter implements the AbstractDeleter interface  
-	/// to provide different methods of deleting a pointer.
+class PointerDeleter: public DeferredDeleter
+	/// PointerDeleter implements the DeferredDeleter interface  
+	/// to provide a method for deleting a raw pointer.
 {
 public:
-	AsyncDeleter(T* p) : 
-		AbstractDeleter(p)
+	void* ptr;
+	
+	PointerDeleter(void* p) : 
+		ptr(p)
 	{
 	}
 
-	virtual ~AsyncDeleter()
+	virtual ~PointerDeleter()
 	{
-		if (ptr) invoke();
-	}
-
-    virtual void invoke()
-    {
 		D func;
 		func((T*)ptr);
 		ptr = nullptr;
-    }
+	}
+};
+
+
+template <class T>
+class SharedPtrDeleter: public DeferredDeleter
+	/// SharedPtrDeleter implements the DeferredDeleter interface to
+	/// provide deferred deletion for shared_ptr managed pointers.
+	/// Note that this class does not guarantee deletion of the managed
+	/// pointer; all it does is copy the shared_ptr and release it when
+	/// the SharedPtrDeleter instance is deleted, which makes it useful
+	/// for certain asyncronous scenarios.
+{
+public:
+	std::shared_ptr<T> ptr;
+	
+	SharedPtrDeleter(std::shared_ptr<T> p) : 
+		ptr(p)
+	{
+		assert(ptr);
+	}
+
+	virtual ~SharedPtrDeleter()
+	{
+	}
 };
 
 
@@ -176,11 +213,26 @@ template <class C> inline void GarbageCollector::deleteLater(C* ptr)
 	/// Schedules a pointer for deferred deletion.
 { 
 	Mutex::ScopedLock lock(_mutex);
-	_pending.push_back(new AsyncDeleter<C>(ptr));
+	_pending.push_back(new PointerDeleter<C>(ptr));
+}
+
+
+template <class C> inline void GarbageCollector::deleteLater(std::shared_ptr<C> ptr)
+	/// Schedules a shared pointer for deferred deletion.
+{ 
+	Mutex::ScopedLock lock(_mutex);
+	_pending.push_back(new SharedPtrDeleter<C>(ptr));
 }
 
 
 template <class C> inline void deleteLater(C* ptr)
+	/// Convenience function for accessing GarbageCollector::deleteLater
+{
+	GarbageCollector::instance().deleteLater(ptr);
+}
+
+
+template <class C> inline void deleteLater(std::shared_ptr<C> ptr)
 	/// Convenience function for accessing GarbageCollector::deleteLater
 {
 	GarbageCollector::instance().deleteLater(ptr);
@@ -247,7 +299,7 @@ protected:
 	SharedObject& operator = (const SharedObject&);
 	
 	friend struct std::default_delete<SharedObject>;
-	friend struct scy::deferred_delete<SharedObject>;
+	//friend struct deleter::Deferred<SharedObject>;
 	
 	std::atomic<unsigned> count;
 	bool deferred;
@@ -499,9 +551,14 @@ private:
 
 
 
+	
+	//void close();
+		// Closes the internal timer and frees all 
+		// scheduled pointers now.
+	//UVEmptyStatusCallback(GarbageCollector, onTimer, uv_timer_t);
 /*
 template <class C>
-class Deleter: public AbstractDeleter
+class Deleter: public DeferredDeleter
 	/// Deleter is the base deleter template  
 	/// from which all others derive.
 {
@@ -510,7 +567,7 @@ public:
 	Func func;
 
 	Deleter(C* p, Func f) : 
-		AbstractDeleter(p), func(f)
+		DeferredDeleter(p), func(f)
 	{
 	}
 
@@ -571,10 +628,10 @@ public:
         //func(p);//, func(f)//<Type>
 		//Type* p = (Type*)ptr;
 		//ptr = nullptr;
-		//AbstractDeleter<Type>::
+		//DeferredDeleter<Type>::
 
 
-	//: public MemoryObject//<deleter_t>//AbstractDeleter* deleter = new DefaultDeleter<SharedObject>()MemoryObject(deleter), 
+	//: public MemoryObject//<deleter_t>//DeferredDeleter* deleter = new DefaultDeleter<SharedObject>()MemoryObject(deleter), 
 			//MemoryObject::
 		//deleter(this);
 		//Deleter::();
@@ -589,7 +646,7 @@ class MemoryObject//: public
 	/// which employ different memory management strategies.
 {	
 public:
-	MemoryObject() //: //AbstractDeleter* deleter = new DefaultDeleter<MemoryObject>()
+	MemoryObject(): //DeferredDeleter* deleter = new DefaultDeleter<MemoryObject>()
 		//deleter(deleter)
 	{
 		//if (deleter->ptr == nullptr)
@@ -611,11 +668,11 @@ protected:
 	MemoryObject(const MemoryObject&) {};
 	MemoryObject& operator = (const MemoryObject&) {};
 	
-	//friend struct scy::deferred_delete/friend class AsyncDeleter/<MemoryObject>;	
+	//friend struct scy::DeferredDelete/friend class PointerDeleter/<MemoryObject>;	
 	//friend class DeferredDeleter<MemoryObject>;
 
 	//deleter_t deleter;
-	//std::unique_ptr<AbstractDeleter> deleter;
+	//std::unique_ptr<DeferredDeleter> deleter;
 };
 //template <class deleter_t>
 */

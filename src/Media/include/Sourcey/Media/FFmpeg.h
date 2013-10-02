@@ -17,56 +17,42 @@
 //
 
 
-#include "Sourcey/Symple/Presence.h"
-#include "Sourcey/Util.h"
-#include "assert.h"
-
-
-using namespace std;
+#ifndef SOURCEY_Media_FFmpeg_H
+#define SOURCEY_Media_FFmpeg_H
 
 
 namespace scy {
-namespace smpl {
+namespace av {
+
+	
+void initializeFFmpeg();
+	// Initialize the FFmpeg library.
+	
+
+void uninitializeFFmpeg();
+	// Uninitializes the FFmpeg library.
+	
+
+} } // namespace scy::av
 
 
-Presence::Presence() 
-{
-	(*this)["type"] = "presence";
-}
+#endif // SOURCEY_Media_FFmpeg_H
 
 
-Presence::Presence(const Presence& root) :
-	Message(root)
-{
-	if (!isMember("type"))
-		(*this)["type"] = "presence";
-}
 
 
-Presence::Presence(const json::Value& root) :
-	Message(root)
-{
-	if (!isMember("type"))
-		(*this)["type"] = "presence";
-}
+	
+	/*
 
 
-Presence::~Presence() 
-{
-}
+#include "Sourcey/Media/Types.h"
+#include <vector>
+namespace internal {
+	void api(int ret, const char* error = nullptr);
+		// Check return values from FFmpeg and throw an exception if it failed.
+	
+	void throwError();
+		// Throws the last FFmpeg error.
 
-
-bool Presence::isProbe() 
-{
-	return (*this)["probe"].asBool();
-}
-
-
-void Presence::setProbe(bool flag)
-{	
-	(*this)["probe"] = flag;
-}
-
-
-} // namespace symple 
-} // namespace scy
+} // namespace internal
+		*/

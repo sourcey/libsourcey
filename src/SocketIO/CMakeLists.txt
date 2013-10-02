@@ -6,5 +6,5 @@ if(BUILD_MODULES AND BUILD_MODULE_SocketIO)
   include_dependency(LibUV REQUIRED)
   include_dependency(HttpParser REQUIRED)
 
-  define_sourcey_module(SocketIO Base UV Net Crypto HTTP JSON)
+  define_sourcey_module(SocketIO Base UV Crypto Net HTTP JSON)
 endif()

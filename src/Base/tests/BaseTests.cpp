@@ -1,6 +1,5 @@
 #include "Sourcey/Base.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/Runner.h"
 #include "Sourcey/Idler.h"
 #include "Sourcey/Signal.h"
 #include "Sourcey/Buffer.h"
@@ -10,6 +9,7 @@
 #include "Sourcey/PacketStream.h"
 #include "Sourcey/SharedLibrary.h"
 #include "Sourcey/FileSystem.h"
+#include "Sourcey/Process.h"
 #include "Sourcey/Timer.h"
 #include "Sourcey/Util.h"
 
@@ -21,15 +21,6 @@
 
 using namespace std;
 using namespace scy;
-
-
-/*
-// Detect Memory Leaks
-#ifdef _DEBUG
-#include "MemLeakDetect/MemLeakDetect.h"
-CMemLeakDetect memLeakDetect;
-#endif
-*/
 
 
 namespace
@@ -79,14 +70,14 @@ namespace
 
 
 namespace scy {
-	
+
 
 class Tests
 {
-	Application app;
-
 public:
-	Tests()
+	Application& app;
+
+	Tests(Application& app) : app(app)
 	{	
 		//testBuffer();
 		//testHandle();
@@ -98,16 +89,19 @@ public:
 		//runExceptionTest();
 		//runScheduler::TaskTest();
 		//testTimer();
-		testIdler();
+		//testIdler();
+		//testSyncDelegate();
+		//testProcess();
 		//testRunner();
+		//testThread();
 		
-		//runPacketStreamTests();
+		testPacketStream();
 		//runPacketSignalTest();
 		//runSocketTests();
 		//runGarbageCollectorTests();
 		//runSignalReceivers();
 		
-		scy::pause();
+		//scy::pause();
 	}
 	
 	void testBuffer()
@@ -197,7 +191,6 @@ public:
 			catch (std::out_of_range& exc) {
 			}		
 			*/
-
 		}
 	}
 		
@@ -209,21 +202,21 @@ public:
 	{
 		{
 			SharedPtr<TestObj> ptr = new TestObj;
-			assert (ptr->rc() == 1);
+			assert(ptr->rc() == 1);
 			SharedPtr<TestObj> ptr2 = ptr;
-			assert (ptr->rc() == 2);
+			assert(ptr->rc() == 2);
 			ptr2 = new TestObj;
-			assert (ptr->rc() == 1);
+			assert(ptr->rc() == 1);
 			SharedPtr<TestObj> ptr3;
 			ptr3 = ptr2;
-			assert (ptr2->rc() == 2);
+			assert(ptr2->rc() == 2);
 			ptr3 = new TestObj;
-			assert (ptr2->rc() == 1);
+			assert(ptr2->rc() == 1);
 			ptr3 = ptr2;
-			assert (ptr2->rc() == 2);
-			assert (TestObj::count() > 0);
+			assert(ptr2->rc() == 2);
+			assert(TestObj::count() > 0);
 		}
-		assert (TestObj::count() == 0);
+		assert(TestObj::count() == 0);
 	}
 
 
@@ -233,19 +226,19 @@ public:
 	void testNVCollection()
 	{
 		NVCollection nvc;
-		assert (nvc.empty());
-		assert (nvc.size() == 0);
+		assert(nvc.empty());
+		assert(nvc.size() == 0);
 	
 		nvc.set("name", "value");
-		assert (!nvc.empty());
-		assert (nvc["name"] == "value");
-		assert (nvc["Name"] == "value");
+		assert(!nvc.empty());
+		assert(nvc["name"] == "value");
+		assert(nvc["Name"] == "value");
 	
 		nvc.set("name2", "value2");
-		assert (nvc.get("name2") == "value2");
-		assert (nvc.get("NAME2") == "value2");
+		assert(nvc.get("name2") == "value2");
+		assert(nvc.get("NAME2") == "value2");
 	
-		assert (nvc.size() == 2);
+		assert(nvc.size() == 2);
 	
 		try
 		{
@@ -265,46 +258,46 @@ public:
 		{
 		}
 	
-		assert (nvc.get("name", "default") == "value");
-		assert (nvc.get("name3", "default") == "default");
+		assert(nvc.get("name", "default") == "value");
+		assert(nvc.get("name3", "default") == "default");
 
-		assert (nvc.has("name"));
-		assert (nvc.has("name2"));
-		assert (!nvc.has("name3"));	
+		assert(nvc.has("name"));
+		assert(nvc.has("name2"));
+		assert(!nvc.has("name3"));	
 	
 		nvc.add("name3", "value3");
-		assert (nvc.get("name3") == "value3");
+		assert(nvc.get("name3") == "value3");
 	
 		nvc.add("name3", "value31");
 		
 		nvc.add("Connection", "value31");
 	
 		NVCollection::ConstIterator it = nvc.find("Name3");
-		assert (it != nvc.end());
+		assert(it != nvc.end());
 		std::string v1 = it->second;
-		assert (it->first == "name3");
+		assert(it->first == "name3");
 		++it;
-		assert (it != nvc.end());
+		assert(it != nvc.end());
 		std::string v2 = it->second;
-		assert (it->first == "name3");
+		assert(it->first == "name3");
 	
-		assert ((v1 == "value3" && v2 == "value31") || (v1 == "value31" && v2 == "value3"));
+		assert((v1 == "value3" && v2 == "value31") || (v1 == "value31" && v2 == "value3"));
 	
 		nvc.erase("name3");
-		assert (!nvc.has("name3"));
-		assert (nvc.find("name3") == nvc.end());
+		assert(!nvc.has("name3"));
+		assert(nvc.find("name3") == nvc.end());
 	
 		it = nvc.begin();
-		assert (it != nvc.end());
+		assert(it != nvc.end());
 		++it;
-		assert (it != nvc.end());
+		assert(it != nvc.end());
 		++it;
-		assert (it == nvc.end());
+		assert(it == nvc.end());
 	
 		nvc.clear();
-		assert (nvc.empty());
+		assert(nvc.empty());
 	
-		assert (nvc.size() == 0);
+		assert(nvc.size() == 0);
 	}
 
 
@@ -315,13 +308,17 @@ public:
 	{
 		std::string path(scy::getExePath());
 		debugL("FileSystemTest") << "Executable path: " << path << endl;
+		assert(fs::exists(path));
 
-		//std::string junkPath(path + "junkname.huh");
-		//debugL("FileSystemTest") << "Junk path: " << junkPath << endl;
+		std::string junkPath(path + "junkname.huh");
+		debugL("FileSystemTest") << "Junk path: " << junkPath << endl;
+		assert(!fs::exists(path));
 
 		std::string dir(fs::dirname(path));
-		debugL("FileSystemTest") << "Dir name: " << dir << endl;		
+		debugL("FileSystemTest") << "Dir name: " << dir << endl;	
+		assert(fs::exists(path));	
 	}
+
 
 	// ============================================================================
 	// Plugin Test
@@ -390,6 +387,7 @@ public:
 		cout << "Ending" << endl;
 	}
 
+
 	// ============================================================================
 	// Platform Test
 	//
@@ -398,6 +396,7 @@ public:
 		cout << "executable path: " << scy::getExePath() << endl;
 		cout << "current working directory: " << scy::getCwd() << endl;
 	}
+
 
 	// ============================================================================
 	// Logger Test
@@ -418,44 +417,105 @@ public:
 			cout << "Test message: " << i << endl;
 		cout << "#### asynchronous test completed after: " << (clock() - start) << endl;
 	}
-	
-	
-	// ============================================================================
-	// Exception Test
-	//
-       /*
-	void runExceptionTest() 
-	{
-		try
-		{
-			throw FileException("That's not a file!");
-			assert(0 && "must throw");
-		}
-		catch (FileException& exc)
-		{
-			cout << "Message: " << exc << endl;
-		}
-		catch (Exception&)
-		{
-			assert(0 && "bad cast");
-		}
 
-		try
+
+	// ============================================================================
+	// Process Test
+	//	
+	void testProcess()
+	{
+		try 
 		{
-			throw IOException();
-			assert(0 && "must throw");
+			Process proc;
+		
+			char* args[3];
+			args[0] = "C:/Windows/notepad.exe";
+			args[1] = "runspot";
+			args[2] = NULL;
+		
+			proc.options.args = args;
+			proc.options.file = args[0];
+			proc.onexit = std::bind(&Tests::processExit, this, std::placeholders::_1);
+			proc.spawn();
+		
+			runLoop();
 		}
-		catch (IOException& exc)
+		catch (std::exception& exc)
 		{
-			cout << "Message: " << exc << endl;
-			assert(std::string(exc.what()) == "IO error");
-		}
-		catch (Exception&)
-		{
-			assert(0 && "bad cast");
+			cerr << "Process error: " << exc.what() << endl;
+			assert(0);
 		}
 	}
-       */
+
+	void processExit(Int64 exitStatus)
+	{
+		cout << "On process exit: " << exitStatus << endl;
+	}
+	
+
+	// ============================================================================
+	// Thread Tests
+	//	
+	bool threadRan;
+
+	void testThread()
+	{
+		threadRan = false;
+		Thread async([](void* arg) {
+			auto self = reinterpret_cast<Tests*>(arg);	
+			self->threadRan = true;
+		}, this);
+
+		while (!threadRan) {			
+			scy::sleep(10); // wait for thread
+		}
+		
+		cout << "Thread Ran" << endl;
+		assert(async.started());
+		assert(!async.running());
+	}
+
+
+	/*
+	// ============================================================================
+	// Sync Delegate
+	//
+	NullSignal SyncText;
+
+	void testSyncDelegate()
+	{
+		SyncText += syncDelegate(this, &Tests::onSyncSignal);
+
+		Thread async([](void* arg) {
+			cout << "Sending Sync Callback" << endl;
+
+			auto self = reinterpret_cast<Tests*>(arg);
+			self->SyncText.emit(self);
+		}, this);
+		
+		scy::sleep(50); // wait for thread
+		assert(!SyncText.delegates().empty());
+
+		runLoop();
+	}
+	
+	void onSyncSignal(void* sender)
+	{
+		// This method is called inside the event loop context.
+
+		assert(sender == this);		
+		cout << "Received Sync Callback" << endl;
+
+		// Remove the delegate
+		SyncText -= syncDelegate(this, &Tests::onSyncSignal);
+
+		// Cleanup now to remove the redundant delegate, 
+		// and dereference the event loop.
+		SyncText.cleanup();
+		assert(SyncText.delegates().empty());
+	}
+	*/
+
 	
 	// ============================================================================
 	// Timer Test
@@ -472,14 +532,12 @@ public:
 
 		timerRestarted = false;
 		
-		uv_ref(timer.handle()); // timers do not reference the loop
 		runLoop();
 		cout << "Ending" << endl;
 	}
 
 	void timerCallback(void* sender)
 	{
-		/*
 		auto timer = reinterpret_cast<Timer*>(sender);
 		cout << "On timeout: " << timer->count() << endl;
 		if (timer->count() == numTimerTicks) {
@@ -490,7 +548,6 @@ public:
 			else
 				timer->stop(); // event loop will be released
 		}
-		*/
 	}
 	
 	// ============================================================================
@@ -502,10 +559,8 @@ public:
 	
 	void testIdler() 
 	{
-		idler.start(std::bind(&Tests::idlerCallback, this));
-
 		idlerTicks = 0;
-		uv_ref(idler.ptr.handle()); // idlers do not reference the loop
+		idler.start(std::bind(&Tests::idlerCallback, this));
 		runLoop();
 	}
 
@@ -516,80 +571,77 @@ public:
 			idler.stop(); // event loop will be released
 		}
 	}
-
-	/*	
-	Idler::start(std::bind(&Runner::onIdle, this));
-	void Runner::onIdle()
-	{
-	}
-	*/
 	
 	// ============================================================================
-	// Runner Test
-	//
-	Runner runner;
-	
-	void testRunner() 
+	// Packet Stream Tests
+	//	
+	struct TestPacketSource: public PacketSource, public async::Startable
 	{
-		/*
-		idler.start(std::bind(&Tests::idlerCallback, this));
+		Idler runner;
+		PacketSignal emitter;
 
-		idlerTicks = 0;
-		uv_ref(idler.ptr.handle()); // idlers do not reference the loop
-		*/
-		uv_ref(runner.ptr.handle()); // runners do not reference the loop
-		runLoop();
-	}
-
-	/*
-	// ============================================================================
-	// Scheduled Task Tests
-	//
-	struct TestScheduler::Task: public Scheduler::Task
-	{
-		TestScheduler::Task(Runner& runner) : 
-			Scheduler::Task(runner) {}
-
-		void run() 
+		TestPacketSource() : 
+			PacketSource(emitter)
 		{
-			debugL() << "TestScheduler::Task: Running" << endl;
-			ready.set();	
+		}
+
+		void start() 
+		{
+			debugL("TestPacketSource", this) << "Start" << endl;	
+			runner.start([](void* arg) {
+				auto self = reinterpret_cast<TestPacketSource*>(arg);
+				self->emitter.emit(self, RawPacket("hello", 5));
+			}, this);
+		}
+
+		void stop() 
+		{
+			debugL("TestPacketSource", this) << "Stop" << endl;	
+			runner.cancel();
+			runner.close();
+		}
+	};	
+
+	struct TestPacketProcessor: public PacketProcessor
+	{
+		PacketSignal emitter;
+
+		TestPacketProcessor() : 
+			PacketProcessor(emitter)
+		{
+		}
+
+		void process(IPacket& packet) 
+		{
+			debugL("TestPacketProcessor", this) << "Process: " << packet.className() << endl;			
+			emit(packet);
 		}
 	};
-
-	void runScheduler::TaskTest() 
+	
+	void onPacketStreamOutput(void* sender, IPacket& packet) 
 	{
-		Log("trace") << "Running Scheduled Task Test" << endl;
-
-		// Schedule to fire 1 second from now.
-		{
-			TestScheduler::Task* task = new TestScheduler::Task(runner);
-			Poco::DateTime dt;
-			Poco::Timespan ts(1, 0);
-			dt += ts;
-			task->schedule(dt);
-			task->start();
-			ready.wait();
-		}
-		
-		// Schedule to fire once now, and twice at 1 second intervals.
-		{
-			TestScheduler::Task* task = new TestScheduler::Task(runner);
-			Poco::DateTime dt;
-			Poco::Timespan ts(1, 0);
-			task->scheduleRepeated(dt, ts);
-			task->start();
-			ready.wait();
-			ready.wait();
-			ready.wait();		
-			task->destroy();
-		}
-		
-		Log("trace") << "Running Scheduled Task Test: END" << endl;
-		//util::pause();
+		debugL("TestPacketStream", this) << "On packet: " << packet.className() << endl;
 	}
 
+	void testPacketStream() 
+	{
+		PacketStream stream;	
+		stream.setAsyncContext(std::make_shared<Thread>());
+		stream.attachSource(new TestPacketSource, true, true);
+		stream.attach(new TestPacketProcessor, 0, true);
+		stream.emitter += packetDelegate(this, &Tests::onPacketStreamOutput);	
+		stream.start();
 
+		// TODO: Test pause/resume functionality
+					
+		app.waitForShutdown([](void* arg) {
+			auto stream = reinterpret_cast<PacketStream*>(arg);
+			stream->close();
+		}, &stream);		
+	}
+	
+
+	/*
 	// ============================================================================
 	// Packet Signal Tests
 	//
@@ -597,55 +649,17 @@ public:
 
 	void onBroadcastPacket(void* sender, DataPacket& packet)
 	{
-		Log("trace") << "On Packet: " << packet.className() << endl;
+		traceL() << "On Packet: " << packet.className() << endl;
 	}
 	
 	void runPacketSignalTest() 
 	{
-		Log("trace") << "Running Packet Signal Test" << endl;
+		traceL() << "Running Packet Signal Test" << endl;
 		BroadcastPacket += packetDelegate(this, &Tests::onBroadcastPacket, 0);
 		DataPacket packet;
 		BroadcastPacket.emit(this, packet);
 		//util::pause();
-		Log("trace") << "Running Packet Signal Test: END" << endl;
-	}
-
-	
-	// ============================================================================
-	// Packet Stream Tests
-	//
-	class SimplePacketProcessor: public IPacketProcessor
-	{
-		void process(IPacket& packet) 
-		{
-			debugL() << "SimplePacketProcessor: Processing: " << packet.className() << endl;
-			
-			BroadcastPacket.send(this, packet);
-		}
-	};
-	
-	void onPacketStreamPacket(void* sender, IPacket& packet) 
-	{
-		Log("trace") << "On Packet: " << packet.className() << endl;
-	}
-
-	void runPacketStreamTests() 
-	{
-		PacketStream stream;
-		stream.attach(packetDelegate(this, &Tests::onPacketStreamPacket, 0));
-
-		// init source
-		//Media::VideoCapture cap(0);
-		//stream.attach(&cap);
-		
-		// init proc
-		//SimplePacketProcessor proc;
-		//stream.attach(&proc);	
-
-		// run!		
-		//cap.start();
-		//util::pause();
-		//cap.stop();
+		traceL() << "Running Packet Signal Test: END" << endl;
 	}
 	
 
@@ -653,7 +667,7 @@ public:
 	// Garbage Collector Tests
 	//
 	void runGarbageCollectorTests() {
-		Log("trace") << "Running Garbage Collector Test" << endl;
+		traceL() << "Running Garbage Collector Test" << endl;
 		
 		//for (unsigned i = 0; i < 100; i++) { 
 			char* ptr = new char[1000];
@@ -665,7 +679,7 @@ public:
 		//}
 
 		//util::pause();
-		Log("trace") << "Running Garbage Collector Test: END" << endl;
+		traceL() << "Running Garbage Collector Test: END" << endl;
 	}
 	
 	// ============================================================================
@@ -673,13 +687,13 @@ public:
 	//
 	void onTimerTask(void* sender)
 	{
-		Log("trace") << "Timer Task Timout" << endl;
+		traceL() << "Timer Task Timout" << endl;
 		ready.set();
 	}
 
 	void runTimerTaskTest() 
 	{
-		Log("trace") << "Running Timer Task Test" << endl;
+		traceL() << "Running Timer Task Test" << endl;
 		TimerTask* task = new TimerTask(runner, 1000, 1000);
 		task->Timeout += delegate(this, &Tests::onTimerTask);
 		task->start();
@@ -687,10 +701,9 @@ public:
 		ready.wait();
 		task->destroy();
 		//util::pause();
-		Log("trace") << "Running Timer Task Test: END" << endl;
+		traceL() << "Running Timer Task Test: END" << endl;
 	}
 	
-
 	
 	// ============================================================================
 	// Signal Tests
@@ -768,11 +781,76 @@ public:
 
 int main(int argc, char** argv) 
 {	
-	Logger::instance().add(new ConsoleChannel("Test", LTrace));
+	Logger::instance().add(new ConsoleChannel("debug", LTrace));
+	//Logger::instance().setWriter(new AsyncLogWriter);	
+	
 	{
-		scy::Tests app;
-	}	
+#ifdef _MSC_VER
+		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
+		// Create the test application
+		Application app;
+	
+		// Initialize the GarbageCollector in the main thread
+		GarbageCollector::instance();
+
+		// Run tests
+		{
+			scy::Tests run(app);	
+		}	
+	
+		// Wait for user intervention before finalizing
+		scy::pause();
+			
+		// Finalize the application to free all memory
+		app.finalize();
+	}
+
+	// Cleanup singleton instances
+	GarbageCollector::shutdown();
 	Logger::shutdown();
-	//util::pause();
 	return 0;
 }
+
+
+
+	
+	
+	// ============================================================================
+	// Exception Test
+	//
+       /*
+	void runExceptionTest() 
+	{
+		try
+		{
+			throw FileException("That's not a file!");
+			assert(0 && "must throw");
+		}
+		catch (FileException& exc)
+		{
+			cout << "Message: " << exc << endl;
+		}
+		catch (Exception&)
+		{
+			assert(0 && "bad cast");
+		}
+
+		try
+		{
+			throw IOException();
+			assert(0 && "must throw");
+		}
+		catch (IOException& exc)
+		{
+			cout << "Message: " << exc << endl;
+			assert(std::string(exc.what()) == "IO error");
+		}
+		catch (Exception&)
+		{
+			assert(0 && "bad cast");
+		}
+	}
+       */
+	

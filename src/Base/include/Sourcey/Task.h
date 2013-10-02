@@ -27,58 +27,6 @@
 
 
 namespace scy {
-	
-
-class Runner;
-
-
-class Task: public basic::Runnable
-	/// This class is for implementing any kind 
-	/// async task that is compatible with a Runner.
-{
-public:	
-	Task(bool repeat = false);
-	
-	virtual void destroy();
-		// Sets the task to destroyed state.
-
-	virtual bool destroyed() const;
-		// Signals that the task should be disposed of.
-
-	virtual bool repeating() const;
-		// Signals that the task's should be called
-		// repeatedly by the Runner.
-		// If this returns false the task will be cancelled()
-
-	virtual UInt32 id() const;
-		// Unique task ID.
-	
-	// basic::Runnable:
-	//
-	// virtual void run();
-	// virtual void cancel();
-	// virtual bool cancelled() const;
-	
-protected:
-	Task& operator=(Task const&) {}
-	virtual ~Task();
-		// Should remain protected.
-
-	virtual void run() = 0;	
-		// Called by the Runner to run the task.
-		// Override this method to implement task action.
-		// Returning true means the true should be called again,
-		// and false will cause the task to be destroyed.
-		// The task will similarly be destroyed id destroy()
-		// was called during the current task iteration.
-
-	friend class Runner;
-		// Tasks belong to a Runner instance.
-
-	bool _destroyed;
-	bool _repeating;
-	UInt32 _id;
-};
 
 
 } // namespace scy
@@ -89,32 +37,32 @@ protected:
 
 
 
-	//virtual Runner& runner();
-		// Returns a reference to the associated Runner or 
+	//virtual TaskRunner& runner();
+		// Returns a reference to the associated TaskRunner or 
 		// throws an exception.
 /*
 	
 	virtual bool beforeRun();	
-		// Called by the Runner to perform pre-processing, and
+		// Called by the TaskRunner to perform pre-processing, and
 		// to determine weather the task should be run or not.
 		// By default this method returns true if the task is not 
 		// cancelled or destroying.
 		// It is safe to destroy() the task from this method.
 	
 	virtual bool afterRun();	
-		// Called by the Runner to perform post-processing, and
+		// Called by the TaskRunner to perform post-processing, and
 		// to determine weather the task should be destroyed or not.
 		// This method returns true by default. Return false here
 		// to destroy the task.
 
- // Runner& runner, , bool autoStart = falsebool repeat = falseal
+ // TaskRunner& runner, , bool autoStart = falsebool repeat = falseal
 		
 	//virtual void start();
 	//Task(bool repeat = false);	
-template <class basic::RunnableT>
-class ITask: public basic::RunnableT
+template <class async::RunnableT>
+class ITask: public async::RunnableT
 	// This class defines an asynchronous Task which is
-	// managed by a Runner.
+	// managed by a TaskRunner.
 {
 public:			
 	virtual bool start() = 0;
@@ -126,8 +74,8 @@ public:
 	virtual bool repeating() const = 0;
 		// Returns true if the task should be run once only
 
-	virtual Runner& runner();
-		// Returns a reference to the affiliated Runner or 
+	virtual TaskRunner& runner();
+		// Returns a reference to the affiliated TaskRunner or 
 		// throws an exception.
 	
 protected:
@@ -136,17 +84,17 @@ protected:
 		// CAUTION: The destructor should be private, but we
 		// left it protected for implementational flexibility. The
 		// reason being that if the derived task is programmatically
-		// destroyed there is a chance that the Runner will call
+		// destroyed there is a chance that the TaskRunner will call
 		// run() as a pure virtual method.
 	
 	virtual bool beforeRun();	
-		// Called by the Runner to determine weather the task can
+		// Called by the TaskRunner to determine weather the task can
 		// be run or not. It is safe to destroy() the task from
 		// inside this method.
 		// This method returns true by default.
 
 	virtual void run() = 0;	
-		// Called by the Runner to run the task.
+		// Called by the TaskRunner to run the task.
 		// Override this method to implement task logic.
 	
 protected:	
@@ -156,9 +104,9 @@ protected:
 	bool _destroyed;
 	bool _repeating;
 
-	Runner* _runner;
+	TaskRunner* _runner;
 	
-	friend class Runner;
+	friend class TaskRunner;
 };
 
 class TaskBase: public SocketBase<StreamSocketT, TransportT, SocketBaseT>
@@ -167,7 +115,7 @@ class TaskBase: public SocketBase<StreamSocketT, TransportT, SocketBaseT>
 	//std::string _name;
 
 	//Task(const std::string& name, bool repeating = false);
-	//Task(Runner& runner, const std::string& name, bool repeating = false, bool autoStart = false);
+	//Task(TaskRunner& runner, const std::string& name, bool repeating = false, bool autoStart = false);
 	//virtual std::string name() const;
 	//virtual void setName(const std::string& name);	
 
@@ -178,17 +126,17 @@ class TaskBase: public SocketBase<StreamSocketT, TransportT, SocketBaseT>
 		  
 		// Called from outside to abort the task without any
 		// more callbacks. The task instance will be deleted
-		// shortly by the Runner.	
+		// shortly by the TaskRunner.	
 //, 
 //		  bool autoStart = false
 
 //#include <string>
 
-//template <class AsyncDeleterT>
+//template <class PointerDeleterT>
 //class GarbageCollectorTask;
-	//virtual Runner& runner() { return _runner; }
+	//virtual TaskRunner& runner() { return _runner; }
 
-//Runner& runner,
+//TaskRunner& runner,
 		  
 	/*
 	virtual void runOnce() const;
@@ -196,5 +144,5 @@ class TaskBase: public SocketBase<StreamSocketT, TransportT, SocketBaseT>
 
 	//EvLoop& _loop;	
 	//bool _runOnce;
-	//template <class AsyncDeleterT> 
+	//template <class PointerDeleterT> 
 	//friend class GarbageCollectorTask;

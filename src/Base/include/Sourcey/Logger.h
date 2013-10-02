@@ -108,7 +108,7 @@ public:
 //
 
 
-class AsyncLogWriter: public LogWriter, public basic::Runnable
+class AsyncLogWriter: public LogWriter, public async::Runnable
 {
 public:	
 	AsyncLogWriter();

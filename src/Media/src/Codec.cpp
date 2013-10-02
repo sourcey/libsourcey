@@ -28,7 +28,11 @@ namespace scy {
 namespace av {
 
 
-// ---------------------------------------------------------------------
+//
+// Base Codec
+//
+
+
 Codec::Codec() : 
 	name("Unknown"), sampleRate(0), bitRate(0), quality(0), enabled(false) 
 {
@@ -78,7 +82,11 @@ void Codec::print(std::ostream& ost)
 }
 
 
-// ---------------------------------------------------------------------
+//
+// Audio Codec
+//
+
+
 AudioCodec::AudioCodec() : 
 	Codec("Unknown", DEFAULT_AUDIO_SAMPLE_RATE, DEFAULT_AUDIO_BIT_RATE, false), 
 	channels(DEFAULT_AUDIO_CHANNELS), sampleFmt(DEFAULT_AUDIO_SAMPLE_FMT) 
@@ -105,11 +113,11 @@ AudioCodec::AudioCodec(const AudioCodec& r) :
 }
 
 
-string AudioCodec::toString() const 
+std::string AudioCodec::toString() const 
 {
-	ostringstream os;
-	os << "AudioCodec[" << name << ": " << encoder << ": " << sampleRate << ": " << bitRate
-		<< ": " << channels << ": " << sampleFmt << ": " << enabled << "]";
+	std::ostringstream os;
+	os << "AudioCodec[" << name << ":" << encoder << ":" << sampleRate << ":" << bitRate
+		<< ":" << channels << ":" << sampleFmt << ":" << enabled << "]";
 	return os.str();
 }
 
@@ -129,7 +137,11 @@ void AudioCodec::print(std::ostream& ost)
 }
 
 
-// ---------------------------------------------------------------------
+//
+// Video Codec
+//
+
+
 VideoCodec::VideoCodec() : 
 	Codec("Unknown", DEFAULT_VIDEO_SAMPLE_RATE, DEFAULT_VIDEO_BIT_RATE, false), 
 	width(0), height(0), fps(0), pixelFmt(DEFAULT_VIDEO_PIXEL_FMT) 
@@ -161,8 +173,8 @@ VideoCodec::VideoCodec(const VideoCodec& r) :
 string VideoCodec::toString() const 
 {
 	ostringstream os;
-	os << "VideoCodec[" << name << ": " << encoder << ": " << width << ": " << height
-		<< ": " << fps << ": " << pixelFmt << ": " << enabled << "]";
+	os << "VideoCodec[" << name << ":" << encoder << ":" << width << ":" << height
+		<< ":" << fps << ":" << pixelFmt << ":" << enabled << "]";
 	return os.str();
 }
 
@@ -184,114 +196,4 @@ void VideoCodec::print(std::ostream& ost)
 }
 
 
-} // namespace av 
-} // namespace scy
-
-
-
-	/*id(Unknown), */
-	
-	
-	
-	// set the name if none was set by derived class.
-	//if (name.empty()) 
-	//	name = idString(id);
-		//name = idString(static_cast<ID>(id));
-	//id(r.id),
-	
-	/*
-UInt32 Codec::toID(const std::string& type) 
-{
-	// TODO: Use FFmpeg is available?
-
-	// video
-	if (type == "Raw")
-		return Codec::Raw;
-	if (type == "H263")
-		return Codec::H263;
-	if (type == "H263p")
-		return Codec::H263p;
-	if (type == "H264")
-		return Codec::H264;
-	if (type == "MPEG1")
-		return Codec::MPEG1;
-	if (type == "MPEG2")
-		return Codec::MPEG2;
-	if (type == "MPEG4")
-		return Codec::MPEG4;
-	if (type == "MJPEG")
-		return Codec::MJPEG;
-	if (type == "JPEG")
-		return Codec::MJPEG;
-	if (type == "FLV")
-		return Codec::FLV;
-
-	// audio
-	if (type == "PCM")
-		return Codec::PCM;
-	if (type == "MP2")
-		return Codec::MP2;
-	if (type == "MP3")
-		return Codec::MP3;
-	if (type == "AAC")
-		return Codec::AAC;
-	if (type == "AC3")
-		return Codec::AC3;
-	if (type == "Vorbis")
-		return Codec::Vorbis;
-	if (type == "FLAC")
-		return Codec::FLAC;
-	if (type == "NellyMoser")
-		return Codec::NellyMoser;
-	if (type == "Speex")
-		return Codec::Speex;	
-
-	return Codec::Unknown;
-}
-
-
-string Codec::idString(UInt32 id) 
-{
-	switch(id)
-	{
-		case Unknown:	return "Unknown";
-
-		case Raw:		return "Raw";
-		case H263:		return "H263";
-		case H263p:		return "H263p";
-		case H264:		return "H264";
-		case MPEG1:		return "MPEG1";
-		case MPEG2:		return "MPEG2";
-		case MPEG4:		return "MPEG4";
-		case MJPEG:		return "MJPEG";
-		case FLV:		return "FLV";
-			
-		case PCM:		return "PCM";
-		case MP2:		return "MP2";
-		case MP3:		return "MP3";
-		case AAC:		return "AAC";
-		case AC3:		return "AC3";
-		case Vorbis:	return "Vorbis";
-		case FLAC:		return "FLAC";
-		case NellyMoser:return "NellyMoser";
-		case Speex:		return "Speex";
-	}
-
-	return "Unknown";
-	// return avcodec_get_name(id);
-}
-*/
-
-
-/*
-string Codec::name() const
-{
-	return Codec::idString(id);
-}
-
-
-bool Codec::matches(UInt32 id, const std::string& name) const 
-{
-	return this->id == id && this->name == name;
-}
-*/
+} } // namespace scy::av

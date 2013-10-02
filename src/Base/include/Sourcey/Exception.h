@@ -29,6 +29,52 @@
 namespace scy { 
 
 
+//
+// Error type
+//
+
+
+struct Error 
+{
+	int errorno; 
+	std::string message; // Error message (set by application)
+
+	Error()
+	{
+		reset();
+	}
+
+	Error(const std::string& msg)
+	{
+		reset();
+		message = msg;
+	}
+
+	Error(const char* msg)
+	{
+		reset();
+		message = msg;
+	}
+
+	bool any() const
+	{
+		return errorno != 0 || !message.empty();
+	}
+
+	void reset() 
+	{
+		errorno = 0;
+		message.clear();
+	}
+	
+    friend std::ostream& operator << (std::ostream& stream, const Error& err) 
+	{
+		stream << err.message;
+		return stream;
+    }
+};
+
+
 #if 0
 class Exception: public std::exception
 	// This class extends the standard library exception object
@@ -121,48 +167,6 @@ DECLARE_EXCEPTION(ArgumentException, Exception, "Invalid argument")
 DECLARE_EXCEPTION(IOException, Exception, "IO error")
 DECLARE_EXCEPTION(FileException, IOException, "File error")
 #endif
-
-//
-// Error type
-//
-
-
-struct Error 
-{
-	int syserr; // System error code
-	int uverr;  // Libuv error code
-	std::string message; // Error message (set by application)
-
-	Error()
-	{
-		reset();
-	}
-
-	Error(const std::string& msg)
-	{
-		reset();
-		message = msg;
-	}
-
-	Error(const char* msg)
-	{
-		//assert(msg);
-		reset();
-		message = msg;
-	}
-
-	bool any() const
-	{
-		return uverr != 0 || syserr != 0 || !message.empty();
-	}
-
-	void reset() 
-	{
-		uverr = 0;
-		syserr = 0;
-		message.clear();
-	}
-};
 
 
 } // namespace scy

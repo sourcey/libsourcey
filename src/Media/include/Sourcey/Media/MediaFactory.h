@@ -103,7 +103,7 @@ protected:
 	MediaFactory& operator=(MediaFactory const&){};
 	~MediaFactory();
 
-	VideoCaptureBase* getVideoCaptureBase(int deviceId);
+	std::shared_ptr<VideoCaptureBase> getVideoCaptureBase(int deviceId);
 	
 	friend class Singleton<MediaFactory>;
 	friend class VideoCapture;
@@ -112,7 +112,7 @@ protected:
 
 	IDeviceManager* _devices;
 	FormatRegistry	_formats;	
-	std::map<int, VideoCaptureBase*> _videoBases;
+	std::map<int, std::shared_ptr<VideoCaptureBase>> _videoBases;
 };
 
 

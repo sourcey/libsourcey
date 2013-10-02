@@ -127,7 +127,7 @@ struct DelegateCallback<C, 8, true, PolymorphicT>
 	}																	\
 
 
-DefinePolymorphicDelegate(PolymorphicDelegate, basic::Polymorphic, PolymorphicDelegateBase)
+DefinePolymorphicDelegate(polymorphicDelegate, basic::Polymorphic, PolymorphicDelegateBase)
 
 
 } // namespace scy

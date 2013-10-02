@@ -67,8 +67,8 @@ struct ClientState: public State
 class Client: public Stateful<ClientState>, public PacketSignal, public basic::Polymorphic
 {
 public:
-	Client(net::SocketBase* socket, uv::Loop& loop = uv::defaultLoop());
-	Client(net::SocketBase* socket, const std::string& host, UInt16 port, uv::Loop& loop = uv::defaultLoop());
+	Client(net::SocketBase* socket, uv::Loop* loop = uv::defaultLoop());
+	Client(net::SocketBase* socket, const std::string& host, UInt16 port, uv::Loop* loop = uv::defaultLoop());
 	virtual ~Client();
 	
 	virtual void connect(const std::string& host, UInt16 port);
@@ -96,7 +96,7 @@ public:
 	virtual Transaction* createTransaction(const sockio::Packet& request, long timeout = 10000);
 		// Creates a packet transaction
 
-	uv::Loop& loop();
+	uv::Loop* loop();
 	http::WebSocket& socket();
 	std::string sessionID() const;	
 	Error error() const;
@@ -136,7 +136,7 @@ protected:
 protected:
 	//mutable Mutex	_mutex;
 	
-	uv::Loop& _loop;
+	uv::Loop* _loop;
 	Error _error;
 	std::vector<std::string> _protocols;
 	std::string _sessionID;
@@ -155,7 +155,7 @@ protected:
 class TCPClient: public Client
 {
 public:
-	TCPClient(uv::Loop& loop = uv::defaultLoop()) :
+	TCPClient(uv::Loop* loop = uv::defaultLoop()) :
 		Client(new net::TCPBase, loop)
 	{
 	}
@@ -178,7 +178,7 @@ public:
 	//virtual net::Address serverAddr() const;
 	
 	//Error _error;
-	TCPClient(const std::string& host, UInt16 port, uv::Loop& loop = uv::defaultLoop()) :
+	TCPClient(const std::string& host, UInt16 port, uv::Loop* loop = uv::defaultLoop()) :
 		Client(new net::TCPBase, const std::string& host, UInt16 port, loop)//,
 		//_socket(loop)
 	{
@@ -190,13 +190,13 @@ template <class WebSocketBaseT>
 class ClientBase: public Client
 {
 public:
-	ClientBase(uv::Loop& loop = uv::defaultLoop()) :
+	ClientBase(uv::Loop* loop = uv::defaultLoop()) :
 		Client(_socket, loop)//,
 		//_socket(loop)
 	{
 	}
 
-	ClientBase(const net::Address& serverAddr, uv::Loop& loop = uv::defaultLoop()) :
+	ClientBase(const net::Address& serverAddr, uv::Loop* loop = uv::defaultLoop()) :
 		Client(_socket, serverAddr, loop)//,
 		//_socket(loop)
 	{

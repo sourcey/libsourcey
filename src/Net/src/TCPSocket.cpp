@@ -61,7 +61,7 @@ TCPBase& TCPSocket::base() const
 //
 
 
-TCPBase::TCPBase(uv::Loop& loop) :
+TCPBase::TCPBase(uv::Loop* loop) :
 	Stream(loop)
 {
 	traceL("TCPBase", this) << "Create" << endl;
@@ -81,7 +81,7 @@ void TCPBase::init()
 		traceL("TCPBase", this) << "Init" << endl;
 		auto tcp = new uv_tcp_t;
 		tcp->data = this;
-		_handle = reinterpret_cast<uv_handle_t*>(tcp);
+		_ptr = reinterpret_cast<uv_handle_t*>(tcp);
 		uv_tcp_init(loop(), tcp);
 		//assert(tcp->data == this);		
 		//_connectReq.data = instance();	
@@ -105,9 +105,9 @@ void TCPBase::connect(const net::Address& peerAddress)
 	_connectReq.get()->data = this;
 	//assert(_connectReq.data != this);
 	//_connectReq.data = this;	
-	auto addr = reinterpret_cast<const sockaddr_in*>(peerAddress.addr());
-	int r = uv_tcp_connect(_connectReq.get(), handle<uv_tcp_t>(), *addr, internal::onConnect);
-	if (r) setAndThrowLastError("TCP connect failed");
+	//auto addr = reinterpret_cast<const sockaddr_in*>(peerAddress.addr());
+	int r = uv_tcp_connect(_connectReq.get(), handle<uv_tcp_t>(), peerAddress.addr(), internal::onConnect);
+	if (r) setAndThrowError("TCP connect failed", r);
 }
 
 
@@ -118,15 +118,15 @@ void TCPBase::bind(const net::Address& address, unsigned /* flags */)
 	int r;
 	switch (address.af()) {
 	case AF_INET:
-		r = uv_tcp_bind(handle<uv_tcp_t>(), *reinterpret_cast<const sockaddr_in*>(address.addr()));
+		r = uv_tcp_bind(handle<uv_tcp_t>(), address.addr());
 		break;
-	case AF_INET6:
-		r = uv_tcp_bind6(handle<uv_tcp_t>(), *reinterpret_cast<const sockaddr_in6*>(address.addr()));
-		break;
+	//case AF_INET6:
+	//	r = uv_tcp_bind6(handle<uv_tcp_t>(), *reinterpret_cast<const sockaddr_in6*>(address.addr()));
+	//	break;
 	default:
 		throw std::runtime_error("Unexpected address family");
 	}
-	if (r) setAndThrowLastError("TCP bind failed");
+	if (r) setAndThrowError("TCP bind failed", r);
 }
 
 
@@ -135,7 +135,7 @@ void TCPBase::listen(int backlog)
 	traceL("TCPBase", this) << "Listening" << endl;
 	init();
 	int r = uv_listen(handle<uv_stream_t>(), backlog, internal::onAcceptConnection);
-	if (r) setAndThrowLastError("TCP listen failed");
+	if (r) setAndThrowError("TCP listen failed", r);
 }
 
 
@@ -157,7 +157,7 @@ void TCPBase::setNoDelay(bool enable)
 {
 	init();
 	int r = uv_tcp_nodelay(handle<uv_tcp_t>(), enable ? 1 : 0);
-	if (r) setLastError();
+	if (r) setUVError("TCP socket error", r);
 }
 
 
@@ -165,7 +165,7 @@ void TCPBase::setKeepAlive(int enable, unsigned int delay)
 {
 	init();
 	int r = uv_tcp_keepalive(handle<uv_tcp_t>(), enable, delay);
-	if (r) setLastError();
+	if (r) setUVError("TCP socket error", r);
 }
 
 
@@ -174,7 +174,7 @@ void TCPBase::setSimultaneousAccepts(bool enable)
 {
 	init();
 	int r = uv_tcp_simultaneous_accepts(handle<uv_tcp_t>(), enable ? 1 : 0);
-	if (r) setLastError();
+	if (r) setUVError("TCP socket error", r);
 }
 #endif
 
@@ -187,7 +187,7 @@ int TCPBase::send(const char* data, int len, int flags)
 
 int TCPBase::send(const char* data, int len, const net::Address& /* peerAddress */, int /* flags */) 
 {
-	assert(len <= net::MAX_TCP_PACKET_SIZE);
+	//assert(len <= net::MAX_TCP_PACKET_SIZE); // libuv handles this for us
 	
 	//if (len < 300)
 	//	traceL("TCPBase", this) << "Send: " << string(data, len) << endl;
@@ -222,7 +222,7 @@ net::Address TCPBase::address() const
 {
 	//traceL("TCPBase", this) << "Get address: " << closed() << endl;
 
-	if (closed())
+	if (!active())
 		return net::Address();
 		//throw std::runtime_error("Invalid TCP socket: No address");
 	
@@ -242,7 +242,7 @@ net::Address TCPBase::address() const
 net::Address TCPBase::peerAddress() const
 {
 	//traceL("TCPBase", this) << "Get peer address: " << closed() << endl;
-	if (closed())
+	if (!active())
 		return net::Address();
 		//throw std::runtime_error("Invalid TCP socket: No peer address");
 
@@ -287,6 +287,12 @@ net::TransportType TCPBase::transport() const
 bool TCPBase::closed() const
 {
 	return Stream::closed(); //uv::Handle::closed();
+}
+
+
+uv::Loop* TCPBase::loop() const
+{
+	return uv::Handle::loop();
 }
 
 

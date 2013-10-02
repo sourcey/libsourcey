@@ -40,7 +40,7 @@ public:
 };
 
 
-template <class DelegateT, DelegateDefaultParams>
+template <class DelegateT, DelegateDefaultArgs>
 class SignalBase 
 	/// This class implements a thread-safe signal which
 	/// broadcasts arbitrary data to multiple receiver delegates.

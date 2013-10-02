@@ -255,7 +255,14 @@ void ServerConnection::onHeaders()
 	
 	// Instantiate the responder when request headers have been parsed
 	_responder = _server.createResponder(*this);
-	assert(_responder);
+
+	// If no responder was created we close the connection.
+	// TODO: Should we return a 404 instead?
+	if (!_responder) {
+		warnL("ServerConnection", this) << "Ignoring unhandled request: " << _request << endl;	
+		close();
+		return;
+	}
 
 	// Upgraded connections don't receive the onHeaders callback
 	if (!_upgrade)
@@ -266,6 +273,12 @@ void ServerConnection::onHeaders()
 void ServerConnection::onPayload(const MutableBuffer& buffer)
 {
 	traceL("ServerConnection", this) << "On payload: " << buffer.size() << endl;	
+
+	// The connection may have been closed inside a previous callback.
+	if (closed()) {
+		traceL("ServerConnection", this) << "On payload: Closed" << endl;	
+		return;
+	}
 	
 	//assert(_upgrade); // no payload for upgrade requests
 	assert(_responder);
@@ -276,6 +289,12 @@ void ServerConnection::onPayload(const MutableBuffer& buffer)
 void ServerConnection::onMessage() 
 {
 	traceL("ServerConnection", this) << "On complete" << endl;	
+
+	// The connection may have been closed inside a previous callback.
+	if (closed()) {
+		traceL("ServerConnection", this) << "On complete: Closed" << endl;	
+		return;
+	}
 
 	// The HTTP request is complete.
 	// The request handler can give a response.

@@ -36,8 +36,8 @@ namespace net {
 class Stream: public uv::Handle
 {
  public:  
-	Stream(uv::Loop& loop = uv::defaultLoop(), void* stream = nullptr) :
-		uv::Handle(&loop, stream), 
+	Stream(uv::Loop* loop = uv::defaultLoop(), void* stream = nullptr) :
+		uv::Handle(loop, stream), 
 		_buffer(65536)
 	{
 	}
@@ -50,6 +50,8 @@ class Stream: public uv::Handle
 		// If the stream is already closed this call
 		// will have no side-effects.
 	{
+		assertTID();
+
 		traceL("Stream", this) << "Close: " << handle() << std::endl;
 		if (!closed()) {
 			readStop();		
@@ -60,8 +62,10 @@ class Stream: public uv::Handle
 	bool shutdown()
 		// Sends a shutdown packet to the connected peer.
 	{
+		assertTID();
+
 		traceL("Stream", this) << "Send shutdown" << std::endl;
-		if (closed()) {
+		if (!active()) {
 			warnL("Stream", this) << "Attempted shutdown on closed stream" << std::endl;
 			return false;
 		}
@@ -70,7 +74,9 @@ class Stream: public uv::Handle
 		// returned via handleRead() which sets the stream 
 		// to error state. This is not really an error,
 		// perhaps it should be handled differently?
-		int r = uv_shutdown(new uv_shutdown_t, handle<uv_stream_t>(), uv::afterShutdown);
+		int r = uv_shutdown(new uv_shutdown_t, handle<uv_stream_t>(), [](uv_shutdown_t* req, int) {
+			delete req;
+		});
 
 		// If the stream is not connected this will return false.
 		return r == 0;
@@ -82,11 +88,13 @@ class Stream: public uv::Handle
 		// Returns false if the underlying socket is closed.
 		// This method does not throw an exception.
 	{		
+		assertTID();
+
 		//if (closed())
 		//	throw std::runtime_error("IO error: Cannot write to closed stream");
-		if (closed())
+		if (!active())
 			return false;
-		
+
 		int r; 		
 		uv_write_t* req = new uv_write_t;
 		uv_buf_t buf = uv_buf_init((char*)data, len);
@@ -94,14 +102,20 @@ class Stream: public uv::Handle
 		bool isIPC = stream->type == UV_NAMED_PIPE && 
 			reinterpret_cast<uv_pipe_t*>(stream)->ipc;
 
-		if (!isIPC)
-			r = uv_write(req, stream, &buf, 1, uv::afterWrite);
-		else
-			r = uv_write2(req, stream, &buf, 1, nullptr, uv::afterWrite);
+		if (!isIPC) {
+			r = uv_write(req, stream, &buf, 1, [](uv_write_t* req, int) {
+				delete req;
+			});
+		}
+		else {
+			r = uv_write2(req, stream, &buf, 1, nullptr, [](uv_write_t* req, int) {
+				delete req;
+			});
+		}
 
 		if (r) {
 			delete req;
-			//setAndThrowLastError("Stream write error");
+			//setAndThrowError(r, "Stream write error");
 		}
 		return r == 0;
 	}
@@ -109,14 +123,9 @@ class Stream: public uv::Handle
 	Buffer& buffer()
 		// Returns the read buffer.
 	{ 
+		assertTID();
 		return _buffer;
 	}
-
-	//virtual bool initialized() const
-		// Returns true if the native socket handle is initialized.
-	//{
-	//	return uv::Handle::active();
-	//}
 
 	virtual bool closed() const
 		// Returns true if the native socket handle is closed.
@@ -130,8 +139,7 @@ class Stream: public uv::Handle
  protected:	
 	bool readStart()
 	{
-		traceL("Stream", this) << "Read start: " << handle() << std::endl;
-
+		//traceL("Stream", this) << "Read start: " << handle() << std::endl;
 		int r;
 		uv_stream_t* stream = this->handle<uv_stream_t>();
 		bool isIPC = stream->type == UV_NAMED_PIPE && 
@@ -141,43 +149,43 @@ class Stream: public uv::Handle
 			r = uv_read2_start(stream, Stream::allocReadBuffer, handleRead2);
 		else 	
 			r = uv_read_start(stream, Stream::allocReadBuffer, handleRead);
-		if (r) setLastError();	
+		if (r) setUVError("Stream read error", r);	
 		return r == 0;
 	}
 
 	bool readStop()
 	{		
-		traceL("Stream", this) << "Read stop: " << handle() << std::endl;
+		//traceL("Stream", this) << "Read stop: " << handle() << std::endl;
 		int r = uv_read_stop(handle<uv_stream_t>());
-		if (r) setLastError();
+		if (r) setUVError("Stream read error", r);
 		return r == 0;
 	}
 
 	virtual void onRead(const char* data, int len)
 	{
-		traceL("Stream", this) << "On read: " << len << std::endl;
-
-		// can be overridden
+		//traceL("Stream", this) << "On read: " << len << std::endl;
 		Read.emit(instance(), data, len);
 	}
 
-	static void handleReadCommon(uv_stream_t* handle, ssize_t nread, uv_buf_t buf, uv_handle_type pending) 
+	static void handleReadCommon(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf, uv_handle_type pending) 
 	{	
 		Stream* io = static_cast<Stream*>(handle->data);
-		traceL("Stream", io) << "Handle read: " << nread << std::endl;
-
-		// Handle EOF or error
-		if (nread == -1)  {
-			io->setLastError();
-			return;
-		}
-		else {
+		//traceL("Stream", io) << "Handle read: " << nread << std::endl;
+		
+		if (nread >= 0) {
 			// We only support UV_TCP right now
 			if (pending == UV_TCP)
 				assert(0);
 			else
 				assert(pending == UV_UNKNOWN_HANDLE);
-			io->onRead(buf.base, nread);
+			io->onRead(buf->base, nread);
+		}
+		else {
+			// NOTE: Not setting error here since it's not
+			// really an error, just close() directly.
+			// This will result in handle destruction.
+			//io->setError(UV_EOF);
+			io->close();
 		}
 	}
 
@@ -194,29 +202,31 @@ class Stream: public uv::Handle
 	// UV callbacks
 	//
 	
-	static void handleRead(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) 
+	static void handleRead(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf) 
 	{
 		handleReadCommon(handle, nread, buf, UV_UNKNOWN_HANDLE);
 	}
 	
-	static void handleRead2(uv_pipe_t* handle, ssize_t nread, uv_buf_t buf,
-		uv_handle_type pending) 
+	static void handleRead2(uv_pipe_t* handle, ssize_t nread, const uv_buf_t* buf, uv_handle_type pending) 
 	{
 		handleReadCommon((uv_stream_t*)handle, nread, buf, pending);
 	}
-
-	static uv_buf_t allocReadBuffer(uv_handle_t *handle, size_t suggested_size)
+	
+	static void allocReadBuffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t* buf)
 	{
 		Stream* self = static_cast<Stream*>(handle->data);
 
 		// Reserve the recommended buffer size
 		//if (suggested_size > self->_buffer.capacity())
 		//	self->_buffer.capacity(suggested_size); 
-		assert(self->_buffer.capacity() >= suggested_size);
+		assert(self->_buffer.size() >= suggested_size);
 
 		// Reset the buffer position on each read
 		//self->_buffer.position(0);
-		return uv_buf_init(self->_buffer.data(), suggested_size);
+		buf->base = self->_buffer.data();
+		buf->len = self->_buffer.size();
+
+		//return uv_buf_init(self->_buffer.data(), suggested_size);
 	}
 
 	Buffer _buffer;
@@ -230,6 +240,12 @@ class Stream: public uv::Handle
 
 
 	/*
+
+	//virtual bool initialized() const
+		// Returns true if the native socket handle is initialized.
+	//{
+	//	return uv::Handle::active();
+	//}
 	//Signal2<const char*, int> Write;
 	void setStream(uv_stream_t* stream)
 	{

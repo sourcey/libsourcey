@@ -38,7 +38,7 @@ public:
 	typedef PointerCollection<TKey, TValue, TDeleter> Base;
 	typedef std::map<TValue*, Timeout> TimeoutMap;
 
-	TimedManager(uv::Loop& loop = uv::defaultLoop()) :
+	TimedManager(uv::Loop* loop = uv::defaultLoop()) :
 		_timer(loop)
 	{		
 		_timer.Timeout += delegate(this, &TimedManager::onTimer);
@@ -119,20 +119,25 @@ protected:
 	
 	void onTimer(void*)
 	{
-		Mutex::ScopedLock lock(_tmutex);
-		for (auto it = _timeouts.begin(); it != _timeouts.end();) {
+		//Mutex::ScopedLock lock(_tmutex);
+		_tmutex.lock();
+		TimeoutMap timeouts(_timeouts);
+		_tmutex.unlock();
+		for (auto it = timeouts.begin(); it != timeouts.end(); ++it) {
 			//traceL("TimedManager", this) << "Check item: " 
 			//	<< it->first << ": " 
 			//	<< it->second.delay() << ": " 
 			//	<< it->second.remaining() << std::endl;	
 			if (it->second.expired()) {	
-				traceL("TimedManager", this) << "Item expired: " << it->first << std::endl;
 				auto item = it->first;
-				if (Base::remove(item))
-					delete item;
-				it = _timeouts.erase(it);
+				traceL("TimedManager", this) << "Item expired: " <<item << std::endl;
+				if (Base::remove(item)) { // will call onRemove
+					TDeleter func;
+					func(item);
+				}
+				//it = _timeouts.erase(it);
 			}
-			else ++it;
+			//else ++it;
 		}
 	}
 
