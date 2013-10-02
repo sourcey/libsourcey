@@ -28,7 +28,7 @@ namespace scy {
 namespace sockio {
 
 
-Client::Client(net::SocketBase* socket, uv::Loop& loop) :
+Client::Client(net::SocketBase* socket, uv::Loop* loop) :
 	_timer(loop),
 	_socket(socket),
 	_loop(loop),
@@ -37,7 +37,7 @@ Client::Client(net::SocketBase* socket, uv::Loop& loop) :
 }
 
 
-Client::Client(net::SocketBase* socket, const std::string& host, UInt16 port, uv::Loop& loop) :
+Client::Client(net::SocketBase* socket, const std::string& host, UInt16 port, uv::Loop* loop) :
 	_timer(loop),
 	_host(host),
 	_port(port),
@@ -398,7 +398,7 @@ void Client::onHeartBeatTimer(void*)
 }
 
 
-uv::Loop& Client::loop()
+uv::Loop* Client::loop()
 {
 	//Mutex::ScopedLock lock(_mutex);
 	return _loop;

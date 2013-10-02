@@ -32,12 +32,6 @@ using namespace std;
 
 namespace scy {
 namespace av {
-	
-
-IDeviceManager* DeviceManagerFactory::create() 
-{
-	return new Win32DeviceManager();
-}
 
 
 static const char* kFilteredAudioDevicesName[] = {
@@ -51,6 +45,12 @@ static const char* const kFilteredVideoDevicesName[] =  {
 };
 static const char kUsbDevicePathPrefix[] = "\\\\?\\usb";
 static bool getDevicesWin32(const CLSID& catid, std::vector<Device>& out);
+	
+
+IDeviceManager* DeviceManagerFactory::create() 
+{
+	return new Win32DeviceManager();
+}
 
 
 //
@@ -246,12 +246,10 @@ namespace internal { // Windows API stuff
 		HRESULT hr = CoCreateInstance(CLSID_SystemDeviceEnum, NULL,  
 			CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pDevEnum));
 
-		if (SUCCEEDED(hr))
-		{
+		if (SUCCEEDED(hr)) {
 			// Create an enumerator for the category.
 			hr = pDevEnum->CreateClassEnumerator(category, ppEnum, 0);
-			if (hr == S_FALSE)
-			{
+			if (hr == S_FALSE) {
 				hr = VFW_E_NOT_FOUND;  // The category is empty. Treat as an error.
 			}
 			pDevEnum->Release();
@@ -268,8 +266,7 @@ namespace internal { // Windows API stuff
 		{
 			IPropertyBag *pPropBag;
 			HRESULT hr = pMoniker->BindToStorage(0, 0, IID_PPV_ARGS(&pPropBag));
-			if (FAILED(hr))
-			{
+			if (FAILED(hr)) {
 				pMoniker->Release();
 				continue;  
 			} 
@@ -280,20 +277,17 @@ namespace internal { // Windows API stuff
 
 			// Get description or friendly name.
 			hr = pPropBag->Read(L"FriendlyName", &var, 0);
-			if (FAILED(hr))
-			{
+			if (FAILED(hr)) {
 				hr = pPropBag->Read(L"Description", &var, 0);
 			}
-			if (SUCCEEDED(hr))
-			{
+			if (SUCCEEDED(hr)) {
 				//printf("%S\n", var.bstrVal);
 				name_str = scy::toUtf8(var.bstrVal);
 				VariantClear(&var); 
 			}
 
 			hr = pPropBag->Read(L"DevicePath", &var, 0);
-			if (SUCCEEDED(hr))
-			{
+			if (SUCCEEDED(hr)) {
 				// The device path is not intended for display.
 				//printf("Device path: %S\n", var.bstrVal);
 				path_str = scy::toUtf8(var.bstrVal);
@@ -319,8 +313,7 @@ bool getDevicesWin32(REFGUID catid, std::vector<Device>& devices)
 
 	IEnumMoniker *pEnum;
     HRESULT hr = internal::enumerateDevices(catid, &pEnum);
-    if (SUCCEEDED(hr))
-    {
+    if (SUCCEEDED(hr)) {
         internal::getDeviceInformation(pEnum, catid, devices);
         pEnum->Release();
 		return true;

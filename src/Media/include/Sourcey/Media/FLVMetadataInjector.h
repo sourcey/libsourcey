@@ -89,7 +89,7 @@ public:
 		traceL("FLVMetadataInjector", this) << "Stream state change: " << state << std::endl;
 
 		switch (state.id()) {
-		case PacketStreamState::Running:
+		case PacketStreamState::Active:
 			_initial = true;
 			_modifyingStream = false;
 			_waitingForKeyframe = false;

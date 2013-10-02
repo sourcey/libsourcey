@@ -120,6 +120,7 @@ protected:
 	void onSocketClose(void*);
 		
 	virtual void setError(const Error& err);
+		/// Sets the internal error.
 
 protected:
     Request _request;

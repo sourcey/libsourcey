@@ -37,7 +37,7 @@ public:
 				const net::Address& peerAddress, 
 				long timeout = 10000, 
 				int retries = 1,
-				uv::Loop& loop = uv::defaultLoop());
+				uv::Loop* loop = uv::defaultLoop());
 
 	virtual bool checkResponse(const Message& message);
 	virtual void onResponse();

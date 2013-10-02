@@ -75,7 +75,7 @@ public:
 class TCPBase: public Stream, public net::SocketBase
 {
 public:	
-	TCPBase(uv::Loop& loop = uv::defaultLoop()); 
+	TCPBase(uv::Loop* loop = uv::defaultLoop()); 
 	
 	virtual bool shutdown();
 	virtual void close();
@@ -92,6 +92,8 @@ public:
 
 	virtual void setNoDelay(bool enable);
 	virtual void setKeepAlive(int enable, unsigned int delay);
+
+	virtual uv::Loop* loop() const;
 			
 	void setError(const Error& err);
 	const Error& error() const;

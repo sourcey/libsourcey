@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/Logger.h"
-#include "Sourcey/Runner.h"
+#include "Sourcey/TaskRunner.h"
 #include "Sourcey/JSON/ISerializable.h"
 #include "Sourcey/Sked/Task.h"
 #include "Sourcey/Sked/TaskFactory.h"
@@ -41,7 +41,7 @@ namespace sked {
 static const char* DeprecitatedDateFormat = "%Y-%m-%d %H:%M:%S %Z";
 
 
-class Scheduler: public Runner, public json::ISerializable
+class Scheduler: public TaskRunner, public json::ISerializable
 	/// The Scheduler manages and runs tasks 
 	/// that need to be executed at specific times.
 {

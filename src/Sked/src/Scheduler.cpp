@@ -46,28 +46,28 @@ Scheduler::~Scheduler()
 
 void Scheduler::schedule(sked::Task* task)
 {
-	Runner::start(task);
+	TaskRunner::start(task);
 	//_wakeUp.set();
 }
 
 
 void Scheduler::cancel(sked::Task* task) 
 {
-	Runner::cancel(task);
+	TaskRunner::cancel(task);
 	//_wakeUp.set();
 }
 
 
 void Scheduler::clear() 
 {
-	Runner::clear();
+	TaskRunner::clear();
 	//_wakeUp.set();
 }
 
 
 void Scheduler::onIdle() 
 {
-	//log("trace") << "Running" << endl;
+	//traceL("Scheduler", this) << "Running" << endl;
 	//while (!_stopped) 
 	//{	
 
@@ -88,7 +88,7 @@ void Scheduler::onIdle()
 			{
 				DateTime now;
 				Timespan remaining = task->trigger().scheduleAt - now;
-				log("trace") << "Waiting: "
+				traceL("Scheduler", this) << "Waiting: "
 					<< "\n\tPID: " << task
 					<< "\n\tDays: " << remaining.days()
 					<< "\n\tHours: " << remaining.totalHours()
@@ -115,41 +115,41 @@ void Scheduler::onIdle()
 #if _DEBUG						
 				{
 					DateTime now;
-					log("trace") << "Running: "
+					traceL("Scheduler", this) << "Running: "
 						<< "\n\tPID: " << task
 						<< "\n\tCurrentTime: " << DateTimeFormatter::format(now, DateTimeFormat::ISO8601_FORMAT)
 						<< "\n\tScheduledTime: " << DateTimeFormatter::format(task->trigger().scheduleAt, DateTimeFormat::ISO8601_FORMAT)
 						<< endl;
 				}
 #else
-				log("trace") << "Running: " << task << endl;
+				traceL("Scheduler", this) << "Running: " << task << endl;
 #endif
 				task->run();	
 				if (task->afterRun())
 					onRun(task);
 				else {
-					log("trace") << "Destroy After Run: " << task << endl;
+					traceL("Scheduler", this) << "Destroy After Run: " << task << endl;
 					task->_destroyed = true; //destroy();
 				}
 			}
 			else
-				log("trace") << "Skipping Task: " << task << endl;
+				traceL("Scheduler", this) << "Skipping Task: " << task << endl;
 			
 			// Destroy the task if needed
 			if (task->destroyed()) {
-				log("trace") << "Destroy Task: " << task << endl;	
+				traceL("Scheduler", this) << "Destroy Task: " << task << endl;	
 				assert(remove(task));
 				delete task;
 			}
 			
-			//log("trace") << "Running: OK: " << task << endl;
+			//traceL("Scheduler", this) << "Running: OK: " << task << endl;
 		}
 
 		// Go to sleep if we have no tasks
 		//else {
-		//	log("trace") << "Sleeping" << endl;
+		//	traceL("Scheduler", this) << "Sleeping" << endl;
 		//	_wakeUp.wait();
-		//	log("trace") << "Waking up" << endl;
+		//	traceL("Scheduler", this) << "Waking up" << endl;
 		//}
 
 		// Gulp
@@ -161,9 +161,9 @@ void Scheduler::onIdle()
 		//Idle.emit(this);
 	//}
 			
-	//log("trace") << "Shutdown" << endl;		
+	//traceL("Scheduler", this) << "Shutdown" << endl;		
 	//Shutdown.emit(this);
-	//log("trace") << "Exiting" << endl;
+	//traceL("Scheduler", this) << "Exiting" << endl;
 }
 
 
@@ -171,7 +171,7 @@ void Scheduler::update()
 {
 	Mutex::ScopedLock lock(_mutex);
 	
-	//log("trace") << "Updating: " << _tasks.size() << endl;
+	//traceL("Scheduler", this) << "Updating: " << _tasks.size() << endl;
 
 	// Update and clean the task list
 	auto it = _tasks.begin();
@@ -180,7 +180,7 @@ void Scheduler::update()
 		if (task->destroyed()) {
 			it = _tasks.erase(it);
 			onRemove(task);
-			log("trace") << "Destroy: " << task << endl;
+			traceL("Scheduler", this) << "Destroy: " << task << endl;
 			delete task;
 		}
 		else
@@ -195,12 +195,12 @@ void Scheduler::update()
 
 void Scheduler::serialize(json::Value& root)
 {
-	log("trace") << "Serializing" << endl;
+	traceL("Scheduler", this) << "Serializing" << endl;
 	
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
 		sked::Task* task = reinterpret_cast<sked::Task*>(*it);
-		log("trace") << "Serializing: " << task << endl;
+		traceL("Scheduler", this) << "Serializing: " << task << endl;
 		json::Value& entry = root[root.size()];
 		task->serialize(entry);
 		task->trigger().serialize(entry["trigger"]);
@@ -210,7 +210,7 @@ void Scheduler::serialize(json::Value& root)
 
 void Scheduler::deserialize(json::Value& root)
 {
-	log("trace") << "Deserializing" << endl;
+	traceL("Scheduler", this) << "Deserializing" << endl;
 	
 	for (auto it = root.begin(); it != root.end(); it++) {
 		sked::Task* task = nullptr;
@@ -229,7 +229,7 @@ void Scheduler::deserialize(json::Value& root)
 				delete task;
 			if (trigger)
 				delete trigger;
-			log("error") << "Deserialization Error: " << exc.what() << endl;
+			errorL("Scheduler", this) << "Deserialization Error: " << exc.what() << endl;
 		}
 	}
 }
@@ -251,7 +251,7 @@ Scheduler& Scheduler::getDefault()
 }
 
 
-sked::TaskFactory& Scheduler::factory() 
+TaskFactory& Scheduler::factory() 
 {
 	return TaskFactory::getDefault();
 }
@@ -267,7 +267,7 @@ sked::TaskFactory& Scheduler::factory()
 			
 			// Push the task back onto the end of the queue
 			//else {
-			//	log("trace") << "Replacing Task: " << task << endl;	
+			//	traceL("Scheduler", this) << "Replacing Task: " << task << endl;	
 			//	Mutex::ScopedLock lock(_mutex);
 			//	_tasks.push_back(task);
 			//}	
@@ -291,7 +291,7 @@ sked::TaskFactory& Scheduler::factory()
 	/*
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
-		log("trace") << "Serializing: " << it->second << endl;
+		traceL("Scheduler", this) << "Serializing: " << it->second << endl;
 		reinterpret_cast<sked::Task*>(it->second)->serialize(root[root.size()]);
 	}
 	*/
@@ -305,7 +305,7 @@ sked::TaskFactory& Scheduler::factory()
 
 			// Destroy the task if it is not repeatable
 			else {
-				log("trace") << "Clearing Redundant: " << task << endl;
+				traceL("Scheduler", this) << "Clearing Redundant: " << task << endl;
 				delete task;
 				it = _tasks.erase(it);
 			}
@@ -328,7 +328,7 @@ void Scheduler::clear()
 	sked::auto it = _tasks.begin();
 	while (it != _tasks.end()) {
 		sked::Task* task = *it;
-		log("trace") << "Clearing Task: " << task << endl;
+		traceL("Scheduler", this) << "Clearing Task: " << task << endl;
 		delete task;
 		it = _tasks.erase(it);
 	}
@@ -341,13 +341,13 @@ void Scheduler::clear()
 	//_scheduleAt.start();
 	//_thread.start(*this);
 
-	//cout << "[Runner: " << this << "] Destroying" << endl;
+	//cout << "[TaskRunner: " << this << "] Destroying" << endl;
 	//_stop = true;
 	//_wakeUp.set();
 	//_thread.join();
 	//clear();
 	//ClearVector(_tasks);
-	//cout << "[Runner: " << this << "] Destroying: OK" << endl;
+	//cout << "[TaskRunner: " << this << "] Destroying: OK" << endl;
  //, const sked::TaskOptions& options
 	
 	// Attempt to stop any matching tasks
@@ -358,21 +358,21 @@ void Scheduler::clear()
 	//}
 	//sort(_tasks.begin(), _tasks.end(), CompareTimeout);
 	
-	//log("trace") << "Started: " << task << endl;
+	//traceL("Scheduler", this) << "Started: " << task << endl;
 
 	//_scheduleAt = _tasks.front()->scheduleAt();
 	//update();
 	//_wakeUp.set();
 
 	/*
-	log("trace") << "Stopping: " << task << endl;
+	traceL("Scheduler", this) << "Stopping: " << task << endl;
 	
 	bool success = false;
 	{
 		Mutex::ScopedLock lock(_mutex);
 		for (sked::auto it = _tasks.begin(); it != _tasks.end(); ++it) {
 			if (*it == task) {
-				log("trace") << "Stopped: " << *it << endl;
+				traceL("Scheduler", this) << "Stopped: " << *it << endl;
 				(*it)->cancel();
 				success = true;
 				break;
@@ -421,12 +421,12 @@ Timeout Scheduler::scheduleAt() const
 		// Run the task if required
 		if (task && !task->cancelled() && scheduleAt().expired()) {
 				
-			log("trace") << "Running: " << task << endl;
+			traceL("Scheduler", this) << "Running: " << task << endl;
 			//try {
 			task->run();				
 			//}
 			//catch (std::except) {
-			//	log("error") << "Swallowing Exception: " << exc.what()/message() << endl;
+			//	errorL("Scheduler", this) << "Swallowing Exception: " << exc.what()/message() << endl;
 			//}
 		}
 
@@ -434,7 +434,7 @@ Timeout Scheduler::scheduleAt() const
 		update();
 	}
 	
-	log("trace") << "Exiting" << endl;
+	traceL("Scheduler", this) << "Exiting" << endl;
 	*/
 	
 
@@ -444,14 +444,14 @@ Timeout Scheduler::scheduleAt() const
 			if (!task) {
 				_scheduleAt.reset();
 				_scheduleAt.setDelay(60 * 1000);
-				log("trace") << "No tasks" << endl;
+				traceL("Scheduler", this) << "No tasks" << endl;
 			}
 
 			// Otherwise update the scheduled timeout
 			else
 				_scheduleAt = task->scheduleAt();
 			
-			log("trace") << "Waiting for " << _scheduleAt.remaining() << endl;
+			traceL("Scheduler", this) << "Waiting for " << _scheduleAt.remaining() << endl;
 				*/
 
 				/*
@@ -462,7 +462,7 @@ Timeout Scheduler::scheduleAt() const
 				while (it != _tasks.end()) {
 					sked::Task* task = *it;
 					if (task->cancelled()) {
-						log("trace") << "Clearing Cancelled: " << task << endl;
+						traceL("Scheduler", this) << "Clearing Cancelled: " << task << endl;
 						//delete task;
 						it = _tasks.erase(it);
 					}
@@ -486,12 +486,12 @@ Timeout Scheduler::scheduleAt() const
 				for (sked::auto it = tasks.begin(); it != tasks.end(); ++it) {
 					sked::Task* task = *it;
 					if (!task->cancelled()) {
-						log("trace") << "Running: " << task << endl;
+						traceL("Scheduler", this) << "Running: " << task << endl;
 						task->run();
 					}	
 				}
 				
-				//log("trace") << "Clearing Redundant Callbacks" << endl;
+				//traceL("Scheduler", this) << "Clearing Redundant Callbacks" << endl;
 				*/
 
 				//Mutex::ScopedLockWithUnlock<Mutex> lock(_mutex);
@@ -503,10 +503,10 @@ Timeout Scheduler::scheduleAt() const
 					//}
 					
 					/*
-					log("trace") << "Printing Sorted Callbacks" << endl;
+					traceL("Scheduler", this) << "Printing Sorted Callbacks" << endl;
 					sked::auto it = _tasks.begin();
 					while (it != _tasks.end()) {
-						log("trace") << "Callback: " 
+						traceL("Scheduler", this) << "Callback: " 
 							<< (*it)->object() << ": " 
 							<< (*it)->scheduleAt().remaining() << endl;
 						++it;
@@ -522,7 +522,7 @@ void Scheduler::stopAll(const void* klass)
 	Mutex::ScopedLock lock(_mutex);
 	for (sked::auto it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if ((*it)->object() == klass) {
-			log("trace") << "Stopped: " << (*it)->object() << endl;
+			traceL("Scheduler", this) << "Stopped: " << (*it)->object() << endl;
 			(*it)->cancel();
 		}
 	}
@@ -535,7 +535,7 @@ void Scheduler::reset(sked::Task* task)
 	bool success = false;
 	for (sked::auto it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (**it == task) {
-			log("trace") << "Reset: " << (*it)->object() << endl;
+			traceL("Scheduler", this) << "Reset: " << (*it)->object() << endl;
 			(*it)->scheduleAt().reset();
 			success = true;
 			break;

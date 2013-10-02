@@ -56,14 +56,14 @@ struct TransactionState: public State
 
 
 template <class PacketT>
-class PacketTransaction: public basic::Sendable, public Stateful<TransactionState>
+class PacketTransaction: public async::Sendable, public Stateful<TransactionState>
 	/// This class provides request/response functionality for IPacket types.
 	///
 	/// PacketTransactions are fire and forget. The object will be deleted
 	/// after a successful response or a timeout.
 {
 public:
-	PacketTransaction(long timeout = 10000, int retries = 0, uv::Loop& loop = uv::defaultLoop()) :
+	PacketTransaction(long timeout = 10000, int retries = 0, uv::Loop* loop = uv::defaultLoop()) :
 		_timer(loop), 
 		_timeout(timeout), 
 		_retries(retries), 
@@ -72,7 +72,7 @@ public:
 	{		
 	}		
 
-	PacketTransaction(const PacketT& request, long timeout = 10000, int retries = 0, uv::Loop& loop = uv::defaultLoop()) : 
+	PacketTransaction(const PacketT& request, long timeout = 10000, int retries = 0, uv::Loop* loop = uv::defaultLoop()) : 
 		_timer(loop),
 		_timeout(timeout),
 		_request(request), 

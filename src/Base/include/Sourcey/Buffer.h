@@ -33,67 +33,6 @@
 namespace scy {
 
 
-
-/*
-class Buffer
-	/// A dynamically expanding buffer type which can either own it's 
-	/// own memory, or reference external memory.
-	///
-	/// Note that when referencing external memeory, that memory will be 
-	/// copied if the buffer is ever resized.
-{
-public:
-	explicit Buffer(std::size_t size = 2048);
-	Buffer(std::size_t size, std::size_t capacity);
-	Buffer(const void* data, std::size_t size);
-	Buffer(const void* data, std::size_t size, std::size_t capacity);
-	Buffer(void* data, std::size_t size, std::size_t capacity, bool assumeOwnership);
-
-	Buffer(const Buffer&);
-	Buffer& operator = (const Buffer&);
-
-	~Buffer();
-
-	void swap(Buffer&);
-	char* detach();
-
-	void assign(const void* data, std::size_t size);
-	void assign(void* data, std::size_t size, std::size_t capacity, bool assumeOwnership);
-	void append(const Buffer&);
-	void append(const void* data, std::size_t size);
-	void fill(char value = 0);
-
-	std::size_t size() const;
-	bool size(std::size_t);
-	std::size_t capacity() const;
-	bool capacity(std::size_t);
-	bool empty() const;
-	void clear();
-
-	char* data();
-	const char* data() const;
-
-	char& operator[] (std::size_t);
-	char operator[] (std::size_t) const;
-	char& at(std::size_t);
-	char at(std::size_t) const;
-
-	static const std::size_t npos = static_cast<std::size_t> (-1);
-
-	std::size_t find(char, std::size_t pos = 0) const;
-	std::size_t rfind(char, std::size_t pos = npos) const;
-
-protected:
-	char* _data;
-	std::size_t _size;
-	std::size_t _capacity;
-	bool _free;
-};
-
-
-bool operator== (const Buffer&, const Buffer&);
-bool operator!= (const Buffer&, const Buffer&);
-*/
 typedef std::vector<char> Buffer;
 
 
@@ -103,9 +42,9 @@ typedef std::vector<char> Buffer;
 
 
 class MutableBuffer
-	/// The MutableBuffer class provides a safe representation of a buffer that can
-	/// be modified. It does not own the underlying data, and so is cheap to copy or
-	/// assign.
+	/// The MutableBuffer class provides a safe representation of a
+	/// buffer that can be modified. It does not own the underlying
+	/// data, and so is cheap to copy or assign.
 {
 public:
 	MutableBuffer() : 
@@ -129,8 +68,8 @@ private:
 };
 
 
-// Warning: The following functions permit violations of type safety, so
-// uses of it in application code should be carefully considered.
+// Warning: The following functions permit violations of type safety, 
+// so uses of it in application code should be carefully considered.
 
 
 template<typename T> inline MutableBuffer mutableBuffer(T data, std::size_t size)
@@ -174,9 +113,9 @@ inline MutableBuffer mutableBuffer(const Buffer& buf)
 
 
 class ConstBuffer
-	/// The ConstBuffer class provides a safe representation of a buffer that cannot
-	/// be modified. It does not own the underlying data, and so is cheap to copy or
-	/// assign.
+	/// The ConstBuffer class provides a safe representation of a 
+	/// buffer that cannot be modified. It does not own the underlying
+	/// data, and so is cheap to copy or assign.
 {
 public:
 	ConstBuffer() : 
@@ -273,8 +212,9 @@ inline PointerToPodType bufferCast(const ConstBuffer& b)
 	return static_cast<PointerToPodType>(b.data());
 }
 
+
 //
-// BitReader
+// Bit Reader
 //
 
 
@@ -357,7 +297,7 @@ private:
 
 
 //
-// BitWriter
+// Bit Writer
 //
 
 
@@ -373,7 +313,6 @@ class BitWriter
 public:	
 	BitWriter(char* bytes, std::size_t size, ByteOrder order = ByteOrder::Network);
 	BitWriter(Buffer& buf, ByteOrder order = ByteOrder::Network);
-	//BitWriter(std::vector<char>& buf, ByteOrder order = ByteOrder::Network);
 	BitWriter(MutableBuffer& pod, ByteOrder order = ByteOrder::Network);
 	~BitWriter();
 
@@ -436,7 +375,6 @@ private:
 	std::size_t _position;
 	std::size_t _limit;
 	ByteOrder _order;
-	//std::vector<char>* _vector;
 	Buffer* _buffer;
 	char* _bytes;
 };
@@ -446,6 +384,71 @@ private:
 
 
 #endif  // SOURCEY_Buffer_H
+
+
+
+/*
+	//BitWriter(std::vector<char>& buf, ByteOrder order = ByteOrder::Network);
+	//std::vector<char>* _vector;
+class Buffer
+	/// A dynamically expanding buffer type which can either own it's 
+	/// own memory, or reference external memory.
+	///
+	/// Note that when referencing external memeory, that memory will be 
+	/// copied if the buffer is ever resized.
+{
+public:
+	explicit Buffer(std::size_t size = 2048);
+	Buffer(std::size_t size, std::size_t capacity);
+	Buffer(const void* data, std::size_t size);
+	Buffer(const void* data, std::size_t size, std::size_t capacity);
+	Buffer(void* data, std::size_t size, std::size_t capacity, bool assumeOwnership);
+
+	Buffer(const Buffer&);
+	Buffer& operator = (const Buffer&);
+
+	~Buffer();
+
+	void swap(Buffer&);
+	char* detach();
+
+	void assign(const void* data, std::size_t size);
+	void assign(void* data, std::size_t size, std::size_t capacity, bool assumeOwnership);
+	void append(const Buffer&);
+	void append(const void* data, std::size_t size);
+	void fill(char value = 0);
+
+	std::size_t size() const;
+	bool size(std::size_t);
+	std::size_t capacity() const;
+	bool capacity(std::size_t);
+	bool empty() const;
+	void clear();
+
+	char* data();
+	const char* data() const;
+
+	char& operator[] (std::size_t);
+	char operator[] (std::size_t) const;
+	char& at(std::size_t);
+	char at(std::size_t) const;
+
+	static const std::size_t npos = static_cast<std::size_t> (-1);
+
+	std::size_t find(char, std::size_t pos = 0) const;
+	std::size_t rfind(char, std::size_t pos = npos) const;
+
+protected:
+	char* _data;
+	std::size_t _size;
+	std::size_t _capacity;
+	bool _free;
+};
+
+
+bool operator== (const Buffer&, const Buffer&);
+bool operator!= (const Buffer&, const Buffer&);
+*/
 
 
 

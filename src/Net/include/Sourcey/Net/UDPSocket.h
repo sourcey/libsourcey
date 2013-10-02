@@ -93,6 +93,8 @@ public:
 	virtual bool closed() const;
 		/// Returns true if the native socket 
 		/// handle is closed.
+
+	virtual uv::Loop* loop() const;
 	
 	virtual void onRecv(const MutableBuffer& buf, const net::Address& address);
 
@@ -101,9 +103,9 @@ protected:
 	virtual bool recvStart();
 	virtual bool recvStop();
 
-	static void onRecv(uv_udp_t* handle, ssize_t nread, uv_buf_t buf, struct sockaddr* addr, unsigned flags);
+	static void onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags);
 	static void afterSend(uv_udp_send_t* req, int status); 
-	static uv_buf_t allocRecvBuffer(uv_handle_t* handle, size_t suggested_size);
+	static void allocRecvBuffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t* buf);
 
 	virtual void onError(const Error& error);
 	virtual void onClose();

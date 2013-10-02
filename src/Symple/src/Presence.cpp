@@ -19,13 +19,10 @@
 
 #include "Sourcey/Symple/Presence.h"
 #include "Sourcey/Util.h"
-//#include "Sourcey/Crypto/Crypto.h"
-//#include "Poco/Format.h"
 #include "assert.h"
 
 
 using namespace std;
-
 
 
 namespace scy {
@@ -69,7 +66,6 @@ void Presence::setProbe(bool flag)
 {	
 	(*this)["probe"] = flag;
 }
-
 
 
 } // namespace symple 

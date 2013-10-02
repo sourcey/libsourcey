@@ -30,7 +30,7 @@ namespace scy {
 //
 
 
-SyncPacketQueue::SyncPacketQueue(uv::Loop& loop, int maxSize) : 
+SyncPacketQueue::SyncPacketQueue(uv::Loop* loop, int maxSize) : 
 	SyncQueue<IPacket>(loop, maxSize), 
 	PacketProcessor(this->emitter)
 {	
@@ -51,24 +51,25 @@ SyncPacketQueue::~SyncPacketQueue()
 
 void SyncPacketQueue::process(IPacket& packet)
 {
-	if (!cancelled())
-		push(packet.clone());
-	else {
-		warnL("SyncPacketQueue", this) << "late packet" << endl;
-		assert(closed());
+	if (cancelled()) {
+		warnL("SyncPacketQueue", this) << "Process late packet" << endl;
 		assert(0);
+		return;
 	}
+	
+	push(packet.clone());
 }
 
 
-void SyncPacketQueue::emit(IPacket& packet)
+void SyncPacketQueue::dispatch(IPacket& packet)
 {	
 	// Emit should never be called after closure.
 	// Any late packets should have been dealt with  
 	// and dropped by the run() function.
 	if (cancelled()) {
-		assert(closed());
-		warnL("SyncPacketQueue", this) << "late packet" << endl;
+		warnL("SyncPacketQueue", this) << "Dispatch late packet" << endl;
+		assert(0);
+		return;
 	}
 	
 	PacketStreamAdapter::emit(packet);
@@ -77,17 +78,20 @@ void SyncPacketQueue::emit(IPacket& packet)
 
 void SyncPacketQueue::onStreamStateChange(const PacketStreamState& state)
 {
-	traceL("SyncPacketQueue", this) << "state change: " << state << endl;
+	traceL("SyncPacketQueue", this) << "Stream state: " << state << endl;
 	
 	switch (state.id()) {
-	//case PacketStreamState::Running:
-	//case PacketStreamState::Stopped:
-	//case PacketStreamState::Error:
-	//case PacketStreamState::Resetting:
 	//case PacketStreamState::None:
-	//case PacketStreamState::Closed:
-	case PacketStreamState::Stopping:
-		close();
+	//case PacketStreamState::Active:
+	//case PacketStreamState::Resetting:
+	//case PacketStreamState::Stopping:
+	//case PacketStreamState::Stopped:
+	case PacketStreamState::Closed:
+	case PacketStreamState::Error:
+		// Can't call close here since we can't 
+		// guarantee the calling thread.
+		//SyncContext::close();
+		SyncQueue<IPacket>::cancel();
 		break;
 	}
 }
@@ -112,32 +116,42 @@ AsyncPacketQueue::~AsyncPacketQueue()
 
 void AsyncPacketQueue::process(IPacket& packet)
 {
+	if (cancelled()) {
+		warnL("AsyncPacketQueue", this) << "Process late packet" << endl;
+		assert(0);
+		return;
+	}
+	
 	push(packet.clone());
 }
 
 
-void AsyncPacketQueue::emit(IPacket& packet)
+void AsyncPacketQueue::dispatch(IPacket& packet)
 {
+	if (cancelled()) {
+		warnL("AsyncPacketQueue", this) << "Dispatch late packet" << endl;
+		assert(0);
+		return;
+	}
+
 	PacketStreamAdapter::emit(packet);
 }
 
 
 void AsyncPacketQueue::onStreamStateChange(const PacketStreamState& state)
 {
-	traceL("AsyncPacketQueue", this) << "stream state: " << state << endl;
+	traceL("AsyncPacketQueue", this) << "Stream state: " << state << endl;
 	
 	switch (state.id()) {
-	case PacketStreamState::Running:
-		//_cancelled = false;
+	case PacketStreamState::Active:
 		break;
 		
 	case PacketStreamState::Stopped:
 
 		// Flush all queued items on stop()
 		flush();	
-		assert(queue().empty());
-		//_cancelled = true;
-		AsyncQueue<IPacket>::cancel();
+		cancel();
+		assert(empty());
 		break;
 
 	//case PacketStreamState::Error:

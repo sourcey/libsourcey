@@ -15,7 +15,6 @@
         'defines': [
           '_LARGEFILE_SOURCE',
           '_FILE_OFFSET_BITS=64',
-          '_GNU_SOURCE',
         ],
         'conditions': [
           ['OS=="solaris"', {
@@ -35,7 +34,6 @@
       'type': '<(library)',
       'include_dirs': [
         'include',
-        'include/uv-private',
         'src/',
       ],
       'direct_dependent_settings': {
@@ -61,7 +59,8 @@
       'sources': [
         'common.gypi',
         'include/uv.h',
-        'include/uv-private/tree.h',
+        'include/tree.h',
+        'include/uv-errno.h',
         'src/fs-poll.c',
         'src/inet.c',
         'src/queue.h',
@@ -76,7 +75,7 @@
             '_GNU_SOURCE',
           ],
           'sources': [
-            'include/uv-private/uv-win.h',
+            'include/uv-win.h',
             'src/win/async.c',
             'src/win/atomicops-inl.h',
             'src/win/core.c',
@@ -129,15 +128,14 @@
             '-Wno-unused-parameter',
           ],
           'sources': [
-            'include/uv-private/uv-unix.h',
-            'include/uv-private/uv-linux.h',
-            'include/uv-private/uv-sunos.h',
-            'include/uv-private/uv-darwin.h',
-            'include/uv-private/uv-bsd.h',
+            'include/uv-unix.h',
+            'include/uv-linux.h',
+            'include/uv-sunos.h',
+            'include/uv-darwin.h',
+            'include/uv-bsd.h',
             'src/unix/async.c',
             'src/unix/core.c',
             'src/unix/dl.c',
-            'src/unix/error.c',
             'src/unix/fs.c',
             'src/unix/getaddrinfo.c',
             'src/unix/internal.h',
@@ -188,13 +186,6 @@
             'src/unix/fsevents.c',
             'src/unix/darwin-proctitle.c',
           ],
-          'link_settings': {
-            'libraries': [
-              '$(SDKROOT)/System/Library/Frameworks/Foundation.framework',
-              '$(SDKROOT)/System/Library/Frameworks/CoreServices.framework',
-              '$(SDKROOT)/System/Library/Frameworks/ApplicationServices.framework',
-            ],
-          },
           'defines': [
             '_DARWIN_USE_64_BIT_INODE=1',
           ]
@@ -303,8 +294,10 @@
         'test/test-util.c',
         'test/test-active.c',
         'test/test-async.c',
+        'test/test-async-null-cb.c',
         'test/test-callback-stack.c',
         'test/test-callback-order.c',
+        'test/test-close-order.c',
         'test/test-connection-fail.c',
         'test/test-cwd-and-chdir.c',
         'test/test-delayed-accept.c',
@@ -368,6 +361,7 @@
         'test/test-barrier.c',
         'test/test-condvar.c',
         'test/test-timer-again.c',
+        'test/test-timer-from-check.c',
         'test/test-timer.c',
         'test/test-tty.c',
         'test/test-udp-dgram-too-big.c',
@@ -378,6 +372,7 @@
         'test/test-udp-multicast-join.c',
         'test/test-dlerror.c',
         'test/test-udp-multicast-ttl.c',
+        'test/test-ip6-addr.c',
       ],
       'conditions': [
         [ 'OS=="win"', {

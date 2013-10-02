@@ -28,7 +28,7 @@
 namespace scy {
 	
 
-#define DelegateDefaultParams typename P = void*, typename P2 = void*, typename P3 = void*, typename P4 = void*
+#define DelegateDefaultArgs typename P = void*, typename P2 = void*, typename P3 = void*, typename P4 = void*
 #define DefineCallbackFields										\
 																	\
 	DelegateCallback(C* object, Method method) :					\
@@ -51,7 +51,7 @@ namespace scy {
 	virtual bool cancelled() const = 0;								\
 	virtual int priority() const = 0;								\
 	virtual bool equals(const Class*) const = 0;					\
-	virtual void emit(void*, P, P2, P3, P4) const = 0;			    \
+	virtual void emit(void*, P, P2, P3, P4) /* const */ = 0;	    \
 	virtual bool accepts(void*, P, P2, P3, P4) { return true; }		\
 	static bool ComparePrioroty(const Class* l, const Class* r) {	\
 		return l->priority() > r->priority();						\
@@ -63,7 +63,7 @@ namespace scy {
 //
 
 
-template<class C, int N, bool withSender = true, DelegateDefaultParams> 
+template<class C, int N, bool withSender = true, DelegateDefaultArgs> 
 struct DelegateCallback 
 {
 };
@@ -201,7 +201,7 @@ struct DelegateCallback<C, 4, false, P, P2, P3, P4>
 //
 
 
-template <DelegateDefaultParams>
+template <DelegateDefaultArgs>
 struct DelegateBase
 	// The abstract base for all instantiations of the
 	// Delegate template classes.
@@ -211,6 +211,8 @@ struct DelegateBase
 
 	DelegateBase(DataT data = 0) : data(data) {};
 	DelegateBase(const DelegateBase& r) : data(r.data) {};
+	virtual ~DelegateBase() {};
+
 	DelegateVirtualFields(DelegateBase)
 
 	//virtual bool accepts(void*, P, P2, P3, P4) const { return true; };
@@ -222,7 +224,7 @@ struct DelegateBase
 //
 
 
-template <class C, class BaseT, class CallbackT, DelegateDefaultParams>
+template <class C, class BaseT, class CallbackT, DelegateDefaultArgs>
 class Delegate: public BaseT, public CallbackT
 	// This template class implements an adapter that sits between
 	// an DelegateBase and an object receiving notifications from it.
@@ -262,9 +264,9 @@ public:
 		return new Delegate(*this);
 	}
 	
-	void emit(void* sender, P arg, P2 arg2, P3 arg3, P4 arg4) const 
+	void emit(void* sender, P arg, P2 arg2, P3 arg3, P4 arg4) /* const */ 
 	{
-		if (!_cancelled)
+		if (!cancelled())
 			CallbackT::emit(sender, arg, arg2, arg3, arg4);
 	}
 	

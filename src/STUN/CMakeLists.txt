@@ -4,5 +4,5 @@ if(BUILD_MODULES AND BUILD_MODULE_STUN)
   include_dependency(OpenSSL REQUIRED)
   include_dependency(LibUV REQUIRED)
 
-  define_sourcey_module(STUN Base UV Net Crypto)
+  define_sourcey_module(STUN Base UV Crypto Net)
 endif()

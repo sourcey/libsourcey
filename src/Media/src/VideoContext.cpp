@@ -284,7 +284,7 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 
 	if (avcodec_encode_video2(ctx, &opacket, oframe, &frameEncoded) < 0) {
 		// TODO: Use av_strerror
-		error = "Fatal Encoder Error";
+		error = "Fatal encoder error";
 		errorL("VideoEncoderContext", this) << error << endl;
 		throw std::runtime_error(error);
     }
@@ -322,7 +322,7 @@ bool VideoEncoderContext::flush(AVPacket& opacket)
 	int frameEncoded = 0;
 	if (avcodec_encode_video2(ctx, &opacket, nullptr, &frameEncoded) < 0) {
 		// TODO: Use av_strerror
-		error = "Fatal Encoder Error";
+		error = "Fatal encoder error";
 		errorL("VideoEncoderContext", this) << error << endl;
 		throw std::runtime_error(error);
     }
@@ -468,8 +468,8 @@ bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 
 	int frameEncoded = 0;
 	if (avcodec_encode_video2(ctx, &opacket, oframe, &frameEncoded) < 0) {
-		error = "Fatal Encoder Error";
-		errorL("VideoCodecEncoderContext", this) << "Fatal Encoder Error" << endl;
+		error = "Fatal encoder error";
+		errorL("VideoCodecEncoderContext", this) << "Fatal encoder error" << endl;
 		throw std::runtime_error(error);
     }
 
@@ -676,7 +676,7 @@ void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec&
 	this->iparams = iparams;
 	this->oparams = oparams;
 	
-	traceL("VideoConversionContext", this) << "Create: OK" << endl;
+	traceL("VideoConversionContext", this) << "Create: OK: " << ctx << endl;
 }
 	
 
@@ -700,6 +700,8 @@ void VideoConversionContext::free()
 
 AVFrame* VideoConversionContext::convert(AVFrame* iframe)
 {
+	traceL("VideoConversionContext", this) << "Convert: " << ctx << endl;
+
 	assert(iframe);
 	assert(iframe->data[0]);
 

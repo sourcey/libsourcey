@@ -44,16 +44,16 @@ namespace uv {
 // Helpers
 //
 	
-inline std::string formatError(const std::string& message, int errorno = UV_UNKNOWN)
+inline std::string formatError(const std::string& message, int errorno = 0)
 {	
 	std::string m(message); // prefix the message, since libuv errors are very brisk
 	if (errorno != UV_UNKNOWN && 
-		errorno != UV_OK) {
-		uv_err_s err;
-		err.code = (uv_err_code)errorno;
+		errorno != 0) {
+		//uv_err_s err;
+		//err.code = (uv_err_code)errorno;
 		if (!m.empty())
 			m.append(": ");
-		m.append(uv_strerror(err));
+		m.append(uv_strerror(errorno));
 	}
 	return m;
 }
@@ -63,16 +63,12 @@ inline void throwError(const std::string& message, int errorno = UV_UNKNOWN)
 {
 	throw std::runtime_error(formatError(message, errorno));
 }
-	
-inline void throwLastError(uv_loop_t* loop, const std::string& message = "") 
-{
-	throwError(message, uv_last_error(loop).code);
-}
 
 
 //
 // Default callbacks - depreciated!
 //
+
 
 #define UVCallback(ClassName, Function, Handle)						 \
 															         \
@@ -86,7 +82,7 @@ inline void throwLastError(uv_loop_t* loop, const std::string& message = "")
 	static void Function(Handle* handle, int status) {			     \
 		ClassName* self = static_cast<ClassName*>(handle->data);	 \
 		if (status)											         \
-			self->setLastError();	                                 \
+			self->setUVError("UV error", status);	                 \
 		self->Function(status);									     \
     }														         \
 	
@@ -96,19 +92,9 @@ inline void throwLastError(uv_loop_t* loop, const std::string& message = "")
 	static void Function(Handle* handle, int status) {			     \
 		ClassName* self = static_cast<ClassName*>(handle->data);	 \
 		if (status)											         \
-			self->setLastError();	                                 \
+			self->setUVError("UV error", status);	                 \
 		self->Function();									         \
     }														         \
-
-
-#define UVReadCallback(ClassName, Function, Handle)				    \
-															        \
-	static void Function(Handle* handle, ssize_t nread, uv_buf_t buf) {	\
-		ClassName* self = static_cast<ClassName*>(handle->data);	\
-		if (nread == -1)											\
-			self->setLastError();	                                \
-		self->Function(handle, nread, buf);							\
-    }														        \
 
 
 #define UVStatusCallbackWithType(ClassName, Function, Handle)		\
@@ -116,36 +102,25 @@ inline void throwLastError(uv_loop_t* loop, const std::string& message = "")
 	static void Function(Handle* handle, int status) {			    \
 		ClassName* self = static_cast<ClassName*>(handle->data);	\
 		if (status)											        \
-			self->setLastError();	                                \
+			self->setUVError("UV error", status);	                \
 		self->Function(handle, status);							    \
     }														        \
-
-
-static void afterWrite(uv_write_t* req, int /* status */) 
-{
-	delete req;
-}
-
-static void afterShutdown(uv_shutdown_t* req, int /* status */) 
-{	
-	delete req;
-}
-
-static void afterClose(uv_handle_t* handle) 
-{	
-	delete handle;
-}
-
+	
 
 //
 // Default Event Loop
 //
 
 typedef uv_loop_t Loop;
+static unsigned long defaultTID = 0;
 
-inline Loop& defaultLoop()
+inline Loop* defaultLoop()
 {
-	return *uv_default_loop();
+	// Capture the main TID the first time
+	// uv_default_loop is accessed.
+	if (defaultTID == 0)
+		defaultTID = uv_thread_self();
+	return uv_default_loop();
 }
 
 
@@ -159,29 +134,33 @@ class Handle
 {
 public:
 	Handle(uv_loop_t* loop = nullptr, void* handle = nullptr) : 
-		_loop(loop ? loop : uv_default_loop()),
-		_handle((uv_handle_t*)handle) // must be nullptr or uv_handle_t
+		_loop(loop ? loop : uv_default_loop()), // nullptr will be uv_default_loop
+		_ptr((uv_handle_t*)handle), // can be nullptr or uv_handle_t
+		_tid(uv_thread_self())
 	{
-		if (_handle)
-			_handle->data = this;
+		if (_ptr)
+			_ptr->data = this;
 	}
 		
 	virtual ~Handle()
 	{
-		if (_handle) 
+		assertTID();
+		if (_ptr) 
 			close();
-		assert(_handle == nullptr);
+		assert(_ptr == nullptr);
 	}
 
 	virtual void setLoop(uv_loop_t* loop)
 		// The event loop may be set before the handle is initialized. 
 	{
-		assert(_handle == nullptr);
+		assertTID();
+		assert(_ptr == nullptr && "set loop before handle");
 		_loop = loop;
 	}
 
 	virtual uv_loop_t* loop() const
 	{
+		assertTID();
 		return _loop;
 	}
 	
@@ -189,25 +168,35 @@ public:
 	T* handle() const
 		// Returns a cast pointer to the managed libuv handle.
 	{ 		
-		return reinterpret_cast<T*>(_handle);
+		// assertTID(); // conflict with uv_async_send in SyncContext
+		return reinterpret_cast<T*>(_ptr);
 	}
 	
 	virtual uv_handle_t* handle() const
 		// Returns a pointer to the managed libuv handle.
 	{ 
-		return _handle; 
+		assertTID();
+		return _ptr; 
+	}
+	
+	virtual bool active() const
+		// Returns true when the handle is active.
+		// This method should be used instead of closed() to determine 
+		// the veracity of the libuv handle for stream io operations.
+	{ 
+		return _ptr && uv_is_active(_ptr) != 0;
 	}
 	
 	virtual bool closed() const
 		// Returns true when the handle is nullptr.
 	{ 
-		return _handle == nullptr; 
+		return !_ptr; // && uv_is_closing(_ptr) != 0;
 	}
 	
-	virtual bool active() const
-		// Returns true when the handle is active.
+	unsigned int tid() const
+		// Returns the parent thread ID.
 	{ 
-		return _handle && uv_is_active(_handle) == 1;
+		return _tid;
 	}
 		
 	const scy::Error& error() const
@@ -215,62 +204,78 @@ public:
 	{ 
 		return _error;
 	}
-
-	virtual void setLastError(const std::string& prefix = "UV Error")
-		// Sets the last error and sends relevant callbacks.
-		// This method can be called inside libuv callbacks.
-	{
-		uv_err_t uv = uv_last_error(loop());
-		Error err;
-		err.uverr = uv.code;
-		err.syserr = uv.sys_errno_;
-		err.message = formatError(prefix, uv.code);
-		setError(err);
-	}
 	
-	virtual void setAndThrowLastError(const std::string& prefix = "UV Error")
+	virtual void setAndThrowError(const std::string& prefix = "UV Error", int errorno = 0)
 		// Sets and throws the last error.
 		// Should never be called inside libuv callbacks.
 	{
-		setLastError(prefix);
-		throwLastError(prefix);
+		setUVError(prefix, errorno);
+		throwError(prefix, errorno);
 	}
 
-	virtual void throwLastError(const std::string& prefix = "UV Error") const
+	virtual void throwError(const std::string& prefix = "UV Error", int errorno = 0) const
 		// Throws the last error.
 		// This function is const so it can be used for
 		// invalid getter operations on closed handles.
 		// The actual error would be set on the next iteraton.
 	{
-		throw std::runtime_error(formatError(prefix));
+		throw std::runtime_error(formatError(prefix, errorno));
+	}
+
+	virtual void setUVError(const std::string& prefix = "UV Error", int errorno = 0)
+		// Sets the last error and sends relevant callbacks.
+		// This method can be called inside libuv callbacks.
+	{
+		scy::Error err;
+		err.errorno = errorno;
+		//err.syserr = uv.sys_errno_;
+		err.message = formatError(prefix, errorno);
+		setError(err);
 	}
 		
-	virtual void setError(const Error& err) 
+	virtual void setError(const scy::Error& err) 
 		// Sets the error content and triggers callbacks.
 	{ 
+		assertTID();
+		_error = err; 
+		onError(err);
 		//if (_error.uverr != err.uverr) {
 		//	_error = err; 
-			onError(err);
+		//	onError(err);
 		//}
 	}
 
-protected:	
 	virtual void close()
 		// Closes and destroys the associated libuv handle.
 	{
-		if (_handle) {
-			uv_close(_handle, uv::afterClose);
+		assertTID();
+		if (_ptr) {
+			if (!uv_is_closing(_ptr)) {
+				uv_close(_ptr, [](uv_handle_t* handle) {
+					delete handle;
+				});
+			}
 
 			// We no longer know about the handle.
 			// The handle pointer will be deleted on afterClose.
-			_handle = nullptr;
+			_ptr = nullptr;
 
 			// Send the local onClose to run final callbacks.
 			onClose();
 		}
 	}
+		
+	void assertTID() const
+		// Make sure we are calling from the event loop thread
+	{
+#ifdef _DEBUG
+		assert(_tid == defaultTID
+			|| _tid == uv_thread_self());
+#endif
+	}
 
-	virtual void onError(const Error& /* error */) 
+protected:	
+	virtual void onError(const scy::Error& /* error */) 
 		// Override to handle errors.
 		// The error may be a UV error, or a custom error.
 	{
@@ -286,10 +291,11 @@ protected:
 	Handle(Handle&&); // = delete;
 	Handle& operator=(const Handle&); // = delete;
 	Handle& operator=(Handle&&); // = delete;
-
-	uv_handle_t* _handle;
+	
+	uv_handle_t* _ptr;
 	uv_loop_t* _loop;
-	Error _error;
+	scy::Error _error;
+	unsigned long _tid;
 };
 
 
@@ -298,6 +304,41 @@ protected:
 
 #endif // SOURCEY_UV_UVPP_H
 
+
+	
+
+/* 
+#define UVReadCallback(ClassName, Function, Handle)				    \
+															        \
+	static void Function(Handle* handle, ssize_t nread, uv_buf_t buf) {	\
+		ClassName* self = static_cast<ClassName*>(handle->data);	\
+		if (nread == -1)											\
+			self->setUVError(nread);	TODO: proper error code?   \
+		self->Function(handle, nread, buf);							\
+    }														        \
+	*/
+/*
+inline void throwLastError(uv_loop_t* loop, const std::string& message = "") 
+{
+	throwError(message, uv_last_error(loop).code);
+}
+*/
+/*
+static void afterWrite(uv_write_t* req, int status) 
+{
+	delete req;
+}
+
+static void afterShutdown(uv_shutdown_t* req, int status) 
+{	
+	delete req;
+}
+
+static void afterClose(uv_handle_t* handle) 
+{	
+	delete handle;
+}
+*/
 	//std::string err;
 	//if (!prefix.empty()) {
 	//	err += prefix;

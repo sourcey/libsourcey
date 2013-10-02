@@ -174,6 +174,8 @@ LogWriter::~LogWriter()
 
 void LogWriter::write(LogStream* stream)
 {
+	// TODO: Make safer; if the app exists and async stuff 
+	// is still logging we can end up with a crash here.
 	stream->channel->write(*stream);	
 	delete stream;
 }
@@ -352,8 +354,8 @@ void ConsoleChannel::write(const LogStream& stream)
 	
 	std::ostringstream ss;
 	format(stream, ss);
-#if defined(_CONSOLE) || defined(_DEBUG)
-	//cout << ss.str();
+#if !defined(WIN32) || defined(_CONSOLE) || defined(_DEBUG)
+	cout << ss.str();
 #endif
 #if defined(_MSC_VER) && defined(_DEBUG) 
 	std::string s(ss.str());
@@ -495,10 +497,10 @@ void RotatingFileChannel::write(const LogStream& stream)
 	*_fstream << ss.str();
 	_fstream->flush();
 	
-#if defined(_CONSOLE) // && defined(_DEBUG)
+#if defined(_CONSOLE) && defined(_DEBUG)
 	cout << ss.str();
 #endif
-#if defined(_MSC_VER) // && defined(_DEBUG) 
+#if defined(_MSC_VER) && defined(_DEBUG) 
 	std::string s(ss.str());
 	std::wstring temp(s.length(), L' ');
 	std::copy(s.begin(), s.end(), temp.begin());

@@ -166,7 +166,7 @@ void ClientConnection::onSocketConnect(void*)
 
 	// Start the outgoing send stream if there  
 	// are any adapters attached.
-	if (Outgoing.numAdapters())
+	if (Outgoing.base().numAdapters())
 		Outgoing.start();
 	
 	// Send the outgoing HTTP header if there 

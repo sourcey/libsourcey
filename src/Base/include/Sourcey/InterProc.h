@@ -25,40 +25,488 @@
 #include "Sourcey/Platform.h"
 #include "Sourcey/Logger.h"
 #include "Sourcey/Timer.h"
-#include "Sourcey/Thread.h"
+#include "Sourcey/Interface.h"
 
 #include <deque>
 
 
 namespace scy {
-		
 	
+
 //
 // Synchronization Context
 //
 
 
-class SyncContext: public uv::Handle
-	/// SyncContext enables any thread to communicate
-	/// with the associated event loop via synchronized
-	/// callbacks.
+class SyncContext: public async::Runner
+	/// SyncContext enables any thread to communicate with
+	/// the associated event loop via synchronized callbacks.
+	/// TODO: Cancellation when uv_cancel is available on win.
+{
+public:
+	SyncContext(uv::Loop* loop);
+	SyncContext(uv::Loop* loop, std::function<void()> target);
+	SyncContext(uv::Loop* loop, std::function<void(void*)> target, void* arg);
+		// Create the synchronization context the given event loop and method.
+		// The target method will be called from the event loop context.
+
+	virtual ~SyncContext();
+
+	void post();
+		// Send a synchronization request to the event loop.
+		// Call this each time you want the target method called synchronously.
+		// The synchronous method will be called on next iteration.
+		// This is not atomic, so do not expect a callback for every request.
+
+	virtual void close();
+	virtual bool closed();
+	
+protected:	
+	virtual void startAsync();
+	virtual bool synced() const;
+
+	friend struct std::default_delete<SyncContext>;
+
+	uv::Handle ptr;
+};
+
+
+//
+// Idler
+//
+
+
+class Idler: public async::Runner
+{
+public:
+	Idler(uv::Loop* loop = uv::defaultLoop());
+	Idler(uv::Loop* loop, std::function<void()> target);
+	Idler(uv::Loop* loop, std::function<void(void*)> target, void* arg);
+		// Create the idler context the given event loop and method.
+	
+	virtual ~Idler();
+
+	//virtual void stop();
+	virtual void restart();
+
+	virtual void close();
+	virtual bool closed();
+	
+	virtual void unref();
+	
+protected:	
+	virtual void init();
+	virtual void startAsync();
+	virtual bool synced() const;
+
+	friend struct std::default_delete<Idler>;
+
+	uv::Handle ptr;
+};
+
+	
+#if 0	
+
+//
+// Synchronization Delegate
+//
+
+
+template <class C, class BaseT, class CallbackT, DelegateDefaultArgs>
+class SyncDelegate: public Delegate<C, BaseT, CallbackT, P, P2, P3, P4>
+	// This template class implements an adapter that sits between
+	// an DelegateBase and an object receiving notifications from it.
+{
+public:
+	//typedef DelegateBase<P, P2, P3, P4> DerivedT;
+	typedef typename CallbackT::Method Method;
+	typedef typename BaseT::DataT DataT;
+
+	struct Context 
+	{
+		void* sender;
+		P arg;
+		P2 arg2;
+		P3 arg3;
+		P4 arg4;
+		Context(void* sender, P arg, P2 arg2, P3 arg3, P4 arg4) : 
+			sender(sender), arg(arg), arg2(arg2), arg3(arg3), arg4(arg4) {}
+	};
+
+	SyncDelegate(C* object, Method method, uv::Loop* loop = uv::defaultLoop(), int priority = 0) : 
+		Delegate(object, method, priority),
+		_loop(loop),
+		_sync(nullptr)
+	{
+	}
+
+	SyncDelegate(C* object, Method method, DataT filter, uv::Loop* loop = uv::defaultLoop(), int priority = 0) :
+		Delegate(object, method, filter, priority),
+		_loop(loop),
+		_sync(nullptr)
+	{
+	}
+
+	virtual ~SyncDelegate() 
+	{ 
+		if (_sync)
+			_sync->dispose();
+	}
+
+	SyncDelegate(const SyncDelegate& r) : 
+		Delegate(r), 
+		_loop(r._loop),
+		_sync(nullptr)	
+	{
+	}
+	
+	BaseT* clone() const 
+	{
+		return new SyncDelegate(*this);
+	}
+
+	virtual void emit(void* sender, P arg, P2 arg2, P3 arg3, P4 arg4)
+	{
+		// Create the context on first emit
+		if (!_sync) {
+			_sync = new SyncQueue<Context>(_loop);
+			_sync->ondispatch = std::bind(&SyncDelegate::emitSync, this, std::placeholders::_1);
+		}
+		_sync->push(new Context(sender, arg, arg2, arg3, arg4));
+	}
+		
+	void emitSync(Context& ctx)
+	{
+		if (!_cancelled)
+			CallbackT::emit(ctx.sender, ctx.arg, ctx.arg2, ctx.arg3, ctx.arg4);
+	} 
+	
+protected:
+	SyncDelegate() 
+	{ 
+	}
+
+	uv::Loop& _loop;
+	SyncQueue<Context>* _sync;
+};
+
+
+template <class C>
+static SyncDelegate<C, 
+	DelegateBase<>, 
+	DelegateCallback<C, 0, true>
+> syncDelegate(C* pObj, void (C::*Method)(void*), uv::Loop* loop = uv::defaultLoop(), int priority = 0) 
+{
+	return SyncDelegate<C,
+		DelegateBase<>,
+		DelegateCallback<C, 0, true>
+	>(pObj, Method, loop, priority);
+}
+
+
+template <class C, typename P>
+static SyncDelegate<C, 
+	DelegateBase<P>, 
+	DelegateCallback<C, 1, true, P>, P
+> syncDelegate(C* pObj, void (C::*Method)(void*,P), uv::Loop* loop = uv::defaultLoop(), int priority = 0) 
+{
+	return SyncDelegate<C, 
+		DelegateBase<P>, 
+		DelegateCallback<C, 1, true, P>, P
+	>(pObj, Method, loop, priority);
+}
+
+#endif
+
+
+} // namespace scy
+
+
+#endif // SOURCEY_InterProcess_H
+
+
+
+	/*
+	//virtual void dispose();
+	
+	//virtual void dispose();
+	virtual SyncContext& syncContext()
+	{	
+		// SyncContext will always outlive the queue.
+		Mutex::ScopedLock lock(RunnableQueue<T>::_mutex);
+		return *_sync;
+	}
+		//while(_processing) {
+		//	traceL("SyncQueue", this) << "Destroy: Waiting" << std::endl;
+		//	sleep(10);
+		//}
+	//bool _processing;
+	//SyncContext* _sync;
+		//_processing = true;
+		//_processing = false;
+	*/
+	
+/*
+template<class T = void*>
+class Async//: public async::Runnable
+{
+public:
+	struct Context
+	{
+		async::Runner* self;
+		std::function<void(T)> target;
+		T opaque;
+	};
+
+	Async(std::function<void(T)> target, T opaque)
+	{
+		start(target, opaque);
+	}
+
+	virtual void start(std::function<void(T)> target, T opaque)
+	{	
+		auto req = new Context;
+		req->self = this;
+		req->target = target;
+		req->opaque = opaque;
+		startAsync(req);
+	}
+
+protected:
+	Async(const Async&); // = delete;
+	Async(Async&&); // = delete;
+	Async& operator=(const Async&); // = delete;
+	Async& operator=(Async&&); // = delete;
+
+	friend struct std::default_delete<async::Runner>;
+		
+	virtual void startAsync(Context* req) = 0;
+
+	static void runAsync(std::shared_ptr<Runner::Context> context)
+	{
+		//async::Runner* self = nullptr;
+		try {
+			std::unique_ptr<async::Runner::Context> req(reinterpret_cast<async::Runner::Context*>(arg));
+			//self = req.get()->self;
+			req.get()->target(req.get()->opaque);
+
+			//self->_running = true;
+			//if (req.get()->target)
+			//	req.get()->target();
+			//else 
+			//	req.get()->target1(req.get()->opaque);
+		}
+		catch (std::exception& exc) {
+			std::cerr << "Runner error: " << exc.what() << std::endl;
+	#ifdef _DEBUG
+			throw exc;
+	#endif
+		}
+		//if (self)
+		//	self->reset();
+	}
+
+	virtual ~Async()
+	{
+	}
+};
+
+
+//
+// Synchronization Context
+//
+
+
+//template<class T>
+class SyncContext: public Async<T>
+	/// SyncContext enables any thread to communicate with
+	/// the associated event loop via synchronized callbacks.
 	///
 	/// TODO: Cancelling when uv_cancel is available on win.
 {
 public:
-	SyncContext(uv::Loop& loop) : 
-		uv::Handle(&loop, new uv_async_t),
-		_loop(loop)
+	SyncContext(uv::Loop* loop) : 
+		ptr(loop, new uv_async_t)
 	{
-		_handle->data = this;
-		uv_async_init(&loop, handle<uv_async_t>(), [](uv_async_t* req, int)
+	}
+
+	SyncContext(uv::Loop* loop, std::function<void(T)> target, T opaque) : 
+		ptr(loop, new uv_async_t)
+	{
+		start(target, opaque);
+	}
+
+	void post()
+		// Can be called from any thread to send  
+		// the synchronized callback.
+	{
+		assert(!ptr.closed());
+		uv_async_send(ptr.handle<uv_async_t>());
+	}
+
+	void close()
+	{
+		ptr.close();
+	}
+	
+protected:	
+	virtual void startAsync(Context* req)
+	{
+		assert(!ptr.active());	
+
+		ptr.handle()->data = req;
+		int err = uv_async_init(ptr.loop(), ptr.handle<uv_async_t>(), [](uv_async_t* req, int) {
+			runAsync(req->data);
+		});
+
+		if (err < 0) {
+			delete req;
+			ptr.setAndThrowError(err, "Cannot initialize synchronization contet");
+		}
+	}
+
+	virtual ~SyncContext()
+	{
+		assert(ptr.closed());
+	}
+
+	uv::Handle ptr;
+};
+
+*/
+
+
+ //async::Runner::Context* req
+
+			//std::unique_ptr<async::Runner::Context> ctx(reinterpret_cast<async::Runner::Context*>(req->data));
+			//ctx.get()->self->
+			//auto arg = reinterpret_cast<async::Runner::Context*>(req);
+			//if (self)
+			//self->reset();
+			//arg->self->reset(); {}
+			//delete req;
+
+	//SyncContext(const SyncContext&); // = delete;
+	//SyncContext(SyncContext&&); // = delete;
+	//SyncContext& operator=(const SyncContext&); // = delete;
+	//SyncContext& operator=(SyncContext&&); // = delete;
+
+	//friend struct std::default_delete<SyncContext>;
+	
+	//virtual void dispatch(T& item) = 0;
+		// Dispatch a synchronized object.
+	
+	//virtual void dispatch(T& item) = 0;
+		// Dispatch a synchronized object.
+
+		//auto req = new CallbackRef;
+		//req->target = target;
+		//req->self = this;
+		//req->arg = arg;
+			//auto req = reinterpret_cast<async::RunnerMethod*>(req->data);
+			//req->target(req->arg);
+
+
+		/*
+
+	//virtual void run() = 0;
+		// Called by the libuv event loop to 
+		// perform synchronized actions.
+		 //basic::Callable target, void* arg
+	struct CallbackRef
+	{
+		basic::Callable target;
+		Sync* self;
+		void* arg;
+	};
+		ptr.handle()->data = &callback;
+		uv_async_init(ptr.loop(), ptr.handle<uv_async_t>(), [](uv_async_t* req, int)
+		{
+			//auto self = reinterpret_cast<Sync*>(req->data);
+			//target()
+
+			auto self = reinterpret_cast<Sync*>(req->data);
+
+			// The context pointer will always  
+			// outlive the next libuv iteration.
+			if (self->ptr.closed()) {
+				warnL("SyncContext", self) << "Late callback" << std::endl;
+				return;
+			}
+
+			self->run();
+		});
+		*/
+	
+		/*
+		ptr.handle()->data = &callback;
+		ptr._handle->data = this;
+		uv_async_init(loop, handle<uv_async_t>(), [](uv_async_t* req, int)
 		{
 			auto self = reinterpret_cast<SyncContext*>(req->data);
 
 			// The context pointer will always  
 			// outlive the next libuv iteration.
 			if (self->closed()) {
-				warnL("SyncContext", self) << "late callback" << std::endl;
+				warnL("SyncContext", self) << "Late callback" << std::endl;
+				return;
+			}
+
+			self->run();
+		});
+		*/
+	/*
+	virtual void start(std::function<void()> target)
+	{
+	}
+
+
+	virtual void start(std::function<void(void*)> target, void* opaque)
+	{
+		ptr.handle()->data = opaque;
+		uv_async_init(ptr.loop(), ptr.handle<uv_async_t>(), [](uv_async_t* req, int)
+		{
+			//auto self = reinterpret_cast<Sync*>(req->data);
+			//target()
+
+			auto self = reinterpret_cast<Sync*>(req->data);
+
+			// The context pointer will always  
+			// outlive the next libuv iteration.
+			if (self->ptr.closed()) {
+				warnL("SyncContext", self) << "Late callback" << std::endl;
+				return;
+			}
+
+			self->target();
+		});
+	}
+	*/
+	
+
+
+
+
+/*
+class SyncContext: public uv::Handle
+	/// SyncContext enables any thread to communicate with
+	/// the associated event loop via synchronized callbacks.
+	///
+	/// TODO: Cancelling when uv_cancel is available on win.
+{
+public:
+	SyncContext(uv::Loop* loop) : 
+		uv::Handle(loop, new uv_async_t)
+	{
+		_handle->data = this;
+		uv_async_init(loop, handle<uv_async_t>(), [](uv_async_t* req, int)
+		{
+			auto self = reinterpret_cast<SyncContext*>(req->data);
+
+			// The context pointer will always  
+			// outlive the next libuv iteration.
+			if (self->closed()) {
+				warnL("SyncContext", self) << "Late callback" << std::endl;
 				return;
 			}
 
@@ -66,7 +514,7 @@ public:
 		});
 	}
 	
-	virtual void destroy()
+	virtual void dispose()
 	{
 		uv::Handle::close();
 
@@ -98,196 +546,13 @@ protected:
 		// Called by the libuv event loop to 
 		// perform synchronized actions.
 
-	uv::Loop& _loop;
-
 	friend struct std::default_delete<SyncContext>;
 };
+*/
 
 
-//
-// Runnable Queue
-//
-
-
-template<class T>
-class RunnableQueue: public basic::Runnable
-{
-public:
-	RunnableQueue(int limit = 2048) :
-		_limit(limit)
-	{
-	}	
-	
-	virtual void push(T* item)
-		// Pushes an item onto the queue.
-		// Ownership is taken of the item pointer.		
-	{
-		Mutex::ScopedLock lock(_mutex);	
-				
-		while (static_cast<int>(_queue.size()) >= (_limit)) {
-			traceL("RunnableQueue", this) << "purging: " << _queue.size() << std::endl;
-			delete _queue.front();
-			_queue.pop_front();
-		}
-			
-		_queue.push_back(item);
-	}
-	
-	virtual void flush()
-		// Flushes all outgoing items.
-	{
-		while (emitNext()) 
-			scy::sleep(1);
-	}
-	
-	virtual std::deque<T*> queue()
-	{
-		Mutex::ScopedLock lock(_mutex);
-		return _queue;
-	}
-	
-	virtual void emit(T& item) = 0;
-		// Override this method to emit a single item.
-	
-	virtual void run()
-		// Called asynchronously to dispatch queued items.
-		// This method blocks until cancel() is called.
-	{
-		while (!cancelled())
-			scy::sleep(emitNext() ? 1 : 50);
-	}
-	
-	virtual void runFor(int timeout)
-		// Called asynchronously to dispatch queued items
-		// until the queue is empty or the timeout expires.
-	{
-		Stopwatch sw;
-		sw.start();
-		while (!cancelled() && sw.elapsedMilliseconds() < timeout && emitNext())
-			scy::sleep(1);
-	}
-	
-	bool emitNext()
-		// Pops and emits the next waiting item.
-	{
-		T* next;
-		{
-			Mutex::ScopedLock lock(_mutex);
-			if (_queue.empty())
-				return false;
-
-			next = _queue.front();
-			_queue.pop_front();
-		}		
-		emit(*next);
-		delete next;
-		return true;
-	}
-	
-	void clear()
-		// Clears all queued items.
-	{
-		Mutex::ScopedLock lock(_mutex);	
-		util::clearDeque(_queue);
-	}
-
-protected:
-	virtual ~RunnableQueue() 
-	{
-		clear();
-	}
-		
-	typedef std::deque<T*> Queue;
-	
-	int _limit;
-	Queue _queue;
-	mutable Mutex _mutex;
-};
-
-
-//
-// Synchronization Queue
-//
-
-
-template<class T>
-class SyncQueue: public RunnableQueue<T>, public SyncContext
-	// SyncQueue extends SyncContext to implement a synchronized FIFO
-	// queue which receives T objects from any thread and synchronizes
-	// them for safe consumption by the associated event loop.
-{
-public:
-	SyncQueue(uv::Loop& loop, int limit = 2048, int timeout = 250) :
-		RunnableQueue<T>(limit), SyncContext(loop), _timeout(timeout)
-	{
-	}	
-	
-	virtual void push(T* item)
-		// Pushes an item onto the queue.
-		// Pointers are now managed by the SyncQueue.		
-	{
-		RunnableQueue<T>::push(item);
-		SyncContext::send();
-	}
-	
-	virtual void cancel()
-	{
-		RunnableQueue<T>::cancel();
-		SyncContext::close();
-	}
-
-protected:
-	virtual ~SyncQueue() 
-	{
-	}	
-	
-	virtual void emit(T& item) = 0;
-		// Emits a single synchronized item.
-
-	virtual void run()
-	{
-		// Run for x timeout
-		RunnableQueue<T>::runFor(_timeout);
-	}
-
-	int _timeout;
-};
-
-
-//
-// Asynchronous Queue
-//
-
-
-template<class T>
-class AsyncQueue: public RunnableQueue<T>
-	// AsyncQueue is a thread-based queue which receives packets  
-	// from any thread source and dispatches them asynchronously.
-	//
-	// This queue is useful for deferring load from operation 
-	// critical system devices before performing long running tasks.
-	//
-	// The thread will call the RunnableQueue's run() method to
-	// constantly flush outgoing packets until cancel() is called. 
-{
-public:
-	AsyncQueue(int limit = 2048) : RunnableQueue<T>(limit)
-	{
-		_thread.start(*this); //std::bind(&RunnableQueue<T>::run, this)
-	}	
-
-protected:
-	virtual ~AsyncQueue() 
-	{
-	}
-	
-	virtual void emit(T& item) = 0;
-		// Override this method to emit the async item.
-
-	Thread _thread;
-};
-
-
+/*
+		//_thread.start(std::bind(&AsyncQueue::run, this));
 //
 // Synchronized Callback
 //
@@ -302,7 +567,7 @@ public:
 	void* opaque;
 		// Client data pointer (unmanaged)
 
-	SyncCallback(uv::Loop& loop, std::function<void(T)> target) : 
+	SyncCallback(uv::Loop* loop, std::function<void(T)> target) : 
 		SyncContext(loop), target(target), opaque(opaque)
 	{
 	}
@@ -316,19 +581,12 @@ protected:
 		target(opaque);
 	}	
 };
-
-
-} // namespace scy
-
-
-#endif // SOURCEY_InterProcess_H
-
-
+*/
 	
 	/*
 	virtual void cancel()
 		// Cancels the queue.
-		// No more items will be emitted after the current item.
+		// No more items will be dispatched after the current item.
 	{
 		Mutex::ScopedLock lock(_mutex);
 		_cancelled = true;
@@ -388,7 +646,7 @@ private:
 
 	/*
 		//_sw.stop();
-		//Task(&loop, false, false),
+		//Task(loop, false, false),
 
 	virtual void start()
 	{

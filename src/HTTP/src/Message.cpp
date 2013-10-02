@@ -86,7 +86,7 @@ UInt64 Message::getContentLength() const
 	{
 		return util::strtoi<UInt64>(contentLength);
 	}
-	else return UNKNOWN_CONTENT_LENGTH;
+	else return UInt64(UNKNOWN_CONTENT_LENGTH);
 }
 
 

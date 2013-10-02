@@ -15,7 +15,7 @@ set(libuv_COMMON_SOURCE_FILES
 
 if(MSVC)
   add_definitions(-D_WIN32_WINNT=0x0600 -D_GNU_SOURCE)
-  set(libuv_DEPENDENCIES "advapi32.lib iphlpapi.lib psapi.lib shell32.lib ws2_32.lib")
+  set(libuv_DEPENDENCIES advapi32.lib iphlpapi.lib psapi.lib shell32.lib ws2_32.lib)
 
   # Windows source files
   set(libuv_SOURCE_FILES ${libuv_COMMON_SOURCE_FILES} 

@@ -30,7 +30,7 @@
 #include "Sourcey/FileSystem.h"
 #include "Sourcey/Platform.h"
 #include "Sourcey/Stateful.h"
-#include "Sourcey/Runner.h"
+#include "Sourcey/TaskRunner.h"
 #include "Sourcey/JSON/JSON.h"
 
 

@@ -294,9 +294,9 @@ void Address::init(const std::string& host, UInt16 port)
 	//traceL("Address", this) << "Parse: " << host << ":" << port << endl;
 
 	char ia[sizeof(struct in6_addr)];
-	if (uv_inet_pton(AF_INET, host.c_str(), &ia).code == UV_OK)
+	if (uv_inet_pton(AF_INET, host.c_str(), &ia) == 0)
 		_base = new IPv4AddressBase(&ia, htons(port));
-    else if (uv_inet_pton(AF_INET6, host.c_str(), &ia).code == UV_OK)
+    else if (uv_inet_pton(AF_INET6, host.c_str(), &ia) == 0)
 		_base = new IPv6AddressBase(&ia, htons(port));
     else
 		throw std::runtime_error("Invalid address: Bad host argument: " + host);
@@ -400,9 +400,9 @@ void Address::swap(Address& addr)
 bool Address::validateIP(const std::string& addr)
 {
 	char ia[sizeof(struct in6_addr)];
-	if (uv_inet_pton(AF_INET, addr.c_str(), &ia).code == UV_OK)
+	if (uv_inet_pton(AF_INET, addr.c_str(), &ia) == 0)
 		return true;
-    else if (uv_inet_pton(AF_INET6, addr.c_str(), &ia).code == UV_OK)
+    else if (uv_inet_pton(AF_INET6, addr.c_str(), &ia) == 0)
 		return true;
 	return false;
 }

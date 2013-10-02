@@ -76,7 +76,7 @@ FormatRegistry& MediaFactory::formats()
 
 void MediaFactory::loadVideo()
 {
-	traceL("MediaFactory") << "Preloading video captures" << endl;
+	debugL("MediaFactory") << "Loading video captures" << endl;
 	
 	// Depreciated code used to preload captures on application load.
 	Mutex::ScopedLock lock(_mutex);
@@ -87,17 +87,16 @@ void MediaFactory::loadVideo()
 	std::vector<Device> devs;
 	_devices->getVideoCaptureDevices(devs);
 	for (size_t i = 0; i < devs.size(); ++i) {
-		try 
-		{
+		try {
 			traceL("MediaFactory") << "Loading video: " << devs[0].id << endl;
 
 			// TODO: Receive callback on capture error or closure.
-			VideoCaptureBase* base = new VideoCaptureBase(devs[0].id); 
-			_videoBases[devs[0].id] = base; 
+			//VideoCaptureBase* base = std::make_shared<VideoCaptureBase>(devs[0].id); 
+			_videoBases[devs[0].id] = std::make_shared<VideoCaptureBase>(devs[0].id);
 		} 
-		catch (...) 
-		{
-			errorL("MediaFactory") << "Cannot load video capture" << endl;
+		catch (std::exception& exc) {
+			errorL("MediaFactory") << "Cannot load video capture: "
+				<< devs[0].id << ": " << exc.what() << endl;
 		}
 	}
 }
@@ -105,26 +104,28 @@ void MediaFactory::loadVideo()
 
 void MediaFactory::unloadVideo()
 {
-	for (VideoCaptureBaseMap::iterator it = _videoBases.begin(); it != _videoBases.end(); ++it) {
-		assert(it->second->refCount() == 1);
-		it->second->release();
-	}
+	//for (auto it = _videoBases.begin(); it != _videoBases.end(); ++it) {
+		//if (it->second->refCount() > 1) {
+		//	warnL("MediaFactory") << "Cannot unload referenced video capture object: "
+		//		<< it->second << ": " << it->second->refCount() << endl;
+		//}
+		//it->second->release();
+	//}
 	_videoBases.clear();
 }
 
 
-VideoCaptureBase* MediaFactory::getVideoCaptureBase(int deviceId) 
+std::shared_ptr<VideoCaptureBase> MediaFactory::getVideoCaptureBase(int deviceId) 
 {
 	//traceL("MediaFactory") << "Get video capture base: " << deviceId << endl;
-	VideoCaptureBase* base;
-	VideoCaptureBaseMap::iterator it = _videoBases.find(deviceId);
+	//std::make_shared<VideoCaptureBase> base;
+	auto it = _videoBases.find(deviceId);
 	if (it != _videoBases.end())
-		base = it->second;
-	else {	
-		// TODO: unique_ptr for exception safe instantiation
-		base = new VideoCaptureBase(deviceId);
-		_videoBases[deviceId] = base;
-	}
+		return it->second;
+
+	// TODO: unique_ptr for exception safe instantiation
+	auto base = std::make_shared<VideoCaptureBase>(deviceId);
+	_videoBases[deviceId] = base;
 	return base;
 }
 

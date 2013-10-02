@@ -21,7 +21,7 @@
 #define SOURCEY_Sked_Task_H
 
 
-#include "Sourcey/Task.h"
+#include "Sourcey/TaskRunner.h"
 #include "Sourcey/JSON/ISerializable.h"
 #include "Sourcey/Sked/Trigger.h"
 

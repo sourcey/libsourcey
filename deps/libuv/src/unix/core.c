@@ -62,9 +62,6 @@
 
 static void uv__run_pending(uv_loop_t* loop);
 
-static uv_loop_t default_loop_struct;
-static uv_loop_t* default_loop_ptr;
-
 /* Verify that uv_buf_t is ABI-compatible with struct iovec. */
 STATIC_ASSERT(sizeof(uv_buf_t) == sizeof(struct iovec));
 STATIC_ASSERT(sizeof(&((uv_buf_t*) 0)->base) ==
@@ -229,44 +226,6 @@ int uv_is_closing(const uv_handle_t* handle) {
 }
 
 
-uv_loop_t* uv_default_loop(void) {
-  if (default_loop_ptr)
-    return default_loop_ptr;
-
-  if (uv__loop_init(&default_loop_struct, /* default_loop? */ 1))
-    return NULL;
-
-  return (default_loop_ptr = &default_loop_struct);
-}
-
-
-uv_loop_t* uv_loop_new(void) {
-  uv_loop_t* loop;
-
-  if ((loop = malloc(sizeof(*loop))) == NULL)
-    return NULL;
-
-  if (uv__loop_init(loop, /* default_loop? */ 0)) {
-    free(loop);
-    return NULL;
-  }
-
-  return loop;
-}
-
-
-void uv_loop_delete(uv_loop_t* loop) {
-  uv__loop_delete(loop);
-#ifndef NDEBUG
-  memset(loop, -1, sizeof *loop);
-#endif
-  if (loop == default_loop_ptr)
-    default_loop_ptr = NULL;
-  else
-    free(loop);
-}
-
-
 int uv_backend_fd(const uv_loop_t* loop) {
   return loop->backend_fd;
 }
@@ -361,25 +320,28 @@ int uv_is_active(const uv_handle_t* handle) {
 /* Open a socket in non-blocking close-on-exec mode, atomically if possible. */
 int uv__socket(int domain, int type, int protocol) {
   int sockfd;
+  int err;
 
 #if defined(SOCK_NONBLOCK) && defined(SOCK_CLOEXEC)
   sockfd = socket(domain, type | SOCK_NONBLOCK | SOCK_CLOEXEC, protocol);
-
   if (sockfd != -1)
-    goto out;
+    return sockfd;
 
   if (errno != EINVAL)
-    goto out;
+    return -errno;
 #endif
 
   sockfd = socket(domain, type, protocol);
-
   if (sockfd == -1)
-    goto out;
+    return -errno;
 
-  if (uv__nonblock(sockfd, 1) || uv__cloexec(sockfd, 1)) {
+  err = uv__nonblock(sockfd, 1);
+  if (err == 0)
+    err = uv__cloexec(sockfd, 1);
+
+  if (err) {
     close(sockfd);
-    sockfd = -1;
+    return err;
   }
 
 #if defined(SO_NOSIGPIPE)
@@ -389,13 +351,13 @@ int uv__socket(int domain, int type, int protocol) {
   }
 #endif
 
-out:
   return sockfd;
 }
 
 
 int uv__accept(int sockfd) {
   int peerfd;
+  int err;
 
   assert(sockfd >= 0);
 
@@ -410,38 +372,37 @@ int uv__accept(int sockfd) {
                          NULL,
                          NULL,
                          UV__SOCK_NONBLOCK|UV__SOCK_CLOEXEC);
-
     if (peerfd != -1)
-      break;
+      return peerfd;
 
     if (errno == EINTR)
       continue;
 
     if (errno != ENOSYS)
-      break;
+      return -errno;
 
     no_accept4 = 1;
 skip:
 #endif
 
     peerfd = accept(sockfd, NULL, NULL);
-
     if (peerfd == -1) {
       if (errno == EINTR)
         continue;
-      else
-        break;
+      return -errno;
     }
 
-    if (uv__cloexec(peerfd, 1) || uv__nonblock(peerfd, 1)) {
+    err = uv__cloexec(peerfd, 1);
+    if (err == 0)
+      err = uv__nonblock(peerfd, 1);
+
+    if (err) {
       close(peerfd);
-      peerfd = -1;
+      return err;
     }
 
-    break;
+    return peerfd;
   }
-
-  return peerfd;
 }
 
 
@@ -454,7 +415,10 @@ int uv__nonblock(int fd, int set) {
     r = ioctl(fd, FIONBIO, &set);
   while (r == -1 && errno == EINTR);
 
-  return r;
+  if (r)
+    return -errno;
+
+  return 0;
 }
 
 
@@ -465,7 +429,10 @@ int uv__cloexec(int fd, int set) {
     r = ioctl(fd, set ? FIOCLEX : FIONCLEX);
   while (r == -1 && errno == EINTR);
 
-  return r;
+  if (r)
+    return -errno;
+
+  return 0;
 }
 
 #else /* !(defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__)) */
@@ -479,7 +446,7 @@ int uv__nonblock(int fd, int set) {
   while (r == -1 && errno == EINTR);
 
   if (r == -1)
-    return -1;
+    return -errno;
 
   /* Bail out now if already set/clear. */
   if (!!(r & O_NONBLOCK) == !!set)
@@ -494,7 +461,10 @@ int uv__nonblock(int fd, int set) {
     r = fcntl(fd, F_SETFL, flags);
   while (r == -1 && errno == EINTR);
 
-  return r;
+  if (r)
+    return -errno;
+
+  return 0;
 }
 
 
@@ -507,7 +477,7 @@ int uv__cloexec(int fd, int set) {
   while (r == -1 && errno == EINTR);
 
   if (r == -1)
-    return -1;
+    return -errno;
 
   /* Bail out now if already set/clear. */
   if (!!(r & FD_CLOEXEC) == !!set)
@@ -522,7 +492,10 @@ int uv__cloexec(int fd, int set) {
     r = fcntl(fd, F_SETFD, flags);
   while (r == -1 && errno == EINTR);
 
-  return r;
+  if (r)
+    return -errno;
+
+  return 0;
 }
 
 #endif /* defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__) */
@@ -532,39 +505,42 @@ int uv__cloexec(int fd, int set) {
  * between the call to dup() and fcntl(FD_CLOEXEC).
  */
 int uv__dup(int fd) {
+  int err;
+
   fd = dup(fd);
 
   if (fd == -1)
-    return -1;
+    return -errno;
 
-  if (uv__cloexec(fd, 1)) {
-    SAVE_ERRNO(close(fd));
-    return -1;
+  err = uv__cloexec(fd, 1);
+  if (err) {
+    close(fd);
+    return err;
   }
 
   return fd;
 }
 
 
-uv_err_t uv_cwd(char* buffer, size_t size) {
-  if (!buffer || !size) {
-    return uv__new_artificial_error(UV_EINVAL);
-  }
+int uv_cwd(char* buffer, size_t size) {
+  if (buffer == NULL)
+    return -EINVAL;
 
-  if (getcwd(buffer, size)) {
-    return uv_ok_;
-  } else {
-    return uv__new_sys_error(errno);
-  }
+  if (size == 0)
+    return -EINVAL;
+
+  if (getcwd(buffer, size) == NULL)
+    return -errno;
+
+  return 0;
 }
 
 
-uv_err_t uv_chdir(const char* dir) {
-  if (chdir(dir) == 0) {
-    return uv_ok_;
-  } else {
-    return uv__new_sys_error(errno);
-  }
+int uv_chdir(const char* dir) {
+  if (chdir(dir))
+    return -errno;
+
+  return 0;
 }
 
 

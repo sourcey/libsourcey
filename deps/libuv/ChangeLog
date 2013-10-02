@@ -1,3 +1,322 @@
+2013.09.05, Version 0.11.13 (Unstable), f5b6db6c1d7f93d28281207fd47c3841c9a9792e
+
+Changes since version 0.11.12:
+
+* unix: define _GNU_SOURCE, exposes glibc-isms (Ben Noordhuis)
+
+* windows: check for nonconforming swprintf arguments (Brent Cook)
+
+* build: include internal headers in source list (Brent Cook)
+
+* include: merge uv_tcp_bind and uv_tcp_bind6 (Ben Noordhuis)
+
+* include: merge uv_tcp_connect and uv_tcp_connect6 (Ben Noordhuis)
+
+* include: merge uv_udp_bind and uv_udp_bind6 (Ben Noordhuis)
+
+* include: merge uv_udp_send and uv_udp_send6 (Ben Noordhuis)
+
+
+2013.09.03, Version 0.11.12 (Unstable), 82d01d5f6780d178f5176a01425ec297583c0811
+
+Changes since version 0.11.11:
+
+* test: fix epoll_wait() usage in test-embed.c (Ben Noordhuis)
+
+* include: uv_alloc_cb now takes uv_buf_t* (Ben Noordhuis)
+
+* include: uv_read{2}_cb now takes const uv_buf_t* (Ben Noordhuis)
+
+* include: uv_ip[46]_addr now takes sockaddr_in* (Ben Noordhuis)
+
+* include: uv_tcp_bind{6} now takes sockaddr_in* (Ben Noordhuis)
+
+* include: uv_tcp_connect{6} now takes sockaddr_in* (Ben Noordhuis)
+
+* include: uv_udp_recv_cb now takes const uv_buf_t* (Ben Noordhuis)
+
+* include: uv_udp_bind{6} now takes sockaddr_in* (Ben Noordhuis)
+
+* include: uv_udp_send{6} now takes sockaddr_in* (Ben Noordhuis)
+
+* include: uv_spawn takes const uv_process_options_t* (Ben Noordhuis)
+
+* include: make uv_write{2} const correct (Ben Noordhuis)
+
+* windows: fix flags assignment in uv_fs_readdir() (Ben Noordhuis)
+
+* windows: fix stray comments (Ben Noordhuis)
+
+* windows: remove unused is_path_dir() function (Ben Noordhuis)
+
+
+2013.08.30, Version 0.11.11 (Unstable), ba876d53539ed0427c52039012419cd9374c6f0d
+
+Changes since version 0.11.10:
+
+* unix, windows: add thread-local storage API (Ben Noordhuis)
+
+* linux: don't turn on SO_REUSEPORT socket option (Ben Noordhuis)
+
+* darwin: fix 10.6 build error in fsevents.c (Ben Noordhuis)
+
+* windows: make uv_shutdown() for write-only pipes work (Bert Belder)
+
+* include: update uv_udp_open() / uv_udp_bind() docs (Ben Noordhuis)
+
+* unix: req queue must be empty when destroying loop (Ben Noordhuis)
+
+* unix: move loop functions from core.c to loop.c (Ben Noordhuis)
+
+* darwin: remove CoreFoundation dependency (Ben Noordhuis)
+
+* windows: make autotools build system work with mingw (Keno Fischer)
+
+* windows: fix mingw build (Alex Crichton)
+
+* windows: tweak Makefile.mingw for easier usage (Alex Crichton)
+
+* build: remove _GNU_SOURCE macro definition (Ben Noordhuis)
+
+
+2013.08.25, Version 0.11.10 (Unstable), 742dadcb7154cc7bb89c0c228a223b767a36cf0d
+
+* windows: Re-implement uv_fs_stat. The st_ctime field now contains the change
+  time, not the creation time, like on unix systems. st_dev, st_ino, st_blocks
+  and st_blksize are now also filled out. (Bert Belder)
+
+* linux: fix setsockopt(SO_REUSEPORT) error handling (Ben Noordhuis)
+
+* windows: report uv_process_t exit code correctly (Bert Belder)
+
+* windows: make uv_fs_chmod() report errors correctly (Bert Belder)
+
+* windows: make some more NT apis available for libuv's internal use (Bert
+  Belder)
+
+* windows: squelch some compiler warnings (Bert Belder)
+
+
+2013.08.24, Version 0.11.9 (Unstable), a2d29b5b068cbac93dc16138fb30a74e2669daad
+
+Changes since version 0.11.8:
+
+* fsevents: share FSEventStream between multiple FS watchers, which removes a
+  limit on the maximum number of file watchers that can be created on OS X.
+  (Fedor Indutny)
+
+* process: the `exit_status` parameter for a uv_process_t's exit callback now
+  is an int64_t, and no longer an int. (Bert Belder)
+
+* process: make uv_spawn() return some types of errors immediately on windows,
+  instead of passing the error code the the exit callback. This brings it on
+  par with libuv's behavior on unix. (Bert Belder)
+
+
+2013.08.22, Version 0.11.8 (Unstable), a5260462db80ab0deab6b9e6a8991dd8f5a9a2f8
+
+Changes since version 0.11.7:
+
+* unix: fix missing return value warning in stream.c (Ben Noordhuis)
+
+* build: serial-tests was added in automake v1.12 (Ben Noordhuis)
+
+* windows: fix uninitialized local variable warning (Ben Noordhuis)
+
+* windows: fix missing return value warning (Ben Noordhuis)
+
+* build: fix string comparisons in autogen.sh (Ben Noordhuis)
+
+* windows: move INLINE macro, remove UNUSED (Ben Noordhuis)
+
+* unix: clean up __attribute__((quux)) usage (Ben Noordhuis)
+
+* sunos: remove futimes() macro (Ben Noordhuis)
+
+* unix: fix uv__signal_unlock() prototype (Ben Noordhuis)
+
+* unix, windows: allow NULL async callback (Ben Noordhuis)
+
+* build: apply dtrace -G to all object files (Timothy J. Fontaine)
+
+* darwin: fix indentation in uv__hrtime() (Ben Noordhuis)
+
+* darwin: create fsevents thread on demand (Ben Noordhuis)
+
+* darwin: reduce fsevents thread stack size (Ben Noordhuis)
+
+* darwin: call pthread_setname_np() if available (Ben Noordhuis)
+
+* build: fix automake serial-tests check again (Ben Noordhuis)
+
+* unix: retry waitpid() on EINTR (Ben Noordhuis)
+
+* darwin: fix ios build error (Ben Noordhuis)
+
+* darwin: fix ios compiler warning (Ben Noordhuis)
+
+* test: simplify test-ip6-addr.c (Ben Noordhuis)
+
+* unix, windows: fix ipv6 link-local address parsing (Ben Noordhuis)
+
+* fsevents: FSEvents is most likely not thread-safe (Fedor Indutny)
+
+* windows: omit stdint.h, fix msvc 2008 build error (Ben Noordhuis)
+
+
+2013.08.07, Version 0.11.7 (Unstable), 3cad361f8776f70941b39d65bd9426bcb1aa817b
+
+Changes since version 0.11.6:
+
+* unix, windows: fix uv_fs_chown() function prototype (Ben Noordhuis)
+
+* unix, windows: remove unused variables (Brian White)
+
+* test: fix signed/unsigned comparison warnings (Ben Noordhuis)
+
+* build: dtrace shouldn't break out of tree builds (Timothy J. Fontaine)
+
+* unix, windows: don't read/recv if buf.len==0 (Ben Noordhuis)
+
+* build: add mingw makefile (Ben Noordhuis)
+
+* unix, windows: add MAC to uv_interface_addresses() (Brian White)
+
+* build: enable AM_INIT_AUTOMAKE([subdir-objects]) (Ben Noordhuis)
+
+* unix, windows: make buf arg to uv_fs_write const (Ben Noordhuis)
+
+* sunos: fix build breakage introduced in e3a657c (Ben Noordhuis)
+
+* aix: fix build breakage introduced in 3ee4d3f (Ben Noordhuis)
+
+* windows: fix mingw32 build, define JOB_OBJECT_XXX (Yasuhiro Matsumoto)
+
+* windows: fix mingw32 build, include limits.h (Yasuhiro Matsumoto)
+
+* test: replace sprintf() with snprintf() (Ben Noordhuis)
+
+* test: replace strcpy() with strncpy() (Ben Noordhuis)
+
+* openbsd: fix uv_ip6_addr() unused variable warnings (Ben Noordhuis)
+
+* openbsd: fix dlerror() const correctness warning (Ben Noordhuis)
+
+* openbsd: fix uv_fs_sendfile() unused variable warnings (Ben Noordhuis)
+
+* build: disable parallel automake tests (Ben Noordhuis)
+
+* test: add windows-only snprintf() function (Ben Noordhuis)
+
+* build: add automake serial-tests version check (Ben Noordhuis)
+
+
+2013.07.26, Version 0.10.13 (Stable), 381312e1fe6fecbabc943ccd56f0e7d114b3d064
+
+Changes since version 0.10.12:
+
+* unix, windows: fix uv_fs_chown() function prototype (Ben Noordhuis)
+
+
+2013.07.21, Version 0.11.6 (Unstable), 6645b93273e0553d23823c576573b82b129bf28c
+
+Changes since version 0.11.5:
+
+* test: open stdout fd in write-only mode (Ben Noordhuis)
+
+* windows: uv_spawn shouldn't reject reparse points (Bert Belder)
+
+* windows: use WSAGetLastError(), not errno (Ben Noordhuis)
+
+* build: darwin: disable -fstrict-aliasing warnings (Ben Noordhuis)
+
+* test: fix signed/unsigned compiler warning (Ben Noordhuis)
+
+* test: add 'start timer from check handle' test (Ben Noordhuis)
+
+* build: `all` now builds static and dynamic lib (Ben Noordhuis)
+
+* unix, windows: add extra fields to uv_stat_t (Saúl Ibarra Corretgé)
+
+* build: add install target to the makefile (Navaneeth Kedaram Nambiathan)
+
+* build: switch to autotools (Ben Noordhuis)
+
+* build: use AM_PROG_AR conditionally (Ben Noordhuis)
+
+* test: fix fs_fstat test on sunos (Ben Noordhuis)
+
+* test: fix fs_chown when running as root (Ben Noordhuis)
+
+* test: fix spawn_setgid_fails and spawn_setuid_fails (Ben Noordhuis)
+
+* build: use AM_SILENT_RULES conditionally (Ben Noordhuis)
+
+* build: add DTrace detection for autotools (Timothy J. Fontaine)
+
+* linux,darwin,win: link-local IPv6 addresses (Miroslav Bajtoš)
+
+* unix: fix build when !defined(PTHREAD_MUTEX_ERRORCHECK) (Ben Noordhuis)
+
+* unix, windows: return error codes directly (Ben Noordhuis)
+
+
+2013.07.10, Version 0.10.12 (Stable), 58a46221bba726746887a661a9f36fe9ff204209
+
+Changes since version 0.10.11:
+
+* linux: add support for MIPS (Andrei Sedoi)
+
+* windows: uv_spawn shouldn't reject reparse points (Bert Belder)
+
+* windows: use WSAGetLastError(), not errno (Ben Noordhuis)
+
+* build: darwin: disable -fstrict-aliasing warnings (Ben Noordhuis)
+
+* build: `all` now builds static and dynamic lib (Ben Noordhuis)
+
+* unix: fix build when !defined(PTHREAD_MUTEX_ERRORCHECK) (Ben Noordhuis)
+
+
+2013.06.27, Version 0.11.5 (Unstable), e3c63ff1627a14e96f54c1c62b0d68b446d8425b
+
+Changes since version 0.11.4:
+
+* build: remove CSTDFLAG, use only CFLAGS (Ben Noordhuis)
+
+* unix: support for android builds (Linus Mårtensson)
+
+* unix: avoid extra read, short-circuit on POLLHUP (Ben Noordhuis)
+
+* uv: support android libuv standalone build (Linus Mårtensson)
+
+* src: make queue.h c++ compatible (Ben Noordhuis)
+
+* unix: s/ngx-queue.h/queue.h/ in checksparse.sh (Ben Noordhuis)
+
+* unix: unconditionally stop handle on close (Ben Noordhuis)
+
+* freebsd: don't enable dtrace if it's not available (Brian White)
+
+* build: make HAVE_DTRACE=0 should disable dtrace (Timothy J. Fontaine)
+
+* unix: remove overzealous assert (Ben Noordhuis)
+
+* unix: remove unused function uv_fatal_error() (Ben Noordhuis)
+
+* unix, windows: clean up uv_thread_create() (Ben Noordhuis)
+
+* queue: fix pointer truncation on LLP64 platforms (Bert Belder)
+
+* build: set OS=="android" for android builds (Linus Mårtensson)
+
+* windows: don't use uppercase in include filename (Ben Noordhuis)
+
+* stream: add an API to make streams do blocking writes (Henry Rawas)
+
+* windows: use WSAGetLastError(), not errno (Ben Noordhuis)
+
+
 2013.06.13, Version 0.10.11 (Stable), c3b75406a66a10222a589cb173e8f469e9665c7e
 
 Changes since version 0.10.10:

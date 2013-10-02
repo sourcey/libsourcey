@@ -49,7 +49,7 @@ class FilePart;
 //
 
 
-class FormWriter: public NVCollection, public PacketSource, public basic::Startable
+class FormWriter: public NVCollection, public PacketSource, public async::Startable
 	/// FormWriter is a HTTP client connection adapter for writing HTML forms.
 	///
 	/// This class runs in its own thread so as not to block the event loop

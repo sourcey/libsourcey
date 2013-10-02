@@ -62,9 +62,9 @@ bool getOsVersion(int* major, int* minor, int* build);
 bool isWindowsVistaOrLater();
 bool isWindowsXpOrLater();
 
-std::wstring toUtf16(const char* utf8, size_t len);
+std::wstring toUtf16(const char* utf8, std::size_t len);
 std::wstring toUtf16(const std::string& str);
-std::string toUtf8(const wchar_t* wide, size_t len);
+std::string toUtf8(const wchar_t* wide, std::size_t len);
 std::string toUtf8(const std::wstring& wstr);
 
 #endif

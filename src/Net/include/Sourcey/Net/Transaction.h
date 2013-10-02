@@ -39,7 +39,7 @@ public:
 				const Address& peerAddress, 
 				int timeout = 10000, 
 				int retries = 1, 
-				uv::Loop& loop = uv::defaultLoop()) : 
+				uv::Loop* loop = uv::defaultLoop()) : 
 		PacketTransaction<PacketT>(timeout, retries, loop), 
 		PacketSocketAdapter(&socket),
 		_peerAddress(peerAddress)

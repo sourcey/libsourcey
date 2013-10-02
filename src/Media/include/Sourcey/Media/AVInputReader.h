@@ -6,6 +6,7 @@
 #include "Sourcey/Interface.h"
 #include "Sourcey/Interface.h"
 #include "Sourcey/Media/Types.h"
+#include "Sourcey/Media/FFmpeg.h"
 #include "Sourcey/Media/VideoContext.h"
 #include "Sourcey/Media/AudioContext.h"
 
@@ -25,7 +26,7 @@ namespace scy {
 namespace av {
 
 
-class AVInputReader: public PacketSignal, public basic::Startable, public basic::Runnable
+class AVInputReader: public PacketSignal, public async::Startable, public async::Runnable
 	/// Video capture and file input decoder class with reusable
 	/// code that depends on ffmpeg libavcodec/libavformat.
 {

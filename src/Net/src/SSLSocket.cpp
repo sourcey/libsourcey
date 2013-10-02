@@ -137,7 +137,7 @@ int SSLBase::send(const char* data, int len, const net::Address& /* peerAddress 
 	traceL("SSLBase", this) << "Send: " << len << endl;
 
 	assert(len <= net::MAX_TCP_PACKET_SIZE);
-	if (closed()) {
+	if (!active()) {
 		warnL("SSLBase", this) << "Send error" << endl;	
 		return -1;
 	}
@@ -206,7 +206,7 @@ void SSLBase::onConnect(int status)
 {
 	traceL("SSLBase", this) << "On connect" << endl;
 	if (status) {
-		setLastError();
+		setUVError("SSL connect error", status);
 		return;
 	}
 	else
@@ -249,7 +249,7 @@ void SSLBase::connect(const Address& peerAddress)
 	int r = uv_tcp_connect(&_connectReq, (uv_tcp_t*)stream(), *addr, uv::onConnected);
 	if (r) {
 		uv_err_t err = uv_last_error(loop());
-		setError(err);
+		setUVError(r);
 		throw std::runtime_error(uv_strerror(err)); // TODO: make exception setError option
 	}
 }

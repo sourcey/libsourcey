@@ -670,7 +670,7 @@ public:
 		cout << "Kill Signal: " << opaque << endl;
 	
 		// print active handles
-		uv_walk(&uv::defaultLoop(), Tests::onPrintHTTPServerHandle, NULL);
+		uv_walk(uv::defaultLoop(), Tests::onPrintHTTPServerHandle, NULL);
 			
 		reinterpret_cast<http::Server*>(opaque)->shutdown();
 	}

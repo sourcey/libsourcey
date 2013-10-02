@@ -118,8 +118,6 @@ static void uv_loop_init(uv_loop_t* loop) {
 
   loop->timer_counter = 0;
   loop->stop_flag = 0;
-
-  loop->last_err = uv_ok_;
 }
 
 
@@ -283,10 +281,7 @@ int uv_run(uv_loop_t *loop, uv_run_mode mode) {
     uv_process_timers(loop);
 
     uv_process_reqs(loop);
-    uv_process_endgames(loop);
-
     uv_idle_invoke(loop);
-
     uv_prepare_invoke(loop);
 
     (*poll)(loop, loop->idle_handles == NULL &&
@@ -298,6 +293,7 @@ int uv_run(uv_loop_t *loop, uv_run_mode mode) {
                   !(mode & UV_RUN_NOWAIT));
 
     uv_check_invoke(loop);
+    uv_process_endgames(loop);
 
     if (mode == UV_RUN_ONCE) {
       /* UV_RUN_ONCE implies forward progess: at least one callback must have

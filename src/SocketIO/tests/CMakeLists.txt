@@ -2,4 +2,4 @@
 include_dependency(OpenSSL REQUIRED)
 include_dependency(JsonCpp REQUIRED)
   
-define_libsourcey_test(SocketIOTests Base UV Net Crypto HTTP SocketIO JSON)
+define_libsourcey_test(SocketIOTests Base UV Crypto Net HTTP SocketIO JSON)

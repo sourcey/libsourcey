@@ -22,45 +22,41 @@
 
 
 #include "Sourcey/UV/UVPP.h"
+#include <functional>
+#include <vector>
 
 
 namespace scy {
+	
+
+typedef uv_process_options_t ProcessOptions;
 
 
 class Process: public uv::Handle
 {
 public:
-	Process(uv::Loop& loop = uv::defaultLoop()) :
-		uv::Handle(&loop, new uv_process_t)
-	{	
-	}
+	Process(uv::Loop* loop = uv::defaultLoop());
 
-	bool spawn()
+	void spawn();
 		// Spawns the process.
 		// Options must be properly set.
-	{	
-		if (uv_spawn(loop(), handle<uv_process_t>(), options)) {
-			setLastError("Cannot spawn process");
-			return false;
-		}
-		return true;
-	}
+		// Throws and exception on error.
 
-	bool kill(int signum = 0)
+	bool kill(int signum = 0);
 		// Kills the process
-	{	
-		assert(pid() > 0);
-		return uv_kill(pid(), signum).code == UV_OK;
-	}
 
-	int pid() const
+	int pid() const;
 		// Returns the process PID
-	{	
-		return handle<uv_process_t>()->pid;
-	}
 
-	typedef uv_process_options_t Options;
-	Options options;
+	std::vector<std::string> args;
+		// Command line args.
+		// Convenience proxy for options.args
+
+	std::function<void(Int64)> onexit;
+		// Exit callback; returns the exit status.
+
+	ProcessOptions options;
+		// Process options
 
 protected:
 	uv_process_t _proc;

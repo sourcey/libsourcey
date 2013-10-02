@@ -76,7 +76,7 @@ public:
 	};
 
 public:
-	Client(net::SocketBase* socket, const Options& options = Options(), uv::Loop& loop = uv::defaultLoop());
+	Client(net::SocketBase* socket, const Options& options = Options(), uv::Loop* loop = uv::defaultLoop());
 	virtual ~Client();
 
 	void connect();
@@ -167,13 +167,13 @@ protected:
 //
 
 
-Client* createTCPClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop());
+Client* createTCPClient(const Client::Options& options = Client::Options(), uv::Loop* loop = uv::defaultLoop());
 
 
 class TCPClient: public Client
 {
 public:
-	TCPClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop());
+	TCPClient(const Client::Options& options = Client::Options(), uv::Loop* loop = uv::defaultLoop());
 };
 
 
@@ -182,13 +182,13 @@ public:
 //
 
 
-Client* createSSLClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop());
+Client* createSSLClient(const Client::Options& options = Client::Options(), uv::Loop* loop = uv::defaultLoop());
 
 
 class SSLClient: public Client
 {
 public:
-	SSLClient(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop());
+	SSLClient(const Client::Options& options = Client::Options(), uv::Loop* loop = uv::defaultLoop());
 };
 
 
@@ -324,7 +324,7 @@ template <class WebSocketBaseT>
 class ClientBase: public Client
 {
 public:
-	ClientBase(const Client::Options& options = Client::Options(), uv::Loop& loop = uv::defaultLoop(),) :
+	ClientBase(const Client::Options& options = Client::Options(), uv::Loop* loop = uv::defaultLoop(),) :
 		_socket(runner),
 		Client(_socket, runner, options)
 	{
@@ -396,7 +396,7 @@ class IClient: public sockio::Client
 public:
 
 public:
-	//Client(uv::Loop& loop, const Options& options = Options()); 
+	//Client(uv::Loop* loop, const Options& options = Options()); 
 	virtual ~IClient() {};
 	
 	virtual void connect() = 0;
@@ -421,7 +421,7 @@ public:
 	
 	virtual Client::Options& options() = 0;
 	virtual Roster& roster() = 0;
-	virtual uv::Loop& loop() = 0;
+	virtual uv::Loop* loop() = 0;
 	virtual PersistenceT& persistence() = 0;
 	virtual std::string ourID() const = 0;
 	virtual int announceStatus() const = 0;
@@ -461,7 +461,7 @@ template <class sockio::Client>
 class Client: public sockio::Client
 {
 public:
-	Client(uv::Loop& loop, const Client::Options& options = Client::Options()) : 
+	Client(uv::Loop* loop, const Client::Options& options = Client::Options()) : 
 		sockio::Client(reactor),
 		_runner(runner),
 		_options(options),
@@ -569,7 +569,7 @@ public:
 	}
 
 
-	virtual uv::Loop& loop() 
+	virtual uv::Loop* loop() 
 	{ 
 		//Mutex::ScopedLock lock(_mutex);
 		return _runner; 
@@ -817,7 +817,7 @@ typedef smpl::Client<
 
 /*
 
-	Client(uv::Loop& loop, const Options& options = Options()); 
+	Client(uv::Loop* loop, const Options& options = Options()); 
 	virtual ~Client();
 	
 	virtual void connect();
@@ -842,7 +842,7 @@ typedef smpl::Client<
 	
 	Options& options();
 	Roster& roster();
-	uv::Loop& loop();
+	uv::Loop* loop();
 	PersistenceT& persistence();
 	std::string ourID() const;
 	int announceStatus() const;

@@ -21,6 +21,7 @@
 
 TEST_DECLARE   (platform_output)
 TEST_DECLARE   (callback_order)
+TEST_DECLARE   (close_order)
 TEST_DECLARE   (run_once)
 TEST_DECLARE   (run_nowait)
 TEST_DECLARE   (loop_stop)
@@ -102,6 +103,7 @@ TEST_DECLARE   (timer_order)
 TEST_DECLARE   (timer_huge_timeout)
 TEST_DECLARE   (timer_huge_repeat)
 TEST_DECLARE   (timer_run_once)
+TEST_DECLARE   (timer_from_check)
 TEST_DECLARE   (idle_starvation)
 TEST_DECLARE   (loop_handles)
 TEST_DECLARE   (get_loadavg)
@@ -133,6 +135,7 @@ TEST_DECLARE   (has_ref)
 TEST_DECLARE   (active)
 TEST_DECLARE   (embed)
 TEST_DECLARE   (async)
+TEST_DECLARE   (async_null_cb)
 TEST_DECLARE   (get_currentexe)
 TEST_DECLARE   (process_title)
 TEST_DECLARE   (cwd_and_chdir)
@@ -201,6 +204,7 @@ TEST_DECLARE   (threadpool_cancel_getaddrinfo)
 TEST_DECLARE   (threadpool_cancel_work)
 TEST_DECLARE   (threadpool_cancel_fs)
 TEST_DECLARE   (threadpool_cancel_single)
+TEST_DECLARE   (thread_local_storage)
 TEST_DECLARE   (thread_mutex)
 TEST_DECLARE   (thread_rwlock)
 TEST_DECLARE   (thread_create)
@@ -210,6 +214,7 @@ TEST_DECLARE   (dlerror)
 TEST_DECLARE   (poll_duplex)
 TEST_DECLARE   (poll_unidirectional)
 TEST_DECLARE   (poll_close)
+TEST_DECLARE   (ip6_addr_link_local)
 #ifdef _WIN32
 TEST_DECLARE   (spawn_detect_pipe_name_collisions_on_windows)
 TEST_DECLARE   (argument_escaping)
@@ -238,6 +243,7 @@ TASK_LIST_START
 #if 0
   TEST_ENTRY  (callback_order)
 #endif
+  TEST_ENTRY  (close_order)
   TEST_ENTRY  (run_once)
   TEST_ENTRY  (run_nowait)
   TEST_ENTRY  (loop_stop)
@@ -352,6 +358,7 @@ TASK_LIST_START
   TEST_ENTRY  (timer_huge_timeout)
   TEST_ENTRY  (timer_huge_repeat)
   TEST_ENTRY  (timer_run_once)
+  TEST_ENTRY  (timer_from_check)
 
   TEST_ENTRY  (idle_starvation)
 
@@ -393,6 +400,7 @@ TASK_LIST_START
   TEST_ENTRY  (embed)
 
   TEST_ENTRY  (async)
+  TEST_ENTRY  (async_null_cb)
 
   TEST_ENTRY  (get_currentexe)
 
@@ -491,12 +499,14 @@ TASK_LIST_START
   TEST_ENTRY  (threadpool_cancel_work)
   TEST_ENTRY  (threadpool_cancel_fs)
   TEST_ENTRY  (threadpool_cancel_single)
+  TEST_ENTRY  (thread_local_storage)
   TEST_ENTRY  (thread_mutex)
   TEST_ENTRY  (thread_rwlock)
   TEST_ENTRY  (thread_create)
   TEST_ENTRY  (strlcpy)
   TEST_ENTRY  (strlcat)
   TEST_ENTRY  (dlerror)
+  TEST_ENTRY  (ip6_addr_link_local)
 #if 0
   /* These are for testing the test runner. */
   TEST_ENTRY  (fail_always)

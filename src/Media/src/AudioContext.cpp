@@ -280,7 +280,7 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 
 	if (avcodec_encode_audio2(ctx, &opacket, frame, &frameEncoded) < 0) {
 		// TODO: Use av_strerror
-		error = "Fatal Encoder Error";
+		error = "Fatal encoder error";
 		errorL("AudioEncoderContext", this) << error << endl;
 		throw std::runtime_error(error);
 	}

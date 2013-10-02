@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/Pacman/Package.h"
-#include "Sourcey/Runner.h"
+#include "Sourcey/TaskRunner.h"
 #include "Sourcey/Stateful.h"
 #include "Sourcey/Logger.h"
 
@@ -86,7 +86,7 @@ struct InstallOptions
 
 
 class InstallTask: 
-	public basic::Runnable, 
+	public async::Runnable, 
 	public basic::Polymorphic, 
 	public Stateful<InstallationState>
 	///
