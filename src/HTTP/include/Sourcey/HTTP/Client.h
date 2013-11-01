@@ -81,6 +81,11 @@ public:
 		// Calls connect() internally if the socket is not
 		// already connecting or connected. The actual request 
 		// will be sent when the socket is connected.
+			
+	virtual void sendData(const char* buf, std::size_t len); //, int flags = 0
+	virtual void sendData(const std::string& buf); //, int flags = 0
+		// Sends raw data to the peer.
+		// Calls send() internally.
 	
 	virtual void close();
 		// Forcefully closes the HTTP connection.

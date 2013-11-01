@@ -77,7 +77,7 @@ protected:
 	unsigned long _tid;
 	std::vector<DeferredDeleter*> _pending;
 	std::vector<DeferredDeleter*> _ready;
-	uv::Handle _ptr;
+	uv::Handle _handle;
 	bool _finalize;
 };
 
@@ -313,49 +313,49 @@ class SharedPtr
 	/// The template class must implement duplicate() and
 	/// release() methods, such as SharedObject.
 	///
-	/// Note: Depreciated in favour of std::smart_ptr 
+	/// Note: Depreciated in favour of std::smart_handle 
 {
 public:
-	SharedPtr() : _ptr(nullptr)
+	SharedPtr() : _handle(nullptr)
 	{
 	}
 
-	SharedPtr(C* ptr) : _ptr(ptr)
+	SharedPtr(C* ptr) : _handle(ptr)
 	{
 	}
 
-	SharedPtr(C* ptr, bool shared) : _ptr(ptr)
+	SharedPtr(C* ptr, bool shared) : _handle(ptr)
 	{
-		if (shared && _ptr) _ptr->duplicate();
+		if (shared && _handle) _handle->duplicate();
 	}
 
-	SharedPtr(const SharedPtr& ptr) : _ptr(ptr._ptr)
+	SharedPtr(const SharedPtr& ptr) : _handle(ptr._handle)
 	{
-		if (_ptr) _ptr->duplicate();
+		if (_handle) _handle->duplicate();
 	}
 
 	~SharedPtr()
 	{
-		if (_ptr) _ptr->release();
+		if (_handle) _handle->release();
 	}
 	
 	SharedPtr& assign(C* ptr)
 	{
-		if (_ptr != ptr)
+		if (_handle != ptr)
 		{
-			if (_ptr) _ptr->release();
-			_ptr = ptr;
+			if (_handle) _handle->release();
+			_handle = ptr;
 		}
 		return *this;
 	}
 
 	SharedPtr& assign(C* ptr, bool shared)
 	{
-		if (_ptr != ptr)
+		if (_handle != ptr)
 		{
-			if (_ptr) _ptr->release();
-			_ptr = ptr;
-			if (shared && _ptr) _ptr->duplicate();
+			if (_handle) _handle->release();
+			_handle = ptr;
+			if (shared && _handle) _handle->duplicate();
 		}
 		return *this;
 	}
@@ -364,9 +364,9 @@ public:
 	{
 		if (&ptr != this)
 		{
-			if (_ptr) _ptr->release();
-			_ptr = ptr._ptr;
-			if (_ptr) _ptr->duplicate();
+			if (_handle) _handle->release();
+			_handle = ptr._handle;
+			if (_handle) _handle->duplicate();
 		}
 		return *this;
 	}
@@ -383,164 +383,164 @@ public:
 
 	C* operator -> ()
 	{
-		if (_ptr)
-			return _ptr;
+		if (_handle)
+			return _handle;
 		else
 			throw std::runtime_error("Null pointer");
 	}
 
 	const C* operator -> () const
 	{
-		if (_ptr)
-			return _ptr;
+		if (_handle)
+			return _handle;
 		else
 			throw std::runtime_error("Null pointer");
 	}
 
 	C& operator * ()
 	{
-		if (_ptr)
-			return *_ptr;
+		if (_handle)
+			return *_handle;
 		else
 			throw std::runtime_error("Null pointer");
 	}
 
 	const C& operator * () const
 	{
-		if (_ptr)
-			return *_ptr;
+		if (_handle)
+			return *_handle;
 		else
 			throw std::runtime_error("Null pointer");
 	}
 
 	C* get()
 	{
-		return _ptr;
+		return _handle;
 	}
 
 	const C* get() const
 	{
-		return _ptr;
+		return _handle;
 	}
 
 	operator C* ()
 	{
-		return _ptr;
+		return _handle;
 	}
 	
 	operator const C* () const
 	{
-		return _ptr;
+		return _handle;
 	}
 	
 	bool operator ! () const
 	{
-		return _ptr == nullptr;
+		return _handle == nullptr;
 	}
 
 	bool isNull() const
 	{
-		return _ptr == nullptr;
+		return _handle == nullptr;
 	}
 	
 	C* duplicate()
 	{
-		if (_ptr) _ptr->duplicate();
-		return _ptr;
+		if (_handle) _handle->duplicate();
+		return _handle;
 	}
 
 	bool operator == (const SharedPtr& ptr) const
 	{
-		return _ptr == ptr._ptr;
+		return _handle == ptr._handle;
 	}
 
 	bool operator == (const C* ptr) const
 	{
-		return _ptr == ptr;
+		return _handle == ptr;
 	}
 
 	bool operator == (C* ptr) const
 	{
-		return _ptr == ptr;
+		return _handle == ptr;
 	}
 
 	bool operator != (const SharedPtr& ptr) const
 	{
-		return _ptr != ptr._ptr;
+		return _handle != ptr._handle;
 	}
 
 	bool operator != (const C* ptr) const
 	{
-		return _ptr != ptr;
+		return _handle != ptr;
 	}
 
 	bool operator != (C* ptr) const
 	{
-		return _ptr != ptr;
+		return _handle != ptr;
 	}
 
 	bool operator < (const SharedPtr& ptr) const
 	{
-		return _ptr < ptr._ptr;
+		return _handle < ptr._handle;
 	}
 
 	bool operator < (const C* ptr) const
 	{
-		return _ptr < ptr;
+		return _handle < ptr;
 	}
 
 	bool operator < (C* ptr) const
 	{
-		return _ptr < ptr;
+		return _handle < ptr;
 	}
 
 	bool operator <= (const SharedPtr& ptr) const
 	{
-		return _ptr <= ptr._ptr;
+		return _handle <= ptr._handle;
 	}
 
 	bool operator <= (const C* ptr) const
 	{
-		return _ptr <= ptr;
+		return _handle <= ptr;
 	}
 
 	bool operator <= (C* ptr) const
 	{
-		return _ptr <= ptr;
+		return _handle <= ptr;
 	}
 
 	bool operator > (const SharedPtr& ptr) const
 	{
-		return _ptr > ptr._ptr;
+		return _handle > ptr._handle;
 	}
 
 	bool operator > (const C* ptr) const
 	{
-		return _ptr > ptr;
+		return _handle > ptr;
 	}
 
 	bool operator > (C* ptr) const
 	{
-		return _ptr > ptr;
+		return _handle > ptr;
 	}
 
 	bool operator >= (const SharedPtr& ptr) const
 	{
-		return _ptr >= ptr._ptr;
+		return _handle >= ptr._handle;
 	}
 
 	bool operator >= (const C* ptr) const
 	{
-		return _ptr >= ptr;
+		return _handle >= ptr;
 	}
 
 	bool operator >= (C* ptr) const
 	{
-		return _ptr >= ptr;
+		return _handle >= ptr;
 	}
 
 private:
-	C* _ptr;
+	C* _handle;
 };
 
 
@@ -672,7 +672,7 @@ protected:
 	//friend class DeferredDeleter<MemoryObject>;
 
 	//deleter_t deleter;
-	//std::unique_ptr<DeferredDeleter> deleter;
+	//std::unique_handle<DeferredDeleter> deleter;
 };
 //template <class deleter_t>
 */

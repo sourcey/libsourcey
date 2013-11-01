@@ -175,6 +175,13 @@ function(status text)
 endfunction()
 
 
+# Converts a CMake list to a string containing elements separated by spaces
+function(set_scy_libname module_name output_var)  
+  set(temp_name)
+  string(TOLOWER "scy_${module_name}_${LibSourcey_DLLVERSION}" temp_name)
+  set(${output_var} "${temp_name}" PARENT_SCOPE)
+endfunction()
+
 #
 ### Macro: ask_build_sourcey_dependency
 #

@@ -95,6 +95,12 @@ ZipFile::~ZipFile()
 }
 
 
+bool ZipFile::opened() const
+{
+	return this->fp != nullptr;
+}
+
+
 void ZipFile::open(const std::string& file) 
 {
 	this->close();
@@ -113,6 +119,8 @@ void ZipFile::open(const std::string& file)
 		info.uncompressedSize = static_cast< size_t >(fileInfo.compressed_size);
 		this->info.push_back(info);
 	}
+
+	unzGoToFirstFile(this->fp); // rewind
 }
 
 
@@ -125,19 +133,37 @@ void ZipFile::close()
 }
 
 
-void ZipFile::extractTo(const std::string& path)
+void ZipFile::extract(const std::string& path)
 {	
-	traceL("ZipFile") << "extracting zip: " << path << endl;	
-	for (int ret = unzGoToFirstFile(this->fp); ret == UNZ_OK; ret = unzGoToNextFile(this->fp))
-	{
-		unz_file_info info;
-		char fname[1024];
+	traceL("ZipFile") << "Extracting zip to: " << path << endl;
+
+	if (!opened())
+		throw std::runtime_error("The archive must be opened for extraction.");
+
+	if (!goToFirstFile())
+		throw std::runtime_error("Cannot read the source archive.");
+
+	while (goToNextFile()) {
+		extractCurrentFile(path, true);
+	}
+}
+
+
+bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
+{	
+	int ret;
+	unz_file_info info;
+	char fname[1024];
+
+	try {
 		internal::api("unzGetCurrentFileInfo", unzGetCurrentFileInfo(this->fp, &info, fname, 1024, nullptr, 0, nullptr, 0));
 		
-		traceL("ZipFile") << "zip contains: " << fname << endl;
-		std::string outPath = std::string(path) + fs::delimiter + fname;
+		std::string outPath(path);
+		fs::addnode(outPath, fname);
 
-		// Check directory
+		traceL("ZipFile") << "Extracting zip file: " << outPath << endl;
+
+		// Create directory
 #if !WIN32
 		const int FILE_ATTRIBUTE_DIRECTORY = 0x10;
 #endif
@@ -149,9 +175,9 @@ void ZipFile::extractTo(const std::string& path)
 
 		// Create file
 		else {			
-			internal::api("unzOpenCurrentFile", unzOpenCurrentFile(this->fp));
+			openCurrentFile();
 
-			traceL("ZipFile") << "extracting file: " << outPath << endl;
+			traceL("ZipFile") << "Extracting file: " << outPath << endl;
 			std::ofstream ofs(outPath, std::ios::binary | std::ios::out);
 			if (!ofs.is_open())
 				throw std::runtime_error("Cannot open zip output file: " + outPath);
@@ -163,15 +189,16 @@ void ZipFile::extractTo(const std::string& path)
 			ofs.close();
 			
 			internal::api("unzReadCurrentFile", ret); // throw file read errors
-			internal::api("unzReadCurrentFile", unzCloseCurrentFile(this->fp));
+			closeCurrentFile();
 		}
+	} 
+	catch (std::exception& exc) {
+		errorL("ZipFile") << "Cannot unzip file: " << exc.what() << endl;
+		if (whiny)
+			throw exc;
+		return false;
 	}
-}
-
-
-bool ZipFile::opened() const
-{
-	return this->fp != nullptr;
+	return true;
 }
 
 
@@ -199,7 +226,7 @@ void ZipFile::closeCurrentFile()
 }
 
 
-string ZipFile::currentFileName()
+std::string ZipFile::currentFileName()
 {
 	char buf[1024];
 	internal::api("unzGetCurrentFileInfo", 

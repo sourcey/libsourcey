@@ -103,14 +103,14 @@ void PackageManager::createDirectories()
 void PackageManager::queryRemotePackages()
 {	
 	Mutex::ScopedLock lock(_mutex);	
-	debugL("PackageManager", this) << "querying server: " 
+	debugL("PackageManager", this) << "Querying server: " 
 		<< _options.endpoint << _options.indexURI << endl;
 
 	if (!_tasks.empty())
 		throw std::runtime_error("Cannot load packages while tasks are active.");	
 
 	try {
-		auto conn = new http::ClientConnection(_options.endpoint + _options.indexURI);
+		auto conn = http::createConnection(_options.endpoint + _options.indexURI);
 		conn->Complete += delegate(this, &PackageManager::onPackageQueryResponse);		
 		conn->request().setMethod("GET");
 		conn->request().setKeepAlive(false);
@@ -135,33 +135,31 @@ void PackageManager::onPackageQueryResponse(void* sender, const http::Response& 
 	auto conn = reinterpret_cast<http::ClientConnection*>(sender);
 
 #ifdef _DEBUG
-	traceL("PackageManager", this) << "server response: " 
+	traceL("PackageManager", this) << "Server response: " 
 		<< response << conn->readStream<std::stringstream>()->str() << endl;
 #endif
 			
 	json::Value root;
 	json::Reader reader;
-	bool res = reader.parse(conn->readStream<std::stringstream>()->str(), root);
-	if (!res) {
+	bool ok = reader.parse(conn->readStream<std::stringstream>()->str(), root);
+	if (ok) {
+		_remotePackages.clear();
 		
+		for (auto it = root.begin(); it != root.end(); it++) {		
+			auto package = new RemotePackage(*it);
+			if (!package->valid()) {
+				errorL("PackageManager", this) << "Invalid package: " << package->id() << endl;
+				delete package;
+				continue;
+			}
+			_remotePackages.add(package->id(), package);
+		}		
+	}
+	else {
 		// TODO: Set error state
 		errorL("PackageManager", this) << "Invalid server JSON response: " << reader.getFormatedErrorMessages() << endl;
-		return;
 	}
 
-	_remotePackages.clear();
-		
-	for (auto it = root.begin(); it != root.end(); it++) {		
-		auto package = new RemotePackage(*it);
-		if (!package->valid()) {
-			errorL("PackageManager", this) << "Invalid package: " << package->id() << endl;
-			delete package;
-			continue;
-		}
-		_remotePackages.add(package->id(), package);
-	}
-	
-	// Fire the event after creating packages
 	RemotePackageResponse.emit(this, response);
 }
 
@@ -207,7 +205,7 @@ void PackageManager::loadLocalPackages(const std::string& dir)
 				localPackages().add(package->id(), package);
 			}
 			catch (std::exception& exc) {
-				errorL("PackageManager", this) << "cannot load local package manifest: " << exc.what() << endl;
+				errorL("PackageManager", this) << "Cannot load local package: " << exc.what() << endl;
 				if (package)
 					delete package;
 			}
@@ -218,7 +216,7 @@ void PackageManager::loadLocalPackages(const std::string& dir)
 
 bool PackageManager::saveLocalPackages(bool whiny)
 {
-	traceL("PackageManager", this) << "saving local packages" << endl;
+	traceL("PackageManager", this) << "Saving local packages" << endl;
 
 	bool res = true;
 	LocalPackageMap toSave = localPackages().map();
@@ -227,7 +225,7 @@ bool PackageManager::saveLocalPackages(bool whiny)
 			res = false;
 	}
 
-	traceL("PackageManager", this) << "saving local packages: OK" << endl;
+	traceL("PackageManager", this) << "Saving local packages: OK" << endl;
 
 	return res;
 }
@@ -238,7 +236,7 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 	bool res = false;
 	try {
 		std::string path(util::format("%s/%s.json", options().interDir.c_str(), package.id().c_str()));
-		debugL("PackageManager", this) << "saving local package: " << package.id() << endl;
+		debugL("PackageManager", this) << "Saving local package: " << package.id() << endl;
 		json::saveFile(path, package);
 		res = true;
 	}
@@ -303,10 +301,82 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 		<< "\n\tVerified: " << isInstalledAndVerified
 		<< endl;
 
+	// Return a specific asset version if requested
+	if (!options.version.empty()) {
+
+		debugL("PackageManager", this) << "Get requested asset: " << options.version << endl;
+
+		// Ensure there is no version lock conflict
+		if (!pair.local->versionLock().empty() && options.version != pair.local->versionLock())
+			throw std::runtime_error("Invalid version option: Package locked at version: " + pair.local->versionLock());
+		
+		// Return the requested asset or throw
+		return pair.remote->assetVersion(options.version);				
+	}
+	
+	// Return a specific SDK asset version if requested
+	if (!options.sdkVersion.empty()) {		
+				
+		debugL("PackageManager", this) << "Get requested SDK asset: " << options.sdkVersion << endl;
+		
+		// Ensure there is no SDK version lock conflict
+		if (!pair.local->sdkLockedVersion().empty() && options.sdkVersion != pair.local->sdkLockedVersion())
+			throw std::runtime_error("Invalid SDK version option: Package is locked at SDK version: " + pair.local->sdkLockedVersion());
+		
+		// Get the latest asset for SDK version or throw
+		Package::Asset sdkAsset = pair.remote->latestSDKAsset(options.sdkVersion);
+		
+		// Check if there is anything to update to update or throw
+		if (isInstalledAndVerified && //pair.local->asset().sdkVersion() == pair.local->sdkLockedVersion() &&
+			!util::compareVersion(sdkAsset.version(), pair.local->version()))
+			throw std::runtime_error("Package is up to date at SDK version: " + options.sdkVersion);
+
+		return sdkAsset;
+	}
+	
+	// Return the locked asset version if set
+	if (!pair.local->versionLock().empty()) {
+
+		debugL("PackageManager", this) << "Get locked asset: " << pair.local->versionLock() << endl;
+		
+		// Check if there is anything to update to update or throw
+		if (isInstalledAndVerified && !util::compareVersion(pair.local->versionLock(), pair.local->version()))
+			throw std::runtime_error("Package is up to date at locked version: " + pair.local->versionLock());
+		
+		// Return the requested asset or throw
+		return pair.remote->assetVersion(pair.local->versionLock());				
+	}	
+	
+	// Return the locked SDK asset version if set
+	if (!pair.local->sdkLockedVersion().empty()) {
+
+		debugL("PackageManager", this) << "Get locked SDK asset: " << pair.local->sdkLockedVersion() << endl;
+		
+		// Get the latest asset for locked SDK version or throw
+		Package::Asset sdkAsset = pair.remote->latestSDKAsset(pair.local->sdkLockedVersion());
+		
+		// Check if there is anything to update to update or throw
+		if (isInstalledAndVerified && !util::compareVersion(sdkAsset.version(), pair.local->version()))
+			throw std::runtime_error("Package is up to date at SDK version: " + pair.local->sdkLockedVersion());
+
+		return sdkAsset;		
+	}
+	
+	// If all else fails return the latest asset if newer than the current one
+	Package::Asset latestAsset = pair.remote->latestAsset();
+	if (isInstalledAndVerified && !util::compareVersion(latestAsset.version(), pair.local->version()))
+		throw std::runtime_error("Package is up to date at version: " + pair.local->version());
+	
+	return latestAsset;
+			
+	/*
 	// Return true if the locked version is already installed
 	if (!pair.local->versionLock().empty() || !options.version.empty()) {
 		std::string versionLock = options.version.empty() ? pair.local->versionLock() : options.version;
+		//assert();
 		// TODO: assert valid version?
+		
+	debugL("PackageManager", this) << "Get asset to install: 1" << endl;
 
 		// Make sure the version option matches the lock, if both were set
 		if (!options.version.empty() && !pair.local->versionLock().empty() && 
@@ -315,7 +385,7 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 
 		// If everything is in order there is nothing to install
 		if (isInstalledAndVerified && pair.local->versionLock() == pair.local->version())
-			throw std::runtime_error("Package is up to date. Locked at " + pair.local->versionLock());
+			throw std::runtime_error("Package is up to date. Locked at version: " + pair.local->versionLock());
 
 		// Return the locked asset, or throw
 		return pair.remote->assetVersion(versionLock);
@@ -324,6 +394,7 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 	// Get the best asset from the locked SDK version, if applicable
 	if (!pair.local->sdkLockedVersion().empty() || !options.sdkVersion.empty()) {		
 				
+	debugL("PackageManager", this) << "Get asset to install: 2" << endl;
 		// Make sure the version option matches the lock, if both were set
 		if (!options.sdkVersion.empty() && !pair.local->sdkLockedVersion().empty() && 
 			options.sdkVersion != pair.local->sdkLockedVersion())
@@ -340,12 +411,16 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 		return sdkAsset;
 	}
 	
+	debugL("PackageManager", this) << "Get asset to install: 3" << endl;
+
 	// If all else fails return the latest asset!
 	Package::Asset latestAsset = pair.remote->latestAsset();
 	if (isInstalledAndVerified && !util::compareVersion(latestAsset.version(), pair.local->version()))
 		throw std::runtime_error("Package is up to date.");
-
+	
+	debugL("PackageManager", this) << "Get asset to install: 4" << endl;
 	return latestAsset;
+	*/
 }
 
 

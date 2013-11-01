@@ -255,7 +255,7 @@ protected:
 
 
 template<class T>
-class SyncQueue: public RunnableQueue<T>//, public SyncContext
+class SyncQueue: public RunnableQueue<T>
 	// SyncQueue extends SyncContext to implement a synchronized FIFO
 	// queue which receives T objects from any thread and synchronizes
 	// them for safe consumption by the associated event loop.
@@ -263,9 +263,10 @@ class SyncQueue: public RunnableQueue<T>//, public SyncContext
 public:
 	SyncQueue(uv::Loop* loop, int limit = 2048, int timeout = 20) :
 		RunnableQueue<T>(limit, timeout), 
-		sync(loop)
+		// Note: The SyncQueue instance must not be destroyed
+		// while the RunnableQueue is still dispatching items.
+		_sync(loop, std::bind(&SyncQueue::run, this))
 	{
-		sync.start(std::bind(&SyncQueue::run, this));
 	}
 
 	virtual ~SyncQueue() 
@@ -279,33 +280,22 @@ public:
 		// Item pointers are now managed by the SyncQueue.		
 	{
 		RunnableQueue<T>::push(item);
-		sync.post();
-		//SyncContext::post();
+		_sync.post();
 	}
 	
 	virtual void cancel()
 	{
 		RunnableQueue<T>::cancel();
-		sync.cancel();
-
-		// Can't do this here
-		//SyncContext::close();
+		_sync.cancel();
 	}
-
-protected:	
-	SyncContext sync;
 	
-	//virtual void dispose()
-	//{
-	//	cancel();
-	//	SyncContext::dispose();
-	//}
+	SyncContext& sync()
+	{
+		return _sync;
+	}	
 
-	//virtual void run()
-	//{
-	//	// Run for x timeout
-	//	RunnableQueue<T>::runTimeout(_timeout);
-	//}
+protected:
+	SyncContext _sync;
 };
 
 
@@ -339,6 +329,11 @@ protected:
 
 	Thread _thread;
 };
+
+
+//
+// Concurrent Queue
+//
 
 
 /* TODO: Re-implement Condition class from libuv primitives
@@ -397,3 +392,18 @@ public:
 
 
 #endif // SOURCEY_Queue_H
+
+
+
+//protected:		
+	//virtual void dispose()
+	//{
+	//	cancel();
+	//	SyncContext::dispose();
+	//}
+
+	//virtual void run()
+	//{
+	//	// Run for x timeout
+	//	RunnableQueue<T>::runTimeout(_timeout);
+	//}

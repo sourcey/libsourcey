@@ -22,17 +22,8 @@
 #include "Sourcey/Logger.h"
 #include "Sourcey/DateTime.h"
 
-/*
-#include "Poco/DateTimeFormatter.h"
-#include "Poco/DateTimeParser.h"
-#include "Poco/DateTime.h"
-#include "Poco/Timespan.h"
-#include "Poco/Format.h"
-*/
-
 
 using namespace std; 
-//using namespace Poco; 
 
 
 namespace scy {

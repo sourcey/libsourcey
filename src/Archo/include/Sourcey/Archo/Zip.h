@@ -40,8 +40,10 @@ struct ZipFile
 	bool opened() const;
 	void close();
 	
-	void extractTo(const std::string& path);
+	void extract(const std::string& path);
 		// Extracts the archive contents to the given directory path.
+	
+	bool extractCurrentFile(const std::string& path, bool whiny = true);
 
 	bool goToFirstFile();
 	bool goToNextFile();

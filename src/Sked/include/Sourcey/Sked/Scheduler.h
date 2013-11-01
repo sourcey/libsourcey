@@ -69,7 +69,7 @@ public:
 	virtual const char* className() const { return "Scheduler"; }
 
 protected:
-	virtual void onIdle();	
+	virtual void run();	
 	virtual void update();
 };
 

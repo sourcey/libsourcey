@@ -19,38 +19,35 @@
 /* Version number of package */
 #cmakedefine SOURCEY_BUILD_SHARED "${BUILD_SHARED_LIBS}" 
 
-/* LibSourcey core modules */
-#cmakedefine HAVE_SOURCEY_Base
-#cmakedefine HAVE_SOURCEY_HTTP
-#cmakedefine HAVE_SOURCEY_JSON
-#cmakedefine HAVE_SOURCEY_Media
-#cmakedefine HAVE_SOURCEY_Net
-#cmakedefine HAVE_SOURCEY_Pacman
-#cmakedefine HAVE_SOURCEY_RTP
-#cmakedefine HAVE_SOURCEY_SDP
-#cmakedefine HAVE_SOURCEY_SocketIO
-#cmakedefine HAVE_SOURCEY_STUN
-#cmakedefine HAVE_SOURCEY_Symple
-#cmakedefine HAVE_SOURCEY_TURN
-#cmakedefine HAVE_SOURCEY_XML
-#cmakedefine HAVE_SOURCEY_XMPP
+/* LibSourcey core modules
+# cmakedefine HAVE_SOURCEY_Base
+# cmakedefine HAVE_SOURCEY_HTTP
+# cmakedefine HAVE_SOURCEY_JSON
+# cmakedefine HAVE_SOURCEY_Media
+# cmakedefine HAVE_SOURCEY_Net
+# cmakedefine HAVE_SOURCEY_Pacman
+# cmakedefine HAVE_SOURCEY_RTP
+# cmakedefine HAVE_SOURCEY_SDP
+# cmakedefine HAVE_SOURCEY_SocketIO
+# cmakedefine HAVE_SOURCEY_STUN
+# cmakedefine HAVE_SOURCEY_Symple
+# cmakedefine HAVE_SOURCEY_TURN
+# cmakedefine HAVE_SOURCEY_XML
+# cmakedefine HAVE_SOURCEY_XMPP
 
-#cmakedefine HAVE_SOURCEY_UV
-#cmakedefine HAVE_SOURCEY_RTSP
-#cmakedefine HAVE_SOURCEY_ICE
+# cmakedefine HAVE_SOURCEY_UV
+# cmakedefine HAVE_SOURCEY_RTSP
+# cmakedefine HAVE_SOURCEY_ICE */
 
-/* LibSourcey ext modules */
-#cmakedefine HAVE_SOURCEY_ISpot
-#cmakedefine HAVE_SOURCEY_Anionu
+/* LibSourcey ext modules
+# cmakedefine HAVE_SOURCEY_ISpot
+# cmakedefine HAVE_SOURCEY_Anionu */
 
 /* Anionu API Credentials */
 #define Anionu_API_USERNAME "${Anionu_API_USERNAME}"
 #define Anionu_API_PASSWORD "${Anionu_API_PASSWORD}"
 
-/* Poco C++ library */
-#cmakedefine HAVE_POCO
-
-/* FFMpeg video library */
+/* FFmpeg video library */
 #cmakedefine HAVE_FFMPEG
 
 /* OpenCV library */
@@ -68,7 +65,7 @@
 /* LibStrophe library */
 #cmakedefine HAVE_LIBSTROPHE
 
-/* LibStrophe library */
+/* LibUV library */
 #cmakedefine HAVE_LIBUV
 
 /* Define to 1 if you have the <inttypes.h> header file. */

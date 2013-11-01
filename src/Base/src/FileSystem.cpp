@@ -59,7 +59,8 @@ std::string filename(const std::string& path)
 std::string dirname(const std::string& path)
 {
 	size_t dirp = path.find_last_of(fs::sepPattern);
-	if (dirp == std::string::npos) return "";
+	if (dirp == std::string::npos) return "";	
+	if (path.find(".", dirp) == std::string::npos) return path;
 	return path.substr(0, dirp);
 }
 
@@ -94,31 +95,39 @@ std::string extname(const std::string& path, bool includeDot)
 
 
 bool exists(const std::string& path)
-{
+{	
+	// Normalize is needed to ensure no 
+	// trailing slash for directories or
+	// stat fails to recognize validity.
+	// TODO: Do we need transcode here?
 #ifdef WIN32
 	struct _stat s;
-	if (_stat(path.c_str(), &s) == 0)
+	return _stat(fs::normalize(path).c_str(), &s) != -1;
 #else
 	struct stat s;
-	if (stat(path.c_str(), &s) == 0)
+	return stat(fs::normalize(path).c_str(), &s) != -1;
 #endif
-		return true;
-	return false;
 }
 
 
 bool isdir(const std::string& path)
 {
+	// TODO: Do we need transcode here?
 #ifdef WIN32
 	struct _stat s;
-	_stat(path.c_str(), &s);
+	_stat(fs::normalize(path).c_str(), &s);
 #else
 	struct stat s;
-	stat(path.c_str(), &s);
+	stat(fs::normalize(path).c_str(), &s);
 #endif
-	// s.st_mode & S_IFDIR == directory
-	// s.st_mode & S_IFREG == file
-	return (s.st_mode & S_IFDIR) == S_IFDIR;
+	// S_IFDIR: directory file.
+	// S_IFCHR: character-oriented device file
+	// S_IFBLK: block-oriented device file
+	// S_IFREG: regular file
+	// S_IFLNK: symbolic link
+	// S_IFSOCK: socket
+	// S_IFIFO: FIFO or pipe
+	return (s.st_mode & S_IFDIR) != 0;
 }
 
 
@@ -204,7 +213,7 @@ void mkdirr(const std::string& path, int mode)
 #endif
 		// create current level
 		if (!fs::exists(current))
-			mkdir(current.c_str(), mode); // create or throw
+			fs::mkdir(current.c_str(), mode); // create or throw
 				
 		current += fs::separator;
 	}
@@ -229,13 +238,27 @@ void rename(const std::string& path, const std::string& target)
 }
 
 
+void trimslash(std::string& path)
+{	
+	size_t dirp = path.find_last_of(sepPattern);
+	if (dirp == path.length() - 1)
+		path.resize(dirp);
+}
+
+
 std::string normalize(const std::string& path)
 {	
-#ifdef WIN32	
-	return util::replace(path, separatorUnix, separatorWin);
+	std::string s(util::replace(path, 
+#ifdef WIN32
+		separatorUnix, separatorWin
 #else
-	return util::replace(path, separatorWin, separatorUnix);  // probably redundant...
+		separatorWin, separatorUnix
 #endif
+	));
+		
+	// Trim the trailing slash for stat compatability
+	trimslash(s);
+	return s;
 }
 
 

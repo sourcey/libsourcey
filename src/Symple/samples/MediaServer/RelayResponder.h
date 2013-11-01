@@ -103,7 +103,7 @@ protected:
 			ConnectionCreated.emit(this, client, peerAddr);
 
 			// Create an output media stream for the new connection
-			PacketStream* stream = new PacketStream(peerAddr.toString());
+			auto stream = new PacketStream(peerAddr.toString());
 			
 			// Setup the packet stream ensuring the audio capture isn't
 			// destroyed with the stream, as it may be reused while the
@@ -111,7 +111,7 @@ protected:
 			MediaServer::setupPacketStream(*stream, options, false, true);
 		
 			// Feed the packet stream directly into the connection		
-			stream->Emitter += packetDelegate(reinterpret_cast<net::Socket*>(
+			stream->emitter += packetDelegate(reinterpret_cast<net::Socket*>(
 				const_cast<net::TCPSocket*>(&socket)), &net::Socket::send);
 
 			// Start the stream
@@ -135,7 +135,7 @@ protected:
 			//this->streams.free(peerAddress.toString());
 			PacketStream* stream = streams.remove(peerAddress.toString());
 			if (stream) {	
-				stream->Emitter += packetDelegate(reinterpret_cast<net::Socket*>(
+				stream->emitter += packetDelegate(reinterpret_cast<net::Socket*>(
 					const_cast<net::TCPSocket*>(&socket)), &net::Socket::send);
 				delete stream;
 				//stream->destroy();
@@ -273,7 +273,7 @@ public:
 		//debugL("RelayedStreamingAllocation", this) << "Setup Packet Stream: OK" << std::endl;	
 
 		// Start the stream
-		stream.Emitter += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
+		stream.emitter += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
 		stream.start();		
 
 		debugL("RelayedStreamingAllocation", this) << "Play Media: OK" << std::endl;
@@ -282,7 +282,7 @@ public:
 	void stopMedia()
 	{
 		debugL("RelayedStreamingAllocation", this) << "Stop Media" << std::endl;
-		stream.Emitter -= packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
+		stream.emitter -= packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
 		stream.close();	
 		debugL("RelayedStreamingAllocation", this) << "Stop Media: OK" << std::endl;
 	}
@@ -313,11 +313,11 @@ public:
 
 	
 		/*
-		//stream.Emitter += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
+		//stream.emitter += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
 		// Start the stream
-		stream.Emitter += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
+		stream.emitter += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
 		stream.start();		
-		stream.Emitter -= packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
+		stream.emitter -= packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
 		stream.close();	
 
 		//currentPeerAddr = peerAddr; // Current peer

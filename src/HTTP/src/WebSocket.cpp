@@ -222,6 +222,9 @@ void WebSocketAdapter::onSocketConnect()
 	
 	// Send the WS handshake request
 	sendClientRequest();
+
+	// Connect signal sent after handshake complete
+	//SocketAdapter::onSocketConnect();
 }
 
 
@@ -318,6 +321,9 @@ void WebSocketAdapter::onSocketClose()
 	_response.clear();
 	framer._headerState = 0;
 	framer._frameFlags = 0;
+
+	// Emit closed event
+	SocketAdapter::onSocketClose();
 }
 
 

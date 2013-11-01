@@ -66,9 +66,6 @@ public:
 	virtual void close() = 0;
 		// Closes the underlying socket.
 
-	virtual void reset() { throw std::runtime_error("Not implemented by protocol"); };
-		// Resets the closed socket for reuse.
-
 	virtual void bind(const Address& address, unsigned flags = 0) = 0;
 		// Bind a local address to the socket.
 		// The address may be IPv4 or IPv6 (if supported).
@@ -142,6 +139,12 @@ public:
 protected:
 	virtual ~SocketBase();
 	friend struct std::default_delete<SocketBase>;	
+
+	virtual void init() = 0;
+		// Initializes the underlying socket context.
+
+	virtual void reset() {};
+		// Resets the socket context for reuse.
 	
 	std::vector<Socket*> _observers;
 	volatile bool _insideCallback;	

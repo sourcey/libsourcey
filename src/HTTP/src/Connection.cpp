@@ -26,7 +26,7 @@
 #include <assert.h>
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy { 
@@ -48,8 +48,8 @@ Connection::Connection(const net::Socket& socket) :
 	// Use an event loop Idler as the PacketStream async source
 	//auto idler = std::make_shared<Idler>(*socket.base().loop());
 	//, scy::deleter::Dispose<Idler>()
-	Incoming.setAsyncContext(std::make_shared<Idler>(socket.base().loop()));
-	Outgoing.setAsyncContext(std::make_shared<Idler>(socket.base().loop()));
+	Incoming.setRunner(std::make_shared<Idler>(socket.base().loop()));
+	Outgoing.setRunner(std::make_shared<Idler>(socket.base().loop()));
 
 	// Attach the outgoing stream to the socket
 	Outgoing.emitter += delegate(&_socket, &net::Socket::send);
@@ -65,17 +65,25 @@ Connection::~Connection()
 }
 
 
-int Connection::sendData(const char* buf, std::size_t len, int flags)
+void Connection::sendData(const char* buf, std::size_t len) //, int flags
 {
 	traceL("Connection", this) << "Send: " << len << endl;
-	return _socket.send(buf, len, flags);
+	Outgoing.write(buf, len);
+
+	// Can't send to socket as may not be connected
+	//return _socket.send(buf, len, flags);
+	//return len; // fixme
 }
 
 
-int Connection::sendData(const std::string& buf, int flags)
+void Connection::sendData(const std::string& buf) //, int flags
 {
 	traceL("Connection", this) << "Send: " << buf.length() << endl;
-	return _socket.send(buf.c_str(), buf.length(), flags);
+	Outgoing.write(buf.c_str(), buf.length());
+	
+	// Can't send to socket as may not be connected
+	//return _socket.send(buf.c_str(), buf.length(), flags);
+	//return buf.length(); // fixme
 }
 
 
@@ -84,8 +92,9 @@ int Connection::sendHeader()
 	if (!_shouldSendHeader)
 		return 0;
 	assert(outgoingHeader());
+	//assert(outgoingHeader()->has("Host"));
 	
-	ostringstream os;
+	std::ostringstream os;
 	outgoingHeader()->write(os);
 	std::string head(os.str().c_str(), os.str().length());
 
@@ -93,6 +102,8 @@ int Connection::sendHeader()
 	_shouldSendHeader = false;
 	
 	traceL("Connection", this) << "Send header: " << head << endl; // remove me
+
+	// Send to base to bypass the ConnectionAdapter
 	return _socket.base().send(head.c_str(), head.length());
 }
 
@@ -191,10 +202,12 @@ net::Socket& Connection::socket()
 }
 	
 
+/*
 Buffer& Connection::incomingBuffer()
 {
 	return static_cast<net::TCPBase&>(_socket.base()).buffer();
 }
+*/
 
 	
 bool Connection::closed() const
@@ -267,7 +280,7 @@ int ConnectionAdapter::send(const char* data, int len, int flags)
 		// Send body / chunk
 		//if (len < 300)
 		//	traceL("ConnectionAdapter", this) << "Send data: " << std::string(data, len) << endl;
-		//if (len > 300)
+		//else
 		//	traceL("ConnectionAdapter", this) << "Send long data: " << std::string(data, 300) << endl;
 		return socket->base().send(data, len, flags);
 	} 
@@ -287,19 +300,20 @@ void ConnectionAdapter::onSocketRecv(const MutableBuffer& buf, const net::Addres
 {
 	traceL("ConnectionAdapter", this) << "On socket recv: " << buf.size() << endl;	
 	
-	// Parse incoming HTTP messages
-	_parser.parse(bufferCast<const char *>(buf), buf.size());
-	
-	/*
-	try {
-	} 
-	catch (std::exception& exc) {
-		errorL("ConnectionAdapter", this) << "HTTP parser error: " << exc.what() << endl;
+	if (_parser.complete()) {
+		// Buggy HTTP servers might send late data or multiple responses,
+		// in which case the parser state might already be HPE_OK.
+		// In this case we discard the late message and log the error here,
+		// rather than complicate the app with this error handling logic.
+		// This issue noted using Webrick with Ruby 1.9.
+		warnL("ConnectionAdapter", this) << "Discarding late response: " << 
+			std::string(bufferCast<const char*>(buf), 
+				std::min<std::size_t>(150, buf.size())) << endl;
+		return;
+	}
 
-		if (socket)
-			socket->close();
-	}	
-	*/
+	// Parse incoming HTTP messages
+	_parser.parse(bufferCast<const char*>(buf), buf.size());
 }
 
 
@@ -339,7 +353,8 @@ void ConnectionAdapter::onParserError(const ParserError& err)
 	warnL("ConnectionAdapter", this) << "On parser error: " << err.message << endl;	
 
 	// HACK: Handle those peski flash policy requests here
-	if (std::string(_connection.incomingBuffer().data(), 22) == "<policy-file-request/>") {
+	auto base = dynamic_cast<net::TCPBase*>(&_connection.socket().base());
+	if (base && std::string(base->buffer().data(), 22) == "<policy-file-request/>") {
 		
 		// Send an all access policy file by default
 		// TODO: User specified flash policy
@@ -350,7 +365,7 @@ void ConnectionAdapter::onParserError(const ParserError& err)
 		policy += "<?xml version=\"1.0\"?><cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
 
 		traceL("ConnectionAdapter", this) << "Send flash policy: " << policy << endl;
-		socket->base().send(policy.c_str(), policy.length() + 1);
+		base->send(policy.c_str(), policy.length() + 1);
 	}
 
 	// Set error and close the connection on parser error
@@ -380,3 +395,16 @@ Connection& ConnectionAdapter::connection()
 
 
 } } // namespace scy::http
+
+
+	
+	/*
+	try {
+	} 
+	catch (std::exception& exc) {
+		errorL("ConnectionAdapter", this) << "HTTP parser error: " << exc.what() << endl;
+
+		if (socket)
+			socket->close();
+	}	
+	*/

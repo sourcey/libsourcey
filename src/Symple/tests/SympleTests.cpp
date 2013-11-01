@@ -24,7 +24,7 @@ namespace scy {
 namespace smpl {
 
 	
-#define SERVER_HOST "localhost"
+#define SERVER_HOST "anionu.com" //"localhost" 
 #define USE_SSL     1
 #if USE_SSL
 #define SERVER_PORT 443
@@ -69,8 +69,10 @@ public:
 		client.StateChange += delegate(this, &Tests::onClientStateChange);
 		client.UpdatePresenceData += delegate(this, &Tests::onUpdatePresenceData);
 		client.connect();
-
-		app.run();
+		
+		//app.run();
+		app.waitForShutdown();
+		debugL() << "Event loop ended" << endl;
 		
 		// TODO: Obtain authentication token
 		// TODO: Transaction test
@@ -79,7 +81,7 @@ public:
 		// TODO: Benchmarks
 		
 #if USE_SSL
-	SSLManager::instance().shutdown();
+		SSLManager::instance().shutdown();
 #endif
 		app.finalize();
 	}
@@ -97,7 +99,7 @@ public:
 			break;
 		case sockio::ClientState::Online: 
 			break;
-		case sockio::ClientState::Disconnected: 
+		case sockio::ClientState::Error:
 			assert(0);
 			break;
 		}

@@ -38,11 +38,6 @@ namespace scy {
 namespace av {
 
 
-// TODO: Implement mutex properly via ffmpeg API.
-// Not a priority for now since PacketStream states are synchronized. 
-//Mutex AVEncoder::_mutex;
-
-
 AVEncoder::AVEncoder(const RecordingOptions& options) :
 	_options(options),	
 	_formatCtx(nullptr),
@@ -51,7 +46,8 @@ AVEncoder::AVEncoder(const RecordingOptions& options) :
 	_audioFifo(nullptr),
 	_audioBuffer(nullptr),
 	_ioBuffer(nullptr),
-	_ioBufferSize(MAX_VIDEO_PACKET_SIZE)
+	_ioBufferSize(MAX_VIDEO_PACKET_SIZE),
+	_videoPtsRemainder(0.0)
 {
 	traceL("AVEncoder", this) << "Create" << endl;
 	initializeFFmpeg();
@@ -65,7 +61,8 @@ AVEncoder::AVEncoder() :
 	_audioFifo(nullptr),
 	_audioBuffer(nullptr),
 	_ioBuffer(nullptr),
-	_ioBufferSize(MAX_VIDEO_PACKET_SIZE)
+	_ioBufferSize(MAX_VIDEO_PACKET_SIZE),
+	_videoPtsRemainder(0.0)
 {
 	traceL("AVEncoder", this) << "Create" << endl;
 	initializeFFmpeg();
@@ -110,108 +107,104 @@ void AVEncoder::initialize()
 		<< endl;
 
 	try {
-		{
-			// Lock mutex during initialization
-			//Mutex::ScopedLock lock(_mutex);
+		// Lock mutex during initialization
+		//Mutex::ScopedLock lock(_mutex);
 
-			if (!_options.oformat.video.enabled && 
-				!_options.oformat.audio.enabled)
-				throw std::runtime_error("Either video or audio parameters must be specified.");
+		if (!_options.oformat.video.enabled && 
+			!_options.oformat.audio.enabled)
+			throw std::runtime_error("Either video or audio parameters must be specified.");
 
-			if (_options.oformat.id.empty())
-				throw std::runtime_error("An output container format must be specified.");	
+		if (_options.oformat.id.empty())
+			throw std::runtime_error("An output container format must be specified.");	
 
-			// TODO: Only need to call this once, but it does not leak memory.
-			// Also consider using av_lockmgr_register to protect avcodec_open/avcodec_close
-			// See http://src.chromium.org/svn/branches/1229_12/src/media/filters/ffmpeg_glue.cc
-			// http://cloudobserver.googlecode.com/svn/trunk/CloudClient/src/filters/multiplexer/multiplexer.cpp
-			av_register_all(); 			
+		// TODO: Only need to call this once, but it does not leak memory.
+		// Also consider using av_lockmgr_register to protect avcodec_open/avcodec_close
+		// See http://src.chromium.org/svn/branches/1229_12/src/media/filters/ffmpeg_glue.cc
+		// http://cloudobserver.googlecode.com/svn/trunk/CloudClient/src/filters/multiplexer/multiplexer.cpp
+		av_register_all(); 			
 
-			// Allocate the output media context
-			assert(!_formatCtx);
-			_formatCtx = avformat_alloc_context();
-			if (!_formatCtx) 
-				throw std::runtime_error("Cannot allocate format context.");
+		// Allocate the output media context
+		assert(!_formatCtx);
+		_formatCtx = avformat_alloc_context();
+		if (!_formatCtx) 
+			throw std::runtime_error("Cannot allocate format context.");
 
-			if (!_options.ofile.empty())
-				snprintf(_formatCtx->filename, sizeof(_formatCtx->filename), "%s", _options.ofile.c_str());
+		if (!_options.ofile.empty())
+			snprintf(_formatCtx->filename, sizeof(_formatCtx->filename), "%s", _options.ofile.c_str());
 		
-			// Set the container codec
-			std::string ofmt = _options.ofile.empty() ? ("." + string(_options.oformat.id)) : _options.ofile;		
-			_formatCtx->oformat = av_guess_format(_options.oformat.id.c_str(), ofmt.c_str(), nullptr);	
-			if (!_formatCtx->oformat)
-				throw std::runtime_error("Cannot find suitable encoding format for " + _options.oformat.name);			
-		//}
+		// Set the container codec
+		std::string ofmt = _options.ofile.empty() ? ("." + string(_options.oformat.id)) : _options.ofile;		
+		_formatCtx->oformat = av_guess_format(_options.oformat.id.c_str(), ofmt.c_str(), nullptr);	
+		if (!_formatCtx->oformat)
+			throw std::runtime_error("Cannot find suitable encoding format for " + _options.oformat.name);			
 
-		// Initialize encoder contexts
+	// Initialize encoder contexts
+	if (_options.oformat.video.enabled)
 		createVideo();
+	if (_options.oformat.audio.enabled)
 		createAudio();		
-		//{
-			// Lock our mutex during initialization
-			////Mutex::ScopedLock lock(_mutex);
 
-			if (_options.ofile.empty()) {
+		if (_options.ofile.empty()) {
 
-				// Operating in streaming mode. Generated packets can be
-				// obtained by connecting to the outgoing PacketSignal.
-				// Setup the output IO context for our output stream.
-				_ioBuffer = new unsigned char[_ioBufferSize];
-				_ioCtx = avio_alloc_context(_ioBuffer, _ioBufferSize, 0, this, 0, dispatchOutputPacket, 0);
-				//_ioCtx->is_streamed = 1;
-				_formatCtx->pb = _ioCtx;
+			// Operating in streaming mode. Generated packets can be
+			// obtained by connecting to the outgoing PacketSignal.
+			// Setup the output IO context for our output stream.
+			_ioBuffer = new unsigned char[_ioBufferSize];
+			_ioCtx = avio_alloc_context(_ioBuffer, _ioBufferSize, 0, this, 0, dispatchOutputPacket, 0);
+			//_ioCtx->is_streamed = 1;
+			_formatCtx->pb = _ioCtx;
+		}
+		else {
+
+			// Operating in file mode.  
+			// Open the output file...
+			if (!(_formatCtx->oformat->flags & AVFMT_NOFILE)) {
+				//if (url_fopen(&_formatCtx->pb, _options.ofile.c_str(), URL_WRONLY) < 0) {
+				if (avio_open(&_formatCtx->pb, _options.ofile.c_str(), AVIO_FLAG_WRITE) < 0) {
+					throw std::runtime_error("AVWriter: Unable to open the output file");
+				}
+			}
+		}
+
+		// Write the stream header (if any)
+		// TODO: After Ready state
+		avformat_write_header(_formatCtx, nullptr);
+
+		// Send the format information to sdout
+		av_dump_format(_formatCtx, 0, _options.ofile.c_str(), 1);
+				
+		// Get realtime presentation timestamp
+		_formatCtx->start_time_realtime = av_gettime();
+
+		/*		
+		// Open the output file
+		//_file.open("test.flv", ios::out | ios::binary);	
+			
+		_videoPts = 0;
+		_audioPts = 0;
+		Int64 delta;
+		if (_realtime) {
+			if (!_formatCtx->start_time_realtime) {
+				_formatCtx->start_time_realtime = av_gettime();
+				_videoPts = 0;
 			}
 			else {
-
-				// Operating in file mode.  
-				// Open the output file...
-				if (!(_formatCtx->oformat->flags & AVFMT_NOFILE)) {
-					//if (url_fopen(&_formatCtx->pb, _options.ofile.c_str(), URL_WRONLY) < 0) {
-					if (avio_open(&_formatCtx->pb, _options.ofile.c_str(), AVIO_FLAG_WRITE) < 0) {
-						throw std::runtime_error("AVWriter: Unable to open the output file");
-					}
-				}
+				delta = av_gettime() - _formatCtx->start_time_realtime;
+				_videoPts = delta * (float) _video->stream->time_base.den / (float) _video->stream->time_base.num / (float) 1000000;
 			}
-
-			// Write the stream header (if any)
-			// TODO: After Ready state
-			avformat_write_header(_formatCtx, nullptr);
-
-			// Send the format information to sdout
-			av_dump_format(_formatCtx, 0, _options.ofile.c_str(), 1);
-				
-			// Get realtime presentation timestamp
-			//_formatCtx->start_time_realtime = av_gettime();
-
-			/*		
-			// Open the output file
-			//_file.open("test.flv", ios::out | ios::binary);	
-			
-			_videoPts = 0;
-			_audioPts = 0;
-			Int64 delta;
-			if (_realtime) {
-				if (!_formatCtx->start_time_realtime) {
-					_formatCtx->start_time_realtime = av_gettime();
-					_videoPts = 0;
-				}
-				else {
-					delta = av_gettime() - _formatCtx->start_time_realtime;
-					_videoPts = delta * (float) _video->stream->time_base.den / (float) _video->stream->time_base.num / (float) 1000000;
-				}
-			}
-
-			stream->time_base.den
-			// Setup the PTS calculator for variable framerate inputs
-			if (_video) {
-				_videoPtsCalc = new LivePTSCalculator;
-				_videoPtsCalc->timeBase = _video->ctx->time_base;
-			}
-			if (_audio) {
-				_audioPtsCalc = new LivePTSCalculator;
-				_audioPtsCalc->timeBase = _audio->ctx->time_base;
-			}
-			*/
 		}
+
+		stream->time_base.den
+		// Setup the PTS calculator for variable framerate inputs
+		if (_video) {
+			_videoPtsCalc = new LivePTSCalculator;
+			_videoPtsCalc->timeBase = _video->ctx->time_base;
+		}
+		if (_audio) {
+			_audioPtsCalc = new LivePTSCalculator;
+			_audioPtsCalc->timeBase = _audio->ctx->time_base;
+		}
+		*/
 		
 		setState(this, EncoderState::Ready);
 	} 
@@ -229,12 +222,8 @@ void AVEncoder::initialize()
 void AVEncoder::uninitialize()
 {
 	traceL("AVEncoder", this) << "Uninitialize" << endl;
-	
- 	// Lock our mutex during closure
-	// TODO: No good, av_write_trailer duispatched packet
-	//Mutex::ScopedLock lock(_mutex);	
 
- 	// Write the trailer 
+ 	// Write the trailer and dispatch the tail packet if any
 	if (_formatCtx &&
 		_formatCtx->pb) 
 		av_write_trailer(_formatCtx);
@@ -252,54 +241,41 @@ void AVEncoder::uninitialize()
 void AVEncoder::cleanup()
 {
 	traceL("AVEncoder", this) << "Cleanup" << endl;
- 	// Lock our mutex during closure
-	////Mutex::ScopedLock lock(_mutex);	
-
-	//{
- 		// Write the trailer
-		//if (_formatCtx &&
-		//	_formatCtx->pb) 
-		//	av_write_trailer(_formatCtx);
-	//}
 
     // Delete stream encoders
 	freeVideo();
 	freeAudio();
-	//{
- 		// Lock our mutex during closure
-		//Mutex::ScopedLock lock(_mutex);	
 
-		// Close the format
-		if (_formatCtx) {
+	// Close the format
+	if (_formatCtx) {
 
-	 		// Free all remaining streams
-			for (unsigned int i = 0; i < _formatCtx->nb_streams; i++) {
-				av_freep(&_formatCtx->streams[i]->codec);
-				av_freep(&_formatCtx->streams[i]);
-			}
+	 	// Free all remaining streams
+		for (unsigned int i = 0; i < _formatCtx->nb_streams; i++) {
+			av_freep(&_formatCtx->streams[i]->codec);
+			av_freep(&_formatCtx->streams[i]);
+		}
 
-	 		// Close the output file (if any)
-			if (!_options.ofile.empty() &&
-				_formatCtx->pb &&  
-				_formatCtx->oformat && !(_formatCtx->oformat->flags & AVFMT_NOFILE))
-				avio_close(_formatCtx->pb);
-				//avio_url_fclose(_formatCtx->pb);
+	 	// Close the output file (if any)
+		if (!_options.ofile.empty() &&
+			_formatCtx->pb &&  
+			_formatCtx->oformat && !(_formatCtx->oformat->flags & AVFMT_NOFILE))
+			avio_close(_formatCtx->pb);
+			//avio_url_fclose(_formatCtx->pb);
 		
-	 		// Free the format context
-			av_free(_formatCtx);
-			_formatCtx = nullptr;
-		}
+	 	// Free the format context
+		av_free(_formatCtx);
+		_formatCtx = nullptr;
+	}
 	
-		//if (_videoPtsCalc) {
-		//	delete _videoPtsCalc;
-		//	_videoPtsCalc = nullptr;
-		//}
-	
-		if (_ioBuffer) {
-			delete _ioBuffer;
-			_ioBuffer = nullptr;
-		}
+	//if (_videoPtsCalc) {
+	//	delete _videoPtsCalc;
+	//	_videoPtsCalc = nullptr;
 	//}
+	
+	if (_ioBuffer) {
+		delete _ioBuffer;
+		_ioBuffer = nullptr;
+	}
 
 	traceL("AVEncoder", this) << "Cleanup: OK" << endl;
 }
@@ -335,16 +311,13 @@ void AVEncoder::createVideo()
 {
 	//Mutex::ScopedLock lock(_mutex);	
 	assert(!_video);
-
-	// Initialize the video encoder (if required)
-	if (_options.oformat.video.enabled) {
-		assert(_formatCtx->oformat->video_codec != CODEC_ID_NONE);
-		_video = new VideoEncoderContext(_formatCtx);
-		_video->iparams = _options.iformat.video;
-		_video->oparams = _options.oformat.video;
-		_video->create();
-		_video->open();
-	}
+	assert(_options.oformat.video.enabled);
+	assert(_formatCtx->oformat->video_codec != CODEC_ID_NONE);
+	_video = new VideoEncoderContext(_formatCtx);
+	_video->iparams = _options.iformat.video;
+	_video->oparams = _options.oformat.video;
+	_video->create();
+	_video->open();
 }
 
 
@@ -419,35 +392,34 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 		assert(opacket.stream_index == video->stream->index);
 		opacket.dts = AV_NOPTS_VALUE; 
 		
-		/* Calculate our own PTS from stream time
-		Int64 delta;
-		delta = av_gettime() - _formatCtx->start_time_realtime;
-		double framePTS = delta * (double) _video->stream->time_base.den / (double) _video->stream->time_base.num / (double) 1000000;
-		double ptsWhole;
-		_videoPtsRemainder += modf(framePTS, &ptsWhole);
-		opacket.pts = ptsWhole;
-		opacket.dts = AV_NOPTS_VALUE; 
-		if (static_cast<int>(_videoPtsRemainder) > 1) {
-			_videoPtsRemainder--;
-			opacket.pts++;
-		}
-		*/
+		// Calculate our own PTS from stream time
+		// TODO: Setting PTS with audio seems to throw mp4
+		// encoding out of sync; need to test more...
+		if (!options->oformat.audio.enabled) {
+			Int64 delta;
+			delta = av_gettime() - _formatCtx->start_time_realtime;
+			double framePTS = delta * (double) _video->stream->time_base.den / (double) _video->stream->time_base.num / (double) 1000000;
+			double ptsWhole;
+			_videoPtsRemainder += modf(framePTS, &ptsWhole); // fixme
+			opacket.pts = ptsWhole;
+			opacket.dts = AV_NOPTS_VALUE; 
+			if (static_cast<int>(_videoPtsRemainder) > 1) {
+				_videoPtsRemainder--;
+				opacket.pts++;
+			}
+		}		
 		
 		/*
 		traceL("AVEncoder", this) << "Writing video:" 
 			<< "\n\tPTS: " << opacket.pts
 			<< "\n\tDTS: " << opacket.dts
 			<< "\n\tFPS: " << video->fps.fps
-			<< "\n\tTime: " << time
+			//<< "\n\tTime: " << time
 			<< "\n\tDuration: " << opacket.duration
 			<< endl;
 			*/
 		
 		// Write the encoded frame to the output file / stream.
-		//{
-		//	//Mutex::ScopedLock lock(_mutex);
-		//	assert(isActive());
-		//}
 		assert(isActive());
 		if (av_interleaved_write_frame(formatCtx, &opacket) < 0) {
 			warnL("AVEncoder", this) << "Cannot write video frame" << endl;
@@ -466,29 +438,29 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 
 void AVEncoder::createAudio()
 {
+	traceL("AVEncoder", this) << "Create Audio" << endl;
+
 	//Mutex::ScopedLock lock(_mutex);	
 	assert(!_audio);
+	assert(_options.oformat.audio.enabled);
+	assert(_formatCtx->oformat->audio_codec != CODEC_ID_NONE);
 
-	// Initialize the audio encoder (if required)
-	if (_options.oformat.audio.enabled) { //&& _formatCtx->oformat->audio_codec != CODEC_ID_NONE		
-		traceL("AVEncoder", this) << "Create Audio" << endl;
-		_audio = new AudioEncoderContext(_formatCtx);
-		_audio->iparams = _options.iformat.audio;
-		_audio->oparams = _options.oformat.audio;
-		_audio->create();
-		_audio->open();
+	_audio = new AudioEncoderContext(_formatCtx);
+	_audio->iparams = _options.iformat.audio;
+	_audio->oparams = _options.oformat.audio;
+	_audio->create();
+	_audio->open();
 		
-		// The encoder may require a minimum number of raw audio
-		// samples for each encoding but we can't guarantee we'll
-		// get this minimum each time an audio frame is decoded
-		// from the in file, so we use a FIFO to store up incoming
-		// raw samples until we have enough to call the codec.
-		_audioFifo = av_fifo_alloc(_audio->outputFrameSize * 2);
+	// The encoder may require a minimum number of raw audio
+	// samples for each encoding but we can't guarantee we'll
+	// get this minimum each time an audio frame is decoded
+	// from the in file, so we use a FIFO to store up incoming
+	// raw samples until we have enough to call the codec.
+	_audioFifo = av_fifo_alloc(_audio->outputFrameSize * 2);
 
-		// Allocate a buffer to read OUT of the FIFO into. 
-		// The FIFO maintains its own buffer internally.
-		_audioBuffer = (UInt8*)av_malloc(_audio->outputFrameSize);
-	}
+	// Allocate a buffer to read OUT of the FIFO into. 
+	// The FIFO maintains its own buffer internally.
+	_audioBuffer = (UInt8*)av_malloc(_audio->outputFrameSize);
 }
 
 

@@ -91,7 +91,7 @@ protected:
 	//Int64 _videoPts;
 	//Int64 _lastVideoPTS;
 	//UInt64 _lastVideoTime;
-	//double _videoPtsRemainder;
+	double _videoPtsRemainder;
 	//FPSCounter		_videoFPS;
 	//clock_t			_videoTime;
 

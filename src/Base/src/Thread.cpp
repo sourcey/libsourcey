@@ -30,28 +30,24 @@ using namespace std;
 namespace scy {
 
 
-Thread::Thread() :
-	_id(0)
+Thread::Thread()
 {
 }
 
 
-Thread::Thread(async::Runnable& target) :
-	_id(0)
+Thread::Thread(async::Runnable& target)
 {
 	start(target);
 }
 
 
-Thread::Thread(std::function<void()> target) :
-	_id(0)
+Thread::Thread(std::function<void()> target)
 {
 	start(target);
 }
 
 
-Thread::Thread(std::function<void(void*)> target, void* arg) :
-	_id(0)
+Thread::Thread(std::function<void(void*)> target, void* arg)
 {
 	start(target, arg);
 }
@@ -65,9 +61,13 @@ Thread::~Thread()
 void Thread::startAsync()
 {
 	int r = uv_thread_create(&_handle, [](void* arg) {
-		auto req = *reinterpret_cast<const Runner::Context::ptr*>(arg);
-		runAsync(req);
-	}, &pContext);
+		auto& ptr = *reinterpret_cast<Runner::Context::ptr*>(arg);
+		do {
+			runAsync(ptr.get());
+			scy::sleep(1); // TODO: uv_thread_yield when available
+		} while (ptr->repeating && !ptr->cancelled());
+		delete &ptr;
+	}, new Runner::Context::ptr(pContext));
 	if (r < 0) throw runtime_error("System error: Cannot initialize thread");	
 }
 
@@ -79,23 +79,22 @@ void Thread::join()
 }
 
 
-unsigned long Thread::id() const
-{
-	//Mutex::ScopedLock lock(_mutex);
-	return _id;
-}
-
-
 unsigned long Thread::currentID()
 {
 	return uv_thread_self();
 }
 
 	
-bool Thread::synced() const
+bool Thread::async() const
 {
-	return false;
+	return true;
 }
+
+
+} // namespace scy
+
+
+
 
 
 //void Thread::reset()
@@ -104,12 +103,6 @@ bool Thread::synced() const
 	//_running = false;
 	//_started = false;
 //}
-
-
-} // namespace scy
-
-
-
 
 /*
 async::Runner::async::Runner(std::function<void()> target) :

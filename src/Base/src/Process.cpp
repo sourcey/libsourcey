@@ -29,7 +29,7 @@ namespace scy {
 Process::Process(uv::Loop* loop) :
 	uv::Handle(loop, new uv_process_t)
 {	
-	handle()->data = this;
+	ptr()->data = this;
 	options.env = nullptr;
 	options.cwd = nullptr;
 	options.flags = 0;
@@ -64,7 +64,7 @@ void Process::spawn()
 		options.args = uvargs;
 	}
 
-	int r = uv_spawn(loop(), handle<uv_process_t>(), &options);
+	int r = uv_spawn(loop(), ptr<uv_process_t>(), &options);
 	if (r < 0) setAndThrowError("Cannot spawn process", r);
 }
 
@@ -78,7 +78,7 @@ bool Process::kill(int signum)
 
 int Process::pid() const
 {	
-	return handle<uv_process_t>()->pid;
+	return ptr<uv_process_t>()->pid;
 }
 
 

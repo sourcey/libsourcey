@@ -27,9 +27,6 @@
 #include "Sourcey/Net/Stream.h"
 #include "Sourcey/Net/Address.h"
 #include "Sourcey/Net/Types.h"
-#if POSIX
-#include <sys/socket.h>
-#endif
 
 
 namespace scy {
@@ -111,16 +108,6 @@ public:
 
 	net::TransportType transport() const;
 		// Returns the TCP transport protocol.
-
-	//bool connected() const;
-		// Returns true if the underlying socket is connected.
-	
-	//bool initialized() const;
-		// Returns true if the underlying socket is initialized.
-
-	//SOCKET sockfd() const;
-		// Returns the socket descriptor for the 
-		// underlying native socket.
 	
 #ifdef _WIN32
 	void setSimultaneousAccepts(bool enable);
@@ -142,8 +129,6 @@ protected:
 
 protected:
 	std::unique_ptr<uv_connect_t> _connectReq;
-	//uv_connect_t _connectReq;
-	//std::string _debugOutput;
 };
 
 
@@ -151,3 +136,15 @@ protected:
 
 
 #endif // SOURCEY_Net_TCPSocket_H
+
+
+
+	//bool connected() const;
+		// Returns true if the underlying socket is connected.
+	
+	//bool initialized() const;
+		// Returns true if the underlying socket is initialized.
+
+	//SOCKET sockfd() const;
+		// Returns the socket descriptor for the 
+		// underlying native socket.

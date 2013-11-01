@@ -68,12 +68,10 @@ public:
 
 	
 class Runner
-	/// This class is a virtual interface for implementing 
+	/// Runner is a virtual interface for implementing 
 	/// asynchronous objects such as threads and futures.
 {
 public:	
-	typedef std::shared_ptr<Runner> ptr;
-
 	Runner();
 	virtual ~Runner();
 	
@@ -81,7 +79,7 @@ public:
 	virtual void start(std::function<void()> target);	
 	virtual void start(std::function<void(void*)> target, void* arg);
 		// Starts the thread with the given target.
-		// TODO: Use veradic templates when we have better windows support (vs2013).
+		// TODO: veradic templates when win support is better (vs2013)
 	
 	bool started() const;
 		// Returns true if the async context has been started.
@@ -97,35 +95,47 @@ public:
 		// It is up to the implementation to return at the
 		// earliest possible time.
 	
-	virtual bool synced() const = 0;
-		// Returns true if the implementation belongs to an event loop.
-		
-protected:
-	Runner(const Runner&);
-	Runner& operator = (const Runner&);
+	bool repeating() const;
+		// Returns true if the Runner is operating in repeating mode.
 	
+	unsigned long tid() const;
+		// Return the native thread ID.
+
+	void setRepeating(bool flag);	
+		// This setting means the implementation should call the
+		// target function repeatedly until cancelled. The importance
+		// of this method to normalize the functionality of threadded 
+		// and event loop driven Runner models.
+	
+	virtual bool async() const = 0;
+		// Returns true if the implementation is thread based, or false
+		// if it belongs to an event loop.
+
+	typedef std::shared_ptr<Runner> ptr;
+		
+protected:	
 	struct Context
 		// The context which we send to the thread context.
 		// This allows us to garecefully handle late callbacks
 		// and avoid the need for deferred destruction of Runner objects.
-		// Implementation note: Only POD and atomic members can be safely
-		// accessed from outside the Runner context.
 	{
 		typedef std::shared_ptr<Context> ptr;
+
+		// Thread-safe POD members
+		// May be accessed at any time
+		unsigned long tid;
+		bool started;
+		bool running;
+		bool repeating;
+		std::atomic<bool> exit;	
 
 		// Non thread-safe members
 		// Should not be accessed once the Runner is started
 		std::function<void()> target;
 		std::function<void(void*)> target1;	
 		void* arg;
-		void* opaque; // unmanaged
+		void* handle; // private implementation data
 
-		// Thread-safe POD members
-		// May be accessed at any time
-		bool started;
-		bool running;
-		std::atomic<bool> exit;
-	
 		void cancel();
 			// Cancels the async context.
 	
@@ -138,24 +148,35 @@ protected:
 			// The implementation is responsible for resetting
 			// the context if it is to be reused.
 		{
+			tid = 0;
 			arg = nullptr;
 			target = nullptr;
 			target1 = nullptr;
 			started = false;
 			running = false;
-			exit = false;
+			exit = false;			
 		}
 
-		Context() { reset(); }
+		Context() { 
+			reset();
+
+			// Non-reseting members
+			repeating = false;
+			handle = nullptr;
+		}
 	};
 	
 	Context::ptr pContext;
+		// Shared pointer to the internal Runner::Context. 	
 
 	virtual void startAsync() = 0;
 		// Start the context from the control thread.
 
-	static void runAsync(Context::ptr context);
+	static void runAsync(Context* context);
 		// Run the context from the async thread.
+	
+	Runner(const Runner&);
+	Runner& operator = (const Runner&);
 };
 
 

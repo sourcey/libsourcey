@@ -146,6 +146,7 @@ protected:
 	int	_heartBeatTimeout;
 	int	_connectionClosingTimeout;
 	bool _wasOnline;
+	bool _closing;
 	Timer _timer;
 };
 

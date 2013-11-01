@@ -113,7 +113,8 @@ void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 	uv_close((uv_handle_t*)req, [](uv_handle_t* handle) {
 		delete handle;
 	});
-	cmd->callback(cmd->opaque);
+	if (cmd->callback)
+		cmd->callback(cmd->opaque);
 	delete cmd;
 }
 		
@@ -128,23 +129,33 @@ void Application::onPrintHandle(uv_handle_t* handle, void* /* arg */)
 // Command-line option parser
 //
 	
-OptionParser::OptionParser(int argc, char* argv[], char delim)
+OptionParser::OptionParser(int argc, char* argv[], char* delim)
 {
-	char* lastkey = 0;		
+	char* lastkey = 0;	
+	int dlen = strlen(delim);	
 	for (int i = 0; i < argc; i++) {
+
+		// Get the application exe path
 		if (i == 0) {
 			exepath.assign(argv[i]);
 			continue;
 		}
-		if (argv[i][0] == delim) {
-			args[&argv[i][1]] = ""; // create empty entry
-			lastkey = argv[i];
+
+		// Get option keys
+		if (strncmp(argv[i], delim, dlen) == 0) {
+			lastkey = (&argv[i][dlen]);
+			args[lastkey] = "";
 		}
+
+		// Get value for current key
 		else if (lastkey) {
+			args[lastkey] = argv[i];
 			lastkey = 0;
-			args[argv[i - 1]] = argv[i];
 		}
-		else assert(0);
+
+		else {
+			traceL("OptionParser") << "Unrecognized option: " << argv[i] << std::endl;	
+		}
 	}
 }
 

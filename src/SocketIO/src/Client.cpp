@@ -91,7 +91,6 @@ void Client::close()
 	log("trace") << "Closing" << endl;
 	reset();
 	onClose();
-
 	log("trace") << "Closing: OK" << endl;	
 }
 
@@ -187,6 +186,7 @@ void Client::onHandshakeResponse(void* sender, const http::Response& response)
 	_socket.request().setURI(url.str());
 	*/
 	_socket.request().setURI("/socket.io/1/websocket/" + _sessionID);
+	_socket.request().setHost(_host, _port);
 	_socket.connect(_host, _port);
 }
 	
@@ -285,13 +285,18 @@ void Client::reset()
 	_connectionClosingTimeout = 0;
 	_protocols.clear();
 	_error.reset();
-	_wasOnline = false;
+		
+	//_wasOnline = false; // Reset via onClose()
 }
 
 
 void Client::setError(const Error& error)
 {
 	log("error") << "Set error: " << error.message << std::endl;
+	
+	// Set the wasOnline flag if previously online before error
+	if (stateEquals(ClientState::Online))
+		_wasOnline = true;
 
 	_error = error;	
 	setState(this, ClientState::Error, error.message);
@@ -319,7 +324,6 @@ void Client::onConnect()
 void Client::onOnline()
 {
 	log("trace") << "On online" << endl;	
-	_wasOnline = true;
 	setState(this, ClientState::Online);
 }
 
@@ -330,6 +334,7 @@ void Client::onClose()
 
 	// Back to initial state
 	setState(this, ClientState::None);
+	_wasOnline = false;
 }
 
 
@@ -355,7 +360,11 @@ void Client::onSocketClose(void*)
 {
 	log("trace") << "On socket close" << endl;
 
-	// Nothing to do since the error was set via onSocketError
+	// Nothing to do since the error is set via onSocketError
+
+	// If no socket error was set we have an EOF
+	//if (!error().any())
+	//	setError("Disconnected from the server");
 }
 
 

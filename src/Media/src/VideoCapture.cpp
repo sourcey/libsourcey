@@ -83,16 +83,23 @@ void VideoCapture::stop()
 
 void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 {
-	//traceL("VideoCapture", this) << "Get frame: " << width << "x" << height << std::endl;
 	Mutex::ScopedLock lock(_mutex);	
+	traceL("VideoCapture", this) << "Get frame: " << width << "x" << height << std::endl;
 	
 	// Don't actually grab a frame here, just copy the current frame.
 	cv::Mat lastFrame = _base->lastFrame();
+	traceL("VideoCapture", this) << "Get frame 1" << std::endl;
 	if ((width && lastFrame.cols != width) || 
-		(height && lastFrame.rows != height))
+		(height && lastFrame.rows != height)) {
+		traceL("VideoCapture", this) << "Get frame 2" << std::endl;
 		cv::resize(lastFrame, frame, cv::Size(width, height));
-	else
+		traceL("VideoCapture", this) << "Get frame 3" << std::endl;
+	}
+	else {
+		traceL("VideoCapture", this) << "Get frame 4" << std::endl;
 		lastFrame.copyTo(frame);
+		traceL("VideoCapture", this) << "Get frame 5" << std::endl;
+	}
 }
 
 		
@@ -178,7 +185,7 @@ VideoCaptureBase::VideoCaptureBase(const std::string& filename) :
 VideoCaptureBase::~VideoCaptureBase() 
 {	
 	traceL("VideoCaptureBase", this) << "Destroy" << std::endl;
-	assert(Thread::currentID() != _thread.id());
+	assert(Thread::currentID() != _thread.tid());
 
 	if (_thread.running()) {
 		_stopping = true;
@@ -224,7 +231,7 @@ void VideoCaptureBase::start()
 void VideoCaptureBase::stop() 
 {
 	traceL("VideoCaptureBase", this) << "Stopping" << std::endl;
-	assert(Thread::currentID() != _thread.id());
+	assert(Thread::currentID() != _thread.tid());
 	if (_thread.running()) {
 		traceL("VideoCaptureBase", this) << "Terminating thread" << std::endl;		
 		_stopping = true;
@@ -237,6 +244,7 @@ bool VideoCaptureBase::open()
 {
 	traceL("VideoCaptureBase", this) << "Open" << std::endl;
 	Mutex::ScopedLock lock(_mutex);
+	assert(Thread::currentID() != _thread.tid());
 
 	_opened = _capture.isOpened() ? true : 
 		_filename.empty() ? 
@@ -319,6 +327,8 @@ void VideoCaptureBase::run()
 
 cv::Mat VideoCaptureBase::grab()
 {	
+	assert(Thread::currentID() == _thread.tid());
+
 	Mutex::ScopedLock lock(_mutex);	
 
 	// Grab a frame from the capture source
@@ -360,6 +370,10 @@ cv::Mat VideoCaptureBase::lastFrame() const
 
 	if (!_frame.cols && !_frame.rows)
 		throw std::runtime_error("Cannot grab video frame: Device is closed: " + name());
+
+	assert(_capturing);
+	if (_frame.size().area() <= 0)
+		throw std::runtime_error("Cannot grab video frame: Invalid source frame: " + name());
 
 	return _frame; // no data is copied
 }

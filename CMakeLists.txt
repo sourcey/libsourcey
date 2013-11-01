@@ -92,7 +92,7 @@ set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
 set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_INSTALL_DIR}/deps")
-set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/LibSourcey/deps")
+set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/libscy/deps")
 
 # Append some common search paths for find_library
 # to find libraries from these locations first
@@ -102,17 +102,17 @@ if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     D:/dev/lib/wxWidgets-2.9.4/lib/vc_lib
     D:/dev/lib/opencv-2.4.6.0/build/install/lib
-    #D:/dev/lib/OpenSSL-Win32/lib/VC/static
-    #D:/dev/lib/poco-1.4.6p1-all/lib 
-    #D:/dev/lib/poco-1.5.1/lib 
-    D:/dev/lib/ffmpeg-1.0.1-gpl/lib
-    #${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib
-    #${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/vc10
+    ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib
     ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/lib/vc10
-    #${LibSourcey_SOURCE_DIR}/anionu-abi/poco/lib/vc10
+    #${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/vc10
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
     )
     
+    #${LibSourcey_SOURCE_DIR}/anionu-abi/poco/lib/vc10
+    #D:/dev/lib/ffmpeg-1.0.1-gpl/lib
+    #D:/dev/lib/OpenSSL-Win32/lib/VC/static
+    #D:/dev/lib/poco-1.4.6p1-all/lib 
+    #D:/dev/lib/poco-1.5.1/lib 
     #D:/dev/lib/OpenCV2.3/build/x86/vc10/lib
     #D:/dev/lib/OpenCV2.4/build/lib/Debug
     #D:/dev/lib/OpenCV2.4/build/install/lib
@@ -139,15 +139,15 @@ endif()
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     D:/dev/lib/wxWidgets-2.9.4  
-    #D:/dev/lib/poco-1.5.1
-    D:/dev/lib/ffmpeg-1.0.1-gpl/include
     D:/dev/lib/opencv-2.4.6.0/build/install/include
-    #${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/include
-    #${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/include
+    ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/include
     ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/include
+    #${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/include
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
     )
     
+    #D:/dev/lib/poco-1.5.1
+    #D:/dev/lib/ffmpeg-1.0.1-gpl/include
     #D:/dev/lib/OpenSSL-Win32/include
     #D:/dev/lib/poco-1.4.6p1-all  
     #${LibSourcey_SOURCE_DIR}/anionu-abi/poco/include
@@ -222,13 +222,12 @@ endif()
 # Include standard and defult libraries
 # ----------------------------------------------------------------------------
 if(MSVC)
-  set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} ws2_32.lib dsound.lib winmm.lib strmiids.lib ${LibSourcey_INCLUDE_LIBRARIES}) 
+  set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} advapi32.lib iphlpapi.lib psapi.lib shell32.lib ws2_32.lib dsound.lib winmm.lib strmiids.lib ${LibSourcey_INCLUDE_LIBRARIES}) 
 elseif(MSYS)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lws2_32 -liphlpapi ${LibSourcey_INCLUDE_LIBRARIES}")
 elseif(LINUX)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -llibc -lglibc ${LibSourcey_INCLUDE_LIBRARIES}")
 endif()
-
 
 # ----------------------------------------------------------------------------
 # Include and third party dependencies
@@ -355,6 +354,7 @@ status("    Built as dynamic libs?:" BUILD_SHARED_LIBS THEN YES ELSE NO)
 status("    C++ Compiler:"           CMAKE_COMPILER_IS_GNUCXX THEN "${CMAKE_CXX_COMPILER} (ver ${CMAKE_GCC_REGEX_VERSION})" ELSE "${CMAKE_CXX_COMPILER}" )
 status("    C++ flags (Release):"    ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE})
 status("    C++ flags (Debug):"      ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG})
+
 status("    C Compiler:"             ${CMAKE_C_COMPILER})
 status("    C flags (Release):"      ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE})
 status("    C flags (Debug):"        ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG})
@@ -378,7 +378,7 @@ status("    Applications:               ${LibSourcey_BUILD_APPLICATIONS}")
 status("")
 status("    Install path:               ${CMAKE_INSTALL_PREFIX}")
 status("")
-status("    LibSourceyConfig.h is in:             ${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
+status("    LibSourceyConfig.h is in:   ${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 status("-----------------------------------------------------------------")
 status("")
 

@@ -206,7 +206,7 @@ struct LocalPackage: public Package
 	virtual Manifest manifest();
 		// Returns the installation manifest.
 	
-	virtual bool verifyInstallManifest();
+	virtual bool verifyInstallManifest(bool allowEmpty = false);
 	
 	virtual std::string getInstalledFilePath(const std::string& fileName, bool whiny = false);
 		// Returns the full full path of the installed file.

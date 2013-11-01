@@ -39,32 +39,33 @@ Runner::~Runner()
 }
 
 
-void Runner::runAsync(Context::ptr ctx)
+void Runner::runAsync(Context* c)
 {
-	auto c = ctx.get();
-	if (!c->cancelled()) 
-	{
-		try {
-			c->running = true;
-			if (c->target) {
-				c->target();
-			} else if (
-				c->target1) {
-				c->target1(c->arg);
-			}
-			else {
-				// Ensure runAsync is not being hmmered by the
-				// calling thread after cancelled and reset.
-				assert(c->cancelled() && "no callback target");
-				throw std::runtime_error("Async callback has no target");
+	c->running = true;
+	try {
+		if (!c->cancelled()) {
+				if (!c->tid)
+					c->tid = uv_thread_self();
+				if (c->target) {
+					//assert((!c->cancelled()));
+					c->target();
+				} else if (
+					c->target1) {
+					c->target1(c->arg);
+				}
+				else {
+					// Ensure runAsync is not being hmmered by the
+					// calling thread after cancelled and reset.
+					assert(c->cancelled() && "no callback target");
+					throw std::runtime_error("Async callback has no target");
+				}
 			}
 		}
-		catch (std::exception& exc) {
-			errorL("RunnerContext") << "Runner error: " << ctx << std::endl;	
-	#ifdef _DEBUG
-			//throw exc;
-	#endif
-		}
+	catch (std::exception& exc) {
+		errorL("RunnerContext") << "Runner error: " << exc.what() << std::endl;	
+#ifdef _DEBUG
+		//throw exc;
+#endif
 	}
 	
 	c->running = false;
@@ -120,6 +121,13 @@ void Runner::start(std::function<void(void*)> target, void* arg)
 }
 
 
+void Runner::setRepeating(bool flag)
+{
+	assert(!pContext->started);
+	pContext->repeating = flag;
+}
+
+
 bool Runner::running() const
 {
 	return pContext->running;
@@ -129,6 +137,12 @@ bool Runner::running() const
 bool Runner::started() const
 {
 	return pContext->started;
+}
+
+
+bool Runner::repeating() const
+{
+	return pContext->repeating;
 }
 
 
@@ -142,6 +156,13 @@ bool Runner::cancelled() const
 {
 	return pContext->cancelled();
 }
+
+
+unsigned long Runner::tid() const
+{
+	return pContext->tid;
+}
+
 	
 
 //

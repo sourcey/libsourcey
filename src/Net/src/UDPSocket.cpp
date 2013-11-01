@@ -85,14 +85,16 @@ UDPBase::~UDPBase()
 
 void UDPBase::init() 
 {
-	if (!handle()) {
-		uv_udp_t* udp = new uv_udp_t;
-		udp->data = this; //instance();
-		_ptr = reinterpret_cast<uv_handle_t*>(udp);
-		int r = uv_udp_init(loop(), udp);
-		if (r)
-			setUVError("Invalid UDP socket", r);
-	}
+	if (ptr()) return;
+	
+	traceL("TCPBase", this) << "Init" << endl;
+	uv_udp_t* udp = new uv_udp_t;
+	udp->data = this; //instance();
+	_closed = false;
+	_ptr = reinterpret_cast<uv_handle_t*>(udp);
+	int r = uv_udp_init(loop(), udp);
+	if (r)
+		setUVError("Cannot initialize UDP socket", r);
 }
 
 
@@ -122,10 +124,10 @@ void UDPBase::bind(const Address& address, unsigned flags)
 	int r;
 	switch (address.af()) {
 	case AF_INET:
-		r = uv_udp_bind(handle<uv_udp_t>(), address.addr(), flags);
+		r = uv_udp_bind(ptr<uv_udp_t>(), address.addr(), flags);
 		break;
 	//case AF_INET6:
-	//	r = uv_udp_bind6(handle<uv_udp_t>(), address.addr(), flags);
+	//	r = uv_udp_bind6(ptr<uv_udp_t>(), address.addr(), flags);
 	//	break;
 	default:
 		throw std::runtime_error("Unexpected address family");
@@ -157,10 +159,10 @@ int UDPBase::send(const char* data, int len, const Address& peerAddress, int /* 
 	traceL("UDPBase", this) << "Send: " << len << ": " << peerAddress << endl;
 	switch (peerAddress.af()) {
 	case AF_INET:
-		r = uv_udp_send(&sr->req, handle<uv_udp_t>(), &sr->buf, 1, peerAddress.addr(), UDPBase::afterSend); //
+		r = uv_udp_send(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1, peerAddress.addr(), UDPBase::afterSend); //
 		break;
 	//case AF_INET6:
-	//	r = uv_udp_send6(&sr->req, handle<uv_udp_t>(), &sr->buf, 1,
+	//	r = uv_udp_send6(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1,
 	//		*reinterpret_cast<const sockaddr_in6*>(peerAddress.addr()), UDPBase::afterSend); //
 	//	break;
 	default:
@@ -178,7 +180,7 @@ int UDPBase::send(const char* data, int len, const Address& peerAddress, int /* 
 bool UDPBase::recvStart() 
 {
 	// UV_EALREADY means that the socket is already bound but that's okay
-	int r = uv_udp_recv_start(handle<uv_udp_t>(), UDPBase::allocRecvBuffer, onRecv);
+	int r = uv_udp_recv_start(ptr<uv_udp_t>(), UDPBase::allocRecvBuffer, onRecv);
 	if (r && r != UV_EALREADY) {
 		setUVError("Invalid UDP socket", r);
 		return false;
@@ -189,9 +191,9 @@ bool UDPBase::recvStart()
 
 bool UDPBase::recvStop() 
 {
-	if (!handle())
+	if (!ptr())
 		return false;
-	return uv_udp_recv_stop(handle<uv_udp_t>()) == 0;
+	return uv_udp_recv_stop(ptr<uv_udp_t>()) == 0;
 }
 
 
@@ -226,7 +228,7 @@ net::Address UDPBase::address() const
 	
 	struct sockaddr address;
 	int addrlen = sizeof(address);
-	int r = uv_udp_getsockname(handle<uv_udp_t>(), &address, &addrlen);
+	int r = uv_udp_getsockname(ptr<uv_udp_t>(), &address, &addrlen);
 	if (r)
 		return net::Address();
 		//throwLastError("Invalid UDP socket: No address");

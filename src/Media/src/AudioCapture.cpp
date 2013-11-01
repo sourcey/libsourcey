@@ -21,8 +21,7 @@
 #include "Sourcey/Logger.h"
 
 
-using namespace std;
-
+using std::endl;
 using namespace scy;
 
 
@@ -77,8 +76,9 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 	//_iParams.nChannels = _channels;
 	unsigned int nBufferFrames = 1536; //256; //512; / 2
 
-	try {
+	try {	
 		_audio.openStream(nullptr, &_iParams, _format, _sampleRate, &nBufferFrames, &AudioCapture::callback, (void*)this);
+
 		_error = "";
 		_opened = true;
 		traceL("AudioCapture", this) << "Opening: OK" << endl;

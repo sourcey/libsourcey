@@ -33,16 +33,16 @@ static const int GCTimerDelay = 2400;
 	
 
 GarbageCollector::GarbageCollector() : 
-	_ptr(uv::defaultLoop(), new uv_timer_t), 
+	_handle(uv::defaultLoop(), new uv_timer_t), 
 	_finalize(false), 
 	_tid(0)
 {
 	traceL("GarbageCollector", this) << "Create" << std::endl;
 
-	_ptr.handle()->data = this;
-	uv_timer_init(_ptr.loop(), _ptr.handle<uv_timer_t>());		
-	uv_timer_start(_ptr.handle<uv_timer_t>(), GarbageCollector::onTimer, GCTimerDelay, GCTimerDelay);
-	uv_unref(_ptr.handle());
+	_handle.ptr()->data = this;
+	uv_timer_init(_handle.loop(), _handle.ptr<uv_timer_t>());		
+	uv_timer_start(_handle.ptr<uv_timer_t>(), GarbageCollector::onTimer, GCTimerDelay, GCTimerDelay);
+	uv_unref(_handle.ptr());
 }
 
 	
@@ -65,17 +65,20 @@ void GarbageCollector::finalize()
 	
 	// Ensure the loop is not running and that the 
 	// calling thread is the main thread.
-	_ptr.assertTID();
-	//assert(_ptr.loop()->active_handles <= 1); 
-	assert(!_ptr.closed());
+	_handle.assertTID();
+	//assert(_handle.loop()->active_handles <= 1); 
+	assert(!_handle.closed());
 	assert(!_finalize);
 	_finalize = true;
 	
+	// Make sure uv_stop doesn't prevent cleanup.
+	_handle.loop()->stop_flag = 0;
+
 	// Run the loop until managed pointers have been deleted,
 	// and the internal timer has also been deleted.
-	uv_timer_set_repeat(_ptr.handle<uv_timer_t>(), 1);
-	uv_ref(_ptr.handle());
-	uv_run(_ptr.loop(), UV_RUN_DEFAULT);
+	uv_timer_set_repeat(_handle.ptr<uv_timer_t>(), 1);
+	uv_ref(_handle.ptr());
+	uv_run(_handle.loop(), UV_RUN_DEFAULT);
 
 	traceL("GarbageCollector", this) << "Finalize: OK" << std::endl;
 }
@@ -104,8 +107,8 @@ void GarbageCollector::runAsync()
 		// Stop and close the timer handle.
 		// This should cause the loop to return after 
 		// uv_close has been called on the timer handle.
-		uv_timer_stop(_ptr.handle<uv_timer_t>());
-		_ptr.close();
+		uv_timer_stop(_handle.ptr<uv_timer_t>());
+		_handle.close();
 
 		traceL("GarbageCollector") << "Finalization complete" << std::endl;
 	}

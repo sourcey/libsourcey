@@ -58,16 +58,18 @@ public:
 		// The synchronous method will be called on next iteration.
 		// This is not atomic, so do not expect a callback for every request.
 
+	virtual void cancel();
+
 	virtual void close();
 	virtual bool closed();
 	
+	uv::Handle& handle();
+	
 protected:	
 	virtual void startAsync();
-	virtual bool synced() const;
+	virtual bool async() const;
 
-	friend struct std::default_delete<SyncContext>;
-
-	uv::Handle ptr;
+	uv::Handle _handle;
 };
 
 
@@ -85,23 +87,15 @@ public:
 		// Create the idler context the given event loop and method.
 	
 	virtual ~Idler();
-
-	//virtual void stop();
-	virtual void restart();
-
-	virtual void close();
-	virtual bool closed();
 	
-	virtual void unref();
-	
+	uv::Handle& handle();
+
 protected:	
 	virtual void init();
 	virtual void startAsync();
-	virtual bool synced() const;
-
-	friend struct std::default_delete<Idler>;
-
-	uv::Handle ptr;
+	virtual bool async() const;
+	
+	uv::Handle _handle;
 };
 
 	
@@ -226,6 +220,12 @@ static SyncDelegate<C,
 
 
 
+	//virtual void stop();
+	//virtual void restart();
+
+	//virtual void close();
+	//virtual bool closed();
+
 	/*
 	//virtual void dispose();
 	
@@ -286,7 +286,7 @@ protected:
 	{
 		//async::Runner* self = nullptr;
 		try {
-			std::unique_ptr<async::Runner::Context> req(reinterpret_cast<async::Runner::Context*>(arg));
+			std::unique_handle<async::Runner::Context> req(reinterpret_cast<async::Runner::Context*>(arg));
 			//self = req.get()->self;
 			req.get()->target(req.get()->opaque);
 
@@ -341,7 +341,7 @@ public:
 		// the synchronized callback.
 	{
 		assert(!ptr.closed());
-		uv_async_send(ptr.handle<uv_async_t>());
+		uv_async_send(handle.ptr<uv_async_t>());
 	}
 
 	void close()
@@ -354,8 +354,8 @@ protected:
 	{
 		assert(!ptr.active());	
 
-		ptr.handle()->data = req;
-		int err = uv_async_init(ptr.loop(), ptr.handle<uv_async_t>(), [](uv_async_t* req, int) {
+		handle.ptr()->data = req;
+		int err = uv_async_init(ptr.loop(), handle.ptr<uv_async_t>(), [](uv_async_t* req, int) {
 			runAsync(req->data);
 		});
 
@@ -378,7 +378,7 @@ protected:
 
  //async::Runner::Context* req
 
-			//std::unique_ptr<async::Runner::Context> ctx(reinterpret_cast<async::Runner::Context*>(req->data));
+			//std::unique_handle<async::Runner::Context> ctx(reinterpret_cast<async::Runner::Context*>(req->data));
 			//ctx.get()->self->
 			//auto arg = reinterpret_cast<async::Runner::Context*>(req);
 			//if (self)
@@ -419,8 +419,8 @@ protected:
 		Sync* self;
 		void* arg;
 	};
-		ptr.handle()->data = &callback;
-		uv_async_init(ptr.loop(), ptr.handle<uv_async_t>(), [](uv_async_t* req, int)
+		handle.ptr()->data = &callback;
+		uv_async_init(ptr.loop(), handle.ptr<uv_async_t>(), [](uv_async_t* req, int)
 		{
 			//auto self = reinterpret_cast<Sync*>(req->data);
 			//target()
@@ -439,7 +439,7 @@ protected:
 		*/
 	
 		/*
-		ptr.handle()->data = &callback;
+		handle.ptr()->data = &callback;
 		ptr._handle->data = this;
 		uv_async_init(loop, handle<uv_async_t>(), [](uv_async_t* req, int)
 		{
@@ -463,8 +463,8 @@ protected:
 
 	virtual void start(std::function<void(void*)> target, void* opaque)
 	{
-		ptr.handle()->data = opaque;
-		uv_async_init(ptr.loop(), ptr.handle<uv_async_t>(), [](uv_async_t* req, int)
+		handle.ptr()->data = opaque;
+		uv_async_init(ptr.loop(), handle.ptr<uv_async_t>(), [](uv_async_t* req, int)
 		{
 			//auto self = reinterpret_cast<Sync*>(req->data);
 			//target()

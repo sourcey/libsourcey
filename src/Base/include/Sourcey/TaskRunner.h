@@ -84,7 +84,7 @@ protected:
 };
 
 	
-class TaskRunner
+class TaskRunner: public async::Runnable
 	// The TaskRunner is an asynchronous event loop in 
 	// charge of running one or many tasks. 
 	//
@@ -92,7 +92,7 @@ class TaskRunner
 	// the task list calling the task's run() method.
 {
 public:
-	TaskRunner(async::Runner* runner = nullptr);
+	TaskRunner(async::Runner::ptr runner = nullptr);
 	virtual ~TaskRunner();
 	
 	virtual bool start(Task* task);
@@ -113,7 +113,7 @@ public:
 		// Returns the task pointer matching the given ID, 
 		// or nullptr if no task exists.
 
-	virtual void setAsyncContext(async::Runner* runner);
+	virtual void setRunner(async::Runner::ptr runner);
 		// Set the asynchronous context for packet processing.
 		// This may be a Thread or another derivative of Async.
 		// Must be set before the stream is activated.
@@ -133,8 +133,8 @@ public:
 	virtual const char* className() const { return "TaskRunner"; }
 		
 protected:
-	virtual void runAsync();
-		// Called by the async context to run managed tasks.
+	virtual void run();
+		// Called by the async context to run the next task.
 	
 	virtual bool add(Task* task);
 		// Adds a task to the runner.
@@ -168,7 +168,7 @@ protected:
 	
 	mutable Mutex	_mutex;
 	TaskList		_tasks;
-	std::unique_ptr<async::Runner> _runner;
+	async::Runner::ptr _runner;
 };
 
 

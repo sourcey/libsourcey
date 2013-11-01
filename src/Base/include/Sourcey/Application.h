@@ -63,7 +63,7 @@ public:
 	// Shutdown handling
 	//
 
-	void waitForShutdown(std::function<void(void*)> callback, void* opaque = nullptr);
+	void waitForShutdown(std::function<void(void*)> callback = nullptr, void* opaque = nullptr);
 			
 	static void onShutdownSignal(uv_signal_t *req, int signum);		
 	static void onPrintHandle(uv_handle_t* handle, void* arg);
@@ -87,7 +87,7 @@ struct OptionParser
 	std::string exepath; // TODO: UTF8
 	OptionMap args;
 	
-	OptionParser(int argc, char* argv[], char delim = '-');
+	OptionParser(int argc, char* argv[], char* delim = "-");
 
 	bool has(const char* key) {
 		return args.find(key) != args.end();
