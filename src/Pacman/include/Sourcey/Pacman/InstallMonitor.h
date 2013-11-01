@@ -56,7 +56,7 @@ public:
 	virtual LocalPackageList packages() const;
 		// Returns the list of monitored packages.
 		
-	Signal3<InstallTask&, InstallationState&, const InstallationState&> InstallStateChange;
+	Signal3<InstallTask&, const InstallationState&, const InstallationState&> InstallStateChange;
 		// Proxies state change events from managed packages
 
 	Signal<LocalPackage&> InstallComplete;

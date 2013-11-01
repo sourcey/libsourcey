@@ -44,21 +44,20 @@ public:
 	
 	void join();
 		// Waits until the thread exits.
-	
+	 
 	unsigned long id() const;
 		// Returns the native thread ID.
 	
 	static unsigned long currentID();
  		// Returns the native thread ID of the current thread.
-		
+
 protected:
 	Thread(const Thread&);
 	Thread& operator = (const Thread&);
 	
-	virtual bool synced() const;
+	virtual bool async() const;
 	virtual void startAsync(); 
 
-	unsigned long _id;	
 	uv_thread_t _handle;
 };
 

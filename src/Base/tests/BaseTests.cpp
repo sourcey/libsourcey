@@ -95,7 +95,9 @@ public:
 		//testRunner();
 		//testThread();
 		
-		testPacketStream();
+		//testSyncQueue();
+		//testPacketStream();
+		testMultiPacketStream();
 		//runPacketSignalTest();
 		//runSocketTests();
 		//runGarbageCollectorTests();
@@ -312,11 +314,16 @@ public:
 
 		std::string junkPath(path + "junkname.huh");
 		debugL("FileSystemTest") << "Junk path: " << junkPath << endl;
-		assert(!fs::exists(path));
+		assert(!fs::exists(junkPath));
 
 		std::string dir(fs::dirname(path));
 		debugL("FileSystemTest") << "Dir name: " << dir << endl;	
-		assert(fs::exists(path));	
+		assert(fs::exists(dir));			
+		assert(fs::exists(dir + "/"));
+		assert(fs::exists(dir + "\\"));
+		assert(fs::dirname(dir) == dir);
+		assert(fs::dirname(dir + "/") == dir);
+		assert(fs::dirname(dir + "\\") == dir);
 	}
 
 
@@ -568,10 +575,18 @@ public:
 	{
 		cout << "On idle" << endl;
 		if (++idlerTicks == numTimerTicks) {
-			idler.stop(); // event loop will be released
+			idler.cancel(); // event loop will be released
 		}
 	}
-	
+		
+	// ============================================================================
+	// SyncQueue Test
+	//	
+	void testSyncQueue() 
+	{
+		runLoop();
+	}
+
 	// ============================================================================
 	// Packet Stream Tests
 	//	
@@ -598,7 +613,7 @@ public:
 		{
 			debugL("TestPacketSource", this) << "Stop" << endl;	
 			runner.cancel();
-			runner.close();
+			//runner.close();
 		}
 	};	
 
@@ -626,7 +641,7 @@ public:
 	void testPacketStream() 
 	{
 		PacketStream stream;	
-		stream.setAsyncContext(std::make_shared<Thread>());
+		stream.setRunner(std::make_shared<Thread>());
 		stream.attachSource(new TestPacketSource, true, true);
 		stream.attach(new TestPacketProcessor, 0, true);
 		stream.emitter += packetDelegate(this, &Tests::onPacketStreamOutput);	
@@ -639,6 +654,63 @@ public:
 			stream->close();
 		}, &stream);		
 	}
+	
+	void onChildPacketStreamOutput(void* sender, IPacket& packet) 
+	{
+		debugL("TestPacketStream", this) << "@@@@@@@@@@@@@@@ On child packet: " << packet.className() << endl;
+	}
+	
+	struct ChildStreams
+	{
+		PacketStream* s1;
+		PacketStream* s2;
+		PacketStream* s3;
+	};
+
+
+	void testMultiPacketStream() 
+	{
+		PacketStream stream;	
+		stream.setRunner(std::make_shared<Thread>());
+		stream.attachSource(new TestPacketSource, true, true);
+		stream.attach(new TestPacketProcessor, 0, true);
+		//stream.emitter += packetDelegate(this, &Tests::onPacketStreamOutput);	
+		stream.start();
+		
+		// The second PacketStream receives packets from the first one
+		// and synchronizes output packets with the default event loop.
+		ChildStreams children;
+		children.s1 = new PacketStream;
+		children.s1->setRunner(std::make_shared<Idler>()); // Use Idler
+		children.s1->attachSource(stream.emitter);
+		//children.s1->synchronizeOutput(uv::defaultLoop());
+		children.s1->emitter += packetDelegate(this, &Tests::onChildPacketStreamOutput);	
+		children.s1->start();
+
+		children.s2 = new PacketStream;
+		children.s2->attachSource(stream.emitter);
+		children.s2->synchronizeOutput(uv::defaultLoop());
+		children.s2->emitter += packetDelegate(this, &Tests::onChildPacketStreamOutput);	
+		children.s2->start();
+		
+		children.s3 = new PacketStream;
+		children.s3->attachSource(stream.emitter);
+		children.s3->synchronizeOutput(uv::defaultLoop());
+		children.s3->emitter += packetDelegate(this, &Tests::onChildPacketStreamOutput);	
+		children.s3->start();
+					
+		app.waitForShutdown([](void* arg) {
+			auto streams = reinterpret_cast<ChildStreams*>(arg);
+			//streams->s1->attachSource(stream.emitter);
+			if (streams->s1) delete streams->s1;
+			if (streams->s2) delete streams->s2;
+			if (streams->s3) delete streams->s3;
+			traceL("TestPacketStream") << "DESTROYED *********************************************************" << endl;
+		}, &children);
+
+		traceL("TestPacketStream", this) << "ENDING *********************************************************" << endl;
+	}
+	
 	
 
 	/*

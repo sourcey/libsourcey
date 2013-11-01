@@ -33,14 +33,14 @@ public:
 		MediaServer::setupPacketStream(stream, options, true, true);
 
 		// Start the stream
-		stream.Emitter += packetDelegate(this, &StreamingRequestHandler::onVideoEncoded);
+		stream.emitter += packetDelegate(this, &StreamingRequestHandler::onVideoEncoded);
 		stream.start();
 	}
 
 	virtual void onClose()
 	{
 		debugL("StreamingRequestHandler", this) << "On close" << std::endl;
-		stream.Emitter -= packetDelegate(this, &StreamingRequestHandler::onVideoEncoded);
+		stream.emitter -= packetDelegate(this, &StreamingRequestHandler::onVideoEncoded);
 		stream.stop();
 	}
 

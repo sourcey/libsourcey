@@ -33,12 +33,14 @@ PacketStream::PacketStream(const std::string& name) :
 	_name(name)
 {
 	traceL("PacketStream", this) << "Create" << endl;
-
-	// Use the deferred deletion for packet streams and managed 
-	// adapters so we can guarantee the cleanup thread.
-	_base = std::shared_ptr<PacketStreamBase>(
-		new PacketStreamBase(this), deleter::Deferred<PacketStreamBase>());
+	
 	//_base = std::make_shared<PacketStreamBase>(this);
+	_base = std::shared_ptr<PacketStreamBase>(new PacketStreamBase(this), 
+		std::default_delete<PacketStreamBase>()
+		// NOTE: No longer using GC for deleting PacketStreamBase 
+		// since we don't want to force the use of the event loop.
+		//deleter::Deferred<PacketStreamBase>()
+		);
 }
 
 
@@ -71,7 +73,7 @@ void PacketStream::start()
 
 	// Setup default (thread based) async context if none set yet
 	if (!_base->_runner) {
-		setAsyncContext(std::make_shared<Thread>());
+		setRunner(std::make_shared<Thread>());
 	}
 		
 	// Set state to Active
@@ -139,6 +141,8 @@ void PacketStream::reset()
 void PacketStream::close()
 {
 	traceL("PacketStream", this) << "Close" << endl;
+
+	/*
 	//Mutex::ScopedLock lock(_mutex);
 	if (_base->statePendingOrEquals(PacketStreamState::None) ||
 		_base->statePendingOrEquals(PacketStreamState::Closed)) {
@@ -146,15 +150,46 @@ void PacketStream::close()
 		//assert(0);
 		return;
 	}
-	
-	if (!_base->statePendingOrEquals(PacketStreamState::Stopped) &&
-		!_base->statePendingOrEquals(PacketStreamState::Stopping))
-		stop();
+	*/	
 
-	// Queue Closed state
-	_base->queueState(PacketStreamState::Closed);
+	// Return if already closed
+	if (_base->stateEquals(PacketStreamState::Closed)) {
+		traceL("PacketStream", this) << "Already closed" << endl;
+		//assert(0);
+		return;
+	}
 	
-	Close.emit(this);
+	// Run close sequence if the stream is active
+	if (!_base->stateEquals(PacketStreamState::None)) {
+
+		// Stop the stream gracefully (if running)
+		if (!_base->statePendingOrEquals(PacketStreamState::Stopped) &&
+			!_base->statePendingOrEquals(PacketStreamState::Stopping))
+			stop();
+
+		// Queue the Closed state
+		_base->queueState(PacketStreamState::Closed);
+	
+		// Wait for the Closed state to synchronize when using an 
+		// asynchronous Runner in order to ensure safe destruction 
+		// of stream adapters.
+		if (async()) {
+			_base->waitForState(PacketStreamState::Closed);
+
+			// We could wait for the runner to close to be completely safe,
+			// but this will not work for shared Runners (in the future).
+			//_base->waitForRunner();
+		}
+
+		// Send the Closed signal
+		Close.emit(this);
+	}
+	
+	// Always detach and free managed stream adapters
+	traceL("PacketStream", this) << "Close: Cleanup: " << _base << endl;
+	_base->teardown();
+	_base->cleanup();
+	
 	traceL("PacketStream", this) << "Close: OK" << endl;
 }
 
@@ -222,7 +257,7 @@ void PacketStream::write(IPacket& packet)
 }
 
 
-void PacketStream::setAsyncContext(async::Runner::ptr runner)
+void PacketStream::setRunner(async::Runner::ptr runner)
 {
 	traceL("PacketStream", this) << "Set async context: " << runner << endl;
 	//Mutex::ScopedLock lock(_mutex);
@@ -231,7 +266,7 @@ void PacketStream::setAsyncContext(async::Runner::ptr runner)
 	
 	// Ensure a reasonable timeout is set when using an event 
 	// loop based runner; we don't block the loop for too long.
-	if (runner->synced() && _base->timeout() == 0)
+	if (!runner->async() && _base->timeout() == 0)
 		_base->setTimeout(20); 
 	
 	// Note: std::bind will increment the PacketStreamBase std::shared_ptr
@@ -302,6 +337,12 @@ bool PacketStream::locked() const
 {
 	//Mutex::ScopedLock lock(_mutex);
 	return _base->statePendingOrEquals(PacketStreamState::Locked);
+}
+
+
+bool PacketStream::async() const
+{
+	return _base->_runner && _base->_runner->async();
 }
 
 
@@ -408,8 +449,10 @@ PacketStreamBase::~PacketStreamBase()
 		|| stateEquals(PacketStreamState::Closed)
 		|| stateEquals(PacketStreamState::Error));
 			
+	// NOTE: Cleanup now on PacketStream destructor 
+	// since we can't guarantee GC is available.
 	// Cleanup all managed adapters
-	cleanup();
+	//cleanup();
 
 	// Make sure all adapters have been cleaned up.
 	assert(_sources.empty());
@@ -430,7 +473,7 @@ bool PacketStreamBase::dispatchNext()
 			_states.pop_front();
 		}	
 
-		traceL("PacketStreamBase", this) << "Set pending state: " << id << endl;	
+		traceL("PacketStreamBase", this) << "Set pending state: " << id << endl;
 		setState(this, id);
 	}
 		
@@ -443,12 +486,12 @@ void PacketStreamBase::dispatch(IPacket& packet)
 {	
 	//traceL("PacketStreamBase", this) << "Processing packet: " 
 	//	<< state() << ": " << packet.className() << endl;	
-	//assert(Thread::currentID() == _thread.id());
+	//assert(Thread::currentID() == _thread.tid());
 
 	try {	
 		// Process the packet if the stream is active
 		PacketProcessor* firstProc = nullptr;
-		if (stateEquals(PacketStreamState::Active)) {
+		if (stateEquals(PacketStreamState::Active) && !packet.flags.has(PacketFlags::NoModify)) {
 			{
 				Mutex::ScopedLock lock(_mutex);
 				firstProc = !_processors.empty() ? 
@@ -572,7 +615,7 @@ void PacketStreamBase::setup()
 
 void PacketStreamBase::write(IPacket& packet)
 {	
-	Mutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 
 	// Clone and push onto the processor queue	
 	push(packet.clone());
@@ -614,12 +657,9 @@ void PacketStreamBase::teardown()
 void PacketStreamBase::cleanup()
 {
 	traceL("PacketStreamBase", this) << "Cleanup" << endl;		
-
-	// Ensure cleanup was inside the default event
-	// loop thread by the garbage collector.
-	assert(Thread::currentID() == GarbageCollector::instance().tid());
+	
 	assert(stateEquals(PacketStreamState::None)
-		|| stateEquals(PacketStreamState::Closed));
+		|| statePendingOrEquals(PacketStreamState::Closed));
 
 	Mutex::ScopedLock lock(_mutex);
 	auto sit = _sources.begin();
@@ -750,8 +790,32 @@ bool PacketStreamBase::detach(PacketProcessor* proc)
 }
 
 
-bool PacketStreamBase::waitForSync()
+bool PacketStreamBase::waitForRunner()
 {	
+	if (!_runner || !_runner->async())
+		return false;
+	
+	traceL("PacketStream", this) << "Wait for sync" << endl;
+	int times = 0;
+	while (!_runner->cancelled() || _runner->running()) { //!_runner->cancelled() || 
+		traceL("PacketStream", this) << "Wait for sync: " 
+			<< times << ": "
+			<< _runner->cancelled() << ": "
+			<< _runner->running()
+			<< endl;
+		scy::sleep(10);
+		if (times++ > 500) {
+			assert(0 && "deadlock; calling inside stream scope?"); // 5 secs
+		}
+	}
+	
+	traceL("PacketStream", this) << "Wait for sync: OK" << endl;
+		traceL("PacketStream", this) << "Wait for sync END: " 
+			<< times << ": "
+			<< _runner->cancelled() << ": "
+			<< _runner->running()
+			<< endl;
+	/*
 	int times = 0;
 	traceL("PacketStream", this) << "Wait for sync" << endl;
 	while (!_queue.empty() || !_states.empty()) { // || !_syncStates.empty()
@@ -762,9 +826,28 @@ bool PacketStreamBase::waitForSync()
 			<< endl;
 		scy::sleep(10);
 		if (times++ > 500) {
-			assert(0 && "deadlock; calling inside stream scope?");
+			assert(0 && "deadlock; calling inside stream scope?"); // 5 secs
 		}
 	}
+	*/
+	return true;
+}
+
+
+bool PacketStreamBase::waitForState(PacketStreamState::ID state)
+{
+	// WARNING: stateEquals will return true before state change
+	// has propagated through adapters. Use waitForRunner;
+	int times = 0;
+	traceL("PacketStream", this) << "Wait for sync state: " << state << endl;
+	while (!stateEquals(state)) {
+	traceL("PacketStream", this) << "Wait for sync state: " << state << ": " << times << endl;
+		scy::sleep(10);
+		if (times++ > 500) {
+			assert(0 && "deadlock; calling inside stream scope?"); // 5 secs
+		}
+	}
+	traceL("PacketStream", this) << "Wait for sync state: " << state << ": OK" << endl;
 	return true;
 }
 
@@ -800,7 +883,7 @@ void PacketStreamBase::assertNotActive()
 
 void PacketStreamBase::synchronizeOutput(uv::Loop* loop)
 {
-	assert((!_runner || !_runner->synced()) && "runner already synchronized");
+	assert((!_runner || _runner->async()) && "runner already synchronized");
 	assertNotActive();
 	
 	// Add a SyncPacketQueue as the final processor so output 
@@ -809,10 +892,13 @@ void PacketStreamBase::synchronizeOutput(uv::Loop* loop)
 }
 
 
-void PacketStreamBase::onStateChange(PacketStreamState& state, const PacketStreamState& oldState)
+	// virtual bool beforeStateChange(const PacketStreamState& state);
+bool PacketStreamBase::beforeStateChange(const PacketStreamState& state) // , unsigned int id, const std::string& message = "") //
 {
-	traceL("PacketStreamBase", this) << "On state change: " << oldState << " => " << state << endl;
-	//assert(Thread::currentID() == _thread.id());
+	traceL("PacketStreamBase", this) << "On state change: " << this->state() << " => " << state << endl;
+	
+	if (!Stateful<PacketStreamState>::beforeStateChange(state))
+		return false;
 
 	// Handle pending stream states before 
 	// they are proxied to adapters.
@@ -843,16 +929,22 @@ void PacketStreamBase::onStateChange(PacketStreamState& state, const PacketStrea
 	// Send the stream state to packet adapters.
 	// This is done inside the processor thread context so  
 	// packet adapters do not need to consider thread safety.
+	//PacketStreamState state;
+	//state.set(id);
 	auto adapters = this->adapters();
-	for (auto& ref : adapters) {		
+	traceL("PacketStreamBase", this) << "On state change: Adapters: " << adapters.size() << endl;
+	for (auto& ref : adapters) {
 		auto adapter = dynamic_cast<PacketStreamAdapter*>(ref.ptr);
 		assert(adapter);
+		traceL("PacketStreamBase", this) << "On state change: Current adapter: " << adapter << endl;
 		if (adapter)
 			adapter->onStreamStateChange(state);
 	}
 	
 	// Send the StateChange signal to listeners
-	Stateful<PacketStreamState>::onStateChange(state, oldState);
+	//return Stateful<PacketStreamState>::setState(sender, id, message);
+
+	return true;
 }
 
 
@@ -1042,7 +1134,7 @@ void PacketStreamBase::dispose()
 		//_base.reset();
 		//_base->_runner.reset();
 		//_base = nullptr;
-		//_base->waitForSync();
+		//_base->waitForRunner();
 		//if (!_base->_runner || 
 		//	!_base->_runner->started())		
 		//	_base->dispose();
@@ -1155,7 +1247,7 @@ void PacketStreamBase::sync(IPacket& packet)
 	// Push the nocopy packet for async processing
 	//push(new RawPacket(data, len));
 	
-	//assert(Thread::currentID() != _thread.id());
+	//assert(Thread::currentID() != _thread.tid());
 
 	// TODO: Should we throw instead? 
 	// Sources would need to swallow exceptions...
@@ -1183,7 +1275,7 @@ std::string PacketStream::name() const
 /*
 void PacketStream::assertCmdThread()
 {
-	//if (Thread::currentID() != _thread.id()) {
+	//if (Thread::currentID() != _thread.tid()) {
 	//	assert(0);
 	//	throw std::runtime_error("Stream error: Cannot interact from inside stream callback.");
 	//}
@@ -1287,7 +1379,7 @@ void PacketStreamAdapter::setEmitter(PacketSignal* emitter)
 
 
 /*
-bool PacketStream::waitForSync()
+bool PacketStream::waitForRunner()
 {	
 	int times = 0;
 	while(_scopeRef.load() > 0) {

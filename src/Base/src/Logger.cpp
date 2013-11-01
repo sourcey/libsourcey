@@ -58,8 +58,10 @@ Logger& Logger::instance()
 
 void Logger::setInstance(Logger* logger) 
 {
-	// Should be done before the logger is initialized
-	assert(singleton.swap(logger) == nullptr);
+	auto current = singleton.swap(logger);
+
+	// Instance must be set before initialization
+	assert(current == nullptr);
 }
 
 	
@@ -394,9 +396,6 @@ void FileChannel::open()
 		throw std::runtime_error("Log file path must be set.");
 	
 	// Create directories if needed
-	//Poco::Path dir(_path);
-	//dir.setFileName("");
-	//Poco::File(dir).createDirectories();
 	fs::mkdirr(fs::dirname(_path));
 	
 	// Open the file stream

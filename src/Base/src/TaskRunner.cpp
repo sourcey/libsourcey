@@ -75,13 +75,12 @@ bool Task::repeating() const
 //
 
 
-TaskRunner::TaskRunner(async::Runner* runner)
+TaskRunner::TaskRunner(async::Runner::ptr runner)
 {	
-	//Idler::start(std::bind(&TaskRunner::runAsync, this));
-	//_thread.start(*this);uv::Loop* loop = uv::defaultLoop()
-
 	if (runner)
-		setAsyncContext(runner);
+		setRunner(runner);
+	else
+		setRunner(std::make_shared<Thread>());
 }
 
 
@@ -89,6 +88,8 @@ TaskRunner::~TaskRunner()
 {	
 	Shutdown.emit(this);
 	//Idler::stop();
+	if (_runner)
+		_runner->cancel();
 	clear();
 }
 
@@ -96,6 +97,7 @@ TaskRunner::~TaskRunner()
 bool TaskRunner::start(Task* task)
 {
 	add(task);
+
 	//if (task->_cancelled) {
 		//task->_cancelled = false;
 		//task->start();
@@ -157,7 +159,7 @@ bool TaskRunner::add(Task* task)
 	if (!exists(task)) {
 		Mutex::ScopedLock lock(_mutex);	
 		_tasks.push_back(task);
-		//uv_ref(Idler::ptr.handle()); // reference the idler handle when a task is added
+		//uv_ref(Idler::handle.ptr()); // reference the idler handle when a task is added
 		onAdd(task);
 		return true;
 	}
@@ -173,7 +175,7 @@ bool TaskRunner::remove(Task* task)
 	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
 		if (*it == task) {					
 			_tasks.erase(it);
-			//uv_unref(Idler::ptr.handle()); // dereference the idler handle when a task is removed
+			//uv_unref(Idler::handle.ptr()); // dereference the idler handle when a task is removed
 			onRemove(task);
 			return true;
 		}
@@ -226,21 +228,22 @@ void TaskRunner::clear()
 }
 
 
-void TaskRunner::setAsyncContext(async::Runner* runner)
+void TaskRunner::setRunner(async::Runner::ptr runner)
 {
 	traceL("TaskRunner", this) << "Set async: " << runner << endl;
 
+	Mutex::ScopedLock lock(_mutex);
 	assert(!_runner);
-	_runner.reset(runner);
-	assert(0);
-	//_runner->start(std::bind(&TaskRunner::runAsync, this));
+	_runner = runner;
+	_runner->setRepeating(true);
+	_runner->start(*this);
 }
 
 
-void TaskRunner::runAsync()
+void TaskRunner::run()
 {
 	Task* task = next();
-	traceL("TaskRunner", this) << "Next task: " << task << endl;
+	//traceL("TaskRunner", this) << "Next task: " << task << endl;
 		
 	// Run the task
 	if (task) 
@@ -277,6 +280,7 @@ void TaskRunner::runAsync()
 	}
 
 	// Dispatch the Idle signal
+	//traceL("TaskRunner", this) << "idle: "<< Idle.refCount() << endl;
 	Idle.emit(this);
 }
 

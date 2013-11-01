@@ -256,7 +256,7 @@ void Socket::onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
 
 void Socket::onSocketError(const scy::Error& error) //const Error& error
 {
-	//traceL("SocketAdapter", this) << "Error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
+	traceL("SocketAdapter", this) << "Error: " << Error.refCount() << endl;
 	if (_adapter) {
 		_adapter->onSocketError(error);
 	}
@@ -268,7 +268,7 @@ void Socket::onSocketError(const scy::Error& error) //const Error& error
 
 void Socket::onSocketClose()
 {
-	//traceL("SocketAdapter", this) << "On close: " << socket->Close.refCount() << endl;	
+	traceL("SocketAdapter", this) << "On close: " << Close.refCount() << endl;	
 	if (_adapter) {
 		_adapter->onSocketClose();
 	}
@@ -277,7 +277,6 @@ void Socket::onSocketClose()
 		Close.emit(this);
 	}
 }
-
 
 	
 const Error& Socket::error() const 
@@ -445,46 +444,42 @@ void SocketBase::removeObserver(Socket* socket)
 	assert(0 && "unknown socket adapter");
 }
 
-
-namespace internal {
-
-	void onHostResolved(const net::DNSResult& dns)
-	{	
-		auto* sock = reinterpret_cast<SocketBase*>(dns.opaque);
-		traceL("SocketBase", sock) << "DNS resolved: " << dns.success() << endl;
-
-		// Return if the socket was closed while resolving
-		if (sock->closed()) {			
-			warnL("SocketBase", sock) << "DNS resolved but socket closed" << endl;
-			return;
-		}
-
-		// Set the connection error if DNS failed
-		if (!dns.success()) {
-			sock->setError("Failed to resolve DNS for " + dns.host);
-			return;
-		}
-
-		try {	
-			// Connect to resolved host
-			sock->connect(dns.addr);
-		}
-		catch (...) {
-			// Swallow errors
-			// Can be handled by Socket::Error signal
-		}	
-	}
-
-}
-
 	
 void SocketBase::connect(const std::string& host, UInt16 port) 
 {
 	traceL("SocketBase", this) << "Connect to host: " << host << ":" << port << endl;
 	if (Address::validateIP(host))
 		connect(Address(host, port));
-	else
-		net::resolveDNS(host, port, internal::onHostResolved, this); 
+	else {
+		init();
+		assert(!closed());
+		net::resolveDNS(host, port, [](const net::DNSResult& dns) 
+		{	
+			auto* sock = reinterpret_cast<SocketBase*>(dns.opaque);
+			traceL("SocketBase", sock) << "DNS resolved: " << dns.success() << endl;
+
+			// Return if the socket was closed while resolving
+			if (sock->closed()) {			
+				warnL("SocketBase", sock) << "DNS resolved but socket closed" << endl;
+				return;
+			}
+
+			// Set the connection error if DNS failed
+			if (!dns.success()) {
+				sock->setError("Failed to resolve DNS for " + dns.host);
+				return;
+			}
+
+			try {	
+				// Connect to resolved host
+				sock->connect(dns.addr);
+			}
+			catch (...) {
+				// Swallow errors
+				// Can be handled by Socket::Error signal
+			}	
+		}, this); 
+	}
 }
 
 

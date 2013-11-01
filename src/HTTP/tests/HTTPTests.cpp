@@ -6,7 +6,7 @@
 #include "Sourcey/HTTP/Packetizers.h"
 #include "Sourcey/HTTP/Util.h"
 #include "Sourcey/HTTP/URL.h"
-#include "Sourcey/Runner.h"
+#include "Sourcey/Async.h"
 #include "Sourcey/Timer.h"
 #include "Sourcey/Idler.h"
 
@@ -20,7 +20,7 @@
 #include <iterator>
 
 
-using namespace std;
+using std::endl;
 using namespace scy;
 //using namespace scy::net;
 
@@ -75,7 +75,7 @@ public:
 
 		response.setContentLength(14);  // headers will be auto flushed
 
-		connection().send(string("hello universe"), 14); 
+		connection().sendData(std::string("hello universe"), 14); 
 		connection().close();
 	}
 };
@@ -133,7 +133,7 @@ public:
 	{
 		debugL("ChunkedResponder") << "On connection close" << endl;
 		gotClose = true;
-		dataSource.stop();
+		dataSource.cancel();
 	}
 };
 
@@ -166,7 +166,7 @@ public:
 		gotPayload = true;
 
 		// Enco the request back to the client
-		connection().send(body.data(), body.size());
+		connection().sendData(body.data(), body.size());
 	}
 
 	void onClose()
@@ -183,7 +183,7 @@ class OurServerResponderFactory: public ServerResponderFactory
 public:
 	ServerResponder* createResponder(ServerConnection& conn)
 	{		
-		ostringstream os;
+		std::ostringstream os;
 		conn.request().write(os);
 		std::string headers(os.str().data(), os.str().length());
 		debugL("OurServerResponderFactory") << "Incoming Request: " << headers << endl; // remove me
@@ -358,7 +358,7 @@ public:
 		NVCollection params;
 		splitURIParameters("/streaming?format=MJPEG&width=400&height=300&encoding=Base64&packetizer=chunked&rand=0.09983996045775712", params);			
 		for (NVCollection::ConstIterator it = params.begin(); it != params.end(); ++it) {
-			cout << "URL Parameter: " << it->first << ": " << it->second << endl;
+			debugL("Tests") << "URL Parameter: " << it->first << ": " << it->second << endl;
 		}
 		
 		assert(params.get("format") == "MJPEG");
@@ -537,7 +537,7 @@ public:
 
 		void onComplete(void*, const Response& res)
 		{		
-			ostringstream os;
+			std::ostringstream os;
 			res.write(os);
 			debugL("ClientConnectionTest") << "Response complete: " << os.str() << endl;
 		}
@@ -662,12 +662,12 @@ public:
 	static void onPrintHTTPServerHandle(uv_handle_t* handle, void* arg) 
 	{
 		//debugL("HTTPServerTest") << "#### Active HTTPServer Handle: " << handle << endl;
-		cout << "#### Active HTTPServer Handle: " << handle << endl;
+		debugL("Tests") << "#### Active HTTPServer Handle: " << handle << endl;
 	}
 
 	static void onKillHTTPServer(void* opaque)
 	{
-		cout << "Kill Signal: " << opaque << endl;
+		debugL("Tests") << "Kill Signal: " << opaque << endl;
 	
 		// print active handles
 		uv_walk(uv::defaultLoop(), Tests::onPrintHTTPServerHandle, NULL);

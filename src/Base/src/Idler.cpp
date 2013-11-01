@@ -30,8 +30,8 @@ namespace scy {
 Idler::Idler(uv::Loop* loop) :
 	ptr(loop, new uv_idle_t)
 {
-	uv_idle_init(loop, ptr.handle<uv_idle_t>());
-	uv_unref(ptr.handle()); // don't increment main loop
+	uv_idle_init(loop, handle.ptr<uv_idle_t>());
+	uv_unref(handle.ptr()); // don't increment main loop
 }
 	
 
@@ -40,8 +40,8 @@ void Idler::start(std::function<void()> target)
 	assert(!ptr.active());	
 	callback.func = target;
 	callback.self = this;
-	ptr.handle()->data = &callback;
-    int r = uv_idle_start(ptr.handle<uv_idle_t>(), [](uv_idle_t* req, int) {
+	handle.ptr()->data = &callback;
+    int r = uv_idle_start(handle.ptr<uv_idle_t>(), [](uv_idle_t* req, int) {
 		auto callback = reinterpret_cast<CallbackRef*>(req->data);
 		callback->func(); // (callback->self);
 		scy::sleep(1); // required or 100% CPU
@@ -53,7 +53,7 @@ void Idler::start(std::function<void()> target)
 
 void Idler::stop()
 {
-	uv_idle_stop(ptr.handle<uv_idle_t>());
+	uv_idle_stop(handle.ptr<uv_idle_t>());
 }
 */
 

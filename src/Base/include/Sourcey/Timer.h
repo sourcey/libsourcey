@@ -64,21 +64,22 @@ public:
 		// was non-repeating before, it will have been stopped. If it was repeating,
 		// then the old repeat value will have been used to schedule the next timeout.
 	
-	virtual void unref();
+	//virtual void unref();
 
-	virtual bool active() const;
+	bool active() const;
 	
-	virtual Int64 timeout() const;
-	virtual Int64 interval() const;
-	
+	Int64 timeout() const;
+	Int64 interval() const;	
 	Int64 count();
+	
+	uv::Handle& handle();
 	
 	NullSignal Timeout;
 
 protected:	
 	virtual void init();
 	
-	uv::Handle _ptr;
+	uv::Handle _handle;
 	Int64 _timeout;
 	Int64 _interval;
 	Int64 _count;

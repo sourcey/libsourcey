@@ -61,7 +61,7 @@ IDeviceManager* DeviceManagerFactory::create()
 Win32DeviceManager::Win32DeviceManager() : 
 	_needCoUninitialize(false) 
 {
-	RtDeviceManager::initialize();
+	//RtDeviceManager::initialize();
 	traceL("DeviceManager") << "Create" << endl;
 	//setWatcher(new Win32DeviceWatcher(this));
 }
@@ -70,7 +70,7 @@ Win32DeviceManager::Win32DeviceManager() :
 Win32DeviceManager::~Win32DeviceManager() 
 {
 	traceL("DeviceManager") << "Destroy" << endl;
-	RtDeviceManager::uninitialize();
+	//RtDeviceManager::uninitialize();
 	if (initialized()) {
 		uninitialize();
 	}
@@ -122,7 +122,6 @@ void Win32DeviceManager::uninitialize()
 
 bool Win32DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs) 
 {
-	traceL("Win32DeviceManager", this) << "Get audio devices" << endl;
 	devs.clear();
 
 	// Since we are using RtAudio for audio capture, we should
@@ -131,7 +130,7 @@ bool Win32DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
 
 	// Determine the number of devices available
 	auto ndevices = audio.getDeviceCount();
-	traceL("Win32DeviceManager", this) << "Number of device: " << ndevices << endl;
+	traceL("Win32DeviceManager", this) << "Get audio devices: " << ndevices << endl;
 
 	// Scan through devices for various capabilities
 	RtAudio::DeviceInfo info;

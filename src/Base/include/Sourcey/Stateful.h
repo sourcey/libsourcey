@@ -35,7 +35,7 @@ class State
 public:
 	typedef unsigned int ID;
 	
-	State(ID id = 0);
+	State(ID id = 0, const std::string& message = "");
 	virtual ~State() {};
 
 	virtual ID id() const;
@@ -94,7 +94,7 @@ public:
 	virtual void setMessage(const std::string& message) { Mutex::ScopedLock lock(_mutex); _message = message; }
 
 protected:
-	mutable Mutex	_mutex;
+	mutable Mutex _mutex;
 };
 
 
@@ -128,10 +128,10 @@ protected:
 //
 
 
-/// This class implements a simple state machine.
-/// T should be a derived State type.
 template<typename T>
 class Stateful
+	/// This class implements a simple state machine.
+	/// T should be a derived State type.
 {
 public:	
 	Stateful()
@@ -160,31 +160,42 @@ public:
 	virtual const T state() const { return _state; }
 
 protected:
-	virtual bool canChangeState(unsigned int id) 
+	virtual bool beforeStateChange(const T& state) 
 		// Override to handle pre state change logic.
 		// Return false to prevent state change.
 	{
-		if (_state.id() != id) 
-			return true;
-		return false;
+		if (_state == state) 
+			return false;
+		return true;
 	}
 	
 	virtual void onStateChange(T& /*state*/, const T& /*oldState*/) 
 		// Override to handle post state change logic.
 	{
-	}
+	}	
 	
 	virtual bool setState(void* sender, unsigned int id, const std::string& message = "") 
 		// Sets the state and sends the state signal if
 		// the state change was successful.
 	{ 
-		if (canChangeState(id)) {
+		T state;
+		state.set(id);	
+		state.setMessage(message);
+		return setState(sender, state);
+	}
+
+	virtual bool setState(void* sender, const T& state) 
+		// Sets the state and sends the state signal if
+		// the state change was successful.
+	{ 
+		if (beforeStateChange(state)) {
 			T oldState = _state;
-			_state.set(id);	
-			_state.setMessage(message);	
+			_state = state;
+			//_state.set(id);	
+			//_state.setMessage(message);
+			onStateChange(_state, oldState);
 			if (sender)
 				StateChange.emit(sender, _state, oldState); //self(), 
-			onStateChange(_state, oldState);
 			return true;
 		}
 		return false;
@@ -194,11 +205,6 @@ protected:
 	{ 
 		_state.setMessage(message);	
 	}
-
-	//virtual void* self()
-	//{ 
-	//	return this;
-	//}
 
 protected:
 	T _state;
@@ -212,12 +218,17 @@ protected:
 
 
 
+
+	//virtual void* self()
+	//{ 
+	//	return this;
+	//}
 	
 	/*
 			//T& state = this->state();
 	virtual bool setState(unsigned int id, const std::string& message = "") 
 	{ 	
-		if (canChangeState(id)) {
+		if (beforeStateChange(id)) {
 			T& state = this->state();
 			T oldState = state;
 			state.set(id);	

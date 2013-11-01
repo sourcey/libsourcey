@@ -90,42 +90,22 @@ void Parser::init(http_parser_type type)
 }
 
 
-bool Parser::parse(const char* data, std::size_t len) // std::size_t offset, , bool expectComplete
+bool Parser::parse(const char* data, std::size_t len)
 {
 	traceL("HTTPParser", this) << "Parse: " << len << endl;	
 	
-	//assert(!complete());
+	assert(!complete());
 	assert(_parser.data == this);
 
-	if (complete())
-		setParserError("Parsing already complete"); //true, 
-
-	std::size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len); //&data[offset]
-
-	// Set error state and throw
-    if (!_parser.upgrade && nparsed != len) { //_parser.http_errno != HPE_OK
-		
-		//if ()
-		//enum http_errno err = HTTP_PARSER_ERRNO(&_parser);		
-		//traceL("HTTPParser", this) << "Parse Errno: " << http_errno_name(err) << endl;	
-		//warnL("HTTPParser", this) << "########## Parser Error" << endl;	
-		//traceL("HTTPParser", this) << "Data: " << std::string(data, len) << endl;	
-		//traceL("HTTPParser", this) << "Binary: " << util::dumpbin(data, len) << endl;	
-		//traceL("HTTPParser", this) << "Is OK: " << (_parser.http_errno == HPE_OK) << endl;	
-		//traceL("HTTPParser", this) << "Do Upgrade: " << upgrade() << endl;	
-
-		/// HACK: Getting strage issue where parser
-		/// is parsing 1 character short.
-		/// This happens when attempting to delete from callback scope
-		//if (nparsed == len - 1)
-		//	assert(0);
-			//return true;true
-
+	if (complete()) {
+		setParserError("Parsing already complete");
+	}
+	
+	// Parse and handle errors
+	std::size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len);
+    if (nparsed != len && !_parser.upgrade) { //_parser.http_errno != HPE_OK
 		setParserError();
 	}
-
-	//else if (expectComplete && !complete())
-	//	setParserError(true, "Incomplete HTTP message");
 	
 	return complete();
 }
@@ -182,8 +162,9 @@ void Parser::setObserver(ParserObserver* observer)
 
 http::Message* Parser::message()
 {
-	return _request ? static_cast<http::Message*>(_request) : 
-		_response ? static_cast<http::Message*>(_response) : nullptr;
+	return _request ? static_cast<http::Message*>(_request) 
+		: _response ? static_cast<http::Message*>(_response) 
+		: nullptr;
 }
 
 
@@ -240,9 +221,8 @@ void Parser::onHeadersEnd()
 	//headers->setKeepAlive(http_should_keep_alive(parser) > 0);
 	
 	/// Request HTTP method
-	if (_request) {
+	if (_request)
 		_request->setMethod(http_method_str(static_cast<http_method>(_parser.method)));
-	}
 	
 	if (_observer)
 		_observer->onParserHeadersEnd();
@@ -361,7 +341,7 @@ int Parser::on_headers_complete(http_parser* parser)
 	assert(self);
 	assert(&self->_parser == parser);
 
-	/// Add last entry if any
+	// Add last entry if any
 	if (!self->_lastHeaderField.empty()) {
 		self->onHeader(self->_lastHeaderField, self->_lastHeaderValue);
 	}

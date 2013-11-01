@@ -231,7 +231,7 @@ void ServerConnection::onHeaders()
 		traceL("ServerConnection", this) << "Upgrading to WebSocket: " << _request << endl;
 		_upgrade = true;
 
-		WebSocketConnectionAdapter* wsAdapter = new WebSocketConnectionAdapter(*this, WebSocket::ServerSide);
+		auto wsAdapter = new WebSocketConnectionAdapter(*this, WebSocket::ServerSide);
 				
 		// Note: To upgrade the connection we need to replace the 
 		// underlying SocketAdapter instance. Since we are currently 

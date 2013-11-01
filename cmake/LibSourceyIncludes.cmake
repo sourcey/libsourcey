@@ -95,7 +95,8 @@ macro(include_sourcey_modules)
        message(ERROR "Unable to include dependent LibSourcey module ${name}. The build may fail.")
     endif()
         
-    set(lib_name "Sourcey${name}${LibSourcey_DLLVERSION}")
+    set_scy_libname(${name} lib_name)
+    #set(lib_name "Sourcey${name}${LibSourcey_DLLVERSION}")
     
     # Create a Debug and a Release list for MSVC        
     if (MSVC)    

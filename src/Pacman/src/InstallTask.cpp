@@ -202,12 +202,8 @@ void InstallTask::doDownload()
 	}
 	*/
 
-	// Initialize a HTTP transaction to download the file.
-	// If the transaction fails an exception will be thrown.
-	//http::Request* request = new http::Request("GET", asset.url());	
-	
 	std::string outfile = _manager.getCacheFilePath(asset.fileName());
-	_dlconn = new http::ClientConnection(asset.url());
+	_dlconn = http::createConnection(asset.url());
 	if (!_manager.options().httpUsername.empty()) {
 		http::BasicAuthenticator cred(
 			_manager.options().httpUsername, 
@@ -226,15 +222,6 @@ void InstallTask::doDownload()
 	_dlconn->send();
 
 	_downloading = true;
-	/*
-	if (!_dlconn->send() && 
-		!_dlconn->cancelled())
-		throw std::runtime_error(format("Cannot download package files: HTTP Error: %d %s", 
-			static_cast<int>(_dlconn->response().getStatus()), 
-			_dlconn->response().getReason()));
-	
-	log("debug") << "download complete" << endl; 
-			*/
 }
 
 
@@ -277,54 +264,21 @@ void InstallTask::doExtract()
 	// Create the output directory
 	std::string tempDir(_manager.getIntermediatePackageDir(_local->id()));
 	
-	log("debug") << "unpacking archive: " << archivePath << " to " << tempDir << endl;
+	log("debug") << "Unpacking archive: " << archivePath << " to " << tempDir << endl;
 
 	// Reset the local installation manifest before extraction
 	_local->manifest().root.clear();
 	
 	// Decompress the archive
-	arc::ZipFile zip(archivePath);	
-		
-	// Print contents to the log file
-	//for (size_t i = 0; i < zip.info.size(); i++)
-	//	log("debug") << "Zip file contains: " << zip.info[i].path << endl;
-
-	zip.extractTo(tempDir);
-
-	/*
-	// Extract the archive filed. An exception will be thrown
-	// if any errors are encountered and the task will fail.
-	ifstream in(archivePath.toString().c_str(), ios::binary);
-	Poco::Zip::Decompress c(in, tempDir);
-	c.EError += Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const string> >(this, &InstallTask::onDecompressionError);
-	c.EOk +=Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path> >(this, &InstallTask::onDecompressionOk);
-
-	c.decompressAllFiles();
-	c.EError -= Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const string> >(this, &InstallTask::onDecompressionError);
-	c.EOk -=Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path> >(this, &InstallTask::onDecompressionOk);
-	*/
-}
-
-
-/*
-void InstallTask::onDecompressionError(const void*, pair<const Poco::Zip::ZipLocalFileHeader, const string>& info)
-{
-	log("error") << "Decompression Error: " << info.second << endl;
-
-	// Extraction failed, throw an exception
-	throw std::runtime_error("Archive Error: Extraction failed: " + info.second);
-}
-
-
-void InstallTask::onDecompressionOk(const void*, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info)
-{
-	log("debug") << "Decompressing: " 
-		<< info.second.toString() << endl; 
+	arc::ZipFile zip(archivePath);			
+	while (zip.goToNextFile()) {
+		zip.extractCurrentFile(tempDir, true);
 	
-	// Add the extracted file to out package manifest
-	_local->manifest().addFile(info.second.toString()); 
+		// Add the extracted file to the package install manifest	
+		// Note: Manifest stores relative paths
+		_local->manifest().addFile(zip.currentFileName()); 
+	}
 }
-*/
 
 
 void InstallTask::doFinalize() 
@@ -337,6 +291,7 @@ void InstallTask::doFinalize()
 
 	// Ensure the install directory exists
 	fs::mkdirr(installDir);
+	log("debug") << "Finalizing to: " << installDir << endl;
 	
 	// Move all extracted files to the installation path
 	StringVec nodes;
@@ -504,3 +459,51 @@ InstallOptions& InstallTask::options()
 
 
 } } // namespace scy::pman
+
+
+
+	/*
+	if (!_dlconn->send() && 
+		!_dlconn->cancelled())
+		throw std::runtime_error(format("Cannot download package files: HTTP Error: %d %s", 
+			static_cast<int>(_dlconn->response().getStatus()), 
+			_dlconn->response().getReason()));
+	
+	log("debug") << "download complete" << endl; 
+			*/
+
+		
+	// Print contents to the log file
+	//for (size_t i = 0; i < zip.info.size(); i++)
+	//	log("debug") << "Zip file contains: " << zip.info[i].path << endl;
+	//zip.extractTo(tempDir);
+
+	/*
+	// Extract the archive filed. An exception will be thrown
+	// if any errors are encountered and the task will fail.
+	ifstream in(archivePath.toString().c_str(), ios::binary);
+	Poco::Zip::Decompress c(in, tempDir);
+	c.EError += Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const string> >(this, &InstallTask::onDecompressionError);
+	c.EOk +=Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path> >(this, &InstallTask::onDecompressionOk);
+
+	c.decompressAllFiles();
+	c.EError -= Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const string> >(this, &InstallTask::onDecompressionError);
+	c.EOk -=Poco::Delegate<InstallTask, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path> >(this, &InstallTask::onDecompressionOk);
+	*/
+
+/*
+void InstallTask::onDecompressionError(const void*, pair<const Poco::Zip::ZipLocalFileHeader, const string>& info)
+{
+	log("error") << "Decompression Error: " << info.second << endl;
+
+	// Extraction failed, throw an exception
+	throw std::runtime_error("Archive Error: Extraction failed: " + info.second);
+}
+
+
+void InstallTask::onDecompressionOk(const void*, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info)
+{
+	log("debug") << "Decompressing: " 
+		<< info.second.toString() << endl; 
+}
+*/

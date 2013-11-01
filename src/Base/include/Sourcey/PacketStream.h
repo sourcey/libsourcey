@@ -147,6 +147,14 @@ struct PacketAdapterReference
 typedef std::vector<PacketAdapterReference> PacketAdapterVec;
 
 
+enum PacketFlags 
+	/// Flags which determine how the packet is handled by the PacketStream
+{	
+	NoModify = 0x01,    // The packet should not be modified by processors.
+	Final		        // The final packet in the stream.
+};
+
+
 //
 // Packet Stream State
 //
@@ -210,11 +218,14 @@ public:
 
 	PacketAdapterVec processors() const;
 		// Returns a list of all stream processors.
-
-	bool waitForSync();
+	
+	bool waitForRunner();
 		// Block the calling thread until all packets have been flushed,
 		// and internal states have been synchronized.
 		// This function is only useful after calling stop() or pause().
+
+	bool waitForState(PacketStreamState::ID state);
+		// Block the calling thread until the given state is synchronized.
 
 	int numSources() const;
 	int numProcessors() const;
@@ -328,7 +339,8 @@ protected:
 		// Overrides RunnableQueue::dispatchNext to ensure that stream 
 		// states are correctly synchronized with the async context.
 	
-	virtual void onStateChange(PacketStreamState& state, const PacketStreamState& oldState);
+	virtual bool beforeStateChange(const PacketStreamState& state); //, const PacketStreamState& oldStateunsigned int id, const std::string& message = ""
+		// Override the setState method 
 	
 	void queueState(PacketStreamState::ID state);
 	bool statePendingOrEquals(PacketStreamState::ID state) const;
@@ -413,6 +425,9 @@ public:
 	
 	virtual bool closed() const;
 		// Returns true when the stream is in the Closed or Error state.
+
+	virtual bool async() const;
+		// Returns true is the underlying Runner is set and is thread-based.
 	
 	virtual bool lock();
 		// Sets the stream to locked state.
@@ -460,7 +475,7 @@ public:
 		// Note: The pointer will be forgotten about, so if the freePointer
 		// flag set when calling attach() will have no effect.
 
-	virtual void setAsyncContext(async::Runner::ptr runner);
+	virtual void setRunner(async::Runner::ptr runner);
 		// Set the asynchronous context for packet processing.
 		// This may be a Thread or another derivative of Async.
 		// Must be set before the stream is activated.

@@ -137,7 +137,7 @@ bool DiagnosticManager::addDiagnostic(IDiagnostic* test)
 	assert(!test->name.empty());
 	
 	traceL() << "Adding Diagnostic: " << test->name << endl;	
-	test->StateChange += delegate(this, &DiagnosticManager::onDiagnosticStateChange);
+	//test->StateChange += delegate(this, &DiagnosticManager::onDiagnosticStateChange);
 	return DiagnosticStore::add(test->name, test);
 }
 
@@ -150,7 +150,7 @@ bool DiagnosticManager::freeDiagnostic(const std::string& name)
 	IDiagnostic* test = DiagnosticStore::remove(name);
 	if (test) {
 		// TODO: 
-		test->StateChange -= delegate(this, &DiagnosticManager::onDiagnosticStateChange);
+		//test->StateChange -= delegate(this, &DiagnosticManager::onDiagnosticStateChange);
 		delete test;
 		return true;
 	}

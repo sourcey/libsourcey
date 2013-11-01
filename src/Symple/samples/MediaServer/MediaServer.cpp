@@ -200,11 +200,13 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 		auto& media = av::MediaFactory::instance();
 		if (options.oformat.video.enabled) {
 			media.devices().getDefaultVideoCaptureDevice(dev);
+			infoL("HTTPStreamingConnectionFactory") << "Default video capture " << dev.id << endl;
 			options.videoCapture = media.createVideoCapture(dev.id);
 			options.videoCapture->getEncoderFormat(options.iformat);	
 		}
 		if (options.oformat.audio.enabled) {
 			media.devices().getDefaultAudioInputDevice(dev);
+			infoL("HTTPStreamingConnectionFactory") << "Default audio capture " << dev.id << endl;
 			options.audioCapture = media.createAudioCapture(dev.id, 
 				options.oformat.audio.channels, 
 				options.oformat.audio.sampleRate);
@@ -291,14 +293,14 @@ int main(int argc, char** argv)
 		// capture instances may be pending deletion and we 
 		// need to dereference the implementation instances
 		// so system devices can be properly released.
-		GarbageCollector::instance().finalize();
+		//GarbageCollector::instance().finalize();
 
 		// Shutdown the media factory and release devices
 		MediaFactory::instance().unloadVideo();		
 		MediaFactory::shutdown();
 
 		// Shutdown the garbage collector once and for all
-		GarbageCollector::instance().shutdown();	
+		//GarbageCollector::instance().shutdown();	
 		
 		// Finalize the application to free all memory
 		// Note: 2 tiny mem leaks (964 bytes) are from OpenCV

@@ -44,9 +44,13 @@ ClientConnection::ClientConnection(http::Client* client, const URL& url, const n
 	IncomingProgress.sender = this;
 	OutgoingProgress.sender = this;
 		
-	_request.setURI(url.str());
+	_request.setURI(url.pathEtc());
+	_request.setHost(url.host(), url.port());
 
 	_socket.replaceAdapter(new ClientAdapter(*this));
+		
+	// Set default error status
+	_response.setStatus(http::StatusCode::BadGateway);
 
 	if (_client) {
 		_client->Shutdown += delegate(this, &ClientConnection::onClientShutdown);
@@ -66,8 +70,12 @@ ClientConnection::ClientConnection(const URL& url, const net::Socket& socket) :
 
 	IncomingProgress.sender = this;
 	OutgoingProgress.sender = this;
+			
+	_request.setURI(url.pathEtc());
+	_request.setHost(url.host(), url.port());
 	
-	_request.setURI(url.str());
+	// Set default error status
+	_response.setStatus(http::StatusCode::BadGateway);
 
 	_socket.replaceAdapter(new ClientAdapter(*this));
 }
@@ -105,19 +113,32 @@ void ClientConnection::close()
 
 void ClientConnection::send()
 {
-	traceL("ClientConnection", this) << "Send request" << endl;	
-	
-	// Set default error status
-	_response.setStatus(http::StatusCode::BadGateway);
+	traceL("ClientConnection", this) << "Sending" << endl;	
 
-	_socket.Connect += delegate(this, &ClientConnection::onSocketConnect);
-	_socket.connect(_url.host(), _url.port());
+	if (_socket.Connect.refCount() == 0) {
+		_socket.Connect += delegate(this, &ClientConnection::onSocketConnect);
+		_socket.connect(_url.host(), _url.port());
+	}
 }
 
 
 void ClientConnection::send(http::Request& req)
 {
 	_request = req;
+	send();
+}
+
+
+void ClientConnection::sendData(const char* buf, std::size_t len) //, int flags
+{
+	Connection::sendData(buf, len);
+	send();
+}
+
+
+void ClientConnection::sendData(const std::string& buf) //, int flags
+{
+	Connection::sendData(buf);
 	send();
 }
 
@@ -157,16 +178,19 @@ http::Message* ClientConnection::outgoingHeader()
 
 void ClientConnection::onSocketConnect(void*) 
 {
-	traceL("ClientConnection", this) << "connected" << endl;
-	_socket.Connect -= delegate(this, &ClientConnection::onSocketConnect);
+	traceL("ClientConnection", this) << "On connect" << endl;
+
+	// Don't desconnect the delegate so send() won't be called again
+	//_socket.Connect -= delegate(this, &ClientConnection::onSocketConnect);
 	
 	// Emit the connect signal so raw connections ie. 
 	// websockets can kick off the data flow
 	Connect.emit(this);
 
 	// Start the outgoing send stream if there  
-	// are any adapters attached.
-	if (Outgoing.base().numAdapters())
+	// are any queued packets or adapters attached.
+	if (Outgoing.base().size() ||
+		Outgoing.base().numAdapters())
 		Outgoing.start();
 	
 	// Send the outgoing HTTP header if there 
@@ -284,7 +308,7 @@ void Client::shutdown()
 	if (!connections.empty())
 		Shutdown.emit(this);
 
-	/// Connections must remove themselves
+	// Connections must remove themselves
 	assert(connections.empty());
 }
 

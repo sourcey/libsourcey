@@ -266,7 +266,7 @@ bool compareVersion(const std::string& l, const std::string& r)
 void removeSpecialCharacters(std::string& str, bool allowSpaces) 
 {    
 	for (size_t i = 0; i < str.length(); ++i)
-		if (!::isalnum(str[i]) || (!allowSpaces && ::isspace(str[i])))
+		if (!::isalnum(str[i]) && (!allowSpaces || !::isspace(str[i])) && str[i] != '.')
 			str.erase(i, 1);
 }
 
@@ -274,7 +274,7 @@ void removeSpecialCharacters(std::string& str, bool allowSpaces)
 void replaceSpecialCharacters(std::string& str, char with, bool allowSpaces) 
 {    
 	for (size_t i = 0; i < str.length(); ++i)
-		if (!::isalnum(str[i]) || (!allowSpaces && ::isspace(str[i])))
+		if (!::isalnum(str[i]) && (!allowSpaces || !::isspace(str[i])) && str[i] != '.')
 			str[i] = with;
 }
 

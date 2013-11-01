@@ -65,7 +65,7 @@ void Scheduler::clear()
 }
 
 
-void Scheduler::onIdle() 
+void Scheduler::run() 
 {
 	//traceL("Scheduler", this) << "Running" << endl;
 	//while (!_stopped) 

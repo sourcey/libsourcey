@@ -24,20 +24,20 @@ namespace scy {
 
 
 SyncContext::SyncContext(uv::Loop* loop) : 
-	ptr(loop, new uv_async_t)
+	_handle(loop, new uv_async_t)
 {
 }
 
 
 SyncContext::SyncContext(uv::Loop* loop, std::function<void()> target) : 
-	ptr(loop, new uv_async_t)
+	_handle(loop, new uv_async_t)
 {
 	start(target);
 }
 
 
 SyncContext::SyncContext(uv::Loop* loop, std::function<void(void*)> target, void* arg) : 
-	ptr(loop, new uv_async_t)
+	_handle(loop, new uv_async_t)
 {
 	start(target, arg);
 }
@@ -45,45 +45,78 @@ SyncContext::SyncContext(uv::Loop* loop, std::function<void(void*)> target, void
 	
 SyncContext::~SyncContext()
 {
-	//assert(ptr.closed()); // must be dispose()d
+	//assert(_handle.closed()); // must be dispose()d
 }
 
 
 void SyncContext::post()
 {
-	assert(!ptr.closed());
-	uv_async_send(ptr.handle<uv_async_t>());
+	assert(!_handle.closed());
+	uv_async_send(_handle.ptr<uv_async_t>());
 }
 
 
 void SyncContext::startAsync()
 {
-	assert(!ptr.active());	
+	assert(!_handle.active());	
+	
+	_handle.ptr()->data = new async::Runner::Context::ptr(pContext);
+	int r = uv_async_init(_handle.loop(), _handle.ptr<uv_async_t>(), [](uv_async_t* req, int) {
+		assert(req->data != nullptr); // catch late callbacks, may need to
+		                              // make uv handle a context member
+		auto ctx = reinterpret_cast<async::Runner::Context::ptr*>(req->data);
+		if (ctx->get()->cancelled()) {
+			delete ctx; // delete the context and free memory
+			req->data = nullptr;
+			return;
+		}
 
-	ptr.handle()->data = &pContext;
-	int r = uv_async_init(ptr.loop(), ptr.handle<uv_async_t>(), [](uv_async_t* req, int) {
-		runAsync(*reinterpret_cast<const async::Runner::Context::ptr*>(req->data));
+		runAsync(ctx->get());		
 	});
 
-	if (r < 0) ptr.setAndThrowError("Cannot initialize async", r);		
+	/*
+	_handle.ptr()->data = &pContext;
+	int r = uv_async_init(_handle.loop(), _handle.ptr<uv_async_t>(), [](uv_async_t* req, int) {
+		const auto& ptr = *reinterpret_cast<const async::Runner::Context::ptr*>(req->data);
+		errorL("SyncContext") << "runAsync: " << ptr << std::endl;	
+		//if (ptr->cancelled())
+		//	uv_idle_stop(ptr);
+		runAsync(ptr.get());
+	});
+	*/
+
+	if (r < 0) _handle.setAndThrowError("Cannot initialize async", r);		
+}
+
+
+void SyncContext::cancel()
+{
+	async::Runner::cancel();
 }
 
 
 void SyncContext::close()
 {
-	ptr.close();
+	cancel();
+	_handle.close();
 }
 
 
 bool SyncContext::closed()
 {
-	return ptr.closed();
+	return _handle.closed();
 }
 
 	
-bool SyncContext::synced() const
+bool SyncContext::async() const
 {
-	return true;
+	return false;
+}
+
+
+uv::Handle& SyncContext::handle()
+{
+	return _handle;
 }
 
 
@@ -93,14 +126,14 @@ bool SyncContext::synced() const
 
 
 Idler::Idler(uv::Loop* loop) : 
-	ptr(loop, new uv_async_t)
+	_handle(loop, new uv_async_t)
 {
 	init();
 }
 
 
 Idler::Idler(uv::Loop* loop, std::function<void()> target) : 
-	ptr(loop, new uv_async_t)
+	_handle(loop, new uv_async_t)
 {
 	init();
 	start(target);
@@ -108,7 +141,7 @@ Idler::Idler(uv::Loop* loop, std::function<void()> target) :
 
 
 Idler::Idler(uv::Loop* loop, std::function<void(void*)> target, void* arg) : 
-	ptr(loop, new uv_async_t)
+	_handle(loop, new uv_async_t)
 {
 	init();
 	start(target, arg);
@@ -117,22 +150,55 @@ Idler::Idler(uv::Loop* loop, std::function<void(void*)> target, void* arg) :
 	
 Idler::~Idler()
 {
-	//assert(ptr.closed()); // must be dispose()d
+	//assert(_handle.closed()); // must be dispose()d
 }
 
 
 void Idler::init()
 {	
-	uv_idle_init(ptr.loop(), ptr.handle<uv_idle_t>());
+	pContext->repeating = true;
+	pContext->handle = _handle.ptr<uv_idle_t>();
+	uv_idle_init(_handle.loop(), _handle.ptr<uv_idle_t>());
+	_handle.unref(); // unref by default
 }
 
 
-void Idler::unref()
-{	
-	assert(ptr.active()); // should only call once after init()
-	uv_unref(ptr.handle()); // don't increment main loop
-	assert(!ptr.active());
+void Idler::startAsync()
+{
+	assert(!_handle.closed()); // close() must not have been called
+	
+	_handle.ptr()->data = new async::Runner::Context::ptr(pContext);
+	int r = uv_idle_start(_handle.ptr<uv_idle_t>(), [](uv_idle_t* req, int) {
+		auto ctx = reinterpret_cast<async::Runner::Context::ptr*>(req->data);
+		runAsync(ctx->get());
+		if (ctx->get()->handle && ctx->get()->cancelled()) {
+			uv_idle_stop(reinterpret_cast<uv_idle_t*>(ctx->get()->handle));
+			delete ctx; // delete the context and free memory
+		}
+		scy::sleep(1); // prevent 100% idle CPU
+		               // TODO: uv_thread_yield when available
+	});
+
+	if (r < 0) _handle.setAndThrowError("Cannot initialize idler", r);		
 }
+
+
+uv::Handle& Idler::handle()
+{
+	return _handle;
+}
+
+	
+bool Idler::async() const
+{
+	return false;
+}
+
+
+} // namespace scy
+
+
+
 
 
 /*
@@ -140,26 +206,7 @@ void Idler::cancel()
 {
 	traceL("Idler") << "cancel: " << pContext << std::endl;	
 	//cancel();
-	uv_idle_stop(ptr.handle<uv_idle_t>());
-}
-*/
-
-
-void Idler::startAsync()
-{
-	assert(!ptr.closed()); // close() must not have been called
-	
-	pContext->opaque = ptr.handle<uv_idle_t>();
-	ptr.handle()->data = &pContext;
-	int r = uv_idle_start(ptr.handle<uv_idle_t>(), [](uv_idle_t* req, int) {
-		const auto& ptr = *reinterpret_cast<const async::Runner::Context::ptr*>(req->data);
-		runAsync(ptr);
-		if (ptr->cancelled() && ptr->opaque)
-			uv_idle_stop(reinterpret_cast<uv_idle_t*>(ptr->opaque));
-		scy::sleep(1); // required or 100% idle CPU
-	});
-
-	if (r < 0) ptr.setAndThrowError("Cannot initialize idler", r);		
+	uv_idle_stop(_handle.ptr<uv_idle_t>());
 }
 
 
@@ -172,26 +219,15 @@ void Idler::restart()
 void Idler::close()
 {
 	cancel();
-	ptr.close();
+	_handle.close();
 }
 
 
 bool Idler::closed()
 {
-	return ptr.closed();
+	return _handle.closed();
 }
-
-	
-bool Idler::synced() const
-{
-	return true;
-}
-
-
-} // namespace scy
-
-
-
+*/
 	
 /*
 
@@ -218,7 +254,7 @@ void SyncContext::dispose()
 }
 */
 
-    //int r = uv_idle_start(ptr.handle<uv_idle_t>(), [](uv_idle_t* req, int) {
+    //int r = uv_idle_start(_handle.ptr<uv_idle_t>(), [](uv_idle_t* req, int) {
 	//	auto callback = reinterpret_cast<CallbackRef*>(req->data);
 	//	callback->func(); // (callback->self);
 	//	scy::sleep(1); // required or 100% CPU
