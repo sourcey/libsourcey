@@ -175,7 +175,7 @@ void Idler::startAsync()
 			uv_idle_stop(reinterpret_cast<uv_idle_t*>(ctx->get()->handle));
 			delete ctx; // delete the context and free memory
 		}
-		scy::sleep(1); // prevent 100% idle CPU
+		//scy::sleep(1); // prevent 100% idle CPU
 		               // TODO: uv_thread_yield when available
 	});
 
@@ -257,5 +257,5 @@ void SyncContext::dispose()
     //int r = uv_idle_start(_handle.ptr<uv_idle_t>(), [](uv_idle_t* req, int) {
 	//	auto callback = reinterpret_cast<CallbackRef*>(req->data);
 	//	callback->func(); // (callback->self);
-	//	scy::sleep(1); // required or 100% CPU
+	//	// scy::sleep(1); // required or 100% CPU
 	//});

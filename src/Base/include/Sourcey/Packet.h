@@ -51,22 +51,6 @@ class IPacket: public basic::Polymorphic
 	// processing and callbacks using PacketStream and friends.
 { 
 public:
-	void* source;
-		// Packet source pointer reference which enables processors
-		// along the signal chain can determine the packet origin.
-		// Often a subclass of PacketStreamSource.
-
-	IPacketInfo* info;
-		// Optional extra information about the packet.
-		// This pointer is managed by the packet.
-
-	Bitwise flags;
-		// Provides basic information about the packet.	
-
-	void* opaque;
-		// Optional client data pointer.
-		// This pointer is not managed by the packet.
-	
 	IPacket(void* source = nullptr, void* opaque = nullptr, IPacketInfo* info = nullptr, unsigned flags = 0) : 
 		source(source), opaque(opaque), info(info), flags(flags) {}
 	
@@ -89,23 +73,51 @@ public:
 	
 	virtual IPacket* clone() const = 0;	
 
-	virtual ~IPacket() {
+	virtual ~IPacket() 
+	{
 		if (info) delete info;
 	}
-	
-	virtual bool read(const ConstBuffer&) = 0;
-	virtual void write(Buffer&) const = 0;
 
-	// Todo: It would be prefferable to use our pod types here
-	// instead of buffer input, but the current codebase requires
-	// that the buffer be dynamically resizable for some protocols... 
-	//
-	// virtual void write(MutableBuffer&) const = 0;
+	void* source;
+		// Packet source pointer reference which enables processors
+		// along the signal chain can determine the packet origin.
+		// Often a subclass of PacketStreamSource.
+
+	IPacketInfo* info;
+		// Optional extra information about the packet.
+		// This pointer is managed by the packet.
+
+	Bitwise flags;
+		// Provides basic information about the packet.	
+
+	void* opaque;
+		// Optional client data pointer.
+		// This pointer is not managed by the packet.
+		
+	virtual std::size_t read(const ConstBuffer&) = 0;
+		// Read/parse to the packet from the given input buffer.
+		// The number of bytes read is returned.
 	
-	virtual char* data() const { return nullptr; }
-	virtual bool hasData() const { return data() != nullptr; }
+	virtual void write(Buffer&) const = 0;
+		// Copy/generate to the packet given output buffer.
+		// The number of bytes written can be obtained from the buffer.
+		// 
+		// Todo: It may be prefferable to use our pod types here
+		// instead of buffer input, but the current codebase requires
+		// that the buffer be dynamically resizable for some protocols... 
+		//
+		// virtual std::size_t write(MutableBuffer&) const = 0;
 
 	virtual std::size_t size() const { return 0; };
+		// The size of the packet in bytes.
+		//
+		// This is the nember of bytes that will be written on a call
+		// to write(), but may not be the number of bytes that will be
+		// consumed by read().
+	
+	virtual bool hasData() const { return data() != nullptr; }
+	virtual char* data() const { return nullptr; }
+		// The packet data pointer for buffered packets.
 
 	virtual const char* className() const = 0;
 	virtual void print(std::ostream& os) const { os << className() << std::endl; }
@@ -184,7 +196,7 @@ public:
 		std::memcpy(_data, data, size);
 	}	
 	
-	virtual bool read(const ConstBuffer& buf) 
+	virtual std::size_t read(const ConstBuffer& buf) 
 	{ 
 		copyData(bufferCast<const char*>(buf), buf.size());
 		return true;

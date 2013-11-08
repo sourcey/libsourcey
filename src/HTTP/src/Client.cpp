@@ -183,12 +183,12 @@ void ClientConnection::onSocketConnect(void*)
 	// Don't desconnect the delegate so send() won't be called again
 	//_socket.Connect -= delegate(this, &ClientConnection::onSocketConnect);
 	
-	// Emit the connect signal so raw connections ie. 
+	// Emit the connect signal so raw connections like
 	// websockets can kick off the data flow
 	Connect.emit(this);
 
-	// Start the outgoing send stream if there  
-	// are any queued packets or adapters attached.
+	// Start the outgoing send stream if there are
+	// any queued packets or adapters attached
 	if (Outgoing.base().size() ||
 		Outgoing.base().numAdapters())
 		Outgoing.start();

@@ -193,10 +193,11 @@ int TCPBase::send(const char* data, int len, const net::Address& /* peerAddress 
 {
 	//assert(len <= net::MAX_TCP_PACKET_SIZE); // libuv handles this for us
 	
+	traceL("TCPBase", this) << "Send: " << len << endl;
 	//if (len < 300)
-	//	traceL("TCPBase", this) << "Send: " << std::string(data, len) << endl;
+	//	traceL("TCPBase", this) << "Send: " << len << ": " << std::string(data, len) << endl;
 	//else
-	//	traceL("TCPBase", this) << "Send long: " << std::string(data, 300) << endl;
+	//	traceL("TCPBase", this) << "Send long: " << len << ": " << std::string(data, 300) << endl;
 
 	if (!Stream::write(data, len)) {
 		warnL("TCPBase", this) << "Send error" << endl;	

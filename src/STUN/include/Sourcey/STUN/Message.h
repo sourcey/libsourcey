@@ -111,7 +111,7 @@ public:
 			get(static_cast<Attribute::Type>(T::TypeID), index));
 	}
 
-	bool read(const ConstBuffer& buf);
+	std::size_t read(const ConstBuffer& buf);
 		/// Parses the STUN/TURN packet from the given buffer.
 		/// The return value indicates whether this was successful.
 

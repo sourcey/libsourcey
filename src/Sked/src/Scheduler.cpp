@@ -154,6 +154,10 @@ void Scheduler::run()
 
 		// Gulp
 		//Thread::sleep(10);		
+		
+
+		// Prevent 100% CPU
+		scy::sleep(5);
 
 		// Dispatch the Idle signal
 		// TODO: Send Idle complete iteration of all tasks, 

@@ -113,7 +113,6 @@ public:
 
 	typedef std::shared_ptr<Runner> ptr;
 		
-protected:	
 	struct Context
 		// The context which we send to the thread context.
 		// This allows us to garecefully handle late callbacks
@@ -166,6 +165,7 @@ protected:
 		}
 	};
 	
+protected:	
 	Context::ptr pContext;
 		// Shared pointer to the internal Runner::Context. 	
 

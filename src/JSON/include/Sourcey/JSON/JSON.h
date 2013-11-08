@@ -30,9 +30,6 @@
 namespace scy {
 namespace json {
 
-
-// check https://code.google.com/p/rapidjson/
-
 	
 typedef Json::Value Value;
 typedef Json::ValueIterator ValueIterator;
@@ -128,22 +125,22 @@ inline bool hasNestedKey(json::Value& root, const std::string& key, int depth = 
 inline bool findNestedObjectWithProperty(json::Value& root, json::Value*& result, 
 	const std::string& key, const std::string& value, 
 	bool partial = true, int index = 0, int depth = 0) 
-	/// Only works for objects with string values.
-	/// Key or value may be empty for selecting wildcard values.
-	/// If partial is false substring matches will be accepted.
-	/// Result must be a reference to a pointer or the root value's
-	/// internal reference will also be changed when the result is 
-	/// assigned. Further investigation into jsoncpp is required.
+	// Only works for objects with string values.
+	// Key or value may be empty for selecting wildcard values.
+	// If partial is false substring matches will be accepted.
+	// Result must be a reference to a pointer or the root value's
+	// internal reference will also be changed when the result is 
+	// assigned. Further investigation into jsoncpp is required.
 {
 	depth++;
 	if (root.isObject()) {
 		json::Value::Members members = root.getMemberNames();
 		for (size_t i = 0; i < members.size(); i++) {		
-			json::Value& test = root[members[i]];
+			json::Value& test = root[members[(int)i]];
 			if (test.isNull())
 				continue;
 			else if (test.isString() && 
-				(key.empty() || members[i] == key) &&
+				(key.empty() || members[(int)i] == key) &&
 				(value.empty() || (!partial ? 
 					test.asString() == value :
 					test.asString().find(value) != std::string::npos))) {
@@ -154,15 +151,15 @@ inline bool findNestedObjectWithProperty(json::Value& root, json::Value*& result
 						index--;
 			} 
 			else if ((test.isObject() || test.isArray()) &&
-				findNestedObjectWithProperty(root[members[i]], result, key, value, partial, index, depth))
+				findNestedObjectWithProperty(root[members[(int)i]], result, key, value, partial, index, depth))
 				return true;
 		}
 	}
 	else if (root.isArray()) {		
 		for (size_t i = 0; i < root.size(); i++) {		
-			json::Value& test = root[i];
+			json::Value& test = root[(int)i];
 			if (!test.isNull() && (test.isObject() || test.isArray()) &&
-				findNestedObjectWithProperty(root[i], result, key, value, partial, index, depth))
+				findNestedObjectWithProperty(root[(int)i], result, key, value, partial, index, depth))
 				return true;
 		}
 	}

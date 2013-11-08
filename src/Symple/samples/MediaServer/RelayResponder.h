@@ -47,6 +47,8 @@ public:
 		{		
 			// Initiate the TRUN client allocation
 			client.addPermission(peerIP);	
+			client.addPermission("127.0.0.1"); // for proxy
+			client.addPermission("192.168.1.1"); // for proxy
 			client.initiate();
 		} 
 		catch (std::exception& exc) {
@@ -80,7 +82,8 @@ protected:
 			AllocationCreated.emit(this, this->client);
 			break;
 		case turn::ClientState::Failed:
-			assert(0 && "Allocation failed");
+			//assert(0 && "Allocation failed");
+			warnL("RelayedStreamingAllocation", this) << "Relay connection lost" << std::endl;
 			break;
 		//case turn::ClientState::Terminated:	
 		//	break;
@@ -188,7 +191,7 @@ public:
 			<< std::endl;
 
 		turn::Client::Options co;
-		co.serverAddr = net::Address("127.0.0.1", 3478); // "173.230.150.125"
+		co.serverAddr = net::Address("124.150.77.174", 3478); // "127.0.0.1"
 		co.lifetime  = 120 * 1000;	// 2 minutes
 		co.timeout = 10 * 1000;
 		co.timerInterval = 3 * 1000;
@@ -202,13 +205,14 @@ public:
 	
 	void onAllocationCreated(void* sender, turn::Client& client)
 	{
-		debugL("RelayedStreamingResponder", this) << "Allocation Created" << std::endl;
-
 		allocation->AllocationCreated -= delegate(this, &RelayedStreamingResponder::onAllocationCreated);
+		std::string address(allocation->client.relayedAddress().toString());
+
+		debugL("RelayedStreamingResponder", this) << "Allocation Created: " << address << std::endl;
 					
 		// Send the relay address response to the initiator		
 		connection().response().set("Access-Control-Allow-Origin", "*");
-		connection().sendData(allocation->client.relayedAddress().toString());
+		connection().socket().send(address.c_str(), address.length());
 		connection().close();
 	}
 	

@@ -139,8 +139,10 @@ public:
 	virtual void flush()
 		// Flushes all outgoing items.
 	{
-		while (dispatchNext()) 
-			scy::sleep(1);
+		do {
+			// scy::sleep(1);
+		}
+		while (dispatchNext());			
 	}
 	
 	void clear()
@@ -193,9 +195,10 @@ public:
 	{
 		Stopwatch sw;
 		sw.start();
-		while (!cancelled() && sw.elapsedMilliseconds() < _timeout && dispatchNext()) {
-			scy::sleep(1);
+		do {
+			// scy::sleep(1);
 		}
+		while (!cancelled() && sw.elapsedMilliseconds() < _timeout && dispatchNext());
 	}
 	
 	int timeout()	

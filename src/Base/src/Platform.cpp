@@ -73,8 +73,8 @@ void sleep(int ms)
 {
 #ifdef WIN32
 	Sleep(ms);
-#else
-	sleep(ms);
+#else	
+	usleep(ms * 1000);
 #endif
 }
 

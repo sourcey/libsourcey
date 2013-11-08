@@ -372,11 +372,26 @@ void Client::onSocketRecv(void*, net::SocketPacket& packet)
 {	
 	log("trace") << "On socket recv: " << packet.size() << endl;
 
+	
+	sockio::Packet pkt;
+	char* buf = packet.data();
+	std::size_t len = packet.size();
+	std::size_t nread = 0;
+	while (len > 0 && (nread = pkt.read(constBuffer(buf, len))) > 0) {
+		onPacket(pkt);
+		buf += nread;
+		len -= nread;
+	}
+	if (len == packet.size())
+		log("warn") << "Failed to parse incoming SocketIO packet." << endl;	
+
+	/*
 	sockio::Packet pkt;
 	if (pkt.read(constBuffer(packet.data(), packet.size())))
 		onPacket(pkt);
 	else
 		log("warn") << "Failed to parse incoming SocketIO packet." << endl;	
+		*/
 }
 
 

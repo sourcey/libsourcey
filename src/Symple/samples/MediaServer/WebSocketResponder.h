@@ -86,8 +86,9 @@ public:
 		//assert(!connection().socket().closed());
 
 		try
-		{	
-			connection().sendData(packet.data(), packet.size(), http::WebSocket::Binary);
+		{				
+			connection().socket().send(packet.data(), packet.size(), http::WebSocket::Binary);
+			//connection().sendData(packet.data(), packet.size(), http::WebSocket::Binary);
 			fpsCounter.tick();		
 		}
 		catch (std::exception& exc)

@@ -282,6 +282,9 @@ void TaskRunner::run()
 	// Dispatch the Idle signal
 	//traceL("TaskRunner", this) << "idle: "<< Idle.refCount() << endl;
 	Idle.emit(this);
+
+	// Prevent 100% CPU
+	scy::sleep(1);
 }
 
 

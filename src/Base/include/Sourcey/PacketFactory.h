@@ -30,7 +30,7 @@ namespace scy {
 	
 struct IPacketCreationStrategy
 {
-	virtual IPacket* create(const ConstBuffer& buffer) const = 0;	
+	virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const = 0;	
 	virtual int priority() const = 0; // 0 - 100
 
 	static bool compareProiroty(const IPacketCreationStrategy* l, const IPacketCreationStrategy* r) {
@@ -51,10 +51,11 @@ struct PacketCreationStrategy: public IPacketCreationStrategy
 		_priority(priority) {
 		assert(_priority <= 100);
 	}
+	virtual ~PacketCreationStrategy() {};
 
-	virtual IPacket* create(const ConstBuffer& buffer) const {
-		PacketT* packet = new PacketT;
-		if (packet->read(buffer))
+	virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const {
+		auto packet = new PacketT;
+		if ((nread = packet->read(buffer)) > 0)
 			return packet;
 		delete packet;
 		return nullptr;
@@ -91,7 +92,7 @@ public:
 	template <class PacketT>
 	void unregisterPacketType() {
 		//Mutex::ScopedLock lock(_mutex);		
-		for (typename PacketCreationStrategyList::iterator it = _types.begin(); it != _types.end(); ++it) {
+		for (typename auto it = _types.begin(); it != _types.end(); ++it) {
 			if (dynamic_cast<PacketCreationStrategy<PacketT>*>(*it) != 0) {
 				delete *it;
 				_types.erase(it);
@@ -105,13 +106,13 @@ public:
 		unregisterStrategy<StrategyT>(); // ensure unique values
 		//Mutex::ScopedLock lock(_mutex);
 		_types.push_back(new StrategyT(priority));
-		sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
+		std::sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
 	}
 
 	template <class StrategyT>
 	void unregisterStrategy() {
 		//Mutex::ScopedLock lock(_mutex);		
-		for (typename PacketCreationStrategyList::iterator it = _types.begin(); it != _types.end(); ++it) {
+		for (typename auto it = _types.begin(); it != _types.end(); ++it) {
 			if (dynamic_cast<StrategyT*>(*it) != 0) {
 				delete *it;
 				_types.erase(it);
@@ -135,12 +136,12 @@ public:
 		return true;
 	}
 
-	virtual IPacket* createPacket(const ConstBuffer& buffer) {
+	virtual IPacket* createPacket(const ConstBuffer& buffer, std::size_t& nread) {
 		//Mutex::ScopedLock lock(_mutex);
 		assert(!_types.empty() && "no packet types registered");
 		//size_t offset = reader.position();
 		for (unsigned i = 0; i < _types.size(); i++) {
-			IPacket* packet = _types[i]->create(buffer);
+			IPacket* packet = _types[i]->create(buffer, nread);
 			if (packet) {
 				if (!onPacketCreated(packet)) {
 					delete packet;

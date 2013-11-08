@@ -19,14 +19,11 @@
 
 #include "Sourcey/Symple/Message.h"
 #include "Sourcey/Util.h"
-//#include "Sourcey/Crypto/Crypto.h"
 #include "Sourcey/Logger.h"
-//#include "Poco/Format.h"
 #include "assert.h"
 
 
 using namespace std;
-
 
 
 namespace scy {
@@ -72,16 +69,16 @@ IPacket* Message::clone() const
 }
 
 
-bool Message::read(const ConstBuffer& buf) 
+std::size_t Message::read(const ConstBuffer& buf) 
 {
 	return read(std::string(bufferCast<const char*>(buf), buf.size())); // refactor
 }
 
 
-bool Message::read(const std::string& root)
+std::size_t Message::read(const std::string& root)
 {
 	json::Reader reader;
-	return reader.parse(root, *this);
+	return reader.parse(root, *this) ? root.length() : 0;
 }
 
 
