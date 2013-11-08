@@ -823,34 +823,34 @@ int uv_spawn(uv_loop_t* loop,
       options->args == NULL) {
     return UV_EINVAL;
   }
-  
+
   assert(options->file != NULL);
   assert(!(options->flags & ~(UV_PROCESS_DETACHED |
                               UV_PROCESS_SETGID |
                               UV_PROCESS_SETUID |
                               UV_PROCESS_WINDOWS_HIDE |
                               UV_PROCESS_WINDOWS_VERBATIM_ARGUMENTS)));
-  
+
   uv_process_init(loop, process);
   process->exit_cb = options->exit_cb;
 
   err = uv_utf8_to_utf16_alloc(options->file, &application);
   if (err)
     goto immediate_failure;
-  
+
   err = make_program_args(
       options->args,
       options->flags & UV_PROCESS_WINDOWS_VERBATIM_ARGUMENTS,
       &arguments);
   if (err)
     goto immediate_failure;
-  
+
   if (options->env) {
      err = make_program_env(options->env, &env);
      if (err)
        goto immediate_failure;
   }
-  
+
   if (options->cwd) {
     /* Explicit cwd */
     err = uv_utf8_to_utf16_alloc(options->cwd, &cwd);
@@ -860,19 +860,19 @@ int uv_spawn(uv_loop_t* loop,
   } else {
     /* Inherit cwd */
     DWORD cwd_len, r;
-	
+
     cwd_len = GetCurrentDirectoryW(0, NULL);
     if (!cwd_len) {
       err = GetLastError();
       goto immediate_failure;
     }
-	
+
     cwd = (WCHAR*) malloc(cwd_len * sizeof(WCHAR));
     if (cwd == NULL) {
       err = ERROR_OUTOFMEMORY;
       goto immediate_failure;
     }
-	
+
     r = GetCurrentDirectoryW(cwd_len, cwd);
     if (r == 0 || r >= cwd_len) {
       err = GetLastError();
@@ -883,30 +883,30 @@ int uv_spawn(uv_loop_t* loop,
   /* Get PATH environment variable. */
   {
     DWORD path_len, r;
-	
+
     path_len = GetEnvironmentVariableW(L"PATH", NULL, 0);
     if (path_len == 0) {
       err = GetLastError();
       goto immediate_failure;
     }
-	
+
     path = (WCHAR*) malloc(path_len * sizeof(WCHAR));
     if (path == NULL) {
       err = ERROR_OUTOFMEMORY;
       goto immediate_failure;
     }
-	
+
     r = GetEnvironmentVariableW(L"PATH", path, path_len);
     if (r == 0 || r >= path_len) {
       err = GetLastError();
       goto immediate_failure;
     }
   }
-  
+
   err = uv__stdio_create(loop, options, &process->child_stdio_buffer);
   if (err)
     goto immediate_failure;
-  
+
   /* Beyond this point, failure is reported asynchronously. */
 
   application_path = search_path(application,
@@ -937,7 +937,7 @@ int uv_spawn(uv_loop_t* loop,
   } else {
     startup.wShowWindow = SW_SHOWDEFAULT;
   }
-  
+
   process_flags = CREATE_UNICODE_ENVIRONMENT;
 
   if (options->flags & UV_PROCESS_DETACHED) {
@@ -953,7 +953,7 @@ int uv_spawn(uv_loop_t* loop,
      */
     process_flags |= DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP;
   }
-  
+
   if (CreateProcessW(application_path,
                      arguments,
                      NULL,
@@ -967,7 +967,7 @@ int uv_spawn(uv_loop_t* loop,
     /* Spawn succeeded */
     process->process_handle = info.hProcess;
     process->pid = info.dwProcessId;
-	
+
     /* If the process isn't spawned as detached, assign to the global job */
     /* object so windows will kill it when the parent process dies. */
     if (!(options->flags & UV_PROCESS_DETACHED)) {
@@ -1014,7 +1014,7 @@ int uv_spawn(uv_loop_t* loop,
     /* CreateProcessW failed. */
     err = GetLastError();
   }
-  
+
   /* We get here if we successfully created a process, or when we */
   /* encountered failure that we want to report asynchronously. */
  success_or_async_failure:

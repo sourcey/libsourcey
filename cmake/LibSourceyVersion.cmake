@@ -22,5 +22,5 @@ if(WIN32)
 else()
     # Postfix of so's:
     set(LibSourcey_DLLVERSION "")
-    set(LibSourcey_DEBUG_POSTFIX)
+    set(LibSourcey_DEBUG_POSTFIX "")
 endif()

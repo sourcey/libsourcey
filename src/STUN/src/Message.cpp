@@ -190,41 +190,43 @@ Attribute* Message::get(Attribute::Type type, int index) const
 }
 
 
-bool Message::read(const ConstBuffer& buf) //BitReader& reader
+std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
 {	
+	errorL("STUNMessage") << "Parse STUN packet: " << buf.size() << endl;
+
 	try 
 	{
 		BitReader reader(buf);
 		reader.getU16(_type);
-
+		
 		if (_type & 0x8000) {
 			// RTP and RTCP set MSB of first byte, since first two bits are version, 
 			// and version is always 2 (10). If set, this is not a STUN packet.
-			//errorL("STUNMessage") << "Not STUN packet" << endl;
-			return false;
+			errorL("STUNMessage") << "Not STUN packet" << endl;
+			return 0;
 		}
 
 		reader.getU16(_size);
+		if (_size > buf.size()) {
+			warnL("STUNMessage") << "Packet larger than buffer: " << _size << " > " << buf.size() << endl;
+			return 0;
+		}
 
 		std::string transactionID;
 		reader.get(transactionID, 16);
 		assert(transactionID.size() == 16);
 		_transactionID = transactionID;
 
-		if (_size > reader.available()) {
-			warnL("STUNMessage") << "Buffer error: " << _size << " > " << reader.available() << endl;
-			//return false;
-		}
-
-		_attrs.resize(0);
-
+		_attrs.clear();
+		
+		bool integrity = false;
 		size_t rest = reader.available() - _size;
 		while (reader.available() > rest) {
 			UInt16 attrType, attrLength;
 			reader.getU16(attrType);
 			reader.getU16(attrLength);
-
-			Attribute* attr = Attribute::create(attrType, attrLength);
+			
+			auto attr = Attribute::create(attrType, attrLength);
 			if (!attr) {
 				// Allow for unrecognised attributes.
 				warnL("STUNMessage") << "Failed to parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
@@ -232,21 +234,28 @@ bool Message::read(const ConstBuffer& buf) //BitReader& reader
 			}
 			attr->read(reader); // parse or throw
 			_attrs.push_back(attr);
+			integrity = attrType == stun::Attribute::MessageIntegrity;
+			
+			warnL("STUNMessage") << "Parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
+			;
 		}
 
-		if (reader.available() != rest) {
-			warnL("STUNMessage") << "Wrong message size (" << rest << " != " << reader.available() << ")" << endl;
-			assert(0); // remove me
-			return false;
-		}
-	
-		return true; // ok
+		//if (reader.available() != rest) {
+		//	warnL("STUNMessage") << "Wrong message size (" << rest << " != " << reader.available() << ")" << endl;
+		//	assert(0); // remove me
+		//	return false;
+		//}	
+
+		warnL("STUNMessage") << "Parse success: " << _size << ": " << buf.size() << ": " << rest << ": " << reader.position() << endl;
+
+		// Add 20 if MessageIntegrity attribute was included
+		return reader.position(); //(_size + (integrity ? 20 : 0)); // ok
 	}
 	catch (std::exception& exc) {
 		debugL("STUNMessage") << "Parse error: " << exc.what() << endl;
 	}
 	
-	return false;
+	return 0;
 }
 
 

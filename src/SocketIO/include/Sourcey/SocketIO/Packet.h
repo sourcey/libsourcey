@@ -85,7 +85,7 @@ public:
 	void setMessage(const std::string& message);
 	void setAck(bool flag);
 
-	bool read(const ConstBuffer& buf);
+	std::size_t read(const ConstBuffer& buf);
 	void write(Buffer& buf) const;
 	
 	virtual size_t size() const;

@@ -30,6 +30,10 @@
 #define snprintf _snprintf
 #endif
 
+extern "C" {
+#include "libavutil/time.h" // av_gettime (depreciated)
+}
+
 
 using namespace std;
 

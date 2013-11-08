@@ -290,7 +290,7 @@ void VideoCaptureBase::run()
 						break;
 					next = _emitters[idx];
 	
-					traceL("VideoCaptureBase", this) << "Emitting: " << idx << ": " << _counter.fps << std::endl;
+					//traceL("VideoCaptureBase", this) << "Emitting: " << idx << ": " << _counter.fps << std::endl;
 					MatrixPacket out(&frame);
 					next->emit(next, out);
 				}
@@ -371,7 +371,7 @@ cv::Mat VideoCaptureBase::lastFrame() const
 	if (!_frame.cols && !_frame.rows)
 		throw std::runtime_error("Cannot grab video frame: Device is closed: " + name());
 
-	assert(_capturing);
+	//assert(_capturing);
 	if (_frame.size().area() <= 0)
 		throw std::runtime_error("Cannot grab video frame: Invalid source frame: " + name());
 

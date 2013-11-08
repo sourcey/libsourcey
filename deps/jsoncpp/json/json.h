@@ -1,7 +1,329 @@
+/// Json-cpp amalgated header (http://jsoncpp.sourceforge.net/).
+/// It is intented to be used with #include <json/json.h>
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: LICENSE
+// //////////////////////////////////////////////////////////////////////
+
+/*
+The JsonCpp library's source code, including accompanying documentation, 
+tests and demonstration applications, are licensed under the following
+conditions...
+
+The author (Baptiste Lepilleur) explicitly disclaims copyright in all 
+jurisdictions which recognize such a disclaimer. In such jurisdictions, 
+this software is released into the Public Domain.
+
+In jurisdictions which do not recognize Public Domain property (e.g. Germany as of
+2010), this software is Copyright (c) 2007-2010 by Baptiste Lepilleur, and is
+released under the terms of the MIT License (see below).
+
+In jurisdictions which recognize Public Domain property, the user of this 
+software may choose to accept it either as 1) Public Domain, 2) under the 
+conditions of the MIT License (see below), or 3) under the terms of dual 
+Public Domain/MIT License conditions described here, as they choose.
+
+The MIT License is about as close to Public Domain as a license can get, and is
+described in clear, concise terms at:
+
+   http://en.wikipedia.org/wiki/MIT_License
+   
+The full text of the MIT License follows:
+
+========================================================================
+Copyright (c) 2007-2010 Baptiste Lepilleur
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use, copy,
+modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+========================================================================
+(END LICENSE TEXT)
+
+The MIT license is compatible with both the GPL and commercial
+software, affording one all of the rights of Public Domain with the
+minor nuisance of being required to keep the above copyright notice
+and license text in the source code. Note also that by accepting the
+Public Domain "license" you can re-license your copy using whatever
+license you like.
+
+*/
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: LICENSE
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+#ifndef JSON_AMALGATED_H_INCLUDED
+# define JSON_AMALGATED_H_INCLUDED
+/// If defined, indicates that the source file is amalgated
+/// to prevent private header inclusion.
+#define JSON_IS_AMALGATED
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: include/json/config.h
+// //////////////////////////////////////////////////////////////////////
+
+// Copyright 2007-2010 Baptiste Lepilleur
+// Distributed under MIT license, or public domain if desired and
+// recognized in your jurisdiction.
+// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+
+#ifndef JSON_CONFIG_H_INCLUDED
+# define JSON_CONFIG_H_INCLUDED
+
+/// If defined, indicates that json library is embedded in CppTL library.
+//# define JSON_IN_CPPTL 1
+
+/// If defined, indicates that json may leverage CppTL library
+//#  define JSON_USE_CPPTL 1
+/// If defined, indicates that cpptl vector based map should be used instead of std::map
+/// as Value container.
+//#  define JSON_USE_CPPTL_SMALLMAP 1
+/// If defined, indicates that Json specific container should be used
+/// (hash table & simple deque container with customizable allocator).
+/// THIS FEATURE IS STILL EXPERIMENTAL! There is know bugs: See #3177332
+//#  define JSON_VALUE_USE_INTERNAL_MAP 1
+/// Force usage of standard new/malloc based allocator instead of memory pool based allocator.
+/// The memory pools allocator used optimization (initializing Value and ValueInternalLink
+/// as if it was a POD) that may cause some validation tool to report errors.
+/// Only has effects if JSON_VALUE_USE_INTERNAL_MAP is defined.
+//#  define JSON_USE_SIMPLE_INTERNAL_ALLOCATOR 1
+
+/// If defined, indicates that Json use exception to report invalid type manipulation
+/// instead of C assert macro.
+# define JSON_USE_EXCEPTION 1
+
+/// If defined, indicates that the source file is amalgated
+/// to prevent private header inclusion.
+/// Remarks: it is automatically defined in the generated amalgated header.
+#define JSON_IS_AMALGAMATION
+
+
+# ifdef JSON_IN_CPPTL
+#  include <cpptl/config.h>
+#  ifndef JSON_USE_CPPTL
+#   define JSON_USE_CPPTL 1
+#  endif
+# endif
+
+# ifdef JSON_IN_CPPTL
+#  define JSON_API CPPTL_API
+# elif defined(JSON_DLL_BUILD)
+#  define JSON_API __declspec(dllexport)
+# elif defined(JSON_DLL)
+#  define JSON_API __declspec(dllimport)
+# else
+#  define JSON_API
+# endif
+
+// If JSON_NO_INT64 is defined, then Json only support C++ "int" type for integer
+// Storages, and 64 bits integer support is disabled.
+// #define JSON_NO_INT64 1
+
+#if defined(_MSC_VER)  &&  _MSC_VER <= 1200 // MSVC 6
+// Microsoft Visual Studio 6 only support conversion from __int64 to double
+// (no conversion from unsigned __int64).
+#define JSON_USE_INT64_DOUBLE_CONVERSION 1
+#endif // if defined(_MSC_VER)  &&  _MSC_VER < 1200 // MSVC 6
+
+#if defined(_MSC_VER)  &&  _MSC_VER >= 1500 // MSVC 2008
+/// Indicates that the following function is deprecated.
+# define JSONCPP_DEPRECATED(message) __declspec(deprecated(message))
+#endif
+
+#if !defined(JSONCPP_DEPRECATED)
+# define JSONCPP_DEPRECATED(message)
+#endif // if !defined(JSONCPP_DEPRECATED)
+
+namespace Json {
+   typedef int Int;
+   typedef unsigned int UInt;
+# if defined(JSON_NO_INT64)
+   typedef int LargestInt;
+   typedef unsigned int LargestUInt;
+#  undef JSON_HAS_INT64
+# else // if defined(JSON_NO_INT64)
+   // For Microsoft Visual use specific types as long long is not supported
+#  if defined(_MSC_VER) // Microsoft Visual Studio
+   typedef __int64 Int64;
+   typedef unsigned __int64 UInt64;
+#  else // if defined(_MSC_VER) // Other platforms, use long long
+   typedef long long int Int64;
+   typedef unsigned long long int UInt64;
+#  endif // if defined(_MSC_VER)
+   typedef Int64 LargestInt;
+   typedef UInt64 LargestUInt;
+#  define JSON_HAS_INT64
+# endif // if defined(JSON_NO_INT64)
+} // end namespace Json
+
+
+#endif // JSON_CONFIG_H_INCLUDED
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: include/json/config.h
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: include/json/forwards.h
+// //////////////////////////////////////////////////////////////////////
+
+// Copyright 2007-2010 Baptiste Lepilleur
+// Distributed under MIT license, or public domain if desired and
+// recognized in your jurisdiction.
+// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+
+#ifndef JSON_FORWARDS_H_INCLUDED
+# define JSON_FORWARDS_H_INCLUDED
+
+#if !defined(JSON_IS_AMALGAMATION)
+# include "config.h"
+#endif // if !defined(JSON_IS_AMALGAMATION)
+
+namespace Json {
+
+   // writer.h
+   class FastWriter;
+   class StyledWriter;
+
+   // reader.h
+   class Reader;
+
+   // features.h
+   class Features;
+
+   // value.h
+   typedef unsigned int ArrayIndex;
+   class StaticString;
+   class Path;
+   class PathArgument;
+   class Value;
+   class ValueIteratorBase;
+   class ValueIterator;
+   class ValueConstIterator;
+#ifdef JSON_VALUE_USE_INTERNAL_MAP
+   class ValueMapAllocator;
+   class ValueInternalLink;
+   class ValueInternalArray;
+   class ValueInternalMap;
+#endif // #ifdef JSON_VALUE_USE_INTERNAL_MAP
+
+} // namespace Json
+
+
+#endif // JSON_FORWARDS_H_INCLUDED
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: include/json/forwards.h
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: include/json/features.h
+// //////////////////////////////////////////////////////////////////////
+
+// Copyright 2007-2010 Baptiste Lepilleur
+// Distributed under MIT license, or public domain if desired and
+// recognized in your jurisdiction.
+// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+
+#ifndef CPPTL_JSON_FEATURES_H_INCLUDED
+# define CPPTL_JSON_FEATURES_H_INCLUDED
+
+#if !defined(JSON_IS_AMALGAMATION)
+# include "forwards.h"
+#endif // if !defined(JSON_IS_AMALGAMATION)
+
+namespace Json {
+
+   /** \brief Configuration passed to reader and writer.
+    * This configuration object can be used to force the Reader or Writer
+    * to behave in a standard conforming way.
+    */
+   class JSON_API Features
+   {
+   public:
+      /** \brief A configuration that allows all features and assumes all strings are UTF-8.
+       * - C & C++ comments are allowed
+       * - Root object can be any JSON value
+       * - Assumes Value strings are encoded in UTF-8
+       */
+      static Features all();
+
+      /** \brief A configuration that is strictly compatible with the JSON specification.
+       * - Comments are forbidden.
+       * - Root object must be either an array or an object value.
+       * - Assumes Value strings are encoded in UTF-8
+       */
+      static Features strictMode();
+
+      /** \brief Initialize the configuration like JsonConfig::allFeatures;
+       */
+      Features();
+
+      /// \c true if comments are allowed. Default: \c true.
+      bool allowComments_;
+
+      /// \c true if root must be either an array or an object value. Default: \c false.
+      bool strictRoot_;
+   };
+
+} // namespace Json
+
+#endif // CPPTL_JSON_FEATURES_H_INCLUDED
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: include/json/features.h
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: include/json/value.h
+// //////////////////////////////////////////////////////////////////////
+
+// Copyright 2007-2010 Baptiste Lepilleur
+// Distributed under MIT license, or public domain if desired and
+// recognized in your jurisdiction.
+// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+
 #ifndef CPPTL_JSON_H_INCLUDED
 # define CPPTL_JSON_H_INCLUDED
 
+#if !defined(JSON_IS_AMALGAMATION)
 # include "forwards.h"
+#endif // if !defined(JSON_IS_AMALGAMATION)
 # include <string>
 # include <vector>
 
@@ -121,12 +443,35 @@ namespace Json {
       typedef ValueConstIterator const_iterator;
       typedef Json::UInt UInt;
       typedef Json::Int Int;
-      typedef UInt ArrayIndex;
+# if defined(JSON_HAS_INT64)
+      typedef Json::UInt64 UInt64;
+      typedef Json::Int64 Int64;
+#endif // defined(JSON_HAS_INT64)
+      typedef Json::LargestInt LargestInt;
+      typedef Json::LargestUInt LargestUInt;
+      typedef Json::ArrayIndex ArrayIndex;
 
       static const Value null;
+      /// Minimum signed integer value that can be stored in a Json::Value.
+      static const LargestInt minLargestInt;
+      /// Maximum signed integer value that can be stored in a Json::Value.
+      static const LargestInt maxLargestInt;
+      /// Maximum unsigned integer value that can be stored in a Json::Value.
+      static const LargestUInt maxLargestUInt;
+
+      /// Minimum signed int value that can be stored in a Json::Value.
       static const Int minInt;
+      /// Maximum signed int value that can be stored in a Json::Value.
       static const Int maxInt;
+      /// Maximum unsigned int value that can be stored in a Json::Value.
       static const UInt maxUInt;
+
+      /// Minimum signed 64 bits int value that can be stored in a Json::Value.
+      static const Int64 minInt64;
+      /// Maximum signed 64 bits int value that can be stored in a Json::Value.
+      static const Int64 maxInt64;
+      /// Maximum unsigned 64 bits int value that can be stored in a Json::Value.
+      static const UInt64 maxUInt64;
 
    private:
 #ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
@@ -140,20 +485,20 @@ namespace Json {
             duplicate,
             duplicateOnCopy
          };
-         CZString( int index );
+         CZString( ArrayIndex index );
          CZString( const char *cstr, DuplicationPolicy allocate );
          CZString( const CZString &other );
          ~CZString();
          CZString &operator =( const CZString &other );
          bool operator<( const CZString &other ) const;
          bool operator==( const CZString &other ) const;
-         int index() const;
+         ArrayIndex index() const;
          const char *c_str() const;
          bool isStaticString() const;
       private:
          void swap( CZString &other );
          const char *cstr_;
-         int index_;
+         ArrayIndex index_;
       };
 
    public:
@@ -172,18 +517,22 @@ namespace Json {
         To create an empty array, pass arrayValue.
         To create an empty object, pass objectValue.
         Another Value can then be set to this one by assignment.
-	This is useful since clear() and resize() will not alter types.
+    This is useful since clear() and resize() will not alter types.
 
         Examples:
-	\code
-	Json::Value null_value; // null
-	Json::Value arr_value(Json::arrayValue); // []
-	Json::Value obj_value(Json::objectValue); // {}
-	\endcode
+    \code
+    Json::Value null_value; // null
+    Json::Value arr_value(Json::arrayValue); // []
+    Json::Value obj_value(Json::objectValue); // {}
+    \endcode
       */
       Value( ValueType type = nullValue );
       Value( Int value );
       Value( UInt value );
+#if defined(JSON_HAS_INT64)
+      Value( Int64 value );
+      Value( UInt64 value );
+#endif // if defined(JSON_HAS_INT64)
       Value( double value );
       Value( const char *value );
       Value( const char *beginValue, const char *endValue );
@@ -222,7 +571,7 @@ namespace Json {
       bool operator ==( const Value &other ) const;
       bool operator !=( const Value &other ) const;
 
-      int compare( const Value &other );
+      int compare( const Value &other ) const;
 
       const char *asCString() const;
       std::string asString() const;
@@ -231,6 +580,11 @@ namespace Json {
 # endif
       Int asInt() const;
       UInt asUInt() const;
+      Int64 asInt64() const;
+      UInt64 asUInt64() const;
+      LargestInt asLargestInt() const;
+      LargestUInt asLargestUInt() const;
+      float asFloat() const;
       double asDouble() const;
       bool asBool() const;
 
@@ -248,7 +602,7 @@ namespace Json {
       bool isConvertibleTo( ValueType other ) const;
 
       /// Number of values in array or object
-      UInt size() const;
+      ArrayIndex size() const;
 
       /// \brief Return true if empty array, empty object, or null;
       /// otherwise, false.
@@ -267,24 +621,38 @@ namespace Json {
       /// May only be called on nullValue or arrayValue.
       /// \pre type() is arrayValue or nullValue
       /// \post type() is arrayValue
-      void resize( UInt size );
+      void resize( ArrayIndex size );
 
       /// Access an array element (zero based index ).
       /// If the array contains less than index element, then null value are inserted
       /// in the array so that its size is index+1.
       /// (You may need to say 'value[0u]' to get your compiler to distinguish
       ///  this from the operator[] which takes a string.)
-      Value &operator[]( UInt index );
+      Value &operator[]( ArrayIndex index );
+
+      /// Access an array element (zero based index ).
+      /// If the array contains less than index element, then null value are inserted
+      /// in the array so that its size is index+1.
+      /// (You may need to say 'value[0u]' to get your compiler to distinguish
+      ///  this from the operator[] which takes a string.)
+      Value &operator[]( int index );
+
       /// Access an array element (zero based index )
       /// (You may need to say 'value[0u]' to get your compiler to distinguish
       ///  this from the operator[] which takes a string.)
-      const Value &operator[]( UInt index ) const;
+      const Value &operator[]( ArrayIndex index ) const;
+
+      /// Access an array element (zero based index )
+      /// (You may need to say 'value[0u]' to get your compiler to distinguish
+      ///  this from the operator[] which takes a string.)
+      const Value &operator[]( int index ) const;
+
       /// If the array contains at least index+1 elements, returns the element value, 
       /// otherwise returns defaultValue.
-      Value get( UInt index, 
+      Value get( ArrayIndex index, 
                  const Value &defaultValue ) const;
       /// Return true if index < size().
-      bool isValidIndex( UInt index ) const;
+      bool isValidIndex( ArrayIndex index ) const;
       /// \brief Append value to array at the end.
       ///
       /// Equivalent to jsonvalue[jsonvalue.size()] = value;
@@ -424,8 +792,8 @@ namespace Json {
 
       union ValueHolder
       {
-         Int int_;
-         UInt uint_;
+         LargestInt int_;
+         LargestUInt uint_;
          double real_;
          bool bool_;
          char *string_;
@@ -454,7 +822,7 @@ namespace Json {
       friend class Path;
 
       PathArgument();
-      PathArgument( UInt index );
+      PathArgument( ArrayIndex index );
       PathArgument( const char *key );
       PathArgument( const std::string &key );
 
@@ -466,7 +834,7 @@ namespace Json {
          kindKey
       };
       std::string key_;
-      UInt index_;
+      ArrayIndex index_;
       Kind kind_;
    };
 
@@ -513,26 +881,7 @@ namespace Json {
       Args args_;
    };
 
-   /** \brief Experimental do not use: Allocator to customize member name and string value memory management done by Value.
-    *
-    * - makeMemberName() and releaseMemberName() are called to respectively duplicate and
-    *   free an Json::objectValue member name.
-    * - duplicateStringValue() and releaseStringValue() are called similarly to
-    *   duplicate and free a Json::stringValue value.
-    */
-   class ValueAllocator
-   {
-   public:
-      enum { unknown = (unsigned)-1 };
 
-      virtual ~ValueAllocator();
-
-      virtual char *makeMemberName( const char *memberName ) = 0;
-      virtual void releaseMemberName( char *memberName ) = 0;
-      virtual char *duplicateStringValue( const char *value, 
-                                          unsigned int length = unknown ) = 0;
-      virtual void releaseStringValue( char *value ) = 0;
-   };
 
 #ifdef JSON_VALUE_USE_INTERNAL_MAP
    /** \brief Allocator to customize Value internal map.
@@ -1067,3 +1416,440 @@ public: // overridden from ValueArrayAllocator
 
 
 #endif // CPPTL_JSON_H_INCLUDED
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: include/json/value.h
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: include/json/reader.h
+// //////////////////////////////////////////////////////////////////////
+
+// Copyright 2007-2010 Baptiste Lepilleur
+// Distributed under MIT license, or public domain if desired and
+// recognized in your jurisdiction.
+// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+
+#ifndef CPPTL_JSON_READER_H_INCLUDED
+# define CPPTL_JSON_READER_H_INCLUDED
+
+#if !defined(JSON_IS_AMALGAMATION)
+# include "features.h"
+# include "value.h"
+#endif // if !defined(JSON_IS_AMALGAMATION)
+# include <deque>
+# include <stack>
+# include <string>
+# include <iostream>
+
+namespace Json {
+
+   /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a Value.
+    *
+    */
+   class JSON_API Reader
+   {
+   public:
+      typedef char Char;
+      typedef const Char *Location;
+
+      /** \brief Constructs a Reader allowing all features
+       * for parsing.
+       */
+      Reader();
+
+      /** \brief Constructs a Reader allowing the specified feature set
+       * for parsing.
+       */
+      Reader( const Features &features );
+
+      /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a> document.
+       * \param document UTF-8 encoded string containing the document to read.
+       * \param root [out] Contains the root value of the document if it was
+       *             successfully parsed.
+       * \param collectComments \c true to collect comment and allow writing them back during
+       *                        serialization, \c false to discard comments.
+       *                        This parameter is ignored if Features::allowComments_
+       *                        is \c false.
+       * \return \c true if the document was successfully parsed, \c false if an error occurred.
+       */
+      bool parse( const std::string &document, 
+                  Value &root,
+                  bool collectComments = true );
+
+      /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a> document.
+       * \param beginDoc Pointer on the beginning of the UTF-8 encoded string of the document to read.
+       * \param endDoc Pointer on the end of the UTF-8 encoded string of the document to read. 
+       \               Must be >= beginDoc.
+       * \param root [out] Contains the root value of the document if it was
+       *             successfully parsed.
+       * \param collectComments \c true to collect comment and allow writing them back during
+       *                        serialization, \c false to discard comments.
+       *                        This parameter is ignored if Features::allowComments_
+       *                        is \c false.
+       * \return \c true if the document was successfully parsed, \c false if an error occurred.
+       */
+      bool parse( const char *beginDoc, const char *endDoc, 
+                  Value &root,
+                  bool collectComments = true );
+
+      /// \brief Parse from input stream.
+      /// \see Json::operator>>(std::istream&, Json::Value&).
+      bool parse( std::istream &is,
+                  Value &root,
+                  bool collectComments = true );
+
+      /** \brief Returns a user friendly string that list errors in the parsed document.
+       * \return Formatted error message with the list of errors with their location in 
+       *         the parsed document. An empty string is returned if no error occurred
+       *         during parsing.
+       * \deprecated Use getFormattedErrorMessages() instead (typo fix).
+       */
+      JSONCPP_DEPRECATED("Use getFormattedErrorMessages instead") 
+      std::string getFormatedErrorMessages() const;
+
+      /** \brief Returns a user friendly string that list errors in the parsed document.
+       * \return Formatted error message with the list of errors with their location in 
+       *         the parsed document. An empty string is returned if no error occurred
+       *         during parsing.
+       */
+      std::string getFormattedErrorMessages() const;
+
+   private:
+      enum TokenType
+      {
+         tokenEndOfStream = 0,
+         tokenObjectBegin,
+         tokenObjectEnd,
+         tokenArrayBegin,
+         tokenArrayEnd,
+         tokenString,
+         tokenNumber,
+         tokenTrue,
+         tokenFalse,
+         tokenNull,
+         tokenArraySeparator,
+         tokenMemberSeparator,
+         tokenComment,
+         tokenError
+      };
+
+      class Token
+      {
+      public:
+         TokenType type_;
+         Location start_;
+         Location end_;
+      };
+
+      class ErrorInfo
+      {
+      public:
+         Token token_;
+         std::string message_;
+         Location extra_;
+      };
+
+      typedef std::deque<ErrorInfo> Errors;
+
+      bool expectToken( TokenType type, Token &token, const char *message );
+      bool readToken( Token &token );
+      void skipSpaces();
+      bool match( Location pattern, 
+                  int patternLength );
+      bool readComment();
+      bool readCStyleComment();
+      bool readCppStyleComment();
+      bool readString();
+      void readNumber();
+      bool readValue();
+      bool readObject( Token &token );
+      bool readArray( Token &token );
+      bool decodeNumber( Token &token );
+      bool decodeString( Token &token );
+      bool decodeString( Token &token, std::string &decoded );
+      bool decodeDouble( Token &token );
+      bool decodeUnicodeCodePoint( Token &token, 
+                                   Location &current, 
+                                   Location end, 
+                                   unsigned int &unicode );
+      bool decodeUnicodeEscapeSequence( Token &token, 
+                                        Location &current, 
+                                        Location end, 
+                                        unsigned int &unicode );
+      bool addError( const std::string &message, 
+                     Token &token,
+                     Location extra = 0 );
+      bool recoverFromError( TokenType skipUntilToken );
+      bool addErrorAndRecover( const std::string &message, 
+                               Token &token,
+                               TokenType skipUntilToken );
+      void skipUntilSpace();
+      Value &currentValue();
+      Char getNextChar();
+      void getLocationLineAndColumn( Location location,
+                                     int &line,
+                                     int &column ) const;
+      std::string getLocationLineAndColumn( Location location ) const;
+      void addComment( Location begin, 
+                       Location end, 
+                       CommentPlacement placement );
+      void skipCommentTokens( Token &token );
+   
+      typedef std::stack<Value *> Nodes;
+      Nodes nodes_;
+      Errors errors_;
+      std::string document_;
+      Location begin_;
+      Location end_;
+      Location current_;
+      Location lastValueEnd_;
+      Value *lastValue_;
+      std::string commentsBefore_;
+      Features features_;
+      bool collectComments_;
+   };
+
+   /** \brief Read from 'sin' into 'root'.
+
+    Always keep comments from the input JSON.
+
+    This can be used to read a file into a particular sub-object.
+    For example:
+    \code
+    Json::Value root;
+    cin >> root["dir"]["file"];
+    cout << root;
+    \endcode
+    Result:
+    \verbatim
+    {
+    "dir": {
+        "file": {
+        // The input stream JSON would be nested here.
+        }
+    }
+    }
+    \endverbatim
+    \throw std::exception on parse error.
+    \see Json::operator<<()
+   */
+   std::istream& operator>>( std::istream&, Value& );
+
+} // namespace Json
+
+#endif // CPPTL_JSON_READER_H_INCLUDED
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: include/json/reader.h
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: include/json/writer.h
+// //////////////////////////////////////////////////////////////////////
+
+// Copyright 2007-2010 Baptiste Lepilleur
+// Distributed under MIT license, or public domain if desired and
+// recognized in your jurisdiction.
+// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+
+#ifndef JSON_WRITER_H_INCLUDED
+# define JSON_WRITER_H_INCLUDED
+
+#if !defined(JSON_IS_AMALGAMATION)
+# include "value.h"
+#endif // if !defined(JSON_IS_AMALGAMATION)
+# include <vector>
+# include <string>
+# include <iostream>
+
+namespace Json {
+
+   class Value;
+
+   /** \brief Abstract class for writers.
+    */
+   class JSON_API Writer
+   {
+   public:
+      virtual ~Writer();
+
+      virtual std::string write( const Value &root ) = 0;
+   };
+
+   /** \brief Outputs a Value in <a HREF="http://www.json.org">JSON</a> format without formatting (not human friendly).
+    *
+    * The JSON document is written in a single line. It is not intended for 'human' consumption,
+    * but may be usefull to support feature such as RPC where bandwith is limited.
+    * \sa Reader, Value
+    */
+   class JSON_API FastWriter : public Writer
+   {
+   public:
+      FastWriter();
+      virtual ~FastWriter(){}
+
+      void enableYAMLCompatibility();
+
+   public: // overridden from Writer
+      virtual std::string write( const Value &root );
+
+   private:
+      void writeValue( const Value &value );
+
+      std::string document_;
+      bool yamlCompatiblityEnabled_;
+   };
+
+   /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format in a human friendly way.
+    *
+    * The rules for line break and indent are as follow:
+    * - Object value:
+    *     - if empty then print {} without indent and line break
+    *     - if not empty the print '{', line break & indent, print one value per line
+    *       and then unindent and line break and print '}'.
+    * - Array value:
+    *     - if empty then print [] without indent and line break
+    *     - if the array contains no object value, empty array or some other value types,
+    *       and all the values fit on one lines, then print the array on a single line.
+    *     - otherwise, it the values do not fit on one line, or the array contains
+    *       object or non empty array, then print one value per line.
+    *
+    * If the Value have comments then they are outputed according to their #CommentPlacement.
+    *
+    * \sa Reader, Value, Value::setComment()
+    */
+   class JSON_API StyledWriter: public Writer
+   {
+   public:
+      StyledWriter();
+      virtual ~StyledWriter(){}
+
+   public: // overridden from Writer
+      /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
+       * \param root Value to serialize.
+       * \return String containing the JSON document that represents the root value.
+       */
+      virtual std::string write( const Value &root );
+
+   private:
+      void writeValue( const Value &value );
+      void writeArrayValue( const Value &value );
+      bool isMultineArray( const Value &value );
+      void pushValue( const std::string &value );
+      void writeIndent();
+      void writeWithIndent( const std::string &value );
+      void indent();
+      void unindent();
+      void writeCommentBeforeValue( const Value &root );
+      void writeCommentAfterValueOnSameLine( const Value &root );
+      bool hasCommentForValue( const Value &value );
+      static std::string normalizeEOL( const std::string &text );
+
+      typedef std::vector<std::string> ChildValues;
+
+      ChildValues childValues_;
+      std::string document_;
+      std::string indentString_;
+      int rightMargin_;
+      int indentSize_;
+      bool addChildValues_;
+   };
+
+   /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format in a human friendly way,
+        to a stream rather than to a string.
+    *
+    * The rules for line break and indent are as follow:
+    * - Object value:
+    *     - if empty then print {} without indent and line break
+    *     - if not empty the print '{', line break & indent, print one value per line
+    *       and then unindent and line break and print '}'.
+    * - Array value:
+    *     - if empty then print [] without indent and line break
+    *     - if the array contains no object value, empty array or some other value types,
+    *       and all the values fit on one lines, then print the array on a single line.
+    *     - otherwise, it the values do not fit on one line, or the array contains
+    *       object or non empty array, then print one value per line.
+    *
+    * If the Value have comments then they are outputed according to their #CommentPlacement.
+    *
+    * \param indentation Each level will be indented by this amount extra.
+    * \sa Reader, Value, Value::setComment()
+    */
+   class JSON_API StyledStreamWriter
+   {
+   public:
+      StyledStreamWriter( std::string indentation="\t" );
+      ~StyledStreamWriter(){}
+
+   public:
+      /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
+       * \param out Stream to write to. (Can be ostringstream, e.g.)
+       * \param root Value to serialize.
+       * \note There is no point in deriving from Writer, since write() should not return a value.
+       */
+      void write( std::ostream &out, const Value &root );
+
+   private:
+      void writeValue( const Value &value );
+      void writeArrayValue( const Value &value );
+      bool isMultineArray( const Value &value );
+      void pushValue( const std::string &value );
+      void writeIndent();
+      void writeWithIndent( const std::string &value );
+      void indent();
+      void unindent();
+      void writeCommentBeforeValue( const Value &root );
+      void writeCommentAfterValueOnSameLine( const Value &root );
+      bool hasCommentForValue( const Value &value );
+      static std::string normalizeEOL( const std::string &text );
+
+      typedef std::vector<std::string> ChildValues;
+
+      ChildValues childValues_;
+      std::ostream* document_;
+      std::string indentString_;
+      int rightMargin_;
+      std::string indentation_;
+      bool addChildValues_;
+   };
+
+# if defined(JSON_HAS_INT64)
+   std::string JSON_API valueToString( Int value );
+   std::string JSON_API valueToString( UInt value );
+# endif // if defined(JSON_HAS_INT64)
+   std::string JSON_API valueToString( LargestInt value );
+   std::string JSON_API valueToString( LargestUInt value );
+   std::string JSON_API valueToString( double value );
+   std::string JSON_API valueToString( bool value );
+   std::string JSON_API valueToQuotedString( const char *value );
+
+   /// \brief Output using the StyledStreamWriter.
+   /// \see Json::operator>>()
+   std::ostream& operator<<( std::ostream&, const Value &root );
+
+} // namespace Json
+
+
+
+#endif // JSON_WRITER_H_INCLUDED
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: include/json/writer.h
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+#endif //ifndef JSON_AMALGATED_H_INCLUDED

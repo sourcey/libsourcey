@@ -411,10 +411,10 @@ public:
 		return new SocketPacket(*this);
 	}	
 
-	virtual bool read(const ConstBuffer&) 
+	virtual std::size_t read(const ConstBuffer&) 
 	{ 
 		assert(0 && "write only"); 
-		return false;
+		return 0;
 	}
 
 	virtual void write(Buffer& buf) const 

@@ -24,7 +24,7 @@
 //#include "Poco/Format.h"
 
 
-using namespace std;
+using std::endl;
 //using Poco::format;
 
 
@@ -134,11 +134,19 @@ IPacket* Packet::clone() const
 }
 
 
-bool Packet::read(const ConstBuffer& buf) 
-{		
-	//https://github.com/LearnBoost/socket.io-spec#Encoding
+std::size_t Packet::read(const ConstBuffer& buf) 
+{			
+	// https://github.com/LearnBoost/socket.io-spec#Encoding
+
+	// Reset all data
+	_type = Packet::Message;
+	_id = 0;
+	_endpoint = "";
+	_message = "";
+	_size = 0;
+
 	if (buf.size() < 3)
-		return false;
+		return 0;
 
 	std::string data(bufferCast<const char*>(buf), buf.size());	
 	std::vector<std::string> frags = util::split(data, ':', 4);
@@ -200,7 +208,7 @@ bool Packet::read(const ConstBuffer& buf)
 	_size = data.length();
 	//debugL("sockio::Packet", this) << "Parse Success: " << toString() << endl;
 
-	return true;
+	return _size;
 }
 
 
@@ -252,13 +260,13 @@ int Packet::id() const
 }
 
 
-string Packet::endpoint() const 
+std::string Packet::endpoint() const 
 { 
 	return _endpoint; 
 }
 
 
-string Packet::message() const 
+std::string Packet::message() const 
 { 
 	return _message; 
 }
@@ -276,7 +284,7 @@ json::Value Packet::json() const
 }
 
 
-string Packet::typeString() const 
+std::string Packet::typeString() const 
 {
 	switch (_type) {
 	case Disconnect: return "Disconnect";
@@ -292,9 +300,9 @@ string Packet::typeString() const
 }
 
 
-string Packet::toString() const 
+std::string Packet::toString() const 
 {
-	ostringstream ss;
+	std::ostringstream ss;
 	print(ss);
 	//ss << endl;
 	return ss.str();
@@ -310,7 +318,7 @@ bool Packet::valid() const
 
 size_t Packet::size() const
 {
-	ostringstream ss;
+	std::ostringstream ss;
 	print(ss);
 	assert(ss.tellp());
 	return static_cast<size_t>(ss.tellp());

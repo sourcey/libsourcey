@@ -24,7 +24,6 @@
 using namespace std;
 
 
-
 namespace scy {
 
 
@@ -86,34 +85,41 @@ void GarbageCollector::finalize()
 
 void GarbageCollector::runAsync()
 {
-	Mutex::ScopedLock lock(_mutex);
+	std::vector<DeferredDeleter*> deletable;
+	{
+		Mutex::ScopedLock lock(_mutex);
 
-	if (!_ready.empty() || !_pending.empty()) {
-		traceL("GarbageCollector", this) << "Deleting: "
-			<< "\n\tReady: " << _ready.size() 
-			<< "\n\tPending: " << _pending.size()
-			<< "\n\tFinalize: " << _finalize
-			<< std::endl;
+		if (!_ready.empty() || !_pending.empty()) {
+			traceL("GarbageCollector", this) << "Deleting: "
+				<< "\n\tReady: " << _ready.size() 
+				<< "\n\tPending: " << _pending.size()
+				<< "\n\tFinalize: " << _finalize
+				<< std::endl;
 
-		// Delete waiting pointers
-		util::clearVector(_ready);
+			// Delete waiting pointers
+			//util::clearVector(_ready);
+			deletable = _ready;
+			_ready.clear();
 
-		// Swap pending pointers to the ready queue
-		_ready.swap(_pending);
-		assert(_pending.empty());
-	}
+			// Swap pending pointers to the ready queue
+			_ready.swap(_pending);
+		}
 
-	if (_finalize && _ready.empty() && _pending.empty()) {
-		// Stop and close the timer handle.
-		// This should cause the loop to return after 
-		// uv_close has been called on the timer handle.
-		uv_timer_stop(_handle.ptr<uv_timer_t>());
-		_handle.close();
+		if (_finalize && _ready.empty() && _pending.empty()) {
+			// Stop and close the timer handle.
+			// This should cause the loop to return after 
+			// uv_close has been called on the timer handle.
+			uv_timer_stop(_handle.ptr<uv_timer_t>());
+			_handle.close();
 
-		traceL("GarbageCollector") << "Finalization complete" << std::endl;
-	}
+			traceL("GarbageCollector") << "Finalization complete" << std::endl;
+		}
 
-	if (!_tid) { _tid = uv_thread_self(); }	
+		if (!_tid) { _tid = uv_thread_self(); }	
+	}	
+	
+	// Delete pointers
+	util::clearVector(deletable);
 }
 
 

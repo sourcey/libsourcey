@@ -1,6 +1,12 @@
 # ----------------------------------------------------------------------------
-# CMake file for jsoncpp.
+# CMake file for JsonCpp
 # ----------------------------------------------------------------------------
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/json")
+
+set(jsoncpp_SOURCE_FILES jsoncpp.cpp)
+set(jsoncpp_HEADER_FILES json/json.h)
+
 define_sourcey_dependency(jsoncpp)

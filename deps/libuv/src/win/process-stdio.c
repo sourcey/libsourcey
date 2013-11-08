@@ -268,7 +268,7 @@ int uv__stdio_create(uv_loop_t* loop,
   int err;
 
   count = options->stdio_count;
-  
+
   if (count < 0 || count > 255) {
     /* Only support FDs 0-255 */
     return ERROR_NOT_SUPPORTED;
@@ -290,7 +290,7 @@ int uv__stdio_create(uv_loop_t* loop,
     CHILD_STDIO_CRT_FLAGS(buffer, i) = 0;
     CHILD_STDIO_HANDLE(buffer, i) = INVALID_HANDLE_VALUE;
   }
-  
+
   for (i = 0; i < count; i++) {
     uv_stdio_container_t fdopt;
     if (i < options->stdio_count) {

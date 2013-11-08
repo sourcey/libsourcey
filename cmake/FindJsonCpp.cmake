@@ -15,6 +15,7 @@ FIND_PATH(JsonCpp_INCLUDE_DIR
   NAMES 
   	json/json.h   
   PATHS
+  	${LibSourcey_DEPENDENCIES_SOURCE_DIR}/jsoncpp
   	${LibSourcey_DEPENDENCIES_SOURCE_DIR}/jsoncpp/include
   	#/usr/local/include
   	#/usr/include

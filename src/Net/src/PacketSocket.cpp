@@ -37,10 +37,58 @@ PacketSocketAdapter::PacketSocketAdapter(Socket* socket) :
 }
 
 		
-void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
+void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Address& peerAddr)
 {	
-	traceL("PacketSocketAdapter", this) << "Recv: " << buf.size() << std::endl;
+	traceL("PacketSocketAdapter", this) << "Recv: " << buffer.size() << std::endl;
+	
+	IPacket* pkt = nullptr;
+	const char* buf = bufferCast<const char*>(buffer);
+	std::size_t len = buffer.size();
+	std::size_t nread = 0;
+	while (len > 0 && (pkt = factory.createPacket(constBuffer(buf, len), nread))) {
+		assert(nread > 0);
+		pkt->info = new PacketInfo(socket, peerAddr);
+		onPacket(*pkt);
+		delete pkt;
+		buf += nread;
+		len -= nread;
+	}
 
+	/*
+	std::size_t nread = -1;
+	std::size_t offset = 0;
+	while (nread != 0 && offset < buf.size()) {
+		auto arr = bufferCast<const char*>(buf) + offset;
+		auto len = buf.size() - offset;
+		//IPacket* pkt = factory.createPacket(constBuffer(buf), nread);
+		IPacket* pkt = factory.createPacket(constBuffer(arr, len), nread);
+		//IPacket* pkt = factory.createPacket(constBuffer(
+		//	bufferCast<const char*>(buf) + offset,  buf.size() - offset), nread);
+		//IPacket* pkt = factory.createPacket(constBuffer(buf), nread);
+		//assert(!(nread > 0 && buf.size() > nread));
+		warnL("PacketSocketAdapter", this) << "Try create packet: " 
+			<< pkt << ": " << buf.size() << ": " << offset << ": " << nread << std::endl;	
+		if (nread > 0 && buf.size() > nread)
+		{
+			warnL("PacketSocketAdapter", this) << "Joined packet" << std::endl;	
+			;
+		}
+		if (pkt) {
+			pkt->info = new PacketInfo(socket, peerAddr);
+			onPacket(*pkt);
+			delete pkt;
+			return;
+		}
+		else
+			warnL("PacketSocketAdapter", this) << "Cannot create packet" << std::endl;	
+		offset += nread;
+	}	
+	*/
+	
+	/*
+		//bool success = !!pkt;
+
+	auto remaining = buf.size();
 	IPacket* pkt = factory.createPacket(constBuffer(buf));
 	if (!pkt) {
 		warnL("PacketSocketAdapter", this) << "Cannot create packet." << std::endl;	
@@ -50,12 +98,13 @@ void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buf, const Address& 
 	pkt->info = new PacketInfo(socket, peerAddr);
 	onPacket(*pkt);
 	delete pkt;
+	*/
 }
 
 
 void PacketSocketAdapter::onPacket(IPacket& pkt) 
 {		
-	traceL("PacketSocketAdapter", this) << "onPacket: Emitting: " << pkt.size() << std::endl;
+	//traceL("PacketSocketAdapter", this) << "onPacket: emitting: " << pkt.size() << std::endl;
 	PacketSignal::emit(socket, pkt);	
 }
 
@@ -94,7 +143,7 @@ PacketSocketAdapter& PacketSocket::adapter() const
 	
 void PacketSocket::send(IPacket& packet)
 {
-	traceL("PacketSocket", this) << "IPacket Delegate" << std::endl;	
+	//traceL("PacketSocket", this) << "send" << std::endl;	
 	Socket::send(packet);
 }
 
