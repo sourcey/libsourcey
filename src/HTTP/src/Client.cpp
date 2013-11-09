@@ -37,7 +37,8 @@ ClientConnection::ClientConnection(http::Client* client, const URL& url, const n
 	Connection(socket),
 	_client(client), 
 	_url(url), 
-	_readStream(nullptr)
+	_readStream(nullptr),
+	_complete(false)
 {	
 	traceL("ClientConnection", this) << "Create: " << url << endl;
 
@@ -62,9 +63,9 @@ ClientConnection::ClientConnection(http::Client* client, const URL& url, const n
 ClientConnection::ClientConnection(const URL& url, const net::Socket& socket) :
 	Connection(socket),
 	_client(nullptr), 
-	_url(url), 
-	_complete(false),
-	_readStream(nullptr)
+	_url(url),
+	_readStream(nullptr), 
+	_complete(false)
 {	
 	traceL("ClientConnection", this) << "Create: " << url << endl;
 

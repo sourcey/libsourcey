@@ -38,8 +38,8 @@ namespace http {
 class ChunkedAdapter: public IPacketizer
 {
 public:
-	std::string contentType;
 	Connection* connection;
+	std::string contentType;
 	bool initial;
 	bool nocopy;
 

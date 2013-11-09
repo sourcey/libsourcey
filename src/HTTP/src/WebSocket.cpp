@@ -505,7 +505,7 @@ int WebSocketFramer::writeFrame(const char* data, int len, int flags, BitWriter&
 int WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 {
 	assert(handshakeComplete());
-	int limit = int(frame.limit());
+	UInt64 limit = frame.limit();
 	size_t offset = frame.position(); 
 	//assert(offset == 0);
 	
@@ -531,14 +531,14 @@ int WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 	headerReader.getU8(flags);	
 	headerReader.getU8(lengthByte);
 	_frameFlags = flags;
-	int payloadLength = 0;
+	UInt64 payloadLength = 0;
 	int payloadOffset = 2;
 	if ((lengthByte & 0x7f) == 127) {
 		UInt64 l;
 		headerReader.getU64(l);
 		if (l > limit)
-			throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %"I64_FMT"u", l)); //, WebSocket::ErrorPayloadTooBig
-		payloadLength = static_cast<int>(l);
+			throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %" I64_FMT "u", l)); //, WebSocket::ErrorPayloadTooBig
+		payloadLength = l;
 		payloadOffset += 8;
 	}
 	else if ((lengthByte & 0x7f) == 126) {
@@ -546,14 +546,14 @@ int WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 		headerReader.getU16(l);
 		if (l > limit)
 			throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %u", unsigned(l))); //, WebSocket::ErrorPayloadTooBig
-		payloadLength = static_cast<int>(l);
+		payloadLength = l;
 		payloadOffset += 2;
 	}
 	else {
 		UInt8 l = lengthByte & 0x7f;
 		if (l > limit)
 			throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %u", unsigned(l))); //, WebSocket::ErrorPayloadTooBig
-		payloadLength = static_cast<int>(l);
+		payloadLength = l;
 	}
 	if (lengthByte & FRAME_FLAG_MASK) {	
 		headerReader.get(mask, 4);
@@ -568,8 +568,8 @@ int WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 
 	// Unmask the payload if required
 	if (lengthByte & FRAME_FLAG_MASK) {
-		char* p = reinterpret_cast<char*>(payload); //frame.data());
-		for (int i = 0; i < payloadLength; i++) {
+		auto p = reinterpret_cast<char*>(payload); //frame.data());
+		for (UInt64 i = 0; i < payloadLength; i++) {
 			p[i] ^= mask[i % 4];
 		}
 	}

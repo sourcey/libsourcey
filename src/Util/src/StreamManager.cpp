@@ -137,7 +137,10 @@ void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state, 
 			log("debug") << "On stream close: removing: " << stream->name() << endl;
 			success = !!Manager::remove(stream->name());
 		}
-		assert(success);
+		if (!success) {
+			log("warn") << "Cannot remove stream: " << stream->name() << endl;
+			assert(0);
+		}
 	}
 }
 

@@ -221,8 +221,8 @@ protected:
 private:
 	WebSocket::Mode _mode;
 	int _frameFlags;
-	bool _maskPayload;
 	int _headerState;
+	bool _maskPayload;
 	Random _rnd;
 	std::string _key; // client handshake key
 

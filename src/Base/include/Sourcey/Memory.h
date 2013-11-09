@@ -253,7 +253,7 @@ class SharedObject
 {
 public:
 	SharedObject(bool deferred = false) : 
-		deferred(deferred), count(1)
+		count(1), deferred(deferred)
 		// Creates the SharedObject with an 
 		// initial reference count of one.
 	{

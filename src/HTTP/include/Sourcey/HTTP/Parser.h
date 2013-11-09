@@ -108,8 +108,8 @@ public:
 	
 public:
     ParserObserver* _observer;	
-	http::Response* _response;
 	http::Request* _request;
+	http::Response* _response;
 	http::Message* _message;
 	
     http_parser _parser;

@@ -241,12 +241,14 @@ ScopedConfiguration::ScopedConfiguration(Configuration& config, const std::strin
 }
 
 
+/*
 ScopedConfiguration::ScopedConfiguration(const ScopedConfiguration& r) :
 	config(r.config),
 	currentScope(r.currentScope),
 	defaultScope(r.defaultScope)
 {
 }
+*/
 	
 
 std::string ScopedConfiguration::getString(const std::string& key, const std::string& defaultValue, bool forceDefaultScope) const 

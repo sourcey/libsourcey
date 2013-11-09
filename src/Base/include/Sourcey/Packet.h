@@ -57,8 +57,8 @@ public:
 	IPacket(const IPacket& r) : 
 		source(r.source),
 		opaque(r.opaque),
-		flags(r.flags),
-		info(r.info ? r.info->clone() : nullptr)
+		info(r.info ? r.info->clone() : nullptr),
+		flags(r.flags)
 	{
 	}
 		
@@ -66,8 +66,8 @@ public:
 	{
 		source = r.source;
 		opaque = r.opaque;
-		flags = r.flags;
 		info = (r.info ? r.info->clone() : nullptr);
+		flags = r.flags;
 		return *this;
 	}
 	
@@ -83,16 +83,16 @@ public:
 		// along the signal chain can determine the packet origin.
 		// Often a subclass of PacketStreamSource.
 
+	void* opaque;
+		// Optional client data pointer.
+		// This pointer is not managed by the packet.
+
 	IPacketInfo* info;
 		// Optional extra information about the packet.
 		// This pointer is managed by the packet.
 
 	Bitwise flags;
 		// Provides basic information about the packet.	
-
-	void* opaque;
-		// Optional client data pointer.
-		// This pointer is not managed by the packet.
 		
 	virtual std::size_t read(const ConstBuffer&) = 0;
 		// Read/parse to the packet from the given input buffer.

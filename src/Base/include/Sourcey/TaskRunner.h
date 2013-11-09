@@ -63,7 +63,9 @@ public:
 	// virtual bool cancelled() const;
 	
 protected:
-	Task& operator=(Task const&) {}
+	Task(const Task& task);
+	Task& operator=(Task const&);
+
 	virtual ~Task();
 		// Should remain protected.
 
@@ -78,9 +80,9 @@ protected:
 	friend class TaskRunner;
 		// Tasks belong to a TaskRunner instance.
 
-	bool _destroyed;
-	bool _repeating;
 	UInt32 _id;
+	bool _repeating;
+	bool _destroyed;
 };
 
 	

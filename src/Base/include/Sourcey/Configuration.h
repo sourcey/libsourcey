@@ -165,7 +165,6 @@ class ScopedConfiguration
 {	
 public:
 	ScopedConfiguration(Configuration& config, const std::string& currentScope, const std::string& defaultScope);
-	ScopedConfiguration(const ScopedConfiguration& r);
 
 	std::string getString(const std::string& key, const std::string& defaultValue, bool forceDefaultScope = false) const;
 	int getInt(const std::string& key, int defaultValue, bool forceDefaultScope = false) const;
@@ -186,7 +185,8 @@ public:
 	std::string defaultScope;
 
 private:	
-	ScopedConfiguration& operator=(const ScopedConfiguration&) {};
+	ScopedConfiguration(const ScopedConfiguration&);
+	ScopedConfiguration& operator=(const ScopedConfiguration&);
 };
 
 

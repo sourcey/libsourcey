@@ -314,8 +314,8 @@ protected:
 	Handle& operator=(const Handle&); // = delete;
 	Handle& operator=(Handle&&); // = delete;
 	
-	uv_handle_t* _ptr;
 	uv_loop_t* _loop;
+	uv_handle_t* _ptr;
 	scy::Error _error;
 	unsigned long _tid;
 	bool _closed;

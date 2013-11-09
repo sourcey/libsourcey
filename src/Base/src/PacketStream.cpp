@@ -431,8 +431,8 @@ PacketStreamBase& PacketStream::base() const
 
 PacketStreamBase::PacketStreamBase(PacketStream* stream) : 
 	_stream(stream),
-	_syncError(false),
 	_closeOnError(false),
+	_syncError(false),
 	_deleted(false)
 {
 	traceL("PacketStreamBase", this) << "Create" << endl;

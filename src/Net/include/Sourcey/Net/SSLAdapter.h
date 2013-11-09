@@ -73,11 +73,11 @@ protected:
 protected:
 	friend class net::SSLBase;
 
-	SSL* _ssl; // OpenSSL SSL connection context
+	net::SSLBase* _socket;
+	SSL* _ssl;
 	BIO* _readBIO; // The incoming buffer we write encrypted SSL data into
 	BIO* _writeBIO; // The outgoing buffer we write to the socket
 	std::vector<char> _bufferOut; // The outgoing payload to be encrypted and sent
-	net::SSLBase* _socket;
 };
 
 
