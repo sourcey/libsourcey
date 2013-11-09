@@ -37,31 +37,31 @@ class Hash
 public:
 	Hash(const std::string& algorithm);
 	~Hash();
-		/// Re-initializes the digest structure.
+		// Re-initializes the digest structure.
 	
 	void update(char data);
 	void update(const std::string& data);
 	void update(const void* data, unsigned length);
-		/// Hash the given data.
-		/// This function may (and normally will) be called
-		/// many times for large blocks of data.
+		// Hash the given data.
+		// This function may (and normally will) be called
+		// many times for large blocks of data.
 
 	const ByteVec& digest();
-		/// Finish up the digest operation and return the result.
+		// Finish up the digest operation and return the result.
 
 	void reset();
-		/// Resets the engine and digest state ready for the next computation.
+		// Resets the engine and digest state ready for the next computation.
 
 	const std::string& algorithm(void) const;
-		/// Returns the hash algorithm being used.
+		// Returns the hash algorithm being used.
 
 protected:
-	Hash& operator=(Hash const&) {}
+	Hash& operator=(Hash const&);
 
-	EVP_MD_CTX		_ctx;
+	EVP_MD_CTX	_ctx;
 	const EVP_MD*	_md;
 	crypto::ByteVec	_digest;
-	std::string		_algorithm;
+	std::string	_algorithm;
 };
 
 

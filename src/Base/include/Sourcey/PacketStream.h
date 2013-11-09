@@ -523,9 +523,9 @@ protected:
 	friend class PacketStreamBase;
 
 	mutable Mutex _mutex;
+	void* _clientData;
 	std::string _name;
 	std::shared_ptr<PacketStreamBase> _base;
-	void* _clientData;
 };
 
 

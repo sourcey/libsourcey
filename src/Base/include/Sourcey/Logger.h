@@ -202,10 +202,10 @@ protected:
 	friend class Singleton<Logger>;
 	friend class Thread;
 		
-	LogWriter* _writer;
-	LogChannel*	_defaultChannel;
-	LogChannelMap _channels;
 	mutable Mutex _mutex;
+	LogChannelMap _channels;
+	LogChannel*   _defaultChannel;
+	LogWriter*    _writer;
 };
 
 
@@ -217,11 +217,11 @@ protected:
 struct LogStream
 {
 	LogLevel level;
-	LogChannel* channel;
+	std::string realm;              // depreciate - encode in message
+	std::string address;            // depreciate - encode in message
 	std::ostringstream message;
-	std::string realm;		// depreciate - encode in message
-	std::string address;	// depreciate - encode in message
 	std::time_t ts;
+	LogChannel* channel;
 
 	LogStream(LogLevel level = LDebug, const std::string& realm = "", const void* ptr = nullptr, const char* channel = nullptr);
 	LogStream(LogLevel level, const std::string& realm = "", const std::string& address = "");
@@ -333,8 +333,8 @@ public:
 
 protected:
 	std::string _name;
-	LogLevel	_level;
-	const char*	_dateFormat;
+	LogLevel    _level;
+	const char* _dateFormat;
 };
 
 
@@ -403,21 +403,21 @@ public:
 	virtual void write(const LogStream& stream);
 	virtual void rotate();
 
-	std::string	dir() const { return _dir; };
-	std::string	filename() const { return _filename; };
-	int	rotationInterval() const { return _rotationInterval; };
+	std::string dir() const { return _dir; };
+	std::string filename() const { return _filename; };
+	int rotationInterval() const { return _rotationInterval; };
 	
 	void setDir(const std::string& dir) { _dir = dir; };
 	void setExtension(const std::string& ext) { _extension = ext; };
 	void setRotationInterval(int interval) { _rotationInterval = interval; };
 
 protected:
-	std::ofstream*	_fstream;
-	std::string		_dir;
-	std::string		_filename;
-	std::string		_extension;
-	time_t			_rotatedAt;			// The time the log was last rotated
-	int				_rotationInterval;	// The log rotation interval in seconds
+	std::ofstream* _fstream;
+	std::string    _dir;
+	std::string    _filename;
+	std::string    _extension;
+	int            _rotationInterval;    // The log rotation interval in seconds
+	time_t         _rotatedAt;           // The time the log was last rotated
 };
 
 

@@ -101,9 +101,9 @@ protected:
 	virtual ~SSLBase();
 
 protected:
+	net::SSLContext::Ptr _context;
+	net::SSLSession::Ptr _session;
 	net::SSLAdapter _sslAdapter;
-	SSLContext::Ptr _context;
-	SSLSession::Ptr _session;
 
 	friend class net::SSLAdapter;
 };

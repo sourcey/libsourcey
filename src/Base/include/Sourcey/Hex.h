@@ -51,7 +51,7 @@ struct Encoder: public basic::Encoder
 	
 	virtual std::size_t encode(const char* inbuf, std::size_t nread, char* outbuf)
 	{
-		static const int eof = std::char_traits<char>::eof();
+		//static const int eof = std::char_traits<char>::eof();
 		static const char digits[] = "0123456789abcdef0123456789ABCDEF";
 	
 		char c;
@@ -85,9 +85,9 @@ struct Encoder: public basic::Encoder
 		_lineLength = lineLength;
 	}
 	
-	int _uppercase;
 	int _linePos;
 	int _lineLength;
+	int _uppercase;
 };
 
 

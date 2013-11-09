@@ -87,7 +87,7 @@ struct OptionParser
 	std::string exepath; // TODO: UTF8
 	OptionMap args;
 	
-	OptionParser(int argc, char* argv[], char* delim = "-");
+	OptionParser(int argc, char* argv[], char* delim); // "--"
 
 	bool has(const char* key) {
 		return args.find(key) != args.end();

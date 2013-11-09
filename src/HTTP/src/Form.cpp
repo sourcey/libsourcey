@@ -35,11 +35,11 @@ FormWriter* FormWriter::create(ClientConnection& conn, const std::string& encodi
 }
 
 
-FormWriter::FormWriter(ClientConnection& conn, async::Runner::ptr runner, const std::string& encoding) :
+FormWriter::FormWriter(ClientConnection& connection, async::Runner::ptr runner, const std::string& encoding) :
 	PacketSource(this->emitter),
-	_encoding(encoding),
-	_connection(conn),
+	_connection(connection),
 	_runner(runner),
+	_encoding(encoding),
 	_filesSize(0),
 	_writeState(0),
 	_initial(true),

@@ -35,9 +35,9 @@ namespace http {
 class TransferSignal : public Signal<const double&>
 {
 public:
+	void* sender;
 	UInt64 current;
 	UInt64 total;
-	void* sender;
 
 	TransferSignal() :	
 		sender(nullptr), current(0), total(0) {}
@@ -134,8 +134,8 @@ protected:
 	void onClientShutdown(void*);
 	
 protected:	
-	URL _url;
 	http::Client* _client;
+	URL _url;
 	std::ostream* _readStream;
 	TransferSignal _incomingProgress;
 	TransferSignal _outgoingProgress;

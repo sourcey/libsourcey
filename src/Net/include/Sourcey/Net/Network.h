@@ -83,8 +83,6 @@ struct DNSResult
 	struct addrinfo* hints;
 		// libuv uv_getaddrinfo hints (optional)
 	
-	//typedef void (*func)(const DNSResult&, void*);
-	//func callback;
 	std::function<void(const DNSResult&)> callback;
 		// Result callback function
 
@@ -103,10 +101,7 @@ struct DNSResult
 	bool failed() const { return status == Failed; }
 	bool complete() const { return status == Success || status == Failed; }
 
-	DNSResult() : status(None), //, callback(0), 
-		info(0), opaque(0), hints(nullptr)
-	{
-	}
+	DNSResult() : info(nullptr), hints(nullptr), opaque(nullptr), status(None) {}
 };
 
 
@@ -120,9 +115,9 @@ inline void onDNSResolved(uv_getaddrinfo_t* handle, int status, struct addrinfo*
 	dns->info = res;
 	dns->addr.swap(resolved);
 	
-	dns->callback(*dns); //, dns->opaque*
+	dns->callback(*dns);
 
-    uv_freeaddrinfo(res);	
+        uv_freeaddrinfo(res);	
 	delete handle;
 	delete dns;
 }
@@ -130,7 +125,7 @@ inline void onDNSResolved(uv_getaddrinfo_t* handle, int status, struct addrinfo*
 
 inline bool resolveDNS(DNSResult* dns) 
 {			
-	traceL("Network") << "resolving DNS: " << dns->host << ":" << dns->port << std::endl;
+	//traceL("Network") << "Resolving DNS: " << dns->host << ":" << dns->port << std::endl;
 
 	assert(dns->port);
 	assert(!dns->host.empty());
@@ -143,7 +138,7 @@ inline bool resolveDNS(DNSResult* dns)
 }
 
 
-inline bool resolveDNS(const std::string& host, UInt16 port, std::function<void(const DNSResult&)> callback/*DNSResult::func callback*/, void* opaque = nullptr, struct addrinfo* hints = nullptr)
+inline bool resolveDNS(const std::string& host, UInt16 port, std::function<void(const DNSResult&)> callback, void* opaque = nullptr, struct addrinfo* hints = nullptr)
 {		
 	DNSResult* dns = new DNSResult();
 	dns->host = host;

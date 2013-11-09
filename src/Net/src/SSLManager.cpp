@@ -116,8 +116,8 @@ int SSLManager::privateKeyPassphraseCallback(char* pBuf, int size, int flag, voi
 
 	strncpy(pBuf, (char *)(pwd.c_str()), size);
 	pBuf[size - 1] = '\0';
-	if (size > pwd.length())
-		size = (int) pwd.length();
+	if (size > (int)pwd.length())
+		size = (int)pwd.length();
 
 	return size;
 }

@@ -196,6 +196,7 @@ bool endsWith(const std::string& str, const std::string& suffix)
 }
 
 
+/*
 double intToDouble(Int64 v) 
 {
 	if (v+v > 0xFFEULL<<52)
@@ -220,6 +221,7 @@ Int64 doubleToInt(double d)
 	d = frexp(d, &e);
 	return (Int64)(d<0)<<63 | (e+1022LL)<<52 | (Int64)((fabs(d)-0.5)*(1LL<<53));
 }
+*/
 
 
 std::string dumpbin(const char* data, std::size_t len)

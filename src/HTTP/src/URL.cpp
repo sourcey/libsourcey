@@ -339,7 +339,7 @@ std::string URL::encode(const std::string &str)
     const std::string unreserved = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~";
 
     std::string escaped = "";
-    for (size_t i = 0; i < str.length(); i++) {
+    for (std::size_t i = 0; i < str.length(); i++) {
         if (unreserved.find_first_of(str[i]) != std::string::npos) {
             escaped.push_back(str[i]);
         }
@@ -357,7 +357,7 @@ std::string URL::encode(const std::string &str)
 std::string URL::decode(const std::string& str)
 {
 	std::string clean = "";
-	for (int i = 0; i < str.length(); i++) {
+	for (std::size_t i = 0; i < str.length(); i++) {
 		if (str[i] == '%') {
 			const std::string digits = "0123456789ABCDEF";
 			clean += (char)(digits.find(str[i+1])*16 + digits.find(str[i+2]));

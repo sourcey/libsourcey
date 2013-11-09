@@ -206,6 +206,7 @@ const char* getStatusCodeReason(StatusCode status)
 		case StatusCode::BadGateway              : return "Bad Gateway";
 		case StatusCode::Unavailable             : return "Service Unavailable";
 		case StatusCode::GatewayTimeout          : return "Gateway Time-out";
+		case StatusCode::VersionNotSupported     : return "Version Not Supported";
 	}
 	assert(0);
 	return "Unknown";

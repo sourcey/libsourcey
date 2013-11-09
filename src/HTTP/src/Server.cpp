@@ -31,8 +31,8 @@ namespace http {
 
 	
 Server::Server(short port, ServerResponderFactory* factory) :
-	address("0.0.0.0", port),
-	factory(factory)
+	factory(factory),
+	address("0.0.0.0", port)
 {
 	traceL("http::Server", this) << "Create" << endl;
 }
@@ -126,7 +126,10 @@ void Server::onAccept(void*, const net::TCPSocket& sock)
 {	
 	traceL("http::Server", this) << "On server accept" << endl;
 	ServerConnection* conn = createConnection(sock);
-	assert(conn);
+	if (!conn) {		
+		warnL("http::Server", this) << "Cannot create connection" << endl;
+		assert(0);
+	}
 }
 
 

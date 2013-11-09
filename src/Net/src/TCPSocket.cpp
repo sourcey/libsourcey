@@ -216,12 +216,11 @@ void TCPBase::acceptConnection()
 	// If the socket is not handled it will be destroyed.
 	net::TCPSocket socket;
 	traceL("TCPBase", this) << "Accept connection: " << socket.base().ptr() << endl;
-	int r = uv_accept(ptr<uv_stream_t>(), socket.base().ptr<uv_stream_t>());
-	assert(r == 0); // uv_accept should always work
+	uv_accept(ptr<uv_stream_t>(), socket.base().ptr<uv_stream_t>()); // uv_accept should always work
 	socket.base().readStart();		
 	AcceptConnection.emit(instance(), socket);
 	if (socket.base().refCount() == 1)
-		traceL("TCPBase", this) << "Accept connection: Not handled" << endl;
+		warnL("TCPBase", this) << "Accepted connection not handled" << endl;
 }
 
 

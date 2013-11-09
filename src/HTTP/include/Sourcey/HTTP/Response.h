@@ -72,13 +72,12 @@ enum class StatusCode
 	UnsupportedMediaType = 415,
 	RangeNotSatisfiable = 416,
 	ExpectationFailed = 417,
-	ImATeapot = 418,
 
 	InternalServerError = 500,
 	NotImplemented = 501,
 	BadGateway = 502,
 	Unavailable = 503,
-	GatewayTimeout          = 504,
+	GatewayTimeout = 504,
 	VersionNotSupported = 505
 };
 

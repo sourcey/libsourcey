@@ -38,7 +38,7 @@ public:
 		// Encoding must be either "application/x-www-form-urlencoded"
 		// (which is the default) or "multipart/form-data".
 		
-	~FormWriter();
+	virtual ~FormWriter();
 		// Destroys the FormWriter.
 
 	void addFile(const std::string& name, FilePart* part);
@@ -165,9 +165,9 @@ protected:
 	std::string _boundary;
 	PartQueue _parts;
 	UInt64 _filesSize;
+	int _writeState;
 	bool _initial;
 	bool _complete;
-	int _writeState;
 };
 
 
@@ -200,7 +200,7 @@ public:
 		//
 		// Throws an FileException if the file cannot be opened.
 
-	~FilePart();
+	virtual ~FilePart();
 		// Destroys the FilePart.
 
 	virtual void open(const std::string& path);

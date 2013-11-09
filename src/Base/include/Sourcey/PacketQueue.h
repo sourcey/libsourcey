@@ -33,7 +33,7 @@ namespace scy {
 //
 
 
-class SyncPacketQueue: public PacketProcessor, public SyncQueue<IPacket>
+class SyncPacketQueue: public SyncQueue<IPacket>, public PacketProcessor
 {
 public:
 	SyncPacketQueue(uv::Loop* loop, int maxSize = 1024);
@@ -56,7 +56,7 @@ protected:
 //
 
 
-class AsyncPacketQueue: public PacketProcessor, public AsyncQueue<IPacket>
+class AsyncPacketQueue: public AsyncQueue<IPacket>, public PacketProcessor
 {
 public:
 	AsyncPacketQueue(int maxSize = 1024);

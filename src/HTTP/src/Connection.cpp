@@ -35,9 +35,9 @@ namespace http {
 
 Connection::Connection(const net::Socket& socket) : 
 	_socket(socket), 
+	_timeout(30 * 60 * 1000), // 30 secs
 	_closed(false),
-	_shouldSendHeader(true),
-	_timeout(30 * 60 * 1000) // 30 secs
+	_shouldSendHeader(true)
 {	
 	traceL("Connection", this) << "Create: " << &_socket << endl;
 

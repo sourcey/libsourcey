@@ -59,9 +59,8 @@ Logger& Logger::instance()
 void Logger::setInstance(Logger* logger) 
 {
 	auto current = singleton.swap(logger);
-
-	// Instance must be set before initialization
-	assert(current == nullptr);
+	if (current)
+		delete current;
 }
 
 	

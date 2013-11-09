@@ -146,6 +146,9 @@ class ServerResponderFactory
 	/// is used by HTTPServer to create ServerResponder objects.
 {
 public:
+	ServerResponderFactory() {};
+	virtual ~ServerResponderFactory() {};
+
 	virtual ServerResponder* createResponder(ServerConnection& connection) = 0;
 		/// Factory method for instantiating the ServerResponder
 		/// instance using the given ServerConnection.
