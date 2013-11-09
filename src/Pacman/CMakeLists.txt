@@ -1,6 +1,5 @@
 ask_build_sourcey_module(Pacman)
 if(BUILD_MODULES AND BUILD_MODULE_Pacman) 
-  #include_dependency(Poco REQUIRED) # for ZipStream
   include_dependency(OpenSSL REQUIRED)
   include_dependency(JsonCpp REQUIRED)
   include_dependency(LibUV REQUIRED)
