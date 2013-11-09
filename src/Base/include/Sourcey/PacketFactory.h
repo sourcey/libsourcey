@@ -28,8 +28,11 @@
 namespace scy {
 
 	
-struct IPacketCreationStrategy
-{
+class IPacketCreationStrategy
+{	
+public:
+	IPacketCreationStrategy() {}
+	virtual ~IPacketCreationStrategy() {};
 	virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const = 0;	
 	virtual int priority() const = 0; // 0 - 100
 
@@ -92,7 +95,7 @@ public:
 	template <class PacketT>
 	void unregisterPacketType() {
 		//Mutex::ScopedLock lock(_mutex);		
-		for (typename auto it = _types.begin(); it != _types.end(); ++it) {
+		for (auto it = _types.begin(); it != _types.end(); ++it) {
 			if (dynamic_cast<PacketCreationStrategy<PacketT>*>(*it) != 0) {
 				delete *it;
 				_types.erase(it);
@@ -112,7 +115,7 @@ public:
 	template <class StrategyT>
 	void unregisterStrategy() {
 		//Mutex::ScopedLock lock(_mutex);		
-		for (typename auto it = _types.begin(); it != _types.end(); ++it) {
+		for (auto it = _types.begin(); it != _types.end(); ++it) {
 			if (dynamic_cast<StrategyT*>(*it) != 0) {
 				delete *it;
 				_types.erase(it);

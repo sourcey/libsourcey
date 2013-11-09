@@ -53,52 +53,6 @@ void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Addres
 		buf += nread;
 		len -= nread;
 	}
-
-	/*
-	std::size_t nread = -1;
-	std::size_t offset = 0;
-	while (nread != 0 && offset < buf.size()) {
-		auto arr = bufferCast<const char*>(buf) + offset;
-		auto len = buf.size() - offset;
-		//IPacket* pkt = factory.createPacket(constBuffer(buf), nread);
-		IPacket* pkt = factory.createPacket(constBuffer(arr, len), nread);
-		//IPacket* pkt = factory.createPacket(constBuffer(
-		//	bufferCast<const char*>(buf) + offset,  buf.size() - offset), nread);
-		//IPacket* pkt = factory.createPacket(constBuffer(buf), nread);
-		//assert(!(nread > 0 && buf.size() > nread));
-		warnL("PacketSocketAdapter", this) << "Try create packet: " 
-			<< pkt << ": " << buf.size() << ": " << offset << ": " << nread << std::endl;	
-		if (nread > 0 && buf.size() > nread)
-		{
-			warnL("PacketSocketAdapter", this) << "Joined packet" << std::endl;	
-			;
-		}
-		if (pkt) {
-			pkt->info = new PacketInfo(socket, peerAddr);
-			onPacket(*pkt);
-			delete pkt;
-			return;
-		}
-		else
-			warnL("PacketSocketAdapter", this) << "Cannot create packet" << std::endl;	
-		offset += nread;
-	}	
-	*/
-	
-	/*
-		//bool success = !!pkt;
-
-	auto remaining = buf.size();
-	IPacket* pkt = factory.createPacket(constBuffer(buf));
-	if (!pkt) {
-		warnL("PacketSocketAdapter", this) << "Cannot create packet." << std::endl;	
-		return;
-	}
-
-	pkt->info = new PacketInfo(socket, peerAddr);
-	onPacket(*pkt);
-	delete pkt;
-	*/
 }
 
 
