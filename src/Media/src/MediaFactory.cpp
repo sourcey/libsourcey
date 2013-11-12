@@ -21,8 +21,10 @@
 #include "Sourcey/Logger.h"
 
 
+#if defined(HAVE_OPENCV) && defined(HAVE_RTAUDIO)
+
+
 using namespace std;
-using namespace scy;
 
 
 namespace scy {
@@ -160,3 +162,6 @@ AudioCapture* MediaFactory::createAudioCapture(int deviceId, int channels, int s
 
 
 } } // namespace scy::av
+
+
+#endif

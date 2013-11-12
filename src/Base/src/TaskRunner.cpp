@@ -21,6 +21,7 @@
 #include "Sourcey/Logger.h"
 #include "Sourcey/Memory.h"
 #include "Sourcey/Singleton.h"
+#include "Sourcey/Platform.h"
 
 #include <iostream>
 #include <assert.h>
@@ -31,47 +32,9 @@ using namespace std;
 
 namespace scy {
 
-	
-Task::Task(bool repeat) : 
-	_id(util::randomNumber()),
-	_repeating(repeat),
-	_destroyed(false)
-{ 	
-}
-
-
-Task::~Task()
-{
-	//assert(destroyed());
-}
-
-
-void Task::destroy()			
-{
-	_destroyed = true;
-}
-
-
-UInt32 Task::id() const
-{
-	return _id;
-}
-
-
-bool Task::destroyed() const						 
-{ 
-	return _destroyed;
-}
-
-
-bool Task::repeating() const						 
-{ 
-	return _repeating;
-}
-
 
 //
-// Task Async
+// Task Runner
 //
 
 
@@ -317,6 +280,49 @@ TaskRunner& TaskRunner::getDefault()
 {
 	static Singleton<TaskRunner> sh;
 	return *sh.get();
+}
+
+
+//
+// Async Task
+//
+
+
+Task::Task(bool repeat) : 
+	_id(util::randomNumber()),
+	_repeating(repeat),
+	_destroyed(false)
+{ 	
+}
+
+
+Task::~Task()
+{
+	//assert(destroyed());
+}
+
+
+void Task::destroy()			
+{
+	_destroyed = true;
+}
+
+
+UInt32 Task::id() const
+{
+	return _id;
+}
+
+
+bool Task::destroyed() const						 
+{ 
+	return _destroyed;
+}
+
+
+bool Task::repeating() const						 
+{ 
+	return _repeating;
 }
 
 

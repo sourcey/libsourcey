@@ -17,83 +17,95 @@
 //
 
 
-#include "Sourcey/Idler.h"
-#include "Sourcey/Logger.h"
-
-
-using namespace std;
+#include "Sourcey/SyncContext.h"
 
 
 namespace scy {
 
 
-Idler::Idler(uv::Loop* loop) : 
+SyncContext::SyncContext(uv::Loop* loop) : 
 	_handle(loop, new uv_async_t)
 {
-	init();
 }
 
 
-Idler::Idler(uv::Loop* loop, std::function<void()> target) : 
+SyncContext::SyncContext(uv::Loop* loop, std::function<void()> target) : 
 	_handle(loop, new uv_async_t)
 {
-	init();
 	start(target);
 }
 
 
-Idler::Idler(uv::Loop* loop, std::function<void(void*)> target, void* arg) : 
+SyncContext::SyncContext(uv::Loop* loop, std::function<void(void*)> target, void* arg) : 
 	_handle(loop, new uv_async_t)
 {
-	init();
 	start(target, arg);
 }
 
 	
-Idler::~Idler()
+SyncContext::~SyncContext()
 {
 	//assert(_handle.closed()); // must be dispose()d
 }
 
 
-void Idler::init()
-{	
-	pContext->repeating = true;
-	pContext->handle = _handle.ptr<uv_idle_t>();
-	uv_idle_init(_handle.loop(), _handle.ptr<uv_idle_t>());
-	_handle.unref(); // unref by default
+void SyncContext::post()
+{
+	assert(!_handle.closed());
+	uv_async_send(_handle.ptr<uv_async_t>());
 }
 
 
-void Idler::startAsync()
+void SyncContext::startAsync()
 {
-	assert(!_handle.closed()); // close() must not have been called
+	assert(!_handle.active());	
 	
 	_handle.ptr()->data = new async::Runner::Context::ptr(pContext);
-	int r = uv_idle_start(_handle.ptr<uv_idle_t>(), [](uv_idle_t* req, int) {
+	int r = uv_async_init(_handle.loop(), _handle.ptr<uv_async_t>(), [](uv_async_t* req, int) {
+		assert(req->data != nullptr); // catch late callbacks, may need to
+		                              // make uv handle a context member
 		auto ctx = reinterpret_cast<async::Runner::Context::ptr*>(req->data);
-		runAsync(ctx->get());
-		if (ctx->get()->handle && ctx->get()->cancelled()) {
-			uv_idle_stop(reinterpret_cast<uv_idle_t*>(ctx->get()->handle));
+		if (ctx->get()->cancelled()) {
 			delete ctx; // delete the context and free memory
+			req->data = nullptr;
+			return;
 		}
-		//scy::sleep(1); // prevent 100% idle CPU
-		               // TODO: uv_thread_yield when available
+
+		runAsync(ctx->get());		
 	});
 
-	if (r < 0) _handle.setAndThrowError("Cannot initialize idler", r);		
+	if (r < 0) _handle.setAndThrowError("Cannot initialize async", r);		
 }
 
 
-uv::Handle& Idler::handle()
+void SyncContext::cancel()
 {
-	return _handle;
+	async::Runner::cancel();
+}
+
+
+void SyncContext::close()
+{
+	cancel();
+	_handle.close();
+}
+
+
+bool SyncContext::closed()
+{
+	return _handle.closed();
 }
 
 	
-bool Idler::async() const
+bool SyncContext::async() const
 {
 	return false;
+}
+
+
+uv::Handle& SyncContext::handle()
+{
+	return _handle;
 }
 
 

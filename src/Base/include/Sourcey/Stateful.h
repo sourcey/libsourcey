@@ -61,6 +61,11 @@ public:
 	bool operator == (const State& r) 
 	{ 
 		return id() == r.id();
+	}
+
+	bool operator == (const State::ID& r) 
+	{ 
+		return id() == r;
 	}	
 	
     friend std::ostream& operator << (std::ostream& os, const State& state) 

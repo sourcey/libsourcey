@@ -24,6 +24,9 @@
 #include "Sourcey/Util.h"
 
 
+#ifdef HAVE_OPENCV
+
+
 namespace scy {
 namespace av {
 
@@ -88,17 +91,12 @@ void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 	
 	// Don't actually grab a frame here, just copy the current frame.
 	cv::Mat lastFrame = _base->lastFrame();
-	traceL("VideoCapture", this) << "Get frame 1" << std::endl;
 	if ((width && lastFrame.cols != width) || 
 		(height && lastFrame.rows != height)) {
-		traceL("VideoCapture", this) << "Get frame 2" << std::endl;
 		cv::resize(lastFrame, frame, cv::Size(width, height));
-		traceL("VideoCapture", this) << "Get frame 3" << std::endl;
 	}
 	else {
-		traceL("VideoCapture", this) << "Get frame 4" << std::endl;
 		lastFrame.copyTo(frame);
-		traceL("VideoCapture", this) << "Get frame 5" << std::endl;
 	}
 }
 
@@ -290,7 +288,7 @@ void VideoCaptureBase::run()
 						break;
 					next = _emitters[idx];
 	
-					//traceL("VideoCaptureBase", this) << "Emitting: " << idx << ": " << _counter.fps << std::endl;
+					traceL("VideoCaptureBase", this) << "Emitting: " << idx << ": " << _counter.fps << std::endl;
 					MatrixPacket out(&frame);
 					next->emit(next, out);
 				}
@@ -482,6 +480,7 @@ cv::VideoCapture& VideoCaptureBase::capture()
 } } // namespace scy::av
 
 
+#endif
 
 				/*
 					//empty = !!size;

@@ -22,7 +22,7 @@
 
 
 #include "Sourcey/PacketStream.h"
-#include "Sourcey/InterProc.h"
+#include "Sourcey/SyncContext.h"
 
 
 namespace scy {

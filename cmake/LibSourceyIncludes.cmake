@@ -29,7 +29,7 @@ macro(include_dependency name)
   endif()
   
   # Set a HAVE_XXX variable at parent scope for our Config.h
-  set(HAVE_${var_root_upper} TRUE PARENT_SCOPE)      
+  set(HAVE_${var_root_upper} 1) # TRUE PARENT_SCOPE
   # Expose to LibSourcey
   if(${var_root}_INCLUDE_DIR)
     #message(STATUS "- Found ${name} Inc Dir: ${${var_root}_INCLUDE_DIR}")
@@ -259,7 +259,7 @@ macro(set_component_found module component)
   if (${ALIAS_LIBRARIES}) # AND ${ALIAS_INCLUDE_DIRS} (XXX_INCLUDE_DIRS may be empty)
     #message(STATUS "  - ${module} ${component} found.")
     set(${ALIAS_FOUND} TRUE)
-    set(${ALIAS_FOUND} TRUE PARENT_SCOPE)
+    #set(${ALIAS_FOUND} TRUE PARENT_SCOPE)
   
     # Add component vars to the perant module lists
     append_unique_list(${module}_INCLUDE_DIRS ${ALIAS_INCLUDE_DIRS})    
@@ -337,7 +337,7 @@ macro(set_component_notfound module component)
 
   #message(STATUS "  - Setting ${module} ${component} not found.")
   set(${ALIAS_FOUND} FALSE)
-  set(${ALIAS_FOUND} FALSE PARENT_SCOPE)
+  #set(${ALIAS_FOUND} FALSE PARENT_SCOPE)
   
   if (${module}_MULTI_CONFIGURATION AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
     set(${ALIAS_RELEASE_LIBRARIES} ${ALIAS_RELEASE_LIBRARIES}-NOTFOUND)

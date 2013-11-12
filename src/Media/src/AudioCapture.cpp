@@ -20,9 +20,10 @@
 #include "Sourcey/Media/AudioCapture.h"
 #include "Sourcey/Logger.h"
 
+#ifdef HAVE_RTAUDIO
+
 
 using std::endl;
-using namespace scy;
 
 
 namespace scy {
@@ -301,3 +302,6 @@ void AudioCapture::getEncoderFormat(Format& iformat)
 
 
 } } // namespace scy::av
+
+
+#endif

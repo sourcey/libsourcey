@@ -21,6 +21,8 @@
 #include "Sourcey/Media/DeviceManager_WIN32.h"
 #include "Sourcey/Platform.h"
 
+#ifdef HAVE_RTAUDIO
+
 #include "RtAudio.h"
 
 #include <windows.h>
@@ -322,6 +324,9 @@ bool getDevicesWin32(REFGUID catid, std::vector<Device>& devices)
 
 
 } } // namespace scy::av
+
+
+#endif
 
 
 /*

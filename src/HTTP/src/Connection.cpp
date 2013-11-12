@@ -48,8 +48,8 @@ Connection::Connection(const net::Socket& socket) :
 	// Use an event loop Idler as the PacketStream async source
 	//auto idler = std::make_shared<Idler>(*socket.base().loop());
 	//, scy::deleter::Dispose<Idler>()
-	Incoming.setRunner(std::make_shared<Idler>(socket.base().loop()));
-	Outgoing.setRunner(std::make_shared<Idler>(socket.base().loop()));
+	//Incoming.setRunner(std::make_shared<Idler>(socket.base().loop()));
+	//Outgoing.setRunner(std::make_shared<Idler>(socket.base().loop()));
 
 	// Attach the outgoing stream to the socket
 	Outgoing.emitter += delegate(&_socket, &net::Socket::send);
@@ -68,6 +68,7 @@ Connection::~Connection()
 void Connection::sendData(const char* buf, std::size_t len) //, int flags
 {
 	traceL("Connection", this) << "Send: " << len << endl;
+	assert(Outgoing.active());
 	Outgoing.write(buf, len);
 
 	// Can't send to socket as may not be connected
@@ -79,6 +80,7 @@ void Connection::sendData(const char* buf, std::size_t len) //, int flags
 void Connection::sendData(const std::string& buf) //, int flags
 {
 	traceL("Connection", this) << "Send: " << buf.length() << endl;
+	assert(Outgoing.active());
 	Outgoing.write(buf.c_str(), buf.length());
 	
 	// Can't send to socket as may not be connected
@@ -91,6 +93,8 @@ int Connection::sendHeader()
 {
 	if (!_shouldSendHeader)
 		return 0;
+	_shouldSendHeader = false;
+
 	assert(outgoingHeader());
 	//assert(outgoingHeader()->has("Host"));
 	
@@ -98,9 +102,7 @@ int Connection::sendHeader()
 	outgoingHeader()->write(os);
 	std::string head(os.str().c_str(), os.str().length());
 
-	_timeout.start();
-	_shouldSendHeader = false;
-	
+	_timeout.start();	
 	traceL("Connection", this) << "Send header: " << head << endl; // remove me
 
 	// Send to base to bypass the ConnectionAdapter

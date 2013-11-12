@@ -65,10 +65,10 @@ public:
 	}
 	
 	virtual void emitHeader()
-		/// Sets HTTP headers for the initial response.
-		/// This method must not include the final carriage return. 
+		// Sets HTTP headers for the initial response.
+		// This method must not include the final carriage return. 
 	{	
-		/// Flush connection headers if the connection is set.
+		// Flush connection headers if the connection is set.
 		if (connection) {
 			connection->shouldSendHeader(true);					
 			connection->response().setChunkedTransferEncoding(true);
@@ -83,13 +83,13 @@ public:
 			connection->sendHeader();
 		}
 
-		/// Otherwise make up the response.
+		// Otherwise make up the response.
 		else {
 			std::ostringstream hst;
 			hst << "HTTP/1.1 200 OK\r\n"
-				/// Note: If Cache-Control: no-store is not used Chrome's (27.0.1453.110) 
-				/// memory usage grows exponentially for HTTP streaming:
-				/// https://code.google.com/p/chromium/issues/detail?id=28035
+				// Note: If Cache-Control: no-store is not used Chrome's (27.0.1453.110) 
+				// memory usage grows exponentially for HTTP streaming:
+				// https://code.google.com/p/chromium/issues/detail?id=28035
 				<< "Cache-Control: no-store, no-cache, max-age=0, must-revalidate\r\n"
 				<< "Cache-Control: post-check=0, pre-check=0, FALSE\r\n"
 				<< "Access-Control-Allow-Origin: *\r\n"
@@ -105,22 +105,22 @@ public:
 	
 	virtual void process(IPacket& packet)
 	{
-		/// traceL("ChunkedAdapter", this) << "Processing: " << packet.className() << ": " << packet.size() << std::endl;
+		// traceL("ChunkedAdapter", this) << "Processing: " << packet.className() << ": " << packet.size() << std::endl;
 		
 		if (!packet.hasData())
 			throw std::invalid_argument("Incompatible packet type");
 		
-		/// Emit HTTP response header		
+		// Emit HTTP response header		
 		if (initial) {			
 			initial = false;	
 			emitHeader();
 		}
 		
-		/// Get hex stream length
+		// Get hex stream length
 		std::ostringstream ost;
 		ost << std::hex << packet.size();
 		
-		/// Emit separate packets for nocopy
+		// Emit separate packets for nocopy
 		if (nocopy) {
 			emit(ost.str());
 			emit("\r\n", 2);
@@ -128,7 +128,7 @@ public:
 			emit("\r\n", 2);
 		}
 		
-		/// Concat pieces for non fragmented
+		// Concat pieces for non fragmented
 		else {
 			ost << "\r\n";
 			ost.write(packet.data(), packet.size());
@@ -178,7 +178,7 @@ public:
 		
 	virtual void emitHeader()
 	{	
-		/// Flush connection headers if the connection is set.
+		// Flush connection headers if the connection is set.
 		if (connection) {
 			connection->shouldSendHeader(true);				
 			connection->response().set("Content-Type", "multipart/x-mixed-replace; boundary=end");
@@ -192,7 +192,7 @@ public:
 			connection->sendHeader();
 		}
 
-		/// Otherwise make up the response.
+		// Otherwise make up the response.
 		else {
 			std::ostringstream hst;
 			hst << "HTTP/1.1 200 OK\r\n"
@@ -208,9 +208,9 @@ public:
 	}
 	
 	virtual void emitChunkHeader()
-		/// Sets HTTP header for the current chunk.
+		// Sets HTTP header for the current chunk.
 	{	
-		/// Write the chunk header
+		// Write the chunk header
 		std::ostringstream hst;
 
 		hst << "--end\r\n"
@@ -224,17 +224,17 @@ public:
 	
 	virtual void process(IPacket& packet)
 	{		
-		/// Write the initial HTTP response header		
+		// Write the initial HTTP response header		
 		if (initial) {			
 			initial = false;	
 			emitHeader();
 		}
 		
-		/// Broadcast the HTTP header separately 
-		/// so we don't need to copy any data.
+		// Broadcast the HTTP header separately 
+		// so we don't need to copy any data.
 		emitChunkHeader();
 
-		/// Proxy the input packet.
+		// Proxy the input packet.
 		emit(packet);
 	}
 			

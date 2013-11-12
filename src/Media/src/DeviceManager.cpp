@@ -20,15 +20,6 @@
 
 #include "Sourcey/Media/DeviceManager.h"
 
-/*
-#include "talk/base/fileutils.h"
-#include "talk/base/logging.h"
-#include "talk/base/pathutils.h"
-#include "talk/base/stringutils.h"
-#include "talk/base/thread.h"
-#include "talk/session/phone/filevideocapturer.h"
-#include "talk/session/phone/mediacommon.h"
-*/
 
 using namespace std;
 

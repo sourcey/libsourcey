@@ -20,8 +20,10 @@
 #include "Sourcey/Media/VideoAnalyzer.h"
 
 
-using namespace std;
+#ifdef HAVE_FFMPEG
 
+
+using namespace std;
 
 
 namespace scy {
@@ -406,6 +408,8 @@ double log2(double n)
 
 } } // namespace scy::av
 
+
+#endif
 
 
 

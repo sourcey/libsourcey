@@ -23,6 +23,7 @@
 
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Mutex.h"
+#include "Sourcey/Platform.h"
 #include "Sourcey/Async.h"
 
 
@@ -60,6 +61,21 @@ protected:
 
 	uv_thread_t _handle;
 };
+
+
+inline bool waitForThread(Thread& thread, int interval = 10, int timeout = 5000) 
+{	
+	int times = 0;
+	assert(Thread::currentID() != thread.tid());
+	while (!thread.cancelled() || thread.running()) {
+		scy::sleep(interval);
+		if (timeout && ((times * interval) > timeout)) {
+			assert(0 && "deadlock; calling inside thread scope?");
+			return false;
+		}
+	}
+	return true;
+}
 
 
 //

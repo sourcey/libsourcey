@@ -2,6 +2,7 @@
 #include "Sourcey/HTTP/Client.h"
 #include "Sourcey/HTTP/Packetizers.h"
 #include "Sourcey/HTTP/URL.h"
+#include "Sourcey/Idler.h"
 #include "Sourcey/FileSystem.h"
 #include "Sourcey/Crypto/Crypto.h"
 #include <stdexcept>
@@ -46,15 +47,16 @@ FormWriter::FormWriter(ClientConnection& connection, async::Runner::ptr runner, 
 	_complete(false)
 {
 	// Make sure threads are repeating
-	Thread* thread = dynamic_cast<Thread*>(runner.get());
-	if (thread)
-		thread->setRepeating(true);
+	//Thread* thread = dynamic_cast<Thread*>(runner.get());
+	//if (thread)
+	//	thread->setRepeating(true);
+	runner->setRepeating(true);
 }
 
 	
 FormWriter::~FormWriter()
 {
-	for (PartQueue::iterator it = _parts.begin(); it != _parts.end(); ++it)
+	for (auto it = _parts.begin(); it != _parts.end(); ++it)
 		delete it->part;
 }
 
@@ -75,7 +77,7 @@ void FormWriter::addFile(const std::string& name, FilePart* part)
 
 void FormWriter::prepareSubmit()
 {	
-	traceL("FilePart", this) << "Start" << std::endl;
+	traceL("FormWriter", this) << "Prepare submit" << std::endl;
 
 	http::Request& request = _connection.request();
 	if (request.getMethod() == http::Method::Post || 
@@ -126,7 +128,7 @@ void FormWriter::prepareSubmit()
 
 void FormWriter::start()
 {
-	traceL("FilePart", this) << "Start" << std::endl;
+	traceL("FormWriter", this) << "Start" << std::endl;
 
 	prepareSubmit();
 	_runner->start(std::bind(&FormWriter::writeAsync, this));
@@ -135,7 +137,7 @@ void FormWriter::start()
 
 void FormWriter::stop()
 {
-	traceL("FilePart", this) << "Stop" << std::endl;
+	traceL("FormWriter", this) << "Stop" << std::endl;
 
 	//_complete = true;
 	_runner->cancel();

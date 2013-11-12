@@ -106,8 +106,6 @@ if (NOT OpenCV_FOUND)
       /usr/lib 
       /usr/local/lib
     )
-
-  message("OpenCV_LIBRARY_DIRS=${OpenCV_LIBRARY_DIRS}")  
     
   if(OpenCV_LIBRARY_DIRS)
     set(OpenCV_FOUND 1)    

@@ -48,7 +48,7 @@ set_option(BUILD_APPLICATIONS         "Build LibSourcey applications"           
 set_option(BUILD_MODULE_SAMPLES       "Build module sample applications?"                        OFF)
 set_option(BUILD_MODULE_TESTS         "Build module test applications?"                          OFF)
 set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs"                       ON)
-set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs (not MSCV only)"       ON )
+set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs (not MSCV only)"       ON)
 set_option(BUILD_WITH_STATIC_CRT      "Enables staticaly linked CRT for staticaly linked libraries" OFF)
 set_option(BUILD_ALPHA                "Build alpha devlopment modules"                           OFF)
 
@@ -102,8 +102,9 @@ if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     D:/dev/lib/wxWidgets-2.9.4/lib/vc_lib
     D:/dev/lib/opencv-2.4.6.0/build/install/lib
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib
+    #D:/dev/lib/ffmpeg-1.0.1-gpl/lib
     ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/lib/vc10
+    ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib
     #${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/vc10
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
     )
@@ -140,8 +141,9 @@ if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     D:/dev/lib/wxWidgets-2.9.4  
     D:/dev/lib/opencv-2.4.6.0/build/install/include
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/include
+    #D:/dev/lib/ffmpeg-1.0.1-gpl/include
     ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/include
+    ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/include
     #${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/include
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
     )
@@ -230,41 +232,103 @@ elseif(LINUX)
 endif()
 
 # ----------------------------------------------------------------------------
-# Include and third party dependencies
+# Include third party dependencies
 # ----------------------------------------------------------------------------
 
-# Define known dependencies for our LibSourceyConfig.h
-# These variables will be modified by include_dependency()
-set(HAVE_RTAUDIO 0)
-set(HAVE_JSONCPP 0)
-set(HAVE_OPENSSL 0)
-set(HAVE_FFMPEG 0)
-set(HAVE_OPENCV 0)
-set(HAVE_WXWIDGETS 0)
-set(HAVE_LIBUV 0)
-set(HAVE_HTTP_PARSER 0)
-set(HAVE_ZLIB 0)
-#set(HAVE_POCO 0)
-#set(HAVE_LIBSTROPHE 0)
-#set(HAVE_PUGIXML 0)
-  
+set_option(WITH_LIBUV           "Include LibUV support"                ON)
+set_option(WITH_OPENSSL         "Include OpenSSL support"              ON)
+set_option(WITH_FFMPEG          "Include FFmpeg support"               ON)
+set_option(WITH_OPENCV          "Include OpenCV support"               ON)
+set_option(WITH_RTAUDIO         "Include RtAudio support"              ON)
+set_option(WITH_JSONCPP         "Include JsonCpp support"              ON)
+set_option(WITH_ZLIB            "Include zlib support"                 ON)
+set_option(WITH_HTTPPARSER      "Include HttpParser support"           ON)
+set_option(WITH_WXWIDGETS       "Include wxWidgets support"            ON)
+
 if(BUILD_DEPENDENCIES)
-  # TODO: Search for library and conditional build
-  # depending on XXX_FOUND or HAVE_XXX variable  
-  set(WITH_RTAUDIO ON CACHE BOOL "Build with RtAudio")
-  set(WITH_JSONCPP ON CACHE BOOL "Build with JsonCpp")
-  #set(WITH_PUGIXML ON CACHE BOOL "Build with PugiXML")
-  #set(WITH_LIBSTROPHE ON CACHE BOOL "Build with LibStrophe")
-  set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} "${LibSourcey_DEPENDENCIES_SOURCE_DIR}/MemLeakDetect")
   add_subdirectory(${LibSourcey_DEPENDENCIES_SOURCE_DIR})
-else()
-  unset(WITH_RTAUDIO CACHE)
-  unset(WITH_JSONCPP CACHE)
-  #unset(WITH_PUGIXML CACHE)
-  #unset(WITH_LIBSTROPHE CACHE)
 endif()
 
-# Include our dependencies source directory
+if(WITH_LIBUV)
+  include_dependency(LibUV REQUIRED)
+  #set(HAVE_LIBUV 1)
+endif()
+
+if(WITH_OPENSSL)
+  include_dependency(OpenSSL REQUIRED)
+  #set(HAVE_OPENSSL 1)
+endif()
+
+if(WITH_FFMPEG)
+  include_dependency(FFmpeg REQUIRED)
+  #set(HAVE_FFMPEG 1)
+endif()
+
+if(WITH_OPENCV)
+  include_dependency(OpenCV REQUIRED)
+  #set(HAVE_OPENCV 1)
+endif()
+
+if(WITH_RTAUDIO)
+  include_dependency(RtAudio REQUIRED)
+  #set(HAVE_RTAUDIO 1)
+endif()
+
+if(WITH_JSONCPP)
+  include_dependency(JsonCpp REQUIRED)
+  #set(HAVE_JSONCPP 1)
+endif()
+
+if(WITH_ZLIB)
+  include_dependency(ZLIB REQUIRED)
+  include_dependency(Minizip REQUIRED)
+  #set(HAVE_JSONCPP 1)
+endif()
+
+if(WITH_WXWIDGETS)
+  # TODO: specify library option
+  include_dependency(wxWidgets REQUIRED core base adv)
+  #set(HAVE_WXWIDGETS 1)
+endif()
+
+if(WITH_HTTPPARSER)
+  include_dependency(HttpParser REQUIRED)
+  #set(HAVE_HTTPPARSER 1)
+endif()
+
+  
+# Define known dependencies for our LibSourceyConfig.h
+# These variables will be modified by include_dependency()
+#set(HAVE_RTAUDIO 0)
+#set(HAVE_JSONCPP 0)
+#set(HAVE_OPENSSL 0)
+#set(HAVE_FFMPEG 0)
+#set(HAVE_OPENCV 0)
+#set(HAVE_WXWIDGETS 0)
+#set(HAVE_LIBUV 0)
+#set(HAVE_HTTP_PARSER 0)
+#set(HAVE_ZLIB 0)
+##set(HAVE_POCO 0)
+##set(HAVE_LIBSTROPHE 0)
+##set(HAVE_PUGIXML 0)
+  
+#if(BUILD_DEPENDENCIES)
+  # TODO: Search for library and conditional build
+  # depending on XXX_FOUND or HAVE_XXX variable  
+  #set(WITH_RTAUDIO ON CACHE BOOL "Build with RtAudio")
+  #set(WITH_JSONCPP ON CACHE BOOL "Build with JsonCpp")
+  ##set(WITH_PUGIXML ON CACHE BOOL "Build with PugiXML")
+  ##set(WITH_LIBSTROPHE ON CACHE BOOL "Build with LibStrophe")
+  #set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} "${LibSourcey_DEPENDENCIES_SOURCE_DIR}/MemLeakDetect")
+  #add_subdirectory(${LibSourcey_DEPENDENCIES_SOURCE_DIR})
+#else()
+  #unset(WITH_RTAUDIO CACHE)
+  #unset(WITH_JSONCPP CACHE)
+  ##unset(WITH_PUGIXML CACHE)
+  ##unset(WITH_LIBSTROPHE CACHE)
+#endif()
+
+# Include the dependencies source directory
 list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}) 
 if (MSVC)
   list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/msvc) 
@@ -370,15 +434,29 @@ endif()
 status("")
 status("  Build Components:")
 status("")
-status("    Dependencies:               ${LibSourcey_BUILD_DEPENDENCIES}")
-status("    Modules:                    ${LibSourcey_BUILD_MODULES}")
-status("    Applications:               ${LibSourcey_BUILD_APPLICATIONS}")
-  
+status("     Dependencies:               ${LibSourcey_BUILD_DEPENDENCIES}")
+status("     Modules:                    ${LibSourcey_BUILD_MODULES}")
+status("     Applications:               ${LibSourcey_BUILD_APPLICATIONS}")
+
+# Dependencies
+status("")
+status("  Other third-party libraries:")
+status("")
+status("    Use LibUV:"         HAVE_LIBUV           THEN YES ELSE NO)
+status("    Use OpenSSL:"       HAVE_OPENSSL         THEN YES ELSE NO)
+status("    Use FFmpeg:"        HAVE_RTAUDIO         THEN YES ELSE NO)
+status("    Use OpenCV:"        HAVE_OPENCV          THEN "YES (ver ${OpenCV_VERSION})" ELSE NO)
+status("    Use RtAudio:"       HAVE_RTAUDIO         THEN YES ELSE NO)
+status("    Use JsonCpp:"       HAVE_JSONCPP         THEN YES ELSE NO)
+status("    Use wxWidgets:"     HAVE_WXWIDGETS       THEN YES ELSE NO)
+status("    Use HttpParser:"    HAVE_HTTPPARSER      THEN YES ELSE NO)
+status("    Use zlib:"          HAVE_ZLIB            THEN YES ELSE NO)
+
 # Auxiliary
 status("")
-status("    Install path:               ${CMAKE_INSTALL_PREFIX}")
+status("    Install path:                ${CMAKE_INSTALL_PREFIX}")
 status("")
-status("    LibSourceyConfig.h is in:   ${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
+status("    LibSourceyConfig.h is in:    ${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
 status("-----------------------------------------------------------------")
 status("")
 

@@ -17,14 +17,14 @@
 //
 
 
-#ifndef SOURCEY_InterProcess_H
-#define SOURCEY_InterProcess_H
+#ifndef SOURCEY_SyncContext_H
+#define SOURCEY_SyncContext_H
 
 
 #include "Sourcey/UV/UVPP.h"
 #include "Sourcey/Platform.h"
 #include "Sourcey/Logger.h"
-#include "Sourcey/Timer.h"
+#include "Sourcey/Async.h"
 #include "Sourcey/Interface.h"
 
 #include <deque>
@@ -41,7 +41,6 @@ namespace scy {
 class SyncContext: public async::Runner
 	/// SyncContext enables any thread to communicate with
 	/// the associated event loop via synchronized callbacks.
-	/// TODO: Cancellation when uv_cancel is available on win.
 {
 public:
 	SyncContext(uv::Loop* loop);
@@ -69,32 +68,6 @@ protected:
 	virtual void startAsync();
 	virtual bool async() const;
 
-	uv::Handle _handle;
-};
-
-
-//
-// Idler
-//
-
-
-class Idler: public async::Runner
-{
-public:
-	Idler(uv::Loop* loop = uv::defaultLoop());
-	Idler(uv::Loop* loop, std::function<void()> target);
-	Idler(uv::Loop* loop, std::function<void(void*)> target, void* arg);
-		// Create the idler context the given event loop and method.
-	
-	virtual ~Idler();
-	
-	uv::Handle& handle();
-
-protected:	
-	virtual void init();
-	virtual void startAsync();
-	virtual bool async() const;
-	
 	uv::Handle _handle;
 };
 
@@ -216,7 +189,7 @@ static SyncDelegate<C,
 } // namespace scy
 
 
-#endif // SOURCEY_InterProcess_H
+#endif // SOURCEY_SyncContext_H
 
 
 
