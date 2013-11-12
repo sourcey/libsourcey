@@ -23,9 +23,10 @@
 
 #include "assert.h"
 
+#ifdef HAVE_OPENCV
+
 
 using namespace std;
-
 
 
 namespace scy {
@@ -37,7 +38,7 @@ ImageEncoder::ImageEncoder(EncoderOptions& options, std::vector<int> cvParams) :
 	_options(options),
 	_params(cvParams)
 {	
-	traceL() << "[ImageEncoder" << this << "] Creating" << endl;
+	traceL("ImageEncoder", this) << "Create" << endl;
 
 	if (_options.oformat.id == "jpeg" ||
 		_options.oformat.id == "mjpeg")
@@ -54,7 +55,7 @@ ImageEncoder::ImageEncoder(EncoderOptions& options, std::vector<int> cvParams) :
 
 ImageEncoder::~ImageEncoder()
 {
-	traceL() << "[ImageEncoder" << this << "] Destroy" << endl;
+	traceL("ImageEncoder", this) << "Destroy" << endl;
 }
 
 	
@@ -76,7 +77,7 @@ bool ImageEncoder::accepts(IPacket& packet)
 
 void ImageEncoder::process(IPacket& packet)
 { 
-	//traceL() << "[ImageEncoder: " << this <<"] Processing" << endl;
+	//traceL("ImageEncoder", this) << "Processing" << endl;
 
 	MatrixPacket* mpacket = dynamic_cast<MatrixPacket*>(&packet);	
 	if (!mpacket)
@@ -102,9 +103,9 @@ void ImageEncoder::process(IPacket& packet)
 	mpacket->_data = (char*)&buffer[0];
 	mpacket->_size = buffer.size();
 	
-	//traceL() << "[ImageEncoder: " << this <<"] Broadcasting: " << mpacket << endl;
+	//traceL("ImageEncoder", this) << "Broadcasting: " << mpacket << endl;
 	emit(*mpacket); //this, 
-	//traceL() << "[ImageEncoder: " << this <<"] Broadcasting: OK: " << mpacket << endl;
+	//traceL("ImageEncoder", this) << "Broadcasting: OK: " << mpacket << endl;
 }
 
 	
@@ -115,3 +116,6 @@ EncoderOptions& ImageEncoder::options()
 
 
 } } // namespace scy::av
+
+
+#endif

@@ -7,6 +7,7 @@
 #include "Sourcey/Collection.h"
 #include "Sourcey/Application.h"
 #include "Sourcey/PacketStream.h"
+#include "Sourcey/PacketQueue.h"
 #include "Sourcey/SharedLibrary.h"
 #include "Sourcey/FileSystem.h"
 #include "Sourcey/Process.h"
@@ -592,12 +593,14 @@ public:
 	//	
 	struct TestPacketSource: public PacketSource, public async::Startable
 	{
-		Idler runner;
+		Thread runner;
+		//Idler runner;
 		PacketSignal emitter;
 
 		TestPacketSource() : 
 			PacketSource(emitter)
 		{
+			runner.setRepeating(true);
 		}
 
 		void start() 
@@ -605,7 +608,9 @@ public:
 			debugL("TestPacketSource", this) << "Start" << endl;	
 			runner.start([](void* arg) {
 				auto self = reinterpret_cast<TestPacketSource*>(arg);
-				self->emitter.emit(self, RawPacket("hello", 5));
+				debugL("TestPacketSource", self) << "Emitting" << endl;	
+				RawPacket p("hello", 5);
+				self->emitter.emit(self, p);
 			}, this);
 		}
 
@@ -614,6 +619,7 @@ public:
 			debugL("TestPacketSource", this) << "Stop" << endl;	
 			runner.cancel();
 			//runner.close();
+			debugL("TestPacketSource", this) << "Stop: OK" << endl;	
 		}
 	};	
 
@@ -635,15 +641,18 @@ public:
 	
 	void onPacketStreamOutput(void* sender, IPacket& packet) 
 	{
-		debugL("TestPacketStream", this) << "On packet: " << packet.className() << endl;
+		debugL("TestPacketStream", this) << ">>>>>>>>>>> On packet: " << packet.className() << endl;
 	}
 
 	void testPacketStream() 
 	{
 		PacketStream stream;	
-		stream.setRunner(std::make_shared<Thread>());
+		//stream.setRunner(std::make_shared<Thread>());
 		stream.attachSource(new TestPacketSource, true, true);
-		stream.attach(new TestPacketProcessor, 0, true);
+		//stream.attach(new AsyncPacketQueue, 0, true);
+		stream.attach(new TestPacketProcessor, 1, true);
+		//stream.attach(new SyncPacketQueue, 2, true);
+		stream.synchronizeOutput(uv::defaultLoop());
 		stream.emitter += packetDelegate(this, &Tests::onPacketStreamOutput);	
 		stream.start();
 
@@ -651,13 +660,19 @@ public:
 					
 		app.waitForShutdown([](void* arg) {
 			auto stream = reinterpret_cast<PacketStream*>(arg);
+			debugL("TestPacketStream") << "########## Shutdown" << endl;
 			stream->close();
+			//reinterpret_cast<TestPacketSource*>(stream->base().sources()[0].ptr)->stop();
+			debugL("TestPacketStream") << "########## Shutdown: After" << endl;
 		}, &stream);		
+		
+		debugL("TestPacketStream") << "########## Exiting" << endl;
+		stream.close();
 	}
 	
 	void onChildPacketStreamOutput(void* sender, IPacket& packet) 
 	{
-		debugL("TestPacketStream", this) << "@@@@@@@@@@@@@@@ On child packet: " << packet.className() << endl;
+		debugL("TestPacketStream", this) << ">>>>>>>>>>> On child packet: " << packet.className() << endl;
 	}
 	
 	struct ChildStreams
@@ -671,9 +686,10 @@ public:
 	void testMultiPacketStream() 
 	{
 		PacketStream stream;	
-		stream.setRunner(std::make_shared<Thread>());
+		//stream.setRunner(std::make_shared<Thread>());
 		stream.attachSource(new TestPacketSource, true, true);
-		stream.attach(new TestPacketProcessor, 0, true);
+		//stream.attach(new AsyncPacketQueue, 0, true);
+		stream.attach(new TestPacketProcessor, 1, true);
 		//stream.emitter += packetDelegate(this, &Tests::onPacketStreamOutput);	
 		stream.start();
 		
@@ -681,21 +697,25 @@ public:
 		// and synchronizes output packets with the default event loop.
 		ChildStreams children;
 		children.s1 = new PacketStream;
-		children.s1->setRunner(std::make_shared<Idler>()); // Use Idler
+		//children.s1->setRunner(std::make_shared<Idler>()); // Use Idler
 		children.s1->attachSource(stream.emitter);
-		//children.s1->synchronizeOutput(uv::defaultLoop());
+		children.s1->attach(new AsyncPacketQueue, 0, true);
+		children.s1->attach(new SyncPacketQueue, 1, true);
+		children.s1->synchronizeOutput(uv::defaultLoop());
 		children.s1->emitter += packetDelegate(this, &Tests::onChildPacketStreamOutput);	
 		children.s1->start();
 
 		children.s2 = new PacketStream;
 		children.s2->attachSource(stream.emitter);
+		children.s2->attach(new AsyncPacketQueue, 0, true);
 		children.s2->synchronizeOutput(uv::defaultLoop());
 		children.s2->emitter += packetDelegate(this, &Tests::onChildPacketStreamOutput);	
 		children.s2->start();
 		
 		children.s3 = new PacketStream;
 		children.s3->attachSource(stream.emitter);
-		children.s3->synchronizeOutput(uv::defaultLoop());
+		children.s3->attach(new AsyncPacketQueue, 0, true);
+		//children.s3->synchronizeOutput(uv::defaultLoop());
 		children.s3->emitter += packetDelegate(this, &Tests::onChildPacketStreamOutput);	
 		children.s3->start();
 					

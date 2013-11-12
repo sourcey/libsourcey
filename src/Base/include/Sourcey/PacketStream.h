@@ -200,7 +200,7 @@ struct PacketStreamState: public State
 
 
 class PacketStream;
-class PacketStreamBase: public Stateful<PacketStreamState>, public RunnableQueue<IPacket>
+class PacketStreamBase: public Stateful<PacketStreamState>//, public RunnableQueue<IPacket>
 	/// PacketStreamBase contains methods relevent to the internal stream API.
 {	
 	PacketStreamBase(PacketStream* stream);
@@ -224,7 +224,7 @@ public:
 		// and internal states have been synchronized.
 		// This function is only useful after calling stop() or pause().
 
-	bool waitForState(PacketStreamState::ID state);
+	bool waitForStateSync(PacketStreamState::ID state);
 		// Block the calling thread until the given state is synchronized.
 
 	int numSources() const;
@@ -286,14 +286,11 @@ protected:
 	void cleanup();
 		// Remove all stream adapters and delete managed adapters.
 
-	void dispose();
-		// Schedule the pointer for deletion.
-	
-	void write(IPacket& packet);
-		// Write an incoming packet onto the stream.
-
 	void emit(IPacket& packet);
 		// Emit the final packet to listeners.
+		//
+		// Synchronized signals such as Close and Error are sent
+		// from this method. See synchronizeOutput()
 	
 	void attachSource(PacketSignal& source);
 		// Attach a source packet emitter to the stream.
@@ -332,18 +329,23 @@ protected:
 	const std::exception_ptr& error();
 		// Returns the stream error (if any).
 	
-	virtual void dispatch(IPacket& packet);
+	virtual void process(IPacket& packet);
 		// Overrides RunnableQueue::dispatch to process an incoming packet.
+	
+	void startSources();
+		// Start synchronized sources.
 
-	virtual bool dispatchNext();
-		// Overrides RunnableQueue::dispatchNext to ensure that stream 
-		// states are correctly synchronized with the async context.
+	void stopSources();
+		// Stop synchronized sources.
 	
-	virtual bool beforeStateChange(const PacketStreamState& state); //, const PacketStreamState& oldStateunsigned int id, const std::string& message = ""
-		// Override the setState method 
+	void synchronizeStates();
+		// Synchronize queued states with adapters.
 	
-	void queueState(PacketStreamState::ID state);
-	bool statePendingOrEquals(PacketStreamState::ID state) const;
+	virtual void onStateChange(PacketStreamState& state, const PacketStreamState& oldState);
+		// Override the Stateful::onStateChange method 
+	
+	//void queueState(PacketStreamState::ID state);
+	bool hasQueuedState(PacketStreamState::ID state) const;
 	
 	void assertNotActive();
 		// Asserts that the stream is not in or pending the Active state.
@@ -355,15 +357,15 @@ protected:
 	friend struct std::default_delete<PacketStreamBase>;
 	
 	mutable Mutex _mutex;
+	mutable Mutex _procMutex;
 	PacketStream* _stream;
 	PacketAdapterVec _sources;
 	PacketAdapterVec _processors;
-	std::deque<PacketStreamState::ID> _states;
-	async::Runner::ptr _runner;
+	std::deque<PacketStreamState> _states;
+	//async::Runner::ptr _runner;
 	std::exception_ptr _error;
 	bool _closeOnError;
-	bool _syncError;
-	bool _deleted;
+	//bool _syncError;
 };
 
 
@@ -426,7 +428,7 @@ public:
 	virtual bool closed() const;
 		// Returns true when the stream is in the Closed or Error state.
 
-	virtual bool async() const;
+	//virtual bool async() const;
 		// Returns true is the underlying Runner is set and is thread-based.
 	
 	virtual bool lock();
@@ -475,19 +477,8 @@ public:
 		// Note: The pointer will be forgotten about, so if the freePointer
 		// flag set when calling attach() will have no effect.
 
-	virtual void setRunner(async::Runner::ptr runner);
-		// Set the asynchronous context for packet processing.
-		// This may be a Thread or another derivative of Async.
-		// Must be set before the stream is activated.
-
 	virtual void synchronizeOutput(uv::Loop* loop);
 		// Synchronize stream output packets with the given event loop.
-	
-	void startSources();
-		// Start synchronized sources.
-
-	void stopSources();
-		// Stop synchronized sources.
 	
 	virtual void closeOnError(bool flag);
 		// Set the stream to be closed on error.
@@ -538,7 +529,28 @@ typedef std::vector<PacketStream*> PacketStreamVec;
 #endif // SOURCEY_PacketStream_H
 
 
+
+	//void dispose();
+		// Schedule the pointer for deletion.
 	
+	//void write(IPacket& packet);
+		// Write an incoming packet onto the stream.
+	//virtual void setRunner(async::Runner::ptr runner);
+		// Set the asynchronous context for packet processing.
+		// This may be a Thread or another derivative of Async.
+		// Must be set before the stream is activated.
+
+
+	//virtual bool dispatchNext();
+		// Overrides RunnableQueue::dispatchNext to ensure that stream 
+		// states are correctly synchronized with the async context.
+	//bool _syncClose;
+	
+	//bool _deleted;
+
+	//void sync(IPacket& packet);
+		// Synchronizes the outgoing packet before it is emitted.
+		// If no synchronization context is set then proxies to emit()
 	
 	
 	//void setEmitter(PacketSignal* emitter);

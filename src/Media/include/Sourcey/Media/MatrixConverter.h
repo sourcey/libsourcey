@@ -20,9 +20,10 @@
 #ifndef SOURCEY_MEDIA_MatrixConverter_H
 #define SOURCEY_MEDIA_MatrixConverter_H
 
-
 #include "Sourcey/PacketStream.h"
 #include "Sourcey/Signal.h"
+
+#if defined(HAVE_OPENCV) && defined(HAVE_FFMPEG)
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -122,4 +123,5 @@ public:
 } } // namespace scy::av
 
 
+#endif
 #endif

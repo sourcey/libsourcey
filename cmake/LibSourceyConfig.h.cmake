@@ -47,6 +47,9 @@
 #define Anionu_API_USERNAME "${Anionu_API_USERNAME}"
 #define Anionu_API_PASSWORD "${Anionu_API_PASSWORD}"
 
+/* LibUV library */
+#cmakedefine HAVE_LIBUV
+
 /* FFmpeg video library */
 #cmakedefine HAVE_FFMPEG
 
@@ -64,9 +67,6 @@
 
 /* LibStrophe library */
 #cmakedefine HAVE_LIBSTROPHE
-
-/* LibUV library */
-#cmakedefine HAVE_LIBUV
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #cmakedefine HAVE_INTTYPES_H 1

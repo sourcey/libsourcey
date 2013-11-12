@@ -84,19 +84,11 @@ public:
 		// The Outgoing stream is responsible for packetizing  
 		// raw application data into the agreed upon HTTP   
 		// format and sending it to the peer.
-		//
-		// TODO: send() method should pipe though the 
-		// stream is active (has delegates and procs) 
-		// TODO: Use PacketStream alternative
 
 	PacketStream Incoming; 
 		// The Incoming stream is responsible for depacketizing
 		// incoming HTTP chunks emitting the payload to
 		// delegate listeners.
-		//
-		// TODO: send() method should pipe though the 
-		// stream is active (has delegates and procs) 
-		// TODO: Use PacketStream alternative
 
     virtual http::Message* incomingHeader() = 0;
     virtual http::Message* outgoingHeader() = 0;
@@ -120,7 +112,6 @@ protected:
     net::Socket _socket;	
 	Timeout _timeout;
 	Error _error;
-
 	bool _closed;
 	bool _shouldSendHeader;
 	

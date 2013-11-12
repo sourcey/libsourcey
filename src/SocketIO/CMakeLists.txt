@@ -1,10 +1,10 @@
 ask_build_sourcey_module(SocketIO)
 if(BUILD_MODULES AND BUILD_MODULE_SocketIO) 
 
-  include_dependency(OpenSSL REQUIRED)
-  include_dependency(JsonCpp REQUIRED)
-  include_dependency(LibUV REQUIRED)
-  include_dependency(HttpParser REQUIRED)
+  #include_dependency(OpenSSL REQUIRED)
+  #include_dependency(JsonCpp REQUIRED)
+  #include_dependency(LibUV REQUIRED)
+  #include_dependency(HttpParser REQUIRED)
 
   define_sourcey_module(SocketIO Base UV Crypto Net HTTP JSON)
 endif()

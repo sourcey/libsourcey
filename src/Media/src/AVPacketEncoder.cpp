@@ -30,8 +30,8 @@ namespace av {
 AVPacketEncoder::AVPacketEncoder(const RecordingOptions& options, bool muxLiveStreams) :
 	AVEncoder(options), 
 	PacketProcessor(AVEncoder::emitter), 
-	_lastVideoPacket(nullptr), 
-	_muxLiveStreams(muxLiveStreams)
+	_muxLiveStreams(muxLiveStreams), 
+	_lastVideoPacket(nullptr)
 {
 }
 
@@ -39,7 +39,8 @@ AVPacketEncoder::AVPacketEncoder(const RecordingOptions& options, bool muxLiveSt
 AVPacketEncoder::AVPacketEncoder(bool muxLiveStreams) :
 	AVEncoder(), 
 	PacketProcessor(AVEncoder::emitter), 
-	_muxLiveStreams(muxLiveStreams)
+	_muxLiveStreams(muxLiveStreams), 
+	_lastVideoPacket(nullptr)
 {
 }
 
@@ -56,25 +57,22 @@ void AVPacketEncoder::process(IPacket& packet)
 	// We may be receiving either audio or video packets	
 	VideoPacket* vPacket = dynamic_cast<VideoPacket*>(&packet);
 	AudioPacket* aPacket = vPacket ? nullptr : dynamic_cast<AudioPacket*>(&packet);
-	if (!vPacket && aPacket)
-		throw std::invalid_argument("Unknown packet type");
+	if (!vPacket && !aPacket)
+		throw std::invalid_argument("Unknown media packet type.");
 
 	// Do some special synchronizing for muxing live variable framerate streams
-	if (_muxLiveStreams) {	
+	if (_muxLiveStreams) {
 		VideoEncoderContext* video = AVEncoder::video();
 		AudioEncoderContext* audio = AVEncoder::audio();
 		assert(audio && video);
 		double audioPts, videoPts;
 		int times = 0;
-		for (;;) 
-		{
+		for (;;) {
 			times++;
 			assert(times < 10);			
 			audioPts = audio ? (double)audio->stream->pts.val * audio->stream->time_base.num / audio->stream->time_base.den : 0.0;
-			videoPts = video ? (double)video->stream->pts.val * video->stream->time_base.num / video->stream->time_base.den : 0.0;
-
-			if (aPacket)
-			{
+			videoPts = video ? (double)video->stream->pts.val * video->stream->time_base.num / video->stream->time_base.den : 0.0;			
+			if (aPacket) {
 				// Write the audio packet when the encoder is ready
 				if (!video || audioPts < videoPts) {
 					encode(*aPacket);
@@ -90,8 +88,7 @@ void AVPacketEncoder::process(IPacket& packet)
 					encode(*_lastVideoPacket);
 				}
 			}
-			else if (vPacket) 
-			{
+			else if (vPacket) {
 				// Write the video packet if the encoder is ready
 				if (!audio || audioPts > videoPts)
 					encode(*vPacket);
@@ -145,6 +142,9 @@ void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state)
 	case PacketStreamState::Active:
 		if (!isActive()) {
 			traceL("AVPacketEncoder", this) << "Initializing" << endl;
+			//if (AVEncoder::options().oformat.video.enabled && 
+			//	AVEncoder::options().oformat.audio.enabled)
+			//	_muxLiveStreams = true;
 			AVEncoder::initialize();
 		}
 		break;

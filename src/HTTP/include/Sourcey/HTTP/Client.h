@@ -124,6 +124,10 @@ public:
 
 protected:
     virtual ~ClientConnection();
+		
+	virtual void connect();
+		// Connects to the server endpoint.
+		// All sent data is buffered until the connection is made.
 					
 	http::Client* client();
 	http::Message* incomingHeader();	
@@ -137,6 +141,7 @@ protected:
 	http::Client* _client;
 	URL _url;
 	std::ostream* _readStream;
+	std::vector<std::string> _outgoingBuffer;
 	TransferSignal _incomingProgress;
 	TransferSignal _outgoingProgress;
 	bool _complete;

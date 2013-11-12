@@ -114,39 +114,53 @@ void ClientConnection::close()
 
 void ClientConnection::send()
 {
-	traceL("ClientConnection", this) << "Sending" << endl;	
+	// TODO: assert not connected
+	connect();
+}
 
+
+void ClientConnection::send(http::Request& req)
+{
+	// TODO: assert not connected
+	_request = req;
+	connect();
+}
+
+
+void ClientConnection::sendData(const char* buf, std::size_t len) //, int flags
+{
+	connect();
+	if (Outgoing.active())
+		Connection::sendData(buf, len);
+	else
+		_outgoingBuffer.push_back(std::string(buf, len));	
+}
+
+
+void ClientConnection::sendData(const std::string& buf) //, int flags
+{
+	connect();
+	if (Outgoing.active())
+		Connection::sendData(buf);
+	else
+		_outgoingBuffer.push_back(buf);	
+}
+
+
+void ClientConnection::connect()
+{
 	if (_socket.Connect.refCount() == 0) {
+
+		traceL("ClientConnection", this) << "Connecting" << endl;	
 		_socket.Connect += delegate(this, &ClientConnection::onSocketConnect);
 		_socket.connect(_url.host(), _url.port());
 	}
 }
 
 
-void ClientConnection::send(http::Request& req)
-{
-	_request = req;
-	send();
-}
-
-
-void ClientConnection::sendData(const char* buf, std::size_t len) //, int flags
-{
-	Connection::sendData(buf, len);
-	send();
-}
-
-
-void ClientConnection::sendData(const std::string& buf) //, int flags
-{
-	Connection::sendData(buf);
-	send();
-}
-
-
 void ClientConnection::setReadStream(std::ostream* os)
 {
-	// TODO: assert not running
+	// TODO: assert connection not active
 	if (_readStream) {
 		delete _readStream;
 	}
@@ -190,14 +204,26 @@ void ClientConnection::onSocketConnect(void*)
 
 	// Start the outgoing send stream if there are
 	// any queued packets or adapters attached
-	if (Outgoing.base().size() ||
-		Outgoing.base().numAdapters())
-		Outgoing.start();
-	
-	// Send the outgoing HTTP header if there 
-	// is no output stream.
-	else
+	//if (Outgoing.base().size() ||
+	//	Outgoing.base().numAdapters())
+	Outgoing.start();
+
+	// Flush queued packets
+	if (!_outgoingBuffer.empty()) {
+		for (const auto & packet : _outgoingBuffer) {
+			Outgoing.write(packet.c_str(), packet.length());
+		}
+		_outgoingBuffer.clear();
+	}
+
+	// Send the outgoing HTTP header if it hasn't already been sent. 
+	// Note the first call to socket().send() will flush headers.
+	// Note if there are stream adapters we wait for the stream to push
+	// through any custom headers. See ChunkedAdapter::emitHeader
+	else if (Outgoing.base().numAdapters() == 0) {
+		traceL("ClientConnection", this) << "On connect: Send header" << endl;
 		sendHeader();
+	}	
 }
 	
 

@@ -21,15 +21,17 @@
 #ifndef SOURCEY_MEDIA_DeviceManager_WIN32_H
 #define SOURCEY_MEDIA_DeviceManager_WIN32_H
 
-#ifndef __WINDOWS_DS__
-#define __WINDOWS_DS__
-#endif
+//#ifndef __WINDOWS_DS__
+//#define __WINDOWS_DS__
+//#endif
 
+#include "Sourcey/Base.h"
+#include "Sourcey/Media/DeviceManager.h"
 
 #include <string>
 #include <vector>
 
-#include "Sourcey/Media/DeviceManager.h"
+#ifdef HAVE_RTAUDIO
 
 
 namespace scy {
@@ -83,6 +85,7 @@ private:
 } } // namespace scy::av
 
 
+#endif
 #endif  // SOURCEY_MEDIA_DeviceManager_WIN32_H
 
 

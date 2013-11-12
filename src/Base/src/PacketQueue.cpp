@@ -34,6 +34,7 @@ SyncPacketQueue::SyncPacketQueue(uv::Loop* loop, int maxSize) :
 	SyncQueue<IPacket>(loop, maxSize), 
 	PacketProcessor(this->emitter)
 {	
+	traceL("SyncPacketQueue", this) << "Create" << endl;
 }
 
 
@@ -41,11 +42,13 @@ SyncPacketQueue::SyncPacketQueue(int maxSize) :
 	SyncQueue<IPacket>(uv::defaultLoop(), maxSize), 
 	PacketProcessor(this->emitter)
 {	
+	traceL("SyncPacketQueue", this) << "Create" << endl;
 }
 	
 
 SyncPacketQueue::~SyncPacketQueue()
 {
+	traceL("SyncPacketQueue", this) << "Destroy" << endl;
 }
 
 
@@ -88,9 +91,6 @@ void SyncPacketQueue::onStreamStateChange(const PacketStreamState& state)
 	//case PacketStreamState::Stopped:
 	case PacketStreamState::Closed:
 	case PacketStreamState::Error:
-		// Can't call close here since we can't 
-		// guarantee the calling thread.
-		//SyncContext::close();
 		SyncQueue<IPacket>::cancel();
 		break;
 	}
@@ -106,11 +106,13 @@ AsyncPacketQueue::AsyncPacketQueue(int maxSize) :
 	AsyncQueue<IPacket>(maxSize), 
 	PacketProcessor(this->emitter)
 {	
+	traceL("AsyncPacketQueue", this) << "Create" << endl;
 }
 	
 
 AsyncPacketQueue::~AsyncPacketQueue()
 {
+	traceL("AsyncPacketQueue", this) << "Destroy" << endl;
 }
 
 
@@ -147,18 +149,24 @@ void AsyncPacketQueue::onStreamStateChange(const PacketStreamState& state)
 		break;
 		
 	case PacketStreamState::Stopped:
-
-		// Flush all queued items on stop()
-		flush();	
-		cancel();
-		assert(empty());
 		break;
 
-	//case PacketStreamState::Error:
+	case PacketStreamState::Error:
+	case PacketStreamState::Closed:
+		// Flush queued items, some protocols can't afford dropped packets
+		flush();	
+		assert(empty());
+		cancel();
+
+		// Wait for the thread to end to avoid segmentation faults
+		traceL("AsyncPacketQueue", this) << "Waiting for thread" << std::endl;
+		waitForThread(_thread);
+		traceL("AsyncPacketQueue", this) << "Waiting for thread: OK" << std::endl;
+		break;
+
 	//case PacketStreamState::Resetting:
 	//case PacketStreamState::None:
 	//case PacketStreamState::Stopping:
-	//case PacketStreamState::Closed:
 	}
 }
 

@@ -23,7 +23,9 @@
 
 #include "Sourcey/Interface.h"
 #include "Sourcey/Thread.h"
-#include "Sourcey/InterProc.h"
+#include "Sourcey/Platform.h"
+#include "Sourcey/SyncContext.h"
+#include "Sourcey/DateTime.h"
 #include <queue>
 
 
@@ -127,8 +129,8 @@ public:
 	{
 		Mutex::ScopedLock lock(_mutex);	
 				
-		while (static_cast<int>(_queue.size()) >= _limit) {
-			traceL("RunnableQueue", this) << "Purging: " << _queue.size() << std::endl;
+		while (_limit > 0 && static_cast<int>(_queue.size()) >= _limit) {
+			warnL("RunnableQueue", this) << "Purging: " << _queue.size() << std::endl;
 			delete _queue.front();
 			_queue.pop_front();
 		}
@@ -171,7 +173,6 @@ public:
 		return _queue;
 	}
 	
-//protected: 
 	virtual void run()
 		// Called asynchronously to dispatch queued items.
 		// If not timeout is set this method blocks until cancel()
@@ -290,6 +291,11 @@ public:
 	{
 		RunnableQueue<T>::cancel();
 		_sync.cancel();
+
+		// Call uv_close on the handle if calling from  
+		// the event loop thread or we deadlock.
+		if (Thread::currentID() == _sync.tid())
+			_sync.close();
 	}
 	
 	SyncContext& sync()

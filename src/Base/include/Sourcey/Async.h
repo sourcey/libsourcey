@@ -108,7 +108,7 @@ public:
 		// and event loop driven Runner models.
 	
 	virtual bool async() const = 0;
-		// Returns true if the implementation is thread based, or false
+		// Returns true if the implementation is thread-based, or false
 		// if it belongs to an event loop.
 
 	typedef std::shared_ptr<Runner> ptr;

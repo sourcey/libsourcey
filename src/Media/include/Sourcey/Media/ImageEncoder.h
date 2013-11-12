@@ -24,6 +24,8 @@
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/IEncoder.h"
 
+#ifdef HAVE_OPENCV
+
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
@@ -70,5 +72,6 @@ private:
 } } // namespace scy::av
 
 
+#endif
 #endif	// SOURCEY_MEDIA_ImageEncoder_H
 

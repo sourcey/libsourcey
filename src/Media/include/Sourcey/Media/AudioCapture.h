@@ -20,11 +20,12 @@
 #ifndef SOURCEY_MEDIA_AudioCapture_H
 #define SOURCEY_MEDIA_AudioCapture_H
 
-
 #include "Sourcey/Media/Types.h"
 #include "Sourcey/Media/ICapture.h"
 #include "Sourcey/Media/Format.h"
 #include "Sourcey/Signal.h"
+
+#ifdef HAVE_RTAUDIO
 
 #include "RtAudio.h"
 
@@ -87,6 +88,7 @@ typedef std::map<int, AudioCapture*> AudioCaptureMap;
 } } // namespace scy::av
 
 
+#endif
 #endif
 
 

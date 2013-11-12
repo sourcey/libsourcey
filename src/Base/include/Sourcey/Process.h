@@ -50,7 +50,7 @@ public:
 
 	std::vector<std::string> args;
 		// Command line args.
-		// Convenience proxy for options.args
+		// STL proxy for options.args
 
 	std::function<void(Int64)> onexit;
 		// Exit callback; returns the exit status.

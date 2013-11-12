@@ -27,6 +27,8 @@
 #include "Sourcey/Media/FormatRegistry.h"
 #include "Sourcey/Mutex.h"
 
+#if defined(HAVE_OPENCV) && defined(HAVE_RTAUDIO)
+
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
@@ -119,4 +121,5 @@ protected:
 } } // namespace scy::av
 
 
+#endif
 #endif

@@ -30,6 +30,8 @@
 #include "Sourcey/Media/ICapture.h"
 #include "Sourcey/Media/FPSCounter.h"
 
+#ifdef HAVE_OPENCV
+
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
@@ -220,6 +222,7 @@ struct MatrixPacket: public VideoPacket
 } } // namespace scy::av
 
 
+#endif
 #endif // SOURCEY_MEDIA_VideoCapture_H
 
 

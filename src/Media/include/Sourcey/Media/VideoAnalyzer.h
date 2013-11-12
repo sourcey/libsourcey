@@ -21,6 +21,7 @@
 #define SOURCEY_MEDIA_VideoAnalyzer_H
 
 
+#include "Sourcey/Base.h"
 #include "Sourcey/Stateful.h"
 #include "Sourcey/Signal.h"
 #include "Sourcey/PacketStream.h"
@@ -29,6 +30,9 @@
 #include "Sourcey/Media/AVInputReader.h"
 #include "Sourcey/Media/FPSCounter.h"
 #include "Sourcey/Media/Format.h"
+
+
+#ifdef HAVE_FFMPEG
 
 extern "C" {
 #include <libavcodec/avfft.h>
@@ -160,6 +164,7 @@ inline double log2(double n);
 } } // namespace scy::av
 
 
+#endif
 #endif
 
 
