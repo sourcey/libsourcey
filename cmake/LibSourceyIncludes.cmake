@@ -61,6 +61,11 @@ macro(include_dependency name)
     #message(STATUS "- Found ${name} Libs: ${${var_root}_LIBRARIES}")
     list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${var_root}_LIBRARIES})
   endif()
+  if(${var_root}_DEPENDENCIES)
+    #message(STATUS "- Found ${name} Libs: ${${var_root}_DEPENDENCIES}")
+    list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${var_root}_DEPENDENCIES})
+    #list(APPEND LibSourcey_BUILD_DEPENDENCIES ${${var_root}_DEPENDENCIES})
+  endif()
 endmacro()
 
 

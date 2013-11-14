@@ -33,15 +33,15 @@ endif()
 set_module_notfound(FFmpeg)
 if (NOT FFmpeg_FOUND)
   
+  # These folders represent the default install location for
+  # our Capsitrano deploy scripts.
   set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
     /home/deploy/ffmpeg_build)
 
-  # Temporary build paths (remove later)
-  set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} 
+  set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     /home/deploy/ffmpeg_build
     /home/deploy/ffmpeg_build/lib    
     /home/deploy/ffmpeg_build/include)
-
 
   # Check for all components
   find_component(FFmpeg AVCODEC    libavcodec    avcodec    libavcodec/avcodec.h)
@@ -55,6 +55,75 @@ if (NOT FFmpeg_FOUND)
   
   # Set FFmpeg as found or not
   set_module_found(FFmpeg)
+
+  # Include FFmpeg dependencies if available
+  #find_library(LIBDL_LIBRARY NAMES dl)  
+  #if(LIBDL_LIBRARY)
+  #  message("################################# LIBDL_LIBRARY=${LIBDL_LIBRARY}")   
+  #  list(APPEND FFmpeg_DEPENDENCIES ${LIBDL_LIBRARY}) 
+  #endif()
+
+  find_library(LIBVPX_LIBRARY NAMES vpx)  
+  if(LIBVPX_LIBRARY)
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBVPX_LIBRARY}) 
+  endif()
+
+  find_library(LIBX264_LIBRARY NAMES x264)  
+  if(LIBX264_LIBRARY)
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBX264_LIBRARY}) 
+  endif()
+
+  find_library(LIBVA_LIBRARY NAMES va)  
+  if(LIBVA_LIBRARY)
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBVA_LIBRARY}) 
+  endif()
+
+  find_library(LIBFDKAAC_LIBRARY NAMES fdk-aac)  
+  if(LIBFDKAAC_LIBRARY)
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBFDKAAC_LIBRARY}) 
+  endif()
+
+  find_library(LIBMP3LAME_LIBRARY NAMES mp3lame)  
+  if(LIBMP3LAME_LIBRARY)
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBMP3LAME_LIBRARY}) 
+  endif()
+
+  set(LIBVORBIS_LIBRARY LIBVORBIS_LIBRARY-NOTFOUND)
+  find_library(LIBVORBIS_LIBRARY NAMES vorbis)  
+  if(LIBVORBIS_LIBRARY)
+   # message("################################# LIBVORBIS_LIBRARY=${LIBVORBIS_LIBRARY}")   
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBVORBIS_LIBRARY}) 
+  endif()
+
+  set(LIBVORBISRNC_LIBRARY LIBVORBISRNC_LIBRARY-NOTFOUND)
+  find_library(LIBVORBISRNC_LIBRARY NAMES vorbisenc)  
+  if(LIBVORBISRNC_LIBRARY)
+    #message("################################# LIBVORBISRNC_LIBRARY=${LIBVORBISRNC_LIBRARY}")   
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBVORBISRNC_LIBRARY}) 
+  endif()
+
+  set(LIBTHEORA_LIBRARY LIBTHEORA_LIBRARY-NOTFOUND)
+  find_library(LIBTHEORA_LIBRARY NAMES theora)  
+  if(LIBTHEORA_LIBRARY)
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBTHEORA_LIBRARY}) 
+  endif()
+
+  set(LIBOGG_LIBRARY LIBOGG_LIBRARY-NOTFOUND)
+  find_library(LIBOGG_LIBRARY NAMES ogg)  
+  if(LIBOGG_LIBRARY)
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBOGG_LIBRARY}) 
+  endif()
+
+  find_library(LIBOPUS_LIBRARY NAMES opus)  
+  if(LIBOPUS_LIBRARY)
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBOPUS_LIBRARY}) 
+  endif()
+
+  #message("FFmpeg_LIBRARIES=${FFmpeg_LIBRARIES}")     
+  #message("FFmpeg_INCLUDE_DIRS=${FFmpeg_INCLUDE_DIRS}")      
+  #message("FFmpeg_INCLUDE_DIRS=${FFmpeg_INCLUDE_DIRS}")  
+  #message("LIBVPX_LIBRARY=${LIBVPX_LIBRARY}")  
+
 endif ()
 
 
@@ -64,9 +133,6 @@ endif ()
 #set(FFmpeg_DEFINITIONS  ${FFmpeg_DEFINITIONS}  CACHE STRING   "The FFmpeg cflags." FORCE)
 #set(FFmpeg_FOUND        ${FFmpeg_FOUND}        CACHE BOOLEAN  "The FFmpeg found status." FORCE)
 
-#message("FFmpeg_LIBRARIES=${FFmpeg_LIBRARIES}")     
-#message("FFmpeg_INCLUDE_DIRS=${FFmpeg_INCLUDE_DIRS}")      
-#message("FFmpeg_INCLUDE_DIRS=${FFmpeg_INCLUDE_DIRS}")  
 
 # Check that the required components were found.    
 #set(FFmpeg_FOUND 1)

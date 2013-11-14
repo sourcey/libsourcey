@@ -11,7 +11,7 @@
 # ----------------------------------------------------------------------
 # Find libuv include path
 # ----------------------------------------------------------------------
-FIND_PATH(LibUV_INCLUDE_DIR     
+find_path(LibUV_INCLUDE_DIR     
   NAMES 
   	uv.h   
   PATHS
@@ -63,6 +63,9 @@ if(WIN32 AND MSVC)
     mark_as_advanced(LibUV_DEBUG_LIBRARY LibUV_RELEASE_LIBRARY)
   endif()
 
+  add_definitions(-D_WIN32_WINNT=0x0600 -D_GNU_SOURCE)
+  #set(LibUV_DEPENDENCIES advapi32.lib iphlpapi.lib psapi.lib shell32.lib ws2_32.lib)
+
 else()
 
   # TODO: libuv lib names for various systems
@@ -88,6 +91,44 @@ else()
        /usr/lib 
        /usr/local/lib
     )
+
+  add_definitions(-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE)
+  #set(LibUV_DEPENDENCIES "-lm")  
+  #set(LibUV_DEPENDENCIES "m")
+  #find_library(LIBM_LIBRARY NAMES m)  
+  #if(LIBM_LIBRARY)
+  #  list(APPEND FFmpeg_DEPENDENCIES ${LIBM_LIBRARY}) 
+  #endif()
+
+  if(APPLE)
+    add_definitions(-D_DARWIN_USE_64_BIT_INODE=1)
+  elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    #set(LibUV_DEPENDENCIES "-ldl -lrt ${LibUV_DEPENDENCIES}")
+    #list(APPEND LibUV_DEPENDENCIES "-ldl")   
+    #list(APPEND LibUV_DEPENDENCIES "-lrt")   
+    #list(APPEND LibUV_DEPENDENCIES "dl")   
+    #list(APPEND LibUV_DEPENDENCIES "rt")
+    #find_library(LIBDL_LIBRARY NAMES dl)  
+    #if(LIBDL_LIBRARY)
+    #  list(APPEND LIBDL_DEPENDENCIES ${LIBDL_LIBRARY}) 
+    #endif()
+    #find_library(LIBRT_LIBRARY NAMES rt)  
+    #if(LIBRT_LIBRARY)
+    #  list(APPEND LIBDL_DEPENDENCIES ${LIBRT_LIBRARY}) 
+    #endif()
+  elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Android")
+    #set(LibUV_DEPENDENCIES "-ldl ${LibUV_DEPENDENCIES}")
+    #list(APPEND LibUV_DEPENDENCIES "-ldl")   
+    #find_library(LIBDL_LIBRARY NAMES dl)  
+    #if(LIBDL_LIBRARY)
+    #  list(APPEND FFmpeg_DEPENDENCIES ${LIBDL_LIBRARY}) 
+    #endif()
+  else()
+    message(FATAL_ERROR
+      "Cannot include libuv on this system: ${CMAKE_SYSTEM_NAME}")
+  endif()
+
+  # TODO: Solaris, FreeBSD and others; see uv.gyp
 
 endif()
 
