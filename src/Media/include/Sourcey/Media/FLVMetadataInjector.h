@@ -396,11 +396,13 @@ public:
 	
 	virtual void writeAMFDouble(BitWriter& writer, double val)
 	{
+#if WIN32		
 		// The implementation is not perfect, but it's sufficient for our needs.
 		if ((val > double(_I64_MAX)) || (val < double(_I64_MIN))) {
 			traceL("FLVMetadataInjector") << "Double to int truncated" << std::endl;
 			assert(0);
 		}
+#endif
 
 		writer.putU8(AMF_DATA_TYPE_NUMBER); // AMF_DATA_TYPE_NUMBER
 		writer.putU64(Int64(val));

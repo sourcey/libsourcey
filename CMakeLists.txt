@@ -224,12 +224,14 @@ endif()
 # Include standard and defult libraries
 # ----------------------------------------------------------------------------
 if(MSVC)
-  set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} advapi32.lib iphlpapi.lib psapi.lib shell32.lib ws2_32.lib dsound.lib winmm.lib strmiids.lib ${LibSourcey_INCLUDE_LIBRARIES}) 
+  set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} advapi32.lib iphlpapi.lib psapi.lib shell32.lib ws2_32.lib dsound.lib winmm.lib strmiids.lib) # ${LibSourcey_INCLUDE_LIBRARIES} 
 elseif(MSYS)
-  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lws2_32 -liphlpapi ${LibSourcey_INCLUDE_LIBRARIES}")
-elseif(LINUX)
-  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -llibc -lglibc ${LibSourcey_INCLUDE_LIBRARIES}")
+  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lws2_32 -liphlpapi") #${LibSourcey_INCLUDE_LIBRARIES} 
+elseif(UNIX)
+  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -ldl -lrt") # -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES} 
 endif()
+
+
 
 # ----------------------------------------------------------------------------
 # Include third party dependencies
@@ -410,6 +412,7 @@ endif()
 if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
   status("    Configuration:"  ${CMAKE_BUILD_TYPE})
 endif()
+status("    Standard libs:             ${CMAKE_CXX_STANDARD_LIBRARIES}")
 
 # C/C++ options
 status("")

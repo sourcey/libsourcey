@@ -228,7 +228,7 @@ void format(std::string& str, Int64 value, int width)
 	assert(width > 0 && width < 64);
 
 	char buffer[64];
-	std::sprintf(buffer, "%*"I64_FMT"d", width, value);
+	std::sprintf(buffer, "%*" I64_FMT "d", width, value);
 	str.append(buffer);
 }
 
@@ -238,7 +238,7 @@ void format0(std::string& str, Int64 value, int width)
 	assert(width > 0 && width < 64);
 
 	char buffer[64];
-	std::sprintf(buffer, "%0*"I64_FMT"d", width, value);
+	std::sprintf(buffer, "%0*" I64_FMT "d", width, value);
 	str.append(buffer);
 }
 
@@ -246,7 +246,7 @@ void format0(std::string& str, Int64 value, int width)
 void formatHex(std::string& str, Int64 value)
 {
 	char buffer[64];
-	std::sprintf(buffer, "%"I64_FMT"X", value);
+	std::sprintf(buffer, "%" I64_FMT "X", value);
 	str.append(buffer);
 }
 
@@ -256,7 +256,7 @@ void formatHex(std::string& str, Int64 value, int width)
 	assert(width > 0 && width < 64);
 
 	char buffer[64];
-	std::sprintf(buffer, "%0*"I64_FMT"X", width, value);
+	std::sprintf(buffer, "%0*" I64_FMT "X", width, value);
 	str.append(buffer);
 }
 
@@ -264,7 +264,7 @@ void formatHex(std::string& str, Int64 value, int width)
 void format(std::string& str, UInt64 value)
 {
 	char buffer[64];
-	std::sprintf(buffer, "%"I64_FMT"u", value);
+	std::sprintf(buffer, "%" I64_FMT "u", value);
 	str.append(buffer);
 }
 
@@ -274,7 +274,7 @@ void format(std::string& str, UInt64 value, int width)
 	assert(width > 0 && width < 64);
 
 	char buffer[64];
-	std::sprintf(buffer, "%*"I64_FMT"u", width, value);
+	std::sprintf(buffer, "%*" I64_FMT "u", width, value);
 	str.append(buffer);
 }
 
@@ -284,7 +284,7 @@ void format0(std::string& str, UInt64 value, int width)
 	assert(width > 0 && width < 64);
 
 	char buffer[64];
-	std::sprintf(buffer, "%0*"I64_FMT"u", width, value);
+	std::sprintf(buffer, "%0*" I64_FMT "u", width, value);
 	str.append(buffer);
 }
 
@@ -292,7 +292,7 @@ void format0(std::string& str, UInt64 value, int width)
 void formatHex(std::string& str, UInt64 value)
 {
 	char buffer[64];
-	std::sprintf(buffer, "%"I64_FMT"X", value);
+	std::sprintf(buffer, "%" I64_FMT "X", value);
 	str.append(buffer);
 }
 
@@ -302,7 +302,7 @@ void formatHex(std::string& str, UInt64 value, int width)
 	assert(width > 0 && width < 64);
 
 	char buffer[64];
-	std::sprintf(buffer, "%0*"I64_FMT"X", width, value);
+	std::sprintf(buffer, "%0*" I64_FMT "X", width, value);
 	str.append(buffer);
 }
 
@@ -317,7 +317,7 @@ void format(std::string& str, const void* ptr)
 	#if defined(SOURCEY_LONG_IS_64_BIT)
 		std::sprintf(buffer, "%016lX", (UIntPtr) ptr);
 	#else
-		std::sprintf(buffer, "%016"I64_FMT"X", (UIntPtr) ptr);
+		std::sprintf(buffer, "%016" I64_FMT "X", (UIntPtr) ptr);
 	#endif
 #else
 	std::sprintf(buffer, "%08lX", (UIntPtr) ptr);

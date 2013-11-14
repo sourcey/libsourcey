@@ -55,20 +55,21 @@ macro(define_sourcey_application name)
       SET (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
     ENDIF()
   endif()
+  
+  status("  Linking application ${name}")    
+  status("    Libraries:               ${LibSourcey_INCLUDE_LIBRARIES}")    
+  #status("    Library Dirs:            ${LibSourcey_LIBRARY_DIRS}")    
+  #status("    Include Dirs:            ${LibSourcey_INCLUDE_DIRS}")  
+  status("    Dependencies:            ${LibSourcey_BUILD_DEPENDENCIES}")  
+  #status("    Dependencies:            ${FFmpeg_DEPENDENCIES}")
+  
+  # Add external dependencies and required libraries for linking.
+  target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES}) 
 
   # KLUDGE: Adding all thrid party dependencies for now.
   if (LibSourcey_BUILD_DEPENDENCIES)
     add_dependencies(${name} ${LibSourcey_BUILD_DEPENDENCIES})
   endif()
-  
-  #status("  Linking application ${name}")    
-  #status("    Libraries:               ${LibSourcey_INCLUDE_LIBRARIES}")    
-  #status("    Library Dirs:            ${LibSourcey_LIBRARY_DIRS}")    
-  #status("    Include Dirs:            ${LibSourcey_INCLUDE_DIRS}")  
-  #status("    Dependencies:            ${LibSourcey_BUILD_DEPENDENCIES}")
-  
-  # Add external dependencies and required libraries for linking.
-  target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES}) 
   
   if(ENABLE_SOLUTION_FOLDERS)
     set_target_properties(${name} PROPERTIES FOLDER "applications")
