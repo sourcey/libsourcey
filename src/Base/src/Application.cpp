@@ -17,11 +17,11 @@
 //
 
 
-#include "Sourcey/Application.h"
-#include "Sourcey/Memory.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Exception.h"
-#include "Sourcey/Singleton.h"
+#include "scy/application.h"
+#include "scy/memory.h"
+#include "scy/logger.h"
+#include "scy/exception.h"
+#include "scy/singleton.h"
 
 
 namespace scy {

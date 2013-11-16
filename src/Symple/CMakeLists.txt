@@ -1,5 +1,5 @@
-ask_build_sourcey_module(Symple)
-if(BUILD_MODULES AND BUILD_MODULE_Symple) 
+ask_build_sourcey_module(symple)
+if(BUILD_MODULES AND BUILD_MODULE_symple) 
 
   #include_dependency(OpenSSL REQUIRED)
   #include_dependency(JsonCpp REQUIRED)
@@ -12,5 +12,5 @@ if(BUILD_MODULES AND BUILD_MODULE_Symple)
   # dependency libraries properly.
   #include_dependency(OpenCV REQUIRED)
 
-  define_sourcey_module(Symple Base UV Crypto Net HTTP SocketIO JSON Util)
+  define_sourcey_module(symple base uv crypto net http socketio json util)
 endif()

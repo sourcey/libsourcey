@@ -1,7 +1,7 @@
 #include "Poco/Thread.h"
 #include "Poco/Net/SocketAddress.h"
 #include "Poco/Net/ServerSocket.h"
-#include "Sourcey/Logger.h"
+#include "scy/logger.h"
 
 
 class PocoEchoServer: public Poco::Runnable

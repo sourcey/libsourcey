@@ -17,16 +17,16 @@
 //
 
 
-#include "Sourcey/Logger.h"
-#include "Sourcey/Time.h"
-#include "Sourcey/DateTime.h"
-#include "Sourcey/Platform.h"
-#include "Sourcey/FileSystem.h"
-#include "Sourcey/Util.h"
+#include "scy/logger.h"
+#include "scy/time.h"
+#include "scy/datetime.h"
+#include "scy/platform.h"
+#include "scy/filesystem.h"
+#include "scy/util.h"
 #include <assert.h>
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -356,7 +356,7 @@ void ConsoleChannel::write(const LogStream& stream)
 	std::ostringstream ss;
 	format(stream, ss);
 #if !defined(WIN32) || defined(_CONSOLE) || defined(_DEBUG)
-	cout << ss.str();
+	std::cout << ss.str();
 #endif
 #if defined(_MSC_VER) && defined(_DEBUG) 
 	std::string s(ss.str());
@@ -399,7 +399,7 @@ void FileChannel::open()
 	
 	// Open the file stream
 	_fstream.close();
-	_fstream.open(_path.c_str(), ios::out | ios::app);	
+	_fstream.open(_path.c_str(), std::ios::out | std::ios::app);	
 
 	// Throw on failure
 	if (!_fstream.is_open())
@@ -427,7 +427,7 @@ void FileChannel::write(const LogStream& stream)
 	_fstream.flush();
 
 #if defined(_CONSOLE) || defined(_DEBUG)
-	cout << ss.str();
+	std::cout << ss.str();
 #endif
 #if defined(_MSC_VER) && defined(_DEBUG) 
 	std::string s(ss.str());
@@ -445,7 +445,7 @@ void FileChannel::setPath(const std::string& path)
 }
 
 
-string FileChannel::path() const 
+std::string FileChannel::path() const 
 { 
 	return _path;
 }

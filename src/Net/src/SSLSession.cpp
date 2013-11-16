@@ -17,7 +17,7 @@
 //
 
 
-#include "Sourcey/Net/SSLSession.h"
+#include "scy/net/sslsession.h"
 
 
 using namespace std;

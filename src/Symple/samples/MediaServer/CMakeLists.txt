@@ -6,4 +6,4 @@ include_dependency(OpenCV REQUIRED)
 include_dependency(LibUV REQUIRED)
 include_dependency(HttpParser REQUIRED)
   
-define_sourcey_module_sample(MediaServer Base UV Media Net HTTP TURN STUN Util) #Anionu
+define_sourcey_module_sample(mediaserver base uv media net http turn stun util) #Anionu

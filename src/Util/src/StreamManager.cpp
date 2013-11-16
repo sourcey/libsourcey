@@ -17,8 +17,8 @@
 //
 
 
-#include "Sourcey/Util/StreamManager.h"
-#include "Sourcey/Logger.h"
+#include "scy/util/streammanager.h"
+#include "scy/logger.h"
 
 
 using namespace std; 

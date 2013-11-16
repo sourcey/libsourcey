@@ -3,4 +3,4 @@
 #
 # ----------------------------------------------------------------------------
 
-add_subdirectory(MediaServer)
+add_subdirectory(mediaserver)

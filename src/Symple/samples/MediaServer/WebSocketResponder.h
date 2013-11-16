@@ -1,27 +1,27 @@
 
 /*
-#include "Sourcey/Logger.h"
-#include "Sourcey/Application.h"
-#include "Sourcey/PacketStream.h"
-#include "Sourcey/PacketStream.h"
-#include "Sourcey/Crypto.h"
-#include "Sourcey/Util.h"
+#include "scy/logger.h"
+#include "scy/application.h"
+#include "scy/packetstream.h"
+#include "scy/packetstream.h"
+#include "scy/crypto.h"
+#include "scy/util.h"
 
-#include "Sourcey/HTTP/Server.h"
+#include "scy/http/server.h"
 
-#include "Sourcey/Media/MediaFactory.h"
-#include "Sourcey/Media/AVEncoder.h"
-#include "Sourcey/Media/AVInputReader.h"
-#include "Sourcey/Media/FLVMetadataInjector.h"
-#include "Sourcey/Media/FormatRegistry.h"
+#include "scy/media/mediafactory.h"
+#include "scy/media/avencoder.h"
+#include "scy/media/avinputreader.h"
+#include "scy/media/flvmetadatainjector.h"
+#include "scy/media/formatregistry.h"
 
-#include "Sourcey/HTTP/Util.h"
-#include "Sourcey/HTTP/Packetizers.h"
-#include "Sourcey/Util/Base64PacketEncoder.h"
-#include "Sourcey/Util/StreamCollection.h"
+#include "scy/http/util.h"
+#include "scy/http/packetizers.h"
+#include "scy/util/base64packetencoder.h"
+#include "scy/util/streamcollection.h"
 
-#include "Sourcey/TURN/client/TCPClient.h"
-#include "Sourcey/Collection.h"
+#include "scy/turn/client/tcpclient.h"
+#include "scy/collection.h"
 
 #include <string>
 #include <vector>
@@ -43,7 +43,7 @@ using namespace scy::av;
 
 #include "MediaServer.h"
 
-#include "Sourcey/HTTP/WebSocket.h"
+#include "scy/http/websocket.h"
 
 
 namespace scy { 

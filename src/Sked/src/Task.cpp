@@ -17,9 +17,9 @@
 //
 
 
-#include "Sourcey/Sked/Task.h"
-#include "Sourcey/Sked/Scheduler.h"
-#include "Sourcey/DateTime.h"
+#include "scy/sked/task.h"
+#include "scy/sked/scheduler.h"
+#include "scy/datetime.h"
 
 /*
 #include "Poco/DateTimeParser.h"

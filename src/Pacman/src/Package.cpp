@@ -17,10 +17,10 @@
 //
 
 
-#include "Sourcey/Pacman/Package.h"
-#include "Sourcey/Util.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/FileSystem.h"
+#include "scy/pacman/package.h"
+#include "scy/util.h"
+#include "scy/logger.h"
+#include "scy/filesystem.h"
 
 #include "assert.h"
 

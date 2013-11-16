@@ -1,6 +1,6 @@
-#include "Sourcey/Application.h"
-#include "Sourcey/Pacman/PackageManager.h"
-#include "Sourcey/Util.h"
+#include "scy/application.h"
+#include "scy/pacman/packagemanager.h"
+#include "scy/util.h"
 
 #include <string>
 #include <vector>
@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 	opts.endpoint = "http://127.0.0.1:3000";	
 	opts.indexURI = "/packages.json";
 	opts.httpUsername = Anionu_API_USERNAME;
-	opts.httpPassword = Anionu_API_PASSWORD;
+	opts.httpPassword = Anionu_API_KEY;
 
 	PackageManagerApplication app(opts);	
 	app.manager.initialize();

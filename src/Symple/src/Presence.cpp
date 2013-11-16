@@ -17,12 +17,12 @@
 //
 
 
-#include "Sourcey/Symple/Presence.h"
-#include "Sourcey/Util.h"
+#include "scy/symple/presence.h"
+#include "scy/util.h"
 #include "assert.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {

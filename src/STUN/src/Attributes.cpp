@@ -22,9 +22,9 @@
 #endif
 
 
-#include "Sourcey/Crypto/HMAC.h"
-#include "Sourcey/STUN/Attributes.h"
-#include "Sourcey/Logger.h"
+#include "scy/crypto/hmac.h"
+#include "scy/stun/attributes.h"
+#include "scy/logger.h"
 
 
 using namespace std;

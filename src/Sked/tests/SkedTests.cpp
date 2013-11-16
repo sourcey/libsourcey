@@ -1,10 +1,10 @@
-#include "Sourcey/Base.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Runner.h"
-#include "Sourcey/Application.h"
-#include "Sourcey/DateTime.h"
-#include "Sourcey/Platform.h"
-#include "Sourcey/Sked/Scheduler.h"
+#include "scy/base.h"
+#include "scy/logger.h"
+#include "scy/runner.h"
+#include "scy/application.h"
+#include "scy/datetime.h"
+#include "scy/platform.h"
+#include "scy/sked/scheduler.h"
 
 //#include "Poco/NamedEvent.h"
 

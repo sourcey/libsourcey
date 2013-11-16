@@ -2,5 +2,5 @@
 include_dependency(OpenSSL REQUIRED)
 include_dependency(LibUV REQUIRED)
   
-define_libsourcey_test(BaseTests Base UV)
+define_libsourcey_test(basetests base uv)
 add_subdirectory("plugin")

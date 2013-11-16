@@ -1,13 +1,13 @@
-#include "Sourcey/Base.h"
-#include "Sourcey/Platform.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Hex.h"
-#include "Sourcey/Util.h"
-#include "Sourcey/Crypto/Crypto.h"
-#include "Sourcey/Crypto/Hash.h"
-#include "Sourcey/Crypto/Cipher.h"
-#include "Sourcey/Crypto/RSA.h"
-#include "Sourcey/Memory.h"
+#include "scy/base.h"
+#include "scy/platform.h"
+#include "scy/logger.h"
+#include "scy/hex.h"
+#include "scy/util.h"
+#include "scy/crypto/crypto.h"
+#include "scy/crypto/hash.h"
+#include "scy/crypto/cipher.h"
+#include "scy/crypto/rsa.h"
+#include "scy/memory.h"
 
 
 #include <assert.h>

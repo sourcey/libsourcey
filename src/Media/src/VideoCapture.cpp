@@ -17,11 +17,11 @@
 //
 
 
-#include "Sourcey/Media/VideoCapture.h"
-#include "Sourcey/Media/MediaFactory.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Platform.h"
-#include "Sourcey/Util.h"
+#include "scy/media/videocapture.h"
+#include "scy/media/mediafactory.h"
+#include "scy/logger.h"
+#include "scy/platform.h"
+#include "scy/util.h"
 
 
 #ifdef HAVE_OPENCV

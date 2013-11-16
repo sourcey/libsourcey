@@ -1,10 +1,10 @@
-#include "Sourcey/Media/AVInputReader.h"
-#include "Sourcey/Platform.h"
-#include "Sourcey/Logger.h"
+#include "scy/media/avinputreader.h"
+#include "scy/platform.h"
+#include "scy/logger.h"
 //#include "Poco/Format.h"
 
 
-using namespace std;
+using std::endl;
 using namespace scy;
 
 
@@ -123,7 +123,7 @@ void AVInputReader::openDevice(const std::string& device, int width, int height,
 
 void AVInputReader::openStream(const char* filename, AVInputFormat* inputFormat, AVDictionary** formatParams)
 {
-	traceL("AVInputReader", this) << "Opening Stream: " << string(filename) << endl;
+	traceL("AVInputReader", this) << "Opening Stream: " << std::string(filename) << endl;
 
 	av_register_all();
 
@@ -370,7 +370,7 @@ AudioDecoderContext* AVInputReader::audio() const
 }
 
 
-string AVInputReader::error() const
+std::string AVInputReader::error() const
 {
 	Mutex::ScopedLock lock(_mutex);	
 	return _error;

@@ -17,11 +17,11 @@
 //
 
 
-#include "Sourcey/Media/AudioContext.h"
-#include "Sourcey/Logger.h"
+#include "scy/media/audiocontext.h"
+#include "scy/logger.h"
 
 
-using namespace std;
+using std::endl;
 using namespace scy;
 
 

@@ -17,13 +17,13 @@
 //
 
 
-#include "Sourcey/HTTP/Request.h"
-#include "Sourcey/HTTP/Util.h"
+#include "scy/http/request.h"
+#include "scy/http/util.h"
 
 #include <assert.h>
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy { 

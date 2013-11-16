@@ -1,7 +1,7 @@
 #include "MediaServer.h"
 
-#include "Sourcey/Util/StreamManager.h"
-#include "Sourcey/TURN/client/TCPClient.h"
+#include "scy/util/streammanager.h"
+#include "scy/turn/client/tcpclient.h"
 
 
 namespace scy { 
@@ -196,7 +196,7 @@ public:
 		co.timeout = 10 * 1000;
 		co.timerInterval = 3 * 1000;
 		co.username = Anionu_API_USERNAME;
-		co.password = Anionu_API_PASSWORD;
+		co.password = Anionu_API_KEY;
 
 		allocation = new RelayedStreamingAllocation(options, co, connection().socket().peerAddress().host());
 		allocation->AllocationCreated += delegate(this, &RelayedStreamingResponder::onAllocationCreated);

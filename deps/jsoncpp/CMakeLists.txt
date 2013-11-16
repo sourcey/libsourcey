@@ -4,7 +4,7 @@
 
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/json")
+#set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE) #CACHE INTERNAL "") 
 
 set(jsoncpp_SOURCE_FILES jsoncpp.cpp)
 set(jsoncpp_HEADER_FILES json/json.h)

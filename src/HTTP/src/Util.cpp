@@ -17,12 +17,11 @@
 //
 
 
-#include "Sourcey/HTTP/Util.h"
-#include "Sourcey/Util.h"
+#include "scy/http/util.h"
+#include "scy/util.h"
 
 
-using namespace std;
-
+//using std::endl;
 
 
 namespace scy {
@@ -50,14 +49,14 @@ std::string parseURI(const std::string& request)
 
 bool matchURL(const std::string& uri, const std::string& expression) 
 {
-	string::size_type index = uri.find("?");
+	std::string::size_type index = uri.find("?");
 	return util::matchNodes(uri.substr(0, index), expression, "/");
 }
 
 
 std::string parseCookieItem(const std::string& cookie, const std::string& item)
 {
-	string::size_type start, end = 0;
+	std::string::size_type start, end = 0;
 	start = cookie.find(item + "=");
 	if (start != std::string::npos) {
 		start += item.size() + 1;

@@ -1,12 +1,12 @@
 
 
-//#include "Sourcey/UVPP.h"
-#include "Sourcey/Base.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Net/Address.h"
-#include "Sourcey/Net/TCPSocket.h"
-#include "Sourcey/Timer.h"
-#include "Sourcey/Net/Reactor.h"
+//#include "scy/uvpp.h"
+#include "scy/base.h"
+#include "scy/logger.h"
+#include "scy/net/address.h"
+#include "scy/net/tcpsocket.h"
+#include "scy/timer.h"
+#include "scy/net/reactor.h"
 
 #include "Poco/Stopwatch.h"
 #include "Poco/Net/NetException.h"
@@ -35,18 +35,18 @@
 #include "UDPSocket.h"
 #include "NetException.h"
 
-#include "Sourcey/Net/Address.h"
+#include "scy/net/address.h"
 
 
-#include "Sourcey/Timer.h"
+#include "scy/timer.h"
 #include "IOStream.h"
 #include "AsyncLoop.h"
 #include "uv.h"
-#include "Sourcey/Timer.h"
+#include "scy/timer.h"
 
-#include "Sourcey/Net/UDPPacketSocket.h"
-#include "Sourcey/Net/TCPPacketSocket.h"
-#include "Sourcey/Net/TCPServer.h"
+#include "scy/net/udppacketsocket.h"
+#include "scy/net/tcppacketsocket.h"
+#include "scy/net/tcpserver.h"
 */
 
 

@@ -1,18 +1,18 @@
-#include "Sourcey/Base.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Idler.h"
-#include "Sourcey/Signal.h"
-#include "Sourcey/Buffer.h"
-#include "Sourcey/Platform.h"
-#include "Sourcey/Collection.h"
-#include "Sourcey/Application.h"
-#include "Sourcey/PacketStream.h"
-#include "Sourcey/PacketQueue.h"
-#include "Sourcey/SharedLibrary.h"
-#include "Sourcey/FileSystem.h"
-#include "Sourcey/Process.h"
-#include "Sourcey/Timer.h"
-#include "Sourcey/Util.h"
+#include "scy/base.h"
+#include "scy/logger.h"
+#include "scy/idler.h"
+#include "scy/signal.h"
+#include "scy/buffer.h"
+#include "scy/platform.h"
+#include "scy/collection.h"
+#include "scy/application.h"
+#include "scy/packetstream.h"
+#include "scy/packetqueue.h"
+#include "scy/sharedlibrary.h"
+#include "scy/filesystem.h"
+#include "scy/process.h"
+#include "scy/timer.h"
+#include "scy/util.h"
 
 #include "plugin/TestPlugin.h"
 
@@ -360,8 +360,8 @@ public:
 			
 			//
 			// Version checking 
-			if (info->abiVersion != SOURCEY_PLUGIN_ABI_VERSION)
-				throw std::runtime_error(util::format("Module version mismatch. Expected %s, got %s.", SOURCEY_PLUGIN_ABI_VERSION, info->abiVersion));
+			if (info->abiVersion != SCY_PLUGIN_ABI_VERSION)
+				throw std::runtime_error(util::format("Module version mismatch. Expected %s, got %s.", SCY_PLUGIN_ABI_VERSION, info->abiVersion));
 			
 			//
 			// Instantiate the plugin

@@ -1,10 +1,10 @@
-#include "Sourcey/HTTP/Form.h"
-#include "Sourcey/HTTP/Client.h"
-#include "Sourcey/HTTP/Packetizers.h"
-#include "Sourcey/HTTP/URL.h"
-#include "Sourcey/Idler.h"
-#include "Sourcey/FileSystem.h"
-#include "Sourcey/Crypto/Crypto.h"
+#include "scy/http/form.h"
+#include "scy/http/client.h"
+#include "scy/http/packetizers.h"
+#include "scy/http/url.h"
+#include "scy/idler.h"
+#include "scy/filesystem.h"
+#include "scy/crypto/crypto.h"
 #include <stdexcept>
 
 

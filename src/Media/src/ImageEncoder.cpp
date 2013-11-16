@@ -17,16 +17,16 @@
 //
 
 
-#include "Sourcey/Media/ImageEncoder.h"
-#include "Sourcey/Media/VideoCapture.h"
-#include "Sourcey/Logger.h"
+#include "scy/media/imageencoder.h"
+#include "scy/media/videocapture.h"
+#include "scy/logger.h"
 
 #include "assert.h"
 
 #ifdef HAVE_OPENCV
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -85,7 +85,7 @@ void ImageEncoder::process(IPacket& packet)
 	if (!mpacket->mat)
 		throw std::runtime_error("Video packets must contain an OpenCV image.");
 	
-    vector<unsigned char> buffer;
+    std::vector<unsigned char> buffer;
 	
 	// FIXME: If the video capture is stopped before
 	// this callback completes our Mat is corrupted.

@@ -25,7 +25,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-#include "Sourcey/HTTP/Message.h"
+#include "scy/http/message.h"
 
 
 namespace scy {

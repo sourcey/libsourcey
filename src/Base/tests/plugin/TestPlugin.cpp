@@ -8,7 +8,7 @@
 // 
 
 
-SOURCEY_PLUGIN(TestPlugin, "Test Plugin", "0.1.1")
+SCY_PLUGIN(TestPlugin, "Test Plugin", "0.1.1")
 
 
 TestPlugin::TestPlugin()
@@ -48,7 +48,7 @@ const char* TestPlugin::cValue() const
 // 
 
 
-extern "C" SOURCEY_PLUGIN_EXPORT int gimmeFive();
+extern "C" SCY_PLUGIN_EXPORT int gimmeFive();
 
 
 int gimmeFive()

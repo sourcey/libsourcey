@@ -17,13 +17,13 @@
 //
 
 
-#include "Sourcey/Media/VideoAnalyzer.h"
+#include "scy/media/videoanalyzer.h"
 
 
 #ifdef HAVE_FFMPEG
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -269,7 +269,7 @@ VideoAnalyzer::Options& VideoAnalyzer::options()
 }
 
 
-string VideoAnalyzer::error() const
+std::string VideoAnalyzer::error() const
 {
 	Mutex::ScopedLock lock(_mutex);	
 	return _error;

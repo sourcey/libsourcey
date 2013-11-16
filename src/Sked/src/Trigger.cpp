@@ -17,10 +17,10 @@
 //
 
 
-#include "Sourcey/Sked/Trigger.h"
-#include "Sourcey/Sked/Scheduler.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/DateTime.h"
+#include "scy/sked/trigger.h"
+#include "scy/sked/scheduler.h"
+#include "scy/logger.h"
+#include "scy/datetime.h"
 
 
 using namespace std; 

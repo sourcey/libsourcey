@@ -17,12 +17,12 @@
 //
 
 
-#include "Sourcey/Symple/Client.h"
-#include "Sourcey/Net/TCPSocket.h"
-#include "Sourcey/Net/SSLSocket.h"
+#include "scy/symple/client.h"
+#include "scy/net/tcpsocket.h"
+#include "scy/net/sslsocket.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -203,7 +203,7 @@ Client::Options& Client::options()
 }
 
 
-string Client::ourID() const
+std::string Client::ourID() const
 {
 	//Mutex::ScopedLock lock(_mutex);
 	return _ourID;

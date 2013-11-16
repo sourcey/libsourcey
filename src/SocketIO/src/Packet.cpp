@@ -17,10 +17,10 @@
 //
 
 
-#include "Sourcey/SocketIO/Packet.h"
-//#include "Sourcey/Crypto/Crypto.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Util.h"
+#include "scy/socketio/packet.h"
+//#include "scy/crypto/crypto.h"
+#include "scy/logger.h"
+#include "scy/util.h"
 //#include "Poco/Format.h"
 
 

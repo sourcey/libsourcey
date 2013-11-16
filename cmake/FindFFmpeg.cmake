@@ -36,12 +36,12 @@ if (NOT FFmpeg_FOUND)
   # These folders represent the default install location for
   # our Capsitrano deploy scripts.
   set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
-    /home/deploy/ffmpeg_build)
+    /home/deploy/build)
 
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    /home/deploy/ffmpeg_build
-    /home/deploy/ffmpeg_build/lib    
-    /home/deploy/ffmpeg_build/include)
+    /home/deploy/build
+    /home/deploy/build/lib    
+    /home/deploy/build/include)
 
   # Check for all components
   find_component(FFmpeg AVCODEC    libavcodec    avcodec    libavcodec/avcodec.h)
@@ -59,7 +59,6 @@ if (NOT FFmpeg_FOUND)
   # Include FFmpeg dependencies if available
   #find_library(LIBDL_LIBRARY NAMES dl)  
   #if(LIBDL_LIBRARY)
-  #  message("################################# LIBDL_LIBRARY=${LIBDL_LIBRARY}")   
   #  list(APPEND FFmpeg_DEPENDENCIES ${LIBDL_LIBRARY}) 
   #endif()
 
@@ -88,27 +87,25 @@ if (NOT FFmpeg_FOUND)
     list(APPEND FFmpeg_DEPENDENCIES ${LIBMP3LAME_LIBRARY}) 
   endif()
 
-  set(LIBVORBIS_LIBRARY LIBVORBIS_LIBRARY-NOTFOUND)
+  #set(LIBVORBIS_LIBRARY LIBVORBIS_LIBRARY-NOTFOUND)
   find_library(LIBVORBIS_LIBRARY NAMES vorbis)  
   if(LIBVORBIS_LIBRARY)
-   # message("################################# LIBVORBIS_LIBRARY=${LIBVORBIS_LIBRARY}")   
     list(APPEND FFmpeg_DEPENDENCIES ${LIBVORBIS_LIBRARY}) 
   endif()
 
-  set(LIBVORBISRNC_LIBRARY LIBVORBISRNC_LIBRARY-NOTFOUND)
+  #set(LIBVORBISRNC_LIBRARY LIBVORBISRNC_LIBRARY-NOTFOUND)
   find_library(LIBVORBISRNC_LIBRARY NAMES vorbisenc)  
   if(LIBVORBISRNC_LIBRARY)
-    #message("################################# LIBVORBISRNC_LIBRARY=${LIBVORBISRNC_LIBRARY}")   
     list(APPEND FFmpeg_DEPENDENCIES ${LIBVORBISRNC_LIBRARY}) 
   endif()
 
-  set(LIBTHEORA_LIBRARY LIBTHEORA_LIBRARY-NOTFOUND)
+  #set(LIBTHEORA_LIBRARY LIBTHEORA_LIBRARY-NOTFOUND)
   find_library(LIBTHEORA_LIBRARY NAMES theora)  
   if(LIBTHEORA_LIBRARY)
     list(APPEND FFmpeg_DEPENDENCIES ${LIBTHEORA_LIBRARY}) 
   endif()
 
-  set(LIBOGG_LIBRARY LIBOGG_LIBRARY-NOTFOUND)
+  #set(LIBOGG_LIBRARY LIBOGG_LIBRARY-NOTFOUND)
   find_library(LIBOGG_LIBRARY NAMES ogg)  
   if(LIBOGG_LIBRARY)
     list(APPEND FFmpeg_DEPENDENCIES ${LIBOGG_LIBRARY}) 
@@ -124,7 +121,7 @@ if (NOT FFmpeg_FOUND)
   #message("FFmpeg_INCLUDE_DIRS=${FFmpeg_INCLUDE_DIRS}")  
   #message("LIBVPX_LIBRARY=${LIBVPX_LIBRARY}")  
 
-endif ()
+endif()
 
 
 # Cache the vars.

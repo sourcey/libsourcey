@@ -1,8 +1,8 @@
-#include "Sourcey/SocketIO/Socket.h"
-#include "Sourcey/SocketIO/Transaction.h"
-//#include "Sourcey/TaskRunner.h"
-//#include "Sourcey/PacketStream.h"
-#include "Sourcey/Util.h"
+#include "scy/socketio/socket.h"
+#include "scy/socketio/transaction.h"
+//#include "scy/taskrunner.h"
+//#include "scy/packetstream.h"
+#include "scy/util.h"
 
 #include <string>
 #include <vector>

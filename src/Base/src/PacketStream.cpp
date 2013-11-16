@@ -17,9 +17,9 @@
 //
 
 
-#include "Sourcey/PacketStream.h"
-#include "Sourcey/PacketQueue.h"
-#include "Sourcey/Memory.h"
+#include "scy/packetstream.h"
+#include "scy/packetqueue.h"
+#include "scy/memory.h"
 
 
 using std::endl;
@@ -1267,7 +1267,7 @@ void PacketStreamBase::dispose()
 
 
 	
-//#include "Sourcey/Interface.h"
+//#include "scy/interface.h"
 	//_base(std::make_shared<PacketStreamBase>(this)),
 	// Dispose of the base context here if there is no active async context.
 	// TODO: Use shared_ptr for auto deref and destroy when safe?

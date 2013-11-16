@@ -17,13 +17,13 @@
 //
 
 
-#include "Sourcey/Archo/Zip.h"
-#include "Sourcey/FileSystem.h"
+#include "scy/archo/zip.h"
+#include "scy/filesystem.h"
 
 /*
-#include "Sourcey/Exception.h"
-#include "Sourcey/Base64.h"
-#include "Sourcey/Hex.h"
+#include "scy/exception.h"
+#include "scy/base64.h"
+#include "scy/hex.h"
 
 #include <memory>
 #include <iostream>
@@ -32,7 +32,7 @@
 */
 
 
-using namespace std; 
+using std::endl; 
 
 
 namespace scy {

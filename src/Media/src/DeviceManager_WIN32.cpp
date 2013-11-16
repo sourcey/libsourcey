@@ -18,8 +18,8 @@
 // Implemented from libjingle r116 Feb 16, 2012
 
 
-#include "Sourcey/Media/DeviceManager_WIN32.h"
-#include "Sourcey/Platform.h"
+#include "scy/media/devicemanager_win32.h"
+#include "scy/platform.h"
 
 #ifdef HAVE_RTAUDIO
 
@@ -29,7 +29,7 @@
 #include <dshow.h>
 
 
-using namespace std; 
+using std::endl; 
 
 
 namespace scy {

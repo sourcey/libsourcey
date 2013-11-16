@@ -17,8 +17,8 @@
 //
 
 
-#include "Sourcey/Async.h"
-#include "Sourcey/Logger.h"
+#include "scy/async.h"
+#include "scy/logger.h"
 #include <memory>
 
 

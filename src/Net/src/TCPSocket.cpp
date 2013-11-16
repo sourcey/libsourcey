@@ -16,9 +16,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Sourcey/Net/TCPSocket.h"
-#include "Sourcey/Net/TCPSocket.h"
-#include "Sourcey/Logger.h"
+#include "scy/net/tcpsocket.h"
+#include "scy/net/tcpsocket.h"
+#include "scy/logger.h"
 //#if POSIX
 //#include <sys/socket.h>
 //#endif

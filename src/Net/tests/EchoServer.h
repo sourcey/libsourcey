@@ -1,5 +1,5 @@
-#include "Sourcey/Net/TCPSocket.h"
-#include "Sourcey/Net/SSLSocket.h"
+#include "scy/net/tcpsocket.h"
+#include "scy/net/sslsocket.h"
 
 
 namespace scy {

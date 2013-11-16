@@ -17,12 +17,12 @@
 //
 
 
-#include "Sourcey/Symple/Peer.h"
-#include "Sourcey/Logger.h"
+#include "scy/symple/peer.h"
+#include "scy/logger.h"
 #include "assert.h"
 
 
-using namespace std;
+using std::endl;
 //
 
 
@@ -81,37 +81,37 @@ Address Peer::address() const
 }
 
 
-string Peer::id() const 
+std::string Peer::id() const 
 {
 	return get("id", "").asString();
 }
 
 
-string Peer::user() const 
+std::string Peer::user() const 
 {
 	return get("user", "").asString();
 }
 
 
-string Peer::name() const 
+std::string Peer::name() const 
 {
 	return get("name", "").asString();
 }
 
 
-string Peer::group() const 
+std::string Peer::group() const 
 {
 	return get("group", "").asString();
 }
 
 
-string Peer::type() const 
+std::string Peer::type() const 
 {
 	return get("type", "").asString();
 }
 
 
-string Peer::host() const 
+std::string Peer::host() const 
 {
 	return get("host", "").asString();
 }

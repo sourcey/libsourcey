@@ -34,8 +34,8 @@
 //
 
 
-#include "Sourcey/Mutex.h"
-#include "Sourcey/Types.h"
+#include "scy/mutex.h"
+#include "scy/types.h"
 
 
 namespace scy {

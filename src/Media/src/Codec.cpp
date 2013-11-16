@@ -17,11 +17,11 @@
 //
 
 
-#include "Sourcey/Media/Codec.h"
+#include "scy/media/codec.h"
 #include <sstream>
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -60,9 +60,9 @@ Codec::Codec(const Codec& r) :
 }
 
 
-string Codec::toString() const 
+std::string Codec::toString() const 
 {
-	ostringstream os;
+	std::ostringstream os;
 	os << "Codec[" << name << ":" << encoder << ":" << sampleRate << ":" << enabled << "]";
 	return os.str();
 }
@@ -170,9 +170,9 @@ VideoCodec::VideoCodec(const VideoCodec& r) :
 }
 	
 
-string VideoCodec::toString() const 
+std::string VideoCodec::toString() const 
 {
-	ostringstream os;
+	std::ostringstream os;
 	os << "VideoCodec[" << name << ":" << encoder << ":" << width << ":" << height
 		<< ":" << fps << ":" << pixelFmt << ":" << enabled << "]";
 	return os.str();

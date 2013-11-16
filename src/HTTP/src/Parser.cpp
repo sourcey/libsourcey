@@ -17,15 +17,15 @@
 //
 
 
-#include "Sourcey/HTTP/Parser.h"
-#include "Sourcey/HTTP/Connection.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Crypto/Crypto.h"
-#include "Sourcey/HTTP/Util.h"
+#include "scy/http/parser.h"
+#include "scy/http/connection.h"
+#include "scy/logger.h"
+#include "scy/crypto/crypto.h"
+#include "scy/http/util.h"
 #include <stdexcept>
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy { 
@@ -279,7 +279,7 @@ int Parser::on_url(http_parser* parser, const char *at, std::size_t len)
 	assert(self);
 	assert(at && len);	
 
-    self->onURL(string(at, len));
+    self->onURL(std::string(at, len));
 	return 0;
 }
 
@@ -655,10 +655,10 @@ void Parser::validate_incoming() {
 
 
 /*
-#include "Sourcey/HTTP/Authenticator.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Crypto/Crypto.h"
-#include "Sourcey/HTTP/Util.h"
+#include "scy/http/authenticator.h"
+#include "scy/logger.h"
+#include "scy/crypto/crypto.h"
+#include "scy/http/util.h"
 
 #include "Poco/Base64Decoder.h"
 #include "Poco/Base64Encoder.h"
@@ -666,7 +666,7 @@ void Parser::validate_incoming() {
 #include "Poco/Format.h"
 
 
-using namespace std;
+using std::endl;
 
 
 

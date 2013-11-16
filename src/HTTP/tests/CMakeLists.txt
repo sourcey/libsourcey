@@ -4,4 +4,4 @@ include_dependency(JsonCpp REQUIRED)
 include_dependency(HttpParser REQUIRED)
 include_dependency(LibUV REQUIRED)
   
-define_libsourcey_test(HTTPTests Base UV Crypto Net HTTP)
+define_libsourcey_test(httptests base uv crypto net http)

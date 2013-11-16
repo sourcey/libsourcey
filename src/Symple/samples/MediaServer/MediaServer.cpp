@@ -4,17 +4,17 @@
 #include "StreamingResponder.h"
 #include "WebSocketResponder.h"
 
-#include "Sourcey/Collection.h"
-#include "Sourcey/Media/MediaFactory.h"
-#include "Sourcey/Media/AVInputReader.h"
-#include "Sourcey/Media/FLVMetadataInjector.h"
-#include "Sourcey/Media/FormatRegistry.h"
-#include "Sourcey/Media/AVPacketEncoder.h"
+#include "scy/collection.h"
+#include "scy/media/mediafactory.h"
+#include "scy/media/avinputreader.h"
+#include "scy/media/flvmetadatainjector.h"
+#include "scy/media/formatregistry.h"
+#include "scy/media/avpacketencoder.h"
 
-#include "Sourcey/HTTP/Packetizers.h"
-#include "Sourcey/HTTP/Util.h"
-#include "Sourcey/HTTP/Packetizers.h"
-#include "Sourcey/Util/Base64PacketEncoder.h"
+#include "scy/http/packetizers.h"
+#include "scy/http/util.h"
+#include "scy/http/packetizers.h"
+#include "scy/util/base64packetencoder.h"
 
 
 /*

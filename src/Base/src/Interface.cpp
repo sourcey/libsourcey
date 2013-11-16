@@ -17,8 +17,8 @@
 //
 
 
-#include "Sourcey/Interface.h"
-#include "Sourcey/Logger.h"
+#include "scy/interface.h"
+#include "scy/logger.h"
 #include <memory>
 
 

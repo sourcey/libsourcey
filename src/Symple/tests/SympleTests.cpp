@@ -1,7 +1,7 @@
-#include "Sourcey/Application.h"
-#include "Sourcey/Symple/Client.h"
-#include "Sourcey/Net/SSLManager.h"
-#include "Sourcey/Util.h"
+#include "scy/application.h"
+#include "scy/symple/client.h"
+#include "scy/net/sslmanager.h"
+#include "scy/util.h"
 
 
 using namespace std;

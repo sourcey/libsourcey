@@ -2,7 +2,7 @@
 include_dependency(FFmpeg REQUIRED)
 include_dependency(LibUV REQUIRED)
   
-define_libsourcey_test(MediaTests Base UV Media) 
+define_libsourcey_test(mediatests base uv media) 
 
 #include_dependency(OpenSSL REQUIRED)
 #include_dependency(OpenCV REQUIRED)

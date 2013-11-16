@@ -17,13 +17,13 @@
 //
 
 
-#include "Sourcey/Symple/Form.h"
-#include "Sourcey/Util.h"
-//#include "Sourcey/Crypto/Crypto.h"
+#include "scy/symple/form.h"
+#include "scy/util.h"
+//#include "scy/crypto/crypto.h"
 #include "assert.h"
 
 
-using namespace std;
+using std::endl;
 
 
 
@@ -55,7 +55,7 @@ Form::~Form()
 }
 
 
-string Form::action() const 
+std::string Form::action() const 
 {
 	return root().get("action", "form").asString();
 }
@@ -132,19 +132,19 @@ FormElement::~FormElement()
 }
 
 
-string FormElement::type() const
+std::string FormElement::type() const
 {
 	return root()["type"].asString();
 }
 
 
-string FormElement::id() const
+std::string FormElement::id() const
 {
 	return root()["id"].asString();
 }
 
 
-string FormElement::label() const
+std::string FormElement::label() const
 {
 	return root()["label"].asString();
 }
@@ -349,7 +349,7 @@ json::Value& FormField::values()
 }
 
 	
-string FormField::value() const
+std::string FormField::value() const
 {
 	return root()["values"][(unsigned)0].asString();
 }
@@ -407,7 +407,7 @@ void FormField::setValue(double value)
 
 void FormField::setValue(bool value)
 {
-	setValue(string(value ? "1" : "0"));
+	setValue(std::string(value ? "1" : "0"));
 }
 
 
@@ -431,7 +431,7 @@ void FormField::addValue(double value)
 
 void FormField::addValue(bool value)
 {
-	addValue(string(value ? "1" : "0"));
+	addValue(std::string(value ? "1" : "0"));
 }
 
 

@@ -17,11 +17,11 @@
 //
 
 
-#include "Sourcey/Crypto/HMAC.h"
+#include "scy/crypto/hmac.h"
 #include <assert.h>
 	
 #ifdef WIN32
-// hack for name collision of OCSP_RESPONSE and winCrypto.h in openssl release 0.9.8h
+// hack for name collision of OCSP_RESPONSE and wincrypto.h in openssl release 0.9.8h
 // http://www.google.com/search?q=OCSP%5fRESPONSE+wincrypt%2eh
 // continue to watch this issue for a real fix.
 #undef OCSP_RESPONSE

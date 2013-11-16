@@ -16,7 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Sourcey/Net/PacketSocket.h"
+#include "scy/net/packetsocket.h"
 
 using namespace std;
 

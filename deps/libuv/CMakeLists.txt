@@ -128,8 +128,13 @@ else()
  
 endif()
 
-# Include LibUV dependencies in LibSourcey build
-set(LibSourcey_INCLUDE_LIBRARIES ${libuv_DEPENDENCIES} ${LibSourcey_INCLUDE_LIBRARIES} CACHE INTERNAL "") 
-
+# Include LibUV dependencies and paths in LibSourcey build
+#set(LibSourcey_INCLUDE_LIBRARIES ${libuv_DEPENDENCIES} ${LibSourcey_INCLUDE_LIBRARIES} CACHE INTERNAL "") 
+#set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS}
+#  ${CMAKE_CURRENT_SOURCE_DIR}/src 
+#  ${CMAKE_CURRENT_SOURCE_DIR}/include 
+#  ${CMAKE_CURRENT_SOURCE_DIR}/include/uv-private PARENT_SCOPE)
+  #CACHE INTERNAL "") 
+      
 # Define the project
 define_sourcey_dependency(libuv)

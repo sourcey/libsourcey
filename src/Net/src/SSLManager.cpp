@@ -18,9 +18,9 @@
 // This file uses functions from POCO C++ Libraries (license below)
 //
 
-#include "Sourcey/Net/SSLManager.h"
-#include "Sourcey/Net/SSLContext.h"
-#include "Sourcey/Singleton.h"
+#include "scy/net/sslmanager.h"
+#include "scy/net/sslcontext.h"
+#include "scy/singleton.h"
 
 
 using namespace std;

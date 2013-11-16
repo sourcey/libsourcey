@@ -17,9 +17,9 @@
 //
 
 
-#include "Sourcey/Time.h"
-#include "Sourcey/UV/UVPP.h"
-#include "Sourcey/Util.h"
+#include "scy/time.h"
+#include "scy/uv/uvpp.h"
+#include "scy/util.h"
 #include <ctime>
 #include <time.h>
 //#include <chrono>

@@ -17,13 +17,13 @@
 //
 
 
-#include "Sourcey/Symple/Address.h"
-#include "Sourcey/Util.h"
+#include "scy/symple/address.h"
+#include "scy/util.h"
 #include "sstream"
 #include "assert.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -75,25 +75,25 @@ bool Address::parse(const std::string& id)
 */
 
 
-string Address::id() const 
+std::string Address::id() const 
 {
 	return get("id", "").asString();
 }
 
 
-string Address::user() const 
+std::string Address::user() const 
 {
 	return get("user", "").asString();
 }
 
 
-string Address::name() const 
+std::string Address::name() const 
 {
 	return get("name", "").asString();
 }
 
 
-string Address::group() const 
+std::string Address::group() const 
 {
 	return get("group", "").asString();
 }

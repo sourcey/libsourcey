@@ -17,12 +17,12 @@
 //
 
 
-#include "Sourcey/Media/Format.h"
+#include "scy/media/format.h"
 #include <sstream>
 #include <algorithm>
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -76,9 +76,9 @@ Format::Type Format::type() const
 }
 
 
-string Format::toString() const 
+std::string Format::toString() const 
 {
-	ostringstream os;
+	std::ostringstream os;
 	os << "Format[" << name << ":"  << id;
 	if (video.enabled)
 		os << "\n\t" << video.toString();

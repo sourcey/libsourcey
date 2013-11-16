@@ -17,10 +17,10 @@
 //
 
 
-#include "Sourcey/Crypto/Cipher.h"
-#include "Sourcey/Exception.h"
-#include "Sourcey/Base64.h"
-#include "Sourcey/Hex.h"
+#include "scy/crypto/cipher.h"
+#include "scy/exception.h"
+#include "scy/base64.h"
+#include "scy/hex.h"
 
 #include <memory>
 #include <iostream>
@@ -29,7 +29,7 @@
 #include <assert.h>
 
 
-using namespace std; 
+using std::endl; 
 
 
 namespace scy {

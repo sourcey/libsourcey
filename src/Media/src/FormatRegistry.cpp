@@ -17,13 +17,13 @@
 //
 
 
-#include "Sourcey/Media/FormatRegistry.h"
+#include "scy/media/formatregistry.h"
 
-#include "Sourcey/Singleton.h"
+#include "scy/singleton.h"
 //#include "Poco/Format.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {

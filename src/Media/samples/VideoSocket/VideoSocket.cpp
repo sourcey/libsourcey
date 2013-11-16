@@ -1,10 +1,10 @@
-#include "Sourcey/Application.h"
-#include "Sourcey/PacketStream.h"
-#include "Sourcey/Media/VideoCapture.h"
-#include "Sourcey/Media/AVInputReader.h"
-#include "Sourcey/Media/AVPacketEncoder.h"
-#include "Sourcey/Net/Network.h"
-#include "Sourcey/HTTP/Server.h"
+#include "scy/application.h"
+#include "scy/packetstream.h"
+#include "scy/media/videocapture.h"
+#include "scy/media/avinputreader.h"
+#include "scy/media/avpacketencoder.h"
+#include "scy/net/network.h"
+#include "scy/http/server.h"
 
 
 using namespace std;

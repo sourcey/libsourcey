@@ -17,9 +17,9 @@
 //
 
 
-#include "Sourcey/Pacman/InstallMonitor.h"
-#include "Sourcey/Pacman/PackageManager.h"
-#include "Sourcey/Logger.h"
+#include "scy/pacman/installmonitor.h"
+#include "scy/pacman/packagemanager.h"
+#include "scy/logger.h"
 
 
 using namespace std;

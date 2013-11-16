@@ -17,13 +17,13 @@
 //
 
 
-#include "Sourcey/Symple/Message.h"
-#include "Sourcey/Util.h"
-#include "Sourcey/Logger.h"
+#include "scy/symple/message.h"
+#include "scy/util.h"
+#include "scy/logger.h"
 #include "assert.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -130,13 +130,13 @@ void Message::clearNotes()
 }
 
 
-string Message::type() const
+std::string Message::type() const
 {
 	return get("type", "message").asString();
 }
 
 
-string Message::id() const 
+std::string Message::id() const 
 {
 	return get("id", "").asString();
 }

@@ -1,1 +1,1 @@
-add_subdirectory(PackageManagerConsole)
+add_subdirectory(packagemanagerconsole)

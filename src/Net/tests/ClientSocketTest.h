@@ -1,8 +1,8 @@
-#include "Sourcey/UV/UVPP.h"
-#include "Sourcey/Net/TCPSocket.h"
-#include "Sourcey/Net/SSLSocket.h"
-#include "Sourcey/Net/Address.h"
-#include "Sourcey/Logger.h"
+#include "scy/uv/uvpp.h"
+#include "scy/net/tcpsocket.h"
+#include "scy/net/sslsocket.h"
+#include "scy/net/address.h"
+#include "scy/logger.h"
 #include <memory>
 
 

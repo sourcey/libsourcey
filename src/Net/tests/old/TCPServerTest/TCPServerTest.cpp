@@ -1,7 +1,7 @@
-#include "Sourcey/Net/TCPServer.h"
-#include "Sourcey/Net/TCPSocket.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Util.h"
+#include "scy/net/tcpserver.h"
+#include "scy/net/tcpsocket.h"
+#include "scy/logger.h"
+#include "scy/util.h"
 
 #include "Poco/Path.h"
 

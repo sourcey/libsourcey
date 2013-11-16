@@ -1,1 +1,1 @@
-define_sourcey_module_sample(PackageManagerConsole Base UV Net JSON Pacman HTTP Crypto Archo)
+define_sourcey_module_sample(packagemanagerconsole base uv net json pacman http crypto archo)

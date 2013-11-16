@@ -72,16 +72,15 @@ set_option(LibSourcey_WARNINGS_ARE_ERRORS "Treat warnings as errors"            
 # ----------------------------------------------------------------------------
 # LibSourcey internal options
 # ----------------------------------------------------------------------------
-set(LibSourcey_INCLUDE_DIRS           "" CACHE INTERNAL "Global include dirs" FORCE)
-set(LibSourcey_LIBRARY_DIRS           "" CACHE INTERNAL "Global include library dirs" FORCE)
-set(LibSourcey_INCLUDE_LIBRARIES      "" CACHE INTERNAL "Global include libraries" FORCE)
+set(LibSourcey_INCLUDE_DIRS           "") # CACHE INTERNAL "Global include dirs" FORCE)
+set(LibSourcey_LIBRARY_DIRS           "") # CACHE INTERNAL "Global include library dirs" FORCE)
+set(LibSourcey_INCLUDE_LIBRARIES      "") # CACHE INTERNAL "Global include libraries" FORCE)
 
 set(LibSourcey_BUILD_DEPENDENCIES     "" CACHE INTERNAL "Dependencies to build" FORCE)
 set(LibSourcey_BUILD_MODULES          "" CACHE INTERNAL "Modules to build" FORCE)
 set(LibSourcey_BUILD_SAMPLES          "" CACHE INTERNAL "Samples to build" FORCE)
 set(LibSourcey_BUILD_TESTS            "" CACHE INTERNAL "Tests to build" FORCE)
 set(LibSourcey_BUILD_APPLICATIONS     "" CACHE INTERNAL "Applications to build" FORCE)
-
 
 # ----------------------------------------------------------------------------
 # LibSourcey Build paths
@@ -91,14 +90,14 @@ set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
 set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_DIR}/deps")
-set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_INSTALL_DIR}/deps")
+set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_BUILD_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/libscy/deps")
 
 # Append some common search paths for find_library
 # to find libraries from these locations first
 if(WIN32)
-  SET(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
-  SET(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a") # ".dll"
+  set(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a") # ".dll"
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     D:/dev/lib/wxWidgets-2.9.4/lib/vc_lib
     D:/dev/lib/opencv-2.4.6.0/build/install/lib
@@ -124,15 +123,15 @@ if(WIN32)
     #D:/dev/apps/MinGW/msys/1.0/local
     #D:/dev/projects/Sourcey/LibSourcey/src/anionu/deps/ffmpeg/bin
 else()
-  SET(CMAKE_FIND_LIBRARY_PREFIXES "lib")
-  SET(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
+  set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
   set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
+    /home/deploy/build/lib
     /usr/lib
-    /usr/local/lib   
-    /home/deploy/ffmpeg_build/lib)
+    /usr/local/lib)
 
   # Temp fix for "/usr/bin/ld: cannot find -lavcodec"
-  link_directories(/home/deploy/ffmpeg_build/lib)
+  link_directories(/home/deploy/build/lib)
 endif()
 
 # Append some common search paths for find_path
@@ -223,14 +222,26 @@ endif()
 # ----------------------------------------------------------------------------
 # Include standard and defult libraries
 # ----------------------------------------------------------------------------
-if(MSVC)
-  set(CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES} advapi32.lib iphlpapi.lib psapi.lib shell32.lib ws2_32.lib dsound.lib winmm.lib strmiids.lib) # ${LibSourcey_INCLUDE_LIBRARIES} 
+if(MSVC)  
+  # CMAKE_CXX_STANDARD_LIBRARIES must be a string for MSVC
+  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} advapi32.lib iphlpapi.lib psapi.lib shell32.lib ws2_32.lib dsound.lib winmm.lib strmiids.lib")
 elseif(MSYS)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lws2_32 -liphlpapi") #${LibSourcey_INCLUDE_LIBRARIES} 
 elseif(UNIX)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -ldl -lrt") # -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES} 
 endif()
-
+      
+if(MSVC)
+  # Temporary workaround for "error LNK2026: module unsafe for SAFESEH image"
+  # when compiling with certain externally compiled libraries with VS2012, 
+  # such as http://ffmpeg.zeranoe.com/builds/
+  # This disables safe exception handling by default.
+  if(${_MACHINE_ARCH_FLAG} MATCHES X86)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
+  endif()
+endif()
 
 
 # ----------------------------------------------------------------------------
@@ -247,15 +258,59 @@ set_option(WITH_ZLIB            "Include zlib support"                 ON)
 set_option(WITH_HTTPPARSER      "Include HttpParser support"           ON)
 set_option(WITH_WXWIDGETS       "Include wxWidgets support"            ON)
 
-if(BUILD_DEPENDENCIES)
-  add_subdirectory(${LibSourcey_DEPENDENCIES_SOURCE_DIR})
+# Include dependencies build dir for cmake generated config files
+list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_BUILD_DIR}) 
+
+#set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} ${LibSourcey_DEPENDENCIES_BUILD_DIR})
+#list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}) 
+#set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_DIR}/deps")
+#set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_BUILD_DIR}/deps")
+#set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/libscy/deps")
+#link_directories("${LibSourcey_DEPENDENCIES_INSTALL_DIR}")
+
+# Include inttypes.h for windows
+if (MSVC)
+  list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/msvc) 
 endif()
 
+#if(BUILD_DEPENDENCIES)
+#  add_subdirectory(${LibSourcey_DEPENDENCIES_SOURCE_DIR})
+#endif()
+
+# Local dependencies
 if(WITH_LIBUV)
-  include_dependency(LibUV REQUIRED)
-  #set(HAVE_LIBUV 1)
+  #include_dependency(LibUV REQUIRED)
+  add_subdirectory(deps/libuv)
+  set(HAVE_LIBUV 1)
 endif()
 
+if(WITH_RTAUDIO)
+  #include_dependency(RtAudio REQUIRED)
+  add_subdirectory(deps/RtAudio)
+  set(HAVE_RTAUDIO 1)
+endif()
+
+if(WITH_JSONCPP)
+  #include_dependency(JsonCpp REQUIRED)
+  add_subdirectory(deps/jsoncpp)
+  set(HAVE_JSONCPP 1)
+endif()
+
+if(WITH_ZLIB)
+  #include_dependency(ZLIB REQUIRED)
+  #include_dependency(Minizip REQUIRED)
+  add_subdirectory(deps/zlib)
+  add_subdirectory(deps/minizip) #deps/zlib/contrib/minizip
+  set(HAVE_ZLIB 1)
+endif()
+
+if(WITH_HTTPPARSER)
+  #include_dependency(HttpParser REQUIRED)
+  add_subdirectory(deps/http_parser)
+  set(HAVE_HTTPPARSER 1)
+endif()
+
+# External dependencies
 if(WITH_OPENSSL)
   include_dependency(OpenSSL REQUIRED)
   #set(HAVE_OPENSSL 1)
@@ -271,33 +326,11 @@ if(WITH_OPENCV)
   #set(HAVE_OPENCV 1)
 endif()
 
-if(WITH_RTAUDIO)
-  include_dependency(RtAudio REQUIRED)
-  #set(HAVE_RTAUDIO 1)
-endif()
-
-if(WITH_JSONCPP)
-  include_dependency(JsonCpp REQUIRED)
-  #set(HAVE_JSONCPP 1)
-endif()
-
-if(WITH_ZLIB)
-  include_dependency(ZLIB REQUIRED)
-  include_dependency(Minizip REQUIRED)
-  #set(HAVE_JSONCPP 1)
-endif()
-
 if(WITH_WXWIDGETS)
   # TODO: specify library option
   include_dependency(wxWidgets REQUIRED core base adv)
   #set(HAVE_WXWIDGETS 1)
 endif()
-
-if(WITH_HTTPPARSER)
-  include_dependency(HttpParser REQUIRED)
-  #set(HAVE_HTTPPARSER 1)
-endif()
-
   
 # Define known dependencies for our LibSourceyConfig.h
 # These variables will be modified by include_dependency()
@@ -331,11 +364,8 @@ endif()
 #endif()
 
 # Include the dependencies source directory
-list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}) 
-if (MSVC)
-  list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/msvc) 
-endif()
-include_directories("${LibSourcey_INCLUDE_DIRS}")
+#list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}) 
+#include_directories("${LibSourcey_INCLUDE_DIRS}")
 #link_directories("${LibSourcey_INSTALL_DIR}/lib")
   
 # ----------------------------------------------------------------------------
@@ -374,7 +404,7 @@ set(PACKAGE_VERSION "${LibSourcey_VERSION}")
 status("Parsing 'LibSourceyConfig.h.cmake'")
 configure_file(
   "${CMAKE_SOURCE_DIR}/cmake/LibSourceyConfig.h.cmake" 
-  "${LibSourcey_CONFIG_FILE_INCLUDE_DIR}/LibSourceyConfig.h")
+  "${LibSourcey_CONFIG_FILE_INCLUDE_DIR}/scyconfig.h")
   
 # ----------------------------------------------------------------------------
 #  Uninstall target for "make uninstall"
@@ -412,7 +442,6 @@ endif()
 if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
   status("    Configuration:"  ${CMAKE_BUILD_TYPE})
 endif()
-status("    Standard libs:             ${CMAKE_CXX_STANDARD_LIBRARIES}")
 
 # C/C++ options
 status("")
@@ -454,6 +483,14 @@ status("    Use JsonCpp:"       HAVE_JSONCPP         THEN YES ELSE NO)
 status("    Use wxWidgets:"     HAVE_WXWIDGETS       THEN YES ELSE NO)
 status("    Use HttpParser:"    HAVE_HTTPPARSER      THEN YES ELSE NO)
 status("    Use zlib:"          HAVE_ZLIB            THEN YES ELSE NO)
+
+# Includes
+status("")
+status("  Linker paths and libraries:")
+status("")
+status("    Include dirs:                ${LibSourcey_INCLUDE_DIRS}")
+status("    Include libs:                ${LibSourcey_INCLUDE_LIBRARIES}")
+status("    Standard libs:               ${CMAKE_CXX_STANDARD_LIBRARIES}")
 
 # Auxiliary
 status("")

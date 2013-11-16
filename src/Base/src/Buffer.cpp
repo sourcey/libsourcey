@@ -17,10 +17,10 @@
 //
 
 
-#include "Sourcey/Buffer.h"
-#include "Sourcey/Util.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/ByteOrder.h"
+#include "scy/buffer.h"
+#include "scy/util.h"
+#include "scy/logger.h"
+#include "scy/byteorder.h"
 
 #include <cstddef>
 #include <cstring>
