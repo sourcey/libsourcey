@@ -17,10 +17,10 @@
 //
 
 
-#include "Sourcey/Net/Address.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Memory.h"
-#include "Sourcey/Types.h"
+#include "scy/net/address.h"
+#include "scy/logger.h"
+#include "scy/memory.h"
+#include "scy/types.h"
 
 #include "uv.h"
 

@@ -17,12 +17,12 @@
 //
 
 
-#include "Sourcey/HTTP/Response.h"
-#include "Sourcey/HTTP/Util.h"
-#include "Sourcey/DateTime.h"
+#include "scy/http/response.h"
+#include "scy/http/util.h"
+#include "scy/datetime.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy { 

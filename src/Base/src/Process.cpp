@@ -19,8 +19,8 @@
 //
 
 
-#include "Sourcey/Process.h"
-#include "Sourcey/FileSystem.h"
+#include "scy/process.h"
+#include "scy/filesystem.h"
 
 
 namespace scy {

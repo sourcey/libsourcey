@@ -1,8 +1,8 @@
-#include "Sourcey/SocketIO/Client.h"
-#include "Sourcey/SocketIO/Transaction.h"
-#include "Sourcey/Net/SSLManager.h"
-#include "Sourcey/Application.h"
-#include "Sourcey/Util.h"
+#include "scy/socketio/client.h"
+#include "scy/socketio/transaction.h"
+#include "scy/net/sslmanager.h"
+#include "scy/application.h"
+#include "scy/util.h"
 
 
 using namespace std;

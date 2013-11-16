@@ -17,11 +17,11 @@
 //
 
 
-#include "Sourcey/Idler.h"
-#include "Sourcey/Logger.h"
+#include "scy/idler.h"
+#include "scy/logger.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {

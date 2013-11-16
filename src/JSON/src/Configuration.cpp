@@ -17,8 +17,8 @@
 //
 
 
-#include "Sourcey/JSON/Configuration.h"
-#include "Sourcey/Logger.h"
+#include "scy/json/configuration.h"
+#include "scy/logger.h"
 //#include "Poco/String.h"
 //#include "Poco/File.h"
 

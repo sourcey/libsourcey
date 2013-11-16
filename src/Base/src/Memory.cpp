@@ -17,11 +17,11 @@
 //
 
 
-#include "Sourcey/Memory.h"
-#include "Sourcey/Util.h"
+#include "scy/memory.h"
+#include "scy/util.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {

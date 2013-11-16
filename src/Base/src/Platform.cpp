@@ -17,9 +17,9 @@
 //
 
 
-#include "Sourcey/Platform.h"
-#include "Sourcey/UV/UVPP.h"
-#include "Sourcey/Exception.h"
+#include "scy/platform.h"
+#include "scy/uv/uvpp.h"
+#include "scy/exception.h"
 
 #ifdef WIN32
 #include <windows.h>
@@ -28,7 +28,7 @@
 #endif
 
 
-using namespace std;
+using std::endl;
 
 
 #define PATHMAX 1024

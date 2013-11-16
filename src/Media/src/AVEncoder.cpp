@@ -17,12 +17,12 @@
 //
 
 
-#include "Sourcey/Media/AVEncoder.h"
-#include "Sourcey/Media/VideoCapture.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Platform.h"
-#include "Sourcey/Timer.h"
-#include "Sourcey/Media/FLVMetadataInjector.h"
+#include "scy/media/avencoder.h"
+#include "scy/media/videocapture.h"
+#include "scy/logger.h"
+#include "scy/platform.h"
+#include "scy/timer.h"
+#include "scy/media/flvmetadatainjector.h"
 
 #include "assert.h"
 
@@ -35,7 +35,7 @@ extern "C" {
 }
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -137,7 +137,7 @@ void AVEncoder::initialize()
 			snprintf(_formatCtx->filename, sizeof(_formatCtx->filename), "%s", _options.ofile.c_str());
 		
 		// Set the container codec
-		std::string ofmt = _options.ofile.empty() ? ("." + string(_options.oformat.id)) : _options.ofile;		
+		std::string ofmt = _options.ofile.empty() ? ("." + std::string(_options.oformat.id)) : _options.ofile;		
 		_formatCtx->oformat = av_guess_format(_options.oformat.id.c_str(), ofmt.c_str(), nullptr);	
 		if (!_formatCtx->oformat)
 			throw std::runtime_error("Cannot find suitable encoding format for " + _options.oformat.name);			

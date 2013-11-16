@@ -17,11 +17,11 @@
 //
 
 
-#include "Sourcey/Sked/Scheduler.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Platform.h"
-#include "Sourcey/DateTime.h"
-#include "Sourcey/Singleton.h"
+#include "scy/sked/scheduler.h"
+#include "scy/logger.h"
+#include "scy/platform.h"
+#include "scy/datetime.h"
+#include "scy/singleton.h"
 
 #include <algorithm>
 #include "assert.h"

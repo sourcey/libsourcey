@@ -19,10 +19,10 @@
 //
 
 
-#include "Sourcey/DateTime.h"
-#include "Sourcey/Platform.h"
-#include "Sourcey/Time.h"
-#include "Sourcey/Numeric.h"
+#include "scy/datetime.h"
+#include "scy/platform.h"
+#include "scy/time.h"
+#include "scy/numeric.h"
 
 #include <cctype>
 #include <ctime>
@@ -34,7 +34,7 @@
 #endif
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {

@@ -1,5 +1,5 @@
-ask_build_sourcey_module(Media)
-if(BUILD_MODULES AND BUILD_MODULE_Media) 
+ask_build_sourcey_module(media)
+if(BUILD_MODULES AND BUILD_MODULE_media) 
 
   #include_dependency(OpenSSL REQUIRED)
   #include_dependency(FFmpeg REQUIRED)  
@@ -8,5 +8,5 @@ if(BUILD_MODULES AND BUILD_MODULE_Media)
   #include_dependency(RtAudio REQUIRED)
   #include_dependency(LibUV REQUIRED)
 
-  define_sourcey_module(Media Base Net UV)
+  define_sourcey_module(media base net uv)
 endif()

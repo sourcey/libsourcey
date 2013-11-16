@@ -17,9 +17,9 @@
 //
 
 
-#include "Sourcey/STUN/Transaction.h"
-#include "Sourcey/Net/Socket.h"
-#include "Sourcey/Logger.h"
+#include "scy/stun/transaction.h"
+#include "scy/net/socket.h"
+#include "scy/logger.h"
 #include <iostream>
 
 

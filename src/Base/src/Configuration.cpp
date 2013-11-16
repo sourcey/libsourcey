@@ -17,9 +17,9 @@
 //
 
 
-#include "Sourcey/Configuration.h"
-#include "Sourcey/Util.h"
-#include "Sourcey/Exception.h"
+#include "scy/configuration.h"
+#include "scy/util.h"
+#include "scy/exception.h"
 
 
 namespace scy {
@@ -241,15 +241,26 @@ ScopedConfiguration::ScopedConfiguration(Configuration& config, const std::strin
 }
 
 
-/*
 ScopedConfiguration::ScopedConfiguration(const ScopedConfiguration& r) :
 	config(r.config),
 	currentScope(r.currentScope),
 	defaultScope(r.defaultScope)
 {
 }
-*/
 	
+
+/*
+ScopedConfiguration& ScopedConfiguration::operator = (const ScopedConfiguration& that)
+{
+	if (&that != this) {
+		config = that.config;
+		currentScope = that.currentScope;
+		defaultScope = that.defaultScope;
+	}
+	return *this;
+}
+*/
+
 
 std::string ScopedConfiguration::getString(const std::string& key, const std::string& defaultValue, bool forceDefaultScope) const 
 {

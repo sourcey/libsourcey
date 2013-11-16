@@ -17,9 +17,9 @@
 //
 
 
-#include "Sourcey/Util.h"
-#include "Sourcey/Random.h"
-#include "Sourcey/Base64.h"
+#include "scy/util.h"
+#include "scy/random.h"
+#include "scy/base64.h"
 
 #include <memory>
 
@@ -31,7 +31,7 @@
 #include <cstdarg>
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {

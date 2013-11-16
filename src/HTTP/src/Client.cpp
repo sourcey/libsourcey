@@ -17,13 +17,13 @@
 //
 
 
-#include "Sourcey/HTTP/Client.h"
-#include "Sourcey/Net/SSLSocket.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Util.h"
+#include "scy/http/client.h"
+#include "scy/net/sslsocket.h"
+#include "scy/logger.h"
+#include "scy/util.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy { 

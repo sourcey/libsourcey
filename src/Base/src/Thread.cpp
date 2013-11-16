@@ -17,14 +17,14 @@
 //
 
 
-#include "Sourcey/Thread.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Platform.h"
+#include "scy/thread.h"
+#include "scy/logger.h"
+#include "scy/platform.h"
 #include "assert.h"
 #include <memory>
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -68,7 +68,7 @@ void Thread::startAsync()
 		} while (ptr->repeating && !ptr->cancelled());
 		delete &ptr;
 	}, new Runner::Context::ptr(pContext));
-	if (r < 0) throw runtime_error("System error: Cannot initialize thread");	
+	if (r < 0) throw std::runtime_error("System error: Cannot initialize thread");	
 }
 
 

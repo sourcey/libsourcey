@@ -17,11 +17,11 @@
 //
 
 
-#include "Sourcey/HTTP/Connection.h"
-#include "Sourcey/HTTP/Server.h"
-#include "Sourcey/HTTP/Client.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Memory.h"
+#include "scy/http/connection.h"
+#include "scy/http/server.h"
+#include "scy/http/client.h"
+#include "scy/logger.h"
+#include "scy/memory.h"
 
 #include <assert.h>
 

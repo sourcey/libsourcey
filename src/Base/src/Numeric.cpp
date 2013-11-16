@@ -19,7 +19,7 @@
 //
 
 
-#include "Sourcey/Numeric.h"
+#include "scy/numeric.h"
 
 #include <assert.h>
 
@@ -212,7 +212,7 @@ void formatHex(std::string& str, unsigned long value, int width)
 }
 
 
-#if defined(SOURCEY_HAVE_INT64) && !defined(SOURCEY_LONG_IS_64_BIT)
+#if defined(SCY_HAVE_INT64) && !defined(SCY_LONG_IS_64_BIT)
 
 
 void format(std::string& str, Int64 value)
@@ -307,14 +307,14 @@ void formatHex(std::string& str, UInt64 value, int width)
 }
 
 
-#endif // defined(SOURCEY_HAVE_INT64) && !defined(SOURCEY_LONG_IS_64_BIT)
+#endif // defined(SCY_HAVE_INT64) && !defined(SCY_LONG_IS_64_BIT)
 
 
 void format(std::string& str, const void* ptr)
 {
 	char buffer[24];
-#if defined(SOURCEY_PTR_IS_64_BIT)
-	#if defined(SOURCEY_LONG_IS_64_BIT)
+#if defined(SCY_PTR_IS_64_BIT)
+	#if defined(SCY_LONG_IS_64_BIT)
 		std::sprintf(buffer, "%016lX", (UIntPtr) ptr);
 	#else
 		std::sprintf(buffer, "%016" I64_FMT "X", (UIntPtr) ptr);
@@ -365,7 +365,7 @@ void format(std::string& str, float value)
 {
 	char buffer[64];
 	Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
-#if !defined(SOURCEY_NO_LOCALE)
+#if !defined(SCY_NO_LOCALE)
 	ostr.imbue(std::locale::classic());
 #endif
 	ostr << std::setprecision(8) << value;
@@ -377,7 +377,7 @@ void format(std::string& str, double value)
 {
 	char buffer[64];
 	Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
-#if !defined(SOURCEY_NO_LOCALE)
+#if !defined(SCY_NO_LOCALE)
 	ostr.imbue(std::locale::classic());
 #endif
 	ostr << std::setprecision(16) << value;
@@ -391,7 +391,7 @@ void format(std::string& str, double value, int precision)
 
 	char buffer[64];
 	Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
-#if !defined(SOURCEY_NO_LOCALE)
+#if !defined(SCY_NO_LOCALE)
 	ostr.imbue(std::locale::classic());
 #endif
 	ostr << std::fixed << std::showpoint << std::setprecision(precision) << value;
@@ -405,7 +405,7 @@ void format(std::string& str, double value, int width, int precision)
 
 	char buffer[64];
 	Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
-#if !defined(SOURCEY_NO_LOCALE)
+#if !defined(SCY_NO_LOCALE)
 	ostr.imbue(std::locale::classic());
 #endif
 	ostr << std::fixed << std::showpoint << std::setw(width) << std::setprecision(precision) << value;

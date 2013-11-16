@@ -2,4 +2,4 @@
 include_dependency(OpenSSL REQUIRED)
 include_dependency(JsonCpp REQUIRED)
   
-define_libsourcey_test(CryptoTests Base UV Net HTTP JSON Crypto)
+define_libsourcey_test(cryptotests base uv net http json crypto)

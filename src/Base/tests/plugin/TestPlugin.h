@@ -1,10 +1,10 @@
-#ifndef SOURCEY_TestPlugin_H
-#define SOURCEY_TestPlugin_H
+#ifndef SCY_TestPlugin_H
+#define SCY_TestPlugin_H
 
 
 #include "TestPluginAPI.h"
-#include "Sourcey/PacketStream.h"
-#include "Sourcey/Logger.h"
+#include "scy/packetstream.h"
+#include "scy/logger.h"
 #include <string>
 
 

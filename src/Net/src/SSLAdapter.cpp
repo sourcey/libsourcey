@@ -17,9 +17,9 @@
 //
 
 
-#include "Sourcey/Net/SSLAdapter.h"
-#include "Sourcey/Net/SSLSocket.h"
-#include "Sourcey/Logger.h"
+#include "scy/net/ssladapter.h"
+#include "scy/net/sslsocket.h"
+#include "scy/logger.h"
 #include <vector>
 #include <iterator>
 #include <algorithm>

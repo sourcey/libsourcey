@@ -18,11 +18,11 @@
 // This file uses functions from POCO C++ Libraries (license below)
 //
 
-#include "Sourcey/FileSystem.h"
-#include "Sourcey/DateTime.h"
-#include "Sourcey/Net/SSLContext.h"
-#include "Sourcey/Net/SSLManager.h"
-#include "Sourcey/Crypto/Crypto.h"
+#include "scy/filesystem.h"
+#include "scy/datetime.h"
+#include "scy/net/sslcontext.h"
+#include "scy/net/sslmanager.h"
+#include "scy/crypto/crypto.h"
 
 
 using namespace std;

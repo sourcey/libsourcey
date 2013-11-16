@@ -17,8 +17,8 @@
 //
 
 
-#include "Sourcey/HTTP/URL.h"
-#include "Sourcey/Util.h"
+#include "scy/http/url.h"
+#include "scy/util.h"
 
 
 namespace scy {

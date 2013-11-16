@@ -18,7 +18,7 @@
 // Implemented from libjingle r116 Feb 16, 2012
 
 
-#include "Sourcey/Media/DeviceManager_LINUX.h"
+#include "scy/media/devicemanager_linux.h"
 
 #include <unistd.h>
 

@@ -1,18 +1,18 @@
-#ifndef SOURCEY_MediaServer_H
-#define SOURCEY_MediaServer_H
+#ifndef SCY_MediaServer_H
+#define SCY_MediaServer_H
 
-#include "Sourcey/Logger.h"
-#include "Sourcey/Application.h"
-#include "Sourcey/Util.h"
-#include "Sourcey/PacketStream.h"
-#include "Sourcey/Media/AVEncoder.h"
-#include "Sourcey/Media/MediaFactory.h"
-#include "Sourcey/HTTP/Server.h"
+#include "scy/logger.h"
+#include "scy/application.h"
+#include "scy/util.h"
+#include "scy/packetstream.h"
+#include "scy/media/avencoder.h"
+#include "scy/media/mediafactory.h"
+#include "scy/http/server.h"
 
 /*
-//#include "Sourcey/Crypto.h"
-#include "Sourcey/PacketStream.h"
-#include "Sourcey/HTTP/WebSocket.h"
+//#include "scy/crypto.h"
+#include "scy/packetstream.h"
+#include "scy/http/websocket.h"
 
 #include <string>
 #include <vector>

@@ -17,8 +17,8 @@
 //
 
 
-#include "Sourcey/STUN/Message.h"
-#include "Sourcey/Logger.h"
+#include "scy/stun/message.h"
+#include "scy/logger.h"
 
 
 using namespace std;
@@ -60,21 +60,23 @@ Message::Message(const Message& r) :
 
 Message& Message::operator = (const Message& r) 
 {
-	_type = r.type();
-	_state = r.state();
-	_size = r.size();
-	_transactionID = r.transactionID();
-	assert(_type);
-	assert(_transactionID.size() == 16);	
+	if (&r != this) {
+		_type = r.type();
+		_state = r.state();
+		_size = r.size();
+		_transactionID = r.transactionID();
+		assert(_type);
+		assert(_transactionID.size() == 16);	
 
-	// Clear current attributes
-	for (auto i = 0; i < _attrs.size(); i++)
-		delete _attrs[i];
-	_attrs.clear();
+		// Clear current attributes
+		for (auto i = 0; i < _attrs.size(); i++)
+			delete _attrs[i];
+		_attrs.clear();
 
-	// Copy attributes from source object
-	for (auto i = 0; i < r.attrs().size(); i++)
-		_attrs.push_back(r.attrs()[i]->clone());
+		// Copy attributes from source object
+		for (auto i = 0; i < r.attrs().size(); i++)
+			_attrs.push_back(r.attrs()[i]->clone());
+	}
 
 	return *this;
 }

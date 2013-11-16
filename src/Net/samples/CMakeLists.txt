@@ -3,4 +3,4 @@
 #
 # ----------------------------------------------------------------------------
 
-add_subdirectory(EchoServer)
+add_subdirectory(echoserver)

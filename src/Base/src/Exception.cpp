@@ -17,10 +17,10 @@
 //
 
 
-#include "Sourcey/Exception.h"
+#include "scy/exception.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {

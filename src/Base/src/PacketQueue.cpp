@@ -16,10 +16,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Sourcey/PacketQueue.h"
+#include "scy/packetqueue.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {

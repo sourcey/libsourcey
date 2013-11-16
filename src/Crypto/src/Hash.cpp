@@ -17,13 +17,13 @@
 //
 
 
-#include "Sourcey/Crypto/Hash.h"
-#include "Sourcey/Exception.h"
+#include "scy/crypto/hash.h"
+#include "scy/exception.h"
 #include <assert.h>
 #include <iostream>
 
 
-using namespace std; 
+using std::endl; 
 
 
 namespace scy {

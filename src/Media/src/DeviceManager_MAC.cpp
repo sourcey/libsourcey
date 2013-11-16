@@ -18,7 +18,7 @@
 // Implemented from libjingle r116 Feb 16, 2012
 
 
-#include "Sourcey/Media/DeviceManager_MAC.h"
+#include "scy/media/devicemanager_mac.h"
 
 #include <CoreAudio/CoreAudio.h>
 #include <QuickTime/QuickTime.h>
@@ -26,7 +26,7 @@
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"
 #include "talk/base/thread.h"
-#include "Sourcey/Media/mediacommon.h"
+#include "scy/media/mediacommon.h"
 
 class DeviceWatcherImpl;
 

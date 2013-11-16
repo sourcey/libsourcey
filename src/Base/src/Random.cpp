@@ -19,8 +19,8 @@
 //
 
 
-#include "Sourcey/Random.h"
-#include "Sourcey/Exception.h"
+#include "scy/random.h"
+#include "scy/exception.h"
 
 #include <assert.h>
 #include <stdexcept>

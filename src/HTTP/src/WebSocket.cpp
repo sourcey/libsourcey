@@ -17,18 +17,18 @@
 //
 
 
-#include "Sourcey/HTTP/WebSocket.h"
-#include "Sourcey/HTTP/Client.h"
-#include "Sourcey/HTTP/Server.h"
-#include "Sourcey/Crypto/Hash.h"
-#include "Sourcey/Base64.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Numeric.h"
-#include "Sourcey/Random.h"
+#include "scy/http/websocket.h"
+#include "scy/http/client.h"
+#include "scy/http/server.h"
+#include "scy/crypto/hash.h"
+#include "scy/base64.h"
+#include "scy/logger.h"
+#include "scy/numeric.h"
+#include "scy/random.h"
 #include <stdexcept>
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -154,7 +154,7 @@ void WebSocketAdapter::sendClientRequest()
 {
 	framer.createHandshakeRequest(_request);
 
-	ostringstream oss;
+	std::ostringstream oss;
 	_request.write(oss);
 	traceL("WebSocketClientAdapter", this) << "Client request: " << oss.str() << endl;
 	socket->base().send(oss.str().c_str(), oss.str().length());
@@ -210,7 +210,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer)
 	//PrepareServerResponse.emit(this, response);
 				
 	// Send response
-	ostringstream oss;
+	std::ostringstream oss;
 	_response.write(oss);
 	socket->base().send(oss.str().c_str(), oss.str().length());
 }
@@ -369,7 +369,7 @@ std::string createKey()
 }
 
 
-string computeAccept(const std::string& key)
+std::string computeAccept(const std::string& key)
 {
 	std::string accept(key);
 	crypto::Hash engine("SHA1");

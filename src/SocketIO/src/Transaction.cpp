@@ -17,13 +17,13 @@
 //
 
 
-#include "Sourcey/SocketIO/Transaction.h"
-#include "Sourcey/SocketIO/Client.h"
-#include "Sourcey/Logger.h"
+#include "scy/socketio/transaction.h"
+#include "scy/socketio/client.h"
+#include "scy/logger.h"
 #include <iostream>
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {

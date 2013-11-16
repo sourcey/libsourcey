@@ -17,11 +17,11 @@
 //
 
 
-#include "Sourcey/Media/VideoContext.h"
-#include "Sourcey/Logger.h"
+#include "scy/media/videocontext.h"
+#include "scy/logger.h"
 
 
-using namespace std;
+using std::endl;
 using namespace scy;
 
 

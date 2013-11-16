@@ -1,5 +1,5 @@
-#include "Sourcey/Application.h"
-#include "Sourcey/Logger.h"
+#include "scy/application.h"
+#include "scy/logger.h"
 #include "EchoServer.h"
 
 

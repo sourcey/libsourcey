@@ -1,1 +1,1 @@
-define_sourcey_module_sample(WaveformOutput Anionu Base Media)
+define_sourcey_module_sample(waveformoutput anionu base media)

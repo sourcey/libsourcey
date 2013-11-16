@@ -17,10 +17,10 @@
 //
 
 
-#include "Sourcey/Media/AVPacketEncoder.h"
+#include "scy/media/avpacketencoder.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -167,36 +167,3 @@ void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state)
 
 
 } } // namespace scy::av
-
-
-
-
-				// Otherwise write a dummy video frame to keep the encoder happy
-				// We should be able to write the audio packet on next iteration.
-				//{
-					//if (videoPts > audioPts)
-					//	return;
-				//}
-
-			//write_audio_frame(oc, _audio->stream);
-			//encodeAudio((unsigned char*)aPacket->data(), aPacket->size());	
-		//} 
-		//else {
-		/*
-			*/
-		//}
-
-	/*
-
-	AudioPacket* aPacket = dynamic_cast<AudioPacket*>(&packet);
-	if (vPacket) {	
-		encodeVideo((unsigned char*)vPacket->data(), vPacket->size(), vPacket->width, vPacket->height, vPacket->time);
-		return;
-	}
-	*/
-	/*
-	if (aPacket) {		
-		encodeAudio((unsigned char*)aPacket->data(), aPacket->size());
-		return;
-	}
-	*/

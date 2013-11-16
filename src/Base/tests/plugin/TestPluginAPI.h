@@ -1,8 +1,8 @@
-#ifndef SOURCEY_TestPluginAPI_H
-#define SOURCEY_TestPluginAPI_H
+#ifndef SCY_TestPluginAPI_H
+#define SCY_TestPluginAPI_H
 
 
-#include "Sourcey/Base.h"
+#include "scy/base.h"
 
 
 namespace scy {
@@ -10,12 +10,12 @@ namespace scy {
 
 // This value is incremented whenever there are ABI
 // breaking changes to LibSourcey or dependencies.
-#define SOURCEY_PLUGIN_ABI_VERSION 1
+#define SCY_PLUGIN_ABI_VERSION 1
 	
 #ifdef WIN32
-# define SOURCEY_PLUGIN_EXPORT __declspec(dllexport)
+# define SCY_PLUGIN_EXPORT __declspec(dllexport)
 #else
-# define SOURCEY_PLUGIN_EXPORT // empty
+# define SCY_PLUGIN_EXPORT // empty
 #endif
 
 
@@ -27,7 +27,7 @@ public:
 };
 
 
-SOURCEY_EXTERN typedef IPlugin* (*GetPluginFunc)();
+SCY_EXTERN typedef IPlugin* (*GetPluginFunc)();
 
 struct PluginDetails {
 	int abiVersion;
@@ -38,21 +38,21 @@ struct PluginDetails {
 	GetPluginFunc initializeFunc;
 };
 
-#define SOURCEY_STANDARD_PLUGIN_STUFF \
-	SOURCEY_PLUGIN_ABI_VERSION,       \
+#define SCY_STANDARD_PLUGIN_STUFF \
+	SCY_PLUGIN_ABI_VERSION,       \
 	__FILE__
 
 // new classType;
-#define SOURCEY_PLUGIN(classType, pluginName, pluginVersion) \
+#define SCY_PLUGIN(classType, pluginName, pluginVersion) \
   extern "C" {		                                         \
-      SOURCEY_PLUGIN_EXPORT scy::IPlugin* getPlugin()        \
+      SCY_PLUGIN_EXPORT scy::IPlugin* getPlugin()        \
       {                                                      \
 		  static classType singleton;                        \
 	      return &singleton;                                 \
       }                                                      \
-      SOURCEY_PLUGIN_EXPORT scy::PluginDetails exports =        \
+      SCY_PLUGIN_EXPORT scy::PluginDetails exports =        \
       {                                                      \
-          SOURCEY_STANDARD_PLUGIN_STUFF,                     \
+          SCY_STANDARD_PLUGIN_STUFF,                     \
           #classType,                                        \
           pluginName,                                        \
           pluginVersion,                                     \

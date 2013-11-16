@@ -1,5 +1,5 @@
-#include "Sourcey/Media/VideoAnalyzer.h"
-#include "Sourcey/Logger.h"
+#include "scy/media/videoanalyzer.h"
+#include "scy/logger.h"
 
 #include <conio.h>
 
@@ -87,9 +87,9 @@ int main(int argc, char** argv)
 #include "AVFileReader.h"
 #include "MatrixPacketizer.h"
 #include "FFT.h"
-#include "Sourcey/Runner.h"
-#include "Sourcey/PacketStream.h"
-#include "Sourcey/Util.h"
+#include "scy/runner.h"
+#include "scy/packetstream.h"
+#include "scy/util.h"
 
 #include <string>
 #include <vector>

@@ -16,12 +16,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Sourcey/Pacman/PackageManager.h"
-#include "Sourcey/Pacman/Package.h"
-#include "Sourcey/JSON/JSON.h"
-#include "Sourcey/Util.h"
-#include "Sourcey/HTTP/Client.h"
-#include "Sourcey/HTTP/Authenticator.h"
+#include "scy/pacman/packagemanager.h"
+#include "scy/pacman/package.h"
+#include "scy/json/json.h"
+#include "scy/util.h"
+#include "scy/http/client.h"
+#include "scy/http/authenticator.h"
 
 
 using namespace std;

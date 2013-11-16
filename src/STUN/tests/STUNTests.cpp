@@ -1,9 +1,9 @@
-#include "Sourcey/Base.h"
-#include "Sourcey/Platform.h"
-#include "Sourcey/FileSystem.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Util.h"
-#include "Sourcey/STUN/Message.h"
+#include "scy/base.h"
+#include "scy/platform.h"
+#include "scy/filesystem.h"
+#include "scy/logger.h"
+#include "scy/util.h"
+#include "scy/stun/message.h"
 
 #include <assert.h>
 #include <algorithm>

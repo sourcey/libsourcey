@@ -17,7 +17,7 @@
 //
 
 
-#include "Sourcey/SyncContext.h"
+#include "scy/synccontext.h"
 
 
 namespace scy {

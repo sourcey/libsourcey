@@ -17,15 +17,15 @@
 //
 
 
-#include "Sourcey/FileSystem.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Util.h"
-#include "Sourcey/UV/UVPP.h"
+#include "scy/filesystem.h"
+#include "scy/logger.h"
+#include "scy/util.h"
+#include "scy/uv/uvpp.h"
 #include <sstream>
 #include <fstream>
 #include <memory>
 #include <algorithm> 
-#if defined(WIN32) && defined(SOURCEY_UNICODE)
+#if defined(WIN32) && defined(SCY_UNICODE)
 #include <locale>
 #include <codecvt>
 #endif
@@ -264,7 +264,7 @@ std::string normalize(const std::string& path)
 
 std::string transcode(const std::string& path)
 {	
-#if defined(WIN32) && defined(SOURCEY_UNICODE)
+#if defined(WIN32) && defined(SCY_UNICODE)
 	std::wstring_convert<std::codecvt<char16_t,char,std::mbstate_t>,char16_t> convert;
 	std::u16string u16s = convert.from_bytes(path);
 	std::wstring uniPath(u16s.begin(), u16s.end()); // copy data across, w_char is 16 bit on windows so this should be OK

@@ -17,11 +17,11 @@
 //
 
 
-#include "Sourcey/SocketIO/Client.h"
-#include "Sourcey/HTTP/Client.h"
+#include "scy/socketio/client.h"
+#include "scy/http/client.h"
 #include <stdexcept>
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -101,7 +101,7 @@ void Client::sendHandshakeRequest()
 		
 	log("trace") << "Send handshake request" << endl;	
 	
-	ostringstream url;
+	std::ostringstream url;
 	url << (_socket.transport() == net::SSLTCP ? "https://" : "http://")
 		<< _host << ":" << _port
 		<< "/socket.io/1/";

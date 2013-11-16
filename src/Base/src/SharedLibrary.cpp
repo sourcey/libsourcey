@@ -19,7 +19,7 @@
 //
 
 
-#include "Sourcey/SharedLibrary.h"
+#include "scy/sharedlibrary.h"
 
 
 namespace scy {

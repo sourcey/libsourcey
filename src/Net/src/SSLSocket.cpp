@@ -17,9 +17,9 @@
 //
 
 
-#include "Sourcey/Net/SSLSocket.h"
-#include "Sourcey/Net/SSLManager.h"
-#include "Sourcey/Logger.h"
+#include "scy/net/sslsocket.h"
+#include "scy/net/sslmanager.h"
+#include "scy/logger.h"
 
 
 using namespace std;

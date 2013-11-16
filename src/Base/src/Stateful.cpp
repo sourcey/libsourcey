@@ -17,10 +17,10 @@
 //
 
 
-#include "Sourcey/Stateful.h"
+#include "scy/stateful.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -44,7 +44,7 @@ void State::set(State::ID id)
 }
 
 
-string State::message() const 
+std::string State::message() const 
 { 
 	return _message;
 }
@@ -56,7 +56,7 @@ void State::setMessage(const std::string& message)
 }
 	
 
-string State::str(State::ID id) const 
+std::string State::str(State::ID id) const 
 { 
 	// Must be overridden...
 	(void)id; 
@@ -64,7 +64,7 @@ string State::str(State::ID id) const
 }
 
 
-string State::toString() const 
+std::string State::toString() const 
 { 
 	return str(id()); 
 }

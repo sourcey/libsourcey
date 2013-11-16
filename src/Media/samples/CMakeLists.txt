@@ -3,8 +3,8 @@
 #
 # ----------------------------------------------------------------------------
 
-add_subdirectory(DeviceEnumerator)
-add_subdirectory(VideoSocket)
+add_subdirectory(deviceenumerator)
+add_subdirectory(videosocket)
 if(BUILD_ALPHA)
-  #add_subdirectory(WaveformOutput)
+  #add_subdirectory(waveformoutput)
 endif()

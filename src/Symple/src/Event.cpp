@@ -17,13 +17,13 @@
 //
 
 
-#include "Sourcey/Symple/Event.h"
-#include "Sourcey/Util.h"
+#include "scy/symple/event.h"
+#include "scy/util.h"
 ////#include "Poco/DateTimeFormatter.h"
 ////#include "Poco/DateTimeFormat.h"
 
 
-using namespace std;
+using std::endl;
 //
 
 
@@ -70,7 +70,7 @@ bool Event::valid() const
 }
 
 
-string Event::name() const 
+std::string Event::name() const 
 {
 	return get("name", "").asString();
 }

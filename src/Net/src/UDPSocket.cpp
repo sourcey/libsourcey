@@ -17,9 +17,9 @@
 //
 
 
-#include "Sourcey/Net/UDPSocket.h"
-#include "Sourcey/Net/Types.h"
-#include "Sourcey/Logger.h"
+#include "scy/net/udpsocket.h"
+#include "scy/net/types.h"
+#include "scy/logger.h"
 
 
 using namespace std;

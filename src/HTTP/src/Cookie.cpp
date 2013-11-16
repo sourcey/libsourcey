@@ -26,9 +26,9 @@
 //
 
 
-#include "Sourcey/HTTP/Cookie.h"
-#include "Sourcey/HTTP/URL.h"
-#include "Sourcey/DateTime.h"
+#include "scy/http/cookie.h"
+#include "scy/http/url.h"
+#include "scy/datetime.h"
 
 
 namespace scy {

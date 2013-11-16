@@ -17,8 +17,8 @@
 //
 
 
-#include "Sourcey/Media/AudioCapture.h"
-#include "Sourcey/Logger.h"
+#include "scy/media/audiocapture.h"
+#include "scy/logger.h"
 
 #ifdef HAVE_RTAUDIO
 

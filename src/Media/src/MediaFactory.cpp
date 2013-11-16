@@ -17,14 +17,14 @@
 //
 
 
-#include "Sourcey/Media/MediaFactory.h"
-#include "Sourcey/Logger.h"
+#include "scy/media/mediafactory.h"
+#include "scy/logger.h"
 
 
 #if defined(HAVE_OPENCV) && defined(HAVE_RTAUDIO)
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {

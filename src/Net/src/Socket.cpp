@@ -17,11 +17,11 @@
 //
 
 
-#include "Sourcey/Net/Socket.h"
-#include "Sourcey/Net/Types.h"
-#include "Sourcey/Net/Address.h"
+#include "scy/net/socket.h"
+#include "scy/net/types.h"
+#include "scy/net/address.h"
 
-#include "Sourcey/Logger.h"
+#include "scy/logger.h"
 
 
 using namespace std;

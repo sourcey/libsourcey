@@ -45,7 +45,7 @@
 
 /* Anionu API Credentials */
 #define Anionu_API_USERNAME "${Anionu_API_USERNAME}"
-#define Anionu_API_PASSWORD "${Anionu_API_PASSWORD}"
+#define Anionu_API_KEY "${Anionu_API_KEY}"
 
 /* LibUV library */
 #cmakedefine HAVE_LIBUV

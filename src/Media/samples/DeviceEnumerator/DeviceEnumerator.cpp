@@ -1,6 +1,6 @@
-#include "Sourcey/Media/DeviceManager.h"
-#include "Sourcey/Media/MediaFactory.h"
-#include "Sourcey/Util.h"
+#include "scy/media/devicemanager.h"
+#include "scy/media/mediafactory.h"
+#include "scy/util.h"
 
 #include <string>
 #include <vector>

@@ -17,17 +17,17 @@
 //
 
 
-#include "Sourcey/TaskRunner.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Memory.h"
-#include "Sourcey/Singleton.h"
-#include "Sourcey/Platform.h"
+#include "scy/taskrunner.h"
+#include "scy/logger.h"
+#include "scy/memory.h"
+#include "scy/singleton.h"
+#include "scy/platform.h"
 
 #include <iostream>
 #include <assert.h>
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {

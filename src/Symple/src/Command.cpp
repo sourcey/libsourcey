@@ -17,13 +17,13 @@
 //
 
 
-#include "Sourcey/Symple/Command.h"
-#include "Sourcey/Util.h"
-////#include "Sourcey/Crypto/Crypto.h"
+#include "scy/symple/command.h"
+#include "scy/util.h"
+////#include "scy/crypto/crypto.h"
 #include "assert.h"
 
 
-using namespace std;
+using std::endl;
 
 
 
@@ -65,13 +65,13 @@ bool Command::valid() const
 }
 
 
-string Command::node() const 
+std::string Command::node() const 
 {
 	return get("node", "").asString();
 }
 
 
-string Command::action() const 
+std::string Command::action() const 
 {
 	return get("action", "execute").asString();
 }
@@ -89,7 +89,7 @@ void Command::setAction(const std::string& action)
 }
 
 
-string Command::param(int n) const 
+std::string Command::param(int n) const 
 {
 	std::vector<std::string> params = util::split(node(), ':');
 	assert(params.size() >= n);

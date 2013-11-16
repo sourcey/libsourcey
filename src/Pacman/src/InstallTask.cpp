@@ -17,14 +17,14 @@
 //
 
 
-#include "Sourcey/Pacman/InstallTask.h"
-#include "Sourcey/Pacman/PackageManager.h"
-#include "Sourcey/Pacman/Package.h"
-#include "Sourcey/Archo/Zip.h"
-#include "Sourcey/HTTP/Authenticator.h"
-#include "Sourcey/HTTP/Client.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/FileSystem.h"
+#include "scy/pacman/installtask.h"
+#include "scy/pacman/packagemanager.h"
+#include "scy/pacman/package.h"
+#include "scy/archo/zip.h"
+#include "scy/http/authenticator.h"
+#include "scy/http/client.h"
+#include "scy/logger.h"
+#include "scy/filesystem.h"
 
 
 using namespace std;

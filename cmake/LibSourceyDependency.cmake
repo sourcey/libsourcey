@@ -4,7 +4,7 @@
 # This template defines a LibSourcey dependency.
 # Optional helper variables:
 #   <name>_OUTPUT_NAME - The name of the executable file
-#   <name>_DEBUG_POSTFIX - The output file name debum postfix
+#   <name>_DEBUG_POSTFIX - The output file name debug postfix
 #   <name>_SOURCE_PATH - The glob source path
 #   <name>_HEADER_PATH - The glob header path
 #   <name>_SOURCE_FILES - The glob source files
@@ -40,6 +40,14 @@ macro(define_sourcey_dependency name)
   if (${name}_DEPENDENCIES)
     add_dependencies(${name} ${${name}_DEPENDENCIES})
   endif()
+  
+  # Include current directory and existing dependency directories
+  include_directories("${CMAKE_CURRENT_SOURCE_DIR}" "${LibSourcey_INCLUDE_DIRS}")
+  
+  # Cache dependency directories for inclusion by modules and applications
+  get_directory_property(lib_directories INCLUDE_DIRECTORIES)
+  set(LibSourcey_INCLUDE_DIRS ${lib_directories} PARENT_SCOPE)
+  set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} ${name} PARENT_SCOPE)
   
   #message(STATUS "- Linking dependency ${name} with libraries: ${LibSourcey_INCLUDE_LIBRARIES}")    
   #message("${name}: Library Dirs: ${LibSourcey_LIBRARY_DIRS}")    

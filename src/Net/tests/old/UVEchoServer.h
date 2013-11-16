@@ -1,8 +1,8 @@
 #include "Poco/Thread.h"
-#include "Sourcey/Net/Address.h"
-#include "Sourcey/Base/UVPP.h"
+#include "scy/net/address.h"
+#include "scy/base/uvpp.h"
 #include "TCPContext.h"
-#include "Sourcey/Base/Logger.h"
+#include "scy/base/logger.h"
 
 
 class UVEchoServer: public Poco::Runnable

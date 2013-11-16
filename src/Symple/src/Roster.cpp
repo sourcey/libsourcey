@@ -17,11 +17,11 @@
 //
 
 
-#include "Sourcey/Symple/Roster.h"
-#include "Sourcey/Logger.h"
+#include "scy/symple/roster.h"
+#include "scy/logger.h"
 
 
-using namespace std;
+using std::endl;
 
 
 

@@ -17,13 +17,13 @@
 //
 
 
-#include "Sourcey/Timer.h"
-#include "Sourcey/Logger.h"
-#include "Sourcey/Platform.h"
+#include "scy/timer.h"
+#include "scy/logger.h"
+#include "scy/platform.h"
 #include "assert.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {

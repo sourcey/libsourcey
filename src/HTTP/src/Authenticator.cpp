@@ -17,10 +17,10 @@
 //
 
 
-#include "Sourcey/HTTP/Authenticator.h"
-#include "Sourcey/HTTP/Request.h"
-#include "Sourcey/HTTP/Response.h"
-#include "Sourcey/Base64.h"
+#include "scy/http/authenticator.h"
+#include "scy/http/request.h"
+#include "scy/http/response.h"
+#include "scy/base64.h"
 
 
 namespace scy {

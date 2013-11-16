@@ -17,7 +17,7 @@
 //
 
 
-#include "Sourcey/Util/DiagnosticManager.h"
+#include "scy/util/diagnosticmanager.h"
 
 
 using namespace std;

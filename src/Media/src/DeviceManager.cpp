@@ -18,10 +18,10 @@
 // Implemented from libjingle r116 Feb 16, 2012
 
 
-#include "Sourcey/Media/DeviceManager.h"
+#include "scy/media/devicemanager.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
