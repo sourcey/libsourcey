@@ -1,0 +1,2 @@
+/usr/bin/ar cr libscy_spotapi.a  
+/usr/bin/ranlib libscy_spotapi.a

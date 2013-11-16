@@ -1,0 +1,2 @@
+/usr/bin/ar cr libscy_json.a  CMakeFiles/json.dir/src/Configuration.cpp.o CMakeFiles/json.dir/src/JSON.cpp.o
+/usr/bin/ranlib libscy_json.a

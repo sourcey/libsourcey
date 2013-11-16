@@ -228,7 +228,7 @@ if(MSVC)
 elseif(MSYS)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lws2_32 -liphlpapi") #${LibSourcey_INCLUDE_LIBRARIES} 
 elseif(UNIX)
-  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -ldl -lrt") # -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES} 
+  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -lz -ldl -lrt") # -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES} 
 endif()
       
 if(MSVC)

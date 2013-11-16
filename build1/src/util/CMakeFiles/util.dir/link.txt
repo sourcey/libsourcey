@@ -1,0 +1,2 @@
+/usr/bin/ar cr libscy_util.a  CMakeFiles/util.dir/src/ScopedConfiguration.cpp.o CMakeFiles/util.dir/src/DiagnosticManager.cpp.o CMakeFiles/util.dir/src/StreamManager.cpp.o
+/usr/bin/ranlib libscy_util.a
