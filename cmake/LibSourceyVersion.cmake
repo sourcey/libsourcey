@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------
 # Define the current LibSourcey version number
 # ----------------------------------------------------------------------------
-set(LibSourcey_VERSION_FILE "${CMAKE_SOURCE_DIR}/src/Base/include/scy/Base.h")
+set(LibSourcey_VERSION_FILE "${CMAKE_SOURCE_DIR}/src/base/include/scy/base.h")
 if(NOT EXISTS "${LibSourcey_VERSION_FILE}")
   message(FATAL_ERROR "Cannot find base module headers.")
 endif()
