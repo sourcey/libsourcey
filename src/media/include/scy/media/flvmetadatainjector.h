@@ -48,7 +48,7 @@ public:
 		AMF_DATA_TYPE_BOOL        = 0x01,
 		AMF_DATA_TYPE_STRING      = 0x02,
 		AMF_DATA_TYPE_OBJECT      = 0x03,
-		AMF_DATA_TYPE_nullptr        = 0x05,
+		AMF_DATA_TYPE_NULL        = 0x05,
 		AMF_DATA_TYPE_UNDEFINED   = 0x06,
 		AMF_DATA_TYPE_REFERENCE   = 0x07,
 		AMF_DATA_TYPE_MIXEDARRAY  = 0x08,
@@ -152,7 +152,7 @@ public:
 				UInt32 timestamp = static_cast<UInt32>((1000.0 / _fpsCounter.fps) * _fpsCounter.frames);
 				
 				// Update the output packet timestamp.
-				fastUpdateTimestamp(mpacket->data(), timestamp);	
+				//fastUpdateTimestamp(mpacket->data(), timestamp);	
 			
 #if 0				
 				BitReader reader1(mpacket->data(), mpacket->size());
@@ -160,14 +160,14 @@ public:
 #endif
 
 				// Dispatch the modified packet...
-				//traceL("FLVMetadataInjector", this) << "Emit modified packet" << std::endl;
+				traceL("FLVMetadataInjector", this) << "Emit modified packet" << std::endl;
 				emit(*mpacket);
 				return;
 			}
 		}
 
 		// Just proxy the packet if no modification is required.
-		//traceL("FLVMetadataInjector", this) << "Proxy packet" << std::endl;
+		traceL("FLVMetadataInjector", this) << "Proxy packet" << std::endl;
 		emit(packet);
 	}
 	
@@ -381,6 +381,15 @@ public:
 			
 		return result;
 	}
+	
+	Int64 doubleToInt(double d) 
+	{
+		int e;
+		if     ( !d) return 0;
+		else if(d-d) return 0x7FF0000000000000LL + ((Int64)(d<0)<<63) + (d!=d);
+		d = frexp(d, &e);
+		return (Int64)(d<0)<<63 | (e+1022LL)<<52 | (Int64)((fabs(d)-0.5)*(1LL<<53));
+	}
 
 
 	//
@@ -405,8 +414,8 @@ public:
 #endif
 
 		writer.putU8(AMF_DATA_TYPE_NUMBER); // AMF_DATA_TYPE_NUMBER
-		writer.putU64(Int64(val));
-		//writer.putU64(util::doubleToInt(val));
+		//writer.putU64(Int64(val));
+		writer.putU64(doubleToInt(val));
 	}
 	
 	virtual void writeAMFBool(BitWriter& writer, bool val)

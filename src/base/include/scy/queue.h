@@ -330,6 +330,12 @@ public:
 		_thread(std::bind(&AsyncQueue::run, this))
 	{
 	}	
+	
+	virtual void cancel()
+	{
+		RunnableQueue<T>::cancel();
+		_thread.cancel();
+	}
 
 protected:
 	virtual ~AsyncQueue() 

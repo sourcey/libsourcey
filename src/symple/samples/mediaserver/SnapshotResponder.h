@@ -47,7 +47,8 @@ public:
 		//delete data;
 
 		connection().response().set("Access-Control-Allow-Origin", "*");
-		connection().sendData((const char*)&buffer[0], buffer.size());
+		//connection().sendData((const char*)&buffer[0], buffer.size());
+		connection().socket().send((const char*)&buffer[0], buffer.size());
 		connection().close();
 	}
 	

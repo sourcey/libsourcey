@@ -90,6 +90,14 @@ const ByteVec& Hash::digest()
 }
 
 
+std::string Hash::digestStr()
+{
+	const ByteVec& vec = digest();
+	return std::string((const char*)vec.data(), vec.size());
+}
+
+
+
 const std::string& Hash::algorithm(void) const
 {
 	return _algorithm;

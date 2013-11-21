@@ -45,9 +45,12 @@ public:
 		// Hash the given data.
 		// This function may (and normally will) be called
 		// many times for large blocks of data.
-
+	
 	const ByteVec& digest();
 		// Finish up the digest operation and return the result.
+	
+	std::string digestStr();
+		// Finish up the digest operation and return the result as a string.
 
 	void reset();
 		// Resets the engine and digest state ready for the next computation.

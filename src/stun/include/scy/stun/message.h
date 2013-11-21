@@ -24,6 +24,8 @@
 #include "scy/stun/attributes.h"
 #include "scy/packet.h"
 
+#define ENBALE_MESSAGE_PADDING 0
+
 
 namespace scy {
 namespace stun {
@@ -79,6 +81,8 @@ public:
 		ConnectionAlreadyExists		= 446, 
 		ConnectionTimeoutOrFailure	= 447
 	};
+
+	static const int HeaderSize = 20;
 
 public:
 	Message();

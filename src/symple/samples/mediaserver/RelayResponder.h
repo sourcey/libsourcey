@@ -21,23 +21,25 @@ public:
 	StreamingOptions options;	
 	int	frameNumber;
 	bool connected;
-
+	bool deleted;
+	
 	Signal<turn::Client&> AllocationCreated;
+	//Signal<turn::Client&> AllocationFailed;
 	Signal2<turn::Client&, const net::Address&> ConnectionCreated;
 
 	RelayedStreamingAllocation(const StreamingOptions& options, const turn::Client::Options& clientOptions, const std::string& peerIP) : 
-		client(*this, clientOptions), options(options), peerIP(peerIP), frameNumber(0), connected(false)
+		client(*this, clientOptions), options(options), peerIP(peerIP), frameNumber(0), connected(false), deleted(false)
 	{
 	}
 
 	virtual ~RelayedStreamingAllocation() 
 	{ 
-		terminate();
 		assert(streams.empty());
+		assert(deleted);
 
 		// NOTE: We are responsible for deleting the audioCapture.
-		if (options.audioCapture)
-			delete options.audioCapture;
+		//if (options.audioCapture)
+		//	delete options.audioCapture;
 	}
 
 	void initiate() 
@@ -46,7 +48,8 @@ public:
 		try	
 		{		
 			// Initiate the TRUN client allocation
-			client.addPermission(peerIP);	
+			client.addPermission(peerIP);				
+			client.addPermission("58.7.41.244"); // temporary
 			client.addPermission("127.0.0.1"); // for proxy
 			client.addPermission("192.168.1.1"); // for proxy
 			client.initiate();
@@ -57,13 +60,22 @@ public:
 		}	
 	}
 
-	void terminate() 
+	void dispose() 
 	{
 		debugL("RelayedStreamingAllocation", this) << "Terminating" << std::endl;	
+		if (deleted) {
+			// assert(0);
+			return;
+		}
+
 		client.shutdown();
 
 		// Free all managed packet streams
 		streams.closeAll();
+			
+		// Destroy the client when the allocation is lost
+		scy::deleteLater<RelayedStreamingAllocation>(this);
+		deleted = true;
 	}
 
 protected:
@@ -84,6 +96,8 @@ protected:
 		case turn::ClientState::Failed:
 			//assert(0 && "Allocation failed");
 			warnL("RelayedStreamingAllocation", this) << "Relay connection lost" << std::endl;
+			//AllocationFailed.emit(this, this->client);
+			//dispose();
 			break;
 		//case turn::ClientState::Terminated:	
 		//	break;
@@ -111,7 +125,8 @@ protected:
 			// Setup the packet stream ensuring the audio capture isn't
 			// destroyed with the stream, as it may be reused while the
 			// allocation is active.
-			MediaServer::setupPacketStream(*stream, options, false, true);
+			// NOTE: Setting freeCaptures to true for testing.
+			MediaServer::setupPacketStream(*stream, options, true, true);
 		
 			// Feed the packet stream directly into the connection		
 			stream->emitter += packetDelegate(reinterpret_cast<net::Socket*>(
@@ -130,7 +145,7 @@ protected:
 		
 	void onRelayConnectionClosed(turn::TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddress)
 	{
-		debugL("RelayedStreamingAllocation", this) << " Connection closed: " << peerAddress << std::endl;
+		debugL("RelayedStreamingAllocation", this) << "Connection closed: " << peerAddress << std::endl;
 
 		try	
 		{	
@@ -138,7 +153,7 @@ protected:
 			//this->streams.free(peerAddress.toString());
 			PacketStream* stream = streams.remove(peerAddress.toString());
 			if (stream) {	
-				stream->emitter += packetDelegate(reinterpret_cast<net::Socket*>(
+				stream->emitter -= packetDelegate(reinterpret_cast<net::Socket*>(
 					const_cast<net::TCPSocket*>(&socket)), &net::Socket::send);
 				delete stream;
 				//stream->destroy();
@@ -148,6 +163,9 @@ protected:
 			errorL("RelayedStreamingAllocation", this) << "Stream error: " << exc.what() << std::endl;
 			assert(0);
 		}
+
+		if (streams.empty())
+			dispose();
 	}
 
 	void onRelayDataReceived(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
@@ -180,6 +198,7 @@ public:
 
 	virtual ~RelayedStreamingResponder() 
 	{
+		// Note: The RelayedStreamingAllocation is self managing
 	}
 		
 	void onRequest(http::Request& request, http::Response& response)
@@ -191,7 +210,8 @@ public:
 			<< std::endl;
 
 		turn::Client::Options co;
-		co.serverAddr = net::Address("124.150.77.174", 3478); // "127.0.0.1"
+		co.serverAddr = net::Address("74.207.248.97", 3478); // "127.0.0.1"
+		//co.serverAddr = net::Address("127.0.0.1", 3478);
 		co.lifetime  = 120 * 1000;	// 2 minutes
 		co.timeout = 10 * 1000;
 		co.timerInterval = 3 * 1000;
@@ -200,6 +220,7 @@ public:
 
 		allocation = new RelayedStreamingAllocation(options, co, connection().socket().peerAddress().host());
 		allocation->AllocationCreated += delegate(this, &RelayedStreamingResponder::onAllocationCreated);
+		//allocation->AllocationFailed += delegate(this, &RelayedStreamingResponder::onAllocationFailed);
 		allocation->initiate();
 	}
 	
@@ -215,6 +236,22 @@ public:
 		connection().socket().send(address.c_str(), address.length());
 		connection().close();
 	}
+	
+	/*
+	void onAllocationFailed(void* sender, turn::Client& client)
+	{
+		allocation->AllocationFailed -= delegate(this, &RelayedStreamingResponder::onAllocationFailed);
+		//delete allocation;
+		//allocation = nullptr;
+
+		debugL("RelayedStreamingResponder", this) << "Allocation Failed" << std::endl;
+					
+		// Send the relay address response to the initiator		
+		//connection().response().set("Access-Control-Allow-Origin", "*");
+		//connection().socket().send(address.c_str(), address.length());
+		connection().close();
+	}
+	*/
 	
 	RelayedStreamingAllocation* allocation;
 	StreamingOptions options;

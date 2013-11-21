@@ -74,8 +74,31 @@ void Thread::startAsync()
 
 void Thread::join()
 {
+	traceL("Thread", this) << "Joining" << std::endl;
+	assert(this->tid() != Thread::currentID());
+	//assert(this->cancelled());
 	uv_thread_join(&_handle);
 	//reset();
+	traceL("Thread", this) << "Joining: OK" << std::endl;
+}
+
+
+bool Thread::waitForExit(int timeout) 
+{	
+	int times = 0;
+	int interval = 10;
+	assert(Thread::currentID() != this->tid());
+	while (!this->cancelled() || this->running()) {
+		traceL("Thread", this) << "Wait for exit: " 
+			<< !this->cancelled() << ": " << this->running() << endl;
+		scy::sleep(interval);
+		times++;
+		if (timeout && ((times * interval) > timeout)) {
+			assert(0 && "deadlock; calling inside thread scope?");
+			return false;
+		}
+	}
+	return true;
 }
 
 
