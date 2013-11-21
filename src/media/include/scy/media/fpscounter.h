@@ -156,12 +156,17 @@ public:
 	virtual void process(IPacket& packet) 
 	{
 		traceL("FPSLimiter", this) << "Processing" << std::endl;
+		if (_counter.started())
+			_counter.endFrame();
+		/*
 		_counter.tick();
+		*/
 		if (static_cast<int>(_counter.fps) > _max) {			
 			traceL("FPSLimiter", this) << "####################### Dropping packet: " 
 				<< _counter.fps << " > " << _max << std::endl;
 			return;
 		}
+		_counter.startFrame();
 		emit(packet);
 	};
 		
@@ -171,7 +176,7 @@ public:
 
 protected:	
 	int _max;
-	FPSCounter _counter;
+	legacy::FPSCounter _counter;
 };
 
 

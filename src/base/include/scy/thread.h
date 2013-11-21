@@ -45,6 +45,12 @@ public:
 	
 	void join();
 		// Waits until the thread exits.
+	
+	bool waitForExit(int timeout = 5000);
+		// Waits until the thread exits.
+		// The thread should be cancelled beore calling this method.
+		// This method must be called from outside the current thread
+		// context or deadlock will ensue.
 	 
 	unsigned long id() const;
 		// Returns the native thread ID.
@@ -63,21 +69,6 @@ protected:
 };
 
 
-inline bool waitForThread(Thread& thread, int interval = 10, int timeout = 5000) 
-{	
-	int times = 0;
-	assert(Thread::currentID() != thread.tid());
-	while (!thread.cancelled() || thread.running()) {
-		scy::sleep(interval);
-		if (timeout && ((times * interval) > timeout)) {
-			assert(0 && "deadlock; calling inside thread scope?");
-			return false;
-		}
-	}
-	return true;
-}
-
-
 //
 // Runner Startable
 //
@@ -85,9 +76,9 @@ inline bool waitForThread(Thread& thread, int interval = 10, int timeout = 5000)
 
 template <class TStartable>
 class AsyncStartable: public TStartable
-	// Depreciated: This class is an invisible wrapper around a TStartable instance,
-	// which provides asynchronous access to the TStartable start() and
-	// stop() methods. TStartable is an instance of async::Startable.
+	/// Depreciated: This class is an invisible wrapper around a TStartable instance,
+	/// which provides asynchronous access to the TStartable start() and
+	/// stop() methods. TStartable is an instance of async::Startable.
 {
 public:
 	AsyncStartable() {};

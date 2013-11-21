@@ -146,6 +146,8 @@ int Socket::send(const char* data, int len, int flags)
 
 int Socket::send(const char* data, int len, const Address& peerAddress, int flags)
 {
+	traceL("Socket", this) << "Send: " << len << std::endl;
+
 	// TODO: Make SocketPacket for address
 	//if (Sender.numProcessors() > 0) {
 	//	Sender.write(RawPacket(data, len));
@@ -178,7 +180,7 @@ int Socket::send(const IPacket& packet, const Address& peerAddress, int flags)
 	// to be written to a temp buffer for sending. 
 	else {
 		Buffer buf; //(1024);
-		buf.reserve(2048);
+		//buf.reserve(2048);
 		packet.write(buf);
 		return send(buf.data(), buf.size(), peerAddress, flags);
 	}

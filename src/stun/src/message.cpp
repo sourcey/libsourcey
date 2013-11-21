@@ -48,12 +48,12 @@ Message::Message(const Message& r) :
 	assert(_transactionID.size() == 16);	
 
 	// Clear our current attributes
-	for (auto i = 0; i < _attrs.size(); i++)
+	for (unsigned i = 0; i < _attrs.size(); i++)
 		delete _attrs[i];
 	_attrs.clear();
 
 	// Copy attributes from source object
-	for (auto i = 0; i < r.attrs().size(); i++)
+	for (unsigned i = 0; i < r.attrs().size(); i++)
 		_attrs.push_back(r.attrs()[i]->clone());
 }
 
@@ -63,18 +63,18 @@ Message& Message::operator = (const Message& r)
 	if (&r != this) {
 		_type = r.type();
 		_state = r.state();
-		_size = r.size();
+		_size = static_cast<UInt16>(r.size());
 		_transactionID = r.transactionID();
 		assert(_type);
 		assert(_transactionID.size() == 16);	
 
 		// Clear current attributes
-		for (auto i = 0; i < _attrs.size(); i++)
+		for (unsigned i = 0; i < _attrs.size(); i++)
 			delete _attrs[i];
 		_attrs.clear();
 
 		// Copy attributes from source object
-		for (auto i = 0; i < r.attrs().size(); i++)
+		for (unsigned i = 0; i < r.attrs().size(); i++)
 			_attrs.push_back(r.attrs()[i]->clone());
 	}
 
@@ -84,7 +84,7 @@ Message& Message::operator = (const Message& r)
 
 Message::~Message() 
 {
-	for (auto i = 0; i < _attrs.size(); i++)
+	for (unsigned i = 0; i < _attrs.size(); i++)
 		delete _attrs[i];
 }
 
@@ -149,7 +149,7 @@ string Message::toString() const
 {
 	ostringstream os;
 	os << "STUN[" << transactionID() << ":" << typeString();
-	for (auto i = 0; i < _attrs.size(); i++)
+	for (unsigned i = 0; i < _attrs.size(); i++)
 		os << ":" << _attrs[i]->typeString();
 	os << "]";
 	return os.str();
@@ -159,7 +159,7 @@ string Message::toString() const
 void Message::print(std::ostream& os) const
 {
 	os << "STUN[" << typeString() << ":" << transactionID();
-	for (auto i = 0; i < _attrs.size(); i++)
+	for (unsigned i = 0; i < _attrs.size(); i++)
 		os << ":" << _attrs[i]->typeString();
 	os << "]";
 }
@@ -174,14 +174,21 @@ void Message::setTransactionID(const std::string& id)
 
 void Message::add(Attribute* attr) 
 {
-	_attrs.push_back(attr);
-	_size += attr->size() + 4;
+	_attrs.push_back(attr);	
+#if ENBALE_MESSAGE_PADDING
+	size_t attrLength = attr->size();
+	if (attrLength % 4 != 0)
+		attrLength += (4 - (attrLength % 4));
+	_size += attrLength + Attribute::HeaderSize;
+#else
+	_size += attr->size() + Attribute::HeaderSize;	
+#endif
 }
 
 
 Attribute* Message::get(Attribute::Type type, int index) const 
 {
-	for (auto i = 0; i < _attrs.size(); i++) {
+	for (unsigned i = 0; i < _attrs.size(); i++) {
 		if (_attrs[i]->type() == type) {			
 			if (index == 0)
 				return _attrs[i];
@@ -194,13 +201,12 @@ Attribute* Message::get(Attribute::Type type, int index) const
 
 std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
 {	
-	errorL("STUNMessage") << "Parse STUN packet: " << buf.size() << endl;
-
-	try 
-	{
+	traceL("STUNMessage") << "Parse STUN packet: " << buf.size() << endl;
+	
+	try {
 		BitReader reader(buf);
 		reader.getU16(_type);
-		
+
 		if (_type & 0x8000) {
 			// RTP and RTCP set MSB of first byte, since first two bits are version, 
 			// and version is always 2 (10). If set, this is not a STUN packet.
@@ -219,39 +225,34 @@ std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
 		assert(transactionID.size() == 16);
 		_transactionID = transactionID;
 
-		_attrs.clear();
+		_attrs.clear();		
 		
-		bool integrity = false;
-		size_t rest = reader.available() - _size;
-		while (reader.available() > rest) {
+		int errors = 0;
+		while (reader.available()) { // > rest
 			UInt16 attrType, attrLength;
 			reader.getU16(attrType);
 			reader.getU16(attrLength);
-			
+						
 			auto attr = Attribute::create(attrType, attrLength);
-			if (!attr) {
-				// Allow for unrecognised attributes.
+			if (!attr) {				
 				warnL("STUNMessage") << "Failed to parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
+				
+				// Make sure we don't wind up in an infinite loop 
+				errors++;
+				if (errors > 5) {
+					warnL("STUNMessage") << "Cannot parse STUN message: Too many errors." << endl;
+					return 0;
+				}
 				continue;
 			}
 			attr->read(reader); // parse or throw
 			_attrs.push_back(attr);
-			integrity = attrType == stun::Attribute::MessageIntegrity;
-			
-			warnL("STUNMessage") << "Parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
-			;
+
+			traceL("STUNMessage") << "Parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
 		}
 
-		//if (reader.available() != rest) {
-		//	warnL("STUNMessage") << "Wrong message size (" << rest << " != " << reader.available() << ")" << endl;
-		//	assert(0); // remove me
-		//	return false;
-		//}	
-
-		warnL("STUNMessage") << "Parse success: " << _size << ": " << buf.size() << ": " << rest << ": " << reader.position() << endl;
-
-		// Add 20 if MessageIntegrity attribute was included
-		return reader.position(); //(_size + (integrity ? 20 : 0)); // ok
+		traceL("STUNMessage") << "Parse success: " << _size << ": " << buf.size() << endl;
+		return reader.position();
 	}
 	catch (std::exception& exc) {
 		debugL("STUNMessage") << "Parse error: " << exc.what() << endl;
@@ -268,9 +269,9 @@ void Message::write(Buffer& buf) const
 	writer.putU16(_size);
 	writer.put(_transactionID);
 
-	// TODO: Shift Message Integrity to end
+	// Note: MessageIntegrity must be at the end
 
-	for (auto i = 0; i < _attrs.size(); i++) {
+	for (unsigned i = 0; i < _attrs.size(); i++) {
 		writer.putU16(_attrs[i]->type());
 		writer.putU16(_attrs[i]->size()); 
 		_attrs[i]->write(writer);

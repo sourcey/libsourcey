@@ -157,11 +157,7 @@ void AsyncPacketQueue::onStreamStateChange(const PacketStreamState& state)
 		flush();	
 		assert(empty());
 		cancel();
-
-		// Wait for the thread to end to avoid segmentation faults
-		traceL("AsyncPacketQueue", this) << "Waiting for thread" << std::endl;
-		waitForThread(_thread);
-		traceL("AsyncPacketQueue", this) << "Waiting for thread: OK" << std::endl;
+		_thread.join();
 		break;
 
 	//case PacketStreamState::Resetting:

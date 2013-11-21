@@ -92,10 +92,12 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 		assert(options.audioCapture);
 		stream.attachSource(options.audioCapture, freeCaptures, true);	
 	}
+				
+	stream.attach(new FPSLimiter(8), 1, true);
 								
 	// Attach an async queue so we don't choke
 	// the video capture while encoding.
-	auto async = new AsyncPacketQueue(options.oformat.name == "MJPEG" ? 10 : 2048);
+	auto async = new AsyncPacketQueue(2048); //options.oformat.name == "MJPEG" ? 10 : 
 	stream.attach(async, 3, true);
 
 	// Attach the video encoder				
@@ -114,7 +116,7 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 		}
 		else if (options.encoding == "Base64") {
 			auto base64 = new Base64PacketEncoder();
-			stream.attach(base64, 9, true);
+			stream.attach(base64, 10, true);
 		}
 		else
 			throw std::runtime_error("Unsupported encoding method: " + options.encoding);
@@ -122,8 +124,9 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 	else if (options.oformat.name == "FLV") {
 
 		// Allow mid-stream flash client connection
-		auto injector = new FLVMetadataInjector(options.oformat);
-		stream.attach(injector, 10);
+		// FIXME: Broken in latest flash
+		//auto injector = new FLVMetadataInjector(options.oformat);
+	    //stream.attach(injector, 10);
 	}
 		
 	// Attach the HTTP output packetizer
@@ -143,11 +146,11 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 	else throw std::runtime_error("Unsupported packetizer method: " + options.packetizer);
 
 	if (packetizer)					
-		stream.attach(packetizer, 10, true);
-					
+		stream.attach(packetizer, 15, true);
+
 	// Attach a sync queue to synchronize output with the event loop
 	auto sync = new SyncPacketQueue;
-	stream.attach(sync, 15, true);
+	stream.attach(sync, 20, true);
 }
 
 
@@ -170,6 +173,7 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 		// Log incoming requests
 		infoL("HTTPStreamingConnectionFactory")
 			<< "Incoming connection from " << conn.socket().peerAddress() 
+			<< ": URI:\n" << request.getURI()
 			<< ": Request:\n" << request << endl;
 			
 		// Parse streaming options from query
@@ -272,7 +276,8 @@ static void onShutdown1(void* opaque)
 
 int main(int argc, char** argv)
 {
-	Logger::instance().add(new ConsoleChannel("debug", LTrace));		
+	Logger::instance().add(new ConsoleChannel("debug", LTrace));
+	Logger::instance().setWriter(new AsyncLogWriter);			
 	{
 		// Pre-initialize video captures in the main thread	
 		MediaFactory::instance().loadVideo();	

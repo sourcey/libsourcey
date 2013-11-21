@@ -67,47 +67,52 @@ public:
 		AlternateServer			= 0x000e,
 		Fingerprint				= 0x8028,
 
-		/// TURN
+		// TURN
 		ChannelNumber			= 0x000c,
 		Lifetime				= 0x000d,
-		/// 0x0010: Reserved (was BANDWIDTH)
+		// 0x0010: Reserved (was BANDWIDTH)
 		XorPeerAddress			= 0x0012,
 		Data					= 0x0013,
 		XorRelayedAddress		= 0x0016,
 		EventPort				= 0x0018, // Not implemented
 		RequestedTransport		= 0x0019,
 		DontFragment			= 0x001A, // Not implemented
-		/// 0x0021: Reserved (was TIMER-VAL)
+		// 0x0021: Reserved (was TIMER-VAL)
 		ReservationToken			= 0x0022, // 8 bytes token value
 		
-		/// TURN TCP
+		// TURN TCP
 		ConnectionID			= 0x002a,
 
-		/// ICE
+		// ICE
 		ICEControlled			= 0x8029,
 		ICEControlling			= 0x802A,
 		ICEPriority				= 0x0024,
 		ICEUseCandidate			= 0x0025
 	};
+
+	static const int HeaderSize = 4;
 	
 	virtual ~Attribute() {}
 	virtual Attribute* clone() = 0;
 
 	virtual void read(BitReader& reader) = 0;
-		/// Reads the body (not the type or size) for this
-		/// type of attribute from  the given buffer. Return
-		/// value is true if successful.
+		// Reads the body (not the type or size) for this
+		// type of attribute from  the given buffer. Return
+		// value is true if successful.
 
 	virtual void write(BitWriter& writer) const = 0;
-		/// Writes the body (not the type or size) to the
-		/// given buffer. Return value is true if successful.
+		// Writes the body (not the type or size) to the
+		// given buffer. Return value is true if successful.
 
 	static Attribute* create(UInt16 type, UInt16 size = 0);
-		/// Creates an attribute object with the given type 
-		/// and size.
+		// Creates an attribute object with the given type 
+		// and size.
 	
-	Type type() const;
+	UInt16 type() const; //Type
 	UInt16 size() const;
+
+	void consumePadding(BitReader& reader) const;
+	void writePadding(BitWriter& writer) const;
 
 	static const UInt16 TypeID = 0;
 
@@ -358,15 +363,15 @@ public:
 	static const UInt16 TypeID = 0x0009;
 	static const UInt16 MinSize = 4;
 
-	UInt32 errorCode() const;
+	void setErrorCode(int code);
+	//void setErrorClass(UInt8 eClass);
+	//void setErrorNumber(UInt8 eNumber);
+	void setReason(const std::string& reason);
+
+	int errorCode() const;
 	UInt8 errorClass() const { return _class; }
 	UInt8 errorNumber() const { return _number; }
 	const std::string& reason() const { return _reason; }
-
-	void setErrorCode(UInt32 eCode);
-	void setErrorClass(UInt8 eClass) { _class = eClass; }
-	void setErrorNumber(UInt8 eNumber) { _number = eNumber; }
-	void setReason(const std::string& reason);
 
 	void read(BitReader& reader);
 	void write(BitWriter& writer) const;
