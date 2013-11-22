@@ -21,10 +21,9 @@
 #define SCY_STUN_MESSAGE_H
 
 
+#include "scy/stun/stun.h"
 #include "scy/stun/attributes.h"
 #include "scy/packet.h"
-
-#define ENBALE_MESSAGE_PADDING 0
 
 
 namespace scy {
@@ -82,12 +81,10 @@ public:
 		ConnectionTimeoutOrFailure	= 447
 	};
 
-	static const int HeaderSize = 20;
-
 public:
 	Message();
-	Message(const Message& r);	
-	Message& operator = (const Message& r);
+	Message(const Message& that);	
+	Message& operator = (const Message& that);
 	virtual ~Message();
 	
 	virtual IPacket* clone() const;
@@ -116,11 +113,11 @@ public:
 	}
 
 	std::size_t read(const ConstBuffer& buf);
-		/// Parses the STUN/TURN packet from the given buffer.
-		/// The return value indicates whether this was successful.
+		// Parses the STUN/TURN packet from the given buffer.
+		// The return value indicates whether this was successful.
 
 	void write(Buffer& buf) const;
-		/// Writes this object into a STUN/TURN packet.
+		// Writes this object into a STUN/TURN packet.
 
 	std::string toString() const;
 	void print(std::ostream& os) const;

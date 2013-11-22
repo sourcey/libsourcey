@@ -1,2 +1,0 @@
-/usr/bin/ar cr libscy_net.a  CMakeFiles/net.dir/src/UDPSocket.cpp.o CMakeFiles/net.dir/src/Util.cpp.o CMakeFiles/net.dir/src/SSLManager.cpp.o CMakeFiles/net.dir/src/Address.cpp.o CMakeFiles/net.dir/src/SSLAdapter.cpp.o CMakeFiles/net.dir/src/Socket.cpp.o CMakeFiles/net.dir/src/PacketSocket.cpp.o CMakeFiles/net.dir/src/SSLSocket.cpp.o CMakeFiles/net.dir/src/TCPSocket.cpp.o CMakeFiles/net.dir/src/SSLContext.cpp.o CMakeFiles/net.dir/src/SSLSession.cpp.o
-/usr/bin/ranlib libscy_net.a

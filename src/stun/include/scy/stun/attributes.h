@@ -21,16 +21,16 @@
 #define SCY_STUN_ATTRIBUTES_H
 
 
+#include "scy/stun/stun.h"
+#include "scy/buffer.h"
+#include "scy/crypto/crypto.h"
+#include "scy/net/address.h"
+
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <vector>
 #include <assert.h>
-
-#include "scy/base.h"
-#include "scy/buffer.h"
-#include "scy/crypto/crypto.h"
-#include "scy/net/address.h"
 
 
 namespace scy {
@@ -89,8 +89,6 @@ public:
 		ICEPriority				= 0x0024,
 		ICEUseCandidate			= 0x0025
 	};
-
-	static const int HeaderSize = 4;
 	
 	virtual ~Attribute() {}
 	virtual Attribute* clone() = 0;
@@ -120,7 +118,6 @@ public:
 	static std::string typeString(UInt16 type);
 
 protected:
-	//Attribute(UInt16 size = 0) {};
 	Attribute(UInt16 type, UInt16 size = 0);
 	void setLength(UInt16 size);
 

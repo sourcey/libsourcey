@@ -28,6 +28,9 @@ namespace scy {
 namespace stun {
 	
 
+// TODO: Test vectors from http://tools.ietf.org/html/rfc5769
+
+
 class Tests
 {
 public:

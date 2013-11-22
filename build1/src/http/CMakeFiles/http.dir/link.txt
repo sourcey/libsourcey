@@ -1,2 +1,0 @@
-/usr/bin/ar cr libscy_http.a  CMakeFiles/http.dir/src/connection.cpp.o CMakeFiles/http.dir/src/url.cpp.o CMakeFiles/http.dir/src/cookie.cpp.o CMakeFiles/http.dir/src/message.cpp.o CMakeFiles/http.dir/src/parser.cpp.o CMakeFiles/http.dir/src/response.cpp.o CMakeFiles/http.dir/src/util.cpp.o CMakeFiles/http.dir/src/request.cpp.o CMakeFiles/http.dir/src/client.cpp.o CMakeFiles/http.dir/src/form.cpp.o CMakeFiles/http.dir/src/server.cpp.o CMakeFiles/http.dir/src/websocket.cpp.o CMakeFiles/http.dir/src/authenticator.cpp.o
-/usr/bin/ranlib libscy_http.a

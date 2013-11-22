@@ -34,25 +34,9 @@ namespace scy {
 namespace crypto {
 
 
-	/*
-computeHmac(char* hmac, const char* input, int length, const char* key, int sizeKey)
-{
-   //StackLog(<< "***computeHmac: input='" << Data(input, length).hex() << "', length=" << length << ", key='" << Data(key, sizeKey).hex() << "', keySize=" << sizeKey);
-
-   unsigned int resultSize=20;
-   HMAC(EVP_sha1(), 
-        key, sizeKey, 
-        reinterpret_cast<const unsigned char*>(input), length, 
-        reinterpret_cast<unsigned char*>(hmac), &resultSize);
-   assert(resultSize == 20);
-}
-*/
-
 std::string computeHMAC(const std::string& input, const std::string& key) 
 {	
-   std::cout << "***computeHmac: input='" << util::dumpbin(input.c_str(), input.length()) << "', length=" << input.length() << ", key='" << key << "', keySize=" << key.length();
-   //debugL() << "***computeHmac: input='" << util::dumpbin(input.c_str(), input.length()) << "', length=" << input.length() << ", key='" << key << "', keySize=" << key.length();
-
+    //debugL() << "Compute HMAC: input='" << util::dumpbin(input.c_str(), input.length()) << "', length=" << input.length() << ", key='" << key << "', keySize=" << key.length();
 	unsigned int len = 0;
 	char buf[20];	
 	HMAC(EVP_sha1(), 

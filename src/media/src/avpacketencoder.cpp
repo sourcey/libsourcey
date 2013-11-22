@@ -18,6 +18,7 @@
 
 
 #include "scy/media/avpacketencoder.h"
+#ifdef HAVE_FFMPEG
 
 
 using std::endl;
@@ -167,3 +168,6 @@ void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state)
 
 
 } } // namespace scy::av
+
+
+#endif

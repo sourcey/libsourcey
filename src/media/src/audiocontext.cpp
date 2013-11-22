@@ -18,6 +18,9 @@
 
 
 #include "scy/media/audiocontext.h"
+
+#ifdef HAVE_FFMPEG
+
 #include "scy/logger.h"
 
 
@@ -641,3 +644,5 @@ void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, c
 	
 } } // namespace scy::av
 
+
+#endif

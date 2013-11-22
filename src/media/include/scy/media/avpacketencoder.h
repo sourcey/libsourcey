@@ -21,6 +21,8 @@
 #define SCY_MEDIA_AVPacketEncoder_H
 
 
+#include "scy/base.h"
+#ifdef HAVE_FFMPEG
 #include "scy/packetstream.h"
 #include "scy/media/avencoder.h"
 
@@ -58,6 +60,7 @@ protected:
 } } // namespace scy::av
 
 
+#endif
 #endif
 
 

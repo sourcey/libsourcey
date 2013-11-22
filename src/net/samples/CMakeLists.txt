@@ -1,6 +1,2 @@
-# ----------------------------------------------------------------------------
-#  CMake file for samples. See root CMakeLists.txt 
-#
-# ----------------------------------------------------------------------------
-
 add_subdirectory(echoserver)
+add_subdirectory(flashpolicyserver)

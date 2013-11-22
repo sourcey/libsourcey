@@ -18,6 +18,9 @@
 
 
 #include "scy/media/avencoder.h"
+
+#ifdef HAVE_FFMPEG
+
 #include "scy/media/videocapture.h"
 #include "scy/logger.h"
 #include "scy/platform.h"
@@ -558,6 +561,9 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 /* tim
 
 
 } } // namespace scy::av
+
+
+#endif
 
 
 		
