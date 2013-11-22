@@ -22,6 +22,9 @@
 
 
 #include "scy/base.h"
+
+#ifdef HAVE_FFMPEG
+
 #include "scy/stateful.h"
 #include "scy/signal.h"
 #include "scy/packetstream.h"
@@ -30,9 +33,6 @@
 #include "scy/media/avinputreader.h"
 #include "scy/media/fpscounter.h"
 #include "scy/media/format.h"
-
-
-#ifdef HAVE_FFMPEG
 
 extern "C" {
 #include <libavcodec/avfft.h>

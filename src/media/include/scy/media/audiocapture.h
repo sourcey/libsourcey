@@ -20,12 +20,15 @@
 #ifndef SCY_MEDIA_AudioCapture_H
 #define SCY_MEDIA_AudioCapture_H
 
+
+#include "scy/base.h"
+
+#ifdef HAVE_RTAUDIO
+
 #include "scy/media/types.h"
 #include "scy/media/icapture.h"
 #include "scy/media/format.h"
 #include "scy/signal.h"
-
-#ifdef HAVE_RTAUDIO
 
 #include "RtAudio.h"
 

@@ -113,6 +113,7 @@ void Attribute::consumePadding(BitReader& reader) const
 #if ENBALE_MESSAGE_PADDING
 	int remainder = _size % 4;
 	if (remainder > 0) {
+		traceL("STUNAttribute") << "############### consumePadding: " << (4 - remainder) << endl;
 		reader.skip(4 - remainder);
 	}
 #endif
@@ -125,6 +126,7 @@ void Attribute::writePadding(BitWriter& writer) const
 	int remainder = _size % 4;
 	if (remainder > 0) {
 		char zeroes[4] = {0};
+		traceL("STUNAttribute") << "############### writePadding: " << (4 - remainder) << endl;
 		writer.put(zeroes, 4 - remainder);
 	}
 #endif
@@ -692,37 +694,53 @@ bool MessageIntegrity::verifyHmac(const std::string& key) const
 void MessageIntegrity::read(BitReader& reader) 
 {
 	//debugL() << "Message: Read HMAC" << endl;	
-	int messageSize = reader.position() - Attribute::HeaderSize;
+	int sizeBeforeMessageIntegrity = reader.position() - kAttributeHeaderSize;
 
 	// Read the HMAC value.
 	//reader.get(_hmac, MessageIntegrity::Size);
 	
-	_input.assign(reader.begin(), messageSize);
+	//_input.assign(reader.begin(), sizeBeforeMessageIntegrity);
+		
+	// Get the message prior to the current attribute and fill the
+	// attribute with dummy content.
+	Buffer hmacBuf;
+	BitWriter hmacWriter(hmacBuf);
+
+	hmacWriter.put(reader.begin(), reader.position() - kAttributeHeaderSize);
+	//hmacWriter.put("00000000000000000000");
+
+	// Ensure the STUN message size reflects the message up to  
+	// including the MessageIntegrity attribute.
+	hmacWriter.updateU32((UInt32)sizeBeforeMessageIntegrity + MessageIntegrity::Size, 2);
+	_input.assign(hmacWriter.begin(), hmacWriter.position());
+	
 	_hmac.assign(reader.current(), MessageIntegrity::Size);
 
 	reader.skip(MessageIntegrity::Size);
-
+	
+#if 0
 	//debugL() << "Message: Parsed message integrity (" << _hmac << ")" << endl;
 
 	// Remember the original position and set the buffer position back to 0.	
-	//int originalPos = reader.position();
-	//reader.seek(0);
+	int originalPos = reader.position();
+	reader.seek(0);
 
 	// Get the message prior to the current attribute and fill the
 	// attribute with dummy content.
-	//Buffer hmacBuf;
-	//BitWriter hmacWriter(hmacBuf);
+	Buffer hmacBuf;
+	BitWriter hmacWriter(hmacBuf);
 
-	//hmacWriter.put(reader.begin(), reader.available() - MessageIntegrity::Size);
-	//hmacWriter.put("00000000000000000000");
+	hmacWriter.put(reader.begin(), reader.available() - MessageIntegrity::Size);
+	hmacWriter.put("00000000000000000000");
 
 	// Ensure the STUN message size value represents the real 
 	// size of the buffered message.
-	//hmacWriter.updateU32((UInt32)hmacWriter.position(), 2);
-	//_input.assign(hmacWriter.begin(), hmacWriter.position());
+	hmacWriter.updateU32((UInt32)hmacWriter.position(), 2);
+	_input.assign(hmacWriter.begin(), hmacWriter.position());
 
 	// Reset the original buffer position.
-	//reader.seek(originalPos);
+	reader.seek(originalPos);
+#endif
 }
 
 
@@ -732,28 +750,44 @@ void MessageIntegrity::write(BitWriter& writer) const
 	// for the current message, otherwise the attribute content
 	// will be copied.
 	if (!_key.empty()) {	
-		int messageSize = writer.position() - Attribute::HeaderSize;
-		debugL() << "Message: Write HMAC messageSizemessageSizemessageSizemessageSizemessageSizemessageSizemessageSizemessageSize: " << messageSize << endl;
+
+		// The hash used to construct MESSAGE-INTEGRITY includes the length 
+		// field from the STUN message header.
+		// Prior to performing the hash, the MESSAGE-INTEGRITY attribute MUST be
+		// inserted into the message (with dummy content).  
+		int sizeBeforeMessageIntegrity = writer.position() - kAttributeHeaderSize;
 
 		// Get the message prior to the current attribute and
 		// fill the attribute with dummy content.
 		Buffer hmacBuf; // TODO: alloc exact size
 		BitWriter hmacWriter(hmacBuf);
-		hmacWriter.put(writer.begin(), messageSize);
+		hmacWriter.put(writer.begin(), sizeBeforeMessageIntegrity);
 		//hmacWriter.put("00000000000000000000");
+
+		// The length MUST then
+		// be set to point to the length of the message up to, and including,
+		// the MESSAGE-INTEGRITY attribute itself, but excluding any attributes
+		// after it.  Once the computation is performed, the value of the
+		// MESSAGE-INTEGRITY attribute can be filled in, and the value of the
+		// length in the STUN header can be set to its correct value -- the
+		// length of the entire message.  Similarly, when validating the
+		// MESSAGE-INTEGRITY, the length field should be adjusted to point to
+		// the end of the MESSAGE-INTEGRITY attribute prior to calculating the
+		// HMAC.  Such adjustment is necessary when attributes, such as
+		// FINGERPRINT, appear after MESSAGE-INTEGRITY.
+		hmacWriter.updateU32((UInt32)sizeBeforeMessageIntegrity + MessageIntegrity::Size, 2);
 		
-		std::string input(hmacWriter.begin(), hmacWriter.position());
+		std::string input(hmacWriter.begin(), hmacWriter.position());		
+		assert(input.size() == sizeBeforeMessageIntegrity); // + MessageIntegrity::Size
+
+		//std::string input(writer.begin(), sizeBeforeMessageIntegrity);
 		std::string hmac(crypto::computeHMAC(input, _key));
 		assert(hmac.size() == MessageIntegrity::Size);
 
 		// Append the real HAMC to the buffer.
-		writer.put(hmac.c_str(), MessageIntegrity::Size);
-		
-		// Ensure the STUN message size value represents the real 
-		// size of the buffered message.
-		writer.updateU32((UInt32)messageSize + MessageIntegrity::Size, 2);
+		writer.put(hmac.c_str(), hmac.length());		
 
-		/*
+#if 0
 		// Get the message prior to the current attribute and
 		// fill the attribute with dummy content.
 		Buffer hmacBuf; // TODO: alloc exact size
@@ -772,7 +806,7 @@ void MessageIntegrity::write(BitWriter& writer) const
 
 		// Append the real HAMC to the buffer.
 		writer.put(hmac.c_str(), MessageIntegrity::Size);
-		*/
+#endif
 	}
 	else {
 		assert(_hmac.size() == MessageIntegrity::Size);

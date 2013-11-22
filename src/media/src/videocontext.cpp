@@ -18,6 +18,9 @@
 
 
 #include "scy/media/videocontext.h"
+
+#ifdef HAVE_FFMPEG
+
 #include "scy/logger.h"
 
 
@@ -859,6 +862,9 @@ void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
 
 	
 } } // namespace scy::av
+
+
+#endif
 
 		
 

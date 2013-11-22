@@ -21,13 +21,16 @@
 #define SCY_MEDIA_AVEncoder_H
 
 
+#include "scy/base.h"
+
+#ifdef HAVE_FFMPEG
+
 #include "scy/packetstream.h"
 #include "scy/media/types.h"
 #include "scy/media/ffmpeg.h"
 #include "scy/media/iencoder.h"
 #include "scy/media/videocontext.h"
 #include "scy/media/audiocontext.h"
-
 #include "scy/mutex.h"
 #include <fstream>
 
@@ -111,6 +114,7 @@ protected:
 } } // namespace scy::av
 
 
+#endif
 #endif	// SCY_MEDIA_AVEncoder_H
 
 

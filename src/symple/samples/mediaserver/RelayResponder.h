@@ -45,8 +45,7 @@ public:
 	void initiate() 
 	{
 		debugL("RelayedStreamingAllocation", this) << "Initiating" << std::endl;		
-		try	
-		{		
+		try	{		
 			// Initiate the TRUN client allocation
 			client.addPermission(peerIP);				
 			client.addPermission("58.7.41.244"); // temporary
@@ -114,8 +113,7 @@ protected:
 			return;
 		}
 
-		try	
-		{	
+		try	{	
 			// Notify the outside application
 			ConnectionCreated.emit(this, client, peerAddr);
 
@@ -147,8 +145,7 @@ protected:
 	{
 		debugL("RelayedStreamingAllocation", this) << "Connection closed: " << peerAddress << std::endl;
 
-		try	
-		{	
+		try	{	
 			// Destroy the media stream for the closed connection (if any).
 			//this->streams.free(peerAddress.toString());
 			PacketStream* stream = streams.remove(peerAddress.toString());
@@ -210,7 +207,8 @@ public:
 			<< std::endl;
 
 		turn::Client::Options co;
-		co.serverAddr = net::Address("74.207.248.97", 3478); // "127.0.0.1"
+		//co.serverAddr = net::Address("74.207.248.97", 3478); 
+		co.serverAddr = net::Address("122.201.111.134", 3478);		
 		//co.serverAddr = net::Address("127.0.0.1", 3478);
 		co.lifetime  = 120 * 1000;	// 2 minutes
 		co.timeout = 10 * 1000;

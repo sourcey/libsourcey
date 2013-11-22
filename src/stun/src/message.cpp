@@ -32,41 +32,36 @@ Message::Message() :
 	_type(0), 
 	_state(Request), 
 	_size(0), 
-	_transactionID(util::randomString(16)) 
+	_transactionID(util::randomString(kTransactionIdLength)) 
 {
-	assert(_transactionID.size() == 16);
+	assert(_transactionID.size() == kTransactionIdLength);
 }
 
 
-Message::Message(const Message& r) : 
-	_type(r.type()), 
-	_state(r.state()), 
-	_size(r.size()), 
-	_transactionID(r.transactionID()) 
+Message::Message(const Message& that) : 
+	_type(that.type()), 
+	_state(that.state()), 
+	_size(that.size()), 
+	_transactionID(that.transactionID()) 
 {
 	assert(_type);
-	assert(_transactionID.size() == 16);	
-
-	// Clear our current attributes
-	for (unsigned i = 0; i < _attrs.size(); i++)
-		delete _attrs[i];
-	_attrs.clear();
+	assert(_transactionID.size() == kTransactionIdLength);
 
 	// Copy attributes from source object
-	for (unsigned i = 0; i < r.attrs().size(); i++)
-		_attrs.push_back(r.attrs()[i]->clone());
+	for (unsigned i = 0; i < that.attrs().size(); i++)
+		_attrs.push_back(that.attrs()[i]->clone());
 }
 
 
-Message& Message::operator = (const Message& r) 
+Message& Message::operator = (const Message& that) 
 {
-	if (&r != this) {
-		_type = r.type();
-		_state = r.state();
-		_size = static_cast<UInt16>(r.size());
-		_transactionID = r.transactionID();
+	if (&that != this) {
+		_type = that.type();
+		_state = that.state();
+		_size = static_cast<UInt16>(that.size());
+		_transactionID = that.transactionID();
 		assert(_type);
-		assert(_transactionID.size() == 16);	
+		assert(_transactionID.size() == kTransactionIdLength);	
 
 		// Clear current attributes
 		for (unsigned i = 0; i < _attrs.size(); i++)
@@ -74,8 +69,8 @@ Message& Message::operator = (const Message& r)
 		_attrs.clear();
 
 		// Copy attributes from source object
-		for (unsigned i = 0; i < r.attrs().size(); i++)
-			_attrs.push_back(r.attrs()[i]->clone());
+		for (unsigned i = 0; i < that.attrs().size(); i++)
+			_attrs.push_back(that.attrs()[i]->clone());
 	}
 
 	return *this;
@@ -167,7 +162,7 @@ void Message::print(std::ostream& os) const
 
 void Message::setTransactionID(const std::string& id) 
 {
-	assert(id.size() == 16);
+	assert(id.size() == kTransactionIdLength);
 	_transactionID = id;
 }
 
@@ -179,9 +174,9 @@ void Message::add(Attribute* attr)
 	size_t attrLength = attr->size();
 	if (attrLength % 4 != 0)
 		attrLength += (4 - (attrLength % 4));
-	_size += attrLength + Attribute::HeaderSize;
+	_size += attrLength + kAttributeHeaderSize;
 #else
-	_size += attr->size() + Attribute::HeaderSize;	
+	_size += attr->size() + kAttributeHeaderSize;	
 #endif
 }
 
@@ -205,53 +200,69 @@ std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
 	
 	try {
 		BitReader reader(buf);
-		reader.getU16(_type);
 
+		// Message type
+		reader.getU16(_type);
 		if (_type & 0x8000) {
 			// RTP and RTCP set MSB of first byte, since first two bits are version, 
 			// and version is always 2 (10). If set, this is not a STUN packet.
-			errorL("STUNMessage") << "Not STUN packet" << endl;
+			warnL("STUNMessage") << "Not STUN packet" << endl;
 			return 0;
 		}
-
+		
+		// Message length
 		reader.getU16(_size);
 		if (_size > buf.size()) {
 			warnL("STUNMessage") << "Packet larger than buffer: " << _size << " > " << buf.size() << endl;
 			return 0;
 		}
 
-		std::string transactionID;
-		reader.get(transactionID, 16);
-		assert(transactionID.size() == 16);
-		_transactionID = transactionID;
-
-		_attrs.clear();		
+		// Magic cookie
+		//reader.skip(kMagicCookieLength);
+		std::string magicCookie;
+		reader.get(magicCookie, kMagicCookieLength);
 		
+		// Transaction ID
+		std::string transactionID;
+		reader.get(transactionID, kTransactionIdLength);
+		assert(transactionID.size() == kTransactionIdLength);
+		_transactionID = transactionID;
+	
+		// Attributes
+		_attrs.clear();	
 		int errors = 0;
-		while (reader.available()) { // > rest
-			UInt16 attrType, attrLength;
+		int rest = _size;
+		UInt16 attrType, attrLength, padLength;
+		
+		assert(reader.available() >= rest);
+		while (rest > 0) {
 			reader.getU16(attrType);
 			reader.getU16(attrLength);
-						
+			padLength =  attrLength % 4 == 0 ? 0 : 4 - (attrLength % 4);
+
 			auto attr = Attribute::create(attrType, attrLength);
-			if (!attr) {				
+			if (attr) {		
+				attr->read(reader); // parse or throw
+				_attrs.push_back(attr);
+
+				traceL("STUNMessage") << "Parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl; //  << ": " << rest
+			}	
+			else
 				warnL("STUNMessage") << "Failed to parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
 				
-				// Make sure we don't wind up in an infinite loop 
-				errors++;
-				if (errors > 5) {
-					warnL("STUNMessage") << "Cannot parse STUN message: Too many errors." << endl;
-					return 0;
-				}
-				continue;
+			rest -= (attrLength + kAttributeHeaderSize + padLength);
+	
+			// Make sure we don't wind up in an infinite loop 
+			errors++;
+			if (errors > 10) {
+				warnL("STUNMessage") << "Cannot parse STUN message: Too many errors." << endl;
+				return 0;
 			}
-			attr->read(reader); // parse or throw
-			_attrs.push_back(attr);
-
-			traceL("STUNMessage") << "Parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
 		}
 
 		traceL("STUNMessage") << "Parse success: " << _size << ": " << buf.size() << endl;
+		assert(rest == 0);
+		assert(reader.position() == _size + kMessageHeaderSize);
 		return reader.position();
 	}
 	catch (std::exception& exc) {
@@ -264,9 +275,13 @@ std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
 
 void Message::write(Buffer& buf) const 
 {
+	//assert(_type);
+	//assert(_size);
+
 	BitWriter writer(buf);
 	writer.putU16(_type);
 	writer.putU16(_size);
+	writer.putU32(kMagicCookie);
 	writer.put(_transactionID);
 
 	// Note: MessageIntegrity must be at the end

@@ -21,6 +21,10 @@
 #define SCY_MEDIA_AudioContext_H
 
 
+#include "scy/base.h"
+
+#ifdef HAVE_FFMPEG
+
 #include "scy/media/types.h"
 #include "scy/media/format.h"
 #include "scy/media/fpscounter.h"
@@ -151,6 +155,7 @@ void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, c
 } } // namespace scy::av
 
 
+#endif
 #endif	// SCY_MEDIA_AudioContext_H
 
 

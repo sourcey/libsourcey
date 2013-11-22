@@ -21,6 +21,10 @@
 #define SCY_MEDIA_VideoContext_H
 
 
+#include "scy/base.h"
+
+#ifdef HAVE_FFMPEG
+
 #include "scy/timer.h"
 #include "scy/media/types.h"
 #include "scy/media/format.h"
@@ -203,6 +207,7 @@ struct VideoConversionContext
 } } // namespace scy::av
 
 
+#endif
 #endif	// SCY_MEDIA_VideoContext_H
 
 
