@@ -3,6 +3,7 @@
 
 
 #include "scy/turn/client/udpclient.h"
+#include "scy/time.h"
 #include "scy/logger.h"
 
 #include <iostream>
@@ -17,36 +18,37 @@ namespace turn {
 
 class UDPInitiator: public scy::turn::ClientObserver
 {
-	int id;
-	UDPClient* client;
-	Client::Options	opts;
-	//Net::Reactor& reactor;, Net::Reactor& reactor, Runner& runner
-	//Runner& runner;reactor(reactor), runner(runner), 
-
 public:
-	UDPInitiator(int id) : 
-		id(id), client(NULL) {}
-	virtual ~UDPInitiator() { if (client) delete client; }
-	
-	void initiate(const Client::Options opts, const std::string& peerIP) 
-	{
-		try	{
-			client = new UDPClient(*this, opts); //, reactor, runner
-			//client->StateChange += delegate(this, &UDPInitiator::onStateChange);
-			client->addPermission(peerIP);	
-			client->initiate();
-		} 
-		catch (std::exception& exc) {
-			errorL() << "UDPInitiator: " << id << ": Error: " << exc.what() << std::endl;
-		}
-	}
+	int id;
+	UDPClient client;
+	Client::Options	opts;
 
 	NullSignal AllocationCreated;
+	Signal<const net::Address&>	ConnectionCreated;
+	Signal<bool> TestComplete;
+
+	UDPInitiator(int id, const Client::Options& opts) : 
+		id(id), client(*this, opts) {}
+	virtual ~UDPInitiator() { }
+	
+	void initiate(const std::string& peerIP) 
+	{
+		debugL("UDPInitiator", this) << id << ": Initializing" << endl;
+		try	{
+			client.addPermission(peerIP);
+			client.addPermission("127.0.0.1");		
+			client.addPermission("192.168.1.1");			
+			client.initiate();
+		} 
+		catch (std::exception& exc) {
+			errorL("TCPInitiator") << id << ": Error: " << exc.what() << std::endl;
+		}
+	}
 
 protected:
 	void onClientStateChange(turn::Client& client, turn::ClientState& state, const turn::ClientState&) 
 	{
-		debugL() << "UDPInitiator: " << id << ": State change: " << state.toString() << endl;
+		debugL("UDPInitiator", this) << id << ": State change: " << state.toString() << endl;
 
 		switch(state.id()) {
 		case ClientState::None:				
@@ -64,18 +66,27 @@ protected:
 		//	break;
 		}
 	}
+	
+	void onRelayDataReceived(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
+	{				
+		//std::string payload(util::itostr(time::ticks()));
+		if (size < 150) {
+			std::string payload(data, size);
+			UInt64 sentAt = util::strtoi<UInt64>(payload);
+			UInt64 latency = time::ticks() - sentAt;
 
-	void onRelayConnectionDataReceivedReceived(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
-	{
-		debugL() << "UDPInitiator: " << id << ": Received Data: " << string(data, size) << endl;
-
-		// echo it back...
-		client.sendData(data, size, peerAddr);
+			debugL("UDPInitiator") << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
+		}
+		else
+			debugL("UDPInitiator") << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
+	
+		// Echo back to peer
+		//client.sendData(data, size, peerAddr);
 	}
 	
-	void onPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
+	void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
 	{
-		debugL() << "UDPInitiator: " << id << ": Permissions Created" << endl;
+		debugL("UDPInitiator") << id << ": Permissions Created" << endl;
 	}
 };
 
@@ -84,3 +95,21 @@ protected:
 
 
 #endif // TURN_UDPinitiator_TEST_H
+
+
+
+
+	/*
+	void initiate(const Client::Options opts, const std::string& peerIP) 
+	{
+		try	{
+			client = new UDPClient(*this, opts); //, reactor, runner
+			//client.StateChange += delegate(this, &UDPInitiator::onStateChange);
+			client.addPermission(peerIP);	
+			client.initiate();
+		} 
+		catch (std::exception& exc) {
+			errorL() << "UDPInitiator: " << id << ": Error: " << exc.what() << std::endl;
+		}
+	}
+	*/

@@ -60,19 +60,10 @@ UDPBase& UDPSocket::base() const
 //
 
 
-struct SendRequest 
-{
-	uv_udp_send_t req;
-	uv_buf_t buf;
-};
-
-
-UDPBase::UDPBase()
+UDPBase::UDPBase() :
+	_buffer(65536)
 {
 	traceL("UDPBase", this) << "Create" << endl;
-	//closeOnError(true);
-
-	// TODO: Do not init() until required - same as TCPBase.
 	init();
 }
 
@@ -145,29 +136,41 @@ int UDPBase::send(const char* data, int len, int flags)
 }
 
 
+namespace internal {
+	struct SendRequest 
+	{
+		uv_udp_send_t req;
+		uv_buf_t buf;
+	};
+}
+
+
 int UDPBase::send(const char* data, int len, const Address& peerAddress, int /* flags */) 
 {	
 	//assert(len <= net::MAX_UDP_PACKET_SIZE); // libuv handles this for us
 
 	int r;	
-	SendRequest* sr = new SendRequest;
+	auto sr = new internal::SendRequest;
 	sr->buf = uv_buf_init((char*)data, len); // TODO: memcpy data?
 
 	if (_peer.valid() && _peer != peerAddress)
 		throw std::runtime_error("NotAuthorized peer: " + peerAddress.toString());
 	
 	traceL("UDPBase", this) << "Send: " << len << ": " << peerAddress << endl;
+	r = uv_udp_send(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1, peerAddress.addr(), UDPBase::afterSend);
+#if 0
 	switch (peerAddress.af()) {
 	case AF_INET:
-		r = uv_udp_send(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1, peerAddress.addr(), UDPBase::afterSend); //
+		r = uv_udp_send(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1, peerAddress.addr(), UDPBase::afterSend);
 		break;
-	//case AF_INET6:
-	//	r = uv_udp_send6(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1,
-	//		*reinterpret_cast<const sockaddr_in6*>(peerAddress.addr()), UDPBase::afterSend); //
-	//	break;
+	case AF_INET6:
+		r = uv_udp_send6(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1,
+			*reinterpret_cast<const sockaddr_in6*>(peerAddress.addr()), UDPBase::afterSend);
+		break;
 	default:
 		throw std::runtime_error("Unexpected address family");
 	}
+#endif
 	if (r)
 		setUVError("Invalid UDP socket", r); 
 
@@ -291,17 +294,17 @@ void UDPBase::onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const
 
 void UDPBase::afterSend(uv_udp_send_t* req, int status) 
 {
-	SendRequest* sr = reinterpret_cast<SendRequest*>(req);
-	UDPBase* socket = reinterpret_cast<UDPBase*>(sr->req.handle->data);	
+	auto sr = reinterpret_cast<internal::SendRequest*>(req);
+	auto socket = reinterpret_cast<UDPBase*>(sr->req.handle->data);	
 	if (status) 
 		socket->setUVError("Stream send error", status);
 	delete sr;
 }
 
 
-void UDPBase::allocRecvBuffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t* buf)
+void UDPBase::allocRecvBuffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
 {
-	UDPBase* self = static_cast<UDPBase*>(handle->data);	
+	auto self = static_cast<UDPBase*>(handle->data);	
 	//traceL("UDPBase", self) << "Allocating Buffer: " << suggested_size << endl;	
 	
 	// Reserve the recommended buffer size

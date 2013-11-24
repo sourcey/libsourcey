@@ -160,7 +160,7 @@ void IAllocation::addPermission(const std::string& ip)
 
 	// If the permission is already in the list then refresh it.
 	for (PermissionList::iterator it = _permissions.begin(); it != _permissions.end(); ++it) {
-		if ((*it).ip == ip) {		
+		if ((*it).ip == ip) {
 			log("trace") << "Refreshing permission: " << ip << endl;
 			(*it).refresh();
 			return;

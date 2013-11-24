@@ -109,7 +109,7 @@ class Server: public basic::Polymorphic
 {
 public:
 	Server(ServerObserver& observer, const ServerOptions& options = ServerOptions());
-	~Server();
+	virtual ~Server();
 
 	virtual void start();
 	virtual void stop();
@@ -154,6 +154,11 @@ private:
 	ServerAllocationMap	_allocations;
 	//mutable Mutex	_mutex;
 };
+
+
+//int setServerSocketBufSize(net::TCPSocket& socket, int size);
+//int getServerSocketSendBufSize(net::TCPSocket& socket);
+//int getServerSocketRecvBufSize(net::TCPSocket& socket);
 
 
 } } //  namespace scy::turn

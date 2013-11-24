@@ -54,9 +54,9 @@ bool ServerAllocation::handleRequest(Request& request)
 	// requests after the allocation is received under heavy traffic.
 	assert(!IAllocation::deleted());
 
-	if (request.type() == stun::Message::CreatePermission)
+	if (request.methodType() == stun::Message::CreatePermission)
 		handleCreatePermission(request);
-	else if (request.type() == stun::Message::Refresh)	
+	else if (request.methodType() == stun::Message::Refresh)	
 		handleRefreshRequest(request);
 	else
 		return false; //respondError(request, 600, "Operation Not Supported");
@@ -68,8 +68,8 @@ bool ServerAllocation::handleRequest(Request& request)
 void ServerAllocation::handleRefreshRequest(Request& request) 
 {
 	log("trace") << "Handle Refresh Request" << endl;
-	assert(request.type() == stun::Message::Refresh);
-	assert(request.state() == stun::Message::Request);
+	assert(request.methodType() == stun::Message::Refresh);
+	assert(request.classType() == stun::Message::Request);
 
 	// 7.2. Receiving a Refresh Request
 
@@ -123,8 +123,7 @@ void ServerAllocation::handleRefreshRequest(Request& request)
 	//    already been deleted, but the client will treat this as equivalent
 	//    to a success response (see below).
 	
-	stun::Message response;
-	response.setType(stun::Message::Refresh);
+	stun::Message response(stun::Message::SuccessResponse, stun::Message::Refresh);
 	response.setTransactionID(request.transactionID());
 
 	auto resLifetimeAttr = new stun::Lifetime;
@@ -180,11 +179,10 @@ void ServerAllocation::handleCreatePermission(Request& request)
 			else
 				break;	
 		}
-		addPermission(std::string(peerAttr->ipString()));
+		addPermission(std::string(peerAttr->address().host()));
 	}
 	
-	stun::Message response;
-	response.setType(stun::Message::CreatePermission);
+	stun::Message response(stun::Message::SuccessResponse, stun::Message::CreatePermission);
 	response.setTransactionID(request.transactionID());
   
 	request.socket.send(response, request.remoteAddr);

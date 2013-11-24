@@ -83,7 +83,7 @@ public:
 		//assert(0 && "ok");
 
 		// Echo back to client
-		//socket.send(packet.data(), packet.size());
+		socket.send(payload.c_str(), payload.size());
 	}
 
 	void onSocketError(const Error& error) 
@@ -141,7 +141,7 @@ protected:
 	
 	void onRawPacketReceived(void* sender, RawPacket& packet)
 	{
-		debugL() << "########################## [TCPResponder: " << id << "] Received Data: " << string((const char*)packet.data(), packet.size()) << endl;
+		debugL() << "########################## [TCPResponder: " << id << "] Received Data: " << std::string((const char*)packet.data(), packet.size()) << endl;
 		
 		// Echo back to client
 		socket.send(packet);

@@ -40,7 +40,46 @@ const int kTransactionIdLength = 12;
 const UInt32 kMagicCookie = 0x2112A442;
 const int kMagicCookieLength = sizeof(kMagicCookie);
 
-#define ENBALE_MESSAGE_PADDING 1
+enum AddressFamily 		
+	// STUN address types as defined in RFC 5389.
+	// NB: Undefined is not part of the STUN spec.
+{
+	Undefined    = 0,
+	IPv4         = 1,
+	IPv6         = 2
+};
+
+
+#define IS_STUN_REQUEST(msg_type)       (((msg_type) & 0x0110) == 0x0000)
+#define IS_STUN_INDICATION(msg_type)    (((msg_type) & 0x0110) == 0x0010)
+#define IS_STUN_SUCCESS_RESP(msg_type)  (((msg_type) & 0x0110) == 0x0100)
+#define IS_STUN_ERR_RESP(msg_type)      (((msg_type) & 0x0110) == 0x0110)
+
+
+#define GET_STUN_REQUEST(msg_type)      (msg_type & 0xFEEF)
+#define GET_STUN_INDICATION(msg_type)   ((msg_type & 0xFEEF)|0x0010)
+#define GET_STUN_SUCCESS_RESP(msg_type) ((msg_type & 0xFEEF)|0x0100)
+#define GET_STUN_ERR_RESP(msg_type)      (msg_type | 0x0110)
+
+/*
+#define STUN_HEADER_LENGTH (20)
+#define STUN_CHANNEL_HEADER_LENGTH (4)
+
+#define STUN_MAX_USERNAME_SIZE (513)
+#define STUN_MAX_REALM_SIZE (127)
+#define STUN_MAX_NONCE_SIZE (127)
+#define STUN_MAX_PWD_SIZE (127)
+
+#define STUN_MAGIC_COOKIE (0x2112A442)
+
+// Lifetimes: 
+#define STUN_DEFAULT_ALLOCATE_LIFETIME (600)
+#define STUN_MIN_ALLOCATE_LIFETIME STUN_DEFAULT_ALLOCATE_LIFETIME
+#define STUN_MAX_ALLOCATE_LIFETIME (3600)
+#define STUN_CHANNEL_LIFETIME (600)
+#define STUN_PERMISSION_LIFETIME (300)
+#define STUN_NONCE_EXPIRATION_TIME (600)
+*/
 
 
 } } // namespace scy:stun

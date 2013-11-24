@@ -93,7 +93,7 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 		stream.attachSource(options.audioCapture, freeCaptures, true);	
 	}
 				
-	stream.attach(new FPSLimiter(8), 1, true);
+	stream.attach(new FPSLimiter(5), 1, true);
 								
 	// Attach an async queue so we don't choke
 	// the video capture while encoding.

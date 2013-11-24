@@ -42,7 +42,7 @@ Transaction::Transaction(Socket& socket,
 						 uv::Loop* loop) : 
 	net::Transaction<Message>(socket, peerAddress, timeout, retries, loop) 
 {
-	debugL("STUNTransaction", this) << "Create" << std::endl;
+	debugL("StunTransaction", this) << "Create" << std::endl;
 
 	// Register STUN message creation strategy
 	net::Transaction<Message>::factory.registerPacketType<stun::Message>(0);
@@ -51,7 +51,7 @@ Transaction::Transaction(Socket& socket,
 
 Transaction::~Transaction() 
 {
-	debugL("STUNTransaction", this) << "Destroy" << std::endl;	
+	debugL("StunTransaction", this) << "Destroy" << std::endl;	
 }
 
 
@@ -64,15 +64,15 @@ bool Transaction::checkResponse(const Message& message)
 
 void Transaction::onResponse()
 {
-	debugL("STUNTransaction", this) << "On response" << std::endl;	
+	debugL("StunTransaction", this) << "On response" << std::endl;	
 
-	_response.setType(_request.type());
-	_response.setState(Message::SuccessResponse);
+	_response.setMethod(_request.methodType());
+	_response.setClass(Message::SuccessResponse);
 	if (_response.get<stun::ErrorCode>())
-		_response.setState(Message::ErrorResponse);
-	else if (_response.type() == Message::SendIndication ||
-		_response.type() == Message::DataIndication)
-		_response.setState(Message::Indication);
+		_response.setClass(Message::ErrorResponse);
+	else if (_response.methodType() == Message::SendIndication ||
+		_response.methodType() == Message::DataIndication)
+		_response.setClass(Message::Indication);
 
 	net::Transaction<Message>::onResponse();
 }

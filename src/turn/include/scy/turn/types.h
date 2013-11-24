@@ -29,7 +29,92 @@
 namespace scy {
 namespace turn {
 
+
+const int CLIENT_SOCK_BUF_SIZE = 65536;
+const int SERVER_SOCK_BUF_SIZE = CLIENT_SOCK_BUF_SIZE * 32;
 	
+
+// Returns the native socket file descriptor
+#if WIN32
+#define nativeSocketFd(handle) ((handle)->socket)
+#elif defined(__APPLE__)
+int nativeSocketFd__(uv_stream_t* handle);
+#define nativeSocketFd(handle) (nativeSocketFd__((uv_stream_t*) (handle)))
+#else
+#define nativeSocketFd(handle) ((handle)->io_watcher.fd)
+#endif
+
+
+template<class NativeT> int setServerSocketBufSize(uv::Handle& handle, int size)
+{
+	int fd = nativeSocketFd(handle.ptr<NativeT>());
+	int sz;
+
+	sz = size;
+	while (sz > 0) {
+		if (setsockopt(fd, SOL_SOCKET, SO_RCVBUF, (const char*)&sz, (socklen_t)sizeof(sz)) < 0) {
+			sz = sz / 2;
+		} else break;
+	}
+
+	if (sz < 1) {
+		errorL("TURNServer") << "Cannot set rcv sock size " << size << " on fd " << fd;	
+	}
+
+	// Get the value to ensure it has propagated through the OS
+	traceL("TURNServer") << "Recv sock size " << getServerSocketRecvBufSize<NativeT>(handle) << " on fd " << fd << endl;
+
+	sz = size;
+	while (sz > 0) {
+		if (setsockopt(fd, SOL_SOCKET, SO_SNDBUF, (const char*)&sz, (socklen_t)sizeof(sz)) < 0) {
+			sz = sz / 2;
+		} else break;
+	}
+
+	if (sz < 1) {
+		errorL("TURNServer") << "Cannot set snd sock size " << size << " on fd " << fd;
+	}	
+
+	// Get the value to ensure it has propagated through the OS
+	traceL("TURNServer") << "Send sock size " << getServerSocketSendBufSize<NativeT>(handle)<< " on fd " << fd << endl;
+
+	return sz;
+}
+
+
+template<class NativeT> int getServerSocketSendBufSize(uv::Handle& handle)
+{
+	int fd = nativeSocketFd(handle.ptr<NativeT>());
+	int optval = 0; 
+	int optlen = sizeof(int); 
+	int err = getsockopt(fd, SOL_SOCKET, SO_SNDBUF, (char *)&optval, &optlen);
+	if (err < 1) {
+		errorL("TURNServer") << "Cannot get snd sock size on fd " << fd;
+	}
+	return optval;
+}
+
+
+template<class NativeT> int getServerSocketRecvBufSize(uv::Handle& handle)
+{
+	int fd = nativeSocketFd(handle.ptr<NativeT>());
+	int optval = 0; 
+	int optlen = sizeof(int); 
+	int err = getsockopt(fd, SOL_SOCKET, SO_RCVBUF, (char *)&optval, &optlen);
+	if (err < 1) {
+		errorL("TURNServer") << "Cannot get rcv sock size on fd " << fd;
+	}
+	return optval;
+}
+
+
+inline bool isChannelData(UInt16 messageType)
+{
+  // The first two bits of a channel data message are 0b01.
+  return ((messageType & 0xC000) == 0x4000);
+}
+
+
 enum AuthenticationState 
 {
 	Authenticating	= 1,

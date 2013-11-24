@@ -78,7 +78,7 @@ public:
 		RequestedTransport		= 0x0019,
 		DontFragment			= 0x001A, // Not implemented
 		// 0x0021: Reserved (was TIMER-VAL)
-		ReservationToken			= 0x0022, // 8 bytes token value
+		ReservationToken		= 0x0022, // 8 bytes token value
 		
 		// TURN TCP
 		ConnectionID			= 0x002a,
@@ -129,34 +129,52 @@ protected:
 // ---------------------------------------------------------------------------
 //
 class AddressAttribute: public Attribute 
-	/// Implements a STUN/TURN attribute that reflects a socket address.
+	/// Implements a STUN/TURN attribute that contains a socket address.
 {
 public:
-	AddressAttribute(UInt16 type);
+	AddressAttribute(UInt16 type, bool ipv4 = true); //bool xor, 
 	AddressAttribute(const AddressAttribute& r);
 
 	virtual stun::Attribute* clone();
-
-	static const UInt16 Size = 8;
-
-	virtual UInt8 family() const { return _family; }
-	virtual UInt16 port() const { return _port; }
-	virtual UInt32 ip() const { return _ip; }
-	virtual std::string ipString() const;
+	
+	static const UInt16 IPv4Size = 8;
+	static const UInt16 IPv6Size = 20;
+	
+	stun::AddressFamily family() const 
+	{
+		switch (_address.family()) {
+		case net::Address::IPv4:
+			return stun::IPv4;
+		case net::Address::IPv6:
+			return stun::IPv6;
+		}
+		return stun::Undefined;
+	}
+	/*
+	*/
+	
 	virtual net::Address address() const;
-
-	virtual void setFamily(UInt8 family) { _family = family; }
-	virtual void setIP(UInt32 ip) { _ip = ip; }
-	virtual void setIP(const std::string& ip);
-	virtual void setPort(UInt16 port) { _port = port; }
 
 	virtual void read(BitReader& reader);
 	virtual void write(BitWriter& writer) const;
 
+	//virtual UInt16 port() const { return _port; }
+	//virtual UInt32 ip() const { return _ip; }
+	//virtual UInt8 family() const { return _family; }
+	
+	
+	virtual void setAddress(const net::Address& addr) { _address = addr; }
+	//virtual std::string ipString() const;
+	//virtual void setFamily(UInt8 family) { _family = family; }
+	//virtual void setIP(UInt32 ip) { _ip = ip; }
+	//virtual void setIP(const std::string& ip);
+	//virtual void setPort(UInt16 port) { _port = port; }
+
 private:
-	UInt8 _family;
-	UInt16 _port;
-	UInt32 _ip;
+	//UInt8 _family;
+	//UInt16 _port;
+	//UInt32 _ip;
+	net::Address _address;
 };
 
 

@@ -64,7 +64,13 @@ void Client::initiate()
 	_socket.Recv += delegate(this, &Client::onSocketRecv, -1); // using PacketSocket for STUN transactions
 	_socket.Connect += delegate(this, &Client::onSocketConnect);
 	_socket.Close += delegate(this, &Client::onSocketClose);
+
+	if (_socket.base().transport() == net::TransportType::UDP)
+		_socket.bind(net::Address("0.0.0.0", 0));
 	_socket.connect(_options.serverAddr);
+	//_socket
+	//else
+	//	onSocketConnect(&_socket.base());
 }
 
 
@@ -166,8 +172,9 @@ void Client::sendRefresh()
 		
 	log() << "Send refresh allocation request" << endl;	
 
-	auto transaction = createTransaction();
-	transaction->request().setType(stun::Message::Refresh);
+	auto transaction = createTransaction();		
+	transaction->request().setClass(stun::Message::Request);
+	transaction->request().setMethod(stun::Message::Refresh);
 
 	stun::Lifetime* lifetimeAttr = new stun::Lifetime;
 	lifetimeAttr->setValue(_options.lifetime / 1000);
@@ -181,7 +188,7 @@ void Client::handleRefreshResponse(const stun::Message& response)
 {
 	log() << "Received a Refresh Response: " << response.toString() << endl;	
 
-	assert(response.type() == stun::Message::Refresh);	
+	assert(response.methodType() ==  stun::Message::Refresh);	
 
 	// 7.3. Receiving a Refresh Response
 	// 
@@ -297,34 +304,34 @@ bool Client::handleResponse(const stun::Message& response)
 	log() << "Handle response: " << response.toString() << endl;
 	
 	// Send this response to the appropriate handler.	
-	if (response.type() == stun::Message::Allocate) {
-		if (response.state() == stun::Message::SuccessResponse)	
+	if (response.methodType() ==  stun::Message::Allocate) {
+		if (response.classType() == stun::Message::SuccessResponse)	
 			handleAllocateResponse(response);
 
-		else if (response.state() == stun::Message::ErrorResponse)	
+		else if (response.classType() == stun::Message::ErrorResponse)	
 			handleAllocateErrorResponse(response);
 
 		// Must be a Transaction response
 		else assert(0 && "no response state");
 	}
 	
-	else if (response.type() == stun::Message::Refresh)	
+	else if (response.methodType() ==  stun::Message::Refresh)	
 		handleRefreshResponse(response);
 
-	//else if (response.type() == stun::Message::Refresh &&
-	//	response.state() == stun::Message::ErrorResponse)&&
-	//	response.state() == stun::Message::SuccessResponse
+	//else if (response.methodType() ==  stun::Message::Refresh &&
+	//	response.classType() == stun::Message::ErrorResponse)&&
+	//	response.classType() == stun::Message::SuccessResponse
 	//	handleRefreshErrorResponse(response);
 
-	else if (response.type() == stun::Message::CreatePermission &&
-		response.state() == stun::Message::SuccessResponse)	
+	else if (response.methodType() ==  stun::Message::CreatePermission &&
+		response.classType() == stun::Message::SuccessResponse)	
 		handleCreatePermissionResponse(response);
 
-	else if (response.type() == stun::Message::CreatePermission &&
-		response.state() == stun::Message::ErrorResponse)	
+	else if (response.methodType() ==  stun::Message::CreatePermission &&
+		response.classType() == stun::Message::ErrorResponse)	
 		handleCreatePermissionErrorResponse(response);
 
-	else if (response.type() == stun::Message::DataIndication)	
+	else if (response.methodType() ==  stun::Message::DataIndication)	
 		handleDataIndication(response);
 
 	else 
@@ -371,7 +378,9 @@ void Client::sendAllocate()
 	// respectively.
 	// 	
 	auto transaction = createTransaction();
-	transaction->request().setType(stun::Message::Allocate);
+	//stun::Message request(stun::Message::Request, stun::Message::Allocate);
+	transaction->request().setClass(stun::Message::Request);
+	transaction->request().setMethod(stun::Message::Allocate);
 
 	// The client MUST include a REQUESTED-TRANSPORT attribute in the
 	// request.  This attribute specifies the transport protocol between the
@@ -379,7 +388,7 @@ void Client::sendAllocate()
 	// that appears in the 5-tuple).
 	// 
 	auto transportAttr = new stun::RequestedTransport;
-	transportAttr->setValue(transportProtocol());
+	transportAttr->setValue(transportProtocol() << 24);
 	transaction->request().add(transportAttr);
 	
 	// If the client wishes the server to initialize the time-to-expiry
@@ -428,7 +437,7 @@ void Client::handleAllocateResponse(const stun::Message& response)
 {
 	log() << "Allocate Success Response" << endl;
 
-	assert(response.type() == stun::Message::Allocate);	
+	assert(response.methodType() ==  stun::Message::Allocate);	
 	
 	//Mutex::ScopedLock lock(_mutex);
 
@@ -463,7 +472,7 @@ void Client::handleAllocateResponse(const stun::Message& response)
 		assert(0);
 		return;
 	}
-	_mappedAddress = net::Address(mappedAttr->ipString(), mappedAttr->port());
+	_mappedAddress = mappedAttr->address(); //net::Address(mappedAttr->address().host(), mappedAttr->address().port());
 
 	// The client must also remember the 5-tuple used for the request and
 	// the username and password it used to authenticate the request to
@@ -478,17 +487,17 @@ void Client::handleAllocateResponse(const stun::Message& response)
 	// its ICE processing.	
 	// 
 	auto relayedAttr = response.get<stun::XorRelayedAddress>();
-	if (!relayedAttr || relayedAttr && relayedAttr->family() != 1) {
+	if (!relayedAttr || (relayedAttr && relayedAttr->family() != 1)) {
 		assert(0);
 		return;
 	}
 	
 	// Use the relay server host and relayed port
-	_relayedAddress = net::Address(/*relayedAttr->ipString()*/_options.serverAddr.host(), relayedAttr->port());	
+	_relayedAddress = net::Address(/*relayedAttr->address().host()*/_options.serverAddr.host(), relayedAttr->address().port());	
 
 	log() << "Allocation created:" 
-		<< "\n\tRelayed address: " << _relayedAddress.toString()
-		<< "\n\tMapped address: " << _mappedAddress.toString()
+		<< "\n\tRelayed address: " << _relayedAddress //.toString()
+		<< "\n\tMapped address: " << _mappedAddress //.toString()
 		<< "\n\tLifetime: " << lifetimeAttr->value()
 		<< endl;
 	
@@ -507,8 +516,8 @@ void Client::handleAllocateErrorResponse(const stun::Message& response)
 {		
 	log() << "Allocate error response" << endl;
 
-	assert(response.type() == stun::Message::Allocate &&
-		response.state() == stun::Message::ErrorResponse);	
+	assert(response.methodType() ==  stun::Message::Allocate &&
+		response.classType() == stun::Message::ErrorResponse);	
 	
 	auto errorAttr = response.get<stun::ErrorCode>();
 	if (!errorAttr) {
@@ -720,14 +729,17 @@ void Client::sendCreatePermission()
 	// various XOR-PEER-ADDRESS attributes can appear in any order.
 
 	auto transaction = createTransaction();
-	transaction->request().setType(stun::Message::CreatePermission);
+	//stun::Message request(stun::Message::Request, stun::Message::Allocate);
+	transaction->request().setClass(stun::Message::Request);
+	transaction->request().setMethod(stun::Message::CreatePermission);
 	
 	for (PermissionList::const_iterator it = _permissions.begin(); it != _permissions.end(); ++it) {
 		log() << "Create permission request: " << (*it).ip << endl;
 		auto peerAttr = new stun::XorPeerAddress;
-		peerAttr->setFamily(1);
-		peerAttr->setPort(0);
-		peerAttr->setIP((*it).ip);
+		peerAttr->setAddress(net::Address((*it).ip, 0));
+		//peerAttr->setFamily(1);
+		//peerAttr->setPort(0);
+		//peerAttr->setIP((*it).ip);
 		transaction->request().add(peerAttr);
 	}
 
@@ -764,7 +776,7 @@ void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
 			auto peerAttr = transaction->request().get<stun::XorPeerAddress>(i);
 			if (!peerAttr || peerAttr && peerAttr->family() != 1)
 				break;	
-			_observer.onAllocationPermissionsCreated(*this, std::string(peerAttr->ipString()));
+			_observer.onAllocationPermissionsCreated(*this, std::string(peerAttr->address().host()));
 		}
 		*/
 	}
@@ -813,7 +825,8 @@ void Client::sendData(const char* data, int size, const net::Address& peerAddres
 		<< peerAddress << endl;
 
 	stun::Message* request = new stun::Message;
-	request->setType(stun::Message::SendIndication);
+	request->setClass(stun::Message::Indication);
+	request->setMethod(stun::Message::SendIndication);
 
 	// The client can use a Send indication to pass data to the server for
 	// relaying to a peer.  A client may use a Send indication even if a
@@ -833,12 +846,13 @@ void Client::sendData(const char* data, int size, const net::Address& peerAddres
 	// datagram sent to the peer.
 
 	auto peerAttr = new stun::XorPeerAddress;
-	peerAttr->setFamily(1);
-	peerAttr->setPort(peerAddress.port());
-	peerAttr->setIP(peerAddress.host());
+	peerAttr->setAddress(peerAddress);
+	//peerAttr->setFamily(1);
+	//peerAttr->setPort(peerAddress.port());
+	//peerAttr->setIP(peerAddress.host());
 	request->add(peerAttr);
 
-	stun::Data* dataAttr = new stun::Data;
+	auto dataAttr = new stun::Data;
 	dataAttr->copyBytes(data, size);
 	request->add(dataAttr);
 

@@ -100,11 +100,11 @@ void TCPConnectionPair::setPeerSocket(const net::TCPSocket& socket)
 	assert(peer.isNull());
 	//assert(socket.base().refCount() == 1);
 	peer = socket;
-
 	peer.Close += delegate(this, &TCPConnectionPair::onConnectionClosed);
-
-	// Start receiving early media
-	peer.Recv += delegate(this, &TCPConnectionPair::onPeerDataReceived);
+	
+	// Receive and buffer early media from peer
+	peer.Recv += delegate(this, &TCPConnectionPair::onPeerDataReceived);	
+	setServerSocketBufSize<uv_tcp_t>(socket.base(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
 
 
@@ -117,6 +117,7 @@ void TCPConnectionPair::setClientSocket(const net::TCPSocket& socket)
 	//assert(socket.base().refCount() == 2);
 	client = socket;
 	client.Close += delegate(this, &TCPConnectionPair::onConnectionClosed);
+	setServerSocketBufSize<uv_tcp_t>(socket.base(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
 
 
