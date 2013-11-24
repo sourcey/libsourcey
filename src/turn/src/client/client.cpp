@@ -61,12 +61,15 @@ void Client::initiate()
 	
 	assert(!_permissions.empty() && "must set permissions");
 	
+	auto udpSocket = dynamic_cast<net::UDPBase*>(&_socket.base());
+	if (udpSocket) {
+		udpSocket->bind(net::Address("0.0.0.0", 0));
+		udpSocket->setBroadcast(true);
+	}
+
 	_socket.Recv += delegate(this, &Client::onSocketRecv, -1); // using PacketSocket for STUN transactions
 	_socket.Connect += delegate(this, &Client::onSocketConnect);
 	_socket.Close += delegate(this, &Client::onSocketClose);
-
-	if (_socket.base().transport() == net::TransportType::UDP)
-		_socket.bind(net::Address("0.0.0.0", 0));
 	_socket.connect(_options.serverAddr);
 	//_socket
 	//else

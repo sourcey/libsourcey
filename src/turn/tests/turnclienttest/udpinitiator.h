@@ -68,8 +68,17 @@ protected:
 	}
 	
 	void onRelayDataReceived(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
-	{				
-		//std::string payload(util::itostr(time::ticks()));
+	{	
+		std::string payload(data, size);
+		payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
+		if (payload.length() == 8) {
+			UInt64 sentAt = util::strtoi<UInt64>(payload);
+			UInt64 latency = time::ticks() - sentAt;
+
+			debugL("UDPInitiator") << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
+		}
+
+		/*
 		if (size < 150) {
 			std::string payload(data, size);
 			UInt64 sentAt = util::strtoi<UInt64>(payload);
@@ -79,7 +88,7 @@ protected:
 		}
 		else
 			debugL("UDPInitiator") << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
-	
+		*/
 		// Echo back to peer
 		//client.sendData(data, size, peerAddr);
 	}

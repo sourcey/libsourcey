@@ -10,15 +10,15 @@ using namespace scy::net;
 using namespace scy::turn;
 
 
-
 const std::string SERVER_ADDRESS ("0.0.0.0");
 const std::string SERVER_USERNAME("username");
 const std::string SERVER_PASSWORD("password");
 const std::string SERVER_REALM   ("sourcey.com");
 
 
-struct RelayServer: public ServerObserver
+class RelayServer: public ServerObserver
 {
+public:
 	Server server;
 
 	RelayServer(const ServerOptions& so) : server(*this, so) 
@@ -113,7 +113,8 @@ int main(void)
 			opts.allocationDefaultLifetime		= 1 * 60 * 1000;
 			opts.allocationMaxLifetime			= 15 * 60 * 1000;
 			opts.timerInterval					= 5 * 1000;
-			opts.listenAddr						= Address(SERVER_ADDRESS, 3478);
+			opts.listenAddr						= net::Address(SERVER_ADDRESS, 3478);
+			//opts.enableUDP                      = false;
 	
 			RelayServer srv(opts);
 			srv.run();

@@ -81,6 +81,10 @@ public:
 	virtual int send(const char* data, int len, int flags = 0);
 	virtual int send(const char* data, int len, const net::Address& peerAddress, int flags = 0);
 	
+	virtual bool setBroadcast(bool flag);
+	virtual bool setMulticastLoop(bool flag);
+	virtual bool setMulticastTTL(int ttl);
+	
 	virtual net::Address address() const;
 	virtual net::Address peerAddress() const;
 

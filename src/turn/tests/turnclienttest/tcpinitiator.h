@@ -84,23 +84,12 @@ struct TCPInitiator: public TCPClientObserver
 		}
 	}
 	
-	/*
-	void onTimer(TCPClient& client)
-	{
-		debugL("TCPInitiator") << "onTimer: " << lastPeerAddr.valid() << endl;
-
-		// Send some data to the peer when available
-		if (lastPeerAddr.valid())
-			client.sendData("on timer", 6, lastPeerAddr);
-	}
-	*/
-
 	void onRelayConnectionCreated(TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddr) //UInt32 connectionID, 
 	{
 		debugL("TCPInitiator") << id << ": Connection Created: " << peerAddr << endl;
 				
 		// Send the intial data packet to peer
-		client.sendData("hello peer", 10, peerAddr);
+		//client.sendData("hello peer", 10, peerAddr);
 
 		// Remember the last peer
 		lastPeerAddr = peerAddr;
@@ -113,11 +102,31 @@ struct TCPInitiator: public TCPClientObserver
 	}
 
 	void onRelayDataReceived(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
-	{
-		debugL("TCPInitiator") << id << ": Received data from  " << peerAddr << ": " << std::string(data, size)  << endl;
-		
+	{		
+		std::string payload(data, size);
+		payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
+		if (payload.length() == 8) {
+			UInt64 sentAt = util::strtoi<UInt64>(payload);
+			UInt64 latency = time::ticks() - sentAt;
+
+			debugL("UDPInitiator") << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
+		}
+
+		/*
+		if (size < 150) {
+			//std::string payload(data, size);
+			std::string payload(data, 8); // read the first packet from joined packets
+			UInt64 sentAt = util::strtoi<UInt64>(payload);
+			UInt64 latency = time::ticks() - sentAt;
+
+			debugL("UDPInitiator") << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
+		}
+		else
+			debugL("UDPInitiator") << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
+		*/
+		//debugL("TCPInitiator") << id << ": Received data from  " << peerAddr << ": " << std::string(data, size)  << endl;
 		// Echo back to peer
-		client.sendData(data, size, peerAddr);
+		//client.sendData(data, size, peerAddr);
 	}
 	
 	void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)

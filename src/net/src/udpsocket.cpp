@@ -179,6 +179,28 @@ int UDPBase::send(const char* data, int len, const Address& peerAddress, int /* 
 	return len;
 }
 
+	
+bool UDPBase::setBroadcast(bool flag)
+{
+	if (!ptr()) return false;
+	return uv_udp_set_broadcast(ptr<uv_udp_t>(), flag ? 1 : 0);
+}
+
+
+bool UDPBase::setMulticastLoop(bool flag)
+{
+	if (!ptr()) return false;
+	return uv_udp_set_broadcast(ptr<uv_udp_t>(), flag ? 1 : 0);
+}
+
+
+bool UDPBase::setMulticastTTL(int ttl)
+{
+	assert(ttl > 0 && ttl < 255);
+	if (!ptr()) return false;
+	return uv_udp_set_broadcast(ptr<uv_udp_t>(), ttl);
+}
+
 
 bool UDPBase::recvStart() 
 {

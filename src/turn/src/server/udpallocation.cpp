@@ -45,7 +45,8 @@ UDPAllocation::UDPAllocation(Server& server,
 	// Handle data from the relay socket directly from the allocation.
 	// This will remove the need for allocation lookups when receiving
 	// data from peers.
-	_relaySocket.bind(net::Address(server.options().listenAddr.host(), 0));	
+	_relaySocket.bind(net::Address(server.options().listenAddr.host(), 0));		
+	_relaySocket.base().setBroadcast(true);
 	_relaySocket.Recv += delegate(this, &UDPAllocation::onPeerDataReceived);
 	//_relaySocket.adapter() += packetDelegate(this, &UDPAllocation::onPacketReceived, 1);
 
