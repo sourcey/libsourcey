@@ -106,14 +106,16 @@ void TCPAllocation::onPeerAccept(void* sender, const net::TCPSocket& socket)
 	assert(socket.base().refCount() == 1);
 	pair->setPeerSocket(socket);
 	assert(socket.base().refCount() == 2);
+	
+	stun::Message response(stun::Message::Indication, stun::Message::ConnectionAttempt);
+	//stun::Message response;
+	//response.setType(stun::Message::ConnectionAttempt);
 
-	stun::Message response;
-	response.setType(stun::Message::ConnectionAttempt);
-
-	auto addrAttr = new stun::XorPeerAddress;
-	addrAttr->setFamily(1);
-	addrAttr->setPort(socket.peerAddress().port());
-	addrAttr->setIP(socket.peerAddress().host());
+	auto addrAttr = new stun::XorPeerAddress;	
+	addrAttr->setAddress(socket.peerAddress());
+	//addrAttr->setFamily(1);
+	//addrAttr->setPort(socket.peerAddress().port());
+	//addrAttr->setIP(socket.peerAddress().host());
 	response.add(addrAttr);
 	
 	auto connAttr = new stun::ConnectionID;
@@ -131,9 +133,9 @@ bool TCPAllocation::handleRequest(Request& request)
 	log("trace") << "Handle request" << endl;	
 
 	if (!ServerAllocation::handleRequest(request)) {
-		if (request.type() == stun::Message::Connect)
+		if (request.methodType() == stun::Message::Connect)
 			handleConnectRequest(request);
-		else if (request.type() == stun::Message::ConnectionBind)
+		else if (request.methodType() == stun::Message::ConnectionBind)
 			handleConnectionBindRequest(request);
 		else
 			return false;
@@ -212,7 +214,7 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
 {
 	log("trace") << "Handle ConnectionBind Request" << endl;
 	
-	assert(request.type() == stun::Message::ConnectionBind);
+	assert(request.methodType() == stun::Message::ConnectionBind);
 	TCPConnectionPair* pair = nullptr;
 	try {
 		// 5.4. Receiving a ConnectionBind Request
@@ -252,9 +254,8 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
 			assert(0);
 			throw std::runtime_error("Already a peer data connection: " + util::itostr(connAttr->value()));
 		}
-
-		stun::Message response;
-		response.setType(stun::Message::ConnectionBind);
+		
+		stun::Message response(stun::Message::SuccessResponse, stun::Message::ConnectionBind);
 		response.setTransactionID(request.transactionID());
 		
 		// Send the response back over the client connection
@@ -298,8 +299,7 @@ void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair, bool succes
 	// success response. The attribute's value MUST uniquely identify the
 	// peer data connection.
 	// 
-	stun::Message response;
-	response.setType(stun::Message::Connect);
+	stun::Message response(stun::Message::SuccessResponse, stun::Message::Connect);
 	response.setTransactionID(pair->transactionID);
 
 	if (success) {

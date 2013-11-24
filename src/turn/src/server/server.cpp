@@ -60,6 +60,7 @@ void Server::start()
 		_udpSocket.assign(new UDPBase, false);
 		_udpSocket.Recv += delegate(this, &Server::onSocketRecv, 1);
 		_udpSocket.bind(_options.listenAddr);
+		log("trace") << "UDP listening on " << _options.listenAddr << endl;	
 	}
 	
 	if (_options.enableTCP) {
@@ -67,6 +68,7 @@ void Server::start()
 		_tcpSocket.bind(_options.listenAddr);
 		_tcpSocket.listen();
 		_tcpSocket.base().AcceptConnection += delegate(this, &Server::onTCPAcceptConnection);
+		log("trace") << "TCP listening on " << _options.listenAddr << endl;	
 	}
 
 	_timer.Timeout += delegate(this, &Server::onTimer);
@@ -107,8 +109,6 @@ void Server::stop()
 
 void Server::onTimer(void*)
 {
-	//log("trace") << "On timer" << endl;	
-	
 	ServerAllocationMap allocations = this->allocations();
 	for (ServerAllocationMap::iterator it = allocations.begin(); it != allocations.end(); ++it) {
 		log("trace") << "Checking allocation: " << *it->second << endl;	// print the allocation debug info
@@ -130,6 +130,9 @@ void Server::onTCPAcceptConnection(void*, const net::TCPSocket& sock)
 	assert(socket.base().refCount() == 2);
 	socket.Recv += delegate(this, &Server::onSocketRecv);
 	socket.Close += delegate(this, &Server::onTCPSocketClosed);
+
+	// No need to increase control socket buffer size
+	// setServerSocketBufSize<net::TCPSocket>(socket, SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
 
 
@@ -146,7 +149,7 @@ void Server::onSocketRecv(void* sender, net::SocketPacket& packet)
 	std::size_t len = packet.size();
 	std::size_t nread = 0;
 	while (len > 0 && (nread = message.read(constBuffer(buf, len))) > 0) {
-		if (message.state() == stun::Message::Request) {
+		if (message.classType() == stun::Message::Request) {
 			Request request(*info->socket, message, info->socket->address(), info->peerAddress);
 			AuthenticationState state = _observer.authenticateRequest(this, request);
 			handleRequest(request, state);
@@ -158,11 +161,9 @@ void Server::onSocketRecv(void* sender, net::SocketPacket& packet)
 	if (len == packet.size())
 		log("warn") << "Non STUN packet received" << std::endl;
 
-	/*
-	//packet.buffer.position(0);
+#if 0
 	stun::Message message;
 	if (message.read(constBuffer(packet.data(), packet.size()))) {
-		// TODO: We make it here on empty packet!
 		assert(message.state() == stun::Message::Request);	
 
 		Request request(*info->socket, message, info->socket->address(), info->peerAddress);
@@ -170,8 +171,7 @@ void Server::onSocketRecv(void* sender, net::SocketPacket& packet)
 		handleRequest(request, state);
 	}
 	else
-		log() << "Non STUN packet received: " << packet.size() << std::endl;
-		*/
+#endif
 }
 
 
@@ -251,7 +251,7 @@ void Server::handleAuthorizedRequest(Request& request) //, AuthenticationState s
 	// receiving a 437 error response to a request other than Allocate MUST
 	// assume the allocation no longer exists.
 
-	switch (request.type()) {
+	switch (request.methodType()) {
 		case stun::Message::Binding: 
 			handleBindingRequest(request);
 			break;
@@ -306,18 +306,20 @@ void Server::handleBindingRequest(Request& request)
 {
 	log("trace") << "Handle Binding request" << endl;
 
-	assert(request.type() == stun::Message::Binding);
-	assert(request.state() == stun::Message::Request);
+	assert(request.methodType() == stun::Message::Binding);
+	assert(request.classType() == stun::Message::Request);
 
-	stun::Message response;
-	response.setType(stun::Message::Binding);
+	stun::Message response(stun::Message::SuccessResponse, stun::Message::Binding);
+	//response.setClass(stun::Message::Request);
+	//response.setMethod(stun::Message::Binding);
 	response.setTransactionID(request.transactionID());
 
 	// XOR-MAPPED-ADDRESS
 	auto addrAttr = new stun::XorMappedAddress;
-	addrAttr->setFamily(1);
-	addrAttr->setPort(request.remoteAddr.port());
-	addrAttr->setIP(request.remoteAddr.host());
+	addrAttr->setAddress(request.remoteAddr);
+	//addrAttr->setFamily(1);
+	//addrAttr->setPort(request.remoteAddr.port());
+	//addrAttr->setIP(request.remoteAddr.host());
 	response.add(addrAttr);
   
 	request.socket.send(response, request.remoteAddr);
@@ -328,8 +330,8 @@ void Server::handleAllocateRequest(Request& request)
 {
 	log("trace") << "Handle Allocate request" << endl;
 
-	assert(request.type() == stun::Message::Allocate);
-	assert(request.state() == stun::Message::Request);
+	assert(request.methodType() == stun::Message::Allocate);
+	assert(request.classType() == stun::Message::Request);
 
 	// When the server receives an Allocate request, it performs the
 	// following checks:
@@ -367,9 +369,10 @@ void Server::handleAllocateRequest(Request& request)
 		return;
 	}
 		
-	if (transportAttr->value() != 6 &&
-		transportAttr->value() != 17) {
-		errorL() << "Requested Transport is neither TCP or UDP: " << transportAttr->value() << endl;
+	int protocol = transportAttr->value() >> 24;
+	if (protocol != 6 &&
+		protocol != 17) {
+		errorL() << "Requested Transport is neither TCP or UDP: " << protocol << endl;
 		respondError(request, 422, "Unsupported Transport Protocol");
 		return;
 	}
@@ -423,7 +426,7 @@ void Server::handleAllocateRequest(Request& request)
 	ServerAllocation* allocation = nullptr;
 
 	// Protocol specific allocation handling. 6 = TCP, 17 = UDP.
-	if (transportAttr->value() == 17) {		// UDP
+	if (protocol == 17) {		// UDP
 
 		// If all the checks pass, the server creates the allocation.  The
 		// 5-tuple is set to the 5-tuple from the Allocate request, while the
@@ -508,7 +511,7 @@ void Server::handleAllocateRequest(Request& request)
 		allocation = new UDPAllocation(*this, tuple, username, lifetime);
 	} 
 	
-	else if (transportAttr->value() == 6) {	// TCP
+	else if (protocol == 6) {	// TCP
 
 		// 5.1. Receiving a TCP Allocate Request
 		// 
@@ -552,17 +555,19 @@ void Server::handleAllocateRequest(Request& request)
 	// Once the allocation is created, the server replies with a success
 	// response.  The success response contains:
 
-	stun::Message response;
-	response.setType(stun::Message::Allocate);
+	stun::Message response(stun::Message::SuccessResponse, stun::Message::Allocate);
 	response.setTransactionID(request.transactionID());
 
 	// o  An XOR-RELAYED-ADDRESS attribute containing the relayed transport
 	//    address.
 	auto relayAddrAttr = new stun::XorRelayedAddress;
-	relayAddrAttr->setFamily(1);
-	relayAddrAttr->setIP(options().listenAddr.host());
-	//relayAddrAttr->setIP(allocation->relayedAddress().host());
-	relayAddrAttr->setPort(allocation->relayedAddress().port());
+	relayAddrAttr->setAddress(net::Address(
+		options().listenAddr.host(), 
+		allocation->relayedAddress().port()));
+	//relayAddrAttr->setFamily(1);
+	//relayAddrAttr->setIP(options().listenAddr.host());
+	////relayAddrAttr->setIP(allocation->relayedAddress().host());
+	//relayAddrAttr->setPort(allocation->relayedAddress().port());
 	response.add(relayAddrAttr);
 
 	// o  A LIFETIME attribute containing the current value of the time-to-
@@ -583,10 +588,16 @@ void Server::handleAllocateRequest(Request& request)
 	//    can thus avoid having to do an extra Binding transaction with some
 	//    STUN server to learn it. 
 	auto mappedAddressAttr = new stun::XorMappedAddress;
-	mappedAddressAttr->setFamily(1);
-	mappedAddressAttr->setIP(request.remoteAddr.host());
-	mappedAddressAttr->setPort(request.remoteAddr.port());
+	mappedAddressAttr->setAddress(request.remoteAddr);
+	//mappedAddressAttr->setFamily(1);
+	//mappedAddressAttr->setIP(request.remoteAddr.host());
+	//mappedAddressAttr->setPort(request.remoteAddr.port());
 	response.add(mappedAddressAttr);
+
+	
+	log("trace") << "Allocate response: " 
+		<< "XorRelayedAddress=" << relayAddrAttr->address() 
+		<< ", XorMappedAddress=" << mappedAddressAttr->address() << endl;
 	
 	// The response (either success or error) is sent back to the client on
 	// the 5-tuple.
@@ -636,8 +647,7 @@ void Server::respondError(Request& request, int errorCode, const char* errorDesc
 	
 	//Mutex::ScopedLock lock(_mutex);
 
-	stun::Message errorMsg;
-	errorMsg.setType(request.type());
+	stun::Message errorMsg(stun::Message::ErrorResponse, request.methodType());
 	errorMsg.setTransactionID(request.transactionID());
 
 	// SOFTWARE
@@ -787,7 +797,7 @@ void Server::onPacketReceived(void* sender, stun::Message& message)
 
 	assert(message.state() == stun::Message::Request);
 	
-	net::PacketInfo* source = reinterpret_cast<net::PacketInfo*>(message.info);
+	auto source = reinterpret_cast<net::PacketInfo*>(message.info);
 	assert(source);
 	if (!source)
 		return;

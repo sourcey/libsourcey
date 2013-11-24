@@ -36,7 +36,9 @@ class Tests
 public:
 	Tests()
 	{					
-		testMessageIntegrity();
+		//testMessageIntegrity();
+		//testXorAddress();
+		testReuestTypes();
 	}
 	
 	void testMessageIntegrity() 
@@ -44,8 +46,8 @@ public:
 		std::string username("someuser");
 		std::string password("somepass");
 		
-		stun::Message request;
-		request.setType(stun::Message::Allocate);
+		stun::Message request(stun::Message::Request, stun::Message::Allocate);
+		//request.setType(stun::Message::Allocate);
 		
 		auto usernameAttr = new stun::Username;
 		usernameAttr->copyBytes(username.c_str(), username.size());
@@ -63,6 +65,56 @@ public:
 		
 		integrityAttr = response.get<stun::MessageIntegrity>();
 		assert(integrityAttr->verifyHmac(password));
+	}
+	
+	void testReuestTypes() 
+	{	
+		UInt16 type = stun::Message::Indication | stun::Message::SendIndication;
+
+		assert(IS_STUN_INDICATION(type));
+		
+		UInt16 classType = type & 0x0110;
+		UInt16 methodType = type & 0x000F;
+		
+		assert(classType == stun::Message::Indication);
+		assert(methodType == stun::Message::SendIndication);
+
+		stun::Message request(stun::Message::Indication, stun::Message::SendIndication);
+		assert(IS_STUN_INDICATION(request.classType() | request.methodType()));
+		stun::Message request1(stun::Message::Request, stun::Message::Allocate);
+		assert(IS_STUN_REQUEST(request1.classType() | request1.methodType()));
+	}
+	
+	
+	void testXorAddress() 
+	{	
+		assert(5555 == 0x15B3);
+		assert(5555 ^ (kMagicCookie >> 16) == 0x34A1);
+		
+		net::Address addr("192.168.1.1", 5555);
+		debugL("TestXorAddress") << "Source Address: " << addr << endl;
+		
+		stun::Message request(stun::Message::Request, stun::Message::Allocate);
+		//stun::Message request;
+		//request.setType(stun::Message::Allocate);
+		
+		auto addrAttr = new stun::XorRelayedAddress;
+		addrAttr->setAddress(addr);
+		request.add(addrAttr);
+		debugL("TestXorAddress") << "Request Address: " << addrAttr->address() << endl;
+
+		Buffer buf;
+		request.write(buf);
+
+		stun::Message response;
+		response.read(constBuffer(buf));
+				
+		addrAttr = response.get<stun::XorRelayedAddress>();	
+		
+		debugL("TestXorAddress") << "Response Address: " << addrAttr->address() << endl;
+		assert(addrAttr->address() == addr);
+		/*
+		*/
 	}
 };
 

@@ -29,8 +29,8 @@ struct TCPInitiator: public TCPClientObserver
 	Signal<const net::Address&>	ConnectionCreated;
 	Signal<bool> TestComplete;
 
-	TCPInitiator(int id) : 
-		id(id), client(*this), success(false) 
+	TCPInitiator(int id, const Client::Options opts) : 
+		id(id), client(*this, opts), success(false) 
 	{
 		debugL("TCPInitiator") << id << ": Creating" << endl;
 	}
@@ -40,11 +40,10 @@ struct TCPInitiator: public TCPClientObserver
 		debugL("TCPInitiator") << id << ": Destroying" << endl;
 	}
 
-	void initiate(const Client::Options opts, const std::string& peerIP) 
+	void initiate(const std::string& peerIP) 
 	{
 		debugL("TCPInitiator") << id << ": Initializing" << endl;
 		try	{
-			client.options() = opts;
 			client.addPermission(peerIP);
 			client.addPermission("127.0.0.1");		
 			client.addPermission("192.168.1.1");			
@@ -115,10 +114,10 @@ struct TCPInitiator: public TCPClientObserver
 
 	void onRelayDataReceived(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
 	{
-		debugL("TCPInitiator") << id << ": Received data from  " << peerAddr << ": " << string(data, size)  << endl;
+		debugL("TCPInitiator") << id << ": Received data from  " << peerAddr << ": " << std::string(data, size)  << endl;
 		
 		// Echo back to peer
-		//client.sendData(data, size + 1, peerAddr);
+		client.sendData(data, size, peerAddr);
 	}
 	
 	void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
@@ -158,7 +157,7 @@ struct TCPInitiator: public TCPClientObserver
 		
 	void onRawPacketReceived(void* sender, RawPacket& packet)
 	{
-		//debugL("TCPInitiator") << "TCPInitiator: " << id << ": Data Packet Received: " << string(packet.data, packet.size) << endl;
+		//debugL("TCPInitiator") << "TCPInitiator: " << id << ": Data Packet Received: " << std::string(packet.data, packet.size) << endl;
 		debugL("TCPInitiator") << "TCPInitiator: " << id << ": Data Packet Received: " << packet.size << endl;
 	}
 

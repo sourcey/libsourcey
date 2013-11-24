@@ -97,12 +97,16 @@ void TCPClient::sendConnectRequest(const net::Address& peerAddress)
 	log() << "Send Connect request" << endl;	
 
 	auto transaction = createTransaction();
-	transaction->request().setType(stun::Message::Connect);
+	//transaction->request().setType(stun::Message::Connect);
+	//stun::Message request(stun::Message::Request, stun::Message::Allocate);
+	transaction->request().setClass(stun::Message::Request);
+	transaction->request().setMethod(stun::Message::Connect);
 
 	auto peerAttr = new stun::XorPeerAddress;
-	peerAttr->setFamily(1);
-	peerAttr->setPort(peerAddress.port());
-	peerAttr->setIP(peerAddress.host());
+	peerAttr->setAddress(peerAddress);
+	//peerAttr->setFamily(1);
+	//peerAttr->setPort(peerAddress.port());
+	//peerAttr->setIP(peerAddress.host());
 	transaction->request().add(peerAttr);
 	
 	sendAuthenticatedTransaction(transaction);
@@ -128,23 +132,23 @@ void TCPClient::sendData(const char* data, int size, const net::Address& peerAdd
 bool TCPClient::handleResponse(const stun::Message& response)
 {
 	if (!Client::handleResponse(response)) {
-		if (response.type() == stun::Message::Connect &&
-			response.state() == stun::Message::SuccessResponse)	
+		if (response.methodType() ==  stun::Message::Connect &&
+			response.classType() == stun::Message::SuccessResponse)	
 			handleConnectResponse(response);
 		
-		else if (response.type() == stun::Message::ConnectionAttempt)	
+		else if (response.methodType() ==  stun::Message::ConnectionAttempt)	
 			handleConnectionAttemptIndication(response);
 
-		else if (response.type() == stun::Message::ConnectionBind &&
-			response.state() == stun::Message::SuccessResponse)	
+		else if (response.methodType() ==  stun::Message::ConnectionBind &&
+			response.classType() == stun::Message::SuccessResponse)	
 			handleConnectionBindResponse(response);
 
-		else if (response.type() == stun::Message::ConnectionBind &&
-			response.state() == stun::Message::ErrorResponse)	
+		else if (response.methodType() ==  stun::Message::ConnectionBind &&
+			response.classType() == stun::Message::ErrorResponse)	
 			handleConnectionBindErrorResponse(response);
 
-		else if (response.type() == stun::Message::Connect &&
-			response.state() == stun::Message::ErrorResponse)	
+		else if (response.methodType() ==  stun::Message::Connect &&
+			response.classType() == stun::Message::ErrorResponse)	
 			handleConnectErrorResponse(response);
 
 		else
@@ -368,7 +372,8 @@ void TCPClient::onRelayConnectionConnect(void* sender)
 	//net::TCPSocket& socket = _connections.get(peerAddress, conn);
 
 	auto transaction = createTransaction(conn);
-	transaction->request().setType(stun::Message::ConnectionBind);
+	transaction->request().setClass(stun::Message::Request);
+	transaction->request().setMethod(stun::Message::ConnectionBind);
 
 	auto connAttr = new stun::ConnectionID;
 	connAttr->setValue(req->connectionID);

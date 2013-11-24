@@ -36,31 +36,33 @@ typedef std::string TransactionID;
 class Message: public IPacket
 {
 public:
-	enum Type 
+	enum MethodType
 	{
+		Undefined				= 0x0000,   // default error type
+
 		/// STUN
-		Binding					= 0x001, 
+		Binding					= 0x0001, 
 
 		/// TURN
-		Allocate				= 0x003,	// (only request/response semantics defined)
-		Refresh					= 0x004,
-		SendIndication			= 0x006,	// (only indication semantics defined)
-		DataIndication			= 0x007,	// (only indication semantics defined)
-		CreatePermission		= 0x008,	// (only request/response semantics defined)
-		ChannelBind				= 0x009,	// (only request/response semantics defined)
+		Allocate				= 0x0003,	// (only request/response semantics defined)
+		Refresh					= 0x0004,
+		SendIndication			= 0x0006,	// (only indication semantics defined)
+		DataIndication			= 0x0007,	// (only indication semantics defined)
+		CreatePermission		= 0x0008,	// (only request/response semantics defined)
+		ChannelBind				= 0x0009,	// (only request/response semantics defined)
 
-		/// TURN TCP
-		Connect					= 0x000A, 
-		ConnectionBind			= 0x000B, 
-		ConnectionAttempt		= 0x000C
+		/// TURN TCP RFC 6062
+		Connect					= 0x000a, 
+		ConnectionBind			= 0x000b, 
+		ConnectionAttempt		= 0x000c
 	};
 
-	enum State 	
+	enum ClassType 	
 	{
-		Request					= 0x000,
-		Indication				= 0x001,
-		SuccessResponse			= 0x002,
-		ErrorResponse			= 0x003
+		Request					= 0x0000,
+		Indication				= 0x0010,
+		SuccessResponse			= 0x0100,
+		ErrorResponse			= 0x0110
 	};	
 
 	enum ErrorCodes 
@@ -83,26 +85,27 @@ public:
 
 public:
 	Message();
+	Message(ClassType clss, MethodType meth);
 	Message(const Message& that);	
 	Message& operator = (const Message& that);
 	virtual ~Message();
 	
 	virtual IPacket* clone() const;
-
-	Type type() const { return static_cast<Type>(_type); }
-	State state() const { return _state; }
-	size_t size() const { return static_cast<size_t>(_size); }
-	const TransactionID& transactionID() const { return _transactionID; }
-	const std::vector<Attribute*> attrs() const { return _attrs; }
-
-	void setType(UInt16 type) { _type = type; }
-	void setState(State state) { _state = state; }
+	
+	void setClass(ClassType type);
+	void setMethod(MethodType type);
 	void setTransactionID(const std::string& id);
 
-	std::string errorString(UInt16 errorCode) const;
-	std::string typeString() const;
-	std::string stateString() const;
+	ClassType classType() const; // { }
+	MethodType methodType() const; //  { return static_cast<MethodType>(_method); }
+	const TransactionID& transactionID() const { return _transactionID; }
+	const std::vector<Attribute*> attrs() const { return _attrs; }
+	std::size_t size() const { return static_cast<size_t>(_size); }
 
+	std::string methodString() const;
+	std::string classString() const;
+	std::string errorString(UInt16 errorCode) const;
+	
 	void add(Attribute* attr);
 	Attribute* get(Attribute::Type type, int index = 0) const;	
 
@@ -114,7 +117,7 @@ public:
 
 	std::size_t read(const ConstBuffer& buf);
 		// Parses the STUN/TURN packet from the given buffer.
-		// The return value indicates whether this was successful.
+		// The return value indicates the number of bytes read.
 
 	void write(Buffer& buf) const;
 		// Writes this object into a STUN/TURN packet.
@@ -122,15 +125,49 @@ public:
 	std::string toString() const;
 	void print(std::ostream& os) const;
 
-	virtual const char* className() const { return "STUNMessage"; }
+	virtual const char* className() const { return "StunMessage"; }
 
-private:
-	UInt16	_type;
-	UInt16	_size;
-	State	_state;
+protected:	
+	UInt16 _size;
+	UInt16 _class;
+	UInt16 _method;
 	TransactionID _transactionID;
 	std::vector<Attribute*> _attrs;
 };
+
+
+inline bool isValidMethod(UInt16 methodType) 
+{
+	switch (methodType) {
+	case Message::Binding:
+	case Message::Allocate:
+	case Message::Refresh:
+	case Message::SendIndication:
+	case Message::DataIndication:
+	case Message::CreatePermission:
+	case Message::ChannelBind:
+	case Message::Connect:
+	case Message::ConnectionBind:	
+	case Message::ConnectionAttempt:
+		return true;
+	}
+	return false;
+}
+
+
+/*
+int stun_is_response_str(const UInt8* buf, size_t len) {
+  if(is_channel_msg_str(buf,len)) return 0;
+  if(IS_STUN_SUCCESS_RESP(stun_get_msg_type_str(buf,len))) return 1;
+  if(IS_STUN_ERR_RESP(stun_get_msg_type_str(buf,len))) return 1;
+  return 0;
+}
+
+int stun_is_indication_str(const UInt8* buf, size_t len) {
+  if(is_channel_msg_str(buf,len)) return 0;
+  return IS_STUN_INDICATION(stun_get_msg_type_str(buf,len));
+}
+*/
 
 
 } } // namespace scy:stun
@@ -138,3 +175,10 @@ private:
 
 #endif //  SCY_STUN_MESSAGE_H
 
+	
+
+	//State	_state;
+	 // { return _state; }
+	// { return static_cast<Method>(_type); }
+	//UInt16 type() const; // { return _type; }
+	

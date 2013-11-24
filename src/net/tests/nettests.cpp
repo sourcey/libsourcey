@@ -1,5 +1,6 @@
 #include "scy/base.h"
 #include "scy/application.h"
+#include "scy/time.h"
 #include "scy/timer.h"
 #include "scy/logger.h"
 #include "scy/net/tcpsocket.h"
@@ -67,10 +68,10 @@ public:
 
 			//runAddressTest();			
 			//runTCPSocketTest();	
-			//runUDPSocketTest();
+			runUDPSocketTest();
 
 #if TEST_SSL
-			runSSLSocketTest();
+			//runSSLSocketTest();
 #endif	
 
 #if TEST_SSL
@@ -113,50 +114,35 @@ public:
 		assert(sa8.host() == "192.168.2.120");
 		assert(sa8.port() == 88);
 
-		try
-		{
+		try {
 			Address sa3("192.168.1.100", "f00bar");
 			assert(0 && "bad service name - must throw");
 		}
-		catch (Exception&)
-		{
-		}
+		catch (std::exception&) {}
 
-		try
-		{
+		try {
 			Address sa6("192.168.2.120", "80000");
 			assert(0 && "invalid port - must throw");
 		}
-		catch (Exception&)
-		{
-		}
+		catch (std::exception&) {}
 
-		try
-		{
+		try {
 			Address sa5("192.168.2.260", 80);
 			assert(0 && "invalid address - must throw");
 		}
-		catch (Exception&)
-		{
-		}
+		catch (std::exception&) {}
 
-		try
-		{
+		try {
 			Address sa9("[192.168.2.260:", 88);
 			assert(0 && "invalid address - must throw");
 		}
-		catch (Exception&)
-		{
-		}
+		catch (std::exception&) {}
 
-		try
-		{
+		try {
 			Address sa9("[192.168.2.260]");
 			assert(0 && "invalid address - must throw");
 		}
-		catch (Exception&)
-		{
-		}
+		catch (std::exception&) {}
 	}	
 	
 	// ============================================================================
@@ -185,56 +171,82 @@ public:
 	//
 	int numUDPPacketsWanted;
 	int numUDPPacketsReceived;
+	net::UDPSocket serverSock;
+	net::UDPSocket clientSock;
+	net::Address serverAddr;	
+	net::Address clientAddr;	
 	
 	void runUDPSocketTest() 
 	{
 		traceL("Tests") << "UDP Socket Test: Starting" << endl;
 		
-		net::Address serverAddr("127.0.0.1", 1337);	
 		numUDPPacketsWanted = 100;
 		numUDPPacketsReceived = 0;
+		
+		serverAddr.swap(net::Address("127.0.0.1", 1337));	
+		clientAddr.swap(net::Address("127.0.0.1", 1338));	
 
-		net::UDPSocket serverSock;
 		serverSock.Recv += delegate(this, &Tests::onUDPSocketServerRecv);
 		serverSock.bind(serverAddr);
 		
-		net::Address clientAddr("127.0.0.1", 1338);	
-		net::UDPSocket clientSock;
 		clientSock.Recv += delegate(this, &Tests::onUDPClientSocketRecv);		
 		clientSock.bind(clientAddr);	
+		clientSock.connect(serverAddr);	
 
-		for (unsigned i = 0; i < numUDPPacketsWanted; i++)
-			clientSock.send("bounce", 6, serverAddr);
+		//for (unsigned i = 0; i < numUDPPacketsWanted; i++)
+		//	clientSock.send("bounce", 6, serverAddr);		
+
+		// Start the send timer
+		Timer timer;
+		timer.Timeout += delegate(this, &Tests::onUDPClientSendTimer);
+		timer.start(100, 100);
 			
 		runLoop();
 	}
 	
-	// ----------------------------------------------------------------------------
-	//		
-	void onUDPClientSocketRecv(void* sender, net::SocketPacket& packet)
+	void onUDPSocketServerRecv(void* sender, net::SocketPacket& packet)
 	{
-		assert(std::string(packet.data(), packet.size()) == "bounce");
+		std::string payload(packet.data(), packet.size());		
+		debugL("UDPInitiator") << "UDPSocket server recv from " 
+			<< packet.info->peerAddress << ": payload=" << payload << endl;
+		
+		// Send the unix ticks milisecond for checking RTT
+		//payload.assign(util::itostr(time::ticks()));
+		
+		// Relay back to the client to check RTT
+		//packet.info->socket->send(packet, packet.info->peerAddress);
+		packet.info->socket->send(payload.c_str(), payload.length(), packet.info->peerAddress);		
+	}
+
+	void onUDPClientSendTimer(void*)
+	{
+		std::string payload(util::itostr(time::ticks()));
+		clientSock.send(payload.c_str(), payload.length(), serverAddr);
+	}
+
+	void onUDPClientSocketRecv(void* sender, net::SocketPacket& packet)
+	{				
+		std::string payload(packet.data(), packet.size());
+		UInt64 sentAt = util::strtoi<UInt64>(payload);
+		UInt64 latency = time::ticks() - sentAt;
+
+		debugL("UDPInitiator") << "UDPSocket ckient recv from " << packet.info->peerAddress << ": payload=" << payload << ", latency=" << latency << endl;
+		
+
+		/*
 		numUDPPacketsReceived++;
 		if (numUDPPacketsReceived == numUDPPacketsWanted) {
 
 			// Close the client socket dereferencing the main loop.
-			packet.info->socket.close();			
+			packet.info->socket->close();			
 
 			// The server socket is still active so unref the loop once
 			// to cause the destruction of both the socket instances.
 			app.stop();
 		}
+		*/
 	}
 	
-	// ----------------------------------------------------------------------------
-	//		
-	void onUDPSocketServerRecv(void* sender, net::SocketPacket& packet)
-	{
-		traceL("Tests") << "UDPSocket Server Recv: " << (IPacket&)packet << ": " << std::string(packet.data(), packet.size()) << endl;
-
-		// Relay back to the client
-		packet.info->socket.send(packet, packet.info->peerAddress);
-	}
 	
 	// ============================================================================
 	// Timer Test
@@ -281,6 +293,7 @@ public:
 int main(int argc, char** argv) 
 {	
 	Logger::instance().add(new ConsoleChannel("debug", LTrace));
+	Logger::instance().setWriter(new AsyncLogWriter);	
 	{
 		net::Tests run;
 	}

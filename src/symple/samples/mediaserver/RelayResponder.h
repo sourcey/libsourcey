@@ -207,8 +207,8 @@ public:
 			<< std::endl;
 
 		turn::Client::Options co;
-		//co.serverAddr = net::Address("74.207.248.97", 3478); 
-		co.serverAddr = net::Address("122.201.111.134", 3478);		
+		co.serverAddr = net::Address("74.207.248.97", 3478); 
+		//co.serverAddr = net::Address("122.201.111.134", 3478);		
 		//co.serverAddr = net::Address("127.0.0.1", 3478);
 		co.lifetime  = 120 * 1000;	// 2 minutes
 		co.timeout = 10 * 1000;
@@ -330,7 +330,7 @@ public:
 	/*
 	void onMediaEncoded(void* sender, RawPacket& packet)
 	{
-		debugL("RelayedStreamingAllocation", this) << "$$$$$$$$$$$$$$ Sending Packet: " << packet.size() << string((const char*)packet.data(), 100)  << std::endl;
+		debugL("RelayedStreamingAllocation", this) << "$$$$$$$$$$$$$$ Sending Packet: " << packet.size() << std::string((const char*)packet.data(), 100)  << std::endl;
 		
 		//assert(currentPeerAddr.valid());
 		try {

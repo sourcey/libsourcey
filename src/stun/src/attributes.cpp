@@ -110,26 +110,20 @@ std::string Attribute::typeString()
 
 void Attribute::consumePadding(BitReader& reader) const
 {
-#if ENBALE_MESSAGE_PADDING
 	int remainder = _size % 4;
 	if (remainder > 0) {
-		traceL("STUNAttribute") << "############### consumePadding: " << (4 - remainder) << endl;
 		reader.skip(4 - remainder);
 	}
-#endif
 }
 
 
 void Attribute::writePadding(BitWriter& writer) const 
 {
-#if ENBALE_MESSAGE_PADDING
 	int remainder = _size % 4;
 	if (remainder > 0) {
 		char zeroes[4] = {0};
-		traceL("STUNAttribute") << "############### writePadding: " << (4 - remainder) << endl;
 		writer.put(zeroes, 4 - remainder);
 	}
-#endif
 }
 
 
@@ -143,27 +137,32 @@ Attribute* Attribute::create(UInt16 type, UInt16 size)
 	switch (type)
 	{
 	case Attribute::MappedAddress:
-		if (size != MappedAddress::Size)
+		if (size != AddressAttribute::IPv4Size && 
+			size != AddressAttribute::IPv6Size)
 			return nullptr;
 		return new stun::MappedAddress();
 
 	case Attribute::XorMappedAddress:
-		if (size != XorMappedAddress::Size)
+		if (size != AddressAttribute::IPv4Size && 
+			size != AddressAttribute::IPv6Size)
 			return nullptr;
 		return new stun::XorMappedAddress();
 
 	case Attribute::XorRelayedAddress:
-		if (size != XorRelayedAddress::Size)
+		if (size != AddressAttribute::IPv4Size && 
+			size != AddressAttribute::IPv6Size)
 			return nullptr;
 		return new stun::XorRelayedAddress();
 
 	case Attribute::XorPeerAddress:
-		if (size != XorPeerAddress::Size)
+		if (size != AddressAttribute::IPv4Size && 
+			size != AddressAttribute::IPv6Size)
 			return nullptr;
 		return new stun::XorPeerAddress();
 
 	case Attribute::AlternateServer:
-		if (size != AlternateServer::Size)
+		if (size != AddressAttribute::IPv4Size && 
+			size != AddressAttribute::IPv6Size)
 			return nullptr;
 		return new stun::AlternateServer();
 
@@ -275,7 +274,7 @@ Attribute* Attribute::create(UInt16 type, UInt16 size)
 	//	break;
 
 	default:
-		errorL() << "[STUN] Unable to create attribute for type: " << type << endl;
+		errorL("StunAttribute") << "Cannot create attribute for type: " << type << endl;
 		break;
 	}
 
@@ -288,18 +287,19 @@ Attribute* Attribute::create(UInt16 type, UInt16 size)
 
 // ---------------------------------------------------------------------------
 //
-AddressAttribute::AddressAttribute(UInt16 type) : 
-	Attribute(type, Size), _family(0), _port(0), _ip(0) 
+AddressAttribute::AddressAttribute(UInt16 type, bool ipv4) : 
+	Attribute(type, ipv4 ? IPv4Size : IPv6Size)//, 
+	//_family(0), _port(0), _ip(0) 
 {
 }
 
 
 AddressAttribute::AddressAttribute(const AddressAttribute& r) :
-	Attribute(r._type, Size),
-	_family(r._family),
-	_port(r._port),
-	_ip(r._ip)
-{
+	Attribute(r._type, r._size), _address(r._address)
+	//_family(r._family),
+	//_port(r._port),
+	//_ip(r._ip)
+{//
 }
 
 
@@ -309,50 +309,115 @@ Attribute* AddressAttribute::clone()
 }
 
 
-string AddressAttribute::ipString() const 
-{ 
-	ostringstream ost;
-	ost << ((_ip >> 24) & 0xff);
-	ost << '.';
-	ost << ((_ip >> 16) & 0xff);
-	ost << '.';
-	ost << ((_ip >> 8) & 0xff);
-	ost << '.';
-	ost << ((_ip >> 0) & 0xff);
-	return ost.str();
-}
-
-
 net::Address AddressAttribute::address() const 
 { 
-	return net::Address(ipString(), _port); 
+	return _address; 
 }
 
 
-void AddressAttribute::setIP(const std::string& ip) 
+std::string intToIPv4(UInt32 ip) 
 { 
-	in_addr address;
-	address.s_addr = inet_addr(ip.c_str());
-	_ip = ntohl(address.s_addr);
+	// Input should be in host network order
+	// ip = ntohl(ip);
+	char str[20];
+	sprintf(str,"%d.%d.%d.%d",
+		(ip >> 24) & 0xff,
+		(ip >> 16) & 0xff,
+		(ip >> 8) & 0xff,
+		ip & 0xff);
+	return std::string(str);
+
+#if 0
+	ostringstream ost;
+	ost << ((ip >> 24) & 0xff);
+	ost << '.';
+	ost << ((ip >> 16) & 0xff);
+	ost << '.';
+	ost << ((ip >> 8) & 0xff);
+	ost << '.';
+	ost << ((ip >> 0) & 0xff);
+	return ost.str();
+#endif
 }
 
 
 void AddressAttribute::read(BitReader& reader) 
 {
-	UInt8 dummy;
+	// X-Port is computed by taking the mapped port in host byte order,
+	// XOR'ing it with the most significant 16 bits of the magic cookie, and
+	// then the converting the result to network byte order.  If the IP
+	// address family is IPv4, X-Address is computed by taking the mapped IP
+	// address in host byte order, XOR'ing it with the magic cookie, and
+	// converting the result to network byte order.  If the IP address
+	// family is IPv6, X-Address is computed by taking the mapped IP address
+	// in host byte order, XOR'ing it with the magic cookie and the 96-bit
+	// transaction ID, and converting the result to network byte order.
+
+	UInt8 dummy, family;
 	reader.getU8(dummy);
-	reader.getU8(_family);
-	reader.getU16(_port);
-	reader.getU32(_ip);
+	reader.getU8(family);
+	
+	UInt16 port;
+	reader.getU16(port);	
+	port = ntohs(port) ^ ntohs(kMagicCookie >> 16); // XOR
+	//port ^= (kMagicCookie >> 16);
+
+	if (family == AddressFamily::IPv4) {		
+		if (size() != IPv4Size) {
+			assert(0 && "invalid IPv4 address");
+			return;
+		}
+
+		UInt32 ip;	
+		reader.getU32(ip);
+		ip = ntohl(ip) ^ ntohl(kMagicCookie); // XOR
+		//ip ^= ntohl(kMagicCookie);
+		//ip ^= kMagicCookie;
+
+		_address = net::Address(intToIPv4(ntohl(ip)), ntohs(port));
+	}
+	else if (family == AddressFamily::IPv6) {
+		assert(0 && "IPv6 not supported");
+	}
+	else {
+		assert(0 && "invalid address");
+	}
 }
 
 
 void AddressAttribute::write(BitWriter& writer) const 
 {
 	writer.putU8(0);
-	writer.putU8(_family);
-	writer.putU16(_port);
-	writer.putU32(_ip);
+	writer.putU8(family());
+	//writer.putU8(_family);
+	//writer.putU16(_port);
+	//writer.putU32(_ip);
+	
+	switch (_address.family()) {
+		case net::Address::IPv4: {
+			auto v4addr = reinterpret_cast<sockaddr_in*>(
+				const_cast<sockaddr*>(_address.addr()));
+
+			// Port 
+			UInt16 port = ntohs(v4addr->sin_port); 
+			//assert(port == 5555);
+			//assert(port == 0x15B3);
+			port ^= (kMagicCookie >> 16); // XOR
+			//port = port ^ (kMagicCookie >> 16); // XOR
+			//assert(port == 0x34A1);
+			writer.putU16(port);
+
+			// Address
+			UInt32 ip = ntohl(v4addr->sin_addr.s_addr);
+			ip ^= kMagicCookie; // XOR
+			writer.putU32(ip);
+			break;
+		}
+		case net::Address::IPv6: {
+			assert(0 && "IPv6 not supported");
+			break;
+		}
+	}
 }
 
 

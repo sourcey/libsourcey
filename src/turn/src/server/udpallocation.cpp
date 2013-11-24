@@ -45,8 +45,9 @@ UDPAllocation::UDPAllocation(Server& server,
 	// Handle data from the relay socket directly from the allocation.
 	// This will remove the need for allocation lookups when receiving
 	// data from peers.
-	_relaySocket.bind(net::Address(server.options().listenAddr.host(), 0));
-	_relaySocket.adapter() += packetDelegate(this, &UDPAllocation::onPacketReceived, 1);
+	_relaySocket.bind(net::Address(server.options().listenAddr.host(), 0));	
+	_relaySocket.Recv += delegate(this, &UDPAllocation::onPeerDataReceived);
+	//_relaySocket.adapter() += packetDelegate(this, &UDPAllocation::onPacketReceived, 1);
 
 	log("trace") << " Initializing on address: " << _relaySocket.address() << endl;
 }
@@ -55,7 +56,8 @@ UDPAllocation::UDPAllocation(Server& server,
 UDPAllocation::~UDPAllocation() 
 {
 	log("trace") << "Destroy" << endl;	
-	_relaySocket.adapter() -= packetDelegate(this, &UDPAllocation::onPacketReceived);
+	//_relaySocket.adapter() -= packetDelegate(this, &UDPAllocation::onPacketReceived);
+	_relaySocket.Recv -= delegate(this, &UDPAllocation::onPeerDataReceived);
 	_relaySocket.close();
 }
 
@@ -65,7 +67,7 @@ bool UDPAllocation::handleRequest(Request& request)
 	log("trace") << "Handle Request" << endl;	
 
 	if (!ServerAllocation::handleRequest(request)) {
-		if (request.type() == stun::Message::SendIndication)
+		if (request.methodType() == stun::Message::SendIndication)
 			handleSendIndication(request);
 		else
 			return false;
@@ -86,7 +88,7 @@ void UDPAllocation::handleSendIndication(Request& request)
 	// bytes of data.
 
 	auto peerAttr = request.get<stun::XorPeerAddress>();
-	if (!peerAttr || peerAttr && peerAttr->family() != 1) {
+	if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
 		log("error") << "Send Indication Error: No Peer Address" << endl;
 		// silently discard...
 		return;
@@ -150,9 +152,10 @@ void UDPAllocation::handleSendIndication(Request& request)
 }
 
 
-void UDPAllocation::onPacketReceived(void*, RawPacket& packet) 
+//void UDPAllocation::onPacketReceived(void*, RawPacket& packet) 
+void UDPAllocation::onPeerDataReceived(void*, net::SocketPacket& packet)
 {	
-	net::PacketInfo* source = reinterpret_cast<net::PacketInfo*>(packet.info);
+	auto source = reinterpret_cast<net::PacketInfo*>(packet.info);
 	assert(source);
 	if (!source)
 		return;
@@ -169,30 +172,30 @@ void UDPAllocation::onPacketReceived(void*, RawPacket& packet)
 		log("trace") << "No Permission: " << source->peerAddress.host() << endl;	
 		return;
 	}
-
-	stun::Message message;
-	message.setType(stun::Message::DataIndication);
 	
-	auto peerAttr = new stun::XorPeerAddress;
-	peerAttr->setFamily(1);
-	peerAttr->setPort(source->peerAddress.port());
-	peerAttr->setIP(source->peerAddress.host());
+	stun::Message message(stun::Message::Indication, stun::Message::DataIndication);
+	
+	auto peerAttr = new stun::XorPeerAddress;	
+	peerAttr->setAddress(source->peerAddress);
+	//peerAttr->setFamily(1);
+	//peerAttr->setPort(source->peerAddress.port());
+	//peerAttr->setIP(source->peerAddress.host());
 	message.add(peerAttr);
 
-	stun::Data* dataAttr = new stun::Data;
+	auto dataAttr = new stun::Data;
 	dataAttr->copyBytes(packet.data(), UInt16(packet.size()));
 	message.add(dataAttr);
 	
 	//Mutex::ScopedLock lock(_mutex);
 
-	log("trace") << "Send Data Indication:" 
-		<< "\n\tFrom: " << source->peerAddress.toString()
-		<< "\n\tTo: " << _tuple.remote().toString()
-		//<< "\tData: " << string(packet.data, packet.size)
+	log("trace") << "Send data indication:" 
+		<< "\n\tFrom: " << source->peerAddress
+		<< "\n\tTo: " << _tuple.remote()
+		//<< "\n\tData: " << std::string(packet.data(), packet.size())
 		<< endl;
 	
-	assert(0 && "fx");
 	//server().udpSocket().base().send(message, _tuple.remote());
+	server().udpSocket().send(message, _tuple.remote());
 }
 
 
@@ -201,9 +204,8 @@ int UDPAllocation::send(const char* data, int size, const net::Address& peerAddr
 	updateUsage(size);
 	
 	// Check that we have not exceeded our lifetime and bandwidth quota.
-	if (IAllocation::deleted()) {
+	if (IAllocation::deleted())
 		return -1;
-	}
 
 	return _relaySocket.base().send(data, size, peerAddress);
 }

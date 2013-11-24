@@ -29,8 +29,8 @@ namespace stun {
 
 
 Message::Message() : 
-	_type(0), 
-	_state(Request), 
+	_method(Undefined), 
+	_class(Request), 
 	_size(0), 
 	_transactionID(util::randomString(kTransactionIdLength)) 
 {
@@ -38,13 +38,22 @@ Message::Message() :
 }
 
 
-Message::Message(const Message& that) : 
-	_type(that.type()), 
-	_state(that.state()), 
-	_size(that.size()), 
-	_transactionID(that.transactionID()) 
+Message::Message(ClassType clss, MethodType meth) : 
+	_method(meth), 
+	_class(clss), 
+	_size(0), 
+	_transactionID(util::randomString(kTransactionIdLength)) 
 {
-	assert(_type);
+}
+
+
+Message::Message(const Message& that) : 
+	_method(that._method), 
+	_class(that._class), 
+	_size(that._size), 
+	_transactionID(that._transactionID) 
+{
+	assert(_method);
 	assert(_transactionID.size() == kTransactionIdLength);
 
 	// Copy attributes from source object
@@ -56,11 +65,11 @@ Message::Message(const Message& that) :
 Message& Message::operator = (const Message& that) 
 {
 	if (&that != this) {
-		_type = that.type();
-		_state = that.state();
-		_size = static_cast<UInt16>(that.size());
-		_transactionID = that.transactionID();
-		assert(_type);
+		_method = that._method;
+		_class = that._class;
+		_size = that._size;
+		_transactionID = that._transactionID;
+		assert(_method);
 		assert(_transactionID.size() == kTransactionIdLength);	
 
 		// Clear current attributes
@@ -90,14 +99,14 @@ IPacket* Message::clone() const
 }
 
 
-string Message::stateString() const 
+string Message::classString() const 
 {
-	switch (_state) {
+	switch (_class) {
 	case Request:					return "Request";
 	case Indication:				return "Indication";
 	case SuccessResponse:			return "SuccessResponse";
 	case ErrorResponse:				return "ErrorResponse";	
-	default:						return "Unknown";
+	default:						return "UnknownState";
 	}
 }
 
@@ -117,14 +126,14 @@ string Message::errorString(UInt16 errorCode) const
 	case GlobalFailure:				return "GLOBAL FAILURE";	
 	case ConnectionAlreadyExists:	return "Connection Already Exists";		
 	case ConnectionTimeoutOrFailure:	return "Connection Timeout or Failure";			
-	default:						return "Unknown";
+	default:						return "UnknownError";
 	}
 }
 
 
-string Message::typeString() const 
+std::string Message::methodString() const 
 {
-	switch (_type) {
+	switch (_method) {
 	case Binding:					return "BINDING";
 	case Allocate:					return "ALLOCATE";
 	case Refresh:					return "REFRESH";
@@ -135,15 +144,15 @@ string Message::typeString() const
 	case Connect:					return "CONNECT";		
 	case ConnectionBind:			return "CONNECTION-BIND";		
 	case ConnectionAttempt:			return "CONNECTION-ATTEMPT";			
-	default:						return "Unknown";
+	default:						return "UnknownMethod";
 	}
 }
 
 
-string Message::toString() const 
+std::string Message::toString() const 
 {
-	ostringstream os;
-	os << "STUN[" << transactionID() << ":" << typeString();
+	std::ostringstream os;
+	os << "STUN[" << methodString() << ":"; // << transactionID();
 	for (unsigned i = 0; i < _attrs.size(); i++)
 		os << ":" << _attrs[i]->typeString();
 	os << "]";
@@ -153,7 +162,7 @@ string Message::toString() const
 
 void Message::print(std::ostream& os) const
 {
-	os << "STUN[" << typeString() << ":" << transactionID();
+	os << "STUN[" << methodString() << ":"; // << transactionID();
 	for (unsigned i = 0; i < _attrs.size(); i++)
 		os << ":" << _attrs[i]->typeString();
 	os << "]";
@@ -170,14 +179,11 @@ void Message::setTransactionID(const std::string& id)
 void Message::add(Attribute* attr) 
 {
 	_attrs.push_back(attr);	
-#if ENBALE_MESSAGE_PADDING
 	size_t attrLength = attr->size();
 	if (attrLength % 4 != 0)
 		attrLength += (4 - (attrLength % 4));
 	_size += attrLength + kAttributeHeaderSize;
-#else
-	_size += attr->size() + kAttributeHeaderSize;	
-#endif
+	//_size += attr->size() + kAttributeHeaderSize;	
 }
 
 
@@ -196,31 +202,50 @@ Attribute* Message::get(Attribute::Type type, int index) const
 
 std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
 {	
-	traceL("STUNMessage") << "Parse STUN packet: " << buf.size() << endl;
+	traceL("StunMessage") << "Parse STUN packet: " << buf.size() << endl;
 	
 	try {
 		BitReader reader(buf);
 
 		// Message type
-		reader.getU16(_type);
-		if (_type & 0x8000) {
+		UInt16 type;
+		reader.getU16(type);
+		if (type & 0x8000) {
 			// RTP and RTCP set MSB of first byte, since first two bits are version, 
 			// and version is always 2 (10). If set, this is not a STUN packet.
-			warnL("STUNMessage") << "Not STUN packet" << endl;
-			return 0;
-		}
-		
-		// Message length
-		reader.getU16(_size);
-		if (_size > buf.size()) {
-			warnL("STUNMessage") << "Packet larger than buffer: " << _size << " > " << buf.size() << endl;
+			warnL("StunMessage") << "Not STUN packet" << endl;
 			return 0;
 		}
 
+		//UInt16 method = (type & 0x000F) | ((type & 0x00E0)>>1) | 
+		//	((type & 0x0E00)>>2) | ((type & 0x3000)>>2);
+		
+		UInt16 classType = type & 0x0110;
+		UInt16 methodType = type & 0x000F;
+
+		if (!isValidMethod(methodType)) {
+			warnL("StunMessage") << "STUN parse error: Unknown method type: " << methodType << endl;
+			assert(0);
+			return 0;
+		}
+		
+		_class = static_cast<UInt16>(type & 0x0110);
+		_method = static_cast<UInt16>(type & 0x000F);
+				
+		// Message length
+		reader.getU16(_size);
+		if (_size > buf.size()) {
+			warnL("StunMessage") << "Packet larger than buffer: " << _size << " > " << buf.size() << endl;
+			return 0;
+		}
+
+		// TODO: Check valid method
+		// TODO: Parse message class (Message::State)
+
 		// Magic cookie
-		//reader.skip(kMagicCookieLength);
-		std::string magicCookie;
-		reader.get(magicCookie, kMagicCookieLength);
+		reader.skip(kMagicCookieLength);
+		//std::string magicCookie;
+		//reader.get(magicCookie, kMagicCookieLength);
 		
 		// Transaction ID
 		std::string transactionID;
@@ -230,10 +255,9 @@ std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
 	
 		// Attributes
 		_attrs.clear();	
-		int errors = 0;
+		//int errors = 0;
 		int rest = _size;
-		UInt16 attrType, attrLength, padLength;
-		
+		UInt16 attrType, attrLength, padLength;		
 		assert(reader.available() >= rest);
 		while (rest > 0) {
 			reader.getU16(attrType);
@@ -245,28 +269,28 @@ std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
 				attr->read(reader); // parse or throw
 				_attrs.push_back(attr);
 
-				traceL("STUNMessage") << "Parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl; //  << ": " << rest
+				// traceL("StunMessage") << "Parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl; //  << ": " << rest
 			}	
 			else
-				warnL("STUNMessage") << "Failed to parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
+				warnL("StunMessage") << "Failed to parse attribute: " << Attribute::typeString(attrType) << ": " << attrLength << endl;
 				
 			rest -= (attrLength + kAttributeHeaderSize + padLength);
 	
 			// Make sure we don't wind up in an infinite loop 
-			errors++;
-			if (errors > 10) {
-				warnL("STUNMessage") << "Cannot parse STUN message: Too many errors." << endl;
-				return 0;
-			}
+			//errors++;
+			//if (errors > 10) {
+			//	warnL("StunMessage") << "Cannot parse STUN message: Too many errors." << endl;
+			//	return 0;
+			//}
 		}
 
-		traceL("STUNMessage") << "Parse success: " << _size << ": " << buf.size() << endl;
+		traceL("StunMessage") << "Parse success: " << reader.position() << ": " << buf.size() << endl;
 		assert(rest == 0);
 		assert(reader.position() == _size + kMessageHeaderSize);
 		return reader.position();
 	}
 	catch (std::exception& exc) {
-		debugL("STUNMessage") << "Parse error: " << exc.what() << endl;
+		debugL("StunMessage") << "Parse error: " << exc.what() << endl;
 	}
 	
 	return 0;
@@ -275,11 +299,11 @@ std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
 
 void Message::write(Buffer& buf) const 
 {
-	//assert(_type);
+	//assert(_method);
 	//assert(_size);
 
 	BitWriter writer(buf);
-	writer.putU16(_type);
+	writer.putU16((UInt16)(_class | _method));
 	writer.putU16(_size);
 	writer.putU32(kMagicCookie);
 	writer.put(_transactionID);
@@ -291,6 +315,29 @@ void Message::write(Buffer& buf) const
 		writer.putU16(_attrs[i]->size()); 
 		_attrs[i]->write(writer);
 	}
+}
+
+
+Message::ClassType Message::classType() const 
+{ 
+	return static_cast<ClassType>(_class); 
+}
+
+	
+Message::MethodType Message::methodType() const 
+{ 
+	return static_cast<MethodType>(_method);
+}
+
+
+void Message::setClass(ClassType type)
+{ 
+	_class = type;
+}
+
+void Message::setMethod(MethodType type) 
+{ 
+	_method = type; 
 }
 
 

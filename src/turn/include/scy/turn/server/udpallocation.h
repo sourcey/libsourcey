@@ -44,7 +44,8 @@ public:
 		const UInt32& lifetime);
 	virtual ~UDPAllocation();
 
-	void onPacketReceived(void* sender, RawPacket& packet);
+	//void onPacketReceived(void* sender, RawPacket& packet);
+	void onPeerDataReceived(void*, net::SocketPacket& packet);
 		
 	bool handleRequest(Request& request);	
 	void handleSendIndication(Request& request);
@@ -56,8 +57,8 @@ public:
 	virtual const char* className() const { return "UDPAllocation"; };
 
 private:
-	net::PacketSocket _relaySocket;
-	//net::UDPUDPSocket _relaySocket;
+	//net::PacketSocket _relaySocket;
+	net::UDPSocket _relaySocket;
 };
 
 

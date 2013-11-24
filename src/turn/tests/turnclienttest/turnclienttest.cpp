@@ -28,8 +28,14 @@ CMemLeakDetect memLeakDetect;
 */
 
 
-#define USE_TCP 1
+#define TEST_TCP 0 //1
 #define RAISE_LOCAL_SERVER 0
+
+#define TURN_SERVER_IP "58.7.41.244" // "127.0.0.1" "122.201.111.134" "74.207.248.97"
+#define TURN_SERVER_USERNAME "username"
+#define TURN_SERVER_PASSWORD "password"
+#define TURN_SERVER_REALM "sourcey.com"
+#define TURN_AUTHORIZE_PEER_IP "58.7.41.244" // for CreatePremission
 
 
 namespace scy {
@@ -85,46 +91,41 @@ struct ClientTest
 
 	int id;
 	Result result;
-#if USE_TCP
+#if TEST_TCP
 	TCPInitiator* initiator;
 	TCPResponder* responder;
-	ClientTest(int id) : 
+	ClientTest(int id, const Client::Options& opts) : 
 		id(id),
 		result(None),
-		initiator(new TCPInitiator(id)), 
+		initiator(new TCPInitiator(id, opts)), 
 		responder(new TCPResponder(id))
 		{}	
 #else
 	UDPInitiator* initiator;
 	UDPResponder* responder;
-	ClientTest(int id) : 
+	ClientTest(int id, const Client::Options& opts) : 
 		id(id),
-		reactor(reactor), 
-		runner(runner),
 		result(None),
-		initiator(new UDPInitiator(id)), 
+		initiator(new UDPInitiator(id, opts)), 
 		responder(new UDPResponder(id)) {}	
 #endif
 
 	~ClientTest() {
-		debugL("ClientTest") << "Destroying" << endl;
 		if (initiator)
 			delete initiator;
 		if (responder)
 			delete responder;
-		debugL("ClientTest") << "Destroying: OK" << endl;
 	}
 
-	void run(const Client::Options& o) 
+	void run() 
 	{				
-		std::string peerIP("58.7.41.244"); //127.0.0.1
 		initiator->AllocationCreated += delegate(this, &ClientTest::onInitiatorAllocationCreated);
-		initiator->initiate(o, peerIP);
+		initiator->initiate(TURN_AUTHORIZE_PEER_IP);
 	}
 	
 	void onInitiatorAllocationCreated(void* sender) //, turn::Client& client
 	{
-		debugL("ClientTest") << "Initiator Allocation Created" << endl;
+		debugL("ClientTest") << "Initiator allocation created" << endl;
 
 		// Start the responder when the allocation is created
 		responder->start(initiator->client.relayedAddress());
@@ -132,7 +133,7 @@ struct ClientTest
 	
 	void onTestComplete(void* sender, bool success)
 	{
-		debugL("ClientTest") << "TestComplete: " << success << endl;
+		debugL("ClientTest") << "Test complete: " << success << endl;
 		result = success ? Success : Failed;
 		//TestComplete.emit(this, result);
 	}
@@ -145,15 +146,9 @@ struct ClientTestRunner
 	int nComplete;
 	int nSucceeded;
 	
-	vector<turn::ClientTest*> tests;
-	//std::vector<std::string> packets;
+	std::vector<turn::ClientTest*> tests;
 	
-	ClientTestRunner() : 		
-		nTimes(0), nComplete(0), nSucceeded(0) 
-	{
-		//packets.
-	}
-
+	ClientTestRunner() : nTimes(0), nComplete(0), nSucceeded(0) {}
 	~ClientTestRunner() { 		
 		//Timer::getDefault().stop(TimerCallback<ClientTestRunner>(this, &ClientTestRunner::onTimeout));
 		util::clearVector(tests);  
@@ -166,22 +161,20 @@ struct ClientTestRunner
 
 		nTimes = times;
 		for (unsigned i = 0; i < nTimes; i++) {
-			turn::ClientTest* client = new turn::ClientTest(i); //, reactor, runner
+			auto client = new turn::ClientTest(i, o); //, reactor, runner
 			client->initiator->TestComplete += delegate(this, &ClientTestRunner::onTestComplete);
-			client->run(o);
+			client->run();
 			tests.push_back(client);
 		}
 
 		//done.wait();
 	}	
 
-	/*
-	void onTimeout(TimerCallback<ClientTestRunner>& timer)
-	{
+	//void onTimeout(TimerCallback<ClientTestRunner>& timer)
+	//{
 		// took too long...
 		//done.set();
-	}	
-	*/
+	//}
 	
 	void onTestComplete(void* sender, bool result)
 	{
@@ -197,7 +190,7 @@ struct ClientTestRunner
 
 	void print(ostream& ost) 
 	{	
-		ost << "################################## Test results:" 
+		ost << "#################Test results:" 
 			<< "\n\tTimes: " << nTimes
 			<< "\n\tComplete: " << nComplete
 			<< "\n\tSucceeded: " << nSucceeded
@@ -220,7 +213,7 @@ struct TestTCPClientObserver: public TCPClientObserver
 
 	void onRelayConnectionCreated(TCPClient& client, const net::Socket& socket, const net::Address& peerAddr) //UInt32 connectionID, 
 	{
-		debugL("TCPInitiator") << "Connection Created: " << peerAddr << endl;
+		debugL("TCPInitiator") << "Relay Connection Created: " << peerAddr << endl;
 	}
 
 	void onRelayConnectionClosed(TCPClient& client, const net::SocketBase* socketBase, const net::Address& peerAddress) 
@@ -230,7 +223,7 @@ struct TestTCPClientObserver: public TCPClientObserver
 
 	void onRelayConnectionDataReceived(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
 	{
-		debugL("TCPInitiator") << "Received Data: " << string(data, size) <<  ": " << peerAddr << endl;
+		debugL("TCPInitiator") << "Received Data: " << std::string(data, size) <<  ": " << peerAddr << endl;
 	}
 	
 	void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
@@ -258,60 +251,58 @@ int main(int argc, char** argv)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 	Logger::instance().add(new ConsoleChannel("debug", LTrace));	
-	Application app;
-
-	try	{
+	Logger::instance().setWriter(new AsyncLogWriter);	
+	{
+		Application app;
+		try	{
 #if RAISE_LOCAL_SERVER
-		debugL("Tests") << "Running Test Server" << endl;
-		turn::ServerOptions so;	
-		so.software                         = "Sourcey STUN/TURN Server [rfc5766]";
-		so.realm                            = "sourcey.com";
-		so.allocationDefaultLifetime        = 1 * 60 * 1000;
-		so.allocationMaxLifetime            = 15 * 60 * 1000;
-		//so.allocationDefaultLifetime        = 1 * 60 * 1000; // 1 min
-		//so.allocationMaxLifetime            = 5 * 1000; // 5 seccs
-		so.timerInterval					= 5 * 1000; // 5 seccs
-		so.listenAddr                       = net::Address("127.0.0.1", 3478);
-		so.enableUDP						= false;
+			debugL("Tests") << "Running Test Server" << endl;
+			turn::ServerOptions so;	
+			so.software                         = "Sourcey STUN/TURN Server [rfc5766]";
+			so.realm                            = "sourcey.com";
+			so.allocationDefaultLifetime        = 1 * 60 * 1000;
+			so.allocationMaxLifetime            = 15 * 60 * 1000;
+			//so.allocationDefaultLifetime        = 1 * 60 * 1000; // 1 min
+			//so.allocationMaxLifetime            = 5 * 1000; // 5 seccs
+			so.timerInterval					= 5 * 1000; // 5 seccs
+			so.listenAddr                       = net::Address("127.0.0.1", 3478);
+			so.enableUDP						= false;
 
-		debugL("Tests") << "Binding Test Server" << endl;
-		turn::TestServer srv;
-		debugL("Tests") << "Binding Test Server: 1" << endl;
-		srv.run(so);
-		debugL("Tests") << "Binding Test Server: OK" << endl;
+			debugL("Tests") << "Binding Test Server" << endl;
+			turn::TestServer srv;
+			debugL("Tests") << "Binding Test Server: 1" << endl;
+			srv.run(so);
+			debugL("Tests") << "Binding Test Server: OK" << endl;
 #endif
 
-		//
-		// Initialize clients
-		turn::Client::Options co;
-		
-		co.serverAddr = net::Address("127.0.0.1", 3478);
-		//co.serverAddr = net::Address("122.201.111.134", 3478);
-		//co.serverAddr = net::Address("74.207.248.97", 3478); // "74.207.248.97"  "122.201.111.134"
-		co.lifetime  = 120 * 1000; // 1 minute
-		co.timeout = 10 * 1000;
-		co.timerInterval = 3 * 1000;
-		co.username = Anionu_API_USERNAME;
-		co.password = Anionu_API_KEY;
-		co.realm = "sourcey.com";
-		
-		{
-			debugL("Tests") << "################# Running Client Tests" << endl;
-			turn::ClientTestRunner test; //(); //reactor, runner
-			test.run(co, 1, 10000);
-			debugL("Tests") << "################# Running Client Tests: OK" << endl;
-			app.waitForShutdown();
-			test.print(cout);
+			//
+			// Initialize clients
+			{
+				debugL("Tests") << "Running Client Tests" << endl;	
+				turn::Client::Options co;
+				co.serverAddr = net::Address(TURN_SERVER_IP, 3478);
+				co.username = TURN_SERVER_USERNAME;
+				co.password = TURN_SERVER_PASSWORD;
+				co.realm = TURN_SERVER_REALM;
+				co.lifetime  = 120 * 1000; // 1 minute
+				co.timeout = 10 * 1000;
+				co.timerInterval = 3 * 1000;	
+
+				turn::ClientTestRunner test;
+				test.run(co, 1, 10000);
+				debugL("Tests") << "Running Client Tests: OK" << endl;
+				app.waitForShutdown();
+				test.print(cout);
+			}
+		} 
+		catch (std::exception& exc) {
+			errorL("error") << "Error: " << exc.what() << endl;
 		}
-	} 
-	catch (std::exception& exc) {
-		errorL("error") << "TEST: Error: " << exc.what() << endl;
+	
+		debugL("Tests") << "Finalizing" << endl;
+		app.finalize();
+		debugL("Tests") << "Finalizing: OK" << endl;
 	}
-	
-	debugL("Tests") << "################# Running Finalization" << endl;
-	app.finalize();
-	debugL("Tests") << "################# Running Finalization: OK" << endl;
-	
 	scy::Logger::shutdown();
 	return 0;
 }
@@ -542,14 +533,14 @@ protected:
 
 
 	void onRelayConnectionDataReceived(const void* sender, scy::stun::BufferPacket& packet) {
-		debugL() << "################ TURN: Peer Received Data: " << string(packet.buffer.bytes(), packet.buffer.available()) << endl;
+		debugL() << "################ TURN: Peer Received Data: " << std::string(packet.buffer.bytes(), packet.buffer.available()) << endl;
 		//_peer->send("peer2client", 11, client->relayedAddr());
 		//_peer->send("peer2client", 11, packet.remoteAddr);
 	}
 
 
 	void onDataReceived(const void* sender, scy::stun::RawPacket& packet) {
-		debugL() << "TURN: Client Received Data: " << string(packet.data, packet.size) << endl;
+		debugL() << "TURN: Client Received Data: " << std::string(packet.data, packet.size) << endl;
 		//client->sendDataIndication("client2peer", 11, _peer->localAddr());
 		//client->sendDataIndication("client2peer", 11, packet.remoteAddr);
 	}
@@ -561,7 +552,7 @@ protected:
 
 	virtual void onAllocationCreated(turn::Client* client, turn::Client* allocation)
 	{
-		debugL() << "####################### TURN: Client Allocation Created: " << allocation << endl;
+		debugL() << "######TURN: Client Allocation Created: " << allocation << endl;
 
 		//vector<Net::IP> peerIPs;
 		//peerIPs.push_back(Net::IP("127.0.0.1"));
@@ -572,24 +563,24 @@ protected:
 
 	virtual void onAllocationRemoving(turn::Client* client, turn::Client* allocation)
 	{
-		debugL() << "####################### TURN: Client Allocation Deleted: " << allocation << endl;
+		debugL() << "######TURN: Client Allocation Deleted: " << allocation << endl;
 	}
 
 
 	virtual void onPermissionsCreated(turn::Client* client, turn::Client* allocation)
 	{
-		debugL() << "####################### TURN: Client Permissions Created: " << allocation << endl;
+		debugL() << "######TURN: Client Permissions Created: " << allocation << endl;
 	}
 
 
 	virtual void onDataReceived(turn::Client* client, const char* data, int size)
 	{
-		debugL() << "####################### TURN: Client Received Data: " << string(data, size) << endl;
+		debugL() << "######TURN: Client Received Data: " << std::string(data, size) << endl;
 	}
 	
 	virtual void onAllocationFailed(Client* client, int errorCode)
 	{		
-		debugL() << "####################### TURN: Allocation Failed: " << errorCode << endl;
+		debugL() << "######TURN: Allocation Failed: " << errorCode << endl;
 	}
 	
 

@@ -72,12 +72,13 @@ class IPv4AddressBase: public AddressBase
 public:
 	IPv4AddressBase()
 	{
-		memset(&_addr, 0, sizeof(_addr));
 		_addr.sin_family = AF_INET;
+		memset(&_addr, 0, sizeof(_addr));
 	}
 
 	IPv4AddressBase(const struct sockaddr_in* addr)
 	{
+		_addr.sin_family = AF_INET;
 		memcpy(&_addr, addr, sizeof(_addr));
 	}
 
@@ -139,21 +140,22 @@ class IPv6AddressBase: public AddressBase
 public:
 	IPv6AddressBase(const struct sockaddr_in6* addr)
 	{
+		_addr.sin6_family = AF_INET6;
 		memcpy(&_addr, addr, sizeof(_addr));
 	}
 
 	IPv6AddressBase(const void* addr, UInt16 port)
 	{
-		memset(&_addr, 0, sizeof(_addr));
 		_addr.sin6_family = AF_INET6;
+		memset(&_addr, 0, sizeof(_addr));
 		memcpy(&_addr.sin6_addr, addr, sizeof(_addr.sin6_addr));
 		_addr.sin6_port = port;
 	}
 
 	IPv6AddressBase(const void* addr, UInt16 port, UInt32 scope)
 	{
-		memset(&_addr, 0, sizeof(_addr));
 		_addr.sin6_family = AF_INET6;
+		memset(&_addr, 0, sizeof(_addr));
 		memcpy(&_addr.sin6_addr, addr, sizeof(_addr.sin6_addr));
 		_addr.sin6_port = port;
 		_addr.sin6_scope_id = scope;
