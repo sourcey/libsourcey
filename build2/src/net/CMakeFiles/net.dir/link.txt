@@ -1,2 +1,0 @@
-/usr/bin/ar cr libscy_net.a  CMakeFiles/net.dir/src/socket.cpp.o CMakeFiles/net.dir/src/sslsession.cpp.o CMakeFiles/net.dir/src/tcpsocket.cpp.o CMakeFiles/net.dir/src/packetsocket.cpp.o CMakeFiles/net.dir/src/sslcontext.cpp.o CMakeFiles/net.dir/src/sslsocket.cpp.o CMakeFiles/net.dir/src/util.cpp.o CMakeFiles/net.dir/src/address.cpp.o CMakeFiles/net.dir/src/udpsocket.cpp.o CMakeFiles/net.dir/src/ssladapter.cpp.o CMakeFiles/net.dir/src/sslmanager.cpp.o
-/usr/bin/ranlib libscy_net.a

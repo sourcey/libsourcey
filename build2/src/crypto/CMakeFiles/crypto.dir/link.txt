@@ -1,2 +1,0 @@
-/usr/bin/ar cr libscy_crypto.a  CMakeFiles/crypto.dir/src/crypto.cpp.o CMakeFiles/crypto.dir/src/hash.cpp.o CMakeFiles/crypto.dir/src/cipher.cpp.o CMakeFiles/crypto.dir/src/rsa.cpp.o CMakeFiles/crypto.dir/src/x509certificate.cpp.o CMakeFiles/crypto.dir/src/hmac.cpp.o
-/usr/bin/ranlib libscy_crypto.a

@@ -1,2 +1,0 @@
-/usr/bin/ar cr libscy_archo.a  CMakeFiles/archo.dir/src/zip.cpp.o
-/usr/bin/ranlib libscy_archo.a
