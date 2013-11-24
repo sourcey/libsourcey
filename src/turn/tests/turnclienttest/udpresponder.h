@@ -68,7 +68,7 @@ public:
 
 		// Start the send timer
 		timer.Timeout += delegate(this, &UDPResponder::onSendTimer);
-		timer.start(1000, 1000);
+		timer.start(1000, 100);
 	}
 
 	
@@ -83,7 +83,8 @@ public:
 
 		// Send a large packets to test throttling
 		//payload.append(65536, 'x');
-		payload.append(10000, 'x');
+		payload.append(30000, 'x');
+		//payload.append(1024, 'x');
 
 		// Send it
 		socket.send(payload.c_str(), payload.length());

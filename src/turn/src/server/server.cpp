@@ -60,7 +60,7 @@ void Server::start()
 		_udpSocket.assign(new UDPBase, false);
 		_udpSocket.Recv += delegate(this, &Server::onSocketRecv, 1);
 		_udpSocket.bind(_options.listenAddr);		
-		_udpSocket.base().setBroadcast(true);
+		//_udpSocket.base().setBroadcast(true);
 		log("trace") << "UDP listening on " << _options.listenAddr << endl;	
 	}
 	
@@ -85,7 +85,7 @@ void Server::stop()
 	
 	// Delete allocations
 	ServerAllocationMap allocations = this->allocations();
-	for (ServerAllocationMap::iterator it = allocations.begin(); it != allocations.end(); ++it)
+	for (auto it = allocations.begin(); it != allocations.end(); ++it)
 		delete it->second;
 
 	// Should have been cleared via callback
@@ -111,8 +111,8 @@ void Server::stop()
 void Server::onTimer(void*)
 {
 	ServerAllocationMap allocations = this->allocations();
-	for (ServerAllocationMap::iterator it = allocations.begin(); it != allocations.end(); ++it) {
-		log("trace") << "Checking allocation: " << *it->second << endl;	// print the allocation debug info
+	for (auto it = allocations.begin(); it != allocations.end(); ++it) {
+		//log("trace") << "Checking allocation: " << *it->second << endl;	// print the allocation debug info
 		if (!it->second->onTimer()) {
 			// Entry removed via ServerAllocation destructor
 			delete it->second;
@@ -753,7 +753,7 @@ ServerAllocation* Server::getAllocation(const FiveTuple& tuple)
 {
 	//Mutex::ScopedLock lock(_mutex);
 
-	ServerAllocationMap::iterator it = _allocations.find(tuple);
+	auto it = _allocations.find(tuple);
 	if (it != _allocations.end())
 		return it->second;
 	return nullptr;
@@ -764,7 +764,7 @@ TCPAllocation* Server::getTCPAllocation(const UInt32& connectionID)
 {
 	//Mutex::ScopedLock lock(_mutex);	
 
-	for (ServerAllocationMap::iterator it = _allocations.begin(); it != _allocations.end(); ++it) {
+	for (auto it = _allocations.begin(); it != _allocations.end(); ++it) {
 		auto alloc = dynamic_cast<TCPAllocation*>(it->second);
 		if (alloc && alloc->pairs().exists(connectionID))
 			return alloc;

@@ -179,7 +179,7 @@ void TCPClient::handleConnectResponse(const stun::Message& response)
 	
 	auto transaction = reinterpret_cast<stun::Transaction*>(response.opaque);
 	auto peerAttr = transaction->request().get<stun::XorPeerAddress>();
-	if (!peerAttr || peerAttr && peerAttr->family() != 1) {
+	if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
 		assert(0);
 		return;
 	}
@@ -208,7 +208,7 @@ void TCPClient::handleConnectErrorResponse(const stun::Message& response)
 		
 	auto transaction = reinterpret_cast<stun::Transaction*>(response.opaque);
 	auto peerAttr = transaction->request().get<stun::XorPeerAddress>();
-	if (!peerAttr || peerAttr && peerAttr->family() != 1) {
+	if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
 		assert(0);
 		return;
 	}
@@ -240,7 +240,7 @@ void TCPClient::handleConnectionAttemptIndication(const stun::Message& response)
 	// corresponding to the peer.
 
 	auto peerAttr = response.get<stun::XorPeerAddress>();
-	if (!peerAttr || peerAttr && peerAttr->family() != 1) {
+	if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
 		assert(0);
 		return;
 	}

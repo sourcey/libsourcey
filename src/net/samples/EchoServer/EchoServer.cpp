@@ -1,14 +1,16 @@
 #include "scy/application.h"
 #include "scy/logger.h"
-#include "EchoServer.h"
+#include "echoserver.h"
 
 
+/*
 // Detect Memory Leaks
 #ifdef _DEBUG
 #include "MemLeakDetect/MemLeakDetect.h"
 #include "MemLeakDetect/MemLeakDetect.cpp"
 CMemLeakDetect memLeakDetect;
 #endif
+*/
 
 
 using namespace std;
@@ -32,7 +34,7 @@ int main(int argc, char** argv)
 	{	
 		Application app;	
 		SERVER_TYPE srv(SERVER_PORT);
-		srv.shutdown();
+		srv.start();
 		app.waitForShutdown(onShutdown, &srv);
 	}
 	Logger::shutdown();

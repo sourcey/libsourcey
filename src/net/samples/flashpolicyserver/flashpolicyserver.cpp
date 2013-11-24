@@ -5,6 +5,7 @@
 
 int main(int argc, char** argv)
 {
+	/*
 	Logger::instance().add(new ConsoleChannel("debug", LTrace));	
 	{	
 		Application app;	
@@ -13,5 +14,6 @@ int main(int argc, char** argv)
 		//app.waitForShutdown(onShutdown, &srv);
 	}
 	Logger::shutdown();
+	*/
 	return 0;
 }

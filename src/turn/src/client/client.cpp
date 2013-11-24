@@ -64,7 +64,7 @@ void Client::initiate()
 	auto udpSocket = dynamic_cast<net::UDPBase*>(&_socket.base());
 	if (udpSocket) {
 		udpSocket->bind(net::Address("0.0.0.0", 0));
-		udpSocket->setBroadcast(true);
+		//udpSocket->setBroadcast(true);
 	}
 
 	_socket.Recv += delegate(this, &Client::onSocketRecv, -1); // using PacketSocket for STUN transactions
@@ -777,7 +777,7 @@ void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
 		auto transaction = reinterpret_cast<stun::Transaction*>(response.opaque);
 		for (int i = 0; i < 100; i++) {
 			auto peerAttr = transaction->request().get<stun::XorPeerAddress>(i);
-			if (!peerAttr || peerAttr && peerAttr->family() != 1)
+			if (!peerAttr || (peerAttr && peerAttr->family() != 1))
 				break;	
 			_observer.onAllocationPermissionsCreated(*this, std::string(peerAttr->address().host()));
 		}
@@ -904,12 +904,12 @@ void Client::handleDataIndication(const stun::Message& response)
 	// transport address is given by the XOR-PEER-ADDRESS attribute.
 
 	auto peerAttr = response.get<stun::XorPeerAddress>();
-	if (!peerAttr || peerAttr && peerAttr->family() != 1) {
+	if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
 		assert(0);
 		return;
 	}
 
-	const stun::Data* dataAttr = response.get<stun::Data>();
+	auto dataAttr = response.get<stun::Data>();
 	if (!dataAttr) {
 		assert(0);
 		return;

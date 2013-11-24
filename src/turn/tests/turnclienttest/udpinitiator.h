@@ -71,12 +71,14 @@ protected:
 	{	
 		std::string payload(data, size);
 		payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
-		if (payload.length() == 8) {
+		if (payload.length() == 9) {
 			UInt64 sentAt = util::strtoi<UInt64>(payload);
 			UInt64 latency = time::ticks() - sentAt;
 
 			debugL("UDPInitiator") << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
 		}
+		else		
+			debugL("UDPInitiator") << id << ": Received dummy data from " << peerAddr << ": payloadLength=" << payload.length() << endl;
 
 		/*
 		if (size < 150) {
