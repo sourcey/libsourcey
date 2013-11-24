@@ -1,6 +1,7 @@
 #include "scy/application.h"
 #include "scy/logger.h"
-#include "echoserver.h"
+#include "udpechoserver.h"
+#include "tcpechoserver.h"
 
 
 /*
@@ -18,24 +19,47 @@ using namespace scy;
 using namespace scy::net;
 
 	
-#define SERVER_PORT 1337
-#define SERVER_TYPE TCPEchoServer
+const UInt16 UdpPort = 1337;
+const UInt16 TcpPort = 1337;
+const UInt16 SslPort = 1338;
 	
+
+struct Servers 
+{
+	UDPEchoServer udp;
+	TCPEchoServer tcp;
+	TCPEchoServer ssl;
+};
+
 		
 static void onShutdown(void* opaque)
 {
-	reinterpret_cast<SERVER_TYPE*>(opaque)->shutdown();
+	auto srvs = reinterpret_cast<Servers*>(opaque);
+	srvs->udp.shutdown();
+	srvs->tcp.shutdown();
+	srvs->ssl.shutdown();
 }
 
 
 int main(int argc, char** argv)
 {
 	Logger::instance().add(new ConsoleChannel("debug", LTrace));	
+	Logger::instance().setWriter(new AsyncLogWriter);
 	{	
 		Application app;	
-		SERVER_TYPE srv(SERVER_PORT);
-		srv.start();
-		app.waitForShutdown(onShutdown, &srv);
+		{
+			Servers srvs;
+			srvs.udp.start("0.0.0.0", UdpPort);
+			srvs.tcp.start("0.0.0.0", TcpPort);
+			srvs.ssl.start("0.0.0.0", SslPort);
+		
+			infoL("EchoServer") << "UDP Server listening on " << srvs.udp.socket.address() << endl;
+			infoL("EchoServer") << "TCP Server listening on " << srvs.tcp.socket.address() << endl;
+			infoL("EchoServer") << "SSL Server listening on " << srvs.ssl.socket.address() << endl;
+
+			app.waitForShutdown(onShutdown, &srvs);
+		}
+		app.finalize();
 	}
 	Logger::shutdown();
 	return 0;

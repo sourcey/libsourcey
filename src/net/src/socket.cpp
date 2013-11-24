@@ -155,7 +155,7 @@ int Socket::send(const char* data, int len, const Address& peerAddress, int flag
 	//}
 	if (_adapter) {
 		assert(_adapter->socket == this);
-		return _adapter->send(data, len, flags);
+		return _adapter->send(data, len, peerAddress, flags);
 	}
 	return _base->send(data, len, peerAddress, flags);
 }

@@ -26,7 +26,6 @@ public:
 		id(id)
 	{
 		debugL("TCPResponder", this) << id << ": Creating" << endl;
-		//net::SocketAdapter::priority = 100;.base(), true
 		net::SocketAdapter::socket = &socket;
 		socket.setAdapter(this);
 	}

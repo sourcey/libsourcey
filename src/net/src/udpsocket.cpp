@@ -95,7 +95,6 @@ void UDPBase::connect(const Address& peerAddress)
 
 	// Send the Connected signal to mimic TCP behaviour  
 	// since socket implementations are interchangable.
-	//Connect.emit(instance());
 	emitConnect();
 }
 
@@ -132,6 +131,7 @@ void UDPBase::bind(const Address& address, unsigned flags)
 
 int UDPBase::send(const char* data, int len, int flags) 
 {	
+	assert(_peer.valid());
 	return send(data, len, _peer, flags);
 }
 
@@ -147,17 +147,24 @@ namespace internal {
 
 int UDPBase::send(const char* data, int len, const Address& peerAddress, int /* flags */) 
 {	
+	traceL("UDPBase", this) << "Send: " << len << ": " << peerAddress << endl;
 	//assert(len <= net::MAX_UDP_PACKET_SIZE); // libuv handles this for us
 
+	if (_peer.valid() && _peer != peerAddress) {
+		errorL("UDPBase", this) << "Peer not authorized: " << peerAddress << endl;
+		return -1;
+	}
+
+	if (!peerAddress.valid()) {
+		errorL("UDPBase", this) << "Peer not valid: " << peerAddress << endl;
+		return -1;
+	}
+	
 	int r;	
 	auto sr = new internal::SendRequest;
 	sr->buf = uv_buf_init((char*)data, len); // TODO: memcpy data?
-
-	if (_peer.valid() && _peer != peerAddress)
-		throw std::runtime_error("NotAuthorized peer: " + peerAddress.toString());
-	
-	traceL("UDPBase", this) << "Send: " << len << ": " << peerAddress << endl;
 	r = uv_udp_send(&sr->req, ptr<uv_udp_t>(), &sr->buf, 1, peerAddress.addr(), UDPBase::afterSend);
+
 #if 0
 	switch (peerAddress.af()) {
 	case AF_INET:
@@ -175,8 +182,7 @@ int UDPBase::send(const char* data, int len, const Address& peerAddress, int /* 
 		setUVError("Invalid UDP socket", r); 
 
 	// R is -1 on error, otherwise return len
-	//return r ? r : len;
-	return len;
+	return r ? r : len;
 }
 
 	
