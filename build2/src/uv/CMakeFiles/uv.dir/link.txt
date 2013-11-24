@@ -1,0 +1,2 @@
+/usr/bin/ar cr libscy_uv.a  
+/usr/bin/ranlib libscy_uv.a

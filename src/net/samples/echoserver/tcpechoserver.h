@@ -6,13 +6,13 @@ namespace scy {
 namespace net {
 
 
-template <typename SocketT>
+template <class SocketT>
 class EchoServer
 	/// The TCP echo server accepts a template argument  
 	/// of either a TCPSocket or a SSLSocket.
 {
 public:
-	typename SocketT socket;
+	SocketT socket;
 	typename SocketT::List sockets;
 
 	EchoServer()
@@ -70,15 +70,15 @@ public:
 		releaseSocket(reinterpret_cast<SocketT*>(sender));
 	}
 
-	void releaseSocket(typename SocketT* socket) 
+	void releaseSocket(SocketT* sock) 
 	{		
-		for (SocketT::List::iterator it = sockets.begin(); it != sockets.end(); ++it) {
-			if (socket == &(*it)) {
-				debugL("EchoServer", this) << "Removing: " << socket << std::endl;
+		for (typename SocketT::List::iterator it = sockets.begin(); it != sockets.end(); ++it) {
+			if (sock == &(*it)) { 
+				debugL("EchoServer", this) << "Removing: " << sock<< std::endl;
 
 				// All we need to do is erase the socket in order to 
 				// deincrement the ref counter and destroy the socket.
-				assert(socket->base().refCount() == 1);
+				assert(sock->base().refCount() == 1);
 				sockets.erase(it);
 				return;
 			}

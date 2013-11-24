@@ -1,0 +1,2 @@
+/usr/bin/ar cr libscy_stun.a  CMakeFiles/stun.dir/src/transaction.cpp.o CMakeFiles/stun.dir/src/message.cpp.o CMakeFiles/stun.dir/src/attributes.cpp.o
+/usr/bin/ranlib libscy_stun.a
