@@ -169,53 +169,61 @@ public:
 	// ============================================================================
 	// UDP Socket Test
 	//
-	int numUDPPacketsWanted;
-	int numUDPPacketsReceived;
+	int UDPPacketSize;
+	int UDPNumPacketsWanted;
+	int UDPNumPacketsReceived;
+	net::Address udpServerAddr;
+	net::UDPSocket* udpClientSock;
+	/*
 	net::UDPSocket* serverSock;
-	net::UDPSocket* clientSock;
 	net::Address serverBindAddr;	
 	net::Address clientBindAddr;	
-	net::Address serverSendAddr;	
 	net::Address clientSendAddr;
+	*/
 	
 	void runUDPSocketTest() 
 	{
 		traceL("Tests") << "UDP Socket Test: Starting" << endl;
 		
-		numUDPPacketsWanted = 100;
-		numUDPPacketsReceived = 0;
+		UDPPacketSize = 20000;
+		UDPNumPacketsWanted = 100;
+		UDPNumPacketsReceived = 0;
 		
-		serverBindAddr.swap(net::Address("0.0.0.0", 1337));	 //
-		serverSendAddr.swap(net::Address("58.7.41.244", 1337));	 //
+		//serverBindAddr.swap(net::Address("0.0.0.0", 1337));	 //
+		udpServerAddr.swap(net::Address("58.7.41.244", 1337));	 //
+		//udpServerAddr.swap(net::Address("127.0.0.1", 1337));	 //
 
-		clientBindAddr.swap(net::Address("0.0.0.0", 1338));	
-		clientSendAddr.swap(net::Address("58.7.41.244", 1338));	
+		//clientBindAddr.swap(net::Address("0.0.0.0", 1338));	
+		//clientSendAddr.swap(net::Address("58.7.41.244", 1337));	 //
+		//clientSendAddr.swap(net::Address("127.0.0.1", 1337));	 //
 
-		net::UDPSocket serverSock;
-		serverSock.Recv += delegate(this, &Tests::onUDPSocketServerRecv);
-		serverSock.bind(serverBindAddr);
-		this->serverSock = &serverSock;
+		//net::UDPSocket serverSock;
+		//serverSock.Recv += delegate(this, &Tests::onUDPSocketServerRecv);
+		//serverSock.bind(serverBindAddr);
+		//this->serverSock = &serverSock;
 		
 		net::UDPSocket clientSock;
 		clientSock.Recv += delegate(this, &Tests::onUDPClientSocketRecv);		
-		clientSock.bind(clientBindAddr);	
-		clientSock.connect(serverBindAddr);	
-		this->clientSock = &clientSock;
+		clientSock.bind(net::Address("0.0.0.0", 0));	
+		clientSock.connect(udpServerAddr);	
+		this->udpClientSock = &clientSock;
 
-		//for (unsigned i = 0; i < numUDPPacketsWanted; i++)
+		//for (unsigned i = 0; i < UDPNumPacketsWanted; i++)
 		//	clientSock.send("bounce", 6, serverBindAddr);		
 
 		// Start the send timer
 		Timer timer;
 		timer.Timeout += delegate(this, &Tests::onUDPClientSendTimer);
 		timer.start(100, 100);
+		timer.handle().ref();
 			
 		runLoop();
 		
-		this->serverSock = nullptr;
-		this->clientSock = nullptr;
+		//this->serverSock = nullptr;
+		this->udpClientSock = nullptr;
 	}
 	
+	/*
 	void onUDPSocketServerRecv(void* sender, net::SocketPacket& packet)
 	{
 		std::string payload(packet.data(), packet.size());		
@@ -232,12 +240,13 @@ public:
 		packet.info->socket->send(payload.c_str(), payload.length(), clientSendAddr);	
 		
 	}
+	*/
 
 	void onUDPClientSendTimer(void*)
 	{
 		std::string payload(util::itostr(time::ticks()));
-		payload.append(30000, 'x');
-		clientSock->send(payload.c_str(), payload.length(), serverSendAddr);
+		payload.append(UDPPacketSize - payload.length(), 'x');
+		udpClientSock->send(payload.c_str(), payload.length(), udpServerAddr);
 	}
 
 	void onUDPClientSocketRecv(void* sender, net::SocketPacket& packet)
@@ -247,12 +256,15 @@ public:
 		UInt64 sentAt = util::strtoi<UInt64>(payload);
 		UInt64 latency = time::ticks() - sentAt;
 
-		debugL("UDPInitiator") << "UDPSocket ckient recv from " << packet.info->peerAddress << ": payload=" << payload.length() << ", latency=" << latency << endl;
+		debugL("UDPInitiator") << "UDPSocket recv from " << packet.info->peerAddress << ": " 
+			<< "payload=" << payload.length() << ", " 
+			<< "latency=" << latency 
+			<< endl;
 		
 
 		/*
-		numUDPPacketsReceived++;
-		if (numUDPPacketsReceived == numUDPPacketsWanted) {
+		UDPNumPacketsReceived++;
+		if (UDPNumPacketsReceived == UDPNumPacketsWanted) {
 
 			// Close the client socket dereferencing the main loop.
 			packet.info->socket->close();			
@@ -325,7 +337,7 @@ int main(int argc, char** argv)
 
 
 		//traceL("Tests") << "UDPSocket Recv: " << packet << ": " << packet.buffer
-		//	<< "\n\tPacket " << Benchmark.numSuccess << " of " << numUDPPacketsWanted << endl;
+		//	<< "\n\tPacket " << Benchmark.numSuccess << " of " << UDPNumPacketsWanted << endl;
 		//uv::UDPBase* socket = reinterpret_cast<uv::UDPBase*>(sender);	
 
 		//traceL("Tests") << "UDPSocket Server Recv: " << packet << ": " << packet.buffer << endl;		
