@@ -59,7 +59,8 @@ void Server::start()
 	if (_options.enableUDP) {
 		_udpSocket.assign(new UDPBase, false);
 		_udpSocket.Recv += delegate(this, &Server::onSocketRecv, 1);
-		_udpSocket.bind(_options.listenAddr);
+		_udpSocket.bind(_options.listenAddr);		
+		_udpSocket.base().setBroadcast(true);
 		log("trace") << "UDP listening on " << _options.listenAddr << endl;	
 	}
 	

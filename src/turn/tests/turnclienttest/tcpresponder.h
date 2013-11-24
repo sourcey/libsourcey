@@ -60,17 +60,15 @@ public:
 	{	
 		timer.stop();
 	}
-	
+
 	void onSocketConnect() 
 	{
-		// Send some early media to client.
-		// This will be buffered by the server, and send
-		// to the client when the connection is accepted.
-		socket.send("early media", 11);
+		// Send some early media to client
+		sendLatencyCheck();
 
 		// Start the send timer
-		//timer.Timeout += delegate(this, &TCPResponder::onSendTimer);
-		//timer.start(5000, 5000);
+		timer.Timeout += delegate(this, &TCPResponder::onSendTimer);
+		timer.start(1000, 1000);
 	}
 	
 	void onSocketRecv(const MutableBuffer& buf, const net::Address& peerAddr) //net::SocketPacket& packet) 
@@ -79,11 +77,11 @@ public:
 		std::string payload(bufferCast<const char*>(buf), buf.size());
 		traceL("TCPResponder", this) << id << ": On recv: " << peerAddr << ": " << payload << std::endl;
 
-		assert(payload == "hello peer");
+		//assert(payload == "hello peer");
 		//assert(0 && "ok");
 
 		// Echo back to client
-		socket.send(payload.c_str(), payload.size());
+		//socket.send(payload.c_str(), payload.size());
 	}
 
 	void onSocketError(const Error& error) 
@@ -96,6 +94,28 @@ public:
 		traceL("TCPResponder", this) << id << ": On close" << std::endl;
 		stop();
 	}
+	
+	void sendLatencyCheck()
+	{
+		std::string payload;
+		
+		// Send the unix ticks milisecond for checking latency
+		//payload.append(":");
+		payload.append(util::itostr(time::ticks()));
+		//payload.append(":");
+
+		// Send a large packets to test throttling
+		//payload.append(65536, 'x');
+		payload.append(10000, 'x');
+
+		// Send it
+		socket.send(payload.c_str(), payload.length());
+	}
+
+	void onSendTimer(void*)
+	{
+		sendLatencyCheck();
+	}
 };
 
 
@@ -105,6 +125,20 @@ public:
 #endif // TURN_TCPresponder_TEST_H
 
 
+	
+	/*
+	void onSocketConnect() 
+	{
+		// Send some early media to client.
+		// This will be buffered by the server, and send
+		// to the client when the connection is accepted.
+		socket.send("early media", 11);
+
+		// Start the send timer
+		//timer.Timeout += delegate(this, &TCPResponder::onSendTimer);
+		//timer.start(5000, 5000);
+	}
+	*/
 	/*
 	void onSendTimer(void*)
 	{

@@ -68,12 +68,27 @@ public:
 
 		// Start the send timer
 		timer.Timeout += delegate(this, &UDPResponder::onSendTimer);
-		timer.start(100, 100);
+		timer.start(1000, 1000);
 	}
 
 	
 	void sendLatencyCheck()
-	{
+	{		
+		std::string payload;
+		
+		// Send the unix ticks milisecond for checking latency
+		//payload.append(":");
+		payload.append(util::itostr(time::ticks()));
+		//payload.append(":");
+
+		// Send a large packets to test throttling
+		//payload.append(65536, 'x');
+		payload.append(10000, 'x');
+
+		// Send it
+		socket.send(payload.c_str(), payload.length());
+
+		/*
 		// Send a large packets to test throttling
 		//std::string payload(65536, 'x');
 		std::string payload(10000, 'x');
@@ -83,6 +98,7 @@ public:
 		// Send the unix ticks milisecond for checking RTT
 		payload.assign(util::itostr(time::ticks()));
 		socket.send(payload.c_str(), payload.length());
+		*/
 	}
 
 	void onSendTimer(void*)

@@ -31,7 +31,7 @@ CMemLeakDetect memLeakDetect;
 #define TEST_TCP 0 //1
 #define RAISE_LOCAL_SERVER 0
 
-#define TURN_SERVER_IP "58.7.41.244" // "127.0.0.1" "122.201.111.134" "74.207.248.97"
+#define TURN_SERVER_IP "122.201.111.134" //"127.0.0.1" // "58.7.41.244" "127.0.0.1" "122.201.111.134" "74.207.248.97"
 #define TURN_SERVER_USERNAME "username"
 #define TURN_SERVER_PASSWORD "password"
 #define TURN_SERVER_REALM "sourcey.com"

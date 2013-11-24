@@ -45,6 +45,32 @@ int nativeSocketFd__(uv_stream_t* handle);
 #endif
 
 
+template<class NativeT> int getServerSocketSendBufSize(uv::Handle& handle)
+{
+	int fd = nativeSocketFd(handle.ptr<NativeT>());
+	int optval = 0; 
+	socklen_t optlen = sizeof(int); 
+	int err = getsockopt(fd, SOL_SOCKET, SO_SNDBUF, (char *)&optval, &optlen);
+	if (err < 1) {
+		errorL("TURNServer") << "Cannot get snd sock size on fd " << fd << std::endl;
+	}
+	return optval;
+}
+
+
+template<class NativeT> int getServerSocketRecvBufSize(uv::Handle& handle)
+{
+	int fd = nativeSocketFd(handle.ptr<NativeT>());
+	int optval = 0; 
+	socklen_t optlen = sizeof(int); 
+	int err = getsockopt(fd, SOL_SOCKET, SO_RCVBUF, (char *)&optval, &optlen);
+	if (err < 1) {
+		errorL("TURNServer") << "Cannot get rcv sock size on fd " << fd << std::endl;
+	}
+	return optval;
+}
+
+
 template<class NativeT> int setServerSocketBufSize(uv::Handle& handle, int size)
 {
 	int fd = nativeSocketFd(handle.ptr<NativeT>());
@@ -58,11 +84,11 @@ template<class NativeT> int setServerSocketBufSize(uv::Handle& handle, int size)
 	}
 
 	if (sz < 1) {
-		errorL("TURNServer") << "Cannot set rcv sock size " << size << " on fd " << fd;	
+		errorL("TURNServer") << "Cannot set rcv sock size " << size << " on fd " << fd << std::endl;
 	}
 
 	// Get the value to ensure it has propagated through the OS
-	traceL("TURNServer") << "Recv sock size " << getServerSocketRecvBufSize<NativeT>(handle) << " on fd " << fd << endl;
+	traceL("TURNServer") << "Recv sock size " << getServerSocketRecvBufSize<NativeT>(handle) << " on fd " << fd << std::endl;
 
 	sz = size;
 	while (sz > 0) {
@@ -72,39 +98,13 @@ template<class NativeT> int setServerSocketBufSize(uv::Handle& handle, int size)
 	}
 
 	if (sz < 1) {
-		errorL("TURNServer") << "Cannot set snd sock size " << size << " on fd " << fd;
+		errorL("TURNServer") << "Cannot set snd sock size " << size << " on fd " << fd << std::endl;
 	}	
 
 	// Get the value to ensure it has propagated through the OS
-	traceL("TURNServer") << "Send sock size " << getServerSocketSendBufSize<NativeT>(handle)<< " on fd " << fd << endl;
+	traceL("TURNServer") << "Send sock size " << getServerSocketSendBufSize<NativeT>(handle)<< " on fd " << fd << std::endl;
 
 	return sz;
-}
-
-
-template<class NativeT> int getServerSocketSendBufSize(uv::Handle& handle)
-{
-	int fd = nativeSocketFd(handle.ptr<NativeT>());
-	int optval = 0; 
-	int optlen = sizeof(int); 
-	int err = getsockopt(fd, SOL_SOCKET, SO_SNDBUF, (char *)&optval, &optlen);
-	if (err < 1) {
-		errorL("TURNServer") << "Cannot get snd sock size on fd " << fd;
-	}
-	return optval;
-}
-
-
-template<class NativeT> int getServerSocketRecvBufSize(uv::Handle& handle)
-{
-	int fd = nativeSocketFd(handle.ptr<NativeT>());
-	int optval = 0; 
-	int optlen = sizeof(int); 
-	int err = getsockopt(fd, SOL_SOCKET, SO_RCVBUF, (char *)&optval, &optlen);
-	if (err < 1) {
-		errorL("TURNServer") << "Cannot get rcv sock size on fd " << fd;
-	}
-	return optval;
 }
 
 
