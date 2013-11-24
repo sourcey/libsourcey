@@ -192,7 +192,7 @@ void TCPAllocation::handleConnectRequest(Request& request)
 	// reject the request with a 403 (Forbidden) error.
 	// 
 	auto peerAttr = request.get<stun::XorPeerAddress>();
-	if (!peerAttr || peerAttr && peerAttr->family() != 1) {
+	if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
 		server().respondError(request, 400, "Bad Request");
 		return;
 	}

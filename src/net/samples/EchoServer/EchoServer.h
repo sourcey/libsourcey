@@ -7,7 +7,7 @@ namespace net {
 
 
 template <typename SocketT>
-class EchoServer: public CountedObject
+class EchoServer: public SharedObject
 {
 public:
 	typename SocketT socket;
@@ -15,13 +15,13 @@ public:
 	Address address;
 
 	EchoServer(short port, bool ghost = false) :
-		address("127.0.0.1", port)
+		address("0.0.0.0", port)
 	{
 		// Unref the socket handle if running in ghost mode.
 		// This way the server won't prevent the main uv_loop 
 		// from exiting when other processed complete.
-		if (ghost)
-			uv_unref(reinterpret_cast<SocketT::Base&>(socket.base()).handle());
+		//if (ghost)
+		//	uv_unref(reinterpret_cast<SocketT::Base&>(socket.base()).handle());
 	}
 
 	~EchoServer()
@@ -36,7 +36,6 @@ public:
 	
 	void start()
 	{	
-		traceL("EchoServer", this) << "Serrun " << socket.base().refCount() << endl;
 		assert(socket.base().refCount() == 1);
 		socket.bind(address);
 		socket.listen();
@@ -53,7 +52,7 @@ public:
 	{	
 		sockets.push_back(sock);
 		SocketT& socket = sockets.back();
-		traceL("EchoServer", this) << "On Accept: " << &socket.base() << std::endl;
+		traceL("EchoServer", this) << "On accept: " << &socket.base() << std::endl;
 		socket.Recv += delegate(this, &EchoServer::onSocketRecv);
 		socket.Error += delegate(this, &EchoServer::onSocketError);
 		socket.Close += delegate(this, &EchoServer::onSocketClose);
@@ -62,21 +61,21 @@ public:
 	void onSocketRecv(void* sender, SocketPacket& packet) 
 	{
 		SocketT* socket = reinterpret_cast<SocketT*>(sender);
-		traceL("EchoServer", this) << "On Recv: " 
-			<< socket << ": " << packet.buffer << std::endl;
+		traceL("EchoServer", this) << "On recv: " << socket << ": " 
+			<< std::string(packet.data(), packet.size()) << std::endl;
 
 		// Echo it back
 		socket->send(packet);
 	}
 
-	void onSocketError(void* sender, int syserr, const std::string& message) 
+	void onSocketError(void* sender, const Error& error) //int syserr, const std::string& message
 	{
-		traceL("EchoServer", this) << "On Error: " << syserr << ": " << message << std::endl;
+		traceL("EchoServer", this) << "On error: " << error.errorno << ": " << error.message << std::endl;
 	}
 
 	void onSocketClose(void* sender) 
 	{
-		traceL("EchoServer", this) << "On Close" << std::endl;
+		traceL("EchoServer", this) << "On close" << std::endl;
 		releaseSocket(reinterpret_cast<SocketT*>(sender));
 	}
 

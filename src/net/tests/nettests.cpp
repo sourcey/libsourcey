@@ -171,10 +171,12 @@ public:
 	//
 	int numUDPPacketsWanted;
 	int numUDPPacketsReceived;
-	net::UDPSocket serverSock;
-	net::UDPSocket clientSock;
-	net::Address serverAddr;	
-	net::Address clientAddr;	
+	net::UDPSocket* serverSock;
+	net::UDPSocket* clientSock;
+	net::Address serverBindAddr;	
+	net::Address clientBindAddr;	
+	net::Address serverSendAddr;	
+	net::Address clientSendAddr;
 	
 	void runUDPSocketTest() 
 	{
@@ -183,18 +185,25 @@ public:
 		numUDPPacketsWanted = 100;
 		numUDPPacketsReceived = 0;
 		
-		serverAddr.swap(net::Address("127.0.0.1", 1337));	
-		clientAddr.swap(net::Address("127.0.0.1", 1338));	
+		serverBindAddr.swap(net::Address("0.0.0.0", 1337));	 //
+		serverSendAddr.swap(net::Address("58.7.41.244", 1337));	 //
 
+		clientBindAddr.swap(net::Address("0.0.0.0", 1338));	
+		clientSendAddr.swap(net::Address("58.7.41.244", 1338));	
+
+		net::UDPSocket serverSock;
 		serverSock.Recv += delegate(this, &Tests::onUDPSocketServerRecv);
-		serverSock.bind(serverAddr);
+		serverSock.bind(serverBindAddr);
+		this->serverSock = &serverSock;
 		
+		net::UDPSocket clientSock;
 		clientSock.Recv += delegate(this, &Tests::onUDPClientSocketRecv);		
-		clientSock.bind(clientAddr);	
-		clientSock.connect(serverAddr);	
+		clientSock.bind(clientBindAddr);	
+		clientSock.connect(serverBindAddr);	
+		this->clientSock = &clientSock;
 
 		//for (unsigned i = 0; i < numUDPPacketsWanted; i++)
-		//	clientSock.send("bounce", 6, serverAddr);		
+		//	clientSock.send("bounce", 6, serverBindAddr);		
 
 		// Start the send timer
 		Timer timer;
@@ -202,35 +211,43 @@ public:
 		timer.start(100, 100);
 			
 		runLoop();
+		
+		this->serverSock = nullptr;
+		this->clientSock = nullptr;
 	}
 	
 	void onUDPSocketServerRecv(void* sender, net::SocketPacket& packet)
 	{
 		std::string payload(packet.data(), packet.size());		
 		debugL("UDPInitiator") << "UDPSocket server recv from " 
-			<< packet.info->peerAddress << ": payload=" << payload << endl;
+			<< packet.info->peerAddress << ": payloadLength=" << payload.length() << endl;
 		
 		// Send the unix ticks milisecond for checking RTT
 		//payload.assign(util::itostr(time::ticks()));
 		
 		// Relay back to the client to check RTT
 		//packet.info->socket->send(packet, packet.info->peerAddress);
-		packet.info->socket->send(payload.c_str(), payload.length(), packet.info->peerAddress);		
+		//packet.info->socket->send(payload.c_str(), payload.length(), packet.info->peerAddress);		
+
+		packet.info->socket->send(payload.c_str(), payload.length(), clientSendAddr);	
+		
 	}
 
 	void onUDPClientSendTimer(void*)
 	{
 		std::string payload(util::itostr(time::ticks()));
-		clientSock.send(payload.c_str(), payload.length(), serverAddr);
+		payload.append(30000, 'x');
+		clientSock->send(payload.c_str(), payload.length(), serverSendAddr);
 	}
 
 	void onUDPClientSocketRecv(void* sender, net::SocketPacket& packet)
 	{				
 		std::string payload(packet.data(), packet.size());
+		payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
 		UInt64 sentAt = util::strtoi<UInt64>(payload);
 		UInt64 latency = time::ticks() - sentAt;
 
-		debugL("UDPInitiator") << "UDPSocket ckient recv from " << packet.info->peerAddress << ": payload=" << payload << ", latency=" << latency << endl;
+		debugL("UDPInitiator") << "UDPSocket ckient recv from " << packet.info->peerAddress << ": payload=" << payload.length() << ", latency=" << latency << endl;
 		
 
 		/*

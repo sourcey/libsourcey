@@ -46,8 +46,8 @@ UDPAllocation::UDPAllocation(Server& server,
 	// This will remove the need for allocation lookups when receiving
 	// data from peers.
 	_relaySocket.bind(net::Address(server.options().listenAddr.host(), 0));		
-	_relaySocket.base().setBroadcast(true);
 	_relaySocket.Recv += delegate(this, &UDPAllocation::onPeerDataReceived);
+	//_relaySocket.base().setBroadcast(true);
 	//_relaySocket.adapter() += packetDelegate(this, &UDPAllocation::onPacketReceived, 1);
 
 	log("trace") << " Initializing on address: " << _relaySocket.address() << endl;
@@ -90,14 +90,14 @@ void UDPAllocation::handleSendIndication(Request& request)
 
 	auto peerAttr = request.get<stun::XorPeerAddress>();
 	if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
-		log("error") << "Send Indication Error: No Peer Address" << endl;
+		log("error") << "Send Indication error: No Peer Address" << endl;
 		// silently discard...
 		return;
 	}
 
-	const stun::Data* dataAttr = request.get<stun::Data>();
+	auto dataAttr = request.get<stun::Data>();
 	if (!dataAttr) {
-		log("error") << "Send Indication Error: No Data Attribute" << endl;
+		log("error") << "Send Indication error: No Data attribute" << endl;
 		// silently discard...
 		return;
 	}
@@ -119,7 +119,7 @@ void UDPAllocation::handleSendIndication(Request& request)
 	
 	net::Address peerAddress = peerAttr->address();
 	if (!hasPermission(peerAddress.host())) {
-		log("error") << "Send Indication Error: No permission: " << peerAddress.host() << endl;
+		log("error") << "Send Indication error: No permission for: " << peerAddress.host() << endl;
 		// silently discard...
 		return;
 	}
@@ -184,7 +184,7 @@ void UDPAllocation::onPeerDataReceived(void*, net::SocketPacket& packet)
 	message.add(peerAttr);
 
 	auto dataAttr = new stun::Data;
-	dataAttr->copyBytes(packet.data(), UInt16(packet.size()));
+	dataAttr->copyBytes(packet.data(), packet.size());
 	message.add(dataAttr);
 	
 	//Mutex::ScopedLock lock(_mutex);
@@ -194,9 +194,11 @@ void UDPAllocation::onPeerDataReceived(void*, net::SocketPacket& packet)
 		<< "\n\tTo: " << _tuple.remote()
 		//<< "\n\tData: " << std::string(packet.data(), packet.size())
 		<< endl;
-	
-	//server().udpSocket().base().send(message, _tuple.remote());
+		
 	server().udpSocket().send(message, _tuple.remote());
+	
+	//net::Address tempAddress("58.7.41.244", _tuple.remote().port());
+	//server().udpSocket().send(message, tempAddress);
 }
 
 

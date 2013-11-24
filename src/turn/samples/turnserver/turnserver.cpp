@@ -108,12 +108,12 @@ int main(void)
 		Application app;
 		{
 			ServerOptions opts;		
+			opts.listenAddr						= net::Address(SERVER_ADDRESS, 3478);
 			opts.software						= "Sourcey STUN/TURN Server [rfc5766]";
 			opts.realm							= "sourcey.com";
 			opts.allocationDefaultLifetime		= 1 * 60 * 1000;
 			opts.allocationMaxLifetime			= 15 * 60 * 1000;
 			opts.timerInterval					= 5 * 1000;
-			opts.listenAddr						= net::Address(SERVER_ADDRESS, 3478);
 			//opts.enableUDP                      = false;
 	
 			RelayServer srv(opts);

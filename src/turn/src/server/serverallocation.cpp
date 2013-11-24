@@ -171,7 +171,7 @@ void ServerAllocation::handleCreatePermission(Request& request)
 	//
     for (int i = 0; i < _server.options().allocationMaxPermissions; i++) {
 		auto peerAttr = request.get<stun::XorPeerAddress>(i);
-		if (!peerAttr || peerAttr && peerAttr->family() != 1) {
+		if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
 			if (i == 0) {
 				_server.respondError(request, 400, "Bad Request");
 				return;
