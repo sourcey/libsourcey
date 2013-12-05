@@ -61,7 +61,7 @@ bool Trigger::expired()
 
 void Trigger::serialize(json::Value& root)
 {
-	traceL() << "Serializing" << endl;	
+	TraceL << "Serializing" << endl;	
 	
 	root["type"] = type;
 	root["name"] = name;
@@ -74,7 +74,7 @@ void Trigger::serialize(json::Value& root)
 
 void Trigger::deserialize(json::Value& root)
 {
-	traceL() << "Deserializing" << endl;
+	TraceL << "Deserializing" << endl;
 	
 	json::assertMember(root, "type");
 	json::assertMember(root, "name");
@@ -128,7 +128,7 @@ bool IntervalTrigger::expired()
 
 void IntervalTrigger::serialize(json::Value& root)
 {
-	traceL() << "Serializing" << endl;	
+	TraceL << "Serializing" << endl;	
 
 	Trigger::serialize(root);
 	
@@ -141,7 +141,7 @@ void IntervalTrigger::serialize(json::Value& root)
 
 void IntervalTrigger::deserialize(json::Value& root)
 {
-	traceL() << "[IntervalTrigger] Deserializing" << endl;
+	TraceL << "[IntervalTrigger] Deserializing" << endl;
 	
 	json::assertMember(root, "interval");
 	json::assertMember(root["interval"], "days");
@@ -215,7 +215,7 @@ void DailyTrigger::update()
 		timeOfDay.microsecond());
 	
 	/*
-	traceL() << "[DailyTrigger] Updating: "
+	TraceL << "[DailyTrigger] Updating: "
 			<< "\n\tDayOfWeek: " << next.dayOfWeek()
 			<< "\n\tNowTime: " << DateTimeFormatter::format(now, Poco::DateTimeFormat::ISO8601_FORMAT)
 			<< "\n\tPrevTime: " << DateTimeFormatter::format(prev, Poco::DateTimeFormat::ISO8601_FORMAT)

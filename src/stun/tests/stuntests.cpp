@@ -40,6 +40,7 @@ public:
 		//testXorAddress();
 		testReuestTypes();
 	}
+
 	
 	void testMessageIntegrity() 
 	{	
@@ -71,7 +72,7 @@ public:
 	{	
 		UInt16 type = stun::Message::Indication | stun::Message::SendIndication;
 
-		assert(IS_STUN_INDICATION(type));
+		//assert(IS_STUN_INDICATION(type));
 		
 		UInt16 classType = type & 0x0110;
 		UInt16 methodType = type & 0x000F;
@@ -80,9 +81,13 @@ public:
 		assert(methodType == stun::Message::SendIndication);
 
 		stun::Message request(stun::Message::Indication, stun::Message::SendIndication);
-		assert(IS_STUN_INDICATION(request.classType() | request.methodType()));
+		//assert(IS_STUN_INDICATION(request.classType() | request.methodType()));
+			
+		assert(request.classType() != stun::Message::Request);
+		assert(request.classType() == stun::Message::Indication);
+
 		stun::Message request1(stun::Message::Request, stun::Message::Allocate);
-		assert(IS_STUN_REQUEST(request1.classType() | request1.methodType()));
+		//assert(IS_STUN_REQUEST(request1.classType() | request1.methodType()));
 	}
 	
 	
@@ -92,7 +97,7 @@ public:
 		assert(5555 ^ (kMagicCookie >> 16) == 0x34A1);
 		
 		net::Address addr("192.168.1.1", 5555);
-		debugL("TestXorAddress") << "Source Address: " << addr << endl;
+		DebugL << "Source Address: " << addr << endl;
 		
 		stun::Message request(stun::Message::Request, stun::Message::Allocate);
 		//stun::Message request;
@@ -101,7 +106,7 @@ public:
 		auto addrAttr = new stun::XorRelayedAddress;
 		addrAttr->setAddress(addr);
 		request.add(addrAttr);
-		debugL("TestXorAddress") << "Request Address: " << addrAttr->address() << endl;
+		DebugL << "Request Address: " << addrAttr->address() << endl;
 
 		Buffer buf;
 		request.write(buf);
@@ -111,10 +116,8 @@ public:
 				
 		addrAttr = response.get<stun::XorRelayedAddress>();	
 		
-		debugL("TestXorAddress") << "Response Address: " << addrAttr->address() << endl;
+		DebugL << "Response Address: " << addrAttr->address() << endl;
 		assert(addrAttr->address() == addr);
-		/*
-		*/
 	}
 };
 

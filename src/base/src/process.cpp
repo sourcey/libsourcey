@@ -60,7 +60,7 @@ void Process::spawn()
 		unsigned i; 
 		for (i = 0; i < args.size(); i++) { 
 			uvargs[i + 1] = const_cast<char*>(args[i].data()); 
-		} uvargs[i + 1] = NULL;
+		} uvargs[i + 1] = nullptr;
 		options.args = uvargs;
 	}
 

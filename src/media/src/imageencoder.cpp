@@ -38,7 +38,7 @@ ImageEncoder::ImageEncoder(EncoderOptions& options, std::vector<int> cvParams) :
 	_options(options),
 	_params(cvParams)
 {	
-	traceL("ImageEncoder", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 
 	if (_options.oformat.id == "jpeg" ||
 		_options.oformat.id == "mjpeg")
@@ -55,7 +55,7 @@ ImageEncoder::ImageEncoder(EncoderOptions& options, std::vector<int> cvParams) :
 
 ImageEncoder::~ImageEncoder()
 {
-	traceL("ImageEncoder", this) << "Destroy" << endl;
+	TraceLS(this) << "Destroy" << endl;
 }
 
 	
@@ -77,7 +77,7 @@ bool ImageEncoder::accepts(IPacket& packet)
 
 void ImageEncoder::process(IPacket& packet)
 { 
-	//traceL("ImageEncoder", this) << "Processing" << endl;
+	//TraceLS(this) << "Processing" << endl;
 
 	MatrixPacket* mpacket = dynamic_cast<MatrixPacket*>(&packet);	
 	if (!mpacket)
@@ -103,9 +103,9 @@ void ImageEncoder::process(IPacket& packet)
 	mpacket->_data = (char*)&buffer[0];
 	mpacket->_size = buffer.size();
 	
-	//traceL("ImageEncoder", this) << "Broadcasting: " << mpacket << endl;
+	//TraceLS(this) << "Broadcasting: " << mpacket << endl;
 	emit(*mpacket); //this, 
-	//traceL("ImageEncoder", this) << "Broadcasting: OK: " << mpacket << endl;
+	//TraceLS(this) << "Broadcasting: OK: " << mpacket << endl;
 }
 
 	

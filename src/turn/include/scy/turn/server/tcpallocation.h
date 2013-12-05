@@ -72,7 +72,7 @@ public:
 		// Callback for handling controll connection destruction.
 		// The allocation will be deleted.
 
-	virtual const char* className() const { return "TCPAllocation"; };
+	//virtual const char* className() const { return "TCPAllocation"; };
 
 protected:
 	net::TCPSocket _control;

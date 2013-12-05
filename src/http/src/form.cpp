@@ -77,7 +77,7 @@ void FormWriter::addFile(const std::string& name, FilePart* part)
 
 void FormWriter::prepareSubmit()
 {	
-	traceL("FormWriter", this) << "Prepare submit" << std::endl;
+	TraceLS(this) << "Prepare submit" << std::endl;
 
 	http::Request& request = _connection.request();
 	if (request.getMethod() == http::Method::Post || 
@@ -128,7 +128,7 @@ void FormWriter::prepareSubmit()
 
 void FormWriter::start()
 {
-	traceL("FormWriter", this) << "Start" << std::endl;
+	TraceLS(this) << "Start" << std::endl;
 
 	prepareSubmit();
 	_runner->start(std::bind(&FormWriter::writeAsync, this));
@@ -137,7 +137,7 @@ void FormWriter::start()
 
 void FormWriter::stop()
 {
-	traceL("FormWriter", this) << "Stop" << std::endl;
+	TraceLS(this) << "Stop" << std::endl;
 
 	//_complete = true;
 	_runner->cancel();
@@ -151,7 +151,7 @@ void FormWriter::writeAsync()
 		if (encoding() == ENCODING_URL) {
 			std::ostringstream ostr;
 			writeUrl(ostr);					
-			traceL("FormWriter") << "Writing URL: " << ostr.str() << std::endl;
+			TraceL << "Writing URL: " << ostr.str() << std::endl;
 			emit(ostr.str());
 		} 
 		else
@@ -160,7 +160,7 @@ void FormWriter::writeAsync()
 			_runner->cancel();
 	}
 	catch (std::exception& exc) {
-		traceL("FormWriter", this) << "Error: " << exc.what() << std::endl;
+		TraceLS(this) << "Error: " << exc.what() << std::endl;
 		assert(0);
 //#ifdef _DEBUG
 //		throw exc;
@@ -213,7 +213,7 @@ void FormWriter::writeMultipart()
 
 void FormWriter::writeMultipartChunk()
 {
-	traceL("FormWriter", this) << "Writing chunk: " << _writeState << std::endl;
+	TraceLS(this) << "Writing chunk: " << _writeState << std::endl;
 
 	switch(_writeState) {
 	
@@ -259,7 +259,7 @@ void FormWriter::writeMultipartChunk()
 				return; // return after writing a chunk
 			}
 			else {
-				traceL("FormWriter", this) << "Part complete: " << p.name << std::endl;
+				TraceLS(this) << "Part complete: " << p.name << std::endl;
 				delete p.part;
 				_parts.pop_front();
 			}
@@ -278,14 +278,14 @@ void FormWriter::writeMultipartChunk()
 		// The ChunkedAdapter should really be doing this.
 		emit("0\r\n\r\n", 5, PacketFlags::NoModify | PacketFlags::Final);
 
-		traceL("FormWriter", this) << "Request complete" << std::endl;
+		TraceLS(this) << "Request complete" << std::endl;
 		_complete = true;
 		_writeState = -1; // raise error if called again
 		} break;
 	
 	// Invalid state
 	default:
-		errorL("FormWriter", this) << "Invalid write state: " << _writeState << std::endl;
+		ErrorLS(this) << "Invalid write state: " << _writeState << std::endl;
 		assert(0 && "invalid write state");
 		break;
 	}
@@ -417,7 +417,7 @@ FilePart::~FilePart()
 
 void FilePart::open(const std::string& path)
 {
-	traceL("FilePart", this) << "Open: " << path << std::endl;
+	TraceLS(this) << "Open: " << path << std::endl;
 
 	_istr.open(path.c_str(), std::ios::in | std::ios::binary);
 	if (!_istr.is_open())
@@ -432,7 +432,7 @@ void FilePart::open(const std::string& path)
 
 bool FilePart::writeChunk(FormWriter& writer)
 {
-	traceL("FilePart", this) << "Write chunk" << std::endl;		
+	TraceLS(this) << "Write chunk" << std::endl;		
 	assert(!writer.cancelled());
 
 	char buffer[FILE_CHUNK_SIZE];
@@ -458,7 +458,7 @@ bool FilePart::writeChunk(FormWriter& writer)
 
 void FilePart::write(FormWriter& writer)
 {
-	traceL("FilePart", this) << "Write" << std::endl;
+	TraceLS(this) << "Write" << std::endl;
 
 	char buffer[FILE_CHUNK_SIZE];
 	while (_istr.read(buffer, FILE_CHUNK_SIZE) && !writer.cancelled()) {
@@ -479,7 +479,7 @@ void FilePart::write(FormWriter& writer)
 
 void FilePart::write(std::ostream& ostr)
 {
-	traceL("FilePart", this) << "Write" << std::endl;
+	TraceLS(this) << "Write" << std::endl;
 	
 	char buffer[FILE_CHUNK_SIZE];
 	while (_istr.read(buffer, FILE_CHUNK_SIZE))
@@ -574,7 +574,7 @@ void FormWriter::run()
 /*
 void FormWriter::onIdle()
 {
-	traceL("FormWriter", this) << "On idle" << std::endl;
+	TraceLS(this) << "On idle" << std::endl;
 
 	if (_initial)
 		prepareSubmit(_connection.request());

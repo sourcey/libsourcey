@@ -53,6 +53,6 @@ extern "C" SCY_PLUGIN_EXPORT int gimmeFive();
 
 int gimmeFive()
 {
-	scy::errorL("TestPlugin") << "gimmeFive" << std::endl;
+	//scy::ErrorL << "gimmeFive" << std::endl;
 	return 5;
 }

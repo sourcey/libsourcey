@@ -41,13 +41,13 @@ public:
 	TimedManager(uv::Loop* loop = uv::defaultLoop()) :
 		_timer(loop)
 	{		
-		_timer.Timeout += delegate(this, &TimedManager::onTimer);
+		_timer.Timeout += delegate(this, &TimedManager::onTimerUpdate);
 		_timer.start(100); // check every 100ms
 	}
 
 	virtual ~TimedManager() 
 	{
-		_timer.Timeout -= delegate(this, &TimedManager::onTimer);
+		_timer.Timeout -= delegate(this, &TimedManager::onTimerUpdate);
 	}
 	
 	virtual void add(const TKey& key, TValue* item, long timeout = 0)
@@ -65,14 +65,14 @@ public:
 	virtual bool expires(const TKey& key, long timeout) 
 		// Update the item expiry timeout
 	{
-		traceL("TimedManager", this) << "Set expires: " << key << ": " << timeout << std::endl;	
+		TraceLS(this) << "Set expires: " << key << ": " << timeout << std::endl;	
 		return expires(Base::get(key, false), timeout);
 	}
 	
 	virtual bool expires(TValue* item, long timeout) 
 		// Update the item expiry timeout
 	{
-		traceL("TimedManager", this) << "Set expires: " << item << ": " << timeout << std::endl;	
+		TraceLS(this) << "Set expires: " << item << ": " << timeout << std::endl;	
 		return setTimeout(item, timeout);
 	}
 
@@ -89,7 +89,7 @@ protected:
 		if (item) {
 			Mutex::ScopedLock lock(_tmutex);
 			if (timeout > 0) {
-				traceL("TimedManager", this) << "Set timeout: " << item << ": " << timeout << std::endl;	
+				TraceLS(this) << "Set timeout: " << item << ": " << timeout << std::endl;	
 				auto& t = _timeouts[item];
 				t.setDelay(timeout);
 				t.start();
@@ -116,25 +116,31 @@ protected:
 		
 		Base::onRemove(key, item);
 	}
+
+	virtual void onTimeout(TValue* item) 
+	{ 
+		if (Base::remove(item)) { // will call onRemove
+			TDeleter func;
+			func(item);
+		}
+	}
 	
-	void onTimer(void*)
+	void onTimerUpdate(void*)
 	{
-		//Mutex::ScopedLock lock(_tmutex);
 		_tmutex.lock();
 		TimeoutMap timeouts(_timeouts);
 		_tmutex.unlock();
+		
+		//for (auto ref : timeouts) {}
 		for (auto it = timeouts.begin(); it != timeouts.end(); ++it) {
-			//traceL("TimedManager", this) << "Check item: " 
+			//TraceLS(this) << "Check item: " 
 			//	<< it->first << ": " 
 			//	<< it->second.delay() << ": " 
 			//	<< it->second.remaining() << std::endl;	
 			if (it->second.expired()) {	
-				auto item = it->first;
-				traceL("TimedManager", this) << "Item expired: " <<item << std::endl;
-				if (Base::remove(item)) { // will call onRemove
-					TDeleter func;
-					func(item);
-				}
+				//auto item = it->first;
+				TraceLS(this) << "Item expired: " << it->first << std::endl;
+				onTimeout(it->first);
 				//it = _timeouts.erase(it);
 			}
 			//else ++it;
@@ -153,7 +159,7 @@ protected:
 #endif // SCY_TimedManager_H
 
 			/*
-			traceL("TimedManager", this) << "Set timeout: " 
+			TraceLS(this) << "Set timeout: " 
 				<< key << ": " << item << ": " << timeout << std::endl;	
 			Mutex::ScopedLock lock(_tmutex);
 			auto& t = _timeouts[item];

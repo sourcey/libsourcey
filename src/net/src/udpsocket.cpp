@@ -60,17 +60,18 @@ UDPBase& UDPSocket::base() const
 //
 
 
-UDPBase::UDPBase() :
+UDPBase::UDPBase(uv::Loop* loop) :
+	uv::Handle(loop), 
 	_buffer(65536)
 {
-	traceL("UDPBase", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 	init();
 }
 
 
 UDPBase::~UDPBase()
 {
-	traceL("UDPBase", this) << "Destroy" << endl;
+	TraceLS(this) << "Destroy" << endl;
 }
 
 
@@ -78,7 +79,7 @@ void UDPBase::init()
 {
 	if (ptr()) return;
 	
-	traceL("TCPBase", this) << "Init" << endl;
+	TraceLS(this) << "Init" << endl;
 	uv_udp_t* udp = new uv_udp_t;
 	udp->data = this; //instance();
 	_closed = false;
@@ -101,7 +102,7 @@ void UDPBase::connect(const Address& peerAddress)
 
 void UDPBase::close()
 {
-	traceL("UDPBase", this) << "Closing" << endl;	
+	TraceLS(this) << "Closing" << endl;	
 	recvStop();
 	uv::Handle::close();
 }
@@ -109,7 +110,7 @@ void UDPBase::close()
 
 void UDPBase::bind(const Address& address, unsigned flags) 
 {	
-	traceL("UDPBase", this) << "Binding on " << address << endl;
+	TraceLS(this) << "Binding on " << address << endl;
 
 	int r;
 	switch (address.af()) {
@@ -122,10 +123,13 @@ void UDPBase::bind(const Address& address, unsigned flags)
 	default:
 		throw std::runtime_error("Unexpected address family");
 	}
+
+	// Throw and exception of error
 	if (r)
-		setUVError("Invalid UDP socket", r); 
-	else
-		recvStart();
+		setAndThrowError("Cannot bind UDP socket", r); 
+	
+	// Open the receiver channel
+	recvStart();
 }
 
 
@@ -147,16 +151,17 @@ namespace internal {
 
 int UDPBase::send(const char* data, int len, const Address& peerAddress, int /* flags */) 
 {	
-	traceL("UDPBase", this) << "Send: " << len << ": " << peerAddress << endl;
-	//assert(len <= net::MAX_UDP_PACKET_SIZE); // libuv handles this for us
+	TraceLS(this) << "Send: " << len << ": " << peerAddress << endl;
+	assert(Thread::currentID() == tid());
+	//assert(len <= net::MAX_UDP_PACKET_SIZE);
 
 	if (_peer.valid() && _peer != peerAddress) {
-		errorL("UDPBase", this) << "Peer not authorized: " << peerAddress << endl;
+		ErrorLS(this) << "Peer not authorized: " << peerAddress << endl;
 		return -1;
 	}
 
 	if (!peerAddress.valid()) {
-		errorL("UDPBase", this) << "Peer not valid: " << peerAddress << endl;
+		ErrorLS(this) << "Peer not valid: " << peerAddress << endl;
 		return -1;
 	}
 	
@@ -178,9 +183,11 @@ int UDPBase::send(const char* data, int len, const Address& peerAddress, int /* 
 		throw std::runtime_error("Unexpected address family");
 	}
 #endif
-	if (r)
+	if (r) {
+		ErrorLS(this) << "Send failed: " << uv_err_name(r) << endl;
 		setUVError("Invalid UDP socket", r); 
-
+	}
+	
 	// R is -1 on error, otherwise return len
 	return r ? r : len;
 }
@@ -189,14 +196,14 @@ int UDPBase::send(const char* data, int len, const Address& peerAddress, int /* 
 bool UDPBase::setBroadcast(bool flag)
 {
 	if (!ptr()) return false;
-	return uv_udp_set_broadcast(ptr<uv_udp_t>(), flag ? 1 : 0);
+	return uv_udp_set_broadcast(ptr<uv_udp_t>(), flag ? 1 : 0) == 0;
 }
 
 
 bool UDPBase::setMulticastLoop(bool flag)
 {
 	if (!ptr()) return false;
-	return uv_udp_set_broadcast(ptr<uv_udp_t>(), flag ? 1 : 0);
+	return uv_udp_set_broadcast(ptr<uv_udp_t>(), flag ? 1 : 0) == 0;
 }
 
 
@@ -204,16 +211,18 @@ bool UDPBase::setMulticastTTL(int ttl)
 {
 	assert(ttl > 0 && ttl < 255);
 	if (!ptr()) return false;
-	return uv_udp_set_broadcast(ptr<uv_udp_t>(), ttl);
+	return uv_udp_set_broadcast(ptr<uv_udp_t>(), ttl) == 0;
 }
 
 
 bool UDPBase::recvStart() 
 {
 	// UV_EALREADY means that the socket is already bound but that's okay
+	// TODO: No need for boolean value as this method can throw exceptions
+	// since it is called internally by bind().
 	int r = uv_udp_recv_start(ptr<uv_udp_t>(), UDPBase::allocRecvBuffer, onRecv);
 	if (r && r != UV_EALREADY) {
-		setUVError("Invalid UDP socket", r);
+		setAndThrowError("Cannot start recv on invalid UDP socket", r);
 		return false;
 	}  
 	return true;
@@ -222,16 +231,15 @@ bool UDPBase::recvStart()
 
 bool UDPBase::recvStop() 
 {
-	if (!ptr())
-		return false;
+	// This method must not throw since it is called internally via libuv callbacks.
+	if (!ptr()) return false;
 	return uv_udp_recv_stop(ptr<uv_udp_t>()) == 0;
 }
 
 
 void UDPBase::onRecv(const MutableBuffer& buf, const net::Address& address)
 {
-	traceL("UDPBase", this) << "Recv: " << buf.size() << endl;	
-
+	TraceLS(this) << "Recv: " << buf.size() << endl;	
 	emitRecv(buf, address);
 }
 
@@ -253,9 +261,6 @@ net::Address UDPBase::address() const
 	if (!active())
 		return net::Address();
 		//throw std::runtime_error("Invalid UDP socket: No address");
-
-	if (_peer.valid())
-		return _peer;
 	
 	struct sockaddr address;
 	int addrlen = sizeof(address);
@@ -296,27 +301,25 @@ bool UDPBase::closed() const
 
 void UDPBase::onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned /* flags */) 
 {	
-	UDPBase* socket = static_cast<UDPBase*>(handle->data);
-	traceL("UDPBase", socket) << "Handle recv: " << nread << endl;
+	auto socket = static_cast<UDPBase*>(handle->data);
+	TraceL << "On recv: " << nread << endl;
 			
 	if (nread < 0) {
-		assert(0 && "unexpected error");
-		socket->setUVError("End of file", UV_EOF);
+		//assert(0 && "unexpected error");	
+        TraceL << "Recv error: " << uv_err_name(nread)<< endl;
+		socket->setUVError("UDP error", nread);
 		return;
 	}
-
+	
 	if (nread == 0) {
 		assert(addr == NULL);
-		socket->setUVError("End of file", UV_EOF);
+		// Returning unused buffer, this is not an error
+		// 11/12/13: This happens on linux but not windows
+		//socket->setUVError("End of file", UV_EOF);
 		return;
 	}
 	
-	// EOF or Error
-	//if (nread == -1)
-	//	socket->setUVError(r);
-	
-	//socket->_buffer.data()
-	socket->onRecv(mutableBuffer(buf->base, nread), net::Address(addr, sizeof *addr));
+	socket->onRecv(mutableBuffer(buf->base, nread), net::Address(addr, sizeof(*addr)));
 }
 
 
@@ -324,8 +327,10 @@ void UDPBase::afterSend(uv_udp_send_t* req, int status)
 {
 	auto sr = reinterpret_cast<internal::SendRequest*>(req);
 	auto socket = reinterpret_cast<UDPBase*>(sr->req.handle->data);	
-	if (status) 
-		socket->setUVError("Stream send error", status);
+	if (status) {		
+		ErrorL << "Send error: " << uv_err_name(status) << endl;
+		socket->setUVError("UDP send error", status);
+	}
 	delete sr;
 }
 
@@ -333,7 +338,7 @@ void UDPBase::afterSend(uv_udp_send_t* req, int status)
 void UDPBase::allocRecvBuffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
 {
 	auto self = static_cast<UDPBase*>(handle->data);	
-	//traceL("UDPBase", self) << "Allocating Buffer: " << suggested_size << endl;	
+	//TraceL << "Allocating Buffer: " << suggested_size << endl;	
 	
 	// Reserve the recommended buffer size
 	// XXX: libuv wants us to allocate 65536 bytes for UDP .. hmmm
@@ -353,7 +358,7 @@ void UDPBase::allocRecvBuffer(uv_handle_t* handle, size_t suggested_size, uv_buf
 
 void UDPBase::onError(const Error& error) 
 {		
-	errorL("UDPBase", this) << "Error: " << error.message << endl;	
+	ErrorLS(this) << "Error: " << error.message << endl;	
 	emitError(error);
 	close(); // close on error
 }
@@ -361,7 +366,7 @@ void UDPBase::onError(const Error& error)
 
 void UDPBase::onClose() 
 {		
-	errorL("UDPBase", this) << "On close" << endl;	
+	ErrorLS(this) << "On close" << endl;	
 	emitClose();
 }
 
@@ -370,8 +375,6 @@ uv::Loop* UDPBase::loop() const
 {
 	return uv::Handle::loop();
 }
-
-
 
 
 } } // namespace scy::net

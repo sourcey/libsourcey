@@ -103,7 +103,7 @@ void PackageManager::createDirectories()
 void PackageManager::queryRemotePackages()
 {	
 	Mutex::ScopedLock lock(_mutex);	
-	debugL("PackageManager", this) << "Querying server: " 
+	DebugLS(this) << "Querying server: " 
 		<< _options.endpoint << _options.indexURI << endl;
 
 	if (!_tasks.empty())
@@ -124,7 +124,7 @@ void PackageManager::queryRemotePackages()
 		conn->send();
 	}
 	catch (std::exception& exc) {
-		errorL("PackageManager", this) << "Package Query Error: " << exc.what() << endl;
+		ErrorLS(this) << "Package Query Error: " << exc.what() << endl;
 		throw exc;
 	}
 }
@@ -135,7 +135,7 @@ void PackageManager::onPackageQueryResponse(void* sender, const http::Response& 
 	auto conn = reinterpret_cast<http::ClientConnection*>(sender);
 
 #ifdef _DEBUG
-	traceL("PackageManager", this) << "Server response: " 
+	TraceLS(this) << "Server response: " 
 		<< response << conn->readStream<std::stringstream>()->str() << endl;
 #endif
 			
@@ -148,7 +148,7 @@ void PackageManager::onPackageQueryResponse(void* sender, const http::Response& 
 		for (auto it = root.begin(); it != root.end(); it++) {		
 			auto package = new RemotePackage(*it);
 			if (!package->valid()) {
-				errorL("PackageManager", this) << "Invalid package: " << package->id() << endl;
+				ErrorLS(this) << "Invalid package: " << package->id() << endl;
 				delete package;
 				continue;
 			}
@@ -157,7 +157,7 @@ void PackageManager::onPackageQueryResponse(void* sender, const http::Response& 
 	}
 	else {
 		// TODO: Set error state
-		errorL("PackageManager", this) << "Invalid server JSON response: " << reader.getFormatedErrorMessages() << endl;
+		ErrorLS(this) << "Invalid server JSON response: " << reader.getFormatedErrorMessages() << endl;
 	}
 
 	RemotePackageResponse.emit(this, response);
@@ -182,7 +182,7 @@ void PackageManager::loadLocalPackages()
 
 void PackageManager::loadLocalPackages(const std::string& dir)
 {
-	debugL("PackageManager", this) << "Loading manifests: " << dir << endl;		
+	DebugLS(this) << "Loading manifests: " << dir << endl;		
 	
 	StringVec nodes;
 	fs::readdir(dir, nodes);
@@ -195,17 +195,17 @@ void PackageManager::loadLocalPackages(const std::string& dir)
 				json::Value root;
 				json::loadFile(path, root);
 
-				debugL("PackageManager", this) << "Loading package manifest: " << path << endl;
+				DebugLS(this) << "Loading package manifest: " << path << endl;
 				package = new LocalPackage(root);
 				if (!package->valid()) {
 					throw std::runtime_error("The local package is invalid.");
 				}
 				
-				debugL("PackageManager", this) << "local package added: " << package->name() << endl;
+				DebugLS(this) << "local package added: " << package->name() << endl;
 				localPackages().add(package->id(), package);
 			}
 			catch (std::exception& exc) {
-				errorL("PackageManager", this) << "Cannot load local package: " << exc.what() << endl;
+				ErrorLS(this) << "Cannot load local package: " << exc.what() << endl;
 				if (package)
 					delete package;
 			}
@@ -216,7 +216,7 @@ void PackageManager::loadLocalPackages(const std::string& dir)
 
 bool PackageManager::saveLocalPackages(bool whiny)
 {
-	traceL("PackageManager", this) << "Saving local packages" << endl;
+	TraceLS(this) << "Saving local packages" << endl;
 
 	bool res = true;
 	LocalPackageMap toSave = localPackages().map();
@@ -225,7 +225,7 @@ bool PackageManager::saveLocalPackages(bool whiny)
 			res = false;
 	}
 
-	traceL("PackageManager", this) << "Saving local packages: OK" << endl;
+	TraceLS(this) << "Saving local packages: OK" << endl;
 
 	return res;
 }
@@ -236,12 +236,12 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 	bool res = false;
 	try {
 		std::string path(util::format("%s/%s.json", options().interDir.c_str(), package.id().c_str()));
-		debugL("PackageManager", this) << "Saving local package: " << package.id() << endl;
+		DebugLS(this) << "Saving local package: " << package.id() << endl;
 		json::saveFile(path, package);
 		res = true;
 	}
 	catch (std::exception& exc) {
-		errorL("PackageManager", this) << "save error: " << exc.what() << endl;
+		ErrorLS(this) << "save error: " << exc.what() << endl;
 		if (whiny)
 			throw exc;
 	}
@@ -255,7 +255,7 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 
 InstallTask* PackageManager::installPackage(const std::string& name, const InstallOptions& options) //, bool whiny
 {	
-	debugL("PackageManager", this) << "Install package: " << name << endl;	
+	DebugLS(this) << "Install package: " << name << endl;	
 
 	// Try to update our remote package list if none exist.
 	// TODO: Consider storing a remote package cache file.
@@ -276,7 +276,7 @@ InstallTask* PackageManager::installPackage(const std::string& name, const Insta
 		opts.version = asset.version();
 	}
 	catch (std::exception& exc) {
-		debugL("PackageManager", this) << "No installable assets: " << exc.what() << endl;
+		DebugLS(this) << "No installable assets: " << exc.what() << endl;
 		return nullptr;
 	}
 	
@@ -293,7 +293,7 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 		pair.local->isInstalled() && 
 		pair.local->verifyInstallManifest();
 	
-	debugL("PackageManager", this) << "Get asset to install:"
+	DebugLS(this) << "Get asset to install:"
 		<< "\n\tName: " << pair.local->name() 
 		<< "\n\tVersion: " << pair.local->version() 
 		<< "\n\tVersion Lock: " << pair.local->versionLock() 
@@ -304,7 +304,7 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 	// Return a specific asset version if requested
 	if (!options.version.empty()) {
 
-		debugL("PackageManager", this) << "Get requested asset: " << options.version << endl;
+		DebugLS(this) << "Get requested asset: " << options.version << endl;
 
 		// Ensure there is no version lock conflict
 		if (!pair.local->versionLock().empty() && options.version != pair.local->versionLock())
@@ -317,7 +317,7 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 	// Return a specific SDK asset version if requested
 	if (!options.sdkVersion.empty()) {		
 				
-		debugL("PackageManager", this) << "Get requested SDK asset: " << options.sdkVersion << endl;
+		DebugLS(this) << "Get requested SDK asset: " << options.sdkVersion << endl;
 		
 		// Ensure there is no SDK version lock conflict
 		if (!pair.local->sdkLockedVersion().empty() && options.sdkVersion != pair.local->sdkLockedVersion())
@@ -337,7 +337,7 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 	// Return the locked asset version if set
 	if (!pair.local->versionLock().empty()) {
 
-		debugL("PackageManager", this) << "Get locked asset: " << pair.local->versionLock() << endl;
+		DebugLS(this) << "Get locked asset: " << pair.local->versionLock() << endl;
 		
 		// Check if there is anything to update to update or throw
 		if (isInstalledAndVerified && !util::compareVersion(pair.local->versionLock(), pair.local->version()))
@@ -350,7 +350,7 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 	// Return the locked SDK asset version if set
 	if (!pair.local->sdkLockedVersion().empty()) {
 
-		debugL("PackageManager", this) << "Get locked SDK asset: " << pair.local->sdkLockedVersion() << endl;
+		DebugLS(this) << "Get locked SDK asset: " << pair.local->sdkLockedVersion() << endl;
 		
 		// Get the latest asset for locked SDK version or throw
 		Package::Asset sdkAsset = pair.remote->latestSDKAsset(pair.local->sdkLockedVersion());
@@ -376,7 +376,7 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 		//assert();
 		// TODO: assert valid version?
 		
-	debugL("PackageManager", this) << "Get asset to install: 1" << endl;
+	DebugLS(this) << "Get asset to install: 1" << endl;
 
 		// Make sure the version option matches the lock, if both were set
 		if (!options.version.empty() && !pair.local->versionLock().empty() && 
@@ -394,7 +394,7 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 	// Get the best asset from the locked SDK version, if applicable
 	if (!pair.local->sdkLockedVersion().empty() || !options.sdkVersion.empty()) {		
 				
-	debugL("PackageManager", this) << "Get asset to install: 2" << endl;
+	DebugLS(this) << "Get asset to install: 2" << endl;
 		// Make sure the version option matches the lock, if both were set
 		if (!options.sdkVersion.empty() && !pair.local->sdkLockedVersion().empty() && 
 			options.sdkVersion != pair.local->sdkLockedVersion())
@@ -411,14 +411,14 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 		return sdkAsset;
 	}
 	
-	debugL("PackageManager", this) << "Get asset to install: 3" << endl;
+	DebugLS(this) << "Get asset to install: 3" << endl;
 
 	// If all else fails return the latest asset!
 	Package::Asset latestAsset = pair.remote->latestAsset();
 	if (isInstalledAndVerified && !util::compareVersion(latestAsset.version(), pair.local->version()))
 		throw std::runtime_error("Package is up to date.");
 	
-	debugL("PackageManager", this) << "Get asset to install: 4" << endl;
+	DebugLS(this) << "Get asset to install: 4" << endl;
 	return latestAsset;
 	*/
 }
@@ -452,7 +452,7 @@ bool PackageManager::installPackages(const StringVec& ids, const InstallOptions&
 	}
 	catch (std::exception& exc) 
 	{
-		errorL("PackageManager", this) << "Installation failed: " << exc.what() << endl;	
+		ErrorLS(this) << "Installation failed: " << exc.what() << endl;	
 		if (whiny)
 			throw exc;
 	}
@@ -467,7 +467,7 @@ InstallTask* PackageManager::updatePackage(const std::string& name, const Instal
 	{
 		if (!localPackages().exists(name)) {
 			std::string error("Update Failed: " + name + " is not installed.");
-			errorL("PackageManager", this) << "" << error << endl;	
+			ErrorLS(this) << "" << error << endl;	
 			throw std::runtime_error(error);
 			//if (whiny)
 			//else
@@ -488,7 +488,7 @@ bool PackageManager::updatePackages(const StringVec& ids, const InstallOptions& 
 		for (auto it = ids.begin(); it != ids.end(); ++it) {
 			if (!localPackages().exists(*it)) {
 				std::string error("Cannot update " + *it + " because it's not installed.");
-				errorL("PackageManager", this) << error << endl;	
+				ErrorLS(this) << error << endl;	
 				if (whiny)
 					throw std::runtime_error(error);
 				//else
@@ -517,7 +517,7 @@ bool PackageManager::updateAllPackages(bool whiny)
 
 bool PackageManager::uninstallPackage(const std::string& id, bool whiny)
 {
-	debugL("PackageManager", this) << "uninstall: " << id << endl;	
+	DebugLS(this) << "uninstall: " << id << endl;	
 	
 	try 
 	{
@@ -528,31 +528,31 @@ bool PackageManager::uninstallPackage(const std::string& id, bool whiny)
 			LocalPackage::Manifest manifest = package->manifest();
 			if (!manifest.empty()) {
 				for (auto it = manifest.root.begin(); it != manifest.root.end(); it++) {
-					debugL("PackageManager", this) << "delete file: " << (*it).asString() << endl;	
+					DebugLS(this) << "delete file: " << (*it).asString() << endl;	
 					try {							
 						//Poco::File file(package->getInstalledFilePath((*it).asString()));
 						//file.remove();						
 						fs::unlink(package->getInstalledFilePath((*it).asString()));
 					}
 					catch (std::exception& exc) {
-						errorL("PackageManager", this) << "Error deleting file: " << exc.what() << endl;
+						ErrorLS(this) << "Error deleting file: " << exc.what() << endl;
 					}
 				}
 				manifest.root.clear();
 			}	
 			else {
-				debugL("PackageManager", this) << "uninstall: empty package manifest: " << id << endl;	
+				DebugLS(this) << "uninstall: empty package manifest: " << id << endl;	
 			}	
 	
 			// Delete package manifest file
 			std::string path(options().interDir);
 			fs::addnode(path, package->id() + ".json"); // manifest_
 			
-			debugL("PackageManager", this) << "delete manifest: " << path << endl;	
+			DebugLS(this) << "delete manifest: " << path << endl;	
 			fs::unlink(path);
 		}
 		catch (std::exception& exc) {
-			errorL("PackageManager", this) << "nonfatal uninstall error: " << exc.what() << endl;
+			ErrorLS(this) << "nonfatal uninstall error: " << exc.what() << endl;
 			// Swallow and continue...
 		}
 
@@ -568,7 +568,7 @@ bool PackageManager::uninstallPackage(const std::string& id, bool whiny)
 	}
 	catch (std::exception& exc) 
 	{
-		errorL("PackageManager", this) << "fatal uninstall error: " << exc.what() << endl;
+		ErrorLS(this) << "fatal uninstall error: " << exc.what() << endl;
 		if (whiny)
 			throw exc;
 		else 
@@ -581,7 +581,7 @@ bool PackageManager::uninstallPackage(const std::string& id, bool whiny)
 
 bool PackageManager::uninstallPackages(const StringVec& ids, bool whiny)
 {	
-	debugL("PackageManager", this) << "uninstall packages: " << ids.size() << endl;	
+	DebugLS(this) << "uninstall packages: " << ids.size() << endl;	
 	bool res = true;
 	for (auto it = ids.begin(); it != ids.end(); ++it) {
 		if (!uninstallPackage(*it, whiny))
@@ -593,7 +593,7 @@ bool PackageManager::uninstallPackages(const StringVec& ids, bool whiny)
 
 InstallTask* PackageManager::createInstallTask(PackagePair& pair, const InstallOptions& options) //const std::string& name, InstallMonitor* monitor)
 {	
-	infoL("PackageManager", this) << "Create install task: " << pair.name() << endl;	
+	InfoLS(this) << "Create install task: " << pair.name() << endl;	
 
 	// Ensure we only have one task per package
 	if (getInstallTask(pair.remote->id()))
@@ -614,14 +614,14 @@ bool PackageManager::hasUnfinalizedPackages()
 {	
 	//Mutex::ScopedLock lock(_mutex);
 
-	debugL("PackageManager", this) << "checking for unfinalized packages" << endl;
+	DebugLS(this) << "checking for unfinalized packages" << endl;
 	
 	bool res = false;	
 	auto& packages = localPackages().map();
 	for (auto it = packages.begin(); it != packages.end(); ++it) {
 		if (it->second->state() == "Installing" && 
 			it->second->installState() == "Finalizing") {
-			debugL("PackageManager", this) << "finalization required: " << it->second->name() << endl;
+			DebugLS(this) << "finalization required: " << it->second->name() << endl;
 			res = true;
 		}
 	}
@@ -632,7 +632,7 @@ bool PackageManager::hasUnfinalizedPackages()
 
 bool PackageManager::finalizeInstallations(bool whiny)
 {
-	debugL("PackageManager", this) << "Finalizing installations" << endl;
+	DebugLS(this) << "Finalizing installations" << endl;
 	
 	bool res = true;	
 	auto& packages = localPackages().map();
@@ -640,7 +640,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 		try {
 			if (it->second->state() == "Installing" && 
 				it->second->installState() == "Finalizing") {
-				debugL("PackageManager", this) << "Finalizing: " << it->second->name() << endl;
+				DebugLS(this) << "Finalizing: " << it->second->name() << endl;
 
 				// Create an install task on the stack - we only have
 				// to move some files around so no async required.
@@ -664,7 +664,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 			}
 		}
 		catch (std::exception& exc) {
-			errorL("PackageManager", this) << "Finalize Error: " << exc.what() << endl;
+			ErrorLS(this) << "Finalize Error: " << exc.what() << endl;
 			res = false;
 			if (whiny)
 				throw exc;
@@ -680,7 +680,7 @@ bool PackageManager::finalizeInstallations(bool whiny)
 void PackageManager::onPackageInstallComplete(void* sender)
 {
 	auto task = reinterpret_cast<InstallTask*>(sender);	
-	traceL("PackageManager", this) << "Install complete: " 
+	TraceLS(this) << "Install complete: " 
 		<< task->state().toString() << endl;
 	
 	// Save the local package
@@ -839,18 +839,18 @@ bool PackageManager::hasAvailableUpdates(PackagePair& pair)
 
 bool PackageManager::verifyInstallManifest(LocalPackage& package)
 {	
-	debugL("PackageManager", this) << package.name() 
+	DebugLS(this) << package.name() 
 		<< ": Verifying install manifest" << endl;
 
 	// Check file system for each manifest file
 	LocalPackage::Manifest manifest = package.manifest();
 	for (auto it = manifest.root.begin(); it != manifest.root.end(); it++) {		
 		std::string path = package.getInstalledFilePath((*it).asString(), false);
-		debugL("PackageManager", this) << package.name() 
+		DebugLS(this) << package.name() 
 			<< ": Checking: " << path << endl;
 		File file(path);
 		if (!file.exists()) {
-			errorL("PackageManager", this) << package.name() 
+			ErrorLS(this) << package.name() 
 				<< ": Missing package file: " << path << endl;
 			return false;
 		}
@@ -895,7 +895,7 @@ bool PackageManager::clearCacheFile(const std::string& fileName, bool whiny)
 		return true;
 	}
 	catch (std::exception& exc) {
-		errorL("PackageManager", this) << "Clear Cache Error: " 
+		ErrorLS(this) << "Clear Cache Error: " 
 			<< fileName << ": " << exc.what() << endl;
 		if (whiny)
 			throw exc;

@@ -167,7 +167,7 @@ public:
 	virtual int writeFrame(const char* buffer, int length, int flags, BitWriter& frame);
 		// Writes a WebSocket protocol frame from the given data.
 		
-	virtual int readFrame(BitReader& frame, char*& payload); //Buffer& buffer, const char* buffer, int length, 
+	virtual UInt64 readFrame(BitReader& frame, char*& payload); //Buffer& buffer, const char* buffer, int length, 
 		// Reads a single WebSocket frame from the given buffer (frame).
 		//
 		// The actual payload length is returned, and the beginning of the

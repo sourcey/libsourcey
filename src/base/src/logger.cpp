@@ -56,10 +56,10 @@ Logger& Logger::instance()
 }
 
 
-void Logger::setInstance(Logger* logger) 
+void Logger::setInstance(Logger* logger, bool freeExisting) 
 {
 	auto current = singleton.swap(logger);
-	if (current)
+	if (current && freeExisting)
 		delete current;
 }
 
@@ -152,9 +152,9 @@ void Logger::write(LogStream* stream)
 }
 
 	
-LogStream& Logger::send(const char* level, const std::string& realm, const void* ptr, const char* channel) const
+LogStream& Logger::send(const char* level, const char* realm, const void* ptr, const char* channel) const
 {
-	return *new LogStream(getLogLevelFromString(level), realm, ptr, channel);
+	return *new LogStream(getLogLevelFromString(level), realm, 0, ptr, channel);
 }
 
 
@@ -267,17 +267,17 @@ bool AsyncLogWriter::writeNext()
 //
 
 
-LogStream::LogStream(LogLevel level, const std::string& realm, const void* ptr, const char* channel) : 
-	level(level), realm(realm), address(ptr ? util::memAddress(ptr) : ""), ts(time::now()), channel(nullptr)
+LogStream::LogStream(LogLevel level, const char* realm, int line, const void* ptr, const char* channel) : 
+	level(level), realm(realm), line(line), address(ptr ? util::memAddress(ptr) : ""), ts(time::now()), channel(nullptr)
 {
-#ifndef DISABLE_LOGGING
+#ifndef SCY_DISABLE_LOGGING
 	if (channel)
 		this->channel = Logger::instance().get(channel, false);
 #endif
 }
 
 
-LogStream::LogStream(LogLevel level, const std::string& realm, const std::string& address) :
+LogStream::LogStream(LogLevel level, const char* realm, const std::string& address) :
 	level(level), realm(realm), address(address), ts(time::now()), channel(nullptr)
 {
 }
@@ -291,23 +291,28 @@ LogStream::LogStream(const LogStream& that) :
 	message.str(that.message.str());
 }
 
+
+LogStream::~LogStream()
+{
+}
+
 		
 //
 // Log Channel
 //
 
 
-LogChannel::LogChannel(const std::string& name, LogLevel level, const char* dateFormat) : 
+LogChannel::LogChannel(const std::string& name, LogLevel level, const char* timeFormat) : 
 	_name(name), 
 	_level(level), 
-	_dateFormat(dateFormat)
+	_timeFormat(timeFormat)
 {
 }
 
 
-void LogChannel::write(const std::string& message, LogLevel level, const std::string& realm, const void* ptr) 
+void LogChannel::write(const std::string& message, LogLevel level, const char* realm, const void* ptr) 
 {	
-	LogStream stream(level, realm, ptr);
+	LogStream stream(level, realm, 0, ptr);
 	stream << message;
 	write(stream);
 }
@@ -321,13 +326,15 @@ void LogChannel::write(const LogStream& stream)
 
 void LogChannel::format(const LogStream& stream, std::ostream& ost)
 { 
-	if (_dateFormat)
-		ost << time::print(time::toLocal(stream.ts), _dateFormat); //DateTimeFormatter::format(Timestamp(stream.ts), _dateFormat);Local
+	if (_timeFormat)
+		ost << time::print(time::toLocal(stream.ts), _timeFormat);
 	ost << " [" << getStringFromLogLevel(stream.level) << "] ";
 	if (!stream.realm.empty() || !stream.address.empty()) {		
 		ost << "[";		
 		if (!stream.realm.empty())
 			ost << stream.realm;
+		if (stream.line > 0)
+			ost << "(" << stream.line << ")" ;
 		if (!stream.address.empty())
 			ost << ":" << stream.address;
 		ost << "] ";
@@ -342,8 +349,8 @@ void LogChannel::format(const LogStream& stream, std::ostream& ost)
 //
 
 
-ConsoleChannel::ConsoleChannel(const std::string& name, LogLevel level, const char* dateFormat) : 
-	LogChannel(name, level, dateFormat) 
+ConsoleChannel::ConsoleChannel(const std::string& name, LogLevel level, const char* timeFormat) : 
+	LogChannel(name, level, timeFormat) 
 {
 }
 
@@ -375,8 +382,8 @@ void ConsoleChannel::write(const LogStream& stream)
 FileChannel::FileChannel(const std::string& name,
 						 const std::string& path, 
 						 LogLevel level, 
-						 const char* dateFormat) : 
-	LogChannel(name, level, dateFormat),
+						 const char* timeFormat) : 
+	LogChannel(name, level, timeFormat),
 	_path(path)
 {
 }
@@ -461,8 +468,8 @@ RotatingFileChannel::RotatingFileChannel(const std::string& name,
 										 LogLevel level, 
 										 const std::string& extension, 
 										 int rotationInterval, 
-										 const char* dateFormat) : 
-	LogChannel(name, level, dateFormat),
+										 const char* timeFormat) : 
+	LogChannel(name, level, timeFormat),
 	_fstream(nullptr),
 	_dir(dir),
 	_extension(extension),
@@ -548,12 +555,12 @@ void Logger::write(const char* channel, const LogStream& stream)
 
 
 void Logger::write(const std::string& message, const char* level, 
-		const std::string& realm, const void* ptr) const
+		const char* realm, const void* ptr) const
 {
 	// will write to the nullptr channel if no default channel exists
 	LogChannel* c = getDefault();
 	if (c)
-		c->write(message, getLogLevelFromString(level), realm, ptr);
+		c->write(message, getLogLevelFromString(level), realm, 0, ptr);
 }
 */
 
@@ -566,8 +573,8 @@ EventedFileChannel::EventedFileChannel(const std::string& name,
 						 LogLevel level, 
 						 const std::string& extension, 
 						 int rotationInterval, 
-						 const char* dateFormat) : 
-	FileChannel(name, dir, level, extension, rotationInterval, dateFormat)
+						 const char* timeFormat) : 
+	FileChannel(name, dir, level, extension, rotationInterval, timeFormat)
 {
 }
 
@@ -577,7 +584,7 @@ EventedFileChannel::~EventedFileChannel()
 }
 
 
-void EventedFileChannel::write(const LogStream& stream, LogLevel level, const std::string& realm, const void* ptr) 
+void EventedFileChannel::write(const LogStream& stream, LogLevel level, const char* realm, const void* ptr) 
 {	
 	if (this->level() > level)
 		return;

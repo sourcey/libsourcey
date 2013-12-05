@@ -48,11 +48,12 @@ ServerAllocation::~ServerAllocation()
 
 bool ServerAllocation::handleRequest(Request& request) 
 {	
-	log("trace") << "Handle Request" << endl;	
+	TraceL << "Handle Request" << endl;	
 	
-	// FIXME: Adding this check as there is a possibility receiving 
-	// requests after the allocation is received under heavy traffic.
-	assert(!IAllocation::deleted());
+	if (IAllocation::deleted()) {
+		WarnL << "Dropping request for deleted allocation" << endl;			
+		return false;
+	}
 
 	if (request.methodType() == stun::Message::CreatePermission)
 		handleCreatePermission(request);
@@ -67,7 +68,7 @@ bool ServerAllocation::handleRequest(Request& request)
 
 void ServerAllocation::handleRefreshRequest(Request& request) 
 {
-	log("trace") << "Handle Refresh Request" << endl;
+	TraceL << "Handle Refresh Request" << endl;
 	assert(request.methodType() == stun::Message::Refresh);
 	assert(request.classType() == stun::Message::Request);
 
@@ -129,14 +130,15 @@ void ServerAllocation::handleRefreshRequest(Request& request)
 	auto resLifetimeAttr = new stun::Lifetime;
 	resLifetimeAttr->setValue(desiredLifetime);
 	response.add(resLifetimeAttr);
-
-	request.socket.send(response, request.remoteAddr);
+	
+	_server.respondSuccess(request, response);
+	//request.socket.send(response, request.remoteAddr);
 }
 
 
 void ServerAllocation::handleCreatePermission(Request& request) 
 {	
-	log("trace") << "Handle Create Permission" << endl;
+	TraceL << "Handle Create Permission" << endl;
 
 	// 9.2. Receiving a CreatePermission Request
 	// 
@@ -185,13 +187,14 @@ void ServerAllocation::handleCreatePermission(Request& request)
 	stun::Message response(stun::Message::SuccessResponse, stun::Message::CreatePermission);
 	response.setTransactionID(request.transactionID());
   
-	request.socket.send(response, request.remoteAddr);
+	_server.respondSuccess(request, response);
+	//request.socket.send(response, request.remoteAddr);
 }
 
 
 bool ServerAllocation::onTimer()
 {
-	log("trace") << "ServerAllocation: On timer: " << IAllocation::deleted() << endl;
+	TraceL << "ServerAllocation: On timer: " << IAllocation::deleted() << endl;
 	if (IAllocation::deleted())
 		return false; // bye bye
 	
@@ -200,7 +203,7 @@ bool ServerAllocation::onTimer()
 }
 
 
-UInt32 ServerAllocation::maxTimeRemaining() const
+Int64 ServerAllocation::maxTimeRemaining() const
 {
 	Int64 elapsed =  static_cast<Int64>(time(0) - _createdAt);
 	return elapsed > _maxLifetime ? 0 : _maxLifetime - elapsed;
@@ -223,17 +226,18 @@ Server& ServerAllocation::server()
 
 void ServerAllocation::print(std::ostream& os) const
 { 
-	os << className() << ":" 
-		<< "\r\tTuple: " << _tuple.toString()
-		<< "\r\tUsername: " << username()
-		<< "\n\tBandwidth Limit: " << bandwidthLimit()
-		<< "\n\tBandwidth Used: " << bandwidthUsed()
-		<< "\n\tBandwidth Remaining: " << bandwidthRemaining()
-		<< "\n\tBase Time Remaining: " << IAllocation::timeRemaining()
-		<< "\n\tTime Remaining: " << timeRemaining()
-		<< "\n\tMax Time Remaining: " << maxTimeRemaining()
-		<< "\n\tDeletable: " << IAllocation::deleted()
-		<< "\n\tExpired: " << expired()
+	os << "ServerAllocation[" 
+		<< "\r\tTuple=" << _tuple
+		<< "\r\tUsername=" << username()
+		<< "\n\tBandwidth Limit=" << bandwidthLimit()
+		<< "\n\tBandwidth Used=" << bandwidthUsed()
+		<< "\n\tBandwidth Remaining=" << bandwidthRemaining()
+		<< "\n\tBase Time Remaining=" << IAllocation::timeRemaining()
+		<< "\n\tTime Remaining=" << timeRemaining()
+		<< "\n\tMax Time Remaining=" << maxTimeRemaining()
+		<< "\n\tDeletable=" << IAllocation::deleted()
+		<< "\n\tExpired=" << expired()
+		<< "]"
 		<< endl;
 }
 
@@ -244,13 +248,13 @@ void ServerAllocation::print(std::ostream& os) const
 
 	/*
 	
-	log("trace") << "Created: " 
+	TraceL << "Created: " 
 		<< "\r\tUsername: " << username
 		<< "\r\tLifetime: " << _lifetime
 		<< "\r\tMaximum Lifetime: " << _maxLifetime
 		<< endl;
 
-	log("trace") << "Destroy:" 
+	TraceL << "Destroy:" 
 		<< "\r\tUsername: " << username()
 		<< "\n\tBandwidth Limit: " << bandwidthLimit()
 		<< "\n\tBandwidth Used: " << bandwidthUsed()

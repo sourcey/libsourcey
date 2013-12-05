@@ -93,13 +93,13 @@ bool IDiagnostic::failed() const
 //	
 DiagnosticManager::DiagnosticManager()
 {	
-	traceL() << "Create" << endl;
+	TraceL << "Create" << endl;
 }
 
 
 DiagnosticManager::~DiagnosticManager() 
 {
-	traceL() << "Destroy" << endl;
+	TraceL << "Destroy" << endl;
 }
 
 void DiagnosticManager::resetAll()
@@ -136,7 +136,7 @@ bool DiagnosticManager::addDiagnostic(IDiagnostic* test)
 	assert(test);
 	assert(!test->name.empty());
 	
-	traceL() << "Adding Diagnostic: " << test->name << endl;	
+	TraceL << "Adding Diagnostic: " << test->name << endl;	
 	//test->StateChange += delegate(this, &DiagnosticManager::onDiagnosticStateChange);
 	return DiagnosticStore::add(test->name, test);
 }
@@ -146,7 +146,7 @@ bool DiagnosticManager::freeDiagnostic(const std::string& name)
 {
 	assert(!name.empty());
 
-	traceL() << "Removing Diagnostic: " << name << endl;	
+	TraceL << "Removing Diagnostic: " << name << endl;	
 	IDiagnostic* test = DiagnosticStore::remove(name);
 	if (test) {
 		// TODO: 
@@ -167,7 +167,7 @@ IDiagnostic* DiagnosticManager::getDiagnostic(const std::string& name)
 void DiagnosticManager::onDiagnosticStateChange(void* sender, DiagnosticState& state, const DiagnosticState&)
 {
 	IDiagnostic* test = reinterpret_cast<IDiagnostic*>(sender);
-	traceL() << "Diagnostic state change: " << test->name << ": " << state << endl;
+	TraceL << "Diagnostic state change: " << test->name << ": " << state << endl;
 
 	if (test->complete() && allComplete())
 		DiagnosticsComplete.emit(this);

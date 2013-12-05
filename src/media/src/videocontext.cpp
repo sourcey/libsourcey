@@ -38,14 +38,14 @@ VideoContext::VideoContext() :
 	frame(nullptr),
 	pts(0.0)
 {
-	traceL("VideoContext", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 	//reset();
 }
 	
 
 VideoContext::~VideoContext()
 {	
-	traceL("VideoContext", this) << "Destroy" << endl;
+	TraceLS(this) << "Destroy" << endl;
 	
 	//assert((!frame && !codec && !stream) && "video context must be closed");
 	close();
@@ -59,7 +59,7 @@ void VideoContext::create()
 
 void VideoContext::open()
 {
-	traceL("VideoContext", this) << "Opening" << endl;	
+	TraceLS(this) << "Opening" << endl;	
 	assert(ctx);
 	assert(codec);
 
@@ -71,7 +71,7 @@ void VideoContext::open()
 
 void VideoContext::close()
 {
-	traceL("VideoContext", this) << "Closing" << endl;
+	TraceLS(this) << "Closing" << endl;
 
 	if (frame) {
 		av_free(frame);
@@ -93,7 +93,7 @@ void VideoContext::close()
 	pts = 0.0;
 	error = "";
 	
-	traceL("VideoContext", this) << "Closing: OK" << endl;
+	TraceLS(this) << "Closing: OK" << endl;
 }
 
 
@@ -117,7 +117,7 @@ VideoEncoderContext::~VideoEncoderContext()
 
 void VideoEncoderContext::create() //, const VideoCodec& params
 {
-	traceL("VideoEncoderContext", this) << "Create: " 
+	TraceLS(this) << "Create: " 
 		<< "\n\tInput: " << iparams.toString() 
 		<< "\n\tOutput: " << oparams.toString() 
 		<< endl;
@@ -206,7 +206,7 @@ void VideoEncoderContext::freeConverter()
 
 void VideoEncoderContext::close()
 {
-	traceL("VideoEncoderContext", this) << "Closing" << endl;
+	TraceLS(this) << "Closing" << endl;
 
 	VideoContext::close();
 	
@@ -222,7 +222,7 @@ void VideoEncoderContext::close()
 	if (stream && format && format->nb_streams) {		
 		for (unsigned int i = 0; i < format->nb_streams; i++) {
 			if (format->streams[i] == stream) {		
-				traceL("VideoContext", this) << "Closing: Removing Stream: " << stream << endl;
+				TraceLS(this) << "Closing: Removing Stream: " << stream << endl;
 				av_freep(&format->streams[i]->codec);
 				av_freep(&format->streams[i]);
 				stream = nullptr;
@@ -288,7 +288,7 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 	if (avcodec_encode_video2(ctx, &opacket, oframe, &frameEncoded) < 0) {
 		// TODO: Use av_strerror
 		error = "Fatal encoder error";
-		errorL("VideoEncoderContext", this) << error << endl;
+		ErrorLS(this) << error << endl;
 		throw std::runtime_error(error);
     }
 	
@@ -301,10 +301,10 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
         if (opacket.dts != AV_NOPTS_VALUE)
             opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
         if (opacket.duration > 0)
-            opacket.duration = av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
+            opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
 		
 		/*
-		traceL("VideoEncoderContext", this) << "Encoded Frame:" 
+		TraceLS(this) << "Encoded Frame:" 
 			<< "\n\tScaled PTS: " << opacket.pts
 			<< "\n\tScaled DTS: " << opacket.dts
 			<< "\n\tScaled Duration: " << opacket.duration
@@ -326,7 +326,7 @@ bool VideoEncoderContext::flush(AVPacket& opacket)
 	if (avcodec_encode_video2(ctx, &opacket, nullptr, &frameEncoded) < 0) {
 		// TODO: Use av_strerror
 		error = "Fatal encoder error";
-		errorL("VideoEncoderContext", this) << error << endl;
+		ErrorLS(this) << error << endl;
 		throw std::runtime_error(error);
     }
 	
@@ -338,8 +338,8 @@ bool VideoEncoderContext::flush(AVPacket& opacket)
         if (opacket.dts != AV_NOPTS_VALUE)
             opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
         if (opacket.duration > 0)
-            opacket.duration = av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
-		traceL("VideoEncoderContext", this) << "Flushed Video Frame: " << opacket.pts << endl;
+            opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
+		TraceLS(this) << "Flushed Video Frame: " << opacket.pts << endl;
 		return true;
 	}
 	return false;
@@ -367,7 +367,7 @@ VideoCodecEncoderContext::~VideoCodecEncoderContext()
 
 void VideoCodecEncoderContext::create()
 {
-	traceL("VideoCodecEncoderContext", this) << "Create: " 
+	TraceLS(this) << "Create: " 
 		<< "\n\tInput: " << iparams.toString() 
 		<< "\n\tOutput: " << oparams.toString() 
 		<< endl;
@@ -409,7 +409,7 @@ void VideoCodecEncoderContext::create()
 
 void VideoCodecEncoderContext::close()
 {
-	traceL("VideoCodecEncoderContext", this) << "Closing" << endl;
+	TraceLS(this) << "Closing" << endl;
 
 	VideoContext::close();
 	
@@ -458,7 +458,7 @@ bool VideoCodecEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 
 bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 {	
-	traceL("VideoCodecEncoderContext", this) << "Encoding Video Packet" << endl;
+	TraceLS(this) << "Encoding Video Packet" << endl;
 
 	AVFrame* oframe = conv ? conv->convert(iframe) : iframe;
 	oframe->pts = iframe->pts;
@@ -472,7 +472,7 @@ bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 	int frameEncoded = 0;
 	if (avcodec_encode_video2(ctx, &opacket, oframe, &frameEncoded) < 0) {
 		error = "Fatal encoder error";
-		errorL("VideoCodecEncoderContext", this) << "Fatal encoder error" << endl;
+		ErrorLS(this) << "Fatal encoder error" << endl;
 		throw std::runtime_error(error);
     }
 
@@ -482,7 +482,7 @@ bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 		    opacket.flags |= AV_PKT_FLAG_KEY;
 
 		/*	
-		traceL("VideoCodecEncoderContext", this) << "Encoded PTS:\n" 
+		TraceLS(this) << "Encoded PTS:\n" 
 			<< "\n\tPTS: " << opacket.pts
 			<< "\n\tDTS: " << opacket.dts
 			<< endl; 
@@ -511,7 +511,7 @@ VideoDecoderContext::~VideoDecoderContext()
 
 void VideoDecoderContext::create(AVFormatContext *ic, int streamID)
 {	
-	traceL("VideoDecoderContext", this) << "Create: " << streamID << endl;
+	TraceLS(this) << "Create: " << streamID << endl;
 	VideoContext::create();
 
 	assert(ic);
@@ -562,7 +562,7 @@ bool VideoDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 	bytesDecoded = avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
 	if (bytesDecoded < 0) {
 		error = "Decoder error";
-		errorL("VideoDecoderContext", this) << "" << error << endl;
+		ErrorLS(this) << "" << error << endl;
 		throw std::runtime_error(error);
 	}
 
@@ -582,7 +582,7 @@ bool VideoDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 
 	/*
 	while (bytesRemaining) { // && !frameDecoded
-		//traceL("VideoDecoderContext", this) << "Decoding: " << ipacket.pts << endl;
+		//TraceLS(this) << "Decoding: " << ipacket.pts << endl;
 		bytesRemaining -= bytesDecoded;
 	}
 	*/
@@ -591,7 +591,7 @@ bool VideoDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 		fps.tick();
 		initDecodedVideoPacket(stream, ctx, frame, &opacket, &pts);
 		/*
-		traceL("VideoDecoderContext", this) << "Decoded Frame:" 		
+		TraceLS(this) << "Decoded Frame:" 		
 			<< "\n\tPTS: " << pts	
 			<< "\n\tPacket Size: " << opacket.size
 			<< "\n\tPacket PTS: " << opacket.pts
@@ -623,7 +623,7 @@ bool VideoDecoderContext::flush(AVPacket& opacket)
 	avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
 	if (frameDecoded) {
 		initDecodedVideoPacket(stream, ctx, frame, &opacket, &pts);
-		traceL("VideoDecoderContext", this) << "Flushed Video Frame: " << opacket.pts << endl;
+		TraceLS(this) << "Flushed Video Frame: " << opacket.pts << endl;
 		return true;
 	}
 	return false;
@@ -650,7 +650,7 @@ VideoConversionContext::~VideoConversionContext()
 
 void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec& oparams)
 {
-	//traceL("VideoConversionContext", this) << "Create:" 
+	//TraceLS(this) << "Create:" 
 	//	<< "\n\tInput Width: " << iparams.width
 	//	<< "\n\tInput Height: " << iparams.height
 	//	<< "\n\tInput Pixel Format: " << iparams.pixelFmt
@@ -679,13 +679,13 @@ void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec&
 	this->iparams = iparams;
 	this->oparams = oparams;
 	
-	traceL("VideoConversionContext", this) << "Create: OK: " << ctx << endl;
+	TraceLS(this) << "Create: OK: " << ctx << endl;
 }
 	
 
 void VideoConversionContext::free()
 {
-	traceL("VideoConversionContext", this) << "Closing" << endl;
+	TraceLS(this) << "Closing" << endl;
 
 	if (oframe) {
 		av_free(oframe);
@@ -697,13 +697,13 @@ void VideoConversionContext::free()
 		ctx = nullptr;
 	}
 
-	traceL("VideoConversionContext", this) << "Closing: OK" << endl;
+	TraceLS(this) << "Closing: OK" << endl;
 }
 
 
 AVFrame* VideoConversionContext::convert(AVFrame* iframe)
 {
-	traceL("VideoConversionContext", this) << "Convert: " << ctx << endl;
+	TraceLS(this) << "Convert: " << ctx << endl;
 
 	assert(iframe);
 	assert(iframe->data[0]);
@@ -836,7 +836,7 @@ void initDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, c
 	//assert(opacket->pts >= 0);	
 	
 	/*	
-	traceL() << "[VideoContext] Init Decoded Frame Pcket:" 		
+	TraceL << "[VideoContext] Init Decoded Frame Pcket:" 		
 		<< "\n\tFrame DTS: " << frame->pkt_dts		
 		<< "\n\tFrame PTS: " << frame->pkt_pts		
 		<< "\n\tPacket Size: " << opacket->size	
@@ -874,10 +874,10 @@ void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
 	if (maxFPS && ipacket.dts != AV_NOPTS_VALUE) {
 		double fps = ctx->frame_number / (ipacket.dts * av_q2d(stream->time_base));
 		if (fps > maxFPS) {
-			traceL("VideoDecoderContext", this) << "Skipping video frame at fps: " << fps << endl;
+			TraceLS(this) << "Skipping video frame at fps: " << fps << endl;
 			return false;
 		}
-		traceL("VideoDecoderContext", this) << "Decoding at fps: " << fps << ": " << ctx->frame_number << endl;
+		TraceLS(this) << "Decoding at fps: " << fps << ": " << ctx->frame_number << endl;
 	}
 	*/
 
@@ -1011,7 +1011,7 @@ void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
 		//frame->format = ctx->pix_fmt;
 		
 			/*
-		traceL("VideoDecoderContext", this) << "Decoded Frame:" 			
+		TraceLS(this) << "Decoded Frame:" 			
 			<< "\n\tFrame Size: " << opacket.size
 			<< "\n\tFrame PTS: " << opacket.pts
 			<< "\n\tDecoder PTS: " << pts
@@ -1066,7 +1066,7 @@ void VideoEncoderContext::reset()
 			ctx->width, ctx->height, ctx->pix_fmt,
 			SWS_BICUBIC, nullptr, nullptr, nullptr);
 
-		traceL("VideoEncoderContext", this) << "Video Conversion Context:\n" 
+		TraceLS(this) << "Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << iparams.width
 			<< "\n\tInput Height: " << iparams.height
 			<< "\n\tInput Pixel Format: " << iparams.pixelFmt
@@ -1084,7 +1084,7 @@ void VideoEncoderContext::reset()
 	int len = avcodec_encode_video(ctx, this->buffer, this->bufferSize, oframe);
 	if (len < 0) {
 		error = "Encoder error";
-		errorL("VideoEncoderContext", this) << "Encoder Error" << endl;
+		ErrorLS(this) << "Encoder Error" << endl;
 		return false;
     }
 				
@@ -1146,7 +1146,7 @@ void VideoContext::reset()
 		if (opacket.dts != AV_NOPTS_VALUE)
 			opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);		
 		
-		traceL("VideoEncoderContext", this) << "Encoding Video Packet:\n"
+		TraceLS(this) << "Encoding Video Packet:\n"
 			//<< "\n\AV_NOPTS_VALUE: " << (ctx->coded_frame->pts != AV_NOPTS_VALUE)
 			//<< "\n\ctx->coded_frame: " << ctx->coded_frame
 			//<< "\n\ctx->coded_frame->pts: " << ctx->coded_frame->pts
@@ -1168,16 +1168,16 @@ void VideoContext::reset()
 			*/
 
 		/*
-		traceL("VideoDecoderContext", this) << "bytesTotal: " << ipacket.size << endl;
-		traceL("VideoDecoderContext", this) << "frameDecoded: " << opacket.size << endl;
-		traceL("VideoDecoderContext", this) << "bytesRemaining: " << bytesRemaining << endl;
-		traceL("VideoDecoderContext", this) << "bytesDecoded: " << bytesDecoded << endl;
+		TraceLS(this) << "bytesTotal: " << ipacket.size << endl;
+		TraceLS(this) << "frameDecoded: " << opacket.size << endl;
+		TraceLS(this) << "bytesRemaining: " << bytesRemaining << endl;
+		TraceLS(this) << "bytesDecoded: " << bytesDecoded << endl;
 		*/
 
 	/*		
 	// If frameDecoded == 0, then no frame was produced.
 	if (frameDecoded == 0) {
-		warnL("VideoDecoderContext", this) << "Decoding video: No frame was decoded." << endl;
+		WarnL << "Decoding video: No frame was decoded." << endl;
 		return 0;
 	}
 	
@@ -1194,7 +1194,7 @@ void VideoContext::reset()
 			ctx->width, ctx->height, ctx->pix_fmt,
 			SWS_BICUBIC, nullptr, nullptr, nullptr);
 
-		traceL("VideoEncoderContext", this) << "Video Conversion Context:\n" 
+		TraceLS(this) << "Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << iparams.width
 			<< "\n\tInput Height: " << iparams.height
 			<< "\n\tInput Pixel Format: " << iparams.pixelFmt
@@ -1355,7 +1355,7 @@ double VideoContext::pts()
 			ctx->width, ctx->height, ctx->pix_fmt,
 			SWS_BICUBIC, nullptr, nullptr, nullptr);
 
-		traceL() << "[AVEncoder" << this << "] Initializing Video Conversion Context:\n" 
+		TraceL << "[AVEncoder" << this << "] Initializing Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << width
 			<< "\n\tInput Height: " << height
 			<< "\n\tInput Pixel Format: " << iparams.pixelFmt
@@ -1380,7 +1380,7 @@ double VideoContext::pts()
 
 		int result = av_interleaved_write_frame(oc, &opacket);
 		if (result < 0) {
-			errorL() << "[AVEncoder" << this << "] Cannot write video frame." << endl;
+			ErrorL << "[AVEncoder" << this << "] Cannot write video frame." << endl;
 			//throw std::runtime_error("Cannot write video frame");
 			return false;
 		}
@@ -1406,7 +1406,7 @@ double VideoContext::pts()
 	int len = avcodec_encode_video2(ctx, this->buffer, this->bufferSize, (short*)buffer);
     if (len < 0) {
 		error = "Encoder error";
-		errorL("VideoEncoderContext", this) << "Decoding video: Error: " << error << endl;
+		ErrorLS(this) << "Decoding video: Error: " << error << endl;
 		return -1;
     }
 
@@ -1475,14 +1475,14 @@ double VideoContext::pts()
     //return codec;
 	*/
 
-	//traceL("VideoDecoderContext", this) << "Decoder Size: " << frameDecoded << endl;
-	//traceL("VideoDecoderContext", this) << "Decoder DTS: " << packet.dts << endl;
-	//traceL("VideoDecoderContext", this) << "Decoder Time Base: " << stream->time_base.den << endl;
+	//TraceLS(this) << "Decoder Size: " << frameDecoded << endl;
+	//TraceLS(this) << "Decoder DTS: " << packet.dts << endl;
+	//TraceLS(this) << "Decoder Time Base: " << stream->time_base.den << endl;
 
 
 	
-	//traceL("VideoDecoderContext", this) << "Decoder PTS: " << packet.pts << endl;
-	//traceL("VideoDecoderContext", this) << "Decoder PTS 1: " << pts << endl;
+	//TraceLS(this) << "Decoder PTS: " << packet.pts << endl;
+	//TraceLS(this) << "Decoder PTS 1: " << pts << endl;
 
 	/*
 	// Initialize scale conversion context if uninitialized or if the
@@ -1493,7 +1493,7 @@ double VideoContext::pts()
 			ctx->width, ctx->height, ctx->pix_fmt,
 			SWS_BICUBIC, nullptr, nullptr, nullptr);
 
-		traceL() << "[AVEncoder" << this << "] Initializing Video Conversion Context:\n" 
+		TraceL << "[AVEncoder" << this << "] Initializing Video Conversion Context:\n" 
 			<< "\n\tInput Width: " << width
 			<< "\n\tInput Height: " << height
 			<< "\n\tInput Pixel Format: " << iparams.pixelFmt

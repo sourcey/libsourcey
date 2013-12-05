@@ -24,6 +24,7 @@
 #include "scy/base.h"
 #include "scy/packet.h"
 #include "scy/json/json.h"
+#include "scy/symple/peer.h"
 #include "scy/symple/address.h"
 
 
@@ -53,8 +54,12 @@ public:
 	int status() const;	
 	
 	void setType(const std::string& type);
+	void setTo(const Peer& to);	
 	void setTo(const Address& to);	
+	void setTo(const std::string& to);	
+	void setFrom(const Peer& from);
 	void setFrom(const Address& from);
+	void setFrom(const std::string& from);
 
 	void setStatus(int code);
 		// HTTP status codes are used to describe the message response.

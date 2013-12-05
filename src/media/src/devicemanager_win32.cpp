@@ -64,14 +64,14 @@ Win32DeviceManager::Win32DeviceManager() :
 	_needCoUninitialize(false) 
 {
 	//RtDeviceManager::initialize();
-	traceL("DeviceManager") << "Create" << endl;
+	TraceL << "Create" << endl;
 	//setWatcher(new Win32DeviceWatcher(this));
 }
 
 
 Win32DeviceManager::~Win32DeviceManager() 
 {
-	traceL("DeviceManager") << "Destroy" << endl;
+	TraceL << "Destroy" << endl;
 	//RtDeviceManager::uninitialize();
 	if (initialized()) {
 		uninitialize();
@@ -81,33 +81,33 @@ Win32DeviceManager::~Win32DeviceManager()
 
 bool Win32DeviceManager::initialize() 
 {
-	traceL("DeviceManager") << "Initializing" << endl;
+	TraceL << "Initializing" << endl;
 	if (!initialized()) {
 		HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 		//HRESULT hr = CoInitialize(nullptr);
 		_needCoUninitialize = SUCCEEDED(hr);
 		if (FAILED(hr)) {
 			if (hr != RPC_E_CHANGED_MODE) {
-				errorL("DeviceManager") << "CoInitialize failed, hr=" << hr << endl;
+				ErrorL << "CoInitialize failed, hr=" << hr << endl;
 				return false;
 			}
 			else
-				warnL("DeviceManager") << "CoInitialize Changed Mode" << endl;
+				WarnL << "CoInitialize Changed Mode" << endl;
 		}
 		if (watcher() && !watcher()->start()) {
-			errorL("DeviceManager") << "Cannot start watcher" << endl;
+			ErrorL << "Cannot start watcher" << endl;
 			return false;
 		}
 		setInitialized(true);
 	}
-	traceL("DeviceManager") << "Initializing: OK" << endl;
+	TraceL << "Initializing: OK" << endl;
 	return true;
 }
 
 
 void Win32DeviceManager::uninitialize() 
 {
-	traceL("DeviceManager") << "Uninitializing" << endl;
+	TraceL << "Uninitializing" << endl;
 
 	if (initialized()) {
 		if (watcher())
@@ -118,7 +118,7 @@ void Win32DeviceManager::uninitialize()
 		}
 		setInitialized(false);
 	}
-	traceL("DeviceManager") << "Uninitializing: OK" << endl;
+	TraceL << "Uninitializing: OK" << endl;
 }
 
 
@@ -132,15 +132,15 @@ bool Win32DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
 
 	// Determine the number of devices available
 	auto ndevices = audio.getDeviceCount();
-	traceL("Win32DeviceManager", this) << "Get audio devices: " << ndevices << endl;
+	TraceLS(this) << "Get audio devices: " << ndevices << endl;
 
 	// Scan through devices for various capabilities
 	RtAudio::DeviceInfo info;
-	for (auto i = 0; i <= ndevices; i++) {
+	for (unsigned i = 0; i <= ndevices; i++) {
 		try {
 			info = audio.getDeviceInfo(i);	// may throw RtError
 
-			traceL("Win32DeviceManager", this) << "Device:" 
+			TraceLS(this) << "Device:" 
 				<< "\n\tName: " << info.name
 				<< "\n\tOutput Channels: " << info.outputChannels
 				<< "\n\tInput Channels: " << info.inputChannels
@@ -154,14 +154,14 @@ bool Win32DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
 				(input && info.inputChannels > 0) || 
 				(!input && info.outputChannels > 0)) {	
 
-				traceL("Win32DeviceManager", this) << "Adding device: " << info.name << endl;
+				TraceLS(this) << "Adding device: " << info.name << endl;
 				Device dev((input ? "audioin" : "audioout"), i, info.name, "", 
 					(input ? info.isDefaultInput : info.isDefaultOutput));
 				devs.push_back(dev);
 			}
 		} 
 		catch (RtError& e) {
-			errorL("Win32DeviceManager", this) << "Cannot probe audio device: " << e.getMessage() << endl;
+			ErrorLS(this) << "Cannot probe audio device: " << e.getMessage() << endl;
 		}
 	}
 
@@ -374,7 +374,7 @@ bool getDevices(const CLSID& catid, std::vector<Device>& devices)
 	CComPtr<IEnumMoniker> cam_enum;
 	if (FAILED(hr = sys_dev_enum.CoCreateInstance(CLSID_SystemDeviceEnum)) ||
 		FAILED(hr = sys_dev_enum->CreateClassEnumerator(catid, &cam_enum, 0))) {
-			errorL("DeviceManager") << "Cannot create device enumerator, hr="  << hr << endl;
+			ErrorL << "Cannot create device enumerator, hr="  << hr << endl;
 			return false;
 	}
 
@@ -527,12 +527,12 @@ bool getCoreAudioDevices(bool input, std::vector<Device>& devs)
 					
 					Device dev(input ? "audioin" : "audioout", "", i);
 					
-					traceL("DeviceManager") << "Enumerating Device: " << i << endl;
+					TraceL << "Enumerating Device: " << i << endl;
 					hr = getDeviceFromImmDevice(device, dev);
 					if (SUCCEEDED(hr)) {
 						devs.push_back(dev);
 					} else {
-						warnL("DeviceManager") << "Cannot query IMM Device, skipping.  HR=" << hr << endl;
+						WarnL << "Cannot query IMM Device, skipping.  HR=" << hr << endl;
 						hr = S_FALSE;
 					}
 				}
@@ -541,7 +541,7 @@ bool getCoreAudioDevices(bool input, std::vector<Device>& devs)
 	}
 
 	if (FAILED(hr)) {
-		warnL("DeviceManager") << "getCoreAudioDevices failed with hr " << hr << endl;
+		WarnL << "getCoreAudioDevices failed with hr " << hr << endl;
 		return false;
 	}
 	return true;

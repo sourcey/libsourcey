@@ -5,14 +5,10 @@
 #include "scy/datetime.h"
 #include "scy/platform.h"
 #include "scy/sked/scheduler.h"
-
-//#include "Poco/NamedEvent.h"
-
 #include <assert.h>
 
 
 using namespace std;
-//using namespace Poco;
 using namespace scy;
 
 
@@ -65,12 +61,12 @@ public:
 		ScheduledTask() : 
 			sked::Task("ScheduledTask")
 		{
-			debugL("ScheduledTask") << "Creating ################################" << endl;				
+			DebugL << "Creating ################################" << endl;				
 		}
 
 		virtual ~ScheduledTask()
 		{
-			debugL("ScheduledTask") << "Destroying ################################" << endl;	
+			DebugL << "Destroying ################################" << endl;	
 
 			// Dereference the main application 
 			// loop to move on to the next test.
@@ -79,7 +75,7 @@ public:
 
 		void run() 
 		{
-			debugL("ScheduledTask") << "Running ################################" << endl;
+			DebugL << "Running ################################" << endl;
 		}
 		
 		void serialize(json::Value& root)

@@ -290,6 +290,7 @@ void toUnderscore(std::string& str)
 
 bool matchNodes(const std::string& node, const std::string& xnode, const std::string& delim)
 {
+	if (xnode == "*") return true;
 	std::vector<std::string> params = util::split(node, delim);
 	std::vector<std::string> xparams = util::split(xnode, delim);
 	return matchNodes(params, xparams);

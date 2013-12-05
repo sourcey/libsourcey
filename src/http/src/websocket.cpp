@@ -95,7 +95,7 @@ WebSocketAdapter::WebSocketAdapter(net::Socket* socket, WebSocket::Mode mode, ht
 	net::SocketAdapter(socket), 
 	framer(mode), _request(request), _response(response)
 {
-	traceL("WebSocketAdapter", this) << "constructor" << endl;
+	TraceLS(this) << "constructor" << endl;
 }
 
 	
@@ -103,7 +103,7 @@ WebSocketAdapter::WebSocketAdapter(WebSocket::Mode mode, http::Request& request,
 	net::SocketAdapter(nullptr),
 	framer(mode), _request(request), _response(response)
 {
-	traceL("WebSocketAdapter", this) << "destructor" << endl;
+	TraceLS(this) << "destructor" << endl;
 }
 
 	
@@ -132,7 +132,7 @@ int WebSocketAdapter::send(const char* data, int len, int flags)
 
 int WebSocketAdapter::send(const char* data, int len, const net::Address& peerAddr, int flags) 
 {	
-	traceL("WebSocketAdapter", this) << "Send: " << std::string(data, len) << endl;
+	TraceLS(this) << "Send: " << std::string(data, len) << endl;
 	assert(framer.handshakeComplete());
 
 	// Set default text flag if none specified
@@ -156,14 +156,14 @@ void WebSocketAdapter::sendClientRequest()
 
 	std::ostringstream oss;
 	_request.write(oss);
-	traceL("WebSocketClientAdapter", this) << "Client request: " << oss.str() << endl;
+	TraceLS(this) << "Client request: " << oss.str() << endl;
 	socket->base().send(oss.str().c_str(), oss.str().length());
 }
 
 
 void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer)
 {
-	traceL("WebSocketClientAdapter", this) << "Client response: " << buffer.size() << endl;
+	TraceLS(this) << "Client response: " << buffer.size() << endl;
 	http::Parser parser(&_response);
 	if (!parser.parse(bufferCast<char *>(buffer), buffer.size())) {
 		throw std::runtime_error("WebSocket error: Cannot parse response: Incomplete HTTP message");
@@ -172,11 +172,11 @@ void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer)
 	// TODO: Handle resending request for authentication
 	// Should we implement some king of callback for this?
 
-	//traceL("WebSocketClientAdapter", this) << "Client response: parsed: " << _response << endl;
+	//TraceLS(this) << "Client response: parsed: " << _response << endl;
 
 	// Parse and check the response
 	if (framer.checkHandshakeResponse(_response)) {				
-		traceL("WebSocketClientAdapter", this) << "Handshake success" << endl;
+		TraceLS(this) << "Handshake success" << endl;
 		SocketAdapter::onSocketConnect();
 	}			
 }
@@ -190,7 +190,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer)
 		throw std::runtime_error("WebSocket error: Cannot parse request: Incomplete HTTP message");
 	}
 	
-	traceL("WebSocketServerAdapter", this) << "Verifying handshake: " << _request << endl;
+	TraceLS(this) << "Verifying handshake: " << _request << endl;
 
 	// Allow the application to verify the incoming request.
 	// TODO: Handle authentication
@@ -200,10 +200,10 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer)
 	//http::Response response;
 	try {
 		framer.acceptRequest(_request, _response);
-		traceL("WebSocketServerAdapter", this) << "Handshake success" << endl;
+		TraceLS(this) << "Handshake success" << endl;
 	}
 	catch (std::exception& exc) {
-		warnL("WebSocketClientAdapter", this) << "Handshake failed: " << exc.what() << endl;		
+		WarnL << "Handshake failed: " << exc.what() << endl;		
 	}
 
 	// Allow the application to override the response
@@ -218,7 +218,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer)
 
 void WebSocketAdapter::onSocketConnect()
 {
-	traceL("WebSocketAdapter", this) << "On connect" << endl;
+	TraceLS(this) << "On connect" << endl;
 	
 	// Send the WS handshake request
 	sendClientRequest();
@@ -230,7 +230,7 @@ void WebSocketAdapter::onSocketConnect()
 
 void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddr)
 {
-	traceL("WebSocketAdapter", this) << "On recv: " << buffer.size() << endl; // << ": " << buffer
+	TraceLS(this) << "On recv: " << buffer.size() << endl; // << ": " << buffer
 
 	//assert(buffer.position() == 0);
 
@@ -249,14 +249,14 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
 		int offset = reader.position();
 		while (offset < total) {
 			char* payload = nullptr;
-			int payloadLength = 0;
+			UInt64 payloadLength = 0;
 			try {
 				// Restore buffer state for next read
 				//reader.position(offset);
 				//reader.limit(total);
 					
 				/*
-				traceL("WebSocketServerAdapter", this) << "Read frame at: " 
+				TraceLS(this) << "Read frame at: " 
 					 << "\n\tinputPosition: " << offset
 					 << "\n\tinputLength: " << total
 					 << "\n\tbufferPosition: " << reader.position() 
@@ -274,23 +274,23 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
 				// Update the next frame offset
 				offset = reader.position(); // + payloadLength; 
 				if (offset < total)
-					debugL("WebSocketAdapter", this) << "Splitting joined packet at "
+					DebugLS(this) << "Splitting joined packet at "
 						<< offset << " of " << total << endl;
 
 				// Drop empty packets
 				if (!payloadLength) {
-					debugL("WebSocketAdapter", this) << "empty frame" << endl;
+					DebugLS(this) << "empty frame" << endl;
 					continue;
 				}
 			} 
 			catch (std::exception& exc) {
-				warnL("WebSocketAdapter", this) << "Parser error: " << exc.what() << endl;		
+				WarnL << "Parser error: " << exc.what() << endl;		
 				socket->setError(exc.what());	
 				return;
 			}
 			
 			// Emit the result packet
-			//traceL("WebSocketAdapter", this) << "On recv: emit: " << buffer << endl;
+			//TraceLS(this) << "On recv: emit: " << buffer << endl;
 			assert(payload);
 			assert(payloadLength);
 			SocketAdapter::onSocketRecv(mutableBuffer(payload, payloadLength), peerAddr);
@@ -305,10 +305,10 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
 				handleServerRequest(buffer);
 		} 
 		catch (std::exception& exc) {
-			warnL("WebSocketAdapter", this) << "Read error: " << exc.what() << endl;		
+			WarnL << "Read error: " << exc.what() << endl;		
 			socket->setError(exc.what());	
 		}
-		//traceL("WebSocketAdapter", this) << "After handshaking: " << buffer << endl;
+		//TraceLS(this) << "After handshaking: " << buffer << endl;
 		return;
 	}	
 }
@@ -392,8 +392,8 @@ void WebSocketFramer::createHandshakeRequest(http::Request& request)
 	assert(request.has("Sec-WebSocket-Version"));
 	request.set("Sec-WebSocket-Key", _key);
 	assert(request.has("Sec-WebSocket-Key"));
-	//traceL("WebSocketFramer", this) << "Sec-WebSocket-Version: " << request.get("Sec-WebSocket-Version") << endl;
-	//traceL("WebSocketFramer", this) << "Sec-WebSocket-Key: " << request.get("Sec-WebSocket-Key") << endl;
+	//TraceLS(this) << "Sec-WebSocket-Version: " << request.get("Sec-WebSocket-Version") << endl;
+	//TraceLS(this) << "Sec-WebSocket-Key: " << request.get("Sec-WebSocket-Key") << endl;
 	_headerState++;
 }
 
@@ -491,7 +491,7 @@ int WebSocketFramer::writeFrame(const char* data, int len, int flags, BitWriter&
 	//frame.skip(len);
 
 	/*
-	traceL("WebSocketServerAdapter", this) << "Write frame: " 
+	TraceLS(this) << "Write frame: " 
 		 << "\n\tinputLength: " << len
 		 << "\n\tframePosition: " << frame.position() 
 		 << "\n\tframeLimit: " << frame.limit() 
@@ -502,7 +502,7 @@ int WebSocketFramer::writeFrame(const char* data, int len, int flags, BitWriter&
 }
 
 	
-int WebSocketFramer::readFrame(BitReader& frame, char*& payload)
+UInt64 WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 {
 	assert(handshakeComplete());
 	UInt64 limit = frame.limit();
@@ -575,7 +575,7 @@ int WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 	}
 	
 	// Update frame length to include payload plus header
-	frame.seek(offset + payloadOffset + payloadLength);
+	frame.seek(std::size_t(offset + payloadOffset + payloadLength));
 	//frame.limit(offset + payloadOffset + payloadLength);
 	//int frameLength = (offset + payloadOffset);
 	//assert(frame.position() == (offset + payloadOffset));

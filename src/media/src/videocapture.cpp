@@ -34,7 +34,7 @@ namespace av {
 VideoCapture::VideoCapture(int deviceId) : 
 	_base(MediaFactory::instance().getVideoCaptureBase(deviceId))
 {
-	traceL("VideoCapture", this) << "Create: " << deviceId << std::endl;
+	TraceLS(this) << "Create: " << deviceId << std::endl;
 
 	_base->addEmitter(&this->emitter);
 	//_base->duplicate();
@@ -43,7 +43,7 @@ VideoCapture::VideoCapture(int deviceId) :
 
 VideoCapture::VideoCapture(const std::string& filename)
 {
-	traceL("VideoCapture", this) << "Create: " << filename << std::endl;
+	TraceLS(this) << "Create: " << filename << std::endl;
 
 	// The file capture is owned by this instance
 	_base = std::make_shared<VideoCaptureBase>(filename);
@@ -56,7 +56,7 @@ VideoCapture::VideoCapture(const std::string& filename)
 VideoCapture::VideoCapture(std::shared_ptr<VideoCaptureBase> base) :  //VideoCaptureBase*
 	_base(base) 
 {
-	traceL("VideoCapture", this) << "Create: " << base << std::endl;
+	TraceLS(this) << "Create: " << base << std::endl;
 	_base->addEmitter(&this->emitter);
 	//_base->duplicate();
 }
@@ -64,7 +64,7 @@ VideoCapture::VideoCapture(std::shared_ptr<VideoCaptureBase> base) :  //VideoCap
 
 VideoCapture::~VideoCapture() 
 {
-	traceL("VideoCapture", this) << "Destroy: " << _base << std::endl;	// << ": " << _base->refCount()
+	TraceLS(this) << "Destroy: " << _base << std::endl;	// << ": " << _base->refCount()
 	_base->removeEmitter(&this->emitter);
 	//_base->release();
 }
@@ -72,14 +72,14 @@ VideoCapture::~VideoCapture()
 
 void VideoCapture::start() 
 {
-	traceL("VideoCapture", this) << "Start" << std::endl;	
+	TraceLS(this) << "Start" << std::endl;	
 	emitter.enable(true);
 }
 
 
 void VideoCapture::stop() 
 {
-	traceL("VideoCapture", this) << "Stop" << std::endl;
+	TraceLS(this) << "Stop" << std::endl;
 	emitter.enable(false);
 }
 
@@ -87,7 +87,7 @@ void VideoCapture::stop()
 void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 {
 	Mutex::ScopedLock lock(_mutex);	
-	traceL("VideoCapture", this) << "Get frame: " << width << "x" << height << std::endl;
+	TraceLS(this) << "Get frame: " << width << "x" << height << std::endl;
 	
 	// Don't actually grab a frame here, just copy the current frame.
 	cv::Mat lastFrame = _base->lastFrame();
@@ -160,7 +160,7 @@ VideoCaptureBase::VideoCaptureBase(int deviceId) :
 	_opened(false),
 	_stopping(false)
 {
-	traceL("VideoCaptureBase", this) << "Create: " << deviceId << std::endl;
+	TraceLS(this) << "Create: " << deviceId << std::endl;
 	open();
 	start();
 }
@@ -174,7 +174,7 @@ VideoCaptureBase::VideoCaptureBase(const std::string& filename) :
 	_opened(false),
 	_stopping(false)
 {
-	traceL("VideoCaptureBase", this) << "Create: " << filename << std::endl;
+	TraceLS(this) << "Create: " << filename << std::endl;
 	open();
 	start();
 }
@@ -182,7 +182,7 @@ VideoCaptureBase::VideoCaptureBase(const std::string& filename) :
 
 VideoCaptureBase::~VideoCaptureBase() 
 {	
-	traceL("VideoCaptureBase", this) << "Destroy" << std::endl;
+	TraceLS(this) << "Destroy" << std::endl;
 	assert(Thread::currentID() != _thread.tid());
 
 	if (_thread.running()) {
@@ -197,18 +197,18 @@ VideoCaptureBase::~VideoCaptureBase()
 	// Try to release the capture (automatic once unrefed)
 	//try { release(); } catch (...) {}
 
-	traceL("VideoCaptureBase", this) << "Destroy: OK" << std::endl;
+	TraceLS(this) << "Destroy: OK" << std::endl;
 }
 
 
 void VideoCaptureBase::start() 
 {
-	traceL("VideoCaptureBase", this) << "Starting" << std::endl;
+	TraceLS(this) << "Starting" << std::endl;
 	{
 		Mutex::ScopedLock lock(_mutex);
 
 		if (!_thread.running()) {
-			traceL("VideoCaptureBase", this) << "Initializing thread" << std::endl;
+			TraceLS(this) << "Initializing thread" << std::endl;
 			if (!_opened)
 				throw std::runtime_error("The capture must be opened before starting the thread.");
 
@@ -218,20 +218,20 @@ void VideoCaptureBase::start()
 		}
 	}
 	while (!_capturing && error().empty()) {
-		traceL("VideoCaptureBase", this) << "Starting: Waiting" << std::endl;
+		TraceLS(this) << "Starting: Waiting" << std::endl;
 		scy::sleep(20);
 	}
 
-	traceL("VideoCaptureBase", this) << "Starting: OK" << std::endl;
+	TraceLS(this) << "Starting: OK" << std::endl;
 }
 
 
 void VideoCaptureBase::stop() 
 {
-	traceL("VideoCaptureBase", this) << "Stopping" << std::endl;
+	TraceLS(this) << "Stopping" << std::endl;
 	assert(Thread::currentID() != _thread.tid());
 	if (_thread.running()) {
-		traceL("VideoCaptureBase", this) << "Terminating thread" << std::endl;		
+		TraceLS(this) << "Terminating thread" << std::endl;		
 		_stopping = true;
 		_thread.join();
 	}
@@ -240,7 +240,7 @@ void VideoCaptureBase::stop()
 
 bool VideoCaptureBase::open()
 {
-	traceL("VideoCaptureBase", this) << "Open" << std::endl;
+	TraceLS(this) << "Open" << std::endl;
 	Mutex::ScopedLock lock(_mutex);
 	assert(Thread::currentID() != _thread.tid());
 
@@ -270,14 +270,13 @@ void VideoCaptureBase::run()
 		bool empty = true;
 		PacketSignal* next = nullptr;
 
-		traceL("VideoCaptureBase", this) << "Running:"		
+		TraceLS(this) << "Running:"		
 			<< "\n\tDevice ID: " << _deviceId
 			<< "\n\tFilename: " << _filename
 			<< "\n\tWidth: " << width() 
 			<< "\n\tHeight: " << height() << std::endl;		
 
-		while (!_stopping) 
-		{	
+		while (!_stopping) {	
 			{
 				int size = 1; // dummy
 				for (int idx = 0; idx < size; idx++) {
@@ -288,7 +287,7 @@ void VideoCaptureBase::run()
 						break;
 					next = _emitters[idx];
 	
-					traceL("VideoCaptureBase", this) << "Emitting: " << idx << ": " << _counter.fps << std::endl;
+					TraceLS(this) << "Emitting: " << idx << ": " << _counter.fps << std::endl;
 					MatrixPacket out(&frame);
 					next->emit(next, out);
 				}
@@ -318,7 +317,7 @@ void VideoCaptureBase::run()
 		//assert(0);
 	}
 	
-	traceL("VideoCaptureBase", this) << "Exiting" << std::endl;
+	TraceLS(this) << "Exiting" << std::endl;
 	_capturing = false;
 }
 
@@ -399,7 +398,7 @@ void VideoCaptureBase::removeEmitter(PacketSignal* emitter)
 
 void VideoCaptureBase::setError(const std::string& error)
 {
-	errorL("VideoCaptureBase", this) << "Set error: " << error << std::endl;
+	ErrorLS(this) << "Set error: " << error << std::endl;
 	Mutex::ScopedLock lock(_mutex);	
 	_error = error;
 }
@@ -493,7 +492,7 @@ cv::VideoCapture& VideoCaptureBase::capture()
 			
 					_insideCallback = true;
 					for (unsigned idx = 0; i < _emitters.size(); i++) {
-						traceL("VideoCaptureBase", this) << "Emitting: " << _counter.fps << std::endl;
+						TraceLS(this) << "Emitting: " << _counter.fps << std::endl;
 						_emitters[i]->emit(_emitters[i], packet);
 					}
 					_insideCallback = false;
@@ -505,12 +504,12 @@ cv::VideoCapture& VideoCaptureBase::capture()
 /*
 void VideoCaptureBase::release()
 {
-	traceL("VideoCaptureBase", this) << "Release" << std::endl;
+	TraceLS(this) << "Release" << std::endl;
 	Mutex::ScopedLock lock(_mutex);
 	if (_capture.opened())
 		_capture.release();
 	_opened = false;
-	traceL("VideoCaptureBase", this) << "Release: OK" << std::endl;
+	TraceLS(this) << "Release: OK" << std::endl;
 }
 */
 
@@ -521,7 +520,7 @@ void VideoCaptureBase::release()
 				frame = grab();
 				MatrixPacket packet(&frame);
 				if (hasDelegates && packet.width && packet.height && !_stopping) {
-					traceL("VideoCaptureBase", this) << "Emitting: " << _counter.fps << std::endl;
+					TraceLS(this) << "Emitting: " << _counter.fps << std::endl;
 					emit(packet);
 				}				
 				continue;
@@ -533,7 +532,7 @@ void VideoCaptureBase::release()
 void VideoCaptureBase::attach(const PacketDelegateBase& delegate)
 {
 	PacketSignal::attach(delegate);
-	traceL("VideoCaptureBase", this) << "Added Delegate: " << refCount() << std::endl;
+	TraceLS(this) << "Added Delegate: " << refCount() << std::endl;
 	if (!running() && flags().has(SyncWithDelegates)) //refCount == 1
 		start();
 }
@@ -542,7 +541,7 @@ void VideoCaptureBase::attach(const PacketDelegateBase& delegate)
 bool VideoCaptureBase::detach(const PacketDelegateBase& delegate) 
 {
 	if (PacketSignal::detach(delegate)) {
-		traceL("VideoCaptureBase", this) << "Removed Delegate: " << refCount() << std::endl;
+		TraceLS(this) << "Removed Delegate: " << refCount() << std::endl;
 		if (refCount() == 0 && flags().has(SyncWithDelegates)) //running() && 
 			stop();
 		return true;

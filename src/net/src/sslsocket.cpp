@@ -57,37 +57,40 @@ SSLBase& SSLSocket::base() const
 
 // -------------------------------------------------------------------
 //
-SSLBase::SSLBase() : 
+SSLBase::SSLBase(uv::Loop* loop) : 
+	TCPBase(loop),
 	// TODO: Using client context, should assert no bind()/listen() on this socket
 	_context(SSLManager::instance().defaultClientContext()), 
 	_session(nullptr), 
 	_sslAdapter(this)
 {
-	traceL("SSLBase", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 	//assert(_handle);
 	//_handle->data = this;
 	//_connectReq.data = this;
 }
 
 
-SSLBase::SSLBase(SSLContext::Ptr context) : 
+SSLBase::SSLBase(SSLContext::Ptr context, uv::Loop* loop) : 
+	TCPBase(loop),
 	_context(context), 
 	_session(nullptr), 
 	_sslAdapter(this)
 {
-	traceL("SSLBase", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 	//assert(_handle);
 	//_handle->data = this;
 	//_connectReq.data = this;
 }
 	
 
-SSLBase::SSLBase(SSLContext::Ptr context, SSLSession::Ptr session) : 
+SSLBase::SSLBase(SSLContext::Ptr context, SSLSession::Ptr session, uv::Loop* loop) : 
+	TCPBase(loop),
 	_context(context), 
 	_session(session), 
 	_sslAdapter(this)
 {
-	traceL("SSLBase", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 	//assert(_handle);
 	//_handle->data = this;
 	//_connectReq.data = this;
@@ -96,7 +99,7 @@ SSLBase::SSLBase(SSLContext::Ptr context, SSLSession::Ptr session) :
 	
 SSLBase::~SSLBase() 
 {	
-	traceL("SSLBase", this) << "Destroy" << endl;
+	TraceLS(this) << "Destroy" << endl;
 }
 
 
@@ -109,14 +112,14 @@ int SSLBase::available() const
 
 void SSLBase::close()
 {
-	traceL("SSLBase", this) << "Close" << endl;
+	TraceLS(this) << "Close" << endl;
 	TCPBase::close();
 }
 
 
 bool SSLBase::shutdown()
 {
-	traceL("SSLBase", this) << "Shutdown" << endl;
+	TraceLS(this) << "Shutdown" << endl;
 	try {
 		// Try to gracefully shutdown the SSL connection
 		_sslAdapter.shutdown();
@@ -134,13 +137,14 @@ int SSLBase::send(const char* data, int len, int flags)
 
 int SSLBase::send(const char* data, int len, const net::Address& /* peerAddress */, int /* flags */) 
 {	
-	traceL("SSLBase", this) << "Send: " << len << endl;
+	TraceLS(this) << "Send: " << len << endl;	
+	assert(Thread::currentID() == tid());
+	//assert(len <= net::MAX_TCP_PACKET_SIZE);
 
-	assert(len <= net::MAX_TCP_PACKET_SIZE);
 	if (!active()) {
-		warnL("SSLBase", this) << "Send error" << endl;	
+		WarnL << "Send error" << endl;	
 		return -1;
-	}
+	}	
 
 	//assert(initialized());
 	
@@ -194,7 +198,7 @@ net::TransportType SSLBase::transport() const
 
 void SSLBase::onRead(const char* data, int len)
 {
-	traceL("SSLBase", this) << "On SSL read: " << len << endl;
+	TraceLS(this) << "On SSL read: " << len << endl;
 
 	// SSL encrypted data is sent to the SSL conetext
 	_sslAdapter.addIncomingData(data, len);
@@ -204,7 +208,7 @@ void SSLBase::onRead(const char* data, int len)
 
 void SSLBase::onConnect(int status)
 {
-	traceL("SSLBase", this) << "On connect" << endl;
+	TraceLS(this) << "On connect" << endl;
 	if (status) {
 		setUVError("SSL connect error", status);
 		return;
@@ -226,7 +230,7 @@ void SSLBase::onConnect(int status)
 	_sslAdapter.flush();
 
 	SocketBase::emitConnect();
-	traceL("SSLBase", this) << "On connect: OK" << endl;
+	TraceLS(this) << "On connect: OK" << endl;
 }
 
 
@@ -242,7 +246,7 @@ void SSLBase::connect(const Address& peerAddress)
 	if (!_context) 
 		throw std::runtime_error("Cannot connect without SSL context");
 
-	traceL("SSLBase", this) << "Connecting to " << peerAddress << endl;
+	TraceLS(this) << "Connecting to " << peerAddress << endl;
 	init();
 	const sockaddr_in* addr = reinterpret_cast<const sockaddr_in*>(peerAddress.addr());
 	assert(_connectReq.data == this);

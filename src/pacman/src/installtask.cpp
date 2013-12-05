@@ -123,7 +123,7 @@ void InstallTask::run()
 		setState(this, InstallationState::Installed);
 	}
 	catch (std::exception& exc) {		
-		log("error") << "Installation failed: " << exc.what() << endl; 
+		ErrorL << "Installation failed: " << exc.what() << endl; 
 		setState(this, InstallationState::Failed, exc.what());
 	}
 	
@@ -135,7 +135,7 @@ Complete:
 
 void InstallTask::onStateChange(InstallationState& state, const InstallationState& oldState)
 {
-	log("debug") << "state changed to " << state << endl; 	
+	DebugL << "state changed to " << state << endl; 	
 	{
 		auto local = this->local();
 		switch (state.id()) 
@@ -196,7 +196,7 @@ void InstallTask::doDownload()
 	// skip the download. 
 	/* // force file re-download until os get file size is fixed and we can match crc
 	if (_manager.hasCachedFile(asset)) {
-		log("debug") << "file exists, skipping download" << endl;		
+		DebugL << "file exists, skipping download" << endl;		
 		setState(this, InstallationState::Extracting);
 		return;
 	}
@@ -211,7 +211,7 @@ void InstallTask::doDownload()
 		cred.authenticate(_dlconn->request()); 
 	}
 	
-	log("debug") << "Initializing download:" 
+	DebugL << "Initializing download:" 
 		<< "\n\tURI: " << asset.url()
 		<< "\n\tFile path: " << outfile
 		<< endl;
@@ -227,7 +227,7 @@ void InstallTask::doDownload()
 
 void InstallTask::onDownloadProgress(void*, const double& progress)
 {
-	log("debug") << "download progress: " << progress << endl;
+	DebugL << "download progress: " << progress << endl;
 
 	// Progress 1 - 75 covers download
 	// Increments of 10 or greater
@@ -239,7 +239,7 @@ void InstallTask::onDownloadProgress(void*, const double& progress)
 
 void InstallTask::onDownloadComplete(void*, const http::Response& response)
 {
-	log("debug") << "download complete: " << response << endl;
+	DebugL << "download complete: " << response << endl;
 	_dlconn->readStream<std::ofstream>()->close();
 	_dlconn = nullptr;
 	_downloading = false;
@@ -264,7 +264,7 @@ void InstallTask::doExtract()
 	// Create the output directory
 	std::string tempDir(_manager.getIntermediatePackageDir(_local->id()));
 	
-	log("debug") << "Unpacking archive: " << archivePath << " to " << tempDir << endl;
+	DebugL << "Unpacking archive: " << archivePath << " to " << tempDir << endl;
 
 	// Reset the local installation manifest before extraction
 	_local->manifest().root.clear();
@@ -291,7 +291,7 @@ void InstallTask::doFinalize()
 
 	// Ensure the install directory exists
 	fs::mkdirr(installDir);
-	log("debug") << "Finalizing to: " << installDir << endl;
+	DebugL << "Finalizing to: " << installDir << endl;
 	
 	// Move all extracted files to the installation path
 	StringVec nodes;
@@ -305,7 +305,7 @@ void InstallTask::doFinalize()
 			std::string target(installDir);
 			fs::addnode(target, nodes[i]);
 
-			log("debug") << "moving file: " << source << " => " << target << endl;
+			DebugL << "moving file: " << source << " => " << target << endl;
 			fs::rename(source, target);
 		}
 		catch (std::exception& exc)
@@ -315,7 +315,7 @@ void InstallTask::doFinalize()
 			// must be called from an external process before the
 			// installation can be completed.
 			errors = true;
-			log("error") << "finalize error: " << exc.what() << endl;
+			ErrorL << "finalize error: " << exc.what() << endl;
 			_local->addError(exc.what());
 		}
 	}
@@ -324,7 +324,7 @@ void InstallTask::doFinalize()
 	// The current task will be cancelled, and the package
 	// saved with the Installing state.
 	if (errors) {
-		log("debug") << "Finalization failed, cancelling task" << endl;
+		DebugL << "Finalization failed, cancelling task" << endl;
 		cancel();
 		return;
 	}
@@ -333,7 +333,7 @@ void InstallTask::doFinalize()
 	// was successfully finalized.
 	try
 	{		
-		log("debug") << "Removing temp directory: " << tempDir << endl;
+		DebugL << "Removing temp directory: " << tempDir << endl;
 
 		// FIXME: How to remove a folder properly?
 		fs::unlink(tempDir);
@@ -344,10 +344,10 @@ void InstallTask::doFinalize()
 		// While testing on a windows system this fails regularly
 		// with a file sharing error, but since the package is already
 		// installed we can just swallow it.
-		log("warn") << "cannot remove temp directory: " << exc.what() << endl;
+		WarnL << "cannot remove temp directory: " << exc.what() << endl;
 	}
 
-	log("debug") << "finalization complete" << endl;
+	DebugL << "finalization complete" << endl;
 }
 
 
@@ -357,7 +357,7 @@ void InstallTask::setComplete()
 		Mutex::ScopedLock lock(_mutex);
 		assert(_progress == 100);
 
-		log("info") << "Package installed:" 
+		InfoL << "Package installed:" 
 			<< "\n\tName: " << _local->name()
 			<< "\n\tVersion: " << _local->version()
 			<< "\n\tPackage State: " << _local->state()
@@ -469,13 +469,13 @@ InstallOptions& InstallTask::options()
 			static_cast<int>(_dlconn->response().getStatus()), 
 			_dlconn->response().getReason()));
 	
-	log("debug") << "download complete" << endl; 
+	DebugL << "download complete" << endl; 
 			*/
 
 		
 	// Print contents to the log file
 	//for (size_t i = 0; i < zip.info.size(); i++)
-	//	log("debug") << "Zip file contains: " << zip.info[i].path << endl;
+	//	DebugL << "Zip file contains: " << zip.info[i].path << endl;
 	//zip.extractTo(tempDir);
 
 	/*
@@ -494,7 +494,7 @@ InstallOptions& InstallTask::options()
 /*
 void InstallTask::onDecompressionError(const void*, pair<const Poco::Zip::ZipLocalFileHeader, const string>& info)
 {
-	log("error") << "Decompression Error: " << info.second << endl;
+	ErrorL << "Decompression Error: " << info.second << endl;
 
 	// Extraction failed, throw an exception
 	throw std::runtime_error("Archive Error: Extraction failed: " + info.second);
@@ -503,7 +503,7 @@ void InstallTask::onDecompressionError(const void*, pair<const Poco::Zip::ZipLoc
 
 void InstallTask::onDecompressionOk(const void*, pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info)
 {
-	log("debug") << "Decompressing: " 
+	DebugL << "Decompressing: " 
 		<< info.second.toString() << endl; 
 }
 */

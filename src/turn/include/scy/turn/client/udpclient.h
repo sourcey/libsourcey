@@ -110,7 +110,7 @@ public:
 	virtual void onTimer(void*);
 	//virtual void onTimer(TimerCallback<Client>& timer);
 
-	virtual const char* className() const { return "TURNClient"; };
+	//virtual const char* className() const { return "TURNClient"; };
 
 protected:
 	//ClientObserver&	_observer;
@@ -126,7 +126,7 @@ protected:
 	std::string			_realm;
 	std::string			_nonce;
 	
-	std::deque<stun::Message*> _pendingRequests;
+	std::deque<stun::Message*> _pendingIndications;
 		// A list of queued packets awaiting server permissions
 
 	std::vector<stun::Transaction*> _transactions;

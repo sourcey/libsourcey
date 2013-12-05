@@ -39,7 +39,7 @@ Connection::Connection(const net::Socket& socket) :
 	_closed(false),
 	_shouldSendHeader(true)
 {	
-	traceL("Connection", this) << "Create: " << &_socket << endl;
+	TraceLS(this) << "Create: " << &_socket << endl;
 
 	_socket.Recv += delegate(this, &Connection::onSocketRecv);
 	_socket.Error += delegate(this, &Connection::onSocketError);
@@ -58,7 +58,7 @@ Connection::Connection(const net::Socket& socket) :
 	
 Connection::~Connection() 
 {	
-	traceL("Connection", this) << "Destroy" << endl;
+	TraceLS(this) << "Destroy" << endl;
 
 	// Connections must be close()d
 	assert(_closed);
@@ -67,7 +67,7 @@ Connection::~Connection()
 
 void Connection::sendData(const char* buf, std::size_t len) //, int flags
 {
-	traceL("Connection", this) << "Send: " << len << endl;
+	TraceLS(this) << "Send: " << len << endl;
 	assert(Outgoing.active());
 	Outgoing.write(buf, len);
 
@@ -79,7 +79,7 @@ void Connection::sendData(const char* buf, std::size_t len) //, int flags
 
 void Connection::sendData(const std::string& buf) //, int flags
 {
-	traceL("Connection", this) << "Send: " << buf.length() << endl;
+	TraceLS(this) << "Send: " << buf.length() << endl;
 	assert(Outgoing.active());
 	Outgoing.write(buf.c_str(), buf.length());
 	
@@ -103,7 +103,7 @@ int Connection::sendHeader()
 	std::string head(os.str().c_str(), os.str().length());
 
 	_timeout.start();	
-	traceL("Connection", this) << "Send header: " << head << endl; // remove me
+	TraceLS(this) << "Send header: " << head << endl; // remove me
 
 	// Send to base to bypass the ConnectionAdapter
 	return _socket.base().send(head.c_str(), head.length());
@@ -112,7 +112,7 @@ int Connection::sendHeader()
 
 void Connection::close()
 {
-	traceL("Connection", this) << "Close" << endl;	
+	TraceLS(this) << "Close" << endl;	
 	assert(!_closed);
 	assert(_socket.base().refCount() == 1);
 	
@@ -136,7 +136,7 @@ void Connection::close()
 
 void Connection::setError(const Error& err) 
 { 
-	traceL("Connection", this) << "Set error: " << err.message << endl;	
+	TraceLS(this) << "Set error: " << err.message << endl;	
 	
 	//_socket.setError(err);
 	_error = err;
@@ -147,7 +147,7 @@ void Connection::setError(const Error& err)
 
 void Connection::onClose()
 {
-	traceL("Connection", this) << "On close" << endl;	
+	TraceLS(this) << "On close" << endl;	
 
 	Close.emit(this);
 }
@@ -157,7 +157,7 @@ void Connection::onSocketRecv(void*, net::SocketPacket& packet)
 {		
 	_timeout.stop();
 			
-	if (Incoming.emitter.refCount()) {
+	if (Incoming.emitter.ndelegates()) {
 		//RawPacket p(packet.data(), packet.size());
 		//Incoming.write(p);
 		Incoming.write(packet.data(), packet.size());
@@ -170,7 +170,7 @@ void Connection::onSocketRecv(void*, net::SocketPacket& packet)
 
 void Connection::onSocketError(void*, const Error& error) 
 {
-	traceL("Connection", this) << "On socket error" << endl;
+	TraceLS(this) << "On socket error" << endl;
 
 	// Handle the socket error locally
 	setError(error);
@@ -179,7 +179,7 @@ void Connection::onSocketError(void*, const Error& error)
 
 void Connection::onSocketClose(void*) 
 {
-	traceL("Connection", this) << "On socket close" << endl;
+	TraceLS(this) << "On socket close" << endl;
 
 	// Close the connection when the socket closes
 	close();
@@ -245,7 +245,7 @@ ConnectionAdapter::ConnectionAdapter(Connection& connection, http_parser_type ty
 	_connection(connection),
 	_parser(type)
 {	
-	traceL("ConnectionAdapter", this) << "Create: " << &connection << endl;
+	TraceLS(this) << "Create: " << &connection << endl;
 	_parser.setObserver(this);
 	if (type == HTTP_REQUEST)
 		_parser.setRequest(&connection.request());
@@ -256,13 +256,13 @@ ConnectionAdapter::ConnectionAdapter(Connection& connection, http_parser_type ty
 
 ConnectionAdapter::~ConnectionAdapter()
 {
-	traceL("ConnectionAdapter", this) << "Destroy: " << &_connection << endl;
+	TraceLS(this) << "Destroy: " << &_connection << endl;
 }
 
 
 int ConnectionAdapter::send(const char* data, int len, int flags)
 {
-	traceL("ConnectionAdapter", this) << "Send: " << len << endl;
+	TraceLS(this) << "Send: " << len << endl;
 	
 	try
 	{
@@ -281,14 +281,14 @@ int ConnectionAdapter::send(const char* data, int len, int flags)
 
 		// Send body / chunk
 		//if (len < 300)
-		//	traceL("ConnectionAdapter", this) << "Send data: " << std::string(data, len) << endl;
+		//	TraceLS(this) << "Send data: " << std::string(data, len) << endl;
 		//else
-		//	traceL("ConnectionAdapter", this) << "Send long data: " << std::string(data, 300) << endl;
+		//	TraceLS(this) << "Send long data: " << std::string(data, 300) << endl;
 		return socket->base().send(data, len, flags);
 	} 
 	catch (std::exception& exc) 
 	{
-		errorL("ConnectionAdapter", this) << "Send error: " << exc.what() << endl;
+		ErrorLS(this) << "Send error: " << exc.what() << endl;
 
 		// Swallow the exception, the socket error will 
 		// cause the connection to close on next iteration.
@@ -300,7 +300,7 @@ int ConnectionAdapter::send(const char* data, int len, int flags)
 
 void ConnectionAdapter::onSocketRecv(const MutableBuffer& buf, const net::Address& /* peerAddr */)
 {
-	traceL("ConnectionAdapter", this) << "On socket recv: " << buf.size() << endl;	
+	TraceLS(this) << "On socket recv: " << buf.size() << endl;	
 	
 	if (_parser.complete()) {
 		// Buggy HTTP servers might send late data or multiple responses,
@@ -308,7 +308,7 @@ void ConnectionAdapter::onSocketRecv(const MutableBuffer& buf, const net::Addres
 		// In this case we discard the late message and log the error here,
 		// rather than complicate the app with this error handling logic.
 		// This issue noted using Webrick with Ruby 1.9.
-		warnL("ConnectionAdapter", this) << "Discarding late response: " << 
+		WarnL << "Discarding late response: " << 
 			std::string(bufferCast<const char*>(buf), 
 				std::min<std::size_t>(150, buf.size())) << endl;
 		return;
@@ -330,7 +330,7 @@ void ConnectionAdapter::onParserHeader(const std::string& /* name */, const std:
 
 void ConnectionAdapter::onParserHeadersEnd() 
 {
-	traceL("ConnectionAdapter", this) << "On headers end" << endl;	
+	TraceLS(this) << "On headers end" << endl;	
 
 	_connection.onHeaders();	
 
@@ -343,7 +343,7 @@ void ConnectionAdapter::onParserHeadersEnd()
 
 void ConnectionAdapter::onParserChunk(const char* buf, std::size_t len)
 {
-	traceL("ClientConnection", this) << "On parser chunk: " << len << endl;	
+	TraceLS(this) << "On parser chunk: " << len << endl;	
 
 	// Dispatch the payload
 	net::SocketAdapter::onSocketRecv(mutableBuffer(const_cast<char*>(buf), len), socket->peerAddress());
@@ -352,7 +352,7 @@ void ConnectionAdapter::onParserChunk(const char* buf, std::size_t len)
 
 void ConnectionAdapter::onParserError(const ParserError& err)
 {
-	warnL("ConnectionAdapter", this) << "On parser error: " << err.message << endl;	
+	WarnL << "On parser error: " << err.message << endl;	
 
 	// HACK: Handle those peski flash policy requests here
 	auto base = dynamic_cast<net::TCPBase*>(&_connection.socket().base());
@@ -366,7 +366,7 @@ void ConnectionAdapter::onParserError(const ParserError& err)
 		// policy += "HTTP/1.1 200 OK\r\nContent-Type: text/x-cross-domain-policy\r\nX-Permitted-Cross-Domain-Policies: all\r\n\r\n";
 		policy += "<?xml version=\"1.0\"?><cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
 
-		traceL("ConnectionAdapter", this) << "Send flash policy: " << policy << endl;
+		TraceLS(this) << "Send flash policy: " << policy << endl;
 		base->send(policy.c_str(), policy.length() + 1);
 	}
 
@@ -378,7 +378,7 @@ void ConnectionAdapter::onParserError(const ParserError& err)
 
 void ConnectionAdapter::onParserEnd()
 {
-	traceL("ConnectionAdapter", this) << "On parser end" << endl;	
+	TraceLS(this) << "On parser end" << endl;	
 
 	_connection.onMessage();
 }
@@ -404,7 +404,7 @@ Connection& ConnectionAdapter::connection()
 	try {
 	} 
 	catch (std::exception& exc) {
-		errorL("ConnectionAdapter", this) << "HTTP parser error: " << exc.what() << endl;
+		ErrorLS(this) << "HTTP parser error: " << exc.what() << endl;
 
 		if (socket)
 			socket->close();

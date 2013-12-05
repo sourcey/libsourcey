@@ -34,13 +34,13 @@ Server::Server(short port, ServerResponderFactory* factory) :
 	factory(factory),
 	address("0.0.0.0", port)
 {
-	traceL("http::Server", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 }
 
 
 Server::~Server()
 {
-	traceL("http::Server", this) << "Destroy" << endl;
+	TraceLS(this) << "Destroy" << endl;
 	shutdown();
 	if (factory)
 		delete factory;
@@ -55,7 +55,7 @@ void Server::start()
 	socket.bind(address);
 	socket.listen();
 
-	traceL("http::Server", this) << "Server listening on " << port() << endl;		
+	TraceLS(this) << "Server listening on " << port() << endl;		
 
 	//timer.Timeout += delegate(this, &Server::onTimer);
 	//timer.start(5000, 5000);
@@ -64,7 +64,7 @@ void Server::start()
 
 void Server::shutdown() 
 {		
-	traceL("http::Server", this) << "Shutdown" << endl;
+	TraceLS(this) << "Shutdown" << endl;
 
 	socket.base().AcceptConnection -= delegate(this, &Server::onAccept);	
 	socket.Close -= delegate(this, &Server::onClose);
@@ -104,14 +104,14 @@ ServerResponder* Server::createResponder(ServerConnection& conn)
 
 void Server::addConnection(ServerConnection* conn) 
 {		
-	traceL("http::Server", this) << "Adding connection: " << conn << endl;
+	TraceLS(this) << "Adding connection: " << conn << endl;
 	connections.push_back(conn);
 }
 
 
 void Server::removeConnection(ServerConnection* conn) 
 {		
-	traceL("http::Server", this) << "Removing connection: " << conn << endl;
+	TraceLS(this) << "Removing connection: " << conn << endl;
 	for (ServerConnectionList::iterator it = connections.begin(); it != connections.end(); ++it) {
 		if (conn == *it) {
 			connections.erase(it);
@@ -124,10 +124,10 @@ void Server::removeConnection(ServerConnection* conn)
 
 void Server::onAccept(void*, const net::TCPSocket& sock)
 {	
-	traceL("http::Server", this) << "On server accept" << endl;
+	TraceLS(this) << "On server accept" << endl;
 	ServerConnection* conn = createConnection(sock);
 	if (!conn) {		
-		warnL("http::Server", this) << "Cannot create connection" << endl;
+		WarnL << "Cannot create connection" << endl;
 		assert(0);
 	}
 }
@@ -135,7 +135,7 @@ void Server::onAccept(void*, const net::TCPSocket& sock)
 
 void Server::onClose(void*) 
 {
-	traceL("http::Server", this) << "On server socket close" << endl;
+	TraceLS(this) << "On server socket close" << endl;
 }
 
 
@@ -151,7 +151,7 @@ ServerConnection::ServerConnection(Server& server, const net::Socket& socket) :
 	_upgrade(false),
 	_requestComplete(false)
 {	
-	traceL("ServerConnection", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 
 	_socket.replaceAdapter(new ServerAdapter(*this));
 
@@ -162,10 +162,10 @@ ServerConnection::ServerConnection(Server& server, const net::Socket& socket) :
 	
 ServerConnection::~ServerConnection() 
 {	
-	traceL("ServerConnection", this) << "Destroy" << endl;
+	TraceLS(this) << "Destroy" << endl;
 
 	if (_responder) {
-		traceL("ServerConnection", this) << "Destroy: Responder: " << _responder << endl;
+		TraceLS(this) << "Destroy: Responder: " << _responder << endl;
 		delete _responder;
 	}
 }
@@ -185,7 +185,7 @@ void ServerConnection::close()
 /*
 bool ServerConnection::send()
 {
-	traceL("ServerConnection", this) << "Respond" << endl;
+	TraceLS(this) << "Respond" << endl;
 
 	// TODO: Detect end of message and close()
 
@@ -216,7 +216,7 @@ Server& ServerConnection::server()
 
 void ServerConnection::onHeaders() 
 {
-	traceL("ServerConnection", this) << "On headers" << endl;	
+	TraceLS(this) << "On headers" << endl;	
 	
 	/*
 	// Note: To upgrade the connection we need to upgrade the 
@@ -231,7 +231,7 @@ void ServerConnection::onHeaders()
 	if (util::icompare(_request.get("Connection", ""), "upgrade") == 0 && 
 		util::icompare(_request.get("Upgrade", ""), "websocket") == 0)
 	{			
-		traceL("ServerConnection", this) << "Upgrading to WebSocket: " << _request << endl;
+		TraceLS(this) << "Upgrading to WebSocket: " << _request << endl;
 		_upgrade = true;
 
 		auto wsAdapter = new WebSocketConnectionAdapter(*this, WebSocket::ServerSide);
@@ -262,7 +262,7 @@ void ServerConnection::onHeaders()
 	// If no responder was created we close the connection.
 	// TODO: Should we return a 404 instead?
 	if (!_responder) {
-		warnL("ServerConnection", this) << "Ignoring unhandled request: " << _request << endl;	
+		WarnL << "Ignoring unhandled request: " << _request << endl;	
 		close();
 		return;
 	}
@@ -275,11 +275,11 @@ void ServerConnection::onHeaders()
 
 void ServerConnection::onPayload(const MutableBuffer& buffer)
 {
-	traceL("ServerConnection", this) << "On payload: " << buffer.size() << endl;	
+	TraceLS(this) << "On payload: " << buffer.size() << endl;	
 
 	// The connection may have been closed inside a previous callback.
 	if (closed()) {
-		traceL("ServerConnection", this) << "On payload: Closed" << endl;	
+		TraceLS(this) << "On payload: Closed" << endl;	
 		return;
 	}
 	
@@ -291,11 +291,11 @@ void ServerConnection::onPayload(const MutableBuffer& buffer)
 
 void ServerConnection::onMessage() 
 {
-	traceL("ServerConnection", this) << "On complete" << endl;	
+	TraceLS(this) << "On complete" << endl;	
 
 	// The connection may have been closed inside a previous callback.
 	if (closed()) {
-		traceL("ServerConnection", this) << "On complete: Closed" << endl;	
+		TraceLS(this) << "On complete: Closed" << endl;	
 		return;
 	}
 
@@ -310,7 +310,7 @@ void ServerConnection::onMessage()
 
 void ServerConnection::onClose() 
 {
-	traceL("ServerConnection", this) << "On close" << endl;	
+	TraceLS(this) << "On close" << endl;	
 
 	if (_responder)
 		_responder->onClose();
@@ -321,7 +321,7 @@ void ServerConnection::onClose()
 
 void ServerConnection::onServerShutdown(void*)
 {
-	traceL("ServerConnection", this) << "On server shutdown" << endl;	
+	TraceLS(this) << "On server shutdown" << endl;	
 
 	close();
 }
@@ -362,18 +362,18 @@ void ServerConnection::onParserHeadersEnd()
 
 void ServerConnection::onParserChunk(const char* buf, std::size_t len)
 {
-	traceL("ServerConnection", this) << "On Parser Chunk" << endl;	
+	TraceLS(this) << "On Parser Chunk" << endl;	
 }
 
 
 void ServerConnection::onParserEnd() 
 {
-	traceL("ServerConnection", this) << "On Request Complete" << endl;	
+	TraceLS(this) << "On Request Complete" << endl;	
 
-	//traceL("ServerConnection", this) << "On Message Complete 1" << endl;	
-	//traceL("ServerConnection", this) << "On Message Complete 2" << endl;
-	//traceL("ServerConnection", this) << "On Message Complete 2: " << _request.getKeepAlive() << endl;	
-	//traceL("ServerConnection", this) << "On Message Complete 2: " << _response.getKeepAlive() << endl;
+	//TraceLS(this) << "On Message Complete 1" << endl;	
+	//TraceLS(this) << "On Message Complete 2" << endl;
+	//TraceLS(this) << "On Message Complete 2: " << _request.getKeepAlive() << endl;	
+	//TraceLS(this) << "On Message Complete 2: " << _response.getKeepAlive() << endl;
 }
 */
 
@@ -389,7 +389,7 @@ void ServerConnection::onParserEnd()
 	// Set Connection: Close unless otherwise stated
 	if (!isExplicitKeepAlive(_request) || 
 		_response.hasContentLength()) {
-		traceL("ServerConnection", this) << "Respond: No keepalive" << endl;	
+		TraceLS(this) << "Respond: No keepalive" << endl;	
 		_response.setKeepAlive(false);
 	}
 	*/
@@ -402,7 +402,7 @@ void ServerConnection::onParserEnd()
 	
 	// Close unless keepalive is set
 	if (!_response.getKeepAlive()) {
-		traceL("Client", this) << "Closing: No keepalive" << endl; 
+		TraceLS(this) << "Closing: No keepalive" << endl; 
 		close();
 	}	
 	*/

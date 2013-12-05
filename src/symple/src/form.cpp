@@ -256,11 +256,11 @@ bool FormElement::clearElements(const std::string& id, bool partial)
 	bool match = false;
 	json::Value result;				
 	json::Value::Members members = root().getMemberNames();
-	for (auto i = 0; i < members.size(); i++) {
+	for (unsigned i = 0; i < members.size(); i++) {
 
 		// Filter elements	
 		if (members[i] == "elements") {
-			for (int i = 0; i < root()["elements"].size(); i++) {
+			for (unsigned i = 0; i < root()["elements"].size(); i++) {
 				json::Value& element =  root()["elements"][i];
 				std::string curID = element["id"].asString();
 				if (//element.isObject() && 
@@ -268,11 +268,11 @@ bool FormElement::clearElements(const std::string& id, bool partial)
 					partial ? 
 						curID.find(id) != std::string::npos : 
 						curID == id) {
-					traceL() << "Symple form: Removing redundant: " << curID << endl;
+					TraceL << "Symple form: Removing redundant: " << curID << endl;
 					match = true;
 				}
 				else {
-					traceL() << "Symple form: Keeping: " << curID << endl;
+					TraceL << "Symple form: Keeping: " << curID << endl;
 					result["elements"].append(element);
 				}
 			}

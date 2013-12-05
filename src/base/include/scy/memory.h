@@ -722,18 +722,18 @@ public:
 /// By default the reference count is initialized to 1
 template<typename T> struct RefCountedBase
 {
-	std::atomic<unsigned> refCount;
+	std::atomic<unsigned> ndelegates;
 
-	explicit RefCountedBase(unsigned int count = 1) : refCount(count) {}
+	explicit RefCountedBase(unsigned int count = 1) : ndelegates(count) {}
 
 	void increment(unsigned int count = 1)
 	{
-		refCount.fetch_add(count, std::memory_order_relaxed);
+		ndelegates.fetch_add(count, std::memory_order_relaxed);
 	}
 
 	void release(unsigned int count = 1)
 	{
-		if (refCount.fetch_sub(count, std::memory_order_release) == count) {
+		if (ndelegates.fetch_sub(count, std::memory_order_release) == count) {
 			std::atomic_thread_fence(std::memory_order_acquire);
 			delete static_cast<T*>(this);
 		}

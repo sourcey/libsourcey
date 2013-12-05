@@ -66,12 +66,12 @@ public:
 	BasicResponder(ServerConnection& conn) : 
 		ServerResponder(conn)
 	{
-		debugL("BasicResponder") << "Creating" << endl;
+		DebugL << "Creating" << endl;
 	}
 
 	void onRequest(Request& request, Response& response) 
 	{
-		debugL("BasicResponder") << "On complete" << endl;
+		DebugL << "On complete" << endl;
 
 		response.setContentLength(14);  // headers will be auto flushed
 
@@ -131,7 +131,7 @@ public:
 
 	void onClose()
 	{
-		debugL("ChunkedResponder") << "On connection close" << endl;
+		DebugL << "On connection close" << endl;
 		gotClose = true;
 		dataSource.cancel();
 	}
@@ -149,19 +149,19 @@ public:
 		gotPayload(false), 
 		gotClose(false)
 	{
-		debugL("WebSocketResponder") << "Creating" << endl;
+		DebugL << "Creating" << endl;
 	}
 
 	~WebSocketResponder()
 	{
-		debugL("WebSocketResponder") << "destroy" << endl;
+		DebugL << "destroy" << endl;
 		assert(gotPayload);
 		assert(gotClose);
 	}
 
 	void onPayload(const Buffer& body)
 	{
-		debugL("WebSocketResponder") << "On payload: " << body.size() << endl;
+		DebugL << "On payload: " << body.size() << endl;
 
 		gotPayload = true;
 
@@ -171,7 +171,7 @@ public:
 
 	void onClose()
 	{
-		debugL("WebSocketResponder") << "On connection close" << endl;
+		DebugL << "On connection close" << endl;
 		gotClose = true;
 	}
 };
@@ -186,7 +186,7 @@ public:
 		std::ostringstream os;
 		conn.request().write(os);
 		std::string headers(os.str().data(), os.str().length());
-		debugL("OurServerResponderFactory") << "Incoming Request: " << headers << endl; // remove me
+		DebugL << "Incoming Request: " << headers << endl; // remove me
 
 		if (conn.request().getURI() == "/chunked")
 			return new ChunkedResponder(conn);
@@ -213,7 +213,7 @@ public:
 	SocketClientEchoTest(const net::Address& addr) : //, bool ghost = false
 		address(addr)
 	{		
-		debugL("SocketClientEchoTest") << "Creating: " << addr << endl;
+		DebugL << "Creating: " << addr << endl;
 
 		socket.Recv += delegate(this, &SocketClientEchoTest::onRecv);
 		socket.Connect += delegate(this, &SocketClientEchoTest::onConnect);
@@ -223,7 +223,7 @@ public:
 
 	~SocketClientEchoTest()
 	{
-		debugL("SocketClientEchoTest") << "destroy" << endl;
+		DebugL << "destroy" << endl;
 
 		assert(socket.base().refCount() == 1);
 	}
@@ -245,7 +245,7 @@ public:
 	
 	void onConnect(void* sender)
 	{
-		debugL("SocketClientEchoTest") << "connected" << endl;
+		DebugL << "connected" << endl;
 		assert(sender == &socket);
 		socket.send("client > server", 15, WebSocket::SendFlags::Text);
 	}
@@ -254,11 +254,11 @@ public:
 	{
 		assert(sender == &socket);
 		std::string data(packet.data(), packet.size());
-		debugL("SocketClientEchoTest") << "recv: " << data << endl;	
+		DebugL << "recv: " << data << endl;	
 
 		// Check for return packet echoing sent data
 		if (data == "client > server") {
-			debugL("SocketClientEchoTest") << "got return packet" << endl;
+			DebugL << "got return packet" << endl;
 			
 			// Send the shutdown command to close the connection gracefully.
 			// The peer disconnection will trigger an error callback which
@@ -271,13 +271,13 @@ public:
 
 	void onError(void* sender, const Error& err)
 	{
-		errorL("SocketClientEchoTest") << "on error: " << err.message << endl;
+		ErrorL << "on error: " << err.message << endl;
 		assert(sender == &socket);
 	}
 	
 	void onClose(void* sender)
 	{
-		debugL("SocketClientEchoTest") << "on close" << endl;
+		DebugL << "on close" << endl;
 		assert(sender == &socket);
 	}
 };
@@ -294,7 +294,7 @@ public:
 
 	Tests()
 	{	
-		debugL("Tests") << "#################### Starting" << endl;
+		DebugL << "#################### Starting" << endl;
 #ifdef _MSC_VER
 		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
@@ -336,15 +336,15 @@ public:
 		// Run the final cleanup
 		//runCleanup();
 		
-		debugL("Tests") << "#################### Finalizing" << endl;
+		DebugL << "#################### Finalizing" << endl;
 		app.finalize();
-		debugL("Tests") << "#################### Exiting" << endl;
+		DebugL << "#################### Exiting" << endl;
 	}
 
 	void runLoop() {
-		debugL("Tests") << "#################### Running" << endl;
+		DebugL << "#################### Running" << endl;
 		app.run();
-		debugL("Tests") << "#################### Ended" << endl;
+		DebugL << "#################### Ended" << endl;
 	}
 	
 
@@ -358,7 +358,7 @@ public:
 		NVCollection params;
 		splitURIParameters("/streaming?format=MJPEG&width=400&height=300&encoding=Base64&packetizer=chunked&rand=0.09983996045775712", params);			
 		for (NVCollection::ConstIterator it = params.begin(); it != params.end(); ++it) {
-			debugL("Tests") << "URL Parameter: " << it->first << ": " << it->second << endl;
+			DebugL << "URL Parameter: " << it->first << ": " << it->second << endl;
 		}
 		
 		assert(params.get("format") == "MJPEG");
@@ -493,7 +493,7 @@ public:
 			
 		void onConnect(void*)
 		{
-			debugL("ClientConnectionTest") << "On connect" <<  endl;
+			DebugL << "On connect" <<  endl;
 			
 			// Bounce backwards and forwards a few times :)
 			//conn->write("BOUNCE", 6);
@@ -505,7 +505,7 @@ public:
 
 		void onHeaders(void*, Response& res)
 		{
-			debugL("ClientConnectionTest") << "On headers" <<  endl;
+			DebugL << "On headers" <<  endl;
 			
 			// Bounce backwards and forwards a few times :)
 			//conn->write("BOUNCE", 6);
@@ -513,21 +513,21 @@ public:
 		
 		void onPayload(void*, scy::IPacket& packet)
 		{	
-			debugL("ClientConnectionTest") << "On payload: " << packet.size() << endl;
+			DebugL << "On payload: " << packet.size() << endl;
 		}
 
 		/*
 		void onPayload(void*, Buffer& buf)
 		{
-			debugL("ClientConnectionTest") << "On response payload: " << buf << endl;
+			DebugL << "On response payload: " << buf << endl;
 
 			if (buf.toString() == "BOUNCE")
 				numSuccess++;
 			
-			debugL("ClientConnectionTest") << "On response payload: " << buf << ": " << numSuccess << endl;
+			DebugL << "On response payload: " << buf << ": " << numSuccess << endl;
 			if (numSuccess >= 100) {
 				
-				debugL("ClientConnectionTest") << "SUCCESS: " << numSuccess << endl;
+				DebugL << "SUCCESS: " << numSuccess << endl;
 				conn->close();
 			}
 			else
@@ -539,12 +539,12 @@ public:
 		{		
 			std::ostringstream os;
 			res.write(os);
-			debugL("ClientConnectionTest") << "Response complete: " << os.str() << endl;
+			DebugL << "Response complete: " << os.str() << endl;
 		}
 
 		void onClose(void*)
 		{	
-			debugL("ClientConnectionTest") << "Connection closed" << endl;
+			DebugL << "Connection closed" << endl;
 			shutdown();
 		}
 	};
@@ -608,19 +608,19 @@ public:
 	
 	void onStandaloneHTTPClientConnectionHeaders(void*, Response& res)
 	{	
-		debugL("StandaloneClientConnectionTest") << "On response headers: " << res << endl;
+		DebugL << "On response headers: " << res << endl;
 	}
 	
 	//void onStandaloneHTTPClientConnectionPayload(void*, Buffer& buf)
 	//{	
 	//	assert(0);
-	//	debugL("StandaloneClientConnectionTest") << "On response payload: " << buf.size() << endl;
+	//	DebugL << "On response payload: " << buf.size() << endl;
 	//}
 	
 	void onStandaloneHTTPClientConnectionComplete(void* sender, const Response& response)
 	{		
 		auto self = reinterpret_cast<ClientConnection*>(sender);
-		debugL("StandaloneClientConnectionTest") << "On response complete" 
+		DebugL << "On response complete" 
 			<< response << self->readStream<std::stringstream>()->str() << endl;
 		self->close();
 	}
@@ -639,7 +639,7 @@ public:
 		//SocketClientEchoTest<http::WebSocket> test(net::Address("174.129.224.73", 1339));
 		//SocketClientEchoTest<http::WebSocket> test(net::Address("174.129.224.73", 80));
 
-		//debugL("Tests") << "TCP Socket Test: Starting" << endl;
+		//DebugL << "TCP Socket Test: Starting" << endl;
 		SocketClientEchoTest<http::WebSocket> test(net::Address("127.0.0.1", TEST_HTTP_PORT));
 		test.start();
 
@@ -661,13 +661,13 @@ public:
 	
 	static void onPrintHTTPServerHandle(uv_handle_t* handle, void* arg) 
 	{
-		//debugL("HTTPServerTest") << "#### Active HTTPServer Handle: " << handle << endl;
-		debugL("Tests") << "#### Active HTTPServer Handle: " << handle << endl;
+		//DebugL << "#### Active HTTPServer Handle: " << handle << endl;
+		DebugL << "#### Active HTTPServer Handle: " << handle << endl;
 	}
 
 	static void onKillHTTPServer(void* opaque)
 	{
-		debugL("Tests") << "Kill Signal: " << opaque << endl;
+		DebugL << "Kill Signal: " << opaque << endl;
 	
 		// print active handles
 		uv_walk(uv::defaultLoop(), Tests::onPrintHTTPServerHandle, NULL);
@@ -698,7 +698,7 @@ int main(int argc, char** argv)
 	//
 	void runHTTPClientTest() 
 	{
-		debugL("ClientConnectionTest") << "Starting" << endl;	
+		DebugL << "Starting" << endl;	
 
 		// Setup the transaction
 		http::Request req("GET", "http://google.com");
@@ -712,17 +712,17 @@ int main(int argc, char** argv)
 		app.run();
 		//util::pause();
 
-		debugL("ClientConnectionTest") << "Ending" << endl;
+		DebugL << "Ending" << endl;
 	}		
 
 	void onComplete(void* sender, http::Response& response)
 	{
-		debugL("ClientConnectionTest") << "On Complete: " << &response << endl;
+		DebugL << "On Complete: " << &response << endl;
 	}
 
 	void onIncomingProgress(void* sender, http::TransferProgress& progress)
 	{
-		debugL("ClientConnectionTest") << "On Progress: " << progress.progress() << endl;
+		DebugL << "On Progress: " << progress.progress() << endl;
 	}
 		*/
 	

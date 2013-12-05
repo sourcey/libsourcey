@@ -30,20 +30,19 @@ namespace scy {
 namespace smpl {
 
 
-Address::Address() :
-	json::Value(Json::objectValue)
+Address::Address()
 {
 }
 
 
-Address::Address(const Address& r) :
-	json::Value(r)
+Address::Address(const std::string& id)
 {
+	parse(id);
 }
 
 
-Address::Address(const json::Value& r) :
-	json::Value(r)
+Address::Address(const std::string& user, const std::string& group, const std::string& id) :
+	user(user), group(group), id(id)
 {
 }
 
@@ -51,6 +50,84 @@ Address::Address(const json::Value& r) :
 Address::~Address()
 {
 }
+	
+
+bool Address::parse(const std::string& addr)
+{	
+	if (addr.empty())
+		return false;
+  
+	// First find the ID part
+	std::string::size_type slashpos = addr.find('/');
+	id = (slashpos == std::string::npos ? "" : addr.substr(slashpos + 1));
+
+	// Now look for the user
+	std::string::size_type atpos = addr.find('@');
+	std::string::size_type groupbegin;
+	if (atpos < slashpos && atpos != std::string::npos) {
+		user = addr.substr(0, atpos);
+		groupbegin = atpos + 1;
+	} else {
+		groupbegin = 0;
+	}
+
+	// Now take what is left as the group
+	std::string::size_type domainend = (slashpos == std::string::npos) ?
+		(addr.length() - groupbegin) : (slashpos - groupbegin);
+	group = addr.substr(groupbegin, domainend);
+
+	return valid();
+}
+
+bool Address::valid() const
+{
+	return !user.empty()
+		|| !group.empty()
+		|| !id.empty();
+}
+
+
+void Address::print(std::ostream& os) const
+{
+	if (!user.empty())
+		os << user;
+	if (!group.empty()) {
+		if (!user.empty())
+			os << "@";
+		os << group;
+	}
+	if (!id.empty()) {
+		os << "/"; // always add slash to identify ID only addresses
+		os << id;
+	}
+}
+
+
+std::string Address::toString() const
+{
+	std::ostringstream os;
+	print(os);
+	return os.str(); 
+}
+
+
+bool Address::operator == (const Address& r)
+{
+	return group == r.group
+		&& user == r.user
+		&& id == r.id;
+}
+
+
+bool Address::operator == (std::string& r)
+{
+	return toString() == r;
+}
+
+
+} // namespace symple 
+} // namespace scy
+
 
 
 /*
@@ -72,7 +149,6 @@ bool Address::parse(const std::string& id)
 		id = elems[2];
 	return valid();
 }
-*/
 
 
 std::string Address::id() const 
@@ -121,53 +197,4 @@ void Address::setGroup(const std::string& group)
 {
 	(*this)["group"] = group;
 }
-
-
-bool Address::valid() const
-{
-	return !id().empty()
-		&& !user().empty();
-}
-
-
-void Address::print(std::ostream& os) const
-{
-	os << group();
-	os << ":";
-	os << user();
-	os << "(";
-	os << name();
-	os << ")";
-	os << ":";
-	os << id();
-}
-
-
-/*
-string Address::toString() const
-{
-	ostringstream os;
-	print(os);
-	return os.str(); 
-}
 */
-
-
-bool Address::operator == (const Address& r)
-{
-	return group() == r.group()
-		&& user() == r.user()
-		&& id() == r.id();
-}
-
-
-/*
-bool Address::operator == (string& r)
-{
-	return toString() == r;
-}
-*/
-
-
-} // namespace symple 
-} // namespace scy

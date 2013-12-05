@@ -92,7 +92,7 @@ public:
 	//
 	void runAddressTest() 
 	{
-		traceL("AddressTest") << "Starting" << endl;		
+		TraceL << "Starting" << endl;		
 		
 		Address sa1("192.168.1.100", 100);
 		assert(sa1.host() == "192.168.1.100");
@@ -150,7 +150,7 @@ public:
 	//
 	void runTCPSocketTest() 
 	{
-		traceL("Tests") << "TCP Socket Test: Starting" << endl;			
+		TraceL << "TCP Socket Test: Starting" << endl;			
 		ClientSocketTest<net::TCPSocket> test(1337);
 		test.run();
 		runLoop();
@@ -183,14 +183,20 @@ public:
 	
 	void runUDPSocketTest() 
 	{
-		traceL("Tests") << "UDP Socket Test: Starting" << endl;
+		// Notes: Sending over home wireless network via
+		// ADSL to US server round trip stays around 200ms
+		// when sending 1450kb packets at 50ms intervals.
+		// At 40ms send intervals latency increated to around 400ms.
+
+		TraceL << "UDP Socket Test: Starting" << endl;
 		
-		UDPPacketSize = 20000;
+		//UDPPacketSize = 10000;
+		UDPPacketSize = 1450;
 		UDPNumPacketsWanted = 100;
 		UDPNumPacketsReceived = 0;
 		
 		//serverBindAddr.swap(net::Address("0.0.0.0", 1337));	 //
-		udpServerAddr.swap(net::Address("58.7.41.244", 1337));	 //
+		udpServerAddr.swap(net::Address("74.207.248.97", 1337));	 //
 		//udpServerAddr.swap(net::Address("127.0.0.1", 1337));	 //
 
 		//clientBindAddr.swap(net::Address("0.0.0.0", 1338));	
@@ -214,7 +220,7 @@ public:
 		// Start the send timer
 		Timer timer;
 		timer.Timeout += delegate(this, &Tests::onUDPClientSendTimer);
-		timer.start(100, 100);
+		timer.start(50, 50);
 		timer.handle().ref();
 			
 		runLoop();
@@ -227,7 +233,7 @@ public:
 	void onUDPSocketServerRecv(void* sender, net::SocketPacket& packet)
 	{
 		std::string payload(packet.data(), packet.size());		
-		debugL("UDPInitiator") << "UDPSocket server recv from " 
+		DebugL << "UDPSocket server recv from " 
 			<< packet.info->peerAddress << ": payloadLength=" << payload.length() << endl;
 		
 		// Send the unix ticks milisecond for checking RTT
@@ -256,7 +262,7 @@ public:
 		UInt64 sentAt = util::strtoi<UInt64>(payload);
 		UInt64 latency = time::ticks() - sentAt;
 
-		debugL("UDPInitiator") << "UDPSocket recv from " << packet.info->peerAddress << ": " 
+		DebugL << "UDPSocket recv from " << packet.info->peerAddress << ": " 
 			<< "payload=" << payload.length() << ", " 
 			<< "latency=" << latency 
 			<< endl;
@@ -285,7 +291,7 @@ public:
 
 	void runTimerTest() 
 	{
-		traceL("Tests") << "Timer Test: Starting" << endl;
+		TraceL << "Timer Test: Starting" << endl;
 		Timer timer;
 		timer.Timeout += delegate(this, &Tests::onOnTimerTimeout);
 		timer.start(10, 10);
@@ -296,22 +302,22 @@ public:
 	void onOnTimerTimeout(void* sender)
 	{
 		Timer* timer = static_cast<Timer*>(sender);
-		traceL("Tests") << "On Timer: " << timer->count() << endl;
+		TraceL << "On Timer: " << timer->count() << endl;
 
 		if (timer->count() == numTimerTicks)
 			timer->stop(); // event loop will be released
 	}
 
 	void runLoop() {
-		debugL("Tests") << "#################### Running" << endl;
+		DebugL << "#################### Running" << endl;
 		app.run();
-		debugL("Tests") << "#################### Ended" << endl;
+		DebugL << "#################### Ended" << endl;
 	}
 
 	void runCleanup() {
-		debugL("Tests") << "#################### Finalizing" << endl;
+		DebugL << "#################### Finalizing" << endl;
 		app.finalize();
-		debugL("Tests") << "#################### Exiting" << endl;
+		DebugL << "#################### Exiting" << endl;
 	}
 };
 
@@ -336,11 +342,11 @@ int main(int argc, char** argv)
 //Application Tests::app;
 
 
-		//traceL("Tests") << "UDPSocket Recv: " << packet << ": " << packet.buffer
+		//TraceL << "UDPSocket Recv: " << packet << ": " << packet.buffer
 		//	<< "\n\tPacket " << Benchmark.numSuccess << " of " << UDPNumPacketsWanted << endl;
 		//uv::UDPBase* socket = reinterpret_cast<uv::UDPBase*>(sender);	
 
-		//traceL("Tests") << "UDPSocket Server Recv: " << packet << ": " << packet.buffer << endl;		
+		//TraceL << "UDPSocket Server Recv: " << packet << ": " << packet.buffer << endl;		
 		//uv::UDPBase* socket = reinterpret_cast<uv::UDPBase*>(sender);	
 	static void onShutdown(void* opaque)
 	{
@@ -367,10 +373,10 @@ int main(int argc, char** argv)
 			runTimerTest();
 			//runDNSResolverTest();
 
-			traceL("Tests") << "#################### Running" << endl;
+			TraceL << "#################### Running" << endl;
 			//app.waitForShutdown(onShutdown, this);
 			app.run();
-			traceL("Tests") << "#################### Ended" << endl;
+			TraceL << "#################### Ended" << endl;
 			*/
 			
 /*
@@ -382,7 +388,7 @@ int main(int argc, char** argv)
 //using uv::SSLServerPtr;
 	static void onKillSignal2(uv_signal_t *req, int signum)
 	{
-		debugL("Application") << "Kill Signal: " << req << endl;
+		DebugL << "Kill Signal: " << req << endl;
 	
 		((Tests*)req->data)->tcpServer->stop();
 		((Tests*)req->data)->tcpConnector.stop();

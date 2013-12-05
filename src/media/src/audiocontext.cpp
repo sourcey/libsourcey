@@ -59,7 +59,7 @@ void AudioContext::create()
 
 void AudioContext::open()
 {	
-	traceL() << "[AudioContext: " << this << "] Opening" << endl;	
+	TraceL << "[AudioContext: " << this << "] Opening" << endl;	
 	assert(ctx);
 	assert(codec);
 
@@ -118,7 +118,7 @@ void AudioEncoderContext::create()
 {
 	AudioContext::create();
 
-	traceL("AudioEncoderContext", this) << "Create" << endl;	
+	TraceLS(this) << "Create" << endl;	
 	
 	// Find the audio encoder
 	codec = avcodec_find_encoder_by_name(oparams.encoder.c_str());
@@ -187,7 +187,7 @@ void AudioEncoderContext::create()
 
 void AudioEncoderContext::close()
 {
-	traceL("AudioEncoderContext", this) << "Closing" << endl;
+	TraceLS(this) << "Closing" << endl;
 
 	AudioContext::close();	
 	
@@ -216,7 +216,7 @@ void AudioEncoderContext::close()
 	if (stream && format && format->nb_streams) {		
 		for (unsigned int i = 0; i < format->nb_streams; i++) {
 			if (format->streams[i] == stream) {		
-				traceL("AudioEncoderContext", this) << "Closing: Removing Stream: " << stream << endl;
+				TraceLS(this) << "Closing: Removing Stream: " << stream << endl;
 				av_freep(&format->streams[i]->codec);
 				av_freep(&format->streams[i]);
 				stream = nullptr;
@@ -244,7 +244,7 @@ bool AudioEncoderContext::encode(unsigned char* data, int size, Int64 pts, AVPac
 
 bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 {
-	traceL("AudioEncoderContext", this) << "Encoding Audio Packet: " << ipacket.size << endl;
+	TraceLS(this) << "Encoding Audio Packet: " << ipacket.size << endl;
 
 	assert(ipacket.stream_index == stream->index);
 	assert(ipacket.size == outputFrameSize);	
@@ -272,7 +272,7 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 	// frame->pts = ctx->frame_number; // Force a PTS value, no AV_NOPTS_VALUE
 	if (avcodec_fill_audio_frame(frame, ctx->channels, ctx->sample_fmt, samples, outputFrameSize, 0) < 0) {
 		error = "Error filling audio frame";
-		errorL("AudioEncoderContext", this) << error << endl;
+		ErrorLS(this) << error << endl;
 		throw std::runtime_error(error);
 	}
 	
@@ -284,7 +284,7 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 	if (avcodec_encode_audio2(ctx, &opacket, frame, &frameEncoded) < 0) {
 		// TODO: Use av_strerror
 		error = "Fatal encoder error";
-		errorL("AudioEncoderContext", this) << error << endl;
+		ErrorLS(this) << error << endl;
 		throw std::runtime_error(error);
 	}
 		
@@ -297,10 +297,10 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 		if (opacket.dts != AV_NOPTS_VALUE)
 			opacket.dts      = av_rescale_q(opacket.dts,      ctx->time_base, stream->time_base);
 		if (opacket.duration > 0)
-			opacket.duration = av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
+			opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
 		
 		/*
-		traceL("AudioEncoderContext", this) << "Encoded PTS:\n" 
+		TraceLS(this) << "Encoded PTS:\n" 
 			//<< "\n\tPTS: " << av_ts2str(opacket.pts)
 			//<< "\n\tDTS: " << av_ts2str(opacket.dts)
 			//<< "\n\tPTS Time: " << av_ts2timestr(opacket.pts, &stream->time_base)
@@ -317,7 +317,7 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 			*/
 	}
 	else
-		debugL("AudioEncoderContext", this) << "No frame encoded" << endl;	
+		DebugLS(this) << "No frame encoded" << endl;	
 
 	return frameEncoded > 0;
 }
@@ -344,7 +344,7 @@ void AudioDecoderContext::create(AVFormatContext *ic, int streamID)
 {
 	AudioContext::create();
 	
-	traceL("AudioDecoderContext", this) << "Create: " << streamID << endl;
+	TraceLS(this) << "Create: " << streamID << endl;
 
 	assert(ic);
 	assert(streamID >= 0);
@@ -404,7 +404,7 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 	bytesDecoded = avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);		
 	if (bytesDecoded < 0) {
 		error = "Decoder error";
-		errorL("AudioDecoderContext", this) << "" << error << endl;
+		ErrorLS(this) << "" << error << endl;
 		throw std::runtime_error(error);
 	}
 
@@ -428,7 +428,7 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 		avcodec_get_frame_defaults(frame);
 		bytesDecoded = avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);		
 		if (bytesDecoded < 0) {
-			errorL("AudioDecoderContext", this) << "Decoder Error" << endl;
+			ErrorLS(this) << "Decoder Error" << endl;
 			error = "Decoder error";
 			throw std::runtime_error(error);
 		}
@@ -442,7 +442,7 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 		initDecodedAudioPacket(stream, ctx, frame, &opacket, &pts);
 
 		/*
-		traceL("AudioDecoderContext", this) << "Decoded Frame:" 
+		TraceLS(this) << "Decoded Frame:" 
 			<< "\n\tFrame Size: " << opacket.size
 			<< "\n\tFrame PTS: " << opacket.pts
 			<< "\n\tInput Frame PTS: " << ipacket.pts
@@ -474,7 +474,7 @@ bool AudioDecoderContext::flush(AVPacket& opacket)
 
 	if (frameDecoded) {
 		initDecodedAudioPacket(stream, ctx, frame, &opacket, &pts);
-		traceL("AudioDecoderContext", this) << "Flushed Audio Frame: " << opacket.pts << endl;
+		TraceLS(this) << "Flushed Audio Frame: " << opacket.pts << endl;
 		return true;
 	}
 	return false;
@@ -502,7 +502,7 @@ AudioResampler::~AudioResampler()
 
 void AudioResampler::create(const AudioCodec& iparams, const AudioCodec& oparams)
 {
-	traceL("AudioResampler", this) << "Create:" 
+	TraceLS(this) << "Create:" 
 		<< "\n\tInput Sample Rate: " << iparams.sampleRate
 		<< "\n\tOutput Sample Rate:: " << oparams.sampleRate
 		<< endl;
@@ -528,7 +528,7 @@ void AudioResampler::create(const AudioCodec& iparams, const AudioCodec& oparams
 	av_get_channel_layout_string(outChBuf, sizeof(outChBuf), -1, outChLayout);
 
 	/*
-	traceL("AudioResampler", this) << "Resampler Options:\n" 
+	TraceLS(this) << "Resampler Options:\n" 
 		<< "\n\tIn Channel Layout: " << inChBuf
 		<< "\n\tIn Sample Rate: " << iparams.sampleRate
 		<< "\n\tIn Sample Fmt: " << av_get_sample_fmt_name(inSampleFmt)
@@ -549,13 +549,13 @@ void AudioResampler::create(const AudioCodec& iparams, const AudioCodec& oparams
 	this->iparams = iparams;
 	this->oparams = oparams;
 	
-	traceL("AudioResampler", this) << "Create: OK" << endl;
+	TraceLS(this) << "Create: OK" << endl;
 }
 	
 
 void AudioResampler::free()
 {
-	traceL("AudioResampler", this) << "Closing" << endl;
+	TraceLS(this) << "Closing" << endl;
 
 	//if (oframe) {
 	//	av_free(oframe);
@@ -572,7 +572,7 @@ void AudioResampler::free()
 		outBuffer = nullptr;
 	}
 
-	traceL("AudioResampler", this) << "Closing: OK" << endl;
+	TraceLS(this) << "Closing: OK" << endl;
 }
 
 
@@ -582,8 +582,8 @@ UInt8* AudioResampler::resample(UInt8* inSamples, int inNbSamples)
         throw std::runtime_error("Conversion context must be initialized.");	
 
 	outNbSamples = av_rescale_rnd(
-		swr_get_delay(ctx, iparams.sampleRate) + inNbSamples, 
-		oparams.sampleRate, iparams.sampleRate, AV_ROUND_UP);
+		swr_get_delay(ctx, (int64_t)iparams.sampleRate) + inNbSamples, 
+		(int64_t)oparams.sampleRate, (int64_t)iparams.sampleRate, AV_ROUND_UP);
 
 	if (outBuffer) {
 		av_freep(&outBuffer);
@@ -591,7 +591,7 @@ UInt8* AudioResampler::resample(UInt8* inSamples, int inNbSamples)
 	}
 
 	/*
-	traceL("AudioResampler", this) << "Resampling:\n" 
+	TraceLS(this) << "Resampling:\n" 
 		<< "\n\tIn Nb Smaples 1: " << inNbSamples
 		<< "\n\tIn Channels: " << iparams.channels
 		<< "\n\tIn Sample Rate: " << iparams.sampleRate
@@ -631,7 +631,7 @@ void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, c
 		
 	// Local PTS value represented as decimal seconds
     if (opacket->dts != AV_NOPTS_VALUE) {
-		*pts = opacket->pts;
+		*pts = (double)opacket->pts;
 		*pts *= av_q2d(stream->time_base);
 	}
 

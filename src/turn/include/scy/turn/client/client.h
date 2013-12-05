@@ -95,7 +95,7 @@ public:
 		std::string software;
 		std::string username;
 		std::string password;
-		std::string realm;
+		//std::string realm;
 		long timeout;
 		Int64 lifetime;
 		Int64 timerInterval;
@@ -104,7 +104,7 @@ public:
 			software				= "Sourcey STUN/TURN Client [rfc5766]";
 			username				= util::randomString(4);
 			password				= util::randomString(22);
-			realm				    = "sourcey.com";
+			//realm				    = "sourcey.com";
 			lifetime				= 5 * 60 * 1000; // 5 minutes
 			timeout					= 10 * 1000;
 			timerInterval			= 30 * 1000; // 30 seconds
@@ -169,7 +169,7 @@ public:
 	virtual void onStateChange(ClientState& state, const ClientState& oldState);
 	virtual void onTimer(void*);
 
-	virtual const char* className() const { return "TURNClient"; };
+	//virtual const char* className() const { return "TURNClient"; };
 
 protected:
 	ClientObserver&	_observer;
@@ -183,8 +183,8 @@ protected:
 	std::string _realm;
 	std::string _nonce;
 	
-	std::deque<stun::Message*> _pendingRequests;
-		// A list of queued packets awaiting server permissions
+	std::deque<stun::Message> _pendingIndications;
+		// A list of queued Send indication packets awaiting server permissions
 
 	std::vector<stun::Transaction*> _transactions;
 		// A list containing currently active transactions

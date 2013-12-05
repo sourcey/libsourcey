@@ -66,11 +66,21 @@ public:
 	void getEncoderFormat(Format& iformat);
 
 protected:
-	virtual void setError(const std::string& message);
+	virtual void setError(const std::string& message, bool throwExec = true);
 		// Sets the error message and throws an exception.
 
-	static int callback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
-					    double streamTime, RtAudioStreamStatus status, void *data);
+	static int audioCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
+					         double streamTime, RtAudioStreamStatus status, void *data);
+		// The system audio capture callback.
+		// Samples will be dispatched from the audio capture thread, 
+		// so proper synchronization is required.
+
+	static void errorCallback(RtError::Type type, const std::string &errorText);	
+		// The system audio error callback.
+		// Since this static method provides no client data argument we just log the error. 
+		// Errors *may* be dispatched from the audio capture thread, 
+		// so proper synchronization is required.
+
 
 private:
 	mutable Mutex _mutex;

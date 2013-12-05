@@ -36,7 +36,7 @@ GarbageCollector::GarbageCollector() :
 	_finalize(false), 
 	_tid(0)
 {
-	traceL("GarbageCollector", this) << "Create" << std::endl;
+	TraceLS(this) << "Create" << std::endl;
 
 	_handle.ptr()->data = this;
 	uv_timer_init(_handle.loop(), _handle.ptr<uv_timer_t>());		
@@ -47,7 +47,7 @@ GarbageCollector::GarbageCollector() :
 	
 GarbageCollector::~GarbageCollector()
 {
-	traceL("GarbageCollector", this) << "Destroy: "
+	TraceLS(this) << "Destroy: "
 			<< "\n\tReady: " << _ready.size() 
 			<< "\n\tPending: " << _pending.size()
 			<< "\n\tFinalize: " << _finalize
@@ -60,7 +60,7 @@ GarbageCollector::~GarbageCollector()
 
 void GarbageCollector::finalize()
 {
-	traceL("GarbageCollector", this) << "Finalize" << std::endl;	
+	TraceLS(this) << "Finalize" << std::endl;	
 	
 	// Ensure the loop is not running and that the 
 	// calling thread is the main thread.
@@ -79,7 +79,7 @@ void GarbageCollector::finalize()
 	uv_ref(_handle.ptr());
 	uv_run(_handle.loop(), UV_RUN_DEFAULT);
 
-	traceL("GarbageCollector", this) << "Finalize: OK" << std::endl;
+	TraceLS(this) << "Finalize: OK" << std::endl;
 }
 
 
@@ -90,7 +90,7 @@ void GarbageCollector::runAsync()
 		Mutex::ScopedLock lock(_mutex);
 
 		if (!_ready.empty() || !_pending.empty()) {
-			traceL("GarbageCollector", this) << "Deleting: "
+			TraceLS(this) << "Deleting: "
 				<< "\n\tReady: " << _ready.size() 
 				<< "\n\tPending: " << _pending.size()
 				<< "\n\tFinalize: " << _finalize
@@ -112,7 +112,7 @@ void GarbageCollector::runAsync()
 			uv_timer_stop(_handle.ptr<uv_timer_t>());
 			_handle.close();
 
-			traceL("GarbageCollector") << "Finalization complete" << std::endl;
+			TraceLS(this) << "Finalization complete" << std::endl;
 		}
 
 		if (!_tid) { _tid = uv_thread_self(); }	

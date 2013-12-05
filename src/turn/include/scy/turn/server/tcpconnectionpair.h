@@ -122,7 +122,7 @@ public:
 
 	UInt32 connectionID() const;
 
-	virtual const char* className() const { return "TCPClientConnection"; }
+	//virtual const char* className() const { return "TCPClientConnection"; }
 	
 protected:
 	void recv(Buffer& buffer);

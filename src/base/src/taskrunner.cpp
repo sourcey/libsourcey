@@ -64,7 +64,7 @@ bool TaskRunner::start(Task* task)
 	//if (task->_cancelled) {
 		//task->_cancelled = false;
 		//task->start();
-		traceL("TaskRunner", this) << "Start task: " << task << endl;
+		TraceLS(this) << "Start task: " << task << endl;
 		onStart(task);
 		//_wakeUp.set();
 		return true;
@@ -78,7 +78,7 @@ bool TaskRunner::cancel(Task* task)
 	//if (!task->_cancelled) {
 		//task->_cancelled = true;
 		//task->cancel();
-		//traceL("TaskRunner", this) << "Cancelled task: " << task << endl;
+		//TraceLS(this) << "Cancelled task: " << task << endl;
 		//onCancel(task);
 		//_wakeUp.set();
 		//return true;
@@ -86,7 +86,7 @@ bool TaskRunner::cancel(Task* task)
 	
 	if (!task->cancelled()) {
 		task->cancel();
-		traceL("TaskRunner", this) << "Cancel task: " << task << endl;
+		TraceLS(this) << "Cancel task: " << task << endl;
 		onCancel(task);
 		//_wakeUp.set();
 		return true;
@@ -98,17 +98,17 @@ bool TaskRunner::cancel(Task* task)
 
 bool TaskRunner::destroy(Task* task)
 {
-	traceL("TaskRunner", this) << "Abort task: " << task << endl;
+	TraceLS(this) << "Abort task: " << task << endl;
 	
 	// If the task exists then set the destroyed flag.
 	if (exists(task)) {
-		traceL("TaskRunner", this) << "Abort managed task: " << task << endl;
+		TraceLS(this) << "Abort managed task: " << task << endl;
 		task->_destroyed = true;
 	}
 		
 	// Otherwise destroy the pointer.
 	else {
-		traceL("TaskRunner", this) << "Delete unmanaged task: " << task << endl;
+		TraceLS(this) << "Delete unmanaged task: " << task << endl;
 		delete task;
 	}
 
@@ -118,7 +118,7 @@ bool TaskRunner::destroy(Task* task)
 
 bool TaskRunner::add(Task* task)
 {
-	traceL("TaskRunner", this) << "Add task: " << task << endl;
+	TraceLS(this) << "Add task: " << task << endl;
 	if (!exists(task)) {
 		Mutex::ScopedLock lock(_mutex);	
 		_tasks.push_back(task);
@@ -132,7 +132,7 @@ bool TaskRunner::add(Task* task)
 
 bool TaskRunner::remove(Task* task)
 {	
-	traceL("TaskRunner", this) << "Remove task: " << task << endl;
+	TraceLS(this) << "Remove task: " << task << endl;
 
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
@@ -184,7 +184,7 @@ void TaskRunner::clear()
 {
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {	
-		traceL("TaskRunner", this) << "Clear: Destroying task: " << *it << endl;
+		TraceLS(this) << "Clear: Destroying task: " << *it << endl;
 		delete *it;
 	}
 	_tasks.clear();
@@ -193,7 +193,7 @@ void TaskRunner::clear()
 
 void TaskRunner::setRunner(async::Runner::ptr runner)
 {
-	traceL("TaskRunner", this) << "Set async: " << runner << endl;
+	TraceLS(this) << "Set async: " << runner << endl;
 
 	Mutex::ScopedLock lock(_mutex);
 	assert(!_runner);
@@ -206,14 +206,14 @@ void TaskRunner::setRunner(async::Runner::ptr runner)
 void TaskRunner::run()
 {
 	Task* task = next();
-	//traceL("TaskRunner", this) << "Next task: " << task << endl;
+	//TraceLS(this) << "Next task: " << task << endl;
 		
 	// Run the task
 	if (task) 
 	{
 		// Check once more that the task has not been cancelled
 		if (!task->cancelled()) {
-			traceL("TaskRunner", this) << "Run task: " << task << endl;
+			TraceLS(this) << "Run task: " << task << endl;
 			task->run();
 
 			onRun(task);
@@ -236,14 +236,14 @@ void TaskRunner::run()
 						
 		// Destroy the task if required
 		if (task->destroyed()) {
-			traceL("TaskRunner", this) << "Destroy task: " << task << endl;
+			TraceLS(this) << "Destroy task: " << task << endl;
 			remove(task);
 			delete task;
 		}
 	}
 
 	// Dispatch the Idle signal
-	//traceL("TaskRunner", this) << "idle: "<< Idle.refCount() << endl;
+	//TraceLS(this) << "idle: "<< Idle.ndelegates() << endl;
 	Idle.emit(this);
 
 	// Prevent 100% CPU

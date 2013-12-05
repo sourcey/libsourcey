@@ -274,7 +274,7 @@ Attribute* Attribute::create(UInt16 type, UInt16 size)
 	//	break;
 
 	default:
-		errorL("StunAttribute") << "Cannot create attribute for type: " << type << endl;
+		ErrorL << "Cannot create attribute for type: " << type << endl;
 		break;
 	}
 
@@ -738,19 +738,19 @@ Attribute* MessageIntegrity::clone()
 	
 bool MessageIntegrity::verifyHmac(const std::string& key) const 
 {
-	// debugL() << "Message: Verify HMAC: " << key << endl;
+	// DebugL << "Message: Verify HMAC: " << key << endl;
 
 	assert(!key.empty());
 	assert(!_hmac.empty());
 	assert(!_input.empty());
 
-	// debugL() << "Message: Packet integrity input (" << _input << ")" << endl;
-	// debugL() << "Message: Packet integrity key (" << key << ")" << endl;
+	// DebugL << "Message: Packet integrity input (" << _input << ")" << endl;
+	// DebugL << "Message: Packet integrity key (" << key << ")" << endl;
 
 	std::string hmac = crypto::computeHMAC(_input, key);
 	assert(hmac.size() == MessageIntegrity::Size);
 
-	// debugL() << "Message: Verifying message integrity (" << hmac << ": " << _hmac << ")" << endl;
+	// DebugL << "Message: Verifying message integrity (" << hmac << ": " << _hmac << ")" << endl;
 
 	return _hmac == hmac;
 }
@@ -758,7 +758,7 @@ bool MessageIntegrity::verifyHmac(const std::string& key) const
 
 void MessageIntegrity::read(BitReader& reader) 
 {
-	//debugL() << "Message: Read HMAC" << endl;	
+	//DebugL << "Message: Read HMAC" << endl;	
 	int sizeBeforeMessageIntegrity = reader.position() - kAttributeHeaderSize;
 
 	// Read the HMAC value.
@@ -784,7 +784,7 @@ void MessageIntegrity::read(BitReader& reader)
 	reader.skip(MessageIntegrity::Size);
 	
 #if 0
-	//debugL() << "Message: Parsed message integrity (" << _hmac << ")" << endl;
+	//DebugL << "Message: Parsed message integrity (" << _hmac << ")" << endl;
 
 	// Remember the original position and set the buffer position back to 0.	
 	int originalPos = reader.position();
@@ -1012,7 +1012,7 @@ void UInt16ListAttribute::addType(UInt16 value)
 
 void UInt16ListAttribute::read(BitReader& reader) 
 {
-	for (auto i = 0; i < size() / 2; i++) {
+	for (unsigned i = 0; i < size() / 2; i++) {
 		UInt16 attr;
 		reader.getU16(attr);
 		_attrTypes.push_back(attr);
@@ -1028,7 +1028,7 @@ void UInt16ListAttribute::read(BitReader& reader)
 
 void UInt16ListAttribute::write(BitWriter& writer) const 
 {
-	for (auto i = 0; i < _attrTypes.size(); i++)
+	for (unsigned i = 0; i < _attrTypes.size(); i++)
 		writer.putU16(_attrTypes[i]);
 	writePadding(writer);
 }

@@ -36,9 +36,9 @@ namespace net {
 class SSLBase: public TCPBase	
 {
 public:	
-	SSLBase();
-	SSLBase(SSLContext::Ptr sslContext);
-	SSLBase(SSLContext::Ptr sslContext, SSLSession::Ptr session);
+	SSLBase(uv::Loop* loop = uv::defaultLoop());
+	SSLBase(SSLContext::Ptr sslContext, uv::Loop* loop = uv::defaultLoop());
+	SSLBase(SSLContext::Ptr sslContext, SSLSession::Ptr session, uv::Loop* loop = uv::defaultLoop());
 
 	//virtual void connect(const Address& peerAddress);	
 		// Initializes the socket and establishes a secure connection to 

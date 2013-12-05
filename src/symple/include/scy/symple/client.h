@@ -76,32 +76,43 @@ public:
 	};
 
 public:
-	Client(net::SocketBase* socket, const Options& options = Options(), uv::Loop* loop = uv::defaultLoop());
+	Client(net::SocketBase* socket, 
+		const Options& options = Options()//, 
+		//uv::Loop* loop = uv::defaultLoop()
+		);
 	virtual ~Client();
 
 	void connect();
 	void close();
-
-	virtual int send(const std::string& data, bool ack = false);
+	
 	virtual int send(Message& message, bool ack = false);
 		// Sends a message.
+		// May be a polymorphic Command, Presence, Event or other ...
+
+	virtual int send(const std::string& data, bool ack = false);
+		// Sends a string message.
+		// The message must be a valid Symple message otherwise
+		// it will net be delivered.
 
 	virtual int respond(Message& message, bool ack = false);
-		// Responds to the given message.
-		// The 'to' and 'from' fields will be swapped.
+		// Swaps the 'to' and 'from' fields and sends
+		// the given message.
 
 	virtual int sendPresence(bool probe = false);
 		// Broadcasts presence to the user group scope.
+		// The outgoing Presence object may be modified via  
+		// the CreatePresence signal.
 
 	virtual int sendPresence(const Address& to, bool probe = false);
 		// Sends directed presence to the given peer.
-	
+		
 	virtual std::string ourID() const;
-		// Returns the session ID of our peer object.
+		// Returns the session ID of our current peer object.
+		// Returns an empty string when offline.
 
-    virtual Peer& ourPeer();
-		// Returns the peer object that controls the
-		// current session, or throws an exception.
+    virtual Peer* ourPeer();
+		// Returns the peer object for the current session, 
+		// or throws an exception when offline.
 
 	virtual Roster& roster();
 		// Returns the roster which stores all online peers.
@@ -115,21 +126,34 @@ public:
 
 	virtual Client& operator >> (Message& message);	
 		// Stream operator alias for send().
+	
+	virtual void onPresenceData(const json::Value& data, bool whiny = false);
+		// Updates the roster from the given client object.
+
+	//virtual const char* className() const { return "SympleClient"; }
+	
+	//
+	// Signals
+	//
 
 	Signal<const int&> Announce;
 		// Notifies the outside application about the 
 		// response status code of our announce() call.
 		// Possible status codes are:
-		//		- 200: Authentication success
-		//		- 401: Authentication failed
-		//		- 400: Bad request data
-		//		- 500: Server not found
+		//   - 200: Authentication success
+		//	 - 401: Authentication failed
+		//	 - 400: Bad request data
+		//	 - 500: Server not found
+	
+	Signal<Peer&> PeerConnected;
+		// Signals when a peer connects.
 
-	Signal<Peer&> UpdatePresenceData;
+	Signal<Peer&> PeerDiconnected;
+		// Signals when a peer disconnects.
+
+	Signal<Peer&> CreatePresence;
 		// Called by createPresence() so outside classes
-		// can modify the outgoing Peer object.
-
-	virtual const char* className() const { return "SympleClient"; }
+		// can modify the outgoing Peer JSON object.
 	
 protected:	
 	virtual int announce();
@@ -144,16 +168,11 @@ protected:
 	virtual void createPresence(Presence& p);
 		// Creates a Presence object.
 	
-	//virtual void onOnline();
-	//virtual void onClose();
-	
 	virtual void onSocketConnect(void*);
 	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&);
 	virtual void onPacket(sockio::Packet& packet);
 
 protected:	
-	//mutable Mutex	_mutex;
-
 	Roster _roster;
 	std::string _ourID;
 	PersistenceT _persistence;
@@ -192,8 +211,11 @@ public:
 };
 
 
-// ---------------------------------------------------------------------
 //
+// Filters
+//
+
+
 enum FilterFlags 
 {
 	AcceptRequests		= 0x01, 
@@ -214,8 +236,11 @@ struct Filter//: public Flaggable
 };
 
 
-// ---------------------------------------------------------------------
 //
+// Polymorphic Message Delegates
+//
+
+
 struct MessageDelegate: public PacketDelegateBase
 {
 	typedef Filter DataT;
@@ -226,7 +251,7 @@ struct MessageDelegate: public PacketDelegateBase
 	
 	virtual bool accepts(void* /* sender */, IPacket& data, void*, void*, void*) 
 	{
-		Message* packet = dynamic_cast<Message*>(&data);
+		auto packet = dynamic_cast<Message*>(&data);
 		if (packet &&
 			(!filter.flags.has(AcceptRequests) || 
 				(filter.flags.has(AcceptRequests) && packet->isRequest())) &&
@@ -239,11 +264,6 @@ struct MessageDelegate: public PacketDelegateBase
 };
 
 
-DefinePolymorphicDelegateWithArg(messageDelegate, IPacket, MessageDelegate, const Filter&, Filter())
-
-
-// ---------------------------------------------------------------------
-//
 struct CommandDelegate: public MessageDelegate
 {
 	CommandDelegate(const Filter& filter = Filter()) : MessageDelegate(filter) {};
@@ -252,7 +272,7 @@ struct CommandDelegate: public MessageDelegate
 	virtual bool accepts(void* sender, IPacket& data, void* empty2, void* empty3, void* empty4) 
 	{
 		if (MessageDelegate::accepts(sender, data, empty2, empty3, empty4)) {
-			Command* c = dynamic_cast<Command*>(&data);
+			auto c = dynamic_cast<Command*>(&data);
 			return c && c->matches(filter.path);
 		}
 		return false;
@@ -260,11 +280,6 @@ struct CommandDelegate: public MessageDelegate
 };
 
 
-DefinePolymorphicDelegateWithArg(commandDelegate, IPacket, CommandDelegate, const Filter&, Filter())
-
-
-// ---------------------------------------------------------------------
-//
 struct PresenceDelegate: public MessageDelegate
 {
 	PresenceDelegate() : MessageDelegate(AcceptRequests) {};
@@ -273,7 +288,7 @@ struct PresenceDelegate: public MessageDelegate
 	virtual bool accepts(void* sender, IPacket& data, void* empty2, void* empty3, void* empty4) 
 	{
 		if (MessageDelegate::accepts(sender, data, empty2, empty3, empty4)) {
-			Presence* p = dynamic_cast<Presence*>(&data);
+			auto p = dynamic_cast<Presence*>(&data);
 			return p && p->type() == "presence";
 		}
 		return false;
@@ -281,11 +296,6 @@ struct PresenceDelegate: public MessageDelegate
 };
 
 
-DefinePolymorphicDelegate(presenceDelegate, IPacket, PresenceDelegate)
-
-
-// ---------------------------------------------------------------------
-//
 struct EventDelegate: public MessageDelegate
 {
 	EventDelegate() : MessageDelegate(AcceptRequests) {};
@@ -294,15 +304,19 @@ struct EventDelegate: public MessageDelegate
 	virtual bool accepts(void* sender, IPacket& data, void* empty2, void* empty3, void* empty4) 
 	{
 		if (MessageDelegate::accepts(sender, data, empty2, empty3, empty4)) {
-			Event* e = dynamic_cast<Event*>(&data);
-			return e && e->type() == "event" && 
-				(filter.path.empty() || e->name() == filter.path);
+			auto e = dynamic_cast<Event*>(&data);
+			return e && e->type() == "event" && (
+				filter.path.empty() || filter.path == "*" || 
+				util::matchNodes(e->name(), filter.path, ":"));
 		}
 		return false;
 	}
 };
 
 
+DefinePolymorphicDelegateWithArg(messageDelegate, IPacket, MessageDelegate, const Filter&, Filter())
+DefinePolymorphicDelegateWithArg(commandDelegate, IPacket, CommandDelegate, const Filter&, Filter())
+DefinePolymorphicDelegate(presenceDelegate, IPacket, PresenceDelegate)
 DefinePolymorphicDelegate(eventDelegate, IPacket, EventDelegate)
 
 
@@ -435,7 +449,7 @@ public:
 		///		- 400: Bad request data
 		///		- 500: Server not found
 
-	Signal<Peer&> UpdatePresenceData;
+	Signal<Peer&> CreatePresence;
 		// Called by createPresence() so outside classes
 		// can modify the outgoing Peer object.
 
@@ -527,7 +541,7 @@ public:
 		traceL() << "[smpl::Client: " << this << "] Creating Presence" << std::endl;
 
 		Peer& peer = ourPeer();
-		UpdatePresenceData.emit(this, peer);
+		CreatePresence.emit(this, peer);
 		p["data"] = peer;
 	}
 
@@ -621,7 +635,7 @@ public:
 	}
 	
 
-	virtual const char* className() const { return "smpl::Client"; }
+	//virtual const char* className() const { return "smpl::Client"; }
 
 	
 protected:	
@@ -856,7 +870,7 @@ typedef smpl::Client<
 		///		- 400: Bad request data
 		///		- 500: Server not found
 
-	Signal<Peer&> UpdatePresenceData;
+	Signal<Peer&> CreatePresence;
 		// Called by createPresence() so outside classes
 		// can modify the outgoing Peer object.
 	

@@ -64,14 +64,14 @@ Parser::Parser(http_parser_type type) :
 
 Parser::~Parser() 
 {
-	traceL("HTTPParser", this) << "Destroy" << endl;	
+	TraceLS(this) << "Destroy" << endl;	
 	reset();
 }
 
 
 void Parser::init(http_parser_type type)
 {
-	traceL("HTTPParser", this) << "Init: " << type << endl;	
+	TraceLS(this) << "Init: " << type << endl;	
 
 	assert(_parser.data != this);
 
@@ -92,7 +92,7 @@ void Parser::init(http_parser_type type)
 
 bool Parser::parse(const char* data, std::size_t len)
 {
-	traceL("HTTPParser", this) << "Parse: " << len << endl;	
+	TraceLS(this) << "Parse: " << len << endl;	
 	
 	assert(!complete());
 	assert(_parser.data == this);
@@ -231,7 +231,7 @@ void Parser::onHeadersEnd()
 
 void Parser::onBody(const char* buf, std::size_t len) //size_t off, 
 {
-	traceL("HTTPParser", this) << "onBody" << endl;	
+	TraceLS(this) << "onBody" << endl;	
 	if (_observer)
 		_observer->onParserChunk(buf, len); //Buffer(buf+off,len) + off
 }
@@ -239,7 +239,7 @@ void Parser::onBody(const char* buf, std::size_t len) //size_t off,
 
 void Parser::onMessageEnd() 
 {
-	traceL("HTTPParser", this) << "onMessageEnd" << endl;		
+	TraceLS(this) << "onMessageEnd" << endl;		
 	_complete = true;
 	if (_observer)
 		_observer->onParserEnd();
@@ -248,7 +248,7 @@ void Parser::onMessageEnd()
 
 void Parser::onError(const ParserError& err)
 {
-	traceL("HTTPParser", this) << "On error: " << err.code << ": " << err.message << endl;	
+	TraceLS(this) << "On error: " << err.code << ": " << err.message << endl;	
 	_complete = true;
 	_error = new ParserError;
 	_error->code = err.code;
@@ -388,7 +388,7 @@ Parser::Parser(http_parser_type type) : ///, http::Message* headers // ParserObs
 	//_upgrade(true), 
 	//_wasHeaderValue(true)
 {	
-	traceL("HTTPParser", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 }
 */
 	/*
@@ -714,13 +714,13 @@ DigestAuthenticator::DigestAuthenticator(const std::string& realm, const std::st
 	_usingRFC2617(usingRFC2617),
 	_opaque(crypto::hash("md5", realm))
 {
-	traceL() << "[DigestAuthenticator] Creating" << endl;
+	TraceL << "[DigestAuthenticator] Creating" << endl;
 }
 
 
 DigestAuthenticator::~DigestAuthenticator() 
 {
-	traceL() << "[DigestAuthenticator] Destroying" << endl;
+	TraceL << "[DigestAuthenticator] Destroying" << endl;
 }
 
 
@@ -739,14 +739,14 @@ string DigestAuthenticator::parseHeaderSegment(const std::string& key)
 		value = _lastRequest.substr(start, end-start);
 		replaceInPlace(value,"\"", "");
 	}
-	//traceL() << format("Parse: Key: %s, Value: %s, start: %d, end: %d", key, value, start, end));
+	//TraceL << format("Parse: Key: %s, Value: %s, start: %d, end: %d", key, value, start, end));
 	return value;
 }
 
 
 bool DigestAuthenticator::validateRequest(UserManager* authenticator, const std::string& request) 
 {
-	traceL() << "[DigestAuthenticator] Validating Request: " + request << endl;
+	TraceL << "[DigestAuthenticator] Validating Request: " + request << endl;
 
 	_lastRequest = request;
 	std::string hash;
@@ -811,7 +811,7 @@ string DigestAuthenticator::prepare401Header(const std::string& extra)
 
 
 	/*
-	traceL() << "Digest Authenticator:"
+	TraceL << "Digest Authenticator:"
 		<< "\n\tHTTP Method: " << httpMethod
 		<< "\n\tUsername: " << username
 		<< "\n\tURI: " << uri

@@ -25,14 +25,14 @@ public:
 	TCPResponder(int id) : 
 		id(id)
 	{
-		debugL("TCPResponder", this) << id << ": Creating" << endl;
+		DebugLS(this) << id << ": Creating" << endl;
 		net::SocketAdapter::socket = &socket;
 		socket.setAdapter(this);
 	}
 
 	virtual ~TCPResponder() 
 	{ 
-		debugL("TCPResponder", this) << id << ": Destroying" << endl;
+		DebugLS(this) << id << ": Destroying" << endl;
 		//socket.base().removeObserver(this);
 		socket.setAdapter(nullptr);
 		stop(); 
@@ -40,7 +40,7 @@ public:
 
 	void start(const net::Address& relayedAddr) 
 	{		
-		debugL("TCPResponder", this) << id << ": Starting on: " << relayedAddr << endl;
+		DebugLS(this) << id << ": Starting on: " << relayedAddr << endl;
 		
 		try	{
 			this->relayedAddr = relayedAddr;
@@ -74,7 +74,7 @@ public:
 	{
 		//assert(&packet.info->socket == &socket);
 		std::string payload(bufferCast<const char*>(buf), buf.size());
-		traceL("TCPResponder", this) << id << ": On recv: " << peerAddr << ": " << payload << std::endl;
+		DebugLS(this) << id << ": On recv: " << peerAddr << ": " << payload << std::endl;
 
 		//assert(payload == "hello peer");
 		//assert(0 && "ok");
@@ -85,12 +85,12 @@ public:
 
 	void onSocketError(const Error& error) 
 	{
-		traceL("TCPResponder", this) << id << ": On error: " << error.message << std::endl;
+		DebugLS(this) << id << ": On error: " << error.message << std::endl;
 	}
 
 	void onSocketClose() 
 	{
-		traceL("TCPResponder", this) << id << ": On close" << std::endl;
+		DebugLS(this) << id << ": On close" << std::endl;
 		stop();
 	}
 	
@@ -141,7 +141,7 @@ public:
 	/*
 	void onSendTimer(void*)
 	{
-		debugL("TCPResponder", this) << "Send timer" << endl;	
+		DebugLS(this) << "Send timer" << endl;	
 		//socket.send("bouncey", 7);
 	}
 	*/

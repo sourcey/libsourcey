@@ -31,28 +31,28 @@ namespace sockio {
 
 
 Transaction::Transaction(Client& client, long timeout) : 
-	PacketTransaction<Packet>(timeout, 0, client.loop()), client(client)
+	PacketTransaction<Packet>(timeout, 0, client.socket().base().loop()), client(client)
 {
-	debugL("SocketIOTransaction", this) << "Create" << endl;
+	DebugLS(this) << "Create" << endl;
 }
 
 
 Transaction::Transaction(Client& client, const Packet& request, long timeout) : 
-	PacketTransaction<Packet>(request, timeout, 0, client.loop()), client(client)
+	PacketTransaction<Packet>(request, timeout, 0, client.socket().base().loop()), client(client)
 {
-	debugL("SocketIOTransaction", this) << "Create" << endl;
+	DebugLS(this) << "Create" << endl;
 }
 
 
 Transaction::~Transaction() 
 {
-	debugL("SocketIOTransaction", this) << "Destroy" << endl;	
+	DebugLS(this) << "Destroy" << endl;	
 }
 
 
 bool Transaction::send()
 {
-	debugL("SocketIOTransaction", this) << "Send: " << _request.id() << endl;	
+	DebugLS(this) << "Send: " << _request.id() << endl;	
 	_request.setAck(true);	
 	client += packetDelegate(this, &Transaction::onPotentialResponse, 100);
 	if (client.send(_request))
@@ -75,7 +75,7 @@ bool Transaction::checkResponse(const Packet& packet)
 
 void Transaction::onResponse()
 {
-	debugL("SocketIOTransaction", this) << "On success" << endl;
+	DebugLS(this) << "On success" << endl;
 	client -= packetDelegate(this, &Transaction::onPotentialResponse);	
 	PacketTransaction<Packet>::onResponse();
 }
@@ -88,6 +88,6 @@ void Transaction::onResponse()
 /*
 void Transaction::handlePotentialResponse(const Packet& packet)
 {
-	debugL("SocketIOTransaction", this) << "Response" << endl;
+	DebugLS(this) << "Response" << endl;
 }
 */

@@ -30,8 +30,8 @@ macro(define_sourcey_application name)
   #  ${CMAKE_SOURCE_DIR}/projects/AnionuPrivate/SpotImpl/include
   link_directories(${LibSourcey_LIBRARY_DIRS})   
   
-  #status("  Linking application ${name}")    
-  #status("    Libraries:               ${LibSourcey_INCLUDE_LIBRARIES}")    
+  status("  Linking application ${name}")    
+  status("    Libraries:               ${LibSourcey_INCLUDE_LIBRARIES}")    
   #status("    Library Dirs:            ${LibSourcey_LIBRARY_DIRS}")    
   #status("    Include Dirs:            ${LibSourcey_INCLUDE_DIRS}")  
   #status("    Dependencies:            ${LibSourcey_BUILD_DEPENDENCIES}")  

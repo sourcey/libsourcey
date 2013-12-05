@@ -38,13 +38,13 @@ SSLAdapter::SSLAdapter(net::SSLBase* socket) :
 	_readBIO(nullptr),
 	_writeBIO(nullptr)
 {
-	traceL("SSLAdapter", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 }
 
 
 SSLAdapter::~SSLAdapter() 
 {	
-	traceL("SSLAdapter", this) << "Destroy" << endl;
+	TraceLS(this) << "Destroy" << endl;
 	if (_ssl) {
 		SSL_free(_ssl);
 		_ssl = nullptr;
@@ -54,7 +54,7 @@ SSLAdapter::~SSLAdapter()
 
 void SSLAdapter::init(SSL* ssl) 
 {
-	traceL("SSLAdapter", this) << "Init: " << ssl << endl;
+	TraceLS(this) << "Init: " << ssl << endl;
 	assert(_socket);
 	//assert(_socket->initialized());
 	_ssl = ssl;
@@ -66,10 +66,10 @@ void SSLAdapter::init(SSL* ssl)
 
 void SSLAdapter::shutdown()
 {
-	traceL("SSLAdapter", this) << "Shutdown" << endl;
+	TraceLS(this) << "Shutdown" << endl;
 	if (_ssl)
 	{        
-		traceL("SSLAdapter", this) << "Shutdown SSL" << endl;
+		TraceLS(this) << "Shutdown SSL" << endl;
 
         // Don't shut down the socket more than once.
         int shutdownState = SSL_get_shutdown(_ssl);
@@ -105,7 +105,7 @@ int SSLAdapter::available() const
 
 void SSLAdapter::addIncomingData(const char* data, size_t len) 
 {
-	traceL("SSLAdapter") << "Add incoming data: " << len << endl;
+	TraceL << "Add incoming data: " << len << endl;
 	BIO_write(_readBIO, data, len);
 	flush();
 }
@@ -125,12 +125,12 @@ void SSLAdapter::addOutgoingData(const char* data, size_t len)
 
 void SSLAdapter::flush() 
 {
-	traceL("SSLAdapter") << "Flushing" << endl;
+	TraceL << "Flushing" << endl;
 
 	if (!initialized()) {
 		int r = SSL_connect(_ssl);
 		if (r < 0) {
-			traceL("SSLAdapter") << "Flush: Handle error" << endl;
+			TraceL << "Flush: Handle error" << endl;
 			handleError(r);
 		}
 		return;

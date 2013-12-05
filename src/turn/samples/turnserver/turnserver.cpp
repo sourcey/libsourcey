@@ -10,11 +10,14 @@ using namespace scy::net;
 using namespace scy::turn;
 
 
-const std::string SERVER_ADDRESS ("0.0.0.0");
-const std::string SERVER_USERNAME("username");
-const std::string SERVER_PASSWORD("password");
-const std::string SERVER_REALM   ("sourcey.com");
+const std::string SERVER_BIND_IP     ("0.0.0.0");
+const int         SERVER_BIND_PORT   (3478);
+const std::string SERVER_EXTERNAL_IP ("202.173.167.126");
 
+const std::string SERVER_USERNAME    ("username");
+const std::string SERVER_PASSWORD    ("password");
+const std::string SERVER_REALM       ("sourcey.com");
+ 
 
 class RelayServer: public ServerObserver
 {
@@ -34,9 +37,9 @@ public:
 		server.start();
 	}
 	
-	virtual AuthenticationState authenticateRequest(Server* server, const Request& request)
+	virtual AuthenticationState authenticateRequest(Server* server, Request& request)
 	{
-		debugL("RelayServer", this) << "Authenticating: " << request.transactionID() << endl;
+		DebugL << "Authenticating: " << request.transactionID() << endl;
 
 		// The authentication information (e.g., username, password, realm, and
 		// nonce) is used to both verify subsequent requests and to compute the
@@ -61,37 +64,41 @@ public:
 		// or MESSAGE-INTEGRITY attributes. If these attributes are not provided we return
 		// a 401 (Unauthorized) response.
 		auto usernameAttr = request.get<stun::Username>();
-		const stun::Realm* realmAttr = request.get<stun::Realm>();
-		const stun::Nonce* nonceAttr = request.get<stun::Nonce>();
-		const stun::MessageIntegrity* integrityAttr = request.get<stun::MessageIntegrity>();
+		auto realmAttr = request.get<stun::Realm>();
+		auto nonceAttr = request.get<stun::Nonce>();
+		auto integrityAttr = request.get<stun::MessageIntegrity>();
 		if (!usernameAttr || !realmAttr || !nonceAttr || !integrityAttr) {
-			debugL("RelayServer", this) << "Authenticating: Unauthorized STUN Request" << endl;
+			DebugL << "Authenticating: Unauthorized STUN Request" << endl;
 			return turn::NotAuthorized;
 		}
-			
+		
 		// Determine authentication status and return either Authorized, 
 		// Unauthorized or Authenticating.
-		// Since no authentication is required we just return Authorized.
-		//return turn::Authorized;
-		
 		std::string credentials(SERVER_USERNAME + ":" + SERVER_REALM + ":" + SERVER_PASSWORD);
 		crypto::Hash engine("md5");
 		engine.update(credentials);
-		debugL("RelayServer", this) << "Generating HMAC: data=" << credentials << ", key=" << engine.digestStr() << endl;
+		request.hash = engine.digestStr();
 
-		if (integrityAttr->verifyHmac(engine.digestStr()))
+#if ENABLE_AUTHENTICATION
+		DebugL << "Generating HMAC: data=" << credentials << ", key=" << request.hash << endl;
+
+		if (integrityAttr->verifyHmac(request.hash))
 			return turn::Authorized;
 		return turn::NotAuthorized;	
+#else			
+		// Since no authentication is required we just return Authorized.
+		return turn::Authorized;
+#endif
 	}
 
 	virtual void onServerAllocationCreated(Server* server, IAllocation* alloc) 
 	{
-		debugL("RelayServer", this) << "Allocation Created" << endl;
+		DebugL << "Allocation Created" << endl;
 	}
 
 	virtual void onServerAllocationRemoved(Server* server, IAllocation* alloc)
 	{		
-		debugL("RelayServer", this) << "Allocation Removed" << endl;
+		DebugL << "Allocation Removed" << endl;
 	}
 };
 
@@ -103,16 +110,17 @@ int main(void)
 #endif
 
 	Logger::instance().add(new ConsoleChannel("debug", LTrace));	
-	Logger::instance().setWriter(new AsyncLogWriter);	
+	//Logger::instance().setWriter(new AsyncLogWriter);	
 	{
 		Application app;
 		{
 			ServerOptions opts;		
-			opts.listenAddr						= net::Address(SERVER_ADDRESS, 3478);
 			opts.software						= "Sourcey STUN/TURN Server [rfc5766]";
 			opts.realm							= "sourcey.com";
-			opts.allocationDefaultLifetime		= 1 * 60 * 1000;
-			opts.allocationMaxLifetime			= 15 * 60 * 1000;
+			opts.listenAddr						= net::Address(SERVER_BIND_IP, SERVER_BIND_PORT);
+			opts.externalIP					    = SERVER_EXTERNAL_IP;
+			opts.allocationDefaultLifetime		= 2 * 60 * 1000;
+			opts.allocationMaxLifetime			= 10 * 60 * 1000;
 			opts.timerInterval					= 5 * 1000;
 			//opts.enableUDP                      = false;
 	

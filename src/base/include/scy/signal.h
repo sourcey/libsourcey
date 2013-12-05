@@ -53,7 +53,7 @@ public:
 	SignalBase() : 
 		_enabled(true), 
 		_dirty(false), 
-		_refCount(0)
+		_count(0)
 	{
 	}	
 
@@ -74,7 +74,7 @@ public:
 		Mutex::ScopedLock lock(_mutex);
 		_delegates.push_back(delegate.clone());
 		_delegates.sort(DelegateT::ComparePrioroty); 
-		_refCount++;
+		_count++;
 	}
 
 	bool detach(const DelegateT& delegate) 
@@ -86,7 +86,7 @@ public:
 			if (delegate.equals(*it) && !(*it)->cancelled()) {	
 				(*it)->cancel();
 				_dirty = true;
-				_refCount--;
+				_count--;
 				return true;
 			}
 		}
@@ -102,7 +102,7 @@ public:
 				if (klass == (*it)->object() && !(*it)->cancelled()) {	
 					(*it)->cancel();
 					_dirty = true;
-					_refCount--;
+					_count--;
 				}
 			}
 		}
@@ -154,17 +154,49 @@ public:
 		_dirty = false;
 	}
 
+	virtual void emit(void* sender) 
+	{
+		void* empty = 0;
+		emit(sender, (P)empty, (P2)empty, (P3)empty, (P4)empty);
+	}
+
+	virtual void emit(void* sender, P arg) 
+	{
+		void* empty = 0;
+		emit(sender, arg, (P2)empty, (P3)empty, (P4)empty);
+	}
+
+	virtual void emit(void* sender, P arg, P2 arg2) 
+	{
+		void* empty = 0;
+		emit(sender, arg, arg2, (P3)empty, (P4)empty);
+	}	
+
+	virtual void emit(void* sender, P arg, P2 arg2, P3 arg3) 
+	{
+		void* empty = 0;
+		emit(sender, arg, arg2, arg3, (P4)empty);
+	}
+
+	virtual void emit(void* sender, P arg, P2 arg2, P3 arg3, P4 arg4) 
+	{
+		DelegateList toNotify;
+		obtain(toNotify);
+		try {
+			for (ConstIterator it = toNotify.begin(); it != toNotify.end(); ++it) {
+				if ((*it)->accepts(sender, arg, arg2, arg3, arg4))
+					(*it)->emit(sender, arg, arg2, arg3, arg4); 
+			}
+		}
+		catch (StopPropagation&) {
+		}
+	}
+
 	void clear() 
 	{
 		Mutex::ScopedLock lock(_mutex);
 		util::clearList(_delegates);
-		_refCount = 0;
-	}
-
-	DelegateList delegates() const 
-	{
-		Mutex::ScopedLock lock(_mutex);
-		return _delegates;
+		_count = 0;
 	}
 
 	void enable(bool flag = true) 
@@ -178,56 +210,27 @@ public:
 		Mutex::ScopedLock lock(_mutex);
 		return _enabled;
 	}
-	
-	int refCount() const 
+
+	DelegateList delegates() const 
 	{
 		Mutex::ScopedLock lock(_mutex);
-		return _refCount;
+		return _delegates;
 	}
-
-	void emit(void* sender) 
+	
+	int ndelegates() const 
+		// Returns the number of delegates connected to the signal.
+		// Use this instead of delegates().size() since the container
+		// is not updated in real time.
 	{
-		void* empty = 0;
-		emit(sender, (P)empty, (P2)empty, (P3)empty, (P4)empty);
-	}
-
-	void emit(void* sender, P arg) 
-	{
-		void* empty = 0;
-		emit(sender, arg, (P2)empty, (P3)empty, (P4)empty);
-	}
-
-	void emit(void* sender, P arg, P2 arg2) 
-	{
-		void* empty = 0;
-		emit(sender, arg, arg2, (P3)empty, (P4)empty);
-	}	
-
-	void emit(void* sender, P arg, P2 arg2, P3 arg3) 
-	{
-		void* empty = 0;
-		emit(sender, arg, arg2, arg3, (P4)empty);
-	}
-
-	void emit(void* sender, P arg, P2 arg2, P3 arg3, P4 arg4) 
-	{
-		DelegateList toNotify;
-		obtain(toNotify);
-		try {
-			for (ConstIterator it = toNotify.begin(); it != toNotify.end(); ++it) {
-				if ((*it)->accepts(sender, arg, arg2, arg3, arg4))
-					(*it)->emit(sender, arg, arg2, arg3, arg4); 
-			}
-		}
-		catch (StopPropagation&) {
-		}
+		Mutex::ScopedLock lock(_mutex);
+		return _count;
 	}
 		
 protected:
 	DelegateList _delegates;
 	bool _enabled;	
 	bool _dirty;
-	int _refCount;
+	int _count;
 
 	mutable Mutex	_mutex;
 };

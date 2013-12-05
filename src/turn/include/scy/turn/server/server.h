@@ -54,19 +54,22 @@ struct ServerOptions
 	int allocationMaxPermissions;
 	int timerInterval;
 	int earlyMediaBufferSize;
+	
+	net::Address listenAddr; // The TCP and UDP bind() address
+	std::string externalIP;  // The external public facing IP address of the server
 
-	net::Address listenAddr;
 	bool enableTCP;
 	bool enableUDP;
 
 	ServerOptions() {
 		software							= "Sourcey STUN/TURN Server [rfc5766]";
-		realm								= "sourcey.com";	// hello
+		realm								= "sourcey.com";
 		listenAddr							= net::Address("0.0.0.0", 3478);
-		allocationDefaultLifetime			= 90 * 1000;		// ping required every 90 seconds
+		externalIP						    = "";
+		allocationDefaultLifetime			= 2 * 60 * 1000;
 		allocationMaxLifetime				= 15 * 60 * 1000;
 		allocationMaxPermissions			= 10;
-		timerInterval						= 20 * 1000;
+		timerInterval						= 10 * 1000;
 		earlyMediaBufferSize				= 8192;
 		enableTCP							= true;
 		enableUDP							= true;
@@ -82,7 +85,7 @@ struct ServerObserver
 	virtual void onServerAllocationCreated(Server* server, IAllocation* alloc) = 0;
 	virtual void onServerAllocationRemoved(Server* server, IAllocation* alloc) = 0;
 
-	virtual AuthenticationState authenticateRequest(Server* server, const Request& request) = 0;
+	virtual AuthenticationState authenticateRequest(Server* server, Request& request) = 0;
 		// The observer class can implement authentication 
 		// using the long-term credential mechanism of [RFC5389].
 		// The class design is such that authentication can be preformed
@@ -104,7 +107,7 @@ struct ServerObserver
 typedef std::map<FiveTuple, ServerAllocation*> ServerAllocationMap;
 
 
-class Server: public basic::Polymorphic
+class Server
 		// TODO: bandwidth, allocation timer, print allocs
 {
 public:
@@ -119,8 +122,10 @@ public:
 	void handleBindingRequest(Request& request);
 	void handleAllocateRequest(Request& request);
 	void handleConnectionBindRequest(Request& request);
-
+	//void handleSendIndication(Request& request);
+	
 	void respondError(Request& request, int errorCode, const char* errorDesc);
+	void respondSuccess(Request& request, stun::Message& response);
 	
 	ServerAllocationMap allocations() const;
 	void addAllocation(ServerAllocation* alloc);
@@ -142,7 +147,7 @@ public:
 
 	void releaseTCPSocket(net::TCPSocket* sock);
 
-	virtual const char* className() const { return "TURNServer"; };
+	//virtual const char* className() const { return "TURNServer"; };
 
 private:	
 	Timer _timer;

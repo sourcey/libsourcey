@@ -53,9 +53,9 @@ int main(int argc, char** argv)
 			srvs.tcp.start("0.0.0.0", TcpPort);
 			srvs.ssl.start("0.0.0.0", SslPort);
 		
-			infoL("EchoServer") << "UDP Server listening on " << srvs.udp.socket.address() << endl;
-			infoL("EchoServer") << "TCP Server listening on " << srvs.tcp.socket.address() << endl;
-			infoL("EchoServer") << "SSL Server listening on " << srvs.ssl.socket.address() << endl;
+			InfoL << "UDP Server listening on " << srvs.udp.socket.address() << endl;
+			InfoL << "TCP Server listening on " << srvs.tcp.socket.address() << endl;
+			InfoL << "SSL Server listening on " << srvs.ssl.socket.address() << endl;
 
 			app.waitForShutdown(onShutdown, &srvs);
 		}

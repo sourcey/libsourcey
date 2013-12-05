@@ -90,7 +90,7 @@ public:
 	virtual int transportProtocol();
 	ConnectionManager& connections();
 
-	virtual const char* className() const { return "TURNTCPClient"; };
+	//virtual const char* className() const { return "TURNTCPClient"; };
 
 protected:	
 	TCPClientObserver& _observer;

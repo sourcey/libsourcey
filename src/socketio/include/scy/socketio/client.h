@@ -61,14 +61,12 @@ struct ClientState: public State
 	};
 };
 
-	
-// ---------------------------------------------------------------------
-//
-class Client: public Stateful<ClientState>, public PacketSignal, public basic::Polymorphic
+
+class Client: public Stateful<ClientState>, public PacketSignal
 {
 public:
-	Client(net::SocketBase* socket, uv::Loop* loop = uv::defaultLoop());
-	Client(net::SocketBase* socket, const std::string& host, UInt16 port, uv::Loop* loop = uv::defaultLoop());
+	Client(net::SocketBase* socket);
+	Client(net::SocketBase* socket, const std::string& host, UInt16 port);
 	virtual ~Client();
 	
 	virtual void connect(const std::string& host, UInt16 port);
@@ -96,7 +94,7 @@ public:
 	virtual Transaction* createTransaction(const sockio::Packet& request, long timeout = 10000);
 		// Creates a packet transaction
 
-	uv::Loop* loop();
+	//uv::Loop* loop();
 	http::WebSocket& socket();
 	std::string sessionID() const;	
 	Error error() const;
@@ -136,7 +134,7 @@ protected:
 protected:
 	//mutable Mutex	_mutex;
 	
-	uv::Loop* _loop;
+	//uv::Loop* _loop;
 	Error _error;
 	std::vector<std::string> _protocols;
 	std::string _sessionID;
@@ -151,15 +149,31 @@ protected:
 };
 
 
-// ---------------------------------------------------------------------
 //
+// TCP Client
+//
+
+
+Client* createTCPClient(uv::Loop* loop = uv::defaultLoop());
+
 class TCPClient: public Client
 {
 public:
-	TCPClient(uv::Loop* loop = uv::defaultLoop()) :
-		Client(new net::TCPBase, loop)
-	{
-	}
+	TCPClient(uv::Loop* loop = uv::defaultLoop());
+};
+
+
+//
+// SSL Client
+//
+
+
+Client* createSSLClient(uv::Loop* loop = uv::defaultLoop());
+
+class SSLClient: public Client
+{
+public:
+	SSLClient(uv::Loop* loop = uv::defaultLoop());
 };
 
 

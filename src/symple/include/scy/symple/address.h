@@ -21,39 +21,35 @@
 #define SCY_Symple_Address_H
 
 
-#include "scy/json/json.h"
+#include "scy/types.h"
+#include <string>
+//#include "scy/json/json.h"
 
 
 namespace scy {
 namespace smpl {
 
 
-class Address: public json::Value
-	/// The Address structure contains identity information about
-	/// an entity on the network.
+struct Address
+	/// The Address structure is an endpoint identifier for a
+	/// peer on the network.
+	/// The format is very similar to the XMPP JID specification:
+	/// user@group/id
 {
 public:
 	Address();
-	Address(const Address& r);
-	Address(const json::Value& root);
-		// The provided JSON value should be an object containing
-		// the group, user, name and id string properties.
+	Address(const std::string& addr);
+	Address(const std::string& user, const std::string& group, const std::string& id);
 	virtual ~Address();
 	
-	std::string id() const;
-	std::string user() const;
-	std::string name() const;
-	std::string group() const;
-	
-	void setID(const std::string& id);	
-	void setUser(const std::string& user);
-	void setName(const std::string& name);
-	void setGroup(const std::string& group);
+	bool parse(const std::string& addr);		
 	
 	bool valid() const;
 	void print(std::ostream& os) const;
+	std::string Address::toString() const;
 	
 	bool operator == (const Address& r);
+	bool operator == (std::string& r);
 	
     friend std::ostream& operator << (std::ostream& os, const Address& addr)
 	{
@@ -61,8 +57,34 @@ public:
 		return os;
 	}
 	
+	std::string user;
+	std::string group;
+	std::string id;
+};
+
+
+} // namespace symple 
+} // namespace scy
+
+
+#endif // SCY_Symple_Address_H
+
+
+	
 	/*
 
+	std::string id() const;
+	std::string user() const;
+	//std::string name() const;
+	std::string group() const;
+	void setID(const std::string& id);	
+	void setUser(const std::string& user);
+	void setName(const std::string& name);
+	void setGroup(const std::string& group);
+	*/
+
+	
+	/*
 	//std::string group;const std::string& id
 	//std::string user;
 	//std::string name;
@@ -79,12 +101,3 @@ protected:
 		// to an externally managed JSON value,
 		// generally a Message instance.
 	*/
-
-};
-
-
-} // namespace symple 
-} // namespace scy
-
-
-#endif // SCY_Symple_Address_H

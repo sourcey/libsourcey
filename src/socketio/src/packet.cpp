@@ -151,17 +151,17 @@ std::size_t Packet::read(const ConstBuffer& buf)
 	std::string data(bufferCast<const char*>(buf), buf.size());	
 	std::vector<std::string> frags = util::split(data, ':', 4);
 	if (frags.size() < 1) {
-		//debugL("sockio::Packet", this) << "Reading: Invalid Data: " << frags.size() << endl;
+		//DebugLS(this) << "Reading: Invalid Data: " << frags.size() << endl;
 		return false;
 	}
 		
 	if (!frags[0].empty()) {
 		_type = util::strtoi<UInt32>(frags[0]);
-		//debugL("sockio::Packet", this) << "Reading: Type: " << typeString() << endl;
+		//DebugLS(this) << "Reading: Type: " << typeString() << endl;
 	}
 
 	if (_type < 0 || _type > 7) {
-		//debugL("sockio::Packet", this) << "Reading: Invalid Type: " << _type << endl;
+		//DebugLS(this) << "Reading: Invalid Type: " << _type << endl;
 		return false;
 	}
 	if (frags.size() >= 2 && !frags[1].empty()) {
@@ -206,7 +206,7 @@ std::size_t Packet::read(const ConstBuffer& buf)
 	}
 
 	_size = data.length();
-	//debugL("sockio::Packet", this) << "Parse Success: " << toString() << endl;
+	//DebugLS(this) << "Parse Success: " << toString() << endl;
 
 	return _size;
 }

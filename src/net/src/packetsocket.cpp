@@ -33,13 +33,13 @@ namespace net {
 PacketSocketAdapter::PacketSocketAdapter(Socket* socket) : 
 	SocketAdapter(socket)	
 {
-	traceL("PacketSocketAdapter", this) << "Create: " << socket << std::endl;
+	TraceLS(this) << "Create: " << socket << std::endl;
 }
 
 		
 void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Address& peerAddr)
 {	
-	traceL("PacketSocketAdapter", this) << "Recv: " << buffer.size() << std::endl;
+	TraceLS(this) << "Recv: " << buffer.size() << std::endl;
 	
 	IPacket* pkt = nullptr;
 	const char* buf = bufferCast<const char*>(buffer);
@@ -58,7 +58,7 @@ void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Addres
 
 void PacketSocketAdapter::onPacket(IPacket& pkt) 
 {		
-	//traceL("PacketSocketAdapter", this) << "onPacket: emitting: " << pkt.size() << std::endl;
+	//TraceLS(this) << "onPacket: emitting: " << pkt.size() << std::endl;
 	PacketSignal::emit(socket, pkt);	
 }
 
@@ -97,7 +97,7 @@ PacketSocketAdapter& PacketSocket::adapter() const
 	
 void PacketSocket::send(IPacket& packet)
 {
-	//traceL("PacketSocket", this) << "send" << std::endl;	
+	//TraceLS(this) << "send" << std::endl;	
 	Socket::send(packet);
 }
 
@@ -123,7 +123,7 @@ PacketStreamSocketAdapter::~PacketStreamSocketAdapter()
 
 void PacketStreamSocketAdapter::process(IPacket& packet)
 {	
-	traceL("PacketStreamSocketAdapter", this) << "Process: " << packet.className() << endl;
+	TraceLS(this) << "Process: " << packet.className() << endl;
 
 	//Mutex::ScopedLock lock(_mutex);
 
@@ -140,7 +140,7 @@ bool PacketStreamSocketAdapter::accepts(IPacket& packet)
 					
 void PacketStreamSocketAdapter::onStreamStateChange(const PacketStreamState& state) 
 { 
-	traceL("PacketStreamSocketAdapter", this) << "Stream state change: " << state << endl;
+	TraceLS(this) << "Stream state change: " << state << endl;
 	
 	// TODO: Sync socket with stream?
 

@@ -31,8 +31,8 @@ namespace smpl {
 
 
 class Roster: public LiveCollection<std::string, Peer>
-	/// The Roster provided a registry for active network peers
-	/// indexed by their current session ID.
+	/// The Roster provides a registry for active network 
+	/// peers indexed by session ID.
 {
 public:
 	typedef LiveCollection<std::string, Peer>	Manager;
@@ -41,19 +41,15 @@ public:
 public:
 	Roster();
 	virtual ~Roster();
-
-	virtual void update(const json::Value& data, bool whiny = false);
-		// Updates the roster from the given client object.
 	
 	Peer* getByHost(const std::string& host);
-		// Returns the peer who's host matches the 
-		// given IP address.
+		// Returns the first peer which matches the given host address.
 	
 	virtual PeerMap peers() const;
 	
 	virtual void print(std::ostream& os) const;
 
-	virtual const char* className() const { return "smpl::Roster"; }
+	//virtual const char* className() const { return "smpl::Roster"; }
 };
 	
 
@@ -64,6 +60,9 @@ public:
 
 
 
+
+	//virtual void update(const json::Value& data, bool whiny = false);
+		// Updates the roster from the given client object.
 	//Address _ourAddress;
 	
 	//virtual void setOurID(const Address& id);

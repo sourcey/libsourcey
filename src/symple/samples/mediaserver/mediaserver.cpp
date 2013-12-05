@@ -46,7 +46,7 @@ namespace scy {
 MediaServer::MediaServer(UInt16 port) :
 	http::Server(port, new HTTPStreamingConnectionFactory(this))
 {		
-	debugL("MediaServer") << "Create" << endl;
+	DebugL << "Create" << endl;
 	
 	// Register the media formats we will be using
 	FormatRegistry& formats = MediaFactory::instance().formats();		
@@ -75,13 +75,13 @@ MediaServer::MediaServer(UInt16 port) :
 
 MediaServer::~MediaServer()
 {		
-	debugL("MediaServer") << "Destroy" << endl;
+	DebugL << "Destroy" << endl;
 }
 
 
 void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions& options, bool freeCaptures, bool attachPacketizers) 
 {	
-	debugL("MediaServer") << "Setup Packet Stream" << endl;
+	DebugL << "Setup Packet Stream" << endl;
 
 	// Attach capture sources
 	if (options.oformat.video.enabled) {
@@ -93,7 +93,7 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 		stream.attachSource(options.audioCapture, freeCaptures, true);	
 	}
 				
-	stream.attach(new FPSLimiter(5), 1, true);
+	//stream.attach(new FPSLimiter(5), 1, true);
 								
 	// Attach an async queue so we don't choke
 	// the video capture while encoding.
@@ -171,7 +171,7 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 		auto& request = conn.request();
 
 		// Log incoming requests
-		infoL("HTTPStreamingConnectionFactory")
+		InfoL
 			<< "Incoming connection from " << conn.socket().peerAddress() 
 			<< ": URI:\n" << request.getURI()
 			<< ": Request:\n" << request << endl;
@@ -204,13 +204,13 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 		auto& media = av::MediaFactory::instance();
 		if (options.oformat.video.enabled) {
 			media.devices().getDefaultVideoCaptureDevice(dev);
-			infoL("HTTPStreamingConnectionFactory") << "Default video capture " << dev.id << endl;
+			InfoL << "Default video capture " << dev.id << endl;
 			options.videoCapture = media.createVideoCapture(dev.id);
 			options.videoCapture->getEncoderFormat(options.iformat);	
 		}
 		if (options.oformat.audio.enabled) {
 			media.devices().getDefaultAudioInputDevice(dev);
-			infoL("HTTPStreamingConnectionFactory") << "Default audio capture " << dev.id << endl;
+			InfoL << "Default audio capture " << dev.id << endl;
 			options.audioCapture = media.createAudioCapture(dev.id, 
 				options.oformat.audio.channels, 
 				options.oformat.audio.sampleRate);
@@ -240,10 +240,10 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 	}
 	catch (std::exception& exc)
 	{
-		errorL("StreamingRequestHandlerFactory") << "Request error: " << exc.what() << endl;
+		ErrorL << "Request error: " << exc.what() << endl;
 	}
 		
-	errorL("StreamingRequestHandlerFactory") << "Bad Request" << endl;
+	ErrorL << "Bad Request" << endl;
 	return new http::BadRequestHandler(conn);	
 }
 
@@ -256,12 +256,12 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 StreamingOptions::StreamingOptions(MediaServer* server, av::VideoCapture* videoCapture, av::AudioCapture* audioCapture) : 
 	server(server), videoCapture(videoCapture), audioCapture(audioCapture) 
 {
-	debugL("StreamingOptions", this) << "Destroy" << endl;	
+	DebugLS(this) << "Destroy" << endl;	
 }
 
 StreamingOptions::~StreamingOptions() 
 {
-	debugL("StreamingOptions", this) << "Destroy" << endl;			
+	DebugLS(this) << "Destroy" << endl;			
 }
 
 

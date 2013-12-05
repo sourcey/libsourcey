@@ -119,7 +119,7 @@ public:
 	virtual bool canChange(ID id);	
 	virtual void onChange(ID id, ID prev);
 	
-	Signal2<const ID&, const ID&> Change;
+	//Signal2<const ID&, const ID&> Change;
 		// Fired when the state changes to signal 
 		// the new and previous states.
 
