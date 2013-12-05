@@ -108,13 +108,6 @@ template<class NativeT> int setServerSocketBufSize(uv::Handle& handle, int size)
 }
 
 
-inline bool isChannelData(UInt16 messageType)
-{
-  // The first two bits of a channel data message are 0b01.
-  return ((messageType & 0xC000) == 0x4000);
-}
-
-
 enum AuthenticationState 
 {
 	Authenticating	= 1,
@@ -124,11 +117,13 @@ enum AuthenticationState
 };
 
 
-struct Request: public stun::Message
+class Request: public stun::Message
 {
+public:
 	net::Socket socket;
 	net::Address localAddress;
 	net::Address remoteAddr;
+	std::string hash; // for MessageIntegrity signing
 
 	Request(const net::Socket& socket, 
 			const stun::Message& message, 
@@ -138,15 +133,6 @@ struct Request: public stun::Message
 		socket(socket), 
 		localAddress(localAddress), 
 		remoteAddr(remoteAddr) {}
-
-	//Request(const Request& r) :
-	//	stun::Message(r), 
-	//	socket(r.socket), 
-	//	localAddress(r.localAddress), 
-	//	remoteAddr(r.remoteAddr) {}
-
-//private:
-	//Request& operator = (const Request&) {}
 };
 
 

@@ -41,13 +41,13 @@ TCPAllocation::TCPAllocation(Server& server, const net::Socket& control, const F
 	// The allocation will be deleted if the control connection is lost.
 	_control.Close += delegate(this, &TCPAllocation::onControlClosed);
 
-	log("trace") << "Initializing on " << _acceptor.address() << endl;
+	TraceL << "Initializing on " << _acceptor.address() << endl;
 }
 	
 
 TCPAllocation::~TCPAllocation() 
 {
-	log("trace") << "Destroy TCP allocation" << endl;	
+	TraceL << "Destroy TCP allocation" << endl;	
 	
 	//Mutex::ScopedLock lock(_mutex);
 	assert(_acceptor.base().refCount() == 1);
@@ -65,13 +65,13 @@ TCPAllocation::~TCPAllocation()
 	}
 	assert(this->pairs().empty());
 	
-	log("trace") << "Destroy TCP allocation: OK" << endl;	
+	TraceL << "Destroy TCP allocation: OK" << endl;	
 }
 
 
 void TCPAllocation::onPeerAccept(void* sender, const net::TCPSocket& socket)
 {
-	log("trace") << "Peer connection accepted: " << socket.peerAddress() << endl;
+	TraceL << "Peer connection accepted: " << socket.peerAddress() << endl;
 	
 	// 5.3. Receiving a TCP Connection on a Relayed Transport Address
 	// 
@@ -91,10 +91,10 @@ void TCPAllocation::onPeerAccept(void* sender, const net::TCPSocket& socket)
 	// immediately after it has been accepted.
 	// 
 	if (!hasPermission(socket.peerAddress().host())) {
-		log("trace") << "No permission for peer: " << socket.peerAddress() << endl;
+		TraceL << "No permission for peer: " << socket.peerAddress() << endl;
 		return;
 	}
-	log("trace") << "Has permission for: " << socket.peerAddress() << endl;
+	TraceL << "Has permission for: " << socket.peerAddress() << endl;
 
 	// Otherwise, the server sends a ConnectionAttempt indication to the
 	// client over the control connection. The indication MUST include an
@@ -124,13 +124,13 @@ void TCPAllocation::onPeerAccept(void* sender, const net::TCPSocket& socket)
   
 	sendToControl(response);
 	
-	log("trace") << "Peer connection accepted with ID: " << pair->connectionID << endl;
+	TraceL << "Peer connection accepted with ID: " << pair->connectionID << endl;
 }
 
 
 bool TCPAllocation::handleRequest(Request& request) 
 {	
-	log("trace") << "Handle request" << endl;	
+	TraceL << "Handle request" << endl;	
 
 	if (!ServerAllocation::handleRequest(request)) {
 		if (request.methodType() == stun::Message::Connect)
@@ -147,13 +147,13 @@ bool TCPAllocation::handleRequest(Request& request)
 
 bool TCPAllocation::onTimer() 
 {
-	log("trace") << "TCPAllocation: On timer" << endl;
+	TraceL << "TCPAllocation: On timer" << endl;
 	
 	// Clean up any expired Connect request peer connections.
 	auto pairs = this->pairs().map();	
 	for (auto it = pairs.begin(); it != pairs.end(); ++it) {
 		if (it->second->expired()) {			
-			log("trace") << "TCPAllocation: On timer: Removing expired peer" << endl;
+			TraceL << "TCPAllocation: On timer: Removing expired peer" << endl;
 			this->pairs().free(it->first);
 		}
 	}
@@ -164,7 +164,7 @@ bool TCPAllocation::onTimer()
 
 void TCPAllocation::handleConnectRequest(Request& request)
 {
-	log("trace") << "Handle Connect request" << endl;
+	TraceL << "Handle Connect request" << endl;
 
 	// 5.2. Receiving a Connect Request
 	// 
@@ -212,7 +212,7 @@ void TCPAllocation::handleConnectRequest(Request& request)
 
 void TCPAllocation::handleConnectionBindRequest(Request& request) 
 {
-	log("trace") << "Handle ConnectionBind Request" << endl;
+	TraceL << "Handle ConnectionBind Request" << endl;
 	
 	assert(request.methodType() == stun::Message::ConnectionBind);
 	TCPConnectionPair* pair = nullptr;
@@ -271,7 +271,7 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
 		assert(pair->isDataConnection);			
 	} 
 	catch (std::exception& exc) {
-		log("error") << "ConnectionBind error: " << exc.what() << endl;
+		ErrorL << "ConnectionBind error: " << exc.what() << endl;
 		server().respondError(request, 400, "Bad Request");
 		
 		if (pair && !pair->isDataConnection) {
@@ -286,7 +286,7 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
 
 void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair, bool success)
 {
-	log("trace") << "Send peer Connect response: " << success << endl;
+	TraceL << "Send peer Connect response: " << success << endl;
 	
 	assert(!pair->transactionID.empty());
 	
@@ -321,7 +321,7 @@ void TCPAllocation::sendPeerConnectResponse(TCPConnectionPair* pair, bool succes
 int TCPAllocation::sendToControl(stun::Message& message)
 {
 	//Mutex::ScopedLock lock(_mutex);
-	log("trace") << "Send to control: " << message << endl;
+	TraceL << "Send to control: " << message << endl;
 	return _control.send(message);
 }
 
@@ -329,7 +329,7 @@ int TCPAllocation::sendToControl(stun::Message& message)
 void TCPAllocation::onControlClosed(void* sender)
 {
 	//Mutex::ScopedLock lock(_mutex);
-	log("trace") << "Control socket disconnected" << endl;
+	TraceL << "Control socket disconnected" << endl;
 
 	// The allocation will be destroyed on the  
 	// next timer call to IAllocation::deleted()
@@ -380,7 +380,7 @@ net::Address TCPAllocation::relayedAddress() const
 
 	
 	/*
-			traceL() << "TCPAllocation: On timer: Removing expired peer" << endl;
+			TraceL << "TCPAllocation: On timer: Removing expired peer" << endl;
 
 	// Here we clean up expired peer connections, nothing else. 
 	// All other connection types are self maintaining.		
@@ -399,14 +399,14 @@ net::Address TCPAllocation::relayedAddress() const
 	/*
 	ClientConnectionMap clients = this->clients().map();
 	for (ClientConnectionMap::const_iterator it = clients.begin(); it != clients.end(); ++it) {
-		log("trace") << "Destroy: Closing Client: " << it->second << endl;	
+		TraceL << "Destroy: Closing Client: " << it->second << endl;	
 		it->second->close();
 	}
 	
 	//assert(peers().empty()); // should have been cleared when clients closed
 	PeerConnectionMap peers = this->peers().map();		
 	for (PeerConnectionMap::const_iterator it = peers.begin(); it != peers.end(); ++it) {
-		log("trace") << "Destroy: Closing Peer: " << it->second << endl;	
+		TraceL << "Destroy: Closing Peer: " << it->second << endl;	
 		it->second->close();
 	}
 	*/
@@ -415,7 +415,7 @@ net::Address TCPAllocation::relayedAddress() const
 	/*
 void TCPAllocation::onPeerConnectError(TCPConnectionPair* pair)  //, const std::string& error //void* sender, const Error& error
 {
-	log("trace") << "Peer Connect Error" << endl;
+	TraceL << "Peer Connect Error" << endl;
 	
 	assert(0 && "a");
 
@@ -521,7 +521,7 @@ void TCPAllocation::onPeerConnectError(TCPConnectionPair* pair)  //, const std::
 	for (PeerConnectionMap::iterator it = peers.begin(); it != peers.end(); ++it) {
 		if (it->second->expired()) {
 			assert(it->second->client() == nullptr);
-			log("trace") << "Closing Expired Peer Connection: " << it->second << endl;	
+			TraceL << "Closing Expired Peer Connection: " << it->second << endl;	
 			//it->second->Closed -= delegate(this, &TCPAllocation::onPeerDisconnected);
 			it->second->close();
 		}
@@ -542,7 +542,7 @@ void TCPAllocation::onPeerConnectError(TCPConnectionPair* pair)  //, const std::
 	for (TCPConnectionPairMap::iterator it = pairs.begin(); it != pairs.end(); ++it) {
 		if (it->second.expired()) {
 			//assert(it->second->client() == nullptr);
-			log("trace") << "Closing Expired Peer Connection: " << &it->second << endl;	
+			TraceL << "Closing Expired Peer Connection: " << &it->second << endl;	
 			it->second->Closed -= delegate(this, &TCPAllocation::onConnectionClosed);
 			//pairs
 			//it->second->close();
@@ -571,17 +571,17 @@ PeerConnectionManager& TCPAllocation::peers()
 /*
 void TCPAllocation::onPeerDisconnected(TCPPeerConnection* peer)
 {
-	log("trace") << "Peer Disconnected: " << peer << endl;
+	TraceL << "Peer Disconnected: " << peer << endl;
 	net::SocketBase* sock = reinterpret_cast<net::SocketBase*>(sender);
-	log("trace") << "Peer Disconnected 0: " << sock1 << endl;
-	log("trace") << "Peer Disconnected 01: " << sock1->error() << endl;
+	TraceL << "Peer Disconnected 0: " << sock1 << endl;
+	TraceL << "Peer Disconnected 01: " << sock1->error() << endl;
 
 	net::TCPSocket* sock = static_cast<net::TCPSocket*>(sender);
-	log("trace") << "Peer Disconnected: " << sock << endl;
-	log("trace") << "Peer Disconnected 1: " << sock->error() << endl;
+	TraceL << "Peer Disconnected: " << sock << endl;
+	TraceL << "Peer Disconnected 1: " << sock->error() << endl;
 
 	TCPPeerConnection* peer = static_cast<TCPPeerConnection*>(sender);
-	log("trace") << "#### Peer Disconnected: " << peer->error() << endl;
+	TraceL << "#### Peer Disconnected: " << peer->error() << endl;
 	
 	//delete peer;
 }
@@ -590,7 +590,7 @@ void TCPAllocation::onPeerDisconnected(TCPPeerConnection* peer)
 void TCPAllocation::onClientDisconnect(TCPClientConnection* client)
 {
 	//TCPClientConnection* client = reinterpret_cast<TCPClientConnection*>(sender);
-	log("trace") << "Client Disconnected: " << client << endl;	
+	TraceL << "Client Disconnected: " << client << endl;	
 
 	// Close the associated peer connection.
 	TCPPeerConnection* peer = client->peer();

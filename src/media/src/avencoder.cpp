@@ -56,7 +56,7 @@ AVEncoder::AVEncoder(const RecordingOptions& options) :
 	_ioBufferSize(MAX_VIDEO_PACKET_SIZE),
 	_videoPtsRemainder(0.0)
 {
-	traceL("AVEncoder", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 	initializeFFmpeg();
 }
 
@@ -71,14 +71,14 @@ AVEncoder::AVEncoder() :
 	_ioBufferSize(MAX_VIDEO_PACKET_SIZE),
 	_videoPtsRemainder(0.0)
 {
-	traceL("AVEncoder", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 	initializeFFmpeg();
 }
 
 
 AVEncoder::~AVEncoder()
 {
-	traceL("AVEncoder", this) << "Destroy" << endl;
+	TraceLS(this) << "Destroy" << endl;
 	uninitialize();
 	uninitializeFFmpeg();
 }
@@ -89,14 +89,14 @@ static int dispatchOutputPacket(void* opaque, UInt8* buffer, int bufferSize)
 	// Callback example at: http://lists.mplayerhq.hu/pipermail/libav-client/2009-May/003034.html
 	AVEncoder* klass = reinterpret_cast<AVEncoder*>(opaque);
 	if (klass) {
-		traceL("AVEncoder", klass) << "Dispatching packet: " << bufferSize << endl;	
+		TraceL << "Dispatching packet: " << bufferSize << endl;	
 		if (!klass->isActive()) {
-			warnL("AVEncoder", klass) << "Dropping packet: " << bufferSize << ": " << klass->state() << endl;	
+			WarnL << "Dropping packet: " << bufferSize << ": " << klass->state() << endl;	
 			return bufferSize;
 		}
 		MediaPacket packet((char*)buffer, bufferSize);
 		klass->emitter.emit(klass, packet);
-		traceL("AVEncoder", klass) << "Dispatching packet: OK: " << bufferSize << endl;
+		TraceL << "Dispatching packet: OK: " << bufferSize << endl;
 	}   
 
     return bufferSize;
@@ -107,7 +107,7 @@ void AVEncoder::initialize()
 {
 	assert(!isActive());
 
-	traceL("AVEncoder", this) << "Initialize:"
+	TraceLS(this) << "Initialize:"
 		<< "\n\tInput Format: " << _options.iformat.toString()
 		<< "\n\tOutput Format: " << _options.oformat.toString()
 		<< "\n\tDuration: " << _options.duration
@@ -216,38 +216,38 @@ void AVEncoder::initialize()
 		setState(this, EncoderState::Ready);
 	} 
 	catch (std::exception& exc) {
-		errorL("AVEncoder", this) << "Error: " << exc.what() << endl;		
+		ErrorLS(this) << "Error: " << exc.what() << endl;		
 		setState(this, EncoderState::Error, exc.what());
 		cleanup();
 		throw exc; //.rethrow()
 	}
 
-	traceL("AVEncoder", this) << "Initialize: OK" << endl;
+	TraceLS(this) << "Initialize: OK" << endl;
 }
 
 
 void AVEncoder::uninitialize()
 {
-	traceL("AVEncoder", this) << "Uninitialize" << endl;
+	TraceLS(this) << "Uninitialize" << endl;
 
  	// Write the trailer and dispatch the tail packet if any
 	if (_formatCtx &&
 		_formatCtx->pb) 
 		av_write_trailer(_formatCtx);
 
-	traceL("AVEncoder", this) << "Uninitializing: Wrote trailer" << endl;
+	TraceLS(this) << "Uninitializing: Wrote trailer" << endl;
 
 	// Free memory
 	cleanup();	
 	setState(this, EncoderState::Stopped);
 
-	traceL("AVEncoder", this) << "Uninitialize: OK" << endl;
+	TraceLS(this) << "Uninitialize: OK" << endl;
 }
 
 
 void AVEncoder::cleanup()
 {
-	traceL("AVEncoder", this) << "Cleanup" << endl;
+	TraceLS(this) << "Cleanup" << endl;
 
     // Delete stream encoders
 	freeVideo();
@@ -284,7 +284,7 @@ void AVEncoder::cleanup()
 		_ioBuffer = nullptr;
 	}
 
-	traceL("AVEncoder", this) << "Cleanup: OK" << endl;
+	TraceLS(this) << "Cleanup: OK" << endl;
 }
 
 
@@ -341,7 +341,7 @@ void AVEncoder::freeVideo()
 
 bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, int height, UInt64 /* time */)
 {
-	traceL("AVEncoder", this) << "Encoding video: " << bufferSize << endl;	
+	TraceLS(this) << "Encoding video: " << bufferSize << endl;	
 	
 	RecordingOptions* options = nullptr;		
 	AVFormatContext* formatCtx = nullptr;
@@ -374,7 +374,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 		options->iformat.video.height = height;
 		video->iparams.width = width;
 		video->iparams.height = height;
-		traceL("AVEncoder", this) << "Recreating video conversion context" << endl;
+		TraceLS(this) << "Recreating video conversion context" << endl;
 		video->freeConverter();
 		video->createConverter();
 	}
@@ -390,7 +390,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 		
  		// Encode the frame
 		if (!video->encode(buffer, bufferSize, /*calc ? calc->tick() : */AV_NOPTS_VALUE, opacket)) {
-			warnL("AVEncoder", this) << "Cannot encode video frame" << endl;
+			WarnL << "Cannot encode video frame" << endl;
 			return false;
 		}
 	}
@@ -408,7 +408,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 			double framePTS = delta * (double) _video->stream->time_base.den / (double) _video->stream->time_base.num / (double) 1000000;
 			double ptsWhole;
 			_videoPtsRemainder += modf(framePTS, &ptsWhole); // fixme
-			opacket.pts = ptsWhole;
+			opacket.pts = (Int64)ptsWhole;
 			opacket.dts = AV_NOPTS_VALUE; 
 			if (static_cast<int>(_videoPtsRemainder) > 1) {
 				_videoPtsRemainder--;
@@ -417,7 +417,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 		}		
 		
 		/*
-		traceL("AVEncoder", this) << "Writing video:" 
+		TraceLS(this) << "Writing video:" 
 			<< "\n\tPTS: " << opacket.pts
 			<< "\n\tDTS: " << opacket.dts
 			<< "\n\tFPS: " << video->fps.fps
@@ -429,7 +429,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 		// Write the encoded frame to the output file / stream.
 		assert(isActive());
 		if (av_interleaved_write_frame(formatCtx, &opacket) < 0) {
-			warnL("AVEncoder", this) << "Cannot write video frame" << endl;
+			WarnL << "Cannot write video frame" << endl;
 			return false;
 		}		
 	}
@@ -445,7 +445,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 
 void AVEncoder::createAudio()
 {
-	traceL("AVEncoder", this) << "Create Audio" << endl;
+	TraceLS(this) << "Create Audio" << endl;
 
 	//Mutex::ScopedLock lock(_mutex);	
 	assert(!_audio);
@@ -494,7 +494,7 @@ void AVEncoder::freeAudio()
 
 bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 /* time */)
 {
-	//traceL("AVEncoder", this) << "Encoding Audio Packet: " << bufferSize << endl;	
+	//TraceLS(this) << "Encoding Audio Packet: " << bufferSize << endl;	
 	assert(buffer);
 	assert(bufferSize);
 
@@ -539,7 +539,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 /* tim
 			opacket.pts = _videoPts; //AV_NOPTS_VALUE;
 			opacket.dts = AV_NOPTS_VALUE; 
 
-			traceL("AVEncoder", this) << "Writing Audio:" 
+			TraceLS(this) << "Writing Audio:" 
 				<< "\n\tPacket Size: " << opacket.size
 				<< "\n\tPTS: " << opacket.pts
 				<< "\n\tDTS: " << opacket.dts
@@ -550,7 +550,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 /* tim
 	 		// Write the encoded frame to the output file
 			assert(isActive());
 			if (av_interleaved_write_frame(formatCtx, &opacket) != 0) {
-				warnL("AVEncoder", this) << "Cannot write audio frame" << endl;
+				WarnL << "Cannot write audio frame" << endl;
 			}
 			else res = true;
 		} 
@@ -573,7 +573,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 /* tim
 	// video frame to be encoded before we start encoding audio
 	// otherwise we get errors for some codecs.
 	if (_video && _videoFPS.frames == 0) {
-		traceL("AVEncoder", this) << "Encoding Audio Packet: Dropping audio frames until we have video." << endl;
+		TraceLS(this) << "Encoding Audio Packet: Dropping audio frames until we have video." << endl;
 		return false;
 	}
 	*/
@@ -600,7 +600,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 /* tim
 		avcodec_get_frame_defaults(frame);
 		bytesDecoded = avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);		
 		if (bytesDecoded < 0) {
-			errorL() << "[AudioDecoderContext: " << this << "] Decoder Error" << endl;
+			ErrorL << "[AudioDecoderContext: " << this << "] Decoder Error" << endl;
 			error = "Decoder error";
 			throw std::runtime_error(error);
 		}
@@ -640,8 +640,8 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 /* tim
 		//AV_NOPTS_VALUE
 
 		//opacket.duration = 5; //frameDuration * 2; //_frameDuration ? (clock() - _frameDuration) : 1;
-		//traceL("AVEncoder", this) << "_videoTime: " << _videoTime << endl;
-		//traceL("AVEncoder", this) << "opacket.duration: " << opacket.duration << endl;
+		//TraceLS(this) << "_videoTime: " << _videoTime << endl;
+		//TraceLS(this) << "opacket.duration: " << opacket.duration << endl;
 		
 			
 		// PTS value will increment by 1 for input each frame at defined FPS value.
@@ -699,7 +699,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 /* tim
 		//double frameDuration = _videoTime ? ((clock() - _videoTime)) : 1;	// / CLOCKS_PER_SEC
 		//_videoPTS = _videoPTS + ((_video->ctx->time_base.den * 1.0) / frameDuration);
 		//_videoTime = clock();
-		//traceL("AVEncoder", this) << "### Frame Duration: " << frameDuration << endl;
+		//TraceLS(this) << "### Frame Duration: " << frameDuration << endl;
 		//_videoPTS + 
 		//_videoPTS = _videoPTS + frameDuration; //(frameDuration * ((_video->ctx->time_base.den * 1.0) / (_videoFPS.fps  * 1.0)));
 			//_video->stream->time_base.den / (1000000.0 * _video->stream->time_base.num));
@@ -712,8 +712,8 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 /* tim
 			//opacket.pts = _videoPTS;
 			//opacket.dts = _videoPTS;
 
-		//traceL("AVEncoder", this) << "_video->stream->start_time: " << _video->stream->start_time << endl;
-		//traceL("AVEncoder", this) << "opacket.pts: " << opacket.pts << endl;
+		//TraceLS(this) << "_video->stream->start_time: " << _video->stream->start_time << endl;
+		//TraceLS(this) << "opacket.pts: " << opacket.pts << endl;
        //fPacket.pts = int64_t((double)encodeInfo->start_time
        //        * fStream->time_base.den / (1000000.0 * fStream->time_base.num)
        //        + 0.5);
@@ -727,12 +727,12 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 /* tim
 		//fPacket.pts = (encodeInfo->start_time * fStream->time_base.den / fStream->time_base.num) / 1000000;
 
 		//opacket.pts /= 1000; //av_rescale_q(_videoPTS, _video->ctx->time_base, _video->stream->time_base); //_videoPTS; //av_rescale_q(_videoPTS, _video->ctx->time_base, _video->stream->time_base);
-		//traceL("AVEncoder", this) << "opacket.pts: " << opacket.pts << endl;
+		//TraceLS(this) << "opacket.pts: " << opacket.pts << endl;
 
 		//_videoTime = clock();	
 		//_frameDuration = clock();	
 		
-		//traceL() << "@@@@@@@@@@@@@@@@@@@@ [AVEncoder: " << this << "] Video PTS: " << opacket.pts++ << endl;
+		//TraceL << "@@@@@@@@@@@@@@@@@@@@ [AVEncoder: " << this << "] Video PTS: " << opacket.pts++ << endl;
 
 		/*
 		_videoPTS += _video->ctx->time_base.den / (_videoFPS.fps + 3);
@@ -840,7 +840,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 /* tim
 
 		/*
 		_videoFPS.tick();
-		traceL("AVEncoder", this) << "Writing Video Packet: " 
+		TraceLS(this) << "Writing Video Packet: " 
 			<< opacket.pts << ": " 
 			<< opacket.dts << ": " 
 			<< _video->pts << ": "

@@ -161,7 +161,7 @@ namespace internal {
 	int err = uv_fs_ ## func(uv_default_loop(),					\
 		&wrap.req, __VA_ARGS__, nullptr);						\
 	if (err < 0) 												\
-		uv::throwError(std::string("FileSystem error: ") +		\
+		uv::throwError(std::string("Filesystem error: ") +		\
 			#func + std::string(" failed"), err);				\
 	
 } // namespace internal

@@ -34,7 +34,7 @@ namespace scy {
 namespace turn {
 
 
-class IAllocation: public basic::Polymorphic
+class IAllocation//: public basic::Polymorphic
 	//  All TURN operations revolve around allocations, and all TURN messages
 	//  are associated with an allocation.  An allocation conceptually
 	//  consists of the following state data:
@@ -135,7 +135,7 @@ public:
 	
 	virtual void print(std::ostream& os) const 
 	{ 
-		os << className() << std::endl; 
+		os << "Allocation[" << relayedAddress() << "]" << std::endl; 
 	}
 		
     friend std::ostream& operator << (std::ostream& stream, const IAllocation& alloc) 
@@ -144,7 +144,7 @@ public:
 		return stream;
     }
 
-	virtual const char* className() const { return "IAllocation"; };
+	//virtual const char* className() const { return "IAllocation"; };
 
 protected:
 	FiveTuple _tuple;

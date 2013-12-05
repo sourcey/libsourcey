@@ -34,7 +34,7 @@ SyncPacketQueue::SyncPacketQueue(uv::Loop* loop, int maxSize) :
 	SyncQueue<IPacket>(loop, maxSize), 
 	PacketProcessor(this->emitter)
 {	
-	traceL("SyncPacketQueue", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 }
 
 
@@ -42,20 +42,20 @@ SyncPacketQueue::SyncPacketQueue(int maxSize) :
 	SyncQueue<IPacket>(uv::defaultLoop(), maxSize), 
 	PacketProcessor(this->emitter)
 {	
-	traceL("SyncPacketQueue", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 }
 	
 
 SyncPacketQueue::~SyncPacketQueue()
 {
-	traceL("SyncPacketQueue", this) << "Destroy" << endl;
+	TraceLS(this) << "Destroy" << endl;
 }
 
 
 void SyncPacketQueue::process(IPacket& packet)
 {
 	if (cancelled()) {
-		warnL("SyncPacketQueue", this) << "Process late packet" << endl;
+		WarnLS(this) << "Process late packet" << endl;
 		assert(0);
 		return;
 	}
@@ -70,7 +70,7 @@ void SyncPacketQueue::dispatch(IPacket& packet)
 	// Any late packets should have been dealt with  
 	// and dropped by the run() function.
 	if (cancelled()) {
-		warnL("SyncPacketQueue", this) << "Dispatch late packet" << endl;
+		WarnLS(this) << "Dispatch late packet" << endl;
 		assert(0);
 		return;
 	}
@@ -81,7 +81,7 @@ void SyncPacketQueue::dispatch(IPacket& packet)
 
 void SyncPacketQueue::onStreamStateChange(const PacketStreamState& state)
 {
-	traceL("SyncPacketQueue", this) << "Stream state: " << state << endl;
+	TraceLS(this) << "Stream state: " << state << endl;
 	
 	switch (state.id()) {
 	//case PacketStreamState::None:
@@ -106,20 +106,20 @@ AsyncPacketQueue::AsyncPacketQueue(int maxSize) :
 	AsyncQueue<IPacket>(maxSize), 
 	PacketProcessor(this->emitter)
 {	
-	traceL("AsyncPacketQueue", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 }
 	
 
 AsyncPacketQueue::~AsyncPacketQueue()
 {
-	traceL("AsyncPacketQueue", this) << "Destroy" << endl;
+	TraceLS(this) << "Destroy" << endl;
 }
 
 
 void AsyncPacketQueue::process(IPacket& packet)
 {
 	if (cancelled()) {
-		warnL("AsyncPacketQueue", this) << "Process late packet" << endl;
+		WarnLS(this) << "Process late packet" << endl;
 		assert(0);
 		return;
 	}
@@ -131,7 +131,7 @@ void AsyncPacketQueue::process(IPacket& packet)
 void AsyncPacketQueue::dispatch(IPacket& packet)
 {
 	if (cancelled()) {
-		warnL("AsyncPacketQueue", this) << "Dispatch late packet" << endl;
+		WarnLS(this) << "Dispatch late packet" << endl;
 		assert(0);
 		return;
 	}
@@ -142,7 +142,7 @@ void AsyncPacketQueue::dispatch(IPacket& packet)
 
 void AsyncPacketQueue::onStreamStateChange(const PacketStreamState& state)
 {
-	traceL("AsyncPacketQueue", this) << "Stream state: " << state << endl;
+	TraceLS(this) << "Stream state: " << state << endl;
 	
 	switch (state.id()) {
 	case PacketStreamState::Active:
@@ -177,13 +177,13 @@ PacketStream::PacketStream(const std::string& name) :
 	PacketStream(name)
 {
 	_queue = new SyncPacketQueue(*this);
-	traceL("PacketStream", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 }
 
 
 PacketStream::~PacketStream()
 {
-	traceL("PacketStream", this) << "Destroy" << endl;
+	TraceLS(this) << "Destroy" << endl;
 	{
 		Mutex::ScopedLock lock(_mutex);
 		if (_queue) {
@@ -191,13 +191,13 @@ PacketStream::~PacketStream()
 			_queue = nullptr;
 		}
 	}
-	traceL("PacketStream", this) << "Destroy: OK" << endl;
+	TraceLS(this) << "Destroy: OK" << endl;
 }
 
 
 void PacketStream::close()
 {
-	traceL("PacketStream", this) << "Closing" << endl;
+	TraceLS(this) << "Closing" << endl;
 	{
 		Mutex::ScopedLock lock(_mutex);
 		if (_queue) {
@@ -206,20 +206,20 @@ void PacketStream::close()
 		}
 	}
 	PacketStream::close();
-	traceL("PacketStream", this) << "Closing: OK" << endl;
+	TraceLS(this) << "Closing: OK" << endl;
 }
 
 
 void PacketStream::onFinalPacket(IPacket& packet)
 {
-	//traceL("PacketStream", this) << "On final packet: " << &packet << ": " << packet.className() << endl;
+	//TraceLS(this) << "On final packet: " << &packet << ": " << packet.className() << endl;
 	Mutex::ScopedLock lock(_mutex);
 
 	if (_queue) {
 		// Ensure the stream is running and enabled 
 		// before we dispatch the goods.
 		if (!running() || !enabled()) {
-			debugL("PacketStream", this) << "Dropping final packet: " 
+			DebugLS(this) << "Dropping final packet: " 
 				<< enabled() << ": " << state() << endl;	
 			return;
 		}
@@ -227,7 +227,7 @@ void PacketStream::onFinalPacket(IPacket& packet)
 	}
 	else {
 		//assert(0);
-		debugL("PacketStream", this) << "Dropping final packet: Invalid sync queue" << endl;	
+		DebugLS(this) << "Dropping final packet: Invalid sync queue" << endl;	
 	}
 }
 */

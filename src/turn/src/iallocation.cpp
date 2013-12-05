@@ -34,6 +34,9 @@ namespace scy {
 namespace turn {
 
 
+#define ENABLE_LOCAL_IPS 1
+
+
 IAllocation::IAllocation(const FiveTuple& tuple, 
 						 const std::string& username, 
 						 Int64 lifetime) : 
@@ -51,7 +54,7 @@ IAllocation::IAllocation(const FiveTuple& tuple,
 
 IAllocation::~IAllocation() 
 {
-	log("trace") << "Destroy" << endl;	
+	TraceL << "Destroy" << endl;	
 	_permissions.clear();
 }
 
@@ -59,7 +62,7 @@ IAllocation::~IAllocation()
 void IAllocation::updateUsage(Int64 numBytes)
 {
 	//Mutex::ScopedLock lock(_mutex);
-	log("trace") << "Update usage: " << _bandwidthUsed << ": " << numBytes << endl;	
+	TraceL << "Update usage: " << _bandwidthUsed << ": " << numBytes << endl;	
 	_updatedAt = time(0);
 	_bandwidthUsed += numBytes;
 }
@@ -92,7 +95,7 @@ void IAllocation::setLifetime(Int64 lifetime)
 	//Mutex::ScopedLock lock(_mutex);
 	_lifetime = lifetime;
 	_updatedAt = static_cast<Int64>(time(0));
-	log("trace") << "Updating Lifetime: " << _lifetime << endl;
+	TraceL << "Updating Lifetime: " << _lifetime << endl;
 }
 
 
@@ -133,7 +136,7 @@ FiveTuple& IAllocation::tuple()
 }
 
 
-string IAllocation::username() const 
+std::string IAllocation::username() const 
 { 
 	//Mutex::ScopedLock lock(_mutex);
 	return _username; 
@@ -159,23 +162,23 @@ void IAllocation::addPermission(const std::string& ip)
 	//Mutex::ScopedLock lock(_mutex);
 
 	// If the permission is already in the list then refresh it.
-	for (PermissionList::iterator it = _permissions.begin(); it != _permissions.end(); ++it) {
+	for (auto it = _permissions.begin(); it != _permissions.end(); ++it) {
 		if ((*it).ip == ip) {
-			log("trace") << "Refreshing permission: " << ip << endl;
+			TraceL << "Refreshing permission: " << ip << endl;
 			(*it).refresh();
 			return;
 		}
 	}
 
 	// Otherwise create it...
-	log("trace") << "Create permission: " << ip << endl;
+	TraceL << "Create permission: " << ip << endl;
 	_permissions.push_back(Permission(ip));
 }
 
 
 void IAllocation::addPermissions(const IPList& ips)
 {
-	for (IPList::const_iterator it = ips.begin(); it != ips.end(); ++it) {
+	for (auto it = ips.begin(); it != ips.end(); ++it) {
 		addPermission(*it);
 	}
 }
@@ -185,7 +188,7 @@ void IAllocation::removePermission(const std::string& ip)
 {
 	//Mutex::ScopedLock lock(_mutex);
 
-	for (PermissionList::iterator it = _permissions.begin(); it != _permissions.end();) {
+	for (auto it = _permissions.begin(); it != _permissions.end();) {
 		if ((*it).ip == ip) {
 			it = _permissions.erase(it);
 			return;
@@ -205,9 +208,9 @@ void IAllocation::removeAllPermissions()
 void IAllocation::removeExpiredPermissions() 
 {
 	//Mutex::ScopedLock lock(_mutex);
-	for (PermissionList::iterator it = _permissions.begin(); it != _permissions.end();) {
+	for (auto it = _permissions.begin(); it != _permissions.end();) {
 		if ((*it).timeout.expired()) {
-			log("info") << "Removing Expired Permission: " << (*it).ip << endl;
+			InfoL << "Removing Expired Permission: " << (*it).ip << endl;
 			it = _permissions.erase(it);
 		} else 
 			++it;
@@ -217,11 +220,19 @@ void IAllocation::removeExpiredPermissions()
 
 bool IAllocation::hasPermission(const std::string& peerIP) 
 {
-	for (PermissionList::iterator it = _permissions.begin(); it != _permissions.end(); ++it) {
+	for (auto it = _permissions.begin(); it != _permissions.end(); ++it) {
 		if (*it == peerIP)
 			return true;
 	}
-	log("trace") << "No permission for: " << peerIP << endl;
+
+#if ENABLE_LOCAL_IPS
+	if (peerIP.find("192.168.") == 0 || peerIP.find("127.") == 0) {
+		WarnL << "Granting permission for local IP without explicit permission: " << peerIP << endl;
+		return true;
+	}
+#endif
+
+	TraceL << "No permission for: " << peerIP << endl;
 	return false;
 }
 

@@ -57,6 +57,9 @@ public:
 	void setType(const std::string& type);
 	void setHost(const std::string& host);
 
+	//virtual void update(const json::Value& data, bool whiny = false);
+		// Updates the peer from the given data object.
+
 	virtual bool valid();	
 	
 	void print(std::ostream& os) const;
@@ -67,7 +70,7 @@ public:
 		return os;
 	}
 	
-	virtual const char* className() const { return "smpl::Peer"; }
+	//virtual const char* className() const { return "smpl::Peer"; }
 };
 
 

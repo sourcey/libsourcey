@@ -28,16 +28,6 @@ CMemLeakDetect memLeakDetect;
 */
 
 
-#define TEST_TCP 0 //1
-#define RAISE_LOCAL_SERVER 0
-
-#define TURN_SERVER_IP "122.201.111.134" //"58.7.41.244"  // "58.7.41.244" "127.0.0.1" "122.201.111.134" "74.207.248.97"
-#define TURN_SERVER_USERNAME "username"
-#define TURN_SERVER_PASSWORD "password"
-#define TURN_SERVER_REALM "sourcey.com"
-#define TURN_AUTHORIZE_PEER_IP "58.7.41.244" // for CreatePremission
-
-
 namespace scy {
 namespace turn {
 	
@@ -67,12 +57,12 @@ struct TestServer: public turn::ServerObserver
 
 	void onServerAllocationCreated(Server* server, IAllocation* alloc) 
 	{
-		debugL("TestServer", this) << "Allocation created" << endl;
+		DebugLS(this) << "Allocation created" << endl;
 	}
 
 	void onServerAllocationRemoved(Server* server, IAllocation* alloc)
 	{		
-		debugL("TestServer", this) << "Allocation removed" << endl;
+		DebugLS(this) << "Allocation removed" << endl;
 	}
 };
 
@@ -120,20 +110,27 @@ struct ClientTest
 	void run() 
 	{				
 		initiator->AllocationCreated += delegate(this, &ClientTest::onInitiatorAllocationCreated);
+
+		// TODO: Use STUN binding request to get IP
 		initiator->initiate(TURN_AUTHORIZE_PEER_IP);
 	}
 	
 	void onInitiatorAllocationCreated(void* sender) //, turn::Client& client
 	{
-		debugL("ClientTest") << "Initiator allocation created" << endl;
+		DebugL << "Initiator allocation created" << endl;
 
 		// Start the responder when the allocation is created
 		responder->start(initiator->client.relayedAddress());
+		
+#if !TEST_TCP
+		// Set the local responder address for UDP send indications
+		initiator->responderAddress = net::Address(TURN_AUTHORIZE_PEER_IP, responder->socket.address().port());
+#endif
 	}
 	
 	void onTestComplete(void* sender, bool success)
 	{
-		debugL("ClientTest") << "Test complete: " << success << endl;
+		DebugL << "Test complete: " << success << endl;
 		result = success ? Success : Failed;
 		//TestComplete.emit(this, result);
 	}
@@ -178,7 +175,7 @@ struct ClientTestRunner
 	
 	void onTestComplete(void* sender, bool result)
 	{
-		debugL() << "ClientTestRunner: TestComplete" << endl;
+		DebugL << "ClientTestRunner: TestComplete" << endl;
 
 		nComplete++;
 		if (result)
@@ -203,32 +200,32 @@ struct TestTCPClientObserver: public TCPClientObserver
 {
 	void onClientStateChange(turn::Client& client, turn::ClientState& state, const turn::ClientState&) 
 	{
-		debugL("TCPInitiator") << "State change: " << state.toString() << endl;
+		DebugLS(this) << "State change: " << state.toString() << endl;
 	}
 	
 	void onTimer(TCPClient& client)
 	{
-		debugL("TCPInitiator") << "onTimer" << endl;
+		DebugLS(this) << "onTimer" << endl;
 	}
 
 	void onRelayConnectionCreated(TCPClient& client, const net::Socket& socket, const net::Address& peerAddr) //UInt32 connectionID, 
 	{
-		debugL("TCPInitiator") << "Relay Connection Created: " << peerAddr << endl;
+		DebugLS(this) << "Relay Connection Created: " << peerAddr << endl;
 	}
 
 	void onRelayConnectionClosed(TCPClient& client, const net::SocketBase* socketBase, const net::Address& peerAddress) 
 	{
-		debugL("TCPInitiator") << "Connection Closed" << endl;
+		DebugLS(this) << "Connection Closed" << endl;
 	}
 
 	void onRelayConnectionDataReceived(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
 	{
-		debugL("TCPInitiator") << "Received Data: " << std::string(data, size) <<  ": " << peerAddr << endl;
+		DebugLS(this) << "Received Data: " << std::string(data, size) <<  ": " << peerAddr << endl;
 	}
 	
 	void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
 	{
-		debugL("TCPInitiator") << "Permissions Created" << endl;
+		DebugLS(this) << "Permissions Created" << endl;
 	}
 };
 
@@ -251,12 +248,12 @@ int main(int argc, char** argv)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 	Logger::instance().add(new ConsoleChannel("debug", LTrace));	
-	Logger::instance().setWriter(new AsyncLogWriter);	
+	//Logger::instance().setWriter(new AsyncLogWriter);	
 	{
 		Application app;
 		try	{
 #if RAISE_LOCAL_SERVER
-			debugL("Tests") << "Running Test Server" << endl;
+			DebugL << "Running Test Server" << endl;
 			turn::ServerOptions so;	
 			so.software                         = "Sourcey STUN/TURN Server [rfc5766]";
 			so.realm                            = "sourcey.com";
@@ -268,40 +265,39 @@ int main(int argc, char** argv)
 			so.listenAddr                       = net::Address("127.0.0.1", 3478);
 			so.enableUDP						= false;
 
-			debugL("Tests") << "Binding Test Server" << endl;
+			DebugL << "Binding Test Server" << endl;
 			turn::TestServer srv;
-			debugL("Tests") << "Binding Test Server: 1" << endl;
+			DebugL << "Binding Test Server: 1" << endl;
 			srv.run(so);
-			debugL("Tests") << "Binding Test Server: OK" << endl;
+			DebugL << "Binding Test Server: OK" << endl;
 #endif
 
 			//
 			// Initialize clients
 			{
-				debugL("Tests") << "Running Client Tests" << endl;	
+				DebugL << "Running Client Tests" << endl;	
 				turn::Client::Options co;
-				co.serverAddr = net::Address(TURN_SERVER_IP, 3478);
+				co.serverAddr = net::Address(TURN_SERVER_IP, TURN_SERVER_PORT);
 				co.username = TURN_SERVER_USERNAME;
 				co.password = TURN_SERVER_PASSWORD;
-				co.realm = TURN_SERVER_REALM;
 				co.lifetime  = 120 * 1000; // 1 minute
 				co.timeout = 10 * 1000;
 				co.timerInterval = 3 * 1000;	
 
 				turn::ClientTestRunner test;
 				test.run(co, 1, 10000);
-				debugL("Tests") << "Running Client Tests: OK" << endl;
+				DebugL << "Running Client Tests: OK" << endl;
 				app.waitForShutdown();
 				test.print(cout);
 			}
 		} 
 		catch (std::exception& exc) {
-			errorL("error") << "Error: " << exc.what() << endl;
+			ErrorL << "Error: " << exc.what() << endl;
 		}
 	
-		debugL("Tests") << "Finalizing" << endl;
+		DebugL << "Finalizing" << endl;
 		app.finalize();
-		debugL("Tests") << "Finalizing: OK" << endl;
+		DebugL << "Finalizing: OK" << endl;
 	}
 	scy::Logger::shutdown();
 	return 0;
@@ -372,7 +368,7 @@ int main(int argc, char** argv)
 	/*
 	void onTCPSocketCreated(void* sender, Net::TCPSocket& socket)
 	{
-		debugL() << "[TClientTest:" << this << "] onTCPSocketCreated" << endl;		
+		DebugL << "[TClientTest:" << this << "] onTCPSocketCreated" << endl;		
 		//socket->bindEvents();
 		socket->attach(packetDelegate<ClientTest, RawPacket>(this, &ClientTest::onPacketReceived));
 		//socket->unbindEvents();
@@ -395,20 +391,20 @@ int main(int argc, char** argv)
 		//socket1->bindEvents();
 		//socket->unbindEvents();
 
-		//debugL() << "[TClientTest:" << this << "] onTCPSocketCreated: " << impl->refCount() << endl;		
+		//DebugL << "[TClientTest:" << this << "] onTCPSocketCreated: " << impl->refCount() << endl;		
 	}
 
 	void onPacketReceived(void* sender, RawPacket& packet) 
 	{
-		debugL() << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA" << endl;	
-		debugL() << "[ClientTest:" << this << "] onPacketReceived: " << packet.size << endl;	
+		DebugL << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA" << endl;	
+		DebugL << "[ClientTest:" << this << "] onPacketReceived: " << packet.size << endl;	
 
 	}
 
 	void onPacketReceived1(void* sender, RawPacket& packet) 
 	{
-		debugL() << "WOOOOHOOOOOOOOOOOOOOOOOOOOOO" << endl;	
-		debugL() << "[ClientTest:" << this << "] onPacketReceived1: " << packet.size << endl;	
+		DebugL << "WOOOOHOOOOOOOOOOOOOOOOOOOOOO" << endl;	
+		DebugL << "[ClientTest:" << this << "] onPacketReceived1: " << packet.size << endl;	
 
 	}
 	*/
@@ -456,7 +452,7 @@ int main(int argc, char** argv)
 			socket.send(m, socket1.localAddr());
 		}
 		catch (Exception& e) {
-			debugL() << "[ClientTest:" << this << "] ERR: " << e.message() << endl;	
+			DebugL << "[ClientTest:" << this << "] ERR: " << e.message() << endl;	
 		}
 		
 		//util::pause();
@@ -476,12 +472,12 @@ int main(int argc, char** argv)
 			assert(false);
 		}
 
-		debugL() << "stun::Message: " << request.toString() << endl;
-		request.dump(debugL());
+		DebugL << "stun::Message: " << request.toString() << endl;
+		request.dump(DebugL);
 		//util::pause();
 
 		
-		debugL() << "TURN: TCPInitiator: " << peerAttr1->address() << endl;
+		DebugL << "TURN: TCPInitiator: " << peerAttr1->address() << endl;
 		
 		Runner& runner = Runner::getDefault();
 		TCPSocket socket;
@@ -498,7 +494,7 @@ int main(int argc, char** argv)
 	
 	void onSTUNMessageReceived(void* sender, stun::Message& message) 
 	{
-		debugL() << "[ClientTest:" << this << "] onPacketReceived: " << message.toString() << endl;	
+		DebugL << "[ClientTest:" << this << "] onPacketReceived: " << message.toString() << endl;	
 
 	}
 
@@ -512,8 +508,8 @@ protected:
 
 	void onAllocationCreated(const void* sender, stun::MessagePacket& packet) 
 	{
-		debugL() << "TURN: Allocation Created" << endl;
-		debugL() << "TURN: Peer connecting to relayed address: " << client->relayedAddr().toString() << endl;
+		DebugL << "TURN: Allocation Created" << endl;
+		DebugL << "TURN: Peer connecting to relayed address: " << client->relayedAddr().toString() << endl;
 
 		//vector<Net::IP> peerIPs;
 		//peerIPs.push_back(Net::IP("127.0.0.1"));
@@ -533,14 +529,14 @@ protected:
 
 
 	void onRelayConnectionDataReceived(const void* sender, scy::stun::BufferPacket& packet) {
-		debugL() << "################ TURN: Peer Received Data: " << std::string(packet.buffer.bytes(), packet.buffer.available()) << endl;
+		DebugL << "################ TURN: Peer Received Data: " << std::string(packet.buffer.bytes(), packet.buffer.available()) << endl;
 		//_peer->send("peer2client", 11, client->relayedAddr());
 		//_peer->send("peer2client", 11, packet.remoteAddr);
 	}
 
 
 	void onDataReceived(const void* sender, scy::stun::RawPacket& packet) {
-		debugL() << "TURN: Client Received Data: " << std::string(packet.data, packet.size) << endl;
+		DebugL << "TURN: Client Received Data: " << std::string(packet.data, packet.size) << endl;
 		//client->sendDataIndication("client2peer", 11, _peer->localAddr());
 		//client->sendDataIndication("client2peer", 11, packet.remoteAddr);
 	}
@@ -552,7 +548,7 @@ protected:
 
 	virtual void onAllocationCreated(turn::Client* client, turn::Client* allocation)
 	{
-		debugL() << "######TURN: Client Allocation Created: " << allocation << endl;
+		DebugL << "######TURN: Client Allocation Created: " << allocation << endl;
 
 		//vector<Net::IP> peerIPs;
 		//peerIPs.push_back(Net::IP("127.0.0.1"));
@@ -563,24 +559,24 @@ protected:
 
 	virtual void onAllocationRemoving(turn::Client* client, turn::Client* allocation)
 	{
-		debugL() << "######TURN: Client Allocation Deleted: " << allocation << endl;
+		DebugL << "######TURN: Client Allocation Deleted: " << allocation << endl;
 	}
 
 
 	virtual void onPermissionsCreated(turn::Client* client, turn::Client* allocation)
 	{
-		debugL() << "######TURN: Client Permissions Created: " << allocation << endl;
+		DebugL << "######TURN: Client Permissions Created: " << allocation << endl;
 	}
 
 
 	virtual void onDataReceived(turn::Client* client, const char* data, int size)
 	{
-		debugL() << "######TURN: Client Received Data: " << std::string(data, size) << endl;
+		DebugL << "######TURN: Client Received Data: " << std::string(data, size) << endl;
 	}
 	
 	virtual void onAllocationFailed(Client* client, int errorCode)
 	{		
-		debugL() << "######TURN: Allocation Failed: " << errorCode << endl;
+		DebugL << "######TURN: Allocation Failed: " << errorCode << endl;
 	}
 	
 
@@ -605,7 +601,7 @@ private:
 		/*
 		static_cast<Net::TCPSocket&>(socket1).connect(net::Address("127.0.0.1", 4001));		
 		for (unsigned i = 0; i < 100; i++) {
-			debugL() << "TURN: TCPInitiator sendddddddddddd" << endl;
+			DebugL << "TURN: TCPInitiator sendddddddddddd" << endl;
 			stun::Message m;
 			//socket.send(m, socket1.localAddr());
 			socket1.send(m, net::Address("127.0.0.1", 4001));

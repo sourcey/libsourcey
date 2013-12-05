@@ -293,7 +293,7 @@ Address& Address::operator = (const Address& addr)
 
 void Address::init(const std::string& host, UInt16 port)
 {
-	//traceL("Address", this) << "Parse: " << host << ":" << port << endl;
+	//TraceLS(this) << "Parse: " << host << ":" << port << endl;
 
 	char ia[sizeof(struct in6_addr)];
 	if (uv_inet_pton(AF_INET, host.c_str(), &ia) == 0)

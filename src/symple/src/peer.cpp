@@ -72,12 +72,7 @@ bool Peer::valid()
 
 Address Peer::address() const 
 {
-	Address a;
-	a.setID(id());
-	a.setUser(user());
-	a.setName(name());
-	a.setGroup(group());
-	return a;
+	return Address(user(), group(), id());
 }
 
 

@@ -411,16 +411,16 @@ std::string LocalPackage::sdkLockedVersion() const
 
 bool LocalPackage::verifyInstallManifest(bool allowEmpty)
 {	
-	debugL("LocalPackage", this) << name() << ": Verifying install manifest" << std::endl;
+	DebugLS(this) << name() << ": Verifying install manifest" << std::endl;
 
 	// Check file system for each manifest file
 	LocalPackage::Manifest manifest = this->manifest();
 	for (auto it = manifest.root.begin(); it != manifest.root.end(); it++) {		
 		std::string path = this->getInstalledFilePath((*it).asString(), false);
-		debugL("LocalPackage", this) << name() << ": Checking exists: " << path << std::endl;
+		DebugLS(this) << name() << ": Checking exists: " << path << std::endl;
 		
 		if (!fs::exists(fs::normalize(path))) {
-			errorL("PackageManager", this) << name() << ": Missing file: " << path << std::endl;
+			ErrorLS(this) << name() << ": Missing file: " << path << std::endl;
 			return false;
 		}
 	}

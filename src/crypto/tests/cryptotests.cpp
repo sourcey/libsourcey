@@ -61,12 +61,12 @@ public:
 		char encBuf[2048];
 		size_t len = enc.encode(in.c_str(), in.length(), encBuf);
 		std::string encRes(encBuf, len);
-		debugL("HexTest") << "Encoded: " << encRes << endl;
+		DebugL << "Encoded: " << encRes << endl;
 		
 		char decBuf[2048];
 		len = dec.decode(encBuf, len, decBuf);
 		std::string decRes(decBuf, len);
-		debugL("HexTest") << "Decoded: " << decRes << endl;
+		DebugL << "Decoded: " << decRes << endl;
 
 		assert(in == decRes);
 	}
@@ -83,7 +83,7 @@ public:
 				std::string result = ciph.decryptString(out, Cipher::Binary);
 				assert(in == result);
 			}
-			debugL("CipherTest") << "Binary: " << (clock() - start) << endl;
+			DebugL << "Binary: " << (clock() - start) << endl;
 		}
 	
 		{
@@ -96,7 +96,7 @@ public:
 				std::string result = ciph.decryptString(out, Cipher::Base64);
 				assert(in == result);
 			}	
-			debugL("CipherTest") << "Base64: " << (clock() - start) << endl;	
+			DebugL << "Base64: " << (clock() - start) << endl;	
 		}
 
 		{
@@ -109,7 +109,7 @@ public:
 				std::string result = ciph.decryptString(out, Cipher::BinHex);
 				assert(in == result);
 			}		
-			debugL("CipherTest") << "BinHex: " << (clock() - start) << endl;
+			DebugL << "BinHex: " << (clock() - start) << endl;
 		}
 		
 		{

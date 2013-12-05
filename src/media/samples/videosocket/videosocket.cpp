@@ -43,7 +43,7 @@ public:
 	MPEGResponder(http::ServerConnection& conn) : 
 		http::ServerResponder(conn)
 	{
-		debugL("MPEGResponder") << "Creating" << endl;
+		DebugL << "Creating" << endl;
 
 		// We will be sending our own headers
 		conn.shouldSendHeader(false);
@@ -74,21 +74,21 @@ public:
 
 	~MPEGResponder()
 	{
-		debugL("MPEGResponder") << "Destroying" << endl;
+		DebugL << "Destroying" << endl;
 		//stream->destroy();
 		delete stream;
 	}
 
 	void onPayload(const Buffer& body)
 	{
-		debugL("MPEGResponder") << "On recv payload: " << body.size() << endl;
+		DebugL << "On recv payload: " << body.size() << endl;
 
 		// do something with data from peer
 	}
 
 	void onClose()
 	{
-		debugL("MPEGResponder") << "On close" << endl;
+		DebugL << "On close" << endl;
 			
 		stream->Emitter += packetDelegate(this, &MPEGResponder::onVideoEncoded);
 		stream->stop();
@@ -96,7 +96,7 @@ public:
 
 	void onVideoEncoded(void* sender, RawPacket& packet)
 	{
-		traceL("MPEGResponder") << "Sending packet: "
+		TraceL << "Sending packet: "
 			<< packet.size() << ": " << fpsCounter.fps << endl;
 
 		try {		
@@ -104,7 +104,7 @@ public:
 			fpsCounter.tick();		
 		}
 		catch (std::exception/*Exception*/& exc) {
-			errorL("MPEGResponder") << "Error: " << std::string(exc.what())/*message()*/ << endl;
+			ErrorL << "Error: " << std::string(exc.what())/*message()*/ << endl;
 			connection().close();
 		}
 	}

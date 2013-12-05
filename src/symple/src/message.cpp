@@ -108,7 +108,8 @@ bool Message::valid() const
 {
 	return isMember("type") 
 		&& isMember("id") 
-		&& isMember("from");
+		&& isMember("from") 
+		&& (*this)["from"].isString();
 }
 
 
@@ -144,14 +145,13 @@ std::string Message::id() const
 
 Address Message::to() const 
 {
-	//return Address(get("to", ""));
-	return Address((*this)["to"]); //get("from", ""));
+	return Address(get("to", "").asString());
 }
 
 
 Address Message::from() const 
 {
-	return Address((*this)["from"]); //get("from", ""));
+	return Address(get("from", "").asString());
 }
 
 
@@ -189,34 +189,42 @@ void Message::setType(const std::string& type)
 {
 	(*this)["type"] = type;
 }
+	
+	
+void Message::setTo(const Peer& to) 
+{
+	(*this)["to"] = to.address().toString();
+}
 
 	
 void Message::setTo(const Address& to) 
 {
-	(*this)["to"] = to; //.toString();
+	(*this)["to"] = to.toString();
 }
 	
 
-/*
 void Message::setTo(const std::string& to) 
 {
 	(*this)["to"] = to;
 }
-*/
+
+		
+void Message::setFrom(const Peer& from) 
+{
+	(*this)["from"] = from.address().toString();
+}
 
 
 void Message::setFrom(const Address& from) 
 {
-	(*this)["from"] = from; //.toString();
+	(*this)["from"] = from.toString();
 }
 
 
-/*
 void Message::setFrom(const std::string& from) 
 {
 	(*this)["from"] = from;
 }
-*/
 
 
 void Message::setStatus(int code) 

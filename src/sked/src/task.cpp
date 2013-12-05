@@ -44,7 +44,7 @@ Task::Task(const std::string& type, const std::string& name) :
 	_scheduler(nullptr),
 	_trigger(nullptr)
 {
-	traceL() << "Create" << endl;
+	TraceL << "Create" << endl;
 }
 
 	
@@ -56,13 +56,13 @@ Task::Task(sked::Scheduler& scheduler, const std::string& type, const std::strin
 	_scheduler(&scheduler),
 	_trigger(nullptr)
 {
-	traceL() << "Create" << endl;
+	TraceL << "Create" << endl;
 }
 
 
 Task::~Task()
 {
-	traceL() << "Destroy" << endl;
+	TraceL << "Destroy" << endl;
 }
 
 
@@ -77,7 +77,7 @@ void Task::start()
 
 void Task::serialize(json::Value& root)
 {
-	traceL() << "Serializing" << endl;	
+	TraceL << "Serializing" << endl;	
 	
 	Mutex::ScopedLock lock(_mutex);
 	
@@ -89,7 +89,7 @@ void Task::serialize(json::Value& root)
 
 void Task::deserialize(json::Value& root)
 {
-	traceL() << "Deserializing" << endl;
+	TraceL << "Deserializing" << endl;
 	
 	Mutex::ScopedLock lock(_mutex);	
 	
@@ -241,9 +241,9 @@ DateTime Task::time() const
     //DateTime now;
     //Timespan s = now += time;
     //Timespan s = time - now;	
-	//traceL() << "[Task: " << this << "] Time Now: " << DateTimeFormatter::format(now, DateTimeFormat::ISO8601_FORMAT) << endl;
-	//traceL() << "[Task: " << this << "] Time Trigger: " << DateTimeFormatter::format(time, DateTimeFormat::ISO8601_FORMAT) << endl;
-	//traceL() << "[Task: " << this << "] Timeout in " << (diff / 1000) << endl;
+	//TraceL << "[Task: " << this << "] Time Now: " << DateTimeFormatter::format(now, DateTimeFormat::ISO8601_FORMAT) << endl;
+	//TraceL << "[Task: " << this << "] Time Trigger: " << DateTimeFormatter::format(time, DateTimeFormat::ISO8601_FORMAT) << endl;
+	//TraceL << "[Task: " << this << "] Timeout in " << (diff / 1000) << endl;
 	//start();
 
     //DateTime now;
@@ -294,7 +294,7 @@ void Task::schedule(const std::string& time, const std::string& fmt)
 /*
 void Task::serialize(json::Value& root)
 {
-	traceL() << "Serializing" << endl;	
+	TraceL << "Serializing" << endl;	
 	
 	root["time"] = DateTimeFormatter::format(time(), 
 		DateTimeFormat::ISO8601_FORMAT);
@@ -303,7 +303,7 @@ void Task::serialize(json::Value& root)
 
 void Task::deserialize(json::Value& root)
 {
-	traceL() << "Deserializing" << endl;
+	TraceL << "Deserializing" << endl;
 
 	if (!root.isMember("time"))
 		throw std::runtime_error("A time member is required.");

@@ -158,7 +158,7 @@ string getPublicIPAddress(bool whiny)
 		}
 		catch (std::exception&/Exception& exc)
 		{
-			errorL() << exc.what()/message()/ << endl;
+			ErrorL << exc.what()/message()/ << endl;
 		}
 	}
 

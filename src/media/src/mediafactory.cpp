@@ -78,7 +78,7 @@ FormatRegistry& MediaFactory::formats()
 
 void MediaFactory::loadVideo()
 {
-	debugL("MediaFactory") << "Loading video captures" << endl;
+	DebugL << "Loading video captures" << endl;
 	
 	// Depreciated code used to preload captures on application load.
 	Mutex::ScopedLock lock(_mutex);
@@ -90,14 +90,14 @@ void MediaFactory::loadVideo()
 	_devices->getVideoCaptureDevices(devs);
 	for (size_t i = 0; i < devs.size(); ++i) {
 		try {
-			traceL("MediaFactory") << "Loading video: " << devs[0].id << endl;
+			TraceL << "Loading video: " << devs[0].id << endl;
 
 			// TODO: Receive callback on capture error or closure.
 			//VideoCaptureBase* base = std::make_shared<VideoCaptureBase>(devs[0].id); 
 			_videoBases[devs[0].id] = std::make_shared<VideoCaptureBase>(devs[0].id);
 		} 
 		catch (std::exception& exc) {
-			errorL("MediaFactory") << "Cannot load video capture: "
+			ErrorL << "Cannot load video capture: "
 				<< devs[0].id << ": " << exc.what() << endl;
 		}
 	}
@@ -108,7 +108,7 @@ void MediaFactory::unloadVideo()
 {
 	//for (auto it = _videoBases.begin(); it != _videoBases.end(); ++it) {
 		//if (it->second->refCount() > 1) {
-		//	warnL("MediaFactory") << "Cannot unload referenced video capture object: "
+		//	WarnL << "Cannot unload referenced video capture object: "
 		//		<< it->second << ": " << it->second->refCount() << endl;
 		//}
 		//it->second->release();
@@ -119,7 +119,7 @@ void MediaFactory::unloadVideo()
 
 std::shared_ptr<VideoCaptureBase> MediaFactory::getVideoCaptureBase(int deviceId) 
 {
-	//traceL("MediaFactory") << "Get video capture base: " << deviceId << endl;
+	//TraceL << "Get video capture base: " << deviceId << endl;
 	//std::make_shared<VideoCaptureBase> base;
 	auto it = _videoBases.find(deviceId);
 	if (it != _videoBases.end())
@@ -134,14 +134,14 @@ std::shared_ptr<VideoCaptureBase> MediaFactory::getVideoCaptureBase(int deviceId
 
 VideoCapture* MediaFactory::createVideoCapture(int deviceId) //, unsigned flags
 {
-	//traceL("MediaFactory") << "Get video capture: " << deviceId << endl;
+	//TraceL << "Get video capture: " << deviceId << endl;
 	return new VideoCapture(getVideoCaptureBase(deviceId));
 }
 
 
 VideoCapture* MediaFactory::createFileCapture(const std::string& file)
 {
-	traceL("MediaFactory") << "Get video capture: " << file << endl;
+	TraceL << "Get video capture: " << file << endl;
 	
 	// TODO: unique_ptr for exception safe instantiation
 	VideoCapture* capture = new VideoCapture(file);
@@ -151,7 +151,7 @@ VideoCapture* MediaFactory::createFileCapture(const std::string& file)
 
 AudioCapture* MediaFactory::createAudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format)
 {
-	traceL("MediaFactory") << "Create audio capture: " << deviceId << endl;
+	TraceL << "Create audio capture: " << deviceId << endl;
 	if (deviceId < 0)
 		throw std::runtime_error("Invalid audio device ID");
 

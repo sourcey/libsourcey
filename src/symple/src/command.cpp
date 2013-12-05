@@ -92,8 +92,8 @@ void Command::setAction(const std::string& action)
 std::string Command::param(int n) const 
 {
 	std::vector<std::string> params = util::split(node(), ':');
-	assert(params.size() >= n);
-	if (params.size() < n)
+	assert(int(params.size()) >= n);
+	if (int(params.size()) < n)
 		return "";
 	return params[n-1].c_str();
 }
@@ -101,8 +101,7 @@ std::string Command::param(int n) const
 
 std::vector<std::string> Command::params() 
 {
-	std::vector<std::string> params = util::split(node(), ':');
-	return params;
+	return util::split(node(), ':');
 }
 
 

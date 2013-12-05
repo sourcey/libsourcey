@@ -116,7 +116,7 @@ bool StateSignal::canChange(State::ID id)
 void StateSignal::onChange(ID id, ID prev) 
 {
 	// Can be overridden
-	Change.emit(this, id, prev);
+	//Change.emit(this, id, prev);
 }
 
 

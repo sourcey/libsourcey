@@ -6,3 +6,4 @@ Remove PacketStreamBase and use std::shared_ptr (wait for thread in destructor)
 Use lowercase filenames and directories
 Replace zlib with libarchive for better Pacman archive support
 CMake should pre-build dependencies automatically
+Stateful classes should use atomic 32

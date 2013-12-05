@@ -24,7 +24,7 @@
 #include "scy/logger.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -62,10 +62,6 @@ Socket::Socket(const Socket& socket) : //, SocketAdapter* adapter
 	_adapter(nullptr)//, 
 	//_adapter(adapter)
 {	
-	//if (!_adapter) 
-	//	_adapter = new SocketAdapter(this);	
-	//if (!_adapter->socket) 
-	//	_adapter->socket = this;	
 	if (_base) {
 		_base->addObserver(this, true);
 	}
@@ -130,12 +126,8 @@ void Socket::bind(const Address& address)
 
 int Socket::send(const char* data, int len, int flags)
 {
-	/*
-	if (Sender.numProcessors() > 0) {
-		Sender.write(RawPacket(data, len));
-		return len;
-	}
-	*/
+	TraceLS(this) << "Send: " << len << endl;
+
 	if (_adapter) {
 		assert(_adapter->socket == this);
 		return _adapter->send(data, len, flags);
@@ -146,13 +138,8 @@ int Socket::send(const char* data, int len, int flags)
 
 int Socket::send(const char* data, int len, const Address& peerAddress, int flags)
 {
-	traceL("Socket", this) << "Send: " << len << std::endl;
+	TraceLS(this) << "Send to peer: " << peerAddress << ": " << len << endl;
 
-	// TODO: Make SocketPacket for address
-	//if (Sender.numProcessors() > 0) {
-	//	Sender.write(RawPacket(data, len));
-	//	return len;
-	//}
 	if (_adapter) {
 		assert(_adapter->socket == this);
 		return _adapter->send(data, len, peerAddress, flags);
@@ -162,24 +149,33 @@ int Socket::send(const char* data, int len, const Address& peerAddress, int flag
 
 
 int Socket::send(const IPacket& packet, int flags)
-{
-	return send(packet, peerAddress(), flags);
+{	
+	// Try to cast as RawPacket so we can send without copying any data.
+	auto raw = dynamic_cast<const RawPacket*>(&packet);
+	if (raw)
+		return send((const char*)raw->data(), raw->size(), flags);
+	
+	// Dynamically generated packets need to be written to a
+	// temp buffer for sending. 
+	else {
+		Buffer buf;
+		packet.write(buf);
+		return send(buf.data(), buf.size(), flags);
+	}
 }
 
 
 int Socket::send(const IPacket& packet, const Address& peerAddress, int flags)
 {	
-	// Try to cast as RawPacket so as to avoid copying anything.
-	// All large packet types, such as video and audio inherit 
-	// from RawPacket for this reason.
-	auto rawPacket = dynamic_cast<const RawPacket*>(&packet);
-	if (rawPacket)
-		return send((const char*)rawPacket->data(), rawPacket->size(), peerAddress, flags);
+	// Try to cast as RawPacket so we can send without copying any data.
+	auto raw = dynamic_cast<const RawPacket*>(&packet);
+	if (raw)
+		return send((const char*)raw->data(), raw->size(), peerAddress, flags);
 	
-	// Other smaller dynamically generated packets need
-	// to be written to a temp buffer for sending. 
+	// Dynamically generated packets need to be written to a
+	// temp buffer for sending. 
 	else {
-		Buffer buf; //(1024);
+		Buffer buf; //(2048);
 		//buf.reserve(2048);
 		packet.write(buf);
 		return send(buf.data(), buf.size(), peerAddress, flags);
@@ -233,7 +229,7 @@ void Socket::connect(const std::string& host, UInt16 port)
 
 void Socket::onSocketConnect()
 {
-	//traceL("SocketAdapter", this) << "On connect: " << socket->Connect.refCount() << endl;	
+	//TraceLS(this) << "On connect: " << socket->Connect.refCount() << endl;	
 	if (_adapter) {
 		_adapter->onSocketConnect();
 	}
@@ -245,7 +241,7 @@ void Socket::onSocketConnect()
 
 void Socket::onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
 {
-	//traceL("SocketAdapter", this) << "Recv: " << socket->Recv.refCount() << endl;	
+	//TraceLS(this) << "On recv: " << buf.size() << endl;	
 	if (_adapter) {
 		_adapter->onSocketRecv(buf, peerAddr);
 	}
@@ -256,9 +252,9 @@ void Socket::onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
 }
 
 
-void Socket::onSocketError(const scy::Error& error) //const Error& error
+void Socket::onSocketError(const scy::Error& error)
 {
-	traceL("SocketAdapter", this) << "Error: " << Error.refCount() << endl;
+	//TraceLS(this) << "On error: " << error.message << endl;
 	if (_adapter) {
 		_adapter->onSocketError(error);
 	}
@@ -270,7 +266,7 @@ void Socket::onSocketError(const scy::Error& error) //const Error& error
 
 void Socket::onSocketClose()
 {
-	traceL("SocketAdapter", this) << "On close: " << Close.refCount() << endl;	
+	//TraceLS(this) << "On close" << endl;	
 	if (_adapter) {
 		_adapter->onSocketClose();
 	}
@@ -346,26 +342,26 @@ bool SocketAdapter::compareProiroty(const SocketAdapter* l, const SocketAdapter*
 SocketAdapter::SocketAdapter(Socket* socket) : //, int priority
 	socket(socket)//, priority(priority)
 {
-	//traceL("SocketAdapter", this) << "Create" << endl;	
+	//TraceLS(this) << "Create" << endl;	
 }
 	
 
 SocketAdapter::~SocketAdapter()
 {
-	//traceL("SocketAdapter", this) << "Destroy" << endl;	
+	//TraceLS(this) << "Destroy" << endl;	
 }
 
 
 void SocketAdapter::onSocketConnect()
 {
-	//traceL("SocketAdapter", this) << "On connect: " << socket->Connect.refCount() << endl;	
+	//TraceLS(this) << "On connect: " << socket->Connect.refCount() << endl;	
 	socket->Connect.emit(socket);
 }
 
 
 void SocketAdapter::onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
 {
-	//traceL("SocketAdapter", this) << "Recv: " << socket->Recv.refCount() << endl;	
+	//TraceLS(this) << "Recv: " << socket->Recv.refCount() << endl;	
 	SocketPacket packet(socket, buf, peerAddr);
 	socket->Recv.emit(socket, packet);
 }
@@ -373,18 +369,18 @@ void SocketAdapter::onSocketRecv(const MutableBuffer& buf, const Address& peerAd
 
 void SocketAdapter::onSocketError(const Error& error) //const Error& error
 {
-	//traceL("SocketAdapter", this) << "Error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
+	//TraceLS(this) << "Error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
 	socket->Error.emit(socket, error);
 }
 
 
 void SocketAdapter::onSocketClose()
 {
-	//traceL("SocketAdapter", this) << "On close: " << socket->Close.refCount() << endl;	
+	//TraceLS(this) << "On close: " << socket->Close.refCount() << endl;	
 	socket->Close.emit(socket);
 }
 
-		
+	
 int SocketAdapter::send(const char* data, int len, int flags)
 {
 	return socket->base().send(data, len, flags);
@@ -406,13 +402,13 @@ SocketBase::SocketBase() :
 	SharedObject(true), //new DeferredDeleter<SocketBase>()),
 	_insideCallback(false)
 {
-	//traceL("SocketAdapter", this) << "Create" << endl;	
+	//TraceLS(this) << "Create" << endl;	
 }
 
 
 SocketBase::~SocketBase()
 {
-	//traceL("SocketAdapter", this) << "Destroy" << endl;	
+	//TraceLS(this) << "Destroy" << endl;	
 
 	// The destructor never be called from inside a callback.
 	// Deferred destruction ensures this never occurs.
@@ -422,12 +418,12 @@ SocketBase::~SocketBase()
 
 void SocketBase::addObserver(Socket* socket, bool shared) 
 {
-	//traceL("SocketBase", this) << "Duplicating socket: " << &adapter << endl;
+	//TraceLS(this) << "Duplicating socket: " << &adapter << endl;
 	_observers.push_back(socket);		
 	//sortObservers();
 	if (shared)
 		duplicate();
-	//traceL("SocketBase", this) << "Duplicated socket: " << &adapter << endl;
+	//TraceLS(this) << "Duplicated socket: " << &adapter << endl;
 }
 
 
@@ -436,7 +432,7 @@ void SocketBase::removeObserver(Socket* socket)
 	// TODO: Ensure socket destruction when released?
 	for (auto it = _observers.begin(); it != _observers.end(); ++it) {
 		if (*it == socket) {
-			//traceL("SocketBase", this) << "Releasing socket: " << &adapter << endl;
+			//TraceLS(this) << "Releasing socket: " << &adapter << endl;
 			_observers.erase(it);
 			//sortObservers();
 			release();
@@ -449,7 +445,7 @@ void SocketBase::removeObserver(Socket* socket)
 	
 void SocketBase::connect(const std::string& host, UInt16 port) 
 {
-	traceL("SocketBase", this) << "Connect to host: " << host << ":" << port << endl;
+	TraceLS(this) << "Connect to host: " << host << ":" << port << endl;
 	if (Address::validateIP(host))
 		connect(Address(host, port));
 	else {
@@ -458,11 +454,11 @@ void SocketBase::connect(const std::string& host, UInt16 port)
 		net::resolveDNS(host, port, [](const net::DNSResult& dns) 
 		{	
 			auto* sock = reinterpret_cast<SocketBase*>(dns.opaque);
-			traceL("SocketBase", sock) << "DNS resolved: " << dns.success() << endl;
+			TraceL << "DNS resolved: " << dns.success() << endl;
 
 			// Return if the socket was closed while resolving
 			if (sock->closed()) {			
-				warnL("SocketBase", sock) << "DNS resolved but socket closed" << endl;
+				WarnL << "DNS resolved but socket closed" << endl;
 				return;
 			}
 
@@ -540,7 +536,7 @@ void SocketBase::swapObserver(SocketAdapter* a, SocketAdapter* b)
 	for (std::vector<Socket*>::iterator it = _observers.begin(); it != _observers.end(); ++it) {
 		if ((*it) == a) {
 			*it = b;
-			traceL("SocketBase", this) << "swapAdapter: " << a << ": " << b << endl;
+			TraceLS(this) << "swapAdapter: " << a << ": " << b << endl;
 			return;
 		}
 	}
@@ -570,7 +566,7 @@ bool SocketBase::connected() const
 /*
 void SocketBase::setError(const Error& err) 
 { 
-	traceL("SocketBase", this) << "Set error: " << err.message << endl;	
+	TraceLS(this) << "Set error: " << err.message << endl;	
 	_error = err;
 }
 */
@@ -618,13 +614,13 @@ int base().refCount() const
 SocketAdapter::SocketAdapter(int priority) : 
 	priority(priority)
 {
-	//traceL("SocketAdapter", this) << "Create" << endl;	
+	//TraceLS(this) << "Create" << endl;	
 }
 	
 
 SocketAdapter::~SocketAdapter()
 {
-	//traceL("SocketAdapter", this) << "Destroy" << endl;	
+	//TraceLS(this) << "Destroy" << endl;	
 }
 */
 
@@ -721,7 +717,7 @@ void Stream::onClose()
 	//_stream->data = this;
 
 	// TODO: Close if needed.	
-	//traceL("Stream", this) << "Destroy: Send Close" << endl;
+	//TraceLS(this) << "Destroy: Send Close" << endl;
 	// afterClose not always getting called
 	//uv_close((uv_handle_t*)stream(), Stream::afterClose);
 	//shutdown();
@@ -736,11 +732,11 @@ int Stream::writeQueueSize() const
 	return stream()->write_queue_size;
 }
 	if (_handle) {		
-		//traceL("Stream", this) << "Destroy: Handle" << endl;
+		//TraceLS(this) << "Destroy: Handle" << endl;
 		delete _handle;
 		_handle = nullptr;
 	}
-	//traceL("Stream", this) << "Destroy: OK" << endl;
+	//TraceLS(this) << "Destroy: OK" << endl;
 	*/
 	/*
 	
@@ -748,7 +744,7 @@ int Stream::writeQueueSize() const
 
 void Stream::close() 
 {	
-	//traceL("Stream", this) << "Send Close" << endl;
+	//TraceLS(this) << "Send Close" << endl;
 	assert(0);
 	// afterClose not always getting called
     //uv_close((uv_handle_t*)stream(), nullptr); //Stream::afterClose
@@ -761,7 +757,7 @@ void Stream::close()
 
 void Stream::afterClose(uv_handle_t* peer) 
 {	
-	//traceL("Stream") << "After Close: " << peer << endl;
+	//TraceL << "After Close: " << peer << endl;
 	// NOTE: Sending Closed from close() method as afterClose
 	// does not always fire depending on server response.
 	//io->Close.emit(io, io->error().code);

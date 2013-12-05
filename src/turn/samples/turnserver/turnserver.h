@@ -59,7 +59,7 @@ public:
 	void onServerAllocationCreated(Server* server, IAllocation* alloc);
 	void onServerAllocationRemoving(Server* server, IAllocation* alloc);
 	
-	AuthenticationState authenticateRequest(Server* server, const Request& request);
+	AuthenticationState authenticateRequest(Server* server, Request& request);
 	
 	virtual const char* className() const { return "TURNServer"; }
 	

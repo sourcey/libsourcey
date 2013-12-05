@@ -18,8 +18,11 @@
 
 
 #include "scy/socketio/client.h"
+#include "scy/net/tcpsocket.h"
+#include "scy/net/sslsocket.h"
 #include "scy/http/client.h"
 #include <stdexcept>
+
 
 using std::endl;
 
@@ -28,21 +31,55 @@ namespace scy {
 namespace sockio {
 
 
-Client::Client(net::SocketBase* socket, uv::Loop* loop) :
-	_timer(loop),
+//
+// TCP Client
+//
+
+
+Client* createTCPClient(uv::Loop* loop)
+{
+	return new Client(new net::TCPBase(loop)); //, loop
+}
+
+
+TCPClient::TCPClient(uv::Loop* loop) :
+	Client(new net::TCPBase(loop)) //, loop
+{
+}
+
+
+//
+// SSL Client
+//
+	
+
+Client* createSSLClient(uv::Loop* loop)
+{
+	return new Client(new net::SSLBase(loop)); //, loop);
+}
+
+
+SSLClient::SSLClient(uv::Loop* loop) :
+	Client(new net::SSLBase(loop)) //, loop)
+{
+}
+
+
+Client::Client(net::SocketBase* socket) : //, uv::Loop* loop
+	_timer(socket->loop()),
 	_socket(socket),
-	_loop(loop),
+	//_loop(loop),
 	_wasOnline(false)
 {
 }
 
 
-Client::Client(net::SocketBase* socket, const std::string& host, UInt16 port, uv::Loop* loop) :
-	_timer(loop),
+Client::Client(net::SocketBase* socket, const std::string& host, UInt16 port) : //, uv::Loop* loop
+	_timer(socket->loop()),
 	_host(host),
 	_port(port),
 	_socket(socket),
-	_loop(loop),
+	//_loop(loop),
 	_wasOnline(false)
 {
 }
@@ -68,7 +105,7 @@ void Client::connect(const std::string& host, UInt16 port)
 
 void Client::connect()
 {
-	log("trace") << "SocketIO Connecting" << endl;
+	TraceL << "SocketIO Connecting" << endl;
 
 	if (_host.empty() || !_port)
 		throw std::runtime_error("The SocketIO server address is not set.");
@@ -88,10 +125,10 @@ void Client::connect()
 
 void Client::close()
 {			
-	log("trace") << "Closing" << endl;
+	TraceL << "Closing" << endl;
 	reset();
 	onClose();
-	log("trace") << "Closing: OK" << endl;	
+	TraceL << "Closing: OK" << endl;	
 }
 
 
@@ -99,7 +136,7 @@ void Client::sendHandshakeRequest()
 {
 	//Mutex::ScopedLock lock(_mutex);
 		
-	log("trace") << "Send handshake request" << endl;	
+	TraceL << "Send handshake request" << endl;	
 	
 	std::ostringstream url;
 	url << (_socket.transport() == net::SSLTCP ? "https://" : "http://")
@@ -127,7 +164,7 @@ void Client::onHandshakeResponse(void* sender, const http::Response& response)
 	auto conn = reinterpret_cast<http::ClientConnection*>(sender);
 
 	std::string body = conn->readStream<std::stringstream>()->str();		
-	//log("trace") << "SocketIO handshake response:" 
+	//TraceL << "SocketIO handshake response:" 
 	//	<< "\n\tStatus: " << response.getStatus()
 	//	<< "\n\tReason: " << response.getReason()
 	//	<< "\n\tResponse: " << body << endl;
@@ -159,8 +196,8 @@ void Client::onHandshakeResponse(void* sender, const http::Response& response)
 
 	// Check websockets are supported
 	bool wsSupported = false;
-	for (int i = 0; i < _protocols.size(); i++) {
-		log("trace") << "Supports protocol: " << _protocols[i] << endl;
+	for (unsigned i = 0; i < _protocols.size(); i++) {
+		TraceL << "Supports protocol: " << _protocols[i] << endl;
 		if (_protocols[i] == "websocket") {
 			wsSupported = true;
 			break;
@@ -175,7 +212,7 @@ void Client::onHandshakeResponse(void* sender, const http::Response& response)
 	//Mutex::ScopedLock lock(_mutex);
 	
 	// Initialize the WebSocket
-	log("trace") << "Websocket connecting: " << _sessionID << endl;	
+	TraceL << "Websocket connecting: " << _sessionID << endl;	
 	
 	/*
 	ostringstream url;
@@ -190,7 +227,7 @@ void Client::onHandshakeResponse(void* sender, const http::Response& response)
 	_socket.connect(_host, _port);
 }
 	
-	//log("trace") << "Connecting: " << uri.str() << endl;	
+	//TraceL << "Connecting: " << uri.str() << endl;	
 	//_socket.request().setHost("localhost");
 
 
@@ -233,7 +270,7 @@ int Client::send(const json::Value& data, bool ack)
 {
 	Packet packet(data, ack);
 
-	log("trace") << "Sending message: " << packet.toString() << endl;
+	TraceL << "Sending message: " << packet.toString() << endl;
 	return send(packet);
 }
 
@@ -259,7 +296,7 @@ Transaction* Client::createTransaction(const sockio::Packet& request, long timeo
 
 int Client::sendHeartbeat()
 {
-	log("trace") << "Sending heartbeat" << endl;
+	TraceL << "Sending heartbeat" << endl;
 	return socket().send("2::", 3);
 }
 
@@ -292,7 +329,7 @@ void Client::reset()
 
 void Client::setError(const Error& error)
 {
-	log("error") << "Set error: " << error.message << std::endl;
+	ErrorL << "Set error: " << error.message << std::endl;
 	
 	// Set the wasOnline flag if previously online before error
 	if (stateEquals(ClientState::Online))
@@ -307,7 +344,7 @@ void Client::setError(const Error& error)
 
 void Client::onConnect()
 {
-	log("trace") << "On connect" << endl;
+	TraceL << "On connect" << endl;
 			
 	setState(this, ClientState::Connected);
 
@@ -323,14 +360,14 @@ void Client::onConnect()
 
 void Client::onOnline()
 {
-	log("trace") << "On online" << endl;	
+	TraceL << "On online" << endl;	
 	setState(this, ClientState::Online);
 }
 
 
 void Client::onClose()
 {
-	log("trace") << "On close" << endl;
+	TraceL << "On close" << endl;
 
 	// Back to initial state
 	setState(this, ClientState::None);
@@ -350,7 +387,7 @@ void Client::onSocketConnect(void*)
 
 void Client::onSocketError(void*, const Error& error)
 {
-	log("trace") << "On socket error: " << error.message << endl;
+	TraceL << "On socket error: " << error.message << endl;
 		
 	setError(error);
 }
@@ -358,7 +395,7 @@ void Client::onSocketError(void*, const Error& error)
 
 void Client::onSocketClose(void*)
 {
-	log("trace") << "On socket close" << endl;
+	TraceL << "On socket close" << endl;
 
 	// Nothing to do since the error is set via onSocketError
 
@@ -370,9 +407,8 @@ void Client::onSocketClose(void*)
 
 void Client::onSocketRecv(void*, net::SocketPacket& packet)
 {	
-	log("trace") << "On socket recv: " << packet.size() << endl;
-
-	
+	TraceL << "On socket recv: " << packet.size() << endl;
+		
 	sockio::Packet pkt;
 	char* buf = packet.data();
 	std::size_t len = packet.size();
@@ -383,49 +419,42 @@ void Client::onSocketRecv(void*, net::SocketPacket& packet)
 		len -= nread;
 	}
 	if (len == packet.size())
-		log("warn") << "Failed to parse incoming SocketIO packet." << endl;	
+		WarnL << "Failed to parse incoming SocketIO packet." << endl;	
 
 	/*
 	sockio::Packet pkt;
 	if (pkt.read(constBuffer(packet.data(), packet.size())))
 		onPacket(pkt);
 	else
-		log("warn") << "Failed to parse incoming SocketIO packet." << endl;	
+		WarnL << "Failed to parse incoming SocketIO packet." << endl;	
 		*/
 }
 
 
 void Client::onPacket(sockio::Packet& packet)
 {
-	log("trace") << "On packet: " << packet.toString() << endl;		
+	TraceL << "On packet: " << packet.toString() << endl;		
 	PacketSignal::emit(this, packet);	
 }
 
 	
 void Client::onHeartBeatTimer(void*)
 {
-	log("trace") << "On heartbeat" << endl;
+	TraceL << "On heartbeat" << endl;
 	
 	if (isOnline())
 		sendHeartbeat();
 
 	// Try to reconnect if disconnected in error
 	else if (error().any()) {	
-		log("info") << "Attempting to reconnect" << endl;	
+		TraceL << "Attempting to reconnect" << endl;	
 		try {
 			connect();
 		} 
 		catch (std::exception& exc) {			
-			log("error") << "Reconnection attempt failed: " << exc.what() << endl;
+			ErrorL << "Reconnection attempt failed: " << exc.what() << endl;
 		}	
 	}
-}
-
-
-uv::Loop* Client::loop()
-{
-	//Mutex::ScopedLock lock(_mutex);
-	return _loop;
 }
 
 
@@ -471,6 +500,13 @@ bool Client::wasOnline() const
 
 
 /*
+
+
+uv::Loop* Client::loop()
+{
+	//Mutex::ScopedLock lock(_mutex);
+	return _loop;
+}
 std::string& Client::endpoint()
 {
 	//Mutex::ScopedLock lock(_mutex);
@@ -484,7 +520,7 @@ std::string& Client::endpoint()
 
 	
 	/*
-	log("trace") << "%%%%%%%%%%%%%% Sending Handshake" << endl;	
+	TraceL << "%%%%%%%%%%%%%% Sending Handshake" << endl;	
 
 	conn->Headers += delegate(this, &Client::onStandaloneHTTPClientConnectionHeaders);
 	conn->Complete += delegate(this, &Client::onStandaloneHTTPClientConnectionComplete);
@@ -495,7 +531,7 @@ std::string& Client::endpoint()
 	http::Response& response = transaction.response();
 	transaction.send();
 
-	log("trace") << "SocketIO Handshake Response:" 
+	TraceL << "SocketIO Handshake Response:" 
 		<< "\n\tStatus: " << response.getStatus()
 		<< "\n\tReason: " << response.getReason()
 		<< "\n\tResponse: " << response.body.str()
@@ -525,7 +561,7 @@ std::string& Client::endpoint()
 	// Check websockets are supported
 	bool wsSupported = false;
 	for (int i = 0; i < _protocols.size(); i++) {
-		log("trace") << "Supports Protocol: " << _protocols[i] << endl;
+		TraceL << "Supports Protocol: " << _protocols[i] << endl;
 		if (_protocols[i] == "websocket") {
 			wsSupported = true;
 			break;
@@ -582,7 +618,7 @@ void Client::onHeartBeatTimer(TimerCallback<Socket>&)
 
 void Client::onError() 
 {
-	log("warn") << "On error" << endl;
+	WarnL << "On error" << endl;
 }
 */
 
@@ -663,7 +699,7 @@ void Client::onError()
 //	if (_secure)
 //		_uri.setScheme("wss");
 //
-//	debugL() << "[sockio::Socket]	Connecting to " << _uri.toString() << endl;
+//	DebugL << "[sockio::Socket]	Connecting to " << _uri.toString() << endl;
 //
 //	if (sendHandshakeRequest()) {
 //				
@@ -685,7 +721,7 @@ void Client::onError()
 //{
 //	// NOTE: No need for mutex lock because this method is called from connect()
 //	
-//	traceL() << "[sockio::Socket] Sending Handshake" << endl;
+//	TraceL << "[sockio::Socket] Sending Handshake" << endl;
 //	
 //	
 //	URI uri("http://" + _serverAddr.toString() + "/socket.io/1/");	
@@ -705,7 +741,7 @@ void Client::onError()
 //		throw std::runtime_error(format("SocketIO handshake failed: HTTP Error: %d %s", 
 //			static_cast<int>(response.getStatus()), response.getReason()));		
 //
-//	traceL() << "[sockio::Socket] Handshake Response:" 
+//	TraceL << "[sockio::Socket] Handshake Response:" 
 //		<< "\n\tStatus: " << response.getStatus()
 //		<< "\n\tReason: " << response.getReason()
 //		<< "\n\tResponse: " << response.body.str()
@@ -729,7 +765,7 @@ void Client::onError()
 //	// Check websockets are supported
 //	bool wsSupported = false;
 //	for (int i = 0; i < _protocols.size(); i++) {
-//		debugL() << "[sockio::Socket] Supports Protocol: " << _protocols[i] << endl;	
+//		DebugL << "[sockio::Socket] Supports Protocol: " << _protocols[i] << endl;	
 //		if (_protocols[i] == "websocket") {
 //			wsSupported = true;
 //			break;
@@ -745,14 +781,14 @@ void Client::onError()
 //
 //void SocketBase::close()
 //{			
-//	traceL() << "[sockio::Socket] Closing" << endl;	
+//	TraceL << "[sockio::Socket] Closing" << endl;	
 //
 //	if (!isError())
 //		Timer::getDefault().stop(TimerCallback<Socket>(this, &SocketBase::onHeartBeatTimer));
 //	
 //	WebSocketBase::close();
 //
-//	traceL() << "[sockio::Socket] Closing: OK" << endl;	
+//	TraceL << "[sockio::Socket] Closing: OK" << endl;	
 //}
 //
 //
@@ -813,19 +849,19 @@ void Client::onError()
 //
 //void SocketBase::onHeartBeatTimer(TimerCallback<Socket>&) 
 //{
-//	traceL() << "[sockio::Socket] Heart Beat Timer" << endl;
+//	TraceL << "[sockio::Socket] Heart Beat Timer" << endl;
 //	
 //	if (isConnected())
 //		sendHeartbeat();
 //
 //	// Try to reconnect if the connection was closed in error
 //	else if (isError()) {	
-//		traceL() << "[sockio::Socket] Attempting to reconnect" << endl;	
+//		TraceL << "[sockio::Socket] Attempting to reconnect" << endl;	
 //		try {
 //			connect();
 //		} 
 //		catch (std::exception& exc) {			
-//			errorL() << "[sockio::Socket] Reconnection attempt failed: " << exc.what() << endl;
+//			ErrorL << "[sockio::Socket] Reconnection attempt failed: " << exc.what() << endl;
 //		}	
 //	}
 //}
@@ -833,7 +869,7 @@ void Client::onError()
 //
 //int SocketBase::sendHeartbeat()
 //{
-//	traceL() << "[sockio::Socket] Heart Beat" << endl;
+//	TraceL << "[sockio::Socket] Heart Beat" << endl;
 //	return WebSocketBase::send("2::", 3);
 //}
 //
@@ -943,7 +979,7 @@ void Client::onError()
 	std::string body(response.substr(pos, response.length()));
 	socket.shutdownSend();
 
-	debugL() << "[sockio::Socket] Handshake:" 
+	DebugL << "[sockio::Socket] Handshake:" 
 		//<< "\n\tRequest: " << ss.str()
 		<< "\n\tStatus: " << status
 		<< "\n\tResponse: " << response

@@ -135,7 +135,7 @@ void ZipFile::close()
 
 void ZipFile::extract(const std::string& path)
 {	
-	traceL("ZipFile") << "Extracting zip to: " << path << endl;
+	TraceL << "Extracting zip to: " << path << endl;
 
 	if (!opened())
 		throw std::runtime_error("The archive must be opened for extraction.");
@@ -161,7 +161,7 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 		std::string outPath(path);
 		fs::addnode(outPath, fname);
 
-		traceL("ZipFile") << "Extracting zip file: " << outPath << endl;
+		TraceL << "Extracting zip file: " << outPath << endl;
 
 		// Create directory
 #if !WIN32
@@ -169,7 +169,7 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 #endif
 		if (info.external_fa & FILE_ATTRIBUTE_DIRECTORY || 
 			fname[strlen(fname) - 1] == fs::delimiter) {
-			traceL("ZipFile") << "Create directory: " << outPath << endl;
+			TraceL << "Create directory: " << outPath << endl;
 			fs::mkdirr(outPath);
 		}
 
@@ -177,7 +177,7 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 		else {			
 			openCurrentFile();
 
-			traceL("ZipFile") << "Extracting file: " << outPath << endl;
+			TraceL << "Extracting file: " << outPath << endl;
 			std::ofstream ofs(outPath, std::ios::binary | std::ios::out);
 			if (!ofs.is_open())
 				throw std::runtime_error("Cannot open zip output file: " + outPath);
@@ -193,7 +193,7 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 		}
 	} 
 	catch (std::exception& exc) {
-		errorL("ZipFile") << "Cannot unzip file: " << exc.what() << endl;
+		ErrorL << "Cannot unzip file: " << exc.what() << endl;
 		if (whiny)
 			throw exc;
 		return false;

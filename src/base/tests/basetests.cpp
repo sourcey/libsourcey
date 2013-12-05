@@ -12,10 +12,10 @@
 #include "scy/filesystem.h"
 #include "scy/process.h"
 #include "scy/timer.h"
+#include "scy/ipc.h"
 #include "scy/util.h"
 
 #include "plugin/TestPlugin.h"
-
 
 #include <assert.h>
 
@@ -80,29 +80,32 @@ public:
 
 	Tests(Application& app) : app(app)
 	{	
-		//testBuffer();
-		//testHandle();
-		//testNVCollection();
-		//runFSTest();
-		//runPluginTest();
-		//runLoggerTest();
-		//runPlatformTests();
-		//runExceptionTest();
-		//runScheduler::TaskTest();
-		//testTimer();
-		//testIdler();
-		//testSyncDelegate();
-		//testProcess();
-		//testRunner();
-		//testThread();
+#if 0
+		testBuffer();
+		testHandle();
+		testNVCollection();
+		runFSTest();
+		runPluginTest();
+		testLogger();
+		runPlatformTests();
+		runExceptionTest();
+		runScheduler::TaskTest();
+		testTimer();
+		testIdler();
+		testSyncDelegate();
+		testProcess();
+		testRunner();
+		testThread();
 		
-		//testSyncQueue();
-		//testPacketStream();
+		testSyncQueue();
+		testPacketStream();
 		testMultiPacketStream();
-		//runPacketSignalTest();
-		//runSocketTests();
-		//runGarbageCollectorTests();
-		//runSignalReceivers();
+		runPacketSignalTest();
+		runSocketTests();
+		runGarbageCollectorTests();
+		runSignalReceivers();
+#endif
+		testIPC();
 		
 		//scy::pause();
 	}
@@ -310,15 +313,15 @@ public:
 	void runFSTest() 
 	{
 		std::string path(scy::getExePath());
-		debugL("FileSystemTest") << "Executable path: " << path << endl;
+		DebugL << "Executable path: " << path << endl;
 		assert(fs::exists(path));
 
 		std::string junkPath(path + "junkname.huh");
-		debugL("FileSystemTest") << "Junk path: " << junkPath << endl;
+		DebugL << "Junk path: " << junkPath << endl;
 		assert(!fs::exists(junkPath));
 
 		std::string dir(fs::dirname(path));
-		debugL("FileSystemTest") << "Dir name: " << dir << endl;	
+		DebugL << "Dir name: " << dir << endl;	
 		assert(fs::exists(dir));			
 		assert(fs::exists(dir + "/"));
 		assert(fs::exists(dir + "\\"));
@@ -335,7 +338,7 @@ public:
 
 	void runPluginTest() 
 	{
-		debugL("PluginTest") << "Starting" << endl;
+		DebugL << "Starting" << endl;
 		// TODO: Use getExePath
 		std::string path("D:/dev/projects/Sourcey/LibSourcey/build/install/libs/TestPlugin/TestPlugind.dll");
 		
@@ -388,7 +391,7 @@ public:
 		}
 		catch (std::exception& exc)
 		{
-			errorL("PluginTest") << "Error: " << exc.what() << endl;
+			ErrorL << "Error: " << exc.what() << endl;
 			assert(0);
 		}
 		
@@ -405,25 +408,36 @@ public:
 		cout << "current working directory: " << scy::getCwd() << endl;
 	}
 
-
 	// ============================================================================
 	// Logger Test
 	//
-	void runLoggerTest() 
+	void testLogger() 
 	{
 		// Test default synchronous writer
 		Logger::instance().setWriter(new LogWriter);		
 		clock_t start = clock();
 		for (unsigned i = 0; i < 1000; i++) 
-			cout << "Test message: " << i << endl;
+			TraceL << "Test message: " << i << endl;
 		cout << "#### synchronous test completed after: " << (clock() - start) << endl;
 		
 		// Test asynchronous writer (approx 10x faster)
 		Logger::instance().setWriter(new AsyncLogWriter);		
 		start = clock();
 		for (unsigned i = 0; i < 1000; i++) 
-			cout << "Test message: " << i << endl;
+			TraceL << "Test message: " << i << endl;
 		cout << "#### asynchronous test completed after: " << (clock() - start) << endl;
+
+		// Test function logging
+		start = clock();
+		for (unsigned i = 0; i < 1000; i++) 
+			TraceLS(this) << "Test message: " << i << endl;
+		cout << "#### asynchronous function logging completed after: " << (clock() - start) << endl;
+		
+		// Test function and mem address logging
+		start = clock();
+		for (unsigned i = 0; i < 1000; i++) 
+			TraceLS(this) << "Test message: " << i << endl;
+		cout << "#### asynchronous function and mem address logging completed after: " << (clock() - start) << endl;
 	}
 
 
@@ -579,6 +593,34 @@ public:
 			idler.cancel(); // event loop will be released
 		}
 	}
+
+	
+	// ============================================================================
+	// IPC Test
+	//
+	const static int want_x_ipc_callbacks = 5;
+	int num_ipc_callbacks;
+	
+	void testIPC() 
+	{
+		cout << "Test IPC" << endl;
+		num_ipc_callbacks = 0;
+		ipc::Queue<> ipc;
+		ipc.push(new ipc::Action(std::bind(&Tests::ipcCallback, this, std::placeholders::_1), &ipc, "test1"));
+		ipc.push(new ipc::Action(std::bind(&Tests::ipcCallback, this, std::placeholders::_1), &ipc, "test2"));
+		ipc.push(new ipc::Action(std::bind(&Tests::ipcCallback, this, std::placeholders::_1), &ipc, "test3"));
+		ipc.push(new ipc::Action(std::bind(&Tests::ipcCallback, this, std::placeholders::_1), &ipc, "test4"));
+		ipc.push(new ipc::Action(std::bind(&Tests::ipcCallback, this, std::placeholders::_1), &ipc, "test5"));
+		runLoop();
+		cout << "Test IPC: OK" << endl;
+	}
+
+	void ipcCallback(const ipc::Action& action)
+	{
+		cout << "Got IPC callback: " << action.data << endl;
+		if (++num_ipc_callbacks == want_x_ipc_callbacks)
+			reinterpret_cast<ipc::Queue<>*>(action.arg)->close();
+	}
 		
 	// ============================================================================
 	// SyncQueue Test
@@ -605,10 +647,10 @@ public:
 
 		void start() 
 		{
-			debugL("TestPacketSource", this) << "Start" << endl;	
+			DebugLS(this) << "Start" << endl;	
 			runner.start([](void* arg) {
 				auto self = reinterpret_cast<TestPacketSource*>(arg);
-				debugL("TestPacketSource", self) << "Emitting" << endl;	
+				DebugL << "Emitting" << endl;	
 				RawPacket p("hello", 5);
 				self->emitter.emit(self, p);
 			}, this);
@@ -616,10 +658,10 @@ public:
 
 		void stop() 
 		{
-			debugL("TestPacketSource", this) << "Stop" << endl;	
+			DebugLS(this) << "Stop" << endl;	
 			runner.cancel();
 			//runner.close();
-			debugL("TestPacketSource", this) << "Stop: OK" << endl;	
+			DebugLS(this) << "Stop: OK" << endl;	
 		}
 	};	
 
@@ -634,14 +676,14 @@ public:
 
 		void process(IPacket& packet) 
 		{
-			debugL("TestPacketProcessor", this) << "Process: " << packet.className() << endl;			
+			DebugLS(this) << "Process: " << packet.className() << endl;			
 			emit(packet);
 		}
 	};
 	
 	void onPacketStreamOutput(void* sender, IPacket& packet) 
 	{
-		debugL("TestPacketStream", this) << ">>>>>>>>>>> On packet: " << packet.className() << endl;
+		DebugLS(this) << ">>>>>>>>>>> On packet: " << packet.className() << endl;
 	}
 
 	void testPacketStream() 
@@ -660,19 +702,19 @@ public:
 					
 		app.waitForShutdown([](void* arg) {
 			auto stream = reinterpret_cast<PacketStream*>(arg);
-			debugL("TestPacketStream") << "########## Shutdown" << endl;
+			DebugL << "########## Shutdown" << endl;
 			stream->close();
 			//reinterpret_cast<TestPacketSource*>(stream->base().sources()[0].ptr)->stop();
-			debugL("TestPacketStream") << "########## Shutdown: After" << endl;
+			DebugL << "########## Shutdown: After" << endl;
 		}, &stream);		
 		
-		debugL("TestPacketStream") << "########## Exiting" << endl;
+		DebugL << "########## Exiting" << endl;
 		stream.close();
 	}
 	
 	void onChildPacketStreamOutput(void* sender, IPacket& packet) 
 	{
-		debugL("TestPacketStream", this) << ">>>>>>>>>>> On child packet: " << packet.className() << endl;
+		DebugLS(this) << ">>>>>>>>>>> On child packet: " << packet.className() << endl;
 	}
 	
 	struct ChildStreams
@@ -725,10 +767,10 @@ public:
 			if (streams->s1) delete streams->s1;
 			if (streams->s2) delete streams->s2;
 			if (streams->s3) delete streams->s3;
-			traceL("TestPacketStream") << "DESTROYED *********************************************************" << endl;
+			TraceL << "DESTROYED *********************************************************" << endl;
 		}, &children);
 
-		traceL("TestPacketStream", this) << "ENDING *********************************************************" << endl;
+		TraceLS(this) << "ENDING *********************************************************" << endl;
 	}
 	
 	
@@ -741,17 +783,17 @@ public:
 
 	void onBroadcastPacket(void* sender, DataPacket& packet)
 	{
-		traceL() << "On Packet: " << packet.className() << endl;
+		TraceL << "On Packet: " << packet.className() << endl;
 	}
 	
 	void runPacketSignalTest() 
 	{
-		traceL() << "Running Packet Signal Test" << endl;
+		TraceL << "Running Packet Signal Test" << endl;
 		BroadcastPacket += packetDelegate(this, &Tests::onBroadcastPacket, 0);
 		DataPacket packet;
 		BroadcastPacket.emit(this, packet);
 		//util::pause();
-		traceL() << "Running Packet Signal Test: END" << endl;
+		TraceL << "Running Packet Signal Test: END" << endl;
 	}
 	
 
@@ -759,7 +801,7 @@ public:
 	// Garbage Collector Tests
 	//
 	void runGarbageCollectorTests() {
-		traceL() << "Running Garbage Collector Test" << endl;
+		TraceL << "Running Garbage Collector Test" << endl;
 		
 		//for (unsigned i = 0; i < 100; i++) { 
 			char* ptr = new char[1000];
@@ -771,7 +813,7 @@ public:
 		//}
 
 		//util::pause();
-		traceL() << "Running Garbage Collector Test: END" << endl;
+		TraceL << "Running Garbage Collector Test: END" << endl;
 	}
 	
 	// ============================================================================
@@ -779,13 +821,13 @@ public:
 	//
 	void onTimerTask(void* sender)
 	{
-		traceL() << "Timer Task Timout" << endl;
+		TraceL << "Timer Task Timout" << endl;
 		ready.set();
 	}
 
 	void runTimerTaskTest() 
 	{
-		traceL() << "Running Timer Task Test" << endl;
+		TraceL << "Running Timer Task Test" << endl;
 		TimerTask* task = new TimerTask(runner, 1000, 1000);
 		task->Timeout += delegate(this, &Tests::onTimerTask);
 		task->start();
@@ -793,7 +835,7 @@ public:
 		ready.wait();
 		task->destroy();
 		//util::pause();
-		traceL() << "Running Timer Task Test: END" << endl;
+		TraceL << "Running Timer Task Test: END" << endl;
 	}
 	
 	
@@ -813,19 +855,19 @@ public:
 		SignalBroadcaster& klass;
 		SignalReceiver(SignalBroadcaster& klass) : klass(klass)
 		{
-			debugL() << "SignalReceiver: Starting" << endl;
+			DebugL << "SignalReceiver: Starting" << endl;
 			klass.TestSignal += delegate(this, &SignalReceiver::onSignal);
 		}
 
 		~SignalReceiver()
 		{
-			debugL() << "SignalReceiver: Destroying" << endl;	
+			DebugL << "SignalReceiver: Destroying" << endl;	
 			klass.TestSignal -= delegate(this, &SignalReceiver::onSignal);
 		}
 
 		void onSignal(void*, int& value)
 		{
-			debugL() << "SignalReceiver: Callback: " << value << endl;	
+			DebugL << "SignalReceiver: Callback: " << value << endl;	
 		}
 	};
 	 
@@ -854,15 +896,15 @@ public:
 	*/
 
 	void runLoop() {
-		debugL("Tests") << "#################### Running" << endl;
+		DebugL << "#################### Running" << endl;
 		app.run();
-		debugL("Tests") << "#################### Ended" << endl;
+		DebugL << "#################### Ended" << endl;
 	}
 
 	void runCleanup() {
-		debugL("Tests") << "#################### Finalizing" << endl;
+		DebugL << "#################### Finalizing" << endl;
 		app.finalize();
-		debugL("Tests") << "#################### Exiting" << endl;
+		DebugL << "#################### Exiting" << endl;
 	}
 	
 };

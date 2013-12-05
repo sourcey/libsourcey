@@ -2,6 +2,7 @@
 #define TURN_UDPresponder_TEST_H
 
 
+#include "turnclienttest.h"
 #include "scy/net/udpsocket.h"
 #include "scy/time.h"
 #include "scy/timer.h"
@@ -27,26 +28,33 @@ public:
 	UDPResponder(int id) : 
 		id(id)
 	{
-		debugL("UDPResponder", this) << id << ": Creating" << endl;
+		DebugLS(this) << id << ": Creating" << endl;
 		net::SocketAdapter::socket = &socket;
 		socket.setAdapter(this);
+
+		socket.bind(net::Address("0.0.0.0", 0));
+		//socket.bind(net::Address(TURN_AUTHORIZE_PEER_IP, 4020));
+		
+		DebugLS(this) << id << ": Listening on: " << socket.address() << endl;
 	}
 
 	virtual ~UDPResponder() 
 	{ 
-		debugL("UDPResponder", this) << id << ": Destroying" << endl;
+		DebugLS(this) << id << ": Destroying" << endl;
 		socket.setAdapter(nullptr);
 		stop(); 
 	}
 
 	void start(const net::Address& relayedAddr) 
 	{		
-		debugL("UDPResponder", this) << id << ": Starting on: " << relayedAddr << endl;
+		DebugLS(this) << id << ": Starting on: " << relayedAddr << endl;
 		
 		try	{
 			this->relayedAddr = relayedAddr;
 			
-			socket.bind(net::Address("0.0.0.0", 0));
+			//socket.bind(net::Address("0.0.0.0", 0));
+			//socket.bind(net::Address(TURN_AUTHORIZE_PEER_IP, 4020));
+			//socket.bind(net::Address("0.0.0.0", 4020));
 			socket.connect(relayedAddr);
 		}
 		catch (std::exception& exc) {
@@ -59,71 +67,39 @@ public:
 	{	
 		timer.stop();
 		socket.close();
+	}	
+
+	void onSendTimer(void*)
+	{
+		std::string payload(createLatencyCheck(30000));
+		socket.send(payload.c_str(), payload.length());		
 	}
 	
 	void onSocketConnect() 
 	{
-		// Send some early media to client
-		sendLatencyCheck();
-
-		// Start the send timer
+#if TEST_RESPONDER_TO_INITIATOR_LATENCY
 		timer.Timeout += delegate(this, &UDPResponder::onSendTimer);
-		timer.start(1000, 100);
-	}
-
-	
-	void sendLatencyCheck()
-	{		
-		std::string payload;
-		
-		// Send the unix ticks milisecond for checking latency
-		//payload.append(":");
-		payload.append(util::itostr(time::ticks()));
-		//payload.append(":");
-
-		// Send a large packets to test throttling
-		//payload.append(65536, 'x');
-		payload.append(30000, 'x');
-		//payload.append(1024, 'x');
-
-		// Send it
-		socket.send(payload.c_str(), payload.length());
-
-		/*
-		// Send a large packets to test throttling
-		//std::string payload(65536, 'x');
-		std::string payload(10000, 'x');
-		assert(payload.length() == 10000);
-		socket.send(payload.c_str(), payload.length());
-
-		// Send the unix ticks milisecond for checking RTT
-		payload.assign(util::itostr(time::ticks()));
-		socket.send(payload.c_str(), payload.length());
-		*/
-	}
-
-	void onSendTimer(void*)
-	{
-		sendLatencyCheck();
+		timer.start(0, 100);
+#endif
 	}
 	
 	void onSocketRecv(const MutableBuffer& buf, const net::Address& peerAddr) //net::SocketPacket& packet) 
 	{
 		std::string payload(bufferCast<const char*>(buf), buf.size());
-		traceL("UDPResponder", this) << id << ": On recv: " << peerAddr << ": " << payload << std::endl;
+		DebugLS(this) << id << ": On recv: " << peerAddr << ": " << payload << std::endl;
 
 		// Echo back to client
-		socket.send(payload.c_str(), payload.size());
+		socket.send(payload.c_str(), payload.size(), relayedAddr); // peerAddr
 	}
 
 	void onSocketError(const Error& error) 
 	{
-		traceL("UDPResponder", this) << id << ": On error: " << error.message << std::endl;
+		DebugLS(this) << id << ": On error: " << error.message << std::endl;
 	}
 
 	void onSocketClose() 
 	{
-		traceL("UDPResponder", this) << id << ": On close" << std::endl;
+		DebugLS(this) << id << ": On close" << std::endl;
 		stop();
 	}
 };
@@ -135,8 +111,27 @@ public:
 #endif // TURN_UDPresponder_TEST_H
 
 
+		
+	/*
+	void sendLatencyCheck()
+	{		
+		std::string payload;
+		
+		// Send the unix ticks milisecond for checking latency
+		payload.append(util::itostr(time::ticks()));
+
+		// Send large packets to test throttling
+		payload.append(30000, 'x'); // 1024 // 65536
+
+		// Send it
+		socket.send(payload.c_str(), payload.length());
+	}
+	*/
 	
 	/*
+		// Send some early media to client
+		sendLatencyCheck();
+
 	int id;
 	net::Address relayedAddr;
 	Net::UDPPacketSocket* socket;

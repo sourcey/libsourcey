@@ -42,7 +42,7 @@ Transaction::Transaction(Socket& socket,
 						 uv::Loop* loop) : 
 	net::Transaction<Message>(socket, peerAddress, timeout, retries, loop) 
 {
-	debugL("StunTransaction", this) << "Create" << std::endl;
+	DebugLS(this) << "Create" << std::endl;
 
 	// Register STUN message creation strategy
 	net::Transaction<Message>::factory.registerPacketType<stun::Message>(0);
@@ -51,7 +51,7 @@ Transaction::Transaction(Socket& socket,
 
 Transaction::~Transaction() 
 {
-	debugL("StunTransaction", this) << "Destroy" << std::endl;	
+	DebugLS(this) << "Destroy" << std::endl;	
 }
 
 
@@ -64,7 +64,7 @@ bool Transaction::checkResponse(const Message& message)
 
 void Transaction::onResponse()
 {
-	debugL("StunTransaction", this) << "On response" << std::endl;	
+	DebugLS(this) << "On response" << std::endl;	
 
 	_response.setMethod(_request.methodType());
 	_response.setClass(Message::SuccessResponse);

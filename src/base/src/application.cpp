@@ -32,8 +32,9 @@ namespace internal {
 
 	struct ShutdownCmd 
 	{
-		std::function<void(void*)> callback;
+		Application* self;
 		void* opaque;
+		std::function<void(void*)> callback;
 	};
 }
 
@@ -47,13 +48,13 @@ Application& Application::getDefault()
 Application::Application(uv::Loop* loop) :
 	loop(loop)
 {
-	debugL("Application", this) << "Create" << std::endl;
+	DebugLS(this) << "Create" << std::endl;
 }
 
 	
 Application::~Application() 
 {	
-	debugL("Application", this) << "Destroy" << std::endl;
+	DebugLS(this) << "Destroy" << std::endl;
 }
 
 	
@@ -71,7 +72,7 @@ void Application::stop()
 
 void Application::finalize() 
 { 
-	traceL("Application", this) << "Finalizing" << std::endl;
+	DebugLS(this) << "Finalizing" << std::endl;
 
 #ifdef _DEBUG
 	// Print active handles
@@ -86,30 +87,32 @@ void Application::finalize()
 	assert(loop->active_handles == 0);
 	//assert(loop->active_reqs == 0);
 
-	traceL("Application", this) << "Finalization complete" << std::endl;
+	DebugLS(this) << "Finalization complete" << std::endl;
 }		
 	
 	
 void Application::waitForShutdown(std::function<void(void*)> callback, void* opaque)
 { 
-	internal::ShutdownCmd* cmd = new internal::ShutdownCmd;
+	auto cmd = new internal::ShutdownCmd;
+	cmd->self = this;
 	cmd->opaque = opaque;
 	cmd->callback = callback;
 
-	uv_signal_t* sig = new uv_signal_t;
+	auto sig = new uv_signal_t;
 	sig->data = cmd;
 	uv_signal_init(loop, sig);
 	uv_signal_start(sig, Application::onShutdownSignal, SIGINT);
 		
-	debugL("Application", this) << "Wait for shutdown" << std::endl;
+	DebugLS(this) << "Wait for shutdown" << std::endl;
 	run();
 }
 
 			
 void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 {
-	debugL("Application") << "Got shutdown signal" << std::endl;
-	internal::ShutdownCmd* cmd = reinterpret_cast<internal::ShutdownCmd*>(req->data);
+	auto cmd = reinterpret_cast<internal::ShutdownCmd*>(req->data);
+	DebugLS(cmd->self) << "Got shutdown signal" << std::endl;
+
 	uv_close((uv_handle_t*)req, [](uv_handle_t* handle) {
 		delete handle;
 	});
@@ -121,7 +124,7 @@ void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 
 void Application::onPrintHandle(uv_handle_t* handle, void* /* arg */) 
 {
-	debugL("Application") << "#### Active handle: " << handle << ": " << handle->type << std::endl;
+	DebugL << "#### Active handle: " << handle << ": " << handle->type << std::endl;
 }
 
 
@@ -154,7 +157,7 @@ OptionParser::OptionParser(int argc, char* argv[], char* delim)
 		}
 
 		else {
-			traceL("OptionParser") << "Unrecognized option: " << argv[i] << std::endl;	
+			TraceL << "Unrecognized option: " << argv[i] << std::endl;	
 		}
 	}
 }

@@ -216,7 +216,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name, 
 	/*
 	for (std::vector<Device>::const_iterator it = devices.begin(); it != devices.end(); ++it) {
 		if (name == it->name) {
-			infoL() << "Create VideoCapturer for " << name << endl;
+			InfoL << "Create VideoCapturer for " << name << endl;
 			out = *it;
 			return true;
 		}
@@ -226,7 +226,7 @@ bool DeviceManager::getVideoCaptureDevice(Device& out, const std::string& name, 
 	// with the filename. The LmiMediaEngine will know to use a FileVideoCapturer
 	// for these devices.
 	if (talk_base::FileSystem::IsFile(name)) {
-		infoL() << "Create FileVideoCapturer" << endl;
+		InfoL << "Create FileVideoCapturer" << endl;
 		*out = FileVideoCapturer::CreateFileVideoCapturerDevice(name);
 		return true;
 	}
@@ -272,7 +272,7 @@ bool DeviceManager::getDefaultVideoCaptureDevice(Device& device)
 
 bool DeviceManager::getAudioDevice(bool input, Device& out, const std::string& name, int id) 
 {
-	traceL("DeviceManager") << "Get audio device: " << id << ": " << name << endl;
+	TraceL << "Get audio device: " << id << ": " << name << endl;
 
 	// If the name is empty, return the default device id.
 	if (name.empty() || name == kDefaultDeviceName) {
@@ -284,7 +284,7 @@ bool DeviceManager::getAudioDevice(bool input, Device& out, const std::string& n
 
 	std::vector<Device> devices;
 	input ? getAudioInputDevices(devices) : getAudioOutputDevices(devices);
-	traceL("DeviceManager") << "Get audio devices: " << devices.size() << endl;
+	TraceL << "Get audio devices: " << devices.size() << endl;
 	return matchNameAndID(devices, out, name, id);
 }
 
@@ -293,7 +293,7 @@ bool DeviceManager::getAudioDevice(bool input, Device& out, int id)
 {
 	std::vector<Device> devices;
 	input ? getAudioInputDevices(devices) : getAudioOutputDevices(devices);	
-	traceL("DeviceManager") << "Get audio devices: " << devices.size() << endl;
+	TraceL << "Get audio devices: " << devices.size() << endl;
 	return matchID(devices, out, id);
 }
 
@@ -349,7 +349,7 @@ bool DeviceManager::shouldDeviceBeIgnored(const std::string& deviceName, const c
 	int i = 0;
 	while (exclusionList[i]) {
 		if (util::icompare(deviceName, exclusionList[i]) == 0) {
-			traceL("DeviceManager") << "Ignoring device " << deviceName << endl;
+			TraceL << "Ignoring device " << deviceName << endl;
 			return true;
 		}
 		++i;
@@ -377,7 +377,7 @@ bool DeviceManager::filterDevices(std::vector<Device>& devices, const char* cons
 
 bool DeviceManager::matchID(std::vector<Device>& devices, Device& out, int id)
 {
-	for (auto i = 0; i < devices.size(); ++i) {
+	for (unsigned i = 0; i < devices.size(); ++i) {
 		if (devices[i].id == id) {
 			out = devices[i];
 			return true;
@@ -394,22 +394,22 @@ bool DeviceManager::matchID(std::vector<Device>& devices, Device& out, int id)
 
 bool DeviceManager::matchNameAndID(std::vector<Device>& devices, Device& out, const std::string& name, int id)
 {
-	traceL("DeviceManager") << "Match name and ID: " << name << ": " << id << endl;
+	TraceL << "Match name and ID: " << name << ": " << id << endl;
 
 	bool ret = false;
-	for (auto i = 0; i < devices.size(); ++i) {
-		traceL("DeviceManager") << "Match name and ID: Checking: " << devices[i].name << endl;
+	for (unsigned i = 0; i < devices.size(); ++i) {
+		TraceL << "Match name and ID: Checking: " << devices[i].name << endl;
 		if (devices[i].name == name) {
 			// The first device matching the given name will be returned,
 			// but we will try and match the given ID as well.
 			//if (out.id == -1)
 			out = devices[i];
-			traceL("DeviceManager") << "Match name and ID: Match: " << out.name << endl;
+			TraceL << "Match name and ID: Match: " << out.name << endl;
 
 			ret = true;
 			if (id == -1 || id == i) {
 				
-				traceL("DeviceManager") << "Match name and ID: Match ID: " << out.name << endl;
+				TraceL << "Match name and ID: Match ID: " << out.name << endl;
 				break;
 			}
 		}

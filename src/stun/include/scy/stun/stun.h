@@ -29,9 +29,6 @@ namespace scy {
 namespace stun {
 
 
-// The mask used to determine whether a STUN message is a request/response etc.
-const UInt32 kTypeMask = 0x0110;
-
 // Following values correspond to RFC5389.
 const int kAttributeHeaderSize = 4;
 const int kMessageHeaderSize = 20;
@@ -50,18 +47,48 @@ enum AddressFamily
 };
 
 
-#define IS_STUN_REQUEST(msg_type)       (((msg_type) & 0x0110) == 0x0000)
-#define IS_STUN_INDICATION(msg_type)    (((msg_type) & 0x0110) == 0x0010)
-#define IS_STUN_SUCCESS_RESP(msg_type)  (((msg_type) & 0x0110) == 0x0100)
-#define IS_STUN_ERR_RESP(msg_type)      (((msg_type) & 0x0110) == 0x0110)
+#if 0
+inline bool isChannelData(UInt16 msgType)
+{
+  // The first two bits of a channel data message are 0b01.
+  return ((msgType & 0xC000) == 0x4000);
+}
+
+inline bool isRequestType(int msgType) {
+	 return ((msgType & 0x0110) == 0x000);
+}
+
+inline bool isIndicationType(int msgType) {
+	return ((msgType & 0x0110) == 0x010);
+}
+
+inline bool isSuccessResponseType(int msgType) {
+	return ((msgType & 0x0110) == 0x100);
+}
+
+inline bool isErrorResponseType(int msgType) {
+  return ((msgType & 0x0110) == 0x110);
+}
+
+inline int getSuccessResponseType(int reqType) {
+	return isRequestType(reqType) ? (reqType | 0x100) : -1;
+}
+
+inline int getErrorResponseType(int reqType) {
+	return isRequestType(reqType) ? (reqType | 0x110) : -1;
+}
 
 
-#define GET_STUN_REQUEST(msg_type)      (msg_type & 0xFEEF)
-#define GET_STUN_INDICATION(msg_type)   ((msg_type & 0xFEEF)|0x0010)
-#define GET_STUN_SUCCESS_RESP(msg_type) ((msg_type & 0xFEEF)|0x0100)
-#define GET_STUN_ERR_RESP(msg_type)      (msg_type | 0x0110)
+#define IS_STUN_REQUEST(msgType)       (((msgType) & 0x0110) == 0x0000)
+#define IS_STUN_INDICATION(msgType)    (((msgType) & 0x0110) == 0x0010)
+#define IS_STUN_SUCCESS_RESP(msgType)  (((msgType) & 0x0110) == 0x0100)
+#define IS_STUN_ERR_RESP(msgType)      (((msgType) & 0x0110) == 0x0110)
 
-/*
+#define GET_STUN_REQUEST(msgType)      (msgType & 0xFEEF)
+#define GET_STUN_INDICATION(msgType)   ((msgType & 0xFEEF)|0x0010)
+#define GET_STUN_SUCCESS_RESP(msgType) ((msgType & 0xFEEF)|0x0100)
+#define GET_STUN_ERR_RESP(msgType)      (msgType | 0x0110)
+
 #define STUN_HEADER_LENGTH (20)
 #define STUN_CHANNEL_HEADER_LENGTH (4)
 
@@ -79,7 +106,7 @@ enum AddressFamily
 #define STUN_CHANNEL_LIFETIME (600)
 #define STUN_PERMISSION_LIFETIME (300)
 #define STUN_NONCE_EXPIRATION_TIME (600)
-*/
+#endif
 
 
 } } // namespace scy:stun

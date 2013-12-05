@@ -43,7 +43,7 @@ void InstallMonitor::onInstallStateChange(void* sender, InstallationState& state
 {
 	auto task = reinterpret_cast<InstallTask*>(sender);
 
-	debugL() << "[InstallMonitor] onInstallStateChange: " << task << ": " << state << endl;
+	DebugL << "[InstallMonitor] onInstallStateChange: " << task << ": " << state << endl;
 
 	InstallStateChange.emit(this, *task, state, oldState);
 }
@@ -53,7 +53,7 @@ void InstallMonitor::onInstallComplete(void* sender)
 {
 	auto task = reinterpret_cast<InstallTask*>(sender);
 
-	debugL() << "[InstallMonitor] Package Install Complete: " << task->state().toString() << endl;
+	DebugL << "[InstallMonitor] Package Install Complete: " << task->state().toString() << endl;
 
 	// Notify listeners when each package completes.
 	InstallComplete.emit(this, *task->local());
@@ -74,7 +74,7 @@ void InstallMonitor::onInstallComplete(void* sender)
 
 		progress = (_packages.size() - _tasks.size()) / _packages.size();
 
-		infoL() << "[InstallMonitor] Waiting on " 
+		InfoL << "[InstallMonitor] Waiting on " 
 			<< _tasks.size() << " packages to complete" << endl;
 	}
 

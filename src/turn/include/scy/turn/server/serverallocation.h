@@ -52,11 +52,11 @@ public:
 		// If this call returns false the allocation will be deleted.
 	
 	virtual Int64 timeRemaining() const; 
-	virtual UInt32 maxTimeRemaining() const;
+	virtual Int64 maxTimeRemaining() const;
 	virtual Server& server(); 
 	
 	virtual void print(std::ostream& os) const;
-	virtual const char* className() const { return "ServerAllocation"; };
+	//virtual const char* className() const { return "ServerAllocation"; };
 
 protected:
 	virtual ~ServerAllocation();

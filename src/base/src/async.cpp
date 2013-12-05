@@ -62,7 +62,7 @@ void Runner::runAsync(Context* c)
 			}
 		}
 	catch (std::exception& exc) {
-		errorL("RunnerContext") << "Runner error: " << exc.what() << std::endl;	
+		ErrorL << "Runner error: " << exc.what() << std::endl;	
 #ifdef _DEBUG
 		//throw exc;
 #endif

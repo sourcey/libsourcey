@@ -38,16 +38,16 @@ class FiveTuple
 	///                                                               |         |
 	///                                                               | External|
 	///                                                             / | Client  |
-	///                                                           ///  |         |
+	///                                                           //  |         |
 	///                                                          /    |         |
-	///                                                        ///     +---------+
+	///                                                        //     +---------+
 	///                                                       /
-	///                                                     ///
+	///                                                     //
 	///                     +-+                            /
 	///                     | |                           /
-	///                     | |                         ///
+	///                     | |                         //
 	///      +---------+    | |          +---------+   /              +---------+
-	///      |         |    |N|          |         | ///               |         |
+	///      |         |    |N|          |         | //               |         |
 	///      | TURN    |    | |          |         |/                 | External|
 	///      | Client  |----|A|----------|   TURN  |------------------| Client  |
 	///      |         |    | |^        ^|  Server |^                ^|         |
@@ -73,27 +73,33 @@ class FiveTuple
 	///
 {
 public:
-  FiveTuple();
-  FiveTuple(const net::Address& remote, const net::Address& local, net::TransportType transport);
-  FiveTuple(const FiveTuple& r);
+	FiveTuple();
+	FiveTuple(const net::Address& remote, const net::Address& local, net::TransportType transport);
+	FiveTuple(const FiveTuple& r);
 
-  const net::Address& remote() const { return _remote; }
-  const net::Address& local() const { return _local; }
-  const net::TransportType& transport() const { return _transport; }
+	const net::Address& remote() const { return _remote; }
+	const net::Address& local() const { return _local; }
+	const net::TransportType& transport() const { return _transport; }
 
-  void remote(const net::Address& remote) { _remote = remote; }
-  void local(const net::Address& local) { _local = local; }
-  void transport(const net::TransportType& transport) { _transport = transport; }
+	void remote(const net::Address& remote) { _remote = remote; }
+	void local(const net::Address& local) { _local = local; }
+	void transport(const net::TransportType& transport) { _transport = transport; }
 
-  bool operator ==(const FiveTuple& r) const;
-  bool operator <(const FiveTuple& r) const;
+	bool operator ==(const FiveTuple& r) const;
+	bool operator <(const FiveTuple& r) const;
 
-  std::string toString() const;
+	std::string toString() const;
+		
+	friend std::ostream& operator << (std::ostream& stream, const FiveTuple& tuple) 
+	{
+		stream << tuple.toString();
+		return stream;
+	}
 
 private:
-  net::Address _remote;
-  net::Address _local;
-  net::TransportType _transport;
+	net::Address _remote;
+	net::Address _local;
+	net::TransportType _transport;
 };
 
 

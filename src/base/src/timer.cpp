@@ -32,20 +32,20 @@ namespace scy {
 Timer::Timer(uv::Loop* loop) : 
 	_handle(loop, new uv_timer_t)
 {
-	//traceL("Timer", this) << "Create" << endl;
+	//TraceLS(this) << "Create" << endl;
 	init();
 }
 
 
 Timer::~Timer()
 {
-	//traceL("Timer", this) << "Destroy" << endl;
+	//TraceLS(this) << "Destroy" << endl;
 }
 
 
 void Timer::init()
 {
-	//traceL("Timer", this) << "Init" << endl;	
+	//TraceLS(this) << "Init" << endl;	
 
 	_count = 0;
 	_timeout = 0;
@@ -70,9 +70,9 @@ void Timer::start(Int64 interval)
 
 void Timer::start(Int64 timeout, Int64 interval) 
 {
-	//traceL("Timer", this) << "Starting: " << << timeout << ": " << interval << endl;
+	//TraceLS(this) << "Starting: " << << timeout << ": " << interval << endl;
 	assert(_handle.ptr());
-	assert(timeout > 0);
+	assert(timeout > 0 || interval > 0);
 
 	_timeout = timeout;
 	_interval = interval;
@@ -91,7 +91,7 @@ void Timer::start(Int64 timeout, Int64 interval)
 
 void Timer::stop() 
 {
-	//traceL("Timer", this) << "Stopping: " << __handle.ptr << endl;
+	//TraceLS(this) << "Stopping: " << __handle.ptr << endl;
 	
 	if (!active())
 		return; // do nothing
@@ -106,7 +106,7 @@ void Timer::stop()
 
 void Timer::restart()
 {
-	//traceL("Timer", this) << "Restarting: " << __handle.ptr << endl;
+	//TraceLS(this) << "Restarting: " << __handle.ptr << endl;
 	if (!active())
 		return start(_timeout, _interval);
 	return again();
@@ -115,7 +115,7 @@ void Timer::restart()
 
 void Timer::again() 
 {
-	//traceL("Timer", this) << "Again: " << __handle.ptr << endl;
+	//TraceLS(this) << "Again: " << __handle.ptr << endl;
 
 	assert(_handle.ptr());
     int err = uv_timer_again(_handle.ptr<uv_timer_t>());
@@ -128,7 +128,7 @@ void Timer::again()
 
 void Timer::setInterval(Int64 interval)
 {
-	//traceL("Timer", this) << "Set interval: " << interval << endl;
+	//TraceLS(this) << "Set interval: " << interval << endl;
 	
 	assert(_handle.ptr());
     uv_timer_set_repeat(_handle.ptr<uv_timer_t>(), interval);
@@ -175,20 +175,20 @@ uv::Handle& Timer::handle()
 Timer2::Timer2(uv::Loop* loop) : 
 	ptr(loop, new uv_timer_t)
 {
-	//traceL("Timer2", this) << "Create" << endl;
+	//TraceLS(this) << "Create" << endl;
 	init();
 }
 
 
 Timer2::~Timer2()
 {
-	//traceL("Timer2", this) << "Destroy" << endl;
+	//TraceLS(this) << "Destroy" << endl;
 }
 
 
 void Timer2::init()
 {
-	//traceL("Timer2", this) << "Init" << endl;	
+	//TraceLS(this) << "Init" << endl;	
 
 	_count = 0;
 	_timeout = 0;
@@ -220,7 +220,7 @@ void Timer2::start(Int64 interval)
 
 void Timer2::start(Int64 timeout, Int64 interval) 
 {
-	//traceL("Timer2", this) << "Starting: " << << timeout << ": " << interval << endl;
+	//TraceLS(this) << "Starting: " << << timeout << ": " << interval << endl;
 	assert(ptr.ptr());
 	assert(timeout > 0);
 
@@ -241,7 +241,7 @@ void Timer2::start(Int64 timeout, Int64 interval)
 
 void Timer2::stop() 
 {
-	//traceL("Timer2", this) << "Stopping: " << ptr.ptr() << endl;
+	//TraceLS(this) << "Stopping: " << ptr.ptr() << endl;
 	
 	if (!active())
 		return; // do nothing
@@ -256,7 +256,7 @@ void Timer2::stop()
 
 void Timer2::restart()
 {
-	//traceL("Timer2", this) << "Restarting: " << ptr.ptr() << endl;
+	//TraceLS(this) << "Restarting: " << ptr.ptr() << endl;
 	if (!active())
 		return start(_timeout, _interval);
 	return again();
@@ -265,7 +265,7 @@ void Timer2::restart()
 
 void Timer2::again() 
 {
-	//traceL("Timer2", this) << "Again: " << ptr.ptr() << endl;
+	//TraceLS(this) << "Again: " << ptr.ptr() << endl;
 
 	assert(ptr.ptr());
     int err = uv_timer_again(ptr.ptr<uv_timer_t>());
@@ -278,7 +278,7 @@ void Timer2::again()
 
 void Timer2::setInterval(Int64 interval)
 {
-	//traceL("Timer2", this) << "Set interval: " << interval << endl;
+	//TraceLS(this) << "Set interval: " << interval << endl;
 	
 	assert(ptr.ptr());
     uv_timer_set_repeat(ptr.ptr<uv_timer_t>(), interval);
@@ -336,7 +336,7 @@ void Timer::unref()
 Timer::Timer(Int64 timeout, Int64 interval, uv::Loop* loop, bool ghost) : 
 	uv::Handle(loop, new uv_timer_t), _ghost(ghost)
 {
-	//traceL("Timer", this) << "Create" << endl;	
+	//TraceLS(this) << "Create" << endl;	
 	init();
 	//if (timeout || interval)
 	//	start(timeout, interval);
@@ -345,13 +345,13 @@ Timer::Timer(Int64 timeout, Int64 interval, uv::Loop* loop, bool ghost) :
 /*
 void Timer::onTimeout()
 {	
-	//traceL("Timer", this) << "On timeout: " << _count << endl;
+	//TraceLS(this) << "On timeout: " << _count << endl;
 }
 */
 /*
 void Timer::close()
 {
-	//traceL("Timer", this) << "Closing: " << __handle.ptr << endl;
+	//TraceLS(this) << "Closing: " << __handle.ptr << endl;
 	Base::close();
 }
 */
@@ -364,7 +364,7 @@ void Timer::updateState()
 	bool wasActive = _active;
 	_active = !!uv_is_active((uv__handle.ptr_t*) _handle.ptr<uv_timer_t>());
 		
-	//traceL("Timer", this) << "Update State: " << _active << endl;
+	//TraceLS(this) << "Update State: " << _active << endl;
 	if (!wasActive && _active) {
 		// If our state is changing from inactive to active, we
 		// increase the loop's reference count.

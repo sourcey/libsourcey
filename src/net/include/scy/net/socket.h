@@ -326,7 +326,10 @@ public:
 		// to intercept socket events before they hit the application.
 		
 	virtual int send(const char* data, int len, int flags = 0);
+		// Default send interface for TCP type sockets.
+		
 	virtual int send(const char* data, int len, const Address& peerAddress, int flags = 0);
+		// Multicast send interface for UDP type sockets.
 	
 	Socket* socket;
 

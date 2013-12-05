@@ -24,57 +24,26 @@
 using std::endl;
 
 
-
 namespace scy {
 namespace smpl {
 
 
 Roster::Roster()
 {	
-	//traceL("Roster", this) << "Create" << endl;
+	//TraceLS(this) << "Create" << endl;
 }
 	
 
 Roster::~Roster() 
 {
-	//traceL("Roster", this) << "Destroy" << endl;
-}
-
-
-void Roster::update(const json::Value& data, bool whiny)
-{
-	if (data.isObject() &&
-		data.isMember("id") && 
-		data.isMember("user") && 
-		data.isMember("name") && 
-		data.isMember("type")) {
-		traceL("Roster", this) << "Updating: " << json::stringify(data, true) << endl;
-		std::string id = data["id"].asString();
-		Peer* peer = get(id, false);
-		if (!peer) {
-			peer = new Peer(data);
-			add(id, peer);
-		} else
-			static_cast<json::Value&>(*peer) = data;
-	}
-	else if (data.isArray()) {
-		for (auto it = data.begin(); it != data.end(); it++) {
-			update(*it, whiny);	
-		}
-	}
-	else {
-		std::string error("Bad presence data: " + json::stringify(data));
-		errorL("Roster", this) << error << endl;	
-		if (whiny)
-			throw std::runtime_error(error);
-	}
+	//TraceLS(this) << "Destroy" << endl;
 }
 
 
 Peer* Roster::getByHost(const std::string& host)
 {
 	Mutex::ScopedLock lock(_mutex);
-	for (PeerMap::const_iterator it = _map.begin(); it != _map.end(); ++it) {	
+	for (auto it = _map.begin(); it != _map.end(); ++it) {	
 		if (it->second->host() == host)
 			return it->second;
 	}
@@ -94,11 +63,44 @@ void Roster::print(std::ostream& os) const
 	Mutex::ScopedLock lock(_mutex);
 
 	os << "Roster[";
-	for (PeerMap::const_iterator it = _map.begin(); it != _map.end(); ++it) {	
+	for (auto it = _map.begin(); it != _map.end(); ++it) {	
 		os << "\n\t" << it->second << ": " << it->first;
 	}
 	os << "\n]";
 }
+
+
+#if 0
+void Roster::update(const json::Value& data, bool whiny)
+{
+	if (data.isObject() &&
+		data.isMember("id") && 
+		data.isMember("user") && 
+		data.isMember("name") //&& 
+		//data.isMember("type")
+		) {
+		TraceLS(this) << "Updating: " << json::stringify(data, true) << endl;
+		std::string id = data["id"].asString();
+		Peer* peer = get(id, false);
+		if (!peer) {
+			peer = new Peer(data);
+			add(id, peer);
+		} else
+			static_cast<json::Value&>(*peer) = data;
+	}
+	else if (data.isArray()) {
+		for (auto it = data.begin(); it != data.end(); it++) {
+			update(*it, whiny);	
+		}
+	}
+	else {
+		std::string error("Bad presence data: " + json::stringify(data));
+		ErrorLS(this) << error << endl;	
+		if (whiny)
+			throw std::runtime_error(error);
+	}
+}
+#endif
 
 
 } } // namespace scy::smpl

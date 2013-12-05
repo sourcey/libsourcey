@@ -70,7 +70,7 @@ public:
 class UDPBase: public uv::Handle, public net::SocketBase
 {
 public:
-	UDPBase();
+	UDPBase(uv::Loop* loop = uv::defaultLoop());
 	virtual ~UDPBase();
 	
 	virtual void connect(const net::Address& peerAddress);

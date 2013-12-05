@@ -92,7 +92,7 @@ URL& URL::operator = (const char* uri)
 
 bool URL::parse(const std::string& url, bool whiny)
 {
-	debugL("URL") << "Parsing: " << url << std::endl;
+	DebugL << "Parsing: " << url << std::endl;
     _buf = url;
     if (http_parser_parse_url(url.c_str(), url.length(), 0, &_parser) == 0)
 		return true;

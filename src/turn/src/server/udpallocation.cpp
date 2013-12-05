@@ -47,17 +47,14 @@ UDPAllocation::UDPAllocation(Server& server,
 	// data from peers.
 	_relaySocket.bind(net::Address(server.options().listenAddr.host(), 0));		
 	_relaySocket.Recv += delegate(this, &UDPAllocation::onPeerDataReceived);
-	//_relaySocket.base().setBroadcast(true);
-	//_relaySocket.adapter() += packetDelegate(this, &UDPAllocation::onPacketReceived, 1);
 
-	log("trace") << " Initializing on address: " << _relaySocket.address() << endl;
+	TraceL << " Initializing on address: " << _relaySocket.address() << endl;
 }
 
 
 UDPAllocation::~UDPAllocation() 
 {
-	log("trace") << "Destroy" << endl;	
-	//_relaySocket.adapter() -= packetDelegate(this, &UDPAllocation::onPacketReceived);
+	TraceL << "Destroy" << endl;	
 	_relaySocket.Recv -= delegate(this, &UDPAllocation::onPeerDataReceived);
 	_relaySocket.close();
 }
@@ -65,7 +62,7 @@ UDPAllocation::~UDPAllocation()
 
 bool UDPAllocation::handleRequest(Request& request) 
 {	
-	log("trace") << "Handle Request" << endl;	
+	TraceL << "Handle Request" << endl;	
 
 	if (!ServerAllocation::handleRequest(request)) {
 		if (request.methodType() == stun::Message::SendIndication)
@@ -80,7 +77,7 @@ bool UDPAllocation::handleRequest(Request& request)
 
 void UDPAllocation::handleSendIndication(Request& request) 
 {	
-	log("trace") << "Handle Send Indication" << endl;
+	TraceL << "Handle Send Indication" << endl;
 
 	// The message is first checked for validity.  The Send indication MUST
 	// contain both an XOR-PEER-ADDRESS attribute and a DATA attribute.  If
@@ -90,14 +87,14 @@ void UDPAllocation::handleSendIndication(Request& request)
 
 	auto peerAttr = request.get<stun::XorPeerAddress>();
 	if (!peerAttr || (peerAttr && peerAttr->family() != 1)) {
-		log("error") << "Send Indication error: No Peer Address" << endl;
+		ErrorL << "Send Indication error: No Peer Address" << endl;
 		// silently discard...
 		return;
 	}
 
 	auto dataAttr = request.get<stun::Data>();
 	if (!dataAttr) {
-		log("error") << "Send Indication error: No Data attribute" << endl;
+		ErrorL << "Send Indication error: No Data attribute" << endl;
 		// silently discard...
 		return;
 	}
@@ -119,7 +116,7 @@ void UDPAllocation::handleSendIndication(Request& request)
 	
 	net::Address peerAddress = peerAttr->address();
 	if (!hasPermission(peerAddress.host())) {
-		log("error") << "Send Indication error: No permission for: " << peerAddress.host() << endl;
+		ErrorL << "Send Indication error: No permission for: " << peerAddress.host() << endl;
 		// silently discard...
 		return;
 	}
@@ -141,46 +138,46 @@ void UDPAllocation::handleSendIndication(Request& request)
 
 	// The resulting UDP datagram is then sent to the peer.
 	
-	log("trace") << "Relaying Send Indication: " 
+	TraceL << "Relaying Send Indication: " 
 		<< "\r\tFrom: " << request.remoteAddr.toString()
-		<< "\r\tTo: " << peerAttr->address()
+		<< "\r\tTo: " << peerAddress
 		<< endl;	
 
-	if (send(dataAttr->bytes(), dataAttr->size(), peerAttr->address()) == -1) {
+	if (send(dataAttr->bytes(), dataAttr->size(), peerAddress) == -1) {
 		_server.respondError(request, 486, "Allocation Quota Reached");
 		delete this;
 	}
 }
 
 
-//void UDPAllocation::onPacketReceived(void*, RawPacket& packet) 
 void UDPAllocation::onPeerDataReceived(void*, net::SocketPacket& packet)
 {	
-	auto source = reinterpret_cast<net::PacketInfo*>(packet.info);
-	assert(source);
-	if (!source)
-		return;
+	//auto source = reinterpret_cast<net::PacketInfo*>(packet.info);
+	TraceL << "Received UDP Datagram from " << packet.info->peerAddress << endl;	
 	
+	if (!hasPermission(packet.info->peerAddress.host())) {
+		TraceL << "No Permission: " << packet.info->peerAddress.host() << endl;	
+		return;
+	}
+
 	updateUsage(packet.size());
 	
 	// Check that we have not exceeded out lifetime and bandwidth quota.
 	if (IAllocation::deleted())
 		return;
-
-	log("trace") << "Received UDP Datagram from " << source->peerAddress << endl;	
-	
-	if (!hasPermission(source->peerAddress.host())) {
-		log("trace") << "No Permission: " << source->peerAddress.host() << endl;	
-		return;
-	}
 	
 	stun::Message message(stun::Message::Indication, stun::Message::DataIndication);
+		
+	// Try to use the externalIP value for the XorPeerAddress 
+	// attribute to overcome proxy and NAT issues.
+	std::string peerHost(server().options().externalIP);
+	if (peerHost.empty()) {
+		peerHost.assign(packet.info->peerAddress.host());
+		assert(0 && "external IP not set");
+	}
 	
-	auto peerAttr = new stun::XorPeerAddress;	
-	peerAttr->setAddress(source->peerAddress);
-	//peerAttr->setFamily(1);
-	//peerAttr->setPort(source->peerAddress.port());
-	//peerAttr->setIP(source->peerAddress.host());
+	auto peerAttr = new stun::XorPeerAddress;
+	peerAttr->setAddress(net::Address(peerHost, packet.info->peerAddress.port()));
 	message.add(peerAttr);
 
 	auto dataAttr = new stun::Data;
@@ -189,8 +186,8 @@ void UDPAllocation::onPeerDataReceived(void*, net::SocketPacket& packet)
 	
 	//Mutex::ScopedLock lock(_mutex);
 
-	log("trace") << "Send data indication:" 
-		<< "\n\tFrom: " << source->peerAddress
+	TraceL << "Send data indication:" 
+		<< "\n\tFrom: " << packet.info->peerAddress
 		<< "\n\tTo: " << _tuple.remote()
 		//<< "\n\tData: " << std::string(packet.data(), packet.size())
 		<< endl;
@@ -207,8 +204,10 @@ int UDPAllocation::send(const char* data, int size, const net::Address& peerAddr
 	updateUsage(size);
 	
 	// Check that we have not exceeded our lifetime and bandwidth quota.
-	if (IAllocation::deleted())
+	if (IAllocation::deleted()) {
+		WarnL << "Send indication dropped: Allocation quota reached" << endl;
 		return -1;
+	}
 
 	return _relaySocket.base().send(data, size, peerAddress);
 }

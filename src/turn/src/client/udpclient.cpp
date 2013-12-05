@@ -31,14 +31,14 @@ namespace turn {
 UDPClient::UDPClient(ClientObserver& observer, const Options& options) : 
 	Client(observer, options)
 {
-	log() << "Create" << endl;
+	TraceL << "Create" << endl;
 	_socket.assign(new net::UDPBase, false);
 }
 
 
 UDPClient::~UDPClient() 
 {
-	log() << "Destroy" << endl;
+	TraceL << "Destroy" << endl;
 }
 
 

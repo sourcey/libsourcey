@@ -34,14 +34,14 @@ namespace net {
 TCPSocket::TCPSocket() : 
 	net::Socket(new TCPBase, false)
 {	
-	traceL("TCPSocket", this) << "Create" << endl;	
+	TraceLS(this) << "Create" << endl;	
 }
 
 
 TCPSocket::TCPSocket(TCPBase* base, bool shared) : 
 	net::Socket(base, shared) 
 {
-	traceL("TCPSocket", this) << "Destroy" << endl;	
+	TraceLS(this) << "Destroy" << endl;	
 }
 
 
@@ -67,14 +67,14 @@ TCPBase& TCPSocket::base() const
 TCPBase::TCPBase(uv::Loop* loop) :
 	Stream(loop)
 {
-	traceL("TCPBase", this) << "Create" << endl;
+	TraceLS(this) << "Create" << endl;
 	init();	
 }
 
 	
 TCPBase::~TCPBase() 
 {	
-	traceL("TCPBase", this) << "Destroy" << endl;	
+	TraceLS(this) << "Destroy" << endl;	
 }
 
 
@@ -82,7 +82,7 @@ void TCPBase::init()
 {
 	if (ptr()) return;
 
-	traceL("TCPBase", this) << "Init" << endl;
+	TraceLS(this) << "Init" << endl;
 	auto tcp = new uv_tcp_t;
 	tcp->data = this;
 	_ptr = reinterpret_cast<uv_handle_t*>(tcp);
@@ -103,7 +103,7 @@ namespace internal {
 
 void TCPBase::connect(const net::Address& peerAddress) 
 {
-	traceL("TCPBase", this) << "Connecting to " << peerAddress << endl;
+	TraceLS(this) << "Connecting to " << peerAddress << endl;
 	init();
 	_connectReq.reset(new uv_connect_t);
 	_connectReq.get()->data = this;
@@ -117,7 +117,7 @@ void TCPBase::connect(const net::Address& peerAddress)
 
 void TCPBase::bind(const net::Address& address, unsigned /* flags */) 
 {
-	traceL("TCPBase", this) << "Binding on " << address << endl;
+	TraceLS(this) << "Binding on " << address << endl;
 	init();
 	int r;
 	switch (address.af()) {
@@ -136,7 +136,7 @@ void TCPBase::bind(const net::Address& address, unsigned /* flags */)
 
 void TCPBase::listen(int backlog) 
 {
-	traceL("TCPBase", this) << "Listening" << endl;
+	TraceLS(this) << "Listening" << endl;
 	init();
 	int r = uv_listen(ptr<uv_stream_t>(), backlog, internal::onAcceptConnection);
 	if (r) setAndThrowError("TCP listen failed", r);
@@ -145,14 +145,14 @@ void TCPBase::listen(int backlog)
 
 bool TCPBase::shutdown()
 {
-	traceL("TCPBase", this) << "Shutdown" << endl;
+	TraceLS(this) << "Shutdown" << endl;
 	return Stream::shutdown();
 }
 
 
 void TCPBase::close()
 {
-	traceL("TCPBase", this) << "Close" << endl;
+	TraceLS(this) << "Close" << endl;
 	Stream::close();
 }
 
@@ -193,14 +193,16 @@ int TCPBase::send(const char* data, int len, const net::Address& /* peerAddress 
 {
 	//assert(len <= net::MAX_TCP_PACKET_SIZE); // libuv handles this for us
 	
-	traceL("TCPBase", this) << "Send: " << len << endl;
+	TraceLS(this) << "Send: " << len << endl;	
+	assert(Thread::currentID() == tid());
+
 	//if (len < 300)
-	//	traceL("TCPBase", this) << "Send: " << len << ": " << std::string(data, len) << endl;
+	//	TraceLS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
 	//else
-	//	traceL("TCPBase", this) << "Send long: " << len << ": " << std::string(data, 300) << endl;
+	//	TraceLS(this) << "Send long: " << len << ": " << std::string(data, 300) << endl;
 
 	if (!Stream::write(data, len)) {
-		warnL("TCPBase", this) << "Send error" << endl;	
+		WarnL << "Send error" << endl;	
 		return -1;
 	}
 
@@ -215,18 +217,18 @@ void TCPBase::acceptConnection()
 	// Create the socket on the stack.
 	// If the socket is not handled it will be destroyed.
 	net::TCPSocket socket;
-	traceL("TCPBase", this) << "Accept connection: " << socket.base().ptr() << endl;
+	TraceLS(this) << "Accept connection: " << socket.base().ptr() << endl;
 	uv_accept(ptr<uv_stream_t>(), socket.base().ptr<uv_stream_t>()); // uv_accept should always work
 	socket.base().readStart();		
 	AcceptConnection.emit(instance(), socket);
 	if (socket.base().refCount() == 1)
-		warnL("TCPBase", this) << "Accepted connection not handled" << endl;
+		WarnL << "Accepted connection not handled" << endl;
 }
 
 
 net::Address TCPBase::address() const
 {
-	//traceL("TCPBase", this) << "Get address: " << closed() << endl;
+	//TraceLS(this) << "Get address: " << closed() << endl;
 
 	if (!active())
 		return net::Address();
@@ -247,7 +249,7 @@ net::Address TCPBase::address() const
 
 net::Address TCPBase::peerAddress() const
 {
-	//traceL("TCPBase", this) << "Get peer address: " << closed() << endl;
+	//TraceLS(this) << "Get peer address: " << closed() << endl;
 	if (!active())
 		return net::Address();
 		//throw std::runtime_error("Invalid TCP socket: No peer address");
@@ -323,10 +325,10 @@ bool TCPBase::initialized() const
 
 void TCPBase::onRead(const char* data, int len)
 {
-	traceL("TCPBase", this) << "On read: " << len << endl;
+	TraceLS(this) << "On read: " << len << endl;
 	
 	//if (len < 300)
-	//	traceL("TCPBase", this) << "Received: " << std::string(data, len) << endl;
+	//	TraceLS(this) << "Received: " << std::string(data, len) << endl;
 	//_buffer.position(0);
 	//_buffer.limit(len);
 	//onRecv(mutableBuffer(_buffer.data(), len));
@@ -340,14 +342,14 @@ void TCPBase::onRead(const char* data, int len)
 
 void TCPBase::onRecv(const MutableBuffer& buf)
 {
-	traceL("TCPBase", this) << "Recv: " << buf.size() << endl;
+	TraceLS(this) << "Recv: " << buf.size() << endl;
 	emitRecv(buf, peerAddress()); //MutableBuffer(buf)
 }
 
 
 void TCPBase::onConnect(int status)
 {
-	traceL("TCPBase", this) << "On connect" << endl;
+	TraceLS(this) << "On connect" << endl;
 	
 	// Error handled by static callback proxy
 	if (status == 0) {
@@ -355,24 +357,24 @@ void TCPBase::onConnect(int status)
 			emitConnect();
 	}
 	else
-		errorL("TCPBase", this) << "Connection failed: " << error().message << endl;
+		ErrorLS(this) << "Connection failed: " << error().message << endl;
 }
 
 
 void TCPBase::onAcceptConnection(uv_stream_t*, int status) 
 {		
 	if (status == 0) {
-		traceL("TCPBase", this) << "On accept connection" << endl;
+		TraceLS(this) << "On accept connection" << endl;
 		acceptConnection();
 	}
 	else
-		errorL("TCPBase", this) << "Accept connection failed" << endl;
+		ErrorLS(this) << "Accept connection failed" << endl;
 }
 
 
 void TCPBase::onError(const Error& error) 
 {		
-	errorL("TCPBase", this) << "Error: " << error.message << endl;	
+	ErrorLS(this) << "Error: " << error.message << endl;	
 	emitError(error);
 	close(); // close on error
 }
@@ -380,7 +382,7 @@ void TCPBase::onError(const Error& error)
 
 void TCPBase::onClose() 
 {		
-	traceL("TCPBase", this) << "On close" << endl;	
+	TraceLS(this) << "On close" << endl;	
 	emitClose();
 }
 

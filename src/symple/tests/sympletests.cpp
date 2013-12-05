@@ -35,7 +35,13 @@ namespace smpl {
 	
 // ----------------------------------------------------------------------------
 // SocketIO Client Test
-//
+//		
+// TODO: 
+//  - Obtain authentication token
+//  - Transaction test
+//  - Presence test
+//  - Ack test
+//  - Benchmarks
 class Tests
 {
 	Application app;
@@ -43,6 +49,55 @@ class Tests
 public:
 	Tests()
 	{	
+		testAddress();
+	}
+
+	~Tests()
+	{
+		app.finalize();
+	}
+	
+	void testAddress() 
+	{
+		smpl::Address a("user@group/567257247245275");
+		assert(a.user == "user");
+		assert(a.group == "group");
+		assert(a.id == "567257247245275");
+		assert(a.valid());
+
+		smpl::Address a1("user@group");
+		assert(a1.user == "user");
+		assert(a1.group == "group");
+		assert(a1.id == "");
+		assert(a1.valid());
+
+		smpl::Address a2("group");
+		assert(a2.user == "");
+		assert(a2.group == "group");
+		assert(a2.id == "");
+		assert(a2.valid());
+
+		smpl::Address a3("");
+		assert(a3.user == "");
+		assert(a3.group == "");
+		assert(a3.id == "");
+		assert(!a3.valid());
+
+		smpl::Address a4("/567257247245275");
+		assert(a4.user == "");
+		assert(a4.group == "");
+		assert(a4.id == "567257247245275");
+		assert(a4.valid());
+
+		smpl::Address a5("group/567257247245275");
+		assert(a5.user == "");
+		assert(a5.group == "group");
+		assert(a5.id == "567257247245275");
+		assert(a5.valid());
+	}
+
+	void testClient() 
+	{
 		smpl::Client::Options options;
 		options.host = SERVER_HOST;
 		options.port = SERVER_PORT;
@@ -56,41 +111,24 @@ public:
 		//options.token = ""; used for authentication
 	
 #if USE_SSL
-		// Init SSL Context
-		SSLContext::Ptr ptrContext = new SSLContext(SSLContext::CLIENT_USE, "", "", "",
-			SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");	
-		SSLManager::instance().initializeClient(ptrContext);
-
 		smpl::SSLClient client(options); //reactor, runner, 
 #else
 		smpl::TCPClient client(options); //reactor, runner, 
 #endif
 		
 		client.StateChange += delegate(this, &Tests::onClientStateChange);
-		client.UpdatePresenceData += delegate(this, &Tests::onUpdatePresenceData);
+		client.CreatePresence += delegate(this, &Tests::onCreatePresence);
 		client.connect();
-		
+
 		//app.run();
 		app.waitForShutdown();
-		debugL() << "Event loop ended" << endl;
-		
-		// TODO: Obtain authentication token
-		// TODO: Transaction test
-		// TODO: Presence test
-		// TODO: Ack test
-		// TODO: Benchmarks
-		
-#if USE_SSL
-		SSLManager::instance().shutdown();
-#endif
-		app.finalize();
+		DebugL << "Event loop ended" << endl;
 	}
-
 
 	void onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState) 
 	{
 		smpl::Client* client = reinterpret_cast<smpl::Client*>(sender);	
-		debugL() << "Client state changed: " << state.toString() << ": " << client->socket().address() << endl;
+		DebugL << "Client state changed: " << state.toString() << ": " << client->socket().address() << endl;
 		
 		switch (state.id()) {
 		case sockio::ClientState::Connecting:
@@ -105,9 +143,9 @@ public:
 		}
 	}
 	
-	void onUpdatePresenceData(void*, smpl::Peer& peer)
+	void onCreatePresence(void*, smpl::Peer& peer)
 	{
-		debugL() << "Updating Client Data" << endl;
+		DebugL << "Updating Client Data" << endl;
 		
 		// Update the peer object to be broadcast with presence.
 		// Any arbitrary data can be broadcast with presence.
@@ -123,15 +161,21 @@ public:
 int main(int argc, char** argv) 
 {	
 	Logger::instance().add(new ConsoleChannel("debug", LTrace));
+	
+#if USE_SSL
+		// Init SSL Context
+		SSLContext::Ptr ptrContext = new SSLContext(SSLContext::CLIENT_USE, "", "", "",
+			SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");	
+		SSLManager::instance().initializeClient(ptrContext);
+#endif	
 
-	// Init SSL Context
-	//SSLManager::instance().initializeClient(
-	//	new SSLContext(SSLContext::CLIENT_USE, "", "", "",
-	//		SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"));
 	{
 		scy::smpl::Tests run;
 	}		
-	//SSLManager::instance().shutdown();
+		
+#if USE_SSL
+		SSLManager::instance().shutdown();
+#endif	
 	Logger::shutdown();
 	return 0;
 }

@@ -1,7 +1,101 @@
 #
+### Macro: sourcey_find_library
+#
+# Finds libraries with finer control over search paths 
+# for compilers with multiple configuration types.
+#
+macro(sourcey_find_library prefix)
+
+  include(CMakeParseArguments REQUIRED)
+  # cmake_parse_arguments(prefix options singleValueArgs multiValueArgs ${ARGN})
+  cmake_parse_arguments(${name}
+    ""
+    ""
+    "DEBUG_NAMES;RELEASE_NAMES;NAMES;DEBUG_PATHS;RELEASE_PATHS;PATHS"
+    ${ARGN}
+    )
+  
+  if(WIN32 AND MSVC)  
+      
+    if(NOT ${prefix}_DEBUG_PATHS)  
+      list(APPEND ${prefix}_DEBUG_PATHS ${${prefix}_PATHS})
+    endif()
+
+    #set(${prefix}_DEBUG_LIBRARY ${prefix}_DEBUG_LIBRARY-NOTFOUND)
+    find_library(${prefix}_DEBUG_LIBRARY 
+      NAMES 
+        ${${prefix}_DEBUG_NAMES}
+        ${${prefix}_NAMES}
+      PATHS 
+        ${${prefix}_DEBUG_PATHS}
+        # ${${prefix}_PATHS}
+      )
+      
+    if(NOT ${prefix}_RELEASE_PATHS)  
+      list(APPEND ${prefix}_RELEASE_PATHS ${${prefix}_PATHS})
+    endif()
+    
+    #set(${prefix}_RELEASE_LIBRARY ${prefix}_RELEASE_LIBRARY-NOTFOUND)
+    find_library(${prefix}_RELEASE_LIBRARY 
+      NAMES 
+        ${${prefix}_RELEASE_NAMES}
+        ${${prefix}_NAMES}
+      PATHS 
+        ${${prefix}_RELEASE_PATHS}
+        # ${${prefix}_PATHS}
+      )
+      
+    if(${prefix}_DEBUG_LIBRARY OR ${prefix}_RELEASE_LIBRARY)  
+      if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)      
+        if (${prefix}_RELEASE_LIBRARY)         
+          list(APPEND ${prefix}_LIBRARY "optimized" ${${prefix}_RELEASE_LIBRARY})
+        endif()
+        if (${prefix}_DEBUG_LIBRARY)     
+          list(APPEND ${prefix}_LIBRARY "debug" ${${prefix}_DEBUG_LIBRARY})
+        endif()
+      else()    
+        if (${prefix}_RELEASE_LIBRARY) 
+          list(APPEND ${prefix}_LIBRARY ${${prefix}_RELEASE_LIBRARY})
+        elseif (${prefix}_DEBUG_LIBRARY) 
+          list(APPEND ${prefix}_LIBRARY ${${prefix}_DEBUG_LIBRARY})
+        endif()
+      endif()  
+      mark_as_advanced(${prefix}_DEBUG_LIBRARY ${prefix}_RELEASE_LIBRARY)
+    endif()
+
+  else()
+
+    find_library(${prefix}_LIBRARY 
+      NAMES 
+        # ${${prefix}_RELEASE_NAMES}
+        # ${${prefix}_DEBUG_NAMES}
+        ${${prefix}_NAMES}
+      PATHS 
+        # ${${prefix}_RELEASE_PATHS}
+        # ${${prefix}_DEBUG_PATHS}
+        ${${prefix}_PATHS}
+      )
+
+  endif()
+   
+  #message("*** Sourcey find library for ${prefix}")
+  #message("Debug Library: ${${prefix}_DEBUG_LIBRARY}")
+  #message("Release Library: ${${prefix}_RELEASE_LIBRARY}")
+  #message("Library: ${${prefix}_LIBRARY}")
+  #message("Debug Paths: ${${prefix}_RELEASE_PATHS}")
+  #message("Release Paths: ${${prefix}_DEBUG_PATHS}")
+  #message("Paths: ${${prefix}_PATHS}")
+  #message("Debug Names: ${${prefix}_RELEASE_NAMES}")
+  #message("Release Names: ${${prefix}_DEBUG_NAMES}")
+  #message("Names: ${${prefix}_NAMES}")
+    
+endmacro(sourcey_find_library)
+
+
+#
 ### Macro: include_dependency
 #
-# Inclusion of 3rd party dependency into a LibSourcey project.
+# Includes a 3rd party dependency into the LibSourcey solution.
 #
 macro(include_dependency name)
   #message(STATUS "Including dependency: ${name}")
@@ -32,29 +126,29 @@ macro(include_dependency name)
   set(HAVE_${var_root_upper} 1) # TRUE PARENT_SCOPE
   # Expose to LibSourcey
   if(${var_root}_INCLUDE_DIR)
-    #message(STATUS "- Found ${name} Inc Dir: ${${var_root}_INCLUDE_DIR}")
+    message(STATUS "- Found ${name} Inc Dir: ${${var_root}_INCLUDE_DIR}")
     #include_directories(${${var_root}_INCLUDE_DIR})
     list(APPEND LibSourcey_INCLUDE_DIRS ${${var_root}_INCLUDE_DIR})
   endif()
   if(${var_root}_INCLUDE_DIRS)
-    #message(STATUS "- Found ${name} Inc Dirs: ${${var_root}_INCLUDE_DIRS}")
+    message(STATUS "- Found ${name} Inc Dirs: ${${var_root}_INCLUDE_DIRS}")
     #include_directories(${${var_root}_INCLUDE_DIRS})
     list(APPEND LibSourcey_INCLUDE_DIRS ${${var_root}_INCLUDE_DIRS})    
   endif()
   if(${var_root}_LIBRARY_DIR)
-    #message(STATUS "- Found ${name} Lib Dir: ${${var_root}_LIBRARY_DIR}")
+    message(STATUS "- Found ${name} Lib Dir: ${${var_root}_LIBRARY_DIR}")
     #link_directories(${${var_root}_LIBRARY_DIR})
     list(APPEND LibSourcey_LIBRARY_DIRS ${${var_root}_LIBRARY_DIR})
     #list(REMOVE_DUPLICATES LibSourcey_LIBRARY_DIRS)
   endif()
   if(${var_root}_LIBRARY_DIRS)
-    #message(STATUS "- Found ${name} Lib Dirs: ${${var_root}_LIBRARY_DIRS}")
+    message(STATUS "- Found ${name} Lib Dirs: ${${var_root}_LIBRARY_DIRS}")
     #link_directories(${${var_root}_LIBRARY_DIRS})
     list(APPEND LibSourcey_LIBRARY_DIRS ${${var_root}_LIBRARY_DIRS})
     #list(REMOVE_DUPLICATES LibSourcey_LIBRARY_DIRS)
   endif()
   if(${var_root}_LIBRARY)
-    #message(STATUS "- Found ${name} Lib: ${${var_root}_LIBRARY}")
+    message(STATUS "- Found ${name} Lib: ${${var_root}_LIBRARY}")
     list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${var_root}_LIBRARY})
   endif()
   if(${var_root}_LIBRARIES)
@@ -62,7 +156,7 @@ macro(include_dependency name)
     list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${var_root}_LIBRARIES})
   endif()
   if(${var_root}_DEPENDENCIES)
-    #message(STATUS "- Found ${name} Libs: ${${var_root}_DEPENDENCIES}")
+    message(STATUS "- Found ${name} Libs: ${${var_root}_DEPENDENCIES}")
     list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${var_root}_DEPENDENCIES})
     #list(APPEND LibSourcey_BUILD_DEPENDENCIES ${${var_root}_DEPENDENCIES})
   endif()
@@ -72,7 +166,7 @@ endmacro()
 #
 ### Macro: include_sourcey_modules
 #
-# Inclusion of LibSourcey module(s) into a project.
+# Includes dependent LibSourcey module(s) into a project.
 #
 macro(include_sourcey_modules)
   foreach(name ${ARGN})
