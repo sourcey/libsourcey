@@ -38,7 +38,7 @@ namespace scy {
 //
 
 
-TaskRunner::TaskRunner(async::Runner::ptr runner)
+TaskRunner::TaskRunner(async::Runner::Ptr runner)
 {	
 	if (runner)
 		setRunner(runner);
@@ -191,7 +191,7 @@ void TaskRunner::clear()
 }
 
 
-void TaskRunner::setRunner(async::Runner::ptr runner)
+void TaskRunner::setRunner(async::Runner::Ptr runner)
 {
 	TraceLS(this) << "Set async: " << runner << endl;
 

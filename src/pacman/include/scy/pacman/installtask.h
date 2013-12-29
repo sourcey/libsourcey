@@ -87,18 +87,18 @@ struct InstallOptions
 
 class InstallTask: 
 	public async::Runnable, 
-	public basic::Polymorphic, 
 	public Stateful<InstallationState>
 	///
-	/// This class implements actual package 
+	/// This class implements the package 
 	/// installation procedure.
 {
 public:
+	typedef std::shared_ptr<InstallTask> Ptr;
 
-public:
 	InstallTask(PackageManager& manager, 
 				LocalPackage* local, RemotePackage* remote, 
-				const InstallOptions& options = InstallOptions());
+				const InstallOptions& options = InstallOptions(), 
+				uv::Loop* loop = uv::defaultLoop());
 	virtual ~InstallTask();	
 
 	virtual void start();
@@ -108,7 +108,7 @@ public:
 		// Downloads the package archive from the server.
 
 	virtual void doExtract();
-		// Extracts the downloaded package archive files
+		// Extracts the downloaded package files
 		// to the intermediate directory.
 
 	virtual void doFinalize();
@@ -118,12 +118,14 @@ public:
 	virtual void setComplete();
 		// Called when the task completes either
 		// successfully or in error.
+		// This will trigger destruction.
 
 	virtual Package::Asset getRemoteAsset() const;
 
 	virtual LocalPackage* local() const;
 	virtual RemotePackage* remote() const;
 	virtual InstallOptions& options();
+	virtual uv::Loop* loop() const;
 	
 	virtual bool valid() const;
 	virtual bool cancelled() const;
@@ -131,17 +133,9 @@ public:
 	virtual bool success() const;
 	virtual bool complete() const;
 	virtual int progress() const;
-
-	//virtual void printLog(std::ostream& ost) const;	
-	virtual const char* className() const { return "InstallTask"; }
 	
 	Signal<int&> Progress;
 		// Signals on progress update [0-100].
-	
-	//NullSignal Finalizing;
-		// Signals that the task is about to begin finalization.
-		// The outside application should ensure that no pre-existing 
-		// files are in use, and can be overwritten.
 	
 	NullSignal Complete;
 		// Signals on task completion for both
@@ -155,22 +149,21 @@ protected:
 	virtual void onStateChange(InstallationState& state, const InstallationState& oldState);
 	virtual void onDownloadProgress(void* sender, const double& progress);
 	virtual void onDownloadComplete(void* sender, const http::Response& response);
-	
-	//virtual void onDecompressionError(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const std::string>& info);
-	//virtual void onDecompressionOk(const void*, std::pair<const Poco::Zip::ZipLocalFileHeader, const Poco::Path>& info);
 
 	virtual void setProgress(int value);
 
 protected:
 	mutable Mutex	_mutex;
 	
-	Thread          _thread;
+	Idler			_runner;
+	//Thread          _thread;
 	PackageManager& _manager;
 	LocalPackage*	_local;
 	RemotePackage*	_remote;
 	InstallOptions	_options;
 	int             _progress;
 	bool			_downloading;
+	uv::Loop*       _loop;
 	http::ClientConnection* _dlconn;
 	
 	friend class PackageManager;
@@ -178,7 +171,8 @@ protected:
 };
 
 
-typedef std::vector<InstallTask*> InstallTaskList;
+typedef std::vector<InstallTask*> InstallTaskVec;
+typedef std::vector<InstallTask::Ptr> InstallTaskPtrVec;
 
 
 } } // namespace scy::pman

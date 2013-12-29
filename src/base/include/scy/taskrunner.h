@@ -94,7 +94,7 @@ class TaskRunner: public async::Runnable
 	// the task list calling the task's run() method.
 {
 public:
-	TaskRunner(async::Runner::ptr runner = nullptr);
+	TaskRunner(async::Runner::Ptr runner = nullptr);
 	virtual ~TaskRunner();
 	
 	virtual bool start(Task* task);
@@ -115,7 +115,7 @@ public:
 		// Returns the task pointer matching the given ID, 
 		// or nullptr if no task exists.
 
-	virtual void setRunner(async::Runner::ptr runner);
+	virtual void setRunner(async::Runner::Ptr runner);
 		// Set the asynchronous context for packet processing.
 		// This may be a Thread or another derivative of Async.
 		// Must be set before the stream is activated.
@@ -170,7 +170,7 @@ protected:
 	
 	mutable Mutex	_mutex;
 	TaskList		_tasks;
-	async::Runner::ptr _runner;
+	async::Runner::Ptr _runner;
 };
 
 

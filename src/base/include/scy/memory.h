@@ -35,7 +35,7 @@
 namespace scy {
 
 	
-class DeferredDeleter;
+class ScopedPointer;
 
 
 class GarbageCollector
@@ -75,8 +75,8 @@ protected:
 		
 	mutable Mutex _mutex;
 	unsigned long _tid;
-	std::vector<DeferredDeleter*> _pending;
-	std::vector<DeferredDeleter*> _ready;
+	std::vector<ScopedPointer*> _pending;
+	std::vector<ScopedPointer*> _ready;
 	uv::Handle _handle;
 	bool _finalize;
 };
@@ -144,34 +144,34 @@ template<class T> struct Array
 
 
 //
-/// Deleter Storage Classes
+/// Scoped Pointer Classes
 //
 
 
-class DeferredDeleter
-	/// DeferredDeleter provides an interface for holding 
+class ScopedPointer
+	/// ScopedPointer provides an interface for holding 
 	/// and ansynchronously deleting a pointer in various ways. 
 {
 public:
-	DeferredDeleter() {}
-	virtual ~DeferredDeleter() {}
+	ScopedPointer() {}
+	virtual ~ScopedPointer() {}
 };
 
 
-template <class T, typename D = std::default_delete<T>>
-class PointerDeleter: public DeferredDeleter
-	/// PointerDeleter implements the DeferredDeleter interface  
+template <class T, typename D = std::default_delete<T> >
+class ScopedRawPointer: public ScopedPointer
+	/// ScopedRawPointer implements the ScopedPointer interface  
 	/// to provide a method for deleting a raw pointer.
 {
 public:
 	void* ptr;
 	
-	PointerDeleter(void* p) : 
+	ScopedRawPointer(void* p) : 
 		ptr(p)
 	{
 	}
 
-	virtual ~PointerDeleter()
+	virtual ~ScopedRawPointer()
 	{
 		D func;
 		func((T*)ptr);
@@ -180,25 +180,25 @@ public:
 };
 
 
-template <class T>
-class SharedPtrDeleter: public DeferredDeleter
-	/// SharedPtrDeleter implements the DeferredDeleter interface to
+template <class T> //, typename D = std::default_delete<T> 
+class ScopedSharedPointer: public ScopedPointer
+	/// ScopedSharedPointer implements the ScopedPointer interface to
 	/// provide deferred deletion for shared_ptr managed pointers.
 	/// Note that this class does not guarantee deletion of the managed
 	/// pointer; all it does is copy the shared_ptr and release it when
-	/// the SharedPtrDeleter instance is deleted, which makes it useful
+	/// the ScopedSharedPointer instance is deleted, which makes it useful
 	/// for certain asyncronous scenarios.
 {
 public:
 	std::shared_ptr<T> ptr;
 	
-	SharedPtrDeleter(std::shared_ptr<T> p) : 
+	ScopedSharedPointer(std::shared_ptr<T> p) : 
 		ptr(p)
 	{
 		assert(ptr);
 	}
 
-	virtual ~SharedPtrDeleter()
+	virtual ~ScopedSharedPointer()
 	{
 	}
 };
@@ -213,7 +213,7 @@ template <class C> inline void GarbageCollector::deleteLater(C* ptr)
 	/// Schedules a pointer for deferred deletion.
 { 
 	Mutex::ScopedLock lock(_mutex);
-	_pending.push_back(new PointerDeleter<C>(ptr));
+	_pending.push_back(new ScopedRawPointer<C>(ptr));
 }
 
 
@@ -221,7 +221,7 @@ template <class C> inline void GarbageCollector::deleteLater(std::shared_ptr<C> 
 	/// Schedules a shared pointer for deferred deletion.
 { 
 	Mutex::ScopedLock lock(_mutex);
-	_pending.push_back(new SharedPtrDeleter<C>(ptr));
+	_pending.push_back(new ScopedSharedPointer<C>(ptr));
 }
 
 
@@ -558,7 +558,7 @@ private:
 	//UVEmptyStatusCallback(GarbageCollector, onTimer, uv_timer_t);
 /*
 template <class C>
-class Deleter: public DeferredDeleter
+class Deleter: public ScopedPointer
 	/// Deleter is the base deleter template  
 	/// from which all others derive.
 {
@@ -567,7 +567,7 @@ public:
 	Func func;
 
 	Deleter(C* p, Func f) : 
-		DeferredDeleter(p), func(f)
+		ScopedPointer(p), func(f)
 	{
 	}
 
@@ -606,13 +606,13 @@ public:
 
 
 template <class C>
-class DeferredDeleter: public Deleter<C>
-	/// DeferredDeleter schedules a pointer for 
+class ScopedPointer: public Deleter<C>
+	/// ScopedPointer schedules a pointer for 
 	/// deferred deletion by the GarbageCollector.
 {
 public:
-	DeferredDeleter(C* p = nullptr) : 
-		Deleter<C>(p, &DeferredDeleter<C>::func)
+	ScopedPointer(C* p = nullptr) : 
+		Deleter<C>(p, &ScopedPointer<C>::func)
 	{
 	}
 				
@@ -628,16 +628,16 @@ public:
         //func(p);//, func(f)//<Type>
 		//Type* p = (Type*)ptr;
 		//ptr = nullptr;
-		//DeferredDeleter<Type>::
+		//ScopedPointer<Type>::
 
 
-	//: public MemoryObject//<deleter_t>//DeferredDeleter* deleter = new DefaultDeleter<SharedObject>()MemoryObject(deleter), 
+	//: public MemoryObject//<deleter_t>//ScopedPointer* deleter = new DefaultDeleter<SharedObject>()MemoryObject(deleter), 
 			//MemoryObject::
 		//deleter(this);
 		//Deleter::();
 		//deleter->invoke();
 	//friend struct std::default_delete<SharedObject>;	
-	//friend class DeferredDeleter<SharedObject>;
+	//friend class ScopedPointer<SharedObject>;
 
 /*
 //template <class deleter_t>
@@ -646,7 +646,7 @@ class MemoryObject//: public
 	/// which employ different memory management strategies.
 {	
 public:
-	MemoryObject(): //DeferredDeleter* deleter = new DefaultDeleter<MemoryObject>()
+	MemoryObject(): //ScopedPointer* deleter = new DefaultDeleter<MemoryObject>()
 		//deleter(deleter)
 	{
 		//if (deleter->ptr == nullptr)
@@ -668,11 +668,11 @@ protected:
 	MemoryObject(const MemoryObject&) {};
 	MemoryObject& operator = (const MemoryObject&) {};
 	
-	//friend struct scy::DeferredDelete/friend class PointerDeleter/<MemoryObject>;	
-	//friend class DeferredDeleter<MemoryObject>;
+	//friend struct scy::DeferredDelete/friend class ScopedRawPointer/<MemoryObject>;	
+	//friend class ScopedPointer<MemoryObject>;
 
 	//deleter_t deleter;
-	//std::unique_handle<DeferredDeleter> deleter;
+	//std::unique_handle<ScopedPointer> deleter;
 };
 //template <class deleter_t>
 */

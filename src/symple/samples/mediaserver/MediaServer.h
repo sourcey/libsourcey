@@ -47,16 +47,16 @@ class MediaServer;
 //
 struct StreamingOptions: public av::RecordingOptions
 {	
-	std::string packetizer;		// HTTP response packetizer [chunked, multipart]
+	std::string framing;		// HTTP response framing [chunked, multipart]
 	std::string encoding;		// The packet content encoding method [Base64, ...]
 		
 	MediaServer* server;		// Media server instance
-	av::VideoCapture* videoCapture; // Video capture instance
-	av::AudioCapture* audioCapture; // Audio capture instance
+	av::VideoCapture::ptr videoCapture; // Video capture instance
+	av::AudioCapture::ptr audioCapture; // Audio capture instance
 
 	StreamingOptions(MediaServer* server = nullptr, 
-		av::VideoCapture* videoCapture = nullptr,
-		av::AudioCapture* audioCapture = nullptr);
+		av::VideoCapture::ptr videoCapture = nullptr,
+		av::AudioCapture::ptr audioCapture = nullptr);
 
 	virtual ~StreamingOptions();
 };

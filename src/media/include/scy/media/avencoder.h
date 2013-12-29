@@ -51,7 +51,7 @@ class AVEncoder: public IEncoder
 	/// encoder which depends on libavcodec/libavformat.
 {
 public:
-	AVEncoder(const RecordingOptions& options);
+	AVEncoder(const EncoderOptions& options);
 	AVEncoder();
 	virtual ~AVEncoder();
 
@@ -67,7 +67,7 @@ public:
 	virtual void freeAudio();
 	virtual bool encodeAudio(unsigned char* buffer, int bufferSize, UInt64 time = 0);
 		
-	RecordingOptions& options();
+	EncoderOptions& options();
 	VideoEncoderContext* video();
 	AudioEncoderContext* audio();
 
@@ -78,7 +78,7 @@ public:
 protected:
 	//static Mutex _mutex; // Protects avcodec_open/close()
 
-	RecordingOptions _options;
+	EncoderOptions _options;
 	AVFormatContext* _formatCtx;
 	//clock_t			_startTime;
 	AVIOContext*	_ioCtx;
@@ -89,7 +89,7 @@ protected:
  	// Video
 	//
 	VideoEncoderContext* _video;
-	//LivePTSCalculator* _videoPtsCalc;
+	//PTSCalculator* _videoPtsCalc;
 	//bool _realtime;
 	//Int64 _videoPts;
 	//Int64 _lastVideoPTS;
@@ -104,7 +104,7 @@ protected:
 	AudioEncoderContext* _audio;
 	AVFifoBuffer*	_audioFifo;		
 	UInt8*			_audioBuffer;
-	//LivePTSCalculator* _audioPtsCalc;
+	//PTSCalculator* _audioPtsCalc;
 	//Int64 _audioPts;
 	//FPSCounter		_audioFPS;
 	//clock_t			_audioTime;	
@@ -116,110 +116,3 @@ protected:
 
 #endif
 #endif	// SCY_MEDIA_AVEncoder_H
-
-
-
-/*
-//
-// Live PTS Calculator
-//
-
-
-struct LivePTSCalculator
-	/// Helper class which calculates PTS values for a live source
-{
-	AVRational timeBase;
-	clock_t frameTime;
-	double frameDuration;
-	double frameDiff;
-
-	Int64 currentPTS;
-	Int64 lastPTS;
-
-	LivePTSCalculator()
-	{
-		reset();
-	}
-
-	void reset()
-	{		
-		lastPTS = 0;
-		currentPTS = 0;
-		frameTime = 0;
-		frameDuration = 0;
-		frameDiff = 0;
-	}
-	
-	void log()
-	{			
-		Timestamp ts;
-		debugL("LivePTSCalculator", this) << "Values:" 
-			<< "\n\tCurrent PTS: " << currentPTS
-			<< "\n\tLast PTS: " << lastPTS	
-			<< "\n\tFrame Duration: " << frameDuration
-			<< "\n\tFrame Diff: " << frameDiff
-			<< "\n\tFrame Time: " << frameTime
-			<< "\n\tTime Base: " << timeBase.den << ": " << timeBase.num
-			<< std::endl;
-	}
-
-	Int64 tick()
-	{
-		// Initializing
-		if (frameTime == 0) {
-			assert(!frameDuration);
-			frameTime = clock();
-			currentPTS = 1;
-		}
-
-		// Updating
-		else {
-			frameDuration = (double)(clock() - frameTime) / CLOCKS_PER_SEC;
-			frameTime = clock();
-			frameDiff = timeBase.den/(timeBase.num/(frameDuration));
-			currentPTS = lastPTS + frameDiff;
-		}	
-
-		log();
-
-		assert(currentPTS > lastPTS);
-		lastPTS = currentPTS;
-		return currentPTS;
-	}
-};
-*/
-
-
-	//UInt32			_frameDuration;
-
- 	// The following variables allow for dynamically
-	// calculated video presentation timestamps (PTS).
-	//Int64			_videoPTS;
-
-
-/*
-	//Int64			_videoLastPTS;
-	//clock_t			_videoLastTime;
-inline std::string GetEncoderFromCodecName(const std::string& name) 
-	/// Attempts to get the FFmpeg encoder from a codec name.
-{	
-	AVCodec* c;
-	string value = name;
-
-	// make lowercase
-	std::transform(value.begin(), value.end(), value.begin(), ::tolower);
-	
-	// try it
-	if (c = avcodec_find_encoder_by_name(value.c_str())) 
-		goto success;
-
-	// try splitting first word
-	//if (c = avcodec_find_encoder_by_name(value.c_str())) 
-	//	goto success;
-	
-    return "";
-
-success:
-	 return c->name;
-}
-*/

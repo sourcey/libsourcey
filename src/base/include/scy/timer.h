@@ -76,7 +76,10 @@ public:
 	
 	NullSignal Timeout;
 
-protected:	
+protected:		
+	Timer(const Timer&);
+	Timer& operator = (const Timer&);
+
 	virtual void init();
 	
 	uv::Handle _handle;

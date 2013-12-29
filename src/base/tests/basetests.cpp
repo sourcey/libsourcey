@@ -104,8 +104,9 @@ public:
 		runSocketTests();
 		runGarbageCollectorTests();
 		runSignalReceivers();
-#endif
 		testIPC();
+#endif
+		testMultiPacketStream();
 		
 		//scy::pause();
 	}

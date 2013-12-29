@@ -28,6 +28,9 @@ using std::endl;
 
 
 namespace scy {
+	
+	
+const unsigned long Thread::mainID = uv_thread_self();
 
 
 Thread::Thread()
@@ -62,10 +65,14 @@ void Thread::startAsync()
 {
 	int r = uv_thread_create(&_handle, [](void* arg) {
 		auto& ptr = *reinterpret_cast<Runner::Context::ptr*>(arg);
+		ptr->tid = 0;
+		ptr->exit = false;
 		do {
 			runAsync(ptr.get());
 			scy::sleep(1); // TODO: uv_thread_yield when available
-		} while (ptr->repeating && !ptr->cancelled());
+		} while (ptr->repeating && !ptr->cancelled());		
+		ptr->running = false;
+		ptr->started = false;
 		delete &ptr;
 	}, new Runner::Context::ptr(pContext));
 	if (r < 0) throw std::runtime_error("System error: Cannot initialize thread");	
@@ -77,7 +84,7 @@ void Thread::join()
 	TraceLS(this) << "Joining" << std::endl;
 	assert(this->tid() != Thread::currentID());
 	//assert(this->cancelled());
-	uv_thread_join(&_handle);
+	uv_thread_join(&_handle);	
 	//reset();
 	TraceLS(this) << "Joining: OK" << std::endl;
 }

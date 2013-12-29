@@ -183,7 +183,7 @@ public:
 	virtual InstallTask* getInstallTask(const std::string& id) const;
 		// Gets the install task for the given package ID.
 
-	virtual InstallTaskList tasks() const;
+	virtual InstallTaskVec tasks() const;
 		// Returns a list of all tasks.
 	
 	virtual void cancelAllTasks();
@@ -296,7 +296,7 @@ protected:
 	mutable Mutex       _mutex;
 	LocalPackageStore	_localPackages;
 	RemotePackageStore	_remotePackages;
-	InstallTaskList		_tasks;
+	InstallTaskVec		_tasks;
 	Options				_options;
 };
 

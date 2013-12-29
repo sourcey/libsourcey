@@ -31,8 +31,8 @@ namespace scy {
 namespace net {
 
 
-TCPSocket::TCPSocket() : 
-	net::Socket(new TCPBase, false)
+TCPSocket::TCPSocket(uv::Loop* loop) : 
+	net::Socket(new TCPBase(loop), false)
 {	
 	TraceLS(this) << "Create" << endl;	
 }
@@ -196,10 +196,15 @@ int TCPBase::send(const char* data, int len, const net::Address& /* peerAddress 
 	TraceLS(this) << "Send: " << len << endl;	
 	assert(Thread::currentID() == tid());
 
-	//if (len < 300)
-	//	TraceLS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
-	//else
-	//	TraceLS(this) << "Send long: " << len << ": " << std::string(data, 300) << endl;
+#if 0
+	if (len < 300)
+		TraceLS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
+	else {
+		std::string str(data, len);
+		TraceLS(this) << "Send: START: " << len << ": " << str.substr(0, 100) << endl;
+		TraceLS(this) << "Send: END: " << len << ": " << str.substr(str.length() - 100, str.length()) << endl;
+	}
+#endif
 
 	if (!Stream::write(data, len)) {
 		WarnL << "Send error" << endl;	

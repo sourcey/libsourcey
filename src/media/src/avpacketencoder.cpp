@@ -28,7 +28,7 @@ namespace scy {
 namespace av {
 
 
-AVPacketEncoder::AVPacketEncoder(const RecordingOptions& options, bool muxLiveStreams) :
+AVPacketEncoder::AVPacketEncoder(const EncoderOptions& options, bool muxLiveStreams) :
 	AVEncoder(options), 
 	PacketProcessor(AVEncoder::emitter), 
 	_muxLiveStreams(muxLiveStreams), 

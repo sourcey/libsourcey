@@ -40,10 +40,11 @@ class ChunkedAdapter: public IPacketizer
 public:
 	Connection* connection;
 	std::string contentType;
+	std::string frameSeparator;
 	bool initial;
 	bool nocopy;
 
-	ChunkedAdapter(Connection* connection = nullptr) : 
+	ChunkedAdapter(Connection* connection = nullptr, const std::string& frameSeparator = "", bool nocopy = true) : 
 		PacketProcessor(this->emitter),
 		connection(connection), 
 		contentType(connection->outgoingHeader()->getContentType()),
@@ -51,10 +52,11 @@ public:
 	{
 	}
 
-	ChunkedAdapter(const std::string& contentType, bool nocopy = true) : 
+	ChunkedAdapter(const std::string& contentType, const std::string& frameSeparator = "", bool nocopy = true) : 
 		PacketProcessor(this->emitter),
 		connection(nullptr), 
 		contentType(contentType),
+		frameSeparator(frameSeparator),
 		initial(true),
 		nocopy(nocopy)
 	{
@@ -105,7 +107,7 @@ public:
 	
 	virtual void process(IPacket& packet)
 	{
-		// traceL("ChunkedAdapter", this) << "Processing: " << packet.className() << ": " << packet.size() << std::endl;
+		traceL("ChunkedAdapter", this) << "Processing: " << packet.size() << std::endl;
 		
 		if (!packet.hasData())
 			throw std::invalid_argument("Incompatible packet type");
@@ -124,6 +126,8 @@ public:
 		if (nocopy) {
 			emit(ost.str());
 			emit("\r\n", 2);
+			if (!frameSeparator.empty())
+				emit(frameSeparator);
 			emit(packet.data(), packet.size());
 			emit("\r\n", 2);
 		}
@@ -131,6 +135,8 @@ public:
 		// Concat pieces for non fragmented
 		else {
 			ost << "\r\n";
+			if (!frameSeparator.empty())
+				ost << frameSeparator;
 			ost.write(packet.data(), packet.size());
 			ost << "\r\n";
 			emit(ost.str());

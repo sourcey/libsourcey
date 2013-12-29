@@ -60,40 +60,21 @@ struct EncoderOptions
 {
 	Format iformat;		// The input media format.
 	Format oformat;		// The output media format.
-	EncoderOptions(const Format& iformat = Format(), 
-				   const Format& oformat = Format()) :
-		iformat(iformat),
-		oformat(oformat) {}
-	EncoderOptions(const EncoderOptions& r) : 
-		iformat(r.iformat),
-		oformat(r.oformat) {}
-	virtual ~EncoderOptions() {};
-};
-	
-
-struct RecordingOptions: public EncoderOptions
-{
 	std::string ifile;	// The input file path.
 	std::string ofile;	// The output file path.
 	long duration;		// The millisecond duration 
 						// of time to record.
-	RecordingOptions(const Format& iformat = Format(),
-					const Format& oformat = Format(),
-					const std::string& ifile = "",
-					const std::string& ofile = "",
-					long duration = 0) :
-		EncoderOptions(iformat, oformat),
+	EncoderOptions(const Format& iformat = Format(), 
+				   const Format& oformat = Format(),
+				   const std::string& ifile = "",
+				   const std::string& ofile = "",
+				   long duration = 0) :
+		iformat(iformat),
+		oformat(oformat),
 		ifile(ifile),
 		ofile(ofile),
 		duration(duration) {}
-	RecordingOptions(const EncoderOptions& r) :
-		EncoderOptions(r.iformat, r.oformat) {}
-	RecordingOptions(const RecordingOptions& r) : 
-		EncoderOptions(r.iformat, r.oformat),
-		ifile(r.ifile),
-		ofile(r.ofile),
-		duration(r.duration) {}
-	virtual ~RecordingOptions() {};
+	virtual ~EncoderOptions() {};
 };
 
 

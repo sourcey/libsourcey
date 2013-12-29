@@ -47,6 +47,8 @@ DefinePolymorphicDelegateWithArg(audioDelegate, IPacket, PacketDelegateBase, voi
 class AudioCapture: public ICapture
 {
 public:	
+	typedef std::shared_ptr<AudioCapture> Ptr;
+
 	AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFormat format = RTAUDIO_SINT16);
 	virtual ~AudioCapture();
 	

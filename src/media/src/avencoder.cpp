@@ -45,7 +45,7 @@ namespace scy {
 namespace av {
 
 
-AVEncoder::AVEncoder(const RecordingOptions& options) :
+AVEncoder::AVEncoder(const EncoderOptions& options) :
 	_options(options),	
 	_formatCtx(nullptr),
 	_video(nullptr),
@@ -204,11 +204,11 @@ void AVEncoder::initialize()
 		stream->time_base.den
 		// Setup the PTS calculator for variable framerate inputs
 		if (_video) {
-			_videoPtsCalc = new LivePTSCalculator;
+			_videoPtsCalc = new PTSCalculator;
 			_videoPtsCalc->timeBase = _video->ctx->time_base;
 		}
 		if (_audio) {
-			_audioPtsCalc = new LivePTSCalculator;
+			_audioPtsCalc = new PTSCalculator;
 			_audioPtsCalc->timeBase = _audio->ctx->time_base;
 		}
 		*/
@@ -288,7 +288,7 @@ void AVEncoder::cleanup()
 }
 
 
-RecordingOptions& AVEncoder::options()
+EncoderOptions& AVEncoder::options()
 {
 	//Mutex::ScopedLock lock(_mutex);
 	return _options;
@@ -343,7 +343,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 {
 	TraceLS(this) << "Encoding video: " << bufferSize << endl;	
 	
-	RecordingOptions* options = nullptr;		
+	EncoderOptions* options = nullptr;		
 	AVFormatContext* formatCtx = nullptr;
 	VideoEncoderContext* video = nullptr;	
 	{	
@@ -498,7 +498,7 @@ bool AVEncoder::encodeAudio(unsigned char* buffer, int bufferSize, UInt64 /* tim
 	assert(buffer);
 	assert(bufferSize);
 
-	RecordingOptions* options = nullptr;		
+	EncoderOptions* options = nullptr;		
 	AVFormatContext* formatCtx = nullptr;
 	AudioEncoderContext* audio = nullptr;	
 	AVFifoBuffer* audioFifo = nullptr;	

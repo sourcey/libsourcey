@@ -45,10 +45,10 @@ public:
 	typedef TCPBase Base;
 	typedef std::vector<TCPSocket> List;
 	
-	TCPSocket();
+	TCPSocket(uv::Loop* loop = uv::defaultLoop());
 		// Creates an unconnected TCP socket.
 
-	TCPSocket(TCPBase* base, bool shared = false);
+	TCPSocket(TCPBase* base, bool shared);
 		// Creates the Socket and attaches the given SocketBase.
 		//
 		// The SocketBase must be a TCPBase, otherwise an

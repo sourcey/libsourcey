@@ -56,36 +56,50 @@ class MediaFactory
 	/// captures, device enumeration and encoder media formats. 
 {
 public:
-	VideoCapture* createVideoCapture(int deviceId);
+	VideoCapture::Ptr createVideoCapture(int deviceId);
 		// Creates a VideoCapture instance for given device ID.
 		//
-		// If the VideoCaptureBase already exists for this camera then this method
+		// If the VideoCapture already exists for this camera then this method
 		// can be used to create VideoCaptures in any thread.
 		//
-		// If the VideoCaptureBase has not been created for this camera yet it will
-		// be created now, but take case since VideoCaptureBase instances should
+		// If the VideoCapture has not been created for this camera yet it will
+		// be created now, but take case since VideoCapture instances should
 		// only be initialized from the main thread (OpenCV limitation).
-		// You can also lazy load video cameras using loadVideo()
+		// You can also lazy load video cameras using loadVideoCaptures()
 
-	VideoCapture* createFileCapture(const std::string& file);
+	VideoCapture::Ptr createFileCapture(const std::string& file);
 		// Creates a VideoCapture from given source file.
 		// File captures can be created in any thread.
 
-	virtual AudioCapture* createAudioCapture(int deviceId, 
+	AudioCapture::Ptr createAudioCapture(int deviceId, 
 		int channels = DEFAULT_AUDIO_CHANNELS, 
 		int sampleRate = DEFAULT_AUDIO_SAMPLE_RATE, 
 		RtAudioFormat format = RTAUDIO_SINT16);
 		// Creates an AudioCapture from given options.
 		
-	void loadVideo();
+	void loadVideoCaptures();
 		// Preloads a VideoCapture instance for each available camera.
+		// This method MUST be called from the main thread.
 		// This method can be called from the main thread to lazy load 
 		// video device captures. Alternatively you can call createVideoCapture()
 		// This will ensure captures are always available to the
 		// application using createVideoCapture(), from any thread.
 	
-	void unloadVideo();
-		// Destroys all managed VideoCaptureBase instances.
+	void unloadVideoCaptures();
+		// Destroys all managed VideoCapture instances.
+	
+	void reloadFailedVideoCaptures();
+		// Reloads video captures that may have failed or been unplugged.
+		// The original VideoCapture instance is not deleted, just reused.
+		// This method MUST be called from the main thread.
+	
+	Signal<const VideoCapture::Ptr&> VideoCaptureLoaded;
+		// Siganls when a video capture is loaded.
+
+	Signal<const VideoCapture::Ptr&> VideoCaptureError;
+		// Siganls when a video capture fails, or is unplugged.
+
+	std::map<int, VideoCapture::Ptr> videoCaptures() const;
 	
 	IDeviceManager& devices();	
 		// Returns the device manager instance.
@@ -104,8 +118,10 @@ protected:
 	MediaFactory(MediaFactory const&){};
 	MediaFactory& operator=(MediaFactory const&){};
 	~MediaFactory();
+		
+	void onVideoCaptureError(void*, const scy::Error& err);
 
-	std::shared_ptr<VideoCaptureBase> getVideoCaptureBase(int deviceId);
+	//VideoCapture::Ptr getVideoCapture(int deviceId);
 	
 	friend class Singleton<MediaFactory>;
 	friend class VideoCapture;
@@ -114,7 +130,8 @@ protected:
 
 	IDeviceManager* _devices;
 	FormatRegistry	_formats;	
-	std::map<int, std::shared_ptr<VideoCaptureBase>> _videoBases;
+	//bool _hasFailedVideoCaptures;
+	std::map<int, VideoCapture::Ptr> _videoCaptures;
 };
 
 

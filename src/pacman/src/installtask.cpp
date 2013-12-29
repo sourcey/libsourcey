@@ -34,30 +34,81 @@ namespace scy {
 namespace pman {
 
 
-InstallTask::InstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote, const InstallOptions& options) :
+InstallTask::InstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote, 
+						 const InstallOptions& options, uv::Loop* loop) :
 	_manager(manager),
 	_local(local),
 	_remote(remote),
 	_options(options),
 	_dlconn(nullptr),
 	_downloading(false),
-	_progress(0)
+	_progress(0),
+	_loop(loop)
 {
+	TraceLS(this) << "Create" << endl;
 	assert(valid());
 }
 
 
 InstallTask::~InstallTask()
 {
+	TraceLS(this) << "Destory" << endl;
+
 	// :)
 }
 
 
 void InstallTask::start()
 {
-	log("trace") << "start" << endl;	
-	Mutex::ScopedLock lock(_mutex);
-	_thread.start(*this);
+	TraceLS(this) << "Starting:" 
+		<< "\n\tName: " << _local->name()
+		<< "\n\tVersion: " << _options.version
+		<< "\n\tSDK Version: " << _options.sdkVersion
+		<< endl;
+
+	////Mutex::ScopedLock lock(_mutex);
+	//_thread.start(*this);
+		
+	// Prepare environment and install options
+	//{
+	////Mutex::ScopedLock lock(_mutex);
+
+	// Check against provided options to make sure that
+	// we can proceed with task creation.
+	if (!_options.version.empty())    { _remote->assetVersion(_options.version); } // throw if none
+	if (!_options.sdkVersion.empty()) { _remote->latestSDKAsset(_options.sdkVersion); } // throw if none
+
+	// Set default install directory if none was given
+	if (_options.installDir.empty()) {
+
+		// Use the current install dir if the local package already exists
+		if (!_local->installDir().empty()) {
+			_options.installDir = _local->installDir();
+		}
+
+		// Or use the manager default
+		else {
+			_options.installDir = _manager.options().installDir;
+		}
+	}
+
+	// Normalize lazy windows paths
+	_options.installDir = fs::normalize(_options.installDir);
+	_local->setInstallDir(_options.installDir);
+
+	// Create the directory
+	fs::mkdirr(_options.installDir);
+
+	// If the package failed previously we might need 
+	// to clear the file cache.
+	if (_manager.options().clearFailedCache)
+		_manager.clearPackageCache(*_local);
+	//}	
+	
+	_runner.start(*this);
+
+	// Increment the event loop while active
+	_runner.handle().ref();
 }
 
 
@@ -68,51 +119,76 @@ void InstallTask::cancel()
 
 
 void InstallTask::run()
-{
-	try {	
-		// Prepare environment and install options
-		{
-			Mutex::ScopedLock lock(_mutex);
+{	
+	try {
+		auto local = this->local();
 
-			// Check against provided options to make sure that
-			// we can proceed with task creation.
-			if (!_options.version.empty())    { _remote->assetVersion(_options.version); } // throw if none
-			if (!_options.sdkVersion.empty()) { _remote->latestSDKAsset(_options.sdkVersion); }// throw if none
+		// Set the package install task so we know from which state to
+		// resume installation.
+		// TODO: Should this be reset by the clearFailedCache option?
+		local->setInstallState(state().toString());
 
-			// Set default install directory if none was given
-			if (_options.installDir.empty()) {
+		switch (state().id()) 
+		{			
+		case InstallationState::None:			
+			setProgress(0);
+			doDownload();
+			setState(this, InstallationState::Downloading);
+			break;
+		case InstallationState::Downloading:
+			if (_downloading)
+				return; // skip until async download completes
+			
+			setState(this, InstallationState::Extracting);
+			break;
+		case InstallationState::Extracting:
+			setProgress(75);
+			doExtract();
+			setState(this, InstallationState::Finalizing);
+			break;
+		case InstallationState::Finalizing:
+			setProgress(90);
+			doFinalize();
+			local->setState("Installed");
+			local->clearErrors();
+			local->setInstalledAsset(getRemoteAsset());
+			setProgress(100); // set before state change
 
-				// Use the current install dir if the local package already exists
-				if (!_local->installDir().empty()) {
-					_options.installDir = _local->installDir();
-				}
-
-				// Or use the manager default
-				else {
-					_options.installDir = _manager.options().installDir;
-				}
-			}
-
-			// Normalize lazy windows paths
-			_options.installDir = fs::normalize(_options.installDir);
-			_local->setInstallDir(_options.installDir);
-
-			// Create the directory
-			fs::mkdirr(_options.installDir);
-
-			// If the package failed previously we might need 
-			// to clear the file cache.
-			if (_manager.options().clearFailedCache)
-				_manager.clearPackageCache(*_local);
+			// Transition the internal state if finalization was a success.
+			// This will complete the installation process.
+			setState(this, InstallationState::Installed);
+			break;
+		case InstallationState::Installed:
+			setComplete(); // complete and destroy
+			return;
+		case InstallationState::Cancelled:
+			local->setState("Failed");
+			setProgress(100);
+			setComplete(); // complete and destroy
+			return;			
+		case InstallationState::Failed:
+			local->setState("Failed");
+			if (!state().message().empty())
+				local->addError(state().message());
+			setProgress(100); // complete and destroy
+			setComplete();
+			return;
+		default: assert(0);
 		}		
+	}
+	catch (std::exception& exc) {		
+		ErrorL << "Installation failed: " << exc.what() << endl; 
+		setState(this, InstallationState::Failed, exc.what());
+	}
 
+	/*
 		// Kick off the state machine. If any errors are encountered
 		// an exception will be thrown and the task will fail.
 		doDownload();
-		do {
-			scy::sleep(50);
-			if (cancelled()) goto Complete;
-		} while(_downloading);
+		//do {
+		//	scy::sleep(50);
+		//	if (cancelled()) goto Complete;
+		//} while(_downloading);
 
 		doExtract();
 		if (cancelled()) goto Complete;
@@ -130,24 +206,30 @@ void InstallTask::run()
 Complete:
 	setComplete();
 	deleteLater<InstallTask>(this);
+	*/
 }
 
 
 void InstallTask::onStateChange(InstallationState& state, const InstallationState& oldState)
 {
-	DebugL << "state changed to " << state << endl; 	
+	DebugL << "State changed:  " << oldState << " => " << state << endl; 	
+	/*
 	{
 		auto local = this->local();
 		switch (state.id()) 
 		{			
 		case InstallationState::Downloading:
 			setProgress(0);
+			doDownload();
+			//setProgress(0);
 			break;
 		case InstallationState::Extracting:
 			setProgress(75);
+			doExtract();
 			break;
 		case InstallationState::Finalizing:
 			setProgress(90);
+			doFinalize();
 			break;
 		case InstallationState::Installed:
 			local->setState("Installed");
@@ -158,7 +240,7 @@ void InstallTask::onStateChange(InstallationState& state, const InstallationStat
 		case InstallationState::Cancelled:
 			local->setState("Failed");
 			{
-				Mutex::ScopedLock lock(_mutex);
+				//Mutex::ScopedLock lock(_mutex);
 				if (_dlconn)
 					_dlconn->close();
 			}
@@ -179,15 +261,15 @@ void InstallTask::onStateChange(InstallationState& state, const InstallationStat
 		// TODO: Should this be reset by the clearFailedCache option?
 		local->setInstallState(state.toString());
 	}
+	*/
 
 	Stateful<InstallationState>::onStateChange(state, oldState);
+	DebugL << "State changed: AFTER:  " << oldState << " => " << state << endl; 	
 }
 
 
 void InstallTask::doDownload()
 {
-	setState(this, InstallationState::Downloading);
-
 	Package::Asset asset = getRemoteAsset();
 	if (!asset.valid())
 		throw std::runtime_error("Package download failed: The remote asset is invalid.");
@@ -203,7 +285,7 @@ void InstallTask::doDownload()
 	*/
 
 	std::string outfile = _manager.getCacheFilePath(asset.fileName());
-	_dlconn = http::createConnection(asset.url());
+	_dlconn = http::createConnection(asset.url()); //_loop
 	if (!_manager.options().httpUsername.empty()) {
 		http::BasicAuthenticator cred(
 			_manager.options().httpUsername, 
@@ -239,10 +321,12 @@ void InstallTask::onDownloadProgress(void*, const double& progress)
 
 void InstallTask::onDownloadComplete(void*, const http::Response& response)
 {
-	DebugL << "download complete: " << response << endl;
+	DebugL << "Download complete: " << response << endl;
 	_dlconn->readStream<std::ofstream>()->close();
+	_dlconn->close();
 	_dlconn = nullptr;
 	_downloading = false;
+	DebugL << "Download complete 1" << endl;
 }
 
 
@@ -297,8 +381,7 @@ void InstallTask::doFinalize()
 	StringVec nodes;
 	fs::readdir(tempDir, nodes);
 	for (unsigned i = 0; i < nodes.size(); i++) {
-		try
-		{
+		try {
 			std::string source(tempDir);
 			fs::addnode(source, nodes[i]);
 
@@ -308,8 +391,7 @@ void InstallTask::doFinalize()
 			DebugL << "moving file: " << source << " => " << target << endl;
 			fs::rename(source, target);
 		}
-		catch (std::exception& exc)
-		{
+		catch (std::exception& exc) {
 			// The previous version files may be currently in use,
 			// in which case PackageManager::finalizeInstallations()
 			// must be called from an external process before the
@@ -331,16 +413,14 @@ void InstallTask::doFinalize()
 	
 	// Remove the temporary output folder if the installation
 	// was successfully finalized.
-	try
-	{		
+	try {		
 		DebugL << "Removing temp directory: " << tempDir << endl;
 
 		// FIXME: How to remove a folder properly?
 		fs::unlink(tempDir);
 		assert(fs::exists(tempDir));
 	}
-	catch (std::exception& exc)
-	{
+	catch (std::exception& exc) {
 		// While testing on a windows system this fails regularly
 		// with a file sharing error, but since the package is already
 		// installed we can just swallow it.
@@ -354,7 +434,7 @@ void InstallTask::doFinalize()
 void InstallTask::setComplete()
 {
 	{
-		Mutex::ScopedLock lock(_mutex);
+		//Mutex::ScopedLock lock(_mutex);
 		assert(_progress == 100);
 
 		InfoL << "Package installed:" 
@@ -367,17 +447,30 @@ void InstallTask::setComplete()
 		_local->print(cout);	
 #endif
 	}
+
+	// Close the connection
+	{
+		//Mutex::ScopedLock lock(_mutex);
+		if (_dlconn)
+			_dlconn->close();
+	}
+
+	// Cancel the runner and schedule for deletion
+	assert(!_runner.cancelled());
+	_runner.cancel();
 	
 	// The task will be destroyed
 	// as a result of this signal.
 	Complete.emit(this);
+
+	deleteLater<InstallTask>(this);
 }
 
 
 void InstallTask::setProgress(int value) 
 {
 	{
-		Mutex::ScopedLock lock(_mutex);	
+		//Mutex::ScopedLock lock(_mutex);	
 		_progress = value;
 	}
 	Progress.emit(this, value);
@@ -386,7 +479,7 @@ void InstallTask::setProgress(int value)
 
 Package::Asset InstallTask::getRemoteAsset() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return !_options.version.empty() ? 
 		_remote->assetVersion(_options.version) : 
 			!_options.sdkVersion.empty() ?
@@ -397,14 +490,14 @@ Package::Asset InstallTask::getRemoteAsset() const
 
 int InstallTask::progress() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _progress;
 }
 
 
 bool InstallTask::valid() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return !stateEquals(InstallationState::Failed) 
 		&& _local->valid() 
 		&& (!_remote || _remote->valid());
@@ -439,22 +532,29 @@ bool InstallTask::complete() const
 
 LocalPackage* InstallTask::local() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _local;
 }
 
 
 RemotePackage* InstallTask::remote() const
 {
-	Mutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _remote;
 }
 
 
 InstallOptions& InstallTask::options() 
 { 
-	Mutex::ScopedLock lock(_mutex);
+	//Mutex::ScopedLock lock(_mutex);
 	return _options;
+}
+
+
+uv::Loop* InstallTask::loop() const
+{
+	//Mutex::ScopedLock lock(_mutex);
+	return _loop;
 }
 
 

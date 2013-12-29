@@ -37,7 +37,7 @@ class AVPacketEncoder: public AVEncoder, public PacketProcessor
 	/// FFmpeg is used for encoding.
 {
 public:
-	AVPacketEncoder(const RecordingOptions& options, bool muxLiveStreams = false);
+	AVPacketEncoder(const EncoderOptions& options, bool muxLiveStreams = false);
 	AVPacketEncoder(bool muxLiveStreams = false);
 	virtual ~AVPacketEncoder();
 	
@@ -57,11 +57,75 @@ protected:
 };
 
 
+#if 0
+//
+// PTS Calculator
+//
+
+
+struct PTSCalculator
+	/// Helper class which calculates PTS values for a live source
+{
+	AVRational timeBase;
+	clock_t frameTime;
+	double frameDuration;
+	double frameDiff;
+
+	Int64 currentPTS;
+	Int64 lastPTS;
+
+	PTSCalculator() {
+		reset();
+	}
+
+	void reset() {		
+		lastPTS = 0;
+		currentPTS = 0;
+		frameTime = 0;
+		frameDuration = 0;
+		frameDiff = 0;
+	}
+	
+	void log() {			
+		Timestamp ts;
+		debugL("PTSCalculator", this) << "Values:" 
+			<< "\n\tCurrent PTS: " << currentPTS
+			<< "\n\tLast PTS: " << lastPTS	
+			<< "\n\tFrame Duration: " << frameDuration
+			<< "\n\tFrame Diff: " << frameDiff
+			<< "\n\tFrame Time: " << frameTime
+			<< "\n\tTime Base: " << timeBase.den << ": " << timeBase.num
+			<< std::endl;
+	}
+
+	Int64 tick() {
+		// Initializing
+		if (frameTime == 0) {
+			assert(!frameDuration);
+			frameTime = clock();
+			currentPTS = 1;
+		}
+
+		// Updating
+		else {
+			frameDuration = (double)(clock() - frameTime) / CLOCKS_PER_SEC;
+			frameTime = clock();
+			frameDiff = timeBase.den/(timeBase.num/(frameDuration));
+			currentPTS = lastPTS + frameDiff;
+		}	
+
+		log();
+
+		assert(currentPTS > lastPTS);
+		lastPTS = currentPTS;
+		return currentPTS;
+	}
+};
+#endif
+
+
 } } // namespace scy::av
 
 
 #endif
 #endif
-
-
-	//AVEncoder _encoder;

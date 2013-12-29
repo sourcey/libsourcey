@@ -75,7 +75,7 @@ public:
 
 		response.setContentLength(14);  // headers will be auto flushed
 
-		connection().sendData(std::string("hello universe"), 14); 
+		connection().sendData("hello universe", 14); 
 		connection().close();
 	}
 };
@@ -307,9 +307,9 @@ public:
 #endif
 		{		
 			
-			testURLParameters();
-#if 0
 			testStandaloneHTTPClientConnection();	
+#if 0
+			testURLParameters();
 			testURL();
 			runClientConnectionChunkedTest();	
 			runClientConnectionTest();

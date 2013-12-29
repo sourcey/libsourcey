@@ -351,7 +351,7 @@ void Client::onPresenceData(const json::Value& data, bool whiny)
 		else {
 			if (peer) {
 				InfoL << "Peer disconnected: " << peer->address().toString() << endl;
-				PeerDiconnected.emit(this, *peer);
+				PeerDisconnected.emit(this, *peer);
 				_roster.free(id);
 			}
 			else {
@@ -473,7 +473,7 @@ Client& Client::operator >> (Message& message)
 						Peer* peer = _roster.remove(p.from().id);
 						assert(peer);
 						if (peer) {
-							PeerDiconnected.emit(this, *peer);
+							PeerDisconnected.emit(this, *peer);
 							delete peer;
 						}
 					}

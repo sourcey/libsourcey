@@ -27,10 +27,6 @@
 #include "scy/base.h"
 #include "scy/signal.h"
 
-//#include "talk/base/scoped_ptr.h"
-//#include "talk/base/sigslot.h"
-//#include "talk/base/stringencode.h"
-
 
 namespace scy {
 namespace av {
@@ -42,7 +38,7 @@ struct Device
 	Device();
 	Device(const std::string& type, int id, 
 		const std::string& name, const std::string& guid = "", 
-		bool isDefault = false);
+		bool isDefault = false, bool isAvailable = true);
 	
 	void print(std::ostream& os);
 
@@ -51,6 +47,7 @@ struct Device
 	std::string name;
 	std::string guid;
 	bool isDefault;
+	bool isAvailable;
 	
 	bool operator == (const Device& that) const
 	{
@@ -108,7 +105,10 @@ public:
 
 	virtual void print(std::ostream& ost) = 0;
 
-	NullSignal SignalDevicesChange;
+	Signal2<bool&, bool&> DevicesChanged;
+		// Signals on DevicesChanged.
+		// Arg 1 is true when device is video, false for audio
+		// Arg 2 is true when device connects, flase on disconnection
 
 	static const char kDefaultDeviceName[];
 };

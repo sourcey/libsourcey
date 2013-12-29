@@ -18,7 +18,6 @@
 
 
 #include "scy/http/client.h"
-#include "scy/net/sslsocket.h"
 #include "scy/logger.h"
 #include "scy/util.h"
 
@@ -220,7 +219,7 @@ void ClientConnection::onSocketConnect(void*)
 	// Note the first call to socket().send() will flush headers.
 	// Note if there are stream adapters we wait for the stream to push
 	// through any custom headers. See ChunkedAdapter::emitHeader
-	else if (Outgoing.base().numAdapters() == 0) {
+	else if (Outgoing.numAdapters() == 0) {
 		TraceLS(this) << "On connect: Send header" << endl;
 		sendHeader();
 	}	
@@ -284,22 +283,22 @@ void ClientConnection::onClientShutdown(void*)
 // ---------------------------------------------------------------------
 //
 
-ClientConnection* createConnection(const URL& url)
+ClientConnection* createConnection(const URL& url, uv::Loop* loop)
 {
-	ClientConnection* conn = 0;
+	ClientConnection* conn = nullptr;
 
 	if (url.scheme() == "http") {
-		conn = new ClientConnection(url);
+		conn = new ClientConnection(url, net::TCPSocket(loop));
 	}
 	else if (url.scheme() == "https") {
-		conn = new ClientConnection(url, net::SSLSocket());
+		conn = new ClientConnection(url, net::SSLSocket(loop)); //net::SSLSocket());
 	}
 	else if (url.scheme() == "ws") {
-		conn = new ClientConnection(url);
+		conn = new ClientConnection(url, net::TCPSocket(loop));
 		conn->socket().replaceAdapter(new WebSocketConnectionAdapter(*conn, WebSocket::ClientSide));
 	}
 	else if (url.scheme() == "wss") {
-		conn = new ClientConnection(url, net::SSLSocket());
+		conn = new ClientConnection(url, net::SSLSocket(loop)); //net::SSLSocket());
 		conn->socket().replaceAdapter(new WebSocketConnectionAdapter(*conn, WebSocket::ClientSide));
 	}
 	else
@@ -311,7 +310,8 @@ ClientConnection* createConnection(const URL& url)
 
 // ---------------------------------------------------------------------
 //
-Client::Client()
+Client::Client(uv::Loop* loop) :
+	timer(loop), loop(loop)
 {
 	TraceLS(this) << "Create" << endl;
 
@@ -343,6 +343,7 @@ void Client::shutdown()
 void Client::addConnection(ClientConnection* conn) 
 {		
 	TraceLS(this) << "Adding connection: " << conn << endl;
+	assert(conn->socket().base().loop() == loop);
 	connections.push_back(conn);
 }
 
@@ -350,6 +351,7 @@ void Client::addConnection(ClientConnection* conn)
 void Client::removeConnection(ClientConnection* conn) 
 {		
 	TraceLS(this) << "Removing connection: " << conn << endl;
+	assert(conn->socket().base().loop() == loop);
 	for (auto it = connections.begin(); it != connections.end(); ++it) {
 		if (conn == *it) {
 			connections.erase(it);
