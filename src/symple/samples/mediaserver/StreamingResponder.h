@@ -23,7 +23,7 @@ public:
 		debugL("StreamingRequestHandler", this) << "Handle request: " 
 			//<< "\n\tOutput Format: " << options.oformat.name
 			<< "\n\tOutput Encoding: " << options.encoding
-			<< "\n\tOutput Packetizer: " << options.packetizer
+			<< "\n\tOutput Packetizer: " << options.framing
 			<< std::endl;
 
 		// We will be sending our own headers

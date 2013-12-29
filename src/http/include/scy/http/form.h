@@ -123,7 +123,7 @@ public:
 	static const char* ENCODING_MULTIPART; /// "multipart/form-data"
 	
 protected:
-	FormWriter(ClientConnection& conn, async::Runner::ptr runner, const std::string& encoding = FormWriter::ENCODING_URL);
+	FormWriter(ClientConnection& conn, async::Runner::Ptr runner, const std::string& encoding = FormWriter::ENCODING_URL);
 		// Creates the FormWriter that uses the given encoding.
 		//
 		// Encoding must be either "application/x-www-form-urlencoded"
@@ -160,7 +160,7 @@ protected:
 	typedef std::deque<Part> PartQueue;
 	
 	ClientConnection& _connection;
-	async::Runner::ptr _runner;
+	async::Runner::Ptr _runner;
 	std::string _encoding;
 	std::string _boundary;
 	PartQueue _parts;

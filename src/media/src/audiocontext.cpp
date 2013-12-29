@@ -582,7 +582,7 @@ UInt8* AudioResampler::resample(UInt8* inSamples, int inNbSamples)
         throw std::runtime_error("Conversion context must be initialized.");	
 
 	outNbSamples = av_rescale_rnd(
-		swr_get_delay(ctx, (int64_t)iparams.sampleRate) + inNbSamples, 
+		swr_get_delay(ctx, (int64_t)iparams.sampleRate) + (int64_t)inNbSamples, 
 		(int64_t)oparams.sampleRate, (int64_t)iparams.sampleRate, AV_ROUND_UP);
 
 	if (outBuffer) {

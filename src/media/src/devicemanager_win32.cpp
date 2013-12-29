@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
-// Implemented from libjingle r116 Feb 16, 2012
 
 
 #include "scy/media/devicemanager_win32.h"
@@ -27,6 +26,9 @@
 
 #include <windows.h>
 #include <dshow.h>
+#include <dbt.h> // DBT_* & DEV_*
+#include <ks.h>
+#include <ksmedia.h> // KSCATEGORY_*
 
 
 using std::endl; 
@@ -63,19 +65,16 @@ IDeviceManager* DeviceManagerFactory::create()
 Win32DeviceManager::Win32DeviceManager() : 
 	_needCoUninitialize(false) 
 {
-	//RtDeviceManager::initialize();
 	TraceL << "Create" << endl;
-	//setWatcher(new Win32DeviceWatcher(this));
+	
+	// FIXME: Not receiving WM_DEVICECHANGE in our console applications
+	setWatcher(new Win32DeviceWatcher(this));
 }
 
 
 Win32DeviceManager::~Win32DeviceManager() 
 {
 	TraceL << "Destroy" << endl;
-	//RtDeviceManager::uninitialize();
-	if (initialized()) {
-		uninitialize();
-	}
 }
 
 
@@ -323,6 +322,229 @@ bool getDevicesWin32(REFGUID catid, std::vector<Device>& devices)
 }
 
 
+//
+// Win32 Device Watcher
+//
+
+
+Win32DeviceWatcher::Win32DeviceWatcher(Win32DeviceManager* manager) : 
+	DeviceWatcher(manager),
+	manager_(manager),
+	audio_notify_(NULL),
+	video_notify_(NULL) 
+{
+}
+
+
+Win32DeviceWatcher::~Win32DeviceWatcher()
+{
+}
+
+
+bool Win32DeviceWatcher::start() 
+{
+	if (!Create(NULL, L"LibSourcey Device Watcher Window", 0, 0, 0, 0, 0, 0)) {
+		return false;
+	}
+	
+	audio_notify_ = Register(KSCATEGORY_AUDIO);
+	if (!audio_notify_) {
+		stop();
+		return false;
+	}
+
+	video_notify_ = Register(KSCATEGORY_VIDEO);
+	if (!video_notify_) {
+		stop();
+		return false;
+	}
+
+	return true;
+}
+
+
+void Win32DeviceWatcher::stop()
+{
+	UnregisterDeviceNotification(video_notify_);
+	video_notify_ = NULL;
+	UnregisterDeviceNotification(audio_notify_);
+	audio_notify_ = NULL;
+	Destroy();
+}
+
+
+HDEVNOTIFY Win32DeviceWatcher::Register(REFGUID guid)
+{
+	//DEV_BROADCAST_DEVICEINTERFACE dbdi;
+	//dbdi.dbcc_size = sizeof(dbdi);
+	//dbdi.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+	//dbdi.dbcc_classguid = guid;
+	
+    DEV_BROADCAST_DEVICEINTERFACE dbdi;
+
+    ZeroMemory( &dbdi, sizeof(dbdi) );
+    dbdi.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
+    dbdi.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+    dbdi.dbcc_classguid = guid;
+
+	// Add DEVICE_NOTIFY_ALL_INTERFACE_CLASSES to ignore 
+	// dbcc_classguid and listen for all GUID types.
+	return RegisterDeviceNotification(handle(), &dbdi,
+		DEVICE_NOTIFY_WINDOW_HANDLE);
+		//DEVICE_NOTIFY_WINDOW_HANDLE);
+}
+
+
+void Win32DeviceWatcher::Unregister(HDEVNOTIFY handle)
+{
+	UnregisterDeviceNotification(handle);
+}
+
+
+bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& result)
+{
+	DebugL << "OnMessage: " << uMsg << endl;
+
+	if (uMsg == WM_DEVICECHANGE) {
+		//bool arriving = wParam == DBT_DEVICEARRIVAL;
+		//bool removing = wParam == DBT_DEVICEREMOVECOMPLETE;
+		if (wParam == DBT_DEVICEARRIVAL ||
+			wParam == DBT_DEVICEREMOVECOMPLETE) {
+				DEV_BROADCAST_DEVICEINTERFACE* dbdi =
+					reinterpret_cast<DEV_BROADCAST_DEVICEINTERFACE*>(lParam);
+				if (dbdi->dbcc_classguid == KSCATEGORY_AUDIO ||
+					dbdi->dbcc_classguid == KSCATEGORY_VIDEO) {
+						bool isVideo = dbdi->dbcc_classguid == KSCATEGORY_VIDEO;
+						bool isConnect = wParam == DBT_DEVICEARRIVAL;
+						DebugL << "Signal Devices changed: " << isVideo << ": " << isConnect << endl;
+						manager_->DevicesChanged.emit(manager_, isVideo, isConnect);
+				}
+		}
+		result = 0;
+		return true;
+	}
+
+	return false;
+}
+
+
+//
+// Win32 Window
+//
+
+static const wchar_t kWindowBaseClassName[] = L"WindowBaseClass";
+HINSTANCE Win32Window::instance_ = NULL;
+ATOM Win32Window::window_class_ = 0;
+
+Win32Window::Win32Window() : wnd_(NULL) 
+{
+}
+
+
+Win32Window::~Win32Window() 
+{
+	assert(NULL == wnd_);
+}
+
+
+bool Win32Window::Create(HWND parent, const wchar_t* title, DWORD style,
+						 DWORD exstyle, int x, int y, int cx, int cy) 
+{
+	if (wnd_) {
+		// Window already exists.
+		return false;
+	}
+
+	if (!window_class_) {
+		if (!GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+			GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+			reinterpret_cast<LPCWSTR>(&Win32Window::WndProc),
+			&instance_)) {
+				ErrorL << "GetModuleHandleEx failed" << endl;
+				return false;
+		}
+
+		// Class not registered, register it.
+		WNDCLASSEX wcex;
+		memset(&wcex, 0, sizeof(wcex));
+		wcex.cbSize = sizeof(wcex);
+		wcex.hInstance = instance_;
+		wcex.lpfnWndProc = &Win32Window::WndProc;
+		wcex.lpszClassName = kWindowBaseClassName;
+		window_class_ = ::RegisterClassEx(&wcex);
+		if (!window_class_) {
+			ErrorL << "RegisterClassEx failed" << endl;
+			return false;
+		}
+	}
+	wnd_ = ::CreateWindowEx(exstyle, kWindowBaseClassName, title, style,
+		x, y, cx, cy, parent, NULL, instance_, this);
+	return (NULL != wnd_);
+}
+
+
+void Win32Window::Destroy() 
+{
+	BOOL res = ::DestroyWindow(wnd_);
+	assert(res != FALSE);
+}
+
+
+void Win32Window::Shutdown() 
+{
+	if (window_class_) {
+		::UnregisterClass(MAKEINTATOM(window_class_), instance_);
+		window_class_ = 0;
+	}
+}
+
+
+bool Win32Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& result) 
+{
+	switch (uMsg) {
+	case WM_CLOSE:
+		if (!OnClose()) {
+			result = 0;
+			return true;
+		}
+		break;
+	}
+	return false;
+}
+
+
+LRESULT Win32Window::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
+{
+	Win32Window* that = reinterpret_cast<Win32Window*>(
+		::GetWindowLongPtr(hwnd, GWLP_USERDATA));
+	if (!that && (WM_CREATE == uMsg)) {
+		CREATESTRUCT* cs = reinterpret_cast<CREATESTRUCT*>(lParam);
+		that = static_cast<Win32Window*>(cs->lpCreateParams);
+		that->wnd_ = hwnd;
+		::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(that));
+	}
+	if (that) {
+		LRESULT result;
+		bool handled = that->OnMessage(uMsg, wParam, lParam, result);
+		if (WM_DESTROY == uMsg) {
+			for (HWND child = ::GetWindow(hwnd, GW_CHILD); child;
+				child = ::GetWindow(child, GW_HWNDNEXT)) {
+					DebugL << "Child window: " << static_cast<void*>(child) << endl;
+			}
+		}
+		if (WM_NCDESTROY == uMsg) {
+			::SetWindowLongPtr(hwnd, GWLP_USERDATA, NULL);
+			that->wnd_ = NULL;
+			that->OnNcDestroy();
+		}
+		if (handled) {
+			return result;
+		}
+	}
+	return ::DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+
 } } // namespace scy::av
 
 
@@ -360,12 +582,7 @@ bool getDevicesWin32(REFGUID catid, std::vector<Device>& devices)
 /*
 bool getDevices(const CLSID& catid, std::vector<Device>& devices) 
 {	
-	assert(0 && "fixme"); // http://cboard.cprogramming.com/windows-programming/114294-getting-list-usb-devices-listed-system.html
-	return false;
-
-
 	HRESULT hr;
-
 
 	// CComPtr is a scoped pointer that will be auto released when going
 	// out of scope. CoUninitialize must not be called before the
@@ -645,7 +862,7 @@ bool Win32DeviceWatcher::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 						reinterpret_cast<DEV_BROADCAST_DEVICEINTERFACE*>(lParam);
 					if (dbdi->dbcc_classguid == KSCATEGORY_AUDIO ||
 						dbdi->dbcc_classguid == KSCATEGORY_VIDEO) {
-							manager_->SignalDevicesChange();
+							manager_->DevicesChanged();
 					}
 			}
 			result = 0;

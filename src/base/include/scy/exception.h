@@ -38,6 +38,7 @@ struct Error
 {
 	int errorno; 
 	std::string message; // Error message (set by application)
+	std::exception_ptr exception;
 
 	Error()
 	{
@@ -58,14 +59,21 @@ struct Error
 
 	bool any() const
 	{
-		return errorno != 0 || !message.empty();
+		return errorno != 0 || !message.empty() || exception != nullptr;
 	}
 
 	void reset() 
 	{
 		errorno = 0;
 		message.clear();
+		exception = nullptr;
 	}
+
+	void rethrow() 
+	{
+		if (exception)
+			std::rethrow_exception(exception);
+	}	
 	
     friend std::ostream& operator << (std::ostream& stream, const Error& err) 
 	{

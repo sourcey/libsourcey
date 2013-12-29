@@ -124,7 +124,7 @@ void InstallMonitor::setProgress(int value)
 }
 
 
-InstallTaskList InstallMonitor::tasks() const 
+InstallTaskVec InstallMonitor::tasks() const 
 { 
 	Mutex::ScopedLock lock(_mutex);
 	return _tasks; 

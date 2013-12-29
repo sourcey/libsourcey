@@ -16,7 +16,7 @@
 #include "scy/media/formatregistry.h"
 
 #include "scy/http/util.h"
-#include "scy/http/packetizers.h"
+#include "scy/http/framings.h"
 #include "scy/util/base64packetencoder.h"
 #include "scy/util/streamcollection.h"
 

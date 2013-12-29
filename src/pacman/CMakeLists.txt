@@ -7,5 +7,5 @@ if(BUILD_MODULES AND BUILD_MODULE_pacman)
   #include_dependency(ZLIB REQUIRED)
   #include_dependency(Minizip REQUIRED)
 
-  define_sourcey_module(pacman base uv net json http archo)
+  define_sourcey_module(pacman base uv net json http archo crypto)
 endif()

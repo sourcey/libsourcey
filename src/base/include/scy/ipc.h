@@ -32,7 +32,7 @@ namespace ipc {
 
 
 struct Action
-	/// Default action type for passing between threads.
+	/// Default action type for executing synchronized callbacks.
 {
 	typedef std::function<void(const Action&)> callback_t;
 	callback_t target;
@@ -46,12 +46,11 @@ struct Action
 
 template<typename TAction = ipc::Action> 
 class Queue
-	/// IPC queue for passing templated actions between 
-	/// threads and the event loop we are synchronizing.
+	/// IPC queue is for safely passing templated   
+	/// actions between threads and processes.
 {
 public:	
-	Queue(uv::Loop* loop = uv::defaultLoop()) : 
-		_sync(loop, std::bind(&Queue::runSync, this)) 
+	Queue()
 	{
 	}
 
@@ -59,7 +58,7 @@ public:
 	{
 	}
 
-	void push(TAction* action)
+	virtual void push(TAction* action)
 	{
 		{
 			Mutex::ScopedLock lock(_mutex);
@@ -68,7 +67,7 @@ public:
 		post();
 	}
 
-	TAction* pop()
+	virtual TAction* pop()
 	{
 		if (_actions.empty()) 
 			return nullptr;
@@ -78,13 +77,43 @@ public:
 		return next;
 	}
 	
-	void runSync()
+	virtual void runSync()
 	{
 		TAction* next = nullptr;
 		while (next = pop()) {
 			next->target(*next);
 			delete next;
 		}
+	}
+
+	virtual void close()
+	{
+	}
+	
+	virtual void post()
+	{
+	}
+
+protected:	
+	mutable Mutex _mutex;
+	std::deque<TAction*> _actions;
+};
+
+
+template<typename TAction = ipc::Action> 
+class SyncQueue: public Queue<TAction>
+	/// IPC synchronization queue is for passing templated 
+	/// actions between threads and the event loop we are 
+	/// synchronizing with.
+{
+public:	
+	SyncQueue(uv::Loop* loop = uv::defaultLoop()) : 
+		_sync(loop, std::bind(&Queue::runSync, this)) 
+	{
+	}
+
+	virtual ~SyncQueue() 
+	{
 	}
 
 	void close()
@@ -103,13 +132,12 @@ public:
 	}
 
 protected:	
-	mutable Mutex _mutex;
-	std::deque<Action*> _actions;
 	SyncContext _sync;
 };
 
 
 typedef ipc::Queue<ipc::Action> ActionQueue;
+typedef ipc::SyncQueue<ipc::Action> ActionSyncQueue;
 
 
 } } // namespace scy::ipc

@@ -43,72 +43,19 @@ namespace scy {
 namespace av {
 	
 
-class VideoCaptureBase;
-	/// The reference counted video capture implementation.
-	/// Helps us overcome the multithread capture limitation with OpenCV.
-
-
 //
 // Video Capture
 //
 
 
-class VideoCapture: public ICapture
-	/// Class for capturing video from cameras and files using OpenCV.
-{
-public:
-	VideoCapture(int deviceId);
-		// Creates and opens the given device
-		// Captures can be instantiated from thread, providing the  
-		// VideoCaptureBase for the given deviceId was already initialized
-		// in the main thread.
-
-	VideoCapture(const std::string& filename);
-		// Creates and opens the given video file
-		// Can be created in any thread
-
-	VideoCapture(std::shared_ptr<VideoCaptureBase> base);
-		// Creates the video capture using the given base instance.
-
-	virtual ~VideoCapture();
-	
-	virtual void start();
-	virtual void stop();
-	
-	bool opened() const;
-		// True when the system device is open.
-
-	bool running() const;
-		// True when the thread is running. 
-
-	int width();
-	int height();
-
-	VideoCaptureBase& base();
-				
-	void getFrame(cv::Mat& frame, int width = 0, int height = 0);
-
-	virtual void getEncoderFormat(Format& iformat);
-
-protected:
-	mutable Mutex _mutex;
-
-	std::shared_ptr<VideoCaptureBase> _base;
-	//VideoCaptureBase* _base;
-};
-	
-
-//
-// Video Capture Base
-//
-
-
-class VideoCaptureBase: public async::Runnable //public SharedObject, 
+class VideoCapture: public ICapture, public async::Runnable
 	/// Class for capturing video from cameras and files using OpenCV.
 	/// Do not use this class directly, use VideoCapture instead.
 	///
+	/// To handle output packets listen in on the ICapture::emitter signal.
+	///
 	/// Limitations:
-	/// OpenCV doesn't support multi-thread capturing so VideoCaptureBase
+	/// OpenCV doesn't support multi-thread capturing so VideoCapture
 	/// instances should be created in the main thread.
 	/// File captures do not have this limitation.
 	/// Also avoid creating multiple instances using the same device.
@@ -121,13 +68,21 @@ class VideoCaptureBase: public async::Runnable //public SharedObject,
 	/// with the DeviceManager.
 {
 public:
-	VideoCaptureBase(int deviceId); 
-		// Creates and opens the given device
-		// Should be created in the main thread
+	typedef std::shared_ptr<VideoCapture> Ptr;
 
-	VideoCaptureBase(const std::string& filename);
-		// Creates and opens the given video file
-		// Can be created in any thread
+	VideoCapture(int deviceId); 
+		// Creates and opens the given device.
+		// Should be created in the main thread.
+
+	VideoCapture(const std::string& filename);
+		// Creates and opens the given video file.
+		// Can be created in any thread.
+
+	virtual ~VideoCapture();
+		// Destroys the VideoCapture.
+
+	bool open(bool whiny = true);
+		// Opens the VideoCapture.
 	
 	virtual void start();
 	virtual void stop();
@@ -137,55 +92,50 @@ public:
 
 	bool running() const;
 		// True when the internal thread is running. 
+				
+	void getFrame(cv::Mat& frame, int width = 0, int height = 0);
+
+	virtual void getEncoderFormat(Format& iformat);
 	
 	int deviceId() const;
 	std::string	filename() const;
 	std::string	name() const;
-	std::string	error() const;
+	const scy::Error& error() const;
 	double fps() const;
 	int width();
 	int height();
 	cv::Mat lastFrame() const;
 	cv::VideoCapture& capture();
 
-	virtual ~VideoCaptureBase();
-		// Destroy the VideoCaptureBase
-		// Never call directly; only public for compatibility
-		// with std::make_shared.
+	Signal<const scy::Error&> Error;
+		// Signals that the capture is closed in error.
 
 protected:	
-	bool open();
 	cv::Mat grab();
 	virtual void run();
-
+	
 	void setError(const std::string& error);
 	
-	virtual void addEmitter(PacketSignal* emitter);
-	virtual void removeEmitter(PacketSignal* emitter);
-	
-	friend class VideoCapture;
 	friend class MediaFactory;
-	//friend struct std::default_delete<VideoCaptureBase>;	
 
 private:   
 	mutable Mutex _mutex;
-	mutable Mutex _emitMutex;
 
 	bool _opened;
+	bool _started;
 	bool _stopping;
 	bool _capturing;
 	int _deviceId;			// Source device to capture from
 	cv::Mat _frame;			// Current video image
-	std::string	_error;		// Error message if any
+	scy::Error _error;		// Error message if any
 	std::string	_filename;	// Source file to capture from if any
 	FPSCounter _counter;
 	cv::VideoCapture _capture;
-	PacketSignalVec _emitters;
 	Thread _thread;
 };
 
 
-typedef std::map<int, std::shared_ptr<VideoCaptureBase>> VideoCaptureBaseMap;
+typedef std::map<int, VideoCapture::Ptr> VideoCaptureMap;
 	
 
 //
@@ -193,8 +143,9 @@ typedef std::map<int, std::shared_ptr<VideoCaptureBase>> VideoCaptureBaseMap;
 //
 
 
-struct MatrixPacket: public VideoPacket 
+class MatrixPacket: public VideoPacket 
 {
+public:
 	cv::Mat* mat; // For OpenCV generated packets.
 				  // TODO: Use stream offset time instead of process time 
 				  // for consistency with AudioCapture for realtime pts calculation

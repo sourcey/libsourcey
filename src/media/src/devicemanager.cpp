@@ -43,8 +43,8 @@ Device::Device() :
 }
 
 
-Device::Device(const std::string& type, int id, const std::string& name, const std::string& guid, bool isDefault) : 
-	type(type), id(id), name(name), guid(guid), isDefault(isDefault)
+Device::Device(const std::string& type, int id, const std::string& name, const std::string& guid, bool isDefault, bool isAvailable) : 
+	type(type), id(id), name(name), guid(guid), isDefault(isDefault), isAvailable(isAvailable)
 {
 }
 
@@ -55,7 +55,8 @@ void Device::print(std::ostream& os)
 		<< type << ": " 
 		<< id << ": " 
 		<< name << ": " 
-		<< isDefault 
+		<< isDefault  << ": " 
+		<< isAvailable 
 		<< "]";
 }
 
@@ -76,6 +77,8 @@ DeviceManager::~DeviceManager()
 {
 	if (initialized())
 		uninitialize();
+	if (_watcher)
+		delete _watcher;
 }
 
 

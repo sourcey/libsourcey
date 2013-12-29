@@ -1,8 +1,8 @@
-#include "MediaServer.h"
-#include "RelayResponder.h"
-#include "SnapshotResponder.h"
-#include "StreamingResponder.h"
-#include "WebSocketResponder.h"
+#include "mediaserver.h"
+#include "relayresponder.h"
+#include "snapshotresponder.h"
+#include "streamingresponder.h"
+#include "websocketresponder.h"
 
 #include "scy/collection.h"
 #include "scy/media/mediafactory.h"
@@ -13,7 +13,6 @@
 
 #include "scy/http/packetizers.h"
 #include "scy/http/util.h"
-#include "scy/http/packetizers.h"
 #include "scy/util/base64packetencoder.h"
 
 
@@ -86,11 +85,19 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 	// Attach capture sources
 	if (options.oformat.video.enabled) {
 		assert(options.videoCapture);
-		stream.attachSource(options.videoCapture, freeCaptures, true);
+		
+		//assert(dynamic_cast<av::VideoCapture*>(options.videoCapture.get()));
+		//assert(dynamic_cast<av::ICapture*>(options.videoCapture.get()));
+		
+		//auto source = dynamic_cast<PacketSource*>(options.videoCapture.get());
+		//assert(source);
+		//if (!source) throw std::runtime_error("Cannot attach incompatible packet source.");
+
+		stream.attachSource<av::VideoCapture>(options.videoCapture, true); //freeCaptures, 
 	}
 	if (options.oformat.audio.enabled) {
 		assert(options.audioCapture);
-		stream.attachSource(options.audioCapture, freeCaptures, true);	
+		stream.attachSource<av::AudioCapture>(options.audioCapture, true); //freeCaptures, 
 	}
 				
 	//stream.attach(new FPSLimiter(5), 1, true);
@@ -105,7 +112,7 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 	encoder->initialize();
 	stream.attach(encoder, 5, true);		
 				
-	// Add format specific packetizers
+	// Add format specific framings
 	if (options.oformat.name == "MJPEG") {	
 
 		// Base64 encode the MJPEG stream for old browsers
@@ -129,24 +136,24 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
 	    //stream.attach(injector, 10);
 	}
 		
-	// Attach the HTTP output packetizer
-	IPacketizer* packetizer = nullptr;
-	if (options.packetizer.empty() ||
-		options.packetizer == "none" ||
-		options.packetizer == "None")
+	// Attach the HTTP output framing
+	IPacketizer* framing = nullptr;
+	if (options.framing.empty() ||
+		options.framing == "none" ||
+		options.framing == "None")
 		;
-		//packetizer = new http::StreamingAdapter("image/jpeg");	
+		//framing = new http::StreamingAdapter("image/jpeg");	
 
-	else if (options.packetizer == "chunked")
-		packetizer = new http::ChunkedAdapter("image/jpeg");
+	else if (options.framing == "chunked")
+		framing = new http::ChunkedAdapter("image/jpeg");
 
-	else if (options.packetizer == "multipart")
-		packetizer = new http::MultipartAdapter("image/jpeg", options.encoding == "Base64");	// false, 			
+	else if (options.framing == "multipart")
+		framing = new http::MultipartAdapter("image/jpeg", options.encoding == "Base64");	// false, 			
 
-	else throw std::runtime_error("Unsupported packetizer method: " + options.packetizer);
+	else throw std::runtime_error("Unsupported framing method: " + options.framing);
 
-	if (packetizer)					
-		stream.attach(packetizer, 15, true);
+	if (framing)					
+		stream.attach(framing, 15, true);
 
 	// Attach a sync queue to synchronize output with the event loop
 	auto sync = new SyncPacketQueue;
@@ -171,8 +178,7 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 		auto& request = conn.request();
 
 		// Log incoming requests
-		InfoL
-			<< "Incoming connection from " << conn.socket().peerAddress() 
+		InfoL << "Incoming connection from " << conn.socket().peerAddress() 
 			<< ": URI:\n" << request.getURI()
 			<< ": Request:\n" << request << endl;
 			
@@ -194,9 +200,9 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 		if (params.has("quality"))	
 			options.oformat.video.quality = util::strtoi<UInt32>(params.get("quality"));
 
-		// Response encoding and packetizer options
+		// Response encoding and framing options
 		options.encoding = params.get("encoding", "");
-		options.packetizer = params.get("packetizer", "");			
+		options.framing = params.get("framing", "");			
 			
 		// Video captures must be initialized in the main thread. 
 		// See MediaFactory::loadVideo		
@@ -253,7 +259,7 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 //
 
 
-StreamingOptions::StreamingOptions(MediaServer* server, av::VideoCapture* videoCapture, av::AudioCapture* audioCapture) : 
+StreamingOptions::StreamingOptions(MediaServer* server, av::VideoCapture::ptr videoCapture, av::AudioCapture::ptr audioCapture) : 
 	server(server), videoCapture(videoCapture), audioCapture(audioCapture) 
 {
 	DebugLS(this) << "Destroy" << endl;	
@@ -280,7 +286,7 @@ int main(int argc, char** argv)
 	Logger::instance().setWriter(new AsyncLogWriter);			
 	{
 		// Pre-initialize video captures in the main thread	
-		MediaFactory::instance().loadVideo();	
+		//MediaFactory::instance().loadVideo();	
 
 		// Start the application and server
 		Application app;

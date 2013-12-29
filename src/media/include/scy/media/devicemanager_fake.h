@@ -113,7 +113,7 @@ public:
 		//	input_devices_.push_back(Device(devices[i], i));
 		//}
 		input_devices_ = devices;
-		//SignalDevicesChange();
+		//DevicesChanged();
 	}
 
 	void setAudioOutputDevices(const std::vector<Device>& devices) 
@@ -123,7 +123,7 @@ public:
 		//	output_devices_.push_back(Device(devices[i], i));
 		//}		
 		output_devices_ = devices;
-		//SignalDevicesChange();
+		//DevicesChanged();
 	}
 
 	void setVideoCaptureDevices(const std::vector<Device>& devices) 
@@ -133,7 +133,7 @@ public:
 		//	vidcap_devices_.push_back(Device(devices[i], i));
 		//}		
 		vidcap_devices_ = devices;
-		//SignalDevicesChange();
+		//DevicesChanged();
 	}
 
 

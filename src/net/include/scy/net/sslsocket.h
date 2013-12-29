@@ -118,11 +118,11 @@ public:
 	typedef net::SSLBase Base;
 	typedef std::vector<SSLSocket> List;
 	
-	SSLSocket();
+	SSLSocket(uv::Loop* loop = uv::defaultLoop());
 		// Creates an unconnected SSL socket.
 
-	SSLSocket(SSLContext::Ptr sslContext);
-	SSLSocket(SSLContext::Ptr sslContext, SSLSession::Ptr session);
+	SSLSocket(SSLContext::Ptr sslContext, uv::Loop* loop = uv::defaultLoop());
+	SSLSocket(SSLContext::Ptr sslContext, SSLSession::Ptr session, uv::Loop* loop = uv::defaultLoop());
 
 	SSLSocket(SSLBase* base, bool shared = false);
 		// Creates the Socket and attaches the given SocketBase.

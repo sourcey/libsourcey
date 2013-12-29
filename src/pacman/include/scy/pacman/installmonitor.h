@@ -50,7 +50,7 @@ public:
 		// Returns true if all install tasks have completed,
 		// either successfully or unsuccessfully.
 
-	virtual InstallTaskList tasks() const;
+	virtual InstallTaskVec tasks() const;
 		// Returns the list of monitored package tasks.
 	
 	virtual LocalPackageList packages() const;
@@ -78,7 +78,7 @@ protected:
 protected:
 	mutable Mutex	_mutex;
 
-	InstallTaskList _tasks;
+	InstallTaskVec _tasks;
 	LocalPackageList _packages;
 	int _progress;
 };

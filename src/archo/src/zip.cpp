@@ -20,17 +20,6 @@
 #include "scy/archo/zip.h"
 #include "scy/filesystem.h"
 
-/*
-#include "scy/exception.h"
-#include "scy/base64.h"
-#include "scy/hex.h"
-
-#include <memory>
-#include <iostream>
-#include <sstream>
-#include <assert.h>
-*/
-
 
 using std::endl; 
 
@@ -161,7 +150,7 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 		std::string outPath(path);
 		fs::addnode(outPath, fname);
 
-		TraceL << "Extracting zip file: " << outPath << endl;
+		TraceL << "Extracting asset: " << outPath << endl;
 
 		// Create directory
 #if !WIN32
@@ -175,10 +164,23 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 
 		// Create file
 		else {			
-			openCurrentFile();
+			TraceL << "Create file: " << outPath << endl;
 
-			TraceL << "Extracting file: " << outPath << endl;
+			// Note: If this fails the file we are trying 
+			// to write may be in use on the filesystem.
+			openCurrentFile();
+			TraceL << "Create file 1: " << outPath << endl;
+
 			std::ofstream ofs(outPath, std::ios::binary | std::ios::out);
+
+			// FIX: FILE_ATTRIBUTE_DIRECTORY can be inconsistent, so we 
+			// need to be ready to create directories if the output file 
+			// fails to open.
+			if (!ofs.is_open()) {
+				fs::mkdirr(fs::dirname(outPath));
+				ofs.open(outPath);
+			}
+
 			if (!ofs.is_open())
 				throw std::runtime_error("Cannot open zip output file: " + outPath);
 			

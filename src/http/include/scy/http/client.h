@@ -22,6 +22,8 @@
 
 
 #include "scy/net/socket.h"
+#include "scy/net/tcpsocket.h"
+#include "scy/net/sslsocket.h"
 #include "scy/net/network.h"
 #include "scy/http/connection.h"
 #include "scy/http/websocket.h"
@@ -151,7 +153,7 @@ protected:
 typedef std::vector<ClientConnection*> ClientConnectionList;
 	
 
-ClientConnection* createConnection(const URL& url);
+ClientConnection* createConnection(const URL& url, uv::Loop* loop = uv::defaultLoop());
 	// Create a ClientConnection object.
 	// The underlying ConnectionAdapter will be guessed
 	// based on the URL scheme.
@@ -172,13 +174,8 @@ public:
 };
 
 
-/*
-		
-	//virtual void setError(const Error& err);
-	
-	void complete();
-		// The transaction has ended, either is success or in error,
-		// and Complete signal has been sent.
+#if 0
+
 // -------------------------------------------------------------------
 //
 class SecureClientConnection: public ClientConnection
@@ -227,7 +224,7 @@ public:
 	{
 	}
 };
-*/
+#endif
 
 
 //
@@ -238,7 +235,7 @@ public:
 class Client: public basic::Module
 {
 public:
-	Client();
+	Client(uv::Loop* loop = uv::defaultLoop());
 	virtual ~Client();
 
 	void shutdown();
@@ -251,7 +248,26 @@ public:
 	template<class ConnectionT>
 	ConnectionT* createConnectionT(const URL& url)
 	{
-		return new ConnectionT(this, url);
+		ClientConnection* conn = nullptr;
+
+		if (url.scheme() == "http") {
+			conn = new ConnectionT(url, net::TCPSocket(loop));
+		}
+		else if (url.scheme() == "https") {
+			conn = new ConnectionT(url, net::SSLSocket(loop));
+		}
+		else if (url.scheme() == "ws") {
+			conn = new ConnectionT(url, net::TCPSocket(loop));
+			conn->socket().replaceAdapter(new WebSocketConnectionAdapter(*conn, WebSocket::ClientSide));
+		}
+		else if (url.scheme() == "wss") {
+			conn = new ConnectionT(url, net::SSLSocket(loop));
+			conn->socket().replaceAdapter(new WebSocketConnectionAdapter(*conn, WebSocket::ClientSide));
+		}
+		else
+			throw std::runtime_error("Unknown connection type for URL: " + url.str());
+
+		return conn; //new ConnectionT(this, url);
 	}
 
 	virtual void addConnection(ClientConnection* conn);
@@ -267,6 +283,7 @@ protected:
 	friend class ClientConnection;
 	
 	ClientConnectionList connections;
+	uv::Loop* loop;
 	Timer timer;
 };
 

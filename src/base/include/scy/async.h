@@ -111,7 +111,7 @@ public:
 		// Returns true if the implementation is thread-based, or false
 		// if it belongs to an event loop.
 
-	typedef std::shared_ptr<Runner> ptr;
+	typedef std::shared_ptr<Runner> Ptr;
 		
 	struct Context
 		// The context which we send to the thread context.

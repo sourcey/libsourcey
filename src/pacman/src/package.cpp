@@ -243,19 +243,19 @@ Package::Asset RemotePackage::latestSDKAsset(const std::string& version)
 	json::Value& assets = this->assets();
 	if (assets.empty())
 		throw std::runtime_error("Package has no assets");
-	
+
 	size_t index = -1;
 	for (unsigned i = 0; i < assets.size(); i++) {		
-		if (assets[i]["sdk-version"].asString() == version && (
+		if (assets[i]["sdk-version"].asString() == version && (index == -1 || (
 			assets[index]["sdk-version"].asString() != version || 
-			util::compareVersion(assets[i]["version"].asString(), assets[index]["version"].asString()))) {
+			util::compareVersion(assets[i]["version"].asString(), assets[index]["version"].asString())))) {
 			index = i;
 		}
 	}
 	
 	if (index == -1)
 		throw std::runtime_error("No package asset with SDK version " + version);
-
+	
 	return Asset(assets[index]);
 }
 

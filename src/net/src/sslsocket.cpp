@@ -29,8 +29,8 @@ namespace scy {
 namespace net {
 
 
-SSLSocket::SSLSocket() : 
-	net::Socket(new SSLBase, false)
+SSLSocket::SSLSocket(uv::Loop* loop) : 
+	net::Socket(new SSLBase(loop), false)
 {
 }
 

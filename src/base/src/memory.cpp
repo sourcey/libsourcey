@@ -36,7 +36,7 @@ GarbageCollector::GarbageCollector() :
 	_finalize(false), 
 	_tid(0)
 {
-	TraceLS(this) << "Create" << std::endl;
+	TraceL << "Create" << std::endl;
 
 	_handle.ptr()->data = this;
 	uv_timer_init(_handle.loop(), _handle.ptr<uv_timer_t>());		
@@ -47,7 +47,7 @@ GarbageCollector::GarbageCollector() :
 	
 GarbageCollector::~GarbageCollector()
 {
-	TraceLS(this) << "Destroy: "
+	TraceL << "Destroy: "
 			<< "\n\tReady: " << _ready.size() 
 			<< "\n\tPending: " << _pending.size()
 			<< "\n\tFinalize: " << _finalize
@@ -60,7 +60,7 @@ GarbageCollector::~GarbageCollector()
 
 void GarbageCollector::finalize()
 {
-	TraceLS(this) << "Finalize" << std::endl;	
+	TraceL << "Finalize" << std::endl;	
 	
 	// Ensure the loop is not running and that the 
 	// calling thread is the main thread.
@@ -79,47 +79,60 @@ void GarbageCollector::finalize()
 	uv_ref(_handle.ptr());
 	uv_run(_handle.loop(), UV_RUN_DEFAULT);
 
-	TraceLS(this) << "Finalize: OK" << std::endl;
+	TraceL << "Finalize: OK" << std::endl;
+}
+		
+
+void onPrintHandle(uv_handle_t* handle, void* /* arg */) 
+{
+	DebugL << "#### Active handle: " << handle << ": " << handle->type << std::endl;
 }
 
 
 void GarbageCollector::runAsync()
 {
-	std::vector<DeferredDeleter*> deletable;
+	std::vector<ScopedPointer*> deletable;
 	{
-		Mutex::ScopedLock lock(_mutex);
-
+		Mutex::ScopedLock lock(_mutex);		
+		if (!_tid) { _tid = uv_thread_self(); }	
 		if (!_ready.empty() || !_pending.empty()) {
-			TraceLS(this) << "Deleting: "
+			TraceL << "Deleting: "
 				<< "\n\tReady: " << _ready.size() 
 				<< "\n\tPending: " << _pending.size()
 				<< "\n\tFinalize: " << _finalize
 				<< std::endl;
 
 			// Delete waiting pointers
-			//util::clearVector(_ready);
 			deletable = _ready;
 			_ready.clear();
 
 			// Swap pending pointers to the ready queue
 			_ready.swap(_pending);
 		}
-
-		if (_finalize && _ready.empty() && _pending.empty()) {
-			// Stop and close the timer handle.
-			// This should cause the loop to return after 
-			// uv_close has been called on the timer handle.
-			uv_timer_stop(_handle.ptr<uv_timer_t>());
-			_handle.close();
-
-			TraceLS(this) << "Finalization complete" << std::endl;
-		}
-
-		if (!_tid) { _tid = uv_thread_self(); }	
 	}	
 	
 	// Delete pointers
 	util::clearVector(deletable);
+	
+	// Handle finalization
+	if (_finalize) {
+		Mutex::ScopedLock lock(_mutex);
+		if (_ready.empty() && _pending.empty()) {
+			// Stop and close the timer handle.
+			// This should cause the loop to return after 
+			// uv_close has been called on the timer handle.
+			uv_timer_stop(_handle.ptr<uv_timer_t>());
+			//_handle.close();
+	
+			TraceL << "Finalization complete: " << _handle.loop()->active_handles << std::endl;
+
+#ifdef _DEBUG
+			// Print active handles, there should only be 1 left
+			uv_walk(_handle.loop(), onPrintHandle, nullptr);
+			//assert(_handle.loop()->active_handles <= 1); 
+#endif
+		}
+	}
 }
 
 

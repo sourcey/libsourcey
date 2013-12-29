@@ -19,6 +19,7 @@ find_path(WebRTC_INCLUDE_DIR
   	D:/dev/lib/webrtc/trunk
 )
 
+      
 # ----------------------------------------------------------------------
 # Find WebRTC libraries
 # ----------------------------------------------------------------------
@@ -27,11 +28,16 @@ set(WebRTC_RELEASE_PATHS D:/dev/lib/webrtc/trunk/build/Debug/lib)
 
 # webrtc
 sourcey_find_library(WebRTC
-  NAMES webrtc
+  NAMES webrtc_utility
   DEBUG_PATHS ${WebRTC_DEBUG_PATHS}
   RELEASE_PATHS ${WebRTC_RELEASE_PATHS})
 
+message("WebRTC_INCLUDE_DIR=${WebRTC_INCLUDE_DIR}")
+message("WebRTC_LIBRARY=${WebRTC_LIBRARY}")
+
 if(WebRTC_LIBRARY AND WebRTC_INCLUDE_DIR)
+
+  # TODO: Exclude jsoncp and test libs
 
   if(WIN32 AND MSVC)    
     if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)     

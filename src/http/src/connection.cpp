@@ -125,7 +125,9 @@ void Connection::close()
 	_socket.Recv -= delegate(this, &Connection::onSocketRecv);
 	_socket.Error -= delegate(this, &Connection::onSocketError);
 	_socket.Close -= delegate(this, &Connection::onSocketClose);
-	_socket.close();
+
+	// FIXME: Causing slowdows when used for Pacman downloads.
+	//_socket.close();
 
 	onClose();
 		

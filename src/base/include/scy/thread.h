@@ -58,6 +58,8 @@ public:
 	static unsigned long currentID();
  		// Returns the native thread ID of the current thread.
 
+	static const unsigned long mainID;
+
 protected:
 	Thread(const Thread&);
 	Thread& operator = (const Thread&);

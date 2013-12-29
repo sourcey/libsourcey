@@ -143,39 +143,45 @@ class FPSLimiter: public PacketProcessor
 	/// in a PacketStream. If the throughput rate exceeds the
 	/// max specified FPS then packets will be dropped.
 	///	
-	/// Note that upstream processors should not fragment packets
+	/// Note that revious processors must not fragment packets
 	/// otherwise this class will not be accurate, and the packet 
 	/// drop rate will be too high.
 {
 public:
-	FPSLimiter(int max) : 
-		PacketProcessor(this->emitter), _max(max)
+	FPSLimiter(int max, bool videoOnly = false) : 
+		PacketProcessor(this->emitter), _max(max), _videoOnly(videoOnly)
 	{
 	}
 
 	virtual void process(IPacket& packet) 
 	{
-		traceL("FPSLimiter", this) << "Processing" << std::endl;
+		//traceL("FPSLimiter", this) << "Processing" << std::endl;
+
+		// Prody non video packets if videoOnly is set
+		if (_videoOnly && !dynamic_cast<av::VideoPacket*>(&packet))
+			emit(packet);
+
 		if (_counter.started())
 			_counter.endFrame();
-		/*
-		_counter.tick();
-		*/
 		if (static_cast<int>(_counter.fps) > _max) {			
-			traceL("FPSLimiter", this) << "####################### Dropping packet: " 
+			traceL("FPSLimiter", this) << "Dropping packet: " 
 				<< _counter.fps << " > " << _max << std::endl;
 			return;
 		}
 		_counter.startFrame();
 		emit(packet);
-	};
+	}
+
+	virtual void onStreamStateChange(const PacketStreamState&) 
+	{
+		_counter.reset();
+	}
 		
 	PacketSignal emitter;
 
-	// virtual void onStreamStateChange(const PacketStreamState&) {};
-
 protected:	
 	int _max;
+	bool _videoOnly;
 	legacy::FPSCounter _counter;
 };
 

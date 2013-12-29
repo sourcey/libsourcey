@@ -132,7 +132,7 @@ class TaskBase: public SocketBase<StreamSocketT, TransportT, SocketBaseT>
 
 //#include <string>
 
-//template <class PointerDeleterT>
+//template <class ScopedRawPointerT>
 //class GarbageCollectorTask;
 	//virtual TaskRunner& runner() { return _runner; }
 
@@ -144,5 +144,5 @@ class TaskBase: public SocketBase<StreamSocketT, TransportT, SocketBaseT>
 
 	//EvLoop& _loop;	
 	//bool _runOnce;
-	//template <class PointerDeleterT> 
+	//template <class ScopedRawPointerT> 
 	//friend class GarbageCollectorTask;

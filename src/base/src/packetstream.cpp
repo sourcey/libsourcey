@@ -30,17 +30,18 @@ namespace scy {
 
 PacketStream::PacketStream(const std::string& name) : 
 	_clientData(nullptr),
+	_closeOnError(false),
 	_name(name)
 {
 	TraceLS(this) << "Create" << endl;
 	
-	//_base = std::make_shared<PacketStreamBase>(this);
-	_base = std::shared_ptr<PacketStreamBase>(new PacketStreamBase(this), 
-		std::default_delete<PacketStreamBase>()
-		// NOTE: No longer using GC for deleting PacketStreamBase 
+	//_base = std::make_shared<PacketStream>(this);
+	//_base = std::shared_ptr<PacketStream>(new PacketStream(this), 
+		//std::default_delete<PacketStream>()
+		// NOTE: No longer using GC for deleting PacketStream 
 		// since we don't want to force use of the event loop.
-		//deleter::Deferred<PacketStreamBase>()
-		);
+		//deleter::Deferred<PacketStream>()
+		//);
 }
 
 
@@ -51,10 +52,21 @@ PacketStream::~PacketStream()
 	close();
 			
 	// Delete managed adapters
-	_base->cleanup();
+	/*_base->*/cleanup();
 
 	// Nullify the stream pointer 
-	_base->setStream(nullptr);
+	/*_base->setStream(nullptr);*/
+	
+	TraceLS(this) << "Destroy" << endl;
+	
+	// The event machine should always be complete
+	assert(stateEquals(PacketStreamState::None)
+		|| stateEquals(PacketStreamState::Closed)
+		|| stateEquals(PacketStreamState::Error));
+
+	// Make sure all adapters have been cleaned up
+	assert(_sources.empty());
+	assert(_processors.empty());
 
 	TraceLS(this) << "Destroy: OK" << endl;
 }
@@ -65,27 +77,27 @@ void PacketStream::start()
 	TraceLS(this) << "Start" << endl;
 	
 	//Mutex::ScopedLock lock(_mutex);
-	if (_base->stateEquals(PacketStreamState::Active)) {
+	if (/*_base->*/stateEquals(PacketStreamState::Active)) {
 		TraceLS(this) << "Start: Already active" << endl;
 		//assert(0);
 		return;
 	}
 	
 	// Setup the delegate chain
-	_base->setup();
+	/*_base->*/setup();
 
 	// Setup default (thread-based) runner if none set yet
-	//if (!_base->_runner)
+	//if (!/*_base->*/_runner)
 	//	setRunner(std::make_shared<Thread>());
 		
 	// Set state to Active
-	_base->setState(this, PacketStreamState::Active);
+	/*_base->*/setState(this, PacketStreamState::Active);
 	
 	// Lock the processor mutex to synchronize multi source streams
-	Mutex::ScopedLock lock(_base->_procMutex);
+	Mutex::ScopedLock lock(/*_base->*/_procMutex);
 
 	// Start synchronized sources
-	_base->startSources();
+	/*_base->*/startSources();
 }
 
 
@@ -94,22 +106,22 @@ void PacketStream::stop()
 	TraceLS(this) << "Stop" << endl;
 	
 	//Mutex::ScopedLock lock(_mutex);
-	if (_base->stateEquals(PacketStreamState::Stopped) ||
-		_base->stateEquals(PacketStreamState::Stopping) ||
-		_base->stateEquals(PacketStreamState::Closed)) {
+	if (/*_base->*/stateEquals(PacketStreamState::Stopped) ||
+		/*_base->*/stateEquals(PacketStreamState::Stopping) ||
+		/*_base->*/stateEquals(PacketStreamState::Closed)) {
 		TraceLS(this) << "Stop: Already stopped" << endl;
 		//assert(0);
 		return;
 	}
 
-	_base->setState(this, PacketStreamState::Stopping);		
-	_base->setState(this, PacketStreamState::Stopped);
+	/*_base->*/setState(this, PacketStreamState::Stopping);		
+	/*_base->*/setState(this, PacketStreamState::Stopped);
 	
 	// Lock the processor mutex to synchronize multi source streams
-	Mutex::ScopedLock lock(_base->_procMutex);
+	Mutex::ScopedLock lock(/*_base->*/_procMutex);
 
 	// Stop synchronized sources
-	_base->stopSources();
+	/*_base->*/stopSources();
 
 	TraceLS(this) << "Stop: OK" << endl;
 }
@@ -119,7 +131,7 @@ void PacketStream::pause()
 {
 	TraceLS(this) << "Pause" << endl;
 	//Mutex::ScopedLock lock(_mutex);
-	_base->setState(this, PacketStreamState::Paused);
+	/*_base->*/setState(this, PacketStreamState::Paused);
 }
 
 
@@ -127,12 +139,12 @@ void PacketStream::resume()
 {
 	TraceLS(this) << "Resume" << endl;
 	//Mutex::ScopedLock lock(_mutex);
-	if (!_base->stateEquals(PacketStreamState::Paused)) {
+	if (!/*_base->*/stateEquals(PacketStreamState::Paused)) {
 		TraceLS(this) << "Resume: Not paused" << endl;
 		return;
 	}
 	
-	_base->setState(this, PacketStreamState::Active);
+	/*_base->*/setState(this, PacketStreamState::Active);
 }
 
 
@@ -141,8 +153,8 @@ void PacketStream::reset()
 	TraceLS(this) << "Reset" << endl;
 	
 	//Mutex::ScopedLock lock(_mutex);
-	_base->setState(this, PacketStreamState::Resetting);
-	_base->setState(this, PacketStreamState::Active);
+	/*_base->*/setState(this, PacketStreamState::Resetting);
+	/*_base->*/setState(this, PacketStreamState::Active);
 }
 
 
@@ -151,33 +163,32 @@ void PacketStream::close()
 	TraceLS(this) << "Close" << endl;
 
 	//Mutex::ScopedLock lock(_mutex);
-	if (_base->stateEquals(PacketStreamState::None) ||
-		_base->stateEquals(PacketStreamState::Closed)) {
+	if (/*_base->*/stateEquals(PacketStreamState::None) ||
+		/*_base->*/stateEquals(PacketStreamState::Closed)) {
 		TraceLS(this) << "Already closed" << endl;
 		//assert(0);
 		return;
 	}
 	
 	// Stop the stream gracefully (if running)
-	if (!_base->stateEquals(PacketStreamState::Stopped) &&
-		!_base->stateEquals(PacketStreamState::Stopping))
+	if (!/*_base->*/stateEquals(PacketStreamState::Stopped) &&
+		!/*_base->*/stateEquals(PacketStreamState::Stopping))
 		stop();
 
 	// Queue the Closed state
-	_base->setState(this, PacketStreamState::Closed);
+	/*_base->*/setState(this, PacketStreamState::Closed);
 	
 	{
 		// Lock the processor mutex to synchronize multi source streams
-		Mutex::ScopedLock lock(_base->_procMutex);
+		Mutex::ScopedLock lock(/*_base->*/_procMutex);
 
 		// Teardown the adapter delegate chain
-		TraceLS(this) << "Destroy: Teardown: " << _base << endl;
-		_base->teardown();
+		/*_base->*/teardown();
 
 		// Wait for thread-based runners to stop running in order
 		// to ensure safe destruction of stream adapters. 
 		// This call does nothing for non thread-based runners.
-		//_base->waitForRunner();
+		///*_base->*/waitForRunner();
 	
 		// Synchronize any pending states
 		// This should be safe since the adapters won't be receiving
@@ -185,7 +196,10 @@ void PacketStream::close()
 		// This call is essential when using the event loop otherwise
 		// failing to close some handles could result in deadlock.
 		// See SyncQueue::cancel()
-		_base->synchronizeStates();
+		/*_base->*/synchronizeStates();
+			
+		// Clear and delete managed adapters
+		/*_base->*/cleanup();
 	}
 
 	// Send the Closed signal
@@ -195,53 +209,11 @@ void PacketStream::close()
 }
 
 
-void PacketStream::attachSource(PacketStreamAdapter* source, bool freePointer, bool syncState)
-{
-	//Mutex::ScopedLock lock(_mutex);
-	_base->attachSource(source, freePointer, syncState);
-}
-
-
-void PacketStream::attachSource(PacketSignal& source)
-{
-	//Mutex::ScopedLock lock(_mutex);
-	_base->attachSource(new PacketStreamAdapter(source), true, false);
-}
-
-
-bool PacketStream::detachSource(PacketStreamAdapter* source) 
-{
-	//Mutex::ScopedLock lock(_mutex);
-	return _base->detachSource(source);
-}
-
-
-bool PacketStream::detachSource(PacketSignal& source) 
-{
-	//Mutex::ScopedLock lock(_mutex);
-	return _base->detachSource(source);
-}
-
-
-void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer) 
-{
-	//Mutex::ScopedLock lock(_mutex);
-	_base->attach(proc, order, freePointer);
-}
-
-
-bool PacketStream::detach(PacketProcessor* proc) 
-{
-	//Mutex::ScopedLock lock(_mutex);
-	return _base->detach(proc);
-}
-
-
 void PacketStream::write(char* data, std::size_t len)
 {
 	//Mutex::ScopedLock lock(_mutex);
 	 RawPacket p(data, len);
-	_base->process(p);
+	/*_base->*/process(p);
 }
 
 
@@ -249,44 +221,131 @@ void PacketStream::write(const char* data, std::size_t len)
 {
 	//Mutex::ScopedLock lock(_mutex);
 	 RawPacket p(data, len);
-	_base->process(p);
+	/*_base->*/process(p);
 }
-	
 
 void PacketStream::write(IPacket& packet)
 {
 	//Mutex::ScopedLock lock(_mutex);
-	_base->process(packet);
-}
-
-
-void PacketStream::synchronizeOutput(uv::Loop* loop)
-{
-	//Mutex::ScopedLock lock(_mutex);
-	_base->synchronizeOutput(loop);
+	/*_base->*/process(packet);
 }
 
 
 bool PacketStream::locked() const
 {
 	//Mutex::ScopedLock lock(_mutex);
-	return _base->stateEquals(PacketStreamState::Locked);
+	return /*_base->*/stateEquals(PacketStreamState::Locked);
 }
+	
+
+#if 0
+
+
+
+void PacketStream::attachSource(PacketStreamAdapter* source, bool freePointer, bool syncState)
+{
+	//Mutex::ScopedLock lock(_mutex);
+	/*_base->*/attachSource(source, freePointer, syncState);
+}
+
+
+void PacketStream::attachSource(PacketSignal& source)
+{
+	//Mutex::ScopedLock lock(_mutex);
+	/*_base->*/attachSource(new PacketStreamAdapter(source), true, false);
+}
+
+
+bool PacketStream::detachSource(PacketStreamAdapter* source) 
+{
+	//Mutex::ScopedLock lock(_mutex);
+	return /*_base->*/detachSource(source);
+}
+
+
+bool PacketStream::detachSource(PacketSignal& source) 
+{
+	//Mutex::ScopedLock lock(_mutex);
+	return /*_base->*/detachSource(source);
+}
+
+
+void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer) 
+{
+	//Mutex::ScopedLock lock(_mutex);
+	/*_base->*/attach(proc, order, freePointer);
+}
+
+
+bool PacketStream::detach(PacketProcessor* proc) 
+{
+	//Mutex::ScopedLock lock(_mutex);
+	return /*_base->*/detach(proc);
+}
+
+
+void PacketStream::synchronizeOutput(uv::Loop* loop)
+{
+	//Mutex::ScopedLock lock(_mutex);
+	/*_base->*/synchronizeOutput(loop);
+}
+
+
+PacketStream& PacketStream::base() const
+{
+	Mutex::ScopedLock lock(_mutex);
+	if (!_base)
+		throw std::runtime_error("Packet stream context not initialized.");
+	return *_base;
+}
+
+
+PacketStream::PacketStream(PacketStream* stream) : 
+	_stream(stream),
+	_closeOnError(false)
+{
+	TraceLS(this) << "Create" << endl;
+}
+
+
+PacketStream::~PacketStream()
+{
+	TraceLS(this) << "Destroy" << endl;
+	
+	// The event machine should always be complete
+	assert(stateEquals(PacketStreamState::None)
+		|| stateEquals(PacketStreamState::Closed)
+		|| stateEquals(PacketStreamState::Error));
+
+	// Make sure all adapters have been cleaned up
+	assert(_sources.empty());
+	assert(_processors.empty());
+
+	TraceLS(this) << "Destroy: OK" << endl;
+}
+
+
+const std::exception_ptr& PacketStream::error()
+{
+	//Mutex::ScopedLock lock(_mutex);
+	return /*_base->*/error();
+}
+#endif
 
 
 //bool PacketStream::async() const
 //{
-//	return false; //_base->_runner && _base->_runner->async();
+//	return false; ///*_base->*/_runner && /*_base->*/_runner->async();
 //}
 
 
 bool PacketStream::lock()
 {
 	//Mutex::ScopedLock lock(_mutex);
-	if (!_base->stateEquals(PacketStreamState::None))
+	if (!/*_base->*/stateEquals(PacketStreamState::None))
 		return false;
 
-	_base->setState(this, PacketStreamState::Locked);
+	/*_base->*/setState(this, PacketStreamState::Locked);
 	return true;
 }
 	
@@ -294,23 +353,23 @@ bool PacketStream::lock()
 bool PacketStream::active() const
 {
 	//Mutex::ScopedLock lock(_mutex);
-	return _base->stateEquals(PacketStreamState::Active);
+	return /*_base->*/stateEquals(PacketStreamState::Active);
 }
 
 	
 bool PacketStream::closed() const
 {
 	//Mutex::ScopedLock lock(_mutex);
-	return _base->stateEquals(PacketStreamState::Closed)
-		|| _base->stateEquals(PacketStreamState::Error);
+	return /*_base->*/stateEquals(PacketStreamState::Closed)
+		|| /*_base->*/stateEquals(PacketStreamState::Error);
 }
 
 	
 bool PacketStream::stopped() const
 {
 	//Mutex::ScopedLock lock(_mutex);
-	return _base->stateEquals(PacketStreamState::Stopping) 
-		|| _base->stateEquals(PacketStreamState::Stopped);
+	return /*_base->*/stateEquals(PacketStreamState::Stopping) 
+		|| /*_base->*/stateEquals(PacketStreamState::Stopped);
 }
 	
 
@@ -331,7 +390,7 @@ void* PacketStream::clientData() const
 void PacketStream::closeOnError(bool flag)
 {
 	//Mutex::ScopedLock lock(_mutex);
-	_base->_closeOnError = flag;
+	/*_base->*/_closeOnError = flag;
 }
 
 
@@ -342,53 +401,13 @@ std::string PacketStream::name() const
 }
 
 
-const std::exception_ptr& PacketStream::error()
-{
-	//Mutex::ScopedLock lock(_mutex);
-	return _base->error();
-}
-
-
-PacketStreamBase& PacketStream::base() const
-{
-	Mutex::ScopedLock lock(_mutex);
-	if (!_base)
-		throw std::runtime_error("Packet stream context not initialized.");
-	return *_base;
-}
-
-
 //
 // Packet Stream Base
 //
 	
 
-PacketStreamBase::PacketStreamBase(PacketStream* stream) : 
-	_stream(stream),
-	_closeOnError(false)
-{
-	TraceLS(this) << "Create" << endl;
-}
 
-
-PacketStreamBase::~PacketStreamBase()
-{
-	TraceLS(this) << "Destroy" << endl;
-	
-	// The event machine should always be complete
-	assert(stateEquals(PacketStreamState::None)
-		|| stateEquals(PacketStreamState::Closed)
-		|| stateEquals(PacketStreamState::Error));
-
-	// Make sure all adapters have been cleaned up
-	assert(_sources.empty());
-	assert(_processors.empty());
-
-	TraceLS(this) << "Destroy: OK" << endl;
-}
-
-
-void PacketStreamBase::synchronizeStates()
+void PacketStream::synchronizeStates()
 {		
 	// Process queued internal states first
 	while (!_states.empty()) {
@@ -406,7 +425,7 @@ void PacketStreamBase::synchronizeStates()
 		// packet adapters do not need to consider thread safety.
 		auto adapters = this->adapters();
 		for (auto& ref : adapters) {
-			auto adapter = dynamic_cast<PacketStreamAdapter*>(ref.ptr);
+			auto adapter = dynamic_cast<PacketStreamAdapter*>(ref->ptr);
 			if (adapter)
 				adapter->onStreamStateChange(state);
 			else assert(0);
@@ -415,7 +434,7 @@ void PacketStreamBase::synchronizeStates()
 }
 
 
-void PacketStreamBase::process(IPacket& packet)
+void PacketStream::process(IPacket& packet)
 {	
 	//TraceLS(this) << "Processing packet: " 
 	//	<< state() << ": " << packet.className() << endl;	
@@ -429,7 +448,7 @@ void PacketStreamBase::process(IPacket& packet)
 			{
 				Mutex::ScopedLock lock(_mutex);
 				firstProc = !_processors.empty() ? 
-					reinterpret_cast<PacketProcessor*>(_processors[0].ptr) : nullptr;
+					reinterpret_cast<PacketProcessor*>(_processors[0]->ptr) : nullptr;
 			}			
 			if (firstProc) {
 				
@@ -450,17 +469,18 @@ void PacketStreamBase::process(IPacket& packet)
 				
 				// Proxy packets which are rejected by the first processor
 				else {
-					WarnLS(this) << "Source packet rejected: " 
-						<< firstProc << ": " << packet.className() << endl;
+					//WarnLS(this) << "Source packet rejected: " 
+					//	<< firstProc << ": " << packet.className() << endl;
 					firstProc = nullptr;
 				}			
 			}
 		}
 
 		// Otherwise just proxy and emit the packet
+		// TODO: Should we pass the packet to the PacketSyncQueue if
+		// synchronizeOutput was used?
 		if (!firstProc) {
-			//TraceLS(this) << "Proxying: " 
-			//	<< state() << ": " << packet.className() << endl;
+			TraceLS(this) << "Proxying packet: " << state() << ": " << packet.className() << endl;
 			emit(packet);
 		}
 	}
@@ -476,12 +496,12 @@ void PacketStreamBase::process(IPacket& packet)
 		// Capture the exception so it can be rethrown elsewhere.
 		// The Error signal will be sent on next call to emit()
 		_error = std::current_exception();
-		stream()->Error.emit(stream(), _error);
+		/*stream()->*/Error.emit(this, _error);
 
 		//_syncError = true;
 		if (_closeOnError) {
 			TraceLS(this) << "Close on error" << endl;
-			stream()->close();
+			this->close();
 		}
 	}	
 	
@@ -490,17 +510,17 @@ void PacketStreamBase::process(IPacket& packet)
 }
 
 
-//void PacketStreamBase::sync(IPacket& packet)
+//void PacketStream::sync(IPacket& packet)
 //{
 //}
 
 
-void PacketStreamBase::emit(IPacket& packet)
+void PacketStream::emit(IPacket& packet)
 {
 	TraceLS(this) << "Emit: " << packet.size() << endl;
 
-	PacketStream* stream = this->stream();
-	const PacketStreamState& state = this->state();
+	//PacketStream* stream = this->stream();
+	//const PacketStreamState& state = this->state();
 
 	/*
 	// Synchronize the error if required
@@ -518,24 +538,21 @@ void PacketStreamBase::emit(IPacket& packet)
 	*/
 
 	// Ensure the stream is still running
-	if (!state.equals(PacketStreamState::Active)) {
-		TraceLS(this) << "Dropping late packet: " 
-			<< state << endl;
+	if (!stateEquals(PacketStreamState::Active)) {
+		TraceLS(this) << "Dropping late packet: " << state() << endl;
 		return;
 	}
 
 	// Emit the result packet
-	if (stream && 
-		stream->emitter.enabled()) {
-		stream->emitter.emit(stream, packet);	
+	if (emitter.enabled()) {
+		emitter.emit(this, packet);	
 	}
 	else
-		TraceLS(this) << "Dropping packet: No emitter: " 
-			<< stream << ": " << state << endl;
+		TraceLS(this) << "Dropping packet: No emitter: " << state() << endl;
 }
 
 
-void PacketStreamBase::setup()
+void PacketStream::setup()
 {
 	try {	
 		Mutex::ScopedLock lock(_mutex);		
@@ -544,7 +561,7 @@ void PacketStreamBase::setup()
 		PacketProcessor* lastProc = nullptr;
 		PacketProcessor* thisProc = nullptr;
 		for (auto& proc : _processors) {
-			thisProc = reinterpret_cast<PacketProcessor*>(proc.ptr);
+			thisProc = reinterpret_cast<PacketProcessor*>(proc->ptr);
 			if (lastProc) {
 				lastProc->getEmitter().attach(packetDelegate(thisProc, &PacketProcessor::process));
 			}
@@ -553,11 +570,11 @@ void PacketStreamBase::setup()
 
 		// The last processor will emit the packet to the application
 		if (lastProc)
-			lastProc->getEmitter().attach(packetDelegate(this, &PacketStreamBase::emit));
+			lastProc->getEmitter().attach(packetDelegate(this, &PacketStream::emit));
 
-		// Attach source emitters to the PacketStreamBase::process method
+		// Attach source emitters to the PacketStream::process method
 		for (auto& source : _sources) {
-			source.ptr->getEmitter().attach(packetDelegate(this, &PacketStreamBase::process));
+			source->ptr->getEmitter().attach(packetDelegate(this, &PacketStream::process));
 		}	
 	}
 	catch (std::exception& exc) {
@@ -568,7 +585,7 @@ void PacketStreamBase::setup()
 }
 
 
-void PacketStreamBase::teardown()
+void PacketStream::teardown()
 {
 	TraceLS(this) << "Teardown" << endl;
 			
@@ -579,24 +596,24 @@ void PacketStreamBase::teardown()
 	PacketProcessor* lastProc = nullptr;
 	PacketProcessor* thisProc = nullptr;
 	for (auto& proc : _processors) {
-		thisProc = reinterpret_cast<PacketProcessor*>(proc.ptr);
+		thisProc = reinterpret_cast<PacketProcessor*>(proc->ptr);
 		if (lastProc)
 			lastProc->getEmitter().detach(packetDelegate(thisProc, &PacketProcessor::process));
 		lastProc = thisProc;
 	}
 	if (lastProc)
-		lastProc->getEmitter().detach(packetDelegate(this, &PacketStreamBase::emit));
+		lastProc->getEmitter().detach(packetDelegate(this, &PacketStream::emit));
 
 	// Detach sources
 	for (auto& source : _sources) {
-		source.ptr->getEmitter().detach(packetDelegate(this, &PacketStreamBase::process));
+		source->ptr->getEmitter().detach(packetDelegate(this, &PacketStream::process));
 	}
 
 	TraceLS(this) << "Teardown: OK" << endl;
 }
 
 
-void PacketStreamBase::cleanup()
+void PacketStream::cleanup()
 {
 	TraceLS(this) << "Cleanup" << endl;		
 	
@@ -606,29 +623,27 @@ void PacketStreamBase::cleanup()
 	Mutex::ScopedLock lock(_mutex);
 	auto sit = _sources.begin();
 	while (sit != _sources.end()) {
-		TraceLS(this) << "Remove source: " 
-			<< (*sit).ptr << ": " << (*sit).freePointer << endl;
-		if ((*sit).freePointer) {
+		TraceLS(this) << "Remove source: " << (*sit)->ptr << endl; // << ": " << (*sit).freePointer
+		//if ((*sit).freePointer) {
 //#ifdef _DEBUG			
-			delete (*sit).ptr;
+			//delete (*sit)->ptr;
 //#else
-//			deleteLater<PacketStreamAdapter>((*sit).ptr);
+//			deleteLater<PacketStreamAdapter>((*sit)->ptr);
 //#endif
-		}
+		//}
 		sit = _sources.erase(sit);
 	}	
 	
 	auto pit = _processors.begin();
 	while (pit != _processors.end()) {
-		TraceLS(this) << "Remove processor: " 
-			<< (*pit).ptr << ": " << (*pit).freePointer << endl;
-		if ((*pit).freePointer) {
+		TraceLS(this) << "Remove processor: " << (*pit)->ptr << endl; //<< ": " << (*pit).freePointer
+		//if ((*pit).freePointer) {
 //#ifdef _DEBUG
-			delete (*pit).ptr;
+			//delete (*pit)->ptr;
 //#else
-//			deleteLater<PacketStreamAdapter>((*pit).ptr);
+//			deleteLater<PacketStreamAdapter>((*pit)->ptr);
 //#endif
-		}
+		//}
 		pit = _processors.erase(pit);
 	}
 
@@ -636,18 +651,25 @@ void PacketStreamBase::cleanup()
 }
 
 
-void PacketStreamBase::attachSource(PacketStreamAdapter* source, bool freePointer, bool syncState)
+void PacketStream::attachSource(PacketStreamAdapter* source, bool freePointer, bool syncState)
 {
 	//TraceLS(this) << "Attach source: " << source << endl;	
+	attachSource(std::make_shared<PacketAdapterReference>(source, freePointer ? 
+		new ScopedRawPointer<PacketStreamAdapter>(source) : nullptr, 0, syncState)); //freePointer, 
+}
+	
+
+void PacketStream::attachSource(PacketAdapterReference::Ptr ref)
+{
 	assertNotActive();
 
 	Mutex::ScopedLock lock(_mutex);
-	_sources.push_back(PacketAdapterReference(source, 0, freePointer, syncState));
+	_sources.push_back(ref);
 	std::sort(_sources.begin(), _sources.end(), PacketAdapterReference::compareOrder);
 }
 
 
-void PacketStreamBase::attachSource(PacketSignal& source)
+void PacketStream::attachSource(PacketSignal& source)
 {
 	//TraceLS(this) << "Attach source signal: " << &source << endl;	
 	assertNotActive();
@@ -658,15 +680,15 @@ void PacketStreamBase::attachSource(PacketSignal& source)
 }
 
 
-bool PacketStreamBase::detachSource(PacketStreamAdapter* source) 
+bool PacketStream::detachSource(PacketStreamAdapter* source) 
 {
 	//TraceLS(this) << "Detach source adapter: " << source << endl;	
 	assertNotActive();
 
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _sources.begin(); it != _sources.end(); ++it) {
-		if ((*it).ptr == source) {
-			(*it).ptr->getEmitter().detach(packetDelegate(stream(), &PacketStream::write));
+		if ((*it)->ptr == source) {
+			(*it)->ptr->getEmitter().detach(packetDelegate(this, &PacketStream::write));
 			TraceLS(this) << "Detached source adapter: " << source << endl;
 			
 			// Note: The PacketStream is no longer responsible
@@ -679,21 +701,21 @@ bool PacketStreamBase::detachSource(PacketStreamAdapter* source)
 }
 
 
-bool PacketStreamBase::detachSource(PacketSignal& source) 
+bool PacketStream::detachSource(PacketSignal& source) 
 {
 	//TraceLS(this) << "Detach source signal: " << &source << endl;
 	assertNotActive();
 
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _sources.begin(); it != _sources.end(); ++it) {
-		if (&(*it).ptr->getEmitter() == &source) {
-			(*it).ptr->getEmitter().detach(packetDelegate(stream(), &PacketStream::write));
+		if (&(*it)->ptr->getEmitter() == &source) {
+			(*it)->ptr->getEmitter().detach(packetDelegate(this, &PacketStream::write));
 			TraceLS(this) << "Detached source signal: " << &source << endl;
 
 			// Free the PacketStreamAdapter wrapper instance,
 			// not the referenced PacketSignal.
-			assert((*it).freePointer);
-			delete (*it).ptr;
+			//assert((*it).freePointer);
+			//delete (*it)->ptr;
 			_sources.erase(it);
 			return true;
 		}
@@ -702,26 +724,31 @@ bool PacketStreamBase::detachSource(PacketSignal& source)
 }
 
 
-void PacketStreamBase::attach(PacketProcessor* proc, int order, bool freePointer) 
+void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer) 
 {
 	//TraceLS(this) << "Attach processor: " << proc << endl;
 	assert(order >= 0 && order <= 101);
 	assertNotActive();
 
 	Mutex::ScopedLock lock(_mutex);
-	_processors.push_back(PacketAdapterReference(proc, order == 0 ? _processors.size() : order, freePointer));
+	//_processors.push_back(std::make_shared<PacketAdapterReference>(proc, 
+	//	order == 0 ? _processors.size() : order, freePointer));
+	
+	_processors.push_back(std::make_shared<PacketAdapterReference>(proc, 
+		freePointer ? new ScopedRawPointer<PacketStreamAdapter>(proc) : nullptr, order == 0 ? _processors.size() : order)); //freePointer, 
+
 	sort(_processors.begin(), _processors.end(), PacketAdapterReference::compareOrder);
 }
 
 
-bool PacketStreamBase::detach(PacketProcessor* proc) 
+bool PacketStream::detach(PacketProcessor* proc) 
 {
 	//TraceLS(this) << "Detach processor: " << proc << endl;
 	assertNotActive();
 
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _processors.begin(); it != _processors.end(); ++it) {
-		if ((*it).ptr == proc) {
+		if ((*it)->ptr == proc) {
 			TraceLS(this) << "Detached processor: " << proc << endl;
 
 			// Note: The PacketStream is no longer responsible
@@ -734,13 +761,23 @@ bool PacketStreamBase::detach(PacketProcessor* proc)
 }
 
 
-void PacketStreamBase::startSources() 
+void PacketStream::attach(PacketAdapterReference::Ptr ref)
+{
+	assertNotActive();
+
+	Mutex::ScopedLock lock(_mutex);
+	_processors.push_back(ref);
+	std::sort(_processors.begin(), _processors.end(), PacketAdapterReference::compareOrder);
+}
+
+
+void PacketStream::startSources() 
 {
 	//Mutex::ScopedLock lock(_mutex);
 	auto sources = this->sources();
 	for (auto& source : sources) {	
-		if (source.syncState) {				
-			auto startable = dynamic_cast<async::Startable*>(source.ptr);
+		if (source->syncState) {				
+			auto startable = dynamic_cast<async::Startable*>(source->ptr);
 			if (startable) {
 				TraceLS(this) << "Start source: " << startable << endl;
 				startable->start();
@@ -758,13 +795,13 @@ void PacketStreamBase::startSources()
 }
 
 
-void PacketStreamBase::stopSources()
+void PacketStream::stopSources()
 {
 	//Mutex::ScopedLock lock(_mutex);
 	auto sources = this->sources();
 	for (auto& source : sources) {	
-		if (source.syncState) {
-			auto startable = dynamic_cast<async::Startable*>(source.ptr);
+		if (source->syncState) {
+			auto startable = dynamic_cast<async::Startable*>(source->ptr);
 			if (startable) {
 				TraceLS(this) << "Stop source: " << startable << endl;
 				startable->stop();
@@ -782,7 +819,7 @@ void PacketStreamBase::stopSources()
 }
 
 
-bool PacketStreamBase::waitForRunner()
+bool PacketStream::waitForRunner()
 {	
 	/*
 	TraceLS(this) << "Wait for sync: " 
@@ -816,7 +853,7 @@ bool PacketStreamBase::waitForRunner()
 }
 
 
-bool PacketStreamBase::waitForStateSync(PacketStreamState::ID state)
+bool PacketStream::waitForStateSync(PacketStreamState::ID state)
 {
 	int times = 0;
 	TraceLS(this) << "Wait for sync state: " << state << endl;
@@ -832,7 +869,7 @@ bool PacketStreamBase::waitForStateSync(PacketStreamState::ID state)
 }
 
 
-bool PacketStreamBase::hasQueuedState(PacketStreamState::ID state) const
+bool PacketStream::hasQueuedState(PacketStreamState::ID state) const
 {
 	Mutex::ScopedLock lock(_mutex);
 	for (auto const& st : _states) {
@@ -843,7 +880,7 @@ bool PacketStreamBase::hasQueuedState(PacketStreamState::ID state) const
 }
 
 
-void PacketStreamBase::assertNotActive()
+void PacketStream::assertNotActive()
 {
 	if (stateEquals(PacketStreamState::Active)) {
 		assert(0 && "cannot modify active stream");
@@ -852,7 +889,7 @@ void PacketStreamBase::assertNotActive()
 }
 
 
-void PacketStreamBase::synchronizeOutput(uv::Loop* loop)
+void PacketStream::synchronizeOutput(uv::Loop* loop)
 {
 	assertNotActive();
 	
@@ -862,7 +899,7 @@ void PacketStreamBase::synchronizeOutput(uv::Loop* loop)
 }
 
 
-void PacketStreamBase::onStateChange(PacketStreamState& state, const PacketStreamState& oldState)
+void PacketStream::onStateChange(PacketStreamState& state, const PacketStreamState& oldState)
 {	
 	TraceLS(this) << "On state change: " << oldState << " => " << state << endl;
 	
@@ -872,35 +909,35 @@ void PacketStreamBase::onStateChange(PacketStreamState& state, const PacketStrea
 }
 
 
-const std::exception_ptr& PacketStreamBase::error()
+const std::exception_ptr& PacketStream::error()
 {
 	Mutex::ScopedLock lock(_mutex);
 	return _error;
 }
 
 
-int PacketStreamBase::numSources() const
+int PacketStream::numSources() const
 {
 	Mutex::ScopedLock lock(_mutex);
 	return _sources.size();
 }
 
 
-int PacketStreamBase::numProcessors() const
+int PacketStream::numProcessors() const
 {
 	Mutex::ScopedLock lock(_mutex);
 	return _processors.size();
 }
 
 
-int PacketStreamBase::numAdapters() const
+int PacketStream::numAdapters() const
 {
 	Mutex::ScopedLock lock(_mutex);
 	return _sources.size() + _processors.size();
 }
 
 
-PacketAdapterVec PacketStreamBase::adapters() const
+PacketAdapterVec PacketStream::adapters() const
 {
 	Mutex::ScopedLock lock(_mutex);
 	PacketAdapterVec res(_sources);
@@ -909,33 +946,35 @@ PacketAdapterVec PacketStreamBase::adapters() const
 }
 
 
-PacketAdapterVec PacketStreamBase::sources() const
+PacketAdapterVec PacketStream::sources() const
 {
 	Mutex::ScopedLock lock(_mutex);
 	return _sources;
 }
 
 
-PacketAdapterVec PacketStreamBase::processors() const
+PacketAdapterVec PacketStream::processors() const
 {
 	Mutex::ScopedLock lock(_mutex);
 	return _processors;
 }
 
 
-PacketStream* PacketStreamBase::stream() const
+/*
+PacketStream* PacketStream::stream() const
 {
 	Mutex::ScopedLock lock(_mutex);
 	return _stream;
 }
 
 
-void PacketStreamBase::setStream(PacketStream* stream)
+void PacketStream::setStream(PacketStream* stream)
 {
 	Mutex::ScopedLock lock(_mutex);
 	assert(!_stream || stream == nullptr);
 	_stream = stream;
 }
+*/
 
 
 //
@@ -1004,7 +1043,7 @@ PacketSignal& PacketStreamAdapter::getEmitter()
 		//teardown();
 
 		// Cancel the Runner to reset the async contect and decrement  
-		// the PacketStreamBase shared_ptr
+		// the PacketStream shared_ptr
 		//if (_runner)
 		//	_runner->cancel();
 		
@@ -1024,7 +1063,7 @@ PacketSignal& PacketStreamAdapter::getEmitter()
 
 
 /*
-void PacketStream::setRunner(async::Runner::ptr runner)
+void PacketStream::setRunner(async::Runner::Ptr runner)
 {
 	TraceLS(this) << "Set async context: " << runner << endl;
 	//Mutex::ScopedLock lock(_mutex);
@@ -1036,8 +1075,8 @@ void PacketStream::setRunner(async::Runner::ptr runner)
 	if (!runner->async() && _base->timeout() == 0)
 		_base->setTimeout(20); 
 	
-	// Note: std::bind will increment the PacketStreamBase std::shared_ptr
-	// ref count, so the PacketStreamBase will not be destroyed until
+	// Note: std::bind will increment the PacketStream std::shared_ptr
+	// ref count, so the PacketStream will not be destroyed until
 	// the Runner::Context::reset() is called (or the function is unbound).
 	_base->_runner = runner;
 	_base->_runner->start(std::bind(&RunnableQueue<IPacket>::run, _base));
@@ -1071,14 +1110,14 @@ void PacketStream::setRunner(async::Runner::ptr runner)
 /*
 
 
-void PacketStreamBase::write(IPacket& packet)
+void PacketStream::write(IPacket& packet)
 {	
 	//Mutex::ScopedLock lock(_mutex);
 
 	// Clone and push onto the processor queue	
 	process(packet); //.clone()
 }
-bool PacketStreamBase::dispatchNext()
+bool PacketStream::dispatchNext()
 {
 	// Process queued internal states first
 	while (!_states.empty()) {
@@ -1099,7 +1138,7 @@ bool PacketStreamBase::dispatchNext()
 		//state.set(id);
 		auto adapters = this->adapters();
 		for (auto& ref : adapters) {
-			auto adapter = dynamic_cast<PacketStreamAdapter*>(ref.ptr);
+			auto adapter = dynamic_cast<PacketStreamAdapter*>(ref->ptr);
 			TraceLS(this) << "Set queued state to adapter: " << adapter << endl;
 			if (adapter)
 				adapter->onStreamStateChange(state);
@@ -1129,7 +1168,7 @@ bool PacketStreamBase::dispatchNext()
 	*/
 
 /*
-void PacketStreamBase::setState(this, PacketStreamState::ID state)
+void PacketStream::setState(this, PacketStreamState::ID state)
 {
 	Mutex::ScopedLock lock(_mutex);
 	_states.push_back(state);
@@ -1145,7 +1184,7 @@ void PacketStreamBase::setState(this, PacketStreamState::ID state)
 	auto adapters = this->adapters();
 	TraceLS(this) << "On state change: Adapters: " << adapters.size() << endl;
 	for (auto& ref : adapters) {
-		auto adapter = dynamic_cast<PacketStreamAdapter*>(ref.ptr);
+		auto adapter = dynamic_cast<PacketStreamAdapter*>(ref->ptr);
 		assert(adapter);
 		TraceLS(this) << "On state change: Current adapter: " << adapter << endl;
 		if (adapter)
@@ -1229,7 +1268,7 @@ void PacketStreamBase::setState(this, PacketStreamState::ID state)
 			//stopSources();
 		//}
 		//break;
-void PacketStreamBase::dispose()
+void PacketStream::dispose()
 {
 	TraceLS(this) << "Dispose: " << state() << endl;
 
@@ -1250,12 +1289,12 @@ void PacketStreamBase::dispose()
 	//RunnableQueue<IPacket>::cancel(true);
 	
 	// Schedule the pointer for deferred deletion.
-	//deleteLater<PacketStreamBase>(_self); //.lock()
+	//deleteLater<PacketStream>(_self); //.lock()
 	//if (_self) {
-	//	deleteLater<PacketStreamBase>(*_self);
+	//	deleteLater<PacketStream>(*_self);
 	//	(*_self).reset(); // = nullptr;
 	//}
-	//deleteLater<PacketStreamBase>(std::shared_ptr<PacketStreamBase>(this));
+	//deleteLater<PacketStream>(std::shared_ptr<PacketStream>(this));
 	//_self
 	//_self = nullptr;
 
@@ -1266,7 +1305,7 @@ void PacketStreamBase::dispose()
 
 	
 //#include "scy/interface.h"
-	//_base(std::make_shared<PacketStreamBase>(this)),
+	//_base(std::make_shared<PacketStream>(this)),
 	// Dispose of the base context here if there is no active async context.
 	// TODO: Use shared_ptr for auto deref and destroy when safe?
 	//if (_base) {
@@ -1280,12 +1319,12 @@ void PacketStreamBase::dispose()
 	//}
 
 /*
-	//_queue.ondispatch = std::bind(&PacketStreamBase::process, this, std::placeholders::_1);
+	//_queue.ondispatch = std::bind(&PacketStream::process, this, std::placeholders::_1);
 
 	//assert(stateEquals(PacketStreamState::Closed));
 	//cleanup();
 		
-	// Note: The PacketStreamBase is destroyed via the async context
+	// Note: The PacketStream is destroyed via the async context
 	// once the internal state machine is complete. See onStateChange()
 
 			// Flush and emit all remaining queue items.
@@ -1308,7 +1347,7 @@ void PacketStreamBase::dispose()
 	//_syncStates.push_back(std::pair<PacketStreamState, PacketStreamState>(state, oldState));
 
 	
-void PacketStreamBase::processPendingStates()
+void PacketStream::processPendingStates()
 {
 	// Process queued internal states first
 	while (!_states.empty()) {
@@ -1325,7 +1364,7 @@ void PacketStreamBase::processPendingStates()
 }
 
 		// Trigger onStateChange, but do send the StateChange signal. 
-void PacketStreamBase::processSyncStates()
+void PacketStream::processSyncStates()
 {		
 	// Process synchronized states before emitting any packets.
 	// StateChange signals are send here inside the synchroinization so 
@@ -1351,7 +1390,7 @@ void PacketStreamBase::processSyncStates()
 */
 
 /*
-RunnableQueue<IPacket>& PacketStreamBase::queue()
+RunnableQueue<IPacket>& PacketStream::queue()
 {
 	Mutex::ScopedLock lock(_mutex);
 	return _queue;
@@ -1359,7 +1398,7 @@ RunnableQueue<IPacket>& PacketStreamBase::queue()
 */
 
 /*
-void PacketStreamBase::sync(IPacket& packet)
+void PacketStream::sync(IPacket& packet)
 {
 	TraceLS(this) << "Sync: " << packet.size() << endl;
 		
@@ -1426,10 +1465,10 @@ void PacketStream::assertCmdThread()
 #if 0
 			{
 				Mutex::ScopedLock lock(_mutex);
-				auto it = _base->_processors.begin();
-				if (it != _base->_processors.end()) {
+				auto it = /_base->/_processors.begin();
+				if (it != /_base->/_processors.end()) {
 
-					firstProc = reinterpret_cast<PacketProcessor*>((*it).ptr);
+					firstProc = reinterpret_cast<PacketProcessor*>((*it)->ptr);
 					if (!firstProc->accepts(packet)) {
 						WarnL << "Source packet rejected: " 
 							<< firstProc << ": " << packet.className() << endl;
@@ -1450,15 +1489,15 @@ void PacketStream::assertCmdThread()
 	*/
 
 			/*
-			if ((*sit).syncState) {
-				auto startable = dynamic_cast<async::Startable*>((*sit).ptr);
+			if ((*sit)->syncState) {
+				auto startable = dynamic_cast<async::Startable*>((*sit)->ptr);
 				if (startable) {
 					//TraceLS(this) << "Stopping startable: " << source << endl;
 					startable->stop();
 				}
 				else assert(0 && "unknown synchronizable");
 #if 0
-				auto runnable = dynamic_cast<async::Runnable*>((*sit).ptr);
+				auto runnable = dynamic_cast<async::Runnable*>((*sit)->ptr);
 				if (runnable) {
 					TraceLS(this) << "Stopping runnable: " << source << endl;
 					runnable->cancel();
@@ -1474,8 +1513,8 @@ void PacketStream::assertCmdThread()
 			// Initialize synchronized sources
 			// TODO: Start sources on next loop iteration, or ensure they are asynchronous
 			for (auto sit = sources.begin(); sit != sources.end(); ++sit) {
-				PacketStreamAdapter* source = (*sit).ptr;
-				if ((*sit).syncState) {				
+				PacketStreamAdapter* source = (*sit)->ptr;
+				if ((*sit)->syncState) {				
 					auto startable = dynamic_cast<async::Startable*>(source);
 					if (startable) {
 						//TraceLS(this) << "Starting: " << source << endl;

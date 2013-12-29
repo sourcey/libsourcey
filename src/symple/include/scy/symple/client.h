@@ -148,7 +148,7 @@ public:
 	Signal<Peer&> PeerConnected;
 		// Signals when a peer connects.
 
-	Signal<Peer&> PeerDiconnected;
+	Signal<Peer&> PeerDisconnected;
 		// Signals when a peer disconnects.
 
 	Signal<Peer&> CreatePresence;

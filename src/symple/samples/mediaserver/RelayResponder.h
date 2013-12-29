@@ -203,7 +203,7 @@ public:
 		debugL("RelayedStreamingResponder", this) << "Running: " 
 			<< "\n\tOutput Format: " << options.oformat.name
 			<< "\n\tOutput Encoding: " << options.encoding
-			<< "\n\tOutput Packetizer: " << options.packetizer
+			<< "\n\tOutput Packetizer: " << options.framing
 			<< std::endl;
 
 		turn::Client::Options co;
