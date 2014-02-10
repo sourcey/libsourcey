@@ -76,7 +76,7 @@ public:
 	};
 
 public:
-	Client(net::SocketBase* socket, 
+	Client(const net::Socket::Ptr& socket, 
 		const Options& options = Options()//, 
 		//uv::Loop* loop = uv::defaultLoop()
 		);
@@ -168,7 +168,7 @@ protected:
 	virtual void createPresence(Presence& p);
 		// Creates a Presence object.
 	
-	virtual void onSocketConnect(void*);
+	virtual void onSocketConnect();
 	virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&);
 	virtual void onPacket(sockio::Packet& packet);
 
@@ -354,7 +354,7 @@ protected:
 typedef smpl::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
-			Net::SocketBase< Poco::Net::StreamSocket, Net::TCP, http::WebSocket >
+			Net::SocketBase< Poco::Net::StreamSocket, Net::TCP, http::ws::WebSocket >
 		> 
 	> 
 > TCPClient;
@@ -365,7 +365,7 @@ typedef smpl::ClientBase<
 typedef smpl::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
-			Net::SocketBase< Poco::Net::SecureStreamSocket, Net::SSLTCP, http::WebSocket >
+			Net::SocketBase< Poco::Net::SecureStreamSocket, Net::SSLTCP, http::ws::WebSocket >
 		> 
 	> 
 > SSLClient;
@@ -652,7 +652,7 @@ protected:
 		}	
 		sockio::Packet p("announce", data, true);
 		auto txn = new sockio::Transaction(_runner, *this, p, 1, 5000);
-		txn->StateChange += delegate(this, &Client::onAnnounce);
+		txn->StateChange += sdelegate(this, &Client::onAnnounce);
 		return txn->send();
 	}
 

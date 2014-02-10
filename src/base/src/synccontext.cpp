@@ -46,6 +46,7 @@ SyncContext::SyncContext(uv::Loop* loop, std::function<void(void*)> target, void
 SyncContext::~SyncContext()
 {
 	//assert(_handle.closed()); // must be dispose()d
+	close();
 }
 
 
@@ -86,7 +87,10 @@ void SyncContext::cancel()
 
 void SyncContext::close()
 {
+	if (closed())
+		return;
 	cancel();
+	post(); // post to wake up event loop
 	_handle.close();
 }
 

@@ -12,7 +12,7 @@ using namespace scy::turn;
 
 const std::string SERVER_BIND_IP     ("0.0.0.0");
 const int         SERVER_BIND_PORT   (3478);
-const std::string SERVER_EXTERNAL_IP ("202.173.167.126");
+const std::string SERVER_EXTERNAL_IP ("127.0.0.1"); //202.173.167.126
 
 const std::string SERVER_USERNAME    ("username");
 const std::string SERVER_PASSWORD    ("password");
@@ -32,7 +32,7 @@ public:
 	{
 	}
 
-	void run() 
+	void start() 
 	{
 		server.start();
 	}
@@ -125,7 +125,7 @@ int main(void)
 			//opts.enableUDP                      = false;
 	
 			RelayServer srv(opts);
-			srv.run();
+			srv.start();
 			app.waitForShutdown([](void* opaque) {
 				reinterpret_cast<RelayServer*>(opaque)->server.stop();
 			}, &srv);

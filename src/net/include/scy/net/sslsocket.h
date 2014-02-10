@@ -33,12 +33,17 @@ namespace scy {
 namespace net {
 
 
-class SSLBase: public TCPBase	
+class SSLSocket: public TCPSocket	
 {
 public:	
-	SSLBase(uv::Loop* loop = uv::defaultLoop());
-	SSLBase(SSLContext::Ptr sslContext, uv::Loop* loop = uv::defaultLoop());
-	SSLBase(SSLContext::Ptr sslContext, SSLSession::Ptr session, uv::Loop* loop = uv::defaultLoop());
+	typedef std::shared_ptr<SSLSocket> Ptr;
+	typedef std::vector<Ptr> Vec;
+
+	SSLSocket(uv::Loop* loop = uv::defaultLoop());
+	SSLSocket(SSLContext::Ptr sslContext, uv::Loop* loop = uv::defaultLoop());
+	SSLSocket(SSLContext::Ptr sslContext, SSLSession::Ptr session, uv::Loop* loop = uv::defaultLoop());
+	
+	virtual ~SSLSocket();
 
 	//virtual void connect(const Address& peerAddress);	
 		// Initializes the socket and establishes a secure connection to 
@@ -55,8 +60,8 @@ public:
 		// an orderly SSL shutdown, then actually
 		// shutting down the TCP connection.
 	
-	virtual int send(const char* data, int len, int flags = 0);
-	virtual int send(const char* data, int len, const net::Address& peerAddress, int flags = 0);
+	virtual int send(const char* data, std::size_t len, int flags = 0);
+	virtual int send(const char* data, std::size_t len, const net::Address& peerAddress, int flags = 0);
 		
 	int available() const;
 		// Returns the number of bytes available from the
@@ -91,16 +96,14 @@ public:
 
 	net::TransportType transport() const;
 
-	virtual void onConnect(int status);
+	virtual void onConnect(uv_connect_t* handle, int status);
 
-	virtual void onRead(const char* data, int len);
+	virtual void onRead(const char* data, std::size_t len);
 		// Reads raw encrypted SSL data
 
 protected:
-	virtual void* instance() { return this; }
-	virtual ~SSLBase();
+	//virtual void* self() { return this; }
 
-protected:
 	net::SSLContext::Ptr _context;
 	net::SSLSession::Ptr _session;
 	net::SSLAdapter _sslAdapter;
@@ -109,13 +112,14 @@ protected:
 };
 
 
+#if 0
 class SSLSocket: public Socket
 	/// SSLSocket is a disposable SSL socket wrapper
-	/// for SSLBase which can be created on the stack.
-	/// See SSLBase for implementation details.
+	/// for SSLSocket which can be created on the stack.
+	/// See SSLSocket for implementation details.
 {
 public:	
-	typedef net::SSLBase Base;
+	typedef net::SSLSocket Base;
 	typedef std::vector<SSLSocket> List;
 	
 	SSLSocket(uv::Loop* loop = uv::defaultLoop());
@@ -124,21 +128,21 @@ public:
 	SSLSocket(SSLContext::Ptr sslContext, uv::Loop* loop = uv::defaultLoop());
 	SSLSocket(SSLContext::Ptr sslContext, SSLSession::Ptr session, uv::Loop* loop = uv::defaultLoop());
 
-	SSLSocket(SSLBase* base, bool shared = false);
-		// Creates the Socket and attaches the given SocketBase.
+	SSLSocket(SSLSocket* base, bool shared = false);
+		// Creates the Socket and attaches the given Socket.
 		//
-		// The SocketBase must be a SSLBase, otherwise an
+		// The Socket must be a SSLSocket, otherwise an
 		// exception will be thrown.
 
 	SSLSocket(const Socket& socket);
-		// Creates the SSLSocket with the SocketBase
-		// from another socket. The SocketBase must be
-		// a SSLBase, otherwise an exception will be thrown.
+		// Creates the SSLSocket with the Socket
+		// from another socket. The Socket must be
+		// a SSLSocket, otherwise an exception will be thrown.
 	
-	SSLBase& base() const;
-		// Returns the SocketBase for this socket.
+	SSLSocket& base() const;
+		// Returns the Socket for this socket.
 };
-
+#endif
 
 //typedef SocketHandle<SSLSocket> SSLSocketHandle;
 
@@ -154,15 +158,15 @@ public:
 	
 /*
 
-typedef SSLBase SSLSocket;
-class SSLBase;
+typedef SSLSocket SSLSocket;
+class SSLSocket;
 class SSLSocket: public Socket
 	// SSLSocket is a disposable SSL socket wrapper
-	// for SSLBase which can be created on the stack.
-	// See SSLBase for implementation details.
+	// for SSLSocket which can be created on the stack.
+	// See SSLSocket for implementation details.
 {
 public:	
-	typedef net::SSLBase Base;
+	typedef net::SSLSocket Base;
 	typedef std::vector<SSLSocket> List;
 	
 	SSLSocket();
@@ -172,13 +176,13 @@ public:
 	SSLSocket(SSLContext::Ptr sslContext, SSLSession::Ptr session);
 
 	SSLSocket(const SocketHandle& socket);
-		// Creates the SSLSocket with the SocketBase
-		// from another socket. The SocketBase must be
-		// a SSLBase, otherwise an exception will be thrown.
+		// Creates the SSLSocket with the Socket
+		// from another socket. The Socket must be
+		// a SSLSocket, otherwise an exception will be thrown.
 
-	SSLSocket(SSLBase* base);
+	SSLSocket(SSLSocket* base);
 	
-	SSLBase* base() const;
-		// Returns the SocketBase for this socket.
+	SSLSocket* base() const;
+		// Returns the Socket for this socket.
 };
 */

@@ -18,6 +18,7 @@
 
 
 #include "scy/net/socket.h"
+#include "scy/net/socketadapter.h"
 #include "scy/net/types.h"
 #include "scy/net/address.h"
 
@@ -29,8 +30,133 @@ using std::endl;
 
 namespace scy {
 namespace net {
+
+
+//
+// Socket
+//
+
+
+Socket::Socket() //: 
+	//_adapter(nullptr)//, //SharedObject(true), //new DeferredDeleter<Socket>()),
+	//_insideCallback(false)
+{
+	TraceLS(this) << "Create" << endl;	
+}
+
+
+Socket::~Socket()
+{
+	TraceLS(this) << "Destroy" << endl;	
+
+	// Delete the adapter, if any
+	//if (_adapter)
+	//	delete _adapter;
+
+	// The destructor never be called from inside a callback.
+	// Deferred destruction ensures this never occurs.
+	//assert(!_insideCallback && "destructor scope error");
+}
+
+	
+void Socket::connect(const std::string& host, UInt16 port) 
+{
+	TraceLS(this) << "Connect to host: " << host << ":" << port << endl;
+	if (Address::validateIP(host))
+		connect(Address(host, port));
+	else {
+		init();
+		assert(!closed());
+		net::resolveDNS(host, port, [](const net::DNSResult& dns) 
+		{	
+			auto* sock = reinterpret_cast<Socket*>(dns.opaque);
+			TraceL << "DNS resolved: " << dns.success() << endl;
+
+			// Return if the socket was closed while resolving
+			if (sock->closed()) {			
+				WarnL << "DNS resolved but socket closed" << endl;
+				return;
+			}
+
+			// Set the connection error if DNS failed
+			if (!dns.success()) {
+				sock->setError("Failed to resolve DNS for " + dns.host);
+				return;
+			}
+
+			try {	
+				// Connect to resolved host
+				sock->connect(dns.addr);
+			}
+			catch (...) {
+				// Swallow errors
+				// Can be handled by Socket::Error signal
+			}	
+		}, this); 
+	}
+}
+
+	
+/*
+int Socket::send(const char* data, std::size_t len, int flags)
+{
+	TraceLS(this) << "Send: " << len << endl;
+
+	if (_adapter) {
+		assert(_adapter->socket == this);
+		return _adapter->send(data, len, flags);
+	}
+	return _base->send(data, len, flags);
+}
+
+
+int Socket::send(const char* data, std::size_t len, const Address& peerAddress, int flags)
+{
+	TraceLS(this) << "Send to peer: " << peerAddress << ": " << len << endl;
+
+	if (_adapter) {
+		assert(_adapter->socket == this);
+		return _adapter->send(data, len, peerAddress, flags);
+	}
+	return _base->send(data, len, peerAddress, flags);
+}
+*/
+
+
+/*
+void Socket::setAdapter(SocketAdapter* adapter)
+{	
+	// Assign the new adapter pointer
+	_adapter = adapter; //.swap(adapter);
+	if (_adapter)
+		_adapter->socket = this;
+}
+
+
+void Socket::replaceAdapter(SocketAdapter* adapter)
+{
+	// NOTE: Just swap the SocketAdapter pointers as
+	// we don't want to modify the container since we
+	// may be inside the old adapter's callback scope.
+	//_base->swapObserver(_adapter, adapter);
+
+	// Defer deletion to the next iteration.
+	// The old adapter will receive no more callbacks.	
+	if (_adapter)
+		deleteLater<SocketAdapter>(_adapter);
+	
+	setAdapter(adapter);
+}
 	
 
+SocketAdapter* Socket::adapter() const
+{
+	return _adapter;
+}
+*/
+
+
+#if 0
 Socket::Socket() : //SocketAdapter* adapter
 	_base(nullptr), 
 	_adapter(nullptr)//, 
@@ -43,7 +169,7 @@ Socket::Socket() : //SocketAdapter* adapter
 }
 
 
-Socket::Socket(SocketBase* base, bool shared) : //, SocketAdapter* adapter
+Socket::Socket(Socket* base, bool shared) : //, SocketAdapter* adapter
 	_base(base), 
 	_adapter(nullptr)
 {
@@ -74,7 +200,7 @@ Socket& Socket::operator = (const Socket& socket)
 }
 
 
-Socket& Socket::assign(SocketBase* base, bool shared)
+Socket& Socket::assign(Socket* base, bool shared)
 {	
 	if (_base != base) {
 		if (_base) _base->removeObserver(this);
@@ -124,7 +250,7 @@ void Socket::bind(const Address& address)
 }
 	
 
-int Socket::send(const char* data, int len, int flags)
+int Socket::send(const char* data, std::size_t len, int flags)
 {
 	TraceLS(this) << "Send: " << len << endl;
 
@@ -136,7 +262,7 @@ int Socket::send(const char* data, int len, int flags)
 }
 
 
-int Socket::send(const char* data, int len, const Address& peerAddress, int flags)
+int Socket::send(const char* data, std::size_t len, const Address& peerAddress, int flags)
 {
 	TraceLS(this) << "Send to peer: " << peerAddress << ": " << len << endl;
 
@@ -239,7 +365,7 @@ void Socket::onSocketConnect()
 }
 
 
-void Socket::onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
+void Socket::onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress)
 {
 	//TraceLS(this) << "On recv: " << buf.size() << endl;	
 	if (_adapter) {
@@ -283,7 +409,7 @@ const Error& Socket::error() const
 }
 	
 
-SocketBase& Socket::base() const
+Socket& Socket::base() const
 {
 	assert(_base);
 	return *_base;
@@ -333,13 +459,15 @@ bool SocketAdapter::compareProiroty(const SocketAdapter* l, const SocketAdapter*
 	return l->priority > r->priority;
 }
 */
+#endif
 
-
+#if 0
 //
-// SocketAdapter methods
+// Socket Adapter
 //
 
-SocketAdapter::SocketAdapter(Socket* socket) : //, int priority
+
+SocketAdapter::SocketAdapter(Socket::Ptr socket) : //, int priority
 	socket(socket)//, priority(priority)
 {
 	//TraceLS(this) << "Create" << endl;	
@@ -355,174 +483,43 @@ SocketAdapter::~SocketAdapter()
 void SocketAdapter::onSocketConnect()
 {
 	//TraceLS(this) << "On connect: " << socket->Connect.refCount() << endl;	
-	socket->Connect.emit(socket);
+	socket->Connect.emit(socket.get());
 }
 
 
-void SocketAdapter::onSocketRecv(const MutableBuffer& buf, const Address& peerAddr)
+void SocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress)
 {
 	//TraceLS(this) << "Recv: " << socket->Recv.refCount() << endl;	
-	SocketPacket packet(socket, buf, peerAddr);
-	socket->Recv.emit(socket, packet);
+	SocketPacket packet(socket.get(), buf, peerAddr);
+	socket->Recv.emit(socket.get(), packet);
 }
 
 
 void SocketAdapter::onSocketError(const Error& error) //const Error& error
 {
 	//TraceLS(this) << "Error: " << socket->Error.refCount() << ": " << message << endl;	syserr, message
-	socket->Error.emit(socket, error);
+	socket->Error.emit(socket.get(), error);
 }
 
 
 void SocketAdapter::onSocketClose()
 {
 	//TraceLS(this) << "On close: " << socket->Close.refCount() << endl;	
-	socket->Close.emit(socket);
+	socket->Close.emit(socket.get());
 }
 
 	
-int SocketAdapter::send(const char* data, int len, int flags)
+int SocketAdapter::send(const char* data, std::size_t len, int flags)
 {
-	return socket->base().send(data, len, flags);
+	return socket->/*base().*/send(data, len, flags);
 }
 
 
-int SocketAdapter::send(const char* data, int len, const Address& peerAddress, int flags)
+int SocketAdapter::send(const char* data, std::size_t len, const Address& peerAddress, int flags)
 {
-	return socket->base().send(data, len, peerAddress, flags);
+	return socket->/*base().*/send(data, len, peerAddress, flags);
 }
-
-
-//
-// SocketBase
-//
-
-
-SocketBase::SocketBase() : 
-	SharedObject(true), //new DeferredDeleter<SocketBase>()),
-	_insideCallback(false)
-{
-	//TraceLS(this) << "Create" << endl;	
-}
-
-
-SocketBase::~SocketBase()
-{
-	//TraceLS(this) << "Destroy" << endl;	
-
-	// The destructor never be called from inside a callback.
-	// Deferred destruction ensures this never occurs.
-	assert(!_insideCallback && "destructor scope error");
-}
-
-
-void SocketBase::addObserver(Socket* socket, bool shared) 
-{
-	//TraceLS(this) << "Duplicating socket: " << &adapter << endl;
-	_observers.push_back(socket);		
-	//sortObservers();
-	if (shared)
-		duplicate();
-	//TraceLS(this) << "Duplicated socket: " << &adapter << endl;
-}
-
-
-void SocketBase::removeObserver(Socket* socket)  
-{	
-	// TODO: Ensure socket destruction when released?
-	for (auto it = _observers.begin(); it != _observers.end(); ++it) {
-		if (*it == socket) {
-			//TraceLS(this) << "Releasing socket: " << &adapter << endl;
-			_observers.erase(it);
-			//sortObservers();
-			release();
-			return;
-		}
-	}
-	assert(0 && "unknown socket adapter");
-}
-
-	
-void SocketBase::connect(const std::string& host, UInt16 port) 
-{
-	TraceLS(this) << "Connect to host: " << host << ":" << port << endl;
-	if (Address::validateIP(host))
-		connect(Address(host, port));
-	else {
-		init();
-		assert(!closed());
-		net::resolveDNS(host, port, [](const net::DNSResult& dns) 
-		{	
-			auto* sock = reinterpret_cast<SocketBase*>(dns.opaque);
-			TraceL << "DNS resolved: " << dns.success() << endl;
-
-			// Return if the socket was closed while resolving
-			if (sock->closed()) {			
-				WarnL << "DNS resolved but socket closed" << endl;
-				return;
-			}
-
-			// Set the connection error if DNS failed
-			if (!dns.success()) {
-				sock->setError("Failed to resolve DNS for " + dns.host);
-				return;
-			}
-
-			try {	
-				// Connect to resolved host
-				sock->connect(dns.addr);
-			}
-			catch (...) {
-				// Swallow errors
-				// Can be handled by Socket::Error signal
-			}	
-		}, this); 
-	}
-}
-
-
-void SocketBase::emitConnect() 
-{
-	_insideCallback = true;
-	//for (auto observer : _observers) //for (auto& observer : _observers)
-	//	observer->onSocketConnect();
-	for (size_t i = 0; i < _observers.size(); i++) 
-		_observers[i]->onSocketConnect();
-	_insideCallback = false;
-}
-
-
-void SocketBase::emitRecv(const MutableBuffer& buf, const Address& peerAddr)
-{
-	_insideCallback = true;
-	//for (auto observer : _observers) //for (auto& observer : _observers)
-	//	observer->onSocketRecv(buf, peerAddr);
-	for (size_t i = 0; i < _observers.size(); i++)
-		_observers[i]->onSocketRecv(buf, peerAddr);
-	_insideCallback = false;
-}
-
-
-void SocketBase::emitError(const Error& error)
-{
-	_insideCallback = true;
-	//for (auto observer : _observers) //for (auto& observer : _observers)
-	//	observer->onSocketError(error);
-	for (size_t i = 0; i < _observers.size(); i++) 
-		_observers[i]->onSocketError(error);
-	_insideCallback = false;
-}
-
-
-void SocketBase::emitClose()
-{
-	_insideCallback = true;
-	//for (auto observer : _observers) //for (auto& observer : _observers)
-	//	observer->onSocketClose();
-	for (size_t i = 0; i < _observers.size(); i++) 
-		_observers[i]->onSocketClose();
-	_insideCallback = false;
-}
+#endif
 
 
 } } // namespace scy::net
@@ -531,7 +528,25 @@ void SocketBase::emitClose()
 
 
 /*
-void SocketBase::swapObserver(SocketAdapter* a, SocketAdapter* b)
+void Socket::replaceAdapter(SocketAdapter* adapter)
+{
+	// NOTE: Just swap the SocketAdapter pointers as
+	// we don't want to modify the container since we
+	// may be inside the old adapter's callback scope.
+	//_base->swapObserver(_adapter, adapter);
+
+	// Defer deletion to the next iteration.
+	// The old adapter will receive no more callbacks.	
+	//if (_adapter)
+	//	deleteLater<SocketAdapter>(_adapter);
+	
+	setAdapter(adapter);
+}
+*/
+
+
+/*
+void Socket::swapObserver(SocketAdapter* a, SocketAdapter* b)
 {
 	for (std::vector<Socket*>::iterator it = _observers.begin(); it != _observers.end(); ++it) {
 		if ((*it) == a) {
@@ -546,13 +561,13 @@ void SocketBase::swapObserver(SocketAdapter* a, SocketAdapter* b)
 
 
 /*
-void SocketBase::sortObservers()  
+void Socket::sortObservers()  
 {	
 	sort(_observers.begin(), _observers.end(), SocketAdapter::compareProiroty);
 }
 	
 
-bool SocketBase::connected() const 
+bool Socket::connected() const 
 { 
 	return _connected;
 }
@@ -564,7 +579,7 @@ bool SocketBase::connected() const
 
 
 /*
-void SocketBase::setError(const Error& err) 
+void Socket::setError(const Error& err) 
 { 
 	TraceLS(this) << "Set error: " << err.message << endl;	
 	_error = err;
@@ -631,7 +646,7 @@ SocketAdapter::~SocketAdapter()
 /*
 // -------------------------------------------------------------------
 //
-class Socket: public Handle<SocketBase>
+class Socket: public Handle<Socket>
 	// Socket is the base class for accessing socket contexts.
 	// It provides a disposible layer which referencing the 
 	// internal socket context.
@@ -646,9 +661,9 @@ public:
 		// Attaches the socket context from the other socket and
 		// increments the reference count of the socket context.
 		
-	Socket(SocketBase* context);
-		// Creates the Socket and attaches the given SocketBase.
-		// The socket takes owership of the SocketBase.
+	Socket(Socket* context);
+		// Creates the Socket and attaches the given Socket.
+		// The socket takes owership of the Socket.
 
 	Socket& operator = (const Socket& socket);
 		// Assignment operator.
@@ -660,8 +675,8 @@ public:
 	~Socket();
 		// Destroys the Socket and releases the socket context.
 
-	SocketBase* base() const;
-		// Returns the SocketBase for this socket.
+	Socket* base() const;
+		// Returns the Socket for this socket.
 		
 	void connect(const Address& address);
 	bool shutdown();
@@ -670,8 +685,8 @@ public:
 	void bind(const Address& address);
 	void listen(int backlog = 64);
 		
-	int send(const char* data, int len, int flags = 0);
-	//int send(const char* data, int len, const Address& peerAddress, int flags = 0);
+	int send(const char* data, std::size_t len, int flags = 0);
+	//int send(const char* data, std::size_t len, const Address& peerAddress, int flags = 0);
 	//int send(const IPacket& packet, int flags = 0);
 	//int send(const IPacket& packet, const Address& peerAddress, int flags = 0);
 	
@@ -690,7 +705,7 @@ public:
 	int refCount() const;
 
 protected:
-	SocketBase* _base;
+	Socket* _base;
 };
 */
 

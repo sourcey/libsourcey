@@ -60,18 +60,12 @@ InstallTask::~InstallTask()
 
 void InstallTask::start()
 {
-	TraceLS(this) << "Starting:" 
-		<< "\n\tName: " << _local->name()
-		<< "\n\tVersion: " << _options.version
-		<< "\n\tSDK Version: " << _options.sdkVersion
+	TraceLS(this) << "Starting: Name=" << _local->name()
+		<< ", Version= " << _options.version
+		<< ", SDK Version=" << _options.sdkVersion
 		<< endl;
-
-	////Mutex::ScopedLock lock(_mutex);
-	//_thread.start(*this);
 		
 	// Prepare environment and install options
-	//{
-	////Mutex::ScopedLock lock(_mutex);
 
 	// Check against provided options to make sure that
 	// we can proceed with task creation.
@@ -103,11 +97,10 @@ void InstallTask::start()
 	// to clear the file cache.
 	if (_manager.options().clearFailedCache)
 		_manager.clearPackageCache(*_local);
-	//}	
 	
 	_runner.start(*this);
 
-	// Increment the event loop while active
+	// Increment the event loop while the task active
 	_runner.handle().ref();
 }
 
@@ -122,12 +115,6 @@ void InstallTask::run()
 {	
 	try {
 		auto local = this->local();
-
-		// Set the package install task so we know from which state to
-		// resume installation.
-		// TODO: Should this be reset by the clearFailedCache option?
-		local->setInstallState(state().toString());
-
 		switch (state().id()) 
 		{			
 		case InstallationState::None:			
@@ -137,7 +124,7 @@ void InstallTask::run()
 			break;
 		case InstallationState::Downloading:
 			if (_downloading)
-				return; // skip until async download completes
+				return; // skip until download completes
 			
 			setState(this, InstallationState::Extracting);
 			break;
@@ -180,91 +167,19 @@ void InstallTask::run()
 		ErrorL << "Installation failed: " << exc.what() << endl; 
 		setState(this, InstallationState::Failed, exc.what());
 	}
-
-	/*
-		// Kick off the state machine. If any errors are encountered
-		// an exception will be thrown and the task will fail.
-		doDownload();
-		//do {
-		//	scy::sleep(50);
-		//	if (cancelled()) goto Complete;
-		//} while(_downloading);
-
-		doExtract();
-		if (cancelled()) goto Complete;
-		doFinalize();
-			
-		// Transition the internal state if finalization was a success.
-		// This will complete the installation process.
-		setState(this, InstallationState::Installed);
-	}
-	catch (std::exception& exc) {		
-		ErrorL << "Installation failed: " << exc.what() << endl; 
-		setState(this, InstallationState::Failed, exc.what());
-	}
-	
-Complete:
-	setComplete();
-	deleteLater<InstallTask>(this);
-	*/
 }
 
 
 void InstallTask::onStateChange(InstallationState& state, const InstallationState& oldState)
 {
-	DebugL << "State changed:  " << oldState << " => " << state << endl; 	
-	/*
-	{
-		auto local = this->local();
-		switch (state.id()) 
-		{			
-		case InstallationState::Downloading:
-			setProgress(0);
-			doDownload();
-			//setProgress(0);
-			break;
-		case InstallationState::Extracting:
-			setProgress(75);
-			doExtract();
-			break;
-		case InstallationState::Finalizing:
-			setProgress(90);
-			doFinalize();
-			break;
-		case InstallationState::Installed:
-			local->setState("Installed");
-			local->clearErrors();
-			local->setInstalledAsset(getRemoteAsset());
-			setProgress(100);
-			break;
-		case InstallationState::Cancelled:
-			local->setState("Failed");
-			{
-				//Mutex::ScopedLock lock(_mutex);
-				if (_dlconn)
-					_dlconn->close();
-			}
-			setProgress(100);
-			break;			
-		case InstallationState::Failed:
-			local->setState("Failed");
-			if (!state.message().empty())
-				local->addError(state.message());
-			setProgress(100);
-			break;
-		default: 
-			local->setState("Installing");	
-		}
+	DebugL << "State changed: " << oldState << " => " << state << endl; 	
 
-		// Set the package install task so we know from which state to
-		// resume installation.
-		// TODO: Should this be reset by the clearFailedCache option?
-		local->setInstallState(state.toString());
-	}
-	*/
+	// Set the package install task so we know from which state to
+	// resume installation.
+	// TODO: Should this be reset by the clearFailedCache option?
+	local()->setInstallState(state.toString());
 
 	Stateful<InstallationState>::onStateChange(state, oldState);
-	DebugL << "State changed: AFTER:  " << oldState << " => " << state << endl; 	
 }
 
 
@@ -285,7 +200,7 @@ void InstallTask::doDownload()
 	*/
 
 	std::string outfile = _manager.getCacheFilePath(asset.fileName());
-	_dlconn = http::createConnection(asset.url()); //_loop
+	_dlconn = http::Client::instance().createConnection(asset.url(), _loop);
 	if (!_manager.options().httpUsername.empty()) {
 		http::BasicAuthenticator cred(
 			_manager.options().httpUsername, 
@@ -293,14 +208,14 @@ void InstallTask::doDownload()
 		cred.authenticate(_dlconn->request()); 
 	}
 	
-	DebugL << "Initializing download:" 
-		<< "\n\tURI: " << asset.url()
-		<< "\n\tFile path: " << outfile
+	DebugL << "Initializing download" 
+		<< ": URI=" << asset.url()
+		<< ", File path=" << outfile
 		<< endl;
 
 	_dlconn->setReadStream(new std::ofstream(outfile, std::ios_base::out | std::ios_base::binary));
-	_dlconn->IncomingProgress += delegate(this, &InstallTask::onDownloadProgress);
-	_dlconn->Complete += delegate(this, &InstallTask::onDownloadComplete);
+	_dlconn->IncomingProgress += sdelegate(this, &InstallTask::onDownloadProgress);
+	_dlconn->Complete += sdelegate(this, &InstallTask::onDownloadComplete);
 	_dlconn->send();
 
 	_downloading = true;
@@ -309,7 +224,7 @@ void InstallTask::doDownload()
 
 void InstallTask::onDownloadProgress(void*, const double& progress)
 {
-	DebugL << "download progress: " << progress << endl;
+	DebugL << "Download progress: " << progress << endl;
 
 	// Progress 1 - 75 covers download
 	// Increments of 10 or greater
@@ -326,7 +241,6 @@ void InstallTask::onDownloadComplete(void*, const http::Response& response)
 	_dlconn->close();
 	_dlconn = nullptr;
 	_downloading = false;
-	DebugL << "Download complete 1" << endl;
 }
 
 
@@ -354,13 +268,15 @@ void InstallTask::doExtract()
 	_local->manifest().root.clear();
 	
 	// Decompress the archive
-	arc::ZipFile zip(archivePath);			
-	while (zip.goToNextFile()) {
+	arc::ZipFile zip(archivePath);
+	while (true) {
 		zip.extractCurrentFile(tempDir, true);
 	
 		// Add the extracted file to the package install manifest	
 		// Note: Manifest stores relative paths
 		_local->manifest().addFile(zip.currentFileName()); 
+
+		if (!zip.goToNextFile()) break;
 	}
 }
 
@@ -437,11 +353,11 @@ void InstallTask::setComplete()
 		//Mutex::ScopedLock lock(_mutex);
 		assert(_progress == 100);
 
-		InfoL << "Package installed:" 
-			<< "\n\tName: " << _local->name()
-			<< "\n\tVersion: " << _local->version()
-			<< "\n\tPackage State: " << _local->state()
-			<< "\n\tPackage Install State: " << _local->installState()
+		InfoL << "Package installed: " 
+			<< "Name=" << _local->name()
+			<< ", Version=" << _local->version()
+			<< ", Package State=" << _local->state()
+			<< ", Package Install State=" << _local->installState()
 			<< endl;
 #ifdef _DEBUG
 		_local->print(cout);	
@@ -462,8 +378,6 @@ void InstallTask::setComplete()
 	// The task will be destroyed
 	// as a result of this signal.
 	Complete.emit(this);
-
-	deleteLater<InstallTask>(this);
 }
 
 

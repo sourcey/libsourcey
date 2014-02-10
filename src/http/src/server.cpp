@@ -31,6 +31,7 @@ namespace http {
 
 	
 Server::Server(short port, ServerResponderFactory* factory) :
+	socket(net::makeSocket<net::TCPSocket>()),
 	factory(factory),
 	address("0.0.0.0", port)
 {
@@ -50,10 +51,11 @@ Server::~Server()
 void Server::start()
 {	
 	// TODO: Register self as an observer
-	socket.base().AcceptConnection += delegate(this, &Server::onAccept);	
-	socket.Close += delegate(this, &Server::onClose);
-	socket.bind(address);
-	socket.listen();
+	//socket.reset(new net::TCPSocket);
+	socket->AcceptConnection += delegate(this, &Server::onAccept);	
+	socket->Close += delegate(this, &Server::onClose);
+	socket->bind(address);
+	socket->listen();
 
 	TraceLS(this) << "Server listening on " << port() << endl;		
 
@@ -66,30 +68,34 @@ void Server::shutdown()
 {		
 	TraceLS(this) << "Shutdown" << endl;
 
-	socket.base().AcceptConnection -= delegate(this, &Server::onAccept);	
-	socket.Close -= delegate(this, &Server::onClose);
-	socket.close();
+	if (socket) {
+		socket->AcceptConnection -= delegate(this, &Server::onAccept);	
+		socket->Close -= delegate(this, &Server::onClose);
+		socket->close();
+	}
 
-	//timer.stop();
-	if (!connections.empty())
-		Shutdown.emit(this);
+	Shutdown.emit(this);
 
-	// Connections are self removing
-	assert(connections.empty());
-	assert(socket.base().refCount() == 1);
+	for (auto conn : this->connections) {
+		conn->close(); // close and remove via callback
+	}
+	assert(this->connections.empty());
 }
 
 
 UInt16 Server::port()
 {
-	//return socket.address().port();
 	return address.port();
 }	
 
 
-ServerConnection* Server::createConnection(const net::Socket& sock)
+ServerConnection::Ptr Server::createConnection(const net::Socket::Ptr& sock)
 {
-	return new ServerConnection(*this, sock);
+	auto conn = std::shared_ptr<ServerConnection>(
+		new ServerConnection(*this, sock), 
+			deleter::Deferred<ServerConnection>());
+	addConnection(conn);
+	return conn; //return new ServerConnection(*this, sock);
 }
 
 
@@ -102,9 +108,10 @@ ServerResponder* Server::createResponder(ServerConnection& conn)
 }
 
 
-void Server::addConnection(ServerConnection* conn) 
+void Server::addConnection(ServerConnection::Ptr conn) 
 {		
 	TraceLS(this) << "Adding connection: " << conn << endl;
+	conn->Close += sdelegate(this, &Server::onConnectionClose, -1); // lowest priority
 	connections.push_back(conn);
 }
 
@@ -112,8 +119,8 @@ void Server::addConnection(ServerConnection* conn)
 void Server::removeConnection(ServerConnection* conn) 
 {		
 	TraceLS(this) << "Removing connection: " << conn << endl;
-	for (ServerConnectionList::iterator it = connections.begin(); it != connections.end(); ++it) {
-		if (conn == *it) {
+	for (auto it = connections.begin(); it != connections.end(); ++it) {
+		if (conn == it->get()) {
 			connections.erase(it);
 			return;
 		}
@@ -122,10 +129,10 @@ void Server::removeConnection(ServerConnection* conn)
 }
 
 
-void Server::onAccept(void*, const net::TCPSocket& sock)
+void Server::onAccept(const net::TCPSocket::Ptr& sock)
 {	
 	TraceLS(this) << "On server accept" << endl;
-	ServerConnection* conn = createConnection(sock);
+	ServerConnection::Ptr conn = createConnection(sock);
 	if (!conn) {		
 		WarnL << "Cannot create connection" << endl;
 		assert(0);
@@ -133,9 +140,16 @@ void Server::onAccept(void*, const net::TCPSocket& sock)
 }
 
 
-void Server::onClose(void*) 
+void Server::onClose() 
 {
 	TraceLS(this) << "On server socket close" << endl;
+}
+
+
+void Server::onConnectionClose(void* sender)
+{
+	TraceLS(this) << "On connection close" << endl;
+	removeConnection(reinterpret_cast<ServerConnection*>(sender));
 }
 
 
@@ -144,7 +158,7 @@ void Server::onClose(void*)
 //
 
 
-ServerConnection::ServerConnection(Server& server, const net::Socket& socket) : 
+ServerConnection::ServerConnection(Server& server, net::Socket::Ptr socket) : 
 	Connection(socket), 
 	_server(server), 
 	_responder(nullptr),
@@ -153,10 +167,7 @@ ServerConnection::ServerConnection(Server& server, const net::Socket& socket) :
 {	
 	TraceLS(this) << "Create" << endl;
 
-	_socket.replaceAdapter(new ServerAdapter(*this));
-
-	server.Shutdown += delegate(this, &ServerConnection::onServerShutdown);
-	server.addConnection(this);
+	replaceAdapter(new ServerAdapter(*this));
 }
 
 	
@@ -174,34 +185,9 @@ ServerConnection::~ServerConnection()
 void ServerConnection::close()
 {
 	if (!closed()) {
-		_server.Shutdown -= delegate(this, &ServerConnection::onServerShutdown);
-		_server.removeConnection(this);
-
 		Connection::close(); // close and destroy
 	}
 }
-
-
-/*
-bool ServerConnection::send()
-{
-	TraceLS(this) << "Respond" << endl;
-
-	// TODO: Detect end of message and close()
-
-	// KLUDGE: Temp solution for quick sending small requests only.
-	// Use Connection::write() for nocopy binary stream.
-	//string body(_response.body.str());
-	//_response.setContentLength(body.length());
-	//return write(body.data(), body.length()) > 0;
-
-	// Note: Buffer may be empty.
-	// Zero length call will push the response headers  
-	// through on the initial call so Socket::send()
-	//_response.setContentLength(outgoingBuffer().available());
-	//return write(outgoingBuffer().data(), outgoingBuffer().available()) > 0;
-}
-*/
 
 			
 Server& ServerConnection::server()
@@ -211,8 +197,7 @@ Server& ServerConnection::server()
 	
 
 //
-// Connection callbacks
-//
+// Connection Callbacks
 
 void ServerConnection::onHeaders() 
 {
@@ -234,7 +219,7 @@ void ServerConnection::onHeaders()
 		TraceLS(this) << "Upgrading to WebSocket: " << _request << endl;
 		_upgrade = true;
 
-		auto wsAdapter = new WebSocketConnectionAdapter(*this, WebSocket::ServerSide);
+		auto wsAdapter = new ws::ConnectionAdapter(*this, ws::ServerSide);
 				
 		// Note: To upgrade the connection we need to replace the 
 		// underlying SocketAdapter instance. Since we are currently 
@@ -242,18 +227,17 @@ void ServerConnection::onHeaders()
 		// scope we just swap the SocketAdapter instance pointers and do
 		// a deferred delete on the old adapter. No more callbacks will be 
 		// received from the old adapter after replaceAdapter is called.
-		socket().replaceAdapter(wsAdapter);
+		//socket()->adapter = new ws::ConnectionAdapter(*this, ws::ServerSide); //wsAdapter; //replaceAdapter(wsAdapter);		
+		replaceAdapter(wsAdapter);
 
 		std::ostringstream oss;
 		_request.write(oss); // TODO: write to string
-		std::string buffer(oss.str());
-		//Buffer buffer(oss.str().c_str(), oss.str().length());		
+		std::string buffer(oss.str());	
 
 		// Send the handshake request to the WS adapter for handling.
 		// If the request fails the underlying socket will be closed
 		// resulting in the destruction of the current connection.
-		//wsAdapter->onSocketRecv(mutableBuffer(buffer), socket().peerAddress());
-		wsAdapter->onSocketRecv(mutableBuffer(buffer), socket().peerAddress());
+		wsAdapter->onSocketRecv(mutableBuffer(buffer), socket()->peerAddress());
 	}
 	
 	// Instantiate the responder when request headers have been parsed
@@ -270,6 +254,11 @@ void ServerConnection::onHeaders()
 	// Upgraded connections don't receive the onHeaders callback
 	if (!_upgrade)
 		_responder->onHeaders(_request);
+
+	// NOTE: Outgoing.start() must be manually called by the ServerResponder,
+	// since adapters cannot be added once started.
+	// Start the Outgoing packet stream
+	//Outgoing.start();
 }
 
 
@@ -319,12 +308,14 @@ void ServerConnection::onClose()
 }
 
 
+/*
 void ServerConnection::onServerShutdown(void*)
 {
 	TraceLS(this) << "On server shutdown" << endl;	
 
 	close();
 }
+*/
 
 
 http::Message* ServerConnection::incomingHeader() 

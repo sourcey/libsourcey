@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_NET_Transaction_H
-#define SCY_NET_Transaction_H
+#ifndef SCY_Net_Transaction_H
+#define SCY_Net_Transaction_H
 
 
 #include "scy/packettransaction.h"
@@ -35,26 +35,26 @@ class Transaction: public PacketTransaction<PacketT>, public PacketSocketAdapter
 	/// types emitted from a Socket.
 {
 public:
-	Transaction(net::Socket& socket, 
+	Transaction(const net::Socket::Ptr& socket, 
 				const Address& peerAddress, 
 				int timeout = 10000, 
 				int retries = 1, 
 				uv::Loop* loop = uv::defaultLoop()) : 
 		PacketTransaction<PacketT>(timeout, retries, loop), 
-		PacketSocketAdapter(&socket),
+		PacketSocketAdapter(socket),
 		_peerAddress(peerAddress)
 	{
-		debugL("NetTransaction", this) << "Create" << std::endl;
+		TraceLS(this) << "Create" << std::endl;
 
-		// Default options, can be overridden
-		PacketSocketAdapter::socket->setAdapter(this);
+		PacketSocketAdapter::socket->addReceiver(this, 100); // highest prioority
 	}
 
 	virtual bool send()
 	{
-		debugL("NetTransaction", this) << "Send" << std::endl;
-		assert(socket);
-		if (socket->send(PacketTransaction<PacketT>::_request, _peerAddress) > 0)
+		TraceLS(this) << "Send" << std::endl;
+		assert(PacketSocketAdapter::socket);
+		//assert(PacketSocketAdapter::socket->recvAdapter() == this);
+		if (PacketSocketAdapter::socket->sendPacket(PacketTransaction<PacketT>::_request, _peerAddress) > 0)
 			return PacketTransaction<PacketT>::send();
 		PacketTransaction<PacketT>::setState(this, TransactionState::Failed);
 		return false;
@@ -62,22 +62,23 @@ public:
 	
 	virtual void cancel()
 	{
-		debugL("NetTransaction", this) << "Canceling" << std::endl;
+		TraceLS(this) << "Cancel" << std::endl;
 		PacketTransaction<PacketT>::cancel();
+	}
+
+	virtual void dispose()
+	{
+		TraceLS(this) << "Dispose" << std::endl;
+		//if (!PacketTransaction<PacketT>::_destroyed) {
+		//	PacketSocketAdapter::socket->setAdapter(nullptr);
+		//}
+		PacketSocketAdapter::socket->removeReceiver(this);
+		PacketTransaction<PacketT>::dispose(); // gc
 	}
 	
 	Address peerAddress() const
 	{
 		return _peerAddress;
-	}
-
-	virtual void dispose()
-	{
-		debugL("NetTransaction", this) << "Dispose" << std::endl;
-		if (!PacketTransaction<PacketT>::_destroyed) {
-			PacketSocketAdapter::socket->setAdapter(nullptr);
-		}
-		PacketTransaction<PacketT>::dispose(); // gc
 	}
 
 protected:	
@@ -86,23 +87,24 @@ protected:
 	}
 
 	virtual void onPacket(IPacket& packet)
-		// Overrides the PacketSocketAdapter onPacket 
+		// Overrides the PacketSocketAdapter::onPacket 
 		// callback for checking potential response candidates.
 	{
-		debugL("NetTransaction", this) << "On packet: " << packet.size() << std::endl;
+		TraceLS(this) << "On packet: " << packet.size() << std::endl;
 		if (PacketTransaction<PacketT>::handlePotentialResponse(static_cast<PacketT&>(packet))) {
 
 			// Stop socket data propagation since
 			// we have handled the packet
-			//throw StopPropagation();
+			throw StopPropagation();
 		}
 	}
 	
 	virtual void onResponse() 
 		// Called when a successful response match is received.
 	{
-		traceL("NetTransaction", this) << "On success: " << PacketTransaction<PacketT>::_response.toString() << std::endl;
-		PacketSignal::emit(socket, PacketTransaction<PacketT>::_response);
+		TraceLS(this) << "On success: " << 
+			PacketTransaction<PacketT>::_response.toString() << std::endl;
+		PacketSignal::emit(socket.get(), PacketTransaction<PacketT>::_response);
 	}
 
 	virtual bool checkResponse(const PacketT& packet) 
@@ -119,10 +121,11 @@ protected:
 	}
 	
 	Address _peerAddress;
+	//net::Socket::Ptr PacketSocketAdapter::socket;
 };
 
 
 } } // namespace scy::net
 
 
-#endif // SCY_NET_Transaction_H
+#endif // SCY_Net_Transaction_H

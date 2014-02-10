@@ -253,11 +253,11 @@ public:
 		
 		// Reinitiate the provider session
 		ourMediaProvider->initiate();
-		ourMediaProvider->AllocationCreated += delegate(this, &AddressRequestHandler::onAllocationCreated);
+		ourMediaProvider->AllocationCreated += sdelegate(this, &AddressRequestHandler::onAllocationCreated);
 		
 		wakeUp.wait();
 		
-		ourMediaProvider->AllocationCreated -= delegate(this, &AddressRequestHandler::onAllocationCreated);
+		ourMediaProvider->AllocationCreated -= sdelegate(this, &AddressRequestHandler::onAllocationCreated);
 
 		Log("trace") << "[AddressRequestHandler] Exiting" << endl;
 	}

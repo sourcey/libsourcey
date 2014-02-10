@@ -30,7 +30,7 @@ public:
 		NID_ORGANIZATION_UNIT_NAME = 18	
 	};
 	
-	explicit X509Certificate(const char* data, int length);
+	explicit X509Certificate(const char* data, std::size_t length);
 		// Creates the X509Certificate object by reading
 		// a certificate in PEM format from the given buffer.
 
@@ -115,7 +115,7 @@ public:
 		// Returns the underlying OpenSSL certificate.
 
 protected:
-	void load(const char* data, int length);
+	void load(const char* data, std::size_t length);
 		// Loads the certificate from the given buffer.
 		// The certificate must be in PEM format.
 		

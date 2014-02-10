@@ -73,7 +73,7 @@ void VideoAnalyzer::initialize()
 	_reader += packetDelegate(this, &VideoAnalyzer::onVideo);
 	_reader += packetDelegate(this, &VideoAnalyzer::onAudio);
 
-	_reader.ReadComplete += delegate(this, &VideoAnalyzer::onReadComplete);
+	_reader.ReadComplete += sdelegate(this, &VideoAnalyzer::onReadComplete);
 }
 
 	
@@ -122,7 +122,7 @@ void VideoAnalyzer::stop()
 	// Can't lock here in case we inside a callback.
 	//Mutex::ScopedLock lock(_mutex); 
 	
-	_reader.ReadComplete -= delegate(this, &VideoAnalyzer::onReadComplete);
+	_reader.ReadComplete -= sdelegate(this, &VideoAnalyzer::onReadComplete);
 	_reader.detach(this);
 	_reader.stop();
 }

@@ -32,9 +32,6 @@ sourcey_find_library(WebRTC
   DEBUG_PATHS ${WebRTC_DEBUG_PATHS}
   RELEASE_PATHS ${WebRTC_RELEASE_PATHS})
 
-message("WebRTC_INCLUDE_DIR=${WebRTC_INCLUDE_DIR}")
-message("WebRTC_LIBRARY=${WebRTC_LIBRARY}")
-
 if(WebRTC_LIBRARY AND WebRTC_INCLUDE_DIR)
 
   # TODO: Exclude jsoncp and test libs

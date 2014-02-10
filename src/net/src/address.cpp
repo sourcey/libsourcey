@@ -25,7 +25,7 @@
 #include "uv.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -40,7 +40,7 @@ namespace net {
 class AddressBase: public SharedObject
 {
 public:
-	virtual string host() const = 0;	
+	virtual std::string host() const = 0;	
 	virtual UInt16 port() const = 0;
 	virtual Address::Family family() const = 0;
 	virtual socklen_t length() const = 0;
@@ -231,21 +231,18 @@ Address::Address(const std::string& hostAndPort)
 
 	std::string host;
 	std::string port;
-	string::const_iterator it  = hostAndPort.begin();
-	string::const_iterator end = hostAndPort.end();
-	if (*it == '[')
-	{
+	std::string::const_iterator it  = hostAndPort.begin();
+	std::string::const_iterator end = hostAndPort.end();
+	if (*it == '[') {
 		++it;
 		while (it != end && *it != ']') host += *it++;
 		if (it == end) throw std::runtime_error("Invalid address: Malformed IPv6 address");
 		++it;
 	}
-	else
-	{
+	else {
 		while (it != end && *it != ':') host += *it++;
 	}
-	if (it != end && *it == ':')
-	{
+	if (it != end && *it == ':') {
 		++it;
 		while (it != end) port += *it++;
 	}
@@ -281,8 +278,7 @@ Address::~Address()
 
 Address& Address::operator = (const Address& addr)
 {
-	if (&addr != this)
-	{
+	if (&addr != this) {
 		_base->release();
 		_base = addr._base;
 		_base->duplicate();
@@ -301,11 +297,11 @@ void Address::init(const std::string& host, UInt16 port)
     else if (uv_inet_pton(AF_INET6, host.c_str(), &ia) == 0)
 		_base = new IPv6AddressBase(&ia, htons(port));
     else
-		throw std::runtime_error("Invalid address: Bad host argument: " + host);
+		throw std::runtime_error("Invalid IP address format: " + host);
 }
 
 
-string Address::host() const
+std::string Address::host() const
 {
 	return _base->host();
 }
@@ -347,7 +343,7 @@ bool Address::valid() const
 }
 
 
-string Address::toString() const
+std::string Address::toString() const
 {
 	std::string result;
 	if (family() == Address::IPv6)

@@ -65,8 +65,6 @@ public:
 	
 	static sked::TaskFactory& factory();
 		// Returns the TaskFactory singleton.
-	
-	virtual const char* className() const { return "Scheduler"; }
 
 protected:
 	virtual void run();	

@@ -70,7 +70,7 @@ struct ClientObserver
 {
 	virtual void onClientStateChange(Client& client, ClientState& state, const ClientState& oldState) = 0;
 	
-	virtual void onRelayDataReceived(Client& client, const char* data, int size, const net::Address& peerAddress) = 0;
+	virtual void onRelayDataReceived(Client& client, const char* data, std::size_t size, const net::Address& peerAddress) = 0;
 
 	virtual void onAllocationCreated(Client& client, const stun::Transaction& transaction) {};
 	virtual void onAllocationFailed(Client& client, int errorCode, const std::string& reason) {};
@@ -113,7 +113,7 @@ public:
 	};
 	
 public:
-	Client(ClientObserver& observer, const Options& options = Options()); //net::SocketBase* socket, 
+	Client(ClientObserver& observer, const Options& options = Options()); //net::Socket* socket, 
 	virtual ~Client();
 
 	virtual void initiate();
@@ -138,7 +138,7 @@ public:
 
 	virtual void sendChannelBind(const std::string& peerIP);
 	virtual void sendRefresh();
-	virtual void sendData(const char* data, int size, const net::Address& peerAddress);	
+	virtual void sendData(const char* data, std::size_t size, const net::Address& peerAddress);	
 	
 	virtual bool handleResponse(const stun::Message& response);
 	virtual void handleAllocateResponse(const stun::Message& response);
@@ -149,7 +149,7 @@ public:
 	virtual void handleDataIndication(const stun::Message& response);
 	
 	virtual int transportProtocol();
-	virtual stun::Transaction* createTransaction(net::Socket* socket = nullptr);
+	virtual stun::Transaction* createTransaction(const net::Socket::Ptr& socket = nullptr);
 	virtual void authenticateRequest(stun::Message& request);
 	virtual bool sendAuthenticatedTransaction(stun::Transaction* transaction);
 	virtual bool removeTransaction(stun::Transaction* transaction);
@@ -162,18 +162,16 @@ public:
 	ClientObserver& observer();
 	Options& options();	
 	
-	virtual void onSocketRecv(void* sender, net::SocketPacket& packet);
+	virtual void onSocketRecv(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
 	virtual void onSocketConnect(void* sender);
 	virtual void onSocketClose(void* sender);
 	virtual void onTransactionProgress(void* sender, TransactionState& state, const TransactionState&);	
 	virtual void onStateChange(ClientState& state, const ClientState& oldState);
 	virtual void onTimer(void*);
 
-	//virtual const char* className() const { return "TURNClient"; };
-
 protected:
 	ClientObserver&	_observer;
-	net::Socket _socket;
+	net::Socket::Ptr _socket;
 	Options _options;
 	Timer _timer;
 

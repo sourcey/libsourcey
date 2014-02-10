@@ -36,12 +36,12 @@ namespace smpl {
 
 Client* createTCPClient(const Client::Options& options, uv::Loop* loop)
 {
-	return new Client(new net::TCPBase(loop), options); //, loop
+	return new Client(std::make_shared<net::TCPSocket>(loop), options); //, loop
 }
 
 
 TCPClient::TCPClient(const Client::Options& options, uv::Loop* loop) :
-	Client(new net::TCPBase(loop), options) //, loop
+	Client(std::make_shared<net::TCPSocket>(loop), options) //, loop
 {
 }
 
@@ -53,12 +53,12 @@ TCPClient::TCPClient(const Client::Options& options, uv::Loop* loop) :
 
 Client* createSSLClient(const Client::Options& options, uv::Loop* loop)
 {
-	return new Client(new net::SSLBase(loop), options); //, loop);
+	return new Client(std::make_shared<net::SSLSocket>(loop), options); //, loop);
 }
 
 
 SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop) :
-	Client(new net::SSLBase(loop), options) //, loop)
+	Client(std::make_shared<net::SSLSocket>(loop), options) //, loop)
 {
 }
 
@@ -68,7 +68,7 @@ SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop) :
 //
 
 
-Client::Client(net::SocketBase* socket, const Client::Options& options) : //, uv::Loop* loop
+Client::Client(const net::Socket::Ptr& socket, const Client::Options& options) : //, uv::Loop* loop
 	sockio::Client(socket), //, loop
 	_options(options),
 	_announceStatus(500)
@@ -191,7 +191,7 @@ int Client::announce()
 	data["token"] = _options.token;
 	sockio::Packet pkt("announce", data, true);
 	auto txn = createTransaction(pkt);
-	txn->StateChange += delegate(this, &Client::onAnnounce);
+	txn->StateChange += sdelegate(this, &Client::onAnnounce);
 	return txn->send();
 }
 
@@ -241,7 +241,7 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 }
 
 
-void Client::onSocketConnect(void*)
+void Client::onSocketConnect()
 {
 	// Start the socket.io timers etc
 	sockio::Client::onConnect();
@@ -649,7 +649,7 @@ void Client::onError()
 //	}	
 //	sockio::Packet p("announce", data, true);
 //	auto txn = new sockio::Transaction(_runner, *this, p, 1, 5000);
-//	txn->StateChange += delegate(this, &Client::onAnnounce);
+//	txn->StateChange += sdelegate(this, &Client::onAnnounce);
 //	return txn->send();
 //}
 //

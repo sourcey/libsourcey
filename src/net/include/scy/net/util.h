@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_NET_Util_H
-#define SCY_NET_Util_H
+#ifndef SCY_Net_Util_H
+#define SCY_Net_Util_H
 
 
 namespace scy {
@@ -29,4 +29,4 @@ namespace util {
 } // namespace scy
 
 
-#endif // SCY_NET_Util_H
+#endif // SCY_Net_Util_H

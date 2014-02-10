@@ -50,14 +50,14 @@ MediaFactory::MediaFactory()
 {	
 	_devices = DeviceManagerFactory::create();
 	_devices->initialize();
-	//_devices->DevicesChanged += delegate(this, &MediaFactory::onDevicesChanged);
+	//_devices->DevicesChanged += sdelegate(this, &MediaFactory::onDevicesChanged);
 }
 
 
 MediaFactory::~MediaFactory()
 {	
 	if (_devices) {
-		//_devices->DevicesChanged -= delegate(this, &MediaFactory::onDevicesChanged);
+		//_devices->DevicesChanged -= sdelegate(this, &MediaFactory::onDevicesChanged);
 		_devices->uninitialize();
 		delete _devices;
 	}
@@ -165,7 +165,7 @@ VideoCapture::Ptr MediaFactory::createVideoCapture(int deviceId) //, unsigned fl
 	// Note: The capture is opened ad started in the constructor, 
 	// so exceptions thrown during startup will not be handled
 	// via this callback.
-	capture->Error += delegate(this, &MediaFactory::onVideoCaptureError);
+	capture->Error += sdelegate(this, &MediaFactory::onVideoCaptureError);
 	return capture;
 }
 

@@ -31,14 +31,14 @@ namespace sockio {
 
 
 Transaction::Transaction(Client& client, long timeout) : 
-	PacketTransaction<Packet>(timeout, 0, client.socket().base().loop()), client(client)
+	PacketTransaction<Packet>(timeout, 0, client.ws().socket/*.base()*/->loop()), client(client)
 {
 	DebugLS(this) << "Create" << endl;
 }
 
 
 Transaction::Transaction(Client& client, const Packet& request, long timeout) : 
-	PacketTransaction<Packet>(request, timeout, 0, client.socket().base().loop()), client(client)
+	PacketTransaction<Packet>(request, timeout, 0, client.ws().socket/*.base()*/->loop()), client(client)
 {
 	DebugLS(this) << "Create" << endl;
 }

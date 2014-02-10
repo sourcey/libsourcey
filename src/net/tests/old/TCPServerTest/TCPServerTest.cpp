@@ -35,7 +35,7 @@ struct EchoServer
 	{
 		Log("debug") << "[EchoServer:" << this << "] Creating: " << port << endl;	
 		server.bind(Net::Address("127.0.0.1", port));
-		server.SocketCreated += delegate(this, &EchoServer::onServerSocketCreated);
+		server.SocketCreated += sdelegate(this, &EchoServer::onServerSocketCreated);
 	}
 	virtual ~EchoServer() 
 	{
@@ -45,7 +45,7 @@ struct EchoServer
 	void onServerSocketCreated(void* sender, Net::TCPSocket& socket)
 	{
 		Log("debug") << "[EchoServer:" << this << "] TCP Socket Created: " << socket->peerAddress() << endl;
-		//socket->StateChange += delegate(this, &Echos::onServerSocketStateChange);
+		//socket->StateChange += sdelegate(this, &Echos::onServerSocketStateChange);
 		
 		socket->registerPacketType<DataPacket>(1);
 		socket->attach(packetDelegate(this, &EchoServer::onServerSocketRequestReceived));	
@@ -242,7 +242,7 @@ int main(int argc, char** argv)
 			
 		
 		Client c(o);
-		//c.StateChange += delegate(this, &TCPInitiator::onStateChange);
+		//c.StateChange += sdelegate(this, &TCPInitiator::onStateChange);
 		//c.addPermission(_peerIP);	
 		c.initiate();
 
@@ -327,7 +327,7 @@ protected:
 		
 		_peer = new Net::TCPSocket();
 		_peer->bind(Net::Address("127.0.0.1", 0));
-		_peer->DataReceived += delegate(this, &EchoClient::onPeerDataReceived);
+		_peer->DataReceived += sdelegate(this, &EchoClient::onPeerDataReceived);
 
 		_timer.setStartInterval(0);
 		_timer.setPeriodicInterval(2000);
@@ -439,8 +439,8 @@ private:
 			client = new Client(*this, opts);
 			//client->attach(this);
 			client->sendAllocateRequest();
-			//client->AllocationCreated += delegate(this, &EchoClient::onAllocationCreated);
-			//client->DataReceived += delegate(this, &EchoClient::onDataReceived);
+			//client->AllocationCreated += sdelegate(this, &EchoClient::onAllocationCreated);
+			//client->DataReceived += sdelegate(this, &EchoClient::onDataReceived);
 			//client->sendAllocateRe quest();
 			system("pause");
 		try	{

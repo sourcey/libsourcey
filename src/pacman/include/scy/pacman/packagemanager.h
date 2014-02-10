@@ -40,9 +40,6 @@
 
 
 namespace scy { 
-namespace http { 
-	class Response;
-	class ClientConnection; }
 namespace pman {
 
 
@@ -126,7 +123,7 @@ public:
 	//
 	/// Package Installation Methods
 
-	virtual InstallTask* installPackage(const std::string& name,
+	virtual InstallTask::Ptr installPackage(const std::string& name,
 		const InstallOptions& options = InstallOptions()); //, bool whiny = false
 		// Installs a single package.
 		// The returned InstallTask must be started.
@@ -142,7 +139,7 @@ public:
 		// be started, otherwise they will be auto-started.
 		// The PackageManager does not take ownership of the InstallMonitor.	
 
-	virtual InstallTask* updatePackage(const std::string& name, 
+	virtual InstallTask::Ptr updatePackage(const std::string& name, 
 		const InstallOptions& options = InstallOptions()); //, bool whiny = false
 		// Updates a single package.
 		// Throws an exception if the package does not exist.
@@ -180,10 +177,10 @@ public:
 	//
 	/// Task Helper Methods
 
-	virtual InstallTask* getInstallTask(const std::string& id) const;
+	virtual InstallTask::Ptr getInstallTask(const std::string& id) const;
 		// Gets the install task for the given package ID.
 
-	virtual InstallTaskVec tasks() const;
+	virtual InstallTaskPtrVec tasks() const;
 		// Returns a list of all tasks.
 	
 	virtual void cancelAllTasks();
@@ -214,7 +211,7 @@ public:
 		// If the remote package doesn't exist a NotFoundException 
 		// will be thrown.	
 	
-	virtual InstallTask* createInstallTask(PackagePair& pair, 
+	virtual InstallTask::Ptr createInstallTask(PackagePair& pair, 
 		const InstallOptions& options = InstallOptions());
 		// Creates a package installation task for the given pair.
 	
@@ -296,7 +293,7 @@ protected:
 	mutable Mutex       _mutex;
 	LocalPackageStore	_localPackages;
 	RemotePackageStore	_remotePackages;
-	InstallTaskVec		_tasks;
+	InstallTaskPtrVec	_tasks;
 	Options				_options;
 };
 

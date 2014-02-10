@@ -10,7 +10,7 @@ namespace scy {
 namespace crypto {
 
 
-X509Certificate::X509Certificate(const char* data, int length) :
+X509Certificate::X509Certificate(const char* data, std::size_t length) :
 	_certificate(0)
 {	
 	load(data, length);
@@ -76,7 +76,7 @@ X509Certificate::~X509Certificate()
 }
 
 
-void X509Certificate::load(const char* data, int length)
+void X509Certificate::load(const char* data, std::size_t length)
 {
 	assert(!_certificate);
 		

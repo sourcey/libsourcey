@@ -66,7 +66,7 @@ protected:
 		case ClientState::Success:
 			AllocationCreated.emit(this);
 #ifdef TEST_INITIATOR_TO_RESPONDER
-			timer.Timeout += delegate(this, &UDPInitiator::onSendTimer);
+			timer.Timeout += sdelegate(this, &UDPInitiator::onSendTimer);
 			timer.start(0, 1000);
 #endif
 			break;
@@ -89,7 +89,7 @@ protected:
 		//client.sendData(data, size, peerAddr);
 	}
 	
-	void onRelayDataReceived(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
+	void onRelayDataReceived(turn::Client& client, const char* data, std::size_t size, const net::Address& peerAddr)
 	{	
 #ifdef TEST_RESPONDER_TO_INITIATOR
 		std::string payload(data, size);
@@ -142,7 +142,7 @@ protected:
 	{
 		try	{
 			client = new UDPClient(*this, opts); //, reactor, runner
-			//client.StateChange += delegate(this, &UDPInitiator::onStateChange);
+			//client.StateChange += sdelegate(this, &UDPInitiator::onStateChange);
 			client.addPermission(peerIP);	
 			client.initiate();
 		} 

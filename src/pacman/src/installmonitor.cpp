@@ -64,9 +64,9 @@ void InstallMonitor::onInstallComplete(void* sender)
 
 		// Remove the package task reference.
 		for (auto it = _tasks.begin(); it != _tasks.end(); it++) {
-			if (task == *it) {
-				task->StateChange -= delegate(this, &InstallMonitor::onInstallStateChange); 
-				task->Complete -= delegate(this, &InstallMonitor::onInstallComplete);
+			if (task == it->get()) {
+				task->StateChange -= sdelegate(this, &InstallMonitor::onInstallStateChange); 
+				task->Complete -= sdelegate(this, &InstallMonitor::onInstallComplete);
 				_tasks.erase(it);
 				break;
 			}
@@ -86,15 +86,15 @@ void InstallMonitor::onInstallComplete(void* sender)
 }
 
 
-void InstallMonitor::addTask(InstallTask* task)
+void InstallMonitor::addTask(InstallTask::Ptr task)
 {
 	Mutex::ScopedLock lock(_mutex);
 	if (!task->valid())
 		throw std::runtime_error("Invalid package task");
 	_tasks.push_back(task);
 	_packages.push_back(task->_local);
-	task->StateChange += delegate(this, &InstallMonitor::onInstallStateChange);
-	task->Complete += delegate(this, &InstallMonitor::onInstallComplete);
+	task->StateChange += sdelegate(this, &InstallMonitor::onInstallStateChange);
+	task->Complete += sdelegate(this, &InstallMonitor::onInstallComplete);
 }
 
 
@@ -124,14 +124,14 @@ void InstallMonitor::setProgress(int value)
 }
 
 
-InstallTaskVec InstallMonitor::tasks() const 
+InstallTaskPtrVec InstallMonitor::tasks() const 
 { 
 	Mutex::ScopedLock lock(_mutex);
 	return _tasks; 
 }
 
 
-LocalPackageList InstallMonitor::packages() const 
+LocalPackageVec InstallMonitor::packages() const 
 { 
 	Mutex::ScopedLock lock(_mutex);
 	return _packages; 

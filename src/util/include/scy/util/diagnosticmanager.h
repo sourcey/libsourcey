@@ -90,8 +90,6 @@ protected:
 	virtual bool pass();
 	virtual bool fail();
 	virtual void addSummary(const std::string& text);
-
-	//virtual void* self() { return this;	}
 };
 
 
@@ -150,9 +148,6 @@ public:
 	NullSignal DiagnosticsComplete;
 
 	virtual void onDiagnosticStateChange(void*, DiagnosticState& state, const DiagnosticState&);
-	
-	virtual const char* className() const { return "DiagnosticManager"; }
-	//virtual void* self() { return this;	}
 };
 
 

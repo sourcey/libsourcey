@@ -45,8 +45,8 @@ Server::Server(ServerObserver& observer, const ServerOptions& options) :
 Server::~Server() 
 {
 	TraceL << "Destroy" << endl;
-	assert(_udpSocket.isNull() || _udpSocket.base().refCount() == 1);
-	assert(_tcpSocket.isNull() || _tcpSocket.base().refCount() == 1);
+	//assert(_udpSocket.isNull() || _udpSocket./*base().*/refCount() == 1);
+	//assert(_tcpSocket.isNull() || _tcpSocket./*base().*/refCount() == 1);
 	stop();	
 	TraceL << "Destroy: OK" << endl;
 }
@@ -57,22 +57,22 @@ void Server::start()
 	TraceL << "Starting" << endl;	
 
 	if (_options.enableUDP) {
-		_udpSocket.assign(new UDPBase, false);
-		_udpSocket.Recv += delegate(this, &Server::onSocketRecv, 1);
+		//_udpSocket.assign(new UDPSocket, false);
+		_udpSocket.Recv += sdelegate(this, &Server::onSocketRecv, 1);
 		_udpSocket.bind(_options.listenAddr);		
-		//_udpSocket.base().setBroadcast(true);
+		//_udpSocket./*base().*/setBroadcast(true);
 		TraceL << "UDP listening on " << _options.listenAddr << endl;	
 	}
 	
 	if (_options.enableTCP) {
-		_tcpSocket.assign(new TCPBase, false);
+		//_tcpSocket.assign(new TCPSocket, false);
 		_tcpSocket.bind(_options.listenAddr);
 		_tcpSocket.listen();
-		_tcpSocket.base().AcceptConnection += delegate(this, &Server::onTCPAcceptConnection);
+		_tcpSocket.AcceptConnection += sdelegate(this, &Server::onTCPAcceptConnection);
 		TraceL << "TCP listening on " << _options.listenAddr << endl;	
 	}
 
-	_timer.Timeout += delegate(this, &Server::onTimer);
+	_timer.Timeout += sdelegate(this, &Server::onTimer);
 	_timer.start(_options.timerInterval, _options.timerInterval);
 }
 
@@ -97,12 +97,12 @@ void Server::stop()
 	_tcpSockets.clear();
 
 	// Close server sockets
-	if (!_udpSocket.isNull()) {
-		assert(_udpSocket.base().refCount() == 1);
+	if (_udpSocket.active()) {
+		//assert(_udpSocket./*base().*/refCount() == 1);
 		_udpSocket.close();
 	}
-	if (!_tcpSocket.isNull()) {		
-		assert(_tcpSocket.base().refCount() == 1);
+	if (_tcpSocket.active()) {		
+		//assert(_tcpSocket./*base().*/refCount() == 1);
 		_tcpSocket.close();
 	}
 }
@@ -121,38 +121,55 @@ void Server::onTimer(void*)
 }
 
 
-void Server::onTCPAcceptConnection(void*, const net::TCPSocket& sock)
+void Server::onTCPAcceptConnection(void*, const net::TCPSocket::Ptr& sock)
 {
-	TraceL << "TCP connection accepted: " << sock.peerAddress() << endl;	
+	TraceL << "TCP connection accepted: " << sock->peerAddress() << endl;	
 	
-	assert(sock.base().refCount() == 1);
+	//assert(sock./*base().*/refCount() == 1);
 	_tcpSockets.push_back(sock);
-	net::TCPSocket& socket = _tcpSockets.back();
-	assert(socket.base().refCount() == 2);
-	socket.Recv += delegate(this, &Server::onSocketRecv);
-	socket.Close += delegate(this, &Server::onTCPSocketClosed);
+	net::TCPSocket::Ptr& socket = _tcpSockets.back();
+	//assert(socket./*base().*/refCount() == 2);
+	socket->Recv += sdelegate(this, &Server::onSocketRecv);
+	socket->Close += sdelegate(this, &Server::onTCPSocketClosed);
 
 	// No need to increase control socket buffer size
 	// setServerSocketBufSize<net::TCPSocket>(socket, SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
 
 
-void Server::onSocketRecv(void* sender, net::SocketPacket& packet)
+net::TCPSocket::Ptr Server::getTCPSocket(const net::Address& peerAddr)
 {
-	TraceL << "Data received: " << packet.size() << endl;	
+	for (auto& sock : _tcpSockets) {
+		TraceL << "sock->peerAddress(): " << sock->peerAddress() << ": " << peerAddr << endl;	
+		if (sock->peerAddress() == peerAddr) {
+			return sock;
+		}
+	}
+	assert(0 && "unknown socket");
+	return net::TCPSocket::Ptr();
+}
+
+
+void Server::onSocketRecv(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress)
+{
+	TraceL << "Data received: " << buffer.size() << endl;	
  	//auto info = reinterpret_cast<net::PacketInfo*>(packet.info);
 	//assert(info);
 	//if (!info)
-	//	return;
-		
+	//	return;	const net::TCPSocket::Ptr& socket
 	stun::Message message;
-	char* buf = packet.data();
-	std::size_t len = packet.size();
+	auto socket = reinterpret_cast<net::Socket*>(sender);		
+	char* buf = bufferCast<char*>(buffer);
+	std::size_t len = buffer.size();
 	std::size_t nread = 0;
 	while (len > 0 && (nread = message.read(constBuffer(buf, len))) > 0) {
 		if (message.classType() == stun::Message::Request || 
 			message.classType() == stun::Message::Indication) {				
-			Request request(*packet.info->socket, message, packet.info->socket->address(), packet.info->peerAddress);
+			Request request(message, socket->transport(), socket->address(), peerAddress); //getTCPSocket(socket->address()), 
+			//if (!request.socket) {
+			//	assert(0 && "invalid socket");
+			//	continue;
+			//}
 
 			// TODO: Only authenticate stun::Message::Request types
 			handleRequest(request, _observer.authenticateRequest(this, request));
@@ -182,7 +199,7 @@ void Server::onSocketRecv(void* sender, net::SocketPacket& packet)
 		buf += nread;
 		len -= nread;
 	}
-	if (len == packet.size())
+	if (len == buffer.size())
 		WarnL << "Non STUN packet received" << std::endl;
 
 #if 0
@@ -199,83 +216,20 @@ void Server::onSocketRecv(void* sender, net::SocketPacket& packet)
 }
 
 
-#if 0
-void Server::handleSendIndication(Request& request)
-{
-	TraceL << "Send indication received: " << request.toString() << endl;
-
-  const StunAddressAttribute* addr_attr =
-      request.GetAddress(STUN_ATTR_DESTINATION_ADDRESS);
-  if (!addr_attr) {
-    int_conn->SendStunError(request, 400, "Bad Request");
-    return;
-  }
-
-  const StunByteStringAttribute* data_attr =
-      request.GetByteString(STUN_ATTR_DATA);
-  if (!data_attr) {
-    int_conn->SendStunError(request, 400, "Bad Request");
-    return;
-  }
-
-  talk_base::SocketAddress ext_addr(addr_attr->ipaddr(), addr_attr->port());
-  RelayServerConnection* ext_conn =
-      int_conn->binding()->GetExternalConnection(ext_addr);
-  if (!ext_conn) {
-    // Create a new connection to establish the relationship with this binding.
-    ASSERT(external_sockets_.size() == 1);
-    talk_base::AsyncPacketSocket* socket = external_sockets_[0];
-    talk_base::SocketAddressPair ap(ext_addr, socket->GetLocalAddress());
-    ext_conn = new RelayServerConnection(int_conn->binding(), ap, socket);
-    ext_conn->binding()->AddExternalConnection(ext_conn);
-    AddConnection(ext_conn);
-  }
-
-  // If this connection has pinged us, then allow outgoing traffic.
-  if (ext_conn->locked())
-    ext_conn->Send(data_attr->bytes(), data_attr->length());
-
-  const StunUInt32Attribute* options_attr =
-      request.GetUInt32(STUN_ATTR_OPTIONS);
-  if (options_attr && (options_attr->value() & 0x01)) {
-    int_conn->set_default_destination(ext_addr);
-    int_conn->Lock();
-
-    RelayMessage response;
-    response.SetType(STUN_SEND_RESPONSE);
-    response.SetTransactionID(request.transaction_id());
-
-    StunByteStringAttribute* magic_cookie_attr =
-        StunAttribute::CreateByteString(cricket::STUN_ATTR_MAGIC_COOKIE);
-    magic_cookie_attr->CopyBytes(int_conn->binding()->magic_cookie().c_str(),
-                                 int_conn->binding()->magic_cookie().size());
-    response.AddAttribute(magic_cookie_attr);
-
-    StunUInt32Attribute* options2_attr =
-      StunAttribute::CreateUInt32(cricket::STUN_ATTR_OPTIONS);
-    options2_attr->SetValue(0x01);
-    response.AddAttribute(options2_attr);
-
-    int_conn->SendStun(response);
-  }
-}
-#endif
-
-
 void Server::onTCPSocketClosed(void* sender)
 {
 	TraceL << "TCP socket closed" << endl;	
-	releaseTCPSocket(reinterpret_cast<net::TCPSocket*>(sender));
+	releaseTCPSocket(reinterpret_cast<net::Socket*>(sender));
 }
 
 
-void Server::releaseTCPSocket(net::TCPSocket* socket)
+void Server::releaseTCPSocket(net::Socket* socket)
 {	
 	TraceLS(this) << "Removing TCP socket: " << socket << std::endl;
 	for (auto it = _tcpSockets.begin(); it != _tcpSockets.end(); ++it) { //::Ptr
-		if (&(*it).base() == &socket->base()) {
-			socket->Recv -= delegate(this, &Server::onSocketRecv);
-			socket->Close -= delegate(this, &Server::onTCPSocketClosed);
+		if (it->get() == socket) {
+			socket->Recv -= sdelegate(this, &Server::onSocketRecv);
+			socket->Close -= sdelegate(this, &Server::onTCPSocketClosed);
 
 			// All we need to do is erase the socket in order to 
 			// deincrement the ref counter and destroy the socket.
@@ -291,7 +245,7 @@ void Server::releaseTCPSocket(net::TCPSocket* socket)
 void Server::handleRequest(Request& request, AuthenticationState state)
 {	
 	TraceL << "Received STUN request:\n" 
-		<< "\tFrom: " << request.remoteAddr << "\n"
+		<< "\tFrom: " << request.remoteAddress << "\n"
 		<< "\tData: " << request.toString()
 		<< endl;
 
@@ -352,7 +306,7 @@ void Server::handleAuthorizedRequest(Request& request) //, AuthenticationState s
 			break;
 
 		default: {
-			FiveTuple tuple(request.remoteAddr, request.localAddress, request.socket.transport());
+			FiveTuple tuple(request.remoteAddress, request.localAddress, request.transport); //socket->
 			auto allocation = getAllocation(tuple); //reinterpret_cast<ServerAllocation*>();
 			if (!allocation)  {
 				respondError(request, 437, "Allocation Mismatch");
@@ -401,13 +355,14 @@ void Server::handleBindingRequest(Request& request)
 
 	// XOR-MAPPED-ADDRESS
 	auto addrAttr = new stun::XorMappedAddress;
-	addrAttr->setAddress(request.remoteAddr);
+	addrAttr->setAddress(request.remoteAddress);
 	//addrAttr->setFamily(1);
-	//addrAttr->setPort(request.remoteAddr.port());
-	//addrAttr->setIP(request.remoteAddr.host());
+	//addrAttr->setPort(request.remoteAddress.port());
+	//addrAttr->setIP(request.remoteAddress.host());
 	response.add(addrAttr);
   
-	request.socket.send(response, request.remoteAddr);
+	//request.socket->sendPacket(response, request.remoteAddress);
+	respond(request, response);
 }
 
 
@@ -462,7 +417,7 @@ void Server::handleAllocateRequest(Request& request)
 		return;
 	}
 
-	FiveTuple tuple(request.remoteAddr, request.localAddress, protocol == 17 ? net::UDP : net::TCP);
+	FiveTuple tuple(request.remoteAddress, request.localAddress, protocol == 17 ? net::UDP : net::TCP);
 	if (getAllocation(tuple))  {
 		ErrorL << "Allocation already exists for 5tuple: " << tuple << endl;
 		respondError(request, 437, "Allocation Mismatch");
@@ -633,9 +588,9 @@ void Server::handleAllocateRequest(Request& request)
 
 		//net::TCPSocket& socket = static_cast<net::TCPSocket&>(request.socket);  
 		//static_cast<net::TCPSocket&>(request.socket)
-		//assert(request.socket.base().refCount() == 1);
-		allocation = new TCPAllocation(*this, request.socket, tuple, username, lifetime);
-		//assert(request.socket.base().refCount() == 2);
+		//assert(request.socket->/*base().*/refCount() == 1);
+		allocation = new TCPAllocation(*this, getTCPSocket(request.remoteAddress), tuple, username, lifetime); //request.socket
+		//assert(request.socket->/*base().*/refCount() == 2);
 	} 
 
 	// Once the allocation is created, the server replies with a success
@@ -678,10 +633,10 @@ void Server::handleAllocateRequest(Request& request)
 	//    can thus avoid having to do an extra Binding transaction with some
 	//    STUN server to learn it. 
 	auto mappedAddressAttr = new stun::XorMappedAddress;
-	mappedAddressAttr->setAddress(request.remoteAddr);
+	mappedAddressAttr->setAddress(request.remoteAddress);
 	//mappedAddressAttr->setFamily(1);
-	//mappedAddressAttr->setIP(request.remoteAddr.host());
-	//mappedAddressAttr->setPort(request.remoteAddr.port());
+	//mappedAddressAttr->setIP(request.remoteAddress.host());
+	//mappedAddressAttr->setPort(request.remoteAddress.port());
 	response.add(mappedAddressAttr);
 		
 	TraceL << "Allocate response: " 
@@ -696,8 +651,8 @@ void Server::handleAllocateRequest(Request& request)
 	
 	// The response (either success or error) is sent back to the client on
 	// the 5-tuple.
-	//request.socket.send(response, request.remoteAddr);
-	respondSuccess(request, response);
+	//request.socket->send(response, request.remoteAddress);
+	respond(request, response);
 
 	TraceL << "Handle Allocate request: OK" << endl;
 
@@ -737,7 +692,7 @@ void Server::handleAllocateRequest(Request& request)
 }
 
 
-void Server::respondSuccess(Request& request, stun::Message& response)
+void Server::respond(Request& request, stun::Message& response)
 {	
 	// Sign the response message
 	if (!request.hash.empty()) {
@@ -746,9 +701,23 @@ void Server::respondSuccess(Request& request, stun::Message& response)
 		response.add(integrityAttr);
 	}
 	
-	// The response (either success or error) is sent back to the client on
-	// the 5-tuple.
-	request.socket.send(response, request.remoteAddr);
+	InfoL << "Sending message: " << response << ": " << request.remoteAddress << endl;
+	
+	// The response (either success or error) is sent back to the
+	// client on the 5-tuple.
+	switch (request.transport) {
+		case net::UDP:
+			_udpSocket.sendPacket(response, request.remoteAddress);
+			break;
+		case net::TCP:
+		case net::SSLTCP:
+			auto socket = getTCPSocket(request.remoteAddress);
+			if (!socket) {
+				return;
+			}
+			socket->sendPacket(response);
+			break;
+	}
 }
 				   
 void Server::respondError(Request& request, int errorCode, const char* errorDesc) 
@@ -783,7 +752,8 @@ void Server::respondError(Request& request, int errorCode, const char* errorDesc
 	errorMsg.add(errorCodeAttr);
 	assert(errorCode == errorCodeAttr->errorCode());
 	
-	request.socket.send(errorMsg, request.remoteAddr);
+	//request.socket->sendPacket(errorMsg, request.remoteAddress);
+	respond(request, errorMsg);
 }
 
 	
@@ -918,14 +888,6 @@ void Server::onPacketReceived(void* sender, stun::Message& message)
 }
 */
 
-	/*
-	for (auto it = _tcpSockets.begin(); it != _tcpSockets.end();) { //::Ptr ++it
-		TraceL << "Stopping: Clearing TCP socket: " 
-			<< (*it).base().handle() << ": " << (*it).base().refCount() << endl;	
-		assert((*it).base().refCount() == 1);
-		it = _tcpSockets.erase(it);
-	}
-	*/
 /*
 Net::Reactor& Server::reactor()
 {
@@ -940,21 +902,3 @@ Runner& Server::runner()
 	return _runner;
 }
 */
-
-	/*
-	 //Poco::Net::StreamSocket& sock, Net::Reactor& reactor
-	sockets.push_back(sock);
-	SocketT& socket = sockets.back(); //::Ptr
-	TraceLS(this) << "On Accept: " << &socket.base() << std::endl;
-	socket.Recv += delegate(this, &UVEchoServer::onRecv);
-	socket.Error += delegate(this, &UVEchoServer::onError);
-	socket.Close += delegate(this, &UVEchoServer::onClose);
-
-	socket->Closed += delegate(this, &Server::onTCPConnectionClosed, -1);
-
-	TCPSocketBase* socket = new TCPSocketBase(sock, reactor); //, reactor()
-	socket->setDeleteOnClose(true);
-	socket->registerPacketType<stun::Message>(1);
-	socket->attach(packetDelegate(this, &Server::onPacketReceived));
-	//socket->Closed += delegate(this, &Server::onTCPConnectionClosed, -1); // lowest priority
-	*/

@@ -110,8 +110,8 @@ void PackageManager::queryRemotePackages()
 		throw std::runtime_error("Cannot load packages while tasks are active.");	
 
 	try {
-		auto conn = http::createConnection(_options.endpoint + _options.indexURI);
-		conn->Complete += delegate(this, &PackageManager::onPackageQueryResponse);		
+		auto conn = http::Client::instance().createConnection(_options.endpoint + _options.indexURI);
+		conn->Complete += sdelegate(this, &PackageManager::onPackageQueryResponse);		
 		conn->request().setMethod("GET");
 		conn->request().setKeepAlive(false);
 		conn->setReadStream(new std::stringstream);
@@ -161,8 +161,6 @@ void PackageManager::onPackageQueryResponse(void* sender, const http::Response& 
 	}
 
 	RemotePackageResponse.emit(this, response);
-
-	conn->close();
 }
 
 
@@ -255,7 +253,7 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 //	Package installation methods
 //
 
-InstallTask* PackageManager::installPackage(const std::string& name, const InstallOptions& options) //, bool whiny
+InstallTask::Ptr PackageManager::installPackage(const std::string& name, const InstallOptions& options) //, bool whiny
 {	
 	DebugL << "Install package: " << name << endl;	
 
@@ -266,8 +264,6 @@ InstallTask* PackageManager::installPackage(const std::string& name, const Insta
 
 	// Get the asset to install or throw
 	PackagePair pair = getOrCreatePackagePair(name);	
-	
-		
 
 	// Get the asset to install or return a nullptr
 	InstallOptions opts(options);
@@ -285,8 +281,6 @@ InstallTask* PackageManager::installPackage(const std::string& name, const Insta
 		WarnL << "No installable assets: " << exc.what() << endl;
 		return nullptr;
 	}
-	
-		
 
 	return createInstallTask(pair, opts);	
 }
@@ -462,7 +456,7 @@ bool PackageManager::installPackages(const StringVec& ids, const InstallOptions&
 }
 
 
-InstallTask* PackageManager::updatePackage(const std::string& name, const InstallOptions& options)
+InstallTask::Ptr PackageManager::updatePackage(const std::string& name, const InstallOptions& options)
 {	
 	// An update action is essentially the same as an install action,
 	// except we make sure local package exists before continuing.
@@ -519,7 +513,7 @@ bool PackageManager::updateAllPackages(bool whiny)
 
 bool PackageManager::uninstallPackage(const std::string& id, bool whiny)
 {
-	DebugL << "uninstall: " << id << endl;	
+	DebugL << "Uninstalling: " << id << endl;	
 	
 	try {
 		LocalPackage* package = localPackages().get(id, true);
@@ -529,7 +523,7 @@ bool PackageManager::uninstallPackage(const std::string& id, bool whiny)
 			LocalPackage::Manifest manifest = package->manifest();
 			if (!manifest.empty()) {
 				for (auto it = manifest.root.begin(); it != manifest.root.end(); it++) {
-					DebugL << "delete file: " << (*it).asString() << endl;	
+					DebugL << "Delete file: " << (*it).asString() << endl;	
 					try {							
 						//Poco::File file(package->getInstalledFilePath((*it).asString()));
 						//file.remove();						
@@ -542,18 +536,18 @@ bool PackageManager::uninstallPackage(const std::string& id, bool whiny)
 				manifest.root.clear();
 			}	
 			else {
-				DebugL << "uninstall: empty package manifest: " << id << endl;	
+				DebugL << "Uninstall: Empty package manifest: " << id << endl;	
 			}	
 	
 			// Delete package manifest file
 			std::string path(options().interDir);
 			fs::addnode(path, package->id() + ".json"); // manifest_
 			
-			DebugL << "delete manifest: " << path << endl;	
+			DebugL << "Delete manifest: " << path << endl;	
 			fs::unlink(path);
 		}
 		catch (std::exception& exc) {
-			ErrorL << "nonfatal uninstall error: " << exc.what() << endl;
+			ErrorL << "Nonfatal uninstall error: " << exc.what() << endl;
 			// Swallow and continue...
 		}
 
@@ -591,7 +585,7 @@ bool PackageManager::uninstallPackages(const StringVec& ids, bool whiny)
 }
 
 
-InstallTask* PackageManager::createInstallTask(PackagePair& pair, const InstallOptions& options) //const std::string& name, InstallMonitor* monitor)
+InstallTask::Ptr PackageManager::createInstallTask(PackagePair& pair, const InstallOptions& options) //const std::string& name, InstallMonitor* monitor)
 {	
 	InfoL << "Create install task: " << pair.name() << endl;	
 
@@ -599,8 +593,8 @@ InstallTask* PackageManager::createInstallTask(PackagePair& pair, const InstallO
 	if (getInstallTask(pair.remote->id()))
 		throw std::runtime_error(pair.remote->name() + " is already installing.");
 
-	auto task = new InstallTask(*this, pair.local, pair.remote, options);
-	task->Complete += delegate(this, &PackageManager::onPackageInstallComplete, -1); // lowest priority to remove task
+	auto task = std::make_shared<InstallTask>(*this, pair.local, pair.remote, options);
+	task->Complete += sdelegate(this, &PackageManager::onPackageInstallComplete, -1); // lowest priority to remove task
 	{
 		Mutex::ScopedLock lock(_mutex);
 		_tasks.push_back(task);
@@ -693,7 +687,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 	{
 		Mutex::ScopedLock lock(_mutex);
 		for (auto it = _tasks.begin(); it != _tasks.end(); it++) {
-			if (*it == task) {
+			if (it->get() == task) {
 				_tasks.erase(it);
 				break;
 			}
@@ -708,7 +702,7 @@ void PackageManager::onPackageInstallComplete(void* sender)
 // Task helper methods
 //
 
-InstallTask* PackageManager::getInstallTask(const std::string& id) const
+InstallTask::Ptr PackageManager::getInstallTask(const std::string& id) const
 {
 	Mutex::ScopedLock lock(_mutex);
 	for (auto it = _tasks.begin(); it != _tasks.end(); it++) {
@@ -719,7 +713,7 @@ InstallTask* PackageManager::getInstallTask(const std::string& id) const
 }
 
 
-InstallTaskVec PackageManager::tasks() const
+InstallTaskPtrVec PackageManager::tasks() const
 {
 	Mutex::ScopedLock lock(_mutex);
 	return _tasks;

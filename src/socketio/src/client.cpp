@@ -38,12 +38,12 @@ namespace sockio {
 
 Client* createTCPClient(uv::Loop* loop)
 {
-	return new Client(new net::TCPBase(loop)); //, loop
+	return new Client(std::make_shared<net::TCPSocket>(loop)); //, loop
 }
 
 
 TCPClient::TCPClient(uv::Loop* loop) :
-	Client(new net::TCPBase(loop)) //, loop
+	Client(std::make_shared<net::TCPSocket>(loop)) //, loop
 {
 }
 
@@ -55,39 +55,46 @@ TCPClient::TCPClient(uv::Loop* loop) :
 
 Client* createSSLClient(uv::Loop* loop)
 {
-	return new Client(new net::SSLBase(loop)); //, loop);
+	return new Client(std::make_shared<net::SSLSocket>(loop)); //, loop);
 }
 
 
 SSLClient::SSLClient(uv::Loop* loop) :
-	Client(new net::SSLBase(loop)) //, loop)
+	Client(std::make_shared<net::SSLSocket>(loop)) //, loop)
 {
 }
 
 
-Client::Client(net::SocketBase* socket) : //, uv::Loop* loop
+Client::Client(const net::Socket::Ptr& socket) : //, uv::Loop* loop
+	//net::SocketAdapter(nullptr, this),
 	_timer(socket->loop()),
-	_socket(socket),
+	_ws(socket),
 	//_loop(loop),
 	_wasOnline(false)
 {
+	_ws.addReceiver(this);
 }
 
 
-Client::Client(net::SocketBase* socket, const std::string& host, UInt16 port) : //, uv::Loop* loop
+Client::Client(const net::Socket::Ptr& socket, const std::string& host, UInt16 port) : //, uv::Loop* loop
+	//net::SocketAdapter(nullptr, this),
 	_timer(socket->loop()),
 	_host(host),
 	_port(port),
-	_socket(socket),
+	_ws(socket),
 	//_loop(loop),
 	_wasOnline(false)
 {
+	_ws.addReceiver(this);
 }
 
 
 Client::~Client() 
 {
-	//close();
+	_ws.removeReceiver(this);
+	//_ws.remove(this);
+	//_ws.adapter = nullptr;
+	close();
 	//reset();
 }
 
@@ -113,11 +120,11 @@ void Client::connect()
 	reset();
 		
 	setState(this, ClientState::Connecting);
-
-	_socket.Connect += delegate(this, &Client::onSocketConnect);
-	_socket.Recv += delegate(this, &Client::onSocketRecv);
-	_socket.Error += delegate(this, &Client::onSocketError);
-	_socket.Close += delegate(this, &Client::onSocketClose);
+	
+	//_ws.Connect += sdelegate(this, &Client::onSocketConnect);
+	//_ws.Recv += sdelegate(this, &Client::onSocketRecv);
+	//_ws.Error += sdelegate(this, &Client::onSocketError);
+	//_ws.Close += sdelegate(this, &Client::onSocketClose);
 	
 	sendHandshakeRequest();
 }
@@ -126,6 +133,9 @@ void Client::connect()
 void Client::close()
 {			
 	TraceL << "Closing" << endl;
+	if (_sessionID.empty())
+		return;
+
 	reset();
 	onClose();
 	TraceL << "Closing: OK" << endl;	
@@ -139,17 +149,17 @@ void Client::sendHandshakeRequest()
 	TraceL << "Send handshake request" << endl;	
 	
 	std::ostringstream url;
-	url << (_socket.transport() == net::SSLTCP ? "https://" : "http://")
+	url << (_ws.socket->transport() == net::SSLTCP ? "https://" : "http://")
 		<< _host << ":" << _port
 		<< "/socket.io/1/";
 
 	//http::URL url(
-	//	_socket.transport() == net::SSLTCP ? "https" : "http", 
+	//	_ws.socket->transport() == net::SSLTCP ? "https" : "http", 
 	//	_endpoint, "/socket.io/1/websocket/");
 	//assert(url.valid());
 	
-	auto conn = http::createConnection(url.str());
-	conn->Complete += delegate(this, &Client::onHandshakeResponse);
+	auto conn = http::Client::instance().createConnection(url.str());
+	conn->Complete += sdelegate(this, &Client::onHandshakeResponse);
 	conn->setReadStream(new std::stringstream);
 	conn->request().setMethod("POST");
 	conn->request().setKeepAlive(false);
@@ -216,19 +226,21 @@ void Client::onHandshakeResponse(void* sender, const http::Response& response)
 	
 	/*
 	ostringstream url;
-	url << (_socket.transport() == net::SSLTCP ? "wss://" : "ws://")
+	url << (_ws.socket->transport() == net::SSLTCP ? "wss://" : "ws://")
 		<< _host << ":" << _port << "/socket.io/1/websocket/" 
 		<< _sessionID;
 	
-	_socket.request().setURI(url.str());
+	_ws.socket->request().setURI(url.str());
 	*/
-	_socket.request().setURI("/socket.io/1/websocket/" + _sessionID);
-	_socket.request().setHost(_host, _port);
-	_socket.connect(_host, _port);
+	//_ws.setRecvAdapter(this);
+	//_ws.adapter = this;
+	_ws.request().setURI("/socket.io/1/websocket/" + _sessionID);
+	_ws.request().setHost(_host, _port);
+	_ws.socket->connect(_host, _port);
 }
 	
 	//TraceL << "Connecting: " << uri.str() << endl;	
-	//_socket.request().setHost("localhost");
+	//_ws.socket->request().setHost("localhost");
 
 
 int Client::sendConnect(const std::string& endpoint, const std::string& query)
@@ -248,7 +260,7 @@ int Client::sendConnect(const std::string& endpoint, const std::string& query)
 		out += "/" + endpoint;
 	if (!query.empty())
 		out += "?" + query;
-	return socket().send(out.c_str(), out.size());
+	return _ws.send(out.c_str(), out.size());
 }
 
 
@@ -270,14 +282,14 @@ int Client::send(const json::Value& data, bool ack)
 {
 	Packet packet(data, ack);
 
-	TraceL << "Sending message: " << packet.toString() << endl;
+	//TraceL << "Sending message: " << packet.toString() << endl;
 	return send(packet);
 }
 
 
 int Client::send(const sockio::Packet& packet)
 {
-	return socket().send(packet);
+	return _ws.sendPacket(packet);
 }
 
 
@@ -296,8 +308,8 @@ Transaction* Client::createTransaction(const sockio::Packet& request, long timeo
 
 int Client::sendHeartbeat()
 {
-	TraceL << "Sending heartbeat" << endl;
-	return socket().send("2::", 3);
+	//TraceL << "Sending heartbeat" << endl;
+	return _ws.send("2::", 3);
 }
 
 
@@ -308,14 +320,14 @@ void Client::reset()
 	// Note: Only reset session related variables here.
 	// Do not reset host and port variables.
 
-	_timer.Timeout -= delegate(this, &Client::onHeartBeatTimer);
+	_timer.Timeout -= sdelegate(this, &Client::onHeartBeatTimer);
 	_timer.stop();	
 
-	_socket.Connect -= delegate(this, &Client::onSocketConnect);
-	_socket.Recv -= delegate(this, &Client::onSocketRecv);
-	_socket.Error -= delegate(this, &Client::onSocketError);
-	_socket.Close -= delegate(this, &Client::onSocketClose);
-	_socket.close();	
+	//_ws.socket->Connect -= sdelegate(this, &Client::onSocketConnect);
+	//_ws.socket->Recv -= sdelegate(this, &Client::onSocketRecv);
+	//_ws.socket->Error -= sdelegate(this, &Client::onSocketError);
+	//_ws.socket->Close -= sdelegate(this, &Client::onSocketClose);
+	_ws.socket->close();	
 		
 	_sessionID = "";	
 	_heartBeatTimeout = 0;
@@ -327,7 +339,7 @@ void Client::reset()
 }
 
 
-void Client::setError(const Error& error)
+void Client::setError(const scy::Error& error)
 {
 	ErrorL << "Set error: " << error.message << std::endl;
 	
@@ -353,7 +365,7 @@ void Client::onConnect()
 	// Start the heartbeat timer
 	assert(_heartBeatTimeout);
 	int interval = static_cast<int>(_heartBeatTimeout * .75) * 1000;
-	_timer.Timeout += delegate(this, &Client::onHeartBeatTimer);
+	_timer.Timeout += sdelegate(this, &Client::onHeartBeatTimer);
 	_timer.start(interval, interval);
 }
 
@@ -375,7 +387,10 @@ void Client::onClose()
 }
 
 
-void Client::onSocketConnect(void*)
+//
+// Socket Callbacks
+
+void Client::onSocketConnect()
 {
 	// Start 
 	onConnect();
@@ -385,7 +400,7 @@ void Client::onSocketConnect(void*)
 }
 
 
-void Client::onSocketError(void*, const Error& error)
+void Client::onSocketError(const scy::Error& error)
 {
 	TraceL << "On socket error: " << error.message << endl;
 		
@@ -393,7 +408,7 @@ void Client::onSocketError(void*, const Error& error)
 }
 
 
-void Client::onSocketClose(void*)
+void Client::onSocketClose()
 {
 	TraceL << "On socket close" << endl;
 
@@ -405,29 +420,29 @@ void Client::onSocketClose(void*)
 }
 
 
-void Client::onSocketRecv(void*, net::SocketPacket& packet)
+void Client::onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress)
 {	
-	TraceL << "On socket recv: " << packet.size() << endl;
+	TraceL << "On socket recv: " << buffer.size() << endl;
 		
 	sockio::Packet pkt;
-	char* buf = packet.data();
-	std::size_t len = packet.size();
+	char* buf = bufferCast<char*>(buffer);
+	std::size_t len = buffer.size();
 	std::size_t nread = 0;
 	while (len > 0 && (nread = pkt.read(constBuffer(buf, len))) > 0) {
 		onPacket(pkt);
 		buf += nread;
 		len -= nread;
 	}
-	if (len == packet.size())
+	if (len == buffer.size())
 		WarnL << "Failed to parse incoming SocketIO packet." << endl;	
 
-	/*
+#if 0
 	sockio::Packet pkt;
 	if (pkt.read(constBuffer(packet.data(), packet.size())))
 		onPacket(pkt);
 	else
 		WarnL << "Failed to parse incoming SocketIO packet." << endl;	
-		*/
+#endif
 }
 
 
@@ -458,10 +473,10 @@ void Client::onHeartBeatTimer(void*)
 }
 
 
-http::WebSocket& Client::socket()
+http::ws::WebSocket& Client::ws()
 {
 	//Mutex::ScopedLock lock(_mutex);
-	return _socket;
+	return _ws;
 }
 
 
@@ -476,7 +491,7 @@ Error Client::error() const
 {
 	//Mutex::ScopedLock lock(_mutex);
 	return _error;
-	//return _socket.error();
+	//return _ws.socket->error();
 }
 
 
@@ -522,8 +537,8 @@ std::string& Client::endpoint()
 	/*
 	TraceL << "%%%%%%%%%%%%%% Sending Handshake" << endl;	
 
-	conn->Headers += delegate(this, &Client::onStandaloneHTTPClientConnectionHeaders);
-	conn->Complete += delegate(this, &Client::onStandaloneHTTPClientConnectionComplete);
+	conn->Headers += sdelegate(this, &Client::onStandaloneHTTPClientConnectionHeaders);
+	conn->Complete += sdelegate(this, &Client::onStandaloneHTTPClientConnectionComplete);
 	http::Request* request = new http::Request("POST", uri.str());	
 	http::Response response;
 	assert(0);
@@ -590,7 +605,7 @@ net::Address Client::serverAddr() const
 		/*
 		Timer::getDefault().stop(TimerCallback<Client>(this, &Client::onHeartBeatTimer));
 		if (_timer) {
-			_timer.Timeout -= delegate(this, &Client::onHeartBeatTimer);
+			_timer.Timeout -= sdelegate(this, &Client::onHeartBeatTimer);
 			_timer.destroy();	
 			_timer = NULL;
 		}
@@ -614,7 +629,7 @@ void Client::onHeartBeatTimer(TimerCallback<Socket>&)
 /*
 
 
-	//_socket.registerPacketType<sockio::Packet>(10);
+	//_ws.socket->registerPacketType<sockio::Packet>(10);
 
 void Client::onError() 
 {
@@ -623,8 +638,8 @@ void Client::onError()
 */
 
 	
-	//if (!_socket) {
-	//	_socket = createSocket();
+	//if (!_ws) {
+	//	_ws = createSocket();
 	//}
 
 	//if (!isError()) {
@@ -632,16 +647,16 @@ void Client::onError()
 		//Timer::getDefault().stop(TimerCallback<SocketBase>(this, &SocketBase::onHeartBeatTimer));
 	//}	
 	
-	//if (_socket) {
-		//delete _socket;
-		//_socket = NULL;
+	//if (_ws) {
+		//delete _ws;
+		//_ws = NULL;
 	//}
 
-	//if (!_socket)
+	//if (!_ws)
 	//	throw std::runtime_error("The SocketIO WebSocket pointer is NULL.");
 
 	//std::string uri("http://" + _serverAddr.toString() + "/socket.io/1/");	
-	//if (_socket.transport() == Net::SSLTCP)
+	//if (_ws.socket->transport() == Net::SSLTCP)
 	//	uri.setScheme("https");	
 	//std::string uri("ws://" + _serverAddr.toString() + "/socket.io/1/");	
 	//if (socket.transport() == Net::SSLTCP)
@@ -881,10 +896,10 @@ void Client::onError()
 //}
 //
 //
-//http::WebSocket* SocketBase::socket()
+//http::ws::WebSocket* SocketBase::socket()
 //{
 //	Mutex::ScopedLock lock(_mutex);
-//	return _socket;
+//	return _ws;
 //}
 //
 //

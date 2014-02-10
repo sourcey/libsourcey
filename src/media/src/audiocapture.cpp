@@ -188,7 +188,7 @@ bool AudioCapture::detach(const PacketDelegateBase& delegate)
 int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer, unsigned int nBufferFrames,
 	double /* streamTime */, RtAudioStreamStatus status, void* data)
 {
-	AudioCapture* klass = (AudioCapture*)data;
+	AudioCapture* self = (AudioCapture*)data;
 	AudioPacket packet;
 	
 	if (status) 
@@ -201,10 +201,10 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer, uns
 	} 
 
 	{
-		Mutex::ScopedLock lock(klass->_mutex);
+		Mutex::ScopedLock lock(self->_mutex);
 
 		int size = 2;
-		RtAudioFormat format = klass->_format;
+		RtAudioFormat format = self->_format;
 		//  8-bit signed integer.
 		if (format == RTAUDIO_SINT8)
 			size = 1;
@@ -225,7 +225,7 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer, uns
 			size = 8;
 		else assert(0 && "unknown audio capture format");
 
-		packet.setData((char*)inputBuffer, nBufferFrames * klass->_channels * size);
+		packet.setData((char*)inputBuffer, nBufferFrames * self->_channels * size);
 	}
 
 	/*
@@ -242,8 +242,9 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer, uns
 	//	<< "\n\tPacket Size: " << packet.size() 
 	//	<< "\n\tStream Time: " << packet.time
 	//	<< endl;
-
-	klass->emit(packet);
+	
+	TraceLS(self) << "Emitting: " << packet.time << std::endl;
+	self->emit(packet);
 	return 0;
 }
 

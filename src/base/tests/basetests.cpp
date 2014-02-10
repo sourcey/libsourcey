@@ -80,6 +80,7 @@ public:
 
 	Tests(Application& app) : app(app)
 	{	
+		testSignal();
 #if 0
 		testBuffer();
 		testHandle();
@@ -105,8 +106,8 @@ public:
 		runGarbageCollectorTests();
 		runSignalReceivers();
 		testIPC();
-#endif
 		testMultiPacketStream();
+#endif
 		
 		//scy::pause();
 	}
@@ -225,7 +226,33 @@ public:
 		}
 		assert(TestObj::count() == 0);
 	}
+		
+	
+	// ============================================================================
+	// Signal Test
+	//
+	Signal<int&> TestSignal;
 
+	void testSignal()
+	{
+		int val = 0;
+		TestSignal += sdelegate(this, &Tests::testSignalCallback);
+		TestSignal += delegate(this, &Tests::testSignalCallbackNoSender);
+		TestSignal.emit(this, val);
+		assert(val == 2);
+	}
+
+	void testSignalCallback(void* sender, int& val) 
+	{
+		assert(sender == this);
+		val++;
+	}
+
+	void testSignalCallbackNoSender(int& val) 
+	{
+		val++;
+	}
+	
 
 	// ============================================================================
 	// Collection Test
@@ -550,7 +577,7 @@ public:
 	{
 		cout << "Starting" << endl;
 		Timer timer;
-		timer.Timeout += delegate(this, &Tests::timerCallback);
+		//timer.Timeout += sdelegate(this, &Tests::timerCallback);
 		timer.start(10, 10);
 
 		timerRestarted = false;
@@ -696,7 +723,7 @@ public:
 		stream.attach(new TestPacketProcessor, 1, true);
 		//stream.attach(new SyncPacketQueue, 2, true);
 		stream.synchronizeOutput(uv::defaultLoop());
-		stream.emitter += packetDelegate(this, &Tests::onPacketStreamOutput);	
+		//stream.emitter += packetDelegate(this, &Tests::onPacketStreamOutput);	
 		stream.start();
 
 		// TODO: Test pause/resume functionality
@@ -745,21 +772,21 @@ public:
 		children.s1->attach(new AsyncPacketQueue, 0, true);
 		children.s1->attach(new SyncPacketQueue, 1, true);
 		children.s1->synchronizeOutput(uv::defaultLoop());
-		children.s1->emitter += packetDelegate(this, &Tests::onChildPacketStreamOutput);	
+		//children.s1->emitter += packetDelegate(this, &Tests::onChildPacketStreamOutput);	
 		children.s1->start();
 
 		children.s2 = new PacketStream;
 		children.s2->attachSource(stream.emitter);
 		children.s2->attach(new AsyncPacketQueue, 0, true);
 		children.s2->synchronizeOutput(uv::defaultLoop());
-		children.s2->emitter += packetDelegate(this, &Tests::onChildPacketStreamOutput);	
+		//children.s2->emitter += packetDelegate(this, &Tests::onChildPacketStreamOutput);	
 		children.s2->start();
 		
 		children.s3 = new PacketStream;
 		children.s3->attachSource(stream.emitter);
 		children.s3->attach(new AsyncPacketQueue, 0, true);
 		//children.s3->synchronizeOutput(uv::defaultLoop());
-		children.s3->emitter += packetDelegate(this, &Tests::onChildPacketStreamOutput);	
+		//children.s3->emitter += packetDelegate(this, &Tests::onChildPacketStreamOutput);	
 		children.s3->start();
 					
 		app.waitForShutdown([](void* arg) {
@@ -830,7 +857,7 @@ public:
 	{
 		TraceL << "Running Timer Task Test" << endl;
 		TimerTask* task = new TimerTask(runner, 1000, 1000);
-		task->Timeout += delegate(this, &Tests::onTimerTask);
+		task->Timeout += sdelegate(this, &Tests::onTimerTask);
 		task->start();
 		ready.wait();
 		ready.wait();
@@ -857,13 +884,13 @@ public:
 		SignalReceiver(SignalBroadcaster& klass) : klass(klass)
 		{
 			DebugL << "SignalReceiver: Starting" << endl;
-			klass.TestSignal += delegate(this, &SignalReceiver::onSignal);
+			klass.TestSignal += sdelegate(this, &SignalReceiver::onSignal);
 		}
 
 		~SignalReceiver()
 		{
 			DebugL << "SignalReceiver: Destroying" << endl;	
-			klass.TestSignal -= delegate(this, &SignalReceiver::onSignal);
+			klass.TestSignal -= sdelegate(this, &SignalReceiver::onSignal);
 		}
 
 		void onSignal(void*, int& value)

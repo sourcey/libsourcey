@@ -24,7 +24,7 @@ namespace scy {
 namespace smpl {
 
 	
-#define SERVER_HOST "anionu.com" //"localhost" 
+#define SERVER_HOST "localhost" //"anionu.com" //
 #define USE_SSL     1
 #if USE_SSL
 #define SERVER_PORT 443
@@ -36,12 +36,6 @@ namespace smpl {
 // ----------------------------------------------------------------------------
 // SocketIO Client Test
 //		
-// TODO: 
-//  - Obtain authentication token
-//  - Transaction test
-//  - Presence test
-//  - Ack test
-//  - Benchmarks
 class Tests
 {
 	Application app;
@@ -49,7 +43,16 @@ class Tests
 public:
 	Tests()
 	{	
+		// TODO: 
+		//  - Obtain authentication token
+		//  - Transaction test
+		//  - Presence test
+		//  - Ack test
+		//  - Benchmarks
+		testClient();
+#if 0
 		testAddress();
+#endif
 	}
 
 	~Tests()
@@ -116,19 +119,21 @@ public:
 		smpl::TCPClient client(options); //reactor, runner, 
 #endif
 		
-		client.StateChange += delegate(this, &Tests::onClientStateChange);
-		client.CreatePresence += delegate(this, &Tests::onCreatePresence);
+		client.StateChange += sdelegate(this, &Tests::onClientStateChange);
+		client.CreatePresence += sdelegate(this, &Tests::onCreatePresence);
 		client.connect();
 
-		//app.run();
-		app.waitForShutdown();
+		app.waitForShutdown([](void* opaque) {
+			reinterpret_cast<smpl::Client*>(opaque)->close();
+		}, &client);
+
 		DebugL << "Event loop ended" << endl;
 	}
 
 	void onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState) 
 	{
 		smpl::Client* client = reinterpret_cast<smpl::Client*>(sender);	
-		DebugL << "Client state changed: " << state.toString() << ": " << client->socket().address() << endl;
+		DebugL << "Client state changed: " << state << ": " << client->ws().socket->address() << endl;
 		
 		switch (state.id()) {
 		case sockio::ClientState::Connecting:
@@ -163,10 +168,10 @@ int main(int argc, char** argv)
 	Logger::instance().add(new ConsoleChannel("debug", LTrace));
 	
 #if USE_SSL
-		// Init SSL Context
-		SSLContext::Ptr ptrContext = new SSLContext(SSLContext::CLIENT_USE, "", "", "",
-			SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");	
-		SSLManager::instance().initializeClient(ptrContext);
+	// Init SSL Context
+	SSLContext::Ptr ptrContext = new SSLContext(SSLContext::CLIENT_USE, "", "", "",
+		SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");	
+	SSLManager::instance().initializeClient(ptrContext);
 #endif	
 
 	{
@@ -174,7 +179,7 @@ int main(int argc, char** argv)
 	}		
 		
 #if USE_SSL
-		SSLManager::instance().shutdown();
+	SSLManager::instance().shutdown();
 #endif	
 	Logger::shutdown();
 	return 0;

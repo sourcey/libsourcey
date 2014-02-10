@@ -344,10 +344,11 @@ public:
 	static const UInt16 TypeID = 0x0008;
 	static const UInt16 Size = 20;
 
+	bool verifyHmac(const std::string& key) const;
+	
+	std::string input() const { return _input; }
 	std::string hmac() const { return _hmac; }
 	std::string key() const { return _key; }
-
-	bool verifyHmac(const std::string& key) const;
 
 	void setInput(const std::string& input) { _input = input; }
 	void setHmac(const std::string& hmac) { _hmac = hmac; }

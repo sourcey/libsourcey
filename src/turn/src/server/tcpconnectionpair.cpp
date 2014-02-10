@@ -45,19 +45,19 @@ TCPConnectionPair::~TCPConnectionPair()
 {		
 	TraceLS(this) << "Destroy: " << connectionID << endl;	
 
-	if (!client.isNull()) {
-		//assert(client.base().refCount() == 2);
-		client.Recv -= delegate(this, &TCPConnectionPair::onClientDataReceived);
-		client.Close -= delegate(this, &TCPConnectionPair::onConnectionClosed);
-		client.close();
+	if (client) {
+		//assert(client->base().refCount() == 2);
+		client->Recv -= sdelegate(this, &TCPConnectionPair::onClientDataReceived);
+		client->Close -= sdelegate(this, &TCPConnectionPair::onConnectionClosed);
+		client->close();
 	}
-	if (!peer.isNull()) {		
-		//assert(peer.base().refCount() == 1);
-		peer.Recv -= delegate(this, &TCPConnectionPair::onPeerDataReceived);
-		peer.Connect -= delegate(this, &TCPConnectionPair::onPeerConnectSuccess);
-		peer.Error -= delegate(this, &TCPConnectionPair::onPeerConnectError);
-		peer.Close -= delegate(this, &TCPConnectionPair::onConnectionClosed);
-		peer.close();
+	if (peer) {		
+		//assert(peer->base().refCount() == 1);
+		peer->Recv -= sdelegate(this, &TCPConnectionPair::onPeerDataReceived);
+		peer->Connect -= sdelegate(this, &TCPConnectionPair::onPeerConnectSuccess);
+		peer->Error -= sdelegate(this, &TCPConnectionPair::onPeerConnectError);
+		peer->Close -= sdelegate(this, &TCPConnectionPair::onConnectionClosed);
+		peer->close();
 	}
 
 	assert(allocation.pairs().exists(connectionID));
@@ -69,18 +69,18 @@ bool TCPConnectionPair::doPeerConnect(const net::Address& peerAddr)
 {	
 	try {
 		assert(!transactionID.empty());
-		peer.assign(new net::TCPBase, false);
-		peer.base().opaque = this;
-		peer.Close += delegate(this, &TCPConnectionPair::onConnectionClosed);
+		peer = std::make_shared<net::TCPSocket>();
+		peer->opaque = this;
+		peer->Close += sdelegate(this, &TCPConnectionPair::onConnectionClosed);
 
 		// Start receiving early media
-		peer.Recv += delegate(this, &TCPConnectionPair::onPeerDataReceived);
+		peer->Recv += sdelegate(this, &TCPConnectionPair::onPeerDataReceived);
 
 		// Connect request specific events
-		peer.Connect += delegate(this, &TCPConnectionPair::onPeerConnectSuccess);
-		peer.Error += delegate(this, &TCPConnectionPair::onPeerConnectError);
+		peer->Connect += sdelegate(this, &TCPConnectionPair::onPeerConnectSuccess);
+		peer->Error += sdelegate(this, &TCPConnectionPair::onPeerConnectError);
 	
-		client.connect(peerAddr);
+		client->connect(peerAddr);
 	} 
 	catch (std::exception& exc) {
 		ErrorLS(this) << "Peer connect error: " << exc.what() << endl;
@@ -91,54 +91,54 @@ bool TCPConnectionPair::doPeerConnect(const net::Address& peerAddr)
 }
 
 
-void TCPConnectionPair::setPeerSocket(const net::TCPSocket& socket)
+void TCPConnectionPair::setPeerSocket(const net::TCPSocket::Ptr& socket)
 {	
 	TraceLS(this) << "Set peer socket: " 
-		<< connectionID << ": " << socket.peerAddress() 
-		<< ": " << socket.base().refCount() << endl;	
+		<< connectionID << ": " << socket->peerAddress() << endl;	
+		//<< ": " << socket./*base().*/refCount() 
 
-	assert(peer.isNull());
-	//assert(socket.base().refCount() == 1);
+	assert(peer == nullptr);
+	//assert(socket./*base().*/refCount() == 1);
 	peer = socket;
-	peer.Close += delegate(this, &TCPConnectionPair::onConnectionClosed);
+	peer->Close += sdelegate(this, &TCPConnectionPair::onConnectionClosed);
 	
 	// Receive and buffer early media from peer
-	peer.Recv += delegate(this, &TCPConnectionPair::onPeerDataReceived);	
-	setServerSocketBufSize<uv_tcp_t>(socket.base(), SERVER_SOCK_BUF_SIZE); // TODO: make option
+	peer->Recv += sdelegate(this, &TCPConnectionPair::onPeerDataReceived);	
+	setServerSocketBufSize<uv_tcp_t>(*socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
 
 
-void TCPConnectionPair::setClientSocket(const net::TCPSocket& socket)
+void TCPConnectionPair::setClientSocket(const net::TCPSocket::Ptr& socket)
 {
 	TraceLS(this) << "Set client socket: "
-		<< connectionID << ": " << socket.peerAddress() 
-		 << ": " << socket.base().refCount() << endl;	
-	assert(client.isNull());
-	//assert(socket.base().refCount() == 2);
+		<< connectionID << ": " << socket->peerAddress()  << endl;	
+		//<< ": " << socket./*base().*/refCount()
+	assert(client == nullptr);
+	//assert(socket./*base().*/refCount() == 2);
 	client = socket;
-	client.Close += delegate(this, &TCPConnectionPair::onConnectionClosed);
-	setServerSocketBufSize<uv_tcp_t>(socket.base(), SERVER_SOCK_BUF_SIZE); // TODO: make option
+	client->Close += sdelegate(this, &TCPConnectionPair::onConnectionClosed);
+	setServerSocketBufSize<uv_tcp_t>(*socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
 
 
 bool TCPConnectionPair::makeDataConnection()
 {
 	TraceLS(this) << "Make data connection: " << connectionID << endl;	
-	if (peer.isNull() || client.isNull())
+	if (!peer || !client)
 		return false;
 
-	peer.Recv += delegate(this, &TCPConnectionPair::onPeerDataReceived);
-	client.Recv += delegate(this, &TCPConnectionPair::onClientDataReceived);	
+	peer->Recv += sdelegate(this, &TCPConnectionPair::onPeerDataReceived);
+	client->Recv += sdelegate(this, &TCPConnectionPair::onClientDataReceived);	
 	
 	// Relase and unbind the client socket from the server.
 	// The client socket instance, events and data will be
 	// managed by the TCPConnectionPair from now on.
-	allocation.server().releaseTCPSocket(&client);
+	allocation.server().releaseTCPSocket(client.get());
 			
 	// Send early data from peer to client
 	if (earlyPeerData.size()) {
 		TraceLS(this) << "Flushing early media: " << earlyPeerData.size() << endl;	
-		client.send(earlyPeerData.data(), earlyPeerData.size());
+		client->send(earlyPeerData.data(), earlyPeerData.size());
 		earlyPeerData.clear();
 	}
 
@@ -146,68 +146,70 @@ bool TCPConnectionPair::makeDataConnection()
 }
 
 
-void TCPConnectionPair::onPeerDataReceived(void*, net::SocketPacket& pkt)
+void TCPConnectionPair::onPeerDataReceived(void*, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
-	TraceLS(this) << "Peer => Client: " << pkt.size() << endl;	
+	TraceLS(this) << "Peer => Client: " << buffer.size() << endl;	
 	//assert(pkt.buffer.position() == 0);
 	//if (pkt.buffer.available() < 300)
 	//	TraceLS(this) << "Peer => Client: " << pkt.buffer << endl;	
+	//auto socket = reinterpret_cast<net::Socket*>(sender);		
+	//char* buf = bufferCast<char*>(buf);
 	
 	//Buffer& buf = pkt.buffer;
-	if (!client.isNull()) {	
+	const char* buf = bufferCast<const char*>(buffer);
+	std::size_t len = buffer.size();
+	if (client) {	
 		
-		allocation.updateUsage(pkt.size());
+		allocation.updateUsage(len);
 		if (allocation.deleted())
 			return;
 
 		//assert(buf.position() == 0);
-		client.send(static_cast<const char*>(pkt.data()), pkt.size());
+		client->send(buf, len);
 	}
 
 	// Flash policy requests
 	// TODO: Handle elsewhere? Bloody flash...
-	else if (pkt.size() == 23 && (strcmp(static_cast<const char*>(pkt.data()), "<policy-file-request/>") == 0)) {
+	else if (len == 23 && (strcmp(buf, "<policy-file-request/>") == 0)) {
 		TraceLS(this) << "Handle flash policy" << endl;
 		std::string policy("<?xml version=\"1.0\"?><cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>");
-		assert(&peer == pkt.info->socket);
-		peer.send(policy.c_str(), policy.length() + 1);
-		peer.close();
+		//assert(peer->get() == pkt.info->socket);
+		peer->send(policy.c_str(), policy.length() + 1);
+		peer->close();
 	}
 	
 	// Buffer early media
 	// TODO: Make buffer size server option
 	else {
 		size_t maxSize = allocation.server().options().earlyMediaBufferSize;
-		DebugLS(this) << "Buffering early data: " << pkt.size() << endl;
+		DebugLS(this) << "Buffering early data: " << len << endl;
 #ifdef _DEBUG
-		DebugLS(this) << "Printing early data: " << std::string(pkt.data(), pkt.size()) << endl;
+		DebugLS(this) << "Printing early data: " << std::string(buf, len) << endl;
 #endif
-		if (pkt.size() > maxSize)
-			WarnL << "Dropping early media: Oversize packet: " << pkt.size() << endl;
+		if (len > maxSize)
+			WarnL << "Dropping early media: Oversize packet: " << len << endl;
 		if (earlyPeerData.size() > maxSize)
 			WarnL << "Dropping early media: Buffer at capacity >= " << maxSize << endl;
 
-		//earlyPeerData.append(static_cast<const char*>(pkt.data()), pkt.size());
-		earlyPeerData.insert(earlyPeerData.end(), 
-			static_cast<const char*>(pkt.data()), 
-			static_cast<const char*>(pkt.data()) + pkt.size()); 
+		//earlyPeerData.append(static_cast<const char*>(pkt.data()), len);
+		earlyPeerData.insert(earlyPeerData.end(), buf, buf + len); 
 	}
 }
 
 
-void TCPConnectionPair::onClientDataReceived(void*, net::SocketPacket& packet)
+void TCPConnectionPair::onClientDataReceived(void*, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
-	TraceLS(this) << "Client => Peer: " << packet.size() << endl;	
+	TraceLS(this) << "Client => Peer: " << buffer.size() << endl;	
 	//assert(packet.buffer.position() == 0);
 	//if (packet.size() < 300)
 	//	TraceLS(this) << "Client => Peer: " << packet.buffer << endl;	
-	
-	if (!peer.isNull()) {
-		allocation.updateUsage(packet.size());
+
+	if (peer) {
+		allocation.updateUsage(buffer.size());
 		if (allocation.deleted())
 			return;
 
-		peer.send(packet);
+		peer->send(bufferCast<char*>(buffer), buffer.size());
 	}
 }
 
@@ -216,8 +218,8 @@ void TCPConnectionPair::onPeerConnectSuccess(void* sender)
 {
 	TraceLS(this) << "Peer Connect request success" << endl;	
 	assert(sender == &peer);
-	peer.Connect -= delegate(this, &TCPConnectionPair::onPeerConnectSuccess);
-	peer.Error -= delegate(this, &TCPConnectionPair::onPeerConnectError);
+	peer->Connect -= sdelegate(this, &TCPConnectionPair::onPeerConnectSuccess);
+	peer->Error -= sdelegate(this, &TCPConnectionPair::onPeerConnectError);
 		
 	// If no ConnectionBind request associated with this peer data
 	// connection is received after 30 seconds, the peer data connection
@@ -274,23 +276,23 @@ bool TCPConnectionPair::expired() const
 
 
 	/*
-TCPConnectionPair::TCPConnectionPair(TCPAllocation& allocation, const net::TCPSocket& socket, TCPPeerConnection* peer)
+TCPConnectionPair::TCPConnectionPair(TCPAllocation& allocation, const net::TCPSocket::Ptr& socket, TCPPeerConnection* peer)
 	_allocation(allocation),
-	_connectionID(peer.connectionID()),
+	_connectionID(peer->connectionID()),
 {
 }
 	
 
 //TCPClientConnection::TCPClientConnection(TCPAllocation& allocation, const Poco::Net::StreamSocket& socket, TCPPeerConnection* peer, Net::Reactor& reactor) : 
-TCPClientConnection::TCPClientConnection(TCPAllocation& allocation, const net::TCPSocket& socket, TCPPeerConnection* peer) : 
+TCPClientConnection::TCPClientConnection(TCPAllocation& allocation, const net::TCPSocket::Ptr& socket, TCPPeerConnection* peer) : 
 	net::TCPSocket(socket), //, true, reactor
 	_allocation(allocation),
-	_connectionID(peer.connectionID()),
+	_connectionID(peer->connectionID()),
 	_peer(nullptr)
 {
 	TraceLS(this) << "Create" << endl;
 	bindWith(peer);
-	_peer.bindWith(this);
+	_peer->bindWith(this);
 	_allocation.clients().add(_connectionID, this);
 
 	//setDeleteOnClose(true);
@@ -302,7 +304,7 @@ TCPClientConnection::~TCPClientConnection()
 	TraceLS(this) << "Destroy" << endl;
 	//assert(!isConnected());
 	if (_peer)
-		_peer.bindWith(this);
+		_peer->bindWith(this);
 	_allocation.clients().remove(this);
 	TraceLS(this) << "Destroy: OK" << endl;
 }
@@ -320,7 +322,7 @@ void TCPClientConnection::recv(Buffer& buffer)
 			if (!_allocation.!IAllocation::deleted())
 				throw std::runtime_error("Allocation expired");
 
-			_peer.send(buffer.begin(), buffer.available());
+			_peer->send(buffer.begin(), buffer.available());
 		}
 		else		
 			// TODO: buffering early media
@@ -357,13 +359,13 @@ void TCPClientConnection::bindWith(TCPPeerConnection* peer)
 {
 	{
 		//Mutex::ScopedLock lock(_mutex);
-		assert(!peer || _connectionID == peer.connectionID());
+		assert(!peer || _connectionID == peer->connectionID());
 		if (_peer)
-			_peer.base().Closed -= delegate(this, &TCPClientConnection::onPeerDisconnect);	
+			_peer->base().Closed -= sdelegate(this, &TCPClientConnection::onPeerDisconnect);	
 		_peer = peer;
 		if (_peer != nullptr) {
-			TraceLS(this) << "Binding With Peer: " << _peer.address() << endl;
-			_peer.base().Closed += delegate(this, &TCPClientConnection::onPeerDisconnect);	
+			TraceLS(this) << "Binding With Peer: " << _peer->address() << endl;
+			_peer->base().Closed += sdelegate(this, &TCPClientConnection::onPeerDisconnect);	
 		}
 	}
 	if (!peer) {
@@ -399,17 +401,17 @@ void TCPClientConnection::onClose()
 	//Mutex::ScopedLock lock(_mutex);	
 	TCPPeerConnection* peer = _peer;
 	if (peer) {
-		peer.Close -= delegate(this, &TCPClientConnection::onPeerDisconnect);
+		peer->Close -= sdelegate(this, &TCPClientConnection::onPeerDisconnect);
 		TraceLS(this) << "On close 1" << endl;	
 		_peer = nullptr;
-		peer.bindWith(nullptr);
-		//peer.close();
+		peer->bindWith(nullptr);
+		//peer->close();
 	}
 
 	// Close the associated peer connection.
 	if (_peer) {
-		_peer.Close -= delegate(this, &TCPClientConnection::onPeerDisconnect);	
-		_peer.close();
+		_peer->Close -= sdelegate(this, &TCPClientConnection::onPeerDisconnect);	
+		_peer->close();
 		_peer = nullptr;
 	}
 }

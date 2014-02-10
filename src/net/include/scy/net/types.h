@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_NET_Types_H
-#define SCY_NET_Types_H
+#ifndef SCY_Net_Types_H
+#define SCY_Net_Types_H
 
 
 #include "scy/stateful.h"

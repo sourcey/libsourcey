@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_NET_PacketSocket_H
-#define SCY_NET_PacketSocket_H
+#ifndef SCY_Net_PacketSocket_H
+#define SCY_Net_PacketSocket_H
 
 
 #include "scy/base.h"
@@ -26,6 +26,7 @@
 #include "scy/packetsignal.h"
 #include "scy/packetfactory.h"
 #include "scy/net/socket.h"
+#include "scy/net/socketadapter.h"
 
 
 namespace scy {
@@ -44,14 +45,18 @@ class PacketSocket;
 class PacketSocketAdapter: public SocketAdapter, public PacketSignal
 {	
 public:	
+	net::Socket::Ptr socket;
+		// Pointer to the underlying socket.
+		// Sent data will be proxied to this socket.
+
 	PacketFactory factory;
 
-	PacketSocketAdapter(Socket* socket = nullptr);
+	PacketSocketAdapter(const net::Socket::Ptr& socket = nullptr); //const net::Socket::Ptr& socket = nullptr //SocketAdapter* sender = nullptr, SocketAdapter* receiver = nullptr
 		// Creates the PacketSocketAdapter
 		// This class should have a higher priority than standard
 		// sockets so we can parse data packets first.
 		
-	virtual void onSocketRecv(const MutableBuffer& buf, const Address& peerAddr);
+	virtual void onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress);
 		// Creates and dispatches a packet utilizing the available 
 		// creation strategies. For best performance the most used 
 		// strategies should have the highest priority.
@@ -60,27 +65,27 @@ public:
 };
 
 
+#if 0
 //
 // Packet Socket
 //
 
 
-class PacketSocket: public Socket
+class PacketSocket: public PacketSocketAdapter
 {
 public:	
-	PacketSocket(const Socket& socket);
-	PacketSocket(SocketBase* base, bool shared = false);
+	PacketSocket(Socket* socket);
+	//PacketSocket(Socket* base, bool shared = false);
 	virtual ~PacketSocket();
 
-	PacketSocketAdapter& adapter() const;
+	//PacketSocketAdapter& adapter() const;
 		// Returns the PacketSocketAdapter for this socket.		
 	
-	virtual void send(IPacket& packet);
+	//virtual void send(IPacket& packet);
 		// Compatibility method for PacketSignal delegates.
 };
 
 
-#if 0
 //
 // Packet Stream Socket Adapter
 //
@@ -110,7 +115,7 @@ protected:
 } } // namespace scy::Net
 
 
-#endif // SCY_NET_PacketSocket_H
+#endif // SCY_Net_PacketSocket_H
 
 
 
@@ -163,13 +168,13 @@ protected:
 		else
 			send(reinterpret_cast<const IPacket&>(packet));
 			*/
-	//DefineSocketWrapperFields(PacketSocket, SocketBase)
-	//typedef SocketBase Base;
+	//DefineSocketWrapperFields(PacketSocket, Socket)
+	//typedef Socket Base;
 	//typedef std::vector<PacketSocket> List;
 		
 
 	//Socket<> socket;
-	//Handle<SocketBase> socket;
+	//Handle<Socket> socket;
 	//PacketSocket()
 	//{
 	//}
@@ -196,7 +201,7 @@ protected:
 		if (types().empty())
 			PacketFactory::registerPacketType<RawPacket>(100);
 
-		SocketBase<StreamSocketT, TransportT, SocketBaseT>::onConnect();
+		Socket<StreamSocketT, TransportT, SocketT>::onConnect();
 	}
 	PacketInfo& operator = (const PacketInfo& r) {
 		socket = r.socket;
@@ -211,10 +216,10 @@ protected:
 		
 	/*
 			
-	SocketBase* get() const
-		/// Returns the SocketBase for this socket.
+	Socket* get() const
+		/// Returns the Socket for this socket.
 	{
-		return _base; //reinterpret_cast<SocketBase*>(_base);
+		return _base; //reinterpret_cast<Socket*>(_base);
 	}
 	*/
 

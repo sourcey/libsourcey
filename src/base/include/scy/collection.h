@@ -288,7 +288,7 @@ public:
 		clear();
 	}
 	
-	virtual bool set(const TKey& key, const TValue& item, bool update = true, bool whiny = true)
+	virtual bool add(const TKey& key, const TValue& item, bool update = true, bool whiny = true)
 	{	
 		if (!update && has(key)) {
 			if (whiny)
@@ -319,7 +319,7 @@ public:
 		return defaultValue;
 	}
 	
-	virtual bool erase(const TKey& key) 
+	virtual bool remove(const TKey& key) 
 	{
 		//Mutex::ScopedLock lock(_mutex);
 		typename Map::iterator it = _map.find(key);	

@@ -13,10 +13,10 @@
 #include <iostream>
 
 	
-#define TEST_TCP 0 //1
+#define TEST_TCP 1
 #define RAISE_LOCAL_SERVER 0
 
-#define TURN_SERVER_IP "202.173.167.126" // "58.7.41.244" "127.0.0.1" "122.201.111.134" "74.207.248.97"
+#define TURN_SERVER_IP "127.0.0.1" //"202.173.167.126" // "58.7.41.244" "127.0.0.1" "122.201.111.134" "74.207.248.97"
 #define TURN_SERVER_PORT 3478
 #define TURN_SERVER_USERNAME "username"
 #define TURN_SERVER_PASSWORD "password"

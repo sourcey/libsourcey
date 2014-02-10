@@ -41,13 +41,13 @@ public:
 	TimedManager(uv::Loop* loop = uv::defaultLoop()) :
 		_timer(loop)
 	{		
-		_timer.Timeout += delegate(this, &TimedManager::onTimerUpdate);
+		_timer.Timeout += sdelegate(this, &TimedManager::onTimerUpdate);
 		_timer.start(100); // check every 100ms
 	}
 
 	virtual ~TimedManager() 
 	{
-		_timer.Timeout -= delegate(this, &TimedManager::onTimerUpdate);
+		_timer.Timeout -= sdelegate(this, &TimedManager::onTimerUpdate);
 	}
 	
 	virtual void add(const TKey& key, TValue* item, long timeout = 0)

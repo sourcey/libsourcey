@@ -33,60 +33,51 @@ namespace scy {
 namespace http {
 
 
-Connection::Connection(const net::Socket& socket) : 
-	_socket(socket), 
-	_timeout(30 * 60 * 1000), // 30 secs
+Connection::Connection(const net::Socket::Ptr& socket) : 
+	_socket(socket ? socket : std::make_shared<net::TCPSocket>()), 
+	_adapter(nullptr),
+	//_timeout(30 * 60 * 1000), // 30 secs
 	_closed(false),
 	_shouldSendHeader(true)
 {	
-	TraceLS(this) << "Create: " << &_socket << endl;
-
-	_socket.Recv += delegate(this, &Connection::onSocketRecv);
-	_socket.Error += delegate(this, &Connection::onSocketError);
-	_socket.Close += delegate(this, &Connection::onSocketClose);
-
-	// Use an event loop Idler as the PacketStream async source
-	//auto idler = std::make_shared<Idler>(*socket.base().loop());
-	//, scy::deleter::Dispose<Idler>()
-	//Incoming.setRunner(std::make_shared<Idler>(socket.base().loop()));
-	//Outgoing.setRunner(std::make_shared<Idler>(socket.base().loop()));
-
-	// Attach the outgoing stream to the socket
-	Outgoing.emitter += delegate(&_socket, &net::Socket::send);
+	TraceLS(this) << "Create: " << _socket << endl;
 }
 
 	
 Connection::~Connection() 
 {	
-	TraceLS(this) << "Destroy" << endl;
-
-	// Connections must be close()d
-	assert(_closed);
+	TraceLS(this) << "Destroy" << endl;	
+	replaceAdapter(nullptr);
+	//assert(_closed);
+	close(); // don't want pure virtual on onClose.
+	           // the shared pointer is being destroyed,
+               // no need for close() anyway
+	TraceLS(this) << "Destroy: OK" << endl;	
 }
 
 
-void Connection::sendData(const char* buf, std::size_t len) //, int flags
+int Connection::send(const char* data, std::size_t len, int flags)
 {
 	TraceLS(this) << "Send: " << len << endl;
+	assert(!_closed);
 	assert(Outgoing.active());
-	Outgoing.write(buf, len);
-
-	// Can't send to socket as may not be connected
-	//return _socket.send(buf, len, flags);
-	//return len; // fixme
+	Outgoing.write(data, len);
+	return len; 
 }
 
 
-void Connection::sendData(const std::string& buf) //, int flags
+#if 0
+int Connection::send(const std::string& data, int flags) //
 {
-	TraceLS(this) << "Send: " << buf.length() << endl;
+	TraceLS(this) << "Send: " << data.length() << endl;
 	assert(Outgoing.active());
-	Outgoing.write(buf.c_str(), buf.length());
+	Outgoing.write(data.c_str(), data.length());
 	
 	// Can't send to socket as may not be connected
-	//return _socket.send(buf.c_str(), buf.length(), flags);
-	//return buf.length(); // fixme
+	//return _socket->send(buf.c_str(), buf.length(), flags);
+	return data.length(); // fixme
 }
+#endif
 
 
 int Connection::sendHeader()
@@ -102,75 +93,139 @@ int Connection::sendHeader()
 	outgoingHeader()->write(os);
 	std::string head(os.str().c_str(), os.str().length());
 
-	_timeout.start();	
-	TraceLS(this) << "Send header: " << head << endl; // remove me
+	//_timeout.start();	
+	//TraceLS(this) << "Send header: " << head << endl; // remove me
 
 	// Send to base to bypass the ConnectionAdapter
-	return _socket.base().send(head.c_str(), head.length());
+	return _socket->send(head.c_str(), head.length());
 }
 
 
 void Connection::close()
 {
-	TraceLS(this) << "Close" << endl;	
-	assert(!_closed);
-	assert(_socket.base().refCount() == 1);
-	
+	TraceLS(this) << "Close: " << _closed << endl;	
+	if (_closed) return;
 	_closed = true;	
+	
+	TraceLS(this) << "Close 1: " << _closed << endl;	
+	//Outgoing.emitter.detach(_socket->recvAdapter());	
+	//Outgoing.close();
+	//Incoming.close();
+	
+	_socket->close();
 
-	Outgoing.emitter -= delegate(&_socket, &net::Socket::send);	
-	Outgoing.close();
-	Incoming.close();
-
-	_socket.Recv -= delegate(this, &Connection::onSocketRecv);
-	_socket.Error -= delegate(this, &Connection::onSocketError);
-	_socket.Close -= delegate(this, &Connection::onSocketClose);
-
-	// FIXME: Causing slowdows when used for Pacman downloads.
-	//_socket.close();
-
+	// Note that this must not be pure virtual since
+	// close() may be called via the destructor.
 	onClose();
-		
-	//delete this;
-	deleteLater<Connection>(this); // destroy it
 }
 
 
-void Connection::setError(const Error& err) 
+void Connection::replaceAdapter(net::SocketAdapter* adapter)
+{
+	TraceLS(this) << "Replace adapter: " << adapter << endl;	
+
+	if (_adapter) {
+		Outgoing.emitter.detach(_adapter);
+		_socket->removeReceiver(_adapter);
+		delete _adapter;
+		_adapter = nullptr;
+	}
+	
+	// Assign the new ConnectionAdapter and setup the chain
+	// The flow is: Connection <-> ConnectionAdapter <-> Socket
+	if (adapter) {
+		// Attach ourselves to the given ConnectionAdapter (should already be set)
+		//assert(adapter->recvAdapter() == this);
+		//assert(adapter->sendAdapter() == _socket.get());
+		adapter->addReceiver(this);
+
+		// ConnectionAdapter output goes to the Socket
+		adapter->setSender(_socket.get());
+
+		// Attach the ConnectionAdapter to receive Socket callbacks
+		// The adapter will process raw packets into HTTP or WebSocket 
+		// frames depending on the adapter rype.
+		_socket->addReceiver(adapter);
+		
+		// The Outgoing stream pumps data into the ConnectionAdapter,
+		// which in turn proxies to the output Socket
+		Outgoing.emitter += delegate(adapter, &net::SocketAdapter::sendPacket);
+		//Outgoing.emitter += delegate((net::Socket*)_socket.get(), &net::Socket::sendPacket);
+	}
+
+
+	/*
+	// Free current adapter
+	net::SocketAdapter* current = _socket->recvAdapter();
+	if (current && freeExisting) {
+		Outgoing.emitter.detach(current);
+		assert(current->recvAdapter() == this);
+		assert(_socket->recvAdapter() == current);
+		current->addReceiver(nullptr, false); // don't delete ourselves
+		current->setSendAdapter(nullptr, false); // don't delete the Socket
+		_socket->addReceiver(nullptr, true);  // delete current adapter
+	}
+
+	// Assign the new ConnectionAdapter and setup the chain
+	// The flow is: Connection <-> ConnectionAdapter <-> Socket
+	if (adapter) {
+		// Attach ourselves to the given ConnectionAdapter (should already be set)
+		assert(adapter->recvAdapter() == this);
+		assert(adapter->sendAdapter() == _socket.get());
+		adapter->addReceiver(this, false);
+
+		// ConnectionAdapter output goes to the Socket
+		adapter->setSendAdapter(_socket.get(), false);
+
+		// Attach the ConnectionAdapter to receive Socket callbacks
+		// The adapter will process raw packets into HTTP or WebSocket 
+		// frames depending on the adapter rype.
+		_socket->addReceiver(adapter, true); // already deleted existing, 
+		                                         // just in case
+		
+		// The Outgoing stream pumps data into the ConnectionAdapter,
+		// which in turn proxies to the output Socket
+		Outgoing.emitter += sdelegate(static_cast<net::SocketAdapter*>(adapter),
+			&net::SocketAdapter::sendPacket);
+	}
+	*/
+}
+
+
+void Connection::setError(const scy::Error& err) 
 { 
 	TraceLS(this) << "Set error: " << err.message << endl;	
 	
-	//_socket.setError(err);
+	//_socket->setError(err);
 	_error = err;
 	
 	// Note: Setting the error does not call close()
 }
 
 
-void Connection::onClose()
+void Connection::onSocketConnect()
 {
-	TraceLS(this) << "On close" << endl;	
-
-	Close.emit(this);
+	TraceLS(this) << "On socket connect" << endl;
 }
 
 
-void Connection::onSocketRecv(void*, net::SocketPacket& packet)
+void Connection::onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress)
 {		
-	_timeout.stop();
+	TraceLS(this) << "On socket recv" << endl;
+	//_timeout.stop();
 			
 	if (Incoming.emitter.ndelegates()) {
 		//RawPacket p(packet.data(), packet.size());
 		//Incoming.write(p);
-		Incoming.write(packet.data(), packet.size());
+		Incoming.write(bufferCast<const char*>(buffer), buffer.size());
 	}
 
 	// Handle payload data
-	onPayload(mutableBuffer(packet.data(), packet.size()));
+	onPayload(buffer); //mutableBuffer(bufferCast<const char*>(buf)
 }
 
 
-void Connection::onSocketError(void*, const Error& error) 
+void Connection::onSocketError(const scy::Error& error) 
 {
 	TraceLS(this) << "On socket error" << endl;
 
@@ -179,12 +234,20 @@ void Connection::onSocketError(void*, const Error& error)
 }
 
 
-void Connection::onSocketClose(void*) 
+void Connection::onSocketClose() 
 {
 	TraceLS(this) << "On socket close" << endl;
 
 	// Close the connection when the socket closes
 	close();
+}
+
+
+void Connection::onClose()
+{
+	TraceLS(this) << "On close" << endl;	
+
+	Close.emit(this);
 }
 
 
@@ -200,18 +263,10 @@ Response& Connection::response()
 }
 
 	
-net::Socket& Connection::socket()
+net::Socket::Ptr& Connection::socket()
 {
-	return _socket;
+	return _socket; //.get();
 }
-	
-
-/*
-Buffer& Connection::incomingBuffer()
-{
-	return static_cast<net::TCPBase&>(_socket.base()).buffer();
-}
-*/
 
 	
 bool Connection::closed() const
@@ -231,11 +286,6 @@ void Connection::shouldSendHeader(bool flag)
 	_shouldSendHeader = flag;
 }
 
-	
-bool Connection::expired() const
-{
-	return _timeout.expired();
-}
 
 
 //
@@ -244,6 +294,7 @@ bool Connection::expired() const
 
 
 ConnectionAdapter::ConnectionAdapter(Connection& connection, http_parser_type type) : 
+	SocketAdapter(connection.socket().get(), &connection),
 	_connection(connection),
 	_parser(type)
 {	
@@ -262,12 +313,11 @@ ConnectionAdapter::~ConnectionAdapter()
 }
 
 
-int ConnectionAdapter::send(const char* data, int len, int flags)
+int ConnectionAdapter::send(const char* data, std::size_t len, int flags)
 {
 	TraceLS(this) << "Send: " << len << endl;
 	
-	try
-	{
+	try {
 		// Send headers on initial send
 		if (_connection.shouldSendHeader()) {
 			int res = _connection.sendHeader();
@@ -286,10 +336,10 @@ int ConnectionAdapter::send(const char* data, int len, int flags)
 		//	TraceLS(this) << "Send data: " << std::string(data, len) << endl;
 		//else
 		//	TraceLS(this) << "Send long data: " << std::string(data, 300) << endl;
-		return socket->base().send(data, len, flags);
+		//return this->socket->send(data, len, flags);
+		return SocketAdapter::send(data, len, flags);
 	} 
-	catch (std::exception& exc) 
-	{
+	catch (std::exception& exc) {
 		ErrorLS(this) << "Send error: " << exc.what() << endl;
 
 		// Swallow the exception, the socket error will 
@@ -348,7 +398,8 @@ void ConnectionAdapter::onParserChunk(const char* buf, std::size_t len)
 	TraceLS(this) << "On parser chunk: " << len << endl;	
 
 	// Dispatch the payload
-	net::SocketAdapter::onSocketRecv(mutableBuffer(const_cast<char*>(buf), len), socket->peerAddress());
+	net::SocketAdapter::onSocketRecv(mutableBuffer(const_cast<char*>(buf), len), 
+		_connection.socket()->peerAddress());
 }
 
 
@@ -357,7 +408,7 @@ void ConnectionAdapter::onParserError(const ParserError& err)
 	WarnL << "On parser error: " << err.message << endl;	
 
 	// HACK: Handle those peski flash policy requests here
-	auto base = dynamic_cast<net::TCPBase*>(&_connection.socket().base());
+	auto base = dynamic_cast<net::TCPSocket*>(_connection.socket().get());
 	if (base && std::string(base->buffer().data(), 22) == "<policy-file-request/>") {
 		
 		// Send an all access policy file by default

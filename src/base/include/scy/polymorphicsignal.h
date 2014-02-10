@@ -115,7 +115,8 @@ struct DelegateCallback<C, 8, true, PolymorphicT>
 	template <class C, typename PolymorphicT>							\
 	static Delegate<C,													\
 		DelegateBaseT,													\
-		DelegateCallback<C, 8, true, PolymorphicT>, PolymorphicBaseT&	\
+		DelegateCallback<C, 8, true, PolymorphicT>, 					\
+        PolymorphicBaseT&	                                            \
 	> Name(C* pObj, void (C::*Method)(void*, PolymorphicT&),			\
 		ArgType data = ArgDefault, int priority = 0)					\
 	{																	\

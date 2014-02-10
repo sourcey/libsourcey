@@ -33,44 +33,17 @@ using std::endl;
 
 namespace scy {
 namespace http {
+namespace ws {
 
 
-const char* WebSocket::ProtocolGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-const char* WebSocket::ProtocolVersion = "13";
-
-
-WebSocket::WebSocket() : 
-	net::Socket(new net::TCPBase, false)
+WebSocket::WebSocket(const net::Socket::Ptr& socket) : 
+	WebSocketAdapter(socket, ws::ClientSide, _request, _response)
 {
-	setAdapter(new WebSocketAdapter(this, WebSocket::ClientSide, _request, _response));
 }
 
 
-WebSocket::WebSocket(net::SocketBase* base, bool shared) : 
-	net::Socket(base, shared)
+WebSocket::~WebSocket()
 {
-	setAdapter(new WebSocketAdapter(this, WebSocket::ClientSide, _request, _response));
-}
-
-
-WebSocket::WebSocket(const net::Socket& socket) : 
-	net::Socket(socket)
-{
-	if (!dynamic_cast<WebSocketAdapter*>(_adapter))
-		throw std::runtime_error("WebSocket error: Cannot assign incompatible socket adapter");
-}
-
-	
-bool WebSocket::shutdown(UInt16 statusCode, const std::string& statusMessage)
-{
-	return adapter().shutdown(statusCode, statusMessage);
-}
-
-
-WebSocketAdapter& WebSocket::adapter() const
-{
-	assert(net::Socket::adapter());
-	return *static_cast<WebSocketAdapter*>(net::Socket::adapter());
 }
 
 
@@ -91,24 +64,29 @@ http::Response& WebSocket::response()
 //
 
 
-WebSocketAdapter::WebSocketAdapter(net::Socket* socket, WebSocket::Mode mode, http::Request& request, http::Response& response) : 
-	net::SocketAdapter(socket), 
-	framer(mode), _request(request), _response(response)
+WebSocketAdapter::WebSocketAdapter(const net::Socket::Ptr& socket, ws::Mode mode, http::Request& request, http::Response& response) : 
+	SocketAdapter(socket.get()), socket(socket), framer(mode), _request(request), _response(response)
 {
-	TraceLS(this) << "constructor" << endl;
+	TraceLS(this) << "Create" << endl;
+	
+	//setSendAdapter(socket.get());
+	socket->addReceiver(this);
 }
 
 	
-WebSocketAdapter::WebSocketAdapter(WebSocket::Mode mode, http::Request& request, http::Response& response) : 
-	net::SocketAdapter(nullptr),
-	framer(mode), _request(request), _response(response)
-{
-	TraceLS(this) << "destructor" << endl;
-}
+//WebSocketAdapter::WebSocketAdapter(ws::Mode mode, http::Request& request, http::Response& response) : 
+//	framer(mode), _request(request), _response(response)
+//{
+//	TraceLS(this) << "Create" << endl;
+//}
 
 	
 WebSocketAdapter::~WebSocketAdapter() 
 {	
+	TraceLS(this) << "Destroy" << endl;
+
+	//setSendAdapter(nullptr);
+	socket->removeReceiver(this);
 }
 
 	
@@ -118,26 +96,28 @@ bool WebSocketAdapter::shutdown(UInt16 statusCode, const std::string& statusMess
 	BitWriter writer(buffer, 256);
 	writer.putU16(statusCode);
 	writer.put(statusMessage);
-	return socket->base().send(buffer, writer.position(), 
-		unsigned(WebSocket::FrameFlags::Fin) |
-		unsigned(WebSocket::Opcode::Close)) > 0;
+	
+	assert(socket);
+	return /*socket->*/SocketAdapter::send(buffer, writer.position(), 
+		unsigned(ws::FrameFlags::Fin) |
+		unsigned(ws::Opcode::Close)) > 0;
 }
 
 
-int WebSocketAdapter::send(const char* data, int len, int flags) 
+int WebSocketAdapter::send(const char* data, std::size_t len, int flags) 
 {	
 	return send(data, len, socket->peerAddress(), flags);
 }
 
 
-int WebSocketAdapter::send(const char* data, int len, const net::Address& peerAddr, int flags) 
+int WebSocketAdapter::send(const char* data, std::size_t len, const net::Address& peerAddr, int flags) 
 {	
-	TraceLS(this) << "Send: " << std::string(data, len) << endl;
+	TraceLS(this) << "Send: " << len << endl; //std::string(data, len)
 	assert(framer.handshakeComplete());
 
 	// Set default text flag if none specified
 	if (!flags)
-		flags = WebSocket::SendFlags::Text;
+		flags = ws::SendFlags::Text;
 
 	// Frame and send the data
 	//std::vector<char> buffer(len + WebSocketFramer::MAX_HEADER_LENGTH);
@@ -146,7 +126,8 @@ int WebSocketAdapter::send(const char* data, int len, const net::Address& peerAd
 	BitWriter writer(buffer);
 	framer.writeFrame(data, len, flags, writer);
 	
-	return socket->base().send(writer.begin(), writer.position(), peerAddr, 0);
+	assert(socket);
+	return /*socket->*/SocketAdapter::send(writer.begin(), writer.position(), peerAddr, 0);
 }
 
 	
@@ -157,7 +138,9 @@ void WebSocketAdapter::sendClientRequest()
 	std::ostringstream oss;
 	_request.write(oss);
 	TraceLS(this) << "Client request: " << oss.str() << endl;
-	socket->base().send(oss.str().c_str(), oss.str().length());
+	
+	assert(socket);
+	/*socket->*/SocketAdapter::send(oss.str().c_str(), oss.str().length());
 }
 
 
@@ -171,8 +154,6 @@ void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer)
 	
 	// TODO: Handle resending request for authentication
 	// Should we implement some king of callback for this?
-
-	//TraceLS(this) << "Client response: parsed: " << _response << endl;
 
 	// Parse and check the response
 	if (framer.checkHandshakeResponse(_response)) {				
@@ -197,7 +178,6 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer)
 	//VerifyServerRequest.emit(this, request);
 	
 	// Verify the WebSocket handshake request
-	//http::Response response;
 	try {
 		framer.acceptRequest(_request, _response);
 		TraceLS(this) << "Handshake success" << endl;
@@ -212,7 +192,9 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer)
 	// Send response
 	std::ostringstream oss;
 	_response.write(oss);
-	socket->base().send(oss.str().c_str(), oss.str().length());
+	
+	assert(socket);
+	/*socket->*/SocketAdapter::send(oss.str().c_str(), oss.str().length());
 }
 
 
@@ -221,14 +203,13 @@ void WebSocketAdapter::onSocketConnect()
 	TraceLS(this) << "On connect" << endl;
 	
 	// Send the WS handshake request
+	// The Connect signal will be sent after the 
+	// handshake is complete
 	sendClientRequest();
-
-	// Connect signal sent after handshake complete
-	//SocketAdapter::onSocketConnect();
 }
 
 
-void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddr)
+void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress)
 {
 	TraceLS(this) << "On recv: " << buffer.size() << endl; // << ": " << buffer
 
@@ -255,7 +236,7 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
 				//reader.position(offset);
 				//reader.limit(total);
 					
-				/*
+#if 0
 				TraceLS(this) << "Read frame at: " 
 					 << "\n\tinputPosition: " << offset
 					 << "\n\tinputLength: " << total
@@ -264,7 +245,7 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
 					 << "\n\tbufferLimit: " << reader.limit() 
 					 << "\n\tbuffer: " << std::string(reader.current(), reader.limit())
 					 << endl;	
-					 */
+#endif
 				
 				// Parse a frame to throw
 				//int payloadLength = framer.readFrame(reader);
@@ -279,7 +260,7 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
 
 				// Drop empty packets
 				if (!payloadLength) {
-					DebugLS(this) << "empty frame" << endl;
+					DebugLS(this) << "Dropping empty frame" << endl;
 					continue;
 				}
 			} 
@@ -290,16 +271,15 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
 			}
 			
 			// Emit the result packet
-			//TraceLS(this) << "On recv: emit: " << buffer << endl;
 			assert(payload);
 			assert(payloadLength);
-			SocketAdapter::onSocketRecv(mutableBuffer(payload, payloadLength), peerAddr);
+			SocketAdapter::onSocketRecv(mutableBuffer(payload, (std::size_t)payloadLength), peerAddress);
 		}
 		assert(offset == total);
 	}
 	else {		
 		try {
-			if (framer.mode() == WebSocket::ClientSide)
+			if (framer.mode() == ws::ClientSide)
 				handleClientResponse(buffer);
 			else
 				handleServerRequest(buffer);
@@ -308,7 +288,6 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
 			WarnL << "Read error: " << exc.what() << endl;		
 			socket->setError(exc.what());	
 		}
-		//TraceLS(this) << "After handshaking: " << buffer << endl;
 		return;
 	}	
 }
@@ -316,7 +295,7 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
 
 void WebSocketAdapter::onSocketClose()
 {
-	// Reset state incase the connection is reused	
+	// Reset state so the connection can be reused	
 	_request.clear();
 	_response.clear();
 	framer._headerState = 0;
@@ -332,14 +311,14 @@ void WebSocketAdapter::onSocketClose()
 //
 
 
-WebSocketConnectionAdapter::WebSocketConnectionAdapter(Connection& connection, WebSocket::Mode mode) : 
-	WebSocketAdapter(&connection.socket(), mode, connection.request(), connection.response()), 
+ConnectionAdapter::ConnectionAdapter(Connection& connection, ws::Mode mode) : 
+	WebSocketAdapter(connection.socket(), mode, connection.request(), connection.response()), 
 	_connection(connection)
 {
 }
 
 	
-WebSocketConnectionAdapter::~WebSocketConnectionAdapter() 
+ConnectionAdapter::~ConnectionAdapter() 
 {	
 }
 
@@ -349,11 +328,11 @@ WebSocketConnectionAdapter::~WebSocketConnectionAdapter()
 //
 
 
-WebSocketFramer::WebSocketFramer(WebSocket::Mode mode) : //bool mustMaskPayload
+WebSocketFramer::WebSocketFramer(ws::Mode mode) : //bool mustMaskPayload
 	_mode(mode),
 	_frameFlags(0),
 	_headerState(0),
-	_maskPayload(mode == WebSocket::ClientSide)
+	_maskPayload(mode == ws::ClientSide)
 {
 }
 
@@ -373,14 +352,14 @@ std::string computeAccept(const std::string& key)
 {
 	std::string accept(key);
 	crypto::Hash engine("SHA1");
-	engine.update(key + WebSocket::ProtocolGuid);
+	engine.update(key + ws::ProtocolGuid);
 	return base64::encode(engine.digest());
 }
 
 
 void WebSocketFramer::createHandshakeRequest(http::Request& request)
 {
-	assert(_mode == WebSocket::ClientSide);
+	assert(_mode == ws::ClientSide);
 	assert(_headerState == 0);
 
 	// Send the handshake request
@@ -388,7 +367,7 @@ void WebSocketFramer::createHandshakeRequest(http::Request& request)
 	request.setChunkedTransferEncoding(false);
 	request.set("Connection", "Upgrade");
 	request.set("Upgrade", "websocket");
-	request.set("Sec-WebSocket-Version", WebSocket::ProtocolVersion);
+	request.set("Sec-WebSocket-Version", ws::ProtocolVersion);
 	assert(request.has("Sec-WebSocket-Version"));
 	request.set("Sec-WebSocket-Key", _key);
 	assert(request.has("Sec-WebSocket-Key"));
@@ -400,7 +379,7 @@ void WebSocketFramer::createHandshakeRequest(http::Request& request)
 
 bool WebSocketFramer::checkHandshakeResponse(http::Response& response)
 {	
-	assert(_mode == WebSocket::ClientSide);
+	assert(_mode == ws::ClientSide);
 	assert(_headerState == 1);
 	if (response.getStatus() == http::StatusCode::SwitchingProtocols) 
 	{
@@ -415,7 +394,7 @@ bool WebSocketFramer::checkHandshakeResponse(http::Response& response)
 	else if (response.getStatus() == http::StatusCode::NotAuthorized)
 		assert(0 && "authentication not implemented");
 	else
-		throw std::runtime_error("WebSocket error: Cannot upgrade to WebSocket connection: " + response.getReason()); //, WebSocket::ErrorNoHandshake
+		throw std::runtime_error("WebSocket error: Cannot upgrade to WebSocket connection: " + response.getReason()); //, ws::ErrorNoHandshake
 
 	// Need to resend request
 	return false;
@@ -427,10 +406,10 @@ void WebSocketFramer::acceptRequest(http::Request& request, http::Response& resp
 	if (util::icompare(request.get("Connection", ""), "upgrade") == 0 && 
 		util::icompare(request.get("Upgrade", ""), "websocket") == 0) {
 		std::string version = request.get("Sec-WebSocket-Version", "");
-		if (version.empty()) throw std::runtime_error("WebSocket error: Missing Sec-WebSocket-Version in handshake request"); //, WebSocket::ErrorHandshakeNoVersion
-		if (version != WebSocket::ProtocolVersion) throw std::runtime_error("WebSocket error: Unsupported WebSocket version requested: " + version); //, WebSocket::ErrorHandshakeUnsupportedVersion
+		if (version.empty()) throw std::runtime_error("WebSocket error: Missing Sec-WebSocket-Version in handshake request"); //, ws::ErrorHandshakeNoVersion
+		if (version != ws::ProtocolVersion) throw std::runtime_error("WebSocket error: Unsupported WebSocket version requested: " + version); //, ws::ErrorHandshakeUnsupportedVersion
 		std::string key = util::trim(request.get("Sec-WebSocket-Key", ""));
-		if (key.empty()) throw std::runtime_error("WebSocket error: Missing Sec-WebSocket-Key in handshake request"); //, WebSocket::ErrorHandshakeNoKey
+		if (key.empty()) throw std::runtime_error("WebSocket error: Missing Sec-WebSocket-Key in handshake request"); //, ws::ErrorHandshakeNoKey
 		
 		response.setStatusAndReason(http::StatusCode::SwitchingProtocols);
 		response.set("Upgrade", "websocket");
@@ -440,14 +419,14 @@ void WebSocketFramer::acceptRequest(http::Request& request, http::Response& resp
 		// Set headerState 2 since the handshake was accepted.
 		_headerState = 2;
 	}
-	else throw std::runtime_error("WebSocket error: No WebSocket handshake"); //, WebSocket::ErrorNoHandshake
+	else throw std::runtime_error("WebSocket error: No WebSocket handshake"); //, ws::ErrorNoHandshake
 }
 
 	
-int WebSocketFramer::writeFrame(const char* data, int len, int flags, BitWriter& frame)
+std::size_t WebSocketFramer::writeFrame(const char* data, std::size_t len, int flags, BitWriter& frame)
 {
-	assert(flags == WebSocket::SendFlags::Text || 
-		flags == WebSocket::SendFlags::Binary);	
+	assert(flags == ws::SendFlags::Text || 
+		flags == ws::SendFlags::Binary);	
 	assert(frame.position() == 0);
 	//assert(frame.limit() >= std::size_t(len + MAX_HEADER_LENGTH));
 			
@@ -477,7 +456,7 @@ int WebSocketFramer::writeFrame(const char* data, int len, int flags, BitWriter&
 		auto b = reinterpret_cast<const char*>(data);
 		frame.put(m, 4);
 		//auto p = frame.current();
-		for (int i = 0; i < len; i++) {
+		for (unsigned i = 0; i < len; i++) {
 			//p[i] = b[i] ^ m[i % 4];
 			frame.putU8(b[i] ^ m[i % 4]);
 		}
@@ -490,13 +469,14 @@ int WebSocketFramer::writeFrame(const char* data, int len, int flags, BitWriter&
 	// Update frame length to include payload plus header
 	//frame.skip(len);
 
-	/*
+#if 0
 	TraceLS(this) << "Write frame: " 
 		 << "\n\tinputLength: " << len
 		 << "\n\tframePosition: " << frame.position() 
 		 << "\n\tframeLimit: " << frame.limit() 
 		 << "\n\tframeAvailable: " << frame.available() 
-		 << endl;	*/
+		 << endl;
+#endif
 
 	return frame.position();
 }
@@ -537,7 +517,7 @@ UInt64 WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 		UInt64 l;
 		headerReader.getU64(l);
 		if (l > limit)
-			throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %" I64_FMT "u", l)); //, WebSocket::ErrorPayloadTooBig
+			throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %" I64_FMT "u", l)); //, ws::ErrorPayloadTooBig
 		payloadLength = l;
 		payloadOffset += 8;
 	}
@@ -545,14 +525,14 @@ UInt64 WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 		UInt16 l;
 		headerReader.getU16(l);
 		if (l > limit)
-			throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %u", unsigned(l))); //, WebSocket::ErrorPayloadTooBig
+			throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %u", unsigned(l))); //, ws::ErrorPayloadTooBig
 		payloadLength = l;
 		payloadOffset += 2;
 	}
 	else {
 		UInt8 l = lengthByte & 0x7f;
 		if (l > limit)
-			throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %u", unsigned(l))); //, WebSocket::ErrorPayloadTooBig
+			throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %u", unsigned(l))); //, ws::ErrorPayloadTooBig
 		payloadLength = l;
 	}
 	if (lengthByte & FRAME_FLAG_MASK) {	
@@ -561,7 +541,7 @@ UInt64 WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 	}
 
 	if (payloadLength > limit) //length)
-		throw std::runtime_error("WebSocket error: Incomplete frame received"); //, WebSocket::ErrorIncompleteFrame		
+		throw std::runtime_error("WebSocket error: Incomplete frame received"); //, ws::ErrorIncompleteFrame		
 
 	// Get a reference to the start of the payload
 	payload = reinterpret_cast<char*>(const_cast<char*>(frame.begin() + (offset + payloadOffset)));
@@ -588,17 +568,17 @@ void WebSocketFramer::completeHandshake(http::Response& response)
 {
 	std::string connection = response.get("Connection", "");
 	if (util::icompare(connection, "Upgrade") != 0) 
-		throw std::runtime_error("WebSocket error: No Connection: Upgrade header in handshake response"); //, WebSocket::ErrorNoHandshake
+		throw std::runtime_error("WebSocket error: No Connection: Upgrade header in handshake response"); //, ws::ErrorNoHandshake
 	std::string upgrade = response.get("Upgrade", "");
 	if (util::icompare(upgrade, "websocket") != 0)
-		throw std::runtime_error("WebSocket error: No Upgrade: websocket header in handshake response"); //, WebSocket::ErrorNoHandshake
+		throw std::runtime_error("WebSocket error: No Upgrade: websocket header in handshake response"); //, ws::ErrorNoHandshake
 	std::string accept = response.get("Sec-WebSocket-Accept", "");
 	if (accept != computeAccept(_key))
-		throw std::runtime_error("WebSocket error: Invalid or missing Sec-WebSocket-Accept header in handshake response"); //, WebSocket::ErrorNoHandshake
+		throw std::runtime_error("WebSocket error: Invalid or missing Sec-WebSocket-Accept header in handshake response"); //, ws::ErrorNoHandshake
 }
 
 
-WebSocket::Mode WebSocketFramer::mode() const
+ws::Mode WebSocketFramer::mode() const
 {
 	return _mode;
 }
@@ -622,4 +602,4 @@ bool WebSocketFramer::mustMaskPayload() const
 }
 
 
-} } // namespace scy::http
+} } } // namespace scy::http::ws

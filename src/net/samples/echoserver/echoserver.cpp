@@ -14,7 +14,7 @@ CMemLeakDetect memLeakDetect;
 */
 
 
-using namespace std;
+using std::endl;
 using namespace scy;
 using namespace scy::net;
 
@@ -53,9 +53,9 @@ int main(int argc, char** argv)
 			srvs.tcp.start("0.0.0.0", TcpPort);
 			srvs.ssl.start("0.0.0.0", SslPort);
 		
-			InfoL << "UDP Server listening on " << srvs.udp.socket.address() << endl;
-			InfoL << "TCP Server listening on " << srvs.tcp.socket.address() << endl;
-			InfoL << "SSL Server listening on " << srvs.ssl.socket.address() << endl;
+			InfoL << "UDP Server listening on " << srvs.udp.socket->address() << endl;
+			InfoL << "TCP Server listening on " << srvs.tcp.socket->address() << endl;
+			InfoL << "SSL Server listening on " << srvs.ssl.socket->address() << endl;
 
 			app.waitForShutdown(onShutdown, &srvs);
 		}

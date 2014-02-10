@@ -51,7 +51,7 @@ public:
 		sockio::TCPClient client(app.loop);
 #endif
 
-		client.StateChange += delegate(this, &Tests::onClientStateChange);
+		client.StateChange += sdelegate(this, &Tests::onClientStateChange);
 		client.connect(SERVER_HOST, SERVER_PORT);
 		
 		app.run();
@@ -120,15 +120,15 @@ int main(int argc, char** argv)
 		
 		/*
 		//sockio::Socket socket(reactor, srvAddr);
-		//socket.StateChange += delegate(this, &Tests::onClientStateChange);
+		//socket.StateChange += sdelegate(this, &Tests::onClientStateChange);
 		//socket.connect();
 		
 		Net::TCPStatefulSocket tcpSocket(reactor);
-		tcpSocket.StateChange += delegate(this, &Tests::onClientStateChange);
+		tcpSocket.StateChange += sdelegate(this, &Tests::onClientStateChange);
 		tcpSocket.connect(srvAddr);			
 
 		Net::SSLStatefulSocket sslSocket(reactor);
-		sslSocket.StateChange += delegate(this, &Tests::onClientStateChange);
+		sslSocket.StateChange += sdelegate(this, &Tests::onClientStateChange);
 		sslSocket.connect(srvAddr);
 		*/
 
@@ -158,7 +158,7 @@ int main(int argc, char** argv)
 	{
 		Log("trace") << "[Tests:" << this << "] runConnectionTest" << std::endl;
 		
-		socket.StateChange += delegate(this, &Tests::onClientStateChange);
+		socket.StateChange += sdelegate(this, &Tests::onClientStateChange);
 		socket.connect();
 
 		//BroadcastPacket += PacketDelegate<Tests, RawPacket>(this, &Tests::onBroadcastPacket, 0);
@@ -296,18 +296,18 @@ int main(int argc, char** argv)
 		//SecureStreamSocket& ss1(reinterpret_cast<SecureStreamSocket&>(ss11));
 		
 		//Net::SocketBase<Poco::Net::SecureStreamSocket, scy::Net::SSLTCP> ss1(reactor);
-		//ss1.StateChange += delegate(this, &Tests::onClientStateChange);	
+		//ss1.StateChange += sdelegate(this, &Tests::onClientStateChange);	
 		//ss1.connect(srvAddr);	
 		//Net::TCPStatefulSocket ss1(reactor);
 
 		/*
 		Net::SSLStatefulSocket ss1(reactor);
 		//ss1 += packetDelegate(this, &Tests::onResponseReceived);
-		ss1.StateChange += delegate(this, &Tests::onClientStateChange);	
+		ss1.StateChange += sdelegate(this, &Tests::onClientStateChange);	
 		ss1.connect(srvAddr);		
 		//SecureStreamSocket ss1(srvAddr);	
 
-		socket.Connected += delegate(this, &Tests::onConnected);	
+		socket.Connected += sdelegate(this, &Tests::onConnected);	
 		socket += packetDelegate(this, &Tests::onResponseReceived);
 		socket.connect(srvAddr);	
 		*/

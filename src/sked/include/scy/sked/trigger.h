@@ -61,6 +61,7 @@ enum MonthOfTheYeay
           
 
 // ---------------------------------------------------------------------
+//
 struct Trigger: public json::ISerializable
 {
 	Trigger(const std::string& type = "", const std::string& name = "");
@@ -68,7 +69,6 @@ struct Trigger: public json::ISerializable
 	virtual void update() = 0;
 		// Updates the scheduleAt value to the
 		// next scheduled time.
-		// Return false here to destroy the task.
 	
 	virtual Int64 remaining();
 		// Returns the milliseconds remaining 
@@ -108,6 +108,7 @@ struct Trigger: public json::ISerializable
 
 
 // ---------------------------------------------------------------------
+//
 struct OnceOnlyTrigger: public Trigger
 {
 	OnceOnlyTrigger();
@@ -122,6 +123,7 @@ struct OnceOnlyTrigger: public Trigger
 
 
 // ---------------------------------------------------------------------
+//
 struct IntervalTrigger: public Trigger
 {
 	IntervalTrigger();
@@ -144,6 +146,7 @@ struct IntervalTrigger: public Trigger
 
 
 // ---------------------------------------------------------------------
+//
 struct DailyTrigger: public Trigger
 {
 	DailyTrigger();

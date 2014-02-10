@@ -44,7 +44,7 @@ class TCPAllocation: public ServerAllocation
 {
 public:
 	TCPAllocation(Server& server, 
-				  const net::Socket& control, 
+				  const net::Socket::Ptr& control, 
 				  const FiveTuple& tuple, 
 				  const std::string& username, 
 				  const UInt32& lifetime);
@@ -65,7 +65,7 @@ public:
 	
 	bool onTimer();
 
-	void onPeerAccept(void* sender, const net::TCPSocket& sock);
+	void onPeerAccept(void* sender, const net::TCPSocket::Ptr& sock);
 		// Accepts incoming peer sockets for ConnectionBind requests.
 
 	void onControlClosed(void* sender);
@@ -75,9 +75,9 @@ public:
 	//virtual const char* className() const { return "TCPAllocation"; };
 
 protected:
-	net::TCPSocket _control;
+	net::TCPSocket::Ptr _control;
+	net::TCPSocket::Ptr _acceptor;
 	TCPConnectionPairMap _pairs;
-	net::TCPSocket	_acceptor;
 };
 
 

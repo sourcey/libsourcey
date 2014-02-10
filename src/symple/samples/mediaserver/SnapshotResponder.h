@@ -1,4 +1,4 @@
-#include "MediaServer.h"
+#include "mediaserver.h"
 
 
 namespace scy { 
@@ -18,7 +18,7 @@ public:
 			
 	void onRequest(http::Request& request, http::Response& response) 
 	{
-		debugL("SnapshotRequestHandler", this) << "Running" << std::endl;
+		DebugLS(this) << "Running" << std::endl;
 
 		cv::Mat frame;
 		options.videoCapture->getFrame(frame,
@@ -31,7 +31,7 @@ public:
 		param[1] = 95; // default(95) 0-100
 		cv::imencode(".jpg", frame, buffer, param);
 
-		debugL("SnapshotRequestHandler", this) << "Taking Snapshot Image: " 
+		DebugLS(this) << "Taking Snapshot Image: " 
 			<< "\n\tWidth: " << frame.cols 
 			<< "\n\tHeight: " << frame.rows 
 			<< "\n\tCapture Width: " << options.videoCapture->width()
@@ -48,7 +48,7 @@ public:
 
 		connection().response().set("Access-Control-Allow-Origin", "*");
 		//connection().sendData((const char*)&buffer[0], buffer.size());
-		connection().socket().send((const char*)&buffer[0], buffer.size());
+		connection().socket()->send((const char*)&buffer[0], buffer.size());
 		connection().close();
 	}
 	

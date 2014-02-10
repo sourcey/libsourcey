@@ -28,7 +28,7 @@ namespace scy {
 namespace pman {
 
 
-typedef std::vector<LocalPackage*> LocalPackageList;
+typedef std::vector<LocalPackage*> LocalPackageVec;
 
 
 class InstallMonitor
@@ -37,7 +37,7 @@ public:
 	InstallMonitor();
 	virtual ~InstallMonitor();
 	
-	virtual void addTask(InstallTask* task);
+	virtual void addTask(InstallTask::Ptr task);
 		// Adds a task to monitor.
 
 	virtual void startAll();
@@ -50,10 +50,10 @@ public:
 		// Returns true if all install tasks have completed,
 		// either successfully or unsuccessfully.
 
-	virtual InstallTaskVec tasks() const;
+	virtual InstallTaskPtrVec tasks() const;
 		// Returns the list of monitored package tasks.
 	
-	virtual LocalPackageList packages() const;
+	virtual LocalPackageVec packages() const;
 		// Returns the list of monitored packages.
 		
 	Signal3<InstallTask&, const InstallationState&, const InstallationState&> InstallStateChange;
@@ -65,7 +65,7 @@ public:
 	Signal<int&> Progress;
 		// Signals on overall progress update [0-100].
 
-	Signal<LocalPackageList&> Complete;
+	Signal<LocalPackageVec&> Complete;
 		// Signals on all tasks complete.
 	
 protected:
@@ -77,18 +77,17 @@ protected:
 
 protected:
 	mutable Mutex	_mutex;
-
-	InstallTaskVec _tasks;
-	LocalPackageList _packages;
+	InstallTaskPtrVec _tasks;
+	LocalPackageVec _packages;
 	int _progress;
 };
 
 
-inline std::string getInstallTaskNamesString(LocalPackageList& packages) 
-	/// Returns a comma delimited package name string.
+inline std::string getInstallTaskNamesString(LocalPackageVec& packages) 
+	// Returns a comma delimited package name string.
 {
 	std::string names;
-	for (LocalPackageList::const_iterator it = packages.begin(); it != packages.end();) {
+	for (auto it = packages.begin(); it != packages.end();) {
 		names += (*it)->name();
 		++it;
 		if (it != packages.end())

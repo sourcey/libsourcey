@@ -247,13 +247,11 @@ public:
 	virtual void resume();
 		// Resume the stream.
 
-	virtual void reset();
-		// Reset the internal state of all packet adapters in the stream. 
-		// Useful for correcting metadata generation when new receivers
-		// connect to the stream.
-
 	virtual void close();
 		// Close the stream and transition the internal state to Closed.
+
+	virtual void reset();
+		// Cleanup all managed stream adapters and reset the stream state.
 	
 	virtual bool active() const;
 		// Returns true when the stream is in the Active state.
@@ -440,9 +438,6 @@ protected:
 
 	void teardown();
 		// Detach the source and processor delegate chain.
-
-	void cleanup();
-		// Remove all stream adapters and delete managed adapters.
 
 	void emit(IPacket& packet);
 		// Emit the final packet to listeners.

@@ -1,6 +1,7 @@
 #ifndef SCY_MediaServer_H
 #define SCY_MediaServer_H
 
+
 #include "scy/logger.h"
 #include "scy/application.h"
 #include "scy/util.h"
@@ -8,32 +9,7 @@
 #include "scy/media/avencoder.h"
 #include "scy/media/mediafactory.h"
 #include "scy/http/server.h"
-
-/*
-//#include "scy/crypto.h"
-#include "scy/packetstream.h"
-#include "scy/http/websocket.h"
-
-#include <string>
-#include <vector>
-#include <assert.h>
-#include <conio.h>
-*/
-
-
-/*
-// Detect Win32 memory Leaks - leak free!
-#ifdef _DEBUG
-#include "MemLeakDetect/MemLeakDetect.h"
-#include "MemLeakDetect/MemLeakDetect.cpp"
-CMemLeakDetect memLeakDetect;
-#endif
-
-using namespace std;
-using namespace scy;
-using namespace scy::av;
-*/
-
+#include "config.h"
 
 
 namespace scy { 
@@ -45,18 +21,18 @@ class MediaServer;
 // ----------------------------------------------------------------------------
 // HTTP Streaming Options
 //
-struct StreamingOptions: public av::RecordingOptions
+struct StreamingOptions: public av::EncoderOptions
 {	
 	std::string framing;		// HTTP response framing [chunked, multipart]
 	std::string encoding;		// The packet content encoding method [Base64, ...]
 		
 	MediaServer* server;		// Media server instance
-	av::VideoCapture::ptr videoCapture; // Video capture instance
-	av::AudioCapture::ptr audioCapture; // Audio capture instance
+	av::VideoCapture::Ptr videoCapture; // Video capture instance
+	av::AudioCapture::Ptr audioCapture; // Audio capture instance
 
 	StreamingOptions(MediaServer* server = nullptr, 
-		av::VideoCapture::ptr videoCapture = nullptr,
-		av::AudioCapture::ptr audioCapture = nullptr);
+		av::VideoCapture::Ptr videoCapture = nullptr,
+		av::AudioCapture::Ptr audioCapture = nullptr);
 
 	virtual ~StreamingOptions();
 };

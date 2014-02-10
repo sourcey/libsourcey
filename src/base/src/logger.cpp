@@ -430,7 +430,7 @@ void FileChannel::write(const LogStream& stream)
 	
 	std::ostringstream ss;
 	format(stream, ss);
-	_fstream << ss.str();
+	_fstream << ss.str() << std::endl;
 	_fstream.flush();
 
 #if defined(_CONSOLE) || defined(_DEBUG)

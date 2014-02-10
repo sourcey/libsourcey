@@ -173,12 +173,11 @@ HTTPStreamingConnectionFactory::HTTPStreamingConnectionFactory(MediaServer* serv
 	
 http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::ServerConnection& conn)
 {
-	try 
-	{
+	try {
 		auto& request = conn.request();
 
 		// Log incoming requests
-		InfoL << "Incoming connection from " << conn.socket().peerAddress() 
+		InfoL << "Incoming connection from " << conn.socket()->peerAddress() 
 			<< ": URI:\n" << request.getURI()
 			<< ": Request:\n" << request << endl;
 			
@@ -244,8 +243,7 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 			return new SnapshotRequestHandler(conn, options);	
 		}	
 	}
-	catch (std::exception& exc)
-	{
+	catch (std::exception& exc) {
 		ErrorL << "Request error: " << exc.what() << endl;
 	}
 		
@@ -259,7 +257,7 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 //
 
 
-StreamingOptions::StreamingOptions(MediaServer* server, av::VideoCapture::ptr videoCapture, av::AudioCapture::ptr audioCapture) : 
+StreamingOptions::StreamingOptions(MediaServer* server, av::VideoCapture::Ptr videoCapture, av::AudioCapture::Ptr audioCapture) : 
 	server(server), videoCapture(videoCapture), audioCapture(audioCapture) 
 {
 	DebugLS(this) << "Destroy" << endl;	
@@ -283,7 +281,7 @@ static void onShutdown1(void* opaque)
 int main(int argc, char** argv)
 {
 	Logger::instance().add(new ConsoleChannel("debug", LTrace));
-	Logger::instance().setWriter(new AsyncLogWriter);			
+	//Logger::instance().setWriter(new AsyncLogWriter);			
 	{
 		// Pre-initialize video captures in the main thread	
 		//MediaFactory::instance().loadVideo();	
@@ -307,7 +305,7 @@ int main(int argc, char** argv)
 		//GarbageCollector::instance().finalize();
 
 		// Shutdown the media factory and release devices
-		MediaFactory::instance().unloadVideo();		
+		MediaFactory::instance().unloadVideoCaptures();
 		MediaFactory::shutdown();
 
 		// Shutdown the garbage collector once and for all
