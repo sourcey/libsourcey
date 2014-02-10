@@ -233,7 +233,7 @@ void Message::write(Buffer& buf) const
 }
 
 
-string Message::classString() const 
+std::string Message::classString() const 
 {
 	switch (_class) {
 	case Request:					return "Request";
@@ -245,7 +245,7 @@ string Message::classString() const
 }
 
 
-string Message::errorString(UInt16 errorCode) const
+std::string Message::errorString(UInt16 errorCode) const
 {
 	switch (errorCode) {
 	case BadRequest:				return "BAD REQUEST";
@@ -286,7 +286,7 @@ std::string Message::methodString() const
 std::string Message::toString() const 
 {
 	std::ostringstream os;
-	os << "STUN[" << methodString(); // << ":" << transactionID();
+	os << "STUN[" << methodString() << ":" << transactionID();
 	for (unsigned i = 0; i < _attrs.size(); i++)
 		os << ":" << _attrs[i]->typeString();
 	os << "]";
@@ -296,7 +296,7 @@ std::string Message::toString() const
 
 void Message::print(std::ostream& os) const
 {
-	os << "STUN[" << methodString(); // << ":" << transactionID();
+	os << "STUN[" << methodString() << ":" << transactionID();
 	for (unsigned i = 0; i < _attrs.size(); i++)
 		os << ":" << _attrs[i]->typeString();
 	os << "]";

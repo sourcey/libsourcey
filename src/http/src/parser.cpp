@@ -460,7 +460,7 @@ void Parser::setError(UInt32 code, const std::string& message)
  * @return
 Parser* Parser::create(
     http_parser_type type,
-    net::Socket* socket,
+    net::Socket::Ptr socket,
     on__observertype _observercb)
 {
 
@@ -507,7 +507,7 @@ const http_start_line& Parser::start_line() const {
  * @param type   http_parser_type value (HTTP_{REQUEST,RESPONSE,BOTH})
  * @param socket net::Socket to be read by parser
  
-	//socket_(socket) //, net::Socket* socket
+	//socket_(socket) //, net::Socket::Ptr socket
 	//, on__observer()
 	//, 
 	//, parser_()

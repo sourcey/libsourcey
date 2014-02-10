@@ -32,7 +32,9 @@ UDPClient::UDPClient(ClientObserver& observer, const Options& options) :
 	Client(observer, options)
 {
 	TraceL << "Create" << endl;
-	_socket.assign(new net::UDPBase, false);
+
+	_socket = net::makeSocket<net::UDPSocket>(); //std::make_shared<net::UDPSocket>();
+	//_socket.assign(new net::UDPSocket, false);
 }
 
 

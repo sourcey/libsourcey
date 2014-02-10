@@ -62,11 +62,14 @@ struct ClientState: public State
 };
 
 
-class Client: public Stateful<ClientState>, public PacketSignal
+class Client: 
+	public Stateful<ClientState>, 
+	public net::SocketAdapter, 
+	public PacketSignal
 {
 public:
-	Client(net::SocketBase* socket);
-	Client(net::SocketBase* socket, const std::string& host, UInt16 port);
+	Client(const net::Socket::Ptr& socket);
+	Client(const net::Socket::Ptr& socket, const std::string& host, UInt16 port);
 	virtual ~Client();
 	
 	virtual void connect(const std::string& host, UInt16 port);
@@ -95,9 +98,9 @@ public:
 		// Creates a packet transaction
 
 	//uv::Loop* loop();
-	http::WebSocket& socket();
+	http::ws::WebSocket& ws();
 	std::string sessionID() const;	
-	Error error() const;
+	scy::Error error() const;
 		
 	bool isOnline() const;
 
@@ -105,10 +108,10 @@ public:
 		// Returns true if the client was in the Online state.
 		// Useful for delegates handling the Closed state.
 
-	virtual const char* className() const { return "SocketIOClient"; }
+	//virtual const char* className() const { return "SocketIOClient"; }
 
 protected:
-	virtual void setError(const Error& error);
+	virtual void setError(const scy::Error& error);
 
 	virtual void reset();
 		// Resets variables and data at the beginning  
@@ -124,10 +127,14 @@ protected:
 	virtual void onClose();
 	virtual void onPacket(sockio::Packet& packet);
 	
-	virtual void onSocketConnect(void*);
-	virtual void onSocketRecv(void*, net::SocketPacket& packet);
-	virtual void onSocketError(void*, const Error& error);
-	virtual void onSocketClose(void*);
+	virtual void onSocketConnect();
+	virtual void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress);
+	virtual void onSocketError(const scy::Error& error);
+	virtual void onSocketClose();
+	//virtual void onSocketConnect();
+	//virtual void onSocketRecv(void*, const MutableBuffer& buffer, const net::Address& peerAddress);
+	//virtual void onSocketError(void*, const Error& error);
+	//virtual void onSocketClose(void*);
 
 	virtual void onHeartBeatTimer(void*);
 
@@ -135,16 +142,16 @@ protected:
 	//mutable Mutex	_mutex;
 	
 	//uv::Loop* _loop;
-	Error _error;
+	scy::Error _error;
 	std::vector<std::string> _protocols;
 	std::string _sessionID;
 	std::string _host;
 	UInt16 _port;
-	http::WebSocket _socket;
+	http::ws::WebSocket _ws;
 	int	_heartBeatTimeout;
 	int	_connectionClosingTimeout;
 	bool _wasOnline;
-	bool _closing;
+	//bool _closing;
 	Timer _timer;
 };
 
@@ -194,7 +201,7 @@ public:
 	
 	//Error _error;
 	TCPClient(const std::string& host, UInt16 port, uv::Loop* loop = uv::defaultLoop()) :
-		Client(new net::TCPBase, const std::string& host, UInt16 port, loop)//,
+		Client(new net::TCPSocket, const std::string& host, UInt16 port, loop)//,
 		//_socket(loop)
 	{
 	}
@@ -224,7 +231,7 @@ protected:
 
 // ---------------------------------------------------------------------
 //
-typedef sockio::ClientBase<http::WebSocket> TCPClient;
+typedef sockio::ClientBase<http::ws::WebSocket> TCPClient;
 
 	//virtual void onSocketConnect(void*);
 
@@ -234,7 +241,7 @@ typedef sockio::ClientBase<http::WebSocket> TCPClient;
 typedef sockio::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
-			Net::SocketBase< Poco::Net::StreamSocket, Net::TCP, http::WebSocket >
+			Net::SocketBase< Poco::Net::StreamSocket, Net::TCP, http::ws::WebSocket >
 		> 
 	> 
 > TCPClient;
@@ -245,7 +252,7 @@ typedef sockio::ClientBase<
 typedef sockio::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
-			Net::SocketBase< Poco::Net::SecureStreamSocket, Net::SSLTCP, http::WebSocket >
+			Net::SocketBase< Poco::Net::SecureStreamSocket, Net::SSLTCP, http::ws::WebSocket >
 		> 
 	> 
 > SSLClient;
@@ -259,7 +266,7 @@ typedef sockio::ClientBase<
 typedef sockio::ClientBase< 
 	Net::WebSocketBase< 
 		Net::StatefulSocketBase< 
-			Net::SocketBase< ::TCPContext, http::WebSocket >  //sockio::ISocket 
+			Net::SocketBase< ::TCPContext, http::ws::WebSocket >  //sockio::ISocket 
 		> 
 	> 
 > Client;
@@ -280,7 +287,7 @@ typedef sockio::ClientBase<
 	
 	//Signal<sockio::Packet> Packet;
 		// Signals data received by the socket.
-	//virtual http::WebSocket* createSocket() = 0;
+	//virtual http::ws::WebSocket* createSocket() = 0;
 		// Creates the underlying socket instance
 	//Net::Reactor&	_reactor;
 
@@ -530,7 +537,7 @@ typedef sockio::ClientBase<
 //			_timer = new TimerTask(
 //				(_heartBeatTimeout * .75) * 1000, 
 //				(_heartBeatTimeout * .75) * 1000);
-//			_timer.Timeout += delegate(this, &Socket::onHeartBeatTimer);
+//			_timer.Timeout += sdelegate(this, &Socket::onHeartBeatTimer);
 //		}
 //		if (!_timer.running())
 //			_timer.start();
@@ -584,7 +591,7 @@ typedef sockio::ClientBase<
 	}
 
 
-	virtual http::WebSocket* socket()
+	virtual http::ws::WebSocket* socket()
 	{
 		//Mutex::ScopedLock lock(_mutex);
 		return _socket;
@@ -593,7 +600,7 @@ typedef sockio::ClientBase<
 //typedef sockio::SocketBase< Net::SocketBase< ::SSLContext, sockio::ISocket> > SSLSocket;
  //Net::SocketBase< ::TCPContext, sockio::ISocket>
 	//bool			_secure;
-	//http::WebSocket* _socket;
+	//http::ws::WebSocket* _socket;
 
 
 	/*
@@ -697,7 +704,7 @@ public:
 	virtual void setSecure(bool flag);
 		// Enables secure wss:// connection when true.
 	
-	//http::WebSocket* socket();
+	//http::ws::WebSocket* socket();
 	KVCollection& httpHeaders();
 	std::string sessionID() const;
 

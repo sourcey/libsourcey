@@ -59,7 +59,7 @@ void AudioContext::create()
 
 void AudioContext::open()
 {	
-	TraceL << "[AudioContext: " << this << "] Opening" << endl;	
+	TraceLS(this) << "Opening" << endl;	
 	assert(ctx);
 	assert(codec);
 
@@ -105,11 +105,13 @@ AudioEncoderContext::AudioEncoderContext(AVFormatContext* format) :
 	//buffer(nullptr),
 	//bufferSize(0)
 {
+	TraceLS(this) << "Create" << endl;	
 }
 	
 
 AudioEncoderContext::~AudioEncoderContext()
 {
+	TraceLS(this) << "Destroy" << endl;	
 	close();
 }
 

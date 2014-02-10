@@ -45,12 +45,12 @@ public:
 	virtual ~UDPAllocation();
 
 	//void onPacketReceived(void* sender, RawPacket& packet);
-	void onPeerDataReceived(void*, net::SocketPacket& packet);
+	void onPeerDataReceived(void*, const MutableBuffer& buffer, const net::Address& peerAddress);
 		
 	bool handleRequest(Request& request);	
 	void handleSendIndication(Request& request);
 
-	int send(const char* data, int size, const net::Address& peerAddress);
+	int send(const char* data, std::size_t size, const net::Address& peerAddress);
 	
 	net::Address relayedAddress() const;
 

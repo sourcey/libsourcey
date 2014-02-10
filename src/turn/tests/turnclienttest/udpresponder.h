@@ -29,8 +29,8 @@ public:
 		id(id)
 	{
 		DebugLS(this) << id << ": Creating" << endl;
-		net::SocketAdapter::socket = &socket;
-		socket.setAdapter(this);
+		//net::SocketAdapter::socket = &socket;
+		socket.setInputAdapter(this);
 
 		socket.bind(net::Address("0.0.0.0", 0));
 		//socket.bind(net::Address(TURN_AUTHORIZE_PEER_IP, 4020));
@@ -41,7 +41,7 @@ public:
 	virtual ~UDPResponder() 
 	{ 
 		DebugLS(this) << id << ": Destroying" << endl;
-		socket.setAdapter(nullptr);
+		socket.setInputAdapter(nullptr, false);
 		stop(); 
 	}
 
@@ -78,12 +78,12 @@ public:
 	void onSocketConnect() 
 	{
 #if TEST_RESPONDER_TO_INITIATOR_LATENCY
-		timer.Timeout += delegate(this, &UDPResponder::onSendTimer);
+		timer.Timeout += sdelegate(this, &UDPResponder::onSendTimer);
 		timer.start(0, 100);
 #endif
 	}
 	
-	void onSocketRecv(const MutableBuffer& buf, const net::Address& peerAddr) //net::SocketPacket& packet) 
+	void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress) //net::SocketPacket& packet) 
 	{
 		std::string payload(bufferCast<const char*>(buf), buf.size());
 		DebugLS(this) << id << ": On recv: " << peerAddr << ": " << payload << std::endl;
@@ -92,7 +92,7 @@ public:
 		socket.send(payload.c_str(), payload.size(), relayedAddr); // peerAddr
 	}
 
-	void onSocketError(const Error& error) 
+	void onSocketError(const scy::Error& error) 
 	{
 		DebugLS(this) << id << ": On error: " << error.message << std::endl;
 	}
@@ -175,7 +175,7 @@ public:
 	
 protected:	
 
-	void onRelayConnectionDataReceived(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
+	void onRelayConnectionDataReceived(turn::Client& client, const char* data, std::size_t size, const net::Address& peerAddr)
 	{
 		debugL() << "UDPInitiator: " << id << ": Received Data: " << std::string(data, size) << endl;
 

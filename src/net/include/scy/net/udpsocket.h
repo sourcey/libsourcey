@@ -31,35 +31,37 @@ namespace scy {
 namespace net {
 
 
-class UDPBase;
+class UDPSocket;
 
 
+#if 0
 class UDPSocket: public net::Socket
 	/// UDPSocket is a disposable UDP socket wrapper
-	/// for UDPBase which can be created on the stack.
-	/// See UDPBase for implementation details.
+	/// for UDPSocket which can be created on the stack.
+	/// See UDPSocket for implementation details.
 {
 public:	
-	typedef UDPBase Base;
+	typedef UDPSocket Base;
 	typedef std::vector<UDPSocket> List;
 	
 	UDPSocket();
 		/// Creates an unconnected UDP socket.
 
-	UDPSocket(UDPBase* base, bool shared = false);
-		/// Creates the Socket and attaches the given SocketBase.
+	UDPSocket(UDPSocket* base, bool shared = false);
+		/// Creates the Socket and attaches the given Socket.
 		///
-		/// The SocketBase must be a UDPBase, otherwise an
+		/// The Socket must be a UDPSocket, otherwise an
 		/// exception will be thrown.
 
 	UDPSocket(const Socket& socket);
-		/// Creates the UDPSocket with the SocketBase
-		/// from another socket. The SocketBase must be
-		/// a UDPBase, otherwise an exception will be thrown.
+		/// Creates the UDPSocket with the Socket
+		/// from another socket. The Socket must be
+		/// a UDPSocket, otherwise an exception will be thrown.
 	
-	UDPBase& base() const;
-		/// Returns the socket's SocketBase instance.
+	UDPSocket& base() const;
+		/// Returns the socket's Socket instance.
 };
+#endif
 
 
 //
@@ -67,19 +69,22 @@ public:
 //
 
 	
-class UDPBase: public uv::Handle, public net::SocketBase
+class UDPSocket: public net::Socket, public uv::Handle
 {
 public:
-	UDPBase(uv::Loop* loop = uv::defaultLoop());
-	virtual ~UDPBase();
+	typedef std::shared_ptr<UDPSocket> Ptr;
+	typedef std::vector<Ptr> Vec;
+
+	UDPSocket(uv::Loop* loop = uv::defaultLoop());
+	virtual ~UDPSocket();
 	
 	virtual void connect(const net::Address& peerAddress);
 	virtual void close();	
 
 	virtual void bind(const net::Address& address, unsigned flags = 0);
 
-	virtual int send(const char* data, int len, int flags = 0);
-	virtual int send(const char* data, int len, const net::Address& peerAddress, int flags = 0);
+	virtual int send(const char* data, std::size_t len, int flags = 0);
+	virtual int send(const char* data, std::size_t len, const net::Address& peerAddress, int flags = 0);
 	
 	virtual bool setBroadcast(bool flag);
 	virtual bool setMulticastLoop(bool flag);
@@ -91,8 +96,8 @@ public:
 	net::TransportType transport() const;
 		/// Returns the UDP transport protocol.
 			
-	virtual void setError(const Error& err);		
-	const Error& error() const;
+	virtual void setError(const scy::Error& err);		
+	virtual const scy::Error& error() const;
 
 	virtual bool closed() const;
 		/// Returns true if the native socket 
@@ -106,12 +111,13 @@ protected:
 	virtual void init();	
 	virtual bool recvStart();
 	virtual bool recvStop();
+	//virtual void* self() { return this; };
 
 	static void onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags);
 	static void afterSend(uv_udp_send_t* req, int status); 
 	static void allocRecvBuffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t* buf);
 
-	virtual void onError(const Error& error);
+	virtual void onError(const scy::Error& error);
 	virtual void onClose();
 	
 	net::Address _peer;

@@ -29,19 +29,20 @@ namespace scy {
 namespace turn {
 
 
-TCPAllocation::TCPAllocation(Server& server, const net::Socket& control, const FiveTuple& tuple, const std::string& username, const UInt32& lifetime) : 
+TCPAllocation::TCPAllocation(Server& server, const net::Socket::Ptr& control, const FiveTuple& tuple, const std::string& username, const UInt32& lifetime) : 
 	ServerAllocation(server, tuple, username, lifetime),
-	_control(control)
+	_control(std::dynamic_pointer_cast<net::TCPSocket>(control)),
+	_acceptor(std::make_shared<net::TCPSocket>())
 {
 	// Bind a socket acceptor for incoming peer connections.
-	_acceptor.bind(net::Address(server.options().listenAddr.host(), 0));
-	_acceptor.listen();
-	_acceptor.base().AcceptConnection += delegate(this, &TCPAllocation::onPeerAccept);
+	_acceptor->bind(net::Address(server.options().listenAddr.host(), 0));
+	_acceptor->listen();
+	_acceptor->AcceptConnection += sdelegate(this, &TCPAllocation::onPeerAccept);
 	
 	// The allocation will be deleted if the control connection is lost.
-	_control.Close += delegate(this, &TCPAllocation::onControlClosed);
+	_control->Close += sdelegate(this, &TCPAllocation::onControlClosed);
 
-	TraceL << "Initializing on " << _acceptor.address() << endl;
+	TraceL << "Initializing on " << _acceptor->address() << endl;
 }
 	
 
@@ -50,13 +51,13 @@ TCPAllocation::~TCPAllocation()
 	TraceL << "Destroy TCP allocation" << endl;	
 	
 	//Mutex::ScopedLock lock(_mutex);
-	assert(_acceptor.base().refCount() == 1);
-	_acceptor.base().AcceptConnection -= delegate(this, &TCPAllocation::onPeerAccept);
-	_acceptor.close();
+	//assert(_acceptor->/*base().*/refCount() == 1);
+	_acceptor->AcceptConnection -= sdelegate(this, &TCPAllocation::onPeerAccept);
+	_acceptor->close();
 	
-	assert(_acceptor.base().refCount() == 1);
-	_control.Close -= delegate(this, &TCPAllocation::onControlClosed);	
-	_control.close();
+	//assert(_acceptor->/*base().*/refCount() == 1);
+	_control->Close -= sdelegate(this, &TCPAllocation::onControlClosed);	
+	_control->close();
 
 	auto pairs = this->pairs().map();	
 	for (auto it = pairs.begin(); it != pairs.end(); ++it) {
@@ -69,9 +70,9 @@ TCPAllocation::~TCPAllocation()
 }
 
 
-void TCPAllocation::onPeerAccept(void* sender, const net::TCPSocket& socket)
+void TCPAllocation::onPeerAccept(void* sender, const net::TCPSocket::Ptr& socket)
 {
-	TraceL << "Peer connection accepted: " << socket.peerAddress() << endl;
+	TraceL << "Peer connection accepted: " << socket->peerAddress() << endl;
 	
 	// 5.3. Receiving a TCP Connection on a Relayed Transport Address
 	// 
@@ -90,11 +91,11 @@ void TCPAllocation::onPeerAccept(void* sender, const net::TCPSocket& socket)
 	// allocation, the server MUST close the connection with the peer
 	// immediately after it has been accepted.
 	// 
-	if (!hasPermission(socket.peerAddress().host())) {
-		TraceL << "No permission for peer: " << socket.peerAddress() << endl;
+	if (!hasPermission(socket->peerAddress().host())) {
+		TraceL << "No permission for peer: " << socket->peerAddress() << endl;
 		return;
 	}
-	TraceL << "Has permission for: " << socket.peerAddress() << endl;
+	TraceL << "Has permission for: " << socket->peerAddress() << endl;
 
 	// Otherwise, the server sends a ConnectionAttempt indication to the
 	// client over the control connection. The indication MUST include an
@@ -103,19 +104,19 @@ void TCPAllocation::onPeerAccept(void* sender, const net::TCPSocket& socket)
 	// data connection.
 	// 				
 	auto pair = new TCPConnectionPair(*this);
-	assert(socket.base().refCount() == 1);
+	//assert(socket->/*base().*/refCount() == 1);
 	pair->setPeerSocket(socket);
-	assert(socket.base().refCount() == 2);
+	//assert(socket->/*base().*/refCount() == 2);
 	
 	stun::Message response(stun::Message::Indication, stun::Message::ConnectionAttempt);
 	//stun::Message response;
 	//response.setType(stun::Message::ConnectionAttempt);
 
 	auto addrAttr = new stun::XorPeerAddress;	
-	addrAttr->setAddress(socket.peerAddress());
+	addrAttr->setAddress(socket->peerAddress());
 	//addrAttr->setFamily(1);
-	//addrAttr->setPort(socket.peerAddress().port());
-	//addrAttr->setIP(socket.peerAddress().host());
+	//addrAttr->setPort(socket->peerAddress().port());
+	//addrAttr->setIP(socket->peerAddress().host());
 	response.add(addrAttr);
 	
 	auto connAttr = new stun::ConnectionID;
@@ -216,7 +217,11 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
 	
 	assert(request.methodType() == stun::Message::ConnectionBind);
 	TCPConnectionPair* pair = nullptr;
+	auto socket = _server.getTCPSocket(request.remoteAddress);
 	try {
+		if (!socket)
+			throw std::runtime_error("Invalid TCP socket");
+
 		// 5.4. Receiving a ConnectionBind Request
 		// 
 		// When a server receives a ConnectionBind request, it processes the
@@ -225,7 +230,7 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
 		// If the client connection transport is not TCP or TLS, the server MUST
 		// return a 400 (Bad Request) error.
 		// 
-		if (request.socket.transport() != net::TCP) // TODO: TLS!!
+		if (request.transport != net::TCP) // TODO: TLS!!
 			throw std::runtime_error("TLS not supported"); // easy to implement, fixme!
 
 		// If the request does not contain the CONNECTION-ID attribute, or if
@@ -259,10 +264,10 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
 		response.setTransactionID(request.transactionID());
 		
 		// Send the response back over the client connection
-		request.socket.send(response);
+		socket->sendPacket(response);
 
 		// Reassign the socket base instance to the client connection.		
-		pair->setClientSocket(request.socket);
+		pair->setClientSocket(socket);
 		if (!pair->makeDataConnection()) {
 			// Must have a client and peer by now
 			throw std::runtime_error("BUG: Data connection binding failed");
@@ -276,10 +281,10 @@ void TCPAllocation::handleConnectionBindRequest(Request& request)
 		
 		if (pair && !pair->isDataConnection) {
 			delete pair;
-
-			// Close the incoming connection
-			request.socket.close();
 		}
+
+		// Close the incoming connection
+		socket->close();
 	}
 }
 
@@ -322,7 +327,7 @@ int TCPAllocation::sendToControl(stun::Message& message)
 {
 	//Mutex::ScopedLock lock(_mutex);
 	TraceL << "Send to control: " << message << endl;
-	return _control.send(message);
+	return _control->sendPacket(message, 0);
 }
 
 
@@ -340,7 +345,7 @@ void TCPAllocation::onControlClosed(void* sender)
 net::TCPSocket& TCPAllocation::control()
 {
 	//Mutex::ScopedLock lock(_mutex);
-	return _control;
+	return *_control.get();
 }
 
 
@@ -354,7 +359,7 @@ TCPConnectionPairMap& TCPAllocation::pairs()
 net::Address TCPAllocation::relayedAddress() const 
 { 
 	//Mutex::ScopedLock lock(_mutex);
-	return _acceptor.address();
+	return _acceptor->address();
 }
 
 
@@ -362,20 +367,20 @@ net::Address TCPAllocation::relayedAddress() const
 
 
 
-		//pair->client.Close += delegate(this, &TCPAllocation::onConnectionClosed);
+		//pair->client.Close += sdelegate(this, &TCPAllocation::onConnectionClosed);
 	/*
 	TCPPeerConnection* peer = reinterpret_cast<TCPPeerConnection*>(sender);	
-	peer->get()->Connected -= delegate(this, &TCPAllocation::onPeerConnectSuccess);
-	peer->get()->Error -= delegate(this, &TCPAllocation::onPeerConnectError);	
-	//peer->Closed += delegate(this, &TCPAllocation::onPeerDisconnected);	
+	peer->get()->Connected -= sdelegate(this, &TCPAllocation::onPeerConnectSuccess);
+	peer->get()->Error -= sdelegate(this, &TCPAllocation::onPeerConnectError);	
+	//peer->Closed += sdelegate(this, &TCPAllocation::onPeerDisconnected);	
 
-	auto socket = reinterpret_cast<net::TCPSocket*>(sender);
-	TCPConnectionPair* pair = reinterpret_cast<TCPConnectionPair*>(socket->base().opaque);
+	auto socket = reinterpret_cast<net::Socket*>(sender);
+	TCPConnectionPair* pair = reinterpret_cast<TCPConnectionPair*>(socket->opaque);
 	*/
 		//if (it->second->expired()) {
 			//this->pairs().free(it->first);
-			//pair->peer.Close += delegate(this, &TCPAllocation::onConnectionClosed);
-			//pair->peer.Recv += delegate(pair, &TCPConnectionPair::onRelayDataReceived);
+			//pair->peer.Close += sdelegate(this, &TCPAllocation::onConnectionClosed);
+			//pair->peer.Recv += sdelegate(pair, &TCPConnectionPair::onRelayDataReceived);
 		//}
 
 	
@@ -420,17 +425,17 @@ void TCPAllocation::onPeerConnectError(TCPConnectionPair* pair)  //, const std::
 	assert(0 && "a");
 
 	
-	auto socket = reinterpret_cast<net::TCPSocket*>(sender);
-	socket->Connect -= delegate(this, &TCPAllocation::onPeerConnectSuccess);
-	socket->Error -= delegate(this, &TCPAllocation::onPeerConnectError);
+	auto socket = reinterpret_cast<net::Socket*>(sender);
+	socket->Connect -= sdelegate(this, &TCPAllocation::onPeerConnectSuccess);
+	socket->Error -= sdelegate(this, &TCPAllocation::onPeerConnectError);
 
-	TCPConnectionPair* pair = reinterpret_cast<TCPConnectionPair*>(socket->base().opaque);
+	TCPConnectionPair* pair = reinterpret_cast<TCPConnectionPair*>(socket->opaque);
 	//assert(socket->base().refCount() == 1); // ensure the socket base will be destroyed
 	//pairs().free(pair->connectionID);
 
 	TCPPeerConnection* peer = reinterpret_cast<TCPPeerConnection*>(sender);	
-	peer->get()->Connected -= delegate(this, &TCPAllocation::onPeerConnectSuccess);
-	peer->get()->Error -= delegate(this, &TCPAllocation::onPeerConnectError);	
+	peer->get()->Connected -= sdelegate(this, &TCPAllocation::onPeerConnectSuccess);
+	peer->get()->Error -= sdelegate(this, &TCPAllocation::onPeerConnectError);	
 	
 	stun::Message response;
 	response.setType(stun::Message::Connect);
@@ -443,13 +448,13 @@ void TCPAllocation::onPeerConnectError(TCPConnectionPair* pair)  //, const std::
 	*/
 		
 		 //.assign(static_cast<net::TCPSocket*>(&request.socket));
-		 //static_cast<net::TCPBase*>()
+		 //static_cast<net::TCPSocket*>()
 		//UInt32 connectionID = util::randomNumber();
 		//while (pairs().exists(connectionID))
 		//	connectionID = util::randomNumber();
-		//net::SocketBase* socket = static_cast<net::SocketBase*>(&request.socket);
+		//net::Socket* socket = static_cast<net::Socket*>(&request.socket);
 		//TCPClientConnection* client = new TCPClientConnection(*this, *socket, peer); //, server().reactor()
-		//client->Closed += delegate(this, &TCPAllocation::onClientDisconnect);
+		//client->Closed += sdelegate(this, &TCPAllocation::onClientDisconnect);
 		//delete socket;
 		//peers().exists(connAttr->value())
 
@@ -463,25 +468,25 @@ void TCPAllocation::onPeerConnectError(TCPConnectionPair* pair)  //, const std::
 		response.setTransactionID(request.transactionID());
 		
 		// Send the response back over the client connection
-		request.socket.send(response);
+		request.socket->send(response);
 				
 		// Reassign the underlying socket implementation to the 
 		// client connection and free the old socket pointer.
 		
-		//net::SocketBase* socket = static_cast<net::SocketBase*>(&request.socket);
+		//net::Socket* socket = static_cast<net::Socket*>(&request.socket);
 		//TCPClientConnection* client = new TCPClientConnection(*this, *socket, peer); //, server().reactor()
-		//client->Closed += delegate(this, &TCPAllocation::onClientDisconnect);
+		//client->Closed += sdelegate(this, &TCPAllocation::onClientDisconnect);
 		//delete socket;
 		*/
 		
 		 //.assign(static_cast<net::TCPSocket*>(&request.socket));
-		 //static_cast<net::TCPBase*>()
+		 //static_cast<net::TCPSocket*>()
 		//UInt32 connectionID = util::randomNumber();
 		//while (pairs().exists(connectionID))
 		//	connectionID = util::randomNumber();
-		//net::SocketBase* socket = static_cast<net::SocketBase*>(&request.socket);
+		//net::Socket* socket = static_cast<net::Socket*>(&request.socket);
 		//TCPClientConnection* client = new TCPClientConnection(*this, *socket, peer); //, server().reactor()
-		//client->Closed += delegate(this, &TCPAllocation::onClientDisconnect);
+		//client->Closed += sdelegate(this, &TCPAllocation::onClientDisconnect);
 		//delete socket;
 		//peers().exists(connAttr->value())
 
@@ -495,14 +500,14 @@ void TCPAllocation::onPeerConnectError(TCPConnectionPair* pair)  //, const std::
 		response.setTransactionID(request.transactionID());
 		
 		// Send the response back over the client connection
-		request.socket.send(response);
+		request.socket->send(response);
 				
 		// Reassign the underlying socket implementation to the 
 		// client connection and free the old socket pointer.
 		
-		//net::SocketBase* socket = static_cast<net::SocketBase*>(&request.socket);
+		//net::Socket* socket = static_cast<net::Socket*>(&request.socket);
 		//TCPClientConnection* client = new TCPClientConnection(*this, *socket, peer); //, server().reactor()
-		//client->Closed += delegate(this, &TCPAllocation::onClientDisconnect);
+		//client->Closed += sdelegate(this, &TCPAllocation::onClientDisconnect);
 		//delete socket;
 		*/
 
@@ -522,7 +527,7 @@ void TCPAllocation::onPeerConnectError(TCPConnectionPair* pair)  //, const std::
 		if (it->second->expired()) {
 			assert(it->second->client() == nullptr);
 			TraceL << "Closing Expired Peer Connection: " << it->second << endl;	
-			//it->second->Closed -= delegate(this, &TCPAllocation::onPeerDisconnected);
+			//it->second->Closed -= sdelegate(this, &TCPAllocation::onPeerDisconnected);
 			it->second->close();
 		}
 	}
@@ -543,7 +548,7 @@ void TCPAllocation::onPeerConnectError(TCPConnectionPair* pair)  //, const std::
 		if (it->second.expired()) {
 			//assert(it->second->client() == nullptr);
 			TraceL << "Closing Expired Peer Connection: " << &it->second << endl;	
-			it->second->Closed -= delegate(this, &TCPAllocation::onConnectionClosed);
+			it->second->Closed -= sdelegate(this, &TCPAllocation::onConnectionClosed);
 			//pairs
 			//it->second->close();
 		}
@@ -572,7 +577,7 @@ PeerConnectionManager& TCPAllocation::peers()
 void TCPAllocation::onPeerDisconnected(TCPPeerConnection* peer)
 {
 	TraceL << "Peer Disconnected: " << peer << endl;
-	net::SocketBase* sock = reinterpret_cast<net::SocketBase*>(sender);
+	net::Socket* sock = reinterpret_cast<net::Socket*>(sender);
 	TraceL << "Peer Disconnected 0: " << sock1 << endl;
 	TraceL << "Peer Disconnected 01: " << sock1->error() << endl;
 
@@ -595,7 +600,7 @@ void TCPAllocation::onClientDisconnect(TCPClientConnection* client)
 	// Close the associated peer connection.
 	TCPPeerConnection* peer = client->peer();
 	if (peer) {
-		peer->Closed -= delegate(this, &TCPAllocation::onPeerDisconnected);
+		peer->Closed -= sdelegate(this, &TCPAllocation::onPeerDisconnected);
 		peer->close();
 		//delete peer;
 	}

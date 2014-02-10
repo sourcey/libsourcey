@@ -59,7 +59,7 @@ namespace scy {
 
 
 //
-// Delegate callback functions
+// Delegate Callback Functions
 //
 
 
@@ -197,7 +197,7 @@ struct DelegateCallback<C, 4, false, P, P2, P3, P4>
 
 
 //
-// Delegate virtual base
+// Delegate Virtual Base
 //
 
 
@@ -220,7 +220,7 @@ struct DelegateBase
 
 
 //
-// Delegate implementation
+// Delegate Implementation
 //
 
 
@@ -292,7 +292,7 @@ protected:
 
 
 //
-// Delegate inline specializations
+// Delegate Specializations
 //
 
 
@@ -300,7 +300,7 @@ template <class C>
 static Delegate<C, 
 	DelegateBase<>, 
 	DelegateCallback<C, 0, true>
-> delegate(C* pObj, void (C::*Method)(void*), int priority = 0) 
+> sdelegate(C* pObj, void (C::*Method)(void*), int priority = 0) 
 {
 	return Delegate<C,
 		DelegateBase<>,
@@ -309,11 +309,24 @@ static Delegate<C,
 }
 
 
+template <class C>
+static Delegate<C, 
+	DelegateBase<>, 
+	DelegateCallback<C, 0, false>
+> delegate(C* pObj, void (C::*Method)(), int priority = 0) 
+{
+	return Delegate<C,
+		DelegateBase<>,
+		DelegateCallback<C, 0, false>
+	>(pObj, Method, priority);
+}
+
+
 template <class C, typename P>
 static Delegate<C, 
 	DelegateBase<P>, 
 	DelegateCallback<C, 1, true, P>, P
-> delegate(C* pObj, void (C::*Method)(void*,P), int priority = 0) 
+> sdelegate(C* pObj, void (C::*Method)(void*,P), int priority = 0) 
 {
 	return Delegate<C, 
 		DelegateBase<P>, 
@@ -322,11 +335,24 @@ static Delegate<C,
 }
 
 
+template <class C, typename P>
+static Delegate<C, 
+	DelegateBase<P>, 
+	DelegateCallback<C, 1, false, P>, P
+> delegate(C* pObj, void (C::*Method)(P), int priority = 0) 
+{
+	return Delegate<C, 
+		DelegateBase<P>, 
+		DelegateCallback<C, 1, false, P>, P
+	>(pObj, Method, priority);
+}
+
+
 template <class C, typename P, typename P2>
 static Delegate<C, 
 	DelegateBase<P, P2>,
 	DelegateCallback<C, 2, true, P, P2>, P, P2
-> delegate(C* pObj, void (C::*Method)(void*, P, P2), int priority = 0) 
+> sdelegate(C* pObj, void (C::*Method)(void*, P, P2), int priority = 0) 
 {
 	return Delegate<C, 
 		DelegateBase<P, P2>, 
@@ -335,11 +361,24 @@ static Delegate<C,
 }
 
 
+template <class C, typename P, typename P2>
+static Delegate<C, 
+	DelegateBase<P, P2>,
+	DelegateCallback<C, 2, false, P, P2>, P, P2
+> delegate(C* pObj, void (C::*Method)(P, P2), int priority = 0) 
+{
+	return Delegate<C, 
+		DelegateBase<P, P2>, 
+		DelegateCallback<C, 2, false, P, P2>, P, P2
+	>(pObj, Method, priority);
+}
+
+
 template <class C, typename P, typename P2, typename P3>
 static Delegate<C, 
 	DelegateBase<P, P2, P3>, 
 	DelegateCallback<C, 3, true, P, P2, P3>, P, P2, P3
-> delegate(C* pObj, void (C::*Method)(void*, P, P2, P3), int priority = 0) 
+> sdelegate(C* pObj, void (C::*Method)(void*, P, P2, P3), int priority = 0) 
 {
 	return Delegate<C, 
 		DelegateBase<P, P2, P3>,
@@ -348,15 +387,41 @@ static Delegate<C,
 }
 
 
+template <class C, typename P, typename P2, typename P3>
+static Delegate<C, 
+	DelegateBase<P, P2, P3>, 
+	DelegateCallback<C, 3, false, P, P2, P3>, P, P2, P3
+> delegate(C* pObj, void (C::*Method)(P, P2, P3), int priority = 0) 
+{
+	return Delegate<C, 
+		DelegateBase<P, P2, P3>,
+		DelegateCallback<C, 3, false, P, P2, P3>, P, P2, P3
+	>(pObj, Method, priority);
+}
+
+
 template <class C, typename P, typename P2, typename P3, typename P4>
 static Delegate<C, 
 	DelegateBase<P, P2, P3, P4>, 
 	DelegateCallback<C, 4, true, P, P2, P3, P4>, P, P2, P3, P4
-> delegate(C* pObj, void (C::*Method)(void*, P, P2, P3, P4), int priority = 0) 
+> sdelegate(C* pObj, void (C::*Method)(void*, P, P2, P3, P4), int priority = 0) 
 {
 	return Delegate<C, 
 		DelegateBase<P, P2, P3, P4>, 
 		DelegateCallback<C, 4, true, P, P2, P3, P4>, P, P2, P3, P4
+	>(pObj, Method, priority);
+}
+
+
+template <class C, typename P, typename P2, typename P3, typename P4>
+static Delegate<C, 
+	DelegateBase<P, P2, P3, P4>, 
+	DelegateCallback<C, 4, false, P, P2, P3, P4>, P, P2, P3, P4
+> delegate(C* pObj, void (C::*Method)(P, P2, P3, P4), int priority = 0) 
+{
+	return Delegate<C, 
+		DelegateBase<P, P2, P3, P4>, 
+		DelegateCallback<C, 4, false, P, P2, P3, P4>, P, P2, P3, P4
 	>(pObj, Method, priority);
 }
 

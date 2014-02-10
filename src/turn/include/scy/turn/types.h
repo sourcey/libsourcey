@@ -120,19 +120,22 @@ enum AuthenticationState
 class Request: public stun::Message
 {
 public:
-	net::Socket socket;
+	//net::Socket::Ptr socket;
+	net::TransportType transport;
 	net::Address localAddress;
-	net::Address remoteAddr;
+	net::Address remoteAddress;
 	std::string hash; // for MessageIntegrity signing
 
-	Request(const net::Socket& socket, 
+	Request(//const net::Socket::Ptr& socket, 
 			const stun::Message& message, 
+			net::TransportType transport,
 			const net::Address& localAddress = net::Address(), 
-			const net::Address& remoteAddr = net::Address()) :
+			const net::Address& remoteAddress = net::Address()) :
 		stun::Message(message), 
-		socket(socket), 
+		//socket(socket), 
+		transport(transport), 
 		localAddress(localAddress), 
-		remoteAddr(remoteAddr) {}
+		remoteAddress(remoteAddress) {}
 };
 
 

@@ -76,8 +76,6 @@ public:
 	std::string name() const;
 	void setName(const std::string& name);
 
-	virtual const char* className() const { return "Task"; }
-
 protected:
 	Task& operator=(Task const&) {}
 	virtual ~Task();

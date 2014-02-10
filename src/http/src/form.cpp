@@ -26,7 +26,7 @@ const int FILE_CHUNK_SIZE = 65536; //32384;
 FormWriter* FormWriter::create(ClientConnection& conn, const std::string& encoding)
 {
 	//FormWriter* wr = new http::FormWriter(conn, std::make_shared<Thread>(), encoding);
-	FormWriter* wr = new http::FormWriter(conn, std::make_shared<Idler>(conn.socket().base().loop()), encoding);
+	FormWriter* wr = new http::FormWriter(conn, std::make_shared<Idler>(conn.socket()->loop()), encoding);
 	conn.Outgoing.attachSource(wr, true, true);
 	if (encoding == http::FormWriter::ENCODING_MULTIPART &&
 		conn.request().getVersion() == http::Message::HTTP_1_1)
@@ -50,7 +50,6 @@ FormWriter::FormWriter(ClientConnection& connection, async::Runner::Ptr runner, 
 	//Thread* thread = dynamic_cast<Thread*>(runner.get());
 	//if (thread)
 	//	thread->setRepeating(true);
-	runner->setRepeating(true);
 }
 
 	
@@ -131,6 +130,8 @@ void FormWriter::start()
 	TraceLS(this) << "Start" << std::endl;
 
 	prepareSubmit();
+	
+	_runner->setRepeating(true);
 	_runner->start(std::bind(&FormWriter::writeAsync, this));
 }
 
@@ -153,6 +154,7 @@ void FormWriter::writeAsync()
 			writeUrl(ostr);					
 			TraceL << "Writing URL: " << ostr.str() << std::endl;
 			emit(ostr.str());
+			_complete = true;
 		} 
 		else
 			writeMultipartChunk();

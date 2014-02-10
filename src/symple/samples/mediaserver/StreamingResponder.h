@@ -1,4 +1,4 @@
-#include "MediaServer.h"
+#include "mediaserver.h"
 
 
 namespace scy { 
@@ -10,17 +10,17 @@ public:
 	StreamingRequestHandler(http::ServerConnection& connection, const StreamingOptions& options) :
 		http::ServerResponder(connection), options(options)
 	{	
-		debugL("StreamingRequestHandler", this) << "Create" << std::endl;
+		DebugLS(this) << "Create" << std::endl;
 	}
 
 	virtual ~StreamingRequestHandler() 
 	{
-		debugL("StreamingRequestHandler", this) << "Destroy" << std::endl;
+		DebugLS(this) << "Destroy" << std::endl;
 	}
 		
 	virtual void onRequest(http::Request& request, http::Response& response) 
 	{
-		debugL("StreamingRequestHandler", this) << "Handle request: " 
+		DebugLS(this) << "Handle request: " 
 			//<< "\n\tOutput Format: " << options.oformat.name
 			<< "\n\tOutput Encoding: " << options.encoding
 			<< "\n\tOutput Packetizer: " << options.framing
@@ -39,23 +39,23 @@ public:
 
 	virtual void onClose()
 	{
-		debugL("StreamingRequestHandler", this) << "On close" << std::endl;
+		DebugLS(this) << "On close" << std::endl;
 		stream.emitter -= packetDelegate(this, &StreamingRequestHandler::onVideoEncoded);
 		stream.stop();
 	}
 
 	void onVideoEncoded(void* sender, RawPacket& packet)
 	{
-		debugL("StreamingRequestHandler", this) << "Send packet: " 
+		DebugLS(this) << "Send packet: " 
 			<< packet.size() << ": " << fpsCounter.fps << std::endl;
-		//assert(!connection().socket().closed());
+		//assert(!connection().socket()->closed());
 
 		try {	
-			connection().socket().send((const char*)packet.data(), packet.size());
+			connection().socket()->send((const char*)packet.data(), packet.size());
 			fpsCounter.tick();		
 		}
 		catch (std::exception& exc) {
-			errorL("StreamingRequestHandler", this) << exc.what() << std::endl;
+			ErrorLS(this) << exc.what() << std::endl;
 			connection().close();
 		}
 	}

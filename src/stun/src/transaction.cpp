@@ -26,7 +26,6 @@
 using namespace std;
 
 using scy::net::Transaction;
-using scy::net::SocketBase;
 using scy::net::Address;
 using scy::net::Socket;
 
@@ -35,8 +34,8 @@ namespace scy {
 namespace stun {
 
 
-Transaction::Transaction(Socket& socket, 
-						 const Address& peerAddress,
+Transaction::Transaction(const net::Socket::Ptr& socket, 
+						 const net::Address& peerAddress,
 						 long timeout, 
 						 int retries, 
 						 uv::Loop* loop) : 

@@ -29,13 +29,14 @@ namespace scy {
 namespace net {
 
 
+#if 0
 SSLSocket::SSLSocket(uv::Loop* loop) : 
-	net::Socket(new SSLBase(loop), false)
+	net::Socket(new SSLSocket(loop), false)
 {
 }
 
 
-SSLSocket::SSLSocket(SSLBase* base, bool shared) : 
+SSLSocket::SSLSocket(SSLSocket* base, bool shared) : 
 	net::Socket(base, shared) 
 {
 }
@@ -44,21 +45,22 @@ SSLSocket::SSLSocket(SSLBase* base, bool shared) :
 SSLSocket::SSLSocket(const Socket& socket) : 
 	net::Socket(socket)
 {
-	if (!dynamic_cast<SSLBase*>(_base))
+	if (!dynamic_cast<SSLSocket*>(_base))
 		throw std::runtime_error("Cannot assign incompatible socket");
 }
 	
 
-SSLBase& SSLSocket::base() const
+SSLSocket& SSLSocket::base() const
 {
-	return static_cast<SSLBase&>(*_base);
+	return static_cast<SSLSocket&>(*_base);
 }
+#endif
 
 
 // -------------------------------------------------------------------
 //
-SSLBase::SSLBase(uv::Loop* loop) : 
-	TCPBase(loop),
+SSLSocket::SSLSocket(uv::Loop* loop) : 
+	TCPSocket(loop),
 	// TODO: Using client context, should assert no bind()/listen() on this socket
 	_context(SSLManager::instance().defaultClientContext()), 
 	_session(nullptr), 
@@ -71,8 +73,8 @@ SSLBase::SSLBase(uv::Loop* loop) :
 }
 
 
-SSLBase::SSLBase(SSLContext::Ptr context, uv::Loop* loop) : 
-	TCPBase(loop),
+SSLSocket::SSLSocket(SSLContext::Ptr context, uv::Loop* loop) : 
+	TCPSocket(loop),
 	_context(context), 
 	_session(nullptr), 
 	_sslAdapter(this)
@@ -84,8 +86,8 @@ SSLBase::SSLBase(SSLContext::Ptr context, uv::Loop* loop) :
 }
 	
 
-SSLBase::SSLBase(SSLContext::Ptr context, SSLSession::Ptr session, uv::Loop* loop) : 
-	TCPBase(loop),
+SSLSocket::SSLSocket(SSLContext::Ptr context, SSLSession::Ptr session, uv::Loop* loop) : 
+	TCPSocket(loop),
 	_context(context), 
 	_session(session), 
 	_sslAdapter(this)
@@ -97,27 +99,27 @@ SSLBase::SSLBase(SSLContext::Ptr context, SSLSession::Ptr session, uv::Loop* loo
 }
 
 	
-SSLBase::~SSLBase() 
+SSLSocket::~SSLSocket() 
 {	
 	TraceLS(this) << "Destroy" << endl;
 }
 
 
-int SSLBase::available() const
+int SSLSocket::available() const
 {
 	//assert(initialized());
 	return _sslAdapter.available();
 }
 
 
-void SSLBase::close()
+void SSLSocket::close()
 {
 	TraceLS(this) << "Close" << endl;
-	TCPBase::close();
+	TCPSocket::close();
 }
 
 
-bool SSLBase::shutdown()
+bool SSLSocket::shutdown()
 {
 	TraceLS(this) << "Shutdown" << endl;
 	try {
@@ -125,17 +127,17 @@ bool SSLBase::shutdown()
 		_sslAdapter.shutdown();
 	}
 	catch (...) {}
-	return TCPBase::shutdown();
+	return TCPSocket::shutdown();
 }
 
 
-int SSLBase::send(const char* data, int len, int flags) 
+int SSLSocket::send(const char* data, std::size_t len, int flags) 
 {	
 	return send(data, len, peerAddress(), flags);
 }
 
 
-int SSLBase::send(const char* data, int len, const net::Address& /* peerAddress */, int /* flags */) 
+int SSLSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */) 
 {	
 	TraceLS(this) << "Send: " << len << endl;	
 	assert(Thread::currentID() == tid());
@@ -155,7 +157,7 @@ int SSLBase::send(const char* data, int len, const net::Address& /* peerAddress 
 }
 
 
-SSLSession::Ptr SSLBase::currentSession()
+SSLSession::Ptr SSLSocket::currentSession()
 {
 	if (_sslAdapter._ssl) {
 		SSL_SESSION* session = SSL_get1_session(_sslAdapter._ssl);
@@ -171,13 +173,13 @@ SSLSession::Ptr SSLBase::currentSession()
 }
 
 	
-void SSLBase::useSession(SSLSession::Ptr session)
+void SSLSocket::useSession(SSLSession::Ptr session)
 {
 	_session = session;
 }
 
 
-bool SSLBase::sessionWasReused()
+bool SSLSocket::sessionWasReused()
 {
 	if (_sslAdapter._ssl)
 		return SSL_session_reused(_sslAdapter._ssl) != 0;
@@ -186,7 +188,7 @@ bool SSLBase::sessionWasReused()
 }
 
 
-net::TransportType SSLBase::transport() const
+net::TransportType SSLSocket::transport() const
 { 
 	return net::SSLTCP; 
 }
@@ -196,7 +198,7 @@ net::TransportType SSLBase::transport() const
 // Callbacks
 // 
 
-void SSLBase::onRead(const char* data, int len)
+void SSLSocket::onRead(const char* data, std::size_t len)
 {
 	TraceLS(this) << "On SSL read: " << len << endl;
 
@@ -206,7 +208,7 @@ void SSLBase::onRead(const char* data, int len)
 }
 
 
-void SSLBase::onConnect(int status)
+void SSLSocket::onConnect(uv_connect_t* handle, int status)
 {
 	TraceLS(this) << "On connect" << endl;
 	if (status) {
@@ -229,7 +231,8 @@ void SSLBase::onConnect(int status)
 	_sslAdapter.init(ssl);
 	_sslAdapter.flush();
 
-	SocketBase::emitConnect();
+	//emitConnect();
+	onSocketConnect();
 	TraceLS(this) << "On connect: OK" << endl;
 }
 
@@ -241,7 +244,7 @@ void SSLBase::onConnect(int status)
 
 
 /*
-void SSLBase::connect(const Address& peerAddress) 
+void SSLSocket::connect(const Address& peerAddress) 
 {
 	if (!_context) 
 		throw std::runtime_error("Cannot connect without SSL context");

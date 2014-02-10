@@ -1,5 +1,6 @@
 #include "scy/application.h"
 #include "scy/pacman/packagemanager.h"
+#include "scy/net/sslmanager.h"
 #include "scy/util.h"
 
 #include <string>
@@ -8,9 +9,8 @@
 #include <conio.h>
 
 
-using namespace std;
+using std::endl;
 using namespace scy;
-using namespace pman;
 
 
 // Detect Memory Leaks
@@ -28,12 +28,16 @@ public:
 	PackageManagerApplication(const pman::PackageManager::Options& options) :
 		manager(options)
 	{
+		// Default packages to install
+		packages.push_back("surveillancemodeplugin");
+		//packages.push_back("recordingmodeplugin");
 	}
 
-	~PackageManagerApplication()
+	virtual ~PackageManagerApplication()
 	{
 	}
-
+	
+	StringVec packages;
 	pman::PackageManager manager;
 };
 
@@ -42,8 +46,13 @@ int main(int argc, char** argv)
 {
 	scy::Logger::instance().add(new ConsoleChannel("debug", LTrace));
 
-	PackageManager::Options opts;
-	opts.endpoint = "http://127.0.0.1:3000";	
+	// Init SSL Context
+	net::SSLContext::Ptr ptrContext = new net::SSLContext(net::SSLContext::CLIENT_USE, "", "", "",
+		net::SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");	
+	net::SSLManager::instance().initializeClient(ptrContext);
+
+	pman::PackageManager::Options opts;
+	opts.endpoint = "https://anionu.com"; // "http://127.0.0.1:3000";	
 	opts.indexURI = "/packages.json";
 	opts.httpUsername = Anionu_API_USERNAME;
 	opts.httpPassword = Anionu_API_KEY;
@@ -52,19 +61,13 @@ int main(int argc, char** argv)
 	app.manager.initialize();
 	app.manager.queryRemotePackages();
 	
-	StringVec packages;
-	packages.push_back("SurveillanceModePlugin");
-	//packages.push_back("RecordingModePlugin");
-	
-	// Run the event loop until the running flag is set to false
 	char o = 0;
-	while (o != 'Q') {		
-		DebugL << "Before run: Handles=" << app.loop->active_handles << ", Tasks=" << app.manager.tasks().size() << endl;
+	while (o != 'Q') {	
+		// Run event loop while installation tasks are running
+		app.run(); 
 
-		app.run(); // run event loop until we have queried server packages
-		//uv_run(uv::defaultLoop(), UV_RUN_DEFAULT);
-
-		DebugL << 
+		// Wait for input commands on idle
+		InfoL << 
 			"COMMANDS:\n\n"
 			"  A	Set Active Packages.\n"
 			"  L	List Local Packages.\n"
@@ -80,27 +83,27 @@ int main(int argc, char** argv)
 
 		// Set Active Packages
 		if (o == 'A') {	
-			DebugL << "Enter packages names separated by commas: " << endl;
-			string s;
-			getline(cin,s);
-			packages = util::split(s, ",");
+			InfoL << "Enter packages names separated by commas: " << endl;
+			std::string s;
+			std::getline(std::cin, s);
+			app.packages = util::split(s, ",");
 		}
 
 		// List Local Packages
 		else if (o == 'L') {
-			DebugL << "Listing local packages: " << app.manager.localPackages().size() << endl;
+			InfoL << "Listing local packages: " << app.manager.localPackages().size() << endl;
 			auto items = app.manager.localPackages().map();
 			for (auto it = items.begin(); it != items.end(); ++it) {				
-				DebugL << "Package: " << it->first << endl;
+				InfoL << "Package: " << it->first << endl;
 			}
 		} 
 
 		// List Remote Packages
 		else if (o == 'K') {
-			DebugL << "Listing remote packages: " << app.manager.remotePackages().size() << endl;
+			InfoL << "Listing remote packages: " << app.manager.remotePackages().size() << endl;
 			auto items = app.manager.remotePackages().map();
 			for (auto it = items.begin(); it != items.end(); ++it) {				
-				DebugL << "Package: " << it->first << endl;
+				InfoL << "Package: " << it->first << endl;
 			}
 		} 
 
@@ -108,7 +111,7 @@ int main(int argc, char** argv)
 		else if (o == 'J') {
 			auto  items = app.manager.remotePackages().map();
 			for (auto it = items.begin(); it != items.end(); ++it) {			
-				it->second->latestAsset().print(cout);	
+				it->second->latestAsset().print(std::cout);	
 			}
 		} 
 
@@ -116,20 +119,21 @@ int main(int argc, char** argv)
 		else if (o == 'R') {
 			app.manager.uninitialize();
 			app.manager.initialize();
+			app.manager.queryRemotePackages();
 		} 
 
 		// Install Packages
 		else if (o == 'I') {
-			DebugL << "Install packages: " << packages.size() << endl;
-			assert(!packages.empty());
-			app.manager.installPackages(packages);
-			DebugL << "Install packages: OK: " << packages.size() << endl;
+			InfoL << "Install packages: " << app.packages.size() << endl;
+			assert(!app.packages.empty());
+			app.manager.installPackages(app.packages);
+			InfoL << "Install packages: OK: " << app.packages.size() << endl;
 		} 
 
 		// Uninstall Packages
 		else if (o == 'U') {
-			assert(!packages.empty());
-			app.manager.uninstallPackages(packages);
+			assert(!app.packages.empty());
+			app.manager.uninstallPackages(app.packages);
 		} 
 
 		// Update All Packages
@@ -137,6 +141,14 @@ int main(int argc, char** argv)
 			app.manager.updateAllPackages();
 		}
 	}
+	
+	GarbageCollector::instance().finalize();
+	http::Client::instance().shutdown();
+	net::SSLManager::instance().shutdown();
+	Logger::shutdown();
+	return 0;
+}
+
 
 #if 0
 	Thread console([](void* arg) 
@@ -146,7 +158,7 @@ int main(int argc, char** argv)
 		char o = 0;
 		while (o != 'Q') 
 		{	
-			DebugL << 
+			InfoL << 
 				"COMMANDS:\n\n"
 				"  A	Set Active Packages.\n"
 				"  L	List Local Packages.\n"
@@ -162,7 +174,7 @@ int main(int argc, char** argv)
 
 			// Set Active Packages
 			if (o == 'A') {	
-				DebugL << "Enter packages names separated by commas: " << endl;
+				InfoL << "Enter packages names separated by commas: " << endl;
 				string s;
 				getline(cin,s);
 				packages = util::split(s, ",");
@@ -170,19 +182,19 @@ int main(int argc, char** argv)
 
 			// List Local Packages
 			else if (o == 'L') {
-				DebugL << "Listing local packages: " << app->manager.localPackages().size() << endl;
+				InfoL << "Listing local packages: " << app->manager.localPackages().size() << endl;
 				auto items = app->manager.localPackages().map();
 				for (auto it = items.begin(); it != items.end(); ++it) {				
-					DebugL << "Package: " << it->first << endl;
+					InfoL << "Package: " << it->first << endl;
 				}
 			} 
 
 			// List Remote Packages
 			else if (o == 'K') {
-				DebugL << "Listing remote packages: " << app->manager.remotePackages().size() << endl;
+				InfoL << "Listing remote packages: " << app->manager.remotePackages().size() << endl;
 				auto items = app->manager.remotePackages().map();
 				for (auto it = items.begin(); it != items.end(); ++it) {				
-					DebugL << "Package: " << it->first << endl;
+					InfoL << "Package: " << it->first << endl;
 				}
 			} 
 
@@ -190,7 +202,7 @@ int main(int argc, char** argv)
 			else if (o == 'J') {
 				auto  items = app->manager.remotePackages().map();
 				for (auto it = items.begin(); it != items.end(); ++it) {			
-					it->second->latestAsset().print(DebugL);	
+					it->second->latestAsset().print(InfoL);	
 				}
 			} 
 
@@ -223,11 +235,3 @@ int main(int argc, char** argv)
 		reinterpret_cast<PackageManagerApplication*>(arg)->stop();
 	}, &app);
 #endif
-
-	// Shutdown the garbage collector to free memory
-	GarbageCollector::instance().finalize();
-	Logger::shutdown();
-
-	//scy::pause();
-	return 0;
-}

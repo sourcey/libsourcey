@@ -109,7 +109,7 @@ struct ClientTest
 
 	void run() 
 	{				
-		initiator->AllocationCreated += delegate(this, &ClientTest::onInitiatorAllocationCreated);
+		initiator->AllocationCreated += sdelegate(this, &ClientTest::onInitiatorAllocationCreated);
 
 		// TODO: Use STUN binding request to get IP
 		initiator->initiate(TURN_AUTHORIZE_PEER_IP);
@@ -157,9 +157,9 @@ struct ClientTestRunner
 		//	Timer::getDefault().start(TimerCallback<ClientTestRunner>(this, &ClientTestRunner::onTimeout, timeout));
 
 		nTimes = times;
-		for (unsigned i = 0; i < nTimes; i++) {
+		for (int i = 0; i < nTimes; i++) {
 			auto client = new turn::ClientTest(i, o); //, reactor, runner
-			client->initiator->TestComplete += delegate(this, &ClientTestRunner::onTestComplete);
+			client->initiator->TestComplete += sdelegate(this, &ClientTestRunner::onTestComplete);
 			client->run();
 			tests.push_back(client);
 		}
@@ -208,17 +208,17 @@ struct TestTCPClientObserver: public TCPClientObserver
 		DebugLS(this) << "onTimer" << endl;
 	}
 
-	void onRelayConnectionCreated(TCPClient& client, const net::Socket& socket, const net::Address& peerAddr) //UInt32 connectionID, 
+	void onRelayConnectionCreated(TCPClient& client, const net::TCPSocket::Ptr& socket, const net::Address& peerAddr) //UInt32 connectionID, 
 	{
 		DebugLS(this) << "Relay Connection Created: " << peerAddr << endl;
 	}
 
-	void onRelayConnectionClosed(TCPClient& client, const net::SocketBase* socketBase, const net::Address& peerAddress) 
+	void onRelayConnectionClosed(TCPClient& client, const net::TCPSocket::Ptr& socket, const net::Address& peerAddr) 
 	{
 		DebugLS(this) << "Connection Closed" << endl;
 	}
 
-	void onRelayConnectionDataReceived(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
+	void onRelayConnectionDataReceived(turn::Client& client, const char* data, std::size_t size, const net::Address& peerAddr)
 	{
 		DebugLS(this) << "Received Data: " << std::string(data, size) <<  ": " << peerAddr << endl;
 	}
@@ -292,7 +292,7 @@ int main(int argc, char** argv)
 			}
 		} 
 		catch (std::exception& exc) {
-			ErrorL << "Error: " << exc.what() << endl;
+			ErrorL << exc.what() << endl;
 		}
 	
 		DebugL << "Finalizing" << endl;
@@ -325,9 +325,9 @@ int main(int argc, char** argv)
 		TCPClient client;
 		{
 			//net::Socket* socket = new net::Socket(NULL);
-			//socket->assign(new net::TCPBase, false);
+			//socket->assign(new net::TCPSocket, false);
 			//net::TCPSocket* base = new net::TCPSocket;
-			//net::TCPBase* base = new net::TCPBase;
+			//net::TCPSocket* base = new net::TCPSocket;
 			//turn::TCPClient* client = new turn::TCPClient(obs, co);
 			//turn::Client* client = new turn::Client(obs, co);
 			TestSocketHeap* test = new TestSocketHeap();
@@ -432,7 +432,7 @@ int main(int argc, char** argv)
 			
 		
 		Client c(o);
-		//c.StateChange += delegate(this, &TCPInitiator::onStateChange);
+		//c.StateChange += sdelegate(this, &TCPInitiator::onStateChange);
 		//c.addPermission(_peerIP);	
 		c.initiate();
 
@@ -517,7 +517,7 @@ protected:
 		
 		_peer = new Net::TCPSocket();
 		_peer->bind(net::Address("127.0.0.1", 0));
-		_peer->DataReceived += delegate(this, &ClientTest::onRelayConnectionDataReceived);
+		_peer->DataReceived += sdelegate(this, &ClientTest::onRelayConnectionDataReceived);
 
 		_timer.setStartInterval(0);
 		_timer.setPeriodicInterval(2000);
@@ -629,8 +629,8 @@ private:
 			client = new Client(*this, opts);
 			//client->attach(this);
 			client->sendAllocateRequest();
-			//client->AllocationCreated += delegate(this, &ClientTest::onAllocationCreated);
-			//client->DataReceived += delegate(this, &ClientTest::onDataReceived);
+			//client->AllocationCreated += sdelegate(this, &ClientTest::onAllocationCreated);
+			//client->DataReceived += sdelegate(this, &ClientTest::onDataReceived);
 			//client->sendAllocateRe quest();
 			//util::pause();
 		try	{

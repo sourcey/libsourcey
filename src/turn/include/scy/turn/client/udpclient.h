@@ -75,7 +75,7 @@ public:
 
 	virtual void sendChannelBind(const std::string& peerIP);
 	virtual void sendRefresh();
-	virtual void sendData(const char* data, int size, const net::Address& peerAddress);	
+	virtual void sendData(const char* data, std::size_t size, const net::Address& peerAddress);	
 	
 	virtual bool handleResponse(const stun::Message& response);
 	virtual void handleAllocateResponse(const stun::Message& response);
@@ -86,7 +86,7 @@ public:
 	virtual void handleDataIndication(const stun::Message& response);
 	
 	virtual int transportProtocol();
-	virtual net::SocketBase* createSocketBase();
+	virtual net::Socket* createSocketBase();
 	virtual stun::Transaction* createTransaction(net::Socket* socket = nullptr);
 	virtual void authenticateRequest(stun::Message& request);
 	virtual bool sendAuthenticatedTransaction(stun::Transaction* transaction);
@@ -97,7 +97,7 @@ public:
 	bool isTerminated() const;	
 	
 	ClientObserver& observer();
-	net::SocketBase& socket();
+	net::Socket& socket();
 	//uv::Loop* loop();
 	//Net::Reactor& reactor();
 	Options& options();	
@@ -117,7 +117,7 @@ protected:
 	//Runner&				_runner;
 	//Net::Reactor&		_reactor;Base
 	//Options				_options;
-	//net::SocketBase	_socket;
+	//net::Socket	_socket;
 	//Timer*          _timer;
 
 	net::Address		_mappedAddress;

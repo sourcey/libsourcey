@@ -22,15 +22,13 @@
 
 
 #include "scy/pacman/package.h"
-#include "scy/taskrunner.h"
+#include "scy/http/client.h"
 #include "scy/stateful.h"
 #include "scy/logger.h"
+#include "scy/idler.h"
 
 
 namespace scy { 
-namespace http { 
-	class Response;
-	class ClientConnection; }
 namespace pman {
 
 	
@@ -164,7 +162,7 @@ protected:
 	int             _progress;
 	bool			_downloading;
 	uv::Loop*       _loop;
-	http::ClientConnection* _dlconn;
+	http::ClientConnection::Ptr _dlconn;
 	
 	friend class PackageManager;
 	friend class InstallMonitor;	

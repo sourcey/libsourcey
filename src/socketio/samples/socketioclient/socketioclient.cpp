@@ -46,7 +46,7 @@ public:
 	void sendTransaction(const SocketIO::Packet& packet) 
 	{		
 		SocketIO::Transaction* txn = new SocketIO::Transaction(*this, packet);
-		txn->StateChanged += delegate(this, &Messenger::onTransactionStateChanged);
+		txn->StateChanged += sdelegate(this, &Messenger::onTransactionStateChanged);
 		txn->send();
 	}
 
@@ -178,7 +178,7 @@ int main(int argc, char** argv)
 				form->addPart("asset[file]", new FilePartSource(file.toString()));
 
 				APITransaction* transaction = app.upload("UploadAsset", form); //file.toString(), 
-				transaction->APITransactionComplete += delegate(&app, &Messenger::onAPITransactionComplete);
+				transaction->APITransactionComplete += sdelegate(&app, &Messenger::onAPITransactionComplete);
 				transaction->start();
 			} 
 

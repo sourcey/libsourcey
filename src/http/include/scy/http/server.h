@@ -40,17 +40,18 @@ class ServerResponder;
 class ServerConnection: public Connection
 {
 public:
-    ServerConnection(Server& server, const net::Socket& socket);
+	typedef std::shared_ptr<ServerConnection> Ptr;
+
+    ServerConnection(Server& server, net::Socket::Ptr socket);
+    virtual ~ServerConnection();
 	
 	//virtual bool send();
 		/// Sends the HTTP response
 	
 	virtual void close();
-		/// Closes the HTTP connection
+		// Closes the HTTP connection
 	
-protected:
-    virtual ~ServerConnection();
-		
+protected:		
 	virtual void onHeaders();
 	virtual void onPayload(const MutableBuffer& buffer);
 	virtual void onMessage();
@@ -63,7 +64,7 @@ protected:
 
 	//
 	/// Server callbacks
-	void onServerShutdown(void*);
+	//void onServerShutdown(void*);
 	
 protected:
 	Server& _server;
@@ -73,7 +74,7 @@ protected:
 };
 
 
-typedef std::vector<ServerConnection*> ServerConnectionList;
+typedef std::vector<ServerConnection::Ptr> ServerConnectionList;
 
 	
 // -------------------------------------------------------------------
@@ -170,7 +171,7 @@ class Server
 public:
 	ServerConnectionList connections;
 	ServerResponderFactory* factory;
-	net::TCPSocket socket;
+	net::TCPSocket::Ptr socket;
 	net::Address address;
 	//Timer timer;
 
@@ -185,14 +186,15 @@ public:
 	NullSignal Shutdown;
 
 protected:	
-	ServerConnection* createConnection(const net::Socket& sock);
+	ServerConnection::Ptr createConnection(const net::Socket::Ptr& sock);
 	ServerResponder* createResponder(ServerConnection& conn);
 
-	virtual void addConnection(ServerConnection* conn);
+	virtual void addConnection(ServerConnection::Ptr conn);
 	virtual void removeConnection(ServerConnection* conn);
 
-	void onAccept(void* sender, const net::TCPSocket& sock);
-	void onClose(void* sender);
+	void onAccept(const net::TCPSocket::Ptr& sock);
+	void onClose(); // main socket close
+	void onConnectionClose(void*); // connection socket close
 
 	friend class ServerConnection;
 };

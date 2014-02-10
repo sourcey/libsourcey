@@ -1,4 +1,5 @@
 #include "scy/net/udpsocket.h"
+#include "scy/net/socketadapter.h"
 #include "scy/time.h"
 
 
@@ -12,42 +13,42 @@ namespace net {
 class UDPEchoServer: public SocketAdapter
 {
 public:
-	UDPSocket socket;
+	UDPSocket::Ptr socket;
 
-	UDPEchoServer()
+	UDPEchoServer() : 
+		socket(std::make_shared<UDPSocket>())
 	{
-		SocketAdapter::socket = &socket;
-		socket.setAdapter(this);
+		socket->addReceiver(this);
 	}
 
 	virtual ~UDPEchoServer()
 	{
-		socket.setAdapter(nullptr);
+		socket->removeReceiver(this); 
 		shutdown();
 	}
 	
 	void start(const std::string& host, UInt16 port)
 	{	
-		socket.bind(Address(host, port));
+		socket->bind(Address(host, port));
 	}
 
 	void shutdown() 
 	{
-		socket.close();
+		socket->close();
 	}
 	
-	void onSocketRecv(const MutableBuffer& buf, const net::Address& peerAddr)
+	void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress)
 	{
-		debugL("UDPEchoServer", this) << "On recv: " << peerAddr << ": " << buf.size() << std::endl;
+		DebugL << "On recv: " << peerAddress << ": " << buffer.size() << std::endl;
 
 #if PRINT_LATENCY_PACKET		
-		std::string payload(bufferCast<const char*>(buf), buf.size());
+		std::string payload(bufferCast<const char*>(buffer), buffer.size());
 		payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
 		if (payload.length() < 12) {
 			UInt64 sentAt = util::strtoi<UInt64>(payload);
 			UInt64 latency = time::ticks() - sentAt;
 
-			debugL("UDPEchoServer") << "Recv latency packet from " << peerAddr << ": " 
+			DebugL << "Recv latency packet from " << peerAddress << ": " 
 				<< "payload=" << payload.length() << ", " 
 				<< "latency=" << latency 
 				<< std::endl;
@@ -55,17 +56,17 @@ public:
 #endif
 
 		// Echo back to client
-		socket.send(bufferCast<const char*>(buf), buf.size(), peerAddr);
+		socket->send(bufferCast<const char*>(buffer), buffer.size(), peerAddress);
 	}
 
-	void onSocketError(const Error& error) 
+	void onSocketError(const scy::Error& error) 
 	{
-		errorL("UDPResponder", this) << "On error: " << error.message << std::endl;
+		ErrorL << "On error: " << error.message << std::endl;
 	}
 
 	void onSocketClose() 
 	{
-		debugL("UDPResponder", this) << "On close" << std::endl;
+		DebugL << "On close" << std::endl;
 	}
 };
 

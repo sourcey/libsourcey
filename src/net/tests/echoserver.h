@@ -40,7 +40,7 @@ public:
 		assert(socket.base().refCount() == 1);
 		socket.bind(address);
 		socket.listen();
-		socket.base().AcceptConnection += delegate(this, &EchoServer::onAccept);		
+		socket.AcceptConnection += sdelegate(this, &EchoServer::onAccept);		
 		traceL("EchoServer", this) << "Server listening on " << port() << endl;
 	}
 
@@ -54,9 +54,9 @@ public:
 		sockets.push_back(sock);
 		SocketT& socket = sockets.back();
 		traceL("EchoServer", this) << "On Accept: " << &socket.base() << std::endl;
-		socket.Recv += delegate(this, &EchoServer::onSocketRecv);
-		socket.Error += delegate(this, &EchoServer::onSocketError);
-		socket.Close += delegate(this, &EchoServer::onSocketClose);
+		socket.Recv += sdelegate(this, &EchoServer::onSocketRecv);
+		socket.Error += sdelegate(this, &EchoServer::onSocketError);
+		socket.Close += sdelegate(this, &EchoServer::onSocketClose);
 	}
 	
 	void onSocketRecv(void* sender, SocketPacket& packet) 

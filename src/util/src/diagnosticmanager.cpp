@@ -20,7 +20,7 @@
 #include "scy/util/diagnosticmanager.h"
 
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -105,8 +105,8 @@ DiagnosticManager::~DiagnosticManager()
 void DiagnosticManager::resetAll()
 {
 	Map tests = map();
-	for (Map::const_iterator it = tests.begin(); it != tests.end(); ++it) {	
-		it->second->reset();
+	for (auto& test : tests) {	
+		test.second->reset();
 	}
 }
 
@@ -114,8 +114,8 @@ void DiagnosticManager::resetAll()
 void DiagnosticManager::checkAll()
 {
 	Map tests = map();
-	for (Map::const_iterator it = tests.begin(); it != tests.end(); ++it) {	
-		it->second->check();
+	for (auto& test : tests) {	
+		test.second->check();
 	}
 }
 	
@@ -123,8 +123,8 @@ void DiagnosticManager::checkAll()
 bool DiagnosticManager::allComplete()
 {
 	Map tests = map();
-	for (Map::const_iterator it = tests.begin(); it != tests.end(); ++it) {	
-		if (!it->second->complete())
+	for (auto& test : tests) {	
+		if (!test.second->complete())
 			return false;
 	}
 	return true;
@@ -137,7 +137,7 @@ bool DiagnosticManager::addDiagnostic(IDiagnostic* test)
 	assert(!test->name.empty());
 	
 	TraceL << "Adding Diagnostic: " << test->name << endl;	
-	//test->StateChange += delegate(this, &DiagnosticManager::onDiagnosticStateChange);
+	//test->StateChange += sdelegate(this, &DiagnosticManager::onDiagnosticStateChange);
 	return DiagnosticStore::add(test->name, test);
 }
 
@@ -150,7 +150,7 @@ bool DiagnosticManager::freeDiagnostic(const std::string& name)
 	IDiagnostic* test = DiagnosticStore::remove(name);
 	if (test) {
 		// TODO: 
-		//test->StateChange -= delegate(this, &DiagnosticManager::onDiagnosticStateChange);
+		//test->StateChange -= sdelegate(this, &DiagnosticManager::onDiagnosticStateChange);
 		delete test;
 		return true;
 	}
@@ -166,7 +166,7 @@ IDiagnostic* DiagnosticManager::getDiagnostic(const std::string& name)
 
 void DiagnosticManager::onDiagnosticStateChange(void* sender, DiagnosticState& state, const DiagnosticState&)
 {
-	IDiagnostic* test = reinterpret_cast<IDiagnostic*>(sender);
+	auto test = reinterpret_cast<IDiagnostic*>(sender);
 	TraceL << "Diagnostic state change: " << test->name << ": " << state << endl;
 
 	if (test->complete() && allComplete())

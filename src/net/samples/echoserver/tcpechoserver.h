@@ -12,10 +12,11 @@ class EchoServer
 	/// of either a TCPSocket or a SSLSocket.
 {
 public:
-	SocketT socket;
-	typename SocketT::List sockets;
+	typename SocketT::Ptr socket;
+	typename SocketT::Vec sockets;
 
-	EchoServer()
+	EchoServer() :
+		socket(std::make_shared<SocketT>())
 	{
 	}
 
@@ -26,63 +27,64 @@ public:
 		
 	void start(const std::string& host, UInt16 port)
 	{	
-		socket.bind(Address(host, port));
-		socket.listen();
-		socket.base().AcceptConnection += delegate(this, &EchoServer::onAccept);	
+		socket->bind(Address(host, port));
+		socket->listen();
+		socket->AcceptConnection += delegate(this, &EchoServer::onAcceptConnection);	
 	}
 
 	void shutdown() 
 	{
-		socket.close();
+		socket->close();
 		sockets.clear();
 	}
 	
-	void onAccept(void* sender, const TCPSocket& sock)
+	void onAcceptConnection(const TCPSocket::Ptr& sock)
 	{	
 		// Accept client connections
 		sockets.push_back(sock);
-		SocketT& socket = sockets.back();
-		debugL("EchoServer", this) << "On accept: " << &socket.base() << std::endl;
-		socket.Recv += delegate(this, &EchoServer::onClientSocketRecv);
-		socket.Error += delegate(this, &EchoServer::onClientSocketError);
-		socket.Close += delegate(this, &EchoServer::onClientSocketClose);
+		auto& socket = sockets.back();
+		DebugL << "On accept: " << socket << std::endl;
+		socket->Recv += sdelegate(this, &EchoServer::onClientSocketRecv);
+		socket->Error += sdelegate(this, &EchoServer::onClientSocketError);
+		socket->Close += sdelegate(this, &EchoServer::onClientSocketClose);
 	}
 	
-	void onClientSocketRecv(void* sender, SocketPacket& packet) 
+	void onClientSocketRecv(void* sender, const MutableBuffer& buffer, const Address& peerAddress) 
 	{
-		SocketT* socket = reinterpret_cast<SocketT*>(sender);
-		debugL("EchoServer", this) << "On recv: " << socket << ": " 
-			<< std::string(packet.data(), packet.size()) << std::endl;
+		auto socket = reinterpret_cast<net::Socket*>(sender);
+		DebugL << "On recv: " << socket << ": " 
+			<< std::string(bufferCast<const char*>(buffer), buffer.size()) << std::endl;
 
 		// Echo it back
-		socket->send(packet);
+		socket->send(bufferCast<const char*>(buffer), buffer.size());
 	}
 
 	void onClientSocketError(void* sender, const Error& error)
 	{
-		errorL("EchoServer", this) << "On error: " 
+		ErrorL << "On error: " 
 			<< error.errorno << ": " << error.message << std::endl;
 	}
 
 	void onClientSocketClose(void* sender) 
 	{
-		debugL("EchoServer", this) << "On close" << std::endl;
-		releaseSocket(reinterpret_cast<SocketT*>(sender));
+		DebugL << "On close" << std::endl;
+		releaseSocket(reinterpret_cast<net::Socket*>(sender));
 	}
 
-	void releaseSocket(SocketT* sock) 
+	void releaseSocket(net::Socket* sock) 
 	{		
-		for (typename SocketT::List::iterator it = sockets.begin(); it != sockets.end(); ++it) {
-			if (sock == &(*it)) { 
-				debugL("EchoServer", this) << "Removing: " << sock<< std::endl;
+		for (typename SocketT::Vec::iterator it = sockets.begin(); it != sockets.end(); ++it) {
+			if (sock == it->get()) { 
+				DebugL << "Removing: " << sock<< std::endl;
 
 				// All we need to do is erase the socket in order to 
-				// deincrement the ref counter and destroy the socket.
-				assert(sock->base().refCount() == 1);
+				// deincrement the ref counter and destroy the socket->
+				//assert(sock->base().refCount() == 1);
 				sockets.erase(it);
 				return;
 			}
 		}
+		assert(0 && "unknown socket");
 	}
 };
 	

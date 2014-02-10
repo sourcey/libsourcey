@@ -40,7 +40,7 @@ namespace turn {
 Client::Client(ClientObserver& observer, const Options& options) : 
 	_observer(observer),
 	_options(options),
-	_socket(nullptr, false)
+	_socket(nullptr) //, false
 {
 }
 
@@ -49,7 +49,7 @@ Client::~Client()
 {
 	TraceL << "Destroy" << endl;
 	shutdown();
-	assert(_socket.base().refCount() == 1);
+	//assert(_socket->/*base().*/refCount() == 1);
 	//assert(closed());
 }
 
@@ -61,19 +61,19 @@ void Client::initiate()
 	
 	assert(!_permissions.empty() && "must set permissions");
 	
-	auto udpSocket = dynamic_cast<net::UDPBase*>(&_socket.base());
+	auto udpSocket = dynamic_cast<net::UDPSocket*>(_socket.get());
 	if (udpSocket) {
 		udpSocket->bind(net::Address("0.0.0.0", 0));
 		//udpSocket->setBroadcast(true);
 	}
 
-	_socket.Recv += delegate(this, &Client::onSocketRecv, -1); // using PacketSocket for STUN transactions
-	_socket.Connect += delegate(this, &Client::onSocketConnect);
-	_socket.Close += delegate(this, &Client::onSocketClose);
-	_socket.connect(_options.serverAddr);
+	_socket->Recv += sdelegate(this, &Client::onSocketRecv, -1); // using PacketSocket for STUN transactions
+	_socket->Connect += sdelegate(this, &Client::onSocketConnect);
+	_socket->Close += sdelegate(this, &Client::onSocketClose);
+	_socket->connect(_options.serverAddr);
 	//_socket
 	//else
-	//	onSocketConnect(&_socket.base());
+	//	onSocketConnect(&_socket->base());
 }
 
 
@@ -85,20 +85,20 @@ void Client::shutdown()
 	
 		for (auto it = _transactions.begin(); it != _transactions.end();) {
 			TraceL << "Shutdown base: Delete transaction: " << *it << endl;	
-			(*it)->StateChange -= delegate(this, &Client::onTransactionProgress);
+			(*it)->StateChange -= sdelegate(this, &Client::onTransactionProgress);
 			//delete *it;
 			(*it)->dispose();
 			it = _transactions.erase(it);
 		}
 
-		_socket.Connect -= delegate(this, &Client::onSocketConnect);
-		_socket.Recv -= delegate(this, &Client::onSocketRecv);
-		//_socket.Error -= delegate(this, &Client::onSocketError);
-		_socket.Close -= delegate(this, &Client::onSocketClose);
-		if (!_socket.closed()) {
-			_socket.close();
+		_socket->Connect -= sdelegate(this, &Client::onSocketConnect);
+		_socket->Recv -= sdelegate(this, &Client::onSocketRecv);
+		//_socket->Error -= sdelegate(this, &Client::onSocketError);
+		_socket->Close -= sdelegate(this, &Client::onSocketClose);
+		if (!_socket->closed()) {
+			_socket->close();
 		}
-		assert(_socket.base().refCount() == 1);
+		//assert(_socket->/*base().*/refCount() == 1);
 	}
 }
 
@@ -106,55 +106,49 @@ void Client::shutdown()
 void Client::onSocketConnect(void*)
 {
 	TraceL << "Client connected" << endl;	
-	_socket.Connect -= delegate(this, &Client::onSocketConnect);
+	_socket->Connect -= sdelegate(this, &Client::onSocketConnect);
 
-	_timer.Timeout += delegate(this, &Client::onTimer);
+	_timer.Timeout += sdelegate(this, &Client::onTimer);
 	_timer.start(_options.timerInterval, _options.timerInterval);
 
 	sendAllocate();
 }
 
 	
-void Client::onSocketRecv(void* sender, net::SocketPacket& packet) 
+void Client::onSocketRecv(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress) 
 {
-	TraceL << "Control socket recv: " << packet.size() << std::endl;	
+	TraceL << "Control socket recv: " << buffer.size() << endl;	
 	
 	stun::Message message;
-	char* buf = packet.data();
-	std::size_t len = packet.size();
+	auto socket = reinterpret_cast<net::Socket*>(sender);		
+	char* buf = bufferCast<char*>(buffer);
+	std::size_t len = buffer.size();
 	std::size_t nread = 0;
 	while (len > 0 && (nread = message.read(constBuffer(buf, len))) > 0) {
 		handleResponse(message);
 		buf += nread;
 		len -= nread;
 	}
-	if (len == packet.size())
-		WarnL << "Non STUN packet received" << std::endl;
+	if (len == buffer.size())
+		WarnL << "Non STUN packet received" << endl;
 	
-	/*		
+#if 0
 	stun::Message message;
 	if (message.read(constBuffer(packet.data(), packet.size())))
 		handleResponse(message);
 	else
-		WarnL << "Non STUN packet received" << std::endl;
-		*/
+		WarnL << "Non STUN packet received" << endl;
+#endif
 }
 
 
 void Client::onSocketClose(void* sender)  //, const Error& error
 {
-	assert(sender == &_socket);
-	TraceL << "Control socket closed: " << sender << ": " << _socket.error().message << endl;	
-	assert(_socket.closed());
+	assert(sender == _socket.get());
+	TraceL << "Control socket closed: " << sender << ": " << _socket->error().message << endl;	
+	assert(_socket->closed());
 	shutdown();	
-	setState(this, ClientState::Failed, _socket.error().message);
-
-	//if (_socket.error().any()) {
-	//	setState(this, ClientState::Failed, _socket.error().message);
-	//}
-	//else {
-	//	setState(this, ClientState::None);
-	//}	
+	setState(this, ClientState::Failed, _socket->error().message);
 }
 
 
@@ -231,7 +225,7 @@ bool Client::removeTransaction(stun::Transaction* transaction)
 	//Mutex::ScopedLock lock(_mutex); 	
 	for (auto it = _transactions.begin(); it != _transactions.end(); ++it) {
 		if (*it == transaction) {
-			(*it)->StateChange -= delegate(this, &Client::onTransactionProgress);
+			(*it)->StateChange -= sdelegate(this, &Client::onTransactionProgress);
 			_transactions.erase(it);
 			return true;
 		}
@@ -267,13 +261,12 @@ void Client::authenticateRequest(stun::Message& request)
 		request.add(nonceAttr);
 	}
 
-	if (_realm.size() && _options.password.size()) {
-		
+	if (_realm.size() && _options.password.size()) {		
 		crypto::Hash engine("md5");
 		engine.update(_options.username + ":" + _realm + ":" + _options.password);
 		//return hex::encode(engine.digest());		
 		//std::string key(crypto::computeHash("MD5", _options.username + ":" + _realm + ":" + _options.password));
-		//TraceL << "Generating HMAC: data=" << (_options.username + ":" + _realm + ":" + _options.password) << ", key=" << engine.digestStr() << endl;
+		TraceL << "Generating HMAC: data=" << (_options.username + ":" + _realm + ":" + _options.password) << ", key=" << engine.digestStr() << endl;
 		auto integrityAttr = new stun::MessageIntegrity;
 		integrityAttr->setKey(engine.digestStr());
 		request.add(integrityAttr);
@@ -289,13 +282,13 @@ bool Client::sendAuthenticatedTransaction(stun::Transaction* transaction)
 }
 
 
-stun::Transaction* Client::createTransaction(net::Socket* socket)
+stun::Transaction* Client::createTransaction(const net::Socket::Ptr& socket)
 {
 	//Mutex::ScopedLock lock(_mutex); 	
-	socket = socket ? socket : &_socket;
-	assert(socket && !socket->isNull());
-	auto transaction = new stun::Transaction(*socket, _options.serverAddr, _options.timeout, 1);
-	transaction->StateChange += delegate(this, &Client::onTransactionProgress);	
+	//socket = socket ? socket : _socket;
+	//assert(socket && !socket->isNull());
+	auto transaction = new stun::Transaction(socket ? socket : _socket, _options.serverAddr, _options.timeout, 1);
+	transaction->StateChange += sdelegate(this, &Client::onTransactionProgress);	
 	_transactions.push_back(transaction);
 	return transaction;
 }
@@ -494,7 +487,7 @@ void Client::handleAllocateResponse(const stun::Message& response)
 		return;
 	}
 
-	if (relayedAttr->address().host() != "0.0.0.0") {
+	if (relayedAttr->address().host() == "0.0.0.0") {
 		assert(0 && "invalid loopback address");
 		return;
 	}
@@ -766,7 +759,7 @@ void Client::handleCreatePermissionResponse(const stun::Message& /* response */)
 	{
 		//Mutex::ScopedLock lock(_mutex); 		
 		while (!_pendingIndications.empty()) {
-			_socket.send(_pendingIndications.front());
+			_socket->sendPacket(_pendingIndications.front());
 			_pendingIndications.pop_front();
 		}
 	}
@@ -823,7 +816,7 @@ void Client::sendChannelBind(const std::string& /* peerIP */)
 }
 
 
-void Client::sendData(const char* data, int size, const net::Address& peerAddress) 
+void Client::sendData(const char* data, std::size_t size, const net::Address& peerAddress) 
 {
 	TraceL << "Send Data Indication to peer: " << peerAddress << endl;
 	
@@ -880,7 +873,7 @@ void Client::sendData(const char* data, int size, const net::Address& peerAddres
 
 	// If a permission exists on server and client send our data!
 	else {
-		_socket.send(request, _options.serverAddr);
+		_socket->sendPacket(request, _options.serverAddr);
 		//delete request;
 	}
 }

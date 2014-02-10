@@ -94,6 +94,20 @@ public:
 	{
 	}
 
+	void waitForSync()
+	{
+		// TODO: Impose a time limit
+		while(true) {
+			{
+				Mutex::ScopedLock lock(_mutex);
+				if (_actions.empty())
+					return;
+			}
+			DebugL << "Wait for sync" << std::endl;	
+			scy::sleep(10);
+		}	
+	}
+
 protected:	
 	mutable Mutex _mutex;
 	std::deque<TAction*> _actions;
@@ -116,7 +130,7 @@ public:
 	{
 	}
 
-	void close()
+	virtual void close()
 	{
 		_sync.close();
 	}

@@ -255,7 +255,7 @@ public:
  */
 
 
-//, net::Socket* socket
+//, net::Socket::Ptr socket
 
     //void registerSocketEvents();
 
@@ -268,7 +268,7 @@ public:
 
 //private:
 
-    //net::Socket* socket_; // Passed to constructor
+    //net::Socket::Ptr socket_; // Passed to constructor
     //on__observertype on__observer;
     //onError_type onError_;
     //on_close_type on_close_;
@@ -280,7 +280,7 @@ public:
 	/*
     static Parser* create(
         http_parser_type type,
-        net::Socket* socket,
+        net::Socket::Ptr socket,
         on__observertype _observercb = nullptr);
 
     * Callback that must be registered to allow construction of classes

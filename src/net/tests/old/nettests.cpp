@@ -142,7 +142,7 @@ public:
 		//reactor.attach();
 		//ReactorEventSignal += reactorCallback(this, &Tests::onClientSocketConnected);
 		//BasicReactorSignal += reactorCallback(this, &Tests::onBasicReactorSignal);
-		//BasicReactorSignal += delegate(this, &Tests::onBasicReactorSignal);
+		//BasicReactorSignal += sdelegate(this, &Tests::onBasicReactorSignal);
 	}
 */
 	
@@ -216,7 +216,7 @@ public:
 		numTimerTicks = 5;
 
 		Timer timer;
-		timer.OnTimeout += delegate(this, &Tests::onOnTimerTimeout);
+		timer.OnTimeout += sdelegate(this, &Tests::onOnTimerTimeout);
 		timer.start(100, 100);
 
 		RunDefaultLoop;
@@ -247,13 +247,13 @@ public:
 		Net::Address addr("127.0.0.1", 1337);
 
 		Net::UDPSocket serverSock;
-		serverSock.OnSend += delegate(this, &Tests::onUDPSocketServerSend);
-		serverSock.OnRecv += delegate(this, &Tests::onUDPSocketServerRecv);
+		serverSock.OnSend += sdelegate(this, &Tests::onUDPSocketServerSend);
+		serverSock.OnRecv += sdelegate(this, &Tests::onUDPSocketServerRecv);
 		serverSock.bind(addr);
 
 		Net::UDPSocket clientSock;
-		clientSock.OnSend += delegate(this, &Tests::onUDPSocketClientSend);
-		clientSock.OnRecv += delegate(this, &Tests::onUDPSocketClientRecv);
+		clientSock.OnSend += sdelegate(this, &Tests::onUDPSocketClientSend);
+		clientSock.OnRecv += sdelegate(this, &Tests::onUDPSocketClientRecv);
 		
 		clientSock.send("somedata", 8, addr);
 		clientSock.send("somedata", 8, addr);
@@ -391,12 +391,12 @@ public:
 			{	
 				//numRequests
 				socket = new Net::TCPSocket(reactor);
-				socket->StateChanged += delegate(this, &Tests::onClientSocketStateChanged);				
-				socket->DataReceived += delegate(this, &Tests::onClientSocketResponseReceived);
-				//socket->StateChanged += delegate(this, &Tests::onClientSocketStateChanged);
+				socket->StateChanged += sdelegate(this, &Tests::onClientSocketStateChanged);				
+				socket->DataReceived += sdelegate(this, &Tests::onClientSocketResponseReceived);
+				//socket->StateChanged += sdelegate(this, &Tests::onClientSocketStateChanged);
 				//reactor.attach(socket->impl(), reactorCallback(this, &Tests::onClientSocketConnected, SocketWritable));
-				//socket->OnConnected += delegate(this, &Tests::onClientSocketConnected);
-				//socket->OnRead += delegate(this, &Tests::onClientSocketResponseReceived);
+				//socket->OnConnected += sdelegate(this, &Tests::onClientSocketConnected);
+				//socket->OnRead += sdelegate(this, &Tests::onClientSocketResponseReceived);
 				try 
 				{
 					socket->connect(Poco::Net::SocketAddress("127.0.0.1", port));
@@ -645,7 +645,7 @@ public:
 	void onServerSocketallocated(void* sender, Net::TCPPacketSocket* socket)
 	{
 		Log("debug") << "[Tests:" << this << "] TCP Socket allocated: " << socket->peerAddr() << endl;
-		socket->StateChanged += delegate(this, &Tests::onServerSocketStateChanged);
+		socket->StateChanged += sdelegate(this, &Tests::onServerSocketStateChanged);
 		socket->addReceiver(packetDelegate<Tests, DataPacket>(this, &Tests::onServerSocketRequestReceived));	
 	}
 	
@@ -686,7 +686,7 @@ public:
 		Net::Reactor reactor;
 		Net::TCPPacketServer server(reactor);
 		server.bind(Net::Address("127.0.0.1", 1337));
-		server.Socketallocated += delegate(this, &Tests::onServerSocketallocated);
+		server.Socketallocated += sdelegate(this, &Tests::onServerSocketallocated);
 		//EchoServerThread s;
 		//EchoServer s(4000);		
 		//system("pause");		
@@ -704,7 +704,7 @@ public:
 			socket->connect(Net::Address("127.0.0.1", 1337)); //99774000
 			//socket->connect(Net::Address("127.0.0.1", 9977)); //
 			socket->addReceiver(packetDelegate<Tests, DataPacket>(this, &Tests::onClientSocketResponseReceived));		
-			socket->StateChanged += delegate(this, &Tests::onClientSocketStateChanged);
+			socket->StateChanged += sdelegate(this, &Tests::onClientSocketStateChanged);
 			//socket->close();
 			//delete socket;
 			Sleep(10);

@@ -29,42 +29,17 @@ namespace scy {
 namespace http {
 
 
-// -------------------------------------------------------------------
+//
 // Client Connection
 //
-ClientConnection::ClientConnection(http::Client* client, const URL& url, const net::Socket& socket) : 
+
+
+ClientConnection::ClientConnection(const URL& url, const net::Socket::Ptr& socket) :
 	Connection(socket),
-	_client(client), 
-	_url(url), 
-	_readStream(nullptr),
-	_complete(false)
-{	
-	TraceLS(this) << "Create: " << url << endl;
-
-	IncomingProgress.sender = this;
-	OutgoingProgress.sender = this;
-		
-	_request.setURI(url.pathEtc());
-	_request.setHost(url.host(), url.port());
-
-	_socket.replaceAdapter(new ClientAdapter(*this));
-		
-	// Set default error status
-	_response.setStatus(http::StatusCode::BadGateway);
-
-	if (_client) {
-		_client->Shutdown += delegate(this, &ClientConnection::onClientShutdown);
-		_client->addConnection(this);
-	}
-}
-
-
-ClientConnection::ClientConnection(const URL& url, const net::Socket& socket) :
-	Connection(socket),
-	_client(nullptr), 
 	_url(url),
 	_readStream(nullptr), 
-	_complete(false)
+	_complete(false),
+	_connect(false)
 {	
 	TraceLS(this) << "Create: " << url << endl;
 
@@ -77,7 +52,7 @@ ClientConnection::ClientConnection(const URL& url, const net::Socket& socket) :
 	// Set default error status
 	_response.setStatus(http::StatusCode::BadGateway);
 
-	_socket.replaceAdapter(new ClientAdapter(*this));
+	replaceAdapter(new ClientAdapter(*this));
 }
 
 
@@ -91,21 +66,11 @@ ClientConnection::~ClientConnection()
 	}
 }
 
-	
+
 void ClientConnection::close()
 {
-	if (!_complete) {
-		_closed = true; // in case close() is called inside callback 
-		Complete.emit(this, _response);
-		_closed = false;
-	}
-
 	if (!closed()) {
-		if (_client) {
-			_client->Shutdown -= delegate(this, &ClientConnection::onClientShutdown);
-			_client->removeConnection(this);
-		}
-
+		onComplete();
 		Connection::close();
 	}
 }
@@ -113,16 +78,39 @@ void ClientConnection::close()
 
 void ClientConnection::send()
 {
-	// TODO: assert not connected
+	assert(!_connect);
 	connect();
 }
 
 
 void ClientConnection::send(http::Request& req)
 {
-	// TODO: assert not connected
+	assert(!_connect);
 	_request = req;
 	connect();
+}
+
+
+int ClientConnection::send(const char* data, std::size_t len, int flags)
+{
+	connect();
+	if (Outgoing.active())
+		return Connection::send(data, len);
+	else
+		_outgoingBuffer.push_back(std::string(data, len));	
+	return len;
+}
+
+
+#if 0
+int ClientConnection::send(const std::string& buf, int flags) //, int flags
+{
+	connect();
+	if (Outgoing.active())
+		return Connection::send(buf);
+	else
+		_outgoingBuffer.push_back(buf);	
+	return buf.length();
 }
 
 
@@ -135,42 +123,32 @@ void ClientConnection::sendData(const char* buf, std::size_t len) //, int flags
 		_outgoingBuffer.push_back(std::string(buf, len));	
 }
 
-
-void ClientConnection::sendData(const std::string& buf) //, int flags
+	
+http::Client* ClientConnection::client()
 {
-	connect();
-	if (Outgoing.active())
-		Connection::sendData(buf);
-	else
-		_outgoingBuffer.push_back(buf);	
+	return _client;
 }
+#endif
 
 
 void ClientConnection::connect()
 {
-	if (_socket.Connect.ndelegates() == 0) {
-
+	if (!_connect) {
+		_connect = true;
 		TraceLS(this) << "Connecting" << endl;	
-		_socket.Connect += delegate(this, &ClientConnection::onSocketConnect);
-		_socket.connect(_url.host(), _url.port());
+		_socket->connect(_url.host(), _url.port());
 	}
 }
 
 
 void ClientConnection::setReadStream(std::ostream* os)
 {
-	// TODO: assert connection not active
+	assert(!_connect);
 	if (_readStream) {
 		delete _readStream;
 	}
 
 	_readStream = os;
-}
-
-			
-http::Client* ClientConnection::client()
-{
-	return _client;
 }
 
 
@@ -187,15 +165,11 @@ http::Message* ClientConnection::outgoingHeader()
 
 
 //
-// Socket callbacks
-//
+// Socket Callbacks
 
-void ClientConnection::onSocketConnect(void*) 
+void ClientConnection::onSocketConnect() 
 {
 	TraceLS(this) << "On connect" << endl;
-
-	// Don't disconnect the delegate so send() won't be called again
-	//_socket.Connect -= delegate(this, &ClientConnection::onSocketConnect);
 	
 	// Emit the connect signal so raw connections like
 	// websockets can kick off the data flow
@@ -203,8 +177,6 @@ void ClientConnection::onSocketConnect(void*)
 
 	// Start the outgoing send stream if there are
 	// any queued packets or adapters attached
-	//if (Outgoing.base().size() ||
-	//	Outgoing.base().numAdapters())
 	Outgoing.start();
 
 	// Flush queued packets
@@ -227,13 +199,12 @@ void ClientConnection::onSocketConnect(void*)
 	
 
 //
-// Connection callbacks
-//
+// Connection Callbacks
 
 void ClientConnection::onHeaders() 
 {
 	TraceLS(this) << "On headers" << endl;	
-	_incomingProgress.total = _response.getContentLength();
+	IncomingProgress.total = _response.getContentLength();
 
 	Headers.emit(this, _response);
 }
@@ -241,13 +212,14 @@ void ClientConnection::onHeaders()
 
 void ClientConnection::onPayload(const MutableBuffer& buffer)
 {
-	//TraceLS(this) << "On payload: " << std::string(bufferCast<const char*>(buffer), buffer.size()) << endl;	
+	//TraceLS(this) << "On payload: " << 
+	// std::string(bufferCast<const char*>(buffer), buffer.size()) << endl;	
 	
 	// Update download progress
-	_incomingProgress.update(buffer.size());
+	IncomingProgress.update(buffer.size());
 
 	if (_readStream) {		
-		TraceLS(this) << "writing to stream: " << buffer.size() << endl;	
+		TraceLS(this) << "Writing to stream: " << buffer.size() << endl;	
 		_readStream->write(bufferCast<const char*>(buffer), buffer.size());
 		_readStream->flush();
 	}
@@ -259,11 +231,17 @@ void ClientConnection::onPayload(const MutableBuffer& buffer)
 void ClientConnection::onMessage() 
 {
 	TraceLS(this) << "On complete" << endl;
+
+	onComplete();
+}
+
 	
-	// Fire Complete and clear delegates so it
-	// won't fire again on close or error
-	_complete = true;
-	Complete.emit(this, _response);
+void ClientConnection::onComplete()
+{
+	if (!_complete) {
+		_complete = true; // in case close() is called inside callback 
+		Complete.emit(this, _response);
+	}
 }
 
 
@@ -275,48 +253,25 @@ void ClientConnection::onClose()
 }
 
 
-void ClientConnection::onClientShutdown(void*)
-{
-	close();
-}
-
-// ---------------------------------------------------------------------
+//
+// HTTP Client
 //
 
-ClientConnection* createConnection(const URL& url, uv::Loop* loop)
+
+Client& Client::instance() 
 {
-	ClientConnection* conn = nullptr;
-
-	if (url.scheme() == "http") {
-		conn = new ClientConnection(url, net::TCPSocket(loop));
-	}
-	else if (url.scheme() == "https") {
-		conn = new ClientConnection(url, net::SSLSocket(loop)); //net::SSLSocket());
-	}
-	else if (url.scheme() == "ws") {
-		conn = new ClientConnection(url, net::TCPSocket(loop));
-		conn->socket().replaceAdapter(new WebSocketConnectionAdapter(*conn, WebSocket::ClientSide));
-	}
-	else if (url.scheme() == "wss") {
-		conn = new ClientConnection(url, net::SSLSocket(loop)); //net::SSLSocket());
-		conn->socket().replaceAdapter(new WebSocketConnectionAdapter(*conn, WebSocket::ClientSide));
-	}
-	else
-		throw std::runtime_error("Unknown connection type for URL: " + url.str());
-
-	return conn;
+	static Singleton<Client> singleton;
+	return *singleton.get();
 }
 
 
-// ---------------------------------------------------------------------
-//
-Client::Client(uv::Loop* loop) :
-	timer(loop), loop(loop)
+Client::Client() //:
+	//_timer()
 {
 	TraceLS(this) << "Create" << endl;
 
-	timer.Timeout += delegate(this, &Client::onTimer);
-	timer.start(5000);
+	//_timer.Timeout += sdelegate(this, &Client::onConnectionTimer);
+	//_timer.start(5000);
 }
 
 
@@ -331,31 +286,34 @@ void Client::shutdown()
 {
 	TraceLS(this) << "Shutdown" << endl;
 
-	timer.stop();
-	if (!connections.empty())
-		Shutdown.emit(this);
+	//_timer.stop();
+	Shutdown.emit(this);
 
-	// Connections must remove themselves
-	assert(connections.empty());
+	//_connections.clear();
+	auto conns = _connections;
+	for (auto conn : conns) {
+		conn->close(); // close and remove via callback
+	}
+	assert(_connections.empty());
 }
 
 
-void Client::addConnection(ClientConnection* conn) 
+void Client::addConnection(ClientConnection::Ptr conn) 
 {		
-	TraceLS(this) << "Adding connection: " << conn << endl;
-	assert(conn->socket().base().loop() == loop);
-	connections.push_back(conn);
+	TraceLS(this) << "Adding connection: " << conn << endl;	
+
+	conn->Close += sdelegate(this, &Client::onConnectionClose, -1); // lowest priority
+	_connections.push_back(conn);
 }
 
 
 void Client::removeConnection(ClientConnection* conn) 
 {		
 	TraceLS(this) << "Removing connection: " << conn << endl;
-	assert(conn->socket().base().loop() == loop);
-	for (auto it = connections.begin(); it != connections.end(); ++it) {
-		if (conn == *it) {
-			connections.erase(it);
+	for (auto it = _connections.begin(); it != _connections.end(); ++it) {
+		if (conn == it->get()) {
 			TraceLS(this) << "Removed connection: " << conn << endl;
+			_connections.erase(it);
 			return;
 		}
 	}
@@ -363,20 +321,26 @@ void Client::removeConnection(ClientConnection* conn)
 }
 
 
-void Client::onTimer(void*)
+void Client::onConnectionClose(void* sender)
 {
-	//TraceLS(this) << "On timer" << endl;
+	removeConnection(reinterpret_cast<ClientConnection*>(sender));
+}
 
-	/// Close connections that have timed out while receiving
-	/// the server response, maybe due to a faulty server.
-	ClientConnectionList conns = ClientConnectionList(connections);
-	for (auto it = conns.begin(); it != conns.end(); ++it) {
-		if ((*it)->expired()) {
-			TraceLS(this) << "Closing expired connection: " << *it << endl;
-			(*it)->close();
+
+#if 0
+void Client::onConnectionTimer(void*)
+{
+	// Close connections that have timed out while receiving
+	// the server response, maybe due to a faulty server.
+	auto conns = _connections;
+	for (auto conn : conns) {
+		if (conn->closed()) { // conn->expired()
+			TraceLS(this) << "Closing expired connection: " << conn << endl;
+			conn->close();
 		}			
 	}
 }
+#endif
 
 
 } } // namespace scy::http

@@ -81,8 +81,6 @@ inline void throwError(const std::string& message, int errorno = UV_UNKNOWN)
 															         \
 	static void Function(Handle* handle, int status) {			     \
 		ClassName* self = static_cast<ClassName*>(handle->data);	 \
-		if (status)											         \
-			self->setUVError("UV error", status);	                 \
 		self->Function(status);									     \
     }														         \
 	
@@ -101,8 +99,6 @@ inline void throwError(const std::string& message, int errorno = UV_UNKNOWN)
 															        \
 	static void Function(Handle* handle, int status) {			    \
 		ClassName* self = static_cast<ClassName*>(handle->data);	\
-		if (status)											        \
-			self->setUVError("UV error", status);	                \
 		self->Function(handle, status);							    \
     }														        \
 	
@@ -127,6 +123,7 @@ inline Loop* defaultLoop()
 //
 // UV Handle
 //
+
 
 class Handle
 	/// A base class for managing the lifecycle of a libuv handle,  
@@ -310,9 +307,7 @@ protected:
 
  protected:
 	Handle(const Handle&); // = delete;
-	Handle(Handle&&); // = delete;
 	Handle& operator=(const Handle&); // = delete;
-	Handle& operator=(Handle&&); // = delete;
 	
 	uv_loop_t* _loop;
 	uv_handle_t* _ptr;

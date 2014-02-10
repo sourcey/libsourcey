@@ -124,14 +124,16 @@ public:
 	void handleConnectionBindRequest(Request& request);
 	//void handleSendIndication(Request& request);
 	
+	void respond(Request& request, stun::Message& response);
 	void respondError(Request& request, int errorCode, const char* errorDesc);
-	void respondSuccess(Request& request, stun::Message& response);
 	
 	ServerAllocationMap allocations() const;
 	void addAllocation(ServerAllocation* alloc);
 	void removeAllocation(ServerAllocation* alloc);
 	ServerAllocation* getAllocation(const FiveTuple& tuple);
 	TCPAllocation* getTCPAllocation(const UInt32& connectionID);
+	net::TCPSocket::Ptr getTCPSocket(const net::Address& remoteAddr);
+	void releaseTCPSocket(net::Socket* socket);
 	
 	ServerObserver& observer();
 	ServerOptions& options();
@@ -139,13 +141,12 @@ public:
 	net::TCPSocket& tcpSocket();
 	Timer& timer();
 	
-	void onTCPAcceptConnection(void* sender, const net::TCPSocket& sock);
+	void onTCPAcceptConnection(void* sender, const net::TCPSocket::Ptr& sock);
 	void onTCPSocketClosed(void* sender);
-	void onSocketRecv(void* sender, net::SocketPacket& packet);
+	void onSocketRecv(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
 	//void onUDPReceived(void* sender, Buffer& buffer);
 	void onTimer(void*);
 
-	void releaseTCPSocket(net::TCPSocket* sock);
 
 	//virtual const char* className() const { return "TURNServer"; };
 
@@ -153,7 +154,7 @@ private:
 	Timer _timer;
 	net::UDPSocket _udpSocket;
 	net::TCPSocket _tcpSocket;	
-	net::TCPSocket::List _tcpSockets;
+	net::TCPSocket::Vec _tcpSockets;
 	ServerOptions _options;
 	ServerObserver& _observer;
 	ServerAllocationMap	_allocations;

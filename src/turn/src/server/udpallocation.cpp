@@ -39,14 +39,14 @@ UDPAllocation::UDPAllocation(Server& server,
                              const FiveTuple& tuple, 
                              const std::string& username, 
                              const UInt32& lifetime) : 
-	ServerAllocation(server, tuple, username, lifetime),
-	_relaySocket(new net::UDPBase) //server.reactor(), server.runner()
+	ServerAllocation(server, tuple, username, lifetime)//,
+	//_relaySocket(new net::UDPSocket) //server.reactor(), server.runner()
 {
 	// Handle data from the relay socket directly from the allocation.
 	// This will remove the need for allocation lookups when receiving
 	// data from peers.
 	_relaySocket.bind(net::Address(server.options().listenAddr.host(), 0));		
-	_relaySocket.Recv += delegate(this, &UDPAllocation::onPeerDataReceived);
+	_relaySocket.Recv += sdelegate(this, &UDPAllocation::onPeerDataReceived);
 
 	TraceL << " Initializing on address: " << _relaySocket.address() << endl;
 }
@@ -55,7 +55,7 @@ UDPAllocation::UDPAllocation(Server& server,
 UDPAllocation::~UDPAllocation() 
 {
 	TraceL << "Destroy" << endl;	
-	_relaySocket.Recv -= delegate(this, &UDPAllocation::onPeerDataReceived);
+	_relaySocket.Recv -= sdelegate(this, &UDPAllocation::onPeerDataReceived);
 	_relaySocket.close();
 }
 
@@ -139,7 +139,7 @@ void UDPAllocation::handleSendIndication(Request& request)
 	// The resulting UDP datagram is then sent to the peer.
 	
 	TraceL << "Relaying Send Indication: " 
-		<< "\r\tFrom: " << request.remoteAddr.toString()
+		<< "\r\tFrom: " << request.remoteAddress.toString()
 		<< "\r\tTo: " << peerAddress
 		<< endl;	
 
@@ -150,17 +150,17 @@ void UDPAllocation::handleSendIndication(Request& request)
 }
 
 
-void UDPAllocation::onPeerDataReceived(void*, net::SocketPacket& packet)
+void UDPAllocation::onPeerDataReceived(void*, const MutableBuffer& buffer, const net::Address& peerAddress)
 {	
 	//auto source = reinterpret_cast<net::PacketInfo*>(packet.info);
-	TraceL << "Received UDP Datagram from " << packet.info->peerAddress << endl;	
+	TraceL << "Received UDP Datagram from " << peerAddress << endl;	
 	
-	if (!hasPermission(packet.info->peerAddress.host())) {
-		TraceL << "No Permission: " << packet.info->peerAddress.host() << endl;	
+	if (!hasPermission(peerAddress.host())) {
+		TraceL << "No Permission: " << peerAddress.host() << endl;	
 		return;
 	}
 
-	updateUsage(packet.size());
+	updateUsage(buffer.size());
 	
 	// Check that we have not exceeded out lifetime and bandwidth quota.
 	if (IAllocation::deleted())
@@ -172,34 +172,34 @@ void UDPAllocation::onPeerDataReceived(void*, net::SocketPacket& packet)
 	// attribute to overcome proxy and NAT issues.
 	std::string peerHost(server().options().externalIP);
 	if (peerHost.empty()) {
-		peerHost.assign(packet.info->peerAddress.host());
+		peerHost.assign(peerAddress.host());
 		assert(0 && "external IP not set");
 	}
 	
 	auto peerAttr = new stun::XorPeerAddress;
-	peerAttr->setAddress(net::Address(peerHost, packet.info->peerAddress.port()));
+	peerAttr->setAddress(net::Address(peerHost, peerAddress.port()));
 	message.add(peerAttr);
 
 	auto dataAttr = new stun::Data;
-	dataAttr->copyBytes(packet.data(), packet.size());
+	dataAttr->copyBytes(bufferCast<const char*>(buffer), buffer.size());
 	message.add(dataAttr);
 	
 	//Mutex::ScopedLock lock(_mutex);
 
 	TraceL << "Send data indication:" 
-		<< "\n\tFrom: " << packet.info->peerAddress
+		<< "\n\tFrom: " << peerAddress
 		<< "\n\tTo: " << _tuple.remote()
 		//<< "\n\tData: " << std::string(packet.data(), packet.size())
 		<< endl;
 		
-	server().udpSocket().send(message, _tuple.remote());
+	server().udpSocket().sendPacket(message, _tuple.remote());
 	
 	//net::Address tempAddress("58.7.41.244", _tuple.remote().port());
 	//server().udpSocket().send(message, tempAddress);
 }
 
 
-int UDPAllocation::send(const char* data, int size, const net::Address& peerAddress)
+int UDPAllocation::send(const char* data, std::size_t size, const net::Address& peerAddress)
 {
 	updateUsage(size);
 	
@@ -209,7 +209,7 @@ int UDPAllocation::send(const char* data, int size, const net::Address& peerAddr
 		return -1;
 	}
 
-	return _relaySocket.base().send(data, size, peerAddress);
+	return _relaySocket./*base().*/send(data, size, peerAddress);
 }
 
 

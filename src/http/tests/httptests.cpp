@@ -39,7 +39,7 @@ namespace scy {
 namespace http {
 
 	
-#define TEST_SSL 0 //1 //
+#define TEST_SSL 1 //
 #define TEST_HTTP_PORT 1337
 #define TEST_HTTPS_PORT 1338
 
@@ -75,7 +75,7 @@ public:
 
 		response.setContentLength(14);  // headers will be auto flushed
 
-		connection().sendData("hello universe", 14); 
+		connection().send("hello universe", 14); 
 		connection().close();
 	}
 };
@@ -98,7 +98,7 @@ public:
 	{
 		//conn.Outgoing.attach(new http::ChunkedAdapter(conn)); //"text/html"
 		//conn.Outgoing.attachSource(&dataSource.signal, false);
-		//dataSource.signal += delegate(&conn.socket(), &Socket::send);
+		//dataSource.signal += sdelegate(&conn.socket(), &Socket::send);
 	}
 
 	~ChunkedResponder()
@@ -166,7 +166,7 @@ public:
 		gotPayload = true;
 
 		// Enco the request back to the client
-		connection().sendData(body.data(), body.size());
+		connection().send(body.data(), body.size());
 	}
 
 	void onClose()
@@ -215,10 +215,10 @@ public:
 	{		
 		DebugL << "Creating: " << addr << endl;
 
-		socket.Recv += delegate(this, &SocketClientEchoTest::onRecv);
-		socket.Connect += delegate(this, &SocketClientEchoTest::onConnect);
-		socket.Error += delegate(this, &SocketClientEchoTest::onError);
-		socket.Close += delegate(this, &SocketClientEchoTest::onClose);
+		socket.Recv += sdelegate(this, &SocketClientEchoTest::onRecv);
+		socket.Connect += sdelegate(this, &SocketClientEchoTest::onConnect);
+		socket.Error += sdelegate(this, &SocketClientEchoTest::onError);
+		socket.Close += sdelegate(this, &SocketClientEchoTest::onClose);
 	}
 
 	~SocketClientEchoTest()
@@ -247,10 +247,10 @@ public:
 	{
 		DebugL << "connected" << endl;
 		assert(sender == &socket);
-		socket.send("client > server", 15, WebSocket::SendFlags::Text);
+		socket.send("client > server", 15, ws::SendFlags::Text);
 	}
 	
-	void onRecv(void* sender, net::SocketPacket& packet)
+	void onRecv(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress)
 	{
 		assert(sender == &socket);
 		std::string data(packet.data(), packet.size());
@@ -300,14 +300,19 @@ public:
 #endif
 #if TEST_SSL
 			// Init SSL Context 
-			SSLContext::Ptr ptrContext = new SSLContext(
-				SSLContext::CLIENT_USE, "", "", "", 
-				SSLContext::VERIFY_NONE, 9, false, 
+			net::SSLContext::Ptr ptrContext = new net::SSLContext(
+				net::SSLContext::CLIENT_USE, "", "", "", 
+				net::SSLContext::VERIFY_NONE, 9, false, 
 				"ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");		
+			net::SSLManager::instance().initializeClient(ptrContext);
 #endif
 		{		
 			
-			testStandaloneHTTPClientConnection();	
+			//testStandaloneHTTPClientConnection();	
+			//testStandaloneHTTPSClientConnection();	
+			//runSecureClientConnectionTest();
+			//runClientConnectionDownloadTest();
+			//runSecureClientConnectionDownloadTest();
 #if 0
 			testURLParameters();
 			testURL();
@@ -319,15 +324,15 @@ public:
 			runHTTPClientWebSocketTest();	
 			runWebSocketSecureClientConnectionTest();
 			testClientWebSocket();
+#endif
 
 			// NOTE: Must be terminated with Crtl-C
 			runHTTPServerTest();
-#endif
 			
 		}
 #if TEST_SSL
 			// Shutdown SSL
-			SSLManager::instance().shutdown();
+			net::SSLManager::instance().shutdown();
 #endif
 
 		// Shutdown the garbage collector so we can free memory.
@@ -475,12 +480,12 @@ public:
 				server.start();
 
 			conn = (ClientConnection*)client.createConnectionT<ConnectionT>(url);		
-			conn->Connect += delegate(this, &HTTPClientTest::onConnect);	
-			conn->Headers += delegate(this, &HTTPClientTest::onHeaders);
-			conn->Incoming.Emitter += delegate(this, &HTTPClientTest::onPayload); // fix syntax
-			//conn->Payload += delegate(this, &HTTPClientTest::onPayload);
-			conn->Complete += delegate(this, &HTTPClientTest::onComplete);
-			conn->Close += delegate(this, &HTTPClientTest::onClose);
+			conn->Connect += sdelegate(this, &HTTPClientTest::onConnect);	
+			conn->Headers += sdelegate(this, &HTTPClientTest::onHeaders);
+			conn->Incoming.Emitter += sdelegate(this, &HTTPClientTest::onPayload); // fix syntax
+			//conn->Payload += sdelegate(this, &HTTPClientTest::onPayload);
+			conn->Complete += sdelegate(this, &HTTPClientTest::onComplete);
+			conn->Close += sdelegate(this, &HTTPClientTest::onClose);
 			return (ConnectionT*)conn;
 		}
 
@@ -549,14 +554,88 @@ public:
 		}
 	};
 	
+	
+	//
+	/// Default HTTP Client Connection Test
+	//
+	void runClientConnectionDownloadTest() 
+	{	
+		{
+			auto conn = http::Client::instance().createConnection("http://localhost:3000/packages/spotinstaller/download/2667/SpotInstaller.exe");
+			conn->Complete += sdelegate(this, &Tests::onClientConnectionDownloadComplete);	
+			conn->request().setMethod("GET");
+			conn->request().setKeepAlive(false);
+			conn->setReadStream(new std::ofstream("SpotInstaller.exe", std::ios_base::out | std::ios_base::binary));
+			conn->send();
+		}
+		runLoop();
+	}
+
+	void runSecureClientConnectionDownloadTest() 
+	{	
+		{
+			auto conn = http::Client::instance().createConnection("https://anionu.com/assets/download/25/SpotInstaller.exe");
+			conn->Complete += sdelegate(this, &Tests::onClientConnectionDownloadComplete);	
+			conn->request().setMethod("GET");
+			conn->request().setKeepAlive(false);
+			conn->setReadStream(new std::ofstream("SpotInstaller.exe", std::ios_base::out | std::ios_base::binary));
+			conn->send();
+		}
+		runLoop();
+	}
+
+	void onClientConnectionDownloadComplete(void* sender, const http::Response& response)
+	{
+		auto conn = reinterpret_cast<http::ClientConnection*>(sender);
+
+		TraceL << "Server response: " << response << endl;
+	}
+
+	
+	void runSecureClientConnectionTest() 
+	{	
+		{
+			auto conn = http::Client::instance().createConnection("https://anionu.com/");
+			conn->Complete += sdelegate(this, &Tests::onClientConnectionComplete);	
+			conn->request().setMethod("GET");
+			conn->request().setKeepAlive(false);
+			conn->setReadStream(new std::stringstream);	
+			conn->send();
+		}
+		runLoop();
+	}
+	
+	void runClientConnectionTest() 
+	{	
+		{
+			auto conn = http::Client::instance().createConnection("http://localhost:3000/");
+			conn->Complete += sdelegate(this, &Tests::onClientConnectionComplete);	
+			conn->request().setMethod("GET");
+			conn->request().setKeepAlive(false);
+			conn->setReadStream(new std::stringstream);	
+			conn->send();
+		}
+		runLoop();
+	}
+	
+
+	void onClientConnectionComplete(void* sender, const http::Response& response)
+	{
+		auto conn = reinterpret_cast<http::ClientConnection*>(sender);
+
+		TraceL << "Server response: " 
+			<< response << conn->readStream<std::stringstream>()->str() << endl;
+	}
+		
 	/*
+	
 	void runClientConnectionTest() 
 	{	
 		HTTPClientTest test;
 		test.create<ClientConnection>()->send(); // default GET request
 		runLoop();
 	}
-
+	
 	void runClientConnectionChunkedTest() 
 	{	
 		HTTPClientTest test;		
@@ -597,13 +676,15 @@ public:
 	
 	void testStandaloneHTTPClientConnection()
 	{
-		auto conn = new ClientConnection("http://localhost:3000");
-		conn->Headers += delegate(this, &Tests::onStandaloneHTTPClientConnectionHeaders);
-		//conn->Payload += delegate(this, &Tests::onStandaloneHTTPClientConnectionPayload);
-		conn->Complete += delegate(this, &Tests::onStandaloneHTTPClientConnectionComplete);
-		conn->setReadStream(new std::stringstream);
-		conn->send(); // send default GET /
-		runLoop();
+		{
+			ClientConnection conn("http://localhost:3000/");
+			conn.Headers += sdelegate(this, &Tests::onStandaloneHTTPClientConnectionHeaders);
+			//conn->Payload += sdelegate(this, &Tests::onStandaloneHTTPClientConnectionPayload);
+			conn.Complete += sdelegate(this, &Tests::onStandaloneHTTPClientConnectionComplete);
+			conn.setReadStream(new std::stringstream);
+			conn.send(); // send default GET /
+			runLoop();
+		}
 	}	
 	
 	void onStandaloneHTTPClientConnectionHeaders(void*, Response& res)
@@ -636,12 +717,12 @@ public:
 		//srv.start();
 
 		// ws://echo.websocket.org		
-		//SocketClientEchoTest<http::WebSocket> test(net::Address("174.129.224.73", 1339));
-		//SocketClientEchoTest<http::WebSocket> test(net::Address("174.129.224.73", 80));
+		//SocketClientEchoTest<http::ws::WebSocket> test(net::Address("174.129.224.73", 1339));
+		//SocketClientEchoTest<http::ws::WebSocket> test(net::Address("174.129.224.73", 80));
 
 		//DebugL << "TCP Socket Test: Starting" << endl;
-		SocketClientEchoTest<http::WebSocket> test(net::Address("127.0.0.1", TEST_HTTP_PORT));
-		test.start();
+		//SocketClientEchoTest<http::ws::WebSocket> test(net::Address("127.0.0.1", TEST_HTTP_PORT));
+		//test.start();
 
 		runLoop();
 	}		
@@ -704,8 +785,8 @@ int main(int argc, char** argv)
 		http::Request req("GET", "http://google.com");
 		http::Response res;
 		http::ClientConnection txn(&req);
-		txn.Complete += delegate(this, &Tests::onComplete);
-		txn.DownloadProgress += delegate(this, &Tests::onIncomingProgress);	
+		txn.Complete += sdelegate(this, &Tests::onComplete);
+		txn.DownloadProgress += sdelegate(this, &Tests::onIncomingProgress);	
 		txn.send();
 
 		// Run the looop

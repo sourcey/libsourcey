@@ -38,9 +38,9 @@ class TCPClient;
 
 struct TCPClientObserver: public ClientObserver 
 {
-	virtual void onRelayConnectionCreated(TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddress) {};
-	virtual void onRelayConnectionError(TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddress) {};
-	virtual void onRelayConnectionClosed(TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddress) {};
+	virtual void onRelayConnectionCreated(TCPClient& client, const net::TCPSocket::Ptr& socket, const net::Address& peerAddress) {};
+	virtual void onRelayConnectionError(TCPClient& client, const net::TCPSocket::Ptr& socket, const net::Address& peerAddress) {};
+	virtual void onRelayConnectionClosed(TCPClient& client, const net::TCPSocket::Ptr& socket, const net::Address& peerAddress) {};
 	virtual void onRelayConnectionBindingFailed(TCPClient& client, const net::Address& peerAddress) {};
 	virtual bool onPeerConnectionAttempt(TCPClient& client, const net::Address& peerAddress) { return true; };
 };
@@ -53,7 +53,7 @@ struct RelayConnectionBinding
 };
 
 
-typedef PointerCollection<net::Address, net::TCPSocket>	ConnectionManager;
+typedef KVCollection<net::Address, net::TCPSocket::Ptr>	ConnectionManager;
 typedef ConnectionManager::Map						    ConnectionManagerMap;
 
 
@@ -67,7 +67,7 @@ public:
 	virtual void shutdown();
 	
 	virtual void sendConnectRequest(const net::Address& peerAddress);
-	virtual void sendData(const char* data, int size, const net::Address& peerAddress);	
+	virtual void sendData(const char* data, std::size_t size, const net::Address& peerAddress);	
 	
 	virtual bool handleResponse(const stun::Message& response);
 	virtual void handleConnectResponse(const stun::Message& response);
@@ -80,12 +80,12 @@ public:
 	//virtual void onRelayConnectionStateChange(void* sender, Net::SocketState& state, const Net::SocketState& oldState);	
 
 	virtual void onRelayConnectionConnect(void* sender);
-	virtual void onRelayDataReceived(void* sender, net::SocketPacket& packet);
+	virtual void onRelayDataReceived(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
 	virtual void onRelayConnectionError(void* sender, const Error& error) ;	
 	virtual void onRelayConnectionClosed(void* sender);	
 		
 
-	void freeConnection(net::TCPSocket* socket);	
+	void freeConnection(const net::Address& peerAddress); //const net::TCPSocket::Ptr& socket);	
 
 	virtual int transportProtocol();
 	ConnectionManager& connections();

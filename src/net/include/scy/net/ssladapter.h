@@ -36,13 +36,13 @@ namespace scy {
 namespace net {
 
  
-class SSLBase;
+class SSLSocket;
 class SSLAdapter 
 	/// A wrapper for the OpenSSL SSL connection context
-	/// TODO: Decouple from SSLBase implementation
+	/// TODO: Decouple from SSLSocket implementation
 {
 public:
-	SSLAdapter(net::SSLBase* socket);
+	SSLAdapter(net::SSLSocket* socket);
 	~SSLAdapter();
 
 	void init(SSL* ssl = nullptr);
@@ -71,9 +71,9 @@ protected:
 	void flushWriteBIO();
 
 protected:
-	friend class net::SSLBase;
+	friend class net::SSLSocket;
 
-	net::SSLBase* _socket;
+	net::SSLSocket* _socket;
 	SSL* _ssl;
 	BIO* _readBIO; // The incoming buffer we write encrypted SSL data into
 	BIO* _writeBIO; // The outgoing buffer we write to the socket

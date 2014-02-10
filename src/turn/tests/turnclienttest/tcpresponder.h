@@ -26,15 +26,15 @@ public:
 		id(id)
 	{
 		DebugLS(this) << id << ": Creating" << endl;
-		net::SocketAdapter::socket = &socket;
-		socket.setAdapter(this);
+		//net::SocketAdapter::socket = &socket;
+		socket.setInputAdapter(this);
 	}
 
 	virtual ~TCPResponder() 
 	{ 
 		DebugLS(this) << id << ": Destroying" << endl;
 		//socket.base().removeObserver(this);
-		socket.setAdapter(nullptr);
+		socket.setInputAdapter(nullptr, false);
 		stop(); 
 	}
 
@@ -66,11 +66,11 @@ public:
 		sendLatencyCheck();
 
 		// Start the send timer
-		timer.Timeout += delegate(this, &TCPResponder::onSendTimer);
+		timer.Timeout += sdelegate(this, &TCPResponder::onSendTimer);
 		timer.start(1000, 1000);
 	}
 	
-	void onSocketRecv(const MutableBuffer& buf, const net::Address& peerAddr) //net::SocketPacket& packet) 
+	void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress) //net::SocketPacket& packet) 
 	{
 		//assert(&packet.info->socket == &socket);
 		std::string payload(bufferCast<const char*>(buf), buf.size());
@@ -83,7 +83,7 @@ public:
 		//socket.send(payload.c_str(), payload.size());
 	}
 
-	void onSocketError(const Error& error) 
+	void onSocketError(const scy::Error& error) 
 	{
 		DebugLS(this) << id << ": On error: " << error.message << std::endl;
 	}
@@ -134,7 +134,7 @@ public:
 		socket.send("early media", 11);
 
 		// Start the send timer
-		//timer.Timeout += delegate(this, &TCPResponder::onSendTimer);
+		//timer.Timeout += sdelegate(this, &TCPResponder::onSendTimer);
 		//timer.start(5000, 5000);
 	}
 	*/
@@ -149,7 +149,7 @@ public:
 			/*
 			assert(!socket);
 			socket = new Net::TCPStatefulPacketSocket(reactor);
-			socket.StateChange += delegate(this, &TCPResponder::onSocketStateChange);
+			socket.StateChange += sdelegate(this, &TCPResponder::onSocketStateChange);
 			socket.registerPacketType<RawPacket>(0);
 			socket.attach(packetDelegate(this, &TCPResponder::onRawPacketReceived, 102));
 			*/
@@ -160,7 +160,7 @@ public:
 		//Timer::getDefault().stop(TimerCallback<TCPResponder>(this, &TCPResponder::onSendTimer));
 		//Timer::getDefault().stop(TimerCallback<TCPResponder>(this, &TCPResponder::onRecreateTimer));
 		if (socket) {	
-			socket.StateChange -= delegate(this, &TCPResponder::onSocketStateChange);
+			socket.StateChange -= sdelegate(this, &TCPResponder::onSocketStateChange);
 			socket.detach(packetDelegate(this, &TCPResponder::onRawPacketReceived, 102));
 			delete socket;
 			socket = NULL;

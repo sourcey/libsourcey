@@ -204,12 +204,13 @@ public:
 		//clientSendAddr.swap(net::Address("127.0.0.1", 1337));	 //
 
 		//net::UDPSocket serverSock;
-		//serverSock.Recv += delegate(this, &Tests::onUDPSocketServerRecv);
+		//serverSock.Recv += sdelegate(this, &Tests::onUDPSocketServerRecv);
 		//serverSock.bind(serverBindAddr);
 		//this->serverSock = &serverSock;
 		
 		net::UDPSocket clientSock;
-		clientSock.Recv += delegate(this, &Tests::onUDPClientSocketRecv);		
+		//clientSock.Recv += sdelegate(this, &Tests::onUDPClientSocketRecv);		
+		assert(0 && "fixme");
 		clientSock.bind(net::Address("0.0.0.0", 0));	
 		clientSock.connect(udpServerAddr);	
 		this->udpClientSock = &clientSock;
@@ -219,7 +220,7 @@ public:
 
 		// Start the send timer
 		Timer timer;
-		timer.Timeout += delegate(this, &Tests::onUDPClientSendTimer);
+		timer.Timeout += sdelegate(this, &Tests::onUDPClientSendTimer);
 		timer.start(50, 50);
 		timer.handle().ref();
 			
@@ -293,7 +294,7 @@ public:
 	{
 		TraceL << "Timer Test: Starting" << endl;
 		Timer timer;
-		timer.Timeout += delegate(this, &Tests::onOnTimerTimeout);
+		timer.Timeout += sdelegate(this, &Tests::onOnTimerTimeout);
 		timer.start(10, 10);
 		
 		runLoop();
@@ -344,10 +345,10 @@ int main(int argc, char** argv)
 
 		//TraceL << "UDPSocket Recv: " << packet << ": " << packet.buffer
 		//	<< "\n\tPacket " << Benchmark.numSuccess << " of " << UDPNumPacketsWanted << endl;
-		//uv::UDPBase* socket = reinterpret_cast<uv::UDPBase*>(sender);	
+		//uv::UDPSocket* socket = reinterpret_cast<uv::UDPSocket*>(sender);	
 
 		//TraceL << "UDPSocket Server Recv: " << packet << ": " << packet.buffer << endl;		
-		//uv::UDPBase* socket = reinterpret_cast<uv::UDPBase*>(sender);	
+		//uv::UDPSocket* socket = reinterpret_cast<uv::UDPSocket*>(sender);	
 	static void onShutdown(void* opaque)
 	{
 		//reinterpret_cast<MediaServer*>(opaque)->shutdown();

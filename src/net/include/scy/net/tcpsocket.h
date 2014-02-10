@@ -33,35 +33,37 @@ namespace scy {
 namespace net {
 
 	
-class TCPBase; 
+class TCPSocket; 
 
 
+/*
 class TCPSocket: public net::Socket
 	/// TCPSocket is a disposable TCP socket wrapper
-	/// for TCPBase which can be created on the stack.
-	/// See TCPBase for implementation details.
+	/// for TCPSocket which can be created on the stack.
+	/// See TCPSocket for implementation details.
 {
 public:	
-	typedef TCPBase Base;
+	typedef TCPSocket Base;
 	typedef std::vector<TCPSocket> List;
 	
 	TCPSocket(uv::Loop* loop = uv::defaultLoop());
 		// Creates an unconnected TCP socket.
 
-	TCPSocket(TCPBase* base, bool shared);
-		// Creates the Socket and attaches the given SocketBase.
+	TCPSocket(TCPSocket* base, bool shared);
+		// Creates the Socket and attaches the given Socket.
 		//
-		// The SocketBase must be a TCPBase, otherwise an
+		// The Socket must be a TCPSocket, otherwise an
 		// exception will be thrown.
 
 	TCPSocket(const Socket& socket);
-		// Creates the UDPSocket with the SocketBase
-		// from another socket. The SocketBase must be
-		// a UDPBase, otherwise an exception will be thrown.
+		// Creates the UDPSocket with the Socket
+		// from another socket. The Socket must be
+		// a UDPSocket, otherwise an exception will be thrown.
 	
-	TCPBase& base() const;
-		// Returns the SocketBase for this socket.
+	TCPSocket& base() const;
+		// Returns the Socket for this socket.
 };
+*/
 
 
 //
@@ -69,18 +71,22 @@ public:
 //
 
 
-class TCPBase: public Stream, public net::SocketBase
+class TCPSocket: public Stream, public net::Socket
 {
 public:	
-	TCPBase(uv::Loop* loop = uv::defaultLoop()); 
+	typedef std::shared_ptr<TCPSocket> Ptr;
+	typedef std::vector<Ptr> Vec;
+
+	TCPSocket(uv::Loop* loop = uv::defaultLoop()); 
+	virtual ~TCPSocket();
 	
 	virtual bool shutdown();
 	virtual void close();
 	
 	virtual void connect(const net::Address& peerAddress);
 
-	virtual int send(const char* data, int len, int flags = 0);
-	virtual int send(const char* data, int len, const net::Address& peerAddress, int flags = 0);
+	virtual int send(const char* data, std::size_t len, int flags = 0);
+	virtual int send(const char* data, std::size_t len, const net::Address& peerAddress, int flags = 0);
 	
 	virtual void bind(const net::Address& address, unsigned flags = 0);
 	virtual void listen(int backlog = 64);	
@@ -92,8 +98,8 @@ public:
 
 	virtual uv::Loop* loop() const;
 			
-	void setError(const Error& err);
-	const Error& error() const;
+	void setError(const scy::Error& err);
+	const scy::Error& error() const;
 	
 	virtual bool closed() const;
 		// Returns true if the native socket handle is closed.
@@ -113,22 +119,22 @@ public:
 	void setSimultaneousAccepts(bool enable);
 #endif
 	
-	Signal<const net::TCPSocket&> AcceptConnection;
+	Signal<const net::TCPSocket::Ptr&> AcceptConnection;
 	
 public:
-	virtual void onConnect(int status);
+	virtual void onConnect(uv_connect_t* handle, int status);
 	virtual void onAcceptConnection(uv_stream_t* handle, int status);
-	virtual void onRead(const char* data, int len);
+	virtual void onRead(const char* data, std::size_t len);
 	virtual void onRecv(const MutableBuffer& buf);
-	virtual void onError(const Error& error);
+	virtual void onError(const scy::Error& error);
 	virtual void onClose();
 		
 protected:
-	virtual ~TCPBase();
 	virtual void init();
+	//virtual void* self() { return this; }
 
-protected:
-	std::unique_ptr<uv_connect_t> _connectReq;
+	//std::unique_ptr<uv_connect_t> _connectReq;
+	uv_connect_t* _connectReq;
 };
 
 

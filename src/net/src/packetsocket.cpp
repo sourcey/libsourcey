@@ -18,7 +18,7 @@
 
 #include "scy/net/packetsocket.h"
 
-using namespace std;
+using std::endl;
 
 
 namespace scy {
@@ -30,16 +30,16 @@ namespace net {
 //
 
 
-PacketSocketAdapter::PacketSocketAdapter(Socket* socket) : 
-	SocketAdapter(socket)	
+PacketSocketAdapter::PacketSocketAdapter(const net::Socket::Ptr& socket) : 
+	SocketAdapter(socket.get()), socket(socket)
 {
-	TraceLS(this) << "Create: " << socket << std::endl;
+	TraceLS(this) << "Create: " << socket << endl;
 }
 
 		
-void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Address& peerAddr)
+void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress)
 {	
-	TraceLS(this) << "Recv: " << buffer.size() << std::endl;
+	TraceLS(this) << "Recv: " << buffer.size() << endl;
 	
 	IPacket* pkt = nullptr;
 	const char* buf = bufferCast<const char*>(buffer);
@@ -47,7 +47,7 @@ void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Addres
 	std::size_t nread = 0;
 	while (len > 0 && (pkt = factory.createPacket(constBuffer(buf, len), nread))) {
 		assert(nread > 0);
-		pkt->info = new PacketInfo(socket, peerAddr);
+		pkt->info = new PacketInfo(socket, peerAddress);
 		onPacket(*pkt);
 		delete pkt;
 		buf += nread;
@@ -58,11 +58,12 @@ void PacketSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Addres
 
 void PacketSocketAdapter::onPacket(IPacket& pkt) 
 {		
-	//TraceLS(this) << "onPacket: emitting: " << pkt.size() << std::endl;
-	PacketSignal::emit(socket, pkt);	
+	//TraceLS(this) << "onPacket: emitting: " << pkt.size() << endl;
+	PacketSignal::emit(socket.get(), pkt);
 }
 
 	
+#if 0
 //
 // Packet Socket
 //
@@ -71,16 +72,16 @@ void PacketSocketAdapter::onPacket(IPacket& pkt)
 PacketSocket::PacketSocket(const Socket& socket) : 
 	Socket(socket)
 {
-	replaceAdapter(new PacketSocketAdapter);
-	assert(Socket::base().refCount() >= 2);
+	addReceiver(new PacketSocketAdapter);
+	//assert(Socket::base().refCount() >= 2);
 }
 
 
-PacketSocket::PacketSocket(SocketBase* base, bool shared) : 
+PacketSocket::PacketSocket(Socket* base, bool shared) : 
 	Socket(base, shared)
 {		
-	replaceAdapter(new PacketSocketAdapter);
-	assert(!shared || Socket::base().refCount() >= 2);
+	addReceiver(new PacketSocketAdapter);
+	//assert(!shared || Socket::base().refCount() >= 2);
 }
 
 
@@ -89,21 +90,22 @@ PacketSocket::~PacketSocket()
 }
 
 
+/*
 PacketSocketAdapter& PacketSocket::adapter() const
 {
 	return *reinterpret_cast<PacketSocketAdapter*>(_adapter);
 }	
 
 	
-void PacketSocket::send(IPacket& packet)
+void PacketSocket::sendPacket(IPacket& packet)
 {
-	//TraceLS(this) << "send" << std::endl;	
+	//TraceLS(this) << "send" << endl;	
 	Socket::send(packet);
 }
+*/
 
 
 
-#if 0
 //
 // Packet Stream Socket Adapter
 //

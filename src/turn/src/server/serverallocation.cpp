@@ -131,8 +131,8 @@ void ServerAllocation::handleRefreshRequest(Request& request)
 	resLifetimeAttr->setValue(desiredLifetime);
 	response.add(resLifetimeAttr);
 	
-	_server.respondSuccess(request, response);
-	//request.socket.send(response, request.remoteAddr);
+	_server.respond(request, response);
+	//request.socket->send(response, request.remoteAddress);
 }
 
 
@@ -187,8 +187,8 @@ void ServerAllocation::handleCreatePermission(Request& request)
 	stun::Message response(stun::Message::SuccessResponse, stun::Message::CreatePermission);
 	response.setTransactionID(request.transactionID());
   
-	_server.respondSuccess(request, response);
-	//request.socket.send(response, request.remoteAddr);
+	_server.respond(request, response);
+	//request.socket->send(response, request.remoteAddress);
 }
 
 

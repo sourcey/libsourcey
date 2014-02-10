@@ -44,27 +44,27 @@ void Runner::runAsync(Context* c)
 	c->running = true;
 	try {
 		if (!c->cancelled()) {
-				if (!c->tid)
-					c->tid = uv_thread_self();
-				if (c->target) {
-					//assert((!c->cancelled()));
-					c->target();
-				} else if (
-					c->target1) {
-					c->target1(c->arg);
-				}
-				else {
-					// Ensure runAsync is not being hmmered by the
-					// calling thread after cancelled and reset.
-					assert(c->cancelled() && "no callback target");
-					throw std::runtime_error("Async callback has no target");
-				}
+			if (!c->tid)
+				c->tid = uv_thread_self();
+			if (c->target) {
+				//assert((!c->cancelled()));
+				c->target();
+			} else if (
+				c->target1) {
+				c->target1(c->arg);
+			}
+			else {
+				// Ensure runAsync is not being hmmered by the
+				// calling thread after cancelled and reset.
+				assert(c->cancelled() && "no callback target");
+				throw std::runtime_error("Async callback has no target");
 			}
 		}
+	}
 	catch (std::exception& exc) {
 		ErrorL << "Runner error: " << exc.what() << std::endl;	
 #ifdef _DEBUG
-		//throw exc;
+		throw exc;
 #endif
 	}
 	

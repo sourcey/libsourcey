@@ -94,6 +94,7 @@ void Trigger::deserialize(json::Value& root)
 
 
 // ---------------------------------------------------------------------
+//
 OnceOnlyTrigger::OnceOnlyTrigger() :
 	Trigger("OnceOnlyTrigger", "Once Only")
 {
@@ -107,6 +108,7 @@ bool OnceOnlyTrigger::expired()
 
 
 // ---------------------------------------------------------------------
+//
 IntervalTrigger::IntervalTrigger() :
 	Trigger("IntervalTrigger", "Interval"),
 	maxTimes(0)
@@ -166,8 +168,8 @@ void IntervalTrigger::deserialize(json::Value& root)
 }
 
 
-
 // ---------------------------------------------------------------------
+//
 DailyTrigger::DailyTrigger() :
 	Trigger("DailyTrigger", "Daily")
 {

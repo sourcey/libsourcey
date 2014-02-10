@@ -31,14 +31,15 @@ namespace scy {
 namespace net {
 
 
+#if 0
 TCPSocket::TCPSocket(uv::Loop* loop) : 
-	net::Socket(new TCPBase(loop), false)
+	net::Socket(new TCPSocket(loop), false)
 {	
 	TraceLS(this) << "Create" << endl;	
 }
 
 
-TCPSocket::TCPSocket(TCPBase* base, bool shared) : 
+TCPSocket::TCPSocket(TCPSocket* base, bool shared) : 
 	net::Socket(base, shared) 
 {
 	TraceLS(this) << "Destroy" << endl;	
@@ -48,15 +49,16 @@ TCPSocket::TCPSocket(TCPBase* base, bool shared) :
 TCPSocket::TCPSocket(const Socket& socket) : 
 	net::Socket(socket)
 {
-	if (!dynamic_cast<TCPBase*>(_base))
+	if (!dynamic_cast<TCPSocket*>(_base))
 		throw std::runtime_error("Cannot assign incompatible socket");
 }
 	
 
-TCPBase& TCPSocket::base() const
+TCPSocket& TCPSocket::base() const
 {
-	return static_cast<TCPBase&>(*_base);
+	return static_cast<TCPSocket&>(*_base);
 }
+#endif
 
 
 //
@@ -64,7 +66,7 @@ TCPBase& TCPSocket::base() const
 //
 
 
-TCPBase::TCPBase(uv::Loop* loop) :
+TCPSocket::TCPSocket(uv::Loop* loop) :
 	Stream(loop)
 {
 	TraceLS(this) << "Create" << endl;
@@ -72,13 +74,16 @@ TCPBase::TCPBase(uv::Loop* loop) :
 }
 
 	
-TCPBase::~TCPBase() 
+TCPSocket::~TCPSocket() 
 {	
 	TraceLS(this) << "Destroy" << endl;	
+	close();
+	//if (_connectReq)
+	//	delete _connectReq;
 }
 
 
-void TCPBase::init()
+void TCPSocket::init()
 {
 	if (ptr()) return;
 
@@ -87,6 +92,7 @@ void TCPBase::init()
 	tcp->data = this;
 	_ptr = reinterpret_cast<uv_handle_t*>(tcp);
 	_closed = false;
+	_error.reset();
 	int r = uv_tcp_init(loop(), tcp);
 	if (r)
 		setUVError("Cannot initialize TCP socket", r);
@@ -95,27 +101,24 @@ void TCPBase::init()
 
 namespace internal {
 
-	UVStatusCallback(TCPBase, onConnect, uv_connect_t);
-	UVStatusCallbackWithType(TCPBase, onAcceptConnection, uv_stream_t);
+	UVStatusCallbackWithType(TCPSocket, onConnect, uv_connect_t);
+	UVStatusCallbackWithType(TCPSocket, onAcceptConnection, uv_stream_t);
 
 }
 
 
-void TCPBase::connect(const net::Address& peerAddress) 
+void TCPSocket::connect(const net::Address& peerAddress) 
 {
 	TraceLS(this) << "Connecting to " << peerAddress << endl;
 	init();
-	_connectReq.reset(new uv_connect_t);
-	_connectReq.get()->data = this;
-	//assert(_connectReq.data != this);
-	//_connectReq.data = this;	
-	//auto addr = reinterpret_cast<const sockaddr_in*>(peerAddress.addr());
-	int r = uv_tcp_connect(_connectReq.get(), ptr<uv_tcp_t>(), peerAddress.addr(), internal::onConnect);
+	auto req = new uv_connect_t;
+	req->data = this;
+	int r = uv_tcp_connect(req, ptr<uv_tcp_t>(), peerAddress.addr(), internal::onConnect);
 	if (r) setAndThrowError("TCP connect failed", r);
 }
 
 
-void TCPBase::bind(const net::Address& address, unsigned /* flags */) 
+void TCPSocket::bind(const net::Address& address, unsigned /* flags */) 
 {
 	TraceLS(this) << "Binding on " << address << endl;
 	init();
@@ -134,7 +137,7 @@ void TCPBase::bind(const net::Address& address, unsigned /* flags */)
 }
 
 
-void TCPBase::listen(int backlog) 
+void TCPSocket::listen(int backlog) 
 {
 	TraceLS(this) << "Listening" << endl;
 	init();
@@ -143,21 +146,21 @@ void TCPBase::listen(int backlog)
 }
 
 
-bool TCPBase::shutdown()
+bool TCPSocket::shutdown()
 {
 	TraceLS(this) << "Shutdown" << endl;
 	return Stream::shutdown();
 }
 
 
-void TCPBase::close()
+void TCPSocket::close()
 {
 	TraceLS(this) << "Close" << endl;
 	Stream::close();
 }
 
 
-void TCPBase::setNoDelay(bool enable) 
+void TCPSocket::setNoDelay(bool enable) 
 {
 	init();
 	int r = uv_tcp_nodelay(ptr<uv_tcp_t>(), enable ? 1 : 0);
@@ -165,7 +168,7 @@ void TCPBase::setNoDelay(bool enable)
 }
 
 
-void TCPBase::setKeepAlive(int enable, unsigned int delay) 
+void TCPSocket::setKeepAlive(int enable, unsigned int delay) 
 {
 	init();
 	int r = uv_tcp_keepalive(ptr<uv_tcp_t>(), enable, delay);
@@ -174,7 +177,7 @@ void TCPBase::setKeepAlive(int enable, unsigned int delay)
 
 
 #ifdef _WIN32
-void TCPBase::setSimultaneousAccepts(bool enable) 
+void TCPSocket::setSimultaneousAccepts(bool enable) 
 {
 	init();
 	int r = uv_tcp_simultaneous_accepts(ptr<uv_tcp_t>(), enable ? 1 : 0);
@@ -183,19 +186,19 @@ void TCPBase::setSimultaneousAccepts(bool enable)
 #endif
 
 
-int TCPBase::send(const char* data, int len, int flags) 
+int TCPSocket::send(const char* data, std::size_t len, int flags) 
 {	
 	return send(data, len, peerAddress(), flags);
 }
 
 
-int TCPBase::send(const char* data, int len, const net::Address& /* peerAddress */, int /* flags */) 
+int TCPSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */) 
 {
 	//assert(len <= net::MAX_TCP_PACKET_SIZE); // libuv handles this for us
 	
 	TraceLS(this) << "Send: " << len << endl;	
 	assert(Thread::currentID() == tid());
-
+	
 #if 0
 	if (len < 300)
 		TraceLS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
@@ -217,24 +220,21 @@ int TCPBase::send(const char* data, int len, const net::Address& /* peerAddress 
 }
 
 
-void TCPBase::acceptConnection()
+void TCPSocket::acceptConnection()
 {
-	// Create the socket on the stack.
-	// If the socket is not handled it will be destroyed.
-	net::TCPSocket socket;
-	TraceLS(this) << "Accept connection: " << socket.base().ptr() << endl;
-	uv_accept(ptr<uv_stream_t>(), socket.base().ptr<uv_stream_t>()); // uv_accept should always work
-	socket.base().readStart();		
-	AcceptConnection.emit(instance(), socket);
-	if (socket.base().refCount() == 1)
-		WarnL << "Accepted connection not handled" << endl;
+	// Create the shared socket pointer;
+	// if it is not handled it will be destroyed.
+	// TODO: Allow accepted sockets to use different event loops.
+	auto socket = net::makeSocket<net::TCPSocket>(loop()); //std::make_shared<net::TCPSocket>(this->loop());
+	TraceLS(this) << "Accept connection: " << socket->ptr() << endl;
+	uv_accept(ptr<uv_stream_t>(), socket->ptr<uv_stream_t>()); // uv_accept should always work
+	socket->readStart();		
+	AcceptConnection.emit(Socket::self(), socket);
 }
 
 
-net::Address TCPBase::address() const
+net::Address TCPSocket::address() const
 {
-	//TraceLS(this) << "Get address: " << closed() << endl;
-
 	if (!active())
 		return net::Address();
 		//throw std::runtime_error("Invalid TCP socket: No address");
@@ -252,7 +252,7 @@ net::Address TCPBase::address() const
 }
 
 
-net::Address TCPBase::peerAddress() const
+net::Address TCPSocket::peerAddress() const
 {
 	//TraceLS(this) << "Get peer address: " << closed() << endl;
 	if (!active())
@@ -273,70 +273,43 @@ net::Address TCPBase::peerAddress() const
 }
 
 
-void TCPBase::setError(const Error& err)
+void TCPSocket::setError(const scy::Error& err)
 {
+	assert(!error().any());
 	Stream::setError(err);
 }
 
 		
-const Error& TCPBase::error() const
+const scy::Error& TCPSocket::error() const
 {
 	return Stream::error();
 }
 
 
-net::TransportType TCPBase::transport() const 
+net::TransportType TCPSocket::transport() const 
 { 
 	return net::TCP; 
 }
 	
 
-//bool TCPBase::initialized() const
-//{
-//	return Stream::initialized(); //uv::Handle::closed();
-//}
-	
-
-bool TCPBase::closed() const
+bool TCPSocket::closed() const
 {
 	return Stream::closed(); //uv::Handle::closed();
 }
 
 
-uv::Loop* TCPBase::loop() const
+uv::Loop* TCPSocket::loop() const
 {
 	return uv::Handle::loop();
 }
 
 
-/*
-SOCKET TCPBase::sockfd() const
-{
-	return closed() ? INVALID_SOCKET : ptr<uv_tcp_t>()->socket;
-}
-
-
-bool TCPBase::initialized() const
-{
-	return !closed();
-	//return sockfd() != INVALID_SOCKET;
-}
-*/
-
-
 //
 // Callbacks
-//
 
-void TCPBase::onRead(const char* data, int len)
+void TCPSocket::onRead(const char* data, std::size_t len)
 {
 	TraceLS(this) << "On read: " << len << endl;
-	
-	//if (len < 300)
-	//	TraceLS(this) << "Received: " << std::string(data, len) << endl;
-	//_buffer.position(0);
-	//_buffer.limit(len);
-	//onRecv(mutableBuffer(_buffer.data(), len));
 
 	// Note: The const_cast here is relatively safe since the given 
 	// data pointer is the underlying _buffer.data() pointer, but
@@ -345,28 +318,33 @@ void TCPBase::onRead(const char* data, int len)
 }
 
 
-void TCPBase::onRecv(const MutableBuffer& buf)
+void TCPSocket::onRecv(const MutableBuffer& buf)
 {
 	TraceLS(this) << "Recv: " << buf.size() << endl;
-	emitRecv(buf, peerAddress()); //MutableBuffer(buf)
+	//emitRecv(buf, peerAddress());
+	onSocketRecv(buf, peerAddress());
 }
 
 
-void TCPBase::onConnect(int status)
+void TCPSocket::onConnect(uv_connect_t* handle, int status)
 {
 	TraceLS(this) << "On connect" << endl;
 	
 	// Error handled by static callback proxy
 	if (status == 0) {
 		if (readStart())
-			emitConnect();
+			//emitConnect();
+			onSocketConnect();
 	}
-	else
-		ErrorLS(this) << "Connection failed: " << error().message << endl;
+	else {
+		setUVError("Connection failed", status);	
+		//ErrorLS(this) << "Connection failed: " << error().message << endl;
+	}
+	delete handle;
 }
 
 
-void TCPBase::onAcceptConnection(uv_stream_t*, int status) 
+void TCPSocket::onAcceptConnection(uv_stream_t*, int status) 
 {		
 	if (status == 0) {
 		TraceLS(this) << "On accept connection" << endl;
@@ -377,18 +355,20 @@ void TCPBase::onAcceptConnection(uv_stream_t*, int status)
 }
 
 
-void TCPBase::onError(const Error& error) 
+void TCPSocket::onError(const scy::Error& error) 
 {		
 	ErrorLS(this) << "Error: " << error.message << endl;	
-	emitError(error);
+	//emitError(error);
+	onSocketError(error);
 	close(); // close on error
 }
 
 
-void TCPBase::onClose() 
+void TCPSocket::onClose() 
 {		
 	TraceLS(this) << "On close" << endl;	
-	emitClose();
+	//emitClose();	
+	onSocketClose();
 }
 
 

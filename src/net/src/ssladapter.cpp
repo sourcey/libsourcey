@@ -32,7 +32,7 @@ namespace scy {
 namespace net {
 
  
-SSLAdapter::SSLAdapter(net::SSLBase* socket) :
+SSLAdapter::SSLAdapter(net::SSLSocket* socket) :
 	_socket(socket),
 	_ssl(nullptr),
 	_readBIO(nullptr),
@@ -67,15 +67,13 @@ void SSLAdapter::init(SSL* ssl)
 void SSLAdapter::shutdown()
 {
 	TraceLS(this) << "Shutdown" << endl;
-	if (_ssl)
-	{        
+	if (_ssl) {        
 		TraceLS(this) << "Shutdown SSL" << endl;
 
         // Don't shut down the socket more than once.
         int shutdownState = SSL_get_shutdown(_ssl);
         bool shutdownSent = (shutdownState & SSL_SENT_SHUTDOWN) == SSL_SENT_SHUTDOWN;
-        if (!shutdownSent)
-        {
+        if (!shutdownSent) {
 			// A proper clean shutdown would require us to
 			// retry the shutdown if we get a zero return
 			// value, until SSL_shutdown() returns 1.
@@ -92,6 +90,7 @@ void SSLAdapter::shutdown()
 
 bool SSLAdapter::initialized() const
 {
+	assert(_ssl);
 	return SSL_is_init_finished(_ssl);
 }
 
@@ -105,7 +104,7 @@ int SSLAdapter::available() const
 
 void SSLAdapter::addIncomingData(const char* data, size_t len) 
 {
-	TraceL << "Add incoming data: " << len << endl;
+	//TraceL << "Add incoming data: " << len << endl;
 	BIO_write(_readBIO, data, len);
 	flush();
 }
@@ -125,7 +124,7 @@ void SSLAdapter::addOutgoingData(const char* data, size_t len)
 
 void SSLAdapter::flush() 
 {
-	TraceL << "Flushing" << endl;
+	//TraceL << "Flushing" << endl;
 
 	if (!initialized()) {
 		int r = SSL_connect(_ssl);

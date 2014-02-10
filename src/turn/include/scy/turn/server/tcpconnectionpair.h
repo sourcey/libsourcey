@@ -48,8 +48,8 @@ public:
 		// Binds the client <> peer relay pipe once the 
 		// ConnectionBind request is successfull.
 	
-	void setPeerSocket(const net::TCPSocket& socket);
-	void setClientSocket(const net::TCPSocket& socket);
+	void setPeerSocket(const net::TCPSocket::Ptr& socket);
+	void setClientSocket(const net::TCPSocket::Ptr& socket);
 
 	void onPeerConnectSuccess(void* sender); 
 		// Connection success callback for Connect request.
@@ -57,8 +57,8 @@ public:
 	void onPeerConnectError(void* sender, const Error& error);
 		// Connection error callback for Connect request.
 	
-	void onClientDataReceived(void* sender, net::SocketPacket& packet);
-	void onPeerDataReceived(void* sender, net::SocketPacket& packet);
+	void onClientDataReceived(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
+	void onPeerDataReceived(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
 
 	void onConnectionClosed(void* sender);
 		// Callback for handing either client or peer connections
@@ -74,10 +74,10 @@ public:
 	Timeout	timeout;
 		// The ConnectionBind request timeout counter.
 
-	net::TCPSocket client;
+	net::TCPSocket::Ptr client;
 		// The client socket, nullptr to start.
 
-	net::TCPSocket peer;
+	net::TCPSocket::Ptr peer;
 		// The client socket, nullptr to start.
 
 	bool expired() const;
@@ -109,12 +109,12 @@ private:
 
 
 
-	//TCPConnectionPair(TCPAllocation& allocation, const net::TCPSocket& socket, TCPPeerConnection* peer);
+	//TCPConnectionPair(TCPAllocation& allocation, const net::TCPSocket::Ptr& socket, TCPPeerConnection* peer);
 /*
-class TCPClientConnection: public net::TCPBase
+class TCPClientConnection: public net::TCPSocket
 {
 public:
-	TCPClientConnection(TCPAllocation& allocation, const net::TCPSocket& socket, TCPPeerConnection* peer);
+	TCPClientConnection(TCPAllocation& allocation, const net::TCPSocket::Ptr& socket, TCPPeerConnection* peer);
 	virtual ~TCPClientConnection();
 	
 	void bindWith(TCPPeerConnection* peer);

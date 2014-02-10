@@ -1,4 +1,4 @@
-#include "MediaServer.h"
+#include "mediaserver.h"
 
 #include "scy/util/streammanager.h"
 #include "scy/turn/client/tcpclient.h"
@@ -44,24 +44,23 @@ public:
 
 	void initiate() 
 	{
-		debugL("RelayedStreamingAllocation", this) << "Initiating" << std::endl;		
+		DebugLS(this) << "Initiating" << std::endl;		
 		try	{		
 			// Initiate the TRUN client allocation
 			client.addPermission(peerIP);				
-			client.addPermission("58.7.41.244"); // temporary
 			client.addPermission("127.0.0.1"); // for proxy
 			client.addPermission("192.168.1.1"); // for proxy
 			client.initiate();
 		} 
 		catch (std::exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "Error: " << exc.what() << std::endl;
+			ErrorLS(this) << "Error: " << exc.what() << std::endl;
 			assert(0);
 		}	
 	}
 
 	void dispose() 
 	{
-		debugL("RelayedStreamingAllocation", this) << "Terminating" << std::endl;	
+		DebugLS(this) << "Terminating" << std::endl;	
 		if (deleted) {
 			// assert(0);
 			return;
@@ -80,7 +79,7 @@ public:
 protected:
 	void onClientStateChange(turn::Client& client, turn::ClientState& state, const turn::ClientState&) 
 	{
-		debugL("RelayedStreamingAllocation", this) << "Relay state changed: " << state.toString() << std::endl;
+		DebugLS(this) << "Relay state changed: " << state.toString() << std::endl;
 
 		switch(state.id()) {
 		case turn::ClientState::None:				
@@ -94,7 +93,7 @@ protected:
 			break;
 		case turn::ClientState::Failed:
 			//assert(0 && "Allocation failed");
-			warnL("RelayedStreamingAllocation", this) << "Relay connection lost" << std::endl;
+			WarnLS(this) << "Relay connection lost" << std::endl;
 			//AllocationFailed.emit(this, this->client);
 			//dispose();
 			break;
@@ -103,13 +102,13 @@ protected:
 		}
 	}
 	
-	void onRelayConnectionCreated(turn::TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddr) //UInt32 connectionID, 
+	void onRelayConnectionCreated(turn::TCPClient& client, const net::TCPSocket::Ptr& socket, const net::Address& peerAddr) //UInt32 connectionID, 
 	{
-		debugL("RelayedStreamingAllocation", this) << "Connection created: " << peerAddr << std::endl;
+		DebugLS(this) << "Connection created: " << peerAddr << std::endl;
 		
 		// Just allow one stream for now
 		if (this->streams.size() == 1) {
-			debugL("RelayedStreamingAllocation", this) << "Rejecting connection" << std::endl;
+			DebugLS(this) << "Rejecting connection" << std::endl;
 			return;
 		}
 
@@ -127,8 +126,8 @@ protected:
 			MediaServer::setupPacketStream(*stream, options, true, true);
 		
 			// Feed the packet stream directly into the connection		
-			stream->emitter += packetDelegate(reinterpret_cast<net::Socket*>(
-				const_cast<net::TCPSocket*>(&socket)), &net::Socket::send);
+			stream->emitter += packetDelegate(static_cast<net::SocketAdapter*>(
+				const_cast<net::TCPSocket*>(socket.get())), &net::SocketAdapter::sendPacket);
 
 			// Start the stream
 			stream->start();	
@@ -136,28 +135,28 @@ protected:
 			this->streams.addStream(stream);
 		} 
 		catch (std::exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "Stream error: " << exc.what() << std::endl;
+			ErrorLS(this) << "Stream error: " << exc.what() << std::endl;
 			assert(0);
 		}
 	}
 		
-	void onRelayConnectionClosed(turn::TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddress)
+	void onRelayConnectionClosed(turn::TCPClient& client, const net::TCPSocket::Ptr& socket, const net::Address& peerAddress)
 	{
-		debugL("RelayedStreamingAllocation", this) << "Connection closed: " << peerAddress << std::endl;
+		DebugLS(this) << "Connection closed: " << peerAddress << std::endl;
 
 		try	{	
 			// Destroy the media stream for the closed connection (if any).
 			//this->streams.free(peerAddress.toString());
 			PacketStream* stream = streams.remove(peerAddress.toString());
 			if (stream) {	
-				stream->emitter -= packetDelegate(reinterpret_cast<net::Socket*>(
-					const_cast<net::TCPSocket*>(&socket)), &net::Socket::send);
+				stream->emitter -= packetDelegate(static_cast<net::SocketAdapter*>(
+					const_cast<net::TCPSocket*>(socket.get())), &net::SocketAdapter::sendPacket);
 				delete stream;
 				//stream->destroy();
 			}
 		} 
 		catch (std::exception& exc) {
-			errorL("RelayedStreamingAllocation", this) << "Stream error: " << exc.what() << std::endl;
+			ErrorLS(this) << "Stream error: " << exc.what() << std::endl;
 			assert(0);
 		}
 
@@ -165,9 +164,9 @@ protected:
 			dispose();
 	}
 
-	void onRelayDataReceived(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
+	void onRelayDataReceived(turn::Client& client, const char* data, std::size_t size, const net::Address& peerAddr)
 	{
-		debugL("RelayedStreamingAllocation", this) << "Received data from peer: " << std::string(data, size) <<  ": " << peerAddr << std::endl;
+		DebugLS(this) << "Received data from peer: " << std::string(data, size) <<  ": " << peerAddr << std::endl;
 	
 		// If the remove peer is a web browser then the HTTP request sent 
 		// to the relayed address will be the first thing we see here...
@@ -175,7 +174,7 @@ protected:
 
 	void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
 	{
-		debugL("RelayedStreamingAllocation", this) << "Permissions created" << std::endl;
+		DebugLS(this) << "Permissions created" << std::endl;
 	}
 };
 
@@ -200,53 +199,51 @@ public:
 		
 	void onRequest(http::Request& request, http::Response& response)
 	{
-		debugL("RelayedStreamingResponder", this) << "Running: " 
+		DebugLS(this) << "Running: " 
 			<< "\n\tOutput Format: " << options.oformat.name
 			<< "\n\tOutput Encoding: " << options.encoding
 			<< "\n\tOutput Packetizer: " << options.framing
 			<< std::endl;
 
 		turn::Client::Options co;
-		co.serverAddr = net::Address("74.207.248.97", 3478); 
-		//co.serverAddr = net::Address("122.201.111.134", 3478);		
-		//co.serverAddr = net::Address("127.0.0.1", 3478);
+		co.serverAddr = net::Address(kRelayServerIP, 3478); 
 		co.lifetime  = 120 * 1000;	// 2 minutes
 		co.timeout = 10 * 1000;
 		co.timerInterval = 3 * 1000;
 		co.username = Anionu_API_USERNAME;
 		co.password = Anionu_API_KEY;
 
-		allocation = new RelayedStreamingAllocation(options, co, connection().socket().peerAddress().host());
-		allocation->AllocationCreated += delegate(this, &RelayedStreamingResponder::onAllocationCreated);
-		//allocation->AllocationFailed += delegate(this, &RelayedStreamingResponder::onAllocationFailed);
+		allocation = new RelayedStreamingAllocation(options, co, connection().socket()->peerAddress().host());
+		allocation->AllocationCreated += sdelegate(this, &RelayedStreamingResponder::onAllocationCreated);
+		//allocation->AllocationFailed += sdelegate(this, &RelayedStreamingResponder::onAllocationFailed);
 		allocation->initiate();
 	}
 	
 	void onAllocationCreated(void* sender, turn::Client& client)
 	{
-		allocation->AllocationCreated -= delegate(this, &RelayedStreamingResponder::onAllocationCreated);
+		allocation->AllocationCreated -= sdelegate(this, &RelayedStreamingResponder::onAllocationCreated);
 		std::string address(allocation->client.relayedAddress().toString());
 
-		debugL("RelayedStreamingResponder", this) << "Allocation Created: " << address << std::endl;
+		DebugLS(this) << "Allocation Created: " << address << std::endl;
 					
 		// Send the relay address response to the initiator		
 		connection().response().set("Access-Control-Allow-Origin", "*");
-		connection().socket().send(address.c_str(), address.length());
+		connection().send(address.c_str(), address.length());
 		connection().close();
 	}
 	
-	/*
+	/*socket()->
 	void onAllocationFailed(void* sender, turn::Client& client)
 	{
-		allocation->AllocationFailed -= delegate(this, &RelayedStreamingResponder::onAllocationFailed);
+		allocation->AllocationFailed -= sdelegate(this, &RelayedStreamingResponder::onAllocationFailed);
 		//delete allocation;
 		//allocation = nullptr;
 
-		debugL("RelayedStreamingResponder", this) << "Allocation Failed" << std::endl;
+		DebugLS(this) << "Allocation Failed" << std::endl;
 					
 		// Send the relay address response to the initiator		
 		//connection().response().set("Access-Control-Allow-Origin", "*");
-		//connection().socket().send(address.c_str(), address.length());
+		//connection().socket()->send(address.c_str(), address.length());
 		connection().close();
 	}
 	*/
@@ -261,9 +258,9 @@ public:
 
 
 
-		//debugL("RelayedStreamingResponder", this) << "Allocation Created 1" << std::endl;		
+		//DebugLS(this) << "Allocation Created 1" << std::endl;		
 		//stopSignal.set();
-		//debugL("RelayedStreamingResponder", this) << "Allocation Created 2" << std::endl;
+		//DebugLS(this) << "Allocation Created 2" << std::endl;
 
 		//assert(this->response);
 		//this->response->send() 
@@ -273,14 +270,14 @@ public:
 		//this->response = &response;
 				
 		//std::string peerIP("127.0.0.1");
-		//debugL("RelayedStreamingResponder", this) << "Waiting" << std::endl;	
+		//DebugLS(this) << "Waiting" << std::endl;	
 		//stopSignal.wait();
-		//debugL("RelayedStreamingResponder", this) << "Stopped" << std::endl;	
+		//DebugLS(this) << "Stopped" << std::endl;	
 
 		// TODO: The allocation will outlive this handler instance
 		// Manage allocation via MediaService?
 
-		//debugL("RelayedStreamingResponder", this) << "Exiting" << std::endl;
+		//DebugLS(this) << "Exiting" << std::endl;
 
 
 /*
@@ -304,33 +301,33 @@ public:
 
 	void playMedia() 
 	{
-		debugL("RelayedStreamingAllocation", this) << "Play Media" << std::endl;
+		DebugLS(this) << "Play Media" << std::endl;
 
 		// Create the packet stream
-		//debugL("RelayedStreamingAllocation", this) << "Setup Packet Stream" << std::endl;	
+		//DebugLS(this) << "Setup Packet Stream" << std::endl;	
 		//setupPacketStream(stream, options);
-		//debugL("RelayedStreamingAllocation", this) << "Setup Packet Stream: OK" << std::endl;	
+		//DebugLS(this) << "Setup Packet Stream: OK" << std::endl;	
 
 		// Start the stream
 		stream.emitter += packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
 		stream.start();		
 
-		debugL("RelayedStreamingAllocation", this) << "Play Media: OK" << std::endl;
+		DebugLS(this) << "Play Media: OK" << std::endl;
 	}
 
 	void stopMedia()
 	{
-		debugL("RelayedStreamingAllocation", this) << "Stop Media" << std::endl;
+		DebugLS(this) << "Stop Media" << std::endl;
 		stream.emitter -= packetDelegate(this, &RelayedStreamingAllocation::onMediaEncoded);
 		stream.close();	
-		debugL("RelayedStreamingAllocation", this) << "Stop Media: OK" << std::endl;
+		DebugLS(this) << "Stop Media: OK" << std::endl;
 	}
 	*/
 
 	/*
 	void onMediaEncoded(void* sender, RawPacket& packet)
 	{
-		debugL("RelayedStreamingAllocation", this) << "$$$$$$$$$$$$$$ Sending Packet: " << packet.size() << std::string((const char*)packet.data(), 100)  << std::endl;
+		DebugLS(this) << "$$$$$$$$$$$$$$ Sending Packet: " << packet.size() << std::string((const char*)packet.data(), 100)  << std::endl;
 		
 		//assert(currentPeerAddr.valid());
 		try {
@@ -341,12 +338,12 @@ public:
 			//client.sendData(oss.str().data(), oss.str().length(), currentPeerAddr);
 		}
 		catch (std::exception&/Exception&/ exc) {
-			errorL("RelayedStreamingAllocation", this) << "^^^^^^^^^^^^^^^^^^^^^^^^ Send error: " << exc.what()/message()/ << std::endl;
+			ErrorLS(this) << "^^^^^^^^^^^^^^^^^^^^^^^^ Send error: " << exc.what()/message()/ << std::endl;
 			
 			// TODO: Calling stream.stop() inside stream callback causing deadlock
 			terminate();
 		}
-		debugL("RelayedStreamingAllocation", this) << "!$$$$$$$$$$$$$$ Sending Packet: OK: " << packet.size() << std::endl;
+		DebugLS(this) << "!$$$$$$$$$$$$$$ Sending Packet: OK: " << packet.size() << std::endl;
 	}
 	*/
 
@@ -370,7 +367,7 @@ public:
 	void onRelayConnectionState(turn::TCPClient& client, net::SocketBase*, 
 		Net::SocketState& state, const Net::SocketState& oldState) 
 	{
-		debugL("RelayedStreamingAllocation", this) << "@@@@@@@@@@@@@@@@@@@@@ Connection State: " << state.toString() << std::endl;
+		DebugLS(this) << "@@@@@@@@@@@@@@@@@@@@@ Connection State: " << state.toString() << std::endl;
 	}
 
 		//assert(currentPeerAddr.valid());

@@ -39,14 +39,18 @@ TCPClient::TCPClient(TCPClientObserver& observer, const Client::Options& options
 	_observer(observer)
 {
 	TraceL << "Create" << endl;
-	_socket.assign(new net::TCPBase, false);
+
+	_socket = net::makeSocket<net::TCPSocket>(); 
+	//std::make_shared<net::TCPSocket>();
+	//_socket.assign(new net::TCPSocket, false);
 }
 
 	
 TCPClient::~TCPClient() 
 {
 	TraceL << "Destroy" << endl;
-	assert(_connections.empty());
+	shutdown();
+	//assert(connections().empty());
 }
 
 
@@ -73,12 +77,12 @@ void TCPClient::shutdown()
 		auto connections = _connections.map();
 		TraceL << "Shutdown: Active connections: " << connections.size() << endl;	
 		for (auto it = connections.begin(); it != connections.end(); ++it) {
-			assert(it->second->base().refCount() == 1);
+			//assert(it->second->base().refCount() == 1);
 
 			// The connection will be removed via onRelayConnectionClosed
 			it->second->close();
 		}
-		//assert(_connections.empty());
+		//assert(connections().empty());
 	}
 	
 	TraceL << "Shutdown: OK" << endl;
@@ -113,7 +117,7 @@ void TCPClient::sendConnectRequest(const net::Address& peerAddress)
 }
 
 
-void TCPClient::sendData(const char* data, int size, const net::Address& peerAddress) 
+void TCPClient::sendData(const char* data, std::size_t size, const net::Address& peerAddress) 
 {
 	TraceL << "Send data to " << peerAddress << endl;
 
@@ -261,7 +265,7 @@ void TCPClient::handleConnectionBindResponse(const stun::Message& response)
 	TraceL << "ConnectionBind success response" << endl;	
 
 	auto transaction = reinterpret_cast<stun::Transaction*>(response.opaque);
-	auto req = reinterpret_cast<RelayConnectionBinding*>(transaction->socket->base().opaque);
+	auto req = reinterpret_cast<RelayConnectionBinding*>(transaction->socket->opaque);
 	
 	auto conn = connections().get(req->peerAddress, false);
 	if (!conn) {
@@ -270,8 +274,8 @@ void TCPClient::handleConnectionBindResponse(const stun::Message& response)
 	}
 	
 	// Data will now be transferred as-is to and from the peer.
-	conn->Recv += delegate(this, &TCPClient::onRelayDataReceived);
-	_observer.onRelayConnectionCreated(*this, *conn, req->peerAddress);
+	conn->Recv += sdelegate(this, &TCPClient::onRelayDataReceived);
+	_observer.onRelayConnectionCreated(*this, conn, req->peerAddress);
 
 	TraceL << "ConnectionBind success response: OK" << endl;
 }
@@ -282,46 +286,11 @@ void TCPClient::handleConnectionBindErrorResponse(const stun::Message& response)
 	TraceL << "ConnectionBind error response" << endl;
 	
 	auto transaction = reinterpret_cast<stun::Transaction*>(response.opaque);
-	auto req = reinterpret_cast<RelayConnectionBinding*>(transaction->socket->base().opaque);
+	auto req = reinterpret_cast<RelayConnectionBinding*>(transaction->socket->opaque);
 
-	//auto connAttr = response.get<stun::ConnectionID>();
-	//if (!connAttr) {
-	//	assert(0);
-	//	return;
-	//}
+	// TODO: Handle properly
 
-	auto conn = connections().get(req->peerAddress, false);
-	if (!conn) {
-		assert(0);
-		return;
-	}
-
-	freeConnection(conn);
-		
-	/*
-	conn->Connect += delegate(this, &TCPClient::onRelayConnectionConnect);
-	conn->Error += delegate(this, &TCPClient::onRelayConnectionError);
-	conn->Close += delegate(this, &TCPClient::onRelayConnectionClosed);
-	
-	conn->close();
-	_connections.remove(conn);
-	*/
-
-	//assert(0 && "redo");
-
-	/*	
-	auto transaction = reinterpret_cast<stun::Transaction*>(response.opaque);
-	//auto socket = reinterpret_cast<net::TCPSocket*>(sender);
-	net::TCPSocket& conn = connections().get(transaction->socket()->address());
-	//net::TCPSocket& conn = static_cast<net::TCPStatefulSocketBase*>(transaction->socket());
-	conn->StateChange -= delegate(this, &TCPClient::onRelayConnectionStateChange);	
-	//Mutex::ScopedLock lock(_mutex);	
-	if (!closed()) {
-		conn->close();
-		_connections.remove(conn);
-		//delete conn;
-	}
-	*/
+	freeConnection(req->peerAddress);
 }
 
 
@@ -332,17 +301,16 @@ bool TCPClient::createAndBindConnection(UInt32 connectionID, const net::Address&
 
 	TraceL << "Create and bind connection: " << peerAddress << endl;	
 	
-	net::TCPSocket* conn = nullptr;
 	try {
-		conn = new net::TCPSocket; 
-		conn->Connect += delegate(this, &TCPClient::onRelayConnectionConnect);
-		conn->Error += delegate(this, &TCPClient::onRelayConnectionError);
-		conn->Close += delegate(this, &TCPClient::onRelayConnectionClosed);
+		net::TCPSocket::Ptr conn(net::makeSocket<net::TCPSocket>()); //std::make_shared<net::TCPSocket>()); 
+		conn->Connect += sdelegate(this, &TCPClient::onRelayConnectionConnect);
+		conn->Error += sdelegate(this, &TCPClient::onRelayConnectionError);
+		conn->Close += sdelegate(this, &TCPClient::onRelayConnectionClosed);
 
 		auto req = new RelayConnectionBinding;
 		req->connectionID = connectionID;
 		req->peerAddress = peerAddress;
-		conn->base().opaque = req;	
+		conn->opaque = req;	
 
 		conn->connect(_options.serverAddr); // will throw on error
 		
@@ -352,7 +320,6 @@ bool TCPClient::createAndBindConnection(UInt32 connectionID, const net::Address&
 	catch (std::exception& exc) {	
 		// Socket instance deleted via state callback
 		ErrorL << "ConnectionBind Error: " << exc.what() << endl;
-		delete conn;
 	}
 
 	return false;
@@ -363,15 +330,15 @@ void TCPClient::onRelayConnectionConnect(void* sender)
 {		
 	TraceL << "onRelayConnectionConnect" << endl;	
 	
-	auto conn =reinterpret_cast<net::TCPSocket*>(sender);
-	conn->Connect -= delegate(this, &TCPClient::onRelayConnectionConnect);
-	auto req = reinterpret_cast<RelayConnectionBinding*>(conn->base().opaque);
-	assert(_connections.exists(req->peerAddress));
+	auto conn =reinterpret_cast<net::Socket*>(sender);
+	conn->Connect -= sdelegate(this, &TCPClient::onRelayConnectionConnect);
+	auto req = reinterpret_cast<RelayConnectionBinding*>(conn->opaque);
+	assert(connections().has(req->peerAddress));
 
 	// TODO: How to get peerAddress here?
 	//net::TCPSocket& socket = _connections.get(peerAddress, conn);
 
-	auto transaction = createTransaction(conn);
+	auto transaction = createTransaction(connections().get(req->peerAddress));
 	transaction->request().setClass(stun::Message::Request);
 	transaction->request().setMethod(stun::Message::ConnectionBind);
 
@@ -386,54 +353,66 @@ void TCPClient::onRelayConnectionConnect(void* sender)
 
 void TCPClient::onRelayConnectionError(void* sender, const Error& /* error */) 
 {
-	auto socket = reinterpret_cast<net::TCPSocket*>(sender);
-	auto req = reinterpret_cast<RelayConnectionBinding*>(socket->base().opaque);
+	auto ptr = reinterpret_cast<net::Socket*>(sender);
+	auto req = reinterpret_cast<RelayConnectionBinding*>(ptr->opaque);
+	auto socket = _connections.get(req->peerAddress);
 
 	TraceL << "Relay connection error: " << req->peerAddress << endl;	
-	assert(_connections.exists(req->peerAddress));
+	assert(connections().has(req->peerAddress));
 
-	_observer.onRelayConnectionError(*this, *socket, req->peerAddress);
+	_observer.onRelayConnectionError(*this, socket, req->peerAddress);
 }
 
 
 void TCPClient::onRelayConnectionClosed(void* sender)
 {	
-	auto socket = reinterpret_cast<net::TCPSocket*>(sender);
-	auto req = reinterpret_cast<RelayConnectionBinding*>(socket->base().opaque);
+	auto ptr = reinterpret_cast<net::Socket*>(sender);
+	auto req = reinterpret_cast<RelayConnectionBinding*>(ptr->opaque);
+	auto socket = _connections.get(req->peerAddress);
 	
 	TraceL << "Relay connection closed: " << req->peerAddress << endl;	
-	assert(_connections.exists(req->peerAddress));
+	assert(connections().has(req->peerAddress));
 	
-	_observer.onRelayConnectionClosed(*this, *socket, req->peerAddress);
-	freeConnection(socket);
+	_observer.onRelayConnectionClosed(*this, socket, req->peerAddress);
+	freeConnection(req->peerAddress);
 }
 
 
-void TCPClient::onRelayDataReceived(void* sender, net::SocketPacket& packet)
+void TCPClient::onRelayDataReceived(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
-	auto socket = reinterpret_cast<net::TCPSocket*>(sender);
-	auto req = reinterpret_cast<RelayConnectionBinding*>(socket->base().opaque);
-	assert(_connections.exists(req->peerAddress));
+	auto ptr = reinterpret_cast<net::Socket*>(sender);
+	auto req = reinterpret_cast<RelayConnectionBinding*>(ptr->opaque);
+	assert(connections().has(req->peerAddress));
+	//TraceL << "Relay Data Received: " << peerAddress << ": " << req->peerAddress << endl;	
+	//assert(req->peerAddress == peerAddress);
 	
-	_observer.onRelayDataReceived(*this, packet.data(), packet.size(), req->peerAddress);
+	_observer.onRelayDataReceived(*this, bufferCast<const char*>(buffer), buffer.size(), req->peerAddress);
 }
 
 
-void TCPClient::freeConnection(net::TCPSocket* socket)
+void TCPClient::freeConnection(const net::Address& peerAddress) //const net::TCPSocket::Ptr& socket)
 {
 	TraceL << "Freeing TCP connection: " << socket << endl;	
-	socket->Recv -= delegate(this, &TCPClient::onRelayDataReceived);
-	socket->Connect -= delegate(this, &TCPClient::onRelayConnectionConnect);
-	socket->Error -= delegate(this, &TCPClient::onRelayConnectionError);
-	socket->Close -= delegate(this, &TCPClient::onRelayConnectionClosed);
+	auto socket = connections().get(peerAddress);
+	socket->Recv -= sdelegate(this, &TCPClient::onRelayDataReceived);
+	socket->Connect -= sdelegate(this, &TCPClient::onRelayConnectionConnect);
+	socket->Error -= sdelegate(this, &TCPClient::onRelayConnectionError);
+	socket->Close -= sdelegate(this, &TCPClient::onRelayConnectionClosed);
 
-	assert(socket->base().refCount() == 1);
-	assert(connections().exists(socket));
-	connections().remove(socket);
+	//assert(socket->base().refCount() == 1);
+	//assert(connections().has(socket->address()));
+	connections().remove(peerAddress); // destroy socket
+	
+	//auto map = connections().map();
+	//for (auto conn : map) {
+		//assert(it->second->base().refCount() == 1);
+		// The connection will be removed via onRelayConnectionClosed
+		//it->second->close();
+	//}
 
-	delete reinterpret_cast<RelayConnectionBinding*>(socket->base().opaque);
+	delete reinterpret_cast<RelayConnectionBinding*>(socket->opaque);
 	//delete socket;
-	deleteLater<net::TCPSocket>(socket); // deferred
+	//deleteLater<net::TCPSocket>(socket); // deferred
 }
 
 
@@ -459,7 +438,7 @@ int TCPClient::transportProtocol()
 	
 	// TODO: catch and handle
 	//net::TCPSocket& conn = connections().get(peerAddress);
-	assert(_connections.exists(req->peerAddress));
+	assert(connections().has(req->peerAddress));
 	net::Address peerAddress;
 	if (!getPeerAddress(socket, peerAddress)) {
 		WarnL << "No connection for socket: " 
@@ -473,7 +452,7 @@ int TCPClient::transportProtocol()
 	/*
 	// We no longer want to receive STUN packets on the peer connection.
 	// Data will be transferred as-is to and from the peer.
-	socket->Recv += delegate(this, &TCPClient::onRelayDataReceived);
+	socket->Recv += sdelegate(this, &TCPClient::onRelayDataReceived);
 	_observer.onRelayConnectionCreated(*this, *socket, req->peerAddress);
 
 	// We no longer want to receive STUN packets.
@@ -489,7 +468,7 @@ int TCPClient::transportProtocol()
 	
 	// We no longer want to receive STUN packets on the peer connection.
 	// Data will be transferred as-is to and from the peer.
-	//conn.Recv += delegate(this, &TCPClient::onRelayDataReceived);
+	//conn.Recv += sdelegate(this, &TCPClient::onRelayDataReceived);
 	//assert(conn);
 
 	// We no longer want to receive STUN packets.
@@ -508,8 +487,8 @@ int TCPClient::transportProtocol()
 	/*
 	//conn->setDeleteOnClose(true);		
 	//conn->registerPacketType<stun::Message>(1);
-	//conn->StateChange += delegate(this, &TCPClient::onRelayConnectionStateChange);	
-	//conn->Recv += delegate(this, &TCPClient::onConnectionBindSocketRecv);
+	//conn->StateChange += sdelegate(this, &TCPClient::onRelayConnectionStateChange);	
+	//conn->Recv += sdelegate(this, &TCPClient::onConnectionBindSocketRecv);
 
 
 	net::TCPSocket& conn = new net::TCPStatefulSocketBase(_reactor); 
@@ -519,7 +498,7 @@ int TCPClient::transportProtocol()
 		// verify the ConnectionBind response.
 		conn->setDeleteOnClose(true);		
 		conn->registerPacketType<stun::Message>(1);
-		conn->StateChange += delegate(this, &TCPClient::onRelayConnectionStateChange);	
+		conn->StateChange += sdelegate(this, &TCPClient::onRelayConnectionStateChange);	
 		conn->connect(_options.serverAddr); // will throw on error
 		
 		auto transaction = createTransaction(conn);
@@ -572,7 +551,7 @@ TCPClient::TCPClient(TCPClientObserver& observer, Net::Reactor& reactor, uv::Loo
 /*
 
 
-bool TCPClient::getPeerAddress(net::TCPBase* socket, net::Address& peerAddress)
+bool TCPClient::getPeerAddress(net::TCPSocket* socket, net::Address& peerAddress)
 {	
 	TraceL << "getPeerAddress: " << socket << endl;	
 	ConnectionManagerMap conns = connections().map();
@@ -586,7 +565,7 @@ bool TCPClient::getPeerAddress(net::TCPBase* socket, net::Address& peerAddress)
 }
 
 
-void TCPClient::onConnectionBindSocketRecv(void* sender, net::SocketPacket& packet)
+void TCPClient::onConnectionBindSocketRecv(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress)
 {
 	TraceL << "onConnectionBindSocketRecv" << endl;	
 }
@@ -601,7 +580,7 @@ void TCPClient::onRelayConnectionStateChange(void* sender, Net::SocketState& sta
 	if (state.id() == Net::SocketState::None)
 		return;
 
-	auto socket = reinterpret_cast<net::TCPSocket*>(sender);
+	auto socket = reinterpret_cast<net::Socket*>(sender);
 	//net::TCPSocket& conn = connections().get(socket->address(), false);
 	//TraceL << "Client Connection State Change: " << socket << endl;	
 	{
@@ -634,11 +613,11 @@ void TCPClient::onRelayConnectionStateChange(void* sender, Net::SocketState& sta
 	//net::TCPSocket& conn = connections().get(socket->address());
 
 /*
-net::TCPBase* TCPClient::createSocketBase()
+net::TCPSocket* TCPClient::createSocketBase()
 {
 	//Mutex::ScopedLock lock(_mutex);
 	//return new net::TCPStatefulSocketBase(_reactor);
-	return new net::TCPBase;
+	return new net::TCPSocket;
 }
 */
 

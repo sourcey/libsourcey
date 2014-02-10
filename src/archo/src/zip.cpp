@@ -107,6 +107,8 @@ void ZipFile::open(const std::string& file)
 		info.compressedSize   = static_cast< size_t >(fileInfo.uncompressed_size);
 		info.uncompressedSize = static_cast< size_t >(fileInfo.compressed_size);
 		this->info.push_back(info);
+
+		TraceL << "Zip file contains: " << fileName << endl;
 	}
 
 	unzGoToFirstFile(this->fp); // rewind
@@ -131,9 +133,10 @@ void ZipFile::extract(const std::string& path)
 
 	if (!goToFirstFile())
 		throw std::runtime_error("Cannot read the source archive.");
-
-	while (goToNextFile()) {
+	
+	while (true) {
 		extractCurrentFile(path, true);
+		if (!goToNextFile()) break;
 	}
 }
 
@@ -169,7 +172,6 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 			// Note: If this fails the file we are trying 
 			// to write may be in use on the filesystem.
 			openCurrentFile();
-			TraceL << "Create file 1: " << outPath << endl;
 
 			std::ofstream ofs(outPath, std::ios::binary | std::ios::out);
 

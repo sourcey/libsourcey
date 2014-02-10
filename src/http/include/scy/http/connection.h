@@ -24,11 +24,11 @@
 #include "scy/timer.h"
 #include "scy/packetqueue.h"
 #include "scy/net/tcpsocket.h"
+#include "scy/net/socketadapter.h"
 #include "scy/http/request.h"
 #include "scy/http/response.h"
 #include "scy/http/parser.h"
 #include "scy/http/url.h"
-//#include "scy/http/connectionadapters.h"
 
 	
 namespace scy { 
@@ -36,13 +36,13 @@ namespace http {
 	
 
 class ConnectionAdapter;
-class Connection
+class Connection: public net::SocketAdapter
 {
 public:	
-    Connection(const net::Socket& socket);
+    Connection(const net::Socket::Ptr& socket);
+    virtual ~Connection();
 			
-	virtual void sendData(const char* buf, std::size_t len); //, int flags = 0
-	virtual void sendData(const std::string& buf); //, int flags = 0
+	virtual int send(const char* data, std::size_t len, int flags = 0);
 		// Sends raw data to the peer.
 
 	virtual int sendHeader();
@@ -51,28 +51,27 @@ public:
 	virtual void close();
 		// Closes the connection and scheduled the object for 
 		// deferred deletion.
-		//
-		// The connection pointer should no longer be accessed
-		// once closed.
 					
 	bool closed() const;
 		// Returns true if the connection is closed.
 
-	bool expired() const;
-		// Returns true if the remote service did not give us
-		// a proper response within the allotted time frame.
+	//bool expired() const;
+		// Returns true if the server did not give us
+		// a proper response within the allotted time.
 	
 	virtual void onHeaders() = 0;
 	virtual void onPayload(const MutableBuffer&) {};
 	virtual void onMessage() = 0;
-	virtual void onClose() = 0;
+	virtual void onClose(); // not virtual
 
 	bool shouldSendHeader() const;
 	void shouldSendHeader(bool flag);
-		// Provides a means to prevent default sending of HTTP headers.
+		// Set true to prevent auto-sending HTTP headers.
 
-	net::Socket& socket();
-		// Return the connection's underlying socket.
+	void replaceAdapter(net::SocketAdapter* adapter);
+
+	net::Socket::Ptr& socket();
+		// Returns the underlying socket pointer.
 
 	Request& request();	
 		// The HTTP request headers.
@@ -92,26 +91,23 @@ public:
 
     virtual http::Message* incomingHeader() = 0;
     virtual http::Message* outgoingHeader() = 0;
-	
-	NullSignal Close;	
-		// Fires when the connection is closed.
 
 protected:	
-    virtual ~Connection();
-
-	void onSocketRecv(void*, net::SocketPacket& packet);
-	void onSocketError(void*, const Error& error);
-	void onSocketClose(void*);
+	void onSocketConnect();
+	void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress);
+	void onSocketError(const scy::Error& error);
+	void onSocketClose();
 		
-	virtual void setError(const Error& err);
+	virtual void setError(const scy::Error& err);
 		// Sets the internal error.
 
 protected:
+    net::Socket::Ptr _socket;
+	SocketAdapter* _adapter;
     Request _request;
     Response _response;
-    net::Socket _socket;	
-	Timeout _timeout;
-	Error _error;
+	//Timeout _timeout;
+	scy::Error _error;
 	bool _closed;
 	bool _shouldSendHeader;
 	
@@ -119,53 +115,6 @@ protected:
 	friend class ConnectionAdapter;
 	friend struct std::default_delete<Connection>;	
 };
-
-
-	//Buffer _outgoing;
-	//friend class DefaultDeleter<Connection>;
-
-	//Buffer& incomingBuffer();
-		// The incoming SocketBase buffer. 
-		//
-		// The buffer will be overwritten after each socket read,
-		// so if you want to capture raw headers then you can
-		// access the incomingBuffer() on onHeaders(), similarly
-		// if you want raw chunks then access it via onPayload().
-
-	//virtual void onPayload(const MutableBuffer& buffer) = 0;
-	
-	//virtual bool flush();
-		// Flushes any outgoing HTTP data.
-		//
-		// Outgoing HTTP Headers will be sent on the first call
-		// to flush(). If you want to prevent headers from being 
-		// sent set shouldSendHeader to false.
-	//Buffer& outgoingBuffer();
-		// The outgoing body payload buffer.
-		//
-		// HTTP body/chunked data to send to the peer should be 
-		// written to this buffer.
-	
-	//ConnectionAdapter* _adapter;
-    //net::SocketAdapter* _adapter;
-	
-	
-	//void setHTTPAdapter(net::SocketAdapter* adapter);
-
-	/*
-	//PacketStream* _inputStream;
-	//PacketStream* _outputStream;
-		*/
-	//Error _error;
-	
-	//PacketStream Incoming; 
-	//PacketStream Incoming; 
-		// Receiver
-		// The incoming packet stream.
-		// TODO: Replace Payload with this signal and rename to Inbound/Data/Receiver/Outgoing
-
-	//PacketStream* Outgoing; // Outgoing
-		// The outgoing packet stream.
 
 	
 // -------------------------------------------------------------------
@@ -177,7 +126,7 @@ public:
     ConnectionAdapter(Connection& connection, http_parser_type type);	
     virtual ~ConnectionAdapter();	
 		
-	virtual int send(const char* data, int len, int flags = 0);
+	virtual int send(const char* data, std::size_t len, int flags = 0);
 	
 	Parser& parser();
 	Connection& connection();
@@ -185,14 +134,15 @@ public:
 protected:
 
 	//
-	// Socket emitter callbacks
-	//virtual void onSocketConnect() {};
-	virtual void onSocketRecv(const MutableBuffer& buf, const net::Address& peerAddr);
-	//virtual void onSocketError(const Error& error) override;
+	/// SocketAdapter callbacks
+
+	virtual void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress);
+	//virtual void onSocketError(const Error& error);
 	//virtual void onSocketClose();
 		
 	//
-	// Parser callbacks
+	/// HTTPParser callbacks
+
     virtual void onParserHeader(const std::string& name, const std::string& value);
 	virtual void onParserHeadersEnd();
 	virtual void onParserChunk(const char* buf, std::size_t len);

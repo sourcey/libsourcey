@@ -38,12 +38,12 @@ public:
 	
 	void testUnzip() 
 	{			
-		std::string path("MediaPlugin-0.8.8-SDK-0.5.0-win32-debug.zip");
+		std::string path("recordingmodeplugin-0.9.2-sdk-0.6.0-win32-debug.zip");
 		ZipFile zip(path);	
 		
 		std::string output(scy::getCwd());
 		fs::addnode(output, "test");
-		zip.extractTo(output);
+		zip.extract(output);
 	}	
 
 	

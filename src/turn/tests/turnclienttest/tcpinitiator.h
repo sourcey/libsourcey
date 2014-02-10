@@ -101,7 +101,7 @@ struct TCPInitiator: public TCPClientObserver
 		DebugLS(this) << id << ": Connection Closed" << endl;
 	}
 
-	void onRelayDataReceived(turn::Client& client, const char* data, int size, const net::Address& peerAddr)
+	void onRelayDataReceived(turn::Client& client, const char* data, std::size_t size, const net::Address& peerAddr)
 	{		
 		std::string payload(data, size);
 		payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
@@ -158,7 +158,7 @@ struct TCPInitiator: public TCPClientObserver
 	{
 		DebugLS(this) << "TCPInitiator: " << id << ": Connection Error: " << connectionID << endl;
 		if (_dataSocket) {
-			_dataSocket->StateChange -= delegate(this, &TCPInitiator::onDataSocketStateChange);
+			_dataSocket->StateChange -= sdelegate(this, &TCPInitiator::onDataSocketStateChange);
 			_dataSocket->detach(packetDelegate<TCPInitiator, RawPacket>(this, &TCPInitiator::onRawPacketReceived, 102));
 			_dataSocket = NULL;
 		}
