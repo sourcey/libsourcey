@@ -1,8 +1,5 @@
 build/
 bak/
-depreciated/
-
-libs/*
 !libs/Base
 !libs/HTTP
 !libs/JSON
