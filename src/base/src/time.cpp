@@ -42,18 +42,6 @@ std::time_t now()
 }
 
 
-UInt64 ticks()
-{
-#ifdef WIN32
-	return ::GetTickCount();
-#else
-	struct timespec tval;
-	clock_gettime(CLOCK_MONOTONIC, &tval);
-	return tval.tv_sec * 1000 + tval.tv_nsec / 1000000;
-#endif
-}
-
-
 double clockSecs()
 {
 	return clock() / CLOCKS_PER_SEC;
@@ -132,6 +120,23 @@ std::string getUTC()
 	
 
 #if 0
+std::time_t nowUTC()
+{
+	std::time_t local = std::time(NULL);
+	return std::mktime(std::gmtime(&local)); // UTC time
+}
+
+UInt64 ticks()
+{
+#ifdef WIN32
+	return ::GetTickCount();
+#else
+	struct timespec tval;
+	clock_gettime(CLOCK_MONOTONIC, &tval);
+	return tval.tv_sec * 1000 + tval.tv_nsec / 1000000;
+#endif
+}
+
 UInt64 getTimeHR() 
 {
 	return uv_hrtime();

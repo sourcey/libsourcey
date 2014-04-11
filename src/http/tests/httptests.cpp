@@ -4,6 +4,7 @@
 #include "scy/http/client.h"
 #include "scy/http/websocket.h"
 #include "scy/http/packetizers.h"
+#include "scy/http/form.h"
 #include "scy/http/util.h"
 #include "scy/http/url.h"
 #include "scy/async.h"
@@ -22,7 +23,6 @@
 
 using std::endl;
 using namespace scy;
-//using namespace scy::net;
 
 
 /*
@@ -308,12 +308,14 @@ public:
 #endif
 		{		
 			
-			//testStandaloneHTTPClientConnection();	
-			//testStandaloneHTTPSClientConnection();	
-			//runSecureClientConnectionTest();
-			//runClientConnectionDownloadTest();
-			//runSecureClientConnectionDownloadTest();
+			testGoogleDriveMultipartUpload();	
+			
 #if 0
+			testStandaloneHTTPClientConnection();	
+			testStandaloneHTTPSClientConnection();	
+			runSecureClientConnectionTest();
+			runClientConnectionDownloadTest();
+			runSecureClientConnectionDownloadTest();
 			testURLParameters();
 			testURL();
 			runClientConnectionChunkedTest();	
@@ -725,7 +727,72 @@ public:
 		//test.start();
 
 		runLoop();
-	}		
+	}
+
+		
+	//
+	/// Google Drive Upload Test
+	//
+	
+	void testGoogleDriveMultipartUpload() 
+	{
+		// https://developers.google.com/drive/web/manage-uploads
+		// Need a current OAuth2 access_token with https://www.googleapis.com/auth/drive.file access scope for this to work
+		std::string accessToken("ya29.1.AADtN_WY53y0jEgN_SWcmfp6VvAQ6asnYqbDi5CKEfzwL7lfNqtbUiLeL4v07b_I");		
+		std::string metadata("{ \"title\": \"My File\" }");
+
+#if 0
+		auto conn = http::Client::instance().createConnection("https://www.googleapis.com/drive/v2/files");
+		conn->Complete += sdelegate(this, &Tests::onAssetUploadComplete);
+		conn->OutgoingProgress += sdelegate(this, &Tests::onAssetUploadProgress);
+		conn->request().setMethod("POST");
+		conn->request().setContentType("application/json");
+		conn->request().setContentLength(2);
+		conn->request().add("Authorization", "Bearer " + accessToken);
+		
+		// Send the request
+		conn->send("{}", 2);
+#endif
+
+		// Create the transaction
+		auto conn = http::Client::instance().createConnection("https://www.googleapis.com/upload/drive/v2/files?uploadType=multipart");
+		conn->request().setMethod("POST");
+		conn->request().setChunkedTransferEncoding(false);
+		conn->request().add("Authorization", "Bearer " + accessToken);
+		conn->Complete += sdelegate(this, &Tests::onAssetUploadComplete);
+		conn->OutgoingProgress += sdelegate(this, &Tests::onAssetUploadProgress);
+
+		// Attach a HTML form writer for uploading files
+		auto form = http::FormWriter::create(*conn, http::FormWriter::ENCODING_MULTIPART_RELATED);
+		
+		form->addPart("metadata", new http::StringPart(metadata, "application/json; charset=UTF-8"));
+		//form->addPart("file", new http::StringPart("jew", "text/plain"));
+		//form->addPart("file", new http::FilePart("D:/test.txt", "text/plain"));
+		form->addPart("file", new http::FilePart("D:/test.jpg", "image/jpeg"));
+		
+		// Send the request
+		conn->send();
+
+		runLoop();
+	}
+
+	void onAssetUploadProgress(void* sender, const double& progress)
+	{
+		DebugL << "Upload Progress:" << progress << endl;
+	}
+
+	void onAssetUploadComplete(void* sender, const http::Response& response)
+	{
+		auto conn = reinterpret_cast<http::ClientConnection*>(sender);
+
+		DebugL << "Transaction Complete:" 
+			<< "\n\tRequest Head: " << conn->request()
+			<< "\n\tResponse Head: " << response
+			//<< "\n\tResponse Body: " << trans->incomingBuffer()
+			<< endl;
+
+		//assert(response.success());
+	}
 
 
 	//

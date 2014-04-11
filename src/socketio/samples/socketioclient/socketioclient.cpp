@@ -173,7 +173,7 @@ int main(int argc, char** argv)
 
 				Path file("D:/test.avi");
 			
-				HTMLForm* form = new HTMLForm(HTMLForm::ENCODING_MULTIPART);
+				HTMLForm* form = new HTMLForm(HTMLForm::ENCODING_MULTIPART_FORM);
 				form->set("asset[type]", "Video");
 				form->addPart("asset[file]", new FilePartSource(file.toString()));
 

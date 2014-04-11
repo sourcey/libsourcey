@@ -362,7 +362,7 @@ void ConnectionAdapter::onSocketRecv(const MutableBuffer& buf, const net::Addres
 		// This issue noted using Webrick with Ruby 1.9.
 		WarnL << "Discarding late response: " << 
 			std::string(bufferCast<const char*>(buf), 
-				std::min<std::size_t>(150, buf.size())) << endl;
+				/*std::min<std::size_t>(150, buf.size())*/buf.size()) << endl;
 		return;
 	}
 

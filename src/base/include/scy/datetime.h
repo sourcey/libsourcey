@@ -1702,8 +1702,8 @@ private:
 //
 
 
-/// Simple timeout counter which expires after a given delay.
 class Timeout 
+	/// Simple millisecond timeout counter which expires after a given delay.
 {
 public:
 	Timeout(long delay = 0, bool autoStart = false);
@@ -1719,13 +1719,13 @@ public:
 
 	void setDelay(long delay) { _delay = delay; };
 
-	time_t startAt() const { return _startAt; };
+	clock_t startAt() const { return _startAt; };
 	long delay() const { return _delay; };
 
 	Timeout& operator = (const Timeout& src);
 
 protected:
-	time_t	_startAt;
+	clock_t	_startAt;
 	long	_delay;
 };
 
@@ -1736,7 +1736,7 @@ protected:
 
 
 class TimedToken: public Timeout
-	// A token that expires after the specified duration.
+	/// A token that expires after the specified duration.
 {
 public:
 	TimedToken(long duration);

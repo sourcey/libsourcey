@@ -17,7 +17,7 @@ Partial or non-standard support is implemented for the following protocols: **We
 ## Dependencies
 
 _Required_: libuv, cmake, C++11 compiler  
-_Optional_: FFmpeg, OpenCV, WebRTC, OpenSSL, RtAudio, JsonCpp
+_Optional_: FFmpeg, OpenCV, WebRTC, OpenSSL (> 1.0.1g), RtAudio, JsonCpp
  
 ## Public Modules
 
