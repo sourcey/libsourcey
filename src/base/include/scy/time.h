@@ -38,10 +38,7 @@ static const char* ISO8601Format = "%Y-%m-%dT%H:%M:%SZ";
 		//   2005-01-01T11:00:00Z
 		   
 std::time_t now();
-	// Returns the current system time.
-
-UInt64 ticks();
-	// Returns the number of millisecond ticks since epoch.
+	// Returns the number of UTC milliseconds since epoch.
 
 double clockSecs();
 	// Returns the current process time in decimal seconds.
@@ -71,6 +68,9 @@ std::string getUTC();
 
 
 #if 0
+UInt64 ticks();
+	// Retrieves the number of milliseconds that have elapsed since the system was started, up to 49.7 days.
+
 UInt64 hrtime();
 	// Returns the current high-resolution real time in nanoseconds.
 

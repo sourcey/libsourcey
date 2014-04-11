@@ -48,7 +48,7 @@ PacketStream::PacketStream(const std::string& name) :
 PacketStream::~PacketStream()
 {
 	TraceLS(this) << "Destroy" << endl;
-
+	
 	close();
 			
 	// Delete managed adapters

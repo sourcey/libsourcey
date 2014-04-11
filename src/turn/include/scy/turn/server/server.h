@@ -21,12 +21,10 @@
 #define SCY_TURN_Server_H
 
 
-//#include "scy/net/socketacceptor.h"
 #include "scy/net/tcpsocket.h"
 #include "scy/net/udpsocket.h"
 #include "scy/timer.h"
 #include "scy/stun/message.h"
-//#include "scy/turn/server/serverobserver.h"
 #include "scy/turn/server/serverallocation.h"
 #include "scy/turn/server/udpallocation.h"
 #include "scy/turn/server/tcpallocation.h"
@@ -144,12 +142,8 @@ public:
 	void onTCPAcceptConnection(void* sender, const net::TCPSocket::Ptr& sock);
 	void onTCPSocketClosed(void* sender);
 	void onSocketRecv(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
-	//void onUDPReceived(void* sender, Buffer& buffer);
 	void onTimer(void*);
-
-
-	//virtual const char* className() const { return "TURNServer"; };
-
+	
 private:	
 	Timer _timer;
 	net::UDPSocket _udpSocket;
@@ -158,7 +152,7 @@ private:
 	ServerOptions _options;
 	ServerObserver& _observer;
 	ServerAllocationMap	_allocations;
-	//mutable Mutex	_mutex;
+	//mutable Mutex	_mutex; :)
 };
 
 
