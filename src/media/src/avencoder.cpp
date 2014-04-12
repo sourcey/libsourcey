@@ -183,7 +183,7 @@ void AVEncoder::initialize()
 		// Get realtime presentation timestamp
 		_formatCtx->start_time_realtime = av_gettime();
 
-		/*		
+#if 0   // Live PTS testing
 		// Open the output file
 		//_file.open("test.flv", ios::out | ios::binary);	
 			
@@ -211,7 +211,7 @@ void AVEncoder::initialize()
 			_audioPtsCalc = new PTSCalculator;
 			_audioPtsCalc->timeBase = _audio->ctx->time_base;
 		}
-		*/
+#endif
 		
 		setState(this, EncoderState::Ready);
 	} 
@@ -366,8 +366,8 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 	if (!buffer || !bufferSize || !width || !height)
 		throw std::runtime_error("Invalid video frame");
 	
-	// Recreate the video conversion context if the
-	// input resolution changes.
+	// Recreate the video conversion context on the fly
+	// if the input resolution changes.
 	if (options->iformat.video.width != width || 
 		options->iformat.video.height != height) {			
 		options->iformat.video.width = width;
@@ -416,7 +416,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 			}
 		}		
 		
-		/*
+#if 0
 		TraceLS(this) << "Writing video:" 
 			<< "\n\tPTS: " << opacket.pts
 			<< "\n\tDTS: " << opacket.dts
@@ -424,7 +424,7 @@ bool AVEncoder::encodeVideo(unsigned char* buffer, int bufferSize, int width, in
 			//<< "\n\tTime: " << time
 			<< "\n\tDuration: " << opacket.duration
 			<< endl;
-			*/
+#endif
 		
 		// Write the encoded frame to the output file / stream.
 		assert(isActive());

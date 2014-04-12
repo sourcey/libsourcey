@@ -212,7 +212,7 @@ void VideoEncoderContext::close()
 	
 	freeConverter();
 	
-	/*
+#if 0
 	if (buffer) {
 		av_free(buffer);
 		buffer = nullptr;
@@ -222,7 +222,7 @@ void VideoEncoderContext::close()
 	if (stream && format && format->nb_streams) {		
 		for (unsigned int i = 0; i < format->nb_streams; i++) {
 			if (format->streams[i] == stream) {		
-				TraceLS(this) << "Closing: Removing Stream: " << stream << endl;
+				TraceLS(this) << "Closing: Removing stream: " << stream << endl;
 				av_freep(&format->streams[i]->codec);
 				av_freep(&format->streams[i]);
 				stream = nullptr;
@@ -230,7 +230,7 @@ void VideoEncoderContext::close()
 			}
 		}
 	}
-	*/
+#endif
 }
 
 
@@ -373,8 +373,6 @@ void VideoCodecEncoderContext::create()
 		<< endl;
 
 	VideoContext::create();
-		
-	avcodec_register_all();
 
 	// Find the video encoder
 	codec = avcodec_find_encoder_by_name(oparams.encoder.c_str());
@@ -590,7 +588,7 @@ bool VideoDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 	if (frameDecoded) {	
 		fps.tick();
 		initDecodedVideoPacket(stream, ctx, frame, &opacket, &pts);
-		/*
+#if 0
 		TraceLS(this) << "Decoded Frame:" 		
 			<< "\n\tPTS: " << pts	
 			<< "\n\tPacket Size: " << opacket.size
@@ -600,7 +598,7 @@ bool VideoDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 			<< "\n\tFrame Packet DTS: " << frame->pkt_dts
 			<< "\n\tFrame Size: " << ctx->frame_size
 			<< endl;
-			*/
+#endif
 		
 		return true;
 	}
@@ -650,14 +648,16 @@ VideoConversionContext::~VideoConversionContext()
 
 void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec& oparams)
 {
-	//TraceLS(this) << "Create:" 
-	//	<< "\n\tInput Width: " << iparams.width
-	//	<< "\n\tInput Height: " << iparams.height
-	//	<< "\n\tInput Pixel Format: " << iparams.pixelFmt
-	//	<< "\n\tOutput Width: " << oparams.width
-	//	<< "\n\tOutput Height: " << oparams.height
-	//	<< "\n\tOutput Pixel Format: " << oparams.pixelFmt
-	//	<< endl;
+#if 0
+	TraceLS(this) << "Create:" 
+		<< "\n\tInput Width: " << iparams.width
+		<< "\n\tInput Height: " << iparams.height
+		<< "\n\tInput Pixel Format: " << iparams.pixelFmt
+		<< "\n\tOutput Width: " << oparams.width
+		<< "\n\tOutput Height: " << oparams.height
+		<< "\n\tOutput Pixel Format: " << oparams.pixelFmt
+		<< endl;
+#endif
 
     if (ctx)
         throw std::runtime_error("Conversion context already initialized.");
