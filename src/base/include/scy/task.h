@@ -29,36 +29,7 @@
 namespace scy {
 
 
-} // namespace scy
-
-
-#endif // SCY_Task_H
-	
-
-
-
-	//virtual TaskRunner& runner();
-		// Returns a reference to the associated TaskRunner or 
-		// throws an exception.
-/*
-	
-	virtual bool beforeRun();	
-		// Called by the TaskRunner to perform pre-processing, and
-		// to determine weather the task should be run or not.
-		// By default this method returns true if the task is not 
-		// cancelled or destroying.
-		// It is safe to destroy() the task from this method.
-	
-	virtual bool afterRun();	
-		// Called by the TaskRunner to perform post-processing, and
-		// to determine weather the task should be destroyed or not.
-		// This method returns true by default. Return false here
-		// to destroy the task.
-
- // TaskRunner& runner, , bool autoStart = falsebool repeat = falseal
-		
-	//virtual void start();
-	//Task(bool repeat = false);	
+#if 0 // Depreciated
 template <class async::RunnableT>
 class ITask: public async::RunnableT
 	// This class defines an asynchronous Task which is
@@ -108,41 +79,10 @@ protected:
 	
 	friend class TaskRunner;
 };
+#endif
 
-class TaskBase: public SocketBase<StreamSocketT, TransportT, SocketBaseT>
-*/
 
-	//std::string _name;
+} // namespace scy
 
-	//Task(const std::string& name, bool repeating = false);
-	//Task(TaskRunner& runner, const std::string& name, bool repeating = false, bool autoStart = false);
-	//virtual std::string name() const;
-	//virtual void setName(const std::string& name);	
 
-	/*
-	//virtual void start();
-	//virtual void stop();
-	*/
-		  
-		// Called from outside to abort the task without any
-		// more callbacks. The task instance will be deleted
-		// shortly by the TaskRunner.	
-//, 
-//		  bool autoStart = false
-
-//#include <string>
-
-//template <class ScopedRawPointerT>
-//class GarbageCollectorTask;
-	//virtual TaskRunner& runner() { return _runner; }
-
-//TaskRunner& runner,
-		  
-	/*
-	virtual void runOnce() const;
-	*/
-
-	//EvLoop& _loop;	
-	//bool _runOnce;
-	//template <class ScopedRawPointerT> 
-	//friend class GarbageCollectorTask;
+#endif // SCY_Task_H

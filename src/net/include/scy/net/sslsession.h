@@ -22,7 +22,6 @@
 
 
 #include "scy/memory.h"
-
 #include "scy/net/types.h"
 
 #include <openssl/ssl.h>
@@ -41,7 +40,7 @@ class SSLSession : public SharedObject
 	/// if it wants to reuse it with a future connection.
 {
 public:
-	typedef SharedPtr<SSLSession> Ptr;
+	typedef std::shared_ptr<SSLSession> Ptr;
 
 	SSL_SESSION* sslSession() const;
 		/// Returns the stored OpenSSL SSL_SESSION object.

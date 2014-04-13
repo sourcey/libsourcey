@@ -39,11 +39,12 @@ bool Configuration::exists(const std::string& key) const
 {
 	Mutex::ScopedLock lock(_mutex);
 
-	std::string value;
-	return getRaw(key, value);
+	std::string tmp;
+	return getRaw(key, tmp);
 }
 
-	
+
+
 std::string Configuration::getString(const std::string& key) const
 {
 	Mutex::ScopedLock lock(_mutex);
@@ -115,6 +116,30 @@ int Configuration::getInt(const std::string& key, int defaultValue) const
 		return defaultValue;
 }
 
+	
+Int64 Configuration::getLargeInt(const std::string& key) const
+{
+	Mutex::ScopedLock lock(_mutex);
+
+	std::string value;
+	if (getRaw(key, value))
+		return parseLargeInt(value);
+	else
+		throw std::invalid_argument("Not found: " + key);
+}
+
+	
+Int64 Configuration::getLargeInt(const std::string& key, Int64 defaultValue) const
+{
+	Mutex::ScopedLock lock(_mutex);
+
+	std::string value;
+	if (getRaw(key, value))
+		return parseLargeInt(value);
+	else
+		return defaultValue;
+}
+
 
 double Configuration::getDouble(const std::string& key) const
 {
@@ -179,6 +204,14 @@ void Configuration::setInt(const std::string& key, int value)
 	setRaw(key, util::itostr<int>(value));
 }
 
+	
+void Configuration::setLargeInt(const std::string& key, Int64 value)
+{
+	Mutex::ScopedLock lock(_mutex);
+
+	setRaw(key, util::itostr<Int64>(value));
+}
+
 
 void Configuration::setDouble(const std::string& key, double value)
 {
@@ -202,6 +235,15 @@ int Configuration::parseInt(const std::string& value)
 		return util::parseHex(value.substr(2));
 	else
 		return util::strtoi<int>(value);
+}
+
+
+Int64 Configuration::parseLargeInt(const std::string& value)
+{
+	if (value.compare(0, 2, "0x") == 0)
+		return util::parseHex(value.substr(2));
+	else
+		return util::strtoi<Int64>(value);
 }
 
 

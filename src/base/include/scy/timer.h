@@ -90,7 +90,6 @@ protected:
 
 
 #if 0
-
 //
 // Timer 2
 //

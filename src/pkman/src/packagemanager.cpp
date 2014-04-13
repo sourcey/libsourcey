@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "scy/pacman/packagemanager.h"
-#include "scy/pacman/package.h"
+#include "scy/pkman/packagemanager.h"
+#include "scy/pkman/package.h"
 #include "scy/json/json.h"
 #include "scy/util.h"
 #include "scy/http/client.h"
@@ -115,8 +115,14 @@ void PackageManager::queryRemotePackages()
 		conn->request().setMethod("GET");
 		conn->request().setKeepAlive(false);
 		conn->setReadStream(new std::stringstream);
+		
+		// OAuth authentication
+		if (!_options.httpOAuthToken.empty()) {
+			conn->request().add("Authorization", "Bearer " + _options.httpOAuthToken);
+		}
 
-		if (!_options.httpUsername.empty()) {
+		// HTTP Basic authentication
+		else if (!_options.httpUsername.empty()) {
 			http::BasicAuthenticator cred(_options.httpUsername, _options.httpPassword);
 			cred.authenticate(conn->request()); 
 		}

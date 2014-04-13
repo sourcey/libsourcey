@@ -93,13 +93,3 @@ typedef Polymorphic Module;
 
 
 #endif // SCY_Interfaces_H
-
-
- //Callback
-	 //basic::Callable target, void* context
-	//Async(async::Runnable& target);	
-	//virtual void start(async::Runnable& target);
-		// Starts the thread with the given target.
-		//
-		// The Runnable object must remain valid for the  
-		// entire lifetime of the async object.

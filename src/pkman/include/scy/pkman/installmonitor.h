@@ -21,7 +21,7 @@
 #define SCY_Pacman_InstallMonitor_H
 
 
-#include "scy/pacman/installtask.h"
+#include "scy/pkman/installtask.h"
 
 
 namespace scy { 

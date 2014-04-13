@@ -57,8 +57,6 @@ SSLSocket& SSLSocket::base() const
 #endif
 
 
-// -------------------------------------------------------------------
-//
 SSLSocket::SSLSocket(uv::Loop* loop) : 
 	TCPSocket(loop),
 	// TODO: Using client context, should assert no bind()/listen() on this socket
@@ -166,7 +164,7 @@ SSLSession::Ptr SSLSocket::currentSession()
 				SSL_SESSION_free(session);
 				return _session;
 			}
-			else return new SSLSession(session);
+			else return std::make_shared<SSLSession>(session); // new SSLSession(session);
 		}
 	}
 	return 0;
@@ -238,26 +236,3 @@ void SSLSocket::onConnect(uv_connect_t* handle, int status)
 
 
 } } // namespace scy::net
-
-
-
-
-
-/*
-void SSLSocket::connect(const Address& peerAddress) 
-{
-	if (!_context) 
-		throw std::runtime_error("Cannot connect without SSL context");
-
-	TraceLS(this) << "Connecting to " << peerAddress << endl;
-	init();
-	const sockaddr_in* addr = reinterpret_cast<const sockaddr_in*>(peerAddress.addr());
-	assert(_connectReq.data == this);
-	int r = uv_tcp_connect(&_connectReq, (uv_tcp_t*)stream(), *addr, uv::onConnected);
-	if (r) {
-		uv_err_t err = uv_last_error(loop());
-		setUVError(r);
-		throw std::runtime_error(uv_strerror(err)); // TODO: make exception setError option
-	}
-}
-*/

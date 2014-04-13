@@ -103,7 +103,7 @@ T strtoi(const std::string& s)
     return x;
 }
 
-/*
+#if 0
 double intToDouble(Int64 v);
 	// Interger to double
 
@@ -112,7 +112,7 @@ float intToFloat(Int32 v);
 
 Int64 doubleToInt(double d);
 	// Double to interger
-*/
+#endif
 
 
 //

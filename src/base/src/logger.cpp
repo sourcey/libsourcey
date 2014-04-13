@@ -534,37 +534,7 @@ void RotatingFileChannel::rotate()
 }
 
 
-} // namespace scy
-
-
-/*
-void Logger::write(const char* channel, const LogStream& stream)
-{	
-	LogChannel* ch = get(channel, true);
-	QueuedWrite* work = new QueuedWrite;
-	work->logger = this;
-	work->stream = stream;
-	work->channel = ch;
-	Mutex::ScopedLock lock(_mutex);
-	_pending.push_back(work);	
-	// will throw if the specified channel doesn't exist
-	//LogChannel* c = get(channel);
-	//if (c)
-	//	c->write(stream);
-}
-
-
-void Logger::write(const std::string& message, const char* level, 
-		const char* realm, const void* ptr) const
-{
-	// will write to the nullptr channel if no default channel exists
-	LogChannel* c = getDefault();
-	if (c)
-		c->write(message, getLogLevelFromString(level), realm, 0, ptr);
-}
-*/
-
-/*
+#if 0
 // ---------------------------------------------------------------------
 // Evented File Channel
 //
@@ -592,4 +562,8 @@ void EventedFileChannel::write(const LogStream& stream, LogLevel level, const ch
 	FileChannel::write(message, level, ptr);	
 	OnLogStream.emit(this, message, level, ptr);
 }
-*/
+#endif
+
+
+
+} // namespace scy

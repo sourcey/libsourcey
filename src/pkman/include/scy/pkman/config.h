@@ -27,9 +27,9 @@ namespace pman {
 	
 #define DEFAULT_API_ENDPOINT "http://localhost:3000"
 #define DEFAULT_API_INDEX_URI "/packages.json"
-#define DEFAULT_PACKAGE_CACHE_DIR "pacman/cache"
-#define DEFAULT_PACKAGE_INTERMEDIATE_DIR "pacman/data"
-#define DEFAULT_PACKAGE_INSTALL_DIR "pacman/install"
+#define DEFAULT_PACKAGE_CACHE_DIR "pkman/cache"
+#define DEFAULT_PACKAGE_INTERMEDIATE_DIR "pkman/data"
+#define DEFAULT_PACKAGE_INSTALL_DIR "pkman/install"
 #define DEFAULT_PLATFORM "win32"
 
 

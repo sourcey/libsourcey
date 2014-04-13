@@ -346,12 +346,12 @@ protected:
 };
 
 
+#if 0
 //
 // Concurrent Queue
 //
-
-
-/* TODO: Re-implement Condition class from libuv primitives
+// TODO: Re-implement Condition class from libuv primitives
+//
 
 template<typename T>
 class ConcurrentQueue
@@ -399,7 +399,7 @@ public:
         _queue.pop();
     }
 };
-*/
+#endif
 
 
 } // namespace scy
@@ -407,18 +407,3 @@ public:
 
 
 #endif // SCY_Queue_H
-
-
-
-//protected:		
-	//virtual void dispose()
-	//{
-	//	cancel();
-	//	SyncContext::dispose();
-	//}
-
-	//virtual void run()
-	//{
-	//	// Run for x timeout
-	//	RunnableQueue<T>::runTimeout(_timeout);
-	//}

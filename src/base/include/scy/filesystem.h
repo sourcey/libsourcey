@@ -95,45 +95,8 @@ std::string transcode(const std::string& path);
 
 // TODO: Implement more libuv fs_* types
 
-/*
-class StatWatcher: public uv::Handle 
-{
-public:
-	StatWatcher();
-	virtual ~StatWatcher();
-
-	void start(const std::string& path, uint32_t interval, bool persistent = true);
-	void stop();
-
-private:
-	static void onCallback(uv_fs_poll_t* handle,
-						int status,
-						const uv_stat_t* prev,
-						const uv_stat_t* curr);
-	void stop();
-};
-*/
-
 
 } } // namespace scy::fs
 
 
 #endif
-
-
-
-
-/*
-#ifdef _WIN32
-  #define ALLOWABLE_DIRECTORY_DELIMITERS "/\\"
-  #define DIRECTORY_DELIMITER '\\'
-  #define DIRECTORY_DELIMITER_STRING "\\"
-#else
-  #define ALLOWABLE_DIRECTORY_DELIMITERS "/"
-  #define DIRECTORY_DELIMITER '/'
-  #define DIRECTORY_DELIMITER_STRING "/"
-#endif
-  */
-
-	// Note: This method only checks if the path string is a directory, 
-	// it does not check the filesystem for actual existence.

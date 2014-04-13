@@ -1,5 +1,5 @@
 #include "scy/application.h"
-#include "scy/pacman/packagemanager.h"
+#include "scy/pkman/packagemanager.h"
 #include "scy/net/sslmanager.h"
 #include "scy/util.h"
 

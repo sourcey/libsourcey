@@ -17,8 +17,8 @@
 //
 
 
-#include "scy/pacman/installmonitor.h"
-#include "scy/pacman/packagemanager.h"
+#include "scy/pkman/installmonitor.h"
+#include "scy/pkman/packagemanager.h"
 #include "scy/logger.h"
 
 

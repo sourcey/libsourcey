@@ -17,6 +17,7 @@
 //
 
 
+#include "scy/filesystem.h"
 #include "scy/media/thumbnailer.h"
 
 
@@ -27,21 +28,23 @@ namespace scy {
 namespace av {
 
 			
-Thumbnailer::Thumbnailer() : seek(0.0) 
+Thumbnailer::Thumbnailer(int owidth, int oheight) : 
+	owidth(owidth), oheight(oheight), seek(0.0) 
 {
 	initializeFFmpeg();
 }
+
 
 Thumbnailer::~Thumbnailer() 
 {
 	uninitializeFFmpeg();
 }
 
-void Thumbnailer::init(const std::string& ifile, const std::string& ofile, int owidth, int oheight, double seek) 
+
+void Thumbnailer::open(const std::string& ifile, const std::string& ofile) //, int owidth, int oheight, double seek
 {	
 	this->ifile = ifile;
 	this->ofile = ofile;
-	if (seek) this->seek = seek;
 
 	reader += packetDelegate(this, &Thumbnailer::onVideoPacket);
 	reader.options().iFramesOnly = true;
@@ -74,8 +77,11 @@ void Thumbnailer::init(const std::string& ifile, const std::string& ofile, int o
 	//encoder.oparams.print(cout);	
 }
 
-void Thumbnailer::grab() 
+
+void Thumbnailer::grab(double seek) 
 {
+	if (seek) this->seek = seek;
+
 	// Open here so settings may be modified
 	encoder.open();	
 
@@ -83,6 +89,7 @@ void Thumbnailer::grab()
 	reader.run();
 }
 		
+
 void Thumbnailer::onVideoPacket(void*, av::VideoPacket& packet)
 {				
 	DebugL << "Thumbnail packet out: " << packet.size() << std::endl;
@@ -105,6 +112,7 @@ void Thumbnailer::onVideoPacket(void*, av::VideoPacket& packet)
 	}
 }
 	
+
 void Thumbnailer::saveFile(const std::string& path, const char* data, int size)
 {			
 	std::ofstream ofs(path, std::ios_base::binary | std::ios_base::out);
@@ -112,6 +120,15 @@ void Thumbnailer::saveFile(const std::string& path, const char* data, int size)
 		ofs.write(data, size);
 	else
 		throw std::runtime_error("Cannot save image: " + path);		
+}
+	
+
+std::string Thumbnailer::defaultThumbPath(const std::string& ifile, const std::string& ext, const std::string& suffix)
+{
+    std::string thumbpath(ifile);
+    std::string extname = fs::extname(thumbpath, true);
+	std::size_t pos = thumbpath.rfind(extname);
+	return thumbpath.replace(pos, extname.length(), suffix + ext);
 }
 
 

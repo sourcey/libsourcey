@@ -17,7 +17,7 @@
 //
 
 
-#include "scy/pacman/package.h"
+#include "scy/pkman/package.h"
 #include "scy/util.h"
 #include "scy/logger.h"
 #include "scy/filesystem.h"
