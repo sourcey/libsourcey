@@ -21,11 +21,11 @@
 #define SCY_Pacman_PackageManager_H
 
 
-#include "scy/pacman/config.h"
-#include "scy/pacman/types.h"
-#include "scy/pacman/package.h"
-#include "scy/pacman/installtask.h"
-#include "scy/pacman/installmonitor.h"
+#include "scy/pkman/config.h"
+#include "scy/pkman/types.h"
+#include "scy/pkman/package.h"
+#include "scy/pkman/installtask.h"
+#include "scy/pkman/installmonitor.h"
 #include "scy/collection.h"
 #include "scy/filesystem.h"
 #include "scy/platform.h"
@@ -62,6 +62,7 @@ public:
 		std::string indexURI;
 		std::string httpUsername;
 		std::string httpPassword;
+		std::string httpOAuthToken; // will be used instead of HTTP basic if provided
 		
 		// Directories & Paths
 		std::string cacheDir;

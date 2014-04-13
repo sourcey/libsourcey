@@ -26,12 +26,13 @@ const int FILE_CHUNK_SIZE = 65536; //32384;
 
 FormWriter* FormWriter::create(ClientConnection& conn, const std::string& encoding)
 {
-	//FormWriter* wr = new http::FormWriter(conn, std::make_shared<Thread>(), encoding);
-	FormWriter* wr = new http::FormWriter(conn, std::make_shared<Idler>(conn.socket()->loop()), encoding);
+	auto wr = new http::FormWriter(conn, std::make_shared<Idler>(conn.socket()->loop()) /*std::make_shared<Thread>()*/, encoding);
 	conn.Outgoing.attachSource(wr, true, true);
-	if (encoding == http::FormWriter::ENCODING_MULTIPART_FORM &&
-		conn.request().getVersion() == http::Message::HTTP_1_1)
+	if (conn.request().isChunkedTransferEncoding()) {
+		assert(encoding != http::FormWriter::ENCODING_URL);
+		assert(conn.request().getVersion() != http::Message::HTTP_1_0);
 		conn.Outgoing.attach(new http::ChunkedAdapter(&conn), 0, true);
+	}
 	conn.Outgoing.lock();
 	return wr;
 }
@@ -47,10 +48,12 @@ FormWriter::FormWriter(ClientConnection& connection, async::Runner::Ptr runner, 
 	_initial(true),
 	_complete(false)
 {
+#if 0 // Thread based writer
 	// Make sure threads are repeating
-	//Thread* thread = dynamic_cast<Thread*>(runner.get());
-	//if (thread)
-	//	thread->setRepeating(true);
+	auto thread = dynamic_cast<Thread*>(runner.get());
+	if (thread)
+		thread->setRepeating(true);
+#endif
 }
 
 	

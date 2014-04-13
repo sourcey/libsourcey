@@ -19,12 +19,9 @@
 
 #include "scy/json/configuration.h"
 #include "scy/logger.h"
-//#include "Poco/String.h"
-//#include "Poco/File.h"
 
 
 using namespace std;
-
 
 
 namespace scy { 

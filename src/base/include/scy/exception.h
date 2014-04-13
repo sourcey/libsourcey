@@ -83,7 +83,7 @@ struct Error
 };
 
 
-#if 0
+#if 0 // depreciated in favor of std::exception
 class Exception: public std::exception
 	// This class extends the standard library exception object
 	// with features relevent to the LibSourcey debug context.
@@ -128,7 +128,6 @@ protected:
 	std::string _msg;
 	int _code;
 };
-
 
 
 //

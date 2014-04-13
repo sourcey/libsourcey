@@ -21,7 +21,7 @@
 #define SCY_Pacman_InstallTask_H
 
 
-#include "scy/pacman/package.h"
+#include "scy/pkman/package.h"
 #include "scy/http/client.h"
 #include "scy/stateful.h"
 #include "scy/logger.h"

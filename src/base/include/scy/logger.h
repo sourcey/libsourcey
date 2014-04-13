@@ -481,13 +481,3 @@ public:
 
 
 #endif
-
-
-
-
-	//void write(const char* channel, const LogStream& stream);
-		// Writes the given message to the given log channel.
-
-	//void write(const std::string& message, const char* level = "debug", 
-		//const char* realm = "", const void* ptr = nullptr) const;
-		// Writes the given message to the default log channel.

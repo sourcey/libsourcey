@@ -175,6 +175,30 @@ void formatHex(std::string& str, UInt64 value, int width);
 	// right justified and zero-padded in a field having at least 
 	// the specified width.
 
+#if 0
+void format(std::string& str, float value);
+	// Formats a float value in decimal floating-point notation,
+	// according to std::printf's %g format with a precision of 8 fractional digits.
+
+void format(std::string& str, double value);
+	// Formats a double value in decimal floating-point notation,
+	// according to std::printf's %g format with a precision of 16 fractional digits.
+
+void format(std::string& str, double value, int precision);
+	// Formats a double value in decimal floating-point notation,
+	// according to std::printf's %f format with the given precision.
+
+void format(std::string& str, double value, int width, int precision);
+	// Formats a double value in decimal floating-point notation,
+	// right justified in a field of the specified width,
+	// with the number of fractional digits given in precision.
+
+void format(std::string& str, const void* ptr);
+	// Formats a pointer in an eight (32-bit architectures) or
+	// sixteen (64-bit architectures) characters wide
+	// field in hexadecimal notation.
+#endif
+
 
 } } // namespace scy::numeric
 
@@ -208,29 +232,3 @@ void formatHex(std::string& str, UInt64 value, int width);
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 //
-
-
-
-/*
-void format(std::string& str, float value);
-	// Formats a float value in decimal floating-point notation,
-	// according to std::printf's %g format with a precision of 8 fractional digits.
-
-void format(std::string& str, double value);
-	// Formats a double value in decimal floating-point notation,
-	// according to std::printf's %g format with a precision of 16 fractional digits.
-
-void format(std::string& str, double value, int precision);
-	// Formats a double value in decimal floating-point notation,
-	// according to std::printf's %f format with the given precision.
-
-void format(std::string& str, double value, int width, int precision);
-	// Formats a double value in decimal floating-point notation,
-	// right justified in a field of the specified width,
-	// with the number of fractional digits given in precision.
-
-void format(std::string& str, const void* ptr);
-	// Formats a pointer in an eight (32-bit architectures) or
-	// sixteen (64-bit architectures) characters wide
-	// field in hexadecimal notation.
-	*/

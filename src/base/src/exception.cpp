@@ -89,37 +89,3 @@ void Exception::rethrow() const
 
 
 } // namespace scy
-
-
-
-
-/*
-
-
-const char* Exception::className() const throw()
-{
-	return typeid(*this).name();
-}
-
-
-Exception* Exception::clone() const
-{
-	return new Exception(*this);
-}
-Exception::Exception(const Exception& exc) :
-	std::exception(exc),
-	_msg(exc._msg),
-	_code(exc._code)
-{
-}
-
-
-Exception& Exception::operator = (const Exception& exc)
-{
-	if (&exc != this) {
-		_msg = exc._msg;
-		_code = exc._code;
-	}
-	return *this;
-}
-*/

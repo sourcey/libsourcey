@@ -23,7 +23,6 @@
 
 #include "scy/util.h"
 #include "scy/uv/uvpp.h"
-//#include "scy/exception.h"
 
 
 namespace scy { 
@@ -82,20 +81,3 @@ protected:
 
 
 #endif // SCY_SharedLibrary_H
-
-
-		/*
-			//if (whiny)
-			//	throw std::runtime_error(util::format("Symbol '%s' not found.", name));
-		std::string err = lastError();
-		assert(!err.empty());
-		_error = prefix + ": " + err;
-			*/
-
-	/*
-	std::string lastError() const
-		// Returns the last uv_dlopen() or uv_dlsym() error message.
-	{	
-		return uv_dlerror(&_lib);
-	}
-	*/

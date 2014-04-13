@@ -77,30 +77,3 @@ protected:
 
 
 #endif // SCY_PacketQueue_H
-
-
-
-
-
-/*
-//
-// Synchronized Packet Stream
-//
-
-
-class PacketStream: public PacketStream
-{
-public:
-	PacketStream(uv::Loop* loop, const std::string& name = "");
-	PacketStream(const std::string& name = "");
-
-	virtual ~PacketStream(); // make ref count and protected?
-
-	virtual void close();
-
-protected:		
-	virtual void onFinalPacket(IPacket& packet);
-
-	SyncPacketQueue* _queue;
-};
-*/

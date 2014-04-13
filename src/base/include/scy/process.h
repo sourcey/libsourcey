@@ -67,17 +67,3 @@ protected:
 
 
 #endif // SCY_Process_H
-
-
-
-
-	/*
-	bool spawn(const std::string& file, const std::string& args, unsigned int flags = 0)
-		// Spawns the process using basic options.
-	{	
-		options.file = file.c_str();
-		options.args = args.c_str();
-		options.flags = flags;
-		return spawn();
-	}
-	*/

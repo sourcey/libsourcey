@@ -306,6 +306,7 @@ protected:
 };
 
 
+#if 0
 template <class C>
 class SharedPtr	
 	/// SharedPtr manages a pointer to reference counted object.
@@ -313,7 +314,7 @@ class SharedPtr
 	/// The template class must implement duplicate() and
 	/// release() methods, such as SharedObject.
 	///
-	/// Note: Depreciated in favour of std::smart_handle 
+	/// Note: Depreciated in favour of std::smart_ptr
 {
 public:
 	SharedPtr() : _handle(nullptr)
@@ -542,201 +543,10 @@ public:
 private:
 	C* _handle;
 };
+#endif
 
 
 } // namespace scy
 
 
 #endif // SCY_Memory_H
-
-
-
-	
-	//void close();
-		// Closes the internal timer and frees all 
-		// scheduled pointers now.
-	//UVEmptyStatusCallback(GarbageCollector, onTimer, uv_timer_t);
-/*
-template <class C>
-class Deleter: public ScopedPointer
-	/// Deleter is the base deleter template  
-	/// from which all others derive.
-{
-public:
-    typedef void (*Func)(C*);
-	Func func;
-
-	Deleter(C* p, Func f) : 
-		ScopedPointer(p), func(f)
-	{
-	}
-
-	~Deleter()
-	{
-		if (ptr) invoke();
-	}
-
-    void invoke()
-    {
-		assert(ptr);
-		//C* p = reinterpret_cast<C*>(ptr);
-		C* p = (C*)ptr;
-		ptr = nullptr;
-        func(p);
-    }
-};
-
-
-template <class C>
-class DefaultDeleter: public Deleter<C>
-	/// DefaultDeleter calls the standard delete 
-	/// operator to free pointer memory.
-{
-public:
-	DefaultDeleter(C* p = nullptr) : 
-		Deleter<C>(p, &DefaultDeleter<C>::func)
-	{
-	}
-				
-	static void func(C* p)
-	{
-		delete p;
-	}
-};
-
-
-template <class C>
-class ScopedPointer: public Deleter<C>
-	/// ScopedPointer schedules a pointer for 
-	/// deferred deletion by the GarbageCollector.
-{
-public:
-	ScopedPointer(C* p = nullptr) : 
-		Deleter<C>(p, &ScopedPointer<C>::func)
-	{
-	}
-				
-	static void func(C* p)
-	{
-		scy::deleteLater(p);
-	}
-};
-*/
-    //typedef void (*Func)(Type*);
-	//Func func;, Func f
-		//C* p = reinterpret_cast<C*>(ptr);
-        //func(p);//, func(f)//<Type>
-		//Type* p = (Type*)ptr;
-		//ptr = nullptr;
-		//ScopedPointer<Type>::
-
-
-	//: public MemoryObject//<deleter_t>//ScopedPointer* deleter = new DefaultDeleter<SharedObject>()MemoryObject(deleter), 
-			//MemoryObject::
-		//deleter(this);
-		//Deleter::();
-		//deleter->invoke();
-	//friend struct std::default_delete<SharedObject>;	
-	//friend class ScopedPointer<SharedObject>;
-
-/*
-//template <class deleter_t>
-class MemoryObject//: public 
-	/// MemoryObject is the base class for LibSourcey objects
-	/// which employ different memory management strategies.
-{	
-public:
-	MemoryObject(): //ScopedPointer* deleter = new DefaultDeleter<MemoryObject>()
-		//deleter(deleter)
-	{
-		//if (deleter->ptr == nullptr)
-		//	deleter->ptr = this;
-	}
-
-	virtual ~MemoryObject()
-	{
-	}
-
-	virtual void freeMemory()
-	{
-		//deleter(this);
-		//Deleter::();
-		//deleter->invoke();
-	}
-
-protected:
-	MemoryObject(const MemoryObject&) {};
-	MemoryObject& operator = (const MemoryObject&) {};
-	
-	//friend struct scy::DeferredDelete/friend class ScopedRawPointer/<MemoryObject>;	
-	//friend class ScopedPointer<MemoryObject>;
-
-	//deleter_t deleter;
-	//std::unique_handle<ScopedPointer> deleter;
-};
-//template <class deleter_t>
-*/
-
-
-
-/*
-template <class C>
-class GCDeleter: public Deleter<C>
-	/// GCDeleter is used by the GarbageCollector
-	/// to free managed pointer memory.
-{
-public:
-	GCDeleter(C* p = nullptr) : 
-		Deleter<C>(p, &GCDeleter<C>::func)
-	{
-	}
-				
-	static void func(C* p)
-	{
-		delete p;
-	}
-};
-
-
-template <class C>
-class DestroyMethodDeleter: public Deleter<C>
-	/// DestroyMethodDeleter calls the destroy() method 
-	/// on an object to begin the deletion sequence.
-{
-public:
-	DestroyMethodDeleter(C* p = nullptr) : 
-		Deleter<C>(p, &DestroyMethodDeleter<C>::func)
-	{
-	}
-				
-	static void func(C* p)
-	{
-		p->destroy();
-	}
-};
-*/
-
-
-/*
-/// Reference-counted object base class
-/// By default the reference count is initialized to 1
-template<typename T> struct RefCountedBase
-{
-	std::atomic<unsigned> ndelegates;
-
-	explicit RefCountedBase(unsigned int count = 1) : ndelegates(count) {}
-
-	void increment(unsigned int count = 1)
-	{
-		ndelegates.fetch_add(count, std::memory_order_relaxed);
-	}
-
-	void release(unsigned int count = 1)
-	{
-		if (ndelegates.fetch_sub(count, std::memory_order_release) == count) {
-			std::atomic_thread_fence(std::memory_order_acquire);
-			delete static_cast<T*>(this);
-		}
-	}
-};
-*/

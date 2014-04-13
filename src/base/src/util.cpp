@@ -196,7 +196,7 @@ bool endsWith(const std::string& str, const std::string& suffix)
 }
 
 
-/*
+#if 0
 double intToDouble(Int64 v) 
 {
 	if (v+v > 0xFFEULL<<52)
@@ -221,7 +221,7 @@ Int64 doubleToInt(double d)
 	d = frexp(d, &e);
 	return (Int64)(d<0)<<63 | (e+1022LL)<<52 | (Int64)((fabs(d)-0.5)*(1LL<<53));
 }
-*/
+#endif
 
 
 std::string dumpbin(const char* data, std::size_t len)
@@ -333,12 +333,10 @@ std::streamsize copyStream(std::istream& istr, std::ostream& ostr, std::size_t b
 	std::streamsize len = 0;
 	istr.read(buffer.get(), bufferSize);
 	std::streamsize n = istr.gcount();
-	while (n > 0)
-	{
+	while (n > 0) {
 		len += n;
 		ostr.write(buffer.get(), n);
-		if (istr && ostr)
-		{
+		if (istr && ostr) {
 			istr.read(buffer.get(), bufferSize);
 			n = istr.gcount();
 		}
@@ -353,8 +351,7 @@ std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr)
     char c;
     std::streamsize len = 0;
     istr.get(c);
-    while (istr && ostr)
-    {
+    while (istr && ostr) {
         ++len;
         ostr.put(c);
         istr.get(c);
@@ -371,12 +368,10 @@ std::streamsize copyToString(std::istream& istr, std::string& str, std::size_t b
 	std::streamsize len = 0;
 	istr.read(buffer.get(), bufferSize);
 	std::streamsize n = istr.gcount();
-	while (n > 0)
-	{
+	while (n > 0) {
 		len += n;
 		str.append(buffer.get(), static_cast<std::string::size_type>(n));
-		if (istr)
-		{
+		if (istr) {
 			istr.read(buffer.get(), bufferSize);
 			n = istr.gcount();
 		}
@@ -388,179 +383,3 @@ std::streamsize copyToString(std::istream& istr, std::string& str, std::size_t b
 
 } // namespace util
 } // namespace scy
-
-
-
-
-/*
-void trim(std::string& str) 
-{	
-	str.erase(0, str.find_first_not_of(' '));
-	str.erase(str.find_last_not_of(' ') + 1);
-}
-*/
-
-/*
-void toLowerInPlace(std::string& str)
-{
-	std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-}
-
-
-std::string toLower(const std::string& str)
-{
-	std::string res(str);
-	toLowerInPlace(res);
-	return res;
-}
-
-
-void toUpperInPlace(std::string& str)
-{
-	std::transform(str.begin(), str.end(), str.begin(), ::toupper);
-}
-
-
-std::string toUpper(const std::string& str)
-{
-	std::string res(str);
-	toUpperInPlace(res);
-	return res;
-}
-
-
-inline int toLower(int ch)
-{
-	if (::isupper(ch))
-		return ch + 32;
-	else
-		return ch;
-}
-
-
-inline int toUpper(int ch)
-{
-	if (::islower(ch))
-		return ch - 32;
-	else
-		return ch;
-}
-*/
-
-
-	/*
-int icompare(const std::string& str, std::string::size_type pos, std::string::size_type n, std::string::const_iterator it2, std::string::const_iterator end2)
-{
-	std::string::size_type sz = str.size();
-	if (pos > sz) pos = sz;
-	if (pos + n > sz) n = sz - pos;
-	std::string::const_iterator it1  = str.begin() + pos; 
-	std::string::const_iterator end1 = str.begin() + pos + n;
-	while (it1 != end1 && it2 != end2) {
-        std::string::value_type c1 = static_cast<char>(::tolower(*it1)); //util::toLower(*it1);
-        std::string::value_type c2 = static_cast<char>(::tolower(*it1)); //util::toLower(*it2);
-        if (c1 < c2)
-            return -1;
-        else if (c1 > c2)
-            return 1;
-        ++it1; ++it2;
-	}
-    
-    if (it1 == end1)
-		return it2 == end2 ? 0 : -1;
-    else
-        return 1;
-}
-
-
-int icompare(const std::string& str1, const std::string& str2)
-{
-	return icompare(str1, 0, str1.size(), str2.begin(), str2.end());
-#ifdef WIN32
-	return strnicmp(s1.c_str(), s2.c_str(), s1.length());
-#else 
-	return stricmp(s1.c_str(), s2.c_str(), s1.length());
-#endif 
-}
-	*/
-
-
-/*
-bool replace(std::string& str, const std::string& from, const std::string& to) 
-{
-    std::size_t start_pos = str.find(from);
-    if (start_pos == std::string::npos)
-        return false;
-    str.replace(start_pos, from.length(), to);
-    return true;
-}
-
-
-void replaceAll(std::string& str, const std::string& from, const std::string& to)
-{
-    if (from.empty())
-        return;
-    std::size_t start_pos = 0;
-    while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
-    }
-}
-*/
-
-
-
-/*
-std::string replace(const std::string& str, const std::string& from, const std::string& to, std::string::size_type start)
-{
-	std::string res(str);
-	replaceInPlace(res, from, to, start);
-	return res;
-}
-
-	
-std::string& replaceInPlace(std::string& str, const std::string& from, const std::string& to, std::string::size_type start)
-{
-	assert(from.size() > 0);	
-	std::string res;
-	std::string::size_type pos = 0;
-	res.append(str, 0, start);
-	do {
-		pos = str.find(from, start);
-		if (pos != std::string::npos) {
-			res.append(str, start, pos - start);
-			res.append(to);
-			start = pos + from.length();
-		}
-		else res.append(str, start, str.size() - start);
-	}
-	while (pos != std::string::npos);
-	str.swap(res);
-	return str;
-}
-*/
-
-
-
-/*
-#ifdef WIN32
-UInt64 getTimeHR() {
-	return ::GetTickCount();
-}
-#else
-static int ClocksPerSec = sysconf(_SC_CLK_TCK);
-UInt64 getTimeHR() {
-	tms t;
-	clock_t result = times(&t);
-	return (UInt64)result;
-}
-#endif
-
-
-void pause()
-{
-	//cin.ignore(1024, '\n');
-	cout << "Press enter to continue...";
-	cin.get();
-}
-*/

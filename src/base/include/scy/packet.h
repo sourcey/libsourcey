@@ -280,16 +280,3 @@ inline RawPacket rawPacket(const char* data = nullptr, std::size_t size = 0, uns
 
 
 #endif // SCY_Packet_H
-
-
-
-	/*
-	enum ProcessorFlags
-		// Packet processor flags tell processors how to handle
-		// the packet. depreciated
-	{
-		NoModify = 0x00,   // This packet should not be modified by processors.
-		StreamEnd = 0x01,  // This is that last packet in the stream.
-		MemManaged = 0x02  // This packet will assume ownership of the data buffer.
-	};, 
-	*/

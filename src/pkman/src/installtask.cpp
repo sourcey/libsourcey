@@ -17,9 +17,9 @@
 //
 
 
-#include "scy/pacman/installtask.h"
-#include "scy/pacman/packagemanager.h"
-#include "scy/pacman/package.h"
+#include "scy/pkman/installtask.h"
+#include "scy/pkman/packagemanager.h"
+#include "scy/pkman/package.h"
 #include "scy/archo/zip.h"
 #include "scy/http/authenticator.h"
 #include "scy/http/client.h"

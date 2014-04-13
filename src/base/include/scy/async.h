@@ -242,9 +242,3 @@ public:
 
 
 #endif // SCY_Async_H
-
-
-		//std::function<void()> onexit;
-
-	//virtual void onexit(std::function<void()> target);	
-		// Specify a function to be called when the async context exits.
