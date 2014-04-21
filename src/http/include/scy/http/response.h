@@ -109,7 +109,7 @@ public:
 	void setStatus(StatusCode status);
 		// Sets the HTTP status code.
 		//
-		// Does not change the reason phrase.
+		// The reason phrase is set according to the status code.
 		
 	StatusCode getStatus() const;
 		// Returns the HTTP status code.
@@ -122,11 +122,6 @@ public:
 
 	void setStatusAndReason(StatusCode status, const std::string& reason);
 		// Sets the HTTP status code and reason phrase.
-		
-	void setStatusAndReason(StatusCode status);
-		// Sets the HTTP status code and reason phrase.
-		//
-		// The reason phrase is set according to the status code.
 
 	void setDate(const Timestamp& dateTime);
 		// Sets the Date header to the given date/time value.

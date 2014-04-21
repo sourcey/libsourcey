@@ -75,6 +75,7 @@ Response::~Response()
 void Response::setStatus(StatusCode status)
 {
 	_status = status;
+	_reason = getStatusCodeReason(status);
 }
 
 	
@@ -88,12 +89,6 @@ void Response::setStatusAndReason(StatusCode status, const std::string& reason)
 {
 	_status = status;
 	_reason = reason;
-}
-
-	
-void Response::setStatusAndReason(StatusCode status)
-{
-	setStatusAndReason(status, getStatusCodeReason(status));
 }
 
 

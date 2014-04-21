@@ -212,7 +212,7 @@ public:
 
 	void onRequest(Request&, Response& response)
 	{
-		response.setStatusAndReason(http::StatusCode::BadRequest);
+		response.setStatus(http::StatusCode::BadRequest);
 		connection().sendHeader();
 		connection().close();
 	}

@@ -411,7 +411,7 @@ void WebSocketFramer::acceptRequest(http::Request& request, http::Response& resp
 		std::string key = util::trim(request.get("Sec-WebSocket-Key", ""));
 		if (key.empty()) throw std::runtime_error("WebSocket error: Missing Sec-WebSocket-Key in handshake request"); //, ws::ErrorHandshakeNoKey
 		
-		response.setStatusAndReason(http::StatusCode::SwitchingProtocols);
+		response.setStatus(http::StatusCode::SwitchingProtocols);
 		response.set("Upgrade", "websocket");
 		response.set("Connection", "Upgrade");
 		response.set("Sec-WebSocket-Accept", computeAccept(key));
