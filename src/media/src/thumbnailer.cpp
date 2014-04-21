@@ -125,10 +125,19 @@ void Thumbnailer::saveFile(const std::string& path, const char* data, int size)
 
 std::string Thumbnailer::defaultThumbPath(const std::string& ifile, const std::string& ext, const std::string& suffix)
 {
+	if (ifile.find(suffix + ext) != std::string::npos)
+		return ifile;
     std::string thumbpath(ifile);
-    std::string extname = fs::extname(thumbpath, true);
-	std::size_t pos = thumbpath.rfind(extname);
-	return thumbpath.replace(pos, extname.length(), suffix + ext);
+	thumbpath = thumbpath.substr(0, thumbpath.length() - ext.length());
+	thumbpath += suffix;
+	thumbpath += ext;
+	return thumbpath;
+
+	//return thumbpath.substr(pos, thumbpath.length() + suffix.length() + ext.length());
+
+    //std::string extname = fs::extname(thumbpath, true);
+	//std::size_t pos = thumbpath.rfind(extname);
+	//return thumbpath.replace(pos, extname.length(), suffix + ext);
 }
 
 

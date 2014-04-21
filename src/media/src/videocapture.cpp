@@ -150,6 +150,17 @@ VideoCapture& VideoCapture::base()
 #endif
 
 
+inline std::string exceptionMessage(const std::string& reason)
+{
+	std::stringstream ss;
+	ss << reason;
+	if (reason.at(reason.length() - 1) != '.')
+		ss << ".";
+	ss << " Please ensure the device is properly connected and not in use by another application.";
+	return ss.str();
+}
+
+
 //
 // Video Capture Base
 //
@@ -275,12 +286,12 @@ bool VideoCapture::open(bool whiny)
 			_capture.open(_filename);
 	
 	if (!_opened) {
-		std::stringstream ss;
-		ss << "Cannot open the video capture device: "; 
-		_filename.empty() ? (ss << _deviceId) : (ss << _filename);
-
-		ErrorLS(this) << ss.str() << std::endl;
-		if (whiny) throw std::runtime_error(ss.str());
+		//std::stringstream ss;
+		//ss << "Cannot open the video capture device: " << name() << ".";
+		//ss << "Please ensure that it is properly connected and not in use by another application.";
+		std::string err(exceptionMessage("Cannot open the video capture device: " + name()));
+		ErrorLS(this) << err << std::endl;
+		if (whiny) throw std::runtime_error(err);
 	}
 	
 	TraceLS(this) << "Open: " << _opened << std::endl;
@@ -321,7 +332,7 @@ void VideoCapture::run()
 		}	
 	}
 	catch (cv::Exception& exc) {
-		_error.exception = std::current_exception(); // cv::Exception derives from std::exception
+		_error.exception = std::current_exception(); // cv::Exception extends std::exception
 		setError("OpenCV Error: " + exc.err);
 	}
 
@@ -362,16 +373,16 @@ cv::Mat VideoCapture::grab()
 		_capture.open(_filename);
 		if (!_capture.isOpened()) {
 			assert(0 && "invalid frame");
-			throw std::runtime_error("Cannot grab video frame: Cannot loop video source: " + name());
+			throw std::runtime_error(exceptionMessage("Cannot grab video frame: Cannot loop video source: " + name()));
 		}
 		_capture >> _frame;
 	}
 		
 	if (!_capture.isOpened())
-		throw std::runtime_error("Cannot grab video frame: Device is closed: " + name());
+		throw std::runtime_error(exceptionMessage("Cannot grab video frame: Device is closed: " + name()));
 
 	if (!_frame.cols || !_frame.rows)
-		throw std::runtime_error("Cannot grab video frame: Got an invalid frame from device: " + name());
+		throw std::runtime_error(exceptionMessage("Cannot grab video frame:Got an invalid frame from device: " + name()));
 
 #if 0
 	// Grab a frame from the capture source
@@ -410,15 +421,15 @@ cv::Mat VideoCapture::lastFrame() const
 	Mutex::ScopedLock lock(_mutex);
 
 	if (!_opened)
-		throw std::runtime_error("Cannot grab video frame: Device is closed: " + (error().any() ? error().message : 
-			std::string("Check video device: " + name())));
+		throw std::runtime_error(error().any() ? error().message : 
+			exceptionMessage("Cannot grab video frame: Please check device: " + name()));
 
 	if (!_frame.cols && !_frame.rows)
-		throw std::runtime_error("Cannot grab video frame: Device is closed: " + name());
+		throw std::runtime_error(exceptionMessage("Cannot grab video frame: Device is closed: " + name()));
 
 	//assert(_capturing);
 	if (_frame.size().area() <= 0)
-		throw std::runtime_error("Cannot grab video frame: Invalid source frame: " + name());
+		throw std::runtime_error(exceptionMessage("Cannot grab video frame: Invalid source frame: " + name()));
 
 	return _frame; // no data is copied
 }
