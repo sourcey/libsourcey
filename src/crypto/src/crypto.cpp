@@ -181,34 +181,3 @@ void uninitializeEngine()
 
 
 } } // namespace scy::crypto
-
-
-
-
-
-/*
-//private:
-Mutex* _mutexes(0);
-Mutex _mutex;
-int _refCount(0);
-
-internal::OpenSSL()
-{
-	initialize();
-}
-
-
-internal::~OpenSSL()
-{
-	uninitialize();
-}
-*/
-	
-	/*
-/// OpenSSL multithreading support
-void lock(int mode, int n, const char* file, int line);
-unsigned long id();
-struct CRYPTO_dynlock_value* dynlockCreate(const char* file, int line);
-void dynlock(int mode, struct CRYPTO_dynlock_value* lock, const char* file, int line);
-void dynlockDestroy(struct CRYPTO_dynlock_value* lock, const char* file, int line);
-*/

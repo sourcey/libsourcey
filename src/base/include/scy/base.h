@@ -27,7 +27,7 @@
 
 #define SCY_MAJOR_VERSION    0
 #define SCY_MINOR_VERSION    9
-#define SCY_PATCH_VERSION    2
+#define SCY_PATCH_VERSION    3
 
 #define SCY_AUX_STR_EXP(__A) #__A
 #define SCY_AUX_STR(__A)     SCY_AUX_STR_EXP(__A)

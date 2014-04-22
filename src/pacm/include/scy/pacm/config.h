@@ -22,18 +22,18 @@
 
 
 namespace scy { 
-namespace pman {
+namespace pacm {
 
 	
 #define DEFAULT_API_ENDPOINT "http://localhost:3000"
 #define DEFAULT_API_INDEX_URI "/packages.json"
-#define DEFAULT_PACKAGE_CACHE_DIR "pkman/cache"
-#define DEFAULT_PACKAGE_INTERMEDIATE_DIR "pkman/data"
-#define DEFAULT_PACKAGE_INSTALL_DIR "pkman/install"
+#define DEFAULT_PACKAGE_CACHE_DIR "pacm/cache"
+#define DEFAULT_PACKAGE_INTERMEDIATE_DIR "pacm/data"
+#define DEFAULT_PACKAGE_INSTALL_DIR "pacm/install"
 #define DEFAULT_PLATFORM "win32"
 
 
-} } // namespace scy::pman
+} } // namespace scy::pacm
 
 
 #endif // SCY_Pacman_Config_H

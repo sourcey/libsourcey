@@ -21,11 +21,11 @@
 #define SCY_Pacman_InstallMonitor_H
 
 
-#include "scy/pkman/installtask.h"
+#include "scy/pacm/installtask.h"
 
 
 namespace scy { 
-namespace pman {
+namespace pacm {
 
 
 typedef std::vector<LocalPackage*> LocalPackageVec;
@@ -97,7 +97,7 @@ inline std::string getInstallTaskNamesString(LocalPackageVec& packages)
 }
 
 
-} } // namespace scy::pman
+} } // namespace scy::pacm
 
 
 #endif // SCY_Pacman_InstallMonitor_H

@@ -117,8 +117,11 @@ protected:
 };
 
 	
-// -------------------------------------------------------------------
-//	
+//
+// Connection Adapter
+//
+
+
 class ConnectionAdapter: public ParserObserver, public net::SocketAdapter
 	// Default HTTP socket adapter for reading and writing HTTP messages
 {

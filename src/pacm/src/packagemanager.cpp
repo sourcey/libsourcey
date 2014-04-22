@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "scy/pkman/packagemanager.h"
-#include "scy/pkman/package.h"
+#include "scy/pacm/packagemanager.h"
+#include "scy/pacm/package.h"
 #include "scy/json/json.h"
 #include "scy/util.h"
 #include "scy/http/client.h"
@@ -28,7 +28,7 @@ using namespace std;
 
 
 namespace scy { 
-namespace pman {
+namespace pacm {
 
 
 //
@@ -957,4 +957,4 @@ LocalPackageStore& PackageManager::localPackages()
 }
 
 
-} } // namespace scy::pman
+} } // namespace scy::pacm

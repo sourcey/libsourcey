@@ -30,125 +30,6 @@
 namespace scy {
 namespace av {
 
-	
-#if 0
-VideoCapture::VideoCapture(int deviceId) : 
-	_base(MediaFactory::instance().getVideoCapture(deviceId))
-{
-	TraceLS(this) << "Create: " << deviceId << std::endl;
-
-	_base->addEmitter(&this->emitter);
-	//_base->duplicate();
-}
-
-
-VideoCapture::VideoCapture(const std::string& filename)
-{
-	TraceLS(this) << "Create: " << filename << std::endl;
-
-	// The file capture is owned by this instance
-	_base = std::make_shared<VideoCapture>(filename);
-	_base->addEmitter(&this->emitter);
-
-	//assert(_base->refCount() == 1);
-}
-
-
-VideoCapture::VideoCapture(VideoCapture::Ptr base) :  //VideoCapture*
-	_base(base) 
-{
-	TraceLS(this) << "Create: " << base << std::endl;
-	_base->addEmitter(&this->emitter);
-	//_base->duplicate();
-}
-
-
-VideoCapture::~VideoCapture() 
-{
-	TraceLS(this) << "Destroy: " << _base << std::endl;	// << ": " << _base->refCount()
-	_base->removeEmitter(&this->emitter);
-	//_base->release();
-}
-
-
-void VideoCapture::start() 
-{
-	TraceLS(this) << "Start" << std::endl;	
-	emitter.enable(true);
-}
-
-
-void VideoCapture::stop() 
-{
-	TraceLS(this) << "Stop" << std::endl;
-	emitter.enable(false);
-}
-
-
-void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
-{
-	Mutex::ScopedLock lock(_mutex);	
-	TraceLS(this) << "Get frame: " << width << "x" << height << std::endl;
-	
-	// Don't actually grab a frame here, just copy the current frame.
-	cv::Mat lastFrame = _base->lastFrame();
-	if ((width && lastFrame.cols != width) || 
-		(height && lastFrame.rows != height)) {
-		cv::resize(lastFrame, frame, cv::Size(width, height));
-	}
-	else {
-		lastFrame.copyTo(frame);
-	}
-}
-
-		
-void VideoCapture::getEncoderFormat(Format& iformat) 
-{
-	iformat.name = "OpenCV";
-	//iformat.id = "rawvideo";
-	iformat.video.encoder = "rawvideo";
-	iformat.video.pixelFmt = "bgr24";
-	iformat.video.width = width();
-	iformat.video.height = height();
-	iformat.video.enabled = true;
-}
-
-
-int VideoCapture::width() 
-{
-	Mutex::ScopedLock lock(_mutex);
-	return _base->width(); 
-}
-
-
-int VideoCapture::height() 
-{
-	Mutex::ScopedLock lock(_mutex);
-	return _base->height(); 
-}
-
-
-bool VideoCapture::opened() const
-{
-	Mutex::ScopedLock lock(_mutex);
-	return _base->opened();
-}
-
-
-bool VideoCapture::running() const 
-{
-	Mutex::ScopedLock lock(_mutex);
-	return _base->running();
-}
-
-
-VideoCapture& VideoCapture::base() 
-{
-	Mutex::ScopedLock lock(_mutex);
-	return *_base;
-}
-#endif
-
 
 inline std::string exceptionMessage(const std::string& reason)
 {
@@ -162,12 +43,11 @@ inline std::string exceptionMessage(const std::string& reason)
 
 
 //
-// Video Capture Base
+// Video Capture
 //
 
 
 VideoCapture::VideoCapture(int deviceId) : 
-	//SharedObject(true), // no longer deferred
 	_deviceId(deviceId),
 	_capturing(false),
 	_opened(false),
@@ -181,7 +61,6 @@ VideoCapture::VideoCapture(int deviceId) :
 
 
 VideoCapture::VideoCapture(const std::string& filename) : 
-	//SharedObject(true), // no longer deferred
 	_filename(filename),
 	_deviceId(-1),
 	_capturing(false),
@@ -200,7 +79,10 @@ VideoCapture::~VideoCapture()
 	TraceLS(this) << "Destroy" << std::endl;
 	//stop();
 
+	// Ensure we are not inside the thread context
 	assert(Thread::currentID() != _thread.tid());
+
+	// Terminate the internal thread
 	if (_thread.started()) {
 		TraceLS(this) << "Destroy: Terminating thread" << std::endl;		
 		_stopping = true;
@@ -223,9 +105,9 @@ void VideoCapture::start()
 		if (!_started) { //
 			TraceLS(this) << "Initializing thread" << std::endl;
 
-			// The capture must be opened first, since open()
-			// must be called from the first thread, and start()
-			// may be called from any thread.
+			// The capture must be opened first.
+			// open() must be called from the main thread, 
+			// where as start() may be called from any thread.
 			if (!_opened)
 				throw std::runtime_error("The capture must be opened before starting the thread.");
 			
@@ -256,6 +138,7 @@ void VideoCapture::stop()
 	// Note: This function no longer has any side effects.
 	// Once the capture is running, it will continue to do 
 	// so until it is either closed or destroyed.
+
 #if 0
 	// The capture can only be stopped when the delegate
 	// count reaches zero, therefore in order to ensure 
@@ -285,14 +168,8 @@ bool VideoCapture::open(bool whiny)
 			_capture.open(_deviceId) : 
 			_capture.open(_filename);
 	
-	if (!_opened) {
-		//std::stringstream ss;
-		//ss << "Cannot open the video capture device: " << name() << ".";
-		//ss << "Please ensure that it is properly connected and not in use by another application.";
-		std::string err(exceptionMessage("Cannot open the video capture device: " + name()));
-		ErrorLS(this) << err << std::endl;
-		if (whiny) throw std::runtime_error(err);
-	}
+	if (!_opened && whiny)
+		throw std::runtime_error(exceptionMessage("Cannot open the video capture device: " + name()));
 	
 	TraceLS(this) << "Open: " << _opened << std::endl;
 	return _opened;
@@ -336,10 +213,10 @@ void VideoCapture::run()
 		setError("OpenCV Error: " + exc.err);
 	}
 
-	// TODO: We should have a MediaException type in order to differentiate
-	// between internal exceptions and exceptions thrown inside the 
-	// callback signal. The latter represents a serious application error.
-	// Currently they both set the encoder to error state.
+	// TODO: We probably should have a MediaException type in order to 
+	// differentiate between internal exceptions and exceptions thrown inside
+	// the callback signal. The latter represents a serious application error.
+	// Currently they both set the capture to error state.
 	catch (std::exception& exc) {
 		_error.exception = std::current_exception();
 		setError(exc.what());
@@ -364,10 +241,10 @@ cv::Mat VideoCapture::grab()
 	Mutex::ScopedLock lock(_mutex);	
 	
 	// Grab a frame from the capture source
+	// If the capture source is invalid, it will set an invalid frame here
 	_capture >> _frame;
 
-	// If using file input and we reach eof the set
-	// behavior is to loop the input video.
+	// Keep looping the input video if using file input and we reach eof
 	if (!_filename.empty() && (!_frame.cols || !_frame.rows)) {
 		_capture.release();
 		_capture.open(_filename);
@@ -384,32 +261,6 @@ cv::Mat VideoCapture::grab()
 	if (!_frame.cols || !_frame.rows)
 		throw std::runtime_error(exceptionMessage("Cannot grab video frame:Got an invalid frame from device: " + name()));
 
-#if 0
-	// Grab a frame from the capture source
-	_capture >> next;
-
-	// If using file input and we reach eof the set
-	// behavior is to loop the input video.
-	if (!_filename.empty() && (!next.cols || !next.rows)) {
-		_capture.release();
-		_capture.open(_filename);
-		if (!_capture.isOpened()) {
-			assert(0 && "invalid frame");
-			throw std::runtime_error("Cannot grab video frame: Cannot loop video source: " + name());
-		}
-		_capture >> next;
-	}
-		
-	if (!_capture.isOpened())
-		throw std::runtime_error("Cannot grab video frame: Device is closed: " + name());
-
-	if (!next.cols || !next.rows)
-		throw std::runtime_error("Cannot grab video frame: Got an invalid frame from device: " + name());
-
-	_frame = next;
-	//_width = _frame.cols;
-	//_height = _frame.rows;
-#endif
 	_counter.tick();
 
 	return _frame;
@@ -427,7 +278,6 @@ cv::Mat VideoCapture::lastFrame() const
 	if (!_frame.cols && !_frame.rows)
 		throw std::runtime_error(exceptionMessage("Cannot grab video frame: Device is closed: " + name()));
 
-	//assert(_capturing);
 	if (_frame.size().area() <= 0)
 		throw std::runtime_error(exceptionMessage("Cannot grab video frame: Invalid source frame: " + name()));
 
@@ -462,7 +312,8 @@ void VideoCapture::getEncoderFormat(Format& iformat)
 	iformat.video.enabled = true;
 }
 
-/*
+
+#if 0
 void VideoCapture::addEmitter(PacketSignal* emitter)
 {
 	Mutex::ScopedLock lock(_emitMutex);	
@@ -481,7 +332,7 @@ void VideoCapture::removeEmitter(PacketSignal* emitter)
 	}
 	assert(0 && "unknown emitter");
 }
-*/
+#endif
 
 
 void VideoCapture::setError(const std::string& error)

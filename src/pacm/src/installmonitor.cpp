@@ -17,8 +17,8 @@
 //
 
 
-#include "scy/pkman/installmonitor.h"
-#include "scy/pkman/packagemanager.h"
+#include "scy/pacm/installmonitor.h"
+#include "scy/pacm/packagemanager.h"
 #include "scy/logger.h"
 
 
@@ -26,7 +26,7 @@ using namespace std;
 
 
 namespace scy { 
-namespace pman {
+namespace pacm {
 
 
 InstallMonitor::InstallMonitor()
@@ -145,4 +145,4 @@ bool InstallMonitor::isComplete() const
 }
 
 
-} } // namespace scy::pman
+} } // namespace scy::pacm

@@ -240,22 +240,3 @@ std::string decryptString(const std::string& algorithm, const std::string& data,
 
 
 #endif // SCY_Crypto_Cipher_H
-
-
-
-
-	
-/*
-	struct CipherOptions
-	{
-		Encoding encoding;
-
-		CipherOptions() {
-			encoding = Cipher::Binary;
-		}
-	};
-	//void generateKey();	
-	//void setKey(const ByteVec& key);
-	//void setIV(const ByteVec& iv);
-
-*/

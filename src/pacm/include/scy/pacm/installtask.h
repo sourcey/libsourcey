@@ -21,7 +21,7 @@
 #define SCY_Pacman_InstallTask_H
 
 
-#include "scy/pkman/package.h"
+#include "scy/pacm/package.h"
 #include "scy/http/client.h"
 #include "scy/stateful.h"
 #include "scy/logger.h"
@@ -29,7 +29,7 @@
 
 
 namespace scy { 
-namespace pman {
+namespace pacm {
 
 	
 class PackageManager;
@@ -173,7 +173,7 @@ typedef std::vector<InstallTask*> InstallTaskVec;
 typedef std::vector<InstallTask::Ptr> InstallTaskPtrVec;
 
 
-} } // namespace scy::pman
+} } // namespace scy::pacm
 
 
 #endif // SCY_Pacman_InstallTask_H

@@ -214,8 +214,7 @@ void ServerConnection::onHeaders()
 
 	// Upgrade the connection if required
 	if (util::icompare(_request.get("Connection", ""), "upgrade") == 0 && 
-		util::icompare(_request.get("Upgrade", ""), "websocket") == 0)
-	{			
+		util::icompare(_request.get("Upgrade", ""), "websocket") == 0) {			
 		TraceLS(this) << "Upgrading to WebSocket: " << _request << endl;
 		_upgrade = true;
 
@@ -331,69 +330,3 @@ http::Message* ServerConnection::outgoingHeader()
 
 
 } } // namespace scy::http
-
-
-
-
-
-
-/*
-//
-// Parser callbacks
-//
-
-void ServerConnection::onParserHeadersEnd() 
-{
-	// When headers have been parsed we instantiate the request handler
-	_responder = _server.createResponder(*this);
-	assert(_responder);
-	_responder->onHeaders(*_request);
-}
-
-
-void ServerConnection::onParserChunk(const char* buf, std::size_t len)
-{
-	TraceLS(this) << "On Parser Chunk" << endl;	
-}
-
-
-void ServerConnection::onParserEnd() 
-{
-	TraceLS(this) << "On Request Complete" << endl;	
-
-	//TraceLS(this) << "On Message Complete 1" << endl;	
-	//TraceLS(this) << "On Message Complete 2" << endl;
-	//TraceLS(this) << "On Message Complete 2: " << _request.getKeepAlive() << endl;	
-	//TraceLS(this) << "On Message Complete 2: " << _response.getKeepAlive() << endl;
-}
-*/
-
-
-
-	
-
-	/*
-	
-
-	bool res = write(body.c_str(), body.length());
-
-	// Set Connection: Close unless otherwise stated
-	if (!isExplicitKeepAlive(_request) || 
-		_response.hasContentLength()) {
-		TraceLS(this) << "Respond: No keepalive" << endl;	
-		_response.setKeepAlive(false);
-	}
-	*/
-	/* 	
-	// KLUDGE: Temp solution for quick sending small requests only.
-	// Use Connection::write() for nocopy binary stream.
-	bool res = write(
-		_response.body.str().c_str(),
-		_response.body.str().length());
-	
-	// Close unless keepalive is set
-	if (!_response.getKeepAlive()) {
-		TraceLS(this) << "Closing: No keepalive" << endl; 
-		close();
-	}	
-	*/
