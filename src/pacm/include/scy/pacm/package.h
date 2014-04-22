@@ -25,7 +25,7 @@
 
 
 namespace scy { 
-namespace pman {
+namespace pacm {
 	
 
 struct Package: public json::Value
@@ -250,7 +250,7 @@ struct PackagePair
 typedef std::vector<PackagePair> PackagePairVec;
 
 
-} } // namespace scy::pman
+} } // namespace scy::pacm
 
 
 #endif // SCY_Pacman_Package_H

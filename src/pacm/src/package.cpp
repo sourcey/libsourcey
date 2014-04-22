@@ -17,7 +17,7 @@
 //
 
 
-#include "scy/pkman/package.h"
+#include "scy/pacm/package.h"
 #include "scy/util.h"
 #include "scy/logger.h"
 #include "scy/filesystem.h"
@@ -29,7 +29,7 @@
 
 
 namespace scy { 
-namespace pman {
+namespace pacm {
 
 
 //
@@ -555,7 +555,7 @@ bool PackagePair::valid() const
 }
 
 
-} } // namespace scy::pman
+} } // namespace scy::pacm
 
 
 

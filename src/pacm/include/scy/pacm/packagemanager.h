@@ -21,11 +21,11 @@
 #define SCY_Pacman_PackageManager_H
 
 
-#include "scy/pkman/config.h"
-#include "scy/pkman/types.h"
-#include "scy/pkman/package.h"
-#include "scy/pkman/installtask.h"
-#include "scy/pkman/installmonitor.h"
+#include "scy/pacm/config.h"
+#include "scy/pacm/types.h"
+#include "scy/pacm/package.h"
+#include "scy/pacm/installtask.h"
+#include "scy/pacm/installmonitor.h"
 #include "scy/collection.h"
 #include "scy/filesystem.h"
 #include "scy/platform.h"
@@ -40,7 +40,7 @@
 
 
 namespace scy { 
-namespace pman {
+namespace pacm {
 
 
 typedef LiveCollection<std::string, LocalPackage>	LocalPackageStore;
@@ -300,7 +300,7 @@ protected:
 
 
 
-} } // namespace scy::pman
+} } // namespace scy::pacm
 
 
 #endif // SCY_Pacman_PackageManager_H

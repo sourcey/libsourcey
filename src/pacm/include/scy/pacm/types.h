@@ -22,10 +22,10 @@
 
 
 namespace scy { 
-namespace pman {
+namespace pacm {
 		
 
-} } // namespace scy::pman
+} } // namespace scy::pacm
 
 
 #endif // SCY_Pacman_Types_H

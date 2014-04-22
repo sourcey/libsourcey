@@ -127,8 +127,7 @@ void splitParameters(const std::string::const_iterator& begin, const std::string
 	pname.reserve(32);
 	pvalue.reserve(64);
 	std::string::const_iterator it = begin;
-	while (it != end)
-	{
+	while (it != end) {
 		pname.clear();
 		pvalue.clear();
 		while (it != end && ::isspace(*it)) ++it;
@@ -136,15 +135,11 @@ void splitParameters(const std::string::const_iterator& begin, const std::string
 		util::trimRightInPlace(pname);
 		if (it != end && *it != ';') ++it;
 		while (it != end && ::isspace(*it)) ++it;
-		while (it != end && *it != ';')
-		{
-			if (*it == '"')
-			{
+		while (it != end && *it != ';') {
+			if (*it == '"') {
 				++it;
-				while (it != end && *it != '"')
-				{
-					if (*it == '\\')
-					{
+				while (it != end && *it != '"') {
+					if (*it == '\\') {
 						++it;
 						if (it != end) pvalue += *it++;
 					}
@@ -152,8 +147,7 @@ void splitParameters(const std::string::const_iterator& begin, const std::string
 				}
 				if (it != end) ++it;
 			}
-			else if (*it == '\\')
-			{
+			else if (*it == '\\') {
 				++it;
 				if (it != end) pvalue += *it++;
 			}
@@ -166,7 +160,7 @@ void splitParameters(const std::string::const_iterator& begin, const std::string
 }
 
 
-/*
+#if 0
 string parseHeader(const std::string& request, const std::string& name) 
 {
 	std::string req = request;
@@ -186,7 +180,7 @@ string parseHeader(const std::string& request, const std::string& name)
 	}
 	return value;
 }
-*/
+#endif
 
 
 } // namespace http

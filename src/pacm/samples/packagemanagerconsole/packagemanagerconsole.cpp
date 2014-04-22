@@ -1,5 +1,5 @@
 #include "scy/application.h"
-#include "scy/pkman/packagemanager.h"
+#include "scy/pacm/packagemanager.h"
 #include "scy/net/sslmanager.h"
 #include "scy/util.h"
 
@@ -25,7 +25,7 @@ CMemLeakDetect memLeakDetect;
 class PackageManagerApplication: public scy::Application	
 {
 public:
-	PackageManagerApplication(const pman::PackageManager::Options& options) :
+	PackageManagerApplication(const pacm::PackageManager::Options& options) :
 		manager(options)
 	{
 		// Default packages to install
@@ -38,7 +38,7 @@ public:
 	}
 	
 	StringVec packages;
-	pman::PackageManager manager;
+	pacm::PackageManager manager;
 };
 
 
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 		net::SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");	
 	net::SSLManager::instance().initializeClient(ptrContext);
 
-	pman::PackageManager::Options opts;
+	pacm::PackageManager::Options opts;
 	opts.endpoint = "https://anionu.com"; // "http://127.0.0.1:3000";	
 	opts.indexURI = "/packages.json";
 	opts.httpUsername = Anionu_API_USERNAME;

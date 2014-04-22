@@ -66,9 +66,6 @@ public:
 
     ClientConnection(const URL& url, const net::Socket::Ptr& socket = nullptr);
 		// Create a standalone connection with the given host.
-	
-    //ClientConnection(Client* client, const URL& url, net::Socket* socket = new net::TCPSocket); //std::make_shared<net::TCPSocket>() =  = new net::TCPSocket
-		// Create a managed connection with the given host.
 
     virtual ~ClientConnection();
 
@@ -170,59 +167,6 @@ public:
 };
 
 
-#if 0
-
-// -------------------------------------------------------------------
-//
-class SecureClientConnection: public ClientConnection
-{
-public:
-    SecureClientConnection(Client* client, const URL& url) : //, const net::Address& address
-		ClientConnection(client, url, net::SSLSocket()) //, address
-	{
-	}
-
-	virtual ~SecureClientConnection() 
-	{
-	}
-};
-
-
-// -------------------------------------------------------------------
-//
-class WebSocketClientConnection: public ClientConnection
-{
-public:
-    WebSocketClientConnection(Client* client, const URL& url) : //, const net::Address& address
-		ClientConnection(client, url) //, address
-	{
-		socket().replaceAdapter(new ws::ConnectionAdapter(*this, ws::ClientSide));	//&socket(), &request(), request(), request()
-	}
-
-	virtual ~WebSocketClientConnection() 
-	{
-	}
-};
-
-
-// -------------------------------------------------------------------
-//
-class WebSocketSecureClientConnection: public ClientConnection
-{
-public:
-    WebSocketSecureClientConnection(Client* client, const URL& url) : //, const net::Address& address
-		ClientConnection(client, url, net::SSLSocket()) //, address
-	{
-		socket().replaceAdapter(new ws::ConnectionAdapter(*this, ws::ClientSide)); //(&socket(), &request()
-	}
-
-	virtual ~WebSocketSecureClientConnection() 
-	{
-	}
-};
-#endif
-
-
 //
 // HTTP Connection Helpers
 //
@@ -259,7 +203,6 @@ inline ClientConnection::Ptr createConnectionT(const URL& url, http::Client* cli
 			new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)), 
 				deleter::Deferred<ConnectionT>());
 		conn->replaceAdapter(new ws::ConnectionAdapter(*conn, ws::ClientSide));
-		//conn->socket().replaceAdapter(new ws::ws::ConnectionAdapter(*conn, ws::ClientSide));
 	}
 	else
 		throw std::runtime_error("Unknown connection type for URL: " + url.str());
@@ -319,6 +262,52 @@ protected:
 	ClientConnectionPtrVec _connections;
 	//Timer _timer;
 };
+
+
+#if 0
+class SecureClientConnection: public ClientConnection
+{
+public:
+    SecureClientConnection(Client* client, const URL& url) : //, const net::Address& address
+		ClientConnection(client, url, net::SSLSocket()) //, address
+	{
+	}
+
+	virtual ~SecureClientConnection() 
+	{
+	}
+};
+
+
+class WebSocketClientConnection: public ClientConnection
+{
+public:
+    WebSocketClientConnection(Client* client, const URL& url) : //, const net::Address& address
+		ClientConnection(client, url) //, address
+	{
+		socket().replaceAdapter(new ws::ConnectionAdapter(*this, ws::ClientSide));	//&socket(), &request(), request(), request()
+	}
+
+	virtual ~WebSocketClientConnection() 
+	{
+	}
+};
+
+
+class WebSocketSecureClientConnection: public ClientConnection
+{
+public:
+    WebSocketSecureClientConnection(Client* client, const URL& url) : //, const net::Address& address
+		ClientConnection(client, url, net::SSLSocket()) //, address
+	{
+		socket().replaceAdapter(new ws::ConnectionAdapter(*this, ws::ClientSide)); //(&socket(), &request()
+	}
+
+	virtual ~WebSocketSecureClientConnection() 
+	{
+	}
+};
+#endif
 
 
 } } // namespace scy::http

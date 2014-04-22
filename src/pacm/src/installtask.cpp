@@ -17,9 +17,9 @@
 //
 
 
-#include "scy/pkman/installtask.h"
-#include "scy/pkman/packagemanager.h"
-#include "scy/pkman/package.h"
+#include "scy/pacm/installtask.h"
+#include "scy/pacm/packagemanager.h"
+#include "scy/pacm/package.h"
 #include "scy/archo/zip.h"
 #include "scy/http/authenticator.h"
 #include "scy/http/client.h"
@@ -31,7 +31,7 @@ using namespace std;
 
 
 namespace scy { 
-namespace pman {
+namespace pacm {
 
 
 InstallTask::InstallTask(PackageManager& manager, LocalPackage* local, RemotePackage* remote, 
@@ -472,7 +472,7 @@ uv::Loop* InstallTask::loop() const
 }
 
 
-} } // namespace scy::pman
+} } // namespace scy::pacm
 
 
 

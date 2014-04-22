@@ -199,7 +199,7 @@ std::string URL::userInfo() const
 }
 
 	
-/*
+#if 0
 void URL::updateSchema(const std::string& scheme)
 {
 	if (!hasSchema())
@@ -277,7 +277,7 @@ void URL::updateUserInfo(const std::string& info)
 	util::replaceInPlace(tmp, this->userInfo(), info);
 	parse(tmp);
 }
-*/
+#endif
 	
 
 bool URL::valid() const
