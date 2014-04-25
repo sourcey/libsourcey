@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_Pacman_PackageManager_H
-#define SCY_Pacman_PackageManager_H
+#ifndef SCY_Pacm_PackageManager_H
+#define SCY_Pacm_PackageManager_H
 
 
 #include "scy/pacm/config.h"
@@ -51,7 +51,7 @@ typedef RemotePackageStore::Map						RemotePackageMap;
 
 class PackageManager
 	/// The Package Manager provides an interface for managing, 
-	/// installing, updating and uninstalling Pacman packages.
+	/// installing, updating and uninstalling Pacm packages.
 {
 public:
 	struct Options 
@@ -303,39 +303,4 @@ protected:
 } } // namespace scy::pacm
 
 
-#endif // SCY_Pacman_PackageManager_H
-
-
-
-	/*	
-	//Signal<const std::string&, InstallTask&> TaskState;
-		// TaskState notifies the PackageState of each running task.
-		// Installing is used when a bew task is created.
-
-	//virtual bool hasAvailableUpdates(PackagePair& pair);
-		// Checks if a newer version is available for the given
-		// package pair.
-	
-	//virtual bool verifyInstallManifest(LocalPackage& package);
-		// Checks the veracity of the install manifest for the given
-		// package and and ensures all package files exist on the
-		// file system.
-
-	//virtual Poco::Path getInstalledFilePath(const std::string& fileName);
-		// Returns the full path of the installed file if it exists,
-		// or an empty path if the file doesn't exist.
-	
-	virtual bool installPackage(const std::string& name, InstallMonitor* monitor = nullptr, 
-		const InstallOptions& options = InstallOptions(), bool whiny = false);
-		// Installs a single package.
-
-	virtual bool updatePackages(const StringVec& ids, InstallMonitor* monitor = nullptr, 
-		const InstallOptions& options = InstallOptions(), bool whiny = false);
-		// Updates multiple packages.
-		// The package will be installed if it does not exist.
-
-	virtual bool updatePackage(const std::string& name, InstallMonitor* monitor = nullptr, 
-		const InstallOptions& options = InstallOptions(), bool whiny = false);
-		// Updates a single package.
-		// The package will be installed if it does not exist.
-		*/
+#endif // SCY_Pacm_PackageManager_H

@@ -301,7 +301,7 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 		if (opacket.duration > 0)
 			opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
 		
-		/*
+#if 0
 		TraceLS(this) << "Encoded PTS:\n" 
 			//<< "\n\tPTS: " << av_ts2str(opacket.pts)
 			//<< "\n\tDTS: " << av_ts2str(opacket.dts)
@@ -316,7 +316,7 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 			//<< "\n\tStream Time Den: " << stream->time_base.den
 			//<< "\n\tStream Time Num: " << stream->time_base.num
 			<< endl;
-			*/
+#endif
 	}
 	else
 		DebugLS(this) << "No frame encoded" << endl;	
@@ -443,7 +443,7 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 		fps.tick();
 		initDecodedAudioPacket(stream, ctx, frame, &opacket, &pts);
 
-		/*
+#if 0
 		TraceLS(this) << "Decoded Frame:" 
 			<< "\n\tFrame Size: " << opacket.size
 			<< "\n\tFrame PTS: " << opacket.pts
@@ -451,7 +451,7 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 			<< "\n\tNo Frame PTS: " << (frame->pts != AV_NOPTS_VALUE)
 			<< "\n\tDecoder PTS: " << pts
 			<< endl;
-			*/
+#endif
 
 		return true;
 	}
@@ -529,7 +529,7 @@ void AudioResampler::create(const AudioCodec& iparams, const AudioCodec& oparams
 	av_get_channel_layout_string(inChBuf,  sizeof(inChBuf),  -1, inChLayout);
 	av_get_channel_layout_string(outChBuf, sizeof(outChBuf), -1, outChLayout);
 
-	/*
+#if 0
 	TraceLS(this) << "Resampler Options:\n" 
 		<< "\n\tIn Channel Layout: " << inChBuf
 		<< "\n\tIn Sample Rate: " << iparams.sampleRate
@@ -538,7 +538,7 @@ void AudioResampler::create(const AudioCodec& iparams, const AudioCodec& oparams
 		<< "\n\tOut Sample Rate: " << oparams.sampleRate
 		<< "\n\tOut Sample Fmt: " << av_get_sample_fmt_name(outSampleFmt)
 		<< endl; 
-		*/
+#endif
 
     if (ctx == nullptr) {
         throw std::runtime_error("Cannot create resampler context");
@@ -592,7 +592,7 @@ UInt8* AudioResampler::resample(UInt8* inSamples, int inNbSamples)
 		outBuffer = nullptr;
 	}
 
-	/*
+#if 0
 	TraceLS(this) << "Resampling:\n" 
 		<< "\n\tIn Nb Smaples 1: " << inNbSamples
 		<< "\n\tIn Channels: " << iparams.channels
@@ -603,7 +603,7 @@ UInt8* AudioResampler::resample(UInt8* inSamples, int inNbSamples)
 		<< "\n\tOut Sample Rate: " << oparams.sampleRate
 		<< "\n\tOut Sample Fmt: " << av_get_sample_fmt_name((AVSampleFormat)oparams.sampleFmt)
 		<< endl; 
-		*/
+#endif
 	
 	av_samples_alloc(&outBuffer, nullptr, oparams.channels, outNbSamples,
                        av_get_sample_fmt(oparams.sampleFmt), 0);

@@ -125,12 +125,7 @@ bool Address::operator == (std::string& r)
 }
 
 
-} // namespace symple 
-} // namespace scy
-
-
-
-/*
+#if 0 // JSON Address
 Address::Address(const std::string& id)
 {
 	parse(id);
@@ -197,4 +192,10 @@ void Address::setGroup(const std::string& group)
 {
 	(*this)["group"] = group;
 }
-*/
+#endif
+
+
+} // namespace symple 
+} // namespace scy
+
+

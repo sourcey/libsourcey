@@ -57,8 +57,6 @@ public:
 
 	virtual void print(std::ostream& os) const;
 
-	virtual const char* className() const { return "StreamManager"; }
-
 protected:	
 	virtual void onAdd(PacketStream* task);
 		// Called after a stream is added.

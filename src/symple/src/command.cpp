@@ -19,12 +19,10 @@
 
 #include "scy/symple/command.h"
 #include "scy/util.h"
-////#include "scy/crypto/crypto.h"
 #include "assert.h"
 
 
 using std::endl;
-
 
 
 namespace scy {

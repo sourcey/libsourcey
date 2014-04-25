@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_Pacman_InstallMonitor_H
-#define SCY_Pacman_InstallMonitor_H
+#ifndef SCY_Pacm_InstallMonitor_H
+#define SCY_Pacm_InstallMonitor_H
 
 
 #include "scy/pacm/installtask.h"
@@ -100,4 +100,4 @@ inline std::string getInstallTaskNamesString(LocalPackageVec& packages)
 } } // namespace scy::pacm
 
 
-#endif // SCY_Pacman_InstallMonitor_H
+#endif // SCY_Pacm_InstallMonitor_H

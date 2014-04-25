@@ -29,7 +29,7 @@ namespace net {
 
 
 SocketAdapter::SocketAdapter(SocketAdapter* sender, SocketAdapter* receiver) : 
-	 _sender(sender)//, _recvAdapter(recvAdapter)
+	 _sender(sender)
 {
 	//TraceLS(this) << "Create" << endl;	
 	assert(sender != this);
@@ -117,75 +117,26 @@ void SocketAdapter::sendPacket(IPacket& packet)
 
 void SocketAdapter::onSocketConnect()
 {
-	/*
-	//TraceLS(this) << "On connect: " << adapter->Connect.refCount() << endl;
-	//assert(adapter);
-	if (_recvAdapter)
-		_recvAdapter->onSocketConnect();
-		//adapter->Connect.emit(adapter);
-	else
-	*/
-		Connect.emit(self());
+	Connect.emit(self());
 }
 
 
 void SocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress)
 {
-	/*
-	//TraceLS(this) << "Recv: " << adapter->Recv.refCount() << endl;	
-	//SocketPacket packet(socket ? adapter : this, buf, peerAddr);
-	if (_recvAdapter)
-		_recvAdapter->onSocketRecv(buf, peerAddr);
-		//adapter->Recv.emit(adapter, buf, peerAddr);
-	else
-	*/
-		Recv.emit(self(), buffer, peerAddress);
+	Recv.emit(self(), buffer, peerAddress);
 }
 
 
 void SocketAdapter::onSocketError(const scy::Error& error) //const Error& error
 {
-	//TraceLS(this) << "Error: " << adapter->Error.refCount() << ": " << message << endl;	syserr, message
-	/*
-	if (_recvAdapter)
-		_recvAdapter->onSocketError(error);
-		//adapter->Error.emit(adapter, error);
-	else
-	*/
-		Error.emit(self(), error);
+	Error.emit(self(), error);
 }
 
 
 void SocketAdapter::onSocketClose()
 {
-	//TraceLS(this) << "On close: " << adapter->Close.refCount() << endl;	
-	/*
-	if (_recvAdapter)
-		_recvAdapter->onSocketClose();
-		//adapter->Close.emit(adapter);
-	else
-	*/
-		Close.emit(self());
+	Close.emit(self());
 }
-
-
-/*
-void SocketAdapter::addReceiver(SocketAdapter* adapter, bool freeExisting)
-{
-	if (_recvAdapter == adapter) return;
-	if (_recvAdapter && freeExisting)
-		delete _recvAdapter;
-	_recvAdapter = adapter;
-	_recvAdapter->Connect += sdelegate(_recvAdapter, &net::SocketAdapter::onSocketConnect);
-}
-
-
-SocketAdapter* SocketAdapter::recvAdapter()
-{
-	return _recvAdapter;
-}
-	void addReceiver(SocketAdapter* adapter);
-*/
 
 
 void SocketAdapter::addReceiver(SocketAdapter* adapter, int priority) 
@@ -194,13 +145,6 @@ void SocketAdapter::addReceiver(SocketAdapter* adapter, int priority)
 	Recv += delegate(adapter, &net::SocketAdapter::onSocketRecv, priority);
 	Error += delegate(adapter, &net::SocketAdapter::onSocketError, priority);
 	Close += delegate(adapter, &net::SocketAdapter::onSocketClose, priority);
-
-	//TraceLS(this) << "Duplicating socket: " << &adapter << endl;
-	//_observers.push_back(socket);		
-	//sortObservers();
-	//if (shared)
-	//	duplicate();
-	//TraceLS(this) << "Duplicated socket: " << &adapter << endl;
 }
 
 
@@ -210,19 +154,6 @@ void SocketAdapter::removeReceiver(SocketAdapter* adapter)
 	Recv -= delegate(adapter, &net::SocketAdapter::onSocketRecv);
 	Error -= delegate(adapter, &net::SocketAdapter::onSocketError);
 	Close -= delegate(adapter, &net::SocketAdapter::onSocketClose);
-	/*
-	// TODO: Ensure socket destruction when released?
-	for (auto it = _observers.begin(); it != _observers.end(); ++it) {
-		if (*it == socket) {
-			//TraceLS(this) << "Releasing socket: " << &adapter << endl;
-			_observers.erase(it);
-			//sortObservers();
-			release();
-			return;
-		}
-	}
-	assert(0 && "unknown socket adapter");
-	*/
 }
 
 
@@ -235,98 +166,4 @@ void SocketAdapter::setSender(SocketAdapter* adapter, bool freeExisting)
 }
 
 
-#if 0
-SocketAdapter* SocketAdapter::sendAdapter()
-{
-	return _sender;
-}
-
-
-void SocketAdapter::onSocketConnect() 
-{
-	if (_adapter)
-		_adapter->onSocketConnect();
-	else
-		Connect.emit(self());
-
-	/*
-	_insideCallback = true;
-	//for (auto observer : _observers) //for (auto& observer : _observers)
-	//	observer->onSocketConnect();
-	for (size_t i = 0; i < _observers.size(); i++) 
-		_observers[i]->onSocketConnect();
-	_insideCallback = false;
-	*/
-}
-
-
-void SocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress)
-{
-	if (_adapter)
-		_adapter->onSocketRecv(buf, peerAddr);
-	else {
-		SocketPacket packet(this, buf, peerAddr);
-		Recv.emit(self(), packet);
-	}
-
-	/*
-	_insideCallback = true;
-	//for (auto observer : _observers) //for (auto& observer : _observers)
-	//	observer->onSocketRecv(buf, peerAddr);
-	for (size_t i = 0; i < _observers.size(); i++)
-		_observers[i]->onSocketRecv(buf, peerAddr);
-	_insideCallback = false;
-	*/
-}
-
-
-void SocketAdapter::onSocketError(const scy::Error& error)
-{
-	if (_adapter)
-		_adapter->onSocketError(error);
-	else {
-		Error.emit(self(), error);
-	}
-
-	/*
-	_insideCallback = true;
-	//for (auto observer : _observers) //for (auto& observer : _observers)
-	//	observer->onSocketError(error);
-	for (size_t i = 0; i < _observers.size(); i++) 
-		_observers[i]->onSocketError(error);
-	_insideCallback = false;
-	*/
-}
-
-
-void SocketAdapter::onSocketClose()
-{
-	if (_adapter)
-		_adapter->onSocketClose();
-	else
-		Close.emit(self());
-
-	/*
-	_insideCallback = true;
-	//for (auto observer : _observers) //for (auto& observer : _observers)
-	//	observer->onSocketClose();
-	for (size_t i = 0; i < _observers.size(); i++) 
-		_observers[i]->onSocketClose();
-	_insideCallback = false;
-	*/
-}
-#endif
-
-
 } } // namespace scy::net
-
-
-
-
-/*
-SocketAdapter::SocketAdapter(const SocketAdapter::Ptr& adapter) : //, int priority
-	adapter(adapter)//, priority(priority)
-{
-	//TraceLS(this) << "Create" << endl;	
-}
-*/

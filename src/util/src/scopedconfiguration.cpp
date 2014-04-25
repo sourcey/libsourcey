@@ -20,13 +20,6 @@
 #include "scy/util/scopedconfiguration.h"
 
 
-using namespace std;
-
-
 namespace scy {
-
-
-
-
 
 } // namespace scy

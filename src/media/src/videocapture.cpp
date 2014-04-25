@@ -193,6 +193,7 @@ void VideoCapture::run()
 
 		while (!_stopping) {
 			frame = grab();
+			//TraceLS(this) << "Frame: " << frame.rows << "x" << frame.cols << std::endl;
 
 			empty = emitter.ndelegates() == 0;
 			if (!empty) {
@@ -259,7 +260,7 @@ cv::Mat VideoCapture::grab()
 		throw std::runtime_error(exceptionMessage("Cannot grab video frame: Device is closed: " + name()));
 
 	if (!_frame.cols || !_frame.rows)
-		throw std::runtime_error(exceptionMessage("Cannot grab video frame:Got an invalid frame from device: " + name()));
+		throw std::runtime_error(exceptionMessage("Cannot grab video frame: Got an invalid frame from device: " + name()));
 
 	_counter.tick();
 
@@ -289,7 +290,8 @@ void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 {
 	TraceLS(this) << "Get frame: " << width << "x" << height << std::endl;
 	
-	// Don't actually grab a frame here, just copy the current frame.
+	// Don't actually grab a frame here, just copy the current frame
+	// If no valid frame is available an exception will be thrown
 	cv::Mat lastFrame = this->lastFrame();
 	if ((width && lastFrame.cols != width) || 
 		(height && lastFrame.rows != height)) {

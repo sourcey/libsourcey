@@ -18,9 +18,7 @@
 
 
 #include "scy/media/formatregistry.h"
-
 #include "scy/singleton.h"
-//#include "Poco/Format.h"
 
 
 using std::endl;

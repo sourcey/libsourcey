@@ -144,9 +144,8 @@ public:
 		return stream;
     }
 
-	//virtual const char* className() const { return "IAllocation"; };
-
 protected:
+	//mutable Mutex _mutex;
 	FiveTuple _tuple;
 	std::string	_username;
 	PermissionList	_permissions;
@@ -156,12 +155,7 @@ protected:
 	time_t _createdAt;
 	time_t _updatedAt;
 	bool _deleted;
-	//bool _deleted;
-	//mutable Mutex _mutex;
 };
-
-
-//typedef std::map<FiveTuple,IAllocation*> AllocationMap;
 
 
 } } // namespace scy::turn

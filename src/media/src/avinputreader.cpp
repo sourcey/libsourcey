@@ -144,15 +144,12 @@ void AVInputReader::openDevice(const std::string& device, int width, int height,
 void AVInputReader::openStream(const char* filename, AVInputFormat* inputFormat, AVDictionary** formatParams)
 {
 	TraceLS(this) << "Opening Stream: " << std::string(filename) << endl;
-
-	// TODO: Use local ffmpeg.h to register
-	//av_register_all();
-
+	
 	if (avformat_open_input(&_formatCtx, filename, inputFormat, formatParams) != 0)
-		throw std::runtime_error("Could not open the media source.");
+		throw std::runtime_error("Cannot open the media source: " + std::string(filename));
 
 	if (av_find_stream_info(_formatCtx) < 0)
-		throw std::runtime_error("Could not find stream information.");
+		throw std::runtime_error("Cannot find stream information: " + std::string(filename));
 	
   	av_dump_format(_formatCtx, 0, filename, 0);
 	
@@ -173,7 +170,7 @@ void AVInputReader::openStream(const char* filename, AVInputFormat* inputFormat,
 
 	if (_video == nullptr && 
 		_audio == nullptr)
-		throw std::runtime_error("Could not find a valid media stream.");
+		throw std::runtime_error("Cannot find a valid media stream: " + std::string(filename));
 }
 
 
@@ -241,120 +238,91 @@ void AVInputReader::run()
 	try {
 		int res;
 		int videoFrames = 0;
-		int audioFrames = 0;
-		//while (!_stopping) {
-			
-			AVPacket ipacket;
-			AVPacket opacket;
-			av_init_packet(&ipacket);
+		int audioFrames = 0;			
+		AVPacket ipacket;
+		AVPacket opacket;
+		av_init_packet(&ipacket);
 
-			while ((res = av_read_frame(_formatCtx, &ipacket)) >= 0) {
-				TraceLS(this) << "Read video frame: " << _stopping << endl;
-				if (_stopping) break;
-				if (_video && ipacket.stream_index == _video->stream->index) {
-					if ((!_options.processVideoXFrame || (videoFrames % _options.processVideoXFrame) == 0) &&
-						(!_options.processVideoXSecs || !_video->pts || ((ipacket.pts * av_q2d(_video->stream->time_base)) - _video->pts) > _options.processVideoXSecs) &&
-						(!_options.iFramesOnly || (ipacket.flags & AV_PKT_FLAG_KEY))) {
- 						if (_video->decode(ipacket, opacket)) {
-							//TraceLS(this) << "Decoded video: " << _video->pts << endl;
-							VideoPacket video((char*)opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
-							video.source = &opacket;
-							emit(this, video);
-						}
-					}
-					//else
-					//	TraceLS(this) << "Skipping video frame: " << videoFrames << endl;
-					videoFrames++;
-				}
-				else if (_audio && ipacket.stream_index == _audio->stream->index) {	
-					if ((!_options.processAudioXFrame || (audioFrames % _options.processAudioXFrame) == 0) &&
-						(!_options.processAudioXSecs || !_audio->pts || ((ipacket.pts * av_q2d(_audio->stream->time_base)) - _audio->pts) > _options.processAudioXSecs)) {
-						if (_audio->decode(ipacket, opacket)) {			
-							//TraceLS(this) << "Decoded Audio: " << _audio->pts << endl;
-							AudioPacket audio((char*)opacket.data, opacket.size, _audio->pts);
-							audio.source = &opacket;
-							emit(this, audio);
-						}	
-					}
-					//else
-					//	TraceLS(this) << "Skipping audio frame: " << audioFrames << endl;
-					audioFrames++;
-
-					/*
-					while (ipacket.size > 0) {
-						if ((len = _audio->decode(ipacket)) <= 0)
-							break;
-
-						//ipacket.data += len;
-						//ipacket.size -= len;
-						
-						//TraceLS(this) << "Broadcasting audio: " << _video->pts << endl;
-						AudioPacket audio(_audio->buffer, len, _audio->pts);
-						audio.opaque = &ipacket; //_audio;
-						emit(this, audio);
-					}
-					break;
-					*/
-				} 
-				/*
-				else {
-					WarnL << "[AVInputReader: " << this << "] Dropping frame from unknown stream:"		
-						<< "\n\tStream ID: " << ipacket.stream_index
-						<< "\n\tVideo ID: " << _video->stream->index
-						<< "\n\tAudio ID: " << _audio->stream->index
-						<< endl;
-				}
-				*/
-
-				av_free_packet(&ipacket);
-			}
-			
-			if (!_stopping && res < 0) {
-				bool gotFrame = false;
-				
-				// Flush video
-				while (_video && true) {
-					AVPacket opacket;
-					gotFrame = _video->flush(opacket);
-					if (gotFrame) {
+		while ((res = av_read_frame(_formatCtx, &ipacket)) >= 0) {
+			TraceLS(this) << "Read video frame: " << _stopping << endl;
+			if (_stopping) break;
+			if (_video && ipacket.stream_index == _video->stream->index) {
+				if ((!_options.processVideoXFrame || (videoFrames % _options.processVideoXFrame) == 0) &&
+					(!_options.processVideoXSecs || !_video->pts || ((ipacket.pts * av_q2d(_video->stream->time_base)) - _video->pts) > _options.processVideoXSecs) &&
+					(!_options.iFramesOnly || (ipacket.flags & AV_PKT_FLAG_KEY))) {
+ 					if (_video->decode(ipacket, opacket)) {
+						//TraceLS(this) << "Decoded video: " << _video->pts << endl;
 						VideoPacket video((char*)opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
 						video.source = &opacket;
 						emit(this, video);
-					} 					
-					av_free_packet(&opacket);
-					if (!gotFrame)
-						break;
+					}
 				}
-				
-				// Flush audio
-				while (_audio && true) {
-					AVPacket opacket;
-					gotFrame = _audio->flush(opacket);
-					if (gotFrame) {
+				//else
+				//	TraceLS(this) << "Skipping video frame: " << videoFrames << endl;
+				videoFrames++;
+			}
+			else if (_audio && ipacket.stream_index == _audio->stream->index) {	
+				if ((!_options.processAudioXFrame || (audioFrames % _options.processAudioXFrame) == 0) &&
+					(!_options.processAudioXSecs || !_audio->pts || ((ipacket.pts * av_q2d(_audio->stream->time_base)) - _audio->pts) > _options.processAudioXSecs)) {
+					if (_audio->decode(ipacket, opacket)) {			
+						//TraceLS(this) << "Decoded Audio: " << _audio->pts << endl;
 						AudioPacket audio((char*)opacket.data, opacket.size, _audio->pts);
 						audio.source = &opacket;
 						emit(this, audio);
-					}					
-					av_free_packet(&opacket);
-					if (!gotFrame)
-						break;
+					}	
 				}
+				//else
+				//	TraceLS(this) << "Skipping audio frame: " << audioFrames << endl;
+				audioFrames++;
+			} 
 
-				// End of file or error.
-				TraceL << "[AVInputReader: " << this << "] Decoding: EOF" << endl;
-				//break;
+			av_free_packet(&ipacket);
+		}
+			
+		if (!_stopping && res < 0) {
+			bool gotFrame = false;
+				
+			// Flush video
+			while (_video && true) {
+				AVPacket opacket;
+				gotFrame = _video->flush(opacket);
+				if (gotFrame) {
+					VideoPacket video((char*)opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
+					video.source = &opacket;
+					emit(this, video);
+				} 					
+				av_free_packet(&opacket);
+				if (!gotFrame)
+					break;
+			}
+				
+			// Flush audio
+			while (_audio && true) {
+				AVPacket opacket;
+				gotFrame = _audio->flush(opacket);
+				if (gotFrame) {
+					AudioPacket audio((char*)opacket.data, opacket.size, _audio->pts);
+					audio.source = &opacket;
+					emit(this, audio);
+				}					
+				av_free_packet(&opacket);
+				if (!gotFrame)
+					break;
 			}
 
-			//scy::sleep(10);
-		//};
+			// End of file or error.
+			TraceLS(this) << "Decoding: EOF" << endl;
+			//break;
+		}
+
 	} 
 	catch (std::exception& exc) {
 		_error = exc.what();
-		ErrorL << "[AVInputReader: " << this << "] Decoder Error: " << _error << endl;
+		ErrorLS(this) << "Decoder Error: " << _error << endl;
 	}
 	catch (...) {
 		_error = "Unknown Error";
-		ErrorL << "[AVInputReader: " << this << "] Unknown Error" << endl;
+		ErrorLS(this) << "Unknown Error" << endl;
 	}
 
 	TraceLS(this) << "Exiting" << endl;

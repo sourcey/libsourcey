@@ -18,14 +18,11 @@
 
 
 #include "scy/socketio/packet.h"
-//#include "scy/crypto/crypto.h"
 #include "scy/logger.h"
 #include "scy/util.h"
-//#include "Poco/Format.h"
 
 
 using std::endl;
-//using Poco::format;
 
 
 namespace scy {
@@ -191,7 +188,7 @@ std::size_t Packet::read(const ConstBuffer& buf)
 			_message = data;
 		}
 
-		/*
+#if 0
 		frags.clear();
 		util::split(_message, '+', frags, 2);
 		if (frags.size() != 2) {
@@ -202,11 +199,11 @@ std::size_t Packet::read(const ConstBuffer& buf)
 		_ack = true; // This is mostly for requests, but we'll set it anyway
 		_id = util::strtoi<UInt32>(frags[0]);
 		_message = frags[1];
-		*/
+#endif
 	}
 
 	_size = data.length();
-	//DebugLS(this) << "Parse Success: " << toString() << endl;
+	//DebugLS(this) << "Parse success: " << toString() << endl;
 
 	return _size;
 }
@@ -342,7 +339,6 @@ void Packet::print(std::ostream& os) const
 		os << "::" << _endpoint << ":" << _message;
 	}
 }
-
 
 
 } } // namespace scy::sockio

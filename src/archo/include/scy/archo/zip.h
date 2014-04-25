@@ -66,7 +66,7 @@ struct ZipFile
 };
 
 
-/*
+#if 0
 class zip_error : public std::runtime_error 
 {
 public:
@@ -76,7 +76,7 @@ public:
 
 	static std::string errmsg(int e);
 };
-*/
+#endif
 	
 
 } } // namespace scy::arc

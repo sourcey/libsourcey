@@ -25,9 +25,6 @@
 #include "assert.h"
 
 
-//using namespace std;
-
-
 namespace scy { 
 namespace pacm {
 
@@ -35,6 +32,7 @@ namespace pacm {
 //
 // Base Package
 //	
+
 
 Package::Package()
 {
@@ -100,6 +98,7 @@ void Package::print(std::ostream& ost) const
 //
 // Package Asset
 //	
+
 
 Package::Asset::Asset(json::Value& src) :
 	root(src)
@@ -173,6 +172,7 @@ bool Package::Asset::operator == (const Asset& r) const
 //
 // Remote Package
 //	
+
 
 RemotePackage::RemotePackage()
 {
@@ -263,6 +263,7 @@ Package::Asset RemotePackage::latestSDKAsset(const std::string& version)
 //
 // Local Package
 //	
+
 
 LocalPackage::LocalPackage()
 {
@@ -483,6 +484,7 @@ bool LocalPackage::valid() const
 // Local Package Manifest
 //	
 
+
 LocalPackage::Manifest::Manifest(json::Value& src) :
 	root(src)
 {
@@ -514,6 +516,7 @@ bool LocalPackage::Manifest::empty() const
 //
 // Package Pair
 //	
+
 
 PackagePair::PackagePair(LocalPackage* local, RemotePackage* remote) :
 	local(local), remote(remote)
@@ -556,102 +559,3 @@ bool PackagePair::valid() const
 
 
 } } // namespace scy::pacm
-
-
-
-
-
-
-		/*
-
-		Asset bestAsset = 
-		if (bestAsset)
-
-		try {
-
-			// The best SDK version only needs to be newer if the
-			// installed asset matches the locked SDK version.
-			if (asset().sdkVersion() != sdkLockedVersion())
-				return false;
-		}
-		catch (std::exception& exc/Exception& exc/) {
-			// Return false, although we won't be able to update
-			// at all, since there are no available SDK assets :(
-			return false;
-		}
-
-bool LocalPackage::hasAvailableUpdates(RemotePackage& remote)
-{
-	// Return true if the locked version is already installed
-	if (!versionLock().empty()) {
-		return versionLock() == version();
-	}
-	
-	json::Value tmp;
-	Package::Asset bestAsset(tmp);
-
-	// Get the best asset from the locked SDK version, if any
-	if (!sdkLockedVersion().empty()) {
-		try {
-			bestAsset = remote.latestSDKAsset(sdkLockedVersion());
-
-			// The best SDK version only needs to be newer if the
-			// installed asset matches the locked SDK version.
-			if (asset().sdkVersion() != sdkLockedVersion())
-				return false;
-		}
-		catch (std::exception& exc/Exception& exc/) {
-			// Return false, although we won't be able to update
-			// at all, since there are no available SDK assets :(
-			return false;
-		}
-	}
-
-	// Otherwise get the latest available asset
-	else {
-		try {
-			bestAsset = remote.latestAsset();
-		}
-		catch (std::exception& exc/Exception& exc/) {
-			// Return false, there are no available SDK assets.
-			// The remote package is not valid!
-			assert(0 && "invalid remote package");
-			return false;
-		}
-	}
-	
-	// If L is greater than R the function returns true.
-	// If L is equal or less than R the function returns false.
-	return !util::compareVersion(bestAsset.version(), version());
-}
-		*/
-
-	//json::Value node = append_child();
-	//node.set_name("file");
-	//node.append_(*this)["path").set_value(path.c_str());
-
-
-/*
-Package::Asset LocalPackage::getMatchingAsset(const Package::Asset& asset) const
-{
-	assert(asset.valid());
-	return Asset(select_single_node(
-		format("//asset[@file-name='%s' and @version='%s']", 
-			asset.fileName(), asset.version()).c_str()).node());
-}
-*/
-/*
-void LocalPackage::Manifest::addDir(const std::string& path)
-{
-	// Do not allow duplicates
-	//if (!find_child_by_(*this)["dir", "path", path.c_str()).empty())
-	//	return;
-
-	//json::Value node = append_child();
-	//node.set_name("dir");
-	//node.append_(*this)["path").set_value(path.c_str());
-	
-	json::Value node(path);
-	root.append(node);
-}
-*/

@@ -30,44 +30,6 @@
 namespace scy {
 namespace net {
 
-
-class UDPSocket;
-
-
-#if 0
-class UDPSocket: public net::Socket
-	/// UDPSocket is a disposable UDP socket wrapper
-	/// for UDPSocket which can be created on the stack.
-	/// See UDPSocket for implementation details.
-{
-public:	
-	typedef UDPSocket Base;
-	typedef std::vector<UDPSocket> List;
-	
-	UDPSocket();
-		/// Creates an unconnected UDP socket.
-
-	UDPSocket(UDPSocket* base, bool shared = false);
-		/// Creates the Socket and attaches the given Socket.
-		///
-		/// The Socket must be a UDPSocket, otherwise an
-		/// exception will be thrown.
-
-	UDPSocket(const Socket& socket);
-		/// Creates the UDPSocket with the Socket
-		/// from another socket. The Socket must be
-		/// a UDPSocket, otherwise an exception will be thrown.
-	
-	UDPSocket& base() const;
-		/// Returns the socket's Socket instance.
-};
-#endif
-
-
-//
-// UDP Base
-//
-
 	
 class UDPSocket: public net::Socket, public uv::Handle
 {
@@ -111,7 +73,6 @@ protected:
 	virtual void init();	
 	virtual bool recvStart();
 	virtual bool recvStop();
-	//virtual void* self() { return this; };
 
 	static void onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags);
 	static void afterSend(uv_udp_send_t* req, int status); 

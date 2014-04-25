@@ -49,7 +49,7 @@ void StreamManager::closeAll()
 	StreamManager::Map::iterator it2;
 	while (it != _map.end()) {
 		it2 = it++;
-		(*it2).second->/*base().*/StateChange -= sdelegate(this, &StreamManager::onStreamStateChange);
+		(*it2).second->StateChange -= sdelegate(this, &StreamManager::onStreamStateChange);
 		(*it2).second->close();
 		if (_freeClosedStreams) {
 			StreamManager::Deleter func;
@@ -110,14 +110,14 @@ void StreamManager::onAdd(PacketStream* stream)
 	// Receive callbacks after all other listeners 
 	// so we can delete the stream when it closes.
 	DebugL << "stream added: " << stream->name() << endl;
-	stream->/*base().*/StateChange += sdelegate(this, &StreamManager::onStreamStateChange, -1);
+	stream->StateChange += sdelegate(this, &StreamManager::onStreamStateChange, -1);
 }
 
 
 void StreamManager::onRemove(PacketStream* stream)
 {
 	DebugL << "stream removed: " << stream->name() << endl;
-	stream->/*base().*/StateChange -= sdelegate(this, &StreamManager::onStreamStateChange);
+	stream->StateChange -= sdelegate(this, &StreamManager::onStreamStateChange);
 }
 
 
@@ -128,7 +128,7 @@ void StreamManager::onStreamStateChange(void* sender, PacketStreamState& state, 
 	// Cantch stream closed state and free it if necessary
 	if (state.equals(PacketStreamState::Closed)) {
 		PacketStream* stream = reinterpret_cast<PacketStream*>(sender);
-		stream->/*base().*/StateChange -= sdelegate(this, &StreamManager::onStreamStateChange);
+		stream->StateChange -= sdelegate(this, &StreamManager::onStreamStateChange);
 		bool success = false;
 		if (_freeClosedStreams) {
 			DebugL << "On stream close: freeing: " << stream->name() << endl;
@@ -165,17 +165,3 @@ void StreamManager::print(std::ostream& os) const
 
 
 } // namespace scy
-
-
-
-
-
-/*
-bool StreamManager::removeStream(const std::string& name) 
-{
-	assert(!name.empty());
-
-	DebugL << "Removing Stream: " << name << endl;		
-	return Manager::remove(name) != 0;
-}
-*/

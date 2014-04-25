@@ -23,7 +23,6 @@
 
 #include "scy/types.h"
 #include <string>
-//#include "scy/json/json.h"
 
 
 namespace scy {
@@ -68,36 +67,3 @@ public:
 
 
 #endif // SCY_Symple_Address_H
-
-
-	
-	/*
-
-	std::string id() const;
-	std::string user() const;
-	//std::string name() const;
-	std::string group() const;
-	void setID(const std::string& id);	
-	void setUser(const std::string& user);
-	void setName(const std::string& name);
-	void setGroup(const std::string& group);
-	*/
-
-	
-	/*
-	//std::string group;const std::string& id
-	//std::string user;
-	//std::string name;
-	//std::string id;
-
-	bool parse(const json::Value& root);
-		id.print(os);
-	std::string toString() const;
-	bool operator == (std::string& r);
-
-protected:
-	json::Value* _root;
-		// The root pointer is just a reference
-		// to an externally managed JSON value,
-		// generally a Message instance.
-	*/

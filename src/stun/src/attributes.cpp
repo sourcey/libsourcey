@@ -299,7 +299,7 @@ AddressAttribute::AddressAttribute(const AddressAttribute& r) :
 	//_family(r._family),
 	//_port(r._port),
 	//_ip(r._ip)
-{//
+{
 }
 
 
@@ -965,12 +965,6 @@ UInt16ListAttribute::UInt16ListAttribute(const UInt16ListAttribute& r) :
 	Attribute(r._type, r._size),
 	_attrTypes(r._attrTypes)
 {
-	/*
-	//UInt16ListAttribute* attr = new UInt16ListAttribute(type(), size());
-	for (auto i = 0; i < r._attrTypes.size(); i++)
-		addType((r._attrTypes)[i]);
-	return attr;
-	*/
 }
 
 

@@ -178,24 +178,6 @@ void Server::onSocketRecv(void* sender, const MutableBuffer& buffer, const net::
 			assert(0 && "unknown request type");
 		}
 
-		/*
-		// TODO: Avoid copying STUN message
-		Request request(*packet.info->socket, message, packet.info->socket->address(), packet.info->peerAddress);
-		switch (message.classType()) {
-			case stun::Message::Request:
-			case stun::Message::Indication: 
-				handleRequest(request, _observer.authenticateRequest(this, request));
-				break;
-				
-				handleSendIndication(request);
-				break;
-
-			default: 
-				assert(0 && "unknown request type");
-				break;
-		}
-		*/
-
 		buf += nread;
 		len -= nread;
 	}
@@ -858,47 +840,3 @@ TCPAllocation* Server::getTCPAllocation(const UInt32& connectionID)
 
 
 } } //  namespace scy::turn
-
-
-
-
-
-/*
-
-void Server::onDataReceived(void* sender, Buffer& buffer)
-{
-	TraceL << "Data Received: " << buffer.toString() << endl;	
-
-}
-
-void Server::onPacketReceived(void* sender, stun::Message& message) 
-{
-	TraceL << "STUN Packet Received: " << message.toString() << endl;	
-
-	assert(message.state() == stun::Message::Request);
-	
-	auto source = reinterpret_cast<net::PacketInfo*>(message.info);
-	assert(source);
-	if (!source)
-		return;
-
-	Request request(source->socket, message, source->localAddress, source->peerAddress);
-	AuthenticationState state = _observer.authenticateRequest(this, request);
-	handleRequest(request, state);
-}
-*/
-
-/*
-Net::Reactor& Server::reactor()
-{
-	//Mutex::ScopedLock lock(_mutex);
-	return _reactor;
-}
-
-
-Runner& Server::runner()
-{
-	//Mutex::ScopedLock lock(_mutex);
-	return _runner;
-}
-*/

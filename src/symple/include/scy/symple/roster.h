@@ -57,17 +57,3 @@ public:
 
 
 #endif //  SCY_Symple_Router_H
-
-
-
-
-	//virtual void update(const json::Value& data, bool whiny = false);
-		// Updates the roster from the given client object.
-	//Address _ourAddress;
-	
-	//virtual void setOurID(const Address& id);
-
-    //virtual Address ourAddress() const;
-    //virtual Peer* ourPeer(bool whiny = true);
-		// Returns the peer object that
-		// controls the current session.

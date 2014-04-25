@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_Pacman_Types_H
-#define SCY_Pacman_Types_H
+#ifndef SCY_Pacm_Types_H
+#define SCY_Pacm_Types_H
 
 
 namespace scy { 
@@ -28,4 +28,4 @@ namespace pacm {
 } } // namespace scy::pacm
 
 
-#endif // SCY_Pacman_Types_H
+#endif // SCY_Pacm_Types_H

@@ -43,6 +43,7 @@ namespace uv {
 //
 // Helpers
 //
+
 	
 inline std::string formatError(const std::string& message, int errorno = 0)
 {	
@@ -66,46 +67,9 @@ inline void throwError(const std::string& message, int errorno = UV_UNKNOWN)
 
 
 //
-// Default callbacks - depreciated!
-//
-
-
-#define UVCallback(ClassName, Function, Handle)						 \
-															         \
-	static void _Function(Handle* handle) {						     \
-		static_cast<ClassName*>(handle->data)->Function();			 \
-    };														         \
-
-
-#define UVStatusCallback(ClassName, Function, Handle)				 \
-															         \
-	static void Function(Handle* handle, int status) {			     \
-		ClassName* self = static_cast<ClassName*>(handle->data);	 \
-		self->Function(status);									     \
-    }														         \
-	
-
-#define UVEmptyStatusCallback(ClassName, Function, Handle)			 \
-															         \
-	static void Function(Handle* handle, int status) {			     \
-		ClassName* self = static_cast<ClassName*>(handle->data);	 \
-		if (status)											         \
-			self->setUVError("UV error", status);	                 \
-		self->Function();									         \
-    }														         \
-
-
-#define UVStatusCallbackWithType(ClassName, Function, Handle)		\
-															        \
-	static void Function(Handle* handle, int status) {			    \
-		ClassName* self = static_cast<ClassName*>(handle->data);	\
-		self->Function(handle, status);							    \
-    }														        \
-	
-
-//
 // Default Event Loop
 //
+
 
 typedef uv_loop_t Loop;
 static unsigned long defaultTID = 0;
@@ -317,54 +281,45 @@ protected:
 };
 
 
+//
+// Default Callbacks (Depreciated)
+//
+
+
+#define UVCallback(ClassName, Function, Handle)                      \
+                                                                     \
+	static void _Function(Handle* handle) {                          \
+		static_cast<ClassName*>(handle->data)->Function();           \
+    };                                                               \
+
+
+#define UVStatusCallback(ClassName, Function, Handle)                \
+                                                                     \
+	static void Function(Handle* handle, int status) {               \
+		ClassName* self = static_cast<ClassName*>(handle->data);     \
+		self->Function(status);                                      \
+    }                                                                \
+	
+
+#define UVEmptyStatusCallback(ClassName, Function, Handle)           \
+                                                                     \
+	static void Function(Handle* handle, int status) {               \
+		ClassName* self = static_cast<ClassName*>(handle->data);     \
+		if (status)                                                  \
+			self->setUVError("UV error", status);                    \
+		self->Function();                                            \
+    }                                                                \
+
+
+#define UVStatusCallbackWithType(ClassName, Function, Handle)        \
+                                                                     \
+	static void Function(Handle* handle, int status) {               \
+		ClassName* self = static_cast<ClassName*>(handle->data);     \
+		self->Function(handle, status);                              \
+    }                                                                \
+	
+
 } } // namespace scy::uv
 
 
 #endif // SCY_UV_UVPP_H
-
-
-	
-
-/* 
-#define UVReadCallback(ClassName, Function, Handle)				    \
-															        \
-	static void Function(Handle* handle, ssize_t nread, uv_buf_t buf) {	\
-		ClassName* self = static_cast<ClassName*>(handle->data);	\
-		if (nread == -1)											\
-			self->setUVError(nread);	TODO: proper error code?   \
-		self->Function(handle, nread, buf);							\
-    }														        \
-	*/
-/*
-inline void throwLastError(uv_loop_t* loop, const std::string& message = "") 
-{
-	throwError(message, uv_last_error(loop).code);
-}
-*/
-/*
-static void afterWrite(uv_write_t* req, int status) 
-{
-	delete req;
-}
-
-static void afterShutdown(uv_shutdown_t* req, int status) 
-{	
-	delete req;
-}
-
-static void afterClose(uv_handle_t* handle) 
-{	
-	delete handle;
-}
-*/
-	//std::string err;
-	//if (!prefix.empty()) {
-	//	err += prefix;
-	//	err += ": ";
-	//}
-	//err += uv_strerror(uv_last_error(loop()));
-	//std::string m(uv_strerror());
-	//if (!message.empty()) {
-	//	m.append(": ");
-	//	m.append(message);
-	//}

@@ -31,41 +31,6 @@ namespace scy {
 namespace net {
 
 
-#if 0
-TCPSocket::TCPSocket(uv::Loop* loop) : 
-	net::Socket(new TCPSocket(loop), false)
-{	
-	TraceLS(this) << "Create" << endl;	
-}
-
-
-TCPSocket::TCPSocket(TCPSocket* base, bool shared) : 
-	net::Socket(base, shared) 
-{
-	TraceLS(this) << "Destroy" << endl;	
-}
-
-
-TCPSocket::TCPSocket(const Socket& socket) : 
-	net::Socket(socket)
-{
-	if (!dynamic_cast<TCPSocket*>(_base))
-		throw std::runtime_error("Cannot assign incompatible socket");
-}
-	
-
-TCPSocket& TCPSocket::base() const
-{
-	return static_cast<TCPSocket&>(*_base);
-}
-#endif
-
-
-//
-// TCP Base
-//
-
-
 TCPSocket::TCPSocket(uv::Loop* loop) :
 	Stream(loop)
 {
