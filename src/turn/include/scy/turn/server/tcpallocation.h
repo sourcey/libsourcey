@@ -85,15 +85,3 @@ protected:
 
 
 #endif // SCY_TURN_SERVER_TCPAllocation_H
-
-
-
-	//void onPeerConnectError(TCPConnectionPair* pair); //void* sender, const Error& error);
-		// Connection error callback for Connect request.
-	//ClientConnectionManager	_clients;
-	//PeerConnectionManager	_peers;
-	//ClientConnectionManager& clients();
-	//PeerConnectionManager& peers();
-	//net::TCPSocketAcceptor	_acceptor; //, Poco::Net::StreamSocket& sock, Net::Reactor& reactor
-	//void onPeerDisconnected(void* sender);, const std::string& error
-	//void onClientDisconnect(void* sender);

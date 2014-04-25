@@ -144,45 +144,8 @@ public:
 };
 #endif
 
-//typedef SocketHandle<SSLSocket> SSLSocketHandle;
-
 
 } } // namespace scy::net
 
 
-#endif // SCY_Net_SSLSocket_H 
-
-
-
-
-	
-/*
-
-typedef SSLSocket SSLSocket;
-class SSLSocket;
-class SSLSocket: public Socket
-	// SSLSocket is a disposable SSL socket wrapper
-	// for SSLSocket which can be created on the stack.
-	// See SSLSocket for implementation details.
-{
-public:	
-	typedef net::SSLSocket Base;
-	typedef std::vector<SSLSocket> List;
-	
-	SSLSocket();
-		// Creates an unconnected SSL socket.
-
-	SSLSocket(SSLContext::Ptr sslContext);
-	SSLSocket(SSLContext::Ptr sslContext, SSLSession::Ptr session);
-
-	SSLSocket(const SocketHandle& socket);
-		// Creates the SSLSocket with the Socket
-		// from another socket. The Socket must be
-		// a SSLSocket, otherwise an exception will be thrown.
-
-	SSLSocket(SSLSocket* base);
-	
-	SSLSocket* base() const;
-		// Returns the Socket for this socket.
-};
-*/
+#endif // SCY_Net_SSLSocket_H

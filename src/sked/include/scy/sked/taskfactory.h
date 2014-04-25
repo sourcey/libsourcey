@@ -24,9 +24,6 @@
 #include "scy/logger.h"
 #include "scy/sked/task.h"
 #include "scy/sked/trigger.h"
-
-
-//#include "Poco/Event.h"
 #include "scy/singleton.h"
 
 #include <vector>
@@ -60,8 +57,8 @@ public:
 
 
 	//
-	// Scheduled Tasks
-	//
+	/// Scheduled Tasks
+
 	typedef std::map<std::string, sked::Task*(*)(/*Scheduler&*/)> TaskMap;
 
     sked::Task* createTask(const std::string& type/*, Scheduler& scheduler*/) 
@@ -97,8 +94,8 @@ public:
 	
 	
 	//
-	// Schedule Triggers
-	//
+	/// Schedule Triggers
+
 	typedef std::map<std::string, sked::Trigger*(*)()> TriggerMap;
 
     sked::Trigger* createTrigger(const std::string& type)

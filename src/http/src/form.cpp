@@ -108,12 +108,12 @@ void FormWriter::prepareSubmit()
 			if (!_parts.empty()) {
 				assert(_filesLength);
 				_connection.OutgoingProgress.total = _filesLength;
-			
-				// Set Content-Length for non-chunked transfers
-				if (!request.isChunkedTransferEncoding() && 
-					request.getVersion() != http::Message::HTTP_1_0)
-					request.setContentLength(calculateMultipartContentLength());
 			}
+			
+			// Set Content-Length for non-chunked transfers
+			if (!request.isChunkedTransferEncoding() && 
+				request.getVersion() != http::Message::HTTP_1_0)
+				request.setContentLength(calculateMultipartContentLength());
 		}
 		if (request.getVersion() == http::Message::HTTP_1_0) {
 			request.setKeepAlive(false);

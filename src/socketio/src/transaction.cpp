@@ -82,12 +82,3 @@ void Transaction::onResponse()
 
 
 } } // namespace scy::sockio
-
-
-
-/*
-void Transaction::handlePotentialResponse(const Packet& packet)
-{
-	DebugLS(this) << "Response" << endl;
-}
-*/

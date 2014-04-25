@@ -155,30 +155,7 @@ inline bool isValidMethod(UInt16 methodType)
 }
 
 
-/*
-int stun_is_response_str(const UInt8* buf, size_t len) {
-  if(is_channel_msg_str(buf,len)) return 0;
-  if(IS_STUN_SUCCESS_RESP(stun_get_msg_type_str(buf,len))) return 1;
-  if(IS_STUN_ERR_RESP(stun_get_msg_type_str(buf,len))) return 1;
-  return 0;
-}
-
-int stun_is_indication_str(const UInt8* buf, size_t len) {
-  if(is_channel_msg_str(buf,len)) return 0;
-  return IS_STUN_INDICATION(stun_get_msg_type_str(buf,len));
-}
-*/
-
-
 } } // namespace scy:stun
 
 
 #endif //  SCY_STUN_MESSAGE_H
-
-	
-
-	//State	_state;
-	 // { return _state; }
-	// { return static_cast<Method>(_type); }
-	//UInt16 type() const; // { return _type; }
-	

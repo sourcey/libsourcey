@@ -44,7 +44,7 @@ Thumbnailer::~Thumbnailer()
 void Thumbnailer::open(const std::string& ifile, const std::string& ofile) //, int owidth, int oheight, double seek
 {	
 	this->ifile = ifile;
-	this->ofile = ofile;
+	this->ofile = ofile.empty() ? defaultThumbPath(ifile) : ofile;
 
 	reader += packetDelegate(this, &Thumbnailer::onVideoPacket);
 	reader.options().iFramesOnly = true;
@@ -86,7 +86,8 @@ void Thumbnailer::grab(double seek)
 	encoder.open();	
 
 	// Run the decoder loop
-	reader.run();
+	reader.run();	
+	assert(fs::exists(ofile));
 }
 		
 
@@ -132,12 +133,6 @@ std::string Thumbnailer::defaultThumbPath(const std::string& ifile, const std::s
 	thumbpath += suffix;
 	thumbpath += ext;
 	return thumbpath;
-
-	//return thumbpath.substr(pos, thumbpath.length() + suffix.length() + ext.length());
-
-    //std::string extname = fs::extname(thumbpath, true);
-	//std::size_t pos = thumbpath.rfind(extname);
-	//return thumbpath.replace(pos, extname.length(), suffix + ext);
 }
 
 

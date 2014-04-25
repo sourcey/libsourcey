@@ -243,22 +243,3 @@ void ServerAllocation::print(std::ostream& os) const
 
 
 } } // namespace scy::turn
-
-
-
-	/*
-	
-	TraceL << "Created: " 
-		<< "\r\tUsername: " << username
-		<< "\r\tLifetime: " << _lifetime
-		<< "\r\tMaximum Lifetime: " << _maxLifetime
-		<< endl;
-
-	TraceL << "Destroy:" 
-		<< "\r\tUsername: " << username()
-		<< "\n\tBandwidth Limit: " << bandwidthLimit()
-		<< "\n\tBandwidth Used: " << bandwidthUsed()
-		<< "\n\tBandwidth Remaining: " << bandwidthRemaining()
-		<< "\n\tTime Remaining: " << timeRemaining()
-		<< endl;
-		*/

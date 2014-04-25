@@ -150,30 +150,30 @@ public:
 		}
 		return stun::Undefined;
 	}
-	/*
-	*/
 	
 	virtual net::Address address() const;
 
 	virtual void read(BitReader& reader);
 	virtual void write(BitWriter& writer) const;
-
-	//virtual UInt16 port() const { return _port; }
-	//virtual UInt32 ip() const { return _ip; }
-	//virtual UInt8 family() const { return _family; }
-	
 	
 	virtual void setAddress(const net::Address& addr) { _address = addr; }
-	//virtual std::string ipString() const;
-	//virtual void setFamily(UInt8 family) { _family = family; }
-	//virtual void setIP(UInt32 ip) { _ip = ip; }
-	//virtual void setIP(const std::string& ip);
-	//virtual void setPort(UInt16 port) { _port = port; }
+
+#if 0
+	virtual UInt16 port() const { return _port; }
+	virtual UInt32 ip() const { return _ip; }
+	virtual UInt8 family() const { return _family; }	
+
+	virtual void setFamily(UInt8 family) { _family = family; }
+	virtual void setIP(UInt32 ip) { _ip = ip; }
+	virtual void setIP(const std::string& ip);
+	virtual void setPort(UInt16 port) { _port = port; }
+
+	UInt8 _family;
+	UInt16 _port;
+	UInt32 _ip;
+#endif
 
 private:
-	//UInt8 _family;
-	//UInt16 _port;
-	//UInt32 _ip;
 	net::Address _address;
 };
 

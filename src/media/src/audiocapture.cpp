@@ -78,13 +78,6 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 	unsigned int nBufferFrames = 1536; //256; //512; / 2
 
 	try {	
-		/*		
-		  void openStream( RtAudio::StreamParameters *outputParameters,
-						   RtAudio::StreamParameters *inputParameters,
-						   RtAudioFormat format, unsigned int sampleRate,
-						   unsigned int *bufferFrames, RtAudioCallback callback,
-						   void *userData = NULL, RtAudio::StreamOptions *options = NULL, RtAudioErrorCallback errorCallback = NULL );
-				   */
 		_audio.openStream(nullptr, &_iParams, _format, _sampleRate, &nBufferFrames, &AudioCapture::audioCallback, (void*)this, nullptr, AudioCapture::errorCallback);
 
 		_error = "";
@@ -161,7 +154,7 @@ void AudioCapture::stop()
 }
 
 
-/*
+#if 0
 void AudioCapture::attach(const PacketDelegateBase& delegate)
 {
 	PacketSignal::attach(delegate);
@@ -182,7 +175,7 @@ bool AudioCapture::detach(const PacketDelegateBase& delegate)
 	}
 	return false;
 }
-*/
+#endif
 
 
 int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer, unsigned int nBufferFrames,
@@ -228,20 +221,13 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer, uns
 		packet.setData((char*)inputBuffer, nBufferFrames * self->_channels * size);
 	}
 
-	/*
-	AudioPacket packet((char*)inputBuffer, 
-		nBufferFrames * klass->_numChannels * size, //sizeof(AUDIO_DATA),
-
-		// TODO: Add the process time to this value for 
-		// consistency with the time value of other packets.
-		(double)streamTime);
-		*/
-
-	//TraceL << "[AudioCapture] AudioPacket: " 
-	//	<< "\n\tPacket Ptr: " << inputBuffer
-	//	<< "\n\tPacket Size: " << packet.size() 
-	//	<< "\n\tStream Time: " << packet.time
-	//	<< endl;
+#if 0
+	TraceL << "[AudioCapture] AudioPacket: " 
+		<< "\n\tPacket Ptr: " << inputBuffer
+		<< "\n\tPacket Size: " << packet.size() 
+		<< "\n\tStream Time: " << packet.time
+		<< endl;
+#endif
 	
 	TraceLS(self) << "Emitting: " << packet.time << std::endl;
 	self->emit(packet);

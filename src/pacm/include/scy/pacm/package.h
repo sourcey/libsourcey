@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_Pacman_Package_H
-#define SCY_Pacman_Package_H
+#ifndef SCY_Pacm_Package_H
+#define SCY_Pacm_Package_H
 
 
 #include "scy/json/json.h"
@@ -253,7 +253,7 @@ typedef std::vector<PackagePair> PackagePairVec;
 } } // namespace scy::pacm
 
 
-#endif // SCY_Pacman_Package_H
+#endif // SCY_Pacm_Package_H
 
 
 	

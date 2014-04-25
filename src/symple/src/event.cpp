@@ -19,12 +19,9 @@
 
 #include "scy/symple/event.h"
 #include "scy/util.h"
-////#include "Poco/DateTimeFormatter.h"
-////#include "Poco/DateTimeFormat.h"
 
 
 using std::endl;
-//
 
 
 namespace scy {
@@ -76,14 +73,6 @@ std::string Event::name() const
 }
 
 
-/*
-string Event::message() const 
-{
-	return get("message", "").asString();
-}
-*/
-
-
 time_t Event::time() const 
 {
 	return static_cast<time_t>(get("time", 0).asDouble());
@@ -95,31 +84,14 @@ void Event::setName(const std::string& name)
 	(*this)["name"] = name;
 }
 
-
-/*
-void Event::setMessage(const std::string& message) 
-{
-	(*this)["message"] = message;
-}
-*/
-
 	
 void Event::setTime(time_t time) 
 {
-	(*this)["time"] = (double)time;
+	(*this)["time"] = (UInt64)time;
 	//DateTimeFormatter::format(
 	//	Timestamp::fromEpochTime(time), 
 	//	DateTimeFormat::ISO8601_FORMAT);
 }
-
-	
-/*
-void Event::setTime(const std::string& time) 
-{
-	// no checking done
-	(*this)["time"] = time;
-}
-*/
 
 
 } // namespace symple 

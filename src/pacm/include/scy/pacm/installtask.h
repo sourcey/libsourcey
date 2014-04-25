@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_Pacman_InstallTask_H
-#define SCY_Pacman_InstallTask_H
+#ifndef SCY_Pacm_InstallTask_H
+#define SCY_Pacm_InstallTask_H
 
 
 #include "scy/pacm/package.h"
@@ -176,4 +176,4 @@ typedef std::vector<InstallTask::Ptr> InstallTaskPtrVec;
 } } // namespace scy::pacm
 
 
-#endif // SCY_Pacman_InstallTask_H
+#endif // SCY_Pacm_InstallTask_H

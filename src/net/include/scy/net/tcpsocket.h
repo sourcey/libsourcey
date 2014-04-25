@@ -32,44 +32,6 @@
 namespace scy {
 namespace net {
 
-	
-class TCPSocket; 
-
-
-/*
-class TCPSocket: public net::Socket
-	/// TCPSocket is a disposable TCP socket wrapper
-	/// for TCPSocket which can be created on the stack.
-	/// See TCPSocket for implementation details.
-{
-public:	
-	typedef TCPSocket Base;
-	typedef std::vector<TCPSocket> List;
-	
-	TCPSocket(uv::Loop* loop = uv::defaultLoop());
-		// Creates an unconnected TCP socket.
-
-	TCPSocket(TCPSocket* base, bool shared);
-		// Creates the Socket and attaches the given Socket.
-		//
-		// The Socket must be a TCPSocket, otherwise an
-		// exception will be thrown.
-
-	TCPSocket(const Socket& socket);
-		// Creates the UDPSocket with the Socket
-		// from another socket. The Socket must be
-		// a UDPSocket, otherwise an exception will be thrown.
-	
-	TCPSocket& base() const;
-		// Returns the Socket for this socket.
-};
-*/
-
-
-//
-// TCP Base
-//
-
 
 class TCPSocket: public Stream, public net::Socket
 {
@@ -142,15 +104,3 @@ protected:
 
 
 #endif // SCY_Net_TCPSocket_H
-
-
-
-	//bool connected() const;
-		// Returns true if the underlying socket is connected.
-	
-	//bool initialized() const;
-		// Returns true if the underlying socket is initialized.
-
-	//SOCKET sockfd() const;
-		// Returns the socket descriptor for the 
-		// underlying native socket.

@@ -90,22 +90,6 @@ PacketSocket::~PacketSocket()
 }
 
 
-/*
-PacketSocketAdapter& PacketSocket::adapter() const
-{
-	return *reinterpret_cast<PacketSocketAdapter*>(_adapter);
-}	
-
-	
-void PacketSocket::sendPacket(IPacket& packet)
-{
-	//TraceLS(this) << "send" << endl;	
-	Socket::send(packet);
-}
-*/
-
-
-
 //
 // Packet Stream Socket Adapter
 //
