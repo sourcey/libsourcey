@@ -100,11 +100,11 @@ if(WIN32)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a") # ".dll"
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     D:/dev/lib/wxWidgets-2.9.4/lib/vc_lib
-    D:/dev/lib/opencv-2.4.6.0/build/install/lib
+    #D:/dev/lib/opencv-2.4.6.0/build/install/lib
     #D:/dev/lib/ffmpeg-1.0.1-gpl/lib
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/lib/vc10
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib
-    #${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/vc10
+    ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/lib/
+    ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib/
+    ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
     )
     
@@ -139,11 +139,11 @@ endif()
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
     D:/dev/lib/wxWidgets-2.9.4  
-    D:/dev/lib/opencv-2.4.6.0/build/install/include
+    #D:/dev/lib/opencv-2.4.6.0/build/install/include
     #D:/dev/lib/ffmpeg-1.0.1-gpl/include
     ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/include
     ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/include
-    #${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/include
+    ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/include
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
     )
     

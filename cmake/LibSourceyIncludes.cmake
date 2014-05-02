@@ -8,10 +8,10 @@ macro(sourcey_find_library prefix)
 
   include(CMakeParseArguments REQUIRED)
   # cmake_parse_arguments(prefix options singleValueArgs multiValueArgs ${ARGN})
-  cmake_parse_arguments(${name}
+  cmake_parse_arguments(${prefix}
     ""
     ""
-    "DEBUG_NAMES;RELEASE_NAMES;NAMES;DEBUG_PATHS;RELEASE_PATHS;PATHS"
+    "NAMES;DEBUG_NAMES;RELEASE_NAMES;DEBUG_PATHS;RELEASE_PATHS;PATHS"
     ${ARGN}
     )
   
