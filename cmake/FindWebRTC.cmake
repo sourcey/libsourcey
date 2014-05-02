@@ -23,15 +23,15 @@ find_path(WebRTC_INCLUDE_DIR
 # ----------------------------------------------------------------------
 # Find WebRTC libraries
 # ----------------------------------------------------------------------
-set(WebRTC_DEBUG_PATHS D:/dev/lib/webrtc/trunk/build/Debug/lib)
-set(WebRTC_RELEASE_PATHS D:/dev/lib/webrtc/trunk/build/Debug/lib)
+set(_DEBUG_PATHS D:/dev/lib/webrtc/trunk/build/Debug/lib)
+set(_RELEASE_PATHS D:/dev/lib/webrtc/trunk/build/Release/lib)
 
 # webrtc
 sourcey_find_library(WebRTC
   NAMES webrtc_utility
-  DEBUG_PATHS ${WebRTC_DEBUG_PATHS}
-  RELEASE_PATHS ${WebRTC_RELEASE_PATHS})
-
+  DEBUG_PATHS ${_DEBUG_PATHS}
+  RELEASE_PATHS ${_RELEASE_PATHS})
+  
 if(WebRTC_LIBRARY AND WebRTC_INCLUDE_DIR)
 
   # TODO: Exclude jsoncp and test libs
