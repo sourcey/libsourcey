@@ -88,3 +88,17 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES amd64.*|x86_64.*)
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES i686.*|i386.*|x86.*)
     set(X86 1)
 endif()
+
+# Ensure >= 2012 Update 4 for C++11 and Windows XP build support
+if(MSVC OR MSVC_IDE) 
+  if( MSVC_VERSION LESS 1700 )       # VC10-/VS2010- 
+    message(FATAL_ERROR "The project requires C++11 features. " 
+      "You need at least Visual Studio 11 (Microsoft Visual Studio 2012), " 
+      "with Microsoft Visual C++ Compiler 2012 CTP (v110_xp).") 
+  elseif( MSVC_VERSION EQUAL 1700 )  # VC11/VS2012 
+    #message( "VC11: use Microsoft Visual Studio 2012 " 
+    #  "with Microsoft Visual C++ Compiler 2012 CTP (v110_xp)" ) 
+    set(CMAKE_GENERATOR_TOOLSET "v110_xp" CACHE STRING "Platform Toolset" FORCE) 
+  else() # VC12+, assuming C++11 supported. 
+  endif() 
+endif()

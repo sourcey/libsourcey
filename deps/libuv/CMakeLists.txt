@@ -14,7 +14,8 @@ set(libuv_COMMON_SOURCE_FILES
   src/version.c)
 
 if(MSVC)
-  add_definitions(-D_WIN32_WINNT=0x0600 -D_GNU_SOURCE)
+  # Run on windows >= XP SP2
+  add_definitions(-D_WIN32_WINNT=0x0502 -D_GNU_SOURCE) #-D_WIN32_WINNT=0x0600
   set(libuv_DEPENDENCIES advapi32.lib iphlpapi.lib psapi.lib shell32.lib ws2_32.lib)
 
   # Windows source files
@@ -119,9 +120,9 @@ else()
       src/unix/linux-syscalls.c      
       src/unix/linux-syscalls.h
       src/unix/pthread-fixes.c)
-  else()
-    message(FATAL_ERROR
-      "Cannot build libuv on this system: ${CMAKE_SYSTEM_NAME}")
+  #else()
+  #  message(FATAL_ERROR
+  #    "Cannot build libuv on this system: ${CMAKE_SYSTEM_NAME}")
   endif()
 
   # TODO: Solaris, FreeBSD and others; see uv.gyp
