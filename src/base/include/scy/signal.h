@@ -156,25 +156,25 @@ public:
 
 	virtual void emit(void* sender) 
 	{
-		void* empty = 0;
+		void* empty = nullptr;
 		emit(sender, (P)empty, (P2)empty, (P3)empty, (P4)empty);
 	}
 
 	virtual void emit(void* sender, P arg) 
 	{
-		void* empty = 0;
+		void* empty = nullptr;
 		emit(sender, arg, (P2)empty, (P3)empty, (P4)empty);
 	}
 
 	virtual void emit(void* sender, P arg, P2 arg2) 
 	{
-		void* empty = 0;
+		void* empty = nullptr;
 		emit(sender, arg, arg2, (P3)empty, (P4)empty);
 	}	
 
 	virtual void emit(void* sender, P arg, P2 arg2, P3 arg3) 
 	{
-		void* empty = 0;
+		void* empty = nullptr;
 		emit(sender, arg, arg2, arg3, (P4)empty);
 	}
 

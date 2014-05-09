@@ -65,6 +65,8 @@ protected:
 		// Called after a stream is removed.
 
 	virtual void onStreamStateChange(void* sender, PacketStreamState& state, const PacketStreamState&);	
+
+	virtual const char* className() const { return "Stream Manager"; };
 	
 protected:	
 	bool _freeClosedStreams;

@@ -21,7 +21,9 @@ macro(sourcey_find_library prefix)
       list(APPEND ${prefix}_DEBUG_PATHS ${${prefix}_PATHS})
     endif()
 
-    #set(${prefix}_DEBUG_LIBRARY ${prefix}_DEBUG_LIBRARY-NOTFOUND)
+    # Reloading to ensure build always passes and picks up changes
+    # This is more expensive but proves useful for fragmented libraries like WebRTC
+    set(${prefix}_DEBUG_LIBRARY ${prefix}_DEBUG_LIBRARY-NOTFOUND)
     find_library(${prefix}_DEBUG_LIBRARY 
       NAMES 
         ${${prefix}_DEBUG_NAMES}
@@ -35,7 +37,7 @@ macro(sourcey_find_library prefix)
       list(APPEND ${prefix}_RELEASE_PATHS ${${prefix}_PATHS})
     endif()
     
-    #set(${prefix}_RELEASE_LIBRARY ${prefix}_RELEASE_LIBRARY-NOTFOUND)
+    set(${prefix}_RELEASE_LIBRARY ${prefix}_RELEASE_LIBRARY-NOTFOUND)
     find_library(${prefix}_RELEASE_LIBRARY 
       NAMES 
         ${${prefix}_RELEASE_NAMES}
@@ -47,12 +49,12 @@ macro(sourcey_find_library prefix)
       
     if(${prefix}_DEBUG_LIBRARY OR ${prefix}_RELEASE_LIBRARY)  
       if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)      
-        if (${prefix}_RELEASE_LIBRARY)         
+        #if (${prefix}_RELEASE_LIBRARY)         
           list(APPEND ${prefix}_LIBRARY "optimized" ${${prefix}_RELEASE_LIBRARY})
-        endif()
-        if (${prefix}_DEBUG_LIBRARY)     
+        #endif()
+        #if (${prefix}_DEBUG_LIBRARY)     
           list(APPEND ${prefix}_LIBRARY "debug" ${${prefix}_DEBUG_LIBRARY})
-        endif()
+        #endif()
       else()    
         if (${prefix}_RELEASE_LIBRARY) 
           list(APPEND ${prefix}_LIBRARY ${${prefix}_RELEASE_LIBRARY})
@@ -60,7 +62,7 @@ macro(sourcey_find_library prefix)
           list(APPEND ${prefix}_LIBRARY ${${prefix}_DEBUG_LIBRARY})
         endif()
       endif()  
-      mark_as_advanced(${prefix}_DEBUG_LIBRARY ${prefix}_RELEASE_LIBRARY)
+      #mark_as_advanced(${prefix}_DEBUG_LIBRARY ${prefix}_RELEASE_LIBRARY)
     endif()
 
   else()
