@@ -35,10 +35,23 @@ const int SERVER_SOCK_BUF_SIZE = CLIENT_SOCK_BUF_SIZE * 32;
 	
 
 // Returns the native socket file descriptor
+// Based on uv___stream_fd from internal.h
 #if WIN32
 #define nativeSocketFd(handle) ((handle)->socket)
 #elif defined(__APPLE__)
-int nativeSocketFd__(uv_stream_t* handle);
+int nativeSocketFd__(uv_stream_t* handle) {
+  const uv__stream_select_t* s;
+
+  assert(handle->type == UV_TCP ||
+         handle->type == UV_TTY ||
+         handle->type == UV_NAMED_PIPE);
+
+  s = handle->select;
+  if (s != NULL)
+    return s->fd;
+
+  return handle->io_watcher.fd;
+}
 #define nativeSocketFd(handle) (nativeSocketFd__((uv_stream_t*) (handle)))
 #else
 #define nativeSocketFd(handle) ((handle)->io_watcher.fd)
@@ -90,20 +103,6 @@ template<class NativeT> int setServerSocketBufSize(uv::Handle& handle, int size)
 	// Get the value to ensure it has propagated through the OS
 	traceL("TURNServer") << "Recv sock size " << getServerSocketRecvBufSize<NativeT>(handle) << " on fd " << fd << std::endl;
 
-	sz = size;
-	while (sz > 0) {
-		if (setsockopt(fd, SOL_SOCKET, SO_SNDBUF, (const char*)&sz, (socklen_t)sizeof(sz)) < 0) {
-			sz = sz / 2;
-		} else break;
-	}
-
-	if (sz < 1) {
-		errorL("TURNServer") << "Cannot set snd sock size " << size << " on fd " << fd << std::endl;
-	}	
-
-	// Get the value to ensure it has propagated through the OS
-	traceL("TURNServer") << "Send sock size " << getServerSocketSendBufSize<NativeT>(handle)<< " on fd " << fd << std::endl;
-
 	return sz;
 }
 
@@ -120,19 +119,16 @@ enum AuthenticationState
 class Request: public stun::Message
 {
 public:
-	//net::Socket::Ptr socket;
 	net::TransportType transport;
 	net::Address localAddress;
 	net::Address remoteAddress;
 	std::string hash; // for MessageIntegrity signing
 
-	Request(//const net::Socket::Ptr& socket, 
-			const stun::Message& message, 
+	Request(const stun::Message& message, 
 			net::TransportType transport,
 			const net::Address& localAddress = net::Address(), 
 			const net::Address& remoteAddress = net::Address()) :
 		stun::Message(message), 
-		//socket(socket), 
 		transport(transport), 
 		localAddress(localAddress), 
 		remoteAddress(remoteAddress) {}
