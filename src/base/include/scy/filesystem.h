@@ -89,9 +89,14 @@ std::string normalize(const std::string& path);
 	// Currently this function only converts directory separators to native style.
 		
 std::string transcode(const std::string& path);
-	/// Transcodes the path to into windows native format if using windows
-	/// and if LibSourcey was compiled with Unicode support (SCY_UNICODE),
-	/// otherwise the path string is returned unchanged.
+	// Transcodes the path to into windows native format if using windows
+	// and if LibSourcey was compiled with Unicode support (SCY_UNICODE),
+	// otherwise the path string is returned unchanged.
+	
+bool savefile(const std::string& path, const char* data, std::size_t size, bool whiny = false);
+	// Saves the given data buffer to the output file path.
+	// Returns true on success, or if whiny is set then an 
+	// exception will be thrown on error.
 
 // TODO: Implement more libuv fs_* types
 

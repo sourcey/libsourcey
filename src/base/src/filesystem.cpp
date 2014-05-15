@@ -295,4 +295,18 @@ void addnode(std::string& path, const std::string& node)
 }
 
 
+bool savefile(const std::string& path, const char* data, std::size_t size, bool whiny)
+{			
+	std::ofstream ofs(path, std::ios_base::binary | std::ios_base::out);
+	if (ofs.is_open())
+		ofs.write(data, size);
+	else {
+		if (whiny)
+			throw std::runtime_error("Cannot save file: " + path);	
+		return false;
+	}
+	return true;
+}
+
+
 } } // namespace scy::fs

@@ -1,11 +1,6 @@
-#include_dependency(Poco REQUIRED)
-include_dependency(FFmpeg REQUIRED)
-include_dependency(LibUV REQUIRED)
-  
-define_libsourcey_test(mediatests base uv media) 
-
-#include_dependency(OpenSSL REQUIRED)
-#include_dependency(OpenCV REQUIRED)
-#include_dependency(RtAudio REQUIRED)
-#include_dependency(JsonCpp REQUIRED)
-#VideoSocket Anionu Base Net XML HTTP  Net
+if(HAVE_FFMPEG AND HAVE_OPENCV)
+  include_dependency(FFmpeg REQUIRED)
+  include_dependency(LibUV REQUIRED)
+    
+  define_libsourcey_test(mediatests base uv media) 
+endif()
