@@ -23,7 +23,9 @@
 
 #include "scy/base.h"
 #include "scy/media/config.h"
+#ifdef HAVE_FFMPEG
 #include "scy/media/avinputreader.h"
+#endif
 
 #include <iostream>
 #include <string>
@@ -34,35 +36,50 @@ namespace scy {
 namespace av {
 
 
-struct Thumbnailer
+struct ThumbnailerOptions
 {
 	std::string ifile;
 	std::string ofile;
-	int owidth;
-	int oheight;
+	int width;
+	int height;
 	double seek;
 
+	ThumbnailerOptions(const std::string& ifile = "", const std::string& ofile = "", 
+		int width = 0, int height = 0, double seek = 0.0)
+		: ifile(ifile), ofile(ofile), width(width), height(height), seek(seek) {};
+};
+
+
+#ifdef HAVE_FFMPEG
+
+struct Thumbnailer
+	// Creates video thumbnail using FFmpeg.
+	// Note that even if FFmpeg is unavailable we still expose 
+	// ThumbnailerOptions for the Spot API.
+{
+	ThumbnailerOptions options;
 	av::AVInputReader reader;
 	av::VideoCodecEncoderContext encoder;
 		
-	Thumbnailer(int owidth = 0, int oheight = 0);
+	Thumbnailer(const ThumbnailerOptions& options = ThumbnailerOptions());
 	~Thumbnailer() ;
 
-	void open(const std::string& ifile, const std::string& ofile = "");
+	void open();
 		// Open the input file
 		// The encoder context may still be configured after this call
 		// If the ofile path is empty a default one will be selected
+		// using defaultThumbPath()
 
-	void grab(double seek = 0.0);
+	void grab();
 		// Initialize the image encoder and grab a thumbnail at the 
 		// specified seek position
 		
 	void onVideoPacket(void*, av::VideoPacket& packet);
 	
-	void saveFile(const std::string& path, const char* data, int size);
-	
 	static std::string defaultThumbPath(const std::string& ifile, const std::string& ext = ".jpg", const std::string& suffix = "_thumb");
 };
+
+#endif
 
 
 } // namespace av

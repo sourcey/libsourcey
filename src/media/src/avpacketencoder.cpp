@@ -85,7 +85,7 @@ void AVPacketEncoder::process(IPacket& packet)
 					// May be null if the first packet was audio, skip...
 					if (!_lastVideoPacket)
 						break;
-
+					
 					encode(*_lastVideoPacket);
 				}
 			}
