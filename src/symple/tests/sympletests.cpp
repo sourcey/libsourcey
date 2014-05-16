@@ -181,6 +181,6 @@ int main(int argc, char** argv)
 #if USE_SSL
 	SSLManager::instance().shutdown();
 #endif	
-	Logger::shutdown();
+	Logger::destroy();
 	return 0;
 }

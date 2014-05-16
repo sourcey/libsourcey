@@ -302,7 +302,7 @@ int main(int argc, char** argv)
 		// capture instances may be pending deletion and we 
 		// need to dereference the implementation instances
 		// so system devices can be properly released.
-		//GarbageCollector::instance().finalize();
+		//GarbageCollector::destroy();
 
 		// Shutdown the media factory and release devices
 		MediaFactory::instance().unloadVideoCaptures();
@@ -315,6 +315,6 @@ int main(int argc, char** argv)
 		// Note: 2 tiny mem leaks (964 bytes) are from OpenCV
 		app.finalize();
 	}
-	Logger::shutdown();
+	Logger::destroy();
 	return 0;
 }

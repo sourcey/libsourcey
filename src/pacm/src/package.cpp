@@ -151,8 +151,7 @@ bool Package::Asset::valid() const
 {
 	return root.isMember("file-name")
 		&& root.isMember("version")
-		&& root.isMember("mirrors")
-		&& root.isMember("checksum");
+		&& root.isMember("mirrors");
 }
 
 

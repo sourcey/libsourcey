@@ -155,7 +155,7 @@ int main(int argc, char** argv)
 		Log("error") << "TEST: Error: " << exc.displayText() << endl;
 	}
 	
-	Logger::shutdown();
+	Logger::destroy();
 
 	system("pause");
 

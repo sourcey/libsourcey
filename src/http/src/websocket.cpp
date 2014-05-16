@@ -391,7 +391,7 @@ bool WebSocketFramer::checkHandshakeResponse(http::Response& response)
 		assert(handshakeComplete());
 		return true;
 	}
-	else if (response.getStatus() == http::StatusCode::NotAuthorized)
+	else if (response.getStatus() == http::StatusCode::Unauthorized)
 		assert(0 && "authentication not implemented");
 	else
 		throw std::runtime_error("WebSocket error: Cannot upgrade to WebSocket connection: " + response.getReason()); //, ws::ErrorNoHandshake

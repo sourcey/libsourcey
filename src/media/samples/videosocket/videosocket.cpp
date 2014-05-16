@@ -156,6 +156,6 @@ int main(int argc, char** argv)
 	}
 	
 	delete gVideoCapture;
-	Logger::shutdown();
+	Logger::destroy();
 	return 0;
 }

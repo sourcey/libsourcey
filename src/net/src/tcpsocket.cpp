@@ -17,7 +17,6 @@
 //
 
 #include "scy/net/tcpsocket.h"
-#include "scy/net/tcpsocket.h"
 #include "scy/logger.h"
 //#if POSIX
 //#include <sys/socket.h>
@@ -43,8 +42,6 @@ TCPSocket::~TCPSocket()
 {	
 	TraceLS(this) << "Destroy" << endl;	
 	close();
-	//if (_connectReq)
-	//	delete _connectReq;
 }
 
 
@@ -259,7 +256,7 @@ net::TransportType TCPSocket::transport() const
 
 bool TCPSocket::closed() const
 {
-	return Stream::closed(); //uv::Handle::closed();
+	return Stream::closed();
 }
 
 
@@ -286,7 +283,6 @@ void TCPSocket::onRead(const char* data, std::size_t len)
 void TCPSocket::onRecv(const MutableBuffer& buf)
 {
 	TraceLS(this) << "Recv: " << buf.size() << endl;
-	//emitRecv(buf, peerAddress());
 	onSocketRecv(buf, peerAddress());
 }
 
@@ -298,7 +294,6 @@ void TCPSocket::onConnect(uv_connect_t* handle, int status)
 	// Error handled by static callback proxy
 	if (status == 0) {
 		if (readStart())
-			//emitConnect();
 			onSocketConnect();
 	}
 	else {
@@ -322,8 +317,7 @@ void TCPSocket::onAcceptConnection(uv_stream_t*, int status)
 
 void TCPSocket::onError(const scy::Error& error) 
 {		
-	ErrorLS(this) << "Error: " << error.message << endl;	
-	//emitError(error);
+	DebugLS(this) << "Error: " << error.message << endl;
 	onSocketError(error);
 	close(); // close on error
 }
@@ -332,7 +326,6 @@ void TCPSocket::onError(const scy::Error& error)
 void TCPSocket::onClose() 
 {		
 	TraceLS(this) << "On close" << endl;	
-	//emitClose();	
 	onSocketClose();
 }
 

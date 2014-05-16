@@ -20,6 +20,7 @@
 #include "scy/pacm/installtask.h"
 #include "scy/pacm/packagemanager.h"
 #include "scy/pacm/package.h"
+#include "scy/crypto/hash.h"
 #include "scy/archo/zip.h"
 #include "scy/http/authenticator.h"
 #include "scy/http/client.h"
@@ -258,9 +259,18 @@ void InstallTask::doExtract()
 		throw std::runtime_error("The local package file does not exist: " + archivePath);	
 	if (!_manager.isSupportedFileType(asset.fileName()))
 		throw std::runtime_error("The local package has an unsupported file extension: " + fs::extname(archivePath));
+
+	// Verify file checksum if one was provided
+	std::string originalChecksum(asset.checksum());
+	if (!originalChecksum.empty()) {
+		std::string computedChecksum(crypto::checksum(_manager.options().checksumAlgorithm, archivePath));		
+		DebugL << "Verify checksum: original=" << originalChecksum << ", computed=" << computedChecksum << endl;
+		if (originalChecksum != computedChecksum)
+			throw std::runtime_error("Checksum verification failed: " + fs::extname(archivePath));
+	}
 	
 	// Create the output directory
-	std::string tempDir(_manager.getIntermediatePackageDir(_local->id()));
+	std::string tempDir(_manager.getPackageDataDir(_local->id()));
 	
 	DebugL << "Unpacking archive: " << archivePath << " to " << tempDir << endl;
 
@@ -286,7 +296,7 @@ void InstallTask::doFinalize()
 	setState(this, InstallationState::Finalizing);
 
 	bool errors = false;
-	std::string tempDir(_manager.getIntermediatePackageDir(_local->id()));
+	std::string tempDir(_manager.getPackageDataDir(_local->id()));
 	std::string installDir = options().installDir;
 
 	// Ensure the install directory exists

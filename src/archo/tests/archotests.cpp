@@ -109,6 +109,6 @@ int main(int argc, char** argv)
 	{
 		arc::Tests app;
 	}	
-	Logger::shutdown();
+	Logger::destroy();
 	return 0;
 }

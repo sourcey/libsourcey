@@ -177,7 +177,7 @@ const char* getStatusCodeReason(StatusCode status)
 
 		// 400 range: client errors
 		case StatusCode::BadRequest              : return "Bad Request";
-		case StatusCode::NotAuthorized            : return "NotAuthorized";
+		case StatusCode::Unauthorized            : return "Unauthorized";
 		case StatusCode::PaymentRequired         : return "Payment Required";
 		case StatusCode::Forbidden               : return "Forbidden";
 		case StatusCode::NotFound                : return "Not Found";

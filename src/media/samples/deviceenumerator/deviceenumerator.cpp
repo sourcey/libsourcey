@@ -49,6 +49,6 @@ int main(int argc, char** argv)
 		}
 	}
 	
-	scy::Logger::shutdown();
+	scy::Logger::destroy();
 	return 0;
 }

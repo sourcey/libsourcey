@@ -65,9 +65,6 @@ SSLSocket::SSLSocket(uv::Loop* loop) :
 	_sslAdapter(this)
 {
 	TraceLS(this) << "Create" << endl;
-	//assert(_handle);
-	//_handle->data = this;
-	//_connectReq.data = this;
 }
 
 
@@ -78,9 +75,6 @@ SSLSocket::SSLSocket(SSLContext::Ptr context, uv::Loop* loop) :
 	_sslAdapter(this)
 {
 	TraceLS(this) << "Create" << endl;
-	//assert(_handle);
-	//_handle->data = this;
-	//_connectReq.data = this;
 }
 	
 
@@ -91,9 +85,6 @@ SSLSocket::SSLSocket(SSLContext::Ptr context, SSLSession::Ptr session, uv::Loop*
 	_sslAdapter(this)
 {
 	TraceLS(this) << "Create" << endl;
-	//assert(_handle);
-	//_handle->data = this;
-	//_connectReq.data = this;
 }
 
 	
@@ -105,14 +96,12 @@ SSLSocket::~SSLSocket()
 
 int SSLSocket::available() const
 {
-	//assert(initialized());
 	return _sslAdapter.available();
 }
 
 
 void SSLSocket::close()
 {
-	TraceLS(this) << "Close" << endl;
 	TCPSocket::close();
 }
 

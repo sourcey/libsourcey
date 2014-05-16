@@ -299,7 +299,7 @@ int main(int argc, char** argv)
 		app.finalize();
 		DebugL << "Finalizing: OK" << endl;
 	}
-	scy::Logger::shutdown();
+	scy::Logger::destroy();
 	return 0;
 }
 

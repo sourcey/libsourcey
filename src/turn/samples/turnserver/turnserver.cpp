@@ -131,6 +131,6 @@ int main(void)
 			}, &srv);
 		}
 	}
-	Logger::shutdown();
+	Logger::destroy();
 	return 0;
 }

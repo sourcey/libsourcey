@@ -52,6 +52,9 @@ GarbageCollector::~GarbageCollector()
 			<< "\n\tPending: " << _pending.size()
 			<< "\n\tFinalize: " << _finalize
 			<< std::endl;
+	
+	if (!_finalize)
+		finalize();
 
 	// The queue should be empty on shutdown if finalized correctly.
 	assert(_ready.empty() && _pending.empty());
@@ -148,7 +151,7 @@ unsigned long GarbageCollector::tid()
 }
 	
 
-void GarbageCollector::shutdown()
+void GarbageCollector::destroy()
 {
 	singleton.destroy();
 }
