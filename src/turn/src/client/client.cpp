@@ -265,7 +265,7 @@ void Client::authenticateRequest(stun::Message& request)
 		crypto::Hash engine("md5");
 		engine.update(_options.username + ":" + _realm + ":" + _options.password);
 		//return hex::encode(engine.digest());		
-		//std::string key(crypto::computeHash("MD5", _options.username + ":" + _realm + ":" + _options.password));
+		//std::string key(crypto::hash("MD5", _options.username + ":" + _realm + ":" + _options.password));
 		TraceL << "Generating HMAC: data=" << (_options.username + ":" + _realm + ":" + _options.password) << ", key=" << engine.digestStr() << endl;
 		auto integrityAttr = new stun::MessageIntegrity;
 		integrityAttr->setKey(engine.digestStr());

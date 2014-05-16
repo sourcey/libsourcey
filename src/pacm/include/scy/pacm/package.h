@@ -43,6 +43,7 @@ struct Package: public json::Value
 		virtual std::string fileName() const;
 		virtual std::string version() const;
 		virtual std::string sdkVersion() const;
+		virtual std::string checksum() const;
 		virtual std::string url(int index = 0) const;
 		virtual int fileSize() const;
 
@@ -75,6 +76,7 @@ struct Package: public json::Value
 //
 // Remote Package
 //
+
 
 struct RemotePackage: public Package
 	/// This class is a JSON representation of an
@@ -110,6 +112,7 @@ struct RemotePackage: public Package
 //
 // Local Package
 //
+
 
 struct LocalPackage: public Package
 	/// This class is a JSON representation of an
@@ -225,6 +228,7 @@ struct LocalPackage: public Package
 // Package Pair
 //
 
+
 struct PackagePair
 	/// This class provides pairing of a local and a
 	/// remote package.
@@ -254,15 +258,3 @@ typedef std::vector<PackagePair> PackagePairVec;
 
 
 #endif // SCY_Pacm_Package_H
-
-
-	
-	//virtual Asset getMatchingAsset(const Package::Asset& asset) const;
-	//virtual void setVersion(const std::string& message);
-
-
-	//virtual void setComplete(bool flag);
-		// This method is called when package installation
-		// completes in a successful or failed capacity. 
-		// The package version will be set from the asset,
-		// and the installed attribute will be updated.

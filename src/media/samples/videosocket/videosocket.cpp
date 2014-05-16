@@ -1,5 +1,6 @@
 #include "scy/application.h"
 #include "scy/packetstream.h"
+#include "scy/media/iencoder.h"
 #include "scy/media/videocapture.h"
 #include "scy/media/avinputreader.h"
 #include "scy/media/avpacketencoder.h"
@@ -52,7 +53,7 @@ public:
 		stream->attachSource(gVideoCapture, false);
 		
 		// Setup the encoder options
-		av::RecordingOptions options;	
+		av::EncoderOptions options;	
 		options.oformat = av::Format("MJPEG", "mjpeg", av::VideoCodec(
 			"MJPEG", "mjpeg", 400, 300, 25, 48000, 128000, "yuvj420p"));
 		gVideoCapture->getEncoderFormat(options.iformat);
@@ -68,7 +69,7 @@ public:
 		assert(0);
 			
 		// Start the stream
-		stream->Emitter += packetDelegate(this, &MPEGResponder::onVideoEncoded);
+		stream->emitter += packetDelegate(this, &MPEGResponder::onVideoEncoded);
 		stream->start();
 	}
 
@@ -90,7 +91,7 @@ public:
 	{
 		DebugL << "On close" << endl;
 			
-		stream->Emitter += packetDelegate(this, &MPEGResponder::onVideoEncoded);
+		stream->emitter += packetDelegate(this, &MPEGResponder::onVideoEncoded);
 		stream->stop();
 	}
 
