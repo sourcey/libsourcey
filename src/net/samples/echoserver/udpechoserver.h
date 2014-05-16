@@ -7,9 +7,6 @@ namespace scy {
 namespace net {
 
 
-#define PRINT_LATENCY_PACKET 1
-
-
 class UDPEchoServer: public SocketAdapter
 {
 public:
@@ -41,7 +38,7 @@ public:
 	{
 		DebugL << "On recv: " << peerAddress << ": " << buffer.size() << std::endl;
 
-#if PRINT_LATENCY_PACKET		
+#if 0		
 		std::string payload(bufferCast<const char*>(buffer), buffer.size());
 		payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
 		if (payload.length() < 12) {

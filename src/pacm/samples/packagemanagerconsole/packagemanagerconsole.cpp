@@ -46,10 +46,13 @@ int main(int argc, char** argv)
 {
 	scy::Logger::instance().add(new ConsoleChannel("debug", LTrace));
 
-	// Init SSL Context
-	net::SSLContext::Ptr ptrContext = new net::SSLContext(net::SSLContext::CLIENT_USE, "", "", "",
-		net::SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");	
-	net::SSLManager::instance().initializeClient(ptrContext);
+	// Init SSL Context 	
+	net::SSLManager::instance().initializeClient(
+		std::shared_ptr<net::SSLContext>(
+			new net::SSLContext(
+				net::SSLContext::CLIENT_USE, "", "", "", 
+				net::SSLContext::VERIFY_NONE, 9, false, 
+				"ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH")));
 
 	pacm::PackageManager::Options opts;
 	opts.endpoint = "https://anionu.com"; // "http://127.0.0.1:3000";	

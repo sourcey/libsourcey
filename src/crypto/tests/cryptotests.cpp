@@ -15,7 +15,7 @@
 #include <stdexcept>
 
 
-using namespace std;
+using std::endl;
 using namespace scy;
 
 
@@ -40,10 +40,13 @@ public:
 	{	
 		crypto::initializeEngine();
 				
+		testChecksum();
+#if 0
 		testHex();
 		testCipher("aes256", 10000);
 		testSHA1Hash();
 		testMD5Hash();
+#endif
 
 		scy::pause();
 
@@ -76,8 +79,7 @@ public:
 		{
 			Cipher ciph(algorithm);
 			clock_t start = clock();
-			for (std::size_t n = 1; n < iterations; n++)
-			{
+			for (int n = 1; n < iterations; n++) {
 				std::string in(n, 'x');
 				std::string out = ciph.encryptString(in, Cipher::Binary);
 				std::string result = ciph.decryptString(out, Cipher::Binary);
@@ -89,7 +91,7 @@ public:
 		{
 			Cipher ciph(algorithm);
 			clock_t start = clock();
-			for (std::size_t n = 1; n < iterations; n++)
+			for (int n = 1; n < iterations; n++)
 			{
 				std::string in(n, 'x');
 				std::string out = ciph.encryptString(in, Cipher::Base64);
@@ -102,7 +104,7 @@ public:
 		{
 			Cipher ciph(algorithm);
 			clock_t start = clock();
-			for (std::size_t n = 1; n < iterations; n++)
+			for (int n = 1; n < iterations; n++)
 			{
 				std::string in(n, 'x');
 				std::string out = ciph.encryptString(in, Cipher::BinHex);
@@ -146,16 +148,16 @@ public:
 
 		crypto::Hash engine("SHA1");
 		engine.update("abc", 3);
-		assert(crypto::toHex(engine.digest()) == "a9993e364706816aba3e25717850c26c9cd0d89d");
+		assert(hex::encode(engine.digest()) == "a9993e364706816aba3e25717850c26c9cd0d89d");
 		
 		engine.reset();
 		engine.update("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
-		assert (crypto::toHex(engine.digest()) == "84983e441c3bd26ebaae4aa1f95129e5e54670f1");
+		assert(hex::encode(engine.digest()) == "84983e441c3bd26ebaae4aa1f95129e5e54670f1");
 		
 		engine.reset();
 		for (int i = 0; i < 1000000; ++i)
 			engine.update('a');
-		assert (crypto::toHex(engine.digest()) == "34aa973cd4c4daa4f61eeb2bdbad27316534016f");
+		assert(hex::encode(engine.digest()) == "34aa973cd4c4daa4f61eeb2bdbad27316534016f");
 	}
 	
 	void testMD5Hash()
@@ -165,32 +167,43 @@ public:
 		// test vectors from RFC 1321
 
 		engine.update("");
-		assert (crypto::toHex(engine.digest()) == "d41d8cd98f00b204e9800998ecf8427e");
+		assert(hex::encode(engine.digest()) == "d41d8cd98f00b204e9800998ecf8427e");
 
 		engine.reset();
 		engine.update("a");
-		assert (crypto::toHex(engine.digest()) == "0cc175b9c0f1b6a831c399e269772661");
+		assert(hex::encode(engine.digest()) == "0cc175b9c0f1b6a831c399e269772661");
 		
 		engine.reset();
 		engine.update("abc");
-		assert (crypto::toHex(engine.digest()) == "900150983cd24fb0d6963f7d28e17f72");
+		assert(hex::encode(engine.digest()) == "900150983cd24fb0d6963f7d28e17f72");
 		
 		engine.reset();
 		engine.update("message digest");
-		assert (crypto::toHex(engine.digest()) == "f96b697d7cb7938d525a2f31aaf161d0");
+		assert(hex::encode(engine.digest()) == "f96b697d7cb7938d525a2f31aaf161d0");
 		
 		engine.reset();
 		engine.update("abcdefghijklmnopqrstuvwxyz");
-		assert (crypto::toHex(engine.digest()) == "c3fcd3d76192e4007dfb496cca67e13b");
+		assert(hex::encode(engine.digest()) == "c3fcd3d76192e4007dfb496cca67e13b");
 	
 		engine.reset();
 		engine.update("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 		engine.update("abcdefghijklmnopqrstuvwxyz0123456789");
-		assert (crypto::toHex(engine.digest()) == "d174ab98d277d9f5a5611c2c9f419d9f");
+		assert(hex::encode(engine.digest()) == "d174ab98d277d9f5a5611c2c9f419d9f");
 		
 		engine.reset();
 		engine.update("12345678901234567890123456789012345678901234567890123456789012345678901234567890");
-		assert (crypto::toHex(engine.digest()) == "57edf4a22be3c955ac49da2e2107b67a");
+		assert(hex::encode(engine.digest()) == "57edf4a22be3c955ac49da2e2107b67a");
+	}
+	
+	void testChecksum()
+	{
+		// require 'digest'
+		// ::Digest::MD5.file("D:/test.mp4").hexdigest
+		// 57e14d2f24ab34a6eb1de3eb82f02f33
+
+		std::string path("D:/test.mp4");
+
+		InfoL << "Checksum of " << path << " is " << crypto::checksum("MD5", path) << endl;
 	}
 };
 

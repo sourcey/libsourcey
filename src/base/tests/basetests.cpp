@@ -15,59 +15,13 @@
 #include "scy/ipc.h"
 #include "scy/util.h"
 
-#include "plugin/TestPlugin.h"
+#include "plugin/testplugin.h"
 
 #include <assert.h>
 
 
-using namespace std;
+using std::endl;
 using namespace scy;
-
-
-namespace
-{
-	class TestObj
-	{
-	public:
-		TestObj(): _rc(1)
-		{
-			++_count;
-		}
-				
-		void duplicate()
-		{
-			++_rc;
-		}
-		
-		void release()
-		{
-			if (--_rc == 0)
-				delete this;
-		}
-		
-		int rc() const
-		{
-			return _rc;
-		}
-		
-		static int count()
-		{
-			return _count;
-		}
-		
-	protected:
-		~TestObj()
-		{
-			--_count;
-		}
-		
-	private:
-		int _rc;
-		static int _count;
-	};
-	
-	int TestObj::_count = 0;
-}
 
 
 namespace scy {
@@ -82,10 +36,9 @@ public:
 	{	
 		testSignal();
 #if 0
-		testBuffer();
-		testHandle();
-		testNVCollection();
 		runFSTest();
+		testBuffer();
+		testNVCollection();
 		runPluginTest();
 		testLogger();
 		runPlatformTests();
@@ -200,31 +153,6 @@ public:
 			}		
 			*/
 		}
-	}
-		
-	
-	// ============================================================================
-	// Handle Test
-	//
-	void testHandle()
-	{
-		{
-			SharedPtr<TestObj> ptr = new TestObj;
-			assert(ptr->rc() == 1);
-			SharedPtr<TestObj> ptr2 = ptr;
-			assert(ptr->rc() == 2);
-			ptr2 = new TestObj;
-			assert(ptr->rc() == 1);
-			SharedPtr<TestObj> ptr3;
-			ptr3 = ptr2;
-			assert(ptr2->rc() == 2);
-			ptr3 = new TestObj;
-			assert(ptr2->rc() == 1);
-			ptr3 = ptr2;
-			assert(ptr2->rc() == 2);
-			assert(TestObj::count() > 0);
-		}
-		assert(TestObj::count() == 0);
 	}
 		
 	

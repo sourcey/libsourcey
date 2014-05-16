@@ -68,10 +68,35 @@ protected:
 };
 
 
-inline std::string computeHash(const std::string& algorithm, const std::string& data)
+inline std::string hash(const std::string& algorithm, const std::string& data)
 {
 	Hash engine(algorithm);
 	engine.update(data);
+	return hex::encode(engine.digest());
+}
+
+
+inline std::string hash(const std::string& algorithm, const void* data, unsigned length)
+{
+	Hash engine(algorithm);
+	engine.update(data, length);
+	return hex::encode(engine.digest());
+}
+
+
+inline std::string checksum(const std::string& algorithm, const std::string& path) 	
+    // Computes the MD5/SHA checksum for the given file.
+{	
+	std::ifstream fstr(path, std::ios::in | std::ios::binary);
+	if (!fstr.is_open())
+		throw std::runtime_error("Cannot open file: " + path);
+	
+	Hash engine(algorithm);
+	char buffer[4096];
+	while (fstr.read(buffer, 4096) || fstr.gcount() > 0) {
+		engine.update(buffer, (size_t)fstr.gcount());
+	}
+
 	return hex::encode(engine.digest());
 }
 	

@@ -129,6 +129,12 @@ std::string Package::Asset::sdkVersion() const
 }
 
 
+std::string Package::Asset::checksum() const
+{
+	return root.get("checksum", "").asString();
+}
+
+
 std::string Package::Asset::url(int index) const
 {
 	return root["mirrors"][(size_t)index]["url"].asString();
@@ -145,7 +151,8 @@ bool Package::Asset::valid() const
 {
 	return root.isMember("file-name")
 		&& root.isMember("version")
-		&& root.isMember("mirrors");
+		&& root.isMember("mirrors")
+		&& root.isMember("checksum");
 }
 
 
@@ -165,7 +172,9 @@ Package::Asset& Package::Asset::operator = (const Asset& r)
 
 bool Package::Asset::operator == (const Asset& r) const
 {
-	return fileName() == r.fileName();
+	return fileName() == r.fileName() 
+		&& version() == r.version() 
+		&& checksum() == r.checksum();
 }
 
 
