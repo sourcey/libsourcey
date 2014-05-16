@@ -223,7 +223,7 @@ int main(int argc, char** argv)
 	{
 		sked::Tests app;
 	}	
-	Logger::shutdown();
+	Logger::destroy();
 	//util::pause();
 	return 0;
 }

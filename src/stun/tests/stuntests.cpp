@@ -131,6 +131,6 @@ int main(int argc, char** argv)
 	{
 		stun::Tests app;
 	}	
-	Logger::shutdown();
+	Logger::destroy();
 	return 0;
 }

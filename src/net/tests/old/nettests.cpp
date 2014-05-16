@@ -746,6 +746,6 @@ int main(int argc, char** argv)
 	}
 	
 	system("pause");
-	Sourcey::Logger::shutdown();
+	Sourcey::Logger::destroy();
 	return 0;
 }

@@ -95,7 +95,7 @@ void PackageManager::createDirectories()
 {
 	Mutex::ScopedLock lock(_mutex);	
 	fs::mkdirr(_options.cacheDir);
-	fs::mkdirr(_options.interDir);
+	fs::mkdirr(_options.dataDir);
 	fs::mkdirr(_options.installDir);
 }
 
@@ -180,7 +180,7 @@ void PackageManager::loadLocalPackages()
 			throw std::runtime_error("Cannot load packages while there are active tasks.");	
 
 		_localPackages.clear();
-		dir = _options.interDir;
+		dir = _options.dataDir;
 	}
 	loadLocalPackages(dir);
 }
@@ -241,7 +241,7 @@ bool PackageManager::saveLocalPackage(LocalPackage& package, bool whiny)
 {
 	bool res = false;
 	try {
-		std::string path(util::format("%s/%s.json", options().interDir.c_str(), package.id().c_str()));
+		std::string path(util::format("%s/%s.json", options().dataDir.c_str(), package.id().c_str()));
 		DebugL << "Saving local package: " << package.id() << endl;
 		json::saveFile(path, package);
 		res = true;
@@ -312,71 +312,54 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 		<< endl;
 
 	// Return a specific asset version if requested
-	if (!options.version.empty()) {
+	std::string version(options.version.empty() ? pair.local->versionLock() : options.version);
+	if (!version.empty()) {
+		DebugL << "Get specific asset version: " << version << endl;
 
-		DebugL << "Get requested asset: " << options.version << endl;
-
-		// Ensure there is no version lock conflict
+		// Ensure the version lock option doesn't conflict with the saved package
+		// TODO: Is this really necessary, perhaps the option should override the saved package?
 		if (!pair.local->versionLock().empty() && options.version != pair.local->versionLock())
-			throw std::runtime_error("Invalid version option: Package locked at version: " + pair.local->versionLock());
+			throw std::runtime_error("Invalid version option: Package already locked at version: " + pair.local->versionLock());
+		
+		// Get the latest asset for locked SDK version or throw
+		Package::Asset asset = pair.remote->assetVersion(version);
+		assert(asset.version() == version);
+		
+		// Throw if we are already running the locked version
+		if (isInstalledAndVerified && !util::compareVersion(asset.version(), pair.local->version()))
+			throw std::runtime_error("Package is up-to-date at locked version: " + asset.version());
 		
 		// Return the requested asset or throw
-		return pair.remote->assetVersion(options.version);				
+		return asset;				
 	}
 	
-	// Return a specific SDK asset version if requested
-	if (!options.sdkVersion.empty()) {		
-				
-		DebugL << "Get requested SDK asset: " << options.sdkVersion << endl;
+	// Return the latest asset for a specific SDK asset version if requested
+	std::string sdkVersion(options.sdkVersion.empty() ? pair.local->sdkLockedVersion() : options.sdkVersion);
+	if (!sdkVersion.empty()) {
+		DebugL << "Get latest asset for SDK version: " << sdkVersion << endl;
 		
-		// Ensure there is no SDK version lock conflict
-		if (!pair.local->sdkLockedVersion().empty() && options.sdkVersion != pair.local->sdkLockedVersion())
-			throw std::runtime_error("Invalid SDK version option: Package is locked at SDK version: " + pair.local->sdkLockedVersion());
+		// Ensure the SDK version lock option doesn't conflict with the saved package
+		if (!pair.local->sdkLockedVersion().empty() && sdkVersion != pair.local->sdkLockedVersion())
+			throw std::runtime_error("Invalid SDK version option: Package already locked at SDK version: " + pair.local->sdkLockedVersion());
 		
 		// Get the latest asset for SDK version or throw
-		Package::Asset sdkAsset = pair.remote->latestSDKAsset(options.sdkVersion);
-		
-		// Check if there is anything to update to update or throw
-		if (isInstalledAndVerified && //pair.local->asset().sdkVersion() == pair.local->sdkLockedVersion() &&
-			!util::compareVersion(sdkAsset.version(), pair.local->version()))
-			throw std::runtime_error("Package is up to date at SDK version: " + options.sdkVersion);
+		Package::Asset sdkAsset = pair.remote->latestSDKAsset(sdkVersion);
+		assert(sdkAsset.sdkVersion() == sdkVersion);
 
+		// Throw if there are no newer assets for the locked version
+		if (isInstalledAndVerified && !util::compareVersion(sdkAsset.version(), pair.local->version()))
+			throw std::runtime_error("Package is up-to-date at SDK version: " + options.sdkVersion);
+
+		// Return the newer asset for the locked SDK version
 		return sdkAsset;
 	}
 	
-	// Return the locked asset version if set
-	if (!pair.local->versionLock().empty()) {
-
-		DebugL << "Get locked asset: " << pair.local->versionLock() << endl;
-		
-		// Check if there is anything to update to update or throw
-		if (isInstalledAndVerified && !util::compareVersion(pair.local->versionLock(), pair.local->version()))
-			throw std::runtime_error("Package is up to date at locked version: " + pair.local->versionLock());
-		
-		// Return the requested asset or throw
-		return pair.remote->assetVersion(pair.local->versionLock());				
-	}	
-	
-	// Return the locked SDK asset version if set
-	if (!pair.local->sdkLockedVersion().empty()) {
-
-		DebugL << "Get locked SDK asset: " << pair.local->sdkLockedVersion() << endl;
-		
-		// Get the latest asset for locked SDK version or throw
-		Package::Asset sdkAsset = pair.remote->latestSDKAsset(pair.local->sdkLockedVersion());
-		
-		// Check if there is anything to update to update or throw
-		if (isInstalledAndVerified && !util::compareVersion(sdkAsset.version(), pair.local->version()))
-			throw std::runtime_error("Package is up to date at SDK version: " + pair.local->sdkLockedVersion());
-
-		return sdkAsset;		
-	}
-	
-	// If all else fails return the latest asset if newer than the current one
+	// Try to return an asset which is newer than the current one or throw
 	Package::Asset latestAsset = pair.remote->latestAsset();
 	if (isInstalledAndVerified && !util::compareVersion(latestAsset.version(), pair.local->version()))
-		throw std::runtime_error("Package is up to date at version: " + pair.local->version());
+		throw std::runtime_error("Package is up-to-date at version: " + pair.local->version());
 	
+	// Return the newer asset
 	return latestAsset;
 			
 #if 0
@@ -393,7 +376,7 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 
 		// If everything is in order there is nothing to install
 		if (isInstalledAndVerified && pair.local->versionLock() == pair.local->version())
-			throw std::runtime_error("Package is up to date. Locked at version: " + pair.local->versionLock());
+			throw std::runtime_error("Package is up-to-date. Locked at version: " + pair.local->versionLock());
 
 		// Return the locked asset, or throw
 		return pair.remote->assetVersion(versionLock);
@@ -413,7 +396,7 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 		// If everything is in order there is nothing to install
 		if (isInstalledAndVerified && pair.local->asset().sdkVersion() == pair.local->sdkLockedVersion() &&
 			!util::compareVersion(sdkAsset.version(), pair.local->version()))
-			throw std::runtime_error("Package is up to date for SDK: " + pair.local->sdkLockedVersion());
+			throw std::runtime_error("Package is up-to-date for SDK: " + pair.local->sdkLockedVersion());
 
 		return sdkAsset;
 	}
@@ -421,7 +404,7 @@ Package::Asset PackageManager::getLatestInstallableAsset(const PackagePair& pair
 	// If all else fails return the latest asset!
 	Package::Asset latestAsset = pair.remote->latestAsset();
 	if (isInstalledAndVerified && !util::compareVersion(latestAsset.version(), pair.local->version()))
-		throw std::runtime_error("Package is up to date.");
+		throw std::runtime_error("Package is up-to-date.");
 	
 	return latestAsset;
 #endif
@@ -435,7 +418,7 @@ bool PackageManager::hasAvailableUpdates(const PackagePair& pair) const
 		return true; // has updates
 	}
 	catch (std::exception&) {}
-	return false; // up to date
+	return false; // up-to-date
 }
 
 
@@ -529,14 +512,13 @@ bool PackageManager::uninstallPackage(const std::string& id, bool whiny)
 			LocalPackage::Manifest manifest = package->manifest();
 			if (!manifest.empty()) {
 				for (auto it = manifest.root.begin(); it != manifest.root.end(); it++) {
-					DebugL << "Delete file: " << (*it).asString() << endl;	
-					try {							
-						//Poco::File file(package->getInstalledFilePath((*it).asString()));
-						//file.remove();						
-						fs::unlink(package->getInstalledFilePath((*it).asString()));
+					std::string path(package->getInstalledFilePath((*it).asString()));
+					DebugL << "Delete file: " << path << endl;	
+					try {											
+						fs::unlink(path);
 					}
 					catch (std::exception& exc) {
-						ErrorL << "Error deleting file: " << exc.what() << endl;
+						ErrorL << "Error deleting file: " << exc.what() << ": " << path << endl;
 					}
 				}
 				manifest.root.clear();
@@ -546,7 +528,7 @@ bool PackageManager::uninstallPackage(const std::string& id, bool whiny)
 			}	
 	
 			// Delete package manifest file
-			std::string path(options().interDir);
+			std::string path(options().dataDir);
 			fs::addnode(path, package->id() + ".json"); // manifest_
 			
 			DebugL << "Delete manifest: " << path << endl;	
@@ -927,9 +909,9 @@ std::string PackageManager::getCacheFilePath(const std::string& fileName)
 }
 
 	
-std::string PackageManager::getIntermediatePackageDir(const std::string& id)
+std::string PackageManager::getPackageDataDir(const std::string& id)
 {
-	std::string dir(options().interDir);
+	std::string dir(options().dataDir);
 	fs::addnode(dir, id);
 	fs::mkdirr(dir); // create it
 	return dir;

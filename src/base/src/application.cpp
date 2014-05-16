@@ -80,7 +80,7 @@ void Application::finalize()
 #endif
 			
 	// Shutdown the garbage collector to free memory
-	GarbageCollector::instance().finalize();
+	GarbageCollector::destroy();
 
 	// Run until handles are closed
 	run(); 	

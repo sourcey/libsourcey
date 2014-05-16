@@ -183,7 +183,7 @@ void Client::onHandshakeResponse(void* sender, const http::Response& response)
 	//	<< "\n\tResponse: " << body << endl;
 		
 	// The server can respond in three different ways:
-	// 401 NotAuthorized: If the server refuses to authorize the client to connect, 
+	// 401 Unauthorized: If the server refuses to authorize the client to connect, 
 	//		based on the supplied information (eg: Cookie header or custom query components).
 	// 503 Service Unavailable: If the server refuses the connection for any reason (eg: overload).
 	// 200 OK: The handshake was successful.

@@ -333,7 +333,7 @@ int main(int argc, char** argv)
 	{
 		net::Tests run;
 	}
-	Logger::shutdown();
+	Logger::destroy();
 	return 0;
 }
 

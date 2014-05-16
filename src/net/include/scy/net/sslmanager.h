@@ -43,9 +43,6 @@ class SSLManager
 	/// and private key passphrases.
 {
 public:
-	static SSLManager& instance();
-		// Returns the instance of the SSLManager singleton.
-
 	void initializeServer(SSLContext::Ptr ptrContext);
 		// Initializes the server side of the SSLManager server-side SSLContext.
 
@@ -76,6 +73,15 @@ public:
 		// Normally, it's not necessary to call this method directly, as this
 		// will be called either by uninitializeSSL(), or when
 		// the SSLManager instance is destroyed.
+
+	static SSLManager& instance();
+		// Returns the instance of the SSLManager singleton.
+
+	static void destroy();
+		// Shuts down and destroys the SSLManager singleton instance.
+	
+	static void initNoVerifyClient();
+		// Initializes a default no verify client context that's useful for testing.
 
 protected:
 	static int verifyClientCallback(int ok, X509_STORE_CTX* pStore);
@@ -123,6 +129,17 @@ inline int SSLManager::verifyServerCallback(int ok, X509_STORE_CTX* pStore)
 inline int SSLManager::verifyClientCallback(int ok, X509_STORE_CTX* pStore)
 {
 	return SSLManager::verifyCallback(false, ok, pStore);
+}
+
+
+inline void SSLManager::initNoVerifyClient()
+{
+	net::SSLManager::instance().initializeClient(
+		std::shared_ptr<net::SSLContext>(
+			new net::SSLContext(
+				net::SSLContext::CLIENT_USE, "", "", "", 
+				net::SSLContext::VERIFY_NONE, 9, false, 
+				"ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH")));
 }
 
 

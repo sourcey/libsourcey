@@ -43,10 +43,16 @@ class GarbageCollector
 {
 public:	
 	GarbageCollector();	
-	~GarbageCollector();
-		
+	~GarbageCollector();	
+
 	static GarbageCollector& instance();
 		// Returns the GarbageCollector singleton.
+	
+	static void destroy();
+		// Shuts down the garbage collector and deletes 
+		// the singleton instance.
+		// This method must be called from the main thread
+		// while the event loop is inactive.	
 	
 	template <class C> void deleteLater(C* ptr);
 		// Schedules a pointer for deferred deletion.
@@ -56,12 +62,6 @@ public:
 
 	void finalize();
 		// Frees all scheduled pointers now.
-		// This method must be called from the main thread
-		// while the event loop is inactive.
-	
-	static void shutdown();
-		// Shuts down the garbage collector and deletes 
-		// the singleton instance.
 		// This method must be called from the main thread
 		// while the event loop is inactive.
 

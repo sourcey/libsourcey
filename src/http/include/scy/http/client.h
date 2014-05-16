@@ -234,8 +234,11 @@ public:
 	static Client& instance();
 		// Returns the default HTTP Client singleton.
 
+	static void destroy();
+		// Destroys the default HTTP Client singleton.
+
 	void shutdown();
-		// Shutdown the Client, and close all connections.
+		// Shutdown the Client and close all connections.
 
 	template<class ConnectionT>
 	ClientConnection::Ptr createConnectionT(const URL& url, uv::Loop* loop = uv::defaultLoop())

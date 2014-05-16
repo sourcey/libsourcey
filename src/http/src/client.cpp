@@ -258,15 +258,26 @@ void ClientConnection::onClose()
 //
 
 
-Client& Client::instance() 
+Singleton<Client>& singleton() 
 {
 	static Singleton<Client> singleton;
-	return *singleton.get();
+	return singleton;
 }
 
 
-Client::Client() //:
-	//_timer()
+Client& Client::instance() 
+{
+	return *singleton().get();
+}
+	
+
+void Client::destroy()
+{
+	singleton().destroy();
+}
+
+
+Client::Client()
 {
 	TraceLS(this) << "Create" << endl;
 

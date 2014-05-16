@@ -150,11 +150,11 @@ public:
 		// Returns the default logger singleton.
 		// Logger instances may be created separately as needed.
 
-	static void shutdown();
-		// Shuts down the logger and deletes the singleton instance.
-
 	static void setInstance(Logger* logger, bool freeExisting = true);
 		// Sets the default logger singleton instance.
+
+	static void destroy();
+		// Destroys the default logger singleton instance.
 
 	void add(LogChannel* channel);
 		// Adds the given log channel.

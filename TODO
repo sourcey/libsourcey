@@ -1,9 +1,0 @@
-Version 1.0
-
-Replace SharedObject with std::shared_ptr
-Update Signal to use std::bind with lambdas
-Remove PacketStreamBase and use std::shared_ptr (wait for thread in destructor)
-Use lowercase filenames and directories
-Replace zlib with libarchive for better Pacman archive support
-CMake should pre-build dependencies automatically
-Stateful classes should use atomic 32

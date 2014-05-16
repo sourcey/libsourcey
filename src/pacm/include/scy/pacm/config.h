@@ -28,9 +28,18 @@ namespace pacm {
 #define DEFAULT_API_ENDPOINT "http://localhost:3000"
 #define DEFAULT_API_INDEX_URI "/packages.json"
 #define DEFAULT_PACKAGE_CACHE_DIR "pacm/cache"
-#define DEFAULT_PACKAGE_INTERMEDIATE_DIR "pacm/data"
+#define DEFAULT_PACKAGE_DATA_DIR "pacm/data"
 #define DEFAULT_PACKAGE_INSTALL_DIR "pacm/install"
+
+#ifdef WIN32
 #define DEFAULT_PLATFORM "win32"
+#elif APPLE
+#define DEFAULT_PLATFORM "apple"
+#elif LINUX
+#define DEFAULT_PLATFORM "linux"
+#else
+#error "Unknown platform"
+#endif
 
 
 } } // namespace scy::pacm

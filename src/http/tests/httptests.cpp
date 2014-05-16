@@ -334,7 +334,7 @@ public:
 		}
 #if TEST_SSL
 			// Shutdown SSL
-			net::SSLManager::instance().shutdown();
+			net::SSLManager::destroy();
 #endif
 
 		// Shutdown the garbage collector so we can free memory.
@@ -835,7 +835,7 @@ int main(int argc, char** argv)
 	{
 		http::Tests app;
 	}
-	Logger::shutdown();
+	Logger::destroy();
 	return 0;
 }
 

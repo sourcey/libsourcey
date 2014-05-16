@@ -64,7 +64,7 @@ void Logger::setInstance(Logger* logger, bool freeExisting)
 }
 
 	
-void Logger::shutdown()
+void Logger::destroy()
 {
 	singleton.destroy();
 }

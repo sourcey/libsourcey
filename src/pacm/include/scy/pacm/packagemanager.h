@@ -66,25 +66,26 @@ public:
 		
 		// Directories & Paths
 		std::string cacheDir;
-		std::string interDir;
+		std::string dataDir;
 		std::string installDir;
 
 		// Platform (win32, linux, mac)
 		std::string platform;
+		std::string checksumAlgorithm;
 
 		// This flag tells the package manager weather or not
 		// to clear the package cache if installation fails.
 		bool clearFailedCache;
 
-		Options() {	
-			std::string root(getCwd());
+		Options(const std::string& root = getCwd()) {	
 			cacheDir				= root + fs::separator + DEFAULT_PACKAGE_CACHE_DIR;
-			interDir				= root + fs::separator + DEFAULT_PACKAGE_INTERMEDIATE_DIR;
+			dataDir				= root + fs::separator + DEFAULT_PACKAGE_DATA_DIR;
 			installDir				= root + fs::separator + DEFAULT_PACKAGE_INSTALL_DIR;
 			endpoint				= DEFAULT_API_ENDPOINT;
 			indexURI				= DEFAULT_API_INDEX_URI;
 			platform				= DEFAULT_PLATFORM; // TODO: Set for current system
 			clearFailedCache		= true;
+			checksumAlgorithm       = "MD5";
 		}
 	};
 
@@ -128,7 +129,7 @@ public:
 		const InstallOptions& options = InstallOptions()); //, bool whiny = false
 		// Installs a single package.
 		// The returned InstallTask must be started.
-		// If the package is already up to date, a nullptr will be returned.
+		// If the package is already up-to-date, a nullptr will be returned.
 		// Any other error will throw a std::runtime_error.
 
 	virtual bool installPackages(const StringVec& ids, 
@@ -224,7 +225,7 @@ public:
 	virtual Package::Asset getLatestInstallableAsset(const PackagePair& pair, 
 		const InstallOptions& options = InstallOptions()) const;
 		// Returns the best asset to install, or throws a descriptive exception
-		// if no updates are available, or if the package is already up to date.
+		// if no updates are available, or if the package is already up-to-date.
 		// This method takes version and SDK locks into consideration.
 		
 	virtual bool hasAvailableUpdates(const PackagePair& pair) const;
@@ -252,8 +253,8 @@ public:
 		// Returns the full path of the cached file if it exists,
 		// or an empty path if the file doesn't exist.
 
-	std::string getIntermediatePackageDir(const std::string& id);
-		// Returns the the intermediate package directory for the
+	std::string getPackageDataDir(const std::string& id);
+		// Returns the package data directory for the
 		// given package ID.
 	
 	// 

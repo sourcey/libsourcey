@@ -899,7 +899,7 @@ int main(int argc, char** argv)
 
 	// Cleanup singleton instances
 	GarbageCollector::shutdown();
-	Logger::shutdown();
+	Logger::destroy();
 	return 0;
 }
 

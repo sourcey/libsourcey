@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 		//srv.shutdown();
 		//app.waitForShutdown(onShutdown, &srv);
 	}
-	Logger::shutdown();
+	Logger::destroy();
 	*/
 	return 0;
 }

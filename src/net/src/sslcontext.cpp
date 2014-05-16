@@ -205,6 +205,17 @@ void SSLContext::usePrivateKey(const crypto::RSAKey& key)
 }
 
 
+void SSLContext::addVerificationCertificate(const crypto::X509Certificate& certificate)
+{
+	int errCode = X509_STORE_add_cert(SSL_CTX_get_cert_store(_sslContext), const_cast<X509*>(certificate.certificate()));
+	if (errCode != 1)
+	{
+		std::string msg = getLastError();
+		throw std::runtime_error("SSL Error: Cannot add verification certificate: " + msg);
+	}
+}
+
+
 void SSLContext::enableSessionCache(bool flag)
 {
 	if (flag)
@@ -324,7 +335,6 @@ void SSLContext::createSSLContext()
 
 
 } } // namespace scy::net
-
 
 
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.

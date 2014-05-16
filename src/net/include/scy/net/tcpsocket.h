@@ -24,9 +24,9 @@
 #include "scy/uv/uvpp.h"
 #include "scy/net/tcpsocket.h"
 #include "scy/net/socket.h"
-#include "scy/net/stream.h"
 #include "scy/net/address.h"
 #include "scy/net/types.h"
+#include "scy/stream.h"
 
 
 namespace scy {

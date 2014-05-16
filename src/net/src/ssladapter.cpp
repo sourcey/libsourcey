@@ -182,14 +182,12 @@ void SSLAdapter::handleError(int rc)
 		flushWriteBIO();
  		break;
 	case SSL_ERROR_WANT_WRITE:
-		// TODO
-		assert(0);
+		assert(0 && "TODO");
  		break;
 	case SSL_ERROR_WANT_CONNECT: 
 	case SSL_ERROR_WANT_ACCEPT:
 	case SSL_ERROR_WANT_X509_LOOKUP:
-		// should not occur
-		assert(0);
+		assert(0 && "should not occur");
  		break;
 	default:
 		char buffer[256];

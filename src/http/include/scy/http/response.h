@@ -55,7 +55,7 @@ enum class StatusCode
 	TemporaryRedirect = 307,
 
 	BadRequest = 400,
-	NotAuthorized = 401,
+	Unauthorized = 401,
 	PaymentRequired = 402,
 	Forbidden = 403,
 	NotFound = 404,

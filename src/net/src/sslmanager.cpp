@@ -51,15 +51,29 @@ void SSLManager::shutdown()
 }
 
 
+/*
 namespace
 {
 	static Singleton<SSLManager> singleton;
+}
+*/
+
+Singleton<SSLManager>& singleton() 
+{
+	static Singleton<SSLManager> singleton;
+	return singleton;
 }
 
 
 SSLManager& SSLManager::instance()
 {
-	return *singleton.get();
+	return *singleton().get();
+}
+
+
+void SSLManager::destroy()
+{
+	singleton().destroy();
 }
 
 

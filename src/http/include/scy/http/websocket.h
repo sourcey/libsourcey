@@ -105,7 +105,7 @@ enum ErrorCodes
 		/// No Sec-WebSocket-Key header in handshake request.
 	ErrorHandshakeAccept         = 5,
 		/// No Sec-WebSocket-Accept header or wrong value.
-	ErrorNotAuthorized            = 6,
+	ErrorUnauthorized            = 6,
 		/// The server rejected the username or password for authentication.
 	ErrorPayloadTooBig           = 10,
 		/// Payload too big for supplied buffer.

@@ -61,6 +61,6 @@ int main(int argc, char** argv)
 		}
 		app.finalize();
 	}
-	Logger::shutdown();
+	Logger::destroy();
 	return 0;
 }
