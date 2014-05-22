@@ -125,7 +125,7 @@ void TCPClient::sendData(const char* data, std::size_t size, const net::Address&
 	if (!hasPermission(peerAddress.host()))	
 		throw std::runtime_error("No permission exists for peer: " + peerAddress.host());	
 
-	auto conn = connections().get(peerAddress, false);
+	auto conn = connections().get(peerAddress, nullptr);
 	if (!conn)	
 		throw std::runtime_error("No peer exists for: " + peerAddress.toString());
 	
@@ -267,7 +267,7 @@ void TCPClient::handleConnectionBindResponse(const stun::Message& response)
 	auto transaction = reinterpret_cast<stun::Transaction*>(response.opaque);
 	auto req = reinterpret_cast<RelayConnectionBinding*>(transaction->socket->opaque);
 	
-	auto conn = connections().get(req->peerAddress, false);
+	auto conn = connections().get(req->peerAddress, nullptr);
 	if (!conn) {
 		assert(0);
 		return;
