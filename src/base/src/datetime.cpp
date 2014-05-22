@@ -24,6 +24,7 @@
 #include "scy/time.h"
 #include "scy/numeric.h"
 
+#include <cmath>
 #include <cctype>
 #include <ctime>
 #if defined(_WIN32_WCE)
