@@ -189,7 +189,7 @@ template<typename T> inline ConstBuffer constBuffer(Buffer& buf)
 
 template<typename T> inline MutableBuffer constBuffer(const Buffer& buf)
 {
-	return ConstBuffer(reinterpret_cast<void*>(const_cast<const char *>(buf.data())), buf.size());
+	return ConstBuffer(reinterpret_cast<void*>(const_cast<char *>(buf.data())), buf.size());
 }
 
 
