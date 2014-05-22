@@ -328,7 +328,7 @@ public:
 		}
 
 		attach(std::make_shared<PacketAdapterReference>(
-			source, new ScopedSharedPointer<C>(ptr), 0, syncState));
+			proc, new ScopedSharedPointer<C>(ptr), 0, syncState));
 	}
 
 	virtual bool detach(PacketProcessor* proc);
