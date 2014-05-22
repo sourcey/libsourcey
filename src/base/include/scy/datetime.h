@@ -1740,7 +1740,7 @@ class TimedToken: public Timeout
 {
 public:
 	TimedToken(long duration);
-	TimedToken(const std::string& id, long duration);
+	TimedToken(const std::string& id = util::randomString(32), long duration = 1000);
 	
 	std::string id() const { return _id; }
 	

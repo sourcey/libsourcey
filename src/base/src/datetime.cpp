@@ -1837,7 +1837,7 @@ TimedToken::TimedToken(long duration) :
 }
 
 
-TimedToken::TimedToken(const std::string& id = util::randomString(32), long duration = 10000) : 
+TimedToken::TimedToken(const std::string& id, long duration) : 
 	Timeout(duration), _id(id) 
 {
 }
