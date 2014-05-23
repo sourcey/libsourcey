@@ -63,36 +63,6 @@ static void uv__stream_io(uv_loop_t* loop, uv__io_t* w, unsigned int events);
 static size_t uv__write_req_size(uv_write_t* req);
 
 
-/* Used by the accept() EMFILE party trick. */
-static int uv__open_cloexec(const char* path, int flags) {
-  int err;
-  int fd;
-
-#if defined(__linux__)
-  fd = open(path, flags | UV__O_CLOEXEC);
-  if (fd != -1)
-    return fd;
-
-  if (errno != EINVAL)
-    return -errno;
-
-  /* O_CLOEXEC not supported. */
-#endif
-
-  fd = open(path, flags);
-  if (fd == -1)
-    return -errno;
-
-  err = uv__cloexec(fd, 1);
-  if (err) {
-    close(fd);
-    return err;
-  }
-
-  return fd;
-}
-
-
 static size_t uv_count_bufs(const uv_buf_t bufs[], unsigned int nbufs) {
   unsigned int i;
   size_t bytes;
@@ -112,13 +82,13 @@ void uv__stream_init(uv_loop_t* loop,
 
   uv__handle_init(loop, (uv_handle_t*)stream, type);
   stream->read_cb = NULL;
-  stream->read2_cb = NULL;
   stream->alloc_cb = NULL;
   stream->close_cb = NULL;
   stream->connection_cb = NULL;
   stream->connect_req = NULL;
   stream->shutdown_req = NULL;
   stream->accepted_fd = -1;
+  stream->queued_fds = NULL;
   stream->delayed_error = 0;
   QUEUE_INIT(&stream->write_queue);
   QUEUE_INIT(&stream->write_completed_queue);
@@ -135,6 +105,31 @@ void uv__stream_init(uv_loop_t* loop,
 #endif /* defined(__APPLE_) */
 
   uv__io_init(&stream->io_watcher, uv__stream_io, -1);
+}
+
+
+static void uv__stream_osx_interrupt_select(uv_stream_t* stream) {
+#if defined(__APPLE__)
+  /* Notify select() thread about state change */
+  uv__stream_select_t* s;
+  int r;
+
+  s = stream->select;
+  if (s == NULL)
+    return;
+
+  /* Interrupt select() loop
+   * NOTE: fake_fd and int_fd are socketpair(), thus writing to one will
+   * emit read event on other side
+   */
+  do
+    r = write(s->fake_fd, "x", 1);
+  while (r == -1 && errno == EINTR);
+
+  assert(r == 1);
+#else  /* !defined(__APPLE__) */
+  /* No-op on any other platform */
+#endif  /* !defined(__APPLE__) */
 }
 
 
@@ -168,9 +163,9 @@ static void uv__stream_osx_select(void* arg) {
     FD_ZERO(&sread);
     FD_ZERO(&swrite);
 
-    if (uv_is_readable(stream))
+    if (uv__io_active(&stream->io_watcher, UV__POLLIN))
       FD_SET(fd, &sread);
-    if (uv_is_writable(stream))
+    if (uv__io_active(&stream->io_watcher, UV__POLLOUT))
       FD_SET(fd, &swrite);
     FD_SET(s->int_fd, &sread);
 
@@ -229,26 +224,7 @@ static void uv__stream_osx_select(void* arg) {
 }
 
 
-static void uv__stream_osx_interrupt_select(uv_stream_t* stream) {
-  /* Notify select() thread about state change */
-  uv__stream_select_t* s;
-  int r;
-
-  s = stream->select;
-
-  /* Interrupt select() loop
-   * NOTE: fake_fd and int_fd are socketpair(), thus writing to one will
-   * emit read event on other side
-   */
-  do
-    r = write(s->fake_fd, "x", 1);
-  while (r == -1 && errno == EINTR);
-
-  assert(r == 1);
-}
-
-
-static void uv__stream_osx_select_cb(uv_async_t* handle, int status) {
+static void uv__stream_osx_select_cb(uv_async_t* handle) {
   uv__stream_select_t* s;
   uv_stream_t* stream;
   int events;
@@ -295,10 +271,11 @@ int uv__stream_try_select(uv_stream_t* stream, int* fd) {
   int err;
   int ret;
   int kq;
+  int old_fd;
 
   kq = kqueue();
   if (kq == -1) {
-    fprintf(stderr, "(libuv) Failed to create kqueue (%d)\n", errno);
+    perror("(libuv) kqueue()");
     return -errno;
   }
 
@@ -309,7 +286,7 @@ int uv__stream_try_select(uv_stream_t* stream, int* fd) {
   timeout.tv_nsec = 1;
 
   ret = kevent(kq, filter, 1, events, 1, &timeout);
-  SAVE_ERRNO(close(kq));
+  uv__close(kq);
 
   if (ret == -1)
     return -errno;
@@ -347,18 +324,22 @@ int uv__stream_try_select(uv_stream_t* stream, int* fd) {
   s->fake_fd = fds[0];
   s->int_fd = fds[1];
 
-  if (uv_thread_create(&s->thread, uv__stream_osx_select, stream))
-    goto fatal4;
-
+  old_fd = *fd;
   s->stream = stream;
   stream->select = s;
   *fd = s->fake_fd;
 
+  if (uv_thread_create(&s->thread, uv__stream_osx_select, stream))
+    goto fatal4;
+
   return 0;
 
 fatal4:
-  close(s->fake_fd);
-  close(s->int_fd);
+  s->stream = NULL;
+  stream->select = NULL;
+  *fd = old_fd;
+  uv__close(s->fake_fd);
+  uv__close(s->int_fd);
   s->fake_fd = -1;
   s->int_fd = -1;
 fatal3:
@@ -462,27 +443,22 @@ void uv__stream_destroy(uv_stream_t* stream) {
  * calling close() and accept().
  */
 static int uv__emfile_trick(uv_loop_t* loop, int accept_fd) {
-  int fd;
+  int err;
 
   if (loop->emfile_fd == -1)
     return -EMFILE;
 
-  close(loop->emfile_fd);
+  uv__close(loop->emfile_fd);
+  loop->emfile_fd = -1;
 
-  for (;;) {
-    fd = uv__accept(accept_fd);
+  do {
+    err = uv__accept(accept_fd);
+    if (err >= 0)
+      uv__close(err);
+  } while (err >= 0 || err == -EINTR);
 
-    if (fd != -1) {
-      close(fd);
-      continue;
-    }
-
-    if (errno == EINTR)
-      continue;
-
-    SAVE_ERRNO(loop->emfile_fd = uv__open_cloexec("/", O_RDONLY));
-    return -errno;
-  }
+  SAVE_ERRNO(loop->emfile_fd = uv__open_cloexec("/", O_RDONLY));
+  return err;
 }
 
 
@@ -564,6 +540,7 @@ int uv_accept(uv_stream_t* server, uv_stream_t* client) {
   if (server->accepted_fd == -1)
     return -EAGAIN;
 
+  err = 0;
   switch (client->type) {
     case UV_NAMED_PIPE:
     case UV_TCP:
@@ -572,18 +549,16 @@ int uv_accept(uv_stream_t* server, uv_stream_t* client) {
                             UV_STREAM_READABLE | UV_STREAM_WRITABLE);
       if (err) {
         /* TODO handle error */
-        close(server->accepted_fd);
-        server->accepted_fd = -1;
-        return err;
+        uv__close(server->accepted_fd);
+        goto done;
       }
       break;
 
     case UV_UDP:
       err = uv_udp_open((uv_udp_t*) client, server->accepted_fd);
       if (err) {
-        close(server->accepted_fd);
-        server->accepted_fd = -1;
-        return err;
+        uv__close(server->accepted_fd);
+        goto done;
       }
       break;
 
@@ -591,9 +566,33 @@ int uv_accept(uv_stream_t* server, uv_stream_t* client) {
       assert(0);
   }
 
-  uv__io_start(server->loop, &server->io_watcher, UV__POLLIN);
-  server->accepted_fd = -1;
-  return 0;
+done:
+  /* Process queued fds */
+  if (server->queued_fds != NULL) {
+    uv__stream_queued_fds_t* queued_fds;
+
+    queued_fds = server->queued_fds;
+
+    /* Read first */
+    server->accepted_fd = queued_fds->fds[0];
+
+    /* All read, free */
+    assert(queued_fds->offset > 0);
+    if (--queued_fds->offset == 0) {
+      free(queued_fds);
+      server->queued_fds = NULL;
+    } else {
+      /* Shift rest */
+      memmove(queued_fds->fds,
+              queued_fds->fds + 1,
+              queued_fds->offset * sizeof(*queued_fds->fds));
+    }
+  } else {
+    server->accepted_fd = -1;
+    if (err == 0)
+      uv__io_start(server->loop, &server->io_watcher, UV__POLLIN);
+  }
+  return err;
 }
 
 
@@ -627,6 +626,7 @@ static void uv__drain(uv_stream_t* stream) {
 
   assert(QUEUE_EMPTY(&stream->write_queue));
   uv__io_stop(stream->loop, &stream->io_watcher, UV__POLLOUT);
+  uv__stream_osx_interrupt_select(stream);
 
   /* Shutdown? */
   if ((stream->flags & UV_STREAM_SHUTTING) &&
@@ -673,8 +673,8 @@ static void uv__write_req_finish(uv_write_t* req) {
   /* Only free when there was no error. On error, we touch up write_queue_size
    * right before making the callback. The reason we don't do that right away
    * is that a write_queue_size > 0 is our only way to signal to the user that
-   * he should stop writing - which he should if we got an error. Something to
-   * revisit in future revisions of the libuv API.
+   * they should stop writing - which they should if we got an error. Something
+   * to revisit in future revisions of the libuv API.
    */
   if (req->error == 0) {
     if (req->bufs != req->bufsml)
@@ -770,12 +770,12 @@ start:
     msg.msg_flags = 0;
 
     msg.msg_control = (void*) scratch;
-    msg.msg_controllen = CMSG_LEN(sizeof(fd_to_send));
+    msg.msg_controllen = CMSG_SPACE(sizeof(fd_to_send));
 
     cmsg = CMSG_FIRSTHDR(&msg);
     cmsg->cmsg_level = SOL_SOCKET;
     cmsg->cmsg_type = SCM_RIGHTS;
-    cmsg->cmsg_len = msg.msg_controllen;
+    cmsg->cmsg_len = CMSG_LEN(sizeof(fd_to_send));
 
     /* silence aliasing warning */
     {
@@ -807,6 +807,7 @@ start:
       uv__io_stop(stream->loop, &stream->io_watcher, UV__POLLOUT);
       if (!uv__io_active(&stream->io_watcher, UV__POLLIN))
         uv__handle_stop(stream);
+      uv__stream_osx_interrupt_select(stream);
       return;
     } else if (stream->flags & UV_STREAM_BLOCKING) {
       /* If this is a blocking stream, try again. */
@@ -868,6 +869,9 @@ start:
 
   /* We're not done. */
   uv__io_start(stream->loop, &stream->io_watcher, UV__POLLOUT);
+
+  /* Notify select() thread about state change */
+  uv__stream_osx_interrupt_select(stream);
 }
 
 
@@ -902,7 +906,7 @@ static void uv__write_callbacks(uv_stream_t* stream) {
 }
 
 
-static uv_handle_type uv__handle_type(int fd) {
+uv_handle_type uv__handle_type(int fd) {
   struct sockaddr_storage ss;
   socklen_t len;
   int type;
@@ -936,23 +940,106 @@ static uv_handle_type uv__handle_type(int fd) {
 }
 
 
-static void uv__stream_read_cb(uv_stream_t* stream,
-                               int status,
-                               const uv_buf_t* buf,
-                               uv_handle_type type) {
-  if (stream->read_cb != NULL)
-    stream->read_cb(stream, status, buf);
-  else
-    stream->read2_cb((uv_pipe_t*) stream, status, buf, type);
-}
-
-
 static void uv__stream_eof(uv_stream_t* stream, const uv_buf_t* buf) {
   stream->flags |= UV_STREAM_READ_EOF;
   uv__io_stop(stream->loop, &stream->io_watcher, UV__POLLIN);
   if (!uv__io_active(&stream->io_watcher, UV__POLLOUT))
     uv__handle_stop(stream);
-  uv__stream_read_cb(stream, UV_EOF, buf, UV_UNKNOWN_HANDLE);
+  uv__stream_osx_interrupt_select(stream);
+  stream->read_cb(stream, UV_EOF, buf);
+}
+
+
+static int uv__stream_queue_fd(uv_stream_t* stream, int fd) {
+  uv__stream_queued_fds_t* queued_fds;
+  unsigned int queue_size;
+
+  queued_fds = stream->queued_fds;
+  if (queued_fds == NULL) {
+    queue_size = 8;
+    queued_fds = malloc((queue_size - 1) * sizeof(*queued_fds->fds) +
+                        sizeof(*queued_fds));
+    if (queued_fds == NULL)
+      return -ENOMEM;
+    queued_fds->size = queue_size;
+    queued_fds->offset = 0;
+    stream->queued_fds = queued_fds;
+
+    /* Grow */
+  } else if (queued_fds->size == queued_fds->offset) {
+    queue_size = queued_fds->size + 8;
+    queued_fds = realloc(queued_fds,
+                         (queue_size - 1) * sizeof(*queued_fds->fds) +
+                             sizeof(*queued_fds));
+
+    /*
+     * Allocation failure, report back.
+     * NOTE: if it is fatal - sockets will be closed in uv__stream_close
+     */
+    if (queued_fds == NULL)
+      return -ENOMEM;
+    queued_fds->size = queue_size;
+    stream->queued_fds = queued_fds;
+  }
+
+  /* Put fd in a queue */
+  queued_fds->fds[queued_fds->offset++] = fd;
+
+  return 0;
+}
+
+
+#define UV__CMSG_FD_COUNT 64
+#define UV__CMSG_FD_SIZE (UV__CMSG_FD_COUNT * sizeof(int))
+
+
+static int uv__stream_recv_cmsg(uv_stream_t* stream, struct msghdr* msg) {
+  struct cmsghdr* cmsg;
+
+  for (cmsg = CMSG_FIRSTHDR(msg); cmsg != NULL; cmsg = CMSG_NXTHDR(msg, cmsg)) {
+    char* start;
+    char* end;
+    int err;
+    void* pv;
+    int* pi;
+    unsigned int i;
+    unsigned int count;
+
+    if (cmsg->cmsg_type != SCM_RIGHTS) {
+      fprintf(stderr, "ignoring non-SCM_RIGHTS ancillary data: %d\n",
+          cmsg->cmsg_type);
+      continue;
+    }
+
+    /* silence aliasing warning */
+    pv = CMSG_DATA(cmsg);
+    pi = pv;
+
+    /* Count available fds */
+    start = (char*) cmsg;
+    end = (char*) cmsg + cmsg->cmsg_len;
+    count = 0;
+    while (start + CMSG_LEN(count * sizeof(*pi)) < end)
+      count++;
+    assert(start + CMSG_LEN(count * sizeof(*pi)) == end);
+
+    for (i = 0; i < count; i++) {
+      /* Already has accepted fd, queue now */
+      if (stream->accepted_fd != -1) {
+        err = uv__stream_queue_fd(stream, pi[i]);
+        if (err != 0) {
+          /* Close rest */
+          for (; i < count; i++)
+            uv__close(pi[i]);
+          return err;
+        }
+      } else {
+        stream->accepted_fd = pi[i];
+      }
+    }
+  }
+
+  return 0;
 }
 
 
@@ -960,9 +1047,10 @@ static void uv__read(uv_stream_t* stream) {
   uv_buf_t buf;
   ssize_t nread;
   struct msghdr msg;
-  struct cmsghdr* cmsg;
-  char cmsg_space[64];
+  char cmsg_space[CMSG_SPACE(UV__CMSG_FD_SIZE)];
   int count;
+  int err;
+  int is_ipc;
 
   stream->flags &= ~UV_STREAM_READ_PARTIAL;
 
@@ -971,10 +1059,12 @@ static void uv__read(uv_stream_t* stream) {
    */
   count = 32;
 
+  is_ipc = stream->type == UV_NAMED_PIPE && ((uv_pipe_t*) stream)->ipc;
+
   /* XXX: Maybe instead of having UV_STREAM_READING we just test if
    * tcp->read_cb is NULL or not?
    */
-  while ((stream->read_cb || stream->read2_cb)
+  while (stream->read_cb
       && (stream->flags & UV_STREAM_READING)
       && (count-- > 0)) {
     assert(stream->alloc_cb != NULL);
@@ -982,32 +1072,31 @@ static void uv__read(uv_stream_t* stream) {
     stream->alloc_cb((uv_handle_t*)stream, 64 * 1024, &buf);
     if (buf.len == 0) {
       /* User indicates it can't or won't handle the read. */
-      uv__stream_read_cb(stream, UV_ENOBUFS, &buf, UV_UNKNOWN_HANDLE);
+      stream->read_cb(stream, UV_ENOBUFS, &buf);
       return;
     }
 
     assert(buf.base != NULL);
     assert(uv__stream_fd(stream) >= 0);
 
-    if (stream->read_cb) {
+    if (!is_ipc) {
       do {
         nread = read(uv__stream_fd(stream), buf.base, buf.len);
       }
       while (nread < 0 && errno == EINTR);
     } else {
-      assert(stream->read2_cb);
-      /* read2_cb uses recvmsg */
+      /* ipc uses recvmsg */
       msg.msg_flags = 0;
       msg.msg_iov = (struct iovec*) &buf;
       msg.msg_iovlen = 1;
       msg.msg_name = NULL;
       msg.msg_namelen = 0;
       /* Set up to receive a descriptor even if one isn't in the message */
-      msg.msg_controllen = 64;
-      msg.msg_control = (void*)  cmsg_space;
+      msg.msg_controllen = sizeof(cmsg_space);
+      msg.msg_control = cmsg_space;
 
       do {
-        nread = recvmsg(uv__stream_fd(stream), &msg, 0);
+        nread = uv__recvmsg(uv__stream_fd(stream), &msg, 0);
       }
       while (nread < 0 && errno == EINTR);
     }
@@ -1018,11 +1107,12 @@ static void uv__read(uv_stream_t* stream) {
         /* Wait for the next one. */
         if (stream->flags & UV_STREAM_READING) {
           uv__io_start(stream->loop, &stream->io_watcher, UV__POLLIN);
+          uv__stream_osx_interrupt_select(stream);
         }
-        uv__stream_read_cb(stream, 0, &buf, UV_UNKNOWN_HANDLE);
+        stream->read_cb(stream, 0, &buf);
       } else {
         /* Error. User should call uv_close(). */
-        uv__stream_read_cb(stream, -errno, &buf, UV_UNKNOWN_HANDLE);
+        stream->read_cb(stream, -errno, &buf);
         assert(!uv__io_active(&stream->io_watcher, UV__POLLIN) &&
                "stream->read_cb(status=-1) did not call uv_close()");
       }
@@ -1034,50 +1124,14 @@ static void uv__read(uv_stream_t* stream) {
       /* Successful read */
       ssize_t buflen = buf.len;
 
-      if (stream->read_cb) {
-        stream->read_cb(stream, nread, &buf);
-      } else {
-        assert(stream->read2_cb);
-
-        /*
-         * XXX: Some implementations can send multiple file descriptors in a
-         * single message. We should be using CMSG_NXTHDR() to walk the
-         * chain to get at them all. This would require changing the API to
-         * hand these back up the caller, is a pain.
-         */
-
-        for (cmsg = CMSG_FIRSTHDR(&msg);
-             msg.msg_controllen > 0 && cmsg != NULL;
-             cmsg = CMSG_NXTHDR(&msg, cmsg)) {
-
-          if (cmsg->cmsg_type == SCM_RIGHTS) {
-            if (stream->accepted_fd != -1) {
-              fprintf(stderr, "(libuv) ignoring extra FD received\n");
-            }
-
-            /* silence aliasing warning */
-            {
-              void* pv = CMSG_DATA(cmsg);
-              int* pi = pv;
-              stream->accepted_fd = *pi;
-            }
-
-          } else {
-            fprintf(stderr, "ignoring non-SCM_RIGHTS ancillary data: %d\n",
-                cmsg->cmsg_type);
-          }
-        }
-
-
-        if (stream->accepted_fd >= 0) {
-          stream->read2_cb((uv_pipe_t*) stream,
-                           nread,
-                           &buf,
-                           uv__handle_type(stream->accepted_fd));
-        } else {
-          stream->read2_cb((uv_pipe_t*) stream, nread, &buf, UV_UNKNOWN_HANDLE);
+      if (is_ipc) {
+        err = uv__stream_recv_cmsg(stream, &msg);
+        if (err != 0) {
+          stream->read_cb(stream, err, &buf);
+          return;
         }
       }
+      stream->read_cb(stream, nread, &buf);
 
       /* Return if we didn't fill the buffer, there is no more data to read. */
       if (nread < buflen) {
@@ -1089,17 +1143,23 @@ static void uv__read(uv_stream_t* stream) {
 }
 
 
+#undef UV__CMSG_FD_COUNT
+#undef UV__CMSG_FD_SIZE
+
+
 int uv_shutdown(uv_shutdown_t* req, uv_stream_t* stream, uv_shutdown_cb cb) {
   assert((stream->type == UV_TCP || stream->type == UV_NAMED_PIPE) &&
          "uv_shutdown (unix) only supports uv_handle_t right now");
-  assert(uv__stream_fd(stream) >= 0);
 
   if (!(stream->flags & UV_STREAM_WRITABLE) ||
       stream->flags & UV_STREAM_SHUT ||
+      stream->flags & UV_STREAM_SHUTTING ||
       stream->flags & UV_CLOSED ||
       stream->flags & UV_CLOSING) {
     return -ENOTCONN;
   }
+
+  assert(uv__stream_fd(stream) >= 0);
 
   /* Initialize request */
   uv__req_init(stream->loop, req, UV_SHUTDOWN);
@@ -1109,6 +1169,7 @@ int uv_shutdown(uv_shutdown_t* req, uv_stream_t* stream, uv_shutdown_cb cb) {
   stream->flags |= UV_STREAM_SHUTTING;
 
   uv__io_start(stream->loop, &stream->io_watcher, UV__POLLOUT);
+  uv__stream_osx_interrupt_select(stream);
 
   return 0;
 }
@@ -1285,6 +1346,7 @@ int uv_write2(uv_write_t* req,
      */
     assert(!(stream->flags & UV_STREAM_BLOCKING));
     uv__io_start(stream->loop, &stream->io_watcher, UV__POLLOUT);
+    uv__stream_osx_interrupt_select(stream);
   }
 
   return 0;
@@ -1303,10 +1365,60 @@ int uv_write(uv_write_t* req,
 }
 
 
-static int uv__read_start_common(uv_stream_t* stream,
-                                 uv_alloc_cb alloc_cb,
-                                 uv_read_cb read_cb,
-                                 uv_read2_cb read2_cb) {
+void uv_try_write_cb(uv_write_t* req, int status) {
+  /* Should not be called */
+  abort();
+}
+
+
+int uv_try_write(uv_stream_t* stream,
+                 const uv_buf_t bufs[],
+                 unsigned int nbufs) {
+  int r;
+  int has_pollout;
+  size_t written;
+  size_t req_size;
+  uv_write_t req;
+
+  /* Connecting or already writing some data */
+  if (stream->connect_req != NULL || stream->write_queue_size != 0)
+    return 0;
+
+  has_pollout = uv__io_active(&stream->io_watcher, UV__POLLOUT);
+
+  r = uv_write(&req, stream, bufs, nbufs, uv_try_write_cb);
+  if (r != 0)
+    return r;
+
+  /* Remove not written bytes from write queue size */
+  written = uv_count_bufs(bufs, nbufs);
+  if (req.bufs != NULL)
+    req_size = uv__write_req_size(&req);
+  else
+    req_size = 0;
+  written -= req_size;
+  stream->write_queue_size -= req_size;
+
+  /* Unqueue request, regardless of immediateness */
+  QUEUE_REMOVE(&req.queue);
+  uv__req_unregister(stream->loop, &req);
+  if (req.bufs != req.bufsml)
+    free(req.bufs);
+  req.bufs = NULL;
+
+  /* Do not poll for writable, if we wasn't before calling this */
+  if (!has_pollout) {
+    uv__io_stop(stream->loop, &stream->io_watcher, UV__POLLOUT);
+    uv__stream_osx_interrupt_select(stream);
+  }
+
+  return (int) written;
+}
+
+
+int uv_read_start(uv_stream_t* stream,
+                  uv_alloc_cb alloc_cb,
+                  uv_read_cb read_cb) {
   assert(stream->type == UV_TCP || stream->type == UV_NAMED_PIPE ||
       stream->type == UV_TTY);
 
@@ -1318,12 +1430,6 @@ static int uv__read_start_common(uv_stream_t* stream,
    */
   stream->flags |= UV_STREAM_READING;
 
-#if defined(__APPLE__)
-  /* Notify select() thread about state change */
-  if (stream->select != NULL)
-    uv__stream_osx_interrupt_select(stream);
-#endif /* defined(__APPLE__) */
-
   /* TODO: try to do the read inline? */
   /* TODO: keep track of tcp state. If we've gotten a EOF then we should
    * not start the IO watcher.
@@ -1332,25 +1438,13 @@ static int uv__read_start_common(uv_stream_t* stream,
   assert(alloc_cb);
 
   stream->read_cb = read_cb;
-  stream->read2_cb = read2_cb;
   stream->alloc_cb = alloc_cb;
 
   uv__io_start(stream->loop, &stream->io_watcher, UV__POLLIN);
   uv__handle_start(stream);
+  uv__stream_osx_interrupt_select(stream);
 
   return 0;
-}
-
-
-int uv_read_start(uv_stream_t* stream, uv_alloc_cb alloc_cb,
-    uv_read_cb read_cb) {
-  return uv__read_start_common(stream, alloc_cb, read_cb, NULL);
-}
-
-
-int uv_read2_start(uv_stream_t* stream, uv_alloc_cb alloc_cb,
-    uv_read2_cb read_cb) {
-  return uv__read_start_common(stream, alloc_cb, NULL, read_cb);
 }
 
 
@@ -1369,15 +1463,9 @@ int uv_read_stop(uv_stream_t* stream) {
   uv__io_stop(stream->loop, &stream->io_watcher, UV__POLLIN);
   if (!uv__io_active(&stream->io_watcher, UV__POLLOUT))
     uv__handle_stop(stream);
-
-#if defined(__APPLE__)
-  /* Notify select() thread about state change */
-  if (stream->select != NULL)
-    uv__stream_osx_interrupt_select(stream);
-#endif /* defined(__APPLE__) */
+  uv__stream_osx_interrupt_select(stream);
 
   stream->read_cb = NULL;
-  stream->read2_cb = NULL;
   stream->alloc_cb = NULL;
   return 0;
 }
@@ -1394,8 +1482,8 @@ int uv_is_writable(const uv_stream_t* stream) {
 
 
 #if defined(__APPLE__)
-int uv___stream_fd(uv_stream_t* handle) {
-  uv__stream_select_t* s;
+int uv___stream_fd(const uv_stream_t* handle) {
+  const uv__stream_select_t* s;
 
   assert(handle->type == UV_TCP ||
          handle->type == UV_TTY ||
@@ -1411,6 +1499,9 @@ int uv___stream_fd(uv_stream_t* handle) {
 
 
 void uv__stream_close(uv_stream_t* handle) {
+  unsigned int i;
+  uv__stream_queued_fds_t* queued_fds;
+
 #if defined(__APPLE__)
   /* Terminate select loop first */
   if (handle->select != NULL) {
@@ -1424,8 +1515,8 @@ void uv__stream_close(uv_stream_t* handle) {
     uv_thread_join(&s->thread);
     uv_sem_destroy(&s->close_sem);
     uv_sem_destroy(&s->async_sem);
-    close(s->fake_fd);
-    close(s->int_fd);
+    uv__close(s->fake_fd);
+    uv__close(s->int_fd);
     uv_close((uv_handle_t*) &s->async, uv__stream_osx_cb_close);
 
     handle->select = NULL;
@@ -1436,12 +1527,25 @@ void uv__stream_close(uv_stream_t* handle) {
   uv_read_stop(handle);
   uv__handle_stop(handle);
 
-  close(handle->io_watcher.fd);
-  handle->io_watcher.fd = -1;
+  if (handle->io_watcher.fd != -1) {
+    /* Don't close stdio file descriptors.  Nothing good comes from it. */
+    if (handle->io_watcher.fd > STDERR_FILENO)
+      uv__close(handle->io_watcher.fd);
+    handle->io_watcher.fd = -1;
+  }
 
-  if (handle->accepted_fd >= 0) {
-    close(handle->accepted_fd);
+  if (handle->accepted_fd != -1) {
+    uv__close(handle->accepted_fd);
     handle->accepted_fd = -1;
+  }
+
+  /* Close all queued fds */
+  if (handle->queued_fds != NULL) {
+    queued_fds = handle->queued_fds;
+    for (i = 0; i < queued_fds->offset; i++)
+      uv__close(queued_fds->fds[i]);
+    free(handle->queued_fds);
+    handle->queued_fds = NULL;
   }
 
   assert(!uv__io_active(&handle->io_watcher, UV__POLLIN | UV__POLLOUT));
@@ -1449,7 +1553,5 @@ void uv__stream_close(uv_stream_t* handle) {
 
 
 int uv_stream_set_blocking(uv_stream_t* handle, int blocking) {
-  assert(0 && "implement me");
-  abort();
-  return 0;
+  return UV_ENOSYS;
 }

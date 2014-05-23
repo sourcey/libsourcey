@@ -20,6 +20,8 @@
 #include <assert.h>
 
 
+using std::cout;
+using std::cerr;
 using std::endl;
 using namespace scy;
 
@@ -34,8 +36,10 @@ public:
 
 	Tests(Application& app) : app(app)
 	{	
-		testSignal();
+		testVersionStringComparison();
+
 #if 0
+		testSignal();
 		runFSTest();
 		testBuffer();
 		testNVCollection();
@@ -836,20 +840,57 @@ public:
 		}
 		//util::pause();
 	}
+	
+	// ============================================================================
+	// Exception Test
+	//
+	void runExceptionTest() 
+	{
+		try
+		{
+			throw FileException("That's not a file!");
+			assert(0 && "must throw");
+		}
+		catch (FileException& exc)
+		{
+			cout << "Message: " << exc << endl;
+		}
+		catch (Exception&)
+		{
+			assert(0 && "bad cast");
+		}
+
+		try
+		{
+			throw IOException();
+			assert(0 && "must throw");
+		}
+		catch (IOException& exc)
+		{
+			cout << "Message: " << exc << endl;
+			assert(std::string(exc.what()) == "IO error");
+		}
+		catch (Exception&)
+		{
+			assert(0 && "bad cast");
+		}
+	}
 	*/
 
-
-	/*
 	// ============================================================================
 	// Version String Comparison
 	//	
-	void runVersionStringComparison() 
+	void testVersionStringComparison() 
 	{
-		//assert(util::CompareVersion("3.7.8.0", "3.7.8") == false);
-		//assert(util::CompareVersion("3.7.9", "3.7.8") == true);
-		//assert(util::CompareVersion("1.7.9", "3.7.8") == false);
+		assert((util::Version("3.7.8.0") == util::Version("3.7.8.0")) == true);
+		assert((util::Version("3.7.8.0") == util::Version("3.7.8")) == true);
+		assert((util::Version("3.7.8.0") < util::Version("3.7.8")) == false);
+		assert((util::Version("3.7.9") < util::Version("3.7.8")) == false);
+		assert((util::Version("3") < util::Version("3.7.9")) == true);
+		assert((util::Version("1.7.9") < util::Version("3.1")) == true);
+		
+		cout << "Printing version (3.7.8.0): " << util::Version("3.7.8.0") << endl;
 	}
-	*/
 
 	void runLoop() {
 		DebugL << "#################### Running" << endl;
@@ -898,49 +939,7 @@ int main(int argc, char** argv)
 	}
 
 	// Cleanup singleton instances
-	GarbageCollector::shutdown();
+	GarbageCollector::destroy();
 	Logger::destroy();
 	return 0;
 }
-
-
-
-	
-	
-	// ============================================================================
-	// Exception Test
-	//
-       /*
-	void runExceptionTest() 
-	{
-		try
-		{
-			throw FileException("That's not a file!");
-			assert(0 && "must throw");
-		}
-		catch (FileException& exc)
-		{
-			cout << "Message: " << exc << endl;
-		}
-		catch (Exception&)
-		{
-			assert(0 && "bad cast");
-		}
-
-		try
-		{
-			throw IOException();
-			assert(0 && "must throw");
-		}
-		catch (IOException& exc)
-		{
-			cout << "Message: " << exc << endl;
-			assert(std::string(exc.what()) == "IO error");
-		}
-		catch (Exception&)
-		{
-			assert(0 && "bad cast");
-		}
-	}
-       */
-	

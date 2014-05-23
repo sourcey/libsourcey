@@ -17,7 +17,7 @@ ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -I$(top_srcdir)/include \
               -I$(top_srcdir)/src
 
-include_HEADERS=include/uv.h include/uv-errno.h
+include_HEADERS=include/uv.h include/uv-errno.h include/uv-version.h
 
 CLEANFILES =
 
@@ -25,6 +25,7 @@ lib_LTLIBRARIES = libuv.la
 libuv_la_CFLAGS = @CFLAGS@
 libuv_la_LDFLAGS = -no-undefined -version-info 11:0:0
 libuv_la_SOURCES = src/fs-poll.c \
+                   src/heap-inl.h \
                    src/inet.c \
                    src/queue.h \
                    src/uv-common.c \
@@ -41,7 +42,7 @@ include_HEADERS += include/uv-win.h include/tree.h
 AM_CPPFLAGS += -I$(top_srcdir)/src/win \
                -DWIN32_LEAN_AND_MEAN \
                -D_WIN32_WINNT=0x0600
-LIBS += -lws2_32 -lpsapi -lphlpapi2
+LIBS += -lws2_32 -lpsapi -liphlpapi -lshell32
 libuv_la_SOURCES += src/win/async.c \
                     src/win/atomicops-inl.h \
                     src/win/core.c \
@@ -80,6 +81,7 @@ else  # WINNT
 include_HEADERS += include/uv-unix.h
 AM_CPPFLAGS += -I$(top_srcdir)/src/unix
 libuv_la_SOURCES += src/unix/async.c \
+                   src/unix/atomic-ops.h \
                    src/unix/core.c \
                    src/unix/dl.c \
                    src/unix/fs.c \
@@ -91,6 +93,7 @@ libuv_la_SOURCES += src/unix/async.c \
                    src/unix/poll.c \
                    src/unix/process.c \
                    src/unix/signal.c \
+                   src/unix/spinlock.h \
                    src/unix/stream.c \
                    src/unix/tcp.c \
                    src/unix/thread.c \
@@ -103,12 +106,11 @@ endif  # WINNT
 
 TESTS = test/run-tests
 check_PROGRAMS = test/run-tests
+test_run_tests_CFLAGS =
 test_run_tests_SOURCES = test/blackhole-server.c \
                          test/dns-server.c \
                          test/echo-server.c \
                          test/run-tests.c \
-                         test/runner-unix.c \
-                         test/runner-unix.h \
                          test/runner.c \
                          test/runner.h \
                          test/task.h \
@@ -118,6 +120,7 @@ test_run_tests_SOURCES = test/blackhole-server.c \
                          test/test-barrier.c \
                          test/test-callback-order.c \
                          test/test-callback-stack.c \
+                         test/test-close-fd.c \
                          test/test-close-order.c \
                          test/test-condvar.c \
                          test/test-connection-fail.c \
@@ -125,6 +128,7 @@ test_run_tests_SOURCES = test/blackhole-server.c \
                          test/test-delayed-accept.c \
                          test/test-dlerror.c \
                          test/test-embed.c \
+                         test/test-emfile.c \
                          test/test-error.c \
                          test/test-fail-always.c \
                          test/test-fs-event.c \
@@ -137,12 +141,16 @@ test_run_tests_SOURCES = test/blackhole-server.c \
                          test/test-getsockname.c \
                          test/test-hrtime.c \
                          test/test-idle.c \
+                         test/test-ip4-addr.c \
                          test/test-ip6-addr.c \
                          test/test-ipc-send-recv.c \
                          test/test-ipc.c \
                          test/test-list.h \
                          test/test-loop-handles.c \
+                         test/test-loop-alive.c \
+                         test/test-loop-close.c \
                          test/test-loop-stop.c \
+                         test/test-loop-time.c \
                          test/test-multiple-listen.c \
                          test/test-mutexes.c \
                          test/test-osx-select.c \
@@ -150,6 +158,9 @@ test_run_tests_SOURCES = test/blackhole-server.c \
                          test/test-ping-pong.c \
                          test/test-pipe-bind-error.c \
                          test/test-pipe-connect-error.c \
+                         test/test-pipe-getsockname.c \
+                         test/test-pipe-sendmsg.c \
+                         test/test-pipe-server-close.c \
                          test/test-platform-output.c \
                          test/test-poll-close.c \
                          test/test-poll.c \
@@ -160,12 +171,14 @@ test_run_tests_SOURCES = test/blackhole-server.c \
                          test/test-semaphore.c \
                          test/test-shutdown-close.c \
                          test/test-shutdown-eof.c \
+                         test/test-shutdown-twice.c \
                          test/test-signal-multiple-loops.c \
                          test/test-signal.c \
                          test/test-spawn.c \
                          test/test-stdio-over-pipes.c \
                          test/test-tcp-bind-error.c \
                          test/test-tcp-bind6-error.c \
+                         test/test-tcp-close-accept.c \
                          test/test-tcp-close-while-connecting.c \
                          test/test-tcp-close.c \
                          test/test-tcp-connect-error-after-write.c \
@@ -179,6 +192,7 @@ test_run_tests_SOURCES = test/blackhole-server.c \
                          test/test-tcp-unexpected-read.c \
                          test/test-tcp-write-to-half-open-connection.c \
                          test/test-tcp-writealot.c \
+                         test/test-tcp-try-write.c \
                          test/test-thread.c \
                          test/test-threadpool-cancel.c \
                          test/test-threadpool.c \
@@ -186,20 +200,46 @@ test_run_tests_SOURCES = test/blackhole-server.c \
                          test/test-timer-from-check.c \
                          test/test-timer.c \
                          test/test-tty.c \
+                         test/test-udp-bind.c \
                          test/test-udp-dgram-too-big.c \
                          test/test-udp-ipv6.c \
+                         test/test-udp-multicast-interface.c \
+                         test/test-udp-multicast-interface6.c \
                          test/test-udp-multicast-join.c \
+                         test/test-udp-multicast-join6.c \
                          test/test-udp-multicast-ttl.c \
                          test/test-udp-open.c \
                          test/test-udp-options.c \
                          test/test-udp-send-and-recv.c \
-                         test/test-util.c \
-                         test/test-walk-handles.c
+                         test/test-walk-handles.c \
+                         test/test-watcher-cross-stop.c
 test_run_tests_LDADD = libuv.la
+
+if WINNT
+test_run_tests_SOURCES += test/runner-win.c \
+                          test/runner-win.h
+else
+test_run_tests_SOURCES += test/runner-unix.c \
+                          test/runner-unix.h
+endif
+
+if AIX
+test_run_tests_CFLAGS += -D_ALL_SOURCE -D_XOPEN_SOURCE=500
+endif
+
+if SUNOS
+test_run_tests_CFLAGS += -D__EXTENSIONS__ -D_XOPEN_SOURCE=500
+endif
+
 
 if AIX
 libuv_la_CFLAGS += -D_ALL_SOURCE -D_XOPEN_SOURCE=500
 libuv_la_SOURCES += src/unix/aix.c
+endif
+
+if ANDROID
+include_HEADERS += include/android-ifaddrs.h
+libuv_la_SOURCES += src/unix/android-ifaddrs.c
 endif
 
 if DARWIN
@@ -245,6 +285,9 @@ endif
 if HAVE_DTRACE
 BUILT_SOURCES = include/uv-dtrace.h
 CLEANFILES += include/uv-dtrace.h
+if FREEBSD
+libuv_la_LDFLAGS += -lelf
+endif
 endif
 
 if DTRACE_NEEDS_OBJECTS
@@ -254,10 +297,18 @@ libuv_la_LIBADD = uv-dtrace.lo
 CLEANFILES += src/unix/uv-dtrace.o src/unix/uv-dtrace.lo
 endif
 
-SUFFIXES = .d
+if HAVE_PKG_CONFIG
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = @PACKAGE_NAME@.pc
+endif
 
+if HAVE_DTRACE
 include/uv-dtrace.h: src/unix/uv-dtrace.d
 	$(AM_V_GEN)$(DTRACE) $(DTRACEFLAGS) -h -xnolibs -s $< -o $(top_srcdir)/$@
+endif
+
+if DTRACE_NEEDS_OBJECTS
+SUFFIXES = .d
 
 src/unix/uv-dtrace.o: src/unix/uv-dtrace.d ${libuv_la_OBJECTS}
 
@@ -273,3 +324,4 @@ src/unix/uv-dtrace.o: src/unix/uv-dtrace.d ${libuv_la_OBJECTS}
 		"pic_object='uv-dtrace.o'" \
 		"non_pic_object='uv-dtrace.o'" \
 	> ${top_builddir}/uv-dtrace.lo
+endif

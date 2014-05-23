@@ -33,12 +33,12 @@ static uv_connect_t connect_req;
 static unsigned long ticks; /* event loop ticks */
 
 
-static void check_cb(uv_check_t* handle, int status) {
+static void check_cb(uv_check_t* handle) {
   ticks++;
 }
 
 
-static void timer_cb(uv_timer_t* handle, int status) {
+static void timer_cb(uv_timer_t* handle) {
   uv_close((uv_handle_t*) &check_handle, NULL);
   uv_close((uv_handle_t*) &timer_handle, NULL);
   uv_close((uv_handle_t*) &server_handle, NULL);
@@ -98,7 +98,7 @@ TEST_IMPL(tcp_unexpected_read) {
   ASSERT(0 == uv_tcp_init(loop, &server_handle));
   ASSERT(0 == uv_tcp_init(loop, &client_handle));
   ASSERT(0 == uv_tcp_init(loop, &peer_handle));
-  ASSERT(0 == uv_tcp_bind(&server_handle, (const struct sockaddr*) &addr));
+  ASSERT(0 == uv_tcp_bind(&server_handle, (const struct sockaddr*) &addr, 0));
   ASSERT(0 == uv_listen((uv_stream_t*) &server_handle, 1, connection_cb));
   ASSERT(0 == uv_tcp_connect(&connect_req,
                              &client_handle,

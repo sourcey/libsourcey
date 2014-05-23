@@ -45,13 +45,12 @@ static void close_cb(uv_handle_t* handle) {
 }
 
 
-static void do_accept(uv_timer_t* timer_handle, int status) {
+static void do_accept(uv_timer_t* timer_handle) {
   uv_tcp_t* server;
   uv_tcp_t* accepted_handle = (uv_tcp_t*)malloc(sizeof *accepted_handle);
   int r;
 
   ASSERT(timer_handle != NULL);
-  ASSERT(status == 0);
   ASSERT(accepted_handle != NULL);
 
   r = uv_tcp_init(uv_default_loop(), accepted_handle);
@@ -108,7 +107,7 @@ static void start_server(void) {
 
   r = uv_tcp_init(uv_default_loop(), server);
   ASSERT(r == 0);
-  r = uv_tcp_bind(server, (const struct sockaddr*) &addr);
+  r = uv_tcp_bind(server, (const struct sockaddr*) &addr, 0);
   ASSERT(r == 0);
 
   r = uv_listen((uv_stream_t*)server, 128, connection_cb);

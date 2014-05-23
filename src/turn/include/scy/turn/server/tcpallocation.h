@@ -25,8 +25,6 @@
 #include "scy/collection.h"
 #include "scy/net/tcpsocket.h"
 #include "scy/turn/server/tcpconnectionpair.h"
-//#include "scy/turn/server/tcppeerconnection.h"
-//#include "scy/net/socketacceptor.h"
 
 
 namespace scy {
@@ -34,8 +32,6 @@ namespace turn {
 
 	
 class Server;
-//class TCPControlConnection;
-//class TCPConnectionPair;
 
 typedef PointerCollection<UInt32, TCPConnectionPair> TCPConnectionPairMap;
 
@@ -71,8 +67,6 @@ public:
 	void onControlClosed(void* sender);
 		// Callback for handling controll connection destruction.
 		// The allocation will be deleted.
-
-	//virtual const char* className() const { return "TCPAllocation"; };
 
 protected:
 	net::TCPSocket::Ptr _control;

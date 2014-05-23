@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <io.h>
 #include <string.h>
+#include <stdlib.h>
 
 #if defined(_MSC_VER) && _MSC_VER < 1600
 # include "stdint-msvc2008.h"
@@ -697,7 +698,7 @@ void uv_process_tty_read_raw_req(uv_loop_t* loop, uv_tty_t* handle,
         buf.base[buf_used++] = handle->last_key[handle->last_key_offset++];
 
         /* If the buffer is full, emit it */
-        if (buf_used == buf.len) {
+        if ((size_t) buf_used == buf.len) {
           handle->read_cb((uv_stream_t*) handle, buf_used, &buf);
           buf = uv_null_buf_;
           buf_used = 0;
@@ -1814,7 +1815,7 @@ void uv_tty_close(uv_tty_t* handle) {
 
 
 void uv_tty_endgame(uv_loop_t* loop, uv_tty_t* handle) {
-  if (!(handle->flags && UV_HANDLE_TTY_READABLE) &&
+  if (!(handle->flags & UV_HANDLE_TTY_READABLE) &&
       handle->shutdown_req != NULL &&
       handle->write_reqs_pending == 0) {
     UNREGISTER_HANDLE_REQ(loop, handle, handle->shutdown_req);
@@ -1866,7 +1867,7 @@ void uv_process_tty_connect_req(uv_loop_t* loop, uv_tty_t* handle,
 }
 
 
-void uv_tty_reset_mode(void) {
+int uv_tty_reset_mode(void) {
   /* Not necessary to do anything. */
-  ;
+  return 0;
 }

@@ -26,6 +26,7 @@
 
 #include "uv.h"
 #include "internal.h"
+#include "handle-inl.h"
 
 
 /*
@@ -230,7 +231,7 @@ static int uv__duplicate_fd(uv_loop_t* loop, int fd, HANDLE* dup) {
     return ERROR_INVALID_HANDLE;
   }
 
-  handle = (HANDLE) _get_osfhandle(fd);
+  handle = uv__get_osfhandle(fd);
   return uv__duplicate_handle(loop, handle, dup);
 }
 
@@ -326,7 +327,7 @@ int uv__stdio_create(uv_loop_t* loop,
         /* an uv_pipe_t for use by the parent. The other one is given to */
         /* the child. */
         uv_pipe_t* parent_pipe = (uv_pipe_t*) fdopt.data.stream;
-        HANDLE child_pipe;
+        HANDLE child_pipe = INVALID_HANDLE_VALUE;
 
         /* Create a new, connected pipe pair. stdio[i].stream should point */
         /* to an uninitialized, but not connected pipe handle. */
@@ -388,6 +389,7 @@ int uv__stdio_create(uv_loop_t* loop,
 
           default:
             assert(0);
+            return -1;
         }
 
         CHILD_STDIO_HANDLE(buffer, i) = child_handle;
@@ -422,11 +424,9 @@ int uv__stdio_create(uv_loop_t* loop,
         }
 
         /* Make an inheritable copy of the handle. */
-        if (uv__duplicate_handle(loop,
-                             stream_handle,
-                             &child_handle) < 0) {
+        err = uv__duplicate_handle(loop, stream_handle, &child_handle);
+        if (err)
           goto error;
-        }
 
         CHILD_STDIO_HANDLE(buffer, i) = child_handle;
         CHILD_STDIO_CRT_FLAGS(buffer, i) = crt_flags;
@@ -435,6 +435,7 @@ int uv__stdio_create(uv_loop_t* loop,
 
       default:
         assert(0);
+        return -1;
     }
   }
 

@@ -37,6 +37,7 @@
 #include <arpa/inet.h>
 #include <limits.h> /* INT_MAX, PATH_MAX */
 #include <sys/uio.h> /* writev */
+#include <sys/resource.h> /* getrusage */
 
 #ifdef __linux__
 # include <sys/ioctl.h>
@@ -58,6 +59,15 @@
 # include <sys/filio.h>
 # include <sys/ioctl.h>
 # include <sys/wait.h>
+# define UV__O_CLOEXEC O_CLOEXEC
+# if __FreeBSD__ >= 10
+#  define uv__accept4 accept4
+#  define UV__SOCK_NONBLOCK SOCK_NONBLOCK
+#  define UV__SOCK_CLOEXEC  SOCK_CLOEXEC
+# endif
+# if !defined(F_DUP2FD_CLOEXEC) && defined(_F_DUP2FD_CLOEXEC)
+#  define F_DUP2FD_CLOEXEC  _F_DUP2FD_CLOEXEC
+# endif
 #endif
 
 static void uv__run_pending(uv_loop_t* loop);
@@ -73,7 +83,7 @@ STATIC_ASSERT(offsetof(uv_buf_t, len) == offsetof(struct iovec, iov_len));
 
 
 uint64_t uv_hrtime(void) {
-  return uv__hrtime();
+  return uv__hrtime(UV_CLOCK_PRECISE);
 }
 
 
@@ -248,10 +258,15 @@ int uv_backend_timeout(const uv_loop_t* loop) {
 }
 
 
-static int uv__loop_alive(uv_loop_t* loop) {
+static int uv__loop_alive(const uv_loop_t* loop) {
   return uv__has_active_handles(loop) ||
          uv__has_active_reqs(loop) ||
          loop->closing_handles != NULL;
+}
+
+
+int uv_loop_alive(const uv_loop_t* loop) {
+    return uv__loop_alive(loop);
 }
 
 
@@ -260,6 +275,9 @@ int uv_run(uv_loop_t* loop, uv_run_mode mode) {
   int r;
 
   r = uv__loop_alive(loop);
+  if (!r)
+    uv__update_time(loop);
+
   while (r != 0 && loop->stop_flag == 0) {
     UV_TICK_START(loop, mode);
 
@@ -340,7 +358,7 @@ int uv__socket(int domain, int type, int protocol) {
     err = uv__cloexec(sockfd, 1);
 
   if (err) {
-    close(sockfd);
+    uv__close(sockfd);
     return err;
   }
 
@@ -362,7 +380,7 @@ int uv__accept(int sockfd) {
   assert(sockfd >= 0);
 
   while (1) {
-#if defined(__linux__)
+#if defined(__linux__) || __FreeBSD__ >= 10
     static int no_accept4;
 
     if (no_accept4)
@@ -397,12 +415,32 @@ skip:
       err = uv__nonblock(peerfd, 1);
 
     if (err) {
-      close(peerfd);
+      uv__close(peerfd);
       return err;
     }
 
     return peerfd;
   }
+}
+
+
+int uv__close(int fd) {
+  int saved_errno;
+  int rc;
+
+  assert(fd > -1);  /* Catch uninitialized io_watcher.fd bugs. */
+  assert(fd > STDERR_FILENO);  /* Catch stdio close bugs. */
+
+  saved_errno = errno;
+  rc = close(fd);
+  if (rc == -1) {
+    rc = -errno;
+    if (rc == -EINTR)
+      rc = -EINPROGRESS;  /* For platform/libc consistency. */
+    errno = saved_errno;
+  }
+
+  return rc;
 }
 
 
@@ -514,7 +552,7 @@ int uv__dup(int fd) {
 
   err = uv__cloexec(fd, 1);
   if (err) {
-    close(fd);
+    uv__close(fd);
     return err;
   }
 
@@ -522,16 +560,52 @@ int uv__dup(int fd) {
 }
 
 
-int uv_cwd(char* buffer, size_t size) {
-  if (buffer == NULL)
+ssize_t uv__recvmsg(int fd, struct msghdr* msg, int flags) {
+  struct cmsghdr* cmsg;
+  ssize_t rc;
+  int* pfd;
+  int* end;
+#if defined(__linux__)
+  static int no_msg_cmsg_cloexec;
+  if (no_msg_cmsg_cloexec == 0) {
+    rc = recvmsg(fd, msg, flags | 0x40000000);  /* MSG_CMSG_CLOEXEC */
+    if (rc != -1)
+      return rc;
+    if (errno != EINVAL)
+      return -errno;
+    rc = recvmsg(fd, msg, flags);
+    if (rc == -1)
+      return -errno;
+    no_msg_cmsg_cloexec = 1;
+  } else {
+    rc = recvmsg(fd, msg, flags);
+  }
+#else
+  rc = recvmsg(fd, msg, flags);
+#endif
+  if (rc == -1)
+    return -errno;
+  if (msg->msg_controllen == 0)
+    return rc;
+  for (cmsg = CMSG_FIRSTHDR(msg); cmsg != NULL; cmsg = CMSG_NXTHDR(msg, cmsg))
+    if (cmsg->cmsg_type == SCM_RIGHTS)
+      for (pfd = (int*) CMSG_DATA(cmsg),
+           end = (int*) ((char*) cmsg + cmsg->cmsg_len);
+           pfd < end;
+           pfd += 1)
+        uv__cloexec(*pfd, 1);
+  return rc;
+}
+
+
+int uv_cwd(char* buffer, size_t* size) {
+  if (buffer == NULL || size == NULL)
     return -EINVAL;
 
-  if (size == 0)
-    return -EINVAL;
-
-  if (getcwd(buffer, size) == NULL)
+  if (getcwd(buffer, *size) == NULL)
     return -errno;
 
+  *size = strlen(buffer) + 1;
   return 0;
 }
 
@@ -584,20 +658,33 @@ static unsigned int next_power_of_two(unsigned int val) {
 
 static void maybe_resize(uv_loop_t* loop, unsigned int len) {
   uv__io_t** watchers;
+  void* fake_watcher_list;
+  void* fake_watcher_count;
   unsigned int nwatchers;
   unsigned int i;
 
   if (len <= loop->nwatchers)
     return;
 
-  nwatchers = next_power_of_two(len);
-  watchers = realloc(loop->watchers, nwatchers * sizeof(loop->watchers[0]));
+  /* Preserve fake watcher list and count at the end of the watchers */
+  if (loop->watchers != NULL) {
+    fake_watcher_list = loop->watchers[loop->nwatchers];
+    fake_watcher_count = loop->watchers[loop->nwatchers + 1];
+  } else {
+    fake_watcher_list = NULL;
+    fake_watcher_count = NULL;
+  }
+
+  nwatchers = next_power_of_two(len + 2) - 2;
+  watchers = realloc(loop->watchers,
+                     (nwatchers + 2) * sizeof(loop->watchers[0]));
 
   if (watchers == NULL)
     abort();
-
   for (i = loop->nwatchers; i < nwatchers; i++)
     watchers[i] = NULL;
+  watchers[nwatchers] = fake_watcher_list;
+  watchers[nwatchers + 1] = fake_watcher_count;
 
   loop->watchers = watchers;
   loop->nwatchers = nwatchers;
@@ -689,6 +776,9 @@ void uv__io_stop(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
 void uv__io_close(uv_loop_t* loop, uv__io_t* w) {
   uv__io_stop(loop, w, UV__POLLIN | UV__POLLOUT);
   QUEUE_REMOVE(&w->pending_queue);
+
+  /* Remove stale events for this file descriptor */
+  uv__platform_invalidate_fd(loop, w->fd);
 }
 
 
@@ -702,4 +792,125 @@ int uv__io_active(const uv__io_t* w, unsigned int events) {
   assert(0 == (events & ~(UV__POLLIN | UV__POLLOUT)));
   assert(0 != events);
   return 0 != (w->pevents & events);
+}
+
+
+int uv_getrusage(uv_rusage_t* rusage) {
+  struct rusage usage;
+
+  if (getrusage(RUSAGE_SELF, &usage))
+    return -errno;
+
+  rusage->ru_utime.tv_sec = usage.ru_utime.tv_sec;
+  rusage->ru_utime.tv_usec = usage.ru_utime.tv_usec;
+
+  rusage->ru_stime.tv_sec = usage.ru_stime.tv_sec;
+  rusage->ru_stime.tv_usec = usage.ru_stime.tv_usec;
+
+  rusage->ru_maxrss = usage.ru_maxrss;
+  rusage->ru_ixrss = usage.ru_ixrss;
+  rusage->ru_idrss = usage.ru_idrss;
+  rusage->ru_isrss = usage.ru_isrss;
+  rusage->ru_minflt = usage.ru_minflt;
+  rusage->ru_majflt = usage.ru_majflt;
+  rusage->ru_nswap = usage.ru_nswap;
+  rusage->ru_inblock = usage.ru_inblock;
+  rusage->ru_oublock = usage.ru_oublock;
+  rusage->ru_msgsnd = usage.ru_msgsnd;
+  rusage->ru_msgrcv = usage.ru_msgrcv;
+  rusage->ru_nsignals = usage.ru_nsignals;
+  rusage->ru_nvcsw = usage.ru_nvcsw;
+  rusage->ru_nivcsw = usage.ru_nivcsw;
+
+  return 0;
+}
+
+
+int uv__open_cloexec(const char* path, int flags) {
+  int err;
+  int fd;
+
+#if defined(__linux__) || (defined(__FreeBSD__) && __FreeBSD__ >= 9)
+  static int no_cloexec;
+
+  if (!no_cloexec) {
+    fd = open(path, flags | UV__O_CLOEXEC);
+    if (fd != -1)
+      return fd;
+
+    if (errno != EINVAL)
+      return -errno;
+
+    /* O_CLOEXEC not supported. */
+    no_cloexec = 1;
+  }
+#endif
+
+  fd = open(path, flags);
+  if (fd == -1)
+    return -errno;
+
+  err = uv__cloexec(fd, 1);
+  if (err) {
+    uv__close(fd);
+    return err;
+  }
+
+  return fd;
+}
+
+
+int uv__dup2_cloexec(int oldfd, int newfd) {
+  int r;
+#if defined(__FreeBSD__) && __FreeBSD__ >= 10
+  do
+    r = dup3(oldfd, newfd, O_CLOEXEC);
+  while (r == -1 && errno == EINTR);
+  if (r == -1)
+    return -errno;
+  return r;
+#elif defined(__FreeBSD__) && defined(F_DUP2FD_CLOEXEC)
+  do
+    r = fcntl(oldfd, F_DUP2FD_CLOEXEC, newfd);
+  while (r == -1 && errno == EINTR);
+  if (r != -1)
+    return r;
+  if (errno != EINVAL)
+    return -errno;
+  /* Fall through. */
+#elif defined(__linux__)
+  static int no_dup3;
+  if (!no_dup3) {
+    do
+      r = uv__dup3(oldfd, newfd, UV__O_CLOEXEC);
+    while (r == -1 && (errno == EINTR || errno == EBUSY));
+    if (r != -1)
+      return r;
+    if (errno != ENOSYS)
+      return -errno;
+    /* Fall through. */
+    no_dup3 = 1;
+  }
+#endif
+  {
+    int err;
+    do
+      r = dup2(oldfd, newfd);
+#if defined(__linux__)
+    while (r == -1 && (errno == EINTR || errno == EBUSY));
+#else
+    while (r == -1 && errno == EINTR);
+#endif
+
+    if (r == -1)
+      return -errno;
+
+    err = uv__cloexec(newfd, 1);
+    if (err) {
+      uv__close(newfd);
+      return err;
+    }
+
+    return r;
+  }
 }

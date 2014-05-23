@@ -1,37 +1,37 @@
 # libuv
 
-libuv is a platform layer for [node.js][]. Its purpose is to abstract IOCP
-on Windows and epoll/kqueue/event ports/etc. on Unix systems. We intend to
-eventually contain all platform differences in this library.
+libuv is a multi-platform support library with a focus on asynchronous I/O. It
+was primarily developed for use by [Node.js](http://nodejs.org), but it's also
+used by Mozilla's [Rust language](http://www.rust-lang.org/),
+[Luvit](http://luvit.io/), [Julia](http://julialang.org/),
+[pyuv](https://crate.io/packages/pyuv/), and [others](https://github.com/joyent/libuv/wiki/Projects-that-use-libuv).
 
-## Features
+## Feature highlights
 
- * Non-blocking TCP sockets
+ * Full-featured event loop backed by epoll, kqueue, IOCP, event ports.
 
- * Non-blocking named pipes
+ * Asynchronous TCP and UDP sockets
 
- * UDP
+ * Asynchronous DNS resolution
 
- * Timers
+ * Asynchronous file and file system operations
 
- * Child process spawning
+ * File system events
 
- * Asynchronous DNS via `uv_getaddrinfo`.
+ * ANSI escape code controlled TTY
 
- * Asynchronous file system APIs `uv_fs_*`
+ * IPC with socket sharing, using Unix domain sockets or named pipes (Windows)
 
- * High resolution time `uv_hrtime`
+ * Child processes
 
- * Current executable path look up `uv_exepath`
+ * Thread pool
 
- * Thread pool scheduling `uv_queue_work`
+ * Signal handling
 
- * ANSI escape code controlled TTY `uv_tty_t`
+ * High resolution clock
 
- * File system events using inotify, kqueue, event ports,
-   FSEvents and `ReadDirectoryChangesW`
+ * Threading and synchronization primitives
 
- * IPC and socket sharing between processes `uv_write2`
 
 ## Community
 
@@ -41,12 +41,14 @@ eventually contain all platform differences in this library.
 
  * [include/uv.h](https://github.com/joyent/libuv/blob/master/include/uv.h)
    &mdash; API documentation in the form of detailed header comments.
- * [An Introduction to libuv](http://nikhilm.github.com/uvbook/) &mdash; An
-   overview of libuv with tutorials.
- * [LXJS 2012 talk](http://www.youtube.com/watch?v=nGn60vDSxQ4) - High-level
-   introductory talk about libuv.
- * [Tests and benchmarks](https://github.com/joyent/libuv/tree/master/test) -
-   API specification and usage examples.
+ * [An Introduction to libuv](http://nikhilm.github.com/uvbook/)
+   &mdash; An overview of libuv with tutorials.
+ * [LXJS 2012 talk](http://www.youtube.com/watch?v=nGn60vDSxQ4)
+   &mdash; High-level introductory talk about libuv.
+ * [Tests and benchmarks](https://github.com/joyent/libuv/tree/master/test)
+   &mdash; API specification and usage examples.
+ * [libuv-dox](https://github.com/thlorenz/libuv-dox)
+   &mdash; Documenting types and methods of libuv, mostly by reading uv.h.
 
 ## Build Instructions
 
@@ -83,15 +85,22 @@ project tree manually:
 
 Run:
 
-    $ ./gyp_uv -f make
+    $ ./gyp_uv.py -f make
     $ make -C out
 
 ### OS X
 
 Run:
 
-    $ ./gyp_uv -f xcode
-    $ xcodebuild -project uv.xcodeproj -configuration Release -target All
+    $ ./gyp_uv.py -f xcode
+    $ xcodebuild -ARCHS="x86_64" -project uv.xcodeproj \
+         -configuration Release -target All
+
+Note to OS X users:
+
+Make sure that you specify the architecture you wish to build for in the
+"ARCHS" flag. You can specify more than one by delimiting with a space
+(e.g. "x86_64 i386").
 
 ### Android
 
@@ -102,6 +111,14 @@ Run:
 
 Note for UNIX users: compile your project with `-D_LARGEFILE_SOURCE` and
 `-D_FILE_OFFSET_BITS=64`. GYP builds take care of that automatically.
+
+### Running tests
+
+Run:
+
+    $ ./gyp_uv.py -f make
+    $ make -C out
+    $ ./out/Debug/run-tests
 
 ## Supported Platforms
 
@@ -116,6 +133,11 @@ OS X using the GCC or XCode toolchain.
 
 Solaris 121 and later using GCC toolchain.
 
+## Patches
+
+See the [guidelines for contributing][].
+
 [node.js]: http://nodejs.org/
 [GYP]: http://code.google.com/p/gyp/
 [Visual Studio Express 2010]: http://www.microsoft.com/visualstudio/eng/products/visual-studio-2010-express
+[guidelines for contributing]: https://github.com/joyent/libuv/blob/master/CONTRIBUTING.md

@@ -237,12 +237,19 @@ void uv_tcp_endgame(uv_loop_t* loop, uv_tcp_t* handle) {
 
 static int uv_tcp_try_bind(uv_tcp_t* handle,
                            const struct sockaddr* addr,
-                           unsigned int addrlen) {
+                           unsigned int addrlen,
+                           unsigned int flags) {
   DWORD err;
   int r;
 
   if (handle->socket == INVALID_SOCKET) {
-    SOCKET sock = socket(addr->sa_family, SOCK_STREAM, 0);
+    SOCKET sock;
+    
+    /* Cannot set IPv6-only mode on non-IPv6 socket. */
+    if ((flags & UV_TCP_IPV6ONLY) && addr->sa_family != AF_INET6)
+      return ERROR_INVALID_PARAMETER;
+
+    sock = socket(addr->sa_family, SOCK_STREAM, 0);
     if (sock == INVALID_SOCKET) {
       return WSAGetLastError();
     }
@@ -260,6 +267,23 @@ static int uv_tcp_try_bind(uv_tcp_t* handle,
       return err;
     }
   }
+
+#ifdef IPV6_V6ONLY
+  if (addr->sa_family == AF_INET6) {
+    int on;
+
+    on = (flags & UV_TCP_IPV6ONLY) != 0;
+
+    /* TODO: how to handle errors? This may fail if there is no ipv4 stack */
+    /* available, or when run on XP/2003 which have no support for dualstack */
+    /* sockets. For now we're silently ignoring the error. */
+    setsockopt(handle->socket,
+               IPPROTO_IPV6,
+               IPV6_V6ONLY,
+               (const char*)&on,
+               sizeof on);
+  }
+#endif
 
   r = bind(handle->socket, addr, addrlen);
 
@@ -500,7 +524,8 @@ int uv_tcp_listen(uv_tcp_t* handle, int backlog, uv_connection_cb cb) {
   if (!(handle->flags & UV_HANDLE_BOUND)) {
     err = uv_tcp_try_bind(handle,
                           (const struct sockaddr*) &uv_addr_ip4_any_,
-                          sizeof(uv_addr_ip4_any_));
+                          sizeof(uv_addr_ip4_any_),
+                          0);
     if (err)
       return err;
   }
@@ -560,6 +585,7 @@ int uv_tcp_listen(uv_tcp_t* handle, int backlog, uv_connection_cb cb) {
       req->accept_socket = INVALID_SOCKET;
       req->data = handle;
       req->wait_handle = INVALID_HANDLE_VALUE;
+      req->event_handle = NULL;
     }
   }
 
@@ -685,7 +711,7 @@ static int uv_tcp_try_connect(uv_connect_t* req,
     } else {
       abort();
     }
-    err = uv_tcp_try_bind(handle, bind_addr, addrlen);
+    err = uv_tcp_try_bind(handle, bind_addr, addrlen, 0);
     if (err)
       return err;
   }
@@ -727,8 +753,9 @@ static int uv_tcp_try_connect(uv_connect_t* req,
 }
 
 
-int uv_tcp_getsockname(uv_tcp_t* handle, struct sockaddr* name,
-    int* namelen) {
+int uv_tcp_getsockname(const uv_tcp_t* handle,
+                       struct sockaddr* name,
+                       int* namelen) {
   int result;
 
   if (!(handle->flags & UV_HANDLE_BOUND)) {
@@ -748,8 +775,9 @@ int uv_tcp_getsockname(uv_tcp_t* handle, struct sockaddr* name,
 }
 
 
-int uv_tcp_getpeername(uv_tcp_t* handle, struct sockaddr* name,
-    int* namelen) {
+int uv_tcp_getpeername(const uv_tcp_t* handle,
+                       struct sockaddr* name,
+                       int* namelen) {
   int result;
 
   if (!(handle->flags & UV_HANDLE_BOUND)) {
@@ -973,9 +1001,11 @@ void uv_process_tcp_write_req(uv_loop_t* loop, uv_tcp_t* handle,
   if (handle->flags & UV_HANDLE_EMULATE_IOCP) {
     if (req->wait_handle != INVALID_HANDLE_VALUE) {
       UnregisterWait(req->wait_handle);
+      req->wait_handle = INVALID_HANDLE_VALUE;
     }
     if (req->event_handle) {
       CloseHandle(req->event_handle);
+      req->event_handle = NULL;
     }
   }
 
@@ -1077,9 +1107,9 @@ int uv_tcp_import(uv_tcp_t* tcp, WSAPROTOCOL_INFOW* socket_protocol_info,
     int tcp_connection) {
   int err;
 
-  SOCKET socket = WSASocketW(AF_INET,
-                             SOCK_STREAM,
-                             IPPROTO_IP,
+  SOCKET socket = WSASocketW(FROM_PROTOCOL_INFO,
+                             FROM_PROTOCOL_INFO,
+                             FROM_PROTOCOL_INFO,
                              socket_protocol_info,
                              0,
                              WSA_FLAG_OVERLAPPED);
@@ -1171,6 +1201,12 @@ int uv_tcp_duplicate_socket(uv_tcp_t* handle, int pid,
       if (!(handle->flags & UV_HANDLE_BOUND)) {
         return ERROR_INVALID_PARAMETER;
       }
+
+      /* Report any deferred bind errors now. */
+      if (handle->flags & UV_HANDLE_BIND_ERROR) {
+        return handle->bind_error;
+      }
+
       if (listen(handle->socket, SOMAXCONN) == SOCKET_ERROR) {
         return WSAGetLastError();
       }
@@ -1366,10 +1402,11 @@ int uv_tcp_open(uv_tcp_t* handle, uv_os_sock_t sock) {
  */
 int uv__tcp_bind(uv_tcp_t* handle,
                  const struct sockaddr* addr,
-                 unsigned int addrlen) {
+                 unsigned int addrlen,
+                 unsigned int flags) {
   int err;
 
-  err = uv_tcp_try_bind(handle, addr, addrlen);
+  err = uv_tcp_try_bind(handle, addr, addrlen, flags);
   if (err)
     return uv_translate_sys_error(err);
 

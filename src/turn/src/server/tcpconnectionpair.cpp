@@ -104,7 +104,7 @@ void TCPConnectionPair::setPeerSocket(const net::TCPSocket::Ptr& socket)
 	
 	// Receive and buffer early media from peer
 	peer->Recv += sdelegate(this, &TCPConnectionPair::onPeerDataReceived);	
-	setServerSocketBufSize<uv_tcp_t>(*socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
+	net::setServerSocketBufSize<uv_tcp_t>(*socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
 
 
@@ -117,7 +117,7 @@ void TCPConnectionPair::setClientSocket(const net::TCPSocket::Ptr& socket)
 	//assert(socket./*base().*/refCount() == 2);
 	client = socket;
 	client->Close += sdelegate(this, &TCPConnectionPair::onConnectionClosed);
-	setServerSocketBufSize<uv_tcp_t>(*socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
+	net::setServerSocketBufSize<uv_tcp_t>(*socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
 
 
@@ -183,9 +183,9 @@ void TCPConnectionPair::onPeerDataReceived(void*, const MutableBuffer& buffer, c
 	else {
 		size_t maxSize = allocation.server().options().earlyMediaBufferSize;
 		DebugLS(this) << "Buffering early data: " << len << endl;
-#ifdef _DEBUG
-		DebugLS(this) << "Printing early data: " << std::string(buf, len) << endl;
-#endif
+//#ifdef _DEBUG
+//		DebugLS(this) << "Printing early data: " << std::string(buf, len) << endl;
+//#endif
 		if (len > maxSize)
 			WarnL << "Dropping early media: Oversize packet: " << len << endl;
 		if (earlyPeerData.size() > maxSize)

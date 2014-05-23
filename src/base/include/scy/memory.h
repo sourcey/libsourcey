@@ -70,7 +70,7 @@ public:
 		// The garbage collector must be running.
 
 protected:	
-	static void onTimer(uv_timer_t* handle, int status);
+	static void onTimer(uv_timer_t* handle);
 	void runAsync();
 		
 	mutable Mutex _mutex;

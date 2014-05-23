@@ -13,9 +13,10 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 AC_PREREQ(2.57)
-AC_INIT([libuv], [0.11.14], [https://github.com/joyent/libuv/issues])
+AC_INIT([libuv], [0.11.25], [https://github.com/joyent/libuv/issues])
 AC_CONFIG_MACRO_DIR([m4])
 m4_include([m4/libuv-extra-automake-flags.m4])
+m4_include([m4/as_case.m4])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects] UV_EXTRA_AUTOMAKE_FLAGS)
 AC_CANONICAL_HOST
 AC_ENABLE_SHARED
@@ -37,14 +38,20 @@ AC_CHECK_LIB([rt], [clock_gettime])
 AC_CHECK_LIB([sendfile], [sendfile])
 AC_CHECK_LIB([socket], [socket])
 AC_SYS_LARGEFILE
-AM_CONDITIONAL([AIX],     [AS_CASE([$host_os], [aix*],     [true], [false])])
-AM_CONDITIONAL([DARWIN],  [AS_CASE([$host_os], [darwin*],  [true], [false])])
-AM_CONDITIONAL([FREEBSD], [AS_CASE([$host_os], [freebsd*], [true], [false])])
-AM_CONDITIONAL([LINUX],   [AS_CASE([$host_os], [linux*],   [true], [false])])
-AM_CONDITIONAL([NETBSD],  [AS_CASE([$host_os], [netbsd*],  [true], [false])])
-AM_CONDITIONAL([OPENBSD], [AS_CASE([$host_os], [openbsd*], [true], [false])])
-AM_CONDITIONAL([SUNOS],   [AS_CASE([$host_os], [solaris*], [true], [false])])
-AM_CONDITIONAL([WINNT],   [AS_CASE([$host_os], [mingw*],   [true], [false])])
+AM_CONDITIONAL([AIX],    [AS_CASE([$host_os],[aix*],          [true], [false])])
+AM_CONDITIONAL([ANDROID],[AS_CASE([$host_os],[linux-android*],[true], [false])])
+AM_CONDITIONAL([DARWIN], [AS_CASE([$host_os],[darwin*],       [true], [false])])
+AM_CONDITIONAL([FREEBSD],[AS_CASE([$host_os],[freebsd*],      [true], [false])])
+AM_CONDITIONAL([LINUX],  [AS_CASE([$host_os],[linux*],        [true], [false])])
+AM_CONDITIONAL([NETBSD], [AS_CASE([$host_os],[netbsd*],       [true], [false])])
+AM_CONDITIONAL([OPENBSD],[AS_CASE([$host_os],[openbsd*],      [true], [false])])
+AM_CONDITIONAL([SUNOS],  [AS_CASE([$host_os],[solaris*],      [true], [false])])
+AM_CONDITIONAL([WINNT],  [AS_CASE([$host_os],[mingw*],        [true], [false])])
 PANDORA_ENABLE_DTRACE
+AC_CHECK_PROG(PKG_CONFIG, pkg-config, yes)
+AM_CONDITIONAL([HAVE_PKG_CONFIG], [test "x$PKG_CONFIG" != "x"])
+AS_IF([test "x$PKG_CONFIG" != "x"], [
+    AC_CONFIG_FILES([libuv.pc])
+])
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

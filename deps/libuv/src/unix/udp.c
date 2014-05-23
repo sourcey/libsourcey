@@ -28,20 +28,33 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#if defined(IPV6_JOIN_GROUP) && !defined(IPV6_ADD_MEMBERSHIP)
+# define IPV6_ADD_MEMBERSHIP IPV6_JOIN_GROUP
+#endif
+
+#if defined(IPV6_LEAVE_GROUP) && !defined(IPV6_DROP_MEMBERSHIP)
+# define IPV6_DROP_MEMBERSHIP IPV6_LEAVE_GROUP
+#endif
+
 
 static void uv__udp_run_completed(uv_udp_t* handle);
 static void uv__udp_run_pending(uv_udp_t* handle);
 static void uv__udp_io(uv_loop_t* loop, uv__io_t* w, unsigned int revents);
 static void uv__udp_recvmsg(uv_loop_t* loop, uv__io_t* w, unsigned int revents);
 static void uv__udp_sendmsg(uv_loop_t* loop, uv__io_t* w, unsigned int revents);
-static int uv__udp_maybe_deferred_bind(uv_udp_t* handle, int domain);
+static int uv__udp_maybe_deferred_bind(uv_udp_t* handle,
+                                       int domain,
+                                       unsigned int flags);
 
 
 void uv__udp_close(uv_udp_t* handle) {
   uv__io_close(handle->loop, &handle->io_watcher);
   uv__handle_stop(handle);
-  close(handle->io_watcher.fd);
-  handle->io_watcher.fd = -1;
+
+  if (handle->io_watcher.fd != -1) {
+    uv__close(handle->io_watcher.fd);
+    handle->io_watcher.fd = -1;
+  }
 }
 
 
@@ -208,16 +221,17 @@ static void uv__udp_recvmsg(uv_loop_t* loop,
         handle->recv_cb(handle, -errno, &buf, NULL, 0);
     }
     else {
-      flags = 0;
+      const struct sockaddr *addr;
+      if (h.msg_namelen == 0)
+        addr = NULL;
+      else
+        addr = (const struct sockaddr*) &peer;
 
+      flags = 0;
       if (h.msg_flags & MSG_TRUNC)
         flags |= UV_UDP_PARTIAL;
 
-      handle->recv_cb(handle,
-                      nread,
-                      &buf,
-                      (const struct sockaddr*) &peer,
-                      flags);
+      handle->recv_cb(handle, nread, &buf, addr, flags);
     }
   }
   /* recv_cb callback may decide to pause or close the handle */
@@ -297,7 +311,7 @@ int uv__udp_bind(uv_udp_t* handle,
   fd = -1;
 
   /* Check for bad flags. */
-  if (flags & ~UV_UDP_IPV6ONLY)
+  if (flags & ~(UV_UDP_IPV6ONLY | UV_UDP_REUSEADDR))
     return -EINVAL;
 
   /* Cannot set IPv6-only mode on non-IPv6 socket. */
@@ -312,9 +326,11 @@ int uv__udp_bind(uv_udp_t* handle,
     handle->io_watcher.fd = fd;
   }
 
-  err = uv__set_reuse(fd);
-  if (err)
-    goto out;
+  if (flags & UV_UDP_REUSEADDR) {
+    err = uv__set_reuse(fd);
+    if (err)
+      goto out;
+  }
 
   if (flags & UV_UDP_IPV6ONLY) {
 #ifdef IPV6_V6ONLY
@@ -334,16 +350,21 @@ int uv__udp_bind(uv_udp_t* handle,
     goto out;
   }
 
+  if (addr->sa_family == AF_INET6)
+    handle->flags |= UV_HANDLE_IPV6;
+
   return 0;
 
 out:
-  close(handle->io_watcher.fd);
+  uv__close(handle->io_watcher.fd);
   handle->io_watcher.fd = -1;
   return err;
 }
 
 
-static int uv__udp_maybe_deferred_bind(uv_udp_t* handle, int domain) {
+static int uv__udp_maybe_deferred_bind(uv_udp_t* handle,
+                                       int domain,
+                                       unsigned int flags) {
   unsigned char taddr[sizeof(struct sockaddr_in6)];
   socklen_t addrlen;
 
@@ -376,7 +397,7 @@ static int uv__udp_maybe_deferred_bind(uv_udp_t* handle, int domain) {
     abort();
   }
 
-  return uv__udp_bind(handle, (const struct sockaddr*) &taddr, addrlen, 0);
+  return uv__udp_bind(handle, (const struct sockaddr*) &taddr, addrlen, flags);
 }
 
 
@@ -391,7 +412,7 @@ int uv__udp_send(uv_udp_send_t* req,
 
   assert(nbufs > 0);
 
-  err = uv__udp_maybe_deferred_bind(handle, addr->sa_family);
+  err = uv__udp_maybe_deferred_bind(handle, addr->sa_family, 0);
   if (err)
     return err;
 
@@ -414,6 +435,92 @@ int uv__udp_send(uv_udp_send_t* req,
   QUEUE_INSERT_TAIL(&handle->write_queue, &req->queue);
   uv__io_start(handle->loop, &handle->io_watcher, UV__POLLOUT);
   uv__handle_start(handle);
+
+  return 0;
+}
+
+
+static int uv__udp_set_membership4(uv_udp_t* handle,
+                                   const struct sockaddr_in* multicast_addr,
+                                   const char* interface_addr,
+                                   uv_membership membership) {
+  struct ip_mreq mreq;
+  int optname;
+  int err;
+
+  memset(&mreq, 0, sizeof mreq);
+
+  if (interface_addr) {
+    err = uv_inet_pton(AF_INET, interface_addr, &mreq.imr_interface.s_addr);
+    if (err)
+      return err;
+  } else {
+    mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+  }
+
+  mreq.imr_multiaddr.s_addr = multicast_addr->sin_addr.s_addr;
+
+  switch (membership) {
+  case UV_JOIN_GROUP:
+    optname = IP_ADD_MEMBERSHIP;
+    break;
+  case UV_LEAVE_GROUP:
+    optname = IP_DROP_MEMBERSHIP;
+    break;
+  default:
+    return -EINVAL;
+  }
+
+  if (setsockopt(handle->io_watcher.fd,
+                 IPPROTO_IP,
+                 optname,
+                 &mreq,
+                 sizeof(mreq))) {
+    return -errno;
+  }
+
+  return 0;
+}
+
+
+static int uv__udp_set_membership6(uv_udp_t* handle,
+                                   const struct sockaddr_in6* multicast_addr,
+                                   const char* interface_addr,
+                                   uv_membership membership) {
+  int optname;
+  struct ipv6_mreq mreq;
+  struct sockaddr_in6 addr6;
+
+  memset(&mreq, 0, sizeof mreq);
+
+  if (interface_addr) {
+    if (uv_ip6_addr(interface_addr, 0, &addr6))
+      return -EINVAL;
+    mreq.ipv6mr_interface = addr6.sin6_scope_id;
+  } else {
+    mreq.ipv6mr_interface = 0;
+  }
+
+  mreq.ipv6mr_multiaddr = multicast_addr->sin6_addr;
+
+  switch (membership) {
+  case UV_JOIN_GROUP:
+    optname = IPV6_ADD_MEMBERSHIP;
+    break;
+  case UV_LEAVE_GROUP:
+    optname = IPV6_DROP_MEMBERSHIP;
+    break;
+  default:
+    return -EINVAL;
+  }
+
+  if (setsockopt(handle->io_watcher.fd,
+                 IPPROTO_IPV6,
+                 optname,
+                 &mreq,
+                 sizeof(mreq))) {
+    return -errno;
+  }
 
   return 0;
 }
@@ -450,39 +557,23 @@ int uv_udp_set_membership(uv_udp_t* handle,
                           const char* multicast_addr,
                           const char* interface_addr,
                           uv_membership membership) {
-  struct ip_mreq mreq;
-  int optname;
+  int err;
+  struct sockaddr_in addr4;
+  struct sockaddr_in6 addr6;
 
-  memset(&mreq, 0, sizeof mreq);
-
-  if (interface_addr) {
-    mreq.imr_interface.s_addr = inet_addr(interface_addr);
+  if (uv_ip4_addr(multicast_addr, 0, &addr4) == 0) {
+    err = uv__udp_maybe_deferred_bind(handle, AF_INET, UV_UDP_REUSEADDR);
+    if (err)
+      return err;
+    return uv__udp_set_membership4(handle, &addr4, interface_addr, membership);
+  } else if (uv_ip6_addr(multicast_addr, 0, &addr6) == 0) {
+    err = uv__udp_maybe_deferred_bind(handle, AF_INET6, UV_UDP_REUSEADDR);
+    if (err)
+      return err;
+    return uv__udp_set_membership6(handle, &addr6, interface_addr, membership);
   } else {
-    mreq.imr_interface.s_addr = htonl(INADDR_ANY);
-  }
-
-  mreq.imr_multiaddr.s_addr = inet_addr(multicast_addr);
-
-  switch (membership) {
-  case UV_JOIN_GROUP:
-    optname = IP_ADD_MEMBERSHIP;
-    break;
-  case UV_LEAVE_GROUP:
-    optname = IP_DROP_MEMBERSHIP;
-    break;
-  default:
     return -EINVAL;
   }
-
-  if (setsockopt(handle->io_watcher.fd,
-                 IPPROTO_IP,
-                 optname,
-                 &mreq,
-                 sizeof(mreq))) {
-    return -errno;
-  }
-
-  return 0;
 }
 
 
@@ -536,6 +627,62 @@ int uv_udp_set_multicast_loop(uv_udp_t* handle, int on) {
   return uv__setsockopt_maybe_char(handle, IP_MULTICAST_LOOP, on);
 }
 
+int uv_udp_set_multicast_interface(uv_udp_t* handle, const char* interface_addr) {
+  int err;
+  struct sockaddr_storage addr_st;
+  struct sockaddr_in* addr4;
+  struct sockaddr_in6* addr6;
+
+  addr4 = (struct sockaddr_in*) &addr_st;
+  addr6 = (struct sockaddr_in6*) &addr_st;
+
+  if (!interface_addr) {
+    memset(&addr_st, 0, sizeof addr_st);
+    if (handle->flags & UV_HANDLE_IPV6) {
+      addr_st.ss_family = AF_INET6;
+      addr6->sin6_scope_id = 0;
+    } else {
+      addr_st.ss_family = AF_INET;
+      addr4->sin_addr.s_addr = htonl(INADDR_ANY);
+    }
+  } else if (uv_ip4_addr(interface_addr, 0, addr4) == 0) {
+    /* nothing, address was parsed */
+  } else if (uv_ip6_addr(interface_addr, 0, addr6) == 0) {
+    /* nothing, address was parsed */
+  } else {
+    return -EINVAL;
+  }
+
+  if (addr_st.ss_family == AF_INET) {
+    err = uv__udp_maybe_deferred_bind(handle, AF_INET, UV_UDP_REUSEADDR);
+    if (err)
+      return err;
+    if (setsockopt(handle->io_watcher.fd,
+                   IPPROTO_IP,
+                   IP_MULTICAST_IF,
+                   (void*) &addr4->sin_addr,
+                   sizeof(addr4->sin_addr)) == -1) {
+      return -errno;
+    }
+  } else if (addr_st.ss_family == AF_INET6) {
+    err = uv__udp_maybe_deferred_bind(handle, AF_INET6, UV_UDP_REUSEADDR);
+    if (err)
+      return err;
+    if (setsockopt(handle->io_watcher.fd,
+                   IPPROTO_IPV6,
+                   IPV6_MULTICAST_IF,
+                   &addr6->sin6_scope_id,
+                   sizeof(addr6->sin6_scope_id)) == -1) {
+      return -errno;
+    }
+  } else {
+    assert(0 && "unexpected address family");
+    abort();
+  }
+
+  return 0;
+}
+
 
 int uv_udp_getsockname(uv_udp_t* handle, struct sockaddr* name, int* namelen) {
   socklen_t socklen;
@@ -565,7 +712,7 @@ int uv__udp_recv_start(uv_udp_t* handle,
   if (uv__io_active(&handle->io_watcher, UV__POLLIN))
     return -EALREADY;  /* FIXME(bnoordhuis) Should be -EBUSY. */
 
-  err = uv__udp_maybe_deferred_bind(handle, AF_INET);
+  err = uv__udp_maybe_deferred_bind(handle, AF_INET, 0);
   if (err)
     return err;
 

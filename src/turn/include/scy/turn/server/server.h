@@ -106,7 +106,7 @@ typedef std::map<FiveTuple, ServerAllocation*> ServerAllocationMap;
 
 
 class Server
-		// TODO: bandwidth, allocation timer, print allocs
+	/// TURN server rfc5766 implementation
 {
 public:
 	Server(ServerObserver& observer, const ServerOptions& options = ServerOptions());
@@ -120,7 +120,6 @@ public:
 	void handleBindingRequest(Request& request);
 	void handleAllocateRequest(Request& request);
 	void handleConnectionBindRequest(Request& request);
-	//void handleSendIndication(Request& request);
 	
 	void respond(Request& request, stun::Message& response);
 	void respondError(Request& request, int errorCode, const char* errorDesc);
@@ -152,13 +151,7 @@ private:
 	ServerOptions _options;
 	ServerObserver& _observer;
 	ServerAllocationMap	_allocations;
-	//mutable Mutex	_mutex; :)
 };
-
-
-//int setServerSocketBufSize(net::TCPSocket& socket, int size);
-//int getServerSocketSendBufSize(net::TCPSocket& socket);
-//int getServerSocketRecvBufSize(net::TCPSocket& socket);
 
 
 } } //  namespace scy::turn

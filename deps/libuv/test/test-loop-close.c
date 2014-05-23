@@ -19,16 +19,35 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef UV_LINUX_H
-#define UV_LINUX_H
+#include "uv.h"
+#include "task.h"
 
-#define UV_PLATFORM_LOOP_FIELDS                                               \
-  uv__io_t inotify_read_watcher;                                              \
-  void* inotify_watchers;                                                     \
-  int inotify_fd;                                                             \
+static uv_timer_t timer_handle;
 
-#define UV_PLATFORM_FS_EVENT_FIELDS                                           \
-  void* watchers[2];                                                          \
-  int wd;                                                                     \
+static void timer_cb(uv_timer_t* handle) {
+  ASSERT(handle);
+  uv_stop(handle->loop);
+}
 
-#endif /* UV_LINUX_H */
+
+TEST_IMPL(loop_close) {
+  int r;
+  uv_loop_t loop;
+
+  ASSERT(0 == uv_loop_init(&loop));
+
+  uv_timer_init(&loop, &timer_handle);
+  uv_timer_start(&timer_handle, timer_cb, 100, 100);
+
+  ASSERT(UV_EBUSY == uv_loop_close(&loop));
+
+  uv_run(&loop, UV_RUN_DEFAULT);
+
+  uv_close((uv_handle_t*) &timer_handle, NULL);
+  r = uv_run(&loop, UV_RUN_DEFAULT);
+  ASSERT(r == 0);
+
+  ASSERT(0 == uv_loop_close(&loop));
+
+  return 0;
+}

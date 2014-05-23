@@ -46,8 +46,7 @@ static void timer_close_cb(uv_handle_t* handle) {
 }
 
 
-static void timer_cb(uv_timer_t* handle, int status) {
-  ASSERT(status == 0);
+static void timer_cb(uv_timer_t* handle) {
   timer_cb_calls++;
 
   /*
@@ -101,7 +100,7 @@ static void connection_fail(uv_connect_cb connect_cb) {
 
   /* We are never doing multiple reads/connects at a time anyway. */
   /* so these handles can be pre-initialized. */
-  ASSERT(0 == uv_tcp_bind(&tcp, (const struct sockaddr*) &client_addr));
+  ASSERT(0 == uv_tcp_bind(&tcp, (const struct sockaddr*) &client_addr, 0));
 
   r = uv_tcp_connect(&req,
                      &tcp,

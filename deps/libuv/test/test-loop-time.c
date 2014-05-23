@@ -19,16 +19,16 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef UV_BSD_H
-#define UV_BSD_H
+#include "uv.h"
+#include "task.h"
 
-#define UV_PLATFORM_FS_EVENT_FIELDS                                           \
-  uv__io_t event_watcher;                                                     \
 
-#define UV_IO_PRIVATE_PLATFORM_FIELDS                                         \
-  int rcount;                                                                 \
-  int wcount;                                                                 \
+TEST_IMPL(loop_update_time) {
+  uint64_t start;
 
-#define UV_HAVE_KQUEUE 1
+  start = uv_now(uv_default_loop());
+  while (uv_now(uv_default_loop()) - start < 1000)
+    ASSERT(0 == uv_run(uv_default_loop(), UV_RUN_NOWAIT));
 
-#endif /* UV_BSD_H */
+  return 0;
+}

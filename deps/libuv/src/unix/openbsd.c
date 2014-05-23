@@ -56,7 +56,7 @@ void uv__platform_loop_delete(uv_loop_t* loop) {
 }
 
 
-uint64_t uv__hrtime(void) {
+uint64_t uv__hrtime(uv_clocktype_t type) {
   struct timespec ts;
   clock_gettime(CLOCK_MONOTONIC, &ts);
   return (((uint64_t) ts.tv_sec) * NANOSEC + ts.tv_nsec);
@@ -228,7 +228,7 @@ int uv_cpu_info(uv_cpu_info_t** cpu_infos, int* count) {
   uint64_t info[CPUSTATES];
   char model[512];
   int numcpus = 1;
-  static int which[] = {CTL_HW,HW_MODEL,0};
+  int which[] = {CTL_HW,HW_MODEL,0};
   size_t size;
   int i;
   uv_cpu_info_t* cpu_info;

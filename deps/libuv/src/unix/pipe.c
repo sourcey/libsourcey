@@ -29,8 +29,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-static void uv__pipe_accept(uv_loop_t* loop, uv__io_t* w, unsigned int events);
-
 
 int uv_pipe_init(uv_loop_t* loop, uv_pipe_t* handle, int ipc) {
   uv__stream_init(loop, (uv_stream_t*)handle, UV_NAMED_PIPE);
@@ -74,7 +72,8 @@ int uv_pipe_bind(uv_pipe_t* handle, const char* name) {
   sockfd = err;
 
   memset(&saddr, 0, sizeof saddr);
-  uv_strlcpy(saddr.sun_path, pipe_fname, sizeof(saddr.sun_path));
+  strncpy(saddr.sun_path, pipe_fname, sizeof(saddr.sun_path) - 1);
+  saddr.sun_path[sizeof(saddr.sun_path) - 1] = '\0';
   saddr.sun_family = AF_UNIX;
 
   if (bind(sockfd, (struct sockaddr*)&saddr, sizeof saddr)) {
@@ -93,11 +92,11 @@ int uv_pipe_bind(uv_pipe_t* handle, const char* name) {
 
 out:
   if (bound) {
-    /* unlink() before close() to avoid races. */
+    /* unlink() before uv__close() to avoid races. */
     assert(pipe_fname != NULL);
     unlink(pipe_fname);
   }
-  close(sockfd);
+  uv__close(sockfd);
   free((void*)pipe_fname);
   return err;
 }
@@ -111,7 +110,7 @@ int uv_pipe_listen(uv_pipe_t* handle, int backlog, uv_connection_cb cb) {
     return -errno;
 
   handle->connection_cb = cb;
-  handle->io_watcher.cb = uv__pipe_accept;
+  handle->io_watcher.cb = uv__server_io;
   uv__io_start(handle->loop, &handle->io_watcher, UV__POLLIN);
   return 0;
 }
@@ -169,7 +168,8 @@ void uv_pipe_connect(uv_connect_t* req,
   }
 
   memset(&saddr, 0, sizeof saddr);
-  uv_strlcpy(saddr.sun_path, name, sizeof(saddr.sun_path));
+  strncpy(saddr.sun_path, name, sizeof(saddr.sun_path) - 1);
+  saddr.sun_path[sizeof(saddr.sun_path) - 1] = '\0';
   saddr.sun_family = AF_UNIX;
 
   do {
@@ -212,29 +212,65 @@ out:
 }
 
 
-/* TODO merge with uv__server_io()? */
-static void uv__pipe_accept(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
-  uv_pipe_t* pipe;
-  int sockfd;
+int uv_pipe_getsockname(const uv_pipe_t* handle, char* buf, size_t* len) {
+  struct sockaddr_un sa;
+  socklen_t addrlen;
+  int err;
 
-  pipe = container_of(w, uv_pipe_t, io_watcher);
-  assert(pipe->type == UV_NAMED_PIPE);
-
-  sockfd = uv__accept(uv__stream_fd(pipe));
-  if (sockfd == -1) {
-    if (errno != EAGAIN && errno != EWOULDBLOCK)
-      pipe->connection_cb((uv_stream_t*)pipe, -errno);
-    return;
+  addrlen = sizeof(sa);
+  memset(&sa, 0, addrlen);
+  err = getsockname(uv__stream_fd(handle), (struct sockaddr*) &sa, &addrlen);
+  if (err < 0) {
+    *len = 0;
+    return -errno;
   }
 
-  pipe->accepted_fd = sockfd;
-  pipe->connection_cb((uv_stream_t*)pipe, 0);
-  if (pipe->accepted_fd == sockfd) {
-    /* The user hasn't called uv_accept() yet */
-    uv__io_stop(pipe->loop, &pipe->io_watcher, UV__POLLIN);
+  if (sa.sun_path[0] == 0)
+    /* Linux abstract namespace */
+    addrlen -= offsetof(struct sockaddr_un, sun_path);
+  else
+    addrlen = strlen(sa.sun_path) + 1;
+
+
+  if (addrlen > *len) {
+    *len = addrlen;
+    return UV_ENOBUFS;
   }
+
+  memcpy(buf, sa.sun_path, addrlen);
+  *len = addrlen;
+
+  return 0;
 }
 
 
 void uv_pipe_pending_instances(uv_pipe_t* handle, int count) {
+}
+
+
+int uv_pipe_pending_count(uv_pipe_t* handle) {
+  uv__stream_queued_fds_t* queued_fds;
+
+  if (!handle->ipc)
+    return 0;
+
+  if (handle->accepted_fd == -1)
+    return 0;
+
+  if (handle->queued_fds == NULL)
+    return 1;
+
+  queued_fds = handle->queued_fds;
+  return queued_fds->offset + 1;
+}
+
+
+uv_handle_type uv_pipe_pending_type(uv_pipe_t* handle) {
+  if (!handle->ipc)
+    return UV_UNKNOWN_HANDLE;
+
+  if (handle->accepted_fd == -1)
+    return UV_UNKNOWN_HANDLE;
+  else
+    return uv__handle_type(handle->accepted_fd);
 }

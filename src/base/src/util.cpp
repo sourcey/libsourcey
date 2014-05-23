@@ -145,9 +145,8 @@ void split(const std::string& s, const std::string& delim, std::vector<std::stri
 {
 	bool final = false;
 	std::string::size_type prev = 0, pos = 0;
-    while ((pos = s.find(delim, pos)) != std::string::npos) 
-	{
-		final = static_cast<int>(elems.size() + 1) == limit;
+    while ((pos = s.find(delim, pos)) != std::string::npos) {
+		final = limit && static_cast<int>(elems.size() + 1) == limit;
 		elems.push_back(s.substr(prev, final ? (s.size() - prev) : (pos - prev)));
         prev = ++pos;
 		if (final)
@@ -170,9 +169,9 @@ void split(const std::string& s, char delim, std::vector<std::string>& elems, in
 {
     std::stringstream ss(s);
     std::string item;
-    while (getline(ss, item, delim)) {
+    while (std::getline(ss, item, delim)) {
         elems.push_back(item);
-		if (static_cast<int>(elems.size() + 1) == limit)
+		if (limit && static_cast<int>(elems.size() + 1) == limit)
 			break;
     }
 	if (ss.tellg() > 0)
@@ -248,20 +247,21 @@ bool compareVersion(const std::string& l, const std::string& r)
 	if (r.empty())
 		return true;
 
-	bool isEqual = true;
-	std::vector<std::string> lnums = split(l, ".");
-	std::vector<std::string> rnums = split(r, ".");
+	bool equal = true;
+	std::vector<std::string> lnums, rnums;
+	util::split(l, ".", lnums);
+	util::split(r, ".", rnums);
 	for (unsigned i = 0; i < lnums.size(); i++) {			
 		if (rnums.size() < i + 1)
 			break;		
-		int ln = util::strtoi<UInt32>(lnums[i]);
-		int rn = util::strtoi<UInt32>(rnums[i]);
+		int ln = util::strtoi<int>(lnums[i]);
+		int rn = util::strtoi<int>(rnums[i]);
 		if (ln < rn)
 			return false;
 		else if (ln > rn)
-			isEqual = false;
+			equal = false;
 	}
-	return !isEqual;
+	return !equal;
 }
 
 

@@ -80,14 +80,14 @@ void TCPSocket::connect(const net::Address& peerAddress)
 }
 
 
-void TCPSocket::bind(const net::Address& address, unsigned /* flags */) 
+void TCPSocket::bind(const net::Address& address, unsigned flags) 
 {
 	TraceLS(this) << "Binding on " << address << endl;
 	init();
 	int r;
 	switch (address.af()) {
 	case AF_INET:
-		r = uv_tcp_bind(ptr<uv_tcp_t>(), address.addr());
+		r = uv_tcp_bind(ptr<uv_tcp_t>(), address.addr(), flags);
 		break;
 	//case AF_INET6:
 	//	r = uv_tcp_bind6(ptr<uv_tcp_t>(), *reinterpret_cast<const sockaddr_in6*>(address.addr()));

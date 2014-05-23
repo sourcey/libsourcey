@@ -226,6 +226,68 @@ public:
 };
 
 
+//
+// Socket Helpers
+//
+
+	
+#if WIN32
+#define nativeSocketFd(handle) ((handle)->socket)
+#else
+namespace { #include "unix/internal.h" } // uv__stream_fd
+#define nativeSocketFd(handle) (uv__stream_fd(handle))
+#endif
+
+
+template<class NativeT> int getServerSocketSendBufSize(uv::Handle& handle)
+{
+	int fd = nativeSocketFd(handle.ptr<NativeT>());
+	int optval = 0; 
+	socklen_t optlen = sizeof(int); 
+	int err = getsockopt(fd, SOL_SOCKET, SO_SNDBUF, (char *)&optval, &optlen);
+	if (err < 1) {
+		errorL("Socket") << "Cannot get snd sock size on fd " << fd << std::endl;
+	}
+	return optval;
+}
+
+
+template<class NativeT> int getServerSocketRecvBufSize(uv::Handle& handle)
+{
+	int fd = nativeSocketFd(handle.ptr<NativeT>());
+	int optval = 0; 
+	socklen_t optlen = sizeof(int); 
+	int err = getsockopt(fd, SOL_SOCKET, SO_RCVBUF, (char *)&optval, &optlen);
+	if (err < 1) {
+		errorL("Socket") << "Cannot get rcv sock size on fd " << fd << std::endl;
+	}
+	return optval;
+}
+
+
+template<class NativeT> int setServerSocketBufSize(uv::Handle& handle, int size)
+{
+	int fd = nativeSocketFd(handle.ptr<NativeT>());
+	int sz;
+
+	sz = size;
+	while (sz > 0) {
+		if (setsockopt(fd, SOL_SOCKET, SO_RCVBUF, (const char*)&sz, (socklen_t)sizeof(sz)) < 0) {
+			sz = sz / 2;
+		} else break;
+	}
+
+	if (sz < 1) {
+		errorL("Socket") << "Cannot set rcv sock size " << size << " on fd " << fd << std::endl;
+	}
+
+	// Get the value to ensure it has propagated through the OS
+	traceL("Socket") << "Recv sock size " << getServerSocketRecvBufSize<NativeT>(handle) << " on fd " << fd << std::endl;
+
+	return sz;
+}
+
+
 } } // namespace scy::net
 
 

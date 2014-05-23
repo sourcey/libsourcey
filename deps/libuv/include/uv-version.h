@@ -19,79 +19,20 @@
  * IN THE SOFTWARE.
  */
 
-#include "uv.h"
-#include "task.h"
+#ifndef UV_VERSION_H
+#define UV_VERSION_H
 
-#include <string.h>
+ /*
+ * Versions with an even minor version (e.g. 0.6.1 or 1.0.4) are API and ABI
+ * stable. When the minor version is odd, the API can change between patch
+ * releases. Make sure you update the -soname directives in configure.ac
+ * and uv.gyp whenever you bump UV_VERSION_MAJOR or UV_VERSION_MINOR (but
+ * not UV_VERSION_PATCH.)
+ */
 
-#define memeq(a, b, c) (memcmp((a), (b), (c)) == 0)
+#define UV_VERSION_MAJOR 0
+#define UV_VERSION_MINOR 11
+#define UV_VERSION_PATCH 25
+#define UV_VERSION_IS_RELEASE 1
 
-
-TEST_IMPL(strlcpy) {
-  size_t r;
-
-  {
-    char dst[2] = "A";
-    r = uv_strlcpy(dst, "", 0);
-    ASSERT(r == 0);
-    ASSERT(memeq(dst, "A", 1));
-  }
-
-  {
-    char dst[2] = "A";
-    r = uv_strlcpy(dst, "B", 1);
-    ASSERT(r == 0);
-    ASSERT(memeq(dst, "", 1));
-  }
-
-  {
-    char dst[2] = "A";
-    r = uv_strlcpy(dst, "B", 2);
-    ASSERT(r == 1);
-    ASSERT(memeq(dst, "B", 2));
-  }
-
-  {
-    char dst[3] = "AB";
-    r = uv_strlcpy(dst, "CD", 3);
-    ASSERT(r == 2);
-    ASSERT(memeq(dst, "CD", 3));
-  }
-
-  return 0;
-}
-
-
-TEST_IMPL(strlcat) {
-  size_t r;
-
-  {
-    char dst[2] = "A";
-    r = uv_strlcat(dst, "B", 1);
-    ASSERT(r == 1);
-    ASSERT(memeq(dst, "A", 2));
-  }
-
-  {
-    char dst[2] = "A";
-    r = uv_strlcat(dst, "B", 2);
-    ASSERT(r == 1);
-    ASSERT(memeq(dst, "A", 2));
-  }
-
-  {
-    char dst[3] = "A";
-    r = uv_strlcat(dst, "B", 3);
-    ASSERT(r == 2);
-    ASSERT(memeq(dst, "AB", 3));
-  }
-
-  {
-    char dst[5] = "AB";
-    r = uv_strlcat(dst, "CD", 5);
-    ASSERT(r == 4);
-    ASSERT(memeq(dst, "ABCD", 5));
-  }
-
-  return 0;
-}
+#endif /* UV_VERSION_H */

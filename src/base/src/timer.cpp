@@ -78,7 +78,7 @@ void Timer::start(Int64 timeout, Int64 interval)
 	_interval = interval;
 	_count = 0;
 				
-    int err = uv_timer_start(_handle.ptr<uv_timer_t>(), [](uv_timer_t* req, int) {
+    int err = uv_timer_start(_handle.ptr<uv_timer_t>(), [](uv_timer_t* req) {
 		auto self = reinterpret_cast<Timer*>(req->data);
 		self->_count++;
 		self->Timeout.emit(self);

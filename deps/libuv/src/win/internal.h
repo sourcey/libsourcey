@@ -35,6 +35,25 @@
 # define INLINE inline
 #endif
 
+
+#ifdef _DEBUG
+extern __declspec( thread ) int uv__crt_assert_enabled;
+
+#define UV_BEGIN_DISABLE_CRT_ASSERT()                           \
+  {                                                             \
+    int uv__saved_crt_assert_enabled = uv__crt_assert_enabled;  \
+    uv__crt_assert_enabled = FALSE;
+  
+
+#define UV_END_DISABLE_CRT_ASSERT()                             \
+    uv__crt_assert_enabled = uv__saved_crt_assert_enabled;      \
+  }
+
+#else
+#define UV_BEGIN_DISABLE_CRT_ASSERT()
+#define UV_END_DISABLE_CRT_ASSERT()
+#endif
+
 /*
  * Handles
  * (also see handle-inl.h)
@@ -65,8 +84,10 @@
 #define UV_HANDLE_EMULATE_IOCP                  0x00100000
 #define UV_HANDLE_BLOCKING_WRITES               0x00200000
 
-/* Only used by uv_tcp_t handles. */
+/* Used by uv_tcp_t and uv_udp_t handles */
 #define UV_HANDLE_IPV6                          0x01000000
+
+/* Only used by uv_tcp_t handles. */
 #define UV_HANDLE_TCP_NODELAY                   0x02000000
 #define UV_HANDLE_TCP_KEEPALIVE                 0x04000000
 #define UV_HANDLE_TCP_SINGLE_ACCEPT             0x08000000
@@ -147,8 +168,6 @@ int uv_pipe_listen(uv_pipe_t* handle, int backlog, uv_connection_cb cb);
 int uv_pipe_accept(uv_pipe_t* server, uv_stream_t* client);
 int uv_pipe_read_start(uv_pipe_t* handle, uv_alloc_cb alloc_cb,
     uv_read_cb read_cb);
-int uv_pipe_read2_start(uv_pipe_t* handle, uv_alloc_cb alloc_cb,
-    uv_read2_cb read_cb);
 int uv_pipe_write(uv_loop_t* loop, uv_write_t* req, uv_pipe_t* handle,
     const uv_buf_t bufs[], unsigned int nbufs, uv_write_cb cb);
 int uv_pipe_write2(uv_loop_t* loop, uv_write_t* req, uv_pipe_t* handle,
@@ -306,7 +325,7 @@ void uv__fs_poll_endgame(uv_loop_t* loop, uv_fs_poll_t* handle);
 void uv__util_init();
 
 int uv_parent_pid();
-void uv_fatal_error(const int errorno, const char* syscall);
+__declspec(noreturn) void uv_fatal_error(const int errorno, const char* syscall);
 
 
 /*

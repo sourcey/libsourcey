@@ -19,26 +19,28 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef UV_SUNOS_H
-#define UV_SUNOS_H
+#include "uv.h"
+#include "task.h"
 
-#include <sys/port.h>
-#include <port.h>
+#include <stdio.h>
+#include <string.h>
 
-/* For the sake of convenience and reduced #ifdef-ery in src/unix/sunos.c,
- * add the fs_event fields even when this version of SunOS doesn't support
- * file watching.
- */
-#define UV_PLATFORM_LOOP_FIELDS                                               \
-  uv__io_t fs_event_watcher;                                                  \
-  int fs_fd;                                                                  \
 
-#if defined(PORT_SOURCE_FILE)
+TEST_IMPL(ip4_addr) {
 
-# define UV_PLATFORM_FS_EVENT_FIELDS                                          \
-  file_obj_t fo;                                                              \
-  int fd;                                                                     \
+  struct sockaddr_in addr;
 
-#endif /* defined(PORT_SOURCE_FILE) */
+  ASSERT(0 == uv_ip4_addr("127.0.0.1", TEST_PORT, &addr));
+  ASSERT(0 == uv_ip4_addr("255.255.255.255", TEST_PORT, &addr));
+  ASSERT(UV_EINVAL == uv_ip4_addr("255.255.255*000", TEST_PORT, &addr));
+  ASSERT(UV_EINVAL == uv_ip4_addr("255.255.255.256", TEST_PORT, &addr));
+  ASSERT(UV_EINVAL == uv_ip4_addr("2555.0.0.0", TEST_PORT, &addr));
+  ASSERT(UV_EINVAL == uv_ip4_addr("255", TEST_PORT, &addr));
 
-#endif /* UV_SUNOS_H */
+  /* for broken address family */
+  ASSERT(UV_EAFNOSUPPORT == uv_inet_pton(42, "127.0.0.1",
+    &addr.sin_addr.s_addr));
+
+  MAKE_VALGRIND_HAPPY();
+  return 0;
+}

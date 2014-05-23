@@ -62,7 +62,7 @@ void SyncContext::startAsync()
 	assert(!_handle.active());	
 	
 	_handle.ptr()->data = new async::Runner::Context::ptr(pContext);
-	int r = uv_async_init(_handle.loop(), _handle.ptr<uv_async_t>(), [](uv_async_t* req, int) {
+	int r = uv_async_init(_handle.loop(), _handle.ptr<uv_async_t>(), [](uv_async_t* req) {
 		assert(req->data != nullptr); // catch late callbacks, may need to
 		                              // make uv handle a context member
 		auto ctx = reinterpret_cast<async::Runner::Context::ptr*>(req->data);

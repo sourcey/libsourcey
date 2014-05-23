@@ -81,7 +81,7 @@ static int new_inotify_fd(void) {
     err = uv__nonblock(fd, 1);
 
   if (err) {
-    close(fd);
+    uv__close(fd);
     return err;
   }
 
@@ -124,7 +124,7 @@ static void uv__inotify_read(uv_loop_t* loop,
   const char* path;
   ssize_t size;
   const char *p;
-  /* needs to be large enough for sizeof(inotify_event) + strlen(filename) */
+  /* needs to be large enough for sizeof(inotify_event) + strlen(path) */
   char buf[4096];
 
   while (1) {
@@ -168,17 +168,25 @@ static void uv__inotify_read(uv_loop_t* loop,
 }
 
 
-int uv_fs_event_init(uv_loop_t* loop,
-                     uv_fs_event_t* handle,
-                     const char* path,
-                     uv_fs_event_cb cb,
-                     int flags) {
+int uv_fs_event_init(uv_loop_t* loop, uv_fs_event_t* handle) {
+  uv__handle_init(loop, (uv_handle_t*)handle, UV_FS_EVENT);
+  return 0;
+}
+
+
+int uv_fs_event_start(uv_fs_event_t* handle,
+                      uv_fs_event_cb cb,
+                      const char* path,
+                      unsigned int flags) {
   struct watcher_list* w;
   int events;
   int err;
   int wd;
 
-  err = init_inotify(loop);
+  if (uv__is_active(handle))
+    return -EINVAL;
+
+  err = init_inotify(handle->loop);
   if (err)
     return err;
 
@@ -191,11 +199,11 @@ int uv_fs_event_init(uv_loop_t* loop,
          | UV__IN_MOVED_FROM
          | UV__IN_MOVED_TO;
 
-  wd = uv__inotify_add_watch(loop->inotify_fd, path, events);
+  wd = uv__inotify_add_watch(handle->loop->inotify_fd, path, events);
   if (wd == -1)
     return -errno;
 
-  w = find_watcher(loop, wd);
+  w = find_watcher(handle->loop, wd);
   if (w)
     goto no_insert;
 
@@ -206,13 +214,12 @@ int uv_fs_event_init(uv_loop_t* loop,
   w->wd = wd;
   w->path = strcpy((char*)(w + 1), path);
   QUEUE_INIT(&w->watchers);
-  RB_INSERT(watcher_root, CAST(&loop->inotify_watchers), w);
+  RB_INSERT(watcher_root, CAST(&handle->loop->inotify_watchers), w);
 
 no_insert:
-  uv__handle_init(loop, (uv_handle_t*)handle, UV_FS_EVENT);
-  uv__handle_start(handle); /* FIXME shouldn't start automatically */
+  uv__handle_start(handle);
   QUEUE_INSERT_TAIL(&w->watchers, &handle->watchers);
-  handle->filename = w->path;
+  handle->path = w->path;
   handle->cb = cb;
   handle->wd = wd;
 
@@ -220,14 +227,17 @@ no_insert:
 }
 
 
-void uv__fs_event_close(uv_fs_event_t* handle) {
+int uv_fs_event_stop(uv_fs_event_t* handle) {
   struct watcher_list* w;
+
+  if (!uv__is_active(handle))
+    return -EINVAL;
 
   w = find_watcher(handle->loop, handle->wd);
   assert(w != NULL);
 
   handle->wd = -1;
-  handle->filename = NULL;
+  handle->path = NULL;
   uv__handle_stop(handle);
   QUEUE_REMOVE(&handle->watchers);
 
@@ -237,4 +247,11 @@ void uv__fs_event_close(uv_fs_event_t* handle) {
     uv__inotify_rm_watch(handle->loop->inotify_fd, w->wd);
     free(w);
   }
+
+  return 0;
+}
+
+
+void uv__fs_event_close(uv_fs_event_t* handle) {
+  uv_fs_event_stop(handle);
 }

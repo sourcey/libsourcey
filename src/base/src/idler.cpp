@@ -70,7 +70,7 @@ void Idler::startAsync()
 	assert(!_handle.closed()); // close() must not have been called
 	
 	_handle.ptr()->data = new async::Runner::Context::ptr(pContext);
-	int r = uv_idle_start(_handle.ptr<uv_idle_t>(), [](uv_idle_t* req, int) {
+	int r = uv_idle_start(_handle.ptr<uv_idle_t>(), [](uv_idle_t* req) {
 		auto ctx = reinterpret_cast<async::Runner::Context::ptr*>(req->data);
 		runAsync(ctx->get());
 		if (ctx->get()->handle && ctx->get()->cancelled()) {

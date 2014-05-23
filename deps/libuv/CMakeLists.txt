@@ -5,8 +5,11 @@ include_directories(src include include/uv-private)
 # Common source files
 set(libuv_COMMON_SOURCE_FILES 
   include/uv.h
-  include/uv-private/tree.h
+  include/tree.h
+  include/uv-errno.h
+  include/uv-version.h
   src/fs-poll.c
+  src/heap-inl.h
   src/inet.c
   src/queue.h
   src/uv-common.c
@@ -20,7 +23,7 @@ if(MSVC)
 
   # Windows source files
   set(libuv_SOURCE_FILES ${libuv_COMMON_SOURCE_FILES} 
-    include/uv-private/uv-win.h
+    include/uv-win.h
     src/win/async.c
     src/win/atomicops-inl.h
     src/win/core.c
@@ -60,29 +63,31 @@ else()
 
   # Posix source files
   set(libuv_POSIX_SOURCE_FILES    
-    include/uv-private/uv-unix.h
-    include/uv-private/uv-linux.h
-    include/uv-private/uv-sunos.h
-    include/uv-private/uv-darwin.h
-    include/uv-private/uv-bsd.h
-    src/unix/async.c    
-    src/unix/core.c    
-    src/unix/dl.c     
-    src/unix/fs.c    
-    src/unix/getaddrinfo.c    
-    src/unix/internal.h    
-    src/unix/loop.c    
-    src/unix/loop-watcher.c    
-    src/unix/pipe.c    
-    src/unix/poll.c    
-    src/unix/process.c    
-    src/unix/signal.c    
-    src/unix/stream.c    
-    src/unix/tcp.c    
-    src/unix/thread.c    
-    src/unix/threadpool.c    
-    src/unix/timer.c    
-    src/unix/tty.c    
+    include/uv-unix.h
+    include/uv-linux.h
+    include/uv-sunos.h
+    include/uv-darwin.h
+    include/uv-bsd.h
+    src/unix/async.c
+    src/unix/atomic-ops.h
+    src/unix/core.c
+    src/unix/dl.c
+    src/unix/fs.c
+    src/unix/getaddrinfo.c
+    src/unix/internal.h
+    src/unix/loop.c
+    src/unix/loop-watcher.c
+    src/unix/pipe.c
+    src/unix/poll.c
+    src/unix/process.c
+    src/unix/signal.c
+    src/unix/spinlock.h
+    src/unix/stream.c
+    src/unix/tcp.c
+    src/unix/thread.c
+    src/unix/threadpool.c
+    src/unix/timer.c
+    src/unix/tty.c
     src/unix/udp.c)
 
   # For linux mac and android; see uv.gyp
