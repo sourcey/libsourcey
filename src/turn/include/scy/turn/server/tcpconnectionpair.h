@@ -23,7 +23,6 @@
 
 #include "scy/collection.h"
 #include "scy/timer.h"
-//#include "scy/turn/server/tcpallocation.h"
 #include "scy/stun/message.h"
 #include "scy/net/tcpsocket.h"
 
@@ -66,7 +65,7 @@ public:
 
 	void startTimeout();
 		// Starts the ConnectionBind request timeout.
-		///
+		//
 		// If no ConnectionBind request associated with this peer data
 		// connection is received after 30 seconds, the peer data
 		// connection MUST be closed.

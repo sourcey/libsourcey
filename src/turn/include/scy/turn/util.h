@@ -21,14 +21,11 @@
 #define SCY_TURN_Utilities_H
 
 
-#include "scy/net/address.h"
-
-
 namespace scy {
-namespace util {
+namespace turn {
 
 
-} } // namespace scy::util
+} } // namespace scy::turn
 
 
 #endif

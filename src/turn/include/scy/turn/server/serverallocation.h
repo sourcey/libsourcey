@@ -56,13 +56,12 @@ public:
 	virtual Server& server(); 
 	
 	virtual void print(std::ostream& os) const;
-	//virtual const char* className() const { return "ServerAllocation"; };
 
 protected:
 	virtual ~ServerAllocation();
-		// IMPORTANT: The destructor should never be called directly.
-		// The allocation is always deleted via the timer callback
-		// @see onTimer()
+		// IMPORTANT: The destructor should never be called directly 
+		// as the allocation is deleted via the timer callback.
+		// See onTimer()
 
 	friend class Server;
 	

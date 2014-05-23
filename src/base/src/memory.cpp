@@ -139,7 +139,7 @@ void GarbageCollector::runAsync()
 }
 
 
-void GarbageCollector::onTimer(uv_timer_t* handle, int)
+void GarbageCollector::onTimer(uv_timer_t* handle)
 {
 	static_cast<GarbageCollector*>(handle->data)->runAsync();
 }

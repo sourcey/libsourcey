@@ -66,7 +66,7 @@ std::string dumpbin(const char* data, std::size_t len);
 
 bool compareVersion(const std::string& l, const std::string& r);
 	// Compares two version strings ie. 3.7.8.0 > 3.2.1.0
-	// If L is greater than R the function returns true.
+	// If L (local) is greater than R (remote) the function returns true.
 	// If L is equal or less than R the function returns false.
 
 bool matchNodes(const std::string& node, const std::string& xnode, const std::string& delim = "\r\n");
@@ -510,6 +510,58 @@ int icompare(
 std::streamsize copyStreamUnbuffered(std::istream& istr, std::ostream& ostr);
 std::streamsize copyStream(std::istream& istr, std::ostream& ostr, std::size_t bufferSize = 8192);
 std::streamsize copyToString(std::istream& istr, std::string& str, std::size_t bufferSize = 8192);
+
+
+//
+// Version string helper
+//
+
+struct Version
+{
+	Version(const std::string& version)
+	{
+		std::sscanf(version.c_str(), "%d.%d.%d.%d", &major, &minor, &revision, &build);
+		if (major < 0) major = 0;
+		if (minor < 0) minor = 0;
+		if (revision < 0) revision = 0;
+		if (build < 0) build = 0;
+	}
+
+	bool operator < (const Version& other)
+	{
+		if (major < other.major)
+			return true;
+		if (minor < other.minor)
+			return true;
+		if (revision < other.revision)
+			return true;
+		if (build < other.build)
+			return true;
+		return false;
+	}
+
+	bool operator == (const Version& other)
+	{
+		return major == other.major 
+			&& minor == other.minor 
+			&& revision == other.revision 
+			&& build == other.build;
+	}
+
+	friend std::ostream& operator << (std::ostream& stream, const Version& ver) 
+	{
+		stream << ver.major;
+		stream << '.';
+		stream << ver.minor;
+		stream << '.';
+		stream << ver.revision;
+		stream << '.';
+		stream << ver.build;
+		return stream;
+	}
+
+	int major, minor, revision, build;
+};
 
 
 //

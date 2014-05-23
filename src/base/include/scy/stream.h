@@ -31,7 +31,7 @@
 
 namespace scy {
 namespace net {
-
+		
 
 class Stream: public uv::Handle
 {
@@ -137,15 +137,7 @@ class Stream: public uv::Handle
 	bool readStart()
 	{
 		//TraceL << "Read start: " << ptr() << std::endl;
-		int r;
-		auto stream = this->ptr<uv_stream_t>();
-		bool isIPC = stream->type == UV_NAMED_PIPE && 
-			reinterpret_cast<uv_pipe_t*>(stream)->ipc;
-
-		if (isIPC)
-			r = uv_read2_start(stream, Stream::allocReadBuffer, handleRead2);
-		else 	
-			r = uv_read_start(stream, Stream::allocReadBuffer, handleRead);
+		int r = uv_read_start(this->ptr<uv_stream_t>(), Stream::allocReadBuffer, handleRead);
 		if (r) setUVError("Stream read error", r);	
 		return r == 0;
 	}
@@ -170,11 +162,6 @@ class Stream: public uv::Handle
 		//TraceL << "Handle read: " << nread << std::endl;
 		
 		if (nread >= 0) {
-			// Only UV_TCP is supported right now
-			if (pending == UV_TCP)
-				assert(0);
-			else
-				assert(pending == UV_UNKNOWN_HANDLE);
 			self->onRead(buf->base, nread);
 		}
 		else {
