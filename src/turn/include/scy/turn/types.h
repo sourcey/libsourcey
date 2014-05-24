@@ -38,23 +38,12 @@ const int SERVER_SOCK_BUF_SIZE = CLIENT_SOCK_BUF_SIZE * 32;
 // Based on uv___stream_fd from internal.h
 #if WIN32
 #define nativeSocketFd(handle) ((handle)->socket)
-#elif defined(__APPLE__)
-int nativeSocketFd__(uv_stream_t* handle) {
-  const uv__stream_select_t* s;
-
-  assert(handle->type == UV_TCP ||
-         handle->type == UV_TTY ||
-         handle->type == UV_NAMED_PIPE);
-
-  s = handle->select;
-  if (s != NULL)
-    return s->fd;
-
-  return handle->io_watcher.fd;
-}
-#define nativeSocketFd(handle) (nativeSocketFd__((uv_stream_t*) (handle)))
 #else
-#define nativeSocketFd(handle) ((handle)->io_watcher.fd)
+    extern "C"
+    {
+#include "unix/internal.h" // uv__stream_fd
+    }
+#define nativeSocketFd(handle) (uv__stream_fd(handle))
 #endif
 
 
