@@ -130,7 +130,7 @@ class Stream: public uv::Handle
 		return uv::Handle::closed();
 	}
 
-	Signal2<const char*, int> Read;
+	Signal2<const char*, const int&> Read;
 		// Signals when data can be read from the stream.
 
  protected:	
