@@ -24,6 +24,7 @@
 #include "scy/time.h"
 #include "scy/numeric.h"
 
+#include <cmath>
 #include <cctype>
 #include <ctime>
 #if defined(_WIN32_WCE)
@@ -1836,7 +1837,7 @@ TimedToken::TimedToken(long duration) :
 }
 
 
-TimedToken::TimedToken(const std::string& id = util::randomString(32), long duration = 10000) : 
+TimedToken::TimedToken(const std::string& id, long duration) : 
 	Timeout(duration), _id(id) 
 {
 }
