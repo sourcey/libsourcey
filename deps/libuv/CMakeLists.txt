@@ -72,6 +72,7 @@ else()
     src/unix/atomic-ops.h
     src/unix/core.c
     src/unix/dl.c
+    src/unix/kqueue.c
     src/unix/fs.c
     src/unix/getaddrinfo.c
     src/unix/internal.h

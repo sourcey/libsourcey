@@ -1739,8 +1739,8 @@ class TimedToken: public Timeout
 	/// A token that expires after the specified duration.
 {
 public:
-	TimedToken(long duration);
-	TimedToken(const std::string& id, long duration);
+	TimedToken(long duration = 1000);
+	TimedToken(const std::string& id, long duration = 1000);
 	
 	std::string id() const { return _id; }
 	

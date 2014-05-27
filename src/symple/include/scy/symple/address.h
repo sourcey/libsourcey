@@ -45,7 +45,7 @@ public:
 	
 	bool valid() const;
 	void print(std::ostream& os) const;
-	std::string Address::toString() const;
+	std::string toString() const;
 	
 	bool operator == (const Address& r);
 	bool operator == (std::string& r);

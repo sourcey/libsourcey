@@ -173,7 +173,7 @@ public:
 	
 	
 template<class ConnectionT>
-inline ClientConnection::Ptr createConnectionT(const URL& url, http::Client* client = nullptr, uv::Loop* loop = uv::defaultLoop())
+inline ClientConnection::Ptr createConnectionT(const URL& url, uv::Loop* loop = uv::defaultLoop())
 {
 	ClientConnection::Ptr conn;
 
@@ -207,16 +207,7 @@ inline ClientConnection::Ptr createConnectionT(const URL& url, http::Client* cli
 	else
 		throw std::runtime_error("Unknown connection type for URL: " + url.str());
 
-	if (client && conn)
-		client->addConnection(conn);
-
 	return conn;
-}
-
-
-inline ClientConnection::Ptr createConnection(const URL& url, http::Client* client = nullptr, uv::Loop* loop = uv::defaultLoop())
-{
-	return createConnectionT<ClientConnection>(url, client, loop);
 }
 
 
@@ -243,12 +234,20 @@ public:
 	template<class ConnectionT>
 	ClientConnection::Ptr createConnectionT(const URL& url, uv::Loop* loop = uv::defaultLoop())
 	{
-		return http::createConnectionT<ConnectionT>(url, this, loop);
+        auto connection = http::createConnectionT<ConnectionT>(url, loop);
+        if (connection) {
+            addConnection(connection);
+        }
+		return connection;
 	}
 
 	ClientConnection::Ptr createConnection(const URL& url, uv::Loop* loop = uv::defaultLoop())
 	{
-		return http::createConnectionT<ClientConnection>(url, this, loop);
+        auto connection = http::createConnectionT<ClientConnection>(url, loop);
+        if (connection) {
+            addConnection(connection);
+        }
+		return connection;
 	}
 
 	virtual void addConnection(ClientConnection::Ptr conn);
@@ -265,6 +264,15 @@ protected:
 	ClientConnectionPtrVec _connections;
 	//Timer _timer;
 };
+
+inline ClientConnection::Ptr createConnection(const URL& url, http::Client* client = nullptr, uv::Loop* loop = uv::defaultLoop())
+{
+    auto connection = createConnectionT<ClientConnection>(url, loop);
+    if (client && connection)
+        client->addConnection(connection);
+
+    return connection;
+}
 
 
 #if 0

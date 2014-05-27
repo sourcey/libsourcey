@@ -23,7 +23,6 @@
 
 #include "scy/base.h"
 #include "scy/memory.h"
-#include "scy/signal.h"
 #include "scy/packetstream.h"
 #include "scy/net/types.h"
 #include "scy/net/address.h"
