@@ -1,51 +1,47 @@
 /* Name of package */
-#define SOURCEY_PACKAGE "${PACKAGE}"
+#define SCY_PACKAGE "${PACKAGE}"
 
 /* Define to the address where bug reports for this package should be sent. */
-#define SOURCEY_PACKAGE_BUGREPORT "${PACKAGE_BUGREPORT}"
+#define SCY_PACKAGE_BUGREPORT "${PACKAGE_BUGREPORT}"
 
 /* Define to the full name of this package. */
-#define SOURCEY_PACKAGE_NAME "${PACKAGE_NAME}"
+#define SCY_PACKAGE_NAME "${PACKAGE_NAME}"
 
 /* Define to the full name and version of this package. */
-#define SOURCEY_PACKAGE_STRING "${PACKAGE_STRING}"
+#define SCY_PACKAGE_STRING "${PACKAGE_STRING}"
 
 /* Define to the one symbol short name of this package. */
-#define SOURCEY_PACKAGE_TARNAME "${PACKAGE_TARNAME}"
+#define SCY_PACKAGE_TARNAME "${PACKAGE_TARNAME}"
 
 /* Define to the version of this package. */
-#define SOURCEY_PACKAGE_VERSION "${PACKAGE_VERSION}"
+#define SCY_PACKAGE_VERSION "${PACKAGE_VERSION}"
+
+/* Define the installation path. */
+#define SCY_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}"
 
 /* Version number of package */
-#cmakedefine SOURCEY_BUILD_SHARED "${BUILD_SHARED_LIBS}" 
+#cmakedefine SCY_BUILD_SHARED "${BUILD_SHARED_LIBS}" 
 
-/* LibSourcey core modules
-# cmakedefine HAVE_SOURCEY_Base
-# cmakedefine HAVE_SOURCEY_HTTP
-# cmakedefine HAVE_SOURCEY_JSON
-# cmakedefine HAVE_SOURCEY_Media
-# cmakedefine HAVE_SOURCEY_Net
-# cmakedefine HAVE_SOURCEY_Pacman
-# cmakedefine HAVE_SOURCEY_RTP
-# cmakedefine HAVE_SOURCEY_SDP
-# cmakedefine HAVE_SOURCEY_SocketIO
-# cmakedefine HAVE_SOURCEY_STUN
-# cmakedefine HAVE_SOURCEY_Symple
-# cmakedefine HAVE_SOURCEY_TURN
-# cmakedefine HAVE_SOURCEY_XML
-# cmakedefine HAVE_SOURCEY_XMPP
-
-# cmakedefine HAVE_SOURCEY_UV
-# cmakedefine HAVE_SOURCEY_RTSP
-# cmakedefine HAVE_SOURCEY_ICE */
-
-/* LibSourcey ext modules
-# cmakedefine HAVE_SOURCEY_ISpot
-# cmakedefine HAVE_SOURCEY_Anionu */
-
-/* Anionu API Credentials */
-#define Anionu_API_USERNAME "${Anionu_API_USERNAME}"
-#define Anionu_API_KEY "${Anionu_API_KEY}"
+/* LibSourcey modules
+# cmakedefine HAVE_SCY_base
+# cmakedefine HAVE_SCY_http
+# cmakedefine HAVE_SCY_json
+# cmakedefine HAVE_SCY_media
+# cmakedefine HAVE_SCY_net
+# cmakedefine HAVE_SCY_rtp
+# cmakedefine HAVE_SCY_sdp
+# cmakedefine HAVE_SCY_socketio
+# cmakedefine HAVE_SCY_stun
+# cmakedefine HAVE_SCY_symple
+# cmakedefine HAVE_SCY_turn
+# cmakedefine HAVE_SCY_xml
+# cmakedefine HAVE_SCY_xmpp
+# cmakedefine HAVE_SCY_uv
+# cmakedefine HAVE_SCY_rtsp
+# cmakedefine HAVE_SCY_ice
+# cmakedefine HAVE_SCY_pacm
+# cmakedefine HAVE_SCY_anionu
+# cmakedefine HAVE_SCY_spotapi */
 
 /* LibUV library */
 #cmakedefine HAVE_LIBUV
