@@ -279,9 +279,9 @@ macro(define_libsourcey_library name)
   link_directories(${LibSourcey_LIBRARY_DIRS})  
       
   if(ENABLE_SOLUTION_FOLDERS)
-    set_target_properties(${name} PROPERTIES FOLDER "libs")
+    set_target_properties(${name} PROPERTIES FOLDER "libraries")
   endif()
   set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
 
-  install(TARGETS ${name} DESTINATION "libs/${name}" COMPONENT main)    
+  install(TARGETS ${name} DESTINATION "bin/${name}" COMPONENT main)    
 endmacro()

@@ -25,7 +25,9 @@ if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
     add_definitions(/W3)
 endif()
 
-set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+if(APPLE)
+  set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+endif()
 
 # Tell CMake where to locate our .cmake files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)

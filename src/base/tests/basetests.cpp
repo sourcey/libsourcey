@@ -15,8 +15,6 @@
 #include "scy/ipc.h"
 #include "scy/util.h"
 
-#include "plugin/testplugin.h"
-
 #include <assert.h>
 
 
@@ -47,7 +45,7 @@ public:
 		testLogger();
 		runPlatformTests();
 		runExceptionTest();
-		runScheduler::TaskTest();
+		runSchedulerTaskTest();
 		testTimer();
 		testIdler();
 		testSyncDelegate();
@@ -290,7 +288,7 @@ public:
 		assert(fs::dirname(dir + "\\") == dir);
 	}
 
-
+#if 0
 	// ============================================================================
 	// Plugin Test
 	//
@@ -357,6 +355,7 @@ public:
 		
 		cout << "Ending" << endl;
 	}
+#endif
 
 
 	// ============================================================================
