@@ -34,12 +34,11 @@ if (NOT OpenCV_INCLUDE_DIR)
       opencv2/core/core.hpp
     DOC 
       "OpenCV Include Directory"
-    #PATHS
-    #	/usr/local/include
-    #	/usr/include
+    PATHS
+    	/usr/local/include
+    	/usr/include
     )	
 endif()
-
 # ----------------------------------------------------------------------
 # Determine OpenCV version
 # ----------------------------------------------------------------------
@@ -105,6 +104,8 @@ if (NOT OpenCV_FOUND)
     PATHS
       /usr/lib 
       /usr/local/lib
+      /usr/lib64
+      /usr/local/lib64
     )
     
   if(OpenCV_LIBRARY_DIRS)
