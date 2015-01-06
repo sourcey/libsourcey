@@ -29,6 +29,9 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 
   # Using c++11
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")	
+  
+  # Supress libuv internal.h error in gcc 4.8.2+
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
   # We need pthread's
   if(UNIX AND NOT ANDROID)
@@ -39,7 +42,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   #  set(LibSourcey_EXTRA_C_FLAGS "-shared ${LibSourcey_EXTRA_C_FLAGS}")
   #else()    
   #  set(LibSourcey_EXTRA_C_FLAGS "-static ${LibSourcey_EXTRA_C_FLAGS}")
-  #endif()${LIB_TYPE}
+  #endif()
 
   if(LibSourcey_WARNINGS_ARE_ERRORS)
     set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -Werror")

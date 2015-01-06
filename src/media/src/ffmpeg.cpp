@@ -17,6 +17,9 @@
 //
 
 #include "scy/media/ffmpeg.h"
+
+#ifdef HAVE_FFMPEG
+
 #include "scy/mutex.h"
 
 #include <stdexcept>
@@ -104,3 +107,6 @@ void uninitializeFFmpeg()
 
 
 } } // namespace scy::av
+
+
+#endif

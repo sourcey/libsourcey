@@ -133,7 +133,7 @@ Depending on your platform, you may choose run CMake from the command line, or u
 
 git clone https://github.com/sourcey/libsourcey.git
 cd libsourcey
-mkdir -p build
+mkdir -p build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=RELEASE # extra cmake commands here...
 make
 make install

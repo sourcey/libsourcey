@@ -37,22 +37,3 @@ void uninitializeFFmpeg();
 
 
 #endif // SCY_Media_FFmpeg_H
-
-
-
-
-	
-	/*
-
-
-#include "scy/media/types.h"
-#include <vector>
-namespace internal {
-	void api(int ret, const char* error = nullptr);
-		// Check return values from FFmpeg and throw an exception if it failed.
-	
-	void throwError();
-		// Throws the last FFmpeg error.
-
-} // namespace internal
-		*/
