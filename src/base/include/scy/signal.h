@@ -28,6 +28,13 @@
 #include <vector>
 #include <assert.h>
 
+#if defined(__GNUC__)
+   // We're all grown up and we know that simulating
+   // reinterpret_cast<> may cause strict aliasing problems
+   // at runtime.
+#  pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+
 
 namespace scy {
 
