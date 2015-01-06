@@ -233,10 +233,13 @@ public:
 #if WIN32
 #define nativeSocketFd(handle) ((handle)->socket)
 #else
-namespace { 
-    #pragma GCC diagnostic ignored "-fpermissive"
-    #include "unix/internal.h" 
-} // uv__stream_fd
+// uv__stream_fd taken from libuv unix/internal.h
+#if defined(__APPLE__)
+int uv___stream_fd(const uv_stream_t* handle);
+#define uv__stream_fd(handle) (uv___stream_fd((const uv_stream_t*) (handle)))
+#else
+#define uv__stream_fd(handle) ((handle)->io_watcher.fd)
+#endif
 #define nativeSocketFd(handle) (uv__stream_fd(handle))
 #endif
 

@@ -29,9 +29,6 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 
   # Using c++11
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")	
-  
-  # Supress libuv internal.h error in gcc 4.8.2+
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
   # We need pthread's
   if(UNIX AND NOT ANDROID)
