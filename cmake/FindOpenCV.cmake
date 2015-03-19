@@ -35,11 +35,15 @@ if (NOT OpenCV_INCLUDE_DIR)
     DOC 
       "OpenCV Include Directory"
     PATHS
+<<<<<<< HEAD
   	  /usr/local/include
       /usr/include
+=======
+    	/usr/local/include
+    	/usr/include
+>>>>>>> 84c5acf1f3e69fefd1d3e983d4c512437d095c9c
     )	
 endif()
-
 # ----------------------------------------------------------------------
 # Determine OpenCV version
 # ----------------------------------------------------------------------
