@@ -2,19 +2,12 @@
 #include "scy/media/mediafactory.h"
 #include "scy/util.h"
 
-#include <string>
-#include <vector>
 #include <assert.h>
-#include <conio.h>
+//#include <conio.h>
 
 
 using namespace std;
-//using namespace Poco;
 using namespace scy;
-using namespace scy::av;
-
-
-IDeviceManager* devices;
 
 
 // Detect Memory Leaks
@@ -28,11 +21,12 @@ CMemLeakDetect memLeakDetect;
 
 int main(int argc, char** argv)
 {
-	scy::Logger::instance().add(new ConsoleChannel("debug", LTrace));
+	Logger::instance().add(new ConsoleChannel("debug", LTrace));
 
-	devices = DeviceManagerFactory::create();
+	auto devices = av::DeviceManagerFactory::create();
 	devices->initialize();
 	
+	/*
 	char o = 0;
 	while (o != 'Q') 
 	{	
@@ -48,7 +42,11 @@ int main(int argc, char** argv)
 			reinterpret_cast<DeviceManager*>(devices)->print(cout);
 		}
 	}
+	*/
 	
-	scy::Logger::destroy();
+	reinterpret_cast<av::DeviceManager*>(devices)->print(cout);
+	delete devices;
+	
+	Logger::destroy();
 	return 0;
 }

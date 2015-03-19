@@ -77,7 +77,7 @@ public:
 	void setName(const std::string& name);
 
 protected:
-	Task& operator=(Task const&) {}
+	//Task& operator=(Task const&) {}
 	virtual ~Task();
 	
 	virtual bool beforeRun();
@@ -94,10 +94,10 @@ protected:
 
 	friend class Scheduler;
 	
-	std::string _name;
 	std::string _type;
-	sked::Trigger* _trigger;
+	std::string _name;
 	sked::Scheduler* _scheduler;
+	sked::Trigger* _trigger;
 	mutable Mutex _mutex;
 };
 

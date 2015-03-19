@@ -144,8 +144,8 @@ protected:
 	URL _url;
 	std::ostream* _readStream;
 	std::vector<std::string> _outgoingBuffer;
-	bool _connect;
 	bool _complete;
+	bool _connect;
 };
 
 

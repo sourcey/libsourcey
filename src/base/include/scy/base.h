@@ -43,28 +43,38 @@
 #ifdef _WIN32
     // Windows (x64 and x86)
 	#ifndef WIN32
-    #define WIN32 //1
+    #define WIN32
 	#endif
 #endif
-#if __unix__ // all unices
+#if __unix__
     // Unix    
+	#ifndef UNIX
     #define UNIX
+	#endif
 #endif
 #if __posix__
     // POSIX    
+	#ifndef POSIX
     #define POSIX
+	#endif
 #endif
 #if __linux__
-    // linux    
+    // Linux    
+	#ifndef LINUX
     #define LINUX
+	#endif
 #endif
 #if __GNUC__
     // GCC specific
+	#ifndef GNUC
     #define GNUC
+	#endif
 #endif
 #if __APPLE__
     // Mac OS
+	#ifndef APPLE
     #define APPLE
+	#endif
 #endif
 	
 

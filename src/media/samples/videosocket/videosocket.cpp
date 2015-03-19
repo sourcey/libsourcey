@@ -66,7 +66,7 @@ public:
 		// Create and attach the HTTP multipart packetizer
 		//http::MultipartPacketizer* packetizer = new http::MultipartPacketizer("image/jpeg", false);
 		//stream->attach(packetizer, 10, true);	
-		assert(0);
+		assert(0 && "fixme");
 			
 		// Start the stream
 		stream->emitter += packetDelegate(this, &MPEGResponder::onVideoEncoded);

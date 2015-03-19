@@ -41,8 +41,8 @@
 #include "talk/sound/soundsysteminterface.h"
 */
 
-namespace Sourcey {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 IDeviceManager* DeviceManagerFactory::create() {
@@ -139,6 +139,9 @@ bool LinuxDeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
 	sound_system_.release();
 	*/
 
+    assert(0);
+    
+    /*
 	int card = -1, dev = -1;
 	snd_ctl_t *handle = NULL;
 	snd_pcm_info_t *pcminfo = NULL;
@@ -181,6 +184,7 @@ bool LinuxDeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
 		snd_ctl_close(handle);
 	}
 	snd_pcm_info_free(pcminfo);
+	*/
 
 	return filterDevices(devs, kFilteredAudioDevicesName);
 }
@@ -481,7 +485,7 @@ bool LinuxDeviceWatcher::IsDescriptorClosed() {
 */
 
 
-} } // namespace Sourcey::Media
+} } // namespace scy::av
 
 
 /*

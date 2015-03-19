@@ -49,10 +49,10 @@ inline std::string exceptionMessage(const std::string& reason)
 
 VideoCapture::VideoCapture(int deviceId) : 
 	_deviceId(deviceId),
-	_capturing(false),
 	_opened(false),
 	_started(false),
-	_stopping(false)
+	_stopping(false),
+	_capturing(false)
 {
 	TraceLS(this) << "Create: " << deviceId << std::endl;
 	open();
@@ -63,10 +63,10 @@ VideoCapture::VideoCapture(int deviceId) :
 VideoCapture::VideoCapture(const std::string& filename) : 
 	_filename(filename),
 	_deviceId(-1),
-	_capturing(false),
 	_opened(false),
 	_started(false),
-	_stopping(false)
+	_stopping(false),
+	_capturing(false)
 {
 	TraceLS(this) << "Create: " << filename << std::endl;
 	open();

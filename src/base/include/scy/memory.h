@@ -74,11 +74,11 @@ protected:
 	void runAsync();
 		
 	mutable Mutex _mutex;
-	unsigned long _tid;
 	std::vector<ScopedPointer*> _pending;
 	std::vector<ScopedPointer*> _ready;
 	uv::Handle _handle;
 	bool _finalize;
+	unsigned long _tid;
 };
 
 

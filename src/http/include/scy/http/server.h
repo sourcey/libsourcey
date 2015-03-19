@@ -169,9 +169,9 @@ class Server
 	///    registered routes.
 {
 public:
-	ServerConnectionList connections;
-	ServerResponderFactory* factory;
 	net::TCPSocket::Ptr socket;
+	ServerResponderFactory* factory;
+	ServerConnectionList connections;
 	net::Address address;
 	//Timer timer;
 

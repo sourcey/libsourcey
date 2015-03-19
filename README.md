@@ -194,4 +194,4 @@ There is also plenty of examples available in the `samples` and `tests` folder o
 
 ## Issues
 
-If you find any bugs or issues please use the new [Github issue tracker](https://github.com/sourcey/libsourcey/issues).
+If you find any bugs or issues please use the [Github issue tracker](https://github.com/sourcey/libsourcey/issues).

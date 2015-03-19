@@ -268,7 +268,7 @@ bool AsyncLogWriter::writeNext()
 
 
 LogStream::LogStream(LogLevel level, const char* realm, int line, const void* ptr, const char* channel) : 
-	level(level), realm(realm), line(line), address(ptr ? util::memAddress(ptr) : ""), ts(time::now()), channel(nullptr)
+	level(level), line(line), realm(realm), address(ptr ? util::memAddress(ptr) : ""), ts(time::now()), channel(nullptr)
 {
 #ifndef SCY_DISABLE_LOGGING
 	if (channel)
@@ -284,7 +284,7 @@ LogStream::LogStream(LogLevel level, const char* realm, const std::string& addre
 
 	
 LogStream::LogStream(const LogStream& that) :
-	level(that.level), realm(that.realm), address(that.address), 
+	level(that.level), line(that.line), realm(that.realm), address(that.address), 
 	ts(that.ts), channel(that.channel)
 {
 	// try to avoid copy assign

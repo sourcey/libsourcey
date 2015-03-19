@@ -63,7 +63,7 @@ void Message::setVersion(const std::string& version)
 
 void Message::setContentLength(UInt64 length)
 {
-	if (length != UNKNOWN_CONTENT_LENGTH)
+	if (int(length) != UNKNOWN_CONTENT_LENGTH)
 		set(CONTENT_LENGTH, util::itostr<UInt64>(length));
 	else
 		erase(CONTENT_LENGTH);

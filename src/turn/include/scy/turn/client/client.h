@@ -171,8 +171,8 @@ public:
 
 protected:
 	ClientObserver&	_observer;
-	net::Socket::Ptr _socket;
 	Options _options;
+	net::Socket::Ptr _socket;
 	Timer _timer;
 
 	net::Address _mappedAddress;

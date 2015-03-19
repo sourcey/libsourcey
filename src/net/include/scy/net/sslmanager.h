@@ -178,10 +178,10 @@ public:
 
 private:
 	crypto::X509Certificate	_cert;
-	std::string _errorMessage; // Textual representation of the _errorNumber
-	bool _ignoreError;
 	int _errorDepth;
 	int _errorNumber;
+	std::string _errorMessage; // Textual representation of the _errorNumber
+	bool _ignoreError;
 };
 
 

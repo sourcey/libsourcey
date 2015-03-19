@@ -400,7 +400,7 @@ bool DeviceManager::matchNameAndID(std::vector<Device>& devices, Device& out, co
 	TraceL << "Match name and ID: " << name << ": " << id << endl;
 
 	bool ret = false;
-	for (unsigned i = 0; i < devices.size(); ++i) {
+	for (int i = 0; i < static_cast<int>(devices.size()); ++i) {
 		TraceL << "Match name and ID: Checking: " << devices[i].name << endl;
 		if (devices[i].name == name) {
 			// The first device matching the given name will be returned,

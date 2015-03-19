@@ -25,10 +25,6 @@
 #include "scy/socketio/transaction.h"
 #include "scy/http/websocket.h"
 #include "scy/json/json.h"
-
-//#include "scy/application.h"
-//#include "Poco/Format.h"
-//#include "Poco/URI.h"
 #include "scy/collection.h"
 
 
@@ -142,6 +138,7 @@ protected:
 	//mutable Mutex	_mutex;
 	
 	//uv::Loop* _loop;
+	Timer _timer;
 	scy::Error _error;
 	std::vector<std::string> _protocols;
 	std::string _sessionID;
@@ -152,7 +149,6 @@ protected:
 	int	_connectionClosingTimeout;
 	bool _wasOnline;
 	//bool _closing;
-	Timer _timer;
 };
 
 
