@@ -120,7 +120,7 @@ void Client::onSocketRecv(void* sender, const MutableBuffer& buffer, const net::
 	TraceL << "Control socket recv: " << buffer.size() << endl;	
 	
 	stun::Message message;
-	auto socket = reinterpret_cast<net::Socket*>(sender);		
+	//auto socket = reinterpret_cast<net::Socket*>(sender);		
 	char* buf = bufferCast<char*>(buffer);
 	std::size_t len = buffer.size();
 	std::size_t nread = 0;

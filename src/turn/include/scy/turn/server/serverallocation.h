@@ -65,8 +65,8 @@ protected:
 
 	friend class Server;
 	
-	Server&	_server;
 	UInt32 _maxLifetime;
+	Server&	_server;
 
 private:	
 	ServerAllocation(const ServerAllocation&); // = delete;

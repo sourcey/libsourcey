@@ -29,8 +29,8 @@ namespace stun {
 
 
 Message::Message() : 
-	_method(Undefined), 
 	_class(Request), 
+	_method(Undefined), 
 	_size(0), 
 	_transactionID(util::randomString(kTransactionIdLength)) 
 {
@@ -39,8 +39,8 @@ Message::Message() :
 
 
 Message::Message(ClassType clss, MethodType meth) : 
-	_method(meth), 
 	_class(clss), 
+	_method(meth),
 	_size(0), 
 	_transactionID(util::randomString(kTransactionIdLength)) 
 {
@@ -48,8 +48,8 @@ Message::Message(ClassType clss, MethodType meth) :
 
 
 Message::Message(const Message& that) : 
-	_method(that._method), 
 	_class(that._class), 
+	_method(that._method), 
 	_size(that._size), 
 	_transactionID(that._transactionID) 
 {
@@ -151,8 +151,8 @@ std::size_t Message::read(const ConstBuffer& buf) //BitReader& reader
 			return 0;
 		}
 		
-		_class = static_cast<UInt16>(type & 0x0110);
-		_method = static_cast<UInt16>(type & 0x000F);
+		_class = classType; // static_cast<UInt16>(type & 0x0110);
+		_method = methodType; // static_cast<UInt16>(type & 0x000F);
 				
 		// Message length
 		reader.getU16(_size);

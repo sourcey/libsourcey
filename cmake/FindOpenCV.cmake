@@ -34,9 +34,9 @@ if (NOT OpenCV_INCLUDE_DIR)
       opencv2/core/core.hpp
     DOC 
       "OpenCV Include Directory"
-    #PATHS
-    #	/usr/local/include
-    #	/usr/include
+    PATHS
+  	  /usr/local/include
+      /usr/include
     )	
 endif()
 
@@ -50,7 +50,7 @@ if(NOT OpenCV_VERSION AND OpenCV_INCLUDE_DIR) # AND NOT OpenCV_VERSION_FILE
   set(OpenCV_VERSION_FILE "${OpenCV_INCLUDE_DIR}/opencv2/core/version.hpp")
   if(EXISTS "${OpenCV_VERSION_FILE}")
 
-    FILE(STRINGS "${OpenCV_VERSION_FILE}" OpenCV_VERSION_PARTS REGEX "#define CV_VERSION_[A-Z]+[ ]+[0-9]+" )
+    file(STRINGS "${OpenCV_VERSION_FILE}" OpenCV_VERSION_PARTS REGEX "#define CV_VERSION_[A-Z]+[ ]+[0-9]+" )
 
     string(REGEX REPLACE ".+CV_VERSION_EPOCH[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_MAJOR "${OpenCV_VERSION_PARTS}")
     string(REGEX REPLACE ".+CV_VERSION_MAJOR[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_MINOR "${OpenCV_VERSION_PARTS}")
@@ -71,13 +71,9 @@ if(NOT OpenCV_VERSION AND OpenCV_INCLUDE_DIR) # AND NOT OpenCV_VERSION_FILE
   endif()
 endif()
 
-#message("OpenCV_INCLUDE_DIR=${OpenCV_INCLUDE_DIR}")
-#message("OpenCV_VERSION_FILE=${OpenCV_VERSION_FILE}")
-#message("OpenCV_VERSION=${OpenCV_VERSION}")
-
-if(NOT OpenCV_VERSION)
-  message(FATAL_ERROR "Cannot determine installed OpenCV version; please specify it manually. Version >= 2.4.5 supported.")
-endif()
+#if(NOT OpenCV_VERSION)
+#  message(FATAL_ERROR "Cannot determine installed OpenCV version; please specify it manually. Version >= 2.4.5 supported.")
+#endif()
 
 
 # ----------------------------------------------------------------------
@@ -97,14 +93,22 @@ if (NOT OpenCV_FOUND)
       libopencv_core.so.${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}     
       opencv_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}.lib
       opencv_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}d.lib
+      libopencv_core.a     
+      libopencv_core.so    
     DOC 
       "OpenCV Library Directory"    
-    PATH_SUFFIXES 
-      Debug
-      Release
+    #PATH_SUFFIXES 
+    #  Debug
+    #  Release
     PATHS
       /usr/lib 
+      /usr/lib/x86_64-linux-gnu
+      /usr/lib/i386-linux-gnu
+      /usr/lib64
       /usr/local/lib
+      /usr/local/lib/x86_64-linux-gnu
+      /usr/local/lib/i386-linux-gnu
+      /usr/local/lib64
     )
     
   if(OpenCV_LIBRARY_DIRS)
@@ -114,7 +118,11 @@ if (NOT OpenCV_FOUND)
     if (WIN32)
       file(GLOB_RECURSE libraries "${OpenCV_LIBRARY_DIRS}/*.lib") 
     else()
-      file(GLOB_RECURSE libraries "${OpenCV_LIBRARY_DIRS}/*.a")
+      if (BUILD_SHARED_LIBS)
+        file(GLOB_RECURSE libraries "${OpenCV_LIBRARY_DIRS}/*.so")
+      else()    
+        file(GLOB_RECURSE libraries "${OpenCV_LIBRARY_DIRS}/*.a")
+      endif()    
     endif()    
     
     # TODO: Include only OpenCV_FIND_COMPONENTS
@@ -175,11 +183,17 @@ if (NOT OpenCV_FOUND)
                      OpenCV_LIBRARIES
                      OpenCV_FOUND)       
   endif()
+endif()
 
-  if(NOT OpenCV_FOUND)
-     if (OpenCV_FIND_REQUIRED)
-        message(FATAL_ERROR 
-          "OpenCV was not found; please specify the path manually. Version >= 2.4.5 supported.")
-     endif()
-  endif()
+message("OpenCV_INCLUDE_DIR=${OpenCV_INCLUDE_DIR}")
+message("OpenCV_LIBRARY_DIRS=${OpenCV_LIBRARY_DIRS}")
+message("OpenCV_LIBRARIES=${OpenCV_LIBRARIES}")
+message("OpenCV_VERSION_FILE=${OpenCV_VERSION_FILE}")
+message("OpenCV_VERSION=${OpenCV_VERSION}")
+
+if(NOT OpenCV_FOUND)
+ if (OpenCV_FIND_REQUIRED)
+    message(FATAL_ERROR 
+      "OpenCV was not found; please specify the path manually. Version >= 2.4.5 supported.")
+ endif()
 endif()

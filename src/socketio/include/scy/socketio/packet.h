@@ -103,8 +103,8 @@ protected:
 	int _id;
 	std::string _endpoint;
 	std::string _message;
-	size_t _size;
 	bool _ack;
+	size_t _size;
 };
 
 

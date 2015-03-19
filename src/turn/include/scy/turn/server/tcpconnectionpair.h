@@ -70,8 +70,7 @@ public:
 		// connection is received after 30 seconds, the peer data
 		// connection MUST be closed.
 
-	Timeout	timeout;
-		// The ConnectionBind request timeout counter.
+	TCPAllocation& allocation;
 
 	net::TCPSocket::Ptr client;
 		// The client socket, nullptr to start.
@@ -84,13 +83,17 @@ public:
 
 	Buffer earlyPeerData;	
 		// Stores early peer > client data.
+		
+	UInt32 connectionID;
+	    // The unique connection ID.
 
 	bool isDataConnection;
 		// True when p2p relay is flowing.
+	
+	Timeout	timeout;
+		// The ConnectionBind request timeout counter.
 
-	TCPAllocation& allocation;
 	stun::TransactionID	transactionID;
-	UInt32 connectionID;
 
 private:	
 	TCPConnectionPair(const TCPConnectionPair&); // = delete;

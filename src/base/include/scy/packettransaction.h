@@ -72,10 +72,10 @@ public:
 	{		
 	}		
 
-	PacketTransaction(const PacketT& request, long timeout = 10000, int retries = 0, uv::Loop* loop = uv::defaultLoop()) : 
+	PacketTransaction(const PacketT& request, long timeout = 10000, int retries = 0, uv::Loop* loop = uv::defaultLoop()) :
+		_request(request),
 		_timer(loop),
-		_timeout(timeout),
-		_request(request), 
+		_timeout(timeout), 
 		_retries(retries), 
 		_attempts(0),
 		_destroyed(false)
@@ -188,12 +188,12 @@ protected:
 protected:
 	friend struct std::default_delete<PacketTransaction>;
 
-	Timer _timer;
 	PacketT _request;
 	PacketT _response;
+	Timer _timer;
+	int _timeout;		// The request timeout in milliseconds.
 	int _retries;		// The maximum number of attempts before the transaction is considered failed.
 	int _attempts;		// The number of times the transaction has been sent.	
-	int _timeout;		// The request timeout in milliseconds.
 	bool _destroyed;
 };
 

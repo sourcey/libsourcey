@@ -487,8 +487,8 @@ void FormPart::reset()
 	
 FilePart::FilePart(const std::string& path) :	
 	_path(path),
-	_fileSize(0),
-	_filename(fs::filename(path))
+	_filename(fs::filename(path)),
+	_fileSize(0)
 {
 	open();
 }

@@ -132,7 +132,7 @@ void Application::onPrintHandle(uv_handle_t* handle, void* /* arg */)
 // Command-line option parser
 //
 	
-OptionParser::OptionParser(int argc, char* argv[], char* delim)
+OptionParser::OptionParser(int argc, char* argv[], const char* delim)
 {
 	char* lastkey = 0;	
 	int dlen = strlen(delim);	

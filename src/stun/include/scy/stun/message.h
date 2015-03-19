@@ -128,9 +128,9 @@ public:
 	virtual const char* className() const { return "StunMessage"; }
 
 protected:	
-	UInt16 _size;
 	UInt16 _class;
 	UInt16 _method;
+	UInt16 _size;
 	TransactionID _transactionID;
 	std::vector<Attribute*> _attrs;
 };

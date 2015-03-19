@@ -66,7 +66,7 @@ public:
 
 private:
 	FormatRegistry(FormatRegistry const&) {};
-	FormatRegistry& operator=(FormatRegistry const&) {};
+	//FormatRegistry& operator=(FormatRegistry const&) {};
 	
     FormatList _formats;
     std::string _default;

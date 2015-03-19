@@ -8,8 +8,8 @@ macro(define_sourcey_module name)
   project(${name})
 
   # Add library source files
-  file(GLOB_RECURSE lib_srcs "src/*.c*")
-  file(GLOB_RECURSE lib_hdrs "include/*.h*")
+  file(GLOB_RECURSE lib_srcs "src/*.cpp")
+  file(GLOB_RECURSE lib_hdrs "include/*.h")
   
   # Exclude platform dependent implementations
   set(lib_srcs_exclude "")
@@ -18,7 +18,7 @@ macro(define_sourcey_module name)
     set(lib_srcs_exclude ${lib_srcs_exclude} " *_win32.cpp")  
     set(lib_hdrs_exclude ${lib_hdrs_exclude} " *_win32.h")  
   endif()  
-  if(NOT LINUX)
+  if(NOT UNIX)
     set(lib_srcs_exclude ${lib_srcs_exclude} " *_linux.cpp")  
     set(lib_hdrs_exclude ${lib_hdrs_exclude} " *_linux.h")  
   endif()  
@@ -38,6 +38,13 @@ macro(define_sourcey_module name)
   #message(${lib_hdrs_exclude} )
   string(REGEX REPLACE ${lib_srcs_exclude} "" lib_srcs "${lib_srcs}")
   string(REGEX REPLACE ${lib_hdrs_exclude} "" lib_hdrs "${lib_hdrs}")
+  
+   
+  message(STATUS "-------------------------------    lib_hdrs: ${lib_srcs}")  
+  
+  if (${name} MATCHES "media")
+  #message(FATAL_ERROR "-----------------------------") 
+  endif()
   
   source_group("Src" FILES ${lib_srcs})
   source_group("Include" FILES ${lib_hdrs})

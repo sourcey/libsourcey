@@ -144,13 +144,13 @@ public:
 	void onTimer(void*);
 	
 private:	
-	Timer _timer;
+	ServerObserver& _observer;
+	ServerOptions _options;
 	net::UDPSocket _udpSocket;
 	net::TCPSocket _tcpSocket;	
 	net::TCPSocket::Vec _tcpSockets;
-	ServerOptions _options;
-	ServerObserver& _observer;
 	ServerAllocationMap	_allocations;
+	Timer _timer;
 };
 
 

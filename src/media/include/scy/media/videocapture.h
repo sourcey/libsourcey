@@ -121,14 +121,14 @@ protected:
 private:   
 	mutable Mutex _mutex;
 
+	std::string	_filename;	// Source file to capture from if any
+	int _deviceId;			// Source device to capture from
 	bool _opened;
 	bool _started;
 	bool _stopping;
 	bool _capturing;
-	int _deviceId;			// Source device to capture from
 	cv::Mat _frame;			// Current video image
 	scy::Error _error;		// Error message if any
-	std::string	_filename;	// Source file to capture from if any
 	FPSCounter _counter;
 	cv::VideoCapture _capture;
 	Thread _thread;

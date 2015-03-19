@@ -40,13 +40,13 @@ namespace turn {
 IAllocation::IAllocation(const FiveTuple& tuple, 
 						 const std::string& username, 
 						 Int64 lifetime) : 
-	_createdAt(static_cast<Int64>(time(0))), 
-	_updatedAt(static_cast<Int64>(time(0))), 
+	_tuple(tuple),
 	_username(username), 
 	_lifetime(lifetime), 
 	_bandwidthLimit(0),
 	_bandwidthUsed(0),
-	_tuple(tuple),
+	_createdAt(static_cast<Int64>(time(0))), 
+	_updatedAt(static_cast<Int64>(time(0))), 
 	_deleted(false)
 {	
 }

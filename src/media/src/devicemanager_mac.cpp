@@ -23,15 +23,17 @@
 #include <CoreAudio/CoreAudio.h>
 #include <QuickTime/QuickTime.h>
 
+/*
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"
 #include "talk/base/thread.h"
-#include "scy/media/mediacommon.h"
+#include "talk/base/mediacommon.h"
+*/
 
 class DeviceWatcherImpl;
 
-namespace Sourcey {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 IDeviceManager* DeviceManagerFactory::create() {
@@ -208,7 +210,7 @@ void MacDeviceWatcher::stop()
 }
 
 
-} } // namespace Sourcey::Media
+} } // namespace scy::av
 
 
 /*

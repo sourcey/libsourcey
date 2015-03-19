@@ -29,9 +29,9 @@ namespace scy {
 
 
 PacketStream::PacketStream(const std::string& name) : 
-	_clientData(nullptr),
+	_name(name),
 	_closeOnError(false),
-	_name(name)
+	_clientData(nullptr)
 {
 	TraceLS(this) << "Create" << endl;
 	
@@ -56,8 +56,6 @@ PacketStream::~PacketStream()
 
 	// Nullify the stream pointer 
 	/*_base->setStream(nullptr);*/
-	
-	TraceLS(this) << "Destroy" << endl;
 	
 	// The event machine should always be complete
 	assert(stateEquals(PacketStreamState::None)

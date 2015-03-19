@@ -42,8 +42,8 @@ struct Device
 	
 	void print(std::ostream& os);
 
-	int id;
 	std::string type; // audioin, audioout, video
+	int id;
 	std::string name;
 	std::string guid;
 	bool isDefault;
@@ -200,8 +200,8 @@ private:
 	static bool shouldDeviceBeIgnored(const std::string& deviceName, 
 		const char* const exclusionList[]);
 
-	bool _initialized;
 	DeviceWatcher* _watcher;
+	bool _initialized;
 };
 
 

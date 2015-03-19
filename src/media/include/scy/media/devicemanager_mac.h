@@ -33,8 +33,8 @@
 */
 
 
-namespace Sourcey {
-namespace Media {
+namespace scy {
+namespace av {
 
 
 class DeviceWatcher;
@@ -52,7 +52,7 @@ private:
 };
 
 
-} } // namespace Sourcey::Media
+} } // namespace scy::av
 
 #endif  // SCY_MEDIA_DeviceManager_MAC_H
 
