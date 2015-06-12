@@ -103,7 +103,7 @@ if(WIN32)
   set(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a") # ".dll"
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    D:/dev/lib/wxWidgets-2.9.4/lib/vc_lib
+    #D:/dev/lib/wxWidgets-2.9.4/lib/vc_lib
     #D:/dev/lib/opencv-2.4.6.0/build/install/lib
     #D:/dev/lib/ffmpeg-1.0.1-gpl/lib
     ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/lib/
@@ -111,21 +111,6 @@ if(WIN32)
     ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
     )
-    
-    #${LibSourcey_SOURCE_DIR}/anionu-abi/poco/lib/vc10
-    #D:/dev/lib/ffmpeg-1.0.1-gpl/lib
-    #D:/dev/lib/OpenSSL-Win32/lib/VC/static
-    #D:/dev/lib/poco-1.4.6p1-all/lib 
-    #D:/dev/lib/poco-1.5.1/lib 
-    #D:/dev/lib/OpenCV2.3/build/x86/vc10/lib
-    #D:/dev/lib/OpenCV2.4/build/lib/Debug
-    #D:/dev/lib/OpenCV2.4/build/install/lib
-    #D:/dev/lib/OpenCV2.4.1/build/x86/vc10/lib
-    #D:/dev/lib/OpenCV2.4.1/build/x86/vc10/lib
-    #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg/bin
-    #D:/dev/lib/ffmpeg/lib
-    #D:/dev/apps/MinGW/msys/1.0/local
-    #D:/dev/projects/Sourcey/LibSourcey/src/anionu/deps/ffmpeg/bin
 else()
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
@@ -142,7 +127,7 @@ endif()
 # to search these locations first
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    D:/dev/lib/wxWidgets-2.9.4  
+    #D:/dev/lib/wxWidgets-2.9.4  
     #D:/dev/lib/opencv-2.4.6.0/build/install/include
     #D:/dev/lib/ffmpeg-1.0.1-gpl/include
     ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/include
@@ -150,19 +135,6 @@ if(WIN32)
     ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/include
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
     )
-    
-    #D:/dev/lib/poco-1.5.1
-    #D:/dev/lib/ffmpeg-1.0.1-gpl/include
-    #D:/dev/lib/OpenSSL-Win32/include
-    #D:/dev/lib/poco-1.4.6p1-all  
-    #${LibSourcey_SOURCE_DIR}/anionu-abi/poco/include
-    #D:/dev/lib/OpenCV2.3/build/include
-    #D:/dev/lib/OpenCV2.4/build/install/include
-    #D:/dev/lib/OpenCV2.4.1/build/include
-    #${LibSourcey_DEPENDENCIES_SOURCE_DIR}/ffmpeg
-    #D:/dev/lib/ffmpeg
-    #D:/dev/apps/MinGW/msys/1.0/local
-    #D:/dev/projects/Sourcey/LibSourcey/src/anionu/deps/ffmpeg/include
 endif()
 
 # ----------------------------------------------------------------------------
