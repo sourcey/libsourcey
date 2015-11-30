@@ -8,19 +8,19 @@
 #   <name>_DEBUG_POSTFIX - The output file name debum postfix
 #
 macro(define_sourcey_application name)
-            
+
   project(${name})
-  
+
   # Add library source files
   file(GLOB_RECURSE lib_srcs "src/*.c*")
   file(GLOB_RECURSE lib_hdrs "src/*.h*")
-  
+
   # If we build for windows systems, we also include the resource file
   # containing the manifest, icon and other resources
   if(WIN32 AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/${name}.rc")
     set(lib_srcs ${lib_srcs} src/${name}.rc)
   endif()
-  
+
   source_group("Source" FILES ${lib_srcs})
   source_group("Include" FILES ${lib_hdrs})
 
@@ -28,13 +28,13 @@ macro(define_sourcey_application name)
   include_directories(${LibSourcey_INCLUDE_DIRS})
   #  ${CMAKE_SOURCE_DIR}/projects/Anionu/ISpot/include
   #  ${CMAKE_SOURCE_DIR}/projects/AnionuPrivate/SpotImpl/include
-  link_directories(${LibSourcey_LIBRARY_DIRS})   
-  
-  #status("  Linking application ${name}")    
-  #status("    Libraries:               ${LibSourcey_INCLUDE_LIBRARIES}")    
-  #status("    Library Dirs:            ${LibSourcey_LIBRARY_DIRS}")    
-  #status("    Include Dirs:            ${LibSourcey_INCLUDE_DIRS}")  
-  #status("    Dependencies:            ${LibSourcey_BUILD_DEPENDENCIES}")  
+  link_directories(${LibSourcey_LIBRARY_DIRS})
+
+  #status("  Linking application ${name}")
+  #status("    Libraries:               ${LibSourcey_INCLUDE_LIBRARIES}")
+  #status("    Library Dirs:            ${LibSourcey_LIBRARY_DIRS}")
+  #status("    Include Dirs:            ${LibSourcey_INCLUDE_DIRS}")
+  #status("    Dependencies:            ${LibSourcey_BUILD_DEPENDENCIES}")
 
   # Setting WIN32 sets SUBSYSTEM:WINDOWS
   if (${name}_SUBSYSTEM_WINDOWS)
@@ -42,10 +42,10 @@ macro(define_sourcey_application name)
   else()
     add_executable(${name} ${lib_srcs} ${lib_hdrs})
   endif()
-  
+
   # Include dependent modules
   foreach(module ${ARGN})
-    include_sourcey_modules(${module})     
+    include_sourcey_modules(${module})
     add_dependencies(${name} ${module})
   endforeach()
 
@@ -53,10 +53,10 @@ macro(define_sourcey_application name)
   if (LibSourcey_BUILD_DEPENDENCIES)
     add_dependencies(${name} ${LibSourcey_BUILD_DEPENDENCIES})
   endif()
-  
+
   #if(MSVC)
   #  # Temporary workaround for "error LNK2026: module unsafe for SAFESEH image"
-  #  # when compiling with certain externally compiled libraries with VS2012, 
+  #  # when compiling with certain externally compiled libraries with VS2012,
   #  # such as http://ffmpeg.zeranoe.com/builds/
   #  # This disables safe exception handling by default.
   #  if(${_MACHINE_ARCH_FLAG} MATCHES X86)
@@ -65,10 +65,10 @@ macro(define_sourcey_application name)
   #    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
   #  endif()
   #endif()
-  
+
   # Add external dependencies and required libraries for linking.
-  target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES}) 
-  
+  target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
+
   if(ENABLE_SOLUTION_FOLDERS)
     set_target_properties(${name} PROPERTIES FOLDER "applications")
   endif()
@@ -82,26 +82,13 @@ macro(define_sourcey_application name)
   set_target_properties(${name} PROPERTIES
     OUTPUT_NAME ${${name}_EXECUTABLE_NAME}
     DEBUG_POSTFIX "${${name}_DEBUG_POSTFIX}")
-  
+
   if (NOT ${name}_INSTALL_DESTINATION)
     # Must add /bin for Linux
     # This will result in executables being installed to /usr/local/bin
-    set(${name}_INSTALL_DESTINATION "bin") 
+    set(${name}_INSTALL_DESTINATION "bin")
   endif()
   install(TARGETS ${name}
-    RUNTIME DESTINATION ${${name}_INSTALL_DESTINATION} COMPONENT main) 
-        
+    RUNTIME DESTINATION ${${name}_INSTALL_DESTINATION} COMPONENT main)
+
 endmacro()
-
-
-
- #${LibSourcey_DEBUG_POSTFIX} # No debug prefix for executables
-        #ARCHIVE_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_PATH}
-        #RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
-        #INSTALL_NAME_DIR lib
-    
-    #if(${name} MATCHES "Console")
-    #  file(GLOB lib_int_hdrs "../SpotConsole/*.h*")
-    #  file(GLOB lib_int_srcs "../SpotConsole/*.cpp")
-    #endif()
-    #${lib_int_srcs}  ${lib_int_hdrs}  ${lib_int_srcs} ${lib_int_hdrs}

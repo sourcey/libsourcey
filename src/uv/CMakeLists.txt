@@ -4,5 +4,4 @@ if(BUILD_MODULES AND BUILD_MODULE_uv)
   define_sourcey_module(uv) # Base Net Media
 endif()
 
-  ##include_dependency(Poco REQUIRED)
-  #include_dependency(OpenSSL REQUIRED)
+  #   #include_dependency(OpenSSL REQUIRED)

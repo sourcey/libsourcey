@@ -26,9 +26,6 @@
 #include "scy/json/iserializable.h"
 #include "scy/sked/task.h"
 #include "scy/sked/taskfactory.h"
-
-//
-//#include "Poco/Event.h"
 #include "scy/singleton.h"
 
 #include <vector>
@@ -38,7 +35,7 @@ namespace scy {
 namespace sked {
 
 
-static const char* DeprecitatedDateFormat = "%Y-%m-%d %H:%M:%S %Z";
+static const char* DepreciatedDateFormat = "%Y-%m-%d %H:%M:%S %Z";
 
 
 class Scheduler: public TaskRunner, public json::ISerializable

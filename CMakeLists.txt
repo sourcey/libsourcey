@@ -48,13 +48,12 @@ include(LibSourceyVersion REQUIRED)
 set_option(BUILD_SHARED_LIBS          "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" NOT (WIN32 OR ANDROID OR IOS))
 set_option(BUILD_DEPENDENCIES         "Build third party dependencies"                           ON)
 set_option(BUILD_MODULES              "Build LibSourcey modules"                                 ON)
-set_option(BUILD_APPLICATIONS         "Build LibSourcey applications"                            ON)
-set_option(BUILD_MODULE_SAMPLES       "Build module sample applications?"                        OFF)
+set_option(BUILD_APPLICATIONS         "Build LibSourcey applications"                            OFF)
 set_option(BUILD_MODULE_TESTS         "Build module test applications?"                          OFF)
+set_option(BUILD_MODULE_SAMPLES       "Build module sample applications?"                        OFF)
 set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs"                       ON)
-set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs (not MSCV only)"       ON)
-set_option(BUILD_WITH_STATIC_CRT      "Enables staticaly linked CRT for staticaly linked libraries" OFF)
-set_option(BUILD_ALPHA                "Build alpha devlopment modules"                           OFF)
+set_option(BUILD_WITH_STATIC_CRT      "Enables statically linked CRT for statically linked libraries" OFF)
+set_option(BUILD_ALPHA                "Build alpha development modules"                          OFF)
 
 # ----------------------------------------------------------------------------
 # LibSourcey build options
@@ -114,7 +113,7 @@ if(WIN32)
 else()
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
-  set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
+  set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
     /home/deploy/build/lib
     /usr/lib
     /usr/local/lib)
@@ -127,7 +126,7 @@ endif()
 # to search these locations first
 if(WIN32)
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    #D:/dev/lib/wxWidgets-2.9.4  
+    #D:/dev/lib/wxWidgets-2.9.4
     #D:/dev/lib/opencv-2.4.6.0/build/install/include
     #D:/dev/lib/ffmpeg-1.0.1-gpl/include
     ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/include
@@ -173,23 +172,23 @@ endif()
 # ============================================================================
 # Include Dependencies, Modules and Applications
 #
-# LibSourcey automatically includes all directories inside the ./src folder. 
+# LibSourcey automatically includes all directories inside the ./src folder.
 # Libraries in the LibSourcey source tree are broken up into three types:
 #
 # Dependency:
-#     A third party library required by a LibSourcey Modue or Application.  
+#     A third party library required by a LibSourcey Modue or Application.
 #     Dependencies may be external or internal. External dependencies reside
 #     outside on the source tree, while internal dependencies generally reside
 #     in the ./deps folder. All dependencies must be built, installed, found
 #     and included by the build system before Modules and Application can be
-#     built. 
+#     built.
 #
-# Module: 
+# Module:
 #     A static or dynamic library which extends the LibSourcey core, and is
 #     included by Applications based on LibSourcey architecture. Modules must
 #     be built and installed before Applications.
 #
-# Application: 
+# Application:
 #     A standalone application. These can be built once all Dependencies and
 #     Modules have been built and installed.
 #
@@ -198,7 +197,7 @@ endif()
 # ----------------------------------------------------------------------------
 # Include standard and defult libraries
 # ----------------------------------------------------------------------------
-if(MSVC)  
+if(MSVC)
   # CMAKE_CXX_STANDARD_LIBRARIES must be a string for MSVC
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} advapi32.lib iphlpapi.lib psapi.lib shell32.lib ws2_32.lib dsound.lib winmm.lib strmiids.lib")
 elseif(MSYS)
@@ -206,12 +205,12 @@ elseif(MSYS)
 elseif(APPLE)
     set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -lz -ldl") # -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES}
 elseif(UNIX)
-  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -lz -ldl -lrt") # -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES} 
+  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -lz -ldl -lrt") # -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES}
 endif()
-      
+
 if(MSVC)
   # Temporary workaround for "error LNK2026: module unsafe for SAFESEH image"
-  # when compiling with certain externally compiled libraries with VS2012, 
+  # when compiling with certain externally compiled libraries with VS2012,
   # such as http://ffmpeg.zeranoe.com/builds/
   # This disables safe exception handling by default.
   if(${_MACHINE_ARCH_FLAG} MATCHES X86)
@@ -238,10 +237,10 @@ set_option(WITH_WEBRTC          "Include WebRTC support"               OFF)
 set_option(WITH_WXWIDGETS       "Include wxWidgets support"            OFF)
 
 # Include dependencies build dir for cmake generated config files
-list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_BUILD_DIR}) 
+list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_BUILD_DIR})
 
 #set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} ${LibSourcey_DEPENDENCIES_BUILD_DIR})
-#list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}) 
+#list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR})
 #set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_DIR}/deps")
 #set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_BUILD_DIR}/deps")
 #set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/libscy/deps")
@@ -249,7 +248,7 @@ list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_BUILD_DIR})
 
 # Include inttypes.h for windows
 if (MSVC)
-  list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/msvc) 
+  list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/msvc)
 endif()
 
 #if(BUILD_DEPENDENCIES)
@@ -291,33 +290,33 @@ endif()
 
 # External dependencies
 if(WITH_OPENSSL)
-  include_dependency(OpenSSL REQUIRED)
+ include_dependency(OpenSSL REQUIRED)
   #set(HAVE_OPENSSL 1)
 endif()
 
 if(WITH_FFMPEG)
-  include_dependency(FFmpeg REQUIRED)
+ include_dependency(FFmpeg REQUIRED)
   #set(HAVE_FFMPEG 1)
 endif()
 
 if(WITH_OPENCV)
-  include_dependency(OpenCV REQUIRED)
+ include_dependency(OpenCV REQUIRED)
   #set(HAVE_OPENCV 1)
 endif()
 
 if(WITH_WEBRTC)
-  include_dependency(WebRTC REQUIRED)
+ include_dependency(WebRTC REQUIRED)
   #set(HAVE_WEBRTC 1)
 endif()
 
 if(WITH_WXWIDGETS)
   # TODO: specify library option
-  include_dependency(wxWidgets REQUIRED core base adv)
+ include_dependency(wxWidgets REQUIRED core base adv)
   #set(HAVE_WXWIDGETS 1)
 endif()
-  
+
 # Define known dependencies for our LibSourceyConfig.h
-# These variables will be modified by include_dependency()
+# These variables will be modified byinclude_dependency()
 #set(HAVE_RTAUDIO 0)
 #set(HAVE_JSONCPP 0)
 #set(HAVE_OPENSSL 0)
@@ -330,10 +329,10 @@ endif()
 ##set(HAVE_POCO 0)
 ##set(HAVE_LIBSTROPHE 0)
 ##set(HAVE_PUGIXML 0)
-  
+
 #if(BUILD_DEPENDENCIES)
   # TODO: Search for library and conditional build
-  # depending on XXX_FOUND or HAVE_XXX variable  
+  # depending on XXX_FOUND or HAVE_XXX variable
   #set(WITH_RTAUDIO ON CACHE BOOL "Build with RtAudio")
   #set(WITH_JSONCPP ON CACHE BOOL "Build with JsonCpp")
   ##set(WITH_PUGIXML ON CACHE BOOL "Build with PugiXML")
@@ -348,14 +347,14 @@ endif()
 #endif()
 
 # Include the dependencies source directory
-#list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}) 
+#list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR})
 #include_directories("${LibSourcey_INCLUDE_DIRS}")
 #link_directories("${LibSourcey_INSTALL_DIR}/lib")
-  
+
 # ----------------------------------------------------------------------------
 # Include the LibSourcey source tree
 # ----------------------------------------------------------------------------
-if(BUILD_MODULES OR BUILD_APPLICATIONS)    
+if(BUILD_MODULES OR BUILD_APPLICATIONS)
   subdirlist(subdirs "${CMAKE_SOURCE_DIR}/src")
   foreach(name ${subdirs})
     # This variable is so modules can set HAVE_LibSourcey_XXX for our
@@ -366,7 +365,7 @@ if(BUILD_MODULES OR BUILD_APPLICATIONS)
     if (EXISTS "${dir}/CMakeLists.txt")
       add_subdirectory(${dir})
     endif()
-  endforeach() 
+  endforeach()
 endif()
 
 # ----------------------------------------------------------------------------
@@ -387,9 +386,9 @@ set(PACKAGE_VERSION "${LibSourcey_VERSION}")
 
 status("Parsing 'LibSourceyConfig.h.cmake'")
 configure_file(
-  "${CMAKE_SOURCE_DIR}/cmake/LibSourceyConfig.h.cmake" 
+  "${CMAKE_SOURCE_DIR}/cmake/LibSourceyConfig.h.cmake"
   "${LibSourcey_CONFIG_FILE_INCLUDE_DIR}/scyconfig.h")
-  
+
 # ----------------------------------------------------------------------------
 #  Uninstall target for "make uninstall"
 # ----------------------------------------------------------------------------
@@ -501,7 +500,7 @@ endif()
 
 
 #foreach(m ${LibSourcey_BUILD_MODULES})
-  
+
 #endforeach()
   #set(__mdeps "")
   #foreach(d ${LibSourcey_MODULE_${m}_DEPS})
@@ -525,14 +524,14 @@ endif()
 # Default: dynamic
 # ----------------------------------------------------------------------------
 #if(WIN32 AND NOT BUILD_SHARED_LIBS)
-#  option (BUILD_WITH_STATIC_CRT "Enables use of staticaly linked CRT" OFF)
+#  option (BUILD_WITH_STATIC_CRT "Enables use of statically linked CRT" OFF)
 #endif()
-    
+
 
 
 # ----------------------------------------------------------------------------
 # Set bitness
-# ----------------------------------------------------------------------------  
+# ----------------------------------------------------------------------------
 #set(LibSourcey_ARCHITECTURE i386)
 #set(LibSourcey_BITNESS 32)
 #if(CMAKE_SIZEOF_VOID_P EQUAL 8)

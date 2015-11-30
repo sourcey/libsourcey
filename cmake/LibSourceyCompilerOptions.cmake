@@ -19,6 +19,7 @@ set(LibSourcey_EXTRA_EXE_LINKER_FLAGS_RELEASE "")
 set(LibSourcey_EXTRA_EXE_LINKER_FLAGS_DEBUG "")
 
 if(CMAKE_COMPILER_IS_GNUCXX)
+
   # High level of warnings.
   set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -Wall")
 

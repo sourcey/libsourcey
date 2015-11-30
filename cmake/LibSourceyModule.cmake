@@ -39,13 +39,6 @@ macro(define_sourcey_module name)
   string(REGEX REPLACE ${lib_srcs_exclude} "" lib_srcs "${lib_srcs}")
   string(REGEX REPLACE ${lib_hdrs_exclude} "" lib_hdrs "${lib_hdrs}")
   
-   
-  message(STATUS "-------------------------------    lib_hdrs: ${lib_srcs}")  
-  
-  if (${name} MATCHES "media")
-  #message(FATAL_ERROR "-----------------------------") 
-  endif()
-  
   source_group("Src" FILES ${lib_srcs})
   source_group("Include" FILES ${lib_hdrs})
 
@@ -210,7 +203,7 @@ macro(define_libsourcey_test name)
   endforeach()  
 
   # Include external dependencies
-  target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
+  target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES} ${CMAKE_DL_LIBS})
   add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES})
   
   if(MSVC)

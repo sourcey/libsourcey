@@ -38,6 +38,7 @@ macro(define_sourcey_dependency name)
   add_library(${name} ${LibSourcey_LIB_TYPE} ${${name}_SOURCE_FILES} ${${name}_HEADER_FILES})
   
   if (${name}_DEPENDENCIES)
+    target_link_libraries(${name} ${${name}_DEPENDENCIES} ${CMAKE_DL_LIBS})
     add_dependencies(${name} ${${name}_DEPENDENCIES})
   endif()
   
