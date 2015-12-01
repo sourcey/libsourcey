@@ -144,60 +144,52 @@ Also, check out `pluga`, a simple C++ plugin API using LibSourcey: http://source
 The following modules are included in the core LibSourcey repository:
  
 #### Base 
-_dependencies:_ libuv  
 Re-usable utility classes and interfaces used throughout LibSourcey.
 
 #### Net
-_dependencies:_ libuv, OpenSSL  
 TCP, SSL and UDL socket implementation build on top of libuv architecture.
 
 #### HTTP
-_dependencies:_ libuv, JsonCpp  
 HTTP server and client stack including support for WebSockets, multipart streaming, and file transfers.  
     
 #### Media
-_dependencies:_ libuv, OpenCV, FFmpeg, RtAudio  
+_dependencies:_ OpenCV, FFmpeg, RtAudio  
 Wrappers around FFmpeg and OpenCV for device capture, encoding, recording and streaming. The Media API makes extensive use of the PacketStream classes so that encoders, processors and packetisers can be dynamically added and removed from a media source.  
 
 #### UV
-_dependencies:_ libuv  
 The UV module is a set of C++ wrappers for Joyent's brilliant libuv library. 
+
+#### JSON
+_dependencies:_ JsonCpp  
+Thin wrappers and helper functions for the JsonCpp library. 
 
 #### STUN
 [RFC 5389](http://tools.ietf.org/rfc/rfc5389) implementation which includes support for ICE and TURN and TURN TCP messages. 
 
 #### TURN
-_dependencies:_ libuv  
 Server and client stack which supports both [RFC 5766 (Traversal Using Relays around NAT)](http://tools.ietf.org/rfc/rfc5766) and [RFC 6062 (Traversal Using Relays around NAT Extensions for TCP Allocations)](http://tools.ietf.org/rfc/rfc6062) specifications. 
-
-#### SDP
-[RFC 4566](http://tools.ietf.org/rfc/rfc4566) implementation which includes extra support for ICE headers. 
   
 #### SocketIO
-_dependencies:_ libuv, JsonCpp  
 SocketIO C++ client. Read more about [SocketIO](http://socket.io). 
 
 #### Symple
-_dependencies:_ libuv, JsonCpp  
 Client implementation of Sourcey's home grown real time messaging and presence protocol. [More about Symple](<http://sourcey.com/symple).    
 
-#### JSON
-_dependencies:_ JsonCpp  
-Thin wrappers and helper functions for the JsonCpp library. 
+#### SDP
+[RFC 4566](http://tools.ietf.org/rfc/rfc4566) implementation which includes extra support for ICE headers. 
 
 ## External Modules
 
 The following LibSourcey modules are available in external repositories:
 
 #### Pacm
-_dependencies:_ libuv, JsonCpp  
 Pacm is an embeddable package manager which speaks JSON with the server. [More about Pacm](http://sourcey.com/pacm). 
 
 #### Pluga
 Pluga is a simple C++ plugin system that's dead simple to use in your own projects. [More about Pluga](http://sourcey.com/pluga). 
 
 #### Anionu SDK
-_dependencies:_ libuv, OpevCV
+_dependencies:_ OpevCV
 The Anionu SDK includes a C++ API, tools, and client implementation for building [Spot](http://anionu.com/spot) plugins and applications that integrate with the [Anionu cloud surveillance serivice](https://anionu.com).
 
 ## Private Modules
@@ -205,13 +197,11 @@ The Anionu SDK includes a C++ API, tools, and client implementation for building
 The following closed source modules are available. Please contact us if you are interested in using any of them in your projects.
 
 #### ICE
-_dependencies:_ libuv  
 The ICE module is a complete implementation of [RFC 5245 (Interactive Connectivity Establishment)](http://tools.ietf.org/html/rfc5245) based on LibSourcey architecture.
 ICE is a protocol for Network Address Translator (NAT) Traversal for Offer/Answer protocols.
 This module is currently not open source. Please contact us if you are interested in using it.
 
 #### RTP
-_dependencies:_ libuv  
 Our RTP module is quite basic and at this point it only supports RTP and RTCP packetisation. RTCP session management still needs to implemented. If anyone happens to make a project of this we would be very happy to improve our RTP module. 
 
 #### XML
