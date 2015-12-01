@@ -200,9 +200,9 @@ The main build options you will want to configure are as follows:
 * `BUILD_MODULE_xxx`: Enable or disable a specific module replacing _xxx_ with the module name.  
 * `BUILD_APPLICATIONS`: Build LibSourcey modules _default: ON_  
 * `BUILD_APPLICATION_xxx`: Enable or disable a specific applications replacing _xxx_ with the module name.  
-* `BUILD_MODULE_TESTS`: Build module test applications _default: OFF_  
+* `BUILD_MODULE_TESTS`: Build module test applications _default: ON_  
 * `BUILD_MODULES_xxx`: Enable or disable a specific module replacing xxx with the module name.  
-* `BUILD_MODULE_SAMPLES`: Build module sample applications _default: OFF_  
+* `BUILD_MODULE_SAMPLES`: Build module sample applications _default: ON_  
 
 If you are using third-party libraries is custom locations then make sure you update the CMake include paths: `CMAKE_SYSTEM_PREFIX_PATH` and `CMAKE_LIBRARY_PATH`.
 The only third-party libraries that may need configuring if you're using them are FFmpeg, OpenCV and WebRTC.
@@ -212,6 +212,14 @@ For an exhaustive list of options check the `CMakeLists.txt` in the main directo
 ## Examples
 
 There is also plenty of examples available in the `samples` and `tests` folder of each module for you to cut your teeth on.
+
+If you're looking for media streaming examples check out the `mediaserver` sample in the `symple` module. Remember, you will need to compiled LibSourcey with OpenCV and FFmpeg enabled to use it: https://github.com/sourcey/libsourcey/tree/master/src/symple/samples/mediaserver
+
+For an example of the LibSourcey way of doing things, check out this article about the PacketSteram API: http://sourcey.com/libsourcey-packetstream-api/
+
+For a redistributable C++ package manager, take a look at `pacm` here: http://sourcey.com/pacm/
+
+Also, check out `pluga`, a simple C++ plugin API using LibSourcey: http://sourcey.com/pluga/
 
 ## Contributing
 

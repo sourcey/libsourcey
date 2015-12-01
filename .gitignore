@@ -2,17 +2,3 @@
 ~*
 build*
 bak/
-!libs/Base
-!libs/HTTP
-!libs/JSON
-!libs/Media
-!libs/Net
-!libs/RTP
-!libs/SDP
-!libs/SocketIO
-!libs/Symple
-!libs/Pacman
-!libs/STUN
-!libs/TURN
-!libs/XML
-!libs/XMPP
