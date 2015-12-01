@@ -5,14 +5,12 @@
   
 LibSourcey is a collection of open source cross platform C++11 modules and classes which provide developers with a flexible high performance arsenal for the rapid development of real-time messaging and live media streaming applications. 
 
-LibSourcey was been used in private production by Sourcey since 2005, and was open sourced in 2013 under the LGPL licence to promote development of real-time native and web applications.
-
-Since version 0.92, C++11 and event-based asynchronous IO powered by Node.js's underlying libuv library are utilised throughout LibSourcey in to maximise performance and minimise concurrency reliance for building mission critical server-side applications.
+LibSourcey is built on Node.js's underlying libuv library and utilises event-based asynchronous IO in to maximise performance and minimise concurrency reliance for building mission critical server-side applications. Modern C++11 design principles have been adhered to throughout for clear and readable code, and straighforward integration into your existing projects.
 
 LibSourcey provides a simple and flexible method of capturing live audio/video streams (_OpenCV/FFmpeg_), processing, filtering and encoding them using any video format (_FFmpeg_), and broadcasting the result over the Internet (_libuv_). This is made possible by implementing a thin layer over the top of some brilliant open source projects, such as FFmpeg, OpenCV and libuv. The only required third-party dependency is libuv, and that is included in the local source and compiled automatically. All others dependencies are optional. 
 
-LibSourcey has full support for the following protocols: **TCP**, **SSL**, **UDP**, **HTTP**, **JSON**, **XML**, **STUN**, **SDP**, **SocketIO**. 
-Partial or non-standard support is implemented for the following protocols: **WebSockets**, **TURN**, **ICE**, **RTP**, and **XMPP**.
+LibSourcey provides full support for the following protocols: **TCP**, **SSL**, **UDP**, **HTTP**, **JSON**, **XML**, **STUN**, **SDP**, **SocketIO**. 
+Partial support is provided for the following protocols: **WebSockets**, **TURN**, **ICE**, **RTP**, and **XMPP**.
  
 ## Dependencies
 
