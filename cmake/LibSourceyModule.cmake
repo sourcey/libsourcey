@@ -199,6 +199,12 @@ macro(define_libsourcey_library name)
 
   project(${name})
 
+  # Include internal module dependencies
+  #include_sourcey_modules(${ARGN})
+
+  # Include library and header directories
+  set_default_project_directories(${ARGN})
+
   # Add source files
   file(GLOB lib_hdrs "*.h*")
   file(GLOB lib_srcs "*.cpp")
@@ -208,28 +214,15 @@ macro(define_libsourcey_library name)
   source_group("Src" FILES ${lib_srcs})
   source_group("Include" FILES ${lib_hdrs})
 
-  #add_executable(${name} ${lib_srcs} ${lib_hdrs})
   add_library(${name} MODULE ${lib_srcs} ${lib_hdrs})
 
-  # Include dependent modules
-  foreach(module ${ARGN})
-    include_sourcey_modules(${module})
-    #add_dependencies(${name} ${module})
-  endforeach()
-
-  # Include external dependencies
-  target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
-  add_dependencies(${name} ${LibSourcey_INCLUDE_LIBRARIES})
+  # Include linker dependencies
+  set_default_project_dependencies(${name} ${ARGN})
 
   #message(STATUS "Defining module library ${name}:")
   #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
   #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
   #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
-
-  # Include library and header directories
-  include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
-  include_directories(${LibSourcey_INCLUDE_DIRS})
-  link_directories(${LibSourcey_LIBRARY_DIRS})
 
   if(ENABLE_SOLUTION_FOLDERS)
     set_target_properties(${name} PROPERTIES FOLDER "libraries")

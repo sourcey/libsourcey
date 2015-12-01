@@ -22,12 +22,12 @@
 
 
 //
-/// Version number  
+/// Version number
 //
 
 #define SCY_MAJOR_VERSION    0
 #define SCY_MINOR_VERSION    9
-#define SCY_PATCH_VERSION    3
+#define SCY_PATCH_VERSION    4
 
 #define SCY_AUX_STR_EXP(__A) #__A
 #define SCY_AUX_STR(__A)     SCY_AUX_STR_EXP(__A)
@@ -47,19 +47,19 @@
 	#endif
 #endif
 #if __unix__
-    // Unix    
+    // Unix
 	#ifndef UNIX
     #define UNIX
 	#endif
 #endif
 #if __posix__
-    // POSIX    
+    // POSIX
 	#ifndef POSIX
     #define POSIX
 	#endif
 #endif
 #if __linux__
-    // Linux    
+    // Linux
 	#ifndef LINUX
     #define LINUX
 	#endif
@@ -76,7 +76,7 @@
     #define APPLE
 	#endif
 #endif
-	
+
 
 #ifdef WIN32
 # ifndef SCY_SHARED_LIBRARY
@@ -95,7 +95,7 @@
 
 #ifdef WIN32
 
-// Verify that we're built with the multithreaded 
+// Verify that we're built with the multithreaded
 // versions of the runtime libraries
 #if defined(_MSC_VER) && !defined(_MT)
 	#error Must compile with /MD, /MDd, /MT or /MTd
@@ -117,7 +117,7 @@
 // Disable unnecessary warnings
 #if defined(_MSC_VER)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-	#pragma warning(disable:4251) // ... needs to have dll-interface warning 
+	#pragma warning(disable:4251) // ... needs to have dll-interface warning
 	#pragma warning(disable:4355) // 'this' : used in base member initializer list
 	#pragma warning(disable:4996) // VC++ 8.0 deprecation warnings
 	#pragma warning(disable:4351) // new behavior: elements of array '...' will be default initialized
