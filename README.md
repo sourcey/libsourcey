@@ -3,7 +3,7 @@
 **Homepage**: [http://sourcey.com/libsourcey](http://sourcey.com/libsourcey)  
 **Licence**: LGPL
   
-LibSourcey is a collection of open source cross platform C++11 modules and classes which provide developers with a flexible high performance arsenal for the rapid development of real-time messaging and live media streaming applications. 
+LibSourcey is a collection of open source cross platform C++11 modules and classes that provide developers with a flexible high performance arsenal for the rapid development of real-time messaging and live media streaming applications. 
 
 LibSourcey is built on Node.js's underlying libuv library and utilises event-based asynchronous IO in to maximise performance and minimise concurrency reliance for building mission critical server-side applications. Modern C++11 design principles have been adhered to throughout for clear and readable code, and straighforward integration into existing projects.
 
@@ -21,7 +21,7 @@ _Optional_: FFmpeg (>= 2.8.3), OpenCV (>= 3.0), WebRTC, OpenSSL (>= 1.0.1g), RtA
 
 ### Installing on Linux
 
-This guide has been written for Ubuntu 14.04, but should be easily protable for most flavours of Linux.
+This guide has been written for Ubuntu 14.04, but installation is very simple and should be easily protable for most flavours of Linux.
 
 First install the necessary dependencies:
 
@@ -35,9 +35,9 @@ apt-get install -y build-essential pkg-config git openssl libssl-dev cmake libja
 apt-get install -y opencv-dev
 ~~~
 
-_Note_: To compile LibSourcey with video and streaming capabilities enabled you should install the latest versions of both FFmpeg and OpenCV. 
+_Note:_ To compile LibSourcey with video and streaming capabilities enabled you should install the latest versions of both FFmpeg and OpenCV. 
 
-If you don't have FFmpeg development headers installed, then you can use the official FFmpeg installation guide which works out of the box with LibSourcey: http://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
+If you need to install FFmpeg, then you can use the official FFmpeg installation guide which works out of the box with LibSourcey: http://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
 
 Now checkout and compile the source:
 
@@ -51,7 +51,7 @@ make
 sudo make install
 ~~~
 
-Simple! For a complete list of build options [see here](#cmake-build-options).
+Simple! [See here](#cmake-build-options) for a complete list of build options, and [here for examples](#examples).
 
 ### Installing on Windows
 
@@ -73,6 +73,8 @@ Download LibSourcey
 #### Generate Project Files
 
 Open the CMake GUI and set the project directory to point to the LibSourcey root directory. Execute "Configure" to do the initial configuration, then adjust any options, then press "Configure" again and then press "Generate".
+
+[See here](#cmake-build-options) for a complete list of build options, and [here for examples](#examples).
 
 #### Compile with Visual Studio
 
@@ -98,6 +100,8 @@ Download LibSourcey
 #### Generate Project Files
 
 Open the CMake GUI and set the project directory to point to the LibSourcey root directory. Execute "Configure" to do the initial configuration, then adjust any options, then press "Configure" again and then press "Generate".
+
+[See here](#cmake-build-options) for a complete list of build options, and [here for examples](#examples).
 
 #### Compile with Xcode
 
@@ -127,11 +131,11 @@ For an exhaustive list of options check the `CMakeLists.txt` in the main directo
 
 There is also plenty of examples available in the `samples` and `tests` folder of each module for you to cut your teeth on.
 
-If you're looking for media streaming examples check out the `mediaserver` sample in the `symple` module. Remember, you will need to compiled LibSourcey with OpenCV and FFmpeg enabled to use it: https://github.com/sourcey/libsourcey/tree/master/src/symple/samples/mediaserver
+If you're interested in media streaming examples check out the `mediaserver` sample in the `symple` module. Remember, you will need to compile LibSourcey with OpenCV and FFmpeg enabled to use it: https://github.com/sourcey/libsourcey/tree/master/src/symple/samples/mediaserver
 
 For an example of the LibSourcey way of doing things, check out this article about the PacketSteram API: http://sourcey.com/libsourcey-packetstream-api/
 
-For a redistributable C++ package manager, take a look at `pacm` here: http://sourcey.com/pacm/
+For a redistributable C++ package manager, take a look at `pacm`, and specifically the `pacmconsole` application: http://sourcey.com/pacm/
 
 Also, check out `pluga`, a simple C++ plugin API using LibSourcey: http://sourcey.com/pluga/
 
