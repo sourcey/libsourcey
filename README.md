@@ -143,17 +143,18 @@ Simple! For a complete list of build options [see here](#cmake-build-options).
 
 #### Install Dependencies
 
-**Install Git**  
+Install Git  
  : Install [TortoiseGit](http://code.google.com/p/tortoisegit/), a convenient git front-end that integrates right into Windows Explorer. MinGW users can use [msysgit]( from <a class="external" href="http://code.google.com/p/msysgit/downloads/list"></a>).  
 
-**Install CMake**  
-CMake generates the LibSourcey project files so you can build on most platforms and compilers. [Download CMake](http://www.cmake.org/cmake/resources/software.html)  
+Install CMake  
+ : CMake generates the LibSourcey project files so you can build on most platforms and compilers. [Download CMake](http://www.cmake.org/cmake/resources/software.html)  
 
-**Install OpenSSL**  
-Download and install the [Windows OpenSSL binaries](http://slproweb.com/products/Win32OpenSSL.html).  
+Install OpenSSL  
+ : Download and install the [Windows OpenSSL binaries](http://slproweb.com/products/Win32OpenSSL.html).  
 
-** Download LibSourcey**  
-Clone the repository: `git clone https://github.com/sourcey/libsourcey.git`. If you haven't got Git for some reason you can download and extract the [package archive](https://github.com/sourcey/libsourcey) from Github.
+Download LibSourcey  
+ : Clone the repository: `git clone https://github.com/sourcey/libsourcey.git`.  
+   If you haven't got Git for some reason you can download and extract the [package archive](https://github.com/sourcey/libsourcey) from Github.
 
 #### Generate Project Files
 
@@ -167,17 +168,18 @@ Open the CMake GUI and set the project directory to point to the LibSourcey root
 
 ### Apple (MacOS)
 
-**Install Git**  
-Download the [latest Git installer package](http://code.google.com/p/git-osx-installer/downloads/list?can=3), double click on the installer to start the installation wizard. You’ll be prompted for your system password in order for the installer to complete.
+Install Git  
+ : Download the [latest Git installer package](http://code.google.com/p/git-osx-installer/downloads/list?can=3), double click on the installer to start the installation wizard. You’ll be prompted for your system password in order for the installer to complete.
 
-**Install CMake**  
-CMake generates the LibSourcey project files so you can build on most platforms and compilers. [Download CMake](http://www.cmake.org/cmake/resources/software.html)
+Install CMake  
+ : CMake generates the LibSourcey project files so you can build on most platforms and compilers. [Download CMake](http://www.cmake.org/cmake/resources/software.html)
 
-**Install OpenSSL**  
-If you don't already have OpenSSL development headers on your Mac, then please follow [this guide](http://www.opensource.apple.com/source/OpenSSL/OpenSSL-7.1/openssl/INSTALL?txt) to install them.  
+Install OpenSSL  
+ : If you don't already have OpenSSL development headers on your Mac, then please follow [this guide](http://www.opensource.apple.com/source/OpenSSL/OpenSSL-7.1/openssl/INSTALL?txt) to install them.  
 
-Download LibSourcey**  
-Clone the repository: `git clone https://github.com/sourcey/libsourcey.git`. If you haven't got Git for some reason you can download and extract the [package archive](https://github.com/sourcey/libsourcey) from Github.
+Download LibSourcey  
+ : Clone the repository: `git clone https://github.com/sourcey/libsourcey.git`.  
+   If you haven't got Git for some reason you can download and extract the [package archive](https://github.com/sourcey/libsourcey) from Github.
 
 #### Generate Project Files
 
