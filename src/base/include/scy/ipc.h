@@ -122,7 +122,7 @@ class SyncQueue: public Queue<TAction>
 {
 public:	
 	SyncQueue(uv::Loop* loop = uv::defaultLoop()) : 
-		_sync(loop, std::bind(&Queue::runSync, this)) 
+		_sync(loop, std::bind(&Queue<TAction>::runSync, this)) 
 	{
 	}
 

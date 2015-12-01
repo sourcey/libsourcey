@@ -1,8 +1,8 @@
-#include "UDPInitiator.h"
-#include "UDPResponder.h"
+#include "udpinitiator.h"
+#include "udpresponder.h"
 
-#include "TCPInitiator.h"
-#include "TCPResponder.h"
+#include "tcpinitiator.h"
+#include "tcpresponder.h"
 
 #include "scy/application.h"
 #include "scy/turn/client/client.h"

@@ -264,8 +264,8 @@ bool AudioEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 		assert(resampler->outNbSamples == outputFrameSize);
 	}
 	
-	frame = avcodec_alloc_frame();
-	avcodec_get_frame_defaults(frame);
+	frame = av_frame_alloc();
+	av_frame_unref(frame);
 	frame->nb_samples = inputFrameSize;
 	frame->pts = ipacket.pts;
 
@@ -361,7 +361,7 @@ void AudioDecoderContext::create(AVFormatContext *ic, int streamID)
     if (avcodec_open2(ctx, codec, NULL) < 0)
 		throw std::runtime_error("Could not open the audio codec.");
 	
-	frame = avcodec_alloc_frame();
+	frame = av_frame_alloc();
 	if (!frame)
 		throw std::runtime_error("Cannot allocate input frame.");
 }
@@ -402,7 +402,7 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 	opacket.data = nullptr;
 	opacket.size = 0;
 	
-	avcodec_get_frame_defaults(frame);
+	av_frame_unref(frame);
 	bytesDecoded = avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);		
 	if (bytesDecoded < 0) {
 		error = "Decoder error";
@@ -427,7 +427,7 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 	/*
 	while (bytesRemaining) // && !frameDecoded
 	{
-		avcodec_get_frame_defaults(frame);
+		av_frame_unref(frame);
 		bytesDecoded = avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);		
 		if (bytesDecoded < 0) {
 			ErrorLS(this) << "Decoder Error" << endl;

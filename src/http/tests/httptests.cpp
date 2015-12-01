@@ -54,7 +54,8 @@ struct RandomDataSource: public Idler
 
 	virtual void onIdle()
 	{
-		signal.emit(this, RawPacket("hello", 5));
+	  RawPacket packet("hello", 5);
+		signal.emit(this, packet);
 	}
 };	
 
@@ -207,7 +208,7 @@ class SocketClientEchoTest
 	/// Helper class for testing sockets (TCP, SLL, UDP)
 {
 public:
-	typename SocketT socket;
+	SocketT socket;
 	net::Address address;
 
 	SocketClientEchoTest(const net::Address& addr) : //, bool ghost = false
@@ -253,7 +254,7 @@ public:
 	void onRecv(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress)
 	{
 		assert(sender == &socket);
-		std::string data(packet.data(), packet.size());
+		std::string data(buffer.data(), buffer.size());
 		DebugL << "recv: " << data << endl;	
 
 		// Check for return packet echoing sent data
@@ -300,11 +301,7 @@ public:
 #endif
 #if TEST_SSL
 			// Init SSL Context 
-			net::SSLContext::Ptr ptrContext = new net::SSLContext(
-				net::SSLContext::CLIENT_USE, "", "", "", 
-				net::SSLContext::VERIFY_NONE, 9, false, 
-				"ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");		
-			net::SSLManager::instance().initializeClient(ptrContext);
+			net::SSLManager::initNoVerifyClient();
 #endif
 		{		
 			
@@ -484,7 +481,7 @@ public:
 			conn = (ClientConnection*)client.createConnectionT<ConnectionT>(url);		
 			conn->Connect += sdelegate(this, &HTTPClientTest::onConnect);	
 			conn->Headers += sdelegate(this, &HTTPClientTest::onHeaders);
-			conn->Incoming.Emitter += sdelegate(this, &HTTPClientTest::onPayload); // fix syntax
+			conn->Incoming.emitter += sdelegate(this, &HTTPClientTest::onPayload); // fix syntax
 			//conn->Payload += sdelegate(this, &HTTPClientTest::onPayload);
 			conn->Complete += sdelegate(this, &HTTPClientTest::onComplete);
 			conn->Close += sdelegate(this, &HTTPClientTest::onClose);

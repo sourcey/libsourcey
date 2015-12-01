@@ -49,7 +49,7 @@ namespace av {
 struct VideoConversionContext;
 
 	
-AVFrame* createVideoFrame(::PixelFormat pixelFmt, int width, int height);
+AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height);
 void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& oparams);
 void initDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts);
 void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params);
@@ -209,27 +209,3 @@ struct VideoConversionContext
 
 #endif
 #endif	// SCY_MEDIA_VideoContext_H
-
-
-
-
-	//virtual void reset();
-	//virtual void reset();	
-	
-	//AVFrame* oframe;
-	//struct SwsContext* convCtx;
-/*
-void VideoDecoderContext::reset() 
-{
-	VideoContext::reset();
-}
-*/
-	//virtual void reset();	
-
-
-
-	//virtual int encode(unsigned char* buffer, int bufferSize, AVPacket& opacket/*, unsigned pts = AV_NOPTS_VALUE*/);
-		// Encodes a video frame from given data buffer and
-		// stores it in the opacket.
-		// If a pts value is given it will be applied to the
-		// encoded video packet.

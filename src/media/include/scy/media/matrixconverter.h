@@ -76,19 +76,19 @@ public:
 		
 		// Create and allocate the conversion frame.
 		if (_oframe == nullptr) {
-			_oframe = avcodec_alloc_frame();	
+			_oframe = av_frame_alloc();	
 			if (_oframe == nullptr)
 				throw std::runtime_error("Matrix Converter: Could not allocate the output frame.");
 
 			avpicture_alloc(reinterpret_cast<AVPicture*>(_oframe), 
-				PIX_FMT_BGR24, video->ctx->width, video->ctx->height);
+				AV_PIX_FMT_BGR24, video->ctx->width, video->ctx->height);
 		}
 	
 		// Convert the image from its native format to BGR.
 		if (_convCtx == nullptr) {
 			_convCtx = sws_getContext(
 				video->ctx->width, video->ctx->height, video->ctx->pix_fmt, 
-				video->ctx->width, video->ctx->height, PIX_FMT_BGR24, 
+				video->ctx->width, video->ctx->height, AV_PIX_FMT_BGR24, 
 				SWS_BICUBIC, nullptr, nullptr, nullptr);
 			_mat.create(video->ctx->height, video->ctx->width, CV_8UC(3));
 		}

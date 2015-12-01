@@ -14,7 +14,7 @@ template <typename SocketT>
 class ClientSocketTest
 {
 public:
-	typename SocketT socket;
+	SocketT socket;
 	Address address;
 
 	ClientSocketTest(short port, bool ghost = false) :
@@ -50,7 +50,7 @@ public:
 	
 	void onConnect(void* sender)
 	{
-		traceL("ClientSocketTest") << "Connected" << endl;
+		traceL("ClientSocketTest") << "Connected" << std::endl;
 		assert(sender == &socket);
 		socket.send("client > server", 15);
 		socket.send("client > server", 15);
@@ -60,12 +60,12 @@ public:
 	void onRecv(void* sender, SocketPacket& packet)
 	{
 		assert(sender == &socket);
-		string data(packet.data(), 15);
-		traceL("ClientSocketTest") << "Recv: " << data << endl;	
+		std::string data(packet.data(), 15);
+		traceL("ClientSocketTest") << "Recv: " << data << std::endl;	
 
 		// Check for return packet echoing sent data
 		if (data == "client > server") {
-			traceL("ClientSocketTest") << "Recv: Got Return Packet!" << endl;
+			traceL("ClientSocketTest") << "Recv: Got Return Packet!" << std::endl;
 			
 			// Send the shutdown command to close the connection gracefully.
 			// The peer disconnection will trigger an eof error callback
@@ -80,13 +80,13 @@ public:
 
 	void onError(void* sender, const Error& error)
 	{
-		errorL("ClientSocketTest") << "On error: " << error.message << endl;
+		errorL("ClientSocketTest") << "On error: " << error.message << std::endl;
 		assert(sender == &socket);
 	}
 	
 	void onClose(void* sender)
 	{
-		traceL("ClientSocketTest") << "On closed" << endl;
+		traceL("ClientSocketTest") << "On closed" << std::endl;
 		// The last callback to fire is the Closed signal  
 		// which notifies us the underlying libuv socket 
 		// handle is closed. Das is gut!

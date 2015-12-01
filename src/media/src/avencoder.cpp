@@ -319,7 +319,7 @@ void AVEncoder::createVideo()
 	//Mutex::ScopedLock lock(_mutex);	
 	assert(!_video);
 	assert(_options.oformat.video.enabled);
-	assert(_formatCtx->oformat->video_codec != CODEC_ID_NONE);
+	assert(_formatCtx->oformat->video_codec != AV_CODEC_ID_NONE);
 	_video = new VideoEncoderContext(_formatCtx);
 	_video->iparams = _options.iformat.video;
 	_video->oparams = _options.oformat.video;
@@ -450,7 +450,7 @@ void AVEncoder::createAudio()
 	//Mutex::ScopedLock lock(_mutex);	
 	assert(!_audio);
 	assert(_options.oformat.audio.enabled);
-	assert(_formatCtx->oformat->audio_codec != CODEC_ID_NONE);
+	assert(_formatCtx->oformat->audio_codec != AV_CODEC_ID_NONE);
 
 	_audio = new AudioEncoderContext(_formatCtx);
 	_audio->iparams = _options.iformat.audio;

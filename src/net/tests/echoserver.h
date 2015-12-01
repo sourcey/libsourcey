@@ -7,10 +7,10 @@ namespace net {
 
 
 template <typename SocketT>
-class EchoServer: public CountedObject
+class EchoServer//: public CountedObject
 {
 public:
-	typename SocketT socket;
+	SocketT socket;
 	typename SocketT::List sockets;
 	Address address;
 
@@ -21,7 +21,7 @@ public:
 		// This way the server won't prevent the main uv_loop 
 		// from exiting when other processed complete.
 		if (ghost)
-			uv_unref(reinterpret_cast<SocketT::Base&>(socket.base()).handle());
+			uv_unref(reinterpret_cast<typename SocketT::Base&>(socket.base()).handle());
 	}
 
 	~EchoServer()
@@ -36,12 +36,12 @@ public:
 	
 	void run()
 	{	
-		traceL("EchoServer", this) << "Serrun " << socket.base().refCount() << endl;
+		traceL("EchoServer", this) << "Serrun " << socket.base().refCount() << std::endl;
 		assert(socket.base().refCount() == 1);
 		socket.bind(address);
 		socket.listen();
 		socket.AcceptConnection += sdelegate(this, &EchoServer::onAccept);		
-		traceL("EchoServer", this) << "Server listening on " << port() << endl;
+		traceL("EchoServer", this) << "Server listening on " << port() << std::endl;
 	}
 
 	void stop() 
@@ -63,7 +63,8 @@ public:
 	{
 		SocketT* socket = reinterpret_cast<SocketT*>(sender);
 		traceL("EchoServer", this) << "On Recv: " 
-			<< socket << ": " << packet.buffer << std::endl;
+			<< socket //<< ": " << packet.length() 
+			<< std::endl;
 
 		// Echo it back
 		socket->send(packet);
@@ -80,9 +81,9 @@ public:
 		releaseSocket(reinterpret_cast<SocketT*>(sender));
 	}
 
-	void releaseSocket(typename SocketT* socket) 
+	void releaseSocket(SocketT* socket) 
 	{		
-		for (SocketT::List::iterator it = sockets.begin(); it != sockets.end(); ++it) {
+		for (typename SocketT::List::iterator it = sockets.begin(); it != sockets.end(); ++it) {
 			if (socket == &(*it)) {
 				traceL("EchoServer", this) << "Removing: " << socket << std::endl;
 

@@ -24,7 +24,6 @@
 #  <component>_VERSION      - The components version
 
 # The default components were taken from a survey over other FindFFmpeg.cmake files
-# TODO: Implement this...
 if (NOT FFmpeg_FIND_COMPONENTS)
   set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)
 endif()
@@ -33,35 +32,26 @@ endif()
 set_module_notfound(FFmpeg)
 if (NOT FFmpeg_FOUND)
   
-  # These folders represent the default install location for
-  # our Capsitrano deploy scripts.
-  set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} 
-    /home/deploy/build)
-
-  set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    /home/deploy/build
-    /home/deploy/build/lib    
-    /home/deploy/build/include)
+  # The FFmpeg compilation guide stores files in an unusual location.
+  # http://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
+  # Let's support that out of the box
+  set(CMAKE_LIBRARY_PATH $ENV{HOME}/ffmpeg_build/lib ${CMAKE_LIBRARY_PATH})
+  set(CMAKE_SYSTEM_PREFIX_PATH $ENV{HOME}/ffmpeg_build/include ${CMAKE_SYSTEM_PREFIX_PATH})
 
   # Check for all components
   find_component(FFmpeg AVCODEC    libavcodec    avcodec    libavcodec/avcodec.h)
   find_component(FFmpeg AVFORMAT   libavformat   avformat   libavformat/avformat.h)
-  #find_component(FFmpeg AVFILTER   libavfilter   avfilter   libavfilter/avfilter.h)
   find_component(FFmpeg AVUTIL     libavutil     avutil     libavutil/avutil.h)
-  #find_component(FFmpeg AVDEVICE   libavdevice   avdevice   libavdevice/avdevice.h)
-  find_component(FFmpeg SWSCALE    libswscale    swscale    libswscale/swscale.h)
+  find_component(FFmpeg AVFILTER   libavfilter   avfilter   libavfilter/avfilter.h)
+  find_component(FFmpeg AVDEVICE   libavdevice   avdevice   libavdevice/avdevice.h)
   find_component(FFmpeg SWRESAMPLE libswresample swresample libswresample/swresample.h)
+  find_component(FFmpeg SWSCALE    libswscale    swscale    libswscale/swscale.h)
   #find_component(FFmpeg POSTPROC   libpostproc   postproc   libpostproc/postprocess.h)
   
   # Set FFmpeg as found or not
-  set_module_found(FFmpeg)
+  set_module_found(FFmpeg ${FFmpeg_FIND_REQUIRED})
 
   # Include FFmpeg dependencies if available
-  #find_library(LIBDL_LIBRARY NAMES dl)  
-  #if(LIBDL_LIBRARY)
-  #  list(APPEND FFmpeg_DEPENDENCIES ${LIBDL_LIBRARY}) 
-  #endif()
-
   find_library(LIBVPX_LIBRARY NAMES vpx)  
   if(LIBVPX_LIBRARY)
     list(APPEND FFmpeg_DEPENDENCIES ${LIBVPX_LIBRARY}) 

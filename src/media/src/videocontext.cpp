@@ -523,7 +523,7 @@ void VideoDecoderContext::create(AVFormatContext *ic, int streamID)
 	if (!codec)
 		throw std::runtime_error("Video codec missing or unsupported.");
 	
-	this->frame = avcodec_alloc_frame();
+	this->frame = av_frame_alloc();
 	if (this->frame == nullptr)
 		throw std::runtime_error("Could not allocate video input frame.");
 }
@@ -665,7 +665,7 @@ void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec&
 
 	//assert(av_get_pix_fmt(oparams.pixelFmt) == );
 
-	oframe = avcodec_alloc_frame();
+	oframe = av_frame_alloc();
 	oframe->width = oparams.width;
 	oframe->height = oparams.height;
     avpicture_alloc(reinterpret_cast<AVPicture*>(oframe), 
@@ -726,9 +726,9 @@ AVFrame* VideoConversionContext::convert(AVFrame* iframe)
 //	
 
 
-AVFrame* createVideoFrame(::PixelFormat pixelFmt, int width, int height)
+AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
 {
-    AVFrame* picture = avcodec_alloc_frame();
+    AVFrame* picture = av_frame_alloc();
     if (!picture)
         return nullptr;
 	
@@ -773,16 +773,16 @@ void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
 	
 	// Set some defaults for codecs of note.	
 	// Also set optimal output pixel formats if the
-	// default PIX_FMT_YUV420P was given.
+	// default AV_PIX_FMT_YUV420P was given.
 	switch (ctx->codec_id) {
-	case CODEC_ID_H264:
+	case AV_CODEC_ID_H264:
 		// TODO: Use oparams.quality to determine profile
         av_opt_set(ctx->priv_data, "preset", "veryfast", 0); // slow // baseline
 		break;
-	case CODEC_ID_MJPEG:
-	case CODEC_ID_LJPEG:
-		if (ctx->pix_fmt == PIX_FMT_YUV420P)
-			ctx->pix_fmt = PIX_FMT_YUVJ420P;
+	case AV_CODEC_ID_MJPEG:
+	case AV_CODEC_ID_LJPEG:
+		if (ctx->pix_fmt == AV_PIX_FMT_YUV420P)
+			ctx->pix_fmt = AV_PIX_FMT_YUVJ420P;
 		
 		// Use high quality JPEG
 		// TODO: Use oparams.quality to determine values		
@@ -791,26 +791,28 @@ void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
 		ctx->flags          = CODEC_FLAG_QSCALE; 
 		ctx->global_quality = ctx->qmin * FF_QP2LAMBDA; 
 		break;
-	case CODEC_ID_MPEG2VIDEO:
+	case AV_CODEC_ID_MPEG2VIDEO:
 		ctx->max_b_frames = 2;
 		break;		
-	case CODEC_ID_MPEG1VIDEO:
-	case CODEC_ID_MSMPEG4V3:
+	case AV_CODEC_ID_MPEG1VIDEO:
+	case AV_CODEC_ID_MSMPEG4V3:
 		// Needed to avoid using macroblocks in which some codecs overflow
  		// this doesn't happen with normal video, it just happens here as the
  		// motion of the chroma plane doesn't match the luma plane 
  		// avoid FFmpeg warning 'clipping 1 dct coefficients...'
 		ctx->mb_decision = 2;
 	break;
-	case CODEC_ID_JPEGLS:
-		// PIX_FMT_BGR24 or GRAY8 depending on if color...
-		if (ctx->pix_fmt == PIX_FMT_YUV420P)
-			ctx->pix_fmt = PIX_FMT_BGR24;
+	case AV_CODEC_ID_JPEGLS:
+		// AV_PIX_FMT_BGR24 or GRAY8 depending on if color...
+		if (ctx->pix_fmt == AV_PIX_FMT_YUV420P)
+			ctx->pix_fmt = AV_PIX_FMT_BGR24;
 		break;
-	case CODEC_ID_HUFFYUV:
-		if (ctx->pix_fmt == PIX_FMT_YUV420P)
-			ctx->pix_fmt = PIX_FMT_YUV422P;
+	case AV_CODEC_ID_HUFFYUV:
+		if (ctx->pix_fmt == AV_PIX_FMT_YUV420P)
+			ctx->pix_fmt = AV_PIX_FMT_YUV422P;
 		break;
+	default: 
+	  break;
 	}
 	
 	// Update any modified values

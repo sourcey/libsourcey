@@ -1,1 +1,1 @@
-define_sourcey_module_sample(turnserver uv base net crypto stun turn)
+define_sourcey_module_sample(turnserver stun turn net uv base crypto)

@@ -24,7 +24,7 @@ namespace scy {
 namespace smpl {
 
 	
-#define SERVER_HOST "localhost" //"anionu.com" //
+#define SERVER_HOST "localhost"
 #define USE_SSL     1
 #if USE_SSL
 #define SERVER_PORT 443
@@ -168,10 +168,7 @@ int main(int argc, char** argv)
 	Logger::instance().add(new ConsoleChannel("debug", LTrace));
 	
 #if USE_SSL
-	// Init SSL Context
-	SSLContext::Ptr ptrContext = new SSLContext(SSLContext::CLIENT_USE, "", "", "",
-		SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");	
-	SSLManager::instance().initializeClient(ptrContext);
+	SSLManager::initNoVerifyClient();
 #endif	
 
 	{

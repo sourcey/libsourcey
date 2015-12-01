@@ -148,7 +148,7 @@ void AVInputReader::openStream(const char* filename, AVInputFormat* inputFormat,
 	if (avformat_open_input(&_formatCtx, filename, inputFormat, formatParams) != 0)
 		throw std::runtime_error("Cannot open the media source: " + std::string(filename));
 
-	if (av_find_stream_info(_formatCtx) < 0)
+	if (avformat_find_stream_info(_formatCtx, NULL) < 0)
 		throw std::runtime_error("Cannot find stream information: " + std::string(filename));
 	
   	av_dump_format(_formatCtx, 0, filename, 0);
@@ -189,9 +189,9 @@ void AVInputReader::close()
 	}
 
 	if (_formatCtx) {
-  		av_close_input_file(_formatCtx);
-		_formatCtx = nullptr;
-  	}
+		avformat_close_input(&_formatCtx);
+	  _formatCtx = nullptr;
+	}
 
 	TraceLS(this) << "Closing: OK" << endl;
 }
@@ -204,8 +204,7 @@ void AVInputReader::start()
 	Mutex::ScopedLock lock(_mutex);
 	assert(_video || _audio);
 
-	if (_video || _audio &&
-		!_thread.running()) {
+	if ((_video || _audio) && !_thread.running()) {
 		TraceLS(this) << "Initializing Thread" << endl;
 		_stopping = false;
 		_thread.start(*this);

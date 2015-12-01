@@ -68,18 +68,18 @@ public:
 	void onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState) 
 	{
 		sockio::Client* client = reinterpret_cast<sockio::Client*>(sender);	
-		DebugL << "Connection state changed: " << state.toString() << ": " << client->socket().address() << endl;
+		DebugL << "Connection state changed: " << state.toString() << endl;
 		
 		switch (state.id()) {
 		case sockio::ClientState::Connecting:
 			break;
 		case sockio::ClientState::Connected: 
-			DebugL << "Connected on " << client->socket().address() << endl;
+			DebugL << "Connected" << endl;
 			break;
 		case sockio::ClientState::Online: 
 			// TODO: Send message
 			break;
-		case sockio::ClientState::Disconnected: 
+		case sockio::ClientState::Error: 
 			break;
 		}
 	}

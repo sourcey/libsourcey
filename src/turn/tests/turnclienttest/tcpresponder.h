@@ -27,14 +27,14 @@ public:
 	{
 		DebugLS(this) << id << ": Creating" << endl;
 		//net::SocketAdapter::socket = &socket;
-		socket.setInputAdapter(this);
+		socket.addReceiver(this);
 	}
 
 	virtual ~TCPResponder() 
 	{ 
 		DebugLS(this) << id << ": Destroying" << endl;
 		//socket.base().removeObserver(this);
-		socket.setInputAdapter(nullptr, false);
+		socket.removeReceiver(this);
 		stop(); 
 	}
 
@@ -73,8 +73,8 @@ public:
 	void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress) //net::SocketPacket& packet) 
 	{
 		//assert(&packet.info->socket == &socket);
-		std::string payload(bufferCast<const char*>(buf), buf.size());
-		DebugLS(this) << id << ": On recv: " << peerAddr << ": " << payload << std::endl;
+		std::string payload(bufferCast<const char*>(buffer), buffer.size());
+		DebugLS(this) << id << ": On recv: " << peerAddress << ": " << payload << std::endl;
 
 		//assert(payload == "hello peer");
 		//assert(0 && "ok");
@@ -98,10 +98,12 @@ public:
 	{
 		std::string payload;
 		
+		/*
 		// Send the unix ticks milisecond for checking latency
 		//payload.append(":");
 		payload.append(util::itostr(time::ticks()));
 		//payload.append(":");
+		*/
 
 		// Send a large packets to test throttling
 		//payload.append(65536, 'x');

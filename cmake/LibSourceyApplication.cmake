@@ -11,6 +11,12 @@ macro(define_sourcey_application name)
 
   project(${name})
 
+  # Include internal module dependencies
+  #include_sourcey_modules(${ARGN})
+
+  # Include library and header directories
+  set_default_project_directories(${ARGN})
+
   # Add library source files
   file(GLOB_RECURSE lib_srcs "src/*.c*")
   file(GLOB_RECURSE lib_hdrs "src/*.h*")
@@ -25,10 +31,10 @@ macro(define_sourcey_application name)
   source_group("Include" FILES ${lib_hdrs})
 
   # Include all header and library directories
-  include_directories(${LibSourcey_INCLUDE_DIRS})
+  #include_directories(${LibSourcey_INCLUDE_DIRS})
   #  ${CMAKE_SOURCE_DIR}/projects/Anionu/ISpot/include
   #  ${CMAKE_SOURCE_DIR}/projects/AnionuPrivate/SpotImpl/include
-  link_directories(${LibSourcey_LIBRARY_DIRS})
+  #link_directories(${LibSourcey_LIBRARY_DIRS})
 
   #status("  Linking application ${name}")
   #status("    Libraries:               ${LibSourcey_INCLUDE_LIBRARIES}")
@@ -43,16 +49,19 @@ macro(define_sourcey_application name)
     add_executable(${name} ${lib_srcs} ${lib_hdrs})
   endif()
 
+  # Include linker dependencies
+  set_default_project_dependencies(${name} ${ARGN})
+
   # Include dependent modules
-  foreach(module ${ARGN})
-    include_sourcey_modules(${module})
-    add_dependencies(${name} ${module})
-  endforeach()
+  #foreach(module ${ARGN})
+  #  include_sourcey_modules(${module})
+  #  add_dependencies(${name} ${module})
+  #endforeach()
 
   # KLUDGE: Include all thrid party dependencies for now
-  if (LibSourcey_BUILD_DEPENDENCIES)
-    add_dependencies(${name} ${LibSourcey_BUILD_DEPENDENCIES})
-  endif()
+  #if (LibSourcey_BUILD_DEPENDENCIES)
+  #  add_dependencies(${name} ${LibSourcey_BUILD_DEPENDENCIES})
+  #endif()
 
   #if(MSVC)
   #  # Temporary workaround for "error LNK2026: module unsafe for SAFESEH image"
@@ -67,7 +76,7 @@ macro(define_sourcey_application name)
   #endif()
 
   # Add external dependencies and required libraries for linking.
-  target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
+  #target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
 
   if(ENABLE_SOLUTION_FOLDERS)
     set_target_properties(${name} PROPERTIES FOLDER "applications")

@@ -124,7 +124,7 @@ struct AudioCodec: public Codec
 
 
 // ---------------------------------------------------------------------
-#define DEFAULT_VIDEO_SAMPLE_RATE	(384000)				// 128 – 384 kbit/s – business-oriented videoconferencing quality using video compression
+#define DEFAULT_VIDEO_SAMPLE_RATE	(384000)				// 128 ï¿½ 384 kbit/s ï¿½ business-oriented videoconferencing quality using video compression
 #define DEFAULT_VIDEO_BIT_RATE		(9000)					// Default value for RTP	
 #define DEFAULT_VIDEO_PIXEL_FMT		"yuv420p"
 
@@ -170,7 +170,7 @@ typedef std::list<Codec*> CodecPList;
 	/*
 	enum ID 
 		// The codec ID values match their constituent
-		// AV_CODEC_ID_XXX values in the FFmpeg library.
+		// AV_AV_CODEC_ID_XXX values in the FFmpeg library.
 	{		
 		Unknown		= 0,
 		

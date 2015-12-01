@@ -209,7 +209,7 @@ endmacro()
 ### Macro: ask_build_sourcey_module
 #
 # Optionally build a LibSourcey module.
-# This should be called before include_dependency and
+# This should be called before  include_dependency and
 # define_sourcey_module for each module.
 #
 macro(ask_build_sourcey_module name)
@@ -228,7 +228,7 @@ endmacro()
 ### Macro: ask_build_sourcey_test
 #
 # Optionally build a LibSourcey test.
-# This should be called before include_dependency and
+# This should be called before  include_dependency and
 # define_sourcey_test for each test.
 #
 macro(ask_build_sourcey_test name)
@@ -246,7 +246,7 @@ endmacro()
 ### Macro: ask_build_sourcey_sample
 #
 # Optionally build a LibSourcey sample.
-# This should be called before include_dependency and
+# This should be called before  include_dependency and
 # define_sourcey_sample for each sample.
 #
 macro(ask_build_sourcey_sample name)
@@ -265,7 +265,7 @@ endmacro()
 ### Macro: ask_build_sourcey_application
 #
 # Optionally build a LibSourcey application.
-# This should be called before include_dependency for each application.
+# This should be called before  include_dependency for each application.
 #
 macro(ask_build_sourcey_application name)
   if(BUILD_APPLICATIONS)

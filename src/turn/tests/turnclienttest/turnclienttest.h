@@ -33,7 +33,7 @@ namespace turn {
 inline std::string createLatencyCheck(int packetSize = 1024)
 {		
 	std::string payload;
-	payload.append(util::itostr(time::ticks()));
+	//payload.append(util::itostr(time::ticks()));
 	payload.append(packetSize - payload.length(), 'x');
 	return payload;
 }

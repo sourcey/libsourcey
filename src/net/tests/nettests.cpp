@@ -10,8 +10,8 @@
 #include "scy/net/udpsocket.h"
 #include "scy/net/address.h"
 
-#include "EchoServer.h"
-#include "ClientSocketTest.h"
+#include "echoserver.h"
+#include "clientsockettest.h"
 
 #include "assert.h"
 
@@ -50,12 +50,7 @@ public:
 		{			
 
 #if TEST_SSL
-			// Init SSL Context 
-			SSLContext::Ptr ptrContext = new SSLContext(
-				SSLContext::CLIENT_USE, "", "", "", 
-				SSLContext::VERIFY_NONE, 9, false, 
-				"ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");		
-			SSLManager::instance().initializeClient(ptrContext);
+	    SSLManager::initNoVerifyClient();
 
 			// Raise a SSL echo server
 			//Handle<SSLEchoServer> sslServer(new SSLEchoServer(1338, true), false);
@@ -80,7 +75,7 @@ public:
 #endif
 
 			// Shutdown the garbage collector so we can free memory.
-			GarbageCollector::instance().shutdown();
+			//GarbageCollector::instance().shutdown();
 		
 			// Run the final cleanup
 			runCleanup();
@@ -196,7 +191,7 @@ public:
 		UDPNumPacketsReceived = 0;
 		
 		//serverBindAddr.swap(net::Address("0.0.0.0", 1337));	 //
-		udpServerAddr.swap(net::Address("74.207.248.97", 1337));	 //
+		//udpServerAddr.swap(net::Address("74.207.248.97", 1337));	 //
 		//udpServerAddr.swap(net::Address("127.0.0.1", 1337));	 //
 
 		//clientBindAddr.swap(net::Address("0.0.0.0", 1338));	
@@ -251,13 +246,25 @@ public:
 
 	void onUDPClientSendTimer(void*)
 	{
+	  /*
 		std::string payload(util::itostr(time::ticks()));
 		payload.append(UDPPacketSize - payload.length(), 'x');
+		udpClientSock->send(payload.c_str(), payload.length(), udpServerAddr);
+		*/
+		std::string payload;
+		payload.append(UDPPacketSize, 'x');
 		udpClientSock->send(payload.c_str(), payload.length(), udpServerAddr);
 	}
 
 	void onUDPClientSocketRecv(void* sender, net::SocketPacket& packet)
 	{				
+		std::string payload(packet.data(), packet.size());
+		
+		DebugL << "UDPSocket recv from " << packet.info->peerAddress << ": " 
+			<< "payload=" << payload.length()
+			<< endl;
+			
+	  /*
 		std::string payload(packet.data(), packet.size());
 		payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
 		UInt64 sentAt = util::strtoi<UInt64>(payload);
@@ -267,6 +274,7 @@ public:
 			<< "payload=" << payload.length() << ", " 
 			<< "latency=" << latency 
 			<< endl;
+			*/
 		
 
 		/*
@@ -336,67 +344,3 @@ int main(int argc, char** argv)
 	Logger::destroy();
 	return 0;
 }
-
-
-	/*
-//Tests::Result Tests::Benchmark;
-//Application Tests::app;
-
-
-		//TraceL << "UDPSocket Recv: " << packet << ": " << packet.buffer
-		//	<< "\n\tPacket " << Benchmark.numSuccess << " of " << UDPNumPacketsWanted << endl;
-		//uv::UDPSocket* socket = reinterpret_cast<uv::UDPSocket*>(sender);	
-
-		//TraceL << "UDPSocket Server Recv: " << packet << ": " << packet.buffer << endl;		
-		//uv::UDPSocket* socket = reinterpret_cast<uv::UDPSocket*>(sender);	
-	static void onShutdown(void* opaque)
-	{
-		//reinterpret_cast<MediaServer*>(opaque)->shutdown();
-	}
-
-	//Handle<TCPEchoServer> tcpServer;
-	//ClientSocketTest<net::TCPSocket> tcpConnector; //:
-		//tcpServer(new TCPEchoServer(1337, true), false),
-		//tcpConnector(1337)
-		*/
-
-
-			
-			//tcpConnector.run();
-			
-			/*
-			uv_signal_t sig;
-			sig.data = this;
-			uv_signal_init(app.loop, &sig);
-			uv_signal_start(&sig, Tests::onKillSignal2, SIGINT);
-
-			runUDPSocketTest();
-			runTimerTest();
-			//runDNSResolverTest();
-
-			TraceL << "#################### Running" << endl;
-			//app.waitForShutdown(onShutdown, this);
-			app.run();
-			TraceL << "#################### Ended" << endl;
-			*/
-			
-/*
-	
-
-//using uv::TCPEchoServer;
-//using uv::TCPServerPtr;
-//using uv::SSLEchoServer;
-//using uv::SSLServerPtr;
-	static void onKillSignal2(uv_signal_t *req, int signum)
-	{
-		DebugL << "Kill Signal: " << req << endl;
-	
-		((Tests*)req->data)->tcpServer->stop();
-		((Tests*)req->data)->tcpConnector.stop();
-		//(*((Handle<TCPEchoServer>*)req->data))->stop(); //->server.stop();delete
-		uv_signal_stop(req);
-	
-		// print active handles
-		uv_walk(req->loop, onPrintHandle1, NULL);
-	}
-	*/

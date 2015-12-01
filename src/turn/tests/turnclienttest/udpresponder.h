@@ -30,7 +30,7 @@ public:
 	{
 		DebugLS(this) << id << ": Creating" << endl;
 		//net::SocketAdapter::socket = &socket;
-		socket.setInputAdapter(this);
+		socket.addReceiver(this);
 
 		socket.bind(net::Address("0.0.0.0", 0));
 		//socket.bind(net::Address(TURN_AUTHORIZE_PEER_IP, 4020));
@@ -41,7 +41,7 @@ public:
 	virtual ~UDPResponder() 
 	{ 
 		DebugLS(this) << id << ": Destroying" << endl;
-		socket.setInputAdapter(nullptr, false);
+		socket.addReceiver(this);
 		stop(); 
 	}
 
@@ -85,8 +85,8 @@ public:
 	
 	void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress) //net::SocketPacket& packet) 
 	{
-		std::string payload(bufferCast<const char*>(buf), buf.size());
-		DebugLS(this) << id << ": On recv: " << peerAddr << ": " << payload << std::endl;
+		std::string payload(bufferCast<const char*>(buffer), buffer.size());
+		DebugLS(this) << id << ": On recv: " << peerAddress << ": " << payload << std::endl;
 
 		// Echo back to client
 		socket.send(payload.c_str(), payload.size(), relayedAddr); // peerAddr

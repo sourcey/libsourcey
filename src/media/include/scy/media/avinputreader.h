@@ -113,14 +113,14 @@ public:
 
 protected:		
 	mutable Mutex	_mutex;
-	Thread			_thread;
-	bool					_stopping;
-	//std::string				_ifile;	
-	std::string				_error;
-	AVFormatContext*		_formatCtx;	
-	VideoDecoderContext*	_video;
-	AudioDecoderContext*	_audio;
-	Options					_options;
+	Thread _thread;
+	//std::string _ifile;	
+	std::string _error;
+	Options _options;
+	AVFormatContext* _formatCtx;	
+	VideoDecoderContext* _video;
+	AudioDecoderContext* _audio;
+	bool _stopping;
 };
 
 

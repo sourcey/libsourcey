@@ -261,7 +261,7 @@ public:
 			writeAMFDouble(writer, _format.audio.sampleRate);
 
 			writeAMFSring(writer, "audiosamplesize");
-			writeAMFDouble(writer, 16); //FIXME: audio_enc->codec_id == CODEC_ID_PCM_U8 ? 8 : 16
+			writeAMFDouble(writer, 16); //FIXME: audio_enc->codec_id == AV_CODEC_ID_PCM_U8 ? 8 : 16
 
 			writeAMFSring(writer, "stereo");
 			writeAMFBool(writer, _format.audio.channels == 2);

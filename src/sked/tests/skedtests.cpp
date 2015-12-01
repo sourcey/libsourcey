@@ -1,6 +1,6 @@
 #include "scy/base.h"
 #include "scy/logger.h"
-#include "scy/runner.h"
+//#include "scy/runner.h"
 #include "scy/application.h"
 #include "scy/datetime.h"
 #include "scy/platform.h"
@@ -25,7 +25,6 @@ namespace scy {
 namespace sked {
 	
 
-//static NamedEvent ready("TestEvent");
 Application app;
 	
 
@@ -47,7 +46,7 @@ public:
 		//runSkedTaskTest();
 		//runTimerTest();
 				
-		app.cleanup();
+		app.finalize();
 	}
 	
 
@@ -124,24 +123,24 @@ public:
 				DateTime dt;
 				Timespan ts(1, 0);
 				dt += ts;
-				json[(size_t)0]["trigger"]["scheduleAt"] = 
+				json[(int)0]["trigger"]["scheduleAt"] = 
 					DateTimeFormatter::format(dt, DateTimeFormat::ISO8601_FORMAT);
 			}
 
 			// Dynamically create the task from JSON
-			Log("debug") << "Sked Input JSON:\n" 
+			DebugL << "Sked Input JSON:\n" 
 				<< json::stringify(json, true) << endl;
 			scheduler.deserialize(json);
 
 			// Print to cout
-			Log("debug") << "##### Sked Print Output:" << endl;
+			DebugL << "##### Sked Print Output:" << endl;
 			scheduler.print(cout);
-			Log("debug") << "##### Sked Print Output END" << endl;
+			DebugL << "##### Sked Print Output END" << endl;
 			
 			// Output scheduler tasks as JSON before run
 			json::Value before;
 			scheduler.serialize(before);
-			Log("debug") << "Sked Output JSON Before Run:\n" 
+			DebugL << "Sked Output JSON Before Run:\n" 
 				<< json::stringify(before, true) << endl;
 			
 			// Wait for the task to complete
@@ -150,14 +149,14 @@ public:
 			// Output scheduler tasks as JSON after run
 			json::Value after;
 			scheduler.serialize(after);
-			Log("debug") << "Sked Output JSON After Run:\n" 
+			DebugL << "Sked Output JSON After Run:\n" 
 				<< json::stringify(after, true) << endl;
 		}
 	}
 
 	void runSkedTaskIntervalTest() 
 	{
-		Log("trace") << "Running Scheduled Task Test" << endl;
+		DebugL << "Running Scheduled Task Test" << endl;
 
 		// Schedule an interval task to run 3 times at 1 second intervals
 		{
@@ -171,9 +170,9 @@ public:
 			//task->start();
 
 			// Print to cout
-			Log("debug") << "##### Sked Print Output:" << endl;
+			DebugL << "##### Sked Print Output:" << endl;
 			scheduler.print(cout);
-			Log("debug") << "##### Sked Print Output END" << endl;
+			DebugL << "##### Sked Print Output END" << endl;
 			
 			// Wait for the task to complete
 			app.run();
@@ -209,7 +208,7 @@ public:
 		*/
 				
 		app.run();
-		Log("trace") << "Running Scheduled Task Test: END" << endl;
+		DebugL << "Running Scheduled Task Test: END" << endl;
 	}
 };
 
@@ -219,7 +218,7 @@ public:
 
 int main(int argc, char** argv) 
 {	
-	Logger::instance().add(new ConsoleChannel("Test", TraceLevel));
+	Logger::instance().add(new ConsoleChannel("debug", LTrace));
 	{
 		sked::Tests app;
 	}	

@@ -104,6 +104,8 @@ struct TCPInitiator: public TCPClientObserver
 	void onRelayDataReceived(turn::Client& client, const char* data, std::size_t size, const net::Address& peerAddr)
 	{		
 		std::string payload(data, size);
+		
+		/*
 		payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
 		if (payload.length() == 8) {
 			UInt64 sentAt = util::strtoi<UInt64>(payload);
@@ -111,6 +113,7 @@ struct TCPInitiator: public TCPClientObserver
 
 			DebugLS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
 		}
+		*/
 
 		/*
 		if (size < 150) {
@@ -124,9 +127,10 @@ struct TCPInitiator: public TCPClientObserver
 		else
 			DebugLS(this) << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
 		*/
-		//DebugLS(this) << id << ": Received data from  " << peerAddr << ": " << std::string(data, size)  << endl;
+		
+		DebugLS(this) << id << ": Received data from  " << peerAddr << ": " << std::string(data, size)  << endl;
 		// Echo back to peer
-		//client.sendData(data, size, peerAddr);
+		client.sendData(data, size, peerAddr);
 	}
 	
 	void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)

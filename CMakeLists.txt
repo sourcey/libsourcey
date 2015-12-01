@@ -48,9 +48,9 @@ include(LibSourceyVersion REQUIRED)
 set_option(BUILD_SHARED_LIBS          "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" NOT (WIN32 OR ANDROID OR IOS))
 set_option(BUILD_DEPENDENCIES         "Build third party dependencies"                           ON)
 set_option(BUILD_MODULES              "Build LibSourcey modules"                                 ON)
-set_option(BUILD_APPLICATIONS         "Build LibSourcey applications"                            OFF)
-set_option(BUILD_MODULE_TESTS         "Build module test applications?"                          OFF)
-set_option(BUILD_MODULE_SAMPLES       "Build module sample applications?"                        OFF)
+set_option(BUILD_APPLICATIONS         "Build LibSourcey applications"                            ON)
+set_option(BUILD_MODULE_TESTS         "Build module test applications?"                          ON)
+set_option(BUILD_MODULE_SAMPLES       "Build module sample applications?"                        ON)
 set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs"                       ON)
 set_option(BUILD_WITH_STATIC_CRT      "Enables statically linked CRT for statically linked libraries" OFF)
 set_option(BUILD_ALPHA                "Build alpha development modules"                          OFF)
@@ -96,7 +96,7 @@ set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_BUILD_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/libscy/deps")
 
-# Append some common search paths for find_library
+# Append some common search paths for find_library and find_path
 # to find libraries from these locations first
 if(WIN32)
   set(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
@@ -113,27 +113,22 @@ if(WIN32)
 else()
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
-  set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH}
-    /home/deploy/build/lib
-    /usr/lib
-    /usr/local/lib)
+  set(CMAKE_LIBRARY_PATH 
+    #${LibSourcey_BUILD_DIR}/lib
+    #/usr/local/share/libscy/deps/lib
+    #/home/deploy/build/lib
+    #/usr/lib
+    #/usr/local/lib
+    ${CMAKE_LIBRARY_PATH})
+
+  set(CMAKE_SYSTEM_PREFIX_PATH 
+    #/usr/local/share/libscy/deps/include
+    #/home/deploy/build   
+    #/home/deploy/build/include
+    ${CMAKE_SYSTEM_PREFIX_PATH})
 
   # Temp fix for "/usr/bin/ld: cannot find -lavcodec"
   link_directories(/home/deploy/build/lib)
-endif()
-
-# Append some common search paths for find_path
-# to search these locations first
-if(WIN32)
-  set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    #D:/dev/lib/wxWidgets-2.9.4
-    #D:/dev/lib/opencv-2.4.6.0/build/install/include
-    #D:/dev/lib/ffmpeg-1.0.1-gpl/include
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/include
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/include
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/include
-    ${LibSourcey_DEPENDENCIES_SOURCE_DIR}
-    )
 endif()
 
 # ----------------------------------------------------------------------------
@@ -205,7 +200,7 @@ elseif(MSYS)
 elseif(APPLE)
     set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -lz -ldl") # -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES}
 elseif(UNIX)
-  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -lz -ldl -lrt") # -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES}
+  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -lz -ldl -lrt -ljack") # -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES}
 endif()
 
 if(MSVC)
@@ -225,14 +220,18 @@ endif()
 # Include third party dependencies
 # ----------------------------------------------------------------------------
 
-set_option(WITH_LIBUV           "Include LibUV support"                ON)
-set_option(WITH_OPENSSL         "Include OpenSSL support"              ON)
+# Prefind external dependencies so we can set defaults
+find_package(OpenCV)  
+find_package(FFmpeg)
+
+#set_option(WITH_LIBUV           "Include LibUV support"                ON)
+#set_option(WITH_HTTPPARSER      "Include HttpParser support"           ON)
 set_option(WITH_JSONCPP         "Include JsonCpp support"              ON)
 set_option(WITH_ZLIB            "Include zlib support"                 ON)
-set_option(WITH_HTTPPARSER      "Include HttpParser support"           ON)
-set_option(WITH_RTAUDIO         "Include RtAudio support"              OFF)
-set_option(WITH_FFMPEG          "Include FFmpeg support"               OFF)
-set_option(WITH_OPENCV          "Include OpenCV support"               OFF)
+set_option(WITH_OPENSSL         "Include OpenSSL support"              ON)
+set_option(WITH_RTAUDIO         "Include RtAudio support"              ON)
+set_option(WITH_FFMPEG          "Include FFmpeg support"               ON IF (FFmpeg_FOUND))
+set_option(WITH_OPENCV          "Include OpenCV support"               ON IF (OpenCV_FOUND))
 set_option(WITH_WEBRTC          "Include WebRTC support"               OFF)
 set_option(WITH_WXWIDGETS       "Include wxWidgets support"            OFF)
 
@@ -256,20 +255,30 @@ endif()
 #endif()
 
 # Local dependencies
-if(WITH_LIBUV)
+#if(WITH_LIBUV)
   #include_dependency(LibUV REQUIRED)
+  list(APPEND LibSourcey_BUILD_DEPENDENCIES libuv)
   add_subdirectory(deps/libuv)
   set(HAVE_LIBUV 1)
-endif()
+#endif()
+
+#if(WITH_HTTPPARSER)
+  #include_dependency(HttpParser REQUIRED)
+  list(APPEND LibSourcey_BUILD_DEPENDENCIES http_parser)
+  add_subdirectory(deps/http_parser)
+  set(HAVE_HTTPPARSER 1)
+#endif()
 
 if(WITH_RTAUDIO)
   #include_dependency(RtAudio REQUIRED)
+  list(APPEND LibSourcey_BUILD_DEPENDENCIES rtaudio)
   add_subdirectory(deps/RtAudio)
   set(HAVE_RTAUDIO 1)
 endif()
 
 if(WITH_JSONCPP)
   #include_dependency(JsonCpp REQUIRED)
+  list(APPEND LibSourcey_BUILD_DEPENDENCIES jsoncpp)
   add_subdirectory(deps/jsoncpp)
   set(HAVE_JSONCPP 1)
 endif()
@@ -277,79 +286,47 @@ endif()
 if(WITH_ZLIB)
   #include_dependency(ZLIB REQUIRED)
   #include_dependency(Minizip REQUIRED)
+  list(APPEND LibSourcey_BUILD_DEPENDENCIES zlib)
+  list(APPEND LibSourcey_BUILD_DEPENDENCIES minizip)
   add_subdirectory(deps/zlib)
   add_subdirectory(deps/minizip) #deps/zlib/contrib/minizip
   set(HAVE_ZLIB 1)
 endif()
 
-if(WITH_HTTPPARSER)
-  #include_dependency(HttpParser REQUIRED)
-  add_subdirectory(deps/http_parser)
-  set(HAVE_HTTPPARSER 1)
-endif()
-
 # External dependencies
 if(WITH_OPENSSL)
- include_dependency(OpenSSL REQUIRED)
+  include_dependency(OpenSSL REQUIRED)
   #set(HAVE_OPENSSL 1)
 endif()
 
 if(WITH_FFMPEG)
- include_dependency(FFmpeg REQUIRED)
+  include_dependency(FFmpeg REQUIRED)
   #set(HAVE_FFMPEG 1)
 endif()
 
 if(WITH_OPENCV)
- include_dependency(OpenCV REQUIRED)
+  include_dependency(OpenCV REQUIRED)
   #set(HAVE_OPENCV 1)
 endif()
 
 if(WITH_WEBRTC)
- include_dependency(WebRTC REQUIRED)
+  include_dependency(WebRTC REQUIRED)
   #set(HAVE_WEBRTC 1)
 endif()
 
 if(WITH_WXWIDGETS)
   # TODO: specify library option
- include_dependency(wxWidgets REQUIRED core base adv)
+  include_dependency(wxWidgets REQUIRED core base adv)
   #set(HAVE_WXWIDGETS 1)
 endif()
 
-# Define known dependencies for our LibSourceyConfig.h
-# These variables will be modified byinclude_dependency()
-#set(HAVE_RTAUDIO 0)
-#set(HAVE_JSONCPP 0)
-#set(HAVE_OPENSSL 0)
-#set(HAVE_FFMPEG 0)
-#set(HAVE_OPENCV 0)
-#set(HAVE_WXWIDGETS 0)
-#set(HAVE_LIBUV 0)
-#set(HAVE_HTTP_PARSER 0)
-#set(HAVE_ZLIB 0)
-##set(HAVE_POCO 0)
-##set(HAVE_LIBSTROPHE 0)
-##set(HAVE_PUGIXML 0)
-
-#if(BUILD_DEPENDENCIES)
-  # TODO: Search for library and conditional build
-  # depending on XXX_FOUND or HAVE_XXX variable
-  #set(WITH_RTAUDIO ON CACHE BOOL "Build with RtAudio")
-  #set(WITH_JSONCPP ON CACHE BOOL "Build with JsonCpp")
-  ##set(WITH_PUGIXML ON CACHE BOOL "Build with PugiXML")
-  ##set(WITH_LIBSTROPHE ON CACHE BOOL "Build with LibStrophe")
-  #set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} "${LibSourcey_DEPENDENCIES_SOURCE_DIR}/MemLeakDetect")
-  #add_subdirectory(${LibSourcey_DEPENDENCIES_SOURCE_DIR})
-#else()
-  #unset(WITH_RTAUDIO CACHE)
-  #unset(WITH_JSONCPP CACHE)
-  ##unset(WITH_PUGIXML CACHE)
-  ##unset(WITH_LIBSTROPHE CACHE)
-#endif()
-
-# Include the dependencies source directory
-#list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR})
-#include_directories("${LibSourcey_INCLUDE_DIRS}")
-#link_directories("${LibSourcey_INSTALL_DIR}/lib")
+# Remove any duplicates from our lists
+if(LibSourcey_LINK_LIBRARIES)
+  list(REMOVE_DUPLICATES LibSourcey_LINK_LIBRARIES)
+endif()
+if(LibSourcey_BUILD_DEPENDENCIES)
+  list(REMOVE_DUPLICATES LibSourcey_BUILD_DEPENDENCIES)
+endif()
 
 # ----------------------------------------------------------------------------
 # Include the LibSourcey source tree
@@ -457,7 +434,8 @@ status("     Applications:               ${LibSourcey_BUILD_APPLICATIONS}")
 status("")
 status("  Other third-party libraries:")
 status("")
-status("    Use LibUV:"         HAVE_LIBUV           THEN YES ELSE NO)
+#status("    Use LibUV:"         HAVE_LIBUV           THEN YES ELSE NO)
+#status("    Use HttpParser:"    HAVE_HTTPPARSER      THEN YES ELSE NO)
 status("    Use OpenSSL:"       HAVE_OPENSSL         THEN YES ELSE NO)
 status("    Use FFmpeg:"        HAVE_FFMPEG          THEN YES ELSE NO)
 status("    Use OpenCV:"        HAVE_OPENCV          THEN "YES (ver ${OpenCV_VERSION})" ELSE NO)
@@ -465,7 +443,6 @@ status("    Use WebRTC:"        HAVE_WEBRTC          THEN YES ELSE NO)
 status("    Use RtAudio:"       HAVE_RTAUDIO         THEN YES ELSE NO)
 status("    Use JsonCpp:"       HAVE_JSONCPP         THEN YES ELSE NO)
 status("    Use wxWidgets:"     HAVE_WXWIDGETS       THEN YES ELSE NO)
-status("    Use HttpParser:"    HAVE_HTTPPARSER      THEN YES ELSE NO)
 status("    Use zlib:"          HAVE_ZLIB            THEN YES ELSE NO)
 
 # Includes
@@ -474,6 +451,7 @@ status("  Linker paths and libraries:")
 status("")
 status("    Include dirs:                ${LibSourcey_INCLUDE_DIRS}")
 status("    Include libs:                ${LibSourcey_INCLUDE_LIBRARIES}")
+status("    Library dirs:                ${LibSourcey_LIBRARY_DIRS}")
 status("    Standard libs:               ${CMAKE_CXX_STANDARD_LIBRARIES}")
 
 # Auxiliary
@@ -488,53 +466,3 @@ status("")
 if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
     message(WARNING "The source directory is the same as binary directory. \"make clean\" may damage the source tree")
 endif()
-
-
-
-
-
-
-
-
-
-
-
-#foreach(m ${LibSourcey_BUILD_MODULES})
-
-#endforeach()
-  #set(__mdeps "")
-  #foreach(d ${LibSourcey_MODULE_${m}_DEPS})
-  #  if(d MATCHES "^opencv_" AND NOT HAVE_${d})
-  #    list(APPEND __mdeps ${d})
-  #  endif()
-  #endforeach()
-  #list(APPEND LibSourcey_MODULES_DISABLED_AUTO_ST "${m}(deps: ${__mdeps})")
-
-
-#string(REPLACE "opencv_" "" LibSourcey_MODULES_BUILD_ST          "${LibSourcey_MODULES_BUILD}")
-#string(REPLACE "opencv_" "" LibSourcey_MODULES_DISABLED_USER_ST  "${LibSourcey_MODULES_DISABLED_USER}")
-#string(REPLACE "opencv_" "" LibSourcey_MODULES_DISABLED_FORCE_ST "${LibSourcey_MODULES_DISABLED_FORCE}")
-#set(LibSourcey_MODULES_DISABLED_AUTO_ST "")
-
-
-
-
-# ----------------------------------------------------------------------------
-# Use statically or dynamically linked CRT?
-# Default: dynamic
-# ----------------------------------------------------------------------------
-#if(WIN32 AND NOT BUILD_SHARED_LIBS)
-#  option (BUILD_WITH_STATIC_CRT "Enables use of statically linked CRT" OFF)
-#endif()
-
-
-
-# ----------------------------------------------------------------------------
-# Set bitness
-# ----------------------------------------------------------------------------
-#set(LibSourcey_ARCHITECTURE i386)
-#set(LibSourcey_BITNESS 32)
-#if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-#  set(LibSourcey_BITNESS 64)
-#  set(LibSourcey_ARCHITECTURE amd64)
-#endif()
