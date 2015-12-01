@@ -5,16 +5,16 @@
   
 LibSourcey is a collection of open source cross platform C++11 modules and classes which provide developers with a flexible high performance arsenal for the rapid development of real-time messaging and live media streaming applications. 
 
-LibSourcey is built on Node.js's underlying libuv library and utilises event-based asynchronous IO in to maximise performance and minimise concurrency reliance for building mission critical server-side applications. Modern C++11 design principles have been adhered to throughout for clear and readable code, and straighforward integration into your existing projects.
+LibSourcey is built on Node.js's underlying libuv library and utilises event-based asynchronous IO in to maximise performance and minimise concurrency reliance for building mission critical server-side applications. Modern C++11 design principles have been adhered to throughout for clear and readable code, and straighforward integration into existing projects.
 
 LibSourcey provides a simple and flexible method of capturing live audio/video streams (_OpenCV/FFmpeg_), processing, filtering and encoding them using any video format (_FFmpeg_), and broadcasting the result over the Internet (_libuv_). This is made possible by implementing a thin layer over the top of some brilliant open source projects, such as FFmpeg, OpenCV and libuv. The only required third-party dependency is libuv, and that is included in the local source and compiled automatically. All others dependencies are optional. 
 
-LibSourcey provides full support for the following protocols: **TCP**, **SSL**, **UDP**, **HTTP**, **JSON**, **XML**, **STUN**, **SDP**, **SocketIO**. 
+LibSourcey provides full support for the following protocols: **TCP**, **SSL**, **UDP**, **HTTP**, **JSON**, **XML**, **STUN**, **SDP**, **SocketIO**.  
 Partial support is provided for the following protocols: **WebSockets**, **TURN**, **ICE**, **RTP**, and **XMPP**.
  
 ## Dependencies
 
-_Required_: libuv, CMake, C++11 compiler (GCC, Visual Studio, Xcode)
+_Required_: libuv, CMake, C++11 compiler (GCC, Visual Studio, Xcode)  
 _Optional_: FFmpeg (>= 2.8.3), OpenCV (>= 3.0), WebRTC, OpenSSL (>= 1.0.1g), RtAudio, JsonCpp
 
 ## Installation
@@ -219,6 +219,8 @@ _dependencies:_ pugixml, libstrophe
 Our XMPP module includes a full client implementation with Jingle session support. 
 
 ## Contributing
+
+All contributions are very welcome!
 
 1. [Fork LibSourcey on Github](https://github.com/sourcey/libsourcey)
 2. Create your feature branch (`git checkout -b my-new-feature`)
