@@ -5,9 +5,11 @@
   
 LibSourcey is a collection of open source cross platform C++11 modules and classes that provide developers with a flexible high performance arsenal for the rapid development of real-time messaging and live media streaming applications. 
 
-LibSourcey is built on Node.js's underlying libuv library and utilises event-based asynchronous IO in to maximise performance and minimise concurrency reliance for building mission critical server-side applications. Modern C++11 design principles have been adhered to throughout for clear and readable code, and straighforward integration into existing projects.
+LibSourcey is built on top of Node.js's underlying libuv library and utilises event-based asynchronous IO in to maximise performance and minimise concurrency reliance for building mission critical server-side applications. Modern C++11 design principles have been adhered to throughout for clear and readable code, and straighforward integration into existing projects.
 
-LibSourcey provides a simple and flexible method of capturing live audio/video streams (_OpenCV/FFmpeg_), processing, filtering and encoding them using any video format (_FFmpeg_), and broadcasting the result over the Internet (_libuv_). This is made possible by implementing a thin layer over the top of some brilliant open source projects, such as FFmpeg, OpenCV and libuv. The only required third-party dependency is libuv, and that is included in the local source and compiled automatically. All others dependencies are optional. 
+For media streaming applications, LibSourcey provides a simple and flexible method of capturing live audio/video streams (_OpenCV/FFmpeg_), processing, filtering and encoding them using any video format (_FFmpeg_), and broadcasting the result over the Internet (_libuv_). This is made possible by implementing a thin layer over the top of some brilliant open source projects, such as FFmpeg, OpenCV and libuv. The only required third-party dependency is libuv, and that is included in the local source and compiled automatically. All others dependencies are optional. 
+
+Unfortunately documentation still a little sparse at this point, but we hope to change that in the near future. Until then, _use the source, Luke!_, and we welcome all community contributions to LibSourcey in order to promote the development of better real-time native and web applications
 
 LibSourcey provides full support for the following protocols: **TCP**, **SSL**, **UDP**, **HTTP**, **JSON**, **XML**, **STUN**, **SDP**, **SocketIO**.  
 Partial support is provided for the following protocols: **WebSockets**, **TURN**, **ICE**, **RTP**, and **XMPP**.
@@ -127,18 +129,6 @@ The only third-party libraries that may need configuring if you're using them ar
 
 For an exhaustive list of options check the `CMakeLists.txt` in the main directory. 
 
-## Examples
-
-There is also plenty of examples available in the `samples` and `tests` folder of each module for you to cut your teeth on.
-
-If you're interested in media streaming examples check out the `mediaserver` sample in the `symple` module. Remember, you will need to compile LibSourcey with OpenCV and FFmpeg enabled to use it: https://github.com/sourcey/libsourcey/tree/master/src/symple/samples/mediaserver
-
-For an example of the LibSourcey way of doing things, check out this article about the PacketSteram API: http://sourcey.com/libsourcey-packetstream-api/
-
-For a redistributable C++ package manager, take a look at `pacm`, and specifically the `pacmconsole` application: http://sourcey.com/pacm/
-
-Also, check out `pluga`, a simple C++ plugin API using LibSourcey: http://sourcey.com/pluga/
-
 ## Core Modules
 
 The following modules are included in the core LibSourcey repository:
@@ -189,7 +179,7 @@ Pacm is an embeddable package manager which speaks JSON with the server. [More a
 Pluga is a simple C++ plugin system that's dead simple to use in your own projects. [More about Pluga](http://sourcey.com/pluga). 
 
 #### Anionu SDK
-_dependencies:_ OpevCV
+_dependencies:_ OpevCV  
 The Anionu SDK includes a C++ API, tools, and client implementation for building [Spot](http://anionu.com/spot) plugins and applications that integrate with the [Anionu cloud surveillance serivice](https://anionu.com).
 
 ## Private Modules
@@ -212,9 +202,19 @@ Thin wrappers around the pugixml XML library to better support LibSourcey archit
 _dependencies:_ pugixml, libstrophe  
 Our XMPP module includes a full client implementation with Jingle session support. 
 
-## Contributing
+## Examples
 
-All contributions are very welcome!
+There is also plenty of examples available in the `samples` and `tests` folder of each module for you to cut your teeth on.
+
+If you're interested in media streaming examples check out the `mediaserver` sample in the `symple` module. Remember, you will need to compile LibSourcey with OpenCV and FFmpeg enabled to use it: https://github.com/sourcey/libsourcey/tree/master/src/symple/samples/mediaserver
+
+For a redistributable C++ package manager, take a look at `pacm`, and specifically the `pacmconsole` application: http://sourcey.com/pacm/
+
+Also, check out `pluga`, a simple C++ plugin API using LibSourcey: http://sourcey.com/pluga/
+
+For an article on the LibSourcey way of doing things, check out this writeup on using the PacketSteram API for encoding H.264 on the fly: http://sourcey.com/libsourcey-packetstream-api/
+
+## Contributing
 
 1. [Fork LibSourcey on Github](https://github.com/sourcey/libsourcey)
 2. Create your feature branch (`git checkout -b my-new-feature`)
