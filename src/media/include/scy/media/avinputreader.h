@@ -30,6 +30,7 @@
 #include "scy/interface.h"
 #include "scy/media/types.h"
 #include "scy/media/ffmpeg.h"
+#include "scy/media/icapture.h"
 #include "scy/media/videocontext.h"
 #include "scy/media/audiocontext.h"
 #include "scy/mutex.h"
@@ -48,13 +49,13 @@ namespace scy {
 namespace av {
 
 
-class AVInputReader: public PacketSignal, public async::Startable, public async::Runnable
+class AVInputReader: public ICapture, public async::Runnable
 	/// Video capture and file input decoder class with reusable
 	/// code that depends on ffmpeg libavcodec/libavformat.
 {
-public:		
-	struct Options 
-	{			
+public:
+	struct Options
+	{
 		bool disableVideo;
 		bool disableAudio;
 		bool iFramesOnly;			// Process i-frames only (does not restrict audio)
@@ -77,7 +78,7 @@ public:
 			processAudioXFrame = 0;
 			processVideoXSecs = 0;
 			processAudioXSecs = 0;
-						
+
 #ifdef WIN32
 			deviceEngine = "vfwcap";
 #else
@@ -89,20 +90,22 @@ public:
 
 	AVInputReader(const Options& options = Options());
 	virtual ~AVInputReader();
-	
+
 	virtual void openFile(const std::string& file);
 #ifdef LIBAVDEVICE_VERSION
-	virtual void openDevice(int deviceID, int width = 0, int height = 0, double framerate = 0); 
+	virtual void openDevice(int deviceID, int width = 0, int height = 0, double framerate = 0);
 	virtual void openDevice(const std::string& device, int width = 0, int height = 0, double framerate = 0);
 #endif
 	virtual void openStream(const char* filename, AVInputFormat* inputFormat, AVDictionary** formatParams);
 	virtual void close();
-	
+
 	virtual void start();
 	virtual void stop();
 
 	virtual void run();
-		
+
+	virtual void getEncoderFormat(Format& iformat) {};
+
 	virtual Options& options();
 	virtual AVFormatContext* formatCtx() const;
 	virtual VideoDecoderContext* video() const;
@@ -111,13 +114,13 @@ public:
 
 	NullSignal ReadComplete;
 
-protected:		
+protected:
 	mutable Mutex	_mutex;
 	Thread _thread;
-	//std::string _ifile;	
+	//std::string _ifile;
 	std::string _error;
 	Options _options;
-	AVFormatContext* _formatCtx;	
+	AVFormatContext* _formatCtx;
 	VideoDecoderContext* _video;
 	AudioDecoderContext* _audio;
 	bool _stopping;
@@ -129,4 +132,3 @@ protected:
 
 #endif
 #endif	// SCY_MEDIA_AVInputReader_H
-

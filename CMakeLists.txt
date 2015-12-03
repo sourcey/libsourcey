@@ -22,7 +22,7 @@ add_definitions(-DUNICODE -D_UNICODE)
 
 # Set warning level to W3
 if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
-    add_definitions(/W3)
+  add_definitions(/W3)
 endif()
 
 if(APPLE)
@@ -113,17 +113,25 @@ if(WIN32)
 else()
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
-  set(CMAKE_LIBRARY_PATH 
+  set(CMAKE_LIBRARY_PATH
     #${LibSourcey_BUILD_DIR}/lib
     #/usr/local/share/libscy/deps/lib
     #/home/deploy/build/lib
-    #/usr/lib
     #/usr/local/lib
+    #/usr/lib
+    /usr/local/lib
+    /usr/local/lib/x86_64-linux-gnu
+    /usr/local/lib/i386-linux-gnu
+    /usr/local/lib64
+    /usr/lib
+    /usr/lib/x86_64-linux-gnu
+    /usr/lib/i386-linux-gnu
+    /usr/lib64
     ${CMAKE_LIBRARY_PATH})
 
-  set(CMAKE_SYSTEM_PREFIX_PATH 
+  set(CMAKE_SYSTEM_PREFIX_PATH
     #/usr/local/share/libscy/deps/include
-    #/home/deploy/build   
+    #/home/deploy/build
     #/home/deploy/build/include
     ${CMAKE_SYSTEM_PREFIX_PATH})
 
@@ -221,7 +229,7 @@ endif()
 # ----------------------------------------------------------------------------
 
 # Prefind external dependencies so we can set defaults
-find_package(OpenCV)  
+find_package(OpenCV)
 find_package(FFmpeg)
 
 #set_option(WITH_LIBUV           "Include LibUV support"                ON)

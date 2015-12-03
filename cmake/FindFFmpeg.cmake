@@ -31,12 +31,20 @@ endif()
 # Check for cached results. If there are skip the costly part.
 set_module_notfound(FFmpeg)
 if (NOT FFmpeg_FOUND)
-  
+
   # The FFmpeg compilation guide stores files in an unusual location.
   # http://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
   # Let's support that out of the box
-  set(CMAKE_LIBRARY_PATH $ENV{HOME}/ffmpeg_build/lib ${CMAKE_LIBRARY_PATH})
-  set(CMAKE_SYSTEM_PREFIX_PATH $ENV{HOME}/ffmpeg_build/include ${CMAKE_SYSTEM_PREFIX_PATH})
+  set(CMAKE_LIBRARY_PATH
+    $ENV{HOME}/tmp/ffmpeg_build/lib
+    $ENV{HOME}/ffmpeg_build/lib
+    /tmp/ffmpeg_build/lib
+    ${CMAKE_LIBRARY_PATH})
+  set(CMAKE_SYSTEM_PREFIX_PATH
+    $ENV{HOME}/tmp/ffmpeg_build/include
+    $ENV{HOME}/ffmpeg_build/include
+    /tmp/ffmpeg_build/include
+    ${CMAKE_SYSTEM_PREFIX_PATH})
 
   # Check for all components
   find_component(FFmpeg AVCODEC    libavcodec    avcodec    libavcodec/avcodec.h)
@@ -47,69 +55,69 @@ if (NOT FFmpeg_FOUND)
   find_component(FFmpeg SWRESAMPLE libswresample swresample libswresample/swresample.h)
   find_component(FFmpeg SWSCALE    libswscale    swscale    libswscale/swscale.h)
   #find_component(FFmpeg POSTPROC   libpostproc   postproc   libpostproc/postprocess.h)
-  
+
   # Set FFmpeg as found or not
   set_module_found(FFmpeg ${FFmpeg_FIND_REQUIRED})
 
   # Include FFmpeg dependencies if available
-  find_library(LIBVPX_LIBRARY NAMES vpx)  
+  find_library(LIBVPX_LIBRARY NAMES vpx)
   if(LIBVPX_LIBRARY)
-    list(APPEND FFmpeg_DEPENDENCIES ${LIBVPX_LIBRARY}) 
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBVPX_LIBRARY})
   endif()
 
-  find_library(LIBX264_LIBRARY NAMES x264)  
+  find_library(LIBX264_LIBRARY NAMES x264)
   if(LIBX264_LIBRARY)
-    list(APPEND FFmpeg_DEPENDENCIES ${LIBX264_LIBRARY}) 
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBX264_LIBRARY})
   endif()
 
-  find_library(LIBVA_LIBRARY NAMES va)  
+  find_library(LIBVA_LIBRARY NAMES va)
   if(LIBVA_LIBRARY)
-    list(APPEND FFmpeg_DEPENDENCIES ${LIBVA_LIBRARY}) 
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBVA_LIBRARY})
   endif()
 
-  find_library(LIBFDKAAC_LIBRARY NAMES fdk-aac)  
+  find_library(LIBFDKAAC_LIBRARY NAMES fdk-aac)
   if(LIBFDKAAC_LIBRARY)
-    list(APPEND FFmpeg_DEPENDENCIES ${LIBFDKAAC_LIBRARY}) 
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBFDKAAC_LIBRARY})
   endif()
 
-  find_library(LIBMP3LAME_LIBRARY NAMES mp3lame)  
+  find_library(LIBMP3LAME_LIBRARY NAMES mp3lame)
   if(LIBMP3LAME_LIBRARY)
-    list(APPEND FFmpeg_DEPENDENCIES ${LIBMP3LAME_LIBRARY}) 
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBMP3LAME_LIBRARY})
   endif()
 
   #set(LIBVORBIS_LIBRARY LIBVORBIS_LIBRARY-NOTFOUND)
-  find_library(LIBVORBIS_LIBRARY NAMES vorbis)  
+  find_library(LIBVORBIS_LIBRARY NAMES vorbis)
   if(LIBVORBIS_LIBRARY)
-    list(APPEND FFmpeg_DEPENDENCIES ${LIBVORBIS_LIBRARY}) 
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBVORBIS_LIBRARY})
   endif()
 
   #set(LIBVORBISRNC_LIBRARY LIBVORBISRNC_LIBRARY-NOTFOUND)
-  find_library(LIBVORBISRNC_LIBRARY NAMES vorbisenc)  
+  find_library(LIBVORBISRNC_LIBRARY NAMES vorbisenc)
   if(LIBVORBISRNC_LIBRARY)
-    list(APPEND FFmpeg_DEPENDENCIES ${LIBVORBISRNC_LIBRARY}) 
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBVORBISRNC_LIBRARY})
   endif()
 
   #set(LIBTHEORA_LIBRARY LIBTHEORA_LIBRARY-NOTFOUND)
-  find_library(LIBTHEORA_LIBRARY NAMES theora)  
+  find_library(LIBTHEORA_LIBRARY NAMES theora)
   if(LIBTHEORA_LIBRARY)
-    list(APPEND FFmpeg_DEPENDENCIES ${LIBTHEORA_LIBRARY}) 
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBTHEORA_LIBRARY})
   endif()
 
   #set(LIBOGG_LIBRARY LIBOGG_LIBRARY-NOTFOUND)
-  find_library(LIBOGG_LIBRARY NAMES ogg)  
+  find_library(LIBOGG_LIBRARY NAMES ogg)
   if(LIBOGG_LIBRARY)
-    list(APPEND FFmpeg_DEPENDENCIES ${LIBOGG_LIBRARY}) 
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBOGG_LIBRARY})
   endif()
 
-  find_library(LIBOPUS_LIBRARY NAMES opus)  
+  find_library(LIBOPUS_LIBRARY NAMES opus)
   if(LIBOPUS_LIBRARY)
-    list(APPEND FFmpeg_DEPENDENCIES ${LIBOPUS_LIBRARY}) 
+    list(APPEND FFmpeg_DEPENDENCIES ${LIBOPUS_LIBRARY})
   endif()
 
-  #message("FFmpeg_LIBRARIES=${FFmpeg_LIBRARIES}")     
-  #message("FFmpeg_INCLUDE_DIRS=${FFmpeg_INCLUDE_DIRS}")      
-  #message("FFmpeg_INCLUDE_DIRS=${FFmpeg_INCLUDE_DIRS}")  
-  #message("LIBVPX_LIBRARY=${LIBVPX_LIBRARY}")  
+  #message("FFmpeg_LIBRARIES=${FFmpeg_LIBRARIES}")
+  #message("FFmpeg_INCLUDE_DIRS=${FFmpeg_INCLUDE_DIRS}")
+  #message("FFmpeg_INCLUDE_DIRS=${FFmpeg_INCLUDE_DIRS}")
+  #message("LIBVPX_LIBRARY=${LIBVPX_LIBRARY}")
 
 endif()
 
@@ -121,7 +129,7 @@ endif()
 #set(FFmpeg_FOUND        ${FFmpeg_FOUND}        CACHE BOOLEAN  "The FFmpeg found status." FORCE)
 
 
-# Check that the required components were found.    
+# Check that the required components were found.
 #set(FFmpeg_FOUND 1)
 #foreach (_component ${FFmpeg_FIND_COMPONENTS})
 #  if (FFmpeg_${_component}_FOUND)

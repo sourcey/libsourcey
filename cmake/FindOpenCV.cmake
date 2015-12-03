@@ -81,7 +81,6 @@ endif()
 # The reason for including via iteration rather than find_library
 # is so we can remain version agnostic.
 set_module_notfound(OpenCV)
-#set(OpenCV_FOUND 0)
 if (NOT OpenCV_FOUND)
   set(OpenCV_FOUND 0)
 
@@ -100,14 +99,14 @@ if (NOT OpenCV_FOUND)
     #  Debug
     #  Release
     PATHS
-      #/usr/lib
-      #/usr/lib/x86_64-linux-gnu
-      #/usr/lib/i386-linux-gnu
-      #/usr/lib64
-      #/usr/local/lib
-      #/usr/local/lib/x86_64-linux-gnu
-      #/usr/local/lib/i386-linux-gnu
-      #/usr/local/lib64
+      /usr/lib
+      /usr/lib/x86_64-linux-gnu
+      /usr/lib/i386-linux-gnu
+      /usr/lib64
+      /usr/local/lib
+      /usr/local/lib/x86_64-linux-gnu
+      /usr/local/lib/i386-linux-gnu
+      /usr/local/lib64
     )
 
   if(OpenCV_LIBRARY_DIRS)

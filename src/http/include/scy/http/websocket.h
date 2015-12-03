@@ -112,9 +112,9 @@ enum ErrorCodes
 	ErrorIncompleteFrame         = 11
 		/// Incomplete frame received.
 };
-	
-static const char* ProtocolGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-static const char* ProtocolVersion = "13";
+
+static std::string ProtocolGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+static std::string ProtocolVersion = "13";
 	// The WebSocket protocol version supported (13).
 
 	
@@ -298,90 +298,3 @@ protected:
 
 
 #endif //  SCY_NET_WebSocket_H
-
-
-	//WebSocketAdapter(const net::Socket::Ptr& socket, ws::Mode mode, http::Request& request, http::Response& response); 
-	
-	//WebSocket();
-		// Creates an unconnected WebSocket.
-
-	//WebSocket(net::Socket* base, bool shared = false);
-		// Creates the Socket and attaches the given Socket.
-		//
-		// The Socket must be a WebSocketAdapter, otherwise an
-		// exception will be thrown.
-	//net::Socket::Ptr _socket;
-	//WebSocket(const net::Socket::Ptr& socket);
-
-	//WebSocketAdapter& adapter() const;
-		// Returns the WebSocketAdapter for this socket.
-		
-	//net::Socket& socket();
-		// Returns the underlying TCP or SSL socket.
-	
-	//virtual bool shutdown(UInt16 statusCode, const std::string& statusMessage);
-
-
- //socket = nullptr, http::Request* request = nullptr
-
-	//http::Request* request;
-
-/*
-// ---------------------------------------------------------------------
-//
-class ClientConnection;
-class WebSocketClientAdapter: public WebSocketAdapter
-{
-public:	
-	WebSocketClientAdapter(ClientConnection& connection); //socket = nullptr, http::Request* request = nullptr
-	
-	virtual void sendClientRequest(http::Request& request);
-
-	//http::Request* request;
-
-protected:
-	virtual ~WebSocketClientAdapter();
-
-	ClientConnection& _connection;
-};
-
-
-// ---------------------------------------------------------------------
-//
-class ServerConnection;
-class WebSocketServerAdapter: public WebSocketAdapter
-{
-public:	
-	WebSocketServerAdapter(ServerConnection& connection); //net::Socket::Ptr socket = nullptr
-
-	virtual void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress);
-
-protected:
-	virtual ~WebSocketServerAdapter();
-
-	ServerConnection& _connection;
-};
-*/
-	
-	
-	//Signal<http::Request&> PrepareClientRequest;
-	//Signal<http::Response&> VerifyClientResponse;
-
-	//Signal<http::Request&> VerifyServerRequest;
-	//Signal<http::Response&> PrepareServerResponse;
-
-	//virtual http::Request createrequest();
-		/// Returns a reference to the externally managed   
-		/// HTTP request object.
-
-	//virtual http::Response& response();
-		/// Returns a reference to  the externally managed   
-		/// HTTP response object.	
-	
-	//virtual void setRequest(http::Request* request);
-		/// Sets the externally managed HTTP request 
-		/// object for client WS connection.
-
-	//virtual void setResponse(http::Response* response);
-		/// Sets the externally managed HTTP response 
-		/// object for server WS connection.

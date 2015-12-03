@@ -29,38 +29,38 @@ using std::endl;
 namespace scy {
 namespace av {
 
-			
-Thumbnailer::Thumbnailer(const ThumbnailerOptions& options) : 
-	options(options) 
+
+Thumbnailer::Thumbnailer(const ThumbnailerOptions& options) :
+	options(options)
 {
 	initializeFFmpeg();
 }
 
 
-Thumbnailer::~Thumbnailer() 
+Thumbnailer::~Thumbnailer()
 {
 	uninitializeFFmpeg();
 }
 
 
 void Thumbnailer::open() //, int owidth, int oheight, double seek
-{	
+{
 	if (!fs::exists(options.ifile)) {
 		throw std::runtime_error("Cannot create thumbnail: The input file doesn't exist.");
 	}
-	
+
 	if (options.ofile.empty()) {
 		options.ofile = defaultThumbPath(options.ifile);
 	}
 
-	reader += packetDelegate(this, &Thumbnailer::onVideoPacket);
+	reader.emitter += packetDelegate(this, &Thumbnailer::onVideoPacket);
 	reader.options().iFramesOnly = true;
 	reader.options().disableAudio = true;
 	reader.openFile(options.ifile);
 
 	if (options.seek > reader.video()->stream->duration)
 		throw std::runtime_error("Seek position exceeds stream duration");
-							
+
 	// TODO: More media types
 	if (options.ofile.find(".png") != std::string::npos) {
 		encoder.oparams.encoder = "png";
@@ -74,42 +74,42 @@ void Thumbnailer::open() //, int owidth, int oheight, double seek
 
 	encoder.iparams.width = reader.video()->ctx->width;
 	encoder.iparams.height = reader.video()->ctx->height;
-	encoder.iparams.pixelFmt = av_get_pix_fmt_name(reader.video()->ctx->pix_fmt);		
+	encoder.iparams.pixelFmt = av_get_pix_fmt_name(reader.video()->ctx->pix_fmt);
 	encoder.oparams.width = options.width ? options.width :  reader.video()->ctx->width;
 	encoder.oparams.height = options.height ? options.height :  reader.video()->ctx->height;
 	encoder.oparams.fps = 20; // avoid FFmpeg 0 fps bitrate tolerance error
 	encoder.oparams.enabled = true;
-	encoder.create();	
+	encoder.create();
 
-	//encoder.oparams.print(cout);	
+	//encoder.oparams.print(cout);
 }
 
 
-void Thumbnailer::grab() 
+void Thumbnailer::grab()
 {
 	// Open here so settings may be modified
-	encoder.open();	
+	encoder.open();
 
 	// Run the decoder loop
-	reader.run();	
+	reader.run();
 	assert(fs::exists(options.ofile));
 }
-		
+
 
 void Thumbnailer::onVideoPacket(void*, av::VideoPacket& packet)
-{				
+{
 	DebugL << "Thumbnail packet out: " << packet.size() << std::endl;
-			
+
 	// Skip frames before seek position
 	if (reader.video()->pts < options.seek) {
 		TraceL << "Skipping thumbnail frame: " << reader.video()->pts << " < " << options.seek << std::endl;
 		return;
 	}
-		
+
 	// Feed the decoded frame into the encoder
 	AVPacket opacket;
 	if (encoder.encode(reader.video()->frame, opacket)) {
-			
+
 		// Save the thumbnail
 		fs::savefile(options.ofile, (const char*)opacket.data, (std::streamsize)opacket.size);
 
@@ -117,7 +117,7 @@ void Thumbnailer::onVideoPacket(void*, av::VideoPacket& packet)
 		reader.stop();
 	}
 }
-	
+
 
 std::string Thumbnailer::defaultThumbPath(const std::string& ifile, const std::string& ext, const std::string& suffix)
 {

@@ -2,18 +2,18 @@
 
 **Homepage**: [http://sourcey.com/libsourcey](http://sourcey.com/libsourcey)  
 **Licence**: LGPL
-  
-LibSourcey is a collection of open source cross platform C++11 modules and classes that provide developers with a flexible high performance arsenal for the rapid development of real-time messaging and live media streaming applications. 
+
+LibSourcey is a collection of open source cross platform C++11 modules and classes that provide developers with a flexible high performance arsenal for the rapid development of real-time messaging and live media streaming applications.
 
 LibSourcey is built on top of Node.js's underlying libuv library and utilises event-based asynchronous IO in to maximise performance and minimise concurrency reliance for building mission critical server-side applications. Modern C++11 design principles have been adhered to throughout for clear and readable code, and straighforward integration into existing projects.
 
-For media streaming applications, LibSourcey provides a simple and flexible method of capturing live audio/video streams (_OpenCV/FFmpeg_), processing, filtering and encoding them using any video format (_FFmpeg_), and broadcasting the result over the Internet (_libuv_). This is made possible by implementing a thin layer over the top of some brilliant open source projects, such as FFmpeg, OpenCV and libuv. The only required third-party dependency is libuv, and that is included in the local source and compiled automatically. All others dependencies are optional. 
+For media streaming applications, LibSourcey provides a simple and flexible method of capturing live audio/video streams (_OpenCV/FFmpeg_), processing, filtering and encoding them using any video format (_FFmpeg_), and broadcasting the result over the Internet (_libuv_). This is made possible by implementing a thin layer over the top of some brilliant open source projects, such as FFmpeg, OpenCV and libuv. The only required third-party dependency is libuv, and that is included in the local source and compiled automatically. All others dependencies are optional.
 
 Unfortunately documentation still a little sparse at this point, but we hope to change that in the near future. Until then, _use the source, Luke!_, and we welcome all community contributions to LibSourcey in order to promote the development of better real-time native and web applications
 
 LibSourcey provides full support for the following protocols: **TCP**, **SSL**, **UDP**, **HTTP**, **JSON**, **XML**, **STUN**, **SDP**, **SocketIO**.  
 Partial support is provided for the following protocols: **WebSockets**, **TURN**, **ICE**, **RTP**, and **XMPP**.
- 
+
 ## Dependencies
 
 _Required_: libuv, CMake, C++11 compiler (GCC, Visual Studio, Xcode)  
@@ -21,43 +21,65 @@ _Optional_: FFmpeg (>= 2.8.3), OpenCV (>= 3.0), WebRTC, OpenSSL (>= 1.0.1g), RtA
 
 ## Installation
 
+LibSourcey is designed to compile on any system with C++11 compiler, so it should compile on all Linux, Windows and Apple platforms.
+
+_Note:_ To compile LibSourcey with video and streaming capabilities enabled you should install the latest version of both FFmpeg and OpenCV, otherwise dependent modules and features will be disabled by default.
+
 ### Installing on Linux
 
-This guide has been written for Ubuntu 14.04, but installation is very simple and should be easily protable for most flavours of Linux.
+This guide is written for Ubuntu 14.04, but installation is super simple and should be portable across most flavours of Linux.
 
-First install the necessary dependencies:
+##### Install Dependencies
 
-~~~ bash 
+~~~ bash
 sudo apt-get update
-
-# required dependencies
-apt-get install -y build-essential pkg-config git openssl libssl-dev cmake libjack-jackd2-dev
-
-# optional dependencies
-apt-get install -y opencv-dev
+sudo apt-get install -y build-essential pkg-config git cmake openssl libssl-dev libjack-jackd2-dev
 ~~~
 
-_Note:_ To compile LibSourcey with video and streaming capabilities enabled you should install the latest versions of both FFmpeg and OpenCV. 
+##### Install FFmpeg (optional)
 
-If you need to install FFmpeg, then you can use the official FFmpeg installation guide which works out of the box with LibSourcey: http://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
+FFmpeg is an optional but recommended dependency that's required to make use of LibSourcey's media encoding capabilities.
 
-Now checkout and compile the source:
+Please follow the [official guide for installing FFmpeg](http://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu) which works out of the box with LibSourcey.
 
-~~~ bash 
+##### Install OpenCV (optional)
+
+OpenCV is an optional dependecy that's used by LibSourcey for it's video capture, video analysis and computer vision algorithms. Note that if you're compiling FFmpeg yourself (as above), then you should compile OpenCV with `WITH_FFMPEG=OFF` otherwise conflicting FFmpeg libraries may be installed on your system.
+
+~~~ bash
+cd ~/tmp
+wget https://github.com/Itseez/opencv/archive/3.0.0.zip -O opencv-3.0.0.zip
+unzip opencv-3.0.0.zip
+cd opencv-3.0.0
+mkdir build
+cd build
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_TBB=ON -D WITH_V4L=ON -D WITH_QT=ON -D WITH_OPENGL=ON -D WITH_FFMPEG=OFF ..
+make -j $(nproc)
+sudo make install
+sudo /bin/bash -c 'echo "/usr/local/lib" > /etc/ld.so.conf.d/opencv.conf'
+sudo ldconfig
+~~~
+
+##### Install LibSourcey
+
+~~~ bash
 cd ~/tmp
 git clone https://github.com/sourcey/libsourcey.git
 cd libsourcey
-mkdir -p build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=RELEASE # extra cmake commands here...
+mkdir build
+cd build
+cmake .. -D CMAKE_BUILD_TYPE=RELEASE # extra cmake commands here...
 make
 sudo make install
 ~~~
 
-Simple! [See here](#cmake-build-options) for a complete list of build options, and [here for examples](#examples).
+All done! 
+
+[See here](#cmake-build-options) for a complete list of build options, and [here for examples](#examples).
 
 ### Installing on Windows
 
-#### Install Dependencies
+##### Install Dependencies
 
 Install Git  
  : Install [TortoiseGit](http://code.google.com/p/tortoisegit/), a convenient git front-end that integrates right into Windows Explorer. MinGW users can use [msysgit]( from <a class="external" href="http://code.google.com/p/msysgit/downloads/list"></a>).  
@@ -72,19 +94,21 @@ Download LibSourcey
  : Clone the repository: `git clone https://github.com/sourcey/libsourcey.git`.  
    If you haven't got Git for some reason you can download and extract the [package archive](https://github.com/sourcey/libsourcey) from Github.
 
-#### Generate Project Files
+##### Generate Project Files
 
 Open the CMake GUI and set the project directory to point to the LibSourcey root directory. Execute "Configure" to do the initial configuration, then adjust any options, then press "Configure" again and then press "Generate".
 
 [See here](#cmake-build-options) for a complete list of build options, and [here for examples](#examples).
 
-#### Compile with Visual Studio
+##### Compile with Visual Studio
 
 1. Generate solutions using CMake, as described above. Make sure, you chose the proper generator (32-bit or 64-bit)
 2. Launch Visual Studio, locate and open the "libsourcey.sln" solution file in your generated build folder (eg: `C:\LibSourcey\build\libsourcey.sln`). Select "Debug" configuration, build the solution (Ctrl-Shift-B), and/or select "Release" and build it.
 3. Add `{CMAKE_BINARY_DIR}\bin\Release`, `{CMAKE_BINARY_DIR}\bin\Debug` (containing "libscy*.dll" and "libscy*d.dll", respectively) to the system path (My Computer--[Right button click]->Properties->Advanced->Environment Variables->Path)
 
 ### Installing on Apple (MacOS)
+
+##### Install Dependencies
 
 Install Git  
  : Download the [latest Git installer package](http://code.google.com/p/git-osx-installer/downloads/list?can=3), double click on the installer to start the installation wizard. You’ll be prompted for your system password in order for the installer to complete.
@@ -99,18 +123,18 @@ Download LibSourcey
  : Clone the repository: `git clone https://github.com/sourcey/libsourcey.git`.  
    If you haven't got Git for some reason you can download and extract the [package archive](https://github.com/sourcey/libsourcey) from Github.
 
-#### Generate Project Files
+##### Generate Project Files
 
 Open the CMake GUI and set the project directory to point to the LibSourcey root directory. Execute "Configure" to do the initial configuration, then adjust any options, then press "Configure" again and then press "Generate".
 
 [See here](#cmake-build-options) for a complete list of build options, and [here for examples](#examples).
 
-#### Compile with Xcode
+##### Compile with Xcode
 
 * Generate Xcode project using CMake, as described above.
 * Launch Xcode, locate and open libsourcey.xcodeproj. Select "Debug", build the BUILD_ALL target (Cmd-B), select "Release" and build it too.
 
-### CMake Build Options
+##### CMake Build Options
 
 The main build options you will want to configure are as follows:
 
@@ -127,58 +151,59 @@ The main build options you will want to configure are as follows:
 If you are using third-party libraries is custom locations then make sure you update the CMake include paths: `CMAKE_SYSTEM_PREFIX_PATH` and `CMAKE_LIBRARY_PATH`.
 The only third-party libraries that may need configuring if you're using them are FFmpeg, OpenCV and WebRTC.
 
-For an exhaustive list of options check the `CMakeLists.txt` in the main directory. 
+For an exhaustive list of options check the `CMakeLists.txt` in the main directory.
 
 ## Core Modules
 
 The following modules are included in the core LibSourcey repository:
- 
-#### Base 
+
+##### Base
 Re-usable utility classes and interfaces used throughout LibSourcey.
 
-#### Net
+##### Net
 TCP, SSL and UDL socket implementation build on top of libuv architecture.
 
-#### HTTP
-HTTP server and client stack including support for WebSockets, multipart streaming, and file transfers.  
-    
-#### Media
+##### HTTP
+HTTP server and client stack including support for WebSockets, multipart streaming, and file transfers.
+The HTTP parser is based on the super-fast C code used by nginx.
+
+##### Media
 _dependencies:_ OpenCV, FFmpeg, RtAudio  
 Wrappers around FFmpeg and OpenCV for device capture, encoding, recording and streaming. The Media API makes extensive use of the PacketStream classes so that encoders, processors and packetisers can be dynamically added and removed from a media source.  
 
-#### UV
-The UV module is a set of C++ wrappers for Joyent's brilliant libuv library. 
+##### UV
+The UV module is a set of C++ wrappers for Joyent's brilliant libuv library.
 
-#### JSON
+##### JSON
 _dependencies:_ JsonCpp  
-Thin wrappers and helper functions for the JsonCpp library. 
+Thin wrappers and helper functions for the JsonCpp library.
 
-#### STUN
-[RFC 5389](http://tools.ietf.org/rfc/rfc5389) implementation which includes support for ICE and TURN and TURN TCP messages. 
+##### STUN
+[RFC 5389](http://tools.ietf.org/rfc/rfc5389) implementation which includes support for ICE and TURN and TURN TCP messages.
 
-#### TURN
-Server and client stack which supports both [RFC 5766 (Traversal Using Relays around NAT)](http://tools.ietf.org/rfc/rfc5766) and [RFC 6062 (Traversal Using Relays around NAT Extensions for TCP Allocations)](http://tools.ietf.org/rfc/rfc6062) specifications. 
-  
-#### SocketIO
-SocketIO C++ client. Read more about [SocketIO](http://socket.io). 
+##### TURN
+Server and client stack which supports both [RFC 5766 (Traversal Using Relays around NAT)](http://tools.ietf.org/rfc/rfc5766) and [RFC 6062 (Traversal Using Relays around NAT Extensions for TCP Allocations)](http://tools.ietf.org/rfc/rfc6062) specifications.
 
-#### Symple
-Client implementation of Sourcey's home grown real time messaging and presence protocol. [More about Symple](<http://sourcey.com/symple).    
+##### SocketIO
+SocketIO C++ client. Read more about [SocketIO](http://socket.io).
 
-#### SDP
-[RFC 4566](http://tools.ietf.org/rfc/rfc4566) implementation which includes extra support for ICE headers. 
+##### Symple
+Client implementation of Sourcey's home grown real time messaging and presence protocol. [More about Symple](<http://sourcey.com/symple).
+
+##### SDP
+[RFC 4566](http://tools.ietf.org/rfc/rfc4566) implementation which includes extra support for ICE headers.
 
 ## External Modules
 
 The following LibSourcey modules are available in external repositories:
 
-#### Pacm
-Pacm is an embeddable package manager which speaks JSON with the server. [More about Pacm](http://sourcey.com/pacm). 
+##### Pacm
+Pacm is an embeddable package manager which speaks JSON with the server. [More about Pacm](http://sourcey.com/pacm).
 
-#### Pluga
-Pluga is a simple C++ plugin system that's dead simple to use in your own projects. [More about Pluga](http://sourcey.com/pluga). 
+##### Pluga
+Pluga is a simple C++ plugin system that's dead simple to use in your own projects. [More about Pluga](http://sourcey.com/pluga).
 
-#### Anionu SDK
+##### Anionu SDK
 _dependencies:_ OpevCV  
 The Anionu SDK includes a C++ API, tools, and client implementation for building [Spot](http://anionu.com/spot) plugins and applications that integrate with the [Anionu cloud surveillance serivice](https://anionu.com).
 
@@ -186,21 +211,21 @@ The Anionu SDK includes a C++ API, tools, and client implementation for building
 
 The following closed source modules are available. Please contact us if you are interested in using any of them in your projects.
 
-#### ICE
+##### ICE
 The ICE module is a complete implementation of [RFC 5245 (Interactive Connectivity Establishment)](http://tools.ietf.org/html/rfc5245) based on LibSourcey architecture.
 ICE is a protocol for Network Address Translator (NAT) Traversal for Offer/Answer protocols.
 This module is currently not open source. Please contact us if you are interested in using it.
 
-#### RTP
-Our RTP module is quite basic and at this point it only supports RTP and RTCP packetisation. RTCP session management still needs to implemented. If anyone happens to make a project of this we would be very happy to improve our RTP module. 
+##### RTP
+Our RTP module is quite basic and at this point it only supports RTP and RTCP packetisation. RTCP session management still needs to implemented. If anyone happens to make a project of this we would be very happy to improve our RTP module.
 
-#### XML
+##### XML
 _dependencies:_ pugixml  
 Thin wrappers around the pugixml XML library to better support LibSourcey architecture.
-    
-#### XMPP
+
+##### XMPP
 _dependencies:_ pugixml, libstrophe  
-Our XMPP module includes a full client implementation with Jingle session support. 
+Our XMPP module includes a full client implementation with Jingle session support.
 
 ## Examples
 

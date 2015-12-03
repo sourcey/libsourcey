@@ -145,22 +145,22 @@ macro(include_dependency name)
     list(APPEND LibSourcey_LIBRARY_DIRS ${${var_root}_LIBRARY_DIR})
   endif()
   if(${var_root}_LIBRARY_DIRS)
-    message(STATUS "- Found ${name} Lib Dirs: ${${var_root}_LIBRARY_DIRS}")
+    #message(STATUS "- Found ${name} Lib Dirs: ${${var_root}_LIBRARY_DIRS}")
     #link_directories(${${var_root}_LIBRARY_DIRS})
     list(APPEND LibSourcey_LIBRARY_DIRS ${${var_root}_LIBRARY_DIRS})
   endif()
   if(${var_root}_LIBRARY)
-    message(STATUS "- Found dependency lib ${name}: ${${var_root}_LIBRARY}")
+    #message(STATUS "- Found dependency lib ${name}: ${${var_root}_LIBRARY}")
     list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${var_root}_LIBRARY})
     #list(APPEND LibSourcey_BUILD_DEPENDENCIES ${${var_root}_LIBRARY})
   endif()
   if(${var_root}_LIBRARIES)
-    message(STATUS "- Found dependency libs ${name}: ${${var_root}_LIBRARIES}")
+    #message(STATUS "- Found dependency libs ${name}: ${${var_root}_LIBRARIES}")
     list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${var_root}_LIBRARIES})
     #list(APPEND LibSourcey_BUILD_DEPENDENCIES ${${var_root}_LIBRARIES})
   endif()
   if(${var_root}_DEPENDENCIES)
-    message(STATUS "- Found external dependency ${name}: ${${var_root}_DEPENDENCIES}")
+    #message(STATUS "- Found external dependency ${name}: ${${var_root}_DEPENDENCIES}")
     list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${var_root}_DEPENDENCIES})
     #list(APPEND LibSourcey_BUILD_DEPENDENCIES ${${var_root}_DEPENDENCIES})
   endif()
@@ -210,7 +210,7 @@ macro(set_default_project_dependencies name)
   list(APPEND ${name}_LIBRARIES ${LibSourcey_BUILD_DEPENDENCIES})
   list(APPEND ${name}_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES})
   list(REMOVE_DUPLICATES ${name}_LIBRARIES)
-  target_link_libraries(${name} ${${name}_LIBRARIES})
+  target_link_libraries(${name} "${${name}_LIBRARIES}")
 endmacro()
 
 #
@@ -376,8 +376,10 @@ macro(set_module_found module)
     # Give a nice error message if some of the required vars are missing.
     include(FindPackageHandleStandardArgs)
     find_package_handle_standard_args(${module} DEFAULT_MSG ${_${module}_REQUIRED_VARS})
+  endif()
 
-    # Set the module as found.
+  # Set the module as found.
+  if (${module}_LIBRARIES)
     set(${module}_FOUND TRUE)
     #set(${module}_FOUND TRUE PARENT_SCOPE)
   else()
@@ -389,9 +391,6 @@ macro(set_module_found module)
                    ${module}_LIBRARIES
                    ${module}_DEFINITIONS
                    ${module}_FOUND)
-
-  #message("Module Found=${module}")
-
 endmacro()
 
 
