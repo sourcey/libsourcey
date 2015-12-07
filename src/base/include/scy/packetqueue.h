@@ -26,7 +26,7 @@
 
 
 namespace scy {
-	
+    
 
 //
 // Synchronization Packet Queue
@@ -36,18 +36,18 @@ namespace scy {
 class SyncPacketQueue: public SyncQueue<IPacket>, public PacketProcessor
 {
 public:
-	SyncPacketQueue(uv::Loop* loop, int maxSize = 1024);
-	SyncPacketQueue(int maxSize = 1024);
-	virtual ~SyncPacketQueue();
+    SyncPacketQueue(uv::Loop* loop, int maxSize = 1024);
+    SyncPacketQueue(int maxSize = 1024);
+    virtual ~SyncPacketQueue();
 
-	virtual void process(IPacket& packet);
+    virtual void process(IPacket& packet);
 
-	PacketSignal emitter;
+    PacketSignal emitter;
 
-protected:	
-	virtual void dispatch(IPacket& packet);
+protected:    
+    virtual void dispatch(IPacket& packet);
 
-	virtual void onStreamStateChange(const PacketStreamState&);
+    virtual void onStreamStateChange(const PacketStreamState&);
 };
 
 
@@ -59,17 +59,17 @@ protected:
 class AsyncPacketQueue: public AsyncQueue<IPacket>, public PacketProcessor
 {
 public:
-	AsyncPacketQueue(int maxSize = 1024);
-	virtual ~AsyncPacketQueue();
+    AsyncPacketQueue(int maxSize = 1024);
+    virtual ~AsyncPacketQueue();
 
-	virtual void process(IPacket& packet);
-	
-	PacketSignal emitter;
+    virtual void process(IPacket& packet);
+    
+    PacketSignal emitter;
 
-protected:	
-	virtual void dispatch(IPacket& packet);
+protected:    
+    virtual void dispatch(IPacket& packet);
 
-	virtual void onStreamStateChange(const PacketStreamState&);
+    virtual void onStreamStateChange(const PacketStreamState&);
 };
 
 

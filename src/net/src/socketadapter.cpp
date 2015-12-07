@@ -29,140 +29,140 @@ namespace net {
 
 
 SocketAdapter::SocketAdapter(SocketAdapter* sender, SocketAdapter* receiver) : 
-	 _sender(sender)
+     _sender(sender)
 {
-	//TraceLS(this) << "Create" << endl;	
-	assert(sender != this);
-	//assert(receiver != this);
+    //TraceLS(this) << "Create" << endl;    
+    assert(sender != this);
+    //assert(receiver != this);
 
-	if (receiver)
-		addReceiver(receiver);
+    if (receiver)
+        addReceiver(receiver);
 }
-	
+    
 
 SocketAdapter::~SocketAdapter()
 {
-	//TraceLS(this) << "Destroy" << endl;	
-	
+    //TraceLS(this) << "Destroy" << endl;    
+    
 #if 0
-	// Delete child adapters
-	// In order to prevent deletion, the outside 
-	// application must nullify the adapter pointers
-	if (_recvAdapter)
-		delete _recvAdapter;
-	if (_sender)
-		delete _sender;
+    // Delete child adapters
+    // In order to prevent deletion, the outside 
+    // application must nullify the adapter pointers
+    if (_recvAdapter)
+        delete _recvAdapter;
+    if (_sender)
+        delete _sender;
 #endif
 }
 
-	
+    
 int SocketAdapter::send(const char* data, std::size_t len, int flags)
 {
-	assert(_sender); // should have output adapter if default impl is used
-	if (!_sender) return -1;
-	return _sender->send(data, len, flags);
+    assert(_sender); // should have output adapter if default impl is used
+    if (!_sender) return -1;
+    return _sender->send(data, len, flags);
 }
 
 
 int SocketAdapter::send(const char* data, std::size_t len, const Address& peerAddress, int flags)
 {
-	assert(_sender); // should have output adapter if default impl is used
-	if (!_sender) return -1;
-	return _sender->send(data, len, peerAddress, flags);
+    assert(_sender); // should have output adapter if default impl is used
+    if (!_sender) return -1;
+    return _sender->send(data, len, peerAddress, flags);
 }
 
 
 int SocketAdapter::sendPacket(const IPacket& packet, int flags)
-{	
-	// Try to cast as RawPacket so we can send without copying any data.
-	auto raw = dynamic_cast<const RawPacket*>(&packet);
-	if (raw)
-		return send((const char*)raw->data(), raw->size(), flags);
-	
-	// Dynamically generated packets need to be written to a
-	// temp buffer for sending. 
-	else {
-		Buffer buf;
-		packet.write(buf);
-		return send(buf.data(), buf.size(), flags);
-	}
+{    
+    // Try to cast as RawPacket so we can send without copying any data.
+    auto raw = dynamic_cast<const RawPacket*>(&packet);
+    if (raw)
+        return send((const char*)raw->data(), raw->size(), flags);
+    
+    // Dynamically generated packets need to be written to a
+    // temp buffer for sending. 
+    else {
+        Buffer buf;
+        packet.write(buf);
+        return send(buf.data(), buf.size(), flags);
+    }
 }
 
 
 int SocketAdapter::sendPacket(const IPacket& packet, const Address& peerAddress, int flags)
-{	
-	// Try to cast as RawPacket so we can send without copying any data.
-	auto raw = dynamic_cast<const RawPacket*>(&packet);
-	if (raw)
-		return send((const char*)raw->data(), raw->size(), peerAddress, flags);
-	
-	// Dynamically generated packets need to be written to a
-	// temp buffer for sending. 
-	else {
-		Buffer buf; //(2048);
-		//buf.reserve(2048);
-		packet.write(buf);
-		return send(buf.data(), buf.size(), peerAddress, flags);
-	}
+{    
+    // Try to cast as RawPacket so we can send without copying any data.
+    auto raw = dynamic_cast<const RawPacket*>(&packet);
+    if (raw)
+        return send((const char*)raw->data(), raw->size(), peerAddress, flags);
+    
+    // Dynamically generated packets need to be written to a
+    // temp buffer for sending. 
+    else {
+        Buffer buf; //(2048);
+        //buf.reserve(2048);
+        packet.write(buf);
+        return send(buf.data(), buf.size(), peerAddress, flags);
+    }
 }
 
 
 void SocketAdapter::sendPacket(IPacket& packet)
 {
-	int res = sendPacket(packet, 0);
-	if (res < 0)
-		throw std::runtime_error("Invalid socket operation");
+    int res = sendPacket(packet, 0);
+    if (res < 0)
+        throw std::runtime_error("Invalid socket operation");
 }
 
 
 void SocketAdapter::onSocketConnect()
 {
-	Connect.emit(self());
+    Connect.emit(self());
 }
 
 
 void SocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress)
 {
-	Recv.emit(self(), buffer, peerAddress);
+    Recv.emit(self(), buffer, peerAddress);
 }
 
 
 void SocketAdapter::onSocketError(const scy::Error& error) //const Error& error
 {
-	Error.emit(self(), error);
+    Error.emit(self(), error);
 }
 
 
 void SocketAdapter::onSocketClose()
 {
-	Close.emit(self());
+    Close.emit(self());
 }
 
 
 void SocketAdapter::addReceiver(SocketAdapter* adapter, int priority) 
-{	
-	Connect += delegate(adapter, &net::SocketAdapter::onSocketConnect, priority);
-	Recv += delegate(adapter, &net::SocketAdapter::onSocketRecv, priority);
-	Error += delegate(adapter, &net::SocketAdapter::onSocketError, priority);
-	Close += delegate(adapter, &net::SocketAdapter::onSocketClose, priority);
+{    
+    Connect += delegate(adapter, &net::SocketAdapter::onSocketConnect, priority);
+    Recv += delegate(adapter, &net::SocketAdapter::onSocketRecv, priority);
+    Error += delegate(adapter, &net::SocketAdapter::onSocketError, priority);
+    Close += delegate(adapter, &net::SocketAdapter::onSocketClose, priority);
 }
 
 
 void SocketAdapter::removeReceiver(SocketAdapter* adapter)  
-{	
-	Connect -= delegate(adapter, &net::SocketAdapter::onSocketConnect);
-	Recv -= delegate(adapter, &net::SocketAdapter::onSocketRecv);
-	Error -= delegate(adapter, &net::SocketAdapter::onSocketError);
-	Close -= delegate(adapter, &net::SocketAdapter::onSocketClose);
+{    
+    Connect -= delegate(adapter, &net::SocketAdapter::onSocketConnect);
+    Recv -= delegate(adapter, &net::SocketAdapter::onSocketRecv);
+    Error -= delegate(adapter, &net::SocketAdapter::onSocketError);
+    Close -= delegate(adapter, &net::SocketAdapter::onSocketClose);
 }
 
 
 void SocketAdapter::setSender(SocketAdapter* adapter, bool freeExisting)
 {
-	if (_sender == adapter) return;
-	if (_sender && freeExisting)
-		delete _sender;
-	_sender = adapter;
+    if (_sender == adapter) return;
+    if (_sender && freeExisting)
+        delete _sender;
+    _sender = adapter;
 }
 
 

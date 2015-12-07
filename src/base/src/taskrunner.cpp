@@ -39,215 +39,215 @@ namespace scy {
 
 
 TaskRunner::TaskRunner(async::Runner::Ptr runner)
-{	
-	if (runner)
-		setRunner(runner);
-	else
-		setRunner(std::make_shared<Thread>());
+{    
+    if (runner)
+        setRunner(runner);
+    else
+        setRunner(std::make_shared<Thread>());
 }
 
 
 TaskRunner::~TaskRunner()
-{	
-	Shutdown.emit(this);
-	//Idler::stop();
-	if (_runner)
-		_runner->cancel();
-	clear();
+{    
+    Shutdown.emit(this);
+    //Idler::stop();
+    if (_runner)
+        _runner->cancel();
+    clear();
 }
 
 
 bool TaskRunner::start(Task* task)
 {
-	add(task);
+    add(task);
 
-	//if (task->_cancelled) {
-		//task->_cancelled = false;
-		//task->start();
-		TraceLS(this) << "Start task: " << task << endl;
-		onStart(task);
-		//_wakeUp.set();
-		return true;
-	//}
-	//return false;
+    //if (task->_cancelled) {
+        //task->_cancelled = false;
+        //task->start();
+        TraceLS(this) << "Start task: " << task << endl;
+        onStart(task);
+        //_wakeUp.set();
+        return true;
+    //}
+    //return false;
 }
 
 
 bool TaskRunner::cancel(Task* task)
-{		
-	//if (!task->_cancelled) {
-		//task->_cancelled = true;
-		//task->cancel();
-		//TraceLS(this) << "Cancelled task: " << task << endl;
-		//onCancel(task);
-		//_wakeUp.set();
-		//return true;
-	//}
-	
-	if (!task->cancelled()) {
-		task->cancel();
-		TraceLS(this) << "Cancel task: " << task << endl;
-		onCancel(task);
-		//_wakeUp.set();
-		return true;
-	}
-	
-	return false;
+{        
+    //if (!task->_cancelled) {
+        //task->_cancelled = true;
+        //task->cancel();
+        //TraceLS(this) << "Cancelled task: " << task << endl;
+        //onCancel(task);
+        //_wakeUp.set();
+        //return true;
+    //}
+    
+    if (!task->cancelled()) {
+        task->cancel();
+        TraceLS(this) << "Cancel task: " << task << endl;
+        onCancel(task);
+        //_wakeUp.set();
+        return true;
+    }
+    
+    return false;
 }
 
 
 bool TaskRunner::destroy(Task* task)
 {
-	TraceLS(this) << "Abort task: " << task << endl;
-	
-	// If the task exists then set the destroyed flag.
-	if (exists(task)) {
-		TraceLS(this) << "Abort managed task: " << task << endl;
-		task->_destroyed = true;
-	}
-		
-	// Otherwise destroy the pointer.
-	else {
-		TraceLS(this) << "Delete unmanaged task: " << task << endl;
-		delete task;
-	}
+    TraceLS(this) << "Abort task: " << task << endl;
+    
+    // If the task exists then set the destroyed flag.
+    if (exists(task)) {
+        TraceLS(this) << "Abort managed task: " << task << endl;
+        task->_destroyed = true;
+    }
+        
+    // Otherwise destroy the pointer.
+    else {
+        TraceLS(this) << "Delete unmanaged task: " << task << endl;
+        delete task;
+    }
 
-	return true; // hmmm
+    return true; // hmmm
 }
-	
+    
 
 bool TaskRunner::add(Task* task)
 {
-	TraceLS(this) << "Add task: " << task << endl;
-	if (!exists(task)) {
-		Mutex::ScopedLock lock(_mutex);	
-		_tasks.push_back(task);
-		//uv_ref(Idler::handle.ptr()); // reference the idler handle when a task is added
-		onAdd(task);
-		return true;
-	}
-	return false;
+    TraceLS(this) << "Add task: " << task << endl;
+    if (!exists(task)) {
+        Mutex::ScopedLock lock(_mutex);    
+        _tasks.push_back(task);
+        //uv_ref(Idler::handle.ptr()); // reference the idler handle when a task is added
+        onAdd(task);
+        return true;
+    }
+    return false;
 }
 
 
 bool TaskRunner::remove(Task* task)
-{	
-	TraceLS(this) << "Remove task: " << task << endl;
+{    
+    TraceLS(this) << "Remove task: " << task << endl;
 
-	Mutex::ScopedLock lock(_mutex);
-	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
-		if (*it == task) {					
-			_tasks.erase(it);
-			//uv_unref(Idler::handle.ptr()); // dereference the idler handle when a task is removed
-			onRemove(task);
-			return true;
-		}
-	}
-	return false;
+    Mutex::ScopedLock lock(_mutex);
+    for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
+        if (*it == task) {                    
+            _tasks.erase(it);
+            //uv_unref(Idler::handle.ptr()); // dereference the idler handle when a task is removed
+            onRemove(task);
+            return true;
+        }
+    }
+    return false;
 }
 
 
 bool TaskRunner::exists(Task* task) const
-{	
-	Mutex::ScopedLock lock(_mutex);
-	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
-		if (*it == task)
-			return true;
-	}
-	return false;
+{    
+    Mutex::ScopedLock lock(_mutex);
+    for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
+        if (*it == task)
+            return true;
+    }
+    return false;
 }
 
 
 Task* TaskRunner::get(UInt32 id) const
 {
-	Mutex::ScopedLock lock(_mutex);
-	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
-		if ((*it)->id() == id)
-			return *it;
-	}			
-	return nullptr;
+    Mutex::ScopedLock lock(_mutex);
+    for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
+        if ((*it)->id() == id)
+            return *it;
+    }            
+    return nullptr;
 }
 
 
 Task* TaskRunner::next() const
 {
-	Mutex::ScopedLock lock(_mutex);
-	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
-		if (!(*it)->cancelled())
-			return *it;
-	}			
-	return nullptr;
+    Mutex::ScopedLock lock(_mutex);
+    for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
+        if (!(*it)->cancelled())
+            return *it;
+    }            
+    return nullptr;
 }
 
 
 void TaskRunner::clear()
 {
-	Mutex::ScopedLock lock(_mutex);
-	for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {	
-		TraceLS(this) << "Clear: Destroying task: " << *it << endl;
-		delete *it;
-	}
-	_tasks.clear();
+    Mutex::ScopedLock lock(_mutex);
+    for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {    
+        TraceLS(this) << "Clear: Destroying task: " << *it << endl;
+        delete *it;
+    }
+    _tasks.clear();
 }
 
 
 void TaskRunner::setRunner(async::Runner::Ptr runner)
 {
-	TraceLS(this) << "Set async: " << runner << endl;
+    TraceLS(this) << "Set async: " << runner << endl;
 
-	Mutex::ScopedLock lock(_mutex);
-	assert(!_runner);
-	_runner = runner;
-	_runner->setRepeating(true);
-	_runner->start(*this);
+    Mutex::ScopedLock lock(_mutex);
+    assert(!_runner);
+    _runner = runner;
+    _runner->setRepeating(true);
+    _runner->start(*this);
 }
 
 
 void TaskRunner::run()
 {
-	Task* task = next();
-	//TraceLS(this) << "Next task: " << task << endl;
-		
-	// Run the task
-	if (task) 
-	{
-		// Check once more that the task has not been cancelled
-		if (!task->cancelled()) {
-			TraceLS(this) << "Run task: " << task << endl;
-			task->run();
+    Task* task = next();
+    //TraceLS(this) << "Next task: " << task << endl;
+        
+    // Run the task
+    if (task) 
+    {
+        // Check once more that the task has not been cancelled
+        if (!task->cancelled()) {
+            TraceLS(this) << "Run task: " << task << endl;
+            task->run();
 
-			onRun(task);
+            onRun(task);
 
-			// Cancel the task if not repeating
-			if (!task->repeating())
-				task->cancel();
+            // Cancel the task if not repeating
+            if (!task->repeating())
+                task->cancel();
 
-			//if (task->cancelled())
-			//	task->_destroyed = true;
-		}
+            //if (task->cancelled())
+            //    task->_destroyed = true;
+        }
 
-		// Advance the task queue
-		{
-			Mutex::ScopedLock lock(_mutex);
-			Task* t = _tasks.front();
-			_tasks.pop_front();
-			_tasks.push_back(t);
-		}
-						
-		// Destroy the task if required
-		if (task->destroyed()) {
-			TraceLS(this) << "Destroy task: " << task << endl;
-			remove(task);
-			delete task;
-		}
-	}
+        // Advance the task queue
+        {
+            Mutex::ScopedLock lock(_mutex);
+            Task* t = _tasks.front();
+            _tasks.pop_front();
+            _tasks.push_back(t);
+        }
+                        
+        // Destroy the task if required
+        if (task->destroyed()) {
+            TraceLS(this) << "Destroy task: " << task << endl;
+            remove(task);
+            delete task;
+        }
+    }
 
-	// Dispatch the Idle signal
-	//TraceLS(this) << "idle: "<< Idle.ndelegates() << endl;
-	Idle.emit(this);
+    // Dispatch the Idle signal
+    //TraceLS(this) << "idle: "<< Idle.ndelegates() << endl;
+    Idle.emit(this);
 
-	// Prevent 100% CPU
-	scy::sleep(1);
+    // Prevent 100% CPU
+    scy::sleep(1);
 }
 
 
@@ -278,8 +278,8 @@ void TaskRunner::onRun(Task*)
 
 TaskRunner& TaskRunner::getDefault() 
 {
-	static Singleton<TaskRunner> sh;
-	return *sh.get();
+    static Singleton<TaskRunner> sh;
+    return *sh.get();
 }
 
 
@@ -289,40 +289,40 @@ TaskRunner& TaskRunner::getDefault()
 
 
 Task::Task(bool repeat) : 
-	_id(util::randomNumber()),
-	_repeating(repeat),
-	_destroyed(false)
-{ 	
+    _id(util::randomNumber()),
+    _repeating(repeat),
+    _destroyed(false)
+{     
 }
 
 
 Task::~Task()
 {
-	//assert(destroyed());
+    //assert(destroyed());
 }
 
 
-void Task::destroy()			
+void Task::destroy()            
 {
-	_destroyed = true;
+    _destroyed = true;
 }
 
 
 UInt32 Task::id() const
 {
-	return _id;
+    return _id;
 }
 
 
-bool Task::destroyed() const						 
+bool Task::destroyed() const                         
 { 
-	return _destroyed;
+    return _destroyed;
 }
 
 
-bool Task::repeating() const						 
+bool Task::repeating() const                         
 { 
-	return _repeating;
+    return _repeating;
 }
 
 

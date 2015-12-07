@@ -41,24 +41,24 @@ const int PERMISSION_LIFETIME = 3 * 60 * 1000;
 
 struct Permission 
 {
-	std::string ip;
-	Timeout timeout;
+    std::string ip;
+    Timeout timeout;
 
-	Permission(const std::string& ip) : 
-		ip(ip), timeout(PERMISSION_LIFETIME) 
-	{
-		refresh();
-	}
+    Permission(const std::string& ip) : 
+        ip(ip), timeout(PERMISSION_LIFETIME) 
+    {
+        refresh();
+    }
 
-	void refresh()
-	{
-		timeout.reset();
-	}
+    void refresh()
+    {
+        timeout.reset();
+    }
 
-	bool operator ==(const std::string& r) const
-	{
-		return ip == r;
-	}
+    bool operator ==(const std::string& r) const
+    {
+        return ip == r;
+    }
 };
 
 

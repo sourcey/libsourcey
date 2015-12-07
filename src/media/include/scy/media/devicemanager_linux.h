@@ -36,21 +36,17 @@ namespace scy {
 namespace av {
 
 
-class LinuxDeviceManager : public DeviceManager 
+class LinuxDeviceManager : public DeviceManager
 {
 public:
-	LinuxDeviceManager();
-	virtual ~LinuxDeviceManager();
+    LinuxDeviceManager();
+    virtual ~LinuxDeviceManager();
 
-	virtual bool getVideoCaptureDevices(std::vector<Device>& devs);
-
-private:
-	virtual bool getAudioDevices(bool input, std::vector<Device>& devs);
-	//SoundSystemHandle sound_system_;
+    virtual bool getVideoCaptureDevices(std::vector<Device>& devs);
 };
 
 
-} } // namespace scy::av 
+} } // namespace scy::av
 
 
 #endif  // SCY_MEDIA_DeviceManager_LINUX_H

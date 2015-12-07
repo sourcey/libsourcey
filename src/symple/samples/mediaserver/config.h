@@ -12,10 +12,10 @@
 
 
 namespace scy { 
-	
-	
-//const std::string kPublicIP = "124.171.220.107";	// Current external IP for TURN permissions
-const std::string kRelayServerIP = "127.0.0.1";		// TURN server IP
+    
+    
+//const std::string kPublicIP = "124.171.220.107";    // Current external IP for TURN permissions
+const std::string kRelayServerIP = "127.0.0.1";        // TURN server IP
 
 
 } // namespace scy

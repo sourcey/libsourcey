@@ -44,103 +44,103 @@ namespace av {
 
 
 class VideoAnalyzer //: public PacketProcessor
-	/// This class provides basic AV spectrum analysis on a 
-	/// video using the Fourier Transform algorithm.
-	/// Data is outputted in CSV format.
-	///
-	/// TODO: 
-	///		- Pluggable algorithms and processors
-	///		- Normalization (scaling) for output values
-	///		- Process multiple audio channels properly
-	///		- Inherit from PacketProcessor
+    /// This class provides basic AV spectrum analysis on a 
+    /// video using the Fourier Transform algorithm.
+    /// Data is outputted in CSV format.
+    ///
+    /// TODO: 
+    ///        - Pluggable algorithms and processors
+    ///        - Normalization (scaling) for output values
+    ///        - Process multiple audio channels properly
+    ///        - Inherit from PacketProcessor
 {
 public:
-	struct Options 
-	{	
-		std::string ifile;	// The input video file.
-		int rdftSize;		// Size of the FFT input array
-		//bool blocking;		// Blocking mode (disable async)
+    struct Options 
+    {    
+        std::string ifile;    // The input video file.
+        int rdftSize;        // Size of the FFT input array
+        //bool blocking;        // Blocking mode (disable async)
 
-		Options() {
-			rdftSize = 1024;
-			//blocking = false;
-		}
-	};
+        Options() {
+            rdftSize = 1024;
+            //blocking = false;
+        }
+    };
 
-	struct Stream 
-	{
-		std::string name;
-		RDFTContext* rdft;
-		FFTSample* rdftData;
-		int rdftSize;
-		int rdftBits;
-		Int64 frames;
-		int filled;
-		
-		Stream(const std::string& name, int rdftSize);
-		~Stream();
-		
-		void initialize();
-		void uninitialize();
+    struct Stream 
+    {
+        std::string name;
+        RDFTContext* rdft;
+        FFTSample* rdftData;
+        int rdftSize;
+        int rdftBits;
+        Int64 frames;
+        int filled;
+        
+        Stream(const std::string& name, int rdftSize);
+        ~Stream();
+        
+        void initialize();
+        void uninitialize();
 
-		void fft();
-			// Preforms FFT on internal rdftData
-	};
+        void fft();
+            // Preforms FFT on internal rdftData
+    };
 
-	struct Packet 
-	{
-		double time;
-		double value;
-		//double min;
-		//double max;
-		Packet(double time = 0.0, double value = 0.0); //, double min = 99999.9, double max = -99999.9
-	};
+    struct Packet 
+    {
+        double time;
+        double value;
+        //double min;
+        //double max;
+        Packet(double time = 0.0, double value = 0.0); //, double min = 99999.9, double max = -99999.9
+    };
 
 public:
-	VideoAnalyzer(const VideoAnalyzer::Options& options = VideoAnalyzer::Options());
-	virtual ~VideoAnalyzer();
-				
-	virtual void initialize();
-		// Set everything up, and open the input file.
+    VideoAnalyzer(const VideoAnalyzer::Options& options = VideoAnalyzer::Options());
+    virtual ~VideoAnalyzer();
+                
+    virtual void initialize();
+        // Set everything up, and open the input file.
 
-	virtual void uninitialize();
-		// Stop processing and free everything.
+    virtual void uninitialize();
+        // Stop processing and free everything.
 
-	virtual void start();
-		// Begin processing.
+    virtual void start();
+        // Begin processing.
 
-	virtual void stop();
-		// Stop processing.
-	
-	Signal2<const VideoAnalyzer::Stream&, const VideoAnalyzer::Packet&> PacketOut;
-		// Signals on VideoAnalyzer::Packet output
-		// Raw FFT data is available via VideoAnalyzer::Stream->rdftData
+    virtual void stop();
+        // Stop processing.
+    
+    Signal2<const VideoAnalyzer::Stream&, const VideoAnalyzer::Packet&> PacketOut;
+        // Signals on VideoAnalyzer::Packet output
+        // Raw FFT data is available via VideoAnalyzer::Stream->rdftData
 
-	NullSignal Complete;
-		// Signals on analysis complete
-		
-	virtual AVInputReader& reader();
-	virtual Options& options();
-	virtual std::string error() const;
-	
+    NullSignal Complete;
+        // Signals on analysis complete
+        
+    virtual AVInputReader& reader();
+    virtual Options& options();
+    virtual std::string error() const;
+    
 protected:
-	AVFrame* getGrayVideoFrame();
-	
-	virtual void onReadComplete(void* sender);
-	virtual void onVideo(void* sender, VideoPacket& packet);
-	virtual void onAudio(void* sender, AudioPacket& packet);
+    AVFrame* getGrayVideoFrame();
+    
+    virtual void onReadComplete(void* sender);
+    virtual void onVideo(void* sender, VideoPacket& packet);
+    virtual void onAudio(void* sender, AudioPacket& packet);
 
-	const char* className() const { return "VideoAnalyzer"; }
+    const char* className() const { return "VideoAnalyzer"; }
 
 protected:
-	mutable Mutex _mutex;
-	
-	Options _options;
-	std::string	_error;
-	AVInputReader _reader;
-	VideoAnalyzer::Stream* _video;
-	VideoAnalyzer::Stream* _audio;	
-	VideoConversionContext* _videoConv;
+    mutable Mutex _mutex;
+    
+    Options _options;
+    std::string    _error;
+    AVInputReader _reader;
+    VideoAnalyzer::Stream* _video;
+    VideoAnalyzer::Stream* _audio;    
+    VideoConversionContext* _videoConv;
 };
 
 
@@ -170,5 +170,5 @@ inline double log2(double n);
 
 
 
-	//virtual void writeCSV(const VideoAnalyzer::Packet& packet);, double time
-	//std::ofstream _ofile;
+    //virtual void writeCSV(const VideoAnalyzer::Packet& packet);, double time
+    //std::ofstream _ofile;

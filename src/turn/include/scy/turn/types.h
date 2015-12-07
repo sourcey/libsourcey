@@ -36,29 +36,29 @@ const int SERVER_SOCK_BUF_SIZE = CLIENT_SOCK_BUF_SIZE * 32;
 
 enum AuthenticationState 
 {
-	Authenticating	= 1,
-	Authorized		= 2,
-	QuotaReached	= 3,
-	NotAuthorized	= 4
+    Authenticating    = 1,
+    Authorized        = 2,
+    QuotaReached    = 3,
+    NotAuthorized    = 4
 };
 
 
 class Request: public stun::Message
 {
 public:
-	net::TransportType transport;
-	net::Address localAddress;
-	net::Address remoteAddress;
-	std::string hash; // for MessageIntegrity signing
+    net::TransportType transport;
+    net::Address localAddress;
+    net::Address remoteAddress;
+    std::string hash; // for MessageIntegrity signing
 
-	Request(const stun::Message& message, 
-			net::TransportType transport,
-			const net::Address& localAddress = net::Address(), 
-			const net::Address& remoteAddress = net::Address()) :
-		stun::Message(message), 
-		transport(transport), 
-		localAddress(localAddress), 
-		remoteAddress(remoteAddress) {}
+    Request(const stun::Message& message, 
+            net::TransportType transport,
+            const net::Address& localAddress = net::Address(), 
+            const net::Address& remoteAddress = net::Address()) :
+        stun::Message(message), 
+        transport(transport), 
+        localAddress(localAddress), 
+        remoteAddress(remoteAddress) {}
 };
 
 

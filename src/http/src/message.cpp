@@ -39,13 +39,13 @@ const std::string Message::EMPTY;
 
 
 Message::Message() :
-	_version(HTTP_1_1)
+    _version(HTTP_1_1)
 {
 }
 
 
 Message::Message(const std::string& version) :
-	_version(version)
+    _version(version)
 {
 }
 
@@ -57,113 +57,113 @@ Message::~Message()
 
 void Message::setVersion(const std::string& version)
 {
-	_version = version;
+    _version = version;
 }
 
 
 void Message::setContentLength(UInt64 length)
 {
-	if (int(length) != UNKNOWN_CONTENT_LENGTH)
-		set(CONTENT_LENGTH, util::itostr<UInt64>(length));
-	else
-		erase(CONTENT_LENGTH);
+    if (int(length) != UNKNOWN_CONTENT_LENGTH)
+        set(CONTENT_LENGTH, util::itostr<UInt64>(length));
+    else
+        erase(CONTENT_LENGTH);
 }
 
-	
+    
 UInt64 Message::getContentLength() const
 {
-	const std::string& contentLength = get(CONTENT_LENGTH, EMPTY);
-	if (!contentLength.empty())
-	{
-		return util::strtoi<UInt64>(contentLength);
-	}
-	else return UInt64(UNKNOWN_CONTENT_LENGTH);
+    const std::string& contentLength = get(CONTENT_LENGTH, EMPTY);
+    if (!contentLength.empty())
+    {
+        return util::strtoi<UInt64>(contentLength);
+    }
+    else return UInt64(UNKNOWN_CONTENT_LENGTH);
 }
 
 
 void Message::setTransferEncoding(const std::string& transferEncoding)
 {
-	if (util::icompare(transferEncoding, IDENTITY_TRANSFER_ENCODING) == 0)
-		erase(TRANSFER_ENCODING);
-	else
-		set(TRANSFER_ENCODING, transferEncoding);
+    if (util::icompare(transferEncoding, IDENTITY_TRANSFER_ENCODING) == 0)
+        erase(TRANSFER_ENCODING);
+    else
+        set(TRANSFER_ENCODING, transferEncoding);
 }
 
 
 const std::string& Message::getTransferEncoding() const
 {
-	return get(TRANSFER_ENCODING, IDENTITY_TRANSFER_ENCODING);
+    return get(TRANSFER_ENCODING, IDENTITY_TRANSFER_ENCODING);
 }
 
 
 void Message::setChunkedTransferEncoding(bool flag)
 {
-	if (flag)
-		setTransferEncoding(CHUNKED_TRANSFER_ENCODING);
-	else
-		setTransferEncoding(IDENTITY_TRANSFER_ENCODING);
+    if (flag)
+        setTransferEncoding(CHUNKED_TRANSFER_ENCODING);
+    else
+        setTransferEncoding(IDENTITY_TRANSFER_ENCODING);
 }
 
-	
+    
 bool Message::isChunkedTransferEncoding() const
 {
-	return util::icompare(getTransferEncoding(), CHUNKED_TRANSFER_ENCODING) == 0;
+    return util::icompare(getTransferEncoding(), CHUNKED_TRANSFER_ENCODING) == 0;
 }
 
-	
+    
 void Message::setContentType(const std::string& contentType)
 {
-	if (contentType.empty())
-		erase(CONTENT_TYPE);
-	else
-		set(CONTENT_TYPE, contentType);
+    if (contentType.empty())
+        erase(CONTENT_TYPE);
+    else
+        set(CONTENT_TYPE, contentType);
 }
 
-	
+    
 const std::string& Message::getContentType() const
 {
-	return get(CONTENT_TYPE, UNKNOWN_CONTENT_TYPE);
+    return get(CONTENT_TYPE, UNKNOWN_CONTENT_TYPE);
 }
 
 
 void Message::setKeepAlive(bool keepAlive)
 {
-	if (keepAlive)
-		set(CONNECTION, CONNECTION_KEEP_ALIVE);
-	else
-		set(CONNECTION, CONNECTION_CLOSE);
+    if (keepAlive)
+        set(CONNECTION, CONNECTION_KEEP_ALIVE);
+    else
+        set(CONNECTION, CONNECTION_CLOSE);
 }
 
 
 bool Message::getKeepAlive() const
 {
-	const std::string& connection = get(CONNECTION, EMPTY);
-	if (!connection.empty())
-		return util::icompare(connection, CONNECTION_CLOSE) != 0;
-	else
-		return getVersion() == HTTP_1_1;
+    const std::string& connection = get(CONNECTION, EMPTY);
+    if (!connection.empty())
+        return util::icompare(connection, CONNECTION_CLOSE) != 0;
+    else
+        return getVersion() == HTTP_1_1;
 }
 
 
 const std::string& Message::getVersion() const
 {
-	return _version;
+    return _version;
 }
 
 
 bool Message::hasContentLength() const
 {
-	return has(CONTENT_LENGTH);
+    return has(CONTENT_LENGTH);
 }
 
 
 void Message::write(std::ostream& ostr) const
 {
-	NVCollection::ConstIterator it = begin();
-	while (it != end()) {
-		ostr << it->first << ": " << it->second << "\r\n";
-		++it;
-	}
+    NVCollection::ConstIterator it = begin();
+    while (it != end()) {
+        ostr << it->first << ": " << it->second << "\r\n";
+        ++it;
+    }
 }
 
 

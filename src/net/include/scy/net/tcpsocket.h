@@ -35,68 +35,68 @@ namespace net {
 
 class TCPSocket: public Stream, public net::Socket
 {
-public:	
-	typedef std::shared_ptr<TCPSocket> Ptr;
-	typedef std::vector<Ptr> Vec;
+public:    
+    typedef std::shared_ptr<TCPSocket> Ptr;
+    typedef std::vector<Ptr> Vec;
 
-	TCPSocket(uv::Loop* loop = uv::defaultLoop()); 
-	virtual ~TCPSocket();
-	
-	virtual bool shutdown();
-	virtual void close();
-	
-	virtual void connect(const net::Address& peerAddress);
+    TCPSocket(uv::Loop* loop = uv::defaultLoop()); 
+    virtual ~TCPSocket();
+    
+    virtual bool shutdown();
+    virtual void close();
+    
+    virtual void connect(const net::Address& peerAddress);
 
-	virtual int send(const char* data, std::size_t len, int flags = 0);
-	virtual int send(const char* data, std::size_t len, const net::Address& peerAddress, int flags = 0);
-	
-	virtual void bind(const net::Address& address, unsigned flags = 0);
-	virtual void listen(int backlog = 64);	
-	
-	virtual void acceptConnection();
+    virtual int send(const char* data, std::size_t len, int flags = 0);
+    virtual int send(const char* data, std::size_t len, const net::Address& peerAddress, int flags = 0);
+    
+    virtual void bind(const net::Address& address, unsigned flags = 0);
+    virtual void listen(int backlog = 64);    
+    
+    virtual void acceptConnection();
 
-	virtual void setNoDelay(bool enable);
-	virtual void setKeepAlive(int enable, unsigned int delay);
+    virtual void setNoDelay(bool enable);
+    virtual void setKeepAlive(int enable, unsigned int delay);
 
-	virtual uv::Loop* loop() const;
-			
-	void setError(const scy::Error& err);
-	const scy::Error& error() const;
-	
-	virtual bool closed() const;
-		// Returns true if the native socket handle is closed.
-	
-	net::Address address() const;
-		// Returns the IP address and port number of the socket.
-		// A wildcard address is returned if the socket is not connected.
-		
-	net::Address peerAddress() const;
-		// Returns the IP address and port number of the peer socket.
-		// A wildcard address is returned if the socket is not connected.
+    virtual uv::Loop* loop() const;
+            
+    void setError(const scy::Error& err);
+    const scy::Error& error() const;
+    
+    virtual bool closed() const;
+        // Returns true if the native socket handle is closed.
+    
+    net::Address address() const;
+        // Returns the IP address and port number of the socket.
+        // A wildcard address is returned if the socket is not connected.
+        
+    net::Address peerAddress() const;
+        // Returns the IP address and port number of the peer socket.
+        // A wildcard address is returned if the socket is not connected.
 
-	net::TransportType transport() const;
-		// Returns the TCP transport protocol.
-	
+    net::TransportType transport() const;
+        // Returns the TCP transport protocol.
+    
 #ifdef _WIN32
-	void setSimultaneousAccepts(bool enable);
+    void setSimultaneousAccepts(bool enable);
 #endif
-	
-	Signal<const net::TCPSocket::Ptr&> AcceptConnection;
-	
+    
+    Signal<const net::TCPSocket::Ptr&> AcceptConnection;
+    
 public:
-	virtual void onConnect(uv_connect_t* handle, int status);
-	virtual void onAcceptConnection(uv_stream_t* handle, int status);
-	virtual void onRead(const char* data, std::size_t len);
-	virtual void onRecv(const MutableBuffer& buf);
-	virtual void onError(const scy::Error& error);
-	virtual void onClose();
-		
+    virtual void onConnect(uv_connect_t* handle, int status);
+    virtual void onAcceptConnection(uv_stream_t* handle, int status);
+    virtual void onRead(const char* data, std::size_t len);
+    virtual void onRecv(const MutableBuffer& buf);
+    virtual void onError(const scy::Error& error);
+    virtual void onClose();
+        
 protected:
-	virtual void init();
-	//virtual void* self() { return this; }
+    virtual void init();
+    //virtual void* self() { return this; }
 
-	//std::unique_ptr<uv_connect_t> _connectReq;
-	uv_connect_t* _connectReq;
+    //std::unique_ptr<uv_connect_t> _connectReq;
+    uv_connect_t* _connectReq;
 };
 
 

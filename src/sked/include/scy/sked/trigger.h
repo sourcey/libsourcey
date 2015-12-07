@@ -24,13 +24,13 @@
 #include "scy/datetime.h"
 #include "scy/json/iserializable.h"
 
-	
+    
 namespace scy {
 namespace sked {
 
 
 enum DaysOfTheWeek
-	/// Days of the week
+    /// Days of the week
 {
     Sunday = 0,
     Monday = 1,
@@ -43,7 +43,7 @@ enum DaysOfTheWeek
 
 
 enum MonthOfTheYeay
-	/// Months of the year
+    /// Months of the year
 {
     January = 0,
     February = 1,
@@ -64,46 +64,46 @@ enum MonthOfTheYeay
 //
 struct Trigger: public json::ISerializable
 {
-	Trigger(const std::string& type = "", const std::string& name = "");
+    Trigger(const std::string& type = "", const std::string& name = "");
 
-	virtual void update() = 0;
-		// Updates the scheduleAt value to the
-		// next scheduled time.
-	
-	virtual Int64 remaining();
-		// Returns the milliseconds remaining 
-		// until the next scheduled timeout.
-	
-	virtual bool timeout();
-		// Returns true if the task is ready to
-		// be run, false otherwise.
-	
-	virtual bool expired();
-		// Returns true if the task is expired
-		// and should be destroyed.
-		// Returns false by default.
-	
-	virtual void serialize(json::Value& root);
-	virtual void deserialize(json::Value& root);
+    virtual void update() = 0;
+        // Updates the scheduleAt value to the
+        // next scheduled time.
+    
+    virtual Int64 remaining();
+        // Returns the milliseconds remaining 
+        // until the next scheduled timeout.
+    
+    virtual bool timeout();
+        // Returns true if the task is ready to
+        // be run, false otherwise.
+    
+    virtual bool expired();
+        // Returns true if the task is expired
+        // and should be destroyed.
+        // Returns false by default.
+    
+    virtual void serialize(json::Value& root);
+    virtual void deserialize(json::Value& root);
 
-	std::string type;
-		// The type of this trigger class.
+    std::string type;
+        // The type of this trigger class.
 
-	std::string name;
-		// The display name of this trigger class.
-	
-	int timesRun;
-		// The number of times the task has run
-		// since creation;
-	
-	DateTime createdAt;
-		// The time the task was created.
+    std::string name;
+        // The display name of this trigger class.
+    
+    int timesRun;
+        // The number of times the task has run
+        // since creation;
+    
+    DateTime createdAt;
+        // The time the task was created.
 
-	DateTime scheduleAt;
-		// The time the task is scheduled to run.
+    DateTime scheduleAt;
+        // The time the task is scheduled to run.
 
-	DateTime lastRunAt;
-		// The time the task was last run.
+    DateTime lastRunAt;
+        // The time the task was last run.
 };
 
 
@@ -111,14 +111,14 @@ struct Trigger: public json::ISerializable
 //
 struct OnceOnlyTrigger: public Trigger
 {
-	OnceOnlyTrigger();
+    OnceOnlyTrigger();
 
-	virtual void update() {
-		// Nothing to do since scheduleAt contains 
-		// the correct date and we run once only.
-	}
+    virtual void update() {
+        // Nothing to do since scheduleAt contains 
+        // the correct date and we run once only.
+    }
 
-	virtual bool expired();
+    virtual bool expired();
 };
 
 
@@ -126,22 +126,22 @@ struct OnceOnlyTrigger: public Trigger
 //
 struct IntervalTrigger: public Trigger
 {
-	IntervalTrigger();
+    IntervalTrigger();
 
-	virtual void update();
-	virtual bool expired();
-	
-	virtual void serialize(json::Value& root);
-	virtual void deserialize(json::Value& root);
+    virtual void update();
+    virtual bool expired();
+    
+    virtual void serialize(json::Value& root);
+    virtual void deserialize(json::Value& root);
 
-	Timespan interval;
-		// This value represents the interval to wait
-		// before running the task.
+    Timespan interval;
+        // This value represents the interval to wait
+        // before running the task.
 
-	int maxTimes;
-		// The maximum number of times the task will
-		// be run before it is destroyed.
-		// 0 for no effect.
+    int maxTimes;
+        // The maximum number of times the task will
+        // be run before it is destroyed.
+        // 0 for no effect.
 };
 
 
@@ -149,20 +149,20 @@ struct IntervalTrigger: public Trigger
 //
 struct DailyTrigger: public Trigger
 {
-	DailyTrigger();
+    DailyTrigger();
 
-	virtual void update();
+    virtual void update();
 
-	DateTime timeOfDay;
-		// This value represents the time of day the
-		// task will trigger.
-		// The date part of the timestamp is redundant.
+    DateTime timeOfDay;
+        // This value represents the time of day the
+        // task will trigger.
+        // The date part of the timestamp is redundant.
 
-	std::vector<DaysOfTheWeek> daysExcluded;
-		// Days of the week can be excluded by adding
-		// the appropriate bit flag here. 
+    std::vector<DaysOfTheWeek> daysExcluded;
+        // Days of the week can be excluded by adding
+        // the appropriate bit flag here. 
 };
-	
+    
 
 } } // namespace scy::sked
 

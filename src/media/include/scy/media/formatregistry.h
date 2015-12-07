@@ -34,30 +34,30 @@ namespace av {
 class FormatRegistry 
 {
 public:
-	static FormatRegistry& instance();
+    static FormatRegistry& instance();
 
-	FormatRegistry();
-	virtual ~FormatRegistry();
-	
+    FormatRegistry();
+    virtual ~FormatRegistry();
+    
     virtual Format& get(const std::string& name);
     virtual Format& getByID(const std::string& id);
     virtual Format& getOrDefault(const std::string& name);
     virtual Format& getDefault();
-		// Returns the default media format.
-		// If a default has been specified it will be
-		// returned, other the format with the highest
-		// priority will take precedence.
-	
+        // Returns the default media format.
+        // If a default has been specified it will be
+        // returned, other the format with the highest
+        // priority will take precedence.
+    
     virtual void registerFormat(const Format& format);
-		// Registers the given media format overriding 
-		// existing media formats of the same name.
+        // Registers the given media format overriding 
+        // existing media formats of the same name.
 
     virtual bool unregisterFormat(const std::string& name);
-		// Unregisters the media format matching the
-		// given name. 
+        // Unregisters the media format matching the
+        // given name. 
 
     virtual void setDefault(const std::string& name);
-		// Sets the default fallback media format.
+        // Sets the default fallback media format.
 
     virtual bool exists(const std::string& name);
     virtual void clear();
@@ -65,12 +65,12 @@ public:
     virtual FormatList formats() const;
 
 private:
-	FormatRegistry(FormatRegistry const&) {};
-	//FormatRegistry& operator=(FormatRegistry const&) {};
-	
+    FormatRegistry(FormatRegistry const&) {};
+    //FormatRegistry& operator=(FormatRegistry const&) {};
+    
     FormatList _formats;
     std::string _default;
-	mutable Mutex _mutex;
+    mutable Mutex _mutex;
 };
 
 

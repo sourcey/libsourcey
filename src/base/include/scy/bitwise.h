@@ -25,18 +25,18 @@
 
 namespace scy {
 
-	
+    
 struct Bitwise 
 {
-	unsigned data; // storage integer
+    unsigned data; // storage integer
 
-	Bitwise(unsigned flags = 0) : data(flags) {}
-	virtual void reset() { data = 0; };
-	virtual void set(unsigned flag) { if (!has(flag)) data |= flag; };
-	virtual void add(unsigned flag) { data |= flag; };
-	virtual void remove(unsigned flag) { data &= ~flag; };
-	virtual void toggle(unsigned flag) { data ^= flag; };
-	virtual bool has(unsigned flag) const { return (data & flag) == flag; };
+    Bitwise(unsigned flags = 0) : data(flags) {}
+    virtual void reset() { data = 0; };
+    virtual void set(unsigned flag) { if (!has(flag)) data |= flag; };
+    virtual void add(unsigned flag) { data |= flag; };
+    virtual void remove(unsigned flag) { data &= ~flag; };
+    virtual void toggle(unsigned flag) { data ^= flag; };
+    virtual bool has(unsigned flag) const { return (data & flag) == flag; };
 };
 
 
@@ -44,32 +44,32 @@ struct Bitwise
 class Flaggable 
 {
 public:
-	Flaggable(unsigned flags = 0) : _flags(flags) {}
-	Flaggable(const Flaggable& r) : _flags(r._flags) {}
-	Flaggable(const Flags& r) : _flags(r) {}
+    Flaggable(unsigned flags = 0) : _flags(flags) {}
+    Flaggable(const Flaggable& r) : _flags(r._flags) {}
+    Flaggable(const Flags& r) : _flags(r) {}
 
-	virtual void setFlag(unsigned flag) { 
-		_flags.set(flag); 
-	};
-	virtual void addFlag(unsigned flag) { 
-		_flags.add(flag); 
-	};
-	virtual void removeFlag(unsigned flag) { 
-		_flags.remove(flag); 
-	};
-	virtual void toggleFlag(unsigned flag) { 
-		_flags.toggle(flag); 
-	};
-	virtual bool hasFlag(unsigned flag) const { 
-		return _flags.has(flag); 
-	};
-	virtual void setFlags(Flags flags) { 
-		_flags = flags; 
-	};
-	virtual Flags flags() const { return _flags; };
+    virtual void setFlag(unsigned flag) { 
+        _flags.set(flag); 
+    };
+    virtual void addFlag(unsigned flag) { 
+        _flags.add(flag); 
+    };
+    virtual void removeFlag(unsigned flag) { 
+        _flags.remove(flag); 
+    };
+    virtual void toggleFlag(unsigned flag) { 
+        _flags.toggle(flag); 
+    };
+    virtual bool hasFlag(unsigned flag) const { 
+        return _flags.has(flag); 
+    };
+    virtual void setFlags(Flags flags) { 
+        _flags = flags; 
+    };
+    virtual Flags flags() const { return _flags; };
 
 protected:
-	Flags _flags;
+    Flags _flags;
 };
 #endif
 

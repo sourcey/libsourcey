@@ -33,89 +33,89 @@ namespace av {
 
 struct EncoderState: public State 
 {
-	enum Type 
-	{
-		None = 0,
-		Ready,
-		Encoding,
-		Stopped,
-		Error
-	};
+    enum Type 
+    {
+        None = 0,
+        Ready,
+        Encoding,
+        Stopped,
+        Error
+    };
 
-	std::string str(unsigned int id) const 
-	{ 	
-		switch(id) {
-		case None:			return "None";
-		case Ready:			return "Ready";
-		case Encoding:		return "Encoding";
-		case Stopped:		return "Stopped";
-		case Error:			return "Error";
-		}
-		return "undefined"; 
-	};
+    std::string str(unsigned int id) const 
+    {     
+        switch(id) {
+        case None:            return "None";
+        case Ready:            return "Ready";
+        case Encoding:        return "Encoding";
+        case Stopped:        return "Stopped";
+        case Error:            return "Error";
+        }
+        return "undefined"; 
+    };
 };
 
 
 struct EncoderOptions
 {
-	Format iformat;		// The input media format.
-	Format oformat;		// The output media format.
-	std::string ifile;	// The input file path.
-	std::string ofile;	// The output file path.
-	long duration;		// The millisecond duration 
-						// of time to record.
-	EncoderOptions(const Format& iformat = Format(), 
-				   const Format& oformat = Format(),
-				   const std::string& ifile = "",
-				   const std::string& ofile = "",
-				   long duration = 0) :
-		iformat(iformat),
-		oformat(oformat),
-		ifile(ifile),
-		ofile(ofile),
-		duration(duration) {}
-	virtual ~EncoderOptions() {};
+    Format iformat;        // The input media format.
+    Format oformat;        // The output media format.
+    std::string ifile;    // The input file path.
+    std::string ofile;    // The output file path.
+    long duration;        // The millisecond duration 
+                        // of time to record.
+    EncoderOptions(const Format& iformat = Format(), 
+                   const Format& oformat = Format(),
+                   const std::string& ifile = "",
+                   const std::string& ofile = "",
+                   long duration = 0) :
+        iformat(iformat),
+        oformat(oformat),
+        ifile(ifile),
+        ofile(ofile),
+        duration(duration) {}
+    virtual ~EncoderOptions() {};
 };
 
 
 class IEncoder: public Stateful<EncoderState>
-	/// This is the abstract class for all instantiations
-	/// of the IEncoder template.
+    /// This is the abstract class for all instantiations
+    /// of the IEncoder template.
 {
 public:
-	enum Type 
-	{
-		None		= 0,	// huh?
-		Video		= 1,	// video only
-		Audio		= 2,	// audio only
-		Multiplex	= 3		// both video & audio
-	};
-	
-	virtual void initialize() = 0;
-	virtual void uninitialize() = 0;	
-	
-	virtual EncoderOptions& options() = 0;
+    enum Type 
+    {
+        None        = 0,    // huh?
+        Video        = 1,    // video only
+        Audio        = 2,    // audio only
+        Multiplex    = 3        // both video & audio
+    };
+    
+    virtual void initialize() = 0;
+    virtual void uninitialize() = 0;    
+    
+    virtual EncoderOptions& options() = 0;
 
-	virtual bool isNone() const		{ return stateEquals(EncoderState::None); };
-	virtual bool isReady() const	{ return stateEquals(EncoderState::Ready); };
-	virtual bool isEncoding() const	{ return stateEquals(EncoderState::Encoding); };
-	virtual bool isActive() const	{ return stateBetween(EncoderState::Ready, EncoderState::Encoding); };
-	virtual bool isStopped() const	{ return stateEquals(EncoderState::Stopped); };
-	virtual bool isError() const	{ return stateEquals(EncoderState::Error); };
+    virtual bool isNone() const        { return stateEquals(EncoderState::None); };
+    virtual bool isReady() const    { return stateEquals(EncoderState::Ready); };
+    virtual bool isEncoding() const    { return stateEquals(EncoderState::Encoding); };
+    virtual bool isActive() const    { return stateBetween(EncoderState::Ready, EncoderState::Encoding); };
+    virtual bool isStopped() const    { return stateEquals(EncoderState::Stopped); };
+    virtual bool isError() const    { return stateEquals(EncoderState::Error); };
 };
 
 
 typedef IEncoder IPacketEncoder;
-	/// 0.8.x compatibility
+    /// 0.8.x compatibility
 
 /*
 class IPacketEncoder: public IEncoder, public PacketProcessor
-	/// This class extends the IEncoder interface to add
-	/// PacketStream compatibility.
+    /// This class extends the IEncoder interface to add
+    /// PacketStream compatibility.
 {
 public:
-	virtual void process(IPacket& packet) = 0;
-		// Encodes the packet, and pushes it downstream.
+    virtual void process(IPacket& packet) = 0;
+        // Encodes the packet, and pushes it downstream.
 };
 */
 

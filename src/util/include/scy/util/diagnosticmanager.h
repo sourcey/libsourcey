@@ -27,29 +27,29 @@
 
 
 namespace scy {
-	
-	
+    
+    
 struct DiagnosticState: public State 
 {
-	enum Type 
-	{
-		None = 0,
-		Checking,
-		Passed,
-		Failed
-	};
+    enum Type 
+    {
+        None = 0,
+        Checking,
+        Passed,
+        Failed
+    };
 
-	std::string str(unsigned int id) const 
-	{ 
-		switch(id) {
-		case None:			return "None";
-		case Checking:		return "Checking";
-		case Passed:		return "Passed";
-		case Failed:		return "Failed";
-		default:			assert(false);
-		}
-		return "undefined"; 
-	}
+    std::string str(unsigned int id) const 
+    { 
+        switch(id) {
+        case None:            return "None";
+        case Checking:        return "Checking";
+        case Passed:        return "Passed";
+        case Failed:        return "Failed";
+        default:            assert(false);
+        }
+        return "undefined"; 
+    }
 };
 
 
@@ -61,39 +61,39 @@ struct DiagnosticState: public State
 class IDiagnostic: public Stateful<DiagnosticState>
 {
 public:
-	IDiagnostic();
-	virtual ~IDiagnostic();
+    IDiagnostic();
+    virtual ~IDiagnostic();
 
-	std::string name;        /// The name of the diagnostic.
-	std::string description; /// The diagnostic description.
-	std::vector<std::string> summary;		 /// The diagnostic summary, maybe including 
-							 /// troubleshooting information on failure.
-	
-	virtual void check();
-	virtual void reset();
+    std::string name;        /// The name of the diagnostic.
+    std::string description; /// The diagnostic description.
+    std::vector<std::string> summary;         /// The diagnostic summary, maybe including 
+                             /// troubleshooting information on failure.
+    
+    virtual void check();
+    virtual void reset();
 
-	virtual bool complete() const;
-	virtual bool passed() const;
-	virtual bool failed() const;
+    virtual bool complete() const;
+    virtual bool passed() const;
+    virtual bool failed() const;
 
-	Signal<const std::string&> SummaryUpdated;
-		// Fires when a new text item is added 
-		// to the summary.
+    Signal<const std::string&> SummaryUpdated;
+        // Fires when a new text item is added 
+        // to the summary.
 
-	/// The StateChange signal will dispatch
-	/// diagnostic test results to delegates.
+    /// The StateChange signal will dispatch
+    /// diagnostic test results to delegates.
 
 protected:
-	virtual void run() = 0;	
-		// Override to implement diagnostic logic.
-	
-	virtual bool pass();
-	virtual bool fail();
-	virtual void addSummary(const std::string& text);
+    virtual void run() = 0;    
+        // Override to implement diagnostic logic.
+    
+    virtual bool pass();
+    virtual bool fail();
+    virtual void addSummary(const std::string& text);
 };
 
 
-typedef PointerCollection<std::string, IDiagnostic> DiagnosticStore;	
+typedef PointerCollection<std::string, IDiagnostic> DiagnosticStore;    
 
 
 //
@@ -104,15 +104,15 @@ typedef PointerCollection<std::string, IDiagnostic> DiagnosticStore;
 class AsyncDiagnostic: public IDiagnostic, public async::Runnable
 {
 public:
-	virtual ~AsyncDiagnostic() {};
+    virtual ~AsyncDiagnostic() {};
 
-	virtual void check() {
-		reset();
-		_thread.start(*this);
-	};
+    virtual void check() {
+        reset();
+        _thread.start(*this);
+    };
 
 protected:
-	Thread _thread;
+    Thread _thread;
 };
 
 
@@ -120,34 +120,34 @@ protected:
 // Diagnostic Manager
 //
 
-	
+    
 class DiagnosticManager: public DiagnosticStore
 {
 public:
-	DiagnosticManager();
-	virtual ~DiagnosticManager();
-	
-	bool freeDiagnostic(const std::string& name);
-	
-	bool addDiagnostic(IDiagnostic* test);
-		// Adds a IDiagnostic test instance.
+    DiagnosticManager();
+    virtual ~DiagnosticManager();
+    
+    bool freeDiagnostic(const std::string& name);
+    
+    bool addDiagnostic(IDiagnostic* test);
+        // Adds a IDiagnostic test instance.
 
-	virtual IDiagnostic* getDiagnostic(const std::string& name);
-		// Returns the IDiagnostic instance or throws
-		// a NotFoundException exception.
+    virtual IDiagnostic* getDiagnostic(const std::string& name);
+        // Returns the IDiagnostic instance or throws
+        // a NotFoundException exception.
 
-	virtual void resetAll();
+    virtual void resetAll();
 
-	virtual void checkAll();
-		// Runs all managed IDiagnostic tests.
-		// DiagnosticsComplete will be dispatched on
-		// completion.
-	
-	virtual bool allComplete();
+    virtual void checkAll();
+        // Runs all managed IDiagnostic tests.
+        // DiagnosticsComplete will be dispatched on
+        // completion.
+    
+    virtual bool allComplete();
 
-	NullSignal DiagnosticsComplete;
+    NullSignal DiagnosticsComplete;
 
-	virtual void onDiagnosticStateChange(void*, DiagnosticState& state, const DiagnosticState&);
+    virtual void onDiagnosticStateChange(void*, DiagnosticState& state, const DiagnosticState&);
 };
 
 

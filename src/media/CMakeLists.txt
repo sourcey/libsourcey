@@ -3,7 +3,7 @@ if(BUILD_MODULES AND BUILD_MODULE_media)
 
   #include_dependency(OpenSSL REQUIRED)
   #include_dependency(FFmpeg REQUIRED)  
-  #include_dependency(JsonCpp REQUIRED)   
+  #include_dependency(JsonCpp)   
   #include_dependency(OpenCV REQUIRED)   
   #include_dependency(RtAudio REQUIRED)
   #include_dependency(LibUV REQUIRED)

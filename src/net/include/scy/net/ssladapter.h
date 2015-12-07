@@ -38,46 +38,46 @@ namespace net {
  
 class SSLSocket;
 class SSLAdapter 
-	/// A wrapper for the OpenSSL SSL connection context
-	/// TODO: Decouple from SSLSocket implementation
+    /// A wrapper for the OpenSSL SSL connection context
+    /// TODO: Decouple from SSLSocket implementation
 {
 public:
-	SSLAdapter(net::SSLSocket* socket);
-	~SSLAdapter();
+    SSLAdapter(net::SSLSocket* socket);
+    ~SSLAdapter();
 
-	void init(SSL* ssl = nullptr);
-		// Initializes the BIO buffers from the given SSL pointer.
+    void init(SSL* ssl = nullptr);
+        // Initializes the BIO buffers from the given SSL pointer.
 
-	bool initialized() const;
-		// Returns true when the handshake is complete.
-		
-	int available() const;
-		// Returns the number of bytes available in 
-		// the SSL buffer for immediate reading.
-	
-	void shutdown();
-		// Issues an orderly SSL shutdown.
+    bool initialized() const;
+        // Returns true when the handshake is complete.
+        
+    int available() const;
+        // Returns the number of bytes available in 
+        // the SSL buffer for immediate reading.
+    
+    void shutdown();
+        // Issues an orderly SSL shutdown.
 
-	void flush();
-		// Flushes the SSL read/write buffers.
+    void flush();
+        // Flushes the SSL read/write buffers.
 
-	void addIncomingData(const char* data, size_t len);
-	void addOutgoingData(const std::string& data);
-	void addOutgoingData(const char* data, size_t len);
-
-protected:
-	void handleError(int rc);
-
-	void flushWriteBIO();
+    void addIncomingData(const char* data, size_t len);
+    void addOutgoingData(const std::string& data);
+    void addOutgoingData(const char* data, size_t len);
 
 protected:
-	friend class net::SSLSocket;
+    void handleError(int rc);
 
-	net::SSLSocket* _socket;
-	SSL* _ssl;
-	BIO* _readBIO; // The incoming buffer we write encrypted SSL data into
-	BIO* _writeBIO; // The outgoing buffer we write to the socket
-	std::vector<char> _bufferOut; // The outgoing payload to be encrypted and sent
+    void flushWriteBIO();
+
+protected:
+    friend class net::SSLSocket;
+
+    net::SSLSocket* _socket;
+    SSL* _ssl;
+    BIO* _readBIO; // The incoming buffer we write encrypted SSL data into
+    BIO* _writeBIO; // The outgoing buffer we write to the socket
+    std::vector<char> _bufferOut; // The outgoing payload to be encrypted and sent
 };
 
 

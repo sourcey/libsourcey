@@ -32,176 +32,177 @@ namespace scy {
 namespace av {
 
 
-struct Device 
-	/// Represents a system audio, video or render device.
+struct Device
+    /// Represents a system audio, video or render device.
 {
-	Device();
-	Device(const std::string& type, int id, 
-		const std::string& name, const std::string& guid = "", 
-		bool isDefault = false, bool isAvailable = true);
-	
-	void print(std::ostream& os);
+    Device();
+    Device(const std::string& type, int id,
+        const std::string& name, const std::string& guid = "",
+        bool isDefault = false, bool isAvailable = true);
 
-	std::string type; // audioin, audioout, video
-	int id;
-	std::string name;
-	std::string guid;
-	bool isDefault;
-	bool isAvailable;
-	
-	bool operator == (const Device& that) const
-	{
-		return id == that.id
-			&& type == that.type
-			&& name == that.name
-			&& guid == that.guid;
-	}
+    void print(std::ostream& os);
+
+    std::string type; // audioin, audioout, video
+    int id;
+    std::string name;
+    std::string guid;
+    bool isDefault;
+    bool isAvailable;
+
+    bool operator == (const Device& that) const
+    {
+        return id == that.id
+            && type == that.type
+            && name == that.name
+            && guid == that.guid;
+    }
 };
 
-	
-enum MediaCapabilities 
+
+enum MediaCapabilities
 {
-	AUDIO_RECV = 1 << 0,
-	AUDIO_SEND = 1 << 1,
-	VIDEO_RECV = 1 << 2,
-	VIDEO_SEND = 1 << 3,
+    AUDIO_RECV = 1 << 0,
+    AUDIO_SEND = 1 << 1,
+    VIDEO_RECV = 1 << 2,
+    VIDEO_SEND = 1 << 3,
 };
 
 
 class IDeviceManager
-	/// A platform independent interface to manage the audio
-	/// and video devices on the system.
+    /// A platform independent interface to enumerate audio
+    /// and video devices on the system.
 {
 public:
-	virtual ~IDeviceManager() { }
+    virtual ~IDeviceManager() { }
 
-	// Initialization
-	virtual bool initialize() = 0;
-	virtual void uninitialize() = 0;
+    // Initialization
+    virtual bool initialize() = 0;
+    virtual void uninitialize() = 0;
 
-	// Device enumeration
-	virtual bool getAudioInputDevices(std::vector<Device>& devices) = 0;
-	virtual bool getAudioOutputDevices(std::vector<Device>& devices) = 0;
-	
-	virtual bool getAudioInputDevice(Device& out, const std::string& name, int id = -1) = 0;
-	virtual bool getAudioInputDevice(Device& out, int id) = 0;
-	
-	virtual bool getAudioOutputDevice(Device& out, const std::string& name, int id = -1) = 0;
-	virtual bool getAudioOutputDevice(Device& out, int id) = 0;
+    // Device enumeration
+    virtual bool getAudioInputDevices(std::vector<Device>& devices) = 0;
+    virtual bool getAudioOutputDevices(std::vector<Device>& devices) = 0;
 
-	//virtual bool getAudioInputDevice(const std::string& name, Device& out) = 0;
-	//virtual bool getAudioOutputDevice(const std::string& name, Device& out) = 0;
+    virtual bool getAudioInputDevice(Device& out, const std::string& name, int id = -1) = 0;
+    virtual bool getAudioInputDevice(Device& out, int id) = 0;
 
-	virtual bool getVideoCaptureDevices(std::vector<Device>& devs) = 0;
-	virtual bool getVideoCaptureDevice(Device& out, int id) = 0;
-	virtual bool getVideoCaptureDevice(Device& out, const std::string& name, int id = -1) = 0;
-	
-	virtual bool getDefaultAudioInputDevice(Device& device) = 0;
-	virtual bool getDefaultAudioOutputDevice(Device& device) = 0;
-	virtual bool getDefaultVideoCaptureDevice(Device& device) = 0;
+    virtual bool getAudioOutputDevice(Device& out, const std::string& name, int id = -1) = 0;
+    virtual bool getAudioOutputDevice(Device& out, int id) = 0;
 
-	// Capabilities
-	virtual int getCapabilities() = 0;
+    //virtual bool getAudioInputDevice(const std::string& name, Device& out) = 0;
+    //virtual bool getAudioOutputDevice(const std::string& name, Device& out) = 0;
 
-	virtual void print(std::ostream& ost) = 0;
+    virtual bool getVideoCaptureDevices(std::vector<Device>& devs) = 0;
+    virtual bool getVideoCaptureDevice(Device& out, int id) = 0;
+    virtual bool getVideoCaptureDevice(Device& out, const std::string& name, int id = -1) = 0;
 
-	Signal2<bool&, bool&> DevicesChanged;
-		// Signals on DevicesChanged.
-		// Arg 1 is true when device is video, false for audio
-		// Arg 2 is true when device connects, flase on disconnection
+    virtual bool getDefaultAudioInputDevice(Device& device) = 0;
+    virtual bool getDefaultAudioOutputDevice(Device& device) = 0;
+    virtual bool getDefaultVideoCaptureDevice(Device& device) = 0;
 
-	static const char kDefaultDeviceName[];
+    // Capabilities
+    virtual int getCapabilities() = 0;
+
+    virtual void print(std::ostream& ost) = 0;
+
+    Signal2<bool&, bool&> DevicesChanged;
+        // Signals on DevicesChanged.
+        // Arg 1 is true when device is video, false for audio
+        // Arg 2 is true when device connects, flase on disconnection
+
+    static const char kDefaultDeviceName[];
 };
 
 
-class DeviceWatcher 
+class DeviceWatcher
 {
 public:
-	explicit DeviceWatcher(IDeviceManager*) {}
-	virtual ~DeviceWatcher() {}
-	virtual bool start() { return true; }
-	virtual void stop() {}
+    explicit DeviceWatcher(IDeviceManager*) {}
+    virtual ~DeviceWatcher() {}
+    virtual bool start() { return true; }
+    virtual void stop() {}
 };
 
 
-class DeviceManagerFactory 
+class DeviceManagerFactory
 {
 public:
-	static IDeviceManager* create();
+    static IDeviceManager* create();
 private:
-	DeviceManagerFactory();
+    DeviceManagerFactory();
 };
 
 
-class DeviceManager: public IDeviceManager 
+class DeviceManager: public IDeviceManager
 {
 public:
-	DeviceManager();
-	virtual ~DeviceManager();
+    DeviceManager();
+    virtual ~DeviceManager();
 
-	// Initialization
-	virtual bool initialize();
-	virtual void uninitialize();
+    // Initialization
+    virtual bool initialize();
+    virtual void uninitialize();
 
-	// Capabilities
-	virtual int getCapabilities();
+    // Capabilities
+    virtual int getCapabilities();
 
-	// Device enumeration
-	virtual bool getAudioInputDevices(std::vector<Device>& devices);
-	virtual bool getAudioOutputDevices(std::vector<Device>& devices);
+    // Device enumeration
+    virtual bool getAudioInputDevices(std::vector<Device>& devices);
+    virtual bool getAudioOutputDevices(std::vector<Device>& devices);
 
-	//virtual bool getAudioInputDevice(const std::string& name, Device& out);
-	//virtual bool getAudioOutputDevice(const std::string& name, Device& out);
-	
-	virtual bool getAudioInputDevice(Device& out, const std::string& name, int id = -1);
-	virtual bool getAudioInputDevice(Device& out, int id);
-	
-	virtual bool getAudioOutputDevice(Device& out, const std::string& name, int id = -1);
-	virtual bool getAudioOutputDevice(Device& out, int id);
+    //virtual bool getAudioInputDevice(const std::string& name, Device& out);
+    //virtual bool getAudioOutputDevice(const std::string& name, Device& out);
 
-	virtual bool getVideoCaptureDevices(std::vector<Device>& devs);
-	virtual bool getVideoCaptureDevice(Device& out, const std::string& name, int id = -1);
+    virtual bool getAudioInputDevice(Device& out, const std::string& name, int id = -1);
+    virtual bool getAudioInputDevice(Device& out, int id);
 
-	virtual bool getVideoCaptureDevice(Device& out, int id);
-		// Returns the video capture device at the given system index.
-	
-	virtual bool getDefaultAudioInputDevice(Device& device);
-	virtual bool getDefaultAudioOutputDevice(Device& device);
-	virtual bool getDefaultVideoCaptureDevice(Device& device);
+    virtual bool getAudioOutputDevice(Device& out, const std::string& name, int id = -1);
+    virtual bool getAudioOutputDevice(Device& out, int id);
 
-	static bool filterDevices(std::vector<Device>& devices, const char* const exclusionList[]);
-		// The exclusionList MUST be a nullptr terminated list.
-	
-	static bool matchID(std::vector<Device>& devices, Device& out, int id);
-		// Returns a device matching the given ID.
+    virtual bool getVideoCaptureDevices(std::vector<Device>& devs);
+    virtual bool getVideoCaptureDevice(Device& out, const std::string& name, int id = -1);
 
-	static bool matchNameAndID(std::vector<Device>& devices, Device& out, const std::string& name, int id = -1);
-		// Returns a device matching the given name and ID.
-		// If the device name is not available at the given ID then first
-		// device of that name will be returned.
-		// If the ID should not be matched the given ID should be -1.
+    virtual bool getVideoCaptureDevice(Device& out, int id);
+        // Returns the video capture device at the given system index.
 
-	bool initialized() const { return _initialized; }
+    virtual bool getDefaultAudioInputDevice(Device& device);
+    virtual bool getDefaultAudioOutputDevice(Device& device);
+    virtual bool getDefaultVideoCaptureDevice(Device& device);
 
-	void print(std::ostream& ost);
+    static bool filterDevices(std::vector<Device>& devices, const char* const exclusionList[]);
+        // The exclusionList MUST be a nullptr terminated list.
+
+    static bool matchID(std::vector<Device>& devices, Device& out, int id);
+        // Returns a device matching the given ID.
+
+    static bool matchNameAndID(std::vector<Device>& devices, Device& out, const std::string& name, int id = -1);
+        // Returns a device matching the given name and ID.
+        // If the device name is not available at the given ID then first
+        // device of that name will be returned.
+        // If the ID should not be matched the given ID should be -1.
+
+    bool initialized() const { return _initialized; }
+
+    void print(std::ostream& ost);
 
 protected:
-	virtual bool getAudioDevices(bool input, std::vector<Device>& devs);
-	virtual bool getAudioDevice(bool input, Device& out, const std::string& name, int id = -1);
-	virtual bool getAudioDevice(bool input, Device& out, int id);
+    virtual bool getDefaultAudioDevice(bool input, Device& device);
+    virtual bool getAudioDevices(bool input, std::vector<Device>& devs);
+    virtual bool getAudioDevice(bool input, Device& out, const std::string& name, int id = -1);
+    virtual bool getAudioDevice(bool input, Device& out, int id);
 
-	void setInitialized(bool initialized);
+    void setInitialized(bool initialized);
 
-	void setWatcher(DeviceWatcher* watcher);
-	DeviceWatcher* watcher();
+    void setWatcher(DeviceWatcher* watcher);
+    DeviceWatcher* watcher();
 
 private:
-	// The exclusionList MUST be a nullptr terminated list.
-	static bool shouldDeviceBeIgnored(const std::string& deviceName, 
-		const char* const exclusionList[]);
+    // The exclusionList MUST be a nullptr terminated list.
+    static bool shouldDeviceBeIgnored(const std::string& deviceName,
+        const char* const exclusionList[]);
 
-	DeviceWatcher* _watcher;
-	bool _initialized;
+    DeviceWatcher* _watcher;
+    bool _initialized;
 };
 
 

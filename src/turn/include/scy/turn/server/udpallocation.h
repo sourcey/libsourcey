@@ -37,25 +37,25 @@ class IConnection;
 class UDPAllocation: public ServerAllocation
 {
 public:
-	UDPAllocation(
-		Server& server,
-		const FiveTuple& tuple, 
-		const std::string& username, 
-		const UInt32& lifetime);
-	virtual ~UDPAllocation();
+    UDPAllocation(
+        Server& server,
+        const FiveTuple& tuple, 
+        const std::string& username, 
+        const UInt32& lifetime);
+    virtual ~UDPAllocation();
 
-	//void onPacketReceived(void* sender, RawPacket& packet);
-	void onPeerDataReceived(void*, const MutableBuffer& buffer, const net::Address& peerAddress);
-		
-	bool handleRequest(Request& request);	
-	void handleSendIndication(Request& request);
+    //void onPacketReceived(void* sender, RawPacket& packet);
+    void onPeerDataReceived(void*, const MutableBuffer& buffer, const net::Address& peerAddress);
+        
+    bool handleRequest(Request& request);    
+    void handleSendIndication(Request& request);
 
-	int send(const char* data, std::size_t size, const net::Address& peerAddress);
-	
-	net::Address relayedAddress() const;
+    int send(const char* data, std::size_t size, const net::Address& peerAddress);
+    
+    net::Address relayedAddress() const;
 
 private:
-	net::UDPSocket _relaySocket;
+    net::UDPSocket _relaySocket;
 };
 
 

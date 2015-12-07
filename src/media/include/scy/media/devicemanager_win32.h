@@ -43,26 +43,22 @@ namespace av {
 //
 
 
-class Win32DeviceManager: public DeviceManager 
+class Win32DeviceManager: public DeviceManager
 {
 public:
-	Win32DeviceManager();
-	virtual ~Win32DeviceManager();
+    Win32DeviceManager();
+    virtual ~Win32DeviceManager();
 
-	virtual bool initialize();
-	virtual void uninitialize();
+    virtual bool initialize();
+    virtual void uninitialize();
 
-	virtual bool getVideoCaptureDevices(std::vector<Device>& devs);
-	virtual bool getDefaultAudioOutputDevice(Device& device);
-	virtual bool getDefaultAudioInputDevice(Device& device);
-	virtual bool getDefaultVideoCaptureDevice(Device& device);
+    virtual bool getVideoCaptureDevices(std::vector<Device>& devs);
+    virtual bool getDefaultVideoCaptureDevice(Device& device);
 
 private:
-	virtual bool getAudioDevices(bool input, std::vector<Device>& devs);
-	virtual bool getDefaultAudioDevice(bool input, Device& device);
 
-	bool _needCoUninitialize;
-	static Mutex _mutex;
+    bool _needCoUninitialize;
+    static Mutex _mutex;
 };
 
 
@@ -74,30 +70,30 @@ private:
 class Win32Window
 {
 public:
-	Win32Window();
-	virtual ~Win32Window();
+    Win32Window();
+    virtual ~Win32Window();
 
-	bool Create(HWND parent, const wchar_t* title, DWORD style, DWORD exstyle,
-		int x, int y, int cx, int cy);
-	void Destroy();
+    bool Create(HWND parent, const wchar_t* title, DWORD style, DWORD exstyle,
+        int x, int y, int cx, int cy);
+    void Destroy();
 
-	HWND handle() const { return wnd_; }
+    HWND handle() const { return wnd_; }
 
-	static void Shutdown();
-		// Call this when your DLL unloads.
+    static void Shutdown();
+        // Call this when your DLL unloads.
 
 protected:
-	virtual bool OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& result);
+    virtual bool OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& result);
 
-	virtual bool OnClose() { return true; }
-	virtual void OnNcDestroy() { }
+    virtual bool OnClose() { return true; }
+    virtual void OnNcDestroy() { }
 
 private:
-	static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	HWND wnd_;
-	static HINSTANCE instance_;
-	static ATOM window_class_;
+    HWND wnd_;
+    static HINSTANCE instance_;
+    static ATOM window_class_;
 };
 
 
@@ -106,27 +102,27 @@ private:
 //
 
 
-class Win32DeviceWatcher: public DeviceWatcher, public Win32Window 
-	/// Plugs into windows event notifications to detect the adding
-	/// and removing of attached audio and video devices.
-	///
-	/// Note: The application must be compiled with SUBSYSTEM:WINDOWS.
-	/// Console applications receive no device notification.
+class Win32DeviceWatcher: public DeviceWatcher, public Win32Window
+    /// Plugs into windows event notifications to detect the adding
+    /// and removing of attached audio and video devices.
+    ///
+    /// Note: The application must be compiled with SUBSYSTEM:WINDOWS.
+    /// Console applications receive no device notification.
 {
 public:
-	explicit Win32DeviceWatcher(Win32DeviceManager* dm);
-	virtual ~Win32DeviceWatcher();
-	virtual bool start();
-	virtual void stop();
+    explicit Win32DeviceWatcher(Win32DeviceManager* dm);
+    virtual ~Win32DeviceWatcher();
+    virtual bool start();
+    virtual void stop();
 
 private:
-	HDEVNOTIFY Register(REFGUID guid);
-	void Unregister(HDEVNOTIFY notify);
-	virtual bool OnMessage(UINT msg, WPARAM wp, LPARAM lp, LRESULT& result);
+    HDEVNOTIFY Register(REFGUID guid);
+    void Unregister(HDEVNOTIFY notify);
+    virtual bool OnMessage(UINT msg, WPARAM wp, LPARAM lp, LRESULT& result);
 
-	Win32DeviceManager* manager_;
-	HDEVNOTIFY audio_notify_;
-	HDEVNOTIFY video_notify_;
+    Win32DeviceManager* manager_;
+    HDEVNOTIFY audio_notify_;
+    HDEVNOTIFY video_notify_;
 };
 
 

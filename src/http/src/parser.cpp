@@ -33,162 +33,162 @@ namespace http {
 
 
 Parser::Parser(http::Response* response) : 
-	_observer(nullptr),
-	_request(nullptr),
-	_response(response),
-	_error(nullptr)
+    _observer(nullptr),
+    _request(nullptr),
+    _response(response),
+    _error(nullptr)
 {
-	init(HTTP_RESPONSE);
+    init(HTTP_RESPONSE);
 }
 
 
 Parser::Parser(http::Request* request) : 
-	_observer(nullptr),
-	_request(request),
-	_response(nullptr),
-	_error(nullptr)
+    _observer(nullptr),
+    _request(request),
+    _response(nullptr),
+    _error(nullptr)
 {
-	init(HTTP_REQUEST);
+    init(HTTP_REQUEST);
 }
 
 
 Parser::Parser(http_parser_type type) : 
-	_observer(nullptr),
-	_request(nullptr),
-	_response(nullptr),
-	_error(nullptr)
+    _observer(nullptr),
+    _request(nullptr),
+    _response(nullptr),
+    _error(nullptr)
 {
-	init(type);
+    init(type);
 }
 
 
 Parser::~Parser() 
 {
-	TraceLS(this) << "Destroy" << endl;	
-	reset();
+    TraceLS(this) << "Destroy" << endl;    
+    reset();
 }
 
 
 void Parser::init(http_parser_type type)
 {
-	TraceLS(this) << "Init: " << type << endl;	
+    TraceLS(this) << "Init: " << type << endl;    
 
-	assert(_parser.data != this);
+    assert(_parser.data != this);
 
-	::http_parser_init(&_parser, type);
-	_parser.data = this;
-	_settings.on_message_begin = on_message_begin;
-	_settings.on_url = on_url;
-	_settings.on_status_complete = on_status_complete;
-	_settings.on_header_field = on_header_field;
-	_settings.on_header_value = on_header_value;
-	_settings.on_headers_complete = on_headers_complete;
-	_settings.on_body = on_body;
-	_settings.on_message_complete = on_message_complete;
+    ::http_parser_init(&_parser, type);
+    _parser.data = this;
+    _settings.on_message_begin = on_message_begin;
+    _settings.on_url = on_url;
+    _settings.on_status_complete = on_status_complete;
+    _settings.on_header_field = on_header_field;
+    _settings.on_header_value = on_header_value;
+    _settings.on_headers_complete = on_headers_complete;
+    _settings.on_body = on_body;
+    _settings.on_message_complete = on_message_complete;
 
-	reset();
+    reset();
 }
 
 
 bool Parser::parse(const char* data, std::size_t len)
 {
-	TraceLS(this) << "Parse: " << len << endl;	
-	
-	assert(!complete());
-	assert(_parser.data == this);
+    TraceLS(this) << "Parse: " << len << endl;    
+    
+    assert(!complete());
+    assert(_parser.data == this);
 
-	if (complete()) {
-		setParserError("Parsing already complete");
-	}
-	
-	// Parse and handle errors
-	std::size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len);
+    if (complete()) {
+        setParserError("Parsing already complete");
+    }
+    
+    // Parse and handle errors
+    std::size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len);
     if (nparsed != len && !_parser.upgrade) { //_parser.http_errno != HPE_OK
-		setParserError();
-	}
-	
-	return complete();
+        setParserError();
+    }
+    
+    return complete();
 }
 
 
 void Parser::reset() 
 {
-	_complete = false;
-	if (_error) {
-		delete _error;
-		_error = nullptr;
-	}
+    _complete = false;
+    if (_error) {
+        delete _error;
+        _error = nullptr;
+    }
 
-	// TODO: Reset parser internal state?
+    // TODO: Reset parser internal state?
 }
 
 
 void Parser::setParserError(const std::string& message) //bool throwException, 
 {
-	assert(_parser.http_errno != HPE_OK);	
-	ParserError err;
-	err.code = HTTP_PARSER_ERRNO(&_parser);
-	err.message = message.empty() ? http_errno_name(err.code) : message;
-	onError(err);
+    assert(_parser.http_errno != HPE_OK);    
+    ParserError err;
+    err.code = HTTP_PARSER_ERRNO(&_parser);
+    err.message = message.empty() ? http_errno_name(err.code) : message;
+    onError(err);
 
-	//if (throwException)
-	//	throw std::runtime_error(err.message);
+    //if (throwException)
+    //    throw std::runtime_error(err.message);
 }
 
 
 void Parser::setRequest(http::Request* request)
 {
-	assert(!_request);
-	assert(!_response);
-	assert(_parser.type == HTTP_REQUEST);
-	_request = request;
+    assert(!_request);
+    assert(!_response);
+    assert(_parser.type == HTTP_REQUEST);
+    _request = request;
 }
 
 
 void Parser::setResponse(http::Response* response)
 {
-	assert(!_request);
-	assert(!_response);
-	assert(_parser.type == HTTP_RESPONSE);
-	_response = response;
+    assert(!_request);
+    assert(!_response);
+    assert(_parser.type == HTTP_RESPONSE);
+    _response = response;
 }
-	
+    
 
 void Parser::setObserver(ParserObserver* observer)
 {
-	_observer = observer;
+    _observer = observer;
 }
-	
+    
 
 http::Message* Parser::message()
 {
-	return _request ? static_cast<http::Message*>(_request) 
-		: _response ? static_cast<http::Message*>(_response) 
-		: nullptr;
+    return _request ? static_cast<http::Message*>(_request) 
+        : _response ? static_cast<http::Message*>(_response) 
+        : nullptr;
 }
 
 
 ParserObserver* Parser::observer() const
 {
-	return _observer;
+    return _observer;
 }
 
 
 bool Parser::complete() const 
 {
-	return _complete;
+    return _complete;
 }
 
 
 bool Parser::upgrade() const 
 {
-	return _parser.upgrade > 0;
+    return _parser.upgrade > 0;
 }
 
 
 bool Parser::shouldKeepAlive() const 
 {
-	return http_should_keep_alive(&_parser) > 0;
+    return http_should_keep_alive(&_parser) > 0;
 }
 
 
@@ -198,63 +198,63 @@ bool Parser::shouldKeepAlive() const
 
 void Parser::onURL(const std::string& value)
 {
-	if (_request)
-		_request->setURI(value);
+    if (_request)
+        _request->setURI(value);
 }
 
 
 void Parser::onHeader(const std::string& name, const std::string& value)
 {
-	if (message())
-		message()->add(name, value);
-	if (_observer)
-		_observer->onParserHeader(name, value);
+    if (message())
+        message()->add(name, value);
+    if (_observer)
+        _observer->onParserHeader(name, value);
 }
 
 
 void Parser::onHeadersEnd()
-{			
-	/// HTTP version
-	//start_line_.version(parser_.http_major, parser_.http_minor);
+{            
+    /// HTTP version
+    //start_line_.version(parser_.http_major, parser_.http_minor);
 
-	/// KeepAlive
-	//headers->setKeepAlive(http_should_keep_alive(parser) > 0);
-	
-	/// Request HTTP method
-	if (_request)
-		_request->setMethod(http_method_str(static_cast<http_method>(_parser.method)));
-	
-	if (_observer)
-		_observer->onParserHeadersEnd();
+    /// KeepAlive
+    //headers->setKeepAlive(http_should_keep_alive(parser) > 0);
+    
+    /// Request HTTP method
+    if (_request)
+        _request->setMethod(http_method_str(static_cast<http_method>(_parser.method)));
+    
+    if (_observer)
+        _observer->onParserHeadersEnd();
 }
 
 
 void Parser::onBody(const char* buf, std::size_t len) //size_t off, 
 {
-	TraceLS(this) << "onBody" << endl;	
-	if (_observer)
-		_observer->onParserChunk(buf, len); //Buffer(buf+off,len) + off
+    TraceLS(this) << "onBody" << endl;    
+    if (_observer)
+        _observer->onParserChunk(buf, len); //Buffer(buf+off,len) + off
 }
 
 
 void Parser::onMessageEnd() 
 {
-	TraceLS(this) << "onMessageEnd" << endl;		
-	_complete = true;
-	if (_observer)
-		_observer->onParserEnd();
+    TraceLS(this) << "onMessageEnd" << endl;        
+    _complete = true;
+    if (_observer)
+        _observer->onParserEnd();
 }
 
 
 void Parser::onError(const ParserError& err)
 {
-	TraceLS(this) << "On error: " << err.code << ": " << err.message << endl;	
-	_complete = true;
-	_error = new ParserError;
-	_error->code = err.code;
-	_error->message = err.message;
-	if (_observer)
-		_observer->onParserError(err);
+    TraceLS(this) << "On error: " << err.code << ": " << err.message << endl;    
+    _complete = true;
+    _error = new ParserError;
+    _error->code = err.code;
+    _error->message = err.message;
+    if (_observer)
+        _observer->onParserError(err);
 }
 
 
@@ -264,111 +264,111 @@ void Parser::onError(const ParserError& err)
 //
 
 int Parser::on_message_begin(http_parser* parser) 
-{	
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	assert(self);
+{    
+    auto self = reinterpret_cast<Parser*>(parser->data);
+    assert(self);
 
-	self->reset();
-	return 0;
+    self->reset();
+    return 0;
 }
 
 
 int Parser::on_url(http_parser* parser, const char *at, std::size_t len) 
 {
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	assert(self);
-	assert(at && len);	
+    auto self = reinterpret_cast<Parser*>(parser->data);
+    assert(self);
+    assert(at && len);    
 
     self->onURL(std::string(at, len));
-	return 0;
+    return 0;
 }
 
 
 int Parser::on_status_complete(http_parser* parser)
 {
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	assert(self);
+    auto self = reinterpret_cast<Parser*>(parser->data);
+    assert(self);
 
-	/// Handle response status line
-	if (self->_response)
-		self->_response->setStatus((http::StatusCode)parser->status_code);
+    /// Handle response status line
+    if (self->_response)
+        self->_response->setStatus((http::StatusCode)parser->status_code);
 
-	return 0;
+    return 0;
 }
 
 
 int Parser::on_header_field(http_parser* parser, const char* at, std::size_t len) 
-{	
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	assert(self);
+{    
+    auto self = reinterpret_cast<Parser*>(parser->data);
+    assert(self);
 
-	if (self->_wasHeaderValue) {
-		if (!self->_lastHeaderField.empty()) {
-			self->onHeader(self->_lastHeaderField, self->_lastHeaderValue);
-			self->_lastHeaderValue.clear();
-		}
-		self->_lastHeaderField = std::string(at, len);
-		self->_wasHeaderValue = false;
-	} 
-	else {
-		self->_lastHeaderField += std::string(at, len);
-	}
+    if (self->_wasHeaderValue) {
+        if (!self->_lastHeaderField.empty()) {
+            self->onHeader(self->_lastHeaderField, self->_lastHeaderValue);
+            self->_lastHeaderValue.clear();
+        }
+        self->_lastHeaderField = std::string(at, len);
+        self->_wasHeaderValue = false;
+    } 
+    else {
+        self->_lastHeaderField += std::string(at, len);
+    }
 
-	return 0;
+    return 0;
 }
 
 
 int Parser::on_header_value(http_parser* parser, const char* at, std::size_t len) 
 {
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	assert(self);
+    auto self = reinterpret_cast<Parser*>(parser->data);
+    assert(self);
 
-	if (!self->_wasHeaderValue) {
-		self->_lastHeaderValue = std::string(at, len);
-		self->_wasHeaderValue = true;
-	} 
-	else {
-		self->_lastHeaderValue += std::string(at, len);
-	}
+    if (!self->_wasHeaderValue) {
+        self->_lastHeaderValue = std::string(at, len);
+        self->_wasHeaderValue = true;
+    } 
+    else {
+        self->_lastHeaderValue += std::string(at, len);
+    }
 
-	return 0;
+    return 0;
 }
 
 
 int Parser::on_headers_complete(http_parser* parser)
 {
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	assert(self);
-	assert(&self->_parser == parser);
+    auto self = reinterpret_cast<Parser*>(parser->data);
+    assert(self);
+    assert(&self->_parser == parser);
 
-	// Add last entry if any
-	if (!self->_lastHeaderField.empty()) {
-		self->onHeader(self->_lastHeaderField, self->_lastHeaderValue);
-	}
+    // Add last entry if any
+    if (!self->_lastHeaderField.empty()) {
+        self->onHeader(self->_lastHeaderField, self->_lastHeaderValue);
+    }
 
-	self->onHeadersEnd();
-	return 0;
+    self->onHeadersEnd();
+    return 0;
 }
 
 
 int Parser::on_body(http_parser* parser, const char* at, std::size_t len) 
-{		
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	assert(self);
+{        
+    auto self = reinterpret_cast<Parser*>(parser->data);
+    assert(self);
 
-	self->onBody(at, len);
-	return 0;
+    self->onBody(at, len);
+    return 0;
 }
 
 
 int Parser::on_message_complete(http_parser* parser) 
-{	
-	/// When http_parser finished receiving a message, signal message complete
-	auto self = reinterpret_cast<Parser*>(parser->data);
-	assert(self);
+{    
+    /// When http_parser finished receiving a message, signal message complete
+    auto self = reinterpret_cast<Parser*>(parser->data);
+    assert(self);
 
-	self->onMessageEnd();
-	return 0;
+    self->onMessageEnd();
+    return 0;
 }
 
 

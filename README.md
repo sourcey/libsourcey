@@ -27,13 +27,13 @@ _Note:_ To compile LibSourcey with video and streaming capabilities enabled you 
 
 ### Installing on Linux
 
-This guide is written for Ubuntu 14.04, but installation is super simple and should be portable across most flavours of Linux.
+This guide is written for Ubuntu 14.04, but installation is super simple and should be fairly portable across most flavours of Linux.
 
 ##### Install Dependencies
 
 ~~~ bash
 sudo apt-get update
-sudo apt-get install -y build-essential pkg-config git cmake openssl libssl-dev libjack-jackd2-dev
+sudo apt-get install -y build-essential pkg-config git cmake openssl libssl-dev jackd2 libjack-jackd2-dev
 ~~~
 
 ##### Install FFmpeg (optional)
@@ -73,7 +73,7 @@ make
 sudo make install
 ~~~
 
-All done! 
+All done!
 
 [See here](#cmake-build-options) for a complete list of build options, and [here for examples](#examples).
 
@@ -82,7 +82,8 @@ All done!
 ##### Install Dependencies
 
 Install Git  
- : Install [TortoiseGit](http://code.google.com/p/tortoisegit/), a convenient git front-end that integrates right into Windows Explorer. MinGW users can use [msysgit]( from <a class="external" href="http://code.google.com/p/msysgit/downloads/list"></a>).  
+ : Install [TortoiseGit](http://code.google.com/p/tortoisegit/), a convenient git front-end that integrates right into Windows Explorer.
+   MinGW users can use [msysgit]( from <a class="external" href="http://code.google.com/p/msysgit/downloads/list"></a>).  
 
 Install CMake  
  : CMake generates the LibSourcey project files so you can build on most platforms and compilers. [Download CMake](http://www.cmake.org/cmake/resources/software.html)  
@@ -157,53 +158,53 @@ For an exhaustive list of options check the `CMakeLists.txt` in the main directo
 
 The following modules are included in the core LibSourcey repository:
 
-##### Base
+#### Base
 Re-usable utility classes and interfaces used throughout LibSourcey.
 
-##### Net
+#### Net
 TCP, SSL and UDL socket implementation build on top of libuv architecture.
 
-##### HTTP
+#### HTTP
 HTTP server and client stack including support for WebSockets, multipart streaming, and file transfers.
 The HTTP parser is based on the super-fast C code used by nginx.
 
-##### Media
+#### Media
 _dependencies:_ OpenCV, FFmpeg, RtAudio  
 Wrappers around FFmpeg and OpenCV for device capture, encoding, recording and streaming. The Media API makes extensive use of the PacketStream classes so that encoders, processors and packetisers can be dynamically added and removed from a media source.  
 
-##### UV
+#### UV
 The UV module is a set of C++ wrappers for Joyent's brilliant libuv library.
 
-##### JSON
+#### JSON
 _dependencies:_ JsonCpp  
 Thin wrappers and helper functions for the JsonCpp library.
 
-##### STUN
+#### STUN
 [RFC 5389](http://tools.ietf.org/rfc/rfc5389) implementation which includes support for ICE and TURN and TURN TCP messages.
 
-##### TURN
+#### TURN
 Server and client stack which supports both [RFC 5766 (Traversal Using Relays around NAT)](http://tools.ietf.org/rfc/rfc5766) and [RFC 6062 (Traversal Using Relays around NAT Extensions for TCP Allocations)](http://tools.ietf.org/rfc/rfc6062) specifications.
 
-##### SocketIO
+#### SocketIO
 SocketIO C++ client. Read more about [SocketIO](http://socket.io).
 
-##### Symple
+#### Symple
 Client implementation of Sourcey's home grown real time messaging and presence protocol. [More about Symple](<http://sourcey.com/symple).
 
-##### SDP
+#### SDP
 [RFC 4566](http://tools.ietf.org/rfc/rfc4566) implementation which includes extra support for ICE headers.
 
 ## External Modules
 
 The following LibSourcey modules are available in external repositories:
 
-##### Pacm
+#### Pacm
 Pacm is an embeddable package manager which speaks JSON with the server. [More about Pacm](http://sourcey.com/pacm).
 
-##### Pluga
+#### Pluga
 Pluga is a simple C++ plugin system that's dead simple to use in your own projects. [More about Pluga](http://sourcey.com/pluga).
 
-##### Anionu SDK
+#### Anionu SDK
 _dependencies:_ OpevCV  
 The Anionu SDK includes a C++ API, tools, and client implementation for building [Spot](http://anionu.com/spot) plugins and applications that integrate with the [Anionu cloud surveillance serivice](https://anionu.com).
 
@@ -211,19 +212,19 @@ The Anionu SDK includes a C++ API, tools, and client implementation for building
 
 The following closed source modules are available. Please contact us if you are interested in using any of them in your projects.
 
-##### ICE
+#### ICE
 The ICE module is a complete implementation of [RFC 5245 (Interactive Connectivity Establishment)](http://tools.ietf.org/html/rfc5245) based on LibSourcey architecture.
 ICE is a protocol for Network Address Translator (NAT) Traversal for Offer/Answer protocols.
 This module is currently not open source. Please contact us if you are interested in using it.
 
-##### RTP
+#### RTP
 Our RTP module is quite basic and at this point it only supports RTP and RTCP packetisation. RTCP session management still needs to implemented. If anyone happens to make a project of this we would be very happy to improve our RTP module.
 
-##### XML
+#### XML
 _dependencies:_ pugixml  
 Thin wrappers around the pugixml XML library to better support LibSourcey architecture.
 
-##### XMPP
+#### XMPP
 _dependencies:_ pugixml, libstrophe  
 Our XMPP module includes a full client implementation with Jingle session support.
 

@@ -21,17 +21,24 @@
 #define SCY_Media_FFmpeg_H
 
 
+#include "scy/base.h"
+#include "string"
+
+
 namespace scy {
 namespace av {
 
-	
+
 void initializeFFmpeg();
-	// Initialize the FFmpeg library.
-	
+    // Initialize the FFmpeg library.
+
 
 void uninitializeFFmpeg();
-	// Uninitializes the FFmpeg library.
-	
+    // Uninitializes the FFmpeg library.
+
+std::string averror(const int error);
+    // Get an error string for the given error code.
+
 
 } } // namespace scy::av
 

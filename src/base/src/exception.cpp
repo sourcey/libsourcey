@@ -25,27 +25,27 @@ namespace scy {
 
 #if 0
 Exception::Exception(int code): 
-	_code(code)
+    _code(code)
 {
 }
 
 
 Exception::Exception(const std::string& msg, int code) : 
-	_msg(msg), _code(code)
+    _msg(msg), _code(code)
 {
 }
 
 
 Exception::Exception(const std::string& msg, const std::string& ext, int code) : 
-	_msg(msg), _code(code)
+    _msg(msg), _code(code)
 {
-	if (!ext.empty()) {
-		_msg.append(": ");
-		_msg.append(ext);
-	}
+    if (!ext.empty()) {
+        _msg.append(": ");
+        _msg.append(ext);
+    }
 }
 
-	
+    
 Exception::~Exception() throw()
 {
 }
@@ -53,37 +53,37 @@ Exception::~Exception() throw()
 
 const char* Exception::name() const throw()
 {
-	return "Error";
+    return "Error";
 }
 
-	
+    
 const char* Exception::what() const throw()
 {
-	return name();
+    return name();
 }
 
-	
+    
 std::string Exception::message() const
 {
-	if (!_msg.empty())
-		return _msg;
-	return name();
+    if (!_msg.empty())
+        return _msg;
+    return name();
 }
 
 
 void Exception::entendMessage(const std::string& ext)
 {
-	if (!ext.empty()) {
-		if (!_msg.empty()) 
-			_msg.append(": ");
-		_msg.append(ext);
-	}
+    if (!ext.empty()) {
+        if (!_msg.empty()) 
+            _msg.append(": ");
+        _msg.append(ext);
+    }
 }
 
 
 void Exception::rethrow() const
 {
-	throw *this;
+    throw *this;
 }
 #endif
 

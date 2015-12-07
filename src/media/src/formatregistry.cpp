@@ -40,120 +40,120 @@ FormatRegistry::~FormatRegistry()
 
 FormatRegistry& FormatRegistry::instance() 
 {
-	static Singleton<FormatRegistry> sh;
-	return *sh.get();
+    static Singleton<FormatRegistry> sh;
+    return *sh.get();
 }
 
 
 Format& FormatRegistry::get(const std::string& name) 
 {
-	Mutex::ScopedLock lock(_mutex);
-	for (unsigned int i = 0; i < _formats.size(); i++) {
-		if (_formats[i].name == name) {
-			return _formats[i];
-		}
-	}
+    Mutex::ScopedLock lock(_mutex);
+    for (unsigned int i = 0; i < _formats.size(); i++) {
+        if (_formats[i].name == name) {
+            return _formats[i];
+        }
+    }
            
-	throw std::runtime_error("Not found: No media format for: " + name);
+    throw std::runtime_error("Not found: No media format for: " + name);
 }
 
 
 Format& FormatRegistry::getByID(const std::string& id) 
 {
-	Mutex::ScopedLock lock(_mutex);
-	for (unsigned int i = 0; i < _formats.size(); i++) {
-		if (_formats[i].id == id) {
-			return _formats[i];
-		}
-	}
+    Mutex::ScopedLock lock(_mutex);
+    for (unsigned int i = 0; i < _formats.size(); i++) {
+        if (_formats[i].id == id) {
+            return _formats[i];
+        }
+    }
            
-	throw std::runtime_error("Not found: No media format type: " + id);
+    throw std::runtime_error("Not found: No media format type: " + id);
 }
 
 
 Format& FormatRegistry::getOrDefault(const std::string& name) 
 {
-	{
-		Mutex::ScopedLock lock(_mutex);
-		for (unsigned int i = 0; i < _formats.size(); i++) {
-			if (_formats[i].name == name) {
-				return _formats[i];
-			}
-		}
-	}
+    {
+        Mutex::ScopedLock lock(_mutex);
+        for (unsigned int i = 0; i < _formats.size(); i++) {
+            if (_formats[i].name == name) {
+                return _formats[i];
+            }
+        }
+    }
            
-	return getDefault();
+    return getDefault();
 }
 
 
 Format& FormatRegistry::getDefault() 
 {
-	Mutex::ScopedLock lock(_mutex);
-	if (!_default.empty()) {
-		return get(_default);
-	}
-	else if (!_formats.empty()) {
-		return *_formats.begin();
-	}
+    Mutex::ScopedLock lock(_mutex);
+    if (!_default.empty()) {
+        return get(_default);
+    }
+    else if (!_formats.empty()) {
+        return *_formats.begin();
+    }
          
-	throw std::runtime_error("Not found: No default media format.");
+    throw std::runtime_error("Not found: No default media format.");
 }
 
 
 bool FormatRegistry::exists(const std::string& name)
 {
-	Mutex::ScopedLock lock(_mutex);
-	for (unsigned int i = 0; i < _formats.size(); i++) {
-		if (_formats[i].name == name) {
-			return true;
-		}
-	}
+    Mutex::ScopedLock lock(_mutex);
+    for (unsigned int i = 0; i < _formats.size(); i++) {
+        if (_formats[i].name == name) {
+            return true;
+        }
+    }
            
-	return false;
+    return false;
 }
 
 
 void FormatRegistry::clear()
 {
-	Mutex::ScopedLock lock(_mutex);
-	_formats.clear();
+    Mutex::ScopedLock lock(_mutex);
+    _formats.clear();
 }
 
 
 FormatList FormatRegistry::formats() const
 { 
-	Mutex::ScopedLock lock(_mutex);
-	return _formats; 
+    Mutex::ScopedLock lock(_mutex);
+    return _formats; 
 }
 
 
-void FormatRegistry::registerFormat(const Format& format)	
+void FormatRegistry::registerFormat(const Format& format)    
 { 
-	unregisterFormat(format.name);
-	Mutex::ScopedLock lock(_mutex);
+    unregisterFormat(format.name);
+    Mutex::ScopedLock lock(_mutex);
     _formats.push_back(format);
 }
 
 
-bool FormatRegistry::unregisterFormat(const std::string& name)	
+bool FormatRegistry::unregisterFormat(const std::string& name)    
 { 
-	Mutex::ScopedLock lock(_mutex);
-	for (FormatList::iterator it = _formats.begin(); it != _formats.end(); ++it) {
-		if ((*it).name == name) {
-			_formats.erase(it);
-			if (_default == name)
-				_default = "";
-			return true;
-		}
-	}
-	return false;
+    Mutex::ScopedLock lock(_mutex);
+    for (FormatList::iterator it = _formats.begin(); it != _formats.end(); ++it) {
+        if ((*it).name == name) {
+            _formats.erase(it);
+            if (_default == name)
+                _default = "";
+            return true;
+        }
+    }
+    return false;
 }
 
 
 void FormatRegistry::setDefault(const std::string& name)
 {
-	Mutex::ScopedLock lock(_mutex);
-	_default = name;
+    Mutex::ScopedLock lock(_mutex);
+    _default = name;
 }
 
 

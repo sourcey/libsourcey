@@ -31,7 +31,7 @@ namespace scy {
 
 LogStream& basic::Polymorphic::log(const char* level) const 
 { 
-	return printL(level, className(), this);
+    return printL(level, className(), this);
 }
 
 } // namespace scy

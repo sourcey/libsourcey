@@ -32,8 +32,9 @@
 
 #ifdef HAVE_OPENCV
 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+//#include <opencv/cv.h>
+//#include <opencv/highgui.h>
+#include "opencv2/opencv.hpp"
 
 #include <iostream>
 #include <map>
@@ -41,7 +42,7 @@
 
 namespace scy {
 namespace av {
-	
+
 
 //
 // Video Capture
@@ -49,125 +50,125 @@ namespace av {
 
 
 class VideoCapture: public ICapture, public async::Runnable
-	/// Class for capturing video from cameras and files using OpenCV.
-	/// Do not use this class directly, use VideoCapture instead.
-	///
-	/// To handle output packets listen in on the ICapture::emitter signal.
-	///
-	/// Limitations:
-	/// OpenCV doesn't support multi-thread capturing so VideoCapture
-	/// instances should be created in the main thread.
-	/// File captures do not have this limitation.
-	/// Also avoid creating multiple instances using the same device.
-	/// Instead reuse the same instance, preferably using the 
-	/// MediaFactory interface.
-	/// 
-	/// Windows:
-	/// OpenCV HighGUI DirectShow must be compiled with VI_COM_MULTI_THREADED
-	/// defined otherwise capture there will be CoInitialize conflicts
-	/// with the DeviceManager.
+    /// Class for capturing video from cameras and files using OpenCV.
+    /// Do not use this class directly, use VideoCapture instead.
+    ///
+    /// To handle output packets listen in on the ICapture::emitter signal.
+    ///
+    /// Limitations:
+    /// OpenCV doesn't support multi-thread capturing so VideoCapture
+    /// instances should be created in the main thread.
+    /// File captures do not have this limitation.
+    /// Also avoid creating multiple instances using the same device.
+    /// Instead reuse the same instance, preferably using the
+    /// MediaFactory interface.
+    ///
+    /// Windows:
+    /// OpenCV HighGUI DirectShow must be compiled with VI_COM_MULTI_THREADED
+    /// defined otherwise capture there will be CoInitialize conflicts
+    /// with the DeviceManager.
 {
 public:
-	typedef std::shared_ptr<VideoCapture> Ptr;
+    typedef std::shared_ptr<VideoCapture> Ptr;
 
-	VideoCapture(int deviceId); 
-		// Creates and opens the given device.
-		// Should be created in the main thread.
+    VideoCapture(int deviceId);
+        // Creates and opens the given device.
+        // Should be created in the main thread.
 
-	VideoCapture(const std::string& filename);
-		// Creates and opens the given video file.
-		// Can be created in any thread.
+    VideoCapture(const std::string& filename);
+        // Creates and opens the given video file.
+        // Can be created in any thread.
 
-	virtual ~VideoCapture();
-		// Destroys the VideoCapture.
+    virtual ~VideoCapture();
+        // Destroys the VideoCapture.
 
-	bool open(bool whiny = true);
-		// Opens the VideoCapture.
-	
-	virtual void start();
-	virtual void stop();
-	
-	bool opened() const;
-		// True when the system device is open.
+    bool open(bool whiny = true);
+        // Opens the VideoCapture.
 
-	bool running() const;
-		// True when the internal thread is running. 
-				
-	void getFrame(cv::Mat& frame, int width = 0, int height = 0);
+    virtual void start();
+    virtual void stop();
 
-	virtual void getEncoderFormat(Format& iformat);
-	
-	int deviceId() const;
-	std::string	filename() const;
-	std::string	name() const;
-	const scy::Error& error() const;
-	double fps() const;
-	int width();
-	int height();
-	cv::Mat lastFrame() const;
-	cv::VideoCapture& capture();
+    bool opened() const;
+        // True when the system device is open.
 
-	Signal<const scy::Error&> Error;
-		// Signals that the capture is closed in error.
+    bool running() const;
+        // True when the internal thread is running.
 
-protected:	
-	cv::Mat grab();
-	virtual void run();
-	
-	void setError(const std::string& error);
-	
-	friend class MediaFactory;
+    void getFrame(cv::Mat& frame, int width = 0, int height = 0);
 
-private:   
-	mutable Mutex _mutex;
+    virtual void getEncoderFormat(Format& iformat);
 
-	std::string	_filename;	// Source file to capture from if any
-	int _deviceId;			// Source device to capture from
-	bool _opened;
-	bool _started;
-	bool _stopping;
-	bool _capturing;
-	cv::Mat _frame;			// Current video image
-	scy::Error _error;		// Error message if any
-	FPSCounter _counter;
-	cv::VideoCapture _capture;
-	Thread _thread;
+    int deviceId() const;
+    std::string    filename() const;
+    std::string    name() const;
+    const scy::Error& error() const;
+    double fps() const;
+    int width();
+    int height();
+    cv::Mat lastFrame() const;
+    cv::VideoCapture& capture();
+
+    Signal<const scy::Error&> Error;
+        // Signals that the capture is closed in error.
+
+protected:
+    cv::Mat grab();
+    virtual void run();
+
+    void setError(const std::string& error);
+
+    friend class MediaFactory;
+
+private:
+    mutable Mutex _mutex;
+
+    std::string    _filename;    // Source file to capture from if any
+    int _deviceId;            // Source device to capture from
+    bool _opened;
+    bool _started;
+    bool _stopping;
+    bool _capturing;
+    cv::Mat _frame;            // Current video image
+    scy::Error _error;        // Error message if any
+    FPSCounter _counter;
+    cv::VideoCapture _capture;
+    Thread _thread;
 };
 
 
 typedef std::map<int, VideoCapture::Ptr> VideoCaptureMap;
-	
+
 
 //
 // Matrix Packet
 //
 
 
-class MatrixPacket: public VideoPacket 
+class MatrixPacket: public VideoPacket
 {
 public:
-	cv::Mat* mat; // For OpenCV generated packets.
-				  // TODO: Use stream offset time instead of process time 
-				  // for consistency with AudioCapture for realtime pts calculation
-	
-	MatrixPacket(cv::Mat* mat, double time = time::clockSecs()) :
-		VideoPacket((char*)mat->data, mat->rows*mat->step, mat->cols, mat->rows, time),
-		mat(mat) {}
+    cv::Mat* mat; // For OpenCV generated packets.
+                  // TODO: Use stream offset time instead of process time
+                  // for consistency with AudioCapture for realtime pts calculation
 
-	MatrixPacket(char* data = nullptr,
-			  int size = 0,
-			  int width = 0,
-			  int height = 0,
-			  double time = time::clockSecs()) :
-		VideoPacket(data, size, width, height, time),
-		mat(nullptr) {};
+    MatrixPacket(cv::Mat* mat, double time = time::clockSecs()) :
+        VideoPacket(reinterpret_cast<UInt8*>(mat->data), mat->rows*mat->step, mat->cols, mat->rows, time),
+        mat(mat) {}
 
-	virtual IPacket* clone() const {
-		return new MatrixPacket(*this);
-	}	
+    MatrixPacket(char* data = nullptr,
+              int size = 0,
+              int width = 0,
+              int height = 0,
+              double time = time::clockSecs()) :
+        VideoPacket(reinterpret_cast<UInt8*>(data), size, width, height, time),
+        mat(nullptr) {};
 
-	virtual const char* className() const { return "MatrixPacket"; }
-}; 
+    virtual IPacket* clone() const {
+        return new MatrixPacket(*this);
+    }
+
+    virtual const char* className() const { return "MatrixPacket"; }
+};
 
 
 } } // namespace scy::av
@@ -175,116 +176,3 @@ public:
 
 #endif
 #endif // SCY_MEDIA_VideoCapture_H
-
-
-
-/*
-//
-// Video Delegate
-//
-
-
-struct VideoDelegate: public PacketDelegateBase
-	/// Polymorphic packet delegate for the VideoPacket type.
-{
-	typedef double DataT;
-
-	VideoDelegate(double fps = 0.0) : _fps(fps) {};
-	VideoDelegate(const VideoDelegate& r) : 
-		_counter(r._counter), 
-		_fps(r._fps) {};	
-	
-	virtual bool accepts(void*, IPacket&, void*, Void, Void)
-	{
-		// Skip frames if we exceed the maximum FPS
-		if (_fps) {
-			_counter.tick();
-			if (_counter.fps > _fps) {
-				traceL() << "skipping frame" << std::endl;
-				return false;
-			}
-		}		
-		return true;
-	}
-	
-protected:
-	double		_fps;
-	FPSCounter	_counter;
-};
-
-
-DefinePolymorphicDelegateWithArg(videoDelegate, IPacket, VideoDelegate, double, 0)
-*/
-
-
-	/* //, unsigned flags = 0 //, unsigned flags = 0//, public async::Runnable 
-	enum Flag 
-		// Settings for different operational modes
-	{
-		DestroyOnStop		= 0x01, 
-		SyncWithDelegates	= 0x02,
-		WaitForDelegates	= 0x04
-	};
-	*/
-
-
-	/*
-	bool opened() const;
-	bool running() const;
-	
-	int deviceId() const;
-	std::string	filename() const;
-	std::string	name() const;
-	std::string	error() const;
-	int width();
-	int height();
-	double fps() const;
-	Flaggable flags() const;
-	cv::VideoCapture& capture();
-			
-	void getFrame(cv::Mat& frame, int width = 0, int height = 0);
-
-	virtual void getEncoderFormat(Format& iformat);
-
-protected:	
-	bool open();
-	void release();
-	cv::Mat grab();
-	virtual void run();
-
-	void setError(const std::string& error);
-
-private:   
-	mutable Mutex _mutex;
-
-	cv::VideoCapture _capture;
-	cv::Mat _frame;			// Current video image
-	int _deviceId;			// Source device to capture from
-	int _width;				// Capture width
-	int _height;			// Capture height
-	bool _isImageSource;			// Source file is an image or not
-	bool _opened;
-	bool _stopping;
-	bool _capturing;
-	Flaggable _flags;	
-	FPSCounter _counter;
-	std::string	_error;		// Error message if any
-	std::string	_filename;	// Source file to capture from if any
-	Thread _thread;
-	*/
-
-
-	//void release();
-	/*, unsigned flags = 0
-	//int _width;				// Capture width
-	//int _height;			// Capture height
-	//Flaggable _flags;	
-	//Flaggable flags() const;
-	enum Flag 
-		// Settings for different operational modes
-	{
-		DestroyOnStop		= 0x01, 
-		SyncWithDelegates	= 0x02,
-		WaitForDelegates	= 0x04
-	};
-	*/

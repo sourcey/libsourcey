@@ -27,33 +27,34 @@
 #include "scy/media/avencoder.h"
 
 
-namespace scy { 
+namespace scy {
 namespace av {
 
 
 class AVPacketEncoder: public AVEncoder, public PacketProcessor
-	/// Encodes and multiplexes a realtime video stream form 
-	/// audio / video capture sources.
-	/// FFmpeg is used for encoding.
+    /// Encodes and multiplexes a realtime video stream form
+    /// audio / video capture sources.
+    /// FFmpeg is used for encoding.
 {
 public:
-	AVPacketEncoder(const EncoderOptions& options, bool muxLiveStreams = false);
-	AVPacketEncoder(bool muxLiveStreams = false);
-	virtual ~AVPacketEncoder();
-	
-	virtual void encode(VideoPacket& packet);
-	virtual void encode(AudioPacket& packet);
+    AVPacketEncoder(const EncoderOptions& options, bool muxLiveStreams = false);
+    AVPacketEncoder(bool muxLiveStreams = false);
+    virtual ~AVPacketEncoder();
 
-protected:		
-	virtual bool accepts(IPacket& packet);
-	virtual void process(IPacket& packet);	
-	virtual void onStreamStateChange(const PacketStreamState& state);
+    virtual void encode(VideoPacket& packet);
+    virtual void encode(AudioPacket& packet);
 
-	friend class PacketStream;
-			
-	mutable Mutex _mutex;
-	bool _muxLiveStreams;
-	VideoPacket* _lastVideoPacket;
+    virtual bool accepts(IPacket& packet);
+    virtual void process(IPacket& packet);
+
+protected:
+    virtual void onStreamStateChange(const PacketStreamState& state);
+
+    friend class PacketStream;
+
+    mutable Mutex _mutex;
+    bool _muxLiveStreams;
+    VideoPacket* _lastVideoPacket;
 };
 
 
@@ -64,62 +65,62 @@ protected:
 
 
 struct PTSCalculator
-	/// Helper class which calculates PTS values for a live source
+    /// Helper class which calculates PTS values for a live source
 {
-	AVRational timeBase;
-	clock_t frameTime;
-	double frameDuration;
-	double frameDiff;
+    AVRational timeBase;
+    clock_t frameTime;
+    double frameDuration;
+    double frameDiff;
 
-	Int64 currentPTS;
-	Int64 lastPTS;
+    Int64 currentPTS;
+    Int64 lastPTS;
 
-	PTSCalculator() {
-		reset();
-	}
+    PTSCalculator() {
+        reset();
+    }
 
-	void reset() {		
-		lastPTS = 0;
-		currentPTS = 0;
-		frameTime = 0;
-		frameDuration = 0;
-		frameDiff = 0;
-	}
-	
-	void log() {			
-		Timestamp ts;
-		debugL("PTSCalculator", this) << "Values:" 
-			<< "\n\tCurrent PTS: " << currentPTS
-			<< "\n\tLast PTS: " << lastPTS	
-			<< "\n\tFrame Duration: " << frameDuration
-			<< "\n\tFrame Diff: " << frameDiff
-			<< "\n\tFrame Time: " << frameTime
-			<< "\n\tTime Base: " << timeBase.den << ": " << timeBase.num
-			<< std::endl;
-	}
+    void reset() {
+        lastPTS = 0;
+        currentPTS = 0;
+        frameTime = 0;
+        frameDuration = 0;
+        frameDiff = 0;
+    }
 
-	Int64 tick() {
-		// Initializing
-		if (frameTime == 0) {
-			assert(!frameDuration);
-			frameTime = clock();
-			currentPTS = 1;
-		}
+    void log() {
+        Timestamp ts;
+        debugL("PTSCalculator", this) << "Values:"
+            << "\n\tCurrent PTS: " << currentPTS
+            << "\n\tLast PTS: " << lastPTS
+            << "\n\tFrame Duration: " << frameDuration
+            << "\n\tFrame Diff: " << frameDiff
+            << "\n\tFrame Time: " << frameTime
+            << "\n\tTime Base: " << timeBase.den << ": " << timeBase.num
+            << std::endl;
+    }
 
-		// Updating
-		else {
-			frameDuration = (double)(clock() - frameTime) / CLOCKS_PER_SEC;
-			frameTime = clock();
-			frameDiff = timeBase.den/(timeBase.num/(frameDuration));
-			currentPTS = lastPTS + frameDiff;
-		}	
+    Int64 tick() {
+        // Initializing
+        if (frameTime == 0) {
+            assert(!frameDuration);
+            frameTime = clock();
+            currentPTS = 1;
+        }
 
-		log();
+        // Updating
+        else {
+            frameDuration = (double)(clock() - frameTime) / CLOCKS_PER_SEC;
+            frameTime = clock();
+            frameDiff = timeBase.den/(timeBase.num/(frameDuration));
+            currentPTS = lastPTS + frameDiff;
+        }
 
-		assert(currentPTS > lastPTS);
-		lastPTS = currentPTS;
-		return currentPTS;
-	}
+        log();
+
+        assert(currentPTS > lastPTS);
+        lastPTS = currentPTS;
+        return currentPTS;
+    }
 };
 #endif
 

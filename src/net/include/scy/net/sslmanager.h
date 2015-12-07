@@ -32,114 +32,114 @@
 
 namespace scy {
 namespace net {
-	
+    
 
 class VerificationErrorDetails;
 
 
 class SSLManager
-	/// SSLManager is a singleton for holding the default server/client 
-	/// Context and handling callbacks for certificate verification errors
-	/// and private key passphrases.
+    /// SSLManager is a singleton for holding the default server/client 
+    /// Context and handling callbacks for certificate verification errors
+    /// and private key passphrases.
 {
 public:
-	void initializeServer(SSLContext::Ptr ptrContext);
-		// Initializes the server side of the SSLManager server-side SSLContext.
+    void initializeServer(SSLContext::Ptr ptrContext);
+        // Initializes the server side of the SSLManager server-side SSLContext.
 
-	void initializeClient(SSLContext::Ptr ptrContext);
-		// Initializes the client side of the SSLManager with a default client-side SSLContext.
+    void initializeClient(SSLContext::Ptr ptrContext);
+        // Initializes the client side of the SSLManager with a default client-side SSLContext.
 
-	SSLContext::Ptr defaultServerContext();
-		// Returns the default Context used by the server if initialized. 
+    SSLContext::Ptr defaultServerContext();
+        // Returns the default Context used by the server if initialized. 
 
-	SSLContext::Ptr defaultClientContext();
-		// Returns the default Context used by the client if initialized. 
+    SSLContext::Ptr defaultClientContext();
+        // Returns the default Context used by the client if initialized. 
 
-	Signal<VerificationErrorDetails&> ServerVerificationError;
-		// Fired whenever a certificate verification error is detected by the server during a handshake.
+    Signal<VerificationErrorDetails&> ServerVerificationError;
+        // Fired whenever a certificate verification error is detected by the server during a handshake.
 
-	Signal<VerificationErrorDetails&> ClientVerificationError;
-		// Fired whenever a certificate verification error is detected by the client during a handshake.
+    Signal<VerificationErrorDetails&> ClientVerificationError;
+        // Fired whenever a certificate verification error is detected by the client during a handshake.
 
-	Signal<std::string&> PrivateKeyPassphraseRequired;
-		// Fired when a encrypted certificate is loaded. Not setting the password
-		// in the event parameter will result in a failure to load the certificate.
-		
-	void shutdown();
-		// Shuts down the SSLManager and releases the default Context
-		// objects. After a call to shutdown(), the SSLManager can no
-		// longer be used.
-		//
-		// Normally, it's not necessary to call this method directly, as this
-		// will be called either by uninitializeSSL(), or when
-		// the SSLManager instance is destroyed.
+    Signal<std::string&> PrivateKeyPassphraseRequired;
+        // Fired when a encrypted certificate is loaded. Not setting the password
+        // in the event parameter will result in a failure to load the certificate.
+        
+    void shutdown();
+        // Shuts down the SSLManager and releases the default Context
+        // objects. After a call to shutdown(), the SSLManager can no
+        // longer be used.
+        //
+        // Normally, it's not necessary to call this method directly, as this
+        // will be called either by uninitializeSSL(), or when
+        // the SSLManager instance is destroyed.
 
-	static SSLManager& instance();
-		// Returns the instance of the SSLManager singleton.
+    static SSLManager& instance();
+        // Returns the instance of the SSLManager singleton.
 
-	static void destroy();
-		// Shuts down and destroys the SSLManager singleton instance.
-	
-	static void initNoVerifyClient();
-		// Initializes a default no verify client context that's useful for testing.
+    static void destroy();
+        // Shuts down and destroys the SSLManager singleton instance.
+    
+    static void initNoVerifyClient();
+        // Initializes a default no verify client context that's useful for testing.
 
 protected:
-	static int verifyClientCallback(int ok, X509_STORE_CTX* pStore);
-		// The return value of this method defines how errors in
-		// verification are handled. Return 0 to terminate the handshake,
-		// or 1 to continue despite the error.
+    static int verifyClientCallback(int ok, X509_STORE_CTX* pStore);
+        // The return value of this method defines how errors in
+        // verification are handled. Return 0 to terminate the handshake,
+        // or 1 to continue despite the error.
 
-	static int verifyServerCallback(int ok, X509_STORE_CTX* pStore);
-		// The return value of this method defines how errors in
-		// verification are handled. Return 0 to terminate the handshake,
-		// or 1 to continue despite the error.
+    static int verifyServerCallback(int ok, X509_STORE_CTX* pStore);
+        // The return value of this method defines how errors in
+        // verification are handled. Return 0 to terminate the handshake,
+        // or 1 to continue despite the error.
 
-	static int privateKeyPassphraseCallback(char* pBuf, int size, int flag, void* userData);
-		// Method is invoked by OpenSSL to retrieve a passwd for an encrypted certificate.
-		// The request is delegated to the PrivatekeyPassword event. This method returns the
-		// length of the password.
+    static int privateKeyPassphraseCallback(char* pBuf, int size, int flag, void* userData);
+        // Method is invoked by OpenSSL to retrieve a passwd for an encrypted certificate.
+        // The request is delegated to the PrivatekeyPassword event. This method returns the
+        // length of the password.
 
 private:
-	SSLManager();
-		// Creates the SSLManager.
+    SSLManager();
+        // Creates the SSLManager.
 
-	~SSLManager();
-		// Destroys the SSLManager.
+    ~SSLManager();
+        // Destroys the SSLManager.
 
-	static int verifyCallback(bool server, int ok, X509_STORE_CTX* pStore);
-		// The return value of this method defines how errors in
-		// verification are handled. Return 0 to terminate the handshake,
-		// or 1 to continue despite the error.
+    static int verifyCallback(bool server, int ok, X509_STORE_CTX* pStore);
+        // The return value of this method defines how errors in
+        // verification are handled. Return 0 to terminate the handshake,
+        // or 1 to continue despite the error.
 
-	SSLContext::Ptr _defaultServerContext;
-	SSLContext::Ptr _defaultClientContext;
-	Mutex _mutex;
+    SSLContext::Ptr _defaultServerContext;
+    SSLContext::Ptr _defaultClientContext;
+    Mutex _mutex;
 
-	friend class Singleton<SSLManager>;
-	friend class SSLContext;
+    friend class Singleton<SSLManager>;
+    friend class SSLContext;
 };
 
 
 inline int SSLManager::verifyServerCallback(int ok, X509_STORE_CTX* pStore)
 {
-	return SSLManager::verifyCallback(true, ok, pStore);
+    return SSLManager::verifyCallback(true, ok, pStore);
 }
 
 
 inline int SSLManager::verifyClientCallback(int ok, X509_STORE_CTX* pStore)
 {
-	return SSLManager::verifyCallback(false, ok, pStore);
+    return SSLManager::verifyCallback(false, ok, pStore);
 }
 
 
 inline void SSLManager::initNoVerifyClient()
 {
-	net::SSLManager::instance().initializeClient(
-		std::shared_ptr<net::SSLContext>(
-			new net::SSLContext(
-				net::SSLContext::CLIENT_USE, "", "", "", 
-				net::SSLContext::VERIFY_NONE, 9, false, 
-				"ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH")));
+    net::SSLManager::instance().initializeClient(
+        std::shared_ptr<net::SSLContext>(
+            new net::SSLContext(
+                net::SSLContext::CLIENT_USE, "", "", "", 
+                net::SSLContext::VERIFY_NONE, 9, false, 
+                "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH")));
 }
 
 
@@ -149,75 +149,75 @@ inline void SSLManager::initNoVerifyClient()
 
 
 class VerificationErrorDetails
-	/// A utility class for certificate error handling.
+    /// A utility class for certificate error handling.
 {
 public:
-	VerificationErrorDetails(const crypto::X509Certificate& cert, int errDepth, int errNum, const std::string& errMsg);
-		// Creates the VerificationErrorDetails. _ignoreError is per default set to false.
+    VerificationErrorDetails(const crypto::X509Certificate& cert, int errDepth, int errNum, const std::string& errMsg);
+        // Creates the VerificationErrorDetails. _ignoreError is per default set to false.
 
-	~VerificationErrorDetails();
-		// Destroys the VerificationErrorDetails.
+    ~VerificationErrorDetails();
+        // Destroys the VerificationErrorDetails.
 
-	const crypto::X509Certificate& certificate() const;
-		// Returns the certificate that caused the error.
+    const crypto::X509Certificate& certificate() const;
+        // Returns the certificate that caused the error.
 
-	int errorDepth() const;
-		// Returns the position of the certificate in the certificate chain.
+    int errorDepth() const;
+        // Returns the position of the certificate in the certificate chain.
 
-	int errorNumber() const;
-		// Returns the id of the error
+    int errorNumber() const;
+        // Returns the id of the error
 
-	const std::string& errorMessage() const;
-		// Returns the textual presentation of the errorNumber.
+    const std::string& errorMessage() const;
+        // Returns the textual presentation of the errorNumber.
 
-	void setIgnoreError(bool ignoreError);
-		// setIgnoreError to true, if a verification error is judged non-fatal by the user.
+    void setIgnoreError(bool ignoreError);
+        // setIgnoreError to true, if a verification error is judged non-fatal by the user.
 
-	bool getIgnoreError() const;
-		// returns the value of _ignoreError
+    bool getIgnoreError() const;
+        // returns the value of _ignoreError
 
 private:
-	crypto::X509Certificate	_cert;
-	int _errorDepth;
-	int _errorNumber;
-	std::string _errorMessage; // Textual representation of the _errorNumber
-	bool _ignoreError;
+    crypto::X509Certificate    _cert;
+    int _errorDepth;
+    int _errorNumber;
+    std::string _errorMessage; // Textual representation of the _errorNumber
+    bool _ignoreError;
 };
 
 
 inline const crypto::X509Certificate& VerificationErrorDetails::certificate() const
 {
-	return _cert;
+    return _cert;
 }
 
 
 inline int VerificationErrorDetails::errorDepth() const
 {
-	return _errorDepth;
+    return _errorDepth;
 }
 
 
 inline int VerificationErrorDetails::errorNumber() const
 {
-	return _errorNumber;
+    return _errorNumber;
 }
 
 
 inline const std::string& VerificationErrorDetails::errorMessage() const
 {
-	return _errorMessage;
+    return _errorMessage;
 }
 
 
 inline void VerificationErrorDetails::setIgnoreError(bool ignoreError)
 {
-	_ignoreError = ignoreError;
+    _ignoreError = ignoreError;
 }
 
 
 inline bool VerificationErrorDetails::getIgnoreError() const
 {
-	return _ignoreError;
+    return _ignoreError;
 }
 
 

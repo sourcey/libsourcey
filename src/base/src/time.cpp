@@ -35,62 +35,62 @@ namespace time {
 std::time_t now()
 {
 #if 0 // no need for chrono here yet
-	std::chrono::time_point<std::chrono::system_clock> system_now = std::chrono::system_clock::now();
-	return std::chrono::system_clock::to_time_t(system_now);
+    std::chrono::time_point<std::chrono::system_clock> system_now = std::chrono::system_clock::now();
+    return std::chrono::system_clock::to_time_t(system_now);
 #endif
-	return std::time(0);
+    return std::time(0);
 }
 
 
 double clockSecs()
 {
-	return clock() / CLOCKS_PER_SEC;
+    return clock() / CLOCKS_PER_SEC;
 }
 
 
 std::tm toLocal(const std::time_t& time)
 {
-	std::tm tm_snapshot;
+    std::tm tm_snapshot;
 #if defined(WIN32)
-	localtime_s(&tm_snapshot, &time); // thread-safe?
+    localtime_s(&tm_snapshot, &time); // thread-safe?
 #else
-	localtime_r(&time, &tm_snapshot); // POSIX  
+    localtime_r(&time, &tm_snapshot); // POSIX  
 #endif
-	return tm_snapshot;
+    return tm_snapshot;
 }
  
  
 std::tm toUTC(const std::time_t& time)
 {
-	// TODO: double check thread safety of native methods
-	std::tm tm_snapshot;
+    // TODO: double check thread safety of native methods
+    std::tm tm_snapshot;
 #if defined(WIN32)
-	gmtime_s(&tm_snapshot, &time); // thread-safe?
+    gmtime_s(&tm_snapshot, &time); // thread-safe?
 #else
-	gmtime_r(&time, &tm_snapshot); // POSIX  
+    gmtime_r(&time, &tm_snapshot); // POSIX  
 #endif
-	return tm_snapshot;
+    return tm_snapshot;
 }
 
 
 std::string print(const std::tm& dt, const char* fmt)
 {
 #if defined(WIN32)     
-	// BOGUS hack done for VS2012: C++11 non-conformant since it SHOULD take a "const struct tm* "
-	// ref. C++11 standard: ISO/IEC 14882:2011, § 27.7.1, 
-	std::ostringstream oss;
-	oss << std::put_time(const_cast<std::tm*>(&dt), fmt); 
-	return oss.str();
+    // BOGUS hack done for VS2012: C++11 non-conformant since it SHOULD take a "const struct tm* "
+    // ref. C++11 standard: ISO/IEC 14882:2011, ï¿½ 27.7.1, 
+    std::ostringstream oss;
+    oss << std::put_time(const_cast<std::tm*>(&dt), fmt); 
+    return oss.str();
 
 #else    // LINUX
-	const size_t size = 1024;
-	char buffer[size]; 
-	auto success = std::strftime(buffer, size, fmt, &dt); 
+    const size_t size = 1024;
+    char buffer[size]; 
+    auto success = std::strftime(buffer, size, fmt, &dt); 
  
-	if (0 == success)
-	return fmt; 
+    if (0 == success)
+    return fmt; 
    
-	return buffer; 
+    return buffer; 
 #endif
 }
 
@@ -109,43 +109,43 @@ std::string printUTC(const char* fmt)
 
 std::string getLocal()
 {
-   return printLocal(ISO8601Format);	
+   return printLocal(ISO8601Format);    
 }
 
 
 std::string getUTC()
 {
-   return printUTC(ISO8601Format);	
+   return printUTC(ISO8601Format);    
 }
-	
+    
 
 #if 0
 std::time_t nowUTC()
 {
-	std::time_t local = std::time(NULL);
-	return std::mktime(std::gmtime(&local)); // UTC time
+    std::time_t local = std::time(NULL);
+    return std::mktime(std::gmtime(&local)); // UTC time
 }
 
 UInt64 ticks()
 {
 #ifdef WIN32
-	return ::GetTickCount();
+    return ::GetTickCount();
 #else
-	struct timespec tval;
-	clock_gettime(CLOCK_MONOTONIC, &tval);
-	return tval.tv_sec * 1000 + tval.tv_nsec / 1000000;
+    struct timespec tval;
+    clock_gettime(CLOCK_MONOTONIC, &tval);
+    return tval.tv_sec * 1000 + tval.tv_nsec / 1000000;
 #endif
 }
 
 UInt64 getTimeHR() 
 {
-	return uv_hrtime();
+    return uv_hrtime();
 }
-	
+    
 
 UInt64 getTimeMS() 
 {
-	return uv_hrtime() / 1000000;
+    return uv_hrtime() / 1000000;
 }
 #endif
 

@@ -29,19 +29,19 @@ namespace av {
 
 
 AVPacketEncoder::AVPacketEncoder(const EncoderOptions& options, bool muxLiveStreams) :
-	AVEncoder(options), 
-	PacketProcessor(AVEncoder::emitter), 
-	_muxLiveStreams(muxLiveStreams), 
-	_lastVideoPacket(nullptr)
+    AVEncoder(options),
+    PacketProcessor(AVEncoder::emitter),
+    _muxLiveStreams(muxLiveStreams),
+    _lastVideoPacket(nullptr)
 {
 }
 
 
 AVPacketEncoder::AVPacketEncoder(bool muxLiveStreams) :
-	AVEncoder(), 
-	PacketProcessor(AVEncoder::emitter), 
-	_muxLiveStreams(muxLiveStreams), 
-	_lastVideoPacket(nullptr)
+    AVEncoder(),
+    PacketProcessor(AVEncoder::emitter),
+    _muxLiveStreams(muxLiveStreams),
+    _lastVideoPacket(nullptr)
 {
 }
 
@@ -52,118 +52,120 @@ AVPacketEncoder::~AVPacketEncoder()
 
 
 void AVPacketEncoder::process(IPacket& packet)
-{	
-	Mutex::ScopedLock lock(_mutex);
+{
+    Mutex::ScopedLock lock(_mutex);
 
-	// We may be receiving either audio or video packets	
-	VideoPacket* vPacket = dynamic_cast<VideoPacket*>(&packet);
-	AudioPacket* aPacket = vPacket ? nullptr : dynamic_cast<AudioPacket*>(&packet);
-	if (!vPacket && !aPacket)
-		throw std::invalid_argument("Unknown media packet type.");
+    // We may be receiving either audio or video packets
+    VideoPacket* vPacket = dynamic_cast<VideoPacket*>(&packet);
+    AudioPacket* aPacket = vPacket ? nullptr : dynamic_cast<AudioPacket*>(&packet);
+    if (!vPacket && !aPacket)
+        throw std::invalid_argument("Unknown media packet type.");
 
-	// Do some special synchronizing for muxing live variable framerate streams
-	if (_muxLiveStreams) {
-		VideoEncoderContext* video = AVEncoder::video();
-		AudioEncoderContext* audio = AVEncoder::audio();
-		assert(audio && video);
-		double audioPts, videoPts;
-		int times = 0;
-		for (;;) {
-			times++;
-			assert(times < 10);			
-			audioPts = audio ? (double)audio->stream->pts.val * audio->stream->time_base.num / audio->stream->time_base.den : 0.0;
-			videoPts = video ? (double)video->stream->pts.val * video->stream->time_base.num / video->stream->time_base.den : 0.0;			
-			if (aPacket) {
-				// Write the audio packet when the encoder is ready
-				if (!video || audioPts < videoPts) {
-					encode(*aPacket);
-					break;
-				}
+    // Do some special synchronizing for muxing live variable framerate streams
+    if (_muxLiveStreams) {
+        VideoEncoderContext* video = AVEncoder::video();
+        AudioEncoderContext* audio = AVEncoder::audio();
+        assert(audio && video);
+        double audioPts, videoPts;
+        int times = 0;
+        for (;;) {
+            times++;
+            assert(times < 10);
+            audioPts = audio ? (double)audio->stream->pts.val * audio->stream->time_base.num / audio->stream->time_base.den : 0.0;
+            videoPts = video ? (double)video->stream->pts.val * video->stream->time_base.num / video->stream->time_base.den : 0.0;
+            if (aPacket) {
+                // Write the audio packet when the encoder is ready
+                if (!video || audioPts < videoPts) {
+                    encode(*aPacket);
+                    break;
+                }
 
-				// Write dummy video frames until we can encode the audio
-				else {
-					// May be null if the first packet was audio, skip...
-					if (!_lastVideoPacket)
-						break;
-					
-					encode(*_lastVideoPacket);
-				}
-			}
-			else if (vPacket) {
-				// Write the video packet if the encoder is ready
-				if (!audio || audioPts > videoPts)
-					encode(*vPacket);
-				
-				if (audio) {
-					// Clone and buffer the last video packet it can be used
-					// as soon as we need an available frame.
-					// used as a filler if the source framerate is inconstant.
-					if (_lastVideoPacket)
-						delete _lastVideoPacket;
-					_lastVideoPacket = reinterpret_cast<scy::av::VideoPacket*>(vPacket->clone());
-				}
-				break;
-			}
-		}
-	}
-	else if (vPacket) {
-		encode(*vPacket);
-	}
-	else if (aPacket) {
-		encode(*aPacket);
-	}
+                // Write dummy video frames until we can encode the audio
+                else {
+                    // May be null if the first packet was audio, skip...
+                    if (!_lastVideoPacket)
+                        break;
+
+                    encode(*_lastVideoPacket);
+                }
+            }
+            else if (vPacket) {
+                // Write the video packet if the encoder is ready
+                if (!audio || audioPts > videoPts)
+                    encode(*vPacket);
+
+                if (audio) {
+                    // Clone and buffer the last video packet it can be used
+                    // as soon as we need an available frame.
+                    // used as a filler if the source framerate is inconstant.
+                    if (_lastVideoPacket)
+                        delete _lastVideoPacket;
+                    _lastVideoPacket = reinterpret_cast<scy::av::VideoPacket*>(vPacket->clone());
+                }
+                break;
+            }
+        }
+    }
+    else if (vPacket) {
+        encode(*vPacket);
+    }
+    else if (aPacket) {
+        encode(*aPacket);
+    }
 }
 
 
 void AVPacketEncoder::encode(VideoPacket& packet)
 {
-	encodeVideo((unsigned char*)packet.data(), packet.size(), packet.width, packet.height, (UInt64)packet.time);
+    encodeVideo((unsigned char*)packet.data(), packet.size(), packet.width, packet.height, (UInt64)packet.time);
 }
 
 
 void AVPacketEncoder::encode(AudioPacket& packet)
 {
-	encodeAudio((unsigned char*)packet.data(), packet.size());
+    encodeAudio((unsigned char*)packet.data(), packet.size(), packet.frameSize, (UInt64)packet.time);
+    //encodeAudio(((AudioDecoderContext*)packet.opaque)->frame);
 }
 
 
-bool AVPacketEncoder::accepts(IPacket& packet) 
-{ 
-	return dynamic_cast<av::MediaPacket*>(&packet) != 0; 
+bool AVPacketEncoder::accepts(IPacket& packet)
+{
+    return dynamic_cast<av::MediaPacket*>(&packet) != 0;
 }
 
-					
-void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state) 
-{ 
-	TraceLS(this) << "On stream state change: " << state << endl;
-	
-	Mutex::ScopedLock lock(_mutex);
 
-	switch (state.id()) {
-	case PacketStreamState::Active:
-		if (!isActive()) {
-			TraceLS(this) << "Initializing" << endl;
-			//if (AVEncoder::options().oformat.video.enabled && 
-			//	AVEncoder::options().oformat.audio.enabled)
-			//	_muxLiveStreams = true;
-			AVEncoder::initialize();
-		}
-		break;
-		
-	case PacketStreamState::Resetting:
-	case PacketStreamState::Stopping:
-		if (isActive()) {
-			TraceLS(this) << "Uninitializing" << endl;
-			AVEncoder::uninitialize();
-		}
-		break;
-	//case PacketStreamState::Stopped:
-	//case PacketStreamState::Error:
-	//case PacketStreamState::None:
-	//case PacketStreamState::Closed:
-	}
+void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state)
+{
+    TraceLS(this) << "On stream state change: " << state << endl;
 
-	TraceLS(this) << "Stream state change: OK: " << state << endl;
+    Mutex::ScopedLock lock(_mutex);
+
+    switch (state.id()) {
+    case PacketStreamState::Active:
+        if (!isActive()) {
+            TraceLS(this) << "Initializing" << endl;
+            //if (AVEncoder::options().oformat.video.enabled &&
+            //    AVEncoder::options().oformat.audio.enabled)
+            //    _muxLiveStreams = true;
+            AVEncoder::initialize();
+        }
+        break;
+
+    case PacketStreamState::Resetting:
+    case PacketStreamState::Stopping:
+        if (isActive()) {
+            TraceLS(this) << "Uninitializing" << endl;
+            AVEncoder::flush();
+            AVEncoder::uninitialize();
+        }
+        break;
+    //case PacketStreamState::Stopped:
+    //case PacketStreamState::Error:
+    //case PacketStreamState::None:
+    //case PacketStreamState::Closed:
+    }
+
+    TraceLS(this) << "Stream state change: OK: " << state << endl;
 }
 
 

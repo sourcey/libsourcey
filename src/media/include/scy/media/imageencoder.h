@@ -35,35 +35,35 @@ namespace av {
 
 
 class ImageEncoder: public PacketProcessor //IPacketEncoder
-	// This class is a PacketStreamAdapter which uses OpenCV 
-	// to encode images from raw data packets.
-	//
-	// See OpenCV documentation for cvParams information.
-	// JPEG:
-	//	0 = CV_IMWRITE_JPEG_QUALITY
-	//	1 = (quality) default 95 [0-100]
-	//
-	// PNG:
-	//	0 = CV_IMWRITE_PNG_COMPRESSION
-	//	1 = (compression) default 3 [0-9]
-	//
+    // This class is a PacketStreamAdapter which uses OpenCV 
+    // to encode images from raw data packets.
+    //
+    // See OpenCV documentation for cvParams information.
+    // JPEG:
+    //    0 = CV_IMWRITE_JPEG_QUALITY
+    //    1 = (quality) default 95 [0-100]
+    //
+    // PNG:
+    //    0 = CV_IMWRITE_PNG_COMPRESSION
+    //    1 = (compression) default 3 [0-9]
+    //
 {
-public:		
-	ImageEncoder(EncoderOptions& options, std::vector<int> cvParams = std::vector<int>());
-	virtual ~ImageEncoder();
-	
-	virtual void initialize();
-	virtual void uninitialize();
-	
-	virtual bool accepts(IPacket& packet);
-	virtual void process(IPacket& packet);
-	
-	virtual EncoderOptions& options();
-			
-	PacketSignal emitter;
+public:        
+    ImageEncoder(EncoderOptions& options, std::vector<int> cvParams = std::vector<int>());
+    virtual ~ImageEncoder();
+    
+    virtual void initialize();
+    virtual void uninitialize();
+    
+    virtual bool accepts(IPacket& packet);
+    virtual void process(IPacket& packet);
+    
+    virtual EncoderOptions& options();
+            
+    PacketSignal emitter;
 
 private:
-	std::string _extension;
+    std::string _extension;
     EncoderOptions _options;
     std::vector<int> _params;
 };
@@ -73,5 +73,5 @@ private:
 
 
 #endif
-#endif	// SCY_MEDIA_ImageEncoder_H
+#endif    // SCY_MEDIA_ImageEncoder_H
 

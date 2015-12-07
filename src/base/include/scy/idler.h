@@ -33,21 +33,21 @@ namespace scy {
 class Idler: public async::Runner
 {
 public:
-	Idler(uv::Loop* loop = uv::defaultLoop());
-	Idler(uv::Loop* loop, std::function<void()> target);
-	Idler(uv::Loop* loop, std::function<void(void*)> target, void* arg);
-		// Create the idler context the given event loop and method.
-	
-	virtual ~Idler();
-	
-	uv::Handle& handle();
+    Idler(uv::Loop* loop = uv::defaultLoop());
+    Idler(uv::Loop* loop, std::function<void()> target);
+    Idler(uv::Loop* loop, std::function<void(void*)> target, void* arg);
+        // Create the idler context the given event loop and method.
+    
+    virtual ~Idler();
+    
+    uv::Handle& handle();
 
-protected:	
-	virtual void init();
-	virtual void startAsync();
-	virtual bool async() const;
-	
-	uv::Handle _handle;
+protected:    
+    virtual void init();
+    virtual void startAsync();
+    virtual bool async() const;
+    
+    uv::Handle _handle;
 };
 
 

@@ -59,44 +59,44 @@ using Poco::SharedPtr;
 class TestAction: public DirectAction
 {
 public:
-	TestAction(DirectResponse::Ptr pResponse): DirectAction(pResponse)
-	{
-	}
+    TestAction(DirectResponse::Ptr pResponse): DirectAction(pResponse)
+    {
+    }
 
-	void invoke(const std::string& method, const DirectHandler::ArrayType* pArgs)
-	{
-		std::ostringstream os;
-		os << method << '(';
+    void invoke(const std::string& method, const DirectHandler::ArrayType* pArgs)
+    {
+        std::ostringstream os;
+        os << method << '(';
 
-		DirectHandler::ArrayType::const_iterator it = pArgs->begin();
-		DirectHandler::ArrayType::const_iterator end = pArgs->end();
-		for (; it != end;)
-		{
-			if (it->isEmpty())
-				os << "null";
-			else
-				os << it->convert<std::string>();
+        DirectHandler::ArrayType::const_iterator it = pArgs->begin();
+        DirectHandler::ArrayType::const_iterator end = pArgs->end();
+        for (; it != end;)
+        {
+            if (it->isEmpty())
+                os << "null";
+            else
+                os << it->convert<std::string>();
 
-			if (++it != end) os << ',';
-			else os << ')';
-		}
+            if (++it != end) os << ',';
+            else os << ')';
+        }
 
-		response().write(os.str());
-	}
+        response().write(os.str());
+    }
 };
 
 
 class TestArrayAction: public DirectAction
 {
 public:
-	TestArrayAction(DirectResponse::Ptr pResponse): DirectAction(pResponse)
-	{
-	}
+    TestArrayAction(DirectResponse::Ptr pResponse): DirectAction(pResponse)
+    {
+    }
 
-	void invoke(const std::string& method, const DirectHandler::ArrayType* pArgs)
-	{
-		response().writeArray(*pArgs);
-	}
+    void invoke(const std::string& method, const DirectHandler::ArrayType* pArgs)
+    {
+        response().writeArray(*pArgs);
+    }
 };
 
 
@@ -112,162 +112,162 @@ JSONTest::~JSONTest()
 
 void JSONTest::testEncoding()
 {
-	// TODO: Unicode
-	std::vector<char> vc;
-	vc.push_back('"');
-	vc.push_back('\b');
-	vc.push_back('\f');
-	vc.push_back('\n');
-	vc.push_back('\r');
-	vc.push_back('\t');
-	vc.push_back('/');
-	vc.push_back('\\');
+    // TODO: Unicode
+    std::vector<char> vc;
+    vc.push_back('"');
+    vc.push_back('\b');
+    vc.push_back('\f');
+    vc.push_back('\n');
+    vc.push_back('\r');
+    vc.push_back('\t');
+    vc.push_back('/');
+    vc.push_back('\\');
 
-	JSONEntity::String str;
-	std::vector<char>::iterator it = vc.begin();
-	std::vector<char>::iterator end = vc.end();
-	for (; it != end; ++it) str += *it;
+    JSONEntity::String str;
+    std::vector<char>::iterator it = vc.begin();
+    std::vector<char>::iterator end = vc.end();
+    for (; it != end; ++it) str += *it;
 
-	JSONEntity entity(JSONEntity::JSON_T_STRING, str);
-	JSONEntity::String encStr = entity.toString();
-	assert (encStr == "\\\"\\b\\f\\n\\r\\t\\/\\");
+    JSONEntity entity(JSONEntity::JSON_T_STRING, str);
+    JSONEntity::String encStr = entity.toString();
+    assert (encStr == "\\\"\\b\\f\\n\\r\\t\\/\\");
 }
 
 
 void JSONTest::testPrinter()
 {
-	const std::string str("{"
-		"\"firstName\": \"John\","
-		"\"lastName\": \"Smith\","
-		"\"address\": {"
-			"\"streetAddress\": \"21 2nd Street\","
-			"\"city\": \"New York\","
-			"\"state\": \"NY\","
-			"\"postalCode\": 10021"
-		"},"
-	"\"phoneNumbers\": ["
-		"\"212 555-1234\","
-		"\"646 555-4567\""
-	"],"
-	"\"weight\": {"
-		"\"value\": 123.456, \"units\": \"lbs\""
-		"}"
-	"}");
+    const std::string str("{"
+        "\"firstName\": \"John\","
+        "\"lastName\": \"Smith\","
+        "\"address\": {"
+            "\"streetAddress\": \"21 2nd Street\","
+            "\"city\": \"New York\","
+            "\"state\": \"NY\","
+            "\"postalCode\": 10021"
+        "},"
+    "\"phoneNumbers\": ["
+        "\"212 555-1234\","
+        "\"646 555-4567\""
+    "],"
+    "\"weight\": {"
+        "\"value\": 123.456, \"units\": \"lbs\""
+        "}"
+    "}");
 
-	std::ostringstream os;
-	JSONParser jp(new JSONPrinter(os));
-	jp.parse(str);
+    std::ostringstream os;
+    JSONParser jp(new JSONPrinter(os));
+    jp.parse(str);
 
-	std::string s1 = os.str();
+    std::string s1 = os.str();
 
-	std::ostringstream ros;
-	ros << "{" << std::endl;
-	ros << "key = 'firstName', value = string: 'John'" << std::endl;
-	ros << "key = 'lastName', value = string: 'Smith'" << std::endl;
-	ros << "key = 'address', value = {" << std::endl;
-	ros << "key = 'streetAddress', value = string: '21 2nd Street'" << std::endl;
-	ros << "key = 'city', value = string: 'New York'" << std::endl;
-	ros << "key = 'state', value = string: 'NY'" << std::endl;
-	ros << "key = 'postalCode', value = integer: 10021" << std::endl;
-	ros << "\t}" << std::endl;
-	ros << "key = 'phoneNumbers', value = [" << std::endl;
-	ros << "\t\tstring: '212 555-1234'" << std::endl;
-	ros << "\t\tstring: '646 555-4567'" << std::endl;
-	ros << "\t]" << std::endl;
-	ros << "key = 'weight', value = {" << std::endl;
-	ros << "key = 'value', value = float: 123.456" << std::endl;
-	ros << "key = 'units', value = string: 'lbs'" << std::endl;
-	ros << "\t}" << std::endl;
-	ros << "}" << std::endl;
+    std::ostringstream ros;
+    ros << "{" << std::endl;
+    ros << "key = 'firstName', value = string: 'John'" << std::endl;
+    ros << "key = 'lastName', value = string: 'Smith'" << std::endl;
+    ros << "key = 'address', value = {" << std::endl;
+    ros << "key = 'streetAddress', value = string: '21 2nd Street'" << std::endl;
+    ros << "key = 'city', value = string: 'New York'" << std::endl;
+    ros << "key = 'state', value = string: 'NY'" << std::endl;
+    ros << "key = 'postalCode', value = integer: 10021" << std::endl;
+    ros << "\t}" << std::endl;
+    ros << "key = 'phoneNumbers', value = [" << std::endl;
+    ros << "\t\tstring: '212 555-1234'" << std::endl;
+    ros << "\t\tstring: '646 555-4567'" << std::endl;
+    ros << "\t]" << std::endl;
+    ros << "key = 'weight', value = {" << std::endl;
+    ros << "key = 'value', value = float: 123.456" << std::endl;
+    ros << "key = 'units', value = string: 'lbs'" << std::endl;
+    ros << "\t}" << std::endl;
+    ros << "}" << std::endl;
 
-	assert (ros.str() == os.str());
+    assert (ros.str() == os.str());
 }
 
 
 void JSONTest::testCondenser()
 {
-	const std::string str("{"
-		"\"firstName\": \"John\","
-		"\"lastName\":  \"Smith\","
-		"\"address\": {"
-			"\"streetAddress\": \"21 2nd Street\","
-			"\"city\":          \"New York\","
-			"\"state\":         \"NY\","
-			"\"postalCode\":     10021"
-		"},"
-	"\"phoneNumbers\": ["
-		"\"212 555-1234\","
-		"\"646 555-4567\""
-	"],"
-	"\"weight\": {"
-		"\"value\": 123.456, \"units\": \"lbs\""
-		"}"
-	"}");
+    const std::string str("{"
+        "\"firstName\": \"John\","
+        "\"lastName\":  \"Smith\","
+        "\"address\": {"
+            "\"streetAddress\": \"21 2nd Street\","
+            "\"city\":          \"New York\","
+            "\"state\":         \"NY\","
+            "\"postalCode\":     10021"
+        "},"
+    "\"phoneNumbers\": ["
+        "\"212 555-1234\","
+        "\"646 555-4567\""
+    "],"
+    "\"weight\": {"
+        "\"value\": 123.456, \"units\": \"lbs\""
+        "}"
+    "}");
 
-	std::ostringstream os;
-	JSONParser jp(new JSONCondenser(os));
-	jp.parse(str);
+    std::ostringstream os;
+    JSONParser jp(new JSONCondenser(os));
+    jp.parse(str);
 
-	std::string s1 = os.str();
+    std::string s1 = os.str();
 
-	std::ostringstream ros;
-	ros << "{\"firstName\":\"John\",\"lastName\":\"Smith\","
-		"\"address\":{"
-			"\"streetAddress\":\"21 2nd Street\","
-			"\"city\":\"New York\","
-			"\"state\":\"NY\","
-			"\"postalCode\":10021},"
-	"\"phoneNumbers\":[\"212 555-1234\",\"646 555-4567\"],"
-	"\"weight\":{\"value\":123.456,\"units\":\"lbs\"}}";
+    std::ostringstream ros;
+    ros << "{\"firstName\":\"John\",\"lastName\":\"Smith\","
+        "\"address\":{"
+            "\"streetAddress\":\"21 2nd Street\","
+            "\"city\":\"New York\","
+            "\"state\":\"NY\","
+            "\"postalCode\":10021},"
+    "\"phoneNumbers\":[\"212 555-1234\",\"646 555-4567\"],"
+    "\"weight\":{\"value\":123.456,\"units\":\"lbs\"}}";
 
-	assert (ros.str() == os.str());
+    assert (ros.str() == os.str());
 }
 
 
 void JSONTest::testExtJSDirectHandler()
 {
-	std::string str = "{\"action\":\"DataList\",\"method\":\"getAll\",\"data\":[\"abc\",456,1.5,null,true,false],\"type\":\"rpc\",\"tid\":123}";
-	std::ostringstream os;
-	SharedPtr<DirectResponse> pTR = new DirectResponse(os);
-	SharedPtr<TestArrayAction> pTA = new TestArrayAction(pTR);
-	SharedPtr<DirectHandler> pDH = new DirectHandler(pTA);
-	JSONParser jp(pDH);
-	jp.parse(str);
+    std::string str = "{\"action\":\"DataList\",\"method\":\"getAll\",\"data\":[\"abc\",456,1.5,null,true,false],\"type\":\"rpc\",\"tid\":123}";
+    std::ostringstream os;
+    SharedPtr<DirectResponse> pTR = new DirectResponse(os);
+    SharedPtr<TestArrayAction> pTA = new TestArrayAction(pTR);
+    SharedPtr<DirectHandler> pDH = new DirectHandler(pTA);
+    JSONParser jp(pDH);
+    jp.parse(str);
 
-	assert (pDH->action() == "DataList");
-	assert (pDH->method() == "getAll");
-	assert (pDH->type() == DirectHandler::DIRECT_TYPE_RPC);
-	assert (pDH->tid() == 123);
-	assert (pDH->get(0) == "abc");
-	assert (pDH->get(1) == 456);
-	assert (pDH->get(2) == 1.5);
-	assert (pDH->get(3).isEmpty());
-	assert (pDH->get(4) == true);
-	assert (pDH->get(5) == false);
-	
-	assert (pTR->getAction() == "DataList");
-	assert (pTR->getMethod() == "getAll");
-	assert (pTR->getType() == "rpc");
-	assert (pTR->getTID() == 123);
+    assert (pDH->action() == "DataList");
+    assert (pDH->method() == "getAll");
+    assert (pDH->type() == DirectHandler::DIRECT_TYPE_RPC);
+    assert (pDH->tid() == 123);
+    assert (pDH->get(0) == "abc");
+    assert (pDH->get(1) == 456);
+    assert (pDH->get(2) == 1.5);
+    assert (pDH->get(3).isEmpty());
+    assert (pDH->get(4) == true);
+    assert (pDH->get(5) == false);
+    
+    assert (pTR->getAction() == "DataList");
+    assert (pTR->getMethod() == "getAll");
+    assert (pTR->getType() == "rpc");
+    assert (pTR->getTID() == 123);
 
-	assert (os.str() == "{\"type\":\"rpc\","
-		"\"tid\":123,"
-		"\"action\":\"DataList\","
-		"\"method\":\"getAll\","
-		"\"result\":[\"abc\",456,1.5,null,true,false]}");
+    assert (os.str() == "{\"type\":\"rpc\","
+        "\"tid\":123,"
+        "\"action\":\"DataList\","
+        "\"method\":\"getAll\","
+        "\"result\":[\"abc\",456,1.5,null,true,false]}");
 
-	os.str("");
-	SharedPtr<DirectResponse> pTR2 = new DirectResponse(os);
-	SharedPtr<TestAction> pTA2 = new TestAction(pTR2);
-	SharedPtr<DirectHandler> pDH2 = new DirectHandler(pTA2);
-	JSONParser jp2(pDH2);
-	jp2.parse(str);
+    os.str("");
+    SharedPtr<DirectResponse> pTR2 = new DirectResponse(os);
+    SharedPtr<TestAction> pTA2 = new TestAction(pTR2);
+    SharedPtr<DirectHandler> pDH2 = new DirectHandler(pTA2);
+    JSONParser jp2(pDH2);
+    jp2.parse(str);
 
-	assert (os.str() == "{\"type\":\"rpc\","
-		"\"tid\":123,"
-		"\"action\":\"DataList\","
-		"\"method\":\"getAll\","
-		"\"result\":\"getAll(abc,456,1.5,null,true,false)\"}");
+    assert (os.str() == "{\"type\":\"rpc\","
+        "\"tid\":123,"
+        "\"action\":\"DataList\","
+        "\"method\":\"getAll\","
+        "\"result\":\"getAll(abc,456,1.5,null,true,false)\"}");
 }
 
 
@@ -283,12 +283,12 @@ void JSONTest::tearDown()
 
 CppUnit::Test* JSONTest::suite()
 {
-	CppUnit::TestSuite* pSuite = new CppUnit::TestSuite("JSONTest");
+    CppUnit::TestSuite* pSuite = new CppUnit::TestSuite("JSONTest");
 
-	CppUnit_addTest(pSuite, JSONTest, testEncoding);
-	CppUnit_addTest(pSuite, JSONTest, testPrinter);
-	CppUnit_addTest(pSuite, JSONTest, testCondenser);
-	CppUnit_addTest(pSuite, JSONTest, testExtJSDirectHandler);
+    CppUnit_addTest(pSuite, JSONTest, testEncoding);
+    CppUnit_addTest(pSuite, JSONTest, testPrinter);
+    CppUnit_addTest(pSuite, JSONTest, testCondenser);
+    CppUnit_addTest(pSuite, JSONTest, testExtJSDirectHandler);
 
-	return pSuite;
+    return pSuite;
 }

@@ -30,7 +30,7 @@
 namespace scy {
 namespace turn {
 
-	
+    
 class Server;
 
 typedef PointerCollection<UInt32, TCPConnectionPair> TCPConnectionPairMap;
@@ -39,39 +39,39 @@ typedef PointerCollection<UInt32, TCPConnectionPair> TCPConnectionPairMap;
 class TCPAllocation: public ServerAllocation
 {
 public:
-	TCPAllocation(Server& server, 
-				  const net::Socket::Ptr& control, 
-				  const FiveTuple& tuple, 
-				  const std::string& username, 
-				  const UInt32& lifetime);
-	virtual ~TCPAllocation();
-	
-	bool handleRequest(Request& request);	
-	void handleConnectRequest(Request& request);
-	void handleConnectionBindRequest(Request& request);
+    TCPAllocation(Server& server, 
+                  const net::Socket::Ptr& control, 
+                  const FiveTuple& tuple, 
+                  const std::string& username, 
+                  const UInt32& lifetime);
+    virtual ~TCPAllocation();
+    
+    bool handleRequest(Request& request);    
+    void handleConnectRequest(Request& request);
+    void handleConnectionBindRequest(Request& request);
 
-	void sendPeerConnectResponse(TCPConnectionPair* pair, bool success);
-		// Send a Connect request response to control.
+    void sendPeerConnectResponse(TCPConnectionPair* pair, bool success);
+        // Send a Connect request response to control.
 
-	int sendToControl(stun::Message& message);
+    int sendToControl(stun::Message& message);
 
-	net::TCPSocket& control();
-	net::Address relayedAddress() const;
-	TCPConnectionPairMap& pairs();
-	
-	bool onTimer();
+    net::TCPSocket& control();
+    net::Address relayedAddress() const;
+    TCPConnectionPairMap& pairs();
+    
+    bool onTimer();
 
-	void onPeerAccept(void* sender, const net::TCPSocket::Ptr& sock);
-		// Accepts incoming peer sockets for ConnectionBind requests.
+    void onPeerAccept(void* sender, const net::TCPSocket::Ptr& sock);
+        // Accepts incoming peer sockets for ConnectionBind requests.
 
-	void onControlClosed(void* sender);
-		// Callback for handling controll connection destruction.
-		// The allocation will be deleted.
+    void onControlClosed(void* sender);
+        // Callback for handling controll connection destruction.
+        // The allocation will be deleted.
 
 protected:
-	net::TCPSocket::Ptr _control;
-	net::TCPSocket::Ptr _acceptor;
-	TCPConnectionPairMap _pairs;
+    net::TCPSocket::Ptr _control;
+    net::TCPSocket::Ptr _acceptor;
+    TCPConnectionPairMap _pairs;
 };
 
 

@@ -208,7 +208,7 @@ elseif(MSYS)
 elseif(APPLE)
     set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -lz -ldl") # -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES}
 elseif(UNIX)
-  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -lz -ldl -lrt -ljack") # -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES}
+  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -lz -ldl -lrt") # -lpulse-simple -lpulse -ljack -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES}
 endif()
 
 if(MSVC)
@@ -294,9 +294,9 @@ endif()
 if(WITH_ZLIB)
   #include_dependency(ZLIB REQUIRED)
   #include_dependency(Minizip REQUIRED)
-  list(APPEND LibSourcey_BUILD_DEPENDENCIES zlib)
+  #list(APPEND LibSourcey_BUILD_DEPENDENCIES zlib)
   list(APPEND LibSourcey_BUILD_DEPENDENCIES minizip)
-  add_subdirectory(deps/zlib)
+  #add_subdirectory(deps/zlib)
   add_subdirectory(deps/minizip) #deps/zlib/contrib/minizip
   set(HAVE_ZLIB 1)
 endif()

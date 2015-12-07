@@ -30,28 +30,28 @@ namespace smpl {
 
 Event::Event() 
 {
-	setType("event");
-	setTime(::time(0));
+    setType("event");
+    setTime(::time(0));
 }
 
 
 Event::Event(const Event& root) :
-	Message(root)
+    Message(root)
 {
-	if (!isMember("type"))
-		setType("event");
-	if (!isMember("time"))
-		setTime(::time(0));
+    if (!isMember("type"))
+        setType("event");
+    if (!isMember("time"))
+        setTime(::time(0));
 }
 
 
 Event::Event(const json::Value& root) :
-	Message(root)
+    Message(root)
 {
-	if (!isMember("type"))
-		setType("event");
-	if (!isMember("time"))
-		setTime(::time(0));
+    if (!isMember("type"))
+        setType("event");
+    if (!isMember("time"))
+        setTime(::time(0));
 }
 
 
@@ -62,35 +62,35 @@ Event::~Event()
 
 bool Event::valid() const
 {
-	return Message::valid()
-		&& isMember("name");
+    return Message::valid()
+        && isMember("name");
 }
 
 
 std::string Event::name() const 
 {
-	return get("name", "").asString();
+    return get("name", "").asString();
 }
 
 
 time_t Event::time() const 
 {
-	return static_cast<time_t>(get("time", 0).asDouble());
+    return static_cast<time_t>(get("time", 0).asDouble());
 }
 
 
 void Event::setName(const std::string& name)
 {
-	(*this)["name"] = name;
+    (*this)["name"] = name;
 }
 
-	
+    
 void Event::setTime(time_t time) 
 {
-	(*this)["time"] = (UInt64)time;
-	//DateTimeFormatter::format(
-	//	Timestamp::fromEpochTime(time), 
-	//	DateTimeFormat::ISO8601_FORMAT);
+    (*this)["time"] = (UInt64)time;
+    //DateTimeFormatter::format(
+    //    Timestamp::fromEpochTime(time), 
+    //    DateTimeFormat::ISO8601_FORMAT);
 }
 
 

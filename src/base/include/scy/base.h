@@ -42,39 +42,39 @@
 
 #ifdef _WIN32
     // Windows (x64 and x86)
-	#ifndef WIN32
+    #ifndef WIN32
     #define WIN32
-	#endif
+    #endif
 #endif
 #if __unix__
     // Unix
-	#ifndef UNIX
+    #ifndef UNIX
     #define UNIX
-	#endif
+    #endif
 #endif
 #if __posix__
     // POSIX
-	#ifndef POSIX
+    #ifndef POSIX
     #define POSIX
-	#endif
+    #endif
 #endif
 #if __linux__
     // Linux
-	#ifndef LINUX
+    #ifndef LINUX
     #define LINUX
-	#endif
+    #endif
 #endif
 #if __GNUC__
     // GCC specific
-	#ifndef GNUC
+    #ifndef GNUC
     #define GNUC
-	#endif
+    #endif
 #endif
 #if __APPLE__
     // Mac OS
-	#ifndef APPLE
+    #ifndef APPLE
     #define APPLE
-	#endif
+    #endif
 #endif
 
 
@@ -98,31 +98,31 @@
 // Verify that we're built with the multithreaded
 // versions of the runtime libraries
 #if defined(_MSC_VER) && !defined(_MT)
-	#error Must compile with /MD, /MDd, /MT or /MTd
+    #error Must compile with /MD, /MDd, /MT or /MTd
 #endif
 
 
 // Check debug/release settings consistency
 #if defined(NDEBUG) && defined(_DEBUG)
-	#error Inconsistent build settings (check for /MD[d])
+    #error Inconsistent build settings (check for /MD[d])
 #endif
 
 
 // Unicode Support
 #if defined(UNICODE)
-	#define SCY_UNICODE
+    #define SCY_UNICODE
 #endif
 
 
 // Disable unnecessary warnings
 #if defined(_MSC_VER)
-	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-	#pragma warning(disable:4251) // ... needs to have dll-interface warning
-	#pragma warning(disable:4355) // 'this' : used in base member initializer list
-	#pragma warning(disable:4996) // VC++ 8.0 deprecation warnings
-	#pragma warning(disable:4351) // new behavior: elements of array '...' will be default initialized
-	#pragma warning(disable:4675) // resolved overload was found by argument-dependent lookup
-	#pragma warning(disable:4275) // non dll-interface class 'std::exception' used as base for dll-interface class 'scy::Exception'
+    #pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+    #pragma warning(disable:4251) // ... needs to have dll-interface warning
+    #pragma warning(disable:4355) // 'this' : used in base member initializer list
+    #pragma warning(disable:4996) // VC++ 8.0 deprecation warnings
+    #pragma warning(disable:4351) // new behavior: elements of array '...' will be default initialized
+    #pragma warning(disable:4675) // resolved overload was found by argument-dependent lookup
+    #pragma warning(disable:4275) // non dll-interface class 'std::exception' used as base for dll-interface class 'scy::Exception'
 #endif
 
 #endif // WIN32

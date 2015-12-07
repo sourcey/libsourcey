@@ -31,23 +31,23 @@ namespace smpl {
 
 Presence::Presence() 
 {
-	(*this)["type"] = "presence";
+    (*this)["type"] = "presence";
 }
 
 
 Presence::Presence(const Presence& root) :
-	Message(root)
+    Message(root)
 {
-	if (!isMember("type"))
-		(*this)["type"] = "presence";
+    if (!isMember("type"))
+        (*this)["type"] = "presence";
 }
 
 
 Presence::Presence(const json::Value& root) :
-	Message(root)
+    Message(root)
 {
-	if (!isMember("type"))
-		(*this)["type"] = "presence";
+    if (!isMember("type"))
+        (*this)["type"] = "presence";
 }
 
 
@@ -58,13 +58,13 @@ Presence::~Presence()
 
 bool Presence::isProbe() 
 {
-	return (*this)["probe"].asBool();
+    return (*this)["probe"].asBool();
 }
 
 
 void Presence::setProbe(bool flag)
-{	
-	(*this)["probe"] = flag;
+{    
+    (*this)["probe"] = flag;
 }
 
 

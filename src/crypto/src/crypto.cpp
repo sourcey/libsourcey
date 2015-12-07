@@ -34,10 +34,10 @@
 
 extern "C"
 {
-	struct CRYPTO_dynlock_value
-	{
-		scy::Mutex _mutex;
-	};
+    struct CRYPTO_dynlock_value
+    {
+        scy::Mutex _mutex;
+    };
 }
 
 
@@ -48,27 +48,27 @@ namespace internal {
 
 void throwError()
 {
-	unsigned long err;
-	std::string msg;
-		
-	while ((err = ERR_get_error())) {
-		if (!msg.empty())
-			msg.append("; ");
-		msg.append(ERR_error_string(err, 0));
-	}
+    unsigned long err;
+    std::string msg;
+        
+    while ((err = ERR_get_error())) {
+        if (!msg.empty())
+            msg.append("; ");
+        msg.append(ERR_error_string(err, 0));
+    }
 
-	throw std::runtime_error(msg);
+    throw std::runtime_error(msg);
 }
 
-	
+    
 void api(int ret, const char* error)
 {
-	if (ret == 0) {
-		if (error)
-			throw std::runtime_error(error);
-		else
-			throwError();
-	}
+    if (ret == 0) {
+        if (error)
+            throw std::runtime_error(error);
+        else
+            throwError();
+    }
 }
 
 
@@ -85,82 +85,82 @@ static int _refCount(0);
 
 void lock(int mode, int n, const char* /* file */, int /* line */)
 {
-	if (mode & CRYPTO_LOCK)
-		_mutexes[n].lock();
-	else
-		_mutexes[n].unlock();
+    if (mode & CRYPTO_LOCK)
+        _mutexes[n].lock();
+    else
+        _mutexes[n].unlock();
 }
 
 
 unsigned long id()
 {
-	return Thread::currentID();
+    return Thread::currentID();
 }
 
 
 struct CRYPTO_dynlock_value* dynlockCreate(const char* /* file */, int /* line */)
 {
-	return new CRYPTO_dynlock_value;
+    return new CRYPTO_dynlock_value;
 }
 
 
 void dynlock(int mode, struct CRYPTO_dynlock_value* lock, const char* /* file */, int /* line */)
 {
-	assert(lock);
+    assert(lock);
 
-	if (mode & CRYPTO_LOCK)
-		lock->_mutex.lock();
-	else
-		lock->_mutex.unlock();
+    if (mode & CRYPTO_LOCK)
+        lock->_mutex.lock();
+    else
+        lock->_mutex.unlock();
 }
 
 
 void dynlockDestroy(struct CRYPTO_dynlock_value* lock, const char* /* file */, int /* line */)
 {
-	delete lock;
+    delete lock;
 }
 
 
 void initialize()
 {
-	Mutex::ScopedLock lock(_mutex);
-	
-	if (++_refCount == 1)
-	{
+    Mutex::ScopedLock lock(_mutex);
+    
+    if (++_refCount == 1)
+    {
 #if OPENSSL_VERSION_NUMBER >= 0x0907000L
-		OPENSSL_config(NULL);
+        OPENSSL_config(NULL);
 #endif
-		SSL_library_init();
-		SSL_load_error_strings();
-		OpenSSL_add_all_algorithms();
-		
-		char seed[SEEDSIZE];
-		Random::getSeed(seed, sizeof(seed));
-		RAND_seed(seed, SEEDSIZE);
-		
-		int nMutexes = CRYPTO_num_locks();
-		_mutexes = new Mutex[nMutexes];
-		CRYPTO_set_locking_callback(&internal::lock);
+        SSL_library_init();
+        SSL_load_error_strings();
+        OpenSSL_add_all_algorithms();
+        
+        char seed[SEEDSIZE];
+        Random::getSeed(seed, sizeof(seed));
+        RAND_seed(seed, SEEDSIZE);
+        
+        int nMutexes = CRYPTO_num_locks();
+        _mutexes = new Mutex[nMutexes];
+        CRYPTO_set_locking_callback(&internal::lock);
 #ifndef WIN32 // SF# 1828231: random unhandled exceptions when linking with ssl
-		CRYPTO_set_id_callback(&internal::id);
+        CRYPTO_set_id_callback(&internal::id);
 #endif
-		CRYPTO_set_dynlock_create_callback(&internal::dynlockCreate);
-		CRYPTO_set_dynlock_lock_callback(&internal::dynlock);
-		CRYPTO_set_dynlock_destroy_callback(&internal::dynlockDestroy);
-	}
+        CRYPTO_set_dynlock_create_callback(&internal::dynlockCreate);
+        CRYPTO_set_dynlock_lock_callback(&internal::dynlock);
+        CRYPTO_set_dynlock_destroy_callback(&internal::dynlockDestroy);
+    }
 }
 
 
 void uninitialize()
 {
-	Mutex::ScopedLock lock(_mutex);
+    Mutex::ScopedLock lock(_mutex);
 
-	if (--_refCount == 0) {
-		EVP_cleanup();
-		ERR_free_strings();
-		CRYPTO_set_locking_callback(0);
-		delete [] _mutexes;
-	}
+    if (--_refCount == 0) {
+        EVP_cleanup();
+        ERR_free_strings();
+        CRYPTO_set_locking_callback(0);
+        delete [] _mutexes;
+    }
 }
 
 
@@ -170,13 +170,13 @@ void uninitialize()
 /// Initializes the OpenSSL library.
 void initializeEngine()
 {
-	internal::initialize();
+    internal::initialize();
 }
-	
+    
 /// Shuts down the OpenSSL library.
 void uninitializeEngine()
 {
-	internal::uninitialize();
+    internal::uninitialize();
 }
 
 

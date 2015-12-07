@@ -33,7 +33,7 @@ Authenticator::Authenticator()
 
 
 Authenticator::Authenticator(const std::string& username, const std::string& password) :
-	_username(username), _password(password)
+    _username(username), _password(password)
 {
 }
 
@@ -45,99 +45,99 @@ Authenticator::~Authenticator()
 
 void Authenticator::fromUserInfo(const std::string& userInfo)
 {
-	std::string username;
-	std::string password;
-	extractCredentials(userInfo, username, password);
-	setUsername(username);
-	setPassword(password);
+    std::string username;
+    std::string password;
+    extractCredentials(userInfo, username, password);
+    setUsername(username);
+    setPassword(password);
 }
 
 
 void Authenticator::fromURI(const http::URL& uri)
 {
-	std::string username;
-	std::string password;
-	extractCredentials(uri, username, password);
-	setUsername(username);
-	setPassword(password);
+    std::string username;
+    std::string password;
+    extractCredentials(uri, username, password);
+    setUsername(username);
+    setPassword(password);
 }
 
 
 void Authenticator::authenticate(http::Request& request, const http::Response& response)
 {
-	for (http::Response::ConstIterator iter = response.find("WWW-Authenticate"); iter != response.end(); ++iter) {
-		if (isBasicCredentials(iter->second)) {
-			BasicAuthenticator(_username, _password).authenticate(request);
-			return;
-		} 
-		//else if (isDigestCredentials(iter->second)) 
-		//	; // TODO
-	}
+    for (http::Response::ConstIterator iter = response.find("WWW-Authenticate"); iter != response.end(); ++iter) {
+        if (isBasicCredentials(iter->second)) {
+            BasicAuthenticator(_username, _password).authenticate(request);
+            return;
+        } 
+        //else if (isDigestCredentials(iter->second)) 
+        //    ; // TODO
+    }
 }
 
 
 void Authenticator::updateAuthInfo(http::Request& request)
 {
-	if (request.has("Authorization")) {
-		const std::string& authorization = request.get("Authorization");
+    if (request.has("Authorization")) {
+        const std::string& authorization = request.get("Authorization");
 
-		if (isBasicCredentials(authorization)) {
-			BasicAuthenticator(_username, _password).authenticate(request);
-		} 
-		//else if (isDigestCredentials(authorization)) 
-		//	; // TODO
-	}
+        if (isBasicCredentials(authorization)) {
+            BasicAuthenticator(_username, _password).authenticate(request);
+        } 
+        //else if (isDigestCredentials(authorization)) 
+        //    ; // TODO
+    }
 }
 
 
 void Authenticator::proxyAuthenticate(http::Request& request, const http::Response& response)
 {
-	for (http::Response::ConstIterator iter = response.find("Proxy-Authenticate"); iter != response.end(); ++iter) {
-		if (isBasicCredentials(iter->second)) {
-			BasicAuthenticator(_username, _password).proxyAuthenticate(request);
-			return;
-		} 
-		//else if (isDigestCredentials(iter->second)) 
-		//	; // TODO
-	}
+    for (http::Response::ConstIterator iter = response.find("Proxy-Authenticate"); iter != response.end(); ++iter) {
+        if (isBasicCredentials(iter->second)) {
+            BasicAuthenticator(_username, _password).proxyAuthenticate(request);
+            return;
+        } 
+        //else if (isDigestCredentials(iter->second)) 
+        //    ; // TODO
+    }
 }
 
 
 void Authenticator::updateProxyAuthInfo(http::Request& request)
 {
-	if (request.has("Proxy-Authorization")) {
-		const std::string& authorization = request.get("Proxy-Authorization");
+    if (request.has("Proxy-Authorization")) {
+        const std::string& authorization = request.get("Proxy-Authorization");
 
-		if (isBasicCredentials(authorization)) {
-			BasicAuthenticator(_username, _password).proxyAuthenticate(request);
-		} 
-		//else if (isDigestCredentials(authorization))
-		//	; // TODO
-	}
+        if (isBasicCredentials(authorization)) {
+            BasicAuthenticator(_username, _password).proxyAuthenticate(request);
+        } 
+        //else if (isDigestCredentials(authorization))
+        //    ; // TODO
+    }
 }
 
 
 inline void Authenticator::setUsername(const std::string& username)
 {
-	_username = username;
+    _username = username;
 }
 
 
 inline const std::string& Authenticator::username() const
 {
-	return _username;
+    return _username;
 }
 
-	
+    
 inline void Authenticator::setPassword(const std::string& password)
 {
-	_password = password;
+    _password = password;
 }
 
 
 inline const std::string& Authenticator::password() const
 {
-	return _password;
+    return _password;
 }
 
 
@@ -149,60 +149,60 @@ inline const std::string& Authenticator::password() const
 
 bool isBasicCredentials(const std::string& header)
 {
-	return (header.size() > 5 ? ::isspace(header[5]) : true) && util::icompare(header.substr(0, 5), "Basic") == 0;
+    return (header.size() > 5 ? ::isspace(header[5]) : true) && util::icompare(header.substr(0, 5), "Basic") == 0;
 }
 
 
 bool isDigestCredentials(const std::string& header)
 {
-	return  (header.size() > 6 ? ::isspace(header[6]) : true) && util::icompare(header.substr(0, 6), "Digest") == 0;
+    return  (header.size() > 6 ? ::isspace(header[6]) : true) && util::icompare(header.substr(0, 6), "Digest") == 0;
 }
 
 
 bool hasBasicCredentials(const http::Request& request)
 {
-	return request.has("Authorization") && isBasicCredentials(request.get("Authorization"));
+    return request.has("Authorization") && isBasicCredentials(request.get("Authorization"));
 }
 
 
 bool hasDigestCredentials(const http::Request& request)
 {
-	return request.has("Authorization") && isDigestCredentials(request.get("Authorization"));
+    return request.has("Authorization") && isDigestCredentials(request.get("Authorization"));
 }
 
 
 bool hasProxyBasicCredentials(const http::Request& request)
 {
-	return request.has("Proxy-Authorization") && isBasicCredentials(request.get("Proxy-Authorization"));
+    return request.has("Proxy-Authorization") && isBasicCredentials(request.get("Proxy-Authorization"));
 }
 
 
 bool hasProxyDigestCredentials(const http::Request& request)
 {
-	return request.has("Proxy-Authorization") && isDigestCredentials(request.get("Proxy-Authorization"));
+    return request.has("Proxy-Authorization") && isDigestCredentials(request.get("Proxy-Authorization"));
 }
 
 
 void extractCredentials(const std::string& userInfo, std::string& username, std::string& password)
 {
-	const std::string::size_type p = userInfo.find(':');
+    const std::string::size_type p = userInfo.find(':');
 
-	if (p != std::string::npos) {
-		username.assign(userInfo, 0, p);
-		password.assign(userInfo, p + 1, std::string::npos);
-	} 
-	else {
-		username.assign(userInfo);
-		password.clear();
-	}
+    if (p != std::string::npos) {
+        username.assign(userInfo, 0, p);
+        password.assign(userInfo, p + 1, std::string::npos);
+    } 
+    else {
+        username.assign(userInfo);
+        password.clear();
+    }
 }
 
 
 void  extractCredentials(const http::URL& uri, std::string& username, std::string& password)
 {
-	if (!uri.userInfo().empty()) {
-		extractCredentials(uri.userInfo(), username, password);
-	}
+    if (!uri.userInfo().empty()) {
+        extractCredentials(uri.userInfo(), username, password);
+    }
 }
 
 
@@ -215,29 +215,29 @@ BasicAuthenticator::BasicAuthenticator()
 {
 }
 
-	
+    
 BasicAuthenticator::BasicAuthenticator(const std::string& username, const std::string& password) :
-	_username(username),
-	_password(password)
+    _username(username),
+    _password(password)
 {
 }
 
 
 BasicAuthenticator::BasicAuthenticator(const http::Request& request)
 {
-	std::string scheme;
-	std::string authInfo;
-	request.getCredentials(scheme, authInfo);
-	if (util::icompare(scheme, "Basic") == 0) {
-		parseAuthInfo(authInfo);
-	}
-	else throw std::runtime_error("Basic authentication expected");
+    std::string scheme;
+    std::string authInfo;
+    request.getCredentials(scheme, authInfo);
+    if (util::icompare(scheme, "Basic") == 0) {
+        parseAuthInfo(authInfo);
+    }
+    else throw std::runtime_error("Basic authentication expected");
 }
 
 
 BasicAuthenticator::BasicAuthenticator(const std::string& authInfo)
 {
-	parseAuthInfo(authInfo);
+    parseAuthInfo(authInfo);
 }
 
 
@@ -248,68 +248,68 @@ BasicAuthenticator::~BasicAuthenticator()
 
 void BasicAuthenticator::setUsername(const std::string& username)
 {
-	_username = username;
+    _username = username;
 }
-	
-	
+    
+    
 void BasicAuthenticator::setPassword(const std::string& password)
 {
-	_password = password;
+    _password = password;
 }
-	
-	
+    
+    
 void BasicAuthenticator::authenticate(http::Request& request) const
 {
-	request.setCredentials("Basic", base64::encode(_username + ":" + _password, 0));
+    request.setCredentials("Basic", base64::encode(_username + ":" + _password, 0));
 }
 
 
 void BasicAuthenticator::proxyAuthenticate(http::Request& request) const
 {
-	request.setProxyCredentials("Basic", base64::encode(_username + ":" + _password, 0));
+    request.setProxyCredentials("Basic", base64::encode(_username + ":" + _password, 0));
 }
 
 
 void BasicAuthenticator::parseAuthInfo(const std::string& authInfo)
 {
-	std::string res = base64::decode(authInfo);
-	http::extractCredentials(authInfo, _username, _password);
+    std::string res = base64::decode(authInfo);
+    http::extractCredentials(authInfo, _username, _password);
 
-	/*
-	const std::string::size_type p = userInfo.find(':');
+    /*
+    const std::string::size_type p = userInfo.find(':');
 
 
-	if (p != std::string::npos) 
-	{
-		username.assign(userInfo, 0, p);
-		password.assign(userInfo, p + 1, std::string::npos);
-	} 
-	else 
-	{
-		username.assign(userInfo);
-		password.clear();
-	}
+    if (p != std::string::npos) 
+    {
+        username.assign(userInfo, 0, p);
+        password.assign(userInfo, p + 1, std::string::npos);
+    } 
+    else 
+    {
+        username.assign(userInfo);
+        password.clear();
+    }
 
-	std::vector<std::string> fragments;
-	util::split(res, ':', fragments);
-	if (fragments.size() == 2) {
-		_username = fragments[0];
-		_password = fragments[1];
-	}
-	else throw std::invalid_argument("Invalid Basic authentication data");
-	*/
+    std::vector<std::string> fragments;
+    util::split(res, ':', fragments);
+    if (fragments.size() == 2) {
+        _username = fragments[0];
+        _password = fragments[1];
+    }
+    else throw std::invalid_argument("Invalid Basic authentication data");
+    */
 }
 
 
 const std::string& BasicAuthenticator::username() const
 {
-	return _username;
+    return _username;
 }
 
 
 const std::string& BasicAuthenticator::password() const
 {
-	return _password;
+    return _password;
 }
 
 

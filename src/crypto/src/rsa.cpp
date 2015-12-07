@@ -3,5 +3,5 @@
 namespace scy {
 namespace crypto {
 
-	
+    
 } } // namespace scy::crypto

@@ -30,37 +30,37 @@
 namespace scy {
 namespace net {
 
-	
+    
 class SSLSession : public SharedObject
-	/// This class encapsulates a SSL session object
-	/// used with session caching on the client side.
-	///
-	/// For session caching to work, a client must
-	/// save the session object from an existing connection,
-	/// if it wants to reuse it with a future connection.
+    /// This class encapsulates a SSL session object
+    /// used with session caching on the client side.
+    ///
+    /// For session caching to work, a client must
+    /// save the session object from an existing connection,
+    /// if it wants to reuse it with a future connection.
 {
 public:
-	typedef std::shared_ptr<SSLSession> Ptr;
+    typedef std::shared_ptr<SSLSession> Ptr;
 
-	SSL_SESSION* sslSession() const;
-		/// Returns the stored OpenSSL SSL_SESSION object.
+    SSL_SESSION* sslSession() const;
+        /// Returns the stored OpenSSL SSL_SESSION object.
 
-	SSLSession(SSL_SESSION* ptr);
-		/// Creates a new Session object, using the given
-		/// SSL_SESSION object. 
-		/// 
-		/// The SSL_SESSION's reference count is not changed.
+    SSLSession(SSL_SESSION* ptr);
+        /// Creates a new Session object, using the given
+        /// SSL_SESSION object. 
+        /// 
+        /// The SSL_SESSION's reference count is not changed.
 
-	~SSLSession();
-		/// Destroys the Session.
-		///
-		/// Calls SSL_SESSION_free() on the stored
-		/// SSL_SESSION object.
+    ~SSLSession();
+        /// Destroys the Session.
+        ///
+        /// Calls SSL_SESSION_free() on the stored
+        /// SSL_SESSION object.
 
-	SSLSession();
+    SSLSession();
 
 protected:
-	SSL_SESSION* _ptr;
+    SSL_SESSION* _ptr;
 };
 
 

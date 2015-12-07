@@ -29,25 +29,25 @@ namespace scy {
 
 struct IUser 
 {
-	virtual std::string username() const = 0;
-	virtual std::string password() const = 0;
+    virtual std::string username() const = 0;
+    virtual std::string password() const = 0;
 };
 
 
 class BasicUser: public IUser 
 {
 public:
-	BasicUser(const std::string& username, 
-			  const std::string& password = "") :
-		_username(username), 
-		_password(password) {}
-	
-	std::string username() const { return _username; }
-	std::string password() const { return _password; }
+    BasicUser(const std::string& username, 
+              const std::string& password = "") :
+        _username(username), 
+        _password(password) {}
+    
+    std::string username() const { return _username; }
+    std::string password() const { return _password; }
 
 protected:
-	std::string _username;
-	std::string _password;
+    std::string _username;
+    std::string _password;
 };
 
 
@@ -55,22 +55,22 @@ typedef std::map<std::string, IUser*> IUserMap;
 
 
 class UserManager: public LiveCollection<std::string, IUser>
-	/// This class contains a list of users that have access
-	/// on the system.
-	///
-	/// NOTE: This class is depreciated.
+    /// This class contains a list of users that have access
+    /// on the system.
+    ///
+    /// NOTE: This class is depreciated.
 {
 public:
-	typedef LiveCollection<std::string, IUser>	Manager;
-	typedef Manager::Map						Map;
+    typedef LiveCollection<std::string, IUser>    Manager;
+    typedef Manager::Map                        Map;
 
 public:
-	UserManager() {};
-	virtual ~UserManager() {};
+    UserManager() {};
+    virtual ~UserManager() {};
 
-	virtual bool add(IUser* user) {
-		return Manager::add(user->username(), user);
-	};
+    virtual bool add(IUser* user) {
+        return Manager::add(user->username(), user);
+    };
 };
 
 

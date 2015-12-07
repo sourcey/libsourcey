@@ -11,10 +11,10 @@ namespace crypto {
 
 
 typedef ::RSA RSAKey;
-	/// Forward the OpenSSL type to our namespace.
-	/// This may become a class/wrapper in the future.
-	
-	
+    /// Forward the OpenSSL type to our namespace.
+    /// This may become a class/wrapper in the future.
+    
+    
 } } // namespace scy::crypto
 
 

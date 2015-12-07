@@ -43,18 +43,18 @@
 class JSONTest: public CppUnit::TestCase
 {
 public:
-	JSONTest(const std::string& name);
-	~JSONTest();
+    JSONTest(const std::string& name);
+    ~JSONTest();
 
-	void testEncoding();
-	void testPrinter();
-	void testCondenser();
-	void testExtJSDirectHandler();
-	
-	void setUp();
-	void tearDown();
+    void testEncoding();
+    void testPrinter();
+    void testCondenser();
+    void testExtJSDirectHandler();
+    
+    void setUp();
+    void tearDown();
 
-	static CppUnit::Test* suite();
+    static CppUnit::Test* suite();
 
 private:
 };

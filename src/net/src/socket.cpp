@@ -34,51 +34,51 @@ namespace net {
 
 Socket::Socket()
 {
-	TraceLS(this) << "Create" << endl;	
+    TraceLS(this) << "Create" << endl;    
 }
 
 
 Socket::~Socket()
 {
-	TraceLS(this) << "Destroy" << endl;	
+    TraceLS(this) << "Destroy" << endl;    
 }
 
-	
+    
 void Socket::connect(const std::string& host, UInt16 port) 
 {
-	TraceLS(this) << "Connect to host: " << host << ":" << port << endl;
-	if (Address::validateIP(host))
-		connect(Address(host, port));
-	else {
-		init();
-		assert(!closed());
-		net::resolveDNS(host, port, [](const net::DNSResult& dns) 
-		{	
-			auto* sock = reinterpret_cast<Socket*>(dns.opaque);
-			TraceL << "DNS resolved: " << dns.success() << endl;
+    TraceLS(this) << "Connect to host: " << host << ":" << port << endl;
+    if (Address::validateIP(host))
+        connect(Address(host, port));
+    else {
+        init();
+        assert(!closed());
+        net::resolveDNS(host, port, [](const net::DNSResult& dns) 
+        {    
+            auto* sock = reinterpret_cast<Socket*>(dns.opaque);
+            TraceL << "DNS resolved: " << dns.success() << endl;
 
-			// Return if the socket was closed while resolving
-			if (sock->closed()) {			
-				WarnL << "DNS resolved but socket closed" << endl;
-				return;
-			}
+            // Return if the socket was closed while resolving
+            if (sock->closed()) {            
+                WarnL << "DNS resolved but socket closed" << endl;
+                return;
+            }
 
-			// Set the connection error if DNS failed
-			if (!dns.success()) {
-				sock->setError("Failed to resolve DNS for " + dns.host);
-				return;
-			}
+            // Set the connection error if DNS failed
+            if (!dns.success()) {
+                sock->setError("Failed to resolve DNS for " + dns.host);
+                return;
+            }
 
-			try {	
-				// Connect to resolved host
-				sock->connect(dns.addr);
-			}
-			catch (...) {
-				// Swallow errors
-				// Can be handled by Socket::Error signal
-			}	
-		}, this); 
-	}
+            try {    
+                // Connect to resolved host
+                sock->connect(dns.addr);
+            }
+            catch (...) {
+                // Swallow errors
+                // Can be handled by Socket::Error signal
+            }    
+        }, this); 
+    }
 }
 
 

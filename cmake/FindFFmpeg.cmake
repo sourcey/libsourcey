@@ -59,6 +59,10 @@ if (NOT FFmpeg_FOUND)
   # Set FFmpeg as found or not
   set_module_found(FFmpeg ${FFmpeg_FIND_REQUIRED})
 
+  # Include some dependencies required when linking to FFmpeg static build
+  list(APPEND LibSourcey_BUILD_DEPENDENCIES bz2)
+  list(APPEND LibSourcey_BUILD_DEPENDENCIES lzma)
+
   # Include FFmpeg dependencies if available
   find_library(LIBVPX_LIBRARY NAMES vpx)
   if(LIBVPX_LIBRARY)

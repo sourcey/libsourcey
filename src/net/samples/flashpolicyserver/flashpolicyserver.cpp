@@ -5,15 +5,15 @@
 
 int main(int argc, char** argv)
 {
-	/*
-	Logger::instance().add(new ConsoleChannel("debug", LTrace));	
-	{	
-		Application app;	
-		//SERVER_TYPE srv(SERVER_PORT);
-		//srv.shutdown();
-		//app.waitForShutdown(onShutdown, &srv);
-	}
-	Logger::destroy();
-	*/
-	return 0;
+    /*
+    Logger::instance().add(new ConsoleChannel("debug", LTrace));    
+    {    
+        Application app;    
+        //SERVER_TYPE srv(SERVER_PORT);
+        //srv.shutdown();
+        //app.waitForShutdown(onShutdown, &srv);
+    }
+    Logger::destroy();
+    */
+    return 0;
 }

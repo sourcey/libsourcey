@@ -30,159 +30,159 @@ namespace av {
 
 
 class FPSCounter 
-	/// An FPS counter based on the simple moving average (SMA) algorithm
+    /// An FPS counter based on the simple moving average (SMA) algorithm
 {
 private:
-	static const int MAX = 100;
+    static const int MAX = 100;
 
-	int tickIndex;
-	clock_t prevTick;
-	clock_t tickSum;
-	clock_t tickList[MAX];
+    int tickIndex;
+    clock_t prevTick;
+    clock_t tickSum;
+    clock_t tickList[MAX];
 
-	double updateAvg(clock_t newTick)
-	{
-		tickSum -= tickList[tickIndex];  // subtract value falling off
-		tickSum += newTick;              // add new value
-		tickList[tickIndex] = newTick;   // save new value so it can be subtracted later
-		tickIndex = (tickIndex+1) % MAX;
-		
-		return((double)tickSum / MAX);   // return average
-	}
+    double updateAvg(clock_t newTick)
+    {
+        tickSum -= tickList[tickIndex];  // subtract value falling off
+        tickSum += newTick;              // add new value
+        tickList[tickIndex] = newTick;   // save new value so it can be subtracted later
+        tickIndex = (tickIndex+1) % MAX;
+        
+        return((double)tickSum / MAX);   // return average
+    }
 
 public:
-	double fps;
-	Int64 frames;
+    double fps;
+    Int64 frames;
 
-	FPSCounter()
-	{
-		reset();
-	}
+    FPSCounter()
+    {
+        reset();
+    }
 
-	void reset() 
-	{
-		fps = 0;
-		frames = 0;
-		tickIndex = 0;
-		tickSum = 0;
-		prevTick = 0;
-		for (int i = 0; i < MAX; i++)
-			tickList[i] = 0;
-	}
-	
-	void tick()
-	{
-		frames++;
-		clock_t newTick = clock();
-		double avgTick = updateAvg(newTick - prevTick);
-		prevTick = newTick;
-		if (avgTick == 0.)
-			fps = 0.0; //-1.;
-		else 
-			fps = CLOCKS_PER_SEC / avgTick;
-	}
+    void reset() 
+    {
+        fps = 0;
+        frames = 0;
+        tickIndex = 0;
+        tickSum = 0;
+        prevTick = 0;
+        for (int i = 0; i < MAX; i++)
+            tickList[i] = 0;
+    }
+    
+    void tick()
+    {
+        frames++;
+        clock_t newTick = clock();
+        double avgTick = updateAvg(newTick - prevTick);
+        prevTick = newTick;
+        if (avgTick == 0.)
+            fps = 0.0; //-1.;
+        else 
+            fps = CLOCKS_PER_SEC / avgTick;
+    }
 };
 
-	
+    
 namespace legacy {
 
 struct FPSCounter 
 {
-	clock_t start;
-	clock_t end;
-	Int64 frames;
-	double total;
-	double fps;
+    clock_t start;
+    clock_t end;
+    Int64 frames;
+    double total;
+    double fps;
 
-	FPSCounter()
-	{
-		reset();
-	}
+    FPSCounter()
+    {
+        reset();
+    }
 
-	void tick() 
-	{	
-		if (started())
-			endFrame();
-		startFrame();
-	}
+    void tick() 
+    {    
+        if (started())
+            endFrame();
+        startFrame();
+    }
 
-	void reset() 
-	{
-		start = 0;
-		end = 0;
-		total = 0;
-		fps = 0;
-		frames = 0;
-	}
+    void reset() 
+    {
+        start = 0;
+        end = 0;
+        total = 0;
+        fps = 0;
+        frames = 0;
+    }
 
-	bool started() 
-	{
-		return start != 0;
-	}
+    bool started() 
+    {
+        return start != 0;
+    }
 
-	void startFrame() 
-	{
-		start = clock();
-	}
+    void startFrame() 
+    {
+        start = clock();
+    }
 
-	double endFrame() 
-	{
-		end = clock();
-		total += (double)(end - start) / CLOCKS_PER_SEC;
-		frames++;
-		fps = (1.0 * frames) / total;
-		return fps;
-	}
+    double endFrame() 
+    {
+        end = clock();
+        total += (double)(end - start) / CLOCKS_PER_SEC;
+        frames++;
+        fps = (1.0 * frames) / total;
+        return fps;
+    }
 };
 
 } // legacy
 
 
 class FPSLimiter: public PacketProcessor
-	/// This class limits the throughput rate of IPackets
-	/// in a PacketStream. If the throughput rate exceeds the
-	/// max specified FPS then packets will be dropped.
-	///	
-	/// Note that revious processors must not fragment packets
-	/// otherwise this class will not be accurate, and the packet 
-	/// drop rate will be too high.
+    /// This class limits the throughput rate of IPackets
+    /// in a PacketStream. If the throughput rate exceeds the
+    /// max specified FPS then packets will be dropped.
+    ///    
+    /// Note that revious processors must not fragment packets
+    /// otherwise this class will not be accurate, and the packet 
+    /// drop rate will be too high.
 {
 public:
-	FPSLimiter(int max, bool videoOnly = false) : 
-		PacketProcessor(this->emitter), _max(max), _videoOnly(videoOnly)
-	{
-	}
+    FPSLimiter(int max, bool videoOnly = false) : 
+        PacketProcessor(this->emitter), _max(max), _videoOnly(videoOnly)
+    {
+    }
 
-	virtual void process(IPacket& packet) 
-	{
-		//traceL("FPSLimiter", this) << "Processing" << std::endl;
+    virtual void process(IPacket& packet) 
+    {
+        //traceL("FPSLimiter", this) << "Processing" << std::endl;
 
-		// Prody non video packets if videoOnly is set
-		if (_videoOnly && !dynamic_cast<av::VideoPacket*>(&packet))
-			emit(packet);
+        // Prody non video packets if videoOnly is set
+        if (_videoOnly && !dynamic_cast<av::VideoPacket*>(&packet))
+            emit(packet);
 
-		if (_counter.started())
-			_counter.endFrame();
-		if (static_cast<int>(_counter.fps) > _max) {			
-			traceL("FPSLimiter", this) << "Dropping packet: " 
-				<< _counter.fps << " > " << _max << std::endl;
-			return;
-		}
-		_counter.startFrame();
-		emit(packet);
-	}
+        if (_counter.started())
+            _counter.endFrame();
+        if (static_cast<int>(_counter.fps) > _max) {            
+            traceL("FPSLimiter", this) << "Dropping packet: " 
+                << _counter.fps << " > " << _max << std::endl;
+            return;
+        }
+        _counter.startFrame();
+        emit(packet);
+    }
 
-	virtual void onStreamStateChange(const PacketStreamState&) 
-	{
-		_counter.reset();
-	}
-		
-	PacketSignal emitter;
+    virtual void onStreamStateChange(const PacketStreamState&) 
+    {
+        _counter.reset();
+    }
+        
+    PacketSignal emitter;
 
-protected:	
-	int _max;
-	bool _videoOnly;
-	legacy::FPSCounter _counter;
+protected:    
+    int _max;
+    bool _videoOnly;
+    legacy::FPSCounter _counter;
 };
 
 
@@ -191,7 +191,7 @@ protected:
 
 #endif // SCY_MEDIA_FPSCounter_H
 
-	
+    
 
 
 /*
@@ -219,27 +219,27 @@ double CalcAverageTick(int newTick)
 
 
 
-	/*
-	double getFps()
-	{
-		clock_t newTick = clock();
-		double avgTick = updateAvg(newTick-prevTick);
-		prevTick = newTick;
-		if (avgTick==0.) {
-			return -1.;
-		}
-		return CLOCKS_PER_SEC/avgTick;
-	}
-	*/
+    /*
+    double getFps()
+    {
+        clock_t newTick = clock();
+        double avgTick = updateAvg(newTick-prevTick);
+        prevTick = newTick;
+        if (avgTick==0.) {
+            return -1.;
+        }
+        return CLOCKS_PER_SEC/avgTick;
+    }
+    */
 
 /*
 FPSCounter::FPSCounter() {
-	tickIndex=0;
-	tickSum=0;
-	prevTick=0;
-	for(int i=0;i<MAX;i++){
-		tickList[i]=0;
-	}
+    tickIndex=0;
+    tickSum=0;
+    prevTick=0;
+    for(int i=0;i<MAX;i++){
+        tickList[i]=0;
+    }
 }
 
 
@@ -251,93 +251,93 @@ inline double FPSCounter::getFps()
 
 struct FPSCounter 
 {
-	clock_t start;
-	clock_t end;
-	int lastMS;
-	Int64 totalMS;
-	Int64 frames;
-	double fps;
+    clock_t start;
+    clock_t end;
+    int lastMS;
+    Int64 totalMS;
+    Int64 frames;
+    double fps;
 
-	FPSCounter()
-	{
-		reset();
-	}
+    FPSCounter()
+    {
+        reset();
+    }
 
-	void tick() 
-	{	
-		if (started())
-			endFrame();
-		startFrame();
-	}
+    void tick() 
+    {    
+        if (started())
+            endFrame();
+        startFrame();
+    }
 
-	void reset() 
-	{
-		start = 0;
-		end = 0;
-		lastMS = 0;
-		totalMS = 0;
-		fps = 0;
-		frames = 0;
-	}
+    void reset() 
+    {
+        start = 0;
+        end = 0;
+        lastMS = 0;
+        totalMS = 0;
+        fps = 0;
+        frames = 0;
+    }
 
-	bool started() 
-	{
-		return start != 0;
-	}
+    bool started() 
+    {
+        return start != 0;
+    }
 
-	void startFrame() 
-	{
-		start = clock();
-	}
+    void startFrame() 
+    {
+        start = clock();
+    }
 
-	double endFrame() 
-	{
-		end = clock();
-		lastMS = (end - start); //(double)
-		totalMS += lastMS; //(double)(end - start) / CLOCKS_PER_SEC;
-		frames++;
-		fps = (1.0 * frames) / (totalMS / CLOCKS_PER_SEC); //
-		traceL() << "[FPSLimiter: " << this <<"] FPS MS: " << std::endl;
-		traceL() << "[FPSLimiter: " << this <<"] Processing" << std::endl;
-		return fps;
-	}
+    double endFrame() 
+    {
+        end = clock();
+        lastMS = (end - start); //(double)
+        totalMS += lastMS; //(double)(end - start) / CLOCKS_PER_SEC;
+        frames++;
+        fps = (1.0 * frames) / (totalMS / CLOCKS_PER_SEC); //
+        traceL() << "[FPSLimiter: " << this <<"] FPS MS: " << std::endl;
+        traceL() << "[FPSLimiter: " << this <<"] Processing" << std::endl;
+        return fps;
+    }
 };
 */
-	/*
-	virtual FPSCounter& counter()
-	{
-		return _counter;
-	};
-	*/
+    /*
+    virtual FPSCounter& counter()
+    {
+        return _counter;
+    };
+    */
 
 
-		/*
+        /*
 
-	virtual bool accepts(IPacket&)
-		// Reject the packet if we have exceeded the maximum FPS.
-	{ 
-		traceL() << "[FPSLimiter: " << this <<"] Accepting: \n" 
-			<< "\n\tFPS Limit: " << _max
-			<< "\n\tCurrent FPS: " << _counter.fps
-			<< "\n\tAcceptable: " << (static_cast<int>(_counter.fps) <= _max)
-			<< std::endl;
-		
-		if (_counter.started()) {
-			_counter.endFrame();
-			if (_counter.fps > _max)
-				return false;
-		}
-		_counter.startFrame();
-		*/
-		/*
-		_counter.tick();
-		if (_counter.fps > _max)
-			return false;
-		if () {
-			_counter.endFrame();
-			if (_counter.fps > _max)
-				return false;
-		}
-		return true; 
-	};
-		*/
+    virtual bool accepts(IPacket&)
+        // Reject the packet if we have exceeded the maximum FPS.
+    { 
+        traceL() << "[FPSLimiter: " << this <<"] Accepting: \n" 
+            << "\n\tFPS Limit: " << _max
+            << "\n\tCurrent FPS: " << _counter.fps
+            << "\n\tAcceptable: " << (static_cast<int>(_counter.fps) <= _max)
+            << std::endl;
+        
+        if (_counter.started()) {
+            _counter.endFrame();
+            if (_counter.fps > _max)
+                return false;
+        }
+        _counter.startFrame();
+        */
+        /*
+        _counter.tick();
+        if (_counter.fps > _max)
+            return false;
+        if () {
+            _counter.endFrame();
+            if (_counter.fps > _max)
+                return false;
+        }
+        return true; 
+    };
+        */

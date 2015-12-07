@@ -37,116 +37,116 @@ SSLManager::SSLManager()
 
 SSLManager::~SSLManager()
 {
-	shutdown();
+    shutdown();
 }
 
 
 void SSLManager::shutdown()
 {
-	PrivateKeyPassphraseRequired.clear();
-	ClientVerificationError.clear();
-	ServerVerificationError.clear();
-	_defaultServerContext = nullptr;
-	_defaultClientContext = nullptr;
+    PrivateKeyPassphraseRequired.clear();
+    ClientVerificationError.clear();
+    ServerVerificationError.clear();
+    _defaultServerContext = nullptr;
+    _defaultClientContext = nullptr;
 }
 
 
 /*
 namespace
 {
-	static Singleton<SSLManager> singleton;
+    static Singleton<SSLManager> singleton;
 }
 */
 
 Singleton<SSLManager>& singleton() 
 {
-	static Singleton<SSLManager> singleton;
-	return singleton;
+    static Singleton<SSLManager> singleton;
+    return singleton;
 }
 
 
 SSLManager& SSLManager::instance()
 {
-	return *singleton().get();
+    return *singleton().get();
 }
 
 
 void SSLManager::destroy()
 {
-	singleton().destroy();
+    singleton().destroy();
 }
 
 
 void SSLManager::initializeServer(SSLContext::Ptr ptrContext)
 {
-	_defaultServerContext = ptrContext;
+    _defaultServerContext = ptrContext;
 }
 
 
 void SSLManager::initializeClient(SSLContext::Ptr ptrContext)
 {
-	_defaultClientContext = ptrContext;
+    _defaultClientContext = ptrContext;
 }
 
 
 SSLContext::Ptr SSLManager::defaultServerContext()
 {
-	Mutex::ScopedLock lock(_mutex);
-	return _defaultServerContext;
+    Mutex::ScopedLock lock(_mutex);
+    return _defaultServerContext;
 }
 
 
 SSLContext::Ptr SSLManager::defaultClientContext()
 {
-	Mutex::ScopedLock lock(_mutex);
-	return _defaultClientContext;
+    Mutex::ScopedLock lock(_mutex);
+    return _defaultClientContext;
 }
 
 
 int SSLManager::verifyCallback(bool server, int ok, X509_STORE_CTX* pStore)
 {
-	if (!ok) {
-		X509* pCert = X509_STORE_CTX_get_current_cert(pStore);
-		crypto::X509Certificate x509(pCert, true);
-		int depth = X509_STORE_CTX_get_error_depth(pStore);
-		int err = X509_STORE_CTX_get_error(pStore);
-		std::string error(X509_verify_cert_error_string(err));
-		VerificationErrorDetails args(x509, depth, err, error);
-		if (server)
-			SSLManager::instance().ServerVerificationError.emit(&SSLManager::instance(), args);
-		else
-			SSLManager::instance().ClientVerificationError.emit(&SSLManager::instance(), args);
-		ok = args.getIgnoreError() ? 1 : 0;
-	}
+    if (!ok) {
+        X509* pCert = X509_STORE_CTX_get_current_cert(pStore);
+        crypto::X509Certificate x509(pCert, true);
+        int depth = X509_STORE_CTX_get_error_depth(pStore);
+        int err = X509_STORE_CTX_get_error(pStore);
+        std::string error(X509_verify_cert_error_string(err));
+        VerificationErrorDetails args(x509, depth, err, error);
+        if (server)
+            SSLManager::instance().ServerVerificationError.emit(&SSLManager::instance(), args);
+        else
+            SSLManager::instance().ClientVerificationError.emit(&SSLManager::instance(), args);
+        ok = args.getIgnoreError() ? 1 : 0;
+    }
 
-	return ok;
+    return ok;
 }
 
 
 int SSLManager::privateKeyPassphraseCallback(char* pBuf, int size, int flag, void* userData)
 {
-	std::string pwd;
-	SSLManager::instance().PrivateKeyPassphraseRequired.emit(&SSLManager::instance(), pwd);
+    std::string pwd;
+    SSLManager::instance().PrivateKeyPassphraseRequired.emit(&SSLManager::instance(), pwd);
 
-	strncpy(pBuf, (char *)(pwd.c_str()), size);
-	pBuf[size - 1] = '\0';
-	if (size > (int)pwd.length())
-		size = (int)pwd.length();
+    strncpy(pBuf, (char *)(pwd.c_str()), size);
+    pBuf[size - 1] = '\0';
+    if (size > (int)pwd.length())
+        size = (int)pwd.length();
 
-	return size;
+    return size;
 }
 
 
 void initializeSSL()
 {
-	crypto::initializeEngine();
+    crypto::initializeEngine();
 }
 
 
 void uninitializeSSL()
 {
-	SSLManager::instance().shutdown();
-	crypto::uninitializeEngine();
+    SSLManager::instance().shutdown();
+    crypto::uninitializeEngine();
 }
 
 
@@ -156,11 +156,11 @@ void uninitializeSSL()
 
 
 VerificationErrorDetails::VerificationErrorDetails(const crypto::X509Certificate& cert, int errDepth, int errNum, const std::string& errMsg):
-	_cert(cert),
-	_errorDepth(errDepth),
-	_errorNumber(errNum),
-	_errorMessage(errMsg),
-	_ignoreError(false)
+    _cert(cert),
+    _errorDepth(errDepth),
+    _errorNumber(errNum),
+    _errorMessage(errMsg),
+    _ignoreError(false)
 {
 }
 

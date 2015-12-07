@@ -27,18 +27,18 @@
 
 namespace scy {
 
-	
+    
 class IPacketCreationStrategy
-{	
+{    
 public:
-	IPacketCreationStrategy() {}
-	virtual ~IPacketCreationStrategy() {};
-	virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const = 0;	
-	virtual int priority() const = 0; // 0 - 100
+    IPacketCreationStrategy() {}
+    virtual ~IPacketCreationStrategy() {};
+    virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const = 0;    
+    virtual int priority() const = 0; // 0 - 100
 
-	static bool compareProiroty(const IPacketCreationStrategy* l, const IPacketCreationStrategy* r) {
-		return l->priority() > r->priority();
-	}
+    static bool compareProiroty(const IPacketCreationStrategy* l, const IPacketCreationStrategy* r) {
+        return l->priority() > r->priority();
+    }
 };
 
 
@@ -47,27 +47,27 @@ typedef std::vector<IPacketCreationStrategy*> PacketCreationStrategyList;
 
 template <class PacketT>
 struct PacketCreationStrategy: public IPacketCreationStrategy
-	/// This template class implements an adapter that sits between
-	/// an SignalBase and an object receiving notifications from it.
+    /// This template class implements an adapter that sits between
+    /// an SignalBase and an object receiving notifications from it.
 {
-	PacketCreationStrategy(int priority = 0) : 
-		_priority(priority) {
-		assert(_priority <= 100);
-	}
-	virtual ~PacketCreationStrategy() {};
+    PacketCreationStrategy(int priority = 0) : 
+        _priority(priority) {
+        assert(_priority <= 100);
+    }
+    virtual ~PacketCreationStrategy() {};
 
-	virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const {
-		auto packet = new PacketT;
-		if ((nread = packet->read(buffer)) > 0)
-			return packet;
-		delete packet;
-		return nullptr;
-	};
+    virtual IPacket* create(const ConstBuffer& buffer, std::size_t& nread) const {
+        auto packet = new PacketT;
+        if ((nread = packet->read(buffer)) > 0)
+            return packet;
+        delete packet;
+        return nullptr;
+    };
 
-	virtual int priority() const { return _priority; };	
+    virtual int priority() const { return _priority; };    
 
 protected:
-	int _priority;
+    int _priority;
 };
 
 
@@ -79,87 +79,87 @@ protected:
 class PacketFactory
 {
 public:
-	PacketFactory() {}
-	virtual ~PacketFactory() {
-		util::clearVector(_types);
-	}
+    PacketFactory() {}
+    virtual ~PacketFactory() {
+        util::clearVector(_types);
+    }
 
-	template <class PacketT>
-	void registerPacketType(int priority) {
-		unregisterPacketType<PacketT>(); // ensure unique values
-		//Mutex::ScopedLock lock(_mutex);
-		_types.push_back(new PacketCreationStrategy<PacketT>(priority));
-		sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
-	}
+    template <class PacketT>
+    void registerPacketType(int priority) {
+        unregisterPacketType<PacketT>(); // ensure unique values
+        //Mutex::ScopedLock lock(_mutex);
+        _types.push_back(new PacketCreationStrategy<PacketT>(priority));
+        sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
+    }
 
-	template <class PacketT>
-	void unregisterPacketType() {
-		//Mutex::ScopedLock lock(_mutex);		
-		for (auto it = _types.begin(); it != _types.end(); ++it) {
-			if (dynamic_cast<PacketCreationStrategy<PacketT>*>(*it) != 0) {
-				delete *it;
-				_types.erase(it);
-				return;
-			}
-		}
-	}
+    template <class PacketT>
+    void unregisterPacketType() {
+        //Mutex::ScopedLock lock(_mutex);        
+        for (auto it = _types.begin(); it != _types.end(); ++it) {
+            if (dynamic_cast<PacketCreationStrategy<PacketT>*>(*it) != 0) {
+                delete *it;
+                _types.erase(it);
+                return;
+            }
+        }
+    }
 
-	template <class StrategyT>
-	void registerStrategy(int priority) {
-		unregisterStrategy<StrategyT>(); // ensure unique values
-		//Mutex::ScopedLock lock(_mutex);
-		_types.push_back(new StrategyT(priority));
-		std::sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
-	}
+    template <class StrategyT>
+    void registerStrategy(int priority) {
+        unregisterStrategy<StrategyT>(); // ensure unique values
+        //Mutex::ScopedLock lock(_mutex);
+        _types.push_back(new StrategyT(priority));
+        std::sort(_types.begin(), _types.end(), IPacketCreationStrategy::compareProiroty);
+    }
 
-	template <class StrategyT>
-	void unregisterStrategy() {
-		//Mutex::ScopedLock lock(_mutex);		
-		for (auto it = _types.begin(); it != _types.end(); ++it) {
-			if (dynamic_cast<StrategyT*>(*it) != 0) {
-				delete *it;
-				_types.erase(it);
-				return;
-			}
-		}
-	}
+    template <class StrategyT>
+    void unregisterStrategy() {
+        //Mutex::ScopedLock lock(_mutex);        
+        for (auto it = _types.begin(); it != _types.end(); ++it) {
+            if (dynamic_cast<StrategyT*>(*it) != 0) {
+                delete *it;
+                _types.erase(it);
+                return;
+            }
+        }
+    }
 
-	PacketCreationStrategyList& types() {
-		//Mutex::ScopedLock lock(_mutex);		
-		return _types;
-	}
+    PacketCreationStrategyList& types() {
+        //Mutex::ScopedLock lock(_mutex);        
+        return _types;
+    }
 
-	PacketCreationStrategyList types() const {
-		//Mutex::ScopedLock lock(_mutex);		
-		return _types;
-	}
+    PacketCreationStrategyList types() const {
+        //Mutex::ScopedLock lock(_mutex);        
+        return _types;
+    }
 
-	virtual bool onPacketCreated(IPacket*) {
-		// returning false will stop packet propagation
-		return true;
-	}
+    virtual bool onPacketCreated(IPacket*) {
+        // returning false will stop packet propagation
+        return true;
+    }
 
-	virtual IPacket* createPacket(const ConstBuffer& buffer, std::size_t& nread) {
-		//Mutex::ScopedLock lock(_mutex);
-		assert(!_types.empty() && "no packet types registered");
-		//size_t offset = reader.position();
-		for (unsigned i = 0; i < _types.size(); i++) {
-			IPacket* packet = _types[i]->create(buffer, nread);
-			if (packet) {
-				if (!onPacketCreated(packet)) {
-					delete packet;
-					continue;
-				}
-				return packet;
-			}
-			//reader.seek(offset);
-		}
-		return nullptr;
-	}
+    virtual IPacket* createPacket(const ConstBuffer& buffer, std::size_t& nread) {
+        //Mutex::ScopedLock lock(_mutex);
+        assert(!_types.empty() && "no packet types registered");
+        //size_t offset = reader.position();
+        for (unsigned i = 0; i < _types.size(); i++) {
+            IPacket* packet = _types[i]->create(buffer, nread);
+            if (packet) {
+                if (!onPacketCreated(packet)) {
+                    delete packet;
+                    continue;
+                }
+                return packet;
+            }
+            //reader.seek(offset);
+        }
+        return nullptr;
+    }
 
 protected:
-	PacketCreationStrategyList _types;
-	//mutable Mutex	_mutex;
+    PacketCreationStrategyList _types;
+    //mutable Mutex    _mutex;
 };
 
 

@@ -33,53 +33,53 @@
 
 namespace scy {
 
-	
+    
 std::string getExePath() 
-{	
-	char buf[PATHMAX];
-	size_t size = PATHMAX;
-	if (uv_exepath(buf, &size) != 0)
-		throw std::runtime_error("System error: Cannot resolve executable path");
-	return std::string(buf, size);
+{    
+    char buf[PATHMAX];
+    size_t size = PATHMAX;
+    if (uv_exepath(buf, &size) != 0)
+        throw std::runtime_error("System error: Cannot resolve executable path");
+    return std::string(buf, size);
 }
 
 
 std::string getCwd() 
-{	
-	char buf[PATHMAX];
-	size_t size = PATHMAX;
-	if (uv_cwd(buf, &size) != 0)
-		throw std::runtime_error("System error: Cannot resolve working directory");
-	return std::string(buf);
+{    
+    char buf[PATHMAX];
+    size_t size = PATHMAX;
+    if (uv_cwd(buf, &size) != 0)
+        throw std::runtime_error("System error: Cannot resolve working directory");
+    return std::string(buf);
 }
 
 
 UInt64 getFreeMemory()
 {
-	return uv_get_free_memory();
+    return uv_get_free_memory();
 }
 
 
 UInt64 getTotalMemory()
 {
-	return uv_get_total_memory();
+    return uv_get_total_memory();
 }
 
 
 void sleep(int ms)
 {
 #ifdef WIN32
-	Sleep(ms);
-#else	
-	usleep(ms * 1000);
+    Sleep(ms);
+#else    
+    usleep(ms * 1000);
 #endif
 }
 
 
 void pause()
 {
-	std::puts("Press enter to continue...");
-	std::getchar();
+    std::puts("Press enter to continue...");
+    std::getchar();
 }
 
 
@@ -92,36 +92,36 @@ void pause()
 
 enum WindowsMajorVersions 
 {
-	kWindows2000 = 5,
-	kWindowsVista = 6,
+    kWindows2000 = 5,
+    kWindowsVista = 6,
 };
 
 
 bool getOsVersion(int* major, int* minor, int* build) 
 {
-	OSVERSIONINFO info = {0};
-	info.dwOSVersionInfoSize = sizeof(info);
-	if (GetVersionEx(&info)) {
-		if (major) *major = info.dwMajorVersion;
-		if (minor) *minor = info.dwMinorVersion;
-		if (build) *build = info.dwBuildNumber;
-		return true;
-	}
-	return false;
+    OSVERSIONINFO info = {0};
+    info.dwOSVersionInfoSize = sizeof(info);
+    if (GetVersionEx(&info)) {
+        if (major) *major = info.dwMajorVersion;
+        if (minor) *minor = info.dwMinorVersion;
+        if (build) *build = info.dwBuildNumber;
+        return true;
+    }
+    return false;
 }
 
 bool isWindowsVistaOrLater() 
 {
-	int major;
-	return (getOsVersion(&major, nullptr, nullptr) && major >= kWindowsVista);
+    int major;
+    return (getOsVersion(&major, nullptr, nullptr) && major >= kWindowsVista);
 }
 
 bool isWindowsXpOrLater() 
 {
-	int major, minor;
-	return (getOsVersion(&major, &minor, nullptr) &&
-		(major >= kWindowsVista ||
-		(major == kWindows2000 && minor >= 1)));
+    int major, minor;
+    return (getOsVersion(&major, &minor, nullptr) &&
+        (major >= kWindowsVista ||
+        (major == kWindows2000 && minor >= 1)));
 }
 
 
@@ -130,28 +130,28 @@ bool isWindowsXpOrLater()
 
 std::wstring toUtf16(const char* utf8, std::size_t len)
 {
-	int len16 = ::MultiByteToWideChar(CP_UTF8, 0, utf8, len, NULL, 0);
-	wchar_t* ws = STACK_ARRAY(wchar_t, len16);
-	::MultiByteToWideChar(CP_UTF8, 0, utf8, len, ws, len16);
-	return std::wstring(ws, len16);
+    int len16 = ::MultiByteToWideChar(CP_UTF8, 0, utf8, len, NULL, 0);
+    wchar_t* ws = STACK_ARRAY(wchar_t, len16);
+    ::MultiByteToWideChar(CP_UTF8, 0, utf8, len, ws, len16);
+    return std::wstring(ws, len16);
 }
 
 std::wstring toUtf16(const std::string& str) 
 {
-	return toUtf16(str.data(), str.length());
+    return toUtf16(str.data(), str.length());
 }
 
 std::string toUtf8(const wchar_t* wide, std::size_t len) 
 {
-	int len8 = ::WideCharToMultiByte(CP_UTF8, 0, wide, len, NULL, 0, NULL, NULL);
-	char* ns = STACK_ARRAY(char, len8);
-	::WideCharToMultiByte(CP_UTF8, 0, wide, len, ns, len8, NULL, NULL);
-	return std::string(ns, len8);
+    int len8 = ::WideCharToMultiByte(CP_UTF8, 0, wide, len, NULL, 0, NULL, NULL);
+    char* ns = STACK_ARRAY(char, len8);
+    ::WideCharToMultiByte(CP_UTF8, 0, wide, len, ns, len8, NULL, NULL);
+    return std::string(ns, len8);
 }
 
 std::string toUtf8(const std::wstring& wstr) 
 {
-	return toUtf8(wstr.data(), wstr.length());
+    return toUtf8(wstr.data(), wstr.length());
 }
 
 #endif

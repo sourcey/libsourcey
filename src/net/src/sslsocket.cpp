@@ -31,153 +31,153 @@ namespace net {
 
 #if 0
 SSLSocket::SSLSocket(uv::Loop* loop) : 
-	net::Socket(new SSLSocket(loop), false)
+    net::Socket(new SSLSocket(loop), false)
 {
 }
 
 
 SSLSocket::SSLSocket(SSLSocket* base, bool shared) : 
-	net::Socket(base, shared) 
+    net::Socket(base, shared) 
 {
 }
 
 
 SSLSocket::SSLSocket(const Socket& socket) : 
-	net::Socket(socket)
+    net::Socket(socket)
 {
-	if (!dynamic_cast<SSLSocket*>(_base))
-		throw std::runtime_error("Cannot assign incompatible socket");
+    if (!dynamic_cast<SSLSocket*>(_base))
+        throw std::runtime_error("Cannot assign incompatible socket");
 }
-	
+    
 
 SSLSocket& SSLSocket::base() const
 {
-	return static_cast<SSLSocket&>(*_base);
+    return static_cast<SSLSocket&>(*_base);
 }
 #endif
 
 
 SSLSocket::SSLSocket(uv::Loop* loop) : 
-	TCPSocket(loop),
-	// TODO: Using client context, should assert no bind()/listen() on this socket
-	_context(SSLManager::instance().defaultClientContext()), 
-	_session(nullptr), 
-	_sslAdapter(this)
+    TCPSocket(loop),
+    // TODO: Using client context, should assert no bind()/listen() on this socket
+    _context(SSLManager::instance().defaultClientContext()), 
+    _session(nullptr), 
+    _sslAdapter(this)
 {
-	TraceLS(this) << "Create" << endl;
+    TraceLS(this) << "Create" << endl;
 }
 
 
 SSLSocket::SSLSocket(SSLContext::Ptr context, uv::Loop* loop) : 
-	TCPSocket(loop),
-	_context(context), 
-	_session(nullptr), 
-	_sslAdapter(this)
+    TCPSocket(loop),
+    _context(context), 
+    _session(nullptr), 
+    _sslAdapter(this)
 {
-	TraceLS(this) << "Create" << endl;
+    TraceLS(this) << "Create" << endl;
 }
-	
+    
 
 SSLSocket::SSLSocket(SSLContext::Ptr context, SSLSession::Ptr session, uv::Loop* loop) : 
-	TCPSocket(loop),
-	_context(context), 
-	_session(session), 
-	_sslAdapter(this)
+    TCPSocket(loop),
+    _context(context), 
+    _session(session), 
+    _sslAdapter(this)
 {
-	TraceLS(this) << "Create" << endl;
+    TraceLS(this) << "Create" << endl;
 }
 
-	
+    
 SSLSocket::~SSLSocket() 
-{	
-	TraceLS(this) << "Destroy" << endl;
+{    
+    TraceLS(this) << "Destroy" << endl;
 }
 
 
 int SSLSocket::available() const
 {
-	return _sslAdapter.available();
+    return _sslAdapter.available();
 }
 
 
 void SSLSocket::close()
 {
-	TCPSocket::close();
+    TCPSocket::close();
 }
 
 
 bool SSLSocket::shutdown()
 {
-	TraceLS(this) << "Shutdown" << endl;
-	try {
-		// Try to gracefully shutdown the SSL connection
-		_sslAdapter.shutdown();
-	}
-	catch (...) {}
-	return TCPSocket::shutdown();
+    TraceLS(this) << "Shutdown" << endl;
+    try {
+        // Try to gracefully shutdown the SSL connection
+        _sslAdapter.shutdown();
+    }
+    catch (...) {}
+    return TCPSocket::shutdown();
 }
 
 
 int SSLSocket::send(const char* data, std::size_t len, int flags) 
-{	
-	return send(data, len, peerAddress(), flags);
+{    
+    return send(data, len, peerAddress(), flags);
 }
 
 
 int SSLSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */) 
-{	
-	TraceLS(this) << "Send: " << len << endl;	
-	assert(Thread::currentID() == tid());
-	//assert(len <= net::MAX_TCP_PACKET_SIZE);
+{    
+    TraceLS(this) << "Send: " << len << endl;    
+    assert(Thread::currentID() == tid());
+    //assert(len <= net::MAX_TCP_PACKET_SIZE);
 
-	if (!active()) {
-		WarnL << "Send error" << endl;	
-		return -1;
-	}	
+    if (!active()) {
+        WarnL << "Send error" << endl;    
+        return -1;
+    }    
 
-	//assert(initialized());
-	
-	// Send unencrypted data to the SSL context
-	_sslAdapter.addOutgoingData(data, len);
-	_sslAdapter.flush();
-	return len;
+    //assert(initialized());
+    
+    // Send unencrypted data to the SSL context
+    _sslAdapter.addOutgoingData(data, len);
+    _sslAdapter.flush();
+    return len;
 }
 
 
 SSLSession::Ptr SSLSocket::currentSession()
 {
-	if (_sslAdapter._ssl) {
-		SSL_SESSION* session = SSL_get1_session(_sslAdapter._ssl);
-		if (session) {
-			if (_session && session == _session->sslSession()) {
-				SSL_SESSION_free(session);
-				return _session;
-			}
-			else return std::make_shared<SSLSession>(session); // new SSLSession(session);
-		}
-	}
-	return 0;
+    if (_sslAdapter._ssl) {
+        SSL_SESSION* session = SSL_get1_session(_sslAdapter._ssl);
+        if (session) {
+            if (_session && session == _session->sslSession()) {
+                SSL_SESSION_free(session);
+                return _session;
+            }
+            else return std::make_shared<SSLSession>(session); // new SSLSession(session);
+        }
+    }
+    return 0;
 }
 
-	
+    
 void SSLSocket::useSession(SSLSession::Ptr session)
 {
-	_session = session;
+    _session = session;
 }
 
 
 bool SSLSocket::sessionWasReused()
 {
-	if (_sslAdapter._ssl)
-		return SSL_session_reused(_sslAdapter._ssl) != 0;
-	else
-		return false;
+    if (_sslAdapter._ssl)
+        return SSL_session_reused(_sslAdapter._ssl) != 0;
+    else
+        return false;
 }
 
 
 net::TransportType SSLSocket::transport() const
 { 
-	return net::SSLTCP; 
+    return net::SSLTCP; 
 }
 
 
@@ -187,40 +187,40 @@ net::TransportType SSLSocket::transport() const
 
 void SSLSocket::onRead(const char* data, std::size_t len)
 {
-	TraceLS(this) << "On SSL read: " << len << endl;
+    TraceLS(this) << "On SSL read: " << len << endl;
 
-	// SSL encrypted data is sent to the SSL conetext
-	_sslAdapter.addIncomingData(data, len);
-	_sslAdapter.flush();
+    // SSL encrypted data is sent to the SSL conetext
+    _sslAdapter.addIncomingData(data, len);
+    _sslAdapter.flush();
 }
 
 
 void SSLSocket::onConnect(uv_connect_t* handle, int status)
 {
-	TraceLS(this) << "On connect" << endl;
-	if (status) {
-		setUVError("SSL connect error", status);
-		return;
-	}
-	else
-		readStart();
+    TraceLS(this) << "On connect" << endl;
+    if (status) {
+        setUVError("SSL connect error", status);
+        return;
+    }
+    else
+        readStart();
  
-	SSL* ssl = SSL_new(_context->sslContext());
+    SSL* ssl = SSL_new(_context->sslContext());
 
-	// TODO: Automatic SSL session handling.
-	// Maybe add a stored session to the network manager.
-	if (_session)
-		SSL_set_session(ssl, _session->sslSession());
+    // TODO: Automatic SSL session handling.
+    // Maybe add a stored session to the network manager.
+    if (_session)
+        SSL_set_session(ssl, _session->sslSession());
  
-	SSL_set_connect_state(ssl);
-	SSL_do_handshake(ssl);
+    SSL_set_connect_state(ssl);
+    SSL_do_handshake(ssl);
  
-	_sslAdapter.init(ssl);
-	_sslAdapter.flush();
+    _sslAdapter.init(ssl);
+    _sslAdapter.flush();
 
-	//emitConnect();
-	onSocketConnect();
-	TraceLS(this) << "On connect: OK" << endl;
+    //emitConnect();
+    onSocketConnect();
+    TraceLS(this) << "On connect: OK" << endl;
 }
 
 

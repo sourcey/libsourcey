@@ -35,132 +35,132 @@ namespace http {
 
 
 ClientConnection::ClientConnection(const URL& url, const net::Socket::Ptr& socket) :
-	Connection(socket),
-	_url(url),
-	_readStream(nullptr), 
-	_complete(false),
-	_connect(false)
-{	
-	TraceLS(this) << "Create: " << url << endl;
+    Connection(socket),
+    _url(url),
+    _readStream(nullptr), 
+    _complete(false),
+    _connect(false)
+{    
+    TraceLS(this) << "Create: " << url << endl;
 
-	IncomingProgress.sender = this;
-	OutgoingProgress.sender = this;
-			
-	_request.setURI(url.pathEtc());
-	_request.setHost(url.host(), url.port());
-	
-	// Set default error status
-	_response.setStatus(http::StatusCode::BadGateway);
+    IncomingProgress.sender = this;
+    OutgoingProgress.sender = this;
+            
+    _request.setURI(url.pathEtc());
+    _request.setHost(url.host(), url.port());
+    
+    // Set default error status
+    _response.setStatus(http::StatusCode::BadGateway);
 
-	replaceAdapter(new ClientAdapter(*this));
+    replaceAdapter(new ClientAdapter(*this));
 }
 
 
 ClientConnection::~ClientConnection() 
-{	
-	TraceLS(this) << "Destroy" << endl;
+{    
+    TraceLS(this) << "Destroy" << endl;
 
-	if (_readStream) {
-		delete _readStream;
-		_readStream = nullptr;
-	}
+    if (_readStream) {
+        delete _readStream;
+        _readStream = nullptr;
+    }
 }
 
 
 void ClientConnection::close()
 {
-	if (!closed()) {
-		onComplete();
-		Connection::close();
-	}
+    if (!closed()) {
+        onComplete();
+        Connection::close();
+    }
 }
 
 
 void ClientConnection::send()
 {
-	assert(!_connect);
-	connect();
+    assert(!_connect);
+    connect();
 }
 
 
 void ClientConnection::send(http::Request& req)
 {
-	assert(!_connect);
-	_request = req;
-	connect();
+    assert(!_connect);
+    _request = req;
+    connect();
 }
 
 
 int ClientConnection::send(const char* data, std::size_t len, int flags)
 {
-	connect();
-	if (Outgoing.active())
-		return Connection::send(data, len);
-	else
-		_outgoingBuffer.push_back(std::string(data, len));	
-	return len;
+    connect();
+    if (Outgoing.active())
+        return Connection::send(data, len);
+    else
+        _outgoingBuffer.push_back(std::string(data, len));    
+    return len;
 }
 
 
 #if 0
 int ClientConnection::send(const std::string& buf, int flags) //, int flags
 {
-	connect();
-	if (Outgoing.active())
-		return Connection::send(buf);
-	else
-		_outgoingBuffer.push_back(buf);	
-	return buf.length();
+    connect();
+    if (Outgoing.active())
+        return Connection::send(buf);
+    else
+        _outgoingBuffer.push_back(buf);    
+    return buf.length();
 }
 
 
 void ClientConnection::sendData(const char* buf, std::size_t len) //, int flags
 {
-	connect();
-	if (Outgoing.active())
-		Connection::sendData(buf, len);
-	else
-		_outgoingBuffer.push_back(std::string(buf, len));	
+    connect();
+    if (Outgoing.active())
+        Connection::sendData(buf, len);
+    else
+        _outgoingBuffer.push_back(std::string(buf, len));    
 }
 
-	
+    
 http::Client* ClientConnection::client()
 {
-	return _client;
+    return _client;
 }
 #endif
 
 
 void ClientConnection::connect()
 {
-	if (!_connect) {
-		_connect = true;
-		TraceLS(this) << "Connecting" << endl;	
-		_socket->connect(_url.host(), _url.port());
-	}
+    if (!_connect) {
+        _connect = true;
+        TraceLS(this) << "Connecting" << endl;    
+        _socket->connect(_url.host(), _url.port());
+    }
 }
 
 
 void ClientConnection::setReadStream(std::ostream* os)
 {
-	assert(!_connect);
-	if (_readStream) {
-		delete _readStream;
-	}
+    assert(!_connect);
+    if (_readStream) {
+        delete _readStream;
+    }
 
-	_readStream = os;
+    _readStream = os;
 }
 
 
 http::Message* ClientConnection::incomingHeader() 
 { 
-	return static_cast<http::Message*>(&_response);
+    return static_cast<http::Message*>(&_response);
 }
 
 
 http::Message* ClientConnection::outgoingHeader() 
 { 
-	return static_cast<http::Message*>(&_request);
+    return static_cast<http::Message*>(&_request);
 }
 
 
@@ -169,87 +169,87 @@ http::Message* ClientConnection::outgoingHeader()
 
 void ClientConnection::onSocketConnect() 
 {
-	TraceLS(this) << "On connect" << endl;
-	
-	// Emit the connect signal so raw connections like
-	// websockets can kick off the data flow
-	Connect.emit(this);
+    TraceLS(this) << "On connect" << endl;
+    
+    // Emit the connect signal so raw connections like
+    // websockets can kick off the data flow
+    Connect.emit(this);
 
-	// Start the outgoing send stream if there are
-	// any queued packets or adapters attached
-	Outgoing.start();
+    // Start the outgoing send stream if there are
+    // any queued packets or adapters attached
+    Outgoing.start();
 
-	// Flush queued packets
-	if (!_outgoingBuffer.empty()) {
-		for (const auto & packet : _outgoingBuffer) {
-			Outgoing.write(packet.c_str(), packet.length());
-		}
-		_outgoingBuffer.clear();
-	}
+    // Flush queued packets
+    if (!_outgoingBuffer.empty()) {
+        for (const auto & packet : _outgoingBuffer) {
+            Outgoing.write(packet.c_str(), packet.length());
+        }
+        _outgoingBuffer.clear();
+    }
 
-	// Send the outgoing HTTP header if it hasn't already been sent. 
-	// Note the first call to socket().send() will flush headers.
-	// Note if there are stream adapters we wait for the stream to push
-	// through any custom headers. See ChunkedAdapter::emitHeader
-	else if (Outgoing.numAdapters() == 0) {
-		TraceLS(this) << "On connect: Send header" << endl;
-		sendHeader();
-	}	
+    // Send the outgoing HTTP header if it hasn't already been sent. 
+    // Note the first call to socket().send() will flush headers.
+    // Note if there are stream adapters we wait for the stream to push
+    // through any custom headers. See ChunkedAdapter::emitHeader
+    else if (Outgoing.numAdapters() == 0) {
+        TraceLS(this) << "On connect: Send header" << endl;
+        sendHeader();
+    }    
 }
-	
+    
 
 //
 // Connection Callbacks
 
 void ClientConnection::onHeaders() 
 {
-	TraceLS(this) << "On headers" << endl;	
-	IncomingProgress.total = _response.getContentLength();
+    TraceLS(this) << "On headers" << endl;    
+    IncomingProgress.total = _response.getContentLength();
 
-	Headers.emit(this, _response);
+    Headers.emit(this, _response);
 }
 
 
 void ClientConnection::onPayload(const MutableBuffer& buffer)
 {
-	//TraceLS(this) << "On payload: " << 
-	// std::string(bufferCast<const char*>(buffer), buffer.size()) << endl;	
-	
-	// Update download progress
-	IncomingProgress.update(buffer.size());
+    //TraceLS(this) << "On payload: " << 
+    // std::string(bufferCast<const char*>(buffer), buffer.size()) << endl;    
+    
+    // Update download progress
+    IncomingProgress.update(buffer.size());
 
-	if (_readStream) {		
-		TraceLS(this) << "Writing to stream: " << buffer.size() << endl;	
-		_readStream->write(bufferCast<const char*>(buffer), buffer.size());
-		_readStream->flush();
-	}
+    if (_readStream) {        
+        TraceLS(this) << "Writing to stream: " << buffer.size() << endl;    
+        _readStream->write(bufferCast<const char*>(buffer), buffer.size());
+        _readStream->flush();
+    }
 
-	//Payload.emit(this, buffer);
+    //Payload.emit(this, buffer);
 }
 
 
 void ClientConnection::onMessage() 
 {
-	TraceLS(this) << "On complete" << endl;
+    TraceLS(this) << "On complete" << endl;
 
-	onComplete();
+    onComplete();
 }
 
-	
+    
 void ClientConnection::onComplete()
 {
-	if (!_complete) {
-		_complete = true; // in case close() is called inside callback 
-		Complete.emit(this, _response);
-	}
+    if (!_complete) {
+        _complete = true; // in case close() is called inside callback 
+        Complete.emit(this, _response);
+    }
 }
 
 
 void ClientConnection::onClose() 
 {
-	TraceLS(this) << "On close" << endl;	
+    TraceLS(this) << "On close" << endl;    
 
-	Connection::onClose();
+    Connection::onClose();
 }
 
 
@@ -260,96 +260,96 @@ void ClientConnection::onClose()
 
 Singleton<Client>& singleton() 
 {
-	static Singleton<Client> singleton;
-	return singleton;
+    static Singleton<Client> singleton;
+    return singleton;
 }
 
 
 Client& Client::instance() 
 {
-	return *singleton().get();
+    return *singleton().get();
 }
-	
+    
 
 void Client::destroy()
 {
-	singleton().destroy();
+    singleton().destroy();
 }
 
 
 Client::Client()
 {
-	TraceLS(this) << "Create" << endl;
+    TraceLS(this) << "Create" << endl;
 
-	//_timer.Timeout += sdelegate(this, &Client::onConnectionTimer);
-	//_timer.start(5000);
+    //_timer.Timeout += sdelegate(this, &Client::onConnectionTimer);
+    //_timer.start(5000);
 }
 
 
 Client::~Client()
 {
-	TraceLS(this) << "Destroy" << endl;
-	shutdown();
+    TraceLS(this) << "Destroy" << endl;
+    shutdown();
 }
 
 
 void Client::shutdown() 
 {
-	TraceLS(this) << "Shutdown" << endl;
+    TraceLS(this) << "Shutdown" << endl;
 
-	//_timer.stop();
-	Shutdown.emit(this);
+    //_timer.stop();
+    Shutdown.emit(this);
 
-	//_connections.clear();
-	auto conns = _connections;
-	for (auto conn : conns) {
-		conn->close(); // close and remove via callback
-	}
-	assert(_connections.empty());
+    //_connections.clear();
+    auto conns = _connections;
+    for (auto conn : conns) {
+        conn->close(); // close and remove via callback
+    }
+    assert(_connections.empty());
 }
 
 
 void Client::addConnection(ClientConnection::Ptr conn) 
-{		
-	TraceLS(this) << "Adding connection: " << conn << endl;	
+{        
+    TraceLS(this) << "Adding connection: " << conn << endl;    
 
-	conn->Close += sdelegate(this, &Client::onConnectionClose, -1); // lowest priority
-	_connections.push_back(conn);
+    conn->Close += sdelegate(this, &Client::onConnectionClose, -1); // lowest priority
+    _connections.push_back(conn);
 }
 
 
 void Client::removeConnection(ClientConnection* conn) 
-{		
-	TraceLS(this) << "Removing connection: " << conn << endl;
-	for (auto it = _connections.begin(); it != _connections.end(); ++it) {
-		if (conn == it->get()) {
-			TraceLS(this) << "Removed connection: " << conn << endl;
-			_connections.erase(it);
-			return;
-		}
-	}
-	assert(0 && "unknown connection");
+{        
+    TraceLS(this) << "Removing connection: " << conn << endl;
+    for (auto it = _connections.begin(); it != _connections.end(); ++it) {
+        if (conn == it->get()) {
+            TraceLS(this) << "Removed connection: " << conn << endl;
+            _connections.erase(it);
+            return;
+        }
+    }
+    assert(0 && "unknown connection");
 }
 
 
 void Client::onConnectionClose(void* sender)
 {
-	removeConnection(reinterpret_cast<ClientConnection*>(sender));
+    removeConnection(reinterpret_cast<ClientConnection*>(sender));
 }
 
 
 #if 0
 void Client::onConnectionTimer(void*)
 {
-	// Close connections that have timed out while receiving
-	// the server response, maybe due to a faulty server.
-	auto conns = _connections;
-	for (auto conn : conns) {
-		if (conn->closed()) { // conn->expired()
-			TraceLS(this) << "Closing expired connection: " << conn << endl;
-			conn->close();
-		}			
-	}
+    // Close connections that have timed out while receiving
+    // the server response, maybe due to a faulty server.
+    auto conns = _connections;
+    for (auto conn : conns) {
+        if (conn->closed()) { // conn->expired()
+            TraceLS(this) << "Closing expired connection: " << conn << endl;
+            conn->close();
+        }            
+    }
 }
 #endif
 

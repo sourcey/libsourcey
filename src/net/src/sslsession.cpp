@@ -26,22 +26,22 @@ using namespace std;
 namespace scy {
 namespace net {
 
-	
+    
 SSLSession::SSLSession(SSL_SESSION* ptr):
-	_ptr(ptr)
+    _ptr(ptr)
 {
 }
 
 
 SSLSession::~SSLSession()
 {
-	SSL_SESSION_free(_ptr);
+    SSL_SESSION_free(_ptr);
 }
 
 
 SSL_SESSION* SSLSession::sslSession() const
 {
-	return _ptr;
+    return _ptr;
 }
 
 

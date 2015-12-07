@@ -29,34 +29,34 @@
 namespace scy {
 namespace json {
 
-	
+    
 
 /*
 class Parser: public PacketProcessor
 {
 public:
-	virtual void parse(RawPacket& packet)
-	{
-		json::Value data;
-		json::Reader reader;
-		if (reader.parse(packet.message(), data)) {
-		}
-	}
+    virtual void parse(RawPacket& packet)
+    {
+        json::Value data;
+        json::Reader reader;
+        if (reader.parse(packet.message(), data)) {
+        }
+    }
 
-	PacketSignal Output;
+    PacketSignal Output;
 
-	virtual ~Parser() {};
+    virtual ~Parser() {};
 };
 
 
 class Parser: public PacketProcessor
 {
 public:
-	virtual void process(IPacket& packet);
+    virtual void process(IPacket& packet);
 
-	virtual void parse(RawPacket& packet);
+    virtual void parse(RawPacket& packet);
 
-	virtual ~Parser() {};
+    virtual ~Parser() {};
 };
 */
 

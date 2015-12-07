@@ -30,76 +30,76 @@
 namespace scy {
 namespace turn {
 
-	
+    
 class TCPAllocation;
 
 class TCPConnectionPair
 {
-public:	
-	TCPConnectionPair(TCPAllocation& allocation);
-	virtual ~TCPConnectionPair();
+public:    
+    TCPConnectionPair(TCPAllocation& allocation);
+    virtual ~TCPConnectionPair();
 
-	bool doPeerConnect(const net::Address& peerAddr);
-		// Initiates an outgoing TCP connection to the
-		// peer for Connect requests.
+    bool doPeerConnect(const net::Address& peerAddr);
+        // Initiates an outgoing TCP connection to the
+        // peer for Connect requests.
 
-	bool makeDataConnection();
-		// Binds the client <> peer relay pipe once the 
-		// ConnectionBind request is successfull.
-	
-	void setPeerSocket(const net::TCPSocket::Ptr& socket);
-	void setClientSocket(const net::TCPSocket::Ptr& socket);
+    bool makeDataConnection();
+        // Binds the client <> peer relay pipe once the 
+        // ConnectionBind request is successfull.
+    
+    void setPeerSocket(const net::TCPSocket::Ptr& socket);
+    void setClientSocket(const net::TCPSocket::Ptr& socket);
 
-	void onPeerConnectSuccess(void* sender); 
-		// Connection success callback for Connect request.
+    void onPeerConnectSuccess(void* sender); 
+        // Connection success callback for Connect request.
 
-	void onPeerConnectError(void* sender, const Error& error);
-		// Connection error callback for Connect request.
-	
-	void onClientDataReceived(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
-	void onPeerDataReceived(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
+    void onPeerConnectError(void* sender, const Error& error);
+        // Connection error callback for Connect request.
+    
+    void onClientDataReceived(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
+    void onPeerDataReceived(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress);
 
-	void onConnectionClosed(void* sender);
-		// Callback for handing either client or peer connections
-		// which result in the destruction of the TCPConnectionPair.
+    void onConnectionClosed(void* sender);
+        // Callback for handing either client or peer connections
+        // which result in the destruction of the TCPConnectionPair.
 
-	void startTimeout();
-		// Starts the ConnectionBind request timeout.
-		//
-		// If no ConnectionBind request associated with this peer data
-		// connection is received after 30 seconds, the peer data
-		// connection MUST be closed.
+    void startTimeout();
+        // Starts the ConnectionBind request timeout.
+        //
+        // If no ConnectionBind request associated with this peer data
+        // connection is received after 30 seconds, the peer data
+        // connection MUST be closed.
 
-	TCPAllocation& allocation;
+    TCPAllocation& allocation;
 
-	net::TCPSocket::Ptr client;
-		// The client socket, nullptr to start.
+    net::TCPSocket::Ptr client;
+        // The client socket, nullptr to start.
 
-	net::TCPSocket::Ptr peer;
-		// The client socket, nullptr to start.
+    net::TCPSocket::Ptr peer;
+        // The client socket, nullptr to start.
 
-	bool expired() const;
-		// Return true if the peer ConnectionBind request timed out.
+    bool expired() const;
+        // Return true if the peer ConnectionBind request timed out.
 
-	Buffer earlyPeerData;	
-		// Stores early peer > client data.
-		
-	UInt32 connectionID;
-	    // The unique connection ID.
+    Buffer earlyPeerData;    
+        // Stores early peer > client data.
+        
+    UInt32 connectionID;
+        // The unique connection ID.
 
-	bool isDataConnection;
-		// True when p2p relay is flowing.
-	
-	Timeout	timeout;
-		// The ConnectionBind request timeout counter.
+    bool isDataConnection;
+        // True when p2p relay is flowing.
+    
+    Timeout    timeout;
+        // The ConnectionBind request timeout counter.
 
-	stun::TransactionID	transactionID;
+    stun::TransactionID    transactionID;
 
-private:	
-	TCPConnectionPair(const TCPConnectionPair&); // = delete;
-	TCPConnectionPair(TCPConnectionPair&&); // = delete;
-	TCPConnectionPair& operator=(const TCPConnectionPair&); // = delete;
-	TCPConnectionPair& operator=(TCPConnectionPair&&); // = delete;
+private:    
+    TCPConnectionPair(const TCPConnectionPair&); // = delete;
+    TCPConnectionPair(TCPConnectionPair&&); // = delete;
+    TCPConnectionPair& operator=(const TCPConnectionPair&); // = delete;
+    TCPConnectionPair& operator=(TCPConnectionPair&&); // = delete;
 };
 
 

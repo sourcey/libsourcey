@@ -35,44 +35,44 @@ class Server;
 class ServerAllocation: public IAllocation
 {
 public:
-	ServerAllocation(Server& server, 
-					 const FiveTuple& tuple, 
-					 const std::string& username, 
-					 Int64 lifetime);
-	
-	virtual bool handleRequest(Request& request);	
-	virtual void handleRefreshRequest(Request& request);	
-	virtual void handleCreatePermission(Request& request);
-		
-	//virtual bool IAllocation::deleted() const;
+    ServerAllocation(Server& server, 
+                     const FiveTuple& tuple, 
+                     const std::string& username, 
+                     Int64 lifetime);
+    
+    virtual bool handleRequest(Request& request);    
+    virtual void handleRefreshRequest(Request& request);    
+    virtual void handleCreatePermission(Request& request);
+        
+    //virtual bool IAllocation::deleted() const;
 
-	virtual bool onTimer();
-		// Asynchronous timer callback for updating the allocation
-		// permissions and state etc.
-		// If this call returns false the allocation will be deleted.
-	
-	virtual Int64 timeRemaining() const; 
-	virtual Int64 maxTimeRemaining() const;
-	virtual Server& server(); 
-	
-	virtual void print(std::ostream& os) const;
+    virtual bool onTimer();
+        // Asynchronous timer callback for updating the allocation
+        // permissions and state etc.
+        // If this call returns false the allocation will be deleted.
+    
+    virtual Int64 timeRemaining() const; 
+    virtual Int64 maxTimeRemaining() const;
+    virtual Server& server(); 
+    
+    virtual void print(std::ostream& os) const;
 
 protected:
-	virtual ~ServerAllocation();
-		// IMPORTANT: The destructor should never be called directly 
-		// as the allocation is deleted via the timer callback.
-		// See onTimer()
+    virtual ~ServerAllocation();
+        // IMPORTANT: The destructor should never be called directly 
+        // as the allocation is deleted via the timer callback.
+        // See onTimer()
 
-	friend class Server;
-	
-	UInt32 _maxLifetime;
-	Server&	_server;
+    friend class Server;
+    
+    UInt32 _maxLifetime;
+    Server&    _server;
 
-private:	
-	ServerAllocation(const ServerAllocation&); // = delete;
-	ServerAllocation(ServerAllocation&&); // = delete;
-	ServerAllocation& operator=(const ServerAllocation&); // = delete;
-	ServerAllocation& operator=(ServerAllocation&&); // = delete;
+private:    
+    ServerAllocation(const ServerAllocation&); // = delete;
+    ServerAllocation(ServerAllocation&&); // = delete;
+    ServerAllocation& operator=(const ServerAllocation&); // = delete;
+    ServerAllocation& operator=(ServerAllocation&&); // = delete;
 
 };
 

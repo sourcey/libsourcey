@@ -25,141 +25,141 @@
 
 
 namespace scy {
-	
-	
+    
+    
 namespace internal {
-	static Singleton<Application> singleton;
+    static Singleton<Application> singleton;
 
-	struct ShutdownCmd 
-	{
-		Application* self;
-		void* opaque;
-		std::function<void(void*)> callback;
-	};
+    struct ShutdownCmd 
+    {
+        Application* self;
+        void* opaque;
+        std::function<void(void*)> callback;
+    };
 }
 
 
 Application& Application::getDefault() 
 {
-	return *internal::singleton.get();
+    return *internal::singleton.get();
 }
 
 
 Application::Application(uv::Loop* loop) :
-	loop(loop)
+    loop(loop)
 {
-	DebugLS(this) << "Create" << std::endl;
+    DebugLS(this) << "Create" << std::endl;
 }
 
-	
+    
 Application::~Application() 
-{	
-	DebugLS(this) << "Destroy" << std::endl;
+{    
+    DebugLS(this) << "Destroy" << std::endl;
 }
 
-	
+    
 void Application::run() 
 { 
-	uv_run(loop, UV_RUN_DEFAULT);
+    uv_run(loop, UV_RUN_DEFAULT);
 }
 
 
 void Application::stop() 
 { 
-	uv_stop(loop); 
+    uv_stop(loop); 
 }
 
 
 void Application::finalize() 
 { 
-	DebugLS(this) << "Finalizing" << std::endl;
+    DebugLS(this) << "Finalizing" << std::endl;
 
 #ifdef _DEBUG
-	// Print active handles
-	uv_walk(loop, Application::onPrintHandle, nullptr);
+    // Print active handles
+    uv_walk(loop, Application::onPrintHandle, nullptr);
 #endif
-			
-	// Shutdown the garbage collector to free memory
-	GarbageCollector::destroy();
+            
+    // Shutdown the garbage collector to free memory
+    GarbageCollector::destroy();
 
-	// Run until handles are closed
-	run(); 	
-	assert(loop->active_handles == 0);
-	//assert(loop->active_reqs == 0);
+    // Run until handles are closed
+    run();     
+    assert(loop->active_handles == 0);
+    //assert(loop->active_reqs == 0);
 
-	DebugLS(this) << "Finalization complete" << std::endl;
-}		
-	
-	
+    DebugLS(this) << "Finalization complete" << std::endl;
+}        
+    
+    
 void Application::waitForShutdown(std::function<void(void*)> callback, void* opaque)
 { 
-	auto cmd = new internal::ShutdownCmd;
-	cmd->self = this;
-	cmd->opaque = opaque;
-	cmd->callback = callback;
+    auto cmd = new internal::ShutdownCmd;
+    cmd->self = this;
+    cmd->opaque = opaque;
+    cmd->callback = callback;
 
-	auto sig = new uv_signal_t;
-	sig->data = cmd;
-	uv_signal_init(loop, sig);
-	uv_signal_start(sig, Application::onShutdownSignal, SIGINT);
-		
-	DebugLS(this) << "Wait for shutdown" << std::endl;
-	run();
+    auto sig = new uv_signal_t;
+    sig->data = cmd;
+    uv_signal_init(loop, sig);
+    uv_signal_start(sig, Application::onShutdownSignal, SIGINT);
+        
+    DebugLS(this) << "Wait for shutdown" << std::endl;
+    run();
 }
 
-			
+            
 void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 {
-	auto cmd = reinterpret_cast<internal::ShutdownCmd*>(req->data);
-	DebugLS(cmd->self) << "Got shutdown signal" << std::endl;
+    auto cmd = reinterpret_cast<internal::ShutdownCmd*>(req->data);
+    DebugLS(cmd->self) << "Got shutdown signal" << std::endl;
 
-	uv_close((uv_handle_t*)req, [](uv_handle_t* handle) {
-		delete handle;
-	});
-	if (cmd->callback)
-		cmd->callback(cmd->opaque);
-	delete cmd;
+    uv_close((uv_handle_t*)req, [](uv_handle_t* handle) {
+        delete handle;
+    });
+    if (cmd->callback)
+        cmd->callback(cmd->opaque);
+    delete cmd;
 }
-		
+        
 
 void Application::onPrintHandle(uv_handle_t* handle, void* /* arg */) 
 {
-	DebugL << "#### Active handle: " << handle << ": " << handle->type << std::endl;
+    DebugL << "#### Active handle: " << handle << ": " << handle->type << std::endl;
 }
 
 
 //
 // Command-line option parser
 //
-	
+    
 OptionParser::OptionParser(int argc, char* argv[], const char* delim)
 {
-	char* lastkey = 0;	
-	int dlen = strlen(delim);	
-	for (int i = 0; i < argc; i++) {
+    char* lastkey = 0;    
+    int dlen = strlen(delim);    
+    for (int i = 0; i < argc; i++) {
 
-		// Get the application exe path
-		if (i == 0) {
-			exepath.assign(argv[i]);
-			continue;
-		}
+        // Get the application exe path
+        if (i == 0) {
+            exepath.assign(argv[i]);
+            continue;
+        }
 
-		// Get option keys
-		if (strncmp(argv[i], delim, dlen) == 0) {
-			lastkey = (&argv[i][dlen]);
-			args[lastkey] = "";
-		}
+        // Get option keys
+        if (strncmp(argv[i], delim, dlen) == 0) {
+            lastkey = (&argv[i][dlen]);
+            args[lastkey] = "";
+        }
 
-		// Get value for current key
-		else if (lastkey) {
-			args[lastkey] = argv[i];
-			lastkey = 0;
-		}
+        // Get value for current key
+        else if (lastkey) {
+            args[lastkey] = argv[i];
+            lastkey = 0;
+        }
 
-		else {
-			TraceL << "Unrecognized option: " << argv[i] << std::endl;	
-		}
-	}
+        else {
+            TraceL << "Unrecognized option: " << argv[i] << std::endl;    
+        }
+    }
 }
 
 

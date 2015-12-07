@@ -34,76 +34,76 @@ class Scheduler;
 
 
 class Task: public scy::Task, public json::ISerializable
-	/// This class extends the Task class to implement
-	/// scheduling capabilities.
+    /// This class extends the Task class to implement
+    /// scheduling capabilities.
 {
 public:
-	Task(const std::string& type = "", const std::string& name = "");
-	Task(Scheduler& scheduler, const std::string& type, const std::string& name = "");
-	
-	//virtual void start();
-		
-	virtual void serialize(json::Value& root);
-		// Serializes the task to JSON.
+    Task(const std::string& type = "", const std::string& name = "");
+    Task(Scheduler& scheduler, const std::string& type, const std::string& name = "");
+    
+    //virtual void start();
+        
+    virtual void serialize(json::Value& root);
+        // Serializes the task to JSON.
 
-	virtual void deserialize(json::Value& root);
-		// Deserializes the task from JSON.
+    virtual void deserialize(json::Value& root);
+        // Deserializes the task from JSON.
 
-	template<typename T>
-	T* createTrigger() 
-	{
-		T* p = new T();
-		setTrigger(p);
-		return p;
-	}
-	void setTrigger(sked::Trigger* trigger);
+    template<typename T>
+    T* createTrigger() 
+    {
+        T* p = new T();
+        setTrigger(p);
+        return p;
+    }
+    void setTrigger(sked::Trigger* trigger);
 
-	sked::Trigger& trigger();
-		// Returns a reference to the associated 
-		// sked::Trigger or throws an exception.
-	
-	Scheduler& scheduler();
-		// Returns a reference to the associated 
-		// Scheduler or throws an exception.
-	
-	Int64 remaining() const;
-		// Returns the milliseconds remaining 
-		// until the next scheduled timeout.
-		// An sked::Trigger must be associated
-		// or an exception will be thrown.
-	
-	std::string type() const;
-	std::string name() const;
-	void setName(const std::string& name);
+    sked::Trigger& trigger();
+        // Returns a reference to the associated 
+        // sked::Trigger or throws an exception.
+    
+    Scheduler& scheduler();
+        // Returns a reference to the associated 
+        // Scheduler or throws an exception.
+    
+    Int64 remaining() const;
+        // Returns the milliseconds remaining 
+        // until the next scheduled timeout.
+        // An sked::Trigger must be associated
+        // or an exception will be thrown.
+    
+    std::string type() const;
+    std::string name() const;
+    void setName(const std::string& name);
 
 protected:
-	//Task& operator=(Task const&) {}
-	virtual ~Task();
-	
-	virtual bool beforeRun();
-	virtual void run() = 0;
-	virtual bool afterRun();
+    //Task& operator=(Task const&) {}
+    virtual ~Task();
+    
+    virtual bool beforeRun();
+    virtual void run() = 0;
+    virtual bool afterRun();
 
-	static bool CompareTimeout(const scy::Task* l, const scy::Task* r)
-		// For stl::sort operations
-	{
-		return 
-			reinterpret_cast<const Task*>(l)->remaining() <
-			reinterpret_cast<const Task*>(r)->remaining();
-	}
+    static bool CompareTimeout(const scy::Task* l, const scy::Task* r)
+        // For stl::sort operations
+    {
+        return 
+            reinterpret_cast<const Task*>(l)->remaining() <
+            reinterpret_cast<const Task*>(r)->remaining();
+    }
 
-	friend class Scheduler;
-	
-	std::string _type;
-	std::string _name;
-	sked::Scheduler* _scheduler;
-	sked::Trigger* _trigger;
-	mutable Mutex _mutex;
+    friend class Scheduler;
+    
+    std::string _type;
+    std::string _name;
+    sked::Scheduler* _scheduler;
+    sked::Trigger* _trigger;
+    mutable Mutex _mutex;
 };
 
 
 typedef std::vector<sked::Task*> TaskList;
-	
+    
 
 } } // namespace scy::sked
 

@@ -26,50 +26,50 @@
 
 
 namespace scy { 
-	
+    
 
 typedef LiveCollection<
-	std::string, PacketStream, 
-		std::default_delete<PacketStream>
-		//DeferredDeleter<PacketStream>
-		//DestroyMethodDeleter<PacketStream>
+    std::string, PacketStream, 
+        std::default_delete<PacketStream>
+        //DeferredDeleter<PacketStream>
+        //DestroyMethodDeleter<PacketStream>
 > StreamManagerBase;
 
 
 class StreamManager: public StreamManagerBase, public basic::Polymorphic
 {
 public:
-	typedef StreamManagerBase Manager;
-	typedef Manager::Map	  Map;
+    typedef StreamManagerBase Manager;
+    typedef Manager::Map      Map;
 
 public:
-	StreamManager(bool freeClosedStreams = true);
-	virtual ~StreamManager();
+    StreamManager(bool freeClosedStreams = true);
+    virtual ~StreamManager();
 
-	virtual bool addStream(PacketStream* stream, bool whiny = true);	
-	virtual bool closeStream(const std::string& name, bool whiny = true);	
-	virtual void closeAll();	
-	virtual PacketStream* getStream(const std::string& name, bool whiny = true);
+    virtual bool addStream(PacketStream* stream, bool whiny = true);    
+    virtual bool closeStream(const std::string& name, bool whiny = true);    
+    virtual void closeAll();    
+    virtual PacketStream* getStream(const std::string& name, bool whiny = true);
     virtual PacketStream* getDafaultStream();
-		// Returns the first stream in the list, or NULL.
+        // Returns the first stream in the list, or NULL.
 
-	virtual Map streams() const;
+    virtual Map streams() const;
 
-	virtual void print(std::ostream& os) const;
+    virtual void print(std::ostream& os) const;
 
-protected:	
-	virtual void onAdd(PacketStream* task);
-		// Called after a stream is added.
+protected:    
+    virtual void onAdd(PacketStream* task);
+        // Called after a stream is added.
 
-	virtual void onRemove(PacketStream* task);
-		// Called after a stream is removed.
+    virtual void onRemove(PacketStream* task);
+        // Called after a stream is removed.
 
-	virtual void onStreamStateChange(void* sender, PacketStreamState& state, const PacketStreamState&);	
+    virtual void onStreamStateChange(void* sender, PacketStreamState& state, const PacketStreamState&);    
 
-	virtual const char* className() const { return "Stream Manager"; };
-	
-protected:	
-	bool _freeClosedStreams;
+    virtual const char* className() const { return "Stream Manager"; };
+    
+protected:    
+    bool _freeClosedStreams;
 };
 
 

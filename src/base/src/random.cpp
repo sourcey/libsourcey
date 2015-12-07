@@ -106,51 +106,51 @@
  * for the polynomial (actually a trinomial) that the R.N.G. is based on, and
  * the separation between the two lower order coefficients of the trinomial.
  */
-#define	TYPE_0		0		/* linear congruential */
-#define	BREAK_0		8
-#define	DEG_0		0
-#define	SEP_0		0
+#define    TYPE_0        0        /* linear congruential */
+#define    BREAK_0        8
+#define    DEG_0        0
+#define    SEP_0        0
 
-#define	TYPE_1		1		/* x**7 + x**3 + 1 */
-#define	BREAK_1		32
-#define	DEG_1		7
-#define	SEP_1		3
+#define    TYPE_1        1        /* x**7 + x**3 + 1 */
+#define    BREAK_1        32
+#define    DEG_1        7
+#define    SEP_1        3
 
-#define	TYPE_2		2		/* x**15 + x + 1 */
-#define	BREAK_2		64
-#define	DEG_2		15
-#define	SEP_2		1
+#define    TYPE_2        2        /* x**15 + x + 1 */
+#define    BREAK_2        64
+#define    DEG_2        15
+#define    SEP_2        1
 
-#define	TYPE_3		3		/* x**31 + x**3 + 1 */
-#define	BREAK_3		128
-#define	DEG_3		31
-#define	SEP_3		3
+#define    TYPE_3        3        /* x**31 + x**3 + 1 */
+#define    BREAK_3        128
+#define    DEG_3        31
+#define    SEP_3        3
 
-#define	TYPE_4		4		/* x**63 + x + 1 */
-#define	BREAK_4		256
-#define	DEG_4		63
-#define	SEP_4		1
+#define    TYPE_4        4        /* x**63 + x + 1 */
+#define    BREAK_4        256
+#define    DEG_4        63
+#define    SEP_4        1
 
 
 namespace scy {
-	
-	
+    
+    
 Random::Random(int stateSize)
 {
-	assert(BREAK_0 <= stateSize && stateSize <= BREAK_4);
+    assert(BREAK_0 <= stateSize && stateSize <= BREAK_4);
 
-	_buffer = new char[stateSize];
+    _buffer = new char[stateSize];
 #if defined(_WIN32_WCE)
-	initState((UInt32) wceex_time(nullptr), _buffer, stateSize);
+    initState((UInt32) wceex_time(nullptr), _buffer, stateSize);
 #else
-	initState((UInt32) std::time(nullptr), _buffer, stateSize);
+    initState((UInt32) std::time(nullptr), _buffer, stateSize);
 #endif
 }
 
 
 Random::~Random()
 {
-	delete [] _buffer;
+    delete [] _buffer;
 }
 
 
@@ -164,15 +164,15 @@ Random::~Random()
  */
 UInt32 Random::goodRand(Int32 x)
 {
-	Int32 hi, lo;
+    Int32 hi, lo;
 
-	if (x == 0) x = 123459876;
-	hi = x / 127773;
-	lo = x % 127773;
-	x = 16807 * lo - 2836 * hi;
-	if (x < 0) x += 0x7FFFFFFF;
+    if (x == 0) x = 123459876;
+    hi = x / 127773;
+    lo = x % 127773;
+    x = 16807 * lo - 2836 * hi;
+    if (x < 0) x += 0x7FFFFFFF;
 
-	return x;
+    return x;
 }
 
 
@@ -188,21 +188,21 @@ UInt32 Random::goodRand(Int32 x)
  */
 void Random::seed(UInt32 x)
 {
-	int i, lim;
+    int i, lim;
 
-	_state[0] = x;
-	if (_randType == TYPE_0)
-		lim = NSHUFF;
-	else 
-	{
-		for (i = 1; i < _randDeg; i++)
-			_state[i] = goodRand(_state[i - 1]);
-		_fptr = &_state[_randSep];
-		_rptr = &_state[0];
-		lim = 10 * _randDeg;
-	}
-	for (i = 0; i < lim; i++)
-		next();
+    _state[0] = x;
+    if (_randType == TYPE_0)
+        lim = NSHUFF;
+    else 
+    {
+        for (i = 1; i < _randDeg; i++)
+            _state[i] = goodRand(_state[i - 1]);
+        _fptr = &_state[_randSep];
+        _rptr = &_state[0];
+        lim = 10 * _randDeg;
+    }
+    for (i = 0; i < lim; i++)
+        next();
 }
 
 
@@ -217,40 +217,40 @@ void Random::seed(UInt32 x)
  */
 void Random::seed()
 {
-	int len;
+    int len;
 
-	if (_randType == TYPE_0)
-		len = sizeof _state[0];
-	else
-		len = _randDeg * sizeof _state[0];
+    if (_randType == TYPE_0)
+        len = sizeof _state[0];
+    else
+        len = _randDeg * sizeof _state[0];
 
-	getSeed((char*)_state, len);
+    getSeed((char*)_state, len);
 }
 
 
 void Random::getSeed(char* seed, unsigned length)
 {
-	int n = 0;
+    int n = 0;
 
 #if defined(WIN32)
-	HCRYPTPROV hProvider = 0;
-	CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
-	CryptGenRandom(hProvider, (DWORD) length, (BYTE*) seed);
-	CryptReleaseContext(hProvider, 0);
-	n = static_cast<int>(length);
+    HCRYPTPROV hProvider = 0;
+    CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
+    CryptGenRandom(hProvider, (DWORD) length, (BYTE*) seed);
+    CryptReleaseContext(hProvider, 0);
+    n = static_cast<int>(length);
 #else
-	int fd = open("/dev/urandom", O_RDONLY, 0);
-	if (fd >= 0) {
-		n = read(fd, seed, length);
-		close(fd);
-	}
+    int fd = open("/dev/urandom", O_RDONLY, 0);
+    if (fd >= 0) {
+        n = read(fd, seed, length);
+        close(fd);
+    }
 #endif
 
-	// Note: We could use OpenSSL RAND_bytes(),
-	// but we don't want Base to depend on OpenSSL 
+    // Note: We could use OpenSSL RAND_bytes(),
+    // but we don't want Base to depend on OpenSSL 
 
-	if (n == 0)
-		throw std::runtime_error("Cannot generate random number seed");
+    if (n == 0)
+        throw std::runtime_error("Cannot generate random number seed");
 }
 
 
@@ -277,50 +277,50 @@ void Random::getSeed(char* seed, unsigned length)
  */
 void Random::initState(UInt32 s, char* argState, Int32 n)
 {
-	UInt32* intArgState = (UInt32*) argState;
+    UInt32* intArgState = (UInt32*) argState;
 
-	if (n < BREAK_0) 
-	{
-		assert(0 && "not enough state");
-		return;
-	}
-	if (n < BREAK_1) 
-	{
-		_randType = TYPE_0;
-		_randDeg  = DEG_0;
-		_randSep  = SEP_0;
-	} 
-	else if (n < BREAK_2) 
-	{
-		_randType = TYPE_1;
-		_randDeg  = DEG_1;
-		_randSep  = SEP_1;
-	} 
-	else if (n < BREAK_3) 
-	{
-		_randType = TYPE_2;
-		_randDeg  = DEG_2;
-		_randSep  = SEP_2;
-	} 
-	else if (n < BREAK_4) 
-	{
-		_randType = TYPE_3;
-		_randDeg  = DEG_3;
-		_randSep  = SEP_3;
-	} 
-	else 
-	{
-		_randType = TYPE_4;
-		_randDeg = DEG_4;
-		_randSep = SEP_4;
-	}
-	_state  = intArgState + 1; /* first location */
-	_endPtr = &_state[_randDeg];	/* must set end_ptr before seed */
-	seed(s);
-	if (_randType == TYPE_0)
-		intArgState[0] = _randType;
-	else
-		intArgState[0] = MAX_TYPES * (int) (_rptr - _state) + _randType;
+    if (n < BREAK_0) 
+    {
+        assert(0 && "not enough state");
+        return;
+    }
+    if (n < BREAK_1) 
+    {
+        _randType = TYPE_0;
+        _randDeg  = DEG_0;
+        _randSep  = SEP_0;
+    } 
+    else if (n < BREAK_2) 
+    {
+        _randType = TYPE_1;
+        _randDeg  = DEG_1;
+        _randSep  = SEP_1;
+    } 
+    else if (n < BREAK_3) 
+    {
+        _randType = TYPE_2;
+        _randDeg  = DEG_2;
+        _randSep  = SEP_2;
+    } 
+    else if (n < BREAK_4) 
+    {
+        _randType = TYPE_3;
+        _randDeg  = DEG_3;
+        _randSep  = SEP_3;
+    } 
+    else 
+    {
+        _randType = TYPE_4;
+        _randDeg = DEG_4;
+        _randSep = SEP_4;
+    }
+    _state  = intArgState + 1; /* first location */
+    _endPtr = &_state[_randDeg];    /* must set end_ptr before seed */
+    seed(s);
+    if (_randType == TYPE_0)
+        intArgState[0] = _randType;
+    else
+        intArgState[0] = MAX_TYPES * (int) (_rptr - _state) + _randType;
 }
 
 
@@ -343,63 +343,63 @@ void Random::initState(UInt32 s, char* argState, Int32 n)
  */
 UInt32 Random::next()
 {
-	UInt32 i;
-	UInt32 *f, *r;
+    UInt32 i;
+    UInt32 *f, *r;
 
-	if (_randType == TYPE_0) 
-	{
-		i = _state[0];
-		_state[0] = i = goodRand(i) & 0x7FFFFFFF;
-	} 
-	else 
-	{
-		/*
-		 * Use local variables rather than static variables for speed.
-		 */
-		f = _fptr; r = _rptr;
-		*f += *r;
-		i = (*f >> 1) & 0x7FFFFFFF;	/* chucking least random bit */
-		if (++f >= _endPtr) {
-			f = _state;
-			++r;
-		}
-		else if (++r >= _endPtr) {
-			r = _state;
-		}
+    if (_randType == TYPE_0) 
+    {
+        i = _state[0];
+        _state[0] = i = goodRand(i) & 0x7FFFFFFF;
+    } 
+    else 
+    {
+        /*
+         * Use local variables rather than static variables for speed.
+         */
+        f = _fptr; r = _rptr;
+        *f += *r;
+        i = (*f >> 1) & 0x7FFFFFFF;    /* chucking least random bit */
+        if (++f >= _endPtr) {
+            f = _state;
+            ++r;
+        }
+        else if (++r >= _endPtr) {
+            r = _state;
+        }
 
-		_fptr = f; _rptr = r;
-	}
-	return i;
+        _fptr = f; _rptr = r;
+    }
+    return i;
 }
 
 
 UInt32 Random::next(UInt32 n)
 {
-	return next() % n;
+    return next() % n;
 }
 
 
 char Random::nextChar()
 {
-	return char((next() >> 3) & 0xFF);
+    return char((next() >> 3) & 0xFF);
 }
 
 
 bool Random::nextBool()
 {
-	return (next() & 0x1000) != 0;
+    return (next() & 0x1000) != 0;
 }
 
-	
+    
 float Random::nextFloat()
 {
-	return float(next()) / 0x7FFFFFFF;
+    return float(next()) / 0x7FFFFFFF;
 }
 
-	
+    
 double Random::nextDouble()
 {
-	return double(next()) / 0x7FFFFFFF;
+    return double(next()) / 0x7FFFFFFF;
 }
 
 

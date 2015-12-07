@@ -38,45 +38,45 @@ namespace av {
 
 struct ThumbnailerOptions
 {
-	std::string ifile;
-	std::string ofile;
-	int width;
-	int height;
-	double seek;
+    std::string ifile;
+    std::string ofile;
+    int width;
+    int height;
+    double seek;
 
-	ThumbnailerOptions(const std::string& ifile = "", const std::string& ofile = "", 
-		int width = 0, int height = 0, double seek = 0.0)
-		: ifile(ifile), ofile(ofile), width(width), height(height), seek(seek) {};
+    ThumbnailerOptions(const std::string& ifile = "", const std::string& ofile = "", 
+        int width = 0, int height = 0, double seek = 0.0)
+        : ifile(ifile), ofile(ofile), width(width), height(height), seek(seek) {};
 };
 
 
 #ifdef HAVE_FFMPEG
 
 struct Thumbnailer
-	// Creates video thumbnail using FFmpeg.
-	// Note that even if FFmpeg is unavailable we still expose 
-	// ThumbnailerOptions for the Spot API.
+    // Creates video thumbnail using FFmpeg.
+    // Note that even if FFmpeg is unavailable we still expose 
+    // ThumbnailerOptions for the Spot API.
 {
-	ThumbnailerOptions options;
-	av::AVInputReader reader;
-	av::VideoCodecEncoderContext encoder;
-		
-	Thumbnailer(const ThumbnailerOptions& options = ThumbnailerOptions());
-	~Thumbnailer() ;
+    ThumbnailerOptions options;
+    av::AVInputReader reader;
+    av::VideoCodecEncoderContext encoder;
+        
+    Thumbnailer(const ThumbnailerOptions& options = ThumbnailerOptions());
+    ~Thumbnailer() ;
 
-	void open();
-		// Open the input file
-		// The encoder context may still be configured after this call
-		// If the ofile path is empty a default one will be selected
-		// using defaultThumbPath()
+    void open();
+        // Open the input file
+        // The encoder context may still be configured after this call
+        // If the ofile path is empty a default one will be selected
+        // using defaultThumbPath()
 
-	void grab();
-		// Initialize the image encoder and grab a thumbnail at the 
-		// specified seek position
-		
-	void onVideoPacket(void*, av::VideoPacket& packet);
-	
-	static std::string defaultThumbPath(const std::string& ifile, const std::string& ext = ".jpg", const std::string& suffix = "_thumb");
+    void grab();
+        // Initialize the image encoder and grab a thumbnail at the 
+        // specified seek position
+        
+    void onVideoPacket(void*, av::VideoPacket& packet);
+    
+    static std::string defaultThumbPath(const std::string& ifile, const std::string& ext = ".jpg", const std::string& suffix = "_thumb");
 };
 
 #endif

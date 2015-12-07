@@ -52,10 +52,6 @@ macro(define_sourcey_module name)
 
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
-  #set(${name}_LIBRARIES ${ARGN})
-
-  #message(STATUS "!!!!!!!!!!!!!!!!!!##################3 libs ${name}:::::::::: ${${name}_LIBRARIES}:")
-  #target_link_libraries(${name} ${${name}_LIBRARIES})
 
   #message(STATUS "Defining module ${name}:")
   #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
@@ -119,8 +115,6 @@ endmacro()
 #
 macro(define_sourcey_module_sample name)
 
-  message(STATUS "!!!!!!!!!!!!!!!!!!!!!!! Defining module sample ${name}:")
-
   project(${name})
 
   # Include internal module dependencies
@@ -140,28 +134,6 @@ macro(define_sourcey_module_sample name)
 
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
-
-  foreach(dep ${LibSourcey_BUILD_DEPENDENCIES})
-    #add_dependencies(${name} ${dep})
-  endforeach()
-
-  # Include dependent modules
-  foreach(module ${ARGN})
-    #if(NOT ${module} MATCHES "util")
-      #add_dependencies(${name} ${module})
-    #endif()
-  endforeach()
-
-  # Include all linker libraries
-  set(${name}_LIBRARIES ${ARGN})
-  #list(APPEND ${name}_LIBRARIES ${LibSourcey_BUILD_DEPENDENCIES})
-  #list(APPEND ${name}_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES})
-  #list(REMOVE_DUPLICATES ${name}_LIBRARIES)
-
-  message(STATUS "##################3 libs ${name}:::::::::: ${${name}_LIBRARIES}:")
-  #message(STATUS "##################3 libs ${name}:::::::::: base;uv:")
-  #${${name}_LIBRARIES}
-  #target_link_libraries(${name} ${${name}_LIBRARIES}) #;net;media
 
   #message(STATUS "Defining module sample ${name}:")
   #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")

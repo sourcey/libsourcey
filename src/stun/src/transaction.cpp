@@ -35,45 +35,45 @@ namespace stun {
 
 
 Transaction::Transaction(const net::Socket::Ptr& socket, 
-						 const net::Address& peerAddress,
-						 long timeout, 
-						 int retries, 
-						 uv::Loop* loop) : 
-	net::Transaction<Message>(socket, peerAddress, timeout, retries, loop) 
+                         const net::Address& peerAddress,
+                         long timeout, 
+                         int retries, 
+                         uv::Loop* loop) : 
+    net::Transaction<Message>(socket, peerAddress, timeout, retries, loop) 
 {
-	DebugLS(this) << "Create" << std::endl;
+    DebugLS(this) << "Create" << std::endl;
 
-	// Register STUN message creation strategy
-	net::Transaction<Message>::factory.registerPacketType<stun::Message>(0);
+    // Register STUN message creation strategy
+    net::Transaction<Message>::factory.registerPacketType<stun::Message>(0);
 }
 
 
 Transaction::~Transaction() 
 {
-	DebugLS(this) << "Destroy" << std::endl;	
+    DebugLS(this) << "Destroy" << std::endl;    
 }
 
 
 bool Transaction::checkResponse(const Message& message) 
 {
-	return net::Transaction<Message>::checkResponse(message) 
-		&& _request.transactionID() == message.transactionID();
+    return net::Transaction<Message>::checkResponse(message) 
+        && _request.transactionID() == message.transactionID();
 }
 
 
 void Transaction::onResponse()
 {
-	DebugLS(this) << "On response" << std::endl;	
+    DebugLS(this) << "On response" << std::endl;    
 
-	_response.setMethod(_request.methodType());
-	_response.setClass(Message::SuccessResponse);
-	if (_response.get<stun::ErrorCode>())
-		_response.setClass(Message::ErrorResponse);
-	else if (_response.methodType() == Message::SendIndication ||
-		_response.methodType() == Message::DataIndication)
-		_response.setClass(Message::Indication);
+    _response.setMethod(_request.methodType());
+    _response.setClass(Message::SuccessResponse);
+    if (_response.get<stun::ErrorCode>())
+        _response.setClass(Message::ErrorResponse);
+    else if (_response.methodType() == Message::SendIndication ||
+        _response.methodType() == Message::DataIndication)
+        _response.setClass(Message::Indication);
 
-	net::Transaction<Message>::onResponse();
+    net::Transaction<Message>::onResponse();
 }
 
 

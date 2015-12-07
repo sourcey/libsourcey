@@ -57,7 +57,7 @@ static int LockManagerOperation(void** lock, enum AVLockOp op) {
   }
   return 1;
 }
-	
+
 
 static Mutex _mutex;
 static int _refCount(0);
@@ -65,29 +65,29 @@ static int _refCount(0);
 
 void initialize()
 {
-	Mutex::ScopedLock lock(_mutex);
-	
-	if (++_refCount == 1)
-	{ 
-		// Before doing anything disable logging as it interferes with layout tests.
-		//av_log_set_level(AV_LOG_QUIET);
+    Mutex::ScopedLock lock(_mutex);
 
-		// Register our protocol glue code with FFmpeg.
-	    av_lockmgr_register(&LockManagerOperation);
+    if (++_refCount == 1)
+    {
+        // Before doing anything disable logging as it interferes with layout tests.
+        //av_log_set_level(AV_LOG_QUIET);
 
-		// Now register the rest of FFmpeg.
-		av_register_all();
-	}
+        // Register our protocol glue code with FFmpeg.
+        av_lockmgr_register(&LockManagerOperation);
+
+        // Now register the rest of FFmpeg.
+        av_register_all();
+    }
 }
 
 
 void uninitialize()
 {
-	Mutex::ScopedLock lock(_mutex);
+    Mutex::ScopedLock lock(_mutex);
 
-	if (--_refCount == 0) {
-		av_lockmgr_register(NULL);
-	}
+    if (--_refCount == 0) {
+        av_lockmgr_register(NULL);
+    }
 }
 
 
@@ -96,13 +96,21 @@ void uninitialize()
 
 void initializeFFmpeg()
 {
-	internal::initialize();
+    internal::initialize();
 }
-	
+
 
 void uninitializeFFmpeg()
 {
-	internal::uninitialize();
+    internal::uninitialize();
+}
+
+
+std::string averror(const int error)
+{
+   static char error_buffer[255];
+   av_strerror(error, error_buffer, sizeof(error_buffer));
+   return error_buffer;
 }
 
 

@@ -32,52 +32,52 @@ namespace scy {
 #if 0 // Depreciated
 template <class async::RunnableT>
 class ITask: public async::RunnableT
-	// This class defines an asynchronous Task which is
-	// managed by a TaskRunner.
+    // This class defines an asynchronous Task which is
+    // managed by a TaskRunner.
 {
-public:			
-	virtual bool start() = 0;
-	virtual bool cancel() = 0;
-	virtual bool destroy() = 0;
+public:            
+    virtual bool start() = 0;
+    virtual bool cancel() = 0;
+    virtual bool destroy() = 0;
 
-	virtual bool cancelled() const = 0;
-	virtual bool destroyed() const = 0;
-	virtual bool repeating() const = 0;
-		// Returns true if the task should be run once only
+    virtual bool cancelled() const = 0;
+    virtual bool destroyed() const = 0;
+    virtual bool repeating() const = 0;
+        // Returns true if the task should be run once only
 
-	virtual TaskRunner& runner();
-		// Returns a reference to the affiliated TaskRunner or 
-		// throws an exception.
-	
+    virtual TaskRunner& runner();
+        // Returns a reference to the affiliated TaskRunner or 
+        // throws an exception.
+    
 protected:
-	Task& operator=(Task const&) = 0; // {}
-	virtual ~Task() = 0;
-		// CAUTION: The destructor should be private, but we
-		// left it protected for implementational flexibility. The
-		// reason being that if the derived task is programmatically
-		// destroyed there is a chance that the TaskRunner will call
-		// run() as a pure virtual method.
-	
-	virtual bool beforeRun();	
-		// Called by the TaskRunner to determine weather the task can
-		// be run or not. It is safe to destroy() the task from
-		// inside this method.
-		// This method returns true by default.
+    Task& operator=(Task const&) = 0; // {}
+    virtual ~Task() = 0;
+        // CAUTION: The destructor should be private, but we
+        // left it protected for implementational flexibility. The
+        // reason being that if the derived task is programmatically
+        // destroyed there is a chance that the TaskRunner will call
+        // run() as a pure virtual method.
+    
+    virtual bool beforeRun();    
+        // Called by the TaskRunner to determine weather the task can
+        // be run or not. It is safe to destroy() the task from
+        // inside this method.
+        // This method returns true by default.
 
-	virtual void run() = 0;	
-		// Called by the TaskRunner to run the task.
-		// Override this method to implement task logic.
-	
-protected:	
-	mutable Mutex	_mutex;
-	
-	bool _cancelled;
-	bool _destroyed;
-	bool _repeating;
+    virtual void run() = 0;    
+        // Called by the TaskRunner to run the task.
+        // Override this method to implement task logic.
+    
+protected:    
+    mutable Mutex    _mutex;
+    
+    bool _cancelled;
+    bool _destroyed;
+    bool _repeating;
 
-	TaskRunner* _runner;
-	
-	friend class TaskRunner;
+    TaskRunner* _runner;
+    
+    friend class TaskRunner;
 };
 #endif
 

@@ -39,33 +39,33 @@ static std::string DepreciatedDateFormat = "%Y-%m-%d %H:%M:%S %Z";
 
 
 class Scheduler: public TaskRunner, public json::ISerializable
-	/// The Scheduler manages and runs tasks
-	/// that need to be executed at specific times.
+    /// The Scheduler manages and runs tasks
+    /// that need to be executed at specific times.
 {
 public:
-	Scheduler();
-	virtual ~Scheduler();
+    Scheduler();
+    virtual ~Scheduler();
 
-	virtual void schedule(sked::Task* task);
-	virtual void cancel(sked::Task* task);
-	virtual void clear();
+    virtual void schedule(sked::Task* task);
+    virtual void cancel(sked::Task* task);
+    virtual void clear();
 
-	virtual void serialize(json::Value& root);
-	virtual void deserialize(json::Value& root);
+    virtual void serialize(json::Value& root);
+    virtual void deserialize(json::Value& root);
 
     virtual void print(std::ostream& ost);
 
-	static Scheduler& getDefault();
-		// Returns the default Scheduler singleton,
-		// although Scheduler instances may also be
-		// initialized individually.
+    static Scheduler& getDefault();
+        // Returns the default Scheduler singleton,
+        // although Scheduler instances may also be
+        // initialized individually.
 
-	static sked::TaskFactory& factory();
-		// Returns the TaskFactory singleton.
+    static sked::TaskFactory& factory();
+        // Returns the TaskFactory singleton.
 
 protected:
-	virtual void run();
-	virtual void update();
+    virtual void run();
+    virtual void update();
 };
 
 

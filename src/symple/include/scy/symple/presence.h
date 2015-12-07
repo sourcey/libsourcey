@@ -32,14 +32,14 @@ namespace smpl {
 
 class Presence: public Message
 {
-public:	
-	Presence();
-	Presence(const json::Value& root);
-	Presence(const Presence& root);
-	virtual ~Presence();
-	
-	bool isProbe();
-	void setProbe(bool flag);
+public:    
+    Presence();
+    Presence(const json::Value& root);
+    Presence(const Presence& root);
+    virtual ~Presence();
+    
+    bool isProbe();
+    void setProbe(bool flag);
 };
 
 

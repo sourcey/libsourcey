@@ -28,8 +28,8 @@ using std::endl;
 
 
 namespace scy {
-	
-	
+    
+    
 const unsigned long Thread::mainID = uv_thread_self();
 
 
@@ -40,19 +40,19 @@ Thread::Thread()
 
 Thread::Thread(async::Runnable& target)
 {
-	start(target);
+    start(target);
 }
 
 
 Thread::Thread(std::function<void()> target)
 {
-	start(target);
+    start(target);
 }
 
 
 Thread::Thread(std::function<void(void*)> target, void* arg)
 {
-	start(target, arg);
+    start(target, arg);
 }
 
 
@@ -63,62 +63,62 @@ Thread::~Thread()
 
 void Thread::startAsync()
 {
-	int r = uv_thread_create(&_handle, [](void* arg) {
-		auto& ptr = *reinterpret_cast<Runner::Context::ptr*>(arg);
-		ptr->tid = 0;
-		ptr->exit = false;
-		do {
-			runAsync(ptr.get());
-			scy::sleep(1); // TODO: uv_thread_yield when available
-		} while (ptr->repeating && !ptr->cancelled());		
-		ptr->running = false;
-		ptr->started = false;
-		delete &ptr;
-	}, new Runner::Context::ptr(pContext));
-	if (r < 0) throw std::runtime_error("System error: Cannot initialize thread");	
+    int r = uv_thread_create(&_handle, [](void* arg) {
+        auto& ptr = *reinterpret_cast<Runner::Context::ptr*>(arg);
+        ptr->tid = 0;
+        ptr->exit = false;
+        do {
+            runAsync(ptr.get());
+            scy::sleep(1); // TODO: uv_thread_yield when available
+        } while (ptr->repeating && !ptr->cancelled());        
+        ptr->running = false;
+        ptr->started = false;
+        delete &ptr;
+    }, new Runner::Context::ptr(pContext));
+    if (r < 0) throw std::runtime_error("System error: Cannot initialize thread");    
 }
 
 
 void Thread::join()
 {
-	TraceLS(this) << "Joining" << std::endl;
-	assert(this->tid() != Thread::currentID());
-	//assert(this->cancelled()); // probably should be cancelled, but depends on impl
-	uv_thread_join(&_handle);	
-	assert(!this->running());
-	assert(!this->started());
-	TraceLS(this) << "Joining: OK" << std::endl;
+    TraceLS(this) << "Joining" << std::endl;
+    assert(this->tid() != Thread::currentID());
+    //assert(this->cancelled()); // probably should be cancelled, but depends on impl
+    uv_thread_join(&_handle);    
+    assert(!this->running());
+    assert(!this->started());
+    TraceLS(this) << "Joining: OK" << std::endl;
 }
 
 
 bool Thread::waitForExit(int timeout) 
-{	
-	int times = 0;
-	int interval = 10;
-	assert(Thread::currentID() != this->tid());
-	while (!this->cancelled() || this->running()) {
-		TraceLS(this) << "Wait for exit: " 
-			<< !this->cancelled() << ": " << this->running() << endl;
-		scy::sleep(interval);
-		times++;
-		if (timeout && ((times * interval) > timeout)) {
-			assert(0 && "deadlock; calling inside thread scope?");
-			return false;
-		}
-	}
-	return true;
+{    
+    int times = 0;
+    int interval = 10;
+    assert(Thread::currentID() != this->tid());
+    while (!this->cancelled() || this->running()) {
+        TraceLS(this) << "Wait for exit: " 
+            << !this->cancelled() << ": " << this->running() << endl;
+        scy::sleep(interval);
+        times++;
+        if (timeout && ((times * interval) > timeout)) {
+            assert(0 && "deadlock; calling inside thread scope?");
+            return false;
+        }
+    }
+    return true;
 }
 
 
 unsigned long Thread::currentID()
 {
-	return uv_thread_self();
+    return uv_thread_self();
 }
 
-	
+    
 bool Thread::async() const
 {
-	return true;
+    return true;
 }
 
 

@@ -23,10 +23,10 @@
 
 #include "scy/stateful.h"
 
-				
+                
 #if defined(UNIX) && !defined(INVALID_SOCKET)
 #define INVALID_SOCKET -1
-#endif	
+#endif    
 
 #if defined(WIN32)
 typedef int socklen_t;
@@ -35,9 +35,9 @@ typedef int socklen_t;
 #define LibSourcey_HAVE_IPv6 1 // fixme
 
 
-namespace scy {	
+namespace scy {    
 namespace net {
-	
+    
 
 const int MAX_TCP_PACKET_SIZE = 64 * 1024;
 const int MAX_UDP_PACKET_SIZE = 1500;
@@ -45,9 +45,9 @@ const int MAX_UDP_PACKET_SIZE = 1500;
 
 enum TransportType 
 {
-	UDP,
-	TCP,
-	SSLTCP
+    UDP,
+    TCP,
+    SSLTCP
 };
 
 

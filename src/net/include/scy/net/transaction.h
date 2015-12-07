@@ -31,97 +31,97 @@ namespace net {
 
 template <class PacketT>
 class Transaction: public PacketTransaction<PacketT>, public PacketSocketAdapter
-	/// This class provides request/response functionality for IPacket
-	/// types emitted from a Socket.
+    /// This class provides request/response functionality for IPacket
+    /// types emitted from a Socket.
 {
 public:
-	Transaction(const net::Socket::Ptr& socket, 
-				const Address& peerAddress, 
-				int timeout = 10000, 
-				int retries = 1, 
-				uv::Loop* loop = uv::defaultLoop()) : 
-		PacketTransaction<PacketT>(timeout, retries, loop), 
-		PacketSocketAdapter(socket),
-		_peerAddress(peerAddress)
-	{
-		TraceLS(this) << "Create" << std::endl;
+    Transaction(const net::Socket::Ptr& socket, 
+                const Address& peerAddress, 
+                int timeout = 10000, 
+                int retries = 1, 
+                uv::Loop* loop = uv::defaultLoop()) : 
+        PacketTransaction<PacketT>(timeout, retries, loop), 
+        PacketSocketAdapter(socket),
+        _peerAddress(peerAddress)
+    {
+        TraceLS(this) << "Create" << std::endl;
 
-		PacketSocketAdapter::socket->addReceiver(this, 100); // highest prioority
-	}
+        PacketSocketAdapter::socket->addReceiver(this, 100); // highest prioority
+    }
 
-	virtual bool send()
-	{
-		TraceLS(this) << "Send" << std::endl;
-		assert(PacketSocketAdapter::socket);
-		//assert(PacketSocketAdapter::socket->recvAdapter() == this);
-		if (PacketSocketAdapter::socket->sendPacket(PacketTransaction<PacketT>::_request, _peerAddress) > 0)
-			return PacketTransaction<PacketT>::send();
-		PacketTransaction<PacketT>::setState(this, TransactionState::Failed);
-		return false;
-	}
-	
-	virtual void cancel()
-	{
-		TraceLS(this) << "Cancel" << std::endl;
-		PacketTransaction<PacketT>::cancel();
-	}
+    virtual bool send()
+    {
+        TraceLS(this) << "Send" << std::endl;
+        assert(PacketSocketAdapter::socket);
+        //assert(PacketSocketAdapter::socket->recvAdapter() == this);
+        if (PacketSocketAdapter::socket->sendPacket(PacketTransaction<PacketT>::_request, _peerAddress) > 0)
+            return PacketTransaction<PacketT>::send();
+        PacketTransaction<PacketT>::setState(this, TransactionState::Failed);
+        return false;
+    }
+    
+    virtual void cancel()
+    {
+        TraceLS(this) << "Cancel" << std::endl;
+        PacketTransaction<PacketT>::cancel();
+    }
 
-	virtual void dispose()
-	{
-		TraceLS(this) << "Dispose" << std::endl;
-		//if (!PacketTransaction<PacketT>::_destroyed) {
-		//	PacketSocketAdapter::socket->setAdapter(nullptr);
-		//}
-		PacketSocketAdapter::socket->removeReceiver(this);
-		PacketTransaction<PacketT>::dispose(); // gc
-	}
-	
-	Address peerAddress() const
-	{
-		return _peerAddress;
-	}
+    virtual void dispose()
+    {
+        TraceLS(this) << "Dispose" << std::endl;
+        //if (!PacketTransaction<PacketT>::_destroyed) {
+        //    PacketSocketAdapter::socket->setAdapter(nullptr);
+        //}
+        PacketSocketAdapter::socket->removeReceiver(this);
+        PacketTransaction<PacketT>::dispose(); // gc
+    }
+    
+    Address peerAddress() const
+    {
+        return _peerAddress;
+    }
 
-protected:	
-	virtual ~Transaction()
-	{
-	}
+protected:    
+    virtual ~Transaction()
+    {
+    }
 
-	virtual void onPacket(IPacket& packet)
-		// Overrides the PacketSocketAdapter::onPacket 
-		// callback for checking potential response candidates.
-	{
-		TraceLS(this) << "On packet: " << packet.size() << std::endl;
-		if (PacketTransaction<PacketT>::handlePotentialResponse(static_cast<PacketT&>(packet))) {
+    virtual void onPacket(IPacket& packet)
+        // Overrides the PacketSocketAdapter::onPacket 
+        // callback for checking potential response candidates.
+    {
+        TraceLS(this) << "On packet: " << packet.size() << std::endl;
+        if (PacketTransaction<PacketT>::handlePotentialResponse(static_cast<PacketT&>(packet))) {
 
-			// Stop socket data propagation since
-			// we have handled the packet
-			throw StopPropagation();
-		}
-	}
-	
-	virtual void onResponse() 
-		// Called when a successful response match is received.
-	{
-		TraceLS(this) << "On success: " << 
-			PacketTransaction<PacketT>::_response.toString() << std::endl;
-		PacketSignal::emit(socket.get(), PacketTransaction<PacketT>::_response);
-	}
+            // Stop socket data propagation since
+            // we have handled the packet
+            throw StopPropagation();
+        }
+    }
+    
+    virtual void onResponse() 
+        // Called when a successful response match is received.
+    {
+        TraceLS(this) << "On success: " << 
+            PacketTransaction<PacketT>::_response.toString() << std::endl;
+        PacketSignal::emit(socket.get(), PacketTransaction<PacketT>::_response);
+    }
 
-	virtual bool checkResponse(const PacketT& packet) 
-		// Sub classes should derive this method to implement 
-		// response checking logic.
-		// The base implementation only performs address matching.
-	{
-		assert(packet.info && "socket must provide packet info");
-		if (!packet.info)
-			return false;
-		auto info = reinterpret_cast<net::PacketInfo*>(packet.info);		
-		return socket->address()  == info->socket->address() 
-			&& _peerAddress == info->peerAddress;
-	}
-	
-	Address _peerAddress;
-	//net::Socket::Ptr PacketSocketAdapter::socket;
+    virtual bool checkResponse(const PacketT& packet) 
+        // Sub classes should derive this method to implement 
+        // response checking logic.
+        // The base implementation only performs address matching.
+    {
+        assert(packet.info && "socket must provide packet info");
+        if (!packet.info)
+            return false;
+        auto info = reinterpret_cast<net::PacketInfo*>(packet.info);        
+        return socket->address()  == info->socket->address() 
+            && _peerAddress == info->peerAddress;
+    }
+    
+    Address _peerAddress;
+    //net::Socket::Ptr PacketSocketAdapter::socket;
 };
 
 

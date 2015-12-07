@@ -41,14 +41,14 @@ class DeviceWatcher;
 
 class MacDeviceManager: public DeviceManager {
 public:
-	MacDeviceManager();
-	virtual ~MacDeviceManager();
+    MacDeviceManager();
+    virtual ~MacDeviceManager();
 
-	virtual bool getVideoCaptureDevices(std::vector<Device>& devs);
+    virtual bool getVideoCaptureDevices(std::vector<Device>& devs);
 
 private:
-	virtual bool getAudioDevices(bool input, std::vector<Device>& devs);
-	bool FilterDevice(const Device& d);
+    virtual bool getAudioDevices(bool input, std::vector<Device>& devs);
+    bool FilterDevice(const Device& d);
 };
 
 

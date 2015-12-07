@@ -33,169 +33,169 @@ namespace net {
 
  
 SSLAdapter::SSLAdapter(net::SSLSocket* socket) :
-	_socket(socket),
-	_ssl(nullptr),
-	_readBIO(nullptr),
-	_writeBIO(nullptr)
+    _socket(socket),
+    _ssl(nullptr),
+    _readBIO(nullptr),
+    _writeBIO(nullptr)
 {
-	TraceLS(this) << "Create" << endl;
+    TraceLS(this) << "Create" << endl;
 }
 
 
 SSLAdapter::~SSLAdapter() 
-{	
-	TraceLS(this) << "Destroy" << endl;
-	if (_ssl) {
-		SSL_free(_ssl);
-		_ssl = nullptr;
-	}
+{    
+    TraceLS(this) << "Destroy" << endl;
+    if (_ssl) {
+        SSL_free(_ssl);
+        _ssl = nullptr;
+    }
 }
 
 
 void SSLAdapter::init(SSL* ssl) 
 {
-	TraceLS(this) << "Init: " << ssl << endl;
-	assert(_socket);
-	//assert(_socket->initialized());
-	_ssl = ssl;
-	_readBIO = BIO_new(BIO_s_mem());
-	_writeBIO = BIO_new(BIO_s_mem());
-	SSL_set_bio(_ssl, _readBIO, _writeBIO);
+    TraceLS(this) << "Init: " << ssl << endl;
+    assert(_socket);
+    //assert(_socket->initialized());
+    _ssl = ssl;
+    _readBIO = BIO_new(BIO_s_mem());
+    _writeBIO = BIO_new(BIO_s_mem());
+    SSL_set_bio(_ssl, _readBIO, _writeBIO);
 }
 
 
 void SSLAdapter::shutdown()
 {
-	TraceLS(this) << "Shutdown" << endl;
-	if (_ssl) {        
-		TraceLS(this) << "Shutdown SSL" << endl;
+    TraceLS(this) << "Shutdown" << endl;
+    if (_ssl) {        
+        TraceLS(this) << "Shutdown SSL" << endl;
 
         // Don't shut down the socket more than once.
         int shutdownState = SSL_get_shutdown(_ssl);
         bool shutdownSent = (shutdownState & SSL_SENT_SHUTDOWN) == SSL_SENT_SHUTDOWN;
         if (!shutdownSent) {
-			// A proper clean shutdown would require us to
-			// retry the shutdown if we get a zero return
-			// value, until SSL_shutdown() returns 1.
-			// However, this will lead to problems with
-			// most web browsers, so we just set the shutdown
-			// flag by calling SSL_shutdown() once and be
-			// done with it.
-			int rc = SSL_shutdown(_ssl);
-			if (rc < 0) handleError(rc);
-		}
-	}
+            // A proper clean shutdown would require us to
+            // retry the shutdown if we get a zero return
+            // value, until SSL_shutdown() returns 1.
+            // However, this will lead to problems with
+            // most web browsers, so we just set the shutdown
+            // flag by calling SSL_shutdown() once and be
+            // done with it.
+            int rc = SSL_shutdown(_ssl);
+            if (rc < 0) handleError(rc);
+        }
+    }
 }
 
 
 bool SSLAdapter::initialized() const
 {
-	assert(_ssl);
-	return SSL_is_init_finished(_ssl);
+    assert(_ssl);
+    return SSL_is_init_finished(_ssl);
 }
 
 
 int SSLAdapter::available() const
 {
-	assert(_ssl);
-	return SSL_pending(_ssl);
+    assert(_ssl);
+    return SSL_pending(_ssl);
 }
 
 
 void SSLAdapter::addIncomingData(const char* data, size_t len) 
 {
-	//TraceL << "Add incoming data: " << len << endl;
-	BIO_write(_readBIO, data, len);
-	flush();
+    //TraceL << "Add incoming data: " << len << endl;
+    BIO_write(_readBIO, data, len);
+    flush();
 }
 
 
 void SSLAdapter::addOutgoingData(const std::string& s)
 {
-	addOutgoingData(s.c_str(), s.size());
+    addOutgoingData(s.c_str(), s.size());
 }
 
 
 void SSLAdapter::addOutgoingData(const char* data, size_t len) 
 {
-	std::copy(data, data+len, std::back_inserter(_bufferOut));
+    std::copy(data, data+len, std::back_inserter(_bufferOut));
 }
 
 
 void SSLAdapter::flush() 
 {
-	//TraceL << "Flushing" << endl;
+    //TraceL << "Flushing" << endl;
 
-	if (!initialized()) {
-		int r = SSL_connect(_ssl);
-		if (r < 0) {
-			TraceL << "Flush: Handle error" << endl;
-			handleError(r);
-		}
-		return;
-	}
-	
-	// Read any decrypted SSL data from the read BIO
-	// NOTE: Overwriting the socket's raw SSL recv buffer
-	int nread = 0;
-	while ((nread = SSL_read(_ssl, _socket->_buffer.data(), _socket->_buffer.capacity())) > 0) {
-		//_socket->_buffer.limit(nread);
-		_socket->onRecv(mutableBuffer(_socket->_buffer.data(), nread));
-	}
-	
-	// Flush any pending outgoing data
-	if (SSL_is_init_finished(_ssl)) { 
-		if (_bufferOut.size() > 0) {
-			int r = SSL_write(_ssl, &_bufferOut[0], _bufferOut.size()); // causes the write_bio to fill up (which we need to flush)
-			if (r < 0) {
-				handleError(r);
-			}
-			_bufferOut.clear();
-			flushWriteBIO();
-		}
-	}
+    if (!initialized()) {
+        int r = SSL_connect(_ssl);
+        if (r < 0) {
+            TraceL << "Flush: Handle error" << endl;
+            handleError(r);
+        }
+        return;
+    }
+    
+    // Read any decrypted SSL data from the read BIO
+    // NOTE: Overwriting the socket's raw SSL recv buffer
+    int nread = 0;
+    while ((nread = SSL_read(_ssl, _socket->_buffer.data(), _socket->_buffer.capacity())) > 0) {
+        //_socket->_buffer.limit(nread);
+        _socket->onRecv(mutableBuffer(_socket->_buffer.data(), nread));
+    }
+    
+    // Flush any pending outgoing data
+    if (SSL_is_init_finished(_ssl)) { 
+        if (_bufferOut.size() > 0) {
+            int r = SSL_write(_ssl, &_bufferOut[0], _bufferOut.size()); // causes the write_bio to fill up (which we need to flush)
+            if (r < 0) {
+                handleError(r);
+            }
+            _bufferOut.clear();
+            flushWriteBIO();
+        }
+    }
 }
 
 
 void SSLAdapter::flushWriteBIO() 
 {
-	// flushes encrypted data 
-	char buffer[1024*16]; // optimize!
-	int nread = 0;
-	while ((nread = BIO_read(_writeBIO, buffer, sizeof(buffer))) > 0) {
-		
-		// Write encrypted data to the socket stream output
-		_socket->write(buffer, nread);
-	}
+    // flushes encrypted data 
+    char buffer[1024*16]; // optimize!
+    int nread = 0;
+    while ((nread = BIO_read(_writeBIO, buffer, sizeof(buffer))) > 0) {
+        
+        // Write encrypted data to the socket stream output
+        _socket->write(buffer, nread);
+    }
 }
 
 
 void SSLAdapter::handleError(int rc)
 {
-	if (rc >= 0) return;
-	int error = SSL_get_error(_ssl, rc);	
-	switch (error)
-	{
-	case SSL_ERROR_ZERO_RETURN:
-		return;
-	case SSL_ERROR_WANT_READ:
-		flushWriteBIO();
- 		break;
-	case SSL_ERROR_WANT_WRITE:
-		assert(0 && "TODO");
- 		break;
-	case SSL_ERROR_WANT_CONNECT: 
-	case SSL_ERROR_WANT_ACCEPT:
-	case SSL_ERROR_WANT_X509_LOOKUP:
-		assert(0 && "should not occur");
- 		break;
-	default:
-		char buffer[256];
-		ERR_error_string_n(ERR_get_error(), buffer, sizeof(buffer));
-		std::string msg(buffer);
-		throw std::runtime_error("SSL connection error: " + msg);
- 		break;
-	}
+    if (rc >= 0) return;
+    int error = SSL_get_error(_ssl, rc);    
+    switch (error)
+    {
+    case SSL_ERROR_ZERO_RETURN:
+        return;
+    case SSL_ERROR_WANT_READ:
+        flushWriteBIO();
+         break;
+    case SSL_ERROR_WANT_WRITE:
+        assert(0 && "TODO");
+         break;
+    case SSL_ERROR_WANT_CONNECT: 
+    case SSL_ERROR_WANT_ACCEPT:
+    case SSL_ERROR_WANT_X509_LOOKUP:
+        assert(0 && "should not occur");
+         break;
+    default:
+        char buffer[256];
+        ERR_error_string_n(ERR_get_error(), buffer, sizeof(buffer));
+        std::string msg(buffer);
+        throw std::runtime_error("SSL connection error: " + msg);
+         break;
+    }
 }
 
 

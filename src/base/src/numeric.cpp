@@ -26,189 +26,189 @@
 
 namespace scy {
 namespace numeric {
-	
+    
 
 void format(std::string& str, int value)
 {
-	char buffer[64];
-	std::sprintf(buffer, "%d", value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%d", value);
+    str.append(buffer);
 }
 
 
 void format(std::string& str, int value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%*d", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%*d", width, value);
+    str.append(buffer);
 }
 
 
 void format0(std::string& str, int value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%0*d", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%0*d", width, value);
+    str.append(buffer);
 }
 
 
 void formatHex(std::string& str, int value)
 {
-	char buffer[64];
-	std::sprintf(buffer, "%X", value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%X", value);
+    str.append(buffer);
 }
 
 
 void formatHex(std::string& str, int value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%0*X", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%0*X", width, value);
+    str.append(buffer);
 }
 
 
 void format(std::string& str, unsigned value)
 {
-	char buffer[64];
-	std::sprintf(buffer, "%u", value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%u", value);
+    str.append(buffer);
 }
 
 
 void format(std::string& str, unsigned value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%*u", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%*u", width, value);
+    str.append(buffer);
 }
 
 
 void format0(std::string& str, unsigned int value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%0*u", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%0*u", width, value);
+    str.append(buffer);
 }
 
 
 void formatHex(std::string& str, unsigned value)
 {
-	char buffer[64];
-	std::sprintf(buffer, "%X", value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%X", value);
+    str.append(buffer);
 }
 
 
 void formatHex(std::string& str, unsigned value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%0*X", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%0*X", width, value);
+    str.append(buffer);
 }
 
 
 void format(std::string& str, long value)
 {
-	char buffer[64];
-	std::sprintf(buffer, "%ld", value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%ld", value);
+    str.append(buffer);
 }
 
 
 void format(std::string& str, long value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%*ld", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%*ld", width, value);
+    str.append(buffer);
 }
 
 
 void format0(std::string& str, long value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%0*ld", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%0*ld", width, value);
+    str.append(buffer);
 }
 
 
 void formatHex(std::string& str, long value)
 {
-	char buffer[64];
-	std::sprintf(buffer, "%lX", value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%lX", value);
+    str.append(buffer);
 }
 
 
 void formatHex(std::string& str, long value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%0*lX", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%0*lX", width, value);
+    str.append(buffer);
 }
 
 
 void format(std::string& str, unsigned long value)
 {
-	char buffer[64];
-	std::sprintf(buffer, "%lu", value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%lu", value);
+    str.append(buffer);
 }
 
 
 void format(std::string& str, unsigned long value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%*lu", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%*lu", width, value);
+    str.append(buffer);
 }
 
 
 void format0(std::string& str, unsigned long value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%0*lu", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%0*lu", width, value);
+    str.append(buffer);
 }
 
 
 void formatHex(std::string& str, unsigned long value)
 {
-	char buffer[64];
-	std::sprintf(buffer, "%lX", value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%lX", value);
+    str.append(buffer);
 }
 
 
 void formatHex(std::string& str, unsigned long value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%0*lX", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%0*lX", width, value);
+    str.append(buffer);
 }
 
 
@@ -217,93 +217,93 @@ void formatHex(std::string& str, unsigned long value, int width)
 
 void format(std::string& str, Int64 value)
 {
-	char buffer[64];
-	std::sprintf(buffer, "%" I64_FMT "d", value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%" I64_FMT "d", value);
+    str.append(buffer);
 }
 
 
 void format(std::string& str, Int64 value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%*" I64_FMT "d", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%*" I64_FMT "d", width, value);
+    str.append(buffer);
 }
 
 
 void format0(std::string& str, Int64 value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%0*" I64_FMT "d", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%0*" I64_FMT "d", width, value);
+    str.append(buffer);
 }
 
 
 void formatHex(std::string& str, Int64 value)
 {
-	char buffer[64];
-	std::sprintf(buffer, "%" I64_FMT "X", value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%" I64_FMT "X", value);
+    str.append(buffer);
 }
 
 
 void formatHex(std::string& str, Int64 value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%0*" I64_FMT "X", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%0*" I64_FMT "X", width, value);
+    str.append(buffer);
 }
 
 
 void format(std::string& str, UInt64 value)
 {
-	char buffer[64];
-	std::sprintf(buffer, "%" I64_FMT "u", value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%" I64_FMT "u", value);
+    str.append(buffer);
 }
 
 
 void format(std::string& str, UInt64 value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%*" I64_FMT "u", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%*" I64_FMT "u", width, value);
+    str.append(buffer);
 }
 
 
 void format0(std::string& str, UInt64 value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%0*" I64_FMT "u", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%0*" I64_FMT "u", width, value);
+    str.append(buffer);
 }
 
 
 void formatHex(std::string& str, UInt64 value)
 {
-	char buffer[64];
-	std::sprintf(buffer, "%" I64_FMT "X", value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%" I64_FMT "X", value);
+    str.append(buffer);
 }
 
 
 void formatHex(std::string& str, UInt64 value, int width)
 {
-	assert(width > 0 && width < 64);
+    assert(width > 0 && width < 64);
 
-	char buffer[64];
-	std::sprintf(buffer, "%0*" I64_FMT "X", width, value);
-	str.append(buffer);
+    char buffer[64];
+    std::sprintf(buffer, "%0*" I64_FMT "X", width, value);
+    str.append(buffer);
 }
 
 
@@ -312,17 +312,17 @@ void formatHex(std::string& str, UInt64 value, int width)
 
 void format(std::string& str, const void* ptr)
 {
-	char buffer[24];
+    char buffer[24];
 #if defined(SCY_PTR_IS_64_BIT)
-	#if defined(SCY_LONG_IS_64_BIT)
-		std::sprintf(buffer, "%016lX", (UIntPtr) ptr);
-	#else
-		std::sprintf(buffer, "%016" I64_FMT "X", (UIntPtr) ptr);
-	#endif
+    #if defined(SCY_LONG_IS_64_BIT)
+        std::sprintf(buffer, "%016lX", (UIntPtr) ptr);
+    #else
+        std::sprintf(buffer, "%016" I64_FMT "X", (UIntPtr) ptr);
+    #endif
 #else
-	std::sprintf(buffer, "%08lX", (UIntPtr) ptr);
+    std::sprintf(buffer, "%08lX", (UIntPtr) ptr);
 #endif
-	str.append(buffer);
+    str.append(buffer);
 }
 
 
@@ -363,53 +363,53 @@ void format(std::string& str, const void* ptr)
 
 void format(std::string& str, float value)
 {
-	char buffer[64];
-	Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
+    char buffer[64];
+    Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
 #if !defined(SCY_NO_LOCALE)
-	ostr.imbue(std::locale::classic());
+    ostr.imbue(std::locale::classic());
 #endif
-	ostr << std::setprecision(8) << value;
-	str.append(buffer, static_cast<std::string::size_type>(ostr.charsWritten()));
+    ostr << std::setprecision(8) << value;
+    str.append(buffer, static_cast<std::string::size_type>(ostr.charsWritten()));
 }
 
 
 void format(std::string& str, double value)
 {
-	char buffer[64];
-	Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
+    char buffer[64];
+    Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
 #if !defined(SCY_NO_LOCALE)
-	ostr.imbue(std::locale::classic());
+    ostr.imbue(std::locale::classic());
 #endif
-	ostr << std::setprecision(16) << value;
-	str.append(buffer, static_cast<std::string::size_type>(ostr.charsWritten()));
+    ostr << std::setprecision(16) << value;
+    str.append(buffer, static_cast<std::string::size_type>(ostr.charsWritten()));
 }
 
 
 void format(std::string& str, double value, int precision)
 {
-	assert(precision >= 0 && precision < 32);
+    assert(precision >= 0 && precision < 32);
 
-	char buffer[64];
-	Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
+    char buffer[64];
+    Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
 #if !defined(SCY_NO_LOCALE)
-	ostr.imbue(std::locale::classic());
+    ostr.imbue(std::locale::classic());
 #endif
-	ostr << std::fixed << std::showpoint << std::setprecision(precision) << value;
-	str.append(buffer, static_cast<std::string::size_type>(ostr.charsWritten()));
+    ostr << std::fixed << std::showpoint << std::setprecision(precision) << value;
+    str.append(buffer, static_cast<std::string::size_type>(ostr.charsWritten()));
 }
 
 
 void format(std::string& str, double value, int width, int precision)
 {
-	assert(width > 0 && width < 64 && precision >= 0 && precision < width);
+    assert(width > 0 && width < 64 && precision >= 0 && precision < width);
 
-	char buffer[64];
-	Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
+    char buffer[64];
+    Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
 #if !defined(SCY_NO_LOCALE)
-	ostr.imbue(std::locale::classic());
+    ostr.imbue(std::locale::classic());
 #endif
-	ostr << std::fixed << std::showpoint << std::setw(width) << std::setprecision(precision) << value;
-	str.append(buffer, static_cast<std::string::size_type>(ostr.charsWritten()));
+    ostr << std::fixed << std::showpoint << std::setw(width) << std::setprecision(precision) << value;
+    str.append(buffer, static_cast<std::string::size_type>(ostr.charsWritten()));
 }
 
 

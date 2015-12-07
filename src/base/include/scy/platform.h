@@ -26,29 +26,29 @@
 
 
 namespace scy {
-	
-		
+    
+        
 //
 /// Cross-platform utilities
 //
-	
+    
 std::string getExePath();
-	// Returns the current executable path.
+    // Returns the current executable path.
 
 std::string getCwd();
-	// Return the current working directory.
+    // Return the current working directory.
 
 UInt64 getFreeMemory();
-	// Returns the current amount of free memory.
+    // Returns the current amount of free memory.
 
 UInt64 getTotalMemory();
-	// Returns the current amount of used memory.
+    // Returns the current amount of used memory.
 
 void sleep(int ms);
-	// Pause the current thread for the given ms duration.
+    // Pause the current thread for the given ms duration.
 
 void pause();
-	// Pause the current thread until enter is pressed.
+    // Pause the current thread until enter is pressed.
 
 
 

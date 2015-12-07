@@ -33,17 +33,17 @@ namespace stun {
 class Transaction: public net::Transaction<Message>
 {
 public:
-	Transaction(const net::Socket::Ptr& socket, 
-				const net::Address& peerAddress, 
-				long timeout = 10000, 
-				int retries = 1,
-				uv::Loop* loop = uv::defaultLoop());
+    Transaction(const net::Socket::Ptr& socket, 
+                const net::Address& peerAddress, 
+                long timeout = 10000, 
+                int retries = 1,
+                uv::Loop* loop = uv::defaultLoop());
 
-	virtual bool checkResponse(const Message& message);
-	virtual void onResponse();
-	
+    virtual bool checkResponse(const Message& message);
+    virtual void onResponse();
+    
 protected:
-	virtual ~Transaction();
+    virtual ~Transaction();
 };
 
 

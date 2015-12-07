@@ -34,19 +34,19 @@ class Client;
 
 struct Transaction: public PacketTransaction<sockio::Packet>
 {
-	Transaction(sockio::Client& client, long timeout = 10000);
-	Transaction(sockio::Client& client, const sockio::Packet& request, long timeout = 10000);
-	
-	virtual bool send();
-	virtual bool checkResponse(const Packet& packet);
+    Transaction(sockio::Client& client, long timeout = 10000);
+    Transaction(sockio::Client& client, const sockio::Packet& request, long timeout = 10000);
+    
+    virtual bool send();
+    virtual bool checkResponse(const Packet& packet);
 
-	virtual void onPotentialResponse(void*, Packet& packet);
-	virtual void onResponse();
+    virtual void onPotentialResponse(void*, Packet& packet);
+    virtual void onResponse();
 
-	sockio::Client& client;
+    sockio::Client& client;
 
 protected:
-	virtual ~Transaction();
+    virtual ~Transaction();
 };
 
 

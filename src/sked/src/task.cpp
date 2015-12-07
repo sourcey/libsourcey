@@ -27,139 +27,139 @@ using namespace std;
 
 namespace scy {
 namespace sked {
-	
+    
 
 Task::Task(const std::string& type, const std::string& name) : 
-	//scy::Task(true),		
-	_type(type),
-	_name(name),
-	_scheduler(nullptr),
-	_trigger(nullptr)
+    //scy::Task(true),        
+    _type(type),
+    _name(name),
+    _scheduler(nullptr),
+    _trigger(nullptr)
 {
-	TraceL << "Create" << endl;
+    TraceL << "Create" << endl;
 }
 
-	
+    
 Task::Task(sked::Scheduler& scheduler, const std::string& type, const std::string& name) : 
-	//scy::Task(true),	
-	//scy::Task(reinterpret_cast<Scheduler&>(scheduler), true, false),
-	_type(type),
-	_name(name),
-	_scheduler(&scheduler),
-	_trigger(nullptr)
+    //scy::Task(true),    
+    //scy::Task(reinterpret_cast<Scheduler&>(scheduler), true, false),
+    _type(type),
+    _name(name),
+    _scheduler(&scheduler),
+    _trigger(nullptr)
 {
-	TraceL << "Create" << endl;
+    TraceL << "Create" << endl;
 }
 
 
 Task::~Task()
 {
-	TraceL << "Destroy" << endl;
+    TraceL << "Destroy" << endl;
 }
 
 
 /*
 void Task::start()
 {
-	trigger(); // throw if trigger is nullptr
-	scy::Task::start();
+    trigger(); // throw if trigger is nullptr
+    scy::Task::start();
 }
 */
 
 
 void Task::serialize(json::Value& root)
 {
-	TraceL << "Serializing" << endl;	
-	
-	Mutex::ScopedLock lock(_mutex);
-	
-	root["id"] = _id;
-	root["type"] = _type;
-	root["name"] = _name;
+    TraceL << "Serializing" << endl;    
+    
+    Mutex::ScopedLock lock(_mutex);
+    
+    root["id"] = _id;
+    root["type"] = _type;
+    root["name"] = _name;
 }
 
 
 void Task::deserialize(json::Value& root)
 {
-	TraceL << "Deserializing" << endl;
-	
-	Mutex::ScopedLock lock(_mutex);	
-	
-	json::assertMember(root, "id");
-	json::assertMember(root, "type");
-	json::assertMember(root, "name");
-	
-	_id = root["id"].asUInt();
-	_type = root["type"].asString();
-	_name = root["name"].asString();
+    TraceL << "Deserializing" << endl;
+    
+    Mutex::ScopedLock lock(_mutex);    
+    
+    json::assertMember(root, "id");
+    json::assertMember(root, "type");
+    json::assertMember(root, "name");
+    
+    _id = root["id"].asUInt();
+    _type = root["type"].asString();
+    _name = root["name"].asString();
 }
 
 
 bool Task::beforeRun()
 {
-	Mutex::ScopedLock lock(_mutex);	
-	return _trigger && _trigger->timeout() && !_destroyed && !cancelled();
+    Mutex::ScopedLock lock(_mutex);    
+    return _trigger && _trigger->timeout() && !_destroyed && !cancelled();
 }
 
 
 bool Task::afterRun()
 {
-	Mutex::ScopedLock lock(_mutex);
-	DateTime now;
-	_trigger->update();
-	_trigger->timesRun++;
-	_trigger->lastRunAt = now;
-	return !_trigger->expired();
+    Mutex::ScopedLock lock(_mutex);
+    DateTime now;
+    _trigger->update();
+    _trigger->timesRun++;
+    _trigger->lastRunAt = now;
+    return !_trigger->expired();
 }
 
 
 void Task::setTrigger(sked::Trigger* trigger)
 {
-	Mutex::ScopedLock lock(_mutex);	
-	if (_trigger)
-		delete _trigger;
-	_trigger = trigger;
+    Mutex::ScopedLock lock(_mutex);    
+    if (_trigger)
+        delete _trigger;
+    _trigger = trigger;
 }
 
 
 string Task::name() const
 {
-	Mutex::ScopedLock lock(_mutex);	
-	return _name;
+    Mutex::ScopedLock lock(_mutex);    
+    return _name;
 }
 
 
 string Task::type() const
 {
-	Mutex::ScopedLock lock(_mutex);	
-	return _type;
+    Mutex::ScopedLock lock(_mutex);    
+    return _type;
 }
 
 
 Int64 Task::remaining() const
 {
-	Mutex::ScopedLock lock(_mutex);	
-	if (!_trigger)
-		throw std::runtime_error("Tasks must be have a Trigger instance.");
-	return _trigger->remaining();
+    Mutex::ScopedLock lock(_mutex);    
+    if (!_trigger)
+        throw std::runtime_error("Tasks must be have a Trigger instance.");
+    return _trigger->remaining();
 }
 
 
 sked::Trigger& Task::trigger()
 {
-	Mutex::ScopedLock lock(_mutex);	
-	if (!_trigger)
-		throw std::runtime_error("Tasks must have a Trigger instance.");
-	return *_trigger;
+    Mutex::ScopedLock lock(_mutex);    
+    if (!_trigger)
+        throw std::runtime_error("Tasks must have a Trigger instance.");
+    return *_trigger;
 }
 
 
-sked::Scheduler& Task::scheduler()						 
+sked::Scheduler& Task::scheduler()                         
 { 
-	Mutex::ScopedLock lock(_mutex);	
-	if (!_scheduler)
-		throw std::runtime_error("Tasks must be started with a sked::Scheduler instance.");
-	return *_scheduler;
+    Mutex::ScopedLock lock(_mutex);    
+    if (!_scheduler)
+        throw std::runtime_error("Tasks must be started with a sked::Scheduler instance.");
+    return *_scheduler;
 }
 
 

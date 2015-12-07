@@ -27,8 +27,8 @@
 
 
 namespace scy {
-	
-	
+    
+    
 typedef DelegateBase<IPacket&> PacketDelegateBase;
 typedef SignalBase<PacketDelegateBase, IPacket&> PacketSignal;
 typedef std::vector<PacketSignal*> PacketSignalVec;

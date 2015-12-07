@@ -32,121 +32,121 @@ namespace ipc {
 
 
 struct Action
-	/// Default action type for executing synchronized callbacks.
+    /// Default action type for executing synchronized callbacks.
 {
-	typedef std::function<void(const Action&)> callback_t;
-	callback_t target;
-	void* arg;
-	std::string data;
-		
-	Action(callback_t target, void* arg = nullptr, const std::string& data = "") :
-		target(target), arg(arg), data(data) {} 
+    typedef std::function<void(const Action&)> callback_t;
+    callback_t target;
+    void* arg;
+    std::string data;
+        
+    Action(callback_t target, void* arg = nullptr, const std::string& data = "") :
+        target(target), arg(arg), data(data) {} 
 };
 
 
 template<typename TAction = ipc::Action> 
 class Queue
-	/// IPC queue is for safely passing templated   
-	/// actions between threads and processes.
+    /// IPC queue is for safely passing templated   
+    /// actions between threads and processes.
 {
-public:	
-	Queue()
-	{
-	}
+public:    
+    Queue()
+    {
+    }
 
-	virtual ~Queue() 
-	{
-	}
+    virtual ~Queue() 
+    {
+    }
 
-	virtual void push(TAction* action)
-	{
-		{
-			Mutex::ScopedLock lock(_mutex);
-			_actions.push_back(action);
-		}
-		post();
-	}
+    virtual void push(TAction* action)
+    {
+        {
+            Mutex::ScopedLock lock(_mutex);
+            _actions.push_back(action);
+        }
+        post();
+    }
 
-	virtual TAction* pop()
-	{
-		if (_actions.empty()) 
-			return nullptr;
-		Mutex::ScopedLock lock(_mutex);
-		TAction* next = _actions.front();
-		_actions.pop_front();
-		return next;
-	}
-	
-	virtual void runSync()
-	{
-		TAction* next = nullptr;
-		while (next = pop()) {
-			next->target(*next);
-			delete next;
-		}
-	}
+    virtual TAction* pop()
+    {
+        if (_actions.empty()) 
+            return nullptr;
+        Mutex::ScopedLock lock(_mutex);
+        TAction* next = _actions.front();
+        _actions.pop_front();
+        return next;
+    }
+    
+    virtual void runSync()
+    {
+        TAction* next = nullptr;
+        while (next = pop()) {
+            next->target(*next);
+            delete next;
+        }
+    }
 
-	virtual void close()
-	{
-	}
-	
-	virtual void post()
-	{
-	}
+    virtual void close()
+    {
+    }
+    
+    virtual void post()
+    {
+    }
 
-	void waitForSync()
-	{
-		// TODO: Impose a time limit
-		while(true) {
-			{
-				Mutex::ScopedLock lock(_mutex);
-				if (_actions.empty())
-					return;
-			}
-			DebugL << "Wait for sync" << std::endl;	
-			scy::sleep(10);
-		}	
-	}
+    void waitForSync()
+    {
+        // TODO: Impose a time limit
+        while(true) {
+            {
+                Mutex::ScopedLock lock(_mutex);
+                if (_actions.empty())
+                    return;
+            }
+            DebugL << "Wait for sync" << std::endl;    
+            scy::sleep(10);
+        }    
+    }
 
-protected:	
-	mutable Mutex _mutex;
-	std::deque<TAction*> _actions;
+protected:    
+    mutable Mutex _mutex;
+    std::deque<TAction*> _actions;
 };
 
 
 template<typename TAction = ipc::Action> 
 class SyncQueue: public Queue<TAction>
-	/// IPC synchronization queue is for passing templated 
-	/// actions between threads and the event loop we are 
-	/// synchronizing with.
+    /// IPC synchronization queue is for passing templated 
+    /// actions between threads and the event loop we are 
+    /// synchronizing with.
 {
-public:	
-	SyncQueue(uv::Loop* loop = uv::defaultLoop()) : 
-		_sync(loop, std::bind(&Queue<TAction>::runSync, this)) 
-	{
-	}
+public:    
+    SyncQueue(uv::Loop* loop = uv::defaultLoop()) : 
+        _sync(loop, std::bind(&Queue<TAction>::runSync, this)) 
+    {
+    }
 
-	virtual ~SyncQueue() 
-	{
-	}
+    virtual ~SyncQueue() 
+    {
+    }
 
-	virtual void close()
-	{
-		_sync.close();
-	}
-	
-	virtual void post()
-	{
-		_sync.post();
-	}
-	
-	virtual SyncContext& sync()
-	{
-		return _sync;
-	}
+    virtual void close()
+    {
+        _sync.close();
+    }
+    
+    virtual void post()
+    {
+        _sync.post();
+    }
+    
+    virtual SyncContext& sync()
+    {
+        return _sync;
+    }
 
-protected:	
-	SyncContext _sync;
+protected:    
+    SyncContext _sync;
 };
 
 

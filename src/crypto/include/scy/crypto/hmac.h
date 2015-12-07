@@ -27,14 +27,14 @@
 
 namespace scy {
 namespace crypto {
-	
-	
+    
+    
 std::string computeHMAC(const std::string& input, const std::string& key);
     /// HMAC is a MAC (message authentication code), i.e. a keyed hash function 
     /// used for message authentication, which is based on a hash function (SHA1).
     ///
     /// Input is the data to be signed, and key is the private password.
-	
+    
 
 } } // namespace scy::crypto
 

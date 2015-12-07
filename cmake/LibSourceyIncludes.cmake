@@ -207,8 +207,8 @@ macro(set_default_project_dependencies name)
 
   # Include all linker libraries
   set(${name}_LIBRARIES ${ARGN})
-  list(APPEND ${name}_LIBRARIES ${LibSourcey_BUILD_DEPENDENCIES})
   list(APPEND ${name}_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES})
+  list(APPEND ${name}_LIBRARIES ${LibSourcey_BUILD_DEPENDENCIES})
   list(REMOVE_DUPLICATES ${name}_LIBRARIES)
   target_link_libraries(${name} "${${name}_LIBRARIES}")
 endmacro()
@@ -508,7 +508,7 @@ endmacro()
 
 
 #
-### Macro: find_paths
+### Macro: find_component_paths
 #
 # Finds the given component library and include paths.
 #
@@ -587,8 +587,7 @@ macro(find_component module component pkgconfig library header)
   # Reset component alias values (force recheck)
   set_component_alias(${module} ${component})
 
-  # Use pkg-config to obtain directories for
-  # the FIND_PATH() and find_library() calls.
+  # Use pkg-config to obtain directories for the find_path() and find_library() calls.
   find_package(PkgConfig QUIET)
   if (PKG_CONFIG_FOUND)
     #set(PKG_ALIAS                   PKG_${component})
@@ -609,10 +608,10 @@ macro(find_component module component pkgconfig library header)
   #message(STATUS "${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")
 
   if(NOT ${ALIAS_FOUND})
-    #message(STATUS "  - ${module} ${component} pkg-config not found, searching...")
+    message(STATUS "  - ${module} ${component} pkg-config not found, searching...")
     find_component_paths(${module} ${component} ${library} ${header})
   else()
-    #message(STATUS "  - ${module} ${component} pkg-config found.")
+    message(STATUS "  - ${module} ${component} pkg-config found.")
     set_component_found(${module} ${component})
   endif()
 endmacro()

@@ -30,49 +30,49 @@
 
 namespace scy {
 
-		
+        
 class Application
-	/// A simple event based application which runs until the
-	/// internal event loop is terminated.
-	///
-	/// The Application class provides shutdown handling (Ctrl-C).
-	///
-	/// TODO: Cross platform getopts
+    /// A simple event based application which runs until the
+    /// internal event loop is terminated.
+    ///
+    /// The Application class provides shutdown handling (Ctrl-C).
+    ///
+    /// TODO: Cross platform getopts
 {
 public:
-	static Application& getDefault();
-		// Returns the default Application singleton, although
-		// Application instances may be initialized individually.
-		// The default runner should be kept for short running
-		// tasks such as timers in order to maintain performance.
+    static Application& getDefault();
+        // Returns the default Application singleton, although
+        // Application instances may be initialized individually.
+        // The default runner should be kept for short running
+        // tasks such as timers in order to maintain performance.
 
-	uv::Loop* loop;
-		// The active event loop.
-		// May be assigned at construction, otherwise the default
-		// event loop is used.
-	
-	Application(uv::Loop* loop = uv::defaultLoop());
-	~Application();
-	
-	void run();
-	void stop();
-	void finalize();
+    uv::Loop* loop;
+        // The active event loop.
+        // May be assigned at construction, otherwise the default
+        // event loop is used.
+    
+    Application(uv::Loop* loop = uv::defaultLoop());
+    ~Application();
+    
+    void run();
+    void stop();
+    void finalize();
 
-	
-	//
-	// Shutdown handling
-	//
+    
+    //
+    // Shutdown handling
+    //
 
-	void waitForShutdown(std::function<void(void*)> callback = nullptr, void* opaque = nullptr);
-			
-	static void onShutdownSignal(uv_signal_t *req, int signum);		
-	static void onPrintHandle(uv_handle_t* handle, void* arg);
+    void waitForShutdown(std::function<void(void*)> callback = nullptr, void* opaque = nullptr);
+            
+    static void onShutdownSignal(uv_signal_t *req, int signum);        
+    static void onPrintHandle(uv_handle_t* handle, void* arg);
 
 protected:
-	Application(const Application&); // = delete;
-	Application(Application&&); // = delete;
-	Application& operator=(const Application&); // = delete;
-	Application& operator=(Application&&); // = delete;
+    Application(const Application&); // = delete;
+    Application(Application&&); // = delete;
+    Application& operator=(const Application&); // = delete;
+    Application& operator=(Application&&); // = delete;
 };
 
 
@@ -83,29 +83,29 @@ protected:
 typedef std::map<std::string, std::string> OptionMap;
 
 struct OptionParser 
-{	
-	std::string exepath; // TODO: UTF8
-	OptionMap args;
-	
-	OptionParser(int argc, char* argv[], const char* delim); // "--"
+{    
+    std::string exepath; // TODO: UTF8
+    OptionMap args;
+    
+    OptionParser(int argc, char* argv[], const char* delim); // "--"
 
-	bool has(const char* key) {
-		return args.find(key) != args.end();
-	}
+    bool has(const char* key) {
+        return args.find(key) != args.end();
+    }
 
-	std::string get(const char* key) {
-		OptionMap::const_iterator it = args.find(key);
-		if (it != args.end())
-			return it->second;
-		return std::string();
-	}
+    std::string get(const char* key) {
+        OptionMap::const_iterator it = args.find(key);
+        if (it != args.end())
+            return it->second;
+        return std::string();
+    }
 
-	template<typename NumericType>
-	NumericType get(const char* key) {
-		OptionMap::const_iterator it = args.find(key);
-		if (it != args.end())
-			return util::strtoi<NumericType>(it->second);
-	}
+    template<typename NumericType>
+    NumericType get(const char* key) {
+        OptionMap::const_iterator it = args.find(key);
+        if (it != args.end())
+            return util::strtoi<NumericType>(it->second);
+    }
 };
 
 

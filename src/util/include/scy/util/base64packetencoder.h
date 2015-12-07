@@ -33,24 +33,24 @@ namespace scy {
 class Base64PacketEncoder: public PacketProcessor
 {
 public:
-	Base64PacketEncoder() :
-		PacketProcessor(this->emitter)
-	{
-	}
+    Base64PacketEncoder() :
+        PacketProcessor(this->emitter)
+    {
+    }
 
-	virtual void process(IPacket& packet)
-	{		
-		RawPacket& p = dynamic_cast<RawPacket&>(packet); // cast or throw
+    virtual void process(IPacket& packet)
+    {        
+        RawPacket& p = dynamic_cast<RawPacket&>(packet); // cast or throw
 
-		base64::Encoder enc;
-		std::vector<char> result(packet.size() * 2);
-		size_t size = enc.encode((const char*)p.data(), p.size(), &result[0]);		
-		size += enc.finalize(&result[size]);
+        base64::Encoder enc;
+        std::vector<char> result(packet.size() * 2);
+        size_t size = enc.encode((const char*)p.data(), p.size(), &result[0]);        
+        size += enc.finalize(&result[size]);
 
-		emit(&result[0], size);
-	}
+        emit(&result[0], size);
+    }
 
-	PacketSignal emitter;
+    PacketSignal emitter;
 };
 
 

@@ -1,6 +1,7 @@
 #include "scy/application.h"
 #include "scy/packetstream.h"
 #include "scy/media/iencoder.h"
+#include "scy/media/avpacketencoder.h"
 #include "scy/net/network.h"
 #include "scy/http/server.h"
 #include "scy/http/packetizers.h"
@@ -20,12 +21,11 @@ CMemLeakDetect memLeakDetect;
 */
 
 
-#define USE_AVDEVICE_CAPTURE 1
+#define USE_AVDEVICE_CAPTURE 0
 
 #if USE_AVDEVICE_CAPTURE
 #include "scy/media/avinputreader.h"
-#include "scy/media/avpacketencoder.h"
-#define VIDEO_FILE_SOURCE "~/test.mp4"
+#define VIDEO_FILE_SOURCE "test.mp4"
 av::AVInputReader* gVideoCapture;
 #else
 #include "scy/media/videocapture.h"
@@ -38,78 +38,82 @@ namespace scy {
 
 class MPEGResponder: public http::ServerResponder
 {
-	av::FPSCounter fpsCounter;
-	PacketStream* stream;
+    av::FPSCounter fpsCounter;
+    PacketStream* stream;
 
 public:
-	MPEGResponder(http::ServerConnection& conn) :
-		http::ServerResponder(conn)
-	{
-		DebugL << "Creating" << endl;
+    MPEGResponder(http::ServerConnection& conn) :
+        http::ServerResponder(conn)
+    {
+        DebugL << "Creating" << endl;
 
-		// We will be sending our own headers
-		conn.shouldSendHeader(false);
+        auto stream = new PacketStream;
 
-		// Attach the video capture
-		stream->attachSource(gVideoCapture, false);
+        // We will be sending our own headers
+        conn.shouldSendHeader(false);
 
-		// Setup the encoder options
-		av::EncoderOptions options;
-		options.oformat = av::Format("MJPEG", "mjpeg", av::VideoCodec(
-			"MJPEG", "mjpeg", 400, 300, 25, 48000, 128000, "yuvj420p"));
-		gVideoCapture->getEncoderFormat(options.iformat);
+        // Attach the video capture
+        stream->attachSource(gVideoCapture, false);
 
-		// Create and attach the encoder
-		av::AVPacketEncoder* encoder = new av::AVPacketEncoder(options);
-		encoder->initialize();
-		stream->attach(encoder, 5, true);
+        // Setup the encoder options
+        av::EncoderOptions options;
+        options.oformat = av::Format("MJPEG", "mjpeg", av::VideoCodec(
+            "MJPEG", "mjpeg", 400, 300, 25, 48000, 128000, "yuvj420p"));
+        gVideoCapture->getEncoderFormat(options.iformat);
 
-		// Create and attach the HTTP multipart packetizer
-		auto packetizer = new http::MultipartAdapter("image/jpeg", false);
-		stream->attach(packetizer, 10, true);
-		//assert(0 && "fixme");
+        // Create and attach the encoder
+        av::AVPacketEncoder* encoder = new av::AVPacketEncoder(options);
+        encoder->initialize();
+        stream->attach(encoder, 5, true);
 
-		// Start the stream
-		stream->emitter += packetDelegate(this, &MPEGResponder::onVideoEncoded);
-		stream->start();
-	}
+        // Create and attach the HTTP multipart packetizer
+        auto packetizer = new http::MultipartAdapter("image/jpeg", false);
+        stream->attach(packetizer, 10, true);
+        //assert(0 && "fixme");
 
-	~MPEGResponder()
-	{
-		DebugL << "Destroying" << endl;
-		//stream->destroy();
-		delete stream;
-	}
+        // Start the stream
+        stream->emitter += packetDelegate(this, &MPEGResponder::onVideoEncoded);
+        stream->start();
+    }
 
-	void onPayload(const Buffer& body)
-	{
-		DebugL << "On recv payload: " << body.size() << endl;
+    ~MPEGResponder()
+    {
+        DebugL << "Destroying" << endl;
+        //stream->destroy();
+        delete stream;
+    }
 
-		// do something with data from peer
-	}
+    void onPayload(const Buffer& body)
+    {
+        DebugL << "On recv payload: " << body.size() << endl;
 
-	void onClose()
-	{
-		DebugL << "On close" << endl;
+        // do something with data from peer
+    }
 
-		stream->emitter += packetDelegate(this, &MPEGResponder::onVideoEncoded);
-		stream->stop();
-	}
+    void onClose()
+    {
+        DebugL << "On close" << endl;
 
-	void onVideoEncoded(void* sender, RawPacket& packet)
-	{
-		TraceL << "Sending packet: "
-			<< packet.size() << ": " << fpsCounter.fps << endl;
+        stream->emitter -= packetDelegate(this, &MPEGResponder::onVideoEncoded);
+            DebugL << "On close 1" << endl;
+        stream->stop();
+            DebugL << "On close 2" << endl;
+    }
 
-		try {
-			connection().send(packet.data(), packet.size());
-			fpsCounter.tick();
-		}
-		catch (std::exception/*Exception*/& exc) {
-			ErrorL << "Error: " << std::string(exc.what())/*message()*/ << endl;
-			connection().close();
-		}
-	}
+    void onVideoEncoded(void* sender, RawPacket& packet)
+    {
+        TraceL << "Sending packet: "
+            << packet.size() << ": " << fpsCounter.fps << endl;
+
+        try {
+            connection().send(packet.data(), packet.size());
+            fpsCounter.tick();
+        }
+        catch (std::exception/*Exception*/& exc) {
+            ErrorL << "Error: " << std::string(exc.what())/*message()*/ << endl;
+            connection().close();
+        }
+    }
 };
 
 
@@ -118,10 +122,10 @@ public:
 class StreamingResponderFactory: public http::ServerResponderFactory
 {
 public:
-	http::ServerResponder* createResponder(http::ServerConnection& conn)
-	{
-		return new MPEGResponder(conn);
-	}
+    http::ServerResponder* createResponder(http::ServerConnection& conn)
+    {
+        return new MPEGResponder(conn);
+    }
 };
 
 
@@ -130,33 +134,33 @@ public:
 
 static void onShutdownSignal(void* opaque)
 {
-	reinterpret_cast<http::Server*>(opaque)->shutdown();
+    reinterpret_cast<http::Server*>(opaque)->shutdown();
 }
 
 
 int main(int argc, char** argv)
 {
-	Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", LTrace));
 
 #if USE_AVDEVICE_CAPTURE
-	gVideoCapture = new av::AVInputReader();
-	//gAVVideoCapture->openDevice(0);
-	gVideoCapture->openFile(VIDEO_FILE_SOURCE);
-	gVideoCapture->start();
+    gVideoCapture = new av::AVInputReader();
+    //gAVVideoCapture->openDevice(0);
+    gVideoCapture->openFile(VIDEO_FILE_SOURCE);
+    gVideoCapture->start();
 #else
-	// VideoCapture instances must be
-	// instantiated in the main thread.
-	gVideoCapture = new av::VideoCapture(0);
+    // VideoCapture instances must be
+    // instantiated in the main thread.
+    gVideoCapture = new av::VideoCapture(0);
 #endif
 
-	{
-		Application app;
-		http::Server server(328, new StreamingResponderFactory);
-		server.start();
-		app.waitForShutdown(onShutdownSignal, &server);
-	}
+    {
+        Application app;
+        http::Server server(328, new StreamingResponderFactory);
+        server.start();
+        app.waitForShutdown(onShutdownSignal, &server);
+    }
 
-	delete gVideoCapture;
-	Logger::destroy();
-	return 0;
+    delete gVideoCapture;
+    Logger::destroy();
+    return 0;
 }

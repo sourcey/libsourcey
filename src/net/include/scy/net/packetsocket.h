@@ -43,25 +43,25 @@ class PacketSocket;
 
 
 class PacketSocketAdapter: public SocketAdapter, public PacketSignal
-{	
-public:	
-	net::Socket::Ptr socket;
-		// Pointer to the underlying socket.
-		// Sent data will be proxied to this socket.
+{    
+public:    
+    net::Socket::Ptr socket;
+        // Pointer to the underlying socket.
+        // Sent data will be proxied to this socket.
 
-	PacketFactory factory;
+    PacketFactory factory;
 
-	PacketSocketAdapter(const net::Socket::Ptr& socket = nullptr); //const net::Socket::Ptr& socket = nullptr //SocketAdapter* sender = nullptr, SocketAdapter* receiver = nullptr
-		// Creates the PacketSocketAdapter
-		// This class should have a higher priority than standard
-		// sockets so we can parse data packets first.
-		
-	virtual void onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress);
-		// Creates and dispatches a packet utilizing the available 
-		// creation strategies. For best performance the most used 
-		// strategies should have the highest priority.
+    PacketSocketAdapter(const net::Socket::Ptr& socket = nullptr); //const net::Socket::Ptr& socket = nullptr //SocketAdapter* sender = nullptr, SocketAdapter* receiver = nullptr
+        // Creates the PacketSocketAdapter
+        // This class should have a higher priority than standard
+        // sockets so we can parse data packets first.
+        
+    virtual void onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress);
+        // Creates and dispatches a packet utilizing the available 
+        // creation strategies. For best performance the most used 
+        // strategies should have the highest priority.
 
-	virtual void onPacket(IPacket& pkt);
+    virtual void onPacket(IPacket& pkt);
 };
 
 
@@ -73,16 +73,16 @@ public:
 
 class PacketSocket: public PacketSocketAdapter
 {
-public:	
-	PacketSocket(Socket* socket);
-	//PacketSocket(Socket* base, bool shared = false);
-	virtual ~PacketSocket();
+public:    
+    PacketSocket(Socket* socket);
+    //PacketSocket(Socket* base, bool shared = false);
+    virtual ~PacketSocket();
 
-	//PacketSocketAdapter& adapter() const;
-		// Returns the PacketSocketAdapter for this socket.		
-	
-	//virtual void send(IPacket& packet);
-		// Compatibility method for PacketSignal delegates.
+    //PacketSocketAdapter& adapter() const;
+        // Returns the PacketSocketAdapter for this socket.        
+    
+    //virtual void send(IPacket& packet);
+        // Compatibility method for PacketSignal delegates.
 };
 
 
@@ -92,22 +92,22 @@ public:
 
 
 class PacketStreamSocketAdapter: public PacketProcessor, public PacketSignal
-	/// Proxies arbitrary PacketStream packets to an output Socket,
-	/// ensuring the Socket MTU is not exceeded.
-	/// Oversize packets will be split before sending.
+    /// Proxies arbitrary PacketStream packets to an output Socket,
+    /// ensuring the Socket MTU is not exceeded.
+    /// Oversize packets will be split before sending.
 {
 public:
-	PacketStreamSocketAdapter(Socket& socket);
-	virtual ~PacketStreamSocketAdapter();
+    PacketStreamSocketAdapter(Socket& socket);
+    virtual ~PacketStreamSocketAdapter();
 
-protected:		
-	virtual bool accepts(IPacket& packet);
-	virtual void process(IPacket& packet);	
-	virtual void onStreamStateChange(const PacketStreamState& state);
+protected:        
+    virtual bool accepts(IPacket& packet);
+    virtual void process(IPacket& packet);    
+    virtual void onStreamStateChange(const PacketStreamState& state);
 
-	friend class PacketStream;
-			
-	Socket _socket;
+    friend class PacketStream;
+            
+    Socket _socket;
 };
 #endif
 

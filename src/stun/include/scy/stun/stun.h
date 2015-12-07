@@ -37,13 +37,13 @@ const int kTransactionIdLength = 12;
 const UInt32 kMagicCookie = 0x2112A442;
 const int kMagicCookieLength = sizeof(kMagicCookie);
 
-enum AddressFamily 		
-	// STUN address types as defined in RFC 5389.
-	// NB: Undefined is not part of the STUN spec.
+enum AddressFamily         
+    // STUN address types as defined in RFC 5389.
+    // NB: Undefined is not part of the STUN spec.
 {
-	Undefined    = 0,
-	IPv4         = 1,
-	IPv6         = 2
+    Undefined    = 0,
+    IPv4         = 1,
+    IPv6         = 2
 };
 
 
@@ -55,15 +55,15 @@ inline bool isChannelData(UInt16 msgType)
 }
 
 inline bool isRequestType(int msgType) {
-	 return ((msgType & 0x0110) == 0x000);
+     return ((msgType & 0x0110) == 0x000);
 }
 
 inline bool isIndicationType(int msgType) {
-	return ((msgType & 0x0110) == 0x010);
+    return ((msgType & 0x0110) == 0x010);
 }
 
 inline bool isSuccessResponseType(int msgType) {
-	return ((msgType & 0x0110) == 0x100);
+    return ((msgType & 0x0110) == 0x100);
 }
 
 inline bool isErrorResponseType(int msgType) {
@@ -71,11 +71,11 @@ inline bool isErrorResponseType(int msgType) {
 }
 
 inline int getSuccessResponseType(int reqType) {
-	return isRequestType(reqType) ? (reqType | 0x100) : -1;
+    return isRequestType(reqType) ? (reqType | 0x100) : -1;
 }
 
 inline int getErrorResponseType(int reqType) {
-	return isRequestType(reqType) ? (reqType | 0x110) : -1;
+    return isRequestType(reqType) ? (reqType | 0x110) : -1;
 }
 
 

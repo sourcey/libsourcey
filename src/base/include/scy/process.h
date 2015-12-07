@@ -27,7 +27,7 @@
 
 
 namespace scy {
-	
+    
 
 typedef uv_process_options_t ProcessOptions;
 
@@ -35,31 +35,31 @@ typedef uv_process_options_t ProcessOptions;
 class Process: public uv::Handle
 {
 public:
-	Process(uv::Loop* loop = uv::defaultLoop());
+    Process(uv::Loop* loop = uv::defaultLoop());
 
-	void spawn();
-		// Spawns the process.
-		// Options must be properly set.
-		// Throws and exception on error.
+    void spawn();
+        // Spawns the process.
+        // Options must be properly set.
+        // Throws and exception on error.
 
-	bool kill(int signum = 0);
-		// Kills the process
+    bool kill(int signum = 0);
+        // Kills the process
 
-	int pid() const;
-		// Returns the process PID
+    int pid() const;
+        // Returns the process PID
 
-	std::vector<std::string> args;
-		// Command line args.
-		// STL proxy for options.args
+    std::vector<std::string> args;
+        // Command line args.
+        // STL proxy for options.args
 
-	std::function<void(Int64)> onexit;
-		// Exit callback; returns the exit status.
+    std::function<void(Int64)> onexit;
+        // Exit callback; returns the exit status.
 
-	ProcessOptions options;
-		// Process options
+    ProcessOptions options;
+        // Process options
 
 protected:
-	uv_process_t _proc;
+    uv_process_t _proc;
 };
 
 

@@ -36,129 +36,129 @@ namespace scy {
 
 struct Error 
 {
-	int errorno; 
-	std::string message; // Error message (set by application)
-	std::exception_ptr exception;
+    int errorno; 
+    std::string message; // Error message (set by application)
+    std::exception_ptr exception;
 
-	Error()
-	{
-		reset();
-	}
+    Error()
+    {
+        reset();
+    }
 
-	Error(const std::string& msg)
-	{
-		reset();
-		message = msg;
-	}
+    Error(const std::string& msg)
+    {
+        reset();
+        message = msg;
+    }
 
-	Error(const char* msg)
-	{
-		reset();
-		message = msg;
-	}
+    Error(const char* msg)
+    {
+        reset();
+        message = msg;
+    }
 
-	bool any() const
-	{
-		return errorno != 0 || !message.empty() || exception != nullptr;
-	}
+    bool any() const
+    {
+        return errorno != 0 || !message.empty() || exception != nullptr;
+    }
 
-	void reset() 
-	{
-		errorno = 0;
-		message.clear();
-		exception = nullptr;
-	}
+    void reset() 
+    {
+        errorno = 0;
+        message.clear();
+        exception = nullptr;
+    }
 
-	void rethrow() 
-	{
-		if (exception)
-			std::rethrow_exception(exception);
-	}	
-	
+    void rethrow() 
+    {
+        if (exception)
+            std::rethrow_exception(exception);
+    }    
+    
     friend std::ostream& operator << (std::ostream& stream, const Error& err) 
-	{
-		stream << err.message;
-		return stream;
+    {
+        stream << err.message;
+        return stream;
     }
 };
 
 
 #if 0 // depreciated in favor of std::exception
 class Exception: public std::exception
-	// This class extends the standard library exception object
-	// with features relevent to the LibSourcey debug context.
-	//
-	// TDOD: Extend with file and linenumbers 
+    // This class extends the standard library exception object
+    // with features relevent to the LibSourcey debug context.
+    //
+    // TDOD: Extend with file and linenumbers 
 {
 public:
-	Exception(int code = 0);
-	Exception(const std::string& msg, int code = 0);
-	Exception(const std::string& msg, const std::string& ext, int code = 0);
-		
-	~Exception() throw();
+    Exception(int code = 0);
+    Exception(const std::string& msg, int code = 0);
+    Exception(const std::string& msg, const std::string& ext, int code = 0);
+        
+    ~Exception() throw();
 
-	virtual const char* name() const throw();
-		// Returns the exception type name.
-		
-	virtual const char* what() const throw();
-		// Returns the message text char pointer.
-			
-	std::string message() const;
-		// Returns the message text.
-			
-	int code() const;
-		// Returns the exception code if defined.
+    virtual const char* name() const throw();
+        // Returns the exception type name.
+        
+    virtual const char* what() const throw();
+        // Returns the message text char pointer.
+            
+    std::string message() const;
+        // Returns the message text.
+            
+    int code() const;
+        // Returns the exception code if defined.
 
-	void setMessage(const std::string& msg);
-		// Sets the message for the exception.
+    void setMessage(const std::string& msg);
+        // Sets the message for the exception.
 
-	void entendMessage(const std::string& ext);
-		// Appends a message fragment to the exception.
-	
-	virtual void rethrow() const;
-		// (Re)Throws the exception.
-	
+    void entendMessage(const std::string& ext);
+        // Appends a message fragment to the exception.
+    
+    virtual void rethrow() const;
+        // (Re)Throws the exception.
+    
     friend std::ostream& operator << (std::ostream& stream, const Exception& exc) 
-	{
-		//stream << exc.what();
-		return stream;
+    {
+        //stream << exc.what();
+        return stream;
     }
 
-protected:		
-	std::string _msg;
-	int _code;
+protected:        
+    std::string _msg;
+    int _code;
 };
 
 
 //
 // Macro for declaring custom exception types
-#define DECLARE_EXCEPTION(Class, Base, Name)										\
-																					\
-	class Class: public Base														\
-	{																				\
-	public:																			\
-	Class::Class(int code = 0): Base(code = 0)										\
-	{																				\
-	}																				\
-	Class::Class(const std::string& msg, int code = 0) :							\
-		Base(msg, code)																\
-	{																				\
-	}																				\
-	Class::Class(const std::string& msg, const std::string& ext, int code = 0) :	\
-		Base(msg, ext, code)														\
-	{																				\
-	}																				\
-	Class::~Class() throw()															\
-	{																				\
-	}																				\
-	const char* Class::name() const throw()											\
-	{																				\
-		return Name;																\
-	}																				\
-	void Class::rethrow() const														\
-	{																				\
-		throw *this;																\
-	}                                                                               \
+#define DECLARE_EXCEPTION(Class, Base, Name)                                        \
+                                                                                    \
+    class Class: public Base                                                        \
+    {                                                                                \
+    public:                                                                            \
+    Class::Class(int code = 0): Base(code = 0)                                        \
+    {                                                                                \
+    }                                                                                \
+    Class::Class(const std::string& msg, int code = 0) :                            \
+        Base(msg, code)                                                                \
+    {                                                                                \
+    }                                                                                \
+    Class::Class(const std::string& msg, const std::string& ext, int code = 0) :    \
+        Base(msg, ext, code)                                                        \
+    {                                                                                \
+    }                                                                                \
+    Class::~Class() throw()                                                            \
+    {                                                                                \
+    }                                                                                \
+    const char* Class::name() const throw()                                            \
+    {                                                                                \
+        return Name;                                                                \
+    }                                                                                \
+    void Class::rethrow() const                                                        \
+    {                                                                                \
+        throw *this;                                                                \
+    }                                                                               \
 };                                                                                  \
 
 

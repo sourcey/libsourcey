@@ -12,8 +12,8 @@
 #include "config.h"
 
 
-namespace scy { 
-	
+namespace scy {
+
 
 class MediaServer;
 
@@ -22,21 +22,21 @@ class MediaServer;
 // HTTP Streaming Options
 //
 struct StreamingOptions: public av::EncoderOptions
-{	
-	std::string framing;		// HTTP response framing [chunked, multipart]
-	std::string encoding;		// The packet content encoding method [Base64, ...]
-		
-	MediaServer* server;		// Media server instance
-	av::VideoCapture::Ptr videoCapture; // Video capture instance
-	av::AudioCapture::Ptr audioCapture; // Audio capture instance
+{
+    std::string framing;        // HTTP response framing [chunked, multipart]
+    std::string encoding;        // The packet content encoding method [Base64, ...]
 
-	StreamingOptions(MediaServer* server = nullptr, 
-		av::VideoCapture::Ptr videoCapture = nullptr,
-		av::AudioCapture::Ptr audioCapture = nullptr);
+    MediaServer* server;        // Media server instance
+    av::VideoCapture::Ptr videoCapture; // Video capture instance
+    av::AudioCapture::Ptr audioCapture; // Audio capture instance
 
-	virtual ~StreamingOptions();
+    StreamingOptions(MediaServer* server = nullptr,
+        av::VideoCapture::Ptr videoCapture = nullptr,
+        av::AudioCapture::Ptr audioCapture = nullptr);
+
+    virtual ~StreamingOptions();
 };
-	
+
 
 // ----------------------------------------------------------------------------
 // HTTP Media Server
@@ -44,10 +44,10 @@ struct StreamingOptions: public av::EncoderOptions
 class MediaServer: public http::Server
 {
 public:
-	MediaServer(UInt16 port);
-	virtual ~MediaServer();
+    MediaServer(UInt16 port);
+    virtual ~MediaServer();
 
-	static void setupPacketStream(PacketStream& stream, const StreamingOptions& options, bool freeCaptures = true, bool attachPacketizers = false);
+    static void setupPacketStream(PacketStream& stream, const StreamingOptions& options, bool freeCaptures = true, bool attachPacketizers = false);
 };
 
 
@@ -57,11 +57,11 @@ public:
 class HTTPStreamingConnectionFactory: public http::ServerResponderFactory
 {
 public:
-	HTTPStreamingConnectionFactory(MediaServer* server);	
-	
-	http::ServerResponder* createResponder(http::ServerConnection& conn);
+    HTTPStreamingConnectionFactory(MediaServer* server);
 
-	MediaServer* _server;
+    http::ServerResponder* createResponder(http::ServerConnection& conn);
+    StreamingOptions createStreamingOptions(http::ServerConnection& conn);
+    MediaServer* _server;
 };
 
 

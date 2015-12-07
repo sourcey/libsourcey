@@ -48,7 +48,7 @@ namespace av {
 
 struct VideoConversionContext;
 
-	
+    
 AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height);
 void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& oparams);
 void initDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts);
@@ -62,30 +62,30 @@ AVRational getCodecTimeBase(AVCodec* c, double fps);
 
 
 struct VideoContext
-	/// Base video context which all encoders and decoders extend
+    /// Base video context which all encoders and decoders extend
 {
-	VideoContext();
-	virtual ~VideoContext();
-		
-	virtual void create();
-		// Create the AVCodecContext using default values
+    VideoContext();
+    virtual ~VideoContext();
+        
+    virtual void create();
+        // Create the AVCodecContext using default values
 
-	virtual void open();
-		// Open the AVCodecContext
+    virtual void open();
+        // Open the AVCodecContext
 
-	virtual void close();	
-		// Close the AVCodecContext
+    virtual void close();    
+        // Close the AVCodecContext
 
-	AVStream* stream;		// encoder or decoder stream
-	AVCodecContext* ctx;	// encoder or decoder context
-	AVCodec* codec;			// encoder or decoder codec
-	AVFrame* frame;			// encoded or decoded frame
-	FPSCounter fps;			// encoder or decoder fps rate
-	//FPSCounter1 fps1;
-    double pts;				// pts in decimal seconds
-	
-	Stopwatch frameDuration;
-    std::string error;		// error message
+    AVStream* stream;        // encoder or decoder stream
+    AVCodecContext* ctx;    // encoder or decoder context
+    AVCodec* codec;            // encoder or decoder codec
+    AVFrame* frame;            // encoded or decoded frame
+    FPSCounter fps;            // encoder or decoder fps rate
+    //FPSCounter1 fps1;
+    double pts;                // pts in decimal seconds
+    
+    Stopwatch frameDuration;
+    std::string error;        // error message
 };
 
 
@@ -96,29 +96,29 @@ struct VideoContext
 
 struct VideoEncoderContext: public VideoContext
 {
-	VideoEncoderContext(AVFormatContext* format);
-	virtual ~VideoEncoderContext();	
-	
-	virtual void create();
-	//virtual void open();
-	virtual void close();
-	
-	virtual bool encode(unsigned char* data, int size, Int64 pts, AVPacket& opacket);
-	virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
-	virtual bool encode(AVFrame* iframe, AVPacket& opacket);
-	virtual bool flush(AVPacket& opacket);
-	
-	virtual void createConverter();
-	virtual void freeConverter();
-	
-	VideoConversionContext* conv;
-	AVFormatContext* format;
+    VideoEncoderContext(AVFormatContext* format);
+    virtual ~VideoEncoderContext();    
+    
+    virtual void create();
+    //virtual void open();
+    virtual void close();
+    
+    virtual bool encode(unsigned char* data, int size, Int64 pts, AVPacket& opacket);
+    virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
+    virtual bool encode(AVFrame* iframe, AVPacket& opacket);
+    virtual bool flush(AVPacket& opacket);
+    
+    virtual void createConverter();
+    virtual void freeConverter();
+    
+    VideoConversionContext* conv;
+    AVFormatContext* format;
 
-    UInt8*	buffer;
-    int		bufferSize;
+    UInt8*    buffer;
+    int        bufferSize;
 
-	VideoCodec	iparams;
-	VideoCodec	oparams;
+    VideoCodec    iparams;
+    VideoCodec    oparams;
 };
 
 
@@ -129,24 +129,24 @@ struct VideoEncoderContext: public VideoContext
 
 struct VideoCodecEncoderContext: public VideoContext
 {
-	VideoCodecEncoderContext();
-	virtual ~VideoCodecEncoderContext();	
-	
-	virtual void create();
-	//virtual void open(); //const VideoCodec& params
-	virtual void close();
-	
-	virtual bool encode(unsigned char* data, int size, AVPacket& opacket);
-	virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
-	virtual bool encode(AVFrame* iframe, AVPacket& opacket);
-		
-	VideoConversionContext* conv;
+    VideoCodecEncoderContext();
+    virtual ~VideoCodecEncoderContext();    
+    
+    virtual void create();
+    //virtual void open(); //const VideoCodec& params
+    virtual void close();
+    
+    virtual bool encode(unsigned char* data, int size, AVPacket& opacket);
+    virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
+    virtual bool encode(AVFrame* iframe, AVPacket& opacket);
+        
+    VideoConversionContext* conv;
 
-    UInt8*			buffer;
-    int				bufferSize;
+    UInt8*            buffer;
+    int                bufferSize;
 
-	VideoCodec	iparams;
-	VideoCodec	oparams;
+    VideoCodec    iparams;
+    VideoCodec    oparams;
 };
 
 
@@ -157,28 +157,28 @@ struct VideoCodecEncoderContext: public VideoContext
 
 struct VideoDecoderContext: public VideoContext
 {
-	VideoDecoderContext();
-	virtual ~VideoDecoderContext();
-	
-	virtual void create(AVFormatContext *ic, int streamID);	
-	//virtual void open();
-	virtual void close();	
-	
-	virtual bool decode(UInt8* data, int size, AVPacket& opacket);
-	virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
-		// Decodes a the given input packet.
-		// Returns true an output packet was returned, 
-		// false otherwise.
+    VideoDecoderContext();
+    virtual ~VideoDecoderContext();
     
-	virtual bool flush(AVPacket& opacket);
-		// Flushes buffered frames.
-		// This method should be called after decoding
-		// until false is returned.
+    virtual void create(AVFormatContext *ic, int streamID);    
+    //virtual void open();
+    virtual void close();    
+    
+    virtual bool decode(UInt8* data, int size, AVPacket& opacket);
+    virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
+        // Decodes a the given input packet.
+        // Returns true an output packet was returned, 
+        // false otherwise.
+    
+    virtual bool flush(AVPacket& opacket);
+        // Flushes buffered frames.
+        // This method should be called after decoding
+        // until false is returned.
 
-	//double maxFPS; 
-		// Maximum decoding FPS. 
-		// FPS is calculated from ipacket PTS. 
-		// Extra frames will be dropped.
+    //double maxFPS; 
+        // Maximum decoding FPS. 
+        // FPS is calculated from ipacket PTS. 
+        // Extra frames will be dropped.
 };
 
 
@@ -189,18 +189,18 @@ struct VideoDecoderContext: public VideoContext
 
 struct VideoConversionContext
 {
-	VideoConversionContext();
-	virtual ~VideoConversionContext();	
-	
-	virtual void create(const VideoCodec& iparams, const VideoCodec& oparams);
-	virtual void free();
+    VideoConversionContext();
+    virtual ~VideoConversionContext();    
+    
+    virtual void create(const VideoCodec& iparams, const VideoCodec& oparams);
+    virtual void free();
 
-	virtual AVFrame* convert(AVFrame* iframe);
+    virtual AVFrame* convert(AVFrame* iframe);
 
-	AVFrame* oframe;
-	struct SwsContext* ctx;
-	VideoCodec iparams;
-	VideoCodec oparams;
+    AVFrame* oframe;
+    struct SwsContext* ctx;
+    VideoCodec iparams;
+    VideoCodec oparams;
 };
 
 
@@ -208,4 +208,4 @@ struct VideoConversionContext
 
 
 #endif
-#endif	// SCY_MEDIA_VideoContext_H
+#endif    // SCY_MEDIA_VideoContext_H

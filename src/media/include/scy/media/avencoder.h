@@ -47,72 +47,59 @@ namespace av {
 
 
 class AVEncoder: public IEncoder
-	/// This class implements an multiplex audio/video   
-	/// encoder which depends on libavcodec/libavformat.
+    /// This class implements an multiplex audio/video
+    /// encoder which depends on libavcodec/libavformat.
 {
 public:
-	AVEncoder(const EncoderOptions& options);
-	AVEncoder();
-	virtual ~AVEncoder();
+    AVEncoder(const EncoderOptions& options);
+    AVEncoder();
+    virtual ~AVEncoder();
 
-	virtual void initialize();
-	virtual void uninitialize();
-	virtual void cleanup();
+    virtual void initialize();
+    virtual void uninitialize();
+    virtual void cleanup();
 
-	virtual void createVideo();
-	virtual void freeVideo();
-	virtual bool encodeVideo(unsigned char* buffer, int bufferSize, int width, int height, UInt64 time = 0);
-	
-	virtual void createAudio();
-	virtual void freeAudio();
-	virtual bool encodeAudio(unsigned char* buffer, int bufferSize, UInt64 time = 0);
-		
-	EncoderOptions& options();
-	VideoEncoderContext* video();
-	AudioEncoderContext* audio();
+    virtual void createVideo();
+    virtual void freeVideo();
+    virtual bool encodeVideo(UInt8* buffer, int bufferSize, int width, int height, UInt64 time = AV_NOPTS_VALUE);
+      // Encode a single video frame
 
-	//virtual void* self() { return this;	}
-			
-	PacketSignal emitter;
-	
+    virtual void createAudio();
+    virtual void freeAudio();
+    virtual bool encodeAudio(UInt8* buffer, int bufferSize, int frameSize, UInt64 time = AV_NOPTS_VALUE);
+      // Encode a single audio frame
+
+    virtual void flush();
+      // Flush and beffered or queued packets.
+
+    EncoderOptions& options();
+    VideoEncoderContext* video();
+    AudioEncoderContext* audio();
+
+    PacketSignal emitter;
+
 protected:
-	//static Mutex _mutex; // Protects avcodec_open/close()
+    virtual void setVideoPacketPts(AVPacket& packet);
 
-	EncoderOptions _options;
-	AVFormatContext* _formatCtx;
-	//clock_t			_startTime;
-	AVIOContext*	_ioCtx;
-	unsigned char*  _ioBuffer; 
-	int				_ioBufferSize; 
 
-	//
- 	// Video
-	//
-	VideoEncoderContext* _video;
-	//PTSCalculator* _videoPtsCalc;
-	//bool _realtime;
-	//Int64 _videoPts;
-	//Int64 _lastVideoPTS;
-	//UInt64 _lastVideoTime;
-	double _videoPtsRemainder;
-	//FPSCounter		_videoFPS;
-	//clock_t			_videoTime;
+    //static Mutex _mutex; // Protects avcodec_open/close()
 
-	//
- 	// Audio
-	//
-	AudioEncoderContext* _audio;
-	AVFifoBuffer*	_audioFifo;		
-	UInt8*			_audioBuffer;
-	//PTSCalculator* _audioPtsCalc;
-	//Int64 _audioPts;
-	//FPSCounter		_audioFPS;
-	//clock_t			_audioTime;	
+    EncoderOptions _options;
+    AVFormatContext* _formatCtx;
+    VideoEncoderContext* _video;
+    AudioEncoderContext* _audio;
+    AVIOContext* _ioCtx;
+    UInt8* _ioBuffer;
+    int _ioBufferSize;
+    double _videoPtsRemainder;
 };
+
+
+bool writeOutputPacket(AVFormatContext *formatCtx, AVPacket& packet);
 
 
 } } // namespace scy::av
 
 
 #endif
-#endif	// SCY_MEDIA_AVEncoder_H
+#endif    // SCY_MEDIA_AVEncoder_H

@@ -22,7 +22,7 @@
 
 
 #include "scy/uv/uvpp.h"
-#include "scy/net/socket.h"	
+#include "scy/net/socket.h"    
 #include "scy/net/types.h"
 #include "scy/net/address.h"
 
@@ -30,59 +30,59 @@
 namespace scy {
 namespace net {
 
-	
+    
 class UDPSocket: public net::Socket, public uv::Handle
 {
 public:
-	typedef std::shared_ptr<UDPSocket> Ptr;
-	typedef std::vector<Ptr> Vec;
+    typedef std::shared_ptr<UDPSocket> Ptr;
+    typedef std::vector<Ptr> Vec;
 
-	UDPSocket(uv::Loop* loop = uv::defaultLoop());
-	virtual ~UDPSocket();
-	
-	virtual void connect(const net::Address& peerAddress);
-	virtual void close();	
+    UDPSocket(uv::Loop* loop = uv::defaultLoop());
+    virtual ~UDPSocket();
+    
+    virtual void connect(const net::Address& peerAddress);
+    virtual void close();    
 
-	virtual void bind(const net::Address& address, unsigned flags = 0);
+    virtual void bind(const net::Address& address, unsigned flags = 0);
 
-	virtual int send(const char* data, std::size_t len, int flags = 0);
-	virtual int send(const char* data, std::size_t len, const net::Address& peerAddress, int flags = 0);
-	
-	virtual bool setBroadcast(bool flag);
-	virtual bool setMulticastLoop(bool flag);
-	virtual bool setMulticastTTL(int ttl);
-	
-	virtual net::Address address() const;
-	virtual net::Address peerAddress() const;
+    virtual int send(const char* data, std::size_t len, int flags = 0);
+    virtual int send(const char* data, std::size_t len, const net::Address& peerAddress, int flags = 0);
+    
+    virtual bool setBroadcast(bool flag);
+    virtual bool setMulticastLoop(bool flag);
+    virtual bool setMulticastTTL(int ttl);
+    
+    virtual net::Address address() const;
+    virtual net::Address peerAddress() const;
 
-	net::TransportType transport() const;
-		/// Returns the UDP transport protocol.
-			
-	virtual void setError(const scy::Error& err);		
-	virtual const scy::Error& error() const;
+    net::TransportType transport() const;
+        /// Returns the UDP transport protocol.
+            
+    virtual void setError(const scy::Error& err);        
+    virtual const scy::Error& error() const;
 
-	virtual bool closed() const;
-		/// Returns true if the native socket 
-		/// handle is closed.
+    virtual bool closed() const;
+        /// Returns true if the native socket 
+        /// handle is closed.
 
-	virtual uv::Loop* loop() const;
-	
-	virtual void onRecv(const MutableBuffer& buf, const net::Address& address);
+    virtual uv::Loop* loop() const;
+    
+    virtual void onRecv(const MutableBuffer& buf, const net::Address& address);
 
-protected:	
-	virtual void init();	
-	virtual bool recvStart();
-	virtual bool recvStop();
+protected:    
+    virtual void init();    
+    virtual bool recvStart();
+    virtual bool recvStop();
 
-	static void onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags);
-	static void afterSend(uv_udp_send_t* req, int status); 
-	static void allocRecvBuffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t* buf);
+    static void onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags);
+    static void afterSend(uv_udp_send_t* req, int status); 
+    static void allocRecvBuffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t* buf);
 
-	virtual void onError(const scy::Error& error);
-	virtual void onClose();
-	
-	net::Address _peer;
-	Buffer _buffer;
+    virtual void onError(const scy::Error& error);
+    virtual void onClose();
+    
+    net::Address _peer;
+    Buffer _buffer;
 };
 
 

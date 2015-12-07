@@ -37,10 +37,10 @@ namespace turn {
 
 
 class UDPClient: public Client
-{	
+{    
 public:
-	UDPClient(ClientObserver& observer, const Options& options = Options());
-	virtual ~UDPClient();
+    UDPClient(ClientObserver& observer, const Options& options = Options());
+    virtual ~UDPClient();
 };
 
 

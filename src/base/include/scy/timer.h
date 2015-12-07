@@ -35,57 +35,57 @@ namespace scy {
 
 
 class Timer
-	/// TODO: Should be Async, and uv::Handle a member
+    /// TODO: Should be Async, and uv::Handle a member
 {
 public:
-	Timer(uv::Loop* loop = uv::defaultLoop());
-	virtual ~Timer();
-	
-	virtual void start(Int64 interval);
-	virtual void start(Int64 timeout, Int64 interval);
-		// Starts the timer, an interval value of zero will only trigger
-		// once after timeout.
-	
-	virtual void stop();
-		// Stops the timer.
-	
-	virtual void restart();
-		// Restarts the timer, even if it hasn't been started yet.
-		// An interval or interval must be set or an exception will be thrown.
-	
-	virtual void again();
-		// Stop the timer, and if it is repeating restart it using the
-		// repeat value as the timeout. If the timer has never been started
-		// before it returns -1 and sets the error to UV_EINVAL.
-	
-	virtual void setInterval(Int64 interval);
-		// Set the repeat value. Note that if the repeat value is set from
-		// a timer callback it does not immediately take effect. If the timer
-		// was non-repeating before, it will have been stopped. If it was repeating,
-		// then the old repeat value will have been used to schedule the next timeout.
-	
-	//virtual void unref();
+    Timer(uv::Loop* loop = uv::defaultLoop());
+    virtual ~Timer();
+    
+    virtual void start(Int64 interval);
+    virtual void start(Int64 timeout, Int64 interval);
+        // Starts the timer, an interval value of zero will only trigger
+        // once after timeout.
+    
+    virtual void stop();
+        // Stops the timer.
+    
+    virtual void restart();
+        // Restarts the timer, even if it hasn't been started yet.
+        // An interval or interval must be set or an exception will be thrown.
+    
+    virtual void again();
+        // Stop the timer, and if it is repeating restart it using the
+        // repeat value as the timeout. If the timer has never been started
+        // before it returns -1 and sets the error to UV_EINVAL.
+    
+    virtual void setInterval(Int64 interval);
+        // Set the repeat value. Note that if the repeat value is set from
+        // a timer callback it does not immediately take effect. If the timer
+        // was non-repeating before, it will have been stopped. If it was repeating,
+        // then the old repeat value will have been used to schedule the next timeout.
+    
+    //virtual void unref();
 
-	bool active() const;
-	
-	Int64 timeout() const;
-	Int64 interval() const;	
-	Int64 count();
-	
-	uv::Handle& handle();
-	
-	NullSignal Timeout;
+    bool active() const;
+    
+    Int64 timeout() const;
+    Int64 interval() const;    
+    Int64 count();
+    
+    uv::Handle& handle();
+    
+    NullSignal Timeout;
 
-protected:		
-	Timer(const Timer&);
-	Timer& operator = (const Timer&);
+protected:        
+    Timer(const Timer&);
+    Timer& operator = (const Timer&);
 
-	virtual void init();
-	
-	uv::Handle _handle;
-	Int64 _timeout;
-	Int64 _interval;
-	Int64 _count;
+    virtual void init();
+    
+    uv::Handle _handle;
+    Int64 _timeout;
+    Int64 _interval;
+    Int64 _count;
 };
 
 
@@ -96,55 +96,55 @@ protected:
 
 
 class Timer2: public async::Runner
-	/// TODO: Should be Async, and uv::Handle a member
+    /// TODO: Should be Async, and uv::Handle a member
 {
 public:
-	Timer2(uv::Loop* loop = uv::defaultLoop());
-	virtual ~Timer2();
-	
-	//virtual void start(Int64 interval);
-	//virtual void start(Int64 timeout, Int64 interval);
-		// Starts the timer, an interval value of zero will only trigger
-		// once after timeout.
-	
-	virtual void stop();
-		// Stops the timer.
-	
-	virtual void restart();
-		// Restarts the timer, even if it hasn't been started yet.
-		// An interval or interval must be set or an exception will be thrown.
-	
-	virtual void again();
-		// Stop the timer, and if it is repeating restart it using the
-		// repeat value as the timeout. If the timer has never been started
-		// before it returns -1 and sets the error to UV_EINVAL.
-	
-	virtual void setInterval(Int64 interval);
-		// Set the repeat value. Note that if the repeat value is set from
-		// a timer callback it does not immediately take effect. If the timer
-		// was non-repeating before, it will have been stopped. If it was repeating,
-		// then the old repeat value will have been used to schedule the next timeout.
-	
-	virtual void unref();
+    Timer2(uv::Loop* loop = uv::defaultLoop());
+    virtual ~Timer2();
+    
+    //virtual void start(Int64 interval);
+    //virtual void start(Int64 timeout, Int64 interval);
+        // Starts the timer, an interval value of zero will only trigger
+        // once after timeout.
+    
+    virtual void stop();
+        // Stops the timer.
+    
+    virtual void restart();
+        // Restarts the timer, even if it hasn't been started yet.
+        // An interval or interval must be set or an exception will be thrown.
+    
+    virtual void again();
+        // Stop the timer, and if it is repeating restart it using the
+        // repeat value as the timeout. If the timer has never been started
+        // before it returns -1 and sets the error to UV_EINVAL.
+    
+    virtual void setInterval(Int64 interval);
+        // Set the repeat value. Note that if the repeat value is set from
+        // a timer callback it does not immediately take effect. If the timer
+        // was non-repeating before, it will have been stopped. If it was repeating,
+        // then the old repeat value will have been used to schedule the next timeout.
+    
+    virtual void unref();
 
-	virtual bool active() const;
-	
-	virtual Int64 timeout() const;
-	virtual Int64 interval() const;
-	
-	Int64 count();
-	
-	//NullSignal Timeout;
+    virtual bool active() const;
+    
+    virtual Int64 timeout() const;
+    virtual Int64 interval() const;
+    
+    Int64 count();
+    
+    //NullSignal Timeout;
 
-	uv::Handle ptr;
+    uv::Handle ptr;
 
-protected:	
-	virtual void init();
+protected:    
+    virtual void init();
 
-	Int64 _timeout;
-	Int64 _interval;
-	Int64 _count;
-	bool _ghost;
+    Int64 _timeout;
+    Int64 _interval;
+    Int64 _count;
+    bool _ghost;
 };
 
 #endif

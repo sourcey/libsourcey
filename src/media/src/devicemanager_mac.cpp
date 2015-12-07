@@ -181,7 +181,7 @@ static bool getAudioDeviceName(AudioDeviceID id,
 
 
 MacDeviceWatcher::MacDeviceWatcher(IDeviceManager* manager) : 
-	DeviceWatcher(manager),
+    DeviceWatcher(manager),
     manager_(manager),
     impl_(NULL) {
 }

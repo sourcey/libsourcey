@@ -25,79 +25,49 @@ endif()
 set(OpenCV_LINK_SHARED_LIBS TRUE CACHE BOOL "Link with shared OpenCV libraries (.dll/.so) instead of static ones (.lib/.a)")
 
 # ----------------------------------------------------------------------
-# Find OpenCV include directory
+# Use pkg-config to find OpenCV is available
 # ----------------------------------------------------------------------
-#set(OpenCV_INCLUDE_DIR OpenCV_INCLUDE_DIR-NOTFOUND)
-if (NOT OpenCV_INCLUDE_DIR)
-  find_path(OpenCV_INCLUDE_DIR
-    NAMES
-      opencv2/core/core.hpp
-    DOC
-      "OpenCV Include Directory"
-    PATHS
-  	  /usr/local/include
-      /usr/include
-    )
+find_package(PkgConfig QUIET)
+if (PKG_CONFIG_FOUND)
+  pkg_search_module(OpenCV opencv)
+
+  message("OpenCV_FOUND=${OpenCV_FOUND}")
+  message("OpenCV_LIBRARIES=${OpenCV_LIBRARIES}")
+  message("OpenCV_STATIC_LIBRARIES=${OpenCV_STATIC_LIBRARIES}")
+  message("OpenCV_INCLUDE_DIRS=${OpenCV_INCLUDE_DIRS}")
+  message("OpenCV_LIBRARY_DIRS=${OpenCV_LIBRARY_DIRS}")
+  message("OpenCV_DEFINITIONS=${OpenCV_DEFINITIONS}")
+  message("OpenCV_VERSION=${OpenCV_VERSION}")
 endif()
-
-# ----------------------------------------------------------------------
-# Determine OpenCV version
-# ----------------------------------------------------------------------
-# Set the version of the OpenCV library we are linking against.
-# This is important for windows as the opencv libraries names include the vesion.
-
-if(NOT OpenCV_VERSION AND OpenCV_INCLUDE_DIR) # AND NOT OpenCV_VERSION_FILE
-  set(OpenCV_VERSION_FILE "${OpenCV_INCLUDE_DIR}/opencv2/core/version.hpp")
-  if(EXISTS "${OpenCV_VERSION_FILE}")
-
-    file(STRINGS "${OpenCV_VERSION_FILE}" OpenCV_VERSION_PARTS REGEX "#define CV_VERSION_[A-Z]+[ ]+[0-9]+" )
-
-    string(REGEX REPLACE ".+CV_VERSION_EPOCH[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_MAJOR "${OpenCV_VERSION_PARTS}")
-    string(REGEX REPLACE ".+CV_VERSION_MAJOR[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_MINOR "${OpenCV_VERSION_PARTS}")
-    string(REGEX REPLACE ".+CV_VERSION_MINOR[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_PATCH "${OpenCV_VERSION_PARTS}")
-    string(REGEX REPLACE ".+CV_VERSION_REVISION[ ]+([0-9]+).*" "\\1" OpenCV_VERSION_TWEAK "${OpenCV_VERSION_PARTS}")
-
-    if(OpenCV_VERSION_MAJOR AND OpenCV_VERSION_MINOR)
-      set(OpenCV_VERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}")
-      if(OpenCV_VERSION_TWEAK GREATER 0)
-        set(OpenCV_VERSION "${OpenCV_VERSION}.${OpenCV_VERSION_TWEAK}")
-      endif()
-
-      set(OpenCV_SOVERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}")
-      set(OpenCV_LIBVERSION "${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}")
-    endif()
-  #else()
-  #  set(OpenCV_VERSION "2.4.5" CACHE STRING "OpenCV library version.")
-  endif()
-endif()
-
-#if(NOT OpenCV_VERSION)
-#  message(FATAL_ERROR "Cannot determine installed OpenCV version; please specify it manually. Version >= 2.4.5 supported.")
-#endif()
 
 # ----------------------------------------------------------------------
 # Find component libraries
 # ----------------------------------------------------------------------
-# The reason for including via iteration rather than find_library
-# is so we can remain version agnostic.
-set_module_notfound(OpenCV)
+#set_module_notfound(OpenCV)
 if (NOT OpenCV_FOUND)
   set(OpenCV_FOUND 0)
 
-  set(OpenCV_LIBRARY_DIRS OpenCV_LIBRARY_DIRS-NOTFOUND)
+  # Find OpenCV include directory
+  #set(OpenCV_INCLUDE_DIR OpenCV_INCLUDE_DIR-NOTFOUND)
+  if (NOT OpenCV_INCLUDE_DIR)
+    find_path(OpenCV_INCLUDE_DIR
+      NAMES
+        opencv2/core/core.hpp
+      DOC
+        "OpenCV Include Directory"
+      PATHS
+    	  /usr/local/include
+        /usr/include
+      )
+  endif()
+
+  # Find OpenCV library directory
+  #set(OpenCV_LIBRARY_DIRS OpenCV_LIBRARY_DIRS-NOTFOUND)
   find_path(OpenCV_LIBRARY_DIRS
     NAMES
-      libopencv_core.a.${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}
-      libopencv_core.so.${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.${OpenCV_VERSION_PATCH}
-      opencv_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}.lib
-      opencv_core${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}d.lib
-      libopencv_core.a
-      libopencv_core.so
+      opencv_core
     DOC
       "OpenCV Library Directory"
-    #PATH_SUFFIXES
-    #  Debug
-    #  Release
     PATHS
       /usr/lib
       /usr/lib/x86_64-linux-gnu
@@ -169,19 +139,19 @@ if (NOT OpenCV_FOUND)
     #message(STATUS "Found OpenCV libraries: ${OpenCV_LIBRARIES}")
 
     #set_module_found(OpenCV)
-
-    # Cache the vars.
-    set(OpenCV_INCLUDE_DIR  ${OpenCV_INCLUDE_DIR}  CACHE STRING   "The OpenCV include directory." FORCE)
-    set(OpenCV_LIBRARY_DIRS ${OpenCV_LIBRARY_DIRS} CACHE STRING   "The OpenCV library directories." FORCE)
-    set(OpenCV_LIBRARIES    ${OpenCV_LIBRARIES}    CACHE STRING   "The OpenCV libraries." FORCE)
-    set(OpenCV_FOUND        ${OpenCV_FOUND}        CACHE BOOLEAN  "The OpenCV found status." FORCE)
-
-    mark_as_advanced(OpenCV_INCLUDE_DIR
-                     OpenCV_LIBRARY_DIRS
-                     OpenCV_LIBRARIES
-                     OpenCV_FOUND)
   endif()
 endif()
+
+# Cache the vars.
+set(OpenCV_INCLUDE_DIR  ${OpenCV_INCLUDE_DIR}  CACHE STRING   "The OpenCV include directory." FORCE)
+set(OpenCV_LIBRARY_DIRS ${OpenCV_LIBRARY_DIRS} CACHE STRING   "The OpenCV library directories." FORCE)
+set(OpenCV_LIBRARIES    ${OpenCV_LIBRARIES}    CACHE STRING   "The OpenCV libraries." FORCE)
+set(OpenCV_FOUND        ${OpenCV_FOUND}        CACHE BOOLEAN  "The OpenCV found status." FORCE)
+
+mark_as_advanced(OpenCV_INCLUDE_DIR
+                 OpenCV_LIBRARY_DIRS
+                 OpenCV_LIBRARIES
+                 OpenCV_FOUND)
 
 #message("OpenCV_INCLUDE_DIR=${OpenCV_INCLUDE_DIR}")
 #message("OpenCV_LIBRARY_DIRS=${OpenCV_LIBRARY_DIRS}")
@@ -192,6 +162,6 @@ endif()
 if(NOT OpenCV_FOUND)
  if (OpenCV_FIND_REQUIRED)
     message(FATAL_ERROR
-      "OpenCV was not found; please specify the path manually. Version >= 2.4.5 supported.")
+      "OpenCV was not found, please specify the path manually. Version >= 3.0.0 supported.")
  endif()
 endif()
