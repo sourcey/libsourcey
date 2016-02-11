@@ -97,8 +97,8 @@ public:
         std::string password;
         //std::string realm;
         long timeout;
-        Int64 lifetime;
-        Int64 timerInterval;
+        std::int64_t lifetime;
+        std::int64_t timerInterval;
         net::Address serverAddr;
         Options() {
             software                = "Sourcey STUN/TURN Client [rfc5766]";

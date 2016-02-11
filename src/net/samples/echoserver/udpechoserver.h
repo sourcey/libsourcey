@@ -24,7 +24,7 @@ public:
         shutdown();
     }
     
-    void start(const std::string& host, UInt16 port)
+    void start(const std::string& host, std::uint16_t port)
     {    
         socket->bind(Address(host, port));
     }
@@ -42,8 +42,8 @@ public:
         std::string payload(bufferCast<const char*>(buffer), buffer.size());
         payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
         if (payload.length() < 12) {
-            UInt64 sentAt = util::strtoi<UInt64>(payload);
-            UInt64 latency = time::ticks() - sentAt;
+            std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
+            std::uint64_t latency = time::ticks() - sentAt;
 
             DebugL << "Recv latency packet from " << peerAddress << ": " 
                 << "payload=" << payload.length() << ", " 

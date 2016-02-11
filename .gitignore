@@ -1,4 +1,6 @@
 *~
 ~*
+node_modules
+log
+bak
 build*
-bak/

@@ -441,7 +441,7 @@ void Server::handleAllocateRequest(Request& request)
     //     attribute follow the specification in [RFC5389].
 
     // Compute the appropriate LIFETIME for this allocation.
-    UInt32 lifetime = min(options().allocationMaxLifetime / 1000, options().allocationDefaultLifetime / 1000);
+    std::uint32_t lifetime = min(options().allocationMaxLifetime / 1000, options().allocationDefaultLifetime / 1000);
     auto lifetimeAttr = request.get<stun::Lifetime>();
     if (lifetimeAttr)
         lifetime = min(lifetime, lifetimeAttr->value());
@@ -821,7 +821,7 @@ ServerAllocation* Server::getAllocation(const FiveTuple& tuple)
 }
 
 
-TCPAllocation* Server::getTCPAllocation(const UInt32& connectionID) 
+TCPAllocation* Server::getTCPAllocation(const std::uint32_t& connectionID) 
 {
     //Mutex::ScopedLock lock(_mutex);    
 

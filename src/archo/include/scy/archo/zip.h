@@ -56,8 +56,8 @@ struct ZipFile
     struct FileInfo
     {
         std::string path;
-        size_t      compressedSize;
-        size_t      uncompressedSize;
+        std::size_t      compressedSize;
+        std::size_t      uncompressedSize;
     };
 
 
@@ -90,5 +90,5 @@ public:
 
     //typedef std::vector<FileInfo> FileInfoList;
     //std::vector< ci::fs::path > getFiles();
-    //std::pair<boost::shared_array<char>,size_t> ReadCurrentFile();
+    //std::pair<boost::shared_array<char>,std::size_t> ReadCurrentFile();
     //private:

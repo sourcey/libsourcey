@@ -337,7 +337,7 @@ void UDPSocket::afterSend(uv_udp_send_t* req, int status)
 }
 
 
-void UDPSocket::allocRecvBuffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
+void UDPSocket::allocRecvBuffer(uv_handle_t* handle, std::size_t suggested_size, uv_buf_t* buf)
 {
     auto self = static_cast<UDPSocket*>(handle->data);    
     //TraceL << "Allocating Buffer: " << suggested_size << endl;    

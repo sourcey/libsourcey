@@ -20,7 +20,7 @@
 #define SCY_Time_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include <string>
 #include <ctime>
 
@@ -68,13 +68,13 @@ std::string getUTC();
 
 
 #if 0
-UInt64 ticks();
+std::uint64_t ticks();
     // Retrieves the number of milliseconds that have elapsed since the system was started, up to 49.7 days.
 
-UInt64 hrtime();
+std::uint64_t hrtime();
     // Returns the current high-resolution real time in nanoseconds.
 
-UInt64 getTimeMS();
+std::uint64_t getTimeMS();
     // Returns the current high-resolution real time in milliseconds.
 #endif
 

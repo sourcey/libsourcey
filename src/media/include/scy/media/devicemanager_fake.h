@@ -109,7 +109,7 @@ public:
     void setAudioInputDevices(const std::vector<Device>& devices) 
     {
         //input_devices_.clear();
-        //for (size_t i = 0; i < devices.size(); ++i) {
+        //for (std::size_t i = 0; i < devices.size(); ++i) {
         //    input_devices_.push_back(Device(devices[i], i));
         //}
         input_devices_ = devices;
@@ -119,7 +119,7 @@ public:
     void setAudioOutputDevices(const std::vector<Device>& devices) 
     {
         //output_devices_.clear();
-        //for (size_t i = 0; i < devices.size(); ++i) {
+        //for (std::size_t i = 0; i < devices.size(); ++i) {
         //    output_devices_.push_back(Device(devices[i], i));
         //}        
         output_devices_ = devices;
@@ -129,7 +129,7 @@ public:
     void setVideoCaptureDevices(const std::vector<Device>& devices) 
     {
         //vidcap_devices_.clear();
-        //for (size_t i = 0; i < devices.size(); ++i) {
+        //for (std::size_t i = 0; i < devices.size(); ++i) {
         //    vidcap_devices_.push_back(Device(devices[i], i));
         //}        
         vidcap_devices_ = devices;

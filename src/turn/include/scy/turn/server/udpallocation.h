@@ -41,7 +41,7 @@ public:
         Server& server,
         const FiveTuple& tuple, 
         const std::string& username, 
-        const UInt32& lifetime);
+        const std::uint32_t& lifetime);
     virtual ~UDPAllocation();
 
     //void onPacketReceived(void* sender, RawPacket& packet);

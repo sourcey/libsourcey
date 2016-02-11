@@ -38,7 +38,7 @@ namespace turn {
 UDPAllocation::UDPAllocation(Server& server,
                              const FiveTuple& tuple, 
                              const std::string& username, 
-                             const UInt32& lifetime) : 
+                             const std::uint32_t& lifetime) : 
     ServerAllocation(server, tuple, username, lifetime)//,
     //_relaySocket(new net::UDPSocket) //server.reactor(), server.runner()
 {

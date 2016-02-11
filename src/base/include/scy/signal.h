@@ -21,7 +21,7 @@
 #define SCY_Signal_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/delegate.h"
 #include "scy/util.h"
 #include "scy/mutex.h"

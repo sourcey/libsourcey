@@ -83,7 +83,7 @@ void Server::shutdown()
 }
 
 
-UInt16 Server::port()
+std::uint16_t Server::port()
 {
     return address.port();
 }    

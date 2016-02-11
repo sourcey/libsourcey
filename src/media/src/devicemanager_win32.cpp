@@ -138,7 +138,7 @@ bool Win32DeviceManager::getDefaultVideoCaptureDevice(Device& device)
     ret = (getVideoCaptureDevices(devices) && !devices.empty());
     if (ret) {
         device = devices[0];
-        for (size_t i = 0; i < devices.size(); ++i) {
+        for (std::size_t i = 0; i < devices.size(); ++i) {
             if (strnicmp(devices[i].guid.c_str(), kUsbDevicePathPrefix,
             //if (strnicmp(devices[i].id.c_str(), kUsbDevicePathPrefix,
                 ARRAY_SIZE(kUsbDevicePathPrefix) - 1) == 0) {

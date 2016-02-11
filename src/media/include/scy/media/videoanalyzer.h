@@ -74,7 +74,7 @@ public:
         FFTSample* rdftData;
         int rdftSize;
         int rdftBits;
-        Int64 frames;
+        std::int64_t frames;
         int filled;
         
         Stream(const std::string& name, int rdftSize);

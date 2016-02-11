@@ -41,8 +41,8 @@ Address::Address(const std::string& id)
 }
 
 
-Address::Address(const std::string& user, const std::string& group, const std::string& id) :
-    user(user), group(group), id(id)
+Address::Address(const std::string& user, const std::string& id) : //const std::string& group,
+    user(user), id(id) //group(group),
 {
 }
 
@@ -50,31 +50,40 @@ Address::Address(const std::string& user, const std::string& group, const std::s
 Address::~Address()
 {
 }
-    
+
 
 bool Address::parse(const std::string& addr)
-{    
+{
     if (addr.empty())
         return false;
-  
-    // First find the ID part
-    std::string::size_type slashpos = addr.find('/');
-    id = (slashpos == std::string::npos ? "" : addr.substr(slashpos + 1));
 
-    // Now look for the user
-    std::string::size_type atpos = addr.find('@');
-    std::string::size_type groupbegin;
-    if (atpos < slashpos && atpos != std::string::npos) {
-        user = addr.substr(0, atpos);
-        groupbegin = atpos + 1;
-    } else {
-        groupbegin = 0;
-    }
+    std::vector<std::string> params = util::split(addr, '|');
+    assert(params.size() > 1);
+    if (params.empty())
+        return false;
+    if (params.size() > 0)
+        user = params[0];
+    if (params.size() > 1)
+        user = params[1];
 
-    // Now take what is left as the group
-    std::string::size_type domainend = (slashpos == std::string::npos) ?
-        (addr.length() - groupbegin) : (slashpos - groupbegin);
-    group = addr.substr(groupbegin, domainend);
+    // // First find the ID part
+    // std::string::size_type slashpos = addr.find('/');
+    // id = (slashpos == std::string::npos ? "" : addr.substr(slashpos + 1));
+    //
+    // // Now look for the user
+    // std::string::size_type atpos = addr.find('@');
+    // std::string::size_type groupbegin;
+    // if (atpos < slashpos && atpos != std::string::npos) {
+    //     user = addr.substr(0, atpos);
+    //     groupbegin = atpos + 1;
+    // } else {
+    //     groupbegin = 0;
+    // }
+    //
+    // // Now take what is left as the group
+    // std::string::size_type domainend = (slashpos == std::string::npos) ?
+    //     (addr.length() - groupbegin) : (slashpos - groupbegin);
+    // group = addr.substr(groupbegin, domainend);
 
     return valid();
 }
@@ -82,7 +91,7 @@ bool Address::parse(const std::string& addr)
 bool Address::valid() const
 {
     return !user.empty()
-        || !group.empty()
+        // || !group.empty()
         || !id.empty();
 }
 
@@ -91,13 +100,13 @@ void Address::print(std::ostream& os) const
 {
     if (!user.empty())
         os << user;
-    if (!group.empty()) {
-        if (!user.empty())
-            os << "@";
-        os << group;
-    }
+    // if (!group.empty()) {
+    //     if (!user.empty())
+    //         os << "@";
+    //     os << group;
+    // }
     if (!id.empty()) {
-        os << "/"; // always add slash to identify ID only addresses
+        os << "|"; // always add slash to identify ID only addresses
         os << id;
     }
 }
@@ -107,14 +116,14 @@ std::string Address::toString() const
 {
     std::ostringstream os;
     print(os);
-    return os.str(); 
+    return os.str();
 }
 
 
 bool Address::operator == (const Address& r)
 {
-    return group == r.group
-        && user == r.user
+    return user == r.user
+        // && group == r.group
         && id == r.id;
 }
 
@@ -125,77 +134,5 @@ bool Address::operator == (std::string& r)
 }
 
 
-#if 0 // JSON Address
-Address::Address(const std::string& id)
-{
-    parse(id);
-}
-    
-
-bool Address::parse(const std::string& id)
-{
-    std::vector<std::string> elems;
-    util::split(id, ':', elems);
-    if (elems.size() >= 1)
-        group = elems[0];
-    if (elems.size() >= 2)
-        user = elems[1];
-    if (elems.size() >= 3)
-        id = elems[2];
-    return valid();
-}
-
-
-std::string Address::id() const 
-{
-    return get("id", "").asString();
-}
-
-
-std::string Address::user() const 
-{
-    return get("user", "").asString();
-}
-
-
-std::string Address::name() const 
-{
-    return get("name", "").asString();
-}
-
-
-std::string Address::group() const 
-{
-    return get("group", "").asString();
-}
-
-
-void Address::setID(const std::string& id) 
-{
-    (*this)["id"] = id;
-}
-
-
-void Address::setUser(const std::string& user) 
-{
-    (*this)["user"] = user;
-}
-
-
-void Address::setName(const std::string& name) 
-{
-    (*this)["name"] = name;
-}
-
-
-void Address::setGroup(const std::string& group) 
-{
-    (*this)["group"] = group;
-}
-#endif
-
-
-} // namespace symple 
+} // namespace symple
 } // namespace scy
-
-

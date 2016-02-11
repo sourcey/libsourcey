@@ -53,7 +53,7 @@ public:
         // repeatedly by the TaskRunner.
         // If this returns false the task will be cancelled()
 
-    virtual UInt32 id() const;
+    virtual std::uint32_t id() const;
         // Unique task ID.
     
     // Inherits async::Runnable:
@@ -80,7 +80,7 @@ protected:
     friend class TaskRunner;
         // Tasks belong to a TaskRunner instance.
 
-    UInt32 _id;
+    std::uint32_t _id;
     bool _repeating;
     bool _destroyed;
 };
@@ -111,7 +111,7 @@ public:
     virtual bool exists(Task* task) const;
         // Returns weather or not a task exists.
 
-    virtual Task* get(UInt32 id) const;
+    virtual Task* get(std::uint32_t id) const;
         // Returns the task pointer matching the given ID, 
         // or nullptr if no task exists.
 

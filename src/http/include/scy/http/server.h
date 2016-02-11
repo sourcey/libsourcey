@@ -181,7 +181,7 @@ public:
     void start();
     void shutdown();
 
-    UInt16 port();    
+    std::uint16_t port();    
 
     NullSignal Shutdown;
 

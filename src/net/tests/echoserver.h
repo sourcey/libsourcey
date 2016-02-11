@@ -96,7 +96,7 @@ public:
         }
     }
 
-    UInt16 port()
+    std::uint16_t port()
     {
         return socket.address().port();
     }

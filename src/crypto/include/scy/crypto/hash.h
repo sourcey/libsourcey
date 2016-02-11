@@ -22,7 +22,7 @@
 
 
 #include "scy/crypto/crypto.h"
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/hex.h"
 
 #include <openssl/evp.h>
@@ -94,7 +94,7 @@ inline std::string checksum(const std::string& algorithm, const std::string& pat
     Hash engine(algorithm);
     char buffer[4096];
     while (fstr.read(buffer, 4096) || fstr.gcount() > 0) {
-        engine.update(buffer, (size_t)fstr.gcount());
+        engine.update(buffer, (std::size_t)fstr.gcount());
     }
 
     return hex::encode(engine.digest());

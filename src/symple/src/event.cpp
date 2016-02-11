@@ -28,7 +28,7 @@ namespace scy {
 namespace smpl {
 
 
-Event::Event() 
+Event::Event()
 {
     setType("event");
     setTime(::time(0));
@@ -55,7 +55,7 @@ Event::Event(const json::Value& root) :
 }
 
 
-Event::~Event() 
+Event::~Event()
 {
 }
 
@@ -67,13 +67,13 @@ bool Event::valid() const
 }
 
 
-std::string Event::name() const 
+std::string Event::name() const
 {
     return get("name", "").asString();
 }
 
 
-time_t Event::time() const 
+time_t Event::time() const
 {
     return static_cast<time_t>(get("time", 0).asDouble());
 }
@@ -84,15 +84,15 @@ void Event::setName(const std::string& name)
     (*this)["name"] = name;
 }
 
-    
-void Event::setTime(time_t time) 
+
+void Event::setTime(time_t time)
 {
-    (*this)["time"] = (UInt64)time;
+    (*this)["time"] = static_cast<Json::UInt64>(time);
     //DateTimeFormatter::format(
-    //    Timestamp::fromEpochTime(time), 
+    //    Timestamp::fromEpochTime(time),
     //    DateTimeFormat::ISO8601_FORMAT);
 }
 
 
-} // namespace symple 
+} // namespace symple
 } // namespace scy

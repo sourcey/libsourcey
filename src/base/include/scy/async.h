@@ -21,7 +21,7 @@
 #define SCY_Async_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include <stdexcept>
 #include <atomic>
 #include <functional>

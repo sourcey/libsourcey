@@ -174,7 +174,7 @@ void Client::sendRefresh()
     transaction->request().setMethod(stun::Message::Refresh);
 
     stun::Lifetime* lifetimeAttr = new stun::Lifetime;
-    lifetimeAttr->setValue((UInt32)_options.lifetime / 1000);
+    lifetimeAttr->setValue((std::uint32_t)_options.lifetime / 1000);
     transaction->request().add(lifetimeAttr);
     
     sendAuthenticatedTransaction(transaction);
@@ -395,7 +395,7 @@ void Client::sendAllocate()
     // 
     if (_options.lifetime) {
         auto lifetimeAttr = new stun::Lifetime;
-        lifetimeAttr->setValue((UInt32)_options.lifetime / 1000);
+        lifetimeAttr->setValue((std::uint32_t)_options.lifetime / 1000);
         transaction->request().add(lifetimeAttr);
     }
 

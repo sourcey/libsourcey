@@ -38,8 +38,8 @@ class ProgressSignal: public Signal<const double&>
 {
 public:
     void* sender;
-    UInt64 current;
-    UInt64 total;
+    std::uint64_t current;
+    std::uint64_t total;
 
     ProgressSignal() :    
         sender(nullptr), current(0), total(0) {}

@@ -52,7 +52,7 @@ public:
         // Command line args.
         // STL proxy for options.args
 
-    std::function<void(Int64)> onexit;
+    std::function<void(std::int64_t)> onexit;
         // Exit callback; returns the exit status.
 
     ProcessOptions options;

@@ -21,7 +21,7 @@
 #define SCY_PacketSignal_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/packet.h"
 #include "scy/polymorphicsignal.h"
 

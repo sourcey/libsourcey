@@ -75,7 +75,7 @@ public:
         //    - the request's persistent connection state is left unchanged
         //    - the content transfer encoding is set to chunked
         
-    UInt64 calculateMultipartContentLength();
+    std::uint64_t calculateMultipartContentLength();
         // Processes the entire stream and calculates the content length.
         // Not used for chunked encoding.
 
@@ -171,7 +171,7 @@ protected:
     std::string _encoding;
     std::string _boundary;
     PartQueue _parts;
-    UInt64 _filesLength;
+    std::uint64_t _filesLength;
     int _writeState;
     bool _initial;
     bool _complete;
@@ -216,12 +216,12 @@ public:
     const std::string& contentType() const;
         // Returns the MIME type for this part or attachment.
         
-    virtual UInt64 length() const = 0;
+    virtual std::uint64_t length() const = 0;
         // Returns the length of the current part.
 
 protected:
     std::string _contentType;
-    UInt64 _length;
+    std::uint64_t _length;
     NVCollection _headers;
     bool _initialWrite;
 };
@@ -283,7 +283,7 @@ public:
     std::ifstream& stream();
         // Returns the file input stream.
         
-    virtual UInt64 length() const;
+    virtual std::uint64_t length() const;
         // Returns the length of the current part.
 
     /*                
@@ -294,7 +294,7 @@ public:
     const std::string& contentType() const;
         // Returns the MIME type for this part or attachment.
         
-    UInt64 fileSize() const;
+    std::uint64_t fileSize() const;
         // Returns the file size.
         */
 
@@ -303,8 +303,8 @@ protected:
     std::string _path;
     std::string _filename;
     std::ifstream _istr;
-    UInt64 _fileSize;
-    //UInt64 _nWritten;
+    std::uint64_t _fileSize;
+    //std::uint64_t _nWritten;
     //NVCollection _headers;    
 };
 
@@ -337,7 +337,7 @@ public:
     virtual void write(std::ostream& ostr);
         // Writes the form data to the given output stream.    
         
-    virtual UInt64 length() const;
+    virtual std::uint64_t length() const;
         // Returns the length of the current part.
 
 protected:

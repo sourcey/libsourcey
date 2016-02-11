@@ -46,7 +46,7 @@ public:
     Address();
         /// Creates a wildcard (all zero) IPv4 Address.
 
-    Address(const std::string& host, UInt16 port);
+    Address(const std::string& host, std::uint16_t port);
         /// Creates a Address from an IP address and a port number.
         ///
         /// The IP address must either be a domain name, or it must
@@ -91,7 +91,7 @@ public:
     std::string host() const;
         /// Returns the host IP address.
 
-    UInt16 port() const;
+    std::uint16_t port() const;
         /// Returns the port number.
 
     socklen_t length() const;
@@ -113,7 +113,7 @@ public:
         /// Returns true when the port is set and the address is valid
         /// ie. not wildcard.
         
-    static UInt16 resolveService(const std::string& service);
+    static std::uint16_t resolveService(const std::string& service);
 
     static bool validateIP(const std::string& address);
 
@@ -139,7 +139,7 @@ public:
     };
 
 protected:
-    void init(const std::string& host, UInt16 port);
+    void init(const std::string& host, std::uint16_t port);
 
 private:
     AddressBase* _base;

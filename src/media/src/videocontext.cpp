@@ -172,7 +172,7 @@ void VideoEncoderContext::create() //, const VideoCodec& params
     // Allocate the encode buffer
     // XXX: Disabling in favor of encoder manged buffer
     //bufferSize = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
-    //buffer = (UInt8*)av_malloc(bufferSize);
+    //buffer = (std::uint8_t*)av_malloc(bufferSize);
 }
 
 
@@ -235,7 +235,7 @@ void VideoEncoderContext::close()
 }
 
 
-bool VideoEncoderContext::encode(unsigned char* data, int size, Int64 pts, AVPacket& opacket)
+bool VideoEncoderContext::encode(unsigned char* data, int size, std::int64_t pts, AVPacket& opacket)
 {
     assert(data);
     assert(size);
@@ -256,8 +256,8 @@ bool VideoEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
     assert(frame);
     assert(codec);
     frame->pts = ipacket.pts;
-    frame->data[0] = (UInt8*)ipacket.data;
-    //avpicture_fill((AVPicture *)frame, (UInt8*)ipacket.data,
+    frame->data[0] = (std::uint8_t*)ipacket.data;
+    //avpicture_fill((AVPicture *)frame, (std::uint8_t*)ipacket.data,
     //    av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
 
     return encode(frame, opacket);
@@ -403,7 +403,7 @@ void VideoCodecEncoderContext::create()
     // Allocate the encode buffer
     // XXX: Disabling in favor of encoder manged buffer
     //bufferSize = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
-    //buffer = (UInt8*)av_malloc(bufferSize);
+    //buffer = (std::uint8_t*)av_malloc(bufferSize);
 }
 
 
@@ -444,7 +444,7 @@ bool VideoCodecEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
     assert(frame);
     assert(conv);
 
-    frame->data[0] = (UInt8*)ipacket.data;
+    frame->data[0] = (std::uint8_t*)ipacket.data;
 
     // TODO: Correctly set the input frame PTS
     // http://thompsonng.blogspot.com.au/2011/09/ffmpeg-avinterleavedwriteframe-return.html
@@ -534,7 +534,7 @@ void VideoDecoderContext::close()
 }
 
 
-bool VideoDecoderContext::decode(UInt8* data, int size, AVPacket& opacket)
+bool VideoDecoderContext::decode(std::uint8_t* data, int size, AVPacket& opacket)
 {
     AVPacket ipacket;
     av_init_packet(&ipacket);
@@ -732,7 +732,7 @@ AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
         return nullptr;
 
     int size = avpicture_get_size(pixelFmt, width, height);
-    UInt8* buffer = (UInt8*)av_malloc(size);
+    std::uint8_t* buffer = (std::uint8_t*)av_malloc(size);
     if (!buffer) {
         av_free(picture);
         return nullptr;

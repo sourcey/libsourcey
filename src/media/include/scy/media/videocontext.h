@@ -103,7 +103,7 @@ struct VideoEncoderContext: public VideoContext
     //virtual void open();
     virtual void close();
     
-    virtual bool encode(unsigned char* data, int size, Int64 pts, AVPacket& opacket);
+    virtual bool encode(unsigned char* data, int size, std::int64_t pts, AVPacket& opacket);
     virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
     virtual bool encode(AVFrame* iframe, AVPacket& opacket);
     virtual bool flush(AVPacket& opacket);
@@ -114,7 +114,7 @@ struct VideoEncoderContext: public VideoContext
     VideoConversionContext* conv;
     AVFormatContext* format;
 
-    UInt8*    buffer;
+    std::uint8_t*    buffer;
     int        bufferSize;
 
     VideoCodec    iparams;
@@ -142,7 +142,7 @@ struct VideoCodecEncoderContext: public VideoContext
         
     VideoConversionContext* conv;
 
-    UInt8*            buffer;
+    std::uint8_t*            buffer;
     int                bufferSize;
 
     VideoCodec    iparams;
@@ -164,7 +164,7 @@ struct VideoDecoderContext: public VideoContext
     //virtual void open();
     virtual void close();    
     
-    virtual bool decode(UInt8* data, int size, AVPacket& opacket);
+    virtual bool decode(std::uint8_t* data, int size, AVPacket& opacket);
     virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
         // Decodes a the given input packet.
         // Returns true an output packet was returned, 

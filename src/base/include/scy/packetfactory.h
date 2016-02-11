@@ -142,7 +142,7 @@ public:
     virtual IPacket* createPacket(const ConstBuffer& buffer, std::size_t& nread) {
         //Mutex::ScopedLock lock(_mutex);
         assert(!_types.empty() && "no packet types registered");
-        //size_t offset = reader.position();
+        //std::size_t offset = reader.position();
         for (unsigned i = 0; i < _types.size(); i++) {
             IPacket* packet = _types[i]->create(buffer, nread);
             if (packet) {

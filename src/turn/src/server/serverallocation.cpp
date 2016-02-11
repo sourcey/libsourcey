@@ -31,7 +31,7 @@ namespace scy {
 namespace turn {
 
 
-ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple, const std::string& username, Int64 lifetime) : 
+ServerAllocation::ServerAllocation(Server& server, const FiveTuple& tuple, const std::string& username, std::int64_t lifetime) : 
     IAllocation(tuple, username, lifetime),
     _maxLifetime(server.options().allocationMaxLifetime / 1000),
     _server(server)
@@ -91,7 +91,7 @@ void ServerAllocation::handleRefreshRequest(Request& request)
     if (!lifetimeAttr) {
         return;
     }    
-    UInt32 desiredLifetime = std::min<UInt32>(_server.options().allocationMaxLifetime / 1000, lifetimeAttr->value());
+    std::uint32_t desiredLifetime = std::min<std::uint32_t>(_server.options().allocationMaxLifetime / 1000, lifetimeAttr->value());
     //lifetime = min(lifetime, lifetimeAttr->value() * 1000);
 
     // Subsequent processing depends on the "desired lifetime" value:
@@ -203,17 +203,17 @@ bool ServerAllocation::onTimer()
 }
 
 
-Int64 ServerAllocation::maxTimeRemaining() const
+std::int64_t ServerAllocation::maxTimeRemaining() const
 {
-    Int64 elapsed =  static_cast<Int64>(time(0) - _createdAt);
+    std::int64_t elapsed =  static_cast<std::int64_t>(time(0) - _createdAt);
     return elapsed > _maxLifetime ? 0 : _maxLifetime - elapsed;
 }
 
 
-Int64 ServerAllocation::timeRemaining() const
+std::int64_t ServerAllocation::timeRemaining() const
 {
     //Mutex::ScopedLock lock(_mutex);    
-    return min<Int64>(IAllocation::timeRemaining(), maxTimeRemaining());
+    return min<std::int64_t>(IAllocation::timeRemaining(), maxTimeRemaining());
 }
 
 

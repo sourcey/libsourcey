@@ -21,7 +21,7 @@
 #define SCY_Symple_Address_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include <string>
 
 
@@ -32,37 +32,36 @@ namespace smpl {
 struct Address
     /// The Address structure is an endpoint identifier for a
     /// peer on the network.
-    /// The format is very similar to the XMPP JID specification:
-    /// user@group/id
+    /// The format is like so: user|id
 {
 public:
     Address();
     Address(const std::string& addr);
-    Address(const std::string& user, const std::string& group, const std::string& id);
+    Address(const std::string& user, const std::string& id); //const std::string& group,
     virtual ~Address();
-    
-    bool parse(const std::string& addr);        
-    
+
+    bool parse(const std::string& addr);
+
     bool valid() const;
     void print(std::ostream& os) const;
     std::string toString() const;
-    
+
     bool operator == (const Address& r);
     bool operator == (std::string& r);
-    
+
     friend std::ostream& operator << (std::ostream& os, const Address& addr)
     {
         addr.print(os);
         return os;
     }
-    
+
     std::string user;
-    std::string group;
+    // std::string group;
     std::string id;
 };
 
 
-} // namespace symple 
+} // namespace symple
 } // namespace scy
 
 

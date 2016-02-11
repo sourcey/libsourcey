@@ -37,14 +37,14 @@ namespace scy {
 namespace stun {
 
 
-class Attribute 
+class Attribute
     /// The virtual base class for all STUN/TURN attributes.
 {
 public:
-    enum Type 
+    enum Type
     {
         NotExist                = 0,
-        MappedAddress            = 0x0001, 
+        MappedAddress            = 0x0001,
         ResponseAddress         = 0x0002, // Not implemented
         ChangeRequest            = 0x0003, // Not implemented
         SourceAddress            = 0x0004, // Not implemented
@@ -79,7 +79,7 @@ public:
         DontFragment            = 0x001A, // Not implemented
         // 0x0021: Reserved (was TIMER-VAL)
         ReservationToken        = 0x0022, // 8 bytes token value
-        
+
         // TURN TCP
         ConnectionID            = 0x002a,
 
@@ -89,7 +89,7 @@ public:
         ICEPriority                = 0x0024,
         ICEUseCandidate            = 0x0025
     };
-    
+
     virtual ~Attribute() {}
     virtual Attribute* clone() = 0;
 
@@ -102,45 +102,45 @@ public:
         // Writes the body (not the type or size) to the
         // given buffer. Return value is true if successful.
 
-    static Attribute* create(UInt16 type, UInt16 size = 0);
-        // Creates an attribute object with the given type 
+    static Attribute* create(std::uint16_t type, std::uint16_t size = 0);
+        // Creates an attribute object with the given type
         // and size.
-    
-    UInt16 type() const; //Type
-    UInt16 size() const;
+
+    std::uint16_t type() const; //Type
+    std::uint16_t size() const;
 
     void consumePadding(BitReader& reader) const;
     void writePadding(BitWriter& writer) const;
 
-    static const UInt16 TypeID = 0;
+    static const std::uint16_t TypeID = 0;
 
     std::string typeString();
-    static std::string typeString(UInt16 type);
+    static std::string typeString(std::uint16_t type);
 
 protected:
-    Attribute(UInt16 type, UInt16 size = 0);
-    void setLength(UInt16 size);
+    Attribute(std::uint16_t type, std::uint16_t size = 0);
+    void setLength(std::uint16_t size);
 
-    UInt16 _type;
-    UInt16 _size;
+    std::uint16_t _type;
+    std::uint16_t _size;
 };
 
 
 // ---------------------------------------------------------------------------
 //
-class AddressAttribute: public Attribute 
+class AddressAttribute: public Attribute
     /// Implements a STUN/TURN attribute that contains a socket address.
 {
 public:
-    AddressAttribute(UInt16 type, bool ipv4 = true); //bool xor, 
+    AddressAttribute(std::uint16_t type, bool ipv4 = true); //bool xor,
     AddressAttribute(const AddressAttribute& r);
 
     virtual stun::Attribute* clone();
-    
-    static const UInt16 IPv4Size = 8;
-    static const UInt16 IPv6Size = 20;
-    
-    stun::AddressFamily family() const 
+
+    static const std::uint16_t IPv4Size = 8;
+    static const std::uint16_t IPv6Size = 20;
+
+    stun::AddressFamily family() const
     {
         switch (_address.family()) {
         case net::Address::IPv4:
@@ -150,27 +150,27 @@ public:
         }
         return stun::Undefined;
     }
-    
+
     virtual net::Address address() const;
 
     virtual void read(BitReader& reader);
     virtual void write(BitWriter& writer) const;
-    
+
     virtual void setAddress(const net::Address& addr) { _address = addr; }
 
 #if 0
-    virtual UInt16 port() const { return _port; }
-    virtual UInt32 ip() const { return _ip; }
-    virtual UInt8 family() const { return _family; }    
+    virtual std::uint16_t port() const { return _port; }
+    virtual std::uint32_t ip() const { return _ip; }
+    virtual std::uint8_t family() const { return _family; }
 
-    virtual void setFamily(UInt8 family) { _family = family; }
-    virtual void setIP(UInt32 ip) { _ip = ip; }
+    virtual void setFamily(std::uint8_t family) { _family = family; }
+    virtual void setIP(std::uint32_t ip) { _ip = ip; }
     virtual void setIP(const std::string& ip);
-    virtual void setPort(UInt16 port) { _port = port; }
+    virtual void setPort(std::uint16_t port) { _port = port; }
 
-    UInt8 _family;
-    UInt16 _port;
-    UInt32 _ip;
+    std::uint8_t _family;
+    std::uint16_t _port;
+    std::uint32_t _ip;
 #endif
 
 private:
@@ -180,19 +180,19 @@ private:
 
 // ---------------------------------------------------------------------------
 //
-class UInt8Attribute: public Attribute 
+class UInt8Attribute: public Attribute
     /// Implements STUN/TURN attribute that reflects a 32-bit integer.
 {
 public:
-    UInt8Attribute(UInt16 type);
+    UInt8Attribute(std::uint16_t type);
     UInt8Attribute(const UInt8Attribute& r);
 
     virtual Attribute* clone();
 
-    static const UInt16 Size = 1;
+    static const std::uint16_t Size = 1;
 
-    UInt8 value() const { return _bits; }
-    void setValue(UInt8 bits) { _bits = bits; }
+    std::uint8_t value() const { return _bits; }
+    void setValue(std::uint8_t bits) { _bits = bits; }
 
     bool getBit(int index) const;
     void setBit(int index, bool value);
@@ -201,25 +201,25 @@ public:
     void write(BitWriter& writer) const;
 
 private:
-    UInt8 _bits;
+    std::uint8_t _bits;
 };
 
 
 // ---------------------------------------------------------------------------
 //
-class UInt32Attribute: public Attribute 
+class UInt32Attribute: public Attribute
     /// Implements STUN/TURN attribute that reflects a 32-bit integer.
 {
 public:
-    UInt32Attribute(UInt16 type);
+    UInt32Attribute(std::uint16_t type);
     UInt32Attribute(const UInt32Attribute& r);
 
     virtual Attribute* clone();
 
-    static const UInt16 Size = 4;
+    static const std::uint16_t Size = 4;
 
-    UInt32 value() const { return _bits; }
-    void setValue(UInt32 bits) { _bits = bits; }
+    std::uint32_t value() const { return _bits; }
+    void setValue(std::uint32_t bits) { _bits = bits; }
 
     bool getBit(int index) const;
     void setBit(int index, bool value);
@@ -228,25 +228,25 @@ public:
     void write(BitWriter& writer) const;
 
 private:
-    UInt32 _bits;
+    std::uint32_t _bits;
 };
 
 
 // ---------------------------------------------------------------------------
 //
-class UInt64Attribute: public Attribute 
+class UInt64Attribute: public Attribute
     /// Implements STUN/TURN attribute that reflects a 64-bit integer.
 {
 public:
-    UInt64Attribute(UInt16 type);
+    UInt64Attribute(std::uint16_t type);
     UInt64Attribute(const UInt64Attribute& r);
 
     virtual Attribute* clone();
 
-    static const UInt16 Size = 8;
+    static const std::uint16_t Size = 8;
 
-    UInt64 value() const { return _bits; }
-    void setValue(UInt64 bits) { _bits = bits; }
+    std::uint64_t value() const { return _bits; }
+    void setValue(std::uint64_t bits) { _bits = bits; }
 
     bool getBit(int index) const;
     void setBit(int index, bool value);
@@ -255,19 +255,19 @@ public:
     void write(BitWriter& writer) const;
 
 private:
-    UInt64 _bits;
+    std::uint64_t _bits;
 };
 
 
-class FlagAttribute: public Attribute 
+class FlagAttribute: public Attribute
     /// Implements STUN/TURN attribute representing a 0 size flag.
 {
 public:
-    FlagAttribute(UInt16 type);
+    FlagAttribute(std::uint16_t type);
 
     virtual Attribute* clone();
 
-    static const UInt16 Size = 0;
+    static const std::uint16_t Size = 0;
 
     void read(BitReader&) { assert(0 && "not implemented"); }
     void write(BitWriter&) const { assert(0 && "not implemented"); }
@@ -276,11 +276,11 @@ public:
 
 // ---------------------------------------------------------------------------
 //
-class StringAttribute: public Attribute 
+class StringAttribute: public Attribute
     /// Implements STUN/TURN attribute that reflects an arbitrary byte string
 {
 public:
-    StringAttribute(UInt16 type, UInt16 size = 0);
+    StringAttribute(std::uint16_t type, std::uint16_t size = 0);
     StringAttribute(const StringAttribute& r);
     virtual ~StringAttribute();
 
@@ -293,8 +293,8 @@ public:
     void copyBytes(const char* bytes); //  uses strlen
     void copyBytes(const void* bytes, unsigned size);
 
-    UInt8 getByte(int index) const;
-    void setByte(int index, UInt8 value);
+    std::uint8_t getByte(int index) const;
+    void setByte(int index, std::uint8_t value);
 
     void read(BitReader& reader);
     void write(BitWriter& writer) const;
@@ -306,32 +306,32 @@ private:
 
 // ---------------------------------------------------------------------------
 //
-class UInt16ListAttribute: public Attribute 
+class UInt16ListAttribute: public Attribute
     /// Implements STUN/TURN attribute that reflects a list of attribute names.
 {
 public:
-    UInt16ListAttribute(UInt16 type, UInt16 size);
+    UInt16ListAttribute(std::uint16_t type, std::uint16_t size);
     UInt16ListAttribute(const UInt16ListAttribute& r);
     virtual ~UInt16ListAttribute();
 
     virtual Attribute* clone();
 
-    size_t size() const;
-    UInt16 getType(int index) const;
-    void setType(int index, UInt16 value);
-    void addType(UInt16 value);
+    std::size_t size() const;
+    std::uint16_t getType(int index) const;
+    void setType(int index, std::uint16_t value);
+    void addType(std::uint16_t value);
 
     void read(BitReader& reader);
     void write(BitWriter& writer) const;
 
 private:
-    std::vector<UInt16> _attrTypes;
+    std::vector<std::uint16_t> _attrTypes;
 };
 
 
 // ---------------------------------------------------------------------------
 //
-class MessageIntegrity: public Attribute 
+class MessageIntegrity: public Attribute
     /// Implements STUN/TURN attributes that reflects an internet address.
 {
 public:
@@ -340,12 +340,12 @@ public:
     virtual ~MessageIntegrity();
 
     virtual Attribute* clone();
-    
-    static const UInt16 TypeID = 0x0008;
-    static const UInt16 Size = 20;
+
+    static const std::uint16_t TypeID = 0x0008;
+    static const std::uint16_t Size = 20;
 
     bool verifyHmac(const std::string& key) const;
-    
+
     std::string input() const { return _input; }
     std::string hmac() const { return _hmac; }
     std::string key() const { return _key; }
@@ -366,35 +366,35 @@ private:
 
 // ---------------------------------------------------------------------------
 //
-class ErrorCode: public Attribute 
+class ErrorCode: public Attribute
     /// Implements STUN/TURN attribute that reflects an error code.
 {
-public:    
-    ErrorCode(UInt16 size = MinSize);
+public:
+    ErrorCode(std::uint16_t size = MinSize);
     ErrorCode(const ErrorCode& r);
     virtual ~ErrorCode();
 
     virtual Attribute* clone();
-    
-    static const UInt16 TypeID = 0x0009;
-    static const UInt16 MinSize = 4;
+
+    static const std::uint16_t TypeID = 0x0009;
+    static const std::uint16_t MinSize = 4;
 
     void setErrorCode(int code);
-    //void setErrorClass(UInt8 eClass);
-    //void setErrorNumber(UInt8 eNumber);
+    //void setErrorClass(std::uint8_t eClass);
+    //void setErrorNumber(std::uint8_t eNumber);
     void setReason(const std::string& reason);
 
     int errorCode() const;
-    UInt8 errorClass() const { return _class; }
-    UInt8 errorNumber() const { return _number; }
+    std::uint8_t errorClass() const { return _class; }
+    std::uint8_t errorNumber() const { return _number; }
     const std::string& reason() const { return _reason; }
 
     void read(BitReader& reader);
     void write(BitWriter& writer) const;
 
 private:
-    UInt8 _class;
-    UInt8 _number;
+    std::uint8_t _class;
+    std::uint8_t _number;
     std::string _reason;
 };
 
@@ -406,7 +406,7 @@ private:
     class Name: public Derives                                \
     {                                                        \
     public:                                                    \
-        static const UInt16 TypeID = Type;                    \
+        static const std::uint16_t TypeID = Type;                    \
         Name() : Derives(TypeID) {};                        \
         virtual ~Name() {};                                    \
     };                                                        \
@@ -416,8 +416,8 @@ private:
     class Name: public Derives                                \
     {                                                        \
     public:                                                    \
-        static const UInt16 TypeID = Type;                    \
-        Name(UInt16 size = Length) :                        \
+        static const std::uint16_t TypeID = Type;                    \
+        Name(std::uint16_t size = Length) :                        \
             Derives(TypeID, size) {};                        \
         virtual ~Name() {};                                    \
     };                                                        \
@@ -437,7 +437,7 @@ DECLARE_FIXLEN_STUN_ATTRIBUTE(XorMappedAddress, 0x0020, AddressAttribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(XorPeerAddress, 0x0012, AddressAttribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(XorRelayedAddress, 0x0016, AddressAttribute)
 
-// UInt32 attributes
+// std::uint32_t attributes
 DECLARE_FIXLEN_STUN_ATTRIBUTE(Fingerprint, 0x8028, UInt32Attribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(RequestedTransport, 0x0019, UInt32Attribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(ChangeRequest, 0x0003, UInt32Attribute)
@@ -448,10 +448,10 @@ DECLARE_FIXLEN_STUN_ATTRIBUTE(ChannelNumber, 0x000c, UInt32Attribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(ICEPriority, 0x0024, UInt32Attribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(ConnectionID, 0x002a, UInt32Attribute)
 
-// UInt8 attributes
+// std::uint8_t attributes
 DECLARE_FIXLEN_STUN_ATTRIBUTE(EventPort, 0x0018, UInt8Attribute)
 
-// UInt32 list attributes
+// std::uint32_t list attributes
 DECLARE_STUN_ATTRIBUTE(UnknownAttributes, 0x000a, UInt16ListAttribute, 0)
 
 // String attributes
@@ -464,7 +464,7 @@ DECLARE_STUN_ATTRIBUTE(Nonce, 0x0015, StringAttribute, 0)
 DECLARE_STUN_ATTRIBUTE(Software, 0x8022, StringAttribute, 0)
 DECLARE_STUN_ATTRIBUTE(ReservationToken, 0x0022, StringAttribute, 8)
 
-// UInt64 attributes
+// std::uint64_t attributes
 DECLARE_FIXLEN_STUN_ATTRIBUTE(ICEControlling, 0x802A, UInt64Attribute)
 DECLARE_FIXLEN_STUN_ATTRIBUTE(ICEControlled, 0x8029, UInt64Attribute)
 

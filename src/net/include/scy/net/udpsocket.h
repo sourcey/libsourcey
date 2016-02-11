@@ -76,7 +76,7 @@ protected:
 
     static void onRecv(uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags);
     static void afterSend(uv_udp_send_t* req, int status); 
-    static void allocRecvBuffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t* buf);
+    static void allocRecvBuffer(uv_handle_t *handle, std::size_t suggested_size, uv_buf_t* buf);
 
     virtual void onError(const scy::Error& error);
     virtual void onClose();

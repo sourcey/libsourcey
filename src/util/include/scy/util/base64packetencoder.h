@@ -44,7 +44,7 @@ public:
 
         base64::Encoder enc;
         std::vector<char> result(packet.size() * 2);
-        size_t size = enc.encode((const char*)p.data(), p.size(), &result[0]);        
+        std::size_t size = enc.encode((const char*)p.data(), p.size(), &result[0]);        
         size += enc.finalize(&result[size]);
 
         emit(&result[0], size);

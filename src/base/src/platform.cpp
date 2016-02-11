@@ -37,7 +37,7 @@ namespace scy {
 std::string getExePath() 
 {    
     char buf[PATHMAX];
-    size_t size = PATHMAX;
+    std::size_t size = PATHMAX;
     if (uv_exepath(buf, &size) != 0)
         throw std::runtime_error("System error: Cannot resolve executable path");
     return std::string(buf, size);
@@ -47,20 +47,20 @@ std::string getExePath()
 std::string getCwd() 
 {    
     char buf[PATHMAX];
-    size_t size = PATHMAX;
+    std::size_t size = PATHMAX;
     if (uv_cwd(buf, &size) != 0)
         throw std::runtime_error("System error: Cannot resolve working directory");
     return std::string(buf);
 }
 
 
-UInt64 getFreeMemory()
+std::uint64_t getFreeMemory()
 {
     return uv_get_free_memory();
 }
 
 
-UInt64 getTotalMemory()
+std::uint64_t getTotalMemory()
 {
     return uv_get_total_memory();
 }

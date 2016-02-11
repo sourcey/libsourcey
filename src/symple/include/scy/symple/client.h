@@ -38,7 +38,7 @@
 namespace scy {
 namespace smpl {
 
-    
+
 typedef TimedManager<std::string, Message> PersistenceT;
 
 
@@ -50,14 +50,14 @@ typedef TimedManager<std::string, Message> PersistenceT;
 class Client: public sockio::Client
 {
 public:
-    struct Options 
-    {                
+    struct Options
+    {
         std::string host;
-        UInt16 port;
+        std::uint16_t port;
 
         std::string token;
         std::string user;
-        std::string group;
+        // std::string group;
         std::string name;
         std::string type;
         //net::Address serverAddr;
@@ -68,7 +68,7 @@ public:
 
             token        = "";
             user        = "";
-            group        = "global";
+            // group        = "global";
             name        = "";
             type        = "peer";
             //serverAddr    = net::Address("127.0.0.1", 4000);
@@ -76,20 +76,20 @@ public:
     };
 
 public:
-    Client(const net::Socket::Ptr& socket, 
-        const Options& options = Options()//, 
+    Client(const net::Socket::Ptr& socket,
+        const Options& options = Options()//,
         //uv::Loop* loop = uv::defaultLoop()
         );
     virtual ~Client();
 
     void connect();
     void close();
-    
+
     virtual int send(Message& message, bool ack = false);
         // Sends a message.
         // May be a polymorphic Command, Presence, Event or other ...
 
-    virtual int send(const std::string& data, bool ack = false);
+    virtual int send(const std::string& message, bool ack = false);
         // Sends a string message.
         // The message must be a valid Symple message otherwise
         // it will net be delivered.
@@ -100,18 +100,18 @@ public:
 
     virtual int sendPresence(bool probe = false);
         // Broadcasts presence to the user group scope.
-        // The outgoing Presence object may be modified via  
+        // The outgoing Presence object may be modified via
         // the CreatePresence signal.
 
     virtual int sendPresence(const Address& to, bool probe = false);
         // Sends directed presence to the given peer.
-        
+
     virtual std::string ourID() const;
         // Returns the session ID of our current peer object.
         // Returns an empty string when offline.
 
     virtual Peer* ourPeer();
-        // Returns the peer object for the current session, 
+        // Returns the peer object for the current session,
         // or throws an exception when offline.
 
     virtual Roster& roster();
@@ -124,27 +124,27 @@ public:
     virtual Client::Options& options();
         // Returns a reference to the options object.
 
-    virtual Client& operator >> (Message& message);    
+    virtual Client& operator >> (Message& message);
         // Stream operator alias for send().
-    
+
     virtual void onPresenceData(const json::Value& data, bool whiny = false);
         // Updates the roster from the given client object.
 
     //virtual const char* className() const { return "SympleClient"; }
-    
+
     //
     // Signals
     //
 
     Signal<const int&> Announce;
-        // Notifies the outside application about the 
+        // Notifies the outside application about the
         // response status code of our announce() call.
         // Possible status codes are:
         //   - 200: Authentication success
         //     - 401: Authentication failed
         //     - 400: Bad request data
         //     - 500: Server not found
-    
+
     Signal<Peer&> PeerConnected;
         // Signals when a peer connects.
 
@@ -154,25 +154,25 @@ public:
     Signal<Peer&> CreatePresence;
         // Called by createPresence() so outside classes
         // can modify the outgoing Peer JSON object.
-    
-protected:    
+
+protected:
     virtual int announce();
         // Called when a new connection is established
         // to announce and authenticate the peer on the
         // server.
 
     virtual void reset();
-        // Resets variables and data at the beginning  
+        // Resets variables and data at the beginning
         // and end of each session.
 
     virtual void createPresence(Presence& p);
         // Creates a Presence object.
-    
+
     virtual void onSocketConnect();
     virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&);
     virtual void onPacket(sockio::Packet& packet);
 
-protected:    
+protected:
     Roster _roster;
     std::string _ourID;
     PersistenceT _persistence;
@@ -216,19 +216,19 @@ public:
 //
 
 
-enum FilterFlags 
+enum FilterFlags
 {
-    AcceptRequests        = 0x01, 
+    AcceptRequests        = 0x01,
     AcceptResponses        = 0x02
 };
 
 
 struct Filter//: public Flaggable
-{    
-    Filter(const std::string& path, unsigned flags = 0) : 
+{
+    Filter(const std::string& path, unsigned flags = 0) :
         flags(flags), path(path) {}
-    
-    Filter(unsigned flags = 0) : 
+
+    Filter(unsigned flags = 0) :
         flags(flags), path("*") {}
 
     Bitwise flags;
@@ -248,17 +248,17 @@ struct MessageDelegate: public PacketDelegateBase
 
     MessageDelegate(const Filter& filter = Filter()) : filter(filter) {};
     MessageDelegate(const MessageDelegate& r) : filter(r.filter) {};
-    
-    virtual bool accepts(void* /* sender */, IPacket& data, void*, void*, void*) 
+
+    virtual bool accepts(void* /* sender */, IPacket& data, void*, void*, void*)
     {
         auto packet = dynamic_cast<Message*>(&data);
         if (packet &&
-            (!filter.flags.has(AcceptRequests) || 
+            (!filter.flags.has(AcceptRequests) ||
                 (filter.flags.has(AcceptRequests) && packet->isRequest())) &&
-            (!filter.flags.has(AcceptResponses) || 
+            (!filter.flags.has(AcceptResponses) ||
                 (filter.flags.has(AcceptResponses) && !packet->isRequest()))) {
             return true;
-        }    
+        }
         return false;
     }
 };
@@ -269,7 +269,7 @@ struct CommandDelegate: public MessageDelegate
     CommandDelegate(const Filter& filter = Filter()) : MessageDelegate(filter) {};
     CommandDelegate(const CommandDelegate& r) : MessageDelegate(r) {};
 
-    virtual bool accepts(void* sender, IPacket& data, void* empty2, void* empty3, void* empty4) 
+    virtual bool accepts(void* sender, IPacket& data, void* empty2, void* empty3, void* empty4)
     {
         if (MessageDelegate::accepts(sender, data, empty2, empty3, empty4)) {
             auto c = dynamic_cast<Command*>(&data);
@@ -285,7 +285,7 @@ struct PresenceDelegate: public MessageDelegate
     PresenceDelegate() : MessageDelegate(AcceptRequests) {};
     PresenceDelegate(const PresenceDelegate& r) : MessageDelegate(r) {};
 
-    virtual bool accepts(void* sender, IPacket& data, void* empty2, void* empty3, void* empty4) 
+    virtual bool accepts(void* sender, IPacket& data, void* empty2, void* empty3, void* empty4)
     {
         if (MessageDelegate::accepts(sender, data, empty2, empty3, empty4)) {
             auto p = dynamic_cast<Presence*>(&data);
@@ -301,12 +301,12 @@ struct EventDelegate: public MessageDelegate
     EventDelegate() : MessageDelegate(AcceptRequests) {};
     EventDelegate(const EventDelegate& r) : MessageDelegate(r) {};
 
-    virtual bool accepts(void* sender, IPacket& data, void* empty2, void* empty3, void* empty4) 
+    virtual bool accepts(void* sender, IPacket& data, void* empty2, void* empty3, void* empty4)
     {
         if (MessageDelegate::accepts(sender, data, empty2, empty3, empty4)) {
             auto e = dynamic_cast<Event*>(&data);
             return e && e->type() == "event" && (
-                filter.path.empty() || filter.path == "*" || 
+                filter.path.empty() || filter.path == "*" ||
                 util::matchNodes(e->name(), filter.path, ":"));
         }
         return false;

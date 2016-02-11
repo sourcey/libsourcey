@@ -48,7 +48,7 @@ struct TCPClientObserver: public ClientObserver
 
 struct RelayConnectionBinding
 {
-    UInt32 connectionID;
+    std::uint32_t connectionID;
     net::Address peerAddress;
 };
 
@@ -76,7 +76,7 @@ public:
     virtual void handleConnectionBindErrorResponse(const stun::Message& response);
     virtual void handleConnectionAttemptIndication(const stun::Message& response);    
 
-    virtual bool createAndBindConnection(UInt32 connectionID, const net::Address& peerAddress);
+    virtual bool createAndBindConnection(std::uint32_t connectionID, const net::Address& peerAddress);
     //virtual void onRelayConnectionStateChange(void* sender, Net::SocketState& state, const Net::SocketState& oldState);    
 
     virtual void onRelayConnectionConnect(void* sender);

@@ -29,144 +29,223 @@ namespace scy {
 namespace sockio {
 
 
-Packet::Packet(Type type, int id, const std::string& endpoint, const std::string& message, bool ack) : 
-    _type(type), 
+Packet::Packet(Frame frame, Type type, int id, const std::string& nsp, const std::string& event, const std::string& message, bool ack) :
+    _frame(frame),
+    _type(type),
     _id(id),
-    _endpoint(endpoint),
+    _nsp(nsp),
+    _event(event),
     _message(message),
     _ack(ack),
     _size(0)
 {
 }
 
-    
-Packet::Packet(Type type, const std::string& message, bool ack) : 
-    _type(type), 
-    _id(util::randomNumber()),
-    _message(message),
-    _ack(ack),
-    _size(0)
+
+Packet::Packet(Type type, const std::string& message, bool ack) :
+    Packet(Frame::Message, type, util::randomNumber(), "/", "message", message, ack)
 {
-    assert(_id);
 }
 
-    
-Packet::Packet(const std::string& message, bool ack) : 
-    _type(Packet::Message), 
-    _id(util::randomNumber()),
-    _message(message),
-    _ack(ack),
-    _size(0)
+
+Packet::Packet(const std::string& message, bool ack) :
+    Packet(Frame::Message, Type::Event, util::randomNumber(), "/", "message", message, ack)
 {
-    assert(_id);
 }
 
-    
-Packet::Packet(const json::Value& data, bool ack) : 
-    _type(Packet::JSON), 
-    _id(util::randomNumber()),
-    _message(json::stringify(data)),
-    _ack(ack),
-    _size(0)
+
+Packet::Packet(const json::Value& message, bool ack) :
+    Packet(Frame::Message, Type::Event, util::randomNumber(), "/", "message", json::stringify(message), ack)
 {
-    assert(_id);
 }
 
-    
-Packet::Packet(const std::string& event, const json::Value& data, bool ack) : 
-    _type(Packet::Event), 
-    _id(util::randomNumber()),
-    _ack(ack),
-    _size(0)
-{    
-    assert(_id);
 
+Packet::Packet(const std::string& event, const std::string& message, bool ack) :
+    Packet(Frame::Message, Type::Event, util::randomNumber(), "/", event, message, ack)
+{
+    // json::Value root;
+    // root["name"] = event;
+    //
+    // // add the data into an array if it isn't already
+    // if (!data.isArray()) {
+    //     json::Value array(Json::arrayValue);
+    //     array.append(data);
+    //     root["args"] = array;
+    // }
+    // else
+    //     root["args"] = data;
+    //
+    // _message = json::stringify(root);
+}
+
+
+Packet::Packet(const std::string& event, const json::Value& data, bool ack) :
+    Packet(Frame::Message, Type::Event, util::randomNumber(), "/", "message", json::stringify(data), ack)
+{
+    // assert(_id);
+    //
     json::Value root;
-    root["name"] = event;
-
-    // add the data into an array if it isn't already
-    if (!data.isArray()) {
-        json::Value array(Json::arrayValue); 
-        array.append(data);
-        root["args"] = array;
-    }
-    else
-        root["args"] = data;
-        
-    _message = json::stringify(root);
+    // root["name"] = event;
+    //
+    // // add the data into an array if it isn't already
+    // if (!data.isArray()) {
+    //     json::Value array(Json::arrayValue);
+    //     array.append(data);
+    //     root["args"] = array;
+    // }
+    // else
+    //     root["args"] = data;
+    //
+    // _message = json::stringify(root);
 }
 
 
-Packet::Packet(const Packet& r) : 
-    _type(r._type), 
+Packet::Packet(const Packet& r) :
+    _frame(r._frame),
+    _type(r._type),
     _id(r._id),
-    _endpoint(r._endpoint), 
+    _nsp(r._nsp),
     _message(r._message),
-    _ack(true),
-    _size(0)
+    _ack(r._ack),
+    _size(r._size)
 {
 }
 
 
-Packet& Packet::operator = (const Packet& r) 
+Packet& Packet::operator = (const Packet& r)
 {
+    _frame = r._frame;
     _type = r._type;
     _id = r._id;
     _ack = r._ack;
-    _endpoint = r._endpoint;
+    _nsp = r._nsp;
     _message = r._message;
     _size = r._size;
     return *this;
 }
 
 
-Packet::~Packet() 
+Packet::~Packet()
 {
 }
 
 
-IPacket* Packet::clone() const 
+IPacket* Packet::clone() const
 {
     return new Packet(*this);
 }
 
 
-std::size_t Packet::read(const ConstBuffer& buf) 
-{            
-    // https://github.com/LearnBoost/socket.io-spec#Encoding
+std::size_t Packet::read(const ConstBuffer& buf)
+{
+    // DebugL << "Read packet: " << std::string(bufferCast<const char*>(buf), buf.size()) << endl;
 
     // Reset all data
-    _type = Packet::Message;
-    _id = 0;
-    _endpoint = "";
+    _frame = Frame::Unknown;
+    _type = Type::Unknown;
+    _id = -1;
+    _nsp = "/";
     _message = "";
-    _size = 0;
+    _size = -1;
 
-    if (buf.size() < 3)
-        return 0;
+    if (buf.size() < 2)
+        return -1;
 
-    std::string data(bufferCast<const char*>(buf), buf.size());    
+    BitReader reader(buf);
+
+    // look up frame type
+    char frame;
+    reader.get(&frame, 1);
+    _frame = static_cast<Packet::Frame>(atoi(&frame));
+
+    WarnL << "Parse frame: " << frame << ": " << atoi(&frame) << ": " << frameString() << endl;
+
+    if (_frame == Packet::Frame::Message) {
+
+        // look up packet type
+        char type;
+        reader.get(&type, 1);
+        _type = static_cast<Packet::Type>(atoi(&type));
+        // if (_type < TypeMin || _type > TypeMax) {
+        //     WarnL << "Invalid message type: " << _type << endl;
+        //     return false;
+        // }
+
+        WarnL << "Parse type: " << type << ": " << typeString() << endl;
+    }
+
+    // look up attachments if type binary (not implemented)
+
+    WarnL << "Parse namespace: " << reader.peek() << endl;
+
+    // look up namespace (if any)
+    if (reader.peek() == '/') {
+        reader.readToNext(_nsp, ',');
+    }
+
+    WarnL << "Parse id: " << reader.peek() << endl;
+
+    // look up id
+    // assert('oi');
+    // char next = reader.peek();isdigit
+    // if (next !== '' && next == atoi(next)) {
+    if (reader.available() && isdigit(reader.peek())) {
+        char next;
+        std::string id;
+        reader.get(&next, 1);
+        while (reader.available() && isdigit(next)) {
+            id += &next;
+            reader.get(&next, 1);
+        }
+        _id = util::strtoi<int>(id);
+    }
+
+    // var next = str.charAt(i + 1);
+    // if ('' !== next && Number(next) == next) {
+    //   p.id = '';
+    //   while (++i) {
+    //     var c = str.charAt(i);
+    //     if (null == c || Number(c) != c) {
+    //       --i;
+    //       break;
+    //     }
+    //     p.id += str.charAt(i);
+    //     if (i == str.length) break;
+    //   }
+    //   p.id = Number(p.id);
+    // }
+
+    // look up json data
+    // TODO: Take into account joined messages
+    reader.get(_message, reader.available());
+
+    _size = reader.position();
+
+    DebugL << "Parse success: " << toString() << endl;
+
+#if 0 // Socket.IO 0.9x
+    std::string data(bufferCast<const char*>(buf), buf.size());
     std::vector<std::string> frags = util::split(data, ':', 4);
     if (frags.size() < 1) {
-        //DebugLS(this) << "Reading: Invalid Data: " << frags.size() << endl;
+        //DebugL << "Reading: Invalid Data: " << frags.size() << endl;
         return false;
     }
-        
+
     if (!frags[0].empty()) {
-        _type = util::strtoi<UInt32>(frags[0]);
-        //DebugLS(this) << "Reading: Type: " << typeString() << endl;
+        _type = util::strtoi<std::uint32_t>(frags[0]);
+        //DebugL << "Reading: Type: " << typeString() << endl;
     }
 
     if (_type < 0 || _type > 7) {
-        //DebugLS(this) << "Reading: Invalid Type: " << _type << endl;
+        //DebugL << "Reading: Invalid Type: " << typeString() << endl;
         return false;
     }
     if (frags.size() >= 2 && !frags[1].empty()) {
         _ack = (frags[1].find('+') != std::string::npos);
-        _id = util::strtoi<UInt32>(frags[1]);
-    }    
+        _id = util::strtoi<std::uint32_t>(frags[1]);
+    }
     if (frags.size() >= 3 && !frags[2].empty()) {
-        _endpoint = frags[2];
+        _nsp = frags[2];
     }
     if (frags.size() >= 4 && !frags[3].empty()) {
         _message = frags[3];
@@ -178,15 +257,16 @@ std::size_t Packet::read(const ConstBuffer& buf)
 
         std::string data(frags[frags.size() - 1]);
         std::string::size_type pos = data.find('+');
-        if (pos != std::string::npos) 
+        if (pos != std::string::npos)
         {    // complex ack
-            _id = util::strtoi<UInt32>(data.substr(0, pos));
+            _id = util::strtoi<std::uint32_t>(data.substr(0, pos));
             _message = data.substr(pos + 1, data.length());
         }
         else
         {    // simple ack
             _message = data;
         }
+#endif
 
 #if 0
         frags.clear();
@@ -197,75 +277,92 @@ std::size_t Packet::read(const ConstBuffer& buf)
         }
 
         _ack = true; // This is mostly for requests, but we'll set it anyway
-        _id = util::strtoi<UInt32>(frags[0]);
+        _id = util::strtoi<std::uint32_t>(frags[0]);
         _message = frags[1];
-#endif
     }
-
-    _size = data.length();
-    //DebugLS(this) << "Parse success: " << toString() << endl;
+#endif
 
     return _size;
 }
 
 
-void Packet::write(Buffer& buf) const 
+void Packet::write(Buffer& buf) const
 {
     assert(valid());
     std::ostringstream ss;
-    print(ss);
-    
+    // print(ss);
+
+    // 2["message",{"data":"fffffffffffffffffffff","type":"message","id":"k0dsiifb169cz0k9","from":"aaa|/#Zr0vTHQ4JG2Zt-qtAAAA"}]
+    ss << int(_frame)
+        << int(_type);
+
+    if (_type == Type::Event) {
+
+      ss << "[\""
+        << (_event.empty() ? "message" : _event)
+        << "\",\""
+        << _message
+        << "\"]";
+    }
+        // << "[\"message\",\""
+
     std::string str(ss.str()); // TODO: avoid copy
-    buf.insert(buf.end(), str.begin(), str.end()); 
+    buf.insert(buf.end(), str.begin(), str.end());
     //buf.append(ss.str().c_str(), ss.tellp());
 }
 
 
-void Packet::setID(int id) 
-{ 
-    _id = id; 
+void Packet::setID(int id)
+{
+    _id = id;
 }
 
 
-void Packet::setEndpoint(const std::string& endpoint) 
-{ 
-    _endpoint = endpoint; 
+void Packet::setNamespace(const std::string& nsp)
+{
+    _nsp = nsp;
 }
 
 
-void Packet::setMessage(const std::string& message) 
-{ 
-    _message = message; 
+void Packet::setMessage(const std::string& message)
+{
+    _message = message;
 }
 
 
-void Packet::setAck(bool flag) 
-{ 
-    _ack = flag; 
+void Packet::setAck(bool flag)
+{
+    _ack = flag;
 }
 
 
-Packet::Type Packet::type() const 
-{ 
-    return static_cast<Packet::Type>(_type); 
+Packet::Frame Packet::frame() const
+{
+    return _frame;
 }
 
 
-int Packet::id() const 
-{ 
-    return _id; 
+Packet::Type Packet::type() const
+{
+    return _type;
 }
 
 
-std::string Packet::endpoint() const 
-{ 
-    return _endpoint; 
+int Packet::id() const
+{
+    return _id;
 }
 
 
-std::string Packet::message() const 
-{ 
-    return _message; 
+std::string Packet::nsp() const
+{
+    return _nsp;
+}
+
+
+std::string Packet::message() const
+{
+    return _message;
 }
 
 
@@ -281,23 +378,39 @@ json::Value Packet::json() const
 }
 
 
-std::string Packet::typeString() const 
+std::string Packet::frameString() const
 {
-    switch (_type) {
-    case Disconnect: return "Disconnect";
-    case Connect: return "Connect";
-    case Heartbeat: return "Heartbeat";
-    case Message: return "Message";
-    case JSON: return "JSON";
-    case Event: return "Event";
-    case Ack: return "Ack";
-    case Error: return "Error";        
-    default: return "Unknown";
+    switch (_frame) {
+    case Frame::Open: return "Open";
+    case Frame::Close: return "Close";
+    case Frame::Ping: return "Ping";
+    case Frame::Pong: return "Pong";
+    case Frame::Message: return "Message";
+    case Frame::Upgrade: return "Upgrade";
+    case Frame::Noop: return "Noop";
+    // case Unknown: return "unknown";
+    default: return "unknown";
     }
 }
 
 
-std::string Packet::toString() const 
+std::string Packet::typeString() const
+{
+    switch (_type) {
+    case Type::Connect: return "Connect";
+    case Type::Disconnect: return "Disconnect";
+    case Type::Event: return "Event";
+    case Type::Ack: return "Ack";
+    case Type::Error: return "Error";
+    case Type::BinaryEvent: return "BinaryEvent";
+    case Type::BinaryAck: return "BinaryAck";
+    // case Unknown: return "unknown";
+    default: return "unknown";
+    }
+}
+
+
+std::string Packet::toString() const
 {
     std::ostringstream ss;
     print(ss);
@@ -309,34 +422,36 @@ std::string Packet::toString() const
 bool Packet::valid() const
 {
     // Check that ID and correct type have been set
-    return _type >= 0 && _type <= 8 && _id > 0;
+    return int(_type) >= int(Type::TypeMin) && int(_type) <= int(Type::TypeMax) && _id > 0;
 }
 
 
-size_t Packet::size() const
+std::size_t Packet::size() const
 {
     std::ostringstream ss;
     print(ss);
     assert(ss.tellp());
-    return static_cast<size_t>(ss.tellp());
+    return static_cast<std::size_t>(ss.tellp());
 }
 
 
 void Packet::print(std::ostream& os) const
 {
-    os << _type;
-    if (_id == -1 && _endpoint.empty() && _message.empty()) {
+    os << frameString()
+        << ":"
+        << typeString();
+    if (_id == -1 && _nsp.empty() && _message.empty()) {
         os << "::";
     }
-    else if (_id == -1 && _endpoint.empty()){
+    else if (_id == -1 && _nsp.empty()){
         os << ":::" << _message;
-    }  
-    else if (_id > -1 && _type != 6) {
-        os << ":" << _id << (_ack ? "+":"") 
-            << ":" << _endpoint << ":" << _message;
+    }
+    else if (_id > -1) { // && _type != 6
+        os << ":" << _id << (_ack ? "+":"")
+            << ":" << _nsp << ":" << _message;
     }
     else {
-        os << "::" << _endpoint << ":" << _message;
+        os << "::" << _nsp << ":" << _message;
     }
 }
 

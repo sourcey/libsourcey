@@ -100,11 +100,11 @@ public:
     MethodType methodType() const; //  { return static_cast<MethodType>(_method); }
     const TransactionID& transactionID() const { return _transactionID; }
     const std::vector<Attribute*> attrs() const { return _attrs; }
-    std::size_t size() const { return static_cast<size_t>(_size); }
+    std::size_t size() const { return static_cast<std::size_t>(_size); }
 
     std::string methodString() const;
     std::string classString() const;
-    std::string errorString(UInt16 errorCode) const;
+    std::string errorString(std::uint16_t errorCode) const;
     
     void add(Attribute* attr);
     Attribute* get(Attribute::Type type, int index = 0) const;    
@@ -128,15 +128,15 @@ public:
     virtual const char* className() const { return "StunMessage"; }
 
 protected:    
-    UInt16 _class;
-    UInt16 _method;
-    UInt16 _size;
+    std::uint16_t _class;
+    std::uint16_t _method;
+    std::uint16_t _size;
     TransactionID _transactionID;
     std::vector<Attribute*> _attrs;
 };
 
 
-inline bool isValidMethod(UInt16 methodType) 
+inline bool isValidMethod(std::uint16_t methodType) 
 {
     switch (methodType) {
     case Message::Binding:

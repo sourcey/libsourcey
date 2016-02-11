@@ -47,8 +47,8 @@ struct ServerOptions
     std::string software;
     std::string realm;
 
-    UInt32 allocationDefaultLifetime;
-    UInt32 allocationMaxLifetime;    
+    std::uint32_t allocationDefaultLifetime;
+    std::uint32_t allocationMaxLifetime;    
     int allocationMaxPermissions;
     int timerInterval;
     int earlyMediaBufferSize;
@@ -128,7 +128,7 @@ public:
     void addAllocation(ServerAllocation* alloc);
     void removeAllocation(ServerAllocation* alloc);
     ServerAllocation* getAllocation(const FiveTuple& tuple);
-    TCPAllocation* getTCPAllocation(const UInt32& connectionID);
+    TCPAllocation* getTCPAllocation(const std::uint32_t& connectionID);
     net::TCPSocket::Ptr getTCPSocket(const net::Address& remoteAddr);
     void releaseTCPSocket(net::Socket* socket);
     

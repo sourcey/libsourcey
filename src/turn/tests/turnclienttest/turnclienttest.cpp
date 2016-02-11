@@ -208,7 +208,7 @@ struct TestTCPClientObserver: public TCPClientObserver
         DebugLS(this) << "onTimer" << endl;
     }
 
-    void onRelayConnectionCreated(TCPClient& client, const net::TCPSocket::Ptr& socket, const net::Address& peerAddr) //UInt32 connectionID, 
+    void onRelayConnectionCreated(TCPClient& client, const net::TCPSocket::Ptr& socket, const net::Address& peerAddr) //std::uint32_t connectionID, 
     {
         DebugLS(this) << "Relay Connection Created: " << peerAddr << endl;
     }

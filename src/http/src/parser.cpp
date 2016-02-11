@@ -229,7 +229,7 @@ void Parser::onHeadersEnd()
 }
 
 
-void Parser::onBody(const char* buf, std::size_t len) //size_t off, 
+void Parser::onBody(const char* buf, std::size_t len) //std::size_t off, 
 {
     TraceLS(this) << "onBody" << endl;    
     if (_observer)

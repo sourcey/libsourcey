@@ -90,7 +90,7 @@ WebSocketAdapter::~WebSocketAdapter()
 }
 
     
-bool WebSocketAdapter::shutdown(UInt16 statusCode, const std::string& statusMessage)
+bool WebSocketAdapter::shutdown(std::uint16_t statusCode, const std::string& statusMessage)
 {
     char buffer[256];
     BitWriter writer(buffer, 256);
@@ -230,7 +230,7 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
         int offset = reader.position();
         while (offset < total) {
             char* payload = nullptr;
-            UInt64 payloadLength = 0;
+            std::uint64_t payloadLength = 0;
             try {
                 // Restore buffer state for next read
                 //reader.position(offset);
@@ -430,24 +430,24 @@ std::size_t WebSocketFramer::writeFrame(const char* data, std::size_t len, int f
     assert(frame.position() == 0);
     //assert(frame.limit() >= std::size_t(len + MAX_HEADER_LENGTH));
             
-    frame.putU8(static_cast<UInt8>(flags));
-    UInt8 lenByte(0);
+    frame.putU8(static_cast<std::uint8_t>(flags));
+    std::uint8_t lenByte(0);
     if (_maskPayload) {
         lenByte |= FRAME_FLAG_MASK;
     }
     if (len < 126) {
-        lenByte |= static_cast<UInt8>(len);
+        lenByte |= static_cast<std::uint8_t>(len);
         frame.putU8(lenByte);
     }
     else if (len < 65536) {
         lenByte |= 126;
         frame.putU8(lenByte);
-        frame.putU16(static_cast<UInt16>(len));
+        frame.putU16(static_cast<std::uint16_t>(len));
     }
     else {
         lenByte |= 127;
         frame.putU8(lenByte);
-        frame.putU64(static_cast<UInt16>(len));
+        frame.putU64(static_cast<std::uint16_t>(len));
     }    
 
     if (_maskPayload) {
@@ -482,18 +482,18 @@ std::size_t WebSocketFramer::writeFrame(const char* data, std::size_t len, int f
 }
 
     
-UInt64 WebSocketFramer::readFrame(BitReader& frame, char*& payload)
+std::uint64_t WebSocketFramer::readFrame(BitReader& frame, char*& payload)
 {
     assert(handshakeComplete());
-    UInt64 limit = frame.limit();
-    size_t offset = frame.position(); 
+    std::uint64_t limit = frame.limit();
+    std::size_t offset = frame.position(); 
     //assert(offset == 0);
     
     // Read the frame header
     char header[MAX_HEADER_LENGTH];
     BitReader headerReader(header, MAX_HEADER_LENGTH);    
     frame.get(header, 2);
-    UInt8 lengthByte = static_cast<UInt8>(header[1]);
+    std::uint8_t lengthByte = static_cast<std::uint8_t>(header[1]);
     int maskOffset = 0;
     if (lengthByte & FRAME_FLAG_MASK) maskOffset += 4;
     lengthByte &= 0x7f;
@@ -506,15 +506,15 @@ UInt64 WebSocketFramer::readFrame(BitReader& frame, char*& payload)
     frame.skip(2);    
 
     // Parse frame header
-    UInt8 flags;
+    std::uint8_t flags;
     char mask[4];
     headerReader.getU8(flags);    
     headerReader.getU8(lengthByte);
     _frameFlags = flags;
-    UInt64 payloadLength = 0;
+    std::uint64_t payloadLength = 0;
     int payloadOffset = 2;
     if ((lengthByte & 0x7f) == 127) {
-        UInt64 l;
+        std::uint64_t l;
         headerReader.getU64(l);
         if (l > limit)
             throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %" I64_FMT "u", l)); //, ws::ErrorPayloadTooBig
@@ -522,7 +522,7 @@ UInt64 WebSocketFramer::readFrame(BitReader& frame, char*& payload)
         payloadOffset += 8;
     }
     else if ((lengthByte & 0x7f) == 126) {
-        UInt16 l;
+        std::uint16_t l;
         headerReader.getU16(l);
         if (l > limit)
             throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %u", unsigned(l))); //, ws::ErrorPayloadTooBig
@@ -530,7 +530,7 @@ UInt64 WebSocketFramer::readFrame(BitReader& frame, char*& payload)
         payloadOffset += 2;
     }
     else {
-        UInt8 l = lengthByte & 0x7f;
+        std::uint8_t l = lengthByte & 0x7f;
         if (l > limit)
             throw std::runtime_error(util::format("WebSocket error: Insufficient buffer for payload size %u", unsigned(l))); //, ws::ErrorPayloadTooBig
         payloadLength = l;
@@ -549,7 +549,7 @@ UInt64 WebSocketFramer::readFrame(BitReader& frame, char*& payload)
     // Unmask the payload if required
     if (lengthByte & FRAME_FLAG_MASK) {
         auto p = reinterpret_cast<char*>(payload); //frame.data());
-        for (UInt64 i = 0; i < payloadLength; i++) {
+        for (std::uint64_t i = 0; i < payloadLength; i++) {
             p[i] ^= mask[i % 4];
         }
     }

@@ -70,7 +70,7 @@ struct Trigger: public json::ISerializable
         // Updates the scheduleAt value to the
         // next scheduled time.
     
-    virtual Int64 remaining();
+    virtual std::int64_t remaining();
         // Returns the milliseconds remaining 
         // until the next scheduled timeout.
     

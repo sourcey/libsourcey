@@ -21,7 +21,7 @@
 #define SCY_Net_Network_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/uv/uvpp.h"
 
 #include "scy/net/address.h"
@@ -71,7 +71,7 @@ struct DNSResult
     std::string host;
         // The host to resolve
 
-    UInt16 port;
+    std::uint16_t port;
         // The host port to resolve
 
     net::Address addr;
@@ -138,11 +138,11 @@ inline bool resolveDNS(DNSResult* dns)
     
     uv_getaddrinfo_t* handle = new uv_getaddrinfo_t;
     handle->data = dns;
-    return uv_getaddrinfo(uv_default_loop(), handle, onDNSResolved, dns->host.c_str(), util::itostr<UInt16>(dns->port).c_str(), dns->hints) == 0;
+    return uv_getaddrinfo(uv_default_loop(), handle, onDNSResolved, dns->host.c_str(), util::itostr<std::uint16_t>(dns->port).c_str(), dns->hints) == 0;
 }
 
 
-inline bool resolveDNS(const std::string& host, UInt16 port, std::function<void(const DNSResult&)> callback, void* opaque = nullptr, struct addrinfo* hints = nullptr)
+inline bool resolveDNS(const std::string& host, std::uint16_t port, std::function<void(const DNSResult&)> callback, void* opaque = nullptr, struct addrinfo* hints = nullptr)
 {        
     DNSResult* dns = new DNSResult();
     dns->host = host;

@@ -21,7 +21,7 @@
 #define SCY_Task_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/interface.h"
 #include "scy/mutex.h"
 

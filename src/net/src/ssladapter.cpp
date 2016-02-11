@@ -102,7 +102,7 @@ int SSLAdapter::available() const
 }
 
 
-void SSLAdapter::addIncomingData(const char* data, size_t len) 
+void SSLAdapter::addIncomingData(const char* data, std::size_t len) 
 {
     //TraceL << "Add incoming data: " << len << endl;
     BIO_write(_readBIO, data, len);
@@ -116,7 +116,7 @@ void SSLAdapter::addOutgoingData(const std::string& s)
 }
 
 
-void SSLAdapter::addOutgoingData(const char* data, size_t len) 
+void SSLAdapter::addOutgoingData(const char* data, std::size_t len) 
 {
     std::copy(data, data+len, std::back_inserter(_bufferOut));
 }

@@ -44,7 +44,7 @@ struct StreamingOptions: public av::EncoderOptions
 class MediaServer: public http::Server
 {
 public:
-    MediaServer(UInt16 port);
+    MediaServer(std::uint16_t port);
     virtual ~MediaServer();
 
     static void setupPacketStream(PacketStream& stream, const StreamingOptions& options, bool freeCaptures = true, bool attachPacketizers = false);

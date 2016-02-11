@@ -79,14 +79,14 @@ public:
         // to an int.
         // Numbers starting with 0x are treated as hexadecimal.
         
-    Int64 getLargeInt(const std::string& key) const;
+    std::int64_t getLargeInt(const std::string& key) const;
         // Returns the int value of the property with the given name.
         // Throws a NotFoundException if the key does not exist.
         // Throws a SyntaxException if the property can not be converted
         // to an int.
         // Numbers starting with 0x are treated as hexadecimal.
         
-    Int64 getLargeInt(const std::string& key, Int64 defaultValue) const;
+    std::int64_t getLargeInt(const std::string& key, std::int64_t defaultValue) const;
         // If a property with the given key exists, returns the property's int value,
         // otherwise returns the given default value.
         // Throws a SyntaxException if the property can not be converted
@@ -129,7 +129,7 @@ public:
         // Sets the property with the given key to the given value.
         // An already existing value for the key is overwritten.
         
-    void setLargeInt(const std::string& key, Int64 value);
+    void setLargeInt(const std::string& key, std::int64_t value);
         // Sets the property with the given key to the given value.
         // An already existing value for the key is overwritten.
 
@@ -159,7 +159,7 @@ protected:
         // PropertyChanged signal.
     
     static int parseInt(const std::string& value);
-    static Int64 parseLargeInt(const std::string& value);
+    static std::int64_t parseLargeInt(const std::string& value);
     static bool parseBool(const std::string& value);
 
 private:

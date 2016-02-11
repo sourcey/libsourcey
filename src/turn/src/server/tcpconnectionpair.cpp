@@ -181,7 +181,7 @@ void TCPConnectionPair::onPeerDataReceived(void*, const MutableBuffer& buffer, c
     // Buffer early media
     // TODO: Make buffer size server option
     else {
-        size_t maxSize = allocation.server().options().earlyMediaBufferSize;
+        std::size_t maxSize = allocation.server().options().earlyMediaBufferSize;
         DebugLS(this) << "Buffering early data: " << len << endl;
 //#ifdef _DEBUG
 //        DebugLS(this) << "Printing early data: " << std::string(buf, len) << endl;

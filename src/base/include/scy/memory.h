@@ -22,7 +22,7 @@
 
 
 #include "scy/logger.h"
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/mutex.h"
 #include "scy/uv/uvpp.h"
 #include "scy/singleton.h"

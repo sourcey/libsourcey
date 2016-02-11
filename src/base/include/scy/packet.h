@@ -21,7 +21,7 @@
 #define SCY_Packet_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/bitwise.h"
 #include "scy/interface.h"
 #include "scy/buffer.h"
@@ -250,7 +250,7 @@ public:
     }
     
     char* _data;
-    size_t _size;
+    std::size_t _size;
     bool _free;
 };
 

@@ -84,7 +84,7 @@ public:
     Buffer earlyPeerData;    
         // Stores early peer > client data.
         
-    UInt32 connectionID;
+    std::uint32_t connectionID;
         // The unique connection ID.
 
     bool isDataConnection;

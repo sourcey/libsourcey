@@ -29,7 +29,7 @@
 #endif
 
 #include "uv.h"
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/exception.h"
 #include <exception>
 #include <stdexcept>

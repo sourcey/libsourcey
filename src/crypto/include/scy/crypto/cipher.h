@@ -23,7 +23,7 @@
 
 #include "scy/crypto/crypto.h"
 #include "scy/random.h"
-#include "scy/types.h"
+#include <cstdint>
 
 #include <openssl/evp.h>
 

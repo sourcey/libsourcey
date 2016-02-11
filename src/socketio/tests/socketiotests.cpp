@@ -26,7 +26,7 @@ namespace sockio {
 
 
 #define SERVER_HOST "localhost"
-#define SERVER_PORT 88 //443
+#define SERVER_PORT 4444 //443
 #define USE_SSL     0 //1
 
 
@@ -40,12 +40,43 @@ class Tests
 public:
     Tests()
     {
-#if USE_SSL
-        // Init SSL Context
-        SSLContext::Ptr ptrContext = new SSLContext(SSLContext::CLIENT_USE, "", "", "",
-            SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-        SSLManager::instance().initializeClient(ptrContext);
+// #if USE_SSL
+//         // Init SSL Context
+//         SSLContext::Ptr ptrContext = new SSLContext(SSLContext::CLIENT_USE, "", "", "",
+//             SSLContext::VERIFY_NONE, 9, true, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+//         SSLManager::instance().initializeClient(ptrContext);
+//
+//         sockio::SSLClient client(app.loop);
+// #else
+//         sockio::TCPClient client(app.loop);
+// #endif
+//
+//         client.StateChange += sdelegate(this, &Tests::onClientStateChange);
+//         client.connect(SERVER_HOST, SERVER_PORT);
+//
+//         app.run();
+//
+//         // TODO: Benchmarks
+//         // TODO: Transaction tests
+//
+// #if USE_SSL
+//     SSLManager::instance().shutdown();
+// #endif
+//         app.finalize();
 
+        testClient();
+    }
+
+
+    ~Tests()
+    {
+        app.finalize();
+    }
+
+
+    void testClient()
+    {
+#if USE_SSL
         sockio::SSLClient client(app.loop);
 #else
         sockio::TCPClient client(app.loop);
@@ -54,20 +85,18 @@ public:
         client.StateChange += sdelegate(this, &Tests::onClientStateChange);
         client.connect(SERVER_HOST, SERVER_PORT);
 
-        app.run();
+        // app.run();
+        app.waitForShutdown([](void* opaque) {
+            reinterpret_cast<sockio::Client*>(opaque)->close();
+        }, &client);
 
         // TODO: Benchmarks
         // TODO: Transaction tests
-
-#if USE_SSL
-    SSLManager::instance().shutdown();
-#endif
-        app.finalize();
     }
 
     void onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState)
     {
-        //audo client = reinterpret_cast<sockio::Client*>(sender);    
+        auto client = reinterpret_cast<sockio::Client*>(sender);
         DebugL << "Connection state changed: " << state.toString() << endl;
 
         switch (state.id()) {
@@ -78,6 +107,7 @@ public:
             break;
         case sockio::ClientState::Online:
             // TODO: Send message
+            client->send("ping", "hello", true);
             break;
         case sockio::ClientState::Error:
             break;
@@ -92,9 +122,15 @@ public:
 int main(int argc, char** argv)
 {
     Logger::instance().add(new ConsoleChannel("debug", LTrace));
+#if USE_SSL
+    SSLManager::initNoVerifyClient();
+#endif
     {
         scy::sockio::Tests run;
     }
+#if USE_SSL
+    SSLManager::instance().shutdown();
+#endif
     Logger::destroy();
     return 0;
 }

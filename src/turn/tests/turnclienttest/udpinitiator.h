@@ -95,8 +95,8 @@ protected:
         std::string payload(data, size);
         payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
         if (payload.length() == 9) {
-            UInt64 sentAt = util::strtoi<UInt64>(payload);
-            UInt64 latency = time::ticks() - sentAt;
+            std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
+            std::uint64_t latency = time::ticks() - sentAt;
 
             DebugLS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
         }
@@ -106,8 +106,8 @@ protected:
         /*
         if (size < 150) {
             std::string payload(data, size);
-            UInt64 sentAt = util::strtoi<UInt64>(payload);
-            UInt64 latency = time::ticks() - sentAt;
+            std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
+            std::uint64_t latency = time::ticks() - sentAt;
 
             DebugLS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
         }

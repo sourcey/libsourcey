@@ -44,7 +44,7 @@ Socket::~Socket()
 }
 
     
-void Socket::connect(const std::string& host, UInt16 port) 
+void Socket::connect(const std::string& host, std::uint16_t port) 
 {
     TraceLS(this) << "Connect to host: " << host << ":" << port << endl;
     if (Address::validateIP(host))

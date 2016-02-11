@@ -83,7 +83,7 @@ std::string print(const std::tm& dt, const char* fmt)
     return oss.str();
 
 #else    // LINUX
-    const size_t size = 1024;
+    const std::size_t size = 1024;
     char buffer[size]; 
     auto success = std::strftime(buffer, size, fmt, &dt); 
  
@@ -126,7 +126,7 @@ std::time_t nowUTC()
     return std::mktime(std::gmtime(&local)); // UTC time
 }
 
-UInt64 ticks()
+std::uint64_t ticks()
 {
 #ifdef WIN32
     return ::GetTickCount();
@@ -137,13 +137,13 @@ UInt64 ticks()
 #endif
 }
 
-UInt64 getTimeHR() 
+std::uint64_t getTimeHR() 
 {
     return uv_hrtime();
 }
     
 
-UInt64 getTimeMS() 
+std::uint64_t getTimeMS() 
 {
     return uv_hrtime() / 1000000;
 }

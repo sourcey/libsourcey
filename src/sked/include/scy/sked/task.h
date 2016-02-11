@@ -66,7 +66,7 @@ public:
         // Returns a reference to the associated 
         // Scheduler or throws an exception.
     
-    Int64 remaining() const;
+    std::int64_t remaining() const;
         // Returns the milliseconds remaining 
         // until the next scheduled timeout.
         // An sked::Trigger must be associated

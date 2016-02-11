@@ -140,7 +140,7 @@ public:
                     BitWriter writer(flvHeader);
                     writeFLVHeader(writer);
 
-                    MediaPacket opacket((UInt8*)flvHeader.data(), writer.position());
+                    MediaPacket opacket((std::uint8_t*)flvHeader.data(), writer.position());
                     emit(opacket);
                 }
 
@@ -149,7 +149,7 @@ public:
                 _fpsCounter.tick();
 
                 // Generate a timestamp based on frame rate and number.
-                //UInt32 timestamp = static_cast<UInt32>((1000.0 / _fpsCounter.fps) * _fpsCounter.frames);
+                //std::uint32_t timestamp = static_cast<std::uint32_t>((1000.0 / _fpsCounter.fps) * _fpsCounter.frames);
 
                 // Update the output packet timestamp.
                 //fastUpdateTimestamp(mpacket->data(), timestamp);
@@ -171,12 +171,12 @@ public:
         emit(packet);
     }
 
-    virtual void fastUpdateTimestamp(char* buf, UInt32 timestamp)
+    virtual void fastUpdateTimestamp(char* buf, std::uint32_t timestamp)
         // Updates the timestamp in the given FLV tag buffer.
         // No more need to copy data with this method.
         // Caution: this method does not check buffer size.
     {
-        UInt32 val = hostToNetwork32(timestamp);
+        std::uint32_t val = hostToNetwork32(timestamp);
 
         //traceL("FLVMetadataInjector", this) << "Updating timestamp: "
         //    << "\n\tTimestamp: " << timestamp
@@ -197,7 +197,7 @@ public:
     virtual bool fastIsFLVKeyFrame(char* buf)
         // Caution: this method does not check buffer size.
     {
-        UInt8 flags = buf[11];
+        std::uint8_t flags = buf[11];
         return (flags & FLV_FRAME_KEY) == FLV_FRAME_KEY;
     }
 
@@ -296,13 +296,13 @@ public:
     {
         bool result = false;
 
-        UInt8 tagType;
-        UInt32 dataSize;
-        UInt32 timestamp;
-        UInt8 timestampExtended;
-        UInt32 streamId;
-        UInt8 flags;
-        UInt32 previousTagSize;
+        std::uint8_t tagType;
+        std::uint32_t dataSize;
+        std::uint32_t timestamp;
+        std::uint8_t timestampExtended;
+        std::uint32_t streamId;
+        std::uint8_t flags;
+        std::uint32_t previousTagSize;
 
         do {
             if (reader.available() < 12)
@@ -382,13 +382,13 @@ public:
         return result;
     }
 
-    Int64 doubleToInt(double d)
+    std::int64_t doubleToInt(double d)
     {
         int e;
         if     ( !d) return 0;
-        else if(d-d) return 0x7FF0000000000000LL + ((Int64)(d<0)<<63) + (d!=d);
+        else if(d-d) return 0x7FF0000000000000LL + ((std::int64_t)(d<0)<<63) + (d!=d);
         d = frexp(d, &e);
-        return (Int64)(d<0)<<63 | (e+1022LL)<<52 | (Int64)((fabs(d)-0.5)*(1LL<<53));
+        return (std::int64_t)(d<0)<<63 | (e+1022LL)<<52 | (std::int64_t)((fabs(d)-0.5)*(1LL<<53));
     }
 
 
@@ -398,7 +398,7 @@ public:
 
     virtual void writeAMFSring(BitWriter& writer, const char* val)
     {
-        UInt16 len = strlen(val);
+        std::uint16_t len = strlen(val);
         writer.putU16(len);
         writer.put(val, len);
     }
@@ -414,7 +414,7 @@ public:
 #endif
 
         writer.putU8(AMF_DATA_TYPE_NUMBER); // AMF_DATA_TYPE_NUMBER
-        //writer.putU64(Int64(val));
+        //writer.putU64(std::int64_t(val));
         writer.putU64(doubleToInt(val));
     }
 
@@ -431,7 +431,7 @@ protected:
     bool _initial;
     bool _modifyingStream;
     bool _waitingForKeyframe;
-    UInt32 _timestampOffset;
+    std::uint32_t _timestampOffset;
     legacy::FPSCounter _fpsCounter; // Need legacy counter for smooth playback
 };
 
@@ -444,7 +444,7 @@ protected:
 
 
     /*
-    virtual void updateTimestamp(Buffer& buf, UInt32 timestamp)
+    virtual void updateTimestamp(Buffer& buf, std::uint32_t timestamp)
     {
         // Note: The buffer must be positioned at
         // the start of the tag.
@@ -477,12 +477,12 @@ protected:
 
         int offset = buf.position();
 
-        //UInt8 tagType;
+        //std::uint8_t tagType;
         //buf.getU8(tagType);
         //if (tagType != FLV_TAG_TYPE_VIDEO)
         //    return false;
 
-        UInt8 flags;
+        std::uint8_t flags;
         buf.position(11);
         buf.getU8(flags);
 

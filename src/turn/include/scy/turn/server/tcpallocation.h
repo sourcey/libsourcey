@@ -33,7 +33,7 @@ namespace turn {
     
 class Server;
 
-typedef PointerCollection<UInt32, TCPConnectionPair> TCPConnectionPairMap;
+typedef PointerCollection<std::uint32_t, TCPConnectionPair> TCPConnectionPairMap;
 
 
 class TCPAllocation: public ServerAllocation
@@ -43,7 +43,7 @@ public:
                   const net::Socket::Ptr& control, 
                   const FiveTuple& tuple, 
                   const std::string& username, 
-                  const UInt32& lifetime);
+                  const std::uint32_t& lifetime);
     virtual ~TCPAllocation();
     
     bool handleRequest(Request& request);    

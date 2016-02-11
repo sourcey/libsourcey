@@ -196,7 +196,7 @@ class Stream: public uv::Handle
         handleReadCommon((uv_stream_t*)handle, nread, buf, pending);
     }
     
-    static void allocReadBuffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t* buf)
+    static void allocReadBuffer(uv_handle_t *handle, std::size_t suggested_size, uv_buf_t* buf)
     {
         auto self = reinterpret_cast<Stream*>(handle->data);
 

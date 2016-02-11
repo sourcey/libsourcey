@@ -21,7 +21,7 @@
 #define SCY_MEDIA_VideoCapture_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/mutex.h"
 #include "scy/bitwise.h"
 #include "scy/interface.h"
@@ -152,7 +152,7 @@ public:
                   // for consistency with AudioCapture for realtime pts calculation
 
     MatrixPacket(cv::Mat* mat, double time = time::clockSecs()) :
-        VideoPacket(reinterpret_cast<UInt8*>(mat->data), mat->rows*mat->step, mat->cols, mat->rows, time),
+        VideoPacket(reinterpret_cast<std::uint8_t*>(mat->data), mat->rows*mat->step, mat->cols, mat->rows, time),
         mat(mat) {}
 
     MatrixPacket(char* data = nullptr,
@@ -160,7 +160,7 @@ public:
               int width = 0,
               int height = 0,
               double time = time::clockSecs()) :
-        VideoPacket(reinterpret_cast<UInt8*>(data), size, width, height, time),
+        VideoPacket(reinterpret_cast<std::uint8_t*>(data), size, width, height, time),
         mat(nullptr) {};
 
     virtual IPacket* clone() const {

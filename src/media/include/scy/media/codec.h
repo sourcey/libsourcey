@@ -200,7 +200,7 @@ typedef std::list<Codec*> CodecPList;
     //bool matches(const std::string& name) const;
     //virtual std::string toSDP() const;
 
-    //static UInt32 toID(const std::string& type);    
-    //static std::string idString(UInt32 id);
+    //static std::uint32_t toID(const std::string& type);    
+    //static std::string idString(std::uint32_t id);
     
-    //UInt32 id;            // The codec ID. Unsigned integer for easy casting.
+    //std::uint32_t id;            // The codec ID. Unsigned integer for easy casting.

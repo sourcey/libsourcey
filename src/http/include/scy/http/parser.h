@@ -204,7 +204,7 @@ inline const char* get_method_name(method m)
     //detail::resval error_;
     
     //const std::string& message = ""
-    //void setError(UInt32 code, const std::string& message);
+    //void setError(std::uint32_t code, const std::string& message);
 enum http_version {
   HTTP_1_0, HTTP_1_1, HTTP_UNKNOWN_VERSION
 };

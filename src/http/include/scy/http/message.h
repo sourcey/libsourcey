@@ -50,13 +50,13 @@ public:
     const std::string& getVersion() const;
         /// Returns the HTTP version for this message.
         
-    void setContentLength(UInt64 length);
+    void setContentLength(std::uint64_t length);
         /// Sets the Content-Length header.
         //
         /// If length is UNKNOWN_CONTENT_LENGTH, removes
         /// the Content-Length header.
         
-    UInt64 getContentLength() const;
+    std::uint64_t getContentLength() const;
         /// Returns the content length for this message,
         /// which may be UNKNOWN_CONTENT_LENGTH if
         /// no Content-Length header is present.

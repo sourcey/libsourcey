@@ -91,7 +91,7 @@ void Message::write(Buffer& buf) const
 }
 
 
-size_t Message::size() const
+std::size_t Message::size() const
 {
     // KLUDGE: is there a better way?
     return json::stringify(*this).size();

@@ -88,17 +88,17 @@ class IAllocation//: public basic::Polymorphic
 public:
     IAllocation(const FiveTuple& tuple = FiveTuple(), 
                 const std::string& username = "", 
-                Int64 lifetime = 10 * 60 * 1000);
+                std::int64_t lifetime = 10 * 60 * 1000);
     virtual ~IAllocation();
 
-    virtual void updateUsage(Int64 numBytes = 0);
+    virtual void updateUsage(std::int64_t numBytes = 0);
         // Updates the allocation's internal timeout and bandwidth 
         // usage each time the allocation is used.
 
-    virtual void setLifetime(Int64 lifetime);
+    virtual void setLifetime(std::int64_t lifetime);
         // Sets the lifetime of the allocation and resets the timeout.
 
-    virtual void setBandwidthLimit(Int64 numBytes);
+    virtual void setBandwidthLimit(std::int64_t numBytes);
         // Sets the bandwidth limit in bytes for this allocation.
 
     virtual bool expired() const;
@@ -113,14 +113,14 @@ public:
         // destroyed via async garbage collection.
         // See Server::onTimer() and Client::onTimer()
     
-    virtual Int64 bandwidthLimit() const;
-    virtual Int64 bandwidthUsed() const;
-    virtual Int64 bandwidthRemaining() const;
-    virtual Int64 timeRemaining() const;
+    virtual std::int64_t bandwidthLimit() const;
+    virtual std::int64_t bandwidthUsed() const;
+    virtual std::int64_t bandwidthRemaining() const;
+    virtual std::int64_t timeRemaining() const;
 
     virtual FiveTuple& tuple();
     virtual std::string username() const;
-    virtual Int64 lifetime() const;
+    virtual std::int64_t lifetime() const;
     virtual PermissionList permissions() const;
     
     virtual net::Address relayedAddress() const = 0;
@@ -149,9 +149,9 @@ protected:
     FiveTuple _tuple;
     std::string    _username;
     PermissionList    _permissions;
-    Int64 _lifetime;
-    Int64 _bandwidthLimit;
-    Int64 _bandwidthUsed;
+    std::int64_t _lifetime;
+    std::int64_t _bandwidthLimit;
+    std::int64_t _bandwidthUsed;
     time_t _createdAt;
     time_t _updatedAt;
     bool _deleted;

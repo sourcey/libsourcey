@@ -21,7 +21,7 @@
 #define SCY_Buffer_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/memory.h"
 #include "scy/byteorder.h"
 
@@ -47,18 +47,18 @@ class MutableBuffer
     /// data, and so is cheap to copy or assign.
 {
 public:
-    MutableBuffer() : 
+    MutableBuffer() :
         _data(0), _size(0)
         // Construct an empty buffer.
     {
     }
 
-    MutableBuffer(void* data, std::size_t size) : 
+    MutableBuffer(void* data, std::size_t size) :
         _data(data), _size(size)
         // Construct a buffer to represent the given memory range.
     {
     }
-        
+
     void* data() const { return _data; }
     std::size_t size() const { return _size; }
 
@@ -68,7 +68,7 @@ private:
 };
 
 
-// Warning: The following functions permit violations of type safety, 
+// Warning: The following functions permit violations of type safety,
 // so uses of it in application code should be carefully considered.
 
 
@@ -77,7 +77,7 @@ template<typename T> inline MutableBuffer mutableBuffer(T data, std::size_t size
     return MutableBuffer(reinterpret_cast<void*>(data), size);
 }
 
-inline MutableBuffer mutableBuffer(std::string& str) 
+inline MutableBuffer mutableBuffer(std::string& str)
 {
     return MutableBuffer(reinterpret_cast<void*>(&str[0]), str.size()); // std::string is contiguous as of C++11
 }
@@ -113,29 +113,29 @@ inline MutableBuffer mutableBuffer(const Buffer& buf)
 
 
 class ConstBuffer
-    /// The ConstBuffer class provides a safe representation of a 
+    /// The ConstBuffer class provides a safe representation of a
     /// buffer that cannot be modified. It does not own the underlying
     /// data, and so is cheap to copy or assign.
 {
 public:
-    ConstBuffer() : 
+    ConstBuffer() :
         _data(0), _size(0)
         // Construct an empty buffer.
     {
     }
 
-    ConstBuffer(const void* data, std::size_t size) : 
+    ConstBuffer(const void* data, std::size_t size) :
         _data(data), _size(size)
         // Construct a buffer to represent the given memory range.
     {
     }
 
-    ConstBuffer(const MutableBuffer& b) : 
+    ConstBuffer(const MutableBuffer& b) :
         _data(b.data()), _size(b.size())
         // Construct a non-modifiable buffer from a modifiable one.
     {
     }
-            
+
     const void* data() const { return _data; }
     std::size_t size() const { return _size; }
 
@@ -218,7 +218,7 @@ inline PointerToPodType bufferCast(const ConstBuffer& b)
 //
 
 
-class BitReader 
+class BitReader
     /// A BitReader for reading binary streams.
 {
 public:
@@ -229,22 +229,22 @@ public:
 
     void get(char* val, std::size_t len);
     void get(std::string& val, std::size_t len);
-    void getU8(UInt8& val);
-    void getU16(UInt16& val);
-    void getU24(UInt32& val);
-    void getU32(UInt32& val);
-    void getU64(UInt64& val);
-        // Reads a value from the BitReader. 
+    void getU8(std::uint8_t& val);
+    void getU16(std::uint16_t& val);
+    void getU24(std::uint32_t& val);
+    void getU32(std::uint32_t& val);
+    void getU64(std::uint64_t& val);
+        // Reads a value from the BitReader.
         // Returns false if there isn't enough data left for the specified type.
         // Throws a std::out_of_range exception if reading past the limit.
 
     const char peek();
-    const UInt8 peekU8();
-    const UInt16 peekU16();
-    const UInt32 peekU24();
-    const UInt32 peekU32();
-    const UInt64 peekU64();
-        // Peeks data from the BitReader. 
+    const std::uint8_t peekU8();
+    const std::uint16_t peekU16();
+    const std::uint32_t peekU24();
+    const std::uint32_t peekU32();
+    const std::uint64_t peekU64();
+        // Peeks data from the BitReader.
         // -1 is returned if reading past boundary.
 
     int skipToChar(char c);
@@ -281,7 +281,7 @@ public:
 
     std::string toString();
 
-    friend std::ostream& operator << (std::ostream& stream, const BitReader& buf) 
+    friend std::ostream& operator << (std::ostream& stream, const BitReader& buf)
     {
         return stream.write(buf.current(), buf.position());
     }
@@ -301,7 +301,7 @@ private:
 //
 
 
-class BitWriter 
+class BitWriter
     /// A BitWriter for reading/writing binary streams.
     ///
     /// Note that when using the constructor with the Buffer reference
@@ -310,7 +310,7 @@ class BitWriter
     /// All other cases will throw a std::out_of_range error when writing
     /// past the buffer capacity.
 {
-public:    
+public:
     BitWriter(char* bytes, std::size_t size, ByteOrder order = ByteOrder::Network);
     BitWriter(Buffer& buf, ByteOrder order = ByteOrder::Network);
     BitWriter(MutableBuffer& pod, ByteOrder order = ByteOrder::Network);
@@ -318,21 +318,21 @@ public:
 
     void put(const char* val, std::size_t len);
     void put(const std::string& val);
-    void putU8(UInt8 val);
-    void putU16(UInt16 val);
-    void putU24(UInt32 val);
-    void putU32(UInt32 val);
-    void putU64(UInt64 val);
+    void putU8(std::uint8_t val);
+    void putU16(std::uint16_t val);
+    void putU24(std::uint32_t val);
+    void putU32(std::uint32_t val);
+    void putU64(std::uint64_t val);
         // Append bytes to the buffer.
         // Throws a std::out_of_range exception if reading past the limit.
 
     bool update(const char* val, std::size_t len, std::size_t pos);
     bool update(const std::string& val, std::size_t pos);
-    bool updateU8(UInt8 val, std::size_t pos);
-    bool updateU16(UInt16 val, std::size_t pos);
-    bool updateU24(UInt32 val, std::size_t pos);
-    bool updateU32(UInt32 val, std::size_t pos);
-    bool updateU64(UInt64 val, std::size_t pos);
+    bool updateU8(std::uint8_t val, std::size_t pos);
+    bool updateU16(std::uint16_t val, std::size_t pos);
+    bool updateU24(std::uint32_t val, std::size_t pos);
+    bool updateU32(std::uint32_t val, std::size_t pos);
+    bool updateU64(std::uint64_t val, std::size_t pos);
         // Update a byte range.
         // Throws a std::out_of_range exception if reading past the limit.
 
@@ -364,7 +364,7 @@ public:
     std::string toString();
         // Returns written bytes as a string.
 
-    friend std::ostream& operator << (std::ostream& stream, const BitWriter& wr) 
+    friend std::ostream& operator << (std::ostream& stream, const BitWriter& wr)
     {
         return stream.write(wr.begin(), wr.position());
     }

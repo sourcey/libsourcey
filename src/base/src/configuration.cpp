@@ -117,7 +117,7 @@ int Configuration::getInt(const std::string& key, int defaultValue) const
 }
 
     
-Int64 Configuration::getLargeInt(const std::string& key) const
+std::int64_t Configuration::getLargeInt(const std::string& key) const
 {
     Mutex::ScopedLock lock(_mutex);
 
@@ -129,7 +129,7 @@ Int64 Configuration::getLargeInt(const std::string& key) const
 }
 
     
-Int64 Configuration::getLargeInt(const std::string& key, Int64 defaultValue) const
+std::int64_t Configuration::getLargeInt(const std::string& key, std::int64_t defaultValue) const
 {
     Mutex::ScopedLock lock(_mutex);
 
@@ -205,11 +205,11 @@ void Configuration::setInt(const std::string& key, int value)
 }
 
     
-void Configuration::setLargeInt(const std::string& key, Int64 value)
+void Configuration::setLargeInt(const std::string& key, std::int64_t value)
 {
     Mutex::ScopedLock lock(_mutex);
 
-    setRaw(key, util::itostr<Int64>(value));
+    setRaw(key, util::itostr<std::int64_t>(value));
 }
 
 
@@ -238,12 +238,12 @@ int Configuration::parseInt(const std::string& value)
 }
 
 
-Int64 Configuration::parseLargeInt(const std::string& value)
+std::int64_t Configuration::parseLargeInt(const std::string& value)
 {
     if (value.compare(0, 2, "0x") == 0)
         return util::parseHex(value.substr(2));
     else
-        return util::strtoi<Int64>(value);
+        return util::strtoi<std::int64_t>(value);
 }
 
 

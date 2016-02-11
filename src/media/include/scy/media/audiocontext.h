@@ -66,7 +66,7 @@ struct AudioContext
     AVCodecContext* ctx;    // encoder or decoder context
     AVCodec* codec;         // encoder or decoder codec
     AVFrame* frame;         // last encoded or decoded frame
-    Int64 pts;              // encoder current pts
+    std::int64_t pts;              // encoder current pts
     FPSCounter fps;         // encoder or decoder fps rate
     std::string error;      // error message
 };
@@ -87,7 +87,7 @@ struct AudioEncoderContext: public AudioContext
     virtual bool encode(AVFrame* iframe, AVPacket& opacket);
       // Encode a single AVFrame from the decoder.
 
-    virtual bool encode(const UInt8* samples, const int frameSize, const Int64 pts, AVPacket& opacket);
+    virtual bool encode(const std::uint8_t* samples, const int frameSize, const std::int64_t pts, AVPacket& opacket);
       // Encode a single audio frame.
       // @param samples   The input samples to encode.
       // @param frameSize The input frame size as specified by the input audio codec.
@@ -120,7 +120,7 @@ struct AudioDecoderContext: public AudioContext
     //virtual void open();
     virtual void close();
 
-    virtual bool decode(UInt8* data, int size, AVPacket& opacket);
+    virtual bool decode(std::uint8_t* data, int size, AVPacket& opacket);
     virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
         // Decodes a the given input packet.
         // Returns true an output packet was returned,
@@ -147,7 +147,7 @@ struct AudioResampler
     virtual void create(const AudioCodec& iparams, const AudioCodec& oparams);
     virtual void close();
 
-    virtual bool resample(const UInt8* inSamples, int inNbSamples, UInt8**& outSamples, int& outNbSamples);
+    virtual bool resample(const std::uint8_t* inSamples, int inNbSamples, std::uint8_t**& outSamples, int& outNbSamples);
 
     struct SwrContext* ctx;
     AudioCodec iparams;

@@ -23,7 +23,7 @@
 
 #include "scy/uv/uvpp.h"
 #include "scy/datetime.h"
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/signal.h"
 #include "scy/memory.h"
 #include "scy/async.h"
@@ -41,8 +41,8 @@ public:
     Timer(uv::Loop* loop = uv::defaultLoop());
     virtual ~Timer();
     
-    virtual void start(Int64 interval);
-    virtual void start(Int64 timeout, Int64 interval);
+    virtual void start(std::int64_t interval);
+    virtual void start(std::int64_t timeout, std::int64_t interval);
         // Starts the timer, an interval value of zero will only trigger
         // once after timeout.
     
@@ -58,7 +58,7 @@ public:
         // repeat value as the timeout. If the timer has never been started
         // before it returns -1 and sets the error to UV_EINVAL.
     
-    virtual void setInterval(Int64 interval);
+    virtual void setInterval(std::int64_t interval);
         // Set the repeat value. Note that if the repeat value is set from
         // a timer callback it does not immediately take effect. If the timer
         // was non-repeating before, it will have been stopped. If it was repeating,
@@ -68,9 +68,9 @@ public:
 
     bool active() const;
     
-    Int64 timeout() const;
-    Int64 interval() const;    
-    Int64 count();
+    std::int64_t timeout() const;
+    std::int64_t interval() const;    
+    std::int64_t count();
     
     uv::Handle& handle();
     
@@ -83,9 +83,9 @@ protected:
     virtual void init();
     
     uv::Handle _handle;
-    Int64 _timeout;
-    Int64 _interval;
-    Int64 _count;
+    std::int64_t _timeout;
+    std::int64_t _interval;
+    std::int64_t _count;
 };
 
 
@@ -102,8 +102,8 @@ public:
     Timer2(uv::Loop* loop = uv::defaultLoop());
     virtual ~Timer2();
     
-    //virtual void start(Int64 interval);
-    //virtual void start(Int64 timeout, Int64 interval);
+    //virtual void start(std::int64_t interval);
+    //virtual void start(std::int64_t timeout, std::int64_t interval);
         // Starts the timer, an interval value of zero will only trigger
         // once after timeout.
     
@@ -119,7 +119,7 @@ public:
         // repeat value as the timeout. If the timer has never been started
         // before it returns -1 and sets the error to UV_EINVAL.
     
-    virtual void setInterval(Int64 interval);
+    virtual void setInterval(std::int64_t interval);
         // Set the repeat value. Note that if the repeat value is set from
         // a timer callback it does not immediately take effect. If the timer
         // was non-repeating before, it will have been stopped. If it was repeating,
@@ -129,10 +129,10 @@ public:
 
     virtual bool active() const;
     
-    virtual Int64 timeout() const;
-    virtual Int64 interval() const;
+    virtual std::int64_t timeout() const;
+    virtual std::int64_t interval() const;
     
-    Int64 count();
+    std::int64_t count();
     
     //NullSignal Timeout;
 
@@ -141,9 +141,9 @@ public:
 protected:    
     virtual void init();
 
-    Int64 _timeout;
-    Int64 _interval;
-    Int64 _count;
+    std::int64_t _timeout;
+    std::int64_t _interval;
+    std::int64_t _count;
     bool _ghost;
 };
 

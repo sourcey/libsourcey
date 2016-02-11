@@ -85,7 +85,7 @@ public:
     void setHost(const std::string& host);
         // Sets the value of the Host header field.
         
-    void setHost(const std::string& host, UInt16 port);
+    void setHost(const std::string& host, std::uint16_t port);
         // Sets the value of the Host header field.
         //
         // If the given port number is a non-standard

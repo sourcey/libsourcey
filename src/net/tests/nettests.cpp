@@ -267,8 +267,8 @@ public:
       /*
         std::string payload(packet.data(), packet.size());
         payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
-        UInt64 sentAt = util::strtoi<UInt64>(payload);
-        UInt64 latency = time::ticks() - sentAt;
+        std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
+        std::uint64_t latency = time::ticks() - sentAt;
 
         DebugL << "UDPSocket recv from " << packet.info->peerAddress << ": " 
             << "payload=" << payload.length() << ", " 

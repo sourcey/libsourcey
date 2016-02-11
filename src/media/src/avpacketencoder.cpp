@@ -117,13 +117,13 @@ void AVPacketEncoder::process(IPacket& packet)
 
 void AVPacketEncoder::encode(VideoPacket& packet)
 {
-    encodeVideo((unsigned char*)packet.data(), packet.size(), packet.width, packet.height, (UInt64)packet.time);
+    encodeVideo((unsigned char*)packet.data(), packet.size(), packet.width, packet.height, (std::uint64_t)packet.time);
 }
 
 
 void AVPacketEncoder::encode(AudioPacket& packet)
 {
-    encodeAudio((unsigned char*)packet.data(), packet.size(), packet.frameSize, (UInt64)packet.time);
+    encodeAudio((unsigned char*)packet.data(), packet.size(), packet.frameSize, (std::uint64_t)packet.time);
     //encodeAudio(((AudioDecoderContext*)packet.opaque)->frame);
 }
 

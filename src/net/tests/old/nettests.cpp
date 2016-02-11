@@ -222,7 +222,7 @@ public:
         RunDefaultLoop;
     }
 
-    void onOnTimerTimeout(void* sender, Int64 count)
+    void onOnTimerTimeout(void* sender, std::int64_t count)
     {
         Timer* timer = static_cast<Timer*>(sender);
 

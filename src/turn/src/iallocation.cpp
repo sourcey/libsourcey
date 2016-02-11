@@ -39,14 +39,14 @@ namespace turn {
 
 IAllocation::IAllocation(const FiveTuple& tuple, 
                          const std::string& username, 
-                         Int64 lifetime) : 
+                         std::int64_t lifetime) : 
     _tuple(tuple),
     _username(username), 
     _lifetime(lifetime), 
     _bandwidthLimit(0),
     _bandwidthUsed(0),
-    _createdAt(static_cast<Int64>(time(0))), 
-    _updatedAt(static_cast<Int64>(time(0))), 
+    _createdAt(static_cast<std::int64_t>(time(0))), 
+    _updatedAt(static_cast<std::int64_t>(time(0))), 
     _deleted(false)
 {    
 }
@@ -59,7 +59,7 @@ IAllocation::~IAllocation()
 }
 
 
-void IAllocation::updateUsage(Int64 numBytes)
+void IAllocation::updateUsage(std::int64_t numBytes)
 {
     //Mutex::ScopedLock lock(_mutex);
     TraceL << "Update usage: " << _bandwidthUsed << ": " << numBytes << endl;    
@@ -68,11 +68,11 @@ void IAllocation::updateUsage(Int64 numBytes)
 }
 
 
-Int64 IAllocation::timeRemaining() const
+std::int64_t IAllocation::timeRemaining() const
 {
     //Mutex::ScopedLock lock(_mutex);
-    //UInt32 remaining = static_cast<Int64>(_lifetime - (time(0) - _updatedAt));    
-    Int64 remaining = _lifetime - static_cast<Int64>(time(0) - _updatedAt);
+    //std::uint32_t remaining = static_cast<std::int64_t>(_lifetime - (time(0) - _updatedAt));    
+    std::int64_t remaining = _lifetime - static_cast<std::int64_t>(time(0) - _updatedAt);
     return remaining > 0 ? remaining : 0;
 }
 
@@ -90,37 +90,37 @@ bool IAllocation::deleted() const
 }
 
 
-void IAllocation::setLifetime(Int64 lifetime)
+void IAllocation::setLifetime(std::int64_t lifetime)
 {
     //Mutex::ScopedLock lock(_mutex);
     _lifetime = lifetime;
-    _updatedAt = static_cast<Int64>(time(0));
+    _updatedAt = static_cast<std::int64_t>(time(0));
     TraceL << "Updating Lifetime: " << _lifetime << endl;
 }
 
 
-void IAllocation::setBandwidthLimit(Int64 numBytes)
+void IAllocation::setBandwidthLimit(std::int64_t numBytes)
 {
     //Mutex::ScopedLock lock(_mutex);
     _bandwidthLimit = numBytes;
 }
 
 
-Int64 IAllocation::bandwidthLimit() const
+std::int64_t IAllocation::bandwidthLimit() const
 {
     //Mutex::ScopedLock lock(_mutex);
     return _bandwidthLimit;
 }
 
 
-Int64 IAllocation::bandwidthUsed() const
+std::int64_t IAllocation::bandwidthUsed() const
 {
     //Mutex::ScopedLock lock(_mutex);
     return _bandwidthUsed;
 }
 
 
-Int64 IAllocation::bandwidthRemaining() const
+std::int64_t IAllocation::bandwidthRemaining() const
 {
     //Mutex::ScopedLock lock(_mutex);
     return _bandwidthLimit > 0
@@ -143,7 +143,7 @@ std::string IAllocation::username() const
 }
 
 
-Int64 IAllocation::lifetime() const 
+std::int64_t IAllocation::lifetime() const 
 { 
     //Mutex::ScopedLock lock(_mutex);
     return _lifetime; 

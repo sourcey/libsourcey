@@ -2,7 +2,7 @@
 #define SCY_Singleton_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 
 
 namespace scy {

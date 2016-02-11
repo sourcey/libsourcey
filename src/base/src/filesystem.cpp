@@ -50,7 +50,7 @@ static const char* separatorUnix = "/";
 
 std::string filename(const std::string& path)
 {
-    size_t dirp = path.find_last_of(fs::sepPattern);
+    std::size_t dirp = path.find_last_of(fs::sepPattern);
     if (dirp == std::string::npos) return path;
     return path.substr(dirp + 1);
 }
@@ -58,7 +58,7 @@ std::string filename(const std::string& path)
 
 std::string dirname(const std::string& path)
 {
-    size_t dirp = path.find_last_of(fs::sepPattern);
+    std::size_t dirp = path.find_last_of(fs::sepPattern);
     if (dirp == std::string::npos) return "";    
     if (path.find(".", dirp) == std::string::npos) return path;
     return path.substr(0, dirp);
@@ -67,11 +67,11 @@ std::string dirname(const std::string& path)
 
 std::string basename(const std::string& path)
 {
-    size_t dotp = path.find_last_of(".");
+    std::size_t dotp = path.find_last_of(".");
     if (dotp == std::string::npos) 
         return path;
 
-    size_t dirp = path.find_last_of(fs::sepPattern);
+    std::size_t dirp = path.find_last_of(fs::sepPattern);
     if (dirp != std::string::npos && dotp < dirp)
         return path;
 
@@ -81,12 +81,12 @@ std::string basename(const std::string& path)
 
 std::string extname(const std::string& path, bool includeDot)
 {
-    size_t dotp = path.find_last_of(".");
+    std::size_t dotp = path.find_last_of(".");
     if (dotp == std::string::npos) 
         return "";
 
     // Ensure the dot was not part of the pathname
-    size_t dirp = path.find_last_of(fs::sepPattern);
+    std::size_t dirp = path.find_last_of(fs::sepPattern);
     if (dirp != std::string::npos && dotp < dirp)
         return "";
 
@@ -131,7 +131,7 @@ bool isdir(const std::string& path)
 }
 
 
-Int64 filesize(const std::string& path)
+std::int64_t filesize(const std::string& path)
 {
 #ifdef WIN32
     struct _stat s;
@@ -240,7 +240,7 @@ void rename(const std::string& path, const std::string& target)
 
 void trimslash(std::string& path)
 {    
-    size_t dirp = path.find_last_of(sepPattern);
+    std::size_t dirp = path.find_last_of(sepPattern);
     if (dirp == path.length() - 1)
         path.resize(dirp);
 }

@@ -21,7 +21,7 @@
 #define SCY_Delegate_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/logger.h"
 
 

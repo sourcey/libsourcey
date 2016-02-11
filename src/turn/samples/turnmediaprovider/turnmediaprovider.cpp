@@ -185,7 +185,7 @@ protected:
         }
     }
     
-    void onClientConnectionCreated(TURN::TCPClient& client, Net::IPacketSocket* sock, const Net::Address& peerAddr) //UInt32 connectionID, 
+    void onClientConnectionCreated(TURN::TCPClient& client, Net::IPacketSocket* sock, const Net::Address& peerAddr) //std::uint32_t connectionID, 
     {
         LogDebug() << "[TURNMediaProvider: " << this << "] Connection Created: " << peerAddr << endl;
         currentPeerAddr = peerAddr; // Current peer

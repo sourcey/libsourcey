@@ -294,7 +294,7 @@ void TCPClient::handleConnectionBindErrorResponse(const stun::Message& response)
 }
 
 
-bool TCPClient::createAndBindConnection(UInt32 connectionID, const net::Address& peerAddress)
+bool TCPClient::createAndBindConnection(std::uint32_t connectionID, const net::Address& peerAddress)
 {
     //assert (!closed());
     //Mutex::ScopedLock lock(_mutex);

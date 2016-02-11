@@ -82,7 +82,7 @@ AVEncoder::~AVEncoder()
 }
 
 
-static int dispatchOutputPacket(void* opaque, UInt8* buffer, int bufferSize)
+static int dispatchOutputPacket(void* opaque, std::uint8_t* buffer, int bufferSize)
 {
     // Callback example at: http://lists.mplayerhq.hu/pipermail/libav-client/2009-May/003034.html
     AVEncoder* klass = reinterpret_cast<AVEncoder*>(opaque);
@@ -182,7 +182,7 @@ void AVEncoder::initialize()
 
         _videoPts = 0;
         _audioPts = 0;
-        Int64 delta;
+        std::int64_t delta;
         if (_realtime) {
             if (!_formatCtx->start_time_realtime) {
                 _formatCtx->start_time_realtime = av_gettime();
@@ -385,7 +385,7 @@ void AVEncoder::freeVideo()
 }
 
 
-bool AVEncoder::encodeVideo(UInt8* buffer, int bufferSize, int width, int height, UInt64 /* time */)
+bool AVEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int height, std::uint64_t /* time */)
 {
     TraceLS(this) << "Encoding video: " << bufferSize << endl;
 
@@ -461,12 +461,12 @@ void AVEncoder::setVideoPacketPts(AVPacket& packet)
   // TODO: Setting PTS with audio seems to throw mp4
   // encoding out of sync; need to test more...
   if (!_options.oformat.audio.enabled) {
-      Int64 delta;
+      std::int64_t delta;
       delta = av_gettime() - _formatCtx->start_time_realtime;
       double framePTS = delta * (double) _video->stream->time_base.den / (double) _video->stream->time_base.num / (double) 1000000;
       double ptsWhole;
       _videoPtsRemainder += modf(framePTS, &ptsWhole); // fixme
-      packet.pts = (Int64)ptsWhole;
+      packet.pts = (std::int64_t)ptsWhole;
       packet.dts = AV_NOPTS_VALUE;
       if (static_cast<int>(_videoPtsRemainder) > 1) {
           _videoPtsRemainder--;
@@ -505,7 +505,7 @@ void AVEncoder::createAudio()
 
     // Allocate a buffer to read OUT of the FIFO into.
     // The FIFO maintains its own buffer internally.
-    // _audioBuffer = (UInt8*)av_malloc(_audio->outputFrameSize);
+    // _audioBuffer = (std::uint8_t*)av_malloc(_audio->outputFrameSize);
 }
 
 
@@ -530,7 +530,7 @@ void AVEncoder::freeAudio()
 }
 
 
-bool AVEncoder::encodeAudio(UInt8* buffer, int bufferSize, int frameSize, UInt64 time)
+bool AVEncoder::encodeAudio(std::uint8_t* buffer, int bufferSize, int frameSize, std::uint64_t time)
 {
     TraceLS(this) << "Encoding Audio Packet: bufferSize="
         << bufferSize << ", frameSize=" << frameSize << endl;
@@ -571,7 +571,7 @@ bool AVEncoder::encodeAudio(UInt8* buffer, int bufferSize, int frameSize, UInt64
 
     // TODO: Move FIFO to the encoder context.
     // bool res = false;
-    // av_fifo_generic_write(audioFifo, (UInt8*)buffer, bufferSize, nullptr);
+    // av_fifo_generic_write(audioFifo, (std::uint8_t*)buffer, bufferSize, nullptr);
     // while (av_fifo_size(audioFifo) >= _audio->outputFrameSize) {
     //     av_fifo_generic_read(audioFifo, audioBuffer, audio->outputFrameSize, nullptr);
     //
@@ -616,7 +616,7 @@ bool AVEncoder::encodeAudio(UInt8* buffer, int bufferSize, int frameSize, UInt64
 //     AVFormatContext* formatCtx = nullptr;
 //     AudioEncoderContext* audio = nullptr;
 //     // AVFifoBuffer* audioFifo = nullptr;
-//     // UInt8* audioBuffer = nullptr;
+//     // std::uint8_t* audioBuffer = nullptr;
 //     {
 //         //Mutex::ScopedLock lock(_mutex);
 //         options = &_options;
@@ -664,7 +664,7 @@ bool AVEncoder::encodeAudio(UInt8* buffer, int bufferSize, int frameSize, UInt64
 //
 //     // TODO: Move FIFO to the encoder context.
 //     // bool res = false;
-//     // av_fifo_generic_write(audioFifo, (UInt8*)buffer, bufferSize, nullptr);
+//     // av_fifo_generic_write(audioFifo, (std::uint8_t*)buffer, bufferSize, nullptr);
 //     // while (av_fifo_size(audioFifo) >= _audio->outputFrameSize) {
 //     //     av_fifo_generic_read(audioFifo, audioBuffer, audio->outputFrameSize, nullptr);
 //     //

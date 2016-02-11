@@ -23,7 +23,7 @@
 #define SCY_Random_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 
 
 namespace scy {
@@ -53,17 +53,17 @@ public:
     ~Random();
         // Destroys the PRNG.
 
-    void seed(UInt32 seed);
+    void seed(std::uint32_t seed);
         // Seeds the pseudo random generator with the given seed.
 
     void seed();
         // Seeds the pseudo random generator with a random seed
         // obtained from a RandomInputStream.
 
-    UInt32 next();
+    std::uint32_t next();
         // Returns the next 31-bit pseudo random number.
 
-    UInt32 next(UInt32 n);
+    std::uint32_t next(std::uint32_t n);
         // Returns the next 31-bit pseudo random number modulo n.
     
     char nextChar();
@@ -82,8 +82,8 @@ public:
         // Generates a random seed using native OS functions.
 
 protected:
-    void initState(UInt32 seed, char* arg_state, Int32 n);
-    static UInt32 goodRand(Int32 x);
+    void initState(std::uint32_t seed, char* arg_state, std::int32_t n);
+    static std::uint32_t goodRand(std::int32_t x);
 
 private:
     enum
@@ -92,13 +92,13 @@ private:
         NSHUFF    = 50
     };
 
-    UInt32* _fptr;
-    UInt32* _rptr;
-    UInt32* _state;
+    std::uint32_t* _fptr;
+    std::uint32_t* _rptr;
+    std::uint32_t* _state;
     int     _randType;
     int     _randDeg;
     int     _randSep;
-    UInt32* _endPtr;
+    std::uint32_t* _endPtr;
     char*   _buffer;
 };    
 

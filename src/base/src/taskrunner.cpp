@@ -158,7 +158,7 @@ bool TaskRunner::exists(Task* task) const
 }
 
 
-Task* TaskRunner::get(UInt32 id) const
+Task* TaskRunner::get(std::uint32_t id) const
 {
     Mutex::ScopedLock lock(_mutex);
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
@@ -308,7 +308,7 @@ void Task::destroy()
 }
 
 
-UInt32 Task::id() const
+std::uint32_t Task::id() const
 {
     return _id;
 }

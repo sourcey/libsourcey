@@ -46,9 +46,9 @@ class Timestamp
     // in effect on the system.
 {
 public:
-    typedef Int64 TimeVal;    /// monotonic UTC time value in microsecond resolution
-    typedef Int64 UtcTimeVal; /// monotonic UTC time value in 100 nanosecond resolution
-    typedef Int64 TimeDiff;   /// difference between two timestamps in microseconds
+    typedef std::int64_t TimeVal;    /// monotonic UTC time value in microsecond resolution
+    typedef std::int64_t UtcTimeVal; /// monotonic UTC time value in 100 nanosecond resolution
+    typedef std::int64_t TimeDiff;   /// difference between two timestamps in microseconds
 
     Timestamp();
         // Creates a timestamp with the current time.

@@ -32,72 +32,72 @@ namespace scy {
 namespace sockio {
 
 
-struct ClientState: public State 
+struct ClientState: public State
 {
-    enum Type 
+    enum Type
     {
-        None        = 0x00,
+        None          = 0x00,
         Connecting    = 0x01,
-        Connected    = 0x02,
+        Connected     = 0x02,
         Online        = 0x04,
-        Error        = 0x08
+        Error         = 0x08
     };
 
-    std::string str(unsigned int id) const 
-    { 
+    std::string str(unsigned int id) const
+    {
         switch(id) {
         case None:            return "None";
-        case Connecting:    return "Connecting";
-        case Connected:        return "Connected";
-        case Online:        return "Online";
-        case Error:            return "Error";
+        case Connecting:      return "Connecting";
+        case Connected:       return "Connected";
+        case Online:          return "Online";
+        case Error:           return "Error";
         default: assert(false);
         }
-        return "undefined"; 
+        return "undefined";
     };
 };
 
 
-class Client: 
-    public Stateful<ClientState>, 
-    public net::SocketAdapter, 
+class Client:
+    public Stateful<ClientState>,
+    public net::SocketAdapter,
     public PacketSignal
 {
 public:
     Client(const net::Socket::Ptr& socket);
-    Client(const net::Socket::Ptr& socket, const std::string& host, UInt16 port);
+    Client(const net::Socket::Ptr& socket, const std::string& host, std::uint16_t port);
     virtual ~Client();
-    
-    virtual void connect(const std::string& host, UInt16 port);
+
+    virtual void connect(const std::string& host, std::uint16_t port);
     virtual void connect();
     virtual void close();
 
-    virtual int send(const std::string& data, bool ack = false); 
-        // Sends a Message packet
+    virtual int send(const std::string& message, bool ack = false);
+    virtual int send(const json::Value& message, bool ack = false);
+        // Send a default message packet
 
-    virtual int send(const json::Value& data, bool ack = false); 
-        // Sends a JSON packet
+    virtual int send(const std::string& event, const char* message, bool ack = false);
+    virtual int send(const std::string& event, const std::string& message, bool ack = false);
+    virtual int send(const std::string& event, const json::Value& message, bool ack = false);
+        // Send an event packet
 
-    virtual int emit(const std::string& event, const json::Value& data, bool ack = false);
-        // Sends an Event packet
-
-    virtual int send(sockio::Packet::Type type, const std::string& data, bool ack = false);
-        // Creates and sends packet from the given data
+    // virtual int send(sockio::Packet::Type type, const std::string& message, bool ack = false);
+    //     // Creates and sends packet from the given message
 
     virtual int send(const sockio::Packet& packet);
         // Sends the given packet
-    
-    virtual int sendConnect(const std::string& endpoint = "", const std::string& query = "");
+
+    // virtual int sendConnect(const std::string& endpoint = "", const std::string& query = "");
         // Sends a Connect packet
-    
+
     virtual Transaction* createTransaction(const sockio::Packet& request, long timeout = 10000);
         // Creates a packet transaction
 
     //uv::Loop* loop();
     http::ws::WebSocket& ws();
-    std::string sessionID() const;    
+    std::string sessionID() const;
     scy::Error error() const;
-        
+
     bool isOnline() const;
 
     bool wasOnline() const;
@@ -110,43 +110,50 @@ protected:
     virtual void setError(const scy::Error& error);
 
     virtual void reset();
-        // Resets variables and data at the beginning  
+        // Resets variables and timers at the beginning
         // and end of each session.
 
-    virtual int sendHeartbeat();
-    
-    virtual void sendHandshakeRequest();
-    virtual void onHandshakeResponse(void*, const http::Response& response);
+
+    virtual int sendPing();
+    virtual void onPong();
 
     virtual void onConnect();
     virtual void onOnline();
     virtual void onClose();
     virtual void onPacket(sockio::Packet& packet);
-    
+    virtual void onHandshake(sockio::Packet& packet);
+    virtual void onMessage(sockio::Packet& packet);
+
     virtual void onSocketConnect();
     virtual void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress);
     virtual void onSocketError(const scy::Error& error);
     virtual void onSocketClose();
+
+    // virtual void sendHandshakeRequest();
+    // virtual void onHandshakeResponse(void*, const http::Response& response);
     //virtual void onSocketConnect();
     //virtual void onSocketRecv(void*, const MutableBuffer& buffer, const net::Address& peerAddress);
     //virtual void onSocketError(void*, const Error& error);
     //virtual void onSocketClose(void*);
 
-    virtual void onHeartBeatTimer(void*);
+    virtual void onPingTimer(void*);
+    virtual void onPingTimeoutTimer(void*);
 
 protected:
     //mutable Mutex    _mutex;
-    
+
     //uv::Loop* _loop;
-    Timer _timer;
+    Timer _pingTimer;
+    Timer _pingTimeoutTimer;
     scy::Error _error;
-    std::vector<std::string> _protocols;
+    // std::vector<std::string> _protocols;
     std::string _sessionID;
     std::string _host;
-    UInt16 _port;
+    std::uint16_t _port;
     http::ws::WebSocket _ws;
-    int    _heartBeatTimeout;
-    int    _connectionClosingTimeout;
+    int _pingTimeout;
+    int _pingInterval;
+    // int _connectionClosingTimeout;
     bool _wasOnline;
     //bool _closing;
 };

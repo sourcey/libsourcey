@@ -88,7 +88,7 @@ void MediaFactory::loadVideoCaptures()
     // reference count becomes positive.
     std::vector<Device> devs;
     devices().getVideoCaptureDevices(devs);
-    for (size_t i = 0; i < devs.size(); ++i) {
+    for (std::size_t i = 0; i < devs.size(); ++i) {
         try {
             createVideoCapture(devs[0].id);
         } 

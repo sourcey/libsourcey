@@ -62,7 +62,7 @@ public:
         // Throws an exception if the address is malformed.
         // Connection errors can be handled via the Error signal.
 
-    virtual void connect(const std::string& host, UInt16 port);
+    virtual void connect(const std::string& host, std::uint16_t port);
         // Resolves and connects to the given host address.
         //
         // Throws an Exception if the host is malformed.

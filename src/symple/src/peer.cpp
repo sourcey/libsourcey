@@ -30,7 +30,7 @@ namespace scy {
 namespace smpl {
 
 
-Peer::Peer() 
+Peer::Peer()
 {
     (*this)["type"] = "Peer";
 }
@@ -50,11 +50,11 @@ Peer::Peer(const json::Value& r) :
 }
 
 
-Peer::~Peer() 
+Peer::~Peer()
 {
 }
 
-    
+
 void Peer::print(std::ostream& os) const
 {
     json::StyledWriter writer;
@@ -62,89 +62,91 @@ void Peer::print(std::ostream& os) const
 }
 
 
-bool Peer::valid() 
+bool Peer::valid()
 {
-    return isMember("id") 
+    return isMember("id")
         && isMember("user")
         && isMember("type");
 }
 
 
-Address Peer::address() const 
+Address Peer::address() const
 {
-    return Address(user(), group(), id());
+    return Address(user(), id()); //, group()
 }
 
 
-std::string Peer::id() const 
+std::string Peer::id() const
 {
     return get("id", "").asString();
 }
 
 
-std::string Peer::user() const 
+std::string Peer::user() const
 {
     return get("user", "").asString();
 }
 
 
-std::string Peer::name() const 
+std::string Peer::name() const
 {
     return get("name", "").asString();
 }
 
 
-std::string Peer::group() const 
-{
-    return get("group", "").asString();
-}
+// std::string Peer::group() const 
+// {
+//     return get("group", "").asString();
+// }
 
 
-std::string Peer::type() const 
+std::string Peer::type() const
 {
     return get("type", "").asString();
 }
 
 
-std::string Peer::host() const 
+std::string Peer::host() const
 {
     return get("host", "").asString();
 }
 
 
-void Peer::setID(const std::string& id) 
+void Peer::setID(const std::string& id)
 {
     (*this)["id"] = id;
 }
 
 
-void Peer::setUser(const std::string& user) 
+void Peer::setUser(const std::string& user)
 {
     (*this)["user"] = user;
 }
 
 
-void Peer::setName(const std::string& name) 
+void Peer::setName(const std::string& name)
 {
     (*this)["name"] = name;
 }
 
-void Peer::setGroup(const std::string& group) 
-{
-    (*this)["group"] = group;
-}
 
-void Peer::setType(const std::string& type) 
+// void Peer::setGroup(const std::string& group)
+// {
+//     (*this)["group"] = group;
+// }
+
+
+void Peer::setType(const std::string& type)
 {
     (*this)["type"] = type;
 }
 
 
-void Peer::setHost(const std::string& host) 
+void Peer::setHost(const std::string& host)
 {
     (*this)["host"] = host;
 }
 
 
-} // namespace symple 
+} // namespace symple
 } // namespace scy

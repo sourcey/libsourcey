@@ -61,12 +61,12 @@ public:
 
     virtual void createVideo();
     virtual void freeVideo();
-    virtual bool encodeVideo(UInt8* buffer, int bufferSize, int width, int height, UInt64 time = AV_NOPTS_VALUE);
+    virtual bool encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int height, std::uint64_t time = AV_NOPTS_VALUE);
       // Encode a single video frame
 
     virtual void createAudio();
     virtual void freeAudio();
-    virtual bool encodeAudio(UInt8* buffer, int bufferSize, int frameSize, UInt64 time = AV_NOPTS_VALUE);
+    virtual bool encodeAudio(std::uint8_t* buffer, int bufferSize, int frameSize, std::uint64_t time = AV_NOPTS_VALUE);
       // Encode a single audio frame
 
     virtual void flush();
@@ -89,7 +89,7 @@ protected:
     VideoEncoderContext* _video;
     AudioEncoderContext* _audio;
     AVIOContext* _ioCtx;
-    UInt8* _ioBuffer;
+    std::uint8_t* _ioBuffer;
     int _ioBufferSize;
     double _videoPtsRemainder;
 };

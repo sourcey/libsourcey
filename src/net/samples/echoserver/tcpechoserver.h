@@ -25,7 +25,7 @@ public:
         shutdown();
     }
         
-    void start(const std::string& host, UInt16 port)
+    void start(const std::string& host, std::uint16_t port)
     {    
         socket->bind(Address(host, port));
         socket->listen();

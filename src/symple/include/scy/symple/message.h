@@ -85,7 +85,7 @@ public:
     virtual void write(Buffer& buf) const;
     
     bool isRequest() const;    
-    virtual size_t size() const;
+    virtual std::size_t size() const;
 
     void print(std::ostream& os) const;
     

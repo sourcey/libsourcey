@@ -40,17 +40,17 @@ namespace util {
 
 std::string string_vprintf(const char* fmt, va_list args) 
 {
-    size_t size = 500;
+    std::size_t size = 500;
     char* buf = (char*)malloc(size);
     // Grow the buffer size until the output is no longer truncated
     while (true) {
         va_list args_copy;
 #if defined(_WIN32)
         args_copy = args;
-        size_t nwritten = _vsnprintf(buf, size-1, fmt, args_copy);
+        std::size_t nwritten = _vsnprintf(buf, size-1, fmt, args_copy);
 #else
         va_copy(args_copy, args);
-        size_t nwritten = vsnprintf(buf, size-1, fmt, args_copy);
+        std::size_t nwritten = vsnprintf(buf, size-1, fmt, args_copy);
 #endif
         // Some c libraries return -1 for overflow, 
         // some return a number larger than size-1
@@ -78,7 +78,7 @@ std::string format(const char* fmt, ...)
 
 bool isNumber(const std::string& str)
 {
-   for (size_t i = 0; i < str.length(); i++) {
+   for (std::size_t i = 0; i < str.length(); i++) {
        if (!::isdigit(str[i]))
            return false;
    }
@@ -133,7 +133,7 @@ std::string randomString(int size)
 }
 
 
-UInt32 randomNumber()
+std::uint32_t randomNumber()
 {
     Random rnd;
     rnd.seed();
@@ -196,7 +196,7 @@ bool endsWith(const std::string& str, const std::string& suffix)
 
 
 #if 0
-double intToDouble(Int64 v) 
+double intToDouble(std::int64_t v) 
 {
     if (v+v > 0xFFEULL<<52)
         return 0;
@@ -204,7 +204,7 @@ double intToDouble(Int64 v)
 }
 
 
-float intToFloat(Int32 v)
+float intToFloat(std::int32_t v)
 {
     if (v+v > 0xFF000000U)
         return 0;
@@ -212,13 +212,13 @@ float intToFloat(Int32 v)
 }
 
 
-Int64 doubleToInt(double d) 
+std::int64_t doubleToInt(double d) 
 {
     int e;
     if     ( !d) return 0;
-    else if(d-d) return 0x7FF0000000000000LL + ((Int64)(d<0)<<63) + (d!=d);
+    else if(d-d) return 0x7FF0000000000000LL + ((std::int64_t)(d<0)<<63) + (d!=d);
     d = frexp(d, &e);
-    return (Int64)(d<0)<<63 | (e+1022LL)<<52 | (Int64)((fabs(d)-0.5)*(1LL<<53));
+    return (std::int64_t)(d<0)<<63 | (e+1022LL)<<52 | (std::int64_t)((fabs(d)-0.5)*(1LL<<53));
 }
 #endif
 
@@ -226,9 +226,9 @@ Int64 doubleToInt(double d)
 std::string dumpbin(const char* data, std::size_t len)
 {
     std::string output;
-    for (size_t i = 0; i < len; i++) {
+    for (std::size_t i = 0; i < len; i++) {
         char byte = data[i];
-        for (size_t mask = 0x80; mask > 0; mask >>= 1) {
+        for (std::size_t mask = 0x80; mask > 0; mask >>= 1) {
             output.push_back(byte & mask ? '1' : '0');
         }
         if (i % 4 == 3)
@@ -267,7 +267,7 @@ bool compareVersion(const std::string& l, const std::string& r)
 
 void removeSpecialCharacters(std::string& str, bool allowSpaces) 
 {    
-    for (size_t i = 0; i < str.length(); ++i)
+    for (std::size_t i = 0; i < str.length(); ++i)
         if (!::isalnum(str[i]) && (!allowSpaces || !::isspace(str[i])) && str[i] != '.')
             str.erase(i, 1);
 }
@@ -275,7 +275,7 @@ void removeSpecialCharacters(std::string& str, bool allowSpaces)
 
 void replaceSpecialCharacters(std::string& str, char with, bool allowSpaces) 
 {    
-    for (size_t i = 0; i < str.length(); ++i)
+    for (std::size_t i = 0; i < str.length(); ++i)
         if (!::isalnum(str[i]) && (!allowSpaces || !::isspace(str[i])) && str[i] != '.')
             str[i] = with;
 }
@@ -311,7 +311,7 @@ bool matchNodes(const std::vector<std::string>& params, const std::vector<std::s
         xparams[xparams.size() - 1] != "*")
         return false;
 
-    for (size_t i = 0; i < xparams.size(); ++i) {
+    for (std::size_t i = 0; i < xparams.size(); ++i) {
 
         // Wildcard * matches anything.
         if (xparams[i] == "*") 

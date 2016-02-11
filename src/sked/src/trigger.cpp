@@ -38,7 +38,7 @@ Trigger::Trigger(const std::string& type, const std::string& name) :
 }
 
     
-Int64 Trigger::remaining() 
+std::int64_t Trigger::remaining() 
 {
     DateTime now;
     Timespan ts = scheduleAt - now;

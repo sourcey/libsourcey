@@ -66,7 +66,7 @@ static const char* const kFilteredVideoDevicesName[] =  {
     NULL,
 };
 static const int kVideoDeviceOpenAttempts = 3;
-static const UInt32 kAudioDeviceNameLength = 64;
+static const std::uint32_t kAudioDeviceNameLength = 64;
 // Obj-C functions defined in DeviceManager_MAC.mm
 // TODO: have a shared header for these function defines.
 extern DeviceWatcherImpl* CreateDeviceWatcherCallback(IDeviceManager* dm);
@@ -105,7 +105,7 @@ bool MacDeviceManager::getAudioDevices(bool input,
   if (!ret) {
     return false;
   }
-  for (size_t i = 0; i < dev_ids.size(); ++i) {
+  for (std::size_t i = 0; i < dev_ids.size(); ++i) {
     std::string name;
     if (getAudioDeviceName(dev_ids[i], input, &name)) {
       devs.push_back(Device(name, dev_ids[i]));
@@ -117,7 +117,7 @@ bool MacDeviceManager::getAudioDevices(bool input,
 
 static bool getAudioDeviceIDs(bool input,
                               std::vector<AudioDeviceID>* out_dev_ids) {
-  UInt32 propsize;
+  std::uint32_t propsize;
   OSErr err = AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDevices,
                                            &propsize, NULL);
   if (0 != err) {
@@ -126,7 +126,7 @@ static bool getAudioDeviceIDs(bool input,
     return false;
   }
 
-  size_t num_devices = propsize / sizeof(AudioDeviceID);
+  std::size_t num_devices = propsize / sizeof(AudioDeviceID);
   talk_base::scoped_array<AudioDeviceID> device_ids(
       new AudioDeviceID[num_devices]);
 
@@ -138,7 +138,7 @@ static bool getAudioDeviceIDs(bool input,
     return false;
   }
 
-  for (size_t i = 0; i < num_devices; ++i) {
+  for (std::size_t i = 0; i < num_devices; ++i) {
     AudioDeviceID an_id = device_ids[i];
     // find out the number of channels for this direction
     // (input/output) on this device -
@@ -165,7 +165,7 @@ static bool getAudioDeviceIDs(bool input,
 static bool getAudioDeviceName(AudioDeviceID id,
                                bool input,
                                std::string* out_name) {
-  UInt32 nameLength = kAudioDeviceNameLength;
+  std::uint32_t nameLength = kAudioDeviceNameLength;
   char name[kAudioDeviceNameLength + 1];
   OSErr err = AudioDeviceGetProperty(id, 0, input,
                                      kAudioDevicePropertyDeviceName,

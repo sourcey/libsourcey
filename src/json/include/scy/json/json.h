@@ -21,7 +21,7 @@
 #define SCY_JSON_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/exception.h"
 #include "json/json.h"
 #include <fstream>
@@ -47,7 +47,7 @@ inline void loadFile(const std::string& path, json::Value& root)
 
     json::Reader reader;
     if (!reader.parse(ifs, root))
-        throw std::runtime_error("Cannot write to file: Invalid JSON format: " + reader.getFormatedErrorMessages());
+        throw std::runtime_error("Cannot write to file: Invalid JSON format: " + reader.getFormattedErrorMessages());
 }
 
 
@@ -135,7 +135,7 @@ inline bool findNestedObjectWithProperty(json::Value& root, json::Value*& result
     depth++;
     if (root.isObject()) {
         json::Value::Members members = root.getMemberNames();
-        for (size_t i = 0; i < members.size(); i++) {        
+        for (std::size_t i = 0; i < members.size(); i++) {        
             json::Value& test = root[members[(int)i]];
             if (test.isNull())
                 continue;
@@ -156,7 +156,7 @@ inline bool findNestedObjectWithProperty(json::Value& root, json::Value*& result
         }
     }
     else if (root.isArray()) {        
-        for (size_t i = 0; i < root.size(); i++) {        
+        for (std::size_t i = 0; i < root.size(); i++) {        
             json::Value& test = root[(int)i];
             if (!test.isNull() && (test.isObject() || test.isArray()) &&
                 findNestedObjectWithProperty(root[(int)i], result, key, value, partial, index, depth))

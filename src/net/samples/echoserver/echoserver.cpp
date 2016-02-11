@@ -19,9 +19,9 @@ using namespace scy;
 using namespace scy::net;
 
     
-const UInt16 UdpPort = 1337;
-const UInt16 TcpPort = 1337;
-const UInt16 SslPort = 1338;
+const std::uint16_t UdpPort = 1337;
+const std::uint16_t TcpPort = 1337;
+const std::uint16_t SslPort = 1338;
     
 
 struct Servers 

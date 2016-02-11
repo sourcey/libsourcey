@@ -71,54 +71,54 @@ public:
     {
         ByteOrder orders[2] = { ByteOrder::Host,
                                 ByteOrder::Network };
-        for (size_t i = 0; i < 2; i++) {
+        for (std::size_t i = 0; i < 2; i++) {
             Buffer buffer(1024);
             BitReader reader(buffer, orders[i]);
             BitWriter writer(buffer, orders[i]);
             assert(orders[i] == reader.order());
             assert(orders[i] == writer.order());
 
-            // Write and read UInt8.
-            UInt8 wu8 = 1;
+            // Write and read std::uint8_t.
+            std::uint8_t wu8 = 1;
             writer.putU8(wu8);
-            UInt8 ru8;
+            std::uint8_t ru8;
             reader.getU8(ru8);
             assert(wu8 == ru8);
             assert(writer.position() == 1);
             assert(reader.position() == 1);        
 
-            // Write and read UInt16.
-            UInt16 wu16 = (1 << 8) + 1;
+            // Write and read std::uint16_t.
+            std::uint16_t wu16 = (1 << 8) + 1;
             writer.putU16(wu16);
-            UInt16 ru16;
+            std::uint16_t ru16;
             reader.getU16(ru16);
             assert(wu16 == ru16);
             assert(writer.position() == 3);
             assert(reader.position() == 3);
         
             // Write and read UInt24.
-            UInt32 wu24 = (3 << 16) + (2 << 8) + 1;
+            std::uint32_t wu24 = (3 << 16) + (2 << 8) + 1;
             writer.putU24(wu24);
-            UInt32 ru24;
+            std::uint32_t ru24;
             reader.getU24(ru24);
             assert(wu24 == ru24);
             assert(writer.position() == 6);
             assert(reader.position() == 6);
         
-            // Write and read UInt32.
-            UInt32 wu32 = (4 << 24) + (3 << 16) + (2 << 8) + 1;
+            // Write and read std::uint32_t.
+            std::uint32_t wu32 = (4 << 24) + (3 << 16) + (2 << 8) + 1;
             writer.putU32(wu32);
-            UInt32 ru32;
+            std::uint32_t ru32;
             reader.getU32(ru32);
             assert(wu32 == ru32);
             assert(writer.position() == 10);
             assert(reader.position() == 10);
         
-            // Write and read UInt64.
-            UInt32 another32 = (8 << 24) + (7 << 16) + (6 << 8) + 5;
-            UInt64 wu64 = (static_cast<UInt64>(another32) << 32) + wu32;
+            // Write and read std::uint64_t.
+            std::uint32_t another32 = (8 << 24) + (7 << 16) + (6 << 8) + 5;
+            std::uint64_t wu64 = (static_cast<std::uint64_t>(another32) << 32) + wu32;
             writer.putU64(wu64);
-            UInt64 ru64;
+            std::uint64_t ru64;
             reader.getU64(ru64);
             assert(wu64 == ru64);
             assert(writer.position() == 18);
@@ -428,7 +428,7 @@ public:
         }
     }
 
-    void processExit(Int64 exitStatus)
+    void processExit(std::int64_t exitStatus)
     {
         cout << "On process exit: " << exitStatus << endl;
     }

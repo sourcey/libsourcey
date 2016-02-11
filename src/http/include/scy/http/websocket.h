@@ -136,7 +136,7 @@ public:
     virtual std::size_t writeFrame(const char* data, std::size_t len, int flags, BitWriter& frame);
         // Writes a WebSocket protocol frame from the given data.
         
-    virtual UInt64 readFrame(BitReader& frame, char*& payload); //Buffer& buffer, const char* buffer, int length, 
+    virtual std::uint64_t readFrame(BitReader& frame, char*& payload); //Buffer& buffer, const char* buffer, int length, 
         // Reads a single WebSocket frame from the given buffer (frame).
         //
         // The actual payload length is returned, and the beginning of the
@@ -213,7 +213,7 @@ public:
     virtual int send(const char* data, std::size_t len, int flags = 0); // flags = ws::Text || ws::Binary
     virtual int send(const char* data, std::size_t len, const net::Address& peerAddr, int flags = 0); // flags = ws::Text || ws::Binary
     
-    virtual bool shutdown(UInt16 statusCode, const std::string& statusMessage);        
+    virtual bool shutdown(std::uint16_t statusCode, const std::string& statusMessage);        
     
     net::Socket::Ptr socket;
         // Pointer to the underlying socket.

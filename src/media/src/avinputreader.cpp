@@ -306,8 +306,8 @@ void AVInputReader::run()
 
     try {
         int res;
-        Int64 videoFrames = 0;
-        Int64 audioFrames = 0;
+        std::int64_t videoFrames = 0;
+        std::int64_t audioFrames = 0;
         AVPacket ipacket;
         AVPacket opacket;
         av_init_packet(&ipacket); // TODO: ensure always uninitialized

@@ -84,7 +84,7 @@ struct TCPInitiator: public TCPClientObserver
         }
     }
     
-    void onRelayConnectionCreated(TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddr) //UInt32 connectionID, 
+    void onRelayConnectionCreated(TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddr) //std::uint32_t connectionID, 
     {
         DebugLS(this) << id << ": Connection Created: " << peerAddr << endl;
                 
@@ -108,8 +108,8 @@ struct TCPInitiator: public TCPClientObserver
         /*
         payload.erase(std::remove(payload.begin(), payload.end(), 'x'), payload.end());
         if (payload.length() == 8) {
-            UInt64 sentAt = util::strtoi<UInt64>(payload);
-            UInt64 latency = time::ticks() - sentAt;
+            std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
+            std::uint64_t latency = time::ticks() - sentAt;
 
             DebugLS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
         }
@@ -119,8 +119,8 @@ struct TCPInitiator: public TCPClientObserver
         if (size < 150) {
             //std::string payload(data, size);
             std::string payload(data, 8); // read the first packet from joined packets
-            UInt64 sentAt = util::strtoi<UInt64>(payload);
-            UInt64 latency = time::ticks() - sentAt;
+            std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
+            std::uint64_t latency = time::ticks() - sentAt;
 
             DebugLS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
         }
@@ -150,7 +150,7 @@ struct TCPInitiator: public TCPClientObserver
     
 
     /*
-    bool onConnectionAttempt(TCPClient& client, UInt32 connectionID, const net::Address& peerAddr) 
+    bool onConnectionAttempt(TCPClient& client, std::uint32_t connectionID, const net::Address& peerAddr) 
     { 
         DebugLS(this) << "TCPInitiator: " << id << ": Connection Attempt: " << peerAddr << endl;
         return true; 
@@ -158,7 +158,7 @@ struct TCPInitiator: public TCPClientObserver
     */
 
     /*
-    void onConnectionBindError(TCPClient& client, UInt32 connectionID)
+    void onConnectionBindError(TCPClient& client, std::uint32_t connectionID)
     {
         DebugLS(this) << "TCPInitiator: " << id << ": Connection Error: " << connectionID << endl;
         if (_dataSocket) {

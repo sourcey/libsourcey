@@ -24,8 +24,8 @@
 
 
 #include "scy/interface.h"
-#include "scy/logger.h" 
-#include "scy/types.h"
+#include "scy/logger.h"
+#include <cstdint>
 #include <iostream>
 #include <memory>
 
@@ -41,7 +41,7 @@ const int LINE_LENGTH = 72;
 //
 // Base64 Encoder
 //
-    
+
 
 namespace internal {
 
@@ -74,7 +74,7 @@ int encode_blockend(char* code_out, internal::encodestate* state_in);
 
 struct Encoder: public basic::Encoder
 {
-    Encoder(int buffersize = BUFFER_SIZE) : 
+    Encoder(int buffersize = BUFFER_SIZE) :
         _buffersize(buffersize)
     {
         internal::init_encodestate(&_state);
@@ -91,7 +91,7 @@ struct Encoder: public basic::Encoder
         do
         {
             istrm.read(readbuf, N);
-            nread = static_cast<int>(istrm.gcount());            
+            nread = static_cast<int>(istrm.gcount());
             enclen = encode(readbuf, nread, encbuf);
             ostrm.write(encbuf, enclen);
         }
@@ -105,7 +105,7 @@ struct Encoder: public basic::Encoder
         delete [] encbuf;
         delete [] readbuf;
     }
-        
+
     void encode(const std::string& in, std::string& out)
     {
         char* encbuf = new char[in.length() * 2];
@@ -126,10 +126,10 @@ struct Encoder: public basic::Encoder
     }
 
     std::size_t finalize(char* outbuf)
-    {        
+    {
         return internal::encode_blockend(outbuf, &_state);
     }
-    
+
     void setLineLength(int lineLength)
     {
         _state.linelength = lineLength;
@@ -143,11 +143,11 @@ struct Encoder: public basic::Encoder
 template<typename T>
 inline std::string encode(const T& bytes, int lineLength = LINE_LENGTH)
     // Converts a STL container to Base64.
-{    
+{
     std::string res;
     res.reserve(bytes.size() * 2);
     std::unique_ptr<char[]> encbuf(new char[bytes.size() * 2]);
-    
+
     internal::encodestate state;
     internal::init_encodestate(&state);
     state.linelength = lineLength;
@@ -193,7 +193,7 @@ int decode_block(const char* inbuf, const int nread, char* outbuf, internal::dec
 
 struct Decoder : public basic::Decoder
 {
-    Decoder(int buffersize = BUFFER_SIZE) : 
+    Decoder(int buffersize = BUFFER_SIZE) :
         _buffersize(buffersize)
     {
         internal::init_decodestate(&_state);
@@ -240,11 +240,11 @@ struct Decoder : public basic::Decoder
 template<typename T>
 inline std::string decode(const T& bytes)
     /// Decodes a STL container from Base64.
-{    
+{
     std::string res;
     res.reserve(bytes.size() * 2);
     std::unique_ptr<char[]> encbuf(new char[bytes.size() * 2]);
-    
+
     internal::decodestate state;
     internal::init_decodestate(&state);
 

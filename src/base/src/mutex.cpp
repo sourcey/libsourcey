@@ -18,7 +18,7 @@
 
 
 #include "scy/mutex.h"
-#include "scy/types.h"
+#include <cstdint>
 
 
 namespace scy {

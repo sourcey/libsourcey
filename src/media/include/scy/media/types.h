@@ -34,7 +34,7 @@ struct MediaPacket: public RawPacket
 {
     double time;
 
-    MediaPacket(UInt8* data = nullptr,
+    MediaPacket(std::uint8_t* data = nullptr,
                 std::size_t size = 0,
                 double time = time::clockSecs()) :
         RawPacket(reinterpret_cast<char*>(data), size),
@@ -59,7 +59,7 @@ struct VideoPacket: public MediaPacket
     int width;
     int height;
 
-    VideoPacket(UInt8* data = nullptr,
+    VideoPacket(std::uint8_t* data = nullptr,
                 std::size_t size = 0,
                 int width = 0,
                 int height = 0,
@@ -85,10 +85,10 @@ struct VideoPacket: public MediaPacket
 
 struct AudioPacket: public MediaPacket
 {
-    AudioPacket(UInt8* data = nullptr,
+    AudioPacket(std::uint8_t* data = nullptr,
                 std::size_t size = 0,
                 std::size_t frameSize = 0,
-                double time = time::clockSecs()) : //(UInt64)clock() / CLOCKS_PER_SEC
+                double time = time::clockSecs()) : //(std::uint64_t)clock() / CLOCKS_PER_SEC
         MediaPacket(data, size, time), frameSize(frameSize) {};
 
     // AudioPacket(const AudioPacket& r) :
@@ -100,8 +100,8 @@ struct AudioPacket: public MediaPacket
         return new AudioPacket(*this);
     }
 
-    virtual UInt8* samples() const {
-        return reinterpret_cast<UInt8*>(_data);
+    virtual std::uint8_t* samples() const {
+        return reinterpret_cast<std::uint8_t*>(_data);
     }
 
     virtual const char* className() const { return "AudioPacket"; }
@@ -141,14 +141,14 @@ struct VideoCodec
     Codec::ID codec;
     int width;
     int height;
-    UInt64 fps;
+    std::uint64_t fps;
     AV_PIX_FMT_ID pixelFmt;        // The input pixel format
     int bitRate;
     int quality;                // For JPEG creation
     VideoCodec(Codec::ID codec,
                 int width = 400,
                 int height = 300,
-                UInt64 fps = 25,
+                std::uint64_t fps = 25,
                 AV_PIX_FMT_ID pixelFmt = AV_PIX_FMT_BGR24,
                 int bitRate = 200 * 1024,
                 int quality = 80) :
@@ -280,7 +280,7 @@ struct Format
 
 
 /*
-inline const char* getFFmpegStringFromCodec::ID(UInt32 id)
+inline const char* getFFmpegStringFromCodec::ID(std::uint32_t id)
 {
     switch(id)
     {
@@ -334,7 +334,7 @@ std::ostream& operator<<( std::ostream& os, const Codec::ID& id )
 
 
 /*
-inline const char* getFFmpegStringFromCodec::ID(UInt32 id)
+inline const char* getFFmpegStringFromCodec::ID(std::uint32_t id)
 {
     switch(id)
     {

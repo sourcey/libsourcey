@@ -24,7 +24,7 @@ public:
         _thread.join();
     }
 
-    Poco::UInt16 port() const
+    Poco::std::uint16_t port() const
     {
         return _socket.address().port();
     }

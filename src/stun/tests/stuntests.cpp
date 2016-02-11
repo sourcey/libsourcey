@@ -70,12 +70,12 @@ public:
     
     void testReuestTypes() 
     {    
-        UInt16 type = stun::Message::Indication | stun::Message::SendIndication;
+        std::uint16_t type = stun::Message::Indication | stun::Message::SendIndication;
 
         //assert(IS_STUN_INDICATION(type));
         
-        UInt16 classType = type & 0x0110;
-        UInt16 methodType = type & 0x000F;
+        std::uint16_t classType = type & 0x0110;
+        std::uint16_t methodType = type & 0x000F;
         
         assert(classType == stun::Message::Indication);
         assert(methodType == stun::Message::SendIndication);

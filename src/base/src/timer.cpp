@@ -62,13 +62,13 @@ void Timer::init()
 }
 
 
-void Timer::start(Int64 interval)
+void Timer::start(std::int64_t interval)
 {
     start(interval, interval);
 }
 
 
-void Timer::start(Int64 timeout, Int64 interval) 
+void Timer::start(std::int64_t timeout, std::int64_t interval) 
 {
     //TraceLS(this) << "Starting: " << << timeout << ": " << interval << endl;
     assert(_handle.ptr());
@@ -126,7 +126,7 @@ void Timer::again()
 }
 
 
-void Timer::setInterval(Int64 interval)
+void Timer::setInterval(std::int64_t interval)
 {
     //TraceLS(this) << "Set interval: " << interval << endl;
     
@@ -141,20 +141,20 @@ bool Timer::active() const
 }
 
 
-Int64 Timer::timeout() const
+std::int64_t Timer::timeout() const
 {    
     return _timeout;
 }
 
 
-Int64 Timer::interval() const
+std::int64_t Timer::interval() const
 {    
     assert(_handle.ptr());
-    return std::min<Int64>(uv_timer_get_repeat(_handle.ptr<uv_timer_t>()), 0);
+    return std::min<std::int64_t>(uv_timer_get_repeat(_handle.ptr<uv_timer_t>()), 0);
 }
 
 
-Int64 Timer::count()
+std::int64_t Timer::count()
 {
     return _count;
 }
@@ -212,13 +212,13 @@ void Timer2::unref()
 }
 
 
-void Timer2::start(Int64 interval)
+void Timer2::start(std::int64_t interval)
 {
     start(interval, interval);
 }
 
 
-void Timer2::start(Int64 timeout, Int64 interval) 
+void Timer2::start(std::int64_t timeout, std::int64_t interval) 
 {
     //TraceLS(this) << "Starting: " << << timeout << ": " << interval << endl;
     assert(ptr.ptr());
@@ -276,7 +276,7 @@ void Timer2::again()
 }
 
 
-void Timer2::setInterval(Int64 interval)
+void Timer2::setInterval(std::int64_t interval)
 {
     //TraceLS(this) << "Set interval: " << interval << endl;
     
@@ -291,20 +291,20 @@ bool Timer2::active() const
 }
 
 
-Int64 Timer2::timeout() const
+std::int64_t Timer2::timeout() const
 {    
     return _timeout;
 }
 
 
-Int64 Timer2::interval() const
+std::int64_t Timer2::interval() const
 {    
     assert(ptr.ptr());
-    return std::min<Int64>(uv_timer_get_repeat(ptr.ptr<uv_timer_t>()), 0);
+    return std::min<std::int64_t>(uv_timer_get_repeat(ptr.ptr<uv_timer_t>()), 0);
 }
 
 
-Int64 Timer2::count()
+std::int64_t Timer2::count()
 {
     return _count;
 }

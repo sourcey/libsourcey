@@ -21,7 +21,7 @@
 #define SCY_Platform_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include <string>
 
 
@@ -38,10 +38,10 @@ std::string getExePath();
 std::string getCwd();
     // Return the current working directory.
 
-UInt64 getFreeMemory();
+std::uint64_t getFreeMemory();
     // Returns the current amount of free memory.
 
-UInt64 getTotalMemory();
+std::uint64_t getTotalMemory();
     // Returns the current amount of used memory.
 
 void sleep(int ms);

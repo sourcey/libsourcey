@@ -136,7 +136,7 @@ string Task::type() const
 }
 
 
-Int64 Task::remaining() const
+std::int64_t Task::remaining() const
 {
     Mutex::ScopedLock lock(_mutex);    
     if (!_trigger)

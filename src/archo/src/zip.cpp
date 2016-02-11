@@ -104,8 +104,8 @@ void ZipFile::open(const std::string& file)
 
         FileInfo info;
         info.path             = fileName;
-        info.compressedSize   = static_cast< size_t >(fileInfo.uncompressed_size);
-        info.uncompressedSize = static_cast< size_t >(fileInfo.compressed_size);
+        info.compressedSize   = static_cast< std::size_t >(fileInfo.uncompressed_size);
+        info.uncompressedSize = static_cast< std::size_t >(fileInfo.compressed_size);
         this->info.push_back(info);
 
         TraceL << "Zip file contains: " << fileName << endl;

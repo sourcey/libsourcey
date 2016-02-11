@@ -66,7 +66,7 @@ public:
     std::string scheme() const;
     std::string userInfo() const;
     std::string host() const;
-    UInt16 port() const;
+    std::uint16_t port() const;
     std::string authority() const;
     std::string path() const;
     std::string pathEtc() const;
@@ -112,7 +112,7 @@ protected:
     void updateSchema(const std::string& scheme);
     void updateSchema(const std::string& scheme);
     void updateHost(const std::string& host);
-    void updatePort(UInt16 port);
+    void updatePort(std::uint16_t port);
     void updatePath(const std::string& path);    
     void updateQuery(const std::string& query);    
     void updateFragment(const std::string& fragment);    

@@ -386,7 +386,7 @@ bool DeviceManager::getDefaultAudioDevice(bool input, Device& device)
 
         // Loop through devices to check if any are explicitly
         // set as default
-        for (size_t i = 0; i < devices.size(); ++i) {
+        for (std::size_t i = 0; i < devices.size(); ++i) {
             if (devices[i].isDefault) {
                 device = devices[i];
             }
@@ -528,17 +528,17 @@ void DeviceManager::print(std::ostream& ost)
     std::vector<Device> devs;
     getAudioInputDevices(devs);
     ost << "Audio input devices: " << endl;
-    for (size_t i = 0; i < devs.size(); ++i)
+    for (std::size_t i = 0; i < devs.size(); ++i)
         devs[i].print(ost);
 
     getAudioOutputDevices(devs);
     ost << "Audio output devices: " << endl;
-    for (size_t i = 0; i < devs.size(); ++i)
+    for (std::size_t i = 0; i < devs.size(); ++i)
         devs[i].print(ost);
 
     getVideoCaptureDevices(devs);
     ost << "Video capture devices: " << endl;
-    for (size_t i = 0; i < devs.size(); ++i)
+    for (std::size_t i = 0; i < devs.size(); ++i)
         devs[i].print(ost);
 }
 

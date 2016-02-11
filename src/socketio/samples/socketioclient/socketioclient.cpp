@@ -144,7 +144,7 @@ int main(int argc, char** argv)
                 //app.emit("xmpp", "{\"name\":\"value\"}", true);
                 /*
                 Type type = Message, 
-           UInt32 id = -1, 
+           std::uint32_t id = -1, 
            const std::string& endpoint = "", 
            const std::string& message = "", 
            bool ack

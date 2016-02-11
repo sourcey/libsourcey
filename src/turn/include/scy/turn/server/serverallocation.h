@@ -38,7 +38,7 @@ public:
     ServerAllocation(Server& server, 
                      const FiveTuple& tuple, 
                      const std::string& username, 
-                     Int64 lifetime);
+                     std::int64_t lifetime);
     
     virtual bool handleRequest(Request& request);    
     virtual void handleRefreshRequest(Request& request);    
@@ -51,8 +51,8 @@ public:
         // permissions and state etc.
         // If this call returns false the allocation will be deleted.
     
-    virtual Int64 timeRemaining() const; 
-    virtual Int64 maxTimeRemaining() const;
+    virtual std::int64_t timeRemaining() const; 
+    virtual std::int64_t maxTimeRemaining() const;
     virtual Server& server(); 
     
     virtual void print(std::ostream& os) const;
@@ -65,7 +65,7 @@ protected:
 
     friend class Server;
     
-    UInt32 _maxLifetime;
+    std::uint32_t _maxLifetime;
     Server&    _server;
 
 private:    

@@ -35,46 +35,46 @@ class Peer: public json::Value
     /// the client to share with other peers on the network.
     /// @see Address for further methods and basic accessors.
 {
-public:        
+public:
     Peer();
     Peer(const Peer& r);
     Peer(const json::Value& r);
     virtual ~Peer();
 
     Address address() const;
-    
+
     std::string id() const;
     std::string user() const;
     std::string name() const;
-    std::string group() const;
+    // std::string group() const;
     std::string type() const;
     std::string host() const;
-    
-    void setID(const std::string& id);    
+
+    void setID(const std::string& id);
     void setUser(const std::string& user);
     void setName(const std::string& name);
-    void setGroup(const std::string& group);
+    // void setGroup(const std::string& group);
     void setType(const std::string& type);
     void setHost(const std::string& host);
 
     //virtual void update(const json::Value& data, bool whiny = false);
         // Updates the peer from the given data object.
 
-    virtual bool valid();    
-    
+    virtual bool valid();
+
     void print(std::ostream& os) const;
-    
+
     friend std::ostream& operator << (std::ostream& os, const Peer& peer)
     {
         peer.print(os);
         return os;
     }
-    
+
     //virtual const char* className() const { return "smpl::Peer"; }
 };
 
 
-} // namespace symple 
+} // namespace symple
 } // namespace scy
 
 

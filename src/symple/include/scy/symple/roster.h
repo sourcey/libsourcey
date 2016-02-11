@@ -31,27 +31,27 @@ namespace smpl {
 
 
 class Roster: public LiveCollection<std::string, Peer>
-    /// The Roster provides a registry for active network 
+    /// The Roster provides a registry for active network
     /// peers indexed by session ID.
 {
 public:
-    typedef LiveCollection<std::string, Peer>    Manager;
-    typedef Manager::Map                        PeerMap;    
-    
+    typedef LiveCollection<std::string, Peer>   Manager;
+    typedef Manager::Map                        PeerMap;
+
 public:
     Roster();
     virtual ~Roster();
-    
+
     Peer* getByHost(const std::string& host);
         // Returns the first peer which matches the given host address.
-    
+
     virtual PeerMap peers() const;
-    
+
     virtual void print(std::ostream& os) const;
 
     //virtual const char* className() const { return "smpl::Roster"; }
 };
-    
+
 
 } } // namespace scy::smpl
 

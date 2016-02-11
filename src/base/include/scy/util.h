@@ -23,7 +23,7 @@
 #define SCY_Util_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/exception.h"
 
 #include <string>
@@ -104,13 +104,13 @@ T strtoi(const std::string& s)
 }
 
 #if 0
-double intToDouble(Int64 v);
+double intToDouble(std::int64_t v);
     // Interger to double
 
-float intToFloat(Int32 v);
+float intToFloat(std::int32_t v);
     // Interger to float
 
-Int64 doubleToInt(double d);
+std::int64_t doubleToInt(double d);
     // Double to interger
 #endif
 
@@ -119,7 +119,7 @@ Int64 doubleToInt(double d);
 // Random generators
 //
 
-UInt32 randomNumber();
+std::uint32_t randomNumber();
     // Generates a 31-bit pseudo random number.
 
 std::string randomString(int size);

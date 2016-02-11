@@ -21,7 +21,7 @@
 #define SCY_PacketStream_H
 
 
-#include "scy/types.h"
+#include <cstdint>
 #include "scy/logger.h"
 #include "scy/memory.h"
 #include "scy/exception.h"

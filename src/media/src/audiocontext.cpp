@@ -219,7 +219,7 @@ void AudioEncoderContext::close()
 
 // Add converted input audio samples to the FIFO buffer for later processing.
 static void addSamplesToFifo(AVAudioFifo *fifo,
-                             const UInt8 **convertedSamples,
+                             const std::uint8_t **convertedSamples,
                              const int frame_size)
 {
     int error;
@@ -276,7 +276,7 @@ static void initOutputFrame(AVFrame **frame,
 static bool encodeFrame(AudioEncoderContext* enc,
                         AVFrame* oframe,
                         AVPacket& opacket,
-                        const Int64 pts)
+                        const std::int64_t pts)
 {
     // Set the packet data and size so that it is recognized as being empty.
     opacket.data = nullptr;
@@ -343,7 +343,7 @@ static bool encodeFrame(AudioEncoderContext* enc,
 // Read a single audio frame from the FIFO and encode it.
 static bool readAndEncodeFrame(AudioEncoderContext* enc,
                                AVPacket& opacket,
-                               const Int64 pts)
+                               const std::int64_t pts)
 {
     // Use the encoder's desired frame size for processing.
     int frameSize = enc->ctx->frame_size;
@@ -381,12 +381,12 @@ bool AudioEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 }
 
 
-bool AudioEncoderContext::encode(const UInt8* samples, const int frameSize, const Int64 pts, AVPacket& opacket)
+bool AudioEncoderContext::encode(const std::uint8_t* samples, const int frameSize, const std::int64_t pts, AVPacket& opacket)
 {
     TraceLS(this) << "Encoding Audio Packet: " << frameSize << endl;
 
     if (resampler) {
-        UInt8** convertedSamples = nullptr;
+        std::uint8_t** convertedSamples = nullptr;
         int convertedFrameSize;
         if (!resampler->resample(samples, frameSize, convertedSamples, convertedFrameSize)) {
             // The resampler may buffer frames
@@ -395,11 +395,11 @@ bool AudioEncoderContext::encode(const UInt8* samples, const int frameSize, cons
         }
 
         // Add the converted input samples to the FIFO buffer for later processing.
-        addSamplesToFifo(fifo, (const UInt8**)convertedSamples, convertedFrameSize);
+        addSamplesToFifo(fifo, (const std::uint8_t**)convertedSamples, convertedFrameSize);
     }
     else {
        // Add the input samples to the FIFO buffer for later processing.
-       addSamplesToFifo(fifo, (const UInt8**)samples, frameSize);
+       addSamplesToFifo(fifo, (const std::uint8_t**)samples, frameSize);
     }
 
     return readAndEncodeFrame(this, opacket, pts);
@@ -418,7 +418,7 @@ bool AudioEncoderContext::encode(const UInt8* samples, const int frameSize, cons
     // //assert(buffer);
     //
     // int frameEncoded = 0;
-    // UInt8* samples = ipacket.data; // fifoBuffer
+    // std::uint8_t* samples = ipacket.data; // fifoBuffer
     //
     // if (resampler) {
     //     samples = resampler->resample(ipacket.data, ipacket.size);
@@ -517,7 +517,7 @@ void AudioDecoderContext::close()
 }
 
 
-bool AudioDecoderContext::decode(UInt8* data, int size, AVPacket& opacket)
+bool AudioDecoderContext::decode(std::uint8_t* data, int size, AVPacket& opacket)
 {
     AVPacket ipacket;
     av_init_packet(&ipacket);
@@ -643,10 +643,10 @@ void AudioResampler::create(const AudioCodec& iparams, const AudioCodec& oparams
     if (ctx)
         throw std::runtime_error("Resample context already initialized");
 
-    Int64 outChLayout = av_get_default_channel_layout(oparams.channels);
+    std::int64_t outChLayout = av_get_default_channel_layout(oparams.channels);
     enum AVSampleFormat outSampleFmt = av_get_sample_fmt(oparams.sampleFmt);
 
-    Int64 inChLayout  = av_get_default_channel_layout(iparams.channels);
+    std::int64_t inChLayout  = av_get_default_channel_layout(iparams.channels);
     enum AVSampleFormat inSampleFmt  = av_get_sample_fmt(iparams.sampleFmt);
 
     char inChBuf[128], outChBuf[128];
@@ -703,18 +703,18 @@ void AudioResampler::close()
 }
 
 
-bool AudioResampler::resample(const UInt8* inSamples, int inNbSamples, UInt8**& outSamples, int& outNbSamples)
+bool AudioResampler::resample(const std::uint8_t* inSamples, int inNbSamples, std::uint8_t**& outSamples, int& outNbSamples)
 {
     if (!ctx)
         throw std::runtime_error("Conversion context must be initialized.");
 
     outNbSamples = av_rescale_rnd(
-        swr_get_delay(ctx, (Int64)iparams.sampleRate) + (Int64)inNbSamples,
-        (Int64)oparams.sampleRate, (Int64)iparams.sampleRate, AV_ROUND_UP);
+        swr_get_delay(ctx, (std::int64_t)iparams.sampleRate) + (std::int64_t)inNbSamples,
+        (std::int64_t)oparams.sampleRate, (std::int64_t)iparams.sampleRate, AV_ROUND_UP);
 
     int error;
 
-    if (!(outSamples = (UInt8**)calloc(oparams.channels, sizeof(*outSamples)))) {
+    if (!(outSamples = (std::uint8_t**)calloc(oparams.channels, sizeof(*outSamples)))) {
         // fprintf(stderr, "Could not allocate converted input sample pointers: Out of memory\n");
         // return false; //AVERROR(ENOMEM);
         throw std::runtime_error("Could not allocate converted input sample pointers: Out of memory");
@@ -736,7 +736,7 @@ bool AudioResampler::resample(const UInt8* inSamples, int inNbSamples, UInt8**& 
 
     // Convert the samples using the resampler.
     if ((error = swr_convert(ctx, outSamples, outNbSamples,
-              (const UInt8**)&inSamples, inNbSamples)) < 0) {
+              (const std::uint8_t**)&inSamples, inNbSamples)) < 0) {
         //fprintf(stderr, "Could not convert input samples (error '%s')\n",
         //        get_error_text(error));
         //return false;
