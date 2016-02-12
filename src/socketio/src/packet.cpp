@@ -80,11 +80,11 @@ Packet::Packet(const std::string& event, const std::string& message, bool ack) :
 
 
 Packet::Packet(const std::string& event, const json::Value& data, bool ack) :
-    Packet(Frame::Message, Type::Event, util::randomNumber(), "/", "message", json::stringify(data), ack)
+    Packet(Frame::Message, Type::Event, util::randomNumber(), "/", event, json::stringify(data), ack)
 {
     // assert(_id);
     //
-    json::Value root;
+    // json::Value root;
     // root["name"] = event;
     //
     // // add the data into an array if it isn't already
@@ -105,6 +105,7 @@ Packet::Packet(const Packet& r) :
     _type(r._type),
     _id(r._id),
     _nsp(r._nsp),
+    _event(r._event),
     _message(r._message),
     _ack(r._ack),
     _size(r._size)
@@ -117,9 +118,10 @@ Packet& Packet::operator = (const Packet& r)
     _frame = r._frame;
     _type = r._type;
     _id = r._id;
-    _ack = r._ack;
     _nsp = r._nsp;
+    _event = r._event;
     _message = r._message;
+    _ack = r._ack;
     _size = r._size;
     return *this;
 }
@@ -158,8 +160,6 @@ std::size_t Packet::read(const ConstBuffer& buf)
     reader.get(&frame, 1);
     _frame = static_cast<Packet::Frame>(atoi(&frame));
 
-    WarnL << "Parse frame: " << frame << ": " << atoi(&frame) << ": " << frameString() << endl;
-
     if (_frame == Packet::Frame::Message) {
 
         // look up packet type
@@ -171,49 +171,27 @@ std::size_t Packet::read(const ConstBuffer& buf)
         //     return false;
         // }
 
-        WarnL << "Parse type: " << type << ": " << typeString() << endl;
+        // WarnL << "Parse type: " << type << ": " << typeString() << endl;
     }
 
     // look up attachments if type binary (not implemented)
-
-    WarnL << "Parse namespace: " << reader.peek() << endl;
 
     // look up namespace (if any)
     if (reader.peek() == '/') {
         reader.readToNext(_nsp, ',');
     }
 
-    WarnL << "Parse id: " << reader.peek() << endl;
-
     // look up id
-    // assert('oi');
-    // char next = reader.peek();isdigit
-    // if (next !== '' && next == atoi(next)) {
     if (reader.available() && isdigit(reader.peek())) {
         char next;
         std::string id;
         reader.get(&next, 1);
         while (reader.available() && isdigit(next)) {
-            id += &next;
+            id += next;
             reader.get(&next, 1);
         }
         _id = util::strtoi<int>(id);
     }
-
-    // var next = str.charAt(i + 1);
-    // if ('' !== next && Number(next) == next) {
-    //   p.id = '';
-    //   while (++i) {
-    //     var c = str.charAt(i);
-    //     if (null == c || Number(c) != c) {
-    //       --i;
-    //       break;
-    //     }
-    //     p.id += str.charAt(i);
-    //     if (i == str.length) break;
-    //   }
-    //   p.id = Number(p.id);
-    // }
 
     // look up json data
     // TODO: Take into account joined messages
@@ -294,15 +272,18 @@ void Packet::write(Buffer& buf) const
 
     // 2["message",{"data":"fffffffffffffffffffff","type":"message","id":"k0dsiifb169cz0k9","from":"aaa|/#Zr0vTHQ4JG2Zt-qtAAAA"}]
     ss << int(_frame)
-        << int(_type);
+        << int(_type)
+        << _id;
 
     if (_type == Type::Event) {
-
       ss << "[\""
         << (_event.empty() ? "message" : _event)
-        << "\",\""
+        << "\","
         << _message
-        << "\"]";
+        << "]";
+        // << "\",\""
+        // << _message
+        // << "\"]";
     }
         // << "[\"message\",\""
 

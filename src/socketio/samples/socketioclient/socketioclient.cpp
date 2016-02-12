@@ -1,7 +1,5 @@
 #include "scy/socketio/socket.h"
 #include "scy/socketio/transaction.h"
-//#include "scy/taskrunner.h"
-//#include "scy/packetstream.h"
 #include "scy/util.h"
 
 #include <string>
@@ -11,25 +9,15 @@
 #include <conio.h>
 
 
+/* -----------------------------------------------------------------------------
+ FIXME, THIS CODE IS OUT OF DATE!
+----------------------------------------------------------------------------- */
+
 using namespace std;
 using namespace Sourcey;
 using namespace Sourcey::Util;
-//using namespace Sourcey::SocketIO;
 using namespace Sourcey::Net;
 
-
-/*
-using namespace Poco;
-namespace Sourcey { 
-namespace SocketIO {
-
-
-// Detect Memory Leaks
-#ifdef _DEBUG
-#include "MemLeakDetect/MemLeakDetect.h"
-CMemLeakDetect memLeakDetect;
-#endif<DataPacket>
-*/
 
 class Messenger: public SocketIO::Socket
 {
@@ -43,24 +31,24 @@ public:
     {
     }
 
-    void sendTransaction(const SocketIO::Packet& packet) 
-    {        
+    void sendTransaction(const SocketIO::Packet& packet)
+    {
         SocketIO::Transaction* txn = new SocketIO::Transaction(*this, packet);
         txn->StateChanged += sdelegate(this, &Messenger::onTransactionStateChanged);
         txn->send();
     }
 
-    void onTransactionStateChanged(void* sender, TransactionState& state, const TransactionState&) 
+    void onTransactionStateChanged(void* sender, TransactionState& state, const TransactionState&)
     {
         Log("debug", this) << "Transaction State Changed: " << state.toString() << endl;
-    
+
         SocketIO::Transaction* transaction = reinterpret_cast<SocketIO::Transaction*>(sender);
-        switch (state.id()) {    
+        switch (state.id()) {
         case TransactionState::Running:
             break;
 
         case TransactionState::Success:
-            break;        
+            break;
 
         case TransactionState::Cancelled:
             break;
@@ -81,14 +69,14 @@ int main(int argc, char** argv)
     Sourcey::Net::Address srvAddr("localhost", 1337);
     Messenger app(srvAddr);
     app.connect();
-    
+
     std::string network = "4";
     std::string event;
     char o = 0;
-    while (o != 'Q') 
-    {    
+    while (o != 'Q')
+    {
         try {
-            cout << 
+            cout <<
                 "COMMANDS:\n\n"
                 "  E    Set Event Name.\n"
                 "  A    Announce.\n"
@@ -105,59 +93,50 @@ int main(int argc, char** argv)
                 //"  U    Uninstall Packages.\n"
                 //"  D    Update All Packages.\n"
                 "  Q    Quit.\n\n";
-        
+
             o = toupper(getch());
-        
+
             // Set Input File
-            if (o == 'E') {    
+            if (o == 'E') {
                 cout << "Enter event name: " << endl;
                 getline(cin, event);
             }
-        
+
             // Send Message
             else if (o == '1') {
                 app.sendConnect();
-            } 
-        
+            }
+
             // Send Message
             else if (o == 'M') {
                 app.send(SocketIO::Packet::Message, "wassssupppp!", true);
-            } 
-        
+            }
+
             // Send JSON Message
             else if (o == 'J') {
                 app.send(SocketIO::Packet::JSON, "{\"name\":\"value\"}", true);
-            } 
-        
+            }
+
             // Send Announce
             else if (o == 'A') {
                 //app.emit("announce", "{\"username\":\"admin\",\"name\":\"Admin Dude\",\"account\":\"4\"}", true);
-            } 
-        
+            }
+
             // Send XMPP Message
             else if (o == 'X') {
                 //app.emit("xmpp", "{\"name\":\"value\"}", true);
-            } 
-        
+            }
+
             // Send Transaction
             else if (o == 'T') {
-                //app.emit("xmpp", "{\"name\":\"value\"}", true);
-                /*
-                Type type = Message, 
-           std::uint32_t id = -1, 
-           const std::string& endpoint = "", 
-           const std::string& message = "", 
-           bool ack
-           */
-
                 SocketIO::Packet request(SocketIO::Packet::Message, 99, "", "yooooooooooo", true);
                 app.sendTransaction(request);
-            } 
-        } 
-        catch (Poco::Exception& e) 
-        {            
+            }
+        }
+        catch (Poco::Exception& e)
+        {
             cerr << e.displayText() << endl;
-        }        
+        }
     }
 
 
@@ -165,32 +144,32 @@ int main(int argc, char** argv)
 }
 
 
-        
-        
+
+
             /*
             // Call Upload Asset Service
             else if (o == 'U') {
 
                 Path file("D:/test.avi");
-            
+
                 HTMLForm* form = new HTMLForm(HTMLForm::ENCODING_MULTIPART_FORM);
                 form->set("asset[type]", "Video");
                 form->addPart("asset[file]", new FilePartSource(file.toString()));
 
-                APITransaction* transaction = app.upload("UploadAsset", form); //file.toString(), 
+                APITransaction* transaction = app.upload("UploadAsset", form); //file.toString(),
                 transaction->APITransactionComplete += sdelegate(&app, &Messenger::onAPITransactionComplete);
                 transaction->start();
-            } 
+            }
 
             // List Services
             else if (o == 'L') {
                 app.files().print(cout);
-            } 
+            }
 
             // Reload Service List
             else if (o == 'R') {
                 app.loadServices();
-            } 
+            }
             */
     /*
     stringstream ss;
@@ -204,14 +183,14 @@ int main(int argc, char** argv)
 
     StringList v = Util::split(ss.str(), 0xff);
     //cout <<  v.size();
-    
-    
+
+
     stringstream ss1;
     ss1 << 0x00;
     ss1.write("1::", 3);
     ss1 << 0xff;
     cout <<  ss1.str();
-    
+
     stringstream ss2;
     ss2.put(0x00);
     ss2.write("1::", 3);
@@ -222,4 +201,3 @@ int main(int argc, char** argv)
     system("pause");
     return 0;
     */
-

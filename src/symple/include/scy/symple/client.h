@@ -57,29 +57,23 @@ public:
 
         std::string token;
         std::string user;
-        // std::string group;
         std::string name;
         std::string type;
-        //net::Address serverAddr;
 
         Options() {
-            host = "127.0.0.1";
-            port = 4000;
+            host  = "127.0.0.1";
+            port  = 4500;
 
-            token        = "";
-            user        = "";
-            // group        = "global";
-            name        = "";
-            type        = "peer";
-            //serverAddr    = net::Address("127.0.0.1", 4000);
+            token = "";
+            user  = "";
+            name  = "";
+            type  = "peer";
         }
     };
 
 public:
     Client(const net::Socket::Ptr& socket,
-        const Options& options = Options()//,
-        //uv::Loop* loop = uv::defaultLoop()
-        );
+        const Options& options = Options());
     virtual ~Client();
 
     void connect();
@@ -130,8 +124,6 @@ public:
     virtual void onPresenceData(const json::Value& data, bool whiny = false);
         // Updates the roster from the given client object.
 
-    //virtual const char* className() const { return "SympleClient"; }
-
     //
     // Signals
     //
@@ -141,9 +133,9 @@ public:
         // response status code of our announce() call.
         // Possible status codes are:
         //   - 200: Authentication success
-        //     - 401: Authentication failed
-        //     - 400: Bad request data
-        //     - 500: Server not found
+        //   - 401: Authentication failed
+        //   - 400: Bad request data
+        //   - 500: Server not found
 
     Signal<Peer&> PeerConnected;
         // Signals when a peer connects.
@@ -168,9 +160,12 @@ protected:
     virtual void createPresence(Presence& p);
         // Creates a Presence object.
 
-    virtual void onSocketConnect();
+    virtual void emit(IPacket& packet);
+        // Override PAcketStream::emit
+
+    virtual void onOnline();
     virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&);
-    virtual void onPacket(sockio::Packet& packet);
+    // virtual void onPacket(sockio::Packet& packet);
 
 protected:
     Roster _roster;

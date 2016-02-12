@@ -41,8 +41,8 @@ Address::Address(const std::string& id)
 }
 
 
-Address::Address(const std::string& user, const std::string& id) : //const std::string& group,
-    user(user), id(id) //group(group),
+Address::Address(const std::string& user, const std::string& id) :
+    user(user), id(id)
 {
 }
 
@@ -64,26 +64,7 @@ bool Address::parse(const std::string& addr)
     if (params.size() > 0)
         user = params[0];
     if (params.size() > 1)
-        user = params[1];
-
-    // // First find the ID part
-    // std::string::size_type slashpos = addr.find('/');
-    // id = (slashpos == std::string::npos ? "" : addr.substr(slashpos + 1));
-    //
-    // // Now look for the user
-    // std::string::size_type atpos = addr.find('@');
-    // std::string::size_type groupbegin;
-    // if (atpos < slashpos && atpos != std::string::npos) {
-    //     user = addr.substr(0, atpos);
-    //     groupbegin = atpos + 1;
-    // } else {
-    //     groupbegin = 0;
-    // }
-    //
-    // // Now take what is left as the group
-    // std::string::size_type domainend = (slashpos == std::string::npos) ?
-    //     (addr.length() - groupbegin) : (slashpos - groupbegin);
-    // group = addr.substr(groupbegin, domainend);
+        id = params[1];
 
     return valid();
 }
@@ -91,7 +72,6 @@ bool Address::parse(const std::string& addr)
 bool Address::valid() const
 {
     return !user.empty()
-        // || !group.empty()
         || !id.empty();
 }
 
@@ -100,11 +80,6 @@ void Address::print(std::ostream& os) const
 {
     if (!user.empty())
         os << user;
-    // if (!group.empty()) {
-    //     if (!user.empty())
-    //         os << "@";
-    //     os << group;
-    // }
     if (!id.empty()) {
         os << "|"; // always add slash to identify ID only addresses
         os << id;
@@ -123,7 +98,6 @@ std::string Address::toString() const
 bool Address::operator == (const Address& r)
 {
     return user == r.user
-        // && group == r.group
         && id == r.id;
 }
 

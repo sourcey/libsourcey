@@ -110,6 +110,12 @@ int Client::send(Message& m, bool ack)
     m.setFrom(ourPeer()->address());
     //assert(isOnline()); // may be announcing
 
+      TraceL << "Sending message 11111111111111: " << json::stringify(m, true) << endl;
+
+            TraceL << "Sending message FRTOM: " << ourPeer()->address() << endl;
+                  TraceL << "Sending message FRTOM: " << m.from().id << endl;
+                        TraceL << "Sending message TO: " << m.to().id << endl;
+
     if (m.to().id == m.from().id) {
         assert(0);
         throw std::runtime_error("Cannot send message with matching sender and recipient.");
@@ -119,10 +125,10 @@ int Client::send(Message& m, bool ack)
         assert(0);
         throw std::runtime_error("Cannot send invalid message.");
     }
+    // #ifdef _DEBUG
+        TraceL << "Sending message: " << json::stringify(m, true) << endl;
+    // #endif
 
-#ifdef _DEBUG
-    TraceL << "Sending message: " << json::stringify(m, true) << endl;
-#endif
     return sockio::Client::send(m, ack);
 }
 
@@ -187,7 +193,6 @@ int Client::announce()
     data["name"] = _options.name;
     data["user"] = _options.user;
     data["type"] = _options.type;
-    // data["group"] = _options.group;
     data["token"] = _options.token;
     sockio::Packet pkt("announce", data, true);
     auto txn = createTransaction(pkt);
@@ -204,7 +209,7 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
     switch (state.id()) {
     case TransactionState::Success:
         try {
-            json::Value data = transaction->response().json()[(unsigned)0];
+            json::Value data = transaction->response().json(); //[(unsigned)0];
             _announceStatus = data["status"].asInt();
 
             if (_announceStatus != 200)
@@ -241,31 +246,33 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 }
 
 
-void Client::onSocketConnect()
+void Client::onOnline()
 {
-    // Start the socket.io timers etc
-    sockio::Client::onConnect();
+    // // Start the socket.io timers etc
+    // sockio::Client::onOnline();
 
-    // Authorize the symple connection
+    // NOTE: Do not transition the Socket.IO client to Online state here
+    // It will be done via the Announce callback
+
+    // Announce the Symple Client
     announce();
 }
 
 
-void Client::onPacket(sockio::Packet& packet)
+void Client::emit(IPacket& raw)
 {
-    // Parse Symple messages from SocketIO JSON packets
-    if (//packet.type() == sockio::Packet::Message ||
-        //packet.type() == sockio::Packet::JSON
-        packet.type() == sockio::Packet::Type::Event
-        ) {
-        //TraceL << "JSON packet: " << packet.toString() << endl;
+    auto packet = reinterpret_cast<sockio::Packet&>(raw);
 
-        json::Value data;
-        json::Reader reader;
-        if (reader.parse(packet.message(), data)) {
+    // Parse Symple messages from SocketIO packets
+    if (packet.type() == sockio::Packet::Type::Event) {
+        TraceL << "JSON packet: " << packet.toString() << endl;
+
+        json::Value data = packet.json();
+        // json::Reader reader;
+        if (data.isMember("type")) {
             std::string type(data["type"].asString());
 #ifdef _DEBUG
-            TraceL << "Received message: " << type << ": " << json::stringify(data, true) << endl;
+            TraceL << "Received " << type << ": " << json::stringify(data, true) << endl;
 #endif
 
             // KLUDGE: Note we are currently creating the JSON object
@@ -315,7 +322,10 @@ void Client::onPacket(sockio::Packet& packet)
             else
                 WarnL << "Received non-standard message: " << type << endl;
         }
-        else assert(0 && "invalid packet");
+        else {
+          assert(0 && "invalid packet");
+          WarnL << "Invalid Symple message" << endl;
+        }
     }
 
     // Other packet types are proxied directly
@@ -406,7 +416,7 @@ void Client::reset()
     //_persistence.clear();
 
     _roster.clear();
-    _announceStatus = 500;
+    _announceStatus = -1;
     _ourID = "";
     sockio::Client::reset();
 }

@@ -29,7 +29,7 @@ namespace smpl {
 #if USE_SSL
 #define SERVER_PORT 443
 #else
-#define SERVER_PORT 4000
+#define SERVER_PORT 4500
 #endif
 
 
@@ -62,41 +62,25 @@ public:
 
     void testAddress()
     {
-        // smpl::Address a("user@group/567257247245275");
-        // assert(a.user == "user");
-        // assert(a.group == "group");
-        // assert(a.id == "567257247245275");
-        // assert(a.valid());
-
         smpl::Address a1("user|");
         assert(a1.user == "user");
-        // assert(a1.group == "group");
         assert(a1.id == "");
         assert(a1.valid());
 
         smpl::Address a2("user");
         assert(a2.user == "user");
-        // assert(a2.group == "group");
         assert(a2.id == "");
         assert(a2.valid());
 
         smpl::Address a3("");
         assert(a3.user == "");
-        // assert(a3.group == "");
         assert(a3.id == "");
         assert(!a3.valid());
 
         smpl::Address a4("|567257247245275");
         assert(a4.user == "");
-        // assert(a4.group == "");
         assert(a4.id == "567257247245275");
         assert(a4.valid());
-
-        // smpl::Address a5("group/567257247245275");
-        // assert(a5.user == "");
-        // assert(a5.group == "group");
-        // assert(a5.id == "567257247245275");
-        // assert(a5.valid());
     }
 
     void testClient()
@@ -105,7 +89,6 @@ public:
         options.host = SERVER_HOST;
         options.port = SERVER_PORT;
         options.user = "test";
-        // options.group = "global";
         options.name = "crash";
         options.type = "testapp";
 
@@ -119,6 +102,7 @@ public:
         smpl::TCPClient client(options);
 #endif
 
+        client.Announce += sdelegate(this, &Tests::onClientAnnounce);
         client.StateChange += sdelegate(this, &Tests::onClientStateChange);
         client.CreatePresence += sdelegate(this, &Tests::onCreatePresence);
         client.connect();
@@ -128,6 +112,11 @@ public:
         }, &client);
 
         DebugL << "Event loop ended" << endl;
+    }
+
+    void onClientAnnounce(void* sender, const int& status)
+    {
+        assert(status == 200);
     }
 
     void onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState)
@@ -141,6 +130,11 @@ public:
         case sockio::ClientState::Connected:
             break;
         case sockio::ClientState::Online:
+            {
+                smpl::Message m;
+                m.setData("olay");
+                client->send(m, true);
+            }
             break;
         case sockio::ClientState::Error:
             assert(0);
@@ -170,11 +164,9 @@ int main(int argc, char** argv)
 #if USE_SSL
     SSLManager::initNoVerifyClient();
 #endif
-
     {
         scy::smpl::Tests run;
     }
-
 #if USE_SSL
     SSLManager::instance().shutdown();
 #endif

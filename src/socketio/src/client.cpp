@@ -351,12 +351,11 @@ void Client::reset()
     //_ws.socket->Close -= sdelegate(this, &Client::onSocketClose);
     _ws.socket->close();
 
+    _error.reset();
     _sessionID = "";
     _pingInterval = 0;
     _pingTimeout = 0;
-    //_wasOnline = false; // Reset via onClose()
-    _error.reset();
-
+    // _wasOnline = false; // Reset via onClose()
 }
 
 
@@ -388,7 +387,6 @@ void Client::onConnect()
 void Client::onOnline()
 {
     TraceL << "On online" << endl;
-
     assert(stateEquals(ClientState::Connected));
 
     setState(this, ClientState::Online);
@@ -422,7 +420,6 @@ void Client::onClose()
 
 void Client::onSocketConnect()
 {
-    // Start
     onConnect();
 }
 
@@ -496,7 +493,7 @@ void Client::onMessage(sockio::Packet& packet) {
             onOnline();
             break;
         case Packet::Packet::Type::Disconnect:
-            // Do nothing. Handled by close frame
+            // Do nothing, attempt to reconnect after ping timeout
             break;
         case Packet::Packet::Type::Event:
             assert(stateEquals(ClientState::Online));
