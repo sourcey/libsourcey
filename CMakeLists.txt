@@ -294,10 +294,10 @@ endif()
 if(WITH_ZLIB)
   #include_dependency(ZLIB REQUIRED)
   #include_dependency(Minizip REQUIRED)
-  #list(APPEND LibSourcey_BUILD_DEPENDENCIES zlib)
+  list(APPEND LibSourcey_BUILD_DEPENDENCIES zlib)
   list(APPEND LibSourcey_BUILD_DEPENDENCIES minizip)
-  #add_subdirectory(deps/zlib)
-  add_subdirectory(deps/minizip) #deps/zlib/contrib/minizip
+  add_subdirectory(deps/zlib)
+  add_subdirectory(deps/minizip)
   set(HAVE_ZLIB 1)
 endif()
 

@@ -260,7 +260,7 @@ bool DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
     }
     return true;
 #elif defined(HAVE_RTAUDIO)
-TraceLS(this) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Get audio devices: " << endl;
+TraceS(this) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Get audio devices: " << endl;
 
     // Since we are using RtAudio for audio capture it's best to
     // use RtAudio to enumerate devices to ensure indexes match.
@@ -268,7 +268,7 @@ TraceLS(this) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Get 
 
     // Determine the number of devices available
     auto ndevices = audio.getDeviceCount();
-    TraceLS(this) << "Get audio devices: " << ndevices << endl;
+    TraceS(this) << "Get audio devices: " << ndevices << endl;
 
     // Scan through devices for various capabilities
     RtAudio::DeviceInfo info;
@@ -276,7 +276,7 @@ TraceLS(this) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Get 
         try {
             info = audio.getDeviceInfo(i);    // may throw RtAudioError
 
-            TraceLS(this) << "Device:"
+            TraceS(this) << "Device:"
                 << "\n\tName: " << info.name
                 << "\n\tOutput Channels: " << info.outputChannels
                 << "\n\tInput Channels: " << info.inputChannels
@@ -290,14 +290,14 @@ TraceLS(this) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Get 
                 (input && info.inputChannels > 0) ||
                 (!input && info.outputChannels > 0))) {
 
-                TraceLS(this) << "Adding device: " << info.name << endl;
+                TraceS(this) << "Adding device: " << info.name << endl;
                 Device dev((input ? "audioin" : "audioout"), i, info.name, "",
                     (input ? info.isDefaultInput : info.isDefaultOutput));
                 devs.push_back(dev);
             }
         }
         catch (RtAudioError& e) {
-            ErrorLS(this) << "Cannot probe audio device: " << e.getMessage() << endl;
+            ErrorS(this) << "Cannot probe audio device: " << e.getMessage() << endl;
         }
     }
 

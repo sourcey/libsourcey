@@ -54,7 +54,7 @@ VideoCapture::VideoCapture(int deviceId) :
     _stopping(false),
     _capturing(false)
 {
-    TraceLS(this) << "Create: " << deviceId << std::endl;
+    TraceS(this) << "Create: " << deviceId << std::endl;
     open();
     start();
 }
@@ -68,7 +68,7 @@ VideoCapture::VideoCapture(const std::string& filename) :
     _stopping(false),
     _capturing(false)
 {
-    TraceLS(this) << "Create: " << filename << std::endl;
+    TraceS(this) << "Create: " << filename << std::endl;
     open();
     start();
 }
@@ -76,7 +76,7 @@ VideoCapture::VideoCapture(const std::string& filename) :
 
 VideoCapture::~VideoCapture()
 {
-    TraceLS(this) << "Destroy" << std::endl;
+    TraceS(this) << "Destroy" << std::endl;
     //stop();
 
     // Ensure we are not inside the thread context
@@ -84,7 +84,7 @@ VideoCapture::~VideoCapture()
 
     // Terminate the internal thread
     if (_thread.started()) {
-        TraceLS(this) << "Destroy: Terminating thread" << std::endl;
+        TraceS(this) << "Destroy: Terminating thread" << std::endl;
         _stopping = true;
         _thread.join();
     }
@@ -92,18 +92,18 @@ VideoCapture::~VideoCapture()
     // Try to release the capture (automatic once unrefed)
     //try { release(); } catch (...) {}
 
-    TraceLS(this) << "Destroy: OK" << std::endl;
+    TraceS(this) << "Destroy: OK" << std::endl;
 }
 
 
 void VideoCapture::start()
 {
-    TraceLS(this) << "Starting" << std::endl;
+    TraceS(this) << "Starting" << std::endl;
     {
         Mutex::ScopedLock lock(_mutex);
 
         if (!_started) { //
-            TraceLS(this) << "Initializing thread" << std::endl;
+            TraceS(this) << "Initializing thread" << std::endl;
 
             // The capture must be opened first.
             // open() must be called from the main thread,
@@ -123,17 +123,17 @@ void VideoCapture::start()
         }
     }
     while (!_capturing && error().any()) {
-        TraceLS(this) << "Starting: Waiting" << std::endl;
+        TraceS(this) << "Starting: Waiting" << std::endl;
         scy::sleep(10);
     }
 
-    TraceLS(this) << "Starting: OK" << std::endl;
+    TraceS(this) << "Starting: OK" << std::endl;
 }
 
 
 void VideoCapture::stop()
 {
-    TraceLS(this) << "Stopping" << std::endl;
+    TraceS(this) << "Stopping" << std::endl;
 
     // Note: This function no longer has any side effects.
     // Once the capture is running, it will continue to do
@@ -146,7 +146,7 @@ void VideoCapture::stop()
 
     assert(Thread::currentID() != _thread.tid());
     if (_started && emitter.ndelegates() == 0) { //_thread.started()
-        TraceLS(this) << "Terminating thread" << std::endl;
+        TraceS(this) << "Terminating thread" << std::endl;
         _stopping = true;
         _thread.join();
     }
@@ -156,7 +156,7 @@ void VideoCapture::stop()
 
 bool VideoCapture::open(bool whiny)
 {
-    TraceLS(this) << "Open" << std::endl;
+    TraceS(this) << "Open" << std::endl;
     Mutex::ScopedLock lock(_mutex);
     assert(Thread::currentID() != _thread.tid());
 
@@ -171,7 +171,7 @@ bool VideoCapture::open(bool whiny)
     if (!_opened && whiny)
         throw std::runtime_error(exceptionMessage("Cannot open the video capture device: " + name()));
 
-    TraceLS(this) << "Open: " << _opened << std::endl;
+    TraceS(this) << "Open: " << _opened << std::endl;
     return _opened;
 }
 
@@ -185,7 +185,7 @@ void VideoCapture::run()
         bool empty = true;
         PacketSignal* next = nullptr;
 
-        TraceLS(this) << "Running:"
+        TraceS(this) << "Running:"
             << "\n\tDevice ID: " << _deviceId
             << "\n\tFilename: " << _filename
             << "\n\tWidth: " << width()
@@ -193,11 +193,11 @@ void VideoCapture::run()
 
         while (!_stopping) {
             frame = grab();
-            // TraceLS(this) << "Frame: " << frame.rows << "x" << frame.cols << std::endl;
+            // TraceS(this) << "Frame: " << frame.rows << "x" << frame.cols << std::endl;
 
             empty = emitter.ndelegates() == 0;
             if (!empty) {
-                TraceLS(this) << "Emitting: " << _counter.fps << std::endl;
+                TraceS(this) << "Emitting: " << _counter.fps << std::endl;
                 MatrixPacket out(&frame);
                 emitter.emit(next, out);
             }
@@ -228,10 +228,10 @@ void VideoCapture::run()
 
     // Note: Need to release the capture, otherwise this class instance
     // cannot be reused ie. the next call to open() will fail.
-    TraceLS(this) << "Releasing" << std::endl;
+    TraceS(this) << "Releasing" << std::endl;
     _capture.release();
 
-    TraceLS(this) << "Exiting" << std::endl;
+    TraceS(this) << "Exiting" << std::endl;
 }
 
 
@@ -288,7 +288,7 @@ cv::Mat VideoCapture::lastFrame() const
 
 void VideoCapture::getFrame(cv::Mat& frame, int width, int height)
 {
-    TraceLS(this) << "Get frame: " << width << "x" << height << std::endl;
+    TraceS(this) << "Get frame: " << width << "x" << height << std::endl;
 
     // Don't actually grab a frame here, just copy the current frame
     // If no valid frame is available an exception will be thrown
@@ -339,7 +339,7 @@ void VideoCapture::removeEmitter(PacketSignal* emitter)
 
 void VideoCapture::setError(const std::string& error)
 {
-    ErrorLS(this) << "Set error: " << error << std::endl;
+    ErrorS(this) << "Set error: " << error << std::endl;
     {
         Mutex::ScopedLock lock(_mutex);
         _error.message = error;

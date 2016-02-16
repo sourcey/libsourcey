@@ -275,12 +275,12 @@ http::ServerResponder* HTTPStreamingConnectionFactory::createResponder(http::Ser
 StreamingOptions::StreamingOptions(MediaServer* server, av::VideoCapture::Ptr videoCapture, av::AudioCapture::Ptr audioCapture) :
     server(server), videoCapture(videoCapture), audioCapture(audioCapture)
 {
-    DebugLS(this) << "Destroy" << endl;
+    DebugS(this) << "Destroy" << endl;
 }
 
 StreamingOptions::~StreamingOptions()
 {
-    DebugLS(this) << "Destroy" << endl;
+    DebugS(this) << "Destroy" << endl;
 }
 
 

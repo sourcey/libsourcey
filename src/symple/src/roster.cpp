@@ -30,13 +30,13 @@ namespace smpl {
 
 Roster::Roster()
 {    
-    //TraceLS(this) << "Create" << endl;
+    //TraceS(this) << "Create" << endl;
 }
     
 
 Roster::~Roster() 
 {
-    //TraceLS(this) << "Destroy" << endl;
+    //TraceS(this) << "Destroy" << endl;
 }
 
 
@@ -79,7 +79,7 @@ void Roster::update(const json::Value& data, bool whiny)
         data.isMember("name") //&& 
         //data.isMember("type")
         ) {
-        TraceLS(this) << "Updating: " << json::stringify(data, true) << endl;
+        TraceS(this) << "Updating: " << json::stringify(data, true) << endl;
         std::string id = data["id"].asString();
         Peer* peer = get(id, false);
         if (!peer) {
@@ -95,7 +95,7 @@ void Roster::update(const json::Value& data, bool whiny)
     }
     else {
         std::string error("Bad presence data: " + json::stringify(data));
-        ErrorLS(this) << error << endl;    
+        ErrorS(this) << error << endl;    
         if (whiny)
             throw std::runtime_error(error);
     }

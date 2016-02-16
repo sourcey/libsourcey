@@ -65,14 +65,14 @@ public:
     virtual bool expires(const TKey& key, long timeout) 
         // Update the item expiry timeout
     {
-        TraceLS(this) << "Set expires: " << key << ": " << timeout << std::endl;    
+        TraceS(this) << "Set expires: " << key << ": " << timeout << std::endl;    
         return expires(Base::get(key, false), timeout);
     }
     
     virtual bool expires(TValue* item, long timeout) 
         // Update the item expiry timeout
     {
-        TraceLS(this) << "Set expires: " << item << ": " << timeout << std::endl;    
+        TraceS(this) << "Set expires: " << item << ": " << timeout << std::endl;    
         return setTimeout(item, timeout);
     }
 
@@ -89,7 +89,7 @@ protected:
         if (item) {
             Mutex::ScopedLock lock(_tmutex);
             if (timeout > 0) {
-                TraceLS(this) << "Set timeout: " << item << ": " << timeout << std::endl;    
+                TraceS(this) << "Set timeout: " << item << ": " << timeout << std::endl;    
                 auto& t = _timeouts[item];
                 t.setDelay(timeout);
                 t.start();
@@ -133,13 +133,13 @@ protected:
         
         //for (auto ref : timeouts) {}
         for (auto it = timeouts.begin(); it != timeouts.end(); ++it) {
-            //TraceLS(this) << "Check item: " 
+            //TraceS(this) << "Check item: " 
             //    << it->first << ": " 
             //    << it->second.delay() << ": " 
             //    << it->second.remaining() << std::endl;    
             if (it->second.expired()) {    
                 //auto item = it->first;
-                TraceLS(this) << "Item expired: " << it->first << std::endl;
+                TraceS(this) << "Item expired: " << it->first << std::endl;
                 onTimeout(it->first);
                 //it = _timeouts.erase(it);
             }

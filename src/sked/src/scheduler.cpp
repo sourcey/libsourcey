@@ -67,7 +67,7 @@ void Scheduler::clear()
 
 void Scheduler::run() 
 {
-    //TraceLS(this) << "Running" << endl;
+    //TraceS(this) << "Running" << endl;
     //while (!_stopped) 
     //{    
 
@@ -88,7 +88,7 @@ void Scheduler::run()
             {
                 DateTime now;
                 Timespan remaining = task->trigger().scheduleAt - now;
-                TraceLS(this) << "Waiting: "
+                TraceS(this) << "Waiting: "
                     << "\n\tPID: " << task
                     << "\n\tDays: " << remaining.days()
                     << "\n\tHours: " << remaining.totalHours()
@@ -115,41 +115,41 @@ void Scheduler::run()
 #if _DEBUG                        
                 {
                     DateTime now;
-                    TraceLS(this) << "Running: "
+                    TraceS(this) << "Running: "
                         << "\n\tPID: " << task
                         << "\n\tCurrentTime: " << DateTimeFormatter::format(now, DateTimeFormat::ISO8601_FORMAT)
                         << "\n\tScheduledTime: " << DateTimeFormatter::format(task->trigger().scheduleAt, DateTimeFormat::ISO8601_FORMAT)
                         << endl;
                 }
 #else
-                TraceLS(this) << "Running: " << task << endl;
+                TraceS(this) << "Running: " << task << endl;
 #endif
                 task->run();    
                 if (task->afterRun())
                     onRun(task);
                 else {
-                    TraceLS(this) << "Destroy After Run: " << task << endl;
+                    TraceS(this) << "Destroy After Run: " << task << endl;
                     task->_destroyed = true; //destroy();
                 }
             }
             else
-                TraceLS(this) << "Skipping Task: " << task << endl;
+                TraceS(this) << "Skipping Task: " << task << endl;
             
             // Destroy the task if needed
             if (task->destroyed()) {
-                TraceLS(this) << "Destroy Task: " << task << endl;    
+                TraceS(this) << "Destroy Task: " << task << endl;    
                 assert(remove(task));
                 delete task;
             }
             
-            //TraceLS(this) << "Running: OK: " << task << endl;
+            //TraceS(this) << "Running: OK: " << task << endl;
         }
 
         // Go to sleep if we have no tasks
         //else {
-        //    TraceLS(this) << "Sleeping" << endl;
+        //    TraceS(this) << "Sleeping" << endl;
         //    _wakeUp.wait();
-        //    TraceLS(this) << "Waking up" << endl;
+        //    TraceS(this) << "Waking up" << endl;
         //}
 
         // Prevent 100% CPU
@@ -161,9 +161,9 @@ void Scheduler::run()
         //Idle.emit(this);
     //}
             
-    //TraceLS(this) << "Shutdown" << endl;        
+    //TraceS(this) << "Shutdown" << endl;        
     //Shutdown.emit(this);
-    //TraceLS(this) << "Exiting" << endl;
+    //TraceS(this) << "Exiting" << endl;
 }
 
 
@@ -171,7 +171,7 @@ void Scheduler::update()
 {
     Mutex::ScopedLock lock(_mutex);
     
-    //TraceLS(this) << "Updating: " << _tasks.size() << endl;
+    //TraceS(this) << "Updating: " << _tasks.size() << endl;
 
     // Update and clean the task list
     auto it = _tasks.begin();
@@ -180,7 +180,7 @@ void Scheduler::update()
         if (task->destroyed()) {
             it = _tasks.erase(it);
             onRemove(task);
-            TraceLS(this) << "Destroy: " << task << endl;
+            TraceS(this) << "Destroy: " << task << endl;
             delete task;
         }
         else
@@ -195,12 +195,12 @@ void Scheduler::update()
 
 void Scheduler::serialize(json::Value& root)
 {
-    TraceLS(this) << "Serializing" << endl;
+    TraceS(this) << "Serializing" << endl;
     
     Mutex::ScopedLock lock(_mutex);
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         sked::Task* task = reinterpret_cast<sked::Task*>(*it);
-        TraceLS(this) << "Serializing: " << task << endl;
+        TraceS(this) << "Serializing: " << task << endl;
         json::Value& entry = root[root.size()];
         task->serialize(entry);
         task->trigger().serialize(entry["trigger"]);
@@ -210,7 +210,7 @@ void Scheduler::serialize(json::Value& root)
 
 void Scheduler::deserialize(json::Value& root)
 {
-    TraceLS(this) << "Deserializing" << endl;
+    TraceS(this) << "Deserializing" << endl;
     
     for (auto it = root.begin(); it != root.end(); it++) {
         sked::Task* task = nullptr;
@@ -229,7 +229,7 @@ void Scheduler::deserialize(json::Value& root)
                 delete task;
             if (trigger)
                 delete trigger;
-            ErrorLS(this) << "Deserialization Error: " << exc.what() << endl;
+            ErrorS(this) << "Deserialization Error: " << exc.what() << endl;
         }
     }
 }

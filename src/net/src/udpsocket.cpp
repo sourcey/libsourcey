@@ -66,14 +66,14 @@ UDPSocket::UDPSocket(uv::Loop* loop) :
     uv::Handle(loop), 
     _buffer(65536)
 {
-    TraceLS(this) << "Create" << endl;
+    TraceS(this) << "Create" << endl;
     init();
 }
 
 
 UDPSocket::~UDPSocket()
 {
-    TraceLS(this) << "Destroy" << endl;
+    TraceS(this) << "Destroy" << endl;
 }
 
 
@@ -81,7 +81,7 @@ void UDPSocket::init()
 {
     if (ptr()) return;
     
-    TraceLS(this) << "Init" << endl;
+    TraceS(this) << "Init" << endl;
     uv_udp_t* udp = new uv_udp_t;
     udp->data = this; //instance();
     _closed = false;
@@ -105,7 +105,7 @@ void UDPSocket::connect(const Address& peerAddress)
 
 void UDPSocket::close()
 {
-    TraceLS(this) << "Closing" << endl;    
+    TraceS(this) << "Closing" << endl;    
     recvStop();
     uv::Handle::close();
 }
@@ -113,7 +113,7 @@ void UDPSocket::close()
 
 void UDPSocket::bind(const Address& address, unsigned flags) 
 {    
-    TraceLS(this) << "Binding on " << address << endl;
+    TraceS(this) << "Binding on " << address << endl;
 
     int r;
     switch (address.af()) {
@@ -154,17 +154,17 @@ namespace internal {
 
 int UDPSocket::send(const char* data, std::size_t len, const Address& peerAddress, int /* flags */) 
 {    
-    TraceLS(this) << "Send: " << len << ": " << peerAddress << endl;
+    TraceS(this) << "Send: " << len << ": " << peerAddress << endl;
     assert(Thread::currentID() == tid());
     //assert(len <= net::MAX_UDP_PACKET_SIZE);
 
     if (_peer.valid() && _peer != peerAddress) {
-        ErrorLS(this) << "Peer not authorized: " << peerAddress << endl;
+        ErrorS(this) << "Peer not authorized: " << peerAddress << endl;
         return -1;
     }
 
     if (!peerAddress.valid()) {
-        ErrorLS(this) << "Peer not valid: " << peerAddress << endl;
+        ErrorS(this) << "Peer not valid: " << peerAddress << endl;
         return -1;
     }
     
@@ -187,7 +187,7 @@ int UDPSocket::send(const char* data, std::size_t len, const Address& peerAddres
     }
 #endif
     if (r) {
-        ErrorLS(this) << "Send failed: " << uv_err_name(r) << endl;
+        ErrorS(this) << "Send failed: " << uv_err_name(r) << endl;
         setUVError("Invalid UDP socket", r); 
     }
     
@@ -242,7 +242,7 @@ bool UDPSocket::recvStop()
 
 void UDPSocket::onRecv(const MutableBuffer& buf, const net::Address& address)
 {
-    TraceLS(this) << "Recv: " << buf.size() << endl;    
+    TraceS(this) << "Recv: " << buf.size() << endl;    
     //emitRecv(buf, address);
     onSocketRecv(buf, address);
 }
@@ -360,7 +360,7 @@ void UDPSocket::allocRecvBuffer(uv_handle_t* handle, std::size_t suggested_size,
 
 void UDPSocket::onError(const scy::Error& error) 
 {        
-    ErrorLS(this) << "Error: " << error.message << endl;    
+    ErrorS(this) << "Error: " << error.message << endl;    
     //emitError(error);
     onSocketError(error);
     close(); // close on error
@@ -369,7 +369,7 @@ void UDPSocket::onError(const scy::Error& error)
 
 void UDPSocket::onClose() 
 {        
-    ErrorLS(this) << "On close" << endl;    
+    ErrorS(this) << "On close" << endl;    
     //emitClose();
     onSocketClose();
 }

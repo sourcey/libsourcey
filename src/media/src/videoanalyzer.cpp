@@ -36,13 +36,13 @@ VideoAnalyzer::VideoAnalyzer(const Options& options) :
     _audio(nullptr),
     _videoConv(nullptr)
 {
-    TraceLS(this) << "Create" << endl;
+    TraceN(this) << "Create" << endl;
 }
 
 
 VideoAnalyzer::~VideoAnalyzer()
 {
-    TraceLS(this) << "Destroy" << endl;
+    TraceN(this) << "Destroy" << endl;
     uninitialize();
 }
 
@@ -52,7 +52,7 @@ void VideoAnalyzer::initialize()
     if (_options.ifile.empty())
         throw std::runtime_error("Please specify an input file.");
 
-    TraceLS(this) << "Loading: " << _options.ifile << endl;
+    TraceN(this) << "Loading: " << _options.ifile << endl;
 
     _error = "";
 
@@ -110,7 +110,7 @@ void VideoAnalyzer::start()
     catch (std::exception& exc)
     {
         _error = exc.what();
-        ErrorLS(this) << "Error: " << _error << endl;
+        ErrorS(this) << "Error: " << _error << endl;
         throw exc; //.rethrow()
     }
 }
@@ -118,8 +118,7 @@ void VideoAnalyzer::start()
 
 void VideoAnalyzer::stop()
 {
-
-    // Can't lock here in case we inside a callback.
+    // Can't lock here in case we are inside a callback.
     //Mutex::ScopedLock lock(_mutex);
 
     _reader.ReadComplete -= sdelegate(this, &VideoAnalyzer::onReadComplete);
@@ -130,7 +129,7 @@ void VideoAnalyzer::stop()
 
 void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
 {
-    //TraceLS(this) << "On video: "
+    //TraceN(this) << "On video: "
     //    << packet.size() << ": " << packet.time << endl;
 
     VideoAnalyzer::Packet pkt(packet.time);
@@ -166,7 +165,7 @@ void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
         pkt.value /= frames;
         pkt.value = sqrt(pkt.value); ///= _video->rdftSize;
 
-        TraceLS(this) << "Video Output: "
+        TraceN(this) << "Video Output: "
             << pkt.time << ", " << pkt.value << endl;
         PacketOut.emit(this, *_video, pkt);
     }
@@ -174,7 +173,7 @@ void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
 
 void VideoAnalyzer::onAudio(void*, AudioPacket& packet)
 {
-    //TraceLS(this) << "On Audio: "
+    //TraceN(this) << "On Audio: "
     //  << packet.size() << ": " << packet.time << endl;
 
     Mutex::ScopedLock lock(_mutex);
@@ -207,7 +206,7 @@ void VideoAnalyzer::onAudio(void*, AudioPacket& packet)
         // Calculate the average value for this video frame
         pkt.value /= frames;
 
-        TraceLS(this) << "Audio Output: "
+        TraceN(this) << "Audio Output: "
             << pkt.time << ", " << pkt.value << endl;
         PacketOut.emit(this, *_audio, pkt);
     }
@@ -242,7 +241,7 @@ AVFrame* VideoAnalyzer::getGrayVideoFrame()
 
 void VideoAnalyzer::onReadComplete(void* sender)
 {
-    TraceLS(this) << "On Read Complete" << endl;
+    TraceN(this) << "On Read Complete" << endl;
 
     AVInputReader* reader = reinterpret_cast<AVInputReader*>(sender);
     {

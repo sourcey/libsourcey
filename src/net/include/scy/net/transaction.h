@@ -44,14 +44,14 @@ public:
         PacketSocketAdapter(socket),
         _peerAddress(peerAddress)
     {
-        TraceLS(this) << "Create" << std::endl;
+        TraceS(this) << "Create" << std::endl;
 
         PacketSocketAdapter::socket->addReceiver(this, 100); // highest prioority
     }
 
     virtual bool send()
     {
-        TraceLS(this) << "Send" << std::endl;
+        TraceS(this) << "Send" << std::endl;
         assert(PacketSocketAdapter::socket);
         //assert(PacketSocketAdapter::socket->recvAdapter() == this);
         if (PacketSocketAdapter::socket->sendPacket(PacketTransaction<PacketT>::_request, _peerAddress) > 0)
@@ -62,13 +62,13 @@ public:
     
     virtual void cancel()
     {
-        TraceLS(this) << "Cancel" << std::endl;
+        TraceS(this) << "Cancel" << std::endl;
         PacketTransaction<PacketT>::cancel();
     }
 
     virtual void dispose()
     {
-        TraceLS(this) << "Dispose" << std::endl;
+        TraceS(this) << "Dispose" << std::endl;
         //if (!PacketTransaction<PacketT>::_destroyed) {
         //    PacketSocketAdapter::socket->setAdapter(nullptr);
         //}
@@ -90,7 +90,7 @@ protected:
         // Overrides the PacketSocketAdapter::onPacket 
         // callback for checking potential response candidates.
     {
-        TraceLS(this) << "On packet: " << packet.size() << std::endl;
+        TraceS(this) << "On packet: " << packet.size() << std::endl;
         if (PacketTransaction<PacketT>::handlePotentialResponse(static_cast<PacketT&>(packet))) {
 
             // Stop socket data propagation since
@@ -102,7 +102,7 @@ protected:
     virtual void onResponse() 
         // Called when a successful response match is received.
     {
-        TraceLS(this) << "On success: " << 
+        TraceS(this) << "On success: " << 
             PacketTransaction<PacketT>::_response.toString() << std::endl;
         PacketSignal::emit(socket.get(), PacketTransaction<PacketT>::_response);
     }

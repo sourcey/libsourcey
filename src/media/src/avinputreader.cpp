@@ -40,14 +40,14 @@ AVInputReader::AVInputReader(const Options& options)  :
     _audio(nullptr),
     _stopping(false)
 {
-    TraceLS(this) << "Create" << endl;
+    TraceS(this) << "Create" << endl;
     initializeFFmpeg();
 }
 
 
 AVInputReader::~AVInputReader()
 {
-    TraceLS(this) << "Destroy" << endl;
+    TraceS(this) << "Destroy" << endl;
 
     close();
     uninitializeFFmpeg();
@@ -56,7 +56,7 @@ AVInputReader::~AVInputReader()
 
 void AVInputReader::openFile(const std::string& file)
 {
-    TraceLS(this) << "Opening: " << file << endl;
+    TraceS(this) << "Opening: " << file << endl;
     openStream(file.c_str(), nullptr, nullptr);
 }
 
@@ -92,7 +92,7 @@ void AVInputReader::openVideoDevice(int deviceID, int width, int height, double 
 
 void AVInputReader::openVideoDevice(const std::string& device, int width, int height, double framerate) //int deviceID,
 {
-    TraceLS(this) << "Opening Device: " << device << endl;
+    TraceS(this) << "Opening Device: " << device << endl;
 
     avdevice_register_all();
 
@@ -160,7 +160,7 @@ void AVInputReader::openAudioDevice(int deviceID, int channels, int sampleRate)
 
 void AVInputReader::openAudioDevice(const std::string& device, int channels, int sampleRate) //int deviceID,
 {
-    TraceLS(this) << "Opening audio device: " << device << endl;
+    TraceS(this) << "Opening audio device: " << device << endl;
 
     avdevice_register_all();
 
@@ -200,7 +200,7 @@ void AVInputReader::openAudioDevice(const std::string& device, int channels, int
 
 void AVInputReader::openStream(const char* filename, AVInputFormat* inputFormat, AVDictionary** formatParams)
 {
-    TraceLS(this) << "Opening Stream: " << std::string(filename) << endl;
+    TraceS(this) << "Opening Stream: " << std::string(filename) << endl;
 
     if (avformat_open_input(&_formatCtx, filename, inputFormat, formatParams) != 0)
         throw std::runtime_error("Cannot open the media source: " + std::string(filename));
@@ -246,7 +246,7 @@ void AVInputReader::getEncoderFormat(Format& iformat)
 
 void AVInputReader::close()
 {
-    TraceLS(this) << "Closing" << endl;
+    TraceS(this) << "Closing" << endl;
 
     if (_video) {
         delete _video;
@@ -263,46 +263,46 @@ void AVInputReader::close()
       _formatCtx = nullptr;
     }
 
-    TraceLS(this) << "Closing: OK" << endl;
+    TraceS(this) << "Closing: OK" << endl;
 }
 
 
 void AVInputReader::start()
 {
-    TraceLS(this) << "Starting" << endl;
+    TraceS(this) << "Starting" << endl;
 
     Mutex::ScopedLock lock(_mutex);
     assert(_video || _audio);
 
     if ((_video || _audio) && !_thread.running()) {
-        TraceLS(this) << "Initializing Thread" << endl;
+        TraceS(this) << "Initializing Thread" << endl;
         _stopping = false;
         _thread.start(*this);
     }
 
-    TraceLS(this) << "Starting: OK" << endl;
+    TraceS(this) << "Starting: OK" << endl;
 }
 
 
 void AVInputReader::stop()
 {
-    TraceLS(this) << "Stopping" << endl;
+    TraceS(this) << "Stopping" << endl;
 
     //Mutex::ScopedLock lock(_mutex);
 
     _stopping = true;
     if (_thread.running()) {
-        TraceLS(this) << "Terminating Thread" << endl;
+        TraceS(this) << "Terminating Thread" << endl;
         _thread.join();
     }
 
-    TraceLS(this) << "Stopping: OK" << endl;
+    TraceS(this) << "Stopping: OK" << endl;
 }
 
 
 void AVInputReader::run()
 {
-    TraceLS(this) << "Running" << endl;
+    TraceS(this) << "Running" << endl;
 
     try {
         int res;
@@ -313,28 +313,28 @@ void AVInputReader::run()
         av_init_packet(&ipacket); // TODO: ensure always uninitialized
 
         while ((res = av_read_frame(_formatCtx, &ipacket)) >= 0) {
-            TraceLS(this) << "Read frame: pts=" << ipacket.pts << ": dts=" << ipacket.dts << endl;
+            TraceS(this) << "Read frame: pts=" << ipacket.pts << ": dts=" << ipacket.dts << endl;
             if (_stopping) break;
             if (_video && ipacket.stream_index == _video->stream->index) {
                 if ((!_options.processVideoXFrame || (videoFrames % _options.processVideoXFrame) == 0) &&
                     (!_options.processVideoXSecs || !_video->pts || ((ipacket.pts * av_q2d(_video->stream->time_base)) - _video->pts) > _options.processVideoXSecs) &&
                     (!_options.iFramesOnly || (ipacket.flags & AV_PKT_FLAG_KEY))) {
                      if (_video->decode(ipacket, opacket)) {
-                        TraceLS(this) << "Decoded video: " << _video->pts << endl;
+                        TraceS(this) << "Decoded video: " << _video->pts << endl;
                         VideoPacket video(opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
                         video.source = &opacket;
                         emit(video);
                     }
                 }
                 //else
-                //    TraceLS(this) << "Skipping video frame: " << videoFrames << endl;
+                //    TraceS(this) << "Skipping video frame: " << videoFrames << endl;
                 videoFrames++;
             }
             else if (_audio && ipacket.stream_index == _audio->stream->index) {
                 if ((!_options.processAudioXFrame || (audioFrames % _options.processAudioXFrame) == 0) &&
                     (!_options.processAudioXSecs || !_audio->pts || ((ipacket.pts * av_q2d(_audio->stream->time_base)) - _audio->pts) > _options.processAudioXSecs)) {
                     if (_audio->decode(ipacket, opacket)) {
-                        TraceLS(this) << "Decoded Audio: " << _audio->pts << endl;
+                        TraceS(this) << "Decoded Audio: " << _audio->pts << endl;
                         //(char*) opacket.data
                         AudioPacket audio(_audio->frame->data[0], opacket.size, _audio->frame->nb_samples, _audio->pts);
                         audio.source = &opacket;
@@ -343,7 +343,7 @@ void AVInputReader::run()
                     }
                 }
                 //else
-                //    TraceLS(this) << "Skipping audio frame: " << audioFrames << endl;
+                //    TraceS(this) << "Skipping audio frame: " << audioFrames << endl;
                 audioFrames++;
             }
 
@@ -382,21 +382,21 @@ void AVInputReader::run()
             }
 
             // End of file or error.
-            TraceLS(this) << "Decoding: EOF" << endl;
+            TraceS(this) << "Decoding: EOF" << endl;
             //break;
         }
 
     }
     catch (std::exception& exc) {
         _error = exc.what();
-        ErrorLS(this) << "Decoder Error: " << _error << endl;
+        ErrorS(this) << "Decoder Error: " << _error << endl;
     }
     catch (...) {
         _error = "Unknown Error";
-        ErrorLS(this) << "Unknown Error" << endl;
+        ErrorS(this) << "Unknown Error" << endl;
     }
 
-    TraceLS(this) << "Exiting" << endl;
+    TraceS(this) << "Exiting" << endl;
     ReadComplete.emit(this);
 }
 

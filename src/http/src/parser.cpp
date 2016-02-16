@@ -64,14 +64,14 @@ Parser::Parser(http_parser_type type) :
 
 Parser::~Parser() 
 {
-    TraceLS(this) << "Destroy" << endl;    
+    TraceS(this) << "Destroy" << endl;    
     reset();
 }
 
 
 void Parser::init(http_parser_type type)
 {
-    TraceLS(this) << "Init: " << type << endl;    
+    TraceS(this) << "Init: " << type << endl;    
 
     assert(_parser.data != this);
 
@@ -92,7 +92,7 @@ void Parser::init(http_parser_type type)
 
 bool Parser::parse(const char* data, std::size_t len)
 {
-    TraceLS(this) << "Parse: " << len << endl;    
+    TraceS(this) << "Parse: " << len << endl;    
     
     assert(!complete());
     assert(_parser.data == this);
@@ -231,7 +231,7 @@ void Parser::onHeadersEnd()
 
 void Parser::onBody(const char* buf, std::size_t len) //std::size_t off, 
 {
-    TraceLS(this) << "onBody" << endl;    
+    TraceS(this) << "onBody" << endl;    
     if (_observer)
         _observer->onParserChunk(buf, len); //Buffer(buf+off,len) + off
 }
@@ -239,7 +239,7 @@ void Parser::onBody(const char* buf, std::size_t len) //std::size_t off,
 
 void Parser::onMessageEnd() 
 {
-    TraceLS(this) << "onMessageEnd" << endl;        
+    TraceS(this) << "onMessageEnd" << endl;        
     _complete = true;
     if (_observer)
         _observer->onParserEnd();
@@ -248,7 +248,7 @@ void Parser::onMessageEnd()
 
 void Parser::onError(const ParserError& err)
 {
-    TraceLS(this) << "On error: " << err.code << ": " << err.message << endl;    
+    TraceS(this) << "On error: " << err.code << ": " << err.message << endl;    
     _complete = true;
     _error = new ParserError;
     _error->code = err.code;

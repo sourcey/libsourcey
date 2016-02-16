@@ -37,7 +37,7 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFo
     _format(format),
     _opened(false)
 {
-    TraceLS(this) << "Create" << endl;
+    TraceS(this) << "Create" << endl;
 
     _iParams.deviceId = _deviceId;
     _iParams.nChannels = _channels;
@@ -53,13 +53,13 @@ AudioCapture::AudioCapture(int deviceId, int channels, int sampleRate, RtAudioFo
 
     // Open the audio stream or throw an exception.
     open(); //channels, sampleRate
-    TraceLS(this) << "Create: OK" << endl;
+    TraceS(this) << "Create: OK" << endl;
 }
 
 
 AudioCapture::~AudioCapture()
 {
-    TraceLS(this) << "Destroy" << endl;
+    TraceS(this) << "Destroy" << endl;
 }
 
 
@@ -69,7 +69,7 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
         close();
 
     Mutex::ScopedLock lock(_mutex);
-    TraceLS(this) << "Opening: " << _channels << ": " << _sampleRate << endl;
+    TraceS(this) << "Opening: " << _channels << ": " << _sampleRate << endl;
 
     //_channels = channels;
     //_sampleRate = sampleRate;
@@ -82,7 +82,7 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 
         _error = "";
         _opened = true;
-        TraceLS(this) << "Opening: OK" << endl;
+        TraceS(this) << "Opening: OK" << endl;
     }
     catch (RtAudioError& e) {
         setError("Cannot open audio capture: " + e.getMessage());
@@ -95,13 +95,13 @@ void AudioCapture::open() //int channels, int sampleRate, RtAudioFormat format
 
 void AudioCapture::close()
 {
-    TraceLS(this) << "Closing" << endl;
+    TraceS(this) << "Closing" << endl;
     try {
         Mutex::ScopedLock lock(_mutex);
         _opened = false;
         if (_audio.isStreamOpen())
             _audio.closeStream();
-        TraceLS(this) << "Closing: OK" << endl;
+        TraceS(this) << "Closing: OK" << endl;
     }
     catch (RtAudioError& e) {
         setError("Cannot close audio capture: " + e.getMessage());
@@ -114,14 +114,14 @@ void AudioCapture::close()
 
 void AudioCapture::start()
 {
-    TraceLS(this) << "Starting" << endl;
+    TraceS(this) << "Starting" << endl;
 
     if (!running()) {
         try {
             Mutex::ScopedLock lock(_mutex);
             _audio.startStream();
             _error = "";
-            TraceLS(this) << "Starting: OK" << endl;
+            TraceS(this) << "Starting: OK" << endl;
         }
         catch (RtAudioError& e) {
             setError("Cannot start audio capture: " + e.getMessage());
@@ -135,14 +135,14 @@ void AudioCapture::start()
 
 void AudioCapture::stop()
 {
-    TraceLS(this) << "Stopping" << endl;
+    TraceS(this) << "Stopping" << endl;
 
     if (running()) {
         try {
             Mutex::ScopedLock lock(_mutex);
-            TraceLS(this) << "Stopping: Before" << endl;
+            TraceS(this) << "Stopping: Before" << endl;
             _audio.stopStream();
-            TraceLS(this) << "Stopping: OK" << endl;
+            TraceS(this) << "Stopping: OK" << endl;
         }
         catch (RtAudioError& e) {
             setError("Cannot stop audio capture: " + e.getMessage());
@@ -158,7 +158,7 @@ void AudioCapture::stop()
 void AudioCapture::attach(const PacketDelegateBase& delegate)
 {
     PacketSignal::attach(delegate);
-    TraceLS(this) << "Added Delegate: " << refCount() << endl;
+    TraceS(this) << "Added Delegate: " << refCount() << endl;
     if (refCount() == 1)
         start();
 }
@@ -167,10 +167,10 @@ void AudioCapture::attach(const PacketDelegateBase& delegate)
 bool AudioCapture::detach(const PacketDelegateBase& delegate)
 {
     if (PacketSignal::detach(delegate)) {
-        TraceLS(this) << "Removed Delegate: " << refCount() << endl;
+        TraceS(this) << "Removed Delegate: " << refCount() << endl;
         if (refCount() == 0)
             stop();
-        TraceLS(this) << "Removed Delegate: OK" << endl;
+        TraceS(this) << "Removed Delegate: OK" << endl;
         return true;
     }
     return false;
@@ -228,7 +228,7 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer, uns
     //      << "\n\tStream Time: " << packet.time
     //      << endl;
 
-    TraceLS(self) << "Emitting: " << packet.time << std::endl;
+    TraceS(self) << "Emitting: " << packet.time << std::endl;
     self->emit(packet);
     return 0;
 }
@@ -242,7 +242,7 @@ void AudioCapture::errorCallback(RtAudioError::Type type, const std::string& err
 
 void AudioCapture::setError(const std::string& message, bool throwExec)
 {
-    ErrorLS(this) << "Error: " << message << endl;
+    ErrorS(this) << "Error: " << message << endl;
     _error = message;
     if (throwExec)
         throw std::runtime_error(message);

@@ -55,7 +55,7 @@ AVEncoder::AVEncoder(const EncoderOptions& options) :
     _ioBufferSize(MAX_VIDEO_PACKET_SIZE),
     _videoPtsRemainder(0.0)
 {
-    TraceLS(this) << "Create" << endl;
+    TraceS(this) << "Create" << endl;
     initializeFFmpeg();
 }
 
@@ -69,14 +69,14 @@ AVEncoder::AVEncoder() :
     _ioBufferSize(MAX_VIDEO_PACKET_SIZE),
     _videoPtsRemainder(0.0)
 {
-    TraceLS(this) << "Create" << endl;
+    TraceS(this) << "Create" << endl;
     initializeFFmpeg();
 }
 
 
 AVEncoder::~AVEncoder()
 {
-    TraceLS(this) << "Destroy" << endl;
+    TraceS(this) << "Destroy" << endl;
     uninitialize();
     uninitializeFFmpeg();
 }
@@ -105,7 +105,7 @@ void AVEncoder::initialize()
 {
     assert(!isActive());
 
-    TraceLS(this) << "Initialize:"
+    TraceS(this) << "Initialize:"
         << "\n\tInput Format: " << _options.iformat.toString()
         << "\n\tOutput Format: " << _options.oformat.toString()
         << "\n\tDuration: " << _options.duration
@@ -209,38 +209,38 @@ void AVEncoder::initialize()
         setState(this, EncoderState::Ready);
     }
     catch (std::exception& exc) {
-        ErrorLS(this) << "Error: " << exc.what() << endl;
+        ErrorS(this) << "Error: " << exc.what() << endl;
         setState(this, EncoderState::Error, exc.what());
         cleanup();
         throw exc; //.rethrow()
     }
 
-    TraceLS(this) << "Initialize: OK" << endl;
+    TraceS(this) << "Initialize: OK" << endl;
 }
 
 
 void AVEncoder::uninitialize()
 {
-    TraceLS(this) << "Uninitialize" << endl;
+    TraceS(this) << "Uninitialize" << endl;
 
      // Write the trailer and dispatch the tail packet if any
     if (_formatCtx &&
         _formatCtx->pb)
         av_write_trailer(_formatCtx);
 
-    TraceLS(this) << "Uninitializing: Wrote trailer" << endl;
+    TraceS(this) << "Uninitializing: Wrote trailer" << endl;
 
     // Free memory
     cleanup();
     setState(this, EncoderState::Stopped);
 
-    TraceLS(this) << "Uninitialize: OK" << endl;
+    TraceS(this) << "Uninitialize: OK" << endl;
 }
 
 
 void AVEncoder::cleanup()
 {
-    TraceLS(this) << "Cleanup" << endl;
+    TraceS(this) << "Cleanup" << endl;
 
     // Delete stream encoders
     freeVideo();
@@ -277,13 +277,13 @@ void AVEncoder::cleanup()
         _ioBuffer = nullptr;
     }
 
-    TraceLS(this) << "Cleanup: OK" << endl;
+    TraceS(this) << "Cleanup: OK" << endl;
 }
 
 
 void AVEncoder::flush()
 {
-    TraceLS(this) << "Flushing" << endl;
+    TraceS(this) << "Flushing" << endl;
 
     if (_video) {
         while(true) {
@@ -387,7 +387,7 @@ void AVEncoder::freeVideo()
 
 bool AVEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int height, std::uint64_t /* time */)
 {
-    TraceLS(this) << "Encoding video: " << bufferSize << endl;
+    TraceS(this) << "Encoding video: " << bufferSize << endl;
 
     // EncoderOptions* options = nullptr;
     // AVFormatContext* formatCtx = nullptr;
@@ -421,7 +421,7 @@ bool AVEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int
         _options.iformat.video.height = height;
         _video->iparams.width = width;
         _video->iparams.height = height;
-        TraceLS(this) << "Recreating video conversion context" << endl;
+        TraceS(this) << "Recreating video conversion context" << endl;
         _video->freeConverter();
         _video->createConverter();
     }
@@ -483,7 +483,7 @@ void AVEncoder::setVideoPacketPts(AVPacket& packet)
 
 void AVEncoder::createAudio()
 {
-    TraceLS(this) << "Create Audio" << endl;
+    TraceS(this) << "Create Audio" << endl;
 
     //Mutex::ScopedLock lock(_mutex);
     assert(!_audio);
@@ -532,7 +532,7 @@ void AVEncoder::freeAudio()
 
 bool AVEncoder::encodeAudio(std::uint8_t* buffer, int bufferSize, int frameSize, std::uint64_t time)
 {
-    TraceLS(this) << "Encoding Audio Packet: bufferSize="
+    TraceS(this) << "Encoding Audio Packet: bufferSize="
         << bufferSize << ", frameSize=" << frameSize << endl;
     assert(buffer);
     assert(bufferSize);
@@ -586,7 +586,7 @@ bool AVEncoder::encodeAudio(std::uint8_t* buffer, int bufferSize, int frameSize,
     //         // opacket.pts = _videoPts; //AV_NOPTS_VALUE;
     //         // opacket.dts = AV_NOPTS_VALUE;
     //
-    //         TraceLS(this) << "Writing Audio:"
+    //         TraceS(this) << "Writing Audio:"
     //             << "\n\tPacket Size: " << opacket.size
     //             << "\n\tPTS: " << opacket.pts
     //             << "\n\tDTS: " << opacket.dts
@@ -610,7 +610,7 @@ bool AVEncoder::encodeAudio(std::uint8_t* buffer, int bufferSize, int frameSize,
 // {
 //     assert(frame);
 //     assert(frame->nb_samples);
-//     TraceLS(this) << "Encoding Audio Packet: " << frame->nb_samples << endl;
+//     TraceS(this) << "Encoding Audio Packet: " << frame->nb_samples << endl;
 //
 //     EncoderOptions* options = nullptr;
 //     AVFormatContext* formatCtx = nullptr;
@@ -647,7 +647,7 @@ bool AVEncoder::encodeAudio(std::uint8_t* buffer, int bufferSize, int frameSize,
 //         // opacket.pts = _videoPts; //AV_NOPTS_VALUE;
 //         // opacket.dts = AV_NOPTS_VALUE;
 //
-//         TraceLS(this) << "Writing Audio:"
+//         TraceS(this) << "Writing Audio:"
 //             << "\n\tPacket Size: " << opacket.size
 //             << "\n\tPTS: " << opacket.pts
 //             << "\n\tDTS: " << opacket.dts
@@ -679,7 +679,7 @@ bool AVEncoder::encodeAudio(std::uint8_t* buffer, int bufferSize, int frameSize,
 //     //         // opacket.pts = _videoPts; //AV_NOPTS_VALUE;
 //     //         // opacket.dts = AV_NOPTS_VALUE;
 //     //
-//     //         TraceLS(this) << "Writing Audio:"
+//     //         TraceS(this) << "Writing Audio:"
 //     //             << "\n\tPacket Size: " << opacket.size
 //     //             << "\n\tPTS: " << opacket.pts
 //     //             << "\n\tDTS: " << opacket.dts

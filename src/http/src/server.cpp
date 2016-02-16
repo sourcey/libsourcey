@@ -35,13 +35,13 @@ Server::Server(short port, ServerResponderFactory* factory) :
     factory(factory),
     address("0.0.0.0", port)
 {
-    TraceLS(this) << "Create" << endl;
+    TraceS(this) << "Create" << endl;
 }
 
 
 Server::~Server()
 {
-    TraceLS(this) << "Destroy" << endl;
+    TraceS(this) << "Destroy" << endl;
     shutdown();
     if (factory)
         delete factory;
@@ -57,7 +57,7 @@ void Server::start()
     socket->bind(address);
     socket->listen();
 
-    TraceLS(this) << "Server listening on " << port() << endl;        
+    TraceS(this) << "Server listening on " << port() << endl;        
 
     //timer.Timeout += delegate(this, &Server::onTimer);
     //timer.start(5000, 5000);
@@ -66,7 +66,7 @@ void Server::start()
 
 void Server::shutdown() 
 {        
-    TraceLS(this) << "Shutdown" << endl;
+    TraceS(this) << "Shutdown" << endl;
 
     if (socket) {
         socket->AcceptConnection -= delegate(this, &Server::onAccept);    
@@ -110,7 +110,7 @@ ServerResponder* Server::createResponder(ServerConnection& conn)
 
 void Server::addConnection(ServerConnection::Ptr conn) 
 {        
-    TraceLS(this) << "Adding connection: " << conn << endl;
+    TraceS(this) << "Adding connection: " << conn << endl;
     conn->Close += sdelegate(this, &Server::onConnectionClose, -1); // lowest priority
     connections.push_back(conn);
 }
@@ -118,7 +118,7 @@ void Server::addConnection(ServerConnection::Ptr conn)
 
 void Server::removeConnection(ServerConnection* conn) 
 {        
-    TraceLS(this) << "Removing connection: " << conn << endl;
+    TraceS(this) << "Removing connection: " << conn << endl;
     for (auto it = connections.begin(); it != connections.end(); ++it) {
         if (conn == it->get()) {
             connections.erase(it);
@@ -131,7 +131,7 @@ void Server::removeConnection(ServerConnection* conn)
 
 void Server::onAccept(const net::TCPSocket::Ptr& sock)
 {    
-    TraceLS(this) << "On server accept" << endl;
+    TraceS(this) << "On server accept" << endl;
     ServerConnection::Ptr conn = createConnection(sock);
     if (!conn) {        
         WarnL << "Cannot create connection" << endl;
@@ -142,13 +142,13 @@ void Server::onAccept(const net::TCPSocket::Ptr& sock)
 
 void Server::onClose() 
 {
-    TraceLS(this) << "On server socket close" << endl;
+    TraceS(this) << "On server socket close" << endl;
 }
 
 
 void Server::onConnectionClose(void* sender)
 {
-    TraceLS(this) << "On connection close" << endl;
+    TraceS(this) << "On connection close" << endl;
     removeConnection(reinterpret_cast<ServerConnection*>(sender));
 }
 
@@ -165,7 +165,7 @@ ServerConnection::ServerConnection(Server& server, net::Socket::Ptr socket) :
     _upgrade(false),
     _requestComplete(false)
 {    
-    TraceLS(this) << "Create" << endl;
+    TraceS(this) << "Create" << endl;
 
     replaceAdapter(new ServerAdapter(*this));
 }
@@ -173,10 +173,10 @@ ServerConnection::ServerConnection(Server& server, net::Socket::Ptr socket) :
     
 ServerConnection::~ServerConnection() 
 {    
-    TraceLS(this) << "Destroy" << endl;
+    TraceS(this) << "Destroy" << endl;
 
     if (_responder) {
-        TraceLS(this) << "Destroy: Responder: " << _responder << endl;
+        TraceS(this) << "Destroy: Responder: " << _responder << endl;
         delete _responder;
     }
 }
@@ -201,7 +201,7 @@ Server& ServerConnection::server()
 
 void ServerConnection::onHeaders() 
 {
-    TraceLS(this) << "On headers" << endl;    
+    TraceS(this) << "On headers" << endl;    
     
     /*
     // Note: To upgrade the connection we need to upgrade the 
@@ -215,7 +215,7 @@ void ServerConnection::onHeaders()
     // Upgrade the connection if required
     if (util::icompare(_request.get("Connection", ""), "upgrade") == 0 && 
         util::icompare(_request.get("Upgrade", ""), "websocket") == 0) {            
-        TraceLS(this) << "Upgrading to WebSocket: " << _request << endl;
+        TraceS(this) << "Upgrading to WebSocket: " << _request << endl;
         _upgrade = true;
 
         auto wsAdapter = new ws::ConnectionAdapter(*this, ws::ServerSide);
@@ -263,11 +263,11 @@ void ServerConnection::onHeaders()
 
 void ServerConnection::onPayload(const MutableBuffer& buffer)
 {
-    TraceLS(this) << "On payload: " << buffer.size() << endl;    
+    TraceS(this) << "On payload: " << buffer.size() << endl;    
 
     // The connection may have been closed inside a previous callback.
     if (closed()) {
-        TraceLS(this) << "On payload: Closed" << endl;    
+        TraceS(this) << "On payload: Closed" << endl;    
         return;
     }
     
@@ -279,11 +279,11 @@ void ServerConnection::onPayload(const MutableBuffer& buffer)
 
 void ServerConnection::onMessage() 
 {
-    TraceLS(this) << "On complete" << endl;    
+    TraceS(this) << "On complete" << endl;    
 
     // The connection may have been closed inside a previous callback.
     if (closed()) {
-        TraceLS(this) << "On complete: Closed" << endl;    
+        TraceS(this) << "On complete: Closed" << endl;    
         return;
     }
 
@@ -298,7 +298,7 @@ void ServerConnection::onMessage()
 
 void ServerConnection::onClose() 
 {
-    TraceLS(this) << "On close" << endl;    
+    TraceS(this) << "On close" << endl;    
 
     if (_responder)
         _responder->onClose();
@@ -310,7 +310,7 @@ void ServerConnection::onClose()
 /*
 void ServerConnection::onServerShutdown(void*)
 {
-    TraceLS(this) << "On server shutdown" << endl;    
+    TraceS(this) << "On server shutdown" << endl;    
 
     close();
 }

@@ -38,13 +38,13 @@ SSLAdapter::SSLAdapter(net::SSLSocket* socket) :
     _readBIO(nullptr),
     _writeBIO(nullptr)
 {
-    TraceLS(this) << "Create" << endl;
+    TraceS(this) << "Create" << endl;
 }
 
 
 SSLAdapter::~SSLAdapter() 
 {    
-    TraceLS(this) << "Destroy" << endl;
+    TraceS(this) << "Destroy" << endl;
     if (_ssl) {
         SSL_free(_ssl);
         _ssl = nullptr;
@@ -54,7 +54,7 @@ SSLAdapter::~SSLAdapter()
 
 void SSLAdapter::init(SSL* ssl) 
 {
-    TraceLS(this) << "Init: " << ssl << endl;
+    TraceS(this) << "Init: " << ssl << endl;
     assert(_socket);
     //assert(_socket->initialized());
     _ssl = ssl;
@@ -66,9 +66,9 @@ void SSLAdapter::init(SSL* ssl)
 
 void SSLAdapter::shutdown()
 {
-    TraceLS(this) << "Shutdown" << endl;
+    TraceS(this) << "Shutdown" << endl;
     if (_ssl) {        
-        TraceLS(this) << "Shutdown SSL" << endl;
+        TraceS(this) << "Shutdown SSL" << endl;
 
         // Don't shut down the socket more than once.
         int shutdownState = SSL_get_shutdown(_ssl);

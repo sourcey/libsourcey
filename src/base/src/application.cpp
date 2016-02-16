@@ -48,13 +48,13 @@ Application& Application::getDefault()
 Application::Application(uv::Loop* loop) :
     loop(loop)
 {
-    DebugLS(this) << "Create" << std::endl;
+    DebugS(this) << "Create" << std::endl;
 }
 
     
 Application::~Application() 
 {    
-    DebugLS(this) << "Destroy" << std::endl;
+    DebugS(this) << "Destroy" << std::endl;
 }
 
     
@@ -72,7 +72,7 @@ void Application::stop()
 
 void Application::finalize() 
 { 
-    DebugLS(this) << "Finalizing" << std::endl;
+    DebugS(this) << "Finalizing" << std::endl;
 
 #ifdef _DEBUG
     // Print active handles
@@ -87,7 +87,7 @@ void Application::finalize()
     assert(loop->active_handles == 0);
     //assert(loop->active_reqs == 0);
 
-    DebugLS(this) << "Finalization complete" << std::endl;
+    DebugS(this) << "Finalization complete" << std::endl;
 }        
     
     
@@ -103,7 +103,7 @@ void Application::waitForShutdown(std::function<void(void*)> callback, void* opa
     uv_signal_init(loop, sig);
     uv_signal_start(sig, Application::onShutdownSignal, SIGINT);
         
-    DebugLS(this) << "Wait for shutdown" << std::endl;
+    DebugS(this) << "Wait for shutdown" << std::endl;
     run();
 }
 
@@ -111,7 +111,7 @@ void Application::waitForShutdown(std::function<void(void*)> callback, void* opa
 void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 {
     auto cmd = reinterpret_cast<internal::ShutdownCmd*>(req->data);
-    DebugLS(cmd->self) << "Got shutdown signal" << std::endl;
+    DebugS(cmd->self) << "Got shutdown signal" << std::endl;
 
     uv_close((uv_handle_t*)req, [](uv_handle_t* handle) {
         delete handle;

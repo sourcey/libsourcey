@@ -28,26 +28,26 @@ public:
     UDPResponder(int id) : 
         id(id)
     {
-        DebugLS(this) << id << ": Creating" << endl;
+        DebugS(this) << id << ": Creating" << endl;
         //net::SocketAdapter::socket = &socket;
         socket.addReceiver(this);
 
         socket.bind(net::Address("0.0.0.0", 0));
         //socket.bind(net::Address(TURN_AUTHORIZE_PEER_IP, 4020));
         
-        DebugLS(this) << id << ": Listening on: " << socket.address() << endl;
+        DebugS(this) << id << ": Listening on: " << socket.address() << endl;
     }
 
     virtual ~UDPResponder() 
     { 
-        DebugLS(this) << id << ": Destroying" << endl;
+        DebugS(this) << id << ": Destroying" << endl;
         socket.addReceiver(this);
         stop(); 
     }
 
     void start(const net::Address& relayedAddr) 
     {        
-        DebugLS(this) << id << ": Starting on: " << relayedAddr << endl;
+        DebugS(this) << id << ": Starting on: " << relayedAddr << endl;
         
         try    {
             this->relayedAddr = relayedAddr;
@@ -86,7 +86,7 @@ public:
     void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress) //net::SocketPacket& packet) 
     {
         std::string payload(bufferCast<const char*>(buffer), buffer.size());
-        DebugLS(this) << id << ": On recv: " << peerAddress << ": " << payload << std::endl;
+        DebugS(this) << id << ": On recv: " << peerAddress << ": " << payload << std::endl;
 
         // Echo back to client
         socket.send(payload.c_str(), payload.size(), relayedAddr); // peerAddr
@@ -94,12 +94,12 @@ public:
 
     void onSocketError(const scy::Error& error) 
     {
-        DebugLS(this) << id << ": On error: " << error.message << std::endl;
+        DebugS(this) << id << ": On error: " << error.message << std::endl;
     }
 
     void onSocketClose() 
     {
-        DebugLS(this) << id << ": On close" << std::endl;
+        DebugS(this) << id << ": On close" << std::endl;
         stop();
     }
 };

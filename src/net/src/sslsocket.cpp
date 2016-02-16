@@ -64,7 +64,7 @@ SSLSocket::SSLSocket(uv::Loop* loop) :
     _session(nullptr), 
     _sslAdapter(this)
 {
-    TraceLS(this) << "Create" << endl;
+    TraceS(this) << "Create" << endl;
 }
 
 
@@ -74,7 +74,7 @@ SSLSocket::SSLSocket(SSLContext::Ptr context, uv::Loop* loop) :
     _session(nullptr), 
     _sslAdapter(this)
 {
-    TraceLS(this) << "Create" << endl;
+    TraceS(this) << "Create" << endl;
 }
     
 
@@ -84,13 +84,13 @@ SSLSocket::SSLSocket(SSLContext::Ptr context, SSLSession::Ptr session, uv::Loop*
     _session(session), 
     _sslAdapter(this)
 {
-    TraceLS(this) << "Create" << endl;
+    TraceS(this) << "Create" << endl;
 }
 
     
 SSLSocket::~SSLSocket() 
 {    
-    TraceLS(this) << "Destroy" << endl;
+    TraceS(this) << "Destroy" << endl;
 }
 
 
@@ -108,7 +108,7 @@ void SSLSocket::close()
 
 bool SSLSocket::shutdown()
 {
-    TraceLS(this) << "Shutdown" << endl;
+    TraceS(this) << "Shutdown" << endl;
     try {
         // Try to gracefully shutdown the SSL connection
         _sslAdapter.shutdown();
@@ -126,7 +126,7 @@ int SSLSocket::send(const char* data, std::size_t len, int flags)
 
 int SSLSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */) 
 {    
-    TraceLS(this) << "Send: " << len << endl;    
+    TraceS(this) << "Send: " << len << endl;    
     assert(Thread::currentID() == tid());
     //assert(len <= net::MAX_TCP_PACKET_SIZE);
 
@@ -187,7 +187,7 @@ net::TransportType SSLSocket::transport() const
 
 void SSLSocket::onRead(const char* data, std::size_t len)
 {
-    TraceLS(this) << "On SSL read: " << len << endl;
+    TraceS(this) << "On SSL read: " << len << endl;
 
     // SSL encrypted data is sent to the SSL conetext
     _sslAdapter.addIncomingData(data, len);
@@ -197,7 +197,7 @@ void SSLSocket::onRead(const char* data, std::size_t len)
 
 void SSLSocket::onConnect(uv_connect_t* handle, int status)
 {
-    TraceLS(this) << "On connect" << endl;
+    TraceS(this) << "On connect" << endl;
     if (status) {
         setUVError("SSL connect error", status);
         return;
@@ -220,7 +220,7 @@ void SSLSocket::onConnect(uv_connect_t* handle, int status)
 
     //emitConnect();
     onSocketConnect();
-    TraceLS(this) << "On connect: OK" << endl;
+    TraceS(this) << "On connect: OK" << endl;
 }
 
 

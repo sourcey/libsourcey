@@ -12,7 +12,7 @@ public:
     WebSocketRequestHandler(http::ServerConnection& connection, const StreamingOptions& options) :         
         http::ServerResponder(connection), options(options)
     {    
-        DebugLS(this) << "Create" << std::endl;
+        DebugS(this) << "Create" << std::endl;
         
         // Create the packet stream
         MediaServer::setupPacketStream(stream, options);
@@ -24,12 +24,12 @@ public:
 
     virtual ~WebSocketRequestHandler() 
     {
-        DebugLS(this) << "Destroy" << std::endl;            
+        DebugS(this) << "Destroy" << std::endl;            
     }
         
     void onClose() 
     {
-        DebugLS(this) << "On close" << std::endl;
+        DebugS(this) << "On close" << std::endl;
         
         stream.emitter -= packetDelegate(this, &WebSocketRequestHandler::onVideoEncoded);
         stream.stop();    
@@ -37,7 +37,7 @@ public:
     
     void onVideoEncoded(void* sender, RawPacket& packet)
     {
-        DebugLS(this) << "Sending Packet: "
+        DebugS(this) << "Sending Packet: "
             << &connection() << ": " << packet.size() << ": " << fpsCounter.fps << std::endl;
         //assert(!connection().socket()->closed());
 
@@ -47,7 +47,7 @@ public:
             fpsCounter.tick();        
         }
         catch (std::exception& exc) {
-            ErrorLS(this) << "Error: " << exc.what() << std::endl;
+            ErrorS(this) << "Error: " << exc.what() << std::endl;
             connection().close();
         }
     }

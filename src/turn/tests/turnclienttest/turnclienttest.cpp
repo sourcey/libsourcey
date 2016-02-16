@@ -57,12 +57,12 @@ struct TestServer: public turn::ServerObserver
 
     void onServerAllocationCreated(Server* server, IAllocation* alloc) 
     {
-        DebugLS(this) << "Allocation created" << endl;
+        DebugS(this) << "Allocation created" << endl;
     }
 
     void onServerAllocationRemoved(Server* server, IAllocation* alloc)
     {        
-        DebugLS(this) << "Allocation removed" << endl;
+        DebugS(this) << "Allocation removed" << endl;
     }
 };
 
@@ -200,32 +200,32 @@ struct TestTCPClientObserver: public TCPClientObserver
 {
     void onClientStateChange(turn::Client& client, turn::ClientState& state, const turn::ClientState&) 
     {
-        DebugLS(this) << "State change: " << state.toString() << endl;
+        DebugS(this) << "State change: " << state.toString() << endl;
     }
     
     void onTimer(TCPClient& client)
     {
-        DebugLS(this) << "onTimer" << endl;
+        DebugS(this) << "onTimer" << endl;
     }
 
     void onRelayConnectionCreated(TCPClient& client, const net::TCPSocket::Ptr& socket, const net::Address& peerAddr) //std::uint32_t connectionID, 
     {
-        DebugLS(this) << "Relay Connection Created: " << peerAddr << endl;
+        DebugS(this) << "Relay Connection Created: " << peerAddr << endl;
     }
 
     void onRelayConnectionClosed(TCPClient& client, const net::TCPSocket::Ptr& socket, const net::Address& peerAddr) 
     {
-        DebugLS(this) << "Connection Closed" << endl;
+        DebugS(this) << "Connection Closed" << endl;
     }
 
     void onRelayConnectionDataReceived(turn::Client& client, const char* data, std::size_t size, const net::Address& peerAddr)
     {
-        DebugLS(this) << "Received Data: " << std::string(data, size) <<  ": " << peerAddr << endl;
+        DebugS(this) << "Received Data: " << std::string(data, size) <<  ": " << peerAddr << endl;
     }
     
     void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
     {
-        DebugLS(this) << "Permissions Created" << endl;
+        DebugS(this) << "Permissions Created" << endl;
     }
 };
 

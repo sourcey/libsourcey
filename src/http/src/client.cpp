@@ -41,7 +41,7 @@ ClientConnection::ClientConnection(const URL& url, const net::Socket::Ptr& socke
     _complete(false),
     _connect(false)
 {    
-    TraceLS(this) << "Create: " << url << endl;
+    TraceS(this) << "Create: " << url << endl;
 
     IncomingProgress.sender = this;
     OutgoingProgress.sender = this;
@@ -58,7 +58,7 @@ ClientConnection::ClientConnection(const URL& url, const net::Socket::Ptr& socke
 
 ClientConnection::~ClientConnection() 
 {    
-    TraceLS(this) << "Destroy" << endl;
+    TraceS(this) << "Destroy" << endl;
 
     if (_readStream) {
         delete _readStream;
@@ -135,7 +135,7 @@ void ClientConnection::connect()
 {
     if (!_connect) {
         _connect = true;
-        TraceLS(this) << "Connecting" << endl;    
+        TraceS(this) << "Connecting" << endl;    
         _socket->connect(_url.host(), _url.port());
     }
 }
@@ -169,7 +169,7 @@ http::Message* ClientConnection::outgoingHeader()
 
 void ClientConnection::onSocketConnect() 
 {
-    TraceLS(this) << "On connect" << endl;
+    TraceS(this) << "On connect" << endl;
     
     // Emit the connect signal so raw connections like
     // websockets can kick off the data flow
@@ -192,7 +192,7 @@ void ClientConnection::onSocketConnect()
     // Note if there are stream adapters we wait for the stream to push
     // through any custom headers. See ChunkedAdapter::emitHeader
     else if (Outgoing.numAdapters() == 0) {
-        TraceLS(this) << "On connect: Send header" << endl;
+        TraceS(this) << "On connect: Send header" << endl;
         sendHeader();
     }    
 }
@@ -203,7 +203,7 @@ void ClientConnection::onSocketConnect()
 
 void ClientConnection::onHeaders() 
 {
-    TraceLS(this) << "On headers" << endl;    
+    TraceS(this) << "On headers" << endl;    
     IncomingProgress.total = _response.getContentLength();
 
     Headers.emit(this, _response);
@@ -212,14 +212,14 @@ void ClientConnection::onHeaders()
 
 void ClientConnection::onPayload(const MutableBuffer& buffer)
 {
-    //TraceLS(this) << "On payload: " << 
+    //TraceS(this) << "On payload: " << 
     // std::string(bufferCast<const char*>(buffer), buffer.size()) << endl;    
     
     // Update download progress
     IncomingProgress.update(buffer.size());
 
     if (_readStream) {        
-        TraceLS(this) << "Writing to stream: " << buffer.size() << endl;    
+        TraceS(this) << "Writing to stream: " << buffer.size() << endl;    
         _readStream->write(bufferCast<const char*>(buffer), buffer.size());
         _readStream->flush();
     }
@@ -230,7 +230,7 @@ void ClientConnection::onPayload(const MutableBuffer& buffer)
 
 void ClientConnection::onMessage() 
 {
-    TraceLS(this) << "On complete" << endl;
+    TraceS(this) << "On complete" << endl;
 
     onComplete();
 }
@@ -247,7 +247,7 @@ void ClientConnection::onComplete()
 
 void ClientConnection::onClose() 
 {
-    TraceLS(this) << "On close" << endl;    
+    TraceS(this) << "On close" << endl;    
 
     Connection::onClose();
 }
@@ -279,7 +279,7 @@ void Client::destroy()
 
 Client::Client()
 {
-    TraceLS(this) << "Create" << endl;
+    TraceS(this) << "Create" << endl;
 
     //_timer.Timeout += sdelegate(this, &Client::onConnectionTimer);
     //_timer.start(5000);
@@ -288,14 +288,14 @@ Client::Client()
 
 Client::~Client()
 {
-    TraceLS(this) << "Destroy" << endl;
+    TraceS(this) << "Destroy" << endl;
     shutdown();
 }
 
 
 void Client::shutdown() 
 {
-    TraceLS(this) << "Shutdown" << endl;
+    TraceS(this) << "Shutdown" << endl;
 
     //_timer.stop();
     Shutdown.emit(this);
@@ -311,7 +311,7 @@ void Client::shutdown()
 
 void Client::addConnection(ClientConnection::Ptr conn) 
 {        
-    TraceLS(this) << "Adding connection: " << conn << endl;    
+    TraceS(this) << "Adding connection: " << conn << endl;    
 
     conn->Close += sdelegate(this, &Client::onConnectionClose, -1); // lowest priority
     _connections.push_back(conn);
@@ -320,10 +320,10 @@ void Client::addConnection(ClientConnection::Ptr conn)
 
 void Client::removeConnection(ClientConnection* conn) 
 {        
-    TraceLS(this) << "Removing connection: " << conn << endl;
+    TraceS(this) << "Removing connection: " << conn << endl;
     for (auto it = _connections.begin(); it != _connections.end(); ++it) {
         if (conn == it->get()) {
-            TraceLS(this) << "Removed connection: " << conn << endl;
+            TraceS(this) << "Removed connection: " << conn << endl;
             _connections.erase(it);
             return;
         }
@@ -346,7 +346,7 @@ void Client::onConnectionTimer(void*)
     auto conns = _connections;
     for (auto conn : conns) {
         if (conn->closed()) { // conn->expired()
-            TraceLS(this) << "Closing expired connection: " << conn << endl;
+            TraceS(this) << "Closing expired connection: " << conn << endl;
             conn->close();
         }            
     }

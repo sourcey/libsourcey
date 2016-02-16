@@ -81,13 +81,13 @@ void Thread::startAsync()
 
 void Thread::join()
 {
-    TraceLS(this) << "Joining" << std::endl;
+    TraceS(this) << "Joining" << std::endl;
     assert(this->tid() != Thread::currentID());
     //assert(this->cancelled()); // probably should be cancelled, but depends on impl
     uv_thread_join(&_handle);    
     assert(!this->running());
     assert(!this->started());
-    TraceLS(this) << "Joining: OK" << std::endl;
+    TraceS(this) << "Joining: OK" << std::endl;
 }
 
 
@@ -97,7 +97,7 @@ bool Thread::waitForExit(int timeout)
     int interval = 10;
     assert(Thread::currentID() != this->tid());
     while (!this->cancelled() || this->running()) {
-        TraceLS(this) << "Wait for exit: " 
+        TraceS(this) << "Wait for exit: " 
             << !this->cancelled() << ": " << this->running() << endl;
         scy::sleep(interval);
         times++;

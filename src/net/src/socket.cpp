@@ -34,19 +34,19 @@ namespace net {
 
 Socket::Socket()
 {
-    TraceLS(this) << "Create" << endl;    
+    TraceS(this) << "Create" << endl;    
 }
 
 
 Socket::~Socket()
 {
-    TraceLS(this) << "Destroy" << endl;    
+    TraceS(this) << "Destroy" << endl;    
 }
 
     
 void Socket::connect(const std::string& host, std::uint16_t port) 
 {
-    TraceLS(this) << "Connect to host: " << host << ":" << port << endl;
+    TraceS(this) << "Connect to host: " << host << ":" << port << endl;
     if (Address::validateIP(host))
         connect(Address(host, port));
     else {

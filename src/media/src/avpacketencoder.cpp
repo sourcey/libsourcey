@@ -136,14 +136,14 @@ bool AVPacketEncoder::accepts(IPacket& packet)
 
 void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state)
 {
-    TraceLS(this) << "On stream state change: " << state << endl;
+    TraceS(this) << "On stream state change: " << state << endl;
 
     Mutex::ScopedLock lock(_mutex);
 
     switch (state.id()) {
     case PacketStreamState::Active:
         if (!isActive()) {
-            TraceLS(this) << "Initializing" << endl;
+            TraceS(this) << "Initializing" << endl;
             //if (AVEncoder::options().oformat.video.enabled &&
             //    AVEncoder::options().oformat.audio.enabled)
             //    _muxLiveStreams = true;
@@ -154,7 +154,7 @@ void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state)
     case PacketStreamState::Resetting:
     case PacketStreamState::Stopping:
         if (isActive()) {
-            TraceLS(this) << "Uninitializing" << endl;
+            TraceS(this) << "Uninitializing" << endl;
             AVEncoder::flush();
             AVEncoder::uninitialize();
         }
@@ -165,7 +165,7 @@ void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state)
     //case PacketStreamState::Closed:
     }
 
-    TraceLS(this) << "Stream state change: OK: " << state << endl;
+    TraceS(this) << "Stream state change: OK: " << state << endl;
 }
 
 

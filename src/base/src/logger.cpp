@@ -302,7 +302,7 @@ LogStream::~LogStream()
 //
 
 
-LogChannel::LogChannel(const std::string& name, LogLevel level, const char* timeFormat) :
+LogChannel::LogChannel(const std::string& name, LogLevel level, const std::string& timeFormat) :
     _name(name),
     _level(level),
     _timeFormat(timeFormat)
@@ -326,8 +326,8 @@ void LogChannel::write(const LogStream& stream)
 
 void LogChannel::format(const LogStream& stream, std::ostream& ost)
 {
-    if (_timeFormat)
-        ost << time::print(time::toLocal(stream.ts), _timeFormat);
+    if (!_timeFormat.empty())
+        ost << time::print(time::toLocal(stream.ts), _timeFormat.c_str());
     ost << " [" << getStringFromLogLevel(stream.level) << "] ";
     if (!stream.realm.empty() || !stream.address.empty()) {
         ost << "[";
@@ -349,7 +349,7 @@ void LogChannel::format(const LogStream& stream, std::ostream& ost)
 //
 
 
-ConsoleChannel::ConsoleChannel(const std::string& name, LogLevel level, const char* timeFormat) :
+ConsoleChannel::ConsoleChannel(const std::string& name, LogLevel level, const std::string& timeFormat) :
     LogChannel(name, level, timeFormat)
 {
 }
@@ -357,7 +357,10 @@ ConsoleChannel::ConsoleChannel(const std::string& name, LogLevel level, const ch
 
 void ConsoleChannel::write(const LogStream& stream)
 {
-    if (this->level() > stream.level)
+    if (_level > stream.level)
+        return;
+
+    if (!_filter.empty() && !util::matchNodes(stream.realm, _filter, "::"))
         return;
 
     std::ostringstream ss;

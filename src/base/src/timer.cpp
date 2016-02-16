@@ -32,20 +32,20 @@ namespace scy {
 Timer::Timer(uv::Loop* loop) : 
     _handle(loop, new uv_timer_t)
 {
-    //TraceLS(this) << "Create" << endl;
+    //TraceS(this) << "Create" << endl;
     init();
 }
 
 
 Timer::~Timer()
 {
-    //TraceLS(this) << "Destroy" << endl;
+    //TraceS(this) << "Destroy" << endl;
 }
 
 
 void Timer::init()
 {
-    //TraceLS(this) << "Init" << endl;    
+    //TraceS(this) << "Init" << endl;    
 
     _count = 0;
     _timeout = 0;
@@ -70,7 +70,7 @@ void Timer::start(std::int64_t interval)
 
 void Timer::start(std::int64_t timeout, std::int64_t interval) 
 {
-    //TraceLS(this) << "Starting: " << << timeout << ": " << interval << endl;
+    //TraceS(this) << "Starting: " << << timeout << ": " << interval << endl;
     assert(_handle.ptr());
     assert(timeout > 0 || interval > 0);
 
@@ -91,7 +91,7 @@ void Timer::start(std::int64_t timeout, std::int64_t interval)
 
 void Timer::stop() 
 {
-    //TraceLS(this) << "Stopping: " << __handle.ptr << endl;
+    //TraceS(this) << "Stopping: " << __handle.ptr << endl;
     
     if (!active())
         return; // do nothing
@@ -106,7 +106,7 @@ void Timer::stop()
 
 void Timer::restart()
 {
-    //TraceLS(this) << "Restarting: " << __handle.ptr << endl;
+    //TraceS(this) << "Restarting: " << __handle.ptr << endl;
     if (!active())
         return start(_timeout, _interval);
     return again();
@@ -115,7 +115,7 @@ void Timer::restart()
 
 void Timer::again() 
 {
-    //TraceLS(this) << "Again: " << __handle.ptr << endl;
+    //TraceS(this) << "Again: " << __handle.ptr << endl;
 
     assert(_handle.ptr());
     int err = uv_timer_again(_handle.ptr<uv_timer_t>());
@@ -128,7 +128,7 @@ void Timer::again()
 
 void Timer::setInterval(std::int64_t interval)
 {
-    //TraceLS(this) << "Set interval: " << interval << endl;
+    //TraceS(this) << "Set interval: " << interval << endl;
     
     assert(_handle.ptr());
     uv_timer_set_repeat(_handle.ptr<uv_timer_t>(), interval);
@@ -175,20 +175,20 @@ uv::Handle& Timer::handle()
 Timer2::Timer2(uv::Loop* loop) : 
     ptr(loop, new uv_timer_t)
 {
-    //TraceLS(this) << "Create" << endl;
+    //TraceS(this) << "Create" << endl;
     init();
 }
 
 
 Timer2::~Timer2()
 {
-    //TraceLS(this) << "Destroy" << endl;
+    //TraceS(this) << "Destroy" << endl;
 }
 
 
 void Timer2::init()
 {
-    //TraceLS(this) << "Init" << endl;    
+    //TraceS(this) << "Init" << endl;    
 
     _count = 0;
     _timeout = 0;
@@ -220,7 +220,7 @@ void Timer2::start(std::int64_t interval)
 
 void Timer2::start(std::int64_t timeout, std::int64_t interval) 
 {
-    //TraceLS(this) << "Starting: " << << timeout << ": " << interval << endl;
+    //TraceS(this) << "Starting: " << << timeout << ": " << interval << endl;
     assert(ptr.ptr());
     assert(timeout > 0);
 
@@ -241,7 +241,7 @@ void Timer2::start(std::int64_t timeout, std::int64_t interval)
 
 void Timer2::stop() 
 {
-    //TraceLS(this) << "Stopping: " << ptr.ptr() << endl;
+    //TraceS(this) << "Stopping: " << ptr.ptr() << endl;
     
     if (!active())
         return; // do nothing
@@ -256,7 +256,7 @@ void Timer2::stop()
 
 void Timer2::restart()
 {
-    //TraceLS(this) << "Restarting: " << ptr.ptr() << endl;
+    //TraceS(this) << "Restarting: " << ptr.ptr() << endl;
     if (!active())
         return start(_timeout, _interval);
     return again();
@@ -265,7 +265,7 @@ void Timer2::restart()
 
 void Timer2::again() 
 {
-    //TraceLS(this) << "Again: " << ptr.ptr() << endl;
+    //TraceS(this) << "Again: " << ptr.ptr() << endl;
 
     assert(ptr.ptr());
     int err = uv_timer_again(ptr.ptr<uv_timer_t>());
@@ -278,7 +278,7 @@ void Timer2::again()
 
 void Timer2::setInterval(std::int64_t interval)
 {
-    //TraceLS(this) << "Set interval: " << interval << endl;
+    //TraceS(this) << "Set interval: " << interval << endl;
     
     assert(ptr.ptr());
     uv_timer_set_repeat(ptr.ptr<uv_timer_t>(), interval);

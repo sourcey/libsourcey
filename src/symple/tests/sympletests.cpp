@@ -131,6 +131,7 @@ public:
             break;
         case sockio::ClientState::Online:
             {
+                // Send a message when online
                 smpl::Message m;
                 m.setData("olay");
                 client->send(m, true);

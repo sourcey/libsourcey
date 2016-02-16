@@ -73,7 +73,6 @@ SSLClient::SSLClient(uv::Loop* loop) :
 Client::Client(const net::Socket::Ptr& socket) :
     _pingTimer(socket->loop()),
     _ws(socket),
-    //_loop(loop),
     _wasOnline(false)
 {
     _ws.addReceiver(this);
@@ -85,7 +84,6 @@ Client::Client(const net::Socket::Ptr& socket, const std::string& host, std::uin
     _host(host),
     _port(port),
     _ws(socket),
-    //_loop(loop),
     _wasOnline(false)
 {
     _ws.addReceiver(this);
@@ -115,28 +113,22 @@ void Client::connect(const std::string& host, std::uint16_t port)
 
 void Client::connect()
 {
-    TraceL << "SocketIO Connecting" << endl;
+    TraceL << "Socket.IO Connecting" << endl;
 
     if (_host.empty() || !_port)
-        throw std::runtime_error("The SocketIO server address is not set.");
+        throw std::runtime_error("The Socket.IO server address is not set.");
 
     reset();
 
     setState(this, ClientState::Connecting);
 
-    //_ws.Connect += sdelegate(this, &Client::onSocketConnect);
-    //_ws.Recv += sdelegate(this, &Client::onSocketRecv);
-    //_ws.Error += sdelegate(this, &Client::onSocketError);
-    //_ws.Close += sdelegate(this, &Client::onSocketClose);
-
-    // sendHandshakeRequest();
-
-
+    // Build the request
+    // TODO: Allow custom URI params
     std::ostringstream url;
     url << "/socket.io/?EIO=4&transport=websocket";
     if (!_sessionID.empty()) {
       url << "&sid=";
-      url << _sessionID; // TODO: Get sid from handshake response
+      url << _sessionID;
     }
     url << "&t=";
     url << time(NULL);
@@ -157,125 +149,6 @@ void Client::close()
     onClose();
     TraceL << "Closing: OK" << endl;
 }
-
-
-// void Client::sendHandshakeRequest()
-// {
-//     //Mutex::ScopedLock lock(_mutex);
-//
-//     TraceL << "Send handshake request" << endl;
-//
-//     std::ostringstream url;
-//     url << (_ws.socket->transport() == net::SSLTCP ? "https://" : "http://")
-//         << _host << ":" << _port
-//         << "/socket.io/1/";
-//
-//     //http::URL url(
-//     //    _ws.socket->transport() == net::SSLTCP ? "https" : "http",
-//     //    _endpoint, "/socket.io/1/websocket/");
-//     //assert(url.valid());
-//
-//     auto conn = http::Client::instance().createConnection(url.str());
-//     conn->Complete += sdelegate(this, &Client::onHandshakeResponse);
-//     conn->setReadStream(new std::stringstream);
-//     conn->request().setMethod("POST");
-//     conn->request().setKeepAlive(false);
-//     conn->request().setContentLength(0);
-//     conn->request().setURI("/socket.io/1/");
-//     conn->send();
-// }
-//
-//
-// void Client::onHandshakeResponse(void* sender, const http::Response& response)
-// {
-//     auto conn = reinterpret_cast<http::ClientConnection*>(sender);
-//
-//     std::string body = conn->readStream<std::stringstream>()->str();
-//     //TraceL << "SocketIO handshake response:"
-//     //    << "\n\tStatus: " << response.getStatus()
-//     //    << "\n\tReason: " << response.getReason()
-//     //    << "\n\tResponse: " << body << endl;
-//
-//     // The server can respond in three different ways:
-//     // 401 Unauthorized: If the server refuses to authorize the client to connect,
-//     //        based on the supplied information (eg: Cookie header or custom query components).
-//     // 503 Service Unavailable: If the server refuses the connection for any reason (eg: overload).
-//     // 200 OK: The handshake was successful.
-//     if (response.getStatus() != http::StatusCode::OK) {
-//         setError(util::format("SocketIO handshake failed: HTTP error: %d %s",
-//             static_cast<int>(response.getStatus()), response.getReason().c_str()));
-//         return;
-//     }
-//
-//     // Parse the response
-//     std::vector<std::string> respData = util::split(body, ':', 4);
-//     if (respData.size() < 4) {
-//         setError(body.empty() ?
-//             "Invalid SocketIO handshake response." : util::format(
-//             "Invalid SocketIO handshake response: %s", body.c_str()));
-//         return;
-//     }
-//
-//     _sessionID = respData[0];
-//     _pingTimeout = util::strtoi<std::uint32_t>(respData[1]);
-//     _connectionClosingTimeout = util::strtoi<std::uint32_t>(respData[2]);
-//     _protocols = util::split(respData[3], ',');
-//
-//     // Check websockets are supported
-//     bool wsSupported = false;
-//     for (unsigned i = 0; i < _protocols.size(); i++) {
-//         TraceL << "Supports protocol: " << _protocols[i] << endl;
-//         if (_protocols[i] == "websocket") {
-//             wsSupported = true;
-//             break;
-//         }
-//     }
-//
-//     if (!wsSupported) {
-//         setError("The SocketIO server does not support WebSockets.");
-//         return;
-//     }
-//
-//     //Mutex::ScopedLock lock(_mutex);
-//
-//     // Initialize the WebSocket
-//     TraceL << "Websocket connecting: " << _sessionID << endl;
-//
-//     //_ws.setRecvAdapter(this);
-//     //_ws.adapter = this;
-//     _ws.request().setURI("/socket.io/1/websocket/" + _sessionID);
-//     _ws.request().setHost(_host, _port);
-//     _ws.socket->connect(_host, _port);
-// }
-//
-//
-// int Client::sendConnect(const std::string& endpoint, const std::string& query)
-// {
-//     // (1) Connect
-//     // Only used for multiple sockets. Signals a connection to the endpoint.
-//     // Once the server receives it, it's echoed back to the client.
-//     //
-//     // Example, if the client is trying to connect to the endpoint /test,
-//     // a message like this will be delivered:
-//     //
-//     // '1::' [path] [query]
-//     // Example:
-//     //
-//     // 1::/test?my=param
-//     std::string out = "1::";
-//     if (!endpoint.empty())
-//         out += "/" + endpoint;
-//     if (!query.empty())
-//         out += "?" + query;
-//     return _ws.send(out.c_str(), out.size());
-// }
-
-
-// int Client::send(sockio::Packet::Type type, const std::string& message, bool ack)
-// {
-//     Packet packet(type, message, ack);
-//     return send(packet);
-// }
 
 
 int Client::send(const std::string& message, bool ack)
@@ -327,8 +200,12 @@ Transaction* Client::createTransaction(const sockio::Packet& request, long timeo
 
 int Client::sendPing()
 {
-    //TraceL << "Sending heartbeat" << endl;
-    return _ws.send("2", 1); //::
+    // Start the ping timeout
+    _pingTimeoutTimer.stop();
+    _pingTimeoutTimer.start(_pingTimeout);
+
+    // TraceL << "Sending ping" << endl;
+    return _ws.send("2", 1);
 }
 
 
@@ -345,10 +222,6 @@ void Client::reset()
     _pingTimeoutTimer.Timeout -= sdelegate(this, &Client::onPingTimeoutTimer);
     _pingTimeoutTimer.stop();
 
-    //_ws.socket->Connect -= sdelegate(this, &Client::onSocketConnect);
-    //_ws.socket->Recv -= sdelegate(this, &Client::onSocketRecv);
-    //_ws.socket->Error -= sdelegate(this, &Client::onSocketError);
-    //_ws.socket->Close -= sdelegate(this, &Client::onSocketClose);
     _ws.socket->close();
 
     _error.reset();
@@ -379,29 +252,24 @@ void Client::onConnect()
     TraceL << "On connect" << endl;
 
     setState(this, ClientState::Connected);
-
-    //Mutex::ScopedLock lock(_mutex);
 }
 
 
 void Client::onOnline()
 {
     TraceL << "On online" << endl;
-    assert(stateEquals(ClientState::Connected));
 
+    assert(stateEquals(ClientState::Connected));
     setState(this, ClientState::Online);
 
     // Start the ping timer
     assert(_pingInterval);
-    // int interval = static_cast<int>(_pingTimeout * .75) * 1000;
     _pingTimer.Timeout += sdelegate(this, &Client::onPingTimer);
     _pingTimer.start(_pingInterval, _pingInterval);
 
-    // Start the ping timeout timer
+    // Setup the ping timeout timer
     assert(_pingTimeout);
-    // int interval = static_cast<int>(_pingTimeout * .75) * 1000;
     _pingTimeoutTimer.Timeout += sdelegate(this, &Client::onPingTimeoutTimer);
-    _pingTimeoutTimer.start(_pingTimeout);
 }
 
 
@@ -458,19 +326,20 @@ void Client::onSocketRecv(const MutableBuffer& buffer, const net::Address& peerA
         len -= nread;
     }
     if (len == buffer.size())
-        WarnL << "Failed to parse incoming SocketIO packet." << endl;
+        WarnL << "Failed to parse incoming Socket.IO packet." << endl;
 
 #if 0
     sockio::Packet pkt;
     if (pkt.read(constBuffer(packet.data(), packet.size())))
         onPacket(pkt);
     else
-        WarnL << "Failed to parse incoming SocketIO packet." << endl;
+        WarnL << "Failed to parse incoming Socket.IO packet." << endl;
 #endif
 }
 
 
-void Client::onHandshake(sockio::Packet& packet) {
+void Client::onHandshake(sockio::Packet& packet)
+{
     assert(packet.frame() == sockio::Packet::Frame::Open);
 
     json::Value json = packet.json();
@@ -481,12 +350,13 @@ void Client::onHandshake(sockio::Packet& packet) {
     DebugL << "On handshake: "
         << "sid=" << _sessionID << ", "
         << "pingInterval=" << _pingInterval << ", "
-        << "pingTimeout=" << _pingTimeout << ", "
+        << "pingTimeout=" << _pingTimeout
         <<  endl;
 }
 
 
-void Client::onMessage(sockio::Packet& packet) {
+void Client::onMessage(sockio::Packet& packet)
+{
     switch (packet.type()) {
         case Packet::Packet::Type::Connect:
             // Transition to online state
@@ -544,6 +414,7 @@ void Client::onPacket(sockio::Packet& packet)
 
 void Client::onPong()
 {
+    // Pong received, stop the ping timeout
     _pingTimeoutTimer.stop();
 }
 
@@ -552,12 +423,13 @@ void Client::onPingTimer(void*)
 {
     TraceL << "On heartbeat" << endl;
 
+    // If online send the ping packet
     if (isOnline())
         sendPing();
 
-    // Try to reconnect if disconnected in error
+    // If disconnected in error try to reconnect
     else if (error().any()) {
-        TraceL << "Attempting to reconnect" << endl;
+        InfoL << "Attempting to reconnect" << endl;
         try {
             connect();
         }

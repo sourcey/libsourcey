@@ -218,8 +218,8 @@ struct LogStream
 {
     LogLevel level;
     int line;
-    std::string realm;              // depreciate - encode in message
-    std::string address;            // depreciate - encode in message
+    std::string realm;
+    std::string address; // deprecated - encode in message
     std::ostringstream message;
     std::time_t ts;
     LogChannel* channel;
@@ -346,15 +346,22 @@ inline std::string _methodName(const std::string &fsig)
 #endif
 
 #define TraceL *new LogStream(LTrace, __CLASS_FUNCTION__, __LINE__)
-#define TraceLS(self) *new LogStream(LTrace, __CLASS_FUNCTION__, __LINE__, self)
 #define DebugL *new LogStream(LDebug, __CLASS_FUNCTION__, __LINE__)
-#define DebugLS(self) *new LogStream(LDebug, __CLASS_FUNCTION__, __LINE__, self)
 #define InfoL *new LogStream(LInfo, __CLASS_FUNCTION__, __LINE__)
-#define InfoLS(self) *new LogStream(LInfo, __CLASS_FUNCTION__, __LINE__, self)
 #define WarnL *new LogStream(LWarn, __CLASS_FUNCTION__, __LINE__)
-#define WarnLS(self) *new LogStream(LWarn, __CLASS_FUNCTION__, __LINE__, self)
 #define ErrorL *new LogStream(LError, __CLASS_FUNCTION__, __LINE__)
-#define ErrorLS(self) *new LogStream(LError, __CLASS_FUNCTION__, __LINE__, self)
+
+#define TraceS(self) *new LogStream(LTrace, __CLASS_FUNCTION__, __LINE__, self)
+#define DebugS(self) *new LogStream(LDebug, __CLASS_FUNCTION__, __LINE__, self)
+#define InfoS(self) *new LogStream(LInfo, __CLASS_FUNCTION__, __LINE__, self)
+#define WarnS(self) *new LogStream(LWarn, __CLASS_FUNCTION__, __LINE__, self)
+#define ErrorS(self) *new LogStream(LError, __CLASS_FUNCTION__, __LINE__, self)
+
+#define TraceN(self) *new LogStream(LTrace, self->className(), __LINE__, self)
+#define DebugN(self) *new LogStream(LDebug, self->className(), __LINE__, self)
+#define InfoN(self) *new LogStream(LInfo, self->className(), __LINE__, self)
+#define WarnN(self) *new LogStream(LWarn, self->className(), __LINE__, self)
+#define ErrorN(self) *new LogStream(LError, self->className(), __LINE__, self)
 
 
 //
@@ -365,7 +372,7 @@ inline std::string _methodName(const std::string &fsig)
 class LogChannel
 {
 public:
-    LogChannel(const std::string& name, LogLevel level = LDebug, const char* timeFormat = "%H:%M:%S");
+    LogChannel(const std::string& name, LogLevel level = LDebug, const std::string& timeFormat = "%H:%M:%S");
     virtual ~LogChannel() {};
 
     virtual void write(const LogStream& stream);
@@ -373,17 +380,19 @@ public:
         const char* realm = "", const void* ptr = nullptr);
     virtual void format(const LogStream& stream, std::ostream& ost);
 
-    std::string    name() const { return _name; };
+    std::string name() const { return _name; };
     LogLevel level() const { return _level; };
-    const char* timeFormat() const { return _timeFormat; };
+    std::string timeFormat() const { return _timeFormat; };
 
     void setLevel(LogLevel level) { _level = level; };
-    void setDateFormat(const char* format) { _timeFormat = format; };
+    void setDateFormat(const std::string& format) { _timeFormat = format; };
+    void setFilter(const std::string& filter) { _filter = filter; }
 
 protected:
     std::string _name;
     LogLevel    _level;
-    const char* _timeFormat;
+    std::string _timeFormat;
+    std::string _filter;
 };
 
 
@@ -395,7 +404,7 @@ protected:
 class ConsoleChannel: public LogChannel
 {
 public:
-    ConsoleChannel(const std::string& name, LogLevel level = LDebug, const char* timeFormat = "%H:%M:%S");
+    ConsoleChannel(const std::string& name, LogLevel level = LDebug, const std::string& timeFormat = "%H:%M:%S");
     virtual ~ConsoleChannel() {};
 
     virtual void write(const LogStream& stream);

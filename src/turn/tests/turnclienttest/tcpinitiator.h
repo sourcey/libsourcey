@@ -32,17 +32,17 @@ struct TCPInitiator: public TCPClientObserver
     TCPInitiator(int id, const Client::Options opts) : 
         id(id), client(*this, opts), success(false) 
     {
-        DebugLS(this) << id << ": Creating" << endl;
+        DebugS(this) << id << ": Creating" << endl;
     }
 
     virtual ~TCPInitiator()
     {
-        DebugLS(this) << id << ": Destroying" << endl;
+        DebugS(this) << id << ": Destroying" << endl;
     }
 
     void initiate(const std::string& peerIP) 
     {
-        DebugLS(this) << id << ": Initializing" << endl;
+        DebugS(this) << id << ": Initializing" << endl;
         try    {
             client.addPermission(peerIP);
             client.addPermission("127.0.0.1");        
@@ -50,13 +50,13 @@ struct TCPInitiator: public TCPClientObserver
             client.initiate();
         } 
         catch (std::exception& exc) {
-            ErrorLS(this) << id << ": Error: " << exc.what() << std::endl;
+            ErrorS(this) << id << ": Error: " << exc.what() << std::endl;
         }
     }
 
     void onClientStateChange(turn::Client& client, turn::ClientState& state, const turn::ClientState&) 
     {
-        DebugLS(this) << id << ": State change: " << state.toString() << endl;
+        DebugS(this) << id << ": State change: " << state.toString() << endl;
 
         switch(state.id()) {
         case ClientState::None:                
@@ -86,7 +86,7 @@ struct TCPInitiator: public TCPClientObserver
     
     void onRelayConnectionCreated(TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddr) //std::uint32_t connectionID, 
     {
-        DebugLS(this) << id << ": Connection Created: " << peerAddr << endl;
+        DebugS(this) << id << ": Connection Created: " << peerAddr << endl;
                 
         // Send the intial data packet to peer
         //client.sendData("hello peer", 10, peerAddr);
@@ -98,7 +98,7 @@ struct TCPInitiator: public TCPClientObserver
 
     void onRelayConnectionClosed(TCPClient& client, const net::TCPSocket& socket, const net::Address& peerAddr) 
     {
-        DebugLS(this) << id << ": Connection Closed" << endl;
+        DebugS(this) << id << ": Connection Closed" << endl;
     }
 
     void onRelayDataReceived(turn::Client& client, const char* data, std::size_t size, const net::Address& peerAddr)
@@ -111,7 +111,7 @@ struct TCPInitiator: public TCPClientObserver
             std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
             std::uint64_t latency = time::ticks() - sentAt;
 
-            DebugLS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
+            DebugS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
         }
         */
 
@@ -122,20 +122,20 @@ struct TCPInitiator: public TCPClientObserver
             std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
             std::uint64_t latency = time::ticks() - sentAt;
 
-            DebugLS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
+            DebugS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
         }
         else
-            DebugLS(this) << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
+            DebugS(this) << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
         */
         
-        DebugLS(this) << id << ": Received data from  " << peerAddr << ": " << std::string(data, size)  << endl;
+        DebugS(this) << id << ": Received data from  " << peerAddr << ": " << std::string(data, size)  << endl;
         // Echo back to peer
         client.sendData(data, size, peerAddr);
     }
     
     void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
     {
-        DebugLS(this) << id << ": Permissions Created" << endl;
+        DebugS(this) << id << ": Permissions Created" << endl;
     }
 };
 
@@ -152,7 +152,7 @@ struct TCPInitiator: public TCPClientObserver
     /*
     bool onConnectionAttempt(TCPClient& client, std::uint32_t connectionID, const net::Address& peerAddr) 
     { 
-        DebugLS(this) << "TCPInitiator: " << id << ": Connection Attempt: " << peerAddr << endl;
+        DebugS(this) << "TCPInitiator: " << id << ": Connection Attempt: " << peerAddr << endl;
         return true; 
     };
     */
@@ -160,7 +160,7 @@ struct TCPInitiator: public TCPClientObserver
     /*
     void onConnectionBindError(TCPClient& client, std::uint32_t connectionID)
     {
-        DebugLS(this) << "TCPInitiator: " << id << ": Connection Error: " << connectionID << endl;
+        DebugS(this) << "TCPInitiator: " << id << ": Connection Error: " << connectionID << endl;
         if (_dataSocket) {
             _dataSocket->StateChange -= sdelegate(this, &TCPInitiator::onDataSocketStateChange);
             _dataSocket->detach(packetDelegate<TCPInitiator, RawPacket>(this, &TCPInitiator::onRawPacketReceived, 102));
@@ -170,13 +170,13 @@ struct TCPInitiator: public TCPClientObserver
         
     void onRawPacketReceived(void* sender, RawPacket& packet)
     {
-        //DebugLS(this) << "TCPInitiator: " << id << ": Data Packet Received: " << std::string(packet.data, packet.size) << endl;
-        DebugLS(this) << "TCPInitiator: " << id << ": Data Packet Received: " << packet.size << endl;
+        //DebugS(this) << "TCPInitiator: " << id << ": Data Packet Received: " << std::string(packet.data, packet.size) << endl;
+        DebugS(this) << "TCPInitiator: " << id << ": Data Packet Received: " << packet.size << endl;
     }
 
     void onDataSocketStateChange(void* sender, Net::ClientState& state, const Net::ClientState&)
     {
-        DebugLS(this) << "Connection state change: " << state.toString() << endl;    
+        DebugS(this) << "Connection state change: " << state.toString() << endl;    
     
         switch (state.id()) {
         case Net::ClientState::Disconnected: 

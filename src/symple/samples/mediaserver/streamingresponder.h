@@ -10,17 +10,17 @@ public:
     StreamingRequestHandler(http::ServerConnection& connection, const StreamingOptions& options) :
         http::ServerResponder(connection), options(options)
     {    
-        DebugLS(this) << "Create" << std::endl;
+        DebugS(this) << "Create" << std::endl;
     }
 
     virtual ~StreamingRequestHandler() 
     {
-        DebugLS(this) << "Destroy" << std::endl;
+        DebugS(this) << "Destroy" << std::endl;
     }
         
     virtual void onRequest(http::Request& request, http::Response& response) 
     {
-        DebugLS(this) << "Handle request: " 
+        DebugS(this) << "Handle request: " 
             //<< "\n\tOutput Format: " << options.oformat.name
             << "\n\tOutput Encoding: " << options.encoding
             << "\n\tOutput Packetizer: " << options.framing
@@ -39,14 +39,14 @@ public:
 
     virtual void onClose()
     {
-        DebugLS(this) << "On close" << std::endl;
+        DebugS(this) << "On close" << std::endl;
         stream.emitter -= packetDelegate(this, &StreamingRequestHandler::onVideoEncoded);
         stream.stop();
     }
 
     void onVideoEncoded(void* sender, RawPacket& packet)
     {
-        DebugLS(this) << "Send packet: " 
+        DebugS(this) << "Send packet: " 
             << packet.size() << ": " << fpsCounter.fps << std::endl;
         //assert(!connection().socket()->closed());
 
@@ -55,7 +55,7 @@ public:
             fpsCounter.tick();        
         }
         catch (std::exception& exc) {
-            ErrorLS(this) << exc.what() << std::endl;
+            ErrorS(this) << exc.what() << std::endl;
             connection().close();
         }
     }

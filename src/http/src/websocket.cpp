@@ -67,7 +67,7 @@ http::Response& WebSocket::response()
 WebSocketAdapter::WebSocketAdapter(const net::Socket::Ptr& socket, ws::Mode mode, http::Request& request, http::Response& response) : 
     SocketAdapter(socket.get()), socket(socket), framer(mode), _request(request), _response(response)
 {
-    TraceLS(this) << "Create" << endl;
+    TraceS(this) << "Create" << endl;
     
     //setSendAdapter(socket.get());
     socket->addReceiver(this);
@@ -77,13 +77,13 @@ WebSocketAdapter::WebSocketAdapter(const net::Socket::Ptr& socket, ws::Mode mode
 //WebSocketAdapter::WebSocketAdapter(ws::Mode mode, http::Request& request, http::Response& response) : 
 //    framer(mode), _request(request), _response(response)
 //{
-//    TraceLS(this) << "Create" << endl;
+//    TraceS(this) << "Create" << endl;
 //}
 
     
 WebSocketAdapter::~WebSocketAdapter() 
 {    
-    TraceLS(this) << "Destroy" << endl;
+    TraceS(this) << "Destroy" << endl;
 
     //setSendAdapter(nullptr);
     socket->removeReceiver(this);
@@ -112,7 +112,7 @@ int WebSocketAdapter::send(const char* data, std::size_t len, int flags)
 
 int WebSocketAdapter::send(const char* data, std::size_t len, const net::Address& peerAddr, int flags) 
 {    
-    TraceLS(this) << "Send: " << len << endl; //std::string(data, len)
+    TraceS(this) << "Send: " << len << endl; //std::string(data, len)
     assert(framer.handshakeComplete());
 
     // Set default text flag if none specified
@@ -137,7 +137,7 @@ void WebSocketAdapter::sendClientRequest()
 
     std::ostringstream oss;
     _request.write(oss);
-    TraceLS(this) << "Client request: " << oss.str() << endl;
+    TraceS(this) << "Client request: " << oss.str() << endl;
     
     assert(socket);
     /*socket->*/SocketAdapter::send(oss.str().c_str(), oss.str().length());
@@ -146,7 +146,7 @@ void WebSocketAdapter::sendClientRequest()
 
 void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer)
 {
-    TraceLS(this) << "Client response: " << buffer.size() << endl;
+    TraceS(this) << "Client response: " << buffer.size() << endl;
     http::Parser parser(&_response);
     if (!parser.parse(bufferCast<char *>(buffer), buffer.size())) {
         throw std::runtime_error("WebSocket error: Cannot parse response: Incomplete HTTP message");
@@ -157,7 +157,7 @@ void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer)
 
     // Parse and check the response
     if (framer.checkHandshakeResponse(_response)) {                
-        TraceLS(this) << "Handshake success" << endl;
+        TraceS(this) << "Handshake success" << endl;
         SocketAdapter::onSocketConnect();
     }            
 }
@@ -171,7 +171,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer)
         throw std::runtime_error("WebSocket error: Cannot parse request: Incomplete HTTP message");
     }
     
-    TraceLS(this) << "Verifying handshake: " << _request << endl;
+    TraceS(this) << "Verifying handshake: " << _request << endl;
 
     // Allow the application to verify the incoming request.
     // TODO: Handle authentication
@@ -180,7 +180,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer)
     // Verify the WebSocket handshake request
     try {
         framer.acceptRequest(_request, _response);
-        TraceLS(this) << "Handshake success" << endl;
+        TraceS(this) << "Handshake success" << endl;
     }
     catch (std::exception& exc) {
         WarnL << "Handshake failed: " << exc.what() << endl;        
@@ -200,7 +200,7 @@ void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer)
 
 void WebSocketAdapter::onSocketConnect()
 {
-    TraceLS(this) << "On connect" << endl;
+    TraceS(this) << "On connect" << endl;
     
     // Send the WS handshake request
     // The Connect signal will be sent after the 
@@ -211,7 +211,7 @@ void WebSocketAdapter::onSocketConnect()
 
 void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress)
 {
-    TraceLS(this) << "On recv: " << buffer.size() << endl; // << ": " << buffer
+    TraceS(this) << "On recv: " << buffer.size() << endl; // << ": " << buffer
 
     //assert(buffer.position() == 0);
 
@@ -237,7 +237,7 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
                 //reader.limit(total);
                     
 #if 0
-                TraceLS(this) << "Read frame at: " 
+                TraceS(this) << "Read frame at: " 
                      << "\n\tinputPosition: " << offset
                      << "\n\tinputLength: " << total
                      << "\n\tbufferPosition: " << reader.position() 
@@ -255,12 +255,12 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
                 // Update the next frame offset
                 offset = reader.position(); // + payloadLength; 
                 if (offset < total)
-                    DebugLS(this) << "Splitting joined packet at "
+                    DebugS(this) << "Splitting joined packet at "
                         << offset << " of " << total << endl;
 
                 // Drop empty packets
                 if (!payloadLength) {
-                    DebugLS(this) << "Dropping empty frame" << endl;
+                    DebugS(this) << "Dropping empty frame" << endl;
                     continue;
                 }
             } 
@@ -371,8 +371,8 @@ void WebSocketFramer::createHandshakeRequest(http::Request& request)
     assert(request.has("Sec-WebSocket-Version"));
     request.set("Sec-WebSocket-Key", _key);
     assert(request.has("Sec-WebSocket-Key"));
-    //TraceLS(this) << "Sec-WebSocket-Version: " << request.get("Sec-WebSocket-Version") << endl;
-    //TraceLS(this) << "Sec-WebSocket-Key: " << request.get("Sec-WebSocket-Key") << endl;
+    //TraceS(this) << "Sec-WebSocket-Version: " << request.get("Sec-WebSocket-Version") << endl;
+    //TraceS(this) << "Sec-WebSocket-Key: " << request.get("Sec-WebSocket-Key") << endl;
     _headerState++;
 }
 
@@ -470,7 +470,7 @@ std::size_t WebSocketFramer::writeFrame(const char* data, std::size_t len, int f
     //frame.skip(len);
 
 #if 0
-    TraceLS(this) << "Write frame: " 
+    TraceS(this) << "Write frame: " 
          << "\n\tinputLength: " << len
          << "\n\tframePosition: " << frame.position() 
          << "\n\tframeLimit: " << frame.limit() 

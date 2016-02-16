@@ -21,25 +21,25 @@
 #include "scy/filesystem.h"
 
 
-using std::endl; 
+using std::endl;
 
 
 namespace scy {
 namespace arc {
-    
+
 
 namespace internal {
 
     std::string errmsg(int code)
     {
         switch(code) {
-            case UNZ_END_OF_LIST_OF_FILE:        return "end of file list reached";
-            case UNZ_EOF:                        return "end of file reached";
+            case UNZ_END_OF_LIST_OF_FILE:       return "end of file list reached";
+            case UNZ_EOF:                       return "end of file reached";
             case UNZ_PARAMERROR:                return "invalid parameter given";
             case UNZ_BADZIPFILE:                return "bad zip file";
-            case UNZ_INTERNALERROR:                return "internal error";
-            case UNZ_CRCERROR:                    return "crc error, file is corrupt";
-            case UNZ_ERRNO:                        return strerror(code);
+            case UNZ_INTERNALERROR:             return "internal error";
+            case UNZ_CRCERROR:                  return "crc error, file is corrupt";
+            case UNZ_ERRNO:                     return strerror(code);
             default:                            return "unknown error";
         }
     }
@@ -56,7 +56,7 @@ namespace internal {
         }
         throw std::runtime_error(msg);
     }
-        
+
     void api(const char* what, int ret)
     {
         if (ret != UNZ_OK)
@@ -66,8 +66,8 @@ namespace internal {
 } // namespace internal
 
 
-ZipFile::ZipFile() : 
-    fp(nullptr) 
+ZipFile::ZipFile() :
+    fp(nullptr)
 {
 }
 
@@ -90,13 +90,13 @@ bool ZipFile::opened() const
 }
 
 
-void ZipFile::open(const std::string& file) 
+void ZipFile::open(const std::string& file)
 {
     this->close();
     this->fp = unzOpen(fs::transcode(file).c_str());
-    if (this->fp == nullptr) 
+    if (this->fp == nullptr)
         internal::throwError("Cannot open archive file: " + file);
-    
+
     for (int ret = unzGoToFirstFile(this->fp); ret == UNZ_OK; ret = unzGoToNextFile(this->fp)) {
         unz_file_info fileInfo;
         char fileName[1024];
@@ -115,7 +115,7 @@ void ZipFile::open(const std::string& file)
 }
 
 
-void ZipFile::close() 
+void ZipFile::close()
 {
     if (this->opened()) {
         internal::api("unzClose", unzClose(this->fp));
@@ -125,7 +125,7 @@ void ZipFile::close()
 
 
 void ZipFile::extract(const std::string& path)
-{    
+{
     TraceL << "Extracting zip to: " << path << endl;
 
     if (!opened())
@@ -133,7 +133,7 @@ void ZipFile::extract(const std::string& path)
 
     if (!goToFirstFile())
         throw std::runtime_error("Cannot read the source archive.");
-    
+
     while (true) {
         extractCurrentFile(path, true);
         if (!goToNextFile()) break;
@@ -142,14 +142,14 @@ void ZipFile::extract(const std::string& path)
 
 
 bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
-{    
+{
     int ret;
     unz_file_info info;
     char fname[1024];
 
     try {
         internal::api("unzGetCurrentFileInfo", unzGetCurrentFileInfo(this->fp, &info, fname, 1024, nullptr, 0, nullptr, 0));
-        
+
         std::string outPath(path);
         fs::addnode(outPath, fname);
 
@@ -159,24 +159,24 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 #if !WIN32
         const int FILE_ATTRIBUTE_DIRECTORY = 0x10;
 #endif
-        if (info.external_fa & FILE_ATTRIBUTE_DIRECTORY || 
+        if (info.external_fa & FILE_ATTRIBUTE_DIRECTORY ||
             fname[strlen(fname) - 1] == fs::delimiter) {
             TraceL << "Create directory: " << outPath << endl;
             fs::mkdirr(outPath);
         }
 
         // Create file
-        else {            
+        else {
             TraceL << "Create file: " << outPath << endl;
 
-            // Note: If this fails the file we are trying 
+            // Note: If this fails the file we are trying
             // to write may be in use on the filesystem.
             openCurrentFile();
 
             std::ofstream ofs(outPath, std::ios::binary | std::ios::out);
 
-            // FIX: FILE_ATTRIBUTE_DIRECTORY can be inconsistent, so we 
-            // need to be ready to create directories if the output file 
+            // FIX: FILE_ATTRIBUTE_DIRECTORY can be inconsistent, so we
+            // need to be ready to create directories if the output file
             // fails to open.
             if (!ofs.is_open()) {
                 fs::mkdirr(fs::dirname(outPath));
@@ -185,17 +185,17 @@ bool ZipFile::extractCurrentFile(const std::string& path, bool whiny)
 
             if (!ofs.is_open())
                 throw std::runtime_error("Cannot open zip output file: " + outPath);
-            
+
             char buffer[16384];
             while ((ret = unzReadCurrentFile(this->fp, buffer, 16384)) > 0)
                 ofs.write(buffer, ret);
-            
+
             ofs.close();
-            
+
             internal::api("unzReadCurrentFile", ret); // throw file read errors
             closeCurrentFile();
         }
-    } 
+    }
     catch (std::exception& exc) {
         ErrorL << "Cannot unzip file: " << exc.what() << endl;
         if (whiny)
@@ -219,7 +219,7 @@ bool ZipFile::goToNextFile()
 
 
 void ZipFile::openCurrentFile()
-{    
+{
     internal::api("unzOpenCurrentFile", unzOpenCurrentFile(this->fp));
 }
 
@@ -233,8 +233,8 @@ void ZipFile::closeCurrentFile()
 std::string ZipFile::currentFileName()
 {
     char buf[1024];
-    internal::api("unzGetCurrentFileInfo", 
-        unzGetCurrentFileInfo(this->fp, nullptr, buf, 
+    internal::api("unzGetCurrentFileInfo",
+        unzGetCurrentFileInfo(this->fp, nullptr, buf,
             sizeof(buf), nullptr, 0, nullptr, 0));
     return buf;
 }

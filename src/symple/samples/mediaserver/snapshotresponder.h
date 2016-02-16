@@ -18,7 +18,7 @@ public:
 
     void onRequest(http::Request& request, http::Response& response)
     {
-        DebugLS(this) << "Running" << std::endl;
+        DebugS(this) << "Running" << std::endl;
 
         cv::Mat frame;
         options.videoCapture->getFrame(frame,
@@ -31,7 +31,7 @@ public:
         param[1] = 95; // default(95) 0-100
         cv::imencode(".jpg", frame, buffer, param);
 
-        DebugLS(this) << "Taking Snapshot Image: "
+        DebugS(this) << "Taking Snapshot Image: "
             << "\n\tWidth: " << frame.cols
             << "\n\tHeight: " << frame.rows
             << "\n\tCapture Width: " << options.videoCapture->width()

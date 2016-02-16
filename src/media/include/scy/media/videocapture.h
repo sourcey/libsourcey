@@ -32,8 +32,6 @@
 
 #ifdef HAVE_OPENCV
 
-//#include <opencv/cv.h>
-//#include <opencv/highgui.h>
 #include "opencv2/opencv.hpp"
 
 #include <iostream>
@@ -99,8 +97,8 @@ public:
     virtual void getEncoderFormat(Format& iformat);
 
     int deviceId() const;
-    std::string    filename() const;
-    std::string    name() const;
+    std::string filename() const;
+    std::string name() const;
     const scy::Error& error() const;
     double fps() const;
     int width();
@@ -122,13 +120,13 @@ protected:
 private:
     mutable Mutex _mutex;
 
-    std::string    _filename;    // Source file to capture from if any
+    std::string _filename;    // Source file to capture from if any
     int _deviceId;            // Source device to capture from
     bool _opened;
     bool _started;
     bool _stopping;
     bool _capturing;
-    cv::Mat _frame;            // Current video image
+    cv::Mat _frame;           // Current video image
     scy::Error _error;        // Error message if any
     FPSCounter _counter;
     cv::VideoCapture _capture;

@@ -39,7 +39,7 @@ public:
     
     void initiate(const std::string& peerIP) 
     {
-        DebugLS(this) << id << ": Initializing" << endl;
+        DebugS(this) << id << ": Initializing" << endl;
         try    {
             client.addPermission(peerIP);
             client.addPermission("127.0.0.1");        
@@ -47,14 +47,14 @@ public:
             client.initiate();
         } 
         catch (std::exception& exc) {
-            ErrorLS(this) << id << ": " << exc.what() << std::endl;
+            ErrorS(this) << id << ": " << exc.what() << std::endl;
         }
     }
 
 protected:
     void onClientStateChange(turn::Client& client, turn::ClientState& state, const turn::ClientState&) 
     {
-        DebugLS(this) << id << ": State change: " << state.toString() << endl;
+        DebugS(this) << id << ": State change: " << state.toString() << endl;
 
         switch(state.id()) {
         case ClientState::None:                
@@ -98,10 +98,10 @@ protected:
             std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
             std::uint64_t latency = time::ticks() - sentAt;
 
-            DebugLS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
+            DebugS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
         }
         else        
-            DebugLS(this) << id << ": Received dummy data from " << peerAddr << ": payloadLength=" << payload.length() << endl;
+            DebugS(this) << id << ": Received dummy data from " << peerAddr << ": payloadLength=" << payload.length() << endl;
         
         /*
         if (size < 150) {
@@ -109,22 +109,22 @@ protected:
             std::uint64_t sentAt = util::strtoi<std::uint64_t>(payload);
             std::uint64_t latency = time::ticks() - sentAt;
 
-            DebugLS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
+            DebugS(this) << id << ": Received data from " << peerAddr << ": payload=" << payload << ", latency=" << latency << endl;
         }
         else
-            DebugLS(this) << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
+            DebugS(this) << id << ": Received dummy data from " << peerAddr << ": size=" << size << endl;
         */
 
         // Echo back to peer
         //client.sendData(data, size, peerAddr);
 #else //if TEST_INITIATOR_TO_RESPONDER
-        DebugLS(this) << id << ": Received response data from " << peerAddr << ": size=" << size << endl;
+        DebugS(this) << id << ": Received response data from " << peerAddr << ": size=" << size << endl;
 #endif
     }
     
     void onAllocationPermissionsCreated(turn::Client& client, const turn::PermissionList& permissions)
     {
-        DebugLS(this) << id << ": Permissions Created" << endl;
+        DebugS(this) << id << ": Permissions Created" << endl;
     }
 };
 

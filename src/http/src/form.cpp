@@ -80,7 +80,7 @@ void FormWriter::addPart(const std::string& name, FormPart* part)
 
 void FormWriter::prepareSubmit()
 {    
-    TraceLS(this) << "Prepare submit" << std::endl;
+    TraceS(this) << "Prepare submit" << std::endl;
 
     http::Request& request = _connection.request();
     if (request.getMethod() == http::Method::Post || 
@@ -133,7 +133,7 @@ void FormWriter::prepareSubmit()
 
 void FormWriter::start()
 {
-    TraceLS(this) << "Start" << std::endl;
+    TraceS(this) << "Start" << std::endl;
 
     prepareSubmit();
     
@@ -144,7 +144,7 @@ void FormWriter::start()
 
 void FormWriter::stop()
 {
-    TraceLS(this) << "Stop" << std::endl;
+    TraceS(this) << "Stop" << std::endl;
 
     //_complete = true;
     _runner->cancel();
@@ -209,7 +209,7 @@ void FormWriter::writeAsync()
             _runner->cancel();
     }
     catch (std::exception& exc) {
-        TraceLS(this) << "Error: " << exc.what() << std::endl;
+        TraceS(this) << "Error: " << exc.what() << std::endl;
         assert(0);
 //#ifdef _DEBUG
 //        throw exc;
@@ -262,7 +262,7 @@ void FormWriter::writeMultipart()
 
 void FormWriter::writeMultipartChunk()
 {
-    TraceLS(this) << "Writing chunk: " << _writeState << std::endl;
+    TraceS(this) << "Writing chunk: " << _writeState << std::endl;
 
     switch(_writeState) {
     
@@ -315,7 +315,7 @@ void FormWriter::writeMultipartChunk()
                 return; // return after writing a chunk
             }
             else {
-                TraceLS(this) << "Part complete: " << p.name << std::endl;
+                TraceS(this) << "Part complete: " << p.name << std::endl;
                 delete p.part;
                 _parts.pop_front();
             }
@@ -337,14 +337,14 @@ void FormWriter::writeMultipartChunk()
             emit("0\r\n\r\n", 5, PacketFlags::NoModify | PacketFlags::Final);
         }
 
-        TraceLS(this) << "Request complete" << std::endl;
+        TraceS(this) << "Request complete" << std::endl;
         _complete = true;
         _writeState = -1; // raise error if called again
         } break;
     
     // Invalid state
     default:
-        ErrorLS(this) << "Invalid write state: " << _writeState << std::endl;
+        ErrorS(this) << "Invalid write state: " << _writeState << std::endl;
         assert(0 && "invalid write state");
         break;
     }
@@ -521,7 +521,7 @@ FilePart::~FilePart()
 
 void FilePart::open()
 {
-    TraceLS(this) << "Open: " << _path << std::endl;
+    TraceS(this) << "Open: " << _path << std::endl;
 
     _istr.open(_path.c_str(), std::ios::in | std::ios::binary);
     if (!_istr.is_open())
@@ -544,7 +544,7 @@ void FilePart::reset()
 
 bool FilePart::writeChunk(FormWriter& writer)
 {
-    TraceLS(this) << "Write chunk" << std::endl;        
+    TraceS(this) << "Write chunk" << std::endl;        
     assert(!writer.cancelled());
     _initialWrite = false;
 
@@ -571,7 +571,7 @@ bool FilePart::writeChunk(FormWriter& writer)
 
 void FilePart::write(FormWriter& writer)
 {
-    TraceLS(this) << "Write" << std::endl;
+    TraceS(this) << "Write" << std::endl;
     _initialWrite = false;
 
     char buffer[FILE_CHUNK_SIZE];
@@ -593,7 +593,7 @@ void FilePart::write(FormWriter& writer)
 
 void FilePart::write(std::ostream& ostr)
 {
-    TraceLS(this) << "Write" << std::endl;
+    TraceS(this) << "Write" << std::endl;
     _initialWrite = false;
     
     char buffer[FILE_CHUNK_SIZE];
@@ -654,7 +654,7 @@ StringPart::~StringPart()
 
 bool StringPart::writeChunk(FormWriter& writer)
 {
-    TraceLS(this) << "Write chunk" << std::endl;    
+    TraceS(this) << "Write chunk" << std::endl;    
     _initialWrite = false;
 
     // TODO: Honour chunk size for large strings
@@ -668,7 +668,7 @@ bool StringPart::writeChunk(FormWriter& writer)
 
 void StringPart::write(FormWriter& writer)
 {
-    TraceLS(this) << "Write" << std::endl;
+    TraceS(this) << "Write" << std::endl;
     _initialWrite = false;
     
     writer.emit(_data.c_str(), _data.length());
@@ -678,7 +678,7 @@ void StringPart::write(FormWriter& writer)
 
 void StringPart::write(std::ostream& ostr)
 {
-    TraceLS(this) << "Write" << std::endl;
+    TraceS(this) << "Write" << std::endl;
     _initialWrite = false;
     
     ostr.write(_data.c_str(), _data.length());
@@ -741,7 +741,7 @@ void FormWriter::run()
 /*
 void FormWriter::onIdle()
 {
-    TraceLS(this) << "On idle" << std::endl;
+    TraceS(this) << "On idle" << std::endl;
 
     if (_initial)
         prepareSubmit(_connection.request());

@@ -207,7 +207,7 @@ void Server::onTCPSocketClosed(void* sender)
 
 void Server::releaseTCPSocket(net::Socket* socket)
 {    
-    TraceLS(this) << "Removing TCP socket: " << socket << std::endl;
+    TraceS(this) << "Removing TCP socket: " << socket << std::endl;
     for (auto it = _tcpSockets.begin(); it != _tcpSockets.end(); ++it) { //::Ptr
         if (it->get() == socket) {
             socket->Recv -= sdelegate(this, &Server::onSocketRecv);

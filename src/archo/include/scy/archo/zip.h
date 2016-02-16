@@ -29,8 +29,8 @@
 namespace scy {
 namespace arc {
 
-    
-struct ZipFile 
+
+struct ZipFile
 {
     ZipFile();
     ZipFile(const std::string& file);
@@ -39,10 +39,10 @@ struct ZipFile
     void open(const std::string& file);
     bool opened() const;
     void close();
-    
+
     void extract(const std::string& path);
         // Extracts the archive contents to the given directory path.
-    
+
     bool extractCurrentFile(const std::string& path, bool whiny = true);
 
     bool goToFirstFile();
@@ -56,39 +56,16 @@ struct ZipFile
     struct FileInfo
     {
         std::string path;
-        std::size_t      compressedSize;
-        std::size_t      uncompressedSize;
+        std::size_t compressedSize;
+        std::size_t uncompressedSize;
     };
-
 
     std::vector<FileInfo> info;
     unzFile fp;
 };
 
 
-#if 0
-class zip_error : public std::runtime_error 
-{
-public:
-    zip_error(const std::string& func) : runtime_error(func) {}
-    zip_error(const std::string& func, int msg) : runtime_error(func + ": " + errmsg(msg)) {}
-    zip_error(const std::string& func, const std::string& msg) : runtime_error(func + ": " + msg) {}
-
-    static std::string errmsg(int e);
-};
-#endif
-    
-
 } } // namespace scy::arc
 
 
 #endif // SCY_Archo_Zip_H
-
-
-
-    
-
-    //typedef std::vector<FileInfo> FileInfoList;
-    //std::vector< ci::fs::path > getFiles();
-    //std::pair<boost::shared_array<char>,std::size_t> ReadCurrentFile();
-    //private:
