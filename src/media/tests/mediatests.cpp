@@ -3,6 +3,7 @@
 #include "scy/signal.h"
 #include "scy/queue.h"
 #include "scy/packetqueue.h"
+#include "scy/media/devicemanager.h"
 #include "scy/media/flvmetadatainjector.h"
 #include "scy/media/formatregistry.h"
 #include "scy/media/mediafactory.h"
@@ -10,6 +11,7 @@
 #include "scy/media/audiocapture.h"
 #include "scy/media/avpacketencoder.h"
 #include "scy/media/thumbnailer.h"
+#include "scy/media/iencoder.h"
 
 /*
 extern "C" {

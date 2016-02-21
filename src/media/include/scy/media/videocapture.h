@@ -31,7 +31,6 @@
 #include "scy/media/fpscounter.h"
 
 #ifdef HAVE_OPENCV
-
 #include "opencv2/opencv.hpp"
 
 #include <iostream>

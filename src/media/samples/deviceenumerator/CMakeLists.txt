@@ -1,1 +1,1 @@
-define_sourcey_module_sample(deviceenumerator base media)
+define_sourcey_module_sample(deviceenumerator base uv media)

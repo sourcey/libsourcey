@@ -11,7 +11,8 @@
 find_path(MINIZIP_INCLUDE_DIR 
 	NAMES zip.h
 	PATHS ${LibSourcey_SOURCE_DIR}/archo/vendor/minizip)
-find_library(MINIZIP_LIBRARY 
+
+find_library(MINIZIP_LIBRARY
 	NAMES minizip libminizip
     PATHS ${LibSourcey_BUILD_DIR}/src/archo/vendor/minizip)
 

@@ -1,8 +1,9 @@
 ask_build_sourcey_module(json)
-if(BUILD_MODULES AND BUILD_MODULE_json) 
+if(BUILD_MODULES AND BUILD_MODULE_json)
 
-  add_subdirectory(vendor/jsoncpp)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/jsoncpp)
+  add_vendor_dependency(JSONCPP jsoncpp)
+  #add_subdirectory(vendor/jsoncpp)
+  #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/jsoncpp)
 
   include_dependency(JsonCpp)
   include_dependency(LibUV) #REQUIRED

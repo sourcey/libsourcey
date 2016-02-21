@@ -121,14 +121,14 @@ macro(include_dependency name)
 
   # Exit message on failure
   if (NOT ${var_root}_FOUND)
-    message("Failed to include dependency: ${name}. Please build and install dependencies before using CMake.")
+    # message("Failed to include dependency: ${name}. Please build and install dependencies before using CMake.")
     return()
   endif()
 
   # Set a HAVE_XXX variable at parent scope for our Config.h
   set(HAVE_${var_root_upper} 1)
   #set(HAVE_${var_root_upper} 1 PARENT_SCOPE)
-  
+
   # Expose to LibSourcey
   if(${var_root}_INCLUDE_DIR)
     # message(STATUS "- Found ${name} Inc Dir: ${${var_root}_INCLUDE_DIR}")
@@ -170,10 +170,10 @@ macro(include_dependency name)
   list(REMOVE_DUPLICATES LibSourcey_LIBRARY_DIRS)
   list(REMOVE_DUPLICATES LibSourcey_INCLUDE_LIBRARIES)
   #list(REMOVE_DUPLICATES LibSourcey_BUILD_DEPENDENCIES)
-  
+
   # set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} PARENT_SCOPE)
   # set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} PARENT_SCOPE)
-  
+
   # message(STATUS "- LibSourcey_INCLUDE_LIBRARIES: ${LibSourcey_INCLUDE_LIBRARIES}")
 endmacro()
 
@@ -353,7 +353,7 @@ endmacro()
 macro(set_module_found module)
 
   set(${module}_FOUND FALSE)
-  #set(${module}_FOUND FALSE PARENT_SCOPE)
+  set(${module}_FOUND FALSE PARENT_SCOPE)
 
   # Compile the list of required vars
   set(_${module}_REQUIRED_VARS ${module}_LIBRARIES) # ${module}_INCLUDE_DIRS
@@ -387,7 +387,7 @@ macro(set_module_found module)
   # Set the module as found.
   if (${module}_LIBRARIES)
     set(${module}_FOUND TRUE)
-    #set(${module}_FOUND TRUE PARENT_SCOPE)
+    set(${module}_FOUND TRUE PARENT_SCOPE)
   else()
     message("Failed to locate ${module}. Please specify paths manually.")
   endif()
@@ -419,7 +419,7 @@ macro(set_component_found module component)
     set(${ALIAS_FOUND} TRUE)
     #set(${ALIAS_FOUND} TRUE PARENT_SCOPE)
 
-    # Add component vars to the perant module lists
+    # Add component vars to the parent module lists
     append_unique_list(${module}_INCLUDE_DIRS ${ALIAS_INCLUDE_DIRS})
     append_unique_list(${module}_LIBRARY_DIRS ${ALIAS_LIBRARY_DIRS})
     append_unique_list(${module}_LIBRARIES    ${ALIAS_LIBRARIES})

@@ -562,7 +562,7 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
     //     ipacket->size -= ret;
     //     ipacket->data += ret;
     // }
-    assert(bytesDecoded == bytesRemaining);
+    // assert(bytesDecoded == bytesRemaining);
 
     // while (bytesRemaining) // && !frameDecoded
     // {

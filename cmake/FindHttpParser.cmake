@@ -1,86 +1,20 @@
 ########################################################################
-# CMake module for finding HttpParser
+# CMake module for finding HTTPPARSER
 #
-# The following variabled will be defined:
+# The following variables will be defined:
 #
-#  HttpParser_FOUND
-#  HttpParser_INCLUDE_DIR
-#  HttpParser_LIBRARY
+#  HTTPPARSER_FOUND
+#  HTTPPARSER_INCLUDE_DIR
+#  HTTPPARSER_LIBRARY
 #
 
-# ----------------------------------------------------------------------
-# Find http_parser include path
-# ----------------------------------------------------------------------
-FIND_PATH(HttpParser_INCLUDE_DIR     
-  NAMES 
-  	http_parser.h   
-  PATHS
-  	${LibSourcey_DEPENDENCIES_SOURCE_DIR}/http_parser
-  	/usr/local/include
-  	/usr/include
-)
+find_path(HTTPPARSER_INCLUDE_DIR
+	NAMES http_parser.h
+	PATHS ${LibSourcey_SOURCE_DIR}/http/vendor/http_parser)
 
-# ----------------------------------------------------------------------
-# Find http_parser library
-# ----------------------------------------------------------------------
-if(WIN32 AND MSVC)
-  
-  find_library(HttpParser_DEBUG_LIBRARY 
-    NAMES 
-      http_parserd
-    PATHS 
-      ${LibSourcey_DEPENDENCIES_BUILD_DIR}/http_parser
-      ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
-      /usr/lib 
-      /usr/local/lib
-    )
-    
-  find_library(HttpParser_RELEASE_LIBRARY 
-    NAMES 
-      http_parser
-    PATHS 
-      ${LibSourcey_DEPENDENCIES_BUILD_DIR}/http_parser
-      ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
-      /usr/lib 
-      /usr/local/lib
-    )
-    
-  if(HttpParser_DEBUG_LIBRARY OR HttpParser_RELEASE_LIBRARY)  
-    if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)            
-      if (HttpParser_RELEASE_LIBRARY) 
-        list(APPEND HttpParser_LIBRARY "optimized" ${HttpParser_RELEASE_LIBRARY})
-      endif()
-      if (HttpParser_DEBUG_LIBRARY)
-        list(APPEND HttpParser_LIBRARY "debug" ${HttpParser_DEBUG_LIBRARY})
-      endif()
-    else()    
-      if (HttpParser_RELEASE_LIBRARY) 
-        list(APPEND HttpParser_LIBRARY ${HttpParser_RELEASE_LIBRARY})
-      elseif (HttpParser_DEBUG_LIBRARY) 
-        list(APPEND HttpParser_LIBRARY ${HttpParser_DEBUG_LIBRARY})
-      endif()
-    endif()  
-    mark_as_advanced(HttpParser_DEBUG_LIBRARY HttpParser_RELEASE_LIBRARY)
-  endif()
+find_library(HTTPPARSER_LIBRARY
+	NAMES http_parser libhttp_parser
+  PATHS ${LibSourcey_BUILD_DIR}/src/http/vendor/http_parser)
 
-else()
-
-  find_library(HttpParser_LIBRARY 
-    NAMES 
-      http_parser
-      libhttp_parser
-    PATHS 
-       ${LibSourcey_DEPENDENCIES_BUILD_DIR}/http_parser
-       ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib
-       /usr/lib 
-       /usr/local/lib
-    )
-
-endif()
-
-if(HttpParser_LIBRARY AND HttpParser_INCLUDE_DIR)
-  set(HttpParser_FOUND 1)
-  mark_as_advanced(HttpParser_LIBRARY HttpParser_INCLUDE_DIR)
-else()
-  set(HttpParser_FOUND 0)
-endif()
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(HTTPPARSER DEFAULT_MSG HTTPPARSER_LIBRARY HTTPPARSER_INCLUDE_DIR)

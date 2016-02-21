@@ -1,7 +1,7 @@
 ########################################################################
-# Cmake module for finding WebRTC
+# CMake module for finding WebRTC
 #
-# The following variabled will be defined:
+# The following variables will be defined:
 #
 #  WebRTC_FOUND
 #  WebRTC_INCLUDE_DIR

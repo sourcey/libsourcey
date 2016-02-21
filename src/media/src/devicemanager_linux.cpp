@@ -59,32 +59,30 @@ IDeviceManager* DeviceManagerFactory::create() {
 }
 
 
-/*
-class LinuxDeviceWatcher
-    : public DeviceWatcher,
-    private talk_base::Dispatcher {
-public:
-    explicit LinuxDeviceWatcher(IDeviceManager* dm);
-    virtual ~LinuxDeviceWatcher();
-    virtual bool start();
-    virtual void stop();
-
-private:
-    virtual uint32 GetRequestedEvents();
-    virtual void OnPreEvent(uint32 ff);
-    virtual void OnEvent(uint32 ff, int err);
-    virtual int GetDescriptor();
-    virtual bool IsDescriptorClosed();
-
-    IDeviceManager* manager_;
-    LibUDevSymbolTable libudev_;
-    struct udev* udev_;
-    struct udev_monitor* udev_monitor_;
-    bool registered_;
-};
-
-#define LATE(sym) LATESYM_GET(LibUDevSymbolTable, &libudev_, sym)
-*/
+// class LinuxDeviceWatcher
+//     : public DeviceWatcher,
+//     private talk_base::Dispatcher {
+// public:
+//     explicit LinuxDeviceWatcher(IDeviceManager* dm);
+//     virtual ~LinuxDeviceWatcher();
+//     virtual bool start();
+//     virtual void stop();
+//
+// private:
+//     virtual uint32 GetRequestedEvents();
+//     virtual void OnPreEvent(uint32 ff);
+//     virtual void OnEvent(uint32 ff, int err);
+//     virtual int GetDescriptor();
+//     virtual bool IsDescriptorClosed();
+//
+//     IDeviceManager* manager_;
+//     LibUDevSymbolTable libudev_;
+//     struct udev* udev_;
+//     struct udev_monitor* udev_monitor_;
+//     bool registered_;
+// };
+//
+// #define LATE(sym) LATESYM_GET(LibUDevSymbolTable, &libudev_, sym)
 
 
 static const char* const kFilteredAudioDevicesName[] = {

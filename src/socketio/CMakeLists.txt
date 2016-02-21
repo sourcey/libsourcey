@@ -1,6 +1,6 @@
 ask_build_sourcey_module(socketio)
-if(BUILD_MODULES AND BUILD_MODULE_socketio) 
-  include_dependency(LibUV) #REQUIRED
+if(BUILD_MODULES AND BUILD_MODULE_socketio)
+  include_dependency(LibUV)
   include_dependency(OpenSSL REQUIRED)
   include_dependency(JsonCpp)
   include_dependency(HttpParser)

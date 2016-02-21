@@ -26,7 +26,7 @@ endif()
 if(APPLE)
   # Remove the “MACOSX_RPATH is not specified” warning
   # set(CMAKE_MACOSX_RPATH 1)
-  
+
   # Silence CMake warnings by adopting modern behavior for MACOSX_RPATH on newer
   # versions of CMake
   if(POLICY CMP0042)
@@ -42,9 +42,7 @@ set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 # Include required cmake files
 include(LibSourceyUtilities REQUIRED)
 include(LibSourceyIncludes REQUIRED)
-include(LibSourceyDependency REQUIRED)
-include(LibSourceyApplication REQUIRED)
-include(LibSourceyModule REQUIRED)
+include(LibSourceyModules REQUIRED)
 include(LibSourceyDetectCXXCompiler REQUIRED)
 include(LibSourceyVersion REQUIRED)
 
@@ -235,12 +233,12 @@ find_package(FFmpeg)
 
 #set_option(WITH_LIBUV           "Include LibUV support"                ON)
 #set_option(WITH_HTTPPARSER      "Include HttpParser support"           ON)
-set_option(WITH_JSONCPP         "Include JsonCpp support"              ON)
-set_option(WITH_ZLIB            "Include zlib support"                 ON)
+#set_option(WITH_JSONCPP         "Include JsonCpp support"              ON)
+#set_option(WITH_ZLIB            "Include zlib support"                 ON)
+#set_option(WITH_RTAUDIO         "Include RtAudio support"              ON)
 set_option(WITH_OPENSSL         "Include OpenSSL support"              ON)
-set_option(WITH_RTAUDIO         "Include RtAudio support"              ON)
-set_option(WITH_FFMPEG          "Include FFmpeg support"               ON IF (FFmpeg_FOUND))
-set_option(WITH_OPENCV          "Include OpenCV support"               ON IF (OpenCV_FOUND))
+set_option(WITH_FFMPEG          "Include FFmpeg support"               ON IF (FFMPEG_FOUND))
+set_option(WITH_OPENCV          "Include OpenCV support"               ON IF (OPENCV_FOUND))
 set_option(WITH_WEBRTC          "Include WebRTC support"               OFF)
 set_option(WITH_WXWIDGETS       "Include wxWidgets support"            OFF)
 
@@ -319,14 +317,6 @@ if(WITH_WXWIDGETS)
   include_dependency(wxWidgets REQUIRED core base adv)
 endif()
 
-# Remove any duplicates from our lists
-# if(LibSourcey_LINK_LIBRARIES)
-#   list(REMOVE_DUPLICATES LibSourcey_LINK_LIBRARIES)
-# endif()
-# if(LibSourcey_BUILD_DEPENDENCIES)
-#   list(REMOVE_DUPLICATES LibSourcey_BUILD_DEPENDENCIES)
-# endif()
-
 # ----------------------------------------------------------------------------
 # Include the LibSourcey source tree
 # ----------------------------------------------------------------------------
@@ -342,6 +332,14 @@ if(BUILD_MODULES OR BUILD_APPLICATIONS)
       add_subdirectory(${dir})
     endif()
   endforeach()
+endif()
+
+# Remove any duplicates from our lists
+if(LibSourcey_LINK_LIBRARIES)
+  list(REMOVE_DUPLICATES LibSourcey_LINK_LIBRARIES)
+endif()
+if(LibSourcey_BUILD_DEPENDENCIES)
+  list(REMOVE_DUPLICATES LibSourcey_BUILD_DEPENDENCIES)
 endif()
 
 # ----------------------------------------------------------------------------
@@ -437,12 +435,12 @@ status("")
 #status("    Use HttpParser:"    HAVE_HTTPPARSER      THEN YES ELSE NO)
 status("    Use OpenSSL:"       HAVE_OPENSSL         THEN YES ELSE NO)
 status("    Use FFmpeg:"        HAVE_FFMPEG          THEN YES ELSE NO)
-status("    Use OpenCV:"        HAVE_OPENCV          THEN "YES (ver ${OpenCV_VERSION})" ELSE NO)
+status("    Use OpenCV:"        HAVE_OPENCV          THEN "YES (ver ${OPENCV_VERSION})" ELSE NO)
 status("    Use WebRTC:"        HAVE_WEBRTC          THEN YES ELSE NO)
-status("    Use RtAudio:"       HAVE_RTAUDIO         THEN YES ELSE NO)
-status("    Use JsonCpp:"       HAVE_JSONCPP         THEN YES ELSE NO)
+# status("    Use RtAudio:"       HAVE_RTAUDIO         THEN YES ELSE NO)
+# status("    Use JsonCpp:"       HAVE_JSONCPP         THEN YES ELSE NO)
 status("    Use wxWidgets:"     HAVE_WXWIDGETS       THEN YES ELSE NO)
-status("    Use zlib:"          HAVE_ZLIB            THEN YES ELSE NO)
+# status("    Use zlib:"          HAVE_ZLIB            THEN YES ELSE NO)
 
 # Includes
 # status("")
