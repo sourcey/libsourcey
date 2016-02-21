@@ -3,16 +3,11 @@
 **Homepage**: [http://sourcey.com/libsourcey](http://sourcey.com/libsourcey)  
 **Licence**: LGPL
 
-LibSourcey is a collection of open source cross platform C++11 modules and classes that provide developers with a flexible high performance arsenal for the rapid development of real-time messaging and live media streaming applications.
+LibSourcey is a collection of open source cross platform C++11 modules and classes that provide developers with a flexible high performance arsenal for the rapid development of realtime messaging and live media streaming applications.
 
+<!-- For media streaming applications, LibSourcey provides a simple and flexible method of capturing live audio/video streams (_OpenCV/FFmpeg_), processing, filtering and encoding them using any video format (_FFmpeg_), and broadcasting the result over the Internet (_libuv_). This is made possible by implementing a thin layer over the top of some brilliant open source projects, such as FFmpeg, OpenCV and libuv. The only required third-party dependency is libuv, and that is included in the local source and compiled automatically. All others dependencies are optional. -->
 
-
-For media streaming applications, LibSourcey provides a simple and flexible method of capturing live audio/video streams (_OpenCV/FFmpeg_), processing, filtering and encoding them using any video format (_FFmpeg_), and broadcasting the result over the Internet (_libuv_). This is made possible by implementing a thin layer over the top of some brilliant open source projects, such as FFmpeg, OpenCV and libuv. The only required third-party dependency is libuv, and that is included in the local source and compiled automatically. All others dependencies are optional.
-
-<!-- Unfortunately documentation still a little sparse at this point, but we hope to change that in the near future. Until then, _use the source, Luke!_, and we welcome all community contributions to LibSourcey in order to promote the development of better real-time native and web applications -->
-
-
-<!-- Re-usable utility classes and interfaces used throughout LibSourcey. -->
+<!-- Unfortunately documentation still a little sparse at this point, but we hope to change that in the near future. Until then, _use the source, Luke!_, and we welcome all community contributions to LibSourcey in order to promote the development of better real-time native and web applications. -->
 
 ## Features
 
@@ -26,7 +21,7 @@ For media streaming applications, LibSourcey provides a simple and flexible meth
 
 * **Web servers and clients** — LibSourcey includes a HTTP server and client stack that includes support for WebSockets, multipart streaming, and file transfers. The HTTP parser is based on the super-fast C code used by `nginx`.
 
-* **Elegant PacketStream API** — The PacketStream API make it possible for LibSourcey modules to pipe and process arbitrary packets to eachother through a delegate chain, and makes it possible to develop complex data processing applications quickly and easily.
+* **Elegant PacketStream API** — The PacketStream API make it possible for LibSourcey modules to pipe and process arbitrary packets to eachother through a delegate chain, and makes it possible to develop complex data processing applications quickly and easily. Check out this writeup on how to use the PacketSteram API for encoding H.264 on the fly: http://sourcey.com/libsourcey-packetstream-api/
 
 * **Media streaming and encoding** — The media library consists of thin wrappers around FFmpeg and OpenCV for media capture, encoding, recording, streaming, anaysis and more. The Media API makes full use of the PacketStream API so that encoders, processors and packetisers can be dynamically added and removed from a media source.  
 
@@ -38,7 +33,6 @@ For media streaming applications, LibSourcey provides a simple and flexible meth
     * **STUN** — [RFC 5389](http://tools.ietf.org/rfc/rfc5389) implementation that includes support for ICE and TURN and TURN TCP messages.
     * **TURN** — Server and client stack that supports both [RFC 5766 (Traversal Using Relays around NAT)](http://tools.ietf.org/rfc/rfc5766) and [RFC 6062 (Traversal Using Relays around NAT Extensions for TCP Allocations)](http://tools.ietf.org/rfc/rfc6062) specifications.
     * **SDP** — [RFC 4566](http://tools.ietf.org/rfc/rfc4566) implementation that includes extra support for ICE headers.
-
 
 ## Dependencies
 
@@ -185,8 +179,6 @@ See linux instructions.
 <!-- * Generate Xcode project using CMake, as described above.
 * Launch Xcode, locate and open libsourcey.xcodeproj. Select "Debug", build the BUILD_ALL target (Cmd-B), select "Release" and build it too. -->
 
-
-
 ### Installing on Windows
 
 ##### Install Dependencies
@@ -247,8 +239,6 @@ For a redistributable C++ package manager, take a look at `pacm`, and specifical
 
 Also, check out `pluga`, a simple C++ plugin API using LibSourcey: http://sourcey.com/pluga/
 
-For an article on the LibSourcey way of doing things, check out this writeup on using the PacketSteram API for encoding H.264 on the fly: http://sourcey.com/libsourcey-packetstream-api/
-
 ## Contributing
 
 1. [Fork LibSourcey on Github](https://github.com/sourcey/libsourcey)
@@ -259,4 +249,4 @@ For an article on the LibSourcey way of doing things, check out this writeup on 
 
 ## Issues
 
-If you find any bugs or issues please use the [Github issue tracker](https://github.com/sourcey/libsourcey/issues).
+For bugs and issues please use the [Github issue tracker](https://github.com/sourcey/libsourcey/issues).
