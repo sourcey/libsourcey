@@ -240,6 +240,8 @@ Also, check out `pluga`, a simple C++ plugin API using LibSourcey: http://source
 
 ## Contributing
 
+If you make any improvements please feel welcome to send them back upstream.
+
 1. [Fork LibSourcey on Github](https://github.com/sourcey/libsourcey)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
