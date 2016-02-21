@@ -60,8 +60,16 @@ if (NOT FFmpeg_FOUND)
   set_module_found(FFmpeg ${FFmpeg_FIND_REQUIRED})
 
   # Include some dependencies required when linking to FFmpeg static build
-  list(APPEND LibSourcey_BUILD_DEPENDENCIES bz2)
-  list(APPEND LibSourcey_BUILD_DEPENDENCIES lzma)
+  # list(APPEND LibSourcey_BUILD_DEPENDENCIES bz2)
+  # list(APPEND LibSourcey_BUILD_DEPENDENCIES lzma)
+  find_library(BZ2_LIBRARY NAMES bz2)
+  if(BZ2_LIBRARY)
+    list(APPEND FFmpeg_DEPENDENCIES ${BZ2_LIBRARY})
+  endif()
+  find_library(LZMA_LIBRARY NAMES lzma)
+  if(LZMA_LIBRARY)
+    list(APPEND FFmpeg_DEPENDENCIES ${LZMA_LIBRARY})
+  endif()
 
   # Include FFmpeg dependencies if available
   find_library(LIBVPX_LIBRARY NAMES vpx)

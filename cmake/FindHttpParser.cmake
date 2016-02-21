@@ -1,5 +1,5 @@
 ########################################################################
-# Cmake module for finding HttpParser
+# CMake module for finding HttpParser
 #
 # The following variabled will be defined:
 #

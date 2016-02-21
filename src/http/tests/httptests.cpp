@@ -254,7 +254,7 @@ public:
     void onRecv(void* sender, const MutableBuffer& buffer, const net::Address& peerAddress)
     {
         assert(sender == &socket);
-        std::string data(buffer.data(), buffer.size());
+        std::string data(buffer.cdata(), buffer.size());
         DebugL << "recv: " << data << endl;    
 
         // Check for return packet echoing sent data

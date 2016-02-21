@@ -109,7 +109,15 @@ Open the CMake GUI and set the project directory to point to the LibSourcey root
 
 ### Installing on Apple (MacOS)
 
+This guide is for written for Mac users using [Homebrew](http://brew.sh)
+
 ##### Install Dependencies
+
+
+OpenSSL
+
+brew install openssl
+brew link --force openssl
 
 Install Git  
  : Download the [latest Git installer package](http://code.google.com/p/git-osx-installer/downloads/list?can=3), double click on the installer to start the installation wizard. You’ll be prompted for your system password in order for the installer to complete.
@@ -135,7 +143,7 @@ Open the CMake GUI and set the project directory to point to the LibSourcey root
 * Generate Xcode project using CMake, as described above.
 * Launch Xcode, locate and open libsourcey.xcodeproj. Select "Debug", build the BUILD_ALL target (Cmd-B), select "Release" and build it too.
 
-##### CMake Build Options
+## CMake Build Options
 
 The main build options you will want to configure are as follows:
 

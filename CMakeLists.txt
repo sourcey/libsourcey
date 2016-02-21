@@ -2,19 +2,17 @@
 # Root CMake file for LibSourcey
 # ============================================================================
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.10)
 
 # This _must_ go before project(LibSourcey) in order to work
 if(WIN32)
-    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Installation Directory")
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Installation Directory")
 else()
-    set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Installation Directory")
+  set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Installation Directory")
 endif()
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configs" FORCE)
-if(DEFINED CMAKE_BUILD_TYPE AND CMAKE_VERSION VERSION_GREATER "2.8")
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${CMAKE_CONFIGURATION_TYPES})
-endif()
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${CMAKE_CONFIGURATION_TYPES})
 
 project(LibSourcey)
 
@@ -26,6 +24,14 @@ if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
 endif()
 
 if(APPLE)
+  # Remove the “MACOSX_RPATH is not specified” warning
+  # set(CMAKE_MACOSX_RPATH 1)
+  
+  # Silence CMake warnings by adopting modern behavior for MACOSX_RPATH on newer
+  # versions of CMake
+  if(POLICY CMP0042)
+    cmake_policy(SET CMP0042 NEW)
+  endif()
   set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 endif()
 
@@ -99,33 +105,28 @@ set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/libscy/
 # Append some common search paths for find_library and find_path
 # to find libraries from these locations first
 if(WIN32)
-  set(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a") # ".dll"
+  # set(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
+  # set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a") # ".dll"
   set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    #D:/dev/lib/wxWidgets-2.9.4/lib/vc_lib
-    #D:/dev/lib/opencv-2.4.6.0/build/install/lib
-    #D:/dev/lib/ffmpeg-1.0.1-gpl/lib
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/lib/
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib/
-    ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/
+    # ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/lib/
+    # ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib/
+    # ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/
     ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
     )
 else()
-  set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
+  # set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
+  # set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
   set(CMAKE_LIBRARY_PATH
     #${LibSourcey_BUILD_DIR}/lib
     #/usr/local/share/libscy/deps/lib
     #/home/deploy/build/lib
-    #/usr/local/lib
-    #/usr/lib
-    /usr/local/lib
-    /usr/local/lib/x86_64-linux-gnu
-    /usr/local/lib/i386-linux-gnu
-    /usr/local/lib64
-    /usr/lib
-    /usr/lib/x86_64-linux-gnu
-    /usr/lib/i386-linux-gnu
+    # /usr/local/lib
+    # /usr/local/lib/x86_64-linux-gnu
+    # /usr/local/lib/i386-linux-gnu
+    # /usr/local/lib64
+    # /usr/lib
+    # /usr/lib/x86_64-linux-gnu
+    # /usr/lib/i386-linux-gnu
     /usr/lib64
     ${CMAKE_LIBRARY_PATH})
 
@@ -136,7 +137,7 @@ else()
     ${CMAKE_SYSTEM_PREFIX_PATH})
 
   # Temp fix for "/usr/bin/ld: cannot find -lavcodec"
-  link_directories(/home/deploy/build/lib)
+  # link_directories(/home/depßloy/build/lib)
 endif()
 
 # ----------------------------------------------------------------------------
@@ -206,7 +207,7 @@ if(MSVC)
 elseif(MSYS)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lws2_32 -liphlpapi") #${LibSourcey_INCLUDE_LIBRARIES}
 elseif(APPLE)
-    set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -lz -ldl") # -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES}
+  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -ldl") # -lm -lz -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES}
 elseif(UNIX)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -lz -ldl -lrt") # -lpulse-simple -lpulse -ljack -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES}
 endif()
@@ -279,9 +280,11 @@ endif()
 
 if(WITH_RTAUDIO)
   #include_dependency(RtAudio REQUIRED)
+  set(BUILD_TESTING OFF)
   list(APPEND LibSourcey_BUILD_DEPENDENCIES rtaudio)
-  add_subdirectory(deps/RtAudio)
+  add_subdirectory(deps/rtaudio)
   set(HAVE_RTAUDIO 1)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/rtaudio)
 endif()
 
 if(WITH_JSONCPP)
@@ -289,13 +292,14 @@ if(WITH_JSONCPP)
   list(APPEND LibSourcey_BUILD_DEPENDENCIES jsoncpp)
   add_subdirectory(deps/jsoncpp)
   set(HAVE_JSONCPP 1)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/jsoncpp)
 endif()
 
 if(WITH_ZLIB)
   #include_dependency(ZLIB REQUIRED)
   #include_dependency(Minizip REQUIRED)
-  list(APPEND LibSourcey_BUILD_DEPENDENCIES zlib)
-  list(APPEND LibSourcey_BUILD_DEPENDENCIES minizip)
+  #list(APPEND LibSourcey_BUILD_DEPENDENCIES zlib)
+  #list(APPEND LibSourcey_BUILD_DEPENDENCIES minizip)
   add_subdirectory(deps/zlib)
   add_subdirectory(deps/minizip)
   set(HAVE_ZLIB 1)

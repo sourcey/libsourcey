@@ -59,6 +59,7 @@ public:
     {
     }
 
+    char* cdata() const { return reinterpret_cast<char*>(_data); }
     void* data() const { return _data; }
     std::size_t size() const { return _size; }
 
@@ -136,6 +137,7 @@ public:
     {
     }
 
+    const char* cdata() const { return reinterpret_cast<const char*>(_data); }
     const void* data() const { return _data; }
     std::size_t size() const { return _size; }
 

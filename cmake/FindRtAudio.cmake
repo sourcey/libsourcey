@@ -85,12 +85,6 @@ if(RtAudio_LIBRARY AND RtAudio_INCLUDE_DIR)
 else()
   set(RtAudio_FOUND 0)
 endif()
-
-#message("RtAudio_LIBRARY=${RtAudio_LIBRARY}")
-#message("RtAudio_INCLUDE_DIR=${RtAudio_INCLUDE_DIR}")
-#message("LibSourcey_DEPENDENCIES_INSTALL_DIR=${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib")
-#get_filename_component(RtAudio_LIBRARY_DIR "${RtAudio_LIBRARY}" PATH)
-#get_filename_component(RtAudio_LIBRARY "${RtAudio_LIBRARY}" NAME)
   
       
 # ----------------------------------------------------------------------
