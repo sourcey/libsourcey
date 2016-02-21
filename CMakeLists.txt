@@ -98,47 +98,47 @@ set(LibSourcey_DIR ${CMAKE_SOURCE_DIR})
 set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
 set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
-set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_DIR}/deps")
+# set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_BUILD_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/libscy/deps")
 
-# Append some common search paths for find_library and find_path
-# to find libraries from these locations first
-if(WIN32)
-  # set(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
-  # set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a") # ".dll"
-  set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-    # ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/lib/
-    # ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib/
-    # ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/
-    ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
-    )
-else()
-  # set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
-  # set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
-  set(CMAKE_LIBRARY_PATH
-    #${LibSourcey_BUILD_DIR}/lib
-    #/usr/local/share/libscy/deps/lib
-    #/home/deploy/build/lib
-    # /usr/local/lib
-    # /usr/local/lib/x86_64-linux-gnu
-    # /usr/local/lib/i386-linux-gnu
-    # /usr/local/lib64
-    # /usr/lib
-    # /usr/lib/x86_64-linux-gnu
-    # /usr/lib/i386-linux-gnu
-    /usr/lib64
-    ${CMAKE_LIBRARY_PATH})
-
-  set(CMAKE_SYSTEM_PREFIX_PATH
-    #/usr/local/share/libscy/deps/include
-    #/home/deploy/build
-    #/home/deploy/build/include
-    ${CMAKE_SYSTEM_PREFIX_PATH})
-
-  # Temp fix for "/usr/bin/ld: cannot find -lavcodec"
-  # link_directories(/home/depßloy/build/lib)
-endif()
+# # Append some common search paths for find_library and find_path
+# # to find libraries from these locations first
+# if(WIN32)
+#   # # set(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
+#   # # set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a") # ".dll"
+#   # set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
+#   #   # ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/lib/
+#   #   # ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib/
+#   #   # ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/
+#   #   ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
+#   #   )
+# else()
+#   # # set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
+#   # # set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
+#   # set(CMAKE_LIBRARY_PATH
+#   #   #${LibSourcey_BUILD_DIR}/lib
+#   #   #/usr/local/share/libscy/deps/lib
+#   #   #/home/deploy/build/lib
+#   #   # /usr/local/lib
+#   #   # /usr/local/lib/x86_64-linux-gnu
+#   #   # /usr/local/lib/i386-linux-gnu
+#   #   # /usr/local/lib64
+#   #   # /usr/lib
+#   #   # /usr/lib/x86_64-linux-gnu
+#   #   # /usr/lib/i386-linux-gnu
+#   #   /usr/lib64
+#   #   ${CMAKE_LIBRARY_PATH})
+#   #
+#   # set(CMAKE_SYSTEM_PREFIX_PATH
+#   #   #/usr/local/share/libscy/deps/include
+#   #   #/home/deploy/build
+#   #   #/home/deploy/build/include
+#   #   ${CMAKE_SYSTEM_PREFIX_PATH})
+#   #
+#   # # Temp fix for "/usr/bin/ld: cannot find -lavcodec"
+#   # # link_directories(/home/deploy/build/lib)
+# endif()
 
 # ----------------------------------------------------------------------------
 # Solution folders:
@@ -254,11 +254,6 @@ list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_BUILD_DIR})
 #set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/libscy/deps")
 #link_directories("${LibSourcey_DEPENDENCIES_INSTALL_DIR}")
 
-# Include inttypes.h for windows
-if (MSVC)
-  list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/msvc)
-endif()
-
 #if(BUILD_DEPENDENCIES)
 #  add_subdirectory(${LibSourcey_DEPENDENCIES_SOURCE_DIR})
 #endif()
@@ -266,79 +261,71 @@ endif()
 # Local dependencies
 #if(WITH_LIBUV)
   #include_dependency(LibUV REQUIRED)
-  list(APPEND LibSourcey_BUILD_DEPENDENCIES libuv)
-  add_subdirectory(deps/libuv)
-  set(HAVE_LIBUV 1)
+  # list(APPEND LibSourcey_BUILD_DEPENDENCIES libuv)
+  # add_subdirectory(deps/libuv)
+  # set(HAVE_LIBUV 1)
 #endif()
 
-#if(WITH_HTTPPARSER)
-  #include_dependency(HttpParser REQUIRED)
-  list(APPEND LibSourcey_BUILD_DEPENDENCIES http_parser)
-  add_subdirectory(deps/http_parser)
-  set(HAVE_HTTPPARSER 1)
-#endif()
+# #if(WITH_HTTPPARSER)
+#   #include_dependency(HttpParser REQUIRED)
+#   list(APPEND LibSourcey_BUILD_DEPENDENCIES http_parser)
+#   add_subdirectory(deps/http_parser)
+#   set(HAVE_HTTPPARSER 1)
+# #endif()
 
-if(WITH_RTAUDIO)
-  #include_dependency(RtAudio REQUIRED)
-  set(BUILD_TESTING OFF)
-  list(APPEND LibSourcey_BUILD_DEPENDENCIES rtaudio)
-  add_subdirectory(deps/rtaudio)
-  set(HAVE_RTAUDIO 1)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/rtaudio)
-endif()
+# if(WITH_RTAUDIO)
+#   #include_dependency(RtAudio REQUIRED)
+#   set(BUILD_TESTING OFF)
+#   list(APPEND LibSourcey_BUILD_DEPENDENCIES rtaudio)
+#   add_subdirectory(deps/rtaudio)
+#   set(HAVE_RTAUDIO 1)
+#   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/rtaudio)
+# endif()
 
-if(WITH_JSONCPP)
-  #include_dependency(JsonCpp REQUIRED)
-  list(APPEND LibSourcey_BUILD_DEPENDENCIES jsoncpp)
-  add_subdirectory(deps/jsoncpp)
-  set(HAVE_JSONCPP 1)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/jsoncpp)
-endif()
-
-if(WITH_ZLIB)
-  #include_dependency(ZLIB REQUIRED)
-  #include_dependency(Minizip REQUIRED)
-  #list(APPEND LibSourcey_BUILD_DEPENDENCIES zlib)
-  #list(APPEND LibSourcey_BUILD_DEPENDENCIES minizip)
-  add_subdirectory(deps/zlib)
-  add_subdirectory(deps/minizip)
-  set(HAVE_ZLIB 1)
-endif()
+# if(WITH_JSONCPP)
+#   #include_dependency(JsonCpp REQUIRED)
+#   set(HAVE_JSONCPP 1)
+# endif()
+#
+# if(WITH_ZLIB)
+#   #include_dependency(ZLIB REQUIRED)
+#   #include_dependency(Minizip REQUIRED)
+#   #list(APPEND LibSourcey_BUILD_DEPENDENCIES zlib)
+#   #list(APPEND LibSourcey_BUILD_DEPENDENCIES minizip)
+#   set(HAVE_ZLIB 1)
+# endif()
 
 # External dependencies
+include_dependency(LibUV REQUIRED)
+
 if(WITH_OPENSSL)
   include_dependency(OpenSSL REQUIRED)
-  #set(HAVE_OPENSSL 1)
 endif()
 
 if(WITH_FFMPEG)
   include_dependency(FFmpeg REQUIRED)
-  #set(HAVE_FFMPEG 1)
 endif()
 
 if(WITH_OPENCV)
   include_dependency(OpenCV REQUIRED)
-  #set(HAVE_OPENCV 1)
 endif()
 
 if(WITH_WEBRTC)
   include_dependency(WebRTC REQUIRED)
-  #set(HAVE_WEBRTC 1)
 endif()
 
 if(WITH_WXWIDGETS)
   # TODO: specify library option
   include_dependency(wxWidgets REQUIRED core base adv)
-  #set(HAVE_WXWIDGETS 1)
 endif()
 
 # Remove any duplicates from our lists
-if(LibSourcey_LINK_LIBRARIES)
-  list(REMOVE_DUPLICATES LibSourcey_LINK_LIBRARIES)
-endif()
-if(LibSourcey_BUILD_DEPENDENCIES)
-  list(REMOVE_DUPLICATES LibSourcey_BUILD_DEPENDENCIES)
-endif()
+# if(LibSourcey_LINK_LIBRARIES)
+#   list(REMOVE_DUPLICATES LibSourcey_LINK_LIBRARIES)
+# endif()
+# if(LibSourcey_BUILD_DEPENDENCIES)
+#   list(REMOVE_DUPLICATES LibSourcey_BUILD_DEPENDENCIES)
+# endif()
 
 # ----------------------------------------------------------------------------
 # Include the LibSourcey source tree
@@ -458,13 +445,13 @@ status("    Use wxWidgets:"     HAVE_WXWIDGETS       THEN YES ELSE NO)
 status("    Use zlib:"          HAVE_ZLIB            THEN YES ELSE NO)
 
 # Includes
-status("")
-status("  Linker paths and libraries:")
-status("")
-status("    Include dirs:                ${LibSourcey_INCLUDE_DIRS}")
-status("    Include libs:                ${LibSourcey_INCLUDE_LIBRARIES}")
-status("    Library dirs:                ${LibSourcey_LIBRARY_DIRS}")
-status("    Standard libs:               ${CMAKE_CXX_STANDARD_LIBRARIES}")
+# status("")
+# status("  Linker paths and libraries:")
+# status("")
+# status("    Include dirs:                ${LibSourcey_INCLUDE_DIRS}")
+# status("    Include libs:                ${LibSourcey_INCLUDE_LIBRARIES}")
+# status("    Library dirs:                ${LibSourcey_LIBRARY_DIRS}")
+# status("    Standard libs:               ${CMAKE_CXX_STANDARD_LIBRARIES}")
 
 # Auxiliary
 status("")

@@ -1,3 +1,3 @@
-include_dependency(OpenSSL REQUIRED)
+# include_dependency(OpenSSL REQUIRED)
   
 define_libsourcey_test(nettests base net)

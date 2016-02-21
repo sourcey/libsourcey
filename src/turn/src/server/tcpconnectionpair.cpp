@@ -104,7 +104,7 @@ void TCPConnectionPair::setPeerSocket(const net::TCPSocket::Ptr& socket)
     
     // Receive and buffer early media from peer
     peer->Recv += sdelegate(this, &TCPConnectionPair::onPeerDataReceived);    
-    net::setServerSocketBufSize<uv_tcp_t>(*socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
+    net::setServerSocketRecvBufSize<uv_tcp_t>(*socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
 
 
@@ -117,7 +117,7 @@ void TCPConnectionPair::setClientSocket(const net::TCPSocket::Ptr& socket)
     //assert(socket./*base().*/refCount() == 2);
     client = socket;
     client->Close += sdelegate(this, &TCPConnectionPair::onConnectionClosed);
-    net::setServerSocketBufSize<uv_tcp_t>(*socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
+    net::setServerSocketRecvBufSize<uv_tcp_t>(*socket.get(), SERVER_SOCK_BUF_SIZE); // TODO: make option
 }
 
 

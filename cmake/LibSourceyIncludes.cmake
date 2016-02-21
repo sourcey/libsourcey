@@ -100,7 +100,7 @@ endmacro(sourcey_find_library)
 # Includes a 3rd party dependency into the LibSourcey solution.
 #
 macro(include_dependency name)
-  message(STATUS "Including dependency: ${name}")
+  # message(STATUS "Including dependency: ${name}")
 
   find_package(${name} ${ARGN})
 
@@ -113,22 +113,22 @@ macro(include_dependency name)
   if(${var_root_upper}_FOUND)
     set(var_root ${var_root_upper})
     set(lib_found 1)
-  else()
-    if(${var_root}_FOUND)
-      set(lib_found 1)
-  	endif()
+  # else()
+  #   if(${var_root}_FOUND)
+  #     set(lib_found 1)
+  # 	endif()
   endif()
 
   # Exit message on failure
   if (NOT ${var_root}_FOUND)
-    message("Failed to include dependency: ${name}. Please build LibSourcey dependencies first by enabling BUILD_DEPENDENCIES and disabling BUILD_MODULES and BUILD_APPLICATIONS")
+    message("Failed to include dependency: ${name}. Please build and install dependencies before using CMake.")
     return()
   endif()
 
   # Set a HAVE_XXX variable at parent scope for our Config.h
   set(HAVE_${var_root_upper} 1)
-  #set(HAVE_${var_root_upper} 1 PARENT_SCOPE)≈
-
+  #set(HAVE_${var_root_upper} 1 PARENT_SCOPE)
+  
   # Expose to LibSourcey
   if(${var_root}_INCLUDE_DIR)
     # message(STATUS "- Found ${name} Inc Dir: ${${var_root}_INCLUDE_DIR}")
@@ -151,7 +151,7 @@ macro(include_dependency name)
     list(APPEND LibSourcey_LIBRARY_DIRS ${${var_root}_LIBRARY_DIRS})
   endif()
   if(${var_root}_LIBRARY)
-    #message(STATUS "- Found dependency lib ${name}: ${${var_root}_LIBRARY}")
+    # message(STATUS "- Found dependency lib ${name}: ${${var_root}_LIBRARY}")
     list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${var_root}_LIBRARY})
     #list(APPEND LibSourcey_BUILD_DEPENDENCIES ${${var_root}_LIBRARY})
   endif()
@@ -170,6 +170,11 @@ macro(include_dependency name)
   list(REMOVE_DUPLICATES LibSourcey_LIBRARY_DIRS)
   list(REMOVE_DUPLICATES LibSourcey_INCLUDE_LIBRARIES)
   #list(REMOVE_DUPLICATES LibSourcey_BUILD_DEPENDENCIES)
+  
+  # set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} PARENT_SCOPE)
+  # set(LibSourcey_INCLUDE_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES} PARENT_SCOPE)
+  
+  # message(STATUS "- LibSourcey_INCLUDE_LIBRARIES: ${LibSourcey_INCLUDE_LIBRARIES}")
 endmacro()
 
 #

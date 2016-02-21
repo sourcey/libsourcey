@@ -260,7 +260,6 @@ bool DeviceManager::getAudioDevices(bool input, std::vector<Device>& devs)
     }
     return true;
 #elif defined(HAVE_RTAUDIO)
-TraceS(this) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Get audio devices: " << endl;
 
     // Since we are using RtAudio for audio capture it's best to
     // use RtAudio to enumerate devices to ensure indexes match.

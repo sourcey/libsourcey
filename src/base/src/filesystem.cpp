@@ -90,7 +90,7 @@ std::string extname(const std::string& path, bool includeDot)
     if (dirp != std::string::npos && dotp < dirp)
         return "";
 
-    return path.substr(dotp + includeDot ? 0 : 1);
+    return path.substr((dotp + includeDot) ? 0 : 1);
 }
 
 
@@ -168,8 +168,8 @@ namespace internal {
 
 
 void readdir(const std::string& path, std::vector<std::string>& res)
-{    
-    internal::FSapi(readdir, path.c_str(), 0)
+{   
+    internal::FSapi(scandir, path.c_str(), 0)
         
     char *namebuf = static_cast<char*>(wrap.req.ptr);
     int nnames = wrap.req.result;                       

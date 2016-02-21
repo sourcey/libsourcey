@@ -65,7 +65,7 @@ public:
         // This method must be called from the main thread
         // while the event loop is inactive.
 
-    unsigned long tid();
+    uv_thread_t tid();
         // Returns the TID of the garbage collector event loop thread.
         // The garbage collector must be running.
 
@@ -78,7 +78,7 @@ protected:
     std::vector<ScopedPointer*> _ready;
     uv::Handle _handle;
     bool _finalize;
-    unsigned long _tid;
+    uv_thread_t _tid;
 };
 
 

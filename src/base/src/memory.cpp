@@ -67,8 +67,8 @@ void GarbageCollector::finalize()
     
     // Ensure the loop is not running and that the 
     // calling thread is the main thread.
-    _handle.assertTID();
-    //assert(_handle.loop()->active_handles <= 1); 
+    _handle.assertThread();
+    // assert(_handle.loop()->active_handles <= 1); 
     assert(!_handle.closed());
     assert(!_finalize);
     _finalize = true;
@@ -145,7 +145,7 @@ void GarbageCollector::onTimer(uv_timer_t* handle)
 }
     
 
-unsigned long GarbageCollector::tid()
+uv_thread_t GarbageCollector::tid()
 {
     return _tid;
 }

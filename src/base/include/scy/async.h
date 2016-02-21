@@ -21,6 +21,7 @@
 #define SCY_Async_H
 
 
+#include "scy/uv/uvpp.h"
 #include <cstdint>
 #include <stdexcept>
 #include <atomic>
@@ -98,7 +99,7 @@ public:
     bool repeating() const;
         // Returns true if the Runner is operating in repeating mode.
     
-    unsigned long tid() const;
+    uv_thread_t tid() const;
         // Return the native thread ID.
 
     void setRepeating(bool flag);    
@@ -122,7 +123,7 @@ public:
 
         // Thread-safe POD members
         // May be accessed at any time
-        unsigned long tid;
+        uv_thread_t tid;
         bool started;
         bool running;
         bool repeating;
@@ -147,7 +148,7 @@ public:
             // The implementation is responsible for resetting
             // the context if it is to be reused.
         {
-            tid = 0;
+            tid = nullptr;
             arg = nullptr;
             target = nullptr;
             target1 = nullptr;

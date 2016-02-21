@@ -5,29 +5,65 @@
 
 LibSourcey is a collection of open source cross platform C++11 modules and classes that provide developers with a flexible high performance arsenal for the rapid development of real-time messaging and live media streaming applications.
 
-LibSourcey is built on top of Node.js's underlying libuv library and utilises event-based asynchronous IO in to maximise performance and minimise concurrency reliance for building mission critical server-side applications. Modern C++11 design principles have been adhered to throughout for clear and readable code, and straighforward integration into existing projects.
+
 
 For media streaming applications, LibSourcey provides a simple and flexible method of capturing live audio/video streams (_OpenCV/FFmpeg_), processing, filtering and encoding them using any video format (_FFmpeg_), and broadcasting the result over the Internet (_libuv_). This is made possible by implementing a thin layer over the top of some brilliant open source projects, such as FFmpeg, OpenCV and libuv. The only required third-party dependency is libuv, and that is included in the local source and compiled automatically. All others dependencies are optional.
 
-Unfortunately documentation still a little sparse at this point, but we hope to change that in the near future. Until then, _use the source, Luke!_, and we welcome all community contributions to LibSourcey in order to promote the development of better real-time native and web applications
+<!-- Unfortunately documentation still a little sparse at this point, but we hope to change that in the near future. Until then, _use the source, Luke!_, and we welcome all community contributions to LibSourcey in order to promote the development of better real-time native and web applications -->
 
-LibSourcey provides full support for the following protocols: **TCP**, **SSL**, **UDP**, **HTTP**, **JSON**, **XML**, **STUN**, **SDP**, **SocketIO**.  
-Partial support is provided for the following protocols: **WebSockets**, **TURN**, **ICE**, **RTP**, and **XMPP**.
+
+<!-- Re-usable utility classes and interfaces used throughout LibSourcey. -->
+
+## Features
+
+* **Event-based IO** — LibSourcey is built on top of Node.js's underlying library, `libuv`, and uses event-based asynchronous IO throughout in order to maximise performance and minimise concurrency reliance for building mission critical server-side applications. 
+
+* **Cross platform** — The codebase is cross platform and should compile on any system with a modern C++11 compiler. We have compiled and used LibSourcey on the following platforms; Unix, Windows, Mac, Android and iOS.
+
+* **Clean readable code** — Modern C++11 design principles have been adhered to throughout for clear and readable code, and straighforward integration into existing projects.
+
+* **Networking layer** — The networking layer provides support TCP, SSL and UDP socket implementation build on top of `libuv` for blazing fast performance.
+
+* **Web servers and clients** — LibSourcey includes a HTTP server and client stack that includes support for WebSockets, multipart streaming, and file transfers. The HTTP parser is based on the super-fast C code used by `nginx`.
+
+* **Elegant PacketStream API** — The PacketStream API make it possible for LibSourcey modules to pipe and process arbitrary packets to eachother through a delegate chain, and makes it possible to develop complex data processing applications quickly and easily.
+
+* **Media streaming and encoding** — The media library consists of thin wrappers around FFmpeg and OpenCV for media capture, encoding, recording, streaming, anaysis and more. The Media API makes full use of the PacketStream API so that encoders, processors and packetisers can be dynamically added and removed from a media source.  
+
+* **Realtime messaging** — LibSourcey aims to bridge the gap between desktop, mobile and web by providing performance oriented messaging solutions that work across all platforms.
+    * **Socket.IO** — Socket.IO C++ client that supports the latest protocol revision 4 (>- 1.0). Read more about [Socket.IO](http://socket.io).
+    * **Symple** — Sourcey's home grown realtime messaging protocol that works over the top of Socket.IO to provide rostering, presence and many other useful features. [More about Symple](<http://sourcey.com/symple).
+
+* **Full ICE stack** — The ICE module is a complete implementation of [RFC 5245 (Interactive Connectivity Establishment)](http://tools.ietf.org/html/rfc5245) based on LibSourcey architecture.
+    * **STUN** — [RFC 5389](http://tools.ietf.org/rfc/rfc5389) implementation that includes support for ICE and TURN and TURN TCP messages.
+    * **TURN** — Server and client stack that supports both [RFC 5766 (Traversal Using Relays around NAT)](http://tools.ietf.org/rfc/rfc5766) and [RFC 6062 (Traversal Using Relays around NAT Extensions for TCP Allocations)](http://tools.ietf.org/rfc/rfc6062) specifications.
+    * **SDP** — [RFC 4566](http://tools.ietf.org/rfc/rfc4566) implementation that includes extra support for ICE headers.
+
 
 ## Dependencies
 
-_Required_: libuv, CMake, C++11 compiler (GCC, Visual Studio, Xcode)  
-_Optional_: FFmpeg (>= 2.8.3), OpenCV (>= 3.0), WebRTC, OpenSSL (>= 1.0.1g), RtAudio, JsonCpp
+* **LibUV** (required, >= 1.8.0)
+  Networking, filesystem and cross platform utilities
+* **OpenSSL** (required, >= 1.0.1g)
+  SSL networking layer and encryption
+* **FFmpeg** (optional, >= 2.8.3)
+  Media encoding and streaming
+* **OpenCV** (optional, >= 3.0)
+  Video capture and computer vision algorithms
+* **RtAudio** (optional, >= 3.0)
+  Audio capture
+* **WebRTC** (optional)
+  Peer-to-peer video conferencing
 
 ## Installation
 
-LibSourcey is designed to compile on any system with C++11 compiler, so it should compile on all Linux, Windows and Apple platforms.
-
-_Note:_ To compile LibSourcey with video and streaming capabilities enabled you should install the latest version of both FFmpeg and OpenCV, otherwise dependent modules and features will be disabled by default.
+LibSourcey is cross platform and should compile on any system with a modern C++11 compiler.
+  
+_Note:_ To compile LibSourcey with video and streaming capabilities enabled you should install the latest version of both FFmpeg and OpenCV, otherwise modules and features dependant on those librarieswill be disabled by default.
 
 ### Installing on Linux
 
-This guide is written for Ubuntu 14.04, but installation is super simple and should be fairly portable across most flavours of Linux.
+This guide is written for Ubuntu 14.04, although installation should be fairly portable across most flavours of Linux.
 
 ##### Install Dependencies
 
@@ -36,13 +72,26 @@ sudo apt-get update
 sudo apt-get install -y build-essential pkg-config git cmake openssl libssl-dev jackd2 libjack-jackd2-dev
 ~~~
 
-##### Install FFmpeg (optional)
+**Install LibUV:**
+
+~~~ bash
+cd ~/tmp
+git clone https://github.com/libuv/libuv.git
+cd ~/libuv
+sh autogen.sh
+./configure
+make
+make check
+make install
+~~~
+
+**Install FFmpeg (optional):**
 
 FFmpeg is an optional but recommended dependency that's required to make use of LibSourcey's media encoding capabilities.
 
 Please follow the [official guide for installing FFmpeg](http://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu) which works out of the box with LibSourcey.
 
-##### Install OpenCV (optional)
+**Install OpenCV (optional):**
 
 OpenCV is an optional dependecy that's used by LibSourcey for it's video capture, video analysis and computer vision algorithms. Note that if you're compiling FFmpeg yourself (as above), then you should compile OpenCV with `WITH_FFMPEG=OFF` otherwise conflicting FFmpeg libraries may be installed on your system.
 
@@ -77,6 +126,67 @@ All done!
 
 [See here](#cmake-build-options) for a complete list of build options, and [here for examples](#examples).
 
+### Installing on Apple (OS X)
+
+This guide is for written for Mac users using [Homebrew](http://brew.sh).
+
+##### Install Dependencies
+
+~~~ bash
+# LibUV:
+brew install --HEAD libuv
+
+# OpenSSL:
+brew install openssl
+brew link --force openssl
+
+# CMake:
+brew install cmake
+~~~
+
+Please see the [Linux instructions](#installing-on-linux) for other optional dependencies such as FFmpeg and OpenCV.
+
+##### Install LibSourcey
+
+~~~ bash
+cd ~/tmp
+git clone https://github.com/sourcey/libsourcey.git
+cd libsourcey
+mkdir build
+cd build
+cmake .. -D CMAKE_BUILD_TYPE=RELEASE # extra cmake commands here...
+make
+sudo make install
+~~~
+
+<!-- Install Git
+ : Download the [latest Git installer package](http://code.google.com/p/git-osx-installer/downloads/list?can=3), double click on the installer to start the installation wizard. You’ll be prompted for your system password in order for the installer to complete.
+
+Install CMake
+ : CMake generates the LibSourcey project files so you can build on most platforms and compilers. [Download CMake](http://www.cmake.org/cmake/resources/software.html)
+
+Install OpenSSL
+ : If you don't already have OpenSSL development headers on your Mac, then please follow [this guide](http://www.opensource.apple.com/source/OpenSSL/OpenSSL-7.1/openssl/INSTALL?txt) to install them.
+
+Download LibSourcey
+ : Clone the repository: `git clone https://github.com/sourcey/libsourcey.git`.
+   If you haven't got Git for some reason you can download and extract the [package archive](https://github.com/sourcey/libsourcey) from Github. -->
+
+##### Generate Project Files
+
+See linux instructions.
+
+<!-- Open the CMake GUI and set the project directory to point to the LibSourcey root directory. Execute "Configure" to do the initial configuration, then adjust any options, then press "Configure" again and then press "Generate". -->
+
+[See here](#cmake-build-options) for a complete list of build options, and [here for examples](#examples).
+
+##### Compile with Xcode
+
+<!-- * Generate Xcode project using CMake, as described above.
+* Launch Xcode, locate and open libsourcey.xcodeproj. Select "Debug", build the BUILD_ALL target (Cmd-B), select "Release" and build it too. -->
+
+
+
 ### Installing on Windows
 
 ##### Install Dependencies
@@ -107,42 +217,6 @@ Open the CMake GUI and set the project directory to point to the LibSourcey root
 2. Launch Visual Studio, locate and open the "libsourcey.sln" solution file in your generated build folder (eg: `C:\LibSourcey\build\libsourcey.sln`). Select "Debug" configuration, build the solution (Ctrl-Shift-B), and/or select "Release" and build it.
 3. Add `{CMAKE_BINARY_DIR}\bin\Release`, `{CMAKE_BINARY_DIR}\bin\Debug` (containing "libscy*.dll" and "libscy*d.dll", respectively) to the system path (My Computer--[Right button click]->Properties->Advanced->Environment Variables->Path)
 
-### Installing on Apple (MacOS)
-
-This guide is for written for Mac users using [Homebrew](http://brew.sh)
-
-##### Install Dependencies
-
-
-OpenSSL
-
-brew install openssl
-brew link --force openssl
-
-Install Git  
- : Download the [latest Git installer package](http://code.google.com/p/git-osx-installer/downloads/list?can=3), double click on the installer to start the installation wizard. You’ll be prompted for your system password in order for the installer to complete.
-
-Install CMake  
- : CMake generates the LibSourcey project files so you can build on most platforms and compilers. [Download CMake](http://www.cmake.org/cmake/resources/software.html)
-
-Install OpenSSL  
- : If you don't already have OpenSSL development headers on your Mac, then please follow [this guide](http://www.opensource.apple.com/source/OpenSSL/OpenSSL-7.1/openssl/INSTALL?txt) to install them.  
-
-Download LibSourcey  
- : Clone the repository: `git clone https://github.com/sourcey/libsourcey.git`.  
-   If you haven't got Git for some reason you can download and extract the [package archive](https://github.com/sourcey/libsourcey) from Github.
-
-##### Generate Project Files
-
-Open the CMake GUI and set the project directory to point to the LibSourcey root directory. Execute "Configure" to do the initial configuration, then adjust any options, then press "Configure" again and then press "Generate".
-
-[See here](#cmake-build-options) for a complete list of build options, and [here for examples](#examples).
-
-##### Compile with Xcode
-
-* Generate Xcode project using CMake, as described above.
-* Launch Xcode, locate and open libsourcey.xcodeproj. Select "Debug", build the BUILD_ALL target (Cmd-B), select "Release" and build it too.
-
 ## CMake Build Options
 
 The main build options you will want to configure are as follows:
@@ -162,79 +236,6 @@ The only third-party libraries that may need configuring if you're using them ar
 
 For an exhaustive list of options check the `CMakeLists.txt` in the main directory.
 
-## Core Modules
-
-The following modules are included in the core LibSourcey repository:
-
-#### Base
-Re-usable utility classes and interfaces used throughout LibSourcey.
-
-#### Net
-TCP, SSL and UDL socket implementation build on top of libuv architecture.
-
-#### HTTP
-HTTP server and client stack including support for WebSockets, multipart streaming, and file transfers.
-The HTTP parser is based on the super-fast C code used by nginx.
-
-#### Media
-_dependencies:_ OpenCV, FFmpeg, RtAudio  
-Wrappers around FFmpeg and OpenCV for device capture, encoding, recording and streaming. The Media API makes extensive use of the PacketStream classes so that encoders, processors and packetisers can be dynamically added and removed from a media source.  
-
-#### UV
-The UV module is a set of C++ wrappers for Joyent's brilliant libuv library.
-
-#### JSON
-_dependencies:_ JsonCpp  
-Thin wrappers and helper functions for the JsonCpp library.
-
-#### STUN
-[RFC 5389](http://tools.ietf.org/rfc/rfc5389) implementation which includes support for ICE and TURN and TURN TCP messages.
-
-#### TURN
-Server and client stack which supports both [RFC 5766 (Traversal Using Relays around NAT)](http://tools.ietf.org/rfc/rfc5766) and [RFC 6062 (Traversal Using Relays around NAT Extensions for TCP Allocations)](http://tools.ietf.org/rfc/rfc6062) specifications.
-
-#### SocketIO
-SocketIO C++ client. Read more about [SocketIO](http://socket.io).
-
-#### Symple
-Client implementation of Sourcey's home grown real time messaging and presence protocol. [More about Symple](<http://sourcey.com/symple).
-
-#### SDP
-[RFC 4566](http://tools.ietf.org/rfc/rfc4566) implementation which includes extra support for ICE headers.
-
-## External Modules
-
-The following LibSourcey modules are available in external repositories:
-
-#### Pacm
-Pacm is an embeddable package manager which speaks JSON with the server. [More about Pacm](http://sourcey.com/pacm).
-
-#### Pluga
-Pluga is a simple C++ plugin system that's dead simple to use in your own projects. [More about Pluga](http://sourcey.com/pluga).
-
-#### Anionu SDK
-_dependencies:_ OpevCV  
-The Anionu SDK includes a C++ API, tools, and client implementation for building [Spot](http://anionu.com/spot) plugins and applications that integrate with the [Anionu cloud surveillance serivice](https://anionu.com).
-
-## Private Modules
-
-The following closed source modules are available. Please contact us if you are interested in using any of them in your projects.
-
-#### ICE
-The ICE module is a complete implementation of [RFC 5245 (Interactive Connectivity Establishment)](http://tools.ietf.org/html/rfc5245) based on LibSourcey architecture.
-ICE is a protocol for Network Address Translator (NAT) Traversal for Offer/Answer protocols.
-This module is currently not open source. Please contact us if you are interested in using it.
-
-#### RTP
-Our RTP module is quite basic and at this point it only supports RTP and RTCP packetisation. RTCP session management still needs to implemented. If anyone happens to make a project of this we would be very happy to improve our RTP module.
-
-#### XML
-_dependencies:_ pugixml  
-Thin wrappers around the pugixml XML library to better support LibSourcey architecture.
-
-#### XMPP
-_dependencies:_ pugixml, libstrophe  
-Our XMPP module includes a full client implementation with Jingle session support.
 
 ## Examples
 

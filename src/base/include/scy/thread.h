@@ -28,7 +28,7 @@
 
 
 namespace scy {
-    
+	
 
 class Thread: public async::Runner
     /// This class implements a platform-independent
@@ -52,13 +52,13 @@ public:
         // This method must be called from outside the current thread
         // context or deadlock will ensue.
      
-    unsigned long id() const;
-        // Returns the native thread ID.
+    uv_thread_t id() const;
+        // Returns the native thread handle.
     
-    static unsigned long currentID();
+    static uv_thread_t currentID();
          // Returns the native thread ID of the current thread.
 
-    static const unsigned long mainID;
+    static const uv_thread_t mainID;
 
 protected:
     Thread(const Thread&);

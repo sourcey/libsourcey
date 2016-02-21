@@ -92,10 +92,10 @@ void lock(int mode, int n, const char* /* file */, int /* line */)
 }
 
 
-unsigned long id()
-{
-    return Thread::currentID();
-}
+// unsigned long id()
+// {
+//     return Thread::currentID();
+// }
 
 
 struct CRYPTO_dynlock_value* dynlockCreate(const char* /* file */, int /* line */)
@@ -141,9 +141,9 @@ void initialize()
         int nMutexes = CRYPTO_num_locks();
         _mutexes = new Mutex[nMutexes];
         CRYPTO_set_locking_callback(&internal::lock);
-#ifndef WIN32 // SF# 1828231: random unhandled exceptions when linking with ssl
-        CRYPTO_set_id_callback(&internal::id);
-#endif
+// #ifndef WIN32 // SF# 1828231: random unhandled exceptions when linking with ssl
+//         CRYPTO_set_id_callback(&internal::id);
+// #endif
         CRYPTO_set_dynlock_create_callback(&internal::dynlockCreate);
         CRYPTO_set_dynlock_lock_callback(&internal::dynlock);
         CRYPTO_set_dynlock_destroy_callback(&internal::dynlockDestroy);

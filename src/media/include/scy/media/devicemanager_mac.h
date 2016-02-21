@@ -27,10 +27,8 @@
 
 #include "scy/media/devicemanager.h"
 
-/*
-#include "talk/base/sigslot.h"
-#include "talk/base/stringencode.h"
-*/
+// #include "talk/base/sigslot.h"
+// #include "talk/base/stringencode.h"
 
 
 namespace scy {
@@ -47,12 +45,13 @@ public:
     virtual bool getVideoCaptureDevices(std::vector<Device>& devs);
 
 private:
-    virtual bool getAudioDevices(bool input, std::vector<Device>& devs);
+    // virtual bool getAudioDevices(bool input, std::vector<Device>& devs);
     bool FilterDevice(const Device& d);
 };
 
 
 } } // namespace scy::av
+
 
 #endif  // SCY_MEDIA_DeviceManager_MAC_H
 

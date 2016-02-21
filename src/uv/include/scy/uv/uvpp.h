@@ -72,14 +72,15 @@ inline void throwError(const std::string& message, int errorno = UV_UNKNOWN)
 
 
 typedef uv_loop_t Loop;
-static unsigned long defaultTID = 0;
+
+static uv_thread_t mainThread = 0;
 
 inline Loop* defaultLoop()
 {
     // Capture the main TID the first time
     // uv_default_loop is accessed.
-    if (defaultTID == 0)
-        defaultTID = uv_thread_self();
+    if (mainThread == 0)
+        mainThread = uv_thread_self();
     return uv_default_loop();
 }
 
@@ -106,7 +107,7 @@ public:
         
     virtual ~Handle()
     {
-        assertTID();
+        assertThread();
         if (!_closed) 
             close();
         assert(_ptr == nullptr);
@@ -115,14 +116,14 @@ public:
     virtual void setLoop(uv_loop_t* loop)
         // The event loop may be set before the handle is initialized. 
     {
-        assertTID();
+        assertThread();
         assert(_ptr == nullptr && "set loop before handle");
         _loop = loop;
     }
 
     virtual uv_loop_t* loop() const
     {
-        assertTID();
+        assertThread();
         return _loop;
     }
     
@@ -130,14 +131,14 @@ public:
     T* ptr() const
         // Returns a cast pointer to the managed libuv handle.
     {         
-        // assertTID(); // conflict with uv_async_send in SyncContext
+        assertThread(); // conflict with uv_async_send in SyncContext
         return reinterpret_cast<T*>(_ptr);
     }
     
     virtual uv_handle_t* ptr() const
         // Returns a pointer to the managed libuv handle.
     { 
-        assertTID();
+        assertThread();
         return _ptr; 
     }
     
@@ -175,9 +176,9 @@ public:
         return true;
     }
     
-    unsigned int tid() const
+    uv_thread_t tid() const
         // Returns the parent thread ID.
-    { 
+    {
         return _tid;
     }
         
@@ -219,7 +220,7 @@ public:
         // Sets the error content and triggers callbacks.
     { 
         //if (_error == err) return;
-        assertTID();
+        assertThread();
         _error = err; 
         onError(err);
     }
@@ -227,7 +228,7 @@ public:
     virtual void close()
         // Closes and destroys the associated libuv handle.
     {
-        assertTID();
+        assertThread();
         if (!_closed) {
             if (_ptr && !uv_is_closing(_ptr)) {
                 uv_close(_ptr, [](uv_handle_t* handle) {
@@ -245,15 +246,18 @@ public:
         }
     }
         
-    void assertTID() const
+    void assertThread() const
         // Make sure we are calling from the event loop thread.
     {
 #ifdef _DEBUG
-        //assert(_tid == defaultTID
+		uv_thread_t current = uv_thread_self();
+		assert(uv_thread_equal(&_tid, &current));
+		
+        //assert(_tid == mainThread
         //    || _tid == uv_thread_self()
-        //    // Note: The static defaultTID may be 0 when the call
+        //    // Note: The static mainThread may be 0 when the call
         //    // originates from a lambda function.
-        //    || int(defaultTID) <= 0);
+        //    || int(mainThread) <= 0);
 #endif
     }
 
@@ -276,7 +280,7 @@ protected:
     uv_loop_t* _loop;
     uv_handle_t* _ptr;
     scy::Error _error;
-    unsigned long _tid;
+    uv_thread_t _tid;
     bool _closed;
 };
 

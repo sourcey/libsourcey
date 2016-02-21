@@ -51,7 +51,7 @@ macro(define_sourcey_dependency name)
   set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} ${name} PARENT_SCOPE)
   set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${name} PARENT_SCOPE)
 
-  #message(STATUS "- Linking dependency ${name} with libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
+  # message(STATUS "- Linking dependency ${name} with libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
   #message("${name}: Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
   #message("${name}: Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
 

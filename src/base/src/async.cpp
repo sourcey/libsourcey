@@ -158,7 +158,7 @@ bool Runner::cancelled() const
 }
 
 
-unsigned long Runner::tid() const
+uv_thread_t Runner::tid() const
 {
     return pContext->tid;
 }

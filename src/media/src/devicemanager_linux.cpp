@@ -31,24 +31,22 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-/*
-#include <libudev.h>
-#include "talk/base/linux.h"
-#include "talk/base/logging.h"
-#include "talk/base/fileutils.h"
-#include "talk/base/pathutils.h"
-#include "talk/base/physicalsocketserver.h"
-#include "talk/base/stream.h"
-#include "talk/base/stringutils.h"
-#include "talk/base/thread.h"
-#include "talk/session/phone/libudevsymboltable.h"
-#include "talk/session/phone/mediacommon.h"
-#include "talk/session/phone/v4llookup.h"
-#include "talk/sound/platformsoundsystem.h"
-#include "talk/sound/platformsoundsystemfactory.h"
-#include "talk/sound/sounddevicelocator.h"
-#include "talk/sound/soundsysteminterface.h"
-*/
+// #include <libudev.h>
+// #include "talk/base/linux.h"
+// #include "talk/base/logging.h"
+// #include "talk/base/fileutils.h"
+// #include "talk/base/pathutils.h"
+// #include "talk/base/physicalsocketserver.h"
+// #include "talk/base/stream.h"
+// #include "talk/base/stringutils.h"
+// #include "talk/base/thread.h"
+// #include "talk/session/phone/libudevsymboltable.h"
+// #include "talk/session/phone/mediacommon.h"
+// #include "talk/session/phone/v4llookup.h"
+// #include "talk/sound/platformsoundsystem.h"
+// #include "talk/sound/platformsoundsystemfactory.h"
+// #include "talk/sound/sounddevicelocator.h"
+// #include "talk/sound/soundsysteminterface.h"
 using std::endl;
 
 
@@ -435,7 +433,6 @@ bool LinuxDeviceManager::getVideoCaptureDevices(std::vector<Device>& devices)
 {
     devices.clear();
     ScanV4L2Devices(devices);
-    //assert(0 && "implement me");
     return filterDevices(devices, kFilteredVideoDevicesName);
 }
 

@@ -23,12 +23,11 @@
 #include <CoreAudio/CoreAudio.h>
 #include <QuickTime/QuickTime.h>
 
-/*
-#include "talk/base/logging.h"
-#include "talk/base/stringutils.h"
-#include "talk/base/thread.h"
-#include "talk/base/mediacommon.h"
-*/
+// #include "talk/base/logging.h"
+// #include "talk/base/stringutils.h"
+// #include "talk/base/thread.h"
+// #include "talk/base/mediacommon.h"
+using std::endl;
 
 class DeviceWatcherImpl;
 
@@ -71,9 +70,9 @@ static const std::uint32_t kAudioDeviceNameLength = 64;
 // TODO: have a shared header for these function defines.
 extern DeviceWatcherImpl* CreateDeviceWatcherCallback(IDeviceManager* dm);
 extern void ReleaseDeviceWatcherCallback(DeviceWatcherImpl* impl);
-extern bool GetQTKitVideoDevices(std::vector<Device>& out);
-static bool getAudioDeviceIDs(bool inputs, std::vector<AudioDeviceID>* out);
-static bool getAudioDeviceName(AudioDeviceID id, bool input, std::string* out);
+extern bool GetAVFoundationVideoDevices(std::vector<Device>* out);
+// static bool getAudioDeviceIDs(bool inputs, std::vector<AudioDeviceID>* out);
+// static bool getAudioDeviceName(AudioDeviceID id, bool input, std::string* out);
 
 
 MacDeviceManager::MacDeviceManager() 
@@ -90,94 +89,97 @@ MacDeviceManager::~MacDeviceManager()
 bool MacDeviceManager::getVideoCaptureDevices(std::vector<Device>& devices) 
 {
   devices.clear();
-  if (!GetQTKitVideoDevices(devices)) {
+  if (!GetAVFoundationVideoDevices(&devices)) {
     return false;
   }
   return filterDevices(devices, kFilteredVideoDevicesName);
 }
 
 
-bool MacDeviceManager::getAudioDevices(bool input,
-                                       std::vector<Device>& devs) {
-  devs.clear();
-  std::vector<AudioDeviceID> dev_ids;
-  bool ret = getAudioDeviceIDs(input, &dev_ids);
-  if (!ret) {
-    return false;
-  }
-  for (std::size_t i = 0; i < dev_ids.size(); ++i) {
-    std::string name;
-    if (getAudioDeviceName(dev_ids[i], input, &name)) {
-      devs.push_back(Device(name, dev_ids[i]));
-    }
-  }
-  return filterDevices(devs, kFilteredAudioDevicesName);
-}
-
-
-static bool getAudioDeviceIDs(bool input,
-                              std::vector<AudioDeviceID>* out_dev_ids) {
-  std::uint32_t propsize;
-  OSErr err = AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDevices,
-                                           &propsize, NULL);
-  if (0 != err) {
-    Log("error") << "Couldn't get information about property, "
-                  << "so no device list acquired." << endl;
-    return false;
-  }
-
-  std::size_t num_devices = propsize / sizeof(AudioDeviceID);
-  talk_base::scoped_array<AudioDeviceID> device_ids(
-      new AudioDeviceID[num_devices]);
-
-  err = AudioHardwareGetProperty(kAudioHardwarePropertyDevices,
-                                 &propsize, device_ids.get());
-  if (0 != err) {
-    Log("error") << "Failed to get device ids, "
-                  << "so no device listing acquired." << endl;
-    return false;
-  }
-
-  for (std::size_t i = 0; i < num_devices; ++i) {
-    AudioDeviceID an_id = device_ids[i];
-    // find out the number of channels for this direction
-    // (input/output) on this device -
-    // we'll ignore anything with no channels.
-    err = AudioDeviceGetPropertyInfo(an_id, 0, input,
-                                     kAudioDevicePropertyStreams,
-                                     &propsize, NULL);
-    if (0 == err) {
-      unsigned num_channels = propsize / sizeof(AudioStreamID);
-      if (0 < num_channels) {
-        out_dev_ids->push_back(an_id);
-      }
-    } else {
-      Log("error") << "No property info for stream property for device id "
-                    << an_id << "(input == " << input
-                    << "), so not including it in the list." << endl;
-    }
-  }
-
-  return true;
-}
-
-
-static bool getAudioDeviceName(AudioDeviceID id,
-                               bool input,
-                               std::string* out_name) {
-  std::uint32_t nameLength = kAudioDeviceNameLength;
-  char name[kAudioDeviceNameLength + 1];
-  OSErr err = AudioDeviceGetProperty(id, 0, input,
-                                     kAudioDevicePropertyDeviceName,
-                                     &nameLength, name);
-  if (0 != err) {
-    Log("error") << "No name acquired for device id " << id << endl;
-    return false;
-  }
-
-  *out_name = name;
-  return true;
-}
+// bool MacDeviceManager::getAudioDevices(bool input,
+//                                        std::vector<Device>& devs) {
+//   devs.clear();
+//   std::vector<AudioDeviceID> dev_ids;
+//   bool ret = getAudioDeviceIDs(input, &dev_ids);
+//   if (!ret) {
+//     return false;
+//   }
+//   for (std::size_t i = 0; i < dev_ids.size(); ++i) {
+//     std::string name;
+//     if (getAudioDeviceName(dev_ids[i], input, &name)) {
+//       devs.push_back(Device(name, dev_ids[i]));
+//     }
+//   }
+//   return filterDevices(devs, kFilteredAudioDevicesName);
+// }
+//
+//
+// static bool getAudioDeviceIDs(bool input,
+//                               std::vector<AudioDeviceID>* out_dev_ids) {
+//   std::uint32_t propsize;
+//   OSErr err = AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDevices,
+//                                            &propsize, NULL);
+//   if (0 != err) {
+//     ErrorL << "Couldn't get information about property, "
+//                   << "so no device list acquired." << endl;
+//     return false;
+//   }
+//
+//   std::size_t num_devices = propsize / sizeof(AudioDeviceID);
+//   auto device_ids = new AudioDeviceID[num_devices];
+//   // talk_base::scoped_array<AudioDeviceID> device_ids(
+//   //     new AudioDeviceID[num_devices]);
+//
+//   err = AudioHardwareGetProperty(kAudioHardwarePropertyDevices,
+//                                  &propsize, device_ids); //.get()
+//   if (0 != err) {
+//     ErrorL << "Failed to get device ids, "
+//                   << "so no device listing acquired." << endl;
+// 	delete device_ids;
+//     return false;
+//   }
+//
+//   for (std::size_t i = 0; i < num_devices; ++i) {
+//     AudioDeviceID an_id = device_ids[i];
+//     // find out the number of channels for this direction
+//     // (input/output) on this device -
+//     // we'll ignore anything with no channels.
+//     err = AudioDeviceGetPropertyInfo(an_id, 0, input,
+//                                      kAudioDevicePropertyStreams,
+//                                      &propsize, NULL);
+//     if (0 == err) {
+//       unsigned num_channels = propsize / sizeof(AudioStreamID);
+//       if (0 < num_channels) {
+//         out_dev_ids->push_back(an_id);
+//       }
+//     } else {
+//       ErrorL << "No property info for stream property for device id "
+//                     << an_id << "(input == " << input
+//                     << "), so not including it in the list." << endl;
+//     }
+//   }
+//
+//   delete device_ids;
+//   return true;
+// }
+//
+//
+// static bool getAudioDeviceName(AudioDeviceID id,
+//                                bool input,
+//                                std::string* out_name) {
+//   std::uint32_t nameLength = kAudioDeviceNameLength;
+//   char name[kAudioDeviceNameLength + 1];
+//   OSErr err = AudioDeviceGetProperty(id, 0, input,
+//                                      kAudioDevicePropertyDeviceName,
+//                                      &nameLength, name);
+//   if (0 != err) {
+//     ErrorL << "No name acquired for device id " << id << endl;
+//     return false;
+//   }
+//
+//   *out_name = name;
+//   return true;
+// }
 
 
 MacDeviceWatcher::MacDeviceWatcher(IDeviceManager* manager) : 

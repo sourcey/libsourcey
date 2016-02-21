@@ -12,11 +12,11 @@ macro(define_sourcey_module name)
 
   # Include library and header directories
   set_default_project_directories(${ARGN})
-
+  
   # Add library source files
   file(GLOB_RECURSE lib_srcs "src/*.cpp")
   file(GLOB_RECURSE lib_hdrs "include/*.h")
-
+  
   # Exclude platform dependent implementations
   set(lib_srcs_exclude "")
   set(lib_hdrs_exclude "")
@@ -32,16 +32,16 @@ macro(define_sourcey_module name)
     set(lib_srcs_exclude ${lib_srcs_exclude} " *_mac.cpp")
     set(lib_hdrs_exclude ${lib_hdrs_exclude} " *_mac.h")
   endif()
-  JOIN("${lib_srcs_exclude}" "|" lib_srcs_exclude)
-  JOIN("${lib_hdrs_exclude}" "|" lib_hdrs_exclude)
-
-  #STRING(CHOP ${lib_srcs_exclude} 1 lib_srcs_exclude)
-  #STRING(CHOP ${lib_hdrs_exclude} 1 lib_hdrs_exclude)
-
-  #string(REGEX REPLACE " *_WIN32.cpp| *_LINUX.cpp| *_UNIX.cpp| *_MAC.cpp| *_NULL.cpp" "" lib_srcs "${lib_srcs}")
-  #string(REGEX REPLACE " *_WIN32.h| *_LINUX.h| *_UNIX.h| *_MAC.h| *_FAKE.h" "" lib_hdrs "${lib_hdrs}")
-  #message(${lib_srcs_exclude} )
-  #message(${lib_hdrs_exclude} )
+  join("${lib_srcs_exclude}" "|" lib_srcs_exclude)
+  join("${lib_hdrs_exclude}" "|" lib_hdrs_exclude)
+  
+  
+  # Include Objective-C files on Apple
+  if(APPLE)
+	file(GLOB_RECURSE lib_objectivec_srcs "*.mm")
+	set(lib_srcs ${lib_objectivec_srcs} ${lib_srcs})
+  endif()
+  
   string(REGEX REPLACE ${lib_srcs_exclude} "" lib_srcs "${lib_srcs}")
   string(REGEX REPLACE ${lib_hdrs_exclude} "" lib_hdrs "${lib_hdrs}")
 
@@ -53,10 +53,11 @@ macro(define_sourcey_module name)
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
 
-  #message(STATUS "Defining module ${name}:")
-  #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
-  #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
-  #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
+  message(STATUS "Defining module ${name}")
+  message(STATUS "    Dependencies: ${LibSourcey_BUILD_DEPENDENCIES}")
+  message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
+  # message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
+  message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
 
   if(NOT ANDROID)
     # Android SDK build scripts can include only .so files into final .apk
@@ -135,7 +136,7 @@ macro(define_sourcey_module_sample name)
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
 
-  #message(STATUS "Defining module sample ${name}:")
+  message(STATUS "Defining module sample ${name}")
   #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
   #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
   #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
@@ -176,7 +177,7 @@ macro(define_libsourcey_test name)
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
 
-  #message(STATUS "Defining module test ${name}:")
+  message(STATUS "Defining module test ${name}")
   #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
   #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
   #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
@@ -219,7 +220,7 @@ macro(define_libsourcey_library name)
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
 
-  #message(STATUS "Defining module library ${name}:")
+  message(STATUS "Defining module library ${name}")
   #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
   #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
   #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")

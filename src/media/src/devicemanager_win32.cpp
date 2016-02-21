@@ -22,8 +22,6 @@
 
 //#ifdef HAVE_RTAUDIO
 
-//#include "RtAudio.h"
-
 #include <windows.h>
 #include <dshow.h>
 #include <dbt.h> // DBT_* & DEV_*

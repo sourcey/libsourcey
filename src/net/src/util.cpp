@@ -20,9 +20,6 @@
 #include "scy/net/util.h"
 
 
-using namespace std;
-
-
 namespace scy {
 namespace util {
 

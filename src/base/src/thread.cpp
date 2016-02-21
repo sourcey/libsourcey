@@ -30,7 +30,7 @@ using std::endl;
 namespace scy {
     
     
-const unsigned long Thread::mainID = uv_thread_self();
+const uv_thread_t Thread::mainID = uv_thread_self();
 
 
 Thread::Thread()
@@ -110,7 +110,7 @@ bool Thread::waitForExit(int timeout)
 }
 
 
-unsigned long Thread::currentID()
+uv_thread_t Thread::currentID()
 {
     return uv_thread_self();
 }

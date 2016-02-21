@@ -5,5 +5,5 @@ if(BUILD_MODULES AND BUILD_MODULE_util)
   #include_dependency(JsonCpp)
   #include_dependency(LibUV REQUIRED)
 
-  define_sourcey_module(util base uv http json)
+  define_sourcey_module(util base uv json)
 endif()

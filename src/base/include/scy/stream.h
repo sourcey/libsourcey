@@ -60,7 +60,7 @@ class Stream: public uv::Handle
         // Sends a shutdown packet to the connected peer.
         // Returns true if the shutdown packet was sent.
     {
-        assertTID();
+        assertThread();
 
         TraceL << "Send shutdown" << std::endl;
         if (!active()) {
@@ -85,7 +85,7 @@ class Stream: public uv::Handle
         // Returns false if the underlying socket is closed.
         // This method does not throw an exception.
     {        
-        assertTID();
+        assertThread();
 
         //if (closed())
         //    throw std::runtime_error("IO error: Cannot write to closed stream");
@@ -120,7 +120,7 @@ class Stream: public uv::Handle
     Buffer& buffer()
         // Returns the read buffer.
     { 
-        assertTID();
+        assertThread();
         return _buffer;
     }
 
