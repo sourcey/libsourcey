@@ -3,7 +3,7 @@
 **Homepage**: [http://sourcey.com/libsourcey](http://sourcey.com/libsourcey)  
 **Licence**: LGPL
 
-LibSourcey is a collection of open source cross platform C++11 modules and classes that provide developers with a flexible high performance arsenal for the rapid development of realtime messaging and live media streaming applications.
+LibSourcey is a collection of open source cross platform C++11 modules and classes that provide developers with a flexible high performance arsenal for the rapid development of realtime messaging and live media streaming applications. Think of it as the power of `libuv` combined with the ease and readability of the `stl` (C++ Standard Library).
 
 <!-- For media streaming applications, LibSourcey provides a simple and flexible method of capturing live audio/video streams (_OpenCV/FFmpeg_), processing, filtering and encoding them using any video format (_FFmpeg_), and broadcasting the result over the Internet (_libuv_). This is made possible by implementing a thin layer over the top of some brilliant open source projects, such as FFmpeg, OpenCV and libuv. The only required third-party dependency is libuv, and that is included in the local source and compiled automatically. All others dependencies are optional. -->
 
@@ -11,23 +11,23 @@ LibSourcey is a collection of open source cross platform C++11 modules and class
 
 ## Features
 
-* **Event-based IO** — LibSourcey is built on top of Node.js's underlying library, `libuv`, and uses event-based asynchronous IO throughout in order to maximise performance and minimise concurrency reliance for building mission critical server-side applications. 
+* **Event-based IO** — Core modules are built on top of `libuv` (the underlying C library that powers Node.js) and use event-based asynchronous IO throughout to maximise performance and minimise concurrency reliance for building mission critical native and server-side apps.
 
-* **Cross platform** — The codebase is cross platform and should compile on any system with a modern C++11 compiler. We have compiled and used LibSourcey on the following platforms; Unix, Windows, Mac, Android and iOS.
+* **Cross platform** — The codebase is cross platform and should compile on any system with access to a modern C++11 compiler. We have compiled and used LibSourcey on the following platforms; Linux(gcc), Mac(Xcode, gcc), Windows(msys, vs), Android and iOS.
 
-* **Clean readable code** — Modern C++11 design principles have been adhered to throughout for clear and readable code, and straighforward integration into existing projects.
+* **Clean readable code** — Modern C++11 design principles have been used for clear, readable code, and simple integration into your existing projects.
 
-* **Networking layer** — The networking layer provides support TCP, SSL and UDP socket implementation build on top of `libuv` for blazing fast performance.
+* **Networking layer** — The networking layer provides TCP, SSL and UDP socket implementations that combine the use of `libuv` for blazing fast networking, and `openssl` for security and encryption.
 
-* **Web servers and clients** — LibSourcey includes a HTTP server and client stack that includes support for WebSockets, multipart streaming, and file transfers. The HTTP parser is based on the super-fast C code used by `nginx`.
+* **Web servers and clients** — A HTTP stack is included that supports HTTP servers, clients, WebSockets, media streaming, file transfers, and authentication. The HTTP parser is based on the super-fast C code used by `nginx`.
 
-* **Elegant PacketStream API** — The PacketStream API make it possible for LibSourcey modules to pipe and process arbitrary packets to eachother through a delegate chain, and makes it possible to develop complex data processing applications quickly and easily. Check out this writeup on how to use the PacketSteram API for encoding H.264 on the fly: http://sourcey.com/libsourcey-packetstream-api/
+* **Elegant PacketStream API** — The PacketStream API allows LibSourcey modules to pipe and process arbitrary data packets through a dynamic delegate chain. This dynamic method of layering packet processors makes it possible to develop complex data processing applications quickly and easily. Check out this writeup on how the PacketSteram API can be used for encoding H.264 on the fly: http://sourcey.com/libsourcey-packetstream-api/
 
-* **Media streaming and encoding** — The media library consists of thin wrappers around FFmpeg and OpenCV for media capture, encoding, recording, streaming, anaysis and more. The Media API makes full use of the PacketStream API so that encoders, processors and packetisers can be dynamically added and removed from a media source.  
+* **Media streaming and encoding** — The media library consists of thin wrappers around FFmpeg and OpenCV for media capture, encoding, recording, streaming, anaysis and more. The Media API makes full use of the PacketStream API so that encoders, processors and broadcasters can be dynamically added and removed from any media source - a great base for building a [media server](https://github.com/sourcey/libsourcey/tree/master/src/symple/samples/mediaserver).  
 
 * **Realtime messaging** — LibSourcey aims to bridge the gap between desktop, mobile and web by providing performance oriented messaging solutions that work across all platforms.
     * **Socket.IO** — Socket.IO C++ client that supports the latest protocol revision 4 (>- 1.0). Read more about [Socket.IO](http://socket.io).
-    * **Symple** — Sourcey's home grown realtime messaging protocol that works over the top of Socket.IO to provide rostering, presence and many other useful features. [More about Symple](<http://sourcey.com/symple).
+    * **Symple** — Sourcey's home grown realtime messaging protocol that works over the top of Socket.IO to provide rostering, presence and many other features necessary for building online games and chat applications. [More about Symple](<http://sourcey.com/symple).
 
 * **Full ICE stack** — The ICE module is a complete implementation of [RFC 5245 (Interactive Connectivity Establishment)](http://tools.ietf.org/html/rfc5245) based on LibSourcey architecture.
     * **STUN** — [RFC 5389](http://tools.ietf.org/rfc/rfc5389) implementation that includes support for ICE and TURN and TURN TCP messages.
@@ -51,9 +51,9 @@ LibSourcey is a collection of open source cross platform C++11 modules and class
 
 ## Installation
 
-LibSourcey is cross platform and should compile on any system with a modern C++11 compiler.
-  
-_Note:_ To compile LibSourcey with video and streaming capabilities enabled you should install the latest version of both FFmpeg and OpenCV, otherwise modules and features dependant on those librarieswill be disabled by default.
+LibSourcey uses `CMake` to build the project files for the compiler on your platform, and should build on any system with a modern C++11 compiler.
+
+_Note:_ To compile LibSourcey with video and streaming capabilities enabled you should install the latest version of both `FFmpeg` and `OpenCV`, otherwise modules and features dependent on those libraries will be disabled by default.
 
 ### Installing on Linux
 
@@ -71,12 +71,12 @@ sudo apt-get install -y build-essential pkg-config git cmake openssl libssl-dev 
 ~~~ bash
 cd ~/tmp
 git clone https://github.com/libuv/libuv.git
-cd ~/libuv
+cd libuv
 sh autogen.sh
 ./configure
 make
-make check
-make install
+# make check
+sudo make install
 ~~~
 
 **Install FFmpeg (optional):**
@@ -185,7 +185,7 @@ See linux instructions.
 
 Install Git  
  : Install [TortoiseGit](http://code.google.com/p/tortoisegit/), a convenient git front-end that integrates right into Windows Explorer.
-   MinGW users can use [msysgit]( from <a class="external" href="http://code.google.com/p/msysgit/downloads/list"></a>).  
+   MinGW users can use [msysgit](http://code.google.com/p/msysgit/downloads/list).  
 
 Install CMake  
  : CMake generates the LibSourcey project files so you can build on most platforms and compilers. [Download CMake](http://www.cmake.org/cmake/resources/software.html)  
@@ -227,7 +227,6 @@ If you are using third-party libraries is custom locations then make sure you up
 The only third-party libraries that may need configuring if you're using them are FFmpeg, OpenCV and WebRTC.
 
 For an exhaustive list of options check the `CMakeLists.txt` in the main directory.
-
 
 ## Examples
 

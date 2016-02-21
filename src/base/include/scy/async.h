@@ -32,9 +32,9 @@
 namespace scy {
 namespace async {
 
-        
+
 class Runnable
-    // A generic interface for classes that 
+    // A generic interface for classes that
     // can be run and cancelled.
 {
     std::atomic<bool> exit;
@@ -42,17 +42,17 @@ class Runnable
 public:
     Runnable() : exit(false) {}
     virtual ~Runnable() {}
-    
+
     virtual void run() = 0;
         // The run method will be called by the async context.
-    
+
     virtual void cancel(bool flag = true)
         // Cancel the current task.
         // The run() method should return ASAP.
     {
         exit.store(flag, std::memory_order_release);
     }
-    
+
     virtual bool cancelled() const
         // True when the task has been cancelled.
     {
@@ -67,53 +67,53 @@ public:
 // Runner Interface
 //
 
-    
+
 class Runner
-    /// Runner is a virtual interface for implementing 
+    /// Runner is a virtual interface for implementing
     /// asynchronous objects such as threads and futures.
 {
-public:    
+public:
     Runner();
     virtual ~Runner();
-    
+
     virtual void start(async::Runnable& target);
-    virtual void start(std::function<void()> target);    
+    virtual void start(std::function<void()> target);
     virtual void start(std::function<void(void*)> target, void* arg);
         // Starts the thread with the given target.
         // TODO: veradic templates when win support is better (vs2013)
-    
+
     bool started() const;
         // Returns true if the async context has been started.
-    
+
     bool running() const;
         // Returns true if the async context is currently running.
-    
+
     void cancel();
         // Cancels the async context.
-    
+
     bool cancelled() const;
         // True when the task has been cancelled.
         // It is up to the implementation to return at the
         // earliest possible time.
-    
+
     bool repeating() const;
         // Returns true if the Runner is operating in repeating mode.
-    
+
     uv_thread_t tid() const;
         // Return the native thread ID.
 
-    void setRepeating(bool flag);    
+    void setRepeating(bool flag);
         // This setting means the implementation should call the
         // target function repeatedly until cancelled. The importance
-        // of this method to normalize the functionality of threadded 
+        // of this method to normalize the functionality of threadded
         // and event loop driven Runner models.
-    
+
     virtual bool async() const = 0;
         // Returns true if the implementation is thread-based, or false
         // if it belongs to an event loop.
 
     typedef std::shared_ptr<Runner> Ptr;
-        
+
     struct Context
         // The context which we send to the thread context.
         // This allows us to garecefully handle late callbacks
@@ -127,18 +127,18 @@ public:
         bool started;
         bool running;
         bool repeating;
-        std::atomic<bool> exit;    
+        std::atomic<bool> exit;
 
         // Non thread-safe members
         // Should not be accessed once the Runner is started
         std::function<void()> target;
-        std::function<void(void*)> target1;    
+        std::function<void(void*)> target1;
         void* arg;
         void* handle; // private implementation data
 
         void cancel();
             // Cancels the async context.
-    
+
         bool cancelled() const;
             // True when the task has been cancelled.
             // It is up to the implementation to return at the
@@ -148,16 +148,16 @@ public:
             // The implementation is responsible for resetting
             // the context if it is to be reused.
         {
-            tid = nullptr;
+            tid = (uv_thread_t)(0);
             arg = nullptr;
             target = nullptr;
             target1 = nullptr;
             started = false;
             running = false;
-            exit = false;            
+            exit = false;
         }
 
-        Context() { 
+        Context() {
             reset();
 
             // Non-reseting members
@@ -165,17 +165,17 @@ public:
             handle = nullptr;
         }
     };
-    
-protected:    
+
+protected:
     Context::ptr pContext;
-        // Shared pointer to the internal Runner::Context.     
+        // Shared pointer to the internal Runner::Context.
 
     virtual void startAsync() = 0;
         // Start the context from the control thread.
 
     static void runAsync(Context* context);
         // Run the context from the async thread.
-    
+
     Runner(const Runner&);
     Runner& operator = (const Runner&);
 };
@@ -185,13 +185,13 @@ protected:
 // Concurrent Flag
 //
 
-    
-class Flag 
-    /// A concurrent flag which can be    
+
+class Flag
+    /// A concurrent flag which can be
     /// used to request task cancellation.
 {
     std::atomic<bool> state;
-    
+
     // Non-copyable and non-movable
     Flag(const Flag&); // = delete;
     Flag(Flag&&); // = delete;
@@ -214,7 +214,7 @@ public:
     }
 };
 
-    
+
 typedef void (*Callable)(void*);
     // For C client data callbacks.
 
@@ -228,7 +228,7 @@ public:
     virtual void stop() = 0;
 };
 
-        
+
 class Sendable
     // A generic interface for classes
     // that can be sent and cancelled.
@@ -237,7 +237,7 @@ public:
     virtual bool send() = 0;
     virtual void cancel() {};
 };
-     
+
 
 } } // namespace scy::async
 
