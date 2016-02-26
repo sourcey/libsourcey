@@ -219,16 +219,7 @@ endif()
 # LibSourcey include minizip (see deps/minizip)
 #add_subdirectory("contrib")
 
-# LibSourcey include dir
-set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
-
-include_directories("${LibSourcey_INCLUDE_DIRS}")
-include_directories("${LibSourcey_DEPENDENCIES_BUILD_DIR}")
-#  link_directories("${LibSourcey_INSTALL_DIR}/lib")
-# ${CMAKE_CURRENT_SOURCE_DIR}
-#set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} #${LibSourcey_DEPENDENCIES_BUILD_DIR})
-
-if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
+if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
     install(TARGETS zlib zlibstatic
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"

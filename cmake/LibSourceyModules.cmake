@@ -58,9 +58,9 @@ macro(define_sourcey_module name)
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
 
+  #  message(FATAL_ERROR "${CMAKE_SYSTEM_NAME} ${lib_srcs}")
+  message(STATUS "Defining module ${name}")
   if(name STREQUAL "socketio")
-    #  message(FATAL_ERROR "${CMAKE_SYSTEM_NAME} ${lib_srcs}")
-    message(STATUS "Defining module ${name}")
     message(STATUS "    Dependencies: ${LibSourcey_BUILD_DEPENDENCIES}")
     message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
     # message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
@@ -433,27 +433,4 @@ macro(define_sourcey_dependency name)
     ARCHIVE DESTINATION ${INSTALL_DESTINATION} COMPONENT main
     LIBRARY DESTINATION ${INSTALL_DESTINATION} COMPONENT main)
 
-endmacro()
-
-
-#
-### Macro: add_vendor_dependency
-#
-macro(add_vendor_dependency name libname)
-
-  set(libdir vendor/${libname})
-
-  add_subdirectory(${libdir})
-
-  # Include current directory and existing dependency directories
-  include_directories(${libdir})
-
-  # Cache dependency directories for inclusion by modules and applications
-  get_directory_property(lib_directories INCLUDE_DIRECTORIES)
-  set(LibSourcey_INCLUDE_DIRS ${libdir} PARENT_SCOPE)
-  set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} ${libname} PARENT_SCOPE)
-  set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${libname} PARENT_SCOPE)
-
-  set(HAVE_${name} TRUE)
-  set(HAVE_${name} TRUE PARENT_SCOPE)
 endmacro()

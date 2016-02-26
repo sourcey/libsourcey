@@ -1,8 +1,6 @@
 ask_build_sourcey_module(media)
 if(BUILD_MODULES AND BUILD_MODULE_media)
 
-
-
   #if(WITH_RTAUDIO)
     set(BUILD_TESTING OFF) # don't build rtaudio tests
     add_vendor_dependency(RTAUDIO rtaudio)

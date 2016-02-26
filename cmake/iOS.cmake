@@ -12,28 +12,25 @@
 # CMAKE_IOS_DEVELOPER_ROOT = automatic(default) or /path/to/platform/Developer folder
 #   By default this location is automatcially chosen based on the IOS_PLATFORM value above.
 #   If set manually, it will override the default location and force the user of a particular Developer Platform
-set (CMAKE_IOS_DEVELOPER_ROOT "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer")
+#   Example: set (CMAKE_IOS_DEVELOPER_ROOT "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer")
 #
 # CMAKE_IOS_SDK_ROOT = automatic(default) or /path/to/platform/Developer/SDKs/SDK folder
 #   By default this location is automatcially chosen based on the CMAKE_IOS_DEVELOPER_ROOT value.
 #   In this case it will always be the most up-to-date SDK found in the CMAKE_IOS_DEVELOPER_ROOT path.
 #   If set manually, this will force the use of a specific SDK version
-#set (CMAKE_IOS_SDK_ROOT "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs")
-
-#set (CMAKE_C_COMPILER gcc CACHE STRING "C compiler" FORCE)
-#set (CMAKE_CXX_COMPILER g++ CACHE STRING "C++ compiler" FORCE)
+#   Example: set (CMAKE_IOS_SDK_ROOT "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs")
 
 # Standard settings
 set (CMAKE_SYSTEM_NAME Darwin)
-set (CMAKE_SYSTEM_VERSION 1 )
+set (CMAKE_SYSTEM_VERSION 1)
 set (UNIX True)
 set (APPLE True)
 set (IOS True)
 
 # Force the compilers to gcc for iOS
-#include (CMakeForceCompiler)
-#CMAKE_FORCE_C_COMPILER (gcc gcc)
-#CMAKE_FORCE_CXX_COMPILER (g++ g++)
+# include (CMakeForceCompiler)
+# CMAKE_FORCE_C_COMPILER (gcc gcc)
+# CMAKE_FORCE_CXX_COMPILER (g++ g++)
 
 # Skip the platform compiler checks for cross compiling
 set (CMAKE_CXX_COMPILER_WORKS TRUE)
@@ -52,7 +49,7 @@ set (CMAKE_C_OSX_CURRENT_VERSION_FLAG "-current_version ")
 set (CMAKE_CXX_OSX_COMPATIBILITY_VERSION_FLAG "${CMAKE_C_OSX_COMPATIBILITY_VERSION_FLAG}")
 set (CMAKE_CXX_OSX_CURRENT_VERSION_FLAG "${CMAKE_C_OSX_CURRENT_VERSION_FLAG}")
 
-# Hidden visibilty is required for cxx on iOS 
+# Hidden visibilty is required for cxx on iOS
 set (CMAKE_C_FLAGS "")
 set (CMAKE_CXX_FLAGS "-headerpad_max_install_names -fvisibility=hidden -fvisibility-inlines-hidden")
 
@@ -95,10 +92,10 @@ if (NOT DEFINED CMAKE_IOS_DEVELOPER_ROOT)
 endif (NOT DEFINED CMAKE_IOS_DEVELOPER_ROOT)
 set (CMAKE_IOS_DEVELOPER_ROOT ${CMAKE_IOS_DEVELOPER_ROOT} CACHE PATH "Location of iOS Platform")
 
-# Find and use the most recent iOS sdk 
+# Find and use the most recent iOS sdk
 if (NOT DEFINED CMAKE_IOS_SDK_ROOT)
 	file (GLOB _CMAKE_IOS_SDKS "${CMAKE_IOS_DEVELOPER_ROOT}/SDKs/*")
-	if (_CMAKE_IOS_SDKS) 
+	if (_CMAKE_IOS_SDKS)
 		list (SORT _CMAKE_IOS_SDKS)
 		list (REVERSE _CMAKE_IOS_SDKS)
 		list (GET _CMAKE_IOS_SDKS 0 CMAKE_IOS_SDK_ROOT)
@@ -113,7 +110,7 @@ set (CMAKE_IOS_SDK_ROOT ${CMAKE_IOS_SDK_ROOT} CACHE PATH "Location of the select
 
 set (CMAKE_OSX_SYSROOT ${CMAKE_IOS_SDK_ROOT} CACHE PATH "Sysroot used for iOS support")
 
-# set the architecture for iOS - using ARCHS_STANDARD_32_BIT sets armv6,armv7 and appears to be XCode's standard. 
+# set the architecture for iOS - using ARCHS_STANDARD_32_BIT sets armv6,armv7 and appears to be XCode's standard.
 # The other value that works is ARCHS_UNIVERSAL_IPHONE_OS but that sets armv7 only
 #ME set (CMAKE_OSX_ARCHITECTURES "$(ARCHS_STANDARD_32_BIT)" CACHE string  "Build architecture for iOS")
 
@@ -137,19 +134,19 @@ set (CMAKE_SYSTEM_FRAMEWORK_PATH
 #ME ADD
 set(CMAKE_MACOSX_BUNDLE YES)
 
-IF(NOT CMAKE_C_COMPILER)
+if(NOT CMAKE_C_COMPILER)
 	execute_process(COMMAND xcrun -sdk ${CMAKE_IOS_SDK_ROOT} -find clang
-	OUTPUT_VARIABLE CMAKE_C_COMPILER
-	OUTPUT_STRIP_TRAILING_WHITESPACE)
-	message(STATUS "Using c compiler ${CMAKE_C_COMPILER}")
-ENDIF()
+			OUTPUT_VARIABLE CMAKE_C_COMPILER
+			OUTPUT_STRIP_TRAILING_WHITESPACE)
+	message(STATUS "Using C compiler ${CMAKE_C_COMPILER}")
+endif()
 
-IF(NOT CMAKE_CXX_COMPILER)
+if(NOT CMAKE_CXX_COMPILER)
 	execute_process(COMMAND xcrun -sdk ${CMAKE_IOS_SDK_ROOT} -find clang++
-	OUTPUT_VARIABLE CMAKE_CXX_COMPILER
-	OUTPUT_STRIP_TRAILING_WHITESPACE)
-	message(STATUS "Using c compiler ${CMAKE_CXX_COMPILER}")
-ENDIF()
+			OUTPUT_VARIABLE CMAKE_CXX_COMPILER
+			OUTPUT_STRIP_TRAILING_WHITESPACE)
+	message(STATUS "Using C++ compiler ${CMAKE_CXX_COMPILER}")
+endif()
 
 #set(SDKROOT "iphoneos9.2")
 #set(CMAKE_OSX_SYSROOT ${SDKROOT})
@@ -157,10 +154,10 @@ ENDIF()
 #set(CMAKE_OSX_DEPLOYMENT_TARGET ${IPHONEOS_DEPLOYMENT_TARGET})
 #SET_TARGET_PROPERTIES("LibSourcey" PROPERTIES XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "8.1")
 
-MESSAGE(STATUS "==SDKROOT:" ${SDKROOT})
-MESSAGE(STATUS "==CMAKE_IOS_SDK_ROOT:" ${CMAKE_IOS_SDK_ROOT})
-MESSAGE(STATUS "==CMAKE_C_COMPILER:" ${CMAKE_C_COMPILER})
-MESSAGE(STATUS "==CMAKE_CXX_COMPILER:" ${CMAKE_CXX_COMPILER})
-MESSAGE(STATUS "==IOS_PLATFORM_LOCATION:" ${IOS_PLATFORM_LOCATION})
-MESSAGE(STATUS "==CMAKE_SOURCE_DIR:" ${CMAKE_SOURCE_DIR})
-MESSAGE(STATUS "==CMAKE_OSX_SYSROOT:" ${CMAKE_OSX_SYSROOT})  #iOS 9.2
+message(STATUS "== SDKROOT:" ${SDKROOT})
+message(STATUS "== CMAKE_IOS_SDK_ROOT:" ${CMAKE_IOS_SDK_ROOT})
+message(STATUS "== CMAKE_C_COMPILER:" ${CMAKE_C_COMPILER})
+message(STATUS "== CMAKE_CXX_COMPILER:" ${CMAKE_CXX_COMPILER})
+message(STATUS "== IOS_PLATFORM_LOCATION:" ${IOS_PLATFORM_LOCATION})
+message(STATUS "== CMAKE_SOURCE_DIR:" ${CMAKE_SOURCE_DIR})
+message(STATUS "== CMAKE_OSX_SYSROOT:" ${CMAKE_OSX_SYSROOT})  #iOS 9.2

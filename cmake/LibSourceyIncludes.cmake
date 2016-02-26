@@ -1,4 +1,29 @@
 #
+### Macro: add_vendor_dependency
+#
+macro(add_vendor_dependency name libname)
+  set(libdir vendor/${libname})
+
+  add_subdirectory(${libdir})
+
+  # Include current directory and existing dependency directories
+  include_directories(${libdir})
+
+  # Cache dependency directories for inclusion by modules and applications
+  get_directory_property(lib_directories INCLUDE_DIRECTORIES)
+  set(LibSourcey_INCLUDE_DIRS ${libdir})
+  set(LibSourcey_INCLUDE_DIRS ${libdir} PARENT_SCOPE)
+  set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} ${libname})
+  set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} ${libname} PARENT_SCOPE)
+  set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${libname})
+  set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${libname} PARENT_SCOPE)
+
+  set(HAVE_${name} TRUE)
+  set(HAVE_${name} TRUE PARENT_SCOPE)
+endmacro()
+
+
+#
 ### Macro: sourcey_find_library
 #
 # Finds libraries with finer control over search paths

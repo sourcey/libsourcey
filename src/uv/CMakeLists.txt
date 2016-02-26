@@ -3,6 +3,7 @@ if(BUILD_MODULES AND BUILD_MODULE_uv)
 
   set(BUILD_TESTS OFF) # don't build libuv tests
   add_vendor_dependency(LIBUV libuv)
+
   #if(WITH_LIBUV)
   #  list(APPEND LibSourcey_BUILD_DEPENDENCIES libuv)
   #  set(BUILD_TESTS OFF) # don't build tests
@@ -12,5 +13,6 @@ if(BUILD_MODULES AND BUILD_MODULE_uv)
   #endif()
 
   include_dependency(LibUV) #REQUIRED
+  
   define_sourcey_module(uv)
 endif()

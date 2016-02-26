@@ -11,15 +11,10 @@ else()
   set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Installation Directory")
 endif()
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configs" FORCE)
-set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${CMAKE_CONFIGURATION_TYPES})
+# set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configs" FORCE)
+# set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${CMAKE_CONFIGURATION_TYPES})
 
 project(LibSourcey)
-
-if(${IOS})
-  MESSAGE("----> [CUSTOM] Add Threads find. Required by iOS build") #ME
-  find_package(Threads REQUIRED)
-endif()
 
 add_definitions(-DUNICODE -D_UNICODE)
 
@@ -38,6 +33,15 @@ if(APPLE)
     cmake_policy(SET CMP0042 NEW)
   endif()
   set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+endif()
+
+if(IOS)
+  find_package(Threads REQUIRED)
+
+  # TODO: Make portable by specifiying on command line
+  set(SDKROOT "iphoneos9.2")
+  set(CMAKE_OSX_SYSROOT ${SDKROOT})
+  set(IPHONEOS_DEPLOYMENT_TARGET "8.1")
 endif()
 
 # Tell CMake where to locate our .cmake files
@@ -102,7 +106,7 @@ set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
 set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 # set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_DIR}/deps")
-set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_BUILD_DIR}/deps")
+# set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_BUILD_DIR}/deps")
 set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/libscy/deps")
 
 # # Append some common search paths for find_library and find_path
@@ -233,6 +237,7 @@ endif()
 # ----------------------------------------------------------------------------
 
 # Prefind external dependencies so we can set defaults
+find_package(OpenSSL)
 find_package(OpenCV)
 find_package(FFmpeg)
 
@@ -248,7 +253,7 @@ set_option(WITH_WEBRTC          "Include WebRTC support"               OFF)
 set_option(WITH_WXWIDGETS       "Include wxWidgets support"            OFF)
 
 # Include dependencies build dir for cmake generated config files
-list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_BUILD_DIR})
+#list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_BUILD_DIR})
 
 #set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} ${LibSourcey_DEPENDENCIES_BUILD_DIR})
 #list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR})
@@ -257,49 +262,8 @@ list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_BUILD_DIR})
 #set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/libscy/deps")
 #link_directories("${LibSourcey_DEPENDENCIES_INSTALL_DIR}")
 
-#if(BUILD_DEPENDENCIES)
-#  add_subdirectory(${LibSourcey_DEPENDENCIES_SOURCE_DIR})
-#endif()
-
-# Local dependencies
-#if(WITH_LIBUV)
-  #include_dependency(LibUV REQUIRED)
-  # list(APPEND LibSourcey_BUILD_DEPENDENCIES libuv)
-  # add_subdirectory(deps/libuv)
-  # set(HAVE_LIBUV 1)
-#endif()
-
-# #if(WITH_HTTPPARSER)
-#   #include_dependency(HttpParser REQUIRED)
-#   list(APPEND LibSourcey_BUILD_DEPENDENCIES http_parser)
-#   add_subdirectory(deps/http_parser)
-#   set(HAVE_HTTPPARSER 1)
-# #endif()
-
-# if(WITH_RTAUDIO)
-#   #include_dependency(RtAudio REQUIRED)
-#   set(BUILD_TESTING OFF)
-#   list(APPEND LibSourcey_BUILD_DEPENDENCIES rtaudio)
-#   add_subdirectory(deps/rtaudio)
-#   set(HAVE_RTAUDIO 1)
-#   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/deps/rtaudio)
-# endif()
-
-# if(WITH_JSONCPP)
-#   #include_dependency(JsonCpp REQUIRED)
-#   set(HAVE_JSONCPP 1)
-# endif()
-#
-# if(WITH_ZLIB)
-#   #include_dependency(ZLIB REQUIRED)
-#   #include_dependency(Minizip REQUIRED)
-#   #list(APPEND LibSourcey_BUILD_DEPENDENCIES zlib)
-#   #list(APPEND LibSourcey_BUILD_DEPENDENCIES minizip)
-#   set(HAVE_ZLIB 1)
-# endif()
-
 # External dependencies
-include_dependency(LibUV REQUIRED)
+# include_dependency(LibUV REQUIRED)
 
 if(WITH_OPENSSL)
   include_dependency(OpenSSL REQUIRED)
@@ -318,13 +282,23 @@ if(WITH_WEBRTC)
 endif()
 
 if(WITH_WXWIDGETS)
-  # TODO: specify library option
+  # TODO: specify required library options
   include_dependency(wxWidgets REQUIRED core base adv)
 endif()
 
 # ----------------------------------------------------------------------------
 # Include the LibSourcey source tree
 # ----------------------------------------------------------------------------
+
+list(APPEND LibSourcey_INCLUDE_DIRS
+  ${LibSourcey_SOURCE_DIR}/archo/vendor/zlib
+  ${LibSourcey_SOURCE_DIR}/archo/vendor/minizip
+  ${LibSourcey_SOURCE_DIR}/media/vendor/rtaudio
+  ${LibSourcey_SOURCE_DIR}/media/vendor/rtaudio/include
+  ${LibSourcey_SOURCE_DIR}/uv/vendor/libuv/include
+  ${LibSourcey_SOURCE_DIR}/http/vendor/http_parser
+  ${LibSourcey_SOURCE_DIR}/json/vendor/jsoncpp)
+
 if(BUILD_MODULES OR BUILD_APPLICATIONS)
   subdirlist(subdirs "${CMAKE_SOURCE_DIR}/src")
   foreach(name ${subdirs})
@@ -372,12 +346,12 @@ configure_file(
 #  Uninstall target for "make uninstall"
 # ----------------------------------------------------------------------------
 if(UNIX)
-  CONFIGURE_FILE(
+  configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
     IMMEDIATE @ONLY)
 
-  ADD_CUSTOM_TARGET(uninstall
+  add_custom_target(uninstall
     "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 endif()
 
@@ -436,15 +410,15 @@ status("     Applications:               ${LibSourcey_BUILD_APPLICATIONS}")
 status("")
 status("  Other third-party libraries:")
 status("")
-#status("    Use LibUV:"         HAVE_LIBUV           THEN YES ELSE NO)
-#status("    Use HttpParser:"    HAVE_HTTPPARSER      THEN YES ELSE NO)
 status("    Use OpenSSL:"       HAVE_OPENSSL         THEN YES ELSE NO)
 status("    Use FFmpeg:"        HAVE_FFMPEG          THEN YES ELSE NO)
 status("    Use OpenCV:"        HAVE_OPENCV          THEN "YES (ver ${OPENCV_VERSION})" ELSE NO)
 status("    Use WebRTC:"        HAVE_WEBRTC          THEN YES ELSE NO)
+status("    Use wxWidgets:"     HAVE_WXWIDGETS       THEN YES ELSE NO)
+# status("    Use LibUV:"         HAVE_LIBUV           THEN YES ELSE NO)
+# status("    Use HttpParser:"    HAVE_HTTPPARSER      THEN YES ELSE NO)
 # status("    Use RtAudio:"       HAVE_RTAUDIO         THEN YES ELSE NO)
 # status("    Use JsonCpp:"       HAVE_JSONCPP         THEN YES ELSE NO)
-status("    Use wxWidgets:"     HAVE_WXWIDGETS       THEN YES ELSE NO)
 # status("    Use zlib:"          HAVE_ZLIB            THEN YES ELSE NO)
 
 # Includes
@@ -467,10 +441,4 @@ status("")
 # Warn in the case of in-source build
 if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
     message(WARNING "The source directory is the same as binary directory. \"make clean\" may damage the source tree")
-endif()
-
-if(${IOS})
-    set(SDKROOT "iphoneos9.2")
-    set(CMAKE_OSX_SYSROOT ${SDKROOT})
-    set(IPHONEOS_DEPLOYMENT_TARGET "8.1")
 endif()
