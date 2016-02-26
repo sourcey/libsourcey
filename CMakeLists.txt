@@ -16,6 +16,11 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${CMAKE_CONFIGURATION_TYPES
 
 project(LibSourcey)
 
+if(${IOS})
+  MESSAGE("----> [CUSTOM] Add Threads find. Required by iOS build") #ME
+  find_package(Threads REQUIRED)
+endif()
+
 add_definitions(-DUNICODE -D_UNICODE)
 
 # Set warning level to W3
@@ -462,4 +467,10 @@ status("")
 # Warn in the case of in-source build
 if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
     message(WARNING "The source directory is the same as binary directory. \"make clean\" may damage the source tree")
+endif()
+
+if(${IOS})
+    set(SDKROOT "iphoneos9.2")
+    set(CMAKE_OSX_SYSROOT ${SDKROOT})
+    set(IPHONEOS_DEPLOYMENT_TARGET "8.1")
 endif()

@@ -5,4 +5,6 @@ if(BUILD_MODULES AND BUILD_MODULE_crypto)
   #include_dependency(LibUV REQUIRED)
 
   define_sourcey_module(crypto base uv)
+
+  include_directories(${LIBUV_INCLUDE_DIR})
 endif()
