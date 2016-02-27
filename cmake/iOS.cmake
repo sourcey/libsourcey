@@ -12,7 +12,7 @@
 # CMAKE_IOS_DEVELOPER_ROOT = automatic(default) or /path/to/platform/Developer folder
 #   By default this location is automatcially chosen based on the IOS_PLATFORM value above.
 #   If set manually, it will override the default location and force the user of a particular Developer Platform
-#   Example: set (CMAKE_IOS_DEVELOPER_ROOT "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer")
+set (CMAKE_IOS_DEVELOPER_ROOT "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer")
 #
 # CMAKE_IOS_SDK_ROOT = automatic(default) or /path/to/platform/Developer/SDKs/SDK folder
 #   By default this location is automatcially chosen based on the CMAKE_IOS_DEVELOPER_ROOT value.

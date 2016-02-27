@@ -8,5 +8,9 @@ if(BUILD_MODULES AND BUILD_MODULE_base)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/msvc)
   endif()
 
+  if (IOS)
+    include_directories(${LIBUV_INCLUDE_DIR})
+  endif()
+
   define_sourcey_module(base uv)
 endif()

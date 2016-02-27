@@ -3,7 +3,7 @@ if(BUILD_MODULES AND BUILD_MODULE_symple)
   include_dependency(LibUV)
   include_dependency(OpenSSL REQUIRED)
   include_dependency(JsonCpp)
-  #include_dependency(HttpParser)
+  include_dependency(HttpParser)
 
   # FIXME: Including OpenCV dependency here for MediaServer
   # sample although it is not directly required by Symple.
