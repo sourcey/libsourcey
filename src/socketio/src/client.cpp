@@ -370,11 +370,11 @@ void Client::onMessage(sockio::Packet& packet)
             PacketSignal::emit(this, packet);
             break;
         case Packet::Packet::Type::Ack:
-            assert(stateEquals(ClientState::Online));
+            // assert(stateEquals(ClientState::Online));
             PacketSignal::emit(this, packet);
             break;
         case Packet::Packet::Type::Error:
-            assert(stateEquals(ClientState::Online));
+            // assert(stateEquals(ClientState::Online));
             PacketSignal::emit(this, packet);
             break;
         case Packet::Packet::Type::BinaryEvent:

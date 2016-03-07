@@ -71,7 +71,7 @@ SSLClient::SSLClient(const Client::Options& options, uv::Loop* loop) :
 Client::Client(const net::Socket::Ptr& socket, const Client::Options& options) : //, uv::Loop* loop
     sockio::Client(socket), //, loop
     _options(options),
-    _announceStatus(500)
+    _announceStatus(0)
 {
     TraceL << "Create" << endl;
 }
@@ -107,14 +107,9 @@ int Client::send(Message& m, bool ack)
         throw std::runtime_error("Cannot send message while offline.");
     }
 
+    assert(ourPeer());
     m.setFrom(ourPeer()->address());
     //assert(isOnline()); // may be announcing
-
-      TraceL << "Sending message 11111111111111: " << json::stringify(m, true) << endl;
-
-            TraceL << "Sending message FRTOM: " << ourPeer()->address() << endl;
-                  TraceL << "Sending message FRTOM: " << m.from().id << endl;
-                        TraceL << "Sending message TO: " << m.to().id << endl;
 
     if (m.to().id == m.from().id) {
         assert(0);
@@ -125,9 +120,9 @@ int Client::send(Message& m, bool ack)
         assert(0);
         throw std::runtime_error("Cannot send invalid message.");
     }
-    // #ifdef _DEBUG
-        TraceL << "Sending message: " << json::stringify(m, true) << endl;
-    // #endif
+#ifdef _DEBUG
+    TraceL << "Sending message: " << json::stringify(m, true) << endl;
+#endif
 
     return sockio::Client::send(m, ack);
 }
@@ -217,7 +212,7 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 
             _ourID = data["data"]["id"].asString(); //Address();
             if (_ourID.empty())
-                throw std::runtime_error("Invalid server response.");
+                throw std::runtime_error("Invalid announce response.");
 
             // Set our local peer data from the response or fail.
             onPresenceData(data["data"], true);
@@ -227,7 +222,8 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
             Announce.emit(this, _announceStatus);
 
             // Transition to Online state.
-            sockio::Client::onOnline();
+            onOnline();
+            // setState(this, sockio::ClientState::Online);
 
             // Broadcast a presence probe to our network.
             sendPresence(true);
@@ -248,14 +244,12 @@ void Client::onAnnounce(void* sender, TransactionState& state, const Transaction
 
 void Client::onOnline()
 {
-    // // Start the socket.io timers etc
-    // sockio::Client::onOnline();
-
-    // NOTE: Do not transition the Socket.IO client to Online state here
-    // It will be done via the Announce callback
-
-    // Announce the Symple Client
-    announce();
+    // NOTE: Do not transition to Online state until the Announce
+    // callback is successful
+    if (!_announceStatus)
+        announce();
+    else
+        sockio::Client::onOnline();
 }
 
 
@@ -349,7 +343,7 @@ void Client::onPresenceData(const json::Value& data, bool whiny)
         ) {
         std::string id = data["id"].asString();
         bool online = data["online"].asBool();
-        Peer* peer = _roster.get(id, false);
+        auto peer = _roster.get(id, false);
         if (online) {
             if (!peer) {
                 peer = new Peer(data);
@@ -416,7 +410,7 @@ void Client::reset()
     //_persistence.clear();
 
     _roster.clear();
-    _announceStatus = -1;
+    _announceStatus = 0;
     _ourID = "";
     sockio::Client::reset();
 }
