@@ -176,7 +176,7 @@ const char BitReader::peek()
 {
   	if (_limit > _position)
   		  return (const char)_bytes[_position];
-  	DebugL << "Peeking next character is NULL" << std::endl;
+  	// DebugL << "Peeking next character is NULL" << std::endl;
   	return 0;
 }
 

@@ -55,25 +55,34 @@ public:
         std::string host;
         std::uint16_t port;
 
-        std::string token;
+        bool reconnection;
+            // Weather or not to reconnect if disconnected from the server.
+
+        int reconnectAttempts;
+            // The number of times to attempt to reconnect if disconnected
+            // from the server. (0 = unlimited)
+
         std::string user;
         std::string name;
         std::string type;
+        std::string token;
 
         Options() {
-            host  = "127.0.0.1";
-            port  = 4500;
+            host = "127.0.0.1";
+            port = 4500;
 
-            token = "";
+            reconnection = true;
+            reconnectAttempts = 0;
+
             user  = "";
             name  = "";
-            type  = "peer";
+            type  = "";
+            token = "";
         }
     };
 
 public:
-    Client(const net::Socket::Ptr& socket,
-        const Options& options = Options());
+    Client(const net::Socket::Ptr& socket, const Options& options = Options());
     virtual ~Client();
 
     void connect();
@@ -115,8 +124,8 @@ public:
         // Returns the persistence manager which stores
         // long lived messages.
 
-    virtual Client::Options& options();
-        // Returns a reference to the options object.
+    Client::Options& options();
+        // Return a reference to the client options object.
 
     virtual Client& operator >> (Message& message);
         // Stream operator alias for send().
@@ -164,7 +173,7 @@ protected:
         // Override PAcketStream::emit
 
     virtual void onOnline();
-    virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&);
+    virtual void onAnnounceState(void* sender, TransactionState& state, const TransactionState&);
     // virtual void onPacket(sockio::Packet& packet);
 
 protected:

@@ -140,7 +140,8 @@ IPacket* Packet::clone() const
 
 std::size_t Packet::read(const ConstBuffer& buf)
 {
-    // DebugL << "Read packet: " << std::string(bufferCast<const char*>(buf), buf.size()) << endl;
+    // DebugN(this) << "Read raw packet: " << std::string(bufferCast<const char*>(buf), buf.size()) << endl;
+    assert(buf.size() > 0);
 
     // Reset all data
     _frame = Frame::Unknown;
@@ -149,9 +150,6 @@ std::size_t Packet::read(const ConstBuffer& buf)
     _nsp = "/";
     _message = "";
     _size = -1;
-
-    if (buf.size() < 2)
-        return -1;
 
     BitReader reader(buf);
 
@@ -167,11 +165,11 @@ std::size_t Packet::read(const ConstBuffer& buf)
         reader.get(&type, 1);
         _type = static_cast<Packet::Type>(atoi(&type));
         // if (_type < TypeMin || _type > TypeMax) {
-        //     WarnL << "Invalid message type: " << _type << endl;
+        //     WarnN(this) << "Invalid message type: " << _type << endl;
         //     return false;
         // }
 
-        // WarnL << "Parse type: " << type << ": " << typeString() << endl;
+        // TraceN(this) << "Parse type: " << type << ": " << typeString() << endl;
     }
 
     // look up attachments if type binary (not implemented)
@@ -195,27 +193,29 @@ std::size_t Packet::read(const ConstBuffer& buf)
 
     // look up json data
     // TODO: Take into account joined messages
-    reader.get(_message, reader.available());
+    if (reader.available()) {
+        reader.get(_message, reader.available());
+    }
 
     _size = reader.position();
 
-    DebugL << "Parse success: " << toString() << endl;
+    DebugN(this) << "Parse success: " << toString() << endl;
 
 #if 0 // Socket.IO 0.9x
     std::string data(bufferCast<const char*>(buf), buf.size());
     std::vector<std::string> frags = util::split(data, ':', 4);
     if (frags.size() < 1) {
-        //DebugL << "Reading: Invalid Data: " << frags.size() << endl;
+        //DebugN(this) << "Reading: Invalid Data: " << frags.size() << endl;
         return false;
     }
 
     if (!frags[0].empty()) {
         _type = util::strtoi<std::uint32_t>(frags[0]);
-        //DebugL << "Reading: Type: " << typeString() << endl;
+        //DebugN(this) << "Reading: Type: " << typeString() << endl;
     }
 
     if (_type < 0 || _type > 7) {
-        //DebugL << "Reading: Invalid Type: " << typeString() << endl;
+        //DebugN(this) << "Reading: Invalid Type: " << typeString() << endl;
         return false;
     }
     if (frags.size() >= 2 && !frags[1].empty()) {

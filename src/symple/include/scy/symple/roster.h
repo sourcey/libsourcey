@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_Symple_Router_H
-#define SCY_Symple_Router_H
+#ifndef SCY_Symple_Roster_H
+#define SCY_Symple_Roster_H
 
 
 #include "scy/collection.h"
@@ -49,11 +49,11 @@ public:
 
     virtual void print(std::ostream& os) const;
 
-    //virtual const char* className() const { return "smpl::Roster"; }
+    virtual const char* className() const { return "Symple::Roster"; }
 };
 
 
 } } // namespace scy::smpl
 
 
-#endif //  SCY_Symple_Router_H
+#endif //  SCY_Symple_Roster_H

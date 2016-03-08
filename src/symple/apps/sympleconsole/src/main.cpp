@@ -52,7 +52,7 @@ public:
     void printHelp()
     {
         cout <<
-            "\nSymple Coneole Client v0.1.0"
+            "\nSymple Console Client v0.1.0"
             "\n(c) Sourcey"
             "\nhttp://sourcey.com/symple"
             "\n"
@@ -118,6 +118,8 @@ public:
                 return;
             }
 
+            client += packetDelegate(this, &SympleApplication::onRecvPacket);
+            client += packetDelegate(this, &SympleApplication::onRecvMessage);
             client.Announce += delegate(this, &SympleApplication::onClientAnnounce);
             client.StateChange += delegate(this, &SympleApplication::onClientStateChange);
             client.CreatePresence += delegate(this, &SympleApplication::onCreatePresence);
@@ -130,15 +132,29 @@ public:
         }
     }
 
+    void onRecvPacket(void* sender, sockio::Packet& packet)
+    {
+        DebugL << "####### On raw packet: " << packet.className() << endl;
+
+        // Handle incoming raw Socket.IO packets here (not required)
+    }
+
+    void onRecvMessage(void* sender, smpl::Message& message)
+    {
+        DebugL << "####### On message: " << message.className() << endl;
+
+        // Handle incoming Symple messages here
+    }
+
     void onClientAnnounce(const int& status)
     {
+        DebugL << "####### On announce: " << status << endl;
         assert(status == 200);
     }
 
     void onClientStateChange(sockio::ClientState& state, const sockio::ClientState& oldState)
     {
-        // smpl::Client* client = reinterpret_cast<smpl::Client*>(sender);
-        DebugL << "Client state changed: " << state << ": " << client.ws().socket->address() << endl;
+        DebugL << "####### Client state changed: " << state << ": " << client.ws().socket->address() << endl;
 
         switch (state.id()) {
         case sockio::ClientState::Connecting:
@@ -146,22 +162,21 @@ public:
         case sockio::ClientState::Connected:
             break;
         case sockio::ClientState::Online:
-            {
-                // Send a message when online
-                smpl::Message m;
-                m.setData("olay");
-                client.send(m, true);
-            }
+            // {
+            //     // Send a message when online
+            //     smpl::Message m;
+            //     m.setData("olay");
+            //     client.send(m, true);
+            // }
             break;
         case sockio::ClientState::Error:
-            assert(0);
             break;
         }
     }
 
     void onCreatePresence(smpl::Peer& peer)
     {
-        DebugL << "Updating Client Data" << endl;
+        DebugL << "####### Updating presence data" << endl;
 
         // Update the peer object to be broadcast with presence.
         // Any arbitrary data can be broadcast with presence.

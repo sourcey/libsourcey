@@ -61,8 +61,7 @@ public:
 };
 
 
-} // namespace symple
-} // namespace scy
+} } // namespace smpl::scy
 
 
 #endif // SCY_Symple_Address_H

@@ -86,9 +86,16 @@ Client::~Client()
 void Client::connect()
 {
     TraceL << "Connecting" << endl;
+
+    assert(!_options.host.empty());
     assert(!_options.user.empty());
-    _host = _options.host;
-    _port = _options.port;
+
+    // Update the Socket.IO options with local values before connecting
+    sockio::Client::options().host = _options.host;
+    sockio::Client::options().port = _options.port;
+    sockio::Client::options().reconnection = _options.reconnection;
+    sockio::Client::options().reconnectAttempts = _options.reconnectAttempts;
+
     sockio::Client::connect();
 }
 
@@ -185,18 +192,18 @@ int Client::announce()
     TraceL << "Announcing" << endl;
 
     json::Value data;
-    data["name"] = _options.name;
     data["user"] = _options.user;
+    data["name"] = _options.name;
     data["type"] = _options.type;
     data["token"] = _options.token;
     sockio::Packet pkt("announce", data, true);
     auto txn = createTransaction(pkt);
-    txn->StateChange += sdelegate(this, &Client::onAnnounce);
+    txn->StateChange += sdelegate(this, &Client::onAnnounceState);
     return txn->send();
 }
 
 
-void Client::onAnnounce(void* sender, TransactionState& state, const TransactionState&)
+void Client::onAnnounceState(void* sender, TransactionState& state, const TransactionState&)
 {
     TraceL << "On announce response: " << state << endl;
 
@@ -257,12 +264,11 @@ void Client::emit(IPacket& raw)
 {
     auto packet = reinterpret_cast<sockio::Packet&>(raw);
 
-    // Parse Symple messages from SocketIO packets
+    // Parse Symple messages from Socket.IO packets
     if (packet.type() == sockio::Packet::Type::Event) {
         TraceL << "JSON packet: " << packet.toString() << endl;
 
         json::Value data = packet.json();
-        // json::Reader reader;
         if (data.isMember("type")) {
             std::string type(data["type"].asString());
 #ifdef _DEBUG
@@ -433,6 +439,8 @@ PersistenceT& Client::persistence()
 Client::Options& Client::options()
 {
     //Mutex::ScopedLock lock(_mutex);
+
+    // Cast the underlyting options object
     return _options;
 }
 

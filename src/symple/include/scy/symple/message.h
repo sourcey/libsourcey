@@ -34,7 +34,7 @@ namespace smpl {
 
 class Message: public json::Value, public IPacket
 {
-public:        
+public:
     Message();
     Message(const json::Value& root);
     Message(const Message& root);
@@ -46,17 +46,17 @@ public:
     virtual void clear();
     virtual void clearData();
     virtual void clearNotes();
-    
-    std::string type() const;    
-    std::string id() const;    
+
+    std::string type() const;
+    std::string id() const;
     Address to() const;
     Address from() const;
-    int status() const;    
-    
+    int status() const;
+
     void setType(const std::string& type);
-    void setTo(const Peer& to);    
-    void setTo(const Address& to);    
-    void setTo(const std::string& to);    
+    void setTo(const Peer& to);
+    void setTo(const Address& to);
+    void setTo(const std::string& to);
     void setFrom(const Peer& from);
     void setFrom(const Address& from);
     void setFrom(const std::string& from);
@@ -69,7 +69,7 @@ public:
     void setNote(const std::string& type, const std::string& text);
     void addNote(const std::string& type, const std::string& text);
         // Possible "type" values: info, warn, error
-        
+
     json::Value data(const std::string& name) const;
     json::Value& data(const std::string& name);
     json::Value& setData(const std::string& name);
@@ -79,21 +79,21 @@ public:
     void setData(const std::string& name, int data);
     void removeData(const std::string& name);
     bool hasData(const std::string& name);
-    
+
     virtual std::size_t read(const ConstBuffer& buf);
     virtual std::size_t read(const std::string& root);
     virtual void write(Buffer& buf) const;
-    
-    bool isRequest() const;    
+
+    bool isRequest() const;
     virtual std::size_t size() const;
 
     void print(std::ostream& os) const;
-    
-    virtual const char* className() const { return "smpl::Message"; }
+
+    virtual const char* className() const { return "Symple::Message"; }
 };
 
 
-} // namespace symple 
+} // namespace symple
 } // namespace scy
 
 
