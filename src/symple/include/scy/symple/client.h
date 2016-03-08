@@ -89,39 +89,42 @@ public:
     void close();
 
     virtual int send(Message& message, bool ack = false);
-        // Sends a message.
+        // Send a message.
         // May be a polymorphic Command, Presence, Event or other ...
 
     virtual int send(const std::string& message, bool ack = false);
-        // Sends a string message.
-        // The message must be a valid Symple message otherwise
-        // it will net be delivered.
+        // Send a string message.
+        // The message must be a valid Symple message otherwise it will
+        // not be delivered.
+
+    virtual sockio::Transaction* sendWithAck(Message& message);
+        // Send a message and create a Transaction object which will notify
+        // on Ack callback from the server.
 
     virtual int respond(Message& message, bool ack = false);
-        // Swaps the 'to' and 'from' fields and sends
-        // the given message.
+        // Swap the 'to' and 'from' fields and send the given message.
 
     virtual int sendPresence(bool probe = false);
-        // Broadcasts presence to the user group scope.
+        // Broadcast presence to the user group scope.
         // The outgoing Presence object may be modified via
         // the CreatePresence signal.
 
     virtual int sendPresence(const Address& to, bool probe = false);
-        // Sends directed presence to the given peer.
+        // Send directed presence to the given peer.
 
     virtual std::string ourID() const;
-        // Returns the session ID of our current peer object.
-        // Returns an empty string when offline.
+        // Return the session ID of our current peer object.
+        // Return an empty string when offline.
 
     virtual Peer* ourPeer();
-        // Returns the peer object for the current session,
+        // Return the peer object for the current session,
         // or throws an exception when offline.
 
     virtual Roster& roster();
-        // Returns the roster which stores all online peers.
+        // Return the roster which stores all online peers.
 
     virtual PersistenceT& persistence();
-        // Returns the persistence manager which stores
+        // Return the persistence manager which stores
         // long lived messages.
 
     Client::Options& options();
@@ -131,7 +134,7 @@ public:
         // Stream operator alias for send().
 
     virtual void onPresenceData(const json::Value& data, bool whiny = false);
-        // Updates the roster from the given client object.
+        // Update the roster from the given client object.
 
     //
     // Signals

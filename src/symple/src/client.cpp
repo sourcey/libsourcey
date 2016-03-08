@@ -107,16 +107,14 @@ void Client::close()
 }
 
 
-int Client::send(Message& m, bool ack)
+void assertCanSend(Client* client, Message& m)
 {
-    if (!isOnline()) {
-        //assert(0); // may be announcing
+    if (!client->isOnline()) {
         throw std::runtime_error("Cannot send message while offline.");
     }
 
-    assert(ourPeer());
-    m.setFrom(ourPeer()->address());
-    //assert(isOnline()); // may be announcing
+    assert(client->ourPeer());
+    m.setFrom(client->ourPeer()->address());
 
     if (m.to().id == m.from().id) {
         assert(0);
@@ -130,8 +128,21 @@ int Client::send(Message& m, bool ack)
 #ifdef _DEBUG
     TraceL << "Sending message: " << json::stringify(m, true) << endl;
 #endif
+}
 
+
+int Client::send(Message& m, bool ack)
+{
+    assertCanSend(this, m);
     return sockio::Client::send(m, ack);
+}
+
+
+sockio::Transaction* Client::sendWithAck(Message& message)
+{
+    sockio::Packet pkt(message, true);
+    auto txn = createTransaction(pkt);
+    return txn; //->send();
 }
 
 

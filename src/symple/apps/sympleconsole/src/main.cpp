@@ -3,6 +3,9 @@
 #include "scy/symple/client.h"
 #include "scy/net/sslmanager.h"
 #include "scy/util.h"
+#include "scy/ipc.h"
+
+#include <iostream>
 
 
 using std::cout;
@@ -37,7 +40,7 @@ public:
 #else
     smpl::TCPClient client;
 #endif
-
+    ipc::SyncQueue<> ipc;
     bool showHelp;
 
     SympleApplication() :
@@ -99,17 +102,25 @@ public:
             else if (key == "type") {
                 client.options().type = value;
             }
-            // else if (key == "logfile") {
-            //     auto log = dynamic_cast<FileChannel*>(scy::Logger::instance().get("Symple"));
-            //     log->setPath(value);
-            // }
+            else if (key == "logfile") {
+                auto log = dynamic_cast<FileChannel*>(scy::Logger::instance().get("Symple"));
+                log->setPath(value);
+            }
             else {
                 cerr << "Unrecognized command: " << key << "=" << value << endl;
             }
         }
     }
 
-    void work()
+    void shutdown()
+    {
+        ipc.close();
+        client.close();
+        Application::stop();
+        Application::finalize();
+    }
+
+    void start()
     {
         try {
             // Print help
@@ -118,6 +129,7 @@ public:
                 return;
             }
 
+            // Setup the client
             client += packetDelegate(this, &SympleApplication::onRecvPacket);
             client += packetDelegate(this, &SympleApplication::onRecvMessage);
             client.Announce += delegate(this, &SympleApplication::onClientAnnounce);
@@ -125,10 +137,94 @@ public:
             client.CreatePresence += delegate(this, &SympleApplication::onCreatePresence);
             client.connect();
 
-            scy::Application::run();
+            // Start the console thread
+          	Thread console([](void* arg)
+           	{
+                auto app = reinterpret_cast<SympleApplication*>(arg);
+
+             		char o = 0;
+             		while (o != 'Q')
+             		{
+               			cout <<
+                 				"COMMANDS:\n"
+                 				"  M	Send a message.\n"
+                 				"  C	Print contacts list.\n"
+                 				"  Q	Quit.\n";
+
+               			o = toupper(std::getchar());
+                    std::cin.ignore();
+
+               			// Send a message
+               			if (o == 'M') {
+                 				cout << "Please enter your message: " << endl;
+                 				std::string data;
+                 		    std::getline(std::cin, data);
+
+                        auto message = new smpl::Message();
+                        message->setData(data);
+
+                     		cout << "Sending message: " << data << endl;
+                        // app->client.send(message, true);
+
+                        // Synchronize the message with the main thread
+                        app->ipc.push(new ipc::Action(std::bind(&SympleApplication::onSendMessage, app, std::placeholders::_1), message));
+                    }
+
+               			// List contacts
+               			else if (o == 'C') {
+                 				cout << "Listing contacts:" << endl;
+                 				app->client.roster().print(cout);
+                     		cout << endl;
+               			}
+
+                 		// 	// Quit the app
+                 		// 	else if (o == 'Q') {
+                 		// 	}
+               	}
+
+                cout << "Quiting" << endl;
+                app->shutdown();
+            }, this);
+
+            // Run the event loop
+            waitForShutdown([](void* opaque) {
+                reinterpret_cast<SympleApplication*>(opaque)->shutdown();
+            }, this);
         }
         catch (std::exception& exc) {
             cerr << "Symple runtime error: " << exc.what() << endl;
+        }
+    }
+
+    void onSendMessage(const ipc::Action& action)
+    {
+        // Send the message on the main thread
+        auto message = reinterpret_cast<smpl::Message*>(action.arg);
+
+        // Send without transaction
+        // client.send(*message);
+
+        // Send with transaction
+        auto transaction = client.sendWithAck(*message);
+        transaction->StateChange += sdelegate(this, &SympleApplication::onAckState);
+        transaction->send();
+
+        delete message;
+    }
+
+    void onAckState(void* sender, TransactionState& state, const TransactionState&)
+    {
+        DebugL << "####### On announce response: " << state << endl;
+
+        // auto transaction = reinterpret_cast<sockio::Transaction*>(sender);
+        switch (state.id()) {
+        case TransactionState::Success:
+            // Handle transaction success
+            break;
+
+        case TransactionState::Failed:
+            // Handle transaction failure
+            break;
         }
     }
 
@@ -154,7 +250,7 @@ public:
 
     void onClientStateChange(sockio::ClientState& state, const sockio::ClientState& oldState)
     {
-        DebugL << "####### Client state changed: " << state << ": " << client.ws().socket->address() << endl;
+        DebugL << "Client state changed: " << state << ": " << client.ws().socket->address() << endl;
 
         switch (state.id()) {
         case sockio::ClientState::Connecting:
@@ -162,14 +258,10 @@ public:
         case sockio::ClientState::Connected:
             break;
         case sockio::ClientState::Online:
-            // {
-            //     // Send a message when online
-            //     smpl::Message m;
-            //     m.setData("olay");
-            //     client.send(m, true);
-            // }
+            cout << "Client online" << endl;
             break;
         case sockio::ClientState::Error:
+            cout << "Client disconnected" << endl;
             break;
         }
     }
@@ -193,13 +285,13 @@ int main(int argc, char** argv)
         _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-        // // Setup the file logger
-        // std::string logPath(getCwd());
-        // fs::addnode(logPath, "logs");
-        // fs::addnode(logPath, util::format("Symple_%Ld.log", static_cast<long>(Timestamp().epochTime())));
-        // Logger::instance().add(new FileChannel("Symple", logPath, LDebug));
+        // Setup the file logger
+        std::string logPath(getCwd());
+        fs::addnode(logPath, util::format("Symple_%Ld.log", static_cast<long>(Timestamp().epochTime())));
+        cout << "Log path: " << logPath << endl;
+        Logger::instance().add(new FileChannel("Symple", logPath, LDebug));
 
-        Logger::instance().add(new ConsoleChannel("debug", LTrace));
+        // Logger::instance().add(new ConsoleChannel("debug", LDebug)); //LTrace
 
         // Init SSL client context
 #if USE_SSL
@@ -210,7 +302,7 @@ int main(int argc, char** argv)
         {
             SympleApplication app;
             app.parseOptions(argc, argv);
-            app.work();
+            app.start();
         }
 
         // Cleanup all singletons

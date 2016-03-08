@@ -34,9 +34,9 @@ public:
 
     Tests(Application& app) : app(app)
     {
-        testLogger();
 
 #if 0
+        testLogger();
         testVersionStringComparison();
         testSignal();
         runFSTest();
@@ -60,9 +60,9 @@ public:
         runSocketTests();
         runGarbageCollectorTests();
         runSignalReceivers();
-        testIPC();
         testMultiPacketStream();
 #endif
+        testIPC();
 
         //scy::pause();
     }
@@ -500,7 +500,7 @@ public:
     {
         cout << "Test IPC" << endl;
         num_ipc_callbacks = 0;
-        ipc::Queue<> ipc;
+        ipc::SyncQueue<> ipc;
         ipc.push(new ipc::Action(std::bind(&Tests::ipcCallback, this, std::placeholders::_1), &ipc, "test1"));
         ipc.push(new ipc::Action(std::bind(&Tests::ipcCallback, this, std::placeholders::_1), &ipc, "test2"));
         ipc.push(new ipc::Action(std::bind(&Tests::ipcCallback, this, std::placeholders::_1), &ipc, "test3"));
