@@ -24,9 +24,6 @@ using namespace scy::util;
 // symple -host localhost -port 4500 -token nLIgQ2R8DUiVsxm3kLG0xQtt -user 42 -name Somedude
 // symple -host mydomain.com -port 80 -token nLIgQ2R8DUiVsxm3kLG0xQtt -user 42 -name Somedude
 //
-// TODO:
-// - implement console thread for sending messages
-//
 
 
 #define USE_SSL 0
@@ -148,6 +145,8 @@ public:
                			cout <<
                  				"COMMANDS:\n"
                  				"  M	Send a message.\n"
+                 				"  J	Join a room.\n"
+                 				"  L	Leave a room.\n"
                  				"  C	Print contacts list.\n"
                  				"  Q	Quit.\n";
 
@@ -156,7 +155,7 @@ public:
 
                			// Send a message
                			if (o == 'M') {
-                 				cout << "Please enter your message: " << endl;
+                 				cout << "Compose your message: " << endl;
                  				std::string data;
                  		    std::getline(std::cin, data);
 
@@ -167,8 +166,29 @@ public:
                         // app->client.send(message, true);
 
                         // Synchronize the message with the main thread
-                        app->ipc.push(new ipc::Action(std::bind(&SympleApplication::onSendMessage, app, std::placeholders::_1), message));
+                        app->ipc.push(new ipc::Action(
+                            std::bind(&SympleApplication::onSyncMessage, app, std::placeholders::_1), message));
                     }
+
+               			// Join a room
+               			else if (o == 'J') {
+                        cout << "Join a room: " << endl;
+                        auto data = new std::string();
+                        std::getline(std::cin, *data);
+
+                        app->ipc.push(new ipc::Action(
+                            std::bind(&SympleApplication::onSyncCommand, app, std::placeholders::_1), data, "join"));
+               			}
+
+               			// Leave a room
+               			else if (o == 'L') {
+                        cout << "Leave a room: " << endl;
+                        auto data = new std::string();
+                        std::getline(std::cin, *data);
+
+                        app->ipc.push(new ipc::Action(
+                            std::bind(&SympleApplication::onSyncCommand, app, std::placeholders::_1), data, "leave"));
+               			}
 
                			// List contacts
                			else if (o == 'C') {
@@ -176,10 +196,6 @@ public:
                  				app->client.roster().print(cout);
                      		cout << endl;
                			}
-
-                 		// 	// Quit the app
-                 		// 	else if (o == 'Q') {
-                 		// 	}
                	}
 
                 cout << "Quiting" << endl;
@@ -196,7 +212,7 @@ public:
         }
     }
 
-    void onSendMessage(const ipc::Action& action)
+    void onSyncMessage(const ipc::Action& action)
     {
         // Send the message on the main thread
         auto message = reinterpret_cast<smpl::Message*>(action.arg);
@@ -205,11 +221,23 @@ public:
         // client.send(*message);
 
         // Send with transaction
-        auto transaction = client.sendWithAck(*message);
+        auto transaction = client.createTransaction(*message);
         transaction->StateChange += sdelegate(this, &SympleApplication::onAckState);
         transaction->send();
 
         delete message;
+    }
+
+    void onSyncCommand(const ipc::Action& action)
+    {
+        auto arg = reinterpret_cast<std::string*>(action.arg);
+
+        if (action.data == "join") {
+            client.joinRoom(*arg);
+        }
+        else if (action.data == "leave") {
+            client.leaveRoom(*arg);
+        }
     }
 
     void onAckState(void* sender, TransactionState& state, const TransactionState&)
@@ -285,13 +313,13 @@ int main(int argc, char** argv)
         _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-        // Setup the file logger
-        std::string logPath(getCwd());
-        fs::addnode(logPath, util::format("Symple_%Ld.log", static_cast<long>(Timestamp().epochTime())));
-        cout << "Log path: " << logPath << endl;
-        Logger::instance().add(new FileChannel("Symple", logPath, LDebug));
+        // Setup the logger
+        // std::string logPath(getCwd());
+        // fs::addnode(logPath, util::format("Symple_%Ld.log", static_cast<long>(Timestamp().epochTime())));
+        // cout << "Log path: " << logPath << endl;
+        // Logger::instance().add(new FileChannel("Symple", logPath, LDebug));
 
-        // Logger::instance().add(new ConsoleChannel("debug", LDebug)); //LTrace
+        Logger::instance().add(new ConsoleChannel("debug", LDebug)); //LTrace
 
         // Init SSL client context
 #if USE_SSL

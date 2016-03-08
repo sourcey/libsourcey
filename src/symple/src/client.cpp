@@ -138,10 +138,10 @@ int Client::send(Message& m, bool ack)
 }
 
 
-sockio::Transaction* Client::sendWithAck(Message& message)
+sockio::Transaction* Client::createTransaction(Message& message)
 {
     sockio::Packet pkt(message, true);
-    auto txn = createTransaction(pkt);
+    auto txn = sockio::Client::createTransaction(pkt);
     return txn; //->send();
 }
 
@@ -208,9 +208,29 @@ int Client::announce()
     data["type"] = _options.type;
     data["token"] = _options.token;
     sockio::Packet pkt("announce", data, true);
-    auto txn = createTransaction(pkt);
+    auto txn = sockio::Client::createTransaction(pkt);
     txn->StateChange += sdelegate(this, &Client::onAnnounceState);
     return txn->send();
+}
+
+
+int Client::joinRoom(const std::string& room)
+{
+    DebugL << "Join room: " << room << endl;
+
+    _rooms.push_back(room);
+    sockio::Packet pkt("join", "\"" + room + "\"");
+    return sockio::Client::send(pkt);
+}
+
+
+int Client::leaveRoom(const std::string& room)
+{
+    DebugL << "Leave room: " << room << endl;
+
+    _rooms.erase(std::remove(_rooms.begin(), _rooms.end(), room), _rooms.end());
+    sockio::Packet pkt("leave", "\"" + room + "\"");
+    return sockio::Client::send(pkt);
 }
 
 
@@ -355,9 +375,7 @@ void Client::onPresenceData(const json::Value& data, bool whiny)
         data.isMember("id") &&
         data.isMember("user") &&
         data.isMember("name") &&
-        data.isMember("online") //&&
-        //data.isMember("type")
-        ) {
+        data.isMember("online")) {
         std::string id = data["id"].asString();
         bool online = data["online"].asBool();
         auto peer = _roster.get(id, false);
@@ -427,6 +445,7 @@ void Client::reset()
     //_persistence.clear();
 
     _roster.clear();
+    _rooms.clear();
     _announceStatus = 0;
     _ourID = "";
     sockio::Client::reset();
@@ -442,30 +461,30 @@ Roster& Client::roster()
 
 PersistenceT& Client::persistence()
 {
-    //Mutex::ScopedLock lock(_mutex);
     return _persistence;
 }
 
 
 Client::Options& Client::options()
 {
-    //Mutex::ScopedLock lock(_mutex);
-
-    // Cast the underlyting options object
     return _options;
 }
 
 
 std::string Client::ourID() const
 {
-    //Mutex::ScopedLock lock(_mutex);
     return _ourID;
+}
+
+
+StringVec Client::rooms() const
+{
+    return _rooms;
 }
 
 
 Peer* Client::ourPeer()
 {
-    //Mutex::ScopedLock lock(_mutex);
     if (_ourID.empty())
         return nullptr;
         //throw std::runtime_error("No active peer session is available.");

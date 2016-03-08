@@ -97,9 +97,9 @@ public:
         // The message must be a valid Symple message otherwise it will
         // not be delivered.
 
-    virtual sockio::Transaction* sendWithAck(Message& message);
-        // Send a message and create a Transaction object which will notify
-        // on Ack callback from the server.
+    sockio::Transaction* createTransaction(Message& message);
+        // Create a Transaction object with the given message which will
+        // notify on Ack response from the server.
 
     virtual int respond(Message& message, bool ack = false);
         // Swap the 'to' and 'from' fields and send the given message.
@@ -112,9 +112,18 @@ public:
     virtual int sendPresence(const Address& to, bool probe = false);
         // Send directed presence to the given peer.
 
+    virtual int joinRoom(const std::string& room);
+        // Join the given room.
+
+    virtual int leaveRoom(const std::string& room);
+        // Leave the given room.
+
     virtual std::string ourID() const;
         // Return the session ID of our current peer object.
         // Return an empty string when offline.
+        
+    StringVec rooms() const;
+        // Return a list of rooms the client has joined.
 
     virtual Peer* ourPeer();
         // Return the peer object for the current session,
@@ -129,6 +138,7 @@ public:
 
     Client::Options& options();
         // Return a reference to the client options object.
+
 
     virtual Client& operator >> (Message& message);
         // Stream operator alias for send().
@@ -184,6 +194,7 @@ protected:
     std::string _ourID;
     PersistenceT _persistence;
     Client::Options _options;
+    StringVec _rooms;
     int _announceStatus;
 };
 
