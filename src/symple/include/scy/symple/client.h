@@ -55,74 +55,96 @@ public:
         std::string host;
         std::uint16_t port;
 
-        std::string token;
+        bool reconnection;
+            // Weather or not to reconnect if disconnected from the server.
+
+        int reconnectAttempts;
+            // The number of times to attempt to reconnect if disconnected
+            // from the server. (0 = unlimited)
+
         std::string user;
         std::string name;
         std::string type;
+        std::string token;
 
         Options() {
-            host  = "127.0.0.1";
-            port  = 4500;
+            host = "127.0.0.1";
+            port = 4500;
 
-            token = "";
+            reconnection = true;
+            reconnectAttempts = 0;
+
             user  = "";
             name  = "";
-            type  = "peer";
+            type  = "";
+            token = "";
         }
     };
 
 public:
-    Client(const net::Socket::Ptr& socket,
-        const Options& options = Options());
+    Client(const net::Socket::Ptr& socket, const Options& options = Options());
     virtual ~Client();
 
     void connect();
     void close();
 
     virtual int send(Message& message, bool ack = false);
-        // Sends a message.
+        // Send a message.
         // May be a polymorphic Command, Presence, Event or other ...
 
     virtual int send(const std::string& message, bool ack = false);
-        // Sends a string message.
-        // The message must be a valid Symple message otherwise
-        // it will net be delivered.
+        // Send a string message.
+        // The message must be a valid Symple message otherwise it will
+        // not be delivered.
+
+    sockio::Transaction* createTransaction(Message& message);
+        // Create a Transaction object with the given message which will
+        // notify on Ack response from the server.
 
     virtual int respond(Message& message, bool ack = false);
-        // Swaps the 'to' and 'from' fields and sends
-        // the given message.
+        // Swap the 'to' and 'from' fields and send the given message.
 
     virtual int sendPresence(bool probe = false);
-        // Broadcasts presence to the user group scope.
+        // Broadcast presence to the user group scope.
         // The outgoing Presence object may be modified via
         // the CreatePresence signal.
 
     virtual int sendPresence(const Address& to, bool probe = false);
-        // Sends directed presence to the given peer.
+        // Send directed presence to the given peer.
+
+    virtual int joinRoom(const std::string& room);
+        // Join the given room.
+
+    virtual int leaveRoom(const std::string& room);
+        // Leave the given room.
 
     virtual std::string ourID() const;
-        // Returns the session ID of our current peer object.
-        // Returns an empty string when offline.
+        // Return the session ID of our current peer object.
+        // Return an empty string when offline.
+        
+    StringVec rooms() const;
+        // Return a list of rooms the client has joined.
 
     virtual Peer* ourPeer();
-        // Returns the peer object for the current session,
+        // Return the peer object for the current session,
         // or throws an exception when offline.
 
     virtual Roster& roster();
-        // Returns the roster which stores all online peers.
+        // Return the roster which stores all online peers.
 
     virtual PersistenceT& persistence();
-        // Returns the persistence manager which stores
+        // Return the persistence manager which stores
         // long lived messages.
 
-    virtual Client::Options& options();
-        // Returns a reference to the options object.
+    Client::Options& options();
+        // Return a reference to the client options object.
+
 
     virtual Client& operator >> (Message& message);
         // Stream operator alias for send().
 
     virtual void onPresenceData(const json::Value& data, bool whiny = false);
-        // Updates the roster from the given client object.
+        // Update the roster from the given client object.
 
     //
     // Signals
@@ -164,7 +186,7 @@ protected:
         // Override PAcketStream::emit
 
     virtual void onOnline();
-    virtual void onAnnounce(void* sender, TransactionState& state, const TransactionState&);
+    virtual void onAnnounceState(void* sender, TransactionState& state, const TransactionState&);
     // virtual void onPacket(sockio::Packet& packet);
 
 protected:
@@ -172,6 +194,7 @@ protected:
     std::string _ourID;
     PersistenceT _persistence;
     Client::Options _options;
+    StringVec _rooms;
     int _announceStatus;
 };
 

@@ -128,7 +128,7 @@ public:
     std::string toString() const;
     void print(std::ostream& os) const;
 
-    virtual const char* className() const { return "SocketIOPacket"; }
+    virtual const char* className() const { return "SocketIO::Packet"; }
 
 protected:
     // std::uint8_t _type;

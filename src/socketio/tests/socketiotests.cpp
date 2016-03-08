@@ -76,14 +76,18 @@ public:
 
     void testClient()
     {
+        sockio::Client::Options options;
+        options.host = SERVER_HOST;
+        options.port = SERVER_PORT;
+
 #if USE_SSL
-        sockio::SSLClient client(app.loop);
+        sockio::SSLClient client(options, app.loop);
 #else
-        sockio::TCPClient client(app.loop);
+        sockio::TCPClient client(options, app.loop);
 #endif
 
         client.StateChange += sdelegate(this, &Tests::onClientStateChange);
-        client.connect(SERVER_HOST, SERVER_PORT);
+        client.connect();
 
         // app.run();
         app.waitForShutdown([](void* opaque) {

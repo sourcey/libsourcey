@@ -70,7 +70,7 @@ public:
         return os;
     }
 
-    //virtual const char* className() const { return "smpl::Peer"; }
+    virtual const char* className() const { return "smpl::Peer"; }
 };
 
 
