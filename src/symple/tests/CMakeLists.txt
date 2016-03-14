@@ -1,1 +1,1 @@
-define_libsourcey_test(sympletests base uv crypto net http json socketio symple)
+define_libsourcey_test(sympletests uv base crypto net http json socketio symple)

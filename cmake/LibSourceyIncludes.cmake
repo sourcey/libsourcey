@@ -226,22 +226,25 @@ endmacro()
 # Set the default dependencies for a LibSourcey project.
 #
 macro(set_default_project_dependencies name)
-  foreach(dep ${LibSourcey_BUILD_DEPENDENCIES})
-    add_dependencies(${name} ${dep})
-  endforeach()
+  # foreach(dep ${LibSourcey_BUILD_DEPENDENCIES})
+  #   add_dependencies(${name} ${dep})
+  # endforeach()
+  # target_link_libraries(${name} ${LibSourcey_BUILD_DEPENDENCIES})
 
   # Include dependent modules
-  foreach(module ${ARGN})
+  #foreach(module ${ARGN})
     #if(NOT ${module} MATCHES "util")
-      add_dependencies(${name} ${module})
+      #add_dependencies(${name} ${module})
     #endif()
-  endforeach()
+  #endforeach()
 
   # Include all linker libraries
   set(${name}_LIBRARIES ${ARGN})
   list(APPEND ${name}_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES})
   list(APPEND ${name}_LIBRARIES ${LibSourcey_BUILD_DEPENDENCIES})
   list(REMOVE_DUPLICATES ${name}_LIBRARIES)
+  message(STATUS "####################### target_link_libraries ${name} ${${name}_LIBRARIES}")
+
   target_link_libraries(${name} "${${name}_LIBRARIES}")
 endmacro()
 

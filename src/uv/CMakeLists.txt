@@ -12,7 +12,7 @@ if(BUILD_MODULES AND BUILD_MODULE_uv)
   #  set(HAVE_LIBUV 1)
   #endif()
 
-  include_dependency(LibUV) #REQUIRED
-  
+  #include_dependency(LibUV) #REQUIRED
+
   define_sourcey_module(uv)
 endif()

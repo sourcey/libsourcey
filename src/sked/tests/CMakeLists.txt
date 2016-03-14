@@ -1,3 +1,3 @@
 include_dependency(JsonCpp)
 
-define_libsourcey_test(skedtests base uv net json sked)
+define_libsourcey_test(skedtests uv base net json sked)

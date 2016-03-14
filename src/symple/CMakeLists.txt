@@ -1,8 +1,8 @@
 ask_build_sourcey_module(symple)
 if(BUILD_MODULES AND BUILD_MODULE_symple)
-  include_dependency(LibUV)
+  #include_dependency(LibUV)
   include_dependency(OpenSSL REQUIRED)
-  include_dependency(JsonCpp)
+  #include_dependency(JsonCpp)
   #include_dependency(HttpParser)
 
   # FIXME: Including OpenCV dependency here for MediaServer
@@ -12,7 +12,7 @@ if(BUILD_MODULES AND BUILD_MODULE_symple)
   #include_dependency(OpenCV REQUIRED)
   #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../http/vendor/http_parser)
 
-  define_sourcey_module(symple base uv crypto net http socketio json util)
+  define_sourcey_module(symple uv base crypto net http socketio json util)
 
   add_subdirectory(apps)
 endif()
