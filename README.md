@@ -126,10 +126,10 @@ This guide is for written for Mac users using [Homebrew](http://brew.sh).
 
 ##### Install Dependencies
 
-~~~ bash
-# LibUV:
-brew install --HEAD libuv
+<!-- # LibUV:
+brew install --HEAD libuv -->
 
+~~~ bash
 # OpenSSL:
 brew install openssl
 brew link --force openssl
