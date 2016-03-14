@@ -1,0 +1,8 @@
+dependencies:
+  pre:
+    - mkdir build; cd build; cmake ..; make; make install
+  override:
+    - cd build; make; make install
+test:
+  override:
+    - cd build; make check
