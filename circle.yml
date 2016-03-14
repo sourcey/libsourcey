@@ -1,10 +1,7 @@
 dependencies:
   pre:
-    - sudo apt-get install software-properties-common
-    - sudo add-apt-repository ppa:george-edison55/cmake-3.x
-    - sudo apt-get update
-    - sudo apt-get upgrade cmake
-    - mkdir build; cd build; cmake ..; make; make install
+    - curl -sSL https://cmake.org/files/v3.4/cmake-3.4.0-Linux-x86_64.tar.gz | sudo tar -xzC /opt
+    - mkdir build; cd build; /opt/cmake-3.4.0-Linux-x86_64/bin/cmake ..;
   override:
     - cd build; make; make install
 test:
