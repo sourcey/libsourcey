@@ -121,5 +121,5 @@ add_library(rtaudio_static STATIC ${rtaudio_SOURCES})
 target_link_libraries(rtaudio ${LINKLIBS})
 
 if (BUILD_TESTING)
-    add_subdirectory(tests)
+    #add_subdirectory(tests)
 endif (BUILD_TESTING)
