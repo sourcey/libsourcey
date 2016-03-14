@@ -10,6 +10,7 @@ if(BUILD_MODULES AND BUILD_MODULE_symple)
   # dependency libraries properly.
   #include_dependency(OpenCV REQUIRED)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../http/vendor/http_parser)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../json/vendor/jsoncpp)
 
   define_sourcey_module(symple base uv crypto net http socketio json util)
 
