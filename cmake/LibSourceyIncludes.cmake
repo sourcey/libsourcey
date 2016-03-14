@@ -215,6 +215,7 @@ macro(set_default_project_directories)
 
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
   include_directories(${LibSourcey_INCLUDE_DIRS})
+  include_directories(${LibSourcey_VENDOR_INCLUDE_DIRS}) # include all internal vendor dirs
   link_directories(${LibSourcey_LIBRARY_DIRS})
 endmacro()
 

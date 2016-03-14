@@ -290,7 +290,7 @@ endif()
 # Include the LibSourcey source tree
 # ----------------------------------------------------------------------------
 
-list(APPEND LibSourcey_INCLUDE_DIRS
+list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
   ${LibSourcey_SOURCE_DIR}/archo/vendor/zlib
   ${LibSourcey_SOURCE_DIR}/archo/vendor/minizip
   ${LibSourcey_SOURCE_DIR}/media/vendor/rtaudio
