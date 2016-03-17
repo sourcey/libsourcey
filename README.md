@@ -3,6 +3,8 @@
 **Homepage**: [http://sourcey.com/libsourcey](http://sourcey.com/libsourcey)  
 **Licence**: LGPL
 
+[![Circle CI](https://circleci.com/gh/sourcey/libsourcey.svg?style=shield&circle-token=ab142562b19bb857de796d729aab28fa9df7682d)](https://circleci.com/gh/sourcey/libsourcey)
+
 LibSourcey is a collection of open source cross platform C++11 modules and classes that provide developers with a flexible high performance arsenal for the rapid development of realtime messaging and live media streaming applications. Think of it as the power of `libuv` combined with the ease and readability of the `stl` (C++ Standard Library).
 
 <!-- For media streaming applications, LibSourcey provides a simple and flexible method of capturing live audio/video streams (_OpenCV/FFmpeg_), processing, filtering and encoding them using any video format (_FFmpeg_), and broadcasting the result over the Internet (_libuv_). This is made possible by implementing a thin layer over the top of some brilliant open source projects, such as FFmpeg, OpenCV and libuv. The only required third-party dependency is libuv, and that is included in the local source and compiled automatically. All others dependencies are optional. -->
@@ -23,7 +25,7 @@ LibSourcey is a collection of open source cross platform C++11 modules and class
 
 * **Elegant PacketStream API** — The PacketStream API allows LibSourcey modules to pipe and process arbitrary data packets through a dynamic delegate chain. This dynamic method of layering packet processors makes it possible to develop complex data processing applications quickly and easily. Check out this writeup on how the PacketSteram API can be used for encoding H.264 on the fly: http://sourcey.com/libsourcey-packetstream-api/
 
-* **Media streaming and encoding** — The media library consists of thin wrappers around FFmpeg and OpenCV for media capture, encoding, recording, streaming, anaysis and more. The Media API makes full use of the PacketStream API so that encoders, processors and broadcasters can be dynamically added and removed from any media source - a great base for building a [media server](https://github.com/sourcey/libsourcey/tree/master/src/symple/samples/mediaserver).  
+* **Media streaming and encoding** — The media library consists of thin wrappers around FFmpeg and OpenCV for media capture, encoding, recording, streaming, analysis and more. The Media API makes full use of the PacketStream API so that encoders, processors and broadcasters can be dynamically added and removed from any media source - a great base for building a [media server](https://github.com/sourcey/libsourcey/tree/master/src/symple/samples/mediaserver).  
 
 * **Realtime messaging** — LibSourcey aims to bridge the gap between desktop, mobile and web by providing performance oriented messaging solutions that work across all platforms.
     * **Socket.IO** — Socket.IO C++ client that supports the latest protocol revision 4 (>- 1.0). Read more about [Socket.IO](http://socket.io).
