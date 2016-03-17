@@ -35,17 +35,25 @@ namespace test {
 class Test;
 class TestRunner;
 
-typedef std::function<void()> callback_t;
+typedef std::function<void()> voidfunc_t;
 typedef std::list<Test*> test_list_t;
 typedef std::list<std::string> error_list_t;
 typedef std::map<Test*, error_list_t> error_map_t;
 
 
-void describe(const std::string& name, callback_t target);
-void describe(const std::string& name, Test* test);
+int finalize();
+    // Finalize the test environment.
+    //
+    // Destroy the TestRunner singleton instance and return the exit code.
 
+void describe(const std::string& name, voidfunc_t target);
+    // Describe a test environment implemented by the given lambda function.
+
+void describe(const std::string& name, Test* test);
+    // Describe a test environment implemented by the given test instance.
 
 void _expect(bool passed, const char* assert, const char* file, long line);
+    // Expect asserts that a condition is true (use expect() as defined below).
 
 // Shamelessly define macros to aesthetic name :)
 #ifdef NDEBUG
@@ -54,11 +62,6 @@ void _expect(bool passed, const char* assert, const char* file, long line);
 #define expect(x) _expect(x, #x , __FILE__, __LINE__ )
 #endif
 
-
-int finalize();
-    // Finalize the test environment.
-    //
-    // Destroy the TestRunner singleton instance and return the exit code.
 
 //
 // Test
@@ -99,15 +102,17 @@ protected:
 class FunctionTest: public Test
 {
 public:
-    callback_t target;
+    voidfunc_t target;
 
-    FunctionTest(callback_t target, const std::string& name = "Unnamed Test") :
+    FunctionTest(voidfunc_t target, const std::string& name = "Unnamed Test") :
         Test(name), target(target)
     {
     }
 
 protected:
-    virtual ~FunctionTest() {};
+    virtual ~FunctionTest()
+    {
+    }
 
     void run()
     {

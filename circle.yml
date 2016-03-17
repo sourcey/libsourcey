@@ -1,7 +1,7 @@
 dependencies:
   pre:
     - curl -sSL https://cmake.org/files/v3.4/cmake-3.4.0-Linux-x86_64.tar.gz | sudo tar -xzC /opt
-    - mkdir build; cd build; /opt/cmake-3.4.0-Linux-x86_64/bin/cmake ..;
+    - mkdir build; cd build; /opt/cmake-3.4.0-Linux-x86_64/bin/cmake .. -DWITH_FFMPEG=OFF -DWITH_OPENCV=OFF;
   override:
     - cd build; make; make install
 test:

@@ -158,10 +158,14 @@ void TestRunner::run()
 {
     test_list_t tests = this->tests();
     for (auto it = tests.begin(); it != tests.end(); ++it) {
+        {
+            Mutex::ScopedLock lock(_mutex);
+            _current = *it;
+        }
         cout << "---------------------------------------------------------------" << endl;
-        cout << (*it)->name << " starting" << endl;
-        (*it)->run();
-        cout << (*it)->name << " ended" << endl;
+        cout << _current->name << " starting" << endl;
+        _current->run();
+        cout << _current->name << " ended" << endl;
     }
 }
 
