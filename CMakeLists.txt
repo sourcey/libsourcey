@@ -302,7 +302,8 @@ list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
 # Enable testing if required
 if (BUILD_MODULE_TESTS)
   enable_testing()
-  add_custom_target(test ${CMAKE_CTEST_COMMAND} -V)
+  set(CMAKE_CTEST_COMMAND ctest -V)
+  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 endif()
 
 if(BUILD_MODULES OR BUILD_APPLICATIONS)
