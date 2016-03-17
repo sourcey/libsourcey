@@ -299,6 +299,12 @@ list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
   ${LibSourcey_SOURCE_DIR}/http/vendor/http_parser
   ${LibSourcey_SOURCE_DIR}/json/vendor/jsoncpp)
 
+# Enable testing if required
+if (BUILD_MODULE_TESTS)
+  enable_testing()
+  add_custom_target(test ${CMAKE_CTEST_COMMAND} -V)
+endif()
+
 if(BUILD_MODULES OR BUILD_APPLICATIONS)
   subdirlist(subdirs "${CMAKE_SOURCE_DIR}/src")
   foreach(name ${subdirs})

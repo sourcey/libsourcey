@@ -24,7 +24,7 @@
 
 namespace scy {
 namespace async {
-    
+
 
 Runner::Runner()
 {
@@ -41,6 +41,7 @@ Runner::~Runner()
 
 void Runner::runAsync(Context* c)
 {
+    // std::cout << "Runner::runAsync" << std::endl;
     c->running = true;
     try {
         if (!c->cancelled()) {
@@ -62,15 +63,15 @@ void Runner::runAsync(Context* c)
         }
     }
     catch (std::exception& exc) {
-        ErrorL << "Runner error: " << exc.what() << std::endl;    
+        ErrorL << "Runner error: " << exc.what() << std::endl;
 #ifdef _DEBUG
         throw exc;
 #endif
     }
-    
+
     c->running = false;
     if (c->cancelled()) {
-        // Once cancelled we release callback functions to allow freeing   
+        // Once cancelled we release callback functions to allow freeing
         // of memory allocated by std::shared_ptr managed pointers used to
         // std::bind the std::function.
         c->target = nullptr;
@@ -100,7 +101,7 @@ void Runner::start(std::function<void()> target)
     if (started())
         throw std::runtime_error("Runner context already active");
 
-    pContext->target = target;    
+    pContext->target = target;
     pContext->arg = nullptr;
     pContext->running = false;
     pContext->started = true;
@@ -112,8 +113,8 @@ void Runner::start(std::function<void(void*)> target, void* arg)
 {
     if (started())
         throw std::runtime_error("Runner context already active");
-    
-    pContext->target1 = target;    
+
+    pContext->target1 = target;
     pContext->arg = arg;
     pContext->running = false;
     pContext->started = true;
@@ -163,12 +164,12 @@ uv_thread_t Runner::tid() const
     return pContext->tid;
 }
 
-    
+
 
 //
 // Runner Context
 //
-    
+
 
 void Runner::Context::cancel()
 {

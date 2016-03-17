@@ -138,7 +138,8 @@ bool TaskRunner::remove(Task* task)
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         if (*it == task) {
             _tasks.erase(it);
-            //uv_unref(Idler::handle.ptr()); // dereference the idler handle when a task is removed
+            // dereference the idler handle when a task is removed
+            //uv_unref(Idler::handle.ptr());
             onRemove(task);
             return true;
         }

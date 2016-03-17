@@ -295,6 +295,7 @@ private:
     std::size_t _limit;
     const char* _bytes;
     ByteOrder _order;
+    Buffer* _buffer;
 };
 
 
@@ -377,7 +378,7 @@ private:
     std::size_t _position;
     std::size_t _limit;
     ByteOrder _order;
-    Buffer* _buffer;
+    // Buffer* _buffer;
     char* _bytes;
 };
 

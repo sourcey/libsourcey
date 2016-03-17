@@ -28,8 +28,8 @@ using std::endl;
 
 
 namespace scy {
-    
-    
+
+
 const uv_thread_t Thread::mainID = uv_thread_self();
 
 
@@ -70,35 +70,33 @@ void Thread::startAsync()
         do {
             runAsync(ptr.get());
             scy::sleep(1); // TODO: uv_thread_yield when available
-        } while (ptr->repeating && !ptr->cancelled());        
+        } while (ptr->repeating && !ptr->cancelled());
         ptr->running = false;
         ptr->started = false;
         delete &ptr;
     }, new Runner::Context::ptr(pContext));
-    if (r < 0) throw std::runtime_error("System error: Cannot initialize thread");    
+    if (r < 0) throw std::runtime_error("System error: Cannot initialize thread");
 }
 
 
 void Thread::join()
 {
-    TraceS(this) << "Joining" << std::endl;
+    // WARNING: Do not use Logger in this method
     assert(this->tid() != Thread::currentID());
-    //assert(this->cancelled()); // probably should be cancelled, but depends on impl
-    uv_thread_join(&_handle);    
+    //assert(this->cancelled()); // should probably be cancelled, but depends on impl
+    uv_thread_join(&_handle);
     assert(!this->running());
     assert(!this->started());
-    TraceS(this) << "Joining: OK" << std::endl;
 }
 
 
-bool Thread::waitForExit(int timeout) 
-{    
+bool Thread::waitForExit(int timeout)
+{
+    // WARNING: Do not use Logger in this method
+    assert(Thread::currentID() != this->tid());
     int times = 0;
     int interval = 10;
-    assert(Thread::currentID() != this->tid());
     while (!this->cancelled() || this->running()) {
-        TraceS(this) << "Wait for exit: " 
-            << !this->cancelled() << ": " << this->running() << endl;
         scy::sleep(interval);
         times++;
         if (timeout && ((times * interval) > timeout)) {
@@ -115,7 +113,7 @@ uv_thread_t Thread::currentID()
     return uv_thread_self();
 }
 
-    
+
 bool Thread::async() const
 {
     return true;

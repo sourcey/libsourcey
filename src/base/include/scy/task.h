@@ -29,13 +29,13 @@
 namespace scy {
 
 
-#if 0 // Depreciated
+#if 0
 template <class async::RunnableT>
 class ITask: public async::RunnableT
     // This class defines an asynchronous Task which is
     // managed by a TaskRunner.
 {
-public:            
+public:
     virtual bool start() = 0;
     virtual bool cancel() = 0;
     virtual bool destroy() = 0;
@@ -46,9 +46,9 @@ public:
         // Returns true if the task should be run once only
 
     virtual TaskRunner& runner();
-        // Returns a reference to the affiliated TaskRunner or 
+        // Returns a reference to the affiliated TaskRunner or
         // throws an exception.
-    
+
 protected:
     Task& operator=(Task const&) = 0; // {}
     virtual ~Task() = 0;
@@ -57,26 +57,26 @@ protected:
         // reason being that if the derived task is programmatically
         // destroyed there is a chance that the TaskRunner will call
         // run() as a pure virtual method.
-    
-    virtual bool beforeRun();    
+
+    virtual bool beforeRun();
         // Called by the TaskRunner to determine weather the task can
         // be run or not. It is safe to destroy() the task from
         // inside this method.
         // This method returns true by default.
 
-    virtual void run() = 0;    
+    virtual void run() = 0;
         // Called by the TaskRunner to run the task.
         // Override this method to implement task logic.
-    
-protected:    
+
+protected:
     mutable Mutex    _mutex;
-    
+
     bool _cancelled;
     bool _destroyed;
     bool _repeating;
 
     TaskRunner* _runner;
-    
+
     friend class TaskRunner;
 };
 #endif

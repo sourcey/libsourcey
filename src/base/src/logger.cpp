@@ -240,8 +240,10 @@ void AsyncLogWriter::flush()
 
 void AsyncLogWriter::run()
 {
-    while (!cancelled())
+    while (!cancelled()) {
+        std::cout << "hello" << std::endl;
         scy::sleep(writeNext() ? 1 : 50);
+    }
 }
 
 
