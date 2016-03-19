@@ -40,6 +40,8 @@ typedef std::list<Test*> test_list_t;
 typedef std::list<std::string> error_list_t;
 typedef std::map<Test*, error_list_t> error_map_t;
 
+void runTests();
+    // Run all tests.
 
 int finalize();
     // Finalize the test environment.
@@ -52,14 +54,14 @@ void describe(const std::string& name, voidfunc_t target);
 void describe(const std::string& name, Test* test);
     // Describe a test environment implemented by the given test instance.
 
-void _expect(bool passed, const char* assert, const char* file, long line);
+void expectImpl(bool passed, const char* assert, const char* file, long line);
     // Expect asserts that a condition is true (use expect() as defined below).
 
 // Shamelessly define macros to aesthetic name :)
 #ifdef NDEBUG
-#define expect(x) _expect(true, "", "", 0)
+#define expect(x) test::expectImpl(true, "", "", 0)
 #else
-#define expect(x) _expect(x, #x , __FILE__, __LINE__ )
+#define expect(x) test::expectImpl(x, #x , __FILE__, __LINE__)
 #endif
 
 
@@ -89,6 +91,9 @@ public:
 
     error_list_t errors;
         // A list of test errors.
+
+    double duration;
+        // The test run duration for benchmarking.
 
 protected:
     Test(const Test& test);

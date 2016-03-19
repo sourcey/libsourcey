@@ -21,6 +21,7 @@
 #include "scy/logger.h"
 #include "scy/memory.h"
 #include "scy/singleton.h"
+#include "scy/time.h"
 #include "scy/util.h"
 
 #include <iostream>
@@ -53,6 +54,12 @@ void describe(const std::string& name, Test* test)
 }
 
 
+void runTests()
+{
+    TestRunner::getDefault().run();
+}
+
+
 int finalize()
 {
     bool passed = TestRunner::getDefault().passed();
@@ -61,7 +68,7 @@ int finalize()
 }
 
 
-void _expect(bool passed, const char* assert, const char* file, long line)
+void expectImpl(bool passed, const char* assert, const char* file, long line)
 {
     if (passed)
         return;
@@ -156,6 +163,10 @@ Test* TestRunner::current() const
 
 void TestRunner::run()
 {
+    cout << "running all tests" << endl;
+
+    std::uint64_t start = time::hrtime();
+    double duration = 0;
     test_list_t tests = this->tests();
     for (auto it = tests.begin(); it != tests.end(); ++it) {
         {
@@ -164,8 +175,25 @@ void TestRunner::run()
         }
         cout << "---------------------------------------------------------------" << endl;
         cout << _current->name << " starting" << endl;
+        std::uint64_t test_start = time::hrtime();
         _current->run();
-        cout << _current->name << " ended" << endl;
+        _current->duration = (time::hrtime() - test_start) / 1e9;
+        cout << _current->name << " ended after " << _current->duration << " seconds" << endl;
+    }
+
+    duration = (time::hrtime() - start) / 1e9;
+
+    cout << "---------------------------------------------------------------" << endl;
+    cout << "all tests completed after " << duration << " seconds" << endl;
+    // cout << "summary: " << endl;
+
+    for (auto it = tests.begin(); it != tests.end(); ++it) {
+        if ((*it)->passed()) {
+            cout << (*it)->name << " passed" << endl;
+        }
+        else {
+            cout << (*it)->name << " failed" << endl;
+        }
     }
 }
 
@@ -182,7 +210,7 @@ TestRunner& TestRunner::getDefault()
 
 
 Test::Test(const std::string& name) :
-    name(name)
+    name(name), duration(0)
 {
 }
 

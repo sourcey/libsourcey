@@ -288,11 +288,11 @@ int main(int argc, char** argv)
 
         expect(async.started() == true);
 
-        while (!ran) {
-            scy::sleep(10); // wait for thread
-        }
+        async.join();
 
-        // cout << "Thread Ran" << endl;
+        expect(ran == true);
+        expect(async.running() == false);
+        expect(async.started() == false);
     });
 
     // Define class based tests
@@ -303,12 +303,7 @@ int main(int argc, char** argv)
     describe("packet stream", new PacketStreamTest);
     describe("multi packet stream", new MultiPacketStreamTest);
 
-    // Run all tests
-    TestRunner::getDefault().run();
-
-    // // Cleanup singleton instances
-    // GarbageCollector::destroy();
-    // Logger::destroy();
+    runTests();
 
     return finalize();
 }

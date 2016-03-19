@@ -291,7 +291,7 @@ void Client::onOnline()
 }
 
 
-void Client::emit(IPacket& raw)
+void Client::emit(void* sender, IPacket& raw)
 {
     auto packet = reinterpret_cast<sockio::Packet&>(raw);
 
@@ -300,11 +300,12 @@ void Client::emit(IPacket& raw)
         TraceL << "JSON packet: " << packet.toString() << endl;
 
         json::Value data = packet.json();
+#ifdef _DEBUG
+        TraceL << "Received " << json::stringify(data, true) << endl; //type << ": " <<
+#endif
+        assert(data.isObject());
         if (data.isMember("type")) {
             std::string type(data["type"].asString());
-#ifdef _DEBUG
-            TraceL << "Received " << type << ": " << json::stringify(data, true) << endl;
-#endif
 
             // KLUDGE: Note we are currently creating the JSON object
             // twice with these polymorphic message classes. Perhaps
@@ -331,6 +332,7 @@ void Client::emit(IPacket& raw)
                     WarnL << "Dropping invalid presence: " << json::stringify(data, false) << endl;
                     return;
                 }
+                PacketSignal::emit(this, p);
                 if (p.isMember("data")) {
                     onPresenceData(p["data"], false);
                     if (p.isProbe())

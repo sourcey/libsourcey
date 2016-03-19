@@ -29,10 +29,10 @@
 
 namespace scy {
 
-        
-struct TransactionState: public State 
-{    
-    enum Type 
+
+struct TransactionState: public State
+{
+    enum Type
     {
         Waiting = 0,
         Running,
@@ -41,8 +41,8 @@ struct TransactionState: public State
         Failed
     };
 
-    std::string str(unsigned int id) const 
-    { 
+    std::string str(unsigned int id) const
+    {
         switch(id) {
         case Waiting:        return "Waiting";
         case Running:        return "Running";
@@ -50,7 +50,7 @@ struct TransactionState: public State
         case Cancelled:        return "Cancelled";
         case Failed:        return "Failed";
         }
-        return "undefined"; 
+        return "undefined";
     };
 };
 
@@ -64,24 +64,24 @@ class PacketTransaction: public async::Sendable, public Stateful<TransactionStat
 {
 public:
     PacketTransaction(long timeout = 10000, int retries = 0, uv::Loop* loop = uv::defaultLoop()) :
-        _timer(loop), 
-        _timeout(timeout), 
-        _retries(retries), 
-        _attempts(0),
-        _destroyed(false)
-    {        
-    }        
-
-    PacketTransaction(const PacketT& request, long timeout = 10000, int retries = 0, uv::Loop* loop = uv::defaultLoop()) :
-        _request(request),
         _timer(loop),
-        _timeout(timeout), 
-        _retries(retries), 
+        _timeout(timeout),
+        _retries(retries),
         _attempts(0),
         _destroyed(false)
     {
     }
-    
+
+    PacketTransaction(const PacketT& request, long timeout = 10000, int retries = 0, uv::Loop* loop = uv::defaultLoop()) :
+        _request(request),
+        _timer(loop),
+        _timeout(timeout),
+        _retries(retries),
+        _attempts(0),
+        _destroyed(false)
+    {
+    }
+
     virtual bool send()
         // Starts the transaction timer and sends the request.
         // Overriding classes should implement send logic here.
@@ -96,25 +96,27 @@ public:
         _timer.start(_timeout, 0);
 
         return setState(this, TransactionState::Running);
-    }    
-    
+    }
+
     void cancel();
-    bool cancelled() const;    
-        // Cancellation means that the agent will not retransmit 
+    bool cancelled() const;
+        // Cancellation means that the agent will not retransmit
         // the request, will not treat the lack of response to be
         // a failure, but will wait the duration of the transaction
-        // timeout for a response.    
-    
+        // timeout for a response.
+
     virtual void dispose()
         // Schedules the transaction for deferred deletion.
         //
         // It is safe to call this function while the transaction
-        // is still active, providing the call is made from the same 
+        // is still active, providing the call is made from the same
         // loop thread which the timer is running on.
         //
         // Protected by the base implementation as this is called
         // by the internal state machine.
     {
+        traceL("PacketTransaction", this) << "Dispose" << std::endl;
+
         if (!_destroyed) {
             _destroyed = true;
             _timer.Timeout -= sdelegate(this, &PacketTransaction::onTimeout);
@@ -124,13 +126,13 @@ public:
         }
     }
 
-    virtual bool canResend();    
+    virtual bool canResend();
     int attempts() const;
     int retries() const;
-        
+
     PacketT& request();
     PacketT request() const;
-        
+
     PacketT& response();
     PacketT response() const;
 
@@ -140,18 +142,21 @@ protected:
         //assert(!stateEquals(TransactionState::Running));
     }
 
-    virtual void onStateChange(TransactionState& state, const TransactionState&) 
+    virtual void onStateChange(TransactionState& state, const TransactionState&)
         // Override to handle post state change logic.
     {
-        if (state.equals(TransactionState::Success) || 
+        traceL("PacketTransaction", this) << "On state change: "
+            << state.toString() << std::endl;
+
+        if (state.equals(TransactionState::Success) ||
             state.equals(TransactionState::Failed))
             dispose();
     }
-    
+
     virtual bool handlePotentialResponse(const PacketT& packet)
         // Processes a potential response candidate
         // and updates the state accordingly.
-    {    
+    {
         if (stateEquals(TransactionState::Running) && checkResponse(packet)) {
             _response = packet;
             onResponse();
@@ -160,30 +165,30 @@ protected:
         }
         return false;
     }
-    
+
     virtual bool checkResponse(const PacketT& packet) = 0;
         // Checks a potential response candidate and
         // returns true on successful match.
-    
-    virtual void onResponse() 
+
+    virtual void onResponse()
         // Called when a successful response is received.
     {
-        traceL("PacketTransaction", this) << "Success: " 
+        traceL("PacketTransaction", this) << "Success: "
             << _response.toString() << std::endl;
     }
 
     virtual void onTimeout(void*)
-    {    
-        debugL("PacketTransaction", this) << "Timeout" << std::endl;    
+    {
+        debugL("PacketTransaction", this) << "Timeout" << std::endl;
 
         if (!canResend()) {
             //if (!cancelled())
-            //    setState(this, TransactionState::Failed, "Transaction timeout");                
+            //    setState(this, TransactionState::Failed, "Transaction timeout");
             //dispose();
             setState(this, TransactionState::Failed, "Transaction timeout");
-        } 
+        }
         else send();
-    }    
+    }
 
 protected:
     friend struct std::default_delete<PacketTransaction>;
@@ -193,21 +198,21 @@ protected:
     Timer _timer;
     int _timeout;        // The request timeout in milliseconds.
     int _retries;        // The maximum number of attempts before the transaction is considered failed.
-    int _attempts;        // The number of times the transaction has been sent.    
+    int _attempts;        // The number of times the transaction has been sent.
     bool _destroyed;
 };
 
-    
+
 template <class T> inline void PacketTransaction<T>::cancel() { setState(this, TransactionState::Cancelled); }
 template <class T> inline bool PacketTransaction<T>::cancelled() const { return stateEquals(TransactionState::Cancelled); }
 
-template <class T> inline bool PacketTransaction<T>::canResend() { return !cancelled() && attempts() <= retries(); }    
+template <class T> inline bool PacketTransaction<T>::canResend() { return !cancelled() && attempts() <= retries(); }
 template <class T> inline int PacketTransaction<T>::attempts() const { return _attempts; }
 template <class T> inline int PacketTransaction<T>::retries() const { return _retries; }
-        
-template <class T> inline T& PacketTransaction<T>::request() { return _request; }    
-template <class T> inline T PacketTransaction<T>::request() const { return _request; }        
-template <class T> inline T& PacketTransaction<T>::response() { return _response;    }    
+
+template <class T> inline T& PacketTransaction<T>::request() { return _request; }
+template <class T> inline T PacketTransaction<T>::request() const { return _request; }
+template <class T> inline T& PacketTransaction<T>::response() { return _response;    }
 template <class T> inline T PacketTransaction<T>::response() const { return _response; }
 
 

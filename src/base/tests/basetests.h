@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_BaseTests_H
-#define SCY_BaseTests_H
+#ifndef SCY_Base_Tests_H
+#define SCY_Base_Tests_H
 
 
 #include "scy/base.h"
@@ -40,8 +40,13 @@
 #include "scy/util.h"
 
 
+using std::cout;
+using std::cerr;
+using std::endl;
+using scy::test::Test;
+
+
 namespace scy {
-namespace test {
 
 
 // =============================================================================
@@ -377,7 +382,7 @@ class MultiPacketStreamTest: public Test
 };
 
 
-} } // namespace scy::test
+} // namespace scy
 
 
-#endif // SCY_BaseTests_H
+#endif // SCY_Base_Tests_H

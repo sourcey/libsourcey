@@ -194,71 +194,25 @@ std::size_t Packet::read(const ConstBuffer& buf)
     // look up json data
     // TODO: Take into account joined messages
     if (reader.available()) {
-        reader.get(_message, reader.available());
+        std::string temp;
+        reader.get(temp, reader.available());
+
+        json::Value json;
+        json::Reader reader;
+        if (reader.parse(temp, json)) {
+            if (json.isArray()) {
+                _event = json[0].asString();
+                _message = json::stringify(json[1], true);
+            }
+            else if (json.isObject()) {
+                _message = json::stringify(json, true);
+            }
+        }
     }
 
     _size = reader.position();
 
     DebugN(this) << "Parse success: " << toString() << endl;
-
-#if 0 // Socket.IO 0.9x
-    std::string data(bufferCast<const char*>(buf), buf.size());
-    std::vector<std::string> frags = util::split(data, ':', 4);
-    if (frags.size() < 1) {
-        //DebugN(this) << "Reading: Invalid Data: " << frags.size() << endl;
-        return false;
-    }
-
-    if (!frags[0].empty()) {
-        _type = util::strtoi<std::uint32_t>(frags[0]);
-        //DebugN(this) << "Reading: Type: " << typeString() << endl;
-    }
-
-    if (_type < 0 || _type > 7) {
-        //DebugN(this) << "Reading: Invalid Type: " << typeString() << endl;
-        return false;
-    }
-    if (frags.size() >= 2 && !frags[1].empty()) {
-        _ack = (frags[1].find('+') != std::string::npos);
-        _id = util::strtoi<std::uint32_t>(frags[1]);
-    }
-    if (frags.size() >= 3 && !frags[2].empty()) {
-        _nsp = frags[2];
-    }
-    if (frags.size() >= 4 && !frags[3].empty()) {
-        _message = frags[3];
-    }
-
-    // For Ack packets the ID is at the start of the message
-    if (_type == 6) {
-        _ack = true; // This flag is mostly for requests, but we'll set it anyway
-
-        std::string data(frags[frags.size() - 1]);
-        std::string::size_type pos = data.find('+');
-        if (pos != std::string::npos)
-        {    // complex ack
-            _id = util::strtoi<std::uint32_t>(data.substr(0, pos));
-            _message = data.substr(pos + 1, data.length());
-        }
-        else
-        {    // simple ack
-            _message = data;
-        }
-#endif
-
-#if 0
-        frags.clear();
-        util::split(_message, '+', frags, 2);
-        if (frags.size() != 2) {
-            assert(frags.size() == 2 && "invalid ack response");
-            return false;
-        }
-
-        _ack = true; // This is mostly for requests, but we'll set it anyway
-        _id = util::strtoi<std::uint32_t>(frags[0]);
-        _message = frags[1];
-    }
-#endif
 
     return _size;
 }
@@ -285,7 +239,6 @@ void Packet::write(Buffer& buf) const
         // << _message
         // << "\"]";
     }
-        // << "[\"message\",\""
 
     std::string str(ss.str()); // TODO: avoid copy
     buf.insert(buf.end(), str.begin(), str.end());
@@ -352,8 +305,9 @@ json::Value Packet::json() const
     if (!_message.empty()) {
         json::Value data;
         json::Reader reader;
-        if (reader.parse(_message, data))
-            return data;
+        if (reader.parse(_message, data)) {
+            return data; //[1];
+        }
     }
     return json::Value();
 }

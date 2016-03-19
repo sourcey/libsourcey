@@ -1,13 +1,10 @@
-#include "scy/application.h"
-#include "scy/symple/client.h"
-#include "scy/net/sslmanager.h"
-#include "scy/util.h"
+#include "sympletests.h"
 
 
 using namespace std;
 using namespace scy;
-using namespace scy::net;
-using namespace scy::util;
+// using namespace scy::net;
+using namespace scy::test;
 
 
 /*
@@ -21,7 +18,6 @@ CMemLeakDetect memLeakDetect;
 
 
 namespace scy {
-namespace smpl {
 
 
 #define SERVER_HOST "localhost"
@@ -36,32 +32,57 @@ namespace smpl {
 // ----------------------------------------------------------------------------
 // SocketIO Client Test
 //
-class Tests
+
+
+
+struct ShutdownCmd
 {
-    Application app;
+    void* opaque;
+    std::function<void(void*)> callback;
+};
 
-public:
-    Tests()
-    {
-        // TODO:
-        //  - Obtain authentication token
-        //  - Transaction test
-        //  - Presence test
-        //  - Ack test
-        //  - Benchmarks
-        testClient();
-#if 0
-        testAddress();
+inline void waitForShutdown(std::function<void(void*)> callback, void* opaque = nullptr, uv::Loop* loop = uv::defaultLoop())
+{
+    auto cmd = new ShutdownCmd;
+    // cmd->self = this;
+    cmd->opaque = opaque;
+    cmd->callback = callback;
+
+    auto sig = new uv_signal_t;
+    sig->data = cmd;
+    uv_signal_init(loop, sig);
+    uv_signal_start(sig, [](uv_signal_t* req, int /* signum */) {
+        auto cmd = reinterpret_cast<ShutdownCmd*>(req->data);
+        DebugL << "Got shutdown signal" << std::endl;
+
+        uv_close((uv_handle_t*)req, [](uv_handle_t* handle) {
+            delete handle;
+        });
+        if (cmd->callback)
+            cmd->callback(cmd->opaque);
+        delete cmd;
+    }, SIGINT);
+
+    DebugL << "Wait for shutdown" << std::endl;
+    uv_run(loop, UV_RUN_DEFAULT);
+}
+
+
+} // namespace scy
+
+
+int main(int argc, char** argv)
+{
+    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+
+#if USE_SSL
+    SSLManager::initNoVerifyClient();
 #endif
-    }
 
-    ~Tests()
-    {
-        app.finalize();
-    }
-
-    void testAddress()
-    {
+    // =========================================================================
+    // Address
+    //
+    describe("address", []() {
         smpl::Address a1("user|");
         assert(a1.user == "user");
         assert(a1.id == "");
@@ -81,96 +102,50 @@ public:
         assert(a4.user == "");
         assert(a4.id == "567257247245275");
         assert(a4.valid());
-    }
+    });
 
-    void testClient()
-    {
-        smpl::Client::Options options;
-        options.host = SERVER_HOST;
-        options.port = SERVER_PORT;
-        options.user = "test";
-        options.name = "crash";
-        options.type = "testapp";
+    // =========================================================================
+    // Client
+    //
+    describe("client", []() {
+        smpl::Client::Options loptions;
+        loptions.host = SERVER_HOST;
+        loptions.port = SERVER_PORT;
+        loptions.user = "george";
+        loptions.name = "George";
 
         // NOTE: The server should allow anonymous
         // authentication for this test.
-        //options.token = ""; used for authentication
+        // options.token = ""; used for authentication
 
-#if USE_SSL
-        smpl::SSLClient client(options);
-#else
-        smpl::TCPClient client(options);
-#endif
+        smpl::Client::Options roptions;
+        roptions.host = SERVER_HOST;
+        roptions.port = SERVER_PORT;
+        roptions.user = "ringo";
+        roptions.name = "Ringo";
 
-        client.Announce += sdelegate(this, &Tests::onClientAnnounce);
-        client.StateChange += sdelegate(this, &Tests::onClientStateChange);
-        client.CreatePresence += sdelegate(this, &Tests::onCreatePresence);
-        client.connect();
+        static TestClient lclient(roptions);
+        static TestClient rclient(roptions);
 
-        app.waitForShutdown([](void* opaque) {
-            reinterpret_cast<smpl::Client*>(opaque)->close();
-        }, &client);
-
-        DebugL << "Event loop ended" << endl;
-    }
-
-    void onClientAnnounce(void* sender, const int& status)
-    {
-        assert(status == 200);
-    }
-
-    void onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState)
-    {
-        smpl::Client* client = reinterpret_cast<smpl::Client*>(sender);
-        DebugL << "Client state changed: " << state << ": " << client->ws().socket->address() << endl;
-
-        switch (state.id()) {
-        case sockio::ClientState::Connecting:
-            break;
-        case sockio::ClientState::Connected:
-            break;
-        case sockio::ClientState::Online:
-            {
-                // Send a message when online
-                smpl::Message m;
-                m.setData("olay");
-                client->send(m, true);
-            }
-            break;
-        case sockio::ClientState::Error:
-            assert(0);
-            break;
+        while(!lclient.completed() && !rclient.completed()) {
+            // DebugL << "waiting for test completion" << std::endl;
+            uv::runDefaultLoop(UV_RUN_ONCE);
         }
-    }
+    });
 
-    void onCreatePresence(void*, smpl::Peer& peer)
-    {
-        DebugL << "Updating Client Data" << endl;
+    // TODO:
+    //  - Obtain authentication token
+    //  - Transaction test
+    //  - Presence test
+    //  - Ack test
+    //  - Benchmarks
 
-        // Update the peer object to be broadcast with presence.
-        // Any arbitrary data can be broadcast with presence.
-        peer["agent"] = "Spot";
-        peer["version"] = "1.0.1";
-    }
-};
+    runTests();
 
-
-} } // namespace scy::smpl
-
-
-int main(int argc, char** argv)
-{
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
-
-#if USE_SSL
-    SSLManager::initNoVerifyClient();
-#endif
-    {
-        scy::smpl::Tests run;
-    }
 #if USE_SSL
     SSLManager::instance().shutdown();
 #endif
     Logger::destroy();
-    return 0;
+
+    return finalize();
 }

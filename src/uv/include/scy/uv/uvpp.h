@@ -84,9 +84,9 @@ inline Loop* defaultLoop()
     return uv_default_loop();
 }
 
-inline void runDefaultLoop()
+inline void runDefaultLoop(uv_run_mode mode = UV_RUN_DEFAULT)
 {
-    uv_run(defaultLoop(), UV_RUN_DEFAULT);
+    uv_run(defaultLoop(), mode);
 }
 
 inline void stopDefaultLoop()

@@ -413,7 +413,7 @@ BitWriter::BitWriter(char* bytes, std::size_t size, ByteOrder order)
 
 BitWriter::BitWriter(Buffer& buf, ByteOrder order)
 {
-    init(buf.data(), buf.size(), order);
+    init(buf.data(), buf.capacity(), order);
     // _buffer = &buf;
 }
 
@@ -537,7 +537,6 @@ void BitWriter::put(const char* val, std::size_t len)
         if ((_position + len) > _limit)
             throw std::out_of_range("insufficient buffer capacity");
 
-        std::cout << "put fixed " << _bytes << ", len " << len << std::endl;
         memcpy(_bytes + _position, val, len);
         _position += len;
     // }

@@ -121,7 +121,7 @@ public:
     virtual std::string ourID() const;
         // Return the session ID of our current peer object.
         // Return an empty string when offline.
-        
+
     StringVec rooms() const;
         // Return a list of rooms the client has joined.
 
@@ -182,8 +182,8 @@ protected:
     virtual void createPresence(Presence& p);
         // Creates a Presence object.
 
-    virtual void emit(IPacket& packet);
-        // Override PAcketStream::emit
+    virtual void emit(void* sender, IPacket& packet);
+        // Override PacketSignal::emit
 
     virtual void onOnline();
     virtual void onAnnounceState(void* sender, TransactionState& state, const TransactionState&);

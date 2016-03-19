@@ -17,7 +17,7 @@
 //
 
 
-#include "scy/taskrunner.h"
+#include "scy/task.h"
 #include "scy/logger.h"
 #include "scy/memory.h"
 #include "scy/singleton.h"
@@ -31,6 +31,49 @@ using std::endl;
 
 
 namespace scy {
+
+
+//
+// Task
+//
+
+
+Task::Task(bool repeat) :
+    _id(util::randomNumber()),
+    _repeating(repeat),
+    _destroyed(false)
+{
+}
+
+
+Task::~Task()
+{
+    // assert(destroyed());
+}
+
+
+void Task::destroy()
+{
+    _destroyed = true;
+}
+
+
+std::uint32_t Task::id() const
+{
+    return _id;
+}
+
+
+bool Task::destroyed() const
+{
+    return _destroyed;
+}
+
+
+bool Task::repeating() const
+{
+    return _repeating;
+}
 
 
 //
@@ -281,49 +324,6 @@ TaskRunner& TaskRunner::getDefault()
 {
     static Singleton<TaskRunner> sh;
     return *sh.get();
-}
-
-
-//
-// Async Task
-//
-
-
-Task::Task(bool repeat) :
-    _id(util::randomNumber()),
-    _repeating(repeat),
-    _destroyed(false)
-{
-}
-
-
-Task::~Task()
-{
-    //assert(destroyed());
-}
-
-
-void Task::destroy()
-{
-    _destroyed = true;
-}
-
-
-std::uint32_t Task::id() const
-{
-    return _id;
-}
-
-
-bool Task::destroyed() const
-{
-    return _destroyed;
-}
-
-
-bool Task::repeating() const
-{
-    return _repeating;
 }
 
 

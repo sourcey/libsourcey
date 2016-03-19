@@ -287,6 +287,9 @@ public:
             break;
         case sockio::ClientState::Online:
             cout << "Client online" << endl;
+
+            // Join the public room 
+            client.joinRoom("public");
             break;
         case sockio::ClientState::Error:
             cout << "Client disconnected" << endl;

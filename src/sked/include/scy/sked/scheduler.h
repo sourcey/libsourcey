@@ -22,7 +22,7 @@
 
 
 #include "scy/logger.h"
-#include "scy/taskrunner.h"
+#include "scy/task.h"
 #include "scy/json/iserializable.h"
 #include "scy/sked/task.h"
 #include "scy/sked/taskfactory.h"
