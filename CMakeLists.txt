@@ -287,7 +287,7 @@ endif()
 # Include the LibSourcey source tree
 # ----------------------------------------------------------------------------
 
-list(APPEND LibSourcey_INCLUDE_DIRS
+list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
   ${LibSourcey_SOURCE_DIR}/archo/vendor/zlib
   ${LibSourcey_SOURCE_DIR}/archo/vendor/minizip
   ${LibSourcey_SOURCE_DIR}/media/vendor/rtaudio
@@ -295,6 +295,13 @@ list(APPEND LibSourcey_INCLUDE_DIRS
   ${LibSourcey_SOURCE_DIR}/uv/vendor/libuv/include
   ${LibSourcey_SOURCE_DIR}/http/vendor/http_parser
   ${LibSourcey_SOURCE_DIR}/json/vendor/jsoncpp)
+
+# Enable testing if required
+if (BUILD_MODULE_TESTS)
+  enable_testing()
+  set(CMAKE_CTEST_COMMAND ctest -V)
+  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
+endif()
 
 if(BUILD_MODULES OR BUILD_APPLICATIONS)
   subdirlist(subdirs "${CMAKE_SOURCE_DIR}/src")

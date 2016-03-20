@@ -17,7 +17,7 @@
 //
 
 
-#include "scy/exception.h"
+#include "scy/error.h"
 
 
 namespace scy {

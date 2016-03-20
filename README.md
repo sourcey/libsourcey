@@ -3,6 +3,8 @@
 **Homepage**: [http://sourcey.com/libsourcey](http://sourcey.com/libsourcey)  
 **Licence**: LGPL
 
+[![Circle CI](https://circleci.com/gh/sourcey/libsourcey.svg?style=shield&circle-token=ab142562b19bb857de796d729aab28fa9df7682d)](https://circleci.com/gh/sourcey/libsourcey)
+
 LibSourcey is a collection of open source cross platform C++11 modules and classes that provide developers with a flexible high performance arsenal for the rapid development of realtime messaging and live media streaming applications. Think of it as the power of `libuv` combined with the ease and readability of the `stl` (C++ Standard Library).
 
 <!-- For media streaming applications, LibSourcey provides a simple and flexible method of capturing live audio/video streams (_OpenCV/FFmpeg_), processing, filtering and encoding them using any video format (_FFmpeg_), and broadcasting the result over the Internet (_libuv_). This is made possible by implementing a thin layer over the top of some brilliant open source projects, such as FFmpeg, OpenCV and libuv. The only required third-party dependency is libuv, and that is included in the local source and compiled automatically. All others dependencies are optional. -->
@@ -19,15 +21,15 @@ LibSourcey is a collection of open source cross platform C++11 modules and class
 
 * **Networking layer** — The networking layer provides TCP, SSL and UDP socket implementations that combine the use of `libuv` for blazing fast networking, and `openssl` for security and encryption.
 
-* **Web servers and clients** — A HTTP stack is included that supports HTTP servers, clients, WebSockets, media streaming, file transfers, and authentication. The HTTP parser is based on the super-fast C code used by `nginx`.
-
 * **Elegant PacketStream API** — The PacketStream API allows LibSourcey modules to pipe and process arbitrary data packets through a dynamic delegate chain. This dynamic method of layering packet processors makes it possible to develop complex data processing applications quickly and easily. Check out this writeup on how the PacketSteram API can be used for encoding H.264 on the fly: http://sourcey.com/libsourcey-packetstream-api/
 
-* **Media streaming and encoding** — The media library consists of thin wrappers around FFmpeg and OpenCV for media capture, encoding, recording, streaming, anaysis and more. The Media API makes full use of the PacketStream API so that encoders, processors and broadcasters can be dynamically added and removed from any media source - a great base for building a [media server](https://github.com/sourcey/libsourcey/tree/master/src/symple/samples/mediaserver).  
+* **Media streaming and encoding** — The media library consists of thin wrappers around FFmpeg and OpenCV for media capture, encoding, recording, streaming, analysis and more. The Media API makes full use of the PacketStream API so that encoders, processors and broadcasters can be dynamically added and removed from any media source - a great base for building a [media server](https://github.com/sourcey/libsourcey/tree/master/src/symple/samples/mediaserver).  
 
 * **Realtime messaging** — LibSourcey aims to bridge the gap between desktop, mobile and web by providing performance oriented messaging solutions that work across all platforms.
     * **Socket.IO** — Socket.IO C++ client that supports the latest protocol revision 4 (>- 1.0). Read more about [Socket.IO](http://socket.io).
     * **Symple** — Sourcey's home grown realtime messaging protocol that works over the top of Socket.IO to provide rostering, presence and many other features necessary for building online games and chat applications. [More about Symple](<http://sourcey.com/symple).
+
+* **Web servers and clients** — A HTTP stack is included that supports HTTP servers, clients, WebSockets, media streaming, file transfers, and authentication. The HTTP parser is based on the super-fast C code used by `nginx`.
 
 * **Full ICE stack** — The ICE module is a complete implementation of [RFC 5245 (Interactive Connectivity Establishment)](http://tools.ietf.org/html/rfc5245) based on LibSourcey architecture.
     * **STUN** — [RFC 5389](http://tools.ietf.org/rfc/rfc5389) implementation that includes support for ICE and TURN and TURN TCP messages.
@@ -44,7 +46,7 @@ LibSourcey is a collection of open source cross platform C++11 modules and class
   Media encoding and streaming
 * **OpenCV** (optional, >= 3.0)
   Video capture and computer vision algorithms
-* **RtAudio** (optional, >= 3.0)
+* **RtAudio** (optional, >= 4.1.2)
   Audio capture
 * **WebRTC** (optional)
   Peer-to-peer video conferencing
@@ -126,10 +128,10 @@ This guide is for written for Mac users using [Homebrew](http://brew.sh).
 
 ##### Install Dependencies
 
-~~~ bash
-# LibUV:
-brew install --HEAD libuv
+<!-- # LibUV:
+brew install --HEAD libuv -->
 
+~~~ bash
 # OpenSSL:
 brew install openssl
 brew link --force openssl
@@ -232,7 +234,7 @@ For an exhaustive list of options check the `CMakeLists.txt` in the main directo
 
 There is also plenty of examples available in the `samples` and `tests` folder of each module for you to cut your teeth on.
 
-If you're interested in media streaming examples check out the `mediaserver` sample in the `symple` module. Remember, you will need to compile LibSourcey with OpenCV and FFmpeg enabled to use it: https://github.com/sourcey/libsourcey/tree/master/src/symple/samples/mediaserver
+If you're interested in media streaming examples check out the `mediaserver` sample in the `symple` module. Remember, you will need to compile LibSourcey with OpenCV and FFmpeg enabled to use it: https://github.com/sourcey/libsourcey/tree/master/src/media/samples/mediaserver
 
 For a redistributable C++ package manager, take a look at `pacm`, and specifically the `pacmconsole` application: http://sourcey.com/pacm/
 

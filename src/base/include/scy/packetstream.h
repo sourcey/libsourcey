@@ -24,7 +24,7 @@
 #include <cstdint>
 #include "scy/logger.h"
 #include "scy/memory.h"
-#include "scy/exception.h"
+#include "scy/error.h"
 #include "scy/stateful.h"
 #include "scy/interface.h"
 #include "scy/queue.h"

@@ -5,4 +5,4 @@ include_dependency(OpenSSL REQUIRED)
 include_dependency(FFmpeg REQUIRED)
 include_dependency(OpenCV REQUIRED)
 
-define_sourcey_module_sample(videosocket base uv crypto net http media util)
+define_sourcey_module_sample(videosocket uv base crypto net http media util)

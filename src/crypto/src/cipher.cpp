@@ -18,7 +18,7 @@
 
 
 #include "scy/crypto/cipher.h"
-#include "scy/exception.h"
+#include "scy/error.h"
 #include "scy/base64.h"
 #include "scy/hex.h"
 

@@ -16,6 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "scy/crypto/crypto.h"
 #include "scy/random.h"
 #include "scy/mutex.h"
@@ -50,7 +51,7 @@ void throwError()
 {
     unsigned long err;
     std::string msg;
-        
+
     while ((err = ERR_get_error())) {
         if (!msg.empty())
             msg.append("; ");
@@ -60,7 +61,7 @@ void throwError()
     throw std::runtime_error(msg);
 }
 
-    
+
 void api(int ret, const char* error)
 {
     if (ret == 0) {
@@ -124,7 +125,7 @@ void dynlockDestroy(struct CRYPTO_dynlock_value* lock, const char* /* file */, i
 void initialize()
 {
     Mutex::ScopedLock lock(_mutex);
-    
+
     if (++_refCount == 1)
     {
 #if OPENSSL_VERSION_NUMBER >= 0x0907000L
@@ -133,11 +134,11 @@ void initialize()
         SSL_library_init();
         SSL_load_error_strings();
         OpenSSL_add_all_algorithms();
-        
+
         char seed[SEEDSIZE];
         Random::getSeed(seed, sizeof(seed));
         RAND_seed(seed, SEEDSIZE);
-        
+
         int nMutexes = CRYPTO_num_locks();
         _mutexes = new Mutex[nMutexes];
         CRYPTO_set_locking_callback(&internal::lock);
@@ -153,6 +154,8 @@ void initialize()
 
 void uninitialize()
 {
+    // NOTE: crypto::uninitialize() should be called before the app exists
+    // to endure the mutex is still in memory.
     Mutex::ScopedLock lock(_mutex);
 
     if (--_refCount == 0) {
@@ -172,7 +175,7 @@ void initializeEngine()
 {
     internal::initialize();
 }
-    
+
 /// Shuts down the OpenSSL library.
 void uninitializeEngine()
 {

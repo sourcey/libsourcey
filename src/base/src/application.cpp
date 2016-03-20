@@ -20,17 +20,17 @@
 #include "scy/application.h"
 #include "scy/memory.h"
 #include "scy/logger.h"
-#include "scy/exception.h"
+#include "scy/error.h"
 #include "scy/singleton.h"
 
 
 namespace scy {
-    
-    
+
+
 namespace internal {
     static Singleton<Application> singleton;
 
-    struct ShutdownCmd 
+    struct ShutdownCmd
     {
         Application* self;
         void* opaque;
@@ -39,7 +39,7 @@ namespace internal {
 }
 
 
-Application& Application::getDefault() 
+Application& Application::getDefault()
 {
     return *internal::singleton.get();
 }
@@ -51,48 +51,48 @@ Application::Application(uv::Loop* loop) :
     DebugS(this) << "Create" << std::endl;
 }
 
-    
-Application::~Application() 
-{    
+
+Application::~Application()
+{
     DebugS(this) << "Destroy" << std::endl;
 }
 
-    
-void Application::run() 
-{ 
+
+void Application::run()
+{
     uv_run(loop, UV_RUN_DEFAULT);
 }
 
 
-void Application::stop() 
-{ 
-    uv_stop(loop); 
+void Application::stop()
+{
+    uv_stop(loop);
 }
 
 
-void Application::finalize() 
-{ 
+void Application::finalize()
+{
     DebugS(this) << "Finalizing" << std::endl;
 
 #ifdef _DEBUG
     // Print active handles
     uv_walk(loop, Application::onPrintHandle, nullptr);
 #endif
-            
-    // Shutdown the garbage collector to free memory
-    GarbageCollector::destroy();
+
+    // Shutdown the garbage collector to safely free memory before the app exists
+    GarbageCollector::instance().finalize();
 
     // Run until handles are closed
-    run();     
+    run();
     assert(loop->active_handles == 0);
     //assert(loop->active_reqs == 0);
 
     DebugS(this) << "Finalization complete" << std::endl;
-}        
-    
-    
+}
+
+
 void Application::waitForShutdown(std::function<void(void*)> callback, void* opaque)
-{ 
+{
     auto cmd = new internal::ShutdownCmd;
     cmd->self = this;
     cmd->opaque = opaque;
@@ -102,12 +102,12 @@ void Application::waitForShutdown(std::function<void(void*)> callback, void* opa
     sig->data = cmd;
     uv_signal_init(loop, sig);
     uv_signal_start(sig, Application::onShutdownSignal, SIGINT);
-        
+
     DebugS(this) << "Wait for shutdown" << std::endl;
     run();
 }
 
-            
+
 void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
 {
     auto cmd = reinterpret_cast<internal::ShutdownCmd*>(req->data);
@@ -120,9 +120,9 @@ void Application::onShutdownSignal(uv_signal_t* req, int /* signum */)
         cmd->callback(cmd->opaque);
     delete cmd;
 }
-        
 
-void Application::onPrintHandle(uv_handle_t* handle, void* /* arg */) 
+
+void Application::onPrintHandle(uv_handle_t* handle, void* /* arg */)
 {
     DebugL << "#### Active handle: " << handle << ": " << handle->type << std::endl;
 }
@@ -131,11 +131,11 @@ void Application::onPrintHandle(uv_handle_t* handle, void* /* arg */)
 //
 // Command-line option parser
 //
-    
+
 OptionParser::OptionParser(int argc, char* argv[], const char* delim)
 {
-    char* lastkey = 0;    
-    int dlen = strlen(delim);    
+    char* lastkey = 0;
+    int dlen = strlen(delim);
     for (int i = 0; i < argc; i++) {
 
         // Get the application exe path
@@ -157,7 +157,7 @@ OptionParser::OptionParser(int argc, char* argv[], const char* delim)
         }
 
         else {
-            TraceL << "Unrecognized option: " << argv[i] << std::endl;    
+            TraceL << "Unrecognized option: " << argv[i] << std::endl;
         }
     }
 }

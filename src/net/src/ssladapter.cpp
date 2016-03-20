@@ -31,7 +31,7 @@ using namespace std;
 namespace scy {
 namespace net {
 
- 
+
 SSLAdapter::SSLAdapter(net::SSLSocket* socket) :
     _socket(socket),
     _ssl(nullptr),
@@ -42,17 +42,18 @@ SSLAdapter::SSLAdapter(net::SSLSocket* socket) :
 }
 
 
-SSLAdapter::~SSLAdapter() 
-{    
+SSLAdapter::~SSLAdapter()
+{
     TraceS(this) << "Destroy" << endl;
     if (_ssl) {
         SSL_free(_ssl);
         _ssl = nullptr;
     }
+    TraceS(this) << "Destroy: OK" << endl;
 }
 
 
-void SSLAdapter::init(SSL* ssl) 
+void SSLAdapter::init(SSL* ssl)
 {
     TraceS(this) << "Init: " << ssl << endl;
     assert(_socket);
@@ -67,7 +68,7 @@ void SSLAdapter::init(SSL* ssl)
 void SSLAdapter::shutdown()
 {
     TraceS(this) << "Shutdown" << endl;
-    if (_ssl) {        
+    if (_ssl) {
         TraceS(this) << "Shutdown SSL" << endl;
 
         // Don't shut down the socket more than once.
@@ -102,7 +103,7 @@ int SSLAdapter::available() const
 }
 
 
-void SSLAdapter::addIncomingData(const char* data, std::size_t len) 
+void SSLAdapter::addIncomingData(const char* data, std::size_t len)
 {
     //TraceL << "Add incoming data: " << len << endl;
     BIO_write(_readBIO, data, len);
@@ -116,13 +117,13 @@ void SSLAdapter::addOutgoingData(const std::string& s)
 }
 
 
-void SSLAdapter::addOutgoingData(const char* data, std::size_t len) 
+void SSLAdapter::addOutgoingData(const char* data, std::size_t len)
 {
     std::copy(data, data+len, std::back_inserter(_bufferOut));
 }
 
 
-void SSLAdapter::flush() 
+void SSLAdapter::flush()
 {
     //TraceL << "Flushing" << endl;
 
@@ -134,7 +135,7 @@ void SSLAdapter::flush()
         }
         return;
     }
-    
+
     // Read any decrypted SSL data from the read BIO
     // NOTE: Overwriting the socket's raw SSL recv buffer
     int nread = 0;
@@ -142,9 +143,9 @@ void SSLAdapter::flush()
         //_socket->_buffer.limit(nread);
         _socket->onRecv(mutableBuffer(_socket->_buffer.data(), nread));
     }
-    
+
     // Flush any pending outgoing data
-    if (SSL_is_init_finished(_ssl)) { 
+    if (SSL_is_init_finished(_ssl)) {
         if (_bufferOut.size() > 0) {
             int r = SSL_write(_ssl, &_bufferOut[0], _bufferOut.size()); // causes the write_bio to fill up (which we need to flush)
             if (r < 0) {
@@ -157,13 +158,13 @@ void SSLAdapter::flush()
 }
 
 
-void SSLAdapter::flushWriteBIO() 
+void SSLAdapter::flushWriteBIO()
 {
-    // flushes encrypted data 
+    // flushes encrypted data
     char buffer[1024*16]; // optimize!
     int nread = 0;
     while ((nread = BIO_read(_writeBIO, buffer, sizeof(buffer))) > 0) {
-        
+
         // Write encrypted data to the socket stream output
         _socket->write(buffer, nread);
     }
@@ -173,7 +174,7 @@ void SSLAdapter::flushWriteBIO()
 void SSLAdapter::handleError(int rc)
 {
     if (rc >= 0) return;
-    int error = SSL_get_error(_ssl, rc);    
+    int error = SSL_get_error(_ssl, rc);
     switch (error)
     {
     case SSL_ERROR_ZERO_RETURN:
@@ -184,7 +185,7 @@ void SSLAdapter::handleError(int rc)
     case SSL_ERROR_WANT_WRITE:
         assert(0 && "TODO");
          break;
-    case SSL_ERROR_WANT_CONNECT: 
+    case SSL_ERROR_WANT_CONNECT:
     case SSL_ERROR_WANT_ACCEPT:
     case SSL_ERROR_WANT_X509_LOOKUP:
         assert(0 && "should not occur");

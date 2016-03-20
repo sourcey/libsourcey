@@ -30,52 +30,52 @@ namespace time {
 
 
 static const char* ISO8601Format = "%Y-%m-%dT%H:%M:%SZ";
-        // The date/time format defined in the ISO 8601 standard.
-        // This is the default format used throughout the library for consistency.
-        //
-        // Examples: 
-        //   2005-01-01T12:00:00+01:00
-        //   2005-01-01T11:00:00Z
-           
+    // The date/time format defined in the ISO 8601 standard.
+    // This is the default format used throughout the library for consistency.
+    //
+    // Examples:
+    //   2005-01-01T12:00:00+01:00
+    //   2005-01-01T11:00:00Z
+
 std::time_t now();
-    // Returns the number of UTC milliseconds since epoch.
+    // Return the number of UTC milliseconds since epoch.
 
 double clockSecs();
-    // Returns the current process time in decimal seconds.
+    // Return the current process time in decimal seconds.
 
 std::string print(const std::tm& dt, const char* fmt = ISO8601Format);
     // Cross-platform time formatting.
 
 std::string printLocal(const char* fmt = ISO8601Format);
-    // Prints the current local time using the given format.
+    // Print the current local time using the given format.
 
 std::string printUTC(const char* fmt = ISO8601Format);
-    // Prints the current UTC time using the given format.
+    // Print the current UTC time using the given format.
 
 std::tm toLocal(const std::time_t& time);
-    // Converts the given time value to local time.
+    // Convert the given time value to local time.
     // Uses thread-safe native functions.
 
 std::tm toUTC(const std::time_t& time);
-    // Converts the given time value to UTC time.
+    // Convert the given time value to UTC time.
     // Uses thread-safe native functions.
 
 std::string getLocal();
-    // Returns a local ISO8601 formatted date time string.
+    // Return a local ISO8601 formatted date time string.
 
 std::string getUTC();
-    // Returns a UTC ISO8601 formatted date time string.
+    // Return a UTC ISO8601 formatted date time string.
 
+std::uint64_t hrtime();
+    // Return the current high-resolution real time in nanoseconds.
 
 #if 0
 std::uint64_t ticks();
     // Retrieves the number of milliseconds that have elapsed since the system was started, up to 49.7 days.
 
-std::uint64_t hrtime();
-    // Returns the current high-resolution real time in nanoseconds.
 
 std::uint64_t getTimeMS();
-    // Returns the current high-resolution real time in milliseconds.
+    // Return the current high-resolution real time in milliseconds.
 #endif
 
 

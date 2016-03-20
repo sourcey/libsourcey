@@ -216,7 +216,7 @@ int Client::sendPing()
 
 void Client::reset()
 {
-    //Mutex::ScopedLock lock(_mutex);
+    // Mutex::ScopedLock lock(_mutex);
 
     // Note: Only reset session related variables here.
     // Do not reset host and port variables.
@@ -410,15 +410,18 @@ void Client::onMessage(sockio::Packet& packet)
             break;
         case Packet::Packet::Type::Event:
             assert(stateEquals(ClientState::Online));
-            PacketSignal::emit(this, packet);
+            // PacketSignal::
+            emit(this, packet);
             break;
         case Packet::Packet::Type::Ack:
             // assert(stateEquals(ClientState::Online));
-            PacketSignal::emit(this, packet);
+            // PacketSignal::
+            emit(this, packet);
             break;
         case Packet::Packet::Type::Error:
             // assert(stateEquals(ClientState::Online));
-            PacketSignal::emit(this, packet);
+            // PacketSignal::
+            emit(this, packet);
             break;
         case Packet::Packet::Type::BinaryEvent:
             assert(0 && "not implemented");

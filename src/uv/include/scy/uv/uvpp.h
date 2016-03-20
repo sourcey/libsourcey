@@ -24,15 +24,14 @@
 // Disable unnecessary warnings
 #if defined(_MSC_VER)
     #pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-    #pragma warning(disable:4505) // unreferenced local function has been removed 
+    #pragma warning(disable:4505) // unreferenced local function has been removed
                                   // Todo: depreciate once we replace static functions with lambdas
 #endif
 
 #include "uv.h"
 #include <cstdint>
-#include "scy/exception.h"
-#include <exception>
-#include <stdexcept>
+#include "scy/error.h"
+#include <functional>
 #include <assert.h>
 
 
@@ -44,11 +43,11 @@ namespace uv {
 // Helpers
 //
 
-    
+
 inline std::string formatError(const std::string& message, int errorno = 0)
-{    
+{
     std::string m(message); // prefix the message, since libuv errors are very brisk
-    if (errorno != UV_UNKNOWN && 
+    if (errorno != UV_UNKNOWN &&
         errorno != 0) {
         //uv_err_s err;
         //err.code = (uv_err_code)errorno;
@@ -58,9 +57,9 @@ inline std::string formatError(const std::string& message, int errorno = 0)
     }
     return m;
 }
-    
 
-inline void throwError(const std::string& message, int errorno = UV_UNKNOWN) 
+
+inline void throwError(const std::string& message, int errorno = UV_UNKNOWN)
 {
     throw std::runtime_error(formatError(message, errorno));
 }
@@ -84,6 +83,16 @@ inline Loop* defaultLoop()
     return uv_default_loop();
 }
 
+inline void runDefaultLoop(uv_run_mode mode = UV_RUN_DEFAULT)
+{
+    uv_run(defaultLoop(), mode);
+}
+
+inline void stopDefaultLoop()
+{
+    uv_stop(defaultLoop());
+}
+
 
 //
 // UV Handle
@@ -91,11 +100,11 @@ inline Loop* defaultLoop()
 
 
 class Handle
-    /// A base class for managing the lifecycle of a libuv handle,  
-    /// including its asynchronous destruction mechanism.
+    /// A base class for managing a libuv handle during it's lifecycle and
+    /// safely handling its asynchronous destruction mechanism.
 {
 public:
-    Handle(uv_loop_t* loop = nullptr, void* handle = nullptr) : 
+    Handle(uv_loop_t* loop = nullptr, void* handle = nullptr) :
         _loop(loop ? loop : uv_default_loop()), // nullptr will be uv_default_loop
         _ptr((uv_handle_t*)handle), // can be nullptr or uv_handle_t
         _tid(uv_thread_self()),
@@ -104,20 +113,20 @@ public:
         if (_ptr)
             _ptr->data = this;
     }
-        
+
     virtual ~Handle()
     {
         assertThread();
-        if (!_closed) 
+        if (!_closed)
             close();
         assert(_ptr == nullptr);
     }
 
     virtual void setLoop(uv_loop_t* loop)
-        // The event loop may be set before the handle is initialized. 
+        // The event loop may be set before the handle is initialized.
     {
         assertThread();
-        assert(_ptr == nullptr && "set loop before handle");
+        assert(_ptr == nullptr && "loop must be set before handle");
         _loop = loop;
     }
 
@@ -126,68 +135,68 @@ public:
         assertThread();
         return _loop;
     }
-    
+
     template <class T>
     T* ptr() const
         // Returns a cast pointer to the managed libuv handle.
-    {         
+    {
         assertThread(); // conflict with uv_async_send in SyncContext
         return reinterpret_cast<T*>(_ptr);
     }
-    
+
     virtual uv_handle_t* ptr() const
         // Returns a pointer to the managed libuv handle.
-    { 
+    {
         assertThread();
-        return _ptr; 
+        return _ptr;
     }
-    
+
     virtual bool active() const
         // Returns true when the handle is active.
-        // This method should be used instead of closed() to determine 
+        // This method should be used instead of closed() to determine
         // the veracity of the libuv handle for stream io operations.
-    { 
+    {
         return _ptr && uv_is_active(_ptr) != 0;
     }
-    
+
     virtual bool closed() const
         // Returns true after close() has been called.
-    { 
+    {
         return _closed; //_ptr && uv_is_closing(_ptr) != 0;
     }
-    
+
     bool ref()
-        // Reference main loop again, once unref'd
-    {    
+        // Reference main loop again, once unref'd.
+    {
         if (!active())
             return false;
 
-        uv_ref(ptr()); 
+        uv_ref(ptr());
         return true;
     }
 
     bool unref()
-        // Unreference the main loop after initialized
-    {    
+        // Unreference the main loop after initialized.
+    {
         if (active())
             return false;
 
-        uv_unref(ptr()); 
+        uv_unref(ptr());
         return true;
     }
-    
+
     uv_thread_t tid() const
         // Returns the parent thread ID.
     {
         return _tid;
     }
-        
+
     const scy::Error& error() const
         // Returns the error context if any.
-    { 
+    {
         return _error;
     }
-    
+
     virtual void setAndThrowError(const std::string& prefix = "UV Error", int errorno = 0)
         // Sets and throws the last error.
         // Should never be called inside libuv callbacks.
@@ -215,13 +224,13 @@ public:
         err.message = formatError(prefix, errorno);
         setError(err);
     }
-        
-    virtual void setError(const scy::Error& err) 
+
+    virtual void setError(const scy::Error& err)
         // Sets the error content and triggers callbacks.
-    { 
+    {
         //if (_error == err) return;
         assertThread();
-        _error = err; 
+        _error = err;
         onError(err);
     }
 
@@ -245,24 +254,18 @@ public:
             onClose();
         }
     }
-        
+
     void assertThread() const
         // Make sure we are calling from the event loop thread.
     {
 #ifdef _DEBUG
-		uv_thread_t current = uv_thread_self();
-		assert(uv_thread_equal(&_tid, &current));
-		
-        //assert(_tid == mainThread
-        //    || _tid == uv_thread_self()
-        //    // Note: The static mainThread may be 0 when the call
-        //    // originates from a lambda function.
-        //    || int(mainThread) <= 0);
+    		uv_thread_t current = uv_thread_self();
+    		assert(uv_thread_equal(&_tid, &current));
 #endif
     }
 
-protected:    
-    virtual void onError(const scy::Error& /* error */) 
+protected:
+    virtual void onError(const scy::Error& /* error */)
         // Override to handle errors.
         // The error may be a UV error, or a custom error.
     {
@@ -276,13 +279,51 @@ protected:
  protected:
     Handle(const Handle&); // = delete;
     Handle& operator=(const Handle&); // = delete;
-    
+
     uv_loop_t* _loop;
     uv_handle_t* _ptr;
     scy::Error _error;
     uv_thread_t _tid;
     bool _closed;
 };
+
+
+//
+// Shutdown Signal Handler
+//
+
+
+struct ShutdownCmd
+{
+    void* opaque;
+    std::function<void(void*)> callback;
+};
+
+inline void onShutdownSignal(std::function<void(void*)> callback, void* opaque = nullptr, Loop* loop = defaultLoop())
+{
+    auto cmd = new ShutdownCmd;
+    cmd->opaque = opaque;
+    cmd->callback = callback;
+
+    auto sig = new uv_signal_t;
+    sig->data = cmd;
+    uv_signal_init(loop, sig);
+    uv_signal_start(sig, [](uv_signal_t* req, int /* signum */) {
+        auto cmd = reinterpret_cast<ShutdownCmd*>(req->data);
+        uv_close((uv_handle_t*)req, [](uv_handle_t* handle) {
+            delete handle;
+        });
+        if (cmd->callback)
+            cmd->callback(cmd->opaque);
+        delete cmd;
+    }, SIGINT);
+}
+
+inline void waitForShutdown(std::function<void(void*)> callback, void* opaque = nullptr, Loop* loop = defaultLoop())
+{
+    onShutdownSignal(callback, opaque, loop);
+    uv_run(defaultLoop(), UV_RUN_DEFAULT);
+}
 
 
 //
@@ -303,7 +344,7 @@ protected:
         ClassName* self = static_cast<ClassName*>(handle->data);     \
         self->Function(status);                                      \
     }                                                                \
-    
+
 
 #define UVEmptyStatusCallback(ClassName, Function, Handle)           \
                                                                      \
@@ -321,7 +362,7 @@ protected:
         ClassName* self = static_cast<ClassName*>(handle->data);     \
         self->Function(handle, status);                              \
     }                                                                \
-    
+
 
 } } // namespace scy::uv
 

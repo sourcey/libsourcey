@@ -19,7 +19,7 @@
 
 #include "scy/platform.h"
 #include "scy/uv/uvpp.h"
-#include "scy/exception.h"
+#include "scy/error.h"
 
 #ifdef WIN32
 #include <windows.h>

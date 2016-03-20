@@ -44,6 +44,7 @@ BitReader::BitReader(const ConstBuffer& pod, ByteOrder order)
 BitReader::BitReader(const Buffer& buf, ByteOrder order)
 {
     init(buf.data(), buf.size(), order);
+    // _buffer = &buf;
 }
 
 
@@ -55,6 +56,7 @@ BitReader::BitReader(const char* bytes, std::size_t size, ByteOrder order)
 
 void BitReader::init(const char* bytes, std::size_t size, ByteOrder order)
 {
+    // _buffer = nullptr;
     //_mark = 0;
     _position = 0;
     //_capacity = size;
@@ -411,16 +413,15 @@ BitWriter::BitWriter(char* bytes, std::size_t size, ByteOrder order)
 
 BitWriter::BitWriter(Buffer& buf, ByteOrder order)
 {
-    init(buf.data(), buf.size(), order);
-    _buffer = &buf;
+    init(buf.data(), buf.capacity(), order);
+    // _buffer = &buf;
 }
 
 
 void BitWriter::init(char* bytes, std::size_t size, ByteOrder order)
 {
-
     //_vector = nullptr;
-    _buffer = nullptr;
+    // _buffer = nullptr;
     _position = 0;
     _limit = size;
     //_capacity = size;
@@ -521,23 +522,24 @@ void BitWriter::put(const std::string& val)
 
 void BitWriter::put(const char* val, std::size_t len)
 {
-    // Write to dynamic buffer
-    if (_buffer) {
-        //_buffer->resize(std::max<std::size_t>(3 * len / 2, 2048));
-        _buffer->insert(_buffer->end(), val, val + len);
-        _bytes = _buffer->data();
-        _limit = _buffer->size();
-        _position += len;
-    }
-
+    // // Write to dynamic buffer (not compatible with BitReader methods)
+    // if (_buffer) {;
+    //
+    //     //_buffer->resize(std::max<std::size_t>(3 * len / 2, 2048));
+    //     _buffer->insert(_buffer->end(), val, val + len);
+    //     _bytes = _buffer->data();
+    //     _limit = _buffer->size();
+    //     _position += len;
+    // }
+    //
     // Write to fixed size buffer
-    else {
+    // else {
         if ((_position + len) > _limit)
             throw std::out_of_range("insufficient buffer capacity");
 
         memcpy(_bytes + _position, val, len);
         _position += len;
-    }
+    // }
 }
 
 

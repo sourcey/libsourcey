@@ -30,8 +30,8 @@
 
 namespace scy {
 namespace time {
- 
- 
+
+
 std::time_t now()
 {
 #if 0 // no need for chrono here yet
@@ -54,12 +54,12 @@ std::tm toLocal(const std::time_t& time)
 #if defined(WIN32)
     localtime_s(&tm_snapshot, &time); // thread-safe?
 #else
-    localtime_r(&time, &tm_snapshot); // POSIX  
+    localtime_r(&time, &tm_snapshot); // POSIX
 #endif
     return tm_snapshot;
 }
- 
- 
+
+
 std::tm toUTC(const std::time_t& time)
 {
     // TODO: double check thread safety of native methods
@@ -67,7 +67,7 @@ std::tm toUTC(const std::time_t& time)
 #if defined(WIN32)
     gmtime_s(&tm_snapshot, &time); // thread-safe?
 #else
-    gmtime_r(&time, &tm_snapshot); // POSIX  
+    gmtime_r(&time, &tm_snapshot); // POSIX
 #endif
     return tm_snapshot;
 }
@@ -75,22 +75,22 @@ std::tm toUTC(const std::time_t& time)
 
 std::string print(const std::tm& dt, const char* fmt)
 {
-#if defined(WIN32)     
+#if defined(WIN32)
     // BOGUS hack done for VS2012: C++11 non-conformant since it SHOULD take a "const struct tm* "
-    // ref. C++11 standard: ISO/IEC 14882:2011, � 27.7.1, 
+    // ref. C++11 standard: ISO/IEC 14882:2011, � 27.7.1,
     std::ostringstream oss;
-    oss << std::put_time(const_cast<std::tm*>(&dt), fmt); 
+    oss << std::put_time(const_cast<std::tm*>(&dt), fmt);
     return oss.str();
 
 #else    // LINUX
     const std::size_t size = 1024;
-    char buffer[size]; 
-    auto success = std::strftime(buffer, size, fmt, &dt); 
- 
+    char buffer[size];
+    auto success = std::strftime(buffer, size, fmt, &dt);
+
     if (0 == success)
-    return fmt; 
-   
-    return buffer; 
+    return fmt;
+
+    return buffer;
 #endif
 }
 
@@ -109,15 +109,21 @@ std::string printUTC(const char* fmt)
 
 std::string getLocal()
 {
-   return printLocal(ISO8601Format);    
+   return printLocal(ISO8601Format);
 }
 
 
 std::string getUTC()
 {
-   return printUTC(ISO8601Format);    
+   return printUTC(ISO8601Format);
 }
-    
+
+
+std::uint64_t hrtime()
+{
+    return uv_hrtime();
+}
+
 
 #if 0
 std::time_t nowUTC()
@@ -137,13 +143,8 @@ std::uint64_t ticks()
 #endif
 }
 
-std::uint64_t getTimeHR() 
-{
-    return uv_hrtime();
-}
-    
 
-std::uint64_t getTimeMS() 
+std::uint64_t getTimeMS()
 {
     return uv_hrtime() / 1000000;
 }

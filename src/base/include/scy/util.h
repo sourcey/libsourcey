@@ -24,7 +24,7 @@
 
 
 #include <cstdint>
-#include "scy/exception.h"
+#include "scy/error.h"
 
 #include <string>
 #include <cstring>
