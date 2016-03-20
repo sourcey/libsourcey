@@ -23,7 +23,7 @@
 #include "scy/base.h"
 #include "scy/mutex.h"
 #include "scy/thread.h"
-#include "scy/exception.h"
+#include "scy/error.h"
 #include "scy/singleton.h"
 
 #include <iostream>

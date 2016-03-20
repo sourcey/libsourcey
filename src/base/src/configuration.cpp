@@ -19,7 +19,7 @@
 
 #include "scy/configuration.h"
 #include "scy/util.h"
-#include "scy/exception.h"
+#include "scy/error.h"
 
 
 namespace scy {

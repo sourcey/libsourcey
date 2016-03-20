@@ -216,8 +216,6 @@ int Client::sendPing()
 
 void Client::reset()
 {
-    TraceN(this) << "reset" << std::endl;
-
     // Mutex::ScopedLock lock(_mutex);
 
     // Note: Only reset session related variables here.

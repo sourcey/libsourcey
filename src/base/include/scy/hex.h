@@ -24,7 +24,7 @@
 
 
 #include "scy/interface.h"
-#include "scy/exception.h"
+#include "scy/error.h"
 #include "scy/logger.h"
 #include <iostream>
 #include <assert.h>

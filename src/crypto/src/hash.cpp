@@ -18,7 +18,7 @@
 
 
 #include "scy/crypto/hash.h"
-#include "scy/exception.h"
+#include "scy/error.h"
 #include <assert.h>
 #include <iostream>
 

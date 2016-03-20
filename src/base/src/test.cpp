@@ -40,6 +40,32 @@ namespace test {
 static Singleton<TestRunner> singleton;
 
 
+void initialize()
+{
+    // Set the logger to only log warning level and above
+    Logger::instance().add(new ConsoleChannel("debug", LWarn));
+
+    // Nothing else to do
+}
+
+
+int finalize()
+{
+    bool passed = TestRunner::getDefault().passed();
+    singleton.destroy();
+
+    // Destroy the garbase collector to ensure memory if freed before exiting.
+    GarbageCollector::destroy();
+    return passed ? 0 : 1;
+}
+
+
+void runAll()
+{
+    TestRunner::getDefault().run();
+}
+
+
 void describe(const std::string& name, std::function<void()> target)
 {
     auto test = new FunctionTest(target, name);
@@ -51,20 +77,6 @@ void describe(const std::string& name, Test* test)
 {
     test->name = name;
     TestRunner::getDefault().add(test);
-}
-
-
-void runTests()
-{
-    TestRunner::getDefault().run();
-}
-
-
-int finalize()
-{
-    bool passed = TestRunner::getDefault().passed();
-    singleton.destroy();
-    return passed ? 0 : 1;
 }
 
 
@@ -217,6 +229,7 @@ Test::Test(const std::string& name) :
 
 Test::~Test()
 {
+    // cout << "destroying " << name << endl;
 }
 
 

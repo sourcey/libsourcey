@@ -30,9 +30,8 @@
 
 #include "uv.h"
 #include <cstdint>
-#include "scy/exception.h"
-#include <exception>
-#include <stdexcept>
+#include "scy/error.h"
+#include <functional>
 #include <assert.h>
 
 
@@ -101,8 +100,8 @@ inline void stopDefaultLoop()
 
 
 class Handle
-    /// A base class for managing the lifecycle of a libuv handle,
-    /// including its asynchronous destruction mechanism.
+    /// A base class for managing a libuv handle during it's lifecycle and
+    /// safely handling its asynchronous destruction mechanism.
 {
 public:
     Handle(uv_loop_t* loop = nullptr, void* handle = nullptr) :
@@ -127,7 +126,7 @@ public:
         // The event loop may be set before the handle is initialized.
     {
         assertThread();
-        assert(_ptr == nullptr && "set loop before handle");
+        assert(_ptr == nullptr && "loop must be set before handle");
         _loop = loop;
     }
 
@@ -167,7 +166,7 @@ public:
     }
 
     bool ref()
-        // Reference main loop again, once unref'd
+        // Reference main loop again, once unref'd.
     {
         if (!active())
             return false;
@@ -177,7 +176,7 @@ public:
     }
 
     bool unref()
-        // Unreference the main loop after initialized
+        // Unreference the main loop after initialized.
     {
         if (active())
             return false;
@@ -260,14 +259,8 @@ public:
         // Make sure we are calling from the event loop thread.
     {
 #ifdef _DEBUG
-		uv_thread_t current = uv_thread_self();
-		assert(uv_thread_equal(&_tid, &current));
-
-        //assert(_tid == mainThread
-        //    || _tid == uv_thread_self()
-        //    // Note: The static mainThread may be 0 when the call
-        //    // originates from a lambda function.
-        //    || int(mainThread) <= 0);
+    		uv_thread_t current = uv_thread_self();
+    		assert(uv_thread_equal(&_tid, &current));
 #endif
     }
 
@@ -293,6 +286,44 @@ protected:
     uv_thread_t _tid;
     bool _closed;
 };
+
+
+//
+// Shutdown Signal Handler
+//
+
+
+struct ShutdownCmd
+{
+    void* opaque;
+    std::function<void(void*)> callback;
+};
+
+inline void onShutdownSignal(std::function<void(void*)> callback, void* opaque = nullptr, Loop* loop = defaultLoop())
+{
+    auto cmd = new ShutdownCmd;
+    cmd->opaque = opaque;
+    cmd->callback = callback;
+
+    auto sig = new uv_signal_t;
+    sig->data = cmd;
+    uv_signal_init(loop, sig);
+    uv_signal_start(sig, [](uv_signal_t* req, int /* signum */) {
+        auto cmd = reinterpret_cast<ShutdownCmd*>(req->data);
+        uv_close((uv_handle_t*)req, [](uv_handle_t* handle) {
+            delete handle;
+        });
+        if (cmd->callback)
+            cmd->callback(cmd->opaque);
+        delete cmd;
+    }, SIGINT);
+}
+
+inline void waitForShutdown(std::function<void(void*)> callback, void* opaque = nullptr, Loop* loop = defaultLoop())
+{
+    onShutdownSignal(callback, opaque, loop);
+    uv_run(defaultLoop(), UV_RUN_DEFAULT);
+}
 
 
 //

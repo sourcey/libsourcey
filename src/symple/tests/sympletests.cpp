@@ -3,21 +3,7 @@
 
 using namespace std;
 using namespace scy;
-// using namespace scy::net;
 using namespace scy::test;
-
-
-/*
-// Detect Memory Leaks
-#ifdef _DEBUG
-#include "MemLeakDetect/MemLeakDetect.h"
-#include "MemLeakDetect/MemLeakDetect.cpp"
-CMemLeakDetect memLeakDetect;
-#endif
-*/
-
-
-namespace scy {
 
 
 #define SERVER_HOST "localhost"
@@ -27,48 +13,6 @@ namespace scy {
 #else
 #define SERVER_PORT 4500
 #endif
-
-
-// ----------------------------------------------------------------------------
-// SocketIO Client Test
-//
-
-
-
-struct ShutdownCmd
-{
-    void* opaque;
-    std::function<void(void*)> callback;
-};
-
-inline void waitForShutdown(std::function<void(void*)> callback, void* opaque = nullptr, uv::Loop* loop = uv::defaultLoop())
-{
-    auto cmd = new ShutdownCmd;
-    // cmd->self = this;
-    cmd->opaque = opaque;
-    cmd->callback = callback;
-
-    auto sig = new uv_signal_t;
-    sig->data = cmd;
-    uv_signal_init(loop, sig);
-    uv_signal_start(sig, [](uv_signal_t* req, int /* signum */) {
-        auto cmd = reinterpret_cast<ShutdownCmd*>(req->data);
-        DebugL << "Got shutdown signal" << std::endl;
-
-        uv_close((uv_handle_t*)req, [](uv_handle_t* handle) {
-            delete handle;
-        });
-        if (cmd->callback)
-            cmd->callback(cmd->opaque);
-        delete cmd;
-    }, SIGINT);
-
-    DebugL << "Wait for shutdown" << std::endl;
-    uv_run(loop, UV_RUN_DEFAULT);
-}
-
-
-} // namespace scy
 
 
 int main(int argc, char** argv)
@@ -130,6 +74,8 @@ int main(int argc, char** argv)
         while(!lclient.completed() && !rclient.completed()) {
             // DebugL << "waiting for test completion" << std::endl;
             uv::runDefaultLoop(UV_RUN_ONCE);
+
+            // TODO: check client failed status
         }
     });
 
@@ -140,7 +86,7 @@ int main(int argc, char** argv)
     //  - Ack test
     //  - Benchmarks
 
-    runTests();
+    test::runAll();
 
 #if USE_SSL
     SSLManager::instance().shutdown();

@@ -40,13 +40,16 @@ typedef std::list<Test*> test_list_t;
 typedef std::list<std::string> error_list_t;
 typedef std::map<Test*, error_list_t> error_map_t;
 
-void runTests();
-    // Run all tests.
+void initialize();
+    // Initialize the test environment.
 
 int finalize();
     // Finalize the test environment.
     //
     // Destroy the TestRunner singleton instance and return the exit code.
+
+void runAll();
+    // Run all tests.
 
 void describe(const std::string& name, voidfunc_t target);
     // Describe a test environment implemented by the given lambda function.

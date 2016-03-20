@@ -23,7 +23,7 @@
 
 namespace scy {
 namespace http {
-    
+
 
 URL::URL()
 {
@@ -63,7 +63,7 @@ URL::URL(const std::string& scheme, const std::string& host, const std::string& 
 }
 
 
-URL::~URL() 
+URL::~URL()
 {
 }
 
@@ -75,7 +75,7 @@ URL& URL::operator = (const URL& uri)
     return *this;
 }
 
-    
+
 URL& URL::operator = (const std::string& uri)
 {
     parse(uri);
@@ -108,7 +108,7 @@ std::string URL::scheme() const
     std::string res;
     if (hasSchema()) {
         res.assign(_buf.substr(_parser.field_data[UF_SCHEMA].off, _parser.field_data[UF_SCHEMA].len));
-        util::toLower(res); // always returned as lowercase
+        util::toLowerInPlace(res); // always returned as lowercase
     }
     return res;
 }
@@ -137,7 +137,7 @@ std::uint16_t URL::port() const
 
 std::string URL::authority() const
 {
-    std::string res;    
+    std::string res;
     if (hasUserInfo()) {
         res.append(userInfo());
         res.append("@");
@@ -153,8 +153,8 @@ std::string URL::authority() const
 
 std::string URL::pathEtc() const
 {
-    std::string res;    
-    res.append(path());    
+    std::string res;
+    res.append(path());
     if (hasQuery()) {
         res.append("?");
         res.append(query());
@@ -177,7 +177,7 @@ std::string URL::path() const
 
 std::string URL::query() const
 {
-    if (hasQuery()) 
+    if (hasQuery())
         return _buf.substr(_parser.field_data[UF_QUERY].off, _parser.field_data[UF_QUERY].len);
     return std::string();
 }
@@ -185,7 +185,7 @@ std::string URL::query() const
 
 std::string URL::fragment() const
 {
-    if (hasFragment()) 
+    if (hasFragment())
         return _buf.substr(_parser.field_data[UF_FRAGMENT].off, _parser.field_data[UF_FRAGMENT].len);
     return std::string();
 }
@@ -193,18 +193,18 @@ std::string URL::fragment() const
 
 std::string URL::userInfo() const
 {
-    if (hasUserInfo()) 
+    if (hasUserInfo())
         return _buf.substr(_parser.field_data[UF_USERINFO].off, _parser.field_data[UF_USERINFO].len);
     return std::string();
 }
 
-    
+
 #if 0
 void URL::updateSchema(const std::string& scheme)
 {
     if (!hasSchema())
-        throw std::runtime_error("Cannot update invalid URL");        
-    
+        throw std::runtime_error("Cannot update invalid URL");
+
     std::string tmp(str());
     util::replaceInPlace(tmp, this->scheme(), scheme);
     parse(tmp);
@@ -214,7 +214,7 @@ void URL::updateSchema(const std::string& scheme)
 void URL::updateHost(const std::string& host)
 {
     if (!hasHost())
-        throw std::runtime_error("Cannot update invalid URL");        
+        throw std::runtime_error("Cannot update invalid URL");
 
     std::string tmp(str());
     util::replaceInPlace(tmp, this->host(), host);
@@ -223,13 +223,13 @@ void URL::updateHost(const std::string& host)
 
 
 void URL::updatePort(std::uint16_t port)
-{    
+{
     if (!hasPort())
-        throw std::runtime_error("Cannot update invalid URL");        
+        throw std::runtime_error("Cannot update invalid URL");
 
     std::string tmp(str());
-    util::replaceInPlace(tmp, 
-        util::itostr<std::uint16_t>(this->port()), 
+    util::replaceInPlace(tmp,
+        util::itostr<std::uint16_t>(this->port()),
         util::itostr<std::uint16_t>(port));
     parse(tmp);
 }
@@ -238,7 +238,7 @@ void URL::updatePort(std::uint16_t port)
 void URL::updatePath(const std::string& path)
 {
     if (!hasPath())
-        throw std::runtime_error("Cannot update invalid URL");        
+        throw std::runtime_error("Cannot update invalid URL");
 
     std::string tmp(str());
     util::replaceInPlace(tmp, this->path(), path);
@@ -249,7 +249,7 @@ void URL::updatePath(const std::string& path)
 void URL::updateQuery(const std::string& query)
 {
     if (!hasQuery())
-        throw std::runtime_error("Cannot update invalid URL");        
+        throw std::runtime_error("Cannot update invalid URL");
 
     std::string tmp(str());
     util::replaceInPlace(tmp, this->query(), query);
@@ -260,7 +260,7 @@ void URL::updateQuery(const std::string& query)
 void URL::updateFragment(const std::string& fragment)
 {
     if (!hasFragment())
-        throw std::runtime_error("Cannot update invalid URL");        
+        throw std::runtime_error("Cannot update invalid URL");
 
     std::string tmp(str());
     util::replaceInPlace(tmp, this->fragment(), fragment);
@@ -271,14 +271,14 @@ void URL::updateFragment(const std::string& fragment)
 void URL::updateUserInfo(const std::string& info)
 {
     if (!hasUserInfo())
-        throw std::runtime_error("Cannot update invalid URL");        
+        throw std::runtime_error("Cannot update invalid URL");
 
     std::string tmp(str());
     util::replaceInPlace(tmp, this->userInfo(), info);
     parse(tmp);
 }
 #endif
-    
+
 
 bool URL::valid() const
 {
@@ -292,44 +292,44 @@ std::string URL::str() const
 }
 
 
-bool URL::hasSchema() const 
-{ 
-    return (_parser.field_set & (1<<UF_SCHEMA)) == (1<<UF_SCHEMA); 
+bool URL::hasSchema() const
+{
+    return (_parser.field_set & (1<<UF_SCHEMA)) == (1<<UF_SCHEMA);
 }
 
 
-bool URL::hasHost() const 
-{ 
+bool URL::hasHost() const
+{
     return (_parser.field_set & (1<<UF_HOST)) == (1<<UF_HOST);
 }
 
 
 bool URL::hasPort() const
-{ 
+{
     return (_parser.field_set & (1<<UF_PORT)) == (1<<UF_PORT);
 }
 
 
-bool URL::hasPath() const 
-{ 
+bool URL::hasPath() const
+{
     return (_parser.field_set & (1<<UF_PATH)) == (1<<UF_PATH);
 }
 
 
-bool URL::hasQuery() const 
-{ 
+bool URL::hasQuery() const
+{
     return (_parser.field_set & (1<<UF_QUERY)) == (1<<UF_QUERY);
 }
 
 
-bool URL::hasFragment() const 
-{ 
+bool URL::hasFragment() const
+{
     return (_parser.field_set & (1<<UF_FRAGMENT)) == (1<<UF_FRAGMENT);
 }
 
 
-bool URL::hasUserInfo() const 
-{ 
+bool URL::hasUserInfo() const
+{
     return (_parser.field_set & (1<<UF_USERINFO)) == (1<<UF_USERINFO);
 }
 
@@ -362,7 +362,7 @@ std::string URL::decode(const std::string& str)
             const std::string digits = "0123456789ABCDEF";
             clean += (char)(digits.find(str[i+1])*16 + digits.find(str[i+2]));
             i += 2;
-        } 
+        }
         else {
             clean += str[i];
         }

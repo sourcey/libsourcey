@@ -34,9 +34,9 @@ namespace net {
 
 SSLContext::SSLContext(
     Usage usage,
-    const std::string& privateKeyFile, 
+    const std::string& privateKeyFile,
     const std::string& certificateFile,
-    const std::string& caLocation, 
+    const std::string& caLocation,
     VerificationMode verificationMode,
     int verificationDepth,
     bool loadDefaultCAs,
@@ -47,7 +47,7 @@ SSLContext::SSLContext(
     _extendedVerificationErrorDetails(true)
 {
     crypto::initializeEngine();
-    
+
     createSSLContext();
 
     int errCode = 0;
@@ -112,7 +112,7 @@ SSLContext::SSLContext(
 
 SSLContext::SSLContext(
     Usage usage,
-    const std::string& caLocation, 
+    const std::string& caLocation,
     VerificationMode verificationMode,
     int verificationDepth,
     bool loadDefaultCAs,
@@ -123,7 +123,7 @@ SSLContext::SSLContext(
     _extendedVerificationErrorDetails(true)
 {
     crypto::initializeEngine();
-    
+
     createSSLContext();
 
     int errCode = 0;
@@ -167,7 +167,7 @@ SSLContext::SSLContext(
 SSLContext::~SSLContext()
 {
     SSL_CTX_free(_sslContext);
-    
+
     crypto::uninitializeEngine();
 }
 
@@ -182,7 +182,7 @@ void SSLContext::useCertificate(const crypto::X509Certificate& certificate)
     }
 }
 
-    
+
 void SSLContext::addChainCertificate(const crypto::X509Certificate& certificate)
 {
     int errCode = SSL_CTX_add_extra_chain_cert(_sslContext, certificate.certificate());
@@ -193,7 +193,7 @@ void SSLContext::addChainCertificate(const crypto::X509Certificate& certificate)
     }
 }
 
-    
+
 void SSLContext::usePrivateKey(const crypto::RSAKey& key)
 {
     int errCode = SSL_CTX_use_RSAPrivateKey(_sslContext, const_cast<RSA*>(&key));
@@ -241,7 +241,7 @@ void SSLContext::enableSessionCache(bool flag, const std::string& sessionIdConte
     {
         SSL_CTX_set_session_cache_mode(_sslContext, SSL_SESS_CACHE_OFF);
     }
-    
+
     unsigned length = static_cast<unsigned>(sessionIdContext.length());
     if (length > SSL_MAX_SSL_SESSION_ID_LENGTH) length = SSL_MAX_SSL_SESSION_ID_LENGTH;
     int rc = SSL_CTX_set_session_id_context(_sslContext, reinterpret_cast<const unsigned char*>(sessionIdContext.data()), length);
@@ -258,15 +258,15 @@ bool SSLContext::sessionCacheEnabled() const
 void SSLContext::setSessionCacheSize(std::size_t size)
 {
     assert(isForServerUse());
-    
+
     SSL_CTX_sess_set_cache_size(_sslContext, static_cast<long>(size));
 }
 
-    
+
 std::size_t SSLContext::getSessionCacheSize() const
 {
     assert(isForServerUse());
-    
+
     return static_cast<std::size_t>(SSL_CTX_sess_get_cache_size(_sslContext));
 }
 
@@ -287,7 +287,7 @@ long SSLContext::getSessionTimeout() const
 }
 
 
-void SSLContext::flushSessionCache() 
+void SSLContext::flushSessionCache()
 {
     assert(_usage == SERVER_USE);
 

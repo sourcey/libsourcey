@@ -22,7 +22,7 @@
 
 
 #include <cstdint>
-#include "scy/exception.h"
+#include "scy/error.h"
 #include "json/json.h"
 #include <fstream>
 

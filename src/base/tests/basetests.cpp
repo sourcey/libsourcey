@@ -10,6 +10,8 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
+    test::initialize();
+
     // =========================================================================
     // Buffer
     //
@@ -303,9 +305,9 @@ int main(int argc, char** argv)
     describe("packet stream", new PacketStreamTest);
     describe("multi packet stream", new MultiPacketStreamTest);
 
-    runTests();
+    test::runAll();
 
-    return finalize();
+    return test::finalize();
 }
 
 
