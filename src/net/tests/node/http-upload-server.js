@@ -5,13 +5,12 @@ var formidable = require('formidable'),
 http.createServer(function(req, res) {
   if (req.url == '/upload' && req.method.toLowerCase() == 'post') {
     // parse a file upload
-    
-    console.log('New request')
+
+    console.log('new request')
     var form = new formidable.IncomingForm();
-    console.log('New request')
 
     form.parse(req, function(err, fields, files) {
-      console.log('New request: ', err)
+      console.log('new form: ', err)
       res.writeHead(200, {'content-type': 'text/plain'});
       res.write('received upload:\n\n');
       res.end(util.inspect({fields: fields, files: files}));
