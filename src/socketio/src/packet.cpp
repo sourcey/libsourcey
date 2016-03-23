@@ -201,8 +201,15 @@ std::size_t Packet::read(const ConstBuffer& buf)
         json::Reader reader;
         if (reader.parse(temp, json)) {
             if (json.isArray()) {
-                _event = json[0].asString();
-                _message = json::stringify(json[1], true);
+                if (json.size() < 2) {
+                    _event = "message";
+                    _message = json::stringify(json[0], true);
+                }
+                else {
+                    _event = json[0].asString();
+                    _message = json::stringify(json[1], true);
+
+                }
             }
             else if (json.isObject()) {
                 _message = json::stringify(json, true);
@@ -212,7 +219,7 @@ std::size_t Packet::read(const ConstBuffer& buf)
 
     _size = reader.position();
 
-    DebugN(this) << "Parse success: " << toString() << endl;
+    // DebugN(this) << "Parse success: " << toString() << endl;
 
     return _size;
 }
