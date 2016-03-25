@@ -42,10 +42,15 @@ static Singleton<TestRunner> singleton;
 
 void initialize()
 {
-    // Set the logger to only log warning level and above
-    Logger::instance().add(new ConsoleChannel("debug", LWarn));
+    // Set the logger to only log warning level and above if no debug
+    // channel has been set yet.
+    if (!Logger::instance().get("debug", false))
+        Logger::instance().add(new ConsoleChannel("debug", LWarn));
 
-    // Nothing else to do
+    // Initialize the default test runner.
+    TestRunner::getDefault();
+
+    // Nothing else to do...
 }
 
 
@@ -175,6 +180,7 @@ Test* TestRunner::current() const
 
 void TestRunner::run()
 {
+    cout << "===============================================================" << endl;
     cout << "running all tests" << endl;
 
     std::uint64_t start = time::hrtime();

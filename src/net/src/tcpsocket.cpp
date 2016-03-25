@@ -34,13 +34,13 @@ TCPSocket::TCPSocket(uv::Loop* loop) :
     Stream(loop)
 {
     TraceS(this) << "Create" << endl;
-    init();    
+    init();
 }
 
-    
-TCPSocket::~TCPSocket() 
-{    
-    TraceS(this) << "Destroy" << endl;    
+
+TCPSocket::~TCPSocket()
+{
+    TraceS(this) << "Destroy" << endl;
     close();
 }
 
@@ -69,7 +69,7 @@ namespace internal {
 }
 
 
-void TCPSocket::connect(const net::Address& peerAddress) 
+void TCPSocket::connect(const net::Address& peerAddress)
 {
     TraceS(this) << "Connecting to " << peerAddress << endl;
     init();
@@ -80,7 +80,7 @@ void TCPSocket::connect(const net::Address& peerAddress)
 }
 
 
-void TCPSocket::bind(const net::Address& address, unsigned flags) 
+void TCPSocket::bind(const net::Address& address, unsigned flags)
 {
     TraceS(this) << "Binding on " << address << endl;
     init();
@@ -99,7 +99,7 @@ void TCPSocket::bind(const net::Address& address, unsigned flags)
 }
 
 
-void TCPSocket::listen(int backlog) 
+void TCPSocket::listen(int backlog)
 {
     TraceS(this) << "Listening" << endl;
     init();
@@ -122,7 +122,7 @@ void TCPSocket::close()
 }
 
 
-void TCPSocket::setNoDelay(bool enable) 
+void TCPSocket::setNoDelay(bool enable)
 {
     init();
     int r = uv_tcp_nodelay(ptr<uv_tcp_t>(), enable ? 1 : 0);
@@ -130,7 +130,7 @@ void TCPSocket::setNoDelay(bool enable)
 }
 
 
-void TCPSocket::setKeepAlive(int enable, unsigned int delay) 
+void TCPSocket::setKeepAlive(int enable, unsigned int delay)
 {
     init();
     int r = uv_tcp_keepalive(ptr<uv_tcp_t>(), enable, delay);
@@ -139,7 +139,7 @@ void TCPSocket::setKeepAlive(int enable, unsigned int delay)
 
 
 #ifdef _WIN32
-void TCPSocket::setSimultaneousAccepts(bool enable) 
+void TCPSocket::setSimultaneousAccepts(bool enable)
 {
     init();
     int r = uv_tcp_simultaneous_accepts(ptr<uv_tcp_t>(), enable ? 1 : 0);
@@ -148,19 +148,19 @@ void TCPSocket::setSimultaneousAccepts(bool enable)
 #endif
 
 
-int TCPSocket::send(const char* data, std::size_t len, int flags) 
-{    
+int TCPSocket::send(const char* data, std::size_t len, int flags)
+{
     return send(data, len, peerAddress(), flags);
 }
 
 
-int TCPSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */) 
+int TCPSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */)
 {
     //assert(len <= net::MAX_TCP_PACKET_SIZE); // libuv handles this for us
-    
-    TraceS(this) << "Send: " << len << endl;    
+
+    TraceS(this) << "Send: " << len << endl;
     assert(Thread::currentID() == tid());
-    
+
 #if 0
     if (len < 300)
         TraceS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
@@ -172,7 +172,7 @@ int TCPSocket::send(const char* data, std::size_t len, const net::Address& /* pe
 #endif
 
     if (!Stream::write(data, len)) {
-        WarnL << "Send error" << endl;    
+        WarnL << "Send error" << endl;
         return -1;
     }
 
@@ -184,13 +184,12 @@ int TCPSocket::send(const char* data, std::size_t len, const net::Address& /* pe
 
 void TCPSocket::acceptConnection()
 {
-    // Create the shared socket pointer;
-    // if it is not handled it will be destroyed.
-    // TODO: Allow accepted sockets to use different event loops.
-    auto socket = net::makeSocket<net::TCPSocket>(loop()); //std::make_shared<net::TCPSocket>(this->loop());
+    // Create the shared socket pointer so the if the socket handle is not
+    // incremented the accepted socket will be destroyed.
+    auto socket = net::makeSocket<net::TCPSocket>(loop());
     TraceS(this) << "Accept connection: " << socket->ptr() << endl;
-    uv_accept(ptr<uv_stream_t>(), socket->ptr<uv_stream_t>()); // uv_accept should always work
-    socket->readStart();        
+    uv_accept(ptr<uv_stream_t>(), socket->ptr<uv_stream_t>());
+    socket->readStart();
     AcceptConnection.emit(Socket::self(), socket);
 }
 
@@ -200,7 +199,7 @@ net::Address TCPSocket::address() const
     if (!active())
         return net::Address();
         //throw std::runtime_error("Invalid TCP socket: No address");
-    
+
     struct sockaddr_storage address;
     int addrlen = sizeof(address);
     int r = uv_tcp_getsockname(ptr<uv_tcp_t>(),
@@ -241,18 +240,18 @@ void TCPSocket::setError(const scy::Error& err)
     Stream::setError(err);
 }
 
-        
+
 const scy::Error& TCPSocket::error() const
 {
     return Stream::error();
 }
 
 
-net::TransportType TCPSocket::transport() const 
-{ 
-    return net::TCP; 
+net::TransportType TCPSocket::transport() const
+{
+    return net::TCP;
 }
-    
+
 
 bool TCPSocket::closed() const
 {
@@ -266,6 +265,18 @@ uv::Loop* TCPSocket::loop() const
 }
 
 
+void TCPSocket::setMode(SocketMode mode)
+{
+    _mode = mode;
+}
+
+
+const SocketMode TCPSocket::mode() const
+{
+    return _mode;
+}
+
+
 //
 // Callbacks
 
@@ -273,7 +284,7 @@ void TCPSocket::onRead(const char* data, std::size_t len)
 {
     TraceS(this) << "On read: " << len << endl;
 
-    // Note: The const_cast here is relatively safe since the given 
+    // Note: The const_cast here is relatively safe since the given
     // data pointer is the underlying _buffer.data() pointer, but
     // a better way should be devised.
     onRecv(mutableBuffer(const_cast<char*>(data), len));
@@ -290,22 +301,22 @@ void TCPSocket::onRecv(const MutableBuffer& buf)
 void TCPSocket::onConnect(uv_connect_t* handle, int status)
 {
     TraceS(this) << "On connect" << endl;
-    
+
     // Error handled by static callback proxy
     if (status == 0) {
         if (readStart())
             onSocketConnect();
     }
     else {
-        setUVError("Connection failed", status);    
+        setUVError("Connection failed", status);
         //ErrorS(this) << "Connection failed: " << error().message << endl;
     }
     delete handle;
 }
 
 
-void TCPSocket::onAcceptConnection(uv_stream_t*, int status) 
-{        
+void TCPSocket::onAcceptConnection(uv_stream_t*, int status)
+{
     if (status == 0) {
         TraceS(this) << "On accept connection" << endl;
         acceptConnection();
@@ -315,17 +326,17 @@ void TCPSocket::onAcceptConnection(uv_stream_t*, int status)
 }
 
 
-void TCPSocket::onError(const scy::Error& error) 
-{        
+void TCPSocket::onError(const scy::Error& error)
+{
     DebugS(this) << "Error: " << error.message << endl;
     onSocketError(error);
     close(); // close on error
 }
 
 
-void TCPSocket::onClose() 
-{        
-    TraceS(this) << "On close" << endl;    
+void TCPSocket::onClose()
+{
+    TraceS(this) << "On close" << endl;
     onSocketClose();
 }
 

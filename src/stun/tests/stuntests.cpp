@@ -1,17 +1,16 @@
+#include "scy/test.h"
 #include "scy/base.h"
-#include "scy/platform.h"
-#include "scy/filesystem.h"
 #include "scy/logger.h"
 #include "scy/util.h"
 #include "scy/stun/message.h"
 
-#include <assert.h>
 #include <algorithm>
 #include <stdexcept>
 
 
 using namespace std;
 using namespace scy;
+using namespace scy::test;
 
 
 // TODO: Test vectors from http://tools.ietf.org/html/rfc5769
@@ -19,7 +18,8 @@ using namespace scy;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("Test", LTrace));
+    // Logger::instance().add(new ConsoleChannel("Test", LTrace));
+    test::initialize();
 
     // =========================================================================
     // Message Integrity
@@ -39,14 +39,14 @@ int main(int argc, char** argv)
         integrityAttr->setKey(password);
         request.add(integrityAttr);
 
-        Buffer buf;
+        Buffer buf(1024);
         request.write(buf);
 
         stun::Message response;
         response.read(constBuffer(buf));
 
         integrityAttr = response.get<stun::MessageIntegrity>();
-        assert(integrityAttr->verifyHmac(password));
+        expect(integrityAttr->verifyHmac(password));
     });
 
     // =========================================================================
@@ -55,30 +55,30 @@ int main(int argc, char** argv)
     describe("request types", []() {
         std::uint16_t type = stun::Message::Indication | stun::Message::SendIndication;
 
-        //assert(IS_STUN_INDICATION(type));
+        //expect(IS_STUN_INDICATION(type));
 
         std::uint16_t classType = type & 0x0110;
         std::uint16_t methodType = type & 0x000F;
 
-        assert(classType == stun::Message::Indication);
-        assert(methodType == stun::Message::SendIndication);
+        expect(classType == stun::Message::Indication);
+        expect(methodType == stun::Message::SendIndication);
 
         stun::Message request(stun::Message::Indication, stun::Message::SendIndication);
-        //assert(IS_STUN_INDICATION(request.classType() | request.methodType()));
+        //expect(IS_STUN_INDICATION(request.classType() | request.methodType()));
 
-        assert(request.classType() != stun::Message::Request);
-        assert(request.classType() == stun::Message::Indication);
+        expect(request.classType() != stun::Message::Request);
+        expect(request.classType() == stun::Message::Indication);
 
         stun::Message request1(stun::Message::Request, stun::Message::Allocate);
-        //assert(IS_STUN_REQUEST(request1.classType() | request1.methodType()));
+        //expect(IS_STUN_REQUEST(request1.classType() | request1.methodType()));
     });
 
     // =========================================================================
     // Xor Address
     //
     describe("xor address", []() {
-        assert(5555 == 0x15B3);
-        assert(5555 ^ (kMagicCookie >> 16) == 0x34A1);
+        expect(5555 == 0x15B3);
+        expect((5555 ^ (stun::kMagicCookie >> 16)) == 0x34A1);
 
         net::Address addr("192.168.1.1", 5555);
         DebugL << "Source Address: " << addr << endl;
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
         request.add(addrAttr);
         DebugL << "Request Address: " << addrAttr->address() << endl;
 
-        Buffer buf;
+        Buffer buf(1024);
         request.write(buf);
 
         stun::Message response;
@@ -101,12 +101,12 @@ int main(int argc, char** argv)
         addrAttr = response.get<stun::XorRelayedAddress>();
 
         DebugL << "Response Address: " << addrAttr->address() << endl;
-        assert(addrAttr->address() == addr);
+        expect(addrAttr->address() == addr);
     });
 
     test::runAll();
 
     Logger::destroy();
 
-    return finalize();
+    return test::finalize();
 }

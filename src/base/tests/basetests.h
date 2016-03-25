@@ -250,7 +250,7 @@ struct MockThreadedPacketSource: public PacketSource, public async::Startable
         std::cout << "Start" << std::endl;
         runner.start([](void* arg) {
             auto self = reinterpret_cast<MockThreadedPacketSource*>(arg);
-            std::cout << "Emitting" << std::endl;
+            // std::cout << "Emitting" << std::endl;
             RawPacket p("hello", 5);
             self->emitter.emit(self, p);
         }, this);
@@ -258,10 +258,10 @@ struct MockThreadedPacketSource: public PacketSource, public async::Startable
 
     void stop()
     {
-        std::cout << "Stop" << std::endl;
+        // std::cout << "Stop" << std::endl;
         runner.cancel();
-        //runner.close();
-        std::cout << "Stop: OK" << std::endl;
+        // runner.close();
+        // std::cout << "Stop: OK" << std::endl;
     }
 };
 
@@ -276,7 +276,7 @@ struct MockPacketProcessor: public PacketProcessor
 
     void process(IPacket& packet)
     {
-        std::cout << "Process: " << packet.className() << std::endl;
+        // std::cout << "Process: " << packet.className() << std::endl;
         emit(packet);
     }
 };
@@ -287,7 +287,7 @@ class PacketStreamTest: public Test
 
     void onPacketStreamOutput(void* sender, IPacket& packet)
     {
-        std::cout << "On packet: " << packet.className() << std::endl;
+        // std::cout << "On packet: " << packet.className() << std::endl;
         numPackets++;
     }
 
@@ -319,7 +319,7 @@ class MultiPacketStreamTest: public Test
 {
     void onChildPacketStreamOutput(void* sender, IPacket& packet)
     {
-        std::cout << "On child packet: " << packet.className() << std::endl;
+        // std::cout << "On child packet: " << packet.className() << std::endl;
     }
 
     struct ChildStreams

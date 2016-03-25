@@ -1,4 +1,5 @@
 # include_dependency(OpenSSL REQUIRED)
 # include_dependency(JsonCpp)
 
-define_libsourcey_test(archotests base uv archo)
+set(archotests_EXCLUDE_CTEST TRUE)
+define_libsourcey_test(archotests uv base archo)

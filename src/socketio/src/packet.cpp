@@ -63,40 +63,12 @@ Packet::Packet(const json::Value& message, bool ack) :
 Packet::Packet(const std::string& event, const std::string& message, bool ack) :
     Packet(Frame::Message, Type::Event, util::randomNumber(), "/", event, message, ack)
 {
-    // json::Value root;
-    // root["name"] = event;
-    //
-    // // add the data into an array if it isn't already
-    // if (!data.isArray()) {
-    //     json::Value array(Json::arrayValue);
-    //     array.append(data);
-    //     root["args"] = array;
-    // }
-    // else
-    //     root["args"] = data;
-    //
-    // _message = json::stringify(root);
 }
 
 
 Packet::Packet(const std::string& event, const json::Value& data, bool ack) :
     Packet(Frame::Message, Type::Event, util::randomNumber(), "/", event, json::stringify(data), ack)
 {
-    // assert(_id);
-    //
-    // json::Value root;
-    // root["name"] = event;
-    //
-    // // add the data into an array if it isn't already
-    // if (!data.isArray()) {
-    //     json::Value array(Json::arrayValue);
-    //     array.append(data);
-    //     root["args"] = array;
-    // }
-    // else
-    //     root["args"] = data;
-    //
-    // _message = json::stringify(root);
 }
 
 
@@ -207,8 +179,9 @@ std::size_t Packet::read(const ConstBuffer& buf)
                     _message = json::stringify(json[0], true);
                 }
                 else {
-                    _event = json[0].asString();
-                    _message = json::stringify(json[1], true);
+                    assert(json[0].isString());
+                _event = json[0].asString();
+                _message = json::stringify(json[1], true);
 
                 }
             }

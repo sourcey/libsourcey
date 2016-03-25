@@ -19,6 +19,7 @@
 
 #include "scy/net/ssladapter.h"
 #include "scy/net/sslsocket.h"
+#include "scy/net/sslmanager.h"
 #include "scy/logger.h"
 #include <vector>
 #include <iterator>
@@ -53,15 +54,43 @@ SSLAdapter::~SSLAdapter()
 }
 
 
-void SSLAdapter::init(SSL* ssl)
+void SSLAdapter::initClient()
 {
-    TraceS(this) << "Init: " << ssl << endl;
+    TraceS(this) << "Init client" << endl;
     assert(_socket);
-    //assert(_socket->initialized());
-    _ssl = ssl;
+    if (!_socket->context())
+        _socket->useContext(SSLManager::instance().defaultClientContext());
+    assert(!_socket->context()->isForServerUse());
+
+    _ssl = SSL_new(_socket->context()->sslContext());
+
+    // TODO: Improve automatic SSL session handling.
+    // Maybe add a stored session to the network manager.
+    if (_socket->currentSession())
+        SSL_set_session(_ssl, _socket->currentSession()->sslSession());
+
     _readBIO = BIO_new(BIO_s_mem());
     _writeBIO = BIO_new(BIO_s_mem());
     SSL_set_bio(_ssl, _readBIO, _writeBIO);
+    SSL_set_connect_state(_ssl);
+    SSL_do_handshake(_ssl);
+}
+
+
+void SSLAdapter::initServer() //(SSL* ssl)
+{
+    TraceS(this) << "Init server" << endl;
+    assert(_socket);
+    if (!_socket->context())
+        _socket->useContext(SSLManager::instance().defaultServerContext());
+    assert(_socket->context()->isForServerUse());
+
+    _ssl = SSL_new(_socket->context()->sslContext());
+    _readBIO = BIO_new(BIO_s_mem());
+    _writeBIO = BIO_new(BIO_s_mem());
+    SSL_set_bio(_ssl, _readBIO, _writeBIO);
+    SSL_set_accept_state(_ssl);
+    SSL_do_handshake(_ssl);
 }
 
 
@@ -91,8 +120,13 @@ void SSLAdapter::shutdown()
 
 bool SSLAdapter::initialized() const
 {
-    assert(_ssl);
-    return SSL_is_init_finished(_ssl);
+    return !!_ssl;
+}
+
+
+bool SSLAdapter::ready() const
+{
+    return _ssl && SSL_is_init_finished(_ssl);
 }
 
 
@@ -106,6 +140,7 @@ int SSLAdapter::available() const
 void SSLAdapter::addIncomingData(const char* data, std::size_t len)
 {
     //TraceL << "Add incoming data: " << len << endl;
+    assert(_readBIO);
     BIO_write(_readBIO, data, len);
     flush();
 }
@@ -123,36 +158,47 @@ void SSLAdapter::addOutgoingData(const char* data, std::size_t len)
 }
 
 
+void SSLAdapter::handshake()
+{
+    int r = SSL_do_handshake(_ssl);
+    if (r < 0) handleError(r);
+}
+
+
 void SSLAdapter::flush()
 {
-    //TraceL << "Flushing" << endl;
+    TraceL << "Flushing" << endl;
 
-    if (!initialized()) {
-        int r = SSL_connect(_ssl);
+    // Keep trying to handshake until initialized
+    if (!ready())
+        return handshake();
+
+    // Read any decrypted remote data from SSL and emit to the app
+    flushReadBIO();
+
+    // Write any local data to SSL for excryption
+    if (_bufferOut.size() > 0) {
+        int r = SSL_write(_ssl, &_bufferOut[0], _bufferOut.size()); // causes the write_bio to fill up (which we need to flush)
         if (r < 0) {
-            TraceL << "Flush: Handle error" << endl;
             handleError(r);
         }
-        return;
+        _bufferOut.clear();
+        // flushWriteBIO();
     }
 
-    // Read any decrypted SSL data from the read BIO
-    // NOTE: Overwriting the socket's raw SSL recv buffer
-    int nread = 0;
-    while ((nread = SSL_read(_ssl, _socket->_buffer.data(), _socket->_buffer.capacity())) > 0) {
-        //_socket->_buffer.limit(nread);
-        _socket->onRecv(mutableBuffer(_socket->_buffer.data(), nread));
-    }
+    // Send any encrypted data from SSL to the remote peer
+    flushWriteBIO();
+}
 
-    // Flush any pending outgoing data
-    if (SSL_is_init_finished(_ssl)) {
-        if (_bufferOut.size() > 0) {
-            int r = SSL_write(_ssl, &_bufferOut[0], _bufferOut.size()); // causes the write_bio to fill up (which we need to flush)
-            if (r < 0) {
-                handleError(r);
-            }
-            _bufferOut.clear();
-            flushWriteBIO();
+
+void SSLAdapter::flushReadBIO()
+{
+    int npending = BIO_ctrl_pending(_readBIO);
+    if (npending > 0) {
+        int nread;
+        char buffer[MAX_TCP_PACKET_SIZE]; // TODO: allocate npending bytes
+        while((nread = SSL_read(_ssl, buffer, MAX_TCP_PACKET_SIZE)) > 0) {
+            _socket->onRecv(mutableBuffer(buffer, nread));
         }
     }
 }
@@ -160,13 +206,13 @@ void SSLAdapter::flush()
 
 void SSLAdapter::flushWriteBIO()
 {
-    // flushes encrypted data
-    char buffer[1024*16]; // optimize!
-    int nread = 0;
-    while ((nread = BIO_read(_writeBIO, buffer, sizeof(buffer))) > 0) {
-
-        // Write encrypted data to the socket stream output
-        _socket->write(buffer, nread);
+    int npending = BIO_ctrl_pending(_writeBIO);
+    if (npending > 0) {
+        char buffer[MAX_TCP_PACKET_SIZE]; // TODO: allocate npending bytes
+        int nread = BIO_read(_writeBIO, buffer, MAX_TCP_PACKET_SIZE);
+        if (nread > 0) {
+            _socket->write(buffer, nread);
+        }
     }
 }
 
@@ -178,24 +224,27 @@ void SSLAdapter::handleError(int rc)
     switch (error)
     {
     case SSL_ERROR_ZERO_RETURN:
+        // TraceL << "SSL_ERROR_ZERO_RETURN" << endl;
         return;
     case SSL_ERROR_WANT_READ:
+        // TraceL << "SSL_ERROR_WANT_READ" << endl;
         flushWriteBIO();
-         break;
+        break;
     case SSL_ERROR_WANT_WRITE:
+        // TraceL << "SSL_ERROR_WANT_WRITE" << endl;
         assert(0 && "TODO");
-         break;
+        break;
     case SSL_ERROR_WANT_CONNECT:
     case SSL_ERROR_WANT_ACCEPT:
     case SSL_ERROR_WANT_X509_LOOKUP:
         assert(0 && "should not occur");
-         break;
+        break;
     default:
         char buffer[256];
         ERR_error_string_n(ERR_get_error(), buffer, sizeof(buffer));
         std::string msg(buffer);
         throw std::runtime_error("SSL connection error: " + msg);
-         break;
+        break;
     }
 }
 

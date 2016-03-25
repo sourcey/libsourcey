@@ -13,19 +13,9 @@
 #include "scy/media/thumbnailer.h"
 #include "scy/media/iencoder.h"
 
-/*
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavutil/fifo.h>
-#include <libswscale/swscale.h>
-}
-*/
-
 
 using namespace std;
 using namespace scy;
-//using namespace cv;
 
 
 namespace scy {
@@ -1118,31 +1108,11 @@ public:
 } // namespace scy
 
 
-#if 0
-#ifdef _MSC_VER
-#include <windows.h>
-#include <stdio.h>
-#include <tchar.h>
-#include <strsafe.h>
-#include <dbt.h>
-
-int __stdcall _tWinMain(
-                      HINSTANCE hInstanceExe,
-                      HINSTANCE, // should not reference this parameter
-                      PTSTR lpstrCmdLine,
-                      int nCmdShow
-                      )
-#endif
-#endif
 int main(int argc, char** argv)
 {
     Logger::instance().add(new ConsoleChannel("debug", LTrace));
     //Logger::instance().setWriter(new AsyncLogWriter);
     {
-#ifdef _MSC_VER
-        _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
-
         // Create the test application
         Application app;
 

@@ -35,12 +35,12 @@ namespace sked {
 
 
 Scheduler::Scheduler()
-{    
+{
 }
 
 
-Scheduler::~Scheduler() 
-{    
+Scheduler::~Scheduler()
+{
 }
 
 
@@ -51,39 +51,39 @@ void Scheduler::schedule(sked::Task* task)
 }
 
 
-void Scheduler::cancel(sked::Task* task) 
+void Scheduler::cancel(sked::Task* task)
 {
     TaskRunner::cancel(task);
     //_wakeUp.set();
 }
 
 
-void Scheduler::clear() 
+void Scheduler::clear()
 {
     TaskRunner::clear();
     //_wakeUp.set();
 }
 
 
-void Scheduler::run() 
+void Scheduler::run()
 {
     //TraceS(this) << "Running" << endl;
-    //while (!_stopped) 
-    //{    
+    //while (!_stopped)
+    //{
 
         // Update and sort the task list bringing the
         // next scheduled task to the front of the list.
         // TODO: Call only after task run, and when the
         // initial task is nullptr.
         update();
-        
-        // TODO: Create a nextTask member so we don't 
+
+        // TODO: Create a nextTask member so we don't
         // need to call next() on each iteration
-        sked::Task* task = reinterpret_cast<sked::Task*>(next());
-        
+        auto task = reinterpret_cast<sked::Task*>(next());
+
         // Run the task
-        if (task && 
-            task->trigger().timeout()) {    
+        if (task &&
+            task->trigger().timeout()) {
 #if _DEBUG
             {
                 DateTime now;
@@ -100,7 +100,7 @@ void Scheduler::run()
                     << endl;
             }
 #endif
-            
+
             // Wait for the scheduled timeout
             //if (!task->trigger().timeout())
             //    _wakeUp.tryWait(static_cast<long>(task->trigger().remaining()));
@@ -110,9 +110,9 @@ void Scheduler::run()
             // to ensure that the next pending task matches the
             // current pending task.
             if (//task == next() &&
-                //task->trigger().timeout() &&                
-                task->beforeRun()) {    
-#if _DEBUG                        
+                //task->trigger().timeout() &&
+                task->beforeRun()) {
+#if _DEBUG
                 {
                     DateTime now;
                     TraceS(this) << "Running: "
@@ -124,7 +124,7 @@ void Scheduler::run()
 #else
                 TraceS(this) << "Running: " << task << endl;
 #endif
-                task->run();    
+                task->run();
                 if (task->afterRun())
                     onRun(task);
                 else {
@@ -134,14 +134,14 @@ void Scheduler::run()
             }
             else
                 TraceS(this) << "Skipping Task: " << task << endl;
-            
+
             // Destroy the task if needed
             if (task->destroyed()) {
-                TraceS(this) << "Destroy Task: " << task << endl;    
+                TraceS(this) << "Destroy Task: " << task << endl;
                 assert(remove(task));
                 delete task;
             }
-            
+
             //TraceS(this) << "Running: OK: " << task << endl;
         }
 
@@ -153,15 +153,15 @@ void Scheduler::run()
         //}
 
         // Prevent 100% CPU
-        scy::sleep(5);
+        scy::sleep(3);
 
         // Dispatch the Idle signal
-        // TODO: Send Idle complete iteration of all tasks, 
+        // TODO: Send Idle complete iteration of all tasks,
         // rather than after each task.
         //Idle.emit(this);
     //}
-            
-    //TraceS(this) << "Shutdown" << endl;        
+
+    //TraceS(this) << "Shutdown" << endl;
     //Shutdown.emit(this);
     //TraceS(this) << "Exiting" << endl;
 }
@@ -170,7 +170,7 @@ void Scheduler::run()
 void Scheduler::update()
 {
     Mutex::ScopedLock lock(_mutex);
-    
+
     //TraceS(this) << "Updating: " << _tasks.size() << endl;
 
     // Update and clean the task list
@@ -186,8 +186,8 @@ void Scheduler::update()
         else
             ++it;
     }
-    
-    // Sort the task list to the next task to 
+
+    // Sort the task list to the next task to
     // trigger is at the front of the queue.
     sort(_tasks.begin(), _tasks.end(), sked::Task::CompareTimeout);
 }
@@ -196,7 +196,7 @@ void Scheduler::update()
 void Scheduler::serialize(json::Value& root)
 {
     TraceS(this) << "Serializing" << endl;
-    
+
     Mutex::ScopedLock lock(_mutex);
     for (auto it = _tasks.begin(); it != _tasks.end(); ++it) {
         sked::Task* task = reinterpret_cast<sked::Task*>(*it);
@@ -211,7 +211,7 @@ void Scheduler::serialize(json::Value& root)
 void Scheduler::deserialize(json::Value& root)
 {
     TraceS(this) << "Deserializing" << endl;
-    
+
     for (auto it = root.begin(); it != root.end(); it++) {
         sked::Task* task = nullptr;
         sked::Trigger* trigger = nullptr;
@@ -244,14 +244,14 @@ void Scheduler::print(std::ostream& ost)
 }
 
 
-Scheduler& Scheduler::getDefault() 
+Scheduler& Scheduler::getDefault()
 {
     static Singleton<Scheduler> sh;
     return *sh.get();
 }
 
 
-TaskFactory& Scheduler::factory() 
+TaskFactory& Scheduler::factory()
 {
     return TaskFactory::getDefault();
 }

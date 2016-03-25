@@ -55,15 +55,6 @@ public:
         BinaryAck         = 6,
         TypeMax           = 6,
         Unknown           = -1
-
-        // Disconnect        = 0,
-        // Connect           = 1,
-        // Heartbeat         = 2,
-        // Message           = 3,
-        // JSON              = 4,
-        // Event             = 5,
-        // Ack               = 6,
-        // Error             = 7
     };
 
     Packet(Frame frame = Frame::Message,
@@ -131,7 +122,6 @@ public:
     virtual const char* className() const { return "SocketIO::Packet"; }
 
 protected:
-    // std::uint8_t _type;
     Frame _frame;
     Type _type;
     int _id;

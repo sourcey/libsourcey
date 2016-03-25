@@ -38,23 +38,23 @@ struct Action
     callback_t target;
     void* arg;
     std::string data;
-        
+
     Action(callback_t target, void* arg = nullptr, const std::string& data = "") :
-        target(target), arg(arg), data(data) {} 
+        target(target), arg(arg), data(data) {}
 };
 
 
-template<typename TAction = ipc::Action> 
+template<typename TAction = ipc::Action>
 class Queue
-    /// IPC queue is for safely passing templated   
+    /// IPC queue is for safely passing templated
     /// actions between threads and processes.
 {
-public:    
+public:
     Queue()
     {
     }
 
-    virtual ~Queue() 
+    virtual ~Queue()
     {
     }
 
@@ -69,18 +69,18 @@ public:
 
     virtual TAction* pop()
     {
-        if (_actions.empty()) 
+        if (_actions.empty())
             return nullptr;
         Mutex::ScopedLock lock(_mutex);
         TAction* next = _actions.front();
         _actions.pop_front();
         return next;
     }
-    
+
     virtual void runSync()
     {
         TAction* next = nullptr;
-        while (next = pop()) {
+        while ((next = pop())) {
             next->target(*next);
             delete next;
         }
@@ -89,7 +89,7 @@ public:
     virtual void close()
     {
     }
-    
+
     virtual void post()
     {
     }
@@ -103,30 +103,30 @@ public:
                 if (_actions.empty())
                     return;
             }
-            DebugL << "Wait for sync" << std::endl;    
+            DebugL << "Wait for sync" << std::endl;
             scy::sleep(10);
-        }    
+        }
     }
 
-protected:    
+protected:
     mutable Mutex _mutex;
     std::deque<TAction*> _actions;
 };
 
 
-template<typename TAction = ipc::Action> 
+template<typename TAction = ipc::Action>
 class SyncQueue: public Queue<TAction>
-    /// IPC synchronization queue is for passing templated 
-    /// actions between threads and the event loop we are 
+    /// IPC synchronization queue is for passing templated
+    /// actions between threads and the event loop we are
     /// synchronizing with.
 {
-public:    
-    SyncQueue(uv::Loop* loop = uv::defaultLoop()) : 
-        _sync(loop, std::bind(&Queue<TAction>::runSync, this)) 
+public:
+    SyncQueue(uv::Loop* loop = uv::defaultLoop()) :
+        _sync(loop, std::bind(&Queue<TAction>::runSync, this))
     {
     }
 
-    virtual ~SyncQueue() 
+    virtual ~SyncQueue()
     {
     }
 
@@ -134,18 +134,18 @@ public:
     {
         _sync.close();
     }
-    
+
     virtual void post()
     {
         _sync.post();
     }
-    
+
     virtual SyncContext& sync()
     {
         return _sync;
     }
 
-protected:    
+protected:
     SyncContext _sync;
 };
 

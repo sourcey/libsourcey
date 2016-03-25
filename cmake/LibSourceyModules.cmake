@@ -60,12 +60,11 @@ macro(define_sourcey_module name)
 
   #  message(FATAL_ERROR "${CMAKE_SYSTEM_NAME} ${lib_srcs}")
   message(STATUS "Defining module ${name}")
-  if(name STREQUAL "socketio")
-    message(STATUS "    Dependencies: ${LibSourcey_BUILD_DEPENDENCIES}")
-    message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
-    # message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
-    message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
-  endif()
+  # message(STATUS "    Dependencies: ${LibSourcey_BUILD_DEPENDENCIES}")
+  # message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
+  # message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
+  # message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
+  # message(STATUS "    Include Vendor Dirs: ${LibSourcey_VENDOR_INCLUDE_DIRS}")
 
   if(NOT ANDROID)
     # Android SDK build scripts can include only .so files into final .apk
@@ -190,10 +189,15 @@ macro(define_libsourcey_test name)
   #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
   #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
 
+  # Add ctest support
+  if(NOT ${name}_EXCLUDE_CTEST)
+    add_test(${name} ${name})
+  endif()
+
   if(ENABLE_SOLUTION_FOLDERS)
     set_target_properties(${name} PROPERTIES FOLDER "tests")
   endif()
-  set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
+  set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "")
 
   install(TARGETS ${name} RUNTIME DESTINATION "tests/${name}" COMPONENT main)
 endmacro()

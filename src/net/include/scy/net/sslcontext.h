@@ -34,7 +34,7 @@
 namespace scy {
 namespace net {
 
- 
+
 class SSLContext: public SharedObject
     /// This class encapsulates context information for
     /// an SSL server or client, such as the certificate
@@ -47,7 +47,7 @@ class SSLContext: public SharedObject
 {
 public:
     typedef std::shared_ptr<SSLContext> Ptr;
-    
+
     enum Usage
     {
         CLIENT_USE,       // Context is used by a client.
@@ -55,55 +55,55 @@ public:
         TLSV1_CLIENT_USE, // Context is used by a client requiring TLSv1.
         TLSV1_SERVER_USE  // Context is used by a server requiring TLSv2.
     };
-    
-    enum VerificationMode 
+
+    enum VerificationMode
     {
-        VERIFY_NONE    = SSL_VERIFY_NONE, 
-            // Server: The server will not send a client certificate 
-            // request to the client, so the client will not send a certificate. 
+        VERIFY_NONE    = SSL_VERIFY_NONE,
+            // Server: The server will not send a client certificate
+            // request to the client, so the client will not send a certificate.
             //
-            // Client: If not using an anonymous cipher (by default disabled), 
+            // Client: If not using an anonymous cipher (by default disabled),
             // the server will send a certificate which will be checked, but
             // the result of the check will be ignored.
-             
-        VERIFY_RELAXED = SSL_VERIFY_PEER, 
-            // Server: The server sends a client certificate request to the 
-            // client. The certificate returned (if any) is checked. 
-            // If the verification process fails, the TLS/SSL handshake is 
-            // immediately terminated with an alert message containing the 
-            // reason for the verification failure. 
-            //
-            // Client: The server certificate is verified, if one is provided. 
+
+        VERIFY_RELAXED = SSL_VERIFY_PEER,
+            // Server: The server sends a client certificate request to the
+            // client. The certificate returned (if any) is checked.
             // If the verification process fails, the TLS/SSL handshake is
-            // immediately terminated with an alert message containing the 
+            // immediately terminated with an alert message containing the
             // reason for the verification failure.
-            
-        VERIFY_STRICT  = SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
-            // Server: If the client did not return a certificate, the TLS/SSL 
-            // handshake is immediately terminated with a handshake failure
-            // alert. 
             //
-            // Client: Same as VERIFY_RELAXED. 
-            
+            // Client: The server certificate is verified, if one is provided.
+            // If the verification process fails, the TLS/SSL handshake is
+            // immediately terminated with an alert message containing the
+            // reason for the verification failure.
+
+        VERIFY_STRICT  = SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+            // Server: If the client did not return a certificate, the TLS/SSL
+            // handshake is immediately terminated with a handshake failure
+            // alert.
+            //
+            // Client: Same as VERIFY_RELAXED.
+
         VERIFY_ONCE    = SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE
-            // Server: Only request a client certificate on the initial 
-            // TLS/SSL handshake. Do not ask for a client certificate 
+            // Server: Only request a client certificate on the initial
+            // TLS/SSL handshake. Do not ask for a client certificate
             // again in case of a renegotiation.
             //
-            // Client: Same as VERIFY_RELAXED.    
+            // Client: Same as VERIFY_RELAXED.
     };
-    
+
     SSLContext(
         Usage usage,
         const std::string& privateKeyFile,
         const std::string& certificateFile,
-        const std::string& caLocation, 
+        const std::string& caLocation,
         VerificationMode verificationMode = VERIFY_RELAXED,
         int verificationDepth = 9,
         bool loadDefaultCAs = false,
         const std::string& cipherList = "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
         // Creates a Context.
-        // 
+        //
         //   * usage specifies whether the context is used by a client or server.
         //   * privateKeyFile contains the path to the private key file used for encryption.
         //     Can be empty if no private key file is used.
@@ -122,16 +122,16 @@ public:
         // Note: If the private key is protected by a passphrase, a PrivateKeyPassphraseHandler
         // must have been setup with the SSLManager, or the SSLManager's PrivateKeyPassphraseRequired
         // event must be handled.
-    
+
     SSLContext(
         Usage usage,
-        const std::string& caLocation, 
+        const std::string& caLocation,
         VerificationMode verificationMode = VERIFY_RELAXED,
         int verificationDepth = 9,
         bool loadDefaultCAs = false,
         const std::string& cipherList = "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
         // Creates a Context.
-        // 
+        //
         //   * usage specifies whether the context is used by a client or server.
         //   * caLocation contains the path to the file or directory containing the
         //     CA/root certificates. Can be empty if the OpenSSL builtin CA certificates
@@ -144,50 +144,50 @@ public:
         //
         // Note that a private key and/or certificate must be specified with
         // usePrivateKey()/useCertificate() before the Context can be used.
-    
+
     ~SSLContext();
         // Destroys the Context.
-    
-    void useCertificate(const crypto::X509Certificate& certificate);
-        // Sets the certificate to be used by the Context.
-        //
-        // To set-up a complete certificate chain, it might be
-        // necessary to call addChainCertificate() to specify
-        // additional certificates.
-        //
-        // Note that useCertificate() must always be called before
-        // usePrivateKey().
-        
-    void addChainCertificate(const crypto::X509Certificate& certificate);
-        // Adds a certificate for certificate chain validation.
-        
-    void usePrivateKey(const crypto::RSAKey& key);
-        // Sets the private key to be used by the Context.
-        //
-        // Note that useCertificate() must always be called before
-        // usePrivateKey().
-        //
-        // Note: If the private key is protected by a passphrase, a PrivateKeyPassphraseHandler
-        // must have been setup with the SSLManager, or the SSLManager's PrivateKeyPassphraseRequired
-        // event must be handled.
-    
-    void addVerificationCertificate(const crypto::X509Certificate& certificate);
-        // Adds the given certificate to the list of trusted certificates 
-        // that will be used for verification.
-    
+
+    // void useCertificate(const crypto::X509Certificate& certificate);
+    //     // Sets the certificate to be used by the Context.
+    //     //
+    //     // To set-up a complete certificate chain, it might be
+    //     // necessary to call addChainCertificate() to specify
+    //     // additional certificates.
+    //     //
+    //     // Note that useCertificate() must always be called before
+    //     // usePrivateKey().
+    //
+    // void addChainCertificate(const crypto::X509Certificate& certificate);
+    //     // Adds a certificate for certificate chain validation.
+    //
+    // void usePrivateKey(const crypto::RSAKey& key);
+    //     // Sets the private key to be used by the Context.
+    //     //
+    //     // Note that useCertificate() must always be called before
+    //     // usePrivateKey().
+    //     //
+    //     // Note: If the private key is protected by a passphrase, a PrivateKeyPassphraseHandler
+    //     // must have been setup with the SSLManager, or the SSLManager's PrivateKeyPassphraseRequired
+    //     // event must be handled.
+    //
+    // void addVerificationCertificate(const crypto::X509Certificate& certificate);
+    //     // Adds the given certificate to the list of trusted certificates
+    //     // that will be used for verification.
+
     SSL_CTX* sslContext() const;
         // Returns the underlying OpenSSL SSL Context object.
-    
+
     Usage usage() const;
         // Returns whether the context is for use by a client or by a server
         // and whether TLSv1 is required.
-        
+
     bool isForServerUse() const;
         // Returns true if the context is for use by a server.
-    
+
     SSLContext::VerificationMode verificationMode() const;
         // Returns the verification mode.
-        
+
     void enableSessionCache(bool flag = true);
         // Enable or disable SSL/TLS session caching.
         // For session caching to work, it must be enabled
@@ -198,7 +198,7 @@ public:
         // To enable session caching on the server side, use the
         // two-argument version of this method to specify
         // a session ID context.
-    
+
     void enableSessionCache(bool flag, const std::string& sessionIdContext);
         // Enables or disables SSL/TLS session caching on the server.
         // For session caching to work, it must be enabled
@@ -207,7 +207,7 @@ public:
         // SessionIdContext contains the application's unique
         // session ID context, which becomes part of each
         // session identifier generated by the server within this
-        // context. SessionIdContext can be an arbitrary sequence 
+        // context. SessionIdContext can be an arbitrary sequence
         // of bytes with a maximum length of SSL_MAX_SSL_SESSION_ID_LENGTH.
         //
         // A non-empty sessionIdContext should be specified even if
@@ -215,10 +215,10 @@ public:
         // requesting to reuse a session (e.g. Firefox 3.6).
         //
         // This method may only be called on SERVER_USE Context objects.
-        
+
     bool sessionCacheEnabled() const;
         // Returns true if the session cache is enabled.
-        
+
     void setSessionCacheSize(std::size_t size);
         // Sets the maximum size of the server session cache, in number of
         // sessions. The default size (according to OpenSSL documentation)
@@ -228,34 +228,34 @@ public:
         // Specifying a size of 0 will set an unlimited cache size.
         //
         // This method may only be called on SERVER_USE Context objects.
-        
+
     std::size_t getSessionCacheSize() const;
         // Returns the current maximum size of the server session cache.
         //
         // This method may only be called on SERVER_USE Context objects.
-        
+
     void setSessionTimeout(long seconds);
         // Sets the timeout (in seconds) of cached sessions on the server.
         // A cached session will be removed from the cache if it has
         // not been used for the given number of seconds.
         //
         // This method may only be called on SERVER_USE Context objects.
-    
+
     long getSessionTimeout() const;
         // Returns the timeout (in seconds) of cached sessions on the server.
         //
         // This method may only be called on SERVER_USE Context objects.
-    
+
     void flushSessionCache();
         // Flushes the SSL session cache on the server.
         //
         // This method may only be called on SERVER_USE Context objects.
-            
+
     void disableStatelessSessionResumption();
         // Newer versions of OpenSSL support RFC 4507 tickets for stateless
         // session resumption.
         //
-        // The feature can be disabled by calling this method.    
+        // The feature can be disabled by calling this method.
 
 private:
     void createSSLContext();
@@ -363,14 +363,14 @@ inline void clearErrorStack()
 // execute, and transmit the Software, and to prepare derivative works of the
 // Software, and to permit third-parties to whom the Software is furnished to
 // do so, all subject to the following:
-// 
+//
 // The copyright notices in the Software and this entire statement, including
 // the above license grant, this restriction and the following disclaimer,
 // must be included in all copies of the Software, in whole or in part, and
 // all derivative works of the Software, unless such copies or derivative
 // works are solely in the form of machine-executable object code generated by
 // a source language processor.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
