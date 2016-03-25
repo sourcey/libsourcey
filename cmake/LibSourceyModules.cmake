@@ -190,7 +190,7 @@ macro(define_libsourcey_test name)
   #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
 
   # Add ctest support
-  if(${name} MATCHES "basetests|httptests|cryptotests")
+  if(NOT ${name}_EXCLUDE_CTEST)
     add_test(${name} ${name})
   endif()
 

@@ -133,7 +133,7 @@ class Stream: public uv::Handle
         // Signals when data can be read from the stream.
 
  protected:
-    bool readStart()
+    virtual bool readStart()
     {
         //TraceL << "Read start: " << ptr() << std::endl;
         int r = uv_read_start(this->ptr<uv_stream_t>(), Stream::allocReadBuffer, handleRead);
@@ -141,7 +141,7 @@ class Stream: public uv::Handle
         return r == 0;
     }
 
-    bool readStop()
+    virtual bool readStop()
     {
         //TraceL << "Read stop: " << ptr() << std::endl;
         int r = uv_read_stop(ptr<uv_stream_t>());

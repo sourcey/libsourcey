@@ -29,10 +29,15 @@ namespace scy {
 namespace net {
 
 
-SSLSocket::SSLSocket(uv::Loop* loop) :
+// TODO: Using client context, should assert no bind()/listen() on this socket
+
+
+SSLSocket::SSLSocket(uv::Loop* loop) : //, SocketMode mode
     TCPSocket(loop),
-    // TODO: Using client context, should assert no bind()/listen() on this socket
-    _context(SSLManager::instance().defaultClientContext()),
+    _context(nullptr//mode == Client ?
+      // SSLManager::instance().defaultClientContext() //:
+      //SSLManager::instance().defaultServerContext()
+    ),
     _session(nullptr),
     _sslAdapter(this)
 {
@@ -107,12 +112,41 @@ int SSLSocket::send(const char* data, std::size_t len, const net::Address& /* pe
         return -1;
     }
 
-    //assert(initialized());
-
     // Send unencrypted data to the SSL context
+
+    assert(_sslAdapter._ssl);
+
     _sslAdapter.addOutgoingData(data, len);
     _sslAdapter.flush();
     return len;
+}
+
+
+void SSLSocket::acceptConnection()
+{
+    assert(_context->isForServerUse());
+
+    // Create the shared socket pointer so the if the socket handle is not
+    // incremented the accepted socket will be destroyed.
+    // auto socket = net::makeSocket<net::SSLSocket>(loop());
+    auto socket = std::shared_ptr<net::SSLSocket>(new SSLSocket(_context, loop()));
+
+    TraceS(this) << "Accept SSL connection: " << socket->ptr() << endl;
+    uv_accept(ptr<uv_stream_t>(), socket->ptr<uv_stream_t>());
+    socket->readStart();
+
+    socket->_sslAdapter.initServer();
+    // socket->_sslAdapter.start();
+
+    TraceS(this) << "Accept SSL connection: OK: " << socket->ptr() << endl;
+
+    AcceptConnection.emit(Socket::self(), socket);
+}
+
+
+void SSLSocket::useSession(SSLSession::Ptr session)
+{
+    _session = session;
 }
 
 
@@ -132,9 +166,19 @@ SSLSession::Ptr SSLSocket::currentSession()
 }
 
 
-void SSLSocket::useSession(SSLSession::Ptr session)
+void SSLSocket::useContext(SSLContext::Ptr context)
 {
-    _session = session;
+    if (_sslAdapter._ssl)
+        throw std::runtime_error("Cannot change the SSL context for an active socket.");
+
+    _context = context;
+}
+
+
+
+SSLContext::Ptr SSLSocket::context() const
+{
+    return _context;
 }
 
 
@@ -155,13 +199,12 @@ net::TransportType SSLSocket::transport() const
 
 //
 // Callbacks
-//
 
 void SSLSocket::onRead(const char* data, std::size_t len)
 {
-    TraceS(this) << "On SSL read: " << len << endl;
+    TraceS(this) << "On SSL read: " << len << endl; // << ": " << std::string(data, len)
 
-    // SSL encrypted data is sent to the SSL conetext
+    // SSL encrypted data is sent to the SSL context
     _sslAdapter.addIncomingData(data, len);
     _sslAdapter.flush();
 }
@@ -174,25 +217,12 @@ void SSLSocket::onConnect(uv_connect_t* handle, int status)
         setUVError("SSL connect error", status);
         return;
     }
-    else
-        readStart();
+    else readStart();
 
-    SSL* ssl = SSL_new(_context->sslContext());
+    _sslAdapter.initClient();
+    // _sslAdapter.start();
 
-    // TODO: Automatic SSL session handling.
-    // Maybe add a stored session to the network manager.
-    if (_session)
-        SSL_set_session(ssl, _session->sslSession());
-
-    SSL_set_connect_state(ssl);
-    SSL_do_handshake(ssl);
-
-    _sslAdapter.init(ssl);
-    _sslAdapter.flush();
-
-    //emitConnect();
     onSocketConnect();
-    TraceS(this) << "On connect: OK" << endl;
 }
 
 

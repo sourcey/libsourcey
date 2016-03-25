@@ -16,9 +16,10 @@ class ClientSocketTest
 public:
     SocketT socket;
     Address address;
+    bool passed;
 
-    ClientSocketTest(short port, bool ghost = false) :
-        address("127.0.0.1", port)
+    ClientSocketTest(short port) : //, bool ghost = false
+        address("127.0.0.1", port), passed(false)
     {
         traceL("ClientSocketTest") << "Creating: " << port << std::endl;
     }
@@ -52,9 +53,9 @@ public:
     {
         traceL("ClientSocketTest") << "Connected" << std::endl;
         // assert(sender == &socket);
+        // socket.send("client > server", 15);
+        // socket.send("client > server", 15);
         socket.send("client > server", 15);
-        // socket.send("client > server", 15);
-        // socket.send("client > server", 15);
     }
 
     void onRecv(void* sender, const MutableBuffer& buffer, const Address& peerAddress)
@@ -67,6 +68,7 @@ public:
         // Check for return packet echoing sent data
         if (data == "client > server") {
             traceL("ClientSocketTest") << "Recv: Got Return Packet!" << std::endl;
+            passed = true;
 
             // Send the shutdown command to close the connection gracefully.
             // The peer disconnection will trigger an eof error callback

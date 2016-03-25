@@ -14,16 +14,6 @@ using namespace std;
 using namespace scy;
 
 
-/*
-// Detect Memory Leaks
-#ifdef _DEBUG
-#include "MemLeakDetect/MemLeakDetect.cpp"
-#include "MemLeakDetect/MemLeakDetect.h"
-CMemLeakDetect memLeakDetect;
-#endif
-*/
-
-
 namespace scy {
 namespace arc {
 

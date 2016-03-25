@@ -429,6 +429,7 @@ void Client::onMessage(sockio::Packet& packet)
         case Packet::Packet::Type::BinaryAck:
             assert(0 && "not implemented");
             break;
+        default: assert(0 && "unknown type");
     }
 }
 
@@ -454,6 +455,7 @@ void Client::onPacket(sockio::Packet& packet)
         case Packet::Frame::Upgrade:
         case Packet::Frame::Noop:
             break;
+        default: assert(0 && "unknown type");
     }
 }
 

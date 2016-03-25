@@ -24,7 +24,7 @@
 #include "scy/uv/uvpp.h"
 #include "scy/net/address.h"
 #include "scy/net/types.h"
- 
+
 #include <openssl/ssl.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
@@ -35,9 +35,9 @@
 namespace scy {
 namespace net {
 
- 
+
 class SSLSocket;
-class SSLAdapter 
+class SSLAdapter
     /// A wrapper for the OpenSSL SSL connection context
     /// TODO: Decouple from SSLSocket implementation
 {
@@ -45,16 +45,25 @@ public:
     SSLAdapter(net::SSLSocket* socket);
     ~SSLAdapter();
 
-    void init(SSL* ssl = nullptr);
-        // Initializes the BIO buffers from the given SSL pointer.
+    void initClient(); //SSL* ssl = nullptr);
+        // Initializes the SSL context as a client.
+
+    void initServer(); //SSL* ssl = nullptr);
+        // Initializes the SSL context as a server.
 
     bool initialized() const;
+        // Returns true when SSL context has been initialized.
+
+    bool ready() const;
         // Returns true when the handshake is complete.
-        
+
+    void handshake();
+        // Start/continue the SSL handshake process.
+
     int available() const;
-        // Returns the number of bytes available in 
+        // Returns the number of bytes available in
         // the SSL buffer for immediate reading.
-    
+
     void shutdown();
         // Issues an orderly SSL shutdown.
 
@@ -68,6 +77,7 @@ public:
 protected:
     void handleError(int rc);
 
+    void flushReadBIO();
     void flushWriteBIO();
 
 protected:

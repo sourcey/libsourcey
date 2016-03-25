@@ -16,11 +16,17 @@
 /* Define to the version of this package. */
 #define SCY_PACKAGE_VERSION "${PACKAGE_VERSION}"
 
+/* Define the source path. */
+#define SCY_SOURCE_DIR "${LibSourcey_SOURCE_DIR}"
+
+/* Define the build path. */
+#define SCY_BUILD_DIR "${LibSourcey_BUILD_DIR}"
+
 /* Define the installation path. */
-#define SCY_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}"
+#define SCY_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
 
 /* Version number of package */
-#cmakedefine SCY_BUILD_SHARED "${BUILD_SHARED_LIBS}" 
+#cmakedefine SCY_BUILD_SHARED "${BUILD_SHARED_LIBS}"
 
 /* LibSourcey modules
 # cmakedefine HAVE_SCY_base
@@ -46,23 +52,17 @@
 /* LibUV library */
 #cmakedefine HAVE_LIBUV
 
+/* OpenSSL library */
+#cmakedefine HAVE_OPENSSL
+
 /* FFmpeg video library */
 #cmakedefine HAVE_FFMPEG
 
 /* OpenCV library */
 #cmakedefine HAVE_OPENCV
 
-/* OpenSSL library */
-#cmakedefine HAVE_OPENSSL
-
-/* PugiXML library */
-#cmakedefine HAVE_PUGIXML
-
 /* RtAudio library */
 #cmakedefine HAVE_RTAUDIO
-
-/* LibStrophe library */
-#cmakedefine HAVE_LIBSTROPHE
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #cmakedefine HAVE_INTTYPES_H 1

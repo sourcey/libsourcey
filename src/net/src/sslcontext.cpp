@@ -172,48 +172,48 @@ SSLContext::~SSLContext()
 }
 
 
-void SSLContext::useCertificate(const crypto::X509Certificate& certificate)
-{
-    int errCode = SSL_CTX_use_certificate(_sslContext, const_cast<X509*>(certificate.certificate()));
-    if (errCode != 1)
-    {
-        std::string msg = getLastError();
-        throw std::runtime_error("SSL Error: Cannot set certificate for Context: " + msg);
-    }
-}
-
-
-void SSLContext::addChainCertificate(const crypto::X509Certificate& certificate)
-{
-    int errCode = SSL_CTX_add_extra_chain_cert(_sslContext, certificate.certificate());
-    if (errCode != 1)
-    {
-        std::string msg = getLastError();
-        throw std::runtime_error("SSL Error: Cannot add chain certificate to Context: " + msg);
-    }
-}
-
-
-void SSLContext::usePrivateKey(const crypto::RSAKey& key)
-{
-    int errCode = SSL_CTX_use_RSAPrivateKey(_sslContext, const_cast<RSA*>(&key));
-    if (errCode != 1)
-    {
-        std::string msg = getLastError();
-        throw std::runtime_error("SSL Error: Cannot set private key for Context: " + msg);
-    }
-}
-
-
-void SSLContext::addVerificationCertificate(const crypto::X509Certificate& certificate)
-{
-    int errCode = X509_STORE_add_cert(SSL_CTX_get_cert_store(_sslContext), const_cast<X509*>(certificate.certificate()));
-    if (errCode != 1)
-    {
-        std::string msg = getLastError();
-        throw std::runtime_error("SSL Error: Cannot add verification certificate: " + msg);
-    }
-}
+// void SSLContext::useCertificate(const crypto::X509Certificate& certificate)
+// {
+//     int errCode = SSL_CTX_use_certificate(_sslContext, const_cast<X509*>(certificate.certificate()));
+//     if (errCode != 1)
+//     {
+//         std::string msg = getLastError();
+//         throw std::runtime_error("SSL Error: Cannot set certificate for Context: " + msg);
+//     }
+// }
+//
+//
+// void SSLContext::addChainCertificate(const crypto::X509Certificate& certificate)
+// {
+//     int errCode = SSL_CTX_add_extra_chain_cert(_sslContext, certificate.certificate());
+//     if (errCode != 1)
+//     {
+//         std::string msg = getLastError();
+//         throw std::runtime_error("SSL Error: Cannot add chain certificate to Context: " + msg);
+//     }
+// }
+//
+//
+// void SSLContext::usePrivateKey(const crypto::RSAKey& key)
+// {
+//     int errCode = SSL_CTX_use_RSAPrivateKey(_sslContext, const_cast<RSA*>(&key));
+//     if (errCode != 1)
+//     {
+//         std::string msg = getLastError();
+//         throw std::runtime_error("SSL Error: Cannot set private key for Context: " + msg);
+//     }
+// }
+//
+//
+// void SSLContext::addVerificationCertificate(const crypto::X509Certificate& certificate)
+// {
+//     int errCode = X509_STORE_add_cert(SSL_CTX_get_cert_store(_sslContext), const_cast<X509*>(certificate.certificate()));
+//     if (errCode != 1)
+//     {
+//         std::string msg = getLastError();
+//         throw std::runtime_error("SSL Error: Cannot add verification certificate: " + msg);
+//     }
+// }
 
 
 void SSLContext::enableSessionCache(bool flag)

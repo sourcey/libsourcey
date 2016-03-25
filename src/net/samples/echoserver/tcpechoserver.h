@@ -27,6 +27,10 @@ public:
 
     void start(const std::string& host, std::uint16_t port)
     {
+        auto ssl = dynamic_cast<SSLSocket*>(socket.get());
+        if (ssl)
+            ssl->useContext(SSLManager::instance().defaultServerContext());
+
         socket->bind(Address(host, port));
         socket->listen();
         socket->AcceptConnection += delegate(this, &EchoServer::onAcceptConnection);
@@ -40,6 +44,7 @@ public:
 
     void onAcceptConnection(const TCPSocket::Ptr& sock)
     {
+        // std::static_pointer_cast<SocketT>(ptr)
         sockets.push_back(sock);
         auto& socket = sockets.back();
         DebugL << "On accept: " << socket << std::endl;

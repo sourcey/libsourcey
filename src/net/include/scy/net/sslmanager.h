@@ -32,13 +32,13 @@
 
 namespace scy {
 namespace net {
-    
+
 
 class VerificationErrorDetails;
 
 
 class SSLManager
-    /// SSLManager is a singleton for holding the default server/client 
+    /// SSLManager is a singleton for holding the default server/client
     /// Context and handling callbacks for certificate verification errors
     /// and private key passphrases.
 {
@@ -50,10 +50,10 @@ public:
         // Initializes the client side of the SSLManager with a default client-side SSLContext.
 
     SSLContext::Ptr defaultServerContext();
-        // Returns the default Context used by the server if initialized. 
+        // Returns the default Context used by the server if initialized.
 
     SSLContext::Ptr defaultClientContext();
-        // Returns the default Context used by the client if initialized. 
+        // Returns the default Context used by the client if initialized.
 
     Signal<VerificationErrorDetails&> ServerVerificationError;
         // Fired whenever a certificate verification error is detected by the server during a handshake.
@@ -64,7 +64,7 @@ public:
     Signal<std::string&> PrivateKeyPassphraseRequired;
         // Fired when a encrypted certificate is loaded. Not setting the password
         // in the event parameter will result in a failure to load the certificate.
-        
+
     void shutdown();
         // Shuts down the SSLManager and releases the default Context
         // objects. After a call to shutdown(), the SSLManager can no
@@ -79,9 +79,14 @@ public:
 
     static void destroy();
         // Shuts down and destroys the SSLManager singleton instance.
-    
+
     static void initNoVerifyClient();
         // Initializes a default no verify client context that's useful for testing.
+
+    static void initNoVerifyServer(
+        const std::string& privateKeyFile = "",
+        const std::string& certificateFile = "");
+        // Initializes a default no verify server context that's useful for testing.
 
 protected:
     static int verifyClientCallback(int ok, X509_STORE_CTX* pStore);
@@ -118,29 +123,6 @@ private:
     friend class Singleton<SSLManager>;
     friend class SSLContext;
 };
-
-
-inline int SSLManager::verifyServerCallback(int ok, X509_STORE_CTX* pStore)
-{
-    return SSLManager::verifyCallback(true, ok, pStore);
-}
-
-
-inline int SSLManager::verifyClientCallback(int ok, X509_STORE_CTX* pStore)
-{
-    return SSLManager::verifyCallback(false, ok, pStore);
-}
-
-
-inline void SSLManager::initNoVerifyClient()
-{
-    net::SSLManager::instance().initializeClient(
-        std::shared_ptr<net::SSLContext>(
-            new net::SSLContext(
-                net::SSLContext::CLIENT_USE, "", "", "", 
-                net::SSLContext::VERIFY_NONE, 9, false, 
-                "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH")));
-}
 
 
 //

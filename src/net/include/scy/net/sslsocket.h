@@ -22,8 +22,8 @@
 
 
 #include "scy/uv/uvpp.h"
-#include "scy/net/tcpsocket.h"
 #include "scy/net/socket.h"
+#include "scy/net/tcpsocket.h"
 #include "scy/net/ssladapter.h"
 #include "scy/net/sslcontext.h"
 #include "scy/net/sslsession.h"
@@ -39,13 +39,16 @@ public:
     typedef std::shared_ptr<SSLSocket> Ptr;
     typedef std::vector<Ptr> Vec;
 
-    SSLSocket(uv::Loop* loop = uv::defaultLoop());
+    SSLSocket(uv::Loop* loop = uv::defaultLoop()); //, SocketMode mode = ClientSide
     SSLSocket(SSLContext::Ptr sslContext, uv::Loop* loop = uv::defaultLoop());
     SSLSocket(SSLContext::Ptr sslContext, SSLSession::Ptr session, uv::Loop* loop = uv::defaultLoop());
 
     virtual ~SSLSocket();
 
-    //virtual void connect(const Address& peerAddress);
+    // virtual void init(SSLContext::Ptr sslContext, SocketMode mode = ClientSide);
+        // Initialize the SSLSocket with the given SSLContext.
+
+    // virtual void connect(const Address& peerAddress);
         // Initializes the socket and establishes a secure connection to
         // the TCP server at the given address.
         //
@@ -63,22 +66,11 @@ public:
     virtual int send(const char* data, std::size_t len, int flags = 0);
     virtual int send(const char* data, std::size_t len, const net::Address& peerAddress, int flags = 0);
 
-    int available() const;
-        // Returns the number of bytes available from the
-        // SSL buffer for immediate reading.
-
-    X509* peerCertificate() const;
-        // Returns the peer's certificate.
+    void useContext(SSLContext::Ptr context);
+        // Use the given SSL context for this socket.
 
     SSLContext::Ptr context() const;
         // Returns the SSL context used for this socket.
-
-    SSLSession::Ptr currentSession();
-        // Returns the SSL session of the current connection,
-        // for reuse in a future connection (if session caching
-        // is enabled).
-        //
-        // If no connection is established, returns nullptr.
 
     void useSession(SSLSession::Ptr session);
         // Sets the SSL session to use for the next
@@ -90,11 +82,27 @@ public:
         //
         // Must be called before connect() to be effective.
 
+    SSLSession::Ptr currentSession();
+        // Returns the SSL session of the current connection,
+        // for reuse in a future connection (if session caching
+        // is enabled).
+        //
+        // If no connection is established, returns nullptr.
+
     bool sessionWasReused();
         // Returns true if a reused session was negotiated during
         // the handshake.
 
+    int available() const;
+        // Returns the number of bytes available from the
+        // SSL buffer for immediate reading.
+
+    X509* peerCertificate() const;
+        // Returns the peer's certificate.
+
     net::TransportType transport() const;
+
+    virtual void acceptConnection();
 
     virtual void onConnect(uv_connect_t* handle, int status);
 
@@ -102,6 +110,8 @@ public:
         // Reads raw encrypted SSL data
 
 protected:
+    // virtual bool readStart();
+
     net::SSLContext::Ptr _context;
     net::SSLSession::Ptr _session;
     net::SSLAdapter _sslAdapter;
