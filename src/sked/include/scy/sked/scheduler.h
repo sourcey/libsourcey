@@ -35,9 +35,6 @@ namespace scy {
 namespace sked {
 
 
-static std::string DepreciatedDateFormat = "%Y-%m-%d %H:%M:%S %Z";
-
-
 class Scheduler: public TaskRunner, public json::ISerializable
     /// The Scheduler manages and runs tasks
     /// that need to be executed at specific times.
@@ -67,6 +64,9 @@ protected:
     virtual void run();
     virtual void update();
 };
+
+
+// static std::string DepreciatedDateFormat = "%Y-%m-%d %H:%M:%S %Z";
 
 
 } } // namespace scy::sked

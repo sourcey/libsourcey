@@ -1,102 +1,80 @@
 #include "scy/base.h"
+#include "scy/test.h"
 #include "scy/logger.h"
-//#include "scy/runner.h"
-#include "scy/application.h"
 #include "scy/datetime.h"
-#include "scy/platform.h"
 #include "scy/sked/scheduler.h"
-#include <assert.h>
 
 
 using namespace std;
 using namespace scy;
+using namespace scy::test;
 
 
-namespace scy {
-namespace sked {
+static sked::Scheduler scheduler;
+static int taskRunTimes = 0;
 
 
-Application app;
-
-
-class Tests
+// =============================================================================
+// Test Scheduled Task
+//
+struct ScheduledTask: public sked::Task
 {
-    Scheduler scheduler;
-
-public:
-    Tests()
+    ScheduledTask() :
+        sked::Task("ScheduledTask")
     {
-        // Register tasks and triggers
-        scheduler.factory().registerTask<ScheduledTask>("ScheduledTask");
-        scheduler.factory().registerTrigger<OnceOnlyTrigger>("OnceOnlyTrigger");
-        scheduler.factory().registerTrigger<DailyTrigger>("DailyTrigger");
-        scheduler.factory().registerTrigger<IntervalTrigger>("IntervalTrigger");
-
-        runOnceOnlyTest();
-        //runSkedTaskIntervalTest();
-        //runSkedTaskTest();
-        //runTimerTest();
-
-        app.finalize();
     }
 
-
-    // ---------------------------------------------------------------------
-    //
-    // Scheduled Task Tests
-    //
-    // ---------------------------------------------------------------------
-    struct ScheduledTask: public sked::Task
+    virtual ~ScheduledTask()
     {
-        ScheduledTask() :
-            sked::Task("ScheduledTask")
-        {
-            DebugL << "Creating ################################" << endl;
-        }
+    }
 
-        virtual ~ScheduledTask()
-        {
-            DebugL << "Destroying ################################" << endl;
-
-            // Dereference the main application
-            // loop to move on to the next test.
-            app.stop();
-        }
-
-        void run()
-        {
-            DebugL << "Running ################################" << endl;
-        }
-
-        void serialize(json::Value& root)
-        {
-            sked::Task::serialize(root);
-
-            root["RequiredField"] = "blah";
-        }
-
-        void deserialize(json::Value& root)
-        {
-            json::assertMember(root, "RequiredField");
-
-            sked::Task::deserialize(root);
-        }
-    };
-
-    void runOnceOnlyTest()
+    void run()
     {
+        taskRunTimes++;
+    }
+
+    void serialize(json::Value& root)
+    {
+        sked::Task::serialize(root);
+
+        root["CustomField"] = "blah";
+    }
+
+    void deserialize(json::Value& root)
+    {
+        json::assertMember(root, "CustomField");
+
+        sked::Task::deserialize(root);
+    }
+};
+
+
+int main(int argc, char** argv)
+{
+    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    test::initialize();
+
+    // Register tasks and triggers
+    scheduler.factory().registerTask<ScheduledTask>("ScheduledTask");
+    scheduler.factory().registerTrigger<sked::OnceOnlyTrigger>("OnceOnlyTrigger");
+    scheduler.factory().registerTrigger<sked::DailyTrigger>("DailyTrigger");
+    scheduler.factory().registerTrigger<sked::IntervalTrigger>("IntervalTrigger");
+
+    describe("once only task serialization", []() {
         json::Value json;
+        Timespan oneSecond(1, 0);
+        assert(oneSecond.seconds() == 1);
 
-        // Schedule a once only task to run in 5 seconds time.
+        // Schedule a once only task to run in 2 seconds time.
         {
-            ScheduledTask* task = new ScheduledTask(); //scheduler
-            OnceOnlyTrigger* trigger = task->createTrigger<OnceOnlyTrigger>();
+            taskRunTimes = 0;
+
+            auto task = new ScheduledTask();
+            auto trigger = task->createTrigger<sked::OnceOnlyTrigger>();
 
             DateTime dt;
-            Timespan ts(2, 0);
-            dt += ts;
+            dt += oneSecond;
             trigger->scheduleAt = dt;
-            assert(ts.seconds() == 2);
 
             scheduler.start(task);
 
@@ -104,16 +82,21 @@ public:
             scheduler.serialize(json);
 
             // Wait for the task to complete
-            app.run();
+            scy::sleep(1500);
+            expect(taskRunTimes == 1);
+
+            // expect(task->trigger().timesRun == 1);
+            // expect(task->ran = true);
         }
 
         // Deserialize the previous task from JSON and run it again
         {
+            taskRunTimes = 0;
+
             // Set the task to run in 1 secs time
             {
                 DateTime dt;
-                Timespan ts(1, 0);
-                dt += ts;
+                dt += oneSecond;
                 json[(int)0]["trigger"]["scheduleAt"] =
                     DateTimeFormatter::format(dt, DateTimeFormat::ISO8601_FORMAT);
             }
@@ -135,7 +118,8 @@ public:
                 << json::stringify(before, true) << endl;
 
             // Wait for the task to complete
-            app.run();
+            scy::sleep(1500);
+            expect(taskRunTimes == 1);
 
             // Output scheduler tasks as JSON after run
             json::Value after;
@@ -143,22 +127,22 @@ public:
             DebugL << "Sked Output JSON After Run:\n"
                 << json::stringify(after, true) << endl;
         }
-    }
+    });
 
-    void runSkedTaskIntervalTest()
-    {
+    describe("interval task", []() {
         DebugL << "Running Scheduled Task Test" << endl;
 
-        // Schedule an interval task to run 3 times at 1 second intervals
-        {
-            ScheduledTask* task = new ScheduledTask();
-            IntervalTrigger* trigger = task->createTrigger<IntervalTrigger>();
+        taskRunTimes = 0;
 
-            trigger->interval = Timespan(1, 0);
+        // Schedule an interval task to run 3 times at 100 ms intervals
+        {
+            auto task = new ScheduledTask();
+            sked::IntervalTrigger* trigger = task->createTrigger<sked::IntervalTrigger>();
+
+            trigger->interval = Timespan(0, 1);
             trigger->maxTimes = 3;
 
             scheduler.start(task);
-            //task->start();
 
             // Print to cout
             DebugL << "##### Sked Print Output:" << endl;
@@ -166,54 +150,38 @@ public:
             DebugL << "##### Sked Print Output END" << endl;
 
             // Wait for the task to complete
-            app.run();
+            scy::sleep(1000);
+            expect(taskRunTimes == 3);
         }
 
+        // // Schedule to fire once now, and in two days time.
+        // {
+        //     auto task = new ScheduledTask();
+        //     DailyTrigger* trigger = task->createTrigger<DailyTrigger>();
+        //
+        //     // 2 secs from now
+        //     DateTime dt;
+        //     Timespan ts(2, 0);
+        //     dt += ts;
+        //     trigger->timeOfDay = dt;
+        //
+        //     // skip tomorrow
+        //     trigger->daysExcluded.push_back((DaysOfTheWeek)(dt.dayOfWeek() + 1));
+        //
+        //     scheduler.schedule(task);
+        //
+        //     // TODO: Assert running date
+        //
+        //     ready.wait();
+        // }
 
-        /*
-
-            //ready.wait();
-            //ready.wait();
-            //ready.wait();
-
-        // Schedule to fire once now, and in two days time.
-        {
-            ScheduledTask* task = new ScheduledTask();
-            DailyTrigger* trigger = task->createTrigger<DailyTrigger>();
-
-            // 2 secs from now
-            DateTime dt;
-            Timespan ts(2, 0);
-            dt += ts;
-            trigger->timeOfDay = dt;
-
-            // skip tomorrow
-            trigger->daysExcluded.push_back((DaysOfTheWeek)(dt.dayOfWeek() + 1));
-
-            scheduler.schedule(task);
-
-            // TODO: Assert running date
-
-            ready.wait();
-        }
-        */
-
-        app.run();
+        // uv::runDefaultLoop();
         DebugL << "Running Scheduled Task Test: END" << endl;
-    }
-};
+    });
 
+    test::runAll();
 
-} } // namespace scy::sked
-
-
-int main(int argc, char** argv)
-{
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
-    {
-        sked::Tests app;
-    }
     Logger::destroy();
-    //util::pause();
-    return 0;
+
+    return test::finalize();
 }

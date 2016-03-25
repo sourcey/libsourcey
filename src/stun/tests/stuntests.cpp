@@ -18,8 +18,8 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    test::initialize();
     // Logger::instance().add(new ConsoleChannel("Test", LTrace));
+    test::initialize();
 
     // =========================================================================
     // Message Integrity
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
     //
     describe("xor address", []() {
         expect(5555 == 0x15B3);
-        expect(5555 ^ (stun::kMagicCookie >> 16) == 0x34A1);
+        expect((5555 ^ (stun::kMagicCookie >> 16)) == 0x34A1);
 
         net::Address addr("192.168.1.1", 5555);
         DebugL << "Source Address: " << addr << endl;
