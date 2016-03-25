@@ -196,6 +196,7 @@ std::size_t Packet::read(const ConstBuffer& buf)
     if (reader.available()) {
         std::string temp;
         reader.get(temp, reader.available());
+		TraceN(this) << "SOCKETIO PACKET: available: " << temp << endl;
 
         json::Value json;
         json::Reader reader;
