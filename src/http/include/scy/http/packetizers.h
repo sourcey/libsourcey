@@ -26,7 +26,7 @@
 #include <sstream>
 
 
-namespace scy { 
+namespace scy {
 namespace http {
 
 
@@ -44,35 +44,35 @@ public:
     bool initial;
     bool nocopy;
 
-    ChunkedAdapter(Connection* connection = nullptr, const std::string& frameSeparator = "", bool nocopy = true) : 
+    ChunkedAdapter(Connection* connection = nullptr, const std::string& frameSeparator = "", bool nocopy = true) :
         PacketProcessor(this->emitter),
-        connection(connection), 
+        connection(connection),
         contentType(connection->outgoingHeader()->getContentType()),
         initial(true)
     {
     }
 
-    ChunkedAdapter(const std::string& contentType, const std::string& frameSeparator = "", bool nocopy = true) : 
+    ChunkedAdapter(const std::string& contentType, const std::string& frameSeparator = "", bool nocopy = true) :
         PacketProcessor(this->emitter),
-        connection(nullptr), 
+        connection(nullptr),
         contentType(contentType),
         frameSeparator(frameSeparator),
         initial(true),
         nocopy(nocopy)
     {
     }
-    
-    virtual ~ChunkedAdapter() 
+
+    virtual ~ChunkedAdapter()
     {
     }
-    
+
     virtual void emitHeader()
         // Sets HTTP headers for the initial response.
-        // This method must not include the final carriage return. 
-    {    
+        // This method must not include the final carriage return.
+    {
         // Flush connection headers if the connection is set.
         if (connection) {
-            connection->shouldSendHeader(true);                    
+            connection->shouldSendHeader(true);
             connection->response().setChunkedTransferEncoding(true);
             connection->response().set("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate");
             connection->response().set("Cache-Control", "post-check=0, pre-check=0, FALSE");
@@ -89,7 +89,7 @@ public:
         else {
             std::ostringstream hst;
             hst << "HTTP/1.1 200 OK\r\n"
-                // Note: If Cache-Control: no-store is not used Chrome's (27.0.1453.110) 
+                // Note: If Cache-Control: no-store is not used Chrome's (27.0.1453.110)
                 // memory usage grows exponentially for HTTP streaming:
                 // https://code.google.com/p/chromium/issues/detail?id=28035
                 << "Cache-Control: no-store, no-cache, max-age=0, must-revalidate\r\n"
@@ -104,24 +104,24 @@ public:
             emit(hst.str());
         }
     }
-    
+
     virtual void process(IPacket& packet)
     {
         traceL("ChunkedAdapter", this) << "Processing: " << packet.size() << std::endl;
-        
+
         if (!packet.hasData())
             throw std::invalid_argument("Incompatible packet type");
-        
-        // Emit HTTP response header        
-        if (initial) {            
-            initial = false;    
+
+        // Emit HTTP response header
+        if (initial) {
+            initial = false;
             emitHeader();
         }
-        
+
         // Get hex stream length
         std::ostringstream ost;
         ost << std::hex << packet.size();
-        
+
         // Emit separate packets for nocopy
         if (nocopy) {
             emit(ost.str());
@@ -131,7 +131,7 @@ public:
             emit(packet.data(), packet.size());
             emit("\r\n", 2);
         }
-        
+
         // Concat pieces for non fragmented
         else {
             ost << "\r\n";
@@ -142,7 +142,7 @@ public:
             emit(ost.str());
         }
     }
-        
+
     PacketSignal emitter;
 };
 
@@ -160,7 +160,7 @@ public:
     bool isBase64;
     bool initial;
 
-    MultipartAdapter(Connection* connection, bool base64 = false) :    
+    MultipartAdapter(Connection* connection, bool base64 = false) :
         IPacketizer(this->emitter),
         connection(connection),
         contentType(connection->outgoingHeader()->getContentType()),
@@ -169,7 +169,7 @@ public:
     {
     }
 
-    MultipartAdapter(const std::string& contentType, bool base64 = false) :    
+    MultipartAdapter(const std::string& contentType, bool base64 = false) :
         IPacketizer(this->emitter),
         connection(nullptr),
         contentType(contentType),
@@ -177,16 +177,16 @@ public:
         initial(true)
     {
     }
-    
-    virtual ~MultipartAdapter() 
+
+    virtual ~MultipartAdapter()
     {
     }
-        
+
     virtual void emitHeader()
-    {    
+    {
         // Flush connection headers if the connection is set.
         if (connection) {
-            connection->shouldSendHeader(true);                
+            connection->shouldSendHeader(true);
             connection->response().set("Content-Type", "multipart/x-mixed-replace; boundary=end");
             connection->response().set("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate");
             connection->response().set("Cache-Control", "post-check=0, pre-check=0, FALSE");
@@ -212,38 +212,38 @@ public:
             emit(hst.str());
         }
     }
-    
+
     virtual void emitChunkHeader()
         // Sets HTTP header for the current chunk.
-    {    
+    {
         // Write the chunk header
         std::ostringstream hst;
 
         hst << "--end\r\n"
             << "Content-Type: " << contentType << "\r\n";
         if (isBase64)
-            hst << "Content-Transfer-Encoding: base64\r\n";    
-        hst << "\r\n";    
-        
-        emit(hst.str());    
+            hst << "Content-Transfer-Encoding: base64\r\n";
+        hst << "\r\n";
+
+        emit(hst.str());
     }
-    
+
     virtual void process(IPacket& packet)
-    {        
-        // Write the initial HTTP response header        
-        if (initial) {            
-            initial = false;    
+    {
+        // Write the initial HTTP response header
+        if (initial) {
+            initial = false;
             emitHeader();
         }
-        
-        // Broadcast the HTTP header separately 
+
+        // Broadcast the HTTP header separately
         // so we don't need to copy any data.
         emitChunkHeader();
 
         // Proxy the input packet.
         emit(packet);
     }
-            
+
     PacketSignal emitter;
 };
 

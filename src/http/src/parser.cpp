@@ -28,11 +28,11 @@
 using std::endl;
 
 
-namespace scy { 
+namespace scy {
 namespace http {
 
 
-Parser::Parser(http::Response* response) : 
+Parser::Parser(http::Response* response) :
     _observer(nullptr),
     _request(nullptr),
     _response(response),
@@ -42,7 +42,7 @@ Parser::Parser(http::Response* response) :
 }
 
 
-Parser::Parser(http::Request* request) : 
+Parser::Parser(http::Request* request) :
     _observer(nullptr),
     _request(request),
     _response(nullptr),
@@ -52,7 +52,7 @@ Parser::Parser(http::Request* request) :
 }
 
 
-Parser::Parser(http_parser_type type) : 
+Parser::Parser(http_parser_type type) :
     _observer(nullptr),
     _request(nullptr),
     _response(nullptr),
@@ -62,16 +62,16 @@ Parser::Parser(http_parser_type type) :
 }
 
 
-Parser::~Parser() 
+Parser::~Parser()
 {
-    TraceS(this) << "Destroy" << endl;    
+    TraceS(this) << "Destroy" << endl;
     reset();
 }
 
 
 void Parser::init(http_parser_type type)
 {
-    TraceS(this) << "Init: " << type << endl;    
+    TraceS(this) << "Init: " << type << endl;
 
     assert(_parser.data != this);
 
@@ -79,7 +79,7 @@ void Parser::init(http_parser_type type)
     _parser.data = this;
     _settings.on_message_begin = on_message_begin;
     _settings.on_url = on_url;
-    _settings.on_status_complete = on_status_complete;
+    _settings.on_status = on_status;
     _settings.on_header_field = on_header_field;
     _settings.on_header_value = on_header_value;
     _settings.on_headers_complete = on_headers_complete;
@@ -92,26 +92,27 @@ void Parser::init(http_parser_type type)
 
 bool Parser::parse(const char* data, std::size_t len)
 {
-    TraceS(this) << "Parse: " << len << endl;    
-    
+    // TraceS(this) << "Parse: " << len << endl;
+    TraceS(this) << "Parse: " << std::string(data, len) << endl;
+
     assert(!complete());
     assert(_parser.data == this);
 
     if (complete()) {
         setParserError("Parsing already complete");
     }
-    
+
     // Parse and handle errors
     std::size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len);
     if (nparsed != len && !_parser.upgrade) { //_parser.http_errno != HPE_OK
         setParserError();
     }
-    
+
     return complete();
 }
 
 
-void Parser::reset() 
+void Parser::reset()
 {
     _complete = false;
     if (_error) {
@@ -123,9 +124,9 @@ void Parser::reset()
 }
 
 
-void Parser::setParserError(const std::string& message) //bool throwException, 
+void Parser::setParserError(const std::string& message) //bool throwException,
 {
-    assert(_parser.http_errno != HPE_OK);    
+    assert(_parser.http_errno != HPE_OK);
     ParserError err;
     err.code = HTTP_PARSER_ERRNO(&_parser);
     err.message = message.empty() ? http_errno_name(err.code) : message;
@@ -152,18 +153,18 @@ void Parser::setResponse(http::Response* response)
     assert(_parser.type == HTTP_RESPONSE);
     _response = response;
 }
-    
+
 
 void Parser::setObserver(ParserObserver* observer)
 {
     _observer = observer;
 }
-    
+
 
 http::Message* Parser::message()
 {
-    return _request ? static_cast<http::Message*>(_request) 
-        : _response ? static_cast<http::Message*>(_response) 
+    return _request ? reinterpret_cast<http::Message*>(_request)
+        : _response ? reinterpret_cast<http::Message*>(_response)
         : nullptr;
 }
 
@@ -174,19 +175,19 @@ ParserObserver* Parser::observer() const
 }
 
 
-bool Parser::complete() const 
+bool Parser::complete() const
 {
     return _complete;
 }
 
 
-bool Parser::upgrade() const 
+bool Parser::upgrade() const
 {
     return _parser.upgrade > 0;
 }
 
 
-bool Parser::shouldKeepAlive() const 
+bool Parser::shouldKeepAlive() const
 {
     return http_should_keep_alive(&_parser) > 0;
 }
@@ -198,6 +199,8 @@ bool Parser::shouldKeepAlive() const
 
 void Parser::onURL(const std::string& value)
 {
+    TraceS(this) << "onURL: " << value << endl;
+
     if (_request)
         _request->setURI(value);
 }
@@ -205,6 +208,8 @@ void Parser::onURL(const std::string& value)
 
 void Parser::onHeader(const std::string& name, const std::string& value)
 {
+    // TraceS(this) << "onHeader: " << name << ":" << value << endl;
+
     if (message())
         message()->add(name, value);
     if (_observer)
@@ -213,33 +218,33 @@ void Parser::onHeader(const std::string& name, const std::string& value)
 
 
 void Parser::onHeadersEnd()
-{            
+{
     /// HTTP version
     //start_line_.version(parser_.http_major, parser_.http_minor);
 
     /// KeepAlive
     //headers->setKeepAlive(http_should_keep_alive(parser) > 0);
-    
+
     /// Request HTTP method
     if (_request)
         _request->setMethod(http_method_str(static_cast<http_method>(_parser.method)));
-    
+
     if (_observer)
         _observer->onParserHeadersEnd();
 }
 
 
-void Parser::onBody(const char* buf, std::size_t len) //std::size_t off, 
+void Parser::onBody(const char* buf, std::size_t len) //std::size_t off,
 {
-    TraceS(this) << "onBody" << endl;    
+    TraceS(this) << "onBody" << endl;
     if (_observer)
         _observer->onParserChunk(buf, len); //Buffer(buf+off,len) + off
 }
 
 
-void Parser::onMessageEnd() 
+void Parser::onMessageEnd()
 {
-    TraceS(this) << "onMessageEnd" << endl;        
+    TraceS(this) << "onMessageEnd" << endl;
     _complete = true;
     if (_observer)
         _observer->onParserEnd();
@@ -248,7 +253,7 @@ void Parser::onMessageEnd()
 
 void Parser::onError(const ParserError& err)
 {
-    TraceS(this) << "On error: " << err.code << ": " << err.message << endl;    
+    TraceS(this) << "On error: " << err.code << ": " << err.message << endl;
     _complete = true;
     _error = new ParserError;
     _error->code = err.code;
@@ -263,8 +268,8 @@ void Parser::onError(const ParserError& err)
 // http_parser callbacks
 //
 
-int Parser::on_message_begin(http_parser* parser) 
-{    
+int Parser::on_message_begin(http_parser* parser)
+{
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);
 
@@ -273,18 +278,18 @@ int Parser::on_message_begin(http_parser* parser)
 }
 
 
-int Parser::on_url(http_parser* parser, const char *at, std::size_t len) 
+int Parser::on_url(http_parser* parser, const char *at, std::size_t len)
 {
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);
-    assert(at && len);    
+    assert(at && len);
 
     self->onURL(std::string(at, len));
     return 0;
 }
 
 
-int Parser::on_status_complete(http_parser* parser)
+int Parser::on_status(http_parser* parser, const char *at, size_t length)
 {
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);
@@ -297,8 +302,8 @@ int Parser::on_status_complete(http_parser* parser)
 }
 
 
-int Parser::on_header_field(http_parser* parser, const char* at, std::size_t len) 
-{    
+int Parser::on_header_field(http_parser* parser, const char* at, std::size_t len)
+{
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);
 
@@ -309,7 +314,7 @@ int Parser::on_header_field(http_parser* parser, const char* at, std::size_t len
         }
         self->_lastHeaderField = std::string(at, len);
         self->_wasHeaderValue = false;
-    } 
+    }
     else {
         self->_lastHeaderField += std::string(at, len);
     }
@@ -318,7 +323,7 @@ int Parser::on_header_field(http_parser* parser, const char* at, std::size_t len
 }
 
 
-int Parser::on_header_value(http_parser* parser, const char* at, std::size_t len) 
+int Parser::on_header_value(http_parser* parser, const char* at, std::size_t len)
 {
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);
@@ -326,7 +331,7 @@ int Parser::on_header_value(http_parser* parser, const char* at, std::size_t len
     if (!self->_wasHeaderValue) {
         self->_lastHeaderValue = std::string(at, len);
         self->_wasHeaderValue = true;
-    } 
+    }
     else {
         self->_lastHeaderValue += std::string(at, len);
     }
@@ -351,8 +356,8 @@ int Parser::on_headers_complete(http_parser* parser)
 }
 
 
-int Parser::on_body(http_parser* parser, const char* at, std::size_t len) 
-{        
+int Parser::on_body(http_parser* parser, const char* at, std::size_t len)
+{
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);
 
@@ -361,9 +366,9 @@ int Parser::on_body(http_parser* parser, const char* at, std::size_t len)
 }
 
 
-int Parser::on_message_complete(http_parser* parser) 
-{    
-    /// When http_parser finished receiving a message, signal message complete
+int Parser::on_message_complete(http_parser* parser)
+{
+    // When http_parser finished receiving a message, signal message complete
     auto self = reinterpret_cast<Parser*>(parser->data);
     assert(self);
 

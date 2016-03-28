@@ -28,25 +28,25 @@ namespace scy {
 namespace net {
 
 
-SocketAdapter::SocketAdapter(SocketAdapter* sender, SocketAdapter* receiver) : 
+SocketAdapter::SocketAdapter(SocketAdapter* sender, SocketAdapter* receiver) :
      _sender(sender)
 {
-    //TraceS(this) << "Create" << endl;    
+    //TraceS(this) << "Create" << endl;
     assert(sender != this);
     //assert(receiver != this);
 
     if (receiver)
         addReceiver(receiver);
 }
-    
+
 
 SocketAdapter::~SocketAdapter()
 {
-    //TraceS(this) << "Destroy" << endl;    
-    
+    //TraceS(this) << "Destroy" << endl;
+
 #if 0
     // Delete child adapters
-    // In order to prevent deletion, the outside 
+    // In order to prevent deletion, the outside
     // application must nullify the adapter pointers
     if (_recvAdapter)
         delete _recvAdapter;
@@ -55,7 +55,7 @@ SocketAdapter::~SocketAdapter()
 #endif
 }
 
-    
+
 int SocketAdapter::send(const char* data, std::size_t len, int flags)
 {
     assert(_sender); // should have output adapter if default impl is used
@@ -73,16 +73,16 @@ int SocketAdapter::send(const char* data, std::size_t len, const Address& peerAd
 
 
 int SocketAdapter::sendPacket(const IPacket& packet, int flags)
-{    
+{
     // Try to cast as RawPacket so we can send without copying any data.
     auto raw = dynamic_cast<const RawPacket*>(&packet);
     if (raw)
         return send((const char*)raw->data(), raw->size(), flags);
-    
+
     // Dynamically generated packets need to be written to a
-    // temp buffer for sending. 
+    // temp buffer for sending.
     else {
-        Buffer buf;
+        Buffer buf(packet.size());
         packet.write(buf);
         return send(buf.data(), buf.size(), flags);
     }
@@ -90,16 +90,16 @@ int SocketAdapter::sendPacket(const IPacket& packet, int flags)
 
 
 int SocketAdapter::sendPacket(const IPacket& packet, const Address& peerAddress, int flags)
-{    
+{
     // Try to cast as RawPacket so we can send without copying any data.
     auto raw = dynamic_cast<const RawPacket*>(&packet);
     if (raw)
         return send((const char*)raw->data(), raw->size(), peerAddress, flags);
-    
+
     // Dynamically generated packets need to be written to a
-    // temp buffer for sending. 
+    // temp buffer for sending.
     else {
-        Buffer buf; //(2048);
+        Buffer buf(packet.size()); //(2048);
         //buf.reserve(2048);
         packet.write(buf);
         return send(buf.data(), buf.size(), peerAddress, flags);
@@ -117,30 +117,55 @@ void SocketAdapter::sendPacket(IPacket& packet)
 
 void SocketAdapter::onSocketConnect()
 {
-    Connect.emit(self());
+    emitSocketConnect();
 }
 
 
 void SocketAdapter::onSocketRecv(const MutableBuffer& buffer, const Address& peerAddress)
 {
-    Recv.emit(self(), buffer, peerAddress);
+    emitSocketRecv(buffer, peerAddress);
 }
 
 
 void SocketAdapter::onSocketError(const scy::Error& error) //const Error& error
 {
-    Error.emit(self(), error);
+    emitSocketError(error);
 }
 
 
 void SocketAdapter::onSocketClose()
 {
+    emitSocketClose();
+}
+
+
+void SocketAdapter::emitSocketConnect()
+{
+    Connect.emit(self());
+}
+
+
+void SocketAdapter::emitSocketRecv(const MutableBuffer& buffer, const Address& peerAddress)
+{
+    Recv.emit(self(), buffer, peerAddress);
+}
+
+
+void SocketAdapter::emitSocketError(const scy::Error& error)
+{
+    Error.emit(self(), error);
+}
+
+
+void SocketAdapter::emitSocketClose()
+{
     Close.emit(self());
 }
 
 
-void SocketAdapter::addReceiver(SocketAdapter* adapter, int priority) 
-{    
+
+void SocketAdapter::addReceiver(SocketAdapter* adapter, int priority)
+{
     Connect += delegate(adapter, &net::SocketAdapter::onSocketConnect, priority);
     Recv += delegate(adapter, &net::SocketAdapter::onSocketRecv, priority);
     Error += delegate(adapter, &net::SocketAdapter::onSocketError, priority);
@@ -148,8 +173,8 @@ void SocketAdapter::addReceiver(SocketAdapter* adapter, int priority)
 }
 
 
-void SocketAdapter::removeReceiver(SocketAdapter* adapter)  
-{    
+void SocketAdapter::removeReceiver(SocketAdapter* adapter)
+{
     Connect -= delegate(adapter, &net::SocketAdapter::onSocketConnect);
     Recv -= delegate(adapter, &net::SocketAdapter::onSocketRecv);
     Error -= delegate(adapter, &net::SocketAdapter::onSocketError);

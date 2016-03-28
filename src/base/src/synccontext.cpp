@@ -23,26 +23,29 @@
 namespace scy {
 
 
-SyncContext::SyncContext(uv::Loop* loop) : 
+SyncContext::SyncContext(uv::Loop* loop) :
     _handle(loop, new uv_async_t)
 {
+    // ErrorS(this) << "SyncContext: " << _handle.ptr() << std::endl;
 }
 
 
-SyncContext::SyncContext(uv::Loop* loop, std::function<void()> target) : 
+SyncContext::SyncContext(uv::Loop* loop, std::function<void()> target) :
     _handle(loop, new uv_async_t)
 {
+    // ErrorS(this) << "SyncContext: " << _handle.ptr() << std::endl;
     start(target);
 }
 
 
-SyncContext::SyncContext(uv::Loop* loop, std::function<void(void*)> target, void* arg) : 
+SyncContext::SyncContext(uv::Loop* loop, std::function<void(void*)> target, void* arg) :
     _handle(loop, new uv_async_t)
 {
+    // ErrorS(this) << "SyncContext: " << _handle.ptr() << std::endl;
     start(target, arg);
 }
 
-    
+
 SyncContext::~SyncContext()
 {
     //assert(_handle.closed()); // must be dispose()d
@@ -59,8 +62,8 @@ void SyncContext::post()
 
 void SyncContext::startAsync()
 {
-    assert(!_handle.active());    
-    
+    // assert(!_handle.active()); // active() can be unreliable when called inside thread
+
     _handle.ptr()->data = new async::Runner::Context::ptr(pContext);
     int r = uv_async_init(_handle.loop(), _handle.ptr<uv_async_t>(), [](uv_async_t* req) {
         assert(req->data != nullptr); // catch late callbacks, may need to
@@ -72,10 +75,10 @@ void SyncContext::startAsync()
             return;
         }
 
-        runAsync(ctx->get());        
+        runAsync(ctx->get());
     });
 
-    if (r < 0) _handle.setAndThrowError("Cannot initialize async", r);        
+    if (r < 0) _handle.setAndThrowError("Cannot initialize async", r);
 }
 
 
@@ -100,7 +103,7 @@ bool SyncContext::closed()
     return _handle.closed();
 }
 
-    
+
 bool SyncContext::async() const
 {
     return false;

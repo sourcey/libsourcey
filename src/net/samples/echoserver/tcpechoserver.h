@@ -57,7 +57,7 @@ public:
     {
         auto socket = reinterpret_cast<net::Socket*>(sender);
         DebugL << "On recv: " << socket << ": "
-            << std::string(bufferCast<const char*>(buffer), buffer.size()) << std::endl;
+            << buffer.str() << std::endl;
 
         // Echo it back
         socket->send(bufferCast<const char*>(buffer), buffer.size());
@@ -65,8 +65,7 @@ public:
 
     void onClientSocketError(void* sender, const Error& error)
     {
-        ErrorL << "On error: "
-            << error.errorno << ": " << error.message << std::endl;
+        InfoL << "On error: " << error.errorno << ": " << error.message << std::endl;
     }
 
     void onClientSocketClose(void* sender)
@@ -83,7 +82,7 @@ public:
 
                 // All we need to do is erase the socket in order to
                 // deincrement the ref counter and destroy the socket->
-                //assert(sock->base().refCount() == 1);
+                // assert(sock->base().refCount() == 1);
                 sockets.erase(it);
                 return;
             }

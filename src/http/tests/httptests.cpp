@@ -8,11 +8,12 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
+    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
     test::initialize();
     net::SSLManager::initNoVerifyClient();
 
     // Create the static callback context
-    static CallbackContext* defaultCtx = new CallbackContext;
+    static CallbackContext context;
 
     //
     /// HTTP URL Tests
@@ -103,88 +104,92 @@ int main(int argc, char** argv)
         expect(params.get("0") == "streaming");
     });
 
-    // // //
-    // // /// Default HTTP Client Connection Test
-    // // //
     // //
-    // // describe("client connection download", []() {
-    // //     auto conn = http::Client::instance().createConnection("http://anionu.com/packages/spotinstaller/download/2667/SpotInstaller.exe");
-    // //     conn->Complete += sdelegate(defaultCtx, &CallbackContext::onClientConnectionDownloadComplete);
-    // //     conn->request().setMethod("GET");
-    // //     conn->request().setKeepAlive(false);
-    // //     conn->setReadStream(new std::ofstream("SpotInstaller.exe", std::ios_base::out | std::ios_base::binary));
-    // //     conn->send();
-    // //     uv::runDefaultLoop();
-    // // });
+    // /// Default HTTP Client Connection Test
     // //
-    // // describe("secure client connection download", []() {
-    // //     auto conn = http::Client::instance().createConnection("https://anionu.com/assets/download/25/SpotInstaller.exe");
-    // //     conn->Complete += sdelegate(defaultCtx, &CallbackContext::onClientConnectionDownloadComplete);
-    // //     conn->request().setMethod("GET");
-    // //     conn->request().setKeepAlive(false);
-    // //     conn->setReadStream(new std::ofstream("SpotInstaller.exe", std::ios_base::out | std::ios_base::binary));
-    // //     conn->send();
-    // //     uv::runDefaultLoop();
-    // // });
+    //
+    // describe("client connection download", []() {
+    //     auto conn = http::Client::instance().createConnection("http://anionu.com/packages/spotinstaller/download/2667/SpotInstaller.exe");
+    //     conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionDownloadComplete);
+    //     conn->request().setMethod("GET");
+    //     conn->request().setKeepAlive(false);
+    //     conn->setReadStream(new std::ofstream("SpotInstaller.exe", std::ios_base::out | std::ios_base::binary));
+    //     conn->send();
+    //     uv::runDefaultLoop();
+    // });
+    //
+    // describe("secure client connection download", []() {
+    //     auto conn = http::Client::instance().createConnection("https://anionu.com/assets/download/25/SpotInstaller.exe");
+    //     conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionDownloadComplete);
+    //     conn->request().setMethod("GET");
+    //     conn->request().setKeepAlive(false);
+    //     conn->setReadStream(new std::ofstream("SpotInstaller.exe", std::ios_base::out | std::ios_base::binary));
+    //     conn->send();
+    //     uv::runDefaultLoop();
+    // });
 
     describe("client connection", []() {
         auto conn = http::Client::instance().createConnection("http://google.com/");
-        conn->Complete += sdelegate(defaultCtx, &CallbackContext::onClientConnectionComplete);
+        conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
         conn->request().setMethod("GET");
         conn->request().setKeepAlive(false);
-        conn->setReadStream(new std::stringstream);
+        // conn->setReadStream(new std::stringstream);
         conn->send();
         uv::runDefaultLoop();
+        expect(conn->closed());
+        expect(!conn->error().any());
     });
 
     describe("secure client connection", []() {
         auto conn = http::Client::instance().createConnection("https://google.com/");
-        conn->Complete += sdelegate(defaultCtx, &CallbackContext::onClientConnectionComplete);
+        conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionComplete);
         conn->request().setMethod("GET");
         conn->request().setKeepAlive(false);
-        conn->setReadStream(new std::stringstream);
+        // conn->setReadStream(new std::stringstream);
         conn->send();
         uv::runDefaultLoop();
+        expect(conn->closed());
+        expect(!conn->error().any());
     });
 
-    // void runClientConnectionTest()
-    // {
-    //     HTTPClientTest test;
-    //     test.create<ClientConnection>()->send(); // default GET request
-    //     uv::runDefaultLoop();
-    // }
-    //
-    // void runClientConnectionChunkedTest()
-    // {
-    //     HTTPClientTest test;
-    //     auto conn = test.create<ClientConnection>(false, "127.0.0.1", TEST_HTTP_PORT);
-    //     conn->request().setKeepAlive(true);
-    //     conn->request().setURI("/chunked");
-    //     //conn->request().body << "BOUNCE" << endl;
-    //     conn->send();
-    //     uv::runDefaultLoop();
-    // }
-    //
-    // void runWebSocketSecureClientConnectionTest()
-    // {
-    //     HTTPClientTest test;
-    //     auto conn = test.create<WebSocketSecureClientConnection>(false, "127.0.0.1", TEST_HTTPS_PORT);
-    //     conn->request().setURI("/websocket");
-    //     //conn->request().body << "BOUNCE" << endl;
-    //     conn->send();
-    //     uv::runDefaultLoop();
-    // }
-    //
-    // void runWebSocketClientConnectionTest()
-    // {
-    //     HTTPClientTest test;
-    //     auto conn = test.create<WebSocketClientConnection>(http::URL("127.0.0.1", TEST_HTTP_PORT), false);
-    //     conn->shouldSendHead(false);
-    //     conn->request().setURI("/websocket");
-    //     //conn->request().body << "BOUNCE" << endl;
-    //     conn->send();
-    //     uv::runDefaultLoop();
-    // }
+    // // void runClientConnectionTest()
+    // // {
+    // //     HTTPEchoTest test;
+    // //     test.create<ClientConnection>()->send(); // default GET request
+    // //     uv::runDefaultLoop();
+    // // }
+    // //
+    // // void runClientConnectionChunkedTest()
+    // // {
+    // //     HTTPEchoTest test;
+    // //     auto conn = test.create<ClientConnection>(false, "127.0.0.1", TEST_HTTP_PORT);
+    // //     conn->request().setKeepAlive(true);
+    // //     conn->request().setURI("/chunked");
+    // //     //conn->request().body << "BOUNCE" << endl;
+    // //     conn->send();
+    // //     uv::runDefaultLoop();
+    // // }
+    // //
+    // // void runWebSocketSecureClientConnectionTest()
+    // // {
+    // //     HTTPEchoTest test;
+    // //     auto conn = test.create<WebSocketSecureClientConnection>(false, "127.0.0.1", TEST_HTTPS_PORT);
+    // //     conn->request().setURI("/websocket");
+    // //     //conn->request().body << "BOUNCE" << endl;
+    // //     conn->send();
+    // //     uv::runDefaultLoop();
+    // // }
+    // //
+    // // void runWebSocketClientConnectionTest()
+    // // {
+    // //     HTTPEchoTest test;
+    // //     auto conn = test.create<WebSocketClientConnection>(http::URL("127.0.0.1", TEST_HTTP_PORT), false);
+    // //     conn->shouldSendHead(false);
+    // //     conn->request().setURI("/websocket");
+    // //     //conn->request().body << "BOUNCE" << endl;
+    // //     conn->send();
+    // //     uv::runDefaultLoop();
+    // // }
 
     //
     /// Standalone HTTP Client Connection Test
@@ -192,31 +197,48 @@ int main(int argc, char** argv)
 
     describe("standalone client connection", []() {
         http::ClientConnection conn("http://google.com/");
-        conn.Headers += sdelegate(defaultCtx, &CallbackContext::onStandaloneHTTPClientConnectionHeaders);
-        //conn->Payload += sdelegate(defaultCtx, &CallbackContext::onStandaloneHTTPClientConnectionPayload);
-        conn.Complete += sdelegate(defaultCtx, &CallbackContext::onStandaloneHTTPClientConnectionComplete);
-        conn.setReadStream(new std::stringstream);
+        conn.Headers += sdelegate(&context, &CallbackContext::onStandaloneHTTPClientConnectionHeaders);
+        conn.Payload += sdelegate(&context, &CallbackContext::onStandaloneHTTPClientConnectionPayload);
+        conn.Complete += sdelegate(&context, &CallbackContext::onStandaloneHTTPClientConnectionComplete);
+        // conn.setReadStream(new std::stringstream);
         conn.send(); // send default GET /
+
         uv::runDefaultLoop();
+
+        expect(conn.closed());
+        expect(!conn.error().any());
     });
 
     //
-    /// Client WebSocket Test
+    /// Server and Client Echo Tests
     //
 
-    describe("client websocket", []() {
-        // http::Server srv(TEST_HTTP_PORT, new OurServerResponderFactory);
-        // srv.start();
+    describe("websocket client and server", []() {
+        HTTPEchoTest test(100);
+        test.raiseServer();
+        auto conn = test.createConnection("ws", "/websocket");
+        conn->send("PING", 4);
 
-        // SocketClientEchoTest<http::ws::WebSocket> test(net::Address("174.129.224.73", 1339));
-        // SocketClientEchoTest<http::ws::WebSocket> test(net::Address("174.129.224.73", 80));
+        uv::runDefaultLoop();
 
-        // DebugL << "TCP Socket Test: Starting" << endl;
-        // SocketClientEchoTest<http::ws::WebSocket> test(net::Address("127.0.0.1", TEST_HTTP_PORT));
-        // test.start();
-
-        // uv::runDefaultLoop();
+        expect(conn->closed());
+        expect(!conn->error().any());
     });
+
+    describe("http client and server", []() {
+        HTTPEchoTest test;
+        test.raiseServer();
+        auto conn = test.createConnection("http", "/echo");
+        conn->request().setMethod("POST");
+        conn->request().setContentLength(4);
+        conn->send("PING", 4);
+
+        uv::runDefaultLoop();
+
+        expect(conn->closed());
+        expect(!conn->error().any());
+    });
+
 
     //
     /// Google Drive Upload Test
@@ -231,8 +253,8 @@ int main(int argc, char** argv)
 //
 // #if 0
 //         auto conn = http::Client::instance().createConnection("https://www.googleapis.com/drive/v2/files");
-//         conn->Complete += sdelegate(defaultCtx, &CallbackContext::onAssetUploadComplete);
-//         conn->OutgoingProgress += sdelegate(defaultCtx, &CallbackContext::onAssetUploadProgress);
+//         conn->Complete += sdelegate(&context, &CallbackContext::onAssetUploadComplete);
+//         conn->OutgoingProgress += sdelegate(&context, &CallbackContext::onAssetUploadProgress);
 //         conn->request().setMethod("POST");
 //         conn->request().setContentType("application/json");
 //         conn->request().setContentLength(2);
@@ -247,8 +269,8 @@ int main(int argc, char** argv)
 //         conn->request().setMethod("POST");
 //         conn->request().setChunkedTransferEncoding(false);
 //         conn->request().add("Authorization", "Bearer " + accessToken);
-//         conn->Complete += sdelegate(defaultCtx, &CallbackContext::onAssetUploadComplete);
-//         conn->OutgoingProgress += sdelegate(defaultCtx, &CallbackContext::onAssetUploadProgress);
+//         conn->Complete += sdelegate(&context, &CallbackContext::onAssetUploadComplete);
+//         conn->OutgoingProgress += sdelegate(&context, &CallbackContext::onAssetUploadProgress);
 //
 //         // Attach a HTML form writer for uploading files
 //         auto form = http::FormWriter::create(*conn, http::FormWriter::ENCODING_MULTIPART_RELATED);
@@ -265,13 +287,6 @@ int main(int argc, char** argv)
 //     });
 
     test::runAll();
-
-    // http::Client::destory();
-    // GarbageCollector::destroy();
-    // net::SSLManager::destroy();
-    // Logger::destroy();
-
-    delete defaultCtx;
 
     return test::finalize();
 }
@@ -312,7 +327,7 @@ int main(int argc, char** argv)
 // // ============================================================================
 // // HTTP ClientConnection Test
 // //
-// void runHTTPClientTest()
+// void runHTTPEchoTest()
 // {
 //     DebugL << "Starting" << endl;
 //

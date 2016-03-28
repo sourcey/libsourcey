@@ -7,7 +7,6 @@
 #include "scy/crypto/hash.h"
 #include "scy/crypto/cipher.h"
 #include "scy/crypto/rsa.h"
-// #include "scy/memory.h"
 
 
 #include <assert.h>
@@ -97,7 +96,7 @@ void testCipher(const std::string algorithm, int iterations)
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("Test", LTrace));
+    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
     crypto::initializeEngine();
 
     // =========================================================================
@@ -203,7 +202,7 @@ int main(int argc, char** argv)
     test::runAll();
 
     crypto::uninitializeEngine();
-    Logger::destroy();
+    // Logger::destroy();
 
     return finalize();
 }

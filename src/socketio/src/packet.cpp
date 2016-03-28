@@ -112,7 +112,7 @@ IPacket* Packet::clone() const
 
 std::size_t Packet::read(const ConstBuffer& buf)
 {
-    // DebugN(this) << "Read raw packet: " << std::string(bufferCast<const char*>(buf), buf.size()) << endl;
+    // DebugN(this) << "Read raw packet: " << buf.str() << endl;
     assert(buf.size() > 0);
 
     // Reset all data

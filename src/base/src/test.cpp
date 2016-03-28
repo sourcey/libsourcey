@@ -59,8 +59,8 @@ int finalize()
     bool passed = TestRunner::getDefault().passed();
     singleton.destroy();
 
-    // Destroy the garbase collector to ensure memory if freed before exiting.
-    GarbageCollector::destroy();
+    // Finalize the garbage collector to ensure memory if freed before exiting.
+    GarbageCollector::instance().finalize();
     return passed ? 0 : 1;
 }
 
@@ -181,7 +181,7 @@ Test* TestRunner::current() const
 void TestRunner::run()
 {
     cout << "===============================================================" << endl;
-    cout << "running all tests" << endl;
+    // cout << "running all tests" << endl;
 
     std::uint64_t start = time::hrtime();
     double duration = 0;

@@ -30,35 +30,62 @@
 #include "scy/http/parser.h"
 #include "scy/http/url.h"
 
-    
-namespace scy { 
+
+namespace scy {
 namespace http {
-    
+
+
+class ProgressSignal: public Signal<const double&>
+{
+public:
+    void* sender;
+    std::uint64_t current;
+    std::uint64_t total;
+
+    ProgressSignal() :
+        sender(nullptr), current(0), total(0) {}
+
+    double progress() const
+    {
+        return (current / (total * 1.0)) * 100;
+    }
+
+    void update(int nread)
+    {
+        current += nread;
+        // assert(current <= total);
+        emit(sender ? sender : this, progress());
+    }
+};
+
 
 class ConnectionAdapter;
 class Connection: public net::SocketAdapter
 {
-public:    
+public:
     Connection(const net::Socket::Ptr& socket);
     virtual ~Connection();
-            
+
     virtual int send(const char* data, std::size_t len, int flags = 0);
-        // Sends raw data to the peer.
+        // Send raw data to the peer.
 
     virtual int sendHeader();
-        // Sends the outdoing HTTP header.
+        // Send the outdoing HTTP header.
 
     virtual void close();
-        // Closes the connection and scheduled the object for 
+        // Close the connection and schedule the object for
         // deferred deletion.
-                    
-    bool closed() const;
-        // Returns true if the connection is closed.
 
-    //bool expired() const;
-        // Returns true if the server did not give us
+    bool closed() const;
+        // Return true if the connection is closed.
+
+    scy::Error error() const;
+        // Return the error object if any.
+
+    // bool expired() const;
+        // Return true if the server did not give us
         // a proper response within the allotted time.
-    
+
     virtual void onHeaders() = 0;
     virtual void onPayload(const MutableBuffer&) {};
     virtual void onMessage() = 0;
@@ -69,54 +96,59 @@ public:
         // Set true to prevent auto-sending HTTP headers.
 
     void replaceAdapter(net::SocketAdapter* adapter);
+        // Assign the new ConnectionAdapter and setup the chain
+        // The flow is: Connection <-> ConnectionAdapter <-> Socket
 
     net::Socket::Ptr& socket();
-        // Returns the underlying socket pointer.
+        // Return the underlying socket pointer.
 
-    Request& request();    
+    Request& request();
         // The HTTP request headers.
 
     Response& response();
         // The HTTP response headers.
-    
-    PacketStream Outgoing; 
-        // The Outgoing stream is responsible for packetizing  
-        // raw application data into the agreed upon HTTP   
+
+    PacketStream Outgoing;
+        // The Outgoing stream is responsible for packetizing
+        // raw application data into the agreed upon HTTP
         // format and sending it to the peer.
 
-    PacketStream Incoming; 
-        // The Incoming stream is responsible for depacketizing
-        // incoming HTTP chunks emitting the payload to
-        // delegate listeners.
+    PacketStream Incoming;
+        // The Incoming stream emits incoming HTTP packets
+        // for processing by the application.
+        //
+        // This is useful for example when writing incoming data to a file.
+
+    ProgressSignal IncomingProgress;        // Fired on download progress
+    ProgressSignal OutgoingProgress;        // Fired on upload progress
 
     virtual http::Message* incomingHeader() = 0;
     virtual http::Message* outgoingHeader() = 0;
 
-protected:    
-    void onSocketConnect();
-    void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress);
-    void onSocketError(const scy::Error& error);
-    void onSocketClose();
-        
+protected:
+    virtual void onSocketConnect();
+    virtual void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress);
+    virtual void onSocketError(const scy::Error& error);
+    virtual void onSocketClose();
+
     virtual void setError(const scy::Error& err);
-        // Sets the internal error.
+        // Set the internal error.
 
 protected:
     net::Socket::Ptr _socket;
     SocketAdapter* _adapter;
     Request _request;
     Response _response;
-    //Timeout _timeout;
     scy::Error _error;
     bool _closed;
     bool _shouldSendHeader;
-    
+
     friend class Parser;
     friend class ConnectionAdapter;
-    friend struct std::default_delete<Connection>;    
+    friend struct std::default_delete<Connection>;
 };
 
-    
+
 //
 // Connection Adapter
 //
@@ -126,11 +158,11 @@ class ConnectionAdapter: public ParserObserver, public net::SocketAdapter
     // Default HTTP socket adapter for reading and writing HTTP messages
 {
 public:
-    ConnectionAdapter(Connection& connection, http_parser_type type);    
-    virtual ~ConnectionAdapter();    
-        
+    ConnectionAdapter(Connection& connection, http_parser_type type);
+    virtual ~ConnectionAdapter();
+
     virtual int send(const char* data, std::size_t len, int flags = 0);
-    
+
     Parser& parser();
     Connection& connection();
 
@@ -142,7 +174,7 @@ protected:
     virtual void onSocketRecv(const MutableBuffer& buffer, const net::Address& peerAddress);
     //virtual void onSocketError(const Error& error);
     //virtual void onSocketClose();
-        
+
     //
     /// HTTPParser callbacks
 
@@ -150,15 +182,15 @@ protected:
     virtual void onParserHeadersEnd();
     virtual void onParserChunk(const char* buf, std::size_t len);
     virtual void onParserError(const ParserError& err);
-    virtual void onParserEnd();    
-    
+    virtual void onParserEnd();
+
     Connection& _connection;
     Parser _parser;
 };
 
 
-inline bool isExplicitKeepAlive(http::Message* message) 
-{    
+inline bool isExplicitKeepAlive(http::Message* message)
+{
     const std::string& connection = message->get(http::Message::CONNECTION, http::Message::EMPTY);
     return !connection.empty() && util::icompare(connection, http::Message::CONNECTION_KEEP_ALIVE) == 0;
 }

@@ -156,8 +156,14 @@ void BitReader::getU64(std::uint64_t& val)
 
 void BitReader::get(std::string& val, std::size_t len)
 {
-    if (len > available())
+    if (len > available()) {
+        ErrorS(this) << "index out of range: "
+          << "len=" << len << ", "
+          << "available=" << available() << ", "
+          << "position=" << position() << ", "
+          << "limit=" << limit() << std::endl;
         throw std::out_of_range("index out of range");
+    }
 
     val.append(_bytes + _position, len);
     _position += len;
@@ -166,8 +172,14 @@ void BitReader::get(std::string& val, std::size_t len)
 
 void BitReader::get(char* val, std::size_t len)
 {
-    if (len > available())
+    if (len > available()) {
+        ErrorS(this) << "index out of range: "
+          << "len=" << len << ", "
+          << "available=" << available() << ", "
+          << "position=" << position() << ", "
+          << "limit=" << limit() << std::endl;
         throw std::out_of_range("index out of range");
+    }
 
     memcpy(val, _bytes + _position, len);
     _position += len;
@@ -438,8 +450,14 @@ BitWriter::~BitWriter()
 
 void BitWriter::skip(std::size_t val)
 {
-    if (_position + val > _limit)
+    if (_position + val > _limit) {
+        ErrorS(this) << "index out of range: "
+          << "val=" << val << ", "
+          << "available=" << available() << ", "
+          << "position=" << position() << ", "
+          << "limit=" << limit() << std::endl;
         throw std::out_of_range("index out of range");
+    }
 
     _position += val;
 }
@@ -447,8 +465,14 @@ void BitWriter::skip(std::size_t val)
 
 void BitWriter::seek(std::size_t val)
 {
-    if (val > _limit)
+    if (val > _limit) {
+        ErrorS(this) << "index out of range: "
+          << "val=" << val << ", "
+          << "available=" << available() << ", "
+          << "position=" << position() << ", "
+          << "limit=" << limit() << std::endl;
         throw std::out_of_range("index out of range");
+    }
 
     _position = val;
 }
@@ -534,8 +558,14 @@ void BitWriter::put(const char* val, std::size_t len)
     //
     // Write to fixed size buffer
     // else {
-        if ((_position + len) > _limit)
-            throw std::out_of_range("insufficient buffer capacity");
+        if ((_position + len) > _limit) {
+              ErrorS(this) << "insufficient buffer capacity: "
+                << "len=" << len << ", "
+                << "available=" << available() << ", "
+                << "position=" << position() << ", "
+                << "limit=" << limit() << std::endl;
+              throw std::out_of_range("insufficient buffer capacity");
+        }
 
         memcpy(_bytes + _position, val, len);
         _position += len;

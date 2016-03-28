@@ -71,7 +71,7 @@ IPacket* Message::clone() const
 
 std::size_t Message::read(const ConstBuffer& buf) 
 {
-    return read(std::string(bufferCast<const char*>(buf), buf.size())); // refactor
+    return read(buf.str()); // refactor
 }
 
 

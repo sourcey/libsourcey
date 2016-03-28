@@ -30,8 +30,8 @@
 #include "scy/http/parser.h"
 #include "scy/timer.h"
 
-    
-namespace scy { 
+
+namespace scy {
 namespace http {
 
 
@@ -44,19 +44,19 @@ public:
 
     ServerConnection(Server& server, net::Socket::Ptr socket);
     virtual ~ServerConnection();
-    
+
     //virtual bool send();
         /// Sends the HTTP response
-    
+
     virtual void close();
         // Closes the HTTP connection
-    
-protected:        
+
+protected:
     virtual void onHeaders();
     virtual void onPayload(const MutableBuffer& buffer);
     virtual void onMessage();
     virtual void onClose();
-                
+
     Server& server();
 
     http::Message* incomingHeader();
@@ -65,10 +65,10 @@ protected:
     //
     /// Server callbacks
     //void onServerShutdown(void*);
-    
+
 protected:
     Server& _server;
-    ServerResponder* _responder;    
+    ServerResponder* _responder;
     bool _upgrade;
     bool _requestComplete;
 };
@@ -76,13 +76,13 @@ protected:
 
 typedef std::vector<ServerConnection::Ptr> ServerConnectionList;
 
-    
+
 // -------------------------------------------------------------------
 //
 class ServerAdapter: public ConnectionAdapter
 {
 public:
-    ServerAdapter(ServerConnection& connection) : 
+    ServerAdapter(ServerConnection& connection) :
         ConnectionAdapter(connection, HTTP_REQUEST)
     {
     }
@@ -92,7 +92,7 @@ public:
 // -------------------------------------------------------------------
 //
 class ServerResponder
-    /// The abstract base class for HTTP ServerResponders 
+    /// The abstract base class for HTTP ServerResponders
     /// created by HTTP Server.
     ///
     /// Derived classes must override the handleRequest() method.
@@ -102,7 +102,7 @@ class ServerResponder
     ///
 {
 public:
-    ServerResponder(ServerConnection& connection) : 
+    ServerResponder(ServerConnection& connection) :
         _connection(connection)
     {
     }
@@ -118,12 +118,12 @@ public:
     {
         return _connection;
     }
-        
+
     Request& request()
     {
         return _connection.request();
     }
-    
+
     Response& response()
     {
         return _connection.response();
@@ -159,11 +159,11 @@ public:
 // -------------------------------------------------------------------
 //
 class Server
-    /// DISCLAIMER: This HTTP server is not intended to be standards 
+    /// DISCLAIMER: This HTTP server is not intended to be standards
     /// compliant. It was created to be a fast (nocopy where possible)
     /// solution for streaming video to web browsers.
     ///
-    /// TODO: 
+    /// TODO:
     /// - SSL Server
     /// - Enable responders (controllers?) to be instantiated via
     ///    registered routes.
@@ -177,15 +177,15 @@ public:
 
     Server(short port, ServerResponderFactory* factory);
     virtual ~Server();
-    
+
     void start();
     void shutdown();
 
-    std::uint16_t port();    
+    std::uint16_t port();
 
     NullSignal Shutdown;
 
-protected:    
+protected:
     ServerConnection::Ptr createConnection(const net::Socket::Ptr& sock);
     ServerResponder* createResponder(ServerConnection& conn);
 
@@ -205,9 +205,9 @@ protected:
 class BadRequestHandler: public ServerResponder
 {
 public:
-    BadRequestHandler(ServerConnection& connection) :         
+    BadRequestHandler(ServerConnection& connection) :
         ServerResponder(connection)
-    {        
+    {
     }
 
     void onRequest(Request&, Response& response)
@@ -234,9 +234,9 @@ class FlashPolicyConnectionHook: public ServerResponder
 {
 public:
     Poco::Net::TCPServerConnection* createConnection(const Poco::Net::StreamSocket& socket, const std::string& rawRequest)
-    {        
-        try 
-        {            
+    {
+        try
+        {
             if (rawRequest.find("policy-file-request") != std::string::npos) {
                 traceL("HTTPStreamingRequestHandlerFactory") << "Send Flash Crossdomain XMLSocket Policy" << std::endl;
                 return new Net::FlashPolicyRequestHandler(socket, false);
@@ -244,17 +244,17 @@ public:
             else if (rawRequest.find("crossdomain.xml") != std::string::npos) {
                 traceL("HTTPStreamingRequestHandlerFactory") << "Send Flash Crossdomain HTTP Policy" << std::endl;
                 return new Net::FlashPolicyRequestHandler(socket, true);
-            }            
+            }
         }
         catch (std::exception&Exception& exc)
         {
             LogError("ServerConnectionHook") << "Bad Request: " << exc.what()/message()/ << std::endl;
-        }    
+        }
         return nullptr;
     };
 };
 */
-    
+
     /*
     void onTimer(void*)
     {

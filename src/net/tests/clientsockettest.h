@@ -21,12 +21,12 @@ public:
     ClientSocketTest(short port) : //, bool ghost = false
         address("127.0.0.1", port), passed(false)
     {
-        traceL("ClientSocketTest") << "Creating: " << port << std::endl;
+        TraceL << "Creating: " << port << std::endl;
     }
 
     ~ClientSocketTest()
     {
-        traceL("ClientSocketTest") << "Destroying" << std::endl;
+        TraceL << "Destroying" << std::endl;
         //assert(socket.base().refCount() == 1);
     }
 
@@ -51,7 +51,7 @@ public:
 
     void onConnect(void* sender)
     {
-        traceL("ClientSocketTest") << "Connected" << std::endl;
+        TraceL << "Connected" << std::endl;
         // assert(sender == &socket);
         // socket.send("client > server", 15);
         // socket.send("client > server", 15);
@@ -67,7 +67,7 @@ public:
 
         // Check for return packet echoing sent data
         if (data == "client > server") {
-            traceL("ClientSocketTest") << "Recv: Got Return Packet!" << std::endl;
+            TraceL << "Recv: Got Return Packet!" << std::endl;
             passed = true;
 
             // Send the shutdown command to close the connection gracefully.
@@ -83,13 +83,13 @@ public:
 
     void onError(void* sender, const Error& error)
     {
-        errorL("ClientSocketTest") << "On error: " << error.message << std::endl;
+        InfoL << "On error: " << error.message << std::endl;
         // assert(sender == &socket);
     }
 
     void onClose(void* sender)
     {
-        traceL("ClientSocketTest") << "On closed" << std::endl;
+        TraceL << "On closed" << std::endl;
         // The last callback to fire is the Closed signal
         // which notifies us the underlying libuv socket
         // handle is closed. Das is gut!

@@ -177,7 +177,7 @@ struct PacketStreamState: public State
         Locked,
         Active,
         Paused,
-        Resetting,
+        // Resetting,
         Stopping,
         Stopped,
         Closed,
@@ -187,15 +187,15 @@ struct PacketStreamState: public State
     std::string str(unsigned int id) const
     {
         switch(id) {
-        case None:            return "None";
+        case None:          return "None";
         case Locked:        return "Locked";
         case Active:        return "Active";
         case Paused:        return "Paused";
-        case Resetting:        return "Resetting";
-        case Stopping:        return "Stopping";
-        case Stopped:        return "Stopped";
+        // case Resetting:     return "Resetting";
+        case Stopping:      return "Stopping";
+        case Stopped:       return "Stopped";
         case Closed:        return "Closed";
-        case Error:            return "Error";
+        case Error:         return "Error";
         default:            assert(false);
         }
         return "undefined";
@@ -339,8 +339,17 @@ public:
     virtual void synchronizeOutput(uv::Loop* loop);
         // Synchronize stream output packets with the given event loop.
 
+    virtual void autoStart(bool flag);
+        // Set the stream to auto start if inactive (default: false).
+        //
+        // With this flag set the stream will automatically transition to
+        // Active state if the in either the None or Locaked state.
+
     virtual void closeOnError(bool flag);
-        // Set the stream to be closed on error.
+        // Set the stream to be closed on error (default: true).
+        //
+        // With this flag set the stream will be automatically transitioned
+        // to Closed state from Error state.
 
     virtual void setClientData(void* data);
     virtual void* clientData() const;
@@ -466,8 +475,9 @@ protected:
     bool hasQueuedState(PacketStreamState::ID state) const;
         // Returns true if the given state ID is queued.
 
-    void assertNotActive();
-        // Asserts that the stream is not in or pending the Active state.
+    void assertCanModify();
+        // Asserts that the stream can be modified, ie is not in the Locked,
+        // Stopping or Active states.
 
     mutable Mutex _mutex;
     mutable Mutex _procMutex;
@@ -476,6 +486,7 @@ protected:
     PacketAdapterVec _processors;
     std::deque<PacketStreamState> _states;
     std::exception_ptr _error;
+    bool _autoStart;
     bool _closeOnError;
     void* _clientData;
 };
