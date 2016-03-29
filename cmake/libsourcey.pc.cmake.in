@@ -1,13 +1,13 @@
-# Package Information for pkg-config
-
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir_old=@includedir@/scy
-includedir_new=@includedir@
+prefix=@LibSourcey_INSTALL_DIR@
+exec_prefix=@LibSourcey_INSTALL_DIR@
+libdir=@LibSourcey_INSTALL_DIR@
+sharedlibdir=@LibSourcey_DEPENDENCIES_INSTALL_DIR@
+includedir=@LibSourcey_SOURCE_DIR@
 
 Name: LibSourcey
-Description: LibSourcey C++11 Networking Library
-Version: @VERSION@
-Libs: -L${libdir} -lscy_base_@SCY_DLLVERSION@ -lscy_uv_@SCY_DLLVERSION@ -lscy_net_@SCY_DLLVERSION@ -lscy_http_@SCY_DLLVERSION@ -lscy_media_@SCY_DLLVERSION@ -lscy_json_@SCY_DLLVERSION@ -lscy_util_@SCY_DLLVERSION@ -lscy_stun_@SCY_DLLVERSION@ -lscy_turn_@SCY_DLLVERSION@ -lscy_archo_@SCY_DLLVERSION@ -lscy_crypto_@SCY_DLLVERSION@
-Cflags: -I${includedir_old} -I${includedir_new}
+Description: LibSourcey C++ Networking Evolved
+Version: @LibSourcey_VERSION@
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lscy_archo_@LibSourcey_VERSION@ -lscy_base_@LibSourcey_VERSION@ -lscy_crypto_@LibSourcey_VERSION@ -lscy_http_@LibSourcey_VERSION@ -lscy_json_@LibSourcey_VERSION@ -lscy_media_@LibSourcey_VERSION@ -lscy_net_@LibSourcey_VERSION@ -lscy_sked_@LibSourcey_VERSION@ -lscy_socketio_@LibSourcey_VERSION@ -lscy_stun_@LibSourcey_VERSION@ -lscy_symple_@LibSourcey_VERSION@ -lscy_turn_@LibSourcey_VERSION@ -lscy_util_@LibSourcey_VERSION@ -lscy_uv_@LibSourcey_VERSION@
+Cflags: -I${includedir}

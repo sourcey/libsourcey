@@ -105,47 +105,14 @@ set(LibSourcey_DIR ${CMAKE_SOURCE_DIR})
 set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
 set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
-# set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_DIR}/deps")
-# set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_BUILD_DIR}/deps")
-set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/libscy/deps")
+set(LibSourcey_SHARED_INSTALL_DIR ${LibSourcey_INSTALL_DIR}/share/scy)
+set(LibSourcey_VENDOR_INSTALL_DIR ${LibSourcey_SHARED_INSTALL_DIR}/vendor)
+set(LibSourcey_PKGCONFIG_DIR ${LibSourcey_INSTALL_DIR}/lib/pkgconfig)
 
-# # Append some common search paths for find_library and find_path
-# # to find libraries from these locations first
-# if(WIN32)
-#   # # set(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
-#   # # set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a") # ".dll"
-#   # set(CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH}
-#   #   # ${LibSourcey_SOURCE_DIR}/anionu-abi/openssl/lib/
-#   #   # ${LibSourcey_SOURCE_DIR}/anionu-abi/ffmpeg/lib/
-#   #   # ${LibSourcey_SOURCE_DIR}/anionu-abi/opencv/lib/
-#   #   ${LibSourcey_DEPENDENCIES_SOURCE_DIR}/lib
-#   #   )
-# else()
-#   # # set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
-#   # # set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
-#   # set(CMAKE_LIBRARY_PATH
-#   #   #${LibSourcey_BUILD_DIR}/lib
-#   #   #/usr/local/share/libscy/deps/lib
-#   #   #/home/deploy/build/lib
-#   #   # /usr/local/lib
-#   #   # /usr/local/lib/x86_64-linux-gnu
-#   #   # /usr/local/lib/i386-linux-gnu
-#   #   # /usr/local/lib64
-#   #   # /usr/lib
-#   #   # /usr/lib/x86_64-linux-gnu
-#   #   # /usr/lib/i386-linux-gnu
-#   #   /usr/lib64
-#   #   ${CMAKE_LIBRARY_PATH})
-#   #
-#   # set(CMAKE_SYSTEM_PREFIX_PATH
-#   #   #/usr/local/share/libscy/deps/include
-#   #   #/home/deploy/build
-#   #   #/home/deploy/build/include
-#   #   ${CMAKE_SYSTEM_PREFIX_PATH})
-#   #
-#   # # Temp fix for "/usr/bin/ld: cannot find -lavcodec"
-#   # # link_directories(/home/deploy/build/lib)
-# endif()
+# Set CMake defaults
+set(CMAKE_LIBRARY_PATH ${LibSourcey_VENDOR_INSTALL_DIR}/lib ${CMAKE_LIBRARY_PATH})
+set(CMAKE_SYSTEM_PREFIX_PATH ${LibSourcey_VENDOR_INSTALL_DIR}/include ${CMAKE_SYSTEM_PREFIX_PATH})
+link_directories(${LibSourcey_VENDOR_INSTALL_DIR}/lib)
 
 # ----------------------------------------------------------------------------
 # Solution folders:
@@ -216,7 +183,7 @@ elseif(MSYS)
 elseif(APPLE)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -ldl") # -lm -lz -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES}
 elseif(UNIX)
-  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -lz -ldl -lrt") # -lpulse-simple -lpulse -ljack -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES}
+  set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lm -ldl") # -lz -lrt -lpulse-simple -lpulse -ljack -llibc -lglibc #${LibSourcey_INCLUDE_LIBRARIES}
 endif()
 
 if(MSVC)
@@ -252,35 +219,19 @@ set_option(WITH_OPENCV          "Include OpenCV support"               ON IF (OP
 set_option(WITH_WEBRTC          "Include WebRTC support"               OFF)
 set_option(WITH_WXWIDGETS       "Include wxWidgets support"            OFF)
 
-# Include dependencies build dir for cmake generated config files
-#list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_BUILD_DIR})
-
-#set(LibSourcey_INCLUDE_DIRS ${LibSourcey_INCLUDE_DIRS} ${LibSourcey_DEPENDENCIES_BUILD_DIR})
-#list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_DEPENDENCIES_SOURCE_DIR})
-#set(LibSourcey_DEPENDENCIES_SOURCE_DIR "${LibSourcey_DIR}/deps")
-#set(LibSourcey_DEPENDENCIES_BUILD_DIR "${LibSourcey_BUILD_DIR}/deps")
-#set(LibSourcey_DEPENDENCIES_INSTALL_DIR "${LibSourcey_INSTALL_DIR}/share/libscy/deps")
-#link_directories("${LibSourcey_DEPENDENCIES_INSTALL_DIR}")
-
 # External dependencies
-# include_dependency(LibUV REQUIRED)
-
 if(WITH_OPENSSL)
   include_dependency(OpenSSL REQUIRED)
 endif()
-
 if(WITH_FFMPEG)
   include_dependency(FFmpeg REQUIRED)
 endif()
-
 if(WITH_OPENCV)
   include_dependency(OpenCV REQUIRED)
 endif()
-
 if(WITH_WEBRTC)
   include_dependency(WebRTC REQUIRED)
 endif()
-
 if(WITH_WXWIDGETS)
   # TODO: specify required library options
   include_dependency(wxWidgets REQUIRED core base adv)
@@ -332,7 +283,7 @@ endif()
 # Build our LibSourceyConfig.h file
 #
 # A directory will be created for each platform so the "LibSourceyConfig.h" file is
-# not overwritten if cmake generates code in the same path.
+# not overwritten if CMake generates code in the same path.
 # ----------------------------------------------------------------------------
 add_definitions(-DHAVE_CONFIG_H)
 
@@ -348,6 +299,15 @@ status("Parsing 'LibSourceyConfig.h.cmake'")
 configure_file(
   "${CMAKE_SOURCE_DIR}/cmake/LibSourceyConfig.h.cmake"
   "${LibSourcey_CONFIG_FILE_INCLUDE_DIR}/scyconfig.h")
+
+# ----------------------------------------------------------------------------
+#  Install PkgConfig file
+# ----------------------------------------------------------------------------
+set(LibSourcey_PC ${CMAKE_CURRENT_BINARY_DIR}/libsourcey.pc)
+configure_file(
+    ${CMAKE_SOURCE_DIR}/cmake/libsourcey.pc.cmake.in
+		${LibSourcey_PC} @ONLY)
+install(FILES ${LibSourcey_PC} DESTINATION "${LibSourcey_PKGCONFIG_DIR}")
 
 # ----------------------------------------------------------------------------
 #  Uninstall target for "make uninstall"
