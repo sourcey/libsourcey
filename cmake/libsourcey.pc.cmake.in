@@ -1,13 +1,13 @@
 prefix=@LibSourcey_INSTALL_DIR@
-exec_prefix=@LibSourcey_INSTALL_DIR@
-libdir=@LibSourcey_INSTALL_DIR@
-sharedlibdir=@LibSourcey_DEPENDENCIES_INSTALL_DIR@
-includedir=@LibSourcey_SOURCE_DIR@
+exec_prefix=@LibSourcey_INSTALL_DIR@/bin
+libdir=@LibSourcey_INSTALL_DIR@/lib
+vendorlibdir=@LibSourcey_VENDOR_INSTALL_DIR@
+includedir=@LibSourcey_INSTALL_DIR@/include
 
 Name: LibSourcey
 Description: LibSourcey C++ Networking Evolved
 Version: @LibSourcey_VERSION@
 
 Requires:
-Libs: -L${libdir} -L${sharedlibdir} -lscy_archo_@LibSourcey_VERSION@ -lscy_base_@LibSourcey_VERSION@ -lscy_crypto_@LibSourcey_VERSION@ -lscy_http_@LibSourcey_VERSION@ -lscy_json_@LibSourcey_VERSION@ -lscy_media_@LibSourcey_VERSION@ -lscy_net_@LibSourcey_VERSION@ -lscy_sked_@LibSourcey_VERSION@ -lscy_socketio_@LibSourcey_VERSION@ -lscy_stun_@LibSourcey_VERSION@ -lscy_symple_@LibSourcey_VERSION@ -lscy_turn_@LibSourcey_VERSION@ -lscy_util_@LibSourcey_VERSION@ -lscy_uv_@LibSourcey_VERSION@
+Libs: -L${libdir} -L${vendorlibdir} -lscy_archo_@LibSourcey_VERSION@ -lscy_base_@LibSourcey_VERSION@ -lscy_crypto_@LibSourcey_VERSION@ -lscy_http_@LibSourcey_VERSION@ -lscy_json_@LibSourcey_VERSION@ -lscy_media_@LibSourcey_VERSION@ -lscy_net_@LibSourcey_VERSION@ -lscy_sked_@LibSourcey_VERSION@ -lscy_socketio_@LibSourcey_VERSION@ -lscy_stun_@LibSourcey_VERSION@ -lscy_symple_@LibSourcey_VERSION@ -lscy_turn_@LibSourcey_VERSION@ -lscy_util_@LibSourcey_VERSION@ -lscy_uv_@LibSourcey_VERSION@
 Cflags: -I${includedir}
