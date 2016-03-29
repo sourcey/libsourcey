@@ -13,8 +13,8 @@ if (BUILD_MODULES AND BUILD_MODULE_archo)
   #add_subdirectory(vendor/minizip)
 
   #include_dependency(LibUV) # REQUIRED)
-  #include_dependency(ZLIB)
-  #include_dependency(Minizip)
+  include_dependency(ZLIB)
+  include_dependency(Minizip)
 
   define_sourcey_module(archo base uv)
 endif ()
