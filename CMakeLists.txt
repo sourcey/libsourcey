@@ -295,19 +295,21 @@ set(PACKAGE_STRING "${PACKAGE} ${LibSourcey_VERSION}")
 set(PACKAGE_TARNAME "${PACKAGE}")
 set(PACKAGE_VERSION "${LibSourcey_VERSION}")
 
+set(LibSourcey_CONFIG_FILE ${LibSourcey_BUILD_DIR}/scyconfig.h)
 status("Parsing 'LibSourceyConfig.h.cmake'")
 configure_file(
-  "${CMAKE_SOURCE_DIR}/cmake/LibSourceyConfig.h.cmake"
-  "${LibSourcey_CONFIG_FILE_INCLUDE_DIR}/scyconfig.h")
+  ${CMAKE_SOURCE_DIR}/cmake/LibSourceyConfig.h.cmake
+  ${LibSourcey_CONFIG_FILE})
+install(FILES ${LibSourcey_CONFIG_FILE} DESTINATION ${LibSourcey_INSTALL_DIR}/include)
 
 # ----------------------------------------------------------------------------
 #  Install PkgConfig file
 # ----------------------------------------------------------------------------
-set(LibSourcey_PC ${CMAKE_CURRENT_BINARY_DIR}/libsourcey.pc)
+set(LibSourcey_PC ${LibSourcey_BUILD_DIR}/libsourcey.pc)
 configure_file(
     ${CMAKE_SOURCE_DIR}/cmake/libsourcey.pc.cmake.in
 		${LibSourcey_PC} @ONLY)
-install(FILES ${LibSourcey_PC} DESTINATION "${LibSourcey_PKGCONFIG_DIR}")
+install(FILES ${LibSourcey_PC} DESTINATION ${LibSourcey_PKGCONFIG_DIR})
 
 # ----------------------------------------------------------------------------
 #  Uninstall target for "make uninstall"
