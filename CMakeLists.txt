@@ -114,6 +114,9 @@ set(CMAKE_LIBRARY_PATH ${LibSourcey_VENDOR_INSTALL_DIR}/lib ${CMAKE_LIBRARY_PATH
 set(CMAKE_SYSTEM_PREFIX_PATH ${LibSourcey_VENDOR_INSTALL_DIR}/include ${CMAKE_SYSTEM_PREFIX_PATH})
 link_directories(${LibSourcey_VENDOR_INSTALL_DIR}/lib)
 
+list(APPEND LibSourcey_INCLUDE_DIRS ${LibSourcey_VENDOR_INSTALL_DIR}/include)
+list(APPEND LibSourcey_LIBRARY_DIRS ${LibSourcey_VENDOR_INSTALL_DIR}/lib)
+
 # ----------------------------------------------------------------------------
 # Solution folders:
 # ----------------------------------------------------------------------------
@@ -136,12 +139,8 @@ endif()
 include(LibSourceyCompilerOptions REQUIRED)
 
 # ----------------------------------------------------------------------------
-# Set the location of our platform-dependant LibSourceyConfig.h
-# ----------------------------------------------------------------------------
-set(LibSourcey_CONFIG_FILE_INCLUDE_DIR "${CMAKE_BINARY_DIR}/" CACHE PATH "Where to create the platform-dependant LibSourceyConfig.h")
-include_directories("${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
-
 # Set the LibSourcey_LIB_TYPE variable for add_library
+# ----------------------------------------------------------------------------
 set(LibSourcey_LIB_TYPE STATIC)
 if(BUILD_SHARED_LIBS)
   set(LibSourcey_LIB_TYPE SHARED)
@@ -258,13 +257,13 @@ if (BUILD_MODULE_TESTS)
 endif()
 
 if(BUILD_MODULES OR BUILD_APPLICATIONS)
-  subdirlist(subdirs "${CMAKE_SOURCE_DIR}/src")
+  subdirlist(subdirs ${LibSourcey_SOURCE_DIR})
   foreach(name ${subdirs})
     # This variable is so modules can set HAVE_LibSourcey_XXX for our
-    # LibSourceyConfig.h inside the child scope. See include_sourcey_modules()
+    # scyconfig.h inside the child scope. See include_sourcey_modules()
     # TODO: Need to refactor since modules may be nested.
     set(HAVE_LibSourcey_${name} 0)
-    set(dir "${CMAKE_SOURCE_DIR}/src/${name}")
+    set(dir "${LibSourcey_SOURCE_DIR}/${name}")
     if (EXISTS "${dir}/CMakeLists.txt")
       add_subdirectory(${dir})
     endif()
@@ -280,9 +279,9 @@ if(LibSourcey_BUILD_DEPENDENCIES)
 endif()
 
 # ----------------------------------------------------------------------------
-# Build our LibSourceyConfig.h file
+# Build our scyconfig.h file
 #
-# A directory will be created for each platform so the "LibSourceyConfig.h" file is
+# A directory will be created for each platform so the "scyconfig.h" file is
 # not overwritten if CMake generates code in the same path.
 # ----------------------------------------------------------------------------
 add_definitions(-DHAVE_CONFIG_H)

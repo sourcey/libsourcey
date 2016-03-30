@@ -82,7 +82,7 @@ int SocketAdapter::sendPacket(const IPacket& packet, int flags)
     // Dynamically generated packets need to be written to a
     // temp buffer for sending.
     else {
-        Buffer buf(packet.size());
+        Buffer buf;
         packet.write(buf);
         return send(buf.data(), buf.size(), flags);
     }
@@ -99,8 +99,8 @@ int SocketAdapter::sendPacket(const IPacket& packet, const Address& peerAddress,
     // Dynamically generated packets need to be written to a
     // temp buffer for sending.
     else {
-        Buffer buf(packet.size()); //(2048);
-        //buf.reserve(2048);
+        Buffer buf;
+        buf.reserve(2048);
         packet.write(buf);
         return send(buf.data(), buf.size(), peerAddress, flags);
     }
