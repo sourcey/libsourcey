@@ -202,28 +202,10 @@ std::size_t Packet::read(const ConstBuffer& buf)
 void Packet::write(Buffer& buf) const
 {
     assert(valid());
-    std::ostringstream ss;
-    // print(ss);
-
-    // 2["message",{"data":"fffffffffffffffffffff","type":"message","id":"k0dsiifb169cz0k9","from":"aaa|/#Zr0vTHQ4JG2Zt-qtAAAA"}]
-    ss << int(_frame)
-        << int(_type)
-        << _id;
-
-    if (_type == Type::Event) {
-      ss << "[\""
-        << (_event.empty() ? "message" : _event)
-        << "\","
-        << _message
-        << "]";
-        // << "\",\""
-        // << _message
-        // << "\"]";
-    }
-
-    std::string str(ss.str()); // TODO: avoid copy
+    std::ostringstream os;
+    print(os);
+    std::string str = os.str();
     buf.insert(buf.end(), str.begin(), str.end());
-    //buf.append(ss.str().c_str(), ss.tellp());
 }
 
 
@@ -353,21 +335,20 @@ std::size_t Packet::size() const
 
 void Packet::print(std::ostream& os) const
 {
-    os << frameString()
-        << ":"
-        << typeString();
-    if (_id == -1 && _nsp.empty() && _message.empty()) {
-        os << "::";
-    }
-    else if (_id == -1 && _nsp.empty()){
-        os << ":::" << _message;
-    }
-    else if (_id > -1) { // && _type != 6
-        os << ":" << _id << (_ack ? "+":"")
-            << ":" << _nsp << ":" << _message;
-    }
-    else {
-        os << "::" << _nsp << ":" << _message;
+    // 2["message",{"data":"fffffffffffffffffffff","type":"message","id":"k0dsiifb169cz0k9","from":"aaa|/#Zr0vTHQ4JG2Zt-qtAAAA"}]
+    os << int(_frame)
+        << int(_type)
+        << _id;
+
+    if (_type == Type::Event) {
+      os << "[\""
+        << (_event.empty() ? "message" : _event)
+        << "\","
+        << _message
+        << "]";
+        // << "\",\""
+        // << _message
+        // << "\"]";
     }
 }
 

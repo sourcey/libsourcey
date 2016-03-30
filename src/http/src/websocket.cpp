@@ -103,7 +103,7 @@ int WebSocketAdapter::send(const char* data, std::size_t len, int flags)
 
 int WebSocketAdapter::send(const char* data, std::size_t len, const net::Address& peerAddr, int flags)
 {
-    TraceS(this) << "Send: " << len << endl; // std::string(data, len)
+    TraceS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
     assert(framer.handshakeComplete());
 
     // Set default text flag if none specified
