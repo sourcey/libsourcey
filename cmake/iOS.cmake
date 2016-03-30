@@ -148,10 +148,8 @@ if(NOT CMAKE_CXX_COMPILER)
 	message(STATUS "Using C++ compiler ${CMAKE_CXX_COMPILER}")
 endif()
 
-#set(SDKROOT "iphoneos9.2")
-#set(CMAKE_OSX_SYSROOT ${SDKROOT})
-#set(IPHONEOS_DEPLOYMENT_TARGET "iOS 8.1")
-#set(CMAKE_OSX_DEPLOYMENT_TARGET ${IPHONEOS_DEPLOYMENT_TARGET})
+#execute_process(COMMAND xcrun --sdk iphoneos --show-sdk-version OUTPUT_VARIABLE iOSVersion)
+#set(iPhoneOSVersion "iphoneos${iOSVersion}")
 #SET_TARGET_PROPERTIES("LibSourcey" PROPERTIES XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "8.1")
 
 message(STATUS "== SDKROOT:" ${SDKROOT})

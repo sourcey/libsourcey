@@ -9,7 +9,7 @@ if(BUILD_MODULES AND BUILD_MODULE_http)
   #set(HAVE_HTTPPARSER 1)
 
   include_dependency(OpenSSL REQUIRED)
-  include_dependency(LibUV)
+  #include_dependency(LibUV)
   #include_dependency(HttpParser)
 
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/http_parser)

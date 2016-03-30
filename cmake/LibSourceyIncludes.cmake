@@ -215,7 +215,8 @@ macro(set_default_project_directories)
 
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
   include_directories(${LibSourcey_INCLUDE_DIRS})
-  include_directories(${CMAKE_BINARY_DIR})  
+  include_directories(${LibSourcey_VENDOR_INCLUDE_DIRS}) # include all internal vendor dirs
+  include_directories(${CMAKE_BINARY_DIR})    
   link_directories(${LibSourcey_LIBRARY_DIRS})
 endmacro()
 
@@ -226,16 +227,16 @@ endmacro()
 # Set the default dependencies for a LibSourcey project.
 #
 macro(set_default_project_dependencies name)
-  foreach(dep ${LibSourcey_BUILD_DEPENDENCIES})
-    add_dependencies(${name} ${dep})
-  endforeach()
+  # foreach(dep ${LibSourcey_BUILD_DEPENDENCIES})
+  #   add_dependencies(${name} ${dep})
+  # endforeach()
 
   # Include dependent modules
-  foreach(module ${ARGN})
+  # foreach(module ${ARGN})
     #if(NOT ${module} MATCHES "util")
-      add_dependencies(${name} ${module})
+  #     add_dependencies(${name} ${module})
     #endif()
-  endforeach()
+  # endforeach()
 
   # Include all linker libraries
   set(${name}_LIBRARIES ${ARGN})

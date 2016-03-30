@@ -6,7 +6,7 @@ if(BUILD_MODULES AND BUILD_MODULE_json)
   #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/jsoncpp)
 
   #include_dependency(JsonCpp) #ME
-  include_dependency(LibUV) #REQUIRED
+  #include_dependency(LibUV) #REQUIRED
 
   define_sourcey_module(json base uv)
 endif()

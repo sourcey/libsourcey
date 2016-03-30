@@ -12,7 +12,7 @@ if (BUILD_MODULES AND BUILD_MODULE_archo)
   #add_subdirectory(vendor/zlib)
   #add_subdirectory(vendor/minizip)
 
-  include_dependency(LibUV) # REQUIRED)
+  #include_dependency(LibUV) # REQUIRED)
   include_dependency(ZLIB)
   include_dependency(Minizip)
 

@@ -3,4 +3,4 @@
 # include_dependency(JsonCpp)
 # include_dependency(HttpParser)
 
-define_libsourcey_test(httptests base uv crypto net http)
+define_libsourcey_test(httptests uv base crypto net http)

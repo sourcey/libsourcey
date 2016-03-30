@@ -1,10 +1,10 @@
 ask_build_sourcey_module(socketio)
 if(BUILD_MODULES AND BUILD_MODULE_socketio)
-  include_dependency(LibUV)
+  #include_dependency(LibUV)
   include_dependency(OpenSSL REQUIRED)
-  include_dependency(JsonCpp)
+  #include_dependency(JsonCpp)
+  #include_dependency(HttpParser)
+  #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../http/vendor/http_parser)
 
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../http/vendor/http_parser)
-
-  define_sourcey_module(socketio base uv crypto net http json)
+  define_sourcey_module(socketio uv base crypto net http json)
 endif()
