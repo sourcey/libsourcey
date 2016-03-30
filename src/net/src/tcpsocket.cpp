@@ -18,9 +18,6 @@
 
 #include "scy/net/tcpsocket.h"
 #include "scy/logger.h"
-//#if POSIX
-//#include <sys/socket.h>
-//#endif
 
 
 using std::endl;
@@ -156,28 +153,17 @@ int TCPSocket::send(const char* data, std::size_t len, int flags)
 
 int TCPSocket::send(const char* data, std::size_t len, const net::Address& /* peerAddress */, int /* flags */)
 {
-    //assert(len <= net::MAX_TCP_PACKET_SIZE); // libuv handles this for us
-
     TraceS(this) << "Send: " << len << endl;
+    // TraceS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
     assert(Thread::currentID() == tid());
-
-#if 0
-    if (len < 300)
-        TraceS(this) << "Send: " << len << ": " << std::string(data, len) << endl;
-    else {
-        std::string str(data, len);
-        TraceS(this) << "Send: START: " << len << ": " << str.substr(0, 100) << endl;
-        TraceS(this) << "Send: END: " << len << ": " << str.substr(str.length() - 100, str.length()) << endl;
-    }
-#endif
+    //assert(len <= net::MAX_TCP_PACKET_SIZE); // libuv handles this for us
 
     if (!Stream::write(data, len)) {
         WarnL << "Send error" << endl;
         return -1;
     }
 
-    // R is -1 on error, otherwise return len
-    // TODO: Return native error code?
+    // TODO: Return native error code
     return len;
 }
 

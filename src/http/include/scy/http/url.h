@@ -31,7 +31,7 @@ namespace http {
 
 
 class URL
-    /// An RFC 3986 based URL which uses an external c 
+    /// An RFC 3986 based URL which uses an external c
     /// library to do the heavy lifting.
     /// Constructors and assignment operators will throw
     /// a SyntaxException if the URL is invalid.
@@ -44,21 +44,21 @@ public:
     URL(const std::string& scheme, const std::string& authority, const std::string& pathEtc);
     URL(const std::string& scheme, const std::string& authority, const std::string& path, const std::string& query, const std::string& fragment = "");
     ~URL();
-    
+
     URL& operator = (const URL& uri);
     URL& operator = (const std::string& uri);
     URL& operator = (const char* uri);
-    
+
     // Parses and assigns an URI from the given std::string.
     // Throws a SyntaxException if whiny is set and the
     // given url is invalid.
     bool parse(const std::string& url, bool whiny = true);
-    
-    // RFC 3986 based URL encoding based on JavaScript's 
+
+    // RFC 3986 based URL encoding based on JavaScript's
     // encodeURIComponent()
     static std::string encode(const std::string &str);
-    
-    // RFC 3986 based URL decoding based on JavaScript's 
+
+    // RFC 3986 based URL decoding based on JavaScript's
     // decodeURIComponent()
     static std::string decode(const std::string& str);
 
@@ -80,12 +80,12 @@ public:
     bool hasPath() const;
     bool hasQuery() const;
     bool hasFragment() const;
-    
+
     bool valid() const;
 
     std::string str() const;
-    
-    friend std::ostream& operator << (std::ostream& stream, const URL& url) 
+
+    friend std::ostream& operator << (std::ostream& stream, const URL& url)
     {
         stream << url.str();
         return stream;
@@ -102,23 +102,3 @@ protected:
 
 
 #endif // SCY_HTTP_URL_H
-
-
-
-        
-    /*
-    void updateSchema(const std::string& scheme);
-    void updatePathEtc(const std::string& pathEtc);
-    void updateSchema(const std::string& scheme);
-    void updateSchema(const std::string& scheme);
-    void updateHost(const std::string& host);
-    void updatePort(std::uint16_t port);
-    void updatePath(const std::string& path);    
-    void updateQuery(const std::string& query);    
-    void updateFragment(const std::string& fragment);    
-    void updateUserInfo(const std::string& info);
-    */
-
-//std::string parseHeader(const std::string& request, const std::string& name);
-    /// Parses a Header from a HTTP request.
-//bool parseRestfulQuery(const std::string& request, std::vector<std::string>& out);

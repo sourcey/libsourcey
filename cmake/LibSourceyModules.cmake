@@ -95,6 +95,9 @@ macro(define_sourcey_module name)
       ARCHIVE DESTINATION lib COMPONENT main)
   endif()
 
+  install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    DESTINATION "${LibSourcey_INSTALL_DIR}")
+
   # Set HAVE_SOURCEY_XXX at parent scope for use in scyconfig.h
   set(HAVE_SOURCEY_${name} ON PARENT_SCOPE)
 
@@ -153,7 +156,7 @@ macro(define_sourcey_module_sample name)
   endif()
   set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "d")
 
-  install(TARGETS ${name} RUNTIME DESTINATION "samples/${name}" COMPONENT main)
+  install(TARGETS ${name} RUNTIME DESTINATION "${LibSourcey_SHARED_INSTALL_DIR}/samples/${name}" COMPONENT main)
 endmacro()
 
 #
@@ -199,7 +202,7 @@ macro(define_libsourcey_test name)
   endif()
   set_target_properties(${name} PROPERTIES DEBUG_POSTFIX "")
 
-  install(TARGETS ${name} RUNTIME DESTINATION "tests/${name}" COMPONENT main)
+  install(TARGETS ${name} RUNTIME DESTINATION "${LibSourcey_SHARED_INSTALL_DIR}/tests/${name}" COMPONENT main)
 endmacro()
 
 
@@ -430,7 +433,7 @@ macro(define_sourcey_dependency name)
   #  DEBUG_POSTFIX ${${name}_DEBUG_POSTFIX})
 
   if (NOT INSTALL_DESTINATION)
-    set(INSTALL_DESTINATION ${LibSourcey_DEPENDENCIES_INSTALL_DIR}/lib)
+    set(INSTALL_DESTINATION ${LibSourcey_VENDOR_INSTALL_DIR}/lib)
   endif()
   install(TARGETS ${name}
     RUNTIME DESTINATION ${INSTALL_DESTINATION} COMPONENT main

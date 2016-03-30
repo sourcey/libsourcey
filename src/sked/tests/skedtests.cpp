@@ -62,10 +62,9 @@ int main(int argc, char** argv)
 
     describe("once only task serialization", []() {
         json::Value json;
-        Timespan oneSecond(1, 0);
-        assert(oneSecond.seconds() == 1);
+        Timespan hundredMs(0, 1);
 
-        // Schedule a once only task to run in 2 seconds time.
+        // Schedule a once only task to run in 100ms time.
         {
             taskRunTimes = 0;
 
@@ -73,7 +72,7 @@ int main(int argc, char** argv)
             auto trigger = task->createTrigger<sked::OnceOnlyTrigger>();
 
             DateTime dt;
-            dt += oneSecond;
+            dt += hundredMs;
             trigger->scheduleAt = dt;
 
             scheduler.start(task);
@@ -84,19 +83,16 @@ int main(int argc, char** argv)
             // Wait for the task to complete
             scy::sleep(1500);
             expect(taskRunTimes == 1);
-
-            // expect(task->trigger().timesRun == 1);
-            // expect(task->ran = true);
         }
 
         // Deserialize the previous task from JSON and run it again
         {
             taskRunTimes = 0;
 
-            // Set the task to run in 1 secs time
+            // Set the task to run in 100ms time
             {
                 DateTime dt;
-                dt += oneSecond;
+                dt += hundredMs;
                 json[(int)0]["trigger"]["scheduleAt"] =
                     DateTimeFormatter::format(dt, DateTimeFormat::ISO8601_FORMAT);
             }
@@ -134,7 +130,7 @@ int main(int argc, char** argv)
 
         taskRunTimes = 0;
 
-        // Schedule an interval task to run 3 times at 100 ms intervals
+        // Schedule an interval task to run 3 times at 100ms intervals
         {
             auto task = new ScheduledTask();
             sked::IntervalTrigger* trigger = task->createTrigger<sked::IntervalTrigger>();
@@ -154,30 +150,29 @@ int main(int argc, char** argv)
             expect(taskRunTimes == 3);
         }
 
-        // // Schedule to fire once now, and in two days time.
-        // {
-        //     auto task = new ScheduledTask();
-        //     DailyTrigger* trigger = task->createTrigger<DailyTrigger>();
-        //
-        //     // 2 secs from now
-        //     DateTime dt;
-        //     Timespan ts(2, 0);
-        //     dt += ts;
-        //     trigger->timeOfDay = dt;
-        //
-        //     // skip tomorrow
-        //     trigger->daysExcluded.push_back((DaysOfTheWeek)(dt.dayOfWeek() + 1));
-        //
-        //     scheduler.schedule(task);
-        //
-        //     // TODO: Assert running date
-        //
-        //     ready.wait();
-        // }
-
-        // uv::runDefaultLoop();
         DebugL << "Running Scheduled Task Test: END" << endl;
     });
+
+    // // Schedule to fire once now, and in two days time.
+    // {
+    //     auto task = new ScheduledTask();
+    //     auto trigger = task->createTrigger<DailyTrigger>();
+    //
+    //     // 2 secs from now
+    //     DateTime dt;
+    //     Timespan ts(2, 0);
+    //     dt += ts;
+    //     trigger->timeOfDay = dt;
+    //
+    //     // skip tomorrow
+    //     trigger->daysExcluded.push_back((DaysOfTheWeek)(dt.dayOfWeek() + 1));
+    //
+    //     scheduler.schedule(task);
+    //
+    //     // TODO: Assert running date
+    //     expect(task->trigger().remaining() == 1);
+    //     expect(task->trigger().timesRun == 1);
+    // }
 
     test::runAll();
 

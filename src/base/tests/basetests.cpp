@@ -299,11 +299,11 @@ int main(int argc, char** argv)
 
     // Define class based tests
     describe("signal", new SignalTest);
-    // describe("ipc", new IpcTest);
+    describe("ipc", new IpcTest);
     describe("timer", new TimerTest);
     describe("idler", new IdlerTest);
     describe("packet stream", new PacketStreamTest);
-    describe("multi packet stream", new MultiPacketStreamTest);
+    // describe("multi packet stream", new MultiPacketStreamTest);
 
     test::runAll();
 

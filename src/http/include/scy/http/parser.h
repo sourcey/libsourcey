@@ -27,10 +27,10 @@
 #define SCY_HTTP_Parser_H
 
 
-namespace scy { 
+namespace scy {
 namespace http {
 
-    
+
 struct ParserError
 {
     http_errno code;
@@ -53,13 +53,13 @@ public:
 class Parser
 {
 public:
-    Parser(http::Response* response); 
-    Parser(http::Request* request); 
+    Parser(http::Response* response);
+    Parser(http::Request* request);
     Parser(http_parser_type type);
     ~Parser();
 
     void init(http_parser_type type);
-    
+
     bool parse(const char* data, std::size_t length); //, bool expectComplete = false
         // Feed data read from socket into the http_parser.
         //
@@ -67,23 +67,23 @@ public:
 
     void reset();
         // Reset the parser state for a new message
-    
+
     bool complete() const;
-        // Returns true if parsing is complete, either  
+        // Returns true if parsing is complete, either
         // in success or error.
 
-    void setParserError(const std::string& message = ""); //bool throwException = true, 
+    void setParserError(const std::string& message = ""); //bool throwException = true,
 
     void setRequest(http::Request* request);
     void setResponse(http::Response* response);
     void setObserver(ParserObserver* observer);
-    
+
     http::Message* message();
     ParserObserver* observer() const;
 
     bool upgrade() const;
     bool shouldKeepAlive() const;
-    
+
     //
     /// Callbacks
     void onURL(const std::string& value);
@@ -99,26 +99,26 @@ public:
     /// http_parser callbacks
     static int on_message_begin(http_parser* parser);
     static int on_url(http_parser* parser, const char *at, std::size_t len);
-    static int on_status_complete(http_parser* parser);
+    static int on_status(http_parser* parser, const char *at, std::size_t len);
     static int on_header_field(http_parser* parser, const char* at, std::size_t len);
     static int on_header_value(http_parser* parser, const char* at, std::size_t len);
     static int on_headers_complete(http_parser* parser);
     static int on_body(http_parser* parser, const char* at, std::size_t len);
     static int on_message_complete(http_parser* parser);
-    
+
 public:
-    ParserObserver* _observer;    
+    ParserObserver* _observer;
     http::Request* _request;
     http::Response* _response;
     http::Message* _message;
-    
+
     http_parser _parser;
     http_parser_settings _settings;
 
     bool _wasHeaderValue;
     std::string _lastHeaderField;
     std::string _lastHeaderValue;
-    
+
     bool _complete;
 
     ParserError* _error;
@@ -132,10 +132,10 @@ public:
 
 
 
-    
+
         //, or throws an exception on error.
         //
-        // The expectComplete flag can be set for parsing headers only. 
+        // The expectComplete flag can be set for parsing headers only.
         // If the message is not complete after calling the parser
         // an exception will be thrown.
     //bool _failed;
@@ -147,9 +147,9 @@ public:
     /// State
     //
     //bool failed() const;
-    /// Accessors    
+    /// Accessors
 
-    /*    /// std::size_t offset, 
+    /*    /// std::size_t offset,
     //bool parsing() const;
     http::Message* headers()
     {
@@ -202,7 +202,7 @@ inline const char* get_method_name(method m)
   */
 /**
     //detail::resval error_;
-    
+
     //const std::string& message = ""
     //void setError(std::uint32_t code, const std::string& message);
 enum http_version {
@@ -299,9 +299,9 @@ public:
     void register_on_close(on_close_type callback);
     void register_on_end(on_end_type callback);
 
-    NullSignal Recv; 
-    NullSignal Close; 
-    Signal<const Exception&> Error; 
+    NullSignal Recv;
+    NullSignal Close;
+    Signal<const Exception&> Error;
     */
 
 

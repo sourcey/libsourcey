@@ -58,7 +58,7 @@ class IpcTest: public Test
     int num_ipc_callbacks;
 
     void run() {
-        std::cout << "Test IPC" << std::endl;
+        // std::cout << "Test IPC" << std::endl;
 
         want_x_ipc_callbacks = 5;
         num_ipc_callbacks = 0;
@@ -71,12 +71,14 @@ class IpcTest: public Test
         ipc.push(new ipc::Action(std::bind(&IpcTest::ipcCallback, this, std::placeholders::_1), &ipc, "test5"));
 
         uv::runDefaultLoop();
-        std::cout << "Test IPC: OK" << std::endl;
+        // std::cout << "Test IPC: OK" << std::endl;
+
+        expect(num_ipc_callbacks == want_x_ipc_callbacks);
     }
 
     void ipcCallback(const ipc::Action& action)
     {
-        std::cout << "Got IPC callback: " << action.data << std::endl;
+        // std::cout << "Got IPC callback: " << action.data << std::endl;
         if (++num_ipc_callbacks == want_x_ipc_callbacks)
             reinterpret_cast<ipc::Queue<>*>(action.arg)->close();
     }
@@ -106,7 +108,7 @@ class TimerTest: public Test
         timer.handle().ref();
 
         uv::runDefaultLoop();
-        std::cout << "Ending" << std::endl;
+        // std::cout << "Ending" << std::endl;
 
         expect(numTimerTicks == wantTimerTicks);
     }
@@ -114,7 +116,7 @@ class TimerTest: public Test
     void timerCallback(void* sender)
     {
         auto timer = reinterpret_cast<Timer*>(sender);
-        std::cout << "On timeout: " << timer->count() << std::endl;
+        // std::cout << "On timeout: " << timer->count() << std::endl;
         numTimerTicks++;
         if (timer->count() == wantTimerTicks / 2) {
             if (!timerRestarted) {
@@ -154,7 +156,7 @@ class IdlerTest: public Test
 
     void idlerCallback()
     {
-        std::cout << "On idle" << std::endl;
+        // std::cout << "On idle" << std::endl;
         if (++numIdlerTicks == wantIdlerTicks) {
             idler.handle().unref();
             idler.cancel(); // event loop will be released
@@ -173,21 +175,43 @@ class SignalTest: public Test
     void run()
     {
         int val = 0;
-        TestSignal += sdelegate(this, &SignalTest::testSignalCallback);
-        TestSignal += delegate(this, &SignalTest::testSignalCallbackNoSender);
+        TestSignal += sdelegate(this, &SignalTest::intCallback);
+        TestSignal += delegate(this, &SignalTest::intCallbackNoSender);
         TestSignal.emit(this, val);
         expect(val == 2);
+
+        val = -1;
+        TestSignal.clear();
+        TestSignal += delegate(this, &SignalTest::priorityOne, 1); // last
+        TestSignal += delegate(this, &SignalTest::priorityZero, 0); // second
+        TestSignal += delegate(this, &SignalTest::priorityMinusOne, -1); // first
+        TestSignal.emit(this, val);
     }
 
-    void testSignalCallback(void* sender, int& val)
+    void intCallback(void* sender, int& val)
     {
         expect(sender == this);
         val++;
     }
 
-    void testSignalCallbackNoSender(int& val)
+    void intCallbackNoSender(int& val)
     {
         val++;
+    }
+
+    void priorityMinusOne(int& val)
+    {
+        expect(val++ == -1);
+    }
+
+    void priorityZero(int& val)
+    {
+        expect(val++ == 0);
+    }
+
+    void priorityOne(int& val)
+    {
+        expect(val++ == 1);
     }
 };
 

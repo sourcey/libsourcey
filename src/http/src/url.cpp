@@ -33,33 +33,33 @@ URL::URL()
 
 URL::URL(const char* url)
 {
+    DebugL << "Parse char: " << url << std::endl;
     parse(url);
 }
 
 
 URL::URL(const std::string& url)
 {
+    DebugL << "Parse string: " << url << std::endl;
     parse(url);
 }
 
 
-/*
-URL::URL(const std::string& scheme, const std::string& pathEtc)
+URL::URL(const std::string& scheme, const std::string& authority)
 {
-    parse(scheme + "://" + pathEtc);
-}
-*/
-
-
-URL::URL(const std::string& scheme, const std::string& host, const std::string& pathEtc)
-{
-    parse(scheme + "://" + host + pathEtc);
+    parse(scheme + "://" + authority);
 }
 
 
-URL::URL(const std::string& scheme, const std::string& host, const std::string& path, const std::string& query, const std::string& fragment)
+URL::URL(const std::string& scheme, const std::string& authority, const std::string& pathEtc)
 {
-    parse(scheme + "://" + host + path + "?" + query + "#" + fragment);
+    parse(scheme + "://" + authority + pathEtc);
+}
+
+
+URL::URL(const std::string& scheme, const std::string& authority, const std::string& path, const std::string& query, const std::string& fragment)
+{
+    parse(scheme + "://" + authority + path + "?" + query + "#" + fragment);
 }
 
 
@@ -85,7 +85,7 @@ URL& URL::operator = (const std::string& uri)
 
 URL& URL::operator = (const char* uri)
 {
-    parse(std::string(uri));
+    parse(uri);
     return *this;
 }
 
@@ -93,12 +93,13 @@ URL& URL::operator = (const char* uri)
 bool URL::parse(const std::string& url, bool whiny)
 {
     DebugL << "Parsing: " << url << std::endl;
-    _buf = url;
-    if (http_parser_parse_url(url.c_str(), url.length(), 0, &_parser) == 0)
+    std::string src(util::trim(url));
+    _buf = src;
+    if (http_parser_parse_url(src.c_str(), src.length(), 0, &_parser) == 0)
         return true;
     _buf.clear();
     if (whiny)
-        throw std::runtime_error("Syntax error: Cannot parse invalid URL: " + url);
+        throw std::runtime_error("Syntax error: Cannot parse invalid URL: " + src);
     return false;
 }
 
@@ -108,7 +109,7 @@ std::string URL::scheme() const
     std::string res;
     if (hasSchema()) {
         res.assign(_buf.substr(_parser.field_data[UF_SCHEMA].off, _parser.field_data[UF_SCHEMA].len));
-        util::toLowerInPlace(res); // always returned as lowercase
+        util::toLowerInPlace(res); // always return as lowercase
     }
     return res;
 }

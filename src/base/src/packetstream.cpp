@@ -30,18 +30,11 @@ namespace scy {
 
 PacketStream::PacketStream(const std::string& name) :
     _name(name),
+    _autoStart(false),
     _closeOnError(true),
     _clientData(nullptr)
 {
     TraceS(this) << "Create" << endl;
-
-    //_base = std::make_shared<PacketStream>(this);
-    //_base = std::shared_ptr<PacketStream>(new PacketStream(this),
-        //std::default_delete<PacketStream>()
-        // NOTE: No longer using GC for deleting PacketStream
-        // since we don't want to force use of the event loop.
-        //deleter::Deferred<PacketStream>()
-        //);
 }
 
 
@@ -53,9 +46,6 @@ PacketStream::~PacketStream()
 
     // Delete managed adapters
     reset();
-
-    // Nullify the stream pointer
-    // _base->setStream(nullptr);
 
     // The event machine should always be complete
     assert(stateEquals(PacketStreamState::None)
@@ -83,10 +73,6 @@ void PacketStream::start()
 
     // Setup the delegate chain
     setup();
-
-    // Setup default (thread-based) runner if none set yet
-    //if (!_runner)
-    //    setRunner(std::make_shared<Thread>());
 
     // Set state to Active
     setState(this, PacketStreamState::Active);
@@ -146,16 +132,14 @@ void PacketStream::resume()
 }
 
 
-/*
-void PacketStream::reset()
-{
-    TraceS(this) << "Reset" << endl;
-
-    //Mutex::ScopedLock lock(_mutex);
-    setState(this, PacketStreamState::Resetting);
-    setState(this, PacketStreamState::Active);
-}
-*/
+// void PacketStream::reset()
+// {
+//     TraceS(this) << "Reset" << endl;
+//
+//     //Mutex::ScopedLock lock(_mutex);
+//     setState(this, PacketStreamState::Resetting);
+//     setState(this, PacketStreamState::Active);
+// }
 
 
 void PacketStream::close()
@@ -330,13 +314,13 @@ const std::exception_ptr& PacketStream::error()
     //Mutex::ScopedLock lock(_mutex);
     return error();
 }
+
+
+bool PacketStream::async() const
+{
+   return _runner && _runner->async();
+}
 #endif
-
-
-//bool PacketStream::async() const
-//{
-//    return false; //_runner && _runner->async();
-//}
 
 
 bool PacketStream::lock()
@@ -384,6 +368,13 @@ void* PacketStream::clientData() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _clientData;
+}
+
+
+void PacketStream::autoStart(bool flag)
+{
+    //Mutex::ScopedLock lock(_mutex);
+    _autoStart = flag;
 }
 
 
@@ -440,6 +431,14 @@ void PacketStream::process(IPacket& packet)
     //assert(Thread::currentID() == _runner->tid());
 
     try {
+
+        // Auto start the stream if required and currently inactive
+        if (_autoStart &&
+            stateEquals(PacketStreamState::None) // &&
+            // stateEquals(PacketStreamState::Locked)
+            )
+            start();
+
         // Process the packet if the stream is active
         PacketProcessor* firstProc = nullptr;
         if (stateEquals(PacketStreamState::Active) && !packet.flags.has(PacketFlags::NoModify)) {
@@ -532,7 +531,7 @@ void PacketStream::emit(IPacket& packet)
 
     // Ensure the stream is still running
     if (!stateEquals(PacketStreamState::Active)) {
-        TraceS(this) << "Dropping late packet: " << state() << endl;
+        TraceS(this) << "Dropping packet on inactive stream: " << state() << endl;
         return;
     }
 
@@ -676,7 +675,7 @@ void PacketStream::attachSource(PacketStreamAdapter* source, bool freePointer, b
 
 void PacketStream::attachSource(PacketAdapterReference::Ptr ref)
 {
-    assertNotActive();
+    assertCanModify();
 
     Mutex::ScopedLock lock(_mutex);
     _sources.push_back(ref);
@@ -687,7 +686,7 @@ void PacketStream::attachSource(PacketAdapterReference::Ptr ref)
 void PacketStream::attachSource(PacketSignal& source)
 {
     //TraceS(this) << "Attach source signal: " << &source << endl;
-    assertNotActive();
+    assertCanModify();
 
     // TODO: unique_ptr for exception safe pointer creation so we
     // don't need to do state checks here as well as attachSource(PacketStreamAdapter*)
@@ -698,7 +697,7 @@ void PacketStream::attachSource(PacketSignal& source)
 bool PacketStream::detachSource(PacketStreamAdapter* source)
 {
     //TraceS(this) << "Detach source adapter: " << source << endl;
-    assertNotActive();
+    assertCanModify();
 
     Mutex::ScopedLock lock(_mutex);
     for (auto it = _sources.begin(); it != _sources.end(); ++it) {
@@ -719,7 +718,7 @@ bool PacketStream::detachSource(PacketStreamAdapter* source)
 bool PacketStream::detachSource(PacketSignal& source)
 {
     //TraceS(this) << "Detach source signal: " << &source << endl;
-    assertNotActive();
+    assertCanModify();
 
     Mutex::ScopedLock lock(_mutex);
     for (auto it = _sources.begin(); it != _sources.end(); ++it) {
@@ -743,7 +742,7 @@ void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer)
 {
     //TraceS(this) << "Attach processor: " << proc << endl;
     assert(order >= 0 && order <= 101);
-    assertNotActive();
+    assertCanModify();
 
     Mutex::ScopedLock lock(_mutex);
     //_processors.push_back(std::make_shared<PacketAdapterReference>(proc,
@@ -759,7 +758,7 @@ void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer)
 bool PacketStream::detach(PacketProcessor* proc)
 {
     //TraceS(this) << "Detach processor: " << proc << endl;
-    assertNotActive();
+    assertCanModify();
 
     Mutex::ScopedLock lock(_mutex);
     for (auto it = _processors.begin(); it != _processors.end(); ++it) {
@@ -778,7 +777,7 @@ bool PacketStream::detach(PacketProcessor* proc)
 
 void PacketStream::attach(PacketAdapterReference::Ptr ref)
 {
-    assertNotActive();
+    assertCanModify();
 
     Mutex::ScopedLock lock(_mutex);
     _processors.push_back(ref);
@@ -895,18 +894,21 @@ bool PacketStream::hasQueuedState(PacketStreamState::ID state) const
 }
 
 
-void PacketStream::assertNotActive()
+void PacketStream::assertCanModify()
 {
-    if (stateEquals(PacketStreamState::Active)) {
-        assert(0 && "cannot modify active stream");
-        throw std::runtime_error("Stream error: Cannot modify an active stream.");
+    if (stateEquals(PacketStreamState::Locked) ||
+        stateEquals(PacketStreamState::Stopping) ||
+        stateEquals(PacketStreamState::Active)) {
+        ErrorS(this) << "Cannot modify an " << state() << " packet stream" << endl;
+        assert(0 && "cannot modify active packet stream");
+        throw std::runtime_error("Cannot modify an active packet stream.");
     }
 }
 
 
 void PacketStream::synchronizeOutput(uv::Loop* loop)
 {
-    assertNotActive();
+    assertCanModify();
 
     // Add a SyncPacketQueue as the final processor so output
     // packets will be synchronized when they hit the emit() method
@@ -973,23 +975,6 @@ PacketAdapterVec PacketStream::processors() const
     Mutex::ScopedLock lock(_mutex);
     return _processors;
 }
-
-
-/*
-PacketStream* PacketStream::stream() const
-{
-    Mutex::ScopedLock lock(_mutex);
-    return _stream;
-}
-
-
-void PacketStream::setStream(PacketStream* stream)
-{
-    Mutex::ScopedLock lock(_mutex);
-    assert(!_stream || stream == nullptr);
-    _stream = stream;
-}
-*/
 
 
 //

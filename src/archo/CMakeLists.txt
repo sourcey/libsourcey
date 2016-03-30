@@ -1,6 +1,12 @@
 ask_build_sourcey_module(archo)
 if (BUILD_MODULES AND BUILD_MODULE_archo)
 
+  set(INSTALL_BIN_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/bin")
+  set(INSTALL_LIB_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/lib")
+  set(INSTALL_INC_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/include")
+  set(INSTALL_MAN_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/share/man")
+  set(INSTALL_PKGCONFIG_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/share/pkgconfig")
+
   add_vendor_dependency(ZLIB zlib)
   add_vendor_dependency(MINIZIP minizip)
   #add_subdirectory(vendor/zlib)

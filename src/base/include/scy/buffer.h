@@ -59,9 +59,12 @@ public:
     {
     }
 
-    char* cdata() const { return reinterpret_cast<char*>(_data); }
     void* data() const { return _data; }
     std::size_t size() const { return _size; }
+
+    // String methods
+    char* cstr() const { return reinterpret_cast<char*>(_data); }
+    std::string str() const { return std::string(cstr(), size()); }
 
 private:
     void* _data;
@@ -137,31 +140,17 @@ public:
     {
     }
 
-    const char* cdata() const { return reinterpret_cast<const char*>(_data); }
     const void* data() const { return _data; }
     std::size_t size() const { return _size; }
 
-private:
-    //friend const void* bufferCastHelper(const ConstBuffer& b);
-    //friend std::size_t bufferSizeHelper(const ConstBuffer& b);
+    // String methods
+    const char* cstr() const { return reinterpret_cast<const char*>(_data); }
+    std::string str() const { return std::string(cstr(), size()); }
 
+private:
     const void* _data;
     std::size_t _size;
 };
-
-
-/*
-inline const void* bufferCastHelper(const ConstBuffer& b)
-{
-    return b._data;
-}
-
-
-inline std::size_t bufferSizeHelper(const ConstBuffer& b)
-{
-    return b._size;
-}
-*/
 
 
 template<typename T> inline ConstBuffer constBuffer(T data, std::size_t size)

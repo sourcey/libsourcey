@@ -165,7 +165,6 @@ uv_thread_t Runner::tid() const
 }
 
 
-
 //
 // Runner Context
 //

@@ -22,10 +22,10 @@ endif()
 # ----------------------------------------------------------------------
 # Options
 # ----------------------------------------------------------------------
-set(OPENCV_LINK_SHARED_LIBS TRUE CACHE BOOL "Link with shared OpenCV libraries (.dll/.so) instead of static ones (.lib/.a)")
+set(OPENCV_LINK_SHARED_LIBS ${BUILD_SHARED_LIBS} CACHE BOOL "Link with shared OpenCV libraries (.dll/.so) instead of static ones (.lib/.a)")
 
 # ----------------------------------------------------------------------
-# Use pkg-config to find OpenCV is available
+# Use pkg-config to find OpenCV if available
 # ----------------------------------------------------------------------
 find_package(PkgConfig QUIET)
 if (PKG_CONFIG_FOUND)
@@ -48,21 +48,19 @@ if (NOT OPENCV_FOUND)
   set(OPENCV_FOUND 0)
 
   # Find OpenCV include directory
-  #set(OPENCV_INCLUDE_DIR OPENCV_INCLUDE_DIR-NOTFOUND)
-  if (NOT OPENCV_INCLUDE_DIR)
-    find_path(OPENCV_INCLUDE_DIR
-      NAMES
-        opencv2/core/core.hpp
-      DOC
-        "OpenCV Include Directory"
-      PATHS
-    	  /usr/local/include
-        /usr/include
-      )
-  endif()
+  # set(OPENCV_INCLUDE_DIR OPENCV_INCLUDE_DIR-NOTFOUND)
+  find_path(OPENCV_INCLUDE_DIR
+    NAMES
+      opencv2/core/core.hpp
+    DOC
+      "OpenCV Include Directory"
+    PATHS
+  	  /usr/local/include
+      /usr/include
+    )
 
   # Find OpenCV library directory
-  #set(OPENCV_LIBRARY_DIRS OPENCV_LIBRARY_DIRS-NOTFOUND)
+  # set(OPENCV_LIBRARY_DIRS OPENCV_LIBRARY_DIRS-NOTFOUND)
   find_path(OPENCV_LIBRARY_DIRS
     NAMES
       opencv_core

@@ -30,32 +30,8 @@
 #include "scy/timer.h"
 
 
-namespace scy { 
+namespace scy {
 namespace http {
-
-    
-class ProgressSignal: public Signal<const double&>
-{
-public:
-    void* sender;
-    std::uint64_t current;
-    std::uint64_t total;
-
-    ProgressSignal() :    
-        sender(nullptr), current(0), total(0) {}
-
-    double progress() const 
-    {
-        return (current / (total * 1.0)) * 100;
-    }
-
-    void update(int nread) 
-    {
-        current += nread;
-        //assert(current <= total);
-        emit(sender ? sender : this, progress());
-    }
-};
 
 
 class Client;
@@ -70,46 +46,48 @@ public:
     virtual ~ClientConnection();
 
     virtual void send();
-        // Sends the HTTP request.
+        // Send the HTTP request.
         //
         // Calls connect() internally if the socket is not
-        // already connecting or connected. The actual request 
+        // already connecting or connected. The actual request
         // will be sent when the socket is connected.
-                
+
     virtual void send(http::Request& req);
-        // Sends the given HTTP request.
+        // Send the given HTTP request.
         // The given request will overwrite the internal HTTP
         // request object.
         //
         // Calls connect() internally if the socket is not
-        // already connecting or connected. The actual request 
+        // already connecting or connected. The actual request
         // will be sent when the socket is connected.
-            
+
     virtual int send(const char* data, std::size_t len, int flags = 0);
     //virtual int send(const std::string& buf, int flags = 0);
     //virtual void sendData(const char* buf, std::size_t len); //, int flags = 0
     //virtual void sendData(const std::string& buf); //, int flags = 0
-        // Sends raw data to the peer.
+        // Send raw data to the peer.
         // Calls send() internally.
-    
+        //
+        // Throws an exception if the socket is not already or connected.
+
     virtual void close();
         // Forcefully closes the HTTP connection.
-        
-    virtual void setReadStream(std::ostream* os);
-        // Set the output stream for writing response data to.
-        // The stream pointer is managed internally,
-        // and will be freed along with the connection.        
-        
-    template<class T>
-    T* readStream()
-        // Returns the cast read stream pointer or nullptr.
-    {
-        return dynamic_cast<T*>(_readStream);
-    }
-        
+
+    // virtual void setReadStream(std::ostream* os);
+    //     // Set the output stream for writing response data to.
+    //     // The stream pointer is managed internally,
+    //     // and will be freed along with the connection.
+    //
+    // template<class T>
+    // T* readStream()
+    //     // Return the cast read stream pointer or nullptr.
+    // {
+    //     return dynamic_cast<T*>(_readStream);
+    // }
+
     void* opaque;
         // Optional unmanaged client data pointer.
-    
+
     //
     /// Internal callbacks
 
@@ -122,30 +100,30 @@ public:
     //
     /// Status signals
 
-    NullSignal Connect;                        // Fires when the client socket is connected
-    Signal<Response&> Headers;                // Fires when the response HTTP header has been received
-    Signal<const Response&> Complete;        // Always on success or error response
-    ProgressSignal IncomingProgress;        // Notifies on download progress
-    ProgressSignal OutgoingProgress;        // Notifies on upload progress
+    NullSignal Connect;                     // Signal when the client socket is connected and data can flow
+    Signal<Response&> Headers;              // Signal when the response HTTP header has been received
+    Signal<const MutableBuffer&> Payload;   // Signal when raw data is received
+    Signal<const Response&> Complete;       // Signal when the HTTP transaction is complete
 
-protected:        
+protected:
     virtual void connect();
         // Connects to the server endpoint.
         // All sent data is buffered until the connection is made.
-                    
+
     http::Client* client();
-    http::Message* incomingHeader();    
+    http::Message* incomingHeader();
     http::Message* outgoingHeader();
-    
+
     void onSocketConnect();
     void onHostResolved(void*, const net::DNSResult& result);
-    
-protected:    
+
+protected:
     URL _url;
-    std::ostream* _readStream;
+    // std::ostream* _readStream;
     std::vector<std::string> _outgoingBuffer;
-    bool _complete;
     bool _connect;
+    bool _active;
+    bool _complete;
 };
 
 
@@ -160,7 +138,7 @@ typedef std::vector<ClientConnection::Ptr> ClientConnectionPtrVec;
 class ClientAdapter: public ConnectionAdapter
 {
 public:
-    ClientAdapter(ClientConnection& connection) : 
+    ClientAdapter(ClientConnection& connection) :
         ConnectionAdapter(connection, HTTP_RESPONSE)
     {
     }
@@ -170,37 +148,37 @@ public:
 //
 // HTTP Connection Helpers
 //
-    
-    
+
+
 template<class ConnectionT>
 inline ClientConnection::Ptr createConnectionT(const URL& url, uv::Loop* loop = uv::defaultLoop())
 {
     ClientConnection::Ptr conn;
 
-    if (url.scheme() == "http") {            
+    if (url.scheme() == "http") {
         //conn = std::make_shared<ConnectionT>(url, std::make_shared<net::TCPSocket>(loop));
         conn = std::shared_ptr<ConnectionT>(
-            new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)), 
+            new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)),
                 deleter::Deferred<ConnectionT>());
     }
     else if (url.scheme() == "https") {
         //conn = std::make_shared<ConnectionT>(url, std::make_shared<net::SSLSocket>(loop));
         conn = std::shared_ptr<ConnectionT>(
-            new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)), 
+            new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)),
                 deleter::Deferred<ConnectionT>());
     }
     else if (url.scheme() == "ws") {
         //conn = std::make_shared<ConnectionT>(url, std::make_shared<net::TCPSocket>(loop));
         conn = std::shared_ptr<ConnectionT>(
-            new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)), 
+            new ConnectionT(url, std::make_shared<net::TCPSocket>(loop)),
                 deleter::Deferred<ConnectionT>());
-        conn->replaceAdapter(new ws::ConnectionAdapter(*conn, ws::ClientSide)); 
+        conn->replaceAdapter(new ws::ConnectionAdapter(*conn, ws::ClientSide));
         //replaceAdapter(new ws::ws::ConnectionAdapter(*conn, ws::ClientSide));
     }
     else if (url.scheme() == "wss") {
         //conn = std::make_shared<ConnectionT>(url, std::make_shared<net::SSLSocket>(loop));
         conn = std::shared_ptr<ConnectionT>(
-            new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)), 
+            new ConnectionT(url, std::make_shared<net::SSLSocket>(loop)),
                 deleter::Deferred<ConnectionT>());
         conn->replaceAdapter(new ws::ConnectionAdapter(*conn, ws::ClientSide));
     }
@@ -223,7 +201,7 @@ public:
     virtual ~Client();
 
     static Client& instance();
-        // Returns the default HTTP Client singleton.
+        // Return the default HTTP Client singleton.
 
     static void destroy();
         // Destroys the default HTTP Client singleton.
@@ -255,12 +233,12 @@ public:
 
     NullSignal Shutdown;
 
-protected:        
+protected:
     //void onConnectionTimer(void*);
     void onConnectionClose(void*);
 
     friend class ClientConnection;
-    
+
     ClientConnectionPtrVec _connections;
     //Timer _timer;
 };
@@ -284,7 +262,7 @@ public:
     {
     }
 
-    virtual ~SecureClientConnection() 
+    virtual ~SecureClientConnection()
     {
     }
 };
@@ -299,7 +277,7 @@ public:
         socket().replaceAdapter(new ws::ConnectionAdapter(*this, ws::ClientSide));    //&socket(), &request(), request(), request()
     }
 
-    virtual ~WebSocketClientConnection() 
+    virtual ~WebSocketClientConnection()
     {
     }
 };
@@ -314,7 +292,7 @@ public:
         socket().replaceAdapter(new ws::ConnectionAdapter(*this, ws::ClientSide)); //(&socket(), &request()
     }
 
-    virtual ~WebSocketSecureClientConnection() 
+    virtual ~WebSocketSecureClientConnection()
     {
     }
 };

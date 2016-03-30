@@ -37,9 +37,10 @@ namespace http {
 ClientConnection::ClientConnection(const URL& url, const net::Socket::Ptr& socket) :
     Connection(socket),
     _url(url),
-    _readStream(nullptr),
-    _complete(false),
-    _connect(false)
+    // _readStream(nullptr),
+    _connect(false),
+    _active(false),
+    _complete(false)
 {
     TraceS(this) << "Create: " << url << endl;
 
@@ -60,10 +61,10 @@ ClientConnection::~ClientConnection()
 {
     TraceS(this) << "Destroy" << endl;
 
-    if (_readStream) {
-        delete _readStream;
-        _readStream = nullptr;
-    }
+    // if (_readStream) {
+    //     delete _readStream;
+    //     _readStream = nullptr;
+    // }
 }
 
 
@@ -94,41 +95,41 @@ void ClientConnection::send(http::Request& req)
 int ClientConnection::send(const char* data, std::size_t len, int flags)
 {
     connect();
-    if (Outgoing.active())
+    if (_active)
+        // Raw data will be pushed onto the Outgoing packet stream
         return Connection::send(data, len);
     else
         _outgoingBuffer.push_back(std::string(data, len));
     return len;
+    // return Connection::send(data, len, flags);
 }
 
 
-#if 0
-int ClientConnection::send(const std::string& buf, int flags) //, int flags
-{
-    connect();
-    if (Outgoing.active())
-        return Connection::send(buf);
-    else
-        _outgoingBuffer.push_back(buf);
-    return buf.length();
-}
-
-
-void ClientConnection::sendData(const char* buf, std::size_t len) //, int flags
-{
-    connect();
-    if (Outgoing.active())
-        Connection::sendData(buf, len);
-    else
-        _outgoingBuffer.push_back(std::string(buf, len));
-}
-
-
-http::Client* ClientConnection::client()
-{
-    return _client;
-}
-#endif
+// int ClientConnection::send(const std::string& buf, int flags) //, int flags
+// {
+//     connect();
+//     if (Outgoing.active())
+//         return Connection::send(buf);
+//     else
+//         _outgoingBuffer.push_back(buf);
+//     return buf.length();
+// }
+//
+//
+// void ClientConnection::sendData(const char* buf, std::size_t len) //, int flags
+// {
+//     connect();
+//     if (Outgoing.active())
+//         Connection::sendData(buf, len);
+//     else
+//         _outgoingBuffer.push_back(std::string(buf, len));
+// }
+//
+//
+// http::Client* ClientConnection::client()
+// {
+//     return _client;
+// }
 
 
 void ClientConnection::connect()
@@ -141,15 +142,15 @@ void ClientConnection::connect()
 }
 
 
-void ClientConnection::setReadStream(std::ostream* os)
-{
-    assert(!_connect);
-    if (_readStream) {
-        delete _readStream;
-    }
-
-    _readStream = os;
-}
+// void ClientConnection::setReadStream(std::ostream* os)
+// {
+//     assert(!_connect);
+//     if (_readStream) {
+//         delete _readStream;
+//     }
+//
+//     _readStream = os;
+// }
 
 
 http::Message* ClientConnection::incomingHeader()
@@ -171,13 +172,17 @@ void ClientConnection::onSocketConnect()
 {
     TraceS(this) << "On connect" << endl;
 
+    // Set the connection to active
+    _active = true;
+
     // Emit the connect signal so raw connections like
     // websockets can kick off the data flow
     Connect.emit(this);
 
     // Start the outgoing send stream if there are
     // any queued packets or adapters attached
-    Outgoing.start();
+    // startInputStream();
+    // startOutputStream();
 
     // Flush queued packets
     if (!_outgoingBuffer.empty()) {
@@ -191,7 +196,7 @@ void ClientConnection::onSocketConnect()
     // Note the first call to socket().send() will flush headers.
     // Note if there are stream adapters we wait for the stream to push
     // through any custom headers. See ChunkedAdapter::emitHeader
-    else if (Outgoing.numAdapters() == 0) {
+    if (Outgoing.numAdapters() == 0) {
         TraceS(this) << "On connect: Send header" << endl;
         sendHeader();
     }
@@ -212,19 +217,25 @@ void ClientConnection::onHeaders()
 
 void ClientConnection::onPayload(const MutableBuffer& buffer)
 {
-    //TraceS(this) << "On payload: " <<
-    // std::string(bufferCast<const char*>(buffer), buffer.size()) << endl;
+    TraceS(this) << "On payload: " << buffer.size() << endl;
 
     // Update download progress
     IncomingProgress.update(buffer.size());
 
-    if (_readStream) {
-        TraceS(this) << "Writing to stream: " << buffer.size() << endl;
-        _readStream->write(bufferCast<const char*>(buffer), buffer.size());
-        _readStream->flush();
+    if (Incoming.numAdapters() > 0 ||
+        Incoming.emitter.ndelegates() > 0) {
+        // if (!Incoming.active());
+        //     throw std::runtime_error("startInputStream() must be called");
+        Incoming.write(bufferCast<const char*>(buffer), buffer.size());
     }
 
-    //Payload.emit(this, buffer);
+    // if (_readStream) {
+    //     TraceS(this) << "Writing to stream: " << buffer.size() << endl;
+    //     _readStream->write(bufferCast<const char*>(buffer), buffer.size());
+    //     _readStream->flush();
+    // }
+
+    Payload.emit(this, buffer);
 }
 
 
