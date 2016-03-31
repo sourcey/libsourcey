@@ -103,9 +103,9 @@ int main(int argc, char** argv)
             scheduler.deserialize(json);
 
             // Print to cout
-            DebugL << "##### Sked Print Output:" << endl;
-            scheduler.print(cout);
-            DebugL << "##### Sked Print Output END" << endl;
+            // DebugL << "##### Sked Print Output:" << endl;
+            // scheduler.print(cout);
+            // DebugL << "##### Sked Print Output END" << endl;
 
             // Output scheduler tasks as JSON before run
             json::Value before;
@@ -141,9 +141,9 @@ int main(int argc, char** argv)
             scheduler.start(task);
 
             // Print to cout
-            DebugL << "##### Sked Print Output:" << endl;
-            scheduler.print(cout);
-            DebugL << "##### Sked Print Output END" << endl;
+            // DebugL << "##### Sked Print Output:" << endl;
+            // scheduler.print(cout);
+            // DebugL << "##### Sked Print Output END" << endl;
 
             // Wait for the task to complete
             scy::sleep(1000);

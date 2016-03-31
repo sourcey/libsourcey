@@ -39,7 +39,7 @@ int main(int argc, char** argv)
         integrityAttr->setKey(password);
         request.add(integrityAttr);
 
-        Buffer buf; //(1024);
+        Buffer buf(1024);
         request.write(buf);
 
         stun::Message response;
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
         request.add(addrAttr);
         DebugL << "Request Address: " << addrAttr->address() << endl;
 
-        Buffer buf; //(1024);
+        Buffer buf(1024);
         request.write(buf);
 
         stun::Message response;

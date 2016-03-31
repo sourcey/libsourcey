@@ -86,10 +86,10 @@ public:
 
     bool completed()
     {
-        // DebugL << "Check completed: "
-        //   << "gotOnline=" << gotOnline << ", "
-        //   << "gotRemotePresence=" << gotRemotePresence
-        //   << std::endl;
+        DebugL << "Check completed: "
+          << "gotOnline=" << gotOnline << ", "
+          << "gotRemotePresence=" << gotRemotePresence
+          << std::endl;
         return gotOnline && gotRemotePresence;
     }
 

@@ -8,14 +8,6 @@ if(BUILD_MODULES AND BUILD_MODULE_uv)
   set(INCLUDE_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/include")
   add_vendor_dependency(LIBUV libuv)
 
-  #if(WITH_LIBUV)
-  #  list(APPEND LibSourcey_BUILD_DEPENDENCIES libuv)
-  #  set(BUILD_TESTS OFF) # don't build tests
-  #  add_subdirectory(vendor/libuv)
-  #  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/libuv)
-  #  set(HAVE_LIBUV 1)
-  #endif()
-
   #include_dependency(LibUV) #REQUIRED
 
   define_sourcey_module(uv)

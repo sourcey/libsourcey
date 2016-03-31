@@ -151,7 +151,7 @@ void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state)
         }
         break;
 
-    case PacketStreamState::Resetting:
+    // case PacketStreamState::Resetting:
     case PacketStreamState::Stopping:
         if (isActive()) {
             TraceS(this) << "Uninitializing" << endl;
