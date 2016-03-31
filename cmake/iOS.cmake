@@ -12,7 +12,7 @@
 # CMAKE_IOS_DEVELOPER_ROOT = automatic(default) or /path/to/platform/Developer folder
 #   By default this location is automatcially chosen based on the IOS_PLATFORM value above.
 #   If set manually, it will override the default location and force the user of a particular Developer Platform
-#   Example: set (CMAKE_IOS_DEVELOPER_ROOT "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer")
+set (CMAKE_IOS_DEVELOPER_ROOT "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer")
 #
 # CMAKE_IOS_SDK_ROOT = automatic(default) or /path/to/platform/Developer/SDKs/SDK folder
 #   By default this location is automatcially chosen based on the CMAKE_IOS_DEVELOPER_ROOT value.
@@ -148,10 +148,8 @@ if(NOT CMAKE_CXX_COMPILER)
 	message(STATUS "Using C++ compiler ${CMAKE_CXX_COMPILER}")
 endif()
 
-#set(SDKROOT "iphoneos9.2")
-#set(CMAKE_OSX_SYSROOT ${SDKROOT})
-#set(IPHONEOS_DEPLOYMENT_TARGET "iOS 8.1")
-#set(CMAKE_OSX_DEPLOYMENT_TARGET ${IPHONEOS_DEPLOYMENT_TARGET})
+#execute_process(COMMAND xcrun --sdk iphoneos --show-sdk-version OUTPUT_VARIABLE iOSVersion)
+#set(iPhoneOSVersion "iphoneos${iOSVersion}")
 #SET_TARGET_PROPERTIES("LibSourcey" PROPERTIES XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "8.1")
 
 message(STATUS "== SDKROOT:" ${SDKROOT})

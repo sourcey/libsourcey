@@ -32,16 +32,13 @@ if(APPLE)
   if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
   endif()
-  set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+  if(!IOS)
+    set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+  endif()
 endif()
 
 if(IOS)
   find_package(Threads REQUIRED)
-
-  # TODO: Make portable by specifiying on command line
-  set(SDKROOT "iphoneos9.2")
-  set(CMAKE_OSX_SYSROOT ${SDKROOT})
-  set(IPHONEOS_DEPLOYMENT_TARGET "8.1")
 endif()
 
 # Tell CMake where to locate our .cmake files
@@ -409,4 +406,11 @@ status("")
 # Warn in the case of in-source build
 if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
     message(WARNING "The source directory is the same as binary directory. \"make clean\" may damage the source tree")
+endif()
+
+# This is a proper place for make iOS build happy. it cannot be moved to the top
+if(IOS)
+    set(SDKROOT "iphoneos")
+#    set(SDKROOT ${iPhoneOSVersion})
+    set(CMAKE_OSX_SYSROOT ${SDKROOT})
 endif()

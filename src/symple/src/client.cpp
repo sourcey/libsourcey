@@ -242,7 +242,7 @@ void Client::onAnnounceState(void* sender, TransactionState& state, const Transa
     switch (state.id()) {
     case TransactionState::Success:
         try {
-            json::Value data = transaction->response().json(); //[(unsigned)0];
+            json::Value data = transaction->response().json(); //[(unsigned)0];			
             _announceStatus = data["status"].asInt();
 
             if (_announceStatus != 200)

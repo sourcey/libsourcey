@@ -179,8 +179,8 @@ std::size_t Packet::read(const ConstBuffer& buf)
                 }
                 else {
                     assert(json[0].isString());
-                    _event = json[0].asString();
-                    _message = json::stringify(json[1], true);
+                _event = json[0].asString();
+                _message = json::stringify(json[1], true);
 
                 }
             }
