@@ -125,6 +125,7 @@ void assertCanSend(Client* client, Message& m)
         assert(0);
         throw std::runtime_error("Cannot send invalid message.");
     }
+    
 #ifdef _DEBUG
     TraceL << "Sending message: " << json::stringify(m, true) << endl;
 #endif
@@ -242,7 +243,7 @@ void Client::onAnnounceState(void* sender, TransactionState& state, const Transa
     switch (state.id()) {
     case TransactionState::Success:
         try {
-            json::Value data = transaction->response().json(); //[(unsigned)0];			
+            json::Value data = transaction->response().json(); //[(unsigned)0];
             _announceStatus = data["status"].asInt();
 
             if (_announceStatus != 200)

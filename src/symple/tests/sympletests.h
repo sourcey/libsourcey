@@ -26,21 +26,6 @@
 #include "scy/logger.h"
 #include "scy/symple/client.h"
 #include "scy/net/sslmanager.h"
-// #include "scy/util.h"
-// #include "scy/idler.h"
-// #include "scy/signal.h"
-// #include "scy/buffer.h"
-// #include "scy/platform.h"
-// #include "scy/collection.h"
-// #include "scy/application.h"
-// #include "scy/packetstream.h"
-// #include "scy/packetqueue.h"
-// #include "scy/sharedlibrary.h"
-// #include "scy/filesystem.h"
-// #include "scy/process.h"
-// #include "scy/timer.h"
-// #include "scy/ipc.h"
-// #include "scy/util.h"
 
 using std::cout;
 using std::cerr;
@@ -59,6 +44,7 @@ class TestClient
 public:
     bool gotOnline;
     bool gotRemotePresence;
+    std::string user;
 
 #if USE_SSL
     smpl::SSLClient client;
@@ -70,13 +56,13 @@ public:
         gotOnline(false),
         gotRemotePresence(false)
     {
+        user = options.user;
         client.options() = options;
         // client += messageDelegate(this, &TestClient::onRecvMessage);
         client += presenceDelegate(this, &TestClient::onRecvPresence);
         client.Announce += delegate(this, &TestClient::onClientAnnounce);
         client.StateChange += delegate(this, &TestClient::onClientStateChange);
         client.CreatePresence += delegate(this, &TestClient::onCreatePresence);
-        client.connect();
     }
 
     ~TestClient()
@@ -84,29 +70,59 @@ public:
         client.close();
     }
 
+    void connect()
+    {
+        InfoL << user << ": connect" << std::endl;
+        client.connect();
+    }
+
     bool completed()
     {
-        DebugL << "Check completed: "
+        InfoL << user << ": completed: "
+          // << "user=" << client.options().user << ", "
+          // << "name=" << client.options().name << ", "
           << "gotOnline=" << gotOnline << ", "
           << "gotRemotePresence=" << gotRemotePresence
           << std::endl;
         return gotOnline && gotRemotePresence;
     }
 
+    void check()
+    {
+        InfoL << user << ": check: "
+          // << "user=" << client.options().user << ", "
+          // << "name=" << client.options().name << ", "
+          << "gotOnline=" << gotOnline << ", "
+          << "gotRemotePresence=" << gotRemotePresence
+          << std::endl;
+        expect(gotOnline);
+        expect(gotRemotePresence);
+    }
+
     // void onRecvMessage(void* sender, smpl::Message& message)
     // {
-    //     DebugL << "############################### On message: " << message.toStyledString() << endl;
+    //     InfoL << user << ": ############################### On message: " << message.toStyledString() << endl;
     //
     //     // Handle incoming Symple messages here
     // }
 
     void onRecvPresence(void* sender, smpl::Presence& presence)
     {
-        DebugL << "On presence: " << presence.toStyledString() << endl;
+        InfoL << user << ": On presence: " << presence.toStyledString() << endl;
 
         expect(presence.data("version").asString() == "1.0.1");
 
         // Handle incoming Symple messages here
+        if (user == "l") {
+            expect(presence.from().user == "r");
+        }
+        else if (user == "r") {
+            expect(presence.from().user == "l");
+        }
+        else {
+            expect(!"user should be 'l' or 'r'");
+        }
+
         gotRemotePresence = true;
     }
 
@@ -117,7 +133,7 @@ public:
 
     void onClientStateChange(sockio::ClientState& state, const sockio::ClientState& oldState)
     {
-        DebugL << "Client state changed: " << state << ": " << client.ws().socket->address() << endl;
+        InfoL << user << ": Client state changed: " << state << ": " << client.ws().socket->address() << endl;
 
         switch (state.id()) {
         case sockio::ClientState::Connecting:
@@ -145,7 +161,7 @@ public:
 
     void onCreatePresence(smpl::Peer& peer)
     {
-        DebugL << "Updating Client Data" << endl;
+        InfoL << user << ": Updating Client Data" << endl;
 
         // Update the peer object to be broadcast with presence.
         // Any arbitrary data can be broadcast with presence.

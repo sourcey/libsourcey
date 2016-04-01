@@ -17,7 +17,7 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
     test::initialize();
 
 #if USE_SSL
@@ -56,8 +56,8 @@ int main(int argc, char** argv)
         smpl::Client::Options loptions;
         loptions.host = SERVER_HOST;
         loptions.port = SERVER_PORT;
-        loptions.user = "george";
-        loptions.name = "George";
+        loptions.user = "l";
+        loptions.name = "Left";
 
         // NOTE: The server should allow anonymous
         // authentication for this test.
@@ -66,18 +66,31 @@ int main(int argc, char** argv)
         smpl::Client::Options roptions;
         roptions.host = SERVER_HOST;
         roptions.port = SERVER_PORT;
-        roptions.user = "ringo";
-        roptions.name = "Ringo";
+        roptions.user = "r";
+        roptions.name = "Right";
 
-        static TestClient lclient(roptions);
-        static TestClient rclient(roptions);
+        TestClient lclient(loptions);
+        TestClient rclient(roptions);
 
-        while(!lclient.completed() && !rclient.completed()) {
+        lclient.connect();
+        rclient.connect();
+
+        while(!lclient.completed() || !rclient.completed()) {
             // DebugL << "waiting for test completion" << std::endl;
             uv::runDefaultLoop(UV_RUN_ONCE);
 
-            // TODO: check client failed status
+            // // Connect the rclient when lclient is online
+            // if (lclient.client.isOnline() &&
+            //     rclient.client.stateEquals(sockio::ClientState::Closed))
+            //     rclient.connect();
         }
+
+        // TODO: check client failed status
+        lclient.check();
+        rclient.check();
+
+        // lclient.close();
+        // rclient.close();
     });
 
     // TODO:
