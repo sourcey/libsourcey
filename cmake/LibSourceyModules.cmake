@@ -428,9 +428,9 @@ macro(define_sourcey_dependency name)
   # message("${name}: DEBUG_POSTFIX: ${name}_DEBUG_POSTFIX")
   # message("${name}: CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
-  #set_target_properties(${name} PROPERTIES
-  #  OUTPUT_NAME ${${name}_OUTPUT_NAME}
-  #  DEBUG_POSTFIX ${${name}_DEBUG_POSTFIX})
+  # set_target_properties(${name} PROPERTIES
+  #   OUTPUT_NAME ${${name}_OUTPUT_NAME}
+  #   DEBUG_POSTFIX ${${name}_DEBUG_POSTFIX})
 
   if (NOT INSTALL_DESTINATION)
     set(INSTALL_DESTINATION ${LibSourcey_VENDOR_INSTALL_DIR}/lib)
@@ -440,4 +440,6 @@ macro(define_sourcey_dependency name)
     ARCHIVE DESTINATION ${INSTALL_DESTINATION} COMPONENT main
     LIBRARY DESTINATION ${INSTALL_DESTINATION} COMPONENT main)
 
+  # install header include files
+  install(FILES ${${name}_HEADER_FILES} DESTINATION ${LibSourcey_VENDOR_INSTALL_DIR}/include)
 endmacro()

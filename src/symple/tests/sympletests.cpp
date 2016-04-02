@@ -58,6 +58,7 @@ int main(int argc, char** argv)
         loptions.port = SERVER_PORT;
         loptions.user = "l";
         loptions.name = "Left";
+        // loptions.token = "2NuMmyXw2YDuQfyPCKDO2Qtta";
 
         // NOTE: The server should allow anonymous
         // authentication for this test.
@@ -68,6 +69,7 @@ int main(int argc, char** argv)
         roptions.port = SERVER_PORT;
         roptions.user = "r";
         roptions.name = "Right";
+        // roptions.token = "2NuMmyXw2YDuQfyPCKDO2Qtta";
 
         TestClient lclient(loptions);
         TestClient rclient(roptions);
