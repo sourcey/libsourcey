@@ -35,7 +35,7 @@
 
 
 // Include build config
-#include "scyconfig.h"
+#include "libsourcey.h"
 
 
 //
@@ -87,7 +87,7 @@
 
 
 #ifdef WIN32
-# ifndef SCY_SHARED_LIBRARY // scyconfig.h
+# ifndef SCY_SHARED_LIBRARY // libsourcey.h
 #   define SCY_EXTERN __declspec(dllexport)
 # else
 #   define SCY_EXTERN __declspec(dllimport)

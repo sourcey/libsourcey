@@ -98,7 +98,7 @@ macro(define_sourcey_module name)
   install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
     DESTINATION "${LibSourcey_INSTALL_DIR}")
 
-  # Set HAVE_SOURCEY_XXX at parent scope for use in scyconfig.h
+  # Set HAVE_SOURCEY_XXX at parent scope for use in libsourcey.h
   set(HAVE_SOURCEY_${name} ON PARENT_SCOPE)
 
   # Build samples

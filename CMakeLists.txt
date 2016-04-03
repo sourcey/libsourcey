@@ -83,6 +83,7 @@ set(LibSourcey_BUILD_APPLICATIONS     "" CACHE INTERNAL "Applications to build" 
 set(LibSourcey_DIR ${CMAKE_SOURCE_DIR})
 set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
+
 set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 set(LibSourcey_SHARED_INSTALL_DIR ${LibSourcey_INSTALL_DIR}/share/scy)
 set(LibSourcey_VENDOR_INSTALL_DIR ${LibSourcey_SHARED_INSTALL_DIR}/vendor)
@@ -241,6 +242,7 @@ endif()
 
 list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
   ${LibSourcey_SOURCE_DIR}/archo/vendor/zlib
+  ${LibSourcey_BUILD_DIR}/src/archo/vendor/zlib
   ${LibSourcey_SOURCE_DIR}/archo/vendor/minizip
   ${LibSourcey_SOURCE_DIR}/media/vendor/rtaudio
   ${LibSourcey_SOURCE_DIR}/media/vendor/rtaudio/include
@@ -259,7 +261,7 @@ if(BUILD_MODULES OR BUILD_APPLICATIONS)
   subdirlist(subdirs ${LibSourcey_SOURCE_DIR})
   foreach(name ${subdirs})
     # This variable is so modules can set HAVE_LibSourcey_XXX for our
-    # scyconfig.h inside the child scope. See include_sourcey_modules()
+    # libsourcey.h inside the child scope. See include_sourcey_modules()
     # TODO: Need to refactor since modules may be nested.
     set(HAVE_LibSourcey_${name} 0)
     set(dir "${LibSourcey_SOURCE_DIR}/${name}")
@@ -278,25 +280,25 @@ if(LibSourcey_BUILD_DEPENDENCIES)
 endif()
 
 # ----------------------------------------------------------------------------
-# Build our scyconfig.h file
+# Build our libsourcey.h file
 #
-# A directory will be created for each platform so the "scyconfig.h" file is
+# A directory will be created for each platform so the "libsourcey.h" file is
 # not overwritten if CMake generates code in the same path.
 # ----------------------------------------------------------------------------
 add_definitions(-DHAVE_CONFIG_H)
 
 # Variables for LibSourceyConfig.h.cmake
 set(PACKAGE "LibSourcey")
-set(PACKAGE_BUGREPORT "https://github.com/sourcey/LibSourcey/issues")
+set(PACKAGE_BUGREPORT "https://github.com/sourcey/libsourcey/issues")
 set(PACKAGE_NAME "LibSourcey")
 set(PACKAGE_STRING "${PACKAGE} ${LibSourcey_VERSION}")
 set(PACKAGE_TARNAME "${PACKAGE}")
 set(PACKAGE_VERSION "${LibSourcey_VERSION}")
 
-set(LibSourcey_CONFIG_FILE ${LibSourcey_BUILD_DIR}/scyconfig.h)
-status("Parsing 'LibSourceyConfig.h.cmake'")
+set(LibSourcey_CONFIG_FILE ${LibSourcey_BUILD_DIR}/libsourcey.h)
+status("Parsing 'libsourcey.h.cmake'")
 configure_file(
-  ${CMAKE_SOURCE_DIR}/cmake/LibSourceyConfig.h.cmake
+  ${CMAKE_SOURCE_DIR}/cmake/libsourcey.h.cmake
   ${LibSourcey_CONFIG_FILE})
 install(FILES ${LibSourcey_CONFIG_FILE} DESTINATION ${LibSourcey_INSTALL_DIR}/include)
 
