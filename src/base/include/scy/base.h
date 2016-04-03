@@ -34,11 +34,13 @@
 #define SCY_VERSION          SCY_AUX_STR(SCY_MAJOR_VERSION) "." SCY_AUX_STR(SCY_MINOR_VERSION) "." SCY_AUX_STR(SCY_PATCH_VERSION)
 
 
-//
-/// Cross platform configuration
-//
-
+// Include build config
 #include "scyconfig.h"
+
+
+//
+/// Platform and compiler definitions
+//
 
 #ifdef _WIN32
     // Windows (x64 and x86)
@@ -64,22 +66,28 @@
     #define LINUX
     #endif
 #endif
-#if __GNUC__
-    // GCC specific
-    #ifndef GNUC
-    #define GNUC
-    #endif
-#endif
 #if __APPLE__
     // Mac OS
     #ifndef APPLE
     #define APPLE
     #endif
 #endif
+#if __GNUC__
+    // GCC compiler
+    #ifndef GNUC
+    #define GNUC
+    #endif
+#endif
+#if defined(__MINGW32__) || defined(__MINGW64__)
+    // MinGW
+    #ifndef MINGW
+    #define MINGW
+    #endif
+#endif
 
 
 #ifdef WIN32
-# ifndef SCY_SHARED_LIBRARY
+# ifndef SCY_SHARED_LIBRARY // scyconfig.h
 #   define SCY_EXTERN __declspec(dllexport)
 # else
 #   define SCY_EXTERN __declspec(dllimport)

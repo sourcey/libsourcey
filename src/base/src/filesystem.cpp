@@ -24,7 +24,7 @@
 #include <sstream>
 #include <fstream>
 #include <memory>
-#include <algorithm> 
+#include <algorithm>
 #if defined(WIN32) && defined(SCY_UNICODE)
 #include <locale>
 #include <codecvt>
@@ -34,7 +34,7 @@
 namespace scy {
 namespace fs {
 
-    
+
 static const char* separatorWin = "\\";
 static const char* separatorUnix = "/";
 #ifdef WIN32
@@ -59,7 +59,7 @@ std::string filename(const std::string& path)
 std::string dirname(const std::string& path)
 {
     std::size_t dirp = path.find_last_of(fs::sepPattern);
-    if (dirp == std::string::npos) return "";    
+    if (dirp == std::string::npos) return "";
     if (path.find(".", dirp) == std::string::npos) return path;
     return path.substr(0, dirp);
 }
@@ -68,7 +68,7 @@ std::string dirname(const std::string& path)
 std::string basename(const std::string& path)
 {
     std::size_t dotp = path.find_last_of(".");
-    if (dotp == std::string::npos) 
+    if (dotp == std::string::npos)
         return path;
 
     std::size_t dirp = path.find_last_of(fs::sepPattern);
@@ -82,7 +82,7 @@ std::string basename(const std::string& path)
 std::string extname(const std::string& path, bool includeDot)
 {
     std::size_t dotp = path.find_last_of(".");
-    if (dotp == std::string::npos) 
+    if (dotp == std::string::npos)
         return "";
 
     // Ensure the dot was not part of the pathname
@@ -95,8 +95,8 @@ std::string extname(const std::string& path, bool includeDot)
 
 
 bool exists(const std::string& path)
-{    
-    // Normalize is needed to ensure no 
+{
+    // Normalize is needed to ensure no
     // trailing slash for directories or
     // stat fails to recognize validity.
     // TODO: Do we need transcode here?
@@ -146,7 +146,7 @@ std::int64_t filesize(const std::string& path)
 
 
 namespace internal {
-        
+
     struct FSReq
     {
         FSReq() {}
@@ -163,20 +163,20 @@ namespace internal {
     if (err < 0)                                                 \
         uv::throwError(std::string("Filesystem error: ") +        \
             #func + std::string(" failed"), err);                \
-    
+
 } // namespace internal
 
 
 void readdir(const std::string& path, std::vector<std::string>& res)
-{   
+{
     internal::FSapi(scandir, path.c_str(), 0)
-        
+
     char *namebuf = static_cast<char*>(wrap.req.ptr);
-    int nnames = wrap.req.result;                       
-    for (int i = 0; i < nnames; i++) 
+    int nnames = wrap.req.result;
+    for (int i = 0; i < nnames; i++)
     {
         std::string name(namebuf);
-        res.push_back(name);                            
+        res.push_back(name);
 #ifdef _DEBUG
         namebuf += name.length();
         assert(*namebuf == '\0');
@@ -204,8 +204,8 @@ void mkdirr(const std::string& path, int mode)
     {
         if (level.empty()) continue;
         current += level;
-        
-#ifdef WIN32        
+
+#ifdef WIN32
         if (level.at(level.length() - 1) == ':') {
             current += fs::separator;
             continue; // skip drive letter
@@ -214,7 +214,7 @@ void mkdirr(const std::string& path, int mode)
         // create current level
         if (!fs::exists(current))
             fs::mkdir(current.c_str(), mode); // create or throw
-                
+
         current += fs::separator;
     }
 }
@@ -239,7 +239,7 @@ void rename(const std::string& path, const std::string& target)
 
 
 void trimslash(std::string& path)
-{    
+{
     std::size_t dirp = path.find_last_of(sepPattern);
     if (dirp == path.length() - 1)
         path.resize(dirp);
@@ -247,15 +247,15 @@ void trimslash(std::string& path)
 
 
 std::string normalize(const std::string& path)
-{    
-    std::string s(util::replace(path, 
+{
+    std::string s(util::replace(path,
 #ifdef WIN32
         separatorUnix, separatorWin
 #else
         separatorWin, separatorUnix
 #endif
     ));
-        
+
     // Trim the trailing slash for stat compatability
     trimslash(s);
     return s;
@@ -263,8 +263,8 @@ std::string normalize(const std::string& path)
 
 
 std::string transcode(const std::string& path)
-{    
-#if defined(WIN32) && defined(SCY_UNICODE)
+{
+#if defined(_MSC_VER) && defined(SCY_UNICODE)
     std::wstring_convert<std::codecvt<char16_t,char,std::mbstate_t>,char16_t> convert;
     std::u16string u16s = convert.from_bytes(path);
     std::wstring uniPath(u16s.begin(), u16s.end()); // copy data across, w_char is 16 bit on windows so this should be OK
@@ -296,13 +296,13 @@ void addnode(std::string& path, const std::string& node)
 
 
 bool savefile(const std::string& path, const char* data, std::size_t size, bool whiny)
-{            
+{
     std::ofstream ofs(path, std::ios_base::binary | std::ios_base::out);
     if (ofs.is_open())
         ofs.write(data, size);
     else {
         if (whiny)
-            throw std::runtime_error("Cannot save file: " + path);    
+            throw std::runtime_error("Cannot save file: " + path);
         return false;
     }
     return true;

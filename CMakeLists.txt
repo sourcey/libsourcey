@@ -23,24 +23,6 @@ if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
   add_definitions(/W3)
 endif()
 
-if(APPLE)
-  # Remove the “MACOSX_RPATH is not specified” warning
-  # set(CMAKE_MACOSX_RPATH 1)
-
-  # Silence CMake warnings by adopting modern behavior for MACOSX_RPATH on newer
-  # versions of CMake
-  if(POLICY CMP0042)
-    cmake_policy(SET CMP0042 NEW)
-  endif()
-  if(!IOS)
-    set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
-  endif()
-endif()
-
-if(IOS)
-  find_package(Threads REQUIRED)
-endif()
-
 # Tell CMake where to locate our .cmake files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
@@ -128,6 +110,26 @@ endif()
 # ----------------------------------------------------------------------------
 if(MSVC)
   include(LibSourceyCRTLinkage REQUIRED)
+endif()
+
+# ----------------------------------------------------------------------------
+# Apple and iOS build options
+# ----------------------------------------------------------------------------
+if(APPLE)
+  # Remove the “MACOSX_RPATH is not specified” warning
+  # set(CMAKE_MACOSX_RPATH 1)
+
+  # Silence CMake warnings by adopting modern behavior for MACOSX_RPATH on newer
+  # versions of CMake
+  if(POLICY CMP0042)
+    cmake_policy(SET CMP0042 NEW)
+  endif()
+  if(IOS)
+    find_package(Threads REQUIRED)
+  endif()
+  if(!IOS)
+    set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+  endif()
 endif()
 
 # ----------------------------------------------------------------------------
