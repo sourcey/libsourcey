@@ -287,7 +287,7 @@ endif()
 # ----------------------------------------------------------------------------
 add_definitions(-DHAVE_CONFIG_H)
 
-# Variables for LibSourceyConfig.h.cmake
+# Variables for libsourcey.h.cmake
 set(PACKAGE "LibSourcey")
 set(PACKAGE_BUGREPORT "https://github.com/sourcey/libsourcey/issues")
 set(PACKAGE_NAME "LibSourcey")
@@ -401,9 +401,9 @@ status("    Use wxWidgets:"     HAVE_WXWIDGETS       THEN YES ELSE NO)
 
 # Auxiliary
 status("")
-status("    Install path:                ${CMAKE_INSTALL_PREFIX}")
+status("    Install path:                ${LibSourcey_INSTALL_DIR}")
 status("")
-status("    LibSourceyConfig.h is in:    ${LibSourcey_CONFIG_FILE_INCLUDE_DIR}")
+status("    libsourcey.h is in:          ${LibSourcey_INSTALL_DIR}/include/libsourcey.h")
 status("-----------------------------------------------------------------")
 status("")
 
