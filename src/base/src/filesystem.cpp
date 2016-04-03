@@ -25,7 +25,7 @@
 #include <fstream>
 #include <memory>
 #include <algorithm>
-#if defined(WIN32) && defined(SCY_UNICODE)
+#if defined(_MSC_VER) && defined(SCY_UNICODE)
 #include <locale>
 #include <codecvt>
 #endif
