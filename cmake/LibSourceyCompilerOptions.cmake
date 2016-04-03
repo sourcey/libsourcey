@@ -28,8 +28,8 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -Wno-long-long")
   endif()
 
-  # Using c++11
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")	
+  # Using c++11 (CMAKE_CXX_FLAGS only, not for CMAKE_C_FLAGS)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
   # We need pthread's
   if(UNIX AND NOT ANDROID)
@@ -38,7 +38,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 
   #if(BUILD_SHARED_LIBS)
   #  set(LibSourcey_EXTRA_C_FLAGS "-shared ${LibSourcey_EXTRA_C_FLAGS}")
-  #else()    
+  #else()
   #  set(LibSourcey_EXTRA_C_FLAGS "-static ${LibSourcey_EXTRA_C_FLAGS}")
   #endif()
 
@@ -163,18 +163,18 @@ if(MSVC)
       set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} /arch:SSE2")
     endif()
   endif()
-  
+
   if(ENABLE_SSE3)
     set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} /arch:SSE3")
   endif()
   if(ENABLE_SSE4_1)
     set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} /arch:SSE4.1")
   endif()
-  
+
   if(ENABLE_SSE OR ENABLE_SSE2 OR ENABLE_SSE3 OR ENABLE_SSE4_1)
     set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} /Oi")
   endif()
-  
+
   if(X86 OR X86_64)
     if(CMAKE_SIZEOF_VOID_P EQUAL 4 AND ENABLE_SSE2)
       set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} /fp:fast")# !! important - be on the same wave with x64 compilers
@@ -182,7 +182,7 @@ if(MSVC)
   endif()
 
   # Temporary workaround for "error LNK2026: module unsafe for SAFESEH image"
-  # when compiling with certain externally compiled libraries with VS2012, 
+  # when compiling with certain externally compiled libraries with VS2012,
   # such as http://ffmpeg.zeranoe.com/builds/
   # This disables safe exception handling by default.
   SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
@@ -206,7 +206,7 @@ set(LibSourcey_EXTRA_EXE_LINKER_FLAGS "${LibSourcey_EXTRA_EXE_LINKER_FLAGS}" CAC
 set(LibSourcey_EXTRA_EXE_LINKER_FLAGS_RELEASE "${LibSourcey_EXTRA_EXE_LINKER_FLAGS_RELEASE}" CACHE INTERNAL "Extra linker flags for Release build")
 set(LibSourcey_EXTRA_EXE_LINKER_FLAGS_DEBUG "${LibSourcey_EXTRA_EXE_LINKER_FLAGS_DEBUG}" CACHE INTERNAL "Extra linker flags for Debug build")
 
-#combine all "extra" options
+# Combine all "extra" options
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LibSourcey_EXTRA_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LibSourcey_EXTRA_C_FLAGS}")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  ${LibSourcey_EXTRA_C_FLAGS_RELEASE}")
@@ -225,12 +225,12 @@ if(MSVC)
   string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
   string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
   string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
-  
+
   # allow extern "C" functions throw exceptions
   foreach(flags CMAKE_C_FLAGS CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELEASE CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG)
     string(REPLACE "/EHsc-" "/EHs" ${flags} "${${flags}}")
     string(REPLACE "/EHsc" "/EHs" ${flags} "${${flags}}")
-    
+
     string(REPLACE "/Zm1000" "" ${flags} "${${flags}}")
   endforeach()
 
