@@ -60,7 +60,7 @@ public:
 
     void init(http_parser_type type);
 
-    bool parse(const char* data, std::size_t length); //, bool expectComplete = false
+    std::size_t parse(const char* data, std::size_t length); //, bool expectComplete = false
         // Feed data read from socket into the http_parser.
         //
         // Returns true of the message is complete, false if incomplete.

@@ -223,14 +223,14 @@ public:
     /// Client side
 
     virtual void sendClientRequest();
-    virtual void handleClientResponse(const MutableBuffer& buffer);
+    virtual void handleClientResponse(const MutableBuffer& buffer, const net::Address& peerAddr);
     //virtual void prepareClientRequest(http::Request& request);
     //virtual void verifyClientResponse(http::Response& response);
 
     //
     /// Server side
 
-    virtual void handleServerRequest(const MutableBuffer& buffer);
+    virtual void handleServerRequest(const MutableBuffer& buffer, const net::Address& peerAddr);
     //virtual void sendConnectResponse();
     //virtual void verifyServerRequest(http::Request& request);
     //virtual void prepareClientResponse(http::Response& response);

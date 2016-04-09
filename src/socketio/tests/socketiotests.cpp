@@ -11,16 +11,6 @@ using namespace scy::net;
 using namespace scy::util;
 
 
-/*
-// Detect Memory Leaks
-#ifdef _DEBUG
-#include "MemLeakDetect/MemLeakDetect.h"
-#include "MemLeakDetect/MemLeakDetect.cpp"
-CMemLeakDetect memLeakDetect;
-#endif
-*/
-
-
 namespace scy {
 namespace sockio {
 

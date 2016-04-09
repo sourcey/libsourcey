@@ -133,11 +133,14 @@ void WebSocketAdapter::sendClientRequest()
 }
 
 
-void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer)
+void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer, const net::Address& peerAddr)
 {
     TraceS(this) << "Client response: " << buffer.str() << endl;
+
+    auto data = bufferCast<char*>(buffer);
     http::Parser parser(&_response);
-    if (!parser.parse(bufferCast<char*>(buffer), buffer.size())) {
+    std::size_t nparsed = parser.parse(data, buffer.size());
+    if (nparsed == 0) {
         throw std::runtime_error("WebSocket error: Cannot parse response: Incomplete HTTP message");
     }
 
@@ -150,6 +153,13 @@ void WebSocketAdapter::handleClientResponse(const MutableBuffer& buffer)
         TraceS(this) << "Handshake success" << endl;
         onHandshakeComplete();
     }
+
+    // If there is remaining data in the packet (packets may be joined) then
+    // it back through the socket recv method.
+    std::size_t remaining = buffer.size() - nparsed;
+    if (remaining) {
+        onSocketRecv(MutableBuffer(&data[nparsed], remaining), peerAddr);
+    }
 }
 
 
@@ -160,7 +170,7 @@ void WebSocketAdapter::onHandshakeComplete()
 }
 
 
-void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer)
+void WebSocketAdapter::handleServerRequest(const MutableBuffer& buffer, const net::Address& peerAddr)
 {
     TraceS(this) << "Server request: " << buffer.str() << endl;
 
@@ -274,9 +284,9 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
     else {
         try {
             if (framer.mode() == ws::ClientSide)
-                handleClientResponse(buffer);
+                handleClientResponse(buffer, peerAddress);
             else
-                handleServerRequest(buffer);
+                handleServerRequest(buffer, peerAddress);
         }
         catch (std::exception& exc) {
             WarnL << "Read error: " << exc.what() << endl;

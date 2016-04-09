@@ -90,10 +90,10 @@ void Parser::init(http_parser_type type)
 }
 
 
-bool Parser::parse(const char* data, std::size_t len)
+std::size_t Parser::parse(const char* data, std::size_t len)
 {
     // TraceS(this) << "Parse: " << len << endl;
-    TraceS(this) << "Parse: " << std::string(data, len) << endl;
+    TraceS(this) << "Parse: " << len << ": "<< std::string(data, len) << endl;
 
     assert(!complete());
     assert(_parser.data == this);
@@ -104,11 +104,12 @@ bool Parser::parse(const char* data, std::size_t len)
 
     // Parse and handle errors
     std::size_t nparsed = ::http_parser_execute(&_parser, &_settings, data, len);
-    if (nparsed != len && !_parser.upgrade) { //_parser.http_errno != HPE_OK
+    if (_parser.http_errno != HPE_OK) { // && !_parser.upgrade
+        TraceS(this) << "Parse: nparsed=" << nparsed << endl;
         setParserError();
     }
 
-    return complete();
+    return nparsed; // complete();
 }
 
 

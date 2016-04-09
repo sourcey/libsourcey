@@ -125,7 +125,7 @@ void assertCanSend(Client* client, Message& m)
         assert(0);
         throw std::runtime_error("Cannot send invalid message.");
     }
-    
+
 #ifdef _DEBUG
     TraceL << "Sending message: " << json::stringify(m, true) << endl;
 #endif
@@ -283,6 +283,8 @@ void Client::onAnnounceState(void* sender, TransactionState& state, const Transa
 
 void Client::onOnline()
 {
+    // TraceL << "On online" << endl;
+
     // NOTE: Do not transition to Online state until the Announce
     // callback is successful
     if (!_announceStatus)
