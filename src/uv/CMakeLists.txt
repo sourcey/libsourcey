@@ -8,6 +8,7 @@ if(BUILD_MODULES AND BUILD_MODULE_uv)
   set(INCLUDE_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/include")
   add_vendor_dependency(LIBUV libuv)
 
+  include_directories(../base/include)
   #include_dependency(LibUV) #REQUIRED
 
   define_sourcey_module(uv)
