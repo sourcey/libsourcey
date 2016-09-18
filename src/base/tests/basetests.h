@@ -32,6 +32,7 @@
 #include "scy/application.h"
 #include "scy/packetstream.h"
 #include "scy/packetqueue.h"
+#include "scy/packetio.h"
 #include "scy/sharedlibrary.h"
 #include "scy/filesystem.h"
 #include "scy/process.h"
@@ -336,6 +337,45 @@ class PacketStreamTest: public Test
         stream.close();
 
         expect(numPackets > 0);
+    }
+};
+
+static std::string RANDOM_CONTENT = "r@ndom";
+
+struct PacketStreamIOTest: public Test
+{
+
+    int numPackets;
+
+    PacketStreamIOTest()
+    {
+        fs::savefile("input.txt", RANDOM_CONTENT.c_str(), RANDOM_CONTENT.length(), true);
+    }
+
+    ~PacketStreamIOTest()
+    {
+        fs::unlink("input.txt");
+        fs::unlink("output.txt");
+    }
+
+    void run()
+    {
+        numPackets = 0;
+        PacketStream stream;
+        stream.attachSource(new ThreadedStreamReader(new std::ifstream("input.txt")), true, true);
+        stream.attach(new StreamWriter(new std::ofstream("output.txt")), 1, true);
+        stream.start();
+
+        // Run the thread for 100ms
+        scy::sleep(100);
+
+        stream.close();
+
+        // Verify result
+        std::string result;
+        std::ifstream ofile("output.txt");
+        util::copyToString(ofile, result);
+        expect(result == RANDOM_CONTENT);
     }
 };
 

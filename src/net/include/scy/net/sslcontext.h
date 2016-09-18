@@ -148,19 +148,19 @@ public:
     ~SSLContext();
         // Destroys the Context.
 
-    // void useCertificate(const crypto::X509Certificate& certificate);
-    //     // Sets the certificate to be used by the Context.
-    //     //
-    //     // To set-up a complete certificate chain, it might be
-    //     // necessary to call addChainCertificate() to specify
-    //     // additional certificates.
-    //     //
-    //     // Note that useCertificate() must always be called before
-    //     // usePrivateKey().
-    //
-    // void addChainCertificate(const crypto::X509Certificate& certificate);
-    //     // Adds a certificate for certificate chain validation.
-    //
+    void useCertificate(const crypto::X509Certificate& certificate);
+        // Sets the certificate to be used by the Context.
+        //
+        // To set-up a complete certificate chain, it might be
+        // necessary to call addChainCertificate() to specify
+        // additional certificates.
+        //
+        // Note that useCertificate() must always be called before
+        // usePrivateKey().
+
+    void addChainCertificate(const crypto::X509Certificate& certificate);
+        // Adds a certificate for certificate chain validation.
+
     // void usePrivateKey(const crypto::RSAKey& key);
     //     // Sets the private key to be used by the Context.
     //     //
@@ -170,10 +170,10 @@ public:
     //     // Note: If the private key is protected by a passphrase, a PrivateKeyPassphraseHandler
     //     // must have been setup with the SSLManager, or the SSLManager's PrivateKeyPassphraseRequired
     //     // event must be handled.
-    //
-    // void addVerificationCertificate(const crypto::X509Certificate& certificate);
-    //     // Adds the given certificate to the list of trusted certificates
-    //     // that will be used for verification.
+
+    void addVerificationCertificate(const crypto::X509Certificate& certificate);
+        // Adds the given certificate to the list of trusted certificates
+        // that will be used for verification.
 
     SSL_CTX* sslContext() const;
         // Returns the underlying OpenSSL SSL Context object.

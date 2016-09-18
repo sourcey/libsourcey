@@ -16,27 +16,88 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifndef SCY_PACKET_IO_H
+#define SCY_PACKET_IO_H
 
-#ifndef SCY_OutputStreamWriter_H
-#define SCY_OutputStreamWriter_H
 
-
-#include "scy/packetstream.h"
-#include <fstream>
+#include "scy/packetsignal.h"
 
 
 namespace scy {
 
 
-class OutputStreamWriter: public PacketProcessor
+class ThreadedStreamReader: public PacketSource, public async::Startable
 {
 public:
-    OutputStreamWriter(std::ostream* stream) :
+    ThreadedStreamReader(std::istream* is) :
+        PacketSource(this->emitter), _istream(is)
+    {
+        _runner.setRepeating(true);
+    }
+
+    ~ThreadedStreamReader()
+    {
+        TraceS(this) << "Destroy" << std::endl;
+
+        stop();
+
+        if (_istream) {
+            delete _istream;
+        }
+    }
+
+    void start()
+    {
+        _runner.start([](void* arg) {
+            auto self = reinterpret_cast<ThreadedStreamReader*>(arg);
+            std::string line;
+            if (getline(self->stream(), line)) {
+                self->emit(line);
+            }
+            if (self->stream().eof()) {
+                self->emit(PacketFlags::Final);
+            }
+        }, this);
+    }
+
+    void stop()
+    {
+        _runner.cancel();
+        // _runner.close();
+    }
+
+    template <class StreamT>
+    StreamT& stream()
+    {
+        auto stream = dynamic_cast<StreamT*>(_istream);
+        if (!stream)
+            throw std::runtime_error("Cannot cast internal stream type.");
+
+        return *stream;
+    }
+
+    std::istream& stream()
+    {
+        return *_istream;
+    }
+
+    PacketSignal emitter;
+
+protected:
+    Thread _runner;
+    std::istream* _istream;
+};
+
+
+class StreamWriter: public PacketProcessor
+{
+public:
+    StreamWriter(std::ostream* stream) :
         PacketProcessor(this->emitter), _ostream(stream)
     {
     }
 
-    virtual ~OutputStreamWriter()
+    virtual ~StreamWriter()
     {
         if (_ostream) {
             auto fstream = dynamic_cast<std::ofstream*>(_ostream);
@@ -63,7 +124,7 @@ public:
         auto stream = dynamic_cast<StreamT*>(_ostream);
         if (!stream)
             throw std::runtime_error("Cannot cast internal stream type.");
-        
+
         return *stream;
     }
 
@@ -82,4 +143,4 @@ protected:
 } // namespace scy
 
 
-#endif
+#endif // SCY_PACKET_IO_H

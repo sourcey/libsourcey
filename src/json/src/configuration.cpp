@@ -24,13 +24,13 @@
 using namespace std;
 
 
-namespace scy { 
+namespace scy {
 namespace json {
 
 
 Configuration::Configuration() :
     _loaded(false)
-{    
+{
 }
 
 
@@ -48,18 +48,18 @@ void Configuration::load(const std::string& path, bool create)
 
 void Configuration::load(bool /* create */)
 {
-    Mutex::ScopedLock lock(_mutex); 
+    Mutex::ScopedLock lock(_mutex);
 
     if (_path.empty())
         throw std::runtime_error("Cannot load configuration: File path not set.");
 
     DebugL << "Load: " << _path << endl;
-    
-    try {    
+
+    try {
         //if (create && !fs::exists(_path))
         //    fs::createFile(_path);
 
-        json::loadFile(_path, *this);
+        json::loadFile(_path, root);
     }
     catch (...) {
         // The config file may be empty,
@@ -72,92 +72,92 @@ void Configuration::load(bool /* create */)
 
 void Configuration::save()
 {
-    Mutex::ScopedLock lock(_mutex); 
-    
+    Mutex::ScopedLock lock(_mutex);
+
     if (_path.empty())
         throw std::runtime_error("Cannot save: Configuration file path must be set.");
 
     DebugL << "save: " << _path << endl;
-    
+
     // Will throw on error
-    json::saveFile(_path, *this);
+    json::saveFile(_path, root);
 }
 
 
 std::string Configuration::path()
 {
-    Mutex::ScopedLock lock(_mutex); 
+    Mutex::ScopedLock lock(_mutex);
     return _path;
 }
 
 
 bool Configuration::loaded()
 {
-    Mutex::ScopedLock lock(_mutex); 
+    Mutex::ScopedLock lock(_mutex);
     return _loaded;
 }
 
 
-void Configuration::print(std::ostream& ost) 
+void Configuration::print(std::ostream& ost)
 {
     json::StyledWriter writer;
-    ost << writer.write(*this);
+    ost << writer.write(root);
 }
 
 
 bool Configuration::remove(const std::string& key)
 {
-    Mutex::ScopedLock lock(_mutex); 
-    
-    return removeMember(key) != Json::nullValue;
+    Mutex::ScopedLock lock(_mutex);
+
+    return root.removeMember(key) != Json::nullValue;
 }
 
 
 void Configuration::removeAll(const std::string& baseKey)
 {
     TraceL << "remove all: " << baseKey << endl;
-    Mutex::ScopedLock lock(_mutex);     
-    
-    Members members = this->getMemberNames();
+    Mutex::ScopedLock lock(_mutex);
+
+    json::Value::Members members = root.getMemberNames();
     for (unsigned i = 0; i < members.size(); i++) {
         if (members[i].find(baseKey) != std::string::npos)
-            removeMember(members[i]);
+            root.removeMember(members[i]);
     }
 }
 
 
 void Configuration::replace(const std::string& from, const std::string& to)
 {
-    Mutex::ScopedLock lock(_mutex); 
+    Mutex::ScopedLock lock(_mutex);
 
     std::stringstream ss;
     json::StyledWriter writer;
-    std::string data = writer.write(*this);
+    std::string data = writer.write(root);
     util::replaceInPlace(data, from, to);
     ss.str(data);
 
     json::Reader reader;
-    reader.parse(data, *this);
+    reader.parse(data, root);
 }
 
 
 bool Configuration::getRaw(const std::string& key, std::string& value) const
-{    
-    Mutex::ScopedLock lock(_mutex); 
-    
-    if (!isMember(key))
+{
+    Mutex::ScopedLock lock(_mutex);
+
+    if (!root.isMember(key))
         return false;
 
-    value = (*this)[key].asString();
+    value = (root)[key].asString();
     return true;
 }
 
 
 void Configuration::setRaw(const std::string& key, const std::string& value)
-{    
+{
     {
-        Mutex::ScopedLock lock(_mutex); 
-        (*this)[key] = value;
+        Mutex::ScopedLock lock(_mutex);
+        (root)[key] = value;
     }
     PropertyChanged.emit(this, key, value);
 }
@@ -165,9 +165,9 @@ void Configuration::setRaw(const std::string& key, const std::string& value)
 
 void Configuration::keys(std::vector<std::string>& keys, const std::string& baseKey)
 {
-    Mutex::ScopedLock lock(_mutex); 
-        
-    Members members = this->getMemberNames();
+    Mutex::ScopedLock lock(_mutex);
+
+    json::Value::Members members = root.getMemberNames();
     for (unsigned i = 0; i < members.size(); i++) {
         if (members[i].find(baseKey) != std::string::npos)
             keys.push_back(members[i]);

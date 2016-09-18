@@ -303,6 +303,7 @@ int main(int argc, char** argv)
     describe("timer", new TimerTest);
     describe("idler", new IdlerTest);
     describe("packet stream", new PacketStreamTest);
+    describe("packet stream file io", new PacketStreamIOTest);
     // describe("multi packet stream", new MultiPacketStreamTest);
 
     test::runAll();

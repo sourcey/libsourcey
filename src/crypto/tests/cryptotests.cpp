@@ -189,14 +189,10 @@ int main(int argc, char** argv)
     // Checksum
     //
     describe("file checksum", []() {
-        // require 'digest'
-        // ::Digest::MD5.file("D:/test.mp4").hexdigest
-        // 57e14d2f24ab34a6eb1de3eb82f02f33
-        //
-        // std::string path("D:/test.mp4");
-        // InfoL << "Checksum of " << path << " is " << crypto::checksum("MD5", path) << endl;
-        //
-        // assert(in == decRes);
+        // NOTE: checksum tests currently located in HTTP tests
+
+        // std::string path("test.mp4");
+        // assert(crypto::checksum("MD5", path) == "57e14d2f24ab34a6eb1de3eb82f02f33");
     });
 
     test::runAll();

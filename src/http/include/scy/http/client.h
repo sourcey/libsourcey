@@ -28,6 +28,7 @@
 #include "scy/http/connection.h"
 #include "scy/http/websocket.h"
 #include "scy/timer.h"
+#include "scy/packetio.h"
 
 
 namespace scy {
@@ -73,17 +74,21 @@ public:
     virtual void close();
         // Forcefully closes the HTTP connection.
 
-    // virtual void setReadStream(std::ostream* os);
-    //     // Set the output stream for writing response data to.
-    //     // The stream pointer is managed internally,
-    //     // and will be freed along with the connection.
-    //
-    // template<class T>
-    // T* readStream()
-    //     // Return the cast read stream pointer or nullptr.
-    // {
-    //     return dynamic_cast<T*>(_readStream);
-    // }
+    virtual void setReadStream(std::ostream* os);
+        // Set the output stream for writing response data to.
+        // The stream pointer is managed internally,
+        // and will be freed along with the connection.
+
+    template<class StreamT>
+    StreamT& readStream()
+        // Return the cast read stream pointer or nullptr.
+    {
+        auto adapter = Incoming.getProcessor<StreamWriter>();
+        if (!adapter)
+            throw std::runtime_error("No stream reader associated with HTTP client.");
+
+        return adapter->stream<StreamT>();
+    }
 
     void* opaque;
         // Optional unmanaged client data pointer.

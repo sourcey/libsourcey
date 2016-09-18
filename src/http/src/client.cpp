@@ -142,15 +142,12 @@ void ClientConnection::connect()
 }
 
 
-// void ClientConnection::setReadStream(std::ostream* os)
-// {
-//     assert(!_connect);
-//     if (_readStream) {
-//         delete _readStream;
-//     }
-//
-//     _readStream = os;
-// }
+void ClientConnection::setReadStream(std::ostream* os)
+{
+    assert(!_connect);
+    
+    Incoming.attach(new StreamWriter(os), -1, true);
+}
 
 
 http::Message* ClientConnection::incomingHeader()
@@ -222,6 +219,7 @@ void ClientConnection::onPayload(const MutableBuffer& buffer)
     // Update download progress
     IncomingProgress.update(buffer.size());
 
+    // Write to the incoming packet stream if adapters are attached
     if (Incoming.numAdapters() > 0 ||
         Incoming.emitter.ndelegates() > 0) {
         // if (!Incoming.active());
@@ -229,6 +227,7 @@ void ClientConnection::onPayload(const MutableBuffer& buffer)
         Incoming.write(bufferCast<const char*>(buffer), buffer.size());
     }
 
+    // // Write to the STL read stream if available
     // if (_readStream) {
     //     TraceS(this) << "Writing to stream: " << buffer.size() << endl;
     //     _readStream->write(bufferCast<const char*>(buffer), buffer.size());

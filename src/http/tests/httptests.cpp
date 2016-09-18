@@ -104,20 +104,24 @@ int main(int argc, char** argv)
         expect(params.get("0") == "streaming");
     });
 
-    // //
-    // /// Default HTTP Client Connection Test
-    // //
     //
-    // describe("client connection download", []() {
-    //     auto conn = http::Client::instance().createConnection("http://anionu.com/packages/spotinstaller/download/2667/SpotInstaller.exe");
-    //     conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionDownloadComplete);
-    //     conn->request().setMethod("GET");
-    //     conn->request().setKeepAlive(false);
-    //     conn->setReadStream(new std::ofstream("SpotInstaller.exe", std::ios_base::out | std::ios_base::binary));
-    //     conn->send();
-    //     uv::runDefaultLoop();
-    // });
+    /// Default HTTP Client Connection Test
     //
+
+    describe("client connection download", []() {
+        std::string filename("zlib-1.2.8.tar.gz");
+        auto conn = http::Client::instance().createConnection("http://zlib.net/zlib-1.2.8.tar.gz");
+        conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionDownloadComplete);
+        conn->request().setMethod("GET");
+        conn->request().setKeepAlive(false);
+        conn->setReadStream(new std::ofstream(filename, std::ios_base::out | std::ios_base::binary));
+        conn->send();
+        uv::runDefaultLoop();
+        expect(fs::exists(filename));
+        expect(crypto::checksum("MD5", filename) == "44d667c142d7cda120332623eab69f40");
+        fs::unlink(filename);
+    });
+
     // describe("secure client connection download", []() {
     //     auto conn = http::Client::instance().createConnection("https://anionu.com/assets/download/25/SpotInstaller.exe");
     //     conn->Complete += sdelegate(&context, &CallbackContext::onClientConnectionDownloadComplete);
@@ -151,45 +155,6 @@ int main(int argc, char** argv)
         expect(conn->closed());
         expect(!conn->error().any());
     });
-
-    // // void runClientConnectionTest()
-    // // {
-    // //     HTTPEchoTest test;
-    // //     test.create<ClientConnection>()->send(); // default GET request
-    // //     uv::runDefaultLoop();
-    // // }
-    // //
-    // // void runClientConnectionChunkedTest()
-    // // {
-    // //     HTTPEchoTest test;
-    // //     auto conn = test.create<ClientConnection>(false, "127.0.0.1", TEST_HTTP_PORT);
-    // //     conn->request().setKeepAlive(true);
-    // //     conn->request().setURI("/chunked");
-    // //     //conn->request().body << "BOUNCE" << endl;
-    // //     conn->send();
-    // //     uv::runDefaultLoop();
-    // // }
-    // //
-    // // void runWebSocketSecureClientConnectionTest()
-    // // {
-    // //     HTTPEchoTest test;
-    // //     auto conn = test.create<WebSocketSecureClientConnection>(false, "127.0.0.1", TEST_HTTPS_PORT);
-    // //     conn->request().setURI("/websocket");
-    // //     //conn->request().body << "BOUNCE" << endl;
-    // //     conn->send();
-    // //     uv::runDefaultLoop();
-    // // }
-    // //
-    // // void runWebSocketClientConnectionTest()
-    // // {
-    // //     HTTPEchoTest test;
-    // //     auto conn = test.create<WebSocketClientConnection>(http::URL("127.0.0.1", TEST_HTTP_PORT), false);
-    // //     conn->shouldSendHead(false);
-    // //     conn->request().setURI("/websocket");
-    // //     //conn->request().body << "BOUNCE" << endl;
-    // //     conn->send();
-    // //     uv::runDefaultLoop();
-    // // }
 
     //
     /// Standalone HTTP Client Connection Test
@@ -290,81 +255,3 @@ int main(int argc, char** argv)
 
     return test::finalize();
 }
-
-
-// //
-// /// HTTP Server Test
-// //
-//
-//
-// void runHTTPServerTest()
-// {
-//     http::Server srv(TEST_HTTP_PORT, new OurServerResponderFactory);
-//     srv.start();
-//
-//     app.waitForShutdown(Tests::onKillHTTPServer, &srv);
-// }
-//
-//
-// static void onPrintHTTPServerHandle(uv_handle_t* handle, void* arg)
-// {
-//     //DebugL << "#### Active HTTPServer Handle: " << handle << endl;
-//     DebugL << "#### Active HTTPServer Handle: " << handle << endl;
-// }
-//
-//
-// static void onKillHTTPServer(void* opaque)
-// {
-//     DebugL << "Kill Signal: " << opaque << endl;
-//
-//     // print active handles
-//     uv_walk(uv::defaultLoop(), Tests::onPrintHTTPServerHandle, NULL);
-//
-//     reinterpret_cast<http::Server*>(opaque)->shutdown();
-// }
-
-
-// // ============================================================================
-// // HTTP ClientConnection Test
-// //
-// void runHTTPEchoTest()
-// {
-//     DebugL << "Starting" << endl;
-//
-//     // Setup the transaction
-//     http::Request req("GET", "http://google.com");
-//     http::Response res;
-//     http::ClientConnection txn(&req);
-//     txn.Complete += sdelegate(this, onComplete);
-//     txn.DownloadProgress += sdelegate(this, onIncomingProgress);
-//     txn.send();
-//
-//     // Run the looop
-//     app.run();
-//     //util::pause();
-//
-//     DebugL << "Ending" << endl;
-// }
-//
-// void onComplete(void* sender, http::Response& response)
-// {
-//     DebugL << "On Complete: " << &response << endl;
-// }
-//
-// void onIncomingProgress(void* sender, http::TransferProgress& progress)
-// {
-//     DebugL << "On Progress: " << progress.progress() << endl;
-// }
-//
-// struct Result {
-//     int numSuccess;
-//     std::string name;
-//     Stopwatch sw;
-//
-//     void reset() {
-//         numSuccess = 0;
-//         sw.reset();
-//     }
-// };
-//
-// static Result Benchmark;

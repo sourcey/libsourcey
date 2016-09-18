@@ -26,6 +26,8 @@
 #include "scy/async.h"
 #include "scy/timer.h"
 #include "scy/idler.h"
+#include "scy/filesystem.h"
+#include "scy/crypto/hash.h"
 #include "scy/net/sslmanager.h"
 #include "scy/net/sslcontext.h"
 #include "scy/http/server.h"

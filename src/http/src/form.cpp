@@ -31,7 +31,7 @@ FormWriter* FormWriter::create(ClientConnection& conn, const std::string& encodi
     if (conn.request().isChunkedTransferEncoding()) {
         assert(encoding != http::FormWriter::ENCODING_URL);
         assert(conn.request().getVersion() != http::Message::HTTP_1_0);
-        conn.Outgoing.attach(new http::ChunkedAdapter(&conn), 0, true);
+        conn.Outgoing.attach(new http::ChunkedAdapter(&conn), -1, true);
     }
     conn.Outgoing.lock();
     return wr;
@@ -341,7 +341,7 @@ void FormWriter::writeMultipartChunk()
         _complete = true;
         _writeState = -1; // raise error if called again
         } break;
-    
+
     // Invalid state
     default:
         ErrorS(this) << "Invalid write state: " << _writeState << std::endl;

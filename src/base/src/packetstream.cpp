@@ -482,6 +482,11 @@ void PacketStream::process(IPacket& packet)
             TraceS(this) << "Proxying packet: " << state() << ": " << packet.className() << endl;
             emit(packet);
         }
+
+        // Stop the packet stream on the final packet
+        if (stateEquals(PacketStreamState::Active) && packet.flags.has(PacketFlags::Final)) {
+            this->stop();
+        }
     }
 
     // Catch any exceptions thrown within the processor
@@ -513,8 +518,8 @@ void PacketStream::emit(IPacket& packet)
 {
     TraceS(this) << "Emit: " << packet.size() << endl;
 
-    //PacketStream* stream = this->stream();
-    //const PacketStreamState& state = this->state();
+    // PacketStream* stream = this->stream();
+    // const PacketStreamState& state = this->state();
 
     // Synchronize the error if required
     // if (_syncError && state.equals(PacketStreamState::Error)) {
@@ -741,7 +746,7 @@ bool PacketStream::detachSource(PacketSignal& source)
 void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer)
 {
     //TraceS(this) << "Attach processor: " << proc << endl;
-    assert(order >= 0 && order <= 101);
+    assert(order >= -1 && order <= 101);
     assertCanModify();
 
     Mutex::ScopedLock lock(_mutex);
@@ -749,7 +754,7 @@ void PacketStream::attach(PacketProcessor* proc, int order, bool freePointer)
     //    order == 0 ? _processors.size() : order, freePointer));
 
     _processors.push_back(std::make_shared<PacketAdapterReference>(proc,
-        freePointer ? new ScopedRawPointer<PacketStreamAdapter>(proc) : nullptr, order == 0 ? _processors.size() : order)); //freePointer,
+        freePointer ? new ScopedRawPointer<PacketStreamAdapter>(proc) : nullptr, order == -1 ? _processors.size() : order)); //freePointer,
 
     sort(_processors.begin(), _processors.end(), PacketAdapterReference::compareOrder);
 }
@@ -1005,6 +1010,13 @@ void PacketStreamAdapter::emit(const char* data, std::size_t len, unsigned flags
 void PacketStreamAdapter::emit(const std::string& str, unsigned flags)
 {
     RawPacket p(str.c_str(), str.length(), flags);
+    emit(p);
+}
+
+
+void PacketStreamAdapter::emit(unsigned flags)
+{
+    FlagPacket p(flags);
     emit(p);
 }
 

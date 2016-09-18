@@ -288,7 +288,7 @@ public:
         case sockio::ClientState::Online:
             cout << "Client online" << endl;
 
-            // Join the public room 
+            // Join the public room
             client.joinRoom("public");
             break;
         case sockio::ClientState::Error:
@@ -322,7 +322,7 @@ int main(int argc, char** argv)
         // cout << "Log path: " << logPath << endl;
         // Logger::instance().add(new FileChannel("Symple", logPath, LDebug));
 
-        Logger::instance().add(new ConsoleChannel("debug", LDebug)); //LTrace
+        Logger::instance().add(new ConsoleChannel("debug", LTrace)); //LDebug
 
         // Init SSL client context
 #if USE_SSL

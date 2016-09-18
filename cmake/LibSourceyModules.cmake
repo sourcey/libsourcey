@@ -4,7 +4,6 @@
 # Defines a generic LibSourcey module.
 #
 macro(define_sourcey_module name)
-
   project(${name})
 
   # Include internal module dependencies

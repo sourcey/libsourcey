@@ -54,6 +54,7 @@ public:
     virtual void emit(char* data, std::size_t len, unsigned flags = 0);
     virtual void emit(const char* data, std::size_t len, unsigned flags = 0);
     virtual void emit(const std::string& str, unsigned flags = 0);
+    virtual void emit(unsigned flags = 0);
     virtual void emit(IPacket& packet);
 
     PacketSignal& getEmitter();
@@ -160,7 +161,7 @@ enum PacketFlags
     /// Flags which determine how the packet is handled by the PacketStream
 {
     NoModify = 0x01,    // The packet should not be modified by processors.
-    Final                // The final packet in the stream.
+    Final               // The final packet in the stream.
 };
 
 
@@ -301,7 +302,7 @@ public:
         }
 
         attachSource(std::make_shared<PacketAdapterReference>(
-            source, new ScopedSharedPointer<C>(ptr), 0, syncState));
+            source, new ScopedSharedPointer<C>(ptr), false, syncState));
     }
 
     virtual bool detachSource(PacketSignal& source);
