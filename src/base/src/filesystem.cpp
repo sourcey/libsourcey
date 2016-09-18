@@ -265,9 +265,8 @@ std::string normalize(const std::string& path)
 std::string transcode(const std::string& path)
 {
 #if defined(_MSC_VER) && defined(SCY_UNICODE)
-    std::wstring_convert<std::codecvt<char16_t,char,std::mbstate_t>,char16_t> convert;
-    std::u16string u16s = convert.from_bytes(path);
-    std::wstring uniPath(u16s.begin(), u16s.end()); // copy data across, w_char is 16 bit on windows so this should be OK
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> convert; // conversion between UTF-16 and UTF-8
+    std::wstring uniPath = convert.from_bytes( path ); // convert UTF-8 std::string to UTF-16 std::wstring
     DWORD len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, uniPath.c_str(), static_cast<int>(uniPath.length()), nullptr, 0, nullptr, nullptr);
     if (len > 0) {
         std::unique_ptr<char[]> buffer(new char[len]);
