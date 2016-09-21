@@ -53,7 +53,7 @@ else()
     NAMES
       scy/base.h
     PATHS
-  	  /usr/local/include
+      /usr/local/include
       /usr/include
     DOC
       "LibSourcey Include Directory")

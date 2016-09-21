@@ -1,8 +1,5 @@
 add_subdirectory(deviceenumerator)
 
-#if(WITH_FFMPEG AND HAVE_FFMPEG AND WITH_OPENCV AND HAVE_OPENCV)
-#endif()
-
 if(HAVE_FFMPEG)
   #add_subdirectory(audiosocket)
   add_subdirectory(videosocket)

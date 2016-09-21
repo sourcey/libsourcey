@@ -55,7 +55,7 @@ if (NOT OPENCV_FOUND)
     DOC
       "OpenCV Include Directory"
     PATHS
-  	  /usr/local/include
+      /usr/local/include
       /usr/include
     )
 

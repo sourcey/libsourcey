@@ -1,5 +1,5 @@
 ask_build_sourcey_module(http)
-if(BUILD_MODULES AND BUILD_MODULE_http)
+if(BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_http))
   add_vendor_dependency(HTTPPARSER http_parser)
 
   #list(APPEND LibSourcey_BUILD_DEPENDENCIES http_parser)

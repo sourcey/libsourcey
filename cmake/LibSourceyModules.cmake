@@ -6,12 +6,6 @@
 macro(define_sourcey_module name)
   project(${name})
 
-  # Include internal module dependencies
-  #include_sourcey_modules(${ARGN})
-
-  # Include library and header directories
-  set_default_project_directories(${ARGN})
-
   # Add library source files
   file(GLOB_RECURSE lib_srcs "src/*.cpp")
   file(GLOB_RECURSE lib_hdrs "include/*.h")
@@ -38,8 +32,8 @@ macro(define_sourcey_module name)
 
   # Include Objective-C files on Apple
   if(APPLE)
-	  file(GLOB_RECURSE lib_objectivec_srcs "*.mm")
-	  set(lib_srcs ${lib_objectivec_srcs} ${lib_srcs})
+    file(GLOB_RECURSE lib_objectivec_srcs "*.mm")
+    set(lib_srcs ${lib_objectivec_srcs} ${lib_srcs})
   endif()
 
   string(REGEX REPLACE ${lib_srcs_exclude} "" lib_srcs "${lib_srcs}")
@@ -53,6 +47,9 @@ macro(define_sourcey_module name)
   source_group("Include" FILES ${lib_hdrs})
 
   add_library(${name} ${lib_srcs} ${lib_hdrs})
+
+  # Include library and header directories
+  set_default_project_directories(${name} ${ARGN})
 
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
@@ -130,9 +127,6 @@ macro(define_sourcey_module_sample name)
   # Include internal module dependencies
   #include_sourcey_modules(${ARGN})
 
-  # Include library and header directories
-  set_default_project_directories(${ARGN})
-
   # Add source files
   file(GLOB lib_hdrs "*.h*")
   file(GLOB lib_srcs "*.cpp")
@@ -141,6 +135,9 @@ macro(define_sourcey_module_sample name)
   source_group("Include" FILES ${lib_hdrs})
 
   add_executable(${name} ${lib_srcs} ${lib_hdrs})
+
+  # Include library and header directories
+  set_default_project_directories(${name} ${ARGN})
 
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
@@ -167,12 +164,6 @@ macro(define_libsourcey_test name)
 
   project(${name})
 
-  # Include internal module dependencies
-  #include_sourcey_modules(${ARGN})
-
-  # Include library and header directories
-  set_default_project_directories(${ARGN})
-
   # Add source files
   file(GLOB lib_hdrs "*.h*")
   #file(GLOB lib_srcs "*.cpp")
@@ -182,6 +173,9 @@ macro(define_libsourcey_test name)
   source_group("Include" FILES ${lib_hdrs})
 
   add_executable(${name} ${lib_srcs} ${lib_hdrs})
+
+  # Include library and header directories
+  set_default_project_directories(${name} ${ARGN})
 
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
@@ -211,14 +205,7 @@ endmacro()
 # Defines a generic LibSourcey shared library.
 #
 macro(define_libsourcey_library name)
-
   project(${name})
-
-  # Include internal module dependencies
-  #include_sourcey_modules(${ARGN})
-
-  # Include library and header directories
-  set_default_project_directories(${ARGN})
 
   # Add source files
   file(GLOB lib_hdrs "*.h*")
@@ -230,6 +217,9 @@ macro(define_libsourcey_library name)
   source_group("Include" FILES ${lib_hdrs})
 
   add_library(${name} MODULE ${lib_srcs} ${lib_hdrs})
+
+  # Include library and header directories
+  set_default_project_directories(${name} ${ARGN})
 
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
@@ -250,21 +240,14 @@ endmacro()
 #
 ### Macro: define_sourcey_application
 #
-# This template defines a Spot executable.
+# This template defines a LibSourcey application.
 # Optional helper variables:
 #   <name>_SUBSYSTEM_WINDOWS - Sets SUBSYSTEM:WINDOWS under WIN32
 #   <name>_EXECUTABLE_NAME - The name of the executable file
 #   <name>_DEBUG_POSTFIX - The output file name debum postfix
 #
 macro(define_sourcey_application name)
-
   project(${name})
-
-  # Include internal module dependencies
-  #include_sourcey_modules(${ARGN})
-
-  # Include library and header directories
-  set_default_project_directories(${ARGN})
 
   # Add library source files
   file(GLOB_RECURSE lib_srcs "src/*.c*")
@@ -298,19 +281,11 @@ macro(define_sourcey_application name)
     add_executable(${name} ${lib_srcs} ${lib_hdrs})
   endif()
 
+  # Include library and header directories
+  set_default_project_directories(${name} ${ARGN})
+
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
-
-  # Include dependent modules
-  #foreach(module ${ARGN})
-  #  include_sourcey_modules(${module})
-  #  add_dependencies(${name} ${module})
-  #endforeach()
-
-  # KLUDGE: Include all thrid party dependencies for now
-  #if (LibSourcey_BUILD_DEPENDENCIES)
-  #  add_dependencies(${name} ${LibSourcey_BUILD_DEPENDENCIES})
-  #endif()
 
   #if(MSVC)
   #  # Temporary workaround for "error LNK2026: module unsafe for SAFESEH image"
@@ -325,7 +300,7 @@ macro(define_sourcey_application name)
   #endif()
 
   # Add external dependencies and required libraries for linking.
-  #target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
+  # target_link_libraries(${name} ${LibSourcey_INCLUDE_LIBRARIES})
 
   if(ENABLE_SOLUTION_FOLDERS)
     set_target_properties(${name} PROPERTIES FOLDER "applications")
@@ -368,7 +343,7 @@ macro(define_sourcey_dependency name)
   project(${name})
 
   # Include current directory and existing dependency directories
-  include_directories("${CMAKE_CURRENT_SOURCE_DIR}" "${LibSourcey_INCLUDE_DIRS}")
+  include_directories("${CMAKE_CURRENT_SOURCE_DIR}") # "${LibSourcey_INCLUDE_DIRS}"
 
   # Add library source files
   if (NOT ${name}_SOURCE_FILES)
@@ -401,8 +376,8 @@ macro(define_sourcey_dependency name)
   # Cache dependency directories for inclusion by modules and applications
   get_directory_property(lib_directories INCLUDE_DIRECTORIES)
   set(LibSourcey_INCLUDE_DIRS ${lib_directories} PARENT_SCOPE)
-  set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} ${name} PARENT_SCOPE)
-  set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${name} PARENT_SCOPE)
+  # set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} ${name} PARENT_SCOPE)
+  # set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${name} PARENT_SCOPE)
 
   # message(STATUS "- Linking dependency ${name} with libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
   #message("${name}: Library Dirs: ${LibSourcey_LIBRARY_DIRS}")

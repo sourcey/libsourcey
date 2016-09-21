@@ -1,5 +1,5 @@
 ask_build_sourcey_module(archo)
-if (BUILD_MODULES AND BUILD_MODULE_archo)
+if(BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_archo))
   set(INSTALL_BIN_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/bin")
   set(INSTALL_LIB_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/lib")
   set(INSTALL_INC_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/include")

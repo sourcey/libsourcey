@@ -1,5 +1,5 @@
 ask_build_sourcey_module(uv)
-if(BUILD_MODULES AND BUILD_MODULE_uv)
+if(BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_uv))
 
   # Include libuv dependency
   set(BUILD_TESTS OFF) # don't build libuv tests

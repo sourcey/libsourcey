@@ -68,41 +68,41 @@ set (CMAKE_FIND_LIBRARY_SUFFIXES ".dylib" ".so" ".a")
 # and still cmake didn't fail in CMakeFindBinUtils.cmake (because it isn't rerun)
 # hardcode CMAKE_INSTALL_NAME_TOOL here to install_name_tool, so it behaves as it did before, Alex
 if (NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
-	find_program(CMAKE_INSTALL_NAME_TOOL install_name_tool)
+  find_program(CMAKE_INSTALL_NAME_TOOL install_name_tool)
 endif (NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
 
 # Setup iOS platform
 if (NOT DEFINED IOS_PLATFORM)
-	set (IOS_PLATFORM "OS")
+  set (IOS_PLATFORM "OS")
 endif (NOT DEFINED IOS_PLATFORM)
 set (IOS_PLATFORM ${IOS_PLATFORM} CACHE STRING "Type of iOS Platform")
 
 # Check the platform selection and setup for developer root
 if (${IOS_PLATFORM} STREQUAL "OS")
-	set (IOS_PLATFORM_LOCATION "iPhoneOS.platform")
+  set (IOS_PLATFORM_LOCATION "iPhoneOS.platform")
 elseif (${IOS_PLATFORM} STREQUAL "SIMULATOR")
-	set (IOS_PLATFORM_LOCATION "iPhoneSimulator.platform")
+  set (IOS_PLATFORM_LOCATION "iPhoneSimulator.platform")
 else (${IOS_PLATFORM} STREQUAL "OS")
-	message (FATAL_ERROR "Unsupported IOS_PLATFORM value selected. Please choose OS or SIMULATOR")
+  message (FATAL_ERROR "Unsupported IOS_PLATFORM value selected. Please choose OS or SIMULATOR")
 endif (${IOS_PLATFORM} STREQUAL "OS")
 
 # Setup iOS developer location
 if (NOT DEFINED CMAKE_IOS_DEVELOPER_ROOT)
-	set (CMAKE_IOS_DEVELOPER_ROOT "/Developer/Platforms/${IOS_PLATFORM_LOCATION}/Developer")
+  set (CMAKE_IOS_DEVELOPER_ROOT "/Developer/Platforms/${IOS_PLATFORM_LOCATION}/Developer")
 endif (NOT DEFINED CMAKE_IOS_DEVELOPER_ROOT)
 set (CMAKE_IOS_DEVELOPER_ROOT ${CMAKE_IOS_DEVELOPER_ROOT} CACHE PATH "Location of iOS Platform")
 
 # Find and use the most recent iOS sdk
 if (NOT DEFINED CMAKE_IOS_SDK_ROOT)
-	file (GLOB _CMAKE_IOS_SDKS "${CMAKE_IOS_DEVELOPER_ROOT}/SDKs/*")
-	if (_CMAKE_IOS_SDKS)
-		list (SORT _CMAKE_IOS_SDKS)
-		list (REVERSE _CMAKE_IOS_SDKS)
-		list (GET _CMAKE_IOS_SDKS 0 CMAKE_IOS_SDK_ROOT)
-	else (_CMAKE_IOS_SDKS)
-		message (FATAL_ERROR "No iOS SDK's found in default seach path ${CMAKE_IOS_DEVELOPER_ROOT}. Manually set CMAKE_IOS_SDK_ROOT or install the iOS SDK.")
-	endif (_CMAKE_IOS_SDKS)
-	message (STATUS "Toolchain using default iOS SDK: ${CMAKE_IOS_SDK_ROOT}")
+  file (GLOB _CMAKE_IOS_SDKS "${CMAKE_IOS_DEVELOPER_ROOT}/SDKs/*")
+  if (_CMAKE_IOS_SDKS)
+    list (SORT _CMAKE_IOS_SDKS)
+    list (REVERSE _CMAKE_IOS_SDKS)
+    list (GET _CMAKE_IOS_SDKS 0 CMAKE_IOS_SDK_ROOT)
+  else (_CMAKE_IOS_SDKS)
+    message (FATAL_ERROR "No iOS SDK's found in default seach path ${CMAKE_IOS_DEVELOPER_ROOT}. Manually set CMAKE_IOS_SDK_ROOT or install the iOS SDK.")
+  endif (_CMAKE_IOS_SDKS)
+  message (STATUS "Toolchain using default iOS SDK: ${CMAKE_IOS_SDK_ROOT}")
 endif (NOT DEFINED CMAKE_IOS_SDK_ROOT)
 set (CMAKE_IOS_SDK_ROOT ${CMAKE_IOS_SDK_ROOT} CACHE PATH "Location of the selected iOS SDK")
 
@@ -122,9 +122,9 @@ set (CMAKE_FIND_FRAMEWORK FIRST)
 
 # set up the default search directories for frameworks
 set (CMAKE_SYSTEM_FRAMEWORK_PATH
- 	${CMAKE_IOS_SDK_ROOT}/System/Library/Frameworks
- 	${CMAKE_IOS_SDK_ROOT}/System/Library/PrivateFrameworks
- 	${CMAKE_IOS_SDK_ROOT}/Developer/Library/Frameworks
+   ${CMAKE_IOS_SDK_ROOT}/System/Library/Frameworks
+   ${CMAKE_IOS_SDK_ROOT}/System/Library/PrivateFrameworks
+   ${CMAKE_IOS_SDK_ROOT}/Developer/Library/Frameworks
  )
 
 # only search the iOS sdks, not the remainder of the host filesystem
@@ -135,17 +135,17 @@ set (CMAKE_SYSTEM_FRAMEWORK_PATH
 set(CMAKE_MACOSX_BUNDLE YES)
 
 if(NOT CMAKE_C_COMPILER)
-	execute_process(COMMAND xcrun -sdk ${CMAKE_IOS_SDK_ROOT} -find clang
-			OUTPUT_VARIABLE CMAKE_C_COMPILER
-			OUTPUT_STRIP_TRAILING_WHITESPACE)
-	message(STATUS "Using C compiler ${CMAKE_C_COMPILER}")
+  execute_process(COMMAND xcrun -sdk ${CMAKE_IOS_SDK_ROOT} -find clang
+      OUTPUT_VARIABLE CMAKE_C_COMPILER
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message(STATUS "Using C compiler ${CMAKE_C_COMPILER}")
 endif()
 
 if(NOT CMAKE_CXX_COMPILER)
-	execute_process(COMMAND xcrun -sdk ${CMAKE_IOS_SDK_ROOT} -find clang++
-			OUTPUT_VARIABLE CMAKE_CXX_COMPILER
-			OUTPUT_STRIP_TRAILING_WHITESPACE)
-	message(STATUS "Using C++ compiler ${CMAKE_CXX_COMPILER}")
+  execute_process(COMMAND xcrun -sdk ${CMAKE_IOS_SDK_ROOT} -find clang++
+      OUTPUT_VARIABLE CMAKE_CXX_COMPILER
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message(STATUS "Using C++ compiler ${CMAKE_CXX_COMPILER}")
 endif()
 
 #execute_process(COMMAND xcrun --sdk iphoneos --show-sdk-version OUTPUT_VARIABLE iOSVersion)

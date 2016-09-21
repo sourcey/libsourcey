@@ -24,9 +24,10 @@
 #include "scy/stateful.h"
 
 
-#if defined(UNIX) && !defined(INVALID_SOCKET)
-#define INVALID_SOCKET -1
-#endif
+// Conflicts with WebRTC: webrtc/base/socket.h:116
+// #if defined(UNIX) && !defined(INVALID_SOCKET)
+// #define INVALID_SOCKET -1
+// #endif
 
 #if defined(WIN32)
 typedef int socklen_t;
@@ -56,7 +57,6 @@ enum SocketMode
     ServerSide, /// Server-side adapter.
     ClientSide  /// Client-side adapter.
 };
-
 
 
 } } // namespace scy::net

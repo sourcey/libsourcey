@@ -1,5 +1,7 @@
 # TODO
 
+First FindXXX only finds, following calls set includes and headers
+
 Refactor Timer to use Idler Async pattern
 Update Signal to use std::bind with lambdas  
 Stateful classes should use std::atomic  

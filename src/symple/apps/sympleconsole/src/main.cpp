@@ -170,32 +170,32 @@ public:
                             std::bind(&SympleApplication::onSyncMessage, app, std::placeholders::_1), message));
                     }
 
-               			// Join a room
-               			else if (o == 'J') {
+           			// Join a room
+           			else if (o == 'J') {
                         cout << "Join a room: " << endl;
                         auto data = new std::string();
                         std::getline(std::cin, *data);
 
                         app->ipc.push(new ipc::Action(
                             std::bind(&SympleApplication::onSyncCommand, app, std::placeholders::_1), data, "join"));
-               			}
+           			}
 
-               			// Leave a room
-               			else if (o == 'L') {
-                        cout << "Leave a room: " << endl;
-                        auto data = new std::string();
-                        std::getline(std::cin, *data);
+           			// Leave a room
+           			else if (o == 'L') {
+                    cout << "Leave a room: " << endl;
+                    auto data = new std::string();
+                    std::getline(std::cin, *data);
 
-                        app->ipc.push(new ipc::Action(
-                            std::bind(&SympleApplication::onSyncCommand, app, std::placeholders::_1), data, "leave"));
-               			}
+                    app->ipc.push(new ipc::Action(
+                        std::bind(&SympleApplication::onSyncCommand, app, std::placeholders::_1), data, "leave"));
+           			}
 
-               			// List contacts
-               			else if (o == 'C') {
-                 				cout << "Listing contacts:" << endl;
-                 				app->client.roster().print(cout);
-                     		cout << endl;
-               			}
+           			// List contacts
+           			else if (o == 'C') {
+             				cout << "Listing contacts:" << endl;
+             				app->client.roster().print(cout);
+                 		cout << endl;
+           			}
                	}
 
                 cout << "Quiting" << endl;

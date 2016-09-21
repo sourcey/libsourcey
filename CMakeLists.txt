@@ -82,6 +82,7 @@ set(LibSourcey_BUILD_APPLICATIONS     "" CACHE INTERNAL "Applications to build" 
 # ----------------------------------------------------------------------------
 set(LibSourcey_DIR ${CMAKE_SOURCE_DIR})
 set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
+set(LibSourcey_VENDOR_SOURCE_DIR ${CMAKE_SOURCE_DIR}/vendor)
 set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
 
 set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
@@ -220,20 +221,20 @@ set_option(WITH_WXWIDGETS       "Include wxWidgets support"            OFF)
 
 # External dependencies
 if(WITH_OPENSSL)
-  include_dependency(OpenSSL REQUIRED)
+  find_dependency(OpenSSL REQUIRED)
 endif()
 if(WITH_FFMPEG)
-  include_dependency(FFmpeg REQUIRED)
+  find_dependency(FFmpeg REQUIRED)
 endif()
 if(WITH_OPENCV)
-  include_dependency(OpenCV REQUIRED)
+  find_dependency(OpenCV REQUIRED)
 endif()
 if(WITH_WEBRTC)
-  include_dependency(WebRTC REQUIRED)
+  find_dependency(WebRTC REQUIRED)
 endif()
 if(WITH_WXWIDGETS)
   # TODO: specify required library options
-  include_dependency(wxWidgets REQUIRED core base adv)
+  find_dependency(wxWidgets REQUIRED core base adv)
 endif()
 
 # ----------------------------------------------------------------------------

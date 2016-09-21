@@ -157,12 +157,12 @@ namespace internal {
     };
 
 #define FSapi(func, ...)                                        \
-    FSReq wrap;                                                    \
-    int err = uv_fs_ ## func(uv_default_loop(),                    \
-        &wrap.req, __VA_ARGS__, nullptr);                        \
-    if (err < 0)                                                 \
-        uv::throwError(std::string("Filesystem error: ") +        \
-            #func + std::string(" failed"), err);                \
+    FSReq wrap;                                                 \
+    int err = uv_fs_ ## func(uv_default_loop(),                 \
+        &wrap.req, __VA_ARGS__, nullptr);                       \
+    if (err < 0)                                                \
+        uv::throwError(std::string("Filesystem error: ") +      \
+            #func + std::string(" failed"), err);               \
 
 } // namespace internal
 
@@ -203,13 +203,17 @@ void mkdirr(const std::string& path, int mode)
     while (std::getline(istr, level, fs::delimiter))
     {
         if (level.empty()) continue;
-        current += level;
 
 #ifdef WIN32
+        current += level;
         if (level.at(level.length() - 1) == ':') {
             current += fs::separator;
             continue; // skip drive letter
         }
+#else
+        if (current.empty())
+            current += fs::separator;
+        current += level;
 #endif
         // create current level
         if (!fs::exists(current))
