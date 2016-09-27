@@ -91,7 +91,7 @@ void Application::finalize()
 }
 
 
-void Application::waitForShutdown(std::function<void(void*)> callback, void* opaque)
+void Application::bindShutdownSignal(std::function<void(void*)> callback, void* opaque)
 {
     auto cmd = new internal::ShutdownCmd;
     cmd->self = this;
@@ -102,8 +102,13 @@ void Application::waitForShutdown(std::function<void(void*)> callback, void* opa
     sig->data = cmd;
     uv_signal_init(loop, sig);
     uv_signal_start(sig, Application::onShutdownSignal, SIGINT);
+}
 
+
+void Application::waitForShutdown(std::function<void(void*)> callback, void* opaque)
+{
     DebugS(this) << "Wait for shutdown" << std::endl;
+    bindShutdownSignal(callback, opaque);
     run();
 }
 

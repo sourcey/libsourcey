@@ -227,7 +227,7 @@ macro(sourcey_find_library prefix)
   # select_library_configurations(SSL_EAY)
 
   message(${${prefix}_PATHS_RELEASE})
-  print_module_variables(${prefix})
+  # print_module_variables(${prefix})
 
   # unset(${prefix}_LIBRARY)
   # unset(${prefix}_LIBRARY CACHE)

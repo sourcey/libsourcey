@@ -20,14 +20,15 @@ set(_WEBRTC_SUFFIX_DEBUG out/Debug)
 set(_WEBRTC_SUFFIX_RELEASE out/Release)
 # set(_WEBRTC_GENERATOR_EXCLUDES jsoncpp|unittest|examples|main.o)
 
-unset(WEBRTC_INCLUDE_DIR)
-unset(WEBRTC_INCLUDE_DIR CACHE)
-unset(WEBRTC_LIBRARY)
-unset(WEBRTC_LIBRARY CACHE)
-unset(WEBRTC_LIBRARY_DEBUG)
-unset(WEBRTC_LIBRARY_DEBUG CACHE)
-unset(WEBRTC_LIBRARY_RELEASE)
-unset(WEBRTC_LIBRARY_RELEASE CACHE)
+# unset(WEBRTC_INCLUDE_DIR)
+# unset(WEBRTC_INCLUDE_DIR CACHE)
+# unset(WEBRTC_LIBRARY)
+# unset(WEBRTC_LIBRARY CACHE)
+# unset(WEBRTC_LIBRARY_DEBUG)
+# unset(WEBRTC_LIBRARY_DEBUG CACHE)
+# unset(WEBRTC_LIBRARY_RELEASE)
+# unset(WEBRTC_LIBRARY_RELEASE CACHE)
+
 
 # ----------------------------------------------------------------------
 # Find WEBRTC include path

@@ -259,7 +259,7 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
                 // Update the next frame offset
                 offset = reader.position(); // + payloadLength;
                 if (offset < total)
-                    DebugS(this) << "Splitting joined packet at "
+                    TraceS(this) << "Splitting joined packet at "
                         << offset << " of " << total << endl;
 
                 // Drop empty packets
@@ -269,7 +269,7 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
                 }
             }
             catch (std::exception& exc) {
-                WarnL << "Parser error: " << exc.what() << endl;
+                ErrorS(this) << "Parser error: " << exc.what() << endl;
                 socket->setError(exc.what());
                 return;
             }
@@ -289,7 +289,7 @@ void WebSocketAdapter::onSocketRecv(const MutableBuffer& buffer, const net::Addr
                 handleServerRequest(buffer, peerAddress);
         }
         catch (std::exception& exc) {
-            WarnL << "Read error: " << exc.what() << endl;
+            ErrorS(this) << "Read error: " << exc.what() << endl;
             socket->setError(exc.what());
         }
         return;

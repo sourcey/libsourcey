@@ -299,7 +299,7 @@ int main(int argc, char** argv)
     //Logger::instance().setWriter(new AsyncLogWriter);
     {
         // Pre-initialize video captures in the main thread
-        //MediaFactory::instance().loadVideo();
+        MediaFactory::instance().loadVideoCaptures();
 
         // Start the application and server
         Application app;

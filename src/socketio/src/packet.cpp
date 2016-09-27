@@ -112,7 +112,7 @@ IPacket* Packet::clone() const
 
 std::size_t Packet::read(const ConstBuffer& buf)
 {
-    DebugN(this) << "Read raw packet: " << buf.str() << endl;
+    TraceN(this) << "Read raw packet: " << buf.str() << endl;
     assert(buf.size() > 0);
 
     // Reset all data
@@ -126,17 +126,16 @@ std::size_t Packet::read(const ConstBuffer& buf)
     BitReader reader(buf);
 
     // look up frame type
-	  char frame[2] = {'\0'};
+	char frame[2] = {'\0'};
     reader.get(frame, 1);
-    _frame = static_cast<Packet::Frame>(atoi(frame));//alternative: std::stoi(std::string(frame, 1))
+    _frame = static_cast<Packet::Frame>(atoi(frame)) ;//std::stoi(std::string(frame, 1))
 
-    DebugN(this) << "Read raw packet: atoi(&frame): " << atoi(frame) << endl;
     if (_frame == Packet::Frame::Message) {
 
         // look up packet type
-		    char type[2] = {'\0'}; //; //
+		char type[2] = {'\0'};
         reader.get(type, 1);
-        _type = static_cast<Packet::Type>(atoi(type));//std::stoi(std::string(type, 1))
+        _type = static_cast<Packet::Type>(atoi(type)); //std::stoi(std::string(type, 1))
         // if (_type < TypeMin || _type > TypeMax) {
         //     WarnN(this) << "Invalid message type: " << _type << endl;
         //     return false;

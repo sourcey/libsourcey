@@ -30,16 +30,16 @@ using std::endl;
 namespace scy {
 namespace av {
 
-    
-static Singleton<MediaFactory> singleton;
-    
 
-MediaFactory& MediaFactory::instance() 
+static Singleton<MediaFactory> singleton;
+
+
+MediaFactory& MediaFactory::instance()
 {
     return *singleton.get();
 }
 
-    
+
 void MediaFactory::shutdown()
 {
     singleton.destroy();
@@ -47,7 +47,7 @@ void MediaFactory::shutdown()
 
 
 MediaFactory::MediaFactory()
-{    
+{
     _devices = DeviceManagerFactory::create();
     _devices->initialize();
     //_devices->DevicesChanged += sdelegate(this, &MediaFactory::onDevicesChanged);
@@ -55,7 +55,7 @@ MediaFactory::MediaFactory()
 
 
 MediaFactory::~MediaFactory()
-{    
+{
     if (_devices) {
         //_devices->DevicesChanged -= sdelegate(this, &MediaFactory::onDevicesChanged);
         _devices->uninitialize();
@@ -64,17 +64,17 @@ MediaFactory::~MediaFactory()
 }
 
 
-IDeviceManager& MediaFactory::devices() 
-{ 
+IDeviceManager& MediaFactory::devices()
+{
     Mutex::ScopedLock lock(_mutex);
-    return *_devices; 
+    return *_devices;
 }
 
 
-FormatRegistry& MediaFactory::formats() 
-{ 
+FormatRegistry& MediaFactory::formats()
+{
     Mutex::ScopedLock lock(_mutex);
-    return _formats; 
+    return _formats;
 }
 
 
@@ -91,7 +91,7 @@ void MediaFactory::loadVideoCaptures()
     for (std::size_t i = 0; i < devs.size(); ++i) {
         try {
             createVideoCapture(devs[0].id);
-        } 
+        }
         catch (std::exception& exc) {
             ErrorL << "Cannot load video capture: "
                 << devs[0].id << ": " << exc.what() << endl;
@@ -101,22 +101,22 @@ void MediaFactory::loadVideoCaptures()
 
 
 void MediaFactory::reloadFailedVideoCaptures()
-{        
+{
     DebugL << "Reloading failed video captures" << endl;
     assert(Thread::mainID == Thread::currentID());
 
     // Loop through captures and attempt to reopen any
     // that may have been unplugged
     auto videoCaptures = this->videoCaptures();
-    for (auto& kv : videoCaptures) {            
+    for (auto& kv : videoCaptures) {
         if (kv.second->error().any()) {
-            TraceL << "Reloading capture " << kv.second->deviceId() 
-                << ": " << kv.second->error() << endl;    
+            TraceL << "Reloading capture " << kv.second->deviceId()
+                << ": " << kv.second->error() << endl;
             try {
                 kv.second->open();
-                kv.second->start();        
+                kv.second->start();
 
-                // Manually emit the capture loaded signal if the 
+                // Manually emit the capture loaded signal if the
                 // capture was successfully reloaded
                 if (!kv.second->error().any()) {
                     VideoCaptureLoaded.emit(this, kv.second);
@@ -145,7 +145,7 @@ void MediaFactory::unloadVideoCaptures()
 
 
 VideoCapture::Ptr MediaFactory::createVideoCapture(int deviceId) //, unsigned flags
-{    
+{
     TraceL << "Creating video capture: " << deviceId << endl;
 
     if (deviceId < 0)
@@ -158,18 +158,18 @@ VideoCapture::Ptr MediaFactory::createVideoCapture(int deviceId) //, unsigned fl
         return it->second;
 
     auto capture = std::make_shared<VideoCapture>(deviceId);
-    _videoCaptures[deviceId] = capture;    
+    _videoCaptures[deviceId] = capture;
     VideoCaptureLoaded.emit(this, capture);
 
     // Listen for errors.
-    // Note: The capture is opened ad started in the constructor, 
+    // Note: The capture is opened and started in the constructor,
     // so exceptions thrown during startup will not be handled
     // via this callback.
     capture->Error += sdelegate(this, &MediaFactory::onVideoCaptureError);
     return capture;
 }
 
-        
+
 void MediaFactory::onVideoCaptureError(void* sender, const scy::Error& err)
 {
     auto capture = reinterpret_cast<VideoCapture*>(sender);
@@ -185,7 +185,7 @@ void MediaFactory::onVideoCaptureError(void* sender, const scy::Error& err)
 VideoCapture::Ptr MediaFactory::createFileCapture(const std::string& file)
 {
     TraceL << "Create video file capture: " << file << endl;
-    
+
     return std::make_shared<VideoCapture>(file);
 }
 

@@ -48,10 +48,10 @@ GarbageCollector::GarbageCollector() :
 GarbageCollector::~GarbageCollector()
 {
     TraceL << "Destroy: "
-      << "\n\tReady: " << _ready.size()
-      << "\n\tPending: " << _pending.size()
-      << "\n\tFinalize: " << _finalize
-      << std::endl;
+        << "ready=" << _ready.size() << ", "
+        << "pending=" << _pending.size() << ", "
+        << "finalize=" << _finalize
+        << std::endl;
 
     // NOTE: Calling finalize() here is dangerous since more handles may be
     // queued to the garbage collector during finalization causing a deadlock.
@@ -108,9 +108,8 @@ void GarbageCollector::runAsync()
         if (!_tid) { _tid = uv_thread_self(); }
         if (!_ready.empty() || !_pending.empty()) {
             TraceL << "Deleting: "
-                << "\n\tReady: " << _ready.size()
-                << "\n\tPending: " << _pending.size()
-                << "\n\tFinalize: " << _finalize
+                << "ready=" << _ready.size() << ", "
+                << "pending=" << _pending.size()
                 << std::endl;
 
             // Delete waiting pointers

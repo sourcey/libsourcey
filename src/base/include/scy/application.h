@@ -30,7 +30,7 @@
 
 namespace scy {
 
-        
+
 class Application
     /// A simple event based application which runs until the
     /// internal event loop is terminated.
@@ -50,22 +50,26 @@ public:
         // The active event loop.
         // May be assigned at construction, otherwise the default
         // event loop is used.
-    
+
     Application(uv::Loop* loop = uv::defaultLoop());
     ~Application();
-    
+
     void run();
     void stop();
     void finalize();
 
-    
+
     //
     // Shutdown handling
     //
 
+    void bindShutdownSignal(std::function<void(void*)> callback = nullptr, void* opaque = nullptr);
+        // Bind the shutdown signal.
+
     void waitForShutdown(std::function<void(void*)> callback = nullptr, void* opaque = nullptr);
-            
-    static void onShutdownSignal(uv_signal_t *req, int signum);        
+        // Bind the shutdown signal and run the main event loop.
+
+    static void onShutdownSignal(uv_signal_t *req, int signum);
     static void onPrintHandle(uv_handle_t* handle, void* arg);
 
 protected:
@@ -82,11 +86,11 @@ protected:
 
 typedef std::map<std::string, std::string> OptionMap;
 
-struct OptionParser 
-{    
+struct OptionParser
+{
     std::string exepath; // TODO: UTF8
     OptionMap args;
-    
+
     OptionParser(int argc, char* argv[], const char* delim); // "--"
 
     bool has(const char* key) {

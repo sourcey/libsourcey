@@ -197,7 +197,7 @@ void VideoCapture::run()
 
             empty = emitter.ndelegates() == 0;
             if (!empty) {
-                TraceS(this) << "Emitting: " << _counter.fps << std::endl;
+                // TraceS(this) << "Emitting: " << _counter.fps << std::endl;
                 MatrixPacket out(&frame);
                 emitter.emit(next, out);
             }
