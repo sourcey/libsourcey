@@ -16,7 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "videostreamcapturer.h"
+#include "scy/webrtc/videostreamcapturer.h"
 
 
 using std::endl;

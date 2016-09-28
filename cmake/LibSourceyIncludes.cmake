@@ -49,13 +49,13 @@ macro(find_dependency name)
 
   # Exit message on failure
   if (NOT ${var_root}_FOUND)
-    # message("Failed to include dependency: ${name}. Please build and install dependencies before using CMake.")
+    message("Failed to include dependency: ${name}. Please build and install dependencies before using CMake.")
     return()
   endif()
 
   # Set a HAVE_XXX variable at parent scope for our Config.h
-  set(HAVE_${var_root_upper} 1)
-  #set(HAVE_${var_root_upper} 1 PARENT_SCOPE)
+  set(HAVE_${var_root_upper} TRUE)
+  #set(HAVE_${var_root_upper} TRUE PARENT_SCOPE)
 endmacro()
 
 
@@ -226,7 +226,6 @@ macro(sourcey_find_library prefix)
   select_library_configurations(${prefix})
   # select_library_configurations(SSL_EAY)
 
-  message(${${prefix}_PATHS_RELEASE})
   # print_module_variables(${prefix})
 
   # unset(${prefix}_LIBRARY)
@@ -396,7 +395,7 @@ endmacro()
 #
 macro(set_module_found module)
   set(${module}_FOUND FALSE)
-  set(${module}_FOUND FALSE PARENT_SCOPE)
+  # set(${module}_FOUND FALSE PARENT_SCOPE)
 
   # Compile the list of required vars
   set(_${module}_REQUIRED_VARS ${module}_LIBRARIES) # ${module}_INCLUDE_DIRS
@@ -415,10 +414,10 @@ macro(set_module_found module)
   set(${module}_LIBRARY_DIRS ${${module}_LIBRARY_DIRS} CACHE STRING   "The ${module} library directories." FORCE)
   set(${module}_LIBRARIES  ${${module}_LIBRARIES}  CACHE STRING   "The ${module} libraries." FORCE)
   set(${module}_FOUND    ${${module}_FOUND}    CACHE BOOLEAN  "The ${module} found status." FORCE)
-  #set(${module}_INCLUDE_DIRS ${${module}_INCLUDE_DIRS} PARENT_SCOPE)
-  #set(${module}_LIBRARY_DIRS ${${module}_LIBRARY_DIRS} PARENT_SCOPE)
-  #set(${module}_LIBRARIES  ${${module}_LIBRARIES}  PARENT_SCOPE)
-  #set(${module}_FOUND    ${${module}_FOUND}    PARENT_SCOPE)
+  # set(${module}_INCLUDE_DIRS ${${module}_INCLUDE_DIRS} PARENT_SCOPE)
+  # set(${module}_LIBRARY_DIRS ${${module}_LIBRARY_DIRS} PARENT_SCOPE)
+  # set(${module}_LIBRARIES  ${${module}_LIBRARIES}  PARENT_SCOPE)
+  # set(${module}_FOUND    ${${module}_FOUND}    PARENT_SCOPE)
 
   # Ensure required variables have been set, or fail in error.
   if (${module}_FIND_REQUIRED)
@@ -430,7 +429,7 @@ macro(set_module_found module)
   # Set the module as found.
   if (${module}_LIBRARIES)
     set(${module}_FOUND TRUE)
-    set(${module}_FOUND TRUE PARENT_SCOPE)
+    # set(${module}_FOUND TRUE PARENT_SCOPE)
   else()
     message("Failed to locate ${module}. Please specify paths manually.")
   endif()

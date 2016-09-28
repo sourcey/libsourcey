@@ -267,10 +267,10 @@ void AVEncoder::cleanup()
         _formatCtx = nullptr;
     }
 
-    //if (_videoPtsCalc) {
+    // if (_videoPtsCalc) {
     //    delete _videoPtsCalc;
     //    _videoPtsCalc = nullptr;
-    //}
+    // }
 
     if (_ioBuffer) {
         delete _ioBuffer;
@@ -346,7 +346,7 @@ bool writeOutputPacket(AVFormatContext *formatCtx, AVPacket& packet)
         << "\n\tDuration: " << packet.duration
         << endl;
 
-     // Write the encoded frame to the output file
+    // Write the encoded frame to the output file
     if (av_interleaved_write_frame(formatCtx, &packet) != 0) {
         WarnL << "Cannot write packet" << endl;
         return false;
@@ -606,97 +606,99 @@ bool AVEncoder::encodeAudio(std::uint8_t* buffer, int bufferSize, int frameSize,
 }
 
 
-// bool AVEncoder::encodeAudio(AVFrame* frame)
-// {
-//     assert(frame);
-//     assert(frame->nb_samples);
-//     TraceS(this) << "Encoding Audio Packet: " << frame->nb_samples << endl;
-//
-//     EncoderOptions* options = nullptr;
-//     AVFormatContext* formatCtx = nullptr;
-//     AudioEncoderContext* audio = nullptr;
-//     // AVFifoBuffer* audioFifo = nullptr;
-//     // std::uint8_t* audioBuffer = nullptr;
-//     {
-//         //Mutex::ScopedLock lock(_mutex);
-//         options = &_options;
-//         formatCtx = _formatCtx;
-//         audio = _audio;
-//         // audioFifo = _audioFifo;
-//         // audioBuffer = _audioBuffer;
-//     }
-//
-//     if (!isActive())
-//         throw std::runtime_error("The encoder is not initialized");
-//
-//     if (!audio)
-//         throw std::runtime_error("No audio context");
-//
-//     // if (!buffer || !bufferSize)
-//     //     throw std::runtime_error("Invalid audio input");
-//
-//     AVPacket opacket;
-//
-//     bool res = false;
-//     //assert(calc);
-//     if (audio->encode(frame, opacket)) {
-//         assert(opacket.stream_index == audio->stream->index);
-//         assert(opacket.data);
-//         assert(opacket.size);
-//
-//         // opacket.pts = _videoPts; //AV_NOPTS_VALUE;
-//         // opacket.dts = AV_NOPTS_VALUE;
-//
-//         TraceS(this) << "Writing Audio:"
-//             << "\n\tPacket Size: " << opacket.size
-//             << "\n\tPTS: " << opacket.pts
-//             << "\n\tDTS: " << opacket.dts
-//             << "\n\tDuration: " << opacket.duration
-//             << endl;
-//
-//          // Write the encoded frame to the output file
-//         assert(isActive());
-//         if (av_interleaved_write_frame(formatCtx, &opacket) != 0) {
-//             WarnL << "Cannot write audio frame" << endl;
-//         }
-//         else res = true;
-//     }
-//
-//     // TODO: Move FIFO to the encoder context.
-//     // bool res = false;
-//     // av_fifo_generic_write(audioFifo, (std::uint8_t*)buffer, bufferSize, nullptr);
-//     // while (av_fifo_size(audioFifo) >= _audio->outputFrameSize) {
-//     //     av_fifo_generic_read(audioFifo, audioBuffer, audio->outputFrameSize, nullptr);
-//     //
-//     //     AVPacket opacket;
-//     //
-//     //     //assert(calc);
-//     //     if (audio->encode(audioBuffer, audio->outputFrameSize, time/*calc ? calc->tick() : AV_NOPTS_VALUE*/, opacket)) {
-//     //         assert(opacket.stream_index == audio->stream->index);
-//     //         assert(opacket.data);
-//     //         assert(opacket.size);
-//     //
-//     //         // opacket.pts = _videoPts; //AV_NOPTS_VALUE;
-//     //         // opacket.dts = AV_NOPTS_VALUE;
-//     //
-//     //         TraceS(this) << "Writing Audio:"
-//     //             << "\n\tPacket Size: " << opacket.size
-//     //             << "\n\tPTS: " << opacket.pts
-//     //             << "\n\tDTS: " << opacket.dts
-//     //             << "\n\tDuration: " << opacket.duration
-//     //             << endl;
-//     //
-//     //          // Write the encoded frame to the output file
-//     //         assert(isActive());
-//     //         if (av_interleaved_write_frame(formatCtx, &opacket) != 0) {
-//     //             WarnL << "Cannot write audio frame" << endl;
-//     //         }
-//     //         else res = true;
-//     //     }
-//     // }
-//
-//     return res;
-// }
+#if 0
+bool AVEncoder::encodeAudio(AVFrame* frame)
+{
+    assert(frame);
+    assert(frame->nb_samples);
+    TraceS(this) << "Encoding Audio Packet: " << frame->nb_samples << endl;
+
+    EncoderOptions* options = nullptr;
+    AVFormatContext* formatCtx = nullptr;
+    AudioEncoderContext* audio = nullptr;
+    // AVFifoBuffer* audioFifo = nullptr;
+    // std::uint8_t* audioBuffer = nullptr;
+    {
+        //Mutex::ScopedLock lock(_mutex);
+        options = &_options;
+        formatCtx = _formatCtx;
+        audio = _audio;
+        // audioFifo = _audioFifo;
+        // audioBuffer = _audioBuffer;
+    }
+
+    if (!isActive())
+        throw std::runtime_error("The encoder is not initialized");
+
+    if (!audio)
+        throw std::runtime_error("No audio context");
+
+    // if (!buffer || !bufferSize)
+    //     throw std::runtime_error("Invalid audio input");
+
+    AVPacket opacket;
+
+    bool res = false;
+    //assert(calc);
+    if (audio->encode(frame, opacket)) {
+        assert(opacket.stream_index == audio->stream->index);
+        assert(opacket.data);
+        assert(opacket.size);
+
+        // opacket.pts = _videoPts; //AV_NOPTS_VALUE;
+        // opacket.dts = AV_NOPTS_VALUE;
+
+        TraceS(this) << "Writing Audio:"
+            << "\n\tPacket Size: " << opacket.size
+            << "\n\tPTS: " << opacket.pts
+            << "\n\tDTS: " << opacket.dts
+            << "\n\tDuration: " << opacket.duration
+            << endl;
+
+         // Write the encoded frame to the output file
+        assert(isActive());
+        if (av_interleaved_write_frame(formatCtx, &opacket) != 0) {
+            WarnL << "Cannot write audio frame" << endl;
+        }
+        else res = true;
+    }
+
+    // TODO: Move FIFO to the encoder context.
+    // bool res = false;
+    // av_fifo_generic_write(audioFifo, (std::uint8_t*)buffer, bufferSize, nullptr);
+    // while (av_fifo_size(audioFifo) >= _audio->outputFrameSize) {
+    //     av_fifo_generic_read(audioFifo, audioBuffer, audio->outputFrameSize, nullptr);
+    //
+    //     AVPacket opacket;
+    //
+    //     //assert(calc);
+    //     if (audio->encode(audioBuffer, audio->outputFrameSize, time/*calc ? calc->tick() : AV_NOPTS_VALUE*/, opacket)) {
+    //         assert(opacket.stream_index == audio->stream->index);
+    //         assert(opacket.data);
+    //         assert(opacket.size);
+    //
+    //         // opacket.pts = _videoPts; //AV_NOPTS_VALUE;
+    //         // opacket.dts = AV_NOPTS_VALUE;
+    //
+    //         TraceS(this) << "Writing Audio:"
+    //             << "\n\tPacket Size: " << opacket.size
+    //             << "\n\tPTS: " << opacket.pts
+    //             << "\n\tDTS: " << opacket.dts
+    //             << "\n\tDuration: " << opacket.duration
+    //             << endl;
+    //
+    //          // Write the encoded frame to the output file
+    //         assert(isActive());
+    //         if (av_interleaved_write_frame(formatCtx, &opacket) != 0) {
+    //             WarnL << "Cannot write audio frame" << endl;
+    //         }
+    //         else res = true;
+    //     }
+    // }
+
+    return res;
+}
+#endif
 
 
 } } // namespace scy::av

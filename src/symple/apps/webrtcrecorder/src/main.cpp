@@ -1,7 +1,6 @@
 #include "signaler.h"
 #include "scy/logger.h"
 #include "scy/idler.h"
-#include "scy/media/mediafactory.h"
 
 #include "webrtc/base/ssladapter.h"
 #include "webrtc/base/thread.h"
@@ -11,7 +10,7 @@ using std::endl;
 using namespace scy;
 
 
-// Test this demo with: https://github.com/sourcey/symple-webrtc-native-streaming-demo
+// Test this demo with: https://github.com/sourcey/symple-webrtc-native-recording-demo
 
 
 #define SERVER_HOST "localhost"
@@ -31,11 +30,8 @@ int main(int argc, char** argv)
     SSLManager::initNoVerifyClient();
 #endif
 
-    // Pre-initialize video captures in the main thread
-    av::MediaFactory::instance().loadVideoCaptures();
-
     // Setup WebRTC environment
-    rtc::LogMessage::LogToDebug(rtc::LERROR); //(rtc::LoggingSeverity)
+    rtc::LogMessage::LogToDebug(rtc::LERROR);
     rtc::LogMessage::LogTimestamps();
     rtc::LogMessage::LogThreads();
 
@@ -45,8 +41,8 @@ int main(int argc, char** argv)
         smpl::Client::Options options;
         options.host = SERVER_HOST;
         options.port = SERVER_PORT;
-        options.name = "Video Server";
-        options.user = "videoserver";
+        options.name = "Video Recorder";
+        options.user = "videorecorder";
 
         // NOTE: The server must enable anonymous
         // authentication for this test.
@@ -55,7 +51,7 @@ int main(int argc, char** argv)
         Signaler app(options);
 
         Idler rtc(app.loop, [](void* arg) {
-            // DebugL << "Running WebRTC loop" << endl;
+            TraceL << "Running WebRTC loop" << endl;
             auto thread = reinterpret_cast<rtc::Thread*>(arg);
             thread->ProcessMessages(10);
         }, rtc::Thread::Current());
@@ -63,10 +59,6 @@ int main(int argc, char** argv)
         app.waitForShutdown();
         // app.finalize();
     }
-
-    // Shutdown the media factory and release devices
-    av::MediaFactory::instance().unloadVideoCaptures();
-    av::MediaFactory::shutdown();
 
 #if USE_SSL
     net::SSLManager::destroy();

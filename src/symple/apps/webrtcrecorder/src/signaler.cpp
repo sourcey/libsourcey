@@ -1,5 +1,7 @@
 #include "signaler.h"
 
+#include "scy/util.h"
+
 #include <iostream>
 #include <string>
 
@@ -8,6 +10,16 @@ using std::endl;
 
 
 namespace scy {
+
+
+// // Names used for a IceCandidate JSON object.
+// const char kCandidateSdpMidName[] = "sdpMid";
+// const char kCandidateSdpMlineIndexName[] = "sdpMLineIndex";
+// const char kCandidateSdpName[] = "candidate";
+//
+// // Names used for a SessionDescription JSON object.
+// const char kSessionDescriptionTypeName[] = "type";
+// const char kSessionDescriptionSdpName[] = "sdp";
 
 
 Signaler::Signaler(const smpl::Client::Options& options) :
@@ -62,12 +74,20 @@ void Signaler::onPeerConnected(void*, smpl::Peer& peer)
         return;
     }
 
-    auto conn = new PeerConnectionClient(this, peer.id(), PeerConnectionClient::Offer);
+    auto conn = new PeerConnectionClient(this, peer.id(), PeerConnectionClient::Answer);
     conn->constraints().SetMandatoryReceiveAudio(false);
-    conn->constraints().SetMandatoryReceiveVideo(false);
-    conn->constraints().SetAllowDtlsSctpDataChannels();
+    conn->constraints().SetMandatoryReceiveVideo(true);
     conn->initConnection();
-    conn->createOffer();
+
+    // if (!conn->initConnection()) {
+    //     ErrorL << "Cannot initialize peer connection: " << peer.id() << endl;
+    //     delete conn;
+    //     assert(0);
+    //     return;
+    // }
+
+    // Uncomment to always initiate a video session with the connecting peer.
+    // conn->createOffer();
 
     PeerConnectionManager::add(peer.id(), conn);
 }
@@ -78,10 +98,10 @@ void Signaler::onPeerMessage(void*, smpl::Message& m)
     DebugL << "Peer message: " << m.from().toString() << endl;
 
     if (m.isMember("offer")) {
-        assert(0 && "offer not supported");
+        recvSDP(m.from().id, m["offer"]);
     }
     else if (m.isMember("answer")) {
-        recvSDP(m.from().id, m["answer"]);
+        assert(0 && "answer not supported");
     }
     else if (m.isMember("candidate")) {
         recvCandidate(m.from().id, m["candidate"]);
@@ -122,13 +142,21 @@ void Signaler::onClientStateChange(void* sender, sockio::ClientState& state, con
 
 void Signaler::onAddRemoteStream(const std::string& peerid, webrtc::MediaStreamInterface* stream)
 {
-    assert(0 && "not required");
+    webrtc::VideoTrackVector videoTracks = stream->GetVideoTracks();
+    if (videoTracks.empty()) {
+        assert(0 && "no video tracks");
+        return;
+    }
+
+    // Only render the first track.
+    webrtc::VideoTrackInterface* track = videoTracks[0];
+    _remoteRenderer.reset(new VideoRecorder(track, "webrtcrecorder"));
 }
 
 
 void Signaler::onRemoveRemoteStream(const std::string& peerid, webrtc::MediaStreamInterface* stream)
 {
-    assert(0 && "not required");
+    assert(0 && "free streams");
 }
 
 

@@ -20,6 +20,7 @@ set(_WEBRTC_SUFFIX_DEBUG out/Debug)
 set(_WEBRTC_SUFFIX_RELEASE out/Release)
 # set(_WEBRTC_GENERATOR_EXCLUDES jsoncpp|unittest|examples|main.o)
 
+
 # unset(WEBRTC_INCLUDE_DIR)
 # unset(WEBRTC_INCLUDE_DIR CACHE)
 # unset(WEBRTC_LIBRARY)
@@ -28,7 +29,6 @@ set(_WEBRTC_SUFFIX_RELEASE out/Release)
 # unset(WEBRTC_LIBRARY_DEBUG CACHE)
 # unset(WEBRTC_LIBRARY_RELEASE)
 # unset(WEBRTC_LIBRARY_RELEASE CACHE)
-
 
 # ----------------------------------------------------------------------
 # Find WEBRTC include path
@@ -49,8 +49,8 @@ if(WEBRTC_INCLUDE_DIR)
   # Attempt to find our own monolythic library
   sourcey_find_library(WEBRTC
     NAMES webrtc_full
-    PATHS_DEBUG ${WEBRTC_LIBRARY_DIR_DEBUG}
-    PATHS_RELEASE ${WEBRTC_LIBRARY_DIR_RELEASE}
+    PATHS_DEBUG ${WEBRTC_INCLUDE_DIR}/${_WEBRTC_SUFFIX_DEBUG} #${WEBRTC_LIBRARY_DIR_DEBUG}
+    PATHS_RELEASE ${WEBRTC_INCLUDE_DIR}/${_WEBRTC_SUFFIX_RELEASE} #${WEBRTC_LIBRARY_DIR_RELEASE}
   )
 
   # find_path(WEBRTC_LIBRARY_DIR_DEBUG
@@ -138,9 +138,9 @@ if(WEBRTC_INCLUDE_DIR)
 
   include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
   select_library_configurations(WEBRTC)
-
-  # print_module_variables(WEBRTC)
 endif()
+
+# print_module_variables(WEBRTC)
 
 # ----------------------------------------------------------------------
 # Display status

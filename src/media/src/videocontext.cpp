@@ -141,17 +141,15 @@ void VideoEncoderContext::create() //, const VideoCodec& params
     if (!stream)
         throw std::runtime_error("Cannot create video stream.");
 
-    /*
-    // fixme: testing realtime streams
-    // http://stackoverflow.com/questions/16768794/muxing-from-audio-and-video-files-with-ffmpeg
-    stream->time_base.den = 1000; //realtime_ ? 1000 : fps_.num;
-    stream->time_base.num = 1; //realtime_ ? 1: fps_.den;
-
-    stream->r_frame_rate.num = oparams.fps;
-    stream->r_frame_rate.den = 1;
-    stream->avg_frame_rate.den = 1;
-    stream->avg_frame_rate.num = oparams.fps;
-    */
+    // // fixme: testing realtime streams
+    // // http://stackoverflow.com/questions/16768794/muxing-from-audio-and-video-files-with-ffmpeg
+    // stream->time_base.den = 1000; //realtime_ ? 1000 : fps_.num;
+    // stream->time_base.num = 1; //realtime_ ? 1: fps_.den;
+    //
+    // stream->r_frame_rate.num = oparams.fps;
+    // stream->r_frame_rate.den = 1;
+    // stream->avg_frame_rate.den = 1;
+    // stream->avg_frame_rate.num = oparams.fps;
 
     ctx = stream->codec;
 
@@ -270,26 +268,25 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
     assert(frame->data[0]);
     assert(codec);
 
-    AVFrame* oframe = conv ? conv->convert(iframe) : iframe;
+    // Convert the input frame if required
+    AVFrame* cframe = conv ? conv->convert(iframe) : iframe;
+    cframe->format = ctx->pix_fmt;
+    // cframe->width  = width;
+    // cframe->height = height;
 
     // Set the input PTS or a monotonic value to keep the encoder happy.
     // The actual setting of the PTS is outside the scope of the encoder.
-    oframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : ctx->frame_number;
-
-    oframe->format = ctx->pix_fmt;
-    //oframe->width  = width;
-    //oframe->height = height;
+    cframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : ctx->frame_number;
 
     av_init_packet(&opacket);
     opacket.stream_index = stream->index;
     opacket.data = nullptr; // using encoder assigned buffer
     opacket.size = 0;
-    //opacket.data = this->buffer;
-    //opacket.size = this->bufferSize;
+    // opacket.data = this->buffer;
+    // opacket.size = this->bufferSize;
 
     int frameEncoded = 0;
-
-    if (avcodec_encode_video2(ctx, &opacket, oframe, &frameEncoded) < 0) {
+    if (avcodec_encode_video2(ctx, &opacket, cframe, &frameEncoded) < 0) {
         // TODO: Use av_strerror
         error = "Fatal encoder error";
         ErrorS(this) << error << endl;
@@ -341,7 +338,7 @@ bool VideoEncoderContext::flush(AVPacket& opacket)
             opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
         if (opacket.duration > 0)
             opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
-        TraceS(this) << "Flushed Video Frame: " << opacket.pts << endl;
+        TraceS(this) << "Flushed video frame: " << opacket.pts << endl;
         return true;
     }
     return false;
@@ -379,7 +376,7 @@ void VideoCodecEncoderContext::create()
     // Find the video encoder
     codec = avcodec_find_encoder_by_name(oparams.encoder.c_str());
     if (!codec)
-           throw std::runtime_error("Video encoder not found.");
+        throw std::runtime_error("Video encoder not found: " + oparams.encoder);
 
     ctx = avcodec_alloc_context3(codec);
     if (!ctx)
@@ -459,6 +456,9 @@ bool VideoCodecEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 {
     TraceS(this) << "Encoding Video Packet" << endl;
+
+    // TODO: This is same as VideoCodecEncoderContext, create a single
+    // encodeVideo helper method for both
 
     AVFrame* oframe = conv ? conv->convert(iframe) : iframe;
     oframe->pts = iframe->pts;
@@ -857,15 +857,13 @@ void initDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, c
     //assert(opacket->dts >= 0);
     //assert(opacket->pts >= 0);
 
-    /*
-    TraceL << "[VideoContext] Init Decoded Frame Pcket:"
-        << "\n\tFrame DTS: " << frame->pkt_dts
-        << "\n\tFrame PTS: " << frame->pkt_pts
-        << "\n\tPacket Size: " << opacket->size
-        << "\n\tPacket DTS: " << opacket->dts
-        << "\n\tPacket PTS: " << opacket->pts
-        << endl;
-    */
+    // TraceL << "[VideoContext] Init Decoded Frame Pcket:"
+    //     << "\n\tFrame DTS: " << frame->pkt_dts
+    //     << "\n\tFrame PTS: " << frame->pkt_pts
+    //     << "\n\tPacket Size: " << opacket->size
+    //     << "\n\tPacket DTS: " << opacket->dts
+    //     << "\n\tPacket PTS: " << opacket->pts
+    //     << endl;
 }
 
 
@@ -880,6 +878,24 @@ void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
     params.fps =
         ctx->time_base.den /
         ctx->time_base.num;
+}
+
+
+bool encodeVideoPacket(const VideoContext* video, const AVFrame* iframe, AVPacket& opacket)
+{
+    assert(0);
+    return true;
+}
+
+
+void printAvailableEncoders(std::ostream& ost, const char* delim)
+{
+    AVCodec* p = av_codec_next(NULL);
+    while (p) {
+        if (av_codec_is_encoder(p))
+            ost << p->name << delim;
+        p = p->next;
+    }
 }
 
 
