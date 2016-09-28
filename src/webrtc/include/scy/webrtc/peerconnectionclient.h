@@ -45,16 +45,16 @@ public:
     PeerConnectionClient(PeerConnectionManager* manager, const std::string& peerid, Mode mode);
     ~PeerConnectionClient();
 
-    void initConnection();
-        // Initialize the peer connection once configuration and constraints
-        // have been set.
+    rtc::scoped_refptr<webrtc::MediaStreamInterface> createMediaStream();
+        // Create the local media stream.
+        // Only necessary when we are creating the offer.
+
+    void createConnection();
+        // Create the peer connection once configuration, constraints and
+        // streams have been set.
 
     void closeConnection();
         // Close the peer connection.
-
-    void addMediaStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream);
-        // Add a media stream.
-        // Only necessary when we are creating the offer.
 
     void createOffer();
         // Create the offer SDP tos end to the peer.
@@ -68,6 +68,8 @@ public:
         // Receive a remote candidate.
 
     webrtc::FakeConstraints& constraints();
+    rtc::scoped_refptr<webrtc::PeerConnectionInterface> peerConnection() const;
+    rtc::scoped_refptr<webrtc::MediaStreamInterface> stream() const;
 
 protected:
 
@@ -92,9 +94,7 @@ private:
     std::string _peerid;
     Mode _mode;
     webrtc::PeerConnectionInterface::RTCConfiguration _config;
-    // webrtc::PeerConnectionInterface::IceServer server_;
     webrtc::FakeConstraints _constraints;
-    // rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> _factory;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> _peerConnection;
     rtc::scoped_refptr<webrtc::MediaStreamInterface> _stream;
 };

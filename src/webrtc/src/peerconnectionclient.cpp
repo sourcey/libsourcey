@@ -18,7 +18,6 @@
 
 #include "scy/webrtc/peerconnectionclient.h"
 #include "scy/webrtc/peerconnectionmanager.h"
-#include "scy/webrtc/videostreamcapturer.h"
 #include "scy/logger.h"
 
 #include "webrtc/modules/video_capture/video_capture_factory.h"
@@ -31,26 +30,13 @@ using std::endl;
 namespace scy {
 
 
-//
-// Peer Connection Client
-//
-
-
 PeerConnectionClient::PeerConnectionClient(PeerConnectionManager* manager, const std::string& peerid, Mode mode) :
     _manager(manager),
     _peerid(peerid),
-    _mode(mode)//,
-    // _factory(webrtc::CreatePeerConnectionFactory())
+    _mode(mode),
+    _peerConnection(nullptr),
+    _stream(nullptr)
 {
-    // webrtc::PeerConnectionInterface::IceServer stun;
-    // stun.uri = kGoogleStunServerUri;
-    // _config.servers.push_back(stun);
-    //
-    // // We are send only for now
-    // _constraints.SetMandatoryReceiveAudio(false);
-    // _constraints.SetMandatoryReceiveVideo(false);
-    // _constraints.SetAllowDtlsSctpDataChannels();
-
     // webrtc::PeerConnectionInterface::IceServer stun;
     // stun.uri = kGoogleStunServerUri;
     // _config.servers.push_back(stun);
@@ -67,30 +53,25 @@ PeerConnectionClient::~PeerConnectionClient()
 }
 
 
-void PeerConnectionClient::initConnection()
+rtc::scoped_refptr<webrtc::MediaStreamInterface> PeerConnectionClient::createMediaStream()
+{
+    assert(_mode == Offer);
+    assert(!_stream);
+    _stream = _manager->factory()->CreateLocalMediaStream(kStreamLabel);
+    return _stream;
+}
+
+
+void PeerConnectionClient::createConnection()
 {
     _peerConnection = _manager->factory()->CreatePeerConnection(
         _config, &_constraints, NULL, NULL, this);
-    //
-    // rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track(
-    //     _manager->factory()->CreateVideoTrack(kVideoLabel,
-    //         _manager->factory()->CreateVideoSource(new VideoStreamCapturer(0), NULL)));
-    //
-    // rtc::scoped_refptr<webrtc::AudioTrackInterface> audio_track(
-    //     _manager->factory()->CreateAudioTrack(kAudioLabel,
-    //         _manager->factory()->CreateAudioSource(NULL)));
-    //
-    // _stream = _manager->factory()->CreateLocalMediaStream(kStreamLabel);
-    // _stream->AddTrack(video_track);
-    // _stream->AddTrack(audio_track);
-    //
-    // if (!_peerConnection->AddStream(_stream)) {
-    //     ErrorL << _peerid << ": Adding stream to PeerConnection failed" << endl;
-    //     assert(0);
-    //     // return false;
-    // }
 
-    // return true;
+    if (_stream) {
+        if (!_peerConnection->AddStream(_stream)) {
+            throw std::runtime_error("Adding stream to PeerConnection failed");
+        }
+    }
 }
 
 
@@ -98,18 +79,6 @@ void PeerConnectionClient::closeConnection()
 {
     if (_peerConnection) {
         _peerConnection->Close();
-    }
-}
-
-
-void PeerConnectionClient::addMediaStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream)
-{
-    assert(_mode == Offer);
-    assert(!_stream);
-
-    _stream = stream;
-    if (!_peerConnection->AddStream(_stream)) {
-        throw std::runtime_error("Adding stream to PeerConnection failed");
     }
 }
 
@@ -133,14 +102,13 @@ void PeerConnectionClient::recvSDP(const std::string& type, const std::string& s
         throw std::runtime_error("Can't parse remote SDP: " + error.description);
         // ErrorL << _peerid << ": Can't parse remote offer: " << error.description << endl;
         // assert(0);
-        // return false;
+        // return;
     }
     _peerConnection->SetRemoteDescription(DummySetSessionDescriptionObserver::Create(), desc);
 
     if (type == "offer") {
         assert(_mode == Answer);
         _peerConnection->CreateAnswer(this, &_constraints);
-        // assert(0);
     }
     else {
         assert(_mode == Offer);
@@ -148,28 +116,8 @@ void PeerConnectionClient::recvSDP(const std::string& type, const std::string& s
 }
 
 
-// void PeerConnectionClient::recvRemoteAnswer(const std::string& type, const std::string& sdp)
-// {
-//     webrtc::SdpParseError error;
-//     webrtc::SessionDescriptionInterface* desc(webrtc::CreateSessionDescription(type, sdp, &error));
-//     if (!desc) {
-//         throw std::runtime_error("Can't parse remote answer: " + error.description);
-//         // ErrorL << "Can't parse remote answer: " << error.description << endl;
-//         // assert(0);
-//         // return false;
-//     }
-//     _peerConnection->SetRemoteDescription(DummySetSessionDescriptionObserver::Create(), desc);
-//     // return true;
-// }
-
-
 void PeerConnectionClient::recvCandidate(const std::string& mid, int mlineindex, const std::string& sdp)
 {
-    std::cout << _peerid << ": Receive candidate: " << mid << endl;
-        std::cout << _peerid << ": Receive candidate: " << mlineindex << endl;
-            std::cout << _peerid << ": Receive candidate: " << sdp << endl;
-    //         assert(0);
-
     webrtc::SdpParseError error;
     std::unique_ptr<webrtc::IceCandidateInterface> candidate(webrtc::CreateIceCandidate(mid, mlineindex, sdp, &error));
     if (!candidate) {
@@ -179,7 +127,6 @@ void PeerConnectionClient::recvCandidate(const std::string& mid, int mlineindex,
         // return false;
     }
     _peerConnection->AddIceCandidate(candidate.get());
-    // return true;
 }
 
 
@@ -266,6 +213,18 @@ void PeerConnectionClient::OnFailure(const std::string &error)
 webrtc::FakeConstraints& PeerConnectionClient::constraints()
 {
     return _constraints;
+}
+
+
+rtc::scoped_refptr<webrtc::PeerConnectionInterface> PeerConnectionClient::peerConnection() const
+{
+    return _peerConnection;
+}
+
+
+rtc::scoped_refptr<webrtc::MediaStreamInterface> PeerConnectionClient::stream() const
+{
+    return _stream;
 }
 
 

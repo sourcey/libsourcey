@@ -12,16 +12,6 @@ using std::endl;
 namespace scy {
 
 
-// // Names used for a IceCandidate JSON object.
-// const char kCandidateSdpMidName[] = "sdpMid";
-// const char kCandidateSdpMlineIndexName[] = "sdpMLineIndex";
-// const char kCandidateSdpName[] = "candidate";
-//
-// // Names used for a SessionDescription JSON object.
-// const char kSessionDescriptionTypeName[] = "type";
-// const char kSessionDescriptionSdpName[] = "sdp";
-
-
 Signaler::Signaler(const smpl::Client::Options& options) :
     _client(options)
 {
@@ -77,17 +67,7 @@ void Signaler::onPeerConnected(void*, smpl::Peer& peer)
     auto conn = new PeerConnectionClient(this, peer.id(), PeerConnectionClient::Answer);
     conn->constraints().SetMandatoryReceiveAudio(false);
     conn->constraints().SetMandatoryReceiveVideo(true);
-    conn->initConnection();
-
-    // if (!conn->initConnection()) {
-    //     ErrorL << "Cannot initialize peer connection: " << peer.id() << endl;
-    //     delete conn;
-    //     assert(0);
-    //     return;
-    // }
-
-    // Uncomment to always initiate a video session with the connecting peer.
-    // conn->createOffer();
+    conn->createConnection();
 
     PeerConnectionManager::add(peer.id(), conn);
 }

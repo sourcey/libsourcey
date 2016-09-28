@@ -48,37 +48,6 @@ protected:
 };
 
 
-// class Signaler: public Application
-// {
-//     PointerCollection<std::string, PeerConnectionClient1> manager;
-//     ipc::SyncQueue<> ipc;
-// #if USE_SSL
-//     smpl::SSLClient client;
-// #else
-//     smpl::TCPClient client;
-// #endif
-//
-//     // PeerConnectionManager manager;
-//
-// public:
-//     Signaler(const smpl::Client::Options& options);
-//     ~Signaler();
-//
-//     void broadcastSDP(const std::string& type, const std::string sdp);
-//     void broadcastCandidate(const std::string& mid, int mlineindex, const std::string sdp);
-//
-//   protected:
-//     void postMessage(const smpl::Message& m);
-//     void syncMessage(const ipc::Action& action);
-//
-//     void onPeerConnected(void*, smpl::Peer& peer);
-//     void onPeerMessage(void*, smpl::Message& m);
-//     void onPeerDiconnected(void*, const smpl::Peer& peer);
-//
-//     void onClientStateChange(void* sender, sockio::ClientState& state, const sockio::ClientState& oldState);
-// };
-
-
 } // namespace scy
 
 

@@ -1,5 +1,7 @@
 #include "signaler.h"
 
+#include "scy/webrtc/videostreamcapturer.h"
+
 #include <iostream>
 #include <string>
 
@@ -66,7 +68,19 @@ void Signaler::onPeerConnected(void*, smpl::Peer& peer)
     conn->constraints().SetMandatoryReceiveAudio(false);
     conn->constraints().SetMandatoryReceiveVideo(false);
     conn->constraints().SetAllowDtlsSctpDataChannels();
-    conn->initConnection();
+
+    // Create the media stream and tracks
+    rtc::scoped_refptr<webrtc::MediaStreamInterface> stream = conn->createMediaStream();
+    rtc::scoped_refptr<webrtc::VideoTrackInterface> videoTrack(
+        _factory->CreateVideoTrack(kVideoLabel,
+            _factory->CreateVideoSource(new VideoStreamCapturer(0), NULL)));
+    rtc::scoped_refptr<webrtc::AudioTrackInterface> audioTrack(
+        _factory->CreateAudioTrack(kAudioLabel,
+            _factory->CreateAudioSource(NULL)));
+    stream->AddTrack(videoTrack);
+    stream->AddTrack(audioTrack);
+
+    conn->createConnection();
     conn->createOffer();
 
     PeerConnectionManager::add(peer.id(), conn);
