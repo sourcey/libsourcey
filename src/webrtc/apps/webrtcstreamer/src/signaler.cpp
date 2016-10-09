@@ -1,6 +1,6 @@
 #include "signaler.h"
 
-#include "scy/util.h"
+#include "scy/webrtc/opencvvideocapturer.h"
 
 #include <iostream>
 #include <string>
@@ -64,10 +64,24 @@ void Signaler::onPeerConnected(void*, smpl::Peer& peer)
         return;
     }
 
-    auto conn = new PeerConnectionClient(this, peer.id(), PeerConnectionClient::Answer);
+    auto conn = new PeerConnectionClient(this, peer.id(), PeerConnectionClient::Offer);
     conn->constraints().SetMandatoryReceiveAudio(false);
-    conn->constraints().SetMandatoryReceiveVideo(true);
+    conn->constraints().SetMandatoryReceiveVideo(false);
+    conn->constraints().SetAllowDtlsSctpDataChannels();
+
+    // Create the media stream and tracks
+    rtc::scoped_refptr<webrtc::MediaStreamInterface> stream = conn->createMediaStream();
+    rtc::scoped_refptr<webrtc::VideoTrackInterface> videoTrack(
+        _factory->CreateVideoTrack(kVideoLabel,
+            _factory->CreateVideoSource(new OpenCVVideoCapturer(0), NULL)));
+    rtc::scoped_refptr<webrtc::AudioTrackInterface> audioTrack(
+        _factory->CreateAudioTrack(kAudioLabel,
+            _factory->CreateAudioSource(NULL)));
+    stream->AddTrack(videoTrack);
+    stream->AddTrack(audioTrack);
+
     conn->createConnection();
+    conn->createOffer();
 
     PeerConnectionManager::add(peer.id(), conn);
 }
@@ -78,10 +92,10 @@ void Signaler::onPeerMessage(void*, smpl::Message& m)
     DebugL << "Peer message: " << m.from().toString() << endl;
 
     if (m.isMember("offer")) {
-        recvSDP(m.from().id, m["offer"]);
+        assert(0 && "offer not supported");
     }
     else if (m.isMember("answer")) {
-        assert(0 && "answer not supported");
+        recvSDP(m.from().id, m["answer"]);
     }
     else if (m.isMember("candidate")) {
         recvCandidate(m.from().id, m["candidate"]);
@@ -122,21 +136,13 @@ void Signaler::onClientStateChange(void* sender, sockio::ClientState& state, con
 
 void Signaler::onAddRemoteStream(const std::string& peerid, webrtc::MediaStreamInterface* stream)
 {
-    webrtc::VideoTrackVector videoTracks = stream->GetVideoTracks();
-    if (videoTracks.empty()) {
-        assert(0 && "no video tracks");
-        return;
-    }
-
-    // Only render the first track.
-    webrtc::VideoTrackInterface* track = videoTracks[0];
-    _remoteRenderer.reset(new VideoRecorder(track, "webrtcrecorder"));
+    assert(0 && "not required");
 }
 
 
 void Signaler::onRemoveRemoteStream(const std::string& peerid, webrtc::MediaStreamInterface* stream)
 {
-    assert(0 && "free streams");
+    assert(0 && "not required");
 }
 
 

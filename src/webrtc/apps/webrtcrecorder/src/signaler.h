@@ -2,7 +2,8 @@
 #define SCY_Signaler_H
 
 
-#include "videorecorder.h"
+#include "streamrecorder.h"
+#include "imagesequencerecorder.h"
 #include "scy/application.h"
 #include "scy/ipc.h"
 #include "scy/symple/client.h"
@@ -48,7 +49,8 @@ protected:
 #else
     smpl::TCPClient _client;
 #endif
-    std::unique_ptr<VideoRecorder> _remoteRenderer;
+    // std::unique_ptr<ImageSequenceRecorder> _remoteRenderer;
+    std::unique_ptr<StreamRecorder> _recorder;
 };
 
 

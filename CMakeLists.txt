@@ -258,7 +258,7 @@ if (BUILD_MODULE_TESTS)
   add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 endif()
 
-if(BUILD_MODULES OR BUILD_APPLICATIONS)
+#if(BUILD_MODULES OR BUILD_APPLICATIONS)
   subdirlist(subdirs ${LibSourcey_SOURCE_DIR})
   foreach(name ${subdirs})
     # This variable is so modules can set HAVE_LibSourcey_XXX for our
@@ -270,7 +270,7 @@ if(BUILD_MODULES OR BUILD_APPLICATIONS)
       add_subdirectory(${dir})
     endif()
   endforeach()
-endif()
+#endif()
 
 # Remove any duplicates from our lists
 if(LibSourcey_LINK_LIBRARIES)

@@ -8,3 +8,5 @@ Test data folders should be installed relative to compiled test binaries
 Work towards a no-rtti build
 
 Describe how to build WebRTC for use with LibSourcey
+
+Convert smaples to output format before FIFO storage

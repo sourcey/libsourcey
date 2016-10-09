@@ -8,4 +8,7 @@ if(HAVE_WEBRTC AND (BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_webrtc)
   endif()
 
   define_sourcey_module(webrtc)
+
+  add_subdirectory(apps)
+  
 endif()

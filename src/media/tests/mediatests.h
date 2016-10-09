@@ -24,18 +24,21 @@
 #include "scy/base.h"
 #include "scy/test.h"
 #include "scy/logger.h"
-#include "scy/signal.h"
-#include "scy/queue.h"
-#include "scy/packetqueue.h"
-#include "scy/media/devicemanager.h"
-#include "scy/media/flvmetadatainjector.h"
-#include "scy/media/formatregistry.h"
-#include "scy/media/mediafactory.h"
-#include "scy/media/avinputreader.h"
+// #include "scy/signal.h"
+// #include "scy/queue.h"
+// #include "scy/packetqueue.h"
+// #include "scy/media/devicemanager.h"
+// #include "scy/media/flvmetadatainjector.h"
+// #include "scy/media/formatregistry.h"
+// #include "scy/media/mediafactory.h"
+// #include "scy/media/avinputreader.h"
+// #include "scy/media/avpacketencoder.h"
+// #include "scy/media/thumbnailer.h"
+// #include "scy/media/iencoder.h"
+#include "scy/media/videocapture.h"
 #include "scy/media/audiocapture.h"
-#include "scy/media/avpacketencoder.h"
-#include "scy/media/thumbnailer.h"
-#include "scy/media/iencoder.h"
+#include "scy/media/audiocontext.h"
+#include "scy/media/audioresampler.h"
 
 
 using std::cout;
@@ -64,6 +67,166 @@ struct CallbackContext
         // cv::imshow("VideoCaptureTest", *packet.mat);
     }
 };
+
+
+//
+// Heleprs
+//
+
+
+// Generate sin tone with 440Hz frequency and duplicated channels
+void fillAudioSamplesUInt(std::uint16_t* samples, int sample_rate, int nb_channels, int nb_samples, double *t)
+{
+    int j, k;
+    float tincr = 2 * M_PI * 440.0 / sample_rate;
+    for (j = 0; j < nb_samples; j++) {
+        samples[2*j] = (int)(sin(*t) * 10000);
+        for (k = 1; k < nb_channels; k++)
+            samples[2*j + k] = samples[2*j];
+        *t += tincr;
+    }
+}
+
+
+// Generate sin tone with 440Hz frequency and duplicated channels
+void fillAudioSamples(double* samples, int sample_rate, int nb_channels, int nb_samples, double *t)
+{
+    int i, j;
+    double tincr = 1.0 / sample_rate, *dstp = samples;
+    const double c = 2 * M_PI * 440.0;
+    for (i = 0; i < nb_samples; i++) {
+        *dstp = sin(c * *t);
+        for (j = 1; j < nb_channels; j++)
+            dstp[j] = dstp[0];
+        dstp += nb_channels;
+        *t += tincr;
+    }
+}
+
+
+std::vector<std::uint16_t*> createTestAudioSamplesS16(int numFrames, int nbSamples, const av::AudioCodec& params) //const char* sampleFmt, int sampleRate, int channels, int frameSize
+{
+    double t = 0;
+    int bufferSize = av_samples_get_buffer_size(nullptr, params.channels, nbSamples, av_get_sample_fmt(params.sampleFmt.c_str()), 0);
+    auto vec = std::vector<std::uint16_t*>();
+    do {
+        auto samples = new std::uint16_t[bufferSize];
+        fillAudioSamplesUInt(samples, params.sampleRate, params.channels, nbSamples, &t);
+        vec.push_back(samples);
+    } while (--numFrames);
+    return vec;
+}
+
+
+std::vector<double*> createTestAudioSamplesDBL(int numFrames, int nbSamples, const av::AudioCodec& params) //const char* sampleFmt, int sampleRate, int channels, int frameSize
+{
+    double t = 0;
+    int bufferSize = av_samples_get_buffer_size(nullptr, params.channels, nbSamples, av_get_sample_fmt(params.sampleFmt.c_str()), 0);
+    auto vec = std::vector<double*>();
+    do {
+        auto samples = new double[bufferSize];
+        fillAudioSamples(samples, params.sampleRate, params.channels, nbSamples, &t);
+        vec.push_back(samples);
+    } while (--numFrames);
+    return vec;
+}
+
+
+// =============================================================================
+// Audio Encoder
+//
+class AudioEncoderTest: public Test
+{
+    void run()
+    {
+        int numberFramesWanted = 200;
+        int inNbSamples = 1024;
+
+        av::AudioEncoderContext encoder;
+        av::AudioCodec iparams;
+        av::AudioCodec oparams;
+
+        iparams.channels = 2;
+        iparams.sampleRate = 48000;
+        iparams.sampleFmt = "dbl";
+
+        oparams.encoder = "mp2";
+        oparams.bitRate = 64000;
+        oparams.channels = 2;
+        oparams.sampleRate = 44100;
+        oparams.sampleFmt = "s16";
+        oparams.enabled = true;
+
+        encoder.iparams = iparams;
+        encoder.oparams = oparams;
+        encoder.create();
+        encoder.open();
+
+        std::ofstream output("test.mp2", std::ios::out | std::ios::binary);
+
+        auto testSamples = createTestAudioSamplesDBL(numberFramesWanted, inNbSamples, iparams);
+        for (auto samples : testSamples) {
+            AVPacket opacket;
+            if (encoder.encode(reinterpret_cast<std::uint8_t*>(samples), inNbSamples, AV_NOPTS_VALUE, opacket)) {
+                output.write(reinterpret_cast<const char*>(opacket.data), opacket.size);
+            }
+        }
+
+        encoder.close();
+        output.close();
+        util::clearVector<>(testSamples);
+
+        // TODO: verify data integrity
+    }
+};
+
+
+// =============================================================================
+// Audio Resampler
+//
+class AudioResamplerTest: public Test
+{
+    void run()
+    {
+        int numberFramesWanted = 200;
+        int inNbSamples = 1024;
+
+        av::AudioResampler resampler;
+        av::AudioCodec iparams;
+        av::AudioCodec oparams;
+
+        iparams.channels = 2;
+        iparams.sampleRate = 48000;
+        iparams.sampleFmt = "dbl";
+
+        oparams.channels = 2;
+        oparams.sampleRate = 44100;
+        oparams.sampleFmt = "s16";
+
+        resampler.iparams = iparams;
+        resampler.oparams = oparams;
+        resampler.create();
+
+        std::ofstream output("test.pcm", std::ios::out | std::ios::binary);
+
+        auto testSamples = createTestAudioSamplesDBL(numberFramesWanted, inNbSamples, iparams);
+        for (auto samples : testSamples) {
+            if (resampler.resample(reinterpret_cast<std::uint8_t*>(samples), inNbSamples)) {
+                output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outSamplesBytes);
+            }
+        }
+
+        resampler.close();
+        output.close();
+        util::clearVector<>(testSamples);
+
+        // The file is playable with the following command:
+        // ffplay -f s16le -channel_layout 3 -channels 2 -ar 44100 test.pcm
+
+        // TODO: verify data integrity
+    }
+};
+
 
 
 // class Tests
@@ -288,7 +451,7 @@ struct CallbackContext
 //
 //     for(int i=0; i<(int)FormatCtx->nb_streams; i++)
 //     {
-//         if(FormatCtx->streams[i]->codec->codec_type==AVMEDIA_TYPE_VIDEO)
+//         if(FormatCtx->streams[i]->codeencoder.ctx->codec_type==AVMEDIA_TYPE_VIDEO)
 //         {
 //             videoStream=i;
 //             break;
@@ -1063,7 +1226,7 @@ struct CallbackContext
 //
 //         // Attach the Audio Capture
 //         stream.attachSource<av::AudioCapture>(audioCapture, true);
-// 
+//
 //         // Attach the Audio Encoder
 //         //auto encoder = new av::AVPacketEncoder(options);
 //         //encoder->initialize();

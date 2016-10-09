@@ -4,7 +4,7 @@
 # For compatability WebRTC must be build without jsoncpp, and must not define
 # _GLIBCXX_DEBUG=1 or -fno-rtti
 #
-# The best way to build WebRTC is with the forked `webrtcbuilds` project:
+# The best way to build WebRTC is with the forked `webrtcbuilds` project here:
 # https://github.com/sourcey/webrtcbuilds
 #
 # The following variables will be defined:
@@ -45,7 +45,7 @@ find_path(WEBRTC_INCLUDE_DIR
 # ----------------------------------------------------------------------
 if(WEBRTC_INCLUDE_DIR)
 
-  # Attempt to find our own monolythic library
+  # Attempt to find our own monolithic library
   sourcey_find_library(WEBRTC
     NAMES webrtc_full
     PATHS_DEBUG ${WEBRTC_INCLUDE_DIR}/${_WEBRTC_SUFFIX_DEBUG} #${WEBRTC_LIBRARY_DIR_DEBUG}

@@ -16,7 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "scy/webrtc/videostreamcapturer.h"
+#include "scy/webrtc/opencvvideocapturer.h"
 
 
 using std::endl;
@@ -25,7 +25,7 @@ using std::endl;
 namespace scy {
 
 
-VideoStreamCapturer::VideoStreamCapturer(int deviceId) :
+OpenCVVideoCapturer::OpenCVVideoCapturer(int deviceId) :
     capture(av::MediaFactory::instance().createVideoCapture(deviceId))
 {
     // Default supported formats. Use ResetSupportedFormats to over write.
@@ -41,12 +41,12 @@ VideoStreamCapturer::VideoStreamCapturer(int deviceId) :
 }
 
 
-VideoStreamCapturer::~VideoStreamCapturer()
+OpenCVVideoCapturer::~OpenCVVideoCapturer()
 {
 }
 
 
-cricket::CaptureState VideoStreamCapturer::Start(const cricket::VideoFormat& capture_format)
+cricket::CaptureState OpenCVVideoCapturer::Start(const cricket::VideoFormat& capture_format)
 {
     try {
         if (capture_state() == cricket::CS_RUNNING) {
@@ -60,10 +60,10 @@ cricket::CaptureState VideoStreamCapturer::Start(const cricket::VideoFormat& cap
         // Connect and start the mpacket stream.
         // Output packets must be av::MatrixPacket types so we can access
         // the underlying cv::Mat.
-        // _emitter += packetDelegate(this, &VideoStreamCapturer::onFrameCaptured);
+        // _emitter += packetDelegate(this, &OpenCVVideoCapturer::onFrameCaptured);
 
         capture->start();
-        capture->emitter += packetDelegate(this, &VideoStreamCapturer::onFrameCaptured);
+        capture->emitter += packetDelegate(this, &OpenCVVideoCapturer::onFrameCaptured);
 
         SetCaptureFormat(&capture_format);
         return cricket::CS_RUNNING;
@@ -72,7 +72,7 @@ cricket::CaptureState VideoStreamCapturer::Start(const cricket::VideoFormat& cap
 }
 
 
-void VideoStreamCapturer::Stop()
+void OpenCVVideoCapturer::Stop()
 {
     try {
         if (capture_state() == cricket::CS_STOPPED) {
@@ -91,7 +91,7 @@ void VideoStreamCapturer::Stop()
 }
 
 
-void VideoStreamCapturer::onFrameCaptured(void* sender, av::MatrixPacket& packet)
+void OpenCVVideoCapturer::onFrameCaptured(void* sender, av::MatrixPacket& packet)
 {
     // TraceS(this) << "On frame" << std::endl;
 
@@ -112,13 +112,13 @@ void VideoStreamCapturer::onFrameCaptured(void* sender, av::MatrixPacket& packet
 }
 
 
-bool VideoStreamCapturer::IsRunning()
+bool OpenCVVideoCapturer::IsRunning()
 {
     return capture_state() == cricket::CS_RUNNING;
 }
 
 
-bool VideoStreamCapturer::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
+bool OpenCVVideoCapturer::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
 {
     if (!fourccs)
         return false;
@@ -127,12 +127,12 @@ bool VideoStreamCapturer::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
 }
 
 
-bool VideoStreamCapturer::GetBestCaptureFormat(const cricket::VideoFormat& desired, cricket::VideoFormat* best_format)
+bool OpenCVVideoCapturer::GetBestCaptureFormat(const cricket::VideoFormat& desired, cricket::VideoFormat* best_format)
 {
     if (!best_format)
         return false;
 
-    // VideoStreamCapturer does not support capability enumeration.
+    // OpenCVVideoCapturer does not support capability enumeration.
     // Use the desired format as the best format.
     best_format->width = desired.width;
     best_format->height = desired.height;
@@ -143,7 +143,7 @@ bool VideoStreamCapturer::GetBestCaptureFormat(const cricket::VideoFormat& desir
 }
 
 
-bool VideoStreamCapturer::IsScreencast() const
+bool OpenCVVideoCapturer::IsScreencast() const
 {
     return false;
 }

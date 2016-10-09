@@ -1,6 +1,6 @@
 #include "signaler.h"
 
-#include "scy/webrtc/videostreamcapturer.h"
+#include "scy/util.h"
 
 #include <iostream>
 #include <string>
@@ -64,24 +64,10 @@ void Signaler::onPeerConnected(void*, smpl::Peer& peer)
         return;
     }
 
-    auto conn = new PeerConnectionClient(this, peer.id(), PeerConnectionClient::Offer);
-    conn->constraints().SetMandatoryReceiveAudio(false);
+    auto conn = new PeerConnectionClient(this, peer.id(), PeerConnectionClient::Answer);
     conn->constraints().SetMandatoryReceiveVideo(false);
-    conn->constraints().SetAllowDtlsSctpDataChannels();
-
-    // Create the media stream and tracks
-    rtc::scoped_refptr<webrtc::MediaStreamInterface> stream = conn->createMediaStream();
-    rtc::scoped_refptr<webrtc::VideoTrackInterface> videoTrack(
-        _factory->CreateVideoTrack(kVideoLabel,
-            _factory->CreateVideoSource(new VideoStreamCapturer(0), NULL)));
-    rtc::scoped_refptr<webrtc::AudioTrackInterface> audioTrack(
-        _factory->CreateAudioTrack(kAudioLabel,
-            _factory->CreateAudioSource(NULL)));
-    stream->AddTrack(videoTrack);
-    stream->AddTrack(audioTrack);
-
+    conn->constraints().SetMandatoryReceiveAudio(true);
     conn->createConnection();
-    conn->createOffer();
 
     PeerConnectionManager::add(peer.id(), conn);
 }
@@ -92,10 +78,10 @@ void Signaler::onPeerMessage(void*, smpl::Message& m)
     DebugL << "Peer message: " << m.from().toString() << endl;
 
     if (m.isMember("offer")) {
-        assert(0 && "offer not supported");
+        recvSDP(m.from().id, m["offer"]);
     }
     else if (m.isMember("answer")) {
-        recvSDP(m.from().id, m["answer"]);
+        assert(0 && "answer not supported");
     }
     else if (m.isMember("candidate")) {
         recvCandidate(m.from().id, m["candidate"]);
@@ -136,13 +122,37 @@ void Signaler::onClientStateChange(void* sender, sockio::ClientState& state, con
 
 void Signaler::onAddRemoteStream(const std::string& peerid, webrtc::MediaStreamInterface* stream)
 {
-    assert(0 && "not required");
+    // TODO: Should be instance on PeerConnectionClient
+    _recorder.reset(new StreamRecorder());
+
+    auto videoTracks = stream->GetVideoTracks();
+    // if (videoTracks.empty()) {
+    //     assert(0 && "no video tracks");
+    //     return;
+    // }
+    if (!videoTracks.empty())
+        _recorder->setVideoTrack(videoTracks[0]);
+
+    auto audioTracks = stream->GetAudioTracks();
+    assert(!audioTracks.empty());
+    if (!audioTracks.empty())
+        _recorder->setAudioTrack(audioTracks[0]);
+
+    // _recorder
+
+    // _remoteRenderer.reset(new ImageSequenceRecorder(videoTracks[0], "webrtcrecorder"));
+
+    // Audio info here: http://stackoverflow.com/questions/24160034/webrtc-library-remote-audio-rendering-via-addsink
+    // webrtc::AudioSinkInterface
+    // /home/kam/sourcey/webrtcbuilds/out/src/webrtc/api/call/audio_sink.h
+
+    // https://github.com/AnyRTC/AnyRTC-RTMP/blob/3136d0201693aade484d89e6b1639b52f4f7c6ca/AnyCore/avcodec.h
 }
 
 
 void Signaler::onRemoveRemoteStream(const std::string& peerid, webrtc::MediaStreamInterface* stream)
 {
-    assert(0 && "not required");
+    assert(0 && "free streams");
 }
 
 

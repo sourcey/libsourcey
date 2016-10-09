@@ -17,11 +17,6 @@
 //
 
 #include "scy/webrtc/peerconnectionmanager.h"
-// #include "videostreamcapturer.h"
-// #include "peerconnectionclient.h"
-
-// #include <iostream>
-// #include <string>
 
 
 using std::endl;

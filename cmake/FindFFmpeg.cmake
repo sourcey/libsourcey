@@ -32,9 +32,10 @@ endif()
 set_module_notfound(FFMPEG)
 if (NOT FFMPEG_FOUND)
 
-  # The FFmpeg compilation guide stores files in an unusual location.
+
+  # The FFmpeg compilation guide stores files in an unusual location,
+  # so let's support that out of the box
   # http://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
-  # Let's support that out of the box
   set(CMAKE_LIBRARY_PATH
     $ENV{HOME}/tmp/ffmpeg_build/lib
     $ENV{HOME}/ffmpeg_build/lib
@@ -47,31 +48,32 @@ if (NOT FFMPEG_FOUND)
     ${CMAKE_SYSTEM_PREFIX_PATH})
 
   # Check for all components
-  find_component(FFMPEG AVCODEC    libavcodec    avcodec    libavcodec/avcodec.h)
+  find_component(FFMPEG SWRESAMPLE libswresample swresample libswresample/swresample.h)
   find_component(FFMPEG AVFORMAT   libavformat   avformat   libavformat/avformat.h)
+  find_component(FFMPEG AVCODEC    libavcodec    avcodec    libavcodec/avcodec.h)
+  find_component(FFMPEG SWSCALE    libswscale    swscale    libswscale/swscale.h)
   find_component(FFMPEG AVUTIL     libavutil     avutil     libavutil/avutil.h)
   find_component(FFMPEG AVFILTER   libavfilter   avfilter   libavfilter/avfilter.h)
   find_component(FFMPEG AVDEVICE   libavdevice   avdevice   libavdevice/avdevice.h)
-  find_component(FFMPEG SWRESAMPLE libswresample swresample libswresample/swresample.h)
-  find_component(FFMPEG SWSCALE    libswscale    swscale    libswscale/swscale.h)
-  # find_component(FFMPEG POSTPROC   libpostproc   postproc   libpostproc/postprocess.h)
+  find_component(FFMPEG POSTPROC   libpostproc   postproc   libpostproc/postprocess.h)
 
   # Set FFmpeg as found or not
   set_module_found(FFMPEG ${FFMPEG_FIND_REQUIRED})
 
-  # Include some dependencies required when linking to FFmpeg static build
-  # list(APPEND LibSourcey_BUILD_DEPENDENCIES bz2)
-  # list(APPEND LibSourcey_BUILD_DEPENDENCIES lzma)
+  # Include some dependencies required when linking to FFmpeg static build.
+  # NOTE: These libraries are required is compiling FFmpeg with default build
+  # specified in https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
+
   find_library(BZ2_LIBRARY NAMES bz2)
   if(BZ2_LIBRARY)
     list(APPEND FFMPEG_DEPENDENCIES ${BZ2_LIBRARY})
   endif()
+
   find_library(LZMA_LIBRARY NAMES lzma)
   if(LZMA_LIBRARY)
     list(APPEND FFMPEG_DEPENDENCIES ${LZMA_LIBRARY})
   endif()
 
-  # Include FFmpeg dependencies if available
   find_library(LIBVPX_LIBRARY NAMES vpx)
   if(LIBVPX_LIBRARY)
     list(APPEND FFMPEG_DEPENDENCIES ${LIBVPX_LIBRARY})
@@ -80,6 +82,11 @@ if (NOT FFMPEG_FOUND)
   find_library(LIBX264_LIBRARY NAMES x264)
   if(LIBX264_LIBRARY)
     list(APPEND FFMPEG_DEPENDENCIES ${LIBX264_LIBRARY})
+  endif()
+
+  find_library(LIBX265_LIBRARY NAMES x265)
+  if(LIBX265_LIBRARY)
+    list(APPEND FFMPEG_DEPENDENCIES ${LIBX265_LIBRARY})
   endif()
 
   find_library(LIBVA_LIBRARY NAMES va)
@@ -126,52 +133,47 @@ if (NOT FFMPEG_FOUND)
     list(APPEND FFMPEG_DEPENDENCIES ${LIBOPUS_LIBRARY})
   endif()
 
-  #message("FFMPEG_LIBRARIES=${FFMPEG_LIBRARIES}")
-  #message("FFMPEG_INCLUDE_DIRS=${FFMPEG_INCLUDE_DIRS}")
-  #message("FFMPEG_INCLUDE_DIRS=${FFMPEG_INCLUDE_DIRS}")
-  #message("LIBVPX_LIBRARY=${LIBVPX_LIBRARY}")
-
+  print_module_variables(FFMPEG)
 endif()
 
-
 # Cache the vars.
-#set(FFMPEG_INCLUDE_DIRS ${FFMPEG_INCLUDE_DIRS} CACHE STRING   "The FFmpeg include directories." FORCE)
-#set(FFMPEG_LIBRARIES    ${FFMPEG_LIBRARIES}    CACHE STRING   "The FFmpeg libraries." FORCE)
-#set(FFMPEG_DEFINITIONS  ${FFMPEG_DEFINITIONS}  CACHE STRING   "The FFmpeg cflags." FORCE)
-#set(FFMPEG_FOUND        ${FFMPEG_FOUND}        CACHE BOOLEAN  "The FFmpeg found status." FORCE)
-
+# set(FFMPEG_INCLUDE_DIRS ${FFMPEG_INCLUDE_DIRS} CACHE STRING   "The FFmpeg include directories." FORCE)
+# set(FFMPEG_LIBRARIES    ${FFMPEG_LIBRARIES}    CACHE STRING   "The FFmpeg libraries." FORCE)
+# set(FFMPEG_DEFINITIONS  ${FFMPEG_DEFINITIONS}  CACHE STRING   "The FFmpeg cflags." FORCE)
+# set(FFMPEG_FOUND        ${FFMPEG_FOUND}        CACHE BOOLEAN  "The FFmpeg found status." FORCE)
 
 # Check that the required components were found.
-#set(FFMPEG_FOUND 1)
-#foreach (_component ${FFMPEG_FIND_COMPONENTS})
+# set(FFMPEG_FOUND 1)
+# foreach (_component ${FFMPEG_FIND_COMPONENTS})
 #  if (FFMPEG_${_component}_FOUND)
 #    message(STATUS "Required component ${_component} present.")
 #  else ()
 #    message(STATUS "Required component ${_component} missing.")
 #    set(FFMPEG_FOUND 0)
 #  endif ()
-#endforeach ()
+# endforeach ()
 
 # Build the include path with duplicates removed.
-#if (FFMPEG_INCLUDE_DIRS)
+# if (FFMPEG_INCLUDE_DIRS)
 #  list(REMOVE_DUPLICATES FFMPEG_INCLUDE_DIRS)
-#endif ()
-
-#mark_as_advanced(FFMPEG_INCLUDE_DIRS
-#                 FFMPEG_LIBRARIES
-#                 FFMPEG_DEFINITIONS
-#                 FFMPEG_FOUND)
+# endif ()
 
 # Now set the noncached _FOUND vars for the components.
-#foreach (_component AVCODEC AVDEVICE AVFORMAT AVUTIL POSTPROCESS SWSCALE) #AVFILTER
+# foreach (_component AVCODEC AVDEVICE AVFORMAT AVUTIL POSTPROCESS SWSCALE) #AVFILTER
 #  set_component_found(${_component})
-#endforeach ()
+# endforeach ()
 
 # Compile the list of required vars
-#set(_FFMPEG_REQUIRED_VARS FFMPEG_LIBRARIES FFMPEG_INCLUDE_DIRS)
-#foreach (_component ${FFMPEG_FIND_COMPONENTS})
-#  list(APPEND _FFMPEG_REQUIRED_VARS ${_component}_LIBRARIES ${_component}_INCLUDE_DIRS)
-#endforeach ()
+# set(_FFMPEG_REQUIRED_VARS FFMPEG_LIBRARIES FFMPEG_INCLUDE_DIRS)
+# foreach (_component ${FFMPEG_FIND_COMPONENTS})
+#   list(APPEND _FFMPEG_REQUIRED_VARS ${_component}_LIBRARIES ${_component}_INCLUDE_DIRS)
+# endforeach ()
 
 # Give a nice error message if some of the required vars are missing.
-#find_package_handle_standard_args(FFMPEG DEFAULT_MSG ${_FFMPEG_REQUIRED_VARS})
+# include(FindPackageHandleStandardArgs)
+# find_package_handle_standard_args(FFMPEG DEFAULT_MSG ${_FFMPEG_REQUIRED_VARS})
+#
+# mark_as_advanced(FFMPEG_INCLUDE_DIRS
+#                  FFMPEG_LIBRARIES
+#                  FFMPEG_DEFINITIONS
+#                  FFMPEG_FOUND)

@@ -291,8 +291,9 @@ const int kMaxFFTPow2Size = 24;
 
 
 VideoAnalyzer::Stream::Stream(const std::string& name, int rdftSize) :
-    name(name), rdftSize(rdftSize), rdftBits(static_cast<int>(log2(rdftSize))),
-    rdft(nullptr), rdftData(nullptr), frames(0), filled(0)
+    name(name), rdft(nullptr), rdftData(nullptr),
+    rdftSize(rdftSize), rdftBits(static_cast<int>(log2(rdftSize))),
+    frames(0), filled(0)
 {
     TraceL << "[VideoAnalyzerStream: " << this << ": " << name << "] Creating: "
         << rdftSize << ": " << rdftBits << endl;

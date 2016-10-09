@@ -44,7 +44,7 @@ struct ThumbnailerOptions
     int height;
     double seek;
 
-    ThumbnailerOptions(const std::string& ifile = "", const std::string& ofile = "", 
+    ThumbnailerOptions(const std::string& ifile = "", const std::string& ofile = "",
         int width = 0, int height = 0, double seek = 0.0)
         : ifile(ifile), ofile(ofile), width(width), height(height), seek(seek) {};
 };
@@ -54,13 +54,13 @@ struct ThumbnailerOptions
 
 struct Thumbnailer
     // Creates video thumbnail using FFmpeg.
-    // Note that even if FFmpeg is unavailable we still expose 
+    // Note that even if FFmpeg is unavailable we still expose
     // ThumbnailerOptions for the Spot API.
 {
     ThumbnailerOptions options;
     av::AVInputReader reader;
-    av::VideoCodecEncoderContext encoder;
-        
+    av::VideoEncoderContext encoder;
+
     Thumbnailer(const ThumbnailerOptions& options = ThumbnailerOptions());
     ~Thumbnailer() ;
 
@@ -71,11 +71,11 @@ struct Thumbnailer
         // using defaultThumbPath()
 
     void grab();
-        // Initialize the image encoder and grab a thumbnail at the 
+        // Initialize the image encoder and grab a thumbnail at the
         // specified seek position
-        
+
     void onVideoPacket(void*, av::VideoPacket& packet);
-    
+
     static std::string defaultThumbPath(const std::string& ifile, const std::string& ext = ".jpg", const std::string& suffix = "_thumb");
 };
 

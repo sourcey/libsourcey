@@ -8,8 +8,8 @@ using namespace scy::av;
 
 int main(int argc, char** argv)
 {
-    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
-    test::initialize();
+    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    // test::initialize();
     // net::SSLManager::initNoVerifyClient();
 
     // // Create the static callback context
@@ -82,6 +82,10 @@ int main(int argc, char** argv)
     //
     //     DebugL << "Complete" << endl;
     // });
+
+    // Define class based tests
+    describe("audio encoder", new AudioEncoderTest);
+    describe("audio resampler", new AudioResamplerTest);
 
     test::runAll();
 

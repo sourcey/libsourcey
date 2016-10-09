@@ -49,6 +49,7 @@ PeerConnectionClient::PeerConnectionClient(PeerConnectionManager* manager, const
 
 PeerConnectionClient::~PeerConnectionClient()
 {
+    DebugL << _peerid << ": Destroying" << endl;
     closeConnection();
 }
 
@@ -100,9 +101,6 @@ void PeerConnectionClient::recvSDP(const std::string& type, const std::string& s
     webrtc::SessionDescriptionInterface* desc(webrtc::CreateSessionDescription(type, sdp, &error));
     if (!desc) {
         throw std::runtime_error("Can't parse remote SDP: " + error.description);
-        // ErrorL << _peerid << ": Can't parse remote offer: " << error.description << endl;
-        // assert(0);
-        // return;
     }
     _peerConnection->SetRemoteDescription(DummySetSessionDescriptionObserver::Create(), desc);
 
@@ -122,9 +120,6 @@ void PeerConnectionClient::recvCandidate(const std::string& mid, int mlineindex,
     std::unique_ptr<webrtc::IceCandidateInterface> candidate(webrtc::CreateIceCandidate(mid, mlineindex, sdp, &error));
     if (!candidate) {
         throw std::runtime_error("Can't parse remote candidate: " + error.description);
-        // ErrorL << _peerid << ": Can't parse remote candidate message: " << error.description << endl;
-        // assert(0);
-        // return false;
     }
     _peerConnection->AddIceCandidate(candidate.get());
 }
@@ -133,6 +128,21 @@ void PeerConnectionClient::recvCandidate(const std::string& mid, int mlineindex,
 void PeerConnectionClient::OnSignalingChange(webrtc::PeerConnectionInterface::SignalingState new_state)
 {
     DebugL << _peerid << ": On signaling state change: " << new_state << endl;
+    DebugL << "PeerConnection signaling state change: " << new_state << endl;
+
+    switch(new_state) {
+    case webrtc::PeerConnectionInterface::kStable:
+        // session_.addRef();
+        break;
+    case webrtc::PeerConnectionInterface::kClosed:
+        // session_.removeRef();
+        break;
+    case webrtc::PeerConnectionInterface::kHaveLocalOffer:
+        case webrtc::PeerConnectionInterface::kHaveRemoteOffer:
+        case webrtc::PeerConnectionInterface::kHaveLocalPrAnswer:
+        case webrtc::PeerConnectionInterface::kHaveRemotePrAnswer:
+        break;
+    }
 }
 
 

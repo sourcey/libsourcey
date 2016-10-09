@@ -16,8 +16,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef SCY_VideoStreamCaturer_H
-#define SCY_VideoStreamCaturer_H
+#ifndef SCY_OpenCVVideoCapturer_H
+#define SCY_OpenCVVideoCapturer_H
 
 
 #include <iostream>
@@ -33,17 +33,17 @@
 namespace scy {
 
 
-// VideoStreamCapturer implements a simple cricket::VideoCapturer which
+// OpenCVVideoCapturer implements a simple cricket::VideoCapturer which
 // gets decoded remote video frames from media channel.
 // It's used as the remote video source's VideoCapturer so that the remote
 // video can be used as a cricket::VideoCapturer and in that way a remote
 // video stream can implement the MediaStreamSourceInterface.
-class VideoStreamCapturer :
+class OpenCVVideoCapturer :
     public cricket::VideoCapturer
 {
 public:
-    VideoStreamCapturer(int deviceId);
-    virtual ~VideoStreamCapturer();
+    OpenCVVideoCapturer(int deviceId);
+    virtual ~OpenCVVideoCapturer();
 
     // cricket::VideoCapturer implementation.
     virtual cricket::CaptureState Start(
@@ -62,15 +62,15 @@ private:
 };
 
 
-// class VideoStreamCapturerFactory : public cricket::VideoDeviceCapturerFactory {
+// class OpenCVVideoCapturerFactory : public cricket::VideoDeviceCapturerFactory {
 // public:
-//     VideoStreamCapturerFactory() {}
-//     virtual ~VideoStreamCapturerFactory() {}
+//     OpenCVVideoCapturerFactory() {}
+//     virtual ~OpenCVVideoCapturerFactory() {}
 //
 //     virtual cricket::VideoCapturer* Create(const cricket::Device& device) {
 //
 //         // XXX: WebRTC uses device name to instantiate the capture, which is always 0.
-//         return new VideoStreamCapturer(util::strtoi<int>(device.id));
+//         return new OpenCVVideoCapturer(util::strtoi<int>(device.id));
 //     }
 // };
 

@@ -132,16 +132,15 @@ void AVEncoder::initialize()
             snprintf(_formatCtx->filename, sizeof(_formatCtx->filename), "%s", _options.ofile.c_str());
 
         // Set the container codec
-        std::string ofmt = _options.ofile.empty() ? ("." + std::string(_options.oformat.id)) : _options.ofile;
-        _formatCtx->oformat = av_guess_format(_options.oformat.id.c_str(), ofmt.c_str(), nullptr);
+        _formatCtx->oformat = av_guess_format(_options.oformat.id.c_str(), _options.ofile.c_str(), nullptr);
         if (!_formatCtx->oformat)
             throw std::runtime_error("Cannot find suitable encoding format for " + _options.oformat.name);
 
-    // Initialize encoder contexts
-    if (_options.oformat.video.enabled)
-        createVideo();
-    if (_options.oformat.audio.enabled)
-        createAudio();
+        // Initialize encoder contexts
+        if (_options.oformat.video.enabled)
+            createVideo();
+        if (_options.oformat.audio.enabled)
+            createAudio();
 
         if (_options.ofile.empty()) {
 
@@ -287,20 +286,19 @@ void AVEncoder::flush()
 
     if (_video) {
         while(true) {
-          AVPacket opacket;
-          av_init_packet(&opacket);
-          if (!_video->flush(opacket)) break;
-          setVideoPacketPts(opacket);
-          writeOutputPacket(_formatCtx, opacket);
+            AVPacket opacket;
+            av_init_packet(&opacket);
+            if (!_video->flush(opacket)) break;
+            writeOutputPacket(opacket);
         }
     }
 
     if (_audio) {
         while(true) {
-          AVPacket opacket;
-          av_init_packet(&opacket);
-          if (!_audio->flush(opacket)) break;
-          writeOutputPacket(_formatCtx, opacket);
+            AVPacket opacket;
+            av_init_packet(&opacket);
+            if (!_audio->flush(opacket)) break;
+            writeOutputPacket(opacket);
         }
     }
 }
@@ -328,18 +326,31 @@ AudioEncoderContext* AVEncoder::audio()
 
 
 //
-// Static helpers
+// Helpers
 //
 
 
 // Write a packet to the output stream.
-bool writeOutputPacket(AVFormatContext *formatCtx, AVPacket& packet)
+bool AVEncoder::writeOutputPacket(AVPacket& packet)
 {
     assert(packet.data);
     assert(packet.size);
-    assert(packet.pts != AV_NOPTS_VALUE);
+    assert(isActive());
 
-    TraceL << "Writing packet:"
+    // Calculate our own PTS from stream time
+    if (_video && _video->stream->index == packet.stream_index &&
+
+        // NOTE: Setting PTS with audio seems to throw mp4 encoding out of sync;
+        // more testing is required...
+        !_options.oformat.audio.enabled) {
+        setVideoPacketPts(packet);
+    }
+
+    // assert(packet.pts != AV_NOPTS_VALUE);
+
+    // packet.duration = 100;
+
+    DebugL << "Writing packet:"
         << "\n\tPacket Size: " << packet.size
         << "\n\tPTS: " << packet.pts
         << "\n\tDTS: " << packet.dts
@@ -347,7 +358,7 @@ bool writeOutputPacket(AVFormatContext *formatCtx, AVPacket& packet)
         << endl;
 
     // Write the encoded frame to the output file
-    if (av_interleaved_write_frame(formatCtx, &packet) != 0) {
+    if (av_interleaved_write_frame(_formatCtx, &packet) != 0) {
         WarnL << "Cannot write packet" << endl;
         return false;
     }
@@ -385,20 +396,36 @@ void AVEncoder::freeVideo()
 }
 
 
+bool AVEncoder::encodeVideo(AVFrame* frame)
+{
+    TraceS(this) << "Encoding video" << endl;
+
+    assert(isActive());
+    assert(_video && _video->frame);
+
+    if (!isActive())
+        throw std::runtime_error("The encoder is not initialized");
+
+    if (!_video)
+        throw std::runtime_error("No video context");
+
+    if (!frame->data || !frame->width || !frame->height)
+        throw std::runtime_error("Invalid video frame");
+
+    AVPacket opacket;
+    av_init_packet(&opacket);
+    if (_video->encode(frame, opacket)) {
+        assert(opacket.stream_index == _video->stream->index);
+        return writeOutputPacket(opacket);
+    }
+
+    return false;
+}
+
+
 bool AVEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int height, std::uint64_t /* time */)
 {
     TraceS(this) << "Encoding video: " << bufferSize << endl;
-
-    // EncoderOptions* options = nullptr;
-    // AVFormatContext* formatCtx = nullptr;
-    // VideoEncoderContext* video = nullptr;
-    // {
-    //     // Lock the mutex while encoding
-    //     //Mutex::ScopedLock lock(_mutex);
-    //     options = &_options;
-    //     formatCtx = _formatCtx;
-    //     video = _video;
-    // }
 
     assert(isActive());
     assert(_video && _video->frame);
@@ -412,20 +439,6 @@ bool AVEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int
     if (!buffer || !bufferSize || !width || !height)
         throw std::runtime_error("Invalid video frame");
 
-    // Recreate the video conversion context on the fly
-    // if the input resolution changes.
-    // TODO: Move to VideoEncoderContext
-    if (_options.iformat.video.width != width ||
-        _options.iformat.video.height != height) {
-        _options.iformat.video.width = width;
-        _options.iformat.video.height = height;
-        _video->iparams.width = width;
-        _video->iparams.height = height;
-        TraceS(this) << "Recreating video conversion context" << endl;
-        _video->freeConverter();
-        _video->createConverter();
-    }
-
     AVPacket opacket;
     av_init_packet(&opacket);
 
@@ -433,7 +446,7 @@ bool AVEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int
         opacket.flags |= AV_PKT_FLAG_KEY;
         opacket.stream_index = _video->stream->index;
         opacket.data = buffer;
-        opacket.size = bufferSize; //sizeof(AVPicture);
+        opacket.size = bufferSize;
     }
     else {
         if (!_video->encode(buffer, bufferSize, /*calc ? calc->tick() : */AV_NOPTS_VALUE, opacket)) {
@@ -443,10 +456,9 @@ bool AVEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int
     }
 
     if (opacket.size > 0) {
-        setVideoPacketPts(opacket);
         assert(opacket.stream_index == _video->stream->index);
         assert(isActive());
-        return writeOutputPacket(_formatCtx, opacket);
+        return writeOutputPacket(opacket);
     }
 
     return false;
@@ -455,24 +467,16 @@ bool AVEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int
 
 void AVEncoder::setVideoPacketPts(AVPacket& packet)
 {
-  //opacket.dts = AV_NOPTS_VALUE;
-
-  // Calculate our own PTS from stream time
-  // TODO: Setting PTS with audio seems to throw mp4
-  // encoding out of sync; need to test more...
-  if (!_options.oformat.audio.enabled) {
-      std::int64_t delta;
-      delta = av_gettime() - _formatCtx->start_time_realtime;
-      double framePTS = delta * (double) _video->stream->time_base.den / (double) _video->stream->time_base.num / (double) 1000000;
-      double ptsWhole;
-      _videoPtsRemainder += modf(framePTS, &ptsWhole); // fixme
-      packet.pts = (std::int64_t)ptsWhole;
-      packet.dts = AV_NOPTS_VALUE;
-      if (static_cast<int>(_videoPtsRemainder) > 1) {
-          _videoPtsRemainder--;
-          packet.pts++;
-      }
-  }
+    std::int64_t delta(av_gettime() - _formatCtx->start_time_realtime);
+    double ptsActual = delta * (double) _video->stream->time_base.den / (double) _video->stream->time_base.num / (double) 1000000;
+    double ptsWhole;
+    _videoPtsRemainder += modf(ptsActual, &ptsWhole);
+    packet.pts = static_cast<std::int64_t>(ptsWhole);
+    packet.dts = AV_NOPTS_VALUE;
+    if (static_cast<int>(_videoPtsRemainder) > 1) {
+        _videoPtsRemainder--;
+        packet.pts++;
+    }
 }
 
 
@@ -538,16 +542,6 @@ bool AVEncoder::encodeAudio(std::uint8_t* buffer, int bufferSize, int frameSize,
     assert(bufferSize);
     assert(frameSize);
 
-    // //EncoderOptions* options = nullptr;
-    // AVFormatContext* formatCtx = nullptr;
-    // AudioEncoderContext* audio = nullptr;
-    // {
-    //     //Mutex::ScopedLock lock(_mutex);
-    //     //options = &_options;
-    //     formatCtx = _formatCtx;
-    //     audio = _audio;
-    // }
-
     if (!isActive())
         throw std::runtime_error("The encoder is not initialized");
 
@@ -561,8 +555,7 @@ bool AVEncoder::encodeAudio(std::uint8_t* buffer, int bufferSize, int frameSize,
     av_init_packet(&opacket);
     if (_audio->encode(buffer, /*bufferSize*/ frameSize, AV_NOPTS_VALUE, opacket)) {
         assert(opacket.stream_index == _audio->stream->index);
-        assert(isActive());
-        return writeOutputPacket(_formatCtx, opacket);
+        return writeOutputPacket(opacket);
     }
 
     return false;

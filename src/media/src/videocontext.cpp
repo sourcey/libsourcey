@@ -25,7 +25,6 @@
 
 
 using std::endl;
-using namespace scy;
 
 
 namespace scy {
@@ -41,6 +40,7 @@ VideoContext::VideoContext() :
 {
     TraceS(this) << "Create" << endl;
     //reset();
+    initializeFFmpeg();
 }
 
 
@@ -50,6 +50,7 @@ VideoContext::~VideoContext()
 
     //assert((!frame && !codec && !stream) && "video context must be closed");
     close();
+    uninitializeFFmpeg();
 }
 
 
@@ -98,9 +99,11 @@ void VideoContext::close()
 }
 
 
-// ---------------------------------------------------------------------
+//
 // Video Encoder Context
 //
+
+
 VideoEncoderContext::VideoEncoderContext(AVFormatContext* format) :
     format(format),
     conv(nullptr),
@@ -128,30 +131,41 @@ void VideoEncoderContext::create() //, const VideoCodec& params
     // Find the video encoder
     codec = avcodec_find_encoder_by_name(oparams.encoder.c_str());
     if (!codec) {
-        codec = avcodec_find_encoder(format->oformat->video_codec);
+        if (format)
+            codec = avcodec_find_encoder(format->oformat->video_codec);
         if (!codec)
-               throw std::runtime_error("Video encoder not found.");
+            throw std::runtime_error("Video encoder not found: " + oparams.encoder);
     }
 
-    format->oformat->video_codec = codec->id;
+    // Allocate stream and AVCodecContext from the AVFormatContext if available
+    if (format) {
+        format->oformat->video_codec = codec->id;
 
-    // Add a video stream that uses the format's default video
-    // codec to the format context's streams[] array.
-    stream = avformat_new_stream(format, codec);
-    if (!stream)
-        throw std::runtime_error("Cannot create video stream.");
+        // Add a video stream that uses the format's default video
+        // codec to the format context's streams[] array.
+        stream = avformat_new_stream(format, codec);
+        if (!stream)
+            throw std::runtime_error("Cannot create video stream.");
 
-    // // fixme: testing realtime streams
-    // // http://stackoverflow.com/questions/16768794/muxing-from-audio-and-video-files-with-ffmpeg
-    // stream->time_base.den = 1000; //realtime_ ? 1000 : fps_.num;
-    // stream->time_base.num = 1; //realtime_ ? 1: fps_.den;
-    //
-    // stream->r_frame_rate.num = oparams.fps;
-    // stream->r_frame_rate.den = 1;
-    // stream->avg_frame_rate.den = 1;
-    // stream->avg_frame_rate.num = oparams.fps;
+        // // fixme: testing realtime streams
+        // // http://stackoverflow.com/questions/16768794/muxing-from-audio-and-video-files-with-ffmpeg
+        // stream->time_base.den = 1000; //realtime_ ? 1000 : fps_.num;
+        // stream->time_base.num = 1; //realtime_ ? 1: fps_.den;
+        //
+        // stream->r_frame_rate.num = oparams.fps;
+        // stream->r_frame_rate.den = 1;
+        // stream->avg_frame_rate.den = 1;
+        // stream->avg_frame_rate.num = oparams.fps;
 
-    ctx = stream->codec;
+        ctx = stream->codec;
+    }
+
+    // Otherwise allocate the standalone AVCodecContext
+    else {
+        ctx = avcodec_alloc_context3(codec);
+        if (!ctx)
+            throw std::runtime_error("Cannot allocate encoder context.");
+    }
 
     initVideoEncoderContext(ctx, codec, oparams);
 
@@ -159,18 +173,18 @@ void VideoEncoderContext::create() //, const VideoCodec& params
     createConverter();
 
     // Some formats want stream headers to be separate
-    if (format->oformat->flags & AVFMT_GLOBALHEADER)
+    if (format && format->oformat->flags & AVFMT_GLOBALHEADER)
         ctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
 
     // Allocate the input frame
-    frame = createVideoFrame(av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
+    frame = createVideoFrame(av_get_pix_fmt(iparams.pixelFmt.c_str()), iparams.width, iparams.height);
     if (!frame)
         throw std::runtime_error("Cannot allocate input frame.");
 
     // Allocate the encode buffer
     // XXX: Disabling in favor of encoder manged buffer
-    //bufferSize = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
-    //buffer = (std::uint8_t*)av_malloc(bufferSize);
+    // bufferSize = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
+    // buffer = (std::uint8_t*)av_malloc(bufferSize);
 }
 
 
@@ -182,7 +196,7 @@ void VideoEncoderContext::createConverter()
     // Create the conversion context
     if (iparams.width != oparams.width ||
         iparams.height != oparams.height ||
-        strcmp(iparams.pixelFmt, oparams.pixelFmt) != 0) {
+        iparams.pixelFmt != oparams.pixelFmt) {
         conv = new VideoConversionContext();
         conv->create(iparams, oparams);
     }
@@ -239,10 +253,11 @@ bool VideoEncoderContext::encode(unsigned char* data, int size, std::int64_t pts
     assert(size);
     AVPacket ipacket;
     av_init_packet(&ipacket);
-    ipacket.stream_index = stream->index;
     ipacket.data = data;
     ipacket.size = size;
     ipacket.pts = pts;
+    if (stream)
+        ipacket.stream_index = stream->index;
     return encode(ipacket, opacket);
 }
 
@@ -250,12 +265,20 @@ bool VideoEncoderContext::encode(unsigned char* data, int size, std::int64_t pts
 bool VideoEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 {
     assert(ipacket.data);
-    assert(stream);
     assert(frame);
     assert(codec);
+
+    // Populate the input frame with date from the given buffer.
+    // NOTE: This only workd with contiguous buffers
+    frame->data[0] = reinterpret_cast<std::uint8_t*>(ipacket.data);
+
+    // TODO: Correctly set the input frame PTS
+    // http://thompsonng.blogspot.com.au/2011/09/ffmpeg-avinterleavedwriteframe-return.html
+    // http://stackoverflow.com/questions/6603979/ffmpegavcodec-encode-video-setting-pts-h264
+    // (1 / oparams.fps) * sample rate * frame number
     frame->pts = ipacket.pts;
-    frame->data[0] = (std::uint8_t*)ipacket.data;
-    //avpicture_fill((AVPicture *)frame, (std::uint8_t*)ipacket.data,
+
+    // avpicture_fill((AVPicture *)frame, (std::uint8_t*)ipacket.data,
     //    av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
 
     return encode(frame, opacket);
@@ -264,54 +287,29 @@ bool VideoEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 
 bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 {
-    assert(frame);
-    assert(frame->data[0]);
-    assert(codec);
-
-    // Convert the input frame if required
-    AVFrame* cframe = conv ? conv->convert(iframe) : iframe;
-    cframe->format = ctx->pix_fmt;
-    // cframe->width  = width;
-    // cframe->height = height;
-
-    // Set the input PTS or a monotonic value to keep the encoder happy.
-    // The actual setting of the PTS is outside the scope of the encoder.
-    cframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : ctx->frame_number;
-
-    av_init_packet(&opacket);
-    opacket.stream_index = stream->index;
-    opacket.data = nullptr; // using encoder assigned buffer
-    opacket.size = 0;
-    // opacket.data = this->buffer;
-    // opacket.size = this->bufferSize;
-
-    int frameEncoded = 0;
-    if (avcodec_encode_video2(ctx, &opacket, cframe, &frameEncoded) < 0) {
-        // TODO: Use av_strerror
-        error = "Fatal encoder error";
-        ErrorS(this) << error << endl;
-        throw std::runtime_error(error);
-    }
+    bool frameEncoded = encodeVideoPacket(this, iframe, opacket);
 
     if (frameEncoded) {
         fps.tick();
         if (ctx->coded_frame->key_frame)
             opacket.flags |= AV_PKT_FLAG_KEY;
-        if (opacket.pts != AV_NOPTS_VALUE)
-            opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
-        if (opacket.dts != AV_NOPTS_VALUE)
-            opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
-        if (opacket.duration > 0)
-            opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
+        if (stream) {
+            if (opacket.pts != AV_NOPTS_VALUE)
+                opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
+            if (opacket.dts != AV_NOPTS_VALUE)
+                opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
+            if (opacket.duration > 0)
+                opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
 
-        TraceS(this) << "Encoded Frame:"
-            << "\n\tScaled PTS: " << opacket.pts
-            << "\n\tScaled DTS: " << opacket.dts
-            << "\n\tScaled Duration: " << opacket.duration
-            << endl;
+            TraceS(this) << "Encoded Frame:"
+                << "\n\tScaled PTS: " << opacket.pts
+                << "\n\tScaled DTS: " << opacket.dts
+                << "\n\tScaled Duration: " << opacket.duration
+                << endl;
+        }
     }
 
-    return frameEncoded > 0;
+    return frameEncoded;
 }
 
 
@@ -332,163 +330,169 @@ bool VideoEncoderContext::flush(AVPacket& opacket)
     if (frameEncoded) {
         if (ctx->coded_frame->key_frame)
             opacket.flags |= AV_PKT_FLAG_KEY;
-        if (opacket.pts != AV_NOPTS_VALUE)
-            opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
-        if (opacket.dts != AV_NOPTS_VALUE)
-            opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
-        if (opacket.duration > 0)
-            opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
-        TraceS(this) << "Flushed video frame: " << opacket.pts << endl;
+        if (stream) {
+            if (opacket.pts != AV_NOPTS_VALUE)
+                opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
+            if (opacket.dts != AV_NOPTS_VALUE)
+                opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
+            if (opacket.duration > 0)
+                opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
+            TraceS(this) << "Flushed video frame: " << opacket.pts << endl;
+        }
         return true;
     }
     return false;
 }
 
 
+// //
+// // Video Codec Encoder Context
+// //
 //
-// Video Codec Encoder Context
 //
-
-
-VideoCodecEncoderContext::VideoCodecEncoderContext() :
-    conv(nullptr),
-    buffer(nullptr),
-    bufferSize(0)
-{
-}
-
-
-VideoCodecEncoderContext::~VideoCodecEncoderContext()
-{
-    close();
-}
-
-
-void VideoCodecEncoderContext::create()
-{
-    TraceS(this) << "Create: "
-        << "\n\tInput: " << iparams.toString()
-        << "\n\tOutput: " << oparams.toString()
-        << endl;
-
-    VideoContext::create();
-
-    // Find the video encoder
-    codec = avcodec_find_encoder_by_name(oparams.encoder.c_str());
-    if (!codec)
-        throw std::runtime_error("Video encoder not found: " + oparams.encoder);
-
-    ctx = avcodec_alloc_context3(codec);
-    if (!ctx)
-        throw std::runtime_error("Cannot allocate encoder context.");
-
-    initVideoEncoderContext(ctx, codec, oparams);
-
-    // Allocate the conversion context
-    if (iparams.width != oparams.width ||
-        iparams.height != oparams.height ||
-        strcmp(iparams.pixelFmt, oparams.pixelFmt) == 0) {
-        conv = new VideoConversionContext();
-        conv->create(iparams, oparams);
-    }
-
-    // Allocate the input frame
-    frame = createVideoFrame(ctx->pix_fmt, iparams.width, iparams.height);
-    if (!frame)
-        throw std::runtime_error("Cannot allocate input frame.");
-
-    // Allocate the encode buffer
-    // XXX: Disabling in favor of encoder manged buffer
-    //bufferSize = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
-    //buffer = (std::uint8_t*)av_malloc(bufferSize);
-}
-
-
-void VideoCodecEncoderContext::close()
-{
-    TraceS(this) << "Closing" << endl;
-
-    VideoContext::close();
-
-    if (conv) {
-        delete conv;
-        conv = nullptr;
-    }
-
-    if (buffer) {
-        av_free(buffer);
-        buffer = nullptr;
-    }
-}
-
-
-bool VideoCodecEncoderContext::encode(unsigned char* data, int size, AVPacket& opacket)
-{
-    assert(data);
-    assert(size);
-    AVPacket ipacket;
-    av_init_packet(&ipacket);
-    ipacket.data = data;
-    ipacket.size = size;
-    return encode(ipacket, opacket);
-}
-
-
-bool VideoCodecEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
-{
-    assert(stream == nullptr);
-    assert(ipacket.data);
-    assert(frame);
-    assert(conv);
-
-    frame->data[0] = (std::uint8_t*)ipacket.data;
-
-    // TODO: Correctly set the input frame PTS
-    // http://thompsonng.blogspot.com.au/2011/09/ffmpeg-avinterleavedwriteframe-return.html
-    // http://stackoverflow.com/questions/6603979/ffmpegavcodec-encode-video-setting-pts-h264
-    // (1 / oparams.fps) * sample rate * frame number
-    frame->pts = ctx->frame_number;
-
-    return encode(frame, opacket);
-}
-
-
-bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
-{
-    TraceS(this) << "Encoding Video Packet" << endl;
-
-    // TODO: This is same as VideoCodecEncoderContext, create a single
-    // encodeVideo helper method for both
-
-    AVFrame* oframe = conv ? conv->convert(iframe) : iframe;
-    oframe->pts = iframe->pts;
-
-    av_init_packet(&opacket);
-    opacket.data = nullptr;
-    opacket.size = 0;
-    //opacket.data = this->buffer; // use our buffer, not ffmpeg assigned
-    //opacket.size = this->bufferSize;
-
-    int frameEncoded = 0;
-    if (avcodec_encode_video2(ctx, &opacket, oframe, &frameEncoded) < 0) {
-        error = "Fatal encoder error";
-        ErrorS(this) << "Fatal encoder error" << endl;
-        throw std::runtime_error(error);
-    }
-
-    if (frameEncoded) {
-        fps.tick();
-        if (ctx->coded_frame->key_frame)
-            opacket.flags |= AV_PKT_FLAG_KEY;
-
-        // TraceS(this) << "Encoded PTS:\n"
-        //     << "\n\tPTS: " << opacket.pts
-        //     << "\n\tDTS: " << opacket.dts
-        //     << endl;
-    }
-
-    return frameEncoded > 0;
-}
+// VideoCodecEncoderContext::VideoCodecEncoderContext() :
+//     conv(nullptr),
+//     buffer(nullptr),
+//     bufferSize(0)
+// {
+// }
+//
+//
+// VideoCodecEncoderContext::~VideoCodecEncoderContext()
+// {
+//     close();
+// }
+//
+//
+// void VideoCodecEncoderContext::create()
+// {
+//     TraceS(this) << "Create: "
+//         << "\n\tInput: " << iparams.toString()
+//         << "\n\tOutput: " << oparams.toString()
+//         << endl;
+//
+//     VideoContext::create();
+//
+//     // Find the video encoder
+//     codec = avcodec_find_encoder_by_name(oparams.encoder.c_str());
+//     if (!codec)
+//         throw std::runtime_error("Video encoder not found: " + oparams.encoder);
+//
+//     ctx = avcodec_alloc_context3(codec);
+//     if (!ctx)
+//         throw std::runtime_error("Cannot allocate encoder context.");
+//
+//     initVideoEncoderContext(ctx, codec, oparams);
+//
+//     // Allocate the conversion context
+//     if (iparams.width != oparams.width ||
+//         iparams.height != oparams.height ||
+//         strcmp(iparams.pixelFmt, oparams.pixelFmt) == 0) {
+//         conv = new VideoConversionContext();
+//         conv->create(iparams, oparams);
+//     }
+//
+//     // Allocate the input frame
+//     frame = createVideoFrame(av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
+//     if (!frame)
+//         throw std::runtime_error("Cannot allocate input frame.");
+//
+//     // Allocate the encode buffer
+//     // XXX: Disabling in favor of encoder manged buffer
+//     //bufferSize = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
+//     //buffer = (std::uint8_t*)av_malloc(bufferSize);
+// }
+//
+//
+// void VideoCodecEncoderContext::close()
+// {
+//     TraceS(this) << "Closing" << endl;
+//
+//     VideoContext::close();
+//
+//     if (conv) {
+//         delete conv;
+//         conv = nullptr;
+//     }
+//
+//     if (buffer) {
+//         av_free(buffer);
+//         buffer = nullptr;
+//     }
+// }
+//
+//
+// bool VideoCodecEncoderContext::encode(unsigned char* data, int size, AVPacket& opacket)
+// {
+//     assert(data);
+//     assert(size);
+//     AVPacket ipacket;
+//     av_init_packet(&ipacket);
+//     ipacket.data = data;
+//     ipacket.size = size;
+//     return encode(ipacket, opacket);
+// }
+//
+//
+// bool VideoCodecEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
+// {
+//     assert(stream == nullptr);
+//     assert(ipacket.data);
+//     assert(frame);
+//     assert(conv);
+//
+//     // Populate the input frame with date from the given buffer.
+//     // NOTE: This only workd with contiguous buffers
+//     frame->data[0] = reinterpret_cast<std::uint8_t*>(ipacket.data);
+//
+//     // TODO: Correctly set the input frame PTS
+//     // http://thompsonng.blogspot.com.au/2011/09/ffmpeg-avinterleavedwriteframe-return.html
+//     // http://stackoverflow.com/questions/6603979/ffmpegavcodec-encode-video-setting-pts-h264
+//     // (1 / oparams.fps) * sample rate * frame number
+//     frame->pts = ctx->frame_number;
+//
+//     return encode(frame, opacket);
+// }
+//
+//
+// bool VideoCodecEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
+// {
+//     TraceS(this) << "Encoding Video Packet" << endl;
+//
+//     // // TODO: This is same as VideoCodecEncoderContext, create a single
+//     // // encodeVideo helper method for both
+//     //
+//     // AVFrame* oframe = conv ? conv->convert(iframe) : iframe;
+//     // oframe->pts = iframe->pts;
+//     //
+//     // av_init_packet(&opacket);
+//     // opacket.data = nullptr;
+//     // opacket.size = 0;
+//     // //opacket.data = this->buffer; // use our buffer, not ffmpeg assigned
+//     // //opacket.size = this->bufferSize;
+//     //
+//     // int frameEncoded = 0;
+//     // if (avcodec_encode_video2(ctx, &opacket, oframe, &frameEncoded) < 0) {
+//     //     error = "Fatal encoder error";
+//     //     ErrorS(this) << "Fatal encoder error" << endl;
+//     //     throw std::runtime_error(error);
+//     // }
+//
+//     bool frameEncoded = encodeVideoPacket(this, iframe, opacket);
+//
+//     if (frameEncoded) {
+//         fps.tick();
+//         if (ctx->coded_frame->key_frame)
+//             opacket.flags |= AV_PKT_FLAG_KEY;
+//
+//         // TraceS(this) << "Encoded PTS:\n"
+//         //     << "\n\tPTS: " << opacket.pts
+//         //     << "\n\tDTS: " << opacket.dts
+//         //     << endl;
+//     }
+//
+//     return frameEncoded;
+// }
 
 
 //
@@ -668,10 +672,10 @@ void VideoConversionContext::create(const VideoCodec& iparams, const VideoCodec&
     oframe->width = oparams.width;
     oframe->height = oparams.height;
     avpicture_alloc(reinterpret_cast<AVPicture*>(oframe),
-        av_get_pix_fmt(oparams.pixelFmt), oparams.width, oparams.height);
+        av_get_pix_fmt(oparams.pixelFmt.c_str()), oparams.width, oparams.height);
     ctx = sws_getContext(
-        iparams.width, iparams.height, av_get_pix_fmt(iparams.pixelFmt),
-        oparams.width, oparams.height, av_get_pix_fmt(oparams.pixelFmt),
+        iparams.width, iparams.height, av_get_pix_fmt(iparams.pixelFmt.c_str()),
+        oparams.width, oparams.height, av_get_pix_fmt(oparams.pixelFmt.c_str()),
         /* SWS_FAST_BILINEAR */SWS_BICUBIC, nullptr, nullptr, nullptr);
     if (!ctx)
         throw std::runtime_error("Invalid conversion context.");
@@ -727,40 +731,22 @@ AVFrame* VideoConversionContext::convert(AVFrame* iframe)
 
 AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
 {
-    AVFrame* picture = av_frame_alloc();
+    auto picture = av_frame_alloc();
     if (!picture)
         return nullptr;
 
-    int size = avpicture_get_size(pixelFmt, width, height);
-    std::uint8_t* buffer = (std::uint8_t*)av_malloc(size);
+    // int size = avpicture_get_size(pixelFmt, width, height);
+    // int size = av_image_get_buffer_size(pixelFmt, width + 1, height + 1, 16);
+    int size = av_image_get_buffer_size(pixelFmt, width, height, 16);
+    auto buffer = reinterpret_cast<std::uint8_t*>(av_malloc(size));
     if (!buffer) {
         av_free(picture);
         return nullptr;
-        }
+    }
 
-        avpicture_fill(reinterpret_cast<AVPicture*>(picture), buffer, pixelFmt, width, height);
-
-        return picture;
-
-        // AVFrame* frame = av_frame_alloc();
-        // if (!frame) {
-        //         fprintf(stderr, "Could not allocate video frame\n");
-        //         //exit(1);
-        //         return nullptr;
-        // }
-        // frame->format = pixelFmt;
-        // frame->width  = width;
-        // frame->height = height;
-        // // the image can be allocated by any means and av_image_alloc() is
-        //     // just the most convenient way if av_malloc() is to be used
-        // int ret = av_image_alloc(frame->data, frame->linesize, width, height,
-        //                                          (enum AVPixelFormat)pixelFmt, 32);
-        // if (ret < 0) {
-        //         fprintf(stderr, "Could not allocate raw picture buffer\n");
-        //         //exit(1);
-        //         return nullptr;
-        // }
-        // return frame;
+    // avpicture_fill(reinterpret_cast<AVPicture*>(picture), buffer, pixelFmt, width, height);
+    av_image_fill_arrays(picture->data, picture->linesize, buffer, pixelFmt, width, height, 1);
+    return picture;
 }
 
 
@@ -771,8 +757,9 @@ void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
     avcodec_get_context_defaults3(ctx, codec);
     ctx->codec_id = codec->id;
     ctx->codec_type = AVMEDIA_TYPE_VIDEO;
-    ctx->pix_fmt = av_get_pix_fmt(oparams.pixelFmt);
+    ctx->pix_fmt = av_get_pix_fmt(oparams.pixelFmt.c_str());
     ctx->frame_number = 0;
+    ctx->max_b_frames = 1;
 
     // Resolution must be a multiple of two
     ctx->width = oparams.width;
@@ -787,16 +774,16 @@ void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
     ctx->bit_rate = oparams.bitRate;
     ctx->bit_rate_tolerance = oparams.bitRate * 1000; // needed when time_base.num > 1
 
-    // Emit one intra frame every twelve frames at most
-    ctx->gop_size = 12; // oparams.fps;
+    // Emit one intra frame every ten
+    ctx->gop_size = 10;
 
     // Set some defaults for codecs of note.
     // Also set optimal output pixel formats if the
     // default AV_PIX_FMT_YUV420P was given.
     switch (ctx->codec_id) {
     case AV_CODEC_ID_H264:
-        // TODO: Use oparams.quality to determine profile
-        av_opt_set(ctx->priv_data, "preset", "veryfast", 0); // slow // baseline
+        // TODO: Use oparams.quality to determine profile?
+        av_opt_set(ctx->priv_data, "preset", "slow", 0); // veryfast // slow // baseline
         break;
     case AV_CODEC_ID_MJPEG:
     case AV_CODEC_ID_LJPEG:
@@ -805,8 +792,8 @@ void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
 
         // Use high quality JPEG
         // TODO: Use oparams.quality to determine values
-        ctx->mb_lmin        = ctx->lmin = ctx->qmin * FF_QP2LAMBDA;
-        ctx->mb_lmax        = ctx->lmax = ctx->qmax * FF_QP2LAMBDA;
+        // ctx->mb_lmin        = ctx->lmin = ctx->qmin * FF_QP2LAMBDA;
+        // ctx->mb_lmax        = ctx->lmax = ctx->qmax * FF_QP2LAMBDA;
         ctx->flags          = CODEC_FLAG_QSCALE;
         ctx->global_quality = ctx->qmin * FF_QP2LAMBDA;
         break;
@@ -842,7 +829,8 @@ void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
 void initDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts)
 {
     opacket->data = frame->data[0];
-    opacket->size = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
+    // opacket->size = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
+    opacket->size = av_image_get_buffer_size(ctx->pix_fmt, ctx->width, ctx->height, 16);
     opacket->dts = frame->pkt_dts; // Decoder PTS values can be unordered
     opacket->pts = frame->pkt_pts;
 
@@ -881,10 +869,52 @@ void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
 }
 
 
-bool encodeVideoPacket(const VideoContext* video, const AVFrame* iframe, AVPacket& opacket)
+bool encodeVideoPacket(VideoEncoderContext* enc, AVFrame* iframe, AVPacket& opacket)
 {
-    assert(0);
-    return true;
+    assert(iframe);
+    assert(iframe->data[0]);
+    assert(enc->codec);
+
+    // Recreate the video conversion context on the fly
+    // if the input resolution changes.
+    if (enc->iparams.width != iframe->width ||
+        enc->iparams.height != iframe->height) {
+        // _options.iformat.video.width = iframe->width;
+        // _options.iformat.video.height = iframe->height;
+        enc->iparams.width = iframe->width;
+        enc->iparams.height = iframe->height;
+        DebugL << "Recreating video conversion context" << endl;
+        enc->freeConverter();
+        enc->createConverter();
+    }
+
+    // Convert the input frame if required
+    auto cframe = enc->conv ? enc->conv->convert(iframe) : iframe;
+    cframe->format = enc->ctx->pix_fmt;
+    cframe->width  = iframe->width;
+    cframe->height = iframe->height;
+
+    // Set the input PTS or a monotonic value to keep the encoder happy.
+    // The actual setting of the PTS is outside the scope of this encoder.
+    cframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : enc->ctx->frame_number;
+
+    av_init_packet(&opacket);
+    opacket.data = nullptr; // using encoder assigned buffer
+    opacket.size = 0;
+    // opacket.data = this->buffer;
+    // opacket.size = this->bufferSize;
+    if (enc->stream)
+        opacket.stream_index = enc->stream->index;
+
+    int frameEncoded = 0;
+    if (avcodec_encode_video2(enc->ctx, &opacket, cframe, &frameEncoded) < 0) {
+        // TODO: Use av_strerror
+        enc->error = "Fatal encoder error";
+        ErrorL << enc->error << endl; //S(this)
+        throw std::runtime_error(enc->error);
+    }
+
+    return frameEncoded > 0;
 }
 
 

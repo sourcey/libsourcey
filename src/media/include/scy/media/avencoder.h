@@ -61,11 +61,13 @@ public:
 
     virtual void createVideo();
     virtual void freeVideo();
+    virtual bool encodeVideo(AVFrame* frame);
     virtual bool encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int height, std::uint64_t time = AV_NOPTS_VALUE);
       // Encode a single video frame
 
     virtual void createAudio();
     virtual void freeAudio();
+    // virtual bool encodeAudio(AVFrame* frame);
     virtual bool encodeAudio(std::uint8_t* buffer, int bufferSize, int frameSize, std::uint64_t time = AV_NOPTS_VALUE);
       // Encode a single audio frame
 
@@ -79,7 +81,8 @@ public:
     PacketSignal emitter;
 
 protected:
-    virtual void setVideoPacketPts(AVPacket& packet);
+    bool writeOutputPacket(AVPacket& packet);
+    void setVideoPacketPts(AVPacket& packet);
 
 
     //static Mutex _mutex; // Protects avcodec_open/close()

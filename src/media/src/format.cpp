@@ -29,40 +29,40 @@ namespace scy {
 namespace av {
 
 
-Format::Format() : 
-    name("Unknown"), id("rawvideo"), priority(0)
+Format::Format() :
+    name("Unknown"), priority(0)
 {
 }
 
 
-Format::Format(const std::string& name, const char* id, const VideoCodec& video, const AudioCodec& audio, int priority) : 
+Format::Format(const std::string& name, const char* id, const VideoCodec& video, const AudioCodec& audio, int priority) :
     name(name), id(id), video(video), audio(audio), priority(priority)
 {
 }
 
 
-Format::Format(const std::string& name, const char* id, const VideoCodec& video, int priority) : 
+Format::Format(const std::string& name, const char* id, const VideoCodec& video, int priority) :
     name(name), id(id), video(video), priority(priority)
 {
 }
 
 
-Format::Format(const std::string& name, const char* id, const AudioCodec& audio, int priority) : 
+Format::Format(const std::string& name, const char* id, const AudioCodec& audio, int priority) :
     name(name), id(id), audio(audio), priority(priority)
 {
 }
 
-    
+
 Format::Format(const Format& r) :
     name(r.name),
     id(r.id),
     video(r.video),
     audio(r.audio),
-    priority(r.priority) 
+    priority(r.priority)
 {
 }
 
-    
+
 Format::Type Format::type() const
 {
     if (video.enabled && audio.enabled)
@@ -76,7 +76,7 @@ Format::Type Format::type() const
 }
 
 
-std::string Format::toString() const 
+std::string Format::toString() const
 {
     std::ostringstream os;
     os << "Format[" << name << ":"  << id;
@@ -106,5 +106,5 @@ void Format::print(std::ostream& ost)
 }
 
 
-} // namespace av 
+} // namespace av
 } // namespace scy

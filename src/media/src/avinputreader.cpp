@@ -347,7 +347,7 @@ void AVInputReader::run()
                 audioFrames++;
             }
 
-            av_free_packet(&ipacket);
+            av_packet_unref(&ipacket);
         }
 
         if (!_stopping && res < 0) {
@@ -362,7 +362,7 @@ void AVInputReader::run()
                     video.source = &opacket;
                     emit(video);
                 }
-                av_free_packet(&opacket);
+                av_packet_unref(&opacket);
                 if (!gotFrame)
                     break;
             }
@@ -376,7 +376,7 @@ void AVInputReader::run()
                     audio.source = &opacket;
                     emit(audio);
                 }
-                av_free_packet(&opacket);
+                av_packet_unref(&opacket);
                 if (!gotFrame)
                     break;
             }

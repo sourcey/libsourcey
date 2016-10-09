@@ -1,5 +1,5 @@
-#ifndef SCY_VideoRecorder_H
-#define SCY_VideoRecorder_H
+#ifndef SCY_ImageSequenceRecorder_H
+#define SCY_ImageSequenceRecorder_H
 
 
 #include "scy/media/videocontext.h"
@@ -13,22 +13,25 @@
 namespace scy {
 
 
-class VideoRecorder: public rtc::VideoSinkInterface<cricket::VideoFrame>
+class ImageSequenceRecorder: public rtc::VideoSinkInterface<cricket::VideoFrame>
 {
 public:
-    VideoRecorder(webrtc::VideoTrackInterface* track_to_render, const std::string& basename);
-    virtual ~VideoRecorder();
+    ImageSequenceRecorder(webrtc::VideoTrackInterface* track_to_render, const std::string& basename);
+    virtual ~ImageSequenceRecorder();
+
+    std::string getNextFilename();
 
     // VideoSinkInterface implementation
     void OnFrame(const cricket::VideoFrame& frame) override;
 
 protected:
-    rtc::scoped_refptr<webrtc::VideoTrackInterface> rendered_track_;
+    rtc::scoped_refptr<webrtc::VideoTrackInterface> _renderedTrack;
     const std::string _basename;
     size_t _count;
     int _width;
     int _height;
-    av::VideoCodecEncoderContext _encoder;
+    av::VideoEncoderContext _encoder;
+    AVFrame* _avframe;
 };
 
 

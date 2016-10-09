@@ -25,12 +25,12 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/timer.h"
+// #include "scy/mutex.h"
+// #include "scy/timer.h"
 #include "scy/media/types.h"
 #include "scy/media/format.h"
+#include "scy/media/ffmpeg.h"
 #include "scy/media/fpscounter.h"
-
-//#include "scy/mutex.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -39,6 +39,8 @@ extern "C" {
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
 #include <libswscale/swscale.h>
+#include <libavutil/avutil.h>
+#include <libavutil/imgutils.h>
 }
 
 
@@ -46,7 +48,7 @@ namespace scy {
 namespace av {
 
 
-struct VideoContext;
+struct VideoEncoderContext;
 struct VideoConversionContext;
 
 
@@ -54,7 +56,7 @@ AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height);
 void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& oparams);
 void initDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts);
 void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params);
-bool encodeVideoPacket(const VideoContext* video, const AVFrame* iframe, AVPacket& opacket);
+bool encodeVideoPacket(VideoEncoderContext* video, AVFrame* iframe, AVPacket& opacket);
 void printAvailableEncoders(std::ostream& ost, const char* delim = " ");
 AVRational getCodecTimeBase(AVCodec* c, double fps);
 
@@ -99,7 +101,7 @@ struct VideoContext
 
 struct VideoEncoderContext: public VideoContext
 {
-    VideoEncoderContext(AVFormatContext* format);
+    VideoEncoderContext(AVFormatContext* format = nullptr);
     virtual ~VideoEncoderContext();
 
     virtual void create();
@@ -114,43 +116,43 @@ struct VideoEncoderContext: public VideoContext
     virtual void createConverter();
     virtual void freeConverter();
 
-    VideoConversionContext* conv;
     AVFormatContext* format;
-
-    std::uint8_t*    buffer;
-    int        bufferSize;
-
-    VideoCodec    iparams;
-    VideoCodec    oparams;
-};
-
-
-//
-// Video Codec Encoder Context
-//
-
-
-struct VideoCodecEncoderContext: public VideoContext
-{
-    VideoCodecEncoderContext();
-    virtual ~VideoCodecEncoderContext();
-
-    virtual void create();
-    //virtual void open(); //const VideoCodec& params
-    virtual void close();
-
-    virtual bool encode(unsigned char* data, int size, AVPacket& opacket);
-    virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
-    virtual bool encode(AVFrame* iframe, AVPacket& opacket);
-
     VideoConversionContext* conv;
 
-    std::uint8_t*            buffer;
-    int                bufferSize;
+    std::uint8_t* buffer;
+    int           bufferSize;
 
     VideoCodec    iparams;
     VideoCodec    oparams;
 };
+
+
+// //
+// // Video Codec Encoder Context
+// //
+//
+//
+// struct VideoCodecEncoderContext: public VideoContext
+// {
+//     VideoCodecEncoderContext();
+//     virtual ~VideoCodecEncoderContext();
+//
+//     virtual void create();
+//     //virtual void open(); //const VideoCodec& params
+//     virtual void close();
+//
+//     virtual bool encode(unsigned char* data, int size, AVPacket& opacket);
+//     virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
+//     virtual bool encode(AVFrame* iframe, AVPacket& opacket);
+//
+//     VideoConversionContext* conv;
+//
+//     std::uint8_t* buffer;
+//     int           bufferSize;
+//
+//     VideoCodec    iparams;
+//     VideoCodec    oparams;
+// };
 
 
 //

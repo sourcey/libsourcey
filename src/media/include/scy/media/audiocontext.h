@@ -26,23 +26,23 @@
 #ifdef HAVE_FFMPEG
 
 #include "scy/media/types.h"
+#include "scy/media/ffmpeg.h"
 #include "scy/media/format.h"
 #include "scy/media/fpscounter.h"
-//#include "scy/media/iencoder.h"
-
-//#include "scy/mutex.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libavutil/opt.h>
 #include <libavutil/audio_fifo.h>
-#include <libswscale/swscale.h>
-#include <libswresample/swresample.h> //#include "avresample.h"
 }
 
 
 namespace scy {
 namespace av {
+
+
+struct AudioResampler;
 
 
 struct AudioContext
@@ -66,7 +66,7 @@ struct AudioContext
     AVCodecContext* ctx;    // encoder or decoder context
     AVCodec* codec;         // encoder or decoder codec
     AVFrame* frame;         // last encoded or decoded frame
-    std::int64_t pts;              // encoder current pts
+    std::int64_t pts;       // encoder current pts
     FPSCounter fps;         // encoder or decoder fps rate
     std::string error;      // error message
 };
@@ -74,10 +74,9 @@ struct AudioContext
 
 // ---------------------------------------------------------------------
 //
-struct AudioResampler;
 struct AudioEncoderContext: public AudioContext
 {
-    AudioEncoderContext(AVFormatContext* format);
+    AudioEncoderContext(AVFormatContext* format = nullptr);
     virtual ~AudioEncoderContext();
 
     virtual void create();
@@ -101,11 +100,11 @@ struct AudioEncoderContext: public AudioContext
 
     AVFormatContext* format;
     AudioResampler*  resampler;
-    AVAudioFifo       *fifo;
-    AudioCodec        iparams;
-    AudioCodec        oparams;
-    //int                inputFrameSize;
-    int                outputFrameSize;
+    AVAudioFifo*     fifo;
+    AudioCodec       iparams;
+    AudioCodec       oparams;
+    //int              inputFrameSize;
+    int              outputFrameSize;
 };
 
 
@@ -116,7 +115,7 @@ struct AudioDecoderContext: public AudioContext
     AudioDecoderContext();
     virtual ~AudioDecoderContext();
 
-    virtual void create(AVFormatContext *ic, int streamID);
+    virtual void create(AVFormatContext* ic, int streamID);
     //virtual void open();
     virtual void close();
 
@@ -133,25 +132,7 @@ struct AudioDecoderContext: public AudioContext
 
     double duration;
     int width;    // Number of bits used to store a sample
-    bool fp;    // Floating-point sample representation
-};
-
-
-// ---------------------------------------------------------------------
-//
-struct AudioResampler
-{
-    AudioResampler();
-    virtual ~AudioResampler();
-
-    virtual void create(const AudioCodec& iparams, const AudioCodec& oparams);
-    virtual void close();
-
-    virtual bool resample(const std::uint8_t* inSamples, int inNbSamples, std::uint8_t**& outSamples, int& outNbSamples);
-
-    struct SwrContext* ctx;
-    AudioCodec iparams;
-    AudioCodec oparams;
+    bool fp;      // Floating-point sample representation
 };
 
 
@@ -163,45 +144,3 @@ void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, c
 
 #endif
 #endif    // SCY_MEDIA_AudioContext_H
-
-
-
-    //double maxFPS;
-        // Maximum decoding FPS.
-        // FPS is calculated from ipacket PTS.
-        // Extra frames will be dropped.
-    //virtual void reset();
-        // Decodes a single frame from the provided packet.
-        // Returns the size of the decoded frame.
-        // IMPORTANT: In order to ensure all data is decoded from the
-        // input packet, this method should be looped until the input
-        // packet size is 0.
-        // Example:
-        //    while (packet.size > 0) {
-        //        decode(packet);
-        //    }
-/*
-//, AVCodecContext* ocontext, int encFrameSize
-    //AVFrame* iframe
-    //AVFrame* oframe;
-    //struct AVResampleContext* ctx;
-    //int inNbSmaples;
-    //int outFrameSize; // output frame size
-*/
-
-    // Internal data
-    //AVCodec*            codec;
-    //AVPacket*            packet;
-
-    // The output frame size for encoding and decoding.
-    //int                    frameSize;
-
-    //int                offset;
-
-    // Exposed properties
-    /*
-    int bitRate;
-    int sampleRate;
-    int bitsPerSample;
-    int channels;
-    */
