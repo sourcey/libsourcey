@@ -202,30 +202,30 @@ static const std::string kVideoMetaPathK2_6("/sys/class/video4linux/");
 enum MetaType { M2_4, M2_6, NONE };
 
 
-bool IsV4L2Device(const std::string& device_path) {
+bool isV4L2Device(const std::string& devicePath) {
   // check device major/minor numbers are in the range for video devices.
   struct stat s;
-  if (lstat(device_path.c_str(), &s) != 0 || !S_ISCHR(s.st_mode)) return false;
+  if (lstat(devicePath.c_str(), &s) != 0 || !S_ISCHR(s.st_mode)) return false;
   int video_fd = -1;
   bool is_v4l2 = false;
   // check major/minur device numbers are in range for video device
   if (major(s.st_rdev) == 81) {
     dev_t num = minor(s.st_rdev);
     if (num <= 63 && num >= 0) {
-      video_fd = ::open(device_path.c_str(), O_RDONLY | O_NONBLOCK);
+      video_fd = ::open(devicePath.c_str(), O_RDONLY | O_NONBLOCK);
       if ((video_fd >= 0) || (errno == EBUSY)) {
         ::v4l2_capability video_caps;
         memset(&video_caps, 0, sizeof(video_caps));
         if ((errno == EBUSY) ||
             (::ioctl(video_fd, VIDIOC_QUERYCAP, &video_caps) >= 0 &&
             (video_caps.capabilities & V4L2_CAP_VIDEO_CAPTURE))) {
-          InfoL << "Found V4L2 capture device " << device_path;
+          InfoL << "Found V4L2 capture device " << devicePath;
           is_v4l2 = true;
         } else {
-          ErrorL << "VIDIOC_QUERYCAP failed for " << device_path;
+          ErrorL << "VIDIOC_QUERYCAP failed for " << devicePath;
         }
       } else {
-        ErrorL << "Failed to open " << device_path;
+        ErrorL << "Failed to open " << devicePath;
       }
     }
   }
@@ -244,7 +244,7 @@ static std::string Trim(const std::string& s, const std::string& drop = " \t") {
     return s.substr(first, last - first + 1);
 }
 
-static void ScanDeviceDirectory(const std::string& devdir,
+static void scanDeviceDirectory(const std::string& devdir,
     std::vector<Device>& devices) {
 
     std::vector<std::string> nodes;
@@ -254,112 +254,114 @@ static void ScanDeviceDirectory(const std::string& devdir,
         std::string deviceName = devdir + filename;
         //if (!directoryIterator->IsDots()) {
             if (filename.find("video") == 0 &&
-                IsV4L2Device(deviceName)) {
+                isV4L2Device(deviceName)) {
                     devices.push_back(Device("video", i, deviceName));
             }
         //}
     }
 
-        // talk_base::scoped_ptr<talk_base::DirectoryIterator> directoryIterator(
-        //     talk_base::Filesystem::IterateDirectory());
-        //
-        // if (directoryIterator->Iterate(talk_base::Pathname(devdir))) {
-        //     do {
-        //         std::string filename = directoryIterator->Name();
-        //         std::string deviceName = devdir + filename;
-        //         if (!directoryIterator->IsDots()) {
-        //             if (filename.find("video") == 0 &&
-        //                 V4LLookup::IsV4L2Device(deviceName)) {
-        //                     devices.push_back(Device(deviceName, deviceName));
-        //             }
-        //         }
-        //     } while (directoryIterator->Next());
-        // }
+    // talk_base::scoped_ptr<talk_base::DirectoryIterator> directoryIterator(
+    //     talk_base::Filesystem::IterateDirectory());
+    //
+    // if (directoryIterator->Iterate(talk_base::Pathname(devdir))) {
+    //     do {
+    //         std::string filename = directoryIterator->Name();
+    //         std::string deviceName = devdir + filename;
+    //         if (!directoryIterator->IsDots()) {
+    //             if (filename.find("video") == 0 &&
+    //                 V4LLookup::isV4L2Device(deviceName)) {
+    //                     devices.push_back(Device(deviceName, deviceName));
+    //             }
+    //         }
+    //     } while (directoryIterator->Next());
+    // }
 }
 
-/*
-static std::string getVideoDeviceNameK2_6(const std::string& device_meta_path) {
+
+// static std::string getVideoDeviceNameK2_6(const std::string& deviceMetaPath) {
+//     std::string deviceName;
+//
+//     talk_base::scoped_ptr<talk_base::FileStream> device_meta_stream(
+//         talk_base::Filesystem::OpenFile(deviceMetaPath, "r"));
+//
+//     if (device_meta_stream.get() != NULL) {
+//         if (device_meta_stream->ReadLine(&deviceName) != talk_base::SR_SUCCESS) {
+//             ErrorL << "Failed to read V4L2 device meta " << deviceMetaPath << endl;
+//         }
+//         device_meta_stream->Close();
+//     }
+//
+//     return deviceName;
+// }
+//
+// static std::string getVideoDeviceNameK2_4(const std::string& deviceMetaPath) {
+//     talk_base::ConfigParser::MapVector all_values;
+//
+//     talk_base::ConfigParser config_parser;
+//     talk_base::FileStream* file_stream =
+//         talk_base::Filesystem::OpenFile(deviceMetaPath, "r");
+//
+//     if (file_stream == NULL) return "";
+//
+//     config_parser.Attach(file_stream);
+//     config_parser.Parse(&all_values);
+//
+//     for (talk_base::ConfigParser::MapVector::iterator i = all_values.begin();
+//         i != all_values.end(); ++i) {
+//             talk_base::ConfigParser::SimpleMap::iterator deviceName_i =
+//                 i->find("name");
+//
+//             if (deviceName_i != i->end()) {
+//                 return deviceName_i->second;
+//             }
+//     }
+//
+//     return "";
+// }
+
+
+static std::string getVideoDeviceName(MetaType meta, const std::string& deviceFileName)
+{
+    std::string deviceMetaPath;
     std::string deviceName;
+    std::string metaFilePath;
 
-    talk_base::scoped_ptr<talk_base::FileStream> device_meta_stream(
-        talk_base::Filesystem::OpenFile(device_meta_path, "r"));
+    // TODO: Convert code to our API
+    // if (meta == M2_6) {
+    //     metaFilePath = kVideoMetaPathK2_6 + deviceFileName + "/name";
+    //
+    //     InfoL << "Trying " + metaFilePath << endl;
+    //     deviceName = getVideoDeviceNameK2_6(metaFilePath);
+    //
+    //     if (deviceName.empty()) {
+    //         metaFilePath = kVideoMetaPathK2_6 + deviceFileName + "/model";
+    //
+    //         InfoL << "Trying " << metaFilePath << endl;
+    //         deviceName = getVideoDeviceNameK2_6(metaFilePath);
+    //     }
+    // } else {
+    //     metaFilePath = kVideoMetaPathK2_4 + deviceFileName;
+    //     InfoL << "Trying " << metaFilePath << endl;
+    //     deviceName = getVideoDeviceNameK2_4(metaFilePath);
+    // }
 
-    if (device_meta_stream.get() != NULL) {
-        if (device_meta_stream->ReadLine(&deviceName) != talk_base::SR_SUCCESS) {
-            ErrorL << "Failed to read V4L2 device meta " << device_meta_path << endl;
-        }
-        device_meta_stream->Close();
+    if (deviceName.empty()) {
+        deviceName = "/dev/" + deviceFileName;
+        ErrorL << "Device name not found, defaulting to device path: " << deviceName << endl;
     }
 
-    return deviceName;
+    InfoL << "Name for " << deviceFileName << " is " << deviceName << endl;
+
+    return Trim(deviceName);
 }
 
-static std::string getVideoDeviceNameK2_4(const std::string& device_meta_path) {
-    talk_base::ConfigParser::MapVector all_values;
 
-    talk_base::ConfigParser config_parser;
-    talk_base::FileStream* file_stream =
-        talk_base::Filesystem::OpenFile(device_meta_path, "r");
-
-    if (file_stream == NULL) return "";
-
-    config_parser.Attach(file_stream);
-    config_parser.Parse(&all_values);
-
-    for (talk_base::ConfigParser::MapVector::iterator i = all_values.begin();
-        i != all_values.end(); ++i) {
-            talk_base::ConfigParser::SimpleMap::iterator deviceName_i =
-                i->find("name");
-
-            if (deviceName_i != i->end()) {
-                return deviceName_i->second;
-            }
-    }
-
-    return "";
-}
-*/
-
-static std::string getVideoDeviceName(MetaType meta,
-    const std::string& device_file_name) {
-        std::string device_meta_path;
-        std::string deviceName;
-        std::string meta_file_path;
-
-        // if (meta == M2_6) {
-        //     meta_file_path = kVideoMetaPathK2_6 + device_file_name + "/name";
-        //
-        //     InfoL << "Trying " + meta_file_path << endl;
-        //     deviceName = getVideoDeviceNameK2_6(meta_file_path);
-        //
-        //     if (deviceName.empty()) {
-        //         meta_file_path = kVideoMetaPathK2_6 + device_file_name + "/model";
-        //
-        //         InfoL << "Trying " << meta_file_path << endl;
-        //         deviceName = getVideoDeviceNameK2_6(meta_file_path);
-        //     }
-        // } else {
-        //     meta_file_path = kVideoMetaPathK2_4 + device_file_name;
-        //     InfoL << "Trying " << meta_file_path << endl;
-        //     deviceName = getVideoDeviceNameK2_4(meta_file_path);
-        // }
-
-        if (deviceName.empty()) {
-            deviceName = "/dev/" + device_file_name;
-            ErrorL
-                << "Device name not found, defaulting to device path " << deviceName << endl;
-        }
-
-        InfoL << "Name for " << device_file_name << " is " << deviceName << endl;
-
-        return Trim(deviceName);
-}
-
-static void ScanV4L2Devices(std::vector<Device>& devices) {
+static void scanV4L2Devices(std::vector<Device>& devices)
+{
     InfoL << "Enumerating V4L2 devices" << endl;
 
     MetaType meta;
-    std::string metadata_dir;
+    std::string metadataDir;
 
     // talk_base::scoped_ptr<talk_base::DirectoryIterator> directoryIterator(
     //     talk_base::Filesystem::IterateDirectory());
@@ -367,37 +369,38 @@ static void ScanV4L2Devices(std::vector<Device>& devices) {
     // Try and guess kernel version
     // if (directoryIterator->Iterate(kVideoMetaPathK2_6)) {
     //     meta = M2_6;
-    //     metadata_dir = kVideoMetaPathK2_6;
+    //     metadataDir = kVideoMetaPathK2_6;
     // } else if (directoryIterator->Iterate(kVideoMetaPathK2_4)) {
     //     meta = M2_4;
-    //     metadata_dir = kVideoMetaPathK2_4;
+    //     metadataDir = kVideoMetaPathK2_4;
     // } else {
     //     meta = NONE;
     // }
     if (fs::exists(kVideoMetaPathK2_6)) {
         meta = M2_6;
-        metadata_dir = kVideoMetaPathK2_6;
+        metadataDir = kVideoMetaPathK2_6;
     } else if (fs::exists(kVideoMetaPathK2_4)) {
         meta = M2_4;
-        metadata_dir = kVideoMetaPathK2_4;
+        metadataDir = kVideoMetaPathK2_4;
     } else {
         meta = NONE;
     }
 
     if (meta != NONE) {
-        InfoL << "V4L2 device metadata found at " << metadata_dir << endl;
+        InfoL << "V4L2 device metadata found at " << metadataDir << endl;
 
         std::vector<std::string> nodes;
-        fs::readdir(metadata_dir, nodes);
+        fs::readdir(metadataDir, nodes);
         for (unsigned i = 0; i < nodes.size(); i++) {
             std::string filename = nodes[i];
+            DebugL << "Checking video device " << filename << endl;
 
             if (filename.find("video") == 0) {
-                std::string device_path = "/dev/" + filename;
+                std::string devicePath = "/dev/" + filename;
 
-                if (IsV4L2Device(device_path)) {
+                if (isV4L2Device(devicePath)) {
                     devices.push_back(
-                        Device("video", i, getVideoDeviceName(meta, filename), device_path));
+                        Device("video", i, getVideoDeviceName(meta, filename), devicePath));
                 }
             }
         }
@@ -406,11 +409,11 @@ static void ScanV4L2Devices(std::vector<Device>& devices) {
         //     std::string filename = directoryIterator->Name();
         //
         //     if (filename.find("video") == 0) {
-        //         std::string device_path = "/dev/" + filename;
+        //         std::string devicePath = "/dev/" + filename;
         //
-        //         if (V4LLookup::IsV4L2Device(device_path)) {
+        //         if (V4LLookup::isV4L2Device(devicePath)) {
         //             devices.push_back(
-        //                 Device(getVideoDeviceName(meta, filename), device_path));
+        //                 Device(getVideoDeviceName(meta, filename), devicePath));
         //         }
         //     }
         // } while (directoryIterator->Next());
@@ -420,7 +423,7 @@ static void ScanV4L2Devices(std::vector<Device>& devices) {
 
     if (devices.size() == 0) {
         InfoL << "Plan B. Scanning all video devices in /dev directory" << endl;
-        ScanDeviceDirectory("/dev/", devices);
+        scanDeviceDirectory("/dev/", devices);
     }
 
     InfoL << "Total V4L2 devices found : " << devices.size() << endl;
@@ -430,133 +433,132 @@ static void ScanV4L2Devices(std::vector<Device>& devices) {
 bool LinuxDeviceManager::getVideoCaptureDevices(std::vector<Device>& devices)
 {
     devices.clear();
-    ScanV4L2Devices(devices);
+    scanV4L2Devices(devices);
     return filterDevices(devices, kFilteredVideoDevicesName);
 }
 
 
-/*
-LinuxDeviceWatcher::LinuxDeviceWatcher(IDeviceManager* dm)
-    : DeviceWatcher(dm),
-    manager_(dm),
-    udev_(NULL),
-    udev_monitor_(NULL),
-    registered_(false) {
-}
 
-
-LinuxDeviceWatcher::~LinuxDeviceWatcher() {
-}
-
-
-bool LinuxDeviceWatcher::start() {
-    // We deliberately return true in the failure paths here because libudev is
-    // not a critical component of a Linux system so it may not be present/usable,
-    // and we don't want to halt LinuxDeviceManager initialization in such a case.
-    if (!libudev_.Load()) {
-        Log("warn") << "libudev not present/usable; LinuxDeviceWatcher disabled" << endl;
-            return true;
-    }
-    udev_ = LATE(udev_new)();
-    if (!udev_) {
-        ErrorL << "udev_new()" << endl;
-        return true;
-    }
-    // The second argument here is the event source. It can be either "kernel" or
-    // "udev", but "udev" is the only correct choice. Apps listen on udev and the
-    // udev daemon in turn listens on the kernel.
-    udev_monitor_ = LATE(udev_monitor_new_from_netlink)(udev_, "udev");
-    if (!udev_monitor_) {
-        ErrorL << "udev_monitor_new_from_netlink()" << endl;
-        return true;
-    }
-    // We only listen for changes in the video devices. Audio devices are more or
-    // less unimportant because receiving device change notifications really only
-    // matters for broadcasting updated send/recv capabilities based on whether
-    // there is at least one device available, and almost all computers have at
-    // least one audio device. Also, PulseAudio device notifications don't come
-    // from the udev daemon, they come from the PulseAudio daemon, so we'd only
-    // want to listen for audio device changes from udev if using ALSA. For
-    // simplicity, we don't bother with any audio stuff at all.
-    if (LATE(udev_monitor_filter_add_match_subsystem_devtype)(udev_monitor_,
-        "video4linux",
-        NULL) < 0) {
-            ErrorL << "udev_monitor_filter_add_match_subsystem_devtype()" << endl;
-            return true;
-    }
-    if (LATE(udev_monitor_enable_receiving)(udev_monitor_) < 0) {
-        ErrorL << "udev_monitor_enable_receiving()" << endl;
-        return true;
-    }
-    static_cast<talk_base::PhysicalSocketServer*>(
-        talk_base::Thread::Current()->socketserver())->Add(this);
-    registered_ = true;
-    return true;
-}
-
-
-void LinuxDeviceWatcher::stop() {
-    if (registered_) {
-        static_cast<talk_base::PhysicalSocketServer*>(
-            talk_base::Thread::Current()->socketserver())->Remove(this);
-        registered_ = false;
-    }
-    if (udev_monitor_) {
-        LATE(udev_monitor_unref)(udev_monitor_);
-        udev_monitor_ = NULL;
-    }
-    if (udev_) {
-        LATE(udev_unref)(udev_);
-        udev_ = NULL;
-    }
-    libudev_.Unload();
-}
-
-
-uint32 LinuxDeviceWatcher::GetRequestedEvents() {
-    return talk_base::DE_READ;
-}
-
-
-void LinuxDeviceWatcher::OnPreEvent(uint32 ff) {
-    // Nothing to do.
-}
-
-
-void LinuxDeviceWatcher::OnEvent(uint32 ff, int err) {
-    udev_device* device = LATE(udev_monitor_receive_device)(udev_monitor_);
-    if (!device) {
-        // Probably the socket connection to the udev daemon was terminated (perhaps
-        // the daemon crashed or is being restarted?).
-        LOG_ERR(LS_WARNING) << "udev_monitor_receive_device()";
-        // Stop listening to avoid potential livelock (an fd with EOF in it is
-        // always considered readable).
-        static_cast<talk_base::PhysicalSocketServer*>(
-            talk_base::Thread::Current()->socketserver())->Remove(this);
-        registered_ = false;
-        return;
-    }
-    // Else we read the device successfully.
-
-    // Since we already have our own filesystem-based device enumeration code, we
-    // simply re-enumerate rather than inspecting the device event.
-    LATE(udev_device_unref)(device);
-    manager_->SignalDevicesChange();
-}
-
-
-int LinuxDeviceWatcher::GetDescriptor() {
-    return LATE(udev_monitor_get_fd)(udev_monitor_);
-}
-
-
-bool LinuxDeviceWatcher::IsDescriptorClosed() {
-    // If it is closed then we will just get an error in
-    // udev_monitor_receive_device and unregister, so we don't need to check for
-    // it separately.
-    return false;
-}
-*/
+// LinuxDeviceWatcher::LinuxDeviceWatcher(IDeviceManager* dm)
+//     : DeviceWatcher(dm),
+//     manager_(dm),
+//     udev_(NULL),
+//     udev_monitor_(NULL),
+//     registered_(false) {
+// }
+//
+//
+// LinuxDeviceWatcher::~LinuxDeviceWatcher() {
+// }
+//
+//
+// bool LinuxDeviceWatcher::start() {
+//     // We deliberately return true in the failure paths here because libudev is
+//     // not a critical component of a Linux system so it may not be present/usable,
+//     // and we don't want to halt LinuxDeviceManager initialization in such a case.
+//     if (!libudev_.Load()) {
+//         Log("warn") << "libudev not present/usable; LinuxDeviceWatcher disabled" << endl;
+//             return true;
+//     }
+//     udev_ = LATE(udev_new)();
+//     if (!udev_) {
+//         ErrorL << "udev_new()" << endl;
+//         return true;
+//     }
+//     // The second argument here is the event source. It can be either "kernel" or
+//     // "udev", but "udev" is the only correct choice. Apps listen on udev and the
+//     // udev daemon in turn listens on the kernel.
+//     udev_monitor_ = LATE(udev_monitor_new_from_netlink)(udev_, "udev");
+//     if (!udev_monitor_) {
+//         ErrorL << "udev_monitor_new_from_netlink()" << endl;
+//         return true;
+//     }
+//     // We only listen for changes in the video devices. Audio devices are more or
+//     // less unimportant because receiving device change notifications really only
+//     // matters for broadcasting updated send/recv capabilities based on whether
+//     // there is at least one device available, and almost all computers have at
+//     // least one audio device. Also, PulseAudio device notifications don't come
+//     // from the udev daemon, they come from the PulseAudio daemon, so we'd only
+//     // want to listen for audio device changes from udev if using ALSA. For
+//     // simplicity, we don't bother with any audio stuff at all.
+//     if (LATE(udev_monitor_filter_add_match_subsystem_devtype)(udev_monitor_,
+//         "video4linux",
+//         NULL) < 0) {
+//             ErrorL << "udev_monitor_filter_add_match_subsystem_devtype()" << endl;
+//             return true;
+//     }
+//     if (LATE(udev_monitor_enable_receiving)(udev_monitor_) < 0) {
+//         ErrorL << "udev_monitor_enable_receiving()" << endl;
+//         return true;
+//     }
+//     static_cast<talk_base::PhysicalSocketServer*>(
+//         talk_base::Thread::Current()->socketserver())->Add(this);
+//     registered_ = true;
+//     return true;
+// }
+//
+//
+// void LinuxDeviceWatcher::stop() {
+//     if (registered_) {
+//         static_cast<talk_base::PhysicalSocketServer*>(
+//             talk_base::Thread::Current()->socketserver())->Remove(this);
+//         registered_ = false;
+//     }
+//     if (udev_monitor_) {
+//         LATE(udev_monitor_unref)(udev_monitor_);
+//         udev_monitor_ = NULL;
+//     }
+//     if (udev_) {
+//         LATE(udev_unref)(udev_);
+//         udev_ = NULL;
+//     }
+//     libudev_.Unload();
+// }
+//
+//
+// uint32 LinuxDeviceWatcher::GetRequestedEvents() {
+//     return talk_base::DE_READ;
+// }
+//
+//
+// void LinuxDeviceWatcher::OnPreEvent(uint32 ff) {
+//     // Nothing to do.
+// }
+//
+//
+// void LinuxDeviceWatcher::OnEvent(uint32 ff, int err) {
+//     udev_device* device = LATE(udev_monitor_receive_device)(udev_monitor_);
+//     if (!device) {
+//         // Probably the socket connection to the udev daemon was terminated (perhaps
+//         // the daemon crashed or is being restarted?).
+//         LOG_ERR(LS_WARNING) << "udev_monitor_receive_device()";
+//         // Stop listening to avoid potential livelock (an fd with EOF in it is
+//         // always considered readable).
+//         static_cast<talk_base::PhysicalSocketServer*>(
+//             talk_base::Thread::Current()->socketserver())->Remove(this);
+//         registered_ = false;
+//         return;
+//     }
+//     // Else we read the device successfully.
+//
+//     // Since we already have our own filesystem-based device enumeration code, we
+//     // simply re-enumerate rather than inspecting the device event.
+//     LATE(udev_device_unref)(device);
+//     manager_->SignalDevicesChange();
+// }
+//
+//
+// int LinuxDeviceWatcher::GetDescriptor() {
+//     return LATE(udev_monitor_get_fd)(udev_monitor_);
+// }
+//
+//
+// bool LinuxDeviceWatcher::IsDescriptorClosed() {
+//     // If it is closed then we will just get an error in
+//     // udev_monitor_receive_device and unregister, so we don't need to check for
+//     // it separately.
+//     return false;
+// }
 
 
 } } // namespace scy::av

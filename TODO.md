@@ -9,4 +9,4 @@ Work towards a no-rtti build
 
 Describe how to build WebRTC for use with LibSourcey
 
-Convert smaples to output format before FIFO storage
+Devide manager on Linux

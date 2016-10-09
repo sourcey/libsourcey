@@ -171,19 +171,9 @@ void readdir(const std::string& path, std::vector<std::string>& res)
 {
     internal::FSapi(scandir, path.c_str(), 0)
 
-    char *namebuf = static_cast<char*>(wrap.req.ptr);
-    int nnames = wrap.req.result;
-    for (int i = 0; i < nnames; i++)
-    {
-        std::string name(namebuf);
-        res.push_back(name);
-#ifdef _DEBUG
-        namebuf += name.length();
-        assert(*namebuf == '\0');
-        namebuf += 1;
-#else
-        namebuf += name.length() + 1;
-#endif
+    uv_dirent_t dent;
+    while (UV_EOF != uv_fs_scandir_next(&wrap.req, &dent)) {
+        res.push_back(dent.name);
     }
 }
 

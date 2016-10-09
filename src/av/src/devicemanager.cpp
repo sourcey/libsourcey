@@ -431,7 +431,7 @@ bool DeviceManager::shouldDeviceBeIgnored(const std::string& deviceName, const c
     int i = 0;
     while (exclusionList[i]) {
         if (util::icompare(deviceName, exclusionList[i]) == 0) {
-            TraceL << "Ignoring device " << deviceName << endl;
+            DebugL << "Ignoring device " << deviceName << endl;
             return true;
         }
         ++i;
@@ -442,18 +442,14 @@ bool DeviceManager::shouldDeviceBeIgnored(const std::string& deviceName, const c
 
 bool DeviceManager::filterDevices(std::vector<Device>& devices, const char* const exclusionList[])
 {
-    //if (!devices) {
-    //    return false;
-    //}
-
     for (auto it = devices.begin(); it != devices.end(); ) {
-            if (shouldDeviceBeIgnored(it->name, exclusionList)) {
-                it = devices.erase(it);
-            } else {
-                ++it;
-            }
+        if (shouldDeviceBeIgnored(it->name, exclusionList)) {
+            it = devices.erase(it);
+        } else {
+            ++it;
+        }
     }
-    return true;
+    return !devices.empty();
 }
 
 
