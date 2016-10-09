@@ -23,8 +23,8 @@
 #include <iostream>
 #include <string>
 
-#include "scy/media/mediafactory.h"
-#include "scy/media/videocapture.h"
+#include "scy/av/mediafactory.h"
+#include "scy/av/videocapture.h"
 
 #include "webrtc/media/base/videocapturer.h"
 // #include "webrtc/media/base/videocapturerfactory.h"

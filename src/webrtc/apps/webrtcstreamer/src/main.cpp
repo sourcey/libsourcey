@@ -1,7 +1,7 @@
 #include "signaler.h"
 #include "scy/logger.h"
 #include "scy/idler.h"
-#include "scy/media/mediafactory.h"
+#include "scy/av/mediafactory.h"
 
 #include "webrtc/base/ssladapter.h"
 #include "webrtc/base/thread.h"

@@ -2,7 +2,7 @@
 #define SCY_ImageSequenceRecorder_H
 
 
-#include "scy/media/videocontext.h"
+#include "scy/av/videocontext.h"
 
 #include "webrtc/api/peerconnectioninterface.h"
 #include "webrtc/api/jsep.h"

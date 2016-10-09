@@ -2,7 +2,7 @@
 #define SCY_StreamRecorder_H
 
 
-#include "scy/media/avencoder.h"
+#include "scy/av/avencoder.h"
 
 #include "webrtc/api/peerconnectioninterface.h"
 #include "webrtc/api/jsep.h"

@@ -2,7 +2,7 @@
 
 #include "scy/logger.h"
 #include "scy/filesystem.h"
-#include "scy/media/ffmpeg.h"
+#include "scy/av/ffmpeg.h"
 
 #include "webrtc/modules/video_capture/video_capture_factory.h"
 #include "webrtc/media/engine/webrtcvideocapturerfactory.h"

@@ -32,7 +32,7 @@
 # cmakedefine HAVE_SCY_base
 # cmakedefine HAVE_SCY_http
 # cmakedefine HAVE_SCY_json
-# cmakedefine HAVE_SCY_media
+# cmakedefine HAVE_SCY_av
 # cmakedefine HAVE_SCY_net
 # cmakedefine HAVE_SCY_rtp
 # cmakedefine HAVE_SCY_sdp
@@ -46,6 +46,7 @@
 # cmakedefine HAVE_SCY_rtsp
 # cmakedefine HAVE_SCY_ice
 # cmakedefine HAVE_SCY_pacm
+# cmakedefine HAVE_SCY_webrtc
 # cmakedefine HAVE_SCY_anionu
 # cmakedefine HAVE_SCY_spotapi */
 

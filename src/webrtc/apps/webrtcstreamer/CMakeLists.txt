@@ -4,5 +4,5 @@ if(HAVE_WEBRTC AND WITH_OPENCV AND BUILD_APPLICATIONS AND BUILD_APPLICATION_webr
   include_dependency(OpenCV REQUIRED)
 
 
-  define_sourcey_application(webrtcstreamer uv base crypto media net http util json socketio symple webrtc)
+  define_sourcey_application(webrtcstreamer uv base crypto av net http util json socketio symple webrtc)
 endif()
