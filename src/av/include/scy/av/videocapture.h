@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_VideoCapture_H
-#define SCY_MEDIA_VideoCapture_H
+#ifndef SCY_AV_VideoCapture_H
+#define SCY_AV_VideoCapture_H
 
 
 #include <cstdint>
@@ -172,4 +172,4 @@ public:
 
 
 #endif
-#endif // SCY_MEDIA_VideoCapture_H
+#endif // SCY_AV_VideoCapture_H

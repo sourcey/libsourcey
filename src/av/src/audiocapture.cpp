@@ -181,7 +181,7 @@ bool AudioCapture::detach(const PacketDelegateBase& delegate)
 int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer, unsigned int nBufferFrames,
     double streamTime, RtAudioStreamStatus status, void* data)
 {
-    AudioCapture* self = (AudioCapture*)data;
+    auto self = reinterpret_cast<AudioCapture*>(data);
     AudioPacket packet;
 
     if (status)
@@ -189,36 +189,38 @@ int AudioCapture::audioCallback(void* /* outputBuffer */, void* inputBuffer, uns
 
     assert(inputBuffer);
     if (inputBuffer == nullptr) {
-        ErrorL << "Input buffer is nullptr." << endl;
+        ErrorL << "Input buffer is NULL" << endl;
         return 2;
     }
 
     {
         Mutex::ScopedLock lock(self->_mutex);
 
-        int size = 2;
-        RtAudioFormat format = self->_format;
-        // 8-bit signed integer.
-        if (format == RTAUDIO_SINT8)
-            size = 1;
-        // 16-bit signed integer.
-        else if (format == RTAUDIO_SINT16)
-            size = 2;
-        // Lower 3 bytes of 32-bit signed integer.
-        else if (format == RTAUDIO_SINT24)
-            size = 4;
-        // 32-bit signed integer.
-        else if (format == RTAUDIO_SINT32)
-            size = 4;
-        // Normalized between plus/minus 1.0.
-        else if (format == RTAUDIO_FLOAT32)
-            size = 4;
-        // Normalized between plus/minus 1.0.
-        else if (format == RTAUDIO_FLOAT64)
-            size = 8;
-        else assert(0 && "unknown audio capture format");
-
-        packet.setData((char*)inputBuffer, nBufferFrames * self->_channels * size);
+        // int size = 2;
+        // RtAudioFormat format = self->_format;
+        // // 8-bit signed integer.
+        // if (format == RTAUDIO_SINT8)
+        //     size = 1;
+        // // 16-bit signed integer.
+        // else if (format == RTAUDIO_SINT16)
+        //     size = 2;
+        // // Lower 3 bytes of 32-bit signed integer.
+        // else if (format == RTAUDIO_SINT24)
+        //     size = 4;
+        // // 32-bit signed integer.
+        // else if (format == RTAUDIO_SINT32)
+        //     size = 4;
+        // // Normalized between plus/minus 1.0.
+        // else if (format == RTAUDIO_FLOAT32)
+        //     size = 4;
+        // // Normalized between plus/minus 1.0.
+        // else if (format == RTAUDIO_FLOAT64)
+        //     size = 8;
+        // else assert(0 && "unknown audio capture format");
+        //
+        // packet.setData((char*)inputBuffer, nBufferFrames * self->_channels * size);
+        packet.setData((char*)inputBuffer, nBufferFrames * self->_channels * sizeof(RtAudioFormat));
+        packet.frameSize = nBufferFrames;
         packet.time = streamTime;
     }
 
@@ -284,7 +286,7 @@ int AudioCapture::sampleRate() const
 }
 
 
-int AudioCapture::numChannels() const
+int AudioCapture::channels() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _channels;
@@ -293,7 +295,7 @@ int AudioCapture::numChannels() const
 
 std::string AudioCapture::formatString(bool planar) const
 {
-  // FFmpeg sample formats: ffmpeg -sample_fmts
+  // FFmpeg sample formats: `ffmpeg -sample_fmts`
   // name   depth
   // u8        8
   // s16      16
@@ -311,9 +313,9 @@ std::string AudioCapture::formatString(bool planar) const
     case RTAUDIO_SINT16:
       return planar ? "u16p" : "u16";
     case RTAUDIO_SINT24:
-      return planar ? "u32p" : "s32";
+      return planar ? "s32p" : "s32";
     case RTAUDIO_SINT32:
-      return planar ? "u32p" : "s32";
+      return planar ? "s32p" : "s32";
     case RTAUDIO_FLOAT32:
       return planar ? "fltp" : "flt";
     case RTAUDIO_FLOAT64:
@@ -326,34 +328,32 @@ std::string AudioCapture::formatString(bool planar) const
 
 void AudioCapture::getEncoderFormat(Format& iformat)
 {
-    Mutex::ScopedLock lock(_mutex);
     iformat.name = "PCM";
-    //iformat.id = "pcm_s16le";
     iformat.audio.enabled = true;
-    iformat.audio.channels = _channels;
-    iformat.audio.sampleRate = _sampleRate;
-    //iformat.audio.sampleFmt = formatString(true); // TODO: Convert from RtAudioFormat to AVSampleFormat // s16p
-    bool planar = true;
-    switch(_format) {
-      case RTAUDIO_SINT8:
-        iformat.audio.sampleFmt = planar ? "u8p" : "u8";
-        break;
-      case RTAUDIO_SINT16:
-        iformat.audio.sampleFmt = planar ? "s16p" : "s16";
-        break;
-      case RTAUDIO_SINT24:
-        iformat.audio.sampleFmt = planar ? "s32p" : "s32";
-        break;
-      case RTAUDIO_SINT32:
-        iformat.audio.sampleFmt = planar ? "s32p" : "s32";
-        break;
-      case RTAUDIO_FLOAT32:
-        iformat.audio.sampleFmt = planar ? "fltp" : "flt";
-        break;
-      case RTAUDIO_FLOAT64:
-        iformat.audio.sampleFmt = planar ? "dblp" : "dbl";
-        break;
-    }
+    iformat.audio.channels = channels();
+    iformat.audio.sampleRate = sampleRate();
+    iformat.audio.sampleFmt = formatString(true); // TODO: Convert from RtAudioFormat to AVSampleFormat // s16p
+    // bool planar = true;
+    // switch(_format) {
+    //   case RTAUDIO_SINT8:
+    //     iformat.audio.sampleFmt = planar ? "u8p" : "u8";
+    //     break;
+    //   case RTAUDIO_SINT16:
+    //     iformat.audio.sampleFmt = planar ? "s16p" : "s16";
+    //     break;
+    //   case RTAUDIO_SINT24:
+    //     iformat.audio.sampleFmt = planar ? "s32p" : "s32";
+    //     break;
+    //   case RTAUDIO_SINT32:
+    //     iformat.audio.sampleFmt = planar ? "s32p" : "s32";
+    //     break;
+    //   case RTAUDIO_FLOAT32:
+    //     iformat.audio.sampleFmt = planar ? "fltp" : "flt";
+    //     break;
+    //   case RTAUDIO_FLOAT64:
+    //     iformat.audio.sampleFmt = planar ? "dblp" : "dbl";
+    //     break;
+    // }
 }
 
 

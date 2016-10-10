@@ -43,7 +43,7 @@ std::string format(const char* fmt, ...);
     // Printf style string formatting for POD types.
 
 void toUnderscore(std::string& str);
-    // Replaces special characters in the given string with 
+    // Replaces special characters in the given string with
     // underscores and transform to lowercase.
 
 bool isNumber(const std::string& str);
@@ -55,13 +55,13 @@ bool endsWith(const std::string& str, const std::string& suffix);
 void removeSpecialCharacters(std::string& str, bool allowSpaces = false);
 void replaceSpecialCharacters(std::string& str, char with = '_', bool allowSpaces = false);
     // Replaces non-alphanumeric characters.
-    
+
 bool tryParseHex(const std::string& s, unsigned& value);
-unsigned parseHex(const std::string& s);    
+unsigned parseHex(const std::string& s);
     // String to hex value.
 
 std::string dumpbin(const char* data, std::size_t len);
-    // Dumps the binary representation of the 
+    // Dumps the binary representation of the
     // given buffer to the output string.
 
 bool compareVersion(const std::string& l, const std::string& r);
@@ -80,20 +80,20 @@ std::string memAddress(const void* ptr);
 //
 // Type converters
 //
-    
+
 template<typename T>
-std::string itostr(const T& t) 
+std::string itostr(const T& t)
     // Converts integer T to string.
 {
     std::ostringstream oss;
     oss << t;
     return oss.str();
 }
-    
+
 template<typename T>
-T strtoi(const std::string& s) 
+T strtoi(const std::string& s)
     // Converts string to integer T.
-    // Ensure the integer type has  
+    // Ensure the integer type has
     // sufficient storage capacity.
 {
     std::istringstream iss(s);
@@ -150,7 +150,7 @@ template <class S>
 S& replaceInPlace(S& str, const S& from, const S& to, typename S::size_type start = 0)
 {
     assert(from.size() > 0);
-    
+
     S result;
     typename S::size_type pos = 0;
     result.append(str, 0, start);
@@ -213,7 +213,7 @@ S replace(const S& str, const typename S::value_type* from, const typename S::va
 
 
 //
-// String trimming (POCO)
+// String trimming
 //
 
 template <class S>
@@ -223,7 +223,7 @@ S trimLeft(const S& str)
 {
     typename S::const_iterator it  = str.begin();
     typename S::const_iterator end = str.end();
-    
+
     while (it != end && ::isspace(*it)) ++it;
     return S(it, end);
 }
@@ -234,7 +234,7 @@ S& trimLeftInPlace(S& str)
 {
     typename S::iterator it  = str.begin();
     typename S::iterator end = str.end();
-    
+
     while (it != end && ::isspace(*it)) ++it;
     str.erase(str.begin(), it);
     return str;
@@ -246,7 +246,7 @@ S trimRight(const S& str)
     /// whitespace removed.
 {
     int pos = int(str.size()) - 1;
-        
+
     while (pos >= 0 && ::isspace(str[pos])) --pos;
     return S(str, 0, pos + 1);
 }
@@ -256,7 +256,7 @@ S& trimRightInPlace(S& str)
     /// Removes all trailing whitespace in str.
 {
     int pos = int(str.size()) - 1;
-        
+
     while (pos >= 0 && ::isspace(str[pos])) --pos;
     str.resize(pos + 1);
 
@@ -270,7 +270,7 @@ S trim(const S& str)
 {
     int first = 0;
     int last  = int(str.size()) - 1;
-    
+
     while (first <= last && ::isspace(str[first])) ++first;
     while (last >= first && ::isspace(str[last])) --last;
 
@@ -283,7 +283,7 @@ S& trimInPlace(S& str)
 {
     int first = 0;
     int last  = int(str.size()) - 1;
-    
+
     while (first <= last && ::isspace(str[first])) ++first;
     while (last >= first && ::isspace(str[last])) --last;
 
@@ -295,7 +295,7 @@ S& trimInPlace(S& str)
 
 
 //
-// String case conversion (POCO)
+// String case conversion
 //
 
 template <class S>
@@ -354,16 +354,16 @@ S& toLowerInPlace(S& str)
 template <class S, class It>
 int icompare(
     const S& str,
-    typename S::size_type pos, 
+    typename S::size_type pos,
     typename S::size_type n,
-    It it2, 
+    It it2,
     It end2)
     /// Case-insensitive string comparison
 {
     typename S::size_type sz = str.size();
     if (pos > sz) pos = sz;
     if (pos + n > sz) n = sz - pos;
-    It it1  = str.begin() + pos; 
+    It it1  = str.begin() + pos;
     It end1 = str.begin() + pos + n;
     while (it1 != end1 && it2 != end2)
     {
@@ -375,7 +375,7 @@ int icompare(
             return 1;
         ++it1; ++it2;
     }
-    
+
     if (it1 == end1)
         return it2 == end2 ? 0 : -1;
     else
@@ -399,7 +399,7 @@ int icompare(const S& str1, const S& str2)
             return 1;
         ++it1; ++it2;
     }
-    
+
     if (it1 == end1)
         return it2 == end2 ? 0 : -1;
     else
@@ -428,9 +428,9 @@ int icompare(const S& str1, typename S::size_type pos, typename S::size_type n, 
 
 template <class S>
 int icompare(
-    const S& str1, 
-    typename S::size_type pos1, 
-    typename S::size_type n1, 
+    const S& str1,
+    typename S::size_type pos1,
+    typename S::size_type n1,
     const S& str2,
     typename S::size_type pos2,
     typename S::size_type n2)
@@ -443,9 +443,9 @@ int icompare(
 
 template <class S>
 int icompare(
-    const S& str1, 
-    typename S::size_type pos1, 
-    typename S::size_type n, 
+    const S& str1,
+    typename S::size_type pos1,
+    typename S::size_type n,
     const S& str2,
     typename S::size_type pos2)
 {
@@ -466,9 +466,9 @@ int icompare(
     typename S::size_type sz = str.size();
     if (pos > sz) pos = sz;
     if (pos + n > sz) n = sz - pos;
-    typename S::const_iterator it  = str.begin() + pos; 
+    typename S::const_iterator it  = str.begin() + pos;
     typename S::const_iterator end = str.begin() + pos + n;
-    while (it != end && *ptr) 
+    while (it != end && *ptr)
     {
         typename S::value_type c1(static_cast<char>(::tolower(*it)));
         typename S::value_type c2(static_cast<char>(::tolower(*ptr)));
@@ -478,7 +478,7 @@ int icompare(
             return 1;
         ++it; ++ptr;
     }
-    
+
     if (it == end)
         return *ptr == 0 ? 0 : -1;
     else
@@ -542,13 +542,13 @@ struct Version
 
     bool operator == (const Version& other)
     {
-        return major == other.major 
-            && minor == other.minor 
-            && revision == other.revision 
+        return major == other.major
+            && minor == other.minor
+            && revision == other.revision
             && build == other.build;
     }
 
-    friend std::ostream& operator << (std::ostream& stream, const Version& ver) 
+    friend std::ostream& operator << (std::ostream& stream, const Version& ver)
     {
         stream << ver.major;
         stream << '.';
@@ -572,7 +572,7 @@ template<typename Val>
 inline void clearList(std::list<Val*>& L)
     // Delete all elements from a list of pointers.
     // @param L List of pointers to delete.
-{    
+{
     typename std::list<Val*>::iterator it = L.begin();
     while (it != L.end()) {
         delete *it;
@@ -599,7 +599,7 @@ inline void clearVector(std::vector<Val*>& V)
 {
     typename std::vector<Val*>::iterator it = V.begin();
     while (it != V.end()) {
-        delete *it;        
+        delete *it;
         //Deleter::func(*it);
         it = V.erase(it);
     }
@@ -668,14 +668,14 @@ inline void clearMap(std::map<const Key, Val*>& M)
 // execute, and transmit the Software, and to prepare derivative works of the
 // Software, and to permit third-parties to whom the Software is furnished to
 // do so, all subject to the following:
-// 
+//
 // The copyright notices in the Software and this entire statement, including
 // the above license grant, this restriction and the following disclaimer,
 // must be included in all copies of the Software, in whole or in part, and
 // all derivative works of the Software, unless such copies or derivative
 // works are solely in the form of machine-executable object code generated by
 // a source language processor.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT

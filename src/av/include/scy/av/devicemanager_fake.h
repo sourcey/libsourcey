@@ -18,8 +18,8 @@
 // Implemented from libjingle r116 Feb 16, 2012
 
 
-#ifndef SCY_MEDIA_DeviceManager_FAKE_H
-#define SCY_MEDIA_DeviceManager_FAKE_H
+#ifndef SCY_AV_DeviceManager_FAKE_H
+#define SCY_AV_DeviceManager_FAKE_H
 
 
 #include <string>
@@ -184,7 +184,7 @@ private:
 } } // namespace scy::av
 
 
-#endif  // SCY_MEDIA_DeviceManager_FAKE_H
+#endif  // SCY_AV_DeviceManager_FAKE_H
 
 
 /*

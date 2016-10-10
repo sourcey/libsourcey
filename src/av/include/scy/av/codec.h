@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_Codec_H
-#define SCY_MEDIA_Codec_H
+#ifndef SCY_AV_Codec_H
+#define SCY_AV_Codec_H
 
 
 #include "scy/base.h"

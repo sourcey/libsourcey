@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_AudioResampler_H
-#define SCY_MEDIA_AudioResampler_H
+#ifndef SCY_AV_AudioResampler_H
+#define SCY_AV_AudioResampler_H
 
 
 #include "scy/base.h"
@@ -81,4 +81,4 @@ struct AudioResampler
 
 
 #endif
-#endif    // SCY_MEDIA_AudioResampler_H
+#endif    // SCY_AV_AudioResampler_H

@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_AVEncoder_H
-#define SCY_MEDIA_AVEncoder_H
+#ifndef SCY_AV_AVEncoder_H
+#define SCY_AV_AVEncoder_H
 
 
 #include "scy/base.h"
@@ -105,4 +105,4 @@ bool writeOutputPacket(AVFormatContext *formatCtx, AVPacket& packet);
 
 
 #endif
-#endif    // SCY_MEDIA_AVEncoder_H
+#endif    // SCY_AV_AVEncoder_H

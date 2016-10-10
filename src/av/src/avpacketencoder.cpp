@@ -55,16 +55,18 @@ void AVPacketEncoder::process(IPacket& packet)
 {
     Mutex::ScopedLock lock(_mutex);
 
+    TraceS(this) << "processing" << std::endl;
+
     // We may be receiving either audio or video packets
-    VideoPacket* vPacket = dynamic_cast<VideoPacket*>(&packet);
-    AudioPacket* aPacket = vPacket ? nullptr : dynamic_cast<AudioPacket*>(&packet);
+    auto vPacket = dynamic_cast<VideoPacket*>(&packet);
+    auto aPacket = vPacket ? nullptr : dynamic_cast<AudioPacket*>(&packet);
     if (!vPacket && !aPacket)
         throw std::invalid_argument("Unknown media packet type.");
 
     // Do some special synchronizing for muxing live variable framerate streams
     if (_muxLiveStreams) {
-        VideoEncoderContext* video = AVEncoder::video();
-        AudioEncoderContext* audio = AVEncoder::audio();
+        auto video = AVEncoder::video();
+        auto audio = AVEncoder::audio();
         assert(audio && video);
         double audioPts, videoPts;
         int times = 0;
@@ -124,7 +126,6 @@ void AVPacketEncoder::encode(VideoPacket& packet)
 void AVPacketEncoder::encode(AudioPacket& packet)
 {
     encodeAudio((unsigned char*)packet.data(), packet.size(), packet.frameSize, (std::uint64_t)packet.time);
-    //encodeAudio(((AudioDecoderContext*)packet.opaque)->frame);
 }
 
 

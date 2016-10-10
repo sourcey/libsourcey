@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_IEncoder_H
-#define SCY_MEDIA_IEncoder_H
+#ifndef SCY_AV_IEncoder_H
+#define SCY_AV_IEncoder_H
 
 
 #include "scy/signal.h"
@@ -31,9 +31,9 @@ namespace scy {
 namespace av {
 
 
-struct EncoderState: public State 
+struct EncoderState: public State
 {
-    enum Type 
+    enum Type
     {
         None = 0,
         Ready,
@@ -42,8 +42,8 @@ struct EncoderState: public State
         Error
     };
 
-    std::string str(unsigned int id) const 
-    {     
+    std::string str(unsigned int id) const
+    {
         switch(id) {
         case None:            return "None";
         case Ready:            return "Ready";
@@ -51,20 +51,19 @@ struct EncoderState: public State
         case Stopped:        return "Stopped";
         case Error:            return "Error";
         }
-        return "undefined"; 
+        return "undefined";
     };
 };
 
 
 struct EncoderOptions
 {
-    Format iformat;        // The input media format.
-    Format oformat;        // The output media format.
-    std::string ifile;    // The input file path.
-    std::string ofile;    // The output file path.
-    long duration;        // The millisecond duration 
-                        // of time to record.
-    EncoderOptions(const Format& iformat = Format(), 
+    Format iformat;      // input media format.
+    Format oformat;      // output media format.
+    std::string ifile;   // input file path.
+    std::string ofile;   // output file path.
+    long duration;       // duration of time to record in milliseconds.
+    EncoderOptions(const Format& iformat = Format(),
                    const Format& oformat = Format(),
                    const std::string& ifile = "",
                    const std::string& ofile = "",
@@ -83,17 +82,17 @@ class IEncoder: public Stateful<EncoderState>
     /// of the IEncoder template.
 {
 public:
-    enum Type 
+    enum Type
     {
         None        = 0,    // huh?
         Video        = 1,    // video only
         Audio        = 2,    // audio only
         Multiplex    = 3        // both video & audio
     };
-    
+
     virtual void initialize() = 0;
-    virtual void uninitialize() = 0;    
-    
+    virtual void uninitialize() = 0;
+
     virtual EncoderOptions& options() = 0;
 
     virtual bool isNone() const        { return stateEquals(EncoderState::None); };
@@ -124,4 +123,4 @@ public:
 } // namespace scy
 
 
-#endif // SCY_MEDIA_IEncoder_H
+#endif // SCY_AV_IEncoder_H

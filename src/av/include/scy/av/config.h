@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_Config_H
-#define SCY_MEDIA_Config_H
+#ifndef SCY_AV_Config_H
+#define SCY_AV_Config_H
 
 
 #define MAX_VIDEO_PACKET_SIZE        (3 * 1024 * 1024) 
@@ -44,4 +44,4 @@
 
 
 
-#endif // SCY_MEDIA_Config_H
+#endif // SCY_AV_Config_H

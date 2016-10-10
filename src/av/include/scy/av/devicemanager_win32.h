@@ -18,8 +18,8 @@
 // Implemented from libjingle r116 Feb 16, 2012
 
 
-#ifndef SCY_MEDIA_DeviceManager_WIN32_H
-#define SCY_MEDIA_DeviceManager_WIN32_H
+#ifndef SCY_AV_DeviceManager_WIN32_H
+#define SCY_AV_DeviceManager_WIN32_H
 
 //#ifndef __WINDOWS_DS__
 //#define __WINDOWS_DS__
@@ -130,7 +130,7 @@ private:
 
 
 #endif
-#endif  // SCY_MEDIA_DeviceManager_WIN32_H
+#endif  // SCY_AV_DeviceManager_WIN32_H
 
 
 /*

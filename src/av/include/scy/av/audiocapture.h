@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_AudioCapture_H
-#define SCY_MEDIA_AudioCapture_H
+#ifndef SCY_AV_AudioCapture_H
+#define SCY_AV_AudioCapture_H
 
 
 #include "scy/base.h"
@@ -60,7 +60,7 @@ public:
 
     int deviceId() const;
     int sampleRate() const;
-    int numChannels() const;
+    int channels() const;
     bool running() const;
     bool isOpen() const;
     RtAudioFormat format() const;
@@ -90,11 +90,11 @@ private:
     int _deviceId;
     int _channels;
     int _sampleRate;
-    bool _opened;
     RtAudio _audio;
     RtAudioFormat _format;
     RtAudio::StreamParameters _iParams;
     std::string _error;
+    bool _opened;
 };
 
 

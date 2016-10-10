@@ -173,15 +173,15 @@ int AudioResampler::resample(const std::uint8_t* inSamples, int inNbSamples)
                                                  av_get_sample_fmt(oparams.sampleFmt.c_str()), 1);
     assert(outSamplesBytes > 0);
 
-    TraceS(this) << "Resampled audio frame 1:"
+    TraceS(this) << "Resampled audio frame:"
         << "\n\tIn Nb Samples: " << inNbSamples
         << "\n\tIn Channels: " << iparams.channels
         << "\n\tIn Sample Rate: " << iparams.sampleRate
         << "\n\tIn Sample Fmt: " << iparams.sampleFmt
         << "\n\tOut Nb Samples: " << outNbSamples
-        << "\n\tOut Max Nb Samples: " << outMaxNbSamples
+        // << "\n\tOut Max Nb Samples: " << outMaxNbSamples
         // << "\n\tOut Line Size: " << outLinesize
-        << "\n\tOut Buffer Size: " << outSamplesBytes
+        // << "\n\tOut Buffer Size: " << outSamplesBytes
         << "\n\tOut Channels: " << oparams.channels
         << "\n\tOut Sample Rate: " << oparams.sampleRate
         << "\n\tOut Sample Fmt: " << oparams.sampleFmt

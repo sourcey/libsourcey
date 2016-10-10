@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_Types_H
-#define SCY_MEDIA_Types_H
+#ifndef SCY_AV_Types_H
+#define SCY_AV_Types_H
 
 
 #include "scy/av/config.h"
@@ -113,4 +113,4 @@ struct AudioPacket: public MediaPacket
 } } // namespace scy::av
 
 
-#endif // SCY_MEDIA_Types_H
+#endif // SCY_AV_Types_H

@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MediaFactory_H
-#define SCY_MediaFactory_H
+#ifndef SCY_AV_MediaFactory_H
+#define SCY_AV_MediaFactory_H
 
 
 #include "scy/av/types.h"

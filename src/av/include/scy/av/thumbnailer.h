@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_Thumbnailer_H
-#define SCY_MEDIA_Thumbnailer_H
+#ifndef SCY_AV_Thumbnailer_H
+#define SCY_AV_Thumbnailer_H
 
 
 #include "scy/base.h"

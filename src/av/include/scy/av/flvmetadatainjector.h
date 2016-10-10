@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_FLVMetadataInjector_H
-#define SCY_MEDIA_FLVMetadataInjector_H
+#ifndef SCY_AV_FLVMetadataInjector_H
+#define SCY_AV_FLVMetadataInjector_H
 
 
 #include "scy/packetstream.h"

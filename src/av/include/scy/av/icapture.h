@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_ICapture_H
-#define SCY_MEDIA_ICapture_H
+#ifndef SCY_AV_ICapture_H
+#define SCY_AV_ICapture_H
 
 
 #include "scy/packetstream.h"
@@ -59,4 +59,4 @@ public:
 } // namespace scy
 
 
-#endif // SCY_MEDIA_ICapture_H
+#endif // SCY_AV_ICapture_H

@@ -202,39 +202,42 @@ static const std::string kVideoMetaPathK2_6("/sys/class/video4linux/");
 enum MetaType { M2_4, M2_6, NONE };
 
 
-bool isV4L2Device(const std::string& devicePath) {
-  // check device major/minor numbers are in the range for video devices.
-  struct stat s;
-  if (lstat(devicePath.c_str(), &s) != 0 || !S_ISCHR(s.st_mode)) return false;
-  int video_fd = -1;
-  bool is_v4l2 = false;
-  // check major/minur device numbers are in range for video device
-  if (major(s.st_rdev) == 81) {
-    dev_t num = minor(s.st_rdev);
-    if (num <= 63 && num >= 0) {
-      video_fd = ::open(devicePath.c_str(), O_RDONLY | O_NONBLOCK);
-      if ((video_fd >= 0) || (errno == EBUSY)) {
-        ::v4l2_capability video_caps;
-        memset(&video_caps, 0, sizeof(video_caps));
-        if ((errno == EBUSY) ||
-            (::ioctl(video_fd, VIDIOC_QUERYCAP, &video_caps) >= 0 &&
-            (video_caps.capabilities & V4L2_CAP_VIDEO_CAPTURE))) {
-          InfoL << "Found V4L2 capture device " << devicePath;
-          is_v4l2 = true;
-        } else {
-          ErrorL << "VIDIOC_QUERYCAP failed for " << devicePath;
+bool isV4L2Device(const std::string& devicePath)
+{
+    // Check device major/minor numbers are in the range for video devices
+    struct stat s;
+    if (lstat(devicePath.c_str(), &s) != 0 || !S_ISCHR(s.st_mode)) return false;
+    int video_fd = -1;
+    bool is_v4l2 = false;
+
+    // Check major/minur device numbers are in range for video device
+    if (major(s.st_rdev) == 81) {
+        dev_t num = minor(s.st_rdev);
+        if (num <= 63 && num >= 0) {
+            video_fd = ::open(devicePath.c_str(), O_RDONLY | O_NONBLOCK);
+            if ((video_fd >= 0) || (errno == EBUSY)) {
+                ::v4l2_capability video_caps;
+                memset(&video_caps, 0, sizeof(video_caps));
+                if ((errno == EBUSY) ||
+                    (::ioctl(video_fd, VIDIOC_QUERYCAP, &video_caps) >= 0 &&
+                    (video_caps.capabilities & V4L2_CAP_VIDEO_CAPTURE))) {
+                    InfoL << "Found V4L2 capture device " << devicePath;
+                    is_v4l2 = true;
+                } else {
+                    ErrorL << "VIDIOC_QUERYCAP failed for " << devicePath;
+                }
+            } else {
+                ErrorL << "Failed to open " << devicePath;
+            }
         }
-      } else {
-        ErrorL << "Failed to open " << devicePath;
-      }
     }
-  }
-  if (video_fd >= 0)
-    ::close(video_fd);
-  return is_v4l2;
+    if (video_fd >= 0)
+        ::close(video_fd);
+    return is_v4l2;
 }
 
-static std::string Trim(const std::string& s, const std::string& drop = " \t") {
+static std::string trim(const std::string& s, const std::string& drop = " \t")
+{
     std::string::size_type first = s.find_first_not_of(drop);
     std::string::size_type last  = s.find_last_not_of(drop);
 
@@ -244,80 +247,62 @@ static std::string Trim(const std::string& s, const std::string& drop = " \t") {
     return s.substr(first, last - first + 1);
 }
 
-static void scanDeviceDirectory(const std::string& devdir,
-    std::vector<Device>& devices) {
 
+static void scanDeviceDirectory(const std::string& devdir, std::vector<Device>& devices)
+{
     std::vector<std::string> nodes;
     fs::readdir(devdir, nodes);
-    for (unsigned i = 0; i < nodes.size(); i++) {
-        std::string filename = nodes[0];
+    for (auto& filename : nodes) {
         std::string deviceName = devdir + filename;
-        //if (!directoryIterator->IsDots()) {
-            if (filename.find("video") == 0 &&
-                isV4L2Device(deviceName)) {
-                    devices.push_back(Device("video", i, deviceName));
-            }
-        //}
+        if (filename.find("video") == 0 && isV4L2Device(deviceName)) {
+            devices.push_back(Device("video", devices.size(), deviceName));
+        }
     }
-
-    // talk_base::scoped_ptr<talk_base::DirectoryIterator> directoryIterator(
-    //     talk_base::Filesystem::IterateDirectory());
-    //
-    // if (directoryIterator->Iterate(talk_base::Pathname(devdir))) {
-    //     do {
-    //         std::string filename = directoryIterator->Name();
-    //         std::string deviceName = devdir + filename;
-    //         if (!directoryIterator->IsDots()) {
-    //             if (filename.find("video") == 0 &&
-    //                 V4LLookup::isV4L2Device(deviceName)) {
-    //                     devices.push_back(Device(deviceName, deviceName));
-    //             }
-    //         }
-    //     } while (directoryIterator->Next());
-    // }
 }
 
 
-// static std::string getVideoDeviceNameK2_6(const std::string& deviceMetaPath) {
-//     std::string deviceName;
-//
-//     talk_base::scoped_ptr<talk_base::FileStream> device_meta_stream(
-//         talk_base::Filesystem::OpenFile(deviceMetaPath, "r"));
-//
-//     if (device_meta_stream.get() != NULL) {
-//         if (device_meta_stream->ReadLine(&deviceName) != talk_base::SR_SUCCESS) {
-//             ErrorL << "Failed to read V4L2 device meta " << deviceMetaPath << endl;
-//         }
-//         device_meta_stream->Close();
-//     }
-//
-//     return deviceName;
-// }
-//
-// static std::string getVideoDeviceNameK2_4(const std::string& deviceMetaPath) {
-//     talk_base::ConfigParser::MapVector all_values;
-//
-//     talk_base::ConfigParser config_parser;
-//     talk_base::FileStream* file_stream =
-//         talk_base::Filesystem::OpenFile(deviceMetaPath, "r");
-//
-//     if (file_stream == NULL) return "";
-//
-//     config_parser.Attach(file_stream);
-//     config_parser.Parse(&all_values);
-//
-//     for (talk_base::ConfigParser::MapVector::iterator i = all_values.begin();
-//         i != all_values.end(); ++i) {
-//             talk_base::ConfigParser::SimpleMap::iterator deviceName_i =
-//                 i->find("name");
-//
-//             if (deviceName_i != i->end()) {
-//                 return deviceName_i->second;
-//             }
-//     }
-//
-//     return "";
-// }
+static std::string getVideoDeviceNameK2_6(const std::string& deviceMetaPath)
+{
+    std::ifstream metaFile(deviceMetaPath);
+    if (metaFile.is_open()) {
+        std::string deviceName;
+        if (std::getline(metaFile, deviceName)) {
+            return deviceName;
+        }
+        metaFile.close();
+    }
+
+    ErrorL << "Failed to read V4L2 device meta " << deviceMetaPath << endl;
+    return "";
+}
+
+static std::string getVideoDeviceNameK2_4(const std::string& deviceMetaPath)
+{
+    // FIXME: Port to our API
+
+    // talk_base::ConfigParser::MapVector all_values;
+    //
+    // talk_base::ConfigParser config_parser;
+    // talk_base::FileStream* file_stream =
+    //     talk_base::Filesystem::OpenFile(deviceMetaPath, "r");
+    //
+    // if (file_stream == NULL) return "";
+    //
+    // config_parser.Attach(file_stream);
+    // config_parser.Parse(&all_values);
+    //
+    // for (talk_base::ConfigParser::MapVector::iterator i = all_values.begin();
+    //     i != all_values.end(); ++i) {
+    //         talk_base::ConfigParser::SimpleMap::iterator deviceName_i =
+    //             i->find("name");
+    //
+    //         if (deviceName_i != i->end()) {
+    //             return deviceName_i->second;
+    //         }
+    // }
+
+    return "";
+}
 
 
 static std::string getVideoDeviceName(MetaType meta, const std::string& deviceFileName)
@@ -326,24 +311,22 @@ static std::string getVideoDeviceName(MetaType meta, const std::string& deviceFi
     std::string deviceName;
     std::string metaFilePath;
 
-    // TODO: Convert code to our API
-    // if (meta == M2_6) {
-    //     metaFilePath = kVideoMetaPathK2_6 + deviceFileName + "/name";
-    //
-    //     InfoL << "Trying " + metaFilePath << endl;
-    //     deviceName = getVideoDeviceNameK2_6(metaFilePath);
-    //
-    //     if (deviceName.empty()) {
-    //         metaFilePath = kVideoMetaPathK2_6 + deviceFileName + "/model";
-    //
-    //         InfoL << "Trying " << metaFilePath << endl;
-    //         deviceName = getVideoDeviceNameK2_6(metaFilePath);
-    //     }
-    // } else {
-    //     metaFilePath = kVideoMetaPathK2_4 + deviceFileName;
-    //     InfoL << "Trying " << metaFilePath << endl;
-    //     deviceName = getVideoDeviceNameK2_4(metaFilePath);
-    // }
+    if (meta == M2_6) {
+        metaFilePath = kVideoMetaPathK2_6 + deviceFileName + "/name";
+
+        InfoL << "Trying " + metaFilePath << endl;
+        deviceName = getVideoDeviceNameK2_6(metaFilePath);
+        if (deviceName.empty()) {
+            metaFilePath = kVideoMetaPathK2_6 + deviceFileName + "/model";
+
+            InfoL << "Trying " << metaFilePath << endl;
+            deviceName = getVideoDeviceNameK2_6(metaFilePath);
+        }
+    } else {
+        metaFilePath = kVideoMetaPathK2_4 + deviceFileName;
+        InfoL << "Trying " << metaFilePath << endl;
+        deviceName = getVideoDeviceNameK2_4(metaFilePath);
+    }
 
     if (deviceName.empty()) {
         deviceName = "/dev/" + deviceFileName;
@@ -352,7 +335,7 @@ static std::string getVideoDeviceName(MetaType meta, const std::string& deviceFi
 
     InfoL << "Name for " << deviceFileName << " is " << deviceName << endl;
 
-    return Trim(deviceName);
+    return trim(deviceName);
 }
 
 
@@ -363,19 +346,6 @@ static void scanV4L2Devices(std::vector<Device>& devices)
     MetaType meta;
     std::string metadataDir;
 
-    // talk_base::scoped_ptr<talk_base::DirectoryIterator> directoryIterator(
-    //     talk_base::Filesystem::IterateDirectory());
-
-    // Try and guess kernel version
-    // if (directoryIterator->Iterate(kVideoMetaPathK2_6)) {
-    //     meta = M2_6;
-    //     metadataDir = kVideoMetaPathK2_6;
-    // } else if (directoryIterator->Iterate(kVideoMetaPathK2_4)) {
-    //     meta = M2_4;
-    //     metadataDir = kVideoMetaPathK2_4;
-    // } else {
-    //     meta = NONE;
-    // }
     if (fs::exists(kVideoMetaPathK2_6)) {
         meta = M2_6;
         metadataDir = kVideoMetaPathK2_6;
@@ -391,32 +361,16 @@ static void scanV4L2Devices(std::vector<Device>& devices)
 
         std::vector<std::string> nodes;
         fs::readdir(metadataDir, nodes);
-        for (unsigned i = 0; i < nodes.size(); i++) {
-            std::string filename = nodes[i];
+        for (auto& filename : nodes) {
             DebugL << "Checking video device " << filename << endl;
-
             if (filename.find("video") == 0) {
                 std::string devicePath = "/dev/" + filename;
-
                 if (isV4L2Device(devicePath)) {
                     devices.push_back(
-                        Device("video", i, getVideoDeviceName(meta, filename), devicePath));
+                        Device("video", devices.size(), getVideoDeviceName(meta, filename), devicePath));
                 }
             }
         }
-
-        // do {
-        //     std::string filename = directoryIterator->Name();
-        //
-        //     if (filename.find("video") == 0) {
-        //         std::string devicePath = "/dev/" + filename;
-        //
-        //         if (V4LLookup::isV4L2Device(devicePath)) {
-        //             devices.push_back(
-        //                 Device(getVideoDeviceName(meta, filename), devicePath));
-        //         }
-        //     }
-        // } while (directoryIterator->Next());
     } else {
         ErrorL << "Unable to detect v4l2 metadata directory" << endl;
     }
@@ -436,7 +390,6 @@ bool LinuxDeviceManager::getVideoCaptureDevices(std::vector<Device>& devices)
     scanV4L2Devices(devices);
     return filterDevices(devices, kFilteredVideoDevicesName);
 }
-
 
 
 // LinuxDeviceWatcher::LinuxDeviceWatcher(IDeviceManager* dm)

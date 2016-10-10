@@ -20,51 +20,50 @@ int main(int argc, char** argv)
     /// Device Manager Tests
     //
 
-    describe("device manager", []() {
-        cout << "Starting" << endl;
-        auto& deviceManager = av::MediaFactory::instance().devices();
-
-        av::Device device;
-        if (deviceManager.getDefaultVideoCaptureDevice(device)) {
-            cout << "Default video device: " << device.id << ": " << device.name << endl;
-        }
-        if (deviceManager.getDefaultAudioInputDevice(device)) {
-            cout << "Default audio device: " << device.id << ": " << device.name << endl;
-        }
-
-        std::vector<av::Device> devices;
-        if (deviceManager.getVideoCaptureDevices(devices)) {
-            cout << "Num video devices: " << devices.size() << endl;
-            for (auto& device : devices) {
-                cout << "Printing video device: " << device.id << ": " << device.name << endl;
-            }
-        }
-        else {
-            cout << "No video devices detected!" << endl;
-        }
-        if (deviceManager.getAudioInputDevices(devices)) {
-            cout << "Num audio devices: " << devices.size() << endl;
-            for (auto& device : devices) {
-                cout << "Printing audio device: " << device.id << ": " << device.name << endl;
-            }
-        }
-        else {
-            cout << "No video devices detected!" << endl;
-        }
-
-        // TODO: verify data integrity?
-    });
+    // describe("device manager", []() {
+    //     cout << "Starting" << endl;
+    //     auto& deviceManager = av::MediaFactory::instance().devices();
+    //
+    //     av::Device device;
+    //     if (deviceManager.getDefaultVideoCaptureDevice(device)) {
+    //         cout << "Default video device: " << device.id << ": " << device.name << endl;
+    //     }
+    //     if (deviceManager.getDefaultAudioInputDevice(device)) {
+    //         cout << "Default audio device: " << device.id << ": " << device.name << endl;
+    //     }
+    //
+    //     std::vector<av::Device> devices;
+    //     if (deviceManager.getVideoCaptureDevices(devices)) {
+    //         cout << "Num video devices: " << devices.size() << endl;
+    //         for (auto& device : devices) {
+    //             cout << "Printing video device: " << device.id << ": " << device.name << endl;
+    //         }
+    //     }
+    //     else {
+    //         cout << "No video devices detected!" << endl;
+    //     }
+    //     if (deviceManager.getAudioInputDevices(devices)) {
+    //         cout << "Num audio devices: " << devices.size() << endl;
+    //         for (auto& device : devices) {
+    //             cout << "Printing audio device: " << device.id << ": " << device.name << endl;
+    //         }
+    //     }
+    //     else {
+    //         cout << "No video devices detected!" << endl;
+    //     }
+    //
+    //     // TODO: verify data integrity?
+    // });
 
     // Define class based tests
     describe("audio encoder", new AudioEncoderTest);
-    describe("audio resampler", new AudioResamplerTest);
+    // describe("audio resampler", new AudioResamplerTest);
+    // describe("audio capture resampler", new AudioCaptureResamplerTest);
 
     test::runAll();
 
     return test::finalize();
 }
-
-
 
 
 // //

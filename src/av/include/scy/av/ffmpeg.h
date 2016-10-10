@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_Media_FFmpeg_H
-#define SCY_Media_FFmpeg_H
+#ifndef SCY_AV_FFmpeg_H
+#define SCY_AV_FFmpeg_H
 
 
 #include "scy/base.h"

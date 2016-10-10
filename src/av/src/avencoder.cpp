@@ -85,7 +85,7 @@ AVEncoder::~AVEncoder()
 static int dispatchOutputPacket(void* opaque, std::uint8_t* buffer, int bufferSize)
 {
     // Callback example at: http://lists.mplayerhq.hu/pipermail/libav-client/2009-May/003034.html
-    AVEncoder* klass = reinterpret_cast<AVEncoder*>(opaque);
+    auto klass = reinterpret_cast<AVEncoder*>(opaque);
     if (klass) {
         TraceL << "Dispatching packet: " << bufferSize << endl;
         if (!klass->isActive()) {

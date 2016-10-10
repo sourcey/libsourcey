@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_ImageEncoder_H
-#define SCY_MEDIA_ImageEncoder_H
+#ifndef SCY_AV_ImageEncoder_H
+#define SCY_AV_ImageEncoder_H
 
 
 #include "scy/av/types.h"
@@ -73,5 +73,5 @@ private:
 
 
 #endif
-#endif    // SCY_MEDIA_ImageEncoder_H
+#endif    // SCY_AV_ImageEncoder_H
 

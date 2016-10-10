@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_VideoAnalyzer_H
-#define SCY_MEDIA_VideoAnalyzer_H
+#ifndef SCY_AV_VideoAnalyzer_H
+#define SCY_AV_VideoAnalyzer_H
 
 
 #include "scy/base.h"

@@ -278,6 +278,11 @@ bool VideoEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
     // (1 / oparams.fps) * sample rate * frame number
     frame->pts = ipacket.pts;
 
+    // _options.iformat.video.width = iframe->width;
+    // _options.iformat.video.height = iframe->height;
+    // enc->iparams.width = frame->width;
+    // enc->iparams.height = frame->height;
+
     // avpicture_fill((AVPicture *)frame, (std::uint8_t*)ipacket.data,
     //    av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
 
@@ -287,9 +292,7 @@ bool VideoEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
 
 bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 {
-    bool frameEncoded = encodeVideoPacket(this, iframe, opacket);
-
-    if (frameEncoded) {
+    if (encodeVideoPacket(this, iframe, opacket)) {
         fps.tick();
         if (ctx->coded_frame->key_frame)
             opacket.flags |= AV_PKT_FLAG_KEY;
@@ -307,9 +310,11 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
                 << "\n\tScaled Duration: " << opacket.duration
                 << endl;
         }
+
+        return true;
     }
 
-    return frameEncoded;
+    return false;
 }
 
 
@@ -735,8 +740,6 @@ AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
     if (!picture)
         return nullptr;
 
-    // int size = avpicture_get_size(pixelFmt, width, height);
-    // int size = av_image_get_buffer_size(pixelFmt, width + 1, height + 1, 16);
     int size = av_image_get_buffer_size(pixelFmt, width, height, 16);
     auto buffer = reinterpret_cast<std::uint8_t*>(av_malloc(size));
     if (!buffer) {
@@ -744,8 +747,12 @@ AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
         return nullptr;
     }
 
-    // avpicture_fill(reinterpret_cast<AVPicture*>(picture), buffer, pixelFmt, width, height);
     av_image_fill_arrays(picture->data, picture->linesize, buffer, pixelFmt, width, height, 1);
+
+    // FFmpeg v3.1.4 does not set width and height values for us anymore
+    picture->width = width;
+    picture->height = height;
+
     return picture;
 }
 

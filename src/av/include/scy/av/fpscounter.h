@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef SCY_MEDIA_FPSCounter_H
-#define SCY_MEDIA_FPSCounter_H
+#ifndef SCY_AV_FPSCounter_H
+#define SCY_AV_FPSCounter_H
 
 
 #include "scy/packetstream.h"
@@ -189,7 +189,7 @@ protected:
 } } // namespace scy::av
 
 
-#endif // SCY_MEDIA_FPSCounter_H
+#endif // SCY_AV_FPSCounter_H
 
     
 

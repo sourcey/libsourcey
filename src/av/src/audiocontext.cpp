@@ -173,7 +173,7 @@ void AudioEncoderContext::create()
     // Now we'll setup the parameters of AVCodecContext
     avcodec_get_context_defaults3(ctx, codec);
     ctx->bit_rate = oparams.bitRate; //320000;
-    ctx->sample_fmt = av_get_sample_fmt(oparams.sampleFmt.c_str()); // TODO: check exists in codec->sample_fmts[0];
+    ctx->sample_fmt = selectSampleFormat(codec, oparams);
     ctx->sample_rate = oparams.sampleRate;
     ctx->channels = oparams.channels;
     ctx->channel_layout = av_get_default_channel_layout(oparams.channels);
@@ -575,6 +575,34 @@ bool AudioDecoderContext::flush(AVPacket& opacket)
 //
 // Helper functions
 //
+
+
+bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat)
+{
+    const enum AVSampleFormat *p = codec->sample_fmts;
+    while (*p != AV_SAMPLE_FMT_NONE) {
+        if (*p == sampleFormat)
+            return true;
+        p++;
+    }
+    return false;
+}
+
+
+AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params)
+{
+    enum AVSampleFormat requested = av_get_sample_fmt(params.sampleFmt.c_str());
+    enum AVSampleFormat compatible = AV_SAMPLE_FMT_NONE;
+    const enum AVSampleFormat *p = codec->sample_fmts;
+    while (*p != AV_SAMPLE_FMT_NONE) {
+        if (compatible == AV_SAMPLE_FMT_NONE)
+            compatible = *p;  // or use the first compatible format
+        if (*p == requested)
+            return requested; // always try to return requested format
+        p++;
+    }
+    return compatible;
+}
 
 
 void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket) //, double* pts

@@ -50,6 +50,9 @@ using scy::test::Test;
 namespace scy {
 
 
+static const int kNumberFramesWanted = 200;
+
+
 //
 /// Generic Callback Context
 //
@@ -73,6 +76,28 @@ struct CallbackContext
 // Heleprs
 //
 
+
+// Prepare a dummy YUV image
+static void fillYuvImage(AVFrame *pict, int frame_index, int width, int height)
+{
+    int x, y, i;
+    i = frame_index;
+
+    /* Y */
+    for(y=0;y<height;y++) {
+        for(x=0;x<width;x++) {
+            pict->data[0][y * pict->linesize[0] + x] = x + y + i * 3;
+        }
+    }
+
+    /* Cb and Cr */
+    for(y=0;y<height/2;y++) {
+        for(x=0;x<width/2;x++) {
+            pict->data[1][y * pict->linesize[1] + x] = 128 + y + i * 2;
+            pict->data[2][y * pict->linesize[2] + x] = 64 + x + i * 5;
+        }
+    }
+}
 
 // Generate sin tone with 440Hz frequency and duplicated channels
 void fillAudioSamplesUInt(std::uint16_t* samples, int sample_rate, int nb_channels, int nb_samples, double *t)
@@ -139,32 +164,29 @@ class AudioEncoderTest: public Test
 {
     void run()
     {
-        int numberFramesWanted = 200;
         int inNbSamples = 1024;
 
         av::AudioEncoderContext encoder;
-        av::AudioCodec iparams;
-        av::AudioCodec oparams;
+        auto& iparams = encoder.iparams;
+        auto& oparams = encoder.oparams;
 
         iparams.channels = 2;
         iparams.sampleRate = 48000;
         iparams.sampleFmt = "dbl";
 
-        oparams.encoder = "mp2";
+        oparams.encoder = "mp2"; //mp2, aac, libfdk_aac
         oparams.bitRate = 64000;
         oparams.channels = 2;
         oparams.sampleRate = 44100;
-        oparams.sampleFmt = "s16";
+        oparams.sampleFmt = "s16"; //fltp
         oparams.enabled = true;
 
-        encoder.iparams = iparams;
-        encoder.oparams = oparams;
         encoder.create();
         encoder.open();
 
-        std::ofstream output("test.mp2", std::ios::out | std::ios::binary);
+        std::ofstream output("test." + oparams.encoder, std::ios::out | std::ios::binary);
 
-        auto testSamples = createTestAudioSamplesDBL(numberFramesWanted, inNbSamples, iparams);
+        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, inNbSamples, iparams);
         for (auto samples : testSamples) {
             AVPacket opacket;
             if (encoder.encode(reinterpret_cast<std::uint8_t*>(samples), inNbSamples, AV_NOPTS_VALUE, opacket)) {
@@ -184,16 +206,18 @@ class AudioEncoderTest: public Test
 // =============================================================================
 // Audio Resampler
 //
+// The file is playable with the following command:
+// ffplay -f s16le -channel_layout 3 -channels 2 -ar 44100 test.pcm
+//
 class AudioResamplerTest: public Test
 {
     void run()
     {
-        int numberFramesWanted = 200;
         int inNbSamples = 1024;
 
         av::AudioResampler resampler;
-        av::AudioCodec iparams;
-        av::AudioCodec oparams;
+        auto iparams = resampler.iparams;
+        auto oparams = resampler.oparams;
 
         iparams.channels = 2;
         iparams.sampleRate = 48000;
@@ -203,13 +227,11 @@ class AudioResamplerTest: public Test
         oparams.sampleRate = 44100;
         oparams.sampleFmt = "s16";
 
-        resampler.iparams = iparams;
-        resampler.oparams = oparams;
         resampler.create();
 
         std::ofstream output("test.pcm", std::ios::out | std::ios::binary);
 
-        auto testSamples = createTestAudioSamplesDBL(numberFramesWanted, inNbSamples, iparams);
+        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, inNbSamples, iparams);
         for (auto samples : testSamples) {
             if (resampler.resample(reinterpret_cast<std::uint8_t*>(samples), inNbSamples)) {
                 output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outSamplesBytes);
@@ -220,13 +242,70 @@ class AudioResamplerTest: public Test
         output.close();
         util::clearVector<>(testSamples);
 
-        // The file is playable with the following command:
-        // ffplay -f s16le -channel_layout 3 -channels 2 -ar 44100 test.pcm
-
         // TODO: verify data integrity
     }
 };
 
+
+// =============================================================================
+// Audio Capture Resampler
+//
+// The output file is playable with the following command:
+// ffplay -f s16le -channel_layout 3 -channels 2 -ar 44100 test.pcm
+//
+class AudioCaptureResamplerTest: public Test
+{
+    av::AudioResampler resampler;
+    int numFramesRemaining;
+    std::ofstream output;
+
+    void run()
+    {
+        int inDeviceId = 0;
+        int inNbChannels = 2;
+        int inSampleRate = 48000;
+
+        auto iparams = resampler.iparams;
+        auto oparams = resampler.oparams;
+
+        iparams.channels = inNbChannels;
+        iparams.sampleRate = inSampleRate;
+        iparams.sampleFmt = "s16";
+
+        oparams.channels = 2;
+        oparams.sampleRate = 44100;
+        oparams.sampleFmt = "s16";
+
+        resampler.create();
+
+        output.open("test.pcm", std::ios::out | std::ios::binary);
+
+        av::AudioCapture capture(inDeviceId, inNbChannels, inSampleRate);
+        capture.emitter.attach(audioDelegate(this, &AudioCaptureResamplerTest::onAudio));
+        capture.start();
+
+        numFramesRemaining = kNumberFramesWanted;
+        while (numFramesRemaining > 0) {
+            cout << "Waiting for completion: " << numFramesRemaining << endl;
+            scy::sleep(10);
+        }
+
+        resampler.close();
+        output.close();
+
+        // TODO: verify data integrity
+        expect(numFramesRemaining == 0);
+    }
+
+    void onAudio(av::AudioPacket& packet)
+    {
+        cout << "On audio packet: " << packet.size() << endl;
+        if (resampler.resample(reinterpret_cast<std::uint8_t*>(packet.data()), packet.frameSize)) {
+            output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outSamplesBytes);
+        }
+        numFramesRemaining--;
+    }
+};
 
 
 // class Tests

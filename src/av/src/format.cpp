@@ -35,19 +35,19 @@ Format::Format() :
 }
 
 
-Format::Format(const std::string& name, const char* id, const VideoCodec& video, const AudioCodec& audio, int priority) :
+Format::Format(const std::string& name, const std::string& id, const VideoCodec& video, const AudioCodec& audio, int priority) :
     name(name), id(id), video(video), audio(audio), priority(priority)
 {
 }
 
 
-Format::Format(const std::string& name, const char* id, const VideoCodec& video, int priority) :
+Format::Format(const std::string& name, const std::string& id, const VideoCodec& video, int priority) :
     name(name), id(id), video(video), priority(priority)
 {
 }
 
 
-Format::Format(const std::string& name, const char* id, const AudioCodec& audio, int priority) :
+Format::Format(const std::string& name, const std::string& id, const AudioCodec& audio, int priority) :
     name(name), id(id), audio(audio), priority(priority)
 {
 }

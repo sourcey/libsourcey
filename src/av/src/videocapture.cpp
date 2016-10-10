@@ -135,7 +135,7 @@ void VideoCapture::stop()
 {
     TraceS(this) << "Stopping" << std::endl;
 
-    // Note: This function no longer has any side effects.
+    // NOTE: This function no longer does anything.
     // Once the capture is running, it will continue to do
     // so until it is either closed or destroyed.
 
@@ -197,7 +197,7 @@ void VideoCapture::run()
 
             empty = emitter.ndelegates() == 0;
             if (!empty) {
-                // TraceS(this) << "Emitting: " << _counter.fps << std::endl;
+                TraceS(this) << "Emitting: " << _counter.fps << std::endl;
                 MatrixPacket out(&frame);
                 emitter.emit(next, out);
             }
@@ -383,7 +383,7 @@ int VideoCapture::deviceId() const
 }
 
 
-std::string    VideoCapture::filename() const
+std::string VideoCapture::filename() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _filename;

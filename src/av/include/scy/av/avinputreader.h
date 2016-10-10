@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_AVInputReader_H
-#define SCY_MEDIA_AVInputReader_H
+#ifndef SCY_AV_AVInputReader_H
+#define SCY_AV_AVInputReader_H
 
 
 #include "scy/base.h"
@@ -135,4 +135,4 @@ protected:
 
 
 #endif
-#endif    // SCY_MEDIA_AVInputReader_H
+#endif    // SCY_AV_AVInputReader_H

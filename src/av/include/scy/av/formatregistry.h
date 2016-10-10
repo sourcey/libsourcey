@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_FormatRegistry_H
-#define SCY_MEDIA_FormatRegistry_H
+#ifndef SCY_AV_FormatRegistry_H
+#define SCY_AV_FormatRegistry_H
 
 
 #include "scy/av/format.h"
@@ -77,4 +77,4 @@ private:
 } } // namespace scy::av
 
 
-#endif // SCY_MEDIA_FormatRegistry_H
+#endif // SCY_AV_FormatRegistry_H

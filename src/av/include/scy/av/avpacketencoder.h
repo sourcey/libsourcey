@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_AVPacketEncoder_H
-#define SCY_MEDIA_AVPacketEncoder_H
+#ifndef SCY_AV_AVPacketEncoder_H
+#define SCY_AV_AVPacketEncoder_H
 
 
 #include "scy/base.h"

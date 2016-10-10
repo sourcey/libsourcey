@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_VideoContext_H
-#define SCY_MEDIA_VideoContext_H
+#ifndef SCY_AV_VideoContext_H
+#define SCY_AV_VideoContext_H
 
 
 #include "scy/base.h"
@@ -213,4 +213,4 @@ struct VideoConversionContext
 
 
 #endif
-#endif    // SCY_MEDIA_VideoContext_H
+#endif    // SCY_AV_VideoContext_H

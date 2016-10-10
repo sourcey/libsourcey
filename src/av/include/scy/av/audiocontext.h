@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_AudioContext_H
-#define SCY_MEDIA_AudioContext_H
+#ifndef SCY_AV_AudioContext_H
+#define SCY_AV_AudioContext_H
 
 
 #include "scy/base.h"
@@ -136,6 +136,10 @@ struct AudioDecoderContext: public AudioContext
 };
 
 
+// void isSampleFormatSupported(AVCodec* codec, const std::string& sampleFormat);
+bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat);
+// AVSampleFormat getSupportedSampleFormat(AVCodec* codec, const std::string& sampleFormat);
+AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params);
 void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket);
 
 
@@ -143,4 +147,4 @@ void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, c
 
 
 #endif
-#endif    // SCY_MEDIA_AudioContext_H
+#endif    // SCY_AV_AudioContext_H

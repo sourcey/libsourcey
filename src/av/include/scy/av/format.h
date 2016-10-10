@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_Format_H
-#define SCY_MEDIA_Format_H
+#ifndef SCY_AV_Format_H
+#define SCY_AV_Format_H
 
 
 #include "scy/av/codec.h"
@@ -32,12 +32,12 @@ namespace scy {
 namespace av {
 
 
-struct Format 
+struct Format
     /// Defines a media container format which is available through the
     /// Format Registry for encoding/decoding. A format specifies preferred
     /// default values for each codec.
-{    
-    enum Type 
+{
+    enum Type
     {
         None        = 0,
         Video        = 1,    /// video only
@@ -50,7 +50,7 @@ struct Format
     //
     std::string name;        // The display name of this format.
     std::string id;            // The short name of this format.
-    
+
     VideoCodec video;        // The video codec.
     AudioCodec audio;        // The audio codec.
 
@@ -61,20 +61,20 @@ struct Format
     //
     Format();
 
-    Format(const std::string& name, const char* id, 
+    Format(const std::string& name, const std::string& id,
         const VideoCodec& video, const AudioCodec& audio, int priority = 0);
         // Multiplex format constructor
-    
-    Format(const std::string& name, const char* id, 
+
+    Format(const std::string& name, const std::string& id,
         const VideoCodec& video, int priority = 0);
         // Video only format constructor
-    
-    Format(const std::string& name, const char* id, 
+
+    Format(const std::string& name, const std::string& id,
         const AudioCodec& audio, int priority = 0);
         // Audio only format constructor
 
     Format(const Format& r);
-        
+
     Type type() const;
         // The format type.
 
@@ -101,7 +101,7 @@ typedef std::vector<Format*> FormatPList;
 
 
     /*
-    enum ID 
+    enum ID
     {
         Unknown        = 0,
         Raw            = 1,
@@ -121,26 +121,26 @@ typedef std::vector<Format*> FormatPList;
     */
     //
     /// Methods
-    //    
+    //
     //virtual std::string extension() const;
         // Returns the file extension for this format.
-        // The default implementation just transforms the 
+        // The default implementation just transforms the
         // id string to lowercase.
         // TODO: Consider removing or making a member variable
 
     //virtual std::string name() const;
         // Returns a string representation of the Codec name.
         // The default implementation uses idToName.
-    
+
 
     //virtual std::string encoderName() const;
         // Returns the encoder name for this format.
         // The default implementation uses idToEncoderName.
         // This function should return the short name
         // for use with av_guess_format.
-    //static ID toID(const std::string& name);    
-    //static std::string idString(const char* id);
-    //static std::string encoderName(const char* id);
+    //static ID toID(const std::string& name);
+    //static std::string idString(const std::string& id);
+    //static std::string encoderName(const std::string& id);
     //static ID nameToID(const std::string& name);
-    //static std::string idToName(const char* id);
-    //static std::string idToEncoderName(const char* id);
+    //static std::string idToName(const std::string& id);
+    //static std::string idToEncoderName(const std::string& id);

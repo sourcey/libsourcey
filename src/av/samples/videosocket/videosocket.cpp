@@ -11,16 +11,6 @@ using namespace std;
 using namespace scy;
 
 
-/*
-// Detect Memory Leaks
-#ifdef _DEBUG
-#include "MemLeakDetect/MemLeakDetect.h"
-#include "MemLeakDetect/MemLeakDetect.cpp"
-CMemLeakDetect memLeakDetect;
-#endif
-*/
-
-
 #define USE_AVDEVICE_CAPTURE 0
 
 #if USE_AVDEVICE_CAPTURE

@@ -16,16 +16,6 @@
 #include "scy/util/base64packetencoder.h"
 
 
-/*
-// Detect Win32 memory Leaks
-#ifdef _DEBUG
-#include "MemLeakDetect/MemLeakDetect.h"
-#include "MemLeakDetect/MemLeakDetect.cpp"
-CMemLeakDetect memLeakDetect;
-#endif
-*/
-
-
 using namespace std;
 using namespace scy;
 using namespace scy::av;

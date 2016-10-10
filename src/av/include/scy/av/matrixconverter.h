@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_MEDIA_MatrixConverter_H
-#define SCY_MEDIA_MatrixConverter_H
+#ifndef SCY_AV_MatrixConverter_H
+#define SCY_AV_MatrixConverter_H
 
 #include "scy/packetstream.h"
 #include "scy/signal.h"
