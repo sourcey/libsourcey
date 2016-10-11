@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef SCY_PeerConnectionClient_H
-#define SCY_PeerConnectionClient_H
+#ifndef SCY_PeerConnection_H
+#define SCY_PeerConnection_H
 
 
 #include "webrtc/api/peerconnectioninterface.h"
@@ -31,42 +31,43 @@ namespace scy {
 class PeerConnectionManager;
 
 
-class PeerConnectionClient:
+class PeerConnection:
     public webrtc::PeerConnectionObserver,
     public webrtc::CreateSessionDescriptionObserver
 {
 public:
     enum Mode
     {
-        Offer, /// Server-side WebSocket.
-        Answer  /// Client-side WebSocket.
+        Offer,  /// Operating as offerer
+        Answer  /// Operating as answerer
     };
 
-    PeerConnectionClient(PeerConnectionManager* manager, const std::string& peerid, Mode mode);
-    ~PeerConnectionClient();
+    PeerConnection(PeerConnectionManager* manager, const std::string& peerid, Mode mode);
+    virtual ~PeerConnection();
 
-    rtc::scoped_refptr<webrtc::MediaStreamInterface> createMediaStream();
+    virtual rtc::scoped_refptr<webrtc::MediaStreamInterface> createMediaStream();
         // Create the local media stream.
         // Only necessary when we are creating the offer.
 
-    void createConnection();
+    virtual void createConnection();
         // Create the peer connection once configuration, constraints and
         // streams have been set.
 
-    void closeConnection();
+    virtual void closeConnection();
         // Close the peer connection.
 
-    void createOffer();
+    virtual void createOffer();
         // Create the offer SDP tos end to the peer.
         // No offer should be received after creating the offer.
         // A call to `recvRemoteAnswer` is expected to initiate the session.
 
-    void recvSDP(const std::string& type, const std::string& sdp);
+    virtual void recvSDP(const std::string& type, const std::string& sdp);
         // Receive a remote offer or answer.
 
-    void recvCandidate(const std::string& mid, int mlineindex, const std::string& sdp);
+    virtual void recvCandidate(const std::string& mid, int mlineindex, const std::string& sdp);
         // Receive a remote candidate.
 
+    std::string peerid() const;
     webrtc::FakeConstraints& constraints();
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> peerConnection() const;
     rtc::scoped_refptr<webrtc::MediaStreamInterface> stream() const;

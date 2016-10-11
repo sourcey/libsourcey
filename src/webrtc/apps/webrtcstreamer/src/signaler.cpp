@@ -28,7 +28,7 @@ Signaler::~Signaler()
 }
 
 
-void Signaler::sendSDP(const std::string& peerid, const std::string& type, const std::string& sdp)
+void Signaler::sendSDP(PeerConnection* conn, const std::string& type, const std::string& sdp)
 {
     assert(type == "offer" || type == "answer");
     smpl::Message m;
@@ -41,7 +41,7 @@ void Signaler::sendSDP(const std::string& peerid, const std::string& type, const
 }
 
 
-void Signaler::sendCandidate(const std::string& peerid, const std::string& mid, int mlineindex, const std::string& sdp)
+void Signaler::sendCandidate(PeerConnection* conn, const std::string& mid, int mlineindex, const std::string& sdp)
 {
     smpl::Message m;
     Json::Value desc;
@@ -64,7 +64,7 @@ void Signaler::onPeerConnected(void*, smpl::Peer& peer)
         return;
     }
 
-    auto conn = new PeerConnectionClient(this, peer.id(), PeerConnectionClient::Offer);
+    auto conn = new PeerConnection(this, peer.id(), PeerConnection::Offer);
     conn->constraints().SetMandatoryReceiveAudio(false);
     conn->constraints().SetMandatoryReceiveVideo(false);
     conn->constraints().SetAllowDtlsSctpDataChannels();
@@ -134,13 +134,13 @@ void Signaler::onClientStateChange(void* sender, sockio::ClientState& state, con
 }
 
 
-void Signaler::onAddRemoteStream(const std::string& peerid, webrtc::MediaStreamInterface* stream)
+void Signaler::onAddRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "not required");
 }
 
 
-void Signaler::onRemoveRemoteStream(const std::string& peerid, webrtc::MediaStreamInterface* stream)
+void Signaler::onRemoveRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "not required");
 }

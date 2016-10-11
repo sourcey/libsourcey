@@ -53,22 +53,7 @@ AVEncoder::AVEncoder(const EncoderOptions& options) :
     _ioCtx(nullptr),
     _ioBuffer(nullptr),
     _ioBufferSize(MAX_VIDEO_PACKET_SIZE),
-    _videoPtsRemainder(0.0),
     _pts(0)
-{
-    TraceS(this) << "Create" << endl;
-    initializeFFmpeg();
-}
-
-
-AVEncoder::AVEncoder() :
-    _formatCtx(nullptr),
-    _video(nullptr),
-    _audio(nullptr),
-    _ioCtx(nullptr),
-    _ioBuffer(nullptr),
-    _ioBufferSize(MAX_VIDEO_PACKET_SIZE),
-    _videoPtsRemainder(0.0)
 {
     TraceS(this) << "Create" << endl;
     initializeFFmpeg();
@@ -288,7 +273,8 @@ void AVEncoder::flush()
     if (_video) {
         while(true) {
             AVPacket opacket;
-            av_init_packet(&opacket);
+            // TODO: set pts
+            // av_init_packet(&opacket);
             if (!_video->flush(opacket)) break;
             writeOutputPacket(opacket);
         }
@@ -297,7 +283,8 @@ void AVEncoder::flush()
     if (_audio) {
         while(true) {
             AVPacket opacket;
-            av_init_packet(&opacket);
+            // TODO: set pts
+            // av_init_packet(&opacket);
             if (!_audio->flush(opacket)) break;
             writeOutputPacket(opacket);
         }
@@ -339,19 +326,7 @@ bool AVEncoder::writeOutputPacket(AVPacket& packet)
     assert(packet.pts != AV_NOPTS_VALUE);
     assert(isActive());
 
-    // Calculate our own PTS from stream time
-    // if (_video && _video->stream->index == packet.stream_index) { // &&
-    //
-    //     // NOTE: Setting PTS with audio seems to throw mp4 encoding out of sync;
-    //     // more testing is required...
-    //     !_options.oformat.audio.enabled) {
-    //    setVideoPacketPts(packet);
-    // }
-
-
-    // packet.duration = 100;
-
-    DebugL << "Writing packet:"
+    TraceL << "Writing packet:"
         << "\n\tPacket Size: " << packet.size
         << "\n\tPTS: " << packet.pts
         << "\n\tDTS: " << packet.dts
@@ -469,25 +444,9 @@ bool AVEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int
 }
 
 
-void AVEncoder::setVideoPacketPts(AVPacket& packet)
-{
-    std::int64_t delta(av_gettime() - _formatCtx->start_time_realtime);
-    double ptsActual = delta * (double) _video->stream->time_base.den / (double) _video->stream->time_base.num / (double) 1000000;
-    double ptsWhole;
-    _videoPtsRemainder += modf(ptsActual, &ptsWhole);
-    packet.pts = static_cast<std::int64_t>(ptsWhole);
-    packet.dts = AV_NOPTS_VALUE;
-    if (static_cast<int>(_videoPtsRemainder) > 1) {
-        _videoPtsRemainder--;
-        packet.pts++;
-    }
-}
-
-
 void AVEncoder::updatePts(AVStream* stream, std::int64_t* pts)
 {
     std::int64_t delta(av_gettime() - _formatCtx->start_time_realtime);
-    // _pts = delta / (float) 1000000;
     _pts = delta * (float) stream->time_base.den / (float) stream->time_base.num / (float) 1000000;
     *pts = _pts;
 }

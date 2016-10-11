@@ -1,6 +1,6 @@
 //
-// Anionu SDK
-// Copyright (C) 2011, Anionu <http://anionu.com>
+// LibSourcey
+// Copyright (C) 2005, Sourcey <http://sourcey.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

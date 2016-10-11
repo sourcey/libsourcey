@@ -6,7 +6,6 @@
 
 #include "webrtc/modules/video_capture/video_capture_factory.h"
 #include "webrtc/media/engine/webrtcvideocapturerfactory.h"
-// #include "webrtc/media/engine/webrtcvideoframe.h"
 #include "webrtc/common_video/libyuv/include/webrtc_libyuv.h"
 
 

@@ -21,7 +21,7 @@
 
 
 #include "scy/webrtc/webrtc.h"
-#include "scy/webrtc/peerconnectionclient.h"
+#include "scy/webrtc/peerconnection.h"
 #include "scy/collection.h"
 #include "scy/json/json.h"
 
@@ -34,23 +34,27 @@
 namespace scy {
 
 
-class PeerConnectionClient;
+class PeerConnection;
 
 
-class PeerConnectionManager: public PointerCollection<std::string, PeerConnectionClient>
+class PeerConnectionManager: public PointerCollection<std::string, PeerConnection>
 {
 public:
     PeerConnectionManager();
     virtual ~PeerConnectionManager();
 
-    virtual void sendSDP(const std::string& peerid, const std::string& type, const std::string& sdp);
-    virtual void sendCandidate(const std::string& peerid, const std::string& mid, int mlineindex, const std::string& sdp);
+    virtual void sendSDP(PeerConnection* conn, const std::string& type, const std::string& sdp);
+    virtual void sendCandidate(PeerConnection* conn, const std::string& mid, int mlineindex, const std::string& sdp);
 
     virtual void recvSDP(const std::string& peerid, const json::Value& data);
     virtual void recvCandidate(const std::string& peerid, const json::Value& data);
 
-    virtual void onAddRemoteStream(const std::string& peerid, webrtc::MediaStreamInterface* stream);
-    virtual void onRemoveRemoteStream(const std::string& peerid, webrtc::MediaStreamInterface* stream);
+    virtual void onAddRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream);
+    virtual void onRemoveRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream);
+
+    virtual void onStable(PeerConnection* conn);
+    virtual void onClosed(PeerConnection* conn);
+    virtual void onFailure(PeerConnection* conn, const std::string& error);
 
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory() const;
 

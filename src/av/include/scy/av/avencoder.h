@@ -51,8 +51,7 @@ class AVEncoder: public IEncoder
     /// encoder which depends on libavcodec/libavformat.
 {
 public:
-    AVEncoder(const EncoderOptions& options);
-    AVEncoder();
+    AVEncoder(const EncoderOptions& options = EncoderOptions());
     virtual ~AVEncoder();
 
     virtual void initialize();
@@ -82,7 +81,6 @@ public:
 
 protected:
     bool writeOutputPacket(AVPacket& packet);
-    void setVideoPacketPts(AVPacket& packet);
     void updatePts(AVStream* stream, std::int64_t* pts);
 
     //static Mutex _mutex; // Protects avcodec_open/close()
@@ -94,7 +92,6 @@ protected:
     AVIOContext* _ioCtx;
     std::uint8_t* _ioBuffer;
     int _ioBufferSize;
-    double _videoPtsRemainder;
     std::uint64_t _pts;
 };
 

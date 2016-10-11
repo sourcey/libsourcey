@@ -1,9 +1,17 @@
 #include "signaler.h"
 
 #include "scy/util.h"
+#include "scy/av/format.h"
+#include "scy/av/codec.h"
 
 #include <iostream>
 #include <string>
+
+
+#define OUTPUT_FILENAME "webrtcoutput.mp4"
+#define OUTPUT_FORMAT av::Format("MP4", "mp4", \
+    av::VideoCodec("H.264", "libx264", 400, 300, 25, 48000, 128000, "yuv420p"), \
+    av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
 
 
 using std::endl;
@@ -28,7 +36,7 @@ Signaler::~Signaler()
 }
 
 
-void Signaler::sendSDP(const std::string& peerid, const std::string& type, const std::string& sdp)
+void Signaler::sendSDP(PeerConnection* conn, const std::string& type, const std::string& sdp)
 {
     assert(type == "offer" || type == "answer");
     smpl::Message m;
@@ -41,7 +49,7 @@ void Signaler::sendSDP(const std::string& peerid, const std::string& type, const
 }
 
 
-void Signaler::sendCandidate(const std::string& peerid, const std::string& mid, int mlineindex, const std::string& sdp)
+void Signaler::sendCandidate(PeerConnection* conn, const std::string& mid, int mlineindex, const std::string& sdp)
 {
     smpl::Message m;
     Json::Value desc;
@@ -64,8 +72,8 @@ void Signaler::onPeerConnected(void*, smpl::Peer& peer)
         return;
     }
 
-    auto conn = new PeerConnectionClient(this, peer.id(), PeerConnectionClient::Answer);
-    conn->constraints().SetMandatoryReceiveVideo(false);
+    auto conn = new PeerConnection(this, peer.id(), PeerConnection::Answer);
+    conn->constraints().SetMandatoryReceiveVideo(true);
     conn->constraints().SetMandatoryReceiveAudio(true);
     conn->createConnection();
 
@@ -94,10 +102,10 @@ void Signaler::onPeerDiconnected(void*, const smpl::Peer& peer)
 {
     DebugL << "Peer disconnected" << endl;
 
-    auto conn = PeerConnectionManager::remove(peer.id());
+    auto conn = get(peer.id());
     if (conn) {
-        DebugL << "Deleting peer connection: " << peer.id() << endl;
-        delete conn;
+        DebugL << "Closing peer connection: " << peer.id() << endl;
+        conn->closeConnection(); // will be deleted via callback
     }
 }
 
@@ -120,39 +128,48 @@ void Signaler::onClientStateChange(void* sender, sockio::ClientState& state, con
 }
 
 
-void Signaler::onAddRemoteStream(const std::string& peerid, webrtc::MediaStreamInterface* stream)
+void Signaler::onAddRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
-    // TODO: Should be instance on PeerConnectionClient
-    _recorder.reset(new StreamRecorder());
+    // TODO: StreamRecorder should be a member of PeerConnection
+
+    av::EncoderOptions options;
+    options.ofile = OUTPUT_FILENAME;
+    options.oformat = OUTPUT_FORMAT;
+
+    _recorder.reset(new StreamRecorder(options));
 
     auto videoTracks = stream->GetVideoTracks();
-    // if (videoTracks.empty()) {
-    //     assert(0 && "no video tracks");
-    //     return;
-    // }
     if (!videoTracks.empty())
         _recorder->setVideoTrack(videoTracks[0]);
 
     auto audioTracks = stream->GetAudioTracks();
-    assert(!audioTracks.empty());
     if (!audioTracks.empty())
         _recorder->setAudioTrack(audioTracks[0]);
-
-    // _recorder
-
-    // _remoteRenderer.reset(new ImageSequenceRecorder(videoTracks[0], "webrtcrecorder"));
-
-    // Audio info here: http://stackoverflow.com/questions/24160034/webrtc-library-remote-audio-rendering-via-addsink
-    // webrtc::AudioSinkInterface
-    // /home/kam/sourcey/webrtcbuilds/out/src/webrtc/api/call/audio_sink.h
-
-    // https://github.com/AnyRTC/AnyRTC-RTMP/blob/3136d0201693aade484d89e6b1639b52f4f7c6ca/AnyCore/avcodec.h
 }
 
 
-void Signaler::onRemoveRemoteStream(const std::string& peerid, webrtc::MediaStreamInterface* stream)
+void Signaler::onRemoveRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "free streams");
+}
+
+
+void Signaler::onStable(PeerConnection* conn)
+{
+}
+
+
+void Signaler::onClosed(PeerConnection* conn)
+{
+    _recorder.reset(); // shutdown the recorder
+    PeerConnectionManager::onClosed(conn);
+}
+
+
+void Signaler::onFailure(PeerConnection* conn, const std::string& error)
+{
+    _recorder.reset(); // shutdown the recorder
+    PeerConnectionManager::onFailure(conn, error);
 }
 
 

@@ -22,10 +22,10 @@
 
 
 #include "scy/logger.h"
-#include <cstdint>
 #include "scy/mutex.h"
 #include "scy/uv/uvpp.h"
 #include "scy/singleton.h"
+#include <cstdint>
 #include <exception>
 #include <memory>
 #include <atomic>
@@ -34,29 +34,29 @@
 
 namespace scy {
 
-    
+
 class ScopedPointer;
 
 
 class GarbageCollector
     /// Simple garbage collector for deferred pointer deletion.
 {
-public:    
-    GarbageCollector();    
-    ~GarbageCollector();    
+public:
+    GarbageCollector();
+    ~GarbageCollector();
 
     static GarbageCollector& instance();
         // Returns the GarbageCollector singleton.
-    
+
     static void destroy();
-        // Shuts down the garbage collector and deletes 
+        // Shuts down the garbage collector and deletes
         // the singleton instance.
         // This method must be called from the main thread
-        // while the event loop is inactive.    
-    
+        // while the event loop is inactive.
+
     template <class C> void deleteLater(C* ptr);
         // Schedules a pointer for deferred deletion.
-    
+
     template <class C> void deleteLater(std::shared_ptr<C> ptr);
         // Schedules a shared pointer for deferred deletion.
 
@@ -69,10 +69,10 @@ public:
         // Returns the TID of the garbage collector event loop thread.
         // The garbage collector must be running.
 
-protected:    
+protected:
     static void onTimer(uv_timer_t* handle);
     void runAsync();
-        
+
     mutable Mutex _mutex;
     std::vector<ScopedPointer*> _pending;
     std::vector<ScopedPointer*> _ready;
@@ -94,8 +94,8 @@ template<class T> struct Default
 {
     void operator()(T *ptr)
     {
-        assert(ptr);        
-        static_assert(0 < sizeof(T), 
+        assert(ptr);
+        static_assert(0 < sizeof(T),
             "can't delete an incomplete type");
         delete ptr;
     }
@@ -108,7 +108,7 @@ template<class T> struct Deferred
     void operator()(T *ptr)
     {
         assert(ptr);
-        static_assert(0 < sizeof(T), 
+        static_assert(0 < sizeof(T),
             "can't delete an incomplete type");
         GarbageCollector::instance().deleteLater(ptr);
     }
@@ -119,8 +119,8 @@ template<class T> struct Dispose
 {
     void operator()(T *ptr)
     {
-        assert(ptr);        
-        static_assert(0 < sizeof(T), 
+        assert(ptr);
+        static_assert(0 < sizeof(T),
             "can't delete an incomplete type");
         ptr->dispose();
     }
@@ -131,8 +131,8 @@ template<class T> struct Array
 {
     void operator()(T *ptr)
     {
-        assert(ptr);        
-        static_assert(0 < sizeof(T), 
+        assert(ptr);
+        static_assert(0 < sizeof(T),
             "can't delete an incomplete type");
         delete [] ptr;
         ptr->dispose();
@@ -149,8 +149,8 @@ template<class T> struct Array
 
 
 class ScopedPointer
-    /// ScopedPointer provides an interface for holding 
-    /// and ansynchronously deleting a pointer in various ways. 
+    /// ScopedPointer provides an interface for holding
+    /// and ansynchronously deleting a pointer in various ways.
 {
 public:
     ScopedPointer() {}
@@ -160,13 +160,13 @@ public:
 
 template <class T, typename D = std::default_delete<T> >
 class ScopedRawPointer: public ScopedPointer
-    /// ScopedRawPointer implements the ScopedPointer interface  
+    /// ScopedRawPointer implements the ScopedPointer interface
     /// to provide a method for deleting a raw pointer.
 {
 public:
     void* ptr;
-    
-    ScopedRawPointer(void* p) : 
+
+    ScopedRawPointer(void* p) :
         ptr(p)
     {
     }
@@ -180,7 +180,7 @@ public:
 };
 
 
-template <class T> //, typename D = std::default_delete<T> 
+template <class T> //, typename D = std::default_delete<T>
 class ScopedSharedPointer: public ScopedPointer
     /// ScopedSharedPointer implements the ScopedPointer interface to
     /// provide deferred deletion for shared_ptr managed pointers.
@@ -191,8 +191,8 @@ class ScopedSharedPointer: public ScopedPointer
 {
 public:
     std::shared_ptr<T> ptr;
-    
-    ScopedSharedPointer(std::shared_ptr<T> p) : 
+
+    ScopedSharedPointer(std::shared_ptr<T> p) :
         ptr(p)
     {
         assert(ptr);
@@ -211,7 +211,7 @@ public:
 
 template <class C> inline void GarbageCollector::deleteLater(C* ptr)
     /// Schedules a pointer for deferred deletion.
-{ 
+{
     Mutex::ScopedLock lock(_mutex);
     _pending.push_back(new ScopedRawPointer<C>(ptr));
 }
@@ -219,7 +219,7 @@ template <class C> inline void GarbageCollector::deleteLater(C* ptr)
 
 template <class C> inline void GarbageCollector::deleteLater(std::shared_ptr<C> ptr)
     /// Schedules a shared pointer for deferred deletion.
-{ 
+{
     Mutex::ScopedLock lock(_mutex);
     _pending.push_back(new ScopedSharedPointer<C>(ptr));
 }
@@ -237,7 +237,7 @@ template <class C> inline void deleteLater(std::shared_ptr<C> ptr)
 {
     GarbageCollector::instance().deleteLater(ptr);
 }
-    
+
 
 //
 // Memory and Reference Counted Objects
@@ -245,36 +245,36 @@ template <class C> inline void deleteLater(std::shared_ptr<C> ptr)
 
 
 class SharedObject
-    /// SharedObject is the base class for objects that  
+    /// SharedObject is the base class for objects that
     /// employ reference counting based garbage collection.
     ///
     /// Reference-counted objects inhibit construction by
     /// copying and assignment.
 {
 public:
-    SharedObject(bool deferred = false) : 
+    SharedObject(bool deferred = false) :
         count(1), deferred(deferred)
-        // Creates the SharedObject with an 
+        // Creates the SharedObject with an
         // initial reference count of one.
     {
     }
-    
+
     void duplicate()
         // Increment the object's reference count.
     {
         std::atomic_fetch_add_explicit(&count, 1u, std::memory_order_relaxed);
     }
-        
+
     void release()
         // Decrement the object's reference count and
         // calls delete if the count reaches zero.
     {
         if (std::atomic_fetch_sub_explicit(&count, 1u, std::memory_order_release) == 1) {
             std::atomic_thread_fence(std::memory_order_acquire);
-            freeMemory(); 
+            freeMemory();
         }
     }
-        
+
     unsigned refCount() const
     {
         return count;
@@ -297,10 +297,10 @@ protected:
 
     SharedObject(const SharedObject&);
     SharedObject& operator = (const SharedObject&);
-    
+
     friend struct std::default_delete<SharedObject>;
     //friend struct deleter::Deferred<SharedObject>;
-    
+
     std::atomic<unsigned> count;
     bool deferred;
 };
@@ -308,7 +308,7 @@ protected:
 
 #if 0
 template <class C>
-class SharedPtr    
+class SharedPtr
     /// SharedPtr manages a pointer to reference counted object.
     ///
     /// The template class must implement duplicate() and
@@ -339,7 +339,7 @@ public:
     {
         if (_handle) _handle->release();
     }
-    
+
     SharedPtr& assign(C* ptr)
     {
         if (_handle != ptr)
@@ -360,7 +360,7 @@ public:
         }
         return *this;
     }
-    
+
     SharedPtr& assign(const SharedPtr& ptr)
     {
         if (&ptr != this)
@@ -428,12 +428,12 @@ public:
     {
         return _handle;
     }
-    
+
     operator const C* () const
     {
         return _handle;
     }
-    
+
     bool operator ! () const
     {
         return _handle == nullptr;
@@ -443,7 +443,7 @@ public:
     {
         return _handle == nullptr;
     }
-    
+
     C* duplicate()
     {
         if (_handle) _handle->duplicate();

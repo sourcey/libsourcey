@@ -36,13 +36,13 @@ PeerConnectionManager::~PeerConnectionManager()
 }
 
 
-void PeerConnectionManager::sendSDP(const std::string& peerid, const std::string& type, const std::string& sdp)
+void PeerConnectionManager::sendSDP(PeerConnection* conn, const std::string& type, const std::string& sdp)
 {
     assert(0 && "virtual");
 }
 
 
-void PeerConnectionManager::sendCandidate(const std::string& peerid, const std::string& mid, int mlineindex, const std::string& sdp)
+void PeerConnectionManager::sendCandidate(PeerConnection* conn, const std::string& mid, int mlineindex, const std::string& sdp)
 {
     assert(0 && "virtual");
 }
@@ -65,16 +65,6 @@ void PeerConnectionManager::recvSDP(const std::string& peerid, const json::Value
     }
 
     conn->recvSDP(type, sdp);
-    // if (type == "offer") {
-    // }
-    // else if (type == "answer") {
-    // }
-
-    // if (!conn->recvRemoteOffer(type, sdp)) {
-    //     ErrorL << "Failed to parse " << type << endl;
-    //     assert(0 && "cannot parse sdp");
-    //     return;
-    // }
 
     DebugL << "Received " << type << ": " << sdp << endl;
 }
@@ -100,23 +90,41 @@ void PeerConnectionManager::recvCandidate(const std::string& peerid, const json:
     DebugL << "Received candidate: " << sdp << endl;
 
     conn->recvCandidate(mid, mlineindex, sdp);
-    // if (!) {
-    //     ErrorL << "Failed to apply the received candidate" << endl;
-    //     assert(0 && "cannot parse candiate");
-    //     return;
-    // }
 }
 
 
-void PeerConnectionManager::onAddRemoteStream(const std::string& peerid, webrtc::MediaStreamInterface* stream)
+void PeerConnectionManager::onAddRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "virtual");
 }
 
 
-void PeerConnectionManager::onRemoveRemoteStream(const std::string& peerid, webrtc::MediaStreamInterface* stream)
+void PeerConnectionManager::onRemoveRemoteStream(PeerConnection* conn, webrtc::MediaStreamInterface* stream)
 {
     assert(0 && "virtual");
+}
+
+
+void PeerConnectionManager::onStable(PeerConnection* conn)
+{
+}
+
+
+void PeerConnectionManager::onClosed(PeerConnection* conn)
+{
+    DebugL << "Deleting peer connection: " << conn->peerid() << endl;
+
+    if (remove(conn))
+        deleteLater<PeerConnection>(conn); // async delete
+}
+
+
+void PeerConnectionManager::onFailure(PeerConnection* conn, const std::string& error)
+{
+    DebugL << "Deleting peer connection: " << conn->peerid() << endl;
+
+    if (remove(conn))
+        deleteLater<PeerConnection>(conn); // async delete
 }
 
 

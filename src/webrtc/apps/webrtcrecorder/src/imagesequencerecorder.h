@@ -1,13 +1,10 @@
-#ifndef SCY_ImageSequenceRecorder_H
-#define SCY_ImageSequenceRecorder_H
+#ifndef SCY_WebRTCRecorder_ImageSequenceRecorder_H
+#define SCY_WebRTCRecorder_ImageSequenceRecorder_H
 
 
 #include "scy/av/videocontext.h"
 
 #include "webrtc/api/peerconnectioninterface.h"
-#include "webrtc/api/jsep.h"
-#include "webrtc/api/datachannelinterface.h"
-#include "webrtc/api/test/fakeconstraints.h"
 
 
 namespace scy {

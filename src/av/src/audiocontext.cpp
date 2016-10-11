@@ -437,7 +437,7 @@ AudioDecoderContext::~AudioDecoderContext()
 }
 
 
-void AudioDecoderContext::create(AVFormatContext *ic, int streamID)
+void AudioDecoderContext::create(AVFormatContext* ic, int streamID)
 {
     AudioContext::create();
 
@@ -595,11 +595,12 @@ bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat)
 
 AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params)
 {
-    enum AVSampleFormat requested = av_get_sample_fmt(params.sampleFmt.c_str());
     enum AVSampleFormat compatible = AV_SAMPLE_FMT_NONE;
+    enum AVSampleFormat requested = av_get_sample_fmt(params.sampleFmt.c_str());
+    bool planar = av_sample_fmt_is_planar(requested);
     const enum AVSampleFormat *p = codec->sample_fmts;
     while (*p != AV_SAMPLE_FMT_NONE) {
-        if (compatible == AV_SAMPLE_FMT_NONE)
+        if (compatible == AV_SAMPLE_FMT_NONE && av_sample_fmt_is_planar(*p) == planar)
             compatible = *p;  // or use the first compatible format
         if (*p == requested)
             return requested; // always try to return requested format

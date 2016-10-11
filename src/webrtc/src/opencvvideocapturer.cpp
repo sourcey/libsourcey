@@ -1,6 +1,6 @@
 //
-// Anionu SDK
-// Copyright (C) 2011, Anionu <http://anionu.com>
+// LibSourcey
+// Copyright (C) 2005, Sourcey <http://sourcey.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -55,13 +55,11 @@ cricket::CaptureState OpenCVVideoCapturer::Start(const cricket::VideoFormat& cap
         }
         InfoL << "Start" << endl;
 
-        // TODO: Honour cricket::VideoFormat?
+        // TODO: Check and verify cricket::VideoFormat
 
-        // Connect and start the mpacket stream.
+        // Connect and start the packet stream.
         // Output packets must be av::MatrixPacket types so we can access
         // the underlying cv::Mat.
-        // _emitter += packetDelegate(this, &OpenCVVideoCapturer::onFrameCaptured);
-
         capture->start();
         capture->emitter += packetDelegate(this, &OpenCVVideoCapturer::onFrameCaptured);
 
@@ -95,9 +93,7 @@ void OpenCVVideoCapturer::onFrameCaptured(void* sender, av::MatrixPacket& packet
 {
     // TraceS(this) << "On frame" << std::endl;
 
-    // Note: CV_BGR2YUV_I420 to conversion is fixed for now.
-    // This function should updated to check the source packet
-    // fourcc on the next iteration.
+    // Convert the packet from BGR to I420 for WebRTC
     cv::Mat yuv(packet.width, packet.height, CV_8UC4);
     cv::cvtColor(*packet.mat, yuv, CV_BGR2YUV_I420);
 
@@ -122,6 +118,8 @@ bool OpenCVVideoCapturer::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
 {
     if (!fourccs)
         return false;
+
+    // This class does not yet support multiple pixel formats.
     fourccs->push_back(cricket::FOURCC_I420);
     return true;
 }
@@ -132,8 +130,7 @@ bool OpenCVVideoCapturer::GetBestCaptureFormat(const cricket::VideoFormat& desir
     if (!best_format)
         return false;
 
-    // OpenCVVideoCapturer does not support capability enumeration.
-    // Use the desired format as the best format.
+    // Use the supported format as the best format.
     best_format->width = desired.width;
     best_format->height = desired.height;
     best_format->fourcc = cricket::FOURCC_I420;
