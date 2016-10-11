@@ -269,7 +269,7 @@ bool VideoEncoderContext::encode(AVPacket& ipacket, AVPacket& opacket)
     assert(codec);
 
     // Populate the input frame with date from the given buffer.
-    // NOTE: This only workd with contiguous buffers
+    // NOTE: This only works with contiguous buffers
     frame->data[0] = reinterpret_cast<std::uint8_t*>(ipacket.data);
 
     // TODO: Correctly set the input frame PTS
@@ -297,12 +297,12 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
         if (ctx->coded_frame->key_frame)
             opacket.flags |= AV_PKT_FLAG_KEY;
         if (stream) {
-            if (opacket.pts != AV_NOPTS_VALUE)
-                opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
-            if (opacket.dts != AV_NOPTS_VALUE)
-                opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
-            if (opacket.duration > 0)
-                opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
+            // if (opacket.pts != AV_NOPTS_VALUE)
+            //     opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
+            // if (opacket.dts != AV_NOPTS_VALUE)
+            //     opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
+            // if (opacket.duration > 0)
+            //     opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
 
             TraceS(this) << "Encoded Frame:"
                 << "\n\tScaled PTS: " << opacket.pts
@@ -320,33 +320,35 @@ bool VideoEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 
 bool VideoEncoderContext::flush(AVPacket& opacket)
 {
-    av_init_packet(&opacket);
-    opacket.data = nullptr;
-    opacket.size = 0;
+    return encode(nullptr, opacket);
 
-    int frameEncoded = 0;
-    if (avcodec_encode_video2(ctx, &opacket, nullptr, &frameEncoded) < 0) {
-        // TODO: Use av_strerror
-        error = "Fatal encoder error";
-        ErrorS(this) << error << endl;
-        throw std::runtime_error(error);
-    }
-
-    if (frameEncoded) {
-        if (ctx->coded_frame->key_frame)
-            opacket.flags |= AV_PKT_FLAG_KEY;
-        if (stream) {
-            if (opacket.pts != AV_NOPTS_VALUE)
-                opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
-            if (opacket.dts != AV_NOPTS_VALUE)
-                opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
-            if (opacket.duration > 0)
-                opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
-            TraceS(this) << "Flushed video frame: " << opacket.pts << endl;
-        }
-        return true;
-    }
-    return false;
+    // av_init_packet(&opacket);
+    // opacket.data = nullptr;
+    // opacket.size = 0;
+    //
+    // int frameEncoded = 0;
+    // if (avcodec_encode_video2(ctx, &opacket, nullptr, &frameEncoded) < 0) {
+    //     // TODO: Use av_strerror
+    //     error = "Fatal encoder error";
+    //     ErrorS(this) << error << endl;
+    //     throw std::runtime_error(error);
+    // }
+    //
+    // if (frameEncoded) {
+    //     if (ctx->coded_frame->key_frame)
+    //         opacket.flags |= AV_PKT_FLAG_KEY;
+    //     if (stream) {
+    //         if (opacket.pts != AV_NOPTS_VALUE)
+    //             opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
+    //         if (opacket.dts != AV_NOPTS_VALUE)
+    //             opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
+    //         if (opacket.duration > 0)
+    //             opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
+    //         TraceS(this) << "Flushed video frame: " << opacket.pts << endl;
+    //     }
+    //     return true;
+    // }
+    // return false;
 }
 
 
@@ -878,32 +880,36 @@ void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
 
 bool encodeVideoPacket(VideoEncoderContext* enc, AVFrame* iframe, AVPacket& opacket)
 {
-    assert(iframe);
-    assert(iframe->data[0]);
+    // assert(iframe);
+    // assert(iframe->data[0]);
     assert(enc->codec);
 
-    // Recreate the video conversion context on the fly
-    // if the input resolution changes.
-    if (enc->iparams.width != iframe->width ||
-        enc->iparams.height != iframe->height) {
-        // _options.iformat.video.width = iframe->width;
-        // _options.iformat.video.height = iframe->height;
-        enc->iparams.width = iframe->width;
-        enc->iparams.height = iframe->height;
-        DebugL << "Recreating video conversion context" << endl;
-        enc->freeConverter();
-        enc->createConverter();
+    AVFrame* cframe = nullptr;
+    if (iframe) {
+
+        // Recreate the video conversion context on the fly
+        // if the input resolution changes.
+        if (iframe->width != enc->iparams.width ||
+            iframe->height != enc->iparams.height) {
+            // _options.iformat.video.width = iframe->width;
+            // _options.iformat.video.height = iframe->height;
+            enc->iparams.width = iframe->width;
+            enc->iparams.height = iframe->height;
+            DebugL << "Recreating video conversion context" << endl;
+            enc->freeConverter();
+            enc->createConverter();
+        }
+
+        // Convert the input frame if required
+        cframe = enc->conv ? enc->conv->convert(iframe) : iframe;
+        cframe->format = enc->ctx->pix_fmt;
+        cframe->width  = iframe->width;
+        cframe->height = iframe->height;
+
+        // Set the input PTS or a monotonic value to keep the encoder happy.
+        // The actual setting of the PTS is outside the scope of this encoder.
+        cframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : enc->ctx->frame_number;
     }
-
-    // Convert the input frame if required
-    auto cframe = enc->conv ? enc->conv->convert(iframe) : iframe;
-    cframe->format = enc->ctx->pix_fmt;
-    cframe->width  = iframe->width;
-    cframe->height = iframe->height;
-
-    // Set the input PTS or a monotonic value to keep the encoder happy.
-    // The actual setting of the PTS is outside the scope of this encoder.
-    cframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : enc->ctx->frame_number;
 
     av_init_packet(&opacket);
     opacket.data = nullptr; // using encoder assigned buffer

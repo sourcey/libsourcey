@@ -51,6 +51,8 @@ namespace scy {
 
 
 static const int kNumberFramesWanted = 200;
+static const int kInNbSamples = 1024;
+static const int kInAudioDeviceId = 0;
 
 
 //
@@ -164,8 +166,6 @@ class AudioEncoderTest: public Test
 {
     void run()
     {
-        int inNbSamples = 1024;
-
         av::AudioEncoderContext encoder;
         auto& iparams = encoder.iparams;
         auto& oparams = encoder.oparams;
@@ -186,10 +186,10 @@ class AudioEncoderTest: public Test
 
         std::ofstream output("test." + oparams.encoder, std::ios::out | std::ios::binary);
 
-        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, inNbSamples, iparams);
+        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNbSamples, iparams);
         for (auto samples : testSamples) {
             AVPacket opacket;
-            if (encoder.encode(reinterpret_cast<std::uint8_t*>(samples), inNbSamples, AV_NOPTS_VALUE, opacket)) {
+            if (encoder.encode(reinterpret_cast<std::uint8_t*>(samples), kInNbSamples, AV_NOPTS_VALUE, opacket)) {
                 output.write(reinterpret_cast<const char*>(opacket.data), opacket.size);
             }
         }
@@ -206,15 +206,10 @@ class AudioEncoderTest: public Test
 // =============================================================================
 // Audio Resampler
 //
-// The file is playable with the following command:
-// ffplay -f s16le -channel_layout 3 -channels 2 -ar 44100 test.pcm
-//
 class AudioResamplerTest: public Test
 {
     void run()
     {
-        int inNbSamples = 1024;
-
         av::AudioResampler resampler;
         auto iparams = resampler.iparams;
         auto oparams = resampler.oparams;
@@ -231,9 +226,9 @@ class AudioResamplerTest: public Test
 
         std::ofstream output("test.pcm", std::ios::out | std::ios::binary);
 
-        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, inNbSamples, iparams);
+        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNbSamples, iparams);
         for (auto samples : testSamples) {
-            if (resampler.resample(reinterpret_cast<std::uint8_t*>(samples), inNbSamples)) {
+            if (resampler.resample(reinterpret_cast<std::uint8_t*>(samples), kInNbSamples)) {
                 output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outSamplesBytes);
             }
         }
@@ -243,6 +238,71 @@ class AudioResamplerTest: public Test
         util::clearVector<>(testSamples);
 
         // TODO: verify data integrity
+    }
+};
+
+
+// =============================================================================
+// Audio Capture Encoder
+//
+class AudioCaptureEncoderTest: public Test
+{
+    av::AudioEncoderContext encoder;
+    int numFramesRemaining;
+    std::ofstream output;
+
+    void run()
+    {
+        // TODO: return if no video captures availabile
+
+        int inNbChannels = 2;
+        int inSampleRate = 48000;
+
+        auto& iparams = encoder.iparams;
+        auto& oparams = encoder.oparams;
+
+        av::AudioCapture capture(kInAudioDeviceId, inNbChannels, inSampleRate);
+        capture.start();
+        capture.getAudioCodec(iparams);
+
+        expect(iparams.channels == inNbChannels);
+        expect(iparams.sampleRate == inSampleRate);
+
+        oparams.encoder = "mp2"; //mp2, aac, libfdk_aac
+        oparams.bitRate = 64000;
+        oparams.channels = 2;
+        oparams.sampleRate = 44100;
+        oparams.sampleFmt = "s16"; //fltp
+        oparams.enabled = true;
+
+        output.open("test." + oparams.encoder, std::ios::out | std::ios::binary);
+
+        encoder.create();
+        encoder.open();
+        capture.emitter.attach(av::audioDelegate(this, &AudioCaptureEncoderTest::onAudio));
+
+        numFramesRemaining = kNumberFramesWanted;
+        while (numFramesRemaining > 0) {
+            cout << "Waiting for completion: " << numFramesRemaining << endl;
+            scy::sleep(10);
+        }
+
+        encoder.close();
+        output.close();
+
+        // TODO: verify data integrity
+        expect(numFramesRemaining == 0);
+    }
+
+    void onAudio(av::AudioPacket& packet)
+    {
+        cout << "On audio packet: " << packet.size() << endl;
+
+        AVPacket opacket;
+        if (encoder.encode(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples, AV_NOPTS_VALUE, opacket)) {
+            output.write(reinterpret_cast<const char*>(opacket.data), opacket.size);
+        }
+        numFramesRemaining--;
     }
 };
 
@@ -261,28 +321,29 @@ class AudioCaptureResamplerTest: public Test
 
     void run()
     {
-        int inDeviceId = 0;
+        // TODO: return if no video captures availabile
+
         int inNbChannels = 2;
         int inSampleRate = 48000;
 
         auto iparams = resampler.iparams;
         auto oparams = resampler.oparams;
 
-        iparams.channels = inNbChannels;
-        iparams.sampleRate = inSampleRate;
-        iparams.sampleFmt = "s16";
-
         oparams.channels = 2;
         oparams.sampleRate = 44100;
         oparams.sampleFmt = "s16";
 
-        resampler.create();
+        av::AudioCapture capture(kInAudioDeviceId, inNbChannels, inSampleRate);
+        capture.start();
+        capture.getAudioCodec(iparams);
+
+        expect(iparams.channels == inNbChannels);
+        expect(iparams.sampleRate == inSampleRate);
 
         output.open("test.pcm", std::ios::out | std::ios::binary);
 
-        av::AudioCapture capture(inDeviceId, inNbChannels, inSampleRate);
-        capture.emitter.attach(audioDelegate(this, &AudioCaptureResamplerTest::onAudio));
-        capture.start();
+        resampler.create();
+        capture.emitter.attach(av::audioDelegate(this, &AudioCaptureResamplerTest::onAudio));
 
         numFramesRemaining = kNumberFramesWanted;
         while (numFramesRemaining > 0) {
@@ -300,7 +361,7 @@ class AudioCaptureResamplerTest: public Test
     void onAudio(av::AudioPacket& packet)
     {
         cout << "On audio packet: " << packet.size() << endl;
-        if (resampler.resample(reinterpret_cast<std::uint8_t*>(packet.data()), packet.frameSize)) {
+        if (resampler.resample(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples)) {
             output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outSamplesBytes);
         }
         numFramesRemaining--;

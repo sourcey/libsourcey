@@ -45,6 +45,10 @@ DefinePolymorphicDelegateWithArg(audioDelegate, IPacket, PacketDelegateBase, voi
 
 
 class AudioCapture: public ICapture
+    /// Implements a cross platfrom audio device capture class.
+    ///
+    /// NOTE: Audio buffer samples are always in interleaved, not planar channel
+    /// format for ease of use ie. `c1 c1 c2 c2 c1 c1 c2 c2...`
 {
 public:
     typedef std::shared_ptr<AudioCapture> Ptr;
@@ -64,9 +68,10 @@ public:
     bool running() const;
     bool isOpen() const;
     RtAudioFormat format() const;
-    std::string formatString(bool planar) const;
+    std::string formatString() const;
 
     void getEncoderFormat(Format& iformat);
+    void getAudioCodec(AudioCodec& icodec);
 
 protected:
     virtual void setError(const std::string& message, bool throwExec = true);

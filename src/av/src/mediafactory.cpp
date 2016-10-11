@@ -162,7 +162,7 @@ VideoCapture::Ptr MediaFactory::createVideoCapture(int deviceId) //, unsigned fl
     VideoCaptureLoaded.emit(this, capture);
 
     // Listen for errors.
-    // Note: The capture is opened and started in the constructor,
+    // NOTE: The capture is opened and started in the constructor,
     // so exceptions thrown during startup will not be handled
     // via this callback.
     capture->Error += sdelegate(this, &MediaFactory::onVideoCaptureError);

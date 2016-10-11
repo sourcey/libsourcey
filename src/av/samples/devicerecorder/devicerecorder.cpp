@@ -28,7 +28,7 @@ public:
         options.ofile = "devicerecorder.mp4";
         options.oformat = av::Format("MP4", "mp4",
             av::VideoCodec("H.264", "libx264", 400, 300, 25, 48000, 128000, "yuv420p"),
-            av::AudioCodec("AAC", "aac", 2, 44100, 64000, "fltp"));
+            av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
 
         // Attach the capture sources
         if (video) {
@@ -84,21 +84,12 @@ int main(int argc, char** argv)
 {
     Logger::instance().add(new ConsoleChannel("debug", LTrace));
 
-// #if USE_AVDEVICE_CAPTURE
-//     auto video = new av::AVInputReader();
-//     video->openDevice(0);
-//     // video->openFile(VIDEO_FILE_SOURCE);
-//     video->start();
-// #else
-//     // VideoCapture instances should be instantiated in the main thread.
-//
-//     auto video = new av::VideoCapture(0);
-// #endif
-
     {
-        auto& media = av::MediaFactory::instance();
-        av::VideoCapture::Ptr video = nullptr; //media.createVideoCapture(0);
-        av::AudioCapture::Ptr audio = media.createAudioCapture(0, 2, 44100); //nullptr; //
+        // auto& media = av::MediaFactory::instance();
+        // av::VideoCapture::Ptr video = media.createVideoCapture(0);
+        // av::AudioCapture::Ptr audio = media.createAudioCapture(0, 2, 44100);
+        av::VideoCapture::Ptr video(std::make_shared<av::VideoCapture>(0));
+        av::AudioCapture::Ptr audio(std::make_shared<av::AudioCapture>(0, 2, 44100)); 
 
         DeviceRecorder rec(video, audio);
         rec.start();

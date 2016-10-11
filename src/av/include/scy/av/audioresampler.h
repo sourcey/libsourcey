@@ -49,9 +49,14 @@ namespace av {
 
 // ---------------------------------------------------------------------
 //
+// #define SWR_CH_MAX   64
+//
+// typedef uint8_t *[SWR_CH_MAX] SampleData;
+
+
 struct AudioResampler
 {
-    AudioResampler();
+    AudioResampler(const AudioCodec& iparams = AudioCodec(), const AudioCodec& oparams = AudioCodec());
     ~AudioResampler();
 
     void create();
@@ -65,11 +70,9 @@ struct AudioResampler
         //
         // Converted samples are accessable via the `outSamples` member.
 
-    struct SwrContext* ctx;
-
     AudioCodec iparams;        // input audio parameters
     AudioCodec oparams;        // output audio parameters
-
+    struct SwrContext* ctx;    // the conversion context
     std::uint8_t** outSamples; // the output samples buffer
     int outNbSamples;          // the number of samples currently in the output buffer
     int outMaxNbSamples;       // the maximum number of samples that can be stored in the output buffer

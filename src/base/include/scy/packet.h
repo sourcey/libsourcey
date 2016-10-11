@@ -119,6 +119,12 @@ public:
     virtual char* data() const { return nullptr; }
         // The packet data pointer for buffered packets.
 
+    virtual const char* constData() const { return data(); }
+        // The const packet data pointer for buffered packets.
+
+    virtual const char* dataAs() const { return data(); }
+        // The const packet data pointer for buffered packets.
+
     virtual const char* className() const = 0;
     virtual void print(std::ostream& os) const { os << className() << std::endl; }
 

@@ -56,9 +56,10 @@ int main(int argc, char** argv)
     // });
 
     // Define class based tests
-    describe("audio encoder", new AudioEncoderTest);
+    // describe("audio encoder", new AudioEncoderTest);
+    // describe("audio capture encoder", new AudioCaptureEncoderTest);
     // describe("audio resampler", new AudioResamplerTest);
-    // describe("audio capture resampler", new AudioCaptureResamplerTest);
+    describe("audio capture resampler", new AudioCaptureResamplerTest);
 
     test::runAll();
 

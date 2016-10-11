@@ -213,13 +213,14 @@ void AudioEncoderContext::create()
         throw std::runtime_error("Could not allocate FIFO: Out of memory");
     }
 
+    // Update parameters that may have changed
+    oparams.sampleFmt = av_get_sample_fmt_name(ctx->sample_fmt);
+
     // Create a resampler if required
-    if (ctx->sample_fmt != av_get_sample_fmt(iparams.sampleFmt.c_str()) ||
-        ctx->sample_rate != iparams.sampleRate ||
-        ctx->channels != iparams.channels) {
-        resampler = new AudioResampler();
-        resampler->iparams = iparams;
-        resampler->oparams = oparams;
+    if (iparams.sampleFmt != oparams.sampleFmt ||
+        iparams.sampleRate != oparams.sampleRate ||
+        iparams.channels != oparams.channels) {
+        resampler = new AudioResampler(iparams, oparams);
         resampler->create();
     }
 }
@@ -244,20 +245,23 @@ void AudioEncoderContext::close()
 
 
 // Add converted input audio samples to the FIFO buffer for later processing.
-static void addSamplesToFifo(AVAudioFifo *fifo,
-                             const std::uint8_t **convertedSamples,
-                             const int frame_size)
+static void addSamplesToFifo(AVAudioFifo* fifo,
+                             const std::uint8_t** convertedSamples,
+                             const int convertedFrameSize)
 {
     int error;
+    assert(fifo);
+    assert(convertedSamples);
+    assert(convertedSamples[0]);
 
     // Make the FIFO as large as it needs to be to hold both
     // the old and the new samples.
-    if ((error = av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) + frame_size)) < 0) {
+    if ((error = av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) + convertedFrameSize)) < 0) {
         throw std::runtime_error("Could not reallocate FIFO: " + averror(error));
     }
 
     // Store the new samples in the FIFO buffer.
-    if (av_audio_fifo_write(fifo, (void **)convertedSamples, frame_size) < frame_size) {
+    if (av_audio_fifo_write(fifo, (void**)convertedSamples, convertedFrameSize) < convertedFrameSize) {
         throw std::runtime_error("Could not write data to FIFO");
     }
 }
@@ -316,7 +320,7 @@ static bool readAndEncodeFrame(AudioEncoderContext* enc,
     }
 
     // // Initialize temporary storage for one output frame.
-    AVFrame* iframe = initOutputFrame(enc->ctx);
+    auto iframe = initOutputFrame(enc->ctx);
 
     // Read as many samples from the FIFO buffer as required to fill the frame.
     // The samples are stored in the frame temporarily.
@@ -352,7 +356,7 @@ bool AudioEncoderContext::encode(const std::uint8_t* samples, const int frameSiz
             return false;
         }
 
-        TraceS(this) << "Resampled audio packet: " << frameSize << " <=>" << resampler->outNbSamples << endl;
+        TraceS(this) << "Resampled audio packet: " << frameSize << " <=> " << resampler->outNbSamples << endl;
 
         // Add the converted input samples to the FIFO buffer for later processing.
         addSamplesToFifo(fifo, (const std::uint8_t**)resampler->outSamples, resampler->outNbSamples);
@@ -373,7 +377,7 @@ bool AudioEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
     int frameEncoded, error;
 
     // Set the packet data and size so that it is recognized as being empty.
-    // av_init_packet(&opacket);
+    av_init_packet(&opacket);
     opacket.data = nullptr;
     opacket.size = 0;
 
@@ -388,12 +392,12 @@ bool AudioEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
         opacket.flags |= AV_PKT_FLAG_KEY;
         if (stream) {
             opacket.stream_index = stream->index;
-            if (opacket.pts != AV_NOPTS_VALUE)
-                opacket.pts  = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
-            if (opacket.dts != AV_NOPTS_VALUE)
-                opacket.dts  = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
-            if (opacket.duration > 0)
-                opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
+        //     if (opacket.pts != AV_NOPTS_VALUE)
+        //         opacket.pts  = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
+        //     if (opacket.dts != AV_NOPTS_VALUE)
+        //         opacket.dts  = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
+        //     if (opacket.duration > 0)
+        //         opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
         }
         TraceL << "Audio frame encoded:\n"
             << "\n\tFrame PTS: " << (iframe ? iframe->pts : 0)

@@ -37,8 +37,10 @@ namespace av {
 //
 
 
-AudioResampler::AudioResampler() :
+AudioResampler::AudioResampler(const AudioCodec& iparams, const AudioCodec& oparams) :
     ctx(nullptr),
+    iparams(iparams),
+    oparams(oparams),
     outSamples(nullptr),
     outNbSamples(0),
     outMaxNbSamples(0),
@@ -58,13 +60,6 @@ void AudioResampler::create()
     if (ctx)
         throw std::runtime_error("Resample context already initialized");
 
-    assert(iparams.channels);
-    assert(oparams.channels);
-    assert(iparams.sampleRate);
-    assert(oparams.sampleRate);
-    assert(!iparams.sampleFmt.empty());
-    assert(!oparams.sampleFmt.empty());
-
     std::int64_t inChLayout  = av_get_default_channel_layout(iparams.channels);
     std::int64_t outChLayout = av_get_default_channel_layout(oparams.channels);
 
@@ -76,13 +71,26 @@ void AudioResampler::create()
     enum AVSampleFormat outSampleFmt = av_get_sample_fmt(oparams.sampleFmt.c_str());
 
     TraceS(this) << "Create audio resampler:\n"
+        << "\n\tIn Nb Channels: " << iparams.channels
         << "\n\tIn Channel Layout: " << inChBuf
         << "\n\tIn Sample Rate: " << iparams.sampleRate
-        << "\n\tIn Sample Fmt: " << av_get_sample_fmt_name(inSampleFmt)
+        << "\n\tIn Sample Fmt: " << iparams.sampleFmt
+        << "\n\tOut Nb Channels: " << oparams.channels
         << "\n\tOut Channel Layout: " << outChBuf
         << "\n\tOut Sample Rate: " << oparams.sampleRate
-        << "\n\tOut Sample Fmt: " << av_get_sample_fmt_name(outSampleFmt)
+        << "\n\tOut Sample Fmt: " << oparams.sampleFmt
         << endl;
+
+    assert(iparams.channels);
+    assert(oparams.channels);
+    assert(iparams.sampleRate);
+    assert(oparams.sampleRate);
+    assert(!iparams.sampleFmt.empty());
+    assert(!oparams.sampleFmt.empty());
+    assert(inChLayout);
+    assert(outChLayout);
+    assert(inSampleFmt != AV_SAMPLE_FMT_NONE);
+    assert(outSampleFmt != AV_SAMPLE_FMT_NONE);
 
     ctx = swr_alloc();
     if (!ctx) {

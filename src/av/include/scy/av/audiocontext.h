@@ -86,12 +86,13 @@ struct AudioEncoderContext: public AudioContext
     virtual bool encode(AVFrame* iframe, AVPacket& opacket);
       // Encode a single AVFrame from the decoder.
 
-    virtual bool encode(const std::uint8_t* samples, const int frameSize, const std::int64_t pts, AVPacket& opacket);
-      // Encode a single audio frame.
-      // @param samples   The input samples to encode.
-      // @param frameSize The input frame size as specified by the input audio codec.
-      // @param pts       The input samples presentation timestamp.
-      // @param opacket   The output packet data will be encoded to.
+    virtual bool encode(const std::uint8_t* samples, const int numSamples, const std::int64_t pts, AVPacket& opacket);
+      // Encode a single frame of interleaved or planar audio.
+      //
+      // @param samples    The input samples to encode.
+      // @param numSamples The number of input samples per channel.
+      // @param pts        The input samples presentation timestamp.
+      // @param opacket    The output packet data will be encoded to.
 
     virtual bool flush(AVPacket& opacket);
       // Flush remaining packets to be encoded.
@@ -136,10 +137,8 @@ struct AudioDecoderContext: public AudioContext
 };
 
 
-// void isSampleFormatSupported(AVCodec* codec, const std::string& sampleFormat);
-bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat);
-// AVSampleFormat getSupportedSampleFormat(AVCodec* codec, const std::string& sampleFormat);
 AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params);
+bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat);
 void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket);
 
 

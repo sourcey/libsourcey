@@ -87,9 +87,9 @@ struct AudioPacket: public MediaPacket
 {
     AudioPacket(std::uint8_t* data = nullptr,
                 std::size_t size = 0,
-                std::size_t frameSize = 0,
+                std::size_t numSamples = 0,
                 double time = time::clockSecs()) : //(std::uint64_t)clock() / CLOCKS_PER_SEC
-        MediaPacket(data, size, time), frameSize(frameSize) {};
+        MediaPacket(data, size, time), numSamples(numSamples) {};
 
     // AudioPacket(const AudioPacket& r) :
     //     MediaPacket(r) {}
@@ -106,7 +106,7 @@ struct AudioPacket: public MediaPacket
 
     virtual const char* className() const { return "AudioPacket"; }
 
-    std::size_t frameSize; // number of samples per frame
+    std::size_t numSamples; // number of samples per channel
 };
 
 
