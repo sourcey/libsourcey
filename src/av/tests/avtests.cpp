@@ -56,10 +56,13 @@ int main(int argc, char** argv)
     // });
 
     // Define class based tests
-    // describe("audio encoder", new AudioEncoderTest);
-    // describe("audio capture encoder", new AudioCaptureEncoderTest);
-    // describe("audio resampler", new AudioResamplerTest);
+    describe("audio encoder", new AudioEncoderTest);
+    describe("audio resampler", new AudioResamplerTest);
+
+#ifdef HAVE_OPENCV
+    describe("audio capture encoder", new AudioCaptureEncoderTest);
     describe("audio capture resampler", new AudioCaptureResamplerTest);
+#endif // HAVE_OPENCV
 
     test::runAll();
 

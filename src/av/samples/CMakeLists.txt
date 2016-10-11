@@ -3,6 +3,7 @@ add_subdirectory(deviceenumerator)
 if(HAVE_FFMPEG)
   #add_subdirectory(audiosocket)
   #add_subdirectory(videosocket)
+
   if(HAVE_OPENCV)
     add_subdirectory(devicerecorder)
     add_subdirectory(mediaserver)

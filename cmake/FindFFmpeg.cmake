@@ -131,7 +131,7 @@ if (NOT FFMPEG_FOUND)
     list(APPEND FFMPEG_DEPENDENCIES ${LIBOPUS_LIBRARY})
   endif()
 
-  print_module_variables(FFMPEG)
+  # print_module_variables(FFMPEG)
 endif()
 
 # Cache the vars.

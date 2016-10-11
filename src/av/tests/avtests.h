@@ -24,9 +24,6 @@
 #include "scy/base.h"
 #include "scy/test.h"
 #include "scy/logger.h"
-// #include "scy/signal.h"
-// #include "scy/queue.h"
-// #include "scy/packetqueue.h"
 #include "scy/av/devicemanager.h"
 // #include "scy/av/flvmetadatainjector.h"
 // #include "scy/av/formatregistry.h"
@@ -242,6 +239,8 @@ class AudioResamplerTest: public Test
 };
 
 
+#ifdef HAVE_OPENCV
+
 // =============================================================================
 // Audio Capture Encoder
 //
@@ -367,6 +366,8 @@ class AudioCaptureResamplerTest: public Test
         numFramesRemaining--;
     }
 };
+
+#endif // HAVE_OPENCV
 
 
 // class Tests

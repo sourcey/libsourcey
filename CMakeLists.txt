@@ -27,6 +27,9 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
+# Remove a couple of annoying CMake warnings
+cmake_policy(SET CMP0054 OLD)
+
 # Include required cmake files
 include(LibSourceyUtilities REQUIRED)
 include(LibSourceyIncludes REQUIRED)
@@ -213,7 +216,7 @@ find_package(FFmpeg)
 #set_option(WITH_JSONCPP         "Include JsonCpp support"              ON)
 #set_option(WITH_ZLIB            "Include zlib support"                 ON)
 #set_option(WITH_RTAUDIO         "Include RtAudio support"              ON)
-set_option(WITH_OPENSSL         "Include OpenSSL support"              ON)
+set_option(WITH_OPENSSL         "Include OpenSSL support"              ON) #IF (OPENSSL_FOUND)
 set_option(WITH_FFMPEG          "Include FFmpeg support"               ON IF (FFMPEG_FOUND))
 set_option(WITH_OPENCV          "Include OpenCV support"               ON IF (OPENCV_FOUND))
 set_option(WITH_WEBRTC          "Include WebRTC support"               OFF)

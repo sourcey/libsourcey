@@ -55,7 +55,7 @@ macro(define_sourcey_module name)
   set_default_project_dependencies(${name} ${ARGN})
 
   #  message(FATAL_ERROR "${CMAKE_SYSTEM_NAME} ${lib_srcs}")
-  message(STATUS "Defining module ${name}")
+  message(STATUS "Including module ${name}")
   # message(STATUS "    Dependencies: ${LibSourcey_BUILD_DEPENDENCIES}")
   # message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
   # message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
@@ -142,7 +142,7 @@ macro(define_sourcey_module_sample name)
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
 
-  message(STATUS "Defining module sample ${name}")
+  message(STATUS "Including module sample ${name}")
   #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
   #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
   #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
@@ -180,7 +180,7 @@ macro(define_libsourcey_test name)
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
 
-  message(STATUS "Defining module test ${name}")
+  message(STATUS "Including module test ${name}")
   #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
   #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
   #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
@@ -224,7 +224,7 @@ macro(define_libsourcey_library name)
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
 
-  message(STATUS "Defining module library ${name}")
+  message(STATUS "Including module library ${name}")
   #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
   #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
   #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
