@@ -39,7 +39,11 @@ extern "C" {
 // #include <libavformat/avformat.h>
 #include <libavutil/opt.h>
 #include <libswscale/swscale.h>
+#ifdef HAVE_FFMPEG_SWRESAMPLE
 #include <libswresample/swresample.h>
+#else
+#include <libavresample/avresample.h>
+#endif
 }
 
 
@@ -49,11 +53,6 @@ namespace av {
 
 // ---------------------------------------------------------------------
 //
-// #define SWR_CH_MAX   64
-//
-// typedef uint8_t *[SWR_CH_MAX] SampleData;
-
-
 struct AudioResampler
 {
     AudioResampler(const AudioCodec& iparams = AudioCodec(), const AudioCodec& oparams = AudioCodec());
@@ -63,7 +62,9 @@ struct AudioResampler
     void close();
 
     int resample(const std::uint8_t* inSamples, int inNbSamples);
-        // Convert the input samples to the outpot format.
+        // Convert the input samples to the output format.
+        // NOTE: Input buffers must be contiguous, therefore only interleaved
+        // input formats are accepted at this point.
         //
         // Return the number of converted samples or zero if samples
         // were internally buffered. An exception will be thrown on error.
@@ -72,7 +73,12 @@ struct AudioResampler
 
     AudioCodec iparams;        // input audio parameters
     AudioCodec oparams;        // output audio parameters
-    struct SwrContext* ctx;    // the conversion context
+
+#ifdef HAVE_FFMPEG_SWRESAMPLE
+    SwrContext* ctx;           // the conversion context
+#else
+    AVAudioResampleContext* ctx;
+#endif
     std::uint8_t** outSamples; // the output samples buffer
     int outNbSamples;          // the number of samples currently in the output buffer
     int outMaxNbSamples;       // the maximum number of samples that can be stored in the output buffer

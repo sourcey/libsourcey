@@ -58,6 +58,15 @@
 
 /* FFmpeg video library */
 #cmakedefine HAVE_FFMPEG
+#cmakedefine HAVE_FFMPEG_AVCODEC
+#cmakedefine HAVE_FFMPEG_AVFORMAT
+#cmakedefine HAVE_FFMPEG_AVUTIL
+#cmakedefine HAVE_FFMPEG_AVFILTER
+#cmakedefine HAVE_FFMPEG_AVDEVICE
+#cmakedefine HAVE_FFMPEG_AVRESAMPLE
+#cmakedefine HAVE_FFMPEG_SWRESAMPLE
+#cmakedefine HAVE_FFMPEG_SWSCALE
+#cmakedefine HAVE_FFMPEG_POSTPROC
 
 /* OpenCV library */
 #cmakedefine HAVE_OPENCV

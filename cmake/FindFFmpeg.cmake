@@ -12,6 +12,7 @@
 #   - AVFILTER
 #   - AVUTIL
 #   - AVDEVICE
+#   - AVRESAMPLE
 #   - SWSCALE
 #   - SWRESAMPLE
 #   - POSTPROC
@@ -29,7 +30,7 @@ if (NOT FFMPEG_FIND_COMPONENTS)
 endif()
 
 # Check for cached results. If there are skip the costly part.
-# set_module_notfound(FFMPEG)
+set_module_notfound(FFMPEG)
 if (NOT FFMPEG_FOUND)
   # The FFmpeg compilation guide stores files in an unusual location,
   # so let's support that out of the box
@@ -47,6 +48,7 @@ if (NOT FFMPEG_FOUND)
 
   # Check for all components
   find_component(FFMPEG SWRESAMPLE libswresample swresample libswresample/swresample.h)
+  find_component(FFMPEG AVRESAMPLE libavresample avresample libavresample/avresample.h)
   find_component(FFMPEG AVFORMAT   libavformat   avformat   libavformat/avformat.h)
   find_component(FFMPEG AVCODEC    libavcodec    avcodec    libavcodec/avcodec.h)
   find_component(FFMPEG SWSCALE    libswscale    swscale    libswscale/swscale.h)

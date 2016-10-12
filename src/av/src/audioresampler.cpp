@@ -92,7 +92,11 @@ void AudioResampler::create()
     assert(inSampleFmt != AV_SAMPLE_FMT_NONE);
     assert(outSampleFmt != AV_SAMPLE_FMT_NONE);
 
+#ifdef HAVE_FFMPEG_SWRESAMPLE
     ctx = swr_alloc();
+#else
+    ctx = avresample_alloc_context();
+#endif
     if (!ctx) {
         throw std::runtime_error("Could not allocate resample context");
     }
@@ -104,8 +108,12 @@ void AudioResampler::create()
     av_opt_set_sample_fmt(ctx, "in_sample_fmt", inSampleFmt, 0);
     av_opt_set_sample_fmt(ctx, "out_sample_fmt", outSampleFmt, 0);
 
-    // Open the resampler with the specified parameters.
+    // Open the resampler context.
+#ifdef HAVE_FFMPEG_SWRESAMPLE
     int error = swr_init(ctx);
+#else
+    int error = avresample_open(ctx);
+#endif
     if (error < 0) {
         close();
         throw std::runtime_error("Could not initialize resample context: " + averror(error));
@@ -120,7 +128,11 @@ void AudioResampler::close()
     TraceS(this) << "Closing" << endl;
 
     if (ctx) {
-        swr_free(&ctx);
+#ifdef HAVE_FFMPEG_SWRESAMPLE
+    swr_free(&ctx);
+#else
+    avresample_free(&ctx);
+#endif
         ctx = nullptr;
     }
 
@@ -145,8 +157,13 @@ int AudioResampler::resample(const std::uint8_t* inSamples, int inNbSamples)
 
     // Compute output number of samples
     // https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/resampling_audio.c
-    maxNbSamples = av_rescale_rnd(swr_get_delay(ctx,
-        (std::int64_t)iparams.sampleRate) + (std::int64_t)inNbSamples,
+    maxNbSamples = av_rescale_rnd(
+#ifdef HAVE_FFMPEG_SWRESAMPL
+        swr_get_delay(ctx, (std::int64_t)iparams.sampleRate) +
+#else
+        avresample_get_delay(ctx) +
+#endif
+        (std::int64_t)inNbSamples,
         (std::int64_t)oparams.sampleRate, (std::int64_t)iparams.sampleRate, AV_ROUND_UP);
 
     // Resize the output buffer if required
@@ -166,7 +183,11 @@ int AudioResampler::resample(const std::uint8_t* inSamples, int inNbSamples)
     assert(outMaxNbSamples);
 
     // Convert the samples using the resampler.
+#ifdef HAVE_FFMPEG_SWRESAMPLE
     outNbSamples = swr_convert(ctx, outSamples, outMaxNbSamples, (const std::uint8_t**)&inSamples, inNbSamples);
+#else
+    outNbSamples = avresample_convert(ctx, outSamples, 0, outMaxNbSamples, (std::uint8_t**)&inSamples, 0, inNbSamples);
+#endif
     if (outNbSamples < 0) {
         close();
         throw std::runtime_error("Could not convert input samples: " + averror(outNbSamples));

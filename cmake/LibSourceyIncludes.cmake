@@ -228,9 +228,8 @@ macro(sourcey_find_library prefix)
       ${${prefix}_PATHS}
     )
 
-  include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake) #${CMAKE_CURRENT_LIST_DIR}/
+  include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
   select_library_configurations(${prefix})
-  # select_library_configurations(SSL_EAY)
 
   # print_module_variables(${prefix})
 
@@ -382,15 +381,15 @@ endmacro(sourcey_find_library)
 # Sets the current module component alias variables.
 #
 macro(set_component_alias module component)
-  set(ALIAS          ${module}_${component})
-  set(ALIAS_FOUND        ${ALIAS}_FOUND)
-  set(ALIAS_LIBRARIES      ${ALIAS}_LIBRARIES)
-  set(ALIAS_RELEASE_LIBRARIES  ${ALIAS}_RELEASE_LIBRARIES)
-  set(ALIAS_DEBUG_LIBRARIES  ${ALIAS}_DEBUG_LIBRARIES)
-  set(ALIAS_INCLUDE_DIRS     ${ALIAS}_INCLUDE_DIRS)
-  set(ALIAS_LIBRARY_DIRS     ${ALIAS}_LIBRARY_DIRS)
-  set(ALIAS_DEFINITIONS    ${ALIAS}_CFLAGS_OTHER)
-  set(ALIAS_VERSION      ${ALIAS}_VERSION)
+  set(ALIAS                   ${module}_${component})
+  set(ALIAS_FOUND             ${ALIAS}_FOUND)
+  set(ALIAS_LIBRARIES         ${ALIAS}_LIBRARIES)
+  set(ALIAS_RELEASE_LIBRARIES ${ALIAS}_RELEASE_LIBRARIES)
+  set(ALIAS_DEBUG_LIBRARIES   ${ALIAS}_DEBUG_LIBRARIES)
+  set(ALIAS_INCLUDE_DIRS      ${ALIAS}_INCLUDE_DIRS)
+  set(ALIAS_LIBRARY_DIRS      ${ALIAS}_LIBRARY_DIRS)
+  set(ALIAS_DEFINITIONS       ${ALIAS}_CFLAGS_OTHER)
+  set(ALIAS_VERSION           ${ALIAS}_VERSION)
 endmacro()
 
 
@@ -496,6 +495,9 @@ macro(set_component_found module component)
     #message(STATUS "  - ${module} ${component} not found.")
   endif()
 
+  set(HAVE_${ALIAS} ${${ALIAS_FOUND}})
+  set(HAVE_${ALIAS} ${${ALIAS_FOUND}} PARENT_SCOPE)
+
   mark_as_advanced(
       ${ALIAS_FOUND}
       ${ALIAS_DEBUG_LIBRARIES}
@@ -503,7 +505,6 @@ macro(set_component_found module component)
       ${ALIAS_LIBRARIES}
       ${ALIAS_DEFINITIONS}
       ${ALIAS_VERSION})
-
 endmacro()
 
 
@@ -574,10 +575,8 @@ macro(find_component_paths module component library header)
   set_component_notfound(${module} ${component})
 
   find_path(${ALIAS_INCLUDE_DIRS} ${header}
-    #HINTS
-    #  ${${ALIAS_INCLUDE_DIRS}}
-  PATH_SUFFIXES
-    ${${module}_PATH_SUFFIXES}
+    PATH_SUFFIXES
+      ${${module}_PATH_SUFFIXES}
   )
 
   # Create a Debug and a Release list for multi configuration builds.
@@ -585,39 +584,28 @@ macro(find_component_paths module component library header)
   if (${module}_MULTI_CONFIGURATION AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
     find_library(${ALIAS_RELEASE_LIBRARIES}
       NAMES
-      ${library}
-      #lib${library}
-      #lib${library}.so
-      #${library}.lib
-      #${library}
-      #HINTS
+        ${library}
       PATHS
-      ${${ALIAS_LIBRARY_DIRS}}
+        ${${ALIAS_LIBRARY_DIRS}}
     )
     find_library(${ALIAS_DEBUG_LIBRARIES}
       NAMES
-      ${library}d
-      #lib${library}d.a
-      #lib${library}d.so
-      #${library}d.lib
-      #HINTS
+        ${library}d
       PATHS
-      ${${ALIAS_LIBRARY_DIRS}}
+        ${${ALIAS_LIBRARY_DIRS}}
     )
-    if (${ALIAS_RELEASE_LIBRARIES})
-      list(APPEND ${ALIAS_LIBRARIES} "optimized" ${${ALIAS_RELEASE_LIBRARIES}})
-    endif()
-    if (${ALIAS_DEBUG_LIBRARIES})
-      list(APPEND ${ALIAS_LIBRARIES} "debug" ${${ALIAS_DEBUG_LIBRARIES}})
-    endif()
+    # if (${ALIAS_RELEASE_LIBRARIES})
+    #   list(APPEND ${ALIAS_LIBRARIES} "optimized" ${${ALIAS_RELEASE_LIBRARIES}})
+    # endif()
+    # if (${ALIAS_DEBUG_LIBRARIES})
+    #   list(APPEND ${ALIAS_LIBRARIES} "debug" ${${ALIAS_DEBUG_LIBRARIES}})
+    # endif()
+    include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
+    select_library_configurations(${ALIAS})
   else()
     find_library(${ALIAS_LIBRARIES}
-      NAMES # setting in order might help overcome find_library bugs :/
-        #lib${library}.so
-        #lib${library}.a
-        #${library}.lib
+      NAMES
         ${library}
-      #HINTS
       PATHS
         ${${ALIAS_LIBRARY_DIRS}}
     )
@@ -630,8 +618,8 @@ endmacro()
 #
 ### Macro: find_component
 #
-# Checks for the given component by invoking pkgconfig and then looking up the libraries and
-# include directories.
+# Checks for the given component by invoking pkgconfig and then looking up the
+# libraries and include directories.
 #
 macro(find_component module component pkgconfig library header)
   # message("Find Component=${module}:${component}:${pkgconfig}:${library}:${header}")
@@ -642,28 +630,19 @@ macro(find_component module component pkgconfig library header)
   # Use pkg-config to obtain directories for the find_path() and find_library() calls.
   find_package(PkgConfig QUIET)
   if (PKG_CONFIG_FOUND)
-    #set(PKG_ALIAS           PKG_${component})
-    #pkg_check_modules(${PKG_ALIAS}  ${pkgconfig})
-    #set(${ALIAS}_FOUND        ${${PKG_ALIAS}_FOUND})
-    #set(${ALIAS}_LIBRARIES      ${${PKG_ALIAS}_LIBRARIES})
-    #set(${ALIAS}_INCLUDE_DIRS     ${${PKG_ALIAS}_INCLUDE_DIRS})
-    #set(${ALIAS}_LIBRARY_DIRS     ${${PKG_ALIAS}_LIBRARY_DIRS})
-    #set(${ALIAS}_DEFINITIONS    ${${PKG_ALIAS}_CFLAGS_OTHER})
-    #set(${ALIAS}_VERSION      ${${PKG_ALIAS}_VERSION})
-
     pkg_search_module(${ALIAS} ${pkgconfig} QUIET)
-    #message(STATUS "Find Component PkgConfig=${ALIAS}:${${ALIAS}_FOUND}:${${ALIAS}_LIBRARIES}:${${ALIAS}_INCLUDE_DIRS}:${${ALIAS}_LIBRARY_DIRS}:${${ALIAS}_LIBDIR}:${${ALIAS}_INCLUDEDIR}")
+    # message(STATUS "Find Component PkgConfig=${ALIAS}:${${ALIAS}_FOUND}:${${ALIAS}_LIBRARIES}:${${ALIAS}_INCLUDE_DIRS}:${${ALIAS}_LIBRARY_DIRS}:${${ALIAS}_LIBDIR}:${${ALIAS}_INCLUDEDIR}")
   endif()
 
-  #message(STATUS "${ALIAS_FOUND}=${${ALIAS_FOUND}}")
-  #message(STATUS "${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")
-  #message(STATUS "${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")
+  # message(STATUS "${ALIAS_FOUND}=${${ALIAS_FOUND}}")
+  # message(STATUS "${ALIAS_LIBRARIES}=${${ALIAS_LIBRARIES}}")
+  # message(STATUS "${ALIAS_INCLUDE_DIRS}=${${ALIAS_INCLUDE_DIRS}}")
 
   if(NOT ${ALIAS_FOUND})
-    #message(STATUS "  - ${module} ${component} pkg-config not found, searching...")
+    # message(STATUS "  - ${module} ${component} pkg-config not found, searching...")
     find_component_paths(${module} ${component} ${library} ${header})
   else()
-    #message(STATUS "  - ${module} ${component} pkg-config found.")
+    # message(STATUS "  - ${module} ${component} pkg-config found.")
     set_component_found(${module} ${component})
   endif()
 endmacro()
