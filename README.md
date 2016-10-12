@@ -68,6 +68,7 @@ sudo apt-get update
 sudo apt-get install -y build-essential pkg-config git cmake openssl libssl-dev jackd2 libjack-jackd2-dev
 ~~~
 
+<!--
 **Install LibUV:**
 
 ~~~ bash
@@ -80,6 +81,7 @@ make
 # make check
 sudo make install
 ~~~
+-->
 
 **Install FFmpeg (optional):**
 
