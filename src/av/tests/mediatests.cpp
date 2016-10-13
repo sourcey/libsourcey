@@ -23,20 +23,20 @@ int main(int argc, char** argv)
     //     cout << "Starting" << endl;
     //
     //     Device device;
-    //     if (MediaFactory::instance().devices().getDefaultVideoCaptureDevice(device)) {
+    //     if (MediaFactory::instance().devices().getDefaultCamera(device)) {
     //         cout << "Default Video Device: " << device.id << ": " << device.name << endl;
     //     }
-    //     if (MediaFactory::instance().devices().getDefaultAudioInputDevice(device)) {
+    //     if (MediaFactory::instance().devices().getDefaultMicrophone(device)) {
     //         cout << "Default Audio Device: " << device.id << ": " << device.name << endl;
     //     }
     //
     //     std::vector<Device> devices;
-    //     if (MediaFactory::instance().devices().getVideoCaptureDevices(devices)) {
+    //     if (MediaFactory::instance().devices().getCameras(devices)) {
     //         for (std::vector<Device>::const_iterator it = devices.begin(); it != devices.end(); ++it) {
     //             cout << "Printing Video Device: " << (*it).id << ": " << (*it).name << endl;
     //         }
     //     }
-    //     if (MediaFactory::instance().devices().getAudioInputDevices(devices)) {
+    //     if (MediaFactory::instance().devices().getMicrophones(devices)) {
     //         for (std::vector<Device>::const_iterator it = devices.begin(); it != devices.end(); ++it) {
     //             cout << "Printing Audio Device: " << (*it).id << ": " << (*it).name << endl;
     //         }

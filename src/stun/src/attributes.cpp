@@ -17,7 +17,7 @@
 //
 
 
-#ifdef WIN32
+#ifdef SCY_WIN32
 #include <winsock2.h>
 #endif
 

@@ -86,7 +86,7 @@ MacDeviceManager::~MacDeviceManager()
 }
 
 
-bool MacDeviceManager::getVideoCaptureDevices(std::vector<Device>& devices) 
+bool MacDeviceManager::getCameras(std::vector<Device>& devices) 
 {
   devices.clear();
   if (!GetAVFoundationVideoDevices(&devices)) {

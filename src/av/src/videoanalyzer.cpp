@@ -72,8 +72,7 @@ void VideoAnalyzer::initialize()
 
     _reader.emitter += packetDelegate(this, &VideoAnalyzer::onVideo);
     _reader.emitter += packetDelegate(this, &VideoAnalyzer::onAudio);
-
-    _reader.ReadComplete += sdelegate(this, &VideoAnalyzer::onReadComplete);
+    _reader.Closing += sdelegate(this, &VideoAnalyzer::onReadComplete);
 }
 
 
@@ -121,7 +120,7 @@ void VideoAnalyzer::stop()
     // Can't lock here in case we are inside a callback.
     //Mutex::ScopedLock lock(_mutex);
 
-    _reader.ReadComplete -= sdelegate(this, &VideoAnalyzer::onReadComplete);
+    _reader.Closing -= sdelegate(this, &VideoAnalyzer::onReadComplete);
     _reader.emitter.detach(this);
     _reader.stop();
 }
@@ -220,16 +219,19 @@ AVFrame* VideoAnalyzer::getGrayVideoFrame()
 
     // TODO: Conversion via decoder?
     if (_videoConv == nullptr) {
-        VideoCodec iparams;
+        _videoConv = new VideoConversionContext();
+
+        auto& iparams = _videoConv->iparams;
         iparams.width = video->ctx->width;
         iparams.height = video->ctx->height;
         iparams.pixelFmt = av_get_pix_fmt_name(video->ctx->pix_fmt);
-        VideoCodec oparams;
+
+        auto& oparams = _videoConv->oparams;
         oparams.width = video->ctx->width;
         oparams.height = video->ctx->height;
         oparams.pixelFmt = "gray";
-        _videoConv = new VideoConversionContext();
-        _videoConv->create(iparams, oparams);
+
+        _videoConv->create();
     }
     if (_videoConv == nullptr)
         throw std::runtime_error("Video Analyzer: Unable to initialize the video conversion context.");
@@ -243,7 +245,7 @@ void VideoAnalyzer::onReadComplete(void* sender)
 {
     TraceN(this) << "On Read Complete" << endl;
 
-    AVInputReader* reader = reinterpret_cast<AVInputReader*>(sender);
+    AVCapture* reader = reinterpret_cast<AVCapture*>(sender);
     {
         Mutex::ScopedLock lock(_mutex);
         if (_error.empty())
@@ -254,7 +256,7 @@ void VideoAnalyzer::onReadComplete(void* sender)
 }
 
 
-AVInputReader& VideoAnalyzer::reader()
+AVCapture& VideoAnalyzer::reader()
 {
     Mutex::ScopedLock lock(_mutex);
     return _reader;
@@ -398,7 +400,7 @@ double GetAmplitudeScaled(double re, double im, int len, int scale)
 }
 
 
-#ifdef WIN32
+#ifdef SCY_WIN32
 double log2(double n)
 {
     return log(n) / log(double(2));

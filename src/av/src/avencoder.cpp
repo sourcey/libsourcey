@@ -21,21 +21,21 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "scy/av/videocapture.h"
-#include "scy/logger.h"
-#include "scy/platform.h"
-#include "scy/timer.h"
-#include "scy/av/flvmetadatainjector.h"
+// #include "scy/av/videocapture.h"
+// #include "scy/logger.h"
+// #include "scy/platform.h"
+// #include "scy/timer.h"
+// #include "scy/av/flvmetadatainjector.h"
 
 #include "assert.h"
-
-#if WIN32
-#define snprintf _snprintf
-#endif
 
 extern "C" {
 #include "libavutil/time.h" // av_gettime (depreciated)
 }
+
+#ifdef SCY_WIN32
+#define snprintf _snprintf
+#endif
 
 
 using std::endl;
@@ -98,15 +98,14 @@ void AVEncoder::initialize()
         << endl;
 
     try {
-        // Lock mutex during initialization
-        //Mutex::ScopedLock lock(_mutex);
-
+        _options.oformat.video.enabled = _options.iformat.video.enabled;
+        _options.oformat.audio.enabled = _options.iformat.audio.enabled;
         if (!_options.oformat.video.enabled &&
             !_options.oformat.audio.enabled)
             throw std::runtime_error("Either video or audio parameters must be specified.");
 
         if (_options.oformat.id.empty())
-            throw std::runtime_error("An output container format must be specified.");
+            throw std::runtime_error("The output container format must be specified.");
 
         // Allocate the output media context
         assert(!_formatCtx);
@@ -160,36 +159,6 @@ void AVEncoder::initialize()
 
         // Get realtime presentation timestamp
         _formatCtx->start_time_realtime = av_gettime();
-
-#if 0   // Live PTS testing
-        // Open the output file
-        //_file.open("test.flv", ios::out | ios::binary);
-
-        _videoPts = 0;
-        _audioPts = 0;
-        std::int64_t delta;
-        if (_realtime) {
-            if (!_formatCtx->start_time_realtime) {
-                _formatCtx->start_time_realtime = av_gettime();
-                _videoPts = 0;
-            }
-            else {
-                delta = av_gettime() - _formatCtx->start_time_realtime;
-                _videoPts = delta * (float) _video->stream->time_base.den / (float) _video->stream->time_base.num / (float) 1000000;
-            }
-        }
-
-        stream->time_base.den
-        // Setup the PTS calculator for variable framerate inputs
-        if (_video) {
-            _videoPtsCalc = new PTSCalculator;
-            _videoPtsCalc->timeBase = _video->ctx->time_base;
-        }
-        if (_audio) {
-            _audioPtsCalc = new PTSCalculator;
-            _audioPtsCalc->timeBase = _audio->ctx->time_base;
-        }
-#endif
 
         setState(this, EncoderState::Ready);
     }

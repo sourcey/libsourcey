@@ -21,7 +21,7 @@
 #include "scy/util.h"
 #include <assert.h>
     
-#ifdef WIN32
+#ifdef SCY_WIN32
 // hack for name collision of OCSP_RESPONSE and wincrypto.h in openssl release 0.9.8h
 // http://www.google.com/search?q=OCSP%5fRESPONSE+wincrypt%2eh
 // continue to watch this issue for a real fix.

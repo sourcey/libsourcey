@@ -14,9 +14,9 @@ using namespace scy;
 #define USE_AVDEVICE_CAPTURE 0
 
 #if USE_AVDEVICE_CAPTURE
-#include "scy/av/avinputreader.h"
+#include "scy/av/avcapture.h"
 #define VIDEO_FILE_SOURCE "test.mp4"
-av::AVInputReader* gVideoCapture;
+av::AVCapture* gVideoCapture;
 #else
 #include "scy/av/videocapture.h"
 av::VideoCapture* gVideoCapture;
@@ -133,7 +133,7 @@ int main(int argc, char** argv)
     Logger::instance().add(new ConsoleChannel("debug", LTrace));
 
 #if USE_AVDEVICE_CAPTURE
-    gVideoCapture = new av::AVInputReader();
+    gVideoCapture = new av::AVCapture();
     //gAVVideoCapture->openDevice(0);
     gVideoCapture->openFile(VIDEO_FILE_SOURCE);
     gVideoCapture->start();

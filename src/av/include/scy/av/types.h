@@ -58,6 +58,7 @@ struct VideoPacket: public MediaPacket
 {
     int width;
     int height;
+    bool iframe;
 
     VideoPacket(std::uint8_t* data = nullptr,
                 std::size_t size = 0,
@@ -66,12 +67,14 @@ struct VideoPacket: public MediaPacket
                 double time = time::clockSecs()) :
         MediaPacket(data, size, time),
         width(width),
-        height(height) {};
+        height(height),
+        iframe(false) {};
 
     VideoPacket(const VideoPacket& r) :
         MediaPacket(r),
         width(r.width),
-        height(r.height) {}
+        height(r.height),
+        iframe(r.iframe) {}
 
     virtual ~VideoPacket() {};
 

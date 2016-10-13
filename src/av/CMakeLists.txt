@@ -17,5 +17,5 @@ if(BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_av))
   include_dependency(FFmpeg)
   include_dependency(OpenCV)
 
-  define_sourcey_module(av base uv) #net
+  define_sourcey_module(av base uv)
 endif()

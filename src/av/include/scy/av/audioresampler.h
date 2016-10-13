@@ -71,14 +71,14 @@ struct AudioResampler
         //
         // Converted samples are accessable via the `outSamples` member.
 
-    AudioCodec iparams;        // input audio parameters
-    AudioCodec oparams;        // output audio parameters
-
 #ifdef HAVE_FFMPEG_SWRESAMPLE
     SwrContext* ctx;           // the conversion context
 #else
     AVAudioResampleContext* ctx;
 #endif
+
+    AudioCodec iparams;        // input audio parameters
+    AudioCodec oparams;        // output audio parameters
     std::uint8_t** outSamples; // the output samples buffer
     int outNbSamples;          // the number of samples currently in the output buffer
     int outMaxNbSamples;       // the maximum number of samples that can be stored in the output buffer

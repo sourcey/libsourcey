@@ -1,12 +1,11 @@
-add_subdirectory(deviceenumerator)
-
 if(HAVE_FFMPEG)
   #add_subdirectory(audiosocket)
   #add_subdirectory(videosocket)
+  add_subdirectory(deviceenumerator)
+  add_subdirectory(devicerecorder)
 
   if(HAVE_OPENCV)
-    add_subdirectory(devicerecorder)
-    add_subdirectory(mediaserver)
+    #add_subdirectory(mediaserver)
     if(BUILD_ALPHA)
       add_subdirectory(waveformoutput)
     endif()

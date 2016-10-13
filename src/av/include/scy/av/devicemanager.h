@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
-// Implemented from libjingle r116 Feb 16, 2012
 
 
 #ifndef SCY_AV_DeviceManager_H
@@ -26,35 +25,49 @@
 
 #include "scy/base.h"
 #include "scy/signal.h"
+#include "scy/av/ffmpeg.h"
+
+
+extern "C" {
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavdevice/avdevice.h>
+}
 
 
 namespace scy {
 namespace av {
 
 
+class DeviceManager;
+
+
 struct Device
     /// Represents a system audio, video or render device.
 {
+    enum Type {
+        Unknown,
+        Camera,
+        Screen,
+        Microphone,
+        Speaker
+    };
+
+    Type type;
+    std::string id;
+    std::string name;
+    bool isDefault;
+
     Device();
-    Device(const std::string& type, int id,
-        const std::string& name, const std::string& guid = "",
-        bool isDefault = false, bool isAvailable = true);
+    Device(Type type, const std::string& id, const std::string& name, bool isDefault = false);
 
     void print(std::ostream& os);
 
-    std::string type; // audioin, audioout, video
-    int id;
-    std::string name;
-    std::string guid;
-    bool isDefault;
-    bool isAvailable;
-
     bool operator == (const Device& that) const
     {
-        return id == that.id
-            && type == that.type
-            && name == that.name
-            && guid == that.guid;
+        return type == that.type
+            && id == that.id
+            && name == that.name;
     }
 };
 
@@ -68,141 +81,79 @@ enum MediaCapabilities
 };
 
 
-class IDeviceManager
-    /// A platform independent interface to enumerate audio
-    /// and video devices on the system.
-{
-public:
-    virtual ~IDeviceManager() { }
-
-    // Initialization
-    virtual bool initialize() = 0;
-    virtual void uninitialize() = 0;
-
-    // Device enumeration
-    virtual bool getAudioInputDevices(std::vector<Device>& devices) = 0;
-    virtual bool getAudioOutputDevices(std::vector<Device>& devices) = 0;
-
-    virtual bool getAudioInputDevice(Device& out, const std::string& name, int id = -1) = 0;
-    virtual bool getAudioInputDevice(Device& out, int id) = 0;
-
-    virtual bool getAudioOutputDevice(Device& out, const std::string& name, int id = -1) = 0;
-    virtual bool getAudioOutputDevice(Device& out, int id) = 0;
-
-    //virtual bool getAudioInputDevice(const std::string& name, Device& out) = 0;
-    //virtual bool getAudioOutputDevice(const std::string& name, Device& out) = 0;
-
-    virtual bool getVideoCaptureDevices(std::vector<Device>& devs) = 0;
-    virtual bool getVideoCaptureDevice(Device& out, int id) = 0;
-    virtual bool getVideoCaptureDevice(Device& out, const std::string& name, int id = -1) = 0;
-
-    virtual bool getDefaultAudioInputDevice(Device& device) = 0;
-    virtual bool getDefaultAudioOutputDevice(Device& device) = 0;
-    virtual bool getDefaultVideoCaptureDevice(Device& device) = 0;
-
-    // Capabilities
-    virtual int getCapabilities() = 0;
-
-    virtual void print(std::ostream& ost) = 0;
-
-    Signal2<bool&, bool&> DevicesChanged;
-        // Signals on DevicesChanged.
-        // Arg 1 is true when device is video, false for audio
-        // Arg 2 is true when device connects, flase on disconnection
-
-    static const char kDefaultDeviceName[];
-};
+//
+// Device Watcher
+//
 
 
 class DeviceWatcher
 {
 public:
-    explicit DeviceWatcher(IDeviceManager*) {}
+    explicit DeviceWatcher(DeviceManager*) {}
     virtual ~DeviceWatcher() {}
     virtual bool start() { return true; }
     virtual void stop() {}
 };
 
 
-class DeviceManagerFactory
-{
-public:
-    static IDeviceManager* create();
-private:
-    DeviceManagerFactory();
-};
+//
+// Device Manager
+//
 
 
-class DeviceManager: public IDeviceManager
+class DeviceManager
 {
 public:
     DeviceManager();
-    virtual ~DeviceManager();
-
-    // Initialization
-    virtual bool initialize();
-    virtual void uninitialize();
-
-    // Capabilities
-    virtual int getCapabilities();
+    ~DeviceManager();
 
     // Device enumeration
-    virtual bool getAudioInputDevices(std::vector<Device>& devices);
-    virtual bool getAudioOutputDevices(std::vector<Device>& devices);
+    bool getCameras(std::vector<Device>& devices);
+    bool getMicrophones(std::vector<Device>& devices);
+    bool getSpeakers(std::vector<Device>& devices);
 
-    //virtual bool getAudioInputDevice(const std::string& name, Device& out);
-    //virtual bool getAudioOutputDevice(const std::string& name, Device& out);
+    // Default devices
+    bool getDefaultMicrophone(Device& device);
+    bool getDefaultSpeaker(Device& device);
+    bool getDefaultCamera(Device& device);
 
-    virtual bool getAudioInputDevice(Device& out, const std::string& name, int id = -1);
-    virtual bool getAudioInputDevice(Device& out, int id);
+    // Find device by name or id
+    bool findCamera(const std::string& name, Device& device);
+    bool findMicrophone(const std::string& name, Device& device);
+    bool findSpeaker(const std::string& name, Device& device);
 
-    virtual bool getAudioOutputDevice(Device& out, const std::string& name, int id = -1);
-    virtual bool getAudioOutputDevice(Device& out, int id);
+    // Find base FFmpeg formats
+    AVInputFormat* findCameraInputFormat();
+    AVInputFormat* findMicrophoneInputFormat();
+    AVOutputFormat* findSpeakerOutputFormat();
 
-    virtual bool getVideoCaptureDevices(std::vector<Device>& devs);
-    virtual bool getVideoCaptureDevice(Device& out, const std::string& name, int id = -1);
-
-    virtual bool getVideoCaptureDevice(Device& out, int id);
-        // Returns the video capture device at the given system index.
-
-    virtual bool getDefaultAudioInputDevice(Device& device);
-    virtual bool getDefaultAudioOutputDevice(Device& device);
-    virtual bool getDefaultVideoCaptureDevice(Device& device);
-
-    static bool filterDevices(std::vector<Device>& devices, const char* const exclusionList[]);
-        // The exclusionList MUST be a nullptr terminated list.
-
-    static bool matchID(std::vector<Device>& devices, Device& out, int id);
-        // Returns a device matching the given ID.
-
-    static bool matchNameAndID(std::vector<Device>& devices, Device& out, const std::string& name, int id = -1);
-        // Returns a device matching the given name and ID.
-        // If the device name is not available at the given ID then first
-        // device of that name will be returned.
-        // If the ID should not be matched the given ID should be -1.
-
-    bool initialized() const { return _initialized; }
-
-    void print(std::ostream& ost);
-
-protected:
-    virtual bool getDefaultAudioDevice(bool input, Device& device);
-    virtual bool getAudioDevices(bool input, std::vector<Device>& devs);
-    virtual bool getAudioDevice(bool input, Device& out, const std::string& name, int id = -1);
-    virtual bool getAudioDevice(bool input, Device& out, int id);
-
-    void setInitialized(bool initialized);
+    // Capabilities
+    int getCapabilities();
 
     void setWatcher(DeviceWatcher* watcher);
     DeviceWatcher* watcher();
 
-private:
-    // The exclusionList MUST be a nullptr terminated list.
-    static bool shouldDeviceBeIgnored(const std::string& deviceName,
-        const char* const exclusionList[]);
+    void print(std::ostream& ost);
+        // Print all devices to the output stream.
 
-    DeviceWatcher* _watcher;
-    bool _initialized;
+    static DeviceManager& instance();
+        // Returns the default DeviceManager singleton.
+
+    static void shutdown();
+        // Shuts down the MediaFactory and deletes the singleton instance.
+
+    // Signal<> DevicesChanged;
+        // Signals when a system device is connecetd or removed.
+        // This signal is emitted by the platform specific DeviceWatcher.
+
+    // Default platform input formats
+    std::vector<std::string> cameraInputs;
+    std::vector<std::string> screenInputs;
+    std::vector<std::string> microphoneInputs;
+    std::vector<std::string> speakerOutputs;
+
+protected:
+    std::unique_ptr<DeviceWatcher> _watcher;
 };
 
 
@@ -210,31 +161,3 @@ private:
 
 
 #endif  // SCY_AV_DeviceManager_H
-
-
-/*
- * libjingle
- * Copyright 2004 Google Inc.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  1. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above copyright notice,
- *     this list of conditions and the following disclaimer in the documentation
- *     and/or other materials provided with the distribution.
- *  3. The name of the author may not be used to endorse or promote products
- *     derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */

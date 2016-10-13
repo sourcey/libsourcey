@@ -52,8 +52,8 @@ public:
     virtual bool initialize();
     virtual void uninitialize();
 
-    virtual bool getVideoCaptureDevices(std::vector<Device>& devs);
-    virtual bool getDefaultVideoCaptureDevice(Device& device);
+    virtual bool getCameras(std::vector<Device>& devs);
+    virtual bool getDefaultCamera(Device& device);
 
 private:
 

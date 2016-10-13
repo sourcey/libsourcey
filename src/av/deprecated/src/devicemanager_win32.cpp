@@ -116,7 +116,7 @@ void Win32DeviceManager::uninitialize()
 }
 
 
-bool Win32DeviceManager::getVideoCaptureDevices(std::vector<Device>& devices)
+bool Win32DeviceManager::getCameras(std::vector<Device>& devices)
 {
     devices.clear();
     if (!getDevicesWin32(CLSID_VideoInputDeviceCategory, devices))
@@ -127,13 +127,13 @@ bool Win32DeviceManager::getVideoCaptureDevices(std::vector<Device>& devices)
 #define ARRAY_SIZE(x) (static_cast<int>((sizeof(x)/sizeof(x[0]))))
 
 
-bool Win32DeviceManager::getDefaultVideoCaptureDevice(Device& device)
+bool Win32DeviceManager::getDefaultCamera(Device& device)
 {
     bool ret = false;
     // If there are multiple capture devices, we want the first USB device.
     // This avoids issues with defaulting to virtual cameras or grabber cards.
     std::vector<Device> devices;
-    ret = (getVideoCaptureDevices(devices) && !devices.empty());
+    ret = (getCameras(devices) && !devices.empty());
     if (ret) {
         device = devices[0];
         for (std::size_t i = 0; i < devices.size(); ++i) {

@@ -18,8 +18,8 @@
 // Implemented from libjingle r116 Feb 16, 2012
 
 
-#ifndef SCY_AV_DeviceManager_MAC_H
-#define SCY_AV_DeviceManager_MAC_H
+#ifndef SCY_AV_DeviceManager_LINUX_H
+#define SCY_AV_DeviceManager_LINUX_H
 
 
 #include <string>
@@ -27,33 +27,29 @@
 
 #include "scy/av/devicemanager.h"
 
-// #include "talk/base/sigslot.h"
-// #include "talk/base/stringencode.h"
+//#include "talk/base/sigslot.h"
+//#include "talk/base/stringencode.h"
+//#include "talk/sound/soundsystemfactory.h"
 
 
 namespace scy {
 namespace av {
 
 
-class DeviceWatcher;
-
-class MacDeviceManager: public DeviceManager {
+class LinuxDeviceManager : public DeviceManager
+{
 public:
-    MacDeviceManager();
-    virtual ~MacDeviceManager();
+    LinuxDeviceManager();
+    virtual ~LinuxDeviceManager();
 
-    virtual bool getVideoCaptureDevices(std::vector<Device>& devs);
-
-private:
-    // virtual bool getAudioDevices(bool input, std::vector<Device>& devs);
-    bool FilterDevice(const Device& d);
+    virtual bool getCameras(std::vector<Device>& devs);
 };
 
 
 } } // namespace scy::av
 
 
-#endif  // SCY_AV_DeviceManager_MAC_H
+#endif  // SCY_AV_DeviceManager_LINUX_H
 
 
 /*

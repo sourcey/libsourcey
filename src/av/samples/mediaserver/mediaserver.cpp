@@ -6,7 +6,7 @@
 
 #include "scy/collection.h"
 #include "scy/av/mediafactory.h"
-#include "scy/av/avinputreader.h"
+#include "scy/av/avcapture.h"
 #include "scy/av/flvmetadatainjector.h"
 #include "scy/av/formatregistry.h"
 #include "scy/av/avpacketencoder.h"
@@ -196,13 +196,13 @@ StreamingOptions HTTPStreamingConnectionFactory::createStreamingOptions(http::Se
     av::Device dev;
     auto& media = av::MediaFactory::instance();
     if (options.oformat.video.enabled) {
-        media.devices().getDefaultVideoCaptureDevice(dev);
+        media.devices().getDefaultCamera(dev);
         InfoL << "Default video capture " << dev.id << endl;
         options.videoCapture = media.createVideoCapture(dev.id);
         options.videoCapture->getEncoderFormat(options.iformat);
     }
     if (options.oformat.audio.enabled) {
-        media.devices().getDefaultAudioInputDevice(dev);
+        media.devices().getDefaultMicrophone(dev);
         InfoL << "Default audio capture " << dev.id << endl;
         options.audioCapture = media.createAudioCapture(0,
             options.oformat.audio.channels,

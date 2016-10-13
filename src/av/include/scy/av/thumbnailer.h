@@ -23,9 +23,8 @@
 
 #include "scy/base.h"
 #include "scy/av/config.h"
-#ifdef HAVE_FFMPEG
-#include "scy/av/avinputreader.h"
-#endif
+#include "scy/av/avcapture.h"
+#include "scy/av/videoencoder.h"
 
 #include <iostream>
 #include <string>
@@ -58,7 +57,7 @@ struct Thumbnailer
     // ThumbnailerOptions for the Spot API.
 {
     ThumbnailerOptions options;
-    av::AVInputReader reader;
+    av::AVCapture reader;
     av::VideoEncoderContext encoder;
 
     Thumbnailer(const ThumbnailerOptions& options = ThumbnailerOptions());

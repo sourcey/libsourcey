@@ -32,7 +32,6 @@ namespace av {
 void initializeFFmpeg();
     // Initialize the FFmpeg library.
 
-
 void uninitializeFFmpeg();
     // Uninitializes the FFmpeg library.
 

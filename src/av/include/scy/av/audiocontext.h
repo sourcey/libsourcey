@@ -33,16 +33,13 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavutil/opt.h>
-#include <libavutil/audio_fifo.h>
+// #include <libavutil/opt.h>
+// #include <libavutil/audio_fifo.h>
 }
 
 
 namespace scy {
 namespace av {
-
-
-struct AudioResampler;
 
 
 struct AudioContext
@@ -72,71 +69,7 @@ struct AudioContext
 };
 
 
-// ---------------------------------------------------------------------
-//
-struct AudioEncoderContext: public AudioContext
-{
-    AudioEncoderContext(AVFormatContext* format = nullptr);
-    virtual ~AudioEncoderContext();
-
-    virtual void create();
-    //virtual void open();
-    virtual void close();
-
-    virtual bool encode(AVFrame* iframe, AVPacket& opacket);
-      // Encode a single AVFrame from the decoder.
-
-    virtual bool encode(const std::uint8_t* samples, const int numSamples, const std::int64_t pts, AVPacket& opacket);
-      // Encode a single frame of interleaved or planar audio.
-      //
-      // @param samples    The input samples to encode.
-      // @param numSamples The number of input samples per channel.
-      // @param pts        The input samples presentation timestamp.
-      // @param opacket    The output packet data will be encoded to.
-
-    virtual bool flush(AVPacket& opacket);
-      // Flush remaining packets to be encoded.
-      // This method should be called repeatedly before stream close until
-      // it returns false.
-
-    AVFormatContext* format;
-    AudioResampler*  resampler;
-    AVAudioFifo*     fifo;
-    AudioCodec       iparams;
-    AudioCodec       oparams;
-    //int              inputFrameSize;
-    int              outputFrameSize;
-};
-
-
-// ---------------------------------------------------------------------
-//
-struct AudioDecoderContext: public AudioContext
-{
-    AudioDecoderContext();
-    virtual ~AudioDecoderContext();
-
-    virtual void create(AVFormatContext* ic, int streamID);
-    //virtual void open();
-    virtual void close();
-
-    virtual bool decode(std::uint8_t* data, int size, AVPacket& opacket);
-    virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
-        // Decodes a the given input packet.
-        // Returns true an output packet was returned,
-        // false otherwise.
-
-    virtual bool flush(AVPacket& opacket);
-        // Flushes buffered frames.
-        // This method should be called after decoding
-        // until false is returned.
-
-    double duration;
-    int width;    // Number of bits used to store a sample
-    bool fp;      // Floating-point sample representation
-};
-
-
+void initAudioCodecFromContext(const AVCodecContext* ctx, AudioCodec& params);
 AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params);
 bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat);
 void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket);

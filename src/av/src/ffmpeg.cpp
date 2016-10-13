@@ -26,6 +26,9 @@
 
 extern "C" {
 #include <libavformat/avformat.h>
+#ifdef HAVE_FFMPEG_AVDEVICE
+#include <libavdevice/avdevice.h>
+#endif
 }
 
 
@@ -69,14 +72,19 @@ void initialize()
 
     if (++_refCount == 1)
     {
-        // Before doing anything disable logging as it interferes with layout tests.
-        //av_log_set_level(AV_LOG_QUIET);
+        // Optionally disable logging.
+        // av_log_set_level(AV_LOG_QUIET);
 
         // Register our protocol glue code with FFmpeg.
         av_lockmgr_register(&LockManagerOperation);
 
         // Now register the rest of FFmpeg.
         av_register_all();
+
+        // And devices if available.
+#ifdef HAVE_FFMPEG_AVDEVICE
+        avdevice_register_all();
+#endif
     }
 }
 

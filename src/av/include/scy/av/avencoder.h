@@ -29,8 +29,8 @@
 #include "scy/av/types.h"
 #include "scy/av/ffmpeg.h"
 #include "scy/av/iencoder.h"
-#include "scy/av/videocontext.h"
-#include "scy/av/audiocontext.h"
+#include "scy/av/videoencoder.h"
+#include "scy/av/audioencoder.h"
 #include "scy/mutex.h"
 #include <fstream>
 
@@ -47,8 +47,7 @@ namespace av {
 
 
 class AVEncoder: public IEncoder
-    /// This class implements an multiplex audio/video
-    /// encoder which depends on libavcodec/libavformat.
+    /// This class implements an multiplex audio/video encoder.
 {
 public:
     AVEncoder(const EncoderOptions& options = EncoderOptions());

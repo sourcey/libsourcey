@@ -30,7 +30,8 @@
 #include "scy/packetstream.h"
 #include "scy/interface.h"
 #include "scy/packetstream.h"
-#include "scy/av/avinputreader.h"
+#include "scy/av/avcapture.h"
+#include "scy/av/videoconverter.h"
 #include "scy/av/fpscounter.h"
 #include "scy/av/format.h"
 
@@ -44,19 +45,19 @@ namespace av {
 
 
 class VideoAnalyzer //: public PacketProcessor
-    /// This class provides basic AV spectrum analysis on a 
+    /// This class provides basic AV spectrum analysis on a
     /// video using the Fourier Transform algorithm.
     /// Data is outputted in CSV format.
     ///
-    /// TODO: 
+    /// TODO:
     ///        - Pluggable algorithms and processors
     ///        - Normalization (scaling) for output values
     ///        - Process multiple audio channels properly
     ///        - Inherit from PacketProcessor
 {
 public:
-    struct Options 
-    {    
+    struct Options
+    {
         std::string ifile;    // The input video file.
         int rdftSize;        // Size of the FFT input array
         //bool blocking;        // Blocking mode (disable async)
@@ -67,7 +68,7 @@ public:
         }
     };
 
-    struct Stream 
+    struct Stream
     {
         std::string name;
         RDFTContext* rdft;
@@ -76,10 +77,10 @@ public:
         int rdftBits;
         std::int64_t frames;
         int filled;
-        
+
         Stream(const std::string& name, int rdftSize);
         ~Stream();
-        
+
         void initialize();
         void uninitialize();
 
@@ -87,7 +88,7 @@ public:
             // Preforms FFT on internal rdftData
     };
 
-    struct Packet 
+    struct Packet
     {
         double time;
         double value;
@@ -99,7 +100,7 @@ public:
 public:
     VideoAnalyzer(const VideoAnalyzer::Options& options = VideoAnalyzer::Options());
     virtual ~VideoAnalyzer();
-                
+
     virtual void initialize();
         // Set everything up, and open the input file.
 
@@ -111,21 +112,21 @@ public:
 
     virtual void stop();
         // Stop processing.
-    
+
     Signal2<const VideoAnalyzer::Stream&, const VideoAnalyzer::Packet&> PacketOut;
         // Signals on VideoAnalyzer::Packet output
         // Raw FFT data is available via VideoAnalyzer::Stream->rdftData
 
     NullSignal Complete;
         // Signals on analysis complete
-        
-    virtual AVInputReader& reader();
+
+    virtual AVCapture& reader();
     virtual Options& options();
     virtual std::string error() const;
-    
+
 protected:
     AVFrame* getGrayVideoFrame();
-    
+
     virtual void onReadComplete(void* sender);
     virtual void onVideo(void* sender, VideoPacket& packet);
     virtual void onAudio(void* sender, AudioPacket& packet);
@@ -134,12 +135,12 @@ protected:
 
 protected:
     mutable Mutex _mutex;
-    
+
     Options _options;
-    std::string    _error;
-    AVInputReader _reader;
+    std::string _error;
+    AVCapture _reader;
     VideoAnalyzer::Stream* _video;
-    VideoAnalyzer::Stream* _audio;    
+    VideoAnalyzer::Stream* _audio;
     VideoConversionContext* _videoConv;
 };
 
@@ -156,7 +157,7 @@ inline double GetDecibels(double re, double im);
 inline double GetAmplitude(double re, double im, int len);
 inline double GetAmplitudeScaled(double re, double im, int len, int scale);
 
-#ifdef WIN32
+#ifdef SCY_WIN32
 inline double log2(double n);
 #endif
 

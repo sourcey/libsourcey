@@ -27,7 +27,7 @@
 
 #define SCY_MAJOR_VERSION    0
 #define SCY_MINOR_VERSION    9
-#define SCY_PATCH_VERSION    4
+#define SCY_PATCH_VERSION    5
 
 #define SCY_AUX_STR_EXP(__A) #__A
 #define SCY_AUX_STR(__A)     SCY_AUX_STR_EXP(__A)
@@ -44,49 +44,49 @@
 
 #ifdef _WIN32
     // Windows (x64 and x86)
-    #ifndef WIN32
-    #define WIN32
+    #ifndef SCY_WIN32
+    #define SCY_WIN32
     #endif
 #endif
 #if __unix__
     // Unix
-    #ifndef UNIX
-    #define UNIX
+    #ifndef SCY_UNIX
+    #define SCY_UNIX
     #endif
 #endif
 #if __posix__
     // POSIX
-    #ifndef POSIX
-    #define POSIX
+    #ifndef SCY_POSIX
+    #define SCY_POSIX
     #endif
 #endif
 #if __linux__
     // Linux
-    #ifndef LINUX
-    #define LINUX
+    #ifndef SCY_LINUX
+    #define SCY_LINUX
     #endif
 #endif
 #if __APPLE__
     // Mac OS
-    #ifndef APPLE
-    #define APPLE
+    #ifndef SCY_APPLE
+    #define SCY_APPLE
     #endif
 #endif
 #if __GNUC__
     // GCC compiler
-    #ifndef GNUC
-    #define GNUC
+    #ifndef SCY_GNUC
+    #define SCY_GNUC
     #endif
 #endif
 #if defined(__MINGW32__) || defined(__MINGW64__)
     // MinGW
-    #ifndef MINGW
-    #define MINGW
+    #ifndef SCY_MINGW
+    #define SCY_MINGW
     #endif
 #endif
 
 
-#ifdef WIN32
+#ifdef SCY_WIN32
 # ifndef SCY_SHARED_LIBRARY // libsourcey.h
 #   define SCY_EXTERN __declspec(dllexport)
 # else
@@ -101,7 +101,7 @@
 /// Windows specific
 //
 
-#ifdef WIN32
+#ifdef SCY_WIN32
 
 // Verify that we're built with the multithreaded
 // versions of the runtime libraries

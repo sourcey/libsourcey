@@ -24,6 +24,7 @@
 #  <component>_DEFINITIONS  - Compiler switches required for using <component>
 #  <component>_VERSION      - The components version
 
+
 # The default components were taken from a survey over other FindFFmpeg.cmake files
 if (NOT FFMPEG_FIND_COMPONENTS)
   set(FFMPEG_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)

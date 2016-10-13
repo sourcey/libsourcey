@@ -59,7 +59,7 @@ function(find_dependency name)
     return()
   endif()
 
-  # Set a HAVE_XXX variable at parent scope for our Config.h
+  # Set a HAVE_XXX variable at parent scope for the libsourcey.h config sile
   set(HAVE_${var_root_upper} TRUE)
   set(HAVE_${var_root_upper} TRUE PARENT_SCOPE)
 endfunction()

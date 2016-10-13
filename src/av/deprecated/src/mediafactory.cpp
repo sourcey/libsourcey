@@ -87,7 +87,7 @@ void MediaFactory::loadVideoCaptures()
     // The video capture object will begin capturing frames when it's
     // reference count becomes positive.
     std::vector<Device> devs;
-    devices().getVideoCaptureDevices(devs);
+    devices().getCameras(devs);
     for (std::size_t i = 0; i < devs.size(); ++i) {
         try {
             createVideoCapture(devs[0].id);

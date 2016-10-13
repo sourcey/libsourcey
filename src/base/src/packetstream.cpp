@@ -198,7 +198,6 @@ void PacketStream::close()
 
 void PacketStream::write(char* data, std::size_t len)
 {
-    //Mutex::ScopedLock lock(_mutex);
     RawPacket p(data, len);
     process(p);
 }
@@ -206,21 +205,18 @@ void PacketStream::write(char* data, std::size_t len)
 
 void PacketStream::write(const char* data, std::size_t len)
 {
-    //Mutex::ScopedLock lock(_mutex);
     RawPacket p(data, len);
     process(p);
 }
 
 void PacketStream::write(IPacket& packet)
 {
-    //Mutex::ScopedLock lock(_mutex);
     process(packet);
 }
 
 
 bool PacketStream::locked() const
 {
-    //Mutex::ScopedLock lock(_mutex);
     return stateEquals(PacketStreamState::Locked);
 }
 

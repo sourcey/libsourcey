@@ -36,6 +36,8 @@
 #include <iostream>
 #include <map>
 
+#define HAVE_OPENCV_VIDEOCAPTURE
+
 
 namespace scy {
 namespace av {

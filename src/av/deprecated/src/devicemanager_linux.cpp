@@ -384,7 +384,7 @@ static void scanV4L2Devices(std::vector<Device>& devices)
 }
 
 
-bool LinuxDeviceManager::getVideoCaptureDevices(std::vector<Device>& devices)
+bool LinuxDeviceManager::getCameras(std::vector<Device>& devices)
 {
     devices.clear();
     scanV4L2Devices(devices);

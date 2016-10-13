@@ -39,23 +39,23 @@ public:
 
     virtual void start() = 0;
     virtual void stop() = 0;
-    
+
     virtual void getEncoderFormat(Format& iformat) = 0;
         // Sets the input format for encoding with this capture device.
-    
+
     virtual void onStreamStateChange(const PacketStreamState& state)
     {
         switch (state.id()) {
-        case PacketStreamState::Active: start(); break;
-        case PacketStreamState::Stopping: stop(); break;
+            case PacketStreamState::Active: start(); break;
+            case PacketStreamState::Stopping: stop(); break;
         }
     }
-            
+
     PacketSignal emitter;
 };
 
 
-} // namespace av 
+} // namespace av
 } // namespace scy
 
 

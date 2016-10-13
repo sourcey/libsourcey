@@ -49,7 +49,7 @@ struct Format
     // Base Format Variables
     //
     std::string name;        // The display name of this format.
-    std::string id;            // The short name of this format.
+    std::string id;          // The short name of this format.
 
     VideoCodec video;        // The video codec.
     AudioCodec audio;        // The audio codec.

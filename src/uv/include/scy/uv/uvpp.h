@@ -29,8 +29,8 @@
 #endif
 
 #include "uv.h"
-#include <cstdint>
 #include "scy/error.h"
+#include <cstdint>
 #include <functional>
 #include <assert.h>
 
@@ -106,7 +106,7 @@ class Handle
 public:
     Handle(uv_loop_t* loop = nullptr, void* handle = nullptr) :
         _loop(loop ? loop : uv_default_loop()), // nullptr will be uv_default_loop
-        _ptr((uv_handle_t*)handle), // can be nullptr or uv_handle_t
+        _ptr((uv_handle_t*)handle), // nullptr or instance of uv_handle_t
         _tid(uv_thread_self()),
         _closed(false)
     {

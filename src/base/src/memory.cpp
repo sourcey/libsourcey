@@ -96,7 +96,7 @@ void GarbageCollector::finalize()
 
 void onPrintHandle(uv_handle_t* handle, void* /* arg */)
 {
-    DebugL << "#### Active handle: " << handle << ": " << handle->type << std::endl;
+    DebugL << "Active handle: " << handle << ": " << handle->type << std::endl;
 }
 
 

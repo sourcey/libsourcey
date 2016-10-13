@@ -62,33 +62,33 @@ public:
         return caps;
     }
 
-    virtual bool getAudioInputDevices(std::vector<Device>& devs) {
+    virtual bool getMicrophones(std::vector<Device>& devs) {
         devs = input_devices_;
         return true;
     }
 
-    virtual bool getAudioOutputDevices(std::vector<Device>& devs) {
+    virtual bool getSpeakers(std::vector<Device>& devs) {
         devs = output_devices_;
         return true;
     }
 
-    virtual bool getAudioInputDevice(const std::string& name, Device& out) 
+    virtual bool getMicrophone(const std::string& name, Device& out) 
     {
         return getAudioDevice(true, name, out);
     }
 
-    virtual bool getAudioOutputDevice(const std::string& name, Device& out) 
+    virtual bool getSpeaker(const std::string& name, Device& out) 
     {
         return getAudioDevice(false, name, out);
     }
 
-    virtual bool getVideoCaptureDevices(std::vector<Device>& devs) 
+    virtual bool getCameras(std::vector<Device>& devs) 
     {
         devs = vidcap_devices_;
         return true;
     }
 
-    virtual bool getDefaultVideoCaptureDevice(Device& device) 
+    virtual bool getDefaultCamera(Device& device) 
     {
         if (vidcap_devices_.empty()) {
             return false;
@@ -106,7 +106,7 @@ public:
     }
 #endif
 
-    void setAudioInputDevices(const std::vector<Device>& devices) 
+    void setMicrophones(const std::vector<Device>& devices) 
     {
         //input_devices_.clear();
         //for (std::size_t i = 0; i < devices.size(); ++i) {
@@ -116,7 +116,7 @@ public:
         //DevicesChanged();
     }
 
-    void setAudioOutputDevices(const std::vector<Device>& devices) 
+    void setSpeakers(const std::vector<Device>& devices) 
     {
         //output_devices_.clear();
         //for (std::size_t i = 0; i < devices.size(); ++i) {
@@ -126,7 +126,7 @@ public:
         //DevicesChanged();
     }
 
-    void setVideoCaptureDevices(const std::vector<Device>& devices) 
+    void setCameras(const std::vector<Device>& devices) 
     {
         //vidcap_devices_.clear();
         //for (std::size_t i = 0; i < devices.size(); ++i) {
@@ -137,7 +137,7 @@ public:
     }
 
 
-    virtual bool getVideoCaptureDevice(const std::string& name, Device& out) 
+    virtual bool getCamera(const std::string& name, Device& out) 
     {
             if (vidcap_devices_.empty())
                 return false;

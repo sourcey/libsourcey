@@ -110,8 +110,9 @@ void Codec::print(std::ostream& ost)
 
 
 AudioCodec::AudioCodec() :
-    Codec("Unknown", DEFAULT_AUDIO_SAMPLE_RATE, DEFAULT_AUDIO_BIT_RATE, false),
-    channels(DEFAULT_AUDIO_CHANNELS), sampleFmt(DEFAULT_AUDIO_SAMPLE_FMT)
+    Codec("Unknown", 0, 0, false), // DEFAULT_AUDIO_SAMPLE_RATE, DEFAULT_AUDIO_BIT_RATE
+    // channels(DEFAULT_AUDIO_CHANNELS), sampleFmt(DEFAULT_AUDIO_SAMPLE_FMT)
+    channels(0)//, sampleFmt(DEFAULT_AUDIO_SAMPLE_FMT)
 {
     // assert(0);
 }
@@ -179,8 +180,8 @@ void AudioCodec::print(std::ostream& ost)
 
 
 VideoCodec::VideoCodec() :
-    Codec("Unknown", DEFAULT_VIDEO_SAMPLE_RATE, DEFAULT_VIDEO_BIT_RATE, false),
-    width(0), height(0), fps(0), pixelFmt(DEFAULT_VIDEO_PIXEL_FMT)
+    Codec("Unknown", 0, 0, false), //DEFAULT_VIDEO_SAMPLE_RATE, DEFAULT_VIDEO_BIT_RATE
+    width(0), height(0), fps(0)//, pixelFmt(DEFAULT_VIDEO_PIXEL_FMT)
 {
 }
 

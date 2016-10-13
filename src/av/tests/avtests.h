@@ -27,14 +27,14 @@
 #include "scy/av/devicemanager.h"
 // #include "scy/av/flvmetadatainjector.h"
 // #include "scy/av/formatregistry.h"
-#include "scy/av/mediafactory.h"
-// #include "scy/av/avinputreader.h"
+// #include "scy/av/mediafactory.h"
+// #include "scy/av/avcapture.h"
 // #include "scy/av/avpacketencoder.h"
 // #include "scy/av/thumbnailer.h"
 // #include "scy/av/iencoder.h"
-#include "scy/av/videocapture.h"
-#include "scy/av/audiocapture.h"
-#include "scy/av/audiocontext.h"
+// #include "scy/av/videocapture.h"
+#include "scy/av/avcapture.h"
+#include "scy/av/audioencoder.h"
 #include "scy/av/audioresampler.h"
 
 
@@ -49,32 +49,11 @@ namespace scy {
 
 static const int kNumberFramesWanted = 200;
 static const int kInNbSamples = 1024;
-static const int kInAudioDeviceId = 0;
 
 
-//
-/// Generic Callback Context
-//
-
-struct CallbackContext
-{
-    // ---------------------------------------------------------------------
-    // Video Capture Test
-    //
-
-    void onVideoCaptureFrame(void* sender, av::MatrixPacket& packet)
-    {
-        DebugL << "On packet: " << packet.size() << endl;
-
-        // cv::imshow("VideoCaptureTest", *packet.mat);
-    }
-};
-
-
-//
+// =============================================================================
 // Heleprs
 //
-
 
 // Prepare a dummy YUV image
 static void fillYuvImage(AVFrame *pict, int frame_index, int width, int height)
@@ -208,8 +187,8 @@ class AudioResamplerTest: public Test
     void run()
     {
         av::AudioResampler resampler;
-        auto iparams = resampler.iparams;
-        auto oparams = resampler.oparams;
+        auto& iparams = resampler.iparams;
+        auto& oparams = resampler.oparams;
 
         iparams.channels = 2;
         iparams.sampleRate = 48000;
@@ -252,17 +231,21 @@ class AudioCaptureEncoderTest: public Test
 
     void run()
     {
-        // TODO: return if no video captures availabile
-
         int inNbChannels = 2;
         int inSampleRate = 48000;
 
         auto& iparams = encoder.iparams;
         auto& oparams = encoder.oparams;
 
-        av::AudioCapture capture(kInAudioDeviceId, inNbChannels, inSampleRate);
-        capture.start();
+        av::Device device;
+        if (!av::DeviceManager::instance().getDefaultMicrophone(device)) {
+            WarnL << "Skipping audio test because no microphone is available" << endl;
+        }
+
+        av::AVCapture capture;
+        capture.openMicrophone(device.id, inNbChannels, inSampleRate);
         capture.getAudioCodec(iparams);
+        capture.start();
 
         expect(iparams.channels == inNbChannels);
         expect(iparams.sampleRate == inSampleRate);
@@ -286,6 +269,7 @@ class AudioCaptureEncoderTest: public Test
             scy::sleep(10);
         }
 
+        capture.stop();
         encoder.close();
         output.close();
 
@@ -295,13 +279,14 @@ class AudioCaptureEncoderTest: public Test
 
     void onAudio(av::AudioPacket& packet)
     {
-        cout << "On audio packet: " << packet.size() << endl;
-
-        AVPacket opacket;
-        if (encoder.encode(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples, AV_NOPTS_VALUE, opacket)) {
-            output.write(reinterpret_cast<const char*>(opacket.data), opacket.size);
+        if (numFramesRemaining) {
+            numFramesRemaining--;
+            TraceL << "On audio packet: " << packet.size() << endl;
+            AVPacket opacket;
+            if (encoder.encode(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples, AV_NOPTS_VALUE, opacket)) {
+                output.write(reinterpret_cast<const char*>(opacket.data), opacket.size);
+            }
         }
-        numFramesRemaining--;
     }
 };
 
@@ -320,21 +305,25 @@ class AudioCaptureResamplerTest: public Test
 
     void run()
     {
-        // TODO: return if no video captures availabile
-
         int inNbChannels = 2;
         int inSampleRate = 48000;
 
-        auto iparams = resampler.iparams;
-        auto oparams = resampler.oparams;
+        auto& iparams = resampler.iparams;
+        auto& oparams = resampler.oparams;
 
         oparams.channels = 2;
         oparams.sampleRate = 44100;
         oparams.sampleFmt = "s16";
 
-        av::AudioCapture capture(kInAudioDeviceId, inNbChannels, inSampleRate);
-        capture.start();
+        av::Device device;
+        if (!av::DeviceManager::instance().getDefaultMicrophone(device)) {
+            WarnL << "Skipping audio test because no microphone is available" << endl;
+        }
+
+        av::AVCapture capture;
+        capture.openMicrophone(device.id, inNbChannels, inSampleRate);
         capture.getAudioCodec(iparams);
+        capture.start();
 
         expect(iparams.channels == inNbChannels);
         expect(iparams.sampleRate == inSampleRate);
@@ -350,8 +339,11 @@ class AudioCaptureResamplerTest: public Test
             scy::sleep(10);
         }
 
+        // capture.emitter.detach(this);
+        capture.stop();
         resampler.close();
         output.close();
+        cout << "numFramesRemaining: " << numFramesRemaining << endl;
 
         // TODO: verify data integrity
         expect(numFramesRemaining == 0);
@@ -359,17 +351,39 @@ class AudioCaptureResamplerTest: public Test
 
     void onAudio(av::AudioPacket& packet)
     {
-        cout << "On audio packet: " << packet.size() << endl;
-        if (resampler.resample(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples)) {
-            output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outSamplesBytes);
+        if (numFramesRemaining) {
+            numFramesRemaining--;
+            cout << "On audio packet: " << packet.size() << endl;
+            if (resampler.resample(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples)) {
+                output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outSamplesBytes);
+            }
         }
-        numFramesRemaining--;
     }
 };
 
 #endif // HAVE_OPENCV
 
 
+// static const int kInAudioDeviceId = 0;
+//
+//
+// //
+// /// Generic Callback Context
+// //
+//
+// struct CallbackContext
+// {
+//     // ---------------------------------------------------------------------
+//     // Video Capture Test
+//     //
+//
+//     void onVideoCaptureFrame(void* sender, av::MatrixPacket& packet)
+//     {
+//         DebugL << "On packet: " << packet.size() << endl;
+//
+//         // cv::imshow("VideoCaptureTest", *packet.mat);
+//     }
+// };
 // class Tests
 // {
 // public:
@@ -381,7 +395,7 @@ class AudioCaptureResamplerTest: public Test
 //
 //         try {
 //
-//             runAVInputReaderRecorderTest();
+//             runAVCaptureRecorderTest();
 // #if 0
 //             runAudioRecorderTest();
 //             testVideoThumbnailer();
@@ -696,7 +710,7 @@ class AudioCaptureResamplerTest: public Test
 //             }
 //             if (options.oformat.audio.enabled) {
 //                 Device device;
-//                 if (MediaFactory::instance().devices().getDefaultAudioInputDevice(device)) {
+//                 if (MediaFactory::instance().devices().getDefaultMicrophone(device)) {
 //                     DebugL << "Audio device: " << device.id << endl;
 //                     audioCapture = MediaFactory::instance().createAudioCapture(device.id,
 //                         options.oformat.audio.channels,
@@ -1291,9 +1305,9 @@ class AudioCaptureResamplerTest: public Test
 //
 //         av::Device dev;
 //         auto& media = av::MediaFactory::instance();
-//         media.devices().getDefaultAudioInputDevice(dev);
+//         media.devices().getDefaultMicrophone(dev);
 //         InfoL << "Default audio capture " << dev.id << endl;
-//         av::AudioCapture::Ptr audioCapture = media.createAudioCapture(0, //dev.id
+//         av::AVCapture::Ptr audioCapture = media.createAudioCapture(0, //dev.id
 //             options.oformat.audio.channels,
 //             options.oformat.audio.sampleRate);
 //         audioCapture->getEncoderFormat(options.iformat);
@@ -1308,7 +1322,7 @@ class AudioCaptureResamplerTest: public Test
 //     // ---------------------------------------------------------------------
 //     // Audio CaptureRecorder Test
 //     //
-//     void runAVInputReaderRecorderTest()
+//     void runAVCaptureRecorderTest()
 //     {
 //         PacketStream stream;
 //
@@ -1321,14 +1335,14 @@ class AudioCaptureResamplerTest: public Test
 //             //av::AudioCodec("MP3", "libmp3lame", 2, 44100, 128000, "s16p"));
 //
 //         // Attach the Audio Capture
-//         av::AVInputReader::Ptr reader(new av::AVInputReader());
-//         reader->openAudioDevice(0,
+//         av::AVCapture::Ptr reader(new av::AVCapture());
+//         reader->openMicrophone(0,
 //             options.oformat.audio.channels,
 //             options.oformat.audio.sampleRate);
 //         reader->getEncoderFormat(options.iformat);
 //
 //         // Attach the Audio Capture
-//         stream.attachSource<av::AVInputReader>(reader, true);
+//         stream.attachSource<av::AVCapture>(reader, true);
 //
 //         // Attach the Audio Encoder
 //         auto encoder = new av::AVPacketEncoder(options);
@@ -1358,15 +1372,15 @@ class AudioCaptureResamplerTest: public Test
 //         // Create the Audio Capture
 //         av::Device dev;
 //         auto& media = av::MediaFactory::instance();
-//         media.devices().getDefaultAudioInputDevice(dev);
+//         media.devices().getDefaultMicrophone(dev);
 //         InfoL << "Default audio capture " << dev.id << endl;
-//         av::AudioCapture::Ptr audioCapture = media.createAudioCapture(0, //dev.id
+//         av::AVCapture::Ptr audioCapture = media.createAudioCapture(0, //dev.id
 //             options.oformat.audio.channels,
 //             options.oformat.audio.sampleRate);
 //         audioCapture->getEncoderFormat(options.iformat);
 //
 //         // Attach the Audio Capture
-//         stream.attachSource<av::AudioCapture>(audioCapture, true);
+//         stream.attachSource<av::AVCapture>(audioCapture, true);
 //
 //         // Attach the Audio Encoder
 //         //auto encoder = new av::AVPacketEncoder(options);

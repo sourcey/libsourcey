@@ -9,7 +9,7 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", LDebug)); //Trace
     // test::initialize();
     // net::SSLManager::initNoVerifyClient();
 
@@ -25,15 +25,15 @@ int main(int argc, char** argv)
     //     auto& deviceManager = av::MediaFactory::instance().devices();
     //
     //     av::Device device;
-    //     if (deviceManager.getDefaultVideoCaptureDevice(device)) {
+    //     if (deviceManager.getDefaultCamera(device)) {
     //         cout << "Default video device: " << device.id << ": " << device.name << endl;
     //     }
-    //     if (deviceManager.getDefaultAudioInputDevice(device)) {
+    //     if (deviceManager.getDefaultMicrophone(device)) {
     //         cout << "Default audio device: " << device.id << ": " << device.name << endl;
     //     }
     //
     //     std::vector<av::Device> devices;
-    //     if (deviceManager.getVideoCaptureDevices(devices)) {
+    //     if (deviceManager.getCameras(devices)) {
     //         cout << "Num video devices: " << devices.size() << endl;
     //         for (auto& device : devices) {
     //             cout << "Printing video device: " << device.id << ": " << device.name << endl;
@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     //     else {
     //         cout << "No video devices detected!" << endl;
     //     }
-    //     if (deviceManager.getAudioInputDevices(devices)) {
+    //     if (deviceManager.getMicrophones(devices)) {
     //         cout << "Num audio devices: " << devices.size() << endl;
     //         for (auto& device : devices) {
     //             cout << "Printing audio device: " << device.id << ": " << device.name << endl;
@@ -58,11 +58,9 @@ int main(int argc, char** argv)
     // Define class based tests
     describe("audio encoder", new AudioEncoderTest);
     describe("audio resampler", new AudioResamplerTest);
-
-#ifdef HAVE_OPENCV
     describe("audio capture encoder", new AudioCaptureEncoderTest);
     describe("audio capture resampler", new AudioCaptureResamplerTest);
-#endif // HAVE_OPENCV
+    // describe("device capture multiplex encoder", new DeviceCaptureMultiplexEncoderTest);
 
     test::runAll();
 

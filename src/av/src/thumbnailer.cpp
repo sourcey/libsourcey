@@ -54,30 +54,30 @@ void Thumbnailer::open() //, int owidth, int oheight, double seek
     }
 
     reader.emitter += packetDelegate(this, &Thumbnailer::onVideoPacket);
-    reader.options().iFramesOnly = true;
-    reader.options().disableAudio = true;
     reader.openFile(options.ifile);
 
     if (options.seek > reader.video()->stream->duration)
         throw std::runtime_error("Seek position exceeds stream duration");
 
-    // TODO: More media types
     if (options.ofile.find(".png") != std::string::npos) {
         encoder.oparams.encoder = "png";
     }
-
-    // Default to JPEG
-    else {
+    else if (options.ofile.find(".jpg") != std::string::npos) {
         encoder.oparams.encoder = "mjpeg";
         encoder.oparams.pixelFmt = "yuvj420p";
     }
+    else {
+        throw std::runtime_error("Unsupportted image format: " + options.ofile);
+    }
 
-    encoder.iparams.width = reader.video()->ctx->width;
-    encoder.iparams.height = reader.video()->ctx->height;
-    encoder.iparams.pixelFmt = av_get_pix_fmt_name(reader.video()->ctx->pix_fmt);
-    encoder.oparams.width = options.width ? options.width :  reader.video()->ctx->width;
-    encoder.oparams.height = options.height ? options.height :  reader.video()->ctx->height;
-    encoder.oparams.fps = 20; // avoid FFmpeg 0 fps bitrate tolerance error
+    // reader.getEncoderFormat(encoder.iparams);
+    auto ctx = reader.video()->ctx;
+    encoder.iparams.width = ctx->width;
+    encoder.iparams.height = ctx->height;
+    encoder.iparams.pixelFmt = av_get_pix_fmt_name(ctx->pix_fmt);
+    encoder.oparams.width = options.width ? options.width : ctx->width;
+    encoder.oparams.height = options.height ? options.height : ctx->height;
+    encoder.oparams.fps = 1;
     encoder.oparams.enabled = true;
     encoder.create();
 
@@ -103,6 +103,11 @@ void Thumbnailer::onVideoPacket(void*, av::VideoPacket& packet)
     // Skip frames before seek position
     if (reader.video()->pts < options.seek) {
         TraceL << "Skipping thumbnail frame: " << reader.video()->pts << " < " << options.seek << std::endl;
+        return;
+    }
+
+    if (!packet.iframe) {
+        TraceL << "Skipping non-iframe" << std::endl;
         return;
     }
 
