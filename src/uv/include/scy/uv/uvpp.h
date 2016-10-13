@@ -104,37 +104,13 @@ class Handle
     /// safely handling its asynchronous destruction mechanism.
 {
 public:
-    Handle(uv_loop_t* loop = nullptr, void* handle = nullptr) :
-        _loop(loop ? loop : uv_default_loop()), // nullptr will be uv_default_loop
-        _ptr((uv_handle_t*)handle), // nullptr or instance of uv_handle_t
-        _tid(uv_thread_self()),
-        _closed(false)
-    {
-        if (_ptr)
-            _ptr->data = this;
-    }
+    Handle(uv_loop_t* loop = nullptr, void* handle = nullptr);
+    virtual ~Handle();
 
-    virtual ~Handle()
-    {
-        assertThread();
-        if (!_closed)
-            close();
-        assert(_ptr == nullptr);
-    }
-
-    virtual void setLoop(uv_loop_t* loop)
+    virtual void setLoop(uv_loop_t* loop);
         // The event loop may be set before the handle is initialized.
-    {
-        assertThread();
-        assert(_ptr == nullptr && "loop must be set before handle");
-        _loop = loop;
-    }
 
-    virtual uv_loop_t* loop() const
-    {
-        assertThread();
-        return _loop;
-    }
+    virtual uv_loop_t* loop() const;
 
     template <class T>
     T* ptr() const
@@ -144,137 +120,59 @@ public:
         return reinterpret_cast<T*>(_ptr);
     }
 
-    virtual uv_handle_t* ptr() const
+    virtual uv_handle_t* ptr() const;
         // Returns a pointer to the managed libuv handle.
-    {
-        assertThread();
-        return _ptr;
-    }
 
-    virtual bool active() const
+    virtual bool active() const;
         // Returns true when the handle is active.
         // This method should be used instead of closed() to determine
         // the veracity of the libuv handle for stream io operations.
-    {
-        return _ptr && uv_is_active(_ptr) != 0;
-    }
 
-    virtual bool closed() const
+    virtual bool closed() const;
         // Returns true after close() has been called.
-    {
-        return _closed; //_ptr && uv_is_closing(_ptr) != 0;
-    }
 
-    bool ref()
+    bool ref();
         // Reference main loop again, once unref'd.
-    {
-        if (!active())
-            return false;
 
-        uv_ref(ptr());
-        return true;
-    }
-
-    bool unref()
+    bool unref();
         // Unreference the main loop after initialized.
-    {
-        if (active())
-            return false;
 
-        uv_unref(ptr());
-        return true;
-    }
-
-    uv_thread_t tid() const
+    uv_thread_t tid() const;
         // Returns the parent thread ID.
-    {
-        return _tid;
-    }
 
-    const scy::Error& error() const
-        // Returns the error context if any.
-    {
-        return _error;
-    }
+    const scy::Error& error() const;
+        // Returns the error context if any.]
 
-    virtual void setAndThrowError(const std::string& prefix = "UV Error", int errorno = 0)
+    virtual void setAndThrowError(const std::string& prefix = "UV Error", int errorno = 0);
         // Sets and throws the last error.
         // Should never be called inside libuv callbacks.
-    {
-        setUVError(prefix, errorno);
-        throwError(prefix, errorno);
-    }
 
-    virtual void throwError(const std::string& prefix = "UV Error", int errorno = 0) const
+    virtual void throwError(const std::string& prefix = "UV Error", int errorno = 0) const;
         // Throws the last error.
         // This function is const so it can be used for
         // invalid getter operations on closed handles.
         // The actual error would be set on the next iteraton.
-    {
-        throw std::runtime_error(formatError(prefix, errorno));
-    }
 
-    virtual void setUVError(const std::string& prefix = "UV Error", int errorno = 0)
+    virtual void setUVError(const std::string& prefix = "UV Error", int errorno = 0);
         // Sets the last error and sends relevant callbacks.
         // This method can be called inside libuv callbacks.
-    {
-        scy::Error err;
-        err.errorno = errorno;
-        //err.syserr = uv.sys_errno_;
-        err.message = formatError(prefix, errorno);
-        setError(err);
-    }
 
-    virtual void setError(const scy::Error& err)
+    virtual void setError(const scy::Error& err);
         // Sets the error content and triggers callbacks.
-    {
-        //if (_error == err) return;
-        assertThread();
-        _error = err;
-        onError(err);
-    }
 
-    virtual void close()
+    virtual void close();
         // Closes and destroys the associated libuv handle.
-    {
-        assertThread();
-        if (!_closed) {
-            if (_ptr && !uv_is_closing(_ptr)) {
-                uv_close(_ptr, [](uv_handle_t* handle) {
-                    delete handle;
-                });
-            }
 
-            // We no longer know about the handle.
-            // The handle pointer will be deleted on afterClose.
-            _ptr = nullptr;
-            _closed = true;
-
-            // Send the local onClose to run final callbacks.
-            onClose();
-        }
-    }
-
-    void assertThread() const
+    void assertThread() const;
         // Make sure we are calling from the event loop thread.
-    {
-#ifdef _DEBUG
-    		uv_thread_t current = uv_thread_self();
-    		assert(uv_thread_equal(&_tid, &current));
-#endif
-    }
 
 protected:
-    virtual void onError(const scy::Error& /* error */)
+    virtual void onError(const scy::Error& /* error */);
         // Override to handle errors.
         // The error may be a UV error, or a custom error.
-    {
-    }
 
-    virtual void onClose()
+    virtual void onClose();
         // Override to handle closure.
-    {
-    }
 
  protected:
     Handle(const Handle&); // = delete;

@@ -44,45 +44,31 @@
 
 #ifdef _WIN32
     // Windows (x64 and x86)
-    #ifndef SCY_WIN32
     #define SCY_WIN32
-    #endif
 #endif
 #if __unix__
     // Unix
-    #ifndef SCY_UNIX
     #define SCY_UNIX
-    #endif
 #endif
 #if __posix__
     // POSIX
-    #ifndef SCY_POSIX
     #define SCY_POSIX
-    #endif
 #endif
 #if __linux__
     // Linux
-    #ifndef SCY_LINUX
     #define SCY_LINUX
-    #endif
 #endif
 #if __APPLE__
     // Mac OS
-    #ifndef SCY_APPLE
     #define SCY_APPLE
-    #endif
 #endif
 #if __GNUC__
     // GCC compiler
-    #ifndef SCY_GNUC
     #define SCY_GNUC
-    #endif
 #endif
 #if defined(__MINGW32__) || defined(__MINGW64__)
     // MinGW
-    #ifndef SCY_MINGW
     #define SCY_MINGW
-    #endif
 #endif
 
 

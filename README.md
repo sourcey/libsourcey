@@ -44,10 +44,12 @@ LibSourcey is a collection of open source cross platform C++11 modules and class
   SSL networking layer and encryption
 * **FFmpeg** (optional, >= 2.8.3)
   Media encoding and streaming
+<!--
 * **OpenCV** (optional, >= 3.0)
   Video capture and computer vision algorithms
 * **RtAudio** (optional, >= 4.1.2)
   Audio capture
+-->
 * **WebRTC** (optional)
   Peer-to-peer video conferencing
 
@@ -87,8 +89,9 @@ sudo make install
 
 FFmpeg is an optional but recommended dependency that's required to make use of LibSourcey's media encoding capabilities.
 
-Please follow the [official guide for installing FFmpeg](http://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu) which works out of the box with LibSourcey.
+Please follow the [official guide for installing FFmpeg](http://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu) that works out of the box with LibSourcey.
 
+<!--
 **Install OpenCV (optional):**
 
 OpenCV is an optional dependecy that's used by LibSourcey for it's video capture, video analysis and computer vision algorithms. Note that if you're compiling FFmpeg yourself (as above), then you should compile OpenCV with `WITH_FFMPEG=OFF` otherwise conflicting FFmpeg libraries may be installed on your system.
@@ -106,6 +109,7 @@ sudo make install
 sudo /bin/bash -c 'echo "/usr/local/lib" > /etc/ld.so.conf.d/opencv.conf'
 sudo ldconfig
 ~~~
+-->
 
 ##### Install LibSourcey
 
