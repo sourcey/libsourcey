@@ -38,7 +38,7 @@ namespace av {
 //
 
 
-AudioEncoderContext::AudioEncoderContext(AVFormatContext* format) :
+AudioEncoder::AudioEncoder(AVFormatContext* format) :
     format(format),
     resampler(nullptr),
     fifo(nullptr),
@@ -48,14 +48,14 @@ AudioEncoderContext::AudioEncoderContext(AVFormatContext* format) :
 }
 
 
-AudioEncoderContext::~AudioEncoderContext()
+AudioEncoder::~AudioEncoder()
 {
     TraceS(this) << "Destroy" << endl;
     close();
 }
 
 
-void AudioEncoderContext::create()
+void AudioEncoder::create()
 {
     AudioContext::create();
 
@@ -143,7 +143,7 @@ void AudioEncoderContext::create()
 }
 
 
-void AudioEncoderContext::close()
+void AudioEncoder::close()
 {
     TraceS(this) << "Closing" << endl;
 
@@ -218,7 +218,7 @@ static AVFrame* initOutputFrame(AVCodecContext *codecContext)
 
 
 // Read a single audio frame from the FIFO and encode it.
-static bool readAndEncodeFrame(AudioEncoderContext* enc,
+static bool readAndEncodeFrame(AudioEncoder* enc,
                                AVPacket& opacket,
                                const std::int64_t pts)
 {
@@ -262,7 +262,7 @@ static bool readAndEncodeFrame(AudioEncoderContext* enc,
 }
 
 
-bool AudioEncoderContext::encode(const std::uint8_t* samples, const int frameSize, const std::int64_t pts, AVPacket& opacket)
+bool AudioEncoder::encode(const std::uint8_t* samples, const int frameSize, const std::int64_t pts, AVPacket& opacket)
 {
     TraceS(this) << "Encoding audio packet: " << frameSize << endl;
 
@@ -287,7 +287,7 @@ bool AudioEncoderContext::encode(const std::uint8_t* samples, const int frameSiz
 }
 
 
-bool AudioEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
+bool AudioEncoder::encode(AVFrame* iframe, AVPacket& opacket)
 {
     TraceS(this) << "Encoding audio frame" << endl;
 
@@ -331,7 +331,7 @@ bool AudioEncoderContext::encode(AVFrame* iframe, AVPacket& opacket)
 }
 
 
-bool AudioEncoderContext::flush(AVPacket& opacket)
+bool AudioEncoder::flush(AVPacket& opacket)
 {
     return encode(nullptr, opacket);
 }

@@ -25,36 +25,22 @@
 
 #ifdef HAVE_FFMPEG
 
-// #include "scy/mutex.h"
-// #include "scy/timer.h"
 #include "scy/av/types.h"
-#include "scy/av/format.h"
-#include "scy/av/ffmpeg.h"
+// #include "scy/av/format.h"
+// #include "scy/av/ffmpeg.h"
 #include "scy/av/videocontext.h"
-
-// extern "C" {
-// #include <libavcodec/avcodec.h>
-// #include <libavformat/avformat.h>
-// #include <libavutil/fifo.h>
-// #include <libavutil/opt.h>
-// #include <libavutil/pixdesc.h>
-// #include <libswscale/swscale.h>
-// #include <libavutil/avutil.h>
-// #include <libavutil/imgutils.h>
-// }
 
 
 namespace scy {
 namespace av {
 
 
-struct VideoDecoderContext: public VideoContext
+struct VideoDecoder: public VideoContext
 {
-    VideoDecoderContext();
-    virtual ~VideoDecoderContext();
+    VideoDecoder();
+    virtual ~VideoDecoder();
 
-    virtual void create(AVFormatContext *ic, int streamID);
-    //virtual void open();
+    virtual void create(AVFormatContext* format, AVStream* stream);
     virtual void close();
 
     virtual bool decode(std::uint8_t* data, int size, AVPacket& opacket);
@@ -67,11 +53,6 @@ struct VideoDecoderContext: public VideoContext
         // Flushes buffered frames.
         // This method should be called after decoding
         // until false is returned.
-
-    //double maxFPS;
-        // Maximum decoding FPS.
-        // FPS is calculated from ipacket PTS.
-        // Extra frames will be dropped.
 };
 
 

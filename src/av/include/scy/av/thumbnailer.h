@@ -58,7 +58,7 @@ struct Thumbnailer
 {
     ThumbnailerOptions options;
     av::MediaCapture reader;
-    av::VideoEncoderContext encoder;
+    av::VideoEncoder encoder;
 
     Thumbnailer(const ThumbnailerOptions& options = ThumbnailerOptions());
     ~Thumbnailer() ;

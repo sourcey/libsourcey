@@ -28,20 +28,20 @@
 // #include "scy/mutex.h"
 // #include "scy/timer.h"
 #include "scy/av/types.h"
-#include "scy/av/format.h"
-#include "scy/av/ffmpeg.h"
-#include "scy/av/fpscounter.h"
+// #include "scy/av/format.h"
+// #include "scy/av/ffmpeg.h"
+// #include "scy/av/fpscounter.h"
 
-// extern "C" {
+extern "C" {
 // #include <libavcodec/avcodec.h>
-// #include <libavformat/avformat.h>
+#include <libavformat/avformat.h>
 // #include <libavutil/fifo.h>
 // #include <libavutil/opt.h>
 // #include <libavutil/pixdesc.h>
-// #include <libswscale/swscale.h>
+#include <libswscale/swscale.h>
 // #include <libavutil/avutil.h>
 // #include <libavutil/imgutils.h>
-// }
+}
 
 
 namespace scy {
@@ -58,7 +58,7 @@ struct VideoConversionContext
 
     virtual AVFrame* convert(AVFrame* iframe);
 
-    struct SwsContext* ctx;
+    SwsContext* ctx;
     AVFrame* oframe;
     VideoCodec iparams;
     VideoCodec oparams;

@@ -73,8 +73,8 @@ public:
       // Flush and beffered or queued packets.
 
     EncoderOptions& options();
-    VideoEncoderContext* video();
-    AudioEncoderContext* audio();
+    VideoEncoder* video();
+    AudioEncoder* audio();
 
     PacketSignal emitter;
 
@@ -86,8 +86,8 @@ protected:
 
     EncoderOptions _options;
     AVFormatContext* _formatCtx;
-    VideoEncoderContext* _video;
-    AudioEncoderContext* _audio;
+    VideoEncoder* _video;
+    AudioEncoder* _audio;
     AVIOContext* _ioCtx;
     std::uint8_t* _ioBuffer;
     int _ioBufferSize;

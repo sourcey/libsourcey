@@ -36,10 +36,10 @@ VideoContext::VideoContext() :
     ctx(nullptr),
     codec(nullptr),
     frame(nullptr),
+    conv(nullptr),
     pts(0.0)
 {
     TraceS(this) << "Create" << endl;
-    //reset();
     initializeFFmpeg();
 }
 
@@ -48,7 +48,6 @@ VideoContext::~VideoContext()
 {
     TraceS(this) << "Destroy" << endl;
 
-    //assert((!frame && !codec && !stream) && "video context must be closed");
     close();
     uninitializeFFmpeg();
 }
@@ -85,17 +84,80 @@ void VideoContext::close()
         ctx = nullptr;
     }
 
-    // Streams are managed differently by each impl
+    freeConverter();
+
+    // Streams are managed differently by the external impl
     //if (stream)    {
         //stream = nullptr;
         // Note: The stream is managed by the AVFormatContext
         //av_freep(stream);
     //}
 
-    pts = 0.0;
+    // pts = 0.0;
     error = "";
 
     TraceS(this) << "Closing: OK" << endl;
+}
+
+
+AVFrame* VideoContext::convert(AVFrame* iframe)
+{
+    // While flushing the input frame may be null
+    if (!iframe)
+        return nullptr;
+
+    // Recreate the video conversion context on the fly
+    // if the input resolution changes.
+    if (iframe->width != conv->iparams.width ||
+        iframe->height != conv->iparams.height) {
+        iparams.width = iframe->width;
+        iparams.height = iframe->height;
+        DebugL << "Recreating video conversion context" << endl;
+        freeConverter();
+        createConverter();
+    }
+
+    // Return the input frame if no conversion is required
+    if (!conv)
+        return iframe;
+
+    // // Set the input PTS or a monotonic value to keep the encoder happy.
+    // // The actual setting of the PTS is outside the scope of this encoder.
+    // cframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : ctx->frame_number;
+
+    // Convert the input frame
+    return conv->convert(iframe);
+}
+
+
+void VideoContext::createConverter()
+{
+    if (conv)
+        throw std::runtime_error("Conversion context already exists.");
+
+    // Create the conversion context
+    if (iparams.width != oparams.width ||
+        iparams.height != oparams.height ||
+        iparams.pixelFmt != oparams.pixelFmt) {
+        conv = new VideoConversionContext();
+        conv->iparams = iparams;
+        conv->oparams = oparams;
+        conv->create();
+    }
+}
+
+
+void VideoContext::freeConverter()
+{
+    if (conv) {
+        delete conv;
+        conv = nullptr;
+    }
+
+    //if (frame) {
+    //    av_free(frame);
+    //    frame = nullptr;
+    //}
 }
 
 
@@ -124,111 +186,6 @@ AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
     picture->height = height;
 
     return picture;
-}
-
-
-void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& oparams)
-{
-    assert(oparams.enabled);
-
-    avcodec_get_context_defaults3(ctx, codec);
-    ctx->codec_id = codec->id;
-    ctx->codec_type = AVMEDIA_TYPE_VIDEO;
-    ctx->pix_fmt = av_get_pix_fmt(oparams.pixelFmt.c_str());
-    ctx->frame_number = 0;
-    ctx->max_b_frames = 1;
-
-    // Resolution must be a multiple of two
-    ctx->width = oparams.width;
-    ctx->height = oparams.height;
-
-    // For fixed-fps content timebase should be 1/framerate
-    // and timestamp increments should be identically 1.
-    ctx->time_base.den = (int)oparams.fps;
-    ctx->time_base.num = 1;
-
-    // Define encoding parameters
-    ctx->bit_rate = oparams.bitRate;
-    ctx->bit_rate_tolerance = oparams.bitRate * 1000; // needed when time_base.num > 1
-
-    // Emit one intra frame every ten
-    ctx->gop_size = 10;
-
-    // Set some defaults for codecs of note.
-    // Also set optimal output pixel formats if the
-    // default AV_PIX_FMT_YUV420P was given.
-    switch (ctx->codec_id) {
-    case AV_CODEC_ID_H264:
-        // TODO: Use oparams.quality to determine profile?
-        av_opt_set(ctx->priv_data, "preset", "slow", 0); // veryfast // slow // baseline
-        break;
-    case AV_CODEC_ID_MJPEG:
-    case AV_CODEC_ID_LJPEG:
-        if (ctx->pix_fmt == AV_PIX_FMT_YUV420P)
-            ctx->pix_fmt = AV_PIX_FMT_YUVJ420P;
-
-        // Use high quality JPEG
-        // TODO: Use oparams.quality to determine values
-        // ctx->mb_lmin        = ctx->lmin = ctx->qmin * FF_QP2LAMBDA;
-        // ctx->mb_lmax        = ctx->lmax = ctx->qmax * FF_QP2LAMBDA;
-        ctx->flags          = CODEC_FLAG_QSCALE;
-        ctx->global_quality = ctx->qmin * FF_QP2LAMBDA;
-        break;
-    case AV_CODEC_ID_MPEG2VIDEO:
-        ctx->max_b_frames = 2;
-        break;
-    case AV_CODEC_ID_MPEG1VIDEO:
-    case AV_CODEC_ID_MSMPEG4V3:
-        // Needed to avoid using macroblocks in which some codecs overflow
-         // this doesn't happen with normal video, it just happens here as the
-         // motion of the chroma plane doesn't match the luma plane
-         // avoid FFmpeg warning 'clipping 1 dct coefficients...'
-        ctx->mb_decision = 2;
-    break;
-    case AV_CODEC_ID_JPEGLS:
-        // AV_PIX_FMT_BGR24 or GRAY8 depending on if color...
-        if (ctx->pix_fmt == AV_PIX_FMT_YUV420P)
-            ctx->pix_fmt = AV_PIX_FMT_BGR24;
-        break;
-    case AV_CODEC_ID_HUFFYUV:
-        if (ctx->pix_fmt == AV_PIX_FMT_YUV420P)
-            ctx->pix_fmt = AV_PIX_FMT_YUV422P;
-        break;
-    default:
-      break;
-    }
-
-    // Update any modified values
-    oparams.pixelFmt = av_get_pix_fmt_name(ctx->pix_fmt);
-}
-
-
-void initDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts)
-{
-    opacket->data = frame->data[0];
-    // opacket->size = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
-    opacket->size = av_image_get_buffer_size(ctx->pix_fmt, ctx->width, ctx->height, 16);
-    opacket->dts = frame->pkt_dts; // Decoder PTS values can be unordered
-    opacket->pts = frame->pkt_pts;
-
-    // Local PTS value represented as decimal seconds
-    if (opacket->dts != AV_NOPTS_VALUE) {
-        *pts = (double)opacket->pts;
-        *pts *= av_q2d(stream->time_base);
-    }
-
-    assert(opacket->data);
-    assert(opacket->size);
-    //assert(opacket->dts >= 0);
-    //assert(opacket->pts >= 0);
-
-    // TraceL << "[VideoContext] Init Decoded Frame Pcket:"
-    //     << "\n\tFrame DTS: " << frame->pkt_dts
-    //     << "\n\tFrame PTS: " << frame->pkt_pts
-    //     << "\n\tPacket Size: " << opacket->size
-    //     << "\n\tPacket DTS: " << opacket->dts
-    //     << "\n\tPacket PTS: " << opacket->pts
-    //     << endl;
 }
 
 

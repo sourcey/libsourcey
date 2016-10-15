@@ -106,6 +106,15 @@ AVFrame* VideoConversionContext::convert(AVFrame* iframe)
         oframe->data, oframe->linesize) < 0)
         throw std::runtime_error("Pixel format conversion not supported.");
 
+    oframe->format = av_get_pix_fmt(oparams.pixelFmt.c_str()); //ctx->pix_fmt;
+    oframe->width  = oparams.width; //iframe->width;
+    oframe->height = oparams.height; //iframe->height;
+    oframe->pts = iframe->pts;
+
+    // Set the input PTS or a monotonic value to keep the encoder happy.
+    // The actual setting of the PTS is outside the scope of this encoder.
+    // oframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : ctx->frame_number;
+
     return oframe;
 }
 

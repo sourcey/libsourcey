@@ -31,7 +31,6 @@
 #include "scy/av/format.h"
 #include "scy/av/ffmpeg.h"
 #include "scy/av/videocontext.h"
-#include "scy/av/videoconverter.h"
 
 // extern "C" {
 // #include <libavcodec/avcodec.h>
@@ -49,10 +48,10 @@ namespace scy {
 namespace av {
 
 
-struct VideoEncoderContext: public VideoContext
+struct VideoEncoder: public VideoContext
 {
-    VideoEncoderContext(AVFormatContext* format = nullptr);
-    virtual ~VideoEncoderContext();
+    VideoEncoder(AVFormatContext* format = nullptr);
+    virtual ~VideoEncoder();
 
     virtual void create();
     //virtual void open();
@@ -63,17 +62,9 @@ struct VideoEncoderContext: public VideoContext
     virtual bool encode(AVFrame* iframe, AVPacket& opacket);
     virtual bool flush(AVPacket& opacket);
 
-    virtual void createConverter();
-    virtual void freeConverter();
-
     AVFormatContext* format;
-    VideoConversionContext* conv;
-
     std::uint8_t* buffer;
     int           bufferSize;
-
-    VideoCodec    iparams;
-    VideoCodec    oparams;
 };
 
 

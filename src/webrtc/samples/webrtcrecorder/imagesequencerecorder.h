@@ -27,7 +27,7 @@ protected:
     size_t _count;
     int _width;
     int _height;
-    av::VideoEncoderContext _encoder;
+    av::VideoEncoder _encoder;
     AVFrame* _avframe;
 };
 

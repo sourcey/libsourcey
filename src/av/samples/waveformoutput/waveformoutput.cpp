@@ -242,7 +242,7 @@ public:
 
     /*
 
-        //AudioDecoderContext* audio = reinterpret_cast<AudioDecoderContext*>(packet.opaque);
+        //AudioDecoder* audio = reinterpret_cast<AudioDecoder*>(packet.opaque);
         //int samples_per_second = audio->sampleRate;
         //int N = 1024; //1024; //64; //1024; //packet.size / 2;
         //vector<FFT::Complex> fftData(FFT_POINTS);

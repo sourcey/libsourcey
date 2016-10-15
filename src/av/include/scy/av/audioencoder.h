@@ -45,10 +45,10 @@ namespace av {
 struct AudioResampler;
 
 
-struct AudioEncoderContext: public AudioContext
+struct AudioEncoder: public AudioContext
 {
-    AudioEncoderContext(AVFormatContext* format = nullptr);
-    virtual ~AudioEncoderContext();
+    AudioEncoder(AVFormatContext* format = nullptr);
+    virtual ~AudioEncoder();
 
     virtual void create();
     //virtual void open();

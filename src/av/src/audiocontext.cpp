@@ -155,26 +155,6 @@ AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params)
 }
 
 
-void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket) //, double* pts
-{
-    opacket->data = frame->data[0];
-    opacket->size = av_samples_get_buffer_size(nullptr, ctx->channels, frame->nb_samples, ctx->sample_fmt, 0);
-    opacket->dts = frame->pkt_dts; // Decoder PTS values may be out of sequence
-    opacket->pts = frame->pkt_pts;
-
-    // Local PTS value represented as decimal seconds
-    // if (opacket->dts != AV_NOPTS_VALUE) {
-    //     *pts = (double)opacket->pts;
-    //     *pts *= av_q2d(stream->time_base);
-    // }
-
-    assert(opacket->data);
-    assert(opacket->size);
-    assert(opacket->dts >= 0);
-    assert(opacket->pts >= 0);
-}
-
-
 } } // namespace scy::av
 
 

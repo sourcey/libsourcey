@@ -97,14 +97,13 @@ void FFmpegVideoCapturer::onFrameCaptured(void* sender, av::VideoPacket& packet)
     // Convert the packet from BGR to I420 for WebRTC
     // cv::Mat yuv(packet.width, packet.height, CV_8UC4);
     // cv::cvtColor(*packet.mat, yuv, CV_BGR2YUV_I420);
-    assert(0 && "implement me");
 
     cricket::CapturedFrame frame;
     frame.width = packet.width;
     frame.height = packet.height;
     frame.fourcc = cricket::FOURCC_YUYV; //FOURCC_I420;
-    // frame.data_size = yuv.rows * yuv.step;
-    // frame.data = yuv.data;
+    frame.data_size = packet.size(); //yuv.rows * yuv.step;
+    frame.data = packet.data(); //yuv.data;
 
     SignalFrameCaptured(this, &frame);
 }

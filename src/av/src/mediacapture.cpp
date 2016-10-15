@@ -148,15 +148,16 @@ void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputF
     av_dump_format(_formatCtx, 0, filename.c_str(), 0);
 
     for (unsigned i = 0; i < _formatCtx->nb_streams; i++) {
-        auto codec = _formatCtx->streams[i]->codec;
+        auto stream = _formatCtx->streams[i];
+        auto codec = stream->codec;
         if (!_video && codec->codec_type == AVMEDIA_TYPE_VIDEO) {
-            _video = new VideoDecoderContext();
-            _video->create(_formatCtx, i);
+            _video = new VideoDecoder();
+            _video->create(_formatCtx, stream);
             _video->open();
         }
         else if (!_audio && codec->codec_type == AVMEDIA_TYPE_AUDIO) {
-            _audio = new AudioDecoderContext();
-            _audio->create(_formatCtx, i);
+            _audio = new AudioDecoder();
+            _audio->create(_formatCtx, stream);
             _audio->open();
         }
     }
@@ -333,14 +334,14 @@ AVFormatContext* MediaCapture::formatCtx() const
 }
 
 
-VideoDecoderContext* MediaCapture::video() const
+VideoDecoder* MediaCapture::video() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _video;
 }
 
 
-AudioDecoderContext* MediaCapture::audio() const
+AudioDecoder* MediaCapture::audio() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _audio;

@@ -137,7 +137,7 @@ void VideoAnalyzer::onVideo(void*, VideoPacket& packet)
     int height = greyFrame->height;
     int step   = greyFrame->linesize[0];
     int frames = 0;
-    //VideoDecoderContext* video = _reader.video();
+    //VideoDecoder* video = _reader.video();
 
     Mutex::ScopedLock lock(_mutex);
 
@@ -215,7 +215,7 @@ void VideoAnalyzer::onAudio(void*, AudioPacket& packet)
 AVFrame* VideoAnalyzer::getGrayVideoFrame()
 {
     Mutex::ScopedLock lock(_mutex);
-    VideoDecoderContext* video = _reader.video();
+    VideoDecoder* video = _reader.video();
 
     // TODO: Conversion via decoder?
     if (_videoConv == nullptr) {

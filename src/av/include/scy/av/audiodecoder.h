@@ -42,12 +42,12 @@ namespace scy {
 namespace av {
 
 
-struct AudioDecoderContext: public AudioContext
+struct AudioDecoder: public AudioContext
 {
-    AudioDecoderContext();
-    virtual ~AudioDecoderContext();
+    AudioDecoder();
+    virtual ~AudioDecoder();
 
-    virtual void create(AVFormatContext* ic, int streamID);
+    virtual void create(AVFormatContext* format, AVStream* stream);
     //virtual void open();
     virtual void close();
 

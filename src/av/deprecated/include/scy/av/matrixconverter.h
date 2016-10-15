@@ -40,7 +40,7 @@ namespace av {
 class MatrixConverter: public IPacketizer
     /// This class provides the ability to convert decoded
     /// video stream frames to OpenCV matrix images.
-    /// Input packets must pass a VideoDecoderContext pointer
+    /// Input packets must pass a VideoDecoder pointer
     /// as client data.
 {
 public:
@@ -70,9 +70,9 @@ public:
     virtual void process(IPacket& packet)
     {
         VideoPacket& vpacket = reinterpret_cast<VideoPacket&>(packet);
-        VideoDecoderContext* video = reinterpret_cast<VideoDecoderContext*>(packet.opaque);    
+        VideoDecoder* video = reinterpret_cast<VideoDecoder*>(packet.opaque);    
         if (video == nullptr)
-            throw std::runtime_error("Matrix Converter: Video packets must contain a VideoDecoderContext pointer.");    
+            throw std::runtime_error("Matrix Converter: Video packets must contain a VideoDecoder pointer.");    
         
         // Create and allocate the conversion frame.
         if (_oframe == nullptr) {

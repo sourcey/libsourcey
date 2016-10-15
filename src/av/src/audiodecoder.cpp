@@ -38,35 +38,35 @@ namespace av {
 //
 
 
-AudioDecoderContext::AudioDecoderContext() :
+AudioDecoder::AudioDecoder() :
     duration(0.0)
 {
 }
 
 
-AudioDecoderContext::~AudioDecoderContext()
+AudioDecoder::~AudioDecoder()
 {
     close();
 }
 
 
-void AudioDecoderContext::create(AVFormatContext* ic, int streamID)
+void AudioDecoder::create(AVFormatContext* format, AVStream* stream)
 {
     AudioContext::create();
 
-    TraceS(this) << "Create: " << streamID << endl;
+    assert(format);
+    assert(stream);
 
-    assert(ic);
-    assert(streamID >= 0);
+    TraceS(this) << "Create: " << stream->index << endl;
 
-    stream = ic->streams[streamID];
-    ctx = stream->codec;
+    this->stream = stream;
+    this->ctx = stream->codec;
 
-    codec = avcodec_find_decoder(ctx->codec_id);
+    codec = avcodec_find_decoder(this->ctx->codec_id);
     if (!codec)
         throw std::runtime_error("Could not find audio decoder.");
 
-    if (avcodec_open2(ctx, codec, NULL) < 0)
+    if (avcodec_open2(ctx, codec, nullptr) < 0)
         throw std::runtime_error("Could not open the audio codec.");
 
     frame = av_frame_alloc();
@@ -75,7 +75,7 @@ void AudioDecoderContext::create(AVFormatContext* ic, int streamID)
 }
 
 
-void AudioDecoderContext::close()
+void AudioDecoder::close()
 {
     AudioContext::close();
 
@@ -85,7 +85,27 @@ void AudioDecoderContext::close()
 }
 
 
-bool AudioDecoderContext::decode(std::uint8_t* data, int size, AVPacket& opacket)
+void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket) //, double* pts
+{
+    opacket->data = frame->data[0];
+    opacket->size = av_samples_get_buffer_size(nullptr, ctx->channels, frame->nb_samples, ctx->sample_fmt, 0);
+    opacket->pts = frame->pkt_pts;
+    opacket->dts = frame->pkt_dts; // Decoder PTS values may be out of sequence
+
+    // Local PTS value represented as decimal seconds
+    // if (opacket->dts != AV_NOPTS_VALUE) {
+    //     *pts = (double)opacket->pts;
+    //     *pts *= av_q2d(stream->time_base);
+    // }
+
+    assert(opacket->data);
+    assert(opacket->size);
+    assert(opacket->dts >= 0);
+    assert(opacket->pts >= 0);
+}
+
+
+bool AudioDecoder::decode(std::uint8_t* data, int size, AVPacket& opacket)
 {
     AVPacket ipacket;
     av_init_packet(&ipacket);
@@ -96,7 +116,7 @@ bool AudioDecoderContext::decode(std::uint8_t* data, int size, AVPacket& opacket
 }
 
 
-bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
+bool AudioDecoder::decode(AVPacket& ipacket, AVPacket& opacket)
 {
     assert(ipacket.stream_index == stream->index);
     assert(codec);
@@ -166,7 +186,7 @@ bool AudioDecoderContext::decode(AVPacket& ipacket, AVPacket& opacket)
 }
 
 
-bool AudioDecoderContext::flush(AVPacket& opacket)
+bool AudioDecoder::flush(AVPacket& opacket)
 {
     AVPacket ipacket;
     av_init_packet(&ipacket);
@@ -178,20 +198,16 @@ bool AudioDecoderContext::flush(AVPacket& opacket)
     opacket.size = 0;
 
     int frameDecoded = 0;
-    avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
+    av_frame_unref(frame);
+    avcodec_decode_audio4(ctx, frame, &frameDecoded, &ipacket);
 
     if (frameDecoded) {
         initDecodedAudioPacket(stream, ctx, frame, &opacket); //, &ptsSeconds
-        TraceS(this) << "Flushed Audio Frame: " << opacket.pts << endl;
+        TraceS(this) << "Flushed audio frame: " << opacket.pts << endl;
         return true;
     }
     return false;
 }
-
-
-//
-// Helper functions
-//
 
 
 

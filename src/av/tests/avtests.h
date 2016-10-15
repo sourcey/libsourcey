@@ -142,7 +142,7 @@ class AudioEncoderTest: public Test
 {
     void run()
     {
-        av::AudioEncoderContext encoder;
+        av::AudioEncoder encoder;
         auto& iparams = encoder.iparams;
         auto& oparams = encoder.oparams;
 
@@ -225,7 +225,7 @@ class AudioResamplerTest: public Test
 //
 class AudioCaptureEncoderTest: public Test
 {
-    av::AudioEncoderContext encoder;
+    av::AudioEncoder encoder;
     int numFramesRemaining;
     std::ofstream output;
 

@@ -25,12 +25,11 @@
 
 #ifdef HAVE_FFMPEG
 
-// #include "scy/mutex.h"
-// #include "scy/timer.h"
 #include "scy/av/types.h"
 #include "scy/av/format.h"
 #include "scy/av/ffmpeg.h"
 #include "scy/av/fpscounter.h"
+#include "scy/av/videoconverter.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -48,26 +47,8 @@ namespace scy {
 namespace av {
 
 
-struct VideoEncoderContext;
-struct VideoConversionContext;
-
-
-AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height);
-void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& oparams);
-void initDecodedVideoPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket, double* pts);
-void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params);
-// bool encodeVideoPacket(VideoEncoderContext* video, AVFrame* iframe, AVPacket& opacket);
-void printAvailableEncoders(std::ostream& ost, const char* delim = " ");
-AVRational getCodecTimeBase(AVCodec* c, double fps);
-
-
-//
-// Video Context
-//
-
-
 struct VideoContext
-    /// Base video context which all encoders and decoders extend
+    /// Base video context from which all video encoders and decoders derive.
 {
     VideoContext();
     virtual ~VideoContext();
@@ -81,18 +62,33 @@ struct VideoContext
     virtual void close();
         // Close the AVCodecContext
 
-    AVStream* stream;        // encoder or decoder stream
-    AVCodecContext* ctx;    // encoder or decoder context
-    AVCodec* codec;            // encoder or decoder codec
-    AVFrame* frame;            // encoded or decoded frame
-    FPSCounter fps;            // encoder or decoder fps rate
-    //FPSCounter1 fps1;
-    double pts;                // pts in decimal seconds
+    virtual AVFrame* convert(AVFrame* iframe);
+        // Convert the video frame and return the result
 
-    Stopwatch frameDuration;
-    std::string error;        // error message
+    virtual void createConverter();
+    virtual void freeConverter();
+
+    VideoCodec iparams;      // input parameters
+    VideoCodec oparams;      // output parameters
+    AVStream* stream;        // encoder or decoder stream
+    AVCodecContext* ctx;     // encoder or decoder context
+    AVCodec* codec;          // encoder or decoder codec
+    AVFrame* frame;          // encoder or decoder frame
+    VideoConversionContext* conv; // video conversion context
+    FPSCounter fps;          // encoder or decoder fps rate
+    double pts;              // pts in decimal seconds
+    std::string error;       // error message
 };
 
+
+//
+// Inline helpers
+//
+
+
+AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height);
+void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params);
+void printAvailableEncoders(std::ostream& ost, const char* delim = " ");
 
 
 } } // namespace scy::av

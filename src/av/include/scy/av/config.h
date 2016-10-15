@@ -21,9 +21,9 @@
 #define SCY_AV_Config_H
 
 
-#define MAX_VIDEO_PACKET_SIZE        (3 * 1024 * 1024) 
+#define MAX_VIDEO_PACKET_SIZE        (3 * 1024 * 1024)
 #define MAX_AUDIO_PACKET_SIZE        (128 * 1500)            // 1 second of 48khz 32bit audio
-#define MAX_ENCODE_DURATION            (3 * 60 * 60 * 1000)    // 3 hours
+#define MAX_ENCODE_DURATION          (3 * 60 * 60 * 1000)    // 3 hours
 
 
 //#ifndef INT64_C
@@ -41,7 +41,6 @@
 #ifndef UINT64_C
 #define UINT64_C(c) (c ## ULL)
 #endif
-
 
 
 #endif // SCY_AV_Config_H

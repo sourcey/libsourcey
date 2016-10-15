@@ -268,14 +268,14 @@ EncoderOptions& MultiplexEncoder::options()
 }
 
 
-VideoEncoderContext* MultiplexEncoder::video()
+VideoEncoder* MultiplexEncoder::video()
 {
     //Mutex::ScopedLock lock(_mutex);
     return _video;
 }
 
 
-AudioEncoderContext* MultiplexEncoder::audio()
+AudioEncoder* MultiplexEncoder::audio()
 {
     //Mutex::ScopedLock lock(_mutex);
     return _audio;
@@ -322,7 +322,7 @@ void MultiplexEncoder::createVideo()
     assert(!_video);
     assert(_options.oformat.video.enabled);
     assert(_formatCtx->oformat->video_codec != AV_CODEC_ID_NONE);
-    _video = new VideoEncoderContext(_formatCtx);
+    _video = new VideoEncoder(_formatCtx);
     _video->iparams = _options.iformat.video;
     _video->oparams = _options.oformat.video;
     _video->create();
@@ -435,7 +435,7 @@ void MultiplexEncoder::createAudio()
     assert(_options.oformat.audio.enabled);
     assert(_formatCtx->oformat->audio_codec != AV_CODEC_ID_NONE);
 
-    _audio = new AudioEncoderContext(_formatCtx);
+    _audio = new AudioEncoder(_formatCtx);
     _audio->iparams = _options.iformat.audio;
     _audio->oparams = _options.oformat.audio;
     _audio->create();
@@ -548,7 +548,7 @@ bool MultiplexEncoder::encodeAudio(AVFrame* frame)
 
     EncoderOptions* options = nullptr;
     AVFormatContext* formatCtx = nullptr;
-    AudioEncoderContext* audio = nullptr;
+    AudioEncoder* audio = nullptr;
     // AVFifoBuffer* audioFifo = nullptr;
     // std::uint8_t* audioBuffer = nullptr;
     {

@@ -66,8 +66,8 @@ public:
     virtual void getVideoCodec(VideoCodec& iparams);
 
     AVFormatContext* formatCtx() const;
-    VideoDecoderContext* video() const;
-    AudioDecoderContext* audio() const;
+    VideoDecoder* video() const;
+    AudioDecoder* audio() const;
     std::string error() const;
 
     NullSignal Closing;
@@ -81,8 +81,8 @@ protected:
     mutable Mutex _mutex;
     Thread _thread;
     AVFormatContext* _formatCtx;
-    VideoDecoderContext* _video;
-    AudioDecoderContext* _audio;
+    VideoDecoder* _video;
+    AudioDecoder* _audio;
     std::string _error;
     bool _stopping;
 };
