@@ -194,7 +194,13 @@ void TestRunner::run()
         cout << "---------------------------------------------------------------" << endl;
         cout << _current->name << " starting" << endl;
         std::uint64_t test_start = time::hrtime();
-        _current->run();
+        try {
+            _current->run();
+        }
+        catch (std::exception& exc) {
+            _current->errors.push_back(exc.what());
+            cout << "exception thrown: " << exc.what() << endl;
+        }
         _current->duration = (time::hrtime() - test_start) / 1e9;
         cout << _current->name << " ended after " << _current->duration << " seconds" << endl;
     }
