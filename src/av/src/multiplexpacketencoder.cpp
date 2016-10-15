@@ -17,7 +17,7 @@
 //
 
 
-#include "scy/av/avpacketencoder.h"
+#include "scy/av/multiplexpacketencoder.h"
 #ifdef HAVE_FFMPEG
 
 
@@ -28,30 +28,30 @@ namespace scy {
 namespace av {
 
 
-AVPacketEncoder::AVPacketEncoder(const EncoderOptions& options, bool muxLiveStreams) :
-    AVEncoder(options),
-    PacketProcessor(AVEncoder::emitter),
+MultiplexPacketEncoder::MultiplexPacketEncoder(const EncoderOptions& options, bool muxLiveStreams) :
+    MultiplexEncoder(options),
+    PacketProcessor(MultiplexEncoder::emitter),
     _muxLiveStreams(muxLiveStreams),
     _lastVideoPacket(nullptr)
 {
 }
 
 
-AVPacketEncoder::AVPacketEncoder(bool muxLiveStreams) :
-    AVEncoder(),
-    PacketProcessor(AVEncoder::emitter),
+MultiplexPacketEncoder::MultiplexPacketEncoder(bool muxLiveStreams) :
+    MultiplexEncoder(),
+    PacketProcessor(MultiplexEncoder::emitter),
     _muxLiveStreams(muxLiveStreams),
     _lastVideoPacket(nullptr)
 {
 }
 
 
-AVPacketEncoder::~AVPacketEncoder()
+MultiplexPacketEncoder::~MultiplexPacketEncoder()
 {
 }
 
 
-void AVPacketEncoder::process(IPacket& packet)
+void MultiplexPacketEncoder::process(IPacket& packet)
 {
     Mutex::ScopedLock lock(_mutex);
 
@@ -65,8 +65,8 @@ void AVPacketEncoder::process(IPacket& packet)
 
     // Do some special synchronizing for muxing live variable framerate streams
     if (_muxLiveStreams) {
-        auto video = AVEncoder::video();
-        auto audio = AVEncoder::audio();
+        auto video = MultiplexEncoder::video();
+        auto audio = MultiplexEncoder::audio();
         assert(audio && video);
         double audioPts, videoPts;
         int times = 0;
@@ -117,25 +117,25 @@ void AVPacketEncoder::process(IPacket& packet)
 }
 
 
-void AVPacketEncoder::encode(VideoPacket& packet)
+void MultiplexPacketEncoder::encode(VideoPacket& packet)
 {
     encodeVideo((std::uint8_t*)packet.data(), packet.size(), packet.width, packet.height, (std::uint64_t)packet.time);
 }
 
 
-void AVPacketEncoder::encode(AudioPacket& packet)
+void MultiplexPacketEncoder::encode(AudioPacket& packet)
 {
     encodeAudio((std::uint8_t*)packet.data(), packet.numSamples, (std::uint64_t)packet.time);
 }
 
 
-bool AVPacketEncoder::accepts(IPacket& packet)
+bool MultiplexPacketEncoder::accepts(IPacket& packet)
 {
     return dynamic_cast<av::MediaPacket*>(&packet) != 0;
 }
 
 
-void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state)
+void MultiplexPacketEncoder::onStreamStateChange(const PacketStreamState& state)
 {
     TraceS(this) << "On stream state change: " << state << endl;
 
@@ -145,10 +145,10 @@ void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state)
     case PacketStreamState::Active:
         if (!isActive()) {
             TraceS(this) << "Initializing" << endl;
-            //if (AVEncoder::options().oformat.video.enabled &&
-            //    AVEncoder::options().oformat.audio.enabled)
+            //if (MultiplexEncoder::options().oformat.video.enabled &&
+            //    MultiplexEncoder::options().oformat.audio.enabled)
             //    _muxLiveStreams = true;
-            AVEncoder::initialize();
+            MultiplexEncoder::initialize();
         }
         break;
 
@@ -156,8 +156,8 @@ void AVPacketEncoder::onStreamStateChange(const PacketStreamState& state)
     case PacketStreamState::Stopping:
         if (isActive()) {
             TraceS(this) << "Uninitializing" << endl;
-            AVEncoder::flush();
-            AVEncoder::uninitialize();
+            MultiplexEncoder::flush();
+            MultiplexEncoder::uninitialize();
         }
         break;
     //case PacketStreamState::Stopped:

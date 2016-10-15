@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_AV_AVEncoder_H
-#define SCY_AV_AVEncoder_H
+#ifndef SCY_AV_MultiplexEncoder_H
+#define SCY_AV_MultiplexEncoder_H
 
 
 #include "scy/base.h"
@@ -46,12 +46,12 @@ namespace scy {
 namespace av {
 
 
-class AVEncoder: public IEncoder
+class MultiplexEncoder: public IEncoder
     /// This class implements an multiplex audio/video encoder.
 {
 public:
-    AVEncoder(const EncoderOptions& options = EncoderOptions());
-    virtual ~AVEncoder();
+    MultiplexEncoder(const EncoderOptions& options = EncoderOptions());
+    virtual ~MultiplexEncoder();
 
     virtual void initialize();
     virtual void uninitialize();
@@ -95,11 +95,11 @@ protected:
 };
 
 
-bool writeOutputPacket(AVFormatContext *formatCtx, AVPacket& packet);
+// bool writeOutputPacket(AVFormatContext *formatCtx, AVPacket& packet);
 
 
 } } // namespace scy::av
 
 
 #endif
-#endif    // SCY_AV_AVEncoder_H
+#endif // SCY_AV_MultiplexEncoder_H

@@ -9,5 +9,5 @@ if(HAVE_WEBRTC AND (BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_webrtc)
 
   define_sourcey_module(webrtc base av crypto util)
 
-  add_subdirectory(apps)
+  #add_subdirectory(apps)
 endif()

@@ -76,6 +76,8 @@ macro(include_dependency name)
 
   string(TOUPPER ${name} name_upper)
 
+  # print_module_variables(${name_upper})
+
   # Expose to LibSourcey
   if(${name_upper}_INCLUDE_DIR)
     # message(STATUS "- Found ${name} Inc Dir: ${${name_upper}_INCLUDE_DIR}")
@@ -108,7 +110,7 @@ macro(include_dependency name)
     #list(APPEND LibSourcey_BUILD_DEPENDENCIES ${${name_upper}_LIBRARIES})
   endif()
   if(${name_upper}_DEPENDENCIES)
-    #message(STATUS "- Found external dependency ${name}: ${${name_upper}_DEPENDENCIES}")
+    message(STATUS "- Found external dependency ${name}: ${${name_upper}_DEPENDENCIES}")
     list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${name_upper}_DEPENDENCIES})
     #list(APPEND LibSourcey_BUILD_DEPENDENCIES ${${name_upper}_DEPENDENCIES})
   endif()
@@ -575,6 +577,9 @@ macro(find_component_paths module component library header)
   set_component_notfound(${module} ${component})
 
   find_path(${ALIAS_INCLUDE_DIRS} ${header}
+    PATHS
+      ${${module}_INCLUDE_DIR} # try to assertain the component include dir from the root module include dir
+      ${${module}_INCLUDE_HINTS}
     PATH_SUFFIXES
       ${${module}_PATH_SUFFIXES}
   )
@@ -587,12 +592,14 @@ macro(find_component_paths module component library header)
         ${library}
       PATHS
         ${${ALIAS_LIBRARY_DIRS}}
+        ${${module}_LIBRARY_HINTS}
     )
     find_library(${ALIAS_DEBUG_LIBRARIES}
       NAMES
         ${library}d
       PATHS
         ${${ALIAS_LIBRARY_DIRS}}
+        ${${module}_LIBRARY_HINTS}
     )
     # if (${ALIAS_RELEASE_LIBRARIES})
     #   list(APPEND ${ALIAS_LIBRARIES} "optimized" ${${ALIAS_RELEASE_LIBRARIES}})
@@ -608,6 +615,7 @@ macro(find_component_paths module component library header)
         ${library}
       PATHS
         ${${ALIAS_LIBRARY_DIRS}}
+        ${${module}_LIBRARY_HINTS}
     )
   endif()
 

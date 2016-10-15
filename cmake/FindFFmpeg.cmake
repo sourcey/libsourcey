@@ -6,7 +6,7 @@
 #  FFMPEG_LIBRARIES     - Link these to use the required ffmpeg components.
 #  FFMPEG_DEFINITIONS   - Compiler switches required for using the required ffmpeg components.
 #
-# For each of the components it will additionaly set.
+# For each of the components it will additionalLy set.
 #   - AVCODEC
 #   - AVFORMAT
 #   - AVFILTER
@@ -24,10 +24,9 @@
 #  <component>_DEFINITIONS  - Compiler switches required for using <component>
 #  <component>_VERSION      - The components version
 
-
 # The default components were taken from a survey over other FindFFmpeg.cmake files
 if (NOT FFMPEG_FIND_COMPONENTS)
-  set(FFMPEG_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)
+  set(FFMPEG_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL AVDEVICE SWSCALE SWRESAMPLE)
 endif()
 
 # Check for cached results. If there are skip the costly part.
@@ -36,16 +35,14 @@ if (NOT FFMPEG_FOUND)
   # The FFmpeg compilation guide stores files in an unusual location,
   # so let's support that out of the box
   # http://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
-  set(CMAKE_LIBRARY_PATH
+  set(FFMPEG_LIBRARY_HINTS
     $ENV{HOME}/tmp/ffmpeg_build/lib
     $ENV{HOME}/ffmpeg_build/lib
-    /tmp/ffmpeg_build/lib
-    ${CMAKE_LIBRARY_PATH})
-  set(CMAKE_SYSTEM_PREFIX_PATH
+    /tmp/ffmpeg_build/lib)
+  set(FFMPEG_INCLUDE_HINTS
     $ENV{HOME}/tmp/ffmpeg_build/include
     $ENV{HOME}/ffmpeg_build/include
-    /tmp/ffmpeg_build/include
-    ${CMAKE_SYSTEM_PREFIX_PATH})
+    /tmp/ffmpeg_build/include)
 
   # Check for all components
   find_component(FFMPEG SWRESAMPLE libswresample swresample libswresample/swresample.h)

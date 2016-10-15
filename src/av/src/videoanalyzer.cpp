@@ -245,7 +245,7 @@ void VideoAnalyzer::onReadComplete(void* sender)
 {
     TraceN(this) << "On Read Complete" << endl;
 
-    AVCapture* reader = reinterpret_cast<AVCapture*>(sender);
+    MediaCapture* reader = reinterpret_cast<MediaCapture*>(sender);
     {
         Mutex::ScopedLock lock(_mutex);
         if (_error.empty())
@@ -256,7 +256,7 @@ void VideoAnalyzer::onReadComplete(void* sender)
 }
 
 
-AVCapture& VideoAnalyzer::reader()
+MediaCapture& VideoAnalyzer::reader()
 {
     Mutex::ScopedLock lock(_mutex);
     return _reader;

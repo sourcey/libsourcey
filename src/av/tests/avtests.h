@@ -28,12 +28,12 @@
 // #include "scy/av/flvmetadatainjector.h"
 // #include "scy/av/formatregistry.h"
 // #include "scy/av/mediafactory.h"
-// #include "scy/av/avcapture.h"
-// #include "scy/av/avpacketencoder.h"
+// #include "scy/av/mediacapture.h"
+// #include "scy/av/multiplexpacketencoder.h"
 // #include "scy/av/thumbnailer.h"
 // #include "scy/av/iencoder.h"
-// #include "scy/av/videocapture.h"
-#include "scy/av/avcapture.h"
+#include "scy/av/videocapture.h"
+#include "scy/av/audiocapture.h"
 #include "scy/av/audioencoder.h"
 #include "scy/av/audioresampler.h"
 
@@ -242,8 +242,7 @@ class AudioCaptureEncoderTest: public Test
             WarnL << "Skipping audio test because no microphone is available" << endl;
         }
 
-        av::AVCapture capture;
-        capture.openMicrophone(device.id, inNbChannels, inSampleRate);
+        av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
         capture.getAudioCodec(iparams);
         capture.start();
 
@@ -320,8 +319,7 @@ class AudioCaptureResamplerTest: public Test
             WarnL << "Skipping audio test because no microphone is available" << endl;
         }
 
-        av::AVCapture capture;
-        capture.openMicrophone(device.id, inNbChannels, inSampleRate);
+        av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
         capture.getAudioCodec(iparams);
         capture.start();
 
@@ -395,7 +393,7 @@ class AudioCaptureResamplerTest: public Test
 //
 //         try {
 //
-//             runAVCaptureRecorderTest();
+//             runMediaCaptureRecorderTest();
 // #if 0
 //             runAudioRecorderTest();
 //             testVideoThumbnailer();
@@ -419,7 +417,7 @@ class AudioCaptureResamplerTest: public Test
 //             runOpenCVMJPEGTest();
 //             runVideoRecorderTest();
 //             runCaptureRecorderTest();
-//             runAVEncoderTest();
+//             runMultiplexEncoderTest();
 //             runStreamEncoderTest();
 //             runMediaSocketTest();
 //             runFormatFactoryTest();
@@ -727,7 +725,7 @@ class AudioCaptureResamplerTest: public Test
 //             //stream.attach(new AsyncPacketQueue, 4, true);
 //
 //             // Init encoder
-//             encoder = new AVPacketEncoder(options,
+//             encoder = new MultiplexPacketEncoder(options,
 //                 options.oformat.video.enabled &&
 //                 options.oformat.audio.enabled);
 //             stream.attach(encoder, 5, true);
@@ -797,7 +795,7 @@ class AudioCaptureResamplerTest: public Test
 //         VideoCapture::Ptr videoCapture;
 //         AudioCapture::Ptr audioCapture;
 //         //AsyncPacketQueue* queue;
-//         AVPacketEncoder* encoder;
+//         MultiplexPacketEncoder* encoder;
 //         av::EncoderOptions options;
 //         //std::ofstream ofile;
 //     };
@@ -1089,7 +1087,7 @@ class AudioCaptureResamplerTest: public Test
 //                 stream.attach(packetDelegate(this, &MediaConnection::onVideoEncoded));
 //
 //                 // init encoder
-//                 AVEncoder* encoder = new AVEncoder();
+//                 MultiplexEncoder* encoder = new MultiplexEncoder();
 //                 encoder->setParams(options);
 //                 encoder->initialize();
 //                 stream.attach(encoder, 5, true);
@@ -1179,7 +1177,7 @@ class AudioCaptureResamplerTest: public Test
 //         //options.oformat = Format("FLV", "flv", VideoCodec(Codec::FLV, "FLV", 320, 240, 15));
 //
 //         //CaptureRecorder<VideoEncoder> enc(videoCapture, options);
-//         //encoder = new AVEncoder(stream.options());
+//         //encoder = new MultiplexEncoder(stream.options());
 //         CaptureRecorder enc(options, videoCapture, audioCapture);
 //         //enc.initialize();
 //
@@ -1288,7 +1286,7 @@ class AudioCaptureResamplerTest: public Test
 //         }
 //
 //         ICapture* capture;
-//         AVPacketEncoder encoder;
+//         MultiplexPacketEncoder encoder;
 //         bool closed;
 //     };
 //
@@ -1307,7 +1305,7 @@ class AudioCaptureResamplerTest: public Test
 //         auto& media = av::MediaFactory::instance();
 //         media.devices().getDefaultMicrophone(dev);
 //         InfoL << "Default audio capture " << dev.id << endl;
-//         av::AVCapture::Ptr audioCapture = media.createAudioCapture(0, //dev.id
+//         av::MediaCapture::Ptr audioCapture = media.createAudioCapture(0, //dev.id
 //             options.oformat.audio.channels,
 //             options.oformat.audio.sampleRate);
 //         audioCapture->getEncoderFormat(options.iformat);
@@ -1322,7 +1320,7 @@ class AudioCaptureResamplerTest: public Test
 //     // ---------------------------------------------------------------------
 //     // Audio CaptureRecorder Test
 //     //
-//     void runAVCaptureRecorderTest()
+//     void runMediaCaptureRecorderTest()
 //     {
 //         PacketStream stream;
 //
@@ -1335,17 +1333,17 @@ class AudioCaptureResamplerTest: public Test
 //             //av::AudioCodec("MP3", "libmp3lame", 2, 44100, 128000, "s16p"));
 //
 //         // Attach the Audio Capture
-//         av::AVCapture::Ptr reader(new av::AVCapture());
+//         av::MediaCapture::Ptr reader(new av::MediaCapture());
 //         reader->openMicrophone(0,
 //             options.oformat.audio.channels,
 //             options.oformat.audio.sampleRate);
 //         reader->getEncoderFormat(options.iformat);
 //
 //         // Attach the Audio Capture
-//         stream.attachSource<av::AVCapture>(reader, true);
+//         stream.attachSource<av::MediaCapture>(reader, true);
 //
 //         // Attach the Audio Encoder
-//         auto encoder = new av::AVPacketEncoder(options);
+//         auto encoder = new av::MultiplexPacketEncoder(options);
 //         encoder->initialize();
 //         stream.attach(encoder, 5, true);
 //
@@ -1374,16 +1372,16 @@ class AudioCaptureResamplerTest: public Test
 //         auto& media = av::MediaFactory::instance();
 //         media.devices().getDefaultMicrophone(dev);
 //         InfoL << "Default audio capture " << dev.id << endl;
-//         av::AVCapture::Ptr audioCapture = media.createAudioCapture(0, //dev.id
+//         av::MediaCapture::Ptr audioCapture = media.createAudioCapture(0, //dev.id
 //             options.oformat.audio.channels,
 //             options.oformat.audio.sampleRate);
 //         audioCapture->getEncoderFormat(options.iformat);
 //
 //         // Attach the Audio Capture
-//         stream.attachSource<av::AVCapture>(audioCapture, true);
+//         stream.attachSource<av::MediaCapture>(audioCapture, true);
 //
 //         // Attach the Audio Encoder
-//         //auto encoder = new av::AVPacketEncoder(options);
+//         //auto encoder = new av::MultiplexPacketEncoder(options);
 //         //encoder->initialize();
 //         //stream.attach(encoder, 5, true);
 //

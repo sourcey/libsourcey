@@ -90,4 +90,4 @@ struct AudioResampler
 
 
 #endif
-#endif    // SCY_AV_AudioResampler_H
+#endif // SCY_AV_AudioResampler_H

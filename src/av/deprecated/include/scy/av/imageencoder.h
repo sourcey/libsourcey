@@ -73,5 +73,5 @@ private:
 
 
 #endif
-#endif    // SCY_AV_ImageEncoder_H
+#endif // SCY_AV_ImageEncoder_H
 

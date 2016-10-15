@@ -15,11 +15,11 @@
 #  WEBRTC_DEPENDENCIES
 #
 
-
-set(_WEBRTC_ROOT_HINTS /home/kam/sourcey/webrtcbuilds/out/src)
+set(_WEBRTC_ROOT_HINTS
+    $ENV{HOME}/tmp/webrtcbuilds/out/src
+    $ENV{HOME}/sourcey/webrtcbuilds/out/src)
 set(_WEBRTC_SUFFIX_DEBUG out/Debug)
 set(_WEBRTC_SUFFIX_RELEASE out/Release)
-# set(_WEBRTC_GENERATOR_EXCLUDES jsoncpp|unittest|examples|main.o)
 
 # unset(WEBRTC_INCLUDE_DIR)
 # unset(WEBRTC_INCLUDE_DIR CACHE)
@@ -127,17 +127,23 @@ if(WEBRTC_INCLUDE_DIR)
   # Add required system libraries
   if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND MSVC)
     add_definitions(-DWEBRTC_WINDOWS)
-    set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} Secur32.lib Winmm.lib msdmo.lib dmoguids.lib wmcodecdspuuid.lib") # strmbase.lib
+    set(WEBRTC_DEPENDENCIES Secur32.lib Winmm.lib msdmo.lib dmoguids.lib wmcodecdspuuid.lib) # strmbase.lib
   elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_definitions(-DWEBRTC_POSIX)
+    set(WEBRTC_DEPENDENCIES -lX11 -lrt -lGLU -lGL)
 
     # Enable libstdc++ debugging if you build WebRTC with `enable_iterator_debugging=true`
     # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG=1")
-    set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lX11 -lrt -lGLU -lGL")
   endif()
 
   include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
   select_library_configurations(WEBRTC)
+
+  # HACK: WEBRTC_LIBRARY and WEBRTC_DEPENDENCIES not propagating to parent scope
+  # while the WEBRTC_DEBUG_LIBRARY and WEBRTC_RELEASE_LIBRARY vars are.
+  # Setting PARENT_SCOPE fixes this solves theis issue for now.
+  set(WEBRTC_LIBRARY ${WEBRTC_LIBRARY} PARENT_SCOPE)
+  set(WEBRTC_DEPENDENCIES ${WEBRTC_DEPENDENCIES} PARENT_SCOPE)
 endif()
 
 # print_module_variables(WEBRTC)
@@ -149,5 +155,5 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(WEBRTC DEFAULT_MSG WEBRTC_LIBRARY WEBRTC_INCLUDE_DIR)
 
 mark_as_advanced(WEBRTC_LIBRARY WEBRTC_INCLUDE_DIR
-  WEBRTC_LIBRARY_DEBUG WEBRTC_LIBRARY_RELEASE
-  WEBRTC_LIBRARY_DIR_DEBUG WEBRTC_LIBRARY_DIR_RELEASE)
+                 WEBRTC_LIBRARY_DEBUG WEBRTC_LIBRARY_RELEASE
+                 WEBRTC_LIBRARY_DIR_DEBUG WEBRTC_LIBRARY_DIR_RELEASE)

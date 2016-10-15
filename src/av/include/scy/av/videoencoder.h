@@ -81,4 +81,4 @@ struct VideoEncoderContext: public VideoContext
 
 
 #endif
-#endif    // SCY_AV_VideoEncoder_H
+#endif // SCY_AV_VideoEncoder_H

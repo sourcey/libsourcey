@@ -30,7 +30,7 @@
 #include "scy/packetstream.h"
 #include "scy/interface.h"
 #include "scy/packetstream.h"
-#include "scy/av/avcapture.h"
+#include "scy/av/mediacapture.h"
 #include "scy/av/videoconverter.h"
 #include "scy/av/fpscounter.h"
 #include "scy/av/format.h"
@@ -120,7 +120,7 @@ public:
     NullSignal Complete;
         // Signals on analysis complete
 
-    virtual AVCapture& reader();
+    virtual MediaCapture& reader();
     virtual Options& options();
     virtual std::string error() const;
 
@@ -138,7 +138,7 @@ protected:
 
     Options _options;
     std::string _error;
-    AVCapture _reader;
+    MediaCapture _reader;
     VideoAnalyzer::Stream* _video;
     VideoAnalyzer::Stream* _audio;
     VideoConversionContext* _videoConv;

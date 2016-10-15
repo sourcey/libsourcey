@@ -80,31 +80,21 @@ void Device::print(std::ostream& os)
 //
 
 
-AVInputFormat* findDefaultInputFormat(const std::vector<std::string>& inputs)
-{
-    AVInputFormat* iformat = nullptr;
-    for (auto& input : inputs) {
-        iformat = av_find_input_format(input.c_str());
-        if (iformat)
-            return iformat;
-    }
-
-    WarnL << "No valid input format found" << endl;
-    return nullptr;
-}
+namespace internal {
 
 
 // Substitute for missing `av_find_output_format()` function
 AVOutputFormat* findOutputFormat(const std::string& name)
 {
-    AVOutputFormat* f = av_oformat_next(nullptr);
-    assert(f && "have av_register_all() and avdevice_register_all() been called?");
-    while (f) {
-        if (name == f->name) {
-            return f;
+    initializeFFmpeg();
+    AVOutputFormat* oformat = av_oformat_next(nullptr);
+    while (oformat) {
+        if (name == oformat->name) {
+            break;
         }
-        f = av_oformat_next(f);
+        oformat = av_oformat_next(oformat);
     }
+    uninitializeFFmpeg();
     return nullptr;
 }
 
@@ -112,14 +102,32 @@ AVOutputFormat* findOutputFormat(const std::string& name)
 AVOutputFormat* findDefaultOutputFormat(const std::vector<std::string>& outputs)
 {
     AVOutputFormat* oformat = nullptr;
+
+    initializeFFmpeg(); // init here so reference is not held
     for (auto& output : outputs) {
         oformat = findOutputFormat(output.c_str());
-        if (oformat)
-            return oformat;
+        if (oformat) break;
     }
+    uninitializeFFmpeg();
 
-    WarnL << "No valid output format found" << endl;
-    return nullptr;
+    assert(oformat && "no output format found");
+    return oformat;
+}
+
+
+AVInputFormat* findDefaultInputFormat(const std::vector<std::string>& inputs)
+{
+    AVInputFormat* iformat = nullptr;
+
+    initializeFFmpeg(); // init here so reference is not held
+    for (auto& input : inputs) {
+        iformat = av_find_input_format(input.c_str());
+        if (iformat) break;
+    }
+    uninitializeFFmpeg();
+
+    assert(iformat && "no input format found");
+    return iformat;
 }
 
 
@@ -295,6 +303,19 @@ cleanup:
 }
 
 
+void printDevices(std::ostream& ost, std::vector<Device>& devs)
+{
+    for (std::size_t i = 0; i < devs.size(); ++i) {
+        ost << '\t';
+        devs[i].print(ost);
+        ost << endl;
+    }
+}
+
+
+} // namespace internal
+
+
 //
 // Device Manager
 //
@@ -322,31 +343,29 @@ DeviceManager::DeviceManager() :
     speakerOutputs(SCY_SPEAKER_OUTPUTS),
     _watcher(nullptr)
 {
-    initializeFFmpeg();
 }
 
 
 DeviceManager::~DeviceManager()
 {
-    uninitializeFFmpeg();
 }
 
 
 bool DeviceManager::getCameras(std::vector<Device>& devices)
 {
-    return getInputDeviceList(cameraInputs, devices, Device::Camera);
+    return internal::getInputDeviceList(cameraInputs, devices, Device::Camera);
 }
 
 
 bool DeviceManager::getMicrophones(std::vector<Device>& devices)
 {
-    return getInputDeviceList(microphoneInputs, devices, Device::Microphone);
+    return internal::getInputDeviceList(microphoneInputs, devices, Device::Microphone);
 }
 
 
 bool DeviceManager::getSpeakers(std::vector<Device>& devices)
 {
-    return getOutputDeviceList(speakerOutputs, devices, Device::Speaker);
+    return internal::getOutputDeviceList(speakerOutputs, devices, Device::Speaker);
 }
 
 
@@ -436,19 +455,19 @@ bool DeviceManager::getDefaultSpeaker(Device& device)
 
 AVInputFormat* DeviceManager::findCameraInputFormat()
 {
-    return findDefaultInputFormat(cameraInputs);
+    return internal::findDefaultInputFormat(cameraInputs);
 }
 
 
 AVInputFormat* DeviceManager::findMicrophoneInputFormat()
 {
-    return findDefaultInputFormat(microphoneInputs);
+    return internal::findDefaultInputFormat(microphoneInputs);
 }
 
 
 AVOutputFormat* DeviceManager::findSpeakerOutputFormat()
 {
-    return findDefaultOutputFormat(speakerOutputs);
+    return internal::findDefaultOutputFormat(speakerOutputs);
 }
 
 
@@ -481,23 +500,13 @@ DeviceWatcher* DeviceManager::watcher()
 }
 
 
-void printDevices(std::ostream& ost, std::vector<Device>& devs)
-{
-    for (std::size_t i = 0; i < devs.size(); ++i) {
-        ost << '\t';
-        devs[i].print(ost);
-        ost << endl;
-    }
-}
-
-
 void DeviceManager::print(std::ostream& ost)
 {
     std::vector<Device> devs;
 
     ost << "Video capture devices: " << endl;
     if (getCameras(devs)) {
-        printDevices(ost, devs);
+        internal::printDevices(ost, devs);
     }
     else {
         ost << "\tNone" << endl;
@@ -505,7 +514,7 @@ void DeviceManager::print(std::ostream& ost)
 
     ost << "Audio input devices: " << endl;
     if (getMicrophones(devs)) {
-        printDevices(ost, devs);
+        internal::printDevices(ost, devs);
     }
     else {
         ost << "\tNone" << endl;
@@ -513,7 +522,7 @@ void DeviceManager::print(std::ostream& ost)
 
     ost << "Audio output devices: " << endl;
     if (getSpeakers(devs)) {
-        printDevices(ost, devs);
+        internal::printDevices(ost, devs);
     }
     else {
         ost << "\tNone" << endl;

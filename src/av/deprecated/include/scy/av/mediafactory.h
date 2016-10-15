@@ -22,8 +22,8 @@
 
 
 #include "scy/av/types.h"
-#include "scy/av/videocapture.h"
-#include "scy/av/audiocapture.h"
+#include "scy/av/mediacapture.h"
+#include "scy/av/mediacapture.h"
 #include "scy/av/formatregistry.h"
 #include "scy/mutex.h"
 

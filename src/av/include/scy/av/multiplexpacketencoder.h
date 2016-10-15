@@ -17,29 +17,29 @@
 //
 
 
-#ifndef SCY_AV_AVPacketEncoder_H
-#define SCY_AV_AVPacketEncoder_H
+#ifndef SCY_AV_MultiplexPacketEncoder_H
+#define SCY_AV_MultiplexPacketEncoder_H
 
 
 #include "scy/base.h"
 #ifdef HAVE_FFMPEG
 #include "scy/packetstream.h"
-#include "scy/av/avencoder.h"
+#include "scy/av/multiplexencoder.h"
 
 
 namespace scy {
 namespace av {
 
 
-class AVPacketEncoder: public AVEncoder, public PacketProcessor
+class MultiplexPacketEncoder: public MultiplexEncoder, public PacketProcessor
     /// Encodes and multiplexes a realtime video stream form
     /// audio / video capture sources.
     /// FFmpeg is used for encoding.
 {
 public:
-    AVPacketEncoder(const EncoderOptions& options, bool muxLiveStreams = false);
-    AVPacketEncoder(bool muxLiveStreams = false);
-    virtual ~AVPacketEncoder();
+    MultiplexPacketEncoder(const EncoderOptions& options, bool muxLiveStreams = false);
+    MultiplexPacketEncoder(bool muxLiveStreams = false);
+    virtual ~MultiplexPacketEncoder();
 
     virtual void encode(VideoPacket& packet);
     virtual void encode(AudioPacket& packet);

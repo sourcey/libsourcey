@@ -4,7 +4,7 @@
 #include "scy/util.h"
 #include "scy/av/mediafactory.h"
 #include "scy/av/motiondetector.h"
-#include "scy/av/avencoder.h"
+#include "scy/av/multiplexencoder.h"
 #include "scy/av/flvmetadatainjector.h"
 #include "scy/net/tcpservice.h"
 #include "scy/http/multipartpacketizer.h"
@@ -141,7 +141,7 @@ public:
             stream.attach(ourAudioCapture, false);    
         }
         
-        AVEncoder* encoder = new AVEncoder(options);
+        MultiplexEncoder* encoder = new MultiplexEncoder(options);
         encoder->initialize();
         stream.attach(encoder, 5, true);
 

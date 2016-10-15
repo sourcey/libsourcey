@@ -1,7 +1,7 @@
 #include "scy/application.h"
 #include "scy/packetstream.h"
 #include "scy/av/iencoder.h"
-#include "scy/av/avpacketencoder.h"
+#include "scy/av/multiplexpacketencoder.h"
 #include "scy/net/network.h"
 #include "scy/http/server.h"
 #include "scy/http/packetizers.h"
@@ -14,11 +14,11 @@ using namespace scy;
 #define USE_AVDEVICE_CAPTURE 0
 
 #if USE_AVDEVICE_CAPTURE
-#include "scy/av/avcapture.h"
+#include "scy/av/mediacapture.h"
 #define VIDEO_FILE_SOURCE "test.mp4"
-av::AVCapture* gVideoCapture;
+av::MediaCapture* gVideoCapture;
 #else
-#include "scy/av/videocapture.h"
+#include "scy/av/mediacapture.h"
 av::VideoCapture* gVideoCapture;
 #endif
 
@@ -52,7 +52,7 @@ public:
         gVideoCapture->getEncoderFormat(options.iformat);
 
         // Create and attach the encoder
-        av::AVPacketEncoder* encoder = new av::AVPacketEncoder(options);
+        av::MultiplexPacketEncoder* encoder = new av::MultiplexPacketEncoder(options);
         encoder->initialize();
         stream->attach(encoder, 5, true);
 
@@ -133,7 +133,7 @@ int main(int argc, char** argv)
     Logger::instance().add(new ConsoleChannel("debug", LTrace));
 
 #if USE_AVDEVICE_CAPTURE
-    gVideoCapture = new av::AVCapture();
+    gVideoCapture = new av::MediaCapture();
     //gAVVideoCapture->openDevice(0);
     gVideoCapture->openFile(VIDEO_FILE_SOURCE);
     gVideoCapture->start();

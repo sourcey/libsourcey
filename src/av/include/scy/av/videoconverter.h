@@ -69,4 +69,4 @@ struct VideoConversionContext
 
 
 #endif
-#endif    // SCY_AV_VideoConverter_H
+#endif // SCY_AV_VideoConverter_H

@@ -84,4 +84,4 @@ struct AudioEncoderContext: public AudioContext
 
 
 #endif
-#endif    // SCY_AV_AudioEncoder_H
+#endif // SCY_AV_AudioEncoder_H

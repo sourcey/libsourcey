@@ -99,4 +99,4 @@ struct VideoContext
 
 
 #endif
-#endif    // SCY_AV_VideoContext_H
+#endif // SCY_AV_VideoContext_H

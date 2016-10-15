@@ -149,7 +149,7 @@ bool GetQTKitVideoDevices(std::vector<Device>* devices) {
 bool GetAVFoundationVideoDevices(std::vector<Device>* devices) {
 #ifdef __MAC_OS_X_VERSION_MAX_ALLOWED
 #if __MAC_OS_X_VERSION_MAX_ALLOWED >=1070
-  if (![AVCaptureDevice class]) {
+  if (![MediaCaptureDevice class]) {
     // Fallback to using QTKit if AVFoundation is not available
     return GetQTKitVideoDevices(devices);
   }
@@ -159,9 +159,9 @@ bool GetAVFoundationVideoDevices(std::vector<Device>* devices) {
   @autoreleasepool
 #endif
   {
-    NSArray* capture_devices = [AVCaptureDevice devices];
+    NSArray* capture_devices = [MediaCaptureDevice devices];
     InfoL << [capture_devices count] << " capture device(s) found:";
-    for (AVCaptureDevice* capture_device in capture_devices) {
+    for (MediaCaptureDevice* capture_device in capture_devices) {
       if ([capture_device hasMediaType:AVMediaTypeVideo] ||
           [capture_device hasMediaType:AVMediaTypeMuxed]) {
         static NSString* const kFormat = @"localizedName: \"%@\", "

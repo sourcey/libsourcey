@@ -41,11 +41,11 @@ include(LibSourceyVersion REQUIRED)
 # LibSourcey build components
 # ----------------------------------------------------------------------------
 set_option(BUILD_SHARED_LIBS          "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" NOT (WIN32 OR ANDROID OR IOS))
-set_option(BUILD_DEPENDENCIES         "Build third party dependencies"                           ON)
 set_option(BUILD_MODULES              "Build LibSourcey modules"                                 ON)
 set_option(BUILD_APPLICATIONS         "Build LibSourcey applications"                            ON)
-set_option(BUILD_MODULE_TESTS         "Build module test applications?"                          ON)
-set_option(BUILD_MODULE_SAMPLES       "Build module sample applications?"                        ON)
+set_option(BUILD_DEPENDENCIES         "Build third party dependencies"                           ON)
+set_option(BUILD_TESTS                "Build module test applications?"                          ON)
+set_option(BUILD_SAMPLES              "Build module sample applications?"                        ON)
 set_option(BUILD_WITH_DEBUG_INFO      "Include debug info into debug libs"                       ON)
 set_option(BUILD_WITH_STATIC_CRT      "Enables statically linked CRT for statically linked libraries" OFF)
 set_option(BUILD_ALPHA                "Build alpha development modules"                          OFF)
@@ -255,25 +255,23 @@ list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
   ${LibSourcey_SOURCE_DIR}/json/vendor/jsoncpp)
 
 # Enable testing if required
-if (BUILD_MODULE_TESTS)
+if (BUILD_TESTS)
   enable_testing()
   set(CMAKE_CTEST_COMMAND ctest -V)
   add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 endif()
 
-#if(BUILD_MODULES OR BUILD_APPLICATIONS)
-  subdirlist(subdirs ${LibSourcey_SOURCE_DIR})
-  foreach(name ${subdirs})
-    # This variable is so modules can set HAVE_LibSourcey_XXX for our
-    # libsourcey.h inside the child scope. See include_sourcey_modules()
-    # TODO: Need to refactor since modules may be nested.
-    set(HAVE_LibSourcey_${name} 0)
-    set(dir "${LibSourcey_SOURCE_DIR}/${name}")
-    if (EXISTS "${dir}/CMakeLists.txt")
-      add_subdirectory(${dir})
-    endif()
-  endforeach()
-#endif()
+subdirlist(subdirs ${LibSourcey_SOURCE_DIR})
+foreach(name ${subdirs})
+  # This variable is so modules can set HAVE_LibSourcey_XXX for our
+  # libsourcey.h inside the child scope. See include_sourcey_modules()
+  # TODO: Need to refactor since modules may be nested.
+  set(HAVE_LibSourcey_${name} 0)
+  set(dir "${LibSourcey_SOURCE_DIR}/${name}")
+  if (EXISTS "${dir}/CMakeLists.txt")
+    add_subdirectory(${dir})
+  endif()
+endforeach()
 
 # Remove any duplicates from our lists
 if(LibSourcey_LINK_LIBRARIES)
@@ -378,6 +376,8 @@ status("")
 status("     Dependencies:               ${LibSourcey_BUILD_DEPENDENCIES}")
 status("     Modules:                    ${LibSourcey_BUILD_MODULES}")
 status("     Applications:               ${LibSourcey_BUILD_APPLICATIONS}")
+status("     Samples:                    ${LibSourcey_BUILD_SAMPLES}")
+status("     Tests:                      ${LibSourcey_BUILD_TESTS}")
 
 # Dependencies
 status("")

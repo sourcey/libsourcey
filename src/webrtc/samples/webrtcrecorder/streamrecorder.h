@@ -2,7 +2,7 @@
 #define SCY_WebRTCRecorder_StreamRecorder_H
 
 
-#include "scy/av/avencoder.h"
+#include "scy/av/multiplexencoder.h"
 
 #include "webrtc/api/peerconnectioninterface.h"
 
@@ -38,7 +38,7 @@ public:
                         size_t number_of_frames) override;
 
 protected:
-    av::AVEncoder _encoder;
+    av::MultiplexEncoder _encoder;
     rtc::scoped_refptr<webrtc::VideoTrackInterface> _videoTrack;
     rtc::scoped_refptr<webrtc::AudioTrackInterface> _audioTrack;
     bool _awaitingVideo;

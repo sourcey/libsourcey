@@ -17,11 +17,11 @@
 //
 
 
-#include "scy/av/avencoder.h"
+#include "scy/av/multiplexencoder.h"
 
 #ifdef HAVE_FFMPEG
 
-// #include "scy/av/videocapture.h"
+// #include "scy/av/mediacapture.h"
 // #include "scy/logger.h"
 // #include "scy/platform.h"
 // #include "scy/timer.h"
@@ -45,7 +45,7 @@ namespace scy {
 namespace av {
 
 
-AVEncoder::AVEncoder(const EncoderOptions& options) :
+MultiplexEncoder::MultiplexEncoder(const EncoderOptions& options) :
     _options(options),
     _formatCtx(nullptr),
     _video(nullptr),
@@ -60,7 +60,7 @@ AVEncoder::AVEncoder(const EncoderOptions& options) :
 }
 
 
-AVEncoder::~AVEncoder()
+MultiplexEncoder::~MultiplexEncoder()
 {
     TraceS(this) << "Destroy" << endl;
     uninitialize();
@@ -71,7 +71,7 @@ AVEncoder::~AVEncoder()
 static int dispatchOutputPacket(void* opaque, std::uint8_t* buffer, int bufferSize)
 {
     // Callback example at: http://lists.mplayerhq.hu/pipermail/libav-client/2009-May/003034.html
-    auto klass = reinterpret_cast<AVEncoder*>(opaque);
+    auto klass = reinterpret_cast<MultiplexEncoder*>(opaque);
     if (klass) {
         TraceL << "Dispatching packet: " << bufferSize << endl;
         if (!klass->isActive()) {
@@ -87,7 +87,7 @@ static int dispatchOutputPacket(void* opaque, std::uint8_t* buffer, int bufferSi
 }
 
 
-void AVEncoder::initialize()
+void MultiplexEncoder::initialize()
 {
     assert(!isActive());
 
@@ -173,7 +173,7 @@ void AVEncoder::initialize()
 }
 
 
-void AVEncoder::uninitialize()
+void MultiplexEncoder::uninitialize()
 {
     TraceS(this) << "Uninitialize" << endl;
 
@@ -192,7 +192,7 @@ void AVEncoder::uninitialize()
 }
 
 
-void AVEncoder::cleanup()
+void MultiplexEncoder::cleanup()
 {
     TraceS(this) << "Cleanup" << endl;
 
@@ -235,7 +235,7 @@ void AVEncoder::cleanup()
 }
 
 
-void AVEncoder::flush()
+void MultiplexEncoder::flush()
 {
     TraceS(this) << "Flushing" << endl;
 
@@ -261,21 +261,21 @@ void AVEncoder::flush()
 }
 
 
-EncoderOptions& AVEncoder::options()
+EncoderOptions& MultiplexEncoder::options()
 {
     //Mutex::ScopedLock lock(_mutex);
     return _options;
 }
 
 
-VideoEncoderContext* AVEncoder::video()
+VideoEncoderContext* MultiplexEncoder::video()
 {
     //Mutex::ScopedLock lock(_mutex);
     return _video;
 }
 
 
-AudioEncoderContext* AVEncoder::audio()
+AudioEncoderContext* MultiplexEncoder::audio()
 {
     //Mutex::ScopedLock lock(_mutex);
     return _audio;
@@ -288,7 +288,7 @@ AudioEncoderContext* AVEncoder::audio()
 
 
 // Write a packet to the output stream.
-bool AVEncoder::writeOutputPacket(AVPacket& packet)
+bool MultiplexEncoder::writeOutputPacket(AVPacket& packet)
 {
     assert(packet.data);
     assert(packet.size);
@@ -316,7 +316,7 @@ bool AVEncoder::writeOutputPacket(AVPacket& packet)
 //
 
 
-void AVEncoder::createVideo()
+void MultiplexEncoder::createVideo()
 {
     //Mutex::ScopedLock lock(_mutex);
     assert(!_video);
@@ -330,7 +330,7 @@ void AVEncoder::createVideo()
 }
 
 
-void AVEncoder::freeVideo()
+void MultiplexEncoder::freeVideo()
 {
     //Mutex::ScopedLock lock(_mutex);
 
@@ -341,7 +341,7 @@ void AVEncoder::freeVideo()
 }
 
 
-bool AVEncoder::encodeVideo(AVFrame* frame)
+bool MultiplexEncoder::encodeVideo(AVFrame* frame)
 {
     TraceS(this) << "Encoding video" << endl;
 
@@ -370,7 +370,7 @@ bool AVEncoder::encodeVideo(AVFrame* frame)
 }
 
 
-bool AVEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int height, std::int64_t time)
+bool MultiplexEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int height, std::int64_t time)
 {
     TraceS(this) << "Encoding video: " << bufferSize << endl;
 
@@ -413,7 +413,7 @@ bool AVEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int
 }
 
 
-void AVEncoder::updatePts(AVStream* stream, std::int64_t* pts)
+void MultiplexEncoder::updatePts(AVStream* stream, std::int64_t* pts)
 {
     std::int64_t delta(av_gettime() - _formatCtx->start_time_realtime);
     _pts = delta * (float) stream->time_base.den / (float) stream->time_base.num / (float) 1000000;
@@ -426,7 +426,7 @@ void AVEncoder::updatePts(AVStream* stream, std::int64_t* pts)
 //
 
 
-void AVEncoder::createAudio()
+void MultiplexEncoder::createAudio()
 {
     TraceS(this) << "Create Audio" << endl;
 
@@ -454,7 +454,7 @@ void AVEncoder::createAudio()
 }
 
 
-void AVEncoder::freeAudio()
+void MultiplexEncoder::freeAudio()
 {
     //Mutex::ScopedLock lock(_mutex);
 
@@ -475,7 +475,7 @@ void AVEncoder::freeAudio()
 }
 
 
-bool AVEncoder::encodeAudio(const std::uint8_t* buffer, int numSamples, std::int64_t time)
+bool MultiplexEncoder::encodeAudio(const std::uint8_t* buffer, int numSamples, std::int64_t time)
 {
     TraceS(this) << "Encoding Audio Packet: numSamples="
         << numSamples << ", time=" << time << endl;
@@ -540,7 +540,7 @@ bool AVEncoder::encodeAudio(const std::uint8_t* buffer, int numSamples, std::int
 
 
 #if 0
-bool AVEncoder::encodeAudio(AVFrame* frame)
+bool MultiplexEncoder::encodeAudio(AVFrame* frame)
 {
     assert(frame);
     assert(frame->nb_samples);

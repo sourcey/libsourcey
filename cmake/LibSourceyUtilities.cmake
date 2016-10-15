@@ -260,14 +260,14 @@ endmacro()
 # define_sourcey_test for each test.
 #
 macro(ask_build_sourcey_test name)
-  if(BUILD_MODULE_TESTS)
-    set(BUILD_TEST_${name} ON CACHE BOOL "Build LibSourcey test: ${name}")
+  if(BUILD_TESTS)
+    set(BUILD_TESTS_${name} ON CACHE BOOL "Build LibSourcey test: ${name}")
   endif()
-  if(BUILD_TEST_${name})
+  if(BUILD_TESTS_${name})
     #message(STATUS "Building module test: ${name}")
     set(LibSourcey_BUILD_TESTS ${LibSourcey_BUILD_TESTS} ${name} CACHE INTERNAL "")
   endif()
-  mark_as_advanced(FORCE BUILD_TEST_${name})
+  mark_as_advanced(FORCE BUILD_TESTS_${name})
 endmacro()
 
 #
@@ -278,14 +278,14 @@ endmacro()
 # define_sourcey_sample for each sample.
 #
 macro(ask_build_sourcey_sample name)
-  if(BUILD_MODULE_SAMPLES)
-    set(BUILD_SAMPLE_${name} ON CACHE BOOL "Build LibSourcey sample: ${name}")
+  if(BUILD_SAMPLES)
+    set(BUILD_SAMPLES_${name} ON CACHE BOOL "Build LibSourcey sample: ${name}")
   endif()
-  if(BUILD_SAMPLE_${name})
+  if(BUILD_SAMPLES_${name})
     #message(STATUS "Building module sample: ${name}")
     set(LibSourcey_BUILD_SAMPLES ${LibSourcey_BUILD_SAMPLES} ${name} CACHE INTERNAL "")
   endif()
-  mark_as_advanced(FORCE BUILD_SAMPLE_${name})
+  mark_as_advanced(FORCE BUILD_SAMPLES_${name})
 endmacro()
 
 

@@ -23,7 +23,7 @@
 
 #include "scy/base.h"
 #include "scy/av/config.h"
-#include "scy/av/avcapture.h"
+#include "scy/av/mediacapture.h"
 #include "scy/av/videoencoder.h"
 
 #include <iostream>
@@ -57,7 +57,7 @@ struct Thumbnailer
     // ThumbnailerOptions for the Spot API.
 {
     ThumbnailerOptions options;
-    av::AVCapture reader;
+    av::MediaCapture reader;
     av::VideoEncoderContext encoder;
 
     Thumbnailer(const ThumbnailerOptions& options = ThumbnailerOptions());

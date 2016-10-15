@@ -6,7 +6,7 @@
 #include "scy/application.h"
 #include "scy/util.h"
 #include "scy/packetstream.h"
-#include "scy/av/avencoder.h"
+#include "scy/av/multiplexencoder.h"
 #include "scy/av/mediafactory.h"
 #include "scy/http/server.h"
 #include "config.h"

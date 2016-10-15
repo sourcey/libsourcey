@@ -16,7 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "scy/av/videocapture.h"
+#include "scy/av/mediacapture.h"
 #include "scy/logger.h"
 #include "scy/platform.h"
 #include "scy/util.h"

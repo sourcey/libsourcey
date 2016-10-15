@@ -18,8 +18,9 @@
 
 #include "scy/application.h"
 #include "scy/packetstream.h"
-#include "scy/av/avpacketencoder.h"
-#include "scy/av/avcapture.h"
+#include "scy/av/multiplexpacketencoder.h"
+#include "scy/av/videocapture.h"
+#include "scy/av/audiocapture.h"
 #include "scy/av/devicemanager.h"
 
 
@@ -50,25 +51,25 @@ int main(int argc, char** argv)
         options.oformat = OUTPUT_FORMAT;
 
         // Create and attach the default video capture
-        av::AVCapture video;
+        av::VideoCapture video;
         if (av::DeviceManager::instance().getDefaultCamera(device)) {
             InfoL << "Using video device: " << device.name << endl;
-            video.openCamera(device.id, 640, 480, 30);
+            video.open(device.id, 640, 480, 30);
             video.getEncoderFormat(options.iformat);
             stream.attachSource(&video, false, true);
         }
 
         // Create and attach the default audio capture
-        av::AVCapture audio;
+        av::AudioCapture audio;
         if (av::DeviceManager::instance().getDefaultMicrophone(device)) {
             InfoL << "Using audio device: " << device.name << endl;
-            audio.openMicrophone(device.id, 2, 44100);
+            audio.open(device.id, 2, 44100);
             audio.getEncoderFormat(options.iformat);
             stream.attachSource(&audio, false, true);
         }
 
         // Create and attach the multiplex encoder
-        av::AVPacketEncoder encoder(options);
+        av::MultiplexPacketEncoder encoder(options);
         encoder.initialize();
         stream.attach(&encoder, 5, false);
 
@@ -81,7 +82,7 @@ int main(int argc, char** argv)
     		}, &stream);
     }
 
-    av::DeviceManager::shutdown();
-    Logger::destroy();
+    // av::DeviceManager::shutdown();
+    // Logger::destroy();
     return 0;
 }

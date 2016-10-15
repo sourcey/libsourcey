@@ -17,7 +17,7 @@
 //
 
 
-#include "scy/av/audiocapture.h"
+#include "scy/av/mediacapture.h"
 #include "scy/logger.h"
 
 #ifdef HAVE_RTAUDIO

@@ -18,7 +18,7 @@
 
 
 #include "scy/av/imageencoder.h"
-#include "scy/av/videocapture.h"
+#include "scy/av/mediacapture.h"
 #include "scy/logger.h"
 
 #include "assert.h"

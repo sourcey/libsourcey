@@ -27,19 +27,17 @@
 #include "scy/av/videocapture.h"
 
 #include "webrtc/media/base/videocapturer.h"
-// #include "webrtc/media/base/videocapturerfactory.h"
 
 
 namespace scy {
 
 
-// OpenCVVideoCapturer implements a simple cricket::VideoCapturer which
-// gets decoded remote video frames from media channel.
-// It's used as the remote video source's VideoCapturer so that the remote
-// video can be used as a cricket::VideoCapturer and in that way a remote
-// video stream can implement the MediaStreamSourceInterface.
-class OpenCVVideoCapturer :
-    public cricket::VideoCapturer
+class OpenCVVideoCapturer: public cricket::VideoCapturer
+  /// OpenCVVideoCapturer implements a simple cricket::VideoCapturer which
+  /// gets decoded remote video frames from media channel.
+  /// It's used as the remote video source's VideoCapturer so that the remote
+  /// video can be used as a cricket::VideoCapturer and in that way a remote
+  /// video stream can implement the MediaStreamSourceInterface.
 {
 public:
     OpenCVVideoCapturer(int deviceId);

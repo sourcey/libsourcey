@@ -17,7 +17,7 @@
 //
 
 
-#include "scy/av/avcapture.h"
+#include "scy/av/mediacapture.h"
 
 #ifdef HAVE_FFMPEG
 
@@ -28,9 +28,6 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-// #ifdef HAVE_FFMPEG_AVDEVICE
-// #include <libavdevice/avdevice.h>
-// #endif
 }
 
 
@@ -41,7 +38,7 @@ namespace scy {
 namespace av {
 
 
-AVCapture::AVCapture() :
+MediaCapture::MediaCapture() :
     _formatCtx(nullptr),
     _video(nullptr),
     _audio(nullptr),
@@ -52,7 +49,7 @@ AVCapture::AVCapture() :
 }
 
 
-AVCapture::~AVCapture()
+MediaCapture::~MediaCapture()
 {
     TraceS(this) << "Destroy" << endl;
 
@@ -61,7 +58,7 @@ AVCapture::~AVCapture()
 }
 
 
-void AVCapture::close()
+void MediaCapture::close()
 {
     TraceS(this) << "Closing" << endl;
 
@@ -84,58 +81,58 @@ void AVCapture::close()
 }
 
 
-void AVCapture::openFile(const std::string& file)
+void MediaCapture::openFile(const std::string& file)
 {
     TraceS(this) << "Opening file: " << file << endl;
     openStream(file, nullptr, nullptr);
 }
 
 
-// #ifdef HAVE_FFMPEG_AVDEVICE
+// // #ifdef HAVE_FFMPEG_AVDEVICE
+//
+// void MediaCapture::openCamera(const std::string& device, int width, int height, double fps)
+// {
+//     TraceS(this) << "Opening camera: " << device << endl;
+//
+//     auto iformat = DeviceManager::instance().findCameraInputFormat();
+//     if (!iformat)
+//         throw std::runtime_error("Couldn't find camera input format.");
+//
+//     AVDictionary* iparams = nullptr;
+//     if (width > 0 && height > 0)
+//         av_dict_set(&iparams, "video_size", util::format("%dx%d", width, height).c_str(), 0);
+//     if (fps > 0)
+//         av_dict_set(&iparams, "framerate", util::format("%f", fps).c_str(), 0);
+//
+//     openStream(device.c_str(), iformat, &iparams);
+//
+//     av_dict_free(&iparams); // FIXME: possible memory leak
+// }
+//
+//
+// void MediaCapture::openMicrophone(const std::string& device, int channels, int sampleRate)
+// {
+//     TraceS(this) << "Opening microphone: " << device << endl;
+//
+//     auto iformat = DeviceManager::instance().findMicrophoneInputFormat();
+//     if (!iformat)
+//         throw std::runtime_error("Couldn't find microphone input format.");
+//
+//     AVDictionary* iparams = nullptr;
+//     if (sampleRate > 0)
+//         av_dict_set_int(&iparams, "sample_rate", sampleRate, 0);
+//     if (channels > 0)
+//         av_dict_set_int(&iparams, "channels", channels, 0);
+//
+//     openStream(device.c_str(), iformat, &iparams);
+//
+//     av_dict_free(&iparams); // FIXME: possible memory leak
+// }
+//
+// // #endif
 
-void AVCapture::openCamera(const std::string& device, int width, int height, double fps)
-{
-    TraceS(this) << "Opening camera: " << device << endl;
 
-    auto iformat = DeviceManager::instance().findCameraInputFormat();
-    if (!iformat)
-        throw std::runtime_error("Couldn't find camera input format.");
-
-    AVDictionary* iparams = nullptr;
-    if (width > 0 && height > 0)
-        av_dict_set(&iparams, "video_size", util::format("%dx%d", width, height).c_str(), 0);
-    if (fps > 0)
-        av_dict_set(&iparams, "framerate", util::format("%f", fps).c_str(), 0);
-
-    openStream(device.c_str(), iformat, &iparams);
-
-    av_dict_free(&iparams); // FIXME: possible memory leak
-}
-
-
-void AVCapture::openMicrophone(const std::string& device, int channels, int sampleRate)
-{
-    TraceS(this) << "Opening microphone: " << device << endl;
-
-    auto iformat = DeviceManager::instance().findMicrophoneInputFormat();
-    if (!iformat)
-        throw std::runtime_error("Couldn't find microphone input format.");
-
-    AVDictionary* iparams = nullptr;
-    if (sampleRate > 0)
-        av_dict_set_int(&iparams, "sample_rate", sampleRate, 0);
-    if (channels > 0)
-        av_dict_set_int(&iparams, "channels", channels, 0);
-
-    openStream(device.c_str(), iformat, &iparams);
-
-    av_dict_free(&iparams); // FIXME: possible memory leak
-}
-
-// #endif
-
-
-void AVCapture::openStream(const std::string& filename, AVInputFormat* inputFormat, AVDictionary** formatParams)
+void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputFormat, AVDictionary** formatParams)
 {
     TraceS(this) << "Opening stream: " << filename << endl;
 
@@ -169,7 +166,7 @@ void AVCapture::openStream(const std::string& filename, AVInputFormat* inputForm
 }
 
 
-void AVCapture::start()
+void MediaCapture::start()
 {
     TraceS(this) << "Starting" << endl;
 
@@ -186,7 +183,7 @@ void AVCapture::start()
 }
 
 
-void AVCapture::stop()
+void MediaCapture::stop()
 {
     TraceS(this) << "Stopping" << endl;
 
@@ -202,7 +199,7 @@ void AVCapture::stop()
 }
 
 
-void AVCapture::run()
+void MediaCapture::run()
 {
     TraceS(this) << "Running" << endl;
 
@@ -292,17 +289,15 @@ void AVCapture::run()
 }
 
 
-void AVCapture::getEncoderFormat(Format& iformat)
+void MediaCapture::getEncoderFormat(Format& iformat)
 {
-    Mutex::ScopedLock lock(_mutex);
-
     iformat.name = "Capture";
     getVideoCodec(iformat.video);
     getAudioCodec(iformat.audio);
 }
 
 
-void AVCapture::getAudioCodec(AudioCodec& iparams)
+void MediaCapture::getAudioCodec(AudioCodec& iparams)
 {
     Mutex::ScopedLock lock(_mutex);
 
@@ -316,7 +311,7 @@ void AVCapture::getAudioCodec(AudioCodec& iparams)
 }
 
 
-void AVCapture::getVideoCodec(VideoCodec& iparams)
+void MediaCapture::getVideoCodec(VideoCodec& iparams)
 {
     Mutex::ScopedLock lock(_mutex);
 
@@ -330,28 +325,28 @@ void AVCapture::getVideoCodec(VideoCodec& iparams)
 }
 
 
-AVFormatContext* AVCapture::formatCtx() const
+AVFormatContext* MediaCapture::formatCtx() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _formatCtx;
 }
 
 
-VideoDecoderContext* AVCapture::video() const
+VideoDecoderContext* MediaCapture::video() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _video;
 }
 
 
-AudioDecoderContext* AVCapture::audio() const
+AudioDecoderContext* MediaCapture::audio() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _audio;
 }
 
 
-std::string AVCapture::error() const
+std::string MediaCapture::error() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _error;

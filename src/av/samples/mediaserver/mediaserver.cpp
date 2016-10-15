@@ -6,10 +6,10 @@
 
 #include "scy/collection.h"
 #include "scy/av/mediafactory.h"
-#include "scy/av/avcapture.h"
+#include "scy/av/mediacapture.h"
 #include "scy/av/flvmetadatainjector.h"
 #include "scy/av/formatregistry.h"
-#include "scy/av/avpacketencoder.h"
+#include "scy/av/multiplexpacketencoder.h"
 
 #include "scy/http/packetizers.h"
 #include "scy/http/util.h"
@@ -101,7 +101,7 @@ void MediaServer::setupPacketStream(PacketStream& stream, const StreamingOptions
     stream.attach(async, 3, true);
 
     // Attach the video encoder
-    auto encoder = new av::AVPacketEncoder(options);
+    auto encoder = new av::MultiplexPacketEncoder(options);
     //encoder->initialize();
     stream.attach(encoder, 5, true);
 

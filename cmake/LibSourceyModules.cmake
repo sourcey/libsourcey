@@ -100,7 +100,7 @@ macro(define_sourcey_module name)
   # Build samples
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/samples)
     ask_build_sourcey_sample(${name})
-    if(BUILD_MODULE_SAMPLES AND BUILD_SAMPLE_${name})
+    if(BUILD_SAMPLES OR (NOT BUILD_SAMPLES AND BUILD_SAMPLES_${name}))
       add_subdirectory(samples)
     endif()
   endif()
@@ -108,7 +108,8 @@ macro(define_sourcey_module name)
   # Build tests
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     ask_build_sourcey_test(${name})
-    if(BUILD_MODULE_TESTS AND BUILD_TEST_${name})
+    if(BUILD_TESTS OR (NOT BUILD_TESTS AND BUILD_TESTS_${name}))
+    # if(BUILD_TESTS AND BUILD_TESTS_${name})
       add_subdirectory(tests)
     endif()
   endif()
@@ -142,7 +143,7 @@ macro(define_sourcey_module_sample name)
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
 
-  message(STATUS "Including module sample ${name}")
+  # message(STATUS "Including module sample ${name}")
   #message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
   #message(STATUS "    Library Dirs: ${LibSourcey_LIBRARY_DIRS}")
   #message(STATUS "    Include Dirs: ${LibSourcey_INCLUDE_DIRS}")
@@ -263,16 +264,16 @@ macro(define_sourcey_application name)
   source_group("Include" FILES ${lib_hdrs})
 
   # Include all header and library directories
-  #include_directories(${LibSourcey_INCLUDE_DIRS})
+  # include_directories(${LibSourcey_INCLUDE_DIRS})
   #  ${CMAKE_SOURCE_DIR}/projects/Anionu/ISpot/include
   #  ${CMAKE_SOURCE_DIR}/projects/AnionuPrivate/SpotImpl/include
-  #link_directories(${LibSourcey_LIBRARY_DIRS})
+  # link_directories(${LibSourcey_LIBRARY_DIRS})
 
-  #status("  Linking application ${name}")
-  #status("    Libraries:               ${LibSourcey_INCLUDE_LIBRARIES}")
-  #status("    Library Dirs:            ${LibSourcey_LIBRARY_DIRS}")
-  #status("    Include Dirs:            ${LibSourcey_INCLUDE_DIRS}")
-  #status("    Dependencies:            ${LibSourcey_BUILD_DEPENDENCIES}")
+  # status("  Linking application ${name}")
+  # status("    Libraries:               ${LibSourcey_INCLUDE_LIBRARIES}")
+  # status("    Library Dirs:            ${LibSourcey_LIBRARY_DIRS}")
+  # status("    Include Dirs:            ${LibSourcey_INCLUDE_DIRS}")
+  # status("    Dependencies:            ${LibSourcey_BUILD_DEPENDENCIES}")
 
   # Setting WIN32 sets SUBSYSTEM:WINDOWS
   if (${name}_SUBSYSTEM_WINDOWS)

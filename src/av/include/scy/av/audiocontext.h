@@ -79,4 +79,4 @@ void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, c
 
 
 #endif
-#endif    // SCY_AV_AudioContext_H
+#endif // SCY_AV_AudioContext_H

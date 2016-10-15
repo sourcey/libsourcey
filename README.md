@@ -13,9 +13,9 @@ LibSourcey is a collection of open source cross platform C++11 modules and class
 
 ## Features
 
-* **Event-based IO** — Core modules are built on top of `libuv` (the underlying C library that powers Node.js) and use event-based asynchronous IO throughout to maximise performance and minimise concurrency reliance for building mission critical native and server-side apps.
+* **Event-based IO** — Core modules are built on top of `libuv` (the underlying C library that powers Node.js) and use event-based asynchronous IO throughout to maximise performance and minimise concurrency reliance for building mission critical native and server side apps.
 
-* **Cross platform** — The codebase is cross platform and should compile on any system with access to a modern C++11 compiler. We have successfully compiled and used LibSourcey on the following platforms; Linux(gcc), Mac(Xcode, gcc), Windows(msys, vs), Android and iOS.
+* **Cross platform** — The codebase is cross platform and should compile on any system with access to a modern C++11 compiler. We have successfully compiled and used LibSourcey on the following platforms: Linux(gcc), Mac(Xcode, gcc), Windows(msys, vs), Android and iOS.
 
 * **Clean readable code** — Modern C++11 design principles have been used for clear and readable code. Libraries are modular for simple integration into your existing projects.
 
@@ -29,7 +29,7 @@ LibSourcey is a collection of open source cross platform C++11 modules and class
     * **Socket.IO** — Socket.IO C++ client that supports the latest protocol revision 4 (>- 1.0). Read more about [Socket.IO](http://socket.io).
     * **Symple** — Sourcey's home grown realtime messaging protocol that works over the top of Socket.IO to provide rostering, presence and many other features necessary for building online games and chat applications. [More about Symple](<http://sourcey.com/symple).
 
-* **WebRTC support** — WebRTC support allows you to build WebRTC native desktop and server side applications that inherit LibSourcey's realtime messaging and media capabilities. Two demo applications are included; one for streaming live webcam and microphone streams to the browser [here](https://github.com/sourcey/libsourcey/tree/master/src/webrtc/apps/webrtcstreamer), and one for multiplex recording live WebRTC streams from the browser on the server side [here](https://github.com/sourcey/libsourcey/tree/master/src/webrtc/apps/webrtcrecorder).
+* **WebRTC support** — WebRTC support allows you to build WebRTC native desktop and server side applications that inherit LibSourcey's realtime messaging and media capabilities. Two demo applications are included; one for streaming live webcam and microphone streams to the browser [here](https://github.com/sourcey/libsourcey/tree/master/src/webrtc/samples/webrtcstreamer), and one for multiplex recording live WebRTC streams from the browser on the server side [here](https://github.com/sourcey/libsourcey/tree/master/src/webrtc/samples/webrtcrecorder).
 
 * **Web servers and clients** — A HTTP stack is included that supports HTTP servers, clients, WebSockets, media streaming, file transfers, and authentication. The HTTP parser is based on the super-fast C code used by `nginx`.
 
@@ -70,7 +70,6 @@ This guide is written for Ubuntu 14.04, although installation should be fairly p
 ~~~ bash
 sudo apt-get update
 sudo apt-get install -y build-essential pkg-config git cmake openssl libssl-dev
-
 ~~~
 
 <!--
@@ -123,6 +122,21 @@ sudo /bin/bash -c 'echo "/usr/local/lib" > /etc/ld.so.conf.d/opencv.conf'
 sudo ldconfig
 ~~~
 -->
+
+**Install WebRTC (optional):**
+
+Installing WebRTC can be tricky and time consuming, but using the script below you should be able to get started without a hitch. Using the script is highly recommended as there are a few caveats to take note of when compiling WebRTC for use with LibSourcey:
+
+1. RTTI must be enabled (the -no_rtti compiler flag must be removed)
+2. The WebRTC static library must not contain JsonCpp (it conflicts with our newer internal version)
+3. libstdc++ iterator debugging must be disabled or it conflicts with external dependencies compiled without it (ninja build must set `enable_iterator_debugging=false`)
+
+~~~ bash
+cd ~/tmp
+git clone git@github.com:sourcey/webrtcbuilds.git
+cd webrtcbuilds
+./build.sh -l jsoncpp -e
+~~~
 
 ##### Install LibSourcey
 
@@ -257,7 +271,7 @@ There is also plenty of examples available in the `samples` and `tests` folder o
 
 If you're interested in media streaming examples check out the `mediaserver` sample in the `av` module. Remember, you will need to compile LibSourcey with FFmpeg enabled to use it: https://github.com/sourcey/libsourcey/tree/master/src/av/samples/mediaserver
 
-Two demo WebRTC applications are included; one for streaming live webcam and microphone streams to the browser [here](https://github.com/sourcey/libsourcey/tree/master/src/webrtc/apps/webrtcstreamer), and one for multiplex recording live WebRTC streams from the browser on the server side [here](https://github.com/sourcey/libsourcey/tree/master/src/webrtc/apps/webrtcrecorder).
+Two demo WebRTC applications are included; one for streaming live webcam and microphone streams to the browser [here](https://github.com/sourcey/libsourcey/tree/master/src/webrtc/samples/webrtcstreamer), and one for multiplex recording live WebRTC streams from the browser on the server side [here](https://github.com/sourcey/libsourcey/tree/master/src/webrtc/samples/webrtcrecorder).
 
 For a redistributable C++ package manager, take a look at `pacm`, and specifically the `pacmconsole` application: http://sourcey.com/pacm/
 
@@ -265,7 +279,7 @@ Also, check out `pluga`, a simple C++ plugin API using LibSourcey: http://source
 
 ## Contributing
 
-Pull Requests are always welcome, and if you make any improvements please feel free to float them back upstream :)
+Pull Requests are always welcome, so if you make any improvements please feel free to float them back upstream :)
 
 1. [Fork LibSourcey on Github](https://github.com/sourcey/libsourcey)
 2. Create your feature branch (`git checkout -b my-new-feature`)
