@@ -1,7 +1,7 @@
 #include "signaler.h"
 #include "scy/logger.h"
 #include "scy/idler.h"
-#include "scy/av/mediafactory.h"
+// #include "scy/av/mediafactory.h"
 
 #include "webrtc/base/ssladapter.h"
 #include "webrtc/base/thread.h"
@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 #endif
 
     // Pre-initialize video captures in the main thread
-    av::MediaFactory::instance().loadVideoCaptures();
+    // av::MediaFactory::instance().loadVideoCaptures();
 
     // Setup WebRTC environment
     rtc::LogMessage::LogToDebug(rtc::LERROR); //(rtc::LoggingSeverity)
@@ -65,8 +65,8 @@ int main(int argc, char** argv)
     }
 
     // Shutdown the media factory and release devices
-    av::MediaFactory::instance().unloadVideoCaptures();
-    av::MediaFactory::shutdown();
+    // av::MediaFactory::instance().unloadVideoCaptures();
+    // av::MediaFactory::shutdown();
 
 #if USE_SSL
     net::SSLManager::destroy();

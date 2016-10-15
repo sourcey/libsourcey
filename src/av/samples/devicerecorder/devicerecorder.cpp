@@ -38,7 +38,7 @@ using std::endl;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    Logger::instance().add(new ConsoleChannel("debug", LDebug));
 
     {
         // Create a PacketStream to pass packets

@@ -249,6 +249,7 @@ void MediaCapture::run()
                 if (gotFrame) {
                     VideoPacket video(opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
                     video.source = &opacket;
+                    video.opaque = _video;
                     emit(video);
                 }
                 av_packet_unref(&opacket);
@@ -263,6 +264,7 @@ void MediaCapture::run()
                 if (gotFrame) {
                     AudioPacket audio(opacket.data, opacket.size, _audio->frame->nb_samples, _audio->pts);
                     audio.source = &opacket;
+                    audio.opaque = _audio;
                     emit(audio);
                 }
                 av_packet_unref(&opacket);
@@ -272,7 +274,6 @@ void MediaCapture::run()
 
             // End of file or error.
             TraceS(this) << "Decoding: EOF" << endl;
-            //break;
         }
     }
     catch (std::exception& exc) {

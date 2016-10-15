@@ -66,6 +66,9 @@ void VideoCapture::open(const std::string& device, int width, int height, double
     if (framerate > 0)
         av_dict_set(&iparams, "framerate", util::format("%f", framerate).c_str(), 0);
 
+    // Set the desired pixel format
+    av_dict_set(&iparams, "pixel_format", "yuv420p", 0);
+
     openStream(device.c_str(), iformat, &iparams);
 
     av_dict_free(&iparams); // FIXME: possible memory leak

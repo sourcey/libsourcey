@@ -44,7 +44,7 @@ VideoConversionContext::~VideoConversionContext()
 }
 
 
-void VideoConversionContext::create() //const VideoCodec& iparams, const VideoCodec& oparams
+void VideoConversionContext::create()
 {
 //#if 0
     TraceS(this) << "Create:"
@@ -60,13 +60,6 @@ void VideoConversionContext::create() //const VideoCodec& iparams, const VideoCo
     if (ctx)
         throw std::runtime_error("Conversion context already initialized.");
 
-    //assert(av_get_pix_fmt(oparams.pixelFmt) == );
-
-    // oframe = av_frame_alloc();
-    // oframe->width = oparams.width;
-    // oframe->height = oparams.height;
-    // avpicture_alloc(reinterpret_cast<AVPicture*>(oframe),
-    //     av_get_pix_fmt(oparams.pixelFmt.c_str()), oparams.width, oparams.height);
     oframe = createVideoFrame(av_get_pix_fmt(oparams.pixelFmt.c_str()), oparams.width, oparams.height);
 
     ctx = sws_getContext(
@@ -75,9 +68,6 @@ void VideoConversionContext::create() //const VideoCodec& iparams, const VideoCo
         /* SWS_FAST_BILINEAR */SWS_BICUBIC, nullptr, nullptr, nullptr);
     if (!ctx)
         throw std::runtime_error("Invalid conversion context.");
-
-    // this->iparams = iparams;
-    // this->oparams = oparams;
 
     TraceS(this) << "Create: OK: " << ctx << endl;
 }

@@ -1,6 +1,7 @@
 #include "signaler.h"
 
-#include "scy/webrtc/opencvvideocapturer.h"
+#include "scy/av/devicemanager.h"
+#include "scy/webrtc/ffmpegvideocapturer.h"
 
 #include <iostream>
 #include <string>
@@ -69,16 +70,29 @@ void Signaler::onPeerConnected(void*, smpl::Peer& peer)
     conn->constraints().SetMandatoryReceiveVideo(false);
     conn->constraints().SetAllowDtlsSctpDataChannels();
 
-    // Create the media stream and tracks
+    av::Device device;
+
+    // Create the media stream
     rtc::scoped_refptr<webrtc::MediaStreamInterface> stream = conn->createMediaStream();
-    rtc::scoped_refptr<webrtc::VideoTrackInterface> videoTrack(
-        _factory->CreateVideoTrack(kVideoLabel,
-            _factory->CreateVideoSource(new OpenCVVideoCapturer(0), NULL)));
-    rtc::scoped_refptr<webrtc::AudioTrackInterface> audioTrack(
-        _factory->CreateAudioTrack(kAudioLabel,
-            _factory->CreateAudioSource(NULL)));
-    stream->AddTrack(videoTrack);
-    stream->AddTrack(audioTrack);
+
+    // Create and add the audio stream
+    // TODO: Add custom FFmpegAudioCapturer
+    if (av::DeviceManager::instance().getDefaultMicrophone(device)) {
+        InfoL << "Using audio device: " << device.name << endl;
+        rtc::scoped_refptr<webrtc::AudioTrackInterface> audioTrack(
+            _factory->CreateAudioTrack(kAudioLabel,
+                _factory->CreateAudioSource(nullptr)));
+        stream->AddTrack(audioTrack);
+    }
+
+    // Create and add the video stream
+    if (av::DeviceManager::instance().getDefaultCamera(device)) {
+        InfoL << "Using video device: " << device.name << endl;
+        rtc::scoped_refptr<webrtc::VideoTrackInterface> videoTrack(
+            _factory->CreateVideoTrack(kVideoLabel,
+                _factory->CreateVideoSource(new FFmpegVideoCapturer(device.id), nullptr)));
+        stream->AddTrack(videoTrack);
+    }
 
     conn->createConnection();
     conn->createOffer();

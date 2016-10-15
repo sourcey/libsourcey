@@ -9,51 +9,8 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace)); //Trace
-    // test::initialize();
-    // net::SSLManager::initNoVerifyClient();
-
-    // Create the static callback context
-    // static CallbackContext context;
-
-    //
-    /// Device Manager Tests
-    //
-
-    // describe("device manager", []() {
-    //     cout << "Starting" << endl;
-    //     auto& deviceManager = av::MediaFactory::instance().devices();
-    //
-    //     av::Device device;
-    //     if (deviceManager.getDefaultCamera(device)) {
-    //         cout << "Default video device: " << device.id << ": " << device.name << endl;
-    //     }
-    //     if (deviceManager.getDefaultMicrophone(device)) {
-    //         cout << "Default audio device: " << device.id << ": " << device.name << endl;
-    //     }
-    //
-    //     std::vector<av::Device> devices;
-    //     if (deviceManager.getCameras(devices)) {
-    //         cout << "Num video devices: " << devices.size() << endl;
-    //         for (auto& device : devices) {
-    //             cout << "Printing video device: " << device.id << ": " << device.name << endl;
-    //         }
-    //     }
-    //     else {
-    //         cout << "No video devices detected!" << endl;
-    //     }
-    //     if (deviceManager.getMicrophones(devices)) {
-    //         cout << "Num audio devices: " << devices.size() << endl;
-    //         for (auto& device : devices) {
-    //             cout << "Printing audio device: " << device.id << ": " << device.name << endl;
-    //         }
-    //     }
-    //     else {
-    //         cout << "No video devices detected!" << endl;
-    //     }
-    //
-    //     // TODO: verify data integrity?
-    // });
+    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    test::initialize();
 
     // Define class based tests
     describe("audio encoder", new AudioEncoderTest);
@@ -68,6 +25,47 @@ int main(int argc, char** argv)
 }
 
 
+
+// //
+// /// Device Manager Tests
+// //
+//
+// describe("device manager", []() {
+//     cout << "Starting" << endl;
+//     auto& deviceManager = av::MediaFactory::instance().devices();
+//
+//     av::Device device;
+//     if (deviceManager.getDefaultCamera(device)) {
+//         cout << "Default video device: " << device.id << ": " << device.name << endl;
+//     }
+//     if (deviceManager.getDefaultMicrophone(device)) {
+//         cout << "Default audio device: " << device.id << ": " << device.name << endl;
+//     }
+//
+//     std::vector<av::Device> devices;
+//     if (deviceManager.getCameras(devices)) {
+//         cout << "Num video devices: " << devices.size() << endl;
+//         for (auto& device : devices) {
+//             cout << "Printing video device: " << device.id << ": " << device.name << endl;
+//         }
+//     }
+//     else {
+//         cout << "No video devices detected!" << endl;
+//     }
+//     if (deviceManager.getMicrophones(devices)) {
+//         cout << "Num audio devices: " << devices.size() << endl;
+//         for (auto& device : devices) {
+//             cout << "Printing audio device: " << device.id << ": " << device.name << endl;
+//         }
+//     }
+//     else {
+//         cout << "No video devices detected!" << endl;
+//     }
+//
+//     // TODO: verify data integrity?
+// });
+//
+//
 // //
 // /// Video Capture Tests
 // //
