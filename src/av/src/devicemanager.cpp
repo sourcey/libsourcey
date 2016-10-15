@@ -29,9 +29,9 @@
     #define SCY_SPEAKER_OUTPUTS   {"audio_device", "dsound"}
 #elif defined(SCY_APPLE)
     #define SCY_CAMERA_INPUTS     {"avfoundation", "qtkit"}
-    #define SCY_SCREEN_INPUTS     {} // TODO: list formats
-    #define SCY_MICROPHONE_INPUTS {} // TODO: list formats
-    #define SCY_SPEAKER_OUTPUTS   {} // TODO: list formats
+    #define SCY_SCREEN_INPUTS     {"avfoundation"} // TODO: filter screen input formats
+    #define SCY_MICROPHONE_INPUTS {"avfoundation"} // TODO: filter screen input formats
+    #define SCY_SPEAKER_OUTPUTS   {"avfoundation"} // TODO: filter screen output formats
 #elif defined(SCY_LINUX)
     #define SCY_CAMERA_INPUTS     {"v4l2", "dv1394"}
     #define SCY_SCREEN_INPUTS     {"x11grab"}
@@ -173,20 +173,11 @@ AVInputFormat* findDefaultInputFormat(const std::vector<std::string>& inputs)
 bool enumerateDeviceList(AVFormatContext* ctx, std::vector<av::Device>& devices, Device::Type type)
 {
     AVDeviceInfoList* devlist = nullptr;
-    // AVDictionary* tmp = nullptr;
-    //
-    // // TODO: redundant code?
-    // av_dict_copy(&tmp, nullptr, 0);
-    // if (av_opt_set_dict2(ctx, &tmp, AV_OPT_SEARCH_CHILDREN) < 0) {
-    //     assert(0);
-    //     goto cleanup;
-    // }
 
     // List the devices for this context
     avdevice_list_devices(ctx, &devlist);
     if (!devlist) {
-        WarnL << "avdevice_list_devices failed";
-        assert(0 && "avdevice_list_devices failed");
+        WarnL << "Cannot list system devices";
         goto cleanup;
     }
 
@@ -200,8 +191,6 @@ bool enumerateDeviceList(AVFormatContext* ctx, std::vector<av::Device>& devices,
 cleanup:
     if (devlist)
         avdevice_free_list_devices(&devlist);
-    // if (tmp)
-    //     av_dict_free(&tmp);
 
     return !devices.empty();
 }
