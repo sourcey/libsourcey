@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Simple WebRTC Native Recording Demo</title>
+
+    <!-- <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"> -->
+    <link rel="stylesheet" type="text/css" href="symple.player.css">
+    <link rel="stylesheet" type="text/css" href="main.css">
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script> -->
+    <script type="text/javascript" src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+
+    <script type="text/javascript" src="symple.js"></script>
+    <script type="text/javascript" src="symple.client.js"></script>
+    <script type="text/javascript" src="symple.player.js"></script>
+    <script type="text/javascript" src="symple.player.webrtc.js"></script>
+    <script>
+
+        // Symple client options
+        CLIENT_OPTIONS = {
+            url: 'http://localhost:<%- port %>',
+            // url: 'http://sympleserver.sourcey.com:<%- port %>',
+            // secure: true,
+            peer: <%- JSON.stringify(peer) %>
+        }
+
+        // WebRTC config
+        // This is where you would add TURN servers for use in production
+        WEBRTC_CONFIG = {
+            'iceServers': [
+                // {'url': 'stun:stun.l.google.com:19302'}
+            ]
+        }
+    </script>
+    <script type="text/javascript" src="main.js"></script>
+  </head>
+  <body>
+    <div id="webrtc-video">
+      <!-- <h1>WebRTC Video Player</h1> -->
+      <div class="video-player">
+        <!-- <button id="connect" onclick="connect();">Connect</button> -->
+      </div>
+    </div>
+    <script>
+      /*
+      player.play({
+        token: "",
+        format: "Speex",
+        protocol: "Raw",
+        audio: {
+        	codec: "Speex"
+        },
+        candidates: [{
+            protocol: "http",
+            address: Symple.SERVICE,
+            uri: "/streaming?format=Speex"
+        }]
+      });
+      $('#webrtc-video h1').after('<p>' + JSON.stringify(Symple.Media.engines['WebRTC']) + '</p>')
+      */
+    </script>
+  </body>
+</html>
