@@ -218,7 +218,7 @@ class AudioResamplerTest: public Test
 };
 
 
-#ifdef HAVE_OPENCV
+#ifdef HAVE_FFMPEG
 
 // =============================================================================
 // Audio Capture Encoder
@@ -359,7 +359,7 @@ class AudioCaptureResamplerTest: public Test
     }
 };
 
-#endif // HAVE_OPENCV
+#endif // HAVE_FFMPEG
 
 
 // static const int kInAudioDeviceId = 0;
