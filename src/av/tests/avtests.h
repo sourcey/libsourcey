@@ -240,6 +240,7 @@ class AudioCaptureEncoderTest: public Test
         av::Device device;
         if (!av::DeviceManager::instance().getDefaultMicrophone(device)) {
             WarnL << "Skipping audio test because no microphone is available" << endl;
+            return;
         }
 
         av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
@@ -317,6 +318,7 @@ class AudioCaptureResamplerTest: public Test
         av::Device device;
         if (!av::DeviceManager::instance().getDefaultMicrophone(device)) {
             WarnL << "Skipping audio test because no microphone is available" << endl;
+            return;
         }
 
         av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
