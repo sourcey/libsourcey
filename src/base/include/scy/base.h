@@ -44,7 +44,7 @@
 
 #ifdef _WIN32
     // Windows (x64 and x86)
-    #define SCY_WIN32
+    #define SCY_WIN
 #endif
 #if __unix__
     // Unix
@@ -72,7 +72,7 @@
 #endif
 
 
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
 # ifndef SCY_SHARED_LIBRARY // libsourcey.h
 #   define SCY_EXTERN __declspec(dllexport)
 # else
@@ -87,7 +87,7 @@
 /// Windows specific
 //
 
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
 
 // Verify that we're built with the multithreaded
 // versions of the runtime libraries

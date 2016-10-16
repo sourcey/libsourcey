@@ -28,7 +28,7 @@
 #include <arpa/inet.h>
 #endif
 
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
 #include <stdlib.h>
 #endif
 

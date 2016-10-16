@@ -134,7 +134,7 @@ std::time_t nowUTC()
 
 std::uint64_t ticks()
 {
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
     return ::GetTickCount();
 #else
     struct timespec tval;

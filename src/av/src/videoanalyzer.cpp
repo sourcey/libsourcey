@@ -400,7 +400,7 @@ double GetAmplitudeScaled(double re, double im, int len, int scale)
 }
 
 
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
 double log2(double n)
 {
     return log(n) / log(double(2));

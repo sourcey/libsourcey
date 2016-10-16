@@ -235,11 +235,6 @@ add_vendor_dependency(MINIZIP minizip)
 add_vendor_dependency(HTTPPARSER http_parser)
 add_vendor_dependency(JSONCPP jsoncpp)
 
-# Include inttypes.h for windows
-if (MSVC)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/msvc)
-endif()
-
 # External dependencies
 if(WITH_OPENSSL)
   find_dependency(OpenSSL REQUIRED)
@@ -271,6 +266,11 @@ list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
   ${LibSourcey_VENDOR_SOURCE_DIR}/libuv/include
   ${LibSourcey_VENDOR_SOURCE_DIR}/http_parser
   ${LibSourcey_VENDOR_SOURCE_DIR}/jsoncpp)
+
+# Include inttypes.h for windows
+if (MSVC)
+  include_directories(${LibSourcey_VENDOR_SOURCE_DIR}/msvc)
+endif()
 
 # Enable testing if required
 if (BUILD_TESTS)

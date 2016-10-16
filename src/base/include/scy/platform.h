@@ -56,7 +56,7 @@ void pause();
 /// Windows helpers
 //
 
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
 
 bool getOsVersion(int* major, int* minor, int* build);
 bool isWindowsVistaOrLater();

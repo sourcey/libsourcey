@@ -33,7 +33,7 @@ extern "C" {
 #include "libavutil/time.h" // av_gettime (depreciated)
 }
 
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
 #define snprintf _snprintf
 #endif
 

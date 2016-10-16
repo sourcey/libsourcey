@@ -21,7 +21,7 @@
 #include "scy/uv/uvpp.h"
 #include "scy/error.h"
 
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
 #include <windows.h>
 #else
 #include <unistd.h>
@@ -68,7 +68,7 @@ std::uint64_t getTotalMemory()
 
 void sleep(int ms)
 {
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
     Sleep(ms);
 #else    
     usleep(ms * 1000);
@@ -88,7 +88,7 @@ void pause()
 /// Windows helpers
 //
 
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
 
 enum WindowsMajorVersions 
 {

@@ -37,7 +37,7 @@ namespace fs {
 
 static const char* separatorWin = "\\";
 static const char* separatorUnix = "/";
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
     const char delimiter = '\\';
     const char* separator = separatorWin;
     static const char* sepPattern = "/\\";
@@ -100,7 +100,7 @@ bool exists(const std::string& path)
     // trailing slash for directories or
     // stat fails to recognize validity.
     // TODO: Do we need transcode here?
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
     struct _stat s;
     return _stat(fs::normalize(path).c_str(), &s) != -1;
 #else
@@ -113,7 +113,7 @@ bool exists(const std::string& path)
 bool isdir(const std::string& path)
 {
     // TODO: Do we need transcode here?
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
     struct _stat s;
     _stat(fs::normalize(path).c_str(), &s);
 #else
@@ -133,7 +133,7 @@ bool isdir(const std::string& path)
 
 std::int64_t filesize(const std::string& path)
 {
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
     struct _stat s;
     if (_stat(path.c_str(), &s) == 0)
 #else
@@ -194,7 +194,7 @@ void mkdirr(const std::string& path, int mode)
     {
         if (level.empty()) continue;
 
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
         current += level;
         if (level.at(level.length() - 1) == ':') {
             current += fs::separator;
@@ -243,7 +243,7 @@ void trimslash(std::string& path)
 std::string normalize(const std::string& path)
 {
     std::string s(util::replace(path,
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
         separatorUnix, separatorWin
 #else
         separatorWin, separatorUnix

@@ -157,7 +157,7 @@ inline double GetDecibels(double re, double im);
 inline double GetAmplitude(double re, double im, int len);
 inline double GetAmplitudeScaled(double re, double im, int len, int scale);
 
-#ifdef SCY_WIN32
+#ifdef SCY_WIN
 inline double log2(double n);
 #endif
 
