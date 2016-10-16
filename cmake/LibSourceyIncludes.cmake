@@ -13,14 +13,19 @@ macro(add_vendor_dependency name libname)
   # Cache dependency directories for inclusion by modules and applications
   # get_directory_property(lib_directories INCLUDE_DIRECTORIES)
   set(LibSourcey_INCLUDE_DIRS ${libdir})
-  set(LibSourcey_INCLUDE_DIRS ${libdir} PARENT_SCOPE)
   set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} ${libname})
-  set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} ${libname} PARENT_SCOPE)
   set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${libname})
-  set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${libname} PARENT_SCOPE)
 
   set(HAVE_${name} TRUE)
-  set(HAVE_${name} TRUE PARENT_SCOPE)
+
+  # get_directory_property(hasParent PARENT_DIRECTORY)
+  # if(hasParent)
+  #   set(LibSourcey_INCLUDE_DIRS ${libdir} PARENT_SCOPE)
+  #   set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} ${libname} PARENT_SCOPE)
+  #   set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${libname} PARENT_SCOPE)
+  #
+  #   set(HAVE_${name} TRUE PARENT_SCOPE)
+  # endif()
 endmacro()
 
 
@@ -61,7 +66,7 @@ function(find_dependency name)
 
   # Set a HAVE_XXX variable at parent scope for the libsourcey.h config sile
   set(HAVE_${var_root_upper} TRUE)
-  set(HAVE_${var_root_upper} TRUE PARENT_SCOPE)
+  # set(HAVE_${var_root_upper} TRUE PARENT_SCOPE)
 endfunction()
 
 
@@ -171,7 +176,9 @@ macro(set_default_project_dependencies name)
   set(${name}_LIBRARIES ${ARGN})
   list(APPEND ${name}_LIBRARIES ${LibSourcey_INCLUDE_LIBRARIES})
   list(APPEND ${name}_LIBRARIES ${LibSourcey_BUILD_DEPENDENCIES})
-  list(REMOVE_DUPLICATES ${name}_LIBRARIES)
+  if(${name}_LIBRARIES)
+    list(REMOVE_DUPLICATES ${name}_LIBRARIES)
+  endif()
 
   # Allow exclusion of specific libraries
   if (${name}_EXCLUDE_LIBRARIES)
@@ -498,7 +505,11 @@ macro(set_component_found module component)
   endif()
 
   set(HAVE_${ALIAS} ${${ALIAS_FOUND}})
-  set(HAVE_${ALIAS} ${${ALIAS_FOUND}} PARENT_SCOPE)
+
+  get_directory_property(hasParent PARENT_DIRECTORY)
+  if(hasParent)
+    set(HAVE_${ALIAS} ${${ALIAS_FOUND}} PARENT_SCOPE)
+  endif()
 
   mark_as_advanced(
       ${ALIAS_FOUND}
@@ -750,17 +761,17 @@ macro(find_multi_component module component pkgconfig library header)
   #message("${header}")
   #message("${library}")
 
-  set(${component}_DEFINITIONS  ${PC_${component}_CFLAGS_OTHER} CACHE STRING "The ${component} CFLAGS.")
-  set(${component}_VERSION    ${PC_${component}_VERSION}    CACHE STRING "The ${component} version number.")
+  set(${component}_DEFINITIONS ${PC_${component}_CFLAGS_OTHER} CACHE STRING "The ${component} CFLAGS.")
+  set(${component}_VERSION ${PC_${component}_VERSION} CACHE STRING "The ${component} version number.")
 
   set_component_found(${component})
 
   mark_as_advanced(
-  ${component}_INCLUDE_DIRS
-  ${ALIAS_LIBRARIES}
-  ${ALIAS_DEBUG_LIBRARIES}
-  ${ALIAS_RELEASE_LIBRARIES}
-  ${component}_DEFINITIONS
-  ${component}_VERSION)
+      ${component}_INCLUDE_DIRS
+      ${ALIAS_LIBRARIES}
+      ${ALIAS_DEBUG_LIBRARIES}
+      ${ALIAS_RELEASE_LIBRARIES}
+      ${component}_DEFINITIONS
+      ${component}_VERSION)
 
 endmacro()

@@ -5,9 +5,7 @@ if(BUILD_MODULES OR (NOT BUILD_MODULES AND BUILD_MODULE_archo))
   set(INSTALL_INC_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/include")
   set(INSTALL_MAN_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/share/man")
   set(INSTALL_PKGCONFIG_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/share/pkgconfig")
-
-  add_vendor_dependency(ZLIB zlib)
-  add_vendor_dependency(MINIZIP minizip)
+  
   #add_subdirectory(vendor/zlib)
   #add_subdirectory(vendor/minizip)
 

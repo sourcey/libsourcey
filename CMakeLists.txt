@@ -222,6 +222,24 @@ set_option(WITH_OPENCV          "Include OpenCV support"               ON IF (OP
 set_option(WITH_WEBRTC          "Include WebRTC support"               OFF)
 set_option(WITH_WXWIDGETS       "Include wxWidgets support"            OFF)
 
+# Include libuv dependency
+set(BUILD_TESTS OFF) # don't build libuv tests
+set(LIB_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/lib")
+set(BIN_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/bin")
+set(INCLUDE_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/include")
+add_vendor_dependency(LIBUV libuv)
+
+# Build dependencies
+add_vendor_dependency(ZLIB zlib)
+add_vendor_dependency(MINIZIP minizip)
+add_vendor_dependency(HTTPPARSER http_parser)
+add_vendor_dependency(JSONCPP jsoncpp)
+
+# Include inttypes.h for windows
+if (MSVC)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/vendor/msvc)
+endif()
+
 # External dependencies
 if(WITH_OPENSSL)
   find_dependency(OpenSSL REQUIRED)
