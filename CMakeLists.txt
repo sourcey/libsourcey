@@ -263,14 +263,14 @@ endif()
 # ----------------------------------------------------------------------------
 
 list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
-  ${LibSourcey_SOURCE_DIR}/archo/vendor/zlib
-  ${LibSourcey_BUILD_DIR}/src/archo/vendor/zlib
-  ${LibSourcey_SOURCE_DIR}/archo/vendor/minizip
-  ${LibSourcey_SOURCE_DIR}/media/vendor/rtaudio
-  ${LibSourcey_SOURCE_DIR}/media/vendor/rtaudio/include
-  ${LibSourcey_SOURCE_DIR}/uv/vendor/libuv/include
-  ${LibSourcey_SOURCE_DIR}/http/vendor/http_parser
-  ${LibSourcey_SOURCE_DIR}/json/vendor/jsoncpp)
+  ${LibSourcey_VENDOR_SOURCE_DIR}/zlib
+  ${LibSourcey_BUILD_DIR}/zlib
+  ${LibSourcey_VENDOR_SOURCE_DIR}/minizip
+  # ${LibSourcey_VENDOR_SOURCE_DIR}/rtaudio
+  # ${LibSourcey_VENDOR_SOURCE_DIR}/rtaudio/include
+  ${LibSourcey_VENDOR_SOURCE_DIR}/libuv/include
+  ${LibSourcey_VENDOR_SOURCE_DIR}/http_parser
+  ${LibSourcey_VENDOR_SOURCE_DIR}/jsoncpp)
 
 # Enable testing if required
 if (BUILD_TESTS)

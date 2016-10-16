@@ -2,8 +2,8 @@
 ### Macro: add_vendor_dependency
 #
 macro(add_vendor_dependency name libname)
-  set(libdir vendor/${libname})
-  # ${LibSourcey_VENDOR_SOURCE_DIR}
+  set(libdir ${LibSourcey_VENDOR_SOURCE_DIR}/${libname})
+  # vendor
 
   add_subdirectory(${libdir})
 
@@ -66,7 +66,11 @@ function(find_dependency name)
 
   # Set a HAVE_XXX variable at parent scope for the libsourcey.h config sile
   set(HAVE_${var_root_upper} TRUE)
-  # set(HAVE_${var_root_upper} TRUE PARENT_SCOPE)
+
+  # get_directory_property(hasParent PARENT_DIRECTORY)
+  # if(hasParent)
+    set(HAVE_${var_root_upper} TRUE PARENT_SCOPE)
+  # endif()
 endfunction()
 
 
@@ -115,7 +119,7 @@ macro(include_dependency name)
     #list(APPEND LibSourcey_BUILD_DEPENDENCIES ${${name_upper}_LIBRARIES})
   endif()
   if(${name_upper}_DEPENDENCIES)
-    message(STATUS "- Found external dependency ${name}: ${${name_upper}_DEPENDENCIES}")
+    # message(STATUS "- Found external dependency ${name}: ${${name_upper}_DEPENDENCIES}")
     list(APPEND LibSourcey_INCLUDE_LIBRARIES ${${name_upper}_DEPENDENCIES})
     #list(APPEND LibSourcey_BUILD_DEPENDENCIES ${${name_upper}_DEPENDENCIES})
   endif()
@@ -675,103 +679,102 @@ endmacro()
 # Extra helper variables may be set to assist finding libraries:
 #   ${module}_PATH_SUFFIXES
 #
-macro(find_multi_component module component pkgconfig library header)
-
-  # FIXME: currently broken, need to update API
-
-  if (NOT WIN32)
-   # use pkg-config to get the directories and then use these values
-   # in the FIND_PATH() and find_library() calls
-   find_package(PkgConfig)
-   if (PKG_CONFIG_FOUND)
-     pkg_check_modules(PC_${component} ${pkgconfig})
-   endif()
-  endif()
-
-  find_path(${component}_INCLUDE_DIRS ${header}
-  HINTS
-    ${PC_LIB${component}_INCLUDEDIR}
-    ${PC_LIB${component}_INCLUDE_DIRS}
-  PATH_SUFFIXES
-    ${${module}_PATH_SUFFIXES}
-  )
-
-  # Create a Debug and a Release list for multi configuration builds
-  if (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-  #set(${ALIAS_RELEASE_LIBRARIES} ${ALIAS_RELEASE_LIBRARIES}-NOTFOUND)
-  #set(${ALIAS_DEBUG_LIBRARIES} ${ALIAS_DEBUG_LIBRARIES}-NOTFOUND)
-  #set(${ALIAS_LIBRARIES})
-  find_library(${ALIAS_RELEASE_LIBRARIES}
-    NAMES
-    lib${library}.a
-    ${library}.lib
-    ${library}
-    HINTS
-    ${PC_LIB${component}_LIBDIR}
-    ${PC_LIB${component}_LIBRARY_DIRS}
-    PATH_SUFFIXES
-    lib
-    bin
-  )
-  find_library(${ALIAS_DEBUG_LIBRARIES}
-    NAMES
-    lib${library}d.a
-    ${library}d.lib
-    ${library}d
-    HINTS
-    ${PC_LIB${component}_LIBDIR}
-    ${PC_LIB${component}_LIBRARY_DIRS}
-    PATH_SUFFIXES
-    lib
-    bin
-  )
-  if (${ALIAS_RELEASE_LIBRARIES})
-    list(APPEND ${ALIAS_LIBRARIES} "optimized" ${${ALIAS_RELEASE_LIBRARIES}})
-  endif()
-  if (${ALIAS_DEBUG_LIBRARIES})
-    list(APPEND ${ALIAS_LIBRARIES} "debug" ${${ALIAS_DEBUG_LIBRARIES}})
-  endif()
-  else()
-  #set(${ALIAS_LIBRARIES})
-  find_library(${ALIAS_LIBRARIES}
-    NAMES # setting in order might help overcome find_library bugs :/
-    #lib${library}.a
-    #${library}.lib
-    ${library}
-    HINTS
-    ${PC_LIB${component}_LIBDIR}
-    ${PC_LIB${component}_LIBRARY_DIRS}
-    PATH_SUFFIXES
-    lib
-    bin
-  )
-  endif()
-
-  #message("find_component =Searching for: ${library}")
-  #message("find_component module=${${module}_PATH_SUFFIXES}")
-  #message("find_component _PATH_SUFFIXES=${${module}_PATH_SUFFIXES}")
-  #message("find_component _INCLUDE_DIRS=${${component}_INCLUDE_DIRS}")
-  #message("find_component =lib${library}.a")
-  #message("find_component =${${component}_INCLUDE_DIRS}")
-  #message("find_component _INCLUDE_DIRS=${${component}_INCLUDE_DIRS}")
-  #message("find_component _LIBRARIES=${${ALIAS_LIBRARIES}}")
-  #message("${${component}_INCLUDE_DIRS}/lib")
-  #message("${PC_LIB${component}_LIBDIR}")
-  #message("${PC_LIB${component}_LIBRARY_DIRS}")
-  #message("${header}")
-  #message("${library}")
-
-  set(${component}_DEFINITIONS ${PC_${component}_CFLAGS_OTHER} CACHE STRING "The ${component} CFLAGS.")
-  set(${component}_VERSION ${PC_${component}_VERSION} CACHE STRING "The ${component} version number.")
-
-  set_component_found(${component})
-
-  mark_as_advanced(
-      ${component}_INCLUDE_DIRS
-      ${ALIAS_LIBRARIES}
-      ${ALIAS_DEBUG_LIBRARIES}
-      ${ALIAS_RELEASE_LIBRARIES}
-      ${component}_DEFINITIONS
-      ${component}_VERSION)
-
-endmacro()
+# macro(find_multi_component module component pkgconfig library header)
+#
+#   # FIXME: currently broken, need to update API
+#
+#   if (NOT WIN32)
+#    # use pkg-config to get the directories and then use these values
+#    # in the FIND_PATH() and find_library() calls
+#    find_package(PkgConfig)
+#    if (PKG_CONFIG_FOUND)
+#      pkg_check_modules(PC_${component} ${pkgconfig})
+#    endif()
+#   endif()
+#
+#   find_path(${component}_INCLUDE_DIRS ${header}
+#   HINTS
+#     ${PC_LIB${component}_INCLUDEDIR}
+#     ${PC_LIB${component}_INCLUDE_DIRS}
+#   PATH_SUFFIXES
+#     ${${module}_PATH_SUFFIXES}
+#   )
+#
+#   # Create a Debug and a Release list for multi configuration builds
+#   if (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+#     #set(${ALIAS_RELEASE_LIBRARIES} ${ALIAS_RELEASE_LIBRARIES}-NOTFOUND)
+#     #set(${ALIAS_DEBUG_LIBRARIES} ${ALIAS_DEBUG_LIBRARIES}-NOTFOUND)
+#     #set(${ALIAS_LIBRARIES})
+#     find_library(${ALIAS_RELEASE_LIBRARIES}
+#       NAMES
+#         lib${library}.a
+#         ${library}.lib
+#         ${library}
+#       HINTS
+#         ${PC_LIB${component}_LIBDIR}
+#         ${PC_LIB${component}_LIBRARY_DIRS}
+#       PATH_SUFFIXES
+#       lib
+#       bin
+#     )
+#     find_library(${ALIAS_DEBUG_LIBRARIES}
+#       NAMES
+#         lib${library}d.a
+#         ${library}d.lib
+#         ${library}d
+#       HINTS
+#         ${PC_LIB${component}_LIBDIR}
+#         ${PC_LIB${component}_LIBRARY_DIRS}
+#       PATH_SUFFIXES
+#       lib
+#       bin
+#     )
+#     if (${ALIAS_RELEASE_LIBRARIES})
+#       list(APPEND ${ALIAS_LIBRARIES} "optimized" ${${ALIAS_RELEASE_LIBRARIES}})
+#     endif()
+#     if (${ALIAS_DEBUG_LIBRARIES})
+#       list(APPEND ${ALIAS_LIBRARIES} "debug" ${${ALIAS_DEBUG_LIBRARIES}})
+#     endif()
+#   else()
+#     #set(${ALIAS_LIBRARIES})
+#     find_library(${ALIAS_LIBRARIES}
+#       NAMES # setting in order might help overcome find_library bugs :/
+#         #lib${library}.a
+#         #${library}.lib
+#         ${library}
+#       HINTS
+#         ${PC_LIB${component}_LIBDIR}
+#         ${PC_LIB${component}_LIBRARY_DIRS}
+#       PATH_SUFFIXES
+#         lib
+#         bin
+#     )
+#   endif()
+#
+#   #message("find_component =Searching for: ${library}")
+#   #message("find_component module=${${module}_PATH_SUFFIXES}")
+#   #message("find_component _PATH_SUFFIXES=${${module}_PATH_SUFFIXES}")
+#   #message("find_component _INCLUDE_DIRS=${${component}_INCLUDE_DIRS}")
+#   #message("find_component =lib${library}.a")
+#   #message("find_component =${${component}_INCLUDE_DIRS}")
+#   #message("find_component _INCLUDE_DIRS=${${component}_INCLUDE_DIRS}")
+#   #message("find_component _LIBRARIES=${${ALIAS_LIBRARIES}}")
+#   #message("${${component}_INCLUDE_DIRS}/lib")
+#   #message("${PC_LIB${component}_LIBDIR}")
+#   #message("${PC_LIB${component}_LIBRARY_DIRS}")
+#   #message("${header}")
+#   #message("${library}")
+#
+#   set(${component}_DEFINITIONS ${PC_${component}_CFLAGS_OTHER} CACHE STRING "The ${component} CFLAGS.")
+#   set(${component}_VERSION ${PC_${component}_VERSION} CACHE STRING "The ${component} version number.")
+#
+#   set_component_found(${component})
+#
+#   mark_as_advanced(
+#       ${component}_INCLUDE_DIRS
+#       ${ALIAS_LIBRARIES}
+#       ${ALIAS_DEBUG_LIBRARIES}
+#       ${ALIAS_RELEASE_LIBRARIES}
+#       ${component}_DEFINITIONS
+#       ${component}_VERSION)
+# endmacro()

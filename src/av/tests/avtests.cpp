@@ -9,14 +9,14 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LTrace));
-    // test::initialize();
+    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    test::initialize();
 
     // Define class based tests
     describe("audio encoder", new AudioEncoderTest);
     describe("audio resampler", new AudioResamplerTest);
-    describe("audio capture encoder", new AudioCaptureEncoderTest);
-    describe("audio capture resampler", new AudioCaptureResamplerTest);
+    // describe("audio capture encoder", new AudioCaptureEncoderTest);
+    // describe("audio capture resampler", new AudioCaptureResamplerTest);
     // describe("device capture multiplex encoder", new DeviceCaptureMultiplexEncoderTest);
 
     test::runAll();

@@ -54,7 +54,6 @@ macro(define_sourcey_module name)
   # Include linker dependencies
   set_default_project_dependencies(${name} ${ARGN})
 
-  #  message(FATAL_ERROR "${CMAKE_SYSTEM_NAME} ${lib_srcs}")
   message(STATUS "Including module ${name}")
   # message(STATUS "    Dependencies: ${LibSourcey_BUILD_DEPENDENCIES}")
   # message(STATUS "    Libraries: ${LibSourcey_INCLUDE_LIBRARIES}")
@@ -340,7 +339,6 @@ endmacro()
 #   <name>_HEADER_FILES - The glob header files
 #
 macro(define_sourcey_dependency name)
-
   project(${name})
 
   # Include current directory and existing dependency directories
@@ -375,8 +373,10 @@ macro(define_sourcey_dependency name)
   endif()
 
   # Cache dependency directories for inclusion by modules and applications
-  get_directory_property(lib_directories INCLUDE_DIRECTORIES)
-  set(LibSourcey_INCLUDE_DIRS ${lib_directories} PARENT_SCOPE)
+  # get_directory_property(lib_directories INCLUDE_DIRECTORIES)
+  # set(LibSourcey_VENDOR_INCLUDE_DIRS ${lib_directories})
+  # set(LibSourcey_VENDOR_INCLUDE_DIRS ${lib_directories} PARENT_SCOPE)
+
   # set(LibSourcey_LINK_LIBRARIES ${LibSourcey_LINK_LIBRARIES} ${name} PARENT_SCOPE)
   # set(LibSourcey_BUILD_DEPENDENCIES ${LibSourcey_BUILD_DEPENDENCIES} ${name} PARENT_SCOPE)
 
