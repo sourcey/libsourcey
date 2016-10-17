@@ -75,10 +75,8 @@ endfunction()
 #
 function(filter_list result source regex)
   set(items)
-  foreach(ITR ${source})  # ARGN holds all arguments to function after last named one
-
+  foreach(ITR ${source})
     if(NOT ITR MATCHES ${regex})
-          message("WTFFF: ${ITR} ${regex}")
       list(APPEND items ${ITR})
     endif()
   endforeach()

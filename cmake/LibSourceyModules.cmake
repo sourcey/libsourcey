@@ -37,7 +37,7 @@ macro(define_sourcey_module name)
 
   # Include Objective-C files on Apple
   if(APPLE)
-    file(GLOB_RECURSE lib_objectivec_srcs "*.mm")
+    file(GLOB_RECURSE lib_objectivec_srcs "src/*.mm")
     set(lib_srcs ${lib_objectivec_srcs} ${lib_srcs})
   endif()
 

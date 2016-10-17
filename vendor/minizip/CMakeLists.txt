@@ -1,4 +1,4 @@
-include_directories("${LibSourcey_BUILD_DIR}/src/archo/vendor/zlib") # for zconf.h
+include_directories("${LibSourcey_VENDOR_BUILD_DIR}/zlib") # for zconf.h
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../zlib") # for zlib.h
   # ${CMAKE_CURRENT_BINARY_DIR}/../zlib/zconf.h
 

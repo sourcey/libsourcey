@@ -20,7 +20,7 @@ namespace av {
 namespace avfoundation {
 
 
-bool GetQTKitVideoDevices(Device type, std::vector<Device>* devices) {
+bool GetQTKitVideoDevices(Device::Type type, std::vector<Device>* devices) {
 #if !__has_feature(objc_arc)
   NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 #else
@@ -68,10 +68,10 @@ bool GetQTKitVideoDevices(Device type, std::vector<Device>* devices) {
 }
 
 
-bool GetAVFoundationVideoDevices(Device type, std::vector<Device>* devices) {
+bool GetAVFoundationVideoDevices(Device::Type type, std::vector<Device>* devices) {
 #ifdef __MAC_OS_X_VERSION_MAX_ALLOWED
 #if __MAC_OS_X_VERSION_MAX_ALLOWED >=1070
-  if (![MediaCaptureDevice class]) {
+  if (![AVCaptureDevice class]) {
     // Fallback to using QTKit if AVFoundation is not available
     return GetQTKitVideoDevices(type, devices);
   }
@@ -81,11 +81,11 @@ bool GetAVFoundationVideoDevices(Device type, std::vector<Device>* devices) {
   @autoreleasepool
 #endif
   {
-    NSArray* capture_devices = [MediaCaptureDevice devices];
+    NSArray* capture_devices = [AVCaptureDevice devices];
     InfoL << [capture_devices count] << " capture device(s) found:" << std::endl;
-    for (MediaCaptureDevice* capture_device in capture_devices) {
-      if (type == Device::VideoInput && [capture_device hasMediaType:AVMediaTypeVideo] ||
-          type == Device::AudioInput && [capture_device hasMediaType:AVMediaTypeAudio]) {
+    for (AVCaptureDevice* capture_device in capture_devices) {
+      if ((type == Device::VideoInput && [capture_device hasMediaType:AVMediaTypeVideo]) ||
+          (type == Device::AudioInput && [capture_device hasMediaType:AVMediaTypeAudio])) {
       // if ([capture_device hasMediaType:AVMediaTypeVideo] ||
       //     [capture_device hasMediaType:AVMediaTypeMuxed]) {
         static NSString* const kFormat = @"localizedName: \"%@\", "

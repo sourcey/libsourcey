@@ -21,12 +21,13 @@
 #define SCY_AV_AVFoundation_H
 
 
+#include "scy/base.h"
+#include "scy/av/devicemanager.h"
+
+
 #ifndef SCY_APPLE
 #error "This file is only meant to be compiled for Apple targets"
 #endif
-
-#include "scy/base.h"
-#include "scy/av/devicemanager.h"
 
 
 namespace scy {

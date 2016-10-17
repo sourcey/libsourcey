@@ -17,7 +17,7 @@
 //
 
 
-#include "scy/av/devicemanager_mac.h"
+#include "scy/av/apple/avfoundation.h"
 
 // #include <CoreAudio/CoreAudio.h>
 // #include <QuickTime/QuickTime.h>
@@ -31,7 +31,7 @@ namespace av {
 namespace avfoundation {
 
 
-extern bool GetAVFoundationVideoDevices(std::vector<Device>* devices);
+extern bool GetAVFoundationVideoDevices(Device::Type type, std::vector<Device>* devices);
 
 
 bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)

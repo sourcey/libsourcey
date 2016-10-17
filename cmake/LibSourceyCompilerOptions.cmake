@@ -18,6 +18,10 @@ set(LibSourcey_EXTRA_EXE_LINKER_FLAGS "")
 set(LibSourcey_EXTRA_EXE_LINKER_FLAGS_RELEASE "")
 set(LibSourcey_EXTRA_EXE_LINKER_FLAGS_DEBUG "")
 
+
+# Using c++11 (CMAKE_CXX_FLAGS only, not for CMAKE_C_FLAGS)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 if(CMAKE_COMPILER_IS_GNUCXX)
 
   # High level of warnings.
@@ -27,9 +31,6 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   if(X86_64)
     set(LibSourcey_EXTRA_C_FLAGS "${LibSourcey_EXTRA_C_FLAGS} -Wno-long-long")
   endif()
-
-  # Using c++11 (CMAKE_CXX_FLAGS only, not for CMAKE_C_FLAGS)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
   # We need pthread's
   if(UNIX AND NOT ANDROID)

@@ -28,7 +28,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
 # Remove a couple of annoying CMake warnings
-cmake_policy(SET CMP0054 OLD)
+# cmake_policy(SET CMP0054 OLD)
 
 # Include required cmake files
 include(LibSourceyUtilities REQUIRED)
