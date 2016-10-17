@@ -19,8 +19,8 @@
 
 #include "scy/av/devicemanager_mac.h"
 
-#include <CoreAudio/CoreAudio.h>
-#include <QuickTime/QuickTime.h>
+// #include <CoreAudio/CoreAudio.h>
+// #include <QuickTime/QuickTime.h>
 
 
 using std::endl;
@@ -38,8 +38,8 @@ bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
 {
     switch (type) {
     case Device::VideoInput:
+    case Device::AudioInput:
         return GetAVFoundationVideoDevices(type, &devices);
-    // case Device::AudioInput:
     default:
         assert(0 && "unknown avfoundation device type");
         break;

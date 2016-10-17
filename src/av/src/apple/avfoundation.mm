@@ -27,8 +27,19 @@ bool GetQTKitVideoDevices(Device type, std::vector<Device>* devices) {
   @autoreleasepool
 #endif
   {
-    NSArray* qt_capture_devices =
-        [QTCaptureDevice inputDevicesWithMediaType:QTMediaTypeVideo];
+    // NSArray* qt_capture_devices =
+    //     [QTCaptureDevice inputDevicesWithMediaType:QTMediaTypeVideo];
+    NSArray* qt_capture_devices;
+    if (type == Device::VideoInput) {
+        qt_capture_devices = [QTCaptureDevice inputDevicesWithMediaType:QTMediaTypeVideo];
+    }
+    else if(type == Device::AudioInput) {
+        qt_capture_devices = [QTCaptureDevice inputDevicesWithMediaType:QTMediaTypeSound];
+    }
+    else {
+        return false;
+    }
+
     NSUInteger count = [qt_capture_devices count];
     InfoL << count << " capture device(s) found:" << std::endl;
     for (QTCaptureDevice* qt_capture_device in qt_capture_devices) {
@@ -43,7 +54,7 @@ bool GetQTKitVideoDevices(Device type, std::vector<Device>* devices) {
                            [qt_capture_device isConnected],
                            [qt_capture_device isOpen],
                            [qt_capture_device isInUseByAnotherApplication]];
-      InfoL << [info UTF8String] << std::endl;
+      InfoL << '\t' << [info UTF8String] << std::endl;
 
       std::string uniqueID([[qt_capture_device uniqueID] UTF8String]);
       std::string name([[qt_capture_device localizedDisplayName] UTF8String]);
@@ -73,8 +84,10 @@ bool GetAVFoundationVideoDevices(Device type, std::vector<Device>* devices) {
     NSArray* capture_devices = [MediaCaptureDevice devices];
     InfoL << [capture_devices count] << " capture device(s) found:" << std::endl;
     for (MediaCaptureDevice* capture_device in capture_devices) {
-      if ([capture_device hasMediaType:AVMediaTypeVideo] ||
-          [capture_device hasMediaType:AVMediaTypeMuxed]) {
+      if (type == Device::VideoInput && [capture_device hasMediaType:AVMediaTypeVideo] ||
+          type == Device::AudioInput && [capture_device hasMediaType:AVMediaTypeAudio]) {
+      // if ([capture_device hasMediaType:AVMediaTypeVideo] ||
+      //     [capture_device hasMediaType:AVMediaTypeMuxed]) {
         static NSString* const kFormat = @"localizedName: \"%@\", "
             @"modelID: \"%@\", uniqueID \"%@\", isConnected: %d, "
             @"isInUseByAnotherApplication: %d";
@@ -85,7 +98,7 @@ bool GetAVFoundationVideoDevices(Device type, std::vector<Device>* devices) {
                              [capture_device uniqueID],
                              [capture_device isConnected],
                              [capture_device isInUseByAnotherApplication]];
-        InfoL << [info UTF8String] << std::endl;
+        InfoL << '\t' << [info UTF8String] << std::endl;
 
         std::string uniqueID([[capture_device uniqueID] UTF8String]);
         std::string name([[capture_device localizedName] UTF8String]);

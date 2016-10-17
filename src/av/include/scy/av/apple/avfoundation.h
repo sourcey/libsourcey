@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 //
-// Implemented from libjingle r116 Feb 16, 2012
 
 
 #ifndef SCY_AV_AVFoundation_H

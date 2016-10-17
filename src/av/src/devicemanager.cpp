@@ -33,12 +33,12 @@
     #define SCY_AUDIO_INPUTS    {"dsound"}
     #define SCY_AUDIO_OUTPUTS   {"dsound"}
 #elif defined(SCY_APPLE)
-    #include "scy/av/win32/avfoundation.h"
+    #include "scy/av/apple/avfoundation.h"
     #define SCY_VIDEO_INPUTS    {"avfoundation", "qtkit"}
     #define SCY_VIDEO_OUTPUTS   {}
-    #define SCY_SCREEN_INPUTS   {"avfoundation"} // TODO: filter screen input formats
-    #define SCY_AUDIO_INPUTS    {"avfoundation"} // TODO: filter screen input formats
-    #define SCY_AUDIO_OUTPUTS   {"avfoundation"} // TODO: filter screen output formats
+    #define SCY_SCREEN_INPUTS   {"avfoundation"}
+    #define SCY_AUDIO_INPUTS    {"avfoundation"}
+    #define SCY_AUDIO_OUTPUTS   {"avfoundation"}
 #elif defined(SCY_LINUX)
     #define SCY_VIDEO_INPUTS    {"v4l2", "dv1394"}
     #define SCY_VIDEO_OUTPUTS   {}
