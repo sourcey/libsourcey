@@ -19,8 +19,11 @@
 
 #include "scy/av/devicemanager.h"
 
+// NOTE:
+// FFmpeg dshow and avfoundation implementations do no list devices properly yet
+// so we're building out own functions: https://trac.ffmpeg.org/ticket/4486
 
-// TODO: implement all possible platform formats
+// TODO: implement all possible platform formats:
 //
 // input/output: alsa, decklink, fbdev, oss, pulse, sndio, v4l2
 // input: avfoundation, bktr, dshow, dv1394, gdigrab, iec61883, jack, lavfi, openal, vfwcap, x11grab, x11grab_xcb
@@ -175,14 +178,27 @@ AVInputFormat* findDefaultInputFormat(const std::vector<std::string>& inputs)
 // }
 
 
-bool enumerateDeviceList(AVFormatContext* ctx, std::vector<av::Device>& devices, Device::Type type)
+bool enumerateDeviceList(AVFormatContext* s, std::vector<av::Device>& devices, Device::Type type)
 {
+    int error;
+    AVDictionary *tmp = nullptr;
     AVDeviceInfoList* devlist = nullptr;
+// // s->iformat->get_device_list
+//
+//     assert(ctx->oformat || ctx->iformat);
+//     assert((ctx->oformat && ctx->oformat->get_device_list) ||
+//         (ctx->iformat && ctx->iformat->get_device_list));
+//
+//     av_dict_copy(&tmp, nullptr, 0);
+//     if (av_opt_set_dict2(ctx, &tmp, AV_OPT_SEARCH_CHILDREN) < 0) {
+//         assert(0 && "cannot set device options");
+//         goto cleanup;
+//     }
 
-    // List the devices for this context
-    avdevice_list_devices(ctx, &devlist);
-    if (!devlist) {
-        WarnL << "Cannot list system devices" << endl;
+    // TODO: replace with `list_devices_for_context`
+    error = avdevice_list_devices(s, &devlist);
+    if (error || !devlist) {
+        WarnL << "Cannot list system devices: " << averror(error) << endl;
         goto cleanup;
     }
 
@@ -314,6 +330,82 @@ void printDevices(std::ostream& ost, std::vector<Device>& devs)
         devs[i].print(ost);
         ost << endl;
     }
+}
+
+
+bool enumerateInputDeviceList(AVInputFormat *fmt, std::vector<av::Device>& devices, Device::Type type) //AVFormatContext* s
+{
+    int ret, i;
+    AVDeviceInfoList* devlist = nullptr;
+    // AVDictionary* opts = nullptr;
+
+    DebugL << "Enumerating input devices for: " << fmt->name << endl;
+    if (!fmt || !fmt->priv_class  || !AV_IS_INPUT_DEVICE(fmt->priv_class->category)) {
+        assert(0 && "not an input device");
+    }
+
+    if (!fmt->get_device_list) {
+        WarnL << "Cannot list input devices: Not implemented" << endl;
+        goto fail;
+    }
+
+    if ((ret = avdevice_list_input_sources(fmt, nullptr, nullptr/*opts*/, &devlist)) < 0) {
+        WarnL << "Cannot list input device: " << averror(ret) << endl;
+        goto fail;
+    }
+
+    for (int i = 0; i < devlist->nb_devices; i++) {
+        auto dev = devlist->devices[i];
+        // printf("%s %s [%s]\n", devlist->default_device == i ? "*" : " ",
+        //        devlist->devices[i]->device_name, devlist->devices[i]->device_description);
+        devices.push_back(av::Device(type,
+            dev->device_name,
+            dev->device_description,
+            devlist->default_device == i));
+    }
+
+  fail:
+    avdevice_free_list_devices(&devlist);
+
+    return !devices.empty();
+}
+
+
+bool enumerateOutputDeviceList(AVOutputFormat *fmt, std::vector<av::Device>& devices, Device::Type type)
+{
+    int ret, i;
+    AVDeviceInfoList* devlist = nullptr;
+    // AVDictionary* opts = nullptr;
+
+    DebugL << "Enumerating output devices for: " << fmt->name << endl;
+    if (!fmt || !fmt->priv_class  || !AV_IS_OUTPUT_DEVICE(fmt->priv_class->category)) {
+        assert(0 && "not an output device");
+    }
+
+    if (!fmt->get_device_list) {
+        WarnL << "Cannot list output devices: Not implemented" << endl;
+        goto fail;
+    }
+
+    if ((ret = avdevice_list_output_sinks(fmt, nullptr, nullptr/*opts*/, &devlist)) < 0) {
+        WarnL << "Cannot list output device: " << averror(ret) << endl;
+        goto fail;
+    }
+
+    for (i = 0; i < devlist->nb_devices; i++) {
+        auto dev = devlist->devices[i];
+        // printf("%s %s [%s]\n", devlist->default_device == i ? "*" : " ",
+        //        devlist->devices[i]->device_name, devlist->devices[i]->device_description);
+        devices.push_back(av::Device(type,
+            dev->device_name,
+            dev->device_description,
+            devlist->default_device == i));
+    }
+
+  fail:
+    avdevice_free_list_devices(&devlist);
+
+    return !devices.empty();
 }
 
 
