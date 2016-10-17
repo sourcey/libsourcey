@@ -20,7 +20,6 @@
 #include "scy/av/win32/directshow.h"
 #include "scy/platform.h"
 
-//#ifdef HAVE_RTAUDIO
 
 #include <windows.h>
 #include <dshow.h>
@@ -110,7 +109,8 @@ bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
     case Device::AudioInput:
         return getDeviceCategoryList(type, CLSID_AudioInputDeviceCategory, devices);
     default:
-        assert(0 && "unknown dshow device type");
+        // assert(0 && "unknown dshow device type");
+        DebugL << “DirectShow cannot enumerate output devices: Not implemented" << endl;
         break;
     }
 

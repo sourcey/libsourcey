@@ -203,6 +203,12 @@ if(MSVC)
 endif()
 
 
+if(APPLE)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Foundation -framework AVFoundation -framework QTKit")
+  #set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+  #set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
+endif()
+
 # ----------------------------------------------------------------------------
 # Include third party dependencies
 # ----------------------------------------------------------------------------

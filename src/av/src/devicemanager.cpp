@@ -422,6 +422,8 @@ AVInputFormat* DeviceManager::findAudioInputFormat()
 
 bool DeviceManager::getDeviceList(Device::Type type, std::vector<av::Device>& devices)
 {
+    devices.clear();
+
     // NOTE: Unfortunately FFmpeg's dshow and avfoundation implementations don't
     // list devices properly yet so we need to call native libraries outselves:
     // https://trac.ffmpeg.org/ticket/4486

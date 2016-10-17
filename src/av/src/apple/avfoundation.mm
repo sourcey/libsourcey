@@ -41,7 +41,7 @@ bool GetQTKitVideoDevices(Device::Type type, std::vector<Device>* devices) {
     }
 
     NSUInteger count = [qt_capture_devices count];
-    InfoL << count << " capture device(s) found:" << std::endl;
+    DebugL << count << " capture device(s) found:" << std::endl;
     for (QTCaptureDevice* qt_capture_device in qt_capture_devices) {
       static NSString* const kFormat = @"localizedDisplayName: \"%@\", "
           @"modelUniqueID: \"%@\", uniqueID \"%@\", isConnected: %d, "
@@ -54,7 +54,7 @@ bool GetQTKitVideoDevices(Device::Type type, std::vector<Device>* devices) {
                            [qt_capture_device isConnected],
                            [qt_capture_device isOpen],
                            [qt_capture_device isInUseByAnotherApplication]];
-      InfoL << '\t' << [info UTF8String] << std::endl;
+      DebugL << '\t' << [info UTF8String] << std::endl;
 
       std::string uniqueID([[qt_capture_device uniqueID] UTF8String]);
       std::string name([[qt_capture_device localizedDisplayName] UTF8String]);
@@ -82,7 +82,7 @@ bool GetAVFoundationVideoDevices(Device::Type type, std::vector<Device>* devices
 #endif
   {
     NSArray* capture_devices = [AVCaptureDevice devices];
-    InfoL << [capture_devices count] << " capture device(s) found:" << std::endl;
+    DebugL << [capture_devices count] << " capture device(s) found:" << std::endl;
     for (AVCaptureDevice* capture_device in capture_devices) {
       if ((type == Device::VideoInput && [capture_device hasMediaType:AVMediaTypeVideo]) ||
           (type == Device::AudioInput && [capture_device hasMediaType:AVMediaTypeAudio])) {
@@ -98,7 +98,7 @@ bool GetAVFoundationVideoDevices(Device::Type type, std::vector<Device>* devices
                              [capture_device uniqueID],
                              [capture_device isConnected],
                              [capture_device isInUseByAnotherApplication]];
-        InfoL << '\t' << [info UTF8String] << std::endl;
+        DebugL << '\t' << [info UTF8String] << std::endl;
 
         std::string uniqueID([[capture_device uniqueID] UTF8String]);
         std::string name([[capture_device localizedName] UTF8String]);
@@ -111,10 +111,10 @@ bool GetAVFoundationVideoDevices(Device::Type type, std::vector<Device>* devices
 #endif
   return true;
 #else  // __MAC_OS_X_VERSION_MAX_ALLOWED >=1070
-  return GetQTKitVideoDevices(devices);
+  return GetQTKitVideoDevices(type, devices);
 #endif  // __MAC_OS_X_VERSION_MAX_ALLOWED >=1070
 #else  // __MAC_OS_X_VERSION_MAX_ALLOWED
-  return GetQTKitVideoDevices(devices);
+  return GetQTKitVideoDevices(type, devices);
 #endif  // __MAC_OS_X_VERSION_MAX_ALLOWED
 }
 
