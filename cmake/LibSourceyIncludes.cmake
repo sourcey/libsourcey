@@ -3,7 +3,6 @@
 #
 macro(add_vendor_dependency name libname)
   set(libdir ${LibSourcey_VENDOR_SOURCE_DIR}/${libname})
-  # vendor
 
   add_subdirectory(${libdir})
 

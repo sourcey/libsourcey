@@ -24,7 +24,7 @@ SET(LIBUV_VERSION 1.8.0)
 
 # Set up options
 OPTION(BUILD_SHARED_LIBS "Build shared libraries (use OFF for static)" ON)
-OPTION(BUILD_TESTS "Enable test building" ON)
+#OPTION(BUILD_TESTS "Enable test building" ON) # LibSourcey
 SET(BIN_INSTALL_DIR bin CACHE PATH "Install prefix subdirectory for binaries")
 SET(LIB_INSTALL_DIR lib CACHE PATH "Install prefix subdirectory for libraries")
 SET(INCLUDE_INSTALL_DIR include CACHE PATH

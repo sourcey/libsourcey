@@ -87,6 +87,7 @@ set(LibSourcey_DIR ${CMAKE_SOURCE_DIR})
 set(LibSourcey_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(LibSourcey_VENDOR_SOURCE_DIR ${CMAKE_SOURCE_DIR}/vendor)
 set(LibSourcey_BUILD_DIR ${CMAKE_BINARY_DIR})
+set(LibSourcey_VENDOR_BUILD_DIR ${CMAKE_BINARY_DIR}/vendor)
 
 set(LibSourcey_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 set(LibSourcey_SHARED_INSTALL_DIR ${LibSourcey_INSTALL_DIR}/share/scy)
@@ -223,7 +224,7 @@ set_option(WITH_WEBRTC          "Include WebRTC support"               OFF)
 set_option(WITH_WXWIDGETS       "Include wxWidgets support"            OFF)
 
 # Include libuv dependency
-set(BUILD_TESTS OFF) # don't build libuv tests
+# set(BUILD_TESTS OFF) # don't build libuv tests
 set(LIB_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/lib")
 set(BIN_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/bin")
 set(INCLUDE_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/include")
@@ -259,7 +260,7 @@ endif()
 
 list(APPEND LibSourcey_VENDOR_INCLUDE_DIRS
   ${LibSourcey_VENDOR_SOURCE_DIR}/zlib
-  ${LibSourcey_BUILD_DIR}/zlib
+  ${LibSourcey_VENDOR_BUILD_DIR}/zlib
   ${LibSourcey_VENDOR_SOURCE_DIR}/minizip
   # ${LibSourcey_VENDOR_SOURCE_DIR}/rtaudio
   # ${LibSourcey_VENDOR_SOURCE_DIR}/rtaudio/include
