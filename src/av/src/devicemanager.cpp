@@ -26,12 +26,14 @@
 // output: caca, opengl, qtkit, sdl, xv
 
 #if defined(SCY_WIN)
+    #include "scy/av/win32/directshow.h"
     #define SCY_VIDEO_INPUTS    {"dshow", "vfwcap"}
     #define SCY_VIDEO_OUTPUTS   {}
     #define SCY_SCREEN_INPUTS   {"gdigrab"}
     #define SCY_AUDIO_INPUTS    {"dsound"}
     #define SCY_AUDIO_OUTPUTS   {"dsound"}
 #elif defined(SCY_APPLE)
+    #include "scy/av/win32/avfoundation.h"
     #define SCY_VIDEO_INPUTS    {"avfoundation", "qtkit"}
     #define SCY_VIDEO_OUTPUTS   {}
     #define SCY_SCREEN_INPUTS   {"avfoundation"} // TODO: filter screen input formats
@@ -424,16 +426,11 @@ bool DeviceManager::getDeviceList(Device::Type type, std::vector<av::Device>& de
     // list devices properly yet so we need to call native libraries outselves:
     // https://trac.ffmpeg.org/ticket/4486
 #if defined(SCY_WIN)
-    #ifndef HAVE_DSHOW
-    #error "DirectShow is required on Windows to enumerate devices"
-    #endif
     return dshow::getDeviceList(type, devices);
-
-    // TODO: Implement custom avfoundation device lister until FFmpeg has it.
-// #elif defined(SCY_APPLE)
-
-    // Use FFmpeg by default
+#elif defined(SCY_APPLE)
+    return avfoundation::getDeviceList(type, devices);
 #else
+    // Use FFmpeg by default
     switch (type) {
     case Device::VideoInput:
         return internal::getInputDeviceList(SCY_VIDEO_INPUTS, type, devices);

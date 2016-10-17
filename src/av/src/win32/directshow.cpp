@@ -104,8 +104,6 @@ fail:
 
 bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
 {
-    AVInputFormat* iformat = nullptr;
-
     switch (type) {
     case Device::VideoInput:
         return getDeviceCategoryList(type, CLSID_VideoInputDeviceCategory, devices);
