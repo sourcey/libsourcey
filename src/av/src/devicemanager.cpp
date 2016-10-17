@@ -21,6 +21,10 @@
 
 
 // TODO: implement all possible platform formats
+//
+// input/output: alsa, decklink, fbdev, oss, pulse, sndio, v4l2
+// input: avfoundation, bktr, dshow, dv1394, gdigrab, iec61883, jack, lavfi, openal, vfwcap, x11grab, x11grab_xcb
+// output caca, opengl, qtkit, sdl, xv
 
 #if defined(SCY_WIN)
     #define SCY_CAMERA_INPUTS     {"dshow", "vfwcap"}
@@ -86,7 +90,7 @@ namespace internal {
 // Substitute for missing `av_find_output_format()` function
 AVOutputFormat* findOutputFormat(const std::string& name)
 {
-    initializeFFmpeg();
+    initializeFFmpeg(); // init here so reference is not held
     AVOutputFormat* oformat = av_oformat_next(nullptr);
     while (oformat) {
         if (name == oformat->name) {
@@ -95,7 +99,7 @@ AVOutputFormat* findOutputFormat(const std::string& name)
         oformat = av_oformat_next(oformat);
     }
     uninitializeFFmpeg();
-    return nullptr;
+    return oformat;
 }
 
 
@@ -121,6 +125,7 @@ AVInputFormat* findDefaultInputFormat(const std::vector<std::string>& inputs)
 
     initializeFFmpeg(); // init here so reference is not held
     for (auto& input : inputs) {
+        InfoL << "av_find_input_format: " << input << endl;
         iformat = av_find_input_format(input.c_str());
         if (iformat) break;
     }

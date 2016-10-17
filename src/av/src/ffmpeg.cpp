@@ -23,6 +23,8 @@
 #include "scy/mutex.h"
 
 #include <stdexcept>
+#include <iostream>
+
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -119,6 +121,43 @@ std::string averror(const int error)
    static char error_buffer[255];
    av_strerror(error, error_buffer, sizeof(error_buffer));
    return error_buffer;
+}
+
+
+void printInputFormats(std::ostream& ost, const char* delim)
+{
+    initializeFFmpeg(); // init here so reference is not held
+    AVInputFormat* p = av_iformat_next(nullptr);
+    while (p) {
+        ost << p->name << delim;
+        p = av_iformat_next(p);
+    }
+    uninitializeFFmpeg();
+}
+
+
+void printOutputFormats(std::ostream& ost, const char* delim)
+{
+    initializeFFmpeg(); // init here so reference is not held
+    AVOutputFormat* p = av_oformat_next(nullptr);
+    while (p) {
+        ost << p->name << delim;
+        p = av_oformat_next(p);
+    }
+    uninitializeFFmpeg();
+}
+
+
+void printEncoders(std::ostream& ost, const char* delim)
+{
+    initializeFFmpeg(); // init here so reference is not held
+    AVCodec* p = av_codec_next(nullptr);
+    while (p) {
+        if (av_codec_is_encoder(p))
+            ost << p->name << delim;
+        p = p->next;
+    }
+    uninitializeFFmpeg();
 }
 
 

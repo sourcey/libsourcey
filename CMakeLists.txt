@@ -212,16 +212,26 @@ find_package(OpenSSL)
 find_package(OpenCV)
 find_package(FFmpeg)
 
-#set_option(WITH_LIBUV           "Include LibUV support"                ON)
-#set_option(WITH_HTTPPARSER      "Include HttpParser support"           ON)
-#set_option(WITH_JSONCPP         "Include JsonCpp support"              ON)
-#set_option(WITH_ZLIB            "Include zlib support"                 ON)
-#set_option(WITH_RTAUDIO         "Include RtAudio support"              ON)
+# set_option(WITH_LIBUV           "Include LibUV support"                ON)
+# set_option(WITH_RTAUDIO         "Include RtAudio support"              ON)
+# set_option(WITH_HTTPPARSER      "Include HttpParser support"           ON)
+set_option(WITH_JSONCPP         "Include JsonCpp support"              ON)
+set_option(WITH_ZLIB            "Include zlib support"                 ON)
 set_option(WITH_OPENSSL         "Include OpenSSL support"              ON) #IF (OPENSSL_FOUND)
 set_option(WITH_FFMPEG          "Include FFmpeg support"               ON IF (FFMPEG_FOUND))
 set_option(WITH_OPENCV          "Include OpenCV support"               ON IF (OPENCV_FOUND))
 set_option(WITH_WEBRTC          "Include WebRTC support"               OFF)
 set_option(WITH_WXWIDGETS       "Include wxWidgets support"            OFF)
+
+# Build dependencies
+if(WITH_JSONCPP)
+  add_vendor_dependency(ZLIB zlib)
+  add_vendor_dependency(MINIZIP minizip)
+endif()
+if(WITH_JSONCPP)
+  add_vendor_dependency(JSONCPP jsoncpp)
+endif()
+add_vendor_dependency(HTTPPARSER http_parser)
 
 # Include libuv dependency
 # set(BUILD_TESTS OFF) # don't build libuv tests
@@ -229,12 +239,6 @@ set(LIB_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/lib")
 set(BIN_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/bin")
 set(INCLUDE_INSTALL_DIR "${LibSourcey_VENDOR_INSTALL_DIR}/include")
 add_vendor_dependency(LIBUV libuv)
-
-# Build dependencies
-add_vendor_dependency(ZLIB zlib)
-add_vendor_dependency(MINIZIP minizip)
-add_vendor_dependency(HTTPPARSER http_parser)
-add_vendor_dependency(JSONCPP jsoncpp)
 
 # External dependencies
 if(WITH_OPENSSL)

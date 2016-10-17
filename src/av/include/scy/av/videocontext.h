@@ -88,7 +88,6 @@ struct VideoContext
 
 AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height);
 void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params);
-void printAvailableEncoders(std::ostream& ost, const char* delim = " ");
 
 
 } } // namespace scy::av

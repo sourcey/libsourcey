@@ -204,17 +204,6 @@ void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
 }
 
 
-void printAvailableEncoders(std::ostream& ost, const char* delim)
-{
-    AVCodec* p = av_codec_next(NULL);
-    while (p) {
-        if (av_codec_is_encoder(p))
-            ost << p->name << delim;
-        p = p->next;
-    }
-}
-
-
 } } // namespace scy::av
 
 
