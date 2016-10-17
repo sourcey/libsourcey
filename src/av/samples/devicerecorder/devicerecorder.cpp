@@ -45,14 +45,17 @@ int main(int argc, char** argv)
         // from device captures to the encoder
         PacketStream stream;
 
-        av::Device device;
         av::EncoderOptions options;
         options.ofile = OUTPUT_FILENAME;
         options.oformat = OUTPUT_FORMAT;
 
+        // Create a device manager instance to enumerate system devices
+        av::Device device;
+        av::DeviceManager devman;
+
         // Create and attach the default video capture
         av::VideoCapture video;
-        if (av::DeviceManager::instance().getDefaultCamera(device)) {
+        if (devman.getDefaultCamera(device)) {
             InfoL << "Using video device: " << device.name << endl;
             video.open(device.id, 640, 480, 30);
             video.getEncoderFormat(options.iformat);
@@ -61,7 +64,7 @@ int main(int argc, char** argv)
 
         // Create and attach the default audio capture
         av::AudioCapture audio;
-        if (av::DeviceManager::instance().getDefaultMicrophone(device)) {
+        if (devman.getDefaultMicrophone(device)) {
             InfoL << "Using audio device: " << device.name << endl;
             audio.open(device.id, 2, 44100);
             audio.getEncoderFormat(options.iformat);

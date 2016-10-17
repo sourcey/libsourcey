@@ -42,15 +42,20 @@ namespace av {
 class DeviceManager;
 
 
+//
+// Device
+//
+
+
 struct Device
     /// Represents a system audio, video or render device.
 {
     enum Type {
         Unknown,
-        Camera,
-        Screen,
-        Microphone,
-        Speaker
+        VideoInput,
+        VideoOutput,
+        AudioInput,
+        AudioOutput
     };
 
     Type type;
@@ -122,10 +127,8 @@ public:
     bool findMicrophone(const std::string& name, Device& device);
     bool findSpeaker(const std::string& name, Device& device);
 
-    // Find base FFmpeg formats
-    AVInputFormat* findCameraInputFormat();
-    AVInputFormat* findMicrophoneInputFormat();
-    AVOutputFormat* findSpeakerOutputFormat();
+    // Base device list
+    bool getDeviceList(Device::Type type, std::vector<av::Device>& devices);
 
     // Capabilities
     int getCapabilities();
@@ -146,15 +149,26 @@ public:
         // Signals when a system device is connecetd or removed.
         // This signal is emitted by the platform specific DeviceWatcher.
 
+    // Find base FFmpeg formats
+    AVInputFormat* findVideoInputFormat();
+    AVInputFormat* findAudioInputFormat();
+
     // Default platform input formats
-    std::vector<std::string> cameraInputs;
-    std::vector<std::string> screenInputs;
-    std::vector<std::string> microphoneInputs;
-    std::vector<std::string> speakerOutputs;
+    // std::vector<std::string> cameraInputs;
+    // std::vector<std::string> screenInputs;
+    // std::vector<std::string> microphoneInputs;
+    // std::vector<std::string> speakerOutputs;
 
 protected:
     std::unique_ptr<DeviceWatcher> _watcher;
 };
+
+
+//
+// Helpers
+//
+
+
 
 
 } } // namespace scy::av

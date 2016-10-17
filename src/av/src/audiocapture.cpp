@@ -56,7 +56,8 @@ void AudioCapture::open(const std::string& device, int channels, int sampleRate)
 {
     TraceS(this) << "Opening microphone: " << device << endl;
 
-    auto iformat = DeviceManager::instance().findMicrophoneInputFormat();
+    DeviceManager devman;
+    auto iformat = devman.findAudioInputFormat();
     if (!iformat)
         throw std::runtime_error("Couldn't find microphone input format.");
 

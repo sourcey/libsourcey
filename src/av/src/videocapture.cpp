@@ -56,7 +56,8 @@ void VideoCapture::open(const std::string& device, int width, int height, double
 {
     TraceS(this) << "Opening camera: " << device << endl;
 
-    auto iformat = DeviceManager::instance().findCameraInputFormat();
+    DeviceManager devman;
+    auto iformat = devman.findVideoInputFormat();
     if (!iformat)
         throw std::runtime_error("Couldn't find camera input format.");
 

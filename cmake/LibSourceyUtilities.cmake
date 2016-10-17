@@ -48,7 +48,7 @@ endmacro()
 
 
 #
-### Macro: append_unique_list
+### Function: append_unique_list
 #
 # Appends items from the source list to the given target list
 # if they are not already contained within the target list
@@ -67,6 +67,22 @@ function(append_unique_list target source)
       set(${target} ${${target}} ${${source}} PARENT_SCOPE)
     endif()
   endif()
+endfunction()
+
+
+#
+### Function: filter_list
+#
+function(filter_list result source regex)
+  set(items)
+  foreach(ITR ${source})  # ARGN holds all arguments to function after last named one
+
+    if(NOT ITR MATCHES ${regex})
+          message("WTFFF: ${ITR} ${regex}")
+      list(APPEND items ${ITR})
+    endif()
+  endforeach()
+  set(${result} ${items} PARENT_SCOPE)
 endfunction()
 
 

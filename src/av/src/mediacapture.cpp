@@ -94,7 +94,7 @@ void MediaCapture::openFile(const std::string& file)
 // {
 //     TraceS(this) << "Opening camera: " << device << endl;
 //
-//     auto iformat = DeviceManager::instance().findCameraInputFormat();
+//     auto iformat = DeviceManager::instance().findVideoInputFormat();
 //     if (!iformat)
 //         throw std::runtime_error("Couldn't find camera input format.");
 //
@@ -114,7 +114,7 @@ void MediaCapture::openFile(const std::string& file)
 // {
 //     TraceS(this) << "Opening microphone: " << device << endl;
 //
-//     auto iformat = DeviceManager::instance().findMicrophoneInputFormat();
+//     auto iformat = DeviceManager::instance().findAudioInputFormat();
 //     if (!iformat)
 //         throw std::runtime_error("Couldn't find microphone input format.");
 //
