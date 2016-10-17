@@ -182,7 +182,7 @@ bool enumerateDeviceList(AVFormatContext* ctx, std::vector<av::Device>& devices,
     // List the devices for this context
     avdevice_list_devices(ctx, &devlist);
     if (!devlist) {
-        WarnL << "Cannot list system devices";
+        WarnL << "Cannot list system devices" << endl;
         goto cleanup;
     }
 
@@ -205,6 +205,11 @@ bool getInputDeviceList(const std::vector<std::string>& inputs, std::vector<av::
 {
     AVFormatContext* ctx = nullptr;
     AVInputFormat* iformat = nullptr;
+
+#ifndef HAVE_FFMPEG_AVDEVICE
+    WarnL << "HAVE_FFMPEG_AVDEVICE not defined, cannot list input devices" << endl;
+    return false;
+#endif
 
     iformat = findDefaultInputFormat(inputs);
     if (!iformat) {
@@ -251,6 +256,11 @@ cleanup:
 
 bool getOutputDeviceList(const std::vector<std::string>& outputs, std::vector<av::Device>& devices, Device::Type type)
 {
+#ifndef HAVE_FFMPEG_AVDEVICE
+    WarnL << "HAVE_FFMPEG_AVDEVICE not defined, cannot list output devices" << endl;
+    return false;
+#endif
+
     AVFormatContext* ctx = nullptr;
     AVOutputFormat* oformat = nullptr;
 
