@@ -69,7 +69,7 @@ bool getDeviceCategoryList(Device::Type type, REFGUID category, std::vector<av::
         devId = scy::toUtf8(olestr);
 
         // replace ':' with '_' since FFmpeg uses : to delimitate sources
-        for (size_t i = 0; i < strlen(devId); i++)
+        for (size_t i = 0; i < devId.length(); i++)
             if (devId[i] == ':')
                 devId[i] = '_';
 
@@ -89,8 +89,6 @@ fail:
             coMalloc->Free(olestr);
         if (bindCtx)
             bindCtx->Release();
-        delete[] devId;
-        delete[] devHumanName;
         if (bag)
             bag->Release();
         m->Release();
@@ -110,7 +108,7 @@ bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
         return getDeviceCategoryList(type, CLSID_AudioInputDeviceCategory, devices);
     default:
         // assert(0 && "unknown dshow device type");
-        DebugL << “DirectShow cannot enumerate output devices: Not implemented" << endl;
+        DebugL << "DirectShow cannot enumerate output devices: Not implemented" << endl;
         break;
     }
 
