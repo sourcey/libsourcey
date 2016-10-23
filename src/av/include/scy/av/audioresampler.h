@@ -58,10 +58,10 @@ struct AudioResampler
     AudioResampler(const AudioCodec& iparams = AudioCodec(), const AudioCodec& oparams = AudioCodec());
     ~AudioResampler();
 
-    void create();
+    void open();
     void close();
 
-    int resample(const std::uint8_t* inSamples, int inNbSamples);
+    int resample(const std::uint8_t* inSamples, int inNumSamples);
         // Convert the input samples to the output format.
         // NOTE: Input buffers must be contiguous, therefore only interleaved
         // input formats are accepted at this point.
@@ -69,7 +69,7 @@ struct AudioResampler
         // Return the number of converted samples or zero if samples
         // were internally buffered. An exception will be thrown on error.
         //
-        // Converted samples are accessable via the `outSamples` member.
+        // Converted samples are accessable via the `outSamples` class member.
 
 #ifdef HAVE_FFMPEG_SWRESAMPLE
     SwrContext* ctx;           // the conversion context
@@ -80,9 +80,11 @@ struct AudioResampler
     AudioCodec iparams;        // input audio parameters
     AudioCodec oparams;        // output audio parameters
     std::uint8_t** outSamples; // the output samples buffer
-    int outNbSamples;          // the number of samples currently in the output buffer
-    int outMaxNbSamples;       // the maximum number of samples that can be stored in the output buffer
-    int outSamplesBytes;       // the number of bytes currently in the buffer
+    int outNumSamples;         // the number of samples currently in the output buffer
+    int outBufferSize;         // the number of bytes currently in the buffer
+    int maxNumSamples;         // the maximum number of samples that can be stored in the output buffer
+    enum AVSampleFormat inSampleFmt;  // input sample format
+    enum AVSampleFormat outSampleFmt; // output sample format
 };
 
 

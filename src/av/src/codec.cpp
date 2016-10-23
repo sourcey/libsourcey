@@ -65,8 +65,8 @@ Codec::Codec(const std::string& name, const std::string& encoder, int sampleRate
 //     enabled = r.enabled;
 //     return *this;
 // }
-
-
+//
+//
 // Codec::Codec(const Codec& r) :
 //     name(r.name),
 //     encoder(r.encoder),

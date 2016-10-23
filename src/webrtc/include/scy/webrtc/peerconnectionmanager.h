@@ -40,7 +40,7 @@ class PeerConnection;
 class PeerConnectionManager: public PointerCollection<std::string, PeerConnection>
 {
 public:
-    PeerConnectionManager();
+    PeerConnectionManager(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory = nullptr);
     virtual ~PeerConnectionManager();
 
     virtual void sendSDP(PeerConnection* conn, const std::string& type, const std::string& sdp);
@@ -56,7 +56,7 @@ public:
     virtual void onClosed(PeerConnection* conn);
     virtual void onFailure(PeerConnection* conn, const std::string& error);
 
-    rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory() const;
+    webrtc::PeerConnectionFactoryInterface* factory() const;
 
 protected:
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> _factory;

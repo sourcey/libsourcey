@@ -18,6 +18,8 @@
 
 
 #include "scy/av/audiocontext.h"
+#include "scy/av/audioresampler.h"
+
 
 #ifdef HAVE_FFMPEG
 
@@ -36,6 +38,7 @@ AudioContext::AudioContext() :
     stream(nullptr),
     codec(nullptr),
     frame(nullptr),
+    resampler(nullptr),
     pts(0)
 {
     initializeFFmpeg();
@@ -49,27 +52,35 @@ AudioContext::~AudioContext()
 }
 
 
-void AudioContext::create()
-{
-}
-
-
-void AudioContext::open()
-{
-    TraceS(this) << "Opening" << endl;
-    assert(ctx);
-    assert(codec);
-
-    // Open the audio codec
-    if (avcodec_open2(ctx, codec, nullptr) < 0)
-           throw std::runtime_error("Could not open the audio codec.");
-}
+// void AudioContext::open()
+// {
+// }
+//
+//
+// void AudioContext::open()
+// {
+//     TraceS(this) << "Opening" << endl;
+//     assert(ctx);
+//     assert(codec);
+//
+//     // Open the audio codec
+//     if (avcodec_open2(ctx, codec, nullptr) < 0)
+//          throw std::runtime_error("Cannot open the audio codec.");
+//
+//     // Create the resampler if resampling is required
+//     if (iparams.channels != oparams.channels ||
+//         iparams.sampleRate != oparams.sampleRate ||
+//         iparams.sampleFmt != oparams.sampleFmt) {
+//         recreateResampler();
+//     }
+// }
 
 
 void AudioContext::close()
 {
     if (frame) {
-        av_free(frame);
+        // av_free(frame);
+        av_frame_free(&frame);
         frame = nullptr;
     }
 
@@ -78,10 +89,14 @@ void AudioContext::close()
         ctx = nullptr;
     }
 
-    if (stream)    {
+    if (stream) {
+        // The stream pointer is managed by the AVFormatContext
         stream = nullptr;
-        // Note: The stream is managed by the AVFormatContext
-        //av_freep(stream);
+    }
+
+    if (resampler) {
+        delete resampler;
+        resampler = nullptr;
     }
 
     pts = 0;
@@ -107,6 +122,84 @@ double AudioContext::ptsSeconds()
     }
 
     return val;
+}
+
+
+// if (iparams.sampleFmt != oparams.sampleFmt ||
+//     iparams.sampleRate != oparams.sampleRate ||
+//     iparams.channels != oparams.channels) {
+
+// AVFrame* VideoContext::resample(AVFrame* iframe) //, VideoCodec& cparams
+// {
+//     // While flushing the input frame may be null
+//     if (!iframe)
+//         return nullptr;
+//
+//     assert(iframe->channels == iparams.channels);
+//     assert(iframe->sampleRate == iparams.sampleRate);
+//
+//     // Recreate the video resampler context on the fly
+//     // if the input resolution changes.
+//     if (iframe->channels != /*resampler->*/oparams.channels ||
+//         iframe->sampleRate != /*resampler->*/oparams.sampleRate) {
+//         iparams.channels = iframe->channels;
+//         iparams.sampleRate = iframe->sampleRate;
+//         recreateResampler();
+//     }
+//
+//     // Return the input frame if no resampler is required
+//     if (!resampler)
+//         return iframe;
+//
+//     // // Set the input PTS or a monotonic value to keep the encoder happy.
+//     // // The actual setting of the PTS is outside the scope of this encoder.
+//     // cframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : ctx->frame_number;
+//
+//     // Convert the input frame and return the result
+//     return resampler->resamplerert(iframe);
+// }
+
+
+bool AudioContext::recreateResampler()
+{
+    // if (resampler)
+    //     throw std::runtime_error("Conversion context already exists.");
+
+    // NOTE: the input output `channels`, `sampleRate`, and `sampleFmt` parameters work
+    // slightly differently for encoders and decoders.
+    // For encoders `iparams` is the picture format from the application and
+    // `oparams` is the picture format passed into the encoder.
+    // For decoders `iparams` is the picture format from the decoder and
+    // `oparams` is the picture format passed into the application.
+
+    // // Check if resampler is required
+    // if (iparams.channels == oparams.channels &&
+    //     iparams.sampleRate == oparams.sampleRate &&
+    //     iparams.sampleFmt == oparams.sampleFmt) {
+    //     return false;
+    // }
+    //
+    // // Check if the resampler context needs to be recreated
+    // if (resampler && (
+    //     resampler->iparams.channels == iparams.channels &&
+    //     resampler->iparams.sampleRate == iparams.sampleRate &&
+    //     resampler->iparams.sampleFmt == iparams.sampleFmt) && (
+    //     resampler->oparams.channels == oparams.channels &&
+    //     resampler->oparams.sampleRate == oparams.sampleRate &&
+    //     resampler->oparams.sampleFmt == oparams.sampleFmt)) {
+    //     return false;
+    // }
+
+    // Recreate the resampler context
+    DebugL << "Recreating audio resampler context" << endl;
+    // freeResampler();
+    if (resampler)
+        delete resampler;
+    resampler = new AudioResampler();
+    resampler->iparams = iparams;
+    resampler->oparams = oparams;
+    resampler->open();
+    return true;
 }
 
 

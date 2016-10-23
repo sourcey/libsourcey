@@ -18,6 +18,8 @@
 
 #include "scy/webrtc/peerconnectionmanager.h"
 
+#include "webrtc/api/test/fakeaudiocapturemodule.h"
+
 
 using std::endl;
 
@@ -25,8 +27,8 @@ using std::endl;
 namespace scy {
 
 
-PeerConnectionManager::PeerConnectionManager() :
-    _factory(webrtc::CreatePeerConnectionFactory())
+PeerConnectionManager::PeerConnectionManager(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory) :
+    _factory(factory) // ? factory : webrtc::CreatePeerConnectionFactory()
 {
 }
 
@@ -128,9 +130,9 @@ void PeerConnectionManager::onFailure(PeerConnection* conn, const std::string& e
 }
 
 
-rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> PeerConnectionManager::factory() const
+webrtc::PeerConnectionFactoryInterface* PeerConnectionManager::factory() const
 {
-    return _factory;
+    return _factory.get();
 }
 
 

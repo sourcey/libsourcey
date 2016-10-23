@@ -36,7 +36,7 @@ namespace av {
 // ---------------------------------------------------------------------
 //
 struct Codec
-    /// Specifies a codec for encoding/decoding media.
+    /// Defines a codec for encoding/decoding media.
 {
     //
     // Base Codec Variables
@@ -81,28 +81,29 @@ struct Codec
 struct AudioCodec: public Codec
 {
     int channels;
-    std::string sampleFmt;
-        // One of: u8, s16, s32, flt, dbl, u8p, s16p, s32p, fltp, dblp
+    std::string sampleFmt; // One of: u8, s16, s32, flt, dbl, u8p, s16p, s32p, fltp, dblp
+    // int frameSize;  // Frame size (optional value set by encoder/decoder)
+    // int bufferSize; // Buffer size (optional value set by encoder/decoder)
 
     AudioCodec();
     AudioCodec(const std::string& name,
-        int channels = DEFAULT_AUDIO_CHANNELS,
-        int sampleRate = DEFAULT_AUDIO_SAMPLE_RATE,
-        int bitRate = DEFAULT_AUDIO_BIT_RATE,
-        const std::string& sampleFmt = DEFAULT_AUDIO_SAMPLE_FMT);
+        int channels, // = DEFAULT_AUDIO_CHANNELS
+        int sampleRate, // = DEFAULT_AUDIO_SAMPLE_RATE
+        int bitRate, // = DEFAULT_AUDIO_BIT_RATE
+        const std::string& sampleFmt); // = DEFAULT_AUDIO_SAMPLE_FMT
     AudioCodec(const std::string& name,
         const std::string& encoder,
-        int channels = DEFAULT_AUDIO_CHANNELS,
-        int sampleRate = DEFAULT_AUDIO_SAMPLE_RATE,
-        int bitRate = DEFAULT_AUDIO_BIT_RATE,
-        const std::string& sampleFmt = DEFAULT_AUDIO_SAMPLE_FMT);
+        int channels, // = DEFAULT_AUDIO_CHANNELS
+        int sampleRate, // = DEFAULT_AUDIO_SAMPLE_RATE
+        int bitRate, // = DEFAULT_AUDIO_BIT_RATE
+        const std::string& sampleFmt); // = DEFAULT_AUDIO_SAMPLE_FMT
     // AudioCodec(const AudioCodec& r);
     virtual ~AudioCodec();
 
     virtual std::string toString() const;
     virtual void print(std::ostream& ost);
 
-    // AudioCodec& operator=(const AudioCodec& r);
+    // AudioCodec& operator==(const AudioCodec& that);
 };
 
 

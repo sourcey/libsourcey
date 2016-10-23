@@ -16,8 +16,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef SCY_FFmpegVideoCapturer_H
-#define SCY_FFmpegVideoCapturer_H
+#ifndef SCY_VideoPacketSource_H
+#define SCY_VideoPacketSource_H
 
 
 #include "scy/av/videocapture.h"
@@ -28,16 +28,16 @@
 namespace scy {
 
 
-class FFmpegVideoCapturer: public cricket::VideoCapturer
-    /// FFmpegVideoCapturer implements a simple cricket::VideoCapturer that
+class VideoPacketSource: public cricket::VideoCapturer
+    /// VideoPacketSource implements a simple cricket::VideoCapturer that
     /// gets decoded remote video frames from a local media channel.
     /// It's used as the remote video source's VideoCapturer so that the remote
     /// video can be used as a cricket::VideoCapturer and in that way a remote
     /// video stream can implement the MediaStreamSourceInterface.
 {
 public:
-    FFmpegVideoCapturer(const std::string& device);
-    virtual ~FFmpegVideoCapturer();
+    VideoPacketSource(av::MediaCapture::Ptr capture); //PacketSignal& emitter
+    virtual ~VideoPacketSource();
 
     // cricket::VideoCapturer implementation.
     virtual cricket::CaptureState Start(
@@ -52,18 +52,19 @@ public:
 private:
     void onFrameCaptured(void* sender, av::VideoPacket& packet);
 
-    std::string device;
-    av::VideoCapture::Ptr capture;
+    // std::string device;
+    av::MediaCapture::Ptr _capture;
+    // PacketSignal& _emitter;
 };
 
 
-// class FFmpegVideoCapturerFactory : public cricket::VideoDeviceCapturerFactory {
+// class VideoPacketSourceFactory : public cricket::VideoDeviceCapturerFactory {
 // public:
-//     FFmpegVideoCapturerFactory() {}
-//     virtual ~FFmpegVideoCapturerFactory() {}
+//     VideoPacketSourceFactory() {}
+//     virtual ~VideoPacketSourceFactory() {}
 //
 //     virtual cricket::VideoCapturer* Create(const cricket::Device& device) {
-//         return new FFmpegVideoCapturer(device.name);
+//         return new VideoPacketSource(device.name);
 //     }
 // };
 

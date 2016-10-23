@@ -156,9 +156,9 @@ void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputF
             _video->open();
         }
         else if (!_audio && codec->codec_type == AVMEDIA_TYPE_AUDIO) {
-            _audio = new AudioDecoder();
-            _audio->create(_formatCtx, stream);
-            _audio->open();
+            _audio = new AudioDecoder(stream);
+            _audio->open(); //_formatCtx, stream
+            // _audio->open();
         }
     }
 
@@ -218,7 +218,7 @@ void MediaCapture::run()
             if (_video && ipacket.stream_index == _video->stream->index) {
                 if (_video->decode(ipacket, opacket)) {
                     TraceS(this) << "Decoded video: " << _video->pts << endl;
-                    VideoPacket video(opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
+                    VideoPacket video(opacket.data, opacket.size, _video->oparams.width, _video->oparams.height, _video->pts);
                     video.iframe = ipacket.flags & AV_PKT_FLAG_KEY;
                     video.source = &opacket;
                     video.opaque = _video;

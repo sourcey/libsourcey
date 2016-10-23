@@ -25,7 +25,7 @@ using namespace scy;
 
 int main(int argc, char** argv)
 {
-    Logger::instance().add(new ConsoleChannel("debug", LDebug)); //LTrace
+    Logger::instance().add(new ConsoleChannel("debug", LTrace)); //LTrace
 
 #if USE_SSL
     SSLManager::initNoVerifyClient();
@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     // av::MediaFactory::instance().loadVideoCaptures();
 
     // Setup WebRTC environment
-    rtc::LogMessage::LogToDebug(rtc::LERROR); //(rtc::LoggingSeverity)
+    rtc::LogMessage::LogToDebug(rtc::LERROR); //LERROR (rtc::LoggingSeverity)
     rtc::LogMessage::LogTimestamps();
     rtc::LogMessage::LogThreads();
 

@@ -35,7 +35,9 @@
 #include "scy/av/videocapture.h"
 #include "scy/av/audiocapture.h"
 #include "scy/av/audioencoder.h"
+#include "scy/av/audiodecoder.h"
 #include "scy/av/audioresampler.h"
+#include "scy/av/audiobuffer.h"
 
 
 using std::cout;
@@ -48,7 +50,7 @@ namespace scy {
 
 
 static const int kNumberFramesWanted = 200;
-static const int kInNbSamples = 1024;
+static const int kInNumSamples = 1024;
 
 
 // =============================================================================
@@ -56,7 +58,7 @@ static const int kInNbSamples = 1024;
 //
 
 // Prepare a dummy YUV image
-static void fillYuvImage(AVFrame *pict, int frame_index, int width, int height)
+static void fillYuvImage(AVFrame* pict, int frame_index, int width, int height)
 {
     int x, y, i;
     i = frame_index;
@@ -78,7 +80,7 @@ static void fillYuvImage(AVFrame *pict, int frame_index, int width, int height)
 }
 
 // Generate sin tone with 440Hz frequency and duplicated channels
-void fillAudioSamplesUInt(std::uint16_t* samples, int sample_rate, int nb_channels, int nb_samples, double *t)
+void fillAudioSamplesUInt(std::uint16_t* samples, int sample_rate, int nb_channels, int nb_samples, double* t)
 {
     int j, k;
     float tincr = 2 * M_PI * 440.0 / sample_rate;
@@ -92,7 +94,7 @@ void fillAudioSamplesUInt(std::uint16_t* samples, int sample_rate, int nb_channe
 
 
 // Generate sin tone with 440Hz frequency and duplicated channels
-void fillAudioSamples(double* samples, int sample_rate, int nb_channels, int nb_samples, double *t)
+void fillAudioSamples(double* samples, int sample_rate, int nb_channels, int nb_samples, double* t)
 {
     int i, j;
     double tincr = 1.0 / sample_rate, *dstp = samples;
@@ -150,22 +152,21 @@ class AudioEncoderTest: public Test
         iparams.sampleRate = 48000;
         iparams.sampleFmt = "dbl";
 
-        oparams.encoder = "mp2"; //mp2, aac, libfdk_aac
+        oparams.encoder = "mp2"; // mp2, aac, libfdk_aac
         oparams.bitRate = 64000;
         oparams.channels = 2;
         oparams.sampleRate = 44100;
-        oparams.sampleFmt = "s16"; //fltp
+        oparams.sampleFmt = "s16"; // fltp
         oparams.enabled = true;
 
-        encoder.create();
         encoder.open();
-
+        
         std::ofstream output("test." + oparams.encoder, std::ios::out | std::ios::binary);
 
-        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNbSamples, iparams);
+        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNumSamples, iparams);
         for (auto samples : testSamples) {
             AVPacket opacket;
-            if (encoder.encode(reinterpret_cast<std::uint8_t*>(samples), kInNbSamples, AV_NOPTS_VALUE, opacket)) {
+            if (encoder.encode(reinterpret_cast<std::uint8_t*>(samples), kInNumSamples, AV_NOPTS_VALUE, opacket)) {
                 output.write(reinterpret_cast<const char*>(opacket.data), opacket.size);
             }
         }
@@ -198,14 +199,14 @@ class AudioResamplerTest: public Test
         oparams.sampleRate = 44100;
         oparams.sampleFmt = "s16";
 
-        resampler.create();
+        resampler.open();
 
         std::ofstream output("test.pcm", std::ios::out | std::ios::binary);
 
-        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNbSamples, iparams);
+        auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNumSamples, iparams);
         for (auto samples : testSamples) {
-            if (resampler.resample(reinterpret_cast<std::uint8_t*>(samples), kInNbSamples)) {
-                output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outSamplesBytes);
+            if (resampler.resample(reinterpret_cast<std::uint8_t*>(samples), kInNumSamples)) {
+                output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outBufferSize);
             }
         }
 
@@ -218,7 +219,56 @@ class AudioResamplerTest: public Test
 };
 
 
-#ifdef HAVE_FFMPEG
+// =============================================================================
+// Audio Fifo
+//
+class AudioBufferTest: public Test
+{
+    void run()
+    {
+        av::AudioBuffer fifo;
+        fifo.alloc("dbl", 2);
+
+        double t = 0;
+        auto samples = new double[4096];
+        fillAudioSamples(samples, 48000, 2, 200, &t);
+
+        fifo.write((void**)&samples, 200);
+        expect(fifo.numSamples() == 200);
+
+        fifo.read((void**)&samples, 100);
+        expect(fifo.numSamples() == 100);
+
+        fifo.read((void**)&samples, 100);
+        expect(fifo.numSamples() == 0);
+
+        delete samples;
+
+        // int bufferSize = av_samples_get_buffer_size(nullptr, params.channels, nbSamples, av_get_sample_fmt(params.sampleFmt.c_str()), 0);
+        // auto vec = std::vector<double*>();
+        // do {
+        //     auto samples = new double[bufferSize];
+        //     fillAudioSamples(samples, params.sampleRate, params.channels, nbSamples, &t);
+        //     vec.push_back(samples);
+        // } while (--numFrames);
+        // return vec;
+        // auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNumSamples, iparams);
+        // for (auto samples : testSamples) {
+        //     if (resampler.resample(reinterpret_cast<std::uint8_t*>(samples), kInNumSamples)) {
+        //         output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outBufferSize);
+        //     }
+        // }
+
+        // resampler.close();
+        // output.close();
+        // util::clearVector<>(testSamples);
+
+        // TODO: verify data integrity
+    }
+};
+
+
+// #ifdef HAVE_FFMPEG
 
 // =============================================================================
 // Audio Capture Encoder
@@ -250,16 +300,15 @@ class AudioCaptureEncoderTest: public Test
         expect(iparams.channels == inNbChannels);
         expect(iparams.sampleRate == inSampleRate);
 
-        oparams.encoder = "mp2"; //mp2, aac, libfdk_aac
+        oparams.encoder = "mp2"; // mp2, aac, libfdk_aac
         oparams.bitRate = 64000;
         oparams.channels = 2;
         oparams.sampleRate = 44100;
-        oparams.sampleFmt = "s16"; //fltp
+        oparams.sampleFmt = "s16"; // fltp
         oparams.enabled = true;
 
         output.open("test." + oparams.encoder, std::ios::out | std::ios::binary);
 
-        encoder.create();
         encoder.open();
         capture.emitter.attach(av::audioDelegate(this, &AudioCaptureEncoderTest::onAudio));
 
@@ -330,7 +379,7 @@ class AudioCaptureResamplerTest: public Test
 
         output.open("test.pcm", std::ios::out | std::ios::binary);
 
-        resampler.create();
+        resampler.open();
         capture.emitter.attach(av::audioDelegate(this, &AudioCaptureResamplerTest::onAudio));
 
         numFramesRemaining = kNumberFramesWanted;
@@ -355,13 +404,13 @@ class AudioCaptureResamplerTest: public Test
             numFramesRemaining--;
             cout << "On audio packet: " << packet.size() << endl;
             if (resampler.resample(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples)) {
-                output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outSamplesBytes);
+                output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outBufferSize);
             }
         }
     }
 };
 
-#endif // HAVE_FFMPEG
+// #endif // HAVE_FFMPEG
 
 
 // static const int kInAudioDeviceId = 0;

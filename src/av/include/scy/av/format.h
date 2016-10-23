@@ -34,7 +34,7 @@ namespace av {
 
 struct Format
     /// Defines a media container format which is available through the
-    /// Format Registry for encoding/decoding. A format specifies preferred
+    /// Format Registry for encoding/decoding. A format defined preferred
     /// default values for each codec.
 {
     enum Type
@@ -96,51 +96,3 @@ typedef std::vector<Format*> FormatPList;
 
 
 #endif
-
-
-
-
-    /*
-    enum ID
-    {
-        Unknown        = 0,
-        Raw            = 1,
-
-        // Video
-        MP4            = 2,
-        FLV            = 3,
-        OGG            = 4,
-        AVI            = 5,
-        MJPEG        = 6,
-        MPNG        = 7,
-
-        // Audio
-        M4A            = 20,
-        MP3            = 21
-    };
-    */
-    //
-    /// Methods
-    //
-    //virtual std::string extension() const;
-        // Returns the file extension for this format.
-        // The default implementation just transforms the
-        // id string to lowercase.
-        // TODO: Consider removing or making a member variable
-
-    //virtual std::string name() const;
-        // Returns a string representation of the Codec name.
-        // The default implementation uses idToName.
-
-
-    //virtual std::string encoderName() const;
-        // Returns the encoder name for this format.
-        // The default implementation uses idToEncoderName.
-        // This function should return the short name
-        // for use with av_guess_format.
-    //static ID toID(const std::string& name);
-    //static std::string idString(const std::string& id);
-    //static std::string encoderName(const std::string& id);
-    //static ID nameToID(const std::string& name);
-    //static std::string idToName(const std::string& id);
-    //static std::string idToEncoderName(const std::string& id);

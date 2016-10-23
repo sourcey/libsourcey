@@ -1,11 +1,20 @@
 #include "signaler.h"
+#include "filepeerconnection.h"
+#include "videopacketsource.h"
 
-#include "scy/av/devicemanager.h"
-#include "scy/webrtc/ffmpegvideocapturer.h"
+// #include "scy/av/devicemanager.h"
 
 #include <iostream>
 #include <string>
 
+#include "filevideocapturer.h"
+
+
+#include "webrtc/api/peerconnectionfactory.h"
+#include "webrtc/api/mediastreamtrackproxy.h"
+
+
+#include "audiopacketmodule.h"
 
 using std::endl;
 
@@ -65,34 +74,105 @@ void Signaler::onPeerConnected(void*, smpl::Peer& peer)
         return;
     }
 
-    auto conn = new PeerConnection(this, peer.id(), PeerConnection::Offer);
-    conn->constraints().SetMandatoryReceiveAudio(false);
-    conn->constraints().SetMandatoryReceiveVideo(false);
-    conn->constraints().SetAllowDtlsSctpDataChannels();
+    // auto conn = new PeerConnection(this, peer.id(), PeerConnection::Offer);
+    // conn->constraints().SetMandatoryReceiveAudio(false);
+    // conn->constraints().SetMandatoryReceiveVideo(false);
+    // conn->constraints().SetAllowDtlsSctpDataChannels();
 
-    av::Device device;
+    auto conn = new FilePeerConnection(this, peer.id(), PeerConnection::Offer);
+    // conn->constraints().SetMandatoryReceiveAudio(false);
+    // conn->constraints().SetMandatoryReceiveVideo(false);
+    // conn->constraints().SetAllowDtlsSctpDataChannels();
+
+    // conn->setPeerConnectionFactory(
+    //     webrtc::CreatePeerConnectionFactory(
+    //         rtc::Thread::Current(),
+    //         rtc::Thread::Current(),
+    //         rtc::Thread::Current(),
+    //         AudioPacketModule::Create(),
+    //         nullptr, nullptr));
+
+    // av::Device device;
 
     // Create the media stream
     rtc::scoped_refptr<webrtc::MediaStreamInterface> stream = conn->createMediaStream();
 
     // Create and add the audio stream
     // TODO: Add custom FFmpegAudioCapturer
-    if (av::DeviceManager::instance().getDefaultMicrophone(device)) {
-        InfoL << "Using audio device: " << device.name << endl;
-        rtc::scoped_refptr<webrtc::AudioTrackInterface> audioTrack(
-            _factory->CreateAudioTrack(kAudioLabel,
-                _factory->CreateAudioSource(nullptr)));
-        stream->AddTrack(audioTrack);
-    }
+    // if (av::DeviceManager::instance().getDefaultMicrophone(device)) {
+        // InfoL << "Using audio device: " << device.name << endl;
+        // rtc::scoped_refptr<webrtc::AudioTrackInterface> audioTrack(
+        //     conn->factory()->CreateAudioTrack(kAudioLabel,
+        //         conn->factory()->CreateAudioSource(nullptr)));
+
+        // Thread here: https://groups.google.com/forum/#!topic/discuss-webrtc/d1fSm8Ns0Ww
+        // CreateAudioSource returns LocalAudioSource
+        // LocalAudioSource extends AudioSourceInterface
+        //  - LocalAudioSource->AddSink(AudioTrackSinkInterface*) // does nothing
+        //  - AudioSourceInterface->RegisterAudioObserver(AudioObserver* observer) // data comes from here? (only used in receiver code, not source?)
+
+        // All happens at top of rtpreceiver.cc
+        // AudioRtpSender()
+        // AudioTrackInterface* track
+        // sink_adapter_(new LocalAudioSinkAdapter())
+        // track_->RegisterObserver(this);
+        // track_->AddSink(sink_adapter_.get()); // VIDEO DOESN'T DO THIS
+
+        // Asuumptions:
+        // - LocalAudioSource has nothing to do with media capture
+        // - need a custom AudioTrackInterface
+        //   - AudioRtpSender will track_->AddSink the LocalAudioSinkAdapter, but we need
+        //     to override this and add out own LocalAudioSinkAdapter
+
+        // TODO:
+        // - Custom AudioTrackInterface and LocalAudioSinkAdapter
+        // - Override AudioTrackInterface->AddSink and prevent webrtc setting default LocalAudioSinkAdapter
+        //   - At this point attach out own LocalAudioSinkAdapter and BOOM
+
+        // rtc::scoped_refptr<AudioSourceInterface>
+        // PeerConnectionFactory::CreateAudioSource(
+        //     const MediaConstraintsInterface* constraints) {
+        //   RTC_DCHECK(signaling_thread_->IsCurrent());
+        //   rtc::scoped_refptr<LocalAudioSource> source(
+        //       LocalAudioSource::Create(options_, constraints));
+        //   return source;
+        // }
+
+        // rtc::scoped_refptr<AudioTrackInterface>
+        // PeerConnectionFactory::CreateAudioTrack(const std::string& id,
+        //                                         AudioSourceInterface* source) {
+        //   RTC_DCHECK(signaling_thread_->IsCurrent());
+        //   rtc::scoped_refptr<AudioTrackInterface> track(AudioTrack::Create(id, source));
+        //   return AudioTrackProxy::Create(signaling_thread_, track);
+        // }
+
+        // rtc::scoped_refptr<AudioTrackInterface> track(AudioTrack::Create(id, source));
+        // return AudioTrackProxy::Create(signaling_thread_, track);
+
+        // rtc::Thread* PeerConnectionFactory::signaling_thread()
+        //   return VideoTrackProxy::Create(signaling_thread_, worker_thread_, track);
+
+        // static_cast<webrtc::PeerConnectionFactory*>(_factory.get())->signaling_thread();
+
+        // rtc::scoped_refptr<webrtc::AudioTrackInterface> audioTrack(webrtc::AudioTrackProxy::Create( //webrtc::
+        //     rtc::Thread::Current()/*signaling_thread_*/,
+        //         webrtc::CustomAudioTrack::Create(kAudioLabel,
+        //             _factory->CreateAudioSource(nullptr))));
+
+              // rtc::scoped_refptr<LocalAudioSource> source(
+              //     LocalAudioSource::Create(options_, constraints));
+
+        // stream->AddTrack(audioTrack);
+    // }
 
     // Create and add the video stream
-    if (av::DeviceManager::instance().getDefaultCamera(device)) {
-        InfoL << "Using video device: " << device.name << endl;
-        rtc::scoped_refptr<webrtc::VideoTrackInterface> videoTrack(
-            _factory->CreateVideoTrack(kVideoLabel,
-                _factory->CreateVideoSource(new FFmpegVideoCapturer(device.id), nullptr)));
-        stream->AddTrack(videoTrack);
-    }
+    // if (av::DeviceManager::instance().getDefaultCamera(device)) {
+    //     InfoL << "Using video device: " << device.name << endl;
+    //     rtc::scoped_refptr<webrtc::VideoTrackInterface> videoTrack(
+    //         _factory->CreateVideoTrack(kVideoLabel,
+    //             _factory->CreateVideoSource(new VideoPacketSource(device.id), nullptr)));
+    //     stream->AddTrack(videoTrack);
+    // }
 
     conn->createConnection();
     conn->createOffer();

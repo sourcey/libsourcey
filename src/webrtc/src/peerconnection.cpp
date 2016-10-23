@@ -20,8 +20,8 @@
 #include "scy/webrtc/peerconnectionmanager.h"
 #include "scy/logger.h"
 
-#include "webrtc/modules/video_capture/video_capture_factory.h"
-#include "webrtc/media/engine/webrtcvideocapturerfactory.h"
+// #include "webrtc/modules/video_capture/video_capture_factory.h"
+// #include "webrtc/media/engine/webrtcvideocapturerfactory.h"
 
 
 using std::endl;
@@ -34,6 +34,7 @@ PeerConnection::PeerConnection(PeerConnectionManager* manager, const std::string
     _manager(manager),
     _peerid(peerid),
     _mode(mode),
+    _factory(manager->factory()),
     _peerConnection(nullptr),
     _stream(nullptr)
 {
@@ -51,7 +52,7 @@ PeerConnection::~PeerConnection()
 {
     DebugL << _peerid << ": Destroying" << endl;
     // closeConnection();
-    
+
     if (_peerConnection) {
         _peerConnection->Close();
     }
@@ -61,16 +62,19 @@ PeerConnection::~PeerConnection()
 rtc::scoped_refptr<webrtc::MediaStreamInterface> PeerConnection::createMediaStream()
 {
     assert(_mode == Offer);
+    assert(_factory);
     assert(!_stream);
-    _stream = _manager->factory()->CreateLocalMediaStream(kStreamLabel);
+    _stream = _factory->CreateLocalMediaStream(kStreamLabel);
     return _stream;
 }
 
 
 void PeerConnection::createConnection()
 {
-    _peerConnection = _manager->factory()->CreatePeerConnection(
-        _config, &_constraints, NULL, NULL, this);
+    assert(_factory);
+
+    _peerConnection = _factory->CreatePeerConnection(
+        _config, &_constraints, nullptr, nullptr, this);
 
     if (_stream) {
         if (!_peerConnection->AddStream(_stream)) {
@@ -231,6 +235,13 @@ void PeerConnection::OnFailure(const std::string& error)
 }
 
 
+void PeerConnection::setPeerConnectionFactory(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory)
+{
+    assert(!_factory); // should not be already set via PeerConnectionManager
+    _factory = factory;
+}
+
+
 std::string PeerConnection::peerid() const
 {
     return _peerid;
@@ -240,6 +251,12 @@ std::string PeerConnection::peerid() const
 webrtc::FakeConstraints& PeerConnection::constraints()
 {
     return _constraints;
+}
+
+
+webrtc::PeerConnectionFactoryInterface* PeerConnection::factory() const
+{
+    return _factory.get();
 }
 
 

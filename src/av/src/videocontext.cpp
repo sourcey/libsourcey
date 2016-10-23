@@ -100,21 +100,22 @@ void VideoContext::close()
 }
 
 
-AVFrame* VideoContext::convert(AVFrame* iframe)
+AVFrame* VideoContext::convert(AVFrame* iframe) //, VideoCodec& cparams
 {
     // While flushing the input frame may be null
     if (!iframe)
         return nullptr;
 
+    assert(iframe->width == iparams.width);
+    assert(iframe->height == iparams.height);
+
     // Recreate the video conversion context on the fly
     // if the input resolution changes.
-    if (iframe->width != conv->iparams.width ||
-        iframe->height != conv->iparams.height) {
+    if (iframe->width != /*conv->*/oparams.width ||
+        iframe->height != /*conv->*/oparams.height) {
         iparams.width = iframe->width;
         iparams.height = iframe->height;
-        DebugL << "Recreating video conversion context" << endl;
-        freeConverter();
-        createConverter();
+        recreateConverter();
     }
 
     // Return the input frame if no conversion is required
@@ -125,25 +126,49 @@ AVFrame* VideoContext::convert(AVFrame* iframe)
     // // The actual setting of the PTS is outside the scope of this encoder.
     // cframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : ctx->frame_number;
 
-    // Convert the input frame
+    // Convert the input frame and return the result
     return conv->convert(iframe);
 }
 
 
-void VideoContext::createConverter()
+bool VideoContext::recreateConverter()
 {
-    if (conv)
-        throw std::runtime_error("Conversion context already exists.");
+    // if (conv)
+    //     throw std::runtime_error("Conversion context already exists.");
 
-    // Create the conversion context
-    if (iparams.width != oparams.width ||
-        iparams.height != oparams.height ||
-        iparams.pixelFmt != oparams.pixelFmt) {
-        conv = new VideoConversionContext();
-        conv->iparams = iparams;
-        conv->oparams = oparams;
-        conv->create();
+    // NOTE: the input output `width`, `height`, and `pixelFmt` parameters work
+    // slightly differently for encoders and decoders.
+    // For encoders `iparams` is the picture format from the application and
+    // `oparams` is the picture format passed into the encoder.
+    // For decoders `iparams` is the picture format from the decoder and
+    // `oparams` is the picture format passed into the application.
+
+    // Check if conversion is required
+    if (iparams.width == oparams.width &&
+        iparams.height == oparams.height &&
+        iparams.pixelFmt == oparams.pixelFmt) {
+        return false;
     }
+
+    // Check if the conversion context needs to be recreated
+    if (conv && (
+        conv->iparams.width == iparams.width &&
+        conv->iparams.height == iparams.height &&
+        conv->iparams.pixelFmt == iparams.pixelFmt) && (
+        conv->oparams.width == oparams.width &&
+        conv->oparams.height == oparams.height &&
+        conv->oparams.pixelFmt == oparams.pixelFmt)) {
+        return false;
+    }
+
+    // Recreate the conversion context
+    DebugL << "Recreating video conversion context" << endl;
+    freeConverter();
+    conv = new VideoConversionContext();
+    conv->iparams = iparams;
+    conv->oparams = oparams;
+    conv->create();
+    return true;
 }
 
 

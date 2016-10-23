@@ -438,8 +438,8 @@ void MultiplexEncoder::createAudio()
     _audio = new AudioEncoder(_formatCtx);
     _audio->iparams = _options.iformat.audio;
     _audio->oparams = _options.oformat.audio;
-    _audio->create();
     _audio->open();
+    // _audio->open();
 
     // The encoder may require a minimum number of raw audio
     // samples for each encoding but we can't guarantee we'll

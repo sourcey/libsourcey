@@ -29,11 +29,12 @@
 #include "scy/av/ffmpeg.h"
 #include "scy/av/format.h"
 #include "scy/av/audiocontext.h"
+#include "scy/av/audiobuffer.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavutil/opt.h>
+// #include <libavutil/opt.h>
 #include <libavutil/audio_fifo.h>
 }
 
@@ -42,41 +43,34 @@ namespace scy {
 namespace av {
 
 
-struct AudioResampler;
-
-
 struct AudioEncoder: public AudioContext
 {
     AudioEncoder(AVFormatContext* format = nullptr);
     virtual ~AudioEncoder();
 
-    virtual void create();
+    virtual void open();
     //virtual void open();
     virtual void close();
 
     virtual bool encode(AVFrame* iframe, AVPacket& opacket);
-      // Encode a single AVFrame from the decoder.
+        // Encode a single AVFrame from the decoder.
 
     virtual bool encode(const std::uint8_t* samples, const int numSamples, const std::int64_t pts, AVPacket& opacket);
-      // Encode a single frame of interleaved or planar audio.
-      //
-      // @param samples    The input samples to encode.
-      // @param numSamples The number of input samples per channel.
-      // @param pts        The input samples presentation timestamp.
-      // @param opacket    The output packet data will be encoded to.
+        // Encode a single frame of interleaved or planar audio.
+        //
+        // @param samples    The input samples to encode.
+        // @param numSamples The number of input samples per channel.
+        // @param pts        The input samples presentation timestamp.
+        // @param opacket    The output packet data will be encoded to.
 
     virtual bool flush(AVPacket& opacket);
-      // Flush remaining packets to be encoded.
-      // This method should be called repeatedly before stream close until
-      // it returns false.
+        // Flush remaining packets to be encoded.
+        // This method should be called repeatedly before stream close until
+        // it returns false.
 
+    av::AudioBuffer fifo;
     AVFormatContext* format;
-    AudioResampler*  resampler;
-    AVAudioFifo*     fifo;
-    AudioCodec       iparams;
-    AudioCodec       oparams;
-    //int              inputFrameSize;
-    int              outputFrameSize;
+    int outputFrameSize;
 };
 
 

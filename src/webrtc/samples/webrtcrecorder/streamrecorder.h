@@ -10,10 +10,6 @@
 namespace scy {
 
 
-class StreamRecorderVideoTrack;
-class StreamRecorderAudioTrack;
-
-
 class StreamRecorder:
     public rtc::VideoSinkInterface<cricket::VideoFrame>,
     public webrtc::AudioTrackSinkInterface

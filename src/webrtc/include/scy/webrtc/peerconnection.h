@@ -67,8 +67,13 @@ public:
     virtual void recvCandidate(const std::string& mid, int mlineindex, const std::string& sdp);
         // Receive a remote candidate.
 
+    void setPeerConnectionFactory(rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> factory);
+        // Set a custom PeerConnectionFactory object
+        // Must be done before any streams are initiated
+
     std::string peerid() const;
     webrtc::FakeConstraints& constraints();
+    webrtc::PeerConnectionFactoryInterface* factory() const;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> peerConnection() const;
     rtc::scoped_refptr<webrtc::MediaStreamInterface> stream() const;
 
@@ -90,12 +95,13 @@ protected:
     virtual int AddRef() const { return 1; }
     virtual int Release() const { return 0; }
 
-private:
+protected:
     PeerConnectionManager* _manager;
     std::string _peerid;
     Mode _mode;
     webrtc::PeerConnectionInterface::RTCConfiguration _config;
     webrtc::FakeConstraints _constraints;
+    rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> _factory;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> _peerConnection;
     rtc::scoped_refptr<webrtc::MediaStreamInterface> _stream;
 };

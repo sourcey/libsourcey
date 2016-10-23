@@ -29,6 +29,7 @@ if (NOT FFMPEG_FIND_COMPONENTS)
   set(FFMPEG_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL AVDEVICE SWSCALE SWRESAMPLE)
 endif()
 
+
 # Check for cached results. If there are skip the costly part.
 set_module_notfound(FFMPEG)
 if (NOT FFMPEG_FOUND)

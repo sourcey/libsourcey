@@ -16,7 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "scy/webrtc/ffmpegvideocapturer.h"
+#include "videopacketsource.h" //scy/webrtc/
 
 
 using std::endl;
@@ -25,28 +25,28 @@ using std::endl;
 namespace scy {
 
 
-FFmpegVideoCapturer::FFmpegVideoCapturer(const std::string& device) :
-    device(device)
+VideoPacketSource::VideoPacketSource(av::MediaCapture::Ptr capture) :
+    _capture(capture)
 {
     // Default supported formats. Use ResetSupportedFormats to over write.
     std::vector<cricket::VideoFormat> formats;
     formats.push_back(cricket::VideoFormat(1280, 720,
-        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_YUYV)); //FOURCC_I420));
+        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_I420)); //FOURCC_I420));
     formats.push_back(cricket::VideoFormat(640, 480,
-        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_YUYV)); //FOURCC_I420));
+        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_I420)); //FOURCC_I420));
     formats.push_back(cricket::VideoFormat(320, 240,
-        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_YUYV)); //FOURCC_I420));
+        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_I420)); //FOURCC_I420));
     formats.push_back(cricket::VideoFormat(160, 120,
-        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_YUYV)); //FOURCC_I420));
+        cricket::VideoFormat::FpsToInterval(30), cricket::FOURCC_I420)); //FOURCC_I420));
 }
 
 
-FFmpegVideoCapturer::~FFmpegVideoCapturer()
+VideoPacketSource::~VideoPacketSource()
 {
 }
 
 
-cricket::CaptureState FFmpegVideoCapturer::Start(const cricket::VideoFormat& capture_format)
+cricket::CaptureState VideoPacketSource::Start(const cricket::VideoFormat& capture_format)
 {
     try {
         if (capture_state() == cricket::CS_RUNNING) {
@@ -57,12 +57,20 @@ cricket::CaptureState FFmpegVideoCapturer::Start(const cricket::VideoFormat& cap
 
         // TODO: Check and verify cricket::VideoFormat
 
-        // Connect and start the packet stream.
-        capture->open(device, capture_format.width, capture_format.height);
-        capture->start();
-        capture->emitter += packetDelegate(this, &FFmpegVideoCapturer::onFrameCaptured);
+        // Convert to compatible format on the fly
+        assert(_capture->video());
+        _capture->video()->oparams.pixelFmt = "yuv420p";
+        _capture->video()->oparams.width = capture_format.width;
+        _capture->video()->oparams.height = capture_format.height;
 
-        // v4l2 default input format is yuyv422 or FOURCC_YUYV
+        TraceL << "^^^^^^^^^^^^^^^^^ Starting video capture: " << capture_format.width << 'x' << capture_format.height << std::endl;
+
+        // Connect and start the packet stream.
+        _capture->start();
+        _capture->emitter += packetDelegate(this, &VideoPacketSource::onFrameCaptured);
+        // _emitter += packetDelegate(this, &VideoPacketSource::onFrameCaptured);
+
+        // v4l2 default input format is yuyv422 or FOURCC_I420
 
         SetCaptureFormat(&capture_format);
         return cricket::CS_RUNNING;
@@ -71,7 +79,7 @@ cricket::CaptureState FFmpegVideoCapturer::Start(const cricket::VideoFormat& cap
 }
 
 
-void FFmpegVideoCapturer::Stop()
+void VideoPacketSource::Stop()
 {
     try {
         if (capture_state() == cricket::CS_STOPPED) {
@@ -80,7 +88,7 @@ void FFmpegVideoCapturer::Stop()
         }
         InfoL << "Stop" << endl;
 
-        capture->emitter.detach(this); // for cleanup()
+        _capture->emitter.detach(this); // for cleanup()
 
         SetCaptureFormat(NULL);
         SetCaptureState(cricket::CS_STOPPED);
@@ -90,43 +98,50 @@ void FFmpegVideoCapturer::Stop()
 }
 
 
-void FFmpegVideoCapturer::onFrameCaptured(void* sender, av::VideoPacket& packet)
+void VideoPacketSource::onFrameCaptured(void* sender, av::VideoPacket& packet)
 {
     // TraceS(this) << "On frame" << std::endl;
+    TraceL << "^^^^^^^^^^^^^^^^^ On video frame captured: " << packet.width << 'x' << packet.height << std::endl;
+    TraceL << "^^^^^^^^^^^^^^^^^ On video frame captured data_size: " << packet.size() << std::endl;
 
     // Convert the packet from BGR to I420 for WebRTC
     // cv::Mat yuv(packet.width, packet.height, CV_8UC4);
     // cv::cvtColor(*packet.mat, yuv, CV_BGR2YUV_I420);
 
+    // assert(0);
+
     cricket::CapturedFrame frame;
     frame.width = packet.width;
     frame.height = packet.height;
-    frame.fourcc = cricket::FOURCC_YUYV; //FOURCC_I420;
+    frame.fourcc = cricket::FOURCC_I420; //FOURCC_I420;
     frame.data_size = packet.size(); //yuv.rows * yuv.step;
     frame.data = packet.data(); //yuv.data;
+
+        // scy::sleep(100); // testing
+
 
     SignalFrameCaptured(this, &frame);
 }
 
 
-bool FFmpegVideoCapturer::IsRunning()
+bool VideoPacketSource::IsRunning()
 {
     return capture_state() == cricket::CS_RUNNING;
 }
 
 
-bool FFmpegVideoCapturer::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
+bool VideoPacketSource::GetPreferredFourccs(std::vector<uint32_t>* fourccs)
 {
     if (!fourccs)
         return false;
 
     // This class does not yet support multiple pixel formats.
-    fourccs->push_back(cricket::FOURCC_YUYV); //FOURCC_I420);
+    fourccs->push_back(cricket::FOURCC_I420); //FOURCC_I420);
     return true;
 }
 
 
-bool FFmpegVideoCapturer::GetBestCaptureFormat(const cricket::VideoFormat& desired, cricket::VideoFormat* best_format)
+bool VideoPacketSource::GetBestCaptureFormat(const cricket::VideoFormat& desired, cricket::VideoFormat* best_format)
 {
     if (!best_format)
         return false;
@@ -134,14 +149,14 @@ bool FFmpegVideoCapturer::GetBestCaptureFormat(const cricket::VideoFormat& desir
     // Use the supported format as the best format.
     best_format->width = desired.width;
     best_format->height = desired.height;
-    best_format->fourcc = cricket::FOURCC_YUYV; //FOURCC_I420;
+    best_format->fourcc = cricket::FOURCC_I420; //FOURCC_I420;
     best_format->interval = desired.interval;
 
     return true;
 }
 
 
-bool FFmpegVideoCapturer::IsScreencast() const
+bool VideoPacketSource::IsScreencast() const
 {
     return false;
 }

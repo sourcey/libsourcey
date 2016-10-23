@@ -62,10 +62,12 @@ struct VideoContext
     virtual void close();
         // Close the AVCodecContext
 
-    virtual AVFrame* convert(AVFrame* iframe);
+    virtual AVFrame* convert(AVFrame* iframe); //, VideoCodec& cparams
         // Convert the video frame and return the result
+        // If the given conversion params does not match the current
+        // conversion context
 
-    virtual void createConverter();
+    virtual bool recreateConverter();
     virtual void freeConverter();
 
     VideoCodec iparams;      // input parameters

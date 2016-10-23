@@ -32,19 +32,16 @@ namespace scy {
 namespace av {
 
 
-//
-// Audio Resampler
-//
-
-
 AudioResampler::AudioResampler(const AudioCodec& iparams, const AudioCodec& oparams) :
     ctx(nullptr),
     iparams(iparams),
     oparams(oparams),
     outSamples(nullptr),
-    outNbSamples(0),
-    outMaxNbSamples(0),
-    outSamplesBytes(0)
+    outNumSamples(0),
+    outBufferSize(0),
+    maxNumSamples(0),
+    inSampleFmt(AV_SAMPLE_FMT_NONE),
+    outSampleFmt(AV_SAMPLE_FMT_NONE)
 {
 }
 
@@ -55,7 +52,7 @@ AudioResampler::~AudioResampler()
 }
 
 
-void AudioResampler::create()
+void AudioResampler::open()
 {
     if (ctx)
         throw std::runtime_error("Resample context already initialized");
@@ -67,8 +64,8 @@ void AudioResampler::create()
     av_get_channel_layout_string(inChBuf,  sizeof(inChBuf),  -1, inChLayout);
     av_get_channel_layout_string(outChBuf, sizeof(outChBuf), -1, outChLayout);
 
-    enum AVSampleFormat inSampleFmt  = av_get_sample_fmt(iparams.sampleFmt.c_str());
-    enum AVSampleFormat outSampleFmt = av_get_sample_fmt(oparams.sampleFmt.c_str());
+    inSampleFmt  = av_get_sample_fmt(iparams.sampleFmt.c_str());
+    outSampleFmt = av_get_sample_fmt(oparams.sampleFmt.c_str());
 
     TraceS(this) << "Create audio resampler:\n"
         << "\n\tIn Nb Channels: " << iparams.channels
@@ -98,7 +95,7 @@ void AudioResampler::create()
     ctx = avresample_alloc_context();
 #endif
     if (!ctx) {
-        throw std::runtime_error("Could not allocate resample context");
+        throw std::runtime_error("Cannot allocate resample context");
     }
 
     av_opt_set_int(ctx, "in_channel_layout", inChLayout, 0);
@@ -110,13 +107,13 @@ void AudioResampler::create()
 
     // Open the resampler context.
 #ifdef HAVE_FFMPEG_SWRESAMPLE
-    int error = swr_init(ctx);
+    int ret = swr_init(ctx);
 #else
-    int error = avresample_open(ctx);
+    int ret = avresample_open(ctx);
 #endif
-    if (error < 0) {
+    if (ret < 0) {
         close();
-        throw std::runtime_error("Could not initialize resample context: " + averror(error));
+        throw std::runtime_error("Cannot initialize resample context: " + averror(ret));
     }
 
     TraceS(this) << "Create: OK" << endl;
@@ -142,82 +139,159 @@ void AudioResampler::close()
         outSamples = nullptr;
     }
 
-    outNbSamples = 0;
-    outMaxNbSamples = 0;
-    outSamplesBytes = 0;
+    outNumSamples = 0;
+    maxNumSamples = 0;
+    outBufferSize = 0;
 }
 
 
-int AudioResampler::resample(const std::uint8_t* inSamples, int inNbSamples)
+int AudioResampler::resample(const std::uint8_t* inSamples, int inNumSamples)
 {
     if (!ctx)
         throw std::runtime_error("Conversion context must be initialized.");
 
-    int error, outLinesize, maxNbSamples;
+    int ret, requiredNumSamples;
 
-    // Compute output number of samples
+    // Compute the output number of samples
     // https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/resampling_audio.c
-    maxNbSamples = av_rescale_rnd(
+    requiredNumSamples = av_rescale_rnd(
 #ifdef HAVE_FFMPEG_SWRESAMPLE
         swr_get_delay(ctx, (std::int64_t)iparams.sampleRate) +
 #else
         avresample_get_delay(ctx) +
 #endif
-        (std::int64_t)inNbSamples,
+        (std::int64_t)inNumSamples,
         (std::int64_t)oparams.sampleRate, (std::int64_t)iparams.sampleRate, AV_ROUND_UP);
 
     // Resize the output buffer if required
-    if (maxNbSamples > outMaxNbSamples) {
-        error = av_samples_alloc_array_and_samples(&outSamples, &outLinesize,
-                                                   oparams.channels,
-                                                   maxNbSamples,
-                                                   av_get_sample_fmt(oparams.sampleFmt.c_str()), 0);
-        if (error < 0) {
-            throw std::runtime_error("Could not allocate buffer for converted output samples: " + averror(error));
+    if (requiredNumSamples > maxNumSamples) {
+        ret = av_samples_alloc_array_and_samples(&outSamples, nullptr, oparams.channels,
+                                                 requiredNumSamples, outSampleFmt, 0);
+        if (ret < 0) {
+            throw std::runtime_error("Cannot allocate buffer for converted output samples: " + averror(ret));
         }
 
-        outMaxNbSamples = maxNbSamples;
+        TraceS(this) << "Resizing resampler buffer: " << outBufferSize << endl;
+        maxNumSamples = requiredNumSamples;
     }
 
-    assert(maxNbSamples);
-    assert(outMaxNbSamples);
+    assert(requiredNumSamples);
+    assert(maxNumSamples);
 
     // Convert the samples using the resampler.
 #ifdef HAVE_FFMPEG_SWRESAMPLE
-    outNbSamples = swr_convert(ctx, outSamples, outMaxNbSamples, (const std::uint8_t**)&inSamples, inNbSamples);
+    ret = swr_convert(ctx, outSamples, maxNumSamples, (const std::uint8_t**)&inSamples, inNumSamples);
 #else
-    outNbSamples = avresample_convert(ctx, outSamples, 0, outMaxNbSamples, (std::uint8_t**)&inSamples, 0, inNbSamples);
+    ret = avresample_convert(ctx, outSamples, 0, maxNumSamples, (std::uint8_t**)&inSamples, 0, inNumSamples);
 #endif
-    if (outNbSamples < 0) {
+    if (ret < 0) {
         close();
-        throw std::runtime_error("Could not convert input samples: " + averror(outNbSamples));
+        throw std::runtime_error("Cannot convert input samples: " + averror(ret));
     }
+
+    // Set the actual number of output samples
+    outNumSamples = ret;
 
     // Set the output buffer size in bytes.
     // This may be useful for implementations that need to know the size of
     // converted output samples in bytes, such as for writing to files.
-    outSamplesBytes = av_samples_get_buffer_size(&outLinesize,
-                                                 oparams.channels,
-                                                 outNbSamples,
-                                                 av_get_sample_fmt(oparams.sampleFmt.c_str()), 1);
-    assert(outSamplesBytes > 0);
+    outBufferSize = av_samples_get_buffer_size(nullptr, oparams.channels,
+                                               outNumSamples, outSampleFmt, 1);
 
     TraceS(this) << "Resampled audio frame:"
-        << "\n\tIn Nb Samples: " << inNbSamples
+        << "\n\tIn Nb Samples: " << inNumSamples
         << "\n\tIn Channels: " << iparams.channels
         << "\n\tIn Sample Rate: " << iparams.sampleRate
         << "\n\tIn Sample Fmt: " << iparams.sampleFmt
-        << "\n\tOut Nb Samples: " << outNbSamples
-        // << "\n\tOut Max Nb Samples: " << outMaxNbSamples
-        // << "\n\tOut Line Size: " << outLinesize
-        // << "\n\tOut Buffer Size: " << outSamplesBytes
+        << "\n\tOut Nb Samples: " << outNumSamples
+        << "\n\tOut Max Nb Samples: " << maxNumSamples
+        << "\n\tOut Buffer Size: " << outBufferSize
         << "\n\tOut Channels: " << oparams.channels
         << "\n\tOut Sample Rate: " << oparams.sampleRate
         << "\n\tOut Sample Fmt: " << oparams.sampleFmt
         << endl;
 
-    return outNbSamples;
+    assert(outNumSamples > 0);
+    assert(outBufferSize > 0);
+
+    return ret;
 }
+
+
+#if 0
+int AudioResampler::resample(const std::uint8_t* inSamples, int inNumSamples)
+{
+    if (!ctx)
+        throw std::runtime_error("Conversion context must be initialized.");
+
+    int error, outLinesize, requiredNumSamples;
+
+    // Compute output number of samples
+    // https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/resampling_audio.c
+    requiredNumSamples = av_rescale_rnd(
+#ifdef HAVE_FFMPEG_SWRESAMPLE
+        swr_get_delay(ctx, (std::int64_t)iparams.sampleRate) +
+#else
+        avresample_get_delay(ctx) +
+#endif
+        (std::int64_t)inNumSamples,
+        (std::int64_t)oparams.sampleRate, (std::int64_t)iparams.sampleRate, AV_ROUND_UP);
+
+    requiredNumSamples = 440;
+
+    // Resize the output buffer if required
+    if (requiredNumSamples > maxNumSamples) {
+        error = av_samples_alloc_array_and_samples(&outSamples, &outLinesize,
+                                                   oparams.channels,
+                                                   requiredNumSamples,
+                                                   av_get_sample_fmt(oparams.sampleFmt.c_str()), 0);
+        if (error < 0) {
+            throw std::runtime_error("Cannot allocate buffer for converted output samples: " + averror(error));
+        }
+
+        maxNumSamples = requiredNumSamples;
+    }
+
+    assert(requiredNumSamples);
+    assert(maxNumSamples);
+
+    // Convert the samples using the resampler.
+#ifdef HAVE_FFMPEG_SWRESAMPLE
+    outNumSamples = swr_convert(ctx, outSamples, maxNumSamples, (const std::uint8_t**)&inSamples, inNumSamples);
+#else
+    outNumSamples = avresample_convert(ctx, outSamples, 0, maxNumSamples, (std::uint8_t**)&inSamples, 0, inNumSamples);
+#endif
+    if (outNumSamples < 0) {
+        close();
+        throw std::runtime_error("Cannot convert input samples: " + averror(outNumSamples));
+    }
+
+    // Set the output buffer size in bytes.
+    // This may be useful for implementations that need to know the size of
+    // converted output samples in bytes, such as for writing to files.
+    outBufferSize = av_samples_get_buffer_size(&outLinesize,
+                                                 oparams.channels,
+                                                 outNumSamples,
+                                                 av_get_sample_fmt(oparams.sampleFmt.c_str()), 1);
+    assert(outBufferSize > 0);
+
+    TraceS(this) << "Resampled audio frame:"
+        << "\n\tIn Nb Samples: " << inNumSamples
+        << "\n\tIn Channels: " << iparams.channels
+        << "\n\tIn Sample Rate: " << iparams.sampleRate
+        << "\n\tIn Sample Fmt: " << iparams.sampleFmt
+        << "\n\tOut Nb Samples: " << outNumSamples
+        << "\n\tOut Max Nb Samples: " << maxNumSamples
+        << "\n\tOut Line Size: " << outLinesize
+        << "\n\tOut Buffer Size: " << outBufferSize
+        << "\n\tOut Channels: " << oparams.channels
+        << "\n\tOut Sample Rate: " << oparams.sampleRate
+        << "\n\tOut Sample Fmt: " << oparams.sampleFmt
+        << endl;
+
+    return outNumSamples;
+}
+#endif
 
 
 } } // namespace scy::av

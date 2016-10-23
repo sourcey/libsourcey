@@ -44,11 +44,10 @@ namespace av {
 
 struct AudioDecoder: public AudioContext
 {
-    AudioDecoder();
+    AudioDecoder(AVStream* stream); //AVFormatContext* format,
     virtual ~AudioDecoder();
 
-    virtual void create(AVFormatContext* format, AVStream* stream);
-    //virtual void open();
+    virtual void open();
     virtual void close();
 
     virtual bool decode(std::uint8_t* data, int size, AVPacket& opacket);

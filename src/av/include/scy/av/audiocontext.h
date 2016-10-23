@@ -42,15 +42,18 @@ namespace scy {
 namespace av {
 
 
+struct AudioResampler;
+
+
 struct AudioContext
 {
     AudioContext();
     virtual ~AudioContext();
 
-    virtual void create();
+    virtual void open() = 0;
         // Initialize the AVCodecContext with default values
 
-    virtual void open();
+    // virtual void open();
         // Open the AVCodecContext
 
     virtual void close();
@@ -59,10 +62,20 @@ struct AudioContext
     virtual double ptsSeconds();
         // Current pts in decimal seconds
 
+    // virtual AVFrame* resample(AVFrame* iframe);
+        // Convert the audio frame and return the result
+        // The internal frame buffer is owned
+
+    virtual bool recreateResampler();
+    // virtual void freeResampler();
+
+    AudioCodec iparams;     // input parameters
+    AudioCodec oparams;     // output parameters
     AVStream* stream;       // encoder or decoder stream
     AVCodecContext* ctx;    // encoder or decoder context
     AVCodec* codec;         // encoder or decoder codec
     AVFrame* frame;         // last encoded or decoded frame
+    AudioResampler* resampler;
     std::int64_t pts;       // encoder current pts
     FPSCounter fps;         // encoder or decoder fps rate
     std::string error;      // error message

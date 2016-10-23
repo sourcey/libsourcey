@@ -136,23 +136,18 @@ bool enumerateDeviceList(AVFormatContext* s, Device::Type type, std::vector<av::
     int error;
     // AVDictionary *tmp = nullptr;
     AVDeviceInfoList* devlist = nullptr;
-// // s->iformat->get_device_list
-//
-//     assert(ctx->oformat || ctx->iformat);
-//     assert((ctx->oformat && ctx->oformat->get_device_list) ||
-//         (ctx->iformat && ctx->iformat->get_device_list));
-//
-//     av_dict_copy(&tmp, nullptr, 0);
-//     if (av_opt_set_dict2(ctx, &tmp, AV_OPT_SEARCH_CHILDREN) < 0) {
-//         assert(0 && "cannot set device options");
-//         goto cleanup;
-//     }
+
+    // av_dict_copy(&tmp, nullptr, 0);
+    // if (av_opt_set_dict2(ctx, &tmp, AV_OPT_SEARCH_CHILDREN) < 0) {
+    //     assert(0 && "cannot set device options");
+    //     goto fail;
+    // }
 
     // TODO: replace with `list_devices_for_context`
     error = avdevice_list_devices(s, &devlist);
     if (error || !devlist) {
         WarnL << "Cannot list system devices: " << averror(error) << endl;
-        goto cleanup;
+        goto fail;
     }
 
     devices.clear();
@@ -162,7 +157,7 @@ bool enumerateDeviceList(AVFormatContext* s, Device::Type type, std::vector<av::
             av::Device(type, dev->device_name, dev->device_description));
     }
 
-cleanup:
+fail:
     if (devlist)
         avdevice_free_list_devices(&devlist);
 
@@ -172,13 +167,14 @@ cleanup:
 
 bool getInputDeviceList(const std::vector<std::string>& inputs, Device::Type type, std::vector<av::Device>& devices)
 {
-    AVFormatContext* ctx = nullptr;
-    AVInputFormat* iformat = nullptr;
-
 #ifndef HAVE_FFMPEG_AVDEVICE
     WarnL << "HAVE_FFMPEG_AVDEVICE not defined, cannot list input devices" << endl;
     return false;
 #endif
+
+    AVFormatContext* ctx = nullptr;
+    AVInputFormat* iformat = nullptr;
+
 
     iformat = findDefaultInputFormat(inputs);
     if (!iformat) {
@@ -189,12 +185,12 @@ bool getInputDeviceList(const std::vector<std::string>& inputs, Device::Type typ
     // Alloc an input device context
     if (!(ctx = avformat_alloc_context())) {
         assert(0);
-        goto cleanup;
+        goto fail;
     }
 
     if (!iformat->priv_class || !AV_IS_INPUT_DEVICE(iformat->priv_class->category)) {
         assert(0 && "not an input device");
-        goto cleanup;
+        goto fail;
     }
 
     ctx->iformat = iformat;
@@ -202,7 +198,7 @@ bool getInputDeviceList(const std::vector<std::string>& inputs, Device::Type typ
         ctx->priv_data = av_mallocz(ctx->iformat->priv_data_size);
         if (!ctx->priv_data) {
             assert(0);
-            goto cleanup;
+            goto fail;
         }
         if (ctx->iformat->priv_class) {
             *(const AVClass**)ctx->priv_data= ctx->iformat->priv_class;
@@ -213,11 +209,16 @@ bool getInputDeviceList(const std::vector<std::string>& inputs, Device::Type typ
         ctx->priv_data = nullptr;
     }
 
+    // // s->iformat->get_device_list
+    //
+    //     assert(ctx->oformat || ctx->iformat);
+    //     assert((ctx->oformat && ctx->oformat->get_device_list) ||
+    //         (ctx->iformat && ctx->iformat->get_device_list));
+
     enumerateDeviceList(ctx, type, devices);
 
-cleanup:
-    if (ctx)
-        avformat_free_context(ctx);
+fail:
+    avformat_free_context(ctx);
 
     return !devices.empty();
 }
@@ -241,12 +242,12 @@ bool getOutputDeviceList(const std::vector<std::string>& outputs, Device::Type t
 
     if (!(ctx = avformat_alloc_context())) {
         assert(0);
-        goto cleanup;
+        goto fail;
     }
 
     if (!oformat->priv_class || !AV_IS_OUTPUT_DEVICE(oformat->priv_class->category)) {
         assert(0 && "not an output device");
-        goto cleanup;
+        goto fail;
     }
 
     ctx->oformat = oformat;
@@ -254,7 +255,7 @@ bool getOutputDeviceList(const std::vector<std::string>& outputs, Device::Type t
         ctx->priv_data = av_mallocz(ctx->oformat->priv_data_size);
         if (!ctx->priv_data) {
             assert(0);
-            goto cleanup;
+            goto fail;
         }
         if (ctx->oformat->priv_class) {
             *(const AVClass**)ctx->priv_data = ctx->oformat->priv_class;
@@ -267,7 +268,7 @@ bool getOutputDeviceList(const std::vector<std::string>& outputs, Device::Type t
 
     enumerateDeviceList(ctx, type, devices);
 
-cleanup:
+fail:
     if (ctx)
         avformat_free_context(ctx);
 

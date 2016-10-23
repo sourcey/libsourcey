@@ -17,8 +17,6 @@ StreamRecorder::StreamRecorder(const av::EncoderOptions& options) :
     _awaitingVideo(false),
     _awaitingAudio(false)
 {
-    av::initializeFFmpeg();
-
     // Disable audio and video until tracks are set
     _encoder.options().oformat.video.enabled = false;
     _encoder.options().oformat.audio.enabled = false;
@@ -27,8 +25,6 @@ StreamRecorder::StreamRecorder(const av::EncoderOptions& options) :
 
 StreamRecorder::~StreamRecorder()
 {
-    av::uninitializeFFmpeg();
-
     if (_videoTrack)
         _videoTrack->RemoveSink(this);
 
@@ -106,7 +102,7 @@ void StreamRecorder::OnData(const void* audio_data,
       << std::endl;
 
     // FIXME: For some reason the first couple of samples come though as mono,
-    // just skipping for now.
+    // so let's just skip those for now.
     if (number_of_channels < 2) {
         WarnL << "Dropping initial mono samples" << std::endl;
         return;

@@ -40,9 +40,21 @@ bool getDeviceCategoryList(Device::Type type, REFGUID category, std::vector<av::
 {
     IMoniker* m = nullptr;
 
+    HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    bool needCoUninitialize = SUCCEEDED(hr);
+    if (FAILED(hr)) {
+        if (hr != RPC_E_CHANGED_MODE) {
+            ErrorL << "CoInitialize failed, hr=" << hr << endl;
+            return false;
+        }
+        else {
+            WarnL << "CoInitialize Changed Mode" << endl;
+        }
+    }
+
     ICreateDevEnum* devenum = nullptr;
     if (CoCreateInstance(CLSID_SystemDeviceEnum, nullptr, CLSCTX_INPROC_SERVER,
-                             IID_ICreateDevEnum, (void**) &devenum) != S_OK)
+                         IID_ICreateDevEnum, (void**) &devenum) != S_OK)
         return false;
 
     IEnumMoniker* classenum = nullptr;
@@ -68,7 +80,7 @@ bool getDeviceCategoryList(Device::Type type, REFGUID category, std::vector<av::
             goto fail;
         devId = scy::toUtf8(olestr);
 
-        // replace ':' with '_' since FFmpeg uses : to delimitate sources
+        // Replace ':' with '_' since FFmpeg uses : to delimitate sources
         for (size_t i = 0; i < devId.length(); i++)
             if (devId[i] == ':')
                 devId[i] = '_';
@@ -95,6 +107,10 @@ fail:
     }
     classenum->Release();
 
+    if (needCoUninitialize) {
+        CoUninitialize();
+    }
+
     return !devices.empty();
 }
 
@@ -117,6 +133,3 @@ bool getDeviceList(Device::Type type, std::vector<av::Device>& devices)
 
 
 } } } // namespace scy::av::dshow
-
-
-#endif
