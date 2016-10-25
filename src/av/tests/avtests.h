@@ -54,7 +54,7 @@ static const int kInNumSamples = 1024;
 
 
 // =============================================================================
-// Heleprs
+// Helpers
 //
 
 // Prepare a dummy YUV image
@@ -232,6 +232,7 @@ class AudioBufferTest: public Test
 {
     void run()
     {
+#ifdef HAVE_FFMPEG
         av::AudioBuffer fifo;
         fifo.alloc("dbl", 2);
 
@@ -270,11 +271,12 @@ class AudioBufferTest: public Test
         // util::clearVector<>(testSamples);
 
         // TODO: verify data integrity
+#endif
     }
 };
 
 
-// #ifdef HAVE_FFMPEG
+#ifdef HAVE_FFMPEG
 
 // =============================================================================
 // Audio Capture Encoder
@@ -416,7 +418,7 @@ class AudioCaptureResamplerTest: public Test
     }
 };
 
-// #endif // HAVE_FFMPEG
+#endif // HAVE_FFMPEG
 
 
 // static const int kInAudioDeviceId = 0;
