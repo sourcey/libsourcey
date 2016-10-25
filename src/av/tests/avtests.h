@@ -58,7 +58,8 @@ static const int kInNumSamples = 1024;
 //
 
 // Prepare a dummy YUV image
-static void fillYuvImage(AVFrame* pict, int frame_index, int width, int height)
+#ifdef HAVE_FFMPEG
+static void fillYuvImage(AVFrame *pict, int frame_index, int width, int height)
 {
     int x, y, i;
     i = frame_index;
@@ -135,6 +136,7 @@ std::vector<double*> createTestAudioSamplesDBL(int numFrames, int nbSamples, con
     } while (--numFrames);
     return vec;
 }
+#endif
 
 
 // =============================================================================
@@ -144,6 +146,7 @@ class AudioEncoderTest: public Test
 {
     void run()
     {
+#ifdef HAVE_FFMPEG
         av::AudioEncoder encoder;
         auto& iparams = encoder.iparams;
         auto& oparams = encoder.oparams;
@@ -176,6 +179,7 @@ class AudioEncoderTest: public Test
         util::clearVector<>(testSamples);
 
         // TODO: verify data integrity
+#endif
     }
 };
 
@@ -187,6 +191,7 @@ class AudioResamplerTest: public Test
 {
     void run()
     {
+#ifdef HAVE_FFMPEG
         av::AudioResampler resampler;
         auto& iparams = resampler.iparams;
         auto& oparams = resampler.oparams;
@@ -215,6 +220,7 @@ class AudioResamplerTest: public Test
         util::clearVector<>(testSamples);
 
         // TODO: verify data integrity
+#endif
     }
 };
 

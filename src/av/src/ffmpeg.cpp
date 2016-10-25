@@ -164,4 +164,20 @@ void printEncoders(std::ostream& ost, const char* delim)
 } } // namespace scy::av
 
 
+#else
+
+namespace scy {
+namespace av {
+
+void initializeFFmpeg()
+{
+}
+
+
+void uninitializeFFmpeg()
+{
+}
+
+} } // namespace scy::av
+
 #endif

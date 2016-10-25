@@ -133,6 +133,10 @@ AVInputFormat* findDefaultInputFormat(const std::vector<std::string>& inputs)
 
 bool enumerateDeviceList(AVFormatContext* s, Device::Type type, std::vector<av::Device>& devices)
 {
+#ifndef HAVE_FFMPEG_AVDEVICE
+  devices.clear();
+  return false;
+#else
     int error;
     // AVDictionary *tmp = nullptr;
     AVDeviceInfoList* devlist = nullptr;
@@ -162,6 +166,7 @@ fail:
         avdevice_free_list_devices(&devlist);
 
     return !devices.empty();
+#endif
 }
 
 
@@ -170,7 +175,9 @@ bool getInputDeviceList(const std::vector<std::string>& inputs, Device::Type typ
 #ifndef HAVE_FFMPEG_AVDEVICE
     WarnL << "HAVE_FFMPEG_AVDEVICE not defined, cannot list input devices" << endl;
     return false;
-#endif
+#else
+    AVFormatContext* ctx = nullptr;
+    AVInputFormat* iformat = nullptr;
 
     AVFormatContext* ctx = nullptr;
     AVInputFormat* iformat = nullptr;
@@ -221,6 +228,7 @@ fail:
     avformat_free_context(ctx);
 
     return !devices.empty();
+#endif
 }
 
 
@@ -229,7 +237,7 @@ bool getOutputDeviceList(const std::vector<std::string>& outputs, Device::Type t
 #ifndef HAVE_FFMPEG_AVDEVICE
     WarnL << "HAVE_FFMPEG_AVDEVICE not defined, cannot list output devices" << endl;
     return false;
-#endif
+#else
 
     AVFormatContext* ctx = nullptr;
     AVOutputFormat* oformat = nullptr;
@@ -273,6 +281,7 @@ fail:
         avformat_free_context(ctx);
 
     return !devices.empty();
+#endif
 }
 
 
