@@ -179,10 +179,6 @@ bool getInputDeviceList(const std::vector<std::string>& inputs, Device::Type typ
     AVFormatContext* ctx = nullptr;
     AVInputFormat* iformat = nullptr;
 
-    AVFormatContext* ctx = nullptr;
-    AVInputFormat* iformat = nullptr;
-
-
     iformat = findDefaultInputFormat(inputs);
     if (!iformat) {
         assert(0 && "no input formats");
