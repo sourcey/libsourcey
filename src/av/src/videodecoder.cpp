@@ -238,7 +238,7 @@ bool VideoDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
 }
 
 
-bool VideoDecoder::flush() //AVPacket& opacket
+void VideoDecoder::flush() //AVPacket& opacket
 {
     AVPacket ipacket;
     av_init_packet(&ipacket);
@@ -258,10 +258,6 @@ bool VideoDecoder::flush() //AVPacket& opacket
             // return true;
         }
     } while(frameDecoded);
-
-
-    // return false;
-    return !!frameDecoded;
 }
 
 

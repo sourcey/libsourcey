@@ -63,7 +63,7 @@ struct AudioEncoder: public AudioContext
     virtual bool encode(AVFrame* iframe);
         // Encode a single AVFrame from the decoder.
 
-    virtual bool flush();
+    virtual void flush();
         // Flush remaining packets to be encoded.
         // This method should be called once before stream closure.
 

@@ -50,7 +50,7 @@ struct VideoDecoder: public VideoContext
         // Returns true an output packet was returned,
         // false otherwise.
 
-    virtual bool flush(); //AVPacket& opacket
+    virtual void flush(); //AVPacket& opacket
         // Flushes buffered frames.
         // This method should be called after decoding
         // until false is returned.

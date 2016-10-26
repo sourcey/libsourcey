@@ -68,7 +68,7 @@ struct VideoEncoder: public VideoContext
     virtual bool encode(AVFrame* iframe); //, AVPacket& opacket
         // Encode a single AVFrame.
 
-    virtual bool flush();
+    virtual void flush();
         // Flush remaining packets to be encoded.
         // This method should be called once before stream closure.
 

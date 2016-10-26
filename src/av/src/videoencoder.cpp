@@ -341,40 +341,12 @@ bool VideoEncoder::encode(AVFrame* iframe)
 }
 
 
-bool VideoEncoder::flush() //AVPacket& opacket
+void VideoEncoder::flush()
 {
     do {
         // :)
     }
     while (encode(nullptr));
-    return false;
-
-    // av_init_packet(&opacket);, opacket
-    // opacket.data = nullptr;
-    // opacket.size = 0;
-    //
-    // int frameEncoded = 0;
-    // if (avcodec_encode_video2(ctx, &opacket, nullptr, &frameEncoded) < 0) {
-    //     // TODO: Use av_strerror
-    //     error = "Fatal encoder error";
-    //     ErrorS(this) << error << endl;
-    //     throw std::runtime_error(error);
-    // }
-    //
-    // if (frameEncoded) {
-    //     if (ctx->coded_frame->key_frame)
-    //         opacket.flags |= AV_PKT_FLAG_KEY;
-    //     if (stream) {
-    //         if (opacket.pts != AV_NOPTS_VALUE)
-    //             opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
-    //         if (opacket.dts != AV_NOPTS_VALUE)
-    //             opacket.dts = av_rescale_q(opacket.dts, ctx->time_base, stream->time_base);
-    //         if (opacket.duration > 0)
-    //             opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
-    //         TraceS(this) << "Flushed video frame: " << opacket.pts << endl;
-    //     }
-    //     return true;
-    // }
 }
 
 

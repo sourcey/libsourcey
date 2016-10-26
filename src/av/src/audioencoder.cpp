@@ -318,7 +318,7 @@ bool AudioEncoder::encode(AVFrame* iframe)
 }
 
 
-bool AudioEncoder::flush()
+void AudioEncoder::flush()
 {
     TraceS(this) << "Flush" << endl;
 

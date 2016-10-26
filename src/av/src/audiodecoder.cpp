@@ -84,7 +84,7 @@ void AudioDecoder::close()
 }
 
 
-bool emitDecodedAudio(AudioDecoder* dec) //, const AVFrame* frame, AVPacket& opacket
+bool emitPacket(AudioDecoder* dec) //, const AVFrame* frame, AVPacket& opacket
 {
     auto sampleFmt = av_get_sample_fmt(dec->oparams.sampleFmt.c_str());
     assert(av_sample_fmt_is_planar(sampleFmt) == 0 && "planar formats not supported");
@@ -191,7 +191,8 @@ bool AudioDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
             //     << endl;
 
             // fps.tick();
-            return emitDecodedAudio(this); //, frame, opacket, &ptsSeconds
+            // return
+            emitPacket(this); //, frame, opacket, &ptsSeconds
         }
 
         ipacket.size -= ret;
@@ -226,11 +227,11 @@ bool AudioDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
     //     bytesRemaining -= bytesDecoded;
     // }
 
-    return false;
+    return !!frameDecoded;
 }
 
 
-bool AudioDecoder::flush() //AVPacket& opacket
+void AudioDecoder::flush() //AVPacket& opacket
 {
     AVPacket ipacket;
     av_init_packet(&ipacket);
@@ -248,9 +249,8 @@ bool AudioDecoder::flush() //AVPacket& opacket
     if (frameDecoded) {
         TraceS(this) << "Flushed audio frame: " << frame->pts << endl;
         assert(0);
-        return emitDecodedAudio(this); //, frame, opacket, &ptsSeconds
+        emitPacket(this); //, frame, opacket, &ptsSeconds
     }
-    return false;
 }
 
 
