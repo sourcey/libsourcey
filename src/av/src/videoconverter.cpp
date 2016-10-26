@@ -31,20 +31,20 @@ namespace scy {
 namespace av {
 
 
-VideoConversionContext::VideoConversionContext() :
+VideoConverter::VideoConverter() :
     ctx(nullptr),
     oframe(nullptr)
 {
 }
 
 
-VideoConversionContext::~VideoConversionContext()
+VideoConverter::~VideoConverter()
 {
     close();
 }
 
 
-void VideoConversionContext::create()
+void VideoConverter::create()
 {
 //#if 0
     TraceS(this) << "Create:"
@@ -73,7 +73,7 @@ void VideoConversionContext::create()
 }
 
 
-void VideoConversionContext::close()
+void VideoConverter::close()
 {
     TraceS(this) << "Closing" << endl;
 
@@ -91,12 +91,20 @@ void VideoConversionContext::close()
 }
 
 
-AVFrame* VideoConversionContext::convert(AVFrame* iframe)
+AVFrame* VideoConverter::convert(AVFrame* iframe)
 {
-    TraceS(this) << "Convert: " << ctx << endl;
+    TraceS(this) << "Convert:"
+        << "\n\tIn Format: " << iparams.pixelFmt
+        << "\n\tIn Size: " << iframe->width << "x" << iframe->height
+        << "\n\tOut Format: " << oparams.pixelFmt
+        << "\n\tOut Size: " << oparams.width << "x" << oparams.height
+        << "\n\tPTS: " << iframe->pkt_pts
+        << endl;
 
     assert(iframe);
     assert(iframe->data[0]);
+    assert(iframe->width == iparams.width);
+    assert(iframe->height == iparams.height);
 
     if (!ctx)
         throw std::runtime_error("Conversion context must be initialized.");
@@ -106,10 +114,16 @@ AVFrame* VideoConversionContext::convert(AVFrame* iframe)
         oframe->data, oframe->linesize) < 0)
         throw std::runtime_error("Pixel format conversion not supported.");
 
-    oframe->format = av_get_pix_fmt(oparams.pixelFmt.c_str()); //ctx->pix_fmt;
-    oframe->width  = oparams.width; //iframe->width;
-    oframe->height = oparams.height; //iframe->height;
-    oframe->pts = iframe->pts;
+    // Copy input frame properties to output frame
+    av_frame_copy_props(oframe, iframe);
+
+    // oframe->format = av_get_pix_fmt(oparams.pixelFmt.c_str()); //ctx->pix_fmt;
+    // oframe->width  = oparams.width; //iframe->width;
+    // oframe->height = oparams.height; //iframe->height;
+    // oframe->pkt_pts = iframe->pkt_pts;
+    // oframe->pkt_dts = iframe->pkt_dts;
+    // oframe->pts = iframe->pts;
+    // oframe->dts = iframe->dts;
 
     // Set the input PTS or a monotonic value to keep the encoder happy.
     // The actual setting of the PTS is outside the scope of this encoder.

@@ -32,9 +32,7 @@ namespace av {
 
 
 VideoEncoder::VideoEncoder(AVFormatContext* format) :
-    format(format),
-    buffer(nullptr),
-    bufferSize(0)
+    format(format)
 {
 }
 
@@ -66,6 +64,7 @@ void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
     ctx->time_base.num = 1;
 
     // Define encoding parameters
+    assert(oparams.bitRate);
     ctx->bit_rate = oparams.bitRate;
     ctx->bit_rate_tolerance = oparams.bitRate * 1000; // needed when time_base.num > 1
 
@@ -113,23 +112,13 @@ void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
             ctx->pix_fmt = AV_PIX_FMT_YUV422P;
         break;
     default:
-      break;
+        break;
     }
-
-    // Update any modified values
-    oparams.pixelFmt = av_get_pix_fmt_name(ctx->pix_fmt);
 }
 
 
 void VideoEncoder::create() //, const VideoCodec& params
 {
-    TraceS(this) << "Create: "
-        << "\n\tInput: " << iparams.toString()
-        << "\n\tOutput: " << oparams.toString()
-        << endl;
-
-    VideoContext::create();
-
     // Find the video encoder
     codec = avcodec_find_encoder_by_name(oparams.encoder.c_str());
     if (!codec) {
@@ -149,8 +138,8 @@ void VideoEncoder::create() //, const VideoCodec& params
         if (!stream)
             throw std::runtime_error("Cannot create video stream.");
 
-        // // fixme: testing realtime streams
-        // // http://stackoverflow.com/questions/16768794/muxing-from-audio-and-video-files-with-ffmpeg
+        // // Testing realtime streams
+        // // http://stackoverflow.com/questions/16768794/muxing-from-video-and-video-files-with-ffmpeg
         // stream->time_base.den = 1000; //realtime_ ? 1000 : fps_.num;
         // stream->time_base.num = 1; //realtime_ ? 1: fps_.den;
         //
@@ -171,9 +160,6 @@ void VideoEncoder::create() //, const VideoCodec& params
 
     initVideoEncoderContext(ctx, codec, oparams);
 
-    // Create the video conversion context if needed
-    // createConverter();
-
     // Some formats want stream headers to be separate
     if (format && format->oformat->flags & AVFMT_GLOBALHEADER)
         ctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
@@ -183,10 +169,12 @@ void VideoEncoder::create() //, const VideoCodec& params
     if (!frame)
         throw std::runtime_error("Cannot allocate input frame.");
 
-    // Allocate the encode buffer
-    // XXX: Disabling in favor of encoder manged buffer
-    // bufferSize = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
-    // buffer = (std::uint8_t*)av_malloc(bufferSize);
+    int ret = avcodec_open2(ctx, codec, nullptr);
+    if (ret < 0)
+        throw std::runtime_error("Cannot open the video codec: " + averror(ret));
+
+    // Update any output parameters that might have changed
+    initVideoCodecFromContext(stream, ctx, oparams);
 }
 
 
@@ -218,111 +206,116 @@ void VideoEncoder::close()
 }
 
 
-bool encodeVideoPacket(VideoEncoder* enc, AVFrame* iframe, AVPacket& opacket)
-{
-    // assert(iframe);
-    // assert(iframe->data[0]);
-    assert(enc->codec);
-
-    // AVFrame* cframe = nullptr;
-    // if (iframe) {
-    //
-    //     // Recreate the video conversion context on the fly
-    //     // if the input resolution changes.
-    //     if (iframe->width != enc->iparams.width ||
-    //         iframe->height != enc->iparams.height) {
-    //         // _options.iformat.video.width = iframe->width;
-    //         // _options.iformat.video.height = iframe->height;
-    //         enc->iparams.width = iframe->width;
-    //         enc->iparams.height = iframe->height;
-    //         DebugL << "Recreating video conversion context" << endl;
-    //         enc->freeConverter();
-    //         enc->createConverter();
-    //     }
-    //
-    //     // Convert the input frame if required
-    //     cframe = enc->conv ? enc->conv->convert(iframe) : iframe;
-    //     cframe->format = enc->ctx->pix_fmt;
-    //     cframe->width  = iframe->width;
-    //     cframe->height = iframe->height;
-    //
-    //     // Set the input PTS or a monotonic value to keep the encoder happy.
-    //     // The actual setting of the PTS is outside the scope of this encoder.
-    //     cframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : enc->ctx->frame_number;
-    // }
-
-    // auto cframe = convert(iframe);
-
-    av_init_packet(&opacket);
-    opacket.data = nullptr; // using encoder assigned buffer
-    opacket.size = 0;
-    // opacket.data = this->buffer;
-    // opacket.size = this->bufferSize;
-    if (enc->stream)
-        opacket.stream_index = enc->stream->index;
-
-    int frameEncoded = 0;
-    if (avcodec_encode_video2(enc->ctx, &opacket, enc->convert(iframe), &frameEncoded) < 0) {
-        // TODO: Use av_strerror
-        enc->error = "Fatal encoder error";
-        ErrorL << enc->error << endl; //S(this)
-        throw std::runtime_error(enc->error);
-    }
-
-    return frameEncoded > 0;
-}
-
-
-bool VideoEncoder::encode(unsigned char* data, int size, std::int64_t pts, AVPacket& opacket)
+bool VideoEncoder::encode(unsigned char* data, int size, std::int64_t pts)
 {
     assert(data);
     assert(size);
-    AVPacket ipacket;
-    av_init_packet(&ipacket);
-    ipacket.data = data;
-    ipacket.size = size;
-    ipacket.pts = pts;
-    if (stream)
-        ipacket.stream_index = stream->index;
-    return encode(ipacket, opacket);
-}
-
-
-bool VideoEncoder::encode(AVPacket& ipacket, AVPacket& opacket)
-{
-    assert(ipacket.data);
+    // assert(ipacket.data);
     assert(frame);
     assert(codec);
 
     // Populate the input frame with date from the given buffer.
     // NOTE: This only works with contiguous buffers
-    frame->data[0] = reinterpret_cast<std::uint8_t*>(ipacket.data);
+    frame->data[0] = reinterpret_cast<std::uint8_t*>(data);
 
-    // TODO: Correctly set the input frame PTS
-    // http://thompsonng.blogspot.com.au/2011/09/ffmpeg-avinterleavedwriteframe-return.html
-    // http://stackoverflow.com/questions/6603979/ffmpegavcodec-encode-video-setting-pts-h264
-    // (1 / oparams.fps) * sample rate * frame number
-    frame->pts = ipacket.pts;
+    // TODO: assert size and update conversion context if required
 
-    // _options.iformat.video.width = iframe->width;
-    // _options.iformat.video.height = iframe->height;
-    // enc->iparams.width = frame->width;
-    // enc->iparams.height = frame->height;
+    frame->pts = pts;
 
-    // avpicture_fill((AVPicture *)frame, (std::uint8_t*)ipacket.data,
-    //    av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
+    AVPacket opacket;
+    return encode(frame); //, opacket
 
-    return encode(frame, opacket);
+    // AVPacket ipacket;
+    // av_init_packet(&ipacket);
+    // ipacket.data = data;
+    // ipacket.size = size;
+    // ipacket.pts = pts;
+    // if (stream)
+    //     ipacket.stream_index = stream->index;
+    // return encode(ipacket, opacket);
 }
 
 
-bool VideoEncoder::encode(AVFrame* iframe, AVPacket& opacket)
+// bool VideoEncoder::encode(AVPacket& ipacket, AVPacket& opacket)
+// {
+//     assert(ipacket.data);
+//     assert(frame);
+//     assert(codec);
+//
+//     // Populate the input frame with date from the given buffer.
+//     // NOTE: This only works with contiguous buffers
+//     frame->data[0] = reinterpret_cast<std::uint8_t*>(ipacket.data);
+//
+//     // TODO: Correctly set the input frame PTS
+//     // http://thompsonng.blogspot.com.au/2011/09/ffmpeg-avinterleavedwriteframe-return.html
+//     // http://stackoverflow.com/questions/6603979/ffmpegavcodec-encode-video-setting-pts-h264
+//     // (1 / oparams.fps) * sample rate * frame number
+//     frame->pts = ipacket.pts;
+//
+//     // _options.iformat.video.width = iframe->width;
+//     // _options.iformat.video.height = iframe->height;
+//     // iparams.width = frame->width;
+//     // iparams.height = frame->height;
+//
+//     // avpicture_fill((AVPicture *)frame, (std::uint8_t*)ipacket.data,
+//     //    av_get_pix_fmt(iparams.pixelFmt), iparams.width, iparams.height);
+//
+//     return encode(frame, opacket);
+// }
+
+
+void emitPacket(VideoEncoder* enc, AVPacket& opacket)
 {
-    if (encodeVideoPacket(this, iframe, opacket)) {
-        fps.tick();
+    // auto pixelFmt = av_get_pix_fmt(enc->oparams.pixelFmt.c_str());
+    // assert(av_pix_fmt_count_planes(pixelFmt) == 1 && "planar formats not supported");
+
+    // enc->time = enc->frame->pkt_pts > 0 ? static_cast<std::int64_t>(enc->frame->pkt_pts * av_q2d(enc->stream->time_base) * 1000) : 0;
+    // enc->pts = enc->frame->pkt_pts;
+
+    // Compute stream time in miliseconds
+    if (enc->stream && opacket.pts >= 0) {
+        enc->time = static_cast<std::int64_t>(opacket.pts * av_q2d(enc->stream->time_base) * 1000);
+    }
+    enc->pts = opacket.pts;
+
+    assert(opacket.data);
+    assert(opacket.size);
+    // assert(opacket.pts >= 0);
+    // assert(opacket.dts >= 0);
+
+    VideoPacket video(opacket.data, opacket.size, enc->ctx->coded_frame->width, enc->ctx->coded_frame->height, enc->time);
+    video.source = &opacket;
+    video.opaque = enc;
+    enc->emitter.emit(enc, video);
+}
+
+
+bool VideoEncoder::encode(AVFrame* iframe)
+{
+    // assert(iframe);
+    // assert(iframe->data[0]);
+    assert(ctx);
+    assert(codec);
+
+    AVPacket opacket;
+    av_init_packet(&opacket);
+    opacket.data = nullptr; // using encoder assigned buffer
+    opacket.size = 0;
+
+    int frameEncoded = 0;
+    int ret = avcodec_encode_video2(ctx, &opacket, convert(iframe), &frameEncoded);
+    if (ret < 0) {
+        error = "Video encoder error: " + averror(ret);
+        ErrorS(this) << error << endl;
+        throw std::runtime_error(error);
+    }
+
+    if (frameEncoded) {
+        // fps.tick();
         if (ctx->coded_frame->key_frame)
             opacket.flags |= AV_PKT_FLAG_KEY;
         if (stream) {
+            opacket.stream_index = stream->index;
             // if (opacket.pts != AV_NOPTS_VALUE)
             //     opacket.pts = av_rescale_q(opacket.pts, ctx->time_base, stream->time_base);
             // if (opacket.dts != AV_NOPTS_VALUE)
@@ -330,25 +323,33 @@ bool VideoEncoder::encode(AVFrame* iframe, AVPacket& opacket)
             // if (opacket.duration > 0)
             //     opacket.duration = (int)av_rescale_q(opacket.duration, ctx->time_base, stream->time_base);
 
-            TraceS(this) << "Encoded Frame:"
+            TraceS(this) << "Encoded frame:"
                 << "\n\tScaled PTS: " << opacket.pts
                 << "\n\tScaled DTS: " << opacket.dts
                 << "\n\tScaled Duration: " << opacket.duration
                 << endl;
+
+            emitPacket(this, opacket);
         }
 
         return true;
     }
 
+    av_packet_unref(&opacket);
+
     return false;
 }
 
 
-bool VideoEncoder::flush(AVPacket& opacket)
+bool VideoEncoder::flush() //AVPacket& opacket
 {
-    return encode(nullptr, opacket);
+    do {
+        // :)
+    }
+    while (encode(nullptr));
+    return false;
 
-    // av_init_packet(&opacket);
+    // av_init_packet(&opacket);, opacket
     // opacket.data = nullptr;
     // opacket.size = 0;
     //
@@ -374,7 +375,6 @@ bool VideoEncoder::flush(AVPacket& opacket)
     //     }
     //     return true;
     // }
-    // return false;
 }
 
 

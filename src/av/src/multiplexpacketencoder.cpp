@@ -28,22 +28,22 @@ namespace scy {
 namespace av {
 
 
-MultiplexPacketEncoder::MultiplexPacketEncoder(const EncoderOptions& options, bool muxLiveStreams) :
+MultiplexPacketEncoder::MultiplexPacketEncoder(const EncoderOptions& options) : //, bool muxLiveStreams
     MultiplexEncoder(options),
-    PacketProcessor(MultiplexEncoder::emitter),
-    _muxLiveStreams(muxLiveStreams),
-    _lastVideoPacket(nullptr)
+    PacketProcessor(MultiplexEncoder::emitter) //,
+    // _muxLiveStreams(muxLiveStreams),
+    // _lastVideoPacket(nullptr)
 {
 }
 
 
-MultiplexPacketEncoder::MultiplexPacketEncoder(bool muxLiveStreams) :
-    MultiplexEncoder(),
-    PacketProcessor(MultiplexEncoder::emitter),
-    _muxLiveStreams(muxLiveStreams),
-    _lastVideoPacket(nullptr)
-{
-}
+// MultiplexPacketEncoder::MultiplexPacketEncoder(bool muxLiveStreams) :
+//     MultiplexEncoder(),
+//     PacketProcessor(MultiplexEncoder::emitter),
+//     _muxLiveStreams(muxLiveStreams),
+//     _lastVideoPacket(nullptr)
+// {
+// }
 
 
 MultiplexPacketEncoder::~MultiplexPacketEncoder()
@@ -51,6 +51,7 @@ MultiplexPacketEncoder::~MultiplexPacketEncoder()
 }
 
 
+#if 0
 void MultiplexPacketEncoder::process(IPacket& packet)
 {
     Mutex::ScopedLock lock(_mutex);
@@ -115,17 +116,38 @@ void MultiplexPacketEncoder::process(IPacket& packet)
         encode(*aPacket);
     }
 }
+#endif
 
+
+void MultiplexPacketEncoder::process(IPacket& packet)
+{
+    Mutex::ScopedLock lock(_mutex);
+
+    TraceS(this) << "Processing" << std::endl;
+
+    // We may be receiving either audio or video packets
+    auto vPacket = dynamic_cast<VideoPacket*>(&packet);
+    auto aPacket = vPacket ? nullptr : dynamic_cast<AudioPacket*>(&packet);
+    if (!vPacket && !aPacket)
+        throw std::invalid_argument("Unknown media packet type.");
+
+    if (vPacket) {
+        encode(*vPacket);
+    }
+    else if (aPacket) {
+        encode(*aPacket);
+    }
+}
 
 void MultiplexPacketEncoder::encode(VideoPacket& packet)
 {
-    encodeVideo((std::uint8_t*)packet.data(), packet.size(), packet.width, packet.height, (std::uint64_t)packet.time);
+    encodeVideo((std::uint8_t*)packet.data(), packet.size(), packet.width, packet.height, packet.time);
 }
 
 
 void MultiplexPacketEncoder::encode(AudioPacket& packet)
 {
-    encodeAudio((std::uint8_t*)packet.data(), packet.numSamples, (std::uint64_t)packet.time);
+    encodeAudio((std::uint8_t*)packet.data(), packet.numSamples, packet.time);
 }
 
 

@@ -24,6 +24,7 @@
 
 #include "scy/packetsignal.h"
 #include "scy/av/types.h"
+#include "scy/av/audiobuffer.h"
 
 #include "webrtc/base/basictypes.h"
 #include "webrtc/base/criticalsection.h"
@@ -248,6 +249,8 @@ class AudioPacketModule
 
   // The LibSourcey packet stream pointer.
   PacketSignal* _emitter;
+
+  av::AudioBuffer _buffer;
 
   // The time in milliseconds when Process() was last called or 0 if no call
   // has been made.

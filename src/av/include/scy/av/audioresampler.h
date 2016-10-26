@@ -61,7 +61,7 @@ struct AudioResampler
     void open();
     void close();
 
-    int resample(const std::uint8_t* inSamples, int inNumSamples);
+    int resample(std::uint8_t** inSamples, int inNumSamples);
         // Convert the input samples to the output format.
         // NOTE: Input buffers must be contiguous, therefore only interleaved
         // input formats are accepted at this point.

@@ -62,6 +62,8 @@ void MediaCapture::close()
 {
     TraceS(this) << "Closing" << endl;
 
+    stop();
+
     if (_video) {
         delete _video;
         _video = nullptr;
@@ -151,14 +153,16 @@ void MediaCapture::openStream(const std::string& filename, AVInputFormat* inputF
         auto stream = _formatCtx->streams[i];
         auto codec = stream->codec;
         if (!_video && codec->codec_type == AVMEDIA_TYPE_VIDEO) {
-            _video = new VideoDecoder();
-            _video->create(_formatCtx, stream);
+            _video = new VideoDecoder(stream);
+            _video->emitter.attach(packetDelegate(this, &MediaCapture::emit)); // proxy packets
+            _video->create();
             _video->open();
         }
         else if (!_audio && codec->codec_type == AVMEDIA_TYPE_AUDIO) {
             _audio = new AudioDecoder(stream);
-            _audio->open(); //_formatCtx, stream
-            // _audio->open();
+            _audio->emitter.attach(packetDelegate(this, &MediaCapture::emit)); // proxy packets
+            _audio->create();
+            _audio->open();
         }
     }
 
@@ -188,7 +192,7 @@ void MediaCapture::stop()
 {
     TraceS(this) << "Stopping" << endl;
 
-    // Mutex::ScopedLock lock(_mutex);
+    Mutex::ScopedLock lock(_mutex);
 
     _stopping = true;
     if (_thread.running()) {
@@ -200,77 +204,57 @@ void MediaCapture::stop()
 }
 
 
+void MediaCapture::emit(IPacket& packet)
+{
+    TraceS(this) << "Emit: " << packet.size() << endl;
+
+    emitter.emit(this, packet);
+}
+
+
 void MediaCapture::run()
 {
     TraceS(this) << "Running" << endl;
 
     try {
         int res;
-        std::int64_t videoFrames = 0;
-        std::int64_t audioFrames = 0;
         AVPacket ipacket;
-        AVPacket opacket;
-        av_init_packet(&ipacket); // TODO: ensure always uninitialized
-
+        av_init_packet(&ipacket);
         while ((res = av_read_frame(_formatCtx, &ipacket)) >= 0) {
-            TraceS(this) << "Read frame: pts=" << ipacket.pts << ": dts=" << ipacket.dts << endl;
+            TraceS(this) << "Read frame: pts=" << ipacket.pts << ", dts=" << ipacket.dts << endl;
             if (_stopping) break;
             if (_video && ipacket.stream_index == _video->stream->index) {
-                if (_video->decode(ipacket, opacket)) {
-                    TraceS(this) << "Decoded video: " << _video->pts << endl;
-                    VideoPacket video(opacket.data, opacket.size, _video->oparams.width, _video->oparams.height, _video->pts);
-                    video.iframe = ipacket.flags & AV_PKT_FLAG_KEY;
-                    video.source = &opacket;
-                    video.opaque = _video;
-                    emit(video);
+                if (_video->decode(ipacket)) {
+                    TraceS(this) << "Decoded video: "
+                        << "time=" << _video->time //<< ", "
+                        // << "pts=" << opacket.pts << ", "
+                        // << "dts=" << opacket.dts
+                        << endl;
                 }
-                videoFrames++;
             }
             else if (_audio && ipacket.stream_index == _audio->stream->index) {
-                if (_audio->decode(ipacket, opacket)) {
-                    TraceS(this) << "Decoded Audio: " << _audio->pts << endl;
-                    AudioPacket audio(_audio->frame->data[0], opacket.size, _audio->frame->nb_samples, _audio->pts);
-                    audio.source = &opacket;
-                    audio.opaque = _audio;
-                    emit(audio);
+                if (_audio->decode(ipacket)) { //, opacket
+                    TraceS(this) << "Decoded Audio: "
+                        << "time=" << _audio->time //<< ", "
+                        // << "pts=" << opacket.pts << ", "
+                        // << "dts=" << opacket.dts
+                        << endl;
                 }
-                audioFrames++;
             }
 
             av_packet_unref(&ipacket);
         }
 
         if (!_stopping && res < 0) {
-            bool gotFrame = false;
 
             // Flush video
-            while (_video && true) {
-                AVPacket opacket;
-                gotFrame = _video->flush(opacket);
-                if (gotFrame) {
-                    VideoPacket video(opacket.data, opacket.size, _video->ctx->width, _video->ctx->height, _video->pts);
-                    video.source = &opacket;
-                    video.opaque = _video;
-                    emit(video);
-                }
-                av_packet_unref(&opacket);
-                if (!gotFrame)
-                    break;
+            if (_video) {
+                _video->flush();
             }
 
             // Flush audio
-            while (_audio && true) {
-                AVPacket opacket;
-                gotFrame = _audio->flush(opacket);
-                if (gotFrame) {
-                    AudioPacket audio(opacket.data, opacket.size, _audio->frame->nb_samples, _audio->pts);
-                    audio.source = &opacket;
-                    audio.opaque = _audio;
-                    emit(audio);
-                }
-                av_packet_unref(&opacket);
-                if (!gotFrame)
-                    break;
+            if (_audio) {
+                _audio->flush();
             }
 
             // End of file or error.
@@ -287,42 +271,33 @@ void MediaCapture::run()
     }
 
     TraceS(this) << "Exiting" << endl;
+    _stopping = true;
     Closing.emit(this);
 }
 
 
-void MediaCapture::getEncoderFormat(Format& iformat)
+void MediaCapture::getEncoderFormat(Format& format)
 {
-    iformat.name = "Capture";
-    getVideoCodec(iformat.video);
-    getAudioCodec(iformat.audio);
+    format.name = "Capture";
+    getEncoderVideoCodec(format.video);
+    getEncoderAudioCodec(format.audio);
 }
 
 
-void MediaCapture::getAudioCodec(AudioCodec& iparams)
+void MediaCapture::getEncoderAudioCodec(AudioCodec& params)
 {
     Mutex::ScopedLock lock(_mutex);
-
-    for (unsigned i = 0; i < _formatCtx->nb_streams; i++) {
-        auto codec = _formatCtx->streams[i]->codec;
-        if (codec->codec_type == AVMEDIA_TYPE_AUDIO) {
-            assert(_audio);
-            initAudioCodecFromContext(codec, iparams);
-        }
+    if (_audio) {
+        params = _audio->oparams;
     }
 }
 
 
-void MediaCapture::getVideoCodec(VideoCodec& iparams)
+void MediaCapture::getEncoderVideoCodec(VideoCodec& params)
 {
     Mutex::ScopedLock lock(_mutex);
-
-    for (unsigned i = 0; i < _formatCtx->nb_streams; i++) {
-        auto codec = _formatCtx->streams[i]->codec;
-        if (codec->codec_type == AVMEDIA_TYPE_VIDEO) {
-            assert(_video);
-            initVideoCodecFromContext(codec, iparams);
-        }
+    if (_video) {
+        params = _video->oparams;
     }
 }
 
@@ -345,6 +320,13 @@ AudioDecoder* MediaCapture::audio() const
 {
     Mutex::ScopedLock lock(_mutex);
     return _audio;
+}
+
+
+bool MediaCapture::stopping() const
+{
+    Mutex::ScopedLock lock(_mutex);
+    return _stopping;
 }
 
 

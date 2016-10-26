@@ -48,10 +48,10 @@ namespace scy {
 namespace av {
 
 
-struct VideoConversionContext
+struct VideoConverter
 {
-    VideoConversionContext();
-    virtual ~VideoConversionContext();
+    VideoConverter();
+    virtual ~VideoConverter();
 
     virtual void create();
     virtual void close();

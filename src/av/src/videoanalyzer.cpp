@@ -219,7 +219,7 @@ AVFrame* VideoAnalyzer::getGrayVideoFrame()
 
     // TODO: Conversion via decoder?
     if (_videoConv == nullptr) {
-        _videoConv = new VideoConversionContext();
+        _videoConv = new VideoConverter();
 
         auto& iparams = _videoConv->iparams;
         iparams.width = video->ctx->width;

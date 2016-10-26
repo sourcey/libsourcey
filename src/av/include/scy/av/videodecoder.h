@@ -37,19 +37,20 @@ namespace av {
 
 struct VideoDecoder: public VideoContext
 {
-    VideoDecoder();
+    VideoDecoder(AVStream* stream);
     virtual ~VideoDecoder();
 
-    virtual void create(AVFormatContext* format, AVStream* stream);
+    virtual void create();
+    virtual void open();
     virtual void close();
 
-    virtual bool decode(std::uint8_t* data, int size, AVPacket& opacket);
-    virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
+    virtual bool decode(std::uint8_t* data, int size); //, AVPacket& opacket
+    virtual bool decode(AVPacket& ipacket); //, AVPacket& opacket
         // Decodes a the given input packet.
         // Returns true an output packet was returned,
         // false otherwise.
 
-    virtual bool flush(AVPacket& opacket);
+    virtual bool flush(); //AVPacket& opacket
         // Flushes buffered frames.
         // This method should be called after decoding
         // until false is returned.

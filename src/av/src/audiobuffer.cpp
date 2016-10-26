@@ -118,7 +118,7 @@ bool AudioBuffer::read(void** samples, int numSamples)
     // Since the decoder's and the encoder's frame size may differ, we
     // need to FIFO buffer to store as many frames worth of input samples
     // that they make up at least one frame worth of output samples.
-    if (av_audio_fifo_size(fifo) < numSamples) {
+    if (available() < numSamples) {
         TraceL << "No packets in buffer" << endl;
         return false;
     }
@@ -133,7 +133,7 @@ bool AudioBuffer::read(void** samples, int numSamples)
 }
 
 
-int AudioBuffer::numSamples() const
+int AudioBuffer::available() const
 {
     if (fifo)
         return av_audio_fifo_size(fifo);

@@ -32,8 +32,9 @@ namespace scy {
 namespace av {
 
 
-VideoDecoder::VideoDecoder()
+VideoDecoder::VideoDecoder(AVStream* stream)
 {
+    this->stream = stream;
 }
 
 
@@ -43,34 +44,40 @@ VideoDecoder::~VideoDecoder()
 }
 
 
-void VideoDecoder::create(AVFormatContext* format, AVStream* st)
+void VideoDecoder::create()
 {
-    assert(format);
-    assert(st);
+    assert(stream);
+    TraceS(this) << "Create: " << stream->index << endl;
 
-    TraceS(this) << "Create: " << st->index << endl;
-    VideoContext::create();
-
-    stream = st;
     ctx = stream->codec;
 
     codec = avcodec_find_decoder(ctx->codec_id);
     if (!codec)
         throw std::runtime_error("Video codec missing or unsupported.");
 
-    if (avcodec_open2(this->ctx, codec, nullptr) < 0)
-        throw std::runtime_error("Cannot open the audio codec.");
-
     frame = av_frame_alloc();
     if (frame == nullptr)
         throw std::runtime_error("Cannot allocate video input frame.");
 
-    // NOTE: The input and output format is set here once codec defaults have
-    // set. If the output parameters pixel format, width or height is modified
-    // then a conversion context will be created to output the desired format
-    // on the next call to decode().
-    initVideoCodecFromContext(ctx, iparams);
-    initVideoCodecFromContext(ctx, oparams);
+    int ret = avcodec_open2(ctx, codec, nullptr);
+    if (ret < 0)
+        throw std::runtime_error("Cannot open the audio codec: " + averror(ret));
+
+    // Set the default input and output parameters are set here once the codec
+    // context has been opened. The output pixel format, width or height can be
+    // modified after this call and a conversion context will be created on the
+    // next call to open() to output the desired format.
+    initVideoCodecFromContext(stream, ctx, iparams);
+    initVideoCodecFromContext(stream, ctx, oparams);
+
+    // Default to bgr24 output (planar formats not currently supported)
+    oparams.pixelFmt = "bgr24";
+}
+
+
+void VideoDecoder::open()
+{
+    VideoContext::open();
 }
 
 
@@ -80,27 +87,40 @@ void VideoDecoder::close()
 }
 
 
-void initDecodedVideoPacket(const AVFrame* frame, const VideoCodec& oparams, AVPacket& opacket) //const AVStream* stream, const AVCodecContext* ctx, double* pts
+void emitPacket(VideoDecoder* dec, const AVFrame* frame) //, AVPacket& opacket
 {
-    opacket.data = frame->data[0];
-    // opacket->size = avpicture_get_size(ctx->pix_fmt, ctx->width, ctx->height);
-    opacket.size = av_image_get_buffer_size(av_get_pix_fmt(oparams.pixelFmt.c_str()), oparams.width, oparams.height, 16);
-    opacket.dts = frame->pkt_dts; // Decoder PTS values can be unordered
-    opacket.pts = frame->pkt_pts;
+    auto pixelFmt = av_get_pix_fmt(dec->oparams.pixelFmt.c_str());
+    assert(av_pix_fmt_count_planes(pixelFmt) == 1 && "planar formats not supported");
 
-    // ctx->pix_fmt
-    // // Local PTS value represented as decimal seconds
-    // if (opacket->dts != AV_NOPTS_VALUE) {
-    //     *pts = (double)opacket->pts;
-    //     *pts *= av_q2d(stream->time_base);
-    // }
+    dec->time = frame->pkt_pts > 0 ? static_cast<std::int64_t>(frame->pkt_pts * av_q2d(dec->stream->time_base) * 1000) : 0;
+    dec->pts = frame->pkt_pts;
 
-    assert(opacket.data);
-    assert(opacket.size);
-    // assert(opacket.dts >= 0);
+    VideoPacket video(frame->data[0], frame->pkt_size,
+                      frame->width, frame->height,
+                      dec->time);
+    dec->emitter.emit(dec, video);
+
+    // opacket.data = frame->data[0];
+    // opacket.size = frame->pkt_size; //av_image_get_buffer_size(pixelFmt, dec->oparams.width, dec->oparams.height, 16);
+    // opacket.pts = frame->pkt_pts; // Decoder PTS values can be unordered
+    // opacket.dts = frame->pkt_dts;
+    //
+    // // // Local PTS value represented as decimal seconds
+    // // if (opacket->dts != AV_NOPTS_VALUE) {
+    // //     *pts = (double)opacket->pts;
+    // //     *pts *= av_q2d(stream->time_base);
+    // // }
+    //
+    // // Compute stream time in miliseconds
+    // dec->time = opacket.pts > 0 ? static_cast<std::int64_t>(opacket.pts * av_q2d(dec->stream->time_base) * 1000) : 0;
+    // dec->pts = opacket.pts;
+    //
+    // assert(opacket.data);
+    // assert(opacket.size);
+    // // assert(opacket.dts >= 0);
     // assert(opacket.pts >= 0);
 
-    // TraceL << "[VideoContext] Init Decoded Frame Pcket:"
+    // TraceL << "Decoded video frame:"
     //     << "\n\tFrame DTS: " << frame->pkt_dts
     //     << "\n\tFrame PTS: " << frame->pkt_pts
     //     << "\n\tPacket Size: " << opacket->size
@@ -110,35 +130,70 @@ void initDecodedVideoPacket(const AVFrame* frame, const VideoCodec& oparams, AVP
 }
 
 
-bool VideoDecoder::decode(std::uint8_t* data, int size, AVPacket& opacket)
+bool VideoDecoder::decode(std::uint8_t* data, int size) //, AVPacket& opacket
 {
     AVPacket ipacket;
     av_init_packet(&ipacket);
     ipacket.stream_index = stream->index;
     ipacket.data = data;
     ipacket.size = size;
-    return decode(ipacket, opacket);
+    return decode(ipacket); //, opacket
 }
 
 
-bool VideoDecoder::decode(AVPacket& ipacket, AVPacket& opacket)
+bool VideoDecoder::decode(AVPacket& ipacket) //, AVPacket& opacket
 {
-    assert(ipacket.stream_index == stream->index);
+    assert(ctx);
+    assert(codec);
+    assert(frame);
+    assert(!stream || ipacket.stream_index == stream->index);
 
-    int frameDecoded = 0;
-    int bytesDecoded = 0;
-    int bytesRemaining = ipacket.size;
+    int ret, frameDecoded = 0;
+    while (ipacket.size > 0) {
+        ret = avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
+        if (ret < 0) {
+            error = "Audio decoder error: " + averror(ret);
+            ErrorS(this) << error << endl;
+            throw std::runtime_error(error);
+        }
 
-    av_init_packet(&opacket);
-    opacket.data = nullptr;
-    opacket.size = 0;
+        if (frameDecoded) {
+            // assert(bytesDecoded == ipacket.size);
+            // assert(bytesDecoded == )
 
-    bytesDecoded = avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
-    if (bytesDecoded < 0) {
-        error = "Decoder error";
-        ErrorS(this) << "" << error << endl;
-        throw std::runtime_error(error);
+            // TraceS(this) << "Decoded frame:"
+            //     << "\n\tFrame Size: " << opacket.size
+            //     << "\n\tFrame PTS: " << opacket.pts
+            //     << "\n\tInput Frame PTS: " << ipacket.pts
+            //     << "\n\tInput Bytes: " << ipacket.size
+            //     << "\n\tBytes Decoded: " << bytesDecoded
+            //     << "\n\tFrame PTS: " << frame->pts
+            //     << "\n\tDecoder PTS: " << pts
+            //     << endl;
+
+            // fps.tick();
+            emitPacket(this, convert(frame)); //, frame, opacket, &ptsSeconds
+        }
+
+        ipacket.size -= ret;
+        ipacket.data += ret;
     }
+    assert(ipacket.size == 0);
+
+    // int frameDecoded = 0;
+    // int bytesDecoded = 0;
+    // int bytesRemaining = ipacket.size;
+
+    // av_init_packet(&opacket);
+    // opacket.data = nullptr;
+    // opacket.size = 0;
+    //
+    // bytesDecoded = avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
+    // if (bytesDecoded < 0) {
+    //     error = "Decoder error";
+    //     ErrorS(this) << "" << error << endl;
+    //     throw std::runtime_error(error);
+    // }
 
     // XXX: Asserting here to make sure below looping
     // avcodec_decode_video2 is actually redundant.
@@ -152,53 +207,61 @@ bool VideoDecoder::decode(AVPacket& ipacket, AVPacket& opacket)
     //     ipacket->size -= ret;
     //     ipacket->data += ret;
     // }
-    assert(bytesDecoded == bytesRemaining);
+    // assert(bytesDecoded == bytesRemaining);
 
     // while (bytesRemaining) { // && !frameDecoded
     //     //TraceS(this) << "Decoding: " << ipacket.pts << endl;
     //     bytesRemaining -= bytesDecoded;
     // }
 
-    if (frameDecoded) {
-        fps.tick();
-        initDecodedVideoPacket(convert(frame), oparams, opacket); // stream, ctx, &pts
-#if 0
-        TraceS(this) << "Decoded Frame:"
-            << "\n\tPTS: " << pts
-            << "\n\tPacket Size: " << opacket.size
-            << "\n\tPacket PTS: " << opacket.pts
-            << "\n\tPacket DTS: " << opacket.dts
-            << "\n\tFrame Packet PTS: " << frame->pkt_pts
-            << "\n\tFrame Packet DTS: " << frame->pkt_dts
-            << "\n\tFrame Size: " << ctx->frame_size
-            << endl;
-#endif
-
-        return true;
-    }
-    return false;
+//     if (frameDecoded) {
+//         // fps.tick();
+//
+//         // assert(frame->pkt_pts >= 0);
+//         emitPacket(this, convert(frame), opacket); // stream, ctx, &pts, oparams
+// #if 0
+//         TraceS(this) << "Decoded Frame:"
+//             << "\n\tPTS: " << pts
+//             << "\n\tPacket Size: " << opacket.size
+//             << "\n\tPacket PTS: " << opacket.pts
+//             << "\n\tPacket DTS: " << opacket.dts
+//             << "\n\tFrame Packet PTS: " << frame->pkt_pts
+//             << "\n\tFrame Packet DTS: " << frame->pkt_dts
+//             << "\n\tFrame Size: " << ctx->frame_size
+//             << endl;
+// #endif
+//
+//         return true;
+//     }
+//     return false;
+    return !!frameDecoded;
 }
 
 
-bool VideoDecoder::flush(AVPacket& opacket)
+bool VideoDecoder::flush() //AVPacket& opacket
 {
     AVPacket ipacket;
     av_init_packet(&ipacket);
     ipacket.data = nullptr;
     ipacket.size = 0;
 
-    av_init_packet(&opacket);
-    opacket.data = nullptr;
-    opacket.size = 0;
+    // av_init_packet(&opacket);
+    // opacket.data = nullptr;
+    // opacket.size = 0;
 
     int frameDecoded = 0;
-    avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
-    if (frameDecoded) {
-        initDecodedVideoPacket(convert(frame), oparams, opacket); // stream, ctx, &pts
-        TraceS(this) << "Flushed video frame: " << opacket.pts << endl;
-        return true;
-    }
-    return false;
+    do {
+        avcodec_decode_video2(ctx, frame, &frameDecoded, &ipacket);
+        if (frameDecoded) {
+            TraceS(this) << "Flushed video frame" << endl;
+            emitPacket(this, convert(frame)); //, opacket stream, ctx, &pts, oparams
+            // return true;
+        }
+    } while(frameDecoded);
+
+
+    // return false;
+    return !!frameDecoded;
 }
 
 

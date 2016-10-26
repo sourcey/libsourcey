@@ -87,16 +87,16 @@ struct AudioCodec: public Codec
 
     AudioCodec();
     AudioCodec(const std::string& name,
-        int channels, // = DEFAULT_AUDIO_CHANNELS
-        int sampleRate, // = DEFAULT_AUDIO_SAMPLE_RATE
-        int bitRate, // = DEFAULT_AUDIO_BIT_RATE
-        const std::string& sampleFmt); // = DEFAULT_AUDIO_SAMPLE_FMT
+        int channels = 0, // = DEFAULT_AUDIO_CHANNELS
+        int sampleRate = 0, // = DEFAULT_AUDIO_SAMPLE_RATE
+        int bitRate = 0, // = DEFAULT_AUDIO_BIT_RATE
+        const std::string& sampleFmt = ""); // = DEFAULT_AUDIO_SAMPLE_FMT
     AudioCodec(const std::string& name,
         const std::string& encoder,
-        int channels, // = DEFAULT_AUDIO_CHANNELS
-        int sampleRate, // = DEFAULT_AUDIO_SAMPLE_RATE
-        int bitRate, // = DEFAULT_AUDIO_BIT_RATE
-        const std::string& sampleFmt); // = DEFAULT_AUDIO_SAMPLE_FMT
+        int channels = 0, // = DEFAULT_AUDIO_CHANNELS
+        int sampleRate = 0, // = DEFAULT_AUDIO_SAMPLE_RATE
+        int bitRate = 0, // = DEFAULT_AUDIO_BIT_RATE
+        const std::string& sampleFmt = ""); // = DEFAULT_AUDIO_SAMPLE_FMT
     // AudioCodec(const AudioCodec& r);
     virtual ~AudioCodec();
 

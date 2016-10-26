@@ -141,7 +141,7 @@ protected:
     MediaCapture _reader;
     VideoAnalyzer::Stream* _video;
     VideoAnalyzer::Stream* _audio;
-    VideoConversionContext* _videoConv;
+    VideoConverter* _videoConv;
 };
 
 

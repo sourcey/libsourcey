@@ -22,6 +22,7 @@
 
 
 #include "scy/base.h"
+#include "scy/packetsignal.h"
 
 #ifdef HAVE_FFMPEG
 
@@ -34,7 +35,7 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavutil/fifo.h>
+// #include <libavutil/fifo.h>
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
 #include <libswscale/swscale.h>
@@ -68,7 +69,8 @@ struct VideoContext
         // conversion context
 
     virtual bool recreateConverter();
-    virtual void freeConverter();
+
+    PacketSignal emitter;
 
     VideoCodec iparams;      // input parameters
     VideoCodec oparams;      // output parameters
@@ -76,9 +78,11 @@ struct VideoContext
     AVCodecContext* ctx;     // encoder or decoder context
     AVCodec* codec;          // encoder or decoder codec
     AVFrame* frame;          // encoder or decoder frame
-    VideoConversionContext* conv; // video conversion context
-    FPSCounter fps;          // encoder or decoder fps rate
-    double pts;              // pts in decimal seconds
+    VideoConverter* conv;    // video conversion context
+    // FPSCounter fps;          // encoder or decoder fps rate
+    // double pts;              // pts in decimal seconds
+    std::int64_t time;       // stream time in milliseconds
+    std::int64_t pts;        // last packet pts value
     std::string error;       // error message
 };
 
@@ -89,7 +93,7 @@ struct VideoContext
 
 
 AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height);
-void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params);
+void initVideoCodecFromContext(const AVStream* stream, const AVCodecContext* ctx, VideoCodec& params);
 
 
 } } // namespace scy::av

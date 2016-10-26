@@ -48,7 +48,7 @@ struct AudioBuffer
     void write(void** samples, int numSamples);
     bool read(void** samples, int numSamples);
 
-    int numSamples() const;
+    int available() const;
 
     AVAudioFifo* fifo;
 };

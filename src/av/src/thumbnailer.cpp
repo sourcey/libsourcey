@@ -19,6 +19,7 @@
 
 #include "scy/av/thumbnailer.h"
 
+#if 0 // needs updating to latest API
 #ifdef HAVE_FFMPEG
 
 #include "scy/filesystem.h"
@@ -138,4 +139,5 @@ std::string Thumbnailer::defaultThumbPath(const std::string& ifile, const std::s
 
 } } // namespace scy::av
 
+#endif
 #endif

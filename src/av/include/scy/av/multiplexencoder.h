@@ -47,7 +47,7 @@ namespace av {
 
 
 class MultiplexEncoder: public IEncoder
-    /// This class implements an multiplex audio/video encoder.
+    /// This class implements a multiplex audio and video encoder.
 {
 public:
     MultiplexEncoder(const EncoderOptions& options = EncoderOptions());
@@ -61,16 +61,21 @@ public:
     virtual void freeVideo();
     virtual bool encodeVideo(AVFrame* frame);
     virtual bool encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int height, std::int64_t time = AV_NOPTS_VALUE);
-      // Encode a single video frame
+        // Encode a single video frame
+        // If the time is specified it should be the millisecond offset since
+        // the start of the input stream. The value will be converted to the
+        // stream time base internally.
+        // If no time is specified a realtime time value will be assigned to
+        // the frame.
 
     virtual void createAudio();
     virtual void freeAudio();
     // virtual bool encodeAudio(AVFrame* frame);
-    virtual bool encodeAudio(const std::uint8_t* buffer, int numSamples, std::int64_t time = AV_NOPTS_VALUE);
-      // Encode a single audio frame
+    virtual bool encodeAudio(std::uint8_t* buffer, int numSamples, std::int64_t time = AV_NOPTS_VALUE);
+        // Encode a single audio frame
 
     virtual void flush();
-      // Flush and beffered or queued packets.
+        // Flush and beffered or queued packets.
 
     EncoderOptions& options();
     VideoEncoder* video();
@@ -80,7 +85,10 @@ public:
 
 protected:
     bool writeOutputPacket(AVPacket& packet);
-    void updatePts(AVStream* stream, std::int64_t* pts);
+    void updateStreamPts(AVStream* stream, std::int64_t* pts);
+
+    void onVideoEncoded(av::VideoPacket& packet);
+    void onAudioEncoded(av::AudioPacket& packet);
 
     //static Mutex _mutex; // Protects avcodec_open/close()
 

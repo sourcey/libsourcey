@@ -37,7 +37,8 @@ VideoContext::VideoContext() :
     codec(nullptr),
     frame(nullptr),
     conv(nullptr),
-    pts(0.0)
+    time(0),
+    pts(0)
 {
     TraceS(this) << "Create" << endl;
     initializeFFmpeg();
@@ -60,13 +61,22 @@ void VideoContext::create()
 
 void VideoContext::open()
 {
-    TraceS(this) << "Opening" << endl;
+    TraceS(this) << "Open: "
+        << "\n\tInput: " << iparams.toString()
+        << "\n\tOutput: " << oparams.toString()
+        << endl;
+
     assert(ctx);
+    assert(avcodec_is_open(ctx) && "avcodec_open2 must be called");
     assert(codec);
 
-    // Open the video codec
-    if (avcodec_open2(ctx, codec, nullptr) < 0)
-           throw std::runtime_error("Cannot open the video codec.");
+    // NOTE: The codec must be opened prior to calling open()
+    // // Open the video codec
+    // if (avcodec_open2(ctx, codec, nullptr) < 0)
+    //     throw std::runtime_error("Cannot open the video codec.");
+
+    // Create the video conversion context if required
+    recreateConverter();
 }
 
 
@@ -84,7 +94,10 @@ void VideoContext::close()
         ctx = nullptr;
     }
 
-    freeConverter();
+    if (conv) {
+        delete conv;
+        conv = nullptr;
+    }
 
     // Streams are managed differently by the external impl
     //if (stream)    {
@@ -93,7 +106,8 @@ void VideoContext::close()
         //av_freep(stream);
     //}
 
-    // pts = 0.0;
+    time = 0;
+    pts = 0;
     error = "";
 
     TraceS(this) << "Closing: OK" << endl;
@@ -112,9 +126,11 @@ AVFrame* VideoContext::convert(AVFrame* iframe) //, VideoCodec& cparams
     // Recreate the video conversion context on the fly
     // if the input resolution changes.
     if (iframe->width != /*conv->*/oparams.width ||
-        iframe->height != /*conv->*/oparams.height) {
+        iframe->height != /*conv->*/oparams.height ||
+        iframe->format != /*conv->*/av_get_pix_fmt(oparams.pixelFmt.c_str())) {
         iparams.width = iframe->width;
         iparams.height = iframe->height;
+        iparams.pixelFmt = av_get_pix_fmt_name((AVPixelFormat)iframe->format);
         recreateConverter();
     }
 
@@ -163,26 +179,13 @@ bool VideoContext::recreateConverter()
 
     // Recreate the conversion context
     DebugL << "Recreating video conversion context" << endl;
-    freeConverter();
-    conv = new VideoConversionContext();
+    if (conv)
+        delete conv;
+    conv = new VideoConverter();
     conv->iparams = iparams;
     conv->oparams = oparams;
     conv->create();
     return true;
-}
-
-
-void VideoContext::freeConverter()
-{
-    if (conv) {
-        delete conv;
-        conv = nullptr;
-    }
-
-    //if (frame) {
-    //    av_free(frame);
-    //    frame = nullptr;
-    //}
 }
 
 
@@ -209,12 +212,13 @@ AVFrame* createVideoFrame(AVPixelFormat pixelFmt, int width, int height)
     // FFmpeg v3.1.4 does not set width and height values for us anymore
     picture->width = width;
     picture->height = height;
+    picture->format = pixelFmt;
 
     return picture;
 }
 
 
-void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
+void initVideoCodecFromContext(const AVStream* stream, const AVCodecContext* ctx, VideoCodec& params)
 {
     params.enabled = true;
     params.encoder = avcodec_get_name(ctx->codec_id);
@@ -223,9 +227,11 @@ void initVideoCodecFromContext(const AVCodecContext* ctx, VideoCodec& params)
     params.height = ctx->height;
     params.sampleRate = ctx->sample_rate;
     params.bitRate = ctx->bit_rate;
-    params.fps =
-        ctx->time_base.den /
-        ctx->time_base.num;
+    if (stream && stream->r_frame_rate.num) {
+        params.fps =
+            stream->r_frame_rate.num /
+            stream->r_frame_rate.den;
+    }
 }
 
 

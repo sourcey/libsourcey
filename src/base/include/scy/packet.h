@@ -122,9 +122,6 @@ public:
     virtual const char* constData() const { return data(); }
         // The const packet data pointer for buffered packets.
 
-    virtual const char* dataAs() const { return data(); }
-        // The const packet data pointer for buffered packets.
-
     virtual const char* className() const = 0;
     virtual void print(std::ostream& os) const { os << className() << std::endl; }
 
@@ -244,7 +241,7 @@ public:
     virtual std::size_t read(const ConstBuffer& buf)
     {
         copyData(bufferCast<const char*>(buf), buf.size());
-        return true;
+        return buf.size();
     }
 
     // Old Read API

@@ -13,15 +13,16 @@ int main(int argc, char** argv)
     // test::initialize();
 
     // Define class based tests
+#ifdef HAVE_FFMPEG
     describe("audio encoder", new AudioEncoderTest);
-    // describe("audio resampler", new AudioResamplerTest);
-    // describe("audio fifo buffer", new AudioBufferTest);
-
-// #ifdef HAVE_FFMPEG
-    // describe("audio capture encoder", new AudioCaptureEncoderTest);
-    // describe("audio capture resampler", new AudioCaptureResamplerTest);
+    describe("audio resampler", new AudioResamplerTest);
+    describe("audio fifo buffer", new AudioBufferTest);
+    describe("audio capture", new AudioCaptureTest);
+    describe("audio capture encoder", new AudioCaptureEncoderTest);
+    describe("audio capture resampler", new AudioCaptureResamplerTest);
+    // describe("video file transcoder", new VideoFileTranscoderTest);
     // describe("device capture multiplex encoder", new DeviceCaptureMultiplexEncoderTest);
-// #endif
+#endif
 
     test::runAll();
 

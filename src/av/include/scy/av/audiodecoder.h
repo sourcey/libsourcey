@@ -26,16 +26,16 @@
 #ifdef HAVE_FFMPEG
 
 #include "scy/av/types.h"
-#include "scy/av/ffmpeg.h"
-#include "scy/av/format.h"
+// #include "scy/av/ffmpeg.h"
+// #include "scy/av/format.h"
 #include "scy/av/audiocontext.h"
 
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavutil/opt.h>
-#include <libavutil/audio_fifo.h>
-}
+// extern "C" {
+// #include <libavcodec/avcodec.h>
+// #include <libavformat/avformat.h>
+// // #include <libavutil/opt.h>
+// // #include <libavutil/audio_fifo.h>
+// }
 
 
 namespace scy {
@@ -47,30 +47,20 @@ struct AudioDecoder: public AudioContext
     AudioDecoder(AVStream* stream); //AVFormatContext* format,
     virtual ~AudioDecoder();
 
-    virtual void open();
+    virtual void create();
     virtual void close();
 
-    virtual bool decode(std::uint8_t* data, int size, AVPacket& opacket);
-    virtual bool decode(AVPacket& ipacket, AVPacket& opacket);
+    virtual bool decode(std::uint8_t* data, int size); //, AVPacket& opacket
+    virtual bool decode(AVPacket& ipacket); //, AVPacket& opacket
         // Decodes a the given input packet.
         // Returns true an output packet was returned,
         // false otherwise.
 
-    virtual bool flush(AVPacket& opacket);
+    virtual bool flush(); //AVPacket& opacket
         // Flushes buffered frames.
         // This method should be called after decoding
         // until false is returned.
-
-    double duration;
-    int width;    // Number of bits used to store a sample
-    bool fp;      // Floating-point sample representation
 };
-
-
-// void initAudioCodecFromContext(const AVCodecContext* ctx, AudioCodec& params);
-// AVSampleFormat selectSampleFormat(AVCodec* codec, av::AudioCodec& params);
-// bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat);
-// void initDecodedAudioPacket(const AVStream* stream, const AVCodecContext* ctx, const AVFrame* frame, AVPacket* opacket);
 
 
 } } // namespace scy::av

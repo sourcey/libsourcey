@@ -40,9 +40,9 @@ struct Format
     enum Type
     {
         None        = 0,
-        Video        = 1,    /// video only
-        Audio        = 2,    /// audio only
-        Multiplex    = 3        // both video & audio
+        Video       = 1,    /// video only
+        Audio       = 2,    /// audio only
+        Multiplex   = 3     /// both video & audio
     };
 
     //

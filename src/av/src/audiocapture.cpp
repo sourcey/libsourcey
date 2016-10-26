@@ -54,7 +54,11 @@ AudioCapture::~AudioCapture()
 
 void AudioCapture::open(const std::string& device, int channels, int sampleRate)
 {
-    TraceS(this) << "Opening microphone: " << device << endl;
+    TraceS(this) << "Opening microphone: "
+        << "device=" << device << ", "
+        << "channels=" << channels << ", "
+        << "sampleRate=" << sampleRate
+        << endl;
 
     DeviceManager devman;
     auto iformat = devman.findAudioInputFormat();
@@ -69,7 +73,7 @@ void AudioCapture::open(const std::string& device, int channels, int sampleRate)
 
     openStream(device.c_str(), iformat, &iparams);
 
-    av_dict_free(&iparams); // FIXME: possible memory leak
+    av_dict_free(&iparams); // FIXME: possible memory leak if exception thrown
 }
 
 

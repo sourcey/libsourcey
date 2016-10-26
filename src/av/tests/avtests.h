@@ -17,8 +17,8 @@
 //
 
 
-#ifndef SCY_Media_Tests_H
-#define SCY_Media_Tests_H
+#ifndef SCY_AV_Tests_H
+#define SCY_AV_Tests_H
 
 
 #include "scy/base.h"
@@ -28,8 +28,8 @@
 // #include "scy/av/flvmetadatainjector.h"
 // #include "scy/av/formatregistry.h"
 // #include "scy/av/mediafactory.h"
-// #include "scy/av/mediacapture.h"
-// #include "scy/av/multiplexpacketencoder.h"
+#include "scy/av/mediacapture.h"
+#include "scy/av/multiplexpacketencoder.h"
 // #include "scy/av/thumbnailer.h"
 // #include "scy/av/iencoder.h"
 #include "scy/av/videocapture.h"
@@ -51,6 +51,14 @@ namespace scy {
 
 static const int kNumberFramesWanted = 200;
 static const int kInNumSamples = 1024;
+
+#define MP4_H264_AAC_TRANSCODER_FORMAT av::Format("MP4", "mp4", \
+    av::VideoCodec("H.264", "libx264", 400, 300), \
+    av::AudioCodec("AAC", "libfdk_aac"));
+
+#define MP4_H264_AAC_REALTIME_FORMAT av::Format("MP4", "mp4", \
+    av::VideoCodec("H.264", "libx264", 400, 300, 25, 48000, 128000, "yuv420p"), \
+    av::AudioCodec("AAC", "libfdk_aac", 2, 44100, 64000, "s16"));
 
 
 // =============================================================================
@@ -137,11 +145,17 @@ std::vector<double*> createTestAudioSamplesDBL(int numFrames, int nbSamples, con
 }
 
 
+#ifdef HAVE_FFMPEG
+
+
 // =============================================================================
 // Audio Encoder
 //
 class AudioEncoderTest: public Test
 {
+    int numFramesEncoded = 0;
+    std::ofstream output;
+
     void run()
     {
         av::AudioEncoder encoder;
@@ -159,23 +173,30 @@ class AudioEncoderTest: public Test
         oparams.sampleFmt = "s16"; // fltp
         oparams.enabled = true;
 
+        encoder.emitter += packetDelegate(this, &AudioEncoderTest::onAudioEncoded);
+        encoder.create();
         encoder.open();
-        
-        std::ofstream output("test." + oparams.encoder, std::ios::out | std::ios::binary);
+
+        output.open("test." + oparams.encoder, std::ios::out | std::ios::binary);
 
         auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNumSamples, iparams);
         for (auto samples : testSamples) {
-            AVPacket opacket;
-            if (encoder.encode(reinterpret_cast<std::uint8_t*>(samples), kInNumSamples, AV_NOPTS_VALUE, opacket)) {
-                output.write(reinterpret_cast<const char*>(opacket.data), opacket.size);
-            }
+            encoder.encode(reinterpret_cast<std::uint8_t*>(samples), kInNumSamples, AV_NOPTS_VALUE);
         }
 
+        encoder.flush();
         encoder.close();
         output.close();
         util::clearVector<>(testSamples);
 
         // TODO: verify data integrity
+        expect(numFramesEncoded > 0);
+    }
+
+    void onAudioEncoded(av::AudioPacket& packet)
+    {
+        numFramesEncoded++;
+        output.write(reinterpret_cast<const char*>(packet.data()), packet.size());
     }
 };
 
@@ -205,7 +226,8 @@ class AudioResamplerTest: public Test
 
         auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNumSamples, iparams);
         for (auto samples : testSamples) {
-            if (resampler.resample(reinterpret_cast<std::uint8_t*>(samples), kInNumSamples)) {
+            // auto data = reinterpret_cast<std::uint8_t*>(samples);
+            if (resampler.resample(reinterpret_cast<std::uint8_t**>(&samples), kInNumSamples)) {
                 output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outBufferSize);
             }
         }
@@ -220,7 +242,7 @@ class AudioResamplerTest: public Test
 
 
 // =============================================================================
-// Audio Fifo
+// Audio Fifo Buffer
 //
 class AudioBufferTest: public Test
 {
@@ -234,49 +256,62 @@ class AudioBufferTest: public Test
         fillAudioSamples(samples, 48000, 2, 200, &t);
 
         fifo.write((void**)&samples, 200);
-        expect(fifo.numSamples() == 200);
+        expect(fifo.available() == 200);
 
         fifo.read((void**)&samples, 100);
-        expect(fifo.numSamples() == 100);
+        expect(fifo.available() == 100);
 
         fifo.read((void**)&samples, 100);
-        expect(fifo.numSamples() == 0);
+        expect(fifo.available() == 0);
 
         delete samples;
-
-        // int bufferSize = av_samples_get_buffer_size(nullptr, params.channels, nbSamples, av_get_sample_fmt(params.sampleFmt.c_str()), 0);
-        // auto vec = std::vector<double*>();
-        // do {
-        //     auto samples = new double[bufferSize];
-        //     fillAudioSamples(samples, params.sampleRate, params.channels, nbSamples, &t);
-        //     vec.push_back(samples);
-        // } while (--numFrames);
-        // return vec;
-        // auto testSamples = createTestAudioSamplesDBL(kNumberFramesWanted, kInNumSamples, iparams);
-        // for (auto samples : testSamples) {
-        //     if (resampler.resample(reinterpret_cast<std::uint8_t*>(samples), kInNumSamples)) {
-        //         output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outBufferSize);
-        //     }
-        // }
-
-        // resampler.close();
-        // output.close();
-        // util::clearVector<>(testSamples);
-
-        // TODO: verify data integrity
     }
 };
 
 
-// #ifdef HAVE_FFMPEG
+// =============================================================================
+// Video File Transcoder
+//
+class VideoFileTranscoderTest: public Test
+{
+    void run()
+    {
+        av::EncoderOptions options;
+        options.ofile = "transcoderoutput.mp4";
+        options.oformat = av::Format("MP4", "mp4",
+            av::VideoCodec("H.264", "libx264", 480, 320),
+            av::AudioCodec("AAC", "libfdk_aac")
+        );
+
+        // Create a media capture to read and decode the input file
+        auto capture(std::make_shared<av::MediaCapture>());
+        capture->openFile("test.mp4");
+        capture->getEncoderFormat(options.iformat);
+
+        // Create the multiplex encoder
+        auto encoder(std::make_shared<av::MultiplexPacketEncoder>(options));
+
+        // Create a PacketStream to pass packets from the
+        // file capture to the encoder
+        PacketStream stream;
+        stream.attachSource(capture, true);
+        stream.attach(encoder, 5);
+        stream.start();
+
+        while(!capture->stopping()) {
+            cout << "Waiting for completion" << endl;
+            scy::sleep(10);
+        }
+    }
+};
+
 
 // =============================================================================
-// Audio Capture Encoder
+// Audio Capture
 //
-class AudioCaptureEncoderTest: public Test
+class AudioCaptureTest: public Test
 {
-    av::AudioEncoder encoder;
-    int numFramesRemaining;
+    int numFramesRemaining = kNumberFramesWanted;
     std::ofstream output;
 
     void run()
@@ -284,39 +319,110 @@ class AudioCaptureEncoderTest: public Test
         int inNbChannels = 2;
         int inSampleRate = 48000;
 
-        auto& iparams = encoder.iparams;
-        auto& oparams = encoder.oparams;
+        output.open("test.pcm", std::ios::out | std::ios::binary);
 
         av::Device device;
-        if (!av::DeviceManager::instance().getDefaultMicrophone(device)) {
+        av::DeviceManager devman;
+        if (!devman.getDefaultMicrophone(device)) {
             WarnL << "Skipping audio test because no microphone is available" << endl;
             return;
         }
 
+        // Create a media capture to read and decode the input file
         av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
-        capture.getAudioCodec(iparams);
+        // av::MediaCapture capture;
+        // capture.openFile("test.mp4");
+        capture.emitter.attach(packetDelegate(this, &AudioCaptureTest::onAudioCaptured));
         capture.start();
 
-        expect(iparams.channels == inNbChannels);
-        expect(iparams.sampleRate == inSampleRate);
+        av::AudioCodec oparams;
+        capture.getEncoderAudioCodec(oparams);
+        expect(oparams.channels == inNbChannels);
+        expect(oparams.sampleRate == inSampleRate);
+
+        while (numFramesRemaining > 0 && !capture.stopping()) {
+            cout << "Waiting for completion: " << numFramesRemaining << endl;
+            scy::sleep(10);
+        }
+
+        output.close();
+    }
+
+    void onAudioCaptured(av::AudioPacket& packet)
+    {
+        TraceL << "On audio packet: samples=" << packet.numSamples << ", time=" << packet.time << endl;
+        if (numFramesRemaining) {
+            numFramesRemaining--;
+            output.write(reinterpret_cast<const char*>(packet.data()), packet.size());
+        }
+    }
+};
+
+
+// =============================================================================
+// Audio Capture Encoder
+//
+class AudioCaptureEncoderTest: public Test
+{
+    av::AudioEncoder encoder;
+    int numFramesRemaining = kNumberFramesWanted;
+    std::ofstream output;
+
+    void run()
+    {
+        int inNbChannels = 2;
+        int inSampleRate = 48000; //22050; //48000;
+
+        auto& iparams = encoder.iparams;
+        auto& oparams = encoder.oparams;
+
+        av::Device device;
+        av::DeviceManager devman;
+        if (!devman.getDefaultMicrophone(device)) {
+            WarnL << "Skipping audio test because no microphone is available" << endl;
+            return;
+        }
+
+        // Create a media capture to read and decode the input file
+        av::AudioCapture capture(device.id, inNbChannels, inSampleRate); //(std::make_shared<av::AudioCapture>(device.id, inNbChannels, inSampleRate));
+        // av::MediaCapture::Ptr capture;
+        // capture.openFile("test.mp4");
+        capture.getEncoderAudioCodec(iparams);
+        capture.start();
 
         oparams.encoder = "mp2"; // mp2, aac, libfdk_aac
         oparams.bitRate = 64000;
         oparams.channels = 2;
-        oparams.sampleRate = 44100;
+        oparams.sampleRate = 44100; //22050; //
         oparams.sampleFmt = "s16"; // fltp
         oparams.enabled = true;
 
         output.open("test." + oparams.encoder, std::ios::out | std::ios::binary);
 
+        encoder.create();
         encoder.open();
-        capture.emitter.attach(av::audioDelegate(this, &AudioCaptureEncoderTest::onAudio));
 
-        numFramesRemaining = kNumberFramesWanted;
-        while (numFramesRemaining > 0) {
+        capture.emitter.attach(packetDelegate(this, &AudioCaptureEncoderTest::onAudioCaptured));
+        encoder.emitter.attach(packetDelegate(this, &AudioCaptureEncoderTest::onAudioEncoded));
+
+        expect(iparams.channels == inNbChannels);
+        expect(iparams.sampleRate == inSampleRate);
+        assert(iparams.sampleRate == inSampleRate);
+
+        // numFramesRemaining = kNumberFramesWanted; // * 8
+        while (numFramesRemaining > 0 && !capture.stopping()) {
             cout << "Waiting for completion: " << numFramesRemaining << endl;
             scy::sleep(10);
         }
+
+        // while(!capture.stopping()) {
+        //     cout << "Waiting for completion" << endl;
+        //     scy::sleep(10);
+        // }
+
+        cout << "Number samples remaining: " << encoder.fifo.available() << endl;
+        expect(encoder.fifo.available() < 1024);
+        // assert(encoder.fifo.available() == 0);
 
         capture.stop();
         encoder.close();
@@ -326,15 +432,17 @@ class AudioCaptureEncoderTest: public Test
         expect(numFramesRemaining == 0);
     }
 
-    void onAudio(av::AudioPacket& packet)
+    void onAudioCaptured(av::AudioPacket& packet)
+    {
+        TraceL << "On audio packet: samples=" << packet.numSamples << ", time=" << packet.time << endl;
+        encoder.encode(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples, AV_NOPTS_VALUE);
+    }
+
+    void onAudioEncoded(av::AudioPacket& packet)
     {
         if (numFramesRemaining) {
             numFramesRemaining--;
-            TraceL << "On audio packet: " << packet.size() << endl;
-            AVPacket opacket;
-            if (encoder.encode(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples, AV_NOPTS_VALUE, opacket)) {
-                output.write(reinterpret_cast<const char*>(opacket.data), opacket.size);
-            }
+            output.write(reinterpret_cast<const char*>(packet.data()), packet.size());
         }
     }
 };
@@ -349,7 +457,7 @@ class AudioCaptureEncoderTest: public Test
 class AudioCaptureResamplerTest: public Test
 {
     av::AudioResampler resampler;
-    int numFramesRemaining;
+    int numFramesRemaining = kNumberFramesWanted;
     std::ofstream output;
 
     void run()
@@ -365,13 +473,16 @@ class AudioCaptureResamplerTest: public Test
         oparams.sampleFmt = "s16";
 
         av::Device device;
-        if (!av::DeviceManager::instance().getDefaultMicrophone(device)) {
+        av::DeviceManager devman;
+        if (!devman.getDefaultMicrophone(device)) {
             WarnL << "Skipping audio test because no microphone is available" << endl;
             return;
         }
 
         av::AudioCapture capture(device.id, inNbChannels, inSampleRate);
-        capture.getAudioCodec(iparams);
+        // av::MediaCapture::Ptr capture;
+        // capture.openFile("test.mp4");
+        capture.getEncoderAudioCodec(iparams);
         capture.start();
 
         expect(iparams.channels == inNbChannels);
@@ -380,9 +491,9 @@ class AudioCaptureResamplerTest: public Test
         output.open("test.pcm", std::ios::out | std::ios::binary);
 
         resampler.open();
-        capture.emitter.attach(av::audioDelegate(this, &AudioCaptureResamplerTest::onAudio));
+        capture.emitter.attach(packetDelegate(this, &AudioCaptureResamplerTest::onAudioCaptured));
 
-        numFramesRemaining = kNumberFramesWanted;
+        // numFramesRemaining = kNumberFramesWanted; // * 8;
         while (numFramesRemaining > 0) {
             cout << "Waiting for completion: " << numFramesRemaining << endl;
             scy::sleep(10);
@@ -398,19 +509,21 @@ class AudioCaptureResamplerTest: public Test
         expect(numFramesRemaining == 0);
     }
 
-    void onAudio(av::AudioPacket& packet)
+    void onAudioCaptured(av::AudioPacket& packet)
     {
         if (numFramesRemaining) {
             numFramesRemaining--;
             cout << "On audio packet: " << packet.size() << endl;
-            if (resampler.resample(reinterpret_cast<std::uint8_t*>(packet.data()), packet.numSamples)) {
+            auto data = reinterpret_cast<std::uint8_t*>(packet.data());
+            if (resampler.resample(&data, packet.numSamples)) {
                 output.write(reinterpret_cast<const char*>(resampler.outSamples[0]), resampler.outBufferSize);
             }
         }
     }
 };
 
-// #endif // HAVE_FFMPEG
+
+#endif // HAVE_FFMPEG
 
 
 // static const int kInAudioDeviceId = 0;
@@ -545,15 +658,15 @@ class AudioCaptureResamplerTest: public Test
 //                 new VideoCapture(_filename) :
 //                 new VideoCapture(_deviceID));
 //
-//             capture->emitter += packetDelegate(this, &VideoCaptureThread::onVideo);
-//             capture->start();
+//             capture.emitter += packetDelegate(this, &VideoCaptureThread::onVideo);
+//             capture.start();
 //
 //             while (!closed) {
 //                 cv::waitKey(5);
 //             }
 //
-//             capture->emitter -= packetDelegate(this, &VideoCaptureThread::onVideo);
-//             capture->stop();
+//             capture.emitter -= packetDelegate(this, &VideoCaptureThread::onVideo);
+//             capture.stop();
 //
 //             DebugL << " Ended.................." << endl;
 //         }
@@ -939,7 +1052,7 @@ class AudioCaptureResamplerTest: public Test
 //         DebugL << "Starting" << endl;
 //
 //         /*
-//         av::VideoCapture capture(0);
+//         av::VideoCapture::Ptr capture(0);
 //
 //         // Setup encoding format
 //         Format mp4(Format("MP4", "mp4",
@@ -1021,11 +1134,11 @@ class AudioCaptureResamplerTest: public Test
 //                 //capture = new AudioCapture(0, 1, 16000);
 //                 //capture = new AudioCapture(0, 1, 11025);
 //                 AudioCapture* capture = new AudioCapture(0, 1, 16000);
-//                 capture->attach(audioDelegate(this, &AudioCaptureThread::onAudio));
+//                 capture.attach(audioDelegate(this, &AudioCaptureThread::onAudioCaptured));
 //
 //                 _wakeUp.wait();
 //
-//                 capture->detach(audioDelegate(this, &AudioCaptureThread::onAudio));
+//                 capture.detach(audioDelegate(this, &AudioCaptureThread::onAudioCaptured));
 //                 delete capture;
 //
 //                 DebugL << "[AudioCaptureThread] Ending.................." << endl;
@@ -1039,7 +1152,7 @@ class AudioCaptureResamplerTest: public Test
 //             //delete this;
 //         }
 //
-//         void onAudio(void* sender, AudioPacket& packet)
+//         void onAudioCaptured(void* sender, AudioPacket& packet)
 //         {
 //             DebugL << "[AudioCaptureThread] On Packet: " << packet.size() << endl;
 //             //cv::imshow(_thread.name(), *packet.mat);
@@ -1081,18 +1194,18 @@ class AudioCaptureResamplerTest: public Test
 //         DebugL << "Running Audio Capture test..." << endl;
 //
 //         AudioCapture* capture = new AudioCapture(0, 1, 16000);
-//         capture->attach(packetDelegate(this, &Tests::onCaptureTestAudioCapture));
+//         capture.attach(packetDelegate(this, &Tests::onCaptureTestAudioCapture));
 //         //scy::pause();
-//         capture->detach(packetDelegate(this, &Tests::onCaptureTestAudioCapture));
+//         capture.detach(packetDelegate(this, &Tests::onCaptureTestAudioCapture));
 //         delete capture;
 //
 //         AudioCapture* capture = new AudioCapture(0, 1, 16000);
-//         capture->attach(packetDelegate(this, &Tests::onCaptureTestAudioCapture));
+//         capture.attach(packetDelegate(this, &Tests::onCaptureTestAudioCapture));
 //         //audioCapture->start();
 //
 //         //scy::pause();
 //
-//         capture->detach(packetDelegate(this, &Tests::onCaptureTestAudioCapture));
+//         capture.detach(packetDelegate(this, &Tests::onCaptureTestAudioCapture));
 //         delete capture;
 //         //audioCapture->stop();
 //     }
@@ -1308,15 +1421,15 @@ class AudioCaptureResamplerTest: public Test
 //
 //         void start()
 //         {
-//             capture->emitter += packetDelegate(this, &CaptureRecorder::onFrame);
-//             capture->start();
+//             capture.emitter += packetDelegate(this, &CaptureRecorder::onFrame);
+//             capture.start();
 //             //audioCapture->start();
 //         }
 //
 //         void stop()
 //         {
-//             capture->emitter -= packetDelegate(this, &CaptureRecorder::onFrame);
-//             capture->stop();
+//             capture.emitter -= packetDelegate(this, &CaptureRecorder::onFrame);
+//             capture.stop();
 //             encoder.uninitialize();
 //             closed = true;
 //         }
@@ -1448,4 +1561,4 @@ class AudioCaptureResamplerTest: public Test
 } // namespace scy
 
 
-#endif // SCY_Media_Tests_H
+#endif // SCY_AV_Tests_H

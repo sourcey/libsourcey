@@ -22,6 +22,7 @@
 
 
 #include "scy/base.h"
+#include "scy/packetsignal.h"
 
 #ifdef HAVE_FFMPEG
 
@@ -50,24 +51,18 @@ struct AudioContext
     AudioContext();
     virtual ~AudioContext();
 
-    virtual void open() = 0;
+    virtual void create() = 0;
         // Initialize the AVCodecContext with default values
 
-    // virtual void open();
+    virtual void open();
         // Open the AVCodecContext
 
     virtual void close();
         // Close the AVCodecContext
 
-    virtual double ptsSeconds();
-        // Current pts in decimal seconds
-
-    // virtual AVFrame* resample(AVFrame* iframe);
-        // Convert the audio frame and return the result
-        // The internal frame buffer is owned
-
     virtual bool recreateResampler();
-    // virtual void freeResampler();
+
+    PacketSignal emitter;
 
     AudioCodec iparams;     // input parameters
     AudioCodec oparams;     // output parameters
@@ -76,8 +71,10 @@ struct AudioContext
     AVCodec* codec;         // encoder or decoder codec
     AVFrame* frame;         // last encoded or decoded frame
     AudioResampler* resampler;
+    int outputFrameSize;    // encoder or decoder output frame size
+    std::int64_t time;      // stream time in milliseconds
     std::int64_t pts;       // encoder current pts
-    FPSCounter fps;         // encoder or decoder fps rate
+    // FPSCounter fps;         // encoder or decoder fps rate
     std::string error;      // error message
 };
 

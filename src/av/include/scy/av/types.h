@@ -32,11 +32,11 @@ namespace av {
 
 struct MediaPacket: public RawPacket
 {
-    double time;
+    std::int64_t time;
 
     MediaPacket(std::uint8_t* data = nullptr,
                 std::size_t size = 0,
-                double time = time::clockSecs()) :
+                std::int64_t time = 0) : // = time::clockSecs()
         RawPacket(reinterpret_cast<char*>(data), size),
         time(time) {};
 
@@ -64,7 +64,7 @@ struct VideoPacket: public MediaPacket
                 std::size_t size = 0,
                 int width = 0,
                 int height = 0,
-                double time = time::clockSecs()) :
+                std::int64_t time = 0) : // = time::clockSecs()
         MediaPacket(data, size, time),
         width(width),
         height(height),
@@ -88,10 +88,12 @@ struct VideoPacket: public MediaPacket
 
 struct AudioPacket: public MediaPacket
 {
+    std::size_t numSamples; // number of samples per channel
+
     AudioPacket(std::uint8_t* data = nullptr,
                 std::size_t size = 0,
                 std::size_t numSamples = 0,
-                double time = time::clockSecs()) : //(std::uint64_t)clock() / CLOCKS_PER_SEC
+                std::int64_t time = 0) : // = time::clockSecs()
         MediaPacket(data, size, time), numSamples(numSamples) {};
 
     // AudioPacket(const AudioPacket& r) :
@@ -108,8 +110,6 @@ struct AudioPacket: public MediaPacket
     }
 
     virtual const char* className() const { return "AudioPacket"; }
-
-    std::size_t numSamples; // number of samples per channel
 };
 
 

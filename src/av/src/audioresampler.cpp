@@ -145,7 +145,7 @@ void AudioResampler::close()
 }
 
 
-int AudioResampler::resample(const std::uint8_t* inSamples, int inNumSamples)
+int AudioResampler::resample(std::uint8_t** inSamples, int inNumSamples) //const
 {
     if (!ctx)
         throw std::runtime_error("Conversion context must be initialized.");
@@ -180,9 +180,9 @@ int AudioResampler::resample(const std::uint8_t* inSamples, int inNumSamples)
 
     // Convert the samples using the resampler.
 #ifdef HAVE_FFMPEG_SWRESAMPLE
-    ret = swr_convert(ctx, outSamples, maxNumSamples, (const std::uint8_t**)&inSamples, inNumSamples);
+    ret = swr_convert(ctx, outSamples, maxNumSamples, (const std::uint8_t**)/*&*/inSamples, inNumSamples);
 #else
-    ret = avresample_convert(ctx, outSamples, 0, maxNumSamples, (std::uint8_t**)&inSamples, 0, inNumSamples);
+    ret = avresample_convert(ctx, outSamples, 0, maxNumSamples, (std::uint8_t**)/*&*/inSamples, 0, inNumSamples);
 #endif
     if (ret < 0) {
         close();

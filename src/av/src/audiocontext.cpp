@@ -35,11 +35,14 @@ namespace av {
 
 
 AudioContext::AudioContext() :
+    // PacketProcessor(this->emitter),
     stream(nullptr),
     codec(nullptr),
     frame(nullptr),
     resampler(nullptr),
-    pts(0)
+    outputFrameSize(0),
+    time(0),
+    pts(AV_NOPTS_VALUE)
 {
     initializeFFmpeg();
 }
@@ -52,28 +55,28 @@ AudioContext::~AudioContext()
 }
 
 
-// void AudioContext::open()
-// {
-// }
-//
-//
-// void AudioContext::open()
-// {
-//     TraceS(this) << "Opening" << endl;
-//     assert(ctx);
-//     assert(codec);
-//
-//     // Open the audio codec
-//     if (avcodec_open2(ctx, codec, nullptr) < 0)
-//          throw std::runtime_error("Cannot open the audio codec.");
-//
-//     // Create the resampler if resampling is required
-//     if (iparams.channels != oparams.channels ||
-//         iparams.sampleRate != oparams.sampleRate ||
-//         iparams.sampleFmt != oparams.sampleFmt) {
-//         recreateResampler();
-//     }
-// }
+void AudioContext::open()
+{
+    TraceS(this) << "Open: "
+        << "\n\tInput: " << iparams.toString()
+        << "\n\tOutput: " << oparams.toString()
+        << endl;
+
+    assert(ctx);
+    assert(avcodec_is_open(ctx) && "avcodec_open2 must be called");
+    assert(codec);
+
+    // // Open the audio codec
+    // if (avcodec_open2(ctx, codec, nullptr) < 0)
+    //      throw std::runtime_error("Cannot open the audio codec.");
+
+    // Create the resampler if resampling is required
+    if (iparams.channels != oparams.channels ||
+        iparams.sampleRate != oparams.sampleRate ||
+        iparams.sampleFmt != oparams.sampleFmt) {
+        recreateResampler();
+    }
+}
 
 
 void AudioContext::close()
@@ -99,64 +102,29 @@ void AudioContext::close()
         resampler = nullptr;
     }
 
+    time = 0;
     pts = 0;
-    //ptsSeconds = 0.0;
-    error = "";
+    // error = "";
 }
 
 
-double AudioContext::ptsSeconds()
-{
-    double val = 0.0;
-
-    // Local PTS value represented as decimal seconds
-    // if (opacket->dts != AV_NOPTS_VALUE) {
-    //     *pts = (double)opacket->pts;
-    //     *pts *= av_q2d(stream->time_base);
-    // }
-
-    // Local PTS value represented as decimal seconds
-    if (stream && pts > 0 && pts != AV_NOPTS_VALUE) {
-        val = (double)pts;
-        val *= av_q2d(stream->time_base);
-    }
-
-    return val;
-}
-
-
-// if (iparams.sampleFmt != oparams.sampleFmt ||
-//     iparams.sampleRate != oparams.sampleRate ||
-//     iparams.channels != oparams.channels) {
-
-// AVFrame* VideoContext::resample(AVFrame* iframe) //, VideoCodec& cparams
+// double AudioContext::ptsSeconds()
 // {
-//     // While flushing the input frame may be null
-//     if (!iframe)
-//         return nullptr;
+//     double val = 0.0;
 //
-//     assert(iframe->channels == iparams.channels);
-//     assert(iframe->sampleRate == iparams.sampleRate);
+//     // Local PTS value represented as decimal seconds
+//     // if (opacket->dts != AV_NOPTS_VALUE) {
+//     //     *pts = (double)opacket->pts;
+//     //     *pts *= av_q2d(stream->time_base);
+//     // }
 //
-//     // Recreate the video resampler context on the fly
-//     // if the input resolution changes.
-//     if (iframe->channels != /*resampler->*/oparams.channels ||
-//         iframe->sampleRate != /*resampler->*/oparams.sampleRate) {
-//         iparams.channels = iframe->channels;
-//         iparams.sampleRate = iframe->sampleRate;
-//         recreateResampler();
+//     // Local PTS value represented as decimal seconds
+//     if (stream && pts > 0 && pts != AV_NOPTS_VALUE) {
+//         val = (double)pts;
+//         val *= av_q2d(stream->time_base);
 //     }
 //
-//     // Return the input frame if no resampler is required
-//     if (!resampler)
-//         return iframe;
-//
-//     // // Set the input PTS or a monotonic value to keep the encoder happy.
-//     // // The actual setting of the PTS is outside the scope of this encoder.
-//     // cframe->pts = iframe->pts != AV_NOPTS_VALUE ? iframe->pts : ctx->frame_number;
-//
-//     // Convert the input frame and return the result
-//     return resampler->resamplerert(iframe);
+//     return val;
 // }
 
 
@@ -192,7 +160,6 @@ bool AudioContext::recreateResampler()
 
     // Recreate the resampler context
     DebugL << "Recreating audio resampler context" << endl;
-    // freeResampler();
     if (resampler)
         delete resampler;
     resampler = new AudioResampler();
@@ -201,6 +168,12 @@ bool AudioContext::recreateResampler()
     resampler->open();
     return true;
 }
+
+
+// bool AudioContext::accepts(IPacket& packet)
+// {
+//     return dynamic_cast<AudioPacket*>(&packet) != 0;
+// }
 
 
 //
@@ -221,7 +194,7 @@ void initAudioCodecFromContext(const AVCodecContext* ctx, AudioCodec& params)
 
 bool isSampleFormatSupported(AVCodec* codec, enum AVSampleFormat sampleFormat)
 {
-    const enum AVSampleFormat *p = codec->sample_fmts;
+    const enum AVSampleFormat* p = codec->sample_fmts;
     while (*p != AV_SAMPLE_FMT_NONE) {
         if (*p == sampleFormat)
             return true;

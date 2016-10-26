@@ -21,6 +21,8 @@
 #define SCY_AV_Thumbnailer_H
 
 
+#if 0 // needs updating to latest API
+
 #include "scy/base.h"
 #include "scy/av/config.h"
 #include "scy/av/mediacapture.h"
@@ -85,4 +87,5 @@ struct Thumbnailer
 } // namespace scy
 
 
+#endif
 #endif

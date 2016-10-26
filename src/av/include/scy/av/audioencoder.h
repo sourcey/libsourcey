@@ -48,29 +48,27 @@ struct AudioEncoder: public AudioContext
     AudioEncoder(AVFormatContext* format = nullptr);
     virtual ~AudioEncoder();
 
-    virtual void open();
-    //virtual void open();
+    virtual void create();
+    // virtual void open();
     virtual void close();
 
-    virtual bool encode(AVFrame* iframe, AVPacket& opacket);
-        // Encode a single AVFrame from the decoder.
-
-    virtual bool encode(const std::uint8_t* samples, const int numSamples, const std::int64_t pts, AVPacket& opacket);
-        // Encode a single frame of interleaved or planar audio.
+    virtual bool encode(/*const */std::uint8_t* samples, const int numSamples, const std::int64_t pts);
+        // Encode an arbitrary number of interleaved audio samples.
         //
         // @param samples    The input samples to encode.
         // @param numSamples The number of input samples per channel.
         // @param pts        The input samples presentation timestamp.
         // @param opacket    The output packet data will be encoded to.
 
-    virtual bool flush(AVPacket& opacket);
+    virtual bool encode(AVFrame* iframe);
+        // Encode a single AVFrame from the decoder.
+
+    virtual bool flush();
         // Flush remaining packets to be encoded.
-        // This method should be called repeatedly before stream close until
-        // it returns false.
+        // This method should be called once before stream closure.
 
     av::AudioBuffer fifo;
     AVFormatContext* format;
-    int outputFrameSize;
 };
 
 

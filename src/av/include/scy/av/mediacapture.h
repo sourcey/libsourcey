@@ -61,13 +61,14 @@ public:
 
     virtual void run();
 
-    virtual void getEncoderFormat(Format& iformat);
-    virtual void getAudioCodec(AudioCodec& iparams);
-    virtual void getVideoCodec(VideoCodec& iparams);
+    virtual void getEncoderFormat(Format& format);
+    virtual void getEncoderAudioCodec(AudioCodec& params);
+    virtual void getEncoderVideoCodec(VideoCodec& params);
 
     AVFormatContext* formatCtx() const;
     VideoDecoder* video() const;
     AudioDecoder* audio() const;
+    bool stopping() const;
     std::string error() const;
 
     NullSignal Closing;
@@ -76,6 +77,8 @@ public:
 
 protected:
     virtual void openStream(const std::string& filename, AVInputFormat* inputFormat, AVDictionary** formatParams);
+
+    void emit(IPacket& packet);
 
 protected:
     mutable Mutex _mutex;

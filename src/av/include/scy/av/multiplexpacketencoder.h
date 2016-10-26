@@ -37,8 +37,8 @@ class MultiplexPacketEncoder: public MultiplexEncoder, public PacketProcessor
     /// FFmpeg is used for encoding.
 {
 public:
-    MultiplexPacketEncoder(const EncoderOptions& options, bool muxLiveStreams = false);
-    MultiplexPacketEncoder(bool muxLiveStreams = false);
+    MultiplexPacketEncoder(const EncoderOptions& options = EncoderOptions()); //, bool muxLiveStreams = false
+    // MultiplexPacketEncoder(bool muxLiveStreams = false);
     virtual ~MultiplexPacketEncoder();
 
     virtual void encode(VideoPacket& packet);
@@ -53,8 +53,8 @@ protected:
     friend class PacketStream;
 
     mutable Mutex _mutex;
-    bool _muxLiveStreams;
-    VideoPacket* _lastVideoPacket;
+    // bool _muxLiveStreams;
+    // VideoPacket* _lastVideoPacket;
 };
 
 

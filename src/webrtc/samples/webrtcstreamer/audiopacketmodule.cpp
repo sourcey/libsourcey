@@ -82,6 +82,9 @@ void AudioPacketModule::setPacketSignal(scy::PacketSignal* emitter) {
       _emitter->detach(packetDelegate(this, &AudioPacketModule::onAudioCaptured));
   _emitter = emitter;
   _emitter->attach(packetDelegate(this, &AudioPacketModule::onAudioCaptured));
+
+  _buffer.close();
+  _buffer.alloc("s16", 2);
 }
 
 
@@ -95,38 +98,42 @@ void AudioPacketModule::onAudioCaptured(void* sender, av::AudioPacket& packet) {
   if (!audio_callback_) {
     return;
   }
-  bool key_pressed = false;
-  uint32_t current_mic_level = 0;
-  MicrophoneVolume(&current_mic_level);
-  // if (audio_callback_->RecordedDataIsAvailable(send_buffer_, kNumberSamples,
+
+  auto data = packet.data();
+  _buffer.write((void**)&data, packet.numSamples);
+
+  // bool key_pressed = false;
+  // uint32_t current_mic_level = 0;
+  // MicrophoneVolume(&current_mic_level);
+  // // if (audio_callback_->RecordedDataIsAvailable(send_buffer_, kNumberSamples,
+  // //                                             kNumberBytesPerSample,
+  // //                                             kNumberOfChannels,
+  // //                                             kSamplesPerSecond, kTotalDelayMs,
+  // //                                             kClockDriftMs, current_mic_level,
+  // //                                             key_pressed,
+  // //                                             current_mic_level) != 0) {
+  //
+  //
+  // TraceL << "^^^^^^^^^^^^^^^^^ On audio frame captured: " << packet.numSamples << std::endl;
+  //
+  // // #
+  // // # Fatal error in ../../webrtc/common_audio/resampler/push_resampler.cc, line 52
+  // // # last system error: 0
+  // // # Check failed: src_length == src_size_10ms (1024 vs. 440)
+  // // #
+  //
+  // if (audio_callback_->RecordedDataIsAvailable(packet.data(), packet.numSamples, //kNumberSamples, //
   //                                             kNumberBytesPerSample,
-  //                                             kNumberOfChannels,
-  //                                             kSamplesPerSecond, kTotalDelayMs,
-  //                                             kClockDriftMs, current_mic_level,
+  //                                             kNumberOfChannels, //2, //
+  //                                             kSamplesPerSecond,
+  //                                             kTotalDelayMs,
+  //                                             kClockDriftMs,
+  //                                             current_mic_level,
   //                                             key_pressed,
   //                                             current_mic_level) != 0) {
-
-
-  TraceL << "^^^^^^^^^^^^^^^^^ On audio frame captured: " << packet.numSamples << std::endl;
-
-  // #
-  // # Fatal error in ../../webrtc/common_audio/resampler/push_resampler.cc, line 52
-  // # last system error: 0
-  // # Check failed: src_length == src_size_10ms (1024 vs. 440)
-  // #
-
-  if (audio_callback_->RecordedDataIsAvailable(packet.data(), packet.numSamples, //kNumberSamples, //
-                                              kNumberBytesPerSample,
-                                              kNumberOfChannels, //2, //
-                                              kSamplesPerSecond,
-                                              kTotalDelayMs,
-                                              kClockDriftMs,
-                                              current_mic_level,
-                                              key_pressed,
-                                              current_mic_level) != 0) {
-    ASSERT(false);
-  }
-  SetMicrophoneVolume(current_mic_level);
+  //   ASSERT(false);
+  // }
+  // SetMicrophoneVolume(current_mic_level);
 }
 
 int64_t AudioPacketModule::TimeUntilNextProcess() {
@@ -754,8 +761,6 @@ void AudioPacketModule::ReceiveFrameP() {
     ASSERT(nSamplesOut == kNumberSamples);
   }
 
-  // InfoL << "AudioPacketModule::ReceiveFrameP()" << std::endl;
-
   // The SetBuffer() function ensures that after decoding, the audio buffer
   // should contain samples of similar magnitude (there is likely to be some
   // distortion due to the audio pipeline). If one sample is detected to
@@ -769,16 +774,40 @@ void AudioPacketModule::ReceiveFrameP() {
 }
 
 void AudioPacketModule::SendFrameP() {
-  // InfoL << "AudioPacketModule::SendFrameP()" << std::endl;
+  InfoL << "AudioPacketModule::SendFrameP()" << std::endl;
 
-  // ASSERT(process_thread_->IsCurrent());
-  // rtc::CritScope cs(&crit_callback_);
-  // if (!audio_callback_) {
-  //   return;
-  // }
-  // bool key_pressed = false;
-  // uint32_t current_mic_level = 0;
-  // MicrophoneVolume(&current_mic_level);
+  ASSERT(process_thread_->IsCurrent());
+  rtc::CritScope cs(&crit_callback_);
+  if (!audio_callback_) {
+    return;
+  }
+  bool key_pressed = false;
+  uint32_t current_mic_level = 0;
+  MicrophoneVolume(&current_mic_level);
+
+  assert(send_buffer_);
+
+  Sample* samples = new Sample[4096];
+  InfoL << "AudioPacketModule::SendFrameP(): " << send_buffer_ << std::endl;
+  InfoL << "AudioPacketModule::SendFrameP()a: " << _buffer.fifo << std::endl;
+  InfoL << "AudioPacketModule::SendFrameP()a: " << _buffer.available() << std::endl;
+  if (!_buffer.read((void**)&samples, kNumberSamples)) {
+      InfoL << "AudioPacketModule::SendFrameP() 2" << std::endl;
+      return;
+  }
+
+  InfoL << "AudioPacketModule::SendFrameP() PLAYIT" << std::endl;
+
+  if (audio_callback_->RecordedDataIsAvailable(samples, kNumberSamples,
+                                              kNumberBytesPerSample,
+                                              kNumberOfChannels,
+                                              kSamplesPerSecond, kTotalDelayMs,
+                                              kClockDriftMs, current_mic_level,
+                                              key_pressed,
+                                              current_mic_level) != 0) {
+    ASSERT(false);
+  }
+
   // if (audio_callback_->RecordedDataIsAvailable(send_buffer_, kNumberSamples,
   //                                             kNumberBytesPerSample,
   //                                             kNumberOfChannels,
@@ -788,5 +817,5 @@ void AudioPacketModule::SendFrameP() {
   //                                             current_mic_level) != 0) {
   //   ASSERT(false);
   // }
-  // SetMicrophoneVolume(current_mic_level);
+  SetMicrophoneVolume(current_mic_level);
 }

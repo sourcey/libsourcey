@@ -34,8 +34,7 @@ namespace av {
 
 
 AudioEncoder::AudioEncoder(AVFormatContext* format) :
-    format(format),
-    outputFrameSize(0)
+    format(format)
 {
     TraceS(this) << "Create" << endl;
 }
@@ -81,7 +80,7 @@ static AVFrame* initOutputFrame(AVCodecContext* ctx)
 }
 
 
-void AudioEncoder::open()
+void AudioEncoder::create()
 {
     TraceS(this) << "Create" << endl;
     int error;
@@ -111,9 +110,20 @@ void AudioEncoder::open()
             throw std::runtime_error("Cannot allocate encoder context.");
     }
 
+    // assert(oparams.bitRate);
+    // assert(oparams.sampleRate);
+    // assert(oparams.channels);
+    // assert(!oparams.sampleFmt.empty());
+
+    // int bitRate = oparams.bitRate ? oparams.bitRate : DEFAULT_AUDIO_BIT_RATE
+    if (!oparams.bitRate) oparams.bitRate = DEFAULT_AUDIO_BIT_RATE;
+    if (!oparams.sampleRate) oparams.sampleRate = DEFAULT_AUDIO_SAMPLE_RATE;
+    if (!oparams.channels) oparams.channels = DEFAULT_AUDIO_CHANNELS;
+    if (oparams.sampleFmt.empty()) oparams.sampleFmt = DEFAULT_AUDIO_SAMPLE_FMT;
+
     // Now we'll setup the parameters of AVCodecContext
     avcodec_get_context_defaults3(ctx, codec);
-    ctx->bit_rate = oparams.bitRate; //320000;
+    ctx->bit_rate = oparams.bitRate;
     ctx->sample_fmt = selectSampleFormat(codec, oparams);
     ctx->sample_rate = oparams.sampleRate;
     ctx->channels = oparams.channels;
@@ -139,6 +149,7 @@ void AudioEncoder::open()
     outputFrameSize = ctx->frame_size;
     assert(outputFrameSize);
 
+    // Create the encode frame
     frame = initOutputFrame(ctx);
 
     // Create the FIFO buffer based on the specified output sample format.
@@ -149,13 +160,19 @@ void AudioEncoder::open()
     // Update parameters that may have changed
     initAudioCodecFromContext(ctx, oparams);
 
-    // Create the resampler if resampling if required
-    if (iparams.channels != oparams.channels ||
-        iparams.sampleRate != oparams.sampleRate ||
-        iparams.sampleFmt != oparams.sampleFmt) {
-        recreateResampler();
-    }
+    // // Create the resampler if resampling if required
+    // if (iparams.channels != oparams.channels ||
+    //     iparams.sampleRate != oparams.sampleRate ||
+    //     iparams.sampleFmt != oparams.sampleFmt) {
+    //     recreateResampler();
+    // }
 }
+
+
+// void AudioEncoder::open()
+// {
+//     TraceS(this) << "Create" << endl;
+// }
 
 
 void AudioEncoder::close()
@@ -170,66 +187,108 @@ void AudioEncoder::close()
     }
 }
 
-
-bool AudioEncoder::encode(const std::uint8_t* samples, const int frameSize, const std::int64_t pts, AVPacket& opacket)
+void emitPacket(AudioEncoder* enc, AVPacket& opacket)
 {
-    TraceS(this) << "Encoding audio packet: " << frameSize << endl;
+    auto sampleFmt = av_get_sample_fmt(enc->oparams.sampleFmt.c_str());
+    assert(av_sample_fmt_is_planar(sampleFmt) == 0 && "planar formats not supported");
+
+    // enc->time = enc->frame->pkt_pts > 0 ? static_cast<std::int64_t>(enc->frame->pkt_pts * av_q2d(enc->stream->time_base) * 1000) : 0;
+    // enc->pts = enc->frame->pkt_pts;
+
+    // Compute stream time in miliseconds
+    if (enc->stream && opacket.pts >= 0) {
+        enc->time = static_cast<std::int64_t>(opacket.pts * av_q2d(enc->stream->time_base) * 1000);
+    }
+    enc->pts = opacket.pts;
+
+    assert(opacket.data);
+    assert(opacket.size);
+    // assert(opacket.pts >= 0);
+    // assert(opacket.dts >= 0);
+
+    AudioPacket audio(opacket.data, opacket.size, enc->outputFrameSize, enc->time);
+    audio.source = &opacket;
+    audio.opaque = enc;
+
+    enc->emitter.emit(enc, audio);
+    // assert(0);
+}
+
+
+int flushBuffer(AudioEncoder* enc)
+{
+    TraceS(enc) << "Flush" << endl;
+
+    // Read frames from the FIFO while available
+    int num = 0;
+    while (enc->fifo.read((void**)enc->frame->data, enc->frame->nb_samples) && enc->encode(enc->frame)) {
+        // NOTE: The encoder calculate the correct pts value for us,
+        // so let's just increment the pts counter.
+        if (enc->frame->pts != AV_NOPTS_VALUE) {
+            enc->frame->pts++;
+        }
+        num++;
+    }
+
+    return num;
+}
+
+
+bool AudioEncoder::encode(/*const */std::uint8_t* samples, const int numSamples, const std::int64_t pts)
+{
+    TraceS(this) << "Encoding audio packet: " << numSamples << endl;
 
     // Resample input data or add it to the buffer directly
     if (resampler) {
-        if (!resampler->resample(samples, frameSize)) {
+        if (!resampler->resample((std::uint8_t**)&samples, numSamples)) {
             // The resampler may buffer frames
             TraceS(this) << "Samples buffered by resampler" << endl;
             return false;
         }
 
-        TraceS(this) << "Resampled audio packet: " << frameSize << " <=> " << resampler->outNumSamples << endl;
+        TraceS(this) << "Resampled audio packet: " << numSamples << " <=> " << resampler->outNumSamples << endl;
 
-        // Add the converted input samples to the FIFO buffer for later processing.
+        // Add the converted input samples to the FIFO buffer.
         fifo.write((void**)resampler->outSamples, resampler->outNumSamples);
     }
     else {
-        // Add the input samples to the FIFO buffer for later processing.
-        fifo.write((void**)&samples, frameSize);
+        // Add the input samples to the FIFO buffer.
+        fifo.write((void**)&samples, numSamples);
     }
 
-    // Read a while frame from the FIFO if available
-    if (!fifo.read((void**)frame->data, frame->nb_samples)) {
-        return false;
-    }
-
-    // Set a timestamp based on the sample rate for the container.
+    // Set a timestamp value on the frame to be encoded if given.
     if (pts != AV_NOPTS_VALUE) {
         frame->pts = pts;
     }
 
-    return encode(frame, opacket);
+    return flushBuffer(this) > 0;
 }
 
 
-bool AudioEncoder::encode(AVFrame* iframe, AVPacket& opacket)
+bool AudioEncoder::encode(AVFrame* iframe)
 {
     TraceS(this) << "Encoding audio frame" << endl;
 
-    int frameEncoded, error;
+    int frameEncoded, ret;
 
     // This method only receives input format sample frames
-    // assert(iframe->sample_fmt == ctx->sample_fmt);
-    assert(iframe->nb_samples == ctx->frame_size);
+    assert(!iframe || iframe->format == ctx->sample_fmt);
+    assert(!iframe || iframe->nb_samples == ctx->frame_size);
 
     // Set the packet data and size so that it is recognized as being empty.
+    AVPacket opacket;
     av_init_packet(&opacket);
     opacket.data = nullptr;
     opacket.size = 0;
 
     // Encode the audio frame and store it in the temporary packet.
     // The output audio stream encoder is used to do this.
-    if ((error = avcodec_encode_audio2(ctx, &opacket, iframe, &frameEncoded)) < 0) {
-        throw std::runtime_error("Cannot encode audio frame: " + averror(error));
+    if ((ret = avcodec_encode_audio2(ctx, &opacket, iframe, &frameEncoded)) < 0) {
+        throw std::runtime_error("Cannot encode audio frame: " + averror(ret));
     }
 
     if (frameEncoded) {
-        fps.tick();
+        // fps.tick();
         opacket.flags |= AV_PKT_FLAG_KEY;
         if (stream) {
             opacket.stream_index = stream->index;
@@ -246,18 +305,30 @@ bool AudioEncoder::encode(AVFrame* iframe, AVPacket& opacket)
             << "\n\tDTS: " << opacket.dts
             << "\n\tDuration: " << opacket.duration
             << endl;
+
+        emitPacket(this, opacket);
     }
     else {
         TraceL << "No frame encoded" << endl;
     }
 
+    av_packet_unref(&opacket);
+
     return frameEncoded > 0;
 }
 
 
-bool AudioEncoder::flush(AVPacket& opacket)
+bool AudioEncoder::flush()
 {
-    return encode(nullptr, opacket);
+    TraceS(this) << "Flush" << endl;
+
+    // Flush any remaining frames in the FIFO
+    flushBuffer(this);
+
+    do {
+        // :)
+    }
+    while (encode(nullptr));
 }
 
 

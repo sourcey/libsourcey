@@ -57,14 +57,24 @@ struct VideoEncoder: public VideoContext
     //virtual void open();
     virtual void close();
 
-    virtual bool encode(unsigned char* data, int size, std::int64_t pts, AVPacket& opacket);
-    virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
-    virtual bool encode(AVFrame* iframe, AVPacket& opacket);
-    virtual bool flush(AVPacket& opacket);
+    virtual bool encode(unsigned char* data, int size, std::int64_t pts); //, AVPacket& opacket
+        // Encode a single video frame.
+        // The pts argument should be in stream base time format.
+
+    // virtual bool encode(AVPacket& ipacket, AVPacket& opacket);
+    // virtual bool encode(AVFrame* iframe, AVPacket& opacket);
+    // virtual bool flush(AVPacket& opacket);
+
+    virtual bool encode(AVFrame* iframe); //, AVPacket& opacket
+        // Encode a single AVFrame.
+
+    virtual bool flush();
+        // Flush remaining packets to be encoded.
+        // This method should be called once before stream closure.
 
     AVFormatContext* format;
-    std::uint8_t* buffer;
-    int           bufferSize;
+    // std::uint8_t* buffer;
+    // int           bufferSize;
 };
 
 

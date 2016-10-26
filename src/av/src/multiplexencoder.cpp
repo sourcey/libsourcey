@@ -240,23 +240,10 @@ void MultiplexEncoder::flush()
     TraceS(this) << "Flushing" << endl;
 
     if (_video) {
-        while(true) {
-            AVPacket opacket;
-            // TODO: set pts
-            // av_init_packet(&opacket);
-            if (!_video->flush(opacket)) break;
-            writeOutputPacket(opacket);
-        }
+        _video->flush();
     }
-
     if (_audio) {
-        while(true) {
-            AVPacket opacket;
-            // TODO: set pts
-            // av_init_packet(&opacket);
-            if (!_audio->flush(opacket)) break;
-            writeOutputPacket(opacket);
-        }
+        _audio->flush();
     }
 }
 
@@ -311,6 +298,25 @@ bool MultiplexEncoder::writeOutputPacket(AVPacket& packet)
 }
 
 
+void MultiplexEncoder::updateStreamPts(AVStream* stream, std::int64_t* pts)
+{
+    // https://docs.thefoundry.co.uk/products/nuke/developers/63/ndkdevguide/examples/ffmpegReader.cpp
+    // https://ffmpeg.org/doxygen/trunk/doc_2examples_2muxing_8c-example.html
+    // https://ffmpeg.org/doxygen/trunk/doc_2examples_2transcoding_8c-example.html
+    if (*pts == AV_NOPTS_VALUE) {
+        // Set a realtime pts value if not specified
+        std::int64_t delta(av_gettime() - _formatCtx->start_time_realtime);
+        _pts = delta * (float) stream->time_base.den / (float) stream->time_base.num / AV_TIME_BASE;
+        *pts = _pts;
+    }
+    else {
+        // Convert from input miliseconds to encoder stream time base
+        _pts = *pts * (float) stream->time_base.den / (float) stream->time_base.num / 1000;
+        *pts = _pts;
+    }
+}
+
+
 //
 // Video stuff
 //
@@ -323,6 +329,7 @@ void MultiplexEncoder::createVideo()
     assert(_options.oformat.video.enabled);
     assert(_formatCtx->oformat->video_codec != AV_CODEC_ID_NONE);
     _video = new VideoEncoder(_formatCtx);
+    _video->emitter.attach(packetDelegate(this, &MultiplexEncoder::onVideoEncoded));
     _video->iparams = _options.iformat.video;
     _video->oparams = _options.oformat.video;
     _video->create();
@@ -343,7 +350,7 @@ void MultiplexEncoder::freeVideo()
 
 bool MultiplexEncoder::encodeVideo(AVFrame* frame)
 {
-    TraceS(this) << "Encoding video" << endl;
+    TraceS(this) << "Encoding video: " << frame->pts << endl;
 
     assert(isActive());
     assert(_video && _video->frame);
@@ -357,22 +364,27 @@ bool MultiplexEncoder::encodeVideo(AVFrame* frame)
     if (!frame->data || !frame->width || !frame->height)
         throw std::runtime_error("Invalid video frame");
 
-    updatePts(_video->stream, &frame->pts);
+    if (frame->pts == AV_NOPTS_VALUE)
+        updateStreamPts(_video->stream, &frame->pts);
 
-    AVPacket opacket;
-    // av_init_packet(&opacket);
-    if (_video->encode(frame, opacket)) {
-        assert(opacket.stream_index == _video->stream->index);
-        return writeOutputPacket(opacket);
-    }
+    return _video->encode(frame);
 
-    return false;
+    // // AVPacket opacket;
+    // // av_init_packet(&opacket);
+    // if (_video->encode(frame)) { //, opacket
+    //     // assert(opacket.stream_index == _video->stream->index);
+    //     // return writeOutputPacket(opacket);
+    // }
+    //
+    // assert(0);
+    //
+    // return false;
 }
 
 
 bool MultiplexEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int height, std::int64_t time)
 {
-    TraceS(this) << "Encoding video: " << bufferSize << endl;
+    TraceS(this) << "Encoding video: " << time << endl;
 
     assert(isActive());
     assert(_video && _video->frame);
@@ -386,38 +398,39 @@ bool MultiplexEncoder::encodeVideo(std::uint8_t* buffer, int bufferSize, int wid
     if (!buffer || !bufferSize || !width || !height)
         throw std::runtime_error("Invalid video frame");
 
-    updatePts(_video->stream, &time);
+    //if (time == AV_NOPTS_VALUE)
+        updateStreamPts(_video->stream, &time);
 
-    AVPacket opacket;
-    // av_init_packet(&opacket);
-    if (_formatCtx->oformat->flags & AVFMT_RAWPICTURE) {
-        opacket.flags |= AV_PKT_FLAG_KEY;
-        opacket.stream_index = _video->stream->index;
-        opacket.data = buffer;
-        opacket.size = bufferSize;
-    }
-    else {
-        if (!_video->encode(buffer, bufferSize, /*calc ? calc->tick() : */time, opacket)) {
-            WarnL << "Cannot encode video frame" << endl;
-            return false;
-        }
-    }
-
-    if (opacket.size > 0) {
-        assert(opacket.stream_index == _video->stream->index);
-        assert(isActive());
-        return writeOutputPacket(opacket);
-    }
-
-    return false;
+    return _video->encode(buffer, bufferSize, time);
+    // // AVPacket opacket;
+    // // // av_init_packet(&opacket);
+    // // if (_formatCtx->oformat->flags & AVFMT_RAWPICTURE) {
+    // //     opacket.flags |= AV_PKT_FLAG_KEY;
+    // //     opacket.stream_index = _video->stream->index;
+    // //     opacket.data = buffer;
+    // //     opacket.size = bufferSize;
+    // // }
+    // // else {
+    //     if (!_video->encode(buffer, bufferSize, /*calc ? calc->tick() : */time)) { //, opacket
+    //         WarnL << "Cannot encode video frame" << endl;
+    //         return false;
+    //     }
+    // // }
+    //
+    // assert(0);
+    // // if (opacket.size > 0) {
+    // //     assert(opacket.stream_index == _video->stream->index);
+    // //     assert(isActive());
+    // //     return writeOutputPacket(opacket);
+    // // }
+    //
+    // return false;
 }
 
 
-void MultiplexEncoder::updatePts(AVStream* stream, std::int64_t* pts)
+void MultiplexEncoder::onVideoEncoded(av::VideoPacket& packet)
 {
-    std::int64_t delta(av_gettime() - _formatCtx->start_time_realtime);
-    _pts = delta * (float) stream->time_base.den / (float) stream->time_base.num / (float) 1000000;
-    *pts = _pts;
+    writeOutputPacket(*reinterpret_cast<AVPacket*>(packet.source));
 }
 
 
@@ -436,21 +449,11 @@ void MultiplexEncoder::createAudio()
     assert(_formatCtx->oformat->audio_codec != AV_CODEC_ID_NONE);
 
     _audio = new AudioEncoder(_formatCtx);
+    _audio->emitter.attach(packetDelegate(this, &MultiplexEncoder::onAudioEncoded));
     _audio->iparams = _options.iformat.audio;
     _audio->oparams = _options.oformat.audio;
+    _audio->create();
     _audio->open();
-    // _audio->open();
-
-    // The encoder may require a minimum number of raw audio
-    // samples for each encoding but we can't guarantee we'll
-    // get this minimum each time an audio frame is decoded
-    // from the in file, so we use a FIFO to store up incoming
-    // raw samples until we have enough to call the codec.
-    // _audioFifo = av_fifo_alloc(_audio->outputFrameSize * 2);
-
-    // Allocate a buffer to read OUT of the FIFO into.
-    // The FIFO maintains its own buffer internally.
-    // _audioBuffer = (std::uint8_t*)av_malloc(_audio->outputFrameSize);
 }
 
 
@@ -475,12 +478,15 @@ void MultiplexEncoder::freeAudio()
 }
 
 
-bool MultiplexEncoder::encodeAudio(const std::uint8_t* buffer, int numSamples, std::int64_t time)
+bool MultiplexEncoder::encodeAudio(std::uint8_t* buffer, int numSamples, std::int64_t time)
 {
-    TraceS(this) << "Encoding Audio Packet: numSamples="
+    TraceS(this) << "Encoding audio packet: samples="
         << numSamples << ", time=" << time << endl;
     assert(buffer);
     assert(numSamples);
+
+    if (!buffer || !numSamples)
+        throw std::runtime_error("Invalid audio input");
 
     if (!isActive())
         throw std::runtime_error("The encoder is not initialized");
@@ -488,150 +494,30 @@ bool MultiplexEncoder::encodeAudio(const std::uint8_t* buffer, int numSamples, s
     if (!_audio)
         throw std::runtime_error("No audio context");
 
-    if (!buffer || !numSamples)
-        throw std::runtime_error("Invalid audio input");
+    //if (time == AV_NOPTS_VALUE)
+        updateStreamPts(_audio->stream, &time);
 
-    updatePts(_audio->stream, &time);
+    return _audio->encode(buffer, numSamples, time);
 
-    AVPacket opacket;
-    // av_init_packet(&opacket);
-    if (_audio->encode(buffer, numSamples, time, opacket)) {
-        assert(opacket.stream_index == _audio->stream->index);
-        return writeOutputPacket(opacket);
-    }
-
-    return false;
-
-    // TODO: Move FIFO to the encoder context.
-    // bool res = false;
-    // av_fifo_generic_write(audioFifo, (std::uint8_t*)buffer, bufferSize, nullptr);
-    // while (av_fifo_size(audioFifo) >= _audio->outputFrameSize) {
-    //     av_fifo_generic_read(audioFifo, audioBuffer, audio->outputFrameSize, nullptr);
+    // // AVPacket opacket;
+    // // av_init_packet(&opacket);
     //
-    //     AVPacket opacket;
-    //
-    //     //assert(calc);
-    //     if (audio->encode(audioBuffer, audio->outputFrameSize, time/*calc ? calc->tick() : AV_NOPTS_VALUE*/, opacket)) {
-    //         assert(opacket.stream_index == audio->stream->index);
-    //         assert(opacket.data);
-    //         assert(opacket.size);
-    //
-    //         // opacket.pts = _videoPts; //AV_NOPTS_VALUE;
-    //         // opacket.dts = AV_NOPTS_VALUE;
-    //
-    //         TraceS(this) << "Writing Audio:"
-    //             << "\n\tPacket Size: " << opacket.size
-    //             << "\n\tPTS: " << opacket.pts
-    //             << "\n\tDTS: " << opacket.dts
-    //             << "\n\tDuration: " << opacket.duration
-    //             << endl;
-    //
-    //          // Write the encoded frame to the output file
-    //         assert(isActive());
-    //         if (av_interleaved_write_frame(formatCtx, &opacket) != 0) {
-    //             WarnL << "Cannot write audio frame" << endl;
-    //         }
-    //         else res = true;
-    //     }
+    // //FIXME
+    // if (_audio->encode(buffer, numSamples, time)) { //, opacket
+    //     // assert(opacket.stream_index == _audio->stream->index);
+    //     // return writeOutputPacket(opacket);
     // }
     //
-    // return res;
+    // assert(0);
+    //
+    // return false;
 }
 
 
-#if 0
-bool MultiplexEncoder::encodeAudio(AVFrame* frame)
+void MultiplexEncoder::onAudioEncoded(av::AudioPacket& packet)
 {
-    assert(frame);
-    assert(frame->nb_samples);
-    TraceS(this) << "Encoding Audio Packet: " << frame->nb_samples << endl;
-
-    EncoderOptions* options = nullptr;
-    AVFormatContext* formatCtx = nullptr;
-    AudioEncoder* audio = nullptr;
-    // AVFifoBuffer* audioFifo = nullptr;
-    // std::uint8_t* audioBuffer = nullptr;
-    {
-        //Mutex::ScopedLock lock(_mutex);
-        options = &_options;
-        formatCtx = _formatCtx;
-        audio = _audio;
-        // audioFifo = _audioFifo;
-        // audioBuffer = _audioBuffer;
-    }
-
-    if (!isActive())
-        throw std::runtime_error("The encoder is not initialized");
-
-    if (!audio)
-        throw std::runtime_error("No audio context");
-
-    // if (!buffer || !bufferSize)
-    //     throw std::runtime_error("Invalid audio input");
-
-    AVPacket opacket;
-
-    bool res = false;
-    //assert(calc);
-    if (audio->encode(frame, opacket)) {
-        assert(opacket.stream_index == audio->stream->index);
-        assert(opacket.data);
-        assert(opacket.size);
-
-        // opacket.pts = _videoPts; //AV_NOPTS_VALUE;
-        // opacket.dts = AV_NOPTS_VALUE;
-
-        TraceS(this) << "Writing Audio:"
-            << "\n\tPacket Size: " << opacket.size
-            << "\n\tPTS: " << opacket.pts
-            << "\n\tDTS: " << opacket.dts
-            << "\n\tDuration: " << opacket.duration
-            << endl;
-
-         // Write the encoded frame to the output file
-        assert(isActive());
-        if (av_interleaved_write_frame(formatCtx, &opacket) != 0) {
-            WarnL << "Cannot write audio frame" << endl;
-        }
-        else res = true;
-    }
-
-    // TODO: Move FIFO to the encoder context.
-    // bool res = false;
-    // av_fifo_generic_write(audioFifo, (std::uint8_t*)buffer, bufferSize, nullptr);
-    // while (av_fifo_size(audioFifo) >= _audio->outputFrameSize) {
-    //     av_fifo_generic_read(audioFifo, audioBuffer, audio->outputFrameSize, nullptr);
-    //
-    //     AVPacket opacket;
-    //
-    //     //assert(calc);
-    //     if (audio->encode(audioBuffer, audio->outputFrameSize, time/*calc ? calc->tick() : AV_NOPTS_VALUE*/, opacket)) {
-    //         assert(opacket.stream_index == audio->stream->index);
-    //         assert(opacket.data);
-    //         assert(opacket.size);
-    //
-    //         // opacket.pts = _videoPts; //AV_NOPTS_VALUE;
-    //         // opacket.dts = AV_NOPTS_VALUE;
-    //
-    //         TraceS(this) << "Writing Audio:"
-    //             << "\n\tPacket Size: " << opacket.size
-    //             << "\n\tPTS: " << opacket.pts
-    //             << "\n\tDTS: " << opacket.dts
-    //             << "\n\tDuration: " << opacket.duration
-    //             << endl;
-    //
-    //          // Write the encoded frame to the output file
-    //         assert(isActive());
-    //         if (av_interleaved_write_frame(formatCtx, &opacket) != 0) {
-    //             WarnL << "Cannot write audio frame" << endl;
-    //         }
-    //         else res = true;
-    //     }
-    // }
-
-    return res;
+    writeOutputPacket(*reinterpret_cast<AVPacket*>(packet.source));
 }
-#endif
 
 
 } } // namespace scy::av

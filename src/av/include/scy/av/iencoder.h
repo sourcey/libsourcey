@@ -78,16 +78,15 @@ struct EncoderOptions
 
 
 class IEncoder: public Stateful<EncoderState>
-    /// This is the abstract class for all instantiations
-    /// of the IEncoder template.
+    /// This is the abstract class for all encoders.
 {
 public:
     enum Type
     {
         None        = 0,    // huh?
-        Video        = 1,    // video only
-        Audio        = 2,    // audio only
-        Multiplex    = 3        // both video & audio
+        Video       = 1,    // video only
+        Audio       = 2,    // audio only
+        Multiplex   = 3     // both video & audio
     };
 
     virtual void initialize() = 0;
