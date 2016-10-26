@@ -62,11 +62,12 @@ static const int kInNumSamples = 1024;
 
 
 // =============================================================================
-// Heleprs
+// Helpers
 //
 
 // Prepare a dummy YUV image
-static void fillYuvImage(AVFrame* pict, int frame_index, int width, int height)
+#ifdef HAVE_FFMPEG
+static void fillYuvImage(AVFrame *pict, int frame_index, int width, int height)
 {
     int x, y, i;
     i = frame_index;
@@ -143,6 +144,7 @@ std::vector<double*> createTestAudioSamplesDBL(int numFrames, int nbSamples, con
     } while (--numFrames);
     return vec;
 }
+#endif
 
 
 #ifdef HAVE_FFMPEG
@@ -302,6 +304,7 @@ class VideoFileTranscoderTest: public Test
             cout << "Waiting for completion" << endl;
             scy::sleep(10);
         }
+        // TODO: verify data integrity
     }
 };
 
@@ -526,26 +529,6 @@ class AudioCaptureResamplerTest: public Test
 #endif // HAVE_FFMPEG
 
 
-// static const int kInAudioDeviceId = 0;
-//
-//
-// //
-// /// Generic Callback Context
-// //
-//
-// struct CallbackContext
-// {
-//     // ---------------------------------------------------------------------
-//     // Video Capture Test
-//     //
-//
-//     void onVideoCaptureFrame(void* sender, av::MatrixPacket& packet)
-//     {
-//         DebugL << "On packet: " << packet.size() << endl;
-//
-//         // cv::imshow("VideoCaptureTest", *packet.mat);
-//     }
-// };
 // class Tests
 // {
 // public:

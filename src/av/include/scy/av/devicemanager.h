@@ -28,11 +28,23 @@
 #include "scy/av/ffmpeg.h"
 
 
+#ifdef HAVE_FFMPEG_AVDEVICE
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavdevice/avdevice.h>
 }
+#else
+typedef struct {
+} AVInputFormat;
+typedef struct {
+  const char *name;
+} AVOutputFormat;
+typedef struct {
+} AVFormatContext;
+#define av_find_input_format(ANY) (nullptr)
+#define av_oformat_next(ANY) (nullptr)
+#endif
 
 
 namespace scy {
