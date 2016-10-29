@@ -46,14 +46,15 @@ LibSourcey is a collection of open source cross platform C++11 modules and class
   SSL networking layer and encryption
 * **FFmpeg** (optional, >= 2.8.3)
   Media encoding and streaming
-<!--
-* **RtAudio** (optional, >= 4.1.2)
-  Audio capture
--->
 * **WebRTC** (optional)
   Peer-to-peer video conferencing
 * **OpenCV** (optional, >= 3.0)
   Video capture and computer vision algorithms
+  
+<!--
+* **RtAudio** (optional, >= 4.1.2)
+Audio capture
+-->
 
 ## Installation
 

@@ -1,24 +1,23 @@
-/*
- *  Copyright 2012 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
- */
+//
+// LibSourcey
+// Copyright (C) 2005, Sourcey <http://sourcey.com>
+//
+// LibSourcey is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// LibSourcey is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
 
-// This class implements an AudioCaptureModule that can be used to detect if
-// audio is being received properly if it is fed by another AudioCaptureModule
-// in some arbitrary audio pipeline where they are connected. It does not play
-// out or record any audio so it does not need access to any hardware and can
-// therefore be used in the gtest testing framework.
-
-// Note P postfix of a function indicates that it should only be called by the
-// processing thread.
-
-#ifndef WEBRTC_API_TEST_CUSTOMAUDIOCAPTUREMODULE_H_
-#define WEBRTC_API_TEST_CUSTOMAUDIOCAPTUREMODULE_H_
+#ifndef SCY_WebRTC_AudioPacketModule_H
+#define SCY_WebRTC_AudioPacketModule_H
 
 #include <memory>
 
@@ -40,29 +39,26 @@ class Thread;
 
 namespace scy {
 
+
 class AudioPacketModule
     : public webrtc::AudioDeviceModule,
-      public rtc::MessageHandler {
+      public rtc::MessageHandler
+    /// This class implements an AudioCaptureModule that can be used to detect if
+    /// audio is being received properly if it is fed by another AudioCaptureModule
+    /// in some arbitrary audio pipeline where they are connected. It does not play
+    /// out or record any audio so it does not need access to any hardware and can
+    /// therefore be used in the gtest testing framework.
+    ///
+    /// Note P postfix of a function indicates that it should only be called by the
+    /// processing thread.
+{
  public:
   typedef uint16_t Sample;
-
-  // The value for the following constants have been derived by running VoE
-  // using a real ADM. The constants correspond to 10ms of mono audio at 44kHz.
-  static const size_t kNumberSamples = 440;
-  static const size_t kNumberBytesPerSample = sizeof(Sample);
 
   // Creates a AudioPacketModule or returns NULL on failure.
   static rtc::scoped_refptr<AudioPacketModule> Create();
 
-  // Returns the number of frames that have been successfully pulled by the
-  // instance. Note that correctly detecting success can only be done if the
-  // pulled frame was generated/pushed from a AudioPacketModule.
-  int frames_received() const;
-
-  // Set the input packet emitter.
-  // Packets will be received on this stream for broadcasting to peers.
-  void setPacketSignal(PacketSignal* emitter);
-
+  // Handles input packets from the capture for sending.
   void onAudioCaptured(void* sender, av::AudioPacket& packet);
 
   // Following functions are inherited from webrtc::AudioDeviceModule.
@@ -222,80 +218,80 @@ class AudioPacketModule
   // Initializes the state of the AudioPacketModule. This API is called on
   // creation by the Create() API.
   bool Initialize();
-  // SetBuffer() sets all samples in send_buffer_ to |value|.
-  void SetSendBuffer(int value);
-  // Resets rec_buffer_. I.e., sets all rec_buffer_ samples to 0.
-  void ResetRecBuffer();
-  // Returns true if rec_buffer_ contains one or more sample greater than or
-  // equal to |value|.
-  bool CheckRecBuffer(int value);
 
   // Returns true/false depending on if recording or playback has been
   // enabled/started.
-  bool ShouldStartProcessing();
+  bool shouldStartProcessing();
 
   // Starts or stops the pushing and pulling of audio frames.
-  void UpdateProcessing(bool start);
+  void updateProcessing(bool start);
 
   // Starts the periodic calling of ProcessFrame() in a thread safe way.
-  void StartProcessP();
+  void startProcessP();
+
   // Periodcally called function that ensures that frames are pulled and pushed
   // periodically if enabled/started.
-  void ProcessFrameP();
+  void processFrameP();
+
   // Pulls frames from the registered webrtc::AudioTransport.
-  void ReceiveFrameP();
+  void receiveFrameP();
+
   // Pushes frames to the registered webrtc::AudioTransport.
-  void SendFrameP();
-
-  // The LibSourcey packet stream pointer.
-  PacketSignal* _emitter;
-
-  av::AudioBuffer _buffer;
+  void sendFrameP();
 
   // The time in milliseconds when Process() was last called or 0 if no call
   // has been made.
-  int64_t last_process_time_ms_;
+  int64_t _lastProcessTimeMS;
 
   // Callback for playout and recording.
-  webrtc::AudioTransport* audio_callback_;
+  webrtc::AudioTransport* _audioCallback;
 
-  bool recording_; // True when audio is being pushed from the instance.
-  bool playing_; // True when audio is being pulled by the instance.
+  bool _recording; // True when audio is being pushed from the instance.
+  bool _playing; // True when audio is being pulled by the instance.
 
-  bool play_is_initialized_; // True when the instance is ready to pull audio.
-  bool rec_is_initialized_; // True when the instance is ready to push audio.
+  bool _playIsInitialized; // True when the instance is ready to pull audio.
+  bool _recIsInitialized; // True when the instance is ready to push audio.
 
   // Input to and output from RecordedDataIsAvailable(..) makes it possible to
   // modify the current mic level. The implementation does not care about the
   // mic level so it just feeds back what it receives.
-  uint32_t current_mic_level_;
+  uint32_t _currentMicLevel;
 
-  // next_frame_time_ is updated in a non-drifting manner to indicate the next
-  // wall clock time the next frame should be generated and received. started_
-  // ensures that next_frame_time_ can be initialized properly on first call.
-  bool started_;
-  int64_t next_frame_time_;
+  // _nextFrameTime is updated in a non-drifting manner to indicate the next
+  // wall clock time the next frame should be generated and received. _started
+  // ensures that _nextFrameTime can be initialized properly on first call.
+  bool _started;
+  int64_t _nextFrameTime;
 
-  std::unique_ptr<rtc::Thread> process_thread_;
+  std::unique_ptr<rtc::Thread> _processThread;
 
-  // Buffer for storing samples received from the webrtc::AudioTransport.
-  char rec_buffer_[kNumberSamples * kNumberBytesPerSample];
-  // Buffer for samples to send to the webrtc::AudioTransport.
-  char send_buffer_[kNumberSamples * kNumberBytesPerSample];
+  // A FIFO buffer that stores samples from the audio source to be sent.
+  av::AudioBuffer _sendFifo;
 
-  // Counter of frames received that have samples of high enough amplitude to
-  // indicate that the frames are not faked somewhere in the audio pipeline
-  // (e.g. by a jitter buffer).
-  int frames_received_;
+  // A buffer with enough storage for a 10ms of samples to send.
+  std::vector<Sample> _sendSamples;
 
-  // Protects variables that are accessed from process_thread_ and
+  // Protects variables that are accessed from _processThread and
   // the main thread.
-  rtc::CriticalSection crit_;
-  // Protects |audio_callback_| that is accessed from process_thread_ and
+  rtc::CriticalSection _crit;
+  // Protects |_audioCallback| that is accessed from _processThread and
   // the main thread.
-  rtc::CriticalSection crit_callback_;
+  rtc::CriticalSection _critCallback;
 };
+
 
 }  // namespace scy
 
-#endif  // WEBRTC_API_TEST_CUSTOMAUDIOCAPTUREMODULE_H_
+
+#endif  // SCY_WebRTC_AudioPacketModule_H
+
+
+/*
+ *  Copyright 2012 The WebRTC project authors. All Rights Reserved.
+ *
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
+ */

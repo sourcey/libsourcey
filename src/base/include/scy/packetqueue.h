@@ -21,34 +21,127 @@
 #define SCY_PacketQueue_H
 
 
+#include "scy/base.h"
+#include "scy/queue.h"
 #include "scy/packetstream.h"
 #include "scy/synccontext.h"
 
 
 namespace scy {
-    
+
 
 //
-// Synchronization Packet Queue
+// Synchronized Packet Queue
 //
 
 
-class SyncPacketQueue: public SyncQueue<IPacket>, public PacketProcessor
+template <class T = IPacket>
+class SyncPacketQueue: public SyncQueue<T>, public PacketProcessor
 {
 public:
-    SyncPacketQueue(uv::Loop* loop, int maxSize = 1024);
-    SyncPacketQueue(int maxSize = 1024);
-    virtual ~SyncPacketQueue();
+    typedef SyncQueue<T> base_t;
+    typedef PacketProcessor proc_t;
+
+    SyncPacketQueue(uv::Loop* loop, int maxSize = 1024) :
+        base_t(loop, maxSize),
+        proc_t(this->emitter)
+    {
+    }
+
+    SyncPacketQueue(int maxSize = 1024) :
+        base_t(uv::defaultLoop(), maxSize),
+        proc_t(this->emitter)
+    {
+    }
+
+    virtual ~SyncPacketQueue()
+    {
+    }
 
     virtual void process(IPacket& packet);
+    virtual bool accepts(IPacket& packet);
 
     PacketSignal emitter;
 
-protected:    
-    virtual void dispatch(IPacket& packet);
+protected:
+    virtual void dispatch(T& packet);
 
     virtual void onStreamStateChange(const PacketStreamState&);
 };
+
+
+
+// SyncPacketQueue::SyncPacketQueue(uv::Loop* loop, int maxSize) :
+//     SyncQueue<IPacket>(loop, maxSize),
+//     PacketProcessor(this->emitter)
+// {
+//     TraceS(this) << "Create" << std::endl;
+// }
+//
+//
+// SyncPacketQueue::SyncPacketQueue(int maxSize) :
+//     SyncQueue<IPacket>(uv::defaultLoop(), maxSize),
+//     PacketProcessor(this->emitter)
+// {
+//     TraceS(this) << "Create" << std::endl;
+// }
+//
+//
+// SyncPacketQueue::~SyncPacketQueue()
+// {
+//     TraceS(this) << "Destroy" << std::endl;
+// }
+
+
+template <class T> inline void SyncPacketQueue<T>::process(IPacket& packet)
+{
+    if (base_t::cancelled()) {
+        WarnS(this) << "Process late packet" << std::endl;
+        assert(0);
+        return;
+    }
+
+    base_t::push(reinterpret_cast<T*>(packet.clone()));
+}
+
+
+template <class T> inline void SyncPacketQueue<T>::dispatch(T& packet)
+{
+    // Emit should never be called after closure.
+    // Any late packets should have been dealt with
+    // and dropped by the run() function.
+    if (base_t::cancelled()) {
+        WarnS(this) << "Dispatch late packet" << std::endl;
+        assert(0);
+        return;
+    }
+
+    proc_t::emit(packet);
+}
+
+
+template <class T> inline bool SyncPacketQueue<T>::accepts(IPacket& packet)
+{
+    return dynamic_cast<T*>(&packet) != 0;
+}
+
+
+template <class T> inline void SyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
+{
+    TraceS(this) << "Stream state: " << state << std::endl;
+
+    switch (state.id()) {
+    //case PacketStreamState::None:
+    //case PacketStreamState::Active:
+    //case PacketStreamState::Resetting:
+    //case PacketStreamState::Stopping:
+    //case PacketStreamState::Stopped:
+    case PacketStreamState::Closed:
+    case PacketStreamState::Error:
+        base_t::cancel();
+        break;
+    }
+}
 
 
 //
@@ -56,22 +149,98 @@ protected:
 //
 
 
-class AsyncPacketQueue: public AsyncQueue<IPacket>, public PacketProcessor
+template <class T = IPacket>
+class AsyncPacketQueue: public AsyncQueue<T>, public PacketProcessor
 {
 public:
-    AsyncPacketQueue(int maxSize = 1024);
-    virtual ~AsyncPacketQueue();
+    typedef AsyncQueue<T> base_t;
+    typedef PacketProcessor proc_t;
+
+    AsyncPacketQueue(int maxSize = 1024) :
+        base_t(maxSize),
+        proc_t(this->emitter)
+    {
+    }
+
+    virtual ~AsyncPacketQueue()
+    {
+    }
+
+    virtual void close();
 
     virtual void process(IPacket& packet);
-    
+    virtual bool accepts(IPacket& packet);
+
     PacketSignal emitter;
 
-protected:    
-    virtual void dispatch(IPacket& packet);
+protected:
+    virtual void dispatch(T& packet);
 
     virtual void onStreamStateChange(const PacketStreamState&);
 };
 
+
+template <class T> inline void AsyncPacketQueue<T>::close()
+{
+    // Flush queued items, some protocols can't afford dropped packets
+    base_t::flush();
+    assert(base_t::empty());
+    base_t::cancel();
+    base_t::_thread.join();
+}
+
+
+template <class T> inline void AsyncPacketQueue<T>::dispatch(T& packet)
+{
+    if (base_t::cancelled()) {
+        WarnS(this) << "Dispatch late packet" << std::endl;
+        assert(0);
+        return;
+    }
+
+    proc_t::emit(packet);
+}
+
+
+template <class T> inline void AsyncPacketQueue<T>::process(IPacket& packet)
+{
+    if (base_t::cancelled()) {
+        WarnS(this) << "Process late packet" << std::endl;
+        assert(0);
+        return;
+    }
+
+    base_t::push(reinterpret_cast<T*>(packet.clone()));
+}
+
+
+template <class T> inline bool AsyncPacketQueue<T>::accepts(IPacket& packet)
+{
+    return dynamic_cast<T*>(&packet) != 0;
+}
+
+
+template <class T> inline void AsyncPacketQueue<T>::onStreamStateChange(const PacketStreamState& state)
+{
+    TraceS(this) << "Stream state: " << state << std::endl;
+
+    switch (state.id()) {
+    case PacketStreamState::Active:
+        break;
+
+    case PacketStreamState::Stopped:
+        break;
+
+    case PacketStreamState::Error:
+    case PacketStreamState::Closed:
+        close();
+        break;
+
+    //case PacketStreamState::Resetting:
+    //case PacketStreamState::None:
+    //case PacketStreamState::Stopping:
+    }
+}
 
 } // namespace scy
 

@@ -87,17 +87,18 @@ void VideoDecoder::close()
 }
 
 
-void emitPacket(VideoDecoder* dec, const AVFrame* frame) //, AVPacket& opacket
+void emitPacket(VideoDecoder* dec, AVFrame* frame) //, AVPacket& opacket
 {
-    auto pixelFmt = av_get_pix_fmt(dec->oparams.pixelFmt.c_str());
-    assert(av_pix_fmt_count_planes(pixelFmt) == 1 && "planar formats not supported");
+    // assert(av_pix_fmt_count_planes((AVPixelFormat)frame->format) == 1 && "planar formats not supported");
 
-    dec->time = frame->pkt_pts > 0 ? static_cast<std::int64_t>(frame->pkt_pts * av_q2d(dec->stream->time_base) * 1000) : 0;
+    dec->time = frame->pkt_pts > 0 ? static_cast<std::int64_t>(frame->pkt_pts * av_q2d(dec->stream->time_base) * AV_TIME_BASE) : 0;
     dec->pts = frame->pkt_pts;
 
-    VideoPacket video(frame->data[0], frame->pkt_size,
+    VideoPacket video(frame->data[0], av_image_get_buffer_size((AVPixelFormat)frame->format, dec->oparams.width, dec->oparams.height, 16), //frame->pkt_size,
                       frame->width, frame->height,
                       dec->time);
+    video.source = frame;
+    video.opaque = dec;
     dec->emitter.emit(dec, video);
 
     // opacket.data = frame->data[0];
@@ -111,7 +112,7 @@ void emitPacket(VideoDecoder* dec, const AVFrame* frame) //, AVPacket& opacket
     // //     *pts *= av_q2d(stream->time_base);
     // // }
     //
-    // // Compute stream time in miliseconds
+    // // Compute stream time in milliseconds
     // dec->time = opacket.pts > 0 ? static_cast<std::int64_t>(opacket.pts * av_q2d(dec->stream->time_base) * 1000) : 0;
     // dec->pts = opacket.pts;
     //

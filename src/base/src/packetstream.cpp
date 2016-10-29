@@ -452,11 +452,15 @@ void PacketStream::process(IPacket& packet)
                 synchronizeStates();
 
                 // Send the packet to the first processor in the chain
-                if (firstProc->accepts(packet) && stateEquals(PacketStreamState::Active)) {
+                if (stateEquals(PacketStreamState::Active)) {
                     // TraceS(this) << "Starting process chain: "
                     //     << firstProc << ": " << packet.className() << endl;
                     //assert(stateEquals(PacketStreamState::Active));
-                    firstProc->process(packet);
+                    if (firstProc->accepts(packet))
+                        firstProc->process(packet);
+                    else
+                        firstProc->emit(packet);
+
                     // TraceS(this) << "After process chain: "
                     //     << firstProc << ": " << packet.className() << endl;
                     // If all went well the packet was processed and emitted...
@@ -541,8 +545,9 @@ void PacketStream::emit(IPacket& packet)
         if (emitter.enabled()) {
             emitter.emit(this, packet);
         }
-        else
+        else {
             TraceS(this) << "Dropping packet: No emitter: " << state() << endl;
+        }
     }
     catch (std::exception& exc) {
         ErrorL << "Emit error: " << exc.what() << std::endl;
@@ -603,9 +608,7 @@ void PacketStream::setup()
 void PacketStream::teardown()
 {
     TraceS(this) << "Teardown" << endl;
-
     Mutex::ScopedLock lock(_mutex);
-    TraceS(this) << "Stopping: Detach" << endl;
 
     // Detach the processor chain first
     PacketProcessor* lastProc = nullptr;
@@ -630,7 +633,7 @@ void PacketStream::teardown()
 
 void PacketStream::reset()
 {
-    TraceS(this) << "Cleanup" << endl;
+    TraceS(this) << "Reset" << endl;
 
     assert(stateEquals(PacketStreamState::None)
         || stateEquals(PacketStreamState::Closed));
@@ -913,7 +916,7 @@ void PacketStream::synchronizeOutput(uv::Loop* loop)
 
     // Add a SyncPacketQueue as the final processor so output
     // packets will be synchronized when they hit the emit() method
-    attach(new SyncPacketQueue(loop), 101, true);
+    attach(new SyncPacketQueue<>(loop), 101, true);
 }
 
 

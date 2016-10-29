@@ -21,9 +21,6 @@
 #include "scy/webrtc/peerconnectionmanager.h"
 #include "scy/logger.h"
 
-// #include "webrtc/modules/video_capture/video_capture_factory.h"
-// #include "webrtc/media/engine/webrtcvideocapturerfactory.h"
-
 
 using std::endl;
 
@@ -34,16 +31,20 @@ namespace scy {
 FilePeerConnection::FilePeerConnection(PeerConnectionManager* manager, const std::string& peerid, Mode mode) :
     PeerConnection(manager, peerid, mode)
 {
-    _audioCaptureModule = AudioPacketModule::Create();
-
     // Setup a PeerConnectionFactory with our custom ADM
-    // TODO: Setup threads properly
+    // TODO: Setup threads properly:
+    auto networkThread = rtc::Thread::CreateWithSocketServer().release();
+    auto workerThread = rtc::Thread::Create().release();
+    auto signalingThread = rtc::Thread::Current();
     _factory = webrtc::CreatePeerConnectionFactory(
-                  rtc::Thread::Current(),
-                  rtc::Thread::Current(),
-                  rtc::Thread::Current(),
-                  _audioCaptureModule,
+                  networkThread,
+                  workerThread,
+                  signalingThread,
+                  _capturer.getAudioModule(),
                   nullptr, nullptr);
+    networkThread->Start();
+    workerThread->Start();
+    // signalingThread->Start();
 
     _constraints.SetMandatoryReceiveAudio(false);
     _constraints.SetMandatoryReceiveVideo(false);
@@ -61,30 +62,11 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> FilePeerConnection::createMedia
     assert(_mode == Offer);
     assert(_factory);
     assert(!_stream);
-    assert(!_capture);
+    // assert(!_capture);
     _stream = _factory->CreateLocalMediaStream(kStreamLabel);
 
-    _capture = std::make_shared<av::MediaCapture>();
-    _capture->openFile("test.mp4");
-
-    // Create and add the audio stream
-    if (_capture->audio()) {
-        rtc::scoped_refptr<webrtc::AudioTrackInterface> audioTrack(
-            _factory->CreateAudioTrack(kAudioLabel,
-                _factory->CreateAudioSource(nullptr)));
-        _stream->AddTrack(audioTrack);
-
-        _audioCaptureModule->setPacketSignal(&_capture->emitter);
-    }
-
-    // Create and add the video stream
-    if (_capture->video()) {
-        rtc::scoped_refptr<webrtc::VideoTrackInterface> videoTrack(
-            _factory->CreateVideoTrack(kVideoLabel,
-                _factory->CreateVideoSource(
-                    new VideoPacketSource(_capture), nullptr)));
-        _stream->AddTrack(videoTrack);
-    }
+    _capturer.openFile("test.mp4");
+    _capturer.addMediaTracks(_factory, _stream);
 
     return _stream;
 }
@@ -119,20 +101,21 @@ void FilePeerConnection::OnIceConnectionChange(webrtc::PeerConnectionInterface::
 {
     DebugL << _peerid << ": On ICE gathering change: " << new_state << endl;
 
-
     switch(new_state) {
     case webrtc::PeerConnectionInterface::kIceConnectionNew:
     case webrtc::PeerConnectionInterface::kIceConnectionChecking:
     case webrtc::PeerConnectionInterface::kIceConnectionConnected:
         break;
     case webrtc::PeerConnectionInterface::kIceConnectionCompleted:
-        _capture->start();
+        _capturer.start();
+        // _capture->start();
         break;
     case webrtc::PeerConnectionInterface::kIceConnectionFailed:
     case webrtc::PeerConnectionInterface::kIceConnectionDisconnected:
     case webrtc::PeerConnectionInterface::kIceConnectionClosed:
     case webrtc::PeerConnectionInterface::kIceConnectionMax:
-        _capture->stop();
+        _capturer.stop();
+        // _capture->stop();
         break;
     }
 

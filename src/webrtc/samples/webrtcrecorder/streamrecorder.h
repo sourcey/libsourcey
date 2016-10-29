@@ -1,5 +1,23 @@
-#ifndef SCY_WebRTCRecorder_StreamRecorder_H
-#define SCY_WebRTCRecorder_StreamRecorder_H
+//
+// LibSourcey
+// Copyright (C) 2005, Sourcey <http://sourcey.com>
+//
+// LibSourcey is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// LibSourcey is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+
+#ifndef SCY_WebRTC_StreamRecorder_H
+#define SCY_WebRTC_StreamRecorder_H
 
 
 #include "scy/av/multiplexencoder.h"
@@ -10,9 +28,9 @@
 namespace scy {
 
 
-class StreamRecorder:
-    public rtc::VideoSinkInterface<cricket::VideoFrame>,
-    public webrtc::AudioTrackSinkInterface
+class StreamRecorder
+    : public rtc::VideoSinkInterface<cricket::VideoFrame>,
+      public webrtc::AudioTrackSinkInterface
 {
 public:
     StreamRecorder(const av::EncoderOptions& options);
@@ -28,10 +46,10 @@ public:
 
     // AudioTrackSinkInterface implementation
     void OnData(const void* audio_data,
-                        int bits_per_sample,
-                        int sample_rate,
-                        size_t number_of_channels,
-                        size_t number_of_frames) override;
+                int bits_per_sample,
+                int sample_rate,
+                size_t number_of_channels,
+                size_t number_of_frames) override;
 
 protected:
     av::MultiplexEncoder _encoder;

@@ -43,8 +43,47 @@ VideoEncoder::~VideoEncoder()
 }
 
 
-void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& oparams)
+void VideoEncoder::create() //, const VideoCodec& params
 {
+    // Find the video encoder
+    codec = avcodec_find_encoder_by_name(oparams.encoder.c_str());
+    if (!codec) {
+        if (format)
+            codec = avcodec_find_encoder(format->oformat->video_codec);
+        if (!codec)
+            throw std::runtime_error("Video encoder not found: " + oparams.encoder);
+    }
+
+    // Allocate stream and AVCodecContext from the AVFormatContext if available
+    if (format) {
+        format->oformat->video_codec = codec->id;
+
+        // Add a video stream that uses the format's default video
+        // codec to the format context's streams[] array.
+        stream = avformat_new_stream(format, codec);
+        if (!stream)
+            throw std::runtime_error("Cannot create video stream.");
+
+        // // Testing realtime streams
+        // // http://stackoverflow.com/questions/16768794/muxing-from-video-and-video-files-with-ffmpeg
+        // stream->time_base.den = 1000; //realtime_ ? 1000 : fps_.num;
+        // stream->time_base.num = 1; //realtime_ ? 1: fps_.den;
+        //
+        // stream->r_frame_rate.num = oparams.fps;
+        // stream->r_frame_rate.den = 1;
+        // stream->avg_frame_rate.den = 1;
+        // stream->avg_frame_rate.num = oparams.fps;
+
+        ctx = stream->codec;
+    }
+
+    // Otherwise allocate the standalone AVCodecContext
+    else {
+        ctx = avcodec_alloc_context3(codec);
+        if (!ctx)
+            throw std::runtime_error("Cannot allocate encoder context.");
+    }
+
     assert(oparams.enabled);
 
     avcodec_get_context_defaults3(ctx, codec);
@@ -114,51 +153,6 @@ void initVideoEncoderContext(AVCodecContext* ctx, AVCodec* codec, VideoCodec& op
     default:
         break;
     }
-}
-
-
-void VideoEncoder::create() //, const VideoCodec& params
-{
-    // Find the video encoder
-    codec = avcodec_find_encoder_by_name(oparams.encoder.c_str());
-    if (!codec) {
-        if (format)
-            codec = avcodec_find_encoder(format->oformat->video_codec);
-        if (!codec)
-            throw std::runtime_error("Video encoder not found: " + oparams.encoder);
-    }
-
-    // Allocate stream and AVCodecContext from the AVFormatContext if available
-    if (format) {
-        format->oformat->video_codec = codec->id;
-
-        // Add a video stream that uses the format's default video
-        // codec to the format context's streams[] array.
-        stream = avformat_new_stream(format, codec);
-        if (!stream)
-            throw std::runtime_error("Cannot create video stream.");
-
-        // // Testing realtime streams
-        // // http://stackoverflow.com/questions/16768794/muxing-from-video-and-video-files-with-ffmpeg
-        // stream->time_base.den = 1000; //realtime_ ? 1000 : fps_.num;
-        // stream->time_base.num = 1; //realtime_ ? 1: fps_.den;
-        //
-        // stream->r_frame_rate.num = oparams.fps;
-        // stream->r_frame_rate.den = 1;
-        // stream->avg_frame_rate.den = 1;
-        // stream->avg_frame_rate.num = oparams.fps;
-
-        ctx = stream->codec;
-    }
-
-    // Otherwise allocate the standalone AVCodecContext
-    else {
-        ctx = avcodec_alloc_context3(codec);
-        if (!ctx)
-            throw std::runtime_error("Cannot allocate encoder context.");
-    }
-
-    initVideoEncoderContext(ctx, codec, oparams);
 
     // Some formats want stream headers to be separate
     if (format && format->oformat->flags & AVFMT_GLOBALHEADER)
@@ -272,7 +266,7 @@ void emitPacket(VideoEncoder* enc, AVPacket& opacket)
     // enc->time = enc->frame->pkt_pts > 0 ? static_cast<std::int64_t>(enc->frame->pkt_pts * av_q2d(enc->stream->time_base) * 1000) : 0;
     // enc->pts = enc->frame->pkt_pts;
 
-    // Compute stream time in miliseconds
+    // Compute stream time in milliseconds
     if (enc->stream && opacket.pts >= 0) {
         enc->time = static_cast<std::int64_t>(opacket.pts * av_q2d(enc->stream->time_base) * 1000);
     }

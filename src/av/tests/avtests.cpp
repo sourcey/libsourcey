@@ -9,20 +9,22 @@ using namespace scy::test;
 
 int main(int argc, char** argv)
 {
-    // Logger::instance().add(new ConsoleChannel("debug", LTrace));
-    test::initialize();
+    Logger::instance().add(new ConsoleChannel("debug", LTrace));
+    // test::initialize();
 
-    // Define class based tests
-#ifdef HAVE_FFMPEG
-    describe("audio encoder", new AudioEncoderTest);
-    describe("audio resampler", new AudioResamplerTest);
-    describe("audio fifo buffer", new AudioBufferTest);
-    // describe("audio capture", new AudioCaptureTest);
-    // describe("audio capture encoder", new AudioCaptureEncoderTest);
-    // describe("audio capture resampler", new AudioCaptureResamplerTest);
-    // describe("video file transcoder", new VideoFileTranscoderTest);
-    // describe("device capture multiplex encoder", new DeviceCaptureMultiplexEncoderTest);
-#endif
+//     // Define class based tests
+// #ifdef HAVE_FFMPEG
+//     describe("audio encoder", new AudioEncoderTest);
+//     describe("audio resampler", new AudioResamplerTest);
+//     describe("audio fifo buffer", new AudioBufferTest);
+//     // describe("audio capture", new AudioCaptureTest);
+//     // describe("audio capture encoder", new AudioCaptureEncoderTest);
+//     // describe("audio capture resampler", new AudioCaptureResamplerTest);
+//     // describe("video file transcoder", new VideoFileTranscoderTest);
+//     // describe("device capture multiplex encoder", new DeviceCaptureMultiplexEncoderTest);
+// #endif
+
+    describe("realtime media queue", new RealtimeMediaQueueTest);
 
     test::runAll();
 

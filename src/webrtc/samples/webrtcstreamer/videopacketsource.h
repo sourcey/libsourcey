@@ -16,11 +16,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef SCY_VideoPacketSource_H
-#define SCY_VideoPacketSource_H
+#ifndef SCY_WebRTC_VideoPacketSource_H
+#define SCY_WebRTC_VideoPacketSource_H
 
 
-#include "scy/av/videocapture.h"
+#include "scy/av/types.h"
 
 #include "webrtc/media/base/videocapturer.h"
 
@@ -28,7 +28,7 @@
 namespace scy {
 
 
-class VideoPacketSource: public cricket::VideoCapturer
+class VideoPacketSource : public cricket::VideoCapturer
     /// VideoPacketSource implements a simple cricket::VideoCapturer that
     /// gets decoded remote video frames from a local media channel.
     /// It's used as the remote video source's VideoCapturer so that the remote
@@ -36,7 +36,7 @@ class VideoPacketSource: public cricket::VideoCapturer
     /// video stream can implement the MediaStreamSourceInterface.
 {
 public:
-    VideoPacketSource(av::MediaCapture::Ptr capture); //PacketSignal& emitter
+    VideoPacketSource();
     virtual ~VideoPacketSource();
 
     // cricket::VideoCapturer implementation.
@@ -49,12 +49,7 @@ public:
         cricket::VideoFormat* best_format);
     virtual bool IsScreencast() const;
 
-private:
-    void onFrameCaptured(void* sender, av::VideoPacket& packet);
-
-    // std::string device;
-    av::MediaCapture::Ptr _capture;
-    // PacketSignal& _emitter;
+    void onVideoCaptured(void* sender, av::VideoPacket& packet);
 };
 
 

@@ -62,7 +62,7 @@ public:
     virtual bool encodeVideo(AVFrame* frame);
     virtual bool encodeVideo(std::uint8_t* buffer, int bufferSize, int width, int height, std::int64_t time = AV_NOPTS_VALUE);
         // Encode a single video frame
-        // If the time is specified it should be the millisecond offset since
+        // If the time is specified it should be the nanosecond offset since
         // the start of the input stream. The value will be converted to the
         // stream time base internally.
         // If no time is specified a realtime time value will be assigned to

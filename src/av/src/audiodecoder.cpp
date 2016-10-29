@@ -89,7 +89,7 @@ bool emitPacket(AudioDecoder* dec) //, const AVFrame* frame, AVPacket& opacket
     auto sampleFmt = av_get_sample_fmt(dec->oparams.sampleFmt.c_str());
     assert(av_sample_fmt_is_planar(sampleFmt) == 0 && "planar formats not supported");
 
-    dec->time = dec->frame->pkt_pts > 0 ? static_cast<std::int64_t>(dec->frame->pkt_pts * av_q2d(dec->stream->time_base) * 1000) : 0;
+    dec->time = dec->frame->pkt_pts > 0 ? static_cast<std::int64_t>(dec->frame->pkt_pts * av_q2d(dec->stream->time_base) * AV_TIME_BASE) : 0;
     dec->pts = dec->frame->pkt_pts;
 
     if (dec->resampler) {
@@ -126,7 +126,7 @@ bool emitPacket(AudioDecoder* dec) //, const AVFrame* frame, AVPacket& opacket
     // opacket.pts = dec->frame->pkt_pts; // Decoder PTS values may be out of sequence
     // opacket.dts = dec->frame->pkt_dts;
 
-    // Compute stream time in miliseconds
+    // Compute stream time in milliseconds
     // dec->time = opacket.pts > 0 ? static_cast<std::int64_t>(opacket.pts * av_q2d(dec->stream->time_base) * 1000) : 0;
     // dec->pts = opacket.pts;
 

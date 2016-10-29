@@ -25,18 +25,12 @@
 
 #ifdef HAVE_FFMPEG
 
-// #include "scy/av/types.h"
+#include "scy/av/types.h"
 #include "scy/av/ffmpeg.h"
 #include "scy/av/format.h"
-// #include "scy/av/fpscounter.h"
-//#include "scy/av/iencoder.h"
-
-//#include "scy/mutex.h"
 
 extern "C" {
-// #include <libavresample/avresample.h>
 #include <libavcodec/avcodec.h>
-// #include <libavformat/avformat.h>
 #include <libavutil/opt.h>
 #include <libswscale/swscale.h>
 #ifdef HAVE_FFMPEG_SWRESAMPLE

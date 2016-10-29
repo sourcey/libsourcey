@@ -21,12 +21,6 @@
 
 #ifdef HAVE_FFMPEG
 
-// #include "scy/av/mediacapture.h"
-// #include "scy/logger.h"
-// #include "scy/platform.h"
-// #include "scy/timer.h"
-// #include "scy/av/flvmetadatainjector.h"
-
 #include "assert.h"
 
 extern "C" {
@@ -133,7 +127,7 @@ void MultiplexEncoder::initialize()
             // obtained by connecting to the outgoing PacketSignal.
             // Setup the output IO context for our output stream.
             _ioBuffer = new unsigned char[_ioBufferSize];
-            _ioCtx = avio_alloc_context(_ioBuffer, _ioBufferSize, AVIO_FLAG_WRITE, this, NULL, dispatchOutputPacket, NULL);
+            _ioCtx = avio_alloc_context(_ioBuffer, _ioBufferSize, AVIO_FLAG_WRITE, this, nullptr, dispatchOutputPacket, nullptr);
             _ioCtx->seekable = 0;
             _formatCtx->flags |= AVFMT_FLAG_CUSTOM_IO;
             _formatCtx->pb = _ioCtx;
@@ -310,8 +304,8 @@ void MultiplexEncoder::updateStreamPts(AVStream* stream, std::int64_t* pts)
         *pts = _pts;
     }
     else {
-        // Convert from input miliseconds to encoder stream time base
-        _pts = *pts * (float) stream->time_base.den / (float) stream->time_base.num / 1000;
+        // Convert from input milliseconds to encoder stream time base
+        _pts = *pts * (float) stream->time_base.den / (float) stream->time_base.num / AV_TIME_BASE;
         *pts = _pts;
     }
 }

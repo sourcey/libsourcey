@@ -195,7 +195,7 @@ void emitPacket(AudioEncoder* enc, AVPacket& opacket)
     // enc->time = enc->frame->pkt_pts > 0 ? static_cast<std::int64_t>(enc->frame->pkt_pts * av_q2d(enc->stream->time_base) * 1000) : 0;
     // enc->pts = enc->frame->pkt_pts;
 
-    // Compute stream time in miliseconds
+    // Compute stream time in milliseconds
     if (enc->stream && opacket.pts >= 0) {
         enc->time = static_cast<std::int64_t>(opacket.pts * av_q2d(enc->stream->time_base) * 1000);
     }

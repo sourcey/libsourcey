@@ -31,7 +31,7 @@
 #include <sstream>
 #include <vector>
 #include <list>
-#include <deque>
+#include <queue>
 #include <map>
 
 
@@ -591,6 +591,17 @@ inline void clearDeque(std::deque<Val*>& D)
         it = D.erase(it);
     }
 }
+
+// template<typename Val>
+// inline void clearPriorityDeque(std::priority_queue<Val*>& D)
+//     // Delete all elements from a list of pointers.
+//     // @param D List of pointers to delete.
+// {
+//     while (!D.empty()) {
+//         delete D.top();
+//         D.pop();
+//     }
+// }
 
 template<typename Val>
 inline void clearVector(std::vector<Val*>& V)

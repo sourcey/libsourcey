@@ -30,6 +30,7 @@
 // #include "scy/av/mediafactory.h"
 #include "scy/av/mediacapture.h"
 #include "scy/av/multiplexpacketencoder.h"
+#include "scy/av/realtimepacketqueue.h"
 // #include "scy/av/thumbnailer.h"
 // #include "scy/av/iencoder.h"
 #include "scy/av/videocapture.h"
@@ -100,7 +101,6 @@ void fillAudioSamplesUInt(std::uint16_t* samples, int sample_rate, int nb_channe
         *t += tincr;
     }
 }
-
 
 // Generate sin tone with 440Hz frequency and duplicated channels
 void fillAudioSamples(double* samples, int sample_rate, int nb_channels, int nb_samples, double* t)
@@ -527,6 +527,92 @@ class AudioCaptureResamplerTest: public Test
 
 
 #endif // HAVE_FFMPEG
+
+
+// =============================================================================
+// Realtime Media Queue Test
+//
+struct MockMediaPacketSource: public PacketSource, public async::Startable
+{
+    Thread runner;
+    PacketSignal emitter;
+    int numFramesRemaining = kNumberFramesWanted;
+
+    MockMediaPacketSource() :
+        PacketSource(emitter)
+    {
+        runner.setRepeating(true);
+    }
+
+    void start()
+    {
+        cout << "Start" << endl;
+        runner.start([](void* arg) {
+            auto self = reinterpret_cast<MockMediaPacketSource*>(arg);
+            if (self->numFramesRemaining) {
+                self->numFramesRemaining--;
+                std::int64_t time(std::rand() % (1000000 * 5)); // 5 mil is 5 seconds of audio time
+                cout << "Emitting: " << self->numFramesRemaining << endl;
+                av::MediaPacket p(new std::uint8_t[10], 10, time);
+                p.assignDataOwnership();
+                self->emitter.emit(self, p);
+            }
+        }, this);
+    }
+
+    void stop()
+    {
+        cout << "Stop" << std::endl;
+        runner.cancel();
+    }
+
+    void onStreamStateChange(const PacketStreamState& state)
+    {
+        cout << "Stream state: " << state << endl;
+
+        if (state.equals(PacketStreamState::Closed) ||
+            state.equals(PacketStreamState::Error)) {
+            runner.cancel();
+            runner.join();
+        }
+    }
+};
+
+class RealtimeMediaQueueTest: public Test
+{
+    PacketStream stream;
+    int numFramesRemaining = kNumberFramesWanted;
+
+    void run()
+    {
+        // Create the multiplex encoder
+        // auto queue(std::make_shared<av::RealtimePacketQueue<>());
+
+        stream.attachSource(new MockMediaPacketSource, true, true);
+        stream.attach(std::make_shared<av::RealtimePacketQueue<av::MediaPacket>>(), 5);
+        stream.start();
+        stream.emitter += packetDelegate(this, &RealtimeMediaQueueTest::onPacketPlayout);
+
+        while (numFramesRemaining > 0) {
+            // cout << "Waiting for completion: " << numFramesRemaining << endl;
+            scy::sleep(10);
+        }
+
+        // TODO: ensure stream duration
+        expect(numFramesRemaining == 0);
+    }
+
+    void onPacketPlayout(av::MediaPacket& packet)
+    {
+        if (numFramesRemaining) {
+            numFramesRemaining--;
+            cout << "On packet: " << numFramesRemaining << ": " << packet.time << endl;
+        }
+        else {
+            stream.stop();
+        }
+    }
+};
 
 
 // class Tests

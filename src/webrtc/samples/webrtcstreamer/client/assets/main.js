@@ -10,7 +10,7 @@ $(document).ready(function() {
         rtcConfig: WEBRTC_CONFIG,
         mediaConstraints: {
             'mandatory': {
-                // 'OfferToReceiveAudio':true,
+                'OfferToReceiveAudio': true,
                 'OfferToReceiveVideo': true
             }
         },

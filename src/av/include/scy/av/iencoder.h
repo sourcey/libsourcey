@@ -62,7 +62,7 @@ struct EncoderOptions
     Format oformat;      // output media format.
     std::string ifile;   // input file path.
     std::string ofile;   // output file path.
-    long duration;       // duration of time to record in milliseconds.
+    long duration;       // duration of time to record in nanoseconds.
     EncoderOptions(const Format& iformat = Format(),
                    const Format& oformat = Format(),
                    const std::string& ifile = "",

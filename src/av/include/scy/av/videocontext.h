@@ -81,7 +81,7 @@ struct VideoContext
     VideoConverter* conv;    // video conversion context
     // FPSCounter fps;          // encoder or decoder fps rate
     // double pts;              // pts in decimal seconds
-    std::int64_t time;       // stream time in milliseconds
+    std::int64_t time;       // stream time in nanoseconds
     std::int64_t pts;        // last packet pts value
     std::string error;       // error message
 };

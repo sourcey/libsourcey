@@ -27,7 +27,7 @@
 #include "scy/error.h"
 #include "scy/stateful.h"
 #include "scy/interface.h"
-#include "scy/queue.h"
+// #include "scy/queue.h"
 #include "scy/packetsignal.h"
 
 
