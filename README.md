@@ -221,15 +221,29 @@ See linux instructions.
 
 **Install Git**  
 
-Install [TortoiseGit](http://code.google.com/p/tortoisegit/), a convenient git front-end that integrates right into Windows Explorer. MinGW users can use [msysgit](http://code.google.com/p/msysgit/downloads/list).  
+[Download git-scm](https://git-scm.com/)
+You can also use other git Cmd or GUI client.  
 
-**Install CMake**  
+**Install CMake**
+[Download CMake](https://cmake.org/download/)
 
-CMake generates the LibSourcey project files so you can build on most platforms and compilers. [Download CMake](http://www.cmake.org/cmake/resources/software.html)  
+CMake generates the LibSourcey project files so you can build on most platforms and compilers.
+Here we use CMake to generate project for Visual Studio.
 
-**Install OpenSSL**  
+**Install OpenSSL**
+Download and install the [Windows OpenSSL binaries](http://slproweb.com/products/Win32OpenSSL.html).
+Don't forget to set system path if you download `zip` file version, or OpenSSL `Installer` failed to set them up:
+* `OPENSSL_INCLUDE_DIR` => `{PATH_TO_OPENSSL_INSTALL_DIR}\include`
+* `OPENSSL_LIBRARIES` => `{PATH_TO_OPENSSL_INSTALL_DIR}\lib`
+* `OPENSSL_ROOT_DIR` => `{PATH_TO_OPENSSL_INSTALL_DIR}\openssl` 
 
-Download and install the [Windows OpenSSL binaries](http://slproweb.com/products/Win32OpenSSL.html).  
+**Install FFmpeg**
+Download and install [FFmpeg for Windows](https://ffmpeg.zeranoe.com/builds/).
+Notice that you need to download both `Shared` and `Dev` version.
+Extract zip files and set them to head of your system's `PATH` (you can just add new item in Windows10):
+* `{PATH_TO_FFMPEG_DEV_DIR}\bin`
+* `{PATH_TO_FFMPEG_SHARED_DIR}\bin`
+
 
 **Download LibSourcey**  
 
